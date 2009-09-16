@@ -8,13 +8,13 @@
    AnalysisExamples/NTupleSkeleton/src/NTupleSkeleton.cc
    Description: Template to produce NTuples for ETH SUSY Analysis
 
-   Implementation:
+   Implementation: None
 	
 */
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id$
+// $Id: NTupleSkeleton.cc,v 1.1 2009/09/16 14:57:25 stiegerb Exp $
 //
 //
 
