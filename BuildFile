@@ -1,0 +1,36 @@
+<use name=FWCore/Framework>
+<use name=FWCore/PluginManager>
+<use name=FWCore/ParameterSet>
+<use name=FWCore/ServiceRegistry>
+<use name=DataFormats/Common>
+<use name=DataFormats/JetReco>
+<use name=DataFormats/VertexReco>
+<use name=DataFormats/METReco>
+<use name=DataFormats/MuonReco>
+<use name=DataFormats/BeamSpot>
+# <use name=SimDataFormats/HepMCProduct>
+<use name=DataFormats/Candidate>
+<use name=JetMETCorrections/Objects>
+<use name=clhep> 
+<use name=root>
+<use name=PhysicsTools/UtilAlgos>
+<flags EDM_PLUGIN=1>
+<export>
+   <lib name=DiLeptonAnalysisNTupleProducer>
+   # <use name=SimDataFormats/HepMCProduct>
+   <use name=DataFormats/Candidate>
+   <use name=DataFormats/Common>
+   <use name=DataFormats/JetReco>
+   <use name=DataFormats/METReco>
+   <use name=DataFormats/MuonReco>
+   <use name=DataFormats/VertexReco>
+   <use name=DataFormats/BeamSpot>
+   <use name=JetMETCorrections/Objects>
+   <use name=clhep>
+   <use name=root> 
+   <use name=FWCore/Framework>
+   <use name=FWCore/PluginManager>
+   <use name=FWCore/ParameterSet>
+   <use name=FWCore/ServiceRegistry>
+   <use name=PhysicsTools/UtilAlgos>
+</export>
