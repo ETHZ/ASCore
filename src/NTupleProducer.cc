@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id$
+// $Id: NTupleProducer.cc,v 1.1 2009/09/16 14:57:25 stiegerb Exp $
 //
 //
 
@@ -332,14 +332,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeiso[eqi]    = eliso;
 			fTecharge[eqi] = El->charge();
 			
-			if(eIDmapT[electronRef])  fTeIDTight[eqi]       = 1;
-			else fTeIDTight[eqi]                            = 0;
-			if(eIDmapL[electronRef])  fTeIDLoose[eqi]       = 1;
-			else fTeIDLoose[eqi]                            = 0;
-			if(eIDmapRT[electronRef]) fTeIDRobustTight[eqi] = 1;
-			else fTeIDRobustTight[eqi]                      = 0;
-			if(eIDmapRL[electronRef]) fTeIDRobustLoose[eqi] = 1;
-			else fTeIDRobustLoose[eqi]                      = 0;
+			if(eIDmapT[electronRef])  fTeID[eqi][0] = 1;
+			else fTeID[eqi][0]                      = 0;
+			if(eIDmapL[electronRef])  fTeID[eqi][1] = 1;
+			else fTeID[eqi][1]                      = 0;
+			if(eIDmapRT[electronRef]) fTeID[eqi][2] = 1;
+			else fTeID[eqi][2]                      = 0;
+			if(eIDmapRL[electronRef]) fTeID[eqi][3] = 1;
+			else fTeID[eqi][3]                      = 0;
 		}
 	}
 	fTneles = eqi+1;
@@ -470,10 +470,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("ElIso"           ,&fTeiso           ,"ElIso[NEles]/D");
 	fTree->Branch("ElNChi2"         ,&fTenchi2         ,"ElNChi2[NEles]/D");
 	fTree->Branch("ElCharge"        ,&fTecharge        ,"ElCharge[NEles]/I");
-	fTree->Branch("ElIDTight"       ,&fTeIDTight       ,"ElIDTight[NEles]/I");
-	fTree->Branch("ElIDLoose"       ,&fTeIDLoose       ,"ElIDLoose[NEles]/I");
-	fTree->Branch("ElIDRobustTight" ,&fTeIDRobustTight ,"ElIDRobustTight[NEles]/I");
-	fTree->Branch("ElIDRobustLoose" ,&fTeIDRobustLoose ,"ElIDRobustLoose[NEles]/I");
+	fTree->Branch("ElID"            ,&fTeID            ,"ElID[NEles][4]/I");
 
 	// Jets:
 	fTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -565,11 +562,6 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTenchi2);
 	resetDouble(fTeiso);
 	resetInt(fTecharge);
-	resetInt(fTeIDTight);
-	resetInt(fTeIDLoose);
-	resetInt(fTeIDRobustTight);
-	resetInt(fTeIDRobustLoose);
-
 	resetDouble(fTjpx);
 	resetDouble(fTjpy);
 	resetDouble(fTjpz);
@@ -579,6 +571,12 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTjeta);
 	resetDouble(fTjphi);
 	resetDouble(fTjemfrac);
+
+	for(size_t i = 0; i < 20; ++i){
+		for(size_t j = 0; j < 4; ++j){
+			fTeID[i][j] = -999;
+		}
+	}
 
 	fTRawMET         = -999.99;
 	fTRawMETpx       = -999.99;
@@ -624,7 +622,7 @@ vector<double> NTupleProducer::calcMuIso(const reco::Muon *Mu, const edm::Event&
 	// Calo ET sum:
 	edm::Handle<CaloTowerCollection> calotowers;
 	iEvent.getByLabel(fCalTowTag,calotowers);
-	double etsum = 0.;
+	double etsum(0.);
 	for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
 		double eta = itow->eta();
 		if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;

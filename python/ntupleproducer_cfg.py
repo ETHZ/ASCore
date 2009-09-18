@@ -16,10 +16,10 @@ process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("FWCore.MessageService.MessageLogger_cfi")
-## tcMET
-process.load("JetMETCorrections.Type1MET.MuonTCMETValueMapProducer_cff")
-process.load("RecoMET.METProducers.TCMET_cfi")
-###
+# ## tcMET
+# process.load("JetMETCorrections.Type1MET.MuonTCMETValueMapProducer_cff")
+# process.load("RecoMET.METProducers.TCMET_cfi")
+# ###
 
 process.MessageLogger = cms.Service("MessageLogger",
 	# destinations = cms.untracked.vstring('output.txt')
@@ -31,8 +31,8 @@ process.source = cms.Source("PoolSource",
 	# replace 'myfile.root' with the source file you want to use
 	fileNames = cms.untracked.vstring(
 		# This is from /TTJets-madgraph/Fall08_IDEAL_V11_redigi_v10/AODSIM:
-		# 'file:/data/14/stiegerb/SUSY/31X/ppMuXLoose_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
-		'file:/data/14/stiegerb/SUSY/31X/ppEleX_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
+		'file:/data/14/stiegerb/SUSY/31X/ppMuXLoose_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
+		# 'file:/data/14/stiegerb/SUSY/31X/ppEleX_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
 		# 'file:EleIsoTest.root'
 		# This is from /SUSY_LM0-sftsht/Summer08_IDEAL_V11_v1/GEN-SIM-RECO:
 		# 'file:/data/fronga/LM0-RECO-312.root'
@@ -44,12 +44,6 @@ process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTupleProducer.root"),
 	closeFileFast = cms.untracked.bool(True)
 )
-
-############# Trigger ##########################################################
-# process.trigger = hlt.hltHighLevel.clone(
-# 	HLTPaths = ['HLT_Mu11'],
-# 	throw = True
-# )
 
 ############# Jet Corrections ##################################################
 process.load("JetMETCorrections.Configuration.L2L3Corrections_Winter09_cff")
@@ -191,7 +185,6 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxjeta    = cms.untracked.double(5.0),
 	sel_minjemfrac = cms.untracked.double(0.1),
 	# Isolation Parameters
-	# iso_MuTkDRin   = cms.untracked.double(0.0),
 	iso_MuTkDRin   = cms.untracked.double(0.015),
 	iso_MuTkDRout  = cms.untracked.double(0.3),
 	iso_MuTkSeed   = cms.untracked.double(0.1),
@@ -201,7 +194,5 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 )
 
 ############# Path #############################################################
-# process.p = cms.Path(process.trigger + process.L2L3CorJetSC5Calo + process.MetMuonCorrections)
-# process.p = cms.Path(process.trigger + process.L2L3CorJetSC5Calo)
 process.p = cms.Path(process.L2L3CorJetSC5Calo)
-process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.muonMETValueMapProducer*process.corMetGlobalMuons*process.muonTCMETValueMapProducer*process.tcMet + process.analyze)
+process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.muonMETValueMapProducer*process.corMetGlobalMuons + process.analyze)
