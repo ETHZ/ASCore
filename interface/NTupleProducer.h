@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.1 2009/09/16 14:57:24 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.2 2009/09/18 12:33:07 stiegerb Exp $
 //
 //
 
@@ -229,6 +229,20 @@ private:
 	double fTenchi2[20];
 	int fTeID[20][4];    // eID flags: 0->Tight, 1->Loose, 2->RobustTight, 3->RobustLoose
 	int fTecharge[20];
+	int fTeInGap[20];   // seed crystal next to a gap
+	int fTeEcalDriven[20];
+  	int fTeTrackerDriven[20];
+  	int fTeBasicClustersSize[20];
+        double fTefbrem[20];
+        double fTeHcalOverEcal[20];
+   	double fTeE5x5[20];                      // 5x5 arround seed
+        double fTeE2x5Max[20];                   // 2x5 arround seed
+        double fTeSigmaIetaIeta[20];             // shower shape covariance
+        double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed - track) at calo from p_out
+        double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc  - track) at calo extrapolated from p_in
+        double fTeESuperClusterOverP[20];        // Esc/Pin
+    	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
+
 
 	// Jets:
 	int fTnjets;

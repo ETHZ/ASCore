@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.1 2009/09/16 14:57:25 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.2 2009/09/18 12:33:08 stiegerb Exp $
 //
 //
 
@@ -313,6 +313,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			double eliso  = (eTkIso+eECIso+eHCIso)/El->pt();
 			if(eliso > fMaxeliso) continue;
 
+			bool isGap = El->isGap(); 
+		        bool EcalDriven = El-> isEcalDriven();	
+			bool TrackerDriven = El->isTrackerDriven();
+
+			  
+
 			// Dump electron properties in tree variables
 			eqi++;
 
@@ -331,6 +337,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTenchi2[eqi]  = El->gsfTrack()->normalizedChi2();
 			fTeiso[eqi]    = eliso;
 			fTecharge[eqi] = El->charge();
+			fTeInGap[eqi]  = isGap ? 1:0;  // my first contribution in beni's code (isBug? 1:1)   //*** kostas
+			fTeEcalDriven[eqi] = EcalDriven ? 1:0;
+			fTeTrackerDriven[eqi] = TrackerDriven ? 1:0;
+			fTeBasicClustersSize[eqi] = El->basicClustersSize();
+			fTefbrem[eqi] = El->fbrem();
+			fTeHcalOverEcal[eqi] = El->hcalOverEcal();                               
+			fTeE5x5[eqi] = El->e5x5();                                           
+			fTeE2x5Max[eqi] = El->e2x5Max();                                           
+			fTeSigmaIetaIeta[eqi] = El->sigmaIetaIeta();                         
+			fTeDeltaPhiSeedClusterAtCalo[eqi] = El->deltaPhiSeedClusterTrackAtCalo(); 
+			fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
+			fTeESuperClusterOverP[eqi] = El-> eSuperClusterOverP();              
+			fTeDeltaEtaSeedClusterAtCalo[eqi] = El->deltaEtaSeedClusterTrackAtCalo(); 
 			
 			if(eIDmapT[electronRef])  fTeID[eqi][0] = 1;
 			else fTeID[eqi][0]                      = 0;
@@ -471,6 +490,19 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("ElNChi2"         ,&fTenchi2         ,"ElNChi2[NEles]/D");
 	fTree->Branch("ElCharge"        ,&fTecharge        ,"ElCharge[NEles]/I");
 	fTree->Branch("ElID"            ,&fTeID            ,"ElID[NEles][4]/I");
+	fTree->Branch("ElInGap"         ,&fTeInGap         ,"ElInGap[NEles]/I");
+	fTree->Branch("ElEcalDriven"         ,&fTeEcalDriven         ,"ElEcalDriven[NEles]/I");
+	fTree->Branch("ElTrackerDriven"         ,&fTeTrackerDriven         ,"ElTrackerDriven[NEles]/I");
+	fTree->Branch("ElBasicClustersSize"         ,&fTeBasicClustersSize         ,"ElBasicClustersSize[NEles]/I");
+	fTree->Branch("Elfbrem"            ,&fTefbrem            ,"Elfbrem[NEles]/D");
+	fTree->Branch("ElHcalOverEcal"            ,&fTeHcalOverEcal            ,"ElHcalOverEcal[NEles]/D");
+	fTree->Branch("ElE5x5"            ,&fTeE5x5            ,"ElE5x5[NEles]/D");
+	fTree->Branch("ElE2x5Max"            ,&fTeE2x5Max            ,"ElE2x5Max[NEles]/D");
+	fTree->Branch("ElSigmaIetaIeta"            ,&fTeSigmaIetaIeta            ,"ElSigmaIetaIeta[NEles]/D");
+	fTree->Branch("ElDeltaPhiSeedClusterAtCalo"            ,&fTeDeltaPhiSeedClusterAtCalo            ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
+	fTree->Branch("ElDeltaPhiSuperClusterAtVtx"            ,&fTeDeltaPhiSuperClusterAtVtx            ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
+	fTree->Branch("ElESuperClusterOverP"            ,&fTeESuperClusterOverP            ,"ElESuperClusterOverP[NEles]/D");
+	fTree->Branch("ElDeltaEtaSeedClusterAtCalo"            ,&fTeDeltaEtaSeedClusterAtCalo            ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
 
 	// Jets:
 	fTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -562,6 +594,20 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTenchi2);
 	resetDouble(fTeiso);
 	resetInt(fTecharge);
+	resetInt(fTeInGap);
+	resetInt(fTeEcalDriven);
+	resetInt(fTeTrackerDriven);
+	resetInt(fTeBasicClustersSize);
+	resetDouble(fTefbrem);
+	resetDouble(fTeHcalOverEcal);
+	resetDouble(fTeE5x5);
+	resetDouble(fTeE2x5Max);
+	resetDouble(fTeSigmaIetaIeta);
+	resetDouble(fTeDeltaPhiSeedClusterAtCalo);
+	resetDouble(fTeDeltaPhiSuperClusterAtVtx);
+	resetDouble(fTeESuperClusterOverP);
+	resetDouble(fTeDeltaEtaSeedClusterAtCalo);
+
 	resetDouble(fTjpx);
 	resetDouble(fTjpy);
 	resetDouble(fTjpz);
