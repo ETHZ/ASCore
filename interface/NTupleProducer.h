@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.2 2009/09/18 12:33:07 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.3 2009/09/19 20:46:43 theofil Exp $
 //
 //
 
@@ -146,14 +146,29 @@ private:
 	double fIso_MuCalDRout;
 	double fIso_MuCalSeed;
 	
+	TH1I *fHtrigstat; // Added to keep track of trigger names
+	bool fFirstevent;
+
 	////////////////////////////////////////////////////////
 	// Tree:
 	TTree *fTree;
 	
+	// General event information
+	int fTrunnumber;
+	int fTeventnumber;
+	int fTlumisection;
+	double fTweight;
+
+	double fTprimvtxx;
+	double fTprimvtxy;
+	double fTprimvtxz;
+
+	double fTbeamspotx;
+	double fTbeamspoty;
+	double fTbeamspotz;
+
 	// Trigger
 	int fTtrigres[200];
-	TH1I *fHtrigstat; // Added to keep track of trigger names
-	bool fFirstevent;
 	// Muons:
 	unsigned int fTnmu;
 	double fTmupx[20];
@@ -174,12 +189,12 @@ private:
 	double fTmuehcal[20];
 
 	// - Impact Parameters
-	double fTmud0[20];
+	double fTmud0bs[20];
+	double fTmud0pv[20];
 	double fTmud0E[20];
-	double fTmud0Sig[20];
-	double fTmudz[20];
+	double fTmudzbs[20];
+	double fTmudzpv[20];
 	double fTmudzE[20];
-	double fTmudzSig[20];
 
 	// - MuID Variables
 	double fTmunchi2[20];
@@ -197,20 +212,6 @@ private:
 	int fTmuid[20];
 	int fTmumid[20];
 
-	// MET:
-	double fTRawMET;
-	double fTRawMETpx;
-	double fTRawMETpy;
-	double fTRawMETphi;
-	double fTMuCorrMET;
-	double fTMuCorrMETpx;
-	double fTMuCorrMETpy;
-	double fTMuCorrMETphi;
-	double fTTCMET;
-	double fTTCMETpx;
-	double fTTCMETpy;
-	double fTTCMETphi;
-
 	// Electrons:
 	int fTneles;
 	double fTepx[20];
@@ -221,9 +222,11 @@ private:
 	double fTeet[20];
 	double fTeeta[20];
 	double fTephi[20];
-	double fTed0[20];
+	double fTed0bs[20];
+	double fTed0pv[20];
 	double fTed0E[20];
-	double fTedz[20];
+	double fTedzbs[20];
+	double fTedzpv[20];
 	double fTedzE[20];
 	double fTeiso[20];
 	double fTenchi2[20];
@@ -231,17 +234,17 @@ private:
 	int fTecharge[20];
 	int fTeInGap[20];   // seed crystal next to a gap
 	int fTeEcalDriven[20];
-  	int fTeTrackerDriven[20];
-  	int fTeBasicClustersSize[20];
-        double fTefbrem[20];
-        double fTeHcalOverEcal[20];
-   	double fTeE5x5[20];                      // 5x5 arround seed
-        double fTeE2x5Max[20];                   // 2x5 arround seed
-        double fTeSigmaIetaIeta[20];             // shower shape covariance
-        double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed - track) at calo from p_out
-        double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc  - track) at calo extrapolated from p_in
-        double fTeESuperClusterOverP[20];        // Esc/Pin
-    	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
+	int fTeTrackerDriven[20];
+	int fTeBasicClustersSize[20];
+	double fTefbrem[20];
+	double fTeHcalOverEcal[20];
+	double fTeE5x5[20];                      // 5x5 arround seed
+	double fTeE2x5Max[20];                   // 2x5 arround seed
+	double fTeSigmaIetaIeta[20];             // shower shape covariance
+	double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed-track) at calo from p_out
+	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
+	double fTeESuperClusterOverP[20];        // Esc/Pin
+	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
 
 
 	// Jets:
@@ -255,5 +258,19 @@ private:
 	double fTjeta[20];
 	double fTjphi[20];
 	double fTjemfrac[20];
+
+	// MET:
+	double fTRawMET;
+	double fTRawMETpx;
+	double fTRawMETpy;
+	double fTRawMETphi;
+	double fTMuCorrMET;
+	double fTMuCorrMETpx;
+	double fTMuCorrMETpy;
+	double fTMuCorrMETphi;
+	double fTTCMET;
+	double fTTCMETpx;
+	double fTTCMETpy;
+	double fTTCMETphi;
 	////////////////////////////////////////////////////////
 };

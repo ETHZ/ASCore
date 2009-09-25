@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.2 2009/09/18 12:33:08 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.3 2009/09/19 20:45:10 theofil Exp $
 //
 //
 
@@ -156,6 +156,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
 	beamSpot = *beamSpotHandle;
 
+	// Primary vertex
+	edm::Handle<VertexCollection> vertices;
+	iEvent.getByLabel(fVertexTag, vertices);
+	const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
+
 	// Get Muon IsoDeposits
 	// ECAL:
 	edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepECValueMap;
@@ -176,7 +181,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		Service<service::TriggerNamesService> tns;
 		tns->getTrigPaths(*triggers, triggernames);
 		for( unsigned int i = 0; i < tr.size(); i++ ){
-			fHtrigstat->GetXaxis()->SetBinLabel(i+1,TString(triggernames[i]));
+			fHtrigstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
 			// cout << "i " << i << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
 		}
 		// Add a warning about the shift between trigger bits and bin numbers:
@@ -193,6 +198,22 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 ////////////////////////////////////////////////////////////////////////////////
 // Event Selection /////////////////////////////////////////////////////////////
 	bool acceptEvent = true;
+
+	fTrunnumber = iEvent.id().run();
+	fTeventnumber = iEvent.id().event();
+	fTlumisection = iEvent.luminosityBlock();
+
+	fTweight = 1.0; // To be filled at some point?
+
+	// Save position of primary vertex
+	fTprimvtxx = (primVtx->position()).x();
+	fTprimvtxy = (primVtx->position()).y();
+	fTprimvtxz = (primVtx->position()).z();
+
+	// Save position of beamspot
+	fTbeamspotx = (beamSpot.position()).x();
+	fTbeamspoty = (beamSpot.position()).y();
+	fTbeamspotz = (beamSpot.position()).z();
 
 	// Loop over MuonCollection to count muons
 	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
@@ -233,12 +254,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmueecal[mqi] = ECDep.candEnergy();
 		fTmuehcal[mqi] = HCDep.candEnergy();
 
-		fTmud0[mqi]    = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
-		fTmud0E[mqi]   = Mit->globalTrack()->dxyError();
-		fTmud0Sig[mqi] = fabs(fTmud0[mqi])/fTmud0E[mqi];
-		fTmudz[mqi]    = Mit->globalTrack()->dz(beamSpot.position());
-		fTmudzE[mqi]   = Mit->globalTrack()->dzError();
-		fTmudzSig[mqi] = fabs(fTmudz[mqi])/fTmudzE[mqi];
+		fTmud0bs[mqi] = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
+		fTmud0pv[mqi] = -1.0*Mit->innerTrack()->dxy(primVtx->position());
+		fTmud0E[mqi]  = Mit->globalTrack()->dxyError();
+		fTmudzbs[mqi] = Mit->globalTrack()->dz(beamSpot.position());
+		fTmudzpv[mqi] = Mit->globalTrack()->dz(primVtx->position());
+		fTmudzE[mqi]  = Mit->globalTrack()->dzError();
 
 		fTmunchi2[mqi]     = Mit->globalTrack()->normalizedChi2();
 		fTmunglhits[mqi]   = Mit->globalTrack()->hitPattern().numberOfValidHits();
@@ -248,11 +269,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmunchambers[mqi] = Mit->numberOfChambers();
 
 		fTmucalocomp[mqi] = Mit->caloCompatibility();
-		// fTmusegmcomp[mqi] = Mit->segmentCompatibility();
-		if(Mit->isTrackerMuon()) fTmutrackermu[mqi] = 1;
-		else fTmutrackermu[mqi] = 0;
-		if(muon::isGoodMuon(*cm, muon::GlobalMuonPromptTight)) fTmuisGMPT[mqi] = 1;
-		else fTmuisGMPT[mqi] = 0;
+		fTmusegmcomp[mqi] = muon::segmentCompatibility(*cm);
+		fTmutrackermu[mqi] = Mit->isTrackerMuon() ? 1:0;
+		fTmuisGMPT[mqi] = muon::isGoodMuon(*cm, muon::GlobalMuonPromptTight) ? 1:0;
 
 		// Matching
 		vector<int> MuMatch = matchMuCand(&(*Mit), iEvent);
@@ -314,7 +333,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			if(eliso > fMaxeliso) continue;
 
 			bool isGap = El->isGap(); 
-		        bool EcalDriven = El-> isEcalDriven();	
+			bool EcalDriven = El-> isEcalDriven();	
 			bool TrackerDriven = El->isTrackerDriven();
 
 			  
@@ -330,14 +349,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTephi[eqi]    = El->phi();
 			fTee[eqi]      = El->energy();
 			fTeet[eqi]     = El->et(); // i know: it's the same as pt, still...
-			fTed0[eqi]     = El->gsfTrack()->dxy(beamSpot.position());
+			fTed0bs[eqi]   = -1.0*El->gsfTrack()->dxy(beamSpot.position());
+			fTed0pv[eqi]   = -1.0*El->gsfTrack()->dxy(primVtx->position());
 			fTed0E[eqi]    = El->gsfTrack()->dxyError();
-			fTedz[eqi]     = El->gsfTrack()->dz();
+			fTedzbs[eqi]   = El->gsfTrack()->dz(beamSpot.position());
+			fTedzpv[eqi]   = El->gsfTrack()->dz(primVtx->position());
 			fTedzE[eqi]    = El->gsfTrack()->dzError();
 			fTenchi2[eqi]  = El->gsfTrack()->normalizedChi2();
 			fTeiso[eqi]    = eliso;
 			fTecharge[eqi] = El->charge();
-			fTeInGap[eqi]  = isGap ? 1:0;  // my first contribution in beni's code (isBug? 1:1)   //*** kostas
+			fTeInGap[eqi]  = isGap ? 1:0;  // no bug... //*** Beni
 			fTeEcalDriven[eqi] = EcalDriven ? 1:0;
 			fTeTrackerDriven[eqi] = TrackerDriven ? 1:0;
 			fTeBasicClustersSize[eqi] = El->basicClustersSize();
@@ -351,14 +372,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeESuperClusterOverP[eqi] = El-> eSuperClusterOverP();              
 			fTeDeltaEtaSeedClusterAtCalo[eqi] = El->deltaEtaSeedClusterTrackAtCalo(); 
 			
-			if(eIDmapT[electronRef])  fTeID[eqi][0] = 1;
-			else fTeID[eqi][0]                      = 0;
-			if(eIDmapL[electronRef])  fTeID[eqi][1] = 1;
-			else fTeID[eqi][1]                      = 0;
-			if(eIDmapRT[electronRef]) fTeID[eqi][2] = 1;
-			else fTeID[eqi][2]                      = 0;
-			if(eIDmapRL[electronRef]) fTeID[eqi][3] = 1;
-			else fTeID[eqi][3]                      = 0;
+			fTeID[eqi][0] = eIDmapT[electronRef]  ? 1:0;
+			fTeID[eqi][1] = eIDmapL[electronRef]  ? 1:0;
+			fTeID[eqi][2] = eIDmapRT[electronRef] ? 1:0;
+			fTeID[eqi][3] = eIDmapRL[electronRef] ? 1:0;
 		}
 	}
 	fTneles = eqi+1;
@@ -434,9 +451,21 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fNTotEvents = 0;
 	fNFillTree  = 0;
 	fFirstevent = true;
-	fHtrigstat = fTFileService->make<TH1I>("TriggerStats", "TriggerStatistics", 200,0,200);
-	fTree = fTFileService->make<TTree>("Analysis", "MuonAnalysisTree");
+	fHtrigstat = fTFileService->make<TH1I>("TriggerStats", "TriggerStatistics", 200, 0, 200);
+	fTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
+	// Event information:
+	fTree->Branch("Run"            ,&fTrunnumber      ,"Run/I");
+	fTree->Branch("Event"          ,&fTeventnumber    ,"Event/I");
+	fTree->Branch("LumiSection"    ,&fTlumisection    ,"LumiSection/I");
+	fTree->Branch("Weight"         ,&fTweight         ,"Weight/D");
 	fTree->Branch("TrigResults"    ,&fTtrigres        ,"TrigResults[200]/I");
+	fTree->Branch("PrimVtxx"       ,&fTprimvtxx       ,"PrimVtxx/D");
+	fTree->Branch("PrimVtxy"       ,&fTprimvtxy       ,"PrimVtxy/D");
+	fTree->Branch("PrimVtxz"       ,&fTprimvtxz       ,"PrimVtxz/D");	
+	fTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
+	fTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
+	fTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
+	
 	// Muons:
 	fTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
 	fTree->Branch("MuPx"           ,&fTmupx           ,"MuPx[NMus]/D");
@@ -453,12 +482,12 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("MuIso"          ,&fTmuiso          ,"MuIso[NMus]/D");
 	fTree->Branch("MuEem"          ,&fTmueecal        ,"MuEem[NMus]/D");
 	fTree->Branch("MuEhad"         ,&fTmuehcal        ,"MuEhad[NMus]/D");
-	fTree->Branch("MuD0"           ,&fTmud0           ,"MuD0[NMus]/D");
+	fTree->Branch("MuD0BS"         ,&fTmud0bs         ,"MuD0BS[NMus]/D");
+	fTree->Branch("MuD0PV"         ,&fTmud0pv         ,"MuD0PV[NMus]/D");
 	fTree->Branch("MuD0E"          ,&fTmud0E          ,"MuD0E[NMus]/D");
-	fTree->Branch("MuD0Sig"        ,&fTmud0Sig        ,"MuD0Sig[NMus]/D");
-	fTree->Branch("MuDz"           ,&fTmudz           ,"MuDz[NMus]/D");
+	fTree->Branch("MuDzBS"         ,&fTmudzbs         ,"MuDzBS[NMus]/D");
+	fTree->Branch("MuDzPV"         ,&fTmudzpv         ,"MuDzPV[NMus]/D");
 	fTree->Branch("MuDzE"          ,&fTmudzE          ,"MuDzE[NMus]/D");
-	fTree->Branch("MuDzSig"        ,&fTmudzSig        ,"MuDzSig[NMus]/D");
 	fTree->Branch("MuNChi2"        ,&fTmunchi2        ,"MuNChi2[NMus]/D");
 	fTree->Branch("MuNGlHits"      ,&fTmunglhits      ,"MuNGlHits[NMus]/I");
 	fTree->Branch("MuNMuHits"      ,&fTmunmuhits      ,"MuNMuHits[NMus]/I");
@@ -482,27 +511,29 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("ElEt"            ,&fTeet            ,"ElEt[NEles]/D");
 	fTree->Branch("ElEta"           ,&fTeeta           ,"ElEta[NEles]/D");
 	fTree->Branch("ElPhi"           ,&fTephi           ,"ElPhi[NEles]/D");
-	fTree->Branch("ElD0"            ,&fTed0            ,"ElD0[NEles]/D");
+	fTree->Branch("ElD0BS"          ,&fTed0bs          ,"ElD0BS[NEles]/D");
+	fTree->Branch("ElD0PV"          ,&fTed0pv          ,"ElD0PV[NEles]/D");
 	fTree->Branch("ElD0E"           ,&fTed0E           ,"ElD0E[NEles]/D");
-	fTree->Branch("ElDz"            ,&fTedz            ,"ElDz[NEles]/D");
+	fTree->Branch("ElDzBS"          ,&fTedzbs          ,"ElDzBS[NEles]/D");
+	fTree->Branch("ElDzPV"          ,&fTedzpv          ,"ElDzPV[NEles]/D");
 	fTree->Branch("ElDzE"           ,&fTedzE           ,"ElDzE[NEles]/D");
 	fTree->Branch("ElIso"           ,&fTeiso           ,"ElIso[NEles]/D");
 	fTree->Branch("ElNChi2"         ,&fTenchi2         ,"ElNChi2[NEles]/D");
 	fTree->Branch("ElCharge"        ,&fTecharge        ,"ElCharge[NEles]/I");
 	fTree->Branch("ElID"            ,&fTeID            ,"ElID[NEles][4]/I");
 	fTree->Branch("ElInGap"         ,&fTeInGap         ,"ElInGap[NEles]/I");
-	fTree->Branch("ElEcalDriven"         ,&fTeEcalDriven         ,"ElEcalDriven[NEles]/I");
-	fTree->Branch("ElTrackerDriven"         ,&fTeTrackerDriven         ,"ElTrackerDriven[NEles]/I");
-	fTree->Branch("ElBasicClustersSize"         ,&fTeBasicClustersSize         ,"ElBasicClustersSize[NEles]/I");
-	fTree->Branch("Elfbrem"            ,&fTefbrem            ,"Elfbrem[NEles]/D");
-	fTree->Branch("ElHcalOverEcal"            ,&fTeHcalOverEcal            ,"ElHcalOverEcal[NEles]/D");
-	fTree->Branch("ElE5x5"            ,&fTeE5x5            ,"ElE5x5[NEles]/D");
-	fTree->Branch("ElE2x5Max"            ,&fTeE2x5Max            ,"ElE2x5Max[NEles]/D");
-	fTree->Branch("ElSigmaIetaIeta"            ,&fTeSigmaIetaIeta            ,"ElSigmaIetaIeta[NEles]/D");
-	fTree->Branch("ElDeltaPhiSeedClusterAtCalo"            ,&fTeDeltaPhiSeedClusterAtCalo            ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
-	fTree->Branch("ElDeltaPhiSuperClusterAtVtx"            ,&fTeDeltaPhiSuperClusterAtVtx            ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
-	fTree->Branch("ElESuperClusterOverP"            ,&fTeESuperClusterOverP            ,"ElESuperClusterOverP[NEles]/D");
-	fTree->Branch("ElDeltaEtaSeedClusterAtCalo"            ,&fTeDeltaEtaSeedClusterAtCalo            ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
+	fTree->Branch("ElEcalDriven"        ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
+	fTree->Branch("ElTrackerDriven"     ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
+	fTree->Branch("ElBasicClustersSize" ,&fTeBasicClustersSize ,"ElBasicClustersSize[NEles]/I");
+	fTree->Branch("Elfbrem"             ,&fTefbrem             ,"Elfbrem[NEles]/D");
+	fTree->Branch("ElHcalOverEcal"      ,&fTeHcalOverEcal      ,"ElHcalOverEcal[NEles]/D");
+	fTree->Branch("ElE5x5"              ,&fTeE5x5              ,"ElE5x5[NEles]/D");
+	fTree->Branch("ElE2x5Max"           ,&fTeE2x5Max           ,"ElE2x5Max[NEles]/D");
+	fTree->Branch("ElSigmaIetaIeta"     ,&fTeSigmaIetaIeta     ,"ElSigmaIetaIeta[NEles]/D");
+	fTree->Branch("ElDeltaPhiSeedClusterAtCalo" ,&fTeDeltaPhiSeedClusterAtCalo ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
+	fTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
+	fTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
+	fTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
 
 	// Jets:
 	fTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -515,7 +546,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("JEta"           ,&fTjeta           ,"JEta[NJets]/D");
 	fTree->Branch("JPhi"           ,&fTjphi           ,"JPhi[NJets]/D");
 	fTree->Branch("JEMfrac"        ,&fTjemfrac        ,"JEMfrac[NJets]/D");
-	
+
 	// MET:
 	fTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
 	fTree->Branch("RawMETpx"       ,&fTRawMETpx       ,"RawMETpx/D");
@@ -543,6 +574,16 @@ void NTupleProducer::endJob(){
 // Method to reset the TTree variables for each event
 void NTupleProducer::resetTree(){
 	resetInt(fTtrigres, 200);
+	fTrunnumber = -999;
+	fTeventnumber = -999;
+	fTlumisection = -999;
+	fTweight = -999.99;
+	fTprimvtxx = -999.99;
+	fTprimvtxy = -999.99;
+	fTprimvtxz = -999.99;
+	fTbeamspotx = -999.99;
+	fTbeamspoty = -999.99;
+	fTbeamspotz = -999.99;
 	fTnmu = 0;
 	fTneles = 0;
 	fTnjets = 0;
@@ -560,12 +601,12 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTmuiso);
 	resetDouble(fTmueecal);
 	resetDouble(fTmuehcal);
-	resetDouble(fTmud0);
+	resetDouble(fTmud0bs);
+	resetDouble(fTmud0pv);
 	resetDouble(fTmud0E);
-	resetDouble(fTmud0Sig);
-	resetDouble(fTmudz);
+	resetDouble(fTmudzbs);
+	resetDouble(fTmudzpv);
 	resetDouble(fTmudzE);
-	resetDouble(fTmudzSig);
 	resetDouble(fTmunchi2);
 	resetInt(fTmunglhits);
 	resetInt(fTmunmuhits);
@@ -587,9 +628,11 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTept);
 	resetDouble(fTeeta);
 	resetDouble(fTephi);
-	resetDouble(fTed0);
+	resetDouble(fTed0bs);
+	resetDouble(fTed0pv);
 	resetDouble(fTed0E);
-	resetDouble(fTedz);
+	resetDouble(fTedzbs);
+	resetDouble(fTedzpv);
 	resetDouble(fTedzE);
 	resetDouble(fTenchi2);
 	resetDouble(fTeiso);
