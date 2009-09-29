@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.4 2009/09/25 12:26:01 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.5 2009/09/29 18:14:50 sordini Exp $
 //
 //
 
@@ -40,6 +40,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMET1Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met1");
 	fMET2Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met2");
 	fMET3Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met3");
+	fMET4Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met4");
+	fMET5Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met5");
 	fVertexTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
 	fTrackTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
 	fCalTowTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_caltow");
@@ -85,6 +87,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	cout << "    fMET1Tag        = " << fMET1Tag.label()        << endl;
 	cout << "    fMET2Tag        = " << fMET2Tag.label()        << endl;
 	cout << "    fMET3Tag        = " << fMET3Tag.label()        << endl;
+	cout << "    fMET4Tag        = " << fMET4Tag.label()        << endl;
+	cout << "    fMET5Tag        = " << fMET5Tag.label()        << endl;
 	cout << "    fVertexTag      = " << fVertexTag.label()      << endl;
 	cout << "    fTrackTag       = " << fTrackTag.label()       << endl;
 	cout << "    fCalTowTag      = " << fCalTowTag.label()      << endl;
@@ -162,6 +166,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<METCollection> tcmet;
 	iEvent.getByLabel(fMET3Tag, tcmet);
 
+	Handle<View<PFMET> > pfmet;
+	iEvent.getByLabel(fMET4Tag, pfmet);
+
+	Handle<CaloMETCollection> corrmujesmet;
+	iEvent.getByLabel(fMET5Tag, corrmujesmet);
+
 	// Get beamspot for d0 determination
 	BeamSpot beamSpot;
 	Handle<BeamSpot> beamSpotHandle;
@@ -200,11 +210,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fHtrigstat->GetXaxis()->SetBinLabel(tr.size()+2, "Bin#=Bit#+1");
 	}
 	for( unsigned int i = 0; i < tr.size(); i++ ){
-		if(tr[i].accept()){
-			fTtrigres[i] = 1;
-			fHtrigstat->Fill(i);
-		}
-		if(!tr[i].accept())fTtrigres[i] = 0;
+		if(tr[i].accept())	fHtrigstat->Fill(i);
+		fTtrigres[i] = tr[i].accept() ? 1:0;
 	}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -489,14 +496,26 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTRawMETpx  = (calomet->at(0)).px();
 	fTRawMETpy  = (calomet->at(0)).py();
 	fTRawMETphi = (calomet->at(0)).phi();
+
 	fTMuCorrMET    = (corrmumet->at(0)).pt();
 	fTMuCorrMETpx  = (corrmumet->at(0)).px();
 	fTMuCorrMETpy  = (corrmumet->at(0)).py();
 	fTMuCorrMETphi = (corrmumet->at(0)).phi();
+
 	fTTCMET    = (tcmet->at(0)).pt();
 	fTTCMETpx  = (tcmet->at(0)).px();
 	fTTCMETpy  = (tcmet->at(0)).py();
 	fTTCMETphi = (tcmet->at(0)).phi();
+
+	fTPFMET    = (pfmet->front()).pt();
+	fTPFMETpx  = (pfmet->front()).px();
+	fTPFMETpy  = (pfmet->front()).py();
+	fTPFMETphi = (pfmet->front()).phi();
+
+	fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
+	fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
+	fTMuJESCorrMETpy  = (corrmujesmet->at(0)).py();
+	fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
 
 	if(acceptEvent){
 		fTree->Fill();
@@ -632,6 +651,14 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("TCMETpx"        ,&fTTCMETpx        ,"TCMETpx/D");
 	fTree->Branch("TCMETpy"        ,&fTTCMETpy        ,"TCMETpy/D");
 	fTree->Branch("TCMETphi"       ,&fTTCMETphi       ,"TCMETphi/D");
+	fTree->Branch("MuJESCorrMET"   ,&fTMuJESCorrMET   ,"MuJESCorrMET/D");
+	fTree->Branch("MuJESCorrMETpx" ,&fTMuJESCorrMETpx ,"MuJESCorrMETpx/D");
+	fTree->Branch("MuJESCorrMETpy" ,&fTMuJESCorrMETpy ,"MuJESCorrMETpy/D");
+	fTree->Branch("MuJESCorrMETphi",&fTMuJESCorrMETphi,"MuJESCorrMETphi/D");
+	fTree->Branch("PFMET"          ,&fTPFMET          ,"PFMET/D");
+	fTree->Branch("PFMETpx"        ,&fTPFMETpx        ,"PFMETpx/D");
+	fTree->Branch("PFMETpy"        ,&fTPFMETpy        ,"PFMETpy/D");
+	fTree->Branch("PFMETphi"       ,&fTPFMETphi       ,"PFMETphi/D");
 }
 
 // Method called once each job just after ending the event loop
@@ -769,7 +796,14 @@ void NTupleProducer::resetTree(){
 	fTTCMETpx        = -999.99;
 	fTTCMETpy        = -999.99;
 	fTTCMETphi       = -999.99;
-
+	fTMuJESCorrMET    = -999.99;
+	fTMuJESCorrMETpx  = -999.99;
+	fTMuJESCorrMETpy  = -999.99;
+	fTMuJESCorrMETphi = -999.99;
+	fTPFMET           = -999.99;
+	fTPFMETpx         = -999.99;
+	fTPFMETpy         = -999.99;
+	fTPFMETphi        = -999.99;
 }
 
 // Method for calculating the muon isolation

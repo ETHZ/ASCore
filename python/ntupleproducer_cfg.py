@@ -11,8 +11,6 @@ process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
 process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
 # process.GlobalTag.globaltag="IDEAL_V5::All"
 process.GlobalTag.globaltag="MC_31X_V3::All"
-process.load("JetMETCorrections.Type1MET.MuonMETValueMapProducer_cff")
-process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -22,7 +20,7 @@ process.load("RecoBTag.Configuration.RecoBTag_cff")
 process.MessageLogger = cms.Service("MessageLogger",
 )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source("PoolSource",
 	# replace 'myfile.root' with the source file you want to use
@@ -60,6 +58,17 @@ process.prefer("L2JetCorrectorSC5Calo")
 
 ############# b-tagging for SC (antikt) ########################################
 process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssociatorAtVertex")
+
+### JES MET Corrections ########################################################
+from JetMETCorrections.Configuration.L2L3Corrections_Winter09_cff import *
+from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
+
+process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
+process.metMuonJESCorSC5.inputUncorJetsLabel = "sisCone5CaloJets"
+process.metMuonJESCorSC5.corrector = "L2L3JetCorrectorSC5Calo"
+process.metMuonJESCorSC5.inputUncorMetLabel = "corMetGlobalMuons"
+
+process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
 
 ############# Egamma Isolation #################################################
 # Produce eleIsoDeposits first!
@@ -166,6 +175,8 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_met1    = cms.untracked.InputTag('met'),
 	tag_met2    = cms.untracked.InputTag('corMetGlobalMuons'),
 	tag_met3    = cms.untracked.InputTag('tcMet'),
+	tag_met4    = cms.untracked.InputTag('pfMet'),
+	tag_met5    = cms.untracked.InputTag('metMuonJESCorSC5'),
 	tag_vertex  = cms.untracked.InputTag('offlinePrimaryVertices'),
 	tag_tracks  = cms.untracked.InputTag('generalTracks'),
 	tag_caltow  = cms.untracked.InputTag('towerMaker'),
@@ -195,7 +206,7 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 )
 
 ############# Path #############################################################
-process.p = cms.Path(process.L2L3CorJetSC5Calo)
+process.p = cms.Path(process.L2L3CorJetSC5Calo + process.metCorSequence)
 mybtag = cms.Sequence(process.impactParameterTagInfos*process.trackCountingHighPurBJetTags)
-process.p = cms.Path(mybtag)
-process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.muonMETValueMapProducer*process.corMetGlobalMuons + process.analyze)
+process.l = cms.Path(mybtag)
+process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.analyze)

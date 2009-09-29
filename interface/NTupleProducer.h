@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.4 2009/09/25 12:26:01 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.5 2009/09/29 18:14:50 sordini Exp $
 //
 //
 
@@ -54,6 +54,7 @@
 #include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
 #include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
+
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
@@ -124,6 +125,8 @@ private:
   edm::InputTag fMET1Tag;
   edm::InputTag fMET2Tag;
   edm::InputTag fMET3Tag;
+  edm::InputTag fMET4Tag;
+  edm::InputTag fMET5Tag;
   edm::InputTag fVertexTag;
   edm::InputTag fTrackTag;
   edm::InputTag fCalTowTag;
@@ -292,5 +295,13 @@ private:
   double fTTCMETpx;
   double fTTCMETpy;
   double fTTCMETphi;
+  double fTMuJESCorrMET;
+  double fTMuJESCorrMETpx;
+  double fTMuJESCorrMETpy;
+  double fTMuJESCorrMETphi;
+  double fTPFMET;
+  double fTPFMETpx;
+  double fTPFMETpy;
+  double fTPFMETphi;
   ////////////////////////////////////////////////////////
 };
