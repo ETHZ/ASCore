@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.3 2009/09/19 20:45:10 theofil Exp $
+// $Id: NTupleProducer.cc,v 1.4 2009/09/25 12:26:01 stiegerb Exp $
 //
 //
 
@@ -36,6 +36,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMuIsoDepHCTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
 	fSCTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_sc");
 	fJetTag         = iConfig.getUntrackedParameter<edm::InputTag>("tag_jets");
+	fbtagTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag");
 	fMET1Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met1");
 	fMET2Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met2");
 	fMET3Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met3");
@@ -123,6 +124,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	using namespace reco;
 	using reco::MuonCollection;
 	using reco::CaloJetCollection;
+	using reco::JetTagCollection;
 
 	// Reset all the tree variables
 	resetTree();
@@ -139,6 +141,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel(fJetTag,jets); // 'sisCone5CaloJets'
 	const JetCorrector* L2JetCorrector = JetCorrector::getJetCorrector ("L2RelativeJetCorrectorSC5Calo",iSetup);
 	const JetCorrector* L3JetCorrector = JetCorrector::getJetCorrector ("L3AbsoluteJetCorrectorSC5Calo",iSetup);
+	//
+	reco::helper::JetID jetID;
+
+	// collect information for b-tagging
+	Handle<JetTagCollection> jetsAndProbs;
+	iEvent.getByLabel(fbtagTag,jetsAndProbs);
+
+	//Get Tracks collection
+	Handle<TrackCollection> tracks;
+	iEvent.getByLabel(fTrackTag, tracks);
 
 	// MET
 	Handle<CaloMETCollection> calomet;
@@ -380,38 +392,73 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 	fTneles = eqi+1;
 
+
+	int itag(-1); 
 	// Apply L2 and L3 JetCorrections
 	vector<const reco::CaloJet*> CorrJets; // Contains all (corrected) jets
 	CaloJetCollection::const_iterator Jit;
 	for(Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
-		CaloJet *j = Jit->clone();
-		j->scaleEnergy(L2JetCorrector->correction(j->p4()));
-		j->scaleEnergy(L3JetCorrector->correction(j->p4()));
-		const CaloJet *cj = j->clone();
-		CorrJets.push_back(cj);
+	  CaloJet *j = Jit->clone();
+	  //I save here px, py, pz for uncorrected jets
+	  //used later for matching jets with jets in the jet-tracks associator collections
+	  itag++;
+	  UNC_px_match[itag]=j->px();
+	  UNC_py_match[itag]=j->py();
+	  UNC_pz_match[itag]=j->pz();
+	  //energy corrections
+	  j->scaleEnergy(L2JetCorrector->correction(j->p4()));
+	  j->scaleEnergy(L3JetCorrector->correction(j->p4()));
+	  const CaloJet *cj = j->clone();
+	  CorrJets.push_back(cj);
 	}
 
 	// Determine qualified jets
 	int jqi(-1); // counts # of qualified jets
+	int itagcorr(-1); // counts # of jets for b-tagging (this index will talk to the uncorrected jets)
 	for(size_t i = 0; i < CorrJets.size(); ++i){// Loop over corr. jets
 		// Check if maximum number of jets is exceeded already:
 		if(jqi > 19){
 			cout << "NTupleSkeleton::analyze() ==> Warning: Maximum number of jets exceeded..." << endl;
 			break;
 		}
+		itagcorr++;
 		CaloJet *jet = CorrJets[i]->clone();
 		// Jet preselection
 		if(jet->pt() < fMinjpt) continue;
 		if(TMath::Abs(jet->eta()) > fMaxjeta) continue;
 		if(jet->emEnergyFraction() < fMinjemfrac) continue;
-		// Ignore jets within 0.4 DR of a selected electron
-		bool eleprox = false;
-		for(int j = 0; j < fTneles; j++){
-			double ejDR = GetDeltaR(jet->eta(), fTeeta[j], jet->phi(), fTephi[j]);
-			if(ejDR < 0.4) eleprox = true;
-		}
-		if(eleprox) continue;
 		jqi++;
+		//calculate the DR wrt the closest electron
+		double ejDRmin= 10.;
+		//when no electrons in the event, DR will be 10.
+		for(int j = 0; j < fTneles; j++){
+		  double ejDR = GetDeltaR(jet->eta(), fTeeta[j], jet->phi(), fTephi[j]);
+		  if(ejDR<ejDRmin) ejDRmin = ejDR;
+		}
+		fjeMinDR[jqi]=ejDRmin;
+		//jetID variables
+		jetID.calculate(iEvent,*jet);
+
+		//fill the b-tagging probability
+		for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
+		  if (fabs( (UNC_px_match[itagcorr] - (*jetsAndProbs)[i].first->px())/UNC_px_match[itagcorr]) < 0.00001 && 
+		      fabs( (UNC_py_match[itagcorr] - (*jetsAndProbs)[i].first->py())/UNC_py_match[itagcorr]) < 0.00001 &&
+		      fabs( (UNC_pz_match[itagcorr] - (*jetsAndProbs)[i].first->pz())/UNC_pz_match[itagcorr]) < 0.00001)  {
+		    fbTagProb[jqi]=(*jetsAndProbs)[i].second;
+		    break;
+		  }
+		}
+		vector<const reco::Track*> AssociatedTracks = FindAssociatedTracks(&(*jet),tracks.product());
+		//tmp variables for vectorial sum of pt of tracks
+		double pXtmp=0.;
+		double pYtmp=0.;
+		for(size_t t = 0; t < AssociatedTracks.size(); ++t){
+		  if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
+		    pXtmp+=AssociatedTracks[t]->px();
+		    pYtmp+=AssociatedTracks[t]->py();
+		  }
+		}
+		fChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
 
 		// Dump jet properties into tree variables
 		fTjpx[jqi]  = jet->px();
@@ -423,6 +470,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTje[jqi]   = jet->energy();
 		fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
 		fTjemfrac[jqi] = jet->emEnergyFraction();
+		fTjID_HPD[jqi]  = jetID.fHPD();
+		fTjID_RBX[jqi]  = jetID.fRBX();
+		fTjID_n90Hits[jqi]  = jetID.n90Hits();
+		fTjID_SubDet1[jqi]  = jetID.fSubDetector1();
+		fTjID_SubDet2[jqi]  = jetID.fSubDetector2();
+		fTjID_SubDet3[jqi]  = jetID.fSubDetector3();
+		fTjID_SubDet4[jqi]  = jetID.fSubDetector4();
+		fTjID_resEMF[jqi]  = jetID.restrictedEMF();
+		fTjID_HCALTow[jqi]  = jetID.nHCALTowers();
+		fTjID_ECALTow[jqi]  = jetID.nECALTowers();
+		fjEcorr[jqi]  =  UNC_px_match[itagcorr]/jet->px();
 	}
 	fTnjets = jqi+1;
 
@@ -546,6 +604,20 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("JEta"           ,&fTjeta           ,"JEta[NJets]/D");
 	fTree->Branch("JPhi"           ,&fTjphi           ,"JPhi[NJets]/D");
 	fTree->Branch("JEMfrac"        ,&fTjemfrac        ,"JEMfrac[NJets]/D");
+	fTree->Branch("JID_HPD"        ,&fTjID_HPD        ,"JID_HPD[NJets]/D");
+	fTree->Branch("JID_RBX"        ,&fTjID_RBX        ,"JID_RBX[NJets]/D");
+	fTree->Branch("JID_n90Hits"        ,&fTjID_n90Hits        ,"JID_n90Hits[NJets]/D");
+	fTree->Branch("JID_SubDet1"        ,&fTjID_SubDet1        ,"JID_SubDet1[NJets]/D");
+	fTree->Branch("JID_SubDet2"        ,&fTjID_SubDet2        ,"JID_SubDet2[NJets]/D");
+	fTree->Branch("JID_SubDet3"        ,&fTjID_SubDet3        ,"JID_SubDet3[NJets]/D");
+	fTree->Branch("JID_SubDet4"        ,&fTjID_SubDet4        ,"JID_SubDet4[NJets]/D");
+	fTree->Branch("JID_resEMF"        ,&fTjID_resEMF        ,"JID_resEMF[NJets]/D");
+	fTree->Branch("JID_HCALTow"        ,&fTjID_HCALTow        ,"JID_HCALTow[NJets]/D");
+	fTree->Branch("JID_ECALTow"        ,&fTjID_ECALTow        ,"JID_ECALTow[NJets]/D");
+	fTree->Branch("JbTagProb"        ,&fbTagProb        ,"JbTagProb[NJets]/D");
+	fTree->Branch("JChfrac"        ,&fChfrac        ,"JChfrac[NJets]/D");
+	fTree->Branch("JEcorr"        ,&fjEcorr       ,"JEcorr[NJets]/D");
+	fTree->Branch("JeMinDR"        ,&fjeMinDR       ,"JeMinDR[NJets]/D");
 
 	// MET:
 	fTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
@@ -660,6 +732,24 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTjeta);
 	resetDouble(fTjphi);
 	resetDouble(fTjemfrac);
+	resetDouble(fTjID_HPD);
+	resetDouble(fTjID_RBX);
+	resetDouble(fTjID_n90Hits);
+	resetDouble(fTjID_SubDet1);
+	resetDouble(fTjID_SubDet2);
+	resetDouble(fTjID_SubDet3);
+	resetDouble(fTjID_SubDet4);
+	resetDouble(fTjID_resEMF);
+	resetDouble(fTjID_HCALTow);
+	resetDouble(fTjID_ECALTow);
+	resetDouble(fbTagProb);
+  	resetDouble(fTrkPtSum);
+  	resetDouble(fChfrac);
+  	resetDouble(fjeMinDR);
+
+	resetDouble(UNC_px_match,50);
+	resetDouble(UNC_py_match,50);
+	resetDouble(UNC_pz_match,50);
 
 	for(size_t i = 0; i < 20; ++i){
 		for(size_t j = 0; j < 4; ++j){
@@ -1006,6 +1096,19 @@ double NTupleProducer::GetDeltaR(double eta1, double eta2, double phi1, double p
 	// Computes the DeltaR of two objects from their eta and phi values
 	return sqrt( (eta1-eta2)*(eta1-eta2)
             + DeltaPhi(phi1, phi2)*DeltaPhi(phi1, phi2) );
+}
+vector<const reco::Track*> NTupleProducer::FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks){
+  //returns a list of tracks associated to a given jet
+  vector<const reco::Track*> AssociatedTracks;
+  double jeteta=jet->eta();
+  double jetphi=jet->phi();
+  for(TrackCollection::const_iterator itk = tracks->begin(); itk!=tracks->end(); ++itk){
+    if(sqrt(pow(itk->eta()-jeteta,2) + pow(itk->phi()-jetphi,2))<0.5) {
+      const Track *t = new Track(*itk);
+      AssociatedTracks.push_back(t);
+    }
+  }
+  return AssociatedTracks;
 }
 
 //define this as a plug-in

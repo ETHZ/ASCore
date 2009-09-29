@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.3 2009/09/19 20:46:43 theofil Exp $
+// $Id: NTupleProducer.h,v 1.4 2009/09/25 12:26:01 stiegerb Exp $
 //
 //
 
@@ -51,7 +51,9 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
-
+#include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
@@ -73,8 +75,6 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 
-// #include "SSDiLeptonAnalysis/NTupleProducer/interface/MyMuon.h"
-
 #include "TH1.h"
 #include "TH2.h"
 #include "TLorentzVector.h"
@@ -82,195 +82,215 @@
 
 class NTupleProducer : public edm::EDAnalyzer {
 public:
-	explicit NTupleProducer(const edm::ParameterSet&);
-	~NTupleProducer();
-	vector<double> calcMuIso(const reco::Muon *Mu, const edm::Event& iEvent);
-	vector<double> calcMuIso2(const reco::Muon *Mu, const edm::Event& iEvent);
-	vector<double> calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef);
-	vector<double> calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent);
-	vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
-	double DeltaPhi(double, double);
-	double GetDeltaR(double, double, double, double);
-	vector<const reco::Muon*> sortMus(vector<const reco::Muon*>);
-	void switchDouble(double &, double &);
-	void switchInt(int &, int &);
-	void resetDouble(double *v, unsigned int size = 20);
-	void resetInt(int *v, unsigned int size = 20);
-	void resetTree();
+  explicit NTupleProducer(const edm::ParameterSet&);
+  ~NTupleProducer();
+  vector<double> calcMuIso(const reco::Muon *Mu, const edm::Event& iEvent);
+  vector<double> calcMuIso2(const reco::Muon *Mu, const edm::Event& iEvent);
+  vector<double> calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef);
+  vector<double> calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent);
+  vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
+  double DeltaPhi(double, double);
+  double GetDeltaR(double, double, double, double);
+  vector<const reco::Muon*> sortMus(vector<const reco::Muon*>);
+  void switchDouble(double &, double &);
+  void switchInt(int &, int &);
+  void resetDouble(double *v, unsigned int size = 20);
+  void resetInt(int *v, unsigned int size = 20);
+  void resetTree();
+  vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
 private:
-	virtual void beginJob(const edm::EventSetup&) ;
-	virtual void analyze(const edm::Event&, const edm::EventSetup&);
-	virtual void endJob() ;
-		
-		// ----------member data ---------------------------
-	int fNTotEvents;
-	int fNFillTree;
+  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void endJob() ;
+  
+  // ----------member data ---------------------------
+  int fNTotEvents;
+  int fNFillTree;
+  
+  edm::InputTag fMuonTag;
+  edm::InputTag fElectronTag;
+  edm::InputTag fEleIsoTkTag;
+  edm::InputTag fEleIsoECTag;
+  edm::InputTag fEleIsoHCTag;
+  edm::InputTag fEleIsoDepTkTag;
+  edm::InputTag fEleIsoDepECTag;
+  edm::InputTag fEleIsoDepHCTag;
+  edm::InputTag fMuIsoDepTkTag;
+  edm::InputTag fMuIsoDepECTag;
+  edm::InputTag fMuIsoDepHCTag;
+  edm::InputTag fSCTag;
+  edm::InputTag fJetTag;
+  edm::InputTag fbtagTag;
+  edm::InputTag fMET1Tag;
+  edm::InputTag fMET2Tag;
+  edm::InputTag fMET3Tag;
+  edm::InputTag fVertexTag;
+  edm::InputTag fTrackTag;
+  edm::InputTag fCalTowTag;
+  edm::InputTag fGenPartTag;
+  edm::InputTag fTriggerTag;
+  edm::Service<TFileService> fTFileService;
 
-	edm::InputTag fMuonTag;
-	edm::InputTag fElectronTag;
-	edm::InputTag fEleIsoTkTag;
-	edm::InputTag fEleIsoECTag;
-	edm::InputTag fEleIsoHCTag;
-	edm::InputTag fEleIsoDepTkTag;
-	edm::InputTag fEleIsoDepECTag;
-	edm::InputTag fEleIsoDepHCTag;
-	edm::InputTag fMuIsoDepTkTag;
-	edm::InputTag fMuIsoDepECTag;
-	edm::InputTag fMuIsoDepHCTag;
-	edm::InputTag fSCTag;
-	edm::InputTag fJetTag;
-	edm::InputTag fMET1Tag;
-	edm::InputTag fMET2Tag;
-	edm::InputTag fMET3Tag;
-	edm::InputTag fVertexTag;
-	edm::InputTag fTrackTag;
-	edm::InputTag fCalTowTag;
-	edm::InputTag fGenPartTag;
-	edm::InputTag fTriggerTag;
-	edm::Service<TFileService> fTFileService;
-	double fMinmupt;
-	double fMaxmueta;
-	double fMinelpt;
-	double fMaxeleta;
-	double fMaxeliso;
-	double fMaxeld0;
-
-	double fMinjpt;
-	double fMaxjeta;
-	double fMinjemfrac;
-	
-	double fIso_MuTkDRin;
-	double fIso_MuTkDRout;
+  double fMinmupt;
+  double fMaxmueta;
+  double fMinelpt;
+  double fMaxeleta;
+  double fMaxeliso;
+  double fMaxeld0;
+  
+  double fMinjpt;
+  double fMaxjeta;
+  double fMinjemfrac;
+  
+  double fIso_MuTkDRin;
+  double fIso_MuTkDRout;
 	double fIso_MuTkSeed;
-	double fIso_MuCalDRin;
-	double fIso_MuCalDRout;
-	double fIso_MuCalSeed;
+  double fIso_MuCalDRin;
+  double fIso_MuCalDRout;
+  double fIso_MuCalSeed;
+  
+  TH1I *fHtrigstat; // Added to keep track of trigger names
+  bool fFirstevent;
+  
+  ////////////////////////////////////////////////////////
+  // Tree:
+  TTree *fTree;
 	
-	TH1I *fHtrigstat; // Added to keep track of trigger names
-	bool fFirstevent;
-
-	////////////////////////////////////////////////////////
-	// Tree:
-	TTree *fTree;
-	
-	// General event information
-	int fTrunnumber;
+  // General event information
+  int fTrunnumber;
 	int fTeventnumber;
-	int fTlumisection;
-	double fTweight;
-
-	double fTprimvtxx;
-	double fTprimvtxy;
-	double fTprimvtxz;
-
-	double fTbeamspotx;
-	double fTbeamspoty;
-	double fTbeamspotz;
-
-	// Trigger
-	int fTtrigres[200];
-	// Muons:
-	unsigned int fTnmu;
-	double fTmupx[20];
-	double fTmupy[20];
-	double fTmupz[20];
-	double fTmue[20];
-	double fTmuet[20];
-	double fTmupt[20];
-	double fTmueta[20];
-	double fTmuphi[20];
-	int fTmucharge[20];
-
-	// - Isolation Variables
-	double fTmuetsum[20];
-	double fTmuptsum[20];
-	double fTmuiso[20];
-	double fTmueecal[20];
-	double fTmuehcal[20];
-
-	// - Impact Parameters
-	double fTmud0bs[20];
-	double fTmud0pv[20];
-	double fTmud0E[20];
-	double fTmudzbs[20];
-	double fTmudzpv[20];
-	double fTmudzE[20];
-
-	// - MuID Variables
-	double fTmunchi2[20];
-	int fTmunglhits[20];
-	int fTmunmuhits[20];
-	int fTmuntkhits[20];
-	int fTmunmatches[20];
-	int fTmunchambers[20];
-	double fTmucalocomp[20];
-	double fTmusegmcomp[20];
-	int fTmutrackermu[20];
-	int fTmuisGMPT[20];
-
-	// - Gen Info:
-	int fTmuid[20];
-	int fTmumid[20];
-
-	// Electrons:
-	int fTneles;
-	double fTepx[20];
-	double fTepy[20];
-	double fTepz[20];
-	double fTept[20];
-	double fTee[20];
-	double fTeet[20];
-	double fTeeta[20];
-	double fTephi[20];
-	double fTed0bs[20];
-	double fTed0pv[20];
-	double fTed0E[20];
-	double fTedzbs[20];
-	double fTedzpv[20];
-	double fTedzE[20];
-	double fTeiso[20];
-	double fTenchi2[20];
-	int fTeID[20][4];    // eID flags: 0->Tight, 1->Loose, 2->RobustTight, 3->RobustLoose
-	int fTecharge[20];
-	int fTeInGap[20];   // seed crystal next to a gap
-	int fTeEcalDriven[20];
-	int fTeTrackerDriven[20];
-	int fTeBasicClustersSize[20];
-	double fTefbrem[20];
-	double fTeHcalOverEcal[20];
-	double fTeE5x5[20];                      // 5x5 arround seed
-	double fTeE2x5Max[20];                   // 2x5 arround seed
-	double fTeSigmaIetaIeta[20];             // shower shape covariance
-	double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed-track) at calo from p_out
-	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
-	double fTeESuperClusterOverP[20];        // Esc/Pin
-	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
-
-
-	// Jets:
-	int fTnjets;
-	double fTjpx[20];
-	double fTjpy[20];
-	double fTjpz[20];
-	double fTje[20];
-	double fTjet[20];
-	double fTjpt[20];
-	double fTjeta[20];
-	double fTjphi[20];
-	double fTjemfrac[20];
-
-	// MET:
-	double fTRawMET;
-	double fTRawMETpx;
-	double fTRawMETpy;
-	double fTRawMETphi;
-	double fTMuCorrMET;
-	double fTMuCorrMETpx;
-	double fTMuCorrMETpy;
-	double fTMuCorrMETphi;
-	double fTTCMET;
-	double fTTCMETpx;
-	double fTTCMETpy;
-	double fTTCMETphi;
-	////////////////////////////////////////////////////////
+  int fTlumisection;
+  double fTweight;
+  
+  double fTprimvtxx;
+  double fTprimvtxy;
+  double fTprimvtxz;
+  
+  double fTbeamspotx;
+  double fTbeamspoty;
+  double fTbeamspotz;
+  
+  // Trigger
+  int fTtrigres[200];
+  // Muons:
+  unsigned int fTnmu;
+  double fTmupx[20];
+  double fTmupy[20];
+  double fTmupz[20];
+  double fTmue[20];
+  double fTmuet[20];
+  double fTmupt[20];
+  double fTmueta[20];
+  double fTmuphi[20];
+  int fTmucharge[20];
+  
+  // - Isolation Variables
+  double fTmuetsum[20];
+  double fTmuptsum[20];
+  double fTmuiso[20];
+  double fTmueecal[20];
+  double fTmuehcal[20];
+  
+  // - Impact Parameters
+  double fTmud0bs[20];
+  double fTmud0pv[20];
+  double fTmud0E[20];
+  double fTmudzbs[20];
+  double fTmudzpv[20];
+  double fTmudzE[20];
+  
+  // - MuID Variables
+  double fTmunchi2[20];
+  int fTmunglhits[20];
+  int fTmunmuhits[20];
+  int fTmuntkhits[20];
+  int fTmunmatches[20];
+  int fTmunchambers[20];
+  double fTmucalocomp[20];
+  double fTmusegmcomp[20];
+  int fTmutrackermu[20];
+  int fTmuisGMPT[20];
+  
+  // - Gen Info:
+  int fTmuid[20];
+  int fTmumid[20];
+  
+  // Electrons:
+  int fTneles;
+  double fTepx[20];
+  double fTepy[20];
+  double fTepz[20];
+  double fTept[20];
+  double fTee[20];
+  double fTeet[20];
+  double fTeeta[20];
+  double fTephi[20];
+  double fTed0bs[20];
+  double fTed0pv[20];
+  double fTed0E[20];
+  double fTedzbs[20];
+  double fTedzpv[20];
+  double fTedzE[20];
+  double fTeiso[20];
+  double fTenchi2[20];
+  int fTeID[20][4];    // eID flags: 0->Tight, 1->Loose, 2->RobustTight, 3->RobustLoose
+  int fTecharge[20];
+  int fTeInGap[20];   // seed crystal next to a gap
+  int fTeEcalDriven[20];
+  int fTeTrackerDriven[20];
+  int fTeBasicClustersSize[20];
+  double fTefbrem[20];
+  double fTeHcalOverEcal[20];
+  double fTeE5x5[20];                      // 5x5 arround seed
+  double fTeE2x5Max[20];                   // 2x5 arround seed
+  double fTeSigmaIetaIeta[20];             // shower shape covariance
+  double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed-track) at calo from p_out
+  double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
+  double fTeESuperClusterOverP[20];        // Esc/Pin
+  double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
+  
+  
+  // Jets:
+  int fTnjets;
+  double fTjpx[20];
+  double fTjpy[20];
+  double fTjpz[20];
+  double fTje[20];
+  double fTjet[20];
+  double fTjpt[20];
+  double fTjeta[20];
+  double fTjphi[20];
+  double fTjemfrac[20];
+  double fTjID_HPD[20];
+  double fTjID_RBX[20];
+  double fTjID_n90Hits[20];
+  double fTjID_SubDet1[20];
+  double fTjID_SubDet2[20];
+  double fTjID_SubDet3[20];
+  double fTjID_SubDet4[20];
+  double fTjID_resEMF[20];
+  double fTjID_HCALTow[20];
+  double fTjID_ECALTow[20];
+  double fbTagProb[20];
+  double UNC_px_match[50];
+  double UNC_py_match[50];
+  double UNC_pz_match[50];
+  double fTrkPtSum[20];
+  double fChfrac[20];
+  double fjEcorr[20];
+  double fjeMinDR[20];
+  // MET:
+  double fTRawMET;
+  double fTRawMETpx;
+  double fTRawMETpy;
+  double fTRawMETphi;
+  double fTMuCorrMET;
+  double fTMuCorrMETpx;
+  double fTMuCorrMETpy;
+  double fTMuCorrMETphi;
+  double fTTCMET;
+  double fTTCMETpx;
+  double fTTCMETpy;
+  double fTTCMETphi;
+  ////////////////////////////////////////////////////////
 };

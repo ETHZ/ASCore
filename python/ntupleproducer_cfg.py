@@ -16,9 +16,10 @@ process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("FWCore.MessageService.MessageLogger_cfi")
+### b-tagging
+process.load("RecoBTag.Configuration.RecoBTag_cff")
 
 process.MessageLogger = cms.Service("MessageLogger",
-	# destinations = cms.untracked.vstring('output.txt')
 )
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -56,6 +57,9 @@ process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
     correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
 )
 process.prefer("L2JetCorrectorSC5Calo")
+
+############# b-tagging for SC (antikt) ########################################
+process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssociatorAtVertex")
 
 ############# Egamma Isolation #################################################
 # Produce eleIsoDeposits first!
@@ -158,6 +162,7 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_muisodephc = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
 	tag_sc      = cms.untracked.InputTag('correctedHybridSuperClusters'),
 	tag_jets    = cms.untracked.InputTag('sisCone5CaloJets'),
+        tag_btag    = cms.untracked.InputTag('trackCountingHighPurBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
 	tag_met1    = cms.untracked.InputTag('met'),
 	tag_met2    = cms.untracked.InputTag('corMetGlobalMuons'),
 	tag_met3    = cms.untracked.InputTag('tcMet'),
@@ -191,4 +196,6 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 
 ############# Path #############################################################
 process.p = cms.Path(process.L2L3CorJetSC5Calo)
+mybtag = cms.Sequence(process.impactParameterTagInfos*process.trackCountingHighPurBJetTags)
+process.p = cms.Path(mybtag)
 process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.muonMETValueMapProducer*process.corMetGlobalMuons + process.analyze)
