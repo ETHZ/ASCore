@@ -9,7 +9,8 @@
 <use name=DataFormats/MuonReco>
 <use name=DataFormats/BeamSpot>
 <use name=DataFormats/BTauReco>
-# <use name=SimDataFormats/HepMCProduct>
+<use name=TrackingTools/TransientTrack>
+<use name=RecoVertex/AdaptiveVertexFit>
 <use name=DataFormats/Candidate>
 <use name=JetMETCorrections/Objects>
 <use name=clhep> 
