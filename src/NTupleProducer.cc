@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.7 2009/09/30 17:20:14 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.8 2009/10/02 14:34:01 sordini Exp $
 //
 //
 
@@ -233,12 +233,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTweight = 1.0; // To be filled at some point?
 
 	// Save position of primary vertex
-	fTprimvtxx  = primVtx->x();
-	fTprimvtxy  = primVtx->y();
-	fTprimvtxz  = primVtx->z();
-	fTprimvtxxE = primVtx->xError();
-	fTprimvtxyE = primVtx->yError();
-	fTprimvtxzE = primVtx->zError();
+	fTprimvtxx   = primVtx->x();
+	fTprimvtxy   = primVtx->y();
+	fTprimvtxz   = primVtx->z();
+	fTprimvtxxE  = primVtx->xError();
+	fTprimvtxyE  = primVtx->yError();
+	fTprimvtxzE  = primVtx->zError();
+	fTpvtxznchi2 = primVtx->normalizedChi2();
 
 	// Save position of beamspot
 	fTbeamspotx = (beamSpot.position()).x();
@@ -620,6 +621,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("PrimVtxxE"      ,&fTprimvtxxE      ,"PrimVtxxE/D");
 	fTree->Branch("PrimVtxyE"      ,&fTprimvtxyE      ,"PrimVtxyE/D");
 	fTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");	
+	fTree->Branch("PrimVtxzNChi2"  ,&fTpvtxznchi2     ,"PrimVtxzNChi2/D");	
 	fTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
 	fTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
 	fTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
@@ -785,6 +787,7 @@ void NTupleProducer::resetTree(){
 	fTprimvtxxE = -999.99;
 	fTprimvtxyE = -999.99;
 	fTprimvtxzE = -999.99;
+	fTpvtxznchi2 = -999.99;
 	fTbeamspotx = -999.99;
 	fTbeamspoty = -999.99;
 	fTbeamspotz = -999.99;

@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.6 2009/09/29 18:53:39 sordini Exp $
+// $Id: NTupleProducer.h,v 1.7 2009/09/30 17:20:27 stiegerb Exp $
 //
 //
 
@@ -176,6 +176,7 @@ private:
 	double fTprimvtxxE;
 	double fTprimvtxyE;
 	double fTprimvtxzE;
+	double fTpvtxznchi2;
 
 	double fTbeamspotx;
 	double fTbeamspoty;
