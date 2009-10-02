@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.6 2009/09/29 18:53:39 sordini Exp $
+// $Id: NTupleProducer.cc,v 1.7 2009/09/30 17:20:14 stiegerb Exp $
 //
 //
 
@@ -456,7 +456,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjeMinDR[jqi]=ejDRmin;
 		//jetID variables
 		jetID.calculate(iEvent,*jet);
-
 		//fill the b-tagging probability
 		for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
 			if (fabs( (fTUNC_px_match[itagcorr] - (*jetsAndProbs)[i].first->px())/fTUNC_px_match[itagcorr]) < 0.00001 && 
@@ -467,34 +466,38 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			}
 		}
 		vector<const reco::Track*> AssociatedTracks = FindAssociatedTracks(&(*jet), tracks.product());
+		vector<TransientTrack> AssociatedTTracks;
+		if(fabs(jet->eta())<2.9){ //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 		//tmp variables for vectorial sum of pt of tracks
 		double pXtmp=0.;
 		double pYtmp=0.;
-		vector<TransientTrack> AssociatedTTracks;
 		for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-			AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
-			if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-				pXtmp+=AssociatedTracks[t]->px();
-				pYtmp+=AssociatedTracks[t]->py();
-			}
+		  AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
+		  if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
+		    pXtmp+=AssociatedTracks[t]->px();
+		    pYtmp+=AssociatedTracks[t]->py();
+		  }
 		}
 		fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
+		} else {//the whole cone used for jet-tracks association is outside of the tracker acceptance
+		  fTChfrac[jqi]=-1.;
+		}
 		// Convert tracks to transient tracks for vertex fitting
 		if(AssociatedTTracks.size() > 1){
-			AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
-			TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
-			if(jetVtx.isValid()){
-			fTjetVtxx[jqi]  = jetVtx.position().x();
-			fTjetVtxy[jqi]  = jetVtx.position().y();
-			fTjetVtxz[jqi]  = jetVtx.position().z();
-			fTjetVtxExx[jqi] = jetVtx.positionError().cxx();
-			fTjetVtxEyx[jqi] = jetVtx.positionError().cyx();
-			fTjetVtxEyy[jqi] = jetVtx.positionError().cyy();
-			fTjetVtxEzy[jqi] = jetVtx.positionError().czy();
-			fTjetVtxEzz[jqi] = jetVtx.positionError().czz();
-			fTjetVtxEzx[jqi] = jetVtx.positionError().czx();
-			fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
-			}else{
+		  AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
+		  TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
+		  if(jetVtx.isValid()){
+		    fTjetVtxx[jqi]  = jetVtx.position().x();
+		    fTjetVtxy[jqi]  = jetVtx.position().y();
+		    fTjetVtxz[jqi]  = jetVtx.position().z();
+		    fTjetVtxExx[jqi] = jetVtx.positionError().cxx();
+		    fTjetVtxEyx[jqi] = jetVtx.positionError().cyx();
+		    fTjetVtxEyy[jqi] = jetVtx.positionError().cyy();
+		    fTjetVtxEzy[jqi] = jetVtx.positionError().czy();
+		    fTjetVtxEzz[jqi] = jetVtx.positionError().czz();
+		    fTjetVtxEzx[jqi] = jetVtx.positionError().czx();
+		    fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
+		  }else{
 				fTjetVtxx[jqi]     = -777.77;
 				fTjetVtxy[jqi]     = -777.77;
 				fTjetVtxz[jqi]     = -777.77;
@@ -540,7 +543,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjID_resEMF[jqi]  = jetID.restrictedEMF();
 		fTjID_HCALTow[jqi]  = jetID.nHCALTowers();
 		fTjID_ECALTow[jqi]  = jetID.nECALTowers();
-		fTjEcorr[jqi]  =  fTUNC_px_match[itagcorr]/jet->px();
+		fTjEcorr[jqi]  =  jet->px()/fTUNC_px_match[itagcorr];
 	}
 	fTnjets = jqi+1;
 
