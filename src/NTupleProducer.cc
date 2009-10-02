@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.8 2009/10/02 14:34:01 sordini Exp $
+// $Id: NTupleProducer.cc,v 1.9 2009/10/02 17:11:40 stiegerb Exp $
 //
 //
 
@@ -621,7 +621,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("PrimVtxxE"      ,&fTprimvtxxE      ,"PrimVtxxE/D");
 	fTree->Branch("PrimVtxyE"      ,&fTprimvtxyE      ,"PrimVtxyE/D");
 	fTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");	
-	fTree->Branch("PrimVtxzNChi2"  ,&fTpvtxznchi2     ,"PrimVtxzNChi2/D");	
+	fTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");	
 	fTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
 	fTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
 	fTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
