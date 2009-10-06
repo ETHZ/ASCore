@@ -193,7 +193,7 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxeliso   = cms.untracked.double(2.0),
 	sel_maxeld0    = cms.untracked.double(0.2),
 	# Jets:
-	sel_minjpt     = cms.untracked.double(30.0),
+	sel_minjpt     = cms.untracked.double(20.0),
 	sel_maxjeta    = cms.untracked.double(5.0),
 	sel_minjemfrac = cms.untracked.double(0.1),
 	# Isolation Parameters
