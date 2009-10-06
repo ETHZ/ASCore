@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.8 2009/10/02 17:11:55 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.9 2009/10/06 07:01:10 stiegerb Exp $
 //
 //
 
@@ -81,6 +81,9 @@ Implementation:
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
+
 #include "TH1.h"
 #include "TH2.h"
 #include "TLorentzVector.h"
@@ -107,7 +110,8 @@ public:
 private:
 	virtual void beginJob(const edm::EventSetup&) ;
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
-	virtual void endJob() ;
+	virtual void endJob();
+	virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
 // ----------member data ---------------------------
 	int fNTotEvents;
@@ -145,11 +149,9 @@ private:
 	double fMaxeleta;
 	double fMaxeliso;
 	double fMaxeld0;
-
 	double fMinjpt;
 	double fMaxjeta;
 	double fMinjemfrac;
-
 	double fIso_MuTkDRin;
 	double fIso_MuTkDRout;
 	double fIso_MuTkSeed;
@@ -161,13 +163,38 @@ private:
 	bool fFirstevent;
 
 ////////////////////////////////////////////////////////
-// Tree:
-	TTree *fTree;
+// Trees:
+	TTree *fRunTree;
+
+	int fRTrunnumber;
+	double fRTextxslo;
+	double fRTextxsnlo;
+	double fRTintxs;
+
+	double fRTMinmupt;
+	double fRTMaxmueta;
+	double fRTMinelpt;
+	double fRTMaxeleta;
+	double fRTMaxeliso;
+	double fRTMaxeld0;
+	double fRTMinjpt;
+	double fRTMaxjeta;
+	double fRTMinjemfrac;
+	double fRTIsoMuTkDRin;
+	double fRTIsoMuTkDRout;
+	double fRTIsoMuTkSeed;
+	double fRTIsoMuCalDRin;
+	double fRTIsoMuCalDRout;
+	double fRTIsoMuCalSeed;
+
+
+	TTree *fEventTree;
 
 // General event information
 	int fTrunnumber;
 	int fTeventnumber;
 	int fTlumisection;
+	int fTsigprocid;
 	double fTweight;
 
 	double fTprimvtxx;

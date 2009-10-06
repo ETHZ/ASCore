@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.11 2009/10/06 07:00:56 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.12 2009/10/06 08:28:00 stiegerb Exp $
 //
 //
 
@@ -200,6 +200,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Get Transient Track Builder
 	ESHandle<TransientTrackBuilder> theB;
 	iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
+
+	// Get GenEventInfoProduct
+	edm::Handle<GenEventInfoProduct> genEvtInfo;
+	iEvent.getByLabel("generator", genEvtInfo);
+	fTsigprocid = genEvtInfo->signalProcessID();
 
 	// Dump HLT trigger bits
 	Handle<TriggerResults> triggers;
@@ -597,7 +602,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
 
 	if(acceptEvent){
-		fTree->Fill();
+		fEventTree->Fill();
 		fNFillTree++;
 	}
 }
@@ -608,163 +613,237 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fNFillTree  = 0;
 	fFirstevent = true;
 	fHtrigstat = fTFileService->make<TH1I>("TriggerStats", "TriggerStatistics", 200, 0, 200);
-	fTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
+
+	fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
+	fRunTree->Branch("Run"            ,&fRTrunnumber,      "Run/I");
+	fRunTree->Branch("ExtXSecLO"      ,&fRTextxslo,        "ExtXSecLO/D");
+	fRunTree->Branch("ExtXSecNLO"     ,&fRTextxsnlo,       "ExtXSecNLO/D");
+	fRunTree->Branch("IntXSec"        ,&fRTintxs,          "IntXSec/D");
+	fRunTree->Branch("MinMuPt"        ,&fRTMinmupt,        "MinMuPt/D");
+	fRunTree->Branch("MaxMuEta"       ,&fRTMaxmueta,       "MaxMuEta/D");
+	fRunTree->Branch("MinElPt"        ,&fRTMinelpt,        "MinElPt/D");
+	fRunTree->Branch("MaxElEta"       ,&fRTMaxeleta,       "MaxElEta/D");
+	fRunTree->Branch("MaxElIso"       ,&fRTMaxeliso,       "MaxElIso/D");
+	fRunTree->Branch("MaxElD0"        ,&fRTMaxeld0,        "MaxElD0/D");
+	fRunTree->Branch("MinJPt"         ,&fRTMinjpt,         "MinJPt/D");
+	fRunTree->Branch("MaxJEta"        ,&fRTMaxjeta,        "MaxJEta/D");
+	fRunTree->Branch("MinJEMfrac"     ,&fRTMinjemfrac,     "MinJEMfrac/D");
+	fRunTree->Branch("IsoMuTkDRin"    ,&fRTIsoMuTkDRin,    "IsoMuTkDRin/D");
+	fRunTree->Branch("IsoMuTkDRout"   ,&fRTIsoMuTkDRout,   "IsoMuTkDRout/D");
+	fRunTree->Branch("IsoMuTkSeed"    ,&fRTIsoMuTkSeed,    "IsoMuTkSeed/D");
+	fRunTree->Branch("IsoMuCalDRin"   ,&fRTIsoMuCalDRin,   "IsoMuCalDRin/D");
+	fRunTree->Branch("IsoMuCalDRout"  ,&fRTIsoMuCalDRout,  "IsoMuCalDRout/D");
+	fRunTree->Branch("IsoMuCalSeed"   ,&fRTIsoMuCalSeed,   "IsoMuCalSeed/D");
+	
+	fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 	// Event information:
-	fTree->Branch("Run"            ,&fTrunnumber      ,"Run/I");
-	fTree->Branch("Event"          ,&fTeventnumber    ,"Event/I");
-	fTree->Branch("LumiSection"    ,&fTlumisection    ,"LumiSection/I");
-	fTree->Branch("Weight"         ,&fTweight         ,"Weight/D");
-	fTree->Branch("TrigResults"    ,&fTtrigres        ,"TrigResults[200]/I");
-	fTree->Branch("PrimVtxx"       ,&fTprimvtxx       ,"PrimVtxx/D");
-	fTree->Branch("PrimVtxy"       ,&fTprimvtxy       ,"PrimVtxy/D");
-	fTree->Branch("PrimVtxz"       ,&fTprimvtxz       ,"PrimVtxz/D");	
-	fTree->Branch("PrimVtxxE"      ,&fTprimvtxxE      ,"PrimVtxxE/D");
-	fTree->Branch("PrimVtxyE"      ,&fTprimvtxyE      ,"PrimVtxyE/D");
-	fTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");	
-	fTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");	
-	fTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
-	fTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
-	fTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
+	fEventTree->Branch("Run"            ,&fTrunnumber      ,"Run/I");
+	fEventTree->Branch("Event"          ,&fTeventnumber    ,"Event/I");
+	fEventTree->Branch("LumiSection"    ,&fTlumisection    ,"LumiSection/I");
+	fEventTree->Branch("SigProcID"      ,&fTsigprocid      ,"SigProcID/I");
+	fEventTree->Branch("Weight"         ,&fTweight         ,"Weight/D");
+	fEventTree->Branch("TrigResults"    ,&fTtrigres        ,"TrigResults[200]/I");
+	fEventTree->Branch("PrimVtxx"       ,&fTprimvtxx       ,"PrimVtxx/D");
+	fEventTree->Branch("PrimVtxy"       ,&fTprimvtxy       ,"PrimVtxy/D");
+	fEventTree->Branch("PrimVtxz"       ,&fTprimvtxz       ,"PrimVtxz/D");	
+	fEventTree->Branch("PrimVtxxE"      ,&fTprimvtxxE      ,"PrimVtxxE/D");
+	fEventTree->Branch("PrimVtxyE"      ,&fTprimvtxyE      ,"PrimVtxyE/D");
+	fEventTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");	
+	fEventTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");	
+	fEventTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
+	fEventTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
+	fEventTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
 
 	// Muons:
-	fTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
-	fTree->Branch("MuPx"           ,&fTmupx           ,"MuPx[NMus]/D");
-	fTree->Branch("MuPy"           ,&fTmupy           ,"MuPy[NMus]/D");
-	fTree->Branch("MuPz"           ,&fTmupz           ,"MuPz[NMus]/D");
-	fTree->Branch("MuPt"           ,&fTmupt           ,"MuPt[NMus]/D");
-	fTree->Branch("MuE"            ,&fTmue            ,"MuE[NMus]/D");
-	fTree->Branch("MuEt"           ,&fTmuet           ,"MuEt[NMus]/D");
-	fTree->Branch("MuEta"          ,&fTmueta          ,"MuEta[NMus]/D");
-	fTree->Branch("MuPhi"          ,&fTmuphi          ,"MuPhi[NMus]/D");
-	fTree->Branch("MuCharge"       ,&fTmucharge       ,"MuCharge[NMus]/I");
-	fTree->Branch("MuPtsum"        ,&fTmuptsum        ,"MuPtsum[NMus]/D");
-	fTree->Branch("MuEtsum"        ,&fTmuetsum        ,"MuEtsum[NMus]/D");
-	fTree->Branch("MuIso"          ,&fTmuiso          ,"MuIso[NMus]/D");
-	fTree->Branch("MuEem"          ,&fTmueecal        ,"MuEem[NMus]/D");
-	fTree->Branch("MuEhad"         ,&fTmuehcal        ,"MuEhad[NMus]/D");
-	fTree->Branch("MuD0BS"         ,&fTmud0bs         ,"MuD0BS[NMus]/D");
-	fTree->Branch("MuD0PV"         ,&fTmud0pv         ,"MuD0PV[NMus]/D");
-	fTree->Branch("MuD0E"          ,&fTmud0E          ,"MuD0E[NMus]/D");
-	fTree->Branch("MuDzBS"         ,&fTmudzbs         ,"MuDzBS[NMus]/D");
-	fTree->Branch("MuDzPV"         ,&fTmudzpv         ,"MuDzPV[NMus]/D");
-	fTree->Branch("MuDzE"          ,&fTmudzE          ,"MuDzE[NMus]/D");
-	fTree->Branch("MuNChi2"        ,&fTmunchi2        ,"MuNChi2[NMus]/D");
-	fTree->Branch("MuNGlHits"      ,&fTmunglhits      ,"MuNGlHits[NMus]/I");
-	fTree->Branch("MuNMuHits"      ,&fTmunmuhits      ,"MuNMuHits[NMus]/I");
-	fTree->Branch("MuNTkHits"      ,&fTmuntkhits      ,"MuNTkHits[NMus]/I");
-	fTree->Branch("MuNMatches"     ,&fTmunmatches     ,"MuNMatches[NMus]/I");
-	fTree->Branch("MuNChambers"    ,&fTmunchambers    ,"MuNChambers[NMus]/I");
-	fTree->Branch("MuCaloComp"     ,&fTmucalocomp     ,"MuCaloComp[NMus]/D");
-	fTree->Branch("MuSegmComp"     ,&fTmusegmcomp     ,"MuSegmComp[NMus]/D");
-	fTree->Branch("MuTrackerMu"    ,&fTmutrackermu    ,"MuTrackerMu[NMus]/I");
-	fTree->Branch("MuGMPT"         ,&fTmuisGMPT       ,"MuGMPT[NMus]/I");
-	fTree->Branch("MuID"           ,&fTmuid           ,"MuID[NMus]/I");
-	fTree->Branch("MuMID"          ,&fTmumid          ,"MuMID[NMus]/I");
+	fEventTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
+	fEventTree->Branch("MuPx"           ,&fTmupx           ,"MuPx[NMus]/D");
+	fEventTree->Branch("MuPy"           ,&fTmupy           ,"MuPy[NMus]/D");
+	fEventTree->Branch("MuPz"           ,&fTmupz           ,"MuPz[NMus]/D");
+	fEventTree->Branch("MuPt"           ,&fTmupt           ,"MuPt[NMus]/D");
+	fEventTree->Branch("MuE"            ,&fTmue            ,"MuE[NMus]/D");
+	fEventTree->Branch("MuEt"           ,&fTmuet           ,"MuEt[NMus]/D");
+	fEventTree->Branch("MuEta"          ,&fTmueta          ,"MuEta[NMus]/D");
+	fEventTree->Branch("MuPhi"          ,&fTmuphi          ,"MuPhi[NMus]/D");
+	fEventTree->Branch("MuCharge"       ,&fTmucharge       ,"MuCharge[NMus]/I");
+	fEventTree->Branch("MuPtsum"        ,&fTmuptsum        ,"MuPtsum[NMus]/D");
+	fEventTree->Branch("MuEtsum"        ,&fTmuetsum        ,"MuEtsum[NMus]/D");
+	fEventTree->Branch("MuIso"          ,&fTmuiso          ,"MuIso[NMus]/D");
+	fEventTree->Branch("MuEem"          ,&fTmueecal        ,"MuEem[NMus]/D");
+	fEventTree->Branch("MuEhad"         ,&fTmuehcal        ,"MuEhad[NMus]/D");
+	fEventTree->Branch("MuD0BS"         ,&fTmud0bs         ,"MuD0BS[NMus]/D");
+	fEventTree->Branch("MuD0PV"         ,&fTmud0pv         ,"MuD0PV[NMus]/D");
+	fEventTree->Branch("MuD0E"          ,&fTmud0E          ,"MuD0E[NMus]/D");
+	fEventTree->Branch("MuDzBS"         ,&fTmudzbs         ,"MuDzBS[NMus]/D");
+	fEventTree->Branch("MuDzPV"         ,&fTmudzpv         ,"MuDzPV[NMus]/D");
+	fEventTree->Branch("MuDzE"          ,&fTmudzE          ,"MuDzE[NMus]/D");
+	fEventTree->Branch("MuNChi2"        ,&fTmunchi2        ,"MuNChi2[NMus]/D");
+	fEventTree->Branch("MuNGlHits"      ,&fTmunglhits      ,"MuNGlHits[NMus]/I");
+	fEventTree->Branch("MuNMuHits"      ,&fTmunmuhits      ,"MuNMuHits[NMus]/I");
+	fEventTree->Branch("MuNTkHits"      ,&fTmuntkhits      ,"MuNTkHits[NMus]/I");
+	fEventTree->Branch("MuNMatches"     ,&fTmunmatches     ,"MuNMatches[NMus]/I");
+	fEventTree->Branch("MuNChambers"    ,&fTmunchambers    ,"MuNChambers[NMus]/I");
+	fEventTree->Branch("MuCaloComp"     ,&fTmucalocomp     ,"MuCaloComp[NMus]/D");
+	fEventTree->Branch("MuSegmComp"     ,&fTmusegmcomp     ,"MuSegmComp[NMus]/D");
+	fEventTree->Branch("MuTrackerMu"    ,&fTmutrackermu    ,"MuTrackerMu[NMus]/I");
+	fEventTree->Branch("MuGMPT"         ,&fTmuisGMPT       ,"MuGMPT[NMus]/I");
+	fEventTree->Branch("MuID"           ,&fTmuid           ,"MuID[NMus]/I");
+	fEventTree->Branch("MuMID"          ,&fTmumid          ,"MuMID[NMus]/I");
 
 	// Electrons:
-	fTree->Branch("NEles"               ,&fTneles              ,"NEles/I");
-	fTree->Branch("ElPx"                ,&fTepx                ,"ElPx[NEles]/D");
-	fTree->Branch("ElPy"                ,&fTepy                ,"ElPy[NEles]/D");
-	fTree->Branch("ElPz"                ,&fTepz                ,"ElPz[NEles]/D");
-	fTree->Branch("ElPt"                ,&fTept                ,"ElPt[NEles]/D");
-	fTree->Branch("ElE"                 ,&fTee                 ,"ElE[NEles]/D");
-	fTree->Branch("ElEt"                ,&fTeet                ,"ElEt[NEles]/D");
-	fTree->Branch("ElEta"               ,&fTeeta               ,"ElEta[NEles]/D");
-	fTree->Branch("ElPhi"               ,&fTephi               ,"ElPhi[NEles]/D");
-	fTree->Branch("ElD0BS"              ,&fTed0bs              ,"ElD0BS[NEles]/D");
-	fTree->Branch("ElD0PV"              ,&fTed0pv              ,"ElD0PV[NEles]/D");
-	fTree->Branch("ElD0E"               ,&fTed0E               ,"ElD0E[NEles]/D");
-	fTree->Branch("ElDzBS"              ,&fTedzbs              ,"ElDzBS[NEles]/D");
-	fTree->Branch("ElDzPV"              ,&fTedzpv              ,"ElDzPV[NEles]/D");
-	fTree->Branch("ElDzE"               ,&fTedzE               ,"ElDzE[NEles]/D");
-	fTree->Branch("ElIso"               ,&fTeiso               ,"ElIso[NEles]/D");
-	fTree->Branch("ElPtSum"             ,&fTeptsum             ,"ElPtSum[NEles]/D");
-	fTree->Branch("ElEtSum"             ,&fTeetsum             ,"ElEtSum[NEles]/D");
-	fTree->Branch("ElNChi2"             ,&fTenchi2             ,"ElNChi2[NEles]/D");
-	fTree->Branch("ElCharge"            ,&fTecharge            ,"ElCharge[NEles]/I");
-	fTree->Branch("ElID"                ,&fTeID                ,"ElID[NEles][4]/I");
-	fTree->Branch("ElInGap"             ,&fTeInGap             ,"ElInGap[NEles]/I");
-	fTree->Branch("ElEcalDriven"        ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
-	fTree->Branch("ElTrackerDriven"     ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
-	fTree->Branch("ElBasicClustersSize" ,&fTeBasicClustersSize ,"ElBasicClustersSize[NEles]/I");
-	fTree->Branch("Elfbrem"             ,&fTefbrem             ,"Elfbrem[NEles]/D");
-	fTree->Branch("ElHcalOverEcal"      ,&fTeHcalOverEcal      ,"ElHcalOverEcal[NEles]/D");
-	fTree->Branch("ElE5x5"              ,&fTeE5x5              ,"ElE5x5[NEles]/D");
-	fTree->Branch("ElE2x5Max"           ,&fTeE2x5Max           ,"ElE2x5Max[NEles]/D");
-	fTree->Branch("ElSigmaIetaIeta"     ,&fTeSigmaIetaIeta     ,"ElSigmaIetaIeta[NEles]/D");
-	fTree->Branch("ElDeltaPhiSeedClusterAtCalo" ,&fTeDeltaPhiSeedClusterAtCalo ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
-	fTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
-	fTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
-	fTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
+	fEventTree->Branch("NEles"               ,&fTneles              ,"NEles/I");
+	fEventTree->Branch("ElPx"                ,&fTepx                ,"ElPx[NEles]/D");
+	fEventTree->Branch("ElPy"                ,&fTepy                ,"ElPy[NEles]/D");
+	fEventTree->Branch("ElPz"                ,&fTepz                ,"ElPz[NEles]/D");
+	fEventTree->Branch("ElPt"                ,&fTept                ,"ElPt[NEles]/D");
+	fEventTree->Branch("ElE"                 ,&fTee                 ,"ElE[NEles]/D");
+	fEventTree->Branch("ElEt"                ,&fTeet                ,"ElEt[NEles]/D");
+	fEventTree->Branch("ElEta"               ,&fTeeta               ,"ElEta[NEles]/D");
+	fEventTree->Branch("ElPhi"               ,&fTephi               ,"ElPhi[NEles]/D");
+	fEventTree->Branch("ElD0BS"              ,&fTed0bs              ,"ElD0BS[NEles]/D");
+	fEventTree->Branch("ElD0PV"              ,&fTed0pv              ,"ElD0PV[NEles]/D");
+	fEventTree->Branch("ElD0E"               ,&fTed0E               ,"ElD0E[NEles]/D");
+	fEventTree->Branch("ElDzBS"              ,&fTedzbs              ,"ElDzBS[NEles]/D");
+	fEventTree->Branch("ElDzPV"              ,&fTedzpv              ,"ElDzPV[NEles]/D");
+	fEventTree->Branch("ElDzE"               ,&fTedzE               ,"ElDzE[NEles]/D");
+	fEventTree->Branch("ElIso"               ,&fTeiso               ,"ElIso[NEles]/D");
+	fEventTree->Branch("ElPtSum"             ,&fTeptsum             ,"ElPtSum[NEles]/D");
+	fEventTree->Branch("ElEtSum"             ,&fTeetsum             ,"ElEtSum[NEles]/D");
+	fEventTree->Branch("ElNChi2"             ,&fTenchi2             ,"ElNChi2[NEles]/D");
+	fEventTree->Branch("ElCharge"            ,&fTecharge            ,"ElCharge[NEles]/I");
+	fEventTree->Branch("ElID"                ,&fTeID                ,"ElID[NEles][4]/I");
+	fEventTree->Branch("ElInGap"             ,&fTeInGap             ,"ElInGap[NEles]/I");
+	fEventTree->Branch("ElEcalDriven"        ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
+	fEventTree->Branch("ElTrackerDriven"     ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
+	fEventTree->Branch("ElBasicClustersSize" ,&fTeBasicClustersSize ,"ElBasicClustersSize[NEles]/I");
+	fEventTree->Branch("Elfbrem"             ,&fTefbrem             ,"Elfbrem[NEles]/D");
+	fEventTree->Branch("ElHcalOverEcal"      ,&fTeHcalOverEcal      ,"ElHcalOverEcal[NEles]/D");
+	fEventTree->Branch("ElE5x5"              ,&fTeE5x5              ,"ElE5x5[NEles]/D");
+	fEventTree->Branch("ElE2x5Max"           ,&fTeE2x5Max           ,"ElE2x5Max[NEles]/D");
+	fEventTree->Branch("ElSigmaIetaIeta"     ,&fTeSigmaIetaIeta     ,"ElSigmaIetaIeta[NEles]/D");
+	fEventTree->Branch("ElDeltaPhiSeedClusterAtCalo" ,&fTeDeltaPhiSeedClusterAtCalo ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
+	fEventTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
+	fEventTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
+	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
 
 	// Jets:
-	fTree->Branch("NJets"          ,&fTnjets        ,"NJets/I");
-	fTree->Branch("JPx"            ,&fTjpx          ,"JPx[NJets]/D");
-	fTree->Branch("JPy"            ,&fTjpy          ,"JPy[NJets]/D");
-	fTree->Branch("JPz"            ,&fTjpz          ,"JPz[NJets]/D");
-	fTree->Branch("JPt"            ,&fTjpt          ,"JPt[NJets]/D");
-	fTree->Branch("JE"             ,&fTje           ,"JE[NJets]/D");
-	fTree->Branch("JEt"            ,&fTjet          ,"JEt[NJets]/D");
-	fTree->Branch("JEta"           ,&fTjeta         ,"JEta[NJets]/D");
-	fTree->Branch("JPhi"           ,&fTjphi         ,"JPhi[NJets]/D");
-	fTree->Branch("JEMfrac"        ,&fTjemfrac      ,"JEMfrac[NJets]/D");
-	fTree->Branch("JID_HPD"        ,&fTjID_HPD      ,"JID_HPD[NJets]/D");
-	fTree->Branch("JID_RBX"        ,&fTjID_RBX      ,"JID_RBX[NJets]/D");
-	fTree->Branch("JID_n90Hits"    ,&fTjID_n90Hits  ,"JID_n90Hits[NJets]/D");
-	fTree->Branch("JID_SubDet1"    ,&fTjID_SubDet1  ,"JID_SubDet1[NJets]/D");
-	fTree->Branch("JID_SubDet2"    ,&fTjID_SubDet2  ,"JID_SubDet2[NJets]/D");
-	fTree->Branch("JID_SubDet3"    ,&fTjID_SubDet3  ,"JID_SubDet3[NJets]/D");
-	fTree->Branch("JID_SubDet4"    ,&fTjID_SubDet4  ,"JID_SubDet4[NJets]/D");
-	fTree->Branch("JID_resEMF"     ,&fTjID_resEMF   ,"JID_resEMF[NJets]/D");
-	fTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow  ,"JID_HCALTow[NJets]/D");
-	fTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow  ,"JID_ECALTow[NJets]/D");
-	fTree->Branch("JbTagProb"      ,&fTbTagProb     ,"JbTagProb[NJets]/D");
-	fTree->Branch("JChfrac"        ,&fTChfrac       ,"JChfrac[NJets]/D");
-	fTree->Branch("JEcorr"         ,&fTjEcorr       ,"JEcorr[NJets]/D");
-	fTree->Branch("JeMinDR"        ,&fTjeMinDR      ,"JeMinDR[NJets]/D");
-	fTree->Branch("JVtxx"          ,&fTjetVtxx      ,"JVtxx[NJets]/D");
-	fTree->Branch("JVtxy"          ,&fTjetVtxy      ,"JVtxy[NJets]/D");
-	fTree->Branch("JVtxz"          ,&fTjetVtxz      ,"JVtxz[NJets]/D");
-	fTree->Branch("JVtxExx"        ,&fTjetVtxExx    ,"JVtxExx[NJets]/D");
-	fTree->Branch("JVtxEyx"        ,&fTjetVtxEyx    ,"JVtxEyx[NJets]/D");
-	fTree->Branch("JVtxEyy"        ,&fTjetVtxEyy    ,"JVtxEyy[NJets]/D");
-	fTree->Branch("JVtxEzy"        ,&fTjetVtxEzy    ,"JVtxEzy[NJets]/D");
-	fTree->Branch("JVtxEzz"        ,&fTjetVtxEzz    ,"JVtxEzz[NJets]/D");
-	fTree->Branch("JVtxEzx"        ,&fTjetVtxEzx    ,"JVtxEzx[NJets]/D");
-	fTree->Branch("JVtxNChi2"      ,&fTjetVtxNChi2  ,"JVtxNChi2[NJets]/D");
+	fEventTree->Branch("NJets"          ,&fTnjets        ,"NJets/I");
+	fEventTree->Branch("JPx"            ,&fTjpx          ,"JPx[NJets]/D");
+	fEventTree->Branch("JPy"            ,&fTjpy          ,"JPy[NJets]/D");
+	fEventTree->Branch("JPz"            ,&fTjpz          ,"JPz[NJets]/D");
+	fEventTree->Branch("JPt"            ,&fTjpt          ,"JPt[NJets]/D");
+	fEventTree->Branch("JE"             ,&fTje           ,"JE[NJets]/D");
+	fEventTree->Branch("JEt"            ,&fTjet          ,"JEt[NJets]/D");
+	fEventTree->Branch("JEta"           ,&fTjeta         ,"JEta[NJets]/D");
+	fEventTree->Branch("JPhi"           ,&fTjphi         ,"JPhi[NJets]/D");
+	fEventTree->Branch("JEMfrac"        ,&fTjemfrac      ,"JEMfrac[NJets]/D");
+	fEventTree->Branch("JID_HPD"        ,&fTjID_HPD      ,"JID_HPD[NJets]/D");
+	fEventTree->Branch("JID_RBX"        ,&fTjID_RBX      ,"JID_RBX[NJets]/D");
+	fEventTree->Branch("JID_n90Hits"    ,&fTjID_n90Hits  ,"JID_n90Hits[NJets]/D");
+	fEventTree->Branch("JID_SubDet1"    ,&fTjID_SubDet1  ,"JID_SubDet1[NJets]/D");
+	fEventTree->Branch("JID_SubDet2"    ,&fTjID_SubDet2  ,"JID_SubDet2[NJets]/D");
+	fEventTree->Branch("JID_SubDet3"    ,&fTjID_SubDet3  ,"JID_SubDet3[NJets]/D");
+	fEventTree->Branch("JID_SubDet4"    ,&fTjID_SubDet4  ,"JID_SubDet4[NJets]/D");
+	fEventTree->Branch("JID_resEMF"     ,&fTjID_resEMF   ,"JID_resEMF[NJets]/D");
+	fEventTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow  ,"JID_HCALTow[NJets]/D");
+	fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow  ,"JID_ECALTow[NJets]/D");
+	fEventTree->Branch("JbTagProb"      ,&fTbTagProb     ,"JbTagProb[NJets]/D");
+	fEventTree->Branch("JChfrac"        ,&fTChfrac       ,"JChfrac[NJets]/D");
+	fEventTree->Branch("JEcorr"         ,&fTjEcorr       ,"JEcorr[NJets]/D");
+	fEventTree->Branch("JeMinDR"        ,&fTjeMinDR      ,"JeMinDR[NJets]/D");
+	fEventTree->Branch("JVtxx"          ,&fTjetVtxx      ,"JVtxx[NJets]/D");
+	fEventTree->Branch("JVtxy"          ,&fTjetVtxy      ,"JVtxy[NJets]/D");
+	fEventTree->Branch("JVtxz"          ,&fTjetVtxz      ,"JVtxz[NJets]/D");
+	fEventTree->Branch("JVtxExx"        ,&fTjetVtxExx    ,"JVtxExx[NJets]/D");
+	fEventTree->Branch("JVtxEyx"        ,&fTjetVtxEyx    ,"JVtxEyx[NJets]/D");
+	fEventTree->Branch("JVtxEyy"        ,&fTjetVtxEyy    ,"JVtxEyy[NJets]/D");
+	fEventTree->Branch("JVtxEzy"        ,&fTjetVtxEzy    ,"JVtxEzy[NJets]/D");
+	fEventTree->Branch("JVtxEzz"        ,&fTjetVtxEzz    ,"JVtxEzz[NJets]/D");
+	fEventTree->Branch("JVtxEzx"        ,&fTjetVtxEzx    ,"JVtxEzx[NJets]/D");
+	fEventTree->Branch("JVtxNChi2"      ,&fTjetVtxNChi2  ,"JVtxNChi2[NJets]/D");
 
 	// MET:
-	fTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/D");
-	fTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/D");
-	fTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/D");
-	fTree->Branch("ECALEsumx"      ,&fTECALEsumx      ,"ECALEsumx/D");
-	fTree->Branch("ECALEsumy"      ,&fTECALEsumy      ,"ECALEsumy/D");
-	fTree->Branch("ECALEsumz"      ,&fTECALEsumz      ,"ECALEsumz/D");
-	fTree->Branch("ECALMET"        ,&fTECALMET        ,"ECALMET/D");
-	fTree->Branch("HCALEsumx"      ,&fTHCALEsumx      ,"HCALEsumx/D");
-	fTree->Branch("HCALEsumy"      ,&fTHCALEsumy      ,"HCALEsumy/D");
-	fTree->Branch("HCALEsumz"      ,&fTHCALEsumz      ,"HCALEsumz/D");
-	fTree->Branch("HCALMET"        ,&fTHCALMET        ,"HCALMET/D");
-	fTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
-	fTree->Branch("RawMETpx"       ,&fTRawMETpx       ,"RawMETpx/D");
-	fTree->Branch("RawMETpy"       ,&fTRawMETpy       ,"RawMETpy/D");
-	fTree->Branch("RawMETphi"      ,&fTRawMETphi      ,"RawMETphi/D");
-	fTree->Branch("MuCorrMET"      ,&fTMuCorrMET      ,"MuCorrMET/D");
-	fTree->Branch("MuCorrMETpx"    ,&fTMuCorrMETpx    ,"MuCorrMETpx/D");
-	fTree->Branch("MuCorrMETpy"    ,&fTMuCorrMETpy    ,"MuCorrMETpy/D");
-	fTree->Branch("MuCorrMETphi"   ,&fTMuCorrMETphi   ,"MuCorrMETphi/D");
-	fTree->Branch("TCMET"          ,&fTTCMET          ,"TCMET/D");
-	fTree->Branch("TCMETpx"        ,&fTTCMETpx        ,"TCMETpx/D");
-	fTree->Branch("TCMETpy"        ,&fTTCMETpy        ,"TCMETpy/D");
-	fTree->Branch("TCMETphi"       ,&fTTCMETphi       ,"TCMETphi/D");
-	fTree->Branch("MuJESCorrMET"   ,&fTMuJESCorrMET   ,"MuJESCorrMET/D");
-	fTree->Branch("MuJESCorrMETpx" ,&fTMuJESCorrMETpx ,"MuJESCorrMETpx/D");
-	fTree->Branch("MuJESCorrMETpy" ,&fTMuJESCorrMETpy ,"MuJESCorrMETpy/D");
-	fTree->Branch("MuJESCorrMETphi",&fTMuJESCorrMETphi,"MuJESCorrMETphi/D");
-	fTree->Branch("PFMET"          ,&fTPFMET          ,"PFMET/D");
-	fTree->Branch("PFMETpx"        ,&fTPFMETpx        ,"PFMETpx/D");
-	fTree->Branch("PFMETpy"        ,&fTPFMETpy        ,"PFMETpy/D");
-	fTree->Branch("PFMETphi"       ,&fTPFMETphi       ,"PFMETphi/D");
+	fEventTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/D");
+	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/D");
+	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/D");
+	fEventTree->Branch("ECALEsumx"      ,&fTECALEsumx      ,"ECALEsumx/D");
+	fEventTree->Branch("ECALEsumy"      ,&fTECALEsumy      ,"ECALEsumy/D");
+	fEventTree->Branch("ECALEsumz"      ,&fTECALEsumz      ,"ECALEsumz/D");
+	fEventTree->Branch("ECALMET"        ,&fTECALMET        ,"ECALMET/D");
+	fEventTree->Branch("HCALEsumx"      ,&fTHCALEsumx      ,"HCALEsumx/D");
+	fEventTree->Branch("HCALEsumy"      ,&fTHCALEsumy      ,"HCALEsumy/D");
+	fEventTree->Branch("HCALEsumz"      ,&fTHCALEsumz      ,"HCALEsumz/D");
+	fEventTree->Branch("HCALMET"        ,&fTHCALMET        ,"HCALMET/D");
+	fEventTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
+	fEventTree->Branch("RawMETpx"       ,&fTRawMETpx       ,"RawMETpx/D");
+	fEventTree->Branch("RawMETpy"       ,&fTRawMETpy       ,"RawMETpy/D");
+	fEventTree->Branch("RawMETphi"      ,&fTRawMETphi      ,"RawMETphi/D");
+	fEventTree->Branch("MuCorrMET"      ,&fTMuCorrMET      ,"MuCorrMET/D");
+	fEventTree->Branch("MuCorrMETpx"    ,&fTMuCorrMETpx    ,"MuCorrMETpx/D");
+	fEventTree->Branch("MuCorrMETpy"    ,&fTMuCorrMETpy    ,"MuCorrMETpy/D");
+	fEventTree->Branch("MuCorrMETphi"   ,&fTMuCorrMETphi   ,"MuCorrMETphi/D");
+	fEventTree->Branch("TCMET"          ,&fTTCMET          ,"TCMET/D");
+	fEventTree->Branch("TCMETpx"        ,&fTTCMETpx        ,"TCMETpx/D");
+	fEventTree->Branch("TCMETpy"        ,&fTTCMETpy        ,"TCMETpy/D");
+	fEventTree->Branch("TCMETphi"       ,&fTTCMETphi       ,"TCMETphi/D");
+	fEventTree->Branch("MuJESCorrMET"   ,&fTMuJESCorrMET   ,"MuJESCorrMET/D");
+	fEventTree->Branch("MuJESCorrMETpx" ,&fTMuJESCorrMETpx ,"MuJESCorrMETpx/D");
+	fEventTree->Branch("MuJESCorrMETpy" ,&fTMuJESCorrMETpy ,"MuJESCorrMETpy/D");
+	fEventTree->Branch("MuJESCorrMETphi",&fTMuJESCorrMETphi,"MuJESCorrMETphi/D");
+	fEventTree->Branch("PFMET"          ,&fTPFMET          ,"PFMET/D");
+	fEventTree->Branch("PFMETpx"        ,&fTPFMETpx        ,"PFMETpx/D");
+	fEventTree->Branch("PFMETpy"        ,&fTPFMETpy        ,"PFMETpy/D");
+	fEventTree->Branch("PFMETphi"       ,&fTPFMETphi       ,"PFMETphi/D");
+}
+
+// Method called once after each run
+void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
+	edm::Handle<GenRunInfoProduct> genRunInfo;
+	r.getByLabel("generator", genRunInfo);
+	// Reset RunTree information
+	fRTrunnumber     = -999;
+	fRTextxslo       = -999.99;
+	fRTextxsnlo      = -999.99;
+	fRTintxs         = -999.99;
+	fRTMinmupt       = -999.99;
+	fRTMaxmueta      = -999.99;
+	fRTMinelpt       = -999.99;
+	fRTMaxeleta      = -999.99;
+	fRTMaxeliso      = -999.99;
+	fRTMaxeld0       = -999.99;
+	fRTMinjpt        = -999.99;
+	fRTMaxjeta       = -999.99;
+	fRTMinjemfrac    = -999.99;
+	fRTIsoMuTkDRin   = -999.99;
+	fRTIsoMuTkDRout  = -999.99;
+	fRTIsoMuTkSeed   = -999.99;
+	fRTIsoMuCalDRin  = -999.99;
+	fRTIsoMuCalDRout = -999.99;
+	fRTIsoMuCalSeed  = -999.99;
+
+
+	// Fill RunTree information
+	fRTrunnumber     = r.id().run();
+	fRTextxslo       = genRunInfo->externalXSecLO().value();
+	fRTextxsnlo      = genRunInfo->externalXSecNLO().value();
+	fRTintxs         = genRunInfo->internalXSec().value();
+
+	fRTMinmupt       = fMinmupt;
+	fRTMaxmueta      = fMaxmueta;
+	fRTMinelpt       = fMinelpt;
+	fRTMaxeleta      = fMaxeleta;
+	fRTMaxeliso      = fMaxeliso;
+	fRTMaxeld0       = fMaxeld0;
+	fRTMinjpt        = fMinjpt;
+	fRTMaxjeta       = fMaxjeta;
+	fRTMinjemfrac    = fMinjemfrac;
+	fRTIsoMuTkDRin   = fIso_MuTkDRin;
+	fRTIsoMuTkDRout  = fIso_MuTkDRout;
+	fRTIsoMuTkSeed   = fIso_MuTkSeed;
+	fRTIsoMuCalDRin  = fIso_MuCalDRin;
+	fRTIsoMuCalDRout = fIso_MuCalDRout;
+	fRTIsoMuCalSeed  = fIso_MuCalSeed;
+	
+	fRunTree->Fill();
 }
 
 // Method called once each job just after ending the event loop
@@ -782,6 +861,7 @@ void NTupleProducer::resetTree(){
 	fTrunnumber = -999;
 	fTeventnumber = -999;
 	fTlumisection = -999;
+	fTsigprocid = -999;
 	fTweight = -999.99;
 	fTprimvtxx = -999.99;
 	fTprimvtxy = -999.99;
