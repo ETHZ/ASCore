@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.9 2009/10/02 17:11:40 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.10 2009/10/02 17:17:51 stiegerb Exp $
 //
 //
 
@@ -366,9 +366,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			bool isGap = El->isGap(); 
 			bool EcalDriven = El-> isEcalDriven();	
 			bool TrackerDriven = El->isTrackerDriven();
-
-
-
+			
 			// Dump electron properties in tree variables
 			eqi++;
 
@@ -388,6 +386,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTedzE[eqi]    = El->gsfTrack()->dzError();
 			fTenchi2[eqi]  = El->gsfTrack()->normalizedChi2();
 			fTeiso[eqi]    = eliso;
+			fTeptsum[eqi]  = eTkIso;
+			fTeetsum[eqi]    = eECIso+eHCIso;
 			fTecharge[eqi] = El->charge();
 			fTeInGap[eqi]  = isGap ? 1:0;  // no bug... //*** Beni
 			fTeEcalDriven[eqi] = EcalDriven ? 1:0;
@@ -662,26 +662,28 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("MuMID"          ,&fTmumid          ,"MuMID[NMus]/I");
 
 	// Electrons:
-	fTree->Branch("NEles"           ,&fTneles          ,"NEles/I");
-	fTree->Branch("ElPx"            ,&fTepx            ,"ElPx[NEles]/D");
-	fTree->Branch("ElPy"            ,&fTepy            ,"ElPy[NEles]/D");
-	fTree->Branch("ElPz"            ,&fTepz            ,"ElPz[NEles]/D");
-	fTree->Branch("ElPt"            ,&fTept            ,"ElPt[NEles]/D");
-	fTree->Branch("ElE"             ,&fTee             ,"ElE[NEles]/D");
-	fTree->Branch("ElEt"            ,&fTeet            ,"ElEt[NEles]/D");
-	fTree->Branch("ElEta"           ,&fTeeta           ,"ElEta[NEles]/D");
-	fTree->Branch("ElPhi"           ,&fTephi           ,"ElPhi[NEles]/D");
-	fTree->Branch("ElD0BS"          ,&fTed0bs          ,"ElD0BS[NEles]/D");
-	fTree->Branch("ElD0PV"          ,&fTed0pv          ,"ElD0PV[NEles]/D");
-	fTree->Branch("ElD0E"           ,&fTed0E           ,"ElD0E[NEles]/D");
-	fTree->Branch("ElDzBS"          ,&fTedzbs          ,"ElDzBS[NEles]/D");
-	fTree->Branch("ElDzPV"          ,&fTedzpv          ,"ElDzPV[NEles]/D");
-	fTree->Branch("ElDzE"           ,&fTedzE           ,"ElDzE[NEles]/D");
-	fTree->Branch("ElIso"           ,&fTeiso           ,"ElIso[NEles]/D");
-	fTree->Branch("ElNChi2"         ,&fTenchi2         ,"ElNChi2[NEles]/D");
-	fTree->Branch("ElCharge"        ,&fTecharge        ,"ElCharge[NEles]/I");
-	fTree->Branch("ElID"            ,&fTeID            ,"ElID[NEles][4]/I");
-	fTree->Branch("ElInGap"         ,&fTeInGap         ,"ElInGap[NEles]/I");
+	fTree->Branch("NEles"               ,&fTneles              ,"NEles/I");
+	fTree->Branch("ElPx"                ,&fTepx                ,"ElPx[NEles]/D");
+	fTree->Branch("ElPy"                ,&fTepy                ,"ElPy[NEles]/D");
+	fTree->Branch("ElPz"                ,&fTepz                ,"ElPz[NEles]/D");
+	fTree->Branch("ElPt"                ,&fTept                ,"ElPt[NEles]/D");
+	fTree->Branch("ElE"                 ,&fTee                 ,"ElE[NEles]/D");
+	fTree->Branch("ElEt"                ,&fTeet                ,"ElEt[NEles]/D");
+	fTree->Branch("ElEta"               ,&fTeeta               ,"ElEta[NEles]/D");
+	fTree->Branch("ElPhi"               ,&fTephi               ,"ElPhi[NEles]/D");
+	fTree->Branch("ElD0BS"              ,&fTed0bs              ,"ElD0BS[NEles]/D");
+	fTree->Branch("ElD0PV"              ,&fTed0pv              ,"ElD0PV[NEles]/D");
+	fTree->Branch("ElD0E"               ,&fTed0E               ,"ElD0E[NEles]/D");
+	fTree->Branch("ElDzBS"              ,&fTedzbs              ,"ElDzBS[NEles]/D");
+	fTree->Branch("ElDzPV"              ,&fTedzpv              ,"ElDzPV[NEles]/D");
+	fTree->Branch("ElDzE"               ,&fTedzE               ,"ElDzE[NEles]/D");
+	fTree->Branch("ElIso"               ,&fTeiso               ,"ElIso[NEles]/D");
+	fTree->Branch("ElPtSum"             ,&fTeptsum             ,"ElPtSum[NEles]/D");
+	fTree->Branch("ElEtSum"             ,&fTeetsum             ,"ElEtSum[NEles]/D");
+	fTree->Branch("ElNChi2"             ,&fTenchi2             ,"ElNChi2[NEles]/D");
+	fTree->Branch("ElCharge"            ,&fTecharge            ,"ElCharge[NEles]/I");
+	fTree->Branch("ElID"                ,&fTeID                ,"ElID[NEles][4]/I");
+	fTree->Branch("ElInGap"             ,&fTeInGap             ,"ElInGap[NEles]/I");
 	fTree->Branch("ElEcalDriven"        ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
 	fTree->Branch("ElTrackerDriven"     ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
 	fTree->Branch("ElBasicClustersSize" ,&fTeBasicClustersSize ,"ElBasicClustersSize[NEles]/I");
@@ -691,9 +693,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fTree->Branch("ElE2x5Max"           ,&fTeE2x5Max           ,"ElE2x5Max[NEles]/D");
 	fTree->Branch("ElSigmaIetaIeta"     ,&fTeSigmaIetaIeta     ,"ElSigmaIetaIeta[NEles]/D");
 	fTree->Branch("ElDeltaPhiSeedClusterAtCalo" ,&fTeDeltaPhiSeedClusterAtCalo ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
+	fTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
 	fTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
 	fTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
-	fTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
 
 	// Jets:
 	fTree->Branch("NJets"          ,&fTnjets        ,"NJets/I");
@@ -843,6 +845,8 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTedzE);
 	resetDouble(fTenchi2);
 	resetDouble(fTeiso);
+	resetDouble(fTeptsum);
+	resetDouble(fTeetsum);
 	resetInt(fTecharge);
 	resetInt(fTeInGap);
 	resetInt(fTeEcalDriven);

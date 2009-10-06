@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.7 2009/09/30 17:20:27 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.8 2009/10/02 17:11:55 stiegerb Exp $
 //
 //
 
@@ -244,6 +244,8 @@ private:
 	double fTedzpv[20];
 	double fTedzE[20];
 	double fTeiso[20];
+	double fTeptsum[20];
+	double fTeetsum[20];
 	double fTenchi2[20];
 	int fTeID[20][4];    // eID flags: 0->Tight, 1->Loose, 2->RobustTight, 3->RobustLoose
 	int fTecharge[20];
