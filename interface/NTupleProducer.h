@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.10 2009/10/06 09:47:03 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.11 2009/10/06 11:31:17 stiegerb Exp $
 //
 //
 
@@ -336,14 +336,17 @@ private:
 // MET:
 	double fTTrkPtSumx;
 	double fTTrkPtSumy;
+	double fTTrkPtSumphi;
 	double fTTrkPtSum;
 	double fTECALEsumx;
 	double fTECALEsumy;
 	double fTECALEsumz;
+	double fTECALMETphi;
 	double fTECALMET;
 	double fTHCALEsumx;
 	double fTHCALEsumy;
 	double fTHCALEsumz;
+	double fTHCALMETphi;
 	double fTHCALMET;
 	double fTRawMET;
 	double fTRawMETpx;

@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.13 2009/10/06 09:46:52 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.14 2009/10/06 11:31:24 stiegerb Exp $
 //
 //
 
@@ -562,6 +562,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTTrkPtSumy += it->py();
 	}
 	fTTrkPtSum = sqrt(fTTrkPtSumx*fTTrkPtSumx + fTTrkPtSumy*fTTrkPtSumy);
+	TVector3 trkPtSum(fTTrkPtSumx, fTTrkPtSumy, 0.);
+	fTTrkPtSumphi = trkPtSum.Phi();
 
 	fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
 	fTHCALEsumx = 0.; fTHCALEsumy = 0.; fTHCALEsumz = 0.;
@@ -575,8 +577,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTHCALEsumy += itow->py()*hadFrac;
 		fTHCALEsumz += itow->pz()*hadFrac;
 	}
-	fTECALMET = sqrt(fTECALEsumx*fTECALEsumx + fTECALEsumy*fTECALEsumy);
-	fTHCALMET = sqrt(fTHCALEsumx*fTHCALEsumx + fTHCALEsumy*fTHCALEsumy);
+	TVector3 ecalMET(fTECALEsumx, fTECALEsumy, fTECALEsumz);
+	TVector3 hcalMET(fTHCALEsumx, fTHCALEsumy, fTHCALEsumz);
+	fTECALMET = ecalMET.Mag();
+	fTHCALMET = hcalMET.Mag();
+	fTECALMETphi = ecalMET.Phi();
+	fTHCALMETphi = hcalMET.Phi();
 
 	fTRawMET    = (calomet->at(0)).pt();
 	fTRawMETpx  = (calomet->at(0)).px();
@@ -773,14 +779,17 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/D");
 	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/D");
 	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/D");
+	fEventTree->Branch("TrkPtSumPhi"    ,&fTTrkPtSumphi    ,"TrkPtSumPhi/D");
 	fEventTree->Branch("ECALEsumx"      ,&fTECALEsumx      ,"ECALEsumx/D");
 	fEventTree->Branch("ECALEsumy"      ,&fTECALEsumy      ,"ECALEsumy/D");
 	fEventTree->Branch("ECALEsumz"      ,&fTECALEsumz      ,"ECALEsumz/D");
 	fEventTree->Branch("ECALMET"        ,&fTECALMET        ,"ECALMET/D");
+	fEventTree->Branch("ECALMETPhi"     ,&fTECALMETphi     ,"ECALMETPhi/D");
 	fEventTree->Branch("HCALEsumx"      ,&fTHCALEsumx      ,"HCALEsumx/D");
 	fEventTree->Branch("HCALEsumy"      ,&fTHCALEsumy      ,"HCALEsumy/D");
 	fEventTree->Branch("HCALEsumz"      ,&fTHCALEsumz      ,"HCALEsumz/D");
 	fEventTree->Branch("HCALMET"        ,&fTHCALMET        ,"HCALMET/D");
+	fEventTree->Branch("HCALMETPhi"     ,&fTHCALMETphi     ,"HCALMETPhi/D");
 	fEventTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
 	fEventTree->Branch("RawMETpx"       ,&fTRawMETpx       ,"RawMETpx/D");
 	fEventTree->Branch("RawMETpy"       ,&fTRawMETpy       ,"RawMETpy/D");
@@ -1004,14 +1013,17 @@ void NTupleProducer::resetTree(){
 	fTTrkPtSumx       = -999.99;
 	fTTrkPtSumy       = -999.99;
 	fTTrkPtSum        = -999.99;
+	fTTrkPtSumphi     = -999.99;
 	fTECALEsumx       = -999.99;
 	fTECALEsumy       = -999.99;
 	fTECALEsumz       = -999.99;
 	fTECALMET         = -999.99;
+	fTECALMETphi      = -999.99;
 	fTHCALEsumx       = -999.99;
 	fTHCALEsumy       = -999.99;
 	fTHCALEsumz       = -999.99;
 	fTHCALMET         = -999.99;
+	fTHCALMETphi      = -999.99;
 	fTRawMET          = -999.99;
 	fTRawMETpx        = -999.99;
 	fTRawMETpy        = -999.99;
