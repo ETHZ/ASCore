@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.9 2009/10/06 07:01:10 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.10 2009/10/06 09:47:03 stiegerb Exp $
 //
 //
 
@@ -108,7 +108,8 @@ public:
 	void resetTree();
 	vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
 private:
-	virtual void beginJob(const edm::EventSetup&) ;
+	virtual void beginJob(const edm::EventSetup&);
+	virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
@@ -195,6 +196,8 @@ private:
 	int fTeventnumber;
 	int fTlumisection;
 	int fTsigprocid;
+	double fTextxslo;
+	double fTintxs;
 	double fTweight;
 
 	double fTprimvtxx;

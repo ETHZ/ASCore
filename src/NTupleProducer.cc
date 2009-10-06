@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.12 2009/10/06 08:28:00 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.13 2009/10/06 09:46:52 stiegerb Exp $
 //
 //
 
@@ -133,7 +133,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Reset all the tree variables
 	resetTree();
 
-	// Get the collections:
+////////////////////////////////////////////////////////////////////////////////
+// Get the collections /////////////////////////////////////////////////////////
+
 	Handle<MuonCollection> muons;
 	iEvent.getByLabel(fMuonTag,muons); // 'muons'
 
@@ -228,7 +230,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 
 ////////////////////////////////////////////////////////////////////////////////
-// Event Selection /////////////////////////////////////////////////////////////
+// Dump tree variables /////////////////////////////////////////////////////////
 	bool acceptEvent = true;
 
 	fTrunnumber = iEvent.id().run();
@@ -601,6 +603,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTMuJESCorrMETpy  = (corrmujesmet->at(0)).py();
 	fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
 
+////////////////////////////////////////////////////////////////////////////////
+// Fill Tree ///////////////////////////////////////////////////////////////////
 	if(acceptEvent){
 		fEventTree->Fill();
 		fNFillTree++;
@@ -614,6 +618,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fFirstevent = true;
 	fHtrigstat = fTFileService->make<TH1I>("TriggerStats", "TriggerStatistics", 200, 0, 200);
 
+	// Tree with run information
 	fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
 	fRunTree->Branch("Run"            ,&fRTrunnumber,      "Run/I");
 	fRunTree->Branch("ExtXSecLO"      ,&fRTextxslo,        "ExtXSecLO/D");
@@ -635,12 +640,15 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fRunTree->Branch("IsoMuCalDRout"  ,&fRTIsoMuCalDRout,  "IsoMuCalDRout/D");
 	fRunTree->Branch("IsoMuCalSeed"   ,&fRTIsoMuCalSeed,   "IsoMuCalSeed/D");
 	
+	// Tree with event information
 	fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 	// Event information:
 	fEventTree->Branch("Run"            ,&fTrunnumber      ,"Run/I");
 	fEventTree->Branch("Event"          ,&fTeventnumber    ,"Event/I");
 	fEventTree->Branch("LumiSection"    ,&fTlumisection    ,"LumiSection/I");
 	fEventTree->Branch("SigProcID"      ,&fTsigprocid      ,"SigProcID/I");
+	fEventTree->Branch("ExtXSecLO"      ,&fTextxslo        ,"ExtXSecLO/D");
+	fEventTree->Branch("IntXSec"        ,&fTintxs          ,"IntXSec/D");
 	fEventTree->Branch("Weight"         ,&fTweight         ,"Weight/D");
 	fEventTree->Branch("TrigResults"    ,&fTtrigres        ,"TrigResults[200]/I");
 	fEventTree->Branch("PrimVtxx"       ,&fTprimvtxx       ,"PrimVtxx/D");
@@ -795,6 +803,15 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("PFMETphi"       ,&fTPFMETphi       ,"PFMETphi/D");
 }
 
+// Method called once before each run
+void NTupleProducer::beginRun(const edm::Run& r, const edm::EventSetup&){
+	edm::Handle<GenRunInfoProduct> genRunInfo;
+	r.getByLabel("generator", genRunInfo);
+	// Fill RunTree information
+	fTextxslo       = genRunInfo->externalXSecLO().value();
+	fTintxs         = genRunInfo->internalXSec().value();
+}
+
 // Method called once after each run
 void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	edm::Handle<GenRunInfoProduct> genRunInfo;
@@ -858,22 +875,22 @@ void NTupleProducer::endJob(){
 // Method to reset the TTree variables for each event
 void NTupleProducer::resetTree(){
 	resetInt(fTtrigres, 200);
-	fTrunnumber = -999;
+	fTrunnumber   = -999;
 	fTeventnumber = -999;
 	fTlumisection = -999;
-	fTsigprocid = -999;
-	fTweight = -999.99;
-	fTprimvtxx = -999.99;
-	fTprimvtxy = -999.99;
-	fTprimvtxz = -999.99;
-	fTprimvtxxE = -999.99;
-	fTprimvtxyE = -999.99;
-	fTprimvtxzE = -999.99;
-	fTpvtxznchi2 = -999.99;
-	fTbeamspotx = -999.99;
-	fTbeamspoty = -999.99;
-	fTbeamspotz = -999.99;
-	fTnmu = 0;
+	fTsigprocid   = -999;
+	fTweight      = -999.99;
+	fTprimvtxx    = -999.99;
+	fTprimvtxy    = -999.99;
+	fTprimvtxz    = -999.99;
+	fTprimvtxxE   = -999.99;
+	fTprimvtxyE   = -999.99;
+	fTprimvtxzE   = -999.99;
+	fTpvtxznchi2  = -999.99;
+	fTbeamspotx   = -999.99;
+	fTbeamspoty   = -999.99;
+	fTbeamspotz   = -999.99;
+	fTnmu   = 0;
 	fTneles = 0;
 	fTnjets = 0;
 	resetDouble(fTmupx);
