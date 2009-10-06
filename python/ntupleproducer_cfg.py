@@ -190,12 +190,12 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	# Electrons:
 	sel_minelpt    = cms.untracked.double(5.0),
 	sel_maxeleta   = cms.untracked.double(2.5),
-	sel_maxeliso   = cms.untracked.double(2.0),
-	sel_maxeld0    = cms.untracked.double(0.2),
+	sel_maxeliso   = cms.untracked.double(100.0),
+	sel_maxeld0    = cms.untracked.double(100.0),
 	# Jets:
 	sel_minjpt     = cms.untracked.double(20.0),
 	sel_maxjeta    = cms.untracked.double(5.0),
-	sel_minjemfrac = cms.untracked.double(0.1),
+	sel_minjemfrac = cms.untracked.double(0.0),
 	# Isolation Parameters
 	iso_MuTkDRin   = cms.untracked.double(0.015),
 	iso_MuTkDRout  = cms.untracked.double(0.3),

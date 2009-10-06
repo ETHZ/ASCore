@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.10 2009/10/02 17:17:51 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.11 2009/10/06 07:00:56 stiegerb Exp $
 //
 //
 
@@ -344,7 +344,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			const GsfElectron *El = &(*(electrons.product()))[i];
 			if(El->pt() < fMinelpt) continue;
 			if(fabs(El->eta()) > fMaxeleta) continue;
-			if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
+			// if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
 
 			// Read EleIsolation
 			Handle<edm::ValueMap<double> > eIsoTkValueMap;
@@ -361,7 +361,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			double eECIso = eECIsoMap[electronRef];
 			double eHCIso = eHCIsoMap[electronRef];
 			double eliso  = (eTkIso+eECIso+eHCIso)/El->pt();
-			if(eliso > fMaxeliso) continue;
+			// if(eliso > fMaxeliso) continue;
 
 			bool isGap = El->isGap(); 
 			bool EcalDriven = El-> isEcalDriven();	
@@ -445,7 +445,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		// Jet preselection
 		if(jet->pt() < fMinjpt) continue;
 		if(TMath::Abs(jet->eta()) > fMaxjeta) continue;
-		if(jet->emEnergyFraction() < fMinjemfrac) continue;
+		// if(jet->emEnergyFraction() < fMinjemfrac) continue;
 		jqi++;
 		//calculate the DR wrt the closest electron
 		double ejDRmin= 10.;
