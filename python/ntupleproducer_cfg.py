@@ -41,7 +41,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 ############# Jet Corrections ##################################################
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Winter09_cff")
+process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
 	tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
 	label = cms.string('L2RelativeJetCorrectorSC5Calo')
@@ -54,13 +54,13 @@ process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
     src = cms.InputTag("sisCone5CaloJets"),
     correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
 )
-process.prefer("L2JetCorrectorSC5Calo")
+# process.prefer("L2JetCorrectorSC5Calo")
 
 ############# b-tagging for SC (antikt) ########################################
 process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssociatorAtVertex")
 
 ### JES MET Corrections ########################################################
-from JetMETCorrections.Configuration.L2L3Corrections_Winter09_cff import *
+from JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff import *
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
 
 process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
