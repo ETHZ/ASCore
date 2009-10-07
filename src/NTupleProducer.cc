@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.14 2009/10/06 11:31:24 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.15 2009/10/06 16:51:56 stiegerb Exp $
 //
 //
 
@@ -405,11 +405,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeE5x5[eqi] = El->e5x5();                                           
 			fTeE2x5Max[eqi] = El->e2x5Max();                                           
 			fTeSigmaIetaIeta[eqi] = El->sigmaIetaIeta();                         
+			fTeDeltaEtaSeedClusterAtCalo[eqi] = El->deltaEtaSeedClusterTrackAtCalo(); 
 			fTeDeltaPhiSeedClusterAtCalo[eqi] = El->deltaPhiSeedClusterTrackAtCalo(); 
 			fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
-			fTeESuperClusterOverP[eqi] = El-> eSuperClusterOverP();              
-			fTeDeltaEtaSeedClusterAtCalo[eqi] = El->deltaEtaSeedClusterTrackAtCalo(); 
-
+			fTeDeltaEtaSuperClusterAtVtx[eqi] = El->deltaEtaSuperClusterTrackAtVtx(); 
+			fTecaloenergy[eqi] = El->caloEnergy();
+			fTtrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
+			fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
 			fTeID[eqi][0] = eIDmapT[electronRef]  ? 1:0;
 			fTeID[eqi][1] = eIDmapL[electronRef]  ? 1:0;
 			fTeID[eqi][2] = eIDmapRT[electronRef] ? 1:0;
@@ -737,6 +739,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElDeltaPhiSeedClusterAtCalo" ,&fTeDeltaPhiSeedClusterAtCalo ,"ElDeltaPhiSeedClusterAtCalo[NEles]/D");
 	fEventTree->Branch("ElDeltaEtaSeedClusterAtCalo" ,&fTeDeltaEtaSeedClusterAtCalo ,"ElDeltaEtaSeedClusterAtCalo[NEles]/D");
 	fEventTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
+	fEventTree->Branch("ElDeltaEtaSuperClusterAtVtx" ,&fTeDeltaEtaSuperClusterAtVtx ,"ElDeltaEtaSuperClusterAtVtx[NEles]/D");
+	fEventTree->Branch("ElCaloEnergy"    ,&fTecaloenergy        ,"ElCaloEnergy[NEles]/D");
+	fEventTree->Branch("ElTrkMomAtVtx"   ,&fTtrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
 
 	// Jets:
@@ -964,9 +969,12 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTeE2x5Max);
 	resetDouble(fTeSigmaIetaIeta);
 	resetDouble(fTeDeltaPhiSeedClusterAtCalo);
-	resetDouble(fTeDeltaPhiSuperClusterAtVtx);
-	resetDouble(fTeESuperClusterOverP);
 	resetDouble(fTeDeltaEtaSeedClusterAtCalo);
+	resetDouble(fTeDeltaPhiSuperClusterAtVtx);
+	resetDouble(fTeDeltaEtaSuperClusterAtVtx);
+	resetDouble(fTecaloenergy);
+	resetDouble(fTtrkmomatvtx);
+	resetDouble(fTeESuperClusterOverP);
 
 	resetDouble(fTjpx);
 	resetDouble(fTjpy);

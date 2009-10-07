@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.11 2009/10/06 11:31:17 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.12 2009/10/06 16:52:05 stiegerb Exp $
 //
 //
 
@@ -289,9 +289,12 @@ private:
 	double fTeE2x5Max[20];                   // 2x5 arround seed
 	double fTeSigmaIetaIeta[20];             // shower shape covariance
 	double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed-track) at calo from p_out
-	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
-	double fTeESuperClusterOverP[20];        // Esc/Pin
 	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
+	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
+	double fTeDeltaEtaSuperClusterAtVtx[20]; // Deta (sc-track) at calo extrapolated from p_in
+	double fTecaloenergy[20];                // caloEnergy()
+	double fTtrkmomatvtx[20];                // trackMomentumAtVtx().R()
+	double fTeESuperClusterOverP[20];        // Esc/Pin
 
 
 // Jets:
