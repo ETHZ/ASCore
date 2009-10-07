@@ -171,7 +171,7 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_muisodephc = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
 	tag_sc      = cms.untracked.InputTag('correctedHybridSuperClusters'),
 	tag_jets    = cms.untracked.InputTag('sisCone5CaloJets'),
-        tag_btag    = cms.untracked.InputTag('trackCountingHighPurBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
+        tag_btag    = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
 	tag_met1    = cms.untracked.InputTag('met'),
 	tag_met2    = cms.untracked.InputTag('corMetGlobalMuons'),
 	tag_met3    = cms.untracked.InputTag('tcMet'),
@@ -207,6 +207,6 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 
 ############# Path #############################################################
 process.p = cms.Path(process.L2L3CorJetSC5Calo + process.metCorSequence)
-mybtag = cms.Sequence(process.impactParameterTagInfos*process.trackCountingHighPurBJetTags)
+mybtag = cms.Sequence(process.impactParameterTagInfos*process.simpleSecondaryVertexBJetTags)
 process.l = cms.Path(mybtag)
 process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.analyze)

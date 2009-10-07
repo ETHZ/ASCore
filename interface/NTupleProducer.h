@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.12 2009/10/06 16:52:05 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.13 2009/10/07 15:08:45 stiegerb Exp $
 //
 //
 
@@ -323,6 +323,7 @@ private:
 	double fTUNC_py_match[50];
 	double fTUNC_pz_match[50];
 	double fTChfrac[20];
+	int fTnAssoTracks[20];
 	double fTjEcorr[20];
 	double fTjeMinDR[20];
 	double fTjetVtxx[20];

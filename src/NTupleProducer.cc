@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.15 2009/10/06 16:51:56 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.16 2009/10/07 15:08:52 stiegerb Exp $
 //
 //
 
@@ -477,6 +477,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		}
 		vector<const reco::Track*> AssociatedTracks = FindAssociatedTracks(&(*jet), tracks.product());
 		vector<TransientTrack> AssociatedTTracks;
+		fTnAssoTracks[jqi]=0;
 		if(fabs(jet->eta())<2.9){ //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 		//tmp variables for vectorial sum of pt of tracks
 		double pXtmp=0.;
@@ -486,6 +487,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		  if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
 		    pXtmp+=AssociatedTracks[t]->px();
 		    pYtmp+=AssociatedTracks[t]->py();
+		    fTnAssoTracks[jqi]+=1;
 		  }
 		}
 		fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
@@ -767,6 +769,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow  ,"JID_ECALTow[NJets]/D");
 	fEventTree->Branch("JbTagProb"      ,&fTbTagProb     ,"JbTagProb[NJets]/D");
 	fEventTree->Branch("JChfrac"        ,&fTChfrac       ,"JChfrac[NJets]/D");
+	fEventTree->Branch("JNAssoTracks"   ,&fTnAssoTracks  ,"JNAssoTracks[NJets]/I");
 	fEventTree->Branch("JEcorr"         ,&fTjEcorr       ,"JEcorr[NJets]/D");
 	fEventTree->Branch("JeMinDR"        ,&fTjeMinDR      ,"JeMinDR[NJets]/D");
 	fEventTree->Branch("JVtxx"          ,&fTjetVtxx      ,"JVtxx[NJets]/D");
@@ -997,6 +1000,7 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTjID_ECALTow);
 	resetDouble(fTbTagProb);
 	resetDouble(fTChfrac);
+	resetInt(fTnAssoTracks);
 	resetDouble(fTjeMinDR);
 	resetDouble(fTjetVtxx);
 	resetDouble(fTjetVtxy);
