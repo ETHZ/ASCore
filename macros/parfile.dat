@@ -1,0 +1,19 @@
+##########################################
+## General parameters
+##########################################
+fTag             OctoberExercise
+fOutputDir       OctoberExercise/
+##########################################
+fTag1            TTbar
+fFile1Name       NTuples/SD_Mu9/TTbar.root
+fNorm1           1.0
+fTreeSubDirName1 analyze
+fTag2            QCDPt15
+fFile2Name       NTuples/SD_DoublePhoton10/QCD_Pt15.root
+fNorm2           1.0
+fTreeSubDirName2 analyze
+fTag3            QCDPt30
+fFile3Name       NTuples/SD_DoublePhoton10/QCD_Pt30.root
+fNorm3           1.0
+fTreeSubDirName3 analyze
+##########################################

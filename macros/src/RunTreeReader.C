@@ -1,0 +1,85 @@
+// C++ includes
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdio.h>
+
+// ROOT includes
+#include <TROOT.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TChain.h>
+
+#include "TreeReader.hh"
+#include "AnaClass.hh"
+
+using namespace std;
+
+/*******************************************************
+>	Usage:
+	single file: ./RunTreeReader 0 tag filepath
+	filelist:    ./RunTreeReader 1 tag filelistpath
+*******************************************************/
+
+int main(int argc, char* argv[]) {
+	if(argc<5){ // Invalid use:
+		printf("Usage: \n \t Single files  > ./RunTreeReader 0 101 tag file1path file2path ... \n");
+		printf("\t List of files > ./RunTreeReader 1 110 tag listpath \n");
+		printf("\t The second number flags which plots to produce. \n");
+		printf("\t First digit is plot all branches, second is plot list \n");
+		printf("\t third is dilepton tree, fourth is multiplicity plots \n");
+		printf("\t and fifth is significance plots. \n");
+		return -1;
+	}
+	TChain *theChain = new TChain("analyze/Analysis");
+	int flag = atoi(argv[2]);
+	TString tag = TString(argv[3]);
+	cout << "Using flag " << flag << "..." << endl;
+	cout << "Using tag  " << tag << " ..." << endl;
+	if(atoi(argv[1]) == 0){ // case 0 (single files)
+		for(int i = 4; i < argc; i++){
+			theChain->Add(argv[i]);
+			printf(" Adding file: %s\n",argv[i]);
+		} 
+	}else{ // case 1 (list of files)
+		TString rootFile;
+		ifstream is(argv[4]);
+		while(rootFile.ReadLine(is) && (!rootFile.IsNull())){
+			if(rootFile[0] == '#') continue;
+			printf(" Adding file: %s\n", rootFile.Data());
+			theChain->Add(rootFile);
+		}
+	}
+
+	cout<< "Number of events "<< theChain->GetEntries()<< endl;
+
+	TString outputdir = "FOX/";
+	
+	AnaClass *ana;
+	bool allbranches(false), plotlist(false), treeread(false);
+	if((flag/10000)%10) allbranches = true;
+	if((flag/1000)%10)  plotlist = true;
+	if((flag/100%10) || (flag/10)%10 || flag%10) treeread = true;
+	if(allbranches || plotlist){
+		ana = new AnaClass();
+		ana->readVarNames("varnames.dat");
+		ana->setOutputDir(outputdir);
+		ana->setGlobalTag(tag);
+	
+		if(allbranches) ana->plotAllBranches(theChain, tag);		
+		if(plotlist)    ana->plotPlotList("plotlist.dat", theChain, tag);
+		delete ana;
+	}	
+	
+	TreeReader *tR;
+	if(treeread){
+		tR = new TreeReader(theChain, flag%1000);
+		tR->setOutputDir(outputdir+tag);
+		tR->BeginJob();
+		tR->Loop();
+		tR->EndJob();
+		delete tR;
+	}
+	return 0;
+}
+
