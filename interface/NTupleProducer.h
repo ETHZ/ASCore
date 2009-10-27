@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.13 2009/10/07 15:08:45 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.14 2009/10/07 15:21:51 sordini Exp $
 //
 //
 
@@ -293,6 +293,7 @@ private:
 	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
 	double fTeDeltaEtaSuperClusterAtVtx[20]; // Deta (sc-track) at calo extrapolated from p_in
 	double fTecaloenergy[20];                // caloEnergy()
+	double fTeseedenergy[20];                // caloEnergy()
 	double fTtrkmomatvtx[20];                // trackMomentumAtVtx().R()
 	double fTeESuperClusterOverP[20];        // Esc/Pin
 
@@ -346,11 +347,13 @@ private:
 	double fTECALEsumy;
 	double fTECALEsumz;
 	double fTECALMETphi;
+	double fTECALMETeta;
 	double fTECALMET;
 	double fTHCALEsumx;
 	double fTHCALEsumy;
 	double fTHCALEsumz;
 	double fTHCALMETphi;
+	double fTHCALMETeta;
 	double fTHCALMET;
 	double fTRawMET;
 	double fTRawMETpx;

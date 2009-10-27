@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.16 2009/10/07 15:08:52 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.17 2009/10/07 15:21:52 sordini Exp $
 //
 //
 
@@ -410,6 +410,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
 			fTeDeltaEtaSuperClusterAtVtx[eqi] = El->deltaEtaSuperClusterTrackAtVtx(); 
 			fTecaloenergy[eqi] = El->caloEnergy();
+			fTeseedenergy[eqi] = El->superCluster()->seed()->energy();
 			fTtrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
 			fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
 			fTeID[eqi][0] = eIDmapT[electronRef]  ? 1:0;
@@ -572,6 +573,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
 	fTHCALEsumx = 0.; fTHCALEsumy = 0.; fTHCALEsumz = 0.;
 	for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
+		if(itow->energy() == 0.) continue; // Check against zero energy towers
 		double emFrac = itow->emEnergy()/itow->energy();
 		double hadFrac = itow->hadEnergy()/itow->energy();
 		fTECALEsumx += itow->px()*emFrac;
@@ -583,10 +585,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 	TVector3 ecalMET(fTECALEsumx, fTECALEsumy, fTECALEsumz);
 	TVector3 hcalMET(fTHCALEsumx, fTHCALEsumy, fTHCALEsumz);
-	fTECALMET = ecalMET.Mag();
-	fTHCALMET = hcalMET.Mag();
+	fTECALMET    = ecalMET.Mag();
 	fTECALMETphi = ecalMET.Phi();
+	fTHCALMET    = hcalMET.Mag();
 	fTHCALMETphi = hcalMET.Phi();
+	if(fTECALEsumz != 0.) fTECALMETeta = ecalMET.Eta();
+	else fTECALMETeta = 0.;
+	if(fTHCALEsumz != 0.) fTHCALMETeta = hcalMET.Eta();
+	else fTHCALMETeta = 0.;
 
 	fTRawMET    = (calomet->at(0)).pt();
 	fTRawMETpx  = (calomet->at(0)).px();
@@ -743,6 +749,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElDeltaEtaSuperClusterAtVtx" ,&fTeDeltaEtaSuperClusterAtVtx ,"ElDeltaEtaSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElCaloEnergy"    ,&fTecaloenergy        ,"ElCaloEnergy[NEles]/D");
+	fEventTree->Branch("ElSeedEnergy"    ,&fTeseedenergy        ,"ElSeedEnergy[NEles]/D");
 	fEventTree->Branch("ElTrkMomAtVtx"   ,&fTtrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
 
@@ -793,11 +800,13 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ECALEsumz"      ,&fTECALEsumz      ,"ECALEsumz/D");
 	fEventTree->Branch("ECALMET"        ,&fTECALMET        ,"ECALMET/D");
 	fEventTree->Branch("ECALMETPhi"     ,&fTECALMETphi     ,"ECALMETPhi/D");
+	fEventTree->Branch("ECALMETEta"     ,&fTECALMETeta     ,"ECALMETEta/D");
 	fEventTree->Branch("HCALEsumx"      ,&fTHCALEsumx      ,"HCALEsumx/D");
 	fEventTree->Branch("HCALEsumy"      ,&fTHCALEsumy      ,"HCALEsumy/D");
 	fEventTree->Branch("HCALEsumz"      ,&fTHCALEsumz      ,"HCALEsumz/D");
 	fEventTree->Branch("HCALMET"        ,&fTHCALMET        ,"HCALMET/D");
 	fEventTree->Branch("HCALMETPhi"     ,&fTHCALMETphi     ,"HCALMETPhi/D");
+	fEventTree->Branch("HCALMETeta"     ,&fTHCALMETeta     ,"HCALMETEta/D");
 	fEventTree->Branch("RawMET"         ,&fTRawMET         ,"RawMET/D");
 	fEventTree->Branch("RawMETpx"       ,&fTRawMETpx       ,"RawMETpx/D");
 	fEventTree->Branch("RawMETpy"       ,&fTRawMETpy       ,"RawMETpy/D");
@@ -976,6 +985,7 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTeDeltaPhiSuperClusterAtVtx);
 	resetDouble(fTeDeltaEtaSuperClusterAtVtx);
 	resetDouble(fTecaloenergy);
+	resetDouble(fTeseedenergy);
 	resetDouble(fTtrkmomatvtx);
 	resetDouble(fTeESuperClusterOverP);
 
@@ -1031,11 +1041,13 @@ void NTupleProducer::resetTree(){
 	fTECALEsumz       = -999.99;
 	fTECALMET         = -999.99;
 	fTECALMETphi      = -999.99;
+	fTECALMETeta      = -999.99;
 	fTHCALEsumx       = -999.99;
 	fTHCALEsumy       = -999.99;
 	fTHCALEsumz       = -999.99;
 	fTHCALMET         = -999.99;
 	fTHCALMETphi      = -999.99;
+	fTHCALMETeta      = -999.99;
 	fTRawMET          = -999.99;
 	fTRawMETpx        = -999.99;
 	fTRawMETpy        = -999.99;
