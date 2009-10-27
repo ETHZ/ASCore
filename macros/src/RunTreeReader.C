@@ -17,18 +17,28 @@ using namespace std;
 
 /*******************************************************
 >	Usage:
-	single file: ./RunTreeReader 0 tag filepath
-	filelist:    ./RunTreeReader 1 tag filelistpath
+	single file: ./RunTreeReader 0 flag tag filepath
+	filelist:    ./RunTreeReader 1 flag tag filelistpath
+>  Tags: Output is created in a subdir with this name,
+         plots have that name in their filename
+>  Flags: 5 digits correspond to 5 components:
+     1. plotting all branches
+     2. plotting the plotlist
+     3. produce the dilepton tree
+     4. produce the multiplicity plots
+     5. produce the siginificance plots
+   E.g. 10110 will produce all branches, the dilep tree
+        and the sign plots
 *******************************************************/
 
 int main(int argc, char* argv[]) {
 	if(argc<5){ // Invalid use:
-		printf("Usage: \n \t Single files  > ./RunTreeReader 0 101 tag file1path file2path ... \n");
-		printf("\t List of files > ./RunTreeReader 1 110 tag listpath \n");
-		printf("\t The second number flags which plots to produce. \n");
-		printf("\t First digit is plot all branches, second is plot list \n");
-		printf("\t third is dilepton tree, fourth is multiplicity plots \n");
-		printf("\t and fifth is significance plots. \n");
+		printf("Usage: \n \t Single files  > ./RunTreeReader 0 10101 tag file1path file2path ... \n");
+		printf("\t List of files > ./RunTreeReader 1 01001 tag listpath \n");
+		printf("\t\t The second number flags which plots to produce. \n");
+		printf("\t\t First digit is plot all branches, second is plot list \n");
+		printf("\t\t third is dilepton tree, fourth is multiplicity plots \n");
+		printf("\t\t and fifth is significance plots. \n");
 		return -1;
 	}
 	TChain *theChain = new TChain("analyze/Analysis");
@@ -53,13 +63,15 @@ int main(int argc, char* argv[]) {
 
 	cout<< "Number of events "<< theChain->GetEntries()<< endl;
 
-	TString outputdir = "FOX/";
-	
-	AnaClass *ana;
+	TString outputdir = "/data/wwwhome/susy/ETHPromptAnalysis/";
+
+	// Check which functions have to be called
 	bool allbranches(false), plotlist(false), treeread(false);
 	if((flag/10000)%10) allbranches = true;
 	if((flag/1000)%10)  plotlist = true;
 	if((flag/100%10) || (flag/10)%10 || flag%10) treeread = true;
+
+	AnaClass *ana;
 	if(allbranches || plotlist){
 		ana = new AnaClass();
 		ana->readVarNames("varnames.dat");
