@@ -18,14 +18,12 @@ CXXFLAGS      += $(ROOTCFLAGS)
 LIBS           = $(ROOTLIBS) 
 
 NGLIBS         = $(ROOTGLIBS) 
-# NGLIBS        += -lMinuit -lMinuit2
-NGLIBS        += -lMinuit
+NGLIBS        += -lMinuit -lMinuit2
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
 INCLUDEDIR     = ./include/
 CXX           += -I$(INCLUDEDIR)
 OUTLIB         = ./obj/
-# OUTLIB         = $(INCLUDEDIR)
 
 .SUFFIXES: .cc,.C,.hh,.h
 .PREFIXES: ./lib/
@@ -34,7 +32,7 @@ OUTLIB         = ./obj/
 TreeClassBase: src/TreeClassBase.C
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeClassBase.o $<
 
-TreeReaderClass: src/TreeReader.cc
+TreeReader: src/TreeReader.cc
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeReader.o $<
 
 AnaClass: src/AnaClass.cc
@@ -43,49 +41,27 @@ AnaClass: src/AnaClass.cc
 Davismt2: src/Davismt2.c
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/Davismt2.o $<
 
-# PtAveragePlots: src/PtAveragePlots.cc
-# 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/PtAveragePlots.o $<
-
 LeptJetStat: src/LeptJetStat.cc
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/LeptJetStat.o $<
 
 RunTreeReader: src/RunTreeReader.C
 	$(CXX) $(CXXFLAGS) -ldl -o RunTreeReader $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
 
-# MakeAllPlots: src/MakeAllPlots.C
-# 	$(CXX) $(CXXFLAGS) -ldl -o MakeAllPlots $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-# MakePlotList: src/MakePlotList.C
-# 	$(CXX) $(CXXFLAGS) -ldl -o MakePlotList $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-# MakePtAvPlots: src/MakePtAvPlots.C
-# 	$(CXX) $(CXXFLAGS) -ldl -o MakePtAvPlots $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-# MakePlotList2d: src/MakePlotList2d.C
-# 	$(CXX) $(CXXFLAGS) -ldl -o MakePlotList2d $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
 clean:
 	rm -f $(OUTLIB)*.o
 	rm -f RunTreeReader
-	# rm -f MakeAllPlots
-	# rm -f MakePlotList
-	# rm -f MakePlotList2d
 
-TreeReader:
+Reader:
 	make AnaClass
-	make TreeReaderClass
+	make TreeReader
 	touch src/RunTreeReader.C
 	make RunTreeReader
 
 all:
+	touch src/RunTreeReader.C
 	make TreeClassBase
-	make TreeReaderClass
+	make TreeReader
 	make AnaClass
 	make LeptJetStat
 	make Davismt2
-	# make PtAveragePlots
 	make RunTreeReader
-	# make MakeAllPlots
-	# make MakePlotList
-	# make MakePtAvPlots
-	# make MakePlotList2d
