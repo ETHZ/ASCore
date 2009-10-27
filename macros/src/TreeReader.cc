@@ -181,7 +181,7 @@ void TreeReader::WriteSignHists(){
 		for (int j = 0; j < fNBinsPhi; ++j) {
 			float ptaver = 0.;
 			float ptdev = 0.;
-			int nptij = fH_ptevt->GetBinContent(i+1, j+1);
+			int nptij = (int)fH_ptevt->GetBinContent(i+1, j+1);
 			if (nptij > 0) {
 				float ptsumij  = fH_ptsum->GetBinContent(i+1, j+1);
 				float pt2sumij = fH_pt2sum->GetBinContent(i+1, j+1);
