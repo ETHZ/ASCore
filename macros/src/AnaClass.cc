@@ -5,7 +5,6 @@
 *****************************************************************************/
 #include "../include/AnaClass.hh"
 
-
 // ClassImp(AnaClass);
 using namespace std;
 
@@ -314,8 +313,9 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
 	while( IN.getline(readbuff, 200, '\n') ){
 		if (readbuff[0] == '#') {continue;} // Skip lines commented with '#'
 		int nargs = sscanf(readbuff, "%s %s %d %d %f %f %d %f %f %s", path, varname, &sampleindex, &nbins, &xmin, &xmax, &logy, &x1, &x2, reqbuff);
-		if(nargs < 8){ x1 = -999; x2 = -999; }
-		else if(nargs < 9) x2 = -999;
+		if(nargs < 7){ logy = 0; x1 = -999; x2 = -999; req=""; }
+		else if(nargs < 8){ x1 = -999; x2 = -999; req=""; }
+		else if(nargs < 9){ x2 = -999; req=""; }
 		else if(nargs < 10) req = "";
 		else req = TCut(reqbuff);
 		// cout << "varname=" << varname << " req=" << req << " sampleindex=" << sampleindex << " nbins=" << nbins << " xmin=" << xmin << " xmax=" << xmax << " logy=" << logy << " x1=" << x1 << " x2=" << x2 << endl;
@@ -323,7 +323,7 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
 		if(tree==NULL) tree = fTree[sampleindex];
 		fOutputSubDir = tag + "/" + TString(path);
 		if(!strcmp(varname, "ElID")) plotEID(req, tree, tag);
-		else plotVar(varname, req, tree, tag, nbins, xmin, xmax, logy, x1, x2);
+		else plotVar(varname, req, tree, tag, nbins, xmin, xmax, "ofilename", logy, x1, x2);
 	}
 }
 
@@ -508,12 +508,12 @@ TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, 
 }
 
 /****************************************************************************/
-void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
+void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 	TH1D *hfir = drawTree1D(var,reqs,convertVarName2(var),nbins,xmin,xmax,tree,false);
 	if(!hfir){ cout << "AnaClass::plotVar() ==> Error, missing input histogram ..." << endl; return;}
-
+	if(ofilename == "ofilename") ofilename = convertVarName2(var);
 	hfir->SetXTitle(convertVarName(var));
 	hfir->SetLineWidth(2);
 	hfir->SetFillColor(15);
@@ -541,19 +541,19 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 
 	TLine *l1, *l2;
 	if(line1x != -999.){
-		l1 = new TLine(line1x,min,line1x,max);
+		l1 = new TLine(line1x, min, line1x, max);
 		l1->SetLineColor(kRed);
 		l1->SetLineWidth(2);
 		l1->Draw();
 	}
 
 	if(line2x != -999.){
-		l2 = new TLine(line2x,min,line2x,max);
+		l2 = new TLine(line2x, min, line2x, max);
 		l2->SetLineColor(kRed);
 		l2->SetLineWidth(2);
 		l2->Draw();
 	}
-	TString outputname = tag + "_" + convertVarName2(var);
+	TString outputname = tag + "_" + ofilename;
 	printPNG(col, outputname, fOutputSubDir);
 	printEPS(col, outputname, fOutputSubDir);
 }

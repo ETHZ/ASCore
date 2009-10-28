@@ -13,20 +13,24 @@
 #include <TCanvas.h>
 #include <TTree.h>
 #include <TStyle.h>
+#include <TLatex.h>
 
 #include "TreeClassBase.h"
 #include "LeptJetStat.h"
 #include "Davismt2.h"
+// #include "ETHStyle.h"
 
 class TreeReader : public TreeClassBase{
 public:
 	TreeReader(TTree *tree=0, int flag = 111);
 	virtual ~TreeReader();
+	void DefStyle();
 	void BeginJob();
 	void EndJob();
 	void Loop();
 
-	void setOutputDir(TString dir);
+	void SetOutputDir(TString dir);
+	inline void SetTag(TString tag){fTag = tag;};
 
 	void BookSignHists(const char* filename = "SignificancePlots.root");
 	void FillSignHists(Int_t part);
@@ -35,44 +39,51 @@ public:
 	void BookMPHistos(const char* filename = "MultiplicityPlots.root");
 	void FillMPHistos();
 	void PrintMPOutput();
-	void PlotMPSummary(int it);
-	void PlotMPEffic(int it);
+	void PlotMPSummary();
+	void PlotMPEffic();
 
 	void InitDiLepTree(const char *filename = "DiLepTree.root");
 	void FillDiLepTree();
 	void ResetDiLepTree();
 	void WriteDiLepTree();
 
+	void PlotMultiplicity();
+
+	void printPNG(TCanvas*, TString, TString);
+	void printEPS(TCanvas*, TString, TString);
+	
 	double getEta(double, double, double);
 	
 private:
 	// Global parameters:
 	TString fOutputDir;
+	TString fTag;
 	bool fDiLep;
 	bool fMPHist;
 	bool fSignHist;
 	
+	TStyle *fStyle;
 	Davismt2 *fMT2;
+	TLatex *fTlat;
 
 	// Significance Plots:
 	TFile *fSignHistsFile;
-	int fNBinsEta;
+	int fNBinsEta[5];
 	int fNBinsPhi;
-	TH2D *fH_ptdev;
-	TH2D *fH_ptsum;
-	TH2D *fH_pt2sum;
-	TH2I *fH_ptevt;
-	TH2D *fH_ptavg;
-	TH1D *fH_ptsumeta;
-	TH1I *fH_ptevteta;
+	TH2D *fH_ptdev[5];
+	TH2D *fH_ptsum[5];
+	TH2D *fH_pt2sum[5];
+	TH2I *fH_ptevt[5];
+	TH2D *fH_ptavg[5];
+	TH1D *fH_ptsumeta[5];
+	TH1I *fH_ptevteta[5];
 
 	// Multiplicity Plots Variables:
 	TFile *fMPHistFile;
-	std::vector<LeptJetStat *> fMyLeptJetStat;
-	std::vector<TH2D *> fMyhljMult;
-	std::vector<TH2D *> fMyhemuMult;
-	std::vector<TH1F *> fMyhemuEff;
-	int fNcuts;
+	LeptJetStat *fMyLeptJetStat;
+	TH2D *fHljMult;
+	TH2D *fHemuMult;
+	TH1F *fHemuEff;
 
 	// DiLepton Tree Variables:
 	TFile *fDiLepTreeFile;

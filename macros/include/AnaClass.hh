@@ -84,7 +84,7 @@ public:
 	TTree* getTree(TString treename, TString filename, TString subdir = "");
 	TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw, const char* drawopt = "");
 	TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
-	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999.);
 	void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);

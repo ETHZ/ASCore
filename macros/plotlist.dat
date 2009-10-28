@@ -3,7 +3,8 @@
 ##############################################################################################
 # Notes:  > Nbins = 0 gives an 'optimal' number of bins                                      #
 #         > Sample# corresponds to sample in parfile.dat, is ignored when called with        #
-#         > a tree as argument                                                               #
+#           a tree as argument                                                               #
+#         > Logy is optional, equal to false by default                                      #
 #         > To give a Req without plotting lines, use -999 as X1 or X2 resp.                 #
 ##############################################################################################
 # E.g.:                                                                                      #
@@ -11,50 +12,50 @@
 ##############################################################################################
 Muons/           NMus             0         10       0       10     1
 Muons/           MuPt             0         0        0       200.   1
-Muons/           MuEta            0         0        -2.5    2.5    0
-Muons/           MuPhi            0         0        -3.2    3.2    0
-Muons/           MuCharge[0]      0         3        -1.5    1.5    0
-Muons/ID/        MuIso            0         0        0.      10.    0
+Muons/           MuEta            0         0        -2.5    2.5    
+Muons/           MuPhi            0         0        -3.2    3.2    
+Muons/           MuCharge[0]      0         3        -1.5    1.5    
+Muons/ID/        MuIso            0         0        0.      10.    
 Muons/ID/        MuD0BS           0         0        -1.     1.     1    -0.2  0.2
 Muons/ID/        MuDzBS           0         0        -10.    10.    1
 Muons/ID/        MuNChi2          0         0        0.      20.    1    10
 Muons/ID/        MuNTkHits        0         25       0.      25.    0    11
-Muons/ID/        MuNMatches       0         10       0.      10.    0
-Muons/ID/        MuCaloComp       0         0        0.      1.     0
-Muons/ID/        MuSegmComp       0         0        0.      1.     0
-Muons/ID/        MuTrackerMu      0         2        0.      2.     0
+Muons/ID/        MuNMatches       0         10       0.      10.    
+Muons/ID/        MuCaloComp       0         0        0.      1.     
+Muons/ID/        MuSegmComp       0         0        0.      1.     
+Muons/ID/        MuTrackerMu      0         2        0.      2.     
 Jets/            NJets            0         20       0       20     1
 Jets/            JPt              0         0        0       1000.  1
 Jets/            JEta             0         0        -5.0    5.0    1
-Jets/            JPhi             0         0        -3.2    3.2    0
+Jets/            JPhi             0         0        -3.2    3.2    
 Jets/ID/         JEMfrac          0         0        0.0     1.01   1
 Jets/ID/         JChfrac          0         0        0.0     10.    1    1.0
-Jets/ID/         JEcorr           0         0        0.0     5.     0
-Jets/ID/         JbTagProb        0         0        0.0     10.    0
+Jets/ID/         JEcorr           0         0        0.0     5.     
+Jets/ID/         JbTagProb        0         0        0.0     10.    
 Electrons/       NEles            0         10       0       10     1
 Electrons/       ElPt             0         0        0       200.   1
-Electrons/       ElEta            0         0        -2.5    2.5    0
-Electrons/       ElPhi            0         0        -3.2    3.2    0
-Electrons/       ElCharge[0]      0         3        -1.5    1.5    0
-Electrons/ID/    ElIso            0         0        0.      10.    0
+Electrons/       ElEta            0         0        -2.5    2.5    
+Electrons/       ElPhi            0         0        -3.2    3.2    
+Electrons/       ElCharge[0]      0         3        -1.5    1.5    
+Electrons/ID/    ElIso            0         0        0.      10.    
 Electrons/ID/    ElD0BS           0         0        -1.     1.     1    -0.2  0.2
 Electrons/ID/    ElDzBS           0         0        -10.    10.    1
 Electrons/ID/    ElNChi2          0         0        0.      20.    1    10
 Electrons/ID/    ElHcalOverEcal   0         0        0.      5.     1
-Electrons/ID/    ElE2x5Max*(ElE5x5)^(-1) 0  0        0.      1.2    0
-Electrons/ID/    ElID             0         0        0.      0.     0
+Electrons/ID/    ElE2x5Max*(ElE5x5)^(-1) 0  0        0.      1.2    
+Electrons/ID/    ElID             0         0        0.      0.     
 Electrons/ID/    ElSigmaIetaIeta  0         0        0.      0.1    1
 MET/             RawMET           0         0        0       500.   1
-MET/             RawMETphi        0         0        -3.2    3.2    0
+MET/             RawMETphi        0         0        -3.2    3.2    
 MET/             MuJESCorrMET     0         0        0       500.   1
-MET/             MuJESCorrMETphi  0         0        -3.2    3.2    0
+MET/             MuJESCorrMETphi  0         0        -3.2    3.2    
 MET/             TCMET            0         0        0       500.   1
-MET/             TCMETphi         0         0        -3.2    3.2    0
+MET/             TCMETphi         0         0        -3.2    3.2    
 MET/             PFMET            0         0        0       500.   1
-MET/             PFMETphi         0         0        -3.2    3.2    0
+MET/             PFMETphi         0         0        -3.2    3.2    
 MET/             ECALMET          0         0        0       500.   1
-MET/             ECALMETPhi       0         0        -3.2    3.2    0
+MET/             ECALMETPhi       0         0        -3.2    3.2    
 MET/             HCALMET          0         0        0       500.   1
-MET/             HCALMETPhi       0         0        -3.2    3.2    0
+MET/             HCALMETPhi       0         0        -3.2    3.2    
 MET/             TrkPtSum         0         0        0       500.   1
-MET/             TrkPtSumPhi      0         0        -3.2    3.2    0
+MET/             TrkPtSumPhi      0         0        -3.2    3.2

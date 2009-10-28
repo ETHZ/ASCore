@@ -47,6 +47,9 @@ LeptJetStat: src/LeptJetStat.cc
 RunTreeReader: src/RunTreeReader.C
 	$(CXX) $(CXXFLAGS) -ldl -o RunTreeReader $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
 
+ETHStyle: include/ETHStyle.h
+	$(CXX) $(CXXFLAGS) -ldl -o ETHStyle $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
+
 clean:
 	rm -f $(OUTLIB)*.o
 	rm -f RunTreeReader

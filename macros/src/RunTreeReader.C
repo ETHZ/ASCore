@@ -61,9 +61,22 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	cout<< "Number of events "<< theChain->GetEntries()<< endl;
-
 	TString outputdir = "/data/wwwhome/susy/ETHPromptAnalysis/";
+
+	// Read parameters
+	ifstream IN("treepars.dat");
+	char buffer[200];
+	char ParName[100], StringValue[100];
+	while( IN.getline(buffer, 200, '\n') ){
+		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
+		sscanf(buffer, "%s %s", ParName, StringValue);
+		if( !strcmp(ParName, "OutputDir") ){
+			outputdir = TString(StringValue);
+		}
+	}
+	cout << "OutputDir is:     " << outputdir << endl;
+	cout << "Number of events: " << theChain->GetEntries() << endl;
+
 
 	// Check which functions have to be called
 	bool allbranches(false), plotlist(false), treeread(false);
@@ -86,7 +99,8 @@ int main(int argc, char* argv[]) {
 	TreeReader *tR;
 	if(treeread){
 		tR = new TreeReader(theChain, flag%1000);
-		tR->setOutputDir(outputdir+tag);
+		tR->SetOutputDir(outputdir+tag);
+		tR->SetTag(tag);
 		tR->BeginJob();
 		tR->Loop();
 		tR->EndJob();

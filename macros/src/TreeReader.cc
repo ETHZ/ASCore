@@ -10,10 +10,41 @@ TreeReader::TreeReader(TTree *tree, int flag) : TreeClassBase(tree){
 	if((flag/100)%10) fDiLep    = true;
 	if((flag/10)%10)  fMPHist   = true;
 	if((flag/1)%10)   fSignHist = true;
+
+	fTlat = new TLatex();
+	DefStyle();
+	gROOT->SetStyle("ETHStyle");
+	gROOT->ForceStyle();
 }
 
 TreeReader::~TreeReader(){
 	if(!fChain) cout << "no chain!" << endl;
+}
+
+void TreeReader::DefStyle(){
+	fStyle = new TStyle("ETHStyle", "Standard Plain");
+	fStyle->SetCanvasColor(0);
+	fStyle->SetFrameFillColor(0);
+	fStyle->SetFrameBorderMode(0);
+	fStyle->SetFrameBorderSize(0);
+	fStyle->SetPalette(1,0);
+	fStyle->SetOptTitle(0);
+	fStyle->SetOptStat(111111);
+	fStyle->SetStatColor(0);
+	fStyle->SetStatStyle(3001);
+	fStyle->SetStatBorderSize(1);
+
+	// Fonts
+	Int_t font = 42;
+	fStyle->SetStatFont(font);
+	fStyle->SetTextFont(font);
+	fStyle->SetLabelFont(font, "xyz");
+	fStyle->SetTitleFont(font, "xyz");
+
+	// Histograms
+	fStyle->SetHistFillColor(15);
+	fStyle->SetHistFillStyle(1001);
+	fStyle->SetHistLineWidth(2);
 }
 
 // Method called before starting the event loop
@@ -44,12 +75,12 @@ void TreeReader::Loop(){
 		// Put here any method that needs to be called once every event
 		if(fDiLep)    FillDiLepTree();
 		if(fMPHist)   FillMPHistos();
-		if(fSignHist) FillSignHists(3);
+		if(fSignHist) for(size_t i = 0; i < 5; ++i) FillSignHists(i);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void TreeReader::setOutputDir(TString dir){
+void TreeReader::SetOutputDir(TString dir){
 	if(!dir.EndsWith("/")) dir += "/";
 	fOutputDir = dir;
 	// Create directory if needed
@@ -64,32 +95,44 @@ void TreeReader::setOutputDir(TString dir){
 void TreeReader::BookSignHists(const char* filename){
 	fSignHistsFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	fSignHistsFile->cd();
-	fNBinsEta = 10;
+	fNBinsEta[0] = 10;
+	fNBinsEta[1] = 10;
+	fNBinsEta[2] = 10;
+	fNBinsEta[3] = 20;
+	fNBinsEta[4] = 20;
 	fNBinsPhi = 20;
-	const float etamin = -5., etamax = 5.;
+	const float etamin[5] = {-3.0, -2.5, -5.0, -10.0, -10.0};
+	const float etamax[5] = { 3.0,  2.5,  5.0,  10.0,  10.0};
 	const float phimin = -3.1416, phimax = 3.1416;
-	// float deta = (etamax - etamin) / (float)fNBinsEta;
-	// float dphi = (phimax - phimin) / (float)fNBinsPhi;
-	fH_ptdev = new TH2D("h_ptdev", "pT deviation in eta vs phi", fNBinsEta, etamin, etamax, fNBinsPhi, phimin, phimax);
-	fH_ptsum = new TH2D("h_ptsum", "pT sum in eta vs phi", fNBinsEta, etamin, etamax, fNBinsPhi, phimin, phimax);
-	fH_pt2sum = new TH2D("h_pt2sum", "pT square sum in eta vs phi", fNBinsEta, etamin, etamax, fNBinsPhi, phimin, phimax);
-	fH_ptevt = new TH2I("h_ptevt", "Number of ev. in eta vs phi", fNBinsEta, etamin, etamax, fNBinsPhi, phimin, phimax);
-	fH_ptavg = new TH2D("h_ptavg", "pT average in eta vs phi", fNBinsEta, etamin, etamax, fNBinsPhi, phimin, phimax);
-	fH_ptsumeta = new TH1D("h_ptsumeta", "pT sum in eta", fNBinsEta, etamin, etamax);
-	fH_ptevteta = new TH1I("h_ptevteta", "Number of ev. in eta", fNBinsEta, etamin, etamax);
+	TString partname[5];
+	partname[0] = "electrons";
+	partname[1] = "muons";
+	partname[2] = "jets";
+	partname[3] = "ecalMET";
+	partname[4] = "hcalMET";
 
-	fH_ptdev->SetXTitle("#eta");
-	fH_ptsum->SetXTitle("#eta");
-	fH_ptevt->SetXTitle("#eta");
-	fH_ptavg->SetXTitle("#eta");
-	fH_ptdev->SetYTitle("#phi");
-	fH_ptsum->SetYTitle("#phi");
-	fH_ptevt->SetYTitle("#phi");
-	fH_ptavg->SetYTitle("#phi");
-	// fH_ptdev->SetStats(false);
-	// fH_ptsum->SetStats(false);
-	// fH_ptevt->SetStats(false);
-	// fH_ptavg->SetStats(false);
+	for(int i=0; i<5; i++){
+		fH_ptdev[i]    = new TH2D(Form("h_ptdev%d", i),    Form("pT deviation in eta vs phi for %s", partname[i].Data()),  fNBinsEta[i], etamin[i], etamax[i], fNBinsPhi, phimin, phimax);
+		fH_ptsum[i]    = new TH2D(Form("h_ptsum%d", i),    Form("pT sum in eta vs phi for %s", partname[i].Data()),        fNBinsEta[i], etamin[i], etamax[i], fNBinsPhi, phimin, phimax);
+		fH_pt2sum[i]   = new TH2D(Form("h_pt2sum%d", i),   Form("pT square sum in eta vs phi for %s", partname[i].Data()), fNBinsEta[i], etamin[i], etamax[i], fNBinsPhi, phimin, phimax);
+		fH_ptevt[i]    = new TH2I(Form("h_ptevt%d", i),    Form("Number of ev. in eta vs phi for %s", partname[i].Data()), fNBinsEta[i], etamin[i], etamax[i], fNBinsPhi, phimin, phimax);
+		fH_ptavg[i]    = new TH2D(Form("h_ptavg%d", i),    Form("pT average in eta vs phi for %s", partname[i].Data()),    fNBinsEta[i], etamin[i], etamax[i], fNBinsPhi, phimin, phimax);
+		fH_ptsumeta[i] = new TH1D(Form("h_ptsumeta%d", i), Form("pT sum in eta for %s", partname[i].Data()),               fNBinsEta[i], etamin[i], etamax[i]);
+		fH_ptevteta[i] = new TH1I(Form("h_ptevteta%d", i), Form("Number of ev. in eta for %s", partname[i].Data()),        fNBinsEta[i], etamin[i], etamax[i]);
+		fH_ptdev[i]->SetXTitle("#eta");
+		fH_ptsum[i]->SetXTitle("#eta");
+		fH_ptevt[i]->SetXTitle("#eta");
+		fH_ptavg[i]->SetXTitle("#eta");
+		fH_ptdev[i]->SetYTitle("#phi");
+		fH_ptsum[i]->SetYTitle("#phi");
+		fH_ptevt[i]->SetYTitle("#phi");
+		fH_ptavg[i]->SetYTitle("#phi");
+
+		fH_ptdev[i]->SetStats(false);
+		fH_ptavg[i]->SetStats(false);
+		fH_ptsum[i]->SetStats(false);
+		fH_ptevt[i]->SetStats(false);
+	}
 }
 
 void TreeReader::FillSignHists(Int_t part){
@@ -101,15 +144,6 @@ void TreeReader::FillSignHists(Int_t part){
 //       = 3: ECAL recoil
 //       = 4: HCAL recoil
 
-	// gROOT->SetStyle("Plain");
-	// TStyle *style = gROOT->GetStyle("Plain");
-	// const int ncol1 = 11;
-	// int colors1[ncol1]=     {10,16, 5, 28, 29,   8,  4,   9,  45,  46, 2};
-	// const int ncol2 = 8;
-	// // int colors2[ncol2]=     { 6, 28, 5, 29,   8,  7,  4,  2};
-	// int colors2[ncol2]=     { 4, 28, 5, 29,   8,  7, 47,  2}; // new colors from luc: 21/10/09
-	// const int ncont2 = 9;
-	// double contours2[ncont2] = { -4.,-3.,-2.,-1., 0., 1., 2., 3., 4.};
 	fSignHistsFile->cd();
 	double EcalEta(0.);
 	double HcalEta(0.);
@@ -117,31 +151,31 @@ void TreeReader::FillSignHists(Int_t part){
 	// electrons
 	if (part == 0) {
 		for (int ip = 0; ip < NEles; ++ ip) {
-			fH_ptsum->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]);
-			fH_pt2sum->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]*ElPt[ip]);
-			fH_ptevt->Fill(ElEta[ip], ElPhi[ip]);
-			fH_ptsumeta->Fill(ElEta[ip], ElPt[ip]);
-			fH_ptevteta->Fill(ElEta[ip]);
+			fH_ptsum[part]->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]);
+			fH_pt2sum[part]->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]*ElPt[ip]);
+			fH_ptevt[part]->Fill(ElEta[ip], ElPhi[ip]);
+			fH_ptsumeta[part]->Fill(ElEta[ip], ElPt[ip]);
+			fH_ptevteta[part]->Fill(ElEta[ip]);
 		}
 	}
 	// muons
 	else if (part == 1) {
 		for (int ip = 0; ip < NMus; ++ ip) {
-			fH_ptsum->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]);
-			fH_pt2sum->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]*MuPt[ip]);
-			fH_ptevt->Fill(MuEta[ip], MuPhi[ip]);
-			fH_ptsumeta->Fill(MuEta[ip], MuPt[ip]);
-			fH_ptevteta->Fill(MuEta[ip]);
+			fH_ptsum[part]->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]);
+			fH_pt2sum[part]->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]*MuPt[ip]);
+			fH_ptevt[part]->Fill(MuEta[ip], MuPhi[ip]);
+			fH_ptsumeta[part]->Fill(MuEta[ip], MuPt[ip]);
+			fH_ptevteta[part]->Fill(MuEta[ip]);
 		}
 	}
 	// jets
 	else if (part == 2) {
 		for (int ip = 0; ip < NJets; ++ ip) {
-			fH_ptsum->Fill(JEta[ip], JPhi[ip], JPt[ip]);
-			fH_pt2sum->Fill(JEta[ip], JPhi[ip], JPt[ip]*JPt[ip]);
-			fH_ptevt->Fill(JEta[ip], JPhi[ip]);
-			fH_ptsumeta->Fill(JEta[ip], JPt[ip]);
-			fH_ptevteta->Fill(JEta[ip]);
+			fH_ptsum[part]->Fill(JEta[ip], JPhi[ip], JPt[ip]);
+			fH_pt2sum[part]->Fill(JEta[ip], JPhi[ip], JPt[ip]*JPt[ip]);
+			fH_ptevt[part]->Fill(JEta[ip], JPhi[ip]);
+			fH_ptsumeta[part]->Fill(JEta[ip], JPt[ip]);
+			fH_ptevteta[part]->Fill(JEta[ip]);
 		}
 	}
 	// ECAL MET
@@ -149,22 +183,22 @@ void TreeReader::FillSignHists(Int_t part){
 		// this is to protect against NAN
 		if (ECALEsumx != ECALEsumx) {return;}
 		EcalEta = getEta(ECALEsumx, ECALEsumy, ECALEsumz);
-		fH_ptsum->Fill(EcalEta, ECALMETPhi, ECALMET);
-		fH_pt2sum->Fill(EcalEta, ECALMETPhi, ECALMET*ECALMET);
-		fH_ptevt->Fill(EcalEta, ECALMETPhi);
-		fH_ptsumeta->Fill(EcalEta, ECALMET);
-		fH_ptevteta->Fill(EcalEta);
+		fH_ptsum[part]->Fill(EcalEta, ECALMETPhi, ECALMET);
+		fH_pt2sum[part]->Fill(EcalEta, ECALMETPhi, ECALMET*ECALMET);
+		fH_ptevt[part]->Fill(EcalEta, ECALMETPhi);
+		fH_ptsumeta[part]->Fill(EcalEta, ECALMET);
+		fH_ptevteta[part]->Fill(EcalEta);
 	}
 	// HCAL MET
 	else if (part == 4) {
 	// this is to protect against NAN
 		if (HCALEsumx != HCALEsumx) {return;}
 		HcalEta = getEta(HCALEsumx, HCALEsumy, HCALEsumz);
-		fH_ptsum->Fill(HcalEta, HCALMETPhi, HCALMET);
-		fH_pt2sum->Fill(HcalEta, HCALMETPhi, HCALMET*HCALMET);
-		fH_ptevt->Fill(HcalEta, HCALMETPhi);
-		fH_ptsumeta->Fill(HcalEta, HCALMET);
-		fH_ptevteta->Fill(HcalEta);
+		fH_ptsum[part]->Fill(HcalEta, HCALMETPhi, HCALMET);
+		fH_pt2sum[part]->Fill(HcalEta, HCALMETPhi, HCALMET*HCALMET);
+		fH_ptevt[part]->Fill(HcalEta, HCALMETPhi);
+		fH_ptsumeta[part]->Fill(HcalEta, HCALMET);
+		fH_ptevteta[part]->Fill(HcalEta);
 	}
 }
 
@@ -173,34 +207,114 @@ void TreeReader::WriteSignHists(){
 	float zminDev = -4., zmaxDev = 4.;
 
 	// Calculate averages and deviations
-	for (int i = 0; i < fNBinsEta; ++i) {
-		float ptaverEta = 0.;
-		if (fH_ptevteta->GetBinContent(i+1) > 0) {
-			ptaverEta = fH_ptsumeta->GetBinContent(i+1) / (float)fH_ptevteta->GetBinContent(i+1);
-		}
-		for (int j = 0; j < fNBinsPhi; ++j) {
-			float ptaver = 0.;
-			float ptdev = 0.;
-			int nptij = (int)fH_ptevt->GetBinContent(i+1, j+1);
-			if (nptij > 0) {
-				float ptsumij  = fH_ptsum->GetBinContent(i+1, j+1);
-				float pt2sumij = fH_pt2sum->GetBinContent(i+1, j+1);
-				ptaver = ptsumij / (float)nptij;
-				float pterr = sqrt(pt2sumij - (float)nptij*ptaver*ptaver);
-				if (pterr <= 0.) {pterr = 0.1;}
-				ptdev = (ptsumij - (float)nptij*ptaverEta) / pterr;
+	for(size_t part = 0; part < 5; ++part){
+		for (int i = 0; i < fNBinsEta[part]; ++i) {
+			float ptaverEta = 0.;
+			if (fH_ptevteta[part]->GetBinContent(i+1) > 0) {
+				ptaverEta = fH_ptsumeta[part]->GetBinContent(i+1) / (float)fH_ptevteta[part]->GetBinContent(i+1);
 			}
-			if (ptdev > zmaxDev) {ptdev = zmaxDev;}
-			if (ptdev < zminDev) {ptdev = zminDev;}
-			fH_ptdev->SetBinContent(i+1, j+1, ptdev);
-			fH_ptavg->SetBinContent(i+1, j+1, ptaver);
+			for (int j = 0; j < fNBinsPhi; ++j) {
+				float ptaver = 0.;
+				float ptdev = 0.;
+				int nptij = (int)fH_ptevt[part]->GetBinContent(i+1, j+1);
+				if (nptij > 0) {
+					float ptsumij  = fH_ptsum[part]->GetBinContent(i+1, j+1);
+					float pt2sumij = fH_pt2sum[part]->GetBinContent(i+1, j+1);
+					ptaver = ptsumij / (float)nptij;
+					float pterr = sqrt(pt2sumij - (float)nptij*ptaver*ptaver);
+					if (pterr <= 0.) {pterr = 0.1;}
+					ptdev = (ptsumij - (float)nptij*ptaverEta) / pterr;
+				}
+				if (ptdev > zmaxDev) {ptdev = zmaxDev;}
+				if (ptdev < zminDev) {ptdev = zminDev;}
+				fH_ptdev[part]->SetBinContent(i+1, j+1, ptdev);
+				fH_ptavg[part]->SetBinContent(i+1, j+1, ptaver);
+			}
 		}
 	}
+		
+	TString pnames[5];
+	pnames[0] = "el";
+	pnames[1] = "mu";
+	pnames[2] = "jet";
+	pnames[3] = "eMET";
+	pnames[4] = "hMET";
+	
+	TString pnamel[5];
+	pnamel[0] = "Electrons";
+	pnamel[1] = "Muons";
+	pnamel[2] = "Jets";
+	pnamel[3] = "ECALMET";
+	pnamel[4] = "HCALMET";
+	
+	fTlat->SetTextColor(kBlack);
+	fTlat->SetNDC(kTRUE);
+	fTlat->SetTextSize(0.04);
 
-	fH_ptdev->Write();
-	fH_ptsum->Write();
-	fH_ptevt->Write();
-	fH_ptavg->Write();
+	TStyle *style = gROOT->GetStyle("ETHStyle");
+	const int ncol1 = 11;
+	int colors1[ncol1]= {10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
+	const int ncol2 = 8;
+	// int colors2[ncol2]= {6, 28, 5, 29, 8, 7, 4, 2};
+	int colors2[ncol2]= {4, 28, 5, 29, 8, 7, 47, 2}; // new colors from luc: 21/10/09
+	const int ncont2 = 9;
+	double contours2[ncont2] = { -4.,-3.,-2.,-1., 0., 1., 2., 3., 4.};
+
+	// Plot the histograms
+	TString subdir = "SignificancePlots";
+	TCanvas *canv;
+	for(size_t i = 0; i < 5; ++i){
+		gStyle->SetPalette(ncol2, colors2);
+		// gROOT->ForceStyle();
+		TString canvname = "PTDev_" + pnames[i];
+		TString canvtitle = "pT Deviation for " + pnamel[i];
+		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+		fH_ptdev[i]->SetContour(ncont2, contours2);
+		fH_ptdev[i]->SetMinimum(-5);
+		fH_ptdev[i]->SetMaximum(5);
+		fH_ptdev[i]->DrawCopy("colz");
+		fTlat->DrawLatex(0.11,0.92, canvtitle);
+		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+
+		gStyle->SetPalette(ncol1, colors1);
+		// gROOT->ForceStyle();
+
+		canvname = "PTSum_" + pnames[i];
+		canvtitle = "pT sum for " + pnamel[i];
+		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+		fH_ptsum[i]->SetMinimum(0);
+		fH_ptsum[i]->DrawCopy("lego2 z");
+		fTlat->DrawLatex(0.11,0.92, canvtitle);
+		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+
+		canvname = "PTEvt_" + pnames[i];
+		canvtitle = "Event multiplicity for " + pnamel[i];
+		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+		fH_ptevt[i]->SetMinimum(0);
+		fH_ptevt[i]->DrawCopy("lego2 z");
+		fTlat->DrawLatex(0.11,0.92, canvtitle);
+		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+
+		canvname = "PTAvg_" + pnames[i];
+		canvtitle = "pT Average for " + pnamel[i];
+		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+		fH_ptavg[i]->SetMinimum(0);
+		fH_ptavg[i]->DrawCopy("lego2 z");
+		fTlat->DrawLatex(0.11,0.92, canvtitle);
+		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+	}
+
+	// Write the histograms
+	for(size_t i = 0; i < 5; ++i){
+		fH_ptdev[i]->Write();
+		fH_ptsum[i]->Write();
+		fH_ptevt[i]->Write();
+		fH_ptavg[i]->Write();
+	}
 	fSignHistsFile->Close();
 }
 
@@ -208,30 +322,17 @@ void TreeReader::WriteSignHists(){
 // Multiplicity Plots Stuff ///////////////////////////////////////////////////////////////////
 void TreeReader::BookMPHistos(const char* filename){
 	fMPHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
-	fNcuts = 1;
 	// Temp objects:
-	LeptJetStat *aLeptJetStat;
-	TH2D * ahljMult;
-	TH2D * ahemuMult;
-	TH1F * ahemuEff;
-	char hname[20];
-	char htit[50];
-	for (int i=0; i< fNcuts; ++i){
-		aLeptJetStat = new LeptJetStat();
-		fMyLeptJetStat.push_back(aLeptJetStat);
-		sprintf (hname, "ljMult%u", i);
-		sprintf (htit, "lepton/jets multiplicity, cut %u", i);
-		ahljMult = new TH2D( hname, htit, 13, 0, 13, 7, 0, 7);
-		fMyhljMult.push_back(ahljMult);
-		sprintf (hname, "emuMult%u", i);
-		sprintf (htit, "e/mu multiplicity, cut %u", i);
-		ahemuMult = new TH2D( hname, htit, 18, 0, 18, 7, 0, 7);
-		fMyhemuMult.push_back(ahemuMult);
-		sprintf (hname, "emuEffic%u", i);
-		sprintf (htit, "e/mu Efficiency, cut %u", i);
-		ahemuEff = new TH1F( hname, htit, 13, 0, 13);
-		fMyhemuEff.push_back(ahemuEff);
-	}
+	TString hname, htit;
+
+	fMyLeptJetStat = new LeptJetStat();
+	fHljMult  = new TH2D("ljMult", "Lepton / Jets multiplicity", 13, 0, 13, 7, 0, 7);
+	fHemuMult = new TH2D("emuMult", "e/mu multiplicity", 18, 0, 18, 7, 0, 7);
+	fHemuEff  = new TH1F("emuEffic", "e/mu Efficiency", 13, 0, 13);
+
+	fHljMult->SetStats(false);
+   fHemuMult->SetStats(false);
+   fHemuEff->SetStats(false);
 }
 
 void TreeReader::FillMPHistos(){
@@ -308,28 +409,65 @@ void TreeReader::FillMPHistos(){
 	}    
 
 // convert the lepton config into the index and count
-	for(int i=0; i< fNcuts; ++i){
-		fMyLeptJetStat[i]->FillLeptJetStat(LeptCat, NJets, 0);
-	}
+	fMyLeptJetStat->FillLeptJetStat(LeptCat, NJets, 0);
 }
 
 void TreeReader::PrintMPOutput(){
-	for(int i=0; i< fNcuts; ++i){
-		fMyLeptJetStat[i]->FillShortTables();
-		fMyLeptJetStat[i]->PrintConfigs ();
-		PlotMPSummary(i);
-		PlotMPEffic(i);
-	}
+	fMyLeptJetStat->FillShortTables();
+	fMyLeptJetStat->PrintConfigs ();
+	PlotMPSummary();
+	PlotMPEffic();
+
+	fTlat->SetTextColor(kBlack);
+	fTlat->SetNDC(kTRUE);
+	fTlat->SetTextSize(0.04);
+	
+	const int ncol = 11;
+	int colors[ncol] = { 10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
+
+	TString subdir = "MultiplicityPlots";
+	TCanvas *canv;
+	TString canvtitle = "Lepton / Jets multiplicity";
+	canv = new TCanvas("ljMult", canvtitle , 0, 0, 900, 700);
+   gStyle->SetPalette(ncol, colors);
+   gPad->SetTheta(50);
+   gPad->SetPhi(240);
+	fHljMult->SetMinimum(0);
+	fHljMult->DrawCopy("colz");
+	// fHljMult->DrawCopy("lego2 Z");
+	fTlat->DrawLatex(0.11,0.92, canvtitle);
+	printPNG(canv, fTag + "_ljMult", fOutputDir + subdir);
+	printEPS(canv, fTag + "_ljMult", fOutputDir + subdir);
+
+	canvtitle = "e/mu multiplicity";
+	canv = new TCanvas("emuMult", canvtitle , 0, 0, 900, 700);
+   gPad->SetTheta(50); 
+   gPad->SetPhi(240);
+	fHemuMult->SetMinimum(0);
+	fHemuMult->DrawCopy("colz");
+	// fHemuMult->DrawCopy("lego2 Z");
+	fTlat->DrawLatex(0.11,0.92, canvtitle);
+	printPNG(canv, fTag + "_emuMult", fOutputDir + subdir);
+	printEPS(canv, fTag + "_emuMult", fOutputDir + subdir);
+
+	canvtitle = "e/mu Efficiency";
+	canv = new TCanvas("emuEffic", canvtitle , 0, 0, 900, 700);
+   gPad->SetTheta(50); 
+   gPad->SetPhi(240);
+	fHemuEff->DrawCopy();
+	fTlat->DrawLatex(0.11,0.92, canvtitle);
+	printPNG(canv, fTag + "_emuEffic", fOutputDir+subdir);
+	printEPS(canv, fTag + "_emuEffic", fOutputDir+subdir);
+
+
 	fMPHistFile->cd();
-	for(int i=0; i< fNcuts; ++i){
-		fMyhljMult[i]->Write();
-		fMyhemuMult[i]->Write();
-		fMyhemuEff[i]->Write();
-	}
+	fHljMult->Write();
+	fHemuMult->Write();
+	fHemuEff->Write();
 	fMPHistFile->Close();	
 }
 
-void TreeReader::PlotMPSummary(int it){
+void TreeReader::PlotMPSummary(){
 // Makes a 2D plot of lepton configurations versus jet multiplicity
 //  in the lepton configurations, e and mu are summed
 
@@ -355,32 +493,32 @@ void TreeReader::PlotMPSummary(int it){
 	}
 	int imax = njets + 1;
 // nber of leptons = 0
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(0);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(0);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] = nperJets[i];}
 
 // nber of leptons = 1 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(1);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(1);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] = nperJets[i];}
 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(3);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(3);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] += nperJets[i];}
 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(2);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(2);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] = nperJets[i];}
 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(4);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(4);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] += nperJets[i];}
 
 // nber of leptons = 2 
 	for (int i = 0; i < 10; ++i) {
 		int ii = i + 5;
-		index = fMyLeptJetStat[it]->GetConfigfrOrder(ii);
-		fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+		index = fMyLeptJetStat->GetConfigfrOrder(ii);
+		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 //    cout << " ii = << ii << " 
 		for (int j = 1; j < 8; ++j) {multable[indTab2l[i]][j-1] += nperJets[j];}
 	}
@@ -389,16 +527,16 @@ void TreeReader::PlotMPSummary(int it){
 // nber of leptons = 3 
 	for (int i = 0; i < 20; ++i) {
 		int ii = i + 15;
-		index = fMyLeptJetStat[it]->GetConfigfrOrder(ii);
-		fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+		index = fMyLeptJetStat->GetConfigfrOrder(ii);
+		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 		for (int j = 1; j < imax; ++j) {multable[indTab3l[i]][j-1] += nperJets[j];}
 	}
 //  cout << " 3l done " << endl;
 
 // nber of leptons >= 4
 	for (int m = 35; m < 71; ++m){
-		index = fMyLeptJetStat[it]->GetConfigfrOrder(m);
-		fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+		index = fMyLeptJetStat->GetConfigfrOrder(m);
+		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 		for (int i = 1; i < imax; ++i) {multable[12][i-1] += nperJets[i];}
 	}
 
@@ -408,7 +546,7 @@ void TreeReader::PlotMPSummary(int it){
 	for (int i = 0; i < nlept; ++i) {
 		cout << "  " << lablx[i];
 		for (int j = 0; j < njets; ++j) {
-			fMyhljMult[it]->Fill(lablx[i], lably[j], multable[i][j]);
+			fHljMult->Fill(lablx[i], lably[j], multable[i][j]);
 			cout << "  " << multable[i][j];
 		}
 		cout << endl;
@@ -416,7 +554,7 @@ void TreeReader::PlotMPSummary(int it){
 	return;
 }
 
-void TreeReader::PlotMPEffic(int it){
+void TreeReader::PlotMPEffic(){
 // Makes a 2D plot of lepton configurations versus jet multiplicity
 //  in the lepton configurations, + and - charges are summed
 // Makes a profile histogram of e/mu efficiency ratios
@@ -441,141 +579,141 @@ void TreeReader::PlotMPEffic(int it){
 	}
 	int imax = njets + 1;
 // nber of leptons = 1m
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(3);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(3);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(4);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(4);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] += nperJets[i];}
 
 // nber of leptons = 1e 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(1);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(1);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(2);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(2);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(13);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(13);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] = nperJets[i];}
 
 // nber of leptons = OSem
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(8);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(8);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[3][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(10);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(10);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[3][i-1] += nperJets[i];}
 
 // nber of leptons = OSee
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(6);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(6);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[4][i-1] = nperJets[i];}
 
 // nber of leptons = SSmm 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(12);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(12);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[5][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(14);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(14);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[5][i-1] += nperJets[i];}
 
 // nber of leptons = SSem 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(7);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(7);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[6][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(11);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(11);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[6][i-1] += nperJets[i];}
 
 // nber of leptons = SSee 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(5);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(5);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[7][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(9);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(9);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[7][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm1m 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(32);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(32);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[8][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(33);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(33);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[8][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm1e 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(23);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(23);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[9][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(29);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(29);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[9][i-1] += nperJets[i];}
 
 // nber of leptons = OSee1m 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(20);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(20);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[10][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(21);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(21);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[10][i-1] += nperJets[i];}
 
 // nber of leptons = OSee1e 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(16);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(16);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[11][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(19);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(19);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[11][i-1] += nperJets[i];}
 
 // nber of leptons = SSmm1e 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(28);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(28);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[12][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(24);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(24);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[12][i-1] += nperJets[i];}
 
 // nber of leptons = SSee1m 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(18);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(18);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[13][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(26);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(26);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[13][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmmm 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(31);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(31);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[14][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(34);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(34);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[14][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmme 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(22);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(22);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[15][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(30);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(30);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[15][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmee 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(17);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(17);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[16][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(27);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(27);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[16][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSeee 
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(15);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(15);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[17][i-1] = nperJets[i];}
-	index = fMyLeptJetStat[it]->GetConfigfrOrder(25);
-	fMyLeptJetStat[it]->NEntriesPerJetMult(index, nperJets);
+	index = fMyLeptJetStat->GetConfigfrOrder(25);
+	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[17][i-1] += nperJets[i];}
 
 // now fill the 2D plot
@@ -584,7 +722,7 @@ void TreeReader::PlotMPEffic(int it){
 	for (int i = 0; i < nlept; ++i) {
 		cout << "  " << lablx[i];
 		for (int j = 0; j < njets; ++j) {
-			fMyhemuMult[it]->Fill(lablx[i], lably[j], multable[i][j]);
+			fHemuMult->Fill(lablx[i], lably[j], multable[i][j]);
 			cout << "  " << multable[i][j];
 		}
 		cout << endl;
@@ -721,9 +859,9 @@ void TreeReader::PlotMPEffic(int it){
 	cout << "  for ratio " << lablRat[10] 
 		<< " a 3rd root is implied" << endl;
 	for (int i = 0; i < neffRat; ++i) {
-		fMyhemuEff[it]-> GetXaxis()->SetBinLabel(i+1, lablRat[i]);
-		fMyhemuEff[it]->SetBinContent(i+1, effRat[i]);
-		fMyhemuEff[it]->SetBinError(i+1, deffRat[i]);
+		fHemuEff-> GetXaxis()->SetBinLabel(i+1, lablRat[i]);
+		fHemuEff->SetBinContent(i+1, effRat[i]);
+		fHemuEff->SetBinError(i+1, deffRat[i]);
 		cout << "  " << lablRat[i] << " " << effRat[i]
 			<< " +- " << deffRat[i] << endl;
 	}
@@ -969,6 +1107,36 @@ void TreeReader::WriteDiLepTree(){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Utilities //////////////////////////////////////////////////////////////////////////////////
+void TreeReader::printPNG(TCanvas *cin, TString name, TString dir){
+/*		-	Prints a ROOT TCanvas Object to a .png file
+			name is the bare output filename, e.g. "fit_4_8",
+			dir is the output directory (inside the overall output dir.)       */
+	// Create sub directories if needed
+	if(!dir.EndsWith("/")) dir += "/";
+	char cmd[100];
+	sprintf(cmd,"mkdir -p %s", dir.Data());
+	system(cmd);
+
+	dir += name;
+	dir += ".png";
+	cin->Print(dir,"png");
+}
+
+void TreeReader::printEPS(TCanvas *cin, TString name, TString dir){
+/*		-	Prints a ROOT TCanvas Object to a .eps file
+			name is the bare output filename, e.g. "fit_4_8",
+			dir is the output directory (inside the overall output dir.)       */
+	// Create sub directories if needed
+	if(!dir.EndsWith("/")) dir += "/";
+	char cmd[100];
+	sprintf(cmd,"mkdir -p %seps/", dir.Data());
+	system(cmd);
+
+	dir += "eps/";
+	dir += name;
+	dir += ".eps";
+	cin->SaveAs(dir);
+}
 
 double TreeReader::getEta(double x, double y, double z){
 	if(fabs(z) <1.0e-5) return 0;
