@@ -151,6 +151,7 @@ void TreeReader::FillSignHists(Int_t part){
 	// electrons
 	if (part == 0) {
 		for (int ip = 0; ip < NEles; ++ ip) {
+			if(IsGood(ip, &fElCuts) == false) continue;
 			fH_ptsum[part]->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]);
 			fH_pt2sum[part]->Fill(ElEta[ip], ElPhi[ip], ElPt[ip]*ElPt[ip]);
 			fH_ptevt[part]->Fill(ElEta[ip], ElPhi[ip]);
@@ -161,6 +162,7 @@ void TreeReader::FillSignHists(Int_t part){
 	// muons
 	else if (part == 1) {
 		for (int ip = 0; ip < NMus; ++ ip) {
+			if(IsGood(ip, &fMuCuts) == false) continue;
 			fH_ptsum[part]->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]);
 			fH_pt2sum[part]->Fill(MuEta[ip], MuPhi[ip], MuPt[ip]*MuPt[ip]);
 			fH_ptevt[part]->Fill(MuEta[ip], MuPhi[ip]);
@@ -171,6 +173,7 @@ void TreeReader::FillSignHists(Int_t part){
 	// jets
 	else if (part == 2) {
 		for (int ip = 0; ip < NJets; ++ ip) {
+			if(IsGood(ip, &fJetCuts) == false) continue;
 			fH_ptsum[part]->Fill(JEta[ip], JPhi[ip], JPt[ip]);
 			fH_pt2sum[part]->Fill(JEta[ip], JPhi[ip], JPt[ip]*JPt[ip]);
 			fH_ptevt[part]->Fill(JEta[ip], JPhi[ip]);
@@ -270,8 +273,8 @@ void TreeReader::WriteSignHists(){
 		TString canvtitle = "pT Deviation for " + pnamel[i];
 		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
 		fH_ptdev[i]->SetContour(ncont2, contours2);
-		fH_ptdev[i]->SetMinimum(-5);
-		fH_ptdev[i]->SetMaximum(5);
+		fH_ptdev[i]->SetMinimum(-4);
+		fH_ptdev[i]->SetMaximum(4);
 		fH_ptdev[i]->DrawCopy("colz");
 		fTlat->DrawLatex(0.11,0.92, canvtitle);
 		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
@@ -359,6 +362,7 @@ void TreeReader::FillMPHistos(){
 	//loop over es and mus and fill the leptons array
 	int ILept=-1;
 	for(int i=0; i< NEles; ++i){
+		if(IsGood(i, &fElCuts) == false) continue;
 		ILept++;
 		LeptPt[ILept]=ElPt[i];
 		LeptEta[ILept]=ElEta[i];
@@ -369,6 +373,7 @@ void TreeReader::FillMPHistos(){
 		}
 	}
 	for(int i=0; i< NMus; ++i){
+		if(IsGood(i, &fMuCuts) == false) continue;
 		ILept++;
 		LeptPt[ILept]=MuPt[i];
 		LeptEta[ILept]=MuEta[i];
@@ -408,8 +413,14 @@ void TreeReader::FillMPHistos(){
 		LeptCat[0]=5;
 	}    
 
+// count number of good jets (beni)
+	unsigned int NQJets = 0;
+	for(int i=0; i< NJets; ++i){
+		if(IsGood(i, &fJetCuts)) NQJets++;
+	}
+
 // convert the lepton config into the index and count
-	fMyLeptJetStat->FillLeptJetStat(LeptCat, NJets, 0);
+	fMyLeptJetStat->FillLeptJetStat(LeptCat, NQJets, 0);
 }
 
 void TreeReader::PrintMPOutput(){
@@ -915,19 +926,13 @@ void TreeReader::FillDiLepTree(){
 	vector<int> qualMuInd;
 	for(size_t imu = 0; imu < NMus; ++imu){
 		// Muon selection
-		if(MuPt[imu] < 10) continue;
-		if(fabs(MuEta[imu]) > 2.1) continue;
-		if(MuIso[imu] > 1) continue;
-		if(fabs(MuD0BS[imu]) > 0.2) continue;
+		if(IsGood(imu, &fMuCuts) == false) continue;
 		qualMuInd.push_back(imu);
 	}
 	vector<int> qualElInd;
 	for(size_t iel = 0; iel < NEles; ++iel){
-		// Muon selection
-		if(ElPt[iel] < 10) continue;
-		if(fabs(ElEta[iel]) > 2.1) continue;
-		if(ElIso[iel] > 1) continue;
-		if(fabs(ElD0BS[iel]) > 0.2) continue;
+		// Electron selection
+		if(IsGood(iel, &fElCuts) == false) continue;
 		qualElInd.push_back(iel);
 	}
 
@@ -1103,6 +1108,61 @@ void TreeReader::WriteDiLepTree(){
 	fDiLepTreeFile->cd();
 	fDiLepTree->Write();
 	fDiLepTreeFile->Close();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Cut Stuff //////////////////////////////////////////////////////////////////////////////////
+void TreeReader::ReadCuts(const char* filename){
+// Fills the vectors containing object quality cuts for muons, electrons and jets
+	ifstream IN(filename);
+	float inf(0.), sup(0.);
+	char readbuff[200], branch[200];
+	cout << "Reading cutfile " << filename << endl;
+	// Loop over lines of datafile
+	while( IN.getline(readbuff, 200, '\n') ){
+		if (readbuff[0] == '#') {continue;} // Skip lines commented with '#'
+		sscanf(readbuff, "%s %f %f", branch, &inf, &sup);
+		TBranch *tempbranch = NULL;
+		if((tempbranch = fChain->FindBranch(branch)) == NULL){
+			cout << "TreeReader::ReadCuts ==> Branch \"" << branch << "\" not found, continuing... " << endl;
+			continue;
+		}
+		ObjCut cut;
+		if (branch[0] == 'M'){
+			cut.branch = tempbranch;
+			cut.upperbound = sup;
+			cut.lowerbound = inf;
+			cout << "  Cutting  " << (cut.branch)->GetName() << "\t\tbetween " << cut.lowerbound << " and " << cut.upperbound << endl;
+			fMuCuts.push_back(cut);
+		}
+		else if (branch[0] == 'E'){
+			cut.branch = tempbranch;
+			cut.upperbound = sup;
+			cut.lowerbound = inf;
+			cout << "  Cutting  " << (cut.branch)->GetName() << "\t\tbetween " << cut.lowerbound << " and " << cut.upperbound << endl;
+			fElCuts.push_back(cut);
+		}
+		else if (branch[0] == 'J'){
+			cut.branch = tempbranch;
+			cut.upperbound = sup;
+			cut.lowerbound = inf;
+			cout << "  Cutting  " << (cut.branch)->GetName() << "\t\tbetween " << cut.lowerbound << " and " << cut.upperbound << endl;
+			fJetCuts.push_back(cut);
+		}
+	}
+	cout << " ----------- " << endl;
+}
+
+bool TreeReader::IsGood(int i, vector<ObjCut> *cutVec){
+// This loops on the vector of cuts as filled in ReadCuts() and determines if an object is good
+	double *val;
+	for(vector<ObjCut>::const_iterator it = cutVec->begin(); it != cutVec->end(); it++){
+		val = (double*)it->branch->GetAddress();
+		// cout << " Object " << i << " has " << it->branch->GetName() << " " << val[i] << endl;
+		if(val[i] < it->lowerbound) return false;
+		if(val[i] > it->upperbound) return false;
+	}
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

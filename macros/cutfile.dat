@@ -1,0 +1,24 @@
+##########################################
+# These are object quality cuts          #
+# For every object to be good, the value #
+# needs to lie within the two boundaries #
+# specified here.                        #
+##########################################
+# Muons:
+MuPt          10      1e15
+MuEta         -2.5    2.5
+MuIso         1       1e15
+MuD0BS        -0.2    0.2
+MuCaloComp    0.5     1.1
+MuSegmComp    0.5     1.1
+MuNChi2       0       10
+##########################################
+# Electrons:
+ElPt          10      1e15
+ElEta         -2.5    2.5
+ElD0BS        -0.2    0.2
+##########################################
+# Jets:
+JPt           50      1e15
+JEta          -5.0    5.0
+##########################################

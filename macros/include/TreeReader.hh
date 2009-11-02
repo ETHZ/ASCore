@@ -6,6 +6,7 @@
 #include <cmath>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 #include <TH2D.h>
 #include <TVector3.h>
@@ -53,6 +54,8 @@ public:
 	void printEPS(TCanvas*, TString, TString);
 	
 	double getEta(double, double, double);
+	
+	void ReadCuts(const char* = "cutfile.dat");
 	
 private:
 	// Global parameters:
@@ -124,5 +127,16 @@ private:
 	double fTElmt2_50;
 	double fTElmt2_100;
 	
+	// Object quality cuts:
+	struct ObjCut{
+		TBranch *branch;
+		double upperbound;
+		double lowerbound;
+	};
+	bool IsGood(int, std::vector<ObjCut>*);
+	std::vector<ObjCut> fMuCuts;
+	std::vector<ObjCut> fElCuts;
+	std::vector<ObjCut> fJetCuts;
+
 };
 #endif

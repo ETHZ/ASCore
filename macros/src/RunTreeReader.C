@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
 			outputdir = TString(StringValue);
 		}
 	}
+	if(!outputdir.EndsWith("/")) outputdir += "/";
 	cout << "OutputDir is:     " << outputdir << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 
@@ -99,6 +100,7 @@ int main(int argc, char* argv[]) {
 	TreeReader *tR;
 	if(treeread){
 		tR = new TreeReader(theChain, flag%1000);
+		tR->ReadCuts("cutfile.dat");
 		tR->SetOutputDir(outputdir+tag);
 		tR->SetTag(tag);
 		tR->BeginJob();
