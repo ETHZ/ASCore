@@ -1,3 +1,9 @@
-OutputDir     /data/wwwhome/susy/ETHPromptAnalysis/SD_DoubleMu/
+##################################################################
+# Parameters for the RunTreeReader executable                    #
+# Currently implemented are CutFile and OutputDir                #
+##################################################################
+CutFile       NoCuts
+OutputDir     TestOutPut/
+# OutputDir     /data/wwwhome/susy/ETHPromptAnalysis/SD_DoubleMu/
 # OutputDir     /data/wwwhome/susy/ETHPromptAnalysis/SD_DoublePhoton10/
 # OutputDir     /data/wwwhome/susy/ETHPromptAnalysis/SD_Mu9/

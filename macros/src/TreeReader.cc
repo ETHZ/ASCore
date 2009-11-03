@@ -1,7 +1,6 @@
 #include "TreeReader.hh"
 using namespace std;
 
-
 TreeReader::TreeReader(TTree *tree, int flag) : TreeClassBase(tree){
 	fDiLep = false;
 	fMPHist = false;
@@ -254,25 +253,24 @@ void TreeReader::WriteSignHists(){
 	fTlat->SetNDC(kTRUE);
 	fTlat->SetTextSize(0.04);
 
-	TStyle *style = gROOT->GetStyle("ETHStyle");
-	const int ncol1 = 11;
-	int colors1[ncol1]= {10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
-	const int ncol2 = 8;
-	// int colors2[ncol2]= {6, 28, 5, 29, 8, 7, 4, 2};
-	int colors2[ncol2]= {4, 28, 5, 29, 8, 7, 47, 2}; // new colors from luc: 21/10/09
-	const int ncont2 = 9;
-	double contours2[ncont2] = { -4.,-3.,-2.,-1., 0., 1., 2., 3., 4.};
+	// TStyle *style = gROOT->GetStyle("ETHStyle");
+	// const int ncol1 = 11;
+	// int colors1[ncol1]= {10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
+	// const int ncol2 = 8;
+	// // int colors2[ncol2]= {6, 28, 5, 29, 8, 7, 4, 2};
+	// int colors2[ncol2]= {4, 28, 5, 29, 8, 7, 47, 2}; // new colors from luc: 21/10/09
+	// const int ncont2 = 9;
+	// double contours2[ncont2] = { -4.,-3.,-2.,-1., 0., 1., 2., 3., 4.};
 
 	// Plot the histograms
 	TString subdir = "SignificancePlots";
 	TCanvas *canv;
 	for(size_t i = 0; i < 5; ++i){
-		gStyle->SetPalette(ncol2, colors2);
-		// gROOT->ForceStyle();
+		// gStyle->SetPalette(ncol2, colors2);
 		TString canvname = "PTDev_" + pnames[i];
 		TString canvtitle = "pT Deviation for " + pnamel[i];
 		canv = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
-		fH_ptdev[i]->SetContour(ncont2, contours2);
+		// fH_ptdev[i]->SetContour(ncont2, contours2);
 		fH_ptdev[i]->SetMinimum(-4);
 		fH_ptdev[i]->SetMaximum(4);
 		fH_ptdev[i]->DrawCopy("colz");
@@ -280,8 +278,7 @@ void TreeReader::WriteSignHists(){
 		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
 		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
 
-		gStyle->SetPalette(ncol1, colors1);
-		// gROOT->ForceStyle();
+		// gStyle->SetPalette(ncol1, colors1);
 
 		canvname = "PTSum_" + pnames[i];
 		canvtitle = "pT sum for " + pnamel[i];
@@ -433,14 +430,14 @@ void TreeReader::PrintMPOutput(){
 	fTlat->SetNDC(kTRUE);
 	fTlat->SetTextSize(0.04);
 	
-	const int ncol = 11;
-	int colors[ncol] = { 10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
+	// const int ncol = 11;
+	// int colors[ncol] = { 10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
 
 	TString subdir = "MultiplicityPlots";
 	TCanvas *canv;
 	TString canvtitle = "Lepton / Jets multiplicity";
 	canv = new TCanvas("ljMult", canvtitle , 0, 0, 900, 700);
-   gStyle->SetPalette(ncol, colors);
+   // gStyle->SetPalette(ncol, colors);
    gPad->SetTheta(50);
    gPad->SetPhi(240);
 	fHljMult->SetMinimum(0);
@@ -785,14 +782,14 @@ void TreeReader::PlotMPEffic(){
 	}
 	float nOSZee = nOSee-0.5*nOSem;
 	float nOSZmm = nOSmm-0.5*nOSem;
-	if (nOSZmm > 0.) {
+	if (nOSZmm > 0. && nOSZee > 0.) {
 		effRat[1] = sqrt( nOSZee / nOSZmm );
 		if (nOSZee > 0.) {
 			deffRat[1] = sqrt((nOSee+0.25*nOSem)/(nOSZee*nOSZee)
 				+ (nOSmm+0.25*nOSem)/(nOSZmm*nOSZmm) ) * effRat[1];
 		}
 	}
-	if (nSSmm != 0.) {
+	if (nSSmm != 0. && nSSee*nSSmm > 0.) {
 		effRat[2] = sqrt( nSSee / nSSmm );
 		if (nSSee != 0.) {
 			deffRat[2] = 0.5 * sqrt(1./nSSee + 1./nSSmm) * effRat[2];
@@ -822,13 +819,13 @@ void TreeReader::PlotMPEffic(){
 			deffRat[6] = sqrt(1./nOSee1e + 1./nOSee1m) * effRat[6];
 		}
 	}
-	if (nOSmm1m != 0.) {
+	if (nOSmm1m != 0. && nOSee1m*nOSmm1m > 0.) {
 		effRat[7] = sqrt( nOSee1m / nOSmm1m );
 		if (nOSee1m != 0.) {
 			deffRat[7] = 0.5 * sqrt(1./nOSee1m + 1./nOSmm1m) * effRat[7];
 		}
 	}
-	if (nOSmm1e != 0.) {
+	if (nOSmm1e != 0. && nOSee1e*nOSmm1e > 0.) {
 		effRat[8] = sqrt( nOSee1e / nOSmm1e );
 		if (nOSee1e != 0.) {
 			deffRat[8] = 0.5 * sqrt(1./nOSee1e + 1./nOSmm1e) * effRat[8];
@@ -840,19 +837,19 @@ void TreeReader::PlotMPEffic(){
 			deffRat[9] = sqrt(1./nSSee1m + 1./nSSmm1e) * effRat[9];
 		}
 	}
-	if (nSS3m != 0.) {
+	if (nSS3m != 0. && nSSeem*nSS3m > 0.) {
 		effRat[10] = sqrt( nSSeem / nSS3m );
 		if (nSSeem != 0.) {
 			deffRat[10] = 0.5 * sqrt(1./nSSeem + 1./nSS3m) * effRat[10];
 		}
 	}
-	if (nSSmme != 0.) {
+	if (nSSmme != 0. && nSS3e*nSSmme > 0.) {
 		effRat[11] = sqrt( nSS3e / nSSmme );
 		if (nSS3e != 0.) {
 			deffRat[11] = 0.5 * sqrt(1./nSS3e + 1./nSSmme) * effRat[11];
 		}
 	}
-	if (nSS3m != 0.) {
+	if (nSS3m != 0. && nSS3e*nSS3m > 0.) {
 		effRat[12] = pow((nSS3e / nSS3m), (float)(1./3.) );
 		if (nSS3e != 0.) {
 			deffRat[12] = sqrt(1./nSS3e + 1./nSS3m) / 3. * effRat[12];

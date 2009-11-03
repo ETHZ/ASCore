@@ -15,9 +15,9 @@
 
 using namespace std;
 
-/*******************************************************
+/**********************************************************************
 >	Usage:
-	single file: ./RunTreeReader 0 flag tag filepath
+	single file: ./RunTreeReader 0 flag tag file1path file2path
 	filelist:    ./RunTreeReader 1 flag tag filelistpath
 >  Tags: Output is created in a subdir with this name,
          plots have that name in their filename
@@ -29,7 +29,7 @@ using namespace std;
      5. produce the siginificance plots
    E.g. 10110 will produce all branches, the dilep tree
         and the sign plots
-*******************************************************/
+**********************************************************************/
 
 int main(int argc, char* argv[]) {
 	if(argc<5){ // Invalid use:
@@ -62,7 +62,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	TString outputdir = "/data/wwwhome/susy/ETHPromptAnalysis/";
-
+	TString cutfilename = "cutfile.dat";
+	
 	// Read parameters
 	ifstream IN("treepars.dat");
 	char buffer[200];
@@ -73,9 +74,15 @@ int main(int argc, char* argv[]) {
 		if( !strcmp(ParName, "OutputDir") ){
 			outputdir = TString(StringValue);
 		}
+		if( !strcmp(ParName, "CutFile") ){
+			cutfilename = TString(StringValue);
+		}
 	}
 	if(!outputdir.EndsWith("/")) outputdir += "/";
+
+	// Print parameters
 	cout << "OutputDir is:     " << outputdir << endl;
+	cout << "CutFile is:       " << cutfilename << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 
 
@@ -96,7 +103,7 @@ int main(int argc, char* argv[]) {
 		if(plotlist)    ana->plotPlotList("plotlist.dat", theChain, tag);
 		delete ana;
 	}	
-	
+
 	TreeReader *tR;
 	if(treeread){
 		tR = new TreeReader(theChain, flag%1000);
