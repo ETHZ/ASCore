@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.17 2009/10/07 15:21:52 sordini Exp $
+// $Id: NTupleProducer.cc,v 1.18 2009/10/27 13:59:54 stiegerb Exp $
 //
 //
 
@@ -231,8 +231,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 ////////////////////////////////////////////////////////////////////////////////
 // Dump tree variables /////////////////////////////////////////////////////////
-	bool acceptEvent = true;
-
 	fTrunnumber = iEvent.id().run();
 	fTeventnumber = iEvent.id().event();
 	fTlumisection = iEvent.luminosityBlock();
@@ -240,13 +238,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTweight = 1.0; // To be filled at some point?
 
 	// Save position of primary vertex
-	fTprimvtxx   = primVtx->x();
-	fTprimvtxy   = primVtx->y();
-	fTprimvtxz   = primVtx->z();
-	fTprimvtxxE  = primVtx->xError();
-	fTprimvtxyE  = primVtx->yError();
-	fTprimvtxzE  = primVtx->zError();
-	fTpvtxznchi2 = primVtx->normalizedChi2();
+	fTprimvtxx    = primVtx->x();
+	fTprimvtxy    = primVtx->y();
+	fTprimvtxz    = primVtx->z();
+	fTprimvtxxE   = primVtx->xError();
+	fTprimvtxyE   = primVtx->yError();
+	fTprimvtxzE   = primVtx->zError();
+	fTpvtxznchi2  = primVtx->normalizedChi2();
+	fTpvtxntracks = primVtx->tracksSize();
 
 	// Save position of beamspot
 	fTbeamspotx = (beamSpot.position()).x();
@@ -258,7 +257,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	for(MuonCollection::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
 		// Check if maximum number of electrons is exceeded already:
 		if(mqi > 19){
-			cout << "NTupleSkeleton::analyze() ==> Warning: Maximum number of muons exceeded..." << endl;
+			cout << "NTupleProducer::analyze() ==> Warning: Maximum number of muons exceeded..." << endl;
+			fTflagmaxmuexc = 1;
+			fTgoodevent = 0;
 			break;
 		}
 		mi++;
@@ -306,10 +307,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmunmatches[mqi]  = Mit->numberOfMatches();
 		fTmunchambers[mqi] = Mit->numberOfChambers();
 
-		fTmucalocomp[mqi] = Mit->caloCompatibility();
-		fTmusegmcomp[mqi] = muon::segmentCompatibility(*cm);
+		fTmucalocomp[mqi]  = Mit->caloCompatibility();
+		fTmusegmcomp[mqi]  = muon::segmentCompatibility(*cm);
 		fTmutrackermu[mqi] = Mit->isTrackerMuon() ? 1:0;
-		fTmuisGMPT[mqi] = muon::isGoodMuon(*cm, muon::GlobalMuonPromptTight) ? 1:0;
+		fTmuisGMPT[mqi]    = muon::isGoodMuon(*cm, muon::GlobalMuonPromptTight) ? 1:0;
 
 		// Matching
 		vector<int> MuMatch = matchMuCand(&(*Mit), iEvent);
@@ -317,6 +318,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmuid[mqi]  = MuMatch[1];
 			fTmumid[mqi] = MuMatch[2];
 		}
+		
+		fTgoodmu[mqi] = 1;
 	}
 	fTnmu = mqi+1;
 
@@ -343,6 +346,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			// Check if maximum number of electrons is exceeded already:
 			if(eqi > 19){
 				cout << "NTupleProducer::analyze() ==> Warning: Maximum number of electrons exceeded..." << endl;
+				fTflagmaxelexc = 1;
+				fTgoodevent = 0;
 				break;
 			}
 			Ref<GsfElectronCollection> electronRef(electrons,i);
@@ -373,7 +378,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			bool isGap = El->isGap(); 
 			bool EcalDriven = El-> isEcalDriven();	
 			bool TrackerDriven = El->isTrackerDriven();
-			
+
 			// Dump electron properties in tree variables
 			eqi++;
 
@@ -410,13 +415,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
 			fTeDeltaEtaSuperClusterAtVtx[eqi] = El->deltaEtaSuperClusterTrackAtVtx(); 
 			fTecaloenergy[eqi] = El->caloEnergy();
-			fTeseedenergy[eqi] = El->superCluster()->seed()->energy();
 			fTtrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
 			fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
 			fTeID[eqi][0] = eIDmapT[electronRef]  ? 1:0;
 			fTeID[eqi][1] = eIDmapL[electronRef]  ? 1:0;
 			fTeID[eqi][2] = eIDmapRT[electronRef] ? 1:0;
 			fTeID[eqi][3] = eIDmapRL[electronRef] ? 1:0;
+
+			fTgoodel[eqi] = 1;
 		}
 	}
 	fTneles = eqi+1;
@@ -426,14 +432,21 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Apply L2 and L3 JetCorrections
 	vector<const reco::CaloJet*> CorrJets; // Contains all (corrected) jets
 	CaloJetCollection::const_iterator Jit;
+	if(jets->size() > 50){
+		cout << "NTupleProducer::analyze() ==> Warning: Found more than 50 uncorrected jets, I'm scared ..." << endl;
+		fTflagmaxujetexc = 1;
+		fTgoodevent = 0;
+		fEventTree->Fill();
+		return;
+	}
 	for(Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
 		CaloJet *j = Jit->clone();
 	//I save here px, py, pz for uncorrected jets
 	//used later for matching jets with jets in the jet-tracks associator collections
 		itag++;
-		fTUNC_px_match[itag]=j->px();
-		fTUNC_py_match[itag]=j->py();
-		fTUNC_pz_match[itag]=j->pz();
+		fJUNC_px_match[itag]=j->px();
+		fJUNC_py_match[itag]=j->py();
+		fJUNC_pz_match[itag]=j->pz();
 	//energy corrections
 		j->scaleEnergy(L2JetCorrector->correction(j->p4()));
 		j->scaleEnergy(L3JetCorrector->correction(j->p4()));
@@ -447,7 +460,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	for(size_t i = 0; i < CorrJets.size(); ++i){// Loop over corr. jets
 		// Check if maximum number of jets is exceeded already:
 		if(jqi > 19){
-			cout << "NTupleSkeleton::analyze() ==> Warning: Maximum number of jets exceeded..." << endl;
+			cout << "NTupleProducer::analyze() ==> Warning: Maximum number of jets exceeded..." << endl;
+			fTflagmaxjetexc = 1;
+			fTgoodevent = 0;
 			break;
 		}
 		itagcorr++;
@@ -466,12 +481,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		}
 		fTjeMinDR[jqi]=ejDRmin;
 		//jetID variables
-		jetID.calculate(iEvent,*jet);
+		jetID.calculate(iEvent, *jet);
 		//fill the b-tagging probability
 		for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
-			if (fabs( (fTUNC_px_match[itagcorr] - (*jetsAndProbs)[i].first->px())/fTUNC_px_match[itagcorr]) < 0.00001 && 
-				fabs( (fTUNC_py_match[itagcorr] - (*jetsAndProbs)[i].first->py())/fTUNC_py_match[itagcorr]) < 0.00001 &&
-			fabs( (fTUNC_pz_match[itagcorr] - (*jetsAndProbs)[i].first->pz())/fTUNC_pz_match[itagcorr]) < 0.00001)  {
+			if (fabs( (fJUNC_px_match[itagcorr] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[itagcorr]) < 0.00001 && 
+				fabs( (fJUNC_py_match[itagcorr] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[itagcorr]) < 0.00001 &&
+			fabs( (fJUNC_pz_match[itagcorr] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[itagcorr]) < 0.00001)  {
 				fTbTagProb[jqi]=(*jetsAndProbs)[i].second;
 				break;
 			}
@@ -481,36 +496,36 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTnAssoTracks[jqi]=0;
 		if(fabs(jet->eta())<2.9){ //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 		//tmp variables for vectorial sum of pt of tracks
-		double pXtmp=0.;
-		double pYtmp=0.;
-		for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-		  AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
-		  if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-		    pXtmp+=AssociatedTracks[t]->px();
-		    pYtmp+=AssociatedTracks[t]->py();
-		    fTnAssoTracks[jqi]+=1;
-		  }
-		}
-		fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
+			double pXtmp=0.;
+			double pYtmp=0.;
+			for(size_t t = 0; t < AssociatedTracks.size(); ++t){
+				AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
+				if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
+					pXtmp+=AssociatedTracks[t]->px();
+					pYtmp+=AssociatedTracks[t]->py();
+					fTnAssoTracks[jqi]+=1;
+				}
+			}
+			fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
 		} else {//the whole cone used for jet-tracks association is outside of the tracker acceptance
-		  fTChfrac[jqi]=-1.;
+			fTChfrac[jqi]=-1.;
 		}
 		// Convert tracks to transient tracks for vertex fitting
 		if(AssociatedTTracks.size() > 1){
-		  AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
-		  TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
-		  if(jetVtx.isValid()){
-		    fTjetVtxx[jqi]  = jetVtx.position().x();
-		    fTjetVtxy[jqi]  = jetVtx.position().y();
-		    fTjetVtxz[jqi]  = jetVtx.position().z();
-		    fTjetVtxExx[jqi] = jetVtx.positionError().cxx();
-		    fTjetVtxEyx[jqi] = jetVtx.positionError().cyx();
-		    fTjetVtxEyy[jqi] = jetVtx.positionError().cyy();
-		    fTjetVtxEzy[jqi] = jetVtx.positionError().czy();
-		    fTjetVtxEzz[jqi] = jetVtx.positionError().czz();
-		    fTjetVtxEzx[jqi] = jetVtx.positionError().czx();
-		    fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
-		  }else{
+			AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
+			TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
+			if(jetVtx.isValid()){
+				fTjetVtxx[jqi]  = jetVtx.position().x();
+				fTjetVtxy[jqi]  = jetVtx.position().y();
+				fTjetVtxz[jqi]  = jetVtx.position().z();
+				fTjetVtxExx[jqi] = jetVtx.positionError().cxx();
+				fTjetVtxEyx[jqi] = jetVtx.positionError().cyx();
+				fTjetVtxEyy[jqi] = jetVtx.positionError().cyy();
+				fTjetVtxEzy[jqi] = jetVtx.positionError().czy();
+				fTjetVtxEzz[jqi] = jetVtx.positionError().czz();
+				fTjetVtxEzx[jqi] = jetVtx.positionError().czx();
+				fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
+			}else{
 				fTjetVtxx[jqi]     = -777.77;
 				fTjetVtxy[jqi]     = -777.77;
 				fTjetVtxz[jqi]     = -777.77;
@@ -534,8 +549,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTjetVtxEzx[jqi]   = -888.88;
 			fTjetVtxNChi2[jqi] = -888.88;
 		}
-		
-		
+
 		// Dump jet properties into tree variables
 		fTjpx[jqi]  = jet->px();
 		fTjpy[jqi]  = jet->py();
@@ -556,7 +570,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjID_resEMF[jqi]  = jetID.restrictedEMF();
 		fTjID_HCALTow[jqi]  = jetID.nHCALTowers();
 		fTjID_ECALTow[jqi]  = jetID.nECALTowers();
-		fTjEcorr[jqi]  =  jet->px()/fTUNC_px_match[itagcorr];
+		fTjEcorr[jqi]  =  jet->px()/fJUNC_px_match[itagcorr];
+		
+		fTgoodjet[jqi] = 1;
 	}
 	fTnjets = jqi+1;
 
@@ -621,10 +637,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 ////////////////////////////////////////////////////////////////////////////////
 // Fill Tree ///////////////////////////////////////////////////////////////////
-	if(acceptEvent){
-		fEventTree->Fill();
-		fNFillTree++;
-	}
+	fEventTree->Fill();
+	fNFillTree++;
 }
 
 // Method called once each job just before starting event loop
@@ -655,7 +669,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fRunTree->Branch("IsoMuCalDRin"   ,&fRTIsoMuCalDRin,   "IsoMuCalDRin/D");
 	fRunTree->Branch("IsoMuCalDRout"  ,&fRTIsoMuCalDRout,  "IsoMuCalDRout/D");
 	fRunTree->Branch("IsoMuCalSeed"   ,&fRTIsoMuCalSeed,   "IsoMuCalSeed/D");
-	
+
 	// Tree with event information
 	fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 	// Event information:
@@ -672,14 +686,21 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("PrimVtxz"       ,&fTprimvtxz       ,"PrimVtxz/D");	
 	fEventTree->Branch("PrimVtxxE"      ,&fTprimvtxxE      ,"PrimVtxxE/D");
 	fEventTree->Branch("PrimVtxyE"      ,&fTprimvtxyE      ,"PrimVtxyE/D");
-	fEventTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");	
-	fEventTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");	
+	fEventTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");
+	fEventTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");
+	fEventTree->Branch("PrimVtxNTracks" ,&fTpvtxntracks    ,"PrimVtxNTracks/I");
 	fEventTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
 	fEventTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
 	fEventTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
+	fEventTree->Branch("GoodEvent"      ,&fTgoodevent      ,"GoodEvent/I");
+	fEventTree->Branch("MaxMuExceed"    ,&fTflagmaxmuexc   ,"MaxMuExceed/I");
+	fEventTree->Branch("MaxElExceed"    ,&fTflagmaxelexc   ,"MaxElExceed/I");
+	fEventTree->Branch("MaxJetExceed"   ,&fTflagmaxjetexc  ,"MaxJetExceed/I");
+	fEventTree->Branch("MaxUncJetExceed",&fTflagmaxujetexc ,"MaxUncJetExceed/I");
 
 	// Muons:
 	fEventTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
+	fEventTree->Branch("MuGood"         ,&fTgoodmu         ,"MuGood[NMus]/I");
 	fEventTree->Branch("MuPx"           ,&fTmupx           ,"MuPx[NMus]/D");
 	fEventTree->Branch("MuPy"           ,&fTmupy           ,"MuPy[NMus]/D");
 	fEventTree->Branch("MuPz"           ,&fTmupz           ,"MuPz[NMus]/D");
@@ -715,6 +736,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 	// Electrons:
 	fEventTree->Branch("NEles"               ,&fTneles              ,"NEles/I");
+	fEventTree->Branch("ElGood"              ,&fTgoodel             ,"ElGood[NEles]/I");
 	fEventTree->Branch("ElPx"                ,&fTepx                ,"ElPx[NEles]/D");
 	fEventTree->Branch("ElPy"                ,&fTepy                ,"ElPy[NEles]/D");
 	fEventTree->Branch("ElPz"                ,&fTepz                ,"ElPz[NEles]/D");
@@ -749,12 +771,12 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElDeltaEtaSuperClusterAtVtx" ,&fTeDeltaEtaSuperClusterAtVtx ,"ElDeltaEtaSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElCaloEnergy"    ,&fTecaloenergy        ,"ElCaloEnergy[NEles]/D");
-	fEventTree->Branch("ElSeedEnergy"    ,&fTeseedenergy        ,"ElSeedEnergy[NEles]/D");
 	fEventTree->Branch("ElTrkMomAtVtx"   ,&fTtrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets        ,"NJets/I");
+	fEventTree->Branch("JGood"          ,&fTgoodjet      ,"JGood[NJets]/I");
 	fEventTree->Branch("JPx"            ,&fTjpx          ,"JPx[NJets]/D");
 	fEventTree->Branch("JPy"            ,&fTjpy          ,"JPy[NJets]/D");
 	fEventTree->Branch("JPz"            ,&fTjpz          ,"JPz[NJets]/D");
@@ -885,7 +907,7 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTIsoMuCalDRin  = fIso_MuCalDRin;
 	fRTIsoMuCalDRout = fIso_MuCalDRout;
 	fRTIsoMuCalSeed  = fIso_MuCalSeed;
-	
+
 	fRunTree->Fill();
 }
 
@@ -913,12 +935,21 @@ void NTupleProducer::resetTree(){
 	fTprimvtxyE   = -999.99;
 	fTprimvtxzE   = -999.99;
 	fTpvtxznchi2  = -999.99;
+	fTpvtxntracks = -999;
 	fTbeamspotx   = -999.99;
 	fTbeamspoty   = -999.99;
 	fTbeamspotz   = -999.99;
+	
+	fTgoodevent        = 1;
+	fTflagmaxmuexc     = 0;
+	fTflagmaxelexc     = 0;
+	fTflagmaxujetexc = 0;
+	fTflagmaxjetexc    = 0;
+	
 	fTnmu   = 0;
 	fTneles = 0;
 	fTnjets = 0;
+	resetInt(fTgoodmu);
 	resetDouble(fTmupx);
 	resetDouble(fTmupy);
 	resetDouble(fTmupz);
@@ -952,6 +983,7 @@ void NTupleProducer::resetTree(){
 	resetInt(fTmuid);
 	resetInt(fTmumid);
 
+	resetInt(fTgoodel);
 	resetDouble(fTepx);
 	resetDouble(fTepy);
 	resetDouble(fTepz);
@@ -985,10 +1017,10 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTeDeltaPhiSuperClusterAtVtx);
 	resetDouble(fTeDeltaEtaSuperClusterAtVtx);
 	resetDouble(fTecaloenergy);
-	resetDouble(fTeseedenergy);
 	resetDouble(fTtrkmomatvtx);
 	resetDouble(fTeESuperClusterOverP);
 
+	resetInt(fTgoodjet);
 	resetDouble(fTjpx);
 	resetDouble(fTjpy);
 	resetDouble(fTjpz);
@@ -1022,9 +1054,10 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTjetVtxEzz);
 	resetDouble(fTjetVtxEzx);
 	resetDouble(fTjetVtxNChi2);
-	resetDouble(fTUNC_px_match,50);
-	resetDouble(fTUNC_py_match,50);
-	resetDouble(fTUNC_pz_match,50);
+
+	resetDouble(fJUNC_px_match, 50);
+	resetDouble(fJUNC_py_match, 50);
+	resetDouble(fJUNC_pz_match, 50);
 
 	for(size_t i = 0; i < 20; ++i){
 		for(size_t j = 0; j < 4; ++j){

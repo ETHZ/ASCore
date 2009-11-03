@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.14 2009/10/07 15:21:51 sordini Exp $
+// $Id: NTupleProducer.h,v 1.15 2009/10/27 13:59:54 stiegerb Exp $
 //
 //
 
@@ -160,6 +160,10 @@ private:
 	double fIso_MuCalDRout;
 	double fIso_MuCalSeed;
 
+	double fJUNC_px_match[50];
+	double fJUNC_py_match[50];
+	double fJUNC_pz_match[50];
+
 	TH1I *fHtrigstat; // Added to keep track of trigger names
 	bool fFirstevent;
 
@@ -188,7 +192,6 @@ private:
 	double fRTIsoMuCalDRout;
 	double fRTIsoMuCalSeed;
 
-
 	TTree *fEventTree;
 
 // General event information
@@ -207,6 +210,7 @@ private:
 	double fTprimvtxyE;
 	double fTprimvtxzE;
 	double fTpvtxznchi2;
+	int fTpvtxntracks;
 
 	double fTbeamspotx;
 	double fTbeamspoty;
@@ -214,8 +218,17 @@ private:
 
 // Trigger
 	int fTtrigres[200];
+
+// Flags
+	int fTgoodevent;      // 1 for good events, 0 for bad events
+	int fTflagmaxmuexc;   // Found more than 20 muons in event (0 is good, 1 is bad)
+	int fTflagmaxelexc;   // Found more than 20 electrons in event
+	int fTflagmaxujetexc; // Found more than 20 jets in event
+	int fTflagmaxjetexc;  // Found more than 50 uncorrected jets in event
+
 // Muons:
 	unsigned int fTnmu;
+	int fTgoodmu[20];
 	double fTmupx[20];
 	double fTmupy[20];
 	double fTmupz[20];
@@ -259,6 +272,7 @@ private:
 
 // Electrons:
 	int fTneles;
+	int fTgoodel[20];
 	double fTepx[20];
 	double fTepy[20];
 	double fTepz[20];
@@ -292,14 +306,14 @@ private:
 	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
 	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
 	double fTeDeltaEtaSuperClusterAtVtx[20]; // Deta (sc-track) at calo extrapolated from p_in
-	double fTecaloenergy[20];                // caloEnergy()
-	double fTeseedenergy[20];                // caloEnergy()
+	double fTecaloenergy[20];                // caloEnergy() = supercluster energy 99.9% of the time
 	double fTtrkmomatvtx[20];                // trackMomentumAtVtx().R()
 	double fTeESuperClusterOverP[20];        // Esc/Pin
 
 
 // Jets:
 	int fTnjets;
+	int fTgoodjet[20];
 	double fTjpx[20];
 	double fTjpy[20];
 	double fTjpz[20];
@@ -320,9 +334,6 @@ private:
 	double fTjID_HCALTow[20];
 	double fTjID_ECALTow[20];
 	double fTbTagProb[20];
-	double fTUNC_px_match[50];
-	double fTUNC_py_match[50];
-	double fTUNC_pz_match[50];
 	double fTChfrac[20];
 	int fTnAssoTracks[20];
 	double fTjEcorr[20];

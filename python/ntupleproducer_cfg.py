@@ -17,8 +17,7 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 ### b-tagging
 process.load("RecoBTag.Configuration.RecoBTag_cff")
 
-process.MessageLogger = cms.Service("MessageLogger",
-)
+process.MessageLogger.cerr.FwkReport.reportEvery=100
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
