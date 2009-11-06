@@ -7,15 +7,15 @@ process = cms.Process("NTupleProducer")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
-process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
 # process.GlobalTag.globaltag="IDEAL_V5::All"
 process.GlobalTag.globaltag="MC_31X_V3::All"
-process.load("TrackingTools.TrackAssociator.default_cfi")
-process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 ### b-tagging
 process.load("RecoBTag.Configuration.RecoBTag_cff")
+process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
+process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
+process.load("TrackingTools.TrackAssociator.default_cfi")
+process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 
 process.MessageLogger.cerr.FwkReport.reportEvery=100
 
@@ -71,85 +71,17 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
 
 ############# Egamma Isolation #################################################
 # Produce eleIsoDeposits first!
-from RecoEgamma.EgammaIsolationAlgos.eleTrackExtractorBlocks_cff import *
-process.eleIsoDepositTk = cms.EDProducer("CandIsoDepositProducer",
-    src = cms.InputTag("gsfElectrons"),
-    trackType = cms.string('candidate'),
-    MultipleDepositsFlag = cms.bool(False),
-    ExtractorPSet = cms.PSet(EleIsoTrackExtractorBlock)
-)
-from RecoEgamma.EgammaIsolationAlgos.eleEcalExtractorBlocks_cff import *
-process.eleIsoDepositEcalFromHits = cms.EDProducer("CandIsoDepositProducer",
-    src = cms.InputTag("gsfElectrons"),
-    trackType = cms.string('candidate'),
-    MultipleDepositsFlag = cms.bool(False),
-    ExtractorPSet = cms.PSet(EleIsoEcalFromHitsExtractorBlock)
-)
-from RecoEgamma.EgammaIsolationAlgos.eleHcalExtractorBlocks_cff import *
-process.eleIsoDepositHcalFromTowers = cms.EDProducer("CandIsoDepositProducer",
-    src = cms.InputTag("gsfElectrons"),
-    trackType = cms.string('candidate'),
-    MultipleDepositsFlag = cms.bool(False),
-    ExtractorPSet = cms.PSet(EleIsoHcalFromTowersExtractorBlock)
-)
-# from RecoEgamma.EgammaIsolationAlgos.eleIsoDeposits_cff import *
-# from RecoEgamma.EgammaIsolationAlgos.eleIsoFromDepsModules_cff  import *
-process.eleIsoDeposits = cms.Sequence(
-    process.eleIsoDepositTk +
-    process.eleIsoDepositEcalFromHits +
-    process.eleIsoDepositHcalFromTowers
-)
-#################################
-process.eleIsoFromDepsTk = cms.EDProducer("CandIsolatorFromDeposits",
-	deposits = cms.VPSet(
-		cms.PSet(
-			mode = cms.string('sum'),
-			src = cms.InputTag("eleIsoDepositTk"),
-			weight = cms.string('1'),
-			deltaR = cms.double(0.3),
-			vetos = cms.vstring('0.04','Threshold(0.7)'),
-			skipDefaultVeto = cms.bool(True)
-		)
-	)
-)
+process.load("RecoEgamma.EgammaIsolationAlgos.eleIsoDeposits_cff")
+# Make isolation from deposits
+process.load("RecoEgamma.EgammaIsolationAlgos.eleIsoFromDeposits_cff")
+# Only keep the three main eleIsoDeposits
+process.eleIsoDeposits.remove(process.eleIsoDepositHcalDepth1FromTowers)
+process.eleIsoDeposits.remove(process.eleIsoDepositHcalDepth2FromTowers)
+process.eleIsoFromDeposits.remove(process.eleIsoFromDepsHcalDepth1FromTowers)
+process.eleIsoFromDeposits.remove(process.eleIsoFromDepsHcalDepth2FromTowers)
 
-process.eleIsoFromDepsEcalFromHits= cms.EDProducer("CandIsolatorFromDeposits",
-	deposits = cms.VPSet(
-		cms.PSet(
-			mode = cms.string('sum'),
-			src = cms.InputTag("eleIsoDepositEcalFromHits"),
-			weight = cms.string('1'),
-			deltaR = cms.double(0.3),
-			vetos = cms.vstring('EcalBarrel:0.045',
-			            'EcalBarrel:RectangularEtaPhiVeto(-0.02,0.02,-0.5,0.5)',
-			            'EcalBarrel:ThresholdFromTransverse(0.08)',
-                     'EcalEndcaps:ThresholdFromTransverse(0.3)',
-			            'EcalEndcaps:0.070',
-			            'EcalEndcaps:RectangularEtaPhiVeto(-0.02,0.02,-0.5,0.5)'), 
-			skipDefaultVeto = cms.bool(True)
-		)
-	)
-)
-
-process.eleIsoFromDepsHcalFromTowers = cms.EDProducer("CandIsolatorFromDeposits",
-	deposits = cms.VPSet(
-		cms.PSet(
-	   	src             = cms.InputTag("eleIsoDepositHcalFromTowers"),
-	   	deltaR          = cms.double(0.4),
-	   	weight          = cms.string('1'),
-	   	vetos           = cms.vstring('0.15'),
-	   	skipDefaultVeto = cms.bool(True),
-	   	mode            = cms.string('sum')
-		)
-	)
-)
-
-process.eleIsoFromDeposits = cms.Sequence(
-	process.eleIsoFromDepsTk * 
-	process.eleIsoFromDepsEcalFromHits * 
-	process.eleIsoFromDepsHcalFromTowers
-)
- 
+# Exmaple configuration
+process.eleIsoFromDepsEcalFromHits.deposits[0].deltaR = 0.3 
 
 ############# User Analysis ####################################################
 process.analyze = cms.EDAnalyzer('NTupleProducer',
@@ -205,7 +137,11 @@ process.analyze = cms.EDAnalyzer('NTupleProducer',
 )
 
 ############# Path #############################################################
-process.p = cms.Path(process.L2L3CorJetSC5Calo + process.metCorSequence)
-mybtag = cms.Sequence(process.impactParameterTagInfos*process.simpleSecondaryVertexBJetTags)
-process.l = cms.Path(mybtag)
-process.o = cms.EndPath(process.eleIsoDeposits + process.eleIsoFromDeposits + process.analyze)
+process.mybtag = cms.Sequence(process.impactParameterTagInfos*process.simpleSecondaryVertexBJetTags)
+process.p = cms.Path(  process.L2L3CorJetSC5Calo 
+							+ process.metCorSequence
+							+ process.mybtag
+							+ process.eleIsoDeposits 
+							+ process.eleIsoFromDeposits
+							+ process.analyze
+)
