@@ -1,0 +1,63 @@
+import FWCore.ParameterSet.Config as cms
+
+analyze = cms.EDAnalyzer('NTupleProducer',
+        # Main settings
+        isPat = cms.untracked.bool(False),
+	# Collections
+	tag_muons   = cms.untracked.InputTag('muons'),
+	tag_muisodeptk = cms.untracked.InputTag('muIsoDepositTk'),
+	tag_muisodepec = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
+	tag_muisodephc = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
+
+	tag_electrons = cms.untracked.InputTag('gsfElectrons'),	
+	tag_elisotk    = cms.untracked.InputTag('eleIsoFromDepsTk::NTupleProducer'),
+	tag_elisoec    = cms.untracked.InputTag('eleIsoFromDepsEcalFromHits::NTupleProducer'),
+	tag_elisohc    = cms.untracked.InputTag('eleIsoFromDepsHcalFromTowers::NTupleProducer'),
+	tag_elisodeptk = cms.untracked.InputTag('eleIsoDepositTk::NTupleProducer'),
+	tag_elisodepec = cms.untracked.InputTag('eleIsoDepositEcalFromHits::NTupleProducer'),
+	tag_elisodephc = cms.untracked.InputTag('eleIsoDepositHcalFromTowers::NTupleProducer'),
+	
+	tag_sc      = cms.untracked.InputTag('correctedHybridSuperClusters'),
+	tag_jets    = cms.untracked.InputTag('sisCone5CaloJets'),
+        tag_btag    = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
+	tag_met1    = cms.untracked.InputTag('met'),
+	tag_met2    = cms.untracked.InputTag('corMetGlobalMuons'),
+	tag_met3    = cms.untracked.InputTag('tcMet'),
+	tag_met4    = cms.untracked.InputTag('pfMet'),
+	tag_met5    = cms.untracked.InputTag('metMuonJESCorSC5'),
+	tag_vertex  = cms.untracked.InputTag('offlinePrimaryVertices'),
+	tag_tracks  = cms.untracked.InputTag('generalTracks'),
+	tag_caltow  = cms.untracked.InputTag('towerMaker'),
+	tag_genpart = cms.untracked.InputTag('genParticles'),
+	tag_triggers   = cms.InputTag("TriggerResults","","HLT"),
+
+	# Jet ID configuration
+        jetID = cms.PSet(
+           hbheRecHitsColl = cms.InputTag("hbhereco"),
+           hoRecHitsColl   = cms.InputTag("horeco"),
+           hfRecHitsColl   = cms.InputTag("hfreco"),
+           ebRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEB"),
+           eeRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEE")
+        ),
+                                 
+	# Event Selection Criteria
+	# Muons:
+	sel_minmupt    = cms.double(5.0),
+	sel_maxmueta   = cms.double(2.4),
+	# Electrons:
+	sel_minelpt    = cms.double(5.0),
+	sel_maxeleta   = cms.double(2.5),
+	sel_maxeliso   = cms.double(100.0),
+	sel_maxeld0    = cms.double(100.0),
+	# Jets:
+	sel_minjpt     = cms.double(20.0),
+	sel_maxjeta    = cms.double(5.0),
+	sel_minjemfrac = cms.double(0.0),
+	# Isolation Parameters
+	iso_MuTkDRin   = cms.double(0.015),
+	iso_MuTkDRout  = cms.double(0.3),
+	iso_MuTkSeed   = cms.double(0.1),
+	iso_MuCalDRin  = cms.double(0.0),
+	iso_MuCalDRout = cms.double(0.3),
+	iso_MuCalSeed  = cms.double(0.1)
+)
