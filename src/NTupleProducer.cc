@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.18 2009/10/27 13:59:54 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.19 2009/11/03 17:44:55 stiegerb Exp $
 //
 //
 
@@ -147,7 +147,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel(fJetTag,jets); // 'sisCone5CaloJets'
 	const JetCorrector* L2JetCorrector = JetCorrector::getJetCorrector ("L2RelativeJetCorrectorSC5Calo",iSetup);
 	const JetCorrector* L3JetCorrector = JetCorrector::getJetCorrector ("L3AbsoluteJetCorrectorSC5Calo",iSetup);
-	//
 	reco::helper::JetID jetID;
 
 	// collect information for b-tagging
@@ -417,10 +416,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTecaloenergy[eqi] = El->caloEnergy();
 			fTtrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
 			fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
-			fTeID[eqi][0] = eIDmapT[electronRef]  ? 1:0;
-			fTeID[eqi][1] = eIDmapL[electronRef]  ? 1:0;
-			fTeID[eqi][2] = eIDmapRT[electronRef] ? 1:0;
-			fTeID[eqi][3] = eIDmapRL[electronRef] ? 1:0;
+			fTeIDTight[eqi]       = eIDmapT[electronRef]  ? 1:0;
+			fTeIDLoose[eqi]       = eIDmapL[electronRef]  ? 1:0;
+			fTeIDRobustTight[eqi] = eIDmapRT[electronRef] ? 1:0;
+			fTeIDRobustLoose[eqi] = eIDmapRL[electronRef] ? 1:0;
 
 			fTgoodel[eqi] = 1;
 		}
@@ -735,28 +734,31 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("MuMID"          ,&fTmumid          ,"MuMID[NMus]/I");
 
 	// Electrons:
-	fEventTree->Branch("NEles"               ,&fTneles              ,"NEles/I");
-	fEventTree->Branch("ElGood"              ,&fTgoodel             ,"ElGood[NEles]/I");
-	fEventTree->Branch("ElPx"                ,&fTepx                ,"ElPx[NEles]/D");
-	fEventTree->Branch("ElPy"                ,&fTepy                ,"ElPy[NEles]/D");
-	fEventTree->Branch("ElPz"                ,&fTepz                ,"ElPz[NEles]/D");
-	fEventTree->Branch("ElPt"                ,&fTept                ,"ElPt[NEles]/D");
-	fEventTree->Branch("ElE"                 ,&fTee                 ,"ElE[NEles]/D");
-	fEventTree->Branch("ElEt"                ,&fTeet                ,"ElEt[NEles]/D");
-	fEventTree->Branch("ElEta"               ,&fTeeta               ,"ElEta[NEles]/D");
-	fEventTree->Branch("ElPhi"               ,&fTephi               ,"ElPhi[NEles]/D");
-	fEventTree->Branch("ElD0BS"              ,&fTed0bs              ,"ElD0BS[NEles]/D");
-	fEventTree->Branch("ElD0PV"              ,&fTed0pv              ,"ElD0PV[NEles]/D");
-	fEventTree->Branch("ElD0E"               ,&fTed0E               ,"ElD0E[NEles]/D");
-	fEventTree->Branch("ElDzBS"              ,&fTedzbs              ,"ElDzBS[NEles]/D");
-	fEventTree->Branch("ElDzPV"              ,&fTedzpv              ,"ElDzPV[NEles]/D");
-	fEventTree->Branch("ElDzE"               ,&fTedzE               ,"ElDzE[NEles]/D");
-	fEventTree->Branch("ElIso"               ,&fTeiso               ,"ElIso[NEles]/D");
-	fEventTree->Branch("ElPtSum"             ,&fTeptsum             ,"ElPtSum[NEles]/D");
-	fEventTree->Branch("ElEtSum"             ,&fTeetsum             ,"ElEtSum[NEles]/D");
-	fEventTree->Branch("ElNChi2"             ,&fTenchi2             ,"ElNChi2[NEles]/D");
-	fEventTree->Branch("ElCharge"            ,&fTecharge            ,"ElCharge[NEles]/I");
-	fEventTree->Branch("ElID"                ,&fTeID                ,"ElID[NEles][4]/I");
+	fEventTree->Branch("NEles"            ,&fTneles           ,"NEles/I");
+	fEventTree->Branch("ElGood"           ,&fTgoodel          ,"ElGood[NEles]/I");
+	fEventTree->Branch("ElPx"             ,&fTepx             ,"ElPx[NEles]/D");
+	fEventTree->Branch("ElPy"             ,&fTepy             ,"ElPy[NEles]/D");
+	fEventTree->Branch("ElPz"             ,&fTepz             ,"ElPz[NEles]/D");
+	fEventTree->Branch("ElPt"             ,&fTept             ,"ElPt[NEles]/D");
+	fEventTree->Branch("ElE"              ,&fTee              ,"ElE[NEles]/D");
+	fEventTree->Branch("ElEt"             ,&fTeet             ,"ElEt[NEles]/D");
+	fEventTree->Branch("ElEta"            ,&fTeeta            ,"ElEta[NEles]/D");
+	fEventTree->Branch("ElPhi"            ,&fTephi            ,"ElPhi[NEles]/D");
+	fEventTree->Branch("ElD0BS"           ,&fTed0bs           ,"ElD0BS[NEles]/D");
+	fEventTree->Branch("ElD0PV"           ,&fTed0pv           ,"ElD0PV[NEles]/D");
+	fEventTree->Branch("ElD0E"            ,&fTed0E            ,"ElD0E[NEles]/D");
+	fEventTree->Branch("ElDzBS"           ,&fTedzbs           ,"ElDzBS[NEles]/D");
+	fEventTree->Branch("ElDzPV"           ,&fTedzpv           ,"ElDzPV[NEles]/D");
+	fEventTree->Branch("ElDzE"            ,&fTedzE            ,"ElDzE[NEles]/D");
+	fEventTree->Branch("ElIso"            ,&fTeiso            ,"ElIso[NEles]/D");
+	fEventTree->Branch("ElPtSum"          ,&fTeptsum          ,"ElPtSum[NEles]/D");
+	fEventTree->Branch("ElEtSum"          ,&fTeetsum          ,"ElEtSum[NEles]/D");
+	fEventTree->Branch("ElNChi2"          ,&fTenchi2          ,"ElNChi2[NEles]/D");
+	fEventTree->Branch("ElCharge"         ,&fTecharge         ,"ElCharge[NEles]/I");
+	fEventTree->Branch("ElIDTight"        ,&fTeIDTight        ,"ElIDTight[NEles]/I");
+	fEventTree->Branch("ElIDLoose"        ,&fTeIDLoose        ,"ElIDLoose[NEles]/I");
+	fEventTree->Branch("ElIDRobustTight"  ,&fTeIDRobustTight  ,"ElIDRobustTight[NEles]/I");
+	fEventTree->Branch("ElIDRobustLoose"  ,&fTeIDRobustLoose  ,"ElIDRobustLoose[NEles]/I");
 	fEventTree->Branch("ElInGap"             ,&fTeInGap             ,"ElInGap[NEles]/I");
 	fEventTree->Branch("ElEcalDriven"        ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
 	fEventTree->Branch("ElTrackerDriven"     ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
@@ -1059,11 +1061,10 @@ void NTupleProducer::resetTree(){
 	resetDouble(fJUNC_py_match, 50);
 	resetDouble(fJUNC_pz_match, 50);
 
-	for(size_t i = 0; i < 20; ++i){
-		for(size_t j = 0; j < 4; ++j){
-			fTeID[i][j] = -999;
-		}
-	}
+	resetInt(fTeIDTight);
+	resetInt(fTeIDLoose);
+	resetInt(fTeIDRobustTight);
+	resetInt(fTeIDRobustLoose);
 
 	fTTrkPtSumx       = -999.99;
 	fTTrkPtSumy       = -999.99;
