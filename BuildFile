@@ -3,6 +3,7 @@
 <use name=FWCore/ParameterSet>
 <use name=FWCore/ServiceRegistry>
 <use name=DataFormats/Common>
+<use name=DataFormats/PatCandidates>
 <use name=DataFormats/JetReco>
 <use name=DataFormats/VertexReco>
 <use name=DataFormats/METReco>
