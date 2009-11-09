@@ -4,12 +4,12 @@ analyze = cms.EDAnalyzer('NTupleProducer',
         # Main settings
         isPat = cms.untracked.bool(False),
 	# Collections
-	tag_muons   = cms.untracked.InputTag('muons'),
+	tag_muons      = cms.untracked.InputTag('muons'),
 	tag_muisodeptk = cms.untracked.InputTag('muIsoDepositTk'),
 	tag_muisodepec = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
 	tag_muisodephc = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
 
-	tag_electrons = cms.untracked.InputTag('gsfElectrons'),	
+	tag_electrons  = cms.untracked.InputTag('gsfElectrons'),	
 	tag_elisotk    = cms.untracked.InputTag('eleIsoFromDepsTk::NTupleProducer'),
 	tag_elisoec    = cms.untracked.InputTag('eleIsoFromDepsEcalFromHits::NTupleProducer'),
 	tag_elisohc    = cms.untracked.InputTag('eleIsoFromDepsHcalFromTowers::NTupleProducer'),
@@ -17,19 +17,19 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_elisodepec = cms.untracked.InputTag('eleIsoDepositEcalFromHits::NTupleProducer'),
 	tag_elisodephc = cms.untracked.InputTag('eleIsoDepositHcalFromTowers::NTupleProducer'),
 	
-	tag_sc      = cms.untracked.InputTag('correctedHybridSuperClusters'),
-	tag_jets    = cms.untracked.InputTag('sisCone5CaloJets'),
-        tag_btag    = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
-	tag_met1    = cms.untracked.InputTag('met'),
-	tag_met2    = cms.untracked.InputTag('corMetGlobalMuons'),
-	tag_met3    = cms.untracked.InputTag('tcMet'),
-	tag_met4    = cms.untracked.InputTag('pfMet'),
-	tag_met5    = cms.untracked.InputTag('metMuonJESCorSC5'),
-	tag_vertex  = cms.untracked.InputTag('offlinePrimaryVertices'),
-	tag_tracks  = cms.untracked.InputTag('generalTracks'),
-	tag_caltow  = cms.untracked.InputTag('towerMaker'),
-	tag_genpart = cms.untracked.InputTag('genParticles'),
-	tag_triggers   = cms.InputTag("TriggerResults","","HLT"),
+	tag_sc       = cms.untracked.InputTag('correctedHybridSuperClusters'),
+	tag_jets     = cms.untracked.InputTag('sisCone5CaloJets'),
+        tag_btag     = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
+	tag_met1     = cms.untracked.InputTag('met'),
+	tag_met2     = cms.untracked.InputTag('corMetGlobalMuons'),
+	tag_met3     = cms.untracked.InputTag('tcMet'),
+	tag_met4     = cms.untracked.InputTag('pfMet'),
+	tag_met5     = cms.untracked.InputTag('metMuonJESCorSC5'),
+	tag_vertex   = cms.untracked.InputTag('offlinePrimaryVertices'),
+	tag_tracks   = cms.untracked.InputTag('generalTracks'),
+	tag_caltow   = cms.untracked.InputTag('towerMaker'),
+	tag_genpart  = cms.untracked.InputTag('genParticles'),
+	tag_triggers = cms.untracked.InputTag("TriggerResults","","HLT"),
 
 	# Jet ID configuration
         jetID = cms.PSet(
