@@ -55,7 +55,8 @@ public:
 	
 	double getEta(double, double, double);
 	
-	void ReadCuts(const char* = "cutfile.dat");
+	void ReadObjCuts(const char* = "objsel.dat");
+	void ReadEvtSel(const char* = "evtsel.dat");
 	
 private:
 	// Global parameters:
@@ -128,15 +129,17 @@ private:
 	double fTElmt2_100;
 	
 	// Object quality cuts:
-	struct ObjCut{
+	struct Cut{
 		TBranch *branch;
 		double upperbound;
 		double lowerbound;
 	};
-	bool IsGood(int, std::vector<ObjCut>*);
-	std::vector<ObjCut> fMuCuts;
-	std::vector<ObjCut> fElCuts;
-	std::vector<ObjCut> fJetCuts;
+	bool IsGoodObj(int, std::vector<Cut>*);
+	bool IsGoodEvt(std::vector<Cut>*);
+	std::vector<Cut> fMuCuts;
+	std::vector<Cut> fElCuts;
+	std::vector<Cut> fJetCuts;
+	std::vector<Cut> fEvtSelCuts;
 
 };
 #endif
