@@ -52,11 +52,11 @@ process.TFileService = cms.Service("TFileService",
 #### Jet Corrections ###########################################################
 process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
-	tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
+	tagName = cms.string('Summer09_L2Relative_SC5Calo'),
 	label = cms.string('L2RelativeJetCorrectorSC5Calo')
 )
 process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-	tagName = cms.string('Summer08Redigi_L3Absolute_SC5Calo'),
+	tagName = cms.string('Summer09_L3Absolute_SC5Calo'),
 	label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
 )
 process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
@@ -66,7 +66,6 @@ process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
 # process.prefer("L2JetCorrectorSC5Calo")
 
 ### JES MET Corrections ########################################################
-from JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff import *
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
 
 process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
