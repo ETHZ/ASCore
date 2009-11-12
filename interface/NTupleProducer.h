@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.17 2009/11/06 15:51:08 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.18 2009/11/09 10:59:06 fronga Exp $
 //
 //
 
@@ -70,6 +70,14 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
   virtual void endRun(const edm::Run&, const edm::EventSetup&);
+
+  typedef pair<int,double> OrderPair;
+  struct IndexByPt {
+    const bool operator()(const OrderPair& j1, 
+                          const OrderPair& j2 ) const {
+      return j1.second > j2.second;
+    }
+  };
 
   // ----------member data ---------------------------
   edm::Service<TFileService> fTFileService;
