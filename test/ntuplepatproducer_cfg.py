@@ -42,7 +42,7 @@ process.source = cms.Source("PoolSource",
 	),
 	duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 # Output
 process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTuplePatProducer.root"),
@@ -50,23 +50,9 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #### Jet Corrections ###########################################################
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
-process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
-	tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
-	label = cms.string('L2RelativeJetCorrectorSC5Calo')
-)
-process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-	tagName = cms.string('Summer08Redigi_L3Absolute_SC5Calo'),
-	label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
-)
-process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
-    src = cms.InputTag("sisCone5CaloJets"),
-    correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
-)
-# process.prefer("L2JetCorrectorSC5Calo")
+# Not for PAT
 
 ### JES MET Corrections ########################################################
-from JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff import *
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
 
 process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
@@ -79,6 +65,14 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
 ### PAT ########################################################################
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process,cms.InputTag('sisCone5CaloJets'),
+                    doJTA        = True,
+                    doBTagging   = True,
+                    jetCorrLabel = ('SC5','Calo'),
+                    doType1MET   = True,
+                    genJetCollection=cms.InputTag("sisCone5GenJets")
+                    )
 
 ### Egamma Isolation ###########################################################
 # Keep in line with non-PAT config.
@@ -87,23 +81,20 @@ process.eleIsoDepositEcalFromHits.ExtractorPSet.endcapEcalHits = "ecalRecHit:Eca
 # Example configuration
 process.eleIsoFromDepsEcalFromHits.deposits[0].deltaR = 0.3
 
-
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
-process.analyze.tag_muons     = 'cleanLayer1Muons'
-process.analyze.tag_electrons = 'cleanLayer1Electrons'
+process.analyze.tag_muons     = 'allLayer1Muons'
+process.analyze.tag_electrons = 'allLayer1Electrons'
+process.analyze.tag_jets      = 'allLayer1Jets'
 process.analyze.isPat = True
 
 #### Path ######################################################################
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
 process.p = cms.Path(
-      process.L2L3CorJetSC5Calo
-    + process.patDefaultSequence
+      process.patDefaultSequence
     + process.metCorSequence
     + process.mybtag
-#    + process.eleIsoDeposits
-#    + process.eleIsoFromDeposits
     + process.analyze
 #    + process.content
     )
