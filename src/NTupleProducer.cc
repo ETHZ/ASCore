@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.20 2009/11/06 15:51:00 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.21 2009/11/09 11:04:18 fronga Exp $
 //
 //
 
@@ -31,6 +31,12 @@
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+// Utilities
+#include "CommonTools/Utils/interface/PtComparator.h"
+#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+
 // Data formats
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
@@ -43,15 +49,13 @@
 
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
@@ -172,7 +176,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   using namespace std;
   using namespace reco;
   using reco::MuonCollection;
-  using reco::CaloJetCollection;
   using reco::JetTagCollection;
   
   // Reset all the tree variables
@@ -187,7 +190,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iEvent.getByLabel(fElectronTag, electrons); // 'gsfElectrons'
 
   // Jets and Jet Correctors
-  Handle<CaloJetCollection> jets;
+  Handle<View<Jet> > jets;
   iEvent.getByLabel(fJetTag,jets); // 'sisCone5CaloJets'
   const JetCorrector* L2JetCorrector = JetCorrector::getJetCorrector ("L2RelativeJetCorrectorSC5Calo",iSetup);
   const JetCorrector* L3JetCorrector = JetCorrector::getJetCorrector ("L3AbsoluteJetCorrectorSC5Calo",iSetup);
@@ -280,13 +283,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTweight = 1.0; // To be filled at some point?
 
   // Save position of primary vertex
-  fTprimvtxx   = primVtx->x();
-  fTprimvtxy   = primVtx->y();
-  fTprimvtxz   = primVtx->z();
-  fTprimvtxxE  = primVtx->xError();
-  fTprimvtxyE  = primVtx->yError();
-  fTprimvtxzE  = primVtx->zError();
-  fTpvtxznchi2 = primVtx->normalizedChi2();
+  fTprimvtxx    = primVtx->x();
+  fTprimvtxy    = primVtx->y();
+  fTprimvtxz    = primVtx->z();
+  fTprimvtxxE   = primVtx->xError();
+  fTprimvtxyE   = primVtx->yError();
+  fTprimvtxzE   = primVtx->zError();
+  fTpvtxznchi2  = primVtx->normalizedChi2();
   fTpvtxntracks = primVtx->tracksSize();
 
   // Save position of beamspot
@@ -306,12 +309,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       break;
     }
     mi++;
+
     // Muon preselection:
     if(!(Mit->isGlobalMuon())) continue;
     if(Mit->globalTrack()->pt() < fMinmupt) continue;
-    if(TMath::Abs(Mit->globalTrack()->eta()) > fMaxmueta) continue;
+    if(fabs(Mit->globalTrack()->eta()) > fMaxmueta) continue;
     mqi++;
-    const Muon *cm = Mit->clone();
 
     // Dump muon properties in tree variables
     fTmupx[mqi]     = Mit->globalTrack()->px();
@@ -338,8 +341,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTmueecal[mqi] = ECDep.candEnergy();
       fTmuehcal[mqi] = HCDep.candEnergy();
     } else {
-      fTmueecal[mqi] = (static_cast<const pat::Muon*>(cm))->ecalIsoDeposit()->candEnergy();
-      fTmuehcal[mqi] = (static_cast<const pat::Muon*>(cm))->hcalIsoDeposit()->candEnergy();
+      const pat::Muon* pMuon =  static_cast<const pat::Muon*>(&(*Mit));
+      fTmueecal[mqi] = pMuon->ecalIsoDeposit()->candEnergy();
+      fTmuehcal[mqi] = pMuon->hcalIsoDeposit()->candEnergy();
     }
 
     fTmud0bs[mqi] = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
@@ -357,9 +361,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTmunchambers[mqi] = Mit->numberOfChambers();
 
     fTmucalocomp[mqi] = Mit->caloCompatibility();
-    fTmusegmcomp[mqi] = muon::segmentCompatibility(*cm);
+    fTmusegmcomp[mqi] = muon::segmentCompatibility(*Mit);
     fTmutrackermu[mqi] = Mit->isTrackerMuon() ? 1:0;
-    fTmuisGMPT[mqi] = muon::isGoodMuon(*cm, muon::GlobalMuonPromptTight) ? 1:0;
+    fTmuisGMPT[mqi] = muon::isGoodMuon(*Mit, muon::GlobalMuonPromptTight) ? 1:0;
 
     // Matching
     vector<int> MuMatch = matchMuCand(&(*Mit), iEvent);
@@ -373,7 +377,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTnmu = mqi+1;
 
   // Read Electrons
-  int eqi(-1); // counts # of qualified electrons
+  int eqi(-1),ei(-1); // counts # of qualified electrons
   if(electrons->size() > 0){
     // Read eID results
     vector<Handle<ValueMap<float> > > eIDValueMap(4); 
@@ -391,7 +395,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     const ValueMap<float> & eIDmapT  = *eIDValueMap[3] ;
 
     // Loop over electrons
-    for( unsigned int i = 0; i < electrons->size(); i++){
+    for( View<GsfElectron>::const_iterator El = electrons->begin(); 
+         El != electrons->end(); ++El ) {
+      ++ei;
       // Check if maximum number of electrons is exceeded already:
       if(eqi > 19){
         edm::LogWarning("NTP") << "@SUB=analyze"
@@ -402,7 +408,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       }
 
       // Electron preselection:   
-      const GsfElectron *El = &(*(electrons.product()))[i];
       if(El->pt() < fMinelpt) continue;
       if(fabs(El->eta()) > fMaxeleta) continue;
       // if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
@@ -420,12 +425,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
         iEvent.getByLabel(fEleIsoHCTag, eIsoHCValueMap);
         const ValueMap<double> &eHCIsoMap = *eIsoHCValueMap.product();
         
-        Ref<View<GsfElectron> > electronRef(electrons,i);
+        Ref<View<GsfElectron> > electronRef(electrons,ei);
         eTkIso = eTkIsoMap[electronRef];
         eECIso = eECIsoMap[electronRef];
         eHCIso = eHCIsoMap[electronRef];
       } else {
-        const pat::Electron* pEl = static_cast<const pat::Electron*>(El);
+        const pat::Electron* pEl = static_cast<const pat::Electron*>(&(*El));
         eTkIso = pEl->trackIso();
         eECIso = pEl->ecalIso();
         eHCIso = pEl->hcalIso();
@@ -473,13 +478,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
       // Read in Electron ID
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
-        Ref<View<GsfElectron> > electronRef(electrons,i);
+        Ref<View<GsfElectron> > electronRef(electrons,ei);
         fTeIDTight[eqi]       = eIDmapT[electronRef]  ? 1:0;
         fTeIDLoose[eqi]       = eIDmapL[electronRef]  ? 1:0;
         fTeIDRobustTight[eqi] = eIDmapRT[electronRef] ? 1:0;
         fTeIDRobustLoose[eqi] = eIDmapRL[electronRef] ? 1:0;
       } else {
-        const pat::Electron* pEl = static_cast<const pat::Electron*>(El);
+        const pat::Electron* pEl = static_cast<const pat::Electron*>(&(*El));
         fTeIDTight[eqi]       = pEl->electronID("eidTight")>0. ? 1:0;
         fTeIDLoose[eqi]       = pEl->electronID("eidLoose")>0. ? 1:0;
         fTeIDRobustTight[eqi] = pEl->electronID("eidRobustTight")>0. ? 1:0;
@@ -491,10 +496,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   }
   fTneles = eqi+1;
 
-  int itag(-1); 
-  // Apply L2 and L3 JetCorrections
-  vector<const reco::CaloJet*> CorrJets; // Contains all (corrected) jets
-  CaloJetCollection::const_iterator Jit;
+  // Check Jet collection's size
   if(jets->size() > 50){
     edm::LogWarning("NTP") << "@SUB=analyze"
                            << "Found more than 50 uncorrected jets, I'm scared ...";
@@ -503,26 +505,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fEventTree->Fill();
     return;
   }
-  for(Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
-    CaloJet *j = Jit->clone();
-    //I save here px, py, pz for uncorrected jets
-    //used later for matching jets with jets in the jet-tracks associator collections
+
+  // Jet corrections
+  vector<const Jet*> corrJets;
+  corrJets.reserve(jets->size()); // Speed up push-backs
+  vector<OrderPair> corrIndices;  // Vector of indices and pt of corrected jets to re-order them
+  // I save here px, py, pz for uncorrected jets
+  // used later for matching jets with b-tagging information
+  int itag(-1);
+  for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
     itag++;
-    fJUNC_px_match[itag]=j->px();
-    fJUNC_py_match[itag]=j->py();
-    fJUNC_pz_match[itag]=j->pz();
-    //energy corrections
-    j->scaleEnergy(L2JetCorrector->correction(j->p4()));
-    j->scaleEnergy(L3JetCorrector->correction(j->p4()));
-    const CaloJet *cj = j->clone();
-    CorrJets.push_back(cj);
+    if ( !fIsPat ) {
+      // Cast and make a new (non-const) copy to apply corrections
+      const CaloJet* jet = static_cast<const CaloJet*>(&(*Jit));
+      CaloJet* j = new CaloJet(*jet);
+      fJUNC_px_match[itag] = j->px();
+      fJUNC_py_match[itag] = j->py();
+      fJUNC_pz_match[itag] = j->pz();
+      // Apply L2 and L3 JetCorrections
+      j->scaleEnergy(L2JetCorrector->correction(j->p4()));
+      j->scaleEnergy(L3JetCorrector->correction(j->p4()));
+      
+      corrJets.push_back(j);
+      corrIndices.push_back(make_pair(itag,j->pt()));
+    } else { 
+      // PAT Jets are already corrected: revert to raw
+      pat::Jet pJunc = (static_cast<const pat::Jet*>(&(*Jit)))->correctedJet("RAW");
+      fJUNC_px_match[itag] = pJunc.px();
+      fJUNC_py_match[itag] = pJunc.py();
+      fJUNC_pz_match[itag] = pJunc.pz();
+      // Sorting not needed for PAT, but still need index
+      corrJets.push_back( &(*Jit) );
+      corrIndices.push_back(make_pair(itag,(*Jit).pt()));
+    } 
   }
+
+  // Sort corrected jet collection by decreasing pt
+  IndexByPt indexComparator; // Need this to use the uncorrected jets below...
+  std::sort(corrIndices.begin(),corrIndices.end(),indexComparator);
 
   // Determine qualified jets
   int jqi(-1); // counts # of qualified jets
-  int itagcorr(-1); // counts # of jets for b-tagging (this index will talk to the uncorrected jets)
-  for(size_t i = 0; i < CorrJets.size(); ++i){// Loop over corr. jets
-    // Check if maximum number of jets is exceeded already:
+  for(vector<OrderPair>::const_iterator it = corrIndices.begin();
+      it != corrIndices.end(); ++it ) { // Loop over corr. jet indices
+    // Check if maximum number of jets is exceeded already
     if(jqi > 19) {
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of jets exceeded...";
@@ -530,36 +556,63 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTgoodevent = 0;
       break;
     }
-    itagcorr++;
-    CaloJet *jet = CorrJets[i]->clone();
+    int index = it->first;
+  
     // Jet preselection
+    const Jet* jet = corrJets[index];
     if(jet->pt() < fMinjpt) continue;
-    if(TMath::Abs(jet->eta()) > fMaxjeta) continue;
+    if(fabs(jet->eta()) > fMaxjeta) continue;
     // if(jet->emEnergyFraction() < fMinjemfrac) continue;
     jqi++;
-    //calculate the DR wrt the closest electron
-    double ejDRmin= 10.;
-    //when no electrons in the event, DR will be 10.
-    for(int j = 0; j < fTneles; j++){
-      double ejDR = GetDeltaR(jet->eta(), fTeeta[j], jet->phi(), fTephi[j]);
+
+    // Calculate the DR wrt the closest electron
+    double ejDRmin=10.; // Default when no electrons previously selected
+    for(int j = 0; j < fTneles; j++) {
+      double ejDR = reco::deltaR(jet->eta(), jet->phi(), fTeeta[j], fTephi[j]);
       if(ejDR<ejDRmin) ejDRmin = ejDR;
     }
     fTjeMinDR[jqi]=ejDRmin;
-    //jetID variables
-    jetIDHelper.calculate(iEvent, *jet);
-    //fill the b-tagging probability
-    for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
-      if (fabs( (fJUNC_px_match[itagcorr] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[itagcorr]) < 0.00001 && 
-          fabs( (fJUNC_py_match[itagcorr] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[itagcorr]) < 0.00001 &&
-          fabs( (fJUNC_pz_match[itagcorr] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[itagcorr]) < 0.00001)  {
-        fTbTagProb[jqi]=(*jetsAndProbs)[i].second;
-        break;
+
+    // B-tagging probability
+    if ( !fIsPat ) {
+      for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
+        // Match by pt between the two "collections"
+        if (fabs( (fJUNC_px_match[index] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+            fabs( (fJUNC_py_match[index] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+            fabs( (fJUNC_pz_match[index] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001)  {
+          fTbTagProb[jqi]=(*jetsAndProbs)[i].second;
+          break;
+        }
       }
+    } else {
+      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
+      fTbTagProb[jqi] = pJ->bDiscriminator(fBtagTag.label());
     }
-    vector<const reco::Track*> AssociatedTracks = FindAssociatedTracks(&(*jet), tracks.product());
-    vector<TransientTrack> AssociatedTTracks;
+
+    // Jet-track association: get associated tracks
+    vector<const reco::Track*> AssociatedTracks;
     fTnAssoTracks[jqi]=0;
-    if(fabs(jet->eta())<2.9){ //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
+    fTChfrac[jqi]=-1.; // Default (if jet-tracks association cone is outside tracker acceptance)
+    std::cout << "New Jet" << std::endl;
+    if ( !fIsPat ) {
+      AssociatedTracks = FindAssociatedTracks(jet, tracks.product());
+    } else {
+      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
+      for ( TrackRefVector::iterator it = pJ->associatedTracks().begin();
+            it != pJ->associatedTracks().end(); ++it ) {
+        std::cout << (*it)->pt() << " included (dr="
+                  << reco::deltaR(pJ->eta(),pJ->phi(),(*it)->eta(),(*it)->phi()) 
+                  << ")" << std::endl;
+        AssociatedTracks.push_back( it->get() );
+      }
+      //DO NOT use this to keep in sync. with non-PAT code
+      //fTChfrac[jqi] = pJ.jetCharge();
+      //fTnAssoTracks[jqi] = pJ.associatedTracks().size();
+    }
+    // Jet-track association: make transient tracks and store information
+    vector<TransientTrack> AssociatedTTracks;
+    if(fabs(jet->eta())<2.9){ 
+      //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
       //tmp variables for vectorial sum of pt of tracks
       double pXtmp=0.;
       double pYtmp=0.;
@@ -571,12 +624,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
           fTnAssoTracks[jqi]+=1;
         }
       }
-      fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
-    } else {//the whole cone used for jet-tracks association is outside of the tracker acceptance
-      fTChfrac[jqi]=-1.;
+      fTChfrac[jqi]=sqrt(pXtmp*pXtmp+pYtmp*pYtmp)/jet->pt();
     }
+
     // Convert tracks to transient tracks for vertex fitting
-    if(AssociatedTTracks.size() > 1){
+    if(AssociatedTTracks.size() > 1) {
       AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
       TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
       if(jetVtx.isValid()){
@@ -624,26 +676,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTjphi[jqi] = jet->phi();
     fTje[jqi]   = jet->energy();
     fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
-    fTjemfrac[jqi] = jet->emEnergyFraction();
-    fTjID_HPD[jqi]  = jetIDHelper.fHPD();
-    fTjID_RBX[jqi]  = jetIDHelper.fRBX();
-    fTjID_n90Hits[jqi]  = jetIDHelper.n90Hits();
-    fTjID_SubDet1[jqi]  = jetIDHelper.fSubDetector1();
-    fTjID_SubDet2[jqi]  = jetIDHelper.fSubDetector2();
-    fTjID_SubDet3[jqi]  = jetIDHelper.fSubDetector3();
-    fTjID_SubDet4[jqi]  = jetIDHelper.fSubDetector4();
-    fTjID_resEMF[jqi]  = jetIDHelper.restrictedEMF();
-    fTjID_HCALTow[jqi]  = jetIDHelper.nHCALTowers();
-    fTjID_ECALTow[jqi]  = jetIDHelper.nECALTowers();
-    fTjEcorr[jqi]  =  jet->px()/fJUNC_px_match[itagcorr];
-		
+    fTjEcorr[jqi] =  jet->px()/fJUNC_px_match[index];
+
+    // CaloJet specific variables (embedded in PAT)
+    if ( !fIsPat ) {
+      const CaloJet* cJ = static_cast<const CaloJet*>(jet);
+      fTjemfrac[jqi] =  cJ->emEnergyFraction();
+
+      // jetID variables
+      // FIXME: should be calculated before correction (for fractions)
+      // => re-correct all fractions
+      jetIDHelper.calculate(iEvent, *cJ);
+      fTjID_HPD[jqi]      = jetIDHelper.fHPD()*fTjEcorr[jqi];
+      fTjID_RBX[jqi]      = jetIDHelper.fRBX()*fTjEcorr[jqi];
+      fTjID_n90Hits[jqi]  = jetIDHelper.n90Hits();
+      fTjID_SubDet1[jqi]  = jetIDHelper.fSubDetector1()*fTjEcorr[jqi];
+      fTjID_SubDet2[jqi]  = jetIDHelper.fSubDetector2()*fTjEcorr[jqi];
+      fTjID_SubDet3[jqi]  = jetIDHelper.fSubDetector3()*fTjEcorr[jqi];
+      fTjID_SubDet4[jqi]  = jetIDHelper.fSubDetector4()*fTjEcorr[jqi];
+      fTjID_resEMF[jqi]   = jetIDHelper.restrictedEMF();
+      fTjID_HCALTow[jqi]  = jetIDHelper.nHCALTowers();
+      fTjID_ECALTow[jqi]  = jetIDHelper.nECALTowers();
+    } else {
+      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
+      fTjemfrac[jqi]      = pJ->emEnergyFraction();
+      fTjID_HPD[jqi]      = pJ->fHPD();
+      fTjID_RBX[jqi]      = pJ->fRBX();
+      fTjID_n90Hits[jqi]  = pJ->n90Hits();
+      fTjID_SubDet1[jqi]  = pJ->fSubDetector1();
+      fTjID_SubDet2[jqi]  = pJ->fSubDetector2();
+      fTjID_SubDet3[jqi]  = pJ->fSubDetector3();
+      fTjID_SubDet4[jqi]  = pJ->fSubDetector4();
+      fTjID_resEMF[jqi]   = pJ->restrictedEMF();
+      fTjID_HCALTow[jqi]  = pJ->nHCALTowers();
+      fTjID_ECALTow[jqi]  = pJ->nECALTowers();
+    }
+    
     fTgoodjet[jqi] = 1;
   }
   fTnjets = jqi+1;
 
   // Get and Dump MET Variables:
   fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
-  for(TrackCollection::const_iterator it = tracks->begin(); it != tracks->end() ; ++it){
+  for(TrackCollection::const_iterator it = tracks->begin(); 
+      it != tracks->end() ; ++it ) {
     fTTrkPtSumx += it->px();
     fTTrkPtSumy += it->py();
   }
@@ -653,7 +729,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
   fTHCALEsumx = 0.; fTHCALEsumy = 0.; fTHCALEsumz = 0.;
-  for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
+  for(CaloTowerCollection::const_iterator itow = calotowers->begin(); 
+      itow!=calotowers->end(); ++itow ){
     if(itow->energy() == 0.) continue; // Check against zero energy towers
     double emFrac = itow->emEnergy()/itow->energy();
     double hadFrac = itow->hadEnergy()/itow->energy();
@@ -1186,7 +1263,7 @@ vector<double> NTupleProducer::calcMuIso(const reco::Muon *Mu, const edm::Event&
     if((*itk)->pt() < fIso_MuTkSeed) continue;
     double eta = (*itk)->eta();
     double phi = (*itk)->phi();
-    double DR = GetDeltaR(eta, mueta, phi, muphi);
+    double DR = reco::deltaR(eta, phi, mueta, muphi);
     // if(DR <= 0.) DR = 0.001; // Why do I need this?
     if(DR < fIso_MuTkDRin) continue;
     if(DR > fIso_MuTkDRout) continue;
@@ -1205,7 +1282,7 @@ vector<double> NTupleProducer::calcMuIso(const reco::Muon *Mu, const edm::Event&
     double eta = itow->eta();
     if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
     double phi = itow->phi();
-    double DR = GetDeltaR(mueta, eta, muphi, phi);
+    double DR = reco::deltaR(eta, phi, mueta, muphi);
     if(DR <= 0.) DR = 0.001;
     if(DR < fIso_MuCalDRin) continue;
     if(DR > fIso_MuCalDRout) continue;
@@ -1232,7 +1309,7 @@ vector<double> NTupleProducer::calcMuIso2(const reco::Muon *Mu, const edm::Event
     if(itk->pt() < fIso_MuTkSeed) continue;
     double eta = itk->eta();
     double phi = itk->phi();
-    double DR = GetDeltaR(eta, mueta, phi, muphi);
+    double DR = reco::deltaR(eta, phi, mueta, muphi);
     // if(DR <= 0.) DR = 0.001; // Why do I need this?
     if(DR < fIso_MuTkDRin) continue;
     if(DR > fIso_MuTkDRout) continue;
@@ -1251,7 +1328,7 @@ vector<double> NTupleProducer::calcMuIso2(const reco::Muon *Mu, const edm::Event
     double eta = itow->eta();
     if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
     double phi = itow->phi();
-    double DR = GetDeltaR(mueta, eta, muphi, phi);
+    double DR = reco::deltaR(eta, phi, mueta, muphi);
     if(DR <= 0.) DR = 0.001;
     if(DR < fIso_MuCalDRin) continue;
     if(DR > fIso_MuCalDRout) continue;
@@ -1312,7 +1389,7 @@ vector<double> NTupleProducer::calcElIso(const reco::GsfElectron *El, const edm:
     if((*itk)->pt() < fIso_MuTkSeed) continue;
     double eta = (*itk)->eta();
     double phi = (*itk)->phi();
-    double DR = GetDeltaR(eta, eleta, phi, elphi);
+    double DR = reco::deltaR(eta, phi, eleta, elphi);
     if(DR <= 0.) DR = 0.001; // Why do I need this?
     if(DR < fIso_MuTkDRin) continue;
     if(DR > fIso_MuTkDRout) continue;
@@ -1329,8 +1406,8 @@ vector<double> NTupleProducer::calcElIso(const reco::GsfElectron *El, const edm:
     double eta = isc->eta();
     if(isc->energy()/cosh(eta) < fIso_MuCalSeed) continue;
     double phi = isc->phi();
-    double DR = GetDeltaR(eleta, eta, elphi, phi);
-    if(DR <= 0.) DR = 0.001;
+    double DR = reco::deltaR(eta, phi, eleta, elphi);
+    if(DR <= 0.) DR = 0.001; //FIXME:???
     if(DR < fIso_MuCalDRin) continue;
     if(DR > fIso_MuCalDRout) continue;
     etsum += isc->energy()/cosh(eta);
@@ -1344,7 +1421,7 @@ vector<double> NTupleProducer::calcElIso(const reco::GsfElectron *El, const edm:
   //  double eta = itow->eta();
   //  if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
   //  double phi = itow->phi();
-  //  double DR = GetDeltaR(eleta, eta, elphi, phi);
+  //  double DR = reco::deltaR(eta, phi, mueta, muphi);
   //  if(DR <= 0.) DR = 0.001;
   //  if(DR < fIso_MuCalDRin) continue;
   //  if(DR > fIso_MuCalDRout) continue;
@@ -1381,7 +1458,7 @@ vector<int> NTupleProducer::matchMuCand(const reco::Muon *Mu, const edm::Event& 
     int id = abs(gpart->pdgId());
     if(id!=13 && id!=211 && id!=321) continue;
     // Restrict to cone of 0.1 in DR around mu
-    double dr = GetDeltaR(gpart->eta(), mueta, gpart->phi(), muphi);
+    double dr = reco::deltaR(gpart->eta(), gpart->phi(), mueta, muphi);
     if(dr > 0.1) continue;
     // Select same charge
     int ch = gpart->charge();
@@ -1482,31 +1559,15 @@ void NTupleProducer::resetInt(int *v, unsigned int size){
   }
 }
 
-double NTupleProducer::DeltaPhi(double v1, double v2){
-  // Computes the correctly normalized phi difference
-  // v1, v2 = phi of object 1 and 2
-  double diff = fabs(v2 - v1);
-  double corr = 2*acos(-1.) - diff;
-  if(diff < acos(-1.)) return diff;
-  else return corr;
-}
-
-double NTupleProducer::GetDeltaR(double eta1, double eta2, double phi1, double phi2){
-  // Computes the DeltaR of two objects from their eta and phi values
-  return sqrt( (eta1-eta2)*(eta1-eta2)
-               + DeltaPhi(phi1, phi2)*DeltaPhi(phi1, phi2) );
-}
-
 vector<const reco::Track*> NTupleProducer::FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks){
   //returns a list of tracks associated to a given jet
   vector<const reco::Track*> AssociatedTracks;
   double jeteta=jet->eta();
   double jetphi=jet->phi();
   for(TrackCollection::const_iterator itk = tracks->begin(); itk!=tracks->end(); ++itk){
-    if(sqrt(pow(itk->eta()-jeteta,2) + pow(itk->phi()-jetphi,2))<0.5) {
-      const Track *t = new Track(*itk);
-      AssociatedTracks.push_back(t);
-    }
+    // Use safe reco::deltaR function (phi should be between -pi and pi...)
+    if ( reco::deltaR( jeteta, jetphi, itk->eta(), itk->phi() ) < 0.5 )
+      AssociatedTracks.push_back(&(*itk));
   }
   return AssociatedTracks;
 }
