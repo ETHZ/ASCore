@@ -42,7 +42,7 @@ process.source = cms.Source("PoolSource",
 	),
 	duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 # Output
 process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTupleProducer.root"),
