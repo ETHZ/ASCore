@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.21 2009/11/09 11:04:18 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.22 2009/11/12 18:10:45 fronga Exp $
 //
 //
 
@@ -593,16 +593,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     vector<const reco::Track*> AssociatedTracks;
     fTnAssoTracks[jqi]=0;
     fTChfrac[jqi]=-1.; // Default (if jet-tracks association cone is outside tracker acceptance)
-    std::cout << "New Jet" << std::endl;
     if ( !fIsPat ) {
       AssociatedTracks = FindAssociatedTracks(jet, tracks.product());
     } else {
       const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
       for ( TrackRefVector::iterator it = pJ->associatedTracks().begin();
             it != pJ->associatedTracks().end(); ++it ) {
-        std::cout << (*it)->pt() << " included (dr="
-                  << reco::deltaR(pJ->eta(),pJ->phi(),(*it)->eta(),(*it)->phi()) 
-                  << ")" << std::endl;
         AssociatedTracks.push_back( it->get() );
       }
       //DO NOT use this to keep in sync. with non-PAT code
