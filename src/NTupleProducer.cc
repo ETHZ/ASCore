@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.22 2009/11/12 18:10:45 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.23 2009/11/13 09:07:30 fronga Exp $
 //
 //
 
@@ -565,6 +565,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     // if(jet->emEnergyFraction() < fMinjemfrac) continue;
     jqi++;
 
+    // Dump jet properties into tree variables
+    fTjpx[jqi]  = jet->px();
+    fTjpy[jqi]  = jet->py();
+    fTjpz[jqi]  = jet->pz();
+    fTjpt[jqi]  = jet->pt();
+    fTjeta[jqi] = jet->eta();
+    fTjphi[jqi] = jet->phi();
+    fTje[jqi]   = jet->energy();
+    fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
+    fTjEcorr[jqi] =  jet->px()/fJUNC_px_match[index];
+
     // Calculate the DR wrt the closest electron
     double ejDRmin=10.; // Default when no electrons previously selected
     for(int j = 0; j < fTneles; j++) {
@@ -605,13 +616,101 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       //fTChfrac[jqi] = pJ.jetCharge();
       //fTnAssoTracks[jqi] = pJ.associatedTracks().size();
     }
+
+
+    //Look inside the calotowers for each jet
+    double sumEtaEM=0.;
+    double sumEta2EM=0;
+    double sumPhiEM=0.;
+    double sumPhi2EM=0;
+    double sumEtaHAD=0.;
+    double sumEta2HAD=0;
+    double sumPhiHAD=0.;
+    double sumPhi2HAD=0;
+    double sumEMWeights=0.;
+    double sumHADWeights=0.;
+    int NEM=0;
+    int NHAD=0;
+    double meanEtaEM=0.;
+    double meanPhiEM=0.;
+    double varianceEtaEM=0.;
+    double variancePhiEM=0.;
+    double meanEtaHAD=0.;
+    double meanPhiHAD=0.;
+    double varianceEtaHAD=0.;
+    double variancePhiHAD=0.;
+    double phioffset=0.; 
+
+    if( !fIsPat ){
+
+      // Cast and make a new (non-const) copy of corrected calojet, to loop over the calotowers
+      const CaloJet* calojet = static_cast<const CaloJet*>(&(*jet));
+      //
+      vector<CaloTowerPtr> towers = calojet->getCaloConstituents();
+      for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin(); iTower!= towers.end(); ++iTower){
+
+	  if(iTower == towers.begin()) phioffset = (*iTower)->phi();//calculate all phi coordinates wrt this offset
+
+	//calotowers EM energy
+	if((*iTower)->emEnergy()>0.) {
+	  NEM+=1;
+	  //eta
+	  sumEtaEM  +=  (*iTower)->eta()*(*iTower)->emEnergy();
+	  sumEta2EM += (*iTower)->eta()*(*iTower)->eta()*(*iTower)->emEnergy();
+	  //phi
+	  sumPhiEM  += reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->emEnergy();
+	  sumPhi2EM += reco::deltaPhi((*iTower)->phi(),phioffset)*reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->emEnergy();
+	  //weights
+	  sumEMWeights += (*iTower)->emEnergy();
+	}
+	//calotowers HAD energy
+	if((*iTower)->hadEnergy()>0.){
+	  NHAD += 1;
+	  //eta
+	  sumEtaHAD += (*iTower)->eta()*(*iTower)->hadEnergy();
+	  sumEta2HAD += (*iTower)->eta()*(*iTower)->eta()*(*iTower)->hadEnergy();
+	  //phi
+	  sumPhiHAD  += reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->hadEnergy();
+	  sumPhi2HAD += reco::deltaPhi((*iTower)->phi(),phioffset)*reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->hadEnergy();
+	  //weight
+	  sumHADWeights += (*iTower)->hadEnergy();
+	}
+      }
+      if(sumEMWeights>0. && NEM>1){
+	meanEtaEM = sumEtaEM/sumEMWeights;
+	meanPhiEM = sumPhiEM/sumEMWeights;
+	varianceEtaEM = (float(NEM)/float(NEM-1))*(sumEta2EM/sumEMWeights - meanEtaEM*meanEtaEM);
+	variancePhiEM = (float(NEM)/float(NEM-1))*(sumPhi2EM/sumEMWeights - meanPhiEM*meanPhiEM);
+      }
+      if(sumHADWeights>0. && NHAD>1){
+	meanEtaHAD = sumEtaHAD/sumHADWeights;
+	meanPhiHAD = sumPhiHAD/sumHADWeights;
+	varianceEtaHAD = (float(NHAD)/float(NHAD-1))*(sumEta2HAD/sumHADWeights - meanEtaHAD*meanEtaHAD);
+	variancePhiHAD = (float(NHAD)/float(NHAD-1))*(sumPhi2HAD/sumHADWeights - meanPhiHAD*meanPhiHAD);
+      }
+    }else { 
+      //for the moment do nothing, the variables variance* are initialized to zero
+    }
+    fTJEtaEMrms[jqi]  = sqrt(varianceEtaEM);
+    fTJEtaHADrms[jqi] = sqrt(varianceEtaHAD);
+    fTJPhiEMrms[jqi]  = sqrt(variancePhiEM);
+    fTJPhiHADrms[jqi] = sqrt(variancePhiHAD);
+
+    //Below save the momenta of the three leading tracks associated to the jet
+    double pT1 =0.;
+    double pT2 =0.;
+    double pT3 =0.;
+    int idx1=-1;
+    int idx2=-1;
+    int idx3=-1;
     // Jet-track association: make transient tracks and store information
     vector<TransientTrack> AssociatedTTracks;
-    if(fabs(jet->eta())<2.9){ 
-      //when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
-      //tmp variables for vectorial sum of pt of tracks
+    fTnAssoTracks[jqi]=0;
+    if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
+      // tmp variables for vectorial sum of pt of tracks
       double pXtmp=0.;
       double pYtmp=0.;
+
       for(size_t t = 0; t < AssociatedTracks.size(); ++t){
         AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
         if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
@@ -619,8 +718,41 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
           pYtmp+=AssociatedTracks[t]->py();
           fTnAssoTracks[jqi]+=1;
         }
+	//loop and find the three higher pT tracks
+	if(AssociatedTracks[t]->pt()>pT1 && AssociatedTracks.size()>=1){
+	  pT1=AssociatedTracks[t]->pt();
+	  idx3=idx2;
+	  idx2=idx1;
+	  idx1=t;
+	} else if (AssociatedTracks[t]->pt()<pT1 && AssociatedTracks[t]->pt()>pT2 && AssociatedTracks.size()>=2) {
+	  pT2=AssociatedTracks[t]->pt();
+	  idx3=idx2;
+	  idx2=t;
+	} else if (AssociatedTracks[t]->pt()<pT2 && AssociatedTracks[t]->pt()>pT3 && AssociatedTracks.size()>=3){
+	  pT3=AssociatedTracks[t]->pt();
+	  idx3=t;
+	}
       }
-      fTChfrac[jqi]=sqrt(pXtmp*pXtmp+pYtmp*pYtmp)/jet->pt();
+      //fill the momenta
+      if(AssociatedTracks.size()>=1){
+      fTtrk1px[jqi] =AssociatedTracks[idx1]->px();
+      fTtrk1py[jqi] =AssociatedTracks[idx1]->py();
+      fTtrk1pz[jqi] =AssociatedTracks[idx1]->pz();
+      }
+      if(AssociatedTracks.size()>=2){
+      fTtrk2px[jqi] =AssociatedTracks[idx2]->px();
+      fTtrk2py[jqi] =AssociatedTracks[idx2]->py();
+      fTtrk2pz[jqi] =AssociatedTracks[idx2]->pz();
+      }
+      if(AssociatedTracks.size()>=3){
+      fTtrk3px[jqi] =AssociatedTracks[idx3]->px();
+      fTtrk3py[jqi] =AssociatedTracks[idx3]->py();
+      fTtrk3pz[jqi] =AssociatedTracks[idx3]->pz();
+      }
+      //
+      fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
+    } else {//the whole cone used for jet-tracks association is outside of the tracker acceptance
+      fTChfrac[jqi]=-1.;
     }
 
     // Convert tracks to transient tracks for vertex fitting
@@ -662,17 +794,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTjetVtxEzx[jqi]   = -888.88;
       fTjetVtxNChi2[jqi] = -888.88;
     }
-
-    // Dump jet properties into tree variables
-    fTjpx[jqi]  = jet->px();
-    fTjpy[jqi]  = jet->py();
-    fTjpz[jqi]  = jet->pz();
-    fTjpt[jqi]  = jet->pt();
-    fTjeta[jqi] = jet->eta();
-    fTjphi[jqi] = jet->phi();
-    fTje[jqi]   = jet->energy();
-    fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
-    fTjEcorr[jqi] =  jet->px()/fJUNC_px_match[index];
 
     // CaloJet specific variables (embedded in PAT)
     if ( !fIsPat ) {
@@ -938,9 +1059,22 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
   fEventTree->Branch("JID_resEMF"     ,&fTjID_resEMF   ,"JID_resEMF[NJets]/D");
   fEventTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow  ,"JID_HCALTow[NJets]/D");
   fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow  ,"JID_ECALTow[NJets]/D");
+  fEventTree->Branch("JEtaEMrms"     ,&fTJEtaEMrms   ,"JEtaEMrms[NJets]/D");
+  fEventTree->Branch("JEtaHADrms"    ,&fTJEtaHADrms  ,"JEtaHADrms[NJets]/D");
+  fEventTree->Branch("JPhiEMrms"     ,&fTJPhiEMrms   ,"JPhiEMrms[NJets]/D");
+  fEventTree->Branch("JPhiHADrms"    ,&fTJPhiHADrms  ,"JPhiHADrms[NJets]/D");
   fEventTree->Branch("JbTagProb"      ,&fTbTagProb     ,"JbTagProb[NJets]/D");
   fEventTree->Branch("JChfrac"        ,&fTChfrac       ,"JChfrac[NJets]/D");
   fEventTree->Branch("JNAssoTracks"   ,&fTnAssoTracks  ,"JNAssoTracks[NJets]/I");
+  fEventTree->Branch("Jtrk1px"        ,&fTtrk1px       ,"Jtrk1px[NJets]/D");
+  fEventTree->Branch("Jtrk1py"        ,&fTtrk1py       ,"Jtrk1py[NJets]/D");
+  fEventTree->Branch("Jtrk1pz"        ,&fTtrk1pz       ,"Jtrk1pz[NJets]/D");
+  fEventTree->Branch("Jtrk2px"        ,&fTtrk2px       ,"Jtrk2px[NJets]/D");
+  fEventTree->Branch("Jtrk2py"        ,&fTtrk2py       ,"Jtrk2py[NJets]/D");
+  fEventTree->Branch("Jtrk2pz"        ,&fTtrk2pz       ,"Jtrk2pz[NJets]/D");
+  fEventTree->Branch("Jtrk3px"        ,&fTtrk3px       ,"Jtrk3px[NJets]/D");
+  fEventTree->Branch("Jtrk3py"        ,&fTtrk3py       ,"Jtrk3py[NJets]/D");
+  fEventTree->Branch("Jtrk3pz"        ,&fTtrk3pz       ,"Jtrk3pz[NJets]/D");
   fEventTree->Branch("JEcorr"         ,&fTjEcorr       ,"JEcorr[NJets]/D");
   fEventTree->Branch("JeMinDR"        ,&fTjeMinDR      ,"JeMinDR[NJets]/D");
   fEventTree->Branch("JVtxx"          ,&fTjetVtxx      ,"JVtxx[NJets]/D");
@@ -1060,6 +1194,9 @@ void NTupleProducer::endJob(){
   edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
   edm::LogVerbatim("NTP") << "  Number of times Tree was filled:  " << fNFillTree;
   edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+  //violatemp
+
+
 }
 
 // Method to reset the TTree variables for each event
@@ -1185,6 +1322,15 @@ void NTupleProducer::resetTree(){
   resetDouble(fTbTagProb);
   resetDouble(fTChfrac);
   resetInt(fTnAssoTracks);
+  resetDouble(fTtrk1px);
+  resetDouble(fTtrk1py);
+  resetDouble(fTtrk1pz);
+  resetDouble(fTtrk2px);
+  resetDouble(fTtrk2py);
+  resetDouble(fTtrk2pz);
+  resetDouble(fTtrk3px);
+  resetDouble(fTtrk3py);
+  resetDouble(fTtrk3pz);
   resetDouble(fTjeMinDR);
   resetDouble(fTjetVtxx);
   resetDouble(fTjetVtxy);

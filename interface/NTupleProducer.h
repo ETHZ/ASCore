@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.18 2009/11/09 10:59:06 fronga Exp $
+// $Id: NTupleProducer.h,v 1.19 2009/11/12 18:03:56 fronga Exp $
 //
 //
 
@@ -304,9 +304,22 @@ private:
   double fTjID_resEMF[20];
   double fTjID_HCALTow[20];
   double fTjID_ECALTow[20];
+  double fTJEtaEMrms[20];
+  double fTJEtaHADrms[20];
+  double fTJPhiEMrms[20];
+  double fTJPhiHADrms[20];
   double fTbTagProb[20];
   double fTChfrac[20];
   int fTnAssoTracks[20];
+  double fTtrk1px[20];
+  double fTtrk1py[20];
+  double fTtrk1pz[20];
+  double fTtrk2px[20];
+  double fTtrk2py[20];
+  double fTtrk2pz[20];
+  double fTtrk3px[20];
+  double fTtrk3py[20];
+  double fTtrk3pz[20];
   double fTjEcorr[20];
   double fTjeMinDR[20];
   double fTjetVtxx[20];

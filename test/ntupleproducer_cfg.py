@@ -38,11 +38,11 @@ process.source = cms.Source("PoolSource",
 		#'file:/data/14/stiegerb/SUSY/31X/ppEleX_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
 		# 'file:EleIsoTest.root'
 		# This is from /SUSY_LM0-sftsht/Summer08_IDEAL_V11_v1/GEN-SIM-RECO:
-		 'file:/data/fronga/LM0-RECO-312.root'
+		 'file:/data/14/stiegerb/SUSY/31X/ppMuXLoose_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
 	),
 	duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # Output
 process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTupleProducer.root"),
