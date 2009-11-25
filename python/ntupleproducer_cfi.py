@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyze = cms.EDAnalyzer('NTupleProducer',
 	# Main settings
-	isRealData = cms.untracked.bool(True),
+	isRealData = cms.untracked.bool(False),
 	isPat      = cms.untracked.bool(False),
 	# Collections
 	tag_muons      = cms.untracked.InputTag('muons'),
@@ -33,15 +33,9 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_triggers = cms.untracked.InputTag("TriggerResults","","HLT"),
 
 	# Jet ID configuration
-	jetID = cms.PSet(
-		hbheRecHitsColl = cms.InputTag("hbhereco"),
-		hoRecHitsColl   = cms.InputTag("horeco"),
-		hfRecHitsColl   = cms.InputTag("hfreco"),
-		ebRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEB"),
-		eeRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEE")
-	),
+	jetID = cms.PSet()
 
-	# Event Selection Criteria
+        # Event Selection Criteria
 	# Muons:
 	sel_minmupt     = cms.double(3.0),
 	sel_maxmueta    = cms.double(2.4),
@@ -51,11 +45,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxeliso    = cms.double(100.0),
 	sel_maxeld0     = cms.double(100.0),
 	# Jets:
-	sel_minjpt      = cms.double(0.0),
+	sel_minjpt      = cms.double(10.0),
 	sel_maxjeta     = cms.double(10.0),
 	sel_minjemfrac  = cms.double(0.0),
 	# Tracks:
-	sel_mintrkpt    = cms.double(0.0),
+	sel_mintrkpt    = cms.double(10.0),
 	sel_maxtrketa   = cms.double(10.0),
 	sel_maxtrknchi2 = cms.double(1e15),
 	sel_mintrknhits = cms.double(0),

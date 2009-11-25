@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.24 2009/11/19 17:19:36 sordini Exp $
+// $Id: NTupleProducer.cc,v 1.25 2009/11/24 12:56:00 stiegerb Exp $
 //
 //
 
@@ -829,16 +829,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		} else {
 			const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
 			fTjemfrac[jqi]      = pJ->emEnergyFraction();
-			fTjID_HPD[jqi]      = pJ->fHPD();
-			fTjID_RBX[jqi]      = pJ->fRBX();
-			fTjID_n90Hits[jqi]  = pJ->n90Hits();
-			fTjID_SubDet1[jqi]  = pJ->fSubDetector1();
-			fTjID_SubDet2[jqi]  = pJ->fSubDetector2();
-			fTjID_SubDet3[jqi]  = pJ->fSubDetector3();
-			fTjID_SubDet4[jqi]  = pJ->fSubDetector4();
-			fTjID_resEMF[jqi]   = pJ->restrictedEMF();
-			fTjID_HCALTow[jqi]  = pJ->nHCALTowers();
-			fTjID_ECALTow[jqi]  = pJ->nECALTowers();
+			fTjID_HPD[jqi]      = pJ->jetID().fHPD;
+			fTjID_RBX[jqi]      = pJ->jetID().fRBX;
+			fTjID_n90Hits[jqi]  = pJ->jetID().n90Hits;
+			fTjID_SubDet1[jqi]  = pJ->jetID().fSubDetector1;
+			fTjID_SubDet2[jqi]  = pJ->jetID().fSubDetector2;
+			fTjID_SubDet3[jqi]  = pJ->jetID().fSubDetector3;
+			fTjID_SubDet4[jqi]  = pJ->jetID().fSubDetector4;
+			fTjID_resEMF[jqi]   = pJ->jetID().restrictedEMF;
+			fTjID_HCALTow[jqi]  = pJ->jetID().nHCALTowers;
+			fTjID_ECALTow[jqi]  = pJ->jetID().nECALTowers;
 		}
 
 		fTgoodjet[jqi] = 1;

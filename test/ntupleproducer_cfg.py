@@ -92,6 +92,9 @@ process.eleIsoFromDepsEcalFromHits.deposits[0].deltaR = 0.3
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 
+from RecoJets.JetProducers.JetIDParams_cfi import JetIDParams
+process.analyze.jetID = JetIDParams
+
 #### Path ######################################################################
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
