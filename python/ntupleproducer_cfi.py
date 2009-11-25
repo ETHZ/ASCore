@@ -33,7 +33,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_triggers = cms.untracked.InputTag("TriggerResults","","HLT"),
 
 	# Jet ID configuration
-	jetID = cms.PSet()
+	jetID = cms.PSet(),
 
         # Event Selection Criteria
 	# Muons:
