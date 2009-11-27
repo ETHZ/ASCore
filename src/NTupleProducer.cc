@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.25 2009/11/24 12:56:00 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.26 2009/11/25 16:01:38 stiegerb Exp $
 //
 //
 
@@ -309,7 +309,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTbeamspoty = (beamSpot.position()).y();
 	fTbeamspotz = (beamSpot.position()).z();
 
-// Loop over MuonCollection to count muons
+////////////////////////////////////////////////////////
+// Muon Variables:
 	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
 	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
 	// Check if maximum number of electrons is exceeded already:
@@ -389,7 +390,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 	fTnmu = mqi+1;
 
-// Read Electrons
+////////////////////////////////////////////////////////
+// Electron variables:
 	int eqi(-1),ei(-1); // counts # of qualified electrons
 	if(electrons->size() > 0){
 	// Read eID results
@@ -509,6 +511,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 	fTneles = eqi+1;
 
+////////////////////////////////////////////////////////
+// Jet Variables:
 // Check Jet collection's size
 	if(jets->size() > 50){
 		edm::LogWarning("NTP") << "@SUB=analyze"
@@ -845,7 +849,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 	fTnjets = jqi+1;
 
-// Get and Dump MET Variables:
+////////////////////////////////////////////////////////
+// Get and Dump (M)E(T) Variables:
+	// Tracks:
 	int nqtrk(-1);
 	fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
 	for(TrackCollection::const_iterator it = tracks->begin(); 
@@ -879,13 +885,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	TVector3 trkPtSum(fTTrkPtSumx, fTTrkPtSumy, 0.);
 	fTTrkPtSumphi = trkPtSum.Phi();
 
-	fTNCaloTowers = calotowers->size();
-	
+	// Calotowers:
+	fTNCaloTowers = calotowers->size();	
 	fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
 	fTHCALEsumx = 0.; fTHCALEsumy = 0.; fTHCALEsumz = 0.;
+	fTSumEt = 0.; fTECALSumEt = 0.; fTHCALSumEt = 0.;
 	for(CaloTowerCollection::const_iterator itow = calotowers->begin(); 
 	itow!=calotowers->end(); ++itow ){
 		if(itow->energy() == 0.) continue; // Check against zero energy towers
+		fTSumEt += itow->et();
+		fTECALSumEt += itow->emEt();
+		fTHCALSumEt += itow->hadEt();
 		double emFrac = itow->emEnergy()/itow->energy();
 		double hadFrac = itow->hadEnergy()/itow->energy();
 		fTECALEsumx += itow->px()*emFrac;
@@ -906,6 +916,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	if(fTHCALEsumz != 0.) fTHCALMETeta = hcalMET.Eta();
 	else fTHCALMETeta = 0.;
 
+	// MET Collections:
 	fTRawMET    = (calomet->at(0)).pt();
 	fTRawMETpx  = (calomet->at(0)).px();
 	fTRawMETpy  = (calomet->at(0)).py();
@@ -1133,12 +1144,15 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("TrkPhi"         ,&fTtrkphi       ,"TrkPhi[NTracks]/D");
 	fEventTree->Branch("TrkNChi2"       ,&fTtrknchi2     ,"TrkNChi2[NTracks]/D");
 	fEventTree->Branch("TrkNHits"       ,&fTtrknhits     ,"TrkNHits[NTracks]/D");
-
-// MET:
 	fEventTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/D");
 	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/D");
 	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/D");
 	fEventTree->Branch("TrkPtSumPhi"    ,&fTTrkPtSumphi    ,"TrkPtSumPhi/D");
+
+// MET:
+	fEventTree->Branch("SumEt"          ,&fTSumEt          ,"SumEt/D");
+	fEventTree->Branch("ECALSumEt"      ,&fTECALSumEt      ,"ECALSumEt/D");
+	fEventTree->Branch("HCALSumEt"      ,&fTHCALSumEt      ,"HCALSumEt/D");
 	fEventTree->Branch("ECALEsumx"      ,&fTECALEsumx      ,"ECALEsumx/D");
 	fEventTree->Branch("ECALEsumy"      ,&fTECALEsumy      ,"ECALEsumy/D");
 	fEventTree->Branch("ECALEsumz"      ,&fTECALEsumz      ,"ECALEsumz/D");
@@ -1414,6 +1428,9 @@ void NTupleProducer::resetTree(){
 	fTTrkPtSumy       = -999.99;
 	fTTrkPtSum        = -999.99;
 	fTTrkPtSumphi     = -999.99;
+	fTSumEt           = -999.99;
+	fTECALSumEt       = -999.99;
+	fTHCALSumEt       = -999.99;
 	fTECALEsumx       = -999.99;
 	fTECALEsumy       = -999.99;
 	fTECALEsumz       = -999.99;
