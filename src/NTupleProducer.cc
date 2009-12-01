@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.26 2009/11/25 16:01:38 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.27 2009/11/27 15:48:24 stiegerb Exp $
 //
 //
 
@@ -108,7 +108,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMintrkpt       = iConfig.getParameter<double>("sel_mintrkpt");
 	fMaxtrketa      = iConfig.getParameter<double>("sel_maxtrketa");
 	fMaxtrknchi2    = iConfig.getParameter<double>("sel_maxtrknchi2");
-	fMintrknhits    = iConfig.getParameter<double>("sel_mintrknhits");
+	fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
 
 // Isolation Parameters
 	fIso_MuTkDRin   = iConfig.getParameter<double>("iso_MuTkDRin");
@@ -275,11 +275,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		Service<service::TriggerNamesService> tns;
 		tns->getTrigPaths(*triggers, triggernames);
 		for( unsigned int i = 0; i < tr.size(); i++ ){
+			// cout << "i " << i << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
 			fHtrigstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
-		// cout << "i " << i << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
 		}
 	// Add a warning about the shift between trigger bits and bin numbers:
 		fHtrigstat->GetXaxis()->SetBinLabel(tr.size()+2, "Bin#=Bit#+1");
+		triggernames.clear();
 	}
 	for( unsigned int i = 0; i < tr.size(); i++ ){
 		if(tr[i].accept())	fHtrigstat->Fill(i);
@@ -314,7 +315,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
 	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
 	// Check if maximum number of electrons is exceeded already:
-		if(mqi >= 20){
+		if(mqi >= fMaxnmus){
 			edm::LogWarning("NTP") << "@SUB=analyze()"
 				<< "Maximum number of muons exceeded...";
 			fTflagmaxmuexc = 1;
@@ -345,6 +346,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuiso[mqi]   = MuIso[0];
 		fTmuptsum[mqi] = MuIso[1];
 		fTmuetsum[mqi] = MuIso[2];
+		MuIso.clear();
 
 	// Isolation is embedded in PAT.
 		if ( !fIsPat ) {
@@ -385,6 +387,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTmuid[mqi]  = MuMatch[1];
 				fTmumid[mqi] = MuMatch[2];
 			}
+			MuMatch.clear();
 		}
 		fTgoodmu[mqi] = 1;
 	}
@@ -408,13 +411,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Tight 
 		iEvent.getByLabel( "eidTight", eIDValueMap[3] ); 
 		const ValueMap<float> & eIDmapT  = *eIDValueMap[3] ;
-
+		eIDValueMap.clear();
+		
 	// Loop over electrons
 		for( View<GsfElectron>::const_iterator El = electrons->begin(); 
 		El != electrons->end(); ++El ) {
 			++ei;
 		// Check if maximum number of electrons is exceeded already:
-			if(eqi >= 20){
+			if(eqi >= fMaxneles){
 				edm::LogWarning("NTP") << "@SUB=analyze"
 					<< "Maximum number of electrons exceeded...";
 				fTflagmaxelexc = 1;
@@ -425,7 +429,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		// Electron preselection:   
 			if(El->pt() < fMinelpt) continue;
 			if(fabs(El->eta()) > fMaxeleta) continue;
-		// if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
+			if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
 
 		// Read EleIsolation
 			double eTkIso,eECIso,eHCIso;
@@ -451,7 +455,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				eHCIso = pEl->hcalIso();
 			}
 			double eliso  = (eTkIso+eECIso+eHCIso)/El->pt();
-		// if(eliso > fMaxeliso) continue;
+			if(eliso > fMaxeliso) continue;
 
 		// Dump electron properties in tree variables
 			eqi++;
@@ -514,7 +518,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 ////////////////////////////////////////////////////////
 // Jet Variables:
 // Check Jet collection's size
-	if(jets->size() > 50){
+	if((int)jets->size() > fMaxnjets){
 		edm::LogWarning("NTP") << "@SUB=analyze"
 			<< "Found more than 50 uncorrected jets, I'm scared ...";
 		fTflagmaxujetexc = 1;
@@ -559,14 +563,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 // Sort corrected jet collection by decreasing pt
 	IndexByPt indexComparator; // Need this to use the uncorrected jets below...
-	std::sort(corrIndices.begin(),corrIndices.end(),indexComparator);
+	std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
 
 // Determine qualified jets
 	int jqi(-1); // counts # of qualified jets
 	for(vector<OrderPair>::const_iterator it = corrIndices.begin();
 	it != corrIndices.end(); ++it ) { // Loop over corr. jet indices
 	// Check if maximum number of jets is exceeded already
-		if(jqi >= 50) {
+		if(jqi >= fMaxnjets) {
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of jets exceeded...";
 			fTflagmaxjetexc = 1;
@@ -579,7 +583,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		const Jet* jet = corrJets[index];
 		if(jet->pt() < fMinjpt) continue;
 		if(fabs(jet->eta()) > fMaxjeta) continue;
-	// if(jet->emEnergyFraction() < fMinjemfrac) continue;
+		// if(jet->emEnergyFraction() < fMinjemfrac) continue;
 		jqi++;
 
 	// Dump jet properties into tree variables
@@ -704,6 +708,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				varianceEtaHAD = (float(NHAD)/float(NHAD-1))*(sumEta2HAD/sumHADWeights - meanEtaHAD*meanEtaHAD);
 				variancePhiHAD = (float(NHAD)/float(NHAD-1))*(sumPhi2HAD/sumHADWeights - meanPhiHAD*meanPhiHAD);
 			}
+			towers.clear();
 		}else { 
 		//for the moment do nothing, the variables variance* are initialized to zero
 		}
@@ -844,10 +849,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTjID_HCALTow[jqi]  = pJ->jetID().nHCALTowers;
 			fTjID_ECALTow[jqi]  = pJ->jetID().nECALTowers;
 		}
+		AssociatedTracks.clear();
+		AssociatedTTracks.clear();
 
 		fTgoodjet[jqi] = 1;
 	}
 	fTnjets = jqi+1;
+	corrJets.clear();
+	corrIndices.clear();
 
 ////////////////////////////////////////////////////////
 // Get and Dump (M)E(T) Variables:
@@ -856,13 +865,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
 	for(TrackCollection::const_iterator it = tracks->begin(); 
 	it != tracks->end() ; ++it ) {
-		// if(it->pt() < fMintrkpt) continue;
-		// if(fabs(it->eta()) > fMaxtrketa) continue;
-		// if(it->normalizedChi2() > fMaxtrknchi2) continue;
-		// if(it->numberOfValidHits() < fMintrknhits) continue;
+		if(it->pt() < fMintrkpt) continue;
+		if(fabs(it->eta()) > fMaxtrketa) continue;
+		if(it->normalizedChi2() > fMaxtrknchi2) continue;
+		if(it->numberOfValidHits() < fMintrknhits) continue;
 		nqtrk++; // starts at 0
 	// Check if maximum number of tracks is exceeded already
-		if(nqtrk >= 500) {
+		if(nqtrk >= fMaxntrks) {
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of tracks exceeded...";
 			fTflagmaxtrkexc = 1;
@@ -970,6 +979,12 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fRunTree->Branch("MinJPt"         ,&fRTMinjpt,         "MinJPt/D");
 	fRunTree->Branch("MaxJEta"        ,&fRTMaxjeta,        "MaxJEta/D");
 	fRunTree->Branch("MinJEMfrac"     ,&fRTMinjemfrac,     "MinJEMfrac/D");
+
+	fRunTree->Branch("MinTrkPt"       ,&fRTMintrkpt,        "MinTrkPt/D");
+	fRunTree->Branch("MaxTrkEta"      ,&fRTMaxtrketa,       "MaxTrkEta/D");
+	fRunTree->Branch("MaxTrkNChi2"    ,&fRTMaxtrknchi2,     "MaxTrkNChi2/D");
+	fRunTree->Branch("MinTrkNHits"    ,&fRTMintrknhits,     "MinTrkNHits/I");
+
 	fRunTree->Branch("IsoMuTkDRin"    ,&fRTIsoMuTkDRin,    "IsoMuTkDRin/D");
 	fRunTree->Branch("IsoMuTkDRout"   ,&fRTIsoMuTkDRout,   "IsoMuTkDRout/D");
 	fRunTree->Branch("IsoMuTkSeed"    ,&fRTIsoMuTkSeed,    "IsoMuTkSeed/D");
@@ -1214,6 +1229,10 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMinjpt        = -999.99;
 	fRTMaxjeta       = -999.99;
 	fRTMinjemfrac    = -999.99;
+	fRTMintrkpt      = -999.99;
+	fRTMaxtrketa     = -999.99;
+	fRTMaxtrknchi2   = -999.99;
+	fRTMintrknhits   = -999;
 	fRTIsoMuTkDRin   = -999.99;
 	fRTIsoMuTkDRout  = -999.99;
 	fRTIsoMuTkSeed   = -999.99;
@@ -1240,6 +1259,11 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMinjpt        = fMinjpt;
 	fRTMaxjeta       = fMaxjeta;
 	fRTMinjemfrac    = fMinjemfrac;
+	fRTMintrkpt      = fMintrkpt;
+	fRTMaxtrketa     = fMaxtrketa;
+	fRTMaxtrknchi2   = fMaxtrknchi2;
+	fRTMintrknhits   = fMintrknhits;
+
 	fRTIsoMuTkDRin   = fIso_MuTkDRin;
 	fRTIsoMuTkDRout  = fIso_MuTkDRout;
 	fRTIsoMuTkSeed   = fIso_MuTkSeed;

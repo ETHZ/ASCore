@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.21 2009/11/24 12:55:44 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.22 2009/11/27 15:48:38 stiegerb Exp $
 //
 //
 
@@ -44,6 +44,7 @@ Implementation:
 
 // Helpers
 #include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
+
 
 
 class NTupleProducer : public edm::EDAnalyzer {
@@ -82,6 +83,11 @@ private:
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
 	reco::helper::JetIDHelper jetIDHelper;
+
+	static const int fMaxnmus = 20;
+	static const int fMaxneles = 20;
+	static const int fMaxnjets = 100;
+	static const int fMaxntrks = 500;
 
 	bool fIsRealData;
 	bool fIsPat;
@@ -125,7 +131,7 @@ private:
 	double fMintrkpt;
 	double fMaxtrketa;
 	double fMaxtrknchi2;
-	double fMintrknhits;
+	int fMintrknhits;
 	double fIso_MuTkDRin;
 	double fIso_MuTkDRout;
 	double fIso_MuTkSeed;
@@ -133,9 +139,9 @@ private:
 	double fIso_MuCalDRout;
 	double fIso_MuCalSeed;
 
-	double fJUNC_px_match[50];
-	double fJUNC_py_match[50];
-	double fJUNC_pz_match[50];
+	double fJUNC_px_match[fMaxnjets];
+	double fJUNC_py_match[fMaxnjets];
+	double fJUNC_pz_match[fMaxnjets];
 
 	TH1I *fHtrigstat; // Added to keep track of trigger names
 	bool fFirstevent;
@@ -158,6 +164,12 @@ private:
 	double fRTMinjpt;
 	double fRTMaxjeta;
 	double fRTMinjemfrac;
+
+	double fRTMintrkpt;
+	double fRTMaxtrketa;
+	double fRTMaxtrknchi2;
+	int fRTMintrknhits;
+
 	double fRTIsoMuTkDRin;
 	double fRTIsoMuTkDRout;
 	double fRTIsoMuTkSeed;
@@ -204,151 +216,151 @@ private:
 
 // Muons:
 	unsigned int fTnmu;
-	int fTgoodmu[20];
-	double fTmupx[20];
-	double fTmupy[20];
-	double fTmupz[20];
-	double fTmue[20];
-	double fTmuet[20];
-	double fTmupt[20];
-	double fTmueta[20];
-	double fTmuphi[20];
-	int fTmucharge[20];
+	int fTgoodmu[fMaxnmus];
+	double fTmupx[fMaxnmus];
+	double fTmupy[fMaxnmus];
+	double fTmupz[fMaxnmus];
+	double fTmue[fMaxnmus];
+	double fTmuet[fMaxnmus];
+	double fTmupt[fMaxnmus];
+	double fTmueta[fMaxnmus];
+	double fTmuphi[fMaxnmus];
+	int fTmucharge[fMaxnmus];
 
 // - Isolation Variables
-	double fTmuetsum[20];
-	double fTmuptsum[20];
-	double fTmuiso[20];
-	double fTmueecal[20];
-	double fTmuehcal[20];
+	double fTmuetsum[fMaxnmus];
+	double fTmuptsum[fMaxnmus];
+	double fTmuiso[fMaxnmus];
+	double fTmueecal[fMaxnmus];
+	double fTmuehcal[fMaxnmus];
 
 // - Impact Parameters
-	double fTmud0bs[20];
-	double fTmud0pv[20];
-	double fTmud0E[20];
-	double fTmudzbs[20];
-	double fTmudzpv[20];
-	double fTmudzE[20];
+	double fTmud0bs[fMaxnmus];
+	double fTmud0pv[fMaxnmus];
+	double fTmud0E[fMaxnmus];
+	double fTmudzbs[fMaxnmus];
+	double fTmudzpv[fMaxnmus];
+	double fTmudzE[fMaxnmus];
 
 // - MuID Variables
-	double fTmunchi2[20];
-	int fTmunglhits[20];
-	int fTmunmuhits[20];
-	int fTmuntkhits[20];
-	int fTmunmatches[20];
-	int fTmunchambers[20];
-	double fTmucalocomp[20];
-	double fTmusegmcomp[20];
-	int fTmutrackermu[20];
-	int fTmuisGMPT[20];
+	double fTmunchi2[fMaxnmus];
+	int fTmunglhits[fMaxnmus];
+	int fTmunmuhits[fMaxnmus];
+	int fTmuntkhits[fMaxnmus];
+	int fTmunmatches[fMaxnmus];
+	int fTmunchambers[fMaxnmus];
+	double fTmucalocomp[fMaxnmus];
+	double fTmusegmcomp[fMaxnmus];
+	int fTmutrackermu[fMaxnmus];
+	int fTmuisGMPT[fMaxnmus];
 
 // - Gen Info:
-	int fTmuid[20];
-	int fTmumid[20];
+	int fTmuid[fMaxnmus];
+	int fTmumid[fMaxnmus];
 
 // Electrons:
 	int fTneles;
-	int fTgoodel[20];
-	double fTepx[20];
-	double fTepy[20];
-	double fTepz[20];
-	double fTept[20];
-	double fTee[20];
-	double fTeet[20];
-	double fTeeta[20];
-	double fTephi[20];
-	double fTed0bs[20];
-	double fTed0pv[20];
-	double fTed0E[20];
-	double fTedzbs[20];
-	double fTedzpv[20];
-	double fTedzE[20];
-	double fTeiso[20];
-	double fTeptsum[20];
-	double fTeetsum[20];
-	double fTenchi2[20];
-	int fTeIDTight[20];
-	int fTeIDLoose[20];
-	int fTeIDRobustTight[20];
-	int fTeIDRobustLoose[20];
-	int fTecharge[20];
-	int fTeInGap[20];  // seed crystal next to a gap
-	int fTeEcalDriven[20];
-	int fTeTrackerDriven[20];
-	int fTeBasicClustersSize[20];
-	double fTefbrem[20];
-	double fTeHcalOverEcal[20];
-	double fTeE5x5[20];                      // 5x5 arround seed
-	double fTeE2x5Max[20];                   // 2x5 arround seed
-	double fTeSigmaIetaIeta[20];             // shower shape covariance
-	double fTeDeltaPhiSeedClusterAtCalo[20]; // Dphi (seed-track) at calo from p_out
-	double fTeDeltaEtaSeedClusterAtCalo[20]; // outermost track state extrapolated at calo
-	double fTeDeltaPhiSuperClusterAtVtx[20]; // Dphi (sc-track) at calo extrapolated from p_in
-	double fTeDeltaEtaSuperClusterAtVtx[20]; // Deta (sc-track) at calo extrapolated from p_in
-	double fTecaloenergy[20];                // caloEnergy() = supercluster energy 99.9% of the time
-	double fTtrkmomatvtx[20];                // trackMomentumAtVtx().R()
-	double fTeESuperClusterOverP[20];        // Esc/Pin
+	int fTgoodel[fMaxneles];
+	double fTepx[fMaxneles];
+	double fTepy[fMaxneles];
+	double fTepz[fMaxneles];
+	double fTept[fMaxneles];
+	double fTee[fMaxneles];
+	double fTeet[fMaxneles];
+	double fTeeta[fMaxneles];
+	double fTephi[fMaxneles];
+	double fTed0bs[fMaxneles];
+	double fTed0pv[fMaxneles];
+	double fTed0E[fMaxneles];
+	double fTedzbs[fMaxneles];
+	double fTedzpv[fMaxneles];
+	double fTedzE[fMaxneles];
+	double fTeiso[fMaxneles];
+	double fTeptsum[fMaxneles];
+	double fTeetsum[fMaxneles];
+	double fTenchi2[fMaxneles];
+	int fTeIDTight[fMaxneles];
+	int fTeIDLoose[fMaxneles];
+	int fTeIDRobustTight[fMaxneles];
+	int fTeIDRobustLoose[fMaxneles];
+	int fTecharge[fMaxneles];
+	int fTeInGap[fMaxneles];  // seed crystal next to a gap
+	int fTeEcalDriven[fMaxneles];
+	int fTeTrackerDriven[fMaxneles];
+	int fTeBasicClustersSize[fMaxneles];
+	double fTefbrem[fMaxneles];
+	double fTeHcalOverEcal[fMaxneles];
+	double fTeE5x5[fMaxneles];                      // 5x5 arround seed
+	double fTeE2x5Max[fMaxneles];                   // 2x5 arround seed
+	double fTeSigmaIetaIeta[fMaxneles];             // shower shape covariance
+	double fTeDeltaPhiSeedClusterAtCalo[fMaxneles]; // Dphi (seed-track) at calo from p_out
+	double fTeDeltaEtaSeedClusterAtCalo[fMaxneles]; // outermost track state extrapolated at calo
+	double fTeDeltaPhiSuperClusterAtVtx[fMaxneles]; // Dphi (sc-track) at calo extrapolated from p_in
+	double fTeDeltaEtaSuperClusterAtVtx[fMaxneles]; // Deta (sc-track) at calo extrapolated from p_in
+	double fTecaloenergy[fMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
+	double fTtrkmomatvtx[fMaxneles];                // trackMomentumAtVtx().R()
+	double fTeESuperClusterOverP[fMaxneles];        // Esc/Pin
 
 
 // Jets:
 	int fTnjets;
-	int fTgoodjet[50];
-	double fTjpx[50];
-	double fTjpy[50];
-	double fTjpz[50];
-	double fTje[50];
-	double fTjet[50];
-	double fTjpt[50];
-	double fTjeta[50];
-	double fTjphi[50];
-	double fTjemfrac[50];
-	double fTjID_HPD[50];
-	double fTjID_RBX[50];
-	double fTjID_n90Hits[50];
-	double fTjID_SubDet1[50];
-	double fTjID_SubDet2[50];
-	double fTjID_SubDet3[50];
-	double fTjID_SubDet4[50];
-	double fTjID_resEMF[50];
-	double fTjID_HCALTow[50];
-	double fTjID_ECALTow[50];
-	double fTJEtaEMrms[50];
-	double fTJEtaHADrms[50];
-	double fTJPhiEMrms[50];
-	double fTJPhiHADrms[50];
-	double fTbTagProb[50];
-	double fTChfrac[50];
-	int fTnAssoTracks[50];
-	double fTtrk1px[50];
-	double fTtrk1py[50];
-	double fTtrk1pz[50];
-	double fTtrk2px[50];
-	double fTtrk2py[50];
-	double fTtrk2pz[50];
-	double fTtrk3px[50];
-	double fTtrk3py[50];
-	double fTtrk3pz[50];
-	double fTjEcorr[50];
-	double fTjeMinDR[50];
-	double fTjetVtxx[50];
-	double fTjetVtxy[50];
-	double fTjetVtxz[50];
-	double fTjetVtxExx[50];
-	double fTjetVtxEyx[50];
-	double fTjetVtxEyy[50];
-	double fTjetVtxEzy[50];
-	double fTjetVtxEzz[50];
-	double fTjetVtxEzx[50];
-	double fTjetVtxNChi2[50];
+	int fTgoodjet[fMaxnjets];
+	double fTjpx[fMaxnjets];
+	double fTjpy[fMaxnjets];
+	double fTjpz[fMaxnjets];
+	double fTje[fMaxnjets];
+	double fTjet[fMaxnjets];
+	double fTjpt[fMaxnjets];
+	double fTjeta[fMaxnjets];
+	double fTjphi[fMaxnjets];
+	double fTjemfrac[fMaxnjets];
+	double fTjID_HPD[fMaxnjets];
+	double fTjID_RBX[fMaxnjets];
+	double fTjID_n90Hits[fMaxnjets];
+	double fTjID_SubDet1[fMaxnjets];
+	double fTjID_SubDet2[fMaxnjets];
+	double fTjID_SubDet3[fMaxnjets];
+	double fTjID_SubDet4[fMaxnjets];
+	double fTjID_resEMF[fMaxnjets];
+	double fTjID_HCALTow[fMaxnjets];
+	double fTjID_ECALTow[fMaxnjets];
+	double fTJEtaEMrms[fMaxnjets];
+	double fTJEtaHADrms[fMaxnjets];
+	double fTJPhiEMrms[fMaxnjets];
+	double fTJPhiHADrms[fMaxnjets];
+	double fTbTagProb[fMaxnjets];
+	double fTChfrac[fMaxnjets];
+	int fTnAssoTracks[fMaxnjets];
+	double fTtrk1px[fMaxnjets];
+	double fTtrk1py[fMaxnjets];
+	double fTtrk1pz[fMaxnjets];
+	double fTtrk2px[fMaxnjets];
+	double fTtrk2py[fMaxnjets];
+	double fTtrk2pz[fMaxnjets];
+	double fTtrk3px[fMaxnjets];
+	double fTtrk3py[fMaxnjets];
+	double fTtrk3pz[fMaxnjets];
+	double fTjEcorr[fMaxnjets];
+	double fTjeMinDR[fMaxnjets];
+	double fTjetVtxx[fMaxnjets];
+	double fTjetVtxy[fMaxnjets];
+	double fTjetVtxz[fMaxnjets];
+	double fTjetVtxExx[fMaxnjets];
+	double fTjetVtxEyx[fMaxnjets];
+	double fTjetVtxEyy[fMaxnjets];
+	double fTjetVtxEzy[fMaxnjets];
+	double fTjetVtxEzz[fMaxnjets];
+	double fTjetVtxEzx[fMaxnjets];
+	double fTjetVtxNChi2[fMaxnjets];
 
 // Tracks:
 	int fTntracks;
-	int fTgoodtrk[500];
-	double fTtrkpt[500];
-	double fTtrketa[500];
-	double fTtrkphi[500];
-	double fTtrknchi2[500];
-	double fTtrknhits[500];
+	int fTgoodtrk[fMaxntrks];
+	double fTtrkpt[fMaxntrks];
+	double fTtrketa[fMaxntrks];
+	double fTtrkphi[fMaxntrks];
+	double fTtrknchi2[fMaxntrks];
+	double fTtrknhits[fMaxntrks];
 
 // (M)E(T):
 	double fTTrkPtSumx;
