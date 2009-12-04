@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.23 2009/12/01 19:46:04 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.24 2009/12/02 17:50:04 fronga Exp $
 //
 //
 
@@ -84,15 +84,15 @@ private:
   edm::Service<TFileService> fTFileService;
   reco::helper::JetIDHelper jetIDHelper;
 
-  static const int fMaxnmus  = 20;
-  static const int fMaxneles = 20;
-  static const int fMaxnjets = 10;
-  static const int fMaxntrks = 500;
-
   bool fIsRealData;
   bool fIsPat;
   int fNTotEvents;
   int fNFillTree;
+
+  static const int fMaxnmus  = 20;
+  static const int fMaxneles = 20;
+  static const int fMaxnjets = 100;
+  static const int fMaxntrks = 500;
 
   edm::InputTag fMuonTag;
   edm::InputTag fElectronTag;
@@ -356,7 +356,7 @@ private:
   // Tracks:
   int fTntracks;
   int fTgoodtrk[fMaxntrks];
-  double fTtrkpt[fMaxntrks];
+  double fTtrkpt[fMaxntrks]; // this is actually charge*pt
   double fTtrketa[fMaxntrks];
   double fTtrkphi[fMaxntrks];
   double fTtrknchi2[fMaxntrks];
