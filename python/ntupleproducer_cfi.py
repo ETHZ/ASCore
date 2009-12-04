@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 analyze = cms.EDAnalyzer('NTupleProducer',
 	# Main settings
-	isRealData = cms.untracked.bool(False),
+	isRealData = cms.untracked.bool(True),
 	isPat      = cms.untracked.bool(False),
 	# Collections
 	tag_muons      = cms.untracked.InputTag('muons'),
@@ -20,14 +20,17 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	
 	tag_sc       = cms.untracked.InputTag('correctedHybridSuperClusters'),
 	tag_jets     = cms.untracked.InputTag('sisCone5CaloJets'),
-	tag_btag     = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  #trackCountingHighPurBJetTags #jetProbabilityBJetTags
+	tag_btag     = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  
+	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
 	tag_met1     = cms.untracked.InputTag('met'),
 	tag_met2     = cms.untracked.InputTag('corMetGlobalMuons'),
 	tag_met3     = cms.untracked.InputTag('tcMet'),
 	tag_met4     = cms.untracked.InputTag('pfMet'),
 	tag_met5     = cms.untracked.InputTag('metMuonJESCorSC5'),
 	tag_vertex   = cms.untracked.InputTag('offlinePrimaryVertices'),
+	# tag_vertex   = cms.untracked.InputTag('offlinePrimaryVertices','','REVERTEX'),
 	tag_tracks   = cms.untracked.InputTag('generalTracks'),
+	# tag_tracks   = cms.untracked.InputTag('generalTracks','','RETRACK'),
 	tag_caltow   = cms.untracked.InputTag('towerMaker'),
 	tag_genpart  = cms.untracked.InputTag('genParticles'),
 	tag_triggers = cms.untracked.InputTag("TriggerResults","","HLT"),
@@ -35,24 +38,24 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# Jet ID configuration
 	jetID = cms.PSet(),
 
-        # Event Selection Criteria
+   # Event Selection Criteria
 	# Muons:
-	sel_minmupt     = cms.double(3.0),
+	sel_minmupt     = cms.double(0.2),
 	sel_maxmueta    = cms.double(2.4),
 	# Electrons:
-	sel_minelpt     = cms.double(0.0),
+	sel_minelpt     = cms.double(0.2),
 	sel_maxeleta    = cms.double(2.5),
-	sel_maxeliso    = cms.double(100.0),
-	sel_maxeld0     = cms.double(100.0),
+	sel_maxeliso    = cms.double(1e15),
+	sel_maxeld0     = cms.double(1e15),
 	# Jets:
-	sel_minjpt      = cms.double(10.0),
+	sel_minjpt      = cms.double(0.2),
 	sel_maxjeta     = cms.double(10.0),
 	sel_minjemfrac  = cms.double(0.0),
 	# Tracks:
-	sel_mintrkpt    = cms.double(10.0),
+	sel_mintrkpt    = cms.double(0.2),
 	sel_maxtrketa   = cms.double(10.0),
 	sel_maxtrknchi2 = cms.double(1e15),
-	sel_mintrknhits = cms.double(0),
+	sel_mintrknhits = cms.int32(0),
 	# Isolation Parameters
 	iso_MuTkDRin    = cms.double(0.015),
 	iso_MuTkDRout   = cms.double(0.3),
