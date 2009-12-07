@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.29 2009/12/02 17:50:04 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.30 2009/12/04 15:28:02 stiegerb Exp $
 //
 //
 
@@ -49,6 +49,9 @@ Implementation:
 
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
@@ -90,7 +93,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fTrackTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
 	fCalTowTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_caltow");
 	fGenPartTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_genpart");
-	fTriggerTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_triggers");
+	fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
+	fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
 
 // Jet ID helper
 	jetIDHelper = reco::helper::JetIDHelper(iConfig.getParameter<edm::ParameterSet>("jetID")  );
@@ -263,26 +267,58 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTsigprocid = genEvtInfo->signalProcessID();		
 	}
 
-// Dump HLT trigger bits
+// Dump trigger bits
+	Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
+	iEvent.getByLabel(fL1TriggerTag, l1GtReadoutRecord);
+
 	Handle<TriggerResults> triggers;
-	iEvent.getByLabel(fTriggerTag, triggers);
+	iEvent.getByLabel(fHLTTriggerTag, triggers);
 	const TriggerResults& tr = *triggers;
+	
+	if(tr.size() >= gMaxhltbits){
+		edm::LogWarning("NTP") << "@SUB=analyze()"
+			<< "More than " << static_cast<int>(gMaxhltbits) << " HLT trigger bits, increase length!";
+		fTgoodevent = 0;
+	}
+	
 	if(fFirstevent){
 		fFirstevent = false;
 		vector<string> triggernames;
+		triggernames.reserve(tr.size());
 		Service<service::TriggerNamesService> tns;
 		tns->getTrigPaths(*triggers, triggernames);
 		for( unsigned int i = 0; i < tr.size(); i++ ){
-		//cout << "i " << i << " of " << tr.size() << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
-			fHtrigstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
+			//cout << "i " << i << " of " << tr.size() << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
+			fHhltstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
 		}
-	// Add a warning about the shift between trigger bits and bin numbers:
-		fHtrigstat->GetXaxis()->SetBinLabel(tr.size()+2, "Bin#=Bit#+1");
+		// Add a warning about the shift between trigger bits and bin numbers:
+		fHhltstat->GetXaxis()->SetBinLabel(gMaxhltbits+2, "Bin#=Bit#+1");
 		triggernames.clear();
+
+		ESHandle<L1GtTriggerMenu> menuRcd;
+		iSetup.get<L1GtTriggerMenuRcd>().get(menuRcd);
+		const L1GtTriggerMenu *menu = menuRcd.product();
+		const AlgorithmMap& algoMap=menu->gtAlgorithmMap();
+		for (AlgorithmMap::const_iterator it=algoMap.begin();it!=algoMap.end();++it) {
+			fHl1physstat->GetXaxis()->SetBinLabel((*it).second.algoBitNumber() + 1, TString((*it).first));
+		}
 	}
-	for( unsigned int i = 0; i < tr.size(); i++ ){
-		if(tr[i].accept())	fHtrigstat->Fill(i);
-		fTtrigres[i] = tr[i].accept() ? 1:0;
+
+	for(unsigned int i = 0; i < tr.size(); i++ ){
+		if(tr[i].accept())	fHhltstat->Fill(i);
+		fTHLTres[i] = tr[i].accept() ? 1:0;
+	}
+
+	for( unsigned int i = 0; i < gMaxl1physbits; ++i ){
+		bool fired = l1GtReadoutRecord->decisionWord()[i];
+		if(fired) fHl1physstat->Fill(i);
+		fTL1physres[i] = fired ? 1:0;
+	}  
+	
+	for( unsigned int i = 0; i < gMaxl1techbits; ++i){
+		bool fired = l1GtReadoutRecord->technicalTriggerWord()[i];
+		if(fired) fHl1techstat->Fill(i);
+		fTL1techres[i] = fired ? 1:0;
 	}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +349,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
 	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
 	// Check if maximum number of electrons is exceeded already:
-		if(mqi >= fMaxnmus){
+		if(mqi >= gMaxnmus){
 			edm::LogWarning("NTP") << "@SUB=analyze()"
 				<< "Maximum number of muons exceeded";
 			fTflagmaxmuexc = 1;
@@ -416,7 +452,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		El != electrons->end(); ++El ) {
 			++ei;
 		// Check if maximum number of electrons is exceeded already:
-			if(eqi >= fMaxneles){
+			if(eqi >= gMaxneles){
 				edm::LogWarning("NTP") << "@SUB=analyze"
 					<< "Maximum number of electrons exceeded..";
 				fTflagmaxelexc = 1;
@@ -525,10 +561,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int itag(-1);
 	for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
 		itag++;
-		// Save only the fMaxnjets first uncorrected jets
-		if(itag >= fMaxnjets){
+		// Save only the gMaxnjets first uncorrected jets
+		if(itag >= gMaxnjets){
 			edm::LogWarning("NTP") << "@SUB=analyze"
-				<< "Found more than " << static_cast<int>(fMaxnjets) << " uncorrected jets, I'm scared ...";
+				<< "Found more than " << static_cast<int>(gMaxnjets) << " uncorrected jets, I'm scared ...";
 			fTflagmaxujetexc = 1;
 			fTgoodevent = 0;			
 			break;
@@ -567,7 +603,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	for(vector<OrderPair>::const_iterator it = corrIndices.begin();
 	it != corrIndices.end(); ++it ) { // Loop over corr. jet indices
 	// Check if maximum number of jets is exceeded already
-		if(jqi >= fMaxnjets) {
+		if(jqi >= gMaxnjets) {
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of jets exceeded";
 			fTflagmaxjetexc = 1;
@@ -868,7 +904,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(it->numberOfValidHits() < fMintrknhits) continue;
 		nqtrk++; // starts at 0
 	// Check if maximum number of tracks is exceeded already
-		if(nqtrk >= fMaxntrks) {
+		if(nqtrk >= gMaxntrks) {
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of tracks exceeded";
 			fTflagmaxtrkexc = 1;
@@ -959,7 +995,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fNTotEvents = 0;
 	fNFillTree  = 0;
 	fFirstevent = true;
-	fHtrigstat = fTFileService->make<TH1I>("TriggerStats", "TriggerStatistics", 200, 0, 200);
+	fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats", "HLTTriggerStatistics", gMaxhltbits+2, 0, gMaxhltbits+2);
+	fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
+	fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
 
 // Tree with run information
 	fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
@@ -999,7 +1037,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ExtXSecLO"      ,&fTextxslo        ,"ExtXSecLO/D");
 	fEventTree->Branch("IntXSec"        ,&fTintxs          ,"IntXSec/D");
 	fEventTree->Branch("Weight"         ,&fTweight         ,"Weight/D");
-	fEventTree->Branch("TrigResults"    ,&fTtrigres        ,"TrigResults[200]/I");
+	fEventTree->Branch("HLTResults"     ,&fTHLTres         ,"HLTResults[200]/I");
+	fEventTree->Branch("L1PhysResults"  ,&fTL1physres      ,"L1PhysResults[128]/I");
+	fEventTree->Branch("L1TechResults"  ,&fTL1techres      ,"L1TechResults[64]/I");
 	fEventTree->Branch("PrimVtxx"       ,&fTprimvtxx       ,"PrimVtxx/D");
 	fEventTree->Branch("PrimVtxy"       ,&fTprimvtxy       ,"PrimVtxy/D");
 	fEventTree->Branch("PrimVtxz"       ,&fTprimvtxz       ,"PrimVtxz/D");	
@@ -1017,6 +1057,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("MaxElExceed"    ,&fTflagmaxelexc   ,"MaxElExceed/I");
 	fEventTree->Branch("MaxJetExceed"   ,&fTflagmaxjetexc  ,"MaxJetExceed/I");
 	fEventTree->Branch("MaxUncJetExceed",&fTflagmaxujetexc ,"MaxUncJetExceed/I");
+	fEventTree->Branch("MaxTrkExceed"   ,&fTflagmaxtrkexc  ,"MaxTrkExceed/I");
 
 // Muons:
 	fEventTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
@@ -1285,7 +1326,9 @@ void NTupleProducer::endJob(){
 
 // Method to reset the TTree variables for each event
 void NTupleProducer::resetTree(){
-	resetInt(fTtrigres, 200);
+	resetInt(fTHLTres, gMaxhltbits);
+	resetInt(fTL1physres, gMaxl1physbits);
+	resetInt(fTL1techres, gMaxl1techbits);
 	fTrunnumber   = -999;
 	fTeventnumber = -999;
 	fTlumisection = -999;
@@ -1314,135 +1357,135 @@ void NTupleProducer::resetTree(){
 	fTnmu   = 0;
 	fTneles = 0;
 	fTnjets = 0;
-	resetInt(fTgoodmu, fMaxnmus);
-	resetDouble(fTmupx, fMaxnmus);
-	resetDouble(fTmupy, fMaxnmus);
-	resetDouble(fTmupz, fMaxnmus);
-	resetDouble(fTmupt, fMaxnmus);
-	resetDouble(fTmue, fMaxnmus);
-	resetDouble(fTmuet, fMaxnmus);
-	resetDouble(fTmueta, fMaxnmus);
-	resetDouble(fTmuphi, fMaxnmus);
-	resetInt(fTmucharge, fMaxnmus);
-	resetDouble(fTmuptsum, fMaxnmus);
-	resetDouble(fTmuetsum, fMaxnmus);
-	resetDouble(fTmuiso, fMaxnmus);
-	resetDouble(fTmueecal, fMaxnmus);
-	resetDouble(fTmuehcal, fMaxnmus);
-	resetDouble(fTmud0bs, fMaxnmus);
-	resetDouble(fTmud0pv, fMaxnmus);
-	resetDouble(fTmud0E, fMaxnmus);
-	resetDouble(fTmudzbs, fMaxnmus);
-	resetDouble(fTmudzpv, fMaxnmus);
-	resetDouble(fTmudzE, fMaxnmus);
-	resetDouble(fTmunchi2, fMaxnmus);
-	resetInt(fTmunglhits, fMaxnmus);
-	resetInt(fTmunmuhits, fMaxnmus);
-	resetInt(fTmuntkhits, fMaxnmus);
-	resetInt(fTmunmatches, fMaxnmus);
-	resetInt(fTmunchambers, fMaxnmus);
-	resetDouble(fTmucalocomp, fMaxnmus);
-	resetDouble(fTmusegmcomp, fMaxnmus);
-	resetInt(fTmutrackermu, fMaxnmus);
-	resetInt(fTmuisGMPT, fMaxnmus);
-	resetInt(fTmuid, fMaxnmus);
-	resetInt(fTmumid, fMaxnmus);
+	resetInt(fTgoodmu, gMaxnmus);
+	resetDouble(fTmupx, gMaxnmus);
+	resetDouble(fTmupy, gMaxnmus);
+	resetDouble(fTmupz, gMaxnmus);
+	resetDouble(fTmupt, gMaxnmus);
+	resetDouble(fTmue, gMaxnmus);
+	resetDouble(fTmuet, gMaxnmus);
+	resetDouble(fTmueta, gMaxnmus);
+	resetDouble(fTmuphi, gMaxnmus);
+	resetInt(fTmucharge, gMaxnmus);
+	resetDouble(fTmuptsum, gMaxnmus);
+	resetDouble(fTmuetsum, gMaxnmus);
+	resetDouble(fTmuiso, gMaxnmus);
+	resetDouble(fTmueecal, gMaxnmus);
+	resetDouble(fTmuehcal, gMaxnmus);
+	resetDouble(fTmud0bs, gMaxnmus);
+	resetDouble(fTmud0pv, gMaxnmus);
+	resetDouble(fTmud0E, gMaxnmus);
+	resetDouble(fTmudzbs, gMaxnmus);
+	resetDouble(fTmudzpv, gMaxnmus);
+	resetDouble(fTmudzE, gMaxnmus);
+	resetDouble(fTmunchi2, gMaxnmus);
+	resetInt(fTmunglhits, gMaxnmus);
+	resetInt(fTmunmuhits, gMaxnmus);
+	resetInt(fTmuntkhits, gMaxnmus);
+	resetInt(fTmunmatches, gMaxnmus);
+	resetInt(fTmunchambers, gMaxnmus);
+	resetDouble(fTmucalocomp, gMaxnmus);
+	resetDouble(fTmusegmcomp, gMaxnmus);
+	resetInt(fTmutrackermu, gMaxnmus);
+	resetInt(fTmuisGMPT, gMaxnmus);
+	resetInt(fTmuid, gMaxnmus);
+	resetInt(fTmumid, gMaxnmus);
 
-	resetInt(fTgoodel, fMaxneles);
-	resetDouble(fTepx, fMaxneles);
-	resetDouble(fTepy, fMaxneles);
-	resetDouble(fTepz, fMaxneles);
-	resetDouble(fTee, fMaxneles);
-	resetDouble(fTeet, fMaxneles);
-	resetDouble(fTept, fMaxneles);
-	resetDouble(fTeeta, fMaxneles);
-	resetDouble(fTephi, fMaxneles);
-	resetDouble(fTed0bs, fMaxneles);
-	resetDouble(fTed0pv, fMaxneles);
-	resetDouble(fTed0E, fMaxneles);
-	resetDouble(fTedzbs, fMaxneles);
-	resetDouble(fTedzpv, fMaxneles);
-	resetDouble(fTedzE, fMaxneles);
-	resetDouble(fTenchi2, fMaxneles);
-	resetDouble(fTeiso, fMaxneles);
-	resetDouble(fTeptsum, fMaxneles);
-	resetDouble(fTeetsum, fMaxneles);
-	resetInt(fTecharge, fMaxneles);
-	resetInt(fTeInGap, fMaxneles);
-	resetInt(fTeEcalDriven, fMaxneles);
-	resetInt(fTeTrackerDriven, fMaxneles);
-	resetInt(fTeBasicClustersSize, fMaxneles);
-	resetDouble(fTefbrem, fMaxneles);
-	resetDouble(fTeHcalOverEcal, fMaxneles);
-	resetDouble(fTeE5x5, fMaxneles);
-	resetDouble(fTeE2x5Max, fMaxneles);
-	resetDouble(fTeSigmaIetaIeta, fMaxneles);
-	resetDouble(fTeDeltaPhiSeedClusterAtCalo, fMaxneles);
-	resetDouble(fTeDeltaEtaSeedClusterAtCalo, fMaxneles);
-	resetDouble(fTeDeltaPhiSuperClusterAtVtx, fMaxneles);
-	resetDouble(fTeDeltaEtaSuperClusterAtVtx, fMaxneles);
-	resetDouble(fTecaloenergy, fMaxneles);
-	resetDouble(fTtrkmomatvtx, fMaxneles);
-	resetDouble(fTeESuperClusterOverP, fMaxneles);
-	resetInt(fTeIDTight, fMaxneles);
-	resetInt(fTeIDLoose, fMaxneles);
-	resetInt(fTeIDRobustTight, fMaxneles);
-	resetInt(fTeIDRobustLoose, fMaxneles);
+	resetInt(fTgoodel, gMaxneles);
+	resetDouble(fTepx, gMaxneles);
+	resetDouble(fTepy, gMaxneles);
+	resetDouble(fTepz, gMaxneles);
+	resetDouble(fTee, gMaxneles);
+	resetDouble(fTeet, gMaxneles);
+	resetDouble(fTept, gMaxneles);
+	resetDouble(fTeeta, gMaxneles);
+	resetDouble(fTephi, gMaxneles);
+	resetDouble(fTed0bs, gMaxneles);
+	resetDouble(fTed0pv, gMaxneles);
+	resetDouble(fTed0E, gMaxneles);
+	resetDouble(fTedzbs, gMaxneles);
+	resetDouble(fTedzpv, gMaxneles);
+	resetDouble(fTedzE, gMaxneles);
+	resetDouble(fTenchi2, gMaxneles);
+	resetDouble(fTeiso, gMaxneles);
+	resetDouble(fTeptsum, gMaxneles);
+	resetDouble(fTeetsum, gMaxneles);
+	resetInt(fTecharge, gMaxneles);
+	resetInt(fTeInGap, gMaxneles);
+	resetInt(fTeEcalDriven, gMaxneles);
+	resetInt(fTeTrackerDriven, gMaxneles);
+	resetInt(fTeBasicClustersSize, gMaxneles);
+	resetDouble(fTefbrem, gMaxneles);
+	resetDouble(fTeHcalOverEcal, gMaxneles);
+	resetDouble(fTeE5x5, gMaxneles);
+	resetDouble(fTeE2x5Max, gMaxneles);
+	resetDouble(fTeSigmaIetaIeta, gMaxneles);
+	resetDouble(fTeDeltaPhiSeedClusterAtCalo, gMaxneles);
+	resetDouble(fTeDeltaEtaSeedClusterAtCalo, gMaxneles);
+	resetDouble(fTeDeltaPhiSuperClusterAtVtx, gMaxneles);
+	resetDouble(fTeDeltaEtaSuperClusterAtVtx, gMaxneles);
+	resetDouble(fTecaloenergy, gMaxneles);
+	resetDouble(fTtrkmomatvtx, gMaxneles);
+	resetDouble(fTeESuperClusterOverP, gMaxneles);
+	resetInt(fTeIDTight, gMaxneles);
+	resetInt(fTeIDLoose, gMaxneles);
+	resetInt(fTeIDRobustTight, gMaxneles);
+	resetInt(fTeIDRobustLoose, gMaxneles);
 
-	resetInt(fTgoodjet, fMaxnjets);
-	resetDouble(fTjpx,  fMaxnjets);
-	resetDouble(fTjpy,  fMaxnjets);
-	resetDouble(fTjpz,  fMaxnjets);
-	resetDouble(fTje,   fMaxnjets);
-	resetDouble(fTjet,  fMaxnjets);
-	resetDouble(fTjpt,  fMaxnjets);
-	resetDouble(fTjeta, fMaxnjets);
-	resetDouble(fTjphi, fMaxnjets);
-	resetDouble(fTjemfrac, fMaxnjets);
-	resetDouble(fTjID_HPD, fMaxnjets);
-	resetDouble(fTjID_RBX, fMaxnjets);
-	resetDouble(fTjID_n90Hits, fMaxnjets);
-	resetDouble(fTjID_SubDet1, fMaxnjets);
-	resetDouble(fTjID_SubDet2, fMaxnjets);
-	resetDouble(fTjID_SubDet3, fMaxnjets);
-	resetDouble(fTjID_SubDet4, fMaxnjets);
-	resetDouble(fTjID_resEMF,  fMaxnjets);
-	resetDouble(fTjID_HCALTow, fMaxnjets);
-	resetDouble(fTjID_ECALTow, fMaxnjets);
-	resetDouble(fTbTagProb, fMaxnjets);
-	resetDouble(fTChfrac,   fMaxnjets);
-	resetInt(fTnAssoTracks, fMaxnjets);
-	resetDouble(fTtrk1px, fMaxnjets);
-	resetDouble(fTtrk1py, fMaxnjets);
-	resetDouble(fTtrk1pz, fMaxnjets);
-	resetDouble(fTtrk2px, fMaxnjets);
-	resetDouble(fTtrk2py, fMaxnjets);
-	resetDouble(fTtrk2pz, fMaxnjets);
-	resetDouble(fTtrk3px, fMaxnjets);
-	resetDouble(fTtrk3py, fMaxnjets);
-	resetDouble(fTtrk3pz, fMaxnjets);
-	resetDouble(fTjeMinDR, fMaxnjets);
-	resetDouble(fTjetVtxx, fMaxnjets);
-	resetDouble(fTjetVtxy, fMaxnjets);
-	resetDouble(fTjetVtxz, fMaxnjets);
-	resetDouble(fTjetVtxExx, fMaxnjets);
-	resetDouble(fTjetVtxEyx, fMaxnjets);
-	resetDouble(fTjetVtxEyy, fMaxnjets);
-	resetDouble(fTjetVtxEzy, fMaxnjets);
-	resetDouble(fTjetVtxEzz, fMaxnjets);
-	resetDouble(fTjetVtxEzx, fMaxnjets);
-	resetDouble(fTjetVtxNChi2, fMaxnjets);
+	resetInt(fTgoodjet, gMaxnjets);
+	resetDouble(fTjpx,  gMaxnjets);
+	resetDouble(fTjpy,  gMaxnjets);
+	resetDouble(fTjpz,  gMaxnjets);
+	resetDouble(fTje,   gMaxnjets);
+	resetDouble(fTjet,  gMaxnjets);
+	resetDouble(fTjpt,  gMaxnjets);
+	resetDouble(fTjeta, gMaxnjets);
+	resetDouble(fTjphi, gMaxnjets);
+	resetDouble(fTjemfrac, gMaxnjets);
+	resetDouble(fTjID_HPD, gMaxnjets);
+	resetDouble(fTjID_RBX, gMaxnjets);
+	resetDouble(fTjID_n90Hits, gMaxnjets);
+	resetDouble(fTjID_SubDet1, gMaxnjets);
+	resetDouble(fTjID_SubDet2, gMaxnjets);
+	resetDouble(fTjID_SubDet3, gMaxnjets);
+	resetDouble(fTjID_SubDet4, gMaxnjets);
+	resetDouble(fTjID_resEMF,  gMaxnjets);
+	resetDouble(fTjID_HCALTow, gMaxnjets);
+	resetDouble(fTjID_ECALTow, gMaxnjets);
+	resetDouble(fTbTagProb, gMaxnjets);
+	resetDouble(fTChfrac,   gMaxnjets);
+	resetInt(fTnAssoTracks, gMaxnjets);
+	resetDouble(fTtrk1px, gMaxnjets);
+	resetDouble(fTtrk1py, gMaxnjets);
+	resetDouble(fTtrk1pz, gMaxnjets);
+	resetDouble(fTtrk2px, gMaxnjets);
+	resetDouble(fTtrk2py, gMaxnjets);
+	resetDouble(fTtrk2pz, gMaxnjets);
+	resetDouble(fTtrk3px, gMaxnjets);
+	resetDouble(fTtrk3py, gMaxnjets);
+	resetDouble(fTtrk3pz, gMaxnjets);
+	resetDouble(fTjeMinDR, gMaxnjets);
+	resetDouble(fTjetVtxx, gMaxnjets);
+	resetDouble(fTjetVtxy, gMaxnjets);
+	resetDouble(fTjetVtxz, gMaxnjets);
+	resetDouble(fTjetVtxExx, gMaxnjets);
+	resetDouble(fTjetVtxEyx, gMaxnjets);
+	resetDouble(fTjetVtxEyy, gMaxnjets);
+	resetDouble(fTjetVtxEzy, gMaxnjets);
+	resetDouble(fTjetVtxEzz, gMaxnjets);
+	resetDouble(fTjetVtxEzx, gMaxnjets);
+	resetDouble(fTjetVtxNChi2, gMaxnjets);
 
-	resetDouble(fJUNC_px_match, fMaxnjets);
-	resetDouble(fJUNC_py_match, fMaxnjets);
-	resetDouble(fJUNC_pz_match, fMaxnjets);
+	resetDouble(fJUNC_px_match, gMaxnjets);
+	resetDouble(fJUNC_py_match, gMaxnjets);
+	resetDouble(fJUNC_pz_match, gMaxnjets);
 
-	resetInt(fTgoodtrk,  fMaxntrks);
-	resetDouble(fTtrkpt, fMaxntrks);
-	resetDouble(fTtrketa, fMaxntrks);
-	resetDouble(fTtrkphi, fMaxntrks);
-	resetDouble(fTtrknchi2, fMaxntrks);
-	resetDouble(fTtrknhits, fMaxntrks);
+	resetInt(fTgoodtrk,  gMaxntrks);
+	resetDouble(fTtrkpt, gMaxntrks);
+	resetDouble(fTtrketa, gMaxntrks);
+	resetDouble(fTtrkphi, gMaxntrks);
+	resetDouble(fTtrknchi2, gMaxntrks);
+	resetDouble(fTtrknhits, gMaxntrks);
 
 	fTTrkPtSumx       = -999.99;
 	fTTrkPtSumy       = -999.99;

@@ -33,26 +33,27 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# tag_tracks   = cms.untracked.InputTag('generalTracks','','RETRACK'),
 	tag_caltow   = cms.untracked.InputTag('towerMaker'),
 	tag_genpart  = cms.untracked.InputTag('genParticles'),
-	tag_triggers = cms.untracked.InputTag("TriggerResults","","HLT"),
+	tag_l1trig   = cms.untracked.InputTag("gtDigis"),
+	tag_hlttrig  = cms.untracked.InputTag("TriggerResults","","HLT"),
 
 	# Jet ID configuration
 	jetID = cms.PSet(),
 
    # Event Selection Criteria
 	# Muons:
-	sel_minmupt     = cms.double(0.2),
+	sel_minmupt     = cms.double(1.0),
 	sel_maxmueta    = cms.double(2.4),
 	# Electrons:
-	sel_minelpt     = cms.double(0.2),
+	sel_minelpt     = cms.double(1.0),
 	sel_maxeleta    = cms.double(2.5),
 	sel_maxeliso    = cms.double(1e15),
 	sel_maxeld0     = cms.double(1e15),
 	# Jets:
-	sel_minjpt      = cms.double(0.2),
+	sel_minjpt      = cms.double(1.0),
 	sel_maxjeta     = cms.double(10.0),
 	sel_minjemfrac  = cms.double(0.0),
 	# Tracks:
-	sel_mintrkpt    = cms.double(0.2),
+	sel_mintrkpt    = cms.double(1.0),
 	sel_maxtrketa   = cms.double(10.0),
 	sel_maxtrknchi2 = cms.double(1e15),
 	sel_mintrknhits = cms.int32(0),
