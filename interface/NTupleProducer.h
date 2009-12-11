@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.25 2009/12/04 15:28:09 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.26 2009/12/07 18:13:15 stiegerb Exp $
 //
 //
 
@@ -51,13 +51,18 @@ class NTupleProducer : public edm::EDAnalyzer {
 public:
 	explicit NTupleProducer(const edm::ParameterSet&);
 	~NTupleProducer();
+
+	virtual void beginJob(const edm::EventSetup&);
+	virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+	virtual void analyze(const edm::Event&, const edm::EventSetup&);
+	virtual void endJob();
+	virtual void endRun(const edm::Run&, const edm::EventSetup&);
+
 	vector<double> calcMuIso(const reco::Muon *Mu, const edm::Event& iEvent);
 	vector<double> calcMuIso2(const reco::Muon *Mu, const edm::Event& iEvent);
 	vector<double> calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef);
 	vector<double> calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent);
 	vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
-	double DeltaPhi(double, double);
-	double GetDeltaR(double, double, double, double);
 	vector<const reco::Muon*> sortMus(vector<const reco::Muon*>);
 	void switchDouble(double &, double &);
 	void switchInt(int &, int &);
@@ -66,11 +71,17 @@ public:
 	void resetTree();
 	vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
 private:
-	virtual void beginJob(const edm::EventSetup&);
-	virtual void beginRun(const edm::Run&, const edm::EventSetup&);
-	virtual void analyze(const edm::Event&, const edm::EventSetup&);
-	virtual void endJob();
-	virtual void endRun(const edm::Run&, const edm::EventSetup&);
+
+	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
+	virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, const CaloJet* theJet, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
+	virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
+	virtual float CaloTowerSizePhi(float eta);
+	virtual float CaloTowerSizeEta(float eta);
+	virtual bool IsInPhiWindow(float phi, float phimin, float phimax);
+	virtual float DeltaPhiSigned(float v1, float v2);
+	virtual float GetPhiMin(float phi1, float phi2);
+	virtual float GetPhiMax(float phi1, float phi2);
 
 	typedef pair<int,double> OrderPair;
 	struct IndexByPt {
@@ -199,6 +210,7 @@ private:
 	double fTprimvtxzE;
 	double fTpvtxznchi2;
 	int fTpvtxntracks;
+	double fTpvtxptsum;
 
 	double fTbeamspotx;
 	double fTbeamspoty;
@@ -231,6 +243,7 @@ private:
 	double fTmue[gMaxnmus];
 	double fTmuet[gMaxnmus];
 	double fTmupt[gMaxnmus];
+	double fTmuptE[gMaxnmus];
 	double fTmueta[gMaxnmus];
 	double fTmuphi[gMaxnmus];
 	int fTmucharge[gMaxnmus];
@@ -273,6 +286,7 @@ private:
 	double fTepy[gMaxneles];
 	double fTepz[gMaxneles];
 	double fTept[gMaxneles];
+	double fTeptE[gMaxneles];
 	double fTee[gMaxneles];
 	double fTeet[gMaxneles];
 	double fTeeta[gMaxneles];
@@ -306,9 +320,14 @@ private:
 	double fTeDeltaPhiSuperClusterAtVtx[gMaxneles]; // Dphi (sc-track) at calo extrapolated from p_in
 	double fTeDeltaEtaSuperClusterAtVtx[gMaxneles]; // Deta (sc-track) at calo extrapolated from p_in
 	double fTecaloenergy[gMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
-	double fTtrkmomatvtx[gMaxneles];                // trackMomentumAtVtx().R()
+	double fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
 	double fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
-
+	int fTeIsInJet[gMaxneles];
+	double fTeSharedPx[gMaxneles];
+	double fTeSharedPy[gMaxneles];
+	double fTeSharedPz[gMaxneles];
+	double fTeSharedEnergy[gMaxneles];
+	int fTeDupEl[gMaxneles];
 
 // Jets:
 	int fTnjets;

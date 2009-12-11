@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.30 2009/12/04 15:28:02 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.31 2009/12/07 18:13:04 stiegerb Exp $
 //
 //
 
@@ -178,7 +178,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	edm::LogVerbatim("NTP") << "---------------------------------" ;
 }
 
-NTupleProducer::~NTupleProducer() {}
+NTupleProducer::~NTupleProducer(){}
 
 // Method called once for each event
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -274,13 +274,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<TriggerResults> triggers;
 	iEvent.getByLabel(fHLTTriggerTag, triggers);
 	const TriggerResults& tr = *triggers;
-	
+
 	if(tr.size() >= gMaxhltbits){
 		edm::LogWarning("NTP") << "@SUB=analyze()"
 			<< "More than " << static_cast<int>(gMaxhltbits) << " HLT trigger bits, increase length!";
 		fTgoodevent = 0;
 	}
-	
+
 	if(fFirstevent){
 		fFirstevent = false;
 		vector<string> triggernames;
@@ -314,7 +314,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(fired) fHl1physstat->Fill(i);
 		fTL1physres[i] = fired ? 1:0;
 	}  
-	
+
 	for( unsigned int i = 0; i < gMaxl1techbits; ++i){
 		bool fired = l1GtReadoutRecord->technicalTriggerWord()[i];
 		if(fired) fHl1techstat->Fill(i);
@@ -338,6 +338,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTprimvtxzE   = primVtx->zError();
 	fTpvtxznchi2  = primVtx->normalizedChi2();
 	fTpvtxntracks = primVtx->tracksSize();
+	fTpvtxptsum = 0.;
+	for(vector<TrackBaseRef>::const_iterator trackit = primVtx->tracks_begin(); trackit != primVtx->tracks_end(); ++trackit){
+		fTpvtxptsum += (*trackit)->pt();
+	}
+
 
 // Save position of beamspot
 	fTbeamspotx = (beamSpot.position()).x();
@@ -369,6 +374,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmupy[mqi]     = Mit->globalTrack()->py();
 		fTmupz[mqi]     = Mit->globalTrack()->pz();
 		fTmupt[mqi]     = Mit->globalTrack()->pt();
+		fTmuptE[mqi]    = Mit->globalTrack()->ptError();
 		fTmueta[mqi]    = Mit->globalTrack()->eta();
 		fTmuphi[mqi]    = Mit->globalTrack()->phi();
 		fTmue[mqi]      = Mit->energy();
@@ -429,6 +435,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 ////////////////////////////////////////////////////////
 // Electron variables:
+	// Keep pointers to electron superCluster in original collections
+	vector<const SuperCluster*> elecPtr;
+	vector<const GsfTrack*> trckPtr;
 	int eqi(-1),ei(-1); // counts # of qualified electrons
 	if(electrons->size() > 0){
 	// Read eID results
@@ -465,6 +474,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			if(fabs(El->eta()) > fMaxeleta) continue;
 			if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
 
+		// Save the electron SuperCluster pointer
+			const SuperCluster* superCluster = &(*(El->superCluster()));
+			elecPtr.push_back(superCluster);
+			trckPtr.push_back(&(*(El->gsfTrack()) ) );
+
 		// Read EleIsolation
 			double eTkIso,eECIso,eHCIso;
 			if ( !fIsPat ) { // Isolation is embedded in PAT => switch
@@ -498,6 +512,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTepy[eqi]     = El->gsfTrack()->py();
 			fTepz[eqi]     = El->gsfTrack()->pz();
 			fTept[eqi]     = El->pt();
+			fTeptE[eqi]    = El->gsfTrack()->ptError();
 			fTeeta[eqi]    = El->eta();
 			fTephi[eqi]    = El->phi();
 			fTee[eqi]      = El->energy();
@@ -527,7 +542,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
 			fTeDeltaEtaSuperClusterAtVtx[eqi] = El->deltaEtaSuperClusterTrackAtVtx(); 
 			fTecaloenergy[eqi] = El->caloEnergy();
-			fTtrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
+			fTetrkmomatvtx[eqi] = El->trackMomentumAtVtx().R();
 			fTeESuperClusterOverP[eqi] = El->eSuperClusterOverP();
 		// Read in Electron ID
 			if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
@@ -538,20 +553,22 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTeIDRobustLoose[eqi] = eIDmapRL[electronRef] ? 1:0;
 			} else {
 				const pat::Electron* pEl = static_cast<const pat::Electron*>(&(*El));
-				fTeIDTight[eqi]       = pEl->electronID("eidTight")>0. ? 1:0;
-				fTeIDLoose[eqi]       = pEl->electronID("eidLoose")>0. ? 1:0;
-				fTeIDRobustTight[eqi] = pEl->electronID("eidRobustTight")>0. ? 1:0;
-				fTeIDRobustLoose[eqi] = pEl->electronID("eidRobustLoose")>0. ? 1:0;
+				fTeIDTight[eqi]       = pEl->electronID("eidTight") > 0. ? 1:0;
+				fTeIDLoose[eqi]       = pEl->electronID("eidLoose") > 0. ? 1:0;
+				fTeIDRobustTight[eqi] = pEl->electronID("eidRobustTight") > 0. ? 1:0;
+				fTeIDRobustLoose[eqi] = pEl->electronID("eidRobustLoose") > 0. ? 1:0;
 			}
 
 			fTgoodel[eqi] = 1;
+			fTeDupEl[eqi] = -1;
 		}
 	}
 	fTneles = eqi+1;
 
 ////////////////////////////////////////////////////////
 // Jet Variables:
-
+// Keep pointers to jets in original collections
+	vector<const Jet*> jetPtr;
 // Jet corrections
 	vector<const Jet*> corrJets;
 	corrJets.reserve(jets->size()); // Speed up push-backs
@@ -619,6 +636,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// if(jet->emEnergyFraction() < fMinjemfrac) continue;
 		jqi++;
 
+	// Save the jet pointer
+		jetPtr.push_back(jet);
 	// Dump jet properties into tree variables
 		fTjpx[jqi]  = jet->px();
 		fTjpy[jqi]  = jet->py();
@@ -891,6 +910,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	corrJets.clear();
 	corrIndices.clear();
 
+	// Check electron duplication
+	ElectronDuplicate(elecPtr, trckPtr);
+	// Check electron/jet duplication
+	ElJetOverlap(jetPtr, elecPtr, calotowers);
+
 ////////////////////////////////////////////////////////
 // Get and Dump (M)E(T) Variables:
 // Tracks:
@@ -1048,6 +1072,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("PrimVtxzE"      ,&fTprimvtxzE      ,"PrimVtxzE/D");
 	fEventTree->Branch("PrimVtxNChi2"   ,&fTpvtxznchi2     ,"PrimVtxNChi2/D");
 	fEventTree->Branch("PrimVtxNTracks" ,&fTpvtxntracks    ,"PrimVtxNTracks/I");
+	fEventTree->Branch("PrimVtxPtSum"   ,&fTpvtxptsum      ,"PrimVtxPtSum/D");
 	fEventTree->Branch("Beamspotx"      ,&fTbeamspotx      ,"Beamspotx/D");
 	fEventTree->Branch("Beamspoty"      ,&fTbeamspoty      ,"Beamspoty/D");
 	fEventTree->Branch("Beamspotz"      ,&fTbeamspotz      ,"Beamspotz/D");
@@ -1066,6 +1091,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("MuPy"           ,&fTmupy           ,"MuPy[NMus]/D");
 	fEventTree->Branch("MuPz"           ,&fTmupz           ,"MuPz[NMus]/D");
 	fEventTree->Branch("MuPt"           ,&fTmupt           ,"MuPt[NMus]/D");
+	fEventTree->Branch("MuPtE"          ,&fTmuptE          ,"MuPtE[NMus]/D");
 	fEventTree->Branch("MuE"            ,&fTmue            ,"MuE[NMus]/D");
 	fEventTree->Branch("MuEt"           ,&fTmuet           ,"MuEt[NMus]/D");
 	fEventTree->Branch("MuEta"          ,&fTmueta          ,"MuEta[NMus]/D");
@@ -1102,6 +1128,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElPy"             ,&fTepy             ,"ElPy[NEles]/D");
 	fEventTree->Branch("ElPz"             ,&fTepz             ,"ElPz[NEles]/D");
 	fEventTree->Branch("ElPt"             ,&fTept             ,"ElPt[NEles]/D");
+	fEventTree->Branch("ElPtE"            ,&fTeptE            ,"ElPtE[NEles]/D");
 	fEventTree->Branch("ElE"              ,&fTee              ,"ElE[NEles]/D");
 	fEventTree->Branch("ElEt"             ,&fTeet             ,"ElEt[NEles]/D");
 	fEventTree->Branch("ElEta"            ,&fTeeta            ,"ElEta[NEles]/D");
@@ -1135,8 +1162,15 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElDeltaPhiSuperClusterAtVtx" ,&fTeDeltaPhiSuperClusterAtVtx ,"ElDeltaPhiSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElDeltaEtaSuperClusterAtVtx" ,&fTeDeltaEtaSuperClusterAtVtx ,"ElDeltaEtaSuperClusterAtVtx[NEles]/D");
 	fEventTree->Branch("ElCaloEnergy"    ,&fTecaloenergy        ,"ElCaloEnergy[NEles]/D");
-	fEventTree->Branch("ElTrkMomAtVtx"   ,&fTtrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
+	fEventTree->Branch("ElTrkMomAtVtx"   ,&fTetrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
+//////////////////////////////
+	fEventTree->Branch("ElIsInJet"       ,&fTeIsInJet           ,"ElIsInJet[NEles]/I");
+	fEventTree->Branch("ElSharedPx"      ,&fTeSharedPx          ,"ElSharedPx[NEles]/D");
+	fEventTree->Branch("ElSharedPy"      ,&fTeSharedPy          ,"ElSharedPy[NEles]/D");
+	fEventTree->Branch("ElSharedPz"      ,&fTeSharedPz          ,"ElSharedPz[NEles]/D");
+	fEventTree->Branch("ElSharedEnergy"  ,&fTeSharedEnergy      ,"ElSharedEnergy[NEles]/D");
+	fEventTree->Branch("ElDuplicateEl"   ,&fTeDupEl             ,"ElDuplicateEl[NEles]/I");
 
 // Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets        ,"NJets/I");
@@ -1342,6 +1376,7 @@ void NTupleProducer::resetTree(){
 	fTprimvtxzE   = -999.99;
 	fTpvtxznchi2  = -999.99;
 	fTpvtxntracks = -999;
+	fTpvtxptsum   = -999.99;
 	fTbeamspotx   = -999.99;
 	fTbeamspoty   = -999.99;
 	fTbeamspotz   = -999.99;
@@ -1362,6 +1397,7 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTmupy, gMaxnmus);
 	resetDouble(fTmupz, gMaxnmus);
 	resetDouble(fTmupt, gMaxnmus);
+	resetDouble(fTmuptE, gMaxnmus);
 	resetDouble(fTmue, gMaxnmus);
 	resetDouble(fTmuet, gMaxnmus);
 	resetDouble(fTmueta, gMaxnmus);
@@ -1398,6 +1434,7 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTee, gMaxneles);
 	resetDouble(fTeet, gMaxneles);
 	resetDouble(fTept, gMaxneles);
+	resetDouble(fTeptE, gMaxneles);
 	resetDouble(fTeeta, gMaxneles);
 	resetDouble(fTephi, gMaxneles);
 	resetDouble(fTed0bs, gMaxneles);
@@ -1425,8 +1462,15 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTeDeltaPhiSuperClusterAtVtx, gMaxneles);
 	resetDouble(fTeDeltaEtaSuperClusterAtVtx, gMaxneles);
 	resetDouble(fTecaloenergy, gMaxneles);
-	resetDouble(fTtrkmomatvtx, gMaxneles);
+	resetDouble(fTetrkmomatvtx, gMaxneles);
 	resetDouble(fTeESuperClusterOverP, gMaxneles);
+	resetInt(fTeIsInJet, gMaxneles);
+	resetDouble(fTeSharedPx, gMaxneles);
+	resetDouble(fTeSharedPy, gMaxneles);
+	resetDouble(fTeSharedPz, gMaxneles);
+	resetDouble(fTeSharedEnergy, gMaxneles);
+	resetInt(fTeDupEl, gMaxneles);
+
 	resetInt(fTeIDTight, gMaxneles);
 	resetInt(fTeIDLoose, gMaxneles);
 	resetInt(fTeIDRobustTight, gMaxneles);
@@ -1821,6 +1865,277 @@ vector<const reco::Muon*> NTupleProducer::sortMus(vector<const reco::Muon*> Mus)
 	}
 	return v_mu;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Cleaning methods
+void NTupleProducer::ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr) {
+// Looks for duplication among electrons
+	if (fTneles <= 0){return;}
+
+	// loop over the electrons
+	for (int i = 0; i < fTneles; ++i) {
+		const SuperCluster* supercluster = elecPtr[i];
+		const GsfTrack* eletrack = trckPtr[i];
+
+	// loop over the electrons again
+		for (int j = i+1; j < fTneles; ++j) {
+			const SuperCluster* newsuper = elecPtr[j];
+			const GsfTrack* newtrack = trckPtr[j];
+
+	// check if duplicate
+			if (newsuper == supercluster || newtrack == eletrack){
+				fTeDupEl[i] = j;
+				fTeDupEl[j] = i;
+				break;
+			}
+		}
+	}
+
+	return;
+
+}
+
+void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers){
+// checks for jets made from electrons
+// jetIndex and elecIndex contain the indices of the selected jets and
+//   electrons in the Views
+// (electrons and jets should be filled in the ntuple before checking)   
+	if (fTnjets <= 0){return;}
+	if (fTneles <= 0){return;}
+
+// loop over the jets
+	for (int i = 0; i < fTnjets; ++i) {
+		bool isDuplicate = false;
+		const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
+
+	// loop over the electrons
+		for (int j = 0; j < fTneles; ++j) {
+			// fTeSharedPx[j] = 0.;
+			// fTeSharedPy[j] = 0.;
+			// fTeSharedPz[j] = 0.;
+			// fTeSharedEnergy[j] = 0.;
+			const SuperCluster* theElecSC = electrons[j];
+
+			math::XYZVector sharedP(0., 0., 0.);
+			bool isInJet = IsEMObjectInJet(theElecSC, theJet, calotowers, & sharedP);
+			float sharedE = sqrt(sharedP.X()*sharedP.X()+sharedP.Y()*sharedP.Y()
+				+sharedP.Z()*sharedP.Z());
+			if (isInJet) {
+				isDuplicate = true;
+				fTeIsInJet[j] = isDuplicate ? 1:0;
+		// could be:  fTeIsInJet[j] = isDuplicate ? i:-1;
+				fTeSharedPx[j] = sharedP.X();
+				fTeSharedPy[j] = sharedP.Y();
+				fTeSharedPz[j] = sharedP.Z();
+				fTeSharedEnergy[j] = sharedE;
+				break;
+			}
+		}
+	}
+
+	return;
+}
+
+bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, const CaloJet* jetcand, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
+// Checks whether an electron or photon is included in the jet energy
+// and if true, it returns the momentum vector shared by the two
+
+// Define a window in eta,phi for the SuperCluster
+	float phimin=0., phimax=0., etamin=0., etamax=0.;
+	bool window = EMCaloTowerWindow(elecSC, phimin, phimax, etamin, etamax); 
+	if (!window){ return false;}
+
+// Collect the CaloTowers inside this window, save their detId in a vector
+	vector<CaloTowerDetId> eleDetId;
+	vector<float> eleTowerEnergy;
+	vector<float> eleTowerEta;
+	vector<float> eleTowerPhi;
+	float eleEnergySum = 0.;
+	CaloTowerCollection::const_iterator calo;
+	for (calo = calotowers->begin(); calo != calotowers->end(); ++calo ){
+		float tow_eta = calo->eta();
+		float tow_phi = calo->phi();
+		if (IsInPhiWindow (tow_phi, phimin, phimax) 
+		&& (tow_eta-etamin)*(tow_eta-etamax) <= 0.){
+			eleDetId.push_back(calo->id());
+			eleTowerEnergy.push_back(calo->emEnergy());
+			eleTowerEta.push_back(calo->eta());
+			eleTowerPhi.push_back(calo->phi());
+			eleEnergySum += calo->emEnergy();
+		}
+	}
+
+// Collect the CaloTowers detIds for the jet 
+	vector<CaloTowerPtr> jetCaloRefs = jetcand->getCaloConstituents();
+
+// Loop over the detIds vector of the electron
+	float sharedEnergy = 0.;
+	float sharedPx = 0.;
+	float sharedPy = 0.;
+	float sharedPz = 0.;
+	for (unsigned int i = 0; i < eleDetId.size(); ++i){
+	// find whether this detId is in the jet detId list
+		for (unsigned int j = 0; j < jetCaloRefs.size(); ++j){
+		// if yes, add its energy to the sum
+			if (eleDetId[i] == jetCaloRefs[j]->id() ){
+				sharedEnergy += eleTowerEnergy[i];
+				float eleTowerTheta = 2. * atan(exp(-eleTowerEta[i]));
+				if (eleTowerTheta < 0.) {eleTowerTheta += 3.141592654;}
+				float sintheta = sin(eleTowerTheta);
+				sharedPx += eleTowerEnergy[i]*sintheta*cos(eleTowerPhi[i]);
+				sharedPy += eleTowerEnergy[i]*sintheta*sin(eleTowerPhi[i]);
+				sharedPz += eleTowerEnergy[i]*cos(eleTowerTheta);
+			}
+		}
+	}
+
+	eleDetId.clear();
+	eleTowerEnergy.clear();
+	eleTowerEta.clear();
+	eleTowerPhi.clear();
+	jetCaloRefs.clear();
+
+	sharedMomentum->SetXYZ(sharedPx,sharedPy,sharedPz);
+
+	if (sharedEnergy > 0.) {return true;}
+	else {return false;}
+
+}
+
+bool NTupleProducer::EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax){
+// Define a window for CaloTowers around an electron or photon
+
+
+// Define a window in eta,phi for the SuperCluster
+// First, find the extremes from the basicCluster positions
+	phimin=0.;
+	phimax=0.; 
+	etamin=0.; 
+	etamax=0.;
+	float pi    = 3.141592654;
+	float twopi = 6.283185307;
+	float clusterEsum = 0.;
+	reco::CaloCluster_iterator iCluster = superCluster->clustersBegin();
+	for (; iCluster != superCluster->clustersEnd(); ++iCluster){
+		math::XYZPoint clusterXYZ = (*iCluster)->position();
+		float clusterE = (*iCluster)->energy();
+		clusterEsum += clusterE;
+		float clusterphi = atan2(clusterXYZ.Y(), clusterXYZ.X());
+		float clustertheta = acos(clusterXYZ.Z() /
+			sqrt(clusterXYZ.X()*clusterXYZ.X()+clusterXYZ.Y()*clusterXYZ.Y()
+			+clusterXYZ.Z()*clusterXYZ.Z()) );
+		if (clustertheta < 0.) {clustertheta = clustertheta + 3.141592654;}
+		float clustereta = -log(tan(0.5*clustertheta));
+		if (iCluster == superCluster->clustersBegin() ){
+			etamin = clustereta;
+			etamax = clustereta;
+			phimin = clusterphi;
+			phimax = clusterphi;
+		} else {
+			if (etamin > clustereta){etamin = clustereta;}
+			if (etamax < clustereta){etamax = clustereta;}
+			phimin = GetPhiMin(phimin, clusterphi);
+			phimax = GetPhiMax(phimax, clusterphi);
+		}
+	}
+
+// Then put a tolerance for the bigger caloTowers
+// (adding 1/2 of the caloTower size)
+	float etamean = fabs(0.5*(etamin+etamax) );
+	phimin -= CaloTowerSizePhi(etamean);
+	phimax += CaloTowerSizePhi(etamean);
+	etamin -= CaloTowerSizeEta(etamin);
+	etamax += CaloTowerSizeEta(etamax);
+// Check that they are still correctly normalized (-pi < phi < pi)
+	if (phimin < -pi) {phimin += twopi;}
+	if (phimax >  pi) {phimax -= twopi;}
+
+	return true;
+
+}
+
+float NTupleProducer::CaloTowerSizePhi(float eta){
+	// Returns the half size of a CaloTower in phi
+	// numbers from ptdr1, p.201
+
+	float sizePhi = 0.;
+	if (fabs(eta) <= 1.74){
+		sizePhi = 0.0435+0.0174;
+	} else {
+		sizePhi = 0.087+0.0174;
+	}
+
+	return sizePhi;
+}
+
+float NTupleProducer::CaloTowerSizeEta(float eta){
+	// Returns the half size of a CaloTower in eta
+	// numbers from ptdr1, p.201
+
+	float abseta = fabs(eta);
+	float sizeEta = 0.;
+	if (abseta <= 1.74){
+		sizeEta = 0.0435+0.0174;
+	} else if (abseta <= 2.5){
+		sizeEta = 0.0435 + 0.0678*(abseta-1.74)+0.0174;
+	} else {
+		sizeEta = 0.0875+0.0174;
+	}
+
+	return sizeEta;
+}
+
+bool NTupleProducer::IsInPhiWindow(float phi, float phimin, float phimax){
+	// Checks whether phi is inside a given window
+
+	float dphimin = DeltaPhiSigned(phi, phimin);
+	float dphimax = DeltaPhiSigned(phi, phimax);
+
+	float pi    = 3.141592654;
+	if (dphimin*dphimax <= 0. && fabs(dphimin-dphimax) < pi){return true;}
+	else {return false;}
+
+}
+
+float NTupleProducer::DeltaPhiSigned(float v1, float v2){
+	// Computes the clockwise phi difference v1-v2
+	// v1, v2 = phi of object 1 and 2
+
+	float pi    = 3.141592654;
+	float twopi = 6.283185307;
+
+	float diff = v2 - v1;
+	if (diff >  pi){ diff -= twopi;}
+	else if (diff < -pi){ diff += twopi;}
+	return diff;
+
+}
+
+float NTupleProducer::GetPhiMin(float phi1, float phi2){
+	// Computes the minimum of two phi values
+
+	float pi    = 3.141592654;
+	float phimin = phi1;
+	if ((phimin-phi2)>0. && (phimin-phi2)< pi){phimin = phi2;}
+	else if ((phimin-phi2)<-pi){phimin = phi2;}
+
+	return phimin;
+
+}
+
+float NTupleProducer::GetPhiMax(float phi1, float phi2){
+	// Computes the minimum of two phi values
+
+	float pi    = 3.141592654;
+	float phimax = phi1;
+	if ((phimax-phi2)<0. && (phimax-phi2)>-pi){phimax = phi2;}
+	else if ((phimax-phi2)> pi){phimax = phi2;}
+
+	return phimax;
+
+}
+
 
 void NTupleProducer::switchDouble(double &d1, double &d2){
 	double temp = d1;

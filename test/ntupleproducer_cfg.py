@@ -10,7 +10,7 @@ process.MessageLogger.cerr.NTP = cms.untracked.PSet(
     limit = cms.untracked.int32(-1),
     reportEvery = cms.untracked.int32(1)
     )
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 ### Running conditions #########################################################
@@ -33,7 +33,9 @@ process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssoc
 process.source = cms.Source("PoolSource",
 	# replace 'myfile.root' with the source file you want to use
 	fileNames = cms.untracked.vstring(
-		'file:/home/xv/stiegerb/FirstData/Run123596/bit40-123596-stdReco-GR09_P_V7-lumi1-68.root'
+		# 'file:./scratch/ppMuXLoose_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
+		'file:./scratch/ppEleX_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
+		# 'file:/home/xv/stiegerb/FirstData/Run123596/bit40-123596-stdReco-GR09_P_V7-lumi1-68.root'
 		# 'file:/data/theofil08/Data/Beam09/bit40or41skim_expressPhysics_run123596_full.root'
 		# 'file:/home/xv/stiegerb/Skims/python/CollisionSkim_123596_1.root'
 		# 'file:/home/xv/stiegerb/FirstData/Run123592/241D28BF-1EE2-DE11-9CF3-001617E30CC8.root',
@@ -49,11 +51,10 @@ process.source = cms.Source("PoolSource",
 		# 'file:/home/xv/stiegerb/FirstData/Run123592/F25C511D-20E2-DE11-82D0-001617C3B6DE.root',
 		# 'file:/home/xv/stiegerb/FirstData/Run123592/ACA6611D-20E2-DE11-B804-001617E30CC8.root',
 		# 'file:/home/xv/stiegerb/FirstData/Run123592/80B9DACB-20E2-DE11-9526-001617C3B706.root'
-
 	),
 	duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # Output
 process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTupleProducer.root"),
@@ -61,30 +62,55 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #### Jet Corrections ###########################################################
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
-process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
-	tagName = cms.string('Summer09_L2Relative_SC5Calo'),
-	label = cms.string('L2RelativeJetCorrectorSC5Calo')
+process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
+# process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
+## antiKt5
+process.L2JetCorrectorAK5Calo = cms.ESSource("L2RelativeCorrectionService", 
+	tagName = cms.string('900GeV_L2Relative_AK5Calo'),
+	label = cms.string('L2RelativeJetCorrectorAK5Calo')
 )
-process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-	tagName = cms.string('Summer09_L3Absolute_SC5Calo'),
-	label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
+process.L3JetCorrectorAK5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
+	tagName = cms.string('900GeV_L3Absolute_AK5Calo'),
+	label = cms.string('L3AbsoluteJetCorrectorAK5Calo')
 )
-process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
-    src = cms.InputTag("sisCone5CaloJets"),
-    correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
+process.L2L3CorJetAK5Calo = cms.EDProducer("CaloJetCorrectionProducer",
+    src = cms.InputTag("antikt5CaloJets"),
+    # src = cms.InputTag("antiKt5CaloJets"),
+    correctors = cms.vstring('L2L3JetCorrectorAK5Calo')
 )
+# process.prefer("L2JetCorrectorAK5Calo")
+
+## sisCone5
+# process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
+# 	tagName = cms.string('Summer09_L2Relative_SC5Calo'),
+# 	label = cms.string('L2RelativeJetCorrectorSC5Calo')
+# )
+# process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
+# 	tagName = cms.string('Summer09_L3Absolute_SC5Calo'),
+# 	label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
+# )
+# process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
+#     src = cms.InputTag("sisCone5CaloJets"),
+#     correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
+# )
 # process.prefer("L2JetCorrectorSC5Calo")
 
 ### JES MET Corrections ########################################################
-from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
+from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
-process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
-process.metMuonJESCorSC5.inputUncorJetsLabel = "sisCone5CaloJets"
-process.metMuonJESCorSC5.corrector = "L2L3JetCorrectorSC5Calo"
-process.metMuonJESCorSC5.inputUncorMetLabel = "corMetGlobalMuons"
+process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
+process.metMuonJESCorAK5.inputUncorJetsLabel = "antikt5CaloJets"
+# process.metMuonJESCorAK5.inputUncorJetsLabel = "antiKt5CaloJets"
+process.metMuonJESCorAK5.corrector = "L2L3JetCorrectorAK5Calo"
+process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
+process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
-process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
+# from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
+# process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
+# process.metMuonJESCorSC5.inputUncorJetsLabel = "sisCone5CaloJets"
+# process.metMuonJESCorSC5.corrector = "L2L3JetCorrectorSC5Calo"
+# process.metMuonJESCorSC5.inputUncorMetLabel = "corMetGlobalMuons"
+# process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
 
 ### Egamma Isolation ###########################################################
 # Produce eleIsoDeposits first!
@@ -110,7 +136,8 @@ process.analyze.jetID = JetIDParams
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
 process.p = cms.Path(
-      process.L2L3CorJetSC5Calo
+      process.L2L3CorJetAK5Calo
+      # process.L2L3CorJetSC5Calo
     + process.metCorSequence
     + process.mybtag
     + process.eleIsoDeposits
