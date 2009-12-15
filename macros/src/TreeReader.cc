@@ -71,6 +71,9 @@ void TreeReader::Loop(){
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		if (jentry%10000 == 0) cout << ">>> Processing event # " << jentry << endl;
 
+		// Event Selection
+		if(!IsGoodEvt(&fEvtSelCuts)) continue;
+
 		// Put here any method that needs to be called once every event
 		if(fDiLep)    FillDiLepTree();
 		if(fMPHist)   FillMPHistos();
@@ -340,10 +343,6 @@ void TreeReader::BookMPHistos(const char* filename){
 }
 
 void TreeReader::FillMPHistos(){
-	// for (int i=0 ; i<NJets; i++){
-	// cout<< "jet with pt = "<< JPt[i] << endl;
-	// }
-
 	//define an array for leptons (es+mus) with 
 	//information on pt, eta and category
 	//category 1: e+
@@ -416,10 +415,9 @@ void TreeReader::FillMPHistos(){
 
 // count number of good jets (beni)
 	unsigned int NQJets = 0;
-	for(int i=0; i< NJets; ++i){
+	for(int i=0; i < NJets; ++i){
 		if(IsGoodObj(i, &fJetCuts)) NQJets++;
 	}
-
 // convert the lepton config into the index and count
 	fMyLeptJetStat->FillLeptJetStat(LeptCat, NQJets, 0);
 }
@@ -1188,12 +1186,25 @@ void TreeReader::ReadEvtSel(const char* filename){
 bool TreeReader::IsGoodObj(int i, vector<Cut> *cutVec){
 // This loops on the vector of cuts as filled in ReadObjCuts() and 
 // determines if an object is good
-	double *val;
+	TBranch *b;
+	TLeaf *l;
+	double *fval;
+	int *ival;
 	for(vector<Cut>::const_iterator it = cutVec->begin(); it != cutVec->end(); it++){
-		val = (double*)it->branch->GetAddress();
-		// cout << " Object " << i << " has " << it->branch->GetName() << " " << val[i] << endl;
-		if(val[i] < it->lowerbound) return false;
-		if(val[i] > it->upperbound) return false;
+		b = it->branch;
+		l = b->GetLeaf(b->GetName());
+		if(!strcmp(l->GetTypeName(), "Double_t")){
+			fval = (Double_t*)l->GetValuePointer();
+			// cout << " Object " << i << " has " << it->branch->GetName() << " " << fval[i] << endl;
+			if(fval[i] < it->lowerbound) return false;
+			if(fval[i] > it->upperbound) return false;
+		}
+		if(!strcmp(l->GetTypeName(), "Int_t")){
+			ival = (Int_t*)l->GetValuePointer();
+			// cout << " Object " << i << " has " << it->branch->GetName() << " " << ival[i] << endl;
+			if(ival[i] < it->lowerbound) return false;
+			if(ival[i] > it->upperbound) return false;
+		}
 	}
 	return true;
 }
@@ -1201,12 +1212,26 @@ bool TreeReader::IsGoodObj(int i, vector<Cut> *cutVec){
 bool TreeReader::IsGoodEvt(vector<Cut> *cutVec){
 // This loops on the vector of cuts as filled in ReadEvtSel()
 // and determines if an event is selected
-	double *val;
+	TBranch *b;
+	TLeaf *l;
+	double *fval;
+	int *ival;
+		// double *val;
 	for(vector<Cut>::const_iterator it = cutVec->begin(); it != cutVec->end(); it++){
-		val = (double*)it->branch->GetAddress();
-		// cout << " Event has " << it->branch->GetName() << " with " << *val << endl;
-		if(*val < it->lowerbound) return false;
-		if(*val > it->upperbound) return false;
+		b = it->branch;
+		l = b->GetLeaf(b->GetName());
+		if(!strcmp(l->GetTypeName(), "Double_t")){
+			fval = (double*)l->GetValuePointer();
+			// cout << " Object " << i << " has " << it->branch->GetName() << " " << fval[i] << endl;
+			if(*fval < it->lowerbound) return false;
+			if(*fval > it->upperbound) return false;
+		}
+		if(!strcmp(l->GetTypeName(), "Int_t")){
+			ival = (int*)l->GetValuePointer();
+			// cout << " Object " << i << " has " << it->branch->GetName() << " " << ival[i] << endl;
+			if(*ival < it->lowerbound) return false;
+			if(*ival > it->upperbound) return false;
+		}
 	}
 	return true;
 }
