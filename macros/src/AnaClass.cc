@@ -406,16 +406,16 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag){
 	TH1D *hfir = new TH1D("ElID","eID",5,0,5);
 	if(!hfir){ cout << "AnaClass::plotVar() ==> Error, missing input histogram ..." << endl; return;}
 
-	TCut tempreq = req && "ElID[0][0]>0";
-	long n_tight  = t->Draw("ElID[0][0]", tempreq, "goff");
-	tempreq = req && "ElID[0][1]>0";
-	long n_loose  = t->Draw("ElID[0][1]", tempreq, "goff");
-	tempreq = req && "ElID[0][2]>0";
-	long n_rtight = t->Draw("ElID[0][2]", tempreq, "goff");
-	tempreq = req && "ElID[0][3]>0";
-	long n_rloose = t->Draw("ElID[0][3]", tempreq, "goff");
-	tempreq = req && "ElID[0][0]==0&&ElID[0][1]==0&&ElID[0][2]==0&&ElID[0][3]==0";
-	long n_none = t->Draw("ElID[0][0]", tempreq, "goff");
+	TCut tempreq = req && "ElIDTight[0]>0";
+	long n_tight  = t->Draw("ElIDTight[0]", tempreq, "goff");
+	tempreq = req && "ElIDLoose[0]>0";
+	long n_loose  = t->Draw("ElIDLoose[0]", tempreq, "goff");
+	tempreq = req && "ElIDRobustTight[0]>0";
+	long n_rtight = t->Draw("ElIDRobustTight[0]", tempreq, "goff");
+	tempreq = req && "ElIDRobustLoose[0]>0";
+	long n_rloose = t->Draw("ElIDRobustLoose[0]", tempreq, "goff");
+	tempreq = req && "ElIDTight[0]==0&&ElIDLoose[0]==0&&ElIDRobustTight[0]==0&&ElIDRobustLoose[0]==0";
+	long n_none = t->Draw("ElIDTight[0]", tempreq, "goff");
 
 	hfir->SetBinContent(1, n_none);
 	hfir->GetXaxis()->SetBinLabel(1, "None");
