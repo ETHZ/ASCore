@@ -15,6 +15,8 @@
 #include <TTree.h>
 #include <TStyle.h>
 #include <TLatex.h>
+#include <TLeaf.h>
+#include <TBranch.h>
 
 #include "TreeClassBase.h"
 #include "LeptJetStat.h"
@@ -59,9 +61,38 @@ public:
 	void ReadEvtSel(const char* = "evtsel.dat");
 	
 private:
+	
+	// Functions performing the cleaning and duplicate tagging 
+	virtual void TagCleanObjects(void);
+	virtual int CleanPrimaryVertex(void);
+	virtual int IsFromPrimaryVx(int ipart, int ichk);
+	virtual int CleanMuon(int ichk);
+	virtual bool DuplicateMuon(int ichk);
+	virtual int CleanElectron(int ichk);
+	virtual bool DuplicateElectron(int ichk);
+	virtual int CleanPhoton(int ichk);
+	virtual int CleanJet(int ichk);
+	virtual bool ElectronJet(int ichk);
+	virtual int FindNearestJet(double eta, double phi);
+	virtual double DeltaPhi(double v1, double v2);
+	virtual double GetDeltaR(double eta1, double eta2, double phi1, double phi2);
+	
+	// Functions to actually perform the cleaning
+	virtual void DecideIso(void);
+	virtual void InitCleaning(int flag);
+	virtual void DoCleanObjects(void);
+	virtual void AddToJet(int ipart, int ichk, int iJet);
+	virtual void SubtrFromJet(int ipart, int ichk, int iJet);
+	virtual int CleanEvent(void);
+	virtual int CleanMET(double met, double metphi);
+	virtual int NextMuClean(void);
+	virtual int NextElClean(void);
+	virtual int NextJClean(void);
+	
 	// Global parameters:
 	TString fOutputDir;
 	TString fTag;
+	bool fClean;
 	bool fDiLep;
 	bool fMPHist;
 	bool fSignHist;
@@ -69,6 +100,19 @@ private:
 	TStyle *fStyle;
 	Davismt2 *fMT2;
 	TLatex *fTlat;
+
+	// Cleaning variables
+	int fDoClean;
+	int fEvtClean;
+	int fNMuClean;
+	int fMuClean[20];
+	int fNElClean;
+	int fElClean[20];
+	int fNJClean;
+	int fJClean[50];
+	int iMuNext;
+	int iElNext;
+	int iJNext;
 
 	// Significance Plots:
 	TFile *fSignHistsFile;

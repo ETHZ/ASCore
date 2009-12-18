@@ -2,6 +2,7 @@
 using namespace std;
 
 TreeReader::TreeReader(TTree *tree, int flag) : TreeClassBase(tree){
+	fClean = true;
 	fDiLep = false;
 	fMPHist = false;
 	fSignHist = false;
@@ -48,6 +49,8 @@ void TreeReader::DefStyle(){
 
 // Method called before starting the event loop
 void TreeReader::BeginJob(){
+	if(fClean)    InitCleaning(1);
+	else          InitCleaning(0);
 	if(fDiLep)    InitDiLepTree();
 	if(fMPHist)   BookMPHistos();
 	if(fSignHist) BookSignHists();
@@ -71,8 +74,20 @@ void TreeReader::Loop(){
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		if (jentry%10000 == 0) cout << ">>> Processing event # " << jentry << endl;
 
+		// Do the object cleaning on the n-tuples                                                                                                                       
+		TagCleanObjects();
+		if( fClean ){
+			DecideIso();
+			DoCleanObjects();
+		}
+
+		// for(size_t i = 0; i < fNJClean; ++i){
+		// 	int index = fJClean[i];
+		// 	cout << JGood[index] << endl;
+		// }
+
 		// Event Selection
-		if(!IsGoodEvt(&fEvtSelCuts)) continue;
+		// if(!IsGoodEvt(&fEvtSelCuts)) continue;
 
 		// Put here any method that needs to be called once every event
 		if(fDiLep)    FillDiLepTree();
@@ -1234,6 +1249,953 @@ bool TreeReader::IsGoodEvt(vector<Cut> *cutVec){
 		}
 	}
 	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Cleaning Tools /////////////////////////////////////////////////////////////////////////////
+void TreeReader::TagCleanObjects(void){
+// steering for tagging clean/bad objects
+
+	int iBad = 0;
+
+// check the primary vertex
+	iBad = CleanPrimaryVertex();
+	PrimVtxGood = iBad;
+
+// check the muons
+	for (int ichk = 0; ichk < NMus; ++ichk) {
+		iBad = IsFromPrimaryVx(1, ichk);
+		MuGood[ichk] = 10*iBad;
+		iBad = CleanMuon(ichk);
+		MuGood[ichk] += iBad;
+	}
+
+// check the electrons
+	for (int ichk = 0; ichk < NEles; ++ichk) {
+		iBad = IsFromPrimaryVx(2, ichk);
+		ElGood[ichk] = 10*iBad;
+		iBad = CleanElectron(ichk);
+		ElGood[ichk] += iBad;
+	}
+
+// check the jets
+	for (int ichk = 0; ichk < NJets; ++ichk) {
+		iBad = IsFromPrimaryVx(4, ichk);
+		JGood[ichk] = 10*iBad;
+		iBad = CleanJet(ichk);
+		JGood[ichk] += iBad;
+	}
+
+// check also for duplication (only after cleanness has been checked)
+	for (int ichk = 0; ichk < NMus; ++ichk) {
+		if (DuplicateMuon(ichk))  {MuGood[ichk] += 100;}
+	}
+	for (int ichk = 0; ichk < NEles; ++ichk) {
+//    if (DuplicateElectron(ichk)  {ElGood[ichk] += 100;}
+	}
+	for (int ichk = 0; ichk < NJets; ++ichk) {
+		if (ElectronJet(ichk))  {JGood[ichk] += 100;}
+	}
+
+// check the event and MET can only be done later (after bad objects are removed)
+	GoodEvent = 0;
+	return;
+}
+
+int TreeReader::CleanPrimaryVertex(void){
+// Verifies the primary vertex quality
+// returns iBad = 1 for no charged tracks
+//              = 2 for bad normalized chi squared
+//              = 3 for incompatible with beamspot
+//              = 4 for insufficientr track pT
+	double clean_chisqVxmax = 5.0;
+	double clean_dRVxmax = 0.25;
+	double clean_dzVxmax = 20.0;
+	double clean_sumPtTkfromVxmin = 0.0; // check provided exists in ntuple
+
+	int iBad = 0;
+// Check that there are tracks at the Primary Vertex
+	if (PrimVtxNTracks <= 0){
+		iBad = 1;
+		return iBad;
+	}
+
+// Check the chisq/ndof
+	if (PrimVtxNChi2 > clean_chisqVxmax || PrimVtxNChi2 < 0.) {
+		iBad = 2;
+		return iBad;
+	}
+
+// Check compatibility of vertex with beam spot
+	double xVx = PrimVtxx - Beamspotx;
+	double yVx = PrimVtxy - Beamspoty;
+	double zVx = PrimVtxz - Beamspotz;
+	double rVx = sqrt(xVx*xVx + yVx*yVx);
+	if (rVx > clean_dRVxmax || fabs(zVx) > clean_dzVxmax) {
+		iBad = 3;
+		return iBad;
+	}
+
+// Check that there is sufficient Et in the tracks
+// double ptsum = EventData->pvPtsum();
+// if (ptsum < clean_sumPtTkfromVxmin){
+//     iBad = 4;
+//     return iBad;
+//   }
+	return iBad;
+}
+
+int TreeReader::IsFromPrimaryVx(int ipart, int ichk){
+// Checks whether the object is compatible with the primary vertex
+// ipart = 1 for muon
+//       = 2 for electron
+//       = 3 for photon
+//       = 4 for jet
+// returns iBad = 1 for incompatible with primary vertex
+	double clean_distVxmax = 5.0; // number of sigmas
+
+	int iBad = 0;
+// take error from vertex and from track extrapolation into account
+	double drVxsq = PrimVtxxE*PrimVtxxE + PrimVtxyE*PrimVtxyE;
+	double d0, dd0, dz, ddz;
+	if (ipart <= 0 || ichk < 0) {
+		return iBad;
+	} else if (ipart == 1) {
+		d0  = MuD0PV[ichk];
+		dd0 = sqrt(MuD0E[ichk]*MuD0E[ichk] + drVxsq);
+		dz  = MuDzPV[ichk];
+		ddz = sqrt(MuDzE[ichk]*MuDzE[ichk] + PrimVtxzE*PrimVtxzE);
+	} else if (ipart == 2) {
+		d0  = ElD0PV[ichk];
+		dd0 = sqrt(ElD0E[ichk]*ElD0E[ichk] + drVxsq);
+		dz  = ElDzPV[ichk];
+		ddz = sqrt(ElDzE[ichk]*ElDzE[ichk] + PrimVtxzE*PrimVtxzE);
+	} else if (ipart == 3) {
+		return true;
+	} else if (ipart == 4) {
+		d0  = sqrt((JVtxx[ichk]-PrimVtxx)*(JVtxx[ichk]-PrimVtxx)
+			+ (JVtxy[ichk]-PrimVtxy)*(JVtxy[ichk]-PrimVtxy) );
+		dd0 = sqrt(JVtxExx[ichk] + JVtxEyy[ichk] + drVxsq);
+		dz  = JVtxz[ichk] - PrimVtxz;
+		ddz = sqrt(JVtxEzz[ichk] + PrimVtxzE*PrimVtxzE);
+	}
+
+// test that the distance is not too large
+	if (fabs(d0) > clean_distVxmax * dd0 || fabs(dz) > clean_distVxmax * ddz) {
+		iBad = 1;
+	}
+	return iBad;
+}
+
+int TreeReader::CleanMuon(int ichk){
+// Verifies the muon identification quality
+// returns iBad = 1 for bad Delta pT / pT
+//              = 2 for bad normalized chi squared
+//              = 3 for too few valid hits in tracker
+	double clean_MuonDPbyPmax = 0.5;
+	double clean_MuonChi2max = 10.0;
+	double clean_MuonNHitsmin = 11.0;
+
+
+	int iBad = 0;
+	if (ichk < 0){return iBad;}
+
+	// Verify the muon quality
+
+	double pt_track = MuPt[ichk];
+//   double dpt_track = MuPtE[ichk]; // not available
+	double dpt_track = 0.;
+	double chisq = MuNChi2[ichk];
+	int nHitsValid = MuNTkHits[ichk];
+
+	// Now make the quality checks
+	// Maximum Delta p / p
+	if (dpt_track >= clean_MuonDPbyPmax * pt_track) {
+		iBad = 1;
+	}
+
+	// Maximum Chisquared
+	else if (chisq > clean_MuonChi2max) {
+		iBad = 2;
+	}
+
+	// Minimum number of valid hits
+	else if (nHitsValid < clean_MuonNHitsmin) {
+		iBad = 3;
+	}
+	return iBad;
+}
+
+bool TreeReader::DuplicateMuon(int ichk){
+// Checks for duplicate muons
+	double clean_dRSSmuonmax = 0.1;
+
+	bool isDuplicate = false;
+	if (ichk < 0){return isDuplicate;}
+
+	double ptmuon = MuPt[ichk];
+// double dptmuon = MuPtE[ichk]; // not available
+	double dptmuon = 0.;
+
+	for (int j = 0; j < NMus; ++j) {
+		if (j != ichk) {
+
+			if (MuCharge[ichk] == MuCharge[j]) {
+
+				double deltaR = GetDeltaR(MuEta[ichk], MuEta[j], MuPhi[ichk], MuPhi[j]);
+				if (deltaR < clean_dRSSmuonmax){
+
+					if ( (MuGood[ichk] == 0 && MuGood[j] == 0) ||
+					(MuGood[ichk] != 0 && MuGood[j] != 0) ){
+						double ptnew = MuPt[j];
+//            double dptnew = MuPtE[j]; // not available
+						double dptnew = 0.;
+						if (dptmuon/ptmuon >= dptnew/ptnew){
+							isDuplicate =  true;
+							break;
+						}
+					} else if (MuGood[j] == 0 && MuGood[ichk] != 0){
+						isDuplicate =  true;
+						break;
+					}
+				}
+			}
+		}
+
+	}
+	return isDuplicate;
+}
+
+int TreeReader::CleanElectron(int ichk){
+// Verifies the electron identification quality
+// returns iBad = 1 for bad H/E
+//              = 2 for bad shower shape
+//              = 3 for bad matching of Ecal and track
+	bool useHoverE = true;
+	bool useSigmaEtaEta = true;
+	bool useEoverPIn = true;
+	bool useDeltaEtaIn = true;
+	bool useDeltaPhiIn = true;
+	bool useDeltaPhiOut = true;
+	double clean_ElecHoverEBarmax = 0.045;
+	double clean_ElecHoverEEndmax = 0.05;
+	double clean_ElecSigmaEtaEtaBarmax = 0.011;
+	double clean_ElecSigmaEtaEtaEndmax = 0.025;
+	double clean_ElecEoverPInBarmin = 0.3;
+	double clean_ElecEoverPInEndmin = 0.4;
+	double clean_ElecDeltaEtaInBarmax = 0.007;
+	double clean_ElecDeltaEtaInEndmax = 0.007;
+	double clean_ElecDeltaPhiInBarmax = 0.06;
+	double clean_ElecDeltaPhiInEndmax = 0.06;
+	double clean_ElecDeltaPhiOutBarmax = 999.0;
+	double clean_ElecDeltaPhiOutEndmax = 999.0;
+
+	int iBad = 0;
+	if (ichk < 0){return iBad;}
+
+// Verify the electron quality
+
+	double eta = fabs(ElEta[ichk]);
+
+	double eOverPin = ElESuperClusterOverP[ichk];
+	double hOverE = ElHcalOverEcal[ichk];
+	double deltaPhiIn = ElDeltaPhiSuperClusterAtVtx[ichk];
+	double deltaEtaIn = ElDeltaEtaSuperClusterAtVtx[ichk];
+	double deltaPhiOut = ElDeltaPhiSeedClusterAtCalo[ichk];
+
+//  double sce55 = ElE5x5[ichk];
+	double sigmaee = ElSigmaIetaIeta[ichk];
+
+	// define category (barrel, endcap, ...)
+	int cat;
+	if (fabs(eta) < 1.479) {
+		cat = 0;
+	} else {
+		cat = 1;
+	}
+
+	// cut on the electronID variables 
+	vector<double> cut;
+
+	if (useHoverE) {
+		double value = hOverE;
+		cut.push_back(clean_ElecHoverEBarmax);
+		cut.push_back(clean_ElecHoverEEndmax);
+
+		if (value > cut[cat]) {
+			iBad = 1;
+			return iBad;
+		}
+	} 
+
+	cut.clear();
+	if (useSigmaEtaEta) {
+		double value = sigmaee;      
+		cut.push_back(clean_ElecSigmaEtaEtaBarmax);
+		cut.push_back(clean_ElecSigmaEtaEtaEndmax);
+
+		if (value > cut[cat]) {
+			iBad = 2;
+			return iBad;
+		}
+	}  
+
+	cut.clear();
+	if (useEoverPIn) {
+		double value = eOverPin;
+		cut.push_back(clean_ElecEoverPInBarmin);
+		cut.push_back(clean_ElecEoverPInEndmin);         
+
+		if (value < cut[cat]) {
+			iBad = 3;
+			return iBad;
+		}
+	}
+
+	cut.clear();    
+	if (useDeltaEtaIn) {
+		double value = fabs(deltaEtaIn);
+		cut.push_back(clean_ElecDeltaEtaInBarmax);
+		cut.push_back(clean_ElecDeltaEtaInEndmax);      
+
+		if (value > cut[cat]) {
+			iBad = 3;
+			return iBad;
+		}
+	}
+
+	cut.clear();
+	if (useDeltaPhiIn) {
+		double value = fabs(deltaPhiIn);
+		cut.push_back(clean_ElecDeltaPhiInBarmax);
+		cut.push_back(clean_ElecDeltaPhiInEndmax);
+
+		if (value > cut[cat]) {
+			iBad = 3;
+			return iBad;
+		}
+	}   
+
+	cut.clear();
+	if (useDeltaPhiOut) {
+		double value = fabs(deltaPhiOut);
+		cut.push_back(clean_ElecDeltaPhiOutBarmax);
+		cut.push_back(clean_ElecDeltaPhiOutEndmax);
+
+		if (value > cut[cat]) {
+			iBad = 3;
+			return iBad;
+		}
+	}      
+
+	// at the end, we should remove the vector cut
+	cut.clear();
+	return iBad;
+}
+
+bool TreeReader::DuplicateElectron(int ichk){
+// Checks for duplicate electrons
+	double clean_dRSSelecmax = 10.;
+
+	bool isDuplicate = false;
+	if (ichk < 0){return isDuplicate;}
+
+	int j = ElDuplicateEl[ichk];
+	if (j < 0) {return isDuplicate;}
+
+	double deltaR = GetDeltaR(ElEta[ichk], ElEta[j], ElPhi[ichk], ElPhi[j]);
+	if (deltaR < clean_dRSSelecmax){
+
+		if ( (ElGood[ichk] == 0 && ElGood[j] == 0) ||
+		(ElGood[ichk] != 0 && ElGood[j] != 0) ){
+			double elecEoP = ElESuperClusterOverP[ichk];
+			double newEoP = ElESuperClusterOverP[j];
+			if (fabs(elecEoP-1.) > fabs(newEoP-1.)) {
+				isDuplicate =  true;
+			}
+		} else if (ElGood[j] == 0 && ElGood[ichk] != 0){
+			isDuplicate =  true;
+		}
+
+	}
+	return isDuplicate;
+}
+
+int TreeReader::CleanPhoton(int ichk){
+// Verifies the photon identification quality
+// returns iBad = 1 for bad H/E
+// Still to be completed ****
+	double clean_PhotHoEmax = 0.2;
+
+	int iBad = 0;
+	if (ichk < 0){return iBad;}
+
+
+// Verify the photon quality
+
+//  double hOverE = RecoData[ichk]->phHcalOverEcal();
+
+
+	// --------------------------- H over E -------------------------------------------
+//   if (hOverE >= clean_PhotHoEmax ) {
+//     iBad = 1;
+//     return iBad;
+//   }
+
+	// Check that not a fake from pi0
+	return iBad;
+}
+
+int TreeReader::CleanJet(int ichk){
+// Verifies the jet reconstruction quality
+// and flags jets made from electrons
+// (electrons should be filled before cleaning the jets) 
+// returns iBad = 1 Et < Pt
+//              = 2 for too large EM fraction
+//              = 3 for too small EM fraction
+//              = 4 for bad Trk pT fraction
+	double  clean_FracEmmaxJet = 1.0;
+	double  clean_FracEmminJet = 0.01;
+	double  clean_FracChminJet = 0.05;
+
+
+	int iBad = 0;
+	if (ichk < 0){return iBad;}
+
+// veto jets with E<p
+	if(JEt[ichk] - JPt[ichk] < -0.0001 ){
+		iBad = 1;
+		return iBad;
+	}
+
+// check EM and track pT fractions
+	if (JEMfrac[ichk] > clean_FracEmmaxJet){
+		iBad = 2;
+		return iBad;
+	}
+
+	if (JEMfrac[ichk] < clean_FracEmminJet){
+		iBad = 3;
+		return iBad;
+	}
+
+	double etaJet = fabs(JEta[ichk]);
+	if (JChfrac[ichk] < clean_FracChminJet && etaJet < 2.1){  // put as constant
+		iBad = 4;
+		return iBad;
+	}
+	return iBad;
+}
+
+bool TreeReader::ElectronJet(int ichk){
+// checks for jets made from electrons
+// (electrons should be filled in RecoData before checking the jets)
+// ichk = index of the jet
+	double clean_deltaRElecJetmax = 0.5;
+	double clean_elecbyJetEratio = 0.7;
+
+
+	if (ichk < 0){return false;}
+
+	bool isDuplicate = false;
+
+// veto jets made of electrons
+	for (int j = 0; j < NEles; ++j) {
+		if (ElIsInJet[j] >= 0) {
+			int iJet = ElIsInJet[j];
+			if (iJet == ichk) {
+				double deltaR = GetDeltaR(JEta[ichk], ElEta[j], JPhi[ichk], ElPhi[j]);
+
+				if( deltaR < clean_deltaRElecJetmax ){
+					double sharedE = ElSharedEnergy[j];
+					if (sharedE > clean_elecbyJetEratio * JE[ichk]) {
+						isDuplicate = true;
+					}
+				}
+			}
+		}
+		if (isDuplicate){break;}
+	} 
+	return isDuplicate;
+}
+
+void TreeReader::DecideIso(void){
+// decide whether objects are isolated or not
+	double clean_MuonIsomax = 0.1;
+	double clean_ElecIsomax = 0.1;
+
+	double IsoValue = 0.;
+
+// check the muon isolation
+	for (int ichk = 0; ichk < NMus; ++ichk) {
+		IsoValue = MuIso[ichk];
+		if (IsoValue < clean_MuonIsomax) { MuIsIso[ichk] = 1;}
+		else { MuIsIso[ichk] = 0;}
+	}
+
+// check the electron isolation
+	for (int ichk = 0; ichk < NEles; ++ichk) {
+		IsoValue = ElIso[ichk];
+		if (IsoValue < clean_ElecIsomax) { ElIsIso[ichk] = 1;}
+		else { ElIsIso[ichk] = 0;}
+	}
+	return;
+}
+
+void TreeReader::InitCleaning(int flag) {
+// initializes the object cleaning
+// iflag = 0 for no removal of non-clean objects
+//       = 1 to perform the removal of non-clean objects
+
+	if (flag > 0) {
+		fDoClean = 1;
+		fNMuClean = 0;
+		fNElClean = 0;
+		fNJClean = 0;
+		iMuNext = -1;
+		iElNext  = -1;
+		iJNext = -1;
+
+	} else {
+		fDoClean = 0;
+		for (int i; i < 20; ++i) {
+			fMuClean[i] = i;
+		}
+		for (int i; i < 20; ++i) {
+			fElClean[i] = i;
+		}
+		for (int i; i < 50; ++i) {
+			fJClean[i] = i;
+		}
+		iMuNext = -1;
+		iElNext  = -1;
+		iJNext = -1;
+	}
+	return;
+}
+
+void TreeReader::DoCleanObjects(void){
+// steering for removal of bad objects
+// should be initialized by calling InitCleaning
+// should only be called after deciding on isolation
+
+	fEvtClean = 1;
+
+// check the primary vertex
+	if (PrimVtxGood != 0) {;
+		fEvtClean = 0;
+		fNMuClean = 0;
+		fNElClean = 0;
+		fNJClean = 0;
+	}
+
+// check the muons
+	fNMuClean = 0;
+	for (int ichk = 0; ichk < NMus; ++ichk) {
+		if (MuGood[ichk] == 0 && MuIsIso[ichk]) {
+			fMuClean[fNMuClean] = ichk;
+			fNMuClean++;
+		}
+	}
+
+// check the electrons
+	fNElClean = 0;
+	for (int ichk = 0; ichk < NEles; ++ichk) {
+		if (ElGood[ichk] == 0 && ElIsIso[ichk]) {
+			fElClean[fNElClean] = ichk;
+			fNElClean++;
+		}
+	}
+
+// check the jets
+	fNJClean = 0;
+	for (int ichk = 0; ichk < NJets; ++ichk) {
+		if (JGood[ichk] == 0) {
+			// cout << "  Jet " << ichk << " kept = " << fNJClean << endl;
+			fJClean[fNJClean] = ichk;
+			fNJClean++;
+			for (int iel = 0; iel < NEles; ++iel) {
+				if (ElIsInJet[iel] == ichk) {
+					if (ElIsIso[iel]) {
+						SubtrFromJet(2, iel, ichk);
+					} else {
+						AddToJet(2, iel, ichk);
+					}
+				}
+			}
+		}
+		else {
+			// cout << "  Jet " << ichk << " badness = " << JGood[ichk] << endl;
+		}
+	}
+
+	int iBad = 0;
+
+// check the event
+// (should do CleanEvent only on remaining objects)
+	iBad = CleanEvent();
+	GoodEvent = iBad;
+	if (fNMuClean+fNElClean+fNJClean <= 0 || GoodEvent%10 != 0) {;
+		fEvtClean = 0;
+		fNMuClean = 0;
+		fNElClean = 0;
+		fNJClean = 0;
+		// cout << " bad event, badness = " << GoodEvent%10 << endl;
+		return;
+	}
+
+// check the MET
+// (should do CleanMET only on remaining objects)
+// (could we choose one of the MET types?)
+	double met, metphi;
+// or do we let the user choose???
+	met    = TCMET;
+	metphi = TCMETphi;
+	iBad = CleanMET(met, metphi);
+	GoodEvent += 10*iBad;
+	met    = MuJESCorrMET;
+	metphi = MuJESCorrMETphi;
+	iBad = CleanMET(met, metphi);
+	GoodEvent += 100*iBad;
+	met    = PFMET;
+	metphi = PFMETphi;
+	iBad = CleanMET(met, metphi);
+	GoodEvent += 1000*iBad;
+	if (GoodEvent/10 == 111) {
+		fEvtClean = 0;
+		fNMuClean = 0;
+		fNElClean = 0;
+		fNJClean = 0;
+		// cout << " bad MET, badness = " << GoodEvent/10 << endl;
+	}
+	return;
+}
+
+void TreeReader::AddToJet(int ipart, int ichk, int iJet){
+// adds an object (e or mu) to its nearest jet
+// ipart = 1 for muon
+//       = 2 for electron
+//       = 3 for photon
+//       = 4 for jet
+// ichk = index of the object to be added
+// iJet = index of the jet
+
+	if (ichk >= 0 && iJet >= 0) {
+		double pxadd, pyadd, pzadd, eadd, ptadd, emadd;
+		if (ipart == 1) {
+			pxadd = MuPx[ichk];
+			pyadd = MuPy[ichk];
+			pzadd = MuPz[ichk];
+			eadd  = MuE[ichk];
+			ptadd = MuPt[ichk];
+			emadd = 0.;
+		} else if (ipart == 2) {
+			pxadd = ElPx[ichk] - ElSharedPx[ichk];
+			pyadd = ElPy[ichk] - ElSharedPy[ichk];
+			pzadd = ElPz[ichk] - ElSharedPz[ichk];
+			eadd  = ElE[ichk] - ElSharedEnergy[ichk];
+			ptadd = ElPt[ichk];
+			double emshpt = sqrt(ElSharedPx[ichk]*ElSharedPx[ichk]
+				+ ElSharedPy[ichk]*ElSharedPy[ichk]);
+			emadd = ElPt[ichk] - emshpt;
+		} else if (ipart == 3) {
+			// cout << " *** Problem: adding photons is not foreseen" << endl;
+			return;
+		} else if (ipart == 4) {
+			pxadd = JPx[ichk];
+			pyadd = JPy[ichk];
+			pzadd = JPz[ichk];
+			eadd  = JE[ichk];
+			ptadd = JChfrac[ichk] * JPt[ichk];
+			emadd = JEMfrac[ichk] * JPt[ichk];
+		}
+
+		JPx[iJet] += pxadd;
+		JPy[iJet] += pyadd;
+		JPz[iJet] += pzadd;
+		JE[iJet] += eadd;
+	// ??? or do we want to keep the jets massless?
+		JPt[iJet] = sqrt(JPx[iJet]*JPx[iJet] + JPy[iJet]*JPy[iJet]);
+		JEt[iJet] = JPt[iJet];
+		if (fabs(JPz[iJet]) <1.0e-5 ) {JEta[iJet] = 0.;}
+		else {
+			double theta = atan(JPt[iJet]/JPz[iJet]);
+			if (theta < 0.) {theta = theta + 3.141592654;}
+			JEta[iJet] =  -log(tan(0.5*theta));
+		}
+		JPhi[iJet] =  atan2(JPy[iJet],JPx[iJet]);
+		JChfrac[iJet] += ptadd / JPt[iJet];
+		JEMfrac[iJet] += emadd / JPt[iJet];
+	}
+	return;
+}
+
+void TreeReader::SubtrFromJet(int ipart, int ichk, int iJet){
+// subtracts an object from its nearest jet
+// ipart = 1 for muon
+//       = 2 for electron
+//       = 3 for photon
+//       = 4 for jet
+// ichk = index of the object to be subtracted
+// iJet = index of the jet
+
+	if (ichk >= 0 && iJet >= 0) {
+		double pxadd, pyadd, pzadd, eadd, ptadd, emadd;
+		if (ipart == 1) {
+			pxadd = MuPx[ichk];
+			pyadd = MuPy[ichk];
+			pzadd = MuPz[ichk];
+			eadd  = MuE[ichk];
+			ptadd = MuPt[ichk];
+			emadd = 0.;
+		} else if (ipart == 2) {
+			pxadd = ElSharedPx[ichk];
+			pyadd = ElSharedPy[ichk];
+			pzadd = ElSharedPz[ichk];
+			eadd  = ElSharedEnergy[ichk];
+			ptadd = ElPt[ichk];
+			double emshpt = sqrt(ElSharedPx[ichk]*ElSharedPx[ichk]
+				+ ElSharedPy[ichk]*ElSharedPy[ichk]);
+			emadd = ElPt[ichk] - emshpt;
+		} else if (ipart == 3) {
+			// cout << " *** Problem: adding photons is not foreseen" << endl;
+			return;
+		} else if (ipart == 4) {
+			pxadd = JPx[ichk];
+			pyadd = JPy[ichk];
+			pzadd = JPz[ichk];
+			eadd  = JE[ichk];
+			ptadd = JChfrac[ichk] * JPt[ichk];
+			emadd = JEMfrac[ichk] * JPt[ichk];
+		}
+
+		JPx[iJet] -= pxadd;
+		JPy[iJet] -= pyadd;
+		JPz[iJet] -= pzadd;
+		JE[iJet] -= eadd;
+	// ??? or do we want to keep the jets massless?
+		double jmom = sqrt (JPx[iJet]*JPx[iJet] + JPy[iJet]*JPy[iJet] + JPz[iJet]*JPz[iJet]);
+		if(JE[iJet] < jmom) {
+			double egy = JE[iJet];
+			if (egy <= 0.){ egy = 0.001;}
+			double scale = egy / jmom;
+			JPx[iJet] *= scale;
+			JPy[iJet] *= scale;
+			JPz[iJet] *= scale;
+		}
+		JPt[iJet] = sqrt(JPx[iJet]*JPx[iJet] + JPy[iJet]*JPy[iJet]);
+		JEt[iJet] = JPt[iJet];
+		if (fabs(JPz[iJet]) <1.0e-5 ) {JEta[iJet] = 0.;}
+		else {
+			double theta = atan(JPt[iJet]/JPz[iJet]);
+			if (theta < 0.) {theta = theta + 3.141592654;}
+			JEta[iJet] =  -log(tan(0.5*theta));
+		}
+		JPhi[iJet] =  atan2(JPy[iJet],JPx[iJet]);
+		JChfrac[iJet] = ptadd / JPt[iJet];
+		JEMfrac[iJet] = emadd / JPt[iJet];
+	}
+	return;
+}
+
+int TreeReader::CleanEvent(void){
+// To veto events from beam halo, cosmics or noise
+// will also need the primary vertex
+// tests on Fem and Ftrk (careful for mu-mu and e-e)
+// needs to be modified when photons become available
+// returns iBad = 1 event is empty
+//              = 2 for too small EM fraction
+//              = 3 for bad Trk pT fraction
+	double clean_FracChmin = 0.1;
+	double clean_FracEmmin = 0.175;
+
+
+	int iBad = 0;
+// test that data still exist
+	if (fNMuClean+fNElClean+fNJClean <= 0){
+		iBad = 1;
+		return iBad;
+	}
+
+// test total Fem and Ftrk in event
+
+	// cout << " fNMuClean " << fNMuClean << " fNElClean " << fNElClean << " fNJClean " << fNJClean << endl;
+	int nPhot = 0;
+	int nChObj = 0;
+	double pt_track = 0.;
+	double et_em = 0.;
+	double et_had = 0.;
+	for (int i = 0; i < fNMuClean; ++i) {
+		pt_track += MuPt[fMuClean[i]];
+		nChObj++;
+	}
+	for (int i = 0; i < fNElClean; ++i) {
+		pt_track += ElPt[fElClean[i]];
+		et_em += ElEt[fElClean[i]];
+		nChObj++;
+	}
+	for (int i = 0; i < fNJClean; ++i) {
+		pt_track += JChfrac[fJClean[i]] * JPt[fJClean[i]];
+		et_em += JEMfrac[fJClean[i]] * JEt[fJClean[i]];
+		et_had += JEt[fJClean[i]] - et_em;
+		if (JChfrac[fJClean[i]] > 0.) {nChObj++;}
+		// cout << " Jet " << i << ", JEMfrac " << JEMfrac[fJClean[i]] << ", JEt " << JEt[fJClean[i]] << endl;
+	}
+
+	double fracCh = 0.;
+	double fracEm = 0.;
+	if (et_em+et_had <= 0.) {
+		if (fNMuClean < 1) {
+			// cout << " no cal energy " << " et_em " << et_em << ", et_had " << et_had << endl;
+			iBad = 1;
+			return iBad;
+		}
+		fracCh = 1.;
+		fracEm = 1.;
+	} else {
+		fracCh = pt_track / (et_em + et_had);
+		fracEm = et_em / (et_em + et_had);
+	}
+	if (fracEm < clean_FracEmmin) {
+		iBad = 2;
+		return iBad;
+	}
+	if (fracCh < clean_FracChmin && (nPhot < 1 || nChObj > 0) ) {
+		iBad = 3;
+		return iBad;
+	}
+	return iBad;
+}
+
+int TreeReader::CleanMET(double met, double metphi){
+// The MET should not be aligned with any jet
+// and should not be along one and opposite to the other of the 2 leading jets
+// to veto QCD events with jet "mismeasurements"
+// (see Jet + MET analysis in ptdr2)
+// returns iBad = 1 for MET aligned with a jet
+//              = 2 for MET within Rij limit
+	double clean_METmin = 50.0;
+	double clean_dPhiJetMETmin = 0.0;
+	double clean_dR12min = 0.5;
+	double clean_dR21min = 0.5;
+
+	int iBad = 0;
+	double met_x = met * cos(metphi);
+	double met_y = met * sin(metphi);
+	if (met_x == 0. && met_y == 0.){
+		return iBad;
+	}
+// care only if MET is large enough
+	if (met < clean_METmin){
+		return iBad;
+	}
+
+	double etmax1 = 0.;
+	double etmax2 = 0.;
+	int imax1 = -1;
+	int imax2 = -1;
+// loop over all jets
+	for(int ij = 0; ij < fNJClean; ++ij) {
+	// reject if the MET is along the jet
+		int i = fJClean[ij];
+		double dPhi =  DeltaPhi(JPhi[i], metphi);
+		if (dPhi < clean_dPhiJetMETmin) {
+			iBad = 1;
+			return iBad;
+		}
+	// else, pick up the 2 leading jets
+		if(JPt[i] > etmax1){
+			etmax2 = etmax1;
+			imax2 = imax1;
+			etmax1 = JPt[i];
+			imax1 = i;
+		} else if (JPt[i] > etmax2){
+			etmax2 = JPt[i];
+			imax2 = i;
+		}
+	}
+
+// check dR12 and dR21
+	if (imax2 >=0){
+		double dPhi1 = DeltaPhi(JPhi[imax1], metphi );
+		double dPhi2 = DeltaPhi(JPhi[imax2], metphi );
+		double pi = 3.141592654;
+		double r12 = sqrt(dPhi1*dPhi1 + (pi-dPhi2)*(pi-dPhi2) );
+		double r21 = sqrt(dPhi2*dPhi2 + (pi-dPhi1)*(pi-dPhi1) );
+		if (r12 < clean_dR12min || r21 < clean_dR21min){
+			iBad = 2;
+			return iBad;
+		}
+	}
+	return iBad;
+}
+
+int TreeReader::NextMuClean(void) {
+// returns the index to the next clean muon in the ntuple
+//    or -1 if no muon left
+
+	iMuNext++;
+	if (iMuNext >= fNMuClean) {
+		iMuNext = -1;
+	}
+	return iMuNext;
+}
+
+int TreeReader::NextElClean(void) {
+// returns the index to the next clean electron in the ntuple
+//    or -1 if no electron left
+
+	iElNext++;
+	if (iElNext >= fNElClean) {
+		iElNext = -1;
+	}
+	return iElNext;
+}
+
+int TreeReader::NextJClean(void) {
+// returns the index to the next clean jet in the ntuple
+//    or -1 if no jet left
+
+	iJNext++;
+	if (iJNext >= fNJClean) {
+		iJNext = -1;
+	}
+	return iJNext;
+}
+
+int TreeReader::FindNearestJet(double eta, double phi){
+// Looks for the nearest jet in deltaR to a given object (e or mu or photon) 
+// and returns its index 
+// returns -1 if no nearest jet
+
+	int iJetMin = -1;
+
+	double deltaRmin = 999.;
+	for(int i = 0; i < NJets; ++i){
+		double deltaR = GetDeltaR(eta, JEta[i], phi, JPhi[i]);
+		if (deltaR < deltaRmin){
+			deltaRmin = deltaR;
+			iJetMin = i;
+		}
+	}
+	return iJetMin;
+}
+
+double TreeReader::DeltaPhi(double v1, double v2){
+// Computes the correctly normalized phi difference
+// v1, v2 = phi of object 1 and 2
+	const double pi    = 3.141592654;
+	double twopi = 6.283185307;
+
+	double diff = fabs(v2 - v1);
+	double corr = twopi - diff;
+	if (diff < pi){ return diff;} else { return corr;} 
+}
+
+double TreeReader::GetDeltaR(double eta1, double eta2, double phi1, double phi2){
+// Computes the DeltaR of two objects from their eta and phi values
+	return sqrt( (eta1-eta2)*(eta1-eta2) 
+		+ DeltaPhi(phi1, phi2)*DeltaPhi(phi1, phi2) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
