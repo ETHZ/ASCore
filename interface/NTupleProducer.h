@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.26 2009/12/07 18:13:15 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.27 2009/12/11 20:02:23 stiegerb Exp $
 //
 //
 
@@ -41,7 +41,7 @@ Implementation:
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/JetReco/interface/Jet.h"
-
+	
 // Helpers
 #include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
 
@@ -104,6 +104,7 @@ private:
 	static const int gMaxneles = 20;
 	static const int gMaxnjets = 100;
 	static const int gMaxntrks = 500;
+	static const int gMaxnphos = 500;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -126,6 +127,7 @@ private:
 	edm::InputTag fMET5Tag;
 	edm::InputTag fVertexTag;
 	edm::InputTag fTrackTag;
+	edm::InputTag fPhotonTag;
 	edm::InputTag fCalTowTag;
 	edm::InputTag fGenPartTag;
 	edm::InputTag fL1TriggerTag;
@@ -150,6 +152,9 @@ private:
 	double fIso_MuCalDRin;
 	double fIso_MuCalDRout;
 	double fIso_MuCalSeed;
+
+	double fMinphopt;
+	double fMaxphoeta;
 
 	double fJUNC_px_match[gMaxnjets];
 	double fJUNC_py_match[gMaxnjets];
@@ -183,6 +188,9 @@ private:
 	double fRTMaxtrketa;
 	double fRTMaxtrknchi2;
 	int fRTMintrknhits;
+
+	double fRTMinphopt;
+	double fRTMaxphoeta;
 
 	double fRTIsoMuTkDRin;
 	double fRTIsoMuTkDRout;
@@ -233,6 +241,7 @@ private:
 	int fTflagmaxujetexc; // Found more than 50 jets in event
 	int fTflagmaxjetexc;  // Found more than 50 uncorrected jets in event
 	int fTflagmaxtrkexc;  // Found more than 500 tracks in event
+	int fTflagmaxphoexc;  // Found more than 500 photons in event
 
 // Muons:
 	unsigned int fTnmu;
@@ -341,6 +350,7 @@ private:
 	double fTjeta[gMaxnjets];
 	double fTjphi[gMaxnjets];
 	double fTjemfrac[gMaxnjets];
+	int fTjNconstituents[gMaxnjets];
 	double fTjID_HPD[gMaxnjets];
 	double fTjID_RBX[gMaxnjets];
 	double fTjID_n90Hits[gMaxnjets];
@@ -389,6 +399,24 @@ private:
 	double fTtrknchi2[gMaxntrks];
 	double fTtrknhits[gMaxntrks];
 
+  //Photons
+  int    fTnphotons;
+  double fTPhotonPt[gMaxnphos];  
+  double fTPhotonPx[gMaxnphos];  
+  double fTPhotonPy[gMaxnphos];  
+  double fTPhotonPz[gMaxnphos];  
+  double fTPhotonEta[gMaxnphos];
+  double fTPhotonPhi[gMaxnphos];
+  double fTPhotonEnergy[gMaxnphos];
+  double fTPhotoncaloPositionX[gMaxnphos];
+  double fTPhotoncaloPositionY[gMaxnphos];
+  double fTPhotoncaloPositionZ[gMaxnphos];
+  double fTPhotonHoverE[gMaxnphos];
+  double fTPhotonH1overE[gMaxnphos];
+  double fTPhotonH2overE[gMaxnphos];
+  int    fTPhotonHasPixSeed[gMaxnphos];
+  int    fTPhotonHasConvTrks[gMaxnphos];
+  
 // (M)E(T):
 	double fTTrkPtSumx;
 	double fTTrkPtSumy;

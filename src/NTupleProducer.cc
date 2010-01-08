@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.31 2009/12/07 18:13:04 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.32 2009/12/11 20:02:18 stiegerb Exp $
 //
 //
 
@@ -52,6 +52,11 @@ Implementation:
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
 #include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
@@ -91,6 +96,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMET5Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met5");
 	fVertexTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
 	fTrackTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
+	fPhotonTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_photons");
 	fCalTowTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_caltow");
 	fGenPartTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_genpart");
 	fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
@@ -113,6 +119,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMaxtrketa      = iConfig.getParameter<double>("sel_maxtrketa");
 	fMaxtrknchi2    = iConfig.getParameter<double>("sel_maxtrknchi2");
 	fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
+	fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
+	fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
+
 
 // Isolation Parameters
 	fIso_MuTkDRin   = iConfig.getParameter<double>("iso_MuTkDRin");
@@ -149,6 +158,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	edm::LogVerbatim("NTP") << "    fMET5Tag        = " << fMET5Tag.label()        ;
 	edm::LogVerbatim("NTP") << "    fVertexTag      = " << fVertexTag.label()      ;
 	edm::LogVerbatim("NTP") << "    fTrackTag       = " << fTrackTag.label()       ;
+	edm::LogVerbatim("NTP") << "    fPhotonTag      = " << fPhotonTag.label()      ;
 	edm::LogVerbatim("NTP") << "    fCalTowTag      = " << fCalTowTag.label()      ;
 	edm::LogVerbatim("NTP") << "    fGenPartTag     = " << fGenPartTag.label()     ;
 	edm::LogVerbatim("NTP") << endl;
@@ -166,6 +176,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	edm::LogVerbatim("NTP") << "    fMaxtrketa      = " << fMaxtrketa  ;
 	edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2 ;
 	edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits ;
+	edm::LogVerbatim("NTP") << "    fMinphopt       = " << fMinphopt   ;
+	edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta  ;
 	edm::LogVerbatim("NTP") << endl;
 	edm::LogVerbatim("NTP") << "  Isolation Parameters:" ;
 	edm::LogVerbatim("NTP") << "    fIso_MuTkDRin   = " << fIso_MuTkDRin   ;
@@ -214,6 +226,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 //Get Tracks collection
 	Handle<TrackCollection> tracks;
 	iEvent.getByLabel(fTrackTag, tracks);
+
+//Get Photon collection
+	Handle<PhotonCollection> photons;
+	iEvent.getByLabel(fPhotonTag, photons);
 
 // MET
 	Handle<CaloMETCollection> calomet;
@@ -647,6 +663,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjphi[jqi] = jet->phi();
 		fTje[jqi]   = jet->energy();
 		fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
+		fTjNconstituents[jqi]  = jet->getJetConstituents().size(); 
 		fTjEcorr[jqi] =  jet->px()/fJUNC_px_match[index];
 
 	// Calculate the DR wrt the closest electron
@@ -951,6 +968,47 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	TVector3 trkPtSum(fTTrkPtSumx, fTTrkPtSumy, 0.);
 	fTTrkPtSumphi = trkPtSum.Phi();
 
+	// Photons
+	int nqpho(-1);
+	for(PhotonCollection::const_iterator ip = photons->begin(); ip != photons->end() ; ++ip ){
+	  //no idea of a preselection
+	  if(ip->pt() < fMinphopt) continue;
+	  if(fabs(ip->eta()) > fMaxphoeta) continue;
+	  nqpho++;
+	  //check if maximum number of photons exceeded
+	  if(nqpho>=gMaxnphos){
+	    edm::LogWarning("NTP") << "@SUB=analyze"
+				   << "Maximum number of photons exceeded";
+	    fTflagmaxphoexc = 1;
+	    fTgoodevent = 0;
+	    break;
+	  }
+	  fTPhotonPt[nqpho] = ip->pt();
+	  fTPhotonPx[nqpho] = ip->px();
+	  fTPhotonPy[nqpho] = ip->py();
+	  fTPhotonPz[nqpho] = ip->pz();
+	  fTPhotonEta[nqpho] = ip->eta();
+	  fTPhotonPhi[nqpho] = ip->phi();
+	  fTPhotonEnergy[nqpho] = ip->energy();
+	  fTPhotoncaloPositionX[nqpho] = ip->caloPosition().X();
+	  fTPhotoncaloPositionY[nqpho] = ip->caloPosition().Y();
+	  fTPhotoncaloPositionZ[nqpho] = ip->caloPosition().Z();
+	  fTPhotonHoverE[nqpho] = ip->hadronicOverEm();
+	  fTPhotonH1overE[nqpho] = ip->hadronicDepth1OverEm();
+	  fTPhotonH2overE[nqpho] = ip->hadronicDepth2OverEm();
+	  if(ip->hasPixelSeed()){	  
+	    fTPhotonHasPixSeed[nqpho] = 1;
+	  } else {
+	    fTPhotonHasPixSeed[nqpho] = 0;
+	  }
+	  if(ip->hasConversionTracks()){
+	    fTPhotonHasConvTrks[nqpho] = 1;
+	  } else {
+	    fTPhotonHasConvTrks[nqpho] = 0;
+	  }
+	}
+	fTnphotons = nqpho+1;
+
 // Calotowers:
 	fTNCaloTowers = calotowers->size();	
 	fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
@@ -1044,6 +1102,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fRunTree->Branch("MaxTrkNChi2"    ,&fRTMaxtrknchi2,     "MaxTrkNChi2/D");
 	fRunTree->Branch("MinTrkNHits"    ,&fRTMintrknhits,     "MinTrkNHits/I");
 
+	fRunTree->Branch("MinPhotonPt"       ,&fRTMinphopt,        "MinPhotonPt/D");
+	fRunTree->Branch("MaxPhotonEta"      ,&fRTMaxphoeta,       "MaxPhotonEta/D");
+
 	fRunTree->Branch("IsoMuTkDRin"    ,&fRTIsoMuTkDRin,    "IsoMuTkDRin/D");
 	fRunTree->Branch("IsoMuTkDRout"   ,&fRTIsoMuTkDRout,   "IsoMuTkDRout/D");
 	fRunTree->Branch("IsoMuTkSeed"    ,&fRTIsoMuTkSeed,    "IsoMuTkSeed/D");
@@ -1083,6 +1144,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("MaxJetExceed"   ,&fTflagmaxjetexc  ,"MaxJetExceed/I");
 	fEventTree->Branch("MaxUncJetExceed",&fTflagmaxujetexc ,"MaxUncJetExceed/I");
 	fEventTree->Branch("MaxTrkExceed"   ,&fTflagmaxtrkexc  ,"MaxTrkExceed/I");
+	fEventTree->Branch("MaxPhotonsExceed"   ,&fTflagmaxphoexc  ,"MaxPhotonsExceed/I");
 
 // Muons:
 	fEventTree->Branch("NMus"           ,&fTnmu            ,"NMus/I");
@@ -1184,6 +1246,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("JEta"           ,&fTjeta         ,"JEta[NJets]/D");
 	fEventTree->Branch("JPhi"           ,&fTjphi         ,"JPhi[NJets]/D");
 	fEventTree->Branch("JEMfrac"        ,&fTjemfrac      ,"JEMfrac[NJets]/D");
+	fEventTree->Branch("JNConstituents" ,&fTjNconstituents,"JNConstituents[NJets]/I");
 	fEventTree->Branch("JID_HPD"        ,&fTjID_HPD      ,"JID_HPD[NJets]/D");
 	fEventTree->Branch("JID_RBX"        ,&fTjID_RBX      ,"JID_RBX[NJets]/D");
 	fEventTree->Branch("JID_n90Hits"    ,&fTjID_n90Hits  ,"JID_n90Hits[NJets]/D");
@@ -1235,6 +1298,24 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/D");
 	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/D");
 	fEventTree->Branch("TrkPtSumPhi"    ,&fTTrkPtSumphi    ,"TrkPtSumPhi/D");
+
+	//Photons
+	fEventTree->Branch("NPhotons"        ,&fTnphotons      ,"NPhotons/I");
+	fEventTree->Branch("PhotonPt"        ,&fTPhotonPt      ,"PhotonPt[NPhotons]/D");
+	fEventTree->Branch("PhotonPx"        ,&fTPhotonPx      ,"PhotonPx[NPhotons]/D");
+	fEventTree->Branch("PhotonPy"        ,&fTPhotonPy      ,"PhotonPy[NPhotons]/D");
+	fEventTree->Branch("PhotonPz"        ,&fTPhotonPz      ,"PhotonPz[NPhotons]/D");
+	fEventTree->Branch("PhotonEta"       ,&fTPhotonEta        ,"PhotonEta[NPhotons]/D");
+	fEventTree->Branch("PhotonPhi"       ,&fTPhotonPhi        ,"PhotonPhi[NPhotons]/D");
+	fEventTree->Branch("PhotonEnergy"    ,&fTPhotonEnergy        ,"PhotonEnergy[NPhotons]/D");
+	fEventTree->Branch("PhotonCaloPositionX" ,&fTPhotoncaloPositionX ,"PhotonCaloPositionX[NPhotons]/D");
+	fEventTree->Branch("PhotonCaloPositionY" ,&fTPhotoncaloPositionY ,"PhotonCaloPositionY[NPhotons]/D");
+	fEventTree->Branch("PhotonCaloPositionZ" ,&fTPhotoncaloPositionZ ,"PhotonCaloPositionZ[NPhotons]/D");
+	fEventTree->Branch("PhotonHoverE"        ,&fTPhotonHoverE        ,"PhotonHoverE[NPhotons]/D");
+	fEventTree->Branch("PhotonH1overE"       ,&fTPhotonH1overE       ,"PhotonH1overE[NPhotons]/D");
+	fEventTree->Branch("PhotonH2overE"       ,&fTPhotonH1overE       ,"PhotonH2overE[NPhotons]/D");
+	fEventTree->Branch("PhotonHasPixSeed"    ,&fTPhotonHasPixSeed    ,"PhotonHasPixSeed[NPhotons]/I");
+	fEventTree->Branch("PhotonHasConvTrks"   ,&fTPhotonHasConvTrks   ,"PhotonHasConvTrks[NPhotons]/I");
 
 // MET:
 	fEventTree->Branch("SumEt"          ,&fTSumEt          ,"SumEt/D");
@@ -1305,6 +1386,8 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMaxtrketa     = -999.99;
 	fRTMaxtrknchi2   = -999.99;
 	fRTMintrknhits   = -999;
+	fRTMinphopt      = -999.99;
+	fRTMaxphoeta     = -999.99;
 	fRTIsoMuTkDRin   = -999.99;
 	fRTIsoMuTkDRout  = -999.99;
 	fRTIsoMuTkSeed   = -999.99;
@@ -1335,6 +1418,9 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMaxtrketa     = fMaxtrketa;
 	fRTMaxtrknchi2   = fMaxtrknchi2;
 	fRTMintrknhits   = fMintrknhits;
+
+	fRTMinphopt      = fMinphopt;
+	fRTMaxphoeta     = fMaxphoeta;
 
 	fRTIsoMuTkDRin   = fIso_MuTkDRin;
 	fRTIsoMuTkDRout  = fIso_MuTkDRout;
@@ -1388,6 +1474,7 @@ void NTupleProducer::resetTree(){
 	fTflagmaxujetexc = 0;
 	fTflagmaxjetexc    = 0;
 	fTflagmaxtrkexc    = 0;
+	fTflagmaxphoexc    = 0;
 
 	fTnmu   = 0;
 	fTneles = 0;
@@ -1476,6 +1563,8 @@ void NTupleProducer::resetTree(){
 	resetInt(fTeIDRobustTight, gMaxneles);
 	resetInt(fTeIDRobustLoose, gMaxneles);
 
+	resetInt(fTjNconstituents, gMaxnjets);
+
 	resetInt(fTgoodjet, gMaxnjets);
 	resetDouble(fTjpx,  gMaxnjets);
 	resetDouble(fTjpy,  gMaxnjets);
@@ -1530,6 +1619,23 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTtrkphi, gMaxntrks);
 	resetDouble(fTtrknchi2, gMaxntrks);
 	resetDouble(fTtrknhits, gMaxntrks);
+
+	resetDouble(fTPhotonPt,gMaxnphos);
+	resetDouble(fTPhotonPx,gMaxnphos);
+	resetDouble(fTPhotonPy,gMaxnphos);
+	resetDouble(fTPhotonPz,gMaxnphos);
+	resetDouble(fTPhotonEta,gMaxnphos);
+	resetDouble(fTPhotonPhi,gMaxnphos);
+	resetDouble(fTPhotonEnergy,gMaxnphos);
+	resetDouble(fTPhotoncaloPositionX,gMaxnphos);
+	resetDouble(fTPhotoncaloPositionY,gMaxnphos);
+	resetDouble(fTPhotoncaloPositionZ,gMaxnphos);
+	resetDouble(fTPhotonHoverE,gMaxnphos);
+	resetDouble(fTPhotonH1overE,gMaxnphos);
+	resetDouble(fTPhotonH2overE,gMaxnphos);
+	resetInt(fTPhotonHasPixSeed,gMaxnphos);
+	resetInt(fTPhotonHasConvTrks,gMaxnphos);
+
 
 	fTTrkPtSumx       = -999.99;
 	fTTrkPtSumy       = -999.99;
