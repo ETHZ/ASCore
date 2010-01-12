@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.27 2009/12/11 20:02:23 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.28 2010/01/08 09:50:44 sordini Exp $
 //
 //
 
@@ -63,6 +63,7 @@ public:
 	vector<double> calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef);
 	vector<double> calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent);
 	vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
+	vector<int> matchElCand(const reco::GsfElectron *El, const edm::Event& iEvent);
 	vector<const reco::Muon*> sortMus(vector<const reco::Muon*>);
 	void switchDouble(double &, double &);
 	void switchInt(int &, int &);
@@ -210,6 +211,7 @@ private:
 	double fTintxs;
 	double fTweight;
 
+	int fTgoodvtx;
 	double fTprimvtxx;
 	double fTprimvtxy;
 	double fTprimvtxz;
@@ -246,6 +248,7 @@ private:
 // Muons:
 	unsigned int fTnmu;
 	int fTgoodmu[gMaxnmus];
+	int fTmuIsIso[gMaxnmus];
 	double fTmupx[gMaxnmus];
 	double fTmupy[gMaxnmus];
 	double fTmupz[gMaxnmus];
@@ -291,6 +294,7 @@ private:
 // Electrons:
 	int fTneles;
 	int fTgoodel[gMaxneles];
+	int fTeIsIso[gMaxneles];
 	double fTepx[gMaxneles];
 	double fTepy[gMaxneles];
 	double fTepz[gMaxneles];
@@ -337,6 +341,31 @@ private:
 	double fTeSharedPz[gMaxneles];
 	double fTeSharedEnergy[gMaxneles];
 	int fTeDupEl[gMaxneles];
+// - Gen Info:
+	int fTeid[gMaxneles];
+	int fTemid[gMaxneles];
+
+
+// Photons:
+	int fTnphotons;
+	int fTgoodphoton[gMaxnphos];
+	int fTPhotonIsIso[gMaxnphos];
+	double fTPhotonPt[gMaxnphos];  
+	double fTPhotonPx[gMaxnphos];  
+	double fTPhotonPy[gMaxnphos];  
+	double fTPhotonPz[gMaxnphos];  
+	double fTPhotonEta[gMaxnphos];
+	double fTPhotonPhi[gMaxnphos];
+	double fTPhotonEnergy[gMaxnphos];
+	double fTPhotoncaloPositionX[gMaxnphos];
+	double fTPhotoncaloPositionY[gMaxnphos];
+	double fTPhotoncaloPositionZ[gMaxnphos];
+	double fTPhotonHoverE[gMaxnphos];
+	double fTPhotonH1overE[gMaxnphos];
+	double fTPhotonH2overE[gMaxnphos];
+	double fTPhotonSigmaIetaIeta[gMaxnphos];
+	int    fTPhotonHasPixSeed[gMaxnphos];
+	int    fTPhotonHasConvTrks[gMaxnphos];
 
 // Jets:
 	int fTnjets;
@@ -399,24 +428,6 @@ private:
 	double fTtrknchi2[gMaxntrks];
 	double fTtrknhits[gMaxntrks];
 
-  //Photons
-  int    fTnphotons;
-  double fTPhotonPt[gMaxnphos];  
-  double fTPhotonPx[gMaxnphos];  
-  double fTPhotonPy[gMaxnphos];  
-  double fTPhotonPz[gMaxnphos];  
-  double fTPhotonEta[gMaxnphos];
-  double fTPhotonPhi[gMaxnphos];
-  double fTPhotonEnergy[gMaxnphos];
-  double fTPhotoncaloPositionX[gMaxnphos];
-  double fTPhotoncaloPositionY[gMaxnphos];
-  double fTPhotoncaloPositionZ[gMaxnphos];
-  double fTPhotonHoverE[gMaxnphos];
-  double fTPhotonH1overE[gMaxnphos];
-  double fTPhotonH2overE[gMaxnphos];
-  int    fTPhotonHasPixSeed[gMaxnphos];
-  int    fTPhotonHasConvTrks[gMaxnphos];
-  
 // (M)E(T):
 	double fTTrkPtSumx;
 	double fTTrkPtSumy;
