@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.28 2010/01/08 09:50:44 sordini Exp $
+// $Id: NTupleProducer.h,v 1.29 2010/01/12 16:29:59 stiegerb Exp $
 //
 //
 
@@ -105,7 +105,7 @@ private:
 	static const int gMaxneles = 20;
 	static const int gMaxnjets = 100;
 	static const int gMaxntrks = 500;
-	static const int gMaxnphos = 500;
+	static const int gMaxnphos = 50;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -200,6 +200,12 @@ private:
 	double fRTIsoMuCalDRout;
 	double fRTIsoMuCalSeed;
 
+	int fRTmaxnmu;
+	int fRTmaxnel;
+	int fRTmaxnjet;
+	int fRTmaxntrk;
+	int fRTmaxnphot;
+
 	TTree *fEventTree;
 
 // General event information
@@ -261,9 +267,13 @@ private:
 	int fTmucharge[gMaxnmus];
 
 // - Isolation Variables
-	double fTmuetsum[gMaxnmus];
-	double fTmuptsum[gMaxnmus];
 	double fTmuiso[gMaxnmus];
+	double fTmuIso03sumPt[gMaxnmus];
+	double fTmuIso03emEt[gMaxnmus];
+	double fTmuIso03hadEt[gMaxnmus];
+	double fTmuIso05sumPt[gMaxnmus];
+	double fTmuIso05emEt[gMaxnmus];
+	double fTmuIso05hadEt[gMaxnmus];
 	double fTmueecal[gMaxnmus];
 	double fTmuehcal[gMaxnmus];
 
@@ -311,8 +321,9 @@ private:
 	double fTedzpv[gMaxneles];
 	double fTedzE[gMaxneles];
 	double fTeiso[gMaxneles];
-	double fTeptsum[gMaxneles];
-	double fTeetsum[gMaxneles];
+	double fTePtsum[gMaxneles];
+	double fTeEmEtsum[gMaxneles];
+	double fTeHadEtsum[gMaxneles];
 	double fTenchi2[gMaxneles];
 	int fTeIDTight[gMaxneles];
 	int fTeIDLoose[gMaxneles];
@@ -341,10 +352,18 @@ private:
 	double fTeSharedPz[gMaxneles];
 	double fTeSharedEnergy[gMaxneles];
 	int fTeDupEl[gMaxneles];
+	double fTdr03tksumpt[gMaxneles];
+	double fTdr04tksumpt[gMaxneles];
+	double fTdr03ecalrechitsumet[gMaxneles];
+	double fTdr04ecalrechitsumet[gMaxneles];
+	double fTdr03hcaltowersumet[gMaxneles];
+	double fTdr04hcaltowersumet[gMaxneles];
+	double fTetheta[gMaxneles];
+
+
 // - Gen Info:
 	int fTeid[gMaxneles];
 	int fTemid[gMaxneles];
-
 
 // Photons:
 	int fTnphotons;
