@@ -60,9 +60,12 @@ public:
 	void ReadObjCuts(const char* = "objsel.dat");
 	void ReadEvtSel(const char* = "evtsel.dat");
 	
+	void WriteTree(TString);
+	
 private:
 	
 	// Functions performing the cleaning and duplicate tagging 
+	virtual void ReadCleaningParameters(const char* filename = "cleaningparms.dat");
 	virtual void TagCleanObjects(void);
 	virtual int CleanPrimaryVertex(void);
 	virtual int IsFromPrimaryVx(int ipart, int ichk);
@@ -79,7 +82,7 @@ private:
 	
 	// Functions to actually perform the cleaning
 	virtual void DecideIso(void);
-	virtual void InitCleaning(int flag);
+	virtual void InitCleaning();
 	virtual void DoCleanObjects(void);
 	virtual void AddToJet(int ipart, int ichk, int iJet);
 	virtual void SubtrFromJet(int ipart, int ichk, int iJet);
@@ -88,7 +91,70 @@ private:
 	virtual int NextMuClean(void);
 	virtual int NextElClean(void);
 	virtual int NextJClean(void);
-	
+
+	virtual void PutMuon(int, int);
+	virtual void PutElectron(int, int);
+	virtual void PutPhoton(int, int);
+	virtual void PutJet(int, int);
+
+
+	// functions to make cleaning statistics
+	virtual void StatInit(void);
+	virtual void StatFill(void);
+	virtual void StatPrint(void);
+	virtual void StatHistos(void);
+
+// variables for cleaning statistics
+	int fNumTotEvt;
+	int fNumTotEvtReject;
+	int fNumTotEvtEmpty;
+	int fNumTotEvtCleanEmpty;
+	int fNumTotEvtLtFem;
+	int fNumTotEvtLtFch;
+	int fNumTotEvtPfMETJet;
+	int fNumTotEvtPfMETRij;
+	int fNumTotEvtCaMETJet;
+	int fNumTotEvtCaMETRij;
+	int fNumTotEvtTcMETJet;
+	int fNumTotEvtTcMETRij;
+	int fNumTotEvtBadHardJet;
+
+	int fNumTotMuons;  
+	int fNumTotMuonGoodIso;  
+	int fNumTotMuonGoodNonIso;  
+	int fNumTotMuonBadIso;  
+	int fNumTotMuonBadNonIso;  
+	int fNumTotMuonDupl;
+	int fNumTotMuonNotPrimaryTrk;
+	int fNumTotMuonNotClean;
+	int fNumTotMuonBadDpop;
+	int fNumTotMuonBadChi2;  
+	int fNumTotMuonBadNhit;  
+
+	int fNumTotElectrons;
+	int fNumTotElecGoodIso;
+	int fNumTotElecGoodNonIso;
+	int fNumTotElecBadIso;
+	int fNumTotElecBadNonIso;
+	int fNumTotElecDupl;
+	int fNumTotElecNotPrimaryTrk;
+	int fNumTotElecNotClean;
+	int fNumTotElecBadHoE;
+	int fNumTotElecBadShsh;
+	int fNumTotElecBadTmat;
+
+	int fNumTotJets;  
+	int fNumTotJetGood;  
+	int fNumTotJetBad;  
+	int fNumTotJetDuplElJet;
+	int fNumTotJetNotPrimaryTrk;
+	int fNumTotJetNotClean;
+	int fNumTotJetPgtE;
+	int fNumTotJetGtFem;
+	int fNumTotJetLtFem;
+	int fNumTotJetLtFch;
+	int fNumTotBJets;  
+
 	// Global parameters:
 	TString fOutputDir;
 	TString fTag;
@@ -101,19 +167,77 @@ private:
 	Davismt2 *fMT2;
 	TLatex *fTlat;
 
-	// Cleaning variables
-	int fDoClean;
-	int fEvtClean;
+	// Cleaning variables:
 	int fNMuClean;
-	int fMuClean[20];
 	int fNElClean;
-	int fElClean[20];
 	int fNJClean;
+	int fMuClean[20];
+	int fElClean[20];
 	int fJClean[50];
 	int iMuNext;
 	int iElNext;
 	int iJNext;
 
+	// Cleaning parameters:
+	// Number in comments are initial values
+	// -- Primary vertex:
+	double fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
+	double fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
+	double fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
+	double fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
+
+	// -- Vertex compatibility (of muons, electrons, photons and jets)
+	double fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
+	
+	// -- Muons:
+	double fClean_MuonDPbyPmax;          // = 0.5   // Max PtError/Pt
+	double fClean_MuonChi2max;           // = 10.0  // Max nchi2
+	double fClean_MuonNHitsmin;          // = 11.0  // Min number of tracker hits
+	double fClean_dRSSmuonmax;           // = 0.1   // Max delta R of same sign muon duplicate check
+	
+	// -- Electrons:
+	double fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
+	double fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
+	double fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
+	double fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
+	double fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
+	double fClean_ElecEoverPInEndmin;    // = 0.4   // Min ElESuperClusterOverP (endcap)
+	double fClean_ElecDeltaEtaInBarmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (barrel)
+	double fClean_ElecDeltaEtaInEndmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (endcap)
+	double fClean_ElecDeltaPhiInBarmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (barrel)
+	double fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
+	double fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
+	double fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
+	double fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
+
+	// -- Photons:
+	double fClean_PhotHoEmax;            // = 0.2   // Max PhotonHoverE
+	
+	// -- Jets:
+	double fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
+	double fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
+	double fClean_FracChminJet;          // = 0.05  // Min JChfrac
+
+	double fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
+	double fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
+	
+	// -- Isolation:
+	double fClean_MuonIsomax;            // = 1.    // Max relative iso cut (muons)
+	double fClean_ElecIsomax;            // = 1.    // Max relative iso cut (electrons)
+	
+	// -- Event cleaning:
+	double fClean_FracChmin;             // = 0.1   // Min charge fraction in event
+	double fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
+	
+	// -- MET:
+	double fClean_METmin;                // = 50.0  // Min MET to be considered
+	double fClean_dPhiJetMETmin;         // = 0.0   // Min phi distance of MET to closest jet
+	double fClean_dR12min;               // = 0.5   // Min R12 = sqrt(dPhi1^2 + (PI-dPhi2)^2)
+	double fClean_dR21min;               // = 0.5   // Min R21 = sqrt(dPhi2^2 + (PI-dPhi1)^2)
+	
+	TTree *fCleanTree;
+	TFile *fCleanTreeFile;
+	
 	// Significance Plots:
 	TFile *fSignHistsFile;
 	int fNBinsEta[5];

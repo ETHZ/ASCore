@@ -1,0 +1,56 @@
+#####################################################################
+## Cleaning parameters:
+# -- Primary vertex:
+chisqVxmax            5.0
+dRVxmax               0.25
+dzVxmax               20.0
+sumPtTkfromVxmin      0.0
+
+# -- Vertex compatibility (of muons, electrons, photons and jets)
+distVxmax             5.0
+
+# -- Muons:
+MuonDPbyPmax          0.5
+MuonChi2max           10.0
+MuonNHitsmin          11.0
+dRSSmuonmax           0.1
+
+# -- Electrons:
+ElecHoverEBarmax      0.045
+ElecHoverEEndmax      0.05
+ElecSigmaEtaEtaBarmax 0.011
+ElecSigmaEtaEtaEndmax 0.025
+ElecEoverPInBarmin    0.3
+ElecEoverPInEndmin    0.4
+ElecDeltaEtaInBarmax  0.007
+ElecDeltaEtaInEndmax  0.007
+ElecDeltaPhiInBarmax  0.06
+ElecDeltaPhiInEndmax  0.06
+ElecDeltaPhiOutBarmax 999.0
+ElecDeltaPhiOutEndmax 999.0
+dRSSelecmax           10.
+
+# -- Photons:
+PhotHoEmax            0.2
+
+# -- Jets:
+FracEmmaxJet          1.0
+FracEmminJet          0.01
+FracChminJet          0.05
+
+deltaRElecJetmax      0.5
+elecbyJetEratio       0.7
+
+# -- Isolation:
+MuonIsomax            1.
+ElecIsomax            1.
+
+# -- Event cleaning:
+FracChmin             0.1
+FracEmmin             0.175
+
+# -- MET:
+METmin                50.0
+dPhiJetMETmin         0.0
+dR12min               0.5
+dR21min               0.5
