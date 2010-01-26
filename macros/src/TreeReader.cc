@@ -86,7 +86,8 @@ void TreeReader::Loop(){
 		if( ientry < 0 ) break;
 		nb = fChain->GetEntry(jentry);
 		nbytes += nb;
-		if( jentry%10000 == 0 ) cout << ">>> Processing event # " << jentry << endl;
+		if( jentry%200 == 0 ) cout << ">>> Processing event # " << jentry << endl;
+		// if( jentry%10000 == 0 ) cout << ">>> Processing event # " << jentry << endl;
 
 		// Event Selection
 		if(!IsGoodEvt(&fEvtSelCuts)) continue;
@@ -101,9 +102,6 @@ void TreeReader::Loop(){
 			DoCleanObjects();
 
 			StatFill();
-			// cout << " Muon " << fNumTotMuonGoodIso << " " << fNumTotMuonGoodNonIso << "  " << fNumTotMuonBadIso << "  " << fNumTotMuonBadNonIso << endl;
-			// cout << " Elec " << fNumTotElecGoodIso << " " << fNumTotElecGoodNonIso << "  " << fNumTotElecBadIso << "  " << fNumTotElecBadNonIso << endl;
-			// cout << " Jets " << fNumTotJetGood << " " << fNumTotJetBad << endl;
 
 			// Write out a cleaned and skimmed tree
 			int iclean = 0;
@@ -1048,8 +1046,8 @@ void TreeReader::FillDiLepTree(){
 		fTMu2charge   = MuCharge[lep2index];
 		fTMu1eta      = MuEta[lep1index];
 		fTMu2eta      = MuEta[lep2index];
-		fTMu1iso      = MuIso[lep1index];
-		fTMu2iso      = MuIso[lep2index];
+		fTMu1iso      = MuRelIso03[lep1index];
+		fTMu2iso      = MuRelIso03[lep2index];
 		fTMu1d0       = MuD0BS[lep1index];
 		fTMu2d0       = MuD0BS[lep2index];
 		fTMu1ntkhits  = MuNTkHits[lep1index];
@@ -1076,7 +1074,7 @@ void TreeReader::FillDiLepTree(){
 		fTMu1pt       = MuPt[qualMuInd[0]];
 		fTMu1charge   = MuCharge[qualMuInd[0]];
 		fTMu1eta      = MuEta[qualMuInd[0]];
-		fTMu1iso      = MuIso[qualMuInd[0]];
+		fTMu1iso      = MuRelIso03[qualMuInd[0]];
 		fTMu1d0       = MuD0BS[qualMuInd[0]];
 		fTMu1ntkhits  = MuNTkHits[qualMuInd[0]];
 	}
@@ -1713,7 +1711,7 @@ void TreeReader::DecideIso(void){
 // decide whether objects are isolated or not
 	// Muons
 	for( int ichk = 0; ichk < NMus; ++ichk ){
-		if( MuIso[ichk] < fClean_MuonIsomax ) MuIsIso[ichk] = 1;
+		if( MuRelIso03[ichk] < fClean_MuonIsomax ) MuIsIso[ichk] = 1;
 		else MuIsIso[ichk] = 0;
 	}
 
@@ -2122,57 +2120,55 @@ double TreeReader::GetDeltaR(double eta1, double eta2, double phi1, double phi2)
 void TreeReader::StatInit(void){
 // initializes the cleaning statistics
 // to be called once at the beginning of the job
+	fNumTotEvt               = 0;
+	fNumTotEvtReject         = 0;
+	fNumTotEvtEmpty          = 0;
+	fNumTotEvtCleanEmpty     = 0;
+	fNumTotEvtLtFem          = 0;
+	fNumTotEvtLtFch          = 0;
+	fNumTotEvtPfMETJet       = 0;
+	fNumTotEvtPfMETRij       = 0;
+	fNumTotEvtCaMETJet       = 0;
+	fNumTotEvtCaMETRij       = 0;
+	fNumTotEvtTcMETJet       = 0;
+	fNumTotEvtTcMETRij       = 0;
+	fNumTotEvtBadHardJet     = 0;
 
-	fNumTotEvt = 0;
-	fNumTotEvtReject = 0;
-	fNumTotEvtEmpty = 0;
-	fNumTotEvtCleanEmpty = 0;
-	fNumTotEvtLtFem = 0;
-	fNumTotEvtLtFch = 0;
-	fNumTotEvtPfMETJet = 0;
-	fNumTotEvtPfMETRij = 0;
-	fNumTotEvtCaMETJet = 0;
-	fNumTotEvtCaMETRij = 0;
-	fNumTotEvtTcMETJet = 0;
-	fNumTotEvtTcMETRij = 0;
-	fNumTotEvtBadHardJet = 0;
-
-	fNumTotMuons = 0;  
-	fNumTotMuonGoodIso = 0;  
-	fNumTotMuonGoodNonIso = 0;  
-	fNumTotMuonBadIso = 0;  
-	fNumTotMuonBadNonIso = 0;  
-	fNumTotMuonDupl = 0;
+	fNumTotMuons             = 0;  
+	fNumTotMuonGoodIso       = 0;  
+	fNumTotMuonGoodNonIso    = 0;  
+	fNumTotMuonBadIso        = 0;  
+	fNumTotMuonBadNonIso     = 0;  
+	fNumTotMuonDupl          = 0;
 	fNumTotMuonNotPrimaryTrk = 0;
-	fNumTotMuonNotClean = 0;
-	fNumTotMuonBadDpop = 0;
-	fNumTotMuonBadChi2 = 0;  
-	fNumTotMuonBadNhit = 0;  
+	fNumTotMuonNotClean      = 0;
+	fNumTotMuonBadDpop       = 0;
+	fNumTotMuonBadChi2       = 0;  
+	fNumTotMuonBadNhit       = 0;  
 
-	fNumTotElectrons = 0;
-	fNumTotElecGoodIso = 0;
-	fNumTotElecGoodNonIso = 0;
-	fNumTotElecBadIso = 0;
-	fNumTotElecBadNonIso = 0;
-	fNumTotElecDupl = 0;
+	fNumTotElectrons         = 0;
+	fNumTotElecGoodIso       = 0;
+	fNumTotElecGoodNonIso    = 0;
+	fNumTotElecBadIso        = 0;
+	fNumTotElecBadNonIso     = 0;
+	fNumTotElecDupl          = 0;
 	fNumTotElecNotPrimaryTrk = 0;
-	fNumTotElecNotClean = 0;
-	fNumTotElecBadHoE = 0;
-	fNumTotElecBadShsh = 0;
-	fNumTotElecBadTmat = 0;
+	fNumTotElecNotClean      = 0;
+	fNumTotElecBadHoE        = 0;
+	fNumTotElecBadShsh       = 0;
+	fNumTotElecBadTmat       = 0;
 
-	fNumTotJets = 0;  
-	fNumTotJetGood = 0;  
-	fNumTotJetBad = 0;  
-	fNumTotJetDuplElJet = 0;
-	fNumTotJetNotPrimaryTrk = 0;
-	fNumTotJetNotClean = 0;
-	fNumTotJetPgtE = 0;
-	fNumTotJetGtFem = 0;
-	fNumTotJetLtFem = 0;
-	fNumTotJetLtFch = 0;
-	fNumTotBJets = 0;  
-
+	fNumTotJets              = 0;  
+	fNumTotJetGood           = 0;  
+	fNumTotJetBad            = 0;  
+	fNumTotJetDuplElJet      = 0;
+	fNumTotJetNotPrimaryTrk  = 0;
+	fNumTotJetNotClean       = 0;
+	fNumTotJetPgtE           = 0;
+	fNumTotJetGtFem          = 0;
+	fNumTotJetLtFem          = 0;
+	fNumTotJetLtFch          = 0;
+	fNumTotBJets             = 0;  
 
 	return;
 }
@@ -2185,7 +2181,7 @@ void TreeReader::StatFill(void){
 	int nObjects = 0;
 
 	fNumTotMuons += NMus;
-	for( int i; i < NMus; ++i ){
+	for( int i=0; i < NMus; ++i ){
 		if(      MuGood[i] == 0 && MuIsIso[i] == 1 ){ fNumTotMuonGoodIso++; nObjects++; }
 		else if( MuGood[i] == 0 && MuIsIso[i] == 0 ) fNumTotMuonGoodNonIso++;
 		else if( MuGood[i] != 0 && MuIsIso[i] == 1 ) fNumTotMuonBadIso++;
@@ -2204,7 +2200,7 @@ void TreeReader::StatFill(void){
 	}
 
 	fNumTotElectrons += NEles;
-	for( int i; i < NEles; ++i ){
+	for( int i=0; i < NEles; ++i ){
 		if(      ElGood[i] == 0 && ElIsIso[i] == 1 ){ fNumTotElecGoodIso++; nObjects++; }
 		else if( ElGood[i] == 0 && ElIsIso[i] == 0 ) fNumTotElecGoodNonIso++;
 		else if( ElGood[i] != 0 && ElIsIso[i] == 1 ) fNumTotElecBadIso++;
@@ -2223,7 +2219,7 @@ void TreeReader::StatFill(void){
 	}
 
 	fNumTotJets += NJets;
-	for( int i; i < NJets; ++i ){
+	for( int i=0; i < NJets; ++i ){
 		if( JGood[i] == 0 ){ fNumTotJetGood++; nObjects++; }
 		else {
 			fNumTotJetBad++;
@@ -2242,10 +2238,10 @@ void TreeReader::StatFill(void){
 
 	if( nObjects <= 0) fNumTotEvtEmpty++;
 	int evClean = GoodEvent % 10;
-	if( evClean != 0 || nObjects <= 0 )fNumTotEvtReject++;
-	if( evClean == 1 )fNumTotEvtCleanEmpty++;
-	if( evClean == 2 )fNumTotEvtLtFem++;
-	if( evClean == 3 )fNumTotEvtLtFch++;
+	if( evClean != 0 || nObjects <= 0 ) fNumTotEvtReject++;
+	if( evClean == 1 ) fNumTotEvtCleanEmpty++;
+	if( evClean == 2 ) fNumTotEvtLtFem++;
+	if( evClean == 3 ) fNumTotEvtLtFch++;
 
 	evClean = GoodEvent / 1000;
 	if( evClean == 1 ) fNumTotEvtPfMETJet++;
@@ -2256,13 +2252,6 @@ void TreeReader::StatFill(void){
 	evClean = GoodEvent % 100 / 10;
 	if( evClean == 1 ) fNumTotEvtTcMETJet++;
 	if( evClean == 2 ) fNumTotEvtTcMETRij++;
-
-	// cout << " Muon " << fNumTotMuonGoodIso << " " << fNumTotMuonGoodNonIso
-	// 	<< "  " << fNumTotMuonBadIso << "  " << fNumTotMuonBadNonIso << endl;
-	// cout << " Elec " << fNumTotElecGoodIso << " " << fNumTotElecGoodNonIso
-	// 	<< "  " << fNumTotElecBadIso << "  " << fNumTotElecBadNonIso << endl;
-	// cout << " Jets " << fNumTotJetGood << " " << fNumTotJetBad << endl;
-
 	return;
 }
 
@@ -2273,8 +2262,8 @@ void TreeReader::StatPrint(void){
 
 	cout << endl;
 	cout << "Cleaning statistics from TreeReader " << endl;
-	cout << "  " << fNumTotElecGoodIso << " " << fNumTotElecGoodNonIso
-		<< "  " << fNumTotElecBadIso << "  " << fNumTotElecBadNonIso << endl;
+	// cout << "  " << fNumTotElecGoodIso << "  " << fNumTotElecGoodNonIso
+	//         << "  " << fNumTotElecBadIso  << "  " << fNumTotElecBadNonIso << endl;
 
 	cout << endl;
 	cout << " Total number of events processed = " << fNumTotEvt << endl;
@@ -2414,46 +2403,49 @@ void TreeReader::StatHistos(void){
 // Utilities //////////////////////////////////////////////////////////////////////////////////
 void TreeReader::PutMuon(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	MuGood[inew]      = MuGood[iold];
-	MuIsIso[inew]     = MuIsIso[iold];
-	MuPx[inew]        = MuPx[iold];
-	MuPy[inew]        = MuPy[iold];
-	MuPz[inew]        = MuPz[iold];
-	MuPt[inew]        = MuPt[iold];
-	MuPtE[inew]       = MuPtE[iold];
-	MuE[inew]         = MuE[iold];
-	MuEt[inew]        = MuEt[iold];
-	MuEta[inew]       = MuEta[iold];
-	MuPhi[inew]       = MuPhi[iold];
-	MuCharge[inew]    = MuCharge[iold];
-	MuPtsum[inew]     = MuPtsum[iold];
-	MuEtsum[inew]     = MuEtsum[iold];
-	MuIso[inew]       = MuIso[iold];
-	MuEem[inew]       = MuEem[iold];
-	MuEhad[inew]      = MuEhad[iold];
-	MuD0BS[inew]      = MuD0BS[iold];
-	MuD0PV[inew]      = MuD0PV[iold];
-	MuD0E[inew]       = MuD0E[iold];
-	MuDzBS[inew]      = MuDzBS[iold];
-	MuDzPV[inew]      = MuDzPV[iold];
-	MuDzE[inew]       = MuDzE[iold];
-	MuNChi2[inew]     = MuNChi2[iold];
-	MuNGlHits[inew]   = MuNGlHits[iold];
-	MuNMuHits[inew]   = MuNMuHits[iold];
-	MuNTkHits[inew]   = MuNTkHits[iold];
-	MuNMatches[inew]  = MuNMatches[iold];
-	MuNChambers[inew] = MuNChambers[iold];
-	MuCaloComp[inew]  = MuCaloComp[iold];
-	MuSegmComp[inew]  = MuSegmComp[iold];
-	MuTrackerMu[inew] = MuTrackerMu[iold];
-	MuGMPT[inew]      = MuGMPT[iold];
-	MuID[inew]        = MuID[iold];
-	MuMID[inew]       = MuMID[iold];
+	MuGood[inew]       = MuGood[iold];
+	MuIsIso[inew]      = MuIsIso[iold];
+	MuPx[inew]         = MuPx[iold];
+	MuPy[inew]         = MuPy[iold];
+	MuPz[inew]         = MuPz[iold];
+	MuPt[inew]         = MuPt[iold];
+	MuPtE[inew]        = MuPtE[iold];
+	MuE[inew]          = MuE[iold];
+	MuEt[inew]         = MuEt[iold];
+	MuEta[inew]        = MuEta[iold];
+	MuPhi[inew]        = MuPhi[iold];
+	MuCharge[inew]     = MuCharge[iold];
+	MuRelIso03[inew]   = MuRelIso03[iold];
+	MuIso03SumPt[inew] = MuIso03SumPt[iold];
+	MuIso03EmEt[inew]  = MuIso03EmEt[iold];
+	MuIso03HadEt[inew] = MuIso03HadEt[iold];
+	MuIso05SumPt[inew] = MuIso05SumPt[iold];
+	MuIso05EmEt[inew]  = MuIso05EmEt[iold];
+	MuIso05HadEt[inew] = MuIso05HadEt[iold];
+	MuEem[inew]        = MuEem[iold];
+	MuEhad[inew]       = MuEhad[iold];
+	MuD0BS[inew]       = MuD0BS[iold];
+	MuD0PV[inew]       = MuD0PV[iold];
+	MuD0E[inew]        = MuD0E[iold];
+	MuDzBS[inew]       = MuDzBS[iold];
+	MuDzPV[inew]       = MuDzPV[iold];
+	MuDzE[inew]        = MuDzE[iold];
+	MuNChi2[inew]      = MuNChi2[iold];
+	MuNGlHits[inew]    = MuNGlHits[iold];
+	MuNMuHits[inew]    = MuNMuHits[iold];
+	MuNTkHits[inew]    = MuNTkHits[iold];
+	MuNMatches[inew]   = MuNMatches[iold];
+	MuNChambers[inew]  = MuNChambers[iold];
+	MuCaloComp[inew]   = MuCaloComp[iold];
+	MuSegmComp[inew]   = MuSegmComp[iold];
+	MuTrackerMu[inew]  = MuTrackerMu[iold];
+	MuGMPT[inew]       = MuGMPT[iold];
+	MuID[inew]         = MuID[iold];
+	MuMID[inew]        = MuMID[iold];
 }
 
 void TreeReader::PutElectron(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	ElGood[inew]                      = ElGood[iold];
 	ElGood[inew]                      = ElGood[iold];
 	ElIsIso[inew]                     = ElIsIso[iold];
 	ElPx[inew]                        = ElPx[iold];
@@ -2473,7 +2465,8 @@ void TreeReader::PutElectron(int inew, int iold){
 	ElDzE[inew]                       = ElDzE[iold];
 	ElIso[inew]                       = ElIso[iold];
 	ElPtSum[inew]                     = ElPtSum[iold];
-	ElEtSum[inew]                     = ElEtSum[iold];
+	ElEmEtSum[inew]                   = ElEmEtSum[iold];
+	ElHadEtSum[inew]                  = ElHadEtSum[iold];
 	ElNChi2[inew]                     = ElNChi2[iold];
 	ElCharge[inew]                    = ElCharge[iold];
 	ElIDTight[inew]                   = ElIDTight[iold];
@@ -2502,6 +2495,12 @@ void TreeReader::PutElectron(int inew, int iold){
 	ElSharedPz[inew]                  = ElSharedPz[iold];
 	ElSharedEnergy[inew]              = ElSharedEnergy[iold];
 	ElDuplicateEl[inew]               = ElDuplicateEl[iold];
+	ElDR03TkSumPt[inew]               = ElDR03TkSumPt[iold];
+	ElDR04TkSumPt[inew]               = ElDR04TkSumPt[iold];
+	ElDR03EcalRecHitSumEt[inew]       = ElDR03EcalRecHitSumEt[iold];
+	ElDR04EcalRecHitSumEt[inew]       = ElDR04EcalRecHitSumEt[iold];
+	ElDR03HcalTowerSumEt[inew]        = ElDR03HcalTowerSumEt[iold];
+	ElDR04HcalTowerSumEt[inew]        = ElDR04HcalTowerSumEt[iold];
 	ElID[inew]                        = ElID[iold];
 	ElMID[inew]                       = ElMID[iold];
 }
