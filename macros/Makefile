@@ -38,12 +38,6 @@ TreeReader: src/TreeReader.cc
 AnaClass: src/AnaClass.cc
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/AnaClass.o $<
 
-# TreePlotter: src/TreePlotter.cc
-# 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreePlotter.o $<
-
-DiJetReader: src/DiJetReader.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/DiJetReader.o $<
-
 Davismt2: src/Davismt2.c
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/Davismt2.o $<
 
@@ -52,12 +46,6 @@ LeptJetStat: src/LeptJetStat.cc
 
 RunTreeReader: src/RunTreeReader.C
 	$(CXX) $(CXXFLAGS) -ldl -o RunTreeReader $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-# MakeDataMCPlots: src/MakeDataMCPlots.C
-# 	$(CXX) $(CXXFLAGS) -ldl -o MakeDataMCPlots $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-RunDiJetReader: src/RunDiJetReader.C
-	$(CXX) $(CXXFLAGS) -ldl -o RunDiJetReader $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
 
 ETHStyle: include/ETHStyle.h
 	$(CXX) $(CXXFLAGS) -ldl -o ETHStyle $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
@@ -74,15 +62,10 @@ Reader:
 
 all:
 	touch src/RunTreeReader.C
-	# touch src/MakeDataMCPlots.C
-	touch src/RunDiJetReader.C
 	make TreeClassBase
 	make TreeReader
 	make AnaClass
-	# make TreePlotter
-	make DiJetReader
 	make LeptJetStat
 	make Davismt2
 	make RunTreeReader
-	# make MakeDataMCPlots
-	make RunDiJetReader
+
