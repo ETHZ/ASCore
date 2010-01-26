@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.34 2010/01/12 16:29:53 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.35 2010/01/15 15:55:03 stiegerb Exp $
 //
 //
 
@@ -398,7 +398,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuet[mqi]     = Mit->et();
 		fTmucharge[mqi] = Mit->charge();
 
-		fTmuiso[mqi]        = (Mit->isolationR03().sumPt + Mit->isolationR03().emEt + Mit->isolationR03().emEt) / Mit->globalTrack()->pt();
+		fTmuiso[mqi]        = (Mit->isolationR03().sumPt + Mit->isolationR03().emEt + Mit->isolationR03().hadEt) / Mit->globalTrack()->pt();
 		fTmuIso03sumPt[mqi] = Mit->isolationR03().sumPt;
 		fTmuIso03emEt[mqi]  = Mit->isolationR03().emEt;
 		fTmuIso03hadEt[mqi] = Mit->isolationR03().hadEt;
@@ -623,23 +623,22 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTgoodevent = 0;
 			break;
 		}
-		fTPhotonPt[nqpho]  = ip->pt();
-		fTPhotonPx[nqpho]  = ip->px();
-		fTPhotonPy[nqpho]  = ip->py();
-		fTPhotonPz[nqpho]  = ip->pz();
-		fTPhotonEta[nqpho] = ip->eta();
-		fTPhotonPhi[nqpho] = ip->phi();
+		fTPhotonPt[nqpho]     = ip->pt();
+		fTPhotonPx[nqpho]     = ip->px();
+		fTPhotonPy[nqpho]     = ip->py();
+		fTPhotonPz[nqpho]     = ip->pz();
+		fTPhotonEta[nqpho]    = ip->eta();
+		fTPhotonPhi[nqpho]    = ip->phi();
 		fTPhotonEnergy[nqpho] = ip->energy();
 		fTPhotoncaloPositionX[nqpho] = ip->caloPosition().X();
 		fTPhotoncaloPositionY[nqpho] = ip->caloPosition().Y();
 		fTPhotoncaloPositionZ[nqpho] = ip->caloPosition().Z();
-		fTPhotonHoverE[nqpho]      = ip->hadronicOverEm();
-		fTPhotonH1overE[nqpho]     = ip->hadronicDepth1OverEm();
-		fTPhotonH2overE[nqpho]     = ip->hadronicDepth2OverEm();
-		fTPhotonSigmaIetaIeta[nqpho] = ip->sigmaIetaIeta() ? 1:0; 
-		fTPhotonHasPixSeed[nqpho]  = ip->hasPixelSeed() ? 1:0;
-		fTPhotonHasConvTrks[nqpho] = ip->hasConversionTracks() ? 1:0; 
-
+		fTPhotonHoverE[nqpho]        = ip->hadronicOverEm();
+		fTPhotonH1overE[nqpho]       = ip->hadronicDepth1OverEm();
+		fTPhotonH2overE[nqpho]       = ip->hadronicDepth2OverEm();
+		fTPhotonSigmaIetaIeta[nqpho] = ip->sigmaIetaIeta();
+		fTPhotonHasPixSeed[nqpho]    = ip->hasPixelSeed() ? 1:0;
+		fTPhotonHasConvTrks[nqpho]   = ip->hasConversionTracks() ? 1:0; 
 		fTgoodphoton[nqpho]  = 1;
 		fTPhotonIsIso[nqpho] = 1;
 	}
@@ -1270,12 +1269,12 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElSharedPz"      ,&fTeSharedPz          ,"ElSharedPz[NEles]/D");
 	fEventTree->Branch("ElSharedEnergy"  ,&fTeSharedEnergy      ,"ElSharedEnergy[NEles]/D");
 	fEventTree->Branch("ElDuplicateEl"   ,&fTeDupEl             ,"ElDuplicateEl[NEles]/I");
-	fEventTree->Branch("ElDR03TkSumPt"           ,&fTdr03tksumpt,            "ElDR03TkSumPt[NEles]/D");
-	fEventTree->Branch("ElDR04TkSumPt"           ,&fTdr04tksumpt,            "ElDR04TkSumPt[NEles]/D");
-	fEventTree->Branch("ElDR03EcalRecHitSumEt"   ,&fTdr03ecalrechitsumet    ,"ElDR03EcalRecHitSumEt[NEles]/D");
-	fEventTree->Branch("ElDR04EcalRecHitSumEt"   ,&fTdr04ecalrechitsumet    ,"ElDR04EcalRecHitSumEt[NEles]/D");
-	fEventTree->Branch("ElDR03HcalTowerSumEt"    ,&fTdr03hcaltowersumet    ,"ElDR03HcalTowerSumEt[NEles]/D");
-	fEventTree->Branch("ElDR04HcalTowerSumEt"    ,&fTdr04hcaltowersumet    ,"ElDR04HcalTowerSumEt[NEles]/D");
+	fEventTree->Branch("ElDR03TkSumPt"   ,&fTdr03tksumpt        ,"ElDR03TkSumPt[NEles]/D");
+	fEventTree->Branch("ElDR04TkSumPt"   ,&fTdr04tksumpt        ,"ElDR04TkSumPt[NEles]/D");
+	fEventTree->Branch("ElDR03EcalRecHitSumEt" ,&fTdr03ecalrechitsumet    ,"ElDR03EcalRecHitSumEt[NEles]/D");
+	fEventTree->Branch("ElDR04EcalRecHitSumEt" ,&fTdr04ecalrechitsumet    ,"ElDR04EcalRecHitSumEt[NEles]/D");
+	fEventTree->Branch("ElDR03HcalTowerSumEt"  ,&fTdr03hcaltowersumet    ,"ElDR03HcalTowerSumEt[NEles]/D");
+	fEventTree->Branch("ElDR04HcalTowerSumEt"  ,&fTdr04hcaltowersumet    ,"ElDR04HcalTowerSumEt[NEles]/D");
 
 	fEventTree->Branch("ElID"             ,&fTeid                ,"ElID[NEles]/I");
 	fEventTree->Branch("ElMID"            ,&fTemid               ,"ElMID[NEles]/I");
