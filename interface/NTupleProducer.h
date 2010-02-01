@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.29 2010/01/12 16:29:59 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.30 2010/01/15 15:55:11 stiegerb Exp $
 //
 //
 
@@ -368,23 +368,28 @@ private:
 // Photons:
 	int fTnphotons;
 	int fTgoodphoton[gMaxnphos];
-	int fTPhotonIsIso[gMaxnphos];
-	double fTPhotonPt[gMaxnphos];  
-	double fTPhotonPx[gMaxnphos];  
-	double fTPhotonPy[gMaxnphos];  
-	double fTPhotonPz[gMaxnphos];  
-	double fTPhotonEta[gMaxnphos];
-	double fTPhotonPhi[gMaxnphos];
-	double fTPhotonEnergy[gMaxnphos];
-	double fTPhotoncaloPositionX[gMaxnphos];
-	double fTPhotoncaloPositionY[gMaxnphos];
-	double fTPhotoncaloPositionZ[gMaxnphos];
-	double fTPhotonHoverE[gMaxnphos];
-	double fTPhotonH1overE[gMaxnphos];
-	double fTPhotonH2overE[gMaxnphos];
-	double fTPhotonSigmaIetaIeta[gMaxnphos];
-	int    fTPhotonHasPixSeed[gMaxnphos];
-	int    fTPhotonHasConvTrks[gMaxnphos];
+	int fTPhotIsIso[gMaxnphos];
+	double fTPhotPt[gMaxnphos];  
+	double fTPhotPx[gMaxnphos];  
+	double fTPhotPy[gMaxnphos];  
+	double fTPhotPz[gMaxnphos];  
+	double fTPhotEta[gMaxnphos];
+	double fTPhotPhi[gMaxnphos];
+	double fTPhotEnergy[gMaxnphos];
+	double fTPhotIso03Ecal[gMaxnphos];
+	double fTPhotIso03Hcal[gMaxnphos];
+	double fTPhotIso03TrkSolid[gMaxnphos];
+	double fTPhotIso03TrkHollow[gMaxnphos];
+	double fTPhotIso03[gMaxnphos];
+	double fTPhotcaloPositionX[gMaxnphos];
+	double fTPhotcaloPositionY[gMaxnphos];
+	double fTPhotcaloPositionZ[gMaxnphos];
+	double fTPhotHoverE[gMaxnphos];
+	double fTPhotH1overE[gMaxnphos];
+	double fTPhotH2overE[gMaxnphos];
+	double fTPhotSigmaIetaIeta[gMaxnphos];
+	int    fTPhotHasPixSeed[gMaxnphos];
+	int    fTPhotHasConvTrks[gMaxnphos];
 
 // Jets:
 	int fTnjets;
@@ -413,18 +418,19 @@ private:
 	double fTJEtaHADrms[gMaxnjets];
 	double fTJPhiEMrms[gMaxnjets];
 	double fTJPhiHADrms[gMaxnjets];
-	double fTbTagProb[gMaxnjets];
-	double fTChfrac[gMaxnjets];
-	int fTnAssoTracks[gMaxnjets];
-	double fTtrk1px[gMaxnjets];
-	double fTtrk1py[gMaxnjets];
-	double fTtrk1pz[gMaxnjets];
-	double fTtrk2px[gMaxnjets];
-	double fTtrk2py[gMaxnjets];
-	double fTtrk2pz[gMaxnjets];
-	double fTtrk3px[gMaxnjets];
-	double fTtrk3py[gMaxnjets];
-	double fTtrk3pz[gMaxnjets];
+	double fTjbTagProb[gMaxnjets];
+	double fTjChfrac[gMaxnjets];
+	double fTjMass[gMaxnjets];
+	int fTjnAssoTracks[gMaxnjets];
+	double fTjtrk1px[gMaxnjets];
+	double fTjtrk1py[gMaxnjets];
+	double fTjtrk1pz[gMaxnjets];
+	double fTjtrk2px[gMaxnjets];
+	double fTjtrk2py[gMaxnjets];
+	double fTjtrk2pz[gMaxnjets];
+	double fTjtrk3px[gMaxnjets];
+	double fTjtrk3py[gMaxnjets];
+	double fTjtrk3pz[gMaxnjets];
 	double fTjEcorr[gMaxnjets];
 	double fTjeMinDR[gMaxnjets];
 	double fTjetVtxx[gMaxnjets];

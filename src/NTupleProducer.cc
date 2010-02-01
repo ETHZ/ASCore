@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.35 2010/01/15 15:55:03 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.36 2010/01/26 17:13:13 stiegerb Exp $
 //
 //
 
@@ -353,7 +353,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTprimvtxyE   = primVtx->yError();
 	fTprimvtxzE   = primVtx->zError();
 	fTpvtxznchi2  = primVtx->normalizedChi2();
-	fTpvtxntracks = primVtx->tracksSize();
+	fTpvtxntracks = static_cast<int>(primVtx->ndof());
+	// fTpvtxntracks = primVtx->tracksSize();
+
+	// unsigned int pvntrk = 0;
+	// reco::Vertex::trackRef_iterator ittrk;
+	// for(ittrk = primVtx->tracks_begin(); ittrk != primVtx->tracks_end(); ++ittrk){
+	// 	if( primVtx->trackWeight(*ittrk) > 0.5 ) pvntrk++;
+	// }
+	
 	fTpvtxptsum   = 0.;
 	for(vector<TrackBaseRef>::const_iterator trackit = primVtx->tracks_begin(); trackit != primVtx->tracks_end(); ++trackit){
 		fTpvtxptsum += (*trackit)->pt();
@@ -623,24 +631,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTgoodevent = 0;
 			break;
 		}
-		fTPhotonPt[nqpho]     = ip->pt();
-		fTPhotonPx[nqpho]     = ip->px();
-		fTPhotonPy[nqpho]     = ip->py();
-		fTPhotonPz[nqpho]     = ip->pz();
-		fTPhotonEta[nqpho]    = ip->eta();
-		fTPhotonPhi[nqpho]    = ip->phi();
-		fTPhotonEnergy[nqpho] = ip->energy();
-		fTPhotoncaloPositionX[nqpho] = ip->caloPosition().X();
-		fTPhotoncaloPositionY[nqpho] = ip->caloPosition().Y();
-		fTPhotoncaloPositionZ[nqpho] = ip->caloPosition().Z();
-		fTPhotonHoverE[nqpho]        = ip->hadronicOverEm();
-		fTPhotonH1overE[nqpho]       = ip->hadronicDepth1OverEm();
-		fTPhotonH2overE[nqpho]       = ip->hadronicDepth2OverEm();
-		fTPhotonSigmaIetaIeta[nqpho] = ip->sigmaIetaIeta();
-		fTPhotonHasPixSeed[nqpho]    = ip->hasPixelSeed() ? 1:0;
-		fTPhotonHasConvTrks[nqpho]   = ip->hasConversionTracks() ? 1:0; 
+		fTPhotPt[nqpho]     = ip->pt();
+		fTPhotPx[nqpho]     = ip->px();
+		fTPhotPy[nqpho]     = ip->py();
+		fTPhotPz[nqpho]     = ip->pz();
+		fTPhotEta[nqpho]    = ip->eta();
+		fTPhotPhi[nqpho]    = ip->phi();
+		fTPhotEnergy[nqpho] = ip->energy();
+		fTPhotIso03Ecal[nqpho]       = ip->ecalRecHitSumEtConeDR03();
+		fTPhotIso03Hcal[nqpho]       = ip->hcalTowerSumEtConeDR03();
+		fTPhotIso03TrkSolid[nqpho]   = ip->trkSumPtSolidConeDR03();
+		fTPhotIso03TrkHollow[nqpho]  = ip->trkSumPtHollowConeDR03();
+		fTPhotIso03[nqpho]           = (fTPhotIso03TrkSolid[nqpho] + fTPhotIso03Ecal[nqpho] + fTPhotIso03Hcal[nqpho]) / fTPhotPt[nqpho];
+		fTPhotcaloPositionX[nqpho] = ip->caloPosition().X();
+		fTPhotcaloPositionY[nqpho] = ip->caloPosition().Y();
+		fTPhotcaloPositionZ[nqpho] = ip->caloPosition().Z();
+		fTPhotHoverE[nqpho]        = ip->hadronicOverEm();
+		fTPhotH1overE[nqpho]       = ip->hadronicDepth1OverEm();
+		fTPhotH2overE[nqpho]       = ip->hadronicDepth2OverEm();
+		fTPhotSigmaIetaIeta[nqpho] = ip->sigmaIetaIeta();
+		fTPhotHasPixSeed[nqpho]    = ip->hasPixelSeed() ? 1:0;
+		fTPhotHasConvTrks[nqpho]   = ip->hasConversionTracks() ? 1:0; 
 		fTgoodphoton[nqpho]  = 1;
-		fTPhotonIsIso[nqpho] = 1;
+		fTPhotIsIso[nqpho] = 1;
 	}
 	fTnphotons = nqpho+1;
 
@@ -730,34 +743,32 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjEcorr[jqi] =  jet->px()/fJUNC_px_match[index];
 
 	// Calculate the DR wrt the closest electron
-		double ejDRmin=10.; // Default when no electrons previously selected
-		for(int j = 0; j < fTneles; j++) {
+		double ejDRmin = 10.; // Default when no electrons previously selected
+		for( int j = 0; j < fTneles; j++ ){
 			double ejDR = reco::deltaR(jet->eta(), jet->phi(), fTeeta[j], fTephi[j]);
 			if(ejDR<ejDRmin) ejDRmin = ejDR;
 		}
 		fTjeMinDR[jqi]=ejDRmin;
 
 	// B-tagging probability
-		if ( !fIsPat ) {
+		if( !fIsPat ){
 			for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
 		// Match by pt between the two "collections"
-				if (fabs( (fJUNC_px_match[index] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
-					fabs( (fJUNC_py_match[index] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-				fabs( (fJUNC_pz_match[index] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001)  {
-					fTbTagProb[jqi]=(*jetsAndProbs)[i].second;
+				if( fabs( (fJUNC_px_match[index] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+					 fabs( (fJUNC_py_match[index] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+					 fabs( (fJUNC_pz_match[index] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+					fTjbTagProb[jqi]=(*jetsAndProbs)[i].second;
 					break;
 				}
 			}
 		} else {
 			const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
-			fTbTagProb[jqi] = pJ->bDiscriminator(fBtagTag.label());
+			fTjbTagProb[jqi] = pJ->bDiscriminator(fBtagTag.label());
 		}
 
 	// Jet-track association: get associated tracks
 		vector<const reco::Track*> AssociatedTracks;
-		fTnAssoTracks[jqi]=0;
-		fTChfrac[jqi]=-1.; // Default (if jet-tracks association cone is outside tracker acceptance)
-		if ( !fIsPat ) {
+		if( !fIsPat ){
 			AssociatedTracks = FindAssociatedTracks(jet, tracks.product());
 		} else {
 			const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
@@ -765,9 +776,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			it != pJ->associatedTracks().end(); ++it ) {
 				AssociatedTracks.push_back( it->get() );
 			}
-		//DO NOT use this to keep in sync. with non-PAT code
-		//fTChfrac[jqi] = pJ.jetCharge();
-		//fTnAssoTracks[jqi] = pJ.associatedTracks().size();
+		// DO NOT use this to keep in sync. with non-PAT code
+		// fTjChfrac[jqi] = pJ.jetCharge();
+		// fTjnAssoTracks[jqi] = pJ.associatedTracks().size();
 		}
 
 
@@ -858,20 +869,24 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		int idx3=-1;
 	// Jet-track association: make transient tracks and store information
 		vector<TransientTrack> AssociatedTTracks;
-		fTnAssoTracks[jqi]=0;
+		fTjnAssoTracks[jqi] = 0;
+		fTjChfrac[jqi] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
+		fTjMass[jqi] = 0.;
 		if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
-		// tmp variables for vectorial sum of pt of tracks
-			double pXtmp=0.;
-			double pYtmp=0.;
-
+			// Tmp variables for vectorial sum of pt of tracks
+			double pXtmp(0.), pYtmp(0.), pZtmp(0.), E2tmp(0.);
+			const double trkmass = 0.; // Assumed mass for tracks
+			// Loop over associated tracks:
 			for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-				AssociatedTTracks.push_back(theB->build(AssociatedTracks[t]));
+				AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks
 				if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-					pXtmp+=AssociatedTracks[t]->px();
-					pYtmp+=AssociatedTracks[t]->py();
-					fTnAssoTracks[jqi]+=1;
+					pXtmp += AssociatedTracks[t]->px();
+					pYtmp += AssociatedTracks[t]->py();
+					pZtmp += AssociatedTracks[t]->pz();
+					E2tmp += trkmass*trkmass + pXtmp*pXtmp + pYtmp*pYtmp + pZtmp*pZtmp;
+					fTjnAssoTracks[jqi]++;
 				}
-	//loop and find the three higher pT tracks
+				// Find the three highest pT tracks
 				if(AssociatedTracks[t]->pt()>pT1 && AssociatedTracks.size()>=1){
 					pT1=AssociatedTracks[t]->pt();
 					idx3=idx2;
@@ -886,26 +901,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 					idx3=t;
 				}
 			}
-		//fill the momenta
+			// Fill the momenta
 			if(AssociatedTracks.size()>=1){
-				fTtrk1px[jqi] =AssociatedTracks[idx1]->px();
-				fTtrk1py[jqi] =AssociatedTracks[idx1]->py();
-				fTtrk1pz[jqi] =AssociatedTracks[idx1]->pz();
+				fTjtrk1px[jqi] =AssociatedTracks[idx1]->px();
+				fTjtrk1py[jqi] =AssociatedTracks[idx1]->py();
+				fTjtrk1pz[jqi] =AssociatedTracks[idx1]->pz();
 			}
 			if(AssociatedTracks.size()>=2){
-				fTtrk2px[jqi] =AssociatedTracks[idx2]->px();
-				fTtrk2py[jqi] =AssociatedTracks[idx2]->py();
-				fTtrk2pz[jqi] =AssociatedTracks[idx2]->pz();
+				fTjtrk2px[jqi] =AssociatedTracks[idx2]->px();
+				fTjtrk2py[jqi] =AssociatedTracks[idx2]->py();
+				fTjtrk2pz[jqi] =AssociatedTracks[idx2]->pz();
 			}
 			if(AssociatedTracks.size()>=3){
-				fTtrk3px[jqi] =AssociatedTracks[idx3]->px();
-				fTtrk3py[jqi] =AssociatedTracks[idx3]->py();
-				fTtrk3pz[jqi] =AssociatedTracks[idx3]->pz();
+				fTjtrk3px[jqi] =AssociatedTracks[idx3]->px();
+				fTjtrk3py[jqi] =AssociatedTracks[idx3]->py();
+				fTjtrk3pz[jqi] =AssociatedTracks[idx3]->pz();
 			}
-		//
-			fTChfrac[jqi]=sqrt(pow(pXtmp,2)+pow(pYtmp,2))/jet->pt();
-		} else {//the whole cone used for jet-tracks association is outside of the tracker acceptance
-			fTChfrac[jqi]=-1.;
+			
+			fTjChfrac[jqi] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / jet->pt();
+			fTjMass[jqi]   = sqrt(E2tmp - pXtmp*pXtmp - pYtmp*pYtmp - pZtmp*pZtmp);
+			fTjMass[jqi]   *= 1/fTjChfrac[jqi];
+		} else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
+			fTjChfrac[jqi] = -1.;
+			fTjMass[jqi]   = -1.;
 		}
 
 	// Convert tracks to transient tracks for vertex fitting
@@ -1282,23 +1300,28 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 // Photons:
 	fEventTree->Branch("NPhotons"        ,&fTnphotons      ,"NPhotons/I");
 	fEventTree->Branch("PhotonGood"      ,&fTgoodphoton    ,"PhotonGood[NPhotons]/I");
-	fEventTree->Branch("PhotonIsIso"     ,&fTPhotonIsIso   ,"PhotonIsIso[NPhotons]/I");
-	fEventTree->Branch("PhotonPt"        ,&fTPhotonPt      ,"PhotonPt[NPhotons]/D");
-	fEventTree->Branch("PhotonPx"        ,&fTPhotonPx      ,"PhotonPx[NPhotons]/D");
-	fEventTree->Branch("PhotonPy"        ,&fTPhotonPy      ,"PhotonPy[NPhotons]/D");
-	fEventTree->Branch("PhotonPz"        ,&fTPhotonPz      ,"PhotonPz[NPhotons]/D");
-	fEventTree->Branch("PhotonEta"       ,&fTPhotonEta     ,"PhotonEta[NPhotons]/D");
-	fEventTree->Branch("PhotonPhi"       ,&fTPhotonPhi     ,"PhotonPhi[NPhotons]/D");
-	fEventTree->Branch("PhotonEnergy"    ,&fTPhotonEnergy  ,"PhotonEnergy[NPhotons]/D");
-	fEventTree->Branch("PhotonCaloPositionX" ,&fTPhotoncaloPositionX ,"PhotonCaloPositionX[NPhotons]/D");
-	fEventTree->Branch("PhotonCaloPositionY" ,&fTPhotoncaloPositionY ,"PhotonCaloPositionY[NPhotons]/D");
-	fEventTree->Branch("PhotonCaloPositionZ" ,&fTPhotoncaloPositionZ ,"PhotonCaloPositionZ[NPhotons]/D");
-	fEventTree->Branch("PhotonHoverE"        ,&fTPhotonHoverE        ,"PhotonHoverE[NPhotons]/D");
-	fEventTree->Branch("PhotonH1overE"       ,&fTPhotonH1overE       ,"PhotonH1overE[NPhotons]/D");
-	fEventTree->Branch("PhotonH2overE"       ,&fTPhotonH2overE       ,"PhotonH2overE[NPhotons]/D");
-	fEventTree->Branch("PhotonSigmaIetaIeta" ,&fTPhotonSigmaIetaIeta ,"PhotonSigmaIetaIeta[NPhotons]/D");
-	fEventTree->Branch("PhotonHasPixSeed"    ,&fTPhotonHasPixSeed    ,"PhotonHasPixSeed[NPhotons]/I");
-	fEventTree->Branch("PhotonHasConvTrks"   ,&fTPhotonHasConvTrks   ,"PhotonHasConvTrks[NPhotons]/I");
+	fEventTree->Branch("PhotonIsIso"     ,&fTPhotIsIso   ,"PhotonIsIso[NPhotons]/I");
+	fEventTree->Branch("PhotonPt"        ,&fTPhotPt      ,"PhotonPt[NPhotons]/D");
+	fEventTree->Branch("PhotonPx"        ,&fTPhotPx      ,"PhotonPx[NPhotons]/D");
+	fEventTree->Branch("PhotonPy"        ,&fTPhotPy      ,"PhotonPy[NPhotons]/D");
+	fEventTree->Branch("PhotonPz"        ,&fTPhotPz      ,"PhotonPz[NPhotons]/D");
+	fEventTree->Branch("PhotonEta"       ,&fTPhotEta     ,"PhotonEta[NPhotons]/D");
+	fEventTree->Branch("PhotonPhi"       ,&fTPhotPhi     ,"PhotonPhi[NPhotons]/D");
+	fEventTree->Branch("PhotonEnergy"    ,&fTPhotEnergy  ,"PhotonEnergy[NPhotons]/D");
+	fEventTree->Branch("PhotonIso03Ecal"      ,&fTPhotIso03Ecal      ,"PhotonIso03Ecal[NPhotons]/D");
+	fEventTree->Branch("PhotonIso03Hcal"      ,&fTPhotIso03Hcal      ,"PhotonIso03Hcal[NPhotons]/D");
+	fEventTree->Branch("PhotonIso03TrkSolid"  ,&fTPhotIso03TrkSolid  ,"PhotonIso03TrkSolid[NPhotons]/D");
+	fEventTree->Branch("PhotonIso03TrkHollow" ,&fTPhotIso03TrkHollow ,"PhotonIso03TrkHollow[NPhotons]/D");
+	fEventTree->Branch("PhotonIso03"          ,&fTPhotIso03          ,"PhotonIso03[NPhotons]/D");	
+	fEventTree->Branch("PhotonCaloPositionX" ,&fTPhotcaloPositionX ,"PhotonCaloPositionX[NPhotons]/D");
+	fEventTree->Branch("PhotonCaloPositionY" ,&fTPhotcaloPositionY ,"PhotonCaloPositionY[NPhotons]/D");
+	fEventTree->Branch("PhotonCaloPositionZ" ,&fTPhotcaloPositionZ ,"PhotonCaloPositionZ[NPhotons]/D");
+	fEventTree->Branch("PhotonHoverE"        ,&fTPhotHoverE        ,"PhotonHoverE[NPhotons]/D");
+	fEventTree->Branch("PhotonH1overE"       ,&fTPhotH1overE       ,"PhotonH1overE[NPhotons]/D");
+	fEventTree->Branch("PhotonH2overE"       ,&fTPhotH2overE       ,"PhotonH2overE[NPhotons]/D");
+	fEventTree->Branch("PhotonSigmaIetaIeta" ,&fTPhotSigmaIetaIeta ,"PhotonSigmaIetaIeta[NPhotons]/D");
+	fEventTree->Branch("PhotonHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhotonHasPixSeed[NPhotons]/I");
+	fEventTree->Branch("PhotonHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhotonHasConvTrks[NPhotons]/I");
 
 // Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -1327,18 +1350,19 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("JEtaHADrms"     ,&fTJEtaHADrms     ,"JEtaHADrms[NJets]/D");
 	fEventTree->Branch("JPhiEMrms"      ,&fTJPhiEMrms      ,"JPhiEMrms[NJets]/D");
 	fEventTree->Branch("JPhiHADrms"     ,&fTJPhiHADrms     ,"JPhiHADrms[NJets]/D");
-	fEventTree->Branch("JbTagProb"      ,&fTbTagProb       ,"JbTagProb[NJets]/D");
-	fEventTree->Branch("JChfrac"        ,&fTChfrac         ,"JChfrac[NJets]/D");
-	fEventTree->Branch("JNAssoTracks"   ,&fTnAssoTracks    ,"JNAssoTracks[NJets]/I");
-	fEventTree->Branch("Jtrk1px"        ,&fTtrk1px         ,"Jtrk1px[NJets]/D");
-	fEventTree->Branch("Jtrk1py"        ,&fTtrk1py         ,"Jtrk1py[NJets]/D");
-	fEventTree->Branch("Jtrk1pz"        ,&fTtrk1pz         ,"Jtrk1pz[NJets]/D");
-	fEventTree->Branch("Jtrk2px"        ,&fTtrk2px         ,"Jtrk2px[NJets]/D");
-	fEventTree->Branch("Jtrk2py"        ,&fTtrk2py         ,"Jtrk2py[NJets]/D");
-	fEventTree->Branch("Jtrk2pz"        ,&fTtrk2pz         ,"Jtrk2pz[NJets]/D");
-	fEventTree->Branch("Jtrk3px"        ,&fTtrk3px         ,"Jtrk3px[NJets]/D");
-	fEventTree->Branch("Jtrk3py"        ,&fTtrk3py         ,"Jtrk3py[NJets]/D");
-	fEventTree->Branch("Jtrk3pz"        ,&fTtrk3pz         ,"Jtrk3pz[NJets]/D");
+	fEventTree->Branch("JbTagProb"      ,&fTjbTagProb      ,"JbTagProb[NJets]/D");
+	fEventTree->Branch("JChfrac"        ,&fTjChfrac        ,"JChfrac[NJets]/D");
+	fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/D");
+	fEventTree->Branch("JNAssoTracks"   ,&fTjnAssoTracks   ,"JNAssoTracks[NJets]/I");
+	fEventTree->Branch("Jtrk1px"        ,&fTjtrk1px        ,"Jtrk1px[NJets]/D");
+	fEventTree->Branch("Jtrk1py"        ,&fTjtrk1py        ,"Jtrk1py[NJets]/D");
+	fEventTree->Branch("Jtrk1pz"        ,&fTjtrk1pz        ,"Jtrk1pz[NJets]/D");
+	fEventTree->Branch("Jtrk2px"        ,&fTjtrk2px        ,"Jtrk2px[NJets]/D");
+	fEventTree->Branch("Jtrk2py"        ,&fTjtrk2py        ,"Jtrk2py[NJets]/D");
+	fEventTree->Branch("Jtrk2pz"        ,&fTjtrk2pz        ,"Jtrk2pz[NJets]/D");
+	fEventTree->Branch("Jtrk3px"        ,&fTjtrk3px        ,"Jtrk3px[NJets]/D");
+	fEventTree->Branch("Jtrk3py"        ,&fTjtrk3py        ,"Jtrk3py[NJets]/D");
+	fEventTree->Branch("Jtrk3pz"        ,&fTjtrk3pz        ,"Jtrk3pz[NJets]/D");
 	fEventTree->Branch("JEcorr"         ,&fTjEcorr         ,"JEcorr[NJets]/D");
 	fEventTree->Branch("JeMinDR"        ,&fTjeMinDR        ,"JeMinDR[NJets]/D");
 	fEventTree->Branch("JVtxx"          ,&fTjetVtxx        ,"JVtxx[NJets]/D");
@@ -1664,18 +1688,19 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTjID_resEMF,  gMaxnjets);
 	resetDouble(fTjID_HCALTow, gMaxnjets);
 	resetDouble(fTjID_ECALTow, gMaxnjets);
-	resetDouble(fTbTagProb, gMaxnjets);
-	resetDouble(fTChfrac,   gMaxnjets);
-	resetInt(fTnAssoTracks, gMaxnjets);
-	resetDouble(fTtrk1px, gMaxnjets);
-	resetDouble(fTtrk1py, gMaxnjets);
-	resetDouble(fTtrk1pz, gMaxnjets);
-	resetDouble(fTtrk2px, gMaxnjets);
-	resetDouble(fTtrk2py, gMaxnjets);
-	resetDouble(fTtrk2pz, gMaxnjets);
-	resetDouble(fTtrk3px, gMaxnjets);
-	resetDouble(fTtrk3py, gMaxnjets);
-	resetDouble(fTtrk3pz, gMaxnjets);
+	resetDouble(fTjbTagProb, gMaxnjets);
+	resetDouble(fTjChfrac,   gMaxnjets);
+	resetDouble(fTjMass,   gMaxnjets);
+	resetInt(fTjnAssoTracks, gMaxnjets);
+	resetDouble(fTjtrk1px, gMaxnjets);
+	resetDouble(fTjtrk1py, gMaxnjets);
+	resetDouble(fTjtrk1pz, gMaxnjets);
+	resetDouble(fTjtrk2px, gMaxnjets);
+	resetDouble(fTjtrk2py, gMaxnjets);
+	resetDouble(fTjtrk2pz, gMaxnjets);
+	resetDouble(fTjtrk3px, gMaxnjets);
+	resetDouble(fTjtrk3py, gMaxnjets);
+	resetDouble(fTjtrk3pz, gMaxnjets);
 	resetDouble(fTjeMinDR, gMaxnjets);
 	resetDouble(fTjetVtxx, gMaxnjets);
 	resetDouble(fTjetVtxy, gMaxnjets);
@@ -1700,24 +1725,29 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTtrknchi2, gMaxntrks);
 	resetDouble(fTtrknhits, gMaxntrks);
 
-	resetDouble(fTPhotonPt,gMaxnphos);
-	resetDouble(fTPhotonPx,gMaxnphos);
-	resetDouble(fTPhotonPy,gMaxnphos);
-	resetDouble(fTPhotonPz,gMaxnphos);
-	resetDouble(fTPhotonEta,gMaxnphos);
-	resetDouble(fTPhotonPhi,gMaxnphos);
-	resetDouble(fTPhotonEnergy,gMaxnphos);
-	resetDouble(fTPhotoncaloPositionX,gMaxnphos);
-	resetDouble(fTPhotoncaloPositionY,gMaxnphos);
-	resetDouble(fTPhotoncaloPositionZ,gMaxnphos);
-	resetDouble(fTPhotonHoverE,gMaxnphos);
-	resetDouble(fTPhotonH1overE,gMaxnphos);
-	resetDouble(fTPhotonH2overE,gMaxnphos);
-	resetDouble(fTPhotonSigmaIetaIeta,gMaxnphos);
-	resetInt(fTPhotonHasPixSeed,gMaxnphos);
-	resetInt(fTPhotonHasConvTrks,gMaxnphos);
+	resetDouble(fTPhotPt,gMaxnphos);
+	resetDouble(fTPhotPx,gMaxnphos);
+	resetDouble(fTPhotPy,gMaxnphos);
+	resetDouble(fTPhotPz,gMaxnphos);
+	resetDouble(fTPhotEta,gMaxnphos);
+	resetDouble(fTPhotPhi,gMaxnphos);
+	resetDouble(fTPhotEnergy,gMaxnphos);
+	resetDouble(fTPhotIso03Ecal);
+	resetDouble(fTPhotIso03Hcal);
+	resetDouble(fTPhotIso03TrkSolid);
+	resetDouble(fTPhotIso03TrkHollow);
+	resetDouble(fTPhotIso03);
+	resetDouble(fTPhotcaloPositionX,gMaxnphos);
+	resetDouble(fTPhotcaloPositionY,gMaxnphos);
+	resetDouble(fTPhotcaloPositionZ,gMaxnphos);
+	resetDouble(fTPhotHoverE,gMaxnphos);
+	resetDouble(fTPhotH1overE,gMaxnphos);
+	resetDouble(fTPhotH2overE,gMaxnphos);
+	resetDouble(fTPhotSigmaIetaIeta,gMaxnphos);
+	resetInt(fTPhotHasPixSeed,gMaxnphos);
+	resetInt(fTPhotHasConvTrks,gMaxnphos);
 	resetInt(fTgoodphoton,gMaxnphos);
-	resetInt(fTPhotonIsIso,gMaxnphos);
+	resetInt(fTPhotIsIso,gMaxnphos);
 
 
 	fTTrkPtSumx       = -999.99;
@@ -2169,20 +2199,20 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 // jetIndex and elecIndex contain the indices of the selected jets and
 //   electrons in the Views
 // (electrons and jets should be filled in the ntuple before checking)   
-	if (fTnjets <= 0){return;}
-	if (fTneles <= 0){return;}
+	if (fTnjets <= 0) return;
+	if (fTneles <= 0) return;
 
 // loop over the jets
 	for (int i = 0; i < fTnjets; ++i) {
-		bool isDuplicate = false;
 		const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
 
 	// loop over the electrons
 		for (int j = 0; j < fTneles; ++j) {
-			// fTeSharedPx[j] = 0.;
-			// fTeSharedPy[j] = 0.;
-			// fTeSharedPz[j] = 0.;
-			// fTeSharedEnergy[j] = 0.;
+			fTeIsInJet[j] = -1;
+			fTeSharedPx[j] = 0.;
+			fTeSharedPy[j] = 0.;
+			fTeSharedPz[j] = 0.;
+			fTeSharedEnergy[j] = 0.;
 			const SuperCluster* theElecSC = electrons[j];
 
 			math::XYZVector sharedP(0., 0., 0.);
@@ -2190,9 +2220,8 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 			float sharedE = sqrt(sharedP.X()*sharedP.X()+sharedP.Y()*sharedP.Y()
 				+sharedP.Z()*sharedP.Z());
 			if (isInJet) {
-				isDuplicate = true;
-				fTeIsInJet[j] = isDuplicate ? 1:0;
-		// could be:  fTeIsInJet[j] = isDuplicate ? i:-1;
+				fTeIsInJet[j] = i;
+				// was: fTeIsInJet[j] = isDuplicate ? 1:0;
 				fTeSharedPx[j] = sharedP.X();
 				fTeSharedPy[j] = sharedP.Y();
 				fTeSharedPz[j] = sharedP.Z();

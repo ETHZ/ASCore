@@ -10,7 +10,7 @@ process.MessageLogger.cerr.NTP = cms.untracked.PSet(
     limit = cms.untracked.int32(-1),
     reportEvery = cms.untracked.int32(1)
     )
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 ### Running conditions #########################################################
@@ -33,28 +33,12 @@ process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssoc
 process.source = cms.Source("PoolSource",
 	# replace 'myfile.root' with the source file you want to use
 	fileNames = cms.untracked.vstring(
-		# 'file:./scratch/ppMuXLoose_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
-		'file:./scratch/ppEleX_Summer09-MC_31X_V3-v1_GEN-SIM-RECO.root'
-		# 'file:/home/xv/stiegerb/FirstData/Run123596/bit40-123596-stdReco-GR09_P_V7-lumi1-68.root'
-		# 'file:/data/theofil08/Data/Beam09/bit40or41skim_expressPhysics_run123596_full.root'
-		# 'file:/home/xv/stiegerb/Skims/python/CollisionSkim_123596_1.root'
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/241D28BF-1EE2-DE11-9CF3-001617E30CC8.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/5865B623-1EE2-DE11-82E2-001D09F2545B.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/5E32F723-1EE2-DE11-ACC5-001D09F252E9.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/68BAA366-1FE2-DE11-A742-001617C3B66C.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/A6C66722-1EE2-DE11-BCFC-001D09F25208.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/D0ACE867-1FE2-DE11-AF2E-000423D94A20.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/CA74FE6C-1FE2-DE11-9C9A-001617E30D4A.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/761A0BBF-1EE2-DE11-8E1B-001617C3B76E.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/863F0D1D-20E2-DE11-9D98-001617C3B706.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/98B3021F-20E2-DE11-A8A9-0030487D0D3A.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/F25C511D-20E2-DE11-82D0-001617C3B6DE.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/ACA6611D-20E2-DE11-B804-001617E30CC8.root',
-		# 'file:/home/xv/stiegerb/FirstData/Run123592/80B9DACB-20E2-DE11-9526-001617C3B706.root'
+		'file:scratch/TTbar4Jets_40GeVthreshold-alpgen-GEN-SIM-RECO-MC_31X_V3_7TeV-v3.root'
+		# 'file:/data26/papel/ttbar_3_1_2.root'
 	),
 	duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 # Output
 process.TFileService = cms.Service("TFileService",
 	fileName = cms.string("NTupleProducer.root"),
@@ -62,20 +46,22 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #### Jet Corrections ###########################################################
-process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
-# process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
+# process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
+# process.load("JetMETCorrections.Configuration.L2L3Corrections_2360GeV_cff")
+process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 ## antiKt5
 process.L2JetCorrectorAK5Calo = cms.ESSource("L2RelativeCorrectionService", 
-	tagName = cms.string('900GeV_L2Relative_AK5Calo'),
+	tagName = cms.string('Summer09_L2Relative_AK5Calo'),
+	# tagName = cms.string('900GeV_L2Relative_AK5Calo'),
 	label = cms.string('L2RelativeJetCorrectorAK5Calo')
 )
 process.L3JetCorrectorAK5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-	tagName = cms.string('900GeV_L3Absolute_AK5Calo'),
+	tagName = cms.string('Summer09_L3Absolute_AK5Calo'),
+	# tagName = cms.string('900GeV_L3Absolute_AK5Calo'),
 	label = cms.string('L3AbsoluteJetCorrectorAK5Calo')
 )
 process.L2L3CorJetAK5Calo = cms.EDProducer("CaloJetCorrectionProducer",
     src = cms.InputTag("antikt5CaloJets"),
-    # src = cms.InputTag("antiKt5CaloJets"),
     correctors = cms.vstring('L2L3JetCorrectorAK5Calo')
 )
 # process.prefer("L2JetCorrectorAK5Calo")
