@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.36 2010/01/26 17:13:13 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.37 2010/02/01 16:51:03 stiegerb Exp $
 //
 //
 
@@ -112,7 +112,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMaxeleta       = iConfig.getParameter<double>("sel_maxeleta");
 	fMaxeliso       = iConfig.getParameter<double>("sel_maxeliso");
 	fMaxeld0        = iConfig.getParameter<double>("sel_maxeld0");
-	fMinjpt         = iConfig.getParameter<double>("sel_minjpt");
+	fMincorjpt      = iConfig.getParameter<double>("sel_mincorjpt");
+	fMinrawjpt      = iConfig.getParameter<double>("sel_minrawjpt");
 	fMaxjeta        = iConfig.getParameter<double>("sel_maxjeta");
 	fMinjemfrac     = iConfig.getParameter<double>("sel_minjemfrac");
 	fMintrkpt       = iConfig.getParameter<double>("sel_mintrkpt");
@@ -121,15 +122,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
 	fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
 	fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
-
-
-// Isolation Parameters
-	fIso_MuTkDRin   = iConfig.getParameter<double>("iso_MuTkDRin");
-	fIso_MuTkDRout  = iConfig.getParameter<double>("iso_MuTkDRout");
-	fIso_MuTkSeed   = iConfig.getParameter<double>("iso_MuTkSeed");
-	fIso_MuCalDRin  = iConfig.getParameter<double>("iso_MuCalDRin");
-	fIso_MuCalDRout = iConfig.getParameter<double>("iso_MuCalDRout");
-	fIso_MuCalSeed  = iConfig.getParameter<double>("iso_MuCalSeed");
 
 	edm::LogVerbatim("NTP") << "---------------------------------";
 	edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
@@ -169,23 +161,16 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	edm::LogVerbatim("NTP") << "    fMaxeleta       = " << fMaxeleta   ;
 	edm::LogVerbatim("NTP") << "    fMaxeliso       = " << fMaxeliso   ;
 	edm::LogVerbatim("NTP") << "    fMaxeld0        = " << fMaxeld0    ;
-	edm::LogVerbatim("NTP") << "    fMinjpt         = " << fMinjpt     ;
+	edm::LogVerbatim("NTP") << "    fMincorjpt      = " << fMincorjpt  ;
+	edm::LogVerbatim("NTP") << "    fMinrawjpt      = " << fMinrawjpt  ;
 	edm::LogVerbatim("NTP") << "    fMaxjeta        = " << fMaxjeta    ;
 	edm::LogVerbatim("NTP") << "    fMinjemfrac     = " << fMinjemfrac ;
 	edm::LogVerbatim("NTP") << "    fMintrkpt       = " << fMintrkpt   ;
 	edm::LogVerbatim("NTP") << "    fMaxtrketa      = " << fMaxtrketa  ;
-	edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2 ;
-	edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits ;
+	edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2;
+	edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits;
 	edm::LogVerbatim("NTP") << "    fMinphopt       = " << fMinphopt   ;
 	edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta  ;
-	edm::LogVerbatim("NTP") << endl;
-	edm::LogVerbatim("NTP") << "  Isolation Parameters:" ;
-	edm::LogVerbatim("NTP") << "    fIso_MuTkDRin   = " << fIso_MuTkDRin   ;
-	edm::LogVerbatim("NTP") << "    fIso_MuTkDRout  = " << fIso_MuTkDRout  ;
-	edm::LogVerbatim("NTP") << "    fIso_MuTkSeed   = " << fIso_MuTkSeed   ;
-	edm::LogVerbatim("NTP") << "    fIso_MuCalDRin  = " << fIso_MuCalDRin  ;
-	edm::LogVerbatim("NTP") << "    fIso_MuCalDRout = " << fIso_MuCalDRout ;
-	edm::LogVerbatim("NTP") << "    fIso_MuCalSeed  = " << fIso_MuCalSeed  ;
 	edm::LogVerbatim("NTP") << endl;
 	edm::LogVerbatim("NTP") << "---------------------------------" ;
 }
@@ -377,6 +362,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 ////////////////////////////////////////////////////////
 // Muon Variables:
 	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
+	fTnmutot = 0;
 	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
 	// Check if maximum number of electrons is exceeded already:
 		if(mqi >= gMaxnmus){
@@ -387,9 +373,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			break;
 		}
 		mi++;
-
 	// Muon preselection:
 		if(!(Mit->isGlobalMuon())) continue;
+		fTnmutot++;
 		if(Mit->globalTrack()->pt() < fMinmupt) continue;
 		if(fabs(Mit->globalTrack()->eta()) > fMaxmueta) continue;
 		mqi++;
@@ -466,28 +452,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	vector<const SuperCluster*> elecPtr;
 	vector<const GsfTrack*> trckPtr;
 	int eqi(-1),ei(-1); // counts # of qualified electrons
+	fTnelestot = 0;
 	if(electrons->size() > 0){
-	// Read eID results
+		// Read eID results
 		vector<Handle<ValueMap<float> > > eIDValueMap(4); 
-	// Robust-Loose 
+		// Robust-Loose 
 		iEvent.getByLabel( "eidRobustLoose", eIDValueMap[0] ); 
 		const ValueMap<float> & eIDmapRL = *eIDValueMap[0] ;
-	// Robust-Tight 
+		// Robust-Tight 
 		iEvent.getByLabel( "eidRobustTight", eIDValueMap[1] ); 
 		const ValueMap<float> & eIDmapRT = *eIDValueMap[1] ;
-	// Loose 
+		// Loose 
 		iEvent.getByLabel( "eidLoose", eIDValueMap[2] ); 
 		const ValueMap<float> & eIDmapL  = *eIDValueMap[2] ;
-	// Tight 
+		// Tight 
 		iEvent.getByLabel( "eidTight", eIDValueMap[3] ); 
 		const ValueMap<float> & eIDmapT  = *eIDValueMap[3] ;
 		eIDValueMap.clear();
 
-	// Loop over electrons
+		// Loop over electrons
 		for( View<GsfElectron>::const_iterator El = electrons->begin(); 
 		El != electrons->end(); ++El ) {
 			++ei;
-		// Check if maximum number of electrons is exceeded already:
+			// Check if maximum number of electrons is exceeded already:
 			if(eqi >= gMaxneles){
 				edm::LogWarning("NTP") << "@SUB=analyze"
 					<< "Maximum number of electrons exceeded..";
@@ -495,18 +482,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTgoodevent = 0;
 				break;
 			}
-
-		// Electron preselection:   
+			fTnelestot++;
+			// Electron preselection:   
 			if(El->pt() < fMinelpt) continue;
 			if(fabs(El->eta()) > fMaxeleta) continue;
 			if(fabs(El->gsfTrack()->dxy(beamSpot.position())) > fMaxeld0) continue;
 
-		// Save the electron SuperCluster pointer
+			// Save the electron SuperCluster pointer
 			const SuperCluster* superCluster = &(*(El->superCluster()));
 			elecPtr.push_back(superCluster);
 			trckPtr.push_back(&(*(El->gsfTrack()) ) );
 
-		// Read EleIsolation
+			// Read EleIsolation
 			double eTkIso,eECIso,eHCIso;
 			if ( !fIsPat ) { // Isolation is embedded in PAT => switch
 				Handle<edm::ValueMap<double> > eIsoTkValueMap;
@@ -618,12 +605,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 ////////////////////////////////////////////////////////
 // Photon Variables:
 	int nqpho(-1);
+	fTnphotonstot = photons->size();
 	for( PhotonCollection::const_iterator ip = photons->begin(); ip != photons->end(); ++ip ){
-	//no idea of a preselection
+		// No idea of a preselection
 		if(ip->pt() < fMinphopt) continue;
 		if(fabs(ip->eta()) > fMaxphoeta) continue;
 		nqpho++;
-	//check if maximum number of photons exceeded
+		// Check if maximum number of photons exceeded
 		if(nqpho>=gMaxnphos){
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of photons exceeded";
@@ -661,14 +649,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // Jet Variables:
 // Keep pointers to jets in original collections
 	vector<const Jet*> jetPtr;
-// Jet corrections
+	// Jet corrections
 	vector<const Jet*> corrJets;
 	corrJets.reserve(jets->size()); // Speed up push-backs
-	vector<OrderPair> corrIndices;  // Vector of indices and pt of corrected jets to re-order them
-// I save here px, py, pz for uncorrected jets
-// used later for matching jets with b-tagging information
+	vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
+	// I save here px, py, pz for uncorrected jets
+	// used later for matching jets with b-tagging information
 	int itag(-1);
-	for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit){// Loop over uncorr. jets
+	fTnjetstot = jets->size();
+	// Loop over uncorr. jets
+	for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit){
+		// Cut on uncorrected pT (for startup)
+		if(Jit->pt() < fMinrawjpt) continue;
 		itag++;
 		// Save only the gMaxnjets first uncorrected jets
 		if(itag >= gMaxnjets){
@@ -709,8 +701,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 // Determine qualified jets
 	int jqi(-1); // counts # of qualified jets
-	for(vector<OrderPair>::const_iterator it = corrIndices.begin();
-	it != corrIndices.end(); ++it ) { // Loop over corr. jet indices
+	// Loop over corr. jet indices
+	for(vector<OrderPair>::const_iterator it = corrIndices.begin(); it != corrIndices.end(); ++it ) {
 	// Check if maximum number of jets is exceeded already
 		if(jqi >= gMaxnjets) {
 			edm::LogWarning("NTP") << "@SUB=analyze"
@@ -723,7 +715,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Jet preselection
 		const Jet* jet = corrJets[index];
-		if(jet->pt() < fMinjpt) continue;
+		if(jet->pt() < fMincorjpt) continue;
 		if(fabs(jet->eta()) > fMaxjeta) continue;
 	// if(jet->emEnergyFraction() < fMinjemfrac) continue;
 		jqi++;
@@ -1017,9 +1009,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // Get and Dump (M)E(T) Variables:
 // Tracks:
 	int nqtrk(-1);
+	fTntrackstot = tracks->size();
 	fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
-	for(TrackCollection::const_iterator it = tracks->begin(); 
-	it != tracks->end() ; ++it ) {
+	for( TrackCollection::const_iterator it = tracks->begin(); it != tracks->end() ; ++it ){
 		if(it->pt() < fMintrkpt) continue;
 		if(fabs(it->eta()) > fMaxtrketa) continue;
 		if(it->normalizedChi2() > fMaxtrknchi2) continue;
@@ -1134,6 +1126,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fRunTree->Branch("MaxElIso"       ,&fRTMaxeliso,       "MaxElIso/D");
 	fRunTree->Branch("MaxElD0"        ,&fRTMaxeld0,        "MaxElD0/D");
 	fRunTree->Branch("MinJPt"         ,&fRTMinjpt,         "MinJPt/D");
+	fRunTree->Branch("MinRawJPt"      ,&fRTMinrawjpt,      "MinRawJPt/D");
 	fRunTree->Branch("MaxJEta"        ,&fRTMaxjeta,        "MaxJEta/D");
 	fRunTree->Branch("MinJEMfrac"     ,&fRTMinjemfrac,     "MinJEMfrac/D");
 
@@ -1144,13 +1137,6 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 	fRunTree->Branch("MinPhotonPt"    ,&fRTMinphopt,       "MinPhotonPt/D");
 	fRunTree->Branch("MaxPhotonEta"   ,&fRTMaxphoeta,      "MaxPhotonEta/D");
-
-	fRunTree->Branch("IsoMuTkDRin"    ,&fRTIsoMuTkDRin,    "IsoMuTkDRin/D");
-	fRunTree->Branch("IsoMuTkDRout"   ,&fRTIsoMuTkDRout,   "IsoMuTkDRout/D");
-	fRunTree->Branch("IsoMuTkSeed"    ,&fRTIsoMuTkSeed,    "IsoMuTkSeed/D");
-	fRunTree->Branch("IsoMuCalDRin"   ,&fRTIsoMuCalDRin,   "IsoMuCalDRin/D");
-	fRunTree->Branch("IsoMuCalDRout"  ,&fRTIsoMuCalDRout,  "IsoMuCalDRout/D");
-	fRunTree->Branch("IsoMuCalSeed"   ,&fRTIsoMuCalSeed,   "IsoMuCalSeed/D");
 
 	fRunTree->Branch("MaxNMus"        ,&fRTmaxnmu,         "MaxTmu/I");
 	fRunTree->Branch("MaxNEles"       ,&fRTmaxnel,         "MaxTel/I");
@@ -1195,6 +1181,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 // Muons:
 	fEventTree->Branch("NMus"             ,&fTnmu             ,"NMus/I");
+	fEventTree->Branch("NMusTot"          ,&fTnmutot          ,"NMusTot/I");
 	fEventTree->Branch("MuGood"           ,&fTgoodmu          ,"MuGood[NMus]/I");
 	fEventTree->Branch("MuIsIso"          ,&fTmuIsIso         ,"MuIsIso[NMus]/I");
 	fEventTree->Branch("MuPx"             ,&fTmupx            ,"MuPx[NMus]/D");
@@ -1237,6 +1224,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 // Electrons:
 	fEventTree->Branch("NEles"            ,&fTneles           ,"NEles/I");
+	fEventTree->Branch("NElesTot"         ,&fTnelestot        ,"NElesTot/I");
 	fEventTree->Branch("ElGood"           ,&fTgoodel          ,"ElGood[NEles]/I");
 	fEventTree->Branch("ElIsIso"          ,&fTeIsIso          ,"ElIsIso[NEles]/I");
 	fEventTree->Branch("ElPx"             ,&fTepx             ,"ElPx[NEles]/D");
@@ -1298,8 +1286,9 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElMID"            ,&fTemid               ,"ElMID[NEles]/I");
 
 // Photons:
-	fEventTree->Branch("NPhotons"        ,&fTnphotons      ,"NPhotons/I");
-	fEventTree->Branch("PhotonGood"      ,&fTgoodphoton    ,"PhotonGood[NPhotons]/I");
+	fEventTree->Branch("NPhotons"        ,&fTnphotons    ,"NPhotons/I");
+	fEventTree->Branch("NPhotonsTot"     ,&fTnphotonstot ,"NPhotonsTot/I");
+	fEventTree->Branch("PhotonGood"      ,&fTgoodphoton  ,"PhotonGood[NPhotons]/I");
 	fEventTree->Branch("PhotonIsIso"     ,&fTPhotIsIso   ,"PhotonIsIso[NPhotons]/I");
 	fEventTree->Branch("PhotonPt"        ,&fTPhotPt      ,"PhotonPt[NPhotons]/D");
 	fEventTree->Branch("PhotonPx"        ,&fTPhotPx      ,"PhotonPx[NPhotons]/D");
@@ -1325,6 +1314,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 // Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
+	fEventTree->Branch("NJetsTot"       ,&fTnjetstot       ,"NJetsTot/I");
 	fEventTree->Branch("JGood"          ,&fTgoodjet        ,"JGood[NJets]/I");
 	fEventTree->Branch("JPx"            ,&fTjpx            ,"JPx[NJets]/D");
 	fEventTree->Branch("JPy"            ,&fTjpy            ,"JPy[NJets]/D");
@@ -1378,6 +1368,7 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 
 // Tracks:
 	fEventTree->Branch("NTracks"        ,&fTntracks      ,"NTracks/I");
+	fEventTree->Branch("NTracksTot"     ,&fTntrackstot   ,"NTracksTot/I");
 	fEventTree->Branch("TrkGood"        ,&fTgoodtrk      ,"TrkGood[NTracks]/I");
 	fEventTree->Branch("TrkPt"          ,&fTtrkpt        ,"TrkPt[NTracks]/D");
 	fEventTree->Branch("TrkEta"         ,&fTtrketa       ,"TrkEta[NTracks]/D");
@@ -1452,6 +1443,7 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMaxeliso      = -999.99;
 	fRTMaxeld0       = -999.99;
 	fRTMinjpt        = -999.99;
+	fRTMinrawjpt     = -999.99;
 	fRTMaxjeta       = -999.99;
 	fRTMinjemfrac    = -999.99;
 	fRTMintrkpt      = -999.99;
@@ -1460,12 +1452,6 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMintrknhits   = -999;
 	fRTMinphopt      = -999.99;
 	fRTMaxphoeta     = -999.99;
-	fRTIsoMuTkDRin   = -999.99;
-	fRTIsoMuTkDRout  = -999.99;
-	fRTIsoMuTkSeed   = -999.99;
-	fRTIsoMuCalDRin  = -999.99;
-	fRTIsoMuCalDRout = -999.99;
-	fRTIsoMuCalSeed  = -999.99;
 
 	fRTmaxnmu   = -999;
 	fRTmaxnel   = -999;
@@ -1489,7 +1475,8 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMaxeleta      = fMaxeleta;
 	fRTMaxeliso      = fMaxeliso;
 	fRTMaxeld0       = fMaxeld0;
-	fRTMinjpt        = fMinjpt;
+	fRTMinjpt        = fMincorjpt;
+	fRTMinrawjpt     = fMinrawjpt;
 	fRTMaxjeta       = fMaxjeta;
 	fRTMinjemfrac    = fMinjemfrac;
 	fRTMintrkpt      = fMintrkpt;
@@ -1499,13 +1486,6 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 
 	fRTMinphopt      = fMinphopt;
 	fRTMaxphoeta     = fMaxphoeta;
-
-	fRTIsoMuTkDRin   = fIso_MuTkDRin;
-	fRTIsoMuTkDRout  = fIso_MuTkDRout;
-	fRTIsoMuTkSeed   = fIso_MuTkSeed;
-	fRTIsoMuCalDRin  = fIso_MuCalDRin;
-	fRTIsoMuCalDRout = fIso_MuCalDRout;
-	fRTIsoMuCalSeed  = fIso_MuCalSeed;
 
 	fRTmaxnmu   = gMaxnmus;
 	fRTmaxnel   = gMaxneles;
@@ -1561,9 +1541,17 @@ void NTupleProducer::resetTree(){
 	fTflagmaxtrkexc    = 0;
 	fTflagmaxphoexc    = 0;
 
-	fTnmu   = 0;
-	fTneles = 0;
-	fTnjets = 0;
+	fTnmu         = 0;
+	fTnmutot      = 0;
+	fTneles       = 0;
+	fTnelestot    = 0;
+	fTnjets       = 0;
+	fTnjetstot    = 0;
+	fTntracks     = 0;
+	fTntrackstot  = 0;
+	fTnphotons    = 0;
+	fTnphotonstot = 0;
+
 	resetInt(fTgoodmu, gMaxnmus);
 	resetInt(fTmuIsIso, gMaxnmus);
 	resetDouble(fTmupx, gMaxnmus);
@@ -1576,8 +1564,6 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTmueta, gMaxnmus);
 	resetDouble(fTmuphi, gMaxnmus);
 	resetInt(fTmucharge, gMaxnmus);
-	// resetDouble(fTmuptsum, gMaxnmus);
-	// resetDouble(fTmuetsum, gMaxnmus);
 	resetDouble(fTmuiso, gMaxnmus);
 	resetDouble(fTmuIso03sumPt, gMaxnmus);
 	resetDouble(fTmuIso03emEt, gMaxnmus);
@@ -1791,194 +1777,6 @@ void NTupleProducer::resetTree(){
 	fTPFMETphi        = -999.99;
 }
 
-// Method for calculating the muon isolation
-vector<double> NTupleProducer::calcMuIso(const reco::Muon *Mu, const edm::Event& iEvent){
-// Track pT sum:
-	edm::Handle<VertexCollection> vertices;
-	iEvent.getByLabel(fVertexTag, vertices);
-	const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
-// Compare against eta and phi of trackermuon:
-	double mupt  = Mu->innerTrack()->pt();
-	double mueta = Mu->innerTrack()->eta();
-	double muphi = Mu->innerTrack()->phi();
-	double ptsum(0.);
-	for(vector<TrackBaseRef>::const_iterator itk = primVtx->tracks_begin(); itk!=primVtx->tracks_end(); ++itk){
-		if((*itk)->pt() < fIso_MuTkSeed) continue;
-		double eta = (*itk)->eta();
-		double phi = (*itk)->phi();
-		double DR = reco::deltaR(eta, phi, mueta, muphi);
-	// if(DR <= 0.) DR = 0.001; // Why do I need this?
-		if(DR < fIso_MuTkDRin) continue;
-		if(DR > fIso_MuTkDRout) continue;
-		ptsum += (*itk)->pt();
-	}
-// Subtract Muon pT in case inner cone is set to 0.0 radius
-// This doesn't seem to work very well...
-// Muon track not part of primVtx tracks?1
-	if(fIso_MuTkDRin == 0.0) ptsum -= mupt;
-
-// Calo ET sum:
-	edm::Handle<CaloTowerCollection> calotowers;
-	iEvent.getByLabel(fCalTowTag,calotowers);
-	double etsum(0.);
-	for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
-		double eta = itow->eta();
-		if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
-		double phi = itow->phi();
-		double DR = reco::deltaR(eta, phi, mueta, muphi);
-		if(DR <= 0.) DR = 0.001;
-		if(DR < fIso_MuCalDRin) continue;
-		if(DR > fIso_MuCalDRout) continue;
-		etsum += itow->energy()/cosh(eta);
-	}
-	vector<double> res;
-	res.push_back((ptsum+etsum)/mupt);
-	res.push_back(ptsum);
-	res.push_back(etsum);
-	return res;
-}
-
-// Method for calculating the muon isolation
-vector<double> NTupleProducer::calcMuIso2(const reco::Muon *Mu, const edm::Event& iEvent){
-// Track pT sum:
-	edm::Handle<TrackCollection> tracks;
-	iEvent.getByLabel(fTrackTag, tracks);
-// Compare against eta and phi of trackermuon:
-	double mupt  = Mu->innerTrack()->pt();
-	double mueta = Mu->innerTrack()->eta();
-	double muphi = Mu->innerTrack()->phi();
-	double ptsum(0.);
-	for(TrackCollection::const_iterator itk = tracks->begin(); itk!=tracks->end(); ++itk){
-		if(itk->pt() < fIso_MuTkSeed) continue;
-		double eta = itk->eta();
-		double phi = itk->phi();
-		double DR = reco::deltaR(eta, phi, mueta, muphi);
-	// if(DR <= 0.) DR = 0.001; // Why do I need this?
-		if(DR < fIso_MuTkDRin) continue;
-		if(DR > fIso_MuTkDRout) continue;
-		ptsum += itk->pt();
-	}
-// Subtract Muon pT in case inner cone is set to 0.0 radius
-// This doesn't seem to work very well...
-// Muon track not part of primVtx tracks?
-	if(fIso_MuTkDRin == 0.0) ptsum -= mupt;
-
-// Calo ET sum:
-	edm::Handle<CaloTowerCollection> calotowers;
-	iEvent.getByLabel(fCalTowTag,calotowers);
-	double etsum = 0.;
-	for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
-		double eta = itow->eta();
-		if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
-		double phi = itow->phi();
-		double DR = reco::deltaR(eta, phi, mueta, muphi);
-		if(DR <= 0.) DR = 0.001;
-		if(DR < fIso_MuCalDRin) continue;
-		if(DR > fIso_MuCalDRout) continue;
-		etsum += itow->energy()/cosh(eta);
-	}
-	vector<double> res;
-	res.push_back((ptsum+etsum)/mupt);
-	res.push_back(ptsum);
-	res.push_back(etsum);
-	return res;
-}
-
-// Method for calculating the muon isolation
-vector<double> NTupleProducer::calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef){
-	double mupt = Mu->innerTrack()->pt();
-
-// Read MuIsoDeposits
-// Tracker:
-	edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepTkValueMap;
-	iEvent.getByLabel(fMuIsoDepTkTag, IsoDepTkValueMap);
-	const edm::ValueMap<reco::IsoDeposit> &TkDepMap = *IsoDepTkValueMap.product();
-// ECAL:
-	edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepECValueMap;
-	iEvent.getByLabel(fMuIsoDepECTag, IsoDepECValueMap);
-	const edm::ValueMap<reco::IsoDeposit> &ECDepMap = *IsoDepECValueMap.product();
-// HCAL:
-	edm::Handle<edm::ValueMap<reco::IsoDeposit> > IsoDepHCValueMap;
-	iEvent.getByLabel(fMuIsoDepHCTag, IsoDepHCValueMap);
-	const edm::ValueMap<reco::IsoDeposit> &HCDepMap = *IsoDepHCValueMap.product();
-
-	const reco::IsoDeposit TkDep = TkDepMap[muonRef];
-	const reco::IsoDeposit ECDep = ECDepMap[muonRef];
-	const reco::IsoDeposit HCDep = HCDepMap[muonRef];
-	double ptsum = TkDep.depositWithin(fIso_MuTkDRout);
-	double ecsum = ECDep.depositWithin(fIso_MuCalDRout);
-	double hcsum = HCDep.depositWithin(fIso_MuCalDRout);
-	double etsum = ecsum + hcsum;
-	double muiso = (ptsum + etsum)/mupt;
-	vector<double> res;
-	res.push_back(muiso);
-	res.push_back(ptsum);
-	res.push_back(etsum);
-	return res;
-}
-
-// Method for calculating the electron isolation
-vector<double> NTupleProducer::calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent){
-// Track pT sum:
-	edm::Handle<VertexCollection> vertices;
-	iEvent.getByLabel(fVertexTag, vertices);
-	const reco::Vertex *primVtx = &(*(vertices.product()))[0]; // Just take first vertex ...
-// Compare against eta and phi of electron:
-	double elpt  = El->pt();
-	double eleta = El->eta();
-	double elphi = El->phi();
-	double ptsum(0.);
-	for(vector<TrackBaseRef>::const_iterator itk = primVtx->tracks_begin(); itk!=primVtx->tracks_end(); ++itk){
-		if((*itk)->pt() < fIso_MuTkSeed) continue;
-		double eta = (*itk)->eta();
-		double phi = (*itk)->phi();
-		double DR = reco::deltaR(eta, phi, eleta, elphi);
-		if(DR <= 0.) DR = 0.001; // Why do I need this?
-		if(DR < fIso_MuTkDRin) continue;
-		if(DR > fIso_MuTkDRout) continue;
-		ptsum += (*itk)->pt();
-	}
-// Subtract electron pT in case inner cone is set to 0.0 radius
-	if(fIso_MuTkDRin == 0.0) ptsum -= elpt;
-
-// SC ET sum:
-	edm::Handle<SuperClusterCollection> superclusters;
-	iEvent.getByLabel(fSCTag,superclusters);
-	double etsum = 0.;
-	for(SuperClusterCollection::const_iterator isc = superclusters->begin(); isc!=superclusters->end(); ++isc){
-		double eta = isc->eta();
-		if(isc->energy()/cosh(eta) < fIso_MuCalSeed) continue;
-		double phi = isc->phi();
-		double DR = reco::deltaR(eta, phi, eleta, elphi);
-		if(DR <= 0.) DR = 0.001; //FIXME:???
-		if(DR < fIso_MuCalDRin) continue;
-		if(DR > fIso_MuCalDRout) continue;
-		etsum += isc->energy()/cosh(eta);
-	}
-	if(fIso_MuCalDRin == 0.0) etsum -= El->caloEnergy();
-// // Calo ET sum:
-// edm::Handle<CaloTowerCollection> calotowers;
-// iEvent.getByLabel(fCalTowTag,calotowers);
-// double etsum = 0.;
-// for(CaloTowerCollection::const_iterator itow = calotowers->begin(); itow!=calotowers->end(); ++itow){
-//  double eta = itow->eta();
-//  if(itow->energy()/cosh(eta) < fIso_MuCalSeed) continue;
-//  double phi = itow->phi();
-//  double DR = reco::deltaR(eta, phi, mueta, muphi);
-//  if(DR <= 0.) DR = 0.001;
-//  if(DR < fIso_MuCalDRin) continue;
-//  if(DR > fIso_MuCalDRout) continue;
-//  etsum += itow->energy()/cosh(eta);
-// }
-// if(fIso_MuCalDRin == 0.0) etsum -= El->caloEnergy();
-
-	vector<double> res;
-	res.push_back((ptsum+etsum)/elpt);
-	res.push_back(ptsum);
-	res.push_back(etsum);
-	return res;
-}
-
 // Method for matching of muon candidates
 vector<int> NTupleProducer::matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent){
 	if(fIsRealData){
@@ -2133,36 +1931,6 @@ vector<int> NTupleProducer::matchElCand(const reco::GsfElectron *El, const edm::
 		res.push_back(elmid);
 	}
 	return res;
-}
-
-// Method for sorting the muons
-vector<const reco::Muon*> NTupleProducer::sortMus(vector<const reco::Muon*> Mus){
-/* - This will arrange the vector of muons such that they are ordered in pT   */
-	unsigned int size = Mus.size();
-	vector<double> v_mupt;
-	vector<const reco::Muon*> v_mu;
-// Fill mupt vector with dummies
-	for(size_t i = 0; i < size; ++i){
-		v_mupt.push_back(-888.88);
-		const reco::Muon *mu = new reco::Muon();
-		v_mu.push_back(mu);
-	}
-	double mupt(0.);
-	for(size_t i = 0; i < size; ++i){ // Loop over muons
-		mupt = Mus[i]->globalTrack()->pt();
-		for(size_t j = 0; j < size; ++j){ // Loop over container slots
-			if(mupt > v_mupt[j]){
-				for(size_t k = size-1; k > j; k--){ // Shift lower cont. entries
-					v_mupt[k] = v_mupt[k-1];
-					v_mu[k] = v_mu[k-1];
-				}
-				v_mupt[j] = mupt;
-				v_mu[j] = Mus[i];
-				break;
-			}
-		}
-	}
-	return v_mu;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

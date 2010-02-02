@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.30 2010/01/15 15:55:11 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.31 2010/02/01 16:51:08 stiegerb Exp $
 //
 //
 
@@ -58,19 +58,15 @@ public:
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
 
-	vector<double> calcMuIso(const reco::Muon *Mu, const edm::Event& iEvent);
-	vector<double> calcMuIso2(const reco::Muon *Mu, const edm::Event& iEvent);
-	vector<double> calcMuIso3(const reco::Muon *Mu, const edm::Event& iEvent, edm::Ref<reco::MuonCollection> muonRef);
-	vector<double> calcElIso(const reco::GsfElectron *El, const edm::Event& iEvent);
 	vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
 	vector<int> matchElCand(const reco::GsfElectron *El, const edm::Event& iEvent);
-	vector<const reco::Muon*> sortMus(vector<const reco::Muon*>);
 	void switchDouble(double &, double &);
 	void switchInt(int &, int &);
 	void resetDouble(double *v, unsigned int size = 20);
 	void resetInt(int *v, unsigned int size = 20);
 	void resetTree();
 	vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
+
 private:
 
 	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
@@ -140,19 +136,14 @@ private:
 	double fMaxeleta;
 	double fMaxeliso;
 	double fMaxeld0;
-	double fMinjpt;
+	double fMincorjpt;
+	double fMinrawjpt;
 	double fMaxjeta;
 	double fMinjemfrac;
 	double fMintrkpt;
 	double fMaxtrketa;
 	double fMaxtrknchi2;
 	int fMintrknhits;
-	double fIso_MuTkDRin;
-	double fIso_MuTkDRout;
-	double fIso_MuTkSeed;
-	double fIso_MuCalDRin;
-	double fIso_MuCalDRout;
-	double fIso_MuCalSeed;
 
 	double fMinphopt;
 	double fMaxphoeta;
@@ -182,6 +173,7 @@ private:
 	double fRTMaxeliso;
 	double fRTMaxeld0;
 	double fRTMinjpt;
+	double fRTMinrawjpt;
 	double fRTMaxjeta;
 	double fRTMinjemfrac;
 
@@ -192,13 +184,6 @@ private:
 
 	double fRTMinphopt;
 	double fRTMaxphoeta;
-
-	double fRTIsoMuTkDRin;
-	double fRTIsoMuTkDRout;
-	double fRTIsoMuTkSeed;
-	double fRTIsoMuCalDRin;
-	double fRTIsoMuCalDRout;
-	double fRTIsoMuCalSeed;
 
 	int fRTmaxnmu;
 	int fRTmaxnel;
@@ -252,7 +237,8 @@ private:
 	int fTflagmaxphoexc;  // Found more than 500 photons in event
 
 // Muons:
-	unsigned int fTnmu;
+	int fTnmu;
+	int fTnmutot; // before preselection
 	int fTgoodmu[gMaxnmus];
 	int fTmuIsIso[gMaxnmus];
 	double fTmupx[gMaxnmus];
@@ -303,6 +289,7 @@ private:
 
 // Electrons:
 	int fTneles;
+	int fTnelestot; // before preselection
 	int fTgoodel[gMaxneles];
 	int fTeIsIso[gMaxneles];
 	double fTepx[gMaxneles];
@@ -360,13 +347,13 @@ private:
 	double fTdr04hcaltowersumet[gMaxneles];
 	double fTetheta[gMaxneles];
 
-
 // - Gen Info:
 	int fTeid[gMaxneles];
 	int fTemid[gMaxneles];
 
 // Photons:
 	int fTnphotons;
+	int fTnphotonstot; // before preselection
 	int fTgoodphoton[gMaxnphos];
 	int fTPhotIsIso[gMaxnphos];
 	double fTPhotPt[gMaxnphos];  
@@ -393,6 +380,7 @@ private:
 
 // Jets:
 	int fTnjets;
+	int fTnjetstot; // before preselection
 	int fTgoodjet[gMaxnjets];
 	double fTjpx[gMaxnjets];
 	double fTjpy[gMaxnjets];
@@ -446,6 +434,7 @@ private:
 
 // Tracks:
 	int fTntracks;
+	int fTntrackstot; // before preselection
 	int fTgoodtrk[gMaxntrks];
 	double fTtrkpt[gMaxntrks]; // this is actually charge*pt
 	double fTtrketa[gMaxntrks];

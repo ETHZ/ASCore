@@ -64,39 +64,15 @@ process.L2L3CorJetAK5Calo = cms.EDProducer("CaloJetCorrectionProducer",
     src = cms.InputTag("antikt5CaloJets"),
     correctors = cms.vstring('L2L3JetCorrectorAK5Calo')
 )
-# process.prefer("L2JetCorrectorAK5Calo")
-
-## sisCone5
-# process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
-# 	tagName = cms.string('Summer09_L2Relative_SC5Calo'),
-# 	label = cms.string('L2RelativeJetCorrectorSC5Calo')
-# )
-# process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-# 	tagName = cms.string('Summer09_L3Absolute_SC5Calo'),
-# 	label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
-# )
-# process.L2L3CorJetSC5Calo = cms.EDProducer("CaloJetCorrectionProducer",
-#     src = cms.InputTag("sisCone5CaloJets"),
-#     correctors = cms.vstring('L2L3JetCorrectorSC5Calo')
-# )
-# process.prefer("L2JetCorrectorSC5Calo")
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
 process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
 process.metMuonJESCorAK5.inputUncorJetsLabel = "antikt5CaloJets"
-# process.metMuonJESCorAK5.inputUncorJetsLabel = "antiKt5CaloJets"
 process.metMuonJESCorAK5.corrector = "L2L3JetCorrectorAK5Calo"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
-
-# from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorSC5CaloJet
-# process.metMuonJESCorSC5 = metJESCorSC5CaloJet.clone()
-# process.metMuonJESCorSC5.inputUncorJetsLabel = "sisCone5CaloJets"
-# process.metMuonJESCorSC5.corrector = "L2L3JetCorrectorSC5Calo"
-# process.metMuonJESCorSC5.inputUncorMetLabel = "corMetGlobalMuons"
-# process.metCorSequence = cms.Sequence(process.metMuonJESCorSC5)
 
 ### Egamma Isolation ###########################################################
 # Produce eleIsoDeposits first!
