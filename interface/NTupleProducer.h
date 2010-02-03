@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.31 2010/02/01 16:51:08 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.32 2010/02/02 15:12:38 stiegerb Exp $
 //
 //
 
@@ -71,6 +71,7 @@ private:
 
 	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
 	virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+	virtual void PhotonJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
 	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, const CaloJet* theJet, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
 	virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
 	virtual float CaloTowerSizePhi(float eta);
@@ -368,15 +369,21 @@ private:
 	double fTPhotIso03TrkSolid[gMaxnphos];
 	double fTPhotIso03TrkHollow[gMaxnphos];
 	double fTPhotIso03[gMaxnphos];
-	double fTPhotcaloPositionX[gMaxnphos];
-	double fTPhotcaloPositionY[gMaxnphos];
-	double fTPhotcaloPositionZ[gMaxnphos];
+	double fTPhotcaloPosX[gMaxnphos];
+	double fTPhotcaloPosY[gMaxnphos];
+	double fTPhotcaloPosZ[gMaxnphos];
 	double fTPhotHoverE[gMaxnphos];
 	double fTPhotH1overE[gMaxnphos];
 	double fTPhotH2overE[gMaxnphos];
 	double fTPhotSigmaIetaIeta[gMaxnphos];
 	int    fTPhotHasPixSeed[gMaxnphos];
 	int    fTPhotHasConvTrks[gMaxnphos];
+	int    fTPhotIsInJet[gMaxneles];
+	double fTPhotSharedPx[gMaxneles];
+	double fTPhotSharedPy[gMaxneles];
+	double fTPhotSharedPz[gMaxneles];
+	double fTPhotSharedEnergy[gMaxneles];
+	
 
 // Jets:
 	int fTnjets;
