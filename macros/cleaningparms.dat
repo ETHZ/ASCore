@@ -31,7 +31,10 @@ ElecDeltaPhiOutEndmax 999.0
 dRSSelecmax           10.
 
 # -- Photons:
-PhotHoEmax            0.2
+PhotHoverEBarmax      0.2
+PhotHoverEEndmax      0.2
+PhotSigmaEtaEtaBarmax 0.011
+PhotSigmaEtaEtaEndmax 0.025
 
 # -- Jets:
 FracEmmaxJet          1.0
@@ -44,6 +47,7 @@ elecbyJetEratio       0.7
 # -- Isolation:
 MuonIsomax            1.
 ElecIsomax            1.
+PhotIsomax            1.
 
 # -- Event cleaning:
 FracChmin             0.1

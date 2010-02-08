@@ -88,9 +88,6 @@ private:
 	virtual void SubtrFromJet(int ipart, int ichk, int iJet);
 	virtual int CleanEvent(void);
 	virtual int CleanMET(double met, double metphi);
-	virtual int NextMuClean(void);
-	virtual int NextElClean(void);
-	virtual int NextJClean(void);
 
 	virtual void PutMuon(int, int);
 	virtual void PutElectron(int, int);
@@ -99,7 +96,7 @@ private:
 
 
 	// functions to make cleaning statistics
-	virtual void StatInit(void);
+	virtual void StatInit(const char *filename = "CleaningStats.root");
 	virtual void StatFill(void);
 	virtual void StatPrint(void);
 	virtual void StatHistos(void);
@@ -143,6 +140,16 @@ private:
 	int fNumTotElecBadShsh;
 	int fNumTotElecBadTmat;
 
+	int fNumTotPhotons;
+	int fNumTotPhotGoodIso;
+	int fNumTotPhotGoodNonIso;
+	int fNumTotPhotBadIso;
+	int fNumTotPhotBadNonIso;
+	int fNumTotPhotDupl;
+	int fNumTotPhotNotClean;
+	int fNumTotPhotBadHoE;
+	int fNumTotPhotBadShsh;
+
 	int fNumTotJets;  
 	int fNumTotJetGood;  
 	int fNumTotJetBad;  
@@ -170,70 +177,69 @@ private:
 	// Cleaning variables:
 	int fNMuClean;
 	int fNElClean;
+	int fNPhClean;
 	int fNJClean;
-	int fMuClean[20];
-	int fElClean[20];
-	int fJClean[50];
-	int iMuNext;
-	int iElNext;
-	int iJNext;
 
 	// Cleaning parameters:
 	// Number in comments are initial values
 	// -- Primary vertex:
-	double fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
-	double fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
-	double fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
-	double fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
+	float fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
+	float fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
+	float fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
+	float fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
 
 	// -- Vertex compatibility (of muons, electrons, photons and jets)
-	double fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
+	float fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
 	
 	// -- Muons:
-	double fClean_MuonDPbyPmax;          // = 0.5   // Max PtError/Pt
-	double fClean_MuonChi2max;           // = 10.0  // Max nchi2
-	double fClean_MuonNHitsmin;          // = 11.0  // Min number of tracker hits
-	double fClean_dRSSmuonmax;           // = 0.1   // Max delta R of same sign muon duplicate check
+	float fClean_MuonDPbyPmax;          // = 0.5   // Max PtError/Pt
+	float fClean_MuonChi2max;           // = 10.0  // Max nchi2
+	float fClean_MuonNHitsmin;          // = 11.0  // Min number of tracker hits
+	float fClean_dRSSmuonmax;           // = 0.1   // Max delta R of same sign muon duplicate check
 	
 	// -- Electrons:
-	double fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
-	double fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
-	double fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
-	double fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
-	double fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
-	double fClean_ElecEoverPInEndmin;    // = 0.4   // Min ElESuperClusterOverP (endcap)
-	double fClean_ElecDeltaEtaInBarmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (barrel)
-	double fClean_ElecDeltaEtaInEndmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (endcap)
-	double fClean_ElecDeltaPhiInBarmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (barrel)
-	double fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
-	double fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
-	double fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
-	double fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
+	float fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
+	float fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
+	float fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
+	float fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
+	float fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
+	float fClean_ElecEoverPInEndmin;    // = 0.4   // Min ElESuperClusterOverP (endcap)
+	float fClean_ElecDeltaEtaInBarmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (barrel)
+	float fClean_ElecDeltaEtaInEndmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (endcap)
+	float fClean_ElecDeltaPhiInBarmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (barrel)
+	float fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
+	float fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
+	float fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
+	float fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
 
 	// -- Photons:
-	double fClean_PhotHoEmax;            // = 0.2   // Max PhotonHoverE
+	float fClean_PhotHoverEBarmax;      // = 0.2   // Max PhotonHcalOverEcal (barrel)
+	float fClean_PhotHoverEEndmax;      // = 0.2   // Max PhotonHcalOverEcal (endcap)
+	float fClean_PhotSigmaEtaEtaBarmax; // = 0.011 // Max PhotonSigmaIetaIeta (barrel)
+	float fClean_PhotSigmaEtaEtaEndmax; // = 0.025 // Max PhotonSigmaIetaIeta (endcap)
 	
 	// -- Jets:
-	double fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
-	double fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
-	double fClean_FracChminJet;          // = 0.05  // Min JChfrac
+	float fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
+	float fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
+	float fClean_FracChminJet;          // = 0.05  // Min JChfrac
 
-	double fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
-	double fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
+	float fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
+	float fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
 	
 	// -- Isolation:
-	double fClean_MuonIsomax;            // = 1.    // Max relative iso cut (muons)
-	double fClean_ElecIsomax;            // = 1.    // Max relative iso cut (electrons)
+	float fClean_MuonIsomax;            // = 1.    // Max relative iso cut (muons)
+	float fClean_ElecIsomax;            // = 1.    // Max relative iso cut (electrons)
+	float fClean_PhotIsomax;            // = 1.    // Max relative iso cut (photons)
 	
 	// -- Event cleaning:
-	double fClean_FracChmin;             // = 0.1   // Min charge fraction in event
-	double fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
+	float fClean_FracChmin;             // = 0.1   // Min charge fraction in event
+	float fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
 	
 	// -- MET:
-	double fClean_METmin;                // = 50.0  // Min MET to be considered
-	double fClean_dPhiJetMETmin;         // = 0.0   // Min phi distance of MET to closest jet
-	double fClean_dR12min;               // = 0.5   // Min R12 = sqrt(dPhi1^2 + (PI-dPhi2)^2)
-	double fClean_dR21min;               // = 0.5   // Min R21 = sqrt(dPhi2^2 + (PI-dPhi1)^2)
+	float fClean_METmin;                // = 50.0  // Min MET to be considered
+	float fClean_dPhiJetMETmin;         // = 0.0   // Min phi distance of MET to closest jet
+	float fClean_dR12min;               // = 0.5   // Min R12 = sqrt(dPhi1^2 + (PI-dPhi2)^2)
+	float fClean_dR21min;               // = 0.5   // Min R21 = sqrt(dPhi2^2 + (PI-dPhi1)^2)
 	
 	TTree *fCleanTree;
 	TFile *fCleanTreeFile;
@@ -250,6 +256,10 @@ private:
 	TH1D *fH_ptsumeta[5];
 	TH1I *fH_ptevteta[5];
 
+	// cleaning statistica histogram
+	TFile *fHstatFile;
+	TH1D *fHstatHistos;
+	
 	// Multiplicity Plots Variables:
 	TFile *fMPHistFile;
 	LeptJetStat *fMyLeptJetStat;

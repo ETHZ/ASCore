@@ -69,17 +69,25 @@ void TreeReader::EndJob(){
 	if(fDiLep)    WriteDiLepTree();
 	if(fMPHist)   PrintMPOutput();
 	if(fSignHist) WriteSignHists();
-	if(fClean)    StatPrint();
-
+	if(fClean){
+		StatPrint();
+		StatHistos();
+	}
+	
 	fCleanTreeFile->cd("analyze");
 	fCleanTree->Write();
 	fCleanTreeFile->Close();
+	fHstatFile->cd();
+	fHstatHistos->Write();
+	fHstatFile->Close();
 }
 
 // Method for looping over the tree
 void TreeReader::Loop(){
 	Long64_t nbytes = 0, nb = 0;
 	Long64_t nentries = fChain->GetEntries();
+	cout << " total events in ntuples = " << fChain->GetEntries() << endl;
+	// nentries = 10;
 
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		Long64_t ientry = LoadTree(jentry);
@@ -122,7 +130,7 @@ void TreeReader::Loop(){
 			
 			iclean = 0;
 			for( int i = 0; i < NPhotons; i++ ){
-				if( PhotonGood[i] != 0 ) continue;
+				if( PhoGood[i] != 0 ) continue;
 				PutPhoton(iclean, i);
 				iclean++;
 			}
@@ -140,7 +148,6 @@ void TreeReader::Loop(){
 			// The non-clean object are overwritten
 			fCleanTree->Fill();
 		}
-
 
 		if( fDiLep )    FillDiLepTree();
 		if( fMPHist )   FillMPHistos();
@@ -405,8 +412,8 @@ void TreeReader::BookMPHistos(const char* filename){
 	fHemuEff  = new TH1F("emuEffic", "e/mu Efficiency", 13, 0, 13);
 
 	fHljMult->SetStats(false);
-   fHemuMult->SetStats(false);
-   fHemuEff->SetStats(false);
+	fHemuMult->SetStats(false);
+	fHemuEff->SetStats(false);
 }
 
 void TreeReader::FillMPHistos(){
@@ -507,9 +514,9 @@ void TreeReader::PrintMPOutput(){
 	TString canvtitle = "Lepton / Jets multiplicity";
 	canv = new TCanvas("ljMult", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
-   // gStyle->SetPalette(ncol, colors);
-   gPad->SetTheta(50);
-   gPad->SetPhi(240);
+	// gStyle->SetPalette(ncol, colors);
+	gPad->SetTheta(50);
+	gPad->SetPhi(240);
 	fHljMult->SetMinimum(0);
 	fHljMult->DrawCopy("colz");
 	// fHljMult->DrawCopy("lego2 Z");
@@ -520,8 +527,8 @@ void TreeReader::PrintMPOutput(){
 	canvtitle = "e/mu multiplicity";
 	canv = new TCanvas("emuMult", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
-   gPad->SetTheta(50);
-   gPad->SetPhi(240);
+	gPad->SetTheta(50);
+	gPad->SetPhi(240);
 	fHemuMult->SetMinimum(0);
 	fHemuMult->DrawCopy("colz");
 	// fHemuMult->DrawCopy("lego2 Z");
@@ -532,8 +539,8 @@ void TreeReader::PrintMPOutput(){
 	canvtitle = "e/mu Efficiency";
 	canv = new TCanvas("emuEffic", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
-   gPad->SetTheta(50);
-   gPad->SetPhi(240);
+	gPad->SetTheta(50);
+	gPad->SetPhi(240);
 	fHemuEff->DrawCopy();
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	printPNG(canv, fTag + "_emuEffic", fOutputDir+subdir);
@@ -1311,6 +1318,7 @@ void TreeReader::ReadCleaningParameters(const char* filename){
 	char ParName[100];
 	float ParValue;
 
+	bool verbose(true);
 	bool ok(false);
 
 	while( IN.getline(buffer, 200, '\n') ){
@@ -1320,126 +1328,138 @@ void TreeReader::ReadCleaningParameters(const char* filename){
 
 		// -- Primary vertex:
 		if( !strcmp(ParName, "chisqVxmax") ){
-			fClean_chisqVxmax = double(ParValue); ok = true;
+			fClean_chisqVxmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dRVxmax") ){
-			fClean_dRVxmax = double(ParValue); ok = true;
+			fClean_dRVxmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dzVxmax") ){
-			fClean_dzVxmax = double(ParValue); ok = true;
+			fClean_dzVxmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "sumPtTkfromVxmin") ){
-			fClean_sumPtTkfromVxmin = double(ParValue); ok = true;
+			fClean_sumPtTkfromVxmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "distVxmax") ){
-			fClean_distVxmax = double(ParValue); ok = true;
+			fClean_distVxmax = float(ParValue); ok = true;
 		}
 
 		// -- Muons:
 		if( !strcmp(ParName, "MuonDPbyPmax") ){
-			fClean_MuonDPbyPmax = double(ParValue); ok = true;
+			fClean_MuonDPbyPmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "MuonChi2max") ){
-			fClean_MuonChi2max = double(ParValue); ok = true;
+			fClean_MuonChi2max = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "MuonNHitsmin") ){
-			fClean_MuonNHitsmin = double(ParValue); ok = true;
+			fClean_MuonNHitsmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dRSSmuonmax") ){
-			fClean_dRSSmuonmax = double(ParValue); ok = true;
+			fClean_dRSSmuonmax = float(ParValue); ok = true;
 		}
 
 		// -- Electrons:
 		if( !strcmp(ParName, "ElecHoverEBarmax") ){
-			fClean_ElecHoverEBarmax = double(ParValue); ok = true;
+			fClean_ElecHoverEBarmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecHoverEEndmax") ){
-			fClean_ElecHoverEEndmax = double(ParValue); ok = true;
+			fClean_ElecHoverEEndmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecSigmaEtaEtaBarmax") ){
-			fClean_ElecSigmaEtaEtaBarmax = double(ParValue); ok = true;
+			fClean_ElecSigmaEtaEtaBarmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecSigmaEtaEtaEndmax") ){
-			fClean_ElecSigmaEtaEtaEndmax = double(ParValue); ok = true;
+			fClean_ElecSigmaEtaEtaEndmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecEoverPInBarmin") ){
-			fClean_ElecEoverPInBarmin = double(ParValue); ok = true;
+			fClean_ElecEoverPInBarmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecEoverPInEndmin") ){
-			fClean_ElecEoverPInEndmin = double(ParValue); ok = true;
+			fClean_ElecEoverPInEndmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaEtaInBarmax") ){
-			fClean_ElecDeltaEtaInBarmax = double(ParValue); ok = true;
+			fClean_ElecDeltaEtaInBarmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaEtaInEndmax") ){
-			fClean_ElecDeltaEtaInEndmax = double(ParValue); ok = true;
+			fClean_ElecDeltaEtaInEndmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaPhiInBarmax") ){
-			fClean_ElecDeltaPhiInBarmax = double(ParValue); ok = true;
+			fClean_ElecDeltaPhiInBarmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaPhiInEndmax") ){
-			fClean_ElecDeltaPhiInEndmax = double(ParValue); ok = true;
+			fClean_ElecDeltaPhiInEndmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaPhiOutBarmax") ){
-			fClean_ElecDeltaPhiOutBarmax = double(ParValue); ok = true;
+			fClean_ElecDeltaPhiOutBarmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecDeltaPhiOutEndmax") ){
-			fClean_ElecDeltaPhiOutEndmax = double(ParValue); ok = true;
+			fClean_ElecDeltaPhiOutEndmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dRSSelecmax") ){
-			fClean_dRSSelecmax = double(ParValue); ok = true;
+			fClean_dRSSelecmax = float(ParValue); ok = true;
 		}
 
 		// -- Photons:
-		if( !strcmp(ParName, "PhotHoEmax") ){
-			fClean_PhotHoEmax = double(ParValue); ok = true;
+		if( !strcmp(ParName, "PhotHoverEBarmax") ){
+			fClean_PhotHoverEBarmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "PhotHoverEEndmax") ){
+			fClean_PhotHoverEEndmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "PhotSigmaEtaEtaBarmax") ){
+			fClean_PhotSigmaEtaEtaBarmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "PhotSigmaEtaEtaEndmax") ){
+			fClean_PhotSigmaEtaEtaEndmax = float(ParValue); ok = true;
 		}
 
 		// -- Jets:
 		if( !strcmp(ParName, "FracEmmaxJet") ){
-			fClean_FracEmmaxJet = double(ParValue); ok = true;
+			fClean_FracEmmaxJet = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "FracEmminJet") ){
-			fClean_FracEmminJet = double(ParValue); ok = true;
+			fClean_FracEmminJet = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "FracChminJet") ){
-			fClean_FracChminJet = double(ParValue); ok = true;
+			fClean_FracChminJet = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "deltaRElecJetmax") ){
-			fClean_deltaRElecJetmax = double(ParValue); ok = true;
+			fClean_deltaRElecJetmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "elecbyJetEratio") ){
-			fClean_elecbyJetEratio = double(ParValue); ok = true;
+			fClean_elecbyJetEratio = float(ParValue); ok = true;
 		}
 
 		// -- Isolation:
 		if( !strcmp(ParName, "MuonIsomax") ){
-			fClean_MuonIsomax = double(ParValue); ok = true;
+			fClean_MuonIsomax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecIsomax") ){
-			fClean_ElecIsomax = double(ParValue); ok = true;
+			fClean_ElecIsomax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "PhotIsomax") ){
+			fClean_PhotIsomax = float(ParValue); ok = true;
 		}
 
 		// -- Event Cleaning:
 		if( !strcmp(ParName, "FracChmin") ){
-			fClean_FracChmin = double(ParValue); ok = true;
+			fClean_FracChmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "FracEmmin") ){
-			fClean_FracEmmin = double(ParValue); ok = true;
+			fClean_FracEmmin = float(ParValue); ok = true;
 		}
 
 		// -- MET:
 		if( !strcmp(ParName, "METmin") ){
-			fClean_METmin = double(ParValue); ok = true;
+			fClean_METmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dPhiJetMETmin") ){
-			fClean_dPhiJetMETmin = double(ParValue); ok = true;
+			fClean_dPhiJetMETmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dR12min") ){
-			fClean_dR12min = double(ParValue); ok = true;
+			fClean_dR12min = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dR21min") ){
-			fClean_dR21min = double(ParValue); ok = true;
+			fClean_dR21min = float(ParValue); ok = true;
 		}
 
 		if(!ok) cout << "%% TreeReader::ReadCleaningParameters ==> ERROR: Unknown variable " << ParName << endl;
@@ -1464,6 +1484,11 @@ void TreeReader::TagCleanObjects(void){
 		ElGood[ichk] += CleanElectron(ichk);
 	}
 
+	// Photons
+	for( int ichk = 0; ichk < NPhotons; ++ichk ){
+		PhoGood[ichk] = CleanPhoton(ichk);
+	}
+
 	// Jets
 	for( int ichk = 0; ichk < NJets; ++ichk ){
 		JGood[ichk] = 10*IsFromPrimaryVx(4, ichk);
@@ -1473,7 +1498,7 @@ void TreeReader::TagCleanObjects(void){
 	// Duplication (only after cleanness has been checked)
 	for( int ichk = 0; ichk < NMus; ++ichk )  if( DuplicateMuon(ichk)     ) MuGood[ichk] += 100;
 	for( int ichk = 0; ichk < NEles; ++ichk ) if( DuplicateElectron(ichk) ) ElGood[ichk] += 100;
-	for( int ichk = 0; ichk < NJets; ++ichk )	if( ElectronJet(ichk)       ) JGood[ichk]  += 100;
+	for( int ichk = 0; ichk < NJets; ++ichk ) if( ElectronJet(ichk)       ) JGood[ichk]  += 100;
 
 	// Event and MET can only be done later (after bad objects are removed)
 	GoodEvent = 0;
@@ -1661,7 +1686,19 @@ int TreeReader::CleanPhoton(int ichk){
 // returns iBad = 1 for bad H/E
 // Still to be completed ****
 	if( ichk < 0 ) return 0;
-	if( PhotonHoverE[ichk] >= fClean_PhotHoEmax ) return 1;
+	bool useHoverE      = true;
+	bool useSigmaEtaEta = true;
+
+	// Distinguish between barrel and endcap photons
+	if( fabs(PhoEta[ichk]) < 1.479 ){ // Barrel
+		if(useHoverE)      if( PhoHoverE[ichk]        > fClean_PhotHoverEBarmax      ) return 1;
+		if(useSigmaEtaEta) if( PhoSigmaIetaIeta[ichk] > fClean_PhotSigmaEtaEtaBarmax ) return 2;
+	}
+	else{ // EndCap
+		if(useHoverE)      if( PhoHoverE[ichk]        > fClean_PhotHoverEEndmax      ) return 1;
+		if(useSigmaEtaEta) if( PhoSigmaIetaIeta[ichk] > fClean_PhotSigmaEtaEtaEndmax ) return 2;
+	}
+
 	return 0;
 }
 
@@ -1720,29 +1757,27 @@ void TreeReader::DecideIso(void){
 		if( ElIso[ichk] < fClean_ElecIsomax ) ElIsIso[ichk] = 1;
 		else ElIsIso[ichk] = 0;
 	}
+
+	// Photons
+	for ( int ichk = 0; ichk < NPhotons; ++ichk){
+		if ( PhoIso03[ichk] < fClean_PhotIsomax ) PhoIsIso[ichk] = 1;
+		else PhoIsIso[ichk] = 0;
+	}
+
 	return;
 }
 
 void TreeReader::InitCleaning(){
 // Initializes the object cleaning
 // Has to be called once each event!
-	iMuNext = -1;
-	iElNext = -1;
-	iJNext = -1;
 	if(fClean){
 		fNMuClean = 0;
 		fNElClean = 0;
 		fNJClean  = 0;
-		for( int i=0; i < 20; ++i ) fMuClean[i] = -1;
-		for( int i=0; i < 20; ++i ) fElClean[i] = -1;
-		for( int i=0; i < 100; ++i ) fJClean[i] = -1;
 	} else {
 		fNMuClean = NMus;
 		fNElClean = NEles;
 		fNJClean  = NJets;
-		for( int i=0; i < 20; ++i ) fMuClean[i] = i;
-		for( int i=0; i < 20; ++i ) fElClean[i] = i;
-		for( int i=0; i < 100; ++i ) fJClean[i] = i;
 	}
 	return;
 }
@@ -1763,7 +1798,6 @@ void TreeReader::DoCleanObjects(void){
 	fNMuClean = 0;
 	for( int ichk = 0; ichk < NMus; ++ichk ){
 		if( MuGood[ichk] != 0 || MuIsIso[ichk] != 1 ) continue;
-		fMuClean[fNMuClean] = ichk;
 		fNMuClean++;
 	}
 
@@ -1771,15 +1805,20 @@ void TreeReader::DoCleanObjects(void){
 	fNElClean = 0;
 	for( int ichk = 0; ichk < NEles; ++ichk ){
 		if( ElGood[ichk] != 0 || ElIsIso[ichk] != 1 ) continue;
-		fElClean[fNElClean] = ichk;
 		fNElClean++;
+	}
+
+	// Photons
+	fNPhClean = 0;
+	for( int ichk = 0; ichk < NPhotons; ++ichk ){
+		if( PhoGood[ichk] != 0 || PhoIsIso[ichk] != 1 ) continue;
+		fNPhClean++;
 	}
 
 	// Clean the jets
 	fNJClean = 0;
 	for( int ichk = 0; ichk < NJets; ++ichk ){
 		if( JGood[ichk] != 0 ) continue;
-		fJClean[fNJClean] = ichk;
 		fNJClean++;
 		for( int iel = 0; iel < NEles; ++iel ){
 			if( ElIsInJet[iel] != ichk ) continue;
@@ -1958,20 +1997,23 @@ int TreeReader::CleanEvent(void){
 	double pt_track = 0.;
 	double et_em = 0.;
 	double et_had = 0.;
-	for( int i = 0; i < fNMuClean; ++i ){
-		pt_track += MuPt[fMuClean[i]];
+	for( int i = 0; i < NMus; ++i ){
+		if(MuGood[i] != 0) continue;
+		pt_track += MuPt[i];
 		nChObj++;
 	}
-	for( int i = 0; i < fNElClean; ++i ){
-		pt_track += ElPt[fElClean[i]];
-		et_em += ElEt[fElClean[i]];
+	for( int i = 0; i < NEles; ++i ){
+		if(ElGood[i] != 0) continue;
+		pt_track += ElPt[i];
+		et_em += ElEt[i];
 		nChObj++;
 	}
-	for( int i = 0; i < fNJClean; ++i ){
-		pt_track += JChfrac[fJClean[i]] * JPt[fJClean[i]];
-		et_em    += JEMfrac[fJClean[i]] * JEt[fJClean[i]];
-		et_had   += (1.-JEMfrac[fJClean[i]]) * JEt[fJClean[i]];
-		if( JChfrac[fJClean[i]] > 0. ) nChObj++;
+	for( int i = 0; i < NJets; ++i ){
+		if(JGood[i] != 0) continue;
+		pt_track += JChfrac[i] * JPt[i];
+		et_em    += JEMfrac[i] * JEt[i];
+		et_had   += (1.-JEMfrac[i]) * JEt[i];
+		if( JChfrac[i] > 0. ) nChObj++;
 	}
 
 	double fracCh = 0.;
@@ -2008,9 +2050,9 @@ int TreeReader::CleanMET(double met, double metphi){
 	int imax2 = -1;
 
 	// Loop over all jets
-	for( int ij = 0; ij < fNJClean; ++ij ){
+	for( int i = 0; i < NJets; ++i ){
 		// Reject if the MET is along the jet
-		int i = fJClean[ij];
+		if(JGood[i] != 0) continue;
 		double dPhi =  DeltaPhi(JPhi[i], metphi);
 		if( dPhi < fClean_dPhiJetMETmin ) return 1;
 		// Else, pick up the 2 leading jets
@@ -2035,51 +2077,6 @@ int TreeReader::CleanMET(double met, double metphi){
 		if( r12 < fClean_dR12min || r21 < fClean_dR21min ) return 2;
 	}
 	return 0;
-}
-
-int TreeReader::NextMuClean(void){
-// returns the index to the next clean muon in the ntuple
-//    or -1 if no muon left
-	iMuNext++;
-	int iMu;
-	if (iMuNext < fNMuClean) {
-		iMu = fMuClean[iMuNext];
-	} else {
-		iMuNext = -1;
-		iMu     = -1;
-	}
-	// cout << " iMuNext " << iMuNext << ", iMu " << iMu << endl;
-	return iMu;
-}
-
-int TreeReader::NextElClean(void){
-// returns the index to the next clean electron in the ntuple
-//    or -1 if no electron left
-	iElNext++;
-	int iEl;
-	if (iElNext < fNElClean) {
-		iEl = fElClean[iElNext];
-	} else {
-		iElNext = -1;
-		iEl     =  -1;
-	}
-// cout << " iElNext " << iElNext << ", iEl " << iEl << endl;
-	return iElNext;
-}
-
-int TreeReader::NextJClean(void){
-// returns the index to the next clean jet in the ntuple
-//    or -1 if no jet left
-	iJNext++;
-	int iJ;
-	if (iJNext < fNJClean) {
-		iJ = fJClean[iJNext];
-	} else {
-		iJNext = -1;
-		iJ     = -1;
-	}
-	// cout << " iJNext " << iJNext << ", iJ " << iJ << endl;
-	return iJ;
 }
 
 int TreeReader::FindNearestJet(double eta, double phi){
@@ -2117,7 +2114,7 @@ double TreeReader::GetDeltaR(double eta1, double eta2, double phi1, double phi2)
 		+ DeltaPhi(phi1, phi2)*DeltaPhi(phi1, phi2) );
 }
 
-void TreeReader::StatInit(void){
+void TreeReader::StatInit(const char* filename){
 // initializes the cleaning statistics
 // to be called once at the beginning of the job
 	fNumTotEvt               = 0;
@@ -2158,6 +2155,16 @@ void TreeReader::StatInit(void){
 	fNumTotElecBadShsh       = 0;
 	fNumTotElecBadTmat       = 0;
 
+	fNumTotPhotons           = 0;
+	fNumTotPhotGoodIso       = 0;
+	fNumTotPhotGoodNonIso    = 0;
+	fNumTotPhotBadIso        = 0;
+	fNumTotPhotBadNonIso     = 0;
+	fNumTotPhotDupl          = 0;
+	fNumTotPhotNotClean      = 0;
+	fNumTotPhotBadHoE        = 0;
+	fNumTotPhotBadShsh       = 0;
+
 	fNumTotJets              = 0;  
 	fNumTotJetGood           = 0;  
 	fNumTotJetBad            = 0;  
@@ -2169,6 +2176,10 @@ void TreeReader::StatInit(void){
 	fNumTotJetLtFem          = 0;
 	fNumTotJetLtFch          = 0;
 	fNumTotBJets             = 0;  
+
+	// initialize cleaning statistics histogram
+	fHstatFile = new TFile(fOutputDir + TString(filename), "RECREATE");
+	fHstatHistos  = new TH1D("CleanStats", "cleaning statistics", 100, 0, 100);
 
 	return;
 }
@@ -2214,6 +2225,22 @@ void TreeReader::StatFill(void){
 				if( elClean == 1 ) fNumTotElecBadHoE++;
 				if( elClean == 2 ) fNumTotElecBadShsh++;
 				if( elClean == 3 ) fNumTotElecBadTmat++;
+			}
+		}
+	}
+
+	fNumTotPhotons += NPhotons;
+	for( int i=0; i < NPhotons; ++i ){
+		if(      PhoGood[i] == 0 && PhoIsIso[i] == 1 ){ fNumTotPhotGoodIso++; nObjects++; }
+		else if( PhoGood[i] == 0 && PhoIsIso[i] == 0 ) fNumTotPhotGoodNonIso++;
+		else if( PhoGood[i] != 0 && PhoIsIso[i] == 1 ) fNumTotPhotBadIso++;
+		else if( PhoGood[i] != 0 && PhoIsIso[i] == 0 ) fNumTotPhotBadNonIso++;
+		if( PhoGood[i] != 0 ){
+			int phClean = PhoGood[i] % 10;
+			if( phClean != 0 ){
+				fNumTotPhotNotClean++;
+				if( phClean == 1 ) fNumTotPhotBadHoE++;
+				if( phClean == 2 ) fNumTotPhotBadShsh++;
 			}
 		}
 	}
@@ -2361,6 +2388,32 @@ void TreeReader::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotElecBadTmat / (float)fNumTotElectrons << " %" << endl;
 	}
 
+// Statistics for photons
+	cout << endl;
+	cout << " Total number of photons            = " << fNumTotPhotons << endl;
+	if (fNumTotPhotons > 0) {
+		cout << "  photons good+Iso                  = " << fNumTotPhotGoodIso
+			<< "  = " << 100.*(float)fNumTotPhotGoodIso / (float)fNumTotPhotons << " %" << endl;
+		cout << "  photons good+non-Iso              = " << fNumTotPhotGoodNonIso
+			<< "  = " << 100.*(float)fNumTotPhotGoodNonIso / (float)fNumTotPhotons << " %" << endl;
+		cout << "  photons bad+Iso                   = " << fNumTotPhotBadIso
+			<< "  = " << 100.*(float)fNumTotPhotBadIso / (float)fNumTotPhotons << " %" << endl;
+		cout << "  photons bad+non-Iso               = " << fNumTotPhotBadNonIso
+			<< "  = " << 100.*(float)fNumTotPhotBadNonIso / (float)fNumTotPhotons << " %" << endl;
+		cout << endl;
+		int photbad = fNumTotPhotBadIso + fNumTotPhotBadNonIso;
+		cout << "  photons bad total                 = " << photbad
+			<< "  = " << 100.*(float)photbad / (float)fNumTotPhotons << " %" << endl;
+		cout << "   photons duplicated               = " << fNumTotPhotDupl
+			<< "  = " << 100.*(float)fNumTotPhotDupl / (float)fNumTotPhotons << " %" << endl;
+		cout << "   photons not clean                = " << fNumTotPhotNotClean
+			<< "  = " << 100.*(float)fNumTotPhotNotClean / (float)fNumTotPhotons << " %" << endl;
+		cout << "    photons with bad H/E            = " << fNumTotPhotBadHoE
+			<< "  = " << 100.*(float)fNumTotPhotBadHoE / (float)fNumTotPhotons << " %" << endl;
+		cout << "    photons with bad shower shape   = " << fNumTotPhotBadShsh
+			<< "  = " << 100.*(float)fNumTotPhotBadShsh / (float)fNumTotPhotons << " %" << endl;
+	}
+
 // Statistics for jets
 	cout << endl;
 	cout << " Total number of jets               = " << fNumTotJets << endl;
@@ -2394,196 +2447,268 @@ void TreeReader::StatHistos(void){
 // saves the cleaning statistics into histograms (from Kostas)
 // to be called once at the end of the job
 
+	fHstatHistos->SetFillColor(kRed);
+	fHstatHistos->SetDrawOption("hbar");
+	fHstatHistos->GetXaxis()->SetBinLabel(1,  "TotEvts");           fHstatHistos->SetBinContent(1,  fNumTotEvt);
+	fHstatHistos->GetXaxis()->SetBinLabel(2,  "EvtReject");         fHstatHistos->SetBinContent(2,  fNumTotEvtReject);
+	fHstatHistos->GetXaxis()->SetBinLabel(3,  "EvtEmpty");          fHstatHistos->SetBinContent(3,  fNumTotEvtEmpty);
+	fHstatHistos->GetXaxis()->SetBinLabel(4,  "EvtCleanEmpty");     fHstatHistos->SetBinContent(4,  fNumTotEvtCleanEmpty);
+	fHstatHistos->GetXaxis()->SetBinLabel(5,  "EvtLtFem");          fHstatHistos->SetBinContent(5,  fNumTotEvtLtFem);
+	fHstatHistos->GetXaxis()->SetBinLabel(6,  "EvtLtFch");          fHstatHistos->SetBinContent(6,  fNumTotEvtLtFch);
+	fHstatHistos->GetXaxis()->SetBinLabel(7,  "EvtPfMETJet");       fHstatHistos->SetBinContent(7,  fNumTotEvtPfMETJet);
+	fHstatHistos->GetXaxis()->SetBinLabel(8,  "EvtPfMETRij");       fHstatHistos->SetBinContent(8,  fNumTotEvtPfMETRij);
+	fHstatHistos->GetXaxis()->SetBinLabel(9,  "EvtCaMETJet");       fHstatHistos->SetBinContent(9,  fNumTotEvtCaMETJet);
+	fHstatHistos->GetXaxis()->SetBinLabel(10, "EvtCaMETRij");       fHstatHistos->SetBinContent(10, fNumTotEvtCaMETRij);
+	fHstatHistos->GetXaxis()->SetBinLabel(11, "EvtTcMETJet");       fHstatHistos->SetBinContent(11, fNumTotEvtTcMETJet);
+	fHstatHistos->GetXaxis()->SetBinLabel(12, "EvtTcMETRij");       fHstatHistos->SetBinContent(12, fNumTotEvtTcMETRij);
+	fHstatHistos->GetXaxis()->SetBinLabel(13, "EvtBadHardJet");     fHstatHistos->SetBinContent(13, fNumTotEvtBadHardJet);
+
+	fHstatHistos->GetXaxis()->SetBinLabel(21, "TotMuons");          fHstatHistos->SetBinContent(21, fNumTotMuons);
+	fHstatHistos->GetXaxis()->SetBinLabel(22, "MuonGoodIso");       fHstatHistos->SetBinContent(22, fNumTotMuonGoodIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(23, "MuonGoodNonIso");    fHstatHistos->SetBinContent(23, fNumTotMuonGoodNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(24, "MuonBadIso");        fHstatHistos->SetBinContent(24, fNumTotMuonBadIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(25, "MuonBadNonIso");     fHstatHistos->SetBinContent(25, fNumTotMuonBadNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(26, "MuonDupl");          fHstatHistos->SetBinContent(26, fNumTotMuonDupl);
+	fHstatHistos->GetXaxis()->SetBinLabel(27, "MuonNotPrimaryTrk"); fHstatHistos->SetBinContent(27, fNumTotMuonNotPrimaryTrk);
+	fHstatHistos->GetXaxis()->SetBinLabel(28, "MuonNotClean");      fHstatHistos->SetBinContent(28, fNumTotMuonNotClean);
+	fHstatHistos->GetXaxis()->SetBinLabel(29, "MuonBadDpop");       fHstatHistos->SetBinContent(29, fNumTotMuonBadDpop);
+	fHstatHistos->GetXaxis()->SetBinLabel(30, "MuonBadChi2");       fHstatHistos->SetBinContent(30, fNumTotMuonBadChi2);
+	fHstatHistos->GetXaxis()->SetBinLabel(31, "MuonBadNhit");       fHstatHistos->SetBinContent(31, fNumTotMuonBadNhit);
+
+	fHstatHistos->GetXaxis()->SetBinLabel(41, "TotElectrons");      fHstatHistos->SetBinContent(41, fNumTotElectrons);
+	fHstatHistos->GetXaxis()->SetBinLabel(42, "ElecGoodIso");       fHstatHistos->SetBinContent(42, fNumTotElecGoodIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(43, "ElecGoodNonIso");    fHstatHistos->SetBinContent(43, fNumTotElecGoodNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(44, "ElecBadIso");        fHstatHistos->SetBinContent(44, fNumTotElecBadIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(45, "ElecBadNonIso");     fHstatHistos->SetBinContent(45, fNumTotElecBadNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(46, "ElecDupl");          fHstatHistos->SetBinContent(46, fNumTotElecDupl);
+	fHstatHistos->GetXaxis()->SetBinLabel(47, "ElecNotPrimaryTrk"); fHstatHistos->SetBinContent(47, fNumTotElecNotPrimaryTrk);
+	fHstatHistos->GetXaxis()->SetBinLabel(48, "ElecNotClean");      fHstatHistos->SetBinContent(48, fNumTotElecNotClean);
+	fHstatHistos->GetXaxis()->SetBinLabel(49, "ElecBadHoE");        fHstatHistos->SetBinContent(49, fNumTotElecBadHoE);
+	fHstatHistos->GetXaxis()->SetBinLabel(50, "ElecBadShsh");       fHstatHistos->SetBinContent(50, fNumTotElecBadShsh);
+	fHstatHistos->GetXaxis()->SetBinLabel(51, "ElecBadTmat");       fHstatHistos->SetBinContent(51, fNumTotElecBadTmat);
+
+	fHstatHistos->GetXaxis()->SetBinLabel(61, "TotPhotons");        fHstatHistos->SetBinContent(61, fNumTotPhotons);
+	fHstatHistos->GetXaxis()->SetBinLabel(62, "PhotGoodIso");       fHstatHistos->SetBinContent(62, fNumTotPhotGoodIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(63, "PhotGoodNonIso");    fHstatHistos->SetBinContent(63, fNumTotPhotGoodNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(64, "PhotBadIso");        fHstatHistos->SetBinContent(64, fNumTotPhotBadIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(65, "PhotBadNonIso");     fHstatHistos->SetBinContent(65, fNumTotPhotBadNonIso);
+	fHstatHistos->GetXaxis()->SetBinLabel(66, "PhotDupl");          fHstatHistos->SetBinContent(66, fNumTotPhotDupl);
+	fHstatHistos->GetXaxis()->SetBinLabel(67, "PhotNotClean");      fHstatHistos->SetBinContent(67, fNumTotPhotNotClean);
+	fHstatHistos->GetXaxis()->SetBinLabel(68, "PhotBadHoE");        fHstatHistos->SetBinContent(68, fNumTotPhotBadHoE);
+	fHstatHistos->GetXaxis()->SetBinLabel(69, "PhotBadShsh");       fHstatHistos->SetBinContent(69, fNumTotPhotBadShsh);
+
+	fHstatHistos->GetXaxis()->SetBinLabel(81, "TotJets");           fHstatHistos->SetBinContent(81, fNumTotJets);
+	fHstatHistos->GetXaxis()->SetBinLabel(82, "JetGood");           fHstatHistos->SetBinContent(82, fNumTotJetGood);
+	fHstatHistos->GetXaxis()->SetBinLabel(83, "JetBad");            fHstatHistos->SetBinContent(83, fNumTotJetBad);
+	fHstatHistos->GetXaxis()->SetBinLabel(84, "JetDuplElJet");      fHstatHistos->SetBinContent(84, fNumTotJetDuplElJet);
+	fHstatHistos->GetXaxis()->SetBinLabel(85, "JetNotPrimaryTrk");  fHstatHistos->SetBinContent(85, fNumTotJetNotPrimaryTrk);
+	fHstatHistos->GetXaxis()->SetBinLabel(86, "JetNotClean");       fHstatHistos->SetBinContent(86, fNumTotJetNotClean);
+	fHstatHistos->GetXaxis()->SetBinLabel(87, "JetPgtE");           fHstatHistos->SetBinContent(87, fNumTotJetPgtE);
+	fHstatHistos->GetXaxis()->SetBinLabel(88, "JetGtFem");          fHstatHistos->SetBinContent(88, fNumTotJetGtFem);
+	fHstatHistos->GetXaxis()->SetBinLabel(89, "JetLtFem");          fHstatHistos->SetBinContent(89, fNumTotJetLtFem);
+	fHstatHistos->GetXaxis()->SetBinLabel(90, "JetLtFch");          fHstatHistos->SetBinContent(90, fNumTotJetLtFch);
+	fHstatHistos->GetXaxis()->SetBinLabel(91, "TotBJets");          fHstatHistos->SetBinContent(91, fNumTotBJets);
+
 	return;
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Utilities //////////////////////////////////////////////////////////////////////////////////
 void TreeReader::PutMuon(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	MuGood[inew]       = MuGood[iold];
-	MuIsIso[inew]      = MuIsIso[iold];
-	MuPx[inew]         = MuPx[iold];
-	MuPy[inew]         = MuPy[iold];
-	MuPz[inew]         = MuPz[iold];
-	MuPt[inew]         = MuPt[iold];
-	MuPtE[inew]        = MuPtE[iold];
-	MuE[inew]          = MuE[iold];
-	MuEt[inew]         = MuEt[iold];
-	MuEta[inew]        = MuEta[iold];
-	MuPhi[inew]        = MuPhi[iold];
-	MuCharge[inew]     = MuCharge[iold];
-	MuRelIso03[inew]   = MuRelIso03[iold];
-	MuIso03SumPt[inew] = MuIso03SumPt[iold];
-	MuIso03EmEt[inew]  = MuIso03EmEt[iold];
-	MuIso03HadEt[inew] = MuIso03HadEt[iold];
-	MuIso05SumPt[inew] = MuIso05SumPt[iold];
-	MuIso05EmEt[inew]  = MuIso05EmEt[iold];
-	MuIso05HadEt[inew] = MuIso05HadEt[iold];
-	MuEem[inew]        = MuEem[iold];
-	MuEhad[inew]       = MuEhad[iold];
-	MuD0BS[inew]       = MuD0BS[iold];
-	MuD0PV[inew]       = MuD0PV[iold];
-	MuD0E[inew]        = MuD0E[iold];
-	MuDzBS[inew]       = MuDzBS[iold];
-	MuDzPV[inew]       = MuDzPV[iold];
-	MuDzE[inew]        = MuDzE[iold];
-	MuNChi2[inew]      = MuNChi2[iold];
-	MuNGlHits[inew]    = MuNGlHits[iold];
-	MuNMuHits[inew]    = MuNMuHits[iold];
-	MuNTkHits[inew]    = MuNTkHits[iold];
-	MuNMatches[inew]   = MuNMatches[iold];
-	MuNChambers[inew]  = MuNChambers[iold];
-	MuCaloComp[inew]   = MuCaloComp[iold];
-	MuSegmComp[inew]   = MuSegmComp[iold];
-	MuTrackerMu[inew]  = MuTrackerMu[iold];
-	MuGMPT[inew]       = MuGMPT[iold];
-	MuID[inew]         = MuID[iold];
-	MuMID[inew]        = MuMID[iold];
+	MuGood        [inew] = MuGood        [iold];
+	MuIsIso       [inew] = MuIsIso       [iold];
+	MuPx          [inew] = MuPx          [iold];
+	MuPy          [inew] = MuPy          [iold];
+	MuPz          [inew] = MuPz          [iold];
+	MuPt          [inew] = MuPt          [iold];
+	MuPtE         [inew] = MuPtE         [iold];
+	MuE           [inew] = MuE           [iold];
+	MuEt          [inew] = MuEt          [iold];
+	MuEta         [inew] = MuEta         [iold];
+	MuPhi         [inew] = MuPhi         [iold];
+	MuCharge      [inew] = MuCharge      [iold];
+	MuRelIso03    [inew] = MuRelIso03    [iold];
+	MuIso03SumPt  [inew] = MuIso03SumPt  [iold];
+	MuIso03EmEt   [inew] = MuIso03EmEt   [iold];
+	MuIso03HadEt  [inew] = MuIso03HadEt  [iold];
+	MuIso05SumPt  [inew] = MuIso05SumPt  [iold];
+	MuIso05EmEt   [inew] = MuIso05EmEt   [iold];
+	MuIso05HadEt  [inew] = MuIso05HadEt  [iold];
+	MuEem         [inew] = MuEem         [iold];
+	MuEhad        [inew] = MuEhad        [iold];
+	MuD0BS        [inew] = MuD0BS        [iold];
+	MuD0PV        [inew] = MuD0PV        [iold];
+	MuD0E         [inew] = MuD0E         [iold];
+	MuDzBS        [inew] = MuDzBS        [iold];
+	MuDzPV        [inew] = MuDzPV        [iold];
+	MuDzE         [inew] = MuDzE         [iold];
+	MuNChi2       [inew] = MuNChi2       [iold];
+	MuNGlHits     [inew] = MuNGlHits     [iold];
+	MuNMuHits     [inew] = MuNMuHits     [iold];
+	MuNTkHits     [inew] = MuNTkHits     [iold];
+	MuNMatches    [inew] = MuNMatches    [iold];
+	MuNChambers   [inew] = MuNChambers   [iold];
+	MuCaloComp    [inew] = MuCaloComp    [iold];
+	MuSegmComp    [inew] = MuSegmComp    [iold];
+	MuTrackerMu   [inew] = MuTrackerMu   [iold];
+	MuGMPT        [inew] = MuGMPT        [iold];
+	MuID          [inew] = MuID          [iold];
+	MuMID         [inew] = MuMID         [iold];
 }
 
 void TreeReader::PutElectron(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	ElGood[inew]                      = ElGood[iold];
-	ElIsIso[inew]                     = ElIsIso[iold];
-	ElPx[inew]                        = ElPx[iold];
-	ElPy[inew]                        = ElPy[iold];
-	ElPz[inew]                        = ElPz[iold];
-	ElPt[inew]                        = ElPt[iold];
-	ElPtE[inew]                       = ElPtE[iold];
-	ElE[inew]                         = ElE[iold];
-	ElEt[inew]                        = ElEt[iold];
-	ElEta[inew]                       = ElEta[iold];
-	ElPhi[inew]                       = ElPhi[iold];
-	ElD0BS[inew]                      = ElD0BS[iold];
-	ElD0PV[inew]                      = ElD0PV[iold];
-	ElD0E[inew]                       = ElD0E[iold];
-	ElDzBS[inew]                      = ElDzBS[iold];
-	ElDzPV[inew]                      = ElDzPV[iold];
-	ElDzE[inew]                       = ElDzE[iold];
-	ElIso[inew]                       = ElIso[iold];
-	ElPtSum[inew]                     = ElPtSum[iold];
-	ElEmEtSum[inew]                   = ElEmEtSum[iold];
-	ElHadEtSum[inew]                  = ElHadEtSum[iold];
-	ElNChi2[inew]                     = ElNChi2[iold];
-	ElCharge[inew]                    = ElCharge[iold];
-	ElIDTight[inew]                   = ElIDTight[iold];
-	ElIDLoose[inew]                   = ElIDLoose[iold];
-	ElIDRobustTight[inew]             = ElIDRobustTight[iold];
-	ElIDRobustLoose[inew]             = ElIDRobustLoose[iold];
-	ElInGap[inew]                     = ElInGap[iold];
-	ElEcalDriven[inew]                = ElEcalDriven[iold];
-	ElTrackerDriven[inew]             = ElTrackerDriven[iold];
-	ElBasicClustersSize[inew]         = ElBasicClustersSize[iold];
-	Elfbrem[inew]                     = Elfbrem[iold];
-	ElHcalOverEcal[inew]              = ElHcalOverEcal[iold];
-	ElE5x5[inew]                      = ElE5x5[iold];
-	ElE2x5Max[inew]                   = ElE2x5Max[iold];
-	ElSigmaIetaIeta[inew]             = ElSigmaIetaIeta[iold];
-	ElDeltaPhiSeedClusterAtCalo[inew] = ElDeltaPhiSeedClusterAtCalo[iold];
-	ElDeltaEtaSeedClusterAtCalo[inew] = ElDeltaEtaSeedClusterAtCalo[iold];
-	ElDeltaPhiSuperClusterAtVtx[inew] = ElDeltaPhiSuperClusterAtVtx[iold];
-	ElDeltaEtaSuperClusterAtVtx[inew] = ElDeltaEtaSuperClusterAtVtx[iold];
-	ElCaloEnergy[inew]                = ElCaloEnergy[iold];
-	ElTrkMomAtVtx[inew]               = ElTrkMomAtVtx[iold];
-	ElESuperClusterOverP[inew]        = ElESuperClusterOverP[iold];
-	ElIsInJet[inew]                   = ElIsInJet[iold];
-	ElSharedPx[inew]                  = ElSharedPx[iold];
-	ElSharedPy[inew]                  = ElSharedPy[iold];
-	ElSharedPz[inew]                  = ElSharedPz[iold];
-	ElSharedEnergy[inew]              = ElSharedEnergy[iold];
-	ElDuplicateEl[inew]               = ElDuplicateEl[iold];
-	ElDR03TkSumPt[inew]               = ElDR03TkSumPt[iold];
-	ElDR04TkSumPt[inew]               = ElDR04TkSumPt[iold];
-	ElDR03EcalRecHitSumEt[inew]       = ElDR03EcalRecHitSumEt[iold];
-	ElDR04EcalRecHitSumEt[inew]       = ElDR04EcalRecHitSumEt[iold];
-	ElDR03HcalTowerSumEt[inew]        = ElDR03HcalTowerSumEt[iold];
-	ElDR04HcalTowerSumEt[inew]        = ElDR04HcalTowerSumEt[iold];
-	ElID[inew]                        = ElID[iold];
-	ElMID[inew]                       = ElMID[iold];
+	ElGood                      [inew] = ElGood                      [iold];
+	ElIsIso                     [inew] = ElIsIso                     [iold];
+	ElPx                        [inew] = ElPx                        [iold];
+	ElPy                        [inew] = ElPy                        [iold];
+	ElPz                        [inew] = ElPz                        [iold];
+	ElPt                        [inew] = ElPt                        [iold];
+	ElPtE                       [inew] = ElPtE                       [iold];
+	ElE                         [inew] = ElE                         [iold];
+	ElEt                        [inew] = ElEt                        [iold];
+	ElEta                       [inew] = ElEta                       [iold];
+	ElTheta                     [inew] = ElTheta                       [iold];
+	ElPhi                       [inew] = ElPhi                       [iold];
+	ElD0BS                      [inew] = ElD0BS                      [iold];
+	ElD0PV                      [inew] = ElD0PV                      [iold];
+	ElD0E                       [inew] = ElD0E                       [iold];
+	ElDzBS                      [inew] = ElDzBS                      [iold];
+	ElDzPV                      [inew] = ElDzPV                      [iold];
+	ElDzE                       [inew] = ElDzE                       [iold];
+	ElIso                       [inew] = ElIso                       [iold];
+	ElPtSum                     [inew] = ElPtSum                     [iold];
+	ElEmEtSum                   [inew] = ElEmEtSum                   [iold];
+	ElHadEtSum                  [inew] = ElHadEtSum                  [iold];
+	ElNChi2                     [inew] = ElNChi2                     [iold];
+	ElCharge                    [inew] = ElCharge                    [iold];
+	ElIDTight                   [inew] = ElIDTight                   [iold];
+	ElIDLoose                   [inew] = ElIDLoose                   [iold];
+	ElIDRobustTight             [inew] = ElIDRobustTight             [iold];
+	ElIDRobustLoose             [inew] = ElIDRobustLoose             [iold];
+	ElInGap                     [inew] = ElInGap                     [iold];
+	ElEcalDriven                [inew] = ElEcalDriven                [iold];
+	ElTrackerDriven             [inew] = ElTrackerDriven             [iold];
+	ElBasicClustersSize         [inew] = ElBasicClustersSize         [iold];
+	Elfbrem                     [inew] = Elfbrem                     [iold];
+	ElHcalOverEcal              [inew] = ElHcalOverEcal              [iold];
+	ElE5x5                      [inew] = ElE5x5                      [iold];
+	ElE2x5Max                   [inew] = ElE2x5Max                   [iold];
+	ElSigmaIetaIeta             [inew] = ElSigmaIetaIeta             [iold];
+	ElDeltaPhiSeedClusterAtCalo [inew] = ElDeltaPhiSeedClusterAtCalo [iold];
+	ElDeltaEtaSeedClusterAtCalo [inew] = ElDeltaEtaSeedClusterAtCalo [iold];
+	ElDeltaPhiSuperClusterAtVtx [inew] = ElDeltaPhiSuperClusterAtVtx [iold];
+	ElDeltaEtaSuperClusterAtVtx [inew] = ElDeltaEtaSuperClusterAtVtx [iold];
+	ElCaloEnergy                [inew] = ElCaloEnergy                [iold];
+	ElTrkMomAtVtx               [inew] = ElTrkMomAtVtx               [iold];
+	ElESuperClusterOverP        [inew] = ElESuperClusterOverP        [iold];
+	ElIsInJet                   [inew] = ElIsInJet                   [iold];
+	ElSharedPx                  [inew] = ElSharedPx                  [iold];
+	ElSharedPy                  [inew] = ElSharedPy                  [iold];
+	ElSharedPz                  [inew] = ElSharedPz                  [iold];
+	ElSharedEnergy              [inew] = ElSharedEnergy              [iold];
+	ElDuplicateEl               [inew] = ElDuplicateEl               [iold];
+	ElDR03TkSumPt               [inew] = ElDR03TkSumPt               [iold];
+	ElDR04TkSumPt               [inew] = ElDR04TkSumPt               [iold];
+	ElDR03EcalRecHitSumEt       [inew] = ElDR03EcalRecHitSumEt       [iold];
+	ElDR04EcalRecHitSumEt       [inew] = ElDR04EcalRecHitSumEt       [iold];
+	ElDR03HcalTowerSumEt        [inew] = ElDR03HcalTowerSumEt        [iold];
+	ElDR04HcalTowerSumEt        [inew] = ElDR04HcalTowerSumEt        [iold];
+	ElID                        [inew] = ElID                        [iold];
+	ElMID                       [inew] = ElMID                       [iold];
 }
 
 void TreeReader::PutPhoton(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	PhotonGood[inew]          = PhotonGood[iold];
-	PhotonIsIso[inew]         = PhotonIsIso[iold];
-	PhotonPt[inew]            = PhotonPt[iold];
-	PhotonPx[inew]            = PhotonPx[iold];
-	PhotonPy[inew]            = PhotonPy[iold];
-	PhotonPz[inew]            = PhotonPz[iold];
-	PhotonEta[inew]           = PhotonEta[iold];
-	PhotonPhi[inew]           = PhotonPhi[iold];
-	PhotonEnergy[inew]        = PhotonEnergy[iold];
-	PhotonCaloPositionX[inew] = PhotonCaloPositionX[iold];
-	PhotonCaloPositionY[inew] = PhotonCaloPositionY[iold];
-	PhotonCaloPositionZ[inew] = PhotonCaloPositionZ[iold];
-	PhotonHoverE[inew]        = PhotonHoverE[iold];
-	PhotonH1overE[inew]       = PhotonH1overE[iold];
-	PhotonH2overE[inew]       = PhotonH2overE[iold];
-	PhotonSigmaIetaIeta[inew] = PhotonSigmaIetaIeta[iold];
-	PhotonHasPixSeed[inew]    = PhotonHasPixSeed[iold];
-	PhotonHasConvTrks[inew]   = PhotonHasConvTrks[iold];
+	PhoGood           [inew] = PhoGood           [iold];
+	PhoIsIso          [inew] = PhoIsIso          [iold];
+	PhoPt             [inew] = PhoPt             [iold];
+	PhoPx             [inew] = PhoPx             [iold];
+	PhoPy             [inew] = PhoPy             [iold];
+	PhoPz             [inew] = PhoPz             [iold];
+	PhoEta            [inew] = PhoEta            [iold];
+	PhoPhi            [inew] = PhoPhi            [iold];
+	PhoEnergy         [inew] = PhoEnergy         [iold];
+	PhoIso03Ecal      [inew] = PhoIso03Ecal      [iold];
+	PhoIso03Hcal      [inew] = PhoIso03Hcal      [iold];
+	PhoIso03TrkSolid  [inew] = PhoIso03TrkSolid  [iold];
+	PhoIso03TrkHollow [inew] = PhoIso03TrkHollow [iold];
+	PhoIso03          [inew] = PhoIso03          [iold];
+	PhoCaloPositionX  [inew] = PhoCaloPositionX  [iold];
+	PhoCaloPositionY  [inew] = PhoCaloPositionY  [iold];
+	PhoCaloPositionZ  [inew] = PhoCaloPositionZ  [iold];
+	PhoHoverE         [inew] = PhoHoverE         [iold];
+	PhoH1overE        [inew] = PhoH1overE        [iold];
+	PhoH2overE        [inew] = PhoH2overE        [iold];
+	PhoSigmaIetaIeta  [inew] = PhoSigmaIetaIeta  [iold];
+	PhoHasPixSeed     [inew] = PhoHasPixSeed     [iold];
+	PhoHasConvTrks    [inew] = PhoHasConvTrks    [iold];
+	PhoIsInJet        [inew] = PhoIsInJet        [iold];
+	PhoSharedPx       [inew] = PhoSharedPx       [iold];
+	PhoSharedPy       [inew] = PhoSharedPy       [iold];
+	PhoSharedPz       [inew] = PhoSharedPz       [iold];
+	PhoSharedEnergy   [inew] = PhoSharedEnergy   [iold];
 }
 
 void TreeReader::PutJet(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	JGood[inew]          = JGood[iold];
-	JPx[inew]            = JPx[iold];
-	JPy[inew]            = JPy[iold];
-	JPz[inew]            = JPz[iold];
-	JPt[inew]            = JPt[iold];
-	JE[inew]             = JE[iold];
-	JEt[inew]            = JEt[iold];
-	JEta[inew]           = JEta[iold];
-	JPhi[inew]           = JPhi[iold];
-	JEMfrac[inew]        = JEMfrac[iold];
-	JNConstituents[inew] = JNConstituents[iold];
-	JID_HPD[inew]        = JID_HPD[iold];
-	JID_RBX[inew]        = JID_RBX[iold];
-	JID_n90Hits[inew]    = JID_n90Hits[iold];
-	JID_SubDet1[inew]    = JID_SubDet1[iold];
-	JID_SubDet2[inew]    = JID_SubDet2[iold];
-	JID_SubDet3[inew]    = JID_SubDet3[iold];
-	JID_SubDet4[inew]    = JID_SubDet4[iold];
-	JID_resEMF[inew]     = JID_resEMF[iold];
-	JID_HCALTow[inew]    = JID_HCALTow[iold];
-	JID_ECALTow[inew]    = JID_ECALTow[iold];
-	JEtaEMrms[inew]      = JEtaEMrms[iold];
-	JEtaHADrms[inew]     = JEtaHADrms[iold];
-	JPhiEMrms[inew]      = JPhiEMrms[iold];
-	JPhiHADrms[inew]     = JPhiHADrms[iold];
-	JbTagProb[inew]      = JbTagProb[iold];
-	JChfrac[inew]        = JChfrac[iold];
-	JNAssoTracks[inew]   = JNAssoTracks[iold];
-	Jtrk1px[inew]        = Jtrk1px[iold];
-	Jtrk1py[inew]        = Jtrk1py[iold];
-	Jtrk1pz[inew]        = Jtrk1pz[iold];
-	Jtrk2px[inew]        = Jtrk2px[iold];
-	Jtrk2py[inew]        = Jtrk2py[iold];
-	Jtrk2pz[inew]        = Jtrk2pz[iold];
-	Jtrk3px[inew]        = Jtrk3px[iold];
-	Jtrk3py[inew]        = Jtrk3py[iold];
-	Jtrk3pz[inew]        = Jtrk3pz[iold];
-	JEcorr[inew]         = JEcorr[iold];
-	JeMinDR[inew]        = JeMinDR[iold];
-	JVtxx[inew]          = JVtxx[iold];
-	JVtxy[inew]          = JVtxy[iold];
-	JVtxz[inew]          = JVtxz[iold];
-	JVtxExx[inew]        = JVtxExx[iold];
-	JVtxEyx[inew]        = JVtxEyx[iold];
-	JVtxEyy[inew]        = JVtxEyy[iold];
-	JVtxEzy[inew]        = JVtxEzy[iold];
-	JVtxEzz[inew]        = JVtxEzz[iold];
-	JVtxEzx[inew]        = JVtxEzx[iold];
-	JVtxNChi2[inew]      = JVtxNChi2[iold];
+	JGood          [inew] = JGood          [iold];
+	JPx            [inew] = JPx            [iold];
+	JPy            [inew] = JPy            [iold];
+	JPz            [inew] = JPz            [iold];
+	JPt            [inew] = JPt            [iold];
+	JE             [inew] = JE             [iold];
+	JEt            [inew] = JEt            [iold];
+	JEta           [inew] = JEta           [iold];
+	JPhi           [inew] = JPhi           [iold];
+	JEMfrac        [inew] = JEMfrac        [iold];
+	JNConstituents [inew] = JNConstituents [iold];
+	JID_HPD        [inew] = JID_HPD        [iold];
+	JID_RBX        [inew] = JID_RBX        [iold];
+	JID_n90Hits    [inew] = JID_n90Hits    [iold];
+	JID_SubDet1    [inew] = JID_SubDet1    [iold];
+	JID_SubDet2    [inew] = JID_SubDet2    [iold];
+	JID_SubDet3    [inew] = JID_SubDet3    [iold];
+	JID_SubDet4    [inew] = JID_SubDet4    [iold];
+	JID_resEMF     [inew] = JID_resEMF     [iold];
+	JID_HCALTow    [inew] = JID_HCALTow    [iold];
+	JID_ECALTow    [inew] = JID_ECALTow    [iold];
+	JEtaEMrms      [inew] = JEtaEMrms      [iold];
+	JEtaHADrms     [inew] = JEtaHADrms     [iold];
+	JPhiEMrms      [inew] = JPhiEMrms      [iold];
+	JPhiHADrms     [inew] = JPhiHADrms     [iold];
+	JbTagProb      [inew] = JbTagProb      [iold];
+	JChfrac        [inew] = JChfrac        [iold];
+	JMass          [inew] = JMass          [iold];
+	JNAssoTracks   [inew] = JNAssoTracks   [iold];
+	Jtrk1px        [inew] = Jtrk1px        [iold];
+	Jtrk1py        [inew] = Jtrk1py        [iold];
+	Jtrk1pz        [inew] = Jtrk1pz        [iold];
+	Jtrk2px        [inew] = Jtrk2px        [iold];
+	Jtrk2py        [inew] = Jtrk2py        [iold];
+	Jtrk2pz        [inew] = Jtrk2pz        [iold];
+	Jtrk3px        [inew] = Jtrk3px        [iold];
+	Jtrk3py        [inew] = Jtrk3py        [iold];
+	Jtrk3pz        [inew] = Jtrk3pz        [iold];
+	JEcorr         [inew] = JEcorr         [iold];
+	JeMinDR        [inew] = JeMinDR        [iold];
+	JVtxx          [inew] = JVtxx          [iold];
+	JVtxy          [inew] = JVtxy          [iold];
+	JVtxz          [inew] = JVtxz          [iold];
+	JVtxExx        [inew] = JVtxExx        [iold];
+	JVtxEyx        [inew] = JVtxEyx        [iold];
+	JVtxEyy        [inew] = JVtxEyy        [iold];
+	JVtxEzy        [inew] = JVtxEzy        [iold];
+	JVtxEzz        [inew] = JVtxEzz        [iold];
+	JVtxEzx        [inew] = JVtxEzx        [iold];
+	JVtxNChi2      [inew] = JVtxNChi2      [iold];
 }
 
 void TreeReader::printPNG(TCanvas *cin, TString name, TString dir){
 /*		-	Prints a ROOT TCanvas Object to a .png file
-			name is the bare output filename, e.g. "fit_4_8",
-			dir is the output directory (inside the overall output dir.)       */
+name is the bare output filename, e.g. "fit_4_8",
+dir is the output directory (inside the overall output dir.)       */
 	// Create sub directories if needed
 	if(!dir.EndsWith("/")) dir += "/";
 	char cmd[100];
@@ -2597,8 +2722,8 @@ void TreeReader::printPNG(TCanvas *cin, TString name, TString dir){
 
 void TreeReader::printEPS(TCanvas *cin, TString name, TString dir){
 /*		-	Prints a ROOT TCanvas Object to a .eps file
-			name is the bare output filename, e.g. "fit_4_8",
-			dir is the output directory (inside the overall output dir.)       */
+name is the bare output filename, e.g. "fit_4_8",
+dir is the output directory (inside the overall output dir.)       */
 	// Create sub directories if needed
 	if(!dir.EndsWith("/")) dir += "/";
 	char cmd[100];
