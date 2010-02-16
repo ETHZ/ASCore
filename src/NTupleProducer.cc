@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.38 2010/02/02 15:12:33 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.39 2010/02/03 18:09:14 stiegerb Exp $
 //
 //
 
@@ -103,7 +103,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
 
 // Jet ID helper
-	jetIDHelper = reco::helper::JetIDHelper(iConfig.getParameter<edm::ParameterSet>("jetID")  );
+	if ( !fIsPat )
+		jetIDHelper = reco::helper::JetIDHelper(iConfig.getParameter<edm::ParameterSet>("jetID")  );
 
 // Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -213,7 +214,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel(fTrackTag, tracks);
 
 //Get Photon collection
-	Handle<PhotonCollection> photons;
+	Handle<View<Photon> > photons;
 	iEvent.getByLabel(fPhotonTag, photons);
 
 // MET
@@ -515,6 +516,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				eTkIso = pEl->trackIso();
 				eECIso = pEl->ecalIso();
 				eHCIso = pEl->hcalIso();
+//				eTkIso = pEl->userIsolation(pat::TrackIso);
+//				eECIso = pEl->userIsolation(pat::EcalIso);
+//				eHCIso = pEl->userIsolation(pat::HcalIso);
+//				eTkIso = pEl->dr03TkSumPt();
+//				eECIso = pEl->dr03EcalRecHitSumEt();
+//				eHCIso = pEl->dr03HcalTowerSumEt();
 			}
 			double eliso = (eTkIso+eECIso+eHCIso)/El->pt();
 			if(eliso > fMaxeliso) continue;
@@ -543,9 +550,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeEmEtsum[eqi]  = eECIso;
 			fTeHadEtsum[eqi] = eHCIso;
 			fTecharge[eqi] = El->charge();
-			fTeInGap[eqi]         = El->isGap() ? 1:0;  // no bug... //*** Beni
-			fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;
+			fTeInGap[eqi]         = El->isGap() ? 1:0;
+
+			//	Choose the "Driven" methods according to the CMSSW release			
+			// CMSSW_3_3_X:
+			fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;		
 			fTeTrackerDriven[eqi] = El->isTrackerDriven() ? 1:0;
+			// CMSSW_3_4_1 and later:
+			// fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
+			// fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
+			
 			fTeBasicClustersSize[eqi] = El->basicClustersSize();
 			fTefbrem[eqi]  = El->fbrem();
 			fTeHcalOverEcal[eqi] = El->hcalOverEcal();                               
@@ -608,8 +622,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Keep pointers to superclusters for cross cleaning
 	vector<const SuperCluster*> photSCs;
 	fTnphotonstot = photons->size();
-	for( PhotonCollection::const_iterator ip = photons->begin(); ip != photons->end(); ++ip ){
-		// No idea of a preselection
+	for( View<Photon>::const_iterator ip = photons->begin(); ip != photons->end(); ++ip ){	
+		// Preselection
 		if(ip->pt() < fMinphopt) continue;
 		if(fabs(ip->eta()) > fMaxphoeta) continue;
 		nqpho++;
@@ -659,7 +673,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	vector<const Jet*> corrJets;
 	corrJets.reserve(jets->size()); // Speed up push-backs
 	vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
-	// I save here px, py, pz for uncorrected jets
+	// Save here px, py, pz for uncorrected jets
 	// used later for matching jets with b-tagging information
 	int itag(-1);
 	fTnjetstot = jets->size();
@@ -1989,10 +2003,20 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 	if (fTnjets <= 0) return;
 	if (fTneles <= 0) return;
 
+	vector<CaloTowerPtr> jetCaloRefs;
+	
 	// loop over the jets
 	for (int i = 0; i < fTnjets; ++i) {
-		const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
 
+		// Collect the CaloTowers detIds for the jet 
+		if (!fIsPat) {
+			const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));			
+			jetCaloRefs = theJet->getCaloConstituents();
+		} else {
+			const pat::Jet* theJet = static_cast<const pat::Jet*>(&(*jets[i]));
+			jetCaloRefs = theJet->getCaloConstituents();
+		}
+		
 		// loop over the electrons
 		for (int j = 0; j < fTneles; ++j) {
 			fTeIsInJet[j] = -1;
@@ -2003,7 +2027,7 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 			const SuperCluster* theElecSC = electrons[j];
 
 			math::XYZVector sharedP(0., 0., 0.);
-			bool isInJet = IsEMObjectInJet(theElecSC, theJet, calotowers, &sharedP);
+			bool isInJet = IsEMObjectInJet(theElecSC, jetCaloRefs, calotowers, &sharedP);
 			float sharedE = sqrt(sharedP.X()*sharedP.X() 
 				+ sharedP.Y()*sharedP.Y()
 				+ sharedP.Z()*sharedP.Z() );
@@ -2028,10 +2052,20 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 	if( fTnjets <= 0 ) return;
 	if( fTnphotons <= 0 ) return;
 
+	vector<CaloTowerPtr> jetCaloRefs;
+	
 	// loop over the jets
 	for( int i = 0; i < fTnjets; ++i ){
-		const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
 
+		// Collect the CaloTowers detIds for the jet 
+		if (!fIsPat) {
+			const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));			
+			jetCaloRefs = theJet->getCaloConstituents();
+		} else {
+			const pat::Jet* theJet = static_cast<const pat::Jet*>(&(*jets[i]));
+			jetCaloRefs = theJet->getCaloConstituents();
+		}
+		
 		// loop over the photons
 		for( int j = 0; j < fTnphotons; ++j ){
 			fTPhotIsInJet[j] = -1;
@@ -2042,7 +2076,7 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 			const SuperCluster* theSC = superclusters[j];
 
 			math::XYZVector sharedP(0., 0., 0.);
-			bool isInJet = IsEMObjectInJet(theSC, theJet, calotowers, &sharedP);
+			bool isInJet = IsEMObjectInJet(theSC, jetCaloRefs, calotowers, &sharedP);
 			float sharedE = sqrt(sharedP.X()*sharedP.X() 
 				+ sharedP.Y()*sharedP.Y()
 				+ sharedP.Z()*sharedP.Z() );
@@ -2060,7 +2094,7 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 	return;
 }
 
-bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, const CaloJet* jetcand, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
+bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
 // Checks whether an electron or photon is included in the jet energy
 // and if true, it returns the momentum vector shared by the two
 
@@ -2088,9 +2122,6 @@ bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, const CaloJet* 
 			eleEnergySum += calo->emEnergy();
 		}
 	}
-
-// Collect the CaloTowers detIds for the jet 
-	vector<CaloTowerPtr> jetCaloRefs = jetcand->getCaloConstituents();
 
 // Loop over the detIds vector of the electron
 	float sharedEnergy = 0.;

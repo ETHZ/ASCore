@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.32 2010/02/02 15:12:38 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.33 2010/02/03 18:09:18 stiegerb Exp $
 //
 //
 
@@ -72,7 +72,7 @@ private:
 	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
 	virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
 	virtual void PhotonJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, const CaloJet* theJet, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
+	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
 	virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
 	virtual float CaloTowerSizePhi(float eta);
 	virtual float CaloTowerSizeEta(float eta);
