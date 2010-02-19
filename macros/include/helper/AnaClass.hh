@@ -38,6 +38,7 @@
 #include "TPaveStats.h"
 
 #include <iostream>
+#include <fstream.h>
 #include <iomanip>
 #include <math.h>
 #include <vector>
@@ -71,8 +72,8 @@ public:
 	void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag");
 	void makePlotPanel(const TCut req = "", const int nbins = 100);
 	void plotAllBranches(TTree*, TString);
-	void plotAllBranches(int);
 	
+	void plotAllBranches(int);
 /*****************************************************************************
 ###################| Main Methods |###########################################
 *****************************************************************************/
@@ -85,6 +86,12 @@ public:
 	TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw, const char* drawopt = "");
 	TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
 	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999.);
+	void refValues(const char* var, TH1D* h);
+	double tailFraction(TH1D* h, double frac);
+	void printCheckList(const char* var, TH1D* h);
+	void printTailFraction(const char* var, TH1D* h, double frac);
+	void printAverage(const char* var, TH1D* h);
+	void printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
 	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999.);
 	void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
@@ -131,6 +138,7 @@ public:
 	TString fOutputDir;	  // Output directory for plots
 	TString fOutputSubDir; // Output subdirectory for plots, changes for each use
 	
+	ofstream fCheckList;   // Output filename for the Check List
 private:
 	// ClassDef(AnaClass,2)
 };

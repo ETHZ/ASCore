@@ -49,7 +49,7 @@ Davismt2::~Davismt2(){}
 double Davismt2::get_mt2(){
 	if (!momenta_set)
 	{
-		cout <<" Please set momenta first!" << endl;
+		cout << "Davismt2::get_mt2() ==> Please set momenta first!" << endl;
 		return 0;
 	}
 
@@ -132,10 +132,10 @@ void Davismt2::set_mn(double mn0){
 }
 
 void Davismt2::print(){
-	cout << " pax = " << pax*scale << ";   pay = " << pay*scale << ";   ma = " << ma*scale <<";"<< endl;
-	cout << " pbx = " << pbx*scale << ";   pby = " << pby*scale << ";   mb = " << mb*scale <<";"<< endl;
-	cout << " pmissx = " << pmissx*scale << ";   pmissy = " << pmissy*scale <<";"<< endl;
-	cout << " mn = " << mn_unscale<<";" << endl;
+	cout << " Davismt2::print() ==> pax = " << pax*scale << ";   pay = " << pay*scale << ";   ma = " << ma*scale <<";"<< endl;
+	cout << " Davismt2::print() ==> pbx = " << pbx*scale << ";   pby = " << pby*scale << ";   mb = " << mb*scale <<";"<< endl;
+	cout << " Davismt2::print() ==> pmissx = " << pmissx*scale << ";   pmissy = " << pmissy*scale <<";"<< endl;
+	cout << " Davismt2::print() ==> mn = " << mn_unscale<<";" << endl;
 }
 
 //special case, the visible particle is massless
@@ -232,7 +232,7 @@ void Davismt2::mt2_massless(){
 		if(foundhigh==0) 
 		{
 
-			cout<<"Deltasq_high not found at event " << nevt <<endl;
+			cout << "Davismt2::mt2_massless() ==> Deltasq_high not found at event " << nevt <<endl;
 
 
 			mt2_b = (double)sqrt(Deltasq_low+mnsq);
@@ -242,9 +242,9 @@ void Davismt2::mt2_massless(){
 
 	if(nsols_high == nsols_low)
 	{ 
-		cout << "error: nsols_low=nsols_high=" << nsols_high << endl;
-		cout << "Deltasq_high=" << Deltasq_high << endl;
-		cout << "Deltasq_low= "<< Deltasq_low << endl;
+		cout << "Davismt2::mt2_massless() ==> error: nsols_low=nsols_high=" << nsols_high << endl;
+		cout << "Davismt2::mt2_massless() ==> Deltasq_high=" << Deltasq_high << endl;
+		cout << "Davismt2::mt2_massless() ==> Deltasq_low= "<< Deltasq_low << endl;
 
 		mt2_b = sqrt(mnsq + Deltasq_low);
 		return;
@@ -424,7 +424,7 @@ void Davismt2::mt2_bisect(){
 //number of solutions at Deltasq_low should not be larger than zero
 	if( nsols(Deltasq_low) > 0 )
 	{
-//cout << "nsolutions(Deltasq_low) > 0"<<endl;
+//cout << "Davismt2::mt2_bisect() ==> nsolutions(Deltasq_low) > 0"<<endl;
 		mt2_b = (double) sqrt(mnsq+Deltasq0);
 		return;
 	}
@@ -446,7 +446,7 @@ void Davismt2::mt2_bisect(){
 		foundhigh = find_high(Deltasq_high);
 		if(foundhigh == 0) 
 		{
-			cout << "Deltasq_high not found at event " << nevt << endl;
+			cout << "Davismt2::mt2_bisect() ==> Deltasq_high not found at event " << nevt << endl;
 			mt2_b = sqrt( Deltasq_low + mnsq );
 			return;
 		}
@@ -525,7 +525,7 @@ int Davismt2::scan_high(double & Deltasq_high){
 	double tempmass, maxmass;
 	tempmass = mn + ma;
 	maxmass  = sqrt(mnsq + Deltasq_high);
-	if (nevt == 32334) cout << "Deltasq_high = " << Deltasq_high << endl;
+	if (nevt == 32334) cout << "Davismt2::scan_high() ==> Deltasq_high = " << Deltasq_high << endl; // ???
 	for(double mass = tempmass + SCANSTEP; mass < maxmass; mass += SCANSTEP)
 	{
 		Deltasq_high = mass*mass - mnsq;

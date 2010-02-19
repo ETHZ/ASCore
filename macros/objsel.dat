@@ -5,21 +5,22 @@
 # specified here.                        #
 ##########################################
 # Muons:
-MuPt          10      1e15
+MuPt          5       1e15
 MuEta         -2.5    2.5
 MuD0BS        -0.2    0.2
-MuIso         0       1
+MuRelIso03    0       1
 MuCaloComp    0.5     1.1
 MuSegmComp    0.5     1.1
 MuNChi2       0       10
 ##########################################
 # Electrons:
-ElPt          10      1e15
+ElPt          5       1e15
 ElEta         -2.5    2.5
 ElD0BS        -0.2    0.2
 ElIso         0       1
 ##########################################
 # Jets:
-JPt           50      1e15
-JEta          -5.0    5.0
+JPt           20      1e15
+JEta          -2.4    2.4
 JeMinDR       0.1     1e15
+JEMfrac       0.01    0.99
