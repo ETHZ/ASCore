@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 
 process = cms.Process("NTupleProducer")
+# Starting with a PAT skeleton process
+from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 ### Message Logger #############################################################
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -14,12 +16,12 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 ### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
-runon = 'data'
+#runon = 'data'
 #runon = 'MC31x'
-#runon = 'MC34x'
+runon = 'MC34x'
 #recoType = 'RECO'
-recoType = 'PAT'
-#recoType = 'PF'
+#recoType = 'PAT'
+recoType = 'PF'
 
 ### Running conditions #########################################################
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -57,7 +59,7 @@ if runon=='data':
     )
 elif runon=='MC31x':
     source_fileNames = cms.untracked.vstring(
-		'/store/mc/Summer09/LM0/GEN-recoJet_srcSIM-RECO/MC_31X_V3_7TeV-v1/0006/C81C39F6-B4BF-DE11-95E4-001CC47BA216.root'   
+		'/store/mc/Summer09/LM0/GEN-SIM-RECO/MC_31X_V3_7TeV-v1/0006/C81C39F6-B4BF-DE11-95E4-001CC47BA216.root'   
     )
 elif runon=='MC34x':
     source_fileNames = cms.untracked.vstring(
@@ -94,28 +96,48 @@ process.metMuonJESCorAK5.corrector = "L2L3JetCorrectorAK5Calo"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
-### PAT ########################################################################
+### PF+PAT #####################################################################
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
-# Configure PAT to use AOD sources	
-from PhysicsTools.PatAlgos.tools.coreTools import *
+# Configure PAT to use PF2PAT instead of AOD sources
+from PhysicsTools.PatAlgos.tools.pfTools import *		
+usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5') 
 # Configure PAT to use AK5 jet collection	
 from PhysicsTools.PatAlgos.tools.jetTools import *
 switchJetCollection(process,cms.InputTag(recoJet_src),
                     doJTA        = True,
                     doBTagging   = True,
-                    jetCorrLabel = ('AK5','Calo'),
-                    doType1MET   = True,
+                    jetCorrLabel = ('AK5','PF'),
+                    doType1MET   = False,
                     genJetCollection=cms.InputTag(genJet_src)
                     )
 
 if runon=='data':
-	removeMCMatching(process, 'All')
-	
-	# get the 900 GeV or 2360 GeV jet corrections
-	switchJECSet( process, "900GeV")
-	#switchJECSet( process, "2360GeV")
+    process.patDefaultSequence.remove(process.genForPF2PATSequence)
+    removeMCMatching(process, 'All')
+    process.allLayer1Electrons.embedGenMatch = False
+    process.allLayer1Muons.embedGenMatch = False
 
+	# get the 900 GeV or 2360 GeV jet corrections
+    switchJECSet( process, "900GeV")
+	# switchJECSet( process, "2360GeV")
+
+	# remove the tag infos
+    process.allLayer1Jets.addTagInfos = False
+	# require jet pt > 10 (L2+L3 corrected)
+    process.selectedLayer1Jets.cut = cms.string('pt > 10')
+	# look for at least n jets
+	# process.countLayer1Jets.minNumber = 0
+
+	# add the trigger information to the configuration
+    from PhysicsTools.PatAlgos.tools.trigTools import *
+    switchOnTrigger( process )
+	# remove the dtrigger matches
+    process.patTriggerSequence.remove( process.patTriggerMatcher )
+    process.patTriggerEvent.patTriggerMatches = []
+else:
+    process.allLayer1Electrons.embedGenMatch = True
+    process.allLayer1Muons.embedGenMatch = True
 
 ### Egamma Isolation ###########################################################
 # Keep in line with non-PAT config.
@@ -136,7 +158,8 @@ process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.tag_muons     = 'allLayer1Muons'
 process.analyze.tag_electrons = 'allLayer1Electrons'
 process.analyze.tag_jets      = 'allLayer1Jets'
-process.analyze.tag_photons	  = 'allLayer1Photons'
+# use 'photons' instead of 'allLayer1Photons' (photons are not supported in PF+PAT)
+process.analyze.tag_photons	  = 'photons' 
 process.analyze.isPat		= True
 process.analyze.isRealData	= cms.untracked.bool(runon=='data')
 
