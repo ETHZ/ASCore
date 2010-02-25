@@ -20,9 +20,9 @@ public:
 	TString fOutputDir;
 	int fVerbose;
 
-private:	
-	TTree *fTree;
 	TStyle *fStyle;
 	TreeReader *fTR;
+
+private:	
 };
 #endif

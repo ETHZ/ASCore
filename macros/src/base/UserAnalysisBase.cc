@@ -28,37 +28,6 @@ void UserAnalysisBase::SetOutputDir(TString dir){
 	system(cmd);
 };
 
-void UserAnalysisBase::printPNG(TCanvas *cin, TString name, TString dir){
-/*		-	Prints a ROOT TCanvas Object to a .png file
-name is the bare output filename, e.g. "fit_4_8",
-dir is the output directory (inside the overall output dir.)       */
-	// Create sub directories if needed
-	if(!dir.EndsWith("/")) dir += "/";
-	char cmd[100];
-	sprintf(cmd,"mkdir -p %s", dir.Data());
-	system(cmd);
-
-	dir += name;
-	dir += ".png";
-	cin->Print(dir,"png");
-}
-
-void UserAnalysisBase::printEPS(TCanvas *cin, TString name, TString dir){
-/*		-	Prints a ROOT TCanvas Object to a .eps file
-name is the bare output filename, e.g. "fit_4_8",
-dir is the output directory (inside the overall output dir.)       */
-	// Create sub directories if needed
-	if(!dir.EndsWith("/")) dir += "/";
-	char cmd[100];
-	sprintf(cmd,"mkdir -p %seps/", dir.Data());
-	system(cmd);
-
-	dir += "eps/";
-	dir += name;
-	dir += ".eps";
-	cin->SaveAs(dir);
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Cut Stuff //////////////////////////////////////////////////////////////////////////////////
 void UserAnalysisBase::ReadObjCuts(const char* filename){

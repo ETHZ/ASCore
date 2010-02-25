@@ -5,6 +5,7 @@
 #include "TreeCleaner.hh"
 #include "DiLeptonAnalysis.hh"
 #include "MultiplicityAnalysis.hh"
+#include "Utilities.hh"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ TreeAnalyzer::TreeAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
 	fTree = tree;
 	fVerbose = false;
 
-	SetStyle();
+	Util::SetStyle();
 
 	// Initialize UserAnalyses here:
 	fTreeCleaner          = new TreeCleaner(fTR);

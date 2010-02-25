@@ -6,13 +6,11 @@ using namespace std;
 
 TreeAnalyzerBase::TreeAnalyzerBase(TTree *tree) {
 	fTR = new TreeReader(tree);
-	fTree = tree;
 	fVerbose = false;
 }
 
 TreeAnalyzerBase::~TreeAnalyzerBase(){
-	// delete fTR;
-	if(!fTree) cout << "TreeAnalyzerBase ==> No chain!" << endl;
+	if(!fTR->fChain) cout << "TreeAnalyzerBase ==> No chain!" << endl;
 }
 
 void TreeAnalyzerBase::SetOutputDir(TString dir){
@@ -27,12 +25,12 @@ void TreeAnalyzerBase::SetOutputDir(TString dir){
 
 // Method for looping over the tree
 void TreeAnalyzerBase::Loop(){
-	Long64_t nentries = fTree->GetEntries();
-	cout << " total events in ntuples = " << fTree->GetEntries() << endl;
+	Long64_t nentries = fTR->GetEntries();
+	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
 	// nentries = 10;
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		if( jentry%200 == 0 ) cout << ">>> Processing event # " << jentry << endl;
-		fTree->GetEntry(jentry);
+		fTR->GetEntry(jentry);
 
 	}
 }

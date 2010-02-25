@@ -30,6 +30,7 @@ public:
 	void Begin();
 	void Analyze();
 	void End();
+	void Reset();
 
 	TreeReader *fTR;
 
@@ -40,6 +41,9 @@ public:
 	
 	TFile *fHstatFile;
 	TH1D *fHstatHistos;
+	
+	double fR12;
+	double fR21;
 
 private:
 

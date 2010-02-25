@@ -9,17 +9,19 @@
 ##############################################################################################
 # E.g.:                                                                                      #
 # tmp/           MuPt             1         0        0.0     100.   1    20.   -999  NJets>2 #
+# 2 tmp/ var1, var2, sidx, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, req
 ##############################################################################################
 # Primary vertex and track info
-unclean/PrimVtxTrk/  PrimVtxx         0         0        -0.1    0.1
-unclean/PrimVtxTrk/  PrimVtxy         0         0        -0.1    0.1
-unclean/PrimVtxTrk/  PrimVtxz         0         0        -15.    15.
-unclean/PrimVtxTrk/  PrimVtxPtSum     0         0        0       800
-unclean/PrimVtxTrk/  PrimVtxNTracks   0         0        0       500
-unclean/PrimVtxTrk/  PrimVtxNChi2     0         0        0       10.    0     5.
-unclean/PrimVtxTrk/  NTracksTot       0         0        0       500
-unclean/PrimVtxTrk/  TrkPtSum         0         0        0       500.   0     -999   -999  NTracks>0
-unclean/PrimVtxTrk/  TrkPtSumPhi      0         0        -3.2    3.2    0     -999   -999  NTracks>0
+2 unclean/PrimVtxTrk/ PrimVtxx   PrimVtxy  0  0 -0.1 0.1 0 -0.1 0.1 "scat" 6
+unclean/PrimVtxTrk/   PrimVtxx         0         0        -0.1    0.1
+unclean/PrimVtxTrk/   PrimVtxy         0         0        -0.1    0.1
+unclean/PrimVtxTrk/   PrimVtxz         0         0        -15.    15.
+unclean/PrimVtxTrk/   PrimVtxPtSum     0         0        0       800
+unclean/PrimVtxTrk/   PrimVtxNTracks   0         0        0       500
+unclean/PrimVtxTrk/   PrimVtxNChi2     0         0        0       10.    0     5.
+unclean/PrimVtxTrk/   NTracksTot       0         0        0       500
+unclean/PrimVtxTrk/   TrkPtSum         0         0        0       500.   0     -999   -999  NTracks>0
+unclean/PrimVtxTrk/   TrkPtSumPhi      0         0        -3.2    3.2    0     -999   -999  NTracks>0
 # Muon identification
 unclean/MuID/        MuEem            0         0        0.      5.
 unclean/MuID/        MuEhad           0         0        0.      10.
@@ -45,8 +47,9 @@ unclean/ElID/        ElDeltaEtaSuperClusterAtVtx 0  0    -0.1    0.1    0
 unclean/ElID/        ElESuperClusterOverP    0  0        0.      5.
 unclean/ElID/        ElE2x5Max*(ElE5x5)^(-1) 0  0        0.      1.2    
 # Jet identification
-unclean/JetID/       JEMfrac          0         0        0.0     1.01   0    0.01   0.99
-unclean/JetID/       JChfrac          0         0        0.0     5.     0    0.05
+2 unclean/JetID/     JEMfrac JChfrac  0  0 -0.01 1.01 0 -0.01 5. "scat" 6
+unclean/JetID/       JEMfrac          0         0        -0.01     1.01   0    0.01   0.99
+unclean/JetID/       JChfrac          0         0        -1.01     5.     0    0.05
 unclean/JetID/       JNConstituents   0         0        0       50
 unclean/JetID/       JNAssoTracks     0         0        0       50
 unclean/JetID/       JEcorr           0         0        0.0     5.     

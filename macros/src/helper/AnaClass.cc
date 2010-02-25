@@ -4,6 +4,7 @@
 *                                                  (c) 2009 Benjamin Stieger *
 *****************************************************************************/
 #include "AnaClass.hh"
+#include "Utilities.hh"
 
 // ClassImp(AnaClass);
 using namespace std;
@@ -23,30 +24,15 @@ AnaClass::AnaClass(const char* parfile, bool verbose){
 }
 
 /****************************************************************************/
-AnaClass::~AnaClass(){
-
-	fCheckList.close();
-}
+AnaClass::~AnaClass(){}
 
 /****************************************************************************/
 void AnaClass::init(bool verbose){
 	if(verbose) cout << "------------------------------------" << endl;
 	if(verbose) cout << "Initializing AnaClass ... " << endl;
 	fOutputSubDir = "";
-	fFont = 42;
-	fTlat = new TLatex();
-	gROOT->SetStyle("Plain");
-	gStyle->SetOptTitle(0);
-	gStyle->SetOptStat("");
-	gStyle->SetStatFont(fFont);
-	gStyle->SetStatColor(0);
-	gStyle->SetStatStyle(3001);
-	gStyle->SetTextFont(fFont);
-	fBGColor = 10; // White, use 16 for dark gray
-	gStyle->SetLabelFont(fFont, "xyz");
-	gStyle->SetTitleFont(fFont, "xyz");
-
-	fCheckList.open("checkList.txt");
+	fChecklistFile = "checklist.txt";
+	Util::SetStyle();
 }
 
 /****************************************************************************/
@@ -306,30 +292,56 @@ void AnaClass::readVarNames(const char* filename){
 
 /****************************************************************************/
 void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
-	int sampleindex(0), nbins(0), logy(0);
+	int twod(0), sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
+	float ymin(0.), ymax(0.), y1(-999.), y2(-999.);
 	ifstream IN(filename);
-	// char buff1[200], buff2[200], buff3[200];
 	char readbuff[200];
-	char path[200], varname[200], reqbuff[200];
+	char path[200], var1name[200], var2name[200], reqbuff[200], topt[200];
 	TCut req;
-	// Loop over lines of datafile
 	TString temp = fOutputSubDir;
+	fChecklistFile = TString(filename);
+	fChecklistFile.ReplaceAll(".dat", "");
+	fChecklistFile = fChecklistFile + "_checklist.txt";
+	// Remove existing checklist file:
+	char cmd[100];
+	TString checklistfile = fOutputDir + fChecklistFile;
+	sprintf(cmd,"rm -f %s", checklistfile.Data());
+	system(cmd);
+
+	// Loop over lines of datafile
 	while( IN.getline(readbuff, 200, '\n') ){
 		if( readbuff[0] == '#' ) continue; // Skip lines commented with '#'
-		int nargs = sscanf(readbuff, "%s %s %d %d %f %f %d %f %f %s", path, varname, &sampleindex, &nbins, &xmin, &xmax, &logy, &x1, &x2, reqbuff);
-		if(nargs < 7){ logy = 0; x1 = -999; x2 = -999; req=""; }
-		else if(nargs < 8){ x1 = -999; x2 = -999; req=""; }
-		else if(nargs < 9){ x2 = -999; req=""; }
-		else if(nargs < 10) req = "";
-		else req = TCut(reqbuff);
-		// cout << "varname=" << varname << " req=" << req << " sampleindex=" << sampleindex << " nbins=" << nbins << " xmin=" << xmin << " xmax=" << xmax << " logy=" << logy << " x1=" << x1 << " x2=" << x2 << endl;
-		if(tag=="tag") tag = fTag[sampleindex];
-		if(tree==NULL) tree = fTree[sampleindex];
-		fOutputSubDir = TString(path);
-		// fOutputSubDir = tag + "/" + TString(path);
-		if(!strcmp(varname, "ElID")) plotEID(req, tree, tag);
-		else plotVar(varname, req, tree, tag, nbins, xmin, xmax, "ofilename", logy, x1, x2);
+		if( readbuff[0] != '2' ){ // 1D plotting
+			int nargs = sscanf(readbuff, "%s %s %d %d %f %f %d %f %f %s", path, var1name, &sampleindex, &nbinsx, &xmin, &xmax, &logy, &x1, &x2, reqbuff);
+			if(nargs < 7){ logy = 0; x1 = -999; x2 = -999; req=""; }
+			else if(nargs < 8){ x1 = -999; x2 = -999; req=""; }
+			else if(nargs < 9){ x2 = -999; req=""; }
+			else if(nargs < 10) req = "";
+			else req = TCut(reqbuff);
+			if(tag=="tag") tag = fTag[sampleindex];
+			if(tree==NULL) tree = fTree[sampleindex];
+			fOutputSubDir = TString(path);
+			if(!strcmp(var1name, "ElID")) plotEID(req, tree, tag);
+			else plotVar(var1name, req, tree, tag, nbinsx, xmin, xmax, "ofilename", logy, x1, x2);
+		}
+		if( readbuff[0] == '2' ){ // 2D plotting
+			int nargs = sscanf(readbuff, "%d %s %s %s %d %d %f %f %d %f %f %s %d %d %d %d %f %f %f %f %s", &twod, path, var1name, var2name, &sampleindex, &nbinsx, &xmin, &xmax, &nbinsy, &ymin, &ymax, topt, &mrkstl, &logx, &logy, &logz, &x1, &x2, &y1, &y2, reqbuff);
+			if(     nargs < 13){ mrkstl = 1; logx = 0; logy = 0; logz = 0; x1 = -999.; x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 14){ logx = 0; logy = 0; logz = 0; x1 = -999.; x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 15){ logy = 0; logz = 0; x1 = -999.; x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 16){ logz = 0; x1 = -999.; x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 17){ x1 = -999.; x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 18){ x2 = -999.; y1 = -999.; y2 = -999.;}
+			else if(nargs < 19){ y1 = -999.; y2 = -999.;}
+			else if(nargs < 20) y2 = -999.;
+			else if(nargs < 21) req = "";
+			else req = TCut(reqbuff);
+			if(tag=="tag") tag = fTag[sampleindex];
+			if(tree==NULL) tree = fTree[sampleindex];
+			fOutputSubDir = TString(path);
+			plotVar2D(var1name, var2name, req, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2);
+		}
 	}
 	fOutputSubDir = temp;
 }
@@ -354,7 +366,6 @@ void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag){
 		else if(nargs < 19) y2 = -999.;
 		else if(nargs < 20) req = "";
 		else req = TCut(reqbuff);
-		// cout << "varname=" << varname << " req=" << req << " sampleindex=" << sampleindex << " nbins=" << nbins << " xmin=" << xmin << " xmax=" << xmax << " logy=" << logy << " x1=" << x1 << " x2=" << x2 << endl;
 		if(tag=="tag") tag = fTag[sampleindex];
 		if(tree==NULL) tree = fTree[sampleindex];
 		fOutputSubDir = TString(path);
@@ -379,8 +390,8 @@ void AnaClass::plotAllBranches(TTree *tree, TString tag){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = tag + "_" + branchname;
-		printPNG(c, outputname, fOutputSubDir);
-		printEPS(c, outputname, fOutputSubDir);
+		Util::PrintPNG(c, outputname, fOutputSubDir);
+		Util::PrintEPS(c, outputname, fOutputSubDir);
 	}
 }
 void AnaClass::plotAllBranches(int sampleindex){
@@ -401,8 +412,8 @@ void AnaClass::plotAllBranches(int sampleindex){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = fTag[sampleindex] + "_" + branchname;
-		printPNG(c, outputname, fOutputSubDir);
-		printEPS(c, outputname, fOutputSubDir);
+		Util::PrintPNG(c, outputname, fOutputSubDir);
+		Util::PrintEPS(c, outputname, fOutputSubDir);
 	}
 }
 
@@ -454,23 +465,16 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag){
 	hfir->DrawCopy("hist");
 
 	TString outputname = tag + "ElID";
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+	
+	delete col;
+	delete hfir;
 }
 
 /*****************************************************************************
 ###################| Utilities |##############################################
 *****************************************************************************/
-
-/****************************************************************************/
-void AnaClass::setOutputDir(TString dir){
-	if(!dir.EndsWith("/")) dir += "/";
-	fOutputDir = dir;
-	// Create directory if needed
-	char cmd[100];
-	sprintf(cmd,"mkdir -p %s", fOutputDir.Data());
-	system(cmd);
-}
 
 /****************************************************************************/
 TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
@@ -507,7 +511,10 @@ TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, 
 /****************************************************************************/
 TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree* tree, bool draw, const char* drawopt){
 	char out[1000];
-	TH2D* h1 = new TH2D(histn,histn,nbinsx,xmin,xmax,nbinsy,ymin,ymax);
+	int nbinsx_auto(nbinsx), nbinsy_auto(nbinsy);
+	if(nbinsx == 0) nbinsx_auto = OptNBins(tree->Draw(arg1, reqs, "goff"));
+	if(nbinsy == 0) nbinsy_auto = OptNBins(tree->Draw(arg2, reqs, "goff"));
+	TH2D* h1 = new TH2D(histn,histn,nbinsx_auto,xmin,xmax,nbinsy_auto,ymin,ymax);
 	sprintf(out,"%s:%s",arg2,arg1);
 	tree->Project(histn,out,reqs);
 	if(draw) h1->Draw(drawopt);
@@ -522,16 +529,10 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 	if(!hfir){ cout << "AnaClass::plotVar() ==> Error, missing input histogram ..." << endl; return;}
 	if(ofilename == "ofilename") ofilename = convertVarName2(var);
 	hfir->SetXTitle(convertVarName(var));
-	hfir->SetLineWidth(2);
-	hfir->SetFillColor(15);
-	hfir->SetFillStyle(1001);
 	char ctitle[1000];
 	sprintf(ctitle,"Plot of %s: %s", var, tag.Data());
 	TCanvas *col = makeCanvas(ctitle);
-	col->SetFillStyle(0);
-	col->SetFrameFillStyle(0);
 	col->cd();
-	gPad->SetFillStyle(0);
 	if(logy) col->SetLogy(1);
 
 	// Determine plotting range
@@ -564,10 +565,13 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 	refValues(var, hfir);
 
 	TString outputname = tag + ofilename;
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+	
+	printCheckList(var, hfir, fOutputDir + fChecklistFile);
 
-	printCheckList(var, hfir);
+	delete col;
+	delete hfir;
 }
 
 /****************************************************************************/
@@ -575,10 +579,10 @@ void AnaClass::refValues(const char* var, TH1D* h){
 	double percent1 = 0.05;
 	double percent2 = 0.01;
 	if (!strcmp(var, "MuPt")         || !strcmp(var, "ElPt")      || !strcmp(var, "JPt") ||
-		 !strcmp(var, "MuJESCorrMET") || !strcmp(var, "TCMET")     ||
-		 !strcmp(var, "PFMET")        || !strcmp(var, "SumEt")     ||
-		 !strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
-	    !strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ) {
+		!strcmp(var, "MuJESCorrMET") || !strcmp(var, "TCMET")     ||
+		!strcmp(var, "PFMET")        || !strcmp(var, "SumEt")     ||
+		!strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
+	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ) {
 		tailFraction(h, percent1);
 		tailFraction(h, percent2);
 	}
@@ -586,7 +590,6 @@ void AnaClass::refValues(const char* var, TH1D* h){
 
 /****************************************************************************/
 double AnaClass::tailFraction(TH1D* h, double frac){
-
 	double binValue = -999.;
 	int nbins = h->GetNbinsX();
 	double tail = frac * h->Integral();
@@ -623,85 +626,54 @@ double AnaClass::tailFraction(TH1D* h, double frac){
 }
 
 /****************************************************************************/
-void AnaClass::printCheckList(const char* var, TH1D* h){
-// Prints the CheckList to file fCheckList
-
+void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
+// Prints the CheckList to file filename
+	ofstream file;
+	file.open(filename, ios::app);
 	double percent1 = 0.05;
 	double percent2 = 0.01;
 	double etaLow = 1.44, etaHigh = 3.;
 	double d0PVLow = 0.02, d0PVHigh = 0.5;
 	double isoLow = 0.3, isoHigh = 1.;
 
-	bool varprnt = false;
-	if (!strcmp(var, "MuPt") || !strcmp(var, "ElPt") || !strcmp(var, "JPt") ||
-		!strcmp(var, "MuJESCorrMET") || !strcmp(var, "TCMET") ||
-		!strcmp(var, "PFMET") || !strcmp(var, "SumEt") ||
-		!strcmp(var, "ECALSumEt") || !strcmp(var, "HCALSumEt") ||
-	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") )  {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printAverage(var, h);
-		printTailFraction(var, h, percent1);
-		printTailFraction(var, h, percent2);
+	file << "* " << var << endl;
+	if( !strcmp(var, "MuPt")         || !strcmp(var, "ElPt")         || !strcmp(var, "JPt") ||
+		 !strcmp(var, "TCMET")        || !strcmp(var, "MuJESCorrMET") || !strcmp(var, "PFMET") ||
+		 !strcmp(var, "SumEt")        || !strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
+		 !strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ){
+		file << printAverage(var, h) << endl;
+		file << printTailFraction(var, h, percent1) << endl;
+		file << printTailFraction(var, h, percent2) << endl;
 	}
-	if (!strcmp(var, "MuD0PV") ||
-		!strcmp(var, "MuDzPV") || !strcmp(var, "MuNChi2") ||
-		!strcmp(var, "MuNTkHits") || !strcmp(var, "ElD0PV") ||
-		!strcmp(var, "ElDzPV") || !strcmp(var, "Elfbrem") ||
-		!strcmp(var, "JEMfrac") || !strcmp(var, "JCHfrac") ||
-		!strcmp(var, "JNConstituents") || !strcmp(var, "MuRelIso03") ||
-		!strcmp(var, "MuIso03SumPt") || !strcmp(var, "MuIso03EmEt") ||
-		!strcmp(var, "MuIso03HadEt") || !strcmp(var, "ElIso") ||
-		!strcmp(var, "ElPtSum") || !strcmp(var, "ElEmEtSum") ||
-	!strcmp(var, "ElHadEtSum") ) {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printAverage(var, h);
+	if( !strcmp(var, "MuD0PV")         || !strcmp(var, "MuDzPV")       || !strcmp(var, "MuNChi2")      ||
+		 !strcmp(var, "MuNTkHits")      || !strcmp(var, "ElD0PV")       || !strcmp(var, "ElDzPV")       ||
+		 !strcmp(var, "Elfbrem")        || !strcmp(var, "JEMfrac")      || !strcmp(var, "JCHfrac")      ||
+		 !strcmp(var, "JNConstituents") || !strcmp(var, "MuRelIso03")   || !strcmp(var, "MuIso03SumPt") ||
+		 !strcmp(var, "MuIso03EmEt")    || !strcmp(var, "MuIso03HadEt") || !strcmp(var, "ElIso")        ||
+		 !strcmp(var, "ElPtSum")        || !strcmp(var, "ElEmEtSum")    || !strcmp(var, "ElHadEtSum") ){
+		file << printAverage(var, h) << endl;
 	}
-	if (!strcmp(var, "MuEta") || !strcmp(var, "ElEta") ||
-	!strcmp(var, "JEta") ) {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printAverage(var, h);
-		printRatio(var, h, etaLow, etaHigh, -etaHigh, etaHigh);
-		printRatio(var, h, -etaHigh, -etaLow, -etaHigh, etaHigh);
-		printRatio(var, h, 0., etaLow, -etaLow, 0.);
+	if( !strcmp(var, "MuEta") || !strcmp(var, "ElEta") || !strcmp(var, "JEta") ){
+		file << printAverage(var, h) << endl;
+		file << printRatio(var, h, etaLow, etaHigh, -etaHigh, etaHigh) << endl;
+		file << printRatio(var, h, -etaHigh, -etaLow, -etaHigh, etaHigh) << endl;
+		file << printRatio(var, h, 0., etaLow, -etaLow, 0.) << endl;
 	}
-	if (!strcmp(var, "PrimVtxx") || !strcmp(var, "PrimVtxy") ||
-		!strcmp(var, "PrimVtxz") || !strcmp(var, "PrimVtxNTracks") ||
-		!strcmp(var, "PrimVtxNChi2")  || !strcmp(var, "NTracks") ||
-	!strcmp(var, "MuEem") || !strcmp(var, "MuEHad") ) {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printAverage(var, h);
+	if( !strcmp(var, "PrimVtxx")       || !strcmp(var, "PrimVtxy")     || !strcmp(var, "PrimVtxz") ||
+		 !strcmp(var, "PrimVtxNTracks") || !strcmp(var, "PrimVtxNChi2") ||!strcmp(var, "NTracks")   ||
+		 !strcmp(var, "MuEem")          || !strcmp(var, "MuEHad") ){
+		file << printAverage(var, h) << endl;
 	}
-	if (!strcmp(var, "MuD0PV") || !strcmp(var, "ElD0PV") ) {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printRatio(var, h, -d0PVLow, d0PVLow, -d0PVHigh, d0PVHigh);
+	if( !strcmp(var, "MuD0PV") || !strcmp(var, "ElD0PV") ){
+		file << printRatio(var, h, -d0PVLow, d0PVLow, -d0PVHigh, d0PVHigh) << endl;
 	}
-	if (!strcmp(var, "MuRelIso03") || !strcmp(var, "ElIso") ) {
-		if (!varprnt) {
-			fCheckList << "* " << var << endl;
-			varprnt = true;
-		}
-		printRatio(var, h, 0., isoLow, 0., isoHigh);
+	if( !strcmp(var, "MuRelIso03") || !strcmp(var, "ElIso") ){
+		file << printRatio(var, h, 0., isoLow, 0., isoHigh) << endl;
 	}
-
 }
 
 /****************************************************************************/
-void AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
+TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 // Prints the value of the variable for which frac remains in the tail
 
 	double binValue = -999.;
@@ -713,7 +685,6 @@ void AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 	double tailp = tail + dtail;
 	double tailm = tail - dtail;
 	double tailSum = 0.;
-//	fCheckList << "  " << tailm << ", " << tail << ", " << tailp << endl;
 
 	int loc = 0, locp = 0, locm = 0;
 	for (int i = nbins+1; i >= 0; --i) {
@@ -735,31 +706,23 @@ void AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 	}
 	double binSize = h->GetBinWidth(loc);
 	if (binSize > dbinValue) dbinValue = binSize;
-//	fCheckList << "  " << h->GetBinCenter(locm) << ", " 
-//	<< h->GetBinCenter(loc) << ", " << h->GetBinCenter(locp) << endl;
-	fCheckList << "  For " << (float)frac << " of tail " << var
-		<< " = " << (float)binValue << " +- "
-		<< (float)dbinValue << endl;
-
+	TString result = Form("  For %f of tail %s = %f +- %f", frac, var, binValue, dbinValue);
+	return result;
 }
 
 /****************************************************************************/
-void AnaClass::printAverage(const char* var, TH1D* h) {
+TString AnaClass::printAverage(const char* var, TH1D* h) {
 // Prints the average of the histogram
-
 	double aver = h->GetMean(1);
 	double nevts = h->GetEntries();
 	double rms = h->GetRMS(1);
 	double daver = rms / sqrt(nevts);
-//	fCheckList << "   rms = " << rms << endl;
-	fCheckList << "  Mean value of " << var << " = " << aver
-		<< " +- " << daver << endl;
-
+	TString result = Form("  Mean value of %s = %f +- %f", var, aver, daver);
+	return result;
 }
 
 /****************************************************************************/
-void AnaClass::printRatio(const char* var, TH1D* h, 
-double x1, double x2, double y1, double y2){
+TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2){
 // Prints the ratio of entries for which (x1<var<x2) / (y1<var<y2)
 
 	int nbins = h->GetNbinsX();
@@ -808,10 +771,8 @@ double x1, double x2, double y1, double y2){
 			+ (yunc-xunc)*(yunc-xunc)*xycor )
 			/ ( (yunc+xycor)*(yunc+xycor) );
 	}
-	fCheckList << "  Ratio (" << x1 << "<" << var << "<" << x2 << ") / ("
-		<< y1 << "<" << var << "<" << y2 << ") = " << rat 
-		<< " +- " << drat << endl;
-
+	TString result = Form("  Ratio (%f<%s<%f) / (%f<%s<%f) = %f +- %f", x1, var, x2, y1, var, y2, rat, drat);
+	return result;
 }
 
 /****************************************************************************/
@@ -823,13 +784,12 @@ void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TT
 
 	h->SetXTitle(convertVarName(var1));
 	h->SetYTitle(convertVarName(var2));
+	h->GetYaxis()->SetTitleOffset(1.25);
 	h->SetMarkerStyle(markstyle);
 
 	char ctitle[1000];
 	sprintf(ctitle,"Plot of %svs%s: %s", var1, var2, tag.Data());
 	TCanvas *col = makeCanvas(ctitle);
-	col->SetFillStyle(0);
-	col->SetFrameFillStyle(0);
 	col->cd();
 	gPad->SetFillStyle(0);
 	if(logx) col->SetLogx(1);
@@ -879,9 +839,12 @@ void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TT
 		l4->Draw();
 	}
 
-	TString outputname = tag + "_" + convertVarName2(var1) + "-" + convertVarName2(var2);
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	TString outputname = tag + convertVarName2(var1) + "-" + convertVarName2(var2);
+	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+	
+	delete col;
+	delete h;
 }
 
 /****************************************************************************/
@@ -959,8 +922,8 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	}
 
 	TString outputname = fTag[index1] + "_" + fTag[index2] + "_" + convertVarName2(var);
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	Util::PrintPNG(col, outputname, fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1028,8 +991,8 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	}
 	char out[100];
 	sprintf(out, "%s_%s-%s", fTag[sampleindex].Data(), convertVarName2(var1).Data(), convertVarName2(var2).Data());
-	printPNG(col, out, fOutputSubDir);
-	printEPS(col, out, fOutputSubDir);
+	Util::PrintPNG(col, out, fOutputSubDir);
+	Util::PrintEPS(col, out, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1041,48 +1004,48 @@ req1, req2: arguments to be used
 file: file to be used
 nbins, xmin, xmax: specification for the histogram
 logy toggle logarithmiy plot                                       */
-gStyle->SetOptStat("");
-if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+	gStyle->SetOptStat("");
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+	TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
 
-if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
-if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
 
-hfir->SetXTitle(convertVarName(var));
-hfir->SetLineWidth(2);
-hfir->SetFillColor(15);
-hfir->SetFillStyle(1001);
-hsec->SetLineWidth(2);
-hsec->SetLineColor(kBlue);
-hsec->SetFillColor(kBlue);
-hsec->SetFillStyle(3005);
-TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-col->cd();
-if(logy) col->SetLogy(1);
-hfir = normHist(hfir);
-hsec = normHist(hsec);
-double max1 = hfir->GetMaximum();
-double max2 = hsec->GetMaximum();
-double max = (max1>max2)?max1:max2;
-if(logy) max = 5*max;
-else max = 1.05*max;
-hfir->SetMaximum(max);
-hsec->SetMaximum(max);
+	hfir->SetXTitle(convertVarName(var));
+	hfir->SetLineWidth(2);
+	hfir->SetFillColor(15);
+	hfir->SetFillStyle(1001);
+	hsec->SetLineWidth(2);
+	hsec->SetLineColor(kBlue);
+	hsec->SetFillColor(kBlue);
+	hsec->SetFillStyle(3005);
+	TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+	col->cd();
+	if(logy) col->SetLogy(1);
+	hfir = normHist(hfir);
+	hsec = normHist(hsec);
+	double max1 = hfir->GetMaximum();
+	double max2 = hsec->GetMaximum();
+	double max = (max1>max2)?max1:max2;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	hfir->SetMaximum(max);
+	hsec->SetMaximum(max);
 
-TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
-leg->AddEntry(hfir,tag1,"f");
-leg->AddEntry(hsec,tag2,"f");
-leg->SetFillColor(0);
-leg->SetTextFont(fFont);
+	TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
+	leg->AddEntry(hfir,tag1,"f");
+	leg->AddEntry(hsec,tag2,"f");
+	leg->SetFillColor(0);
+	leg->SetTextFont(fFont);
 
-hfir->DrawCopy("hist");
-hsec->DrawCopy("histsame");
-leg->Draw();
-TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
-printPNG(col, outputname, fOutputSubDir);
-printEPS(col, outputname, fOutputSubDir);
+	hfir->DrawCopy("hist");
+	hsec->DrawCopy("histsame");
+	leg->Draw();
+	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
+	Util::PrintPNG(col, outputname, fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1174,77 +1137,77 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "_" + fTag[index2] + "_" + fTag[index3];
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	Util::PrintPNG(col, outputname, fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
 void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy){
-/*		-	Creates an normalized overlay from a tree variable with three
-conditions
--	Arguments:
-var: tree. var to be drawn
-req1, req2, req3: arguments to be used
-file: file to be used
-nbins, xmin, xmax: specification for the histogram
-logy toggle logarithmiy plot                                       */
-gStyle->SetOptStat("");
-if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
-TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
+/*			-	Creates an normalized overlay from a tree variable with three
+	conditions
+	-	Arguments:
+	var: tree. var to be drawn
+	req1, req2, req3: arguments to be used
+	file: file to be used
+	nbins, xmin, xmax: specification for the histogram
+	logy toggle logarithmiy plot                                       */
+	gStyle->SetOptStat("");
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
+	TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
 
-if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
 
-hfir->SetXTitle(convertVarName(var));
-hfir->SetLineWidth(2);
-hfir->SetFillColor(15);
-hfir->SetFillStyle(1001);
-hsec->SetLineWidth(2);
-hsec->SetLineColor(kBlue);
-hsec->SetFillColor(kBlue);
-hsec->SetFillStyle(3005);
+	hfir->SetXTitle(convertVarName(var));
+	hfir->SetLineWidth(2);
+	hfir->SetFillColor(15);
+	hfir->SetFillStyle(1001);
+	hsec->SetLineWidth(2);
+	hsec->SetLineColor(kBlue);
+	hsec->SetFillColor(kBlue);
+	hsec->SetFillStyle(3005);
 
-hthr->SetLineWidth(2);
-hthr->SetLineColor(kRed);
-hthr->SetFillColor(kRed);
-hthr->SetFillStyle(3003);
+	hthr->SetLineWidth(2);
+	hthr->SetLineColor(kRed);
+	hthr->SetFillColor(kRed);
+	hthr->SetFillStyle(3003);
 
-TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-col->cd();
-if(logy) col->SetLogy(1);
-hfir = normHist(hfir);
-hsec = normHist(hsec);
-hthr = normHist(hthr);
-double max1 = hfir->GetMaximum();
-double max2 = hsec->GetMaximum();
-double max3 = hthr->GetMaximum();
-double tempmax = (max1>max2)?max1:max2;
-double max = (tempmax>max3)?tempmax:max3;
-if(logy) max = 5*max;
-else max = 1.05*max;
-hfir->SetMaximum(max);
-hsec->SetMaximum(max);
-hthr->SetMaximum(max);
+	TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+	col->cd();
+	if(logy) col->SetLogy(1);
+	hfir = normHist(hfir);
+	hsec = normHist(hsec);
+	hthr = normHist(hthr);
+	double max1 = hfir->GetMaximum();
+	double max2 = hsec->GetMaximum();
+	double max3 = hthr->GetMaximum();
+	double tempmax = (max1>max2)?max1:max2;
+	double max = (tempmax>max3)?tempmax:max3;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	hfir->SetMaximum(max);
+	hsec->SetMaximum(max);
+	hthr->SetMaximum(max);
 
-TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
-leg->AddEntry(hfir,tag1,"f");
-leg->AddEntry(hsec,tag2,"f");
-leg->AddEntry(hthr,tag3,"f");
-leg->SetFillColor(0);
-leg->SetTextFont(fFont);
+	TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
+	leg->AddEntry(hfir,tag1,"f");
+	leg->AddEntry(hsec,tag2,"f");
+	leg->AddEntry(hthr,tag3,"f");
+	leg->SetFillColor(0);
+	leg->SetTextFont(fFont);
 
-hfir->DrawCopy("hist");
-hsec->DrawCopy("histsame");
-hthr->DrawCopy("histsame");
-leg->Draw();
-TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
-printPNG(col, outputname, fOutputSubDir);
-printEPS(col, outputname, fOutputSubDir);
+	hfir->DrawCopy("hist");
+	hsec->DrawCopy("histsame");
+	hthr->DrawCopy("histsame");
+	leg->Draw();
+	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
+	Util::PrintPNG(col, outputname, fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1352,8 +1315,8 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "-" + fTag[index2] + "-" + fTag[index3] + "-" + fTag[index4];
-	printPNG(col, outputname, fOutputSubDir);
-	printEPS(col, outputname, fOutputSubDir);
+	Util::PrintPNG(col, outputname, fOutputSubDir);
+	Util::PrintEPS(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1388,47 +1351,6 @@ int AnaClass::OptNBins(int nentries){
 	if(nentries < 5000) return 80;
 	if(nentries < 10000) return 100;
 	else return 200;
-}
-
-/****************************************************************************/
-void AnaClass::printPNG(TCanvas *cin, const char* name, const char* dir){
-/*		-	Prints a ROOT TCanvas Object to a .png file
-name is the bare output filename, e.g. "fit_4_8",
-dir is the output directory (inside the overall output dir.)
-including the last "/", e.g. "fits/SG/"									 */
-	// Create sub directories if needed
-char cmd[100];
-sprintf(cmd,"mkdir -p %s%s",fOutputDir.Data(),dir);
-system(cmd);
-
-TString filen = TString(name);
-TString direc = TString(dir);
-TString file = fOutputDir;
-file += direc;
-file += filen;
-file += ".png";
-cin->Print(file,"png");
-}
-
-/****************************************************************************/
-void AnaClass::printEPS(TCanvas *cin, const char* name, const char* dir){
-/*		-	Prints a ROOT TCanvas Object to a .eps file
-name is the bare output filename, e.g. "fit_4_8",
-dir is the output directory (inside the overall output dir.)
-including the last "/", e.g. "fits/SG/"									 */
-	// Create sub directories if needed
-char cmd[100];
-sprintf(cmd,"mkdir -p %s%seps/",fOutputDir.Data(),dir);
-system(cmd);
-
-TString filen = TString(name);
-TString direc = TString(dir);
-TString file = fOutputDir;
-file += direc;
-file += "eps/";
-file += filen;
-file += ".eps";
-cin->SaveAs(file);
 }
 
 /****************************************************************************/

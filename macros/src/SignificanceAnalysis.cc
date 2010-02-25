@@ -1,5 +1,6 @@
 #include "SignificanceAnalysis.hh"
 #include "TreeReader.hh"
+#include "Utilities.hh"
 
 using namespace std;
 
@@ -208,8 +209,8 @@ void SignificanceAnalysis::End(){
 		fH_ptdev[i]->SetMaximum(4);
 		fH_ptdev[i]->DrawCopy("colz");
 		fTlat->DrawLatex(0.11,0.92, canvtitle);
-		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
-		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
 
 		// gStyle->SetPalette(ncol1, colors1);
 
@@ -220,8 +221,8 @@ void SignificanceAnalysis::End(){
 		fH_ptsum[i]->SetMinimum(0);
 		fH_ptsum[i]->DrawCopy("lego2 z");
 		fTlat->DrawLatex(0.11,0.92, canvtitle);
-		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
-		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
 
 		canvname = "PTEvt_" + pnames[i];
 		canvtitle = "Event multiplicity for " + pnamel[i];
@@ -230,8 +231,8 @@ void SignificanceAnalysis::End(){
 		fH_ptevt[i]->SetMinimum(0);
 		fH_ptevt[i]->DrawCopy("lego2 z");
 		fTlat->DrawLatex(0.11,0.92, canvtitle);
-		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
-		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
 
 		canvname = "PTAvg_" + pnames[i];
 		canvtitle = "pT Average for " + pnamel[i];
@@ -240,8 +241,8 @@ void SignificanceAnalysis::End(){
 		fH_ptavg[i]->SetMinimum(0);
 		fH_ptavg[i]->DrawCopy("lego2 z");
 		fTlat->DrawLatex(0.11,0.92, canvtitle);
-		printPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
-		printEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintPNG(canv, fTag + "_" + canvname, fOutputDir+subdir);
+		Util::PrintEPS(canv, fTag + "_" + canvname, fOutputDir+subdir);
 	}
 
 	// Write the histograms

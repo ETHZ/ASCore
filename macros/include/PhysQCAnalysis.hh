@@ -19,24 +19,29 @@
 #include <TBranch.h>
 
 #include "TreeReader.hh"
+#include "TreeCleaner.hh"
 #include "AnaClass.hh"
 #include "UserAnalysisBase.hh"
 
 class PhysQCAnalysis : public UserAnalysisBase{
 public:
-	PhysQCAnalysis(TreeReader *tr = 0);
+	PhysQCAnalysis(TreeReader *tr = NULL, TreeCleaner *tc = NULL);
 	virtual ~PhysQCAnalysis();
 
-	void Begin(const char* filename = "PhysQC.root");
+	void Begin();
 	void Analyze();
 	void End();
 	void MakePlots(TString, TTree*);
 	void PlotTriggerStats();
 	
 	TreeReader *fTR;
+	TreeCleaner *fTC;
 	AnaClass *fAC;
 
 private:
+	
+	TH1D *fMuHistos[3];
+	TH1D *fMETHistos[5];
 
 };
 #endif

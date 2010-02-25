@@ -22,9 +22,6 @@ public:
 	TLatex *fTlat;
 
 	int fVerbose;
-	
-	virtual void printPNG(TCanvas*, TString, TString);
-	virtual void printEPS(TCanvas*, TString, TString);
 
 private:
 	// Object quality cuts:

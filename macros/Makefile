@@ -69,6 +69,9 @@ PhysQCAnalysis: src/PhysQCAnalysis.cc
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/PhysQCAnalysis.o $<
 
 # Helper Classes =================================
+Utilities: include/helper/Utilities.hh
+	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/Utilities.o $<
+
 AnaClass: src/helper/AnaClass.cc
 	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/AnaClass.o $<
 
@@ -92,6 +95,7 @@ clean:
 
 PhysQC:
 	touch src/exe/RunPhysQCAnalyzer.C
+	# make Utilities
 	make AnaClass
 	make PhysQCAnalyzer
 	make PhysQCAnalysis
@@ -100,6 +104,7 @@ PhysQC:
 all:
 	touch src/exe/RunTreeAnalyzer.C
 	touch src/exe/RunPhysQCAnalyzer.C
+	# make Utilities
 	make TreeClassBase
 	make TreeReader
 	make TreeAnalyzerBase

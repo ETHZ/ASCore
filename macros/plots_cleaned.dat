@@ -2,13 +2,11 @@
 # SubPath        VarName          Sample#   Nbins    Xmin    Xmax   Logy X1    X2    Req     #
 ##############################################################################################
 # Notes:  > Nbins = 0 gives an 'optimal' number of bins                                      #
-#         > Sample# corresponds to sample in parfile.dat, is ignored when called with        #
-#           a tree as argument                                                               #
-#         > Logy is optional, equal to false by default                                      #
 #         > To give a Req without plotting lines, use -999 as X1 or X2 resp.                 #
 ##############################################################################################
 # E.g.:                                                                                      #
 # tmp/           MuPt             1         0        0.0     100.   1    20.   -999  NJets>2 #
+# 2 tmp/ var1, var2, sidx, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, req
 ##############################################################################################
 # Kinematics distributions for objects
 clean/ObjectKin/      NMus             0         10       0       10

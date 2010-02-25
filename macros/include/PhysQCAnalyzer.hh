@@ -8,6 +8,7 @@
 #include "TreeReader.hh"
 #include "TreeCleaner.hh"
 #include "PhysQCAnalysis.hh"
+#include "MultiplicityAnalysis.hh"
 #include "AnaClass.hh"
 
 class PhysQCAnalyzer : public TreeAnalyzerBase {
@@ -19,13 +20,10 @@ public:
 	void Loop();
 
 private:
-	
-	TTree *fTree;
-	TreeReader *fTR;
 	AnaClass *fAnaClass;
 	TreeCleaner *fTreeCleaner;
 	PhysQCAnalysis *fPhysQCAnalysis;
+	MultiplicityAnalysis *fMultiplicityAnalysis;
 
-	TStyle *fStyle;
 };
 #endif

@@ -14,7 +14,7 @@ TreeCleaner::~TreeCleaner(){
 void TreeCleaner::Begin(){
 	ReadCleaningParameters();
 	StatInit();
-	
+	Reset();
 	fCleanTreeFile = new TFile(fOutputDir + "CleanTree.root", "RECREATE");
 	fCleanTreeFile->mkdir("analyze", "analyze");
 	fCleanTreeFile->cd("analyze");
@@ -82,6 +82,11 @@ void TreeCleaner::End(){
 	fHstatFile->cd();
 	fHstatHistos->Write();
 	fHstatFile->Close();	
+}
+
+void TreeCleaner::Reset(){
+	fR12 = -999;
+	fR21 = -999;
 }
 
 void TreeCleaner::ReadCleaningParameters(const char* filename){
@@ -844,9 +849,9 @@ int TreeCleaner::CleanMET(double met, double metphi){
 		double dPhi1 = DeltaPhi(fTR->JPhi[imax1], metphi );
 		double dPhi2 = DeltaPhi(fTR->JPhi[imax2], metphi );
 		double pi = 3.141592654;
-		double r12 = sqrt(dPhi1*dPhi1 + (pi-dPhi2)*(pi-dPhi2) );
-		double r21 = sqrt(dPhi2*dPhi2 + (pi-dPhi1)*(pi-dPhi1) );
-		if( r12 < fClean_dR12min || r21 < fClean_dR21min ) return 2;
+		fR12 = sqrt(dPhi1*dPhi1 + (pi-dPhi2)*(pi-dPhi2) );
+		fR21 = sqrt(dPhi2*dPhi2 + (pi-dPhi1)*(pi-dPhi1) );
+		if( fR12 < fClean_dR12min || fR21 < fClean_dR21min ) return 2;
 	}
 	return 0;
 }

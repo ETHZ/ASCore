@@ -1,6 +1,7 @@
 #include "MultiplicityAnalysis.hh"
 #include "TreeReader.hh"
 #include "LeptJetStat.h"
+#include "Utilities.hh"
 
 using namespace std;
 
@@ -138,8 +139,8 @@ void MultiplicityAnalysis::End(){
 	fHljMult->DrawCopy("colz");
 	// fHljMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
-	printPNG(canv, fTag + "_ljMult", fOutputDir + subdir);
-	printEPS(canv, fTag + "_ljMult", fOutputDir + subdir);
+	Util::PrintPNG(canv, fTag + "_ljMult", fOutputDir + subdir);
+	Util::PrintEPS(canv, fTag + "_ljMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu multiplicity";
 	canv = new TCanvas("emuMult", canvtitle , 0, 0, 900, 700);
@@ -150,8 +151,8 @@ void MultiplicityAnalysis::End(){
 	fHemuMult->DrawCopy("colz");
 	// fHemuMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
-	printPNG(canv, fTag + "_emuMult", fOutputDir + subdir);
-	printEPS(canv, fTag + "_emuMult", fOutputDir + subdir);
+	Util::PrintPNG(canv, fTag + "_emuMult", fOutputDir + subdir);
+	Util::PrintEPS(canv, fTag + "_emuMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu Efficiency";
 	canv = new TCanvas("emuEffic", canvtitle , 0, 0, 900, 700);
@@ -160,8 +161,8 @@ void MultiplicityAnalysis::End(){
 	gPad->SetPhi(240);
 	fHemuEff->DrawCopy();
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
-	printPNG(canv, fTag + "_emuEffic", fOutputDir+subdir);
-	printEPS(canv, fTag + "_emuEffic", fOutputDir+subdir);
+	Util::PrintPNG(canv, fTag + "_emuEffic", fOutputDir+subdir);
+	Util::PrintEPS(canv, fTag + "_emuEffic", fOutputDir+subdir);
 
 
 	fMPHistFile->cd();

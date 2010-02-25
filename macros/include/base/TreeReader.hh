@@ -21,7 +21,8 @@ class TreeReader : public TreeClassBase{
 public:
 	TreeReader(TTree *tree=0, int flag = 111);
 	virtual ~TreeReader();
-	
+	inline virtual Long64_t GetEntries(){return fChain->GetEntries();};
+
 private:
 	
 };

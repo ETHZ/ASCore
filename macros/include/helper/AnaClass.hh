@@ -48,7 +48,7 @@
 #include <map>
 #include <time.h> // access to date/time
 
-// #include "TreeClass.hh"
+#include "Utilities.hh"
 
 // class AnaClass: public TObject {
 class AnaClass{
@@ -88,10 +88,10 @@ public:
 	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999.);
 	void refValues(const char* var, TH1D* h);
 	double tailFraction(TH1D* h, double frac);
-	void printCheckList(const char* var, TH1D* h);
-	void printTailFraction(const char* var, TH1D* h, double frac);
-	void printAverage(const char* var, TH1D* h);
-	void printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
+	void printCheckList(const char* var, TH1D* h, const char* filename);
+	TString printTailFraction(const char* var, TH1D* h, double frac);
+	TString printAverage(const char* var, TH1D* h);
+	TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
 	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999.);
 	void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
@@ -102,8 +102,6 @@ public:
 	TString convertVarName(const char* var);
 	TString convertVarName2(const char* var);
 	int OptNBins(int);
-	void printPNG(TCanvas*, const char*, const char* = "");
-	void printEPS(TCanvas*, const char*, const char* = "");
 	TH1D* normHist(const TH1D *ihist);
 	TH2D* normHist(const TH2D *ihist);
 	TCanvas* makeCanvas(const char*);
@@ -113,8 +111,10 @@ public:
 /*****************************************************************************
 ##################| Variables |###############################################
 *****************************************************************************/
-	void setOutputDir(TString dir);
-	inline void setGlobalTag(TString tag){ fGlobalTag = tag;};
+	inline void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
+	inline void setOutputSubDir(TString dir){ fOutputSubDir = Util::MakeOutputDir(dir); };
+	inline void setCheckListFile(TString file){ fChecklistFile = file; };
+	inline void setGlobalTag(TString tag){ fGlobalTag = tag; };
 	TFile *fFile[20];
 	TString fFileName[20];
 	TString fTreeSubDirName[20]; // Name of subdirectory inside rootfile where tree is
@@ -137,8 +137,8 @@ public:
 
 	TString fOutputDir;	  // Output directory for plots
 	TString fOutputSubDir; // Output subdirectory for plots, changes for each use
-	
-	ofstream fCheckList;   // Output filename for the Check List
+	TString fChecklistFile; // Name of checklist file
+
 private:
 	// ClassDef(AnaClass,2)
 };
