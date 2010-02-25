@@ -1,9 +1,9 @@
 #include "PhysQCAnalysis.hh"
-#include "TreeReader.hh"
-#include "TreeAnalyzerBase.hh"
+#include "base/TreeReader.hh"
+#include "helper/AnaClass.hh"
+#include "base/TreeAnalyzerBase.hh"
 #include "TreeCleaner.hh"
-#include "AnaClass.hh"
-#include "Utilities.hh"
+#include "helper/Utilities.hh"
 
 using namespace std;
 

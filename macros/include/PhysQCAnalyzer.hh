@@ -4,12 +4,12 @@
 #include <TTree.h>
 #include <TStyle.h>
 
-#include "TreeAnalyzerBase.hh"
-#include "TreeReader.hh"
+#include "base/TreeAnalyzerBase.hh"
+#include "base/TreeReader.hh"
 #include "TreeCleaner.hh"
 #include "PhysQCAnalysis.hh"
+#include "helper/AnaClass.hh"
 #include "MultiplicityAnalysis.hh"
-#include "AnaClass.hh"
 
 class PhysQCAnalyzer : public TreeAnalyzerBase {
 public:

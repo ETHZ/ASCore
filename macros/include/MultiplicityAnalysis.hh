@@ -18,9 +18,9 @@
 #include <TLeaf.h>
 #include <TBranch.h>
 
-#include "TreeReader.hh"
-#include "UserAnalysisBase.hh"
-#include "LeptJetStat.h"
+#include "base/TreeReader.hh"
+#include "base/UserAnalysisBase.hh"
+#include "helper/LeptJetStat.h"
 
 class MultiplicityAnalysis : public UserAnalysisBase{
 public:

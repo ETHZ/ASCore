@@ -38,7 +38,7 @@
 #include "TPaveStats.h"
 
 #include <iostream>
-#include <fstream.h>
+#include <fstream>
 #include <iomanip>
 #include <math.h>
 #include <vector>

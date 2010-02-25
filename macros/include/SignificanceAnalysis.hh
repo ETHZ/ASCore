@@ -18,8 +18,8 @@
 #include <TLeaf.h>
 #include <TBranch.h>
 
-#include "TreeReader.hh"
-#include "UserAnalysisBase.hh"
+#include "base/TreeReader.hh"
+#include "base/UserAnalysisBase.hh"
 
 class SignificanceAnalysis : public UserAnalysisBase{
 public:

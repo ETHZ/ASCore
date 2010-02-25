@@ -18,9 +18,9 @@
 #include <TLeaf.h>
 #include <TBranch.h>
 
-#include "TreeReader.hh"
-#include "UserAnalysisBase.hh"
-#include "Davismt2.h"
+#include "base/TreeReader.hh"
+#include "base/UserAnalysisBase.hh"
+#include "helper/Davismt2.h"
 
 class DiLeptonAnalysis : public UserAnalysisBase{
 public:

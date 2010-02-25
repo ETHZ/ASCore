@@ -4,8 +4,8 @@
 #include <TTree.h>
 #include <TStyle.h>
 
-#include "TreeAnalyzerBase.hh"
-#include "TreeReader.hh"
+#include "base/TreeAnalyzerBase.hh"
+#include "base/TreeReader.hh"
 #include "TreeCleaner.hh"
 #include "DiLeptonAnalysis.hh"
 #include "MultiplicityAnalysis.hh"

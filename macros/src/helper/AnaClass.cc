@@ -3,8 +3,8 @@
 *                                                                            *
 *                                                  (c) 2009 Benjamin Stieger *
 *****************************************************************************/
-#include "AnaClass.hh"
-#include "Utilities.hh"
+#include "helper/AnaClass.hh"
+#include "helper/Utilities.hh"
 
 // ClassImp(AnaClass);
 using namespace std;

@@ -18,10 +18,10 @@
 #include <TLeaf.h>
 #include <TBranch.h>
 
-#include "TreeReader.hh"
+#include "base/TreeReader.hh"
+#include "helper/AnaClass.hh"
+#include "base/UserAnalysisBase.hh"
 #include "TreeCleaner.hh"
-#include "AnaClass.hh"
-#include "UserAnalysisBase.hh"
 
 class PhysQCAnalysis : public UserAnalysisBase{
 public:

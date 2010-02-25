@@ -1,11 +1,11 @@
 #include "TreeAnalyzer.hh"
 
-#include "TreeAnalyzerBase.hh"
-#include "TreeReader.hh"
+#include "base/TreeAnalyzerBase.hh"
+#include "base/TreeReader.hh"
 #include "TreeCleaner.hh"
 #include "DiLeptonAnalysis.hh"
 #include "MultiplicityAnalysis.hh"
-#include "Utilities.hh"
+#include "helper/Utilities.hh"
 
 using namespace std;
 

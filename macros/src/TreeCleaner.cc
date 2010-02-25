@@ -1,5 +1,4 @@
 #include "TreeCleaner.hh"
-#include "TreeCleaner.hh"
 
 using namespace std;
 

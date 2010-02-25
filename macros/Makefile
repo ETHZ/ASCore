@@ -2,122 +2,52 @@ ROOTCFLAGS     = $(shell root-config --cflags)
 ROOTLIBS       = $(shell root-config --libs)
 ROOTGLIBS      = $(shell root-config --glibs)
 
+INCLUDES       = -I./include
+
 CXX            = g++
-CXXFLAGS       = -g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2
+CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES)
 LD             = g++
 LDFLAGS        = -g
 SOFLAGS        = -shared
 
 
-ARCH         : = $(shell root-config --arch)
-PLATFORM     : = $(shell root-config --platform)
-
-
 CXXFLAGS      += $(ROOTCFLAGS)
-#CXX           += -I./
 LIBS           = $(ROOTLIBS) 
 
-NGLIBS         = $(ROOTGLIBS) 
-NGLIBS        += -lMinuit -lMinuit2
+NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
-INCLUDEDIR1    = ./include/
-CXX           += -I$(INCLUDEDIR1)
-INCLUDEDIR2    = ./include/base/
-CXX           += -I$(INCLUDEDIR2)
-INCLUDEDIR3    = ./include/helper/
-CXX           += -I$(INCLUDEDIR3)
-OUTLIB         = ./obj/
+SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
+                 src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc \
+                 src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysis.cc src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc \
+                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc
+
+OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
+
 
 .SUFFIXES: .cc,.C,.hh,.h
-.PREFIXES: ./lib/
+.PHONY : clean purge all depend PhysQC
 
-# Base Classes ===================================
-TreeClassBase: src/base/TreeClassBase.C
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeClassBase.o $<
+# Rules ====================================
+all: RunTreeAnalyzer PhysQC 
 
-TreeReader: src/base/TreeReader.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeReader.o $<
+PhysQC: RunPhysQCAnalyzer
 
-TreeAnalyzerBase: src/base/TreeAnalyzerBase.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeAnalyzerBase.o $<
+RunTreeAnalyzer: src/exe/RunTreeAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
-UserAnalysisBase: src/base/UserAnalysisBase.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/UserAnalysisBase.o $<
-
-# Analyzers ======================================
-TreeAnalyzer: src/TreeAnalyzer.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeAnalyzer.o $<
-
-PhysQCAnalyzer: src/PhysQCAnalyzer.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/PhysQCAnalyzer.o $<
-
-# UserAnalysis Classes ===========================
-DiLeptonAnalysis: src/DiLeptonAnalysis.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/DiLeptonAnalysis.o $<
-
-TreeCleaner: src/TreeCleaner.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/TreeCleaner.o $<
-
-MultiplicityAnalysis: src/MultiplicityAnalysis.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/MultiplicityAnalysis.o $<
-
-SignificanceAnalysis: src/SignificanceAnalysis.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/SignificanceAnalysis.o $<
-
-PhysQCAnalysis: src/PhysQCAnalysis.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/PhysQCAnalysis.o $<
-
-# Helper Classes =================================
-Utilities: include/helper/Utilities.hh
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/Utilities.o $<
-
-AnaClass: src/helper/AnaClass.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/AnaClass.o $<
-
-Davismt2: src/helper/Davismt2.c
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/Davismt2.o $<
-
-LeptJetStat: src/helper/LeptJetStat.cc
-	$(CXX) $(CXXFLAGS) -c -o $(OUTLIB)/LeptJetStat.o $<
-
-# Executables ====================================
-RunTreeAnalyzer: src/exe/RunTreeAnalyzer.C
-	$(CXX) $(CXXFLAGS) -ldl -o RunTreeAnalyzer $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
-
-RunPhysQCAnalyzer: src/exe/RunPhysQCAnalyzer.C
-	$(CXX) $(CXXFLAGS) -ldl -o RunPhysQCAnalyzer $(OUTLIB)/*.o  $(GLIBS) $(LDFLAGS) $ $<
+RunPhysQCAnalyzer: src/exe/RunPhysQCAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 clean:
-	rm -f $(OUTLIB)*.o
-	rm -f RunTreeAnalyzer
-	rm -f RunPhysQCAnalyzer
+	$(RM) $(OBJS)
+	$(RM) RunTreeAnalyzer
+	$(RM) RunPhysQCAnalyzer
 
-PhysQC:
-	touch src/exe/RunPhysQCAnalyzer.C
-	# make Utilities
-	make AnaClass
-	make PhysQCAnalyzer
-	make PhysQCAnalysis
-	make RunPhysQCAnalyzer
+purge:
+	$(RM) $(OBJS)
 
-all:
-	touch src/exe/RunTreeAnalyzer.C
-	touch src/exe/RunPhysQCAnalyzer.C
-	# make Utilities
-	make TreeClassBase
-	make TreeReader
-	make TreeAnalyzerBase
-	make UserAnalysisBase
-	make TreeAnalyzer
-	make PhysQCAnalyzer
-	make TreeCleaner
-	make DiLeptonAnalysis
-	make MultiplicityAnalysis
-	make SignificanceAnalysis
-	make PhysQCAnalysis
-	make AnaClass
-	make LeptJetStat
-	make Davismt2
-	make RunTreeAnalyzer
-	make RunPhysQCAnalyzer
+deps: $(SRCS)
+	makedepend $(INCLUDES) $^
+
+# DO NOT DELETE THIS LINE -- make depend needs it

@@ -1,7 +1,7 @@
 #include "MultiplicityAnalysis.hh"
-#include "TreeReader.hh"
-#include "LeptJetStat.h"
-#include "Utilities.hh"
+#include "base/TreeReader.hh"
+#include "helper/LeptJetStat.h"
+#include "helper/Utilities.hh"
 
 using namespace std;
 

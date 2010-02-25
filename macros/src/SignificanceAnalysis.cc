@@ -1,6 +1,6 @@
 #include "SignificanceAnalysis.hh"
-#include "TreeReader.hh"
-#include "Utilities.hh"
+#include "base/TreeReader.hh"
+#include "helper/Utilities.hh"
 
 using namespace std;
 
