@@ -5,6 +5,7 @@
 #include "TreeCleaner.hh"
 #include "DiLeptonAnalysis.hh"
 #include "MultiplicityAnalysis.hh"
+#include "SignificanceAnalysis.hh"
 #include "helper/Utilities.hh"
 
 using namespace std;

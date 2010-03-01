@@ -17,7 +17,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunTreeReader [-d dir] [-v verbose] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunTreeAnalyzer [-d dir] [-v verbose] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
 	cout << "               default is TempOutput/               " << endl;

@@ -18,7 +18,7 @@ void TreeCleaner::Begin(){
 	fCleanTreeFile->mkdir("analyze", "analyze");
 	fCleanTreeFile->cd("analyze");
 	fCleanTree = fTR->fChain->CloneTree(0);
-	fCleanTree->CopyAddresses(fTR->fChain);	
+	fCleanTree->CopyAddresses(fTR->fChain);
 }
 
 void TreeCleaner::Analyze(){

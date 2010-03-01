@@ -4,6 +4,7 @@
 #include <TTree.h>
 #include <TString.h>
 #include "TreeReader.hh"
+#include "helper/Utilities.hh"
 
 class TreeAnalyzerBase {
 public:
@@ -13,10 +14,9 @@ public:
 	virtual void EndJob();
 	virtual void Loop();
 
-	virtual void SetStyle();
-	virtual void SetOutputDir(TString);
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
-
+	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
+	
 	TString fOutputDir;
 	int fVerbose;
 

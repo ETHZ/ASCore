@@ -14,7 +14,7 @@ public:
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 
-	void SetOutputDir(TString dir);
+	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 
 	TreeReader *fTR;
 	TString fOutputDir;

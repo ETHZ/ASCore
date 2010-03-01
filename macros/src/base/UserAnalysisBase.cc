@@ -20,16 +20,6 @@ void UserAnalysisBase::Analyze(){}
 
 void UserAnalysisBase::End(){}
 
-void UserAnalysisBase::SetOutputDir(TString dir){
-	if(!dir.EndsWith("/")) dir += "/";
-	fOutputDir = dir;
-	// Create directory if needed
-	//  >> NOTE: This function needs to be called before the booking functions!
-	char cmd[100];
-	sprintf(cmd,"mkdir -p %s", fOutputDir.Data());
-	system(cmd);
-};
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Cut Stuff //////////////////////////////////////////////////////////////////////////////////
 void UserAnalysisBase::ReadObjCuts(const char* filename){
