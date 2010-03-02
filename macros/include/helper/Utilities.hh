@@ -6,6 +6,9 @@
 #include "TStyle.h"
 #include "TString.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 namespace Util {
 	inline TString MakeOutputDir(TString dir){
 		if(!dir.EndsWith("/")) dir += "/";
