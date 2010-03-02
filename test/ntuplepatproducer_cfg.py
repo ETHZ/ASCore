@@ -108,6 +108,7 @@ switchJetCollection(process,cms.InputTag(recoJet_src),
                     doType1MET   = True,
                     genJetCollection=cms.InputTag(genJet_src)
                     )
+process.ak5JetID.src = cms.InputTag(recoJet_src)                
 
 if runon=='data':
 	removeMCMatching(process, 'All')
@@ -144,7 +145,8 @@ process.analyze.isRealData	= cms.untracked.bool(runon=='data')
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
 process.p = cms.Path(
-    process.patDefaultSequence
+    process.ak5JetID
+    + process.patDefaultSequence
     + process.metCorSequence
     + process.mybtag
     + process.analyze
