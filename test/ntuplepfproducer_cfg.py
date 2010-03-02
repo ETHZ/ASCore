@@ -2,8 +2,6 @@ import FWCore.ParameterSet.Config as cms
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 
 process = cms.Process("NTupleProducer")
-# Starting with a PAT skeleton process
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
 ### Message Logger #############################################################
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -16,9 +14,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 ### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
-#runon = 'data'
+runon = 'data'
 #runon = 'MC31x'
-runon = 'MC34x'
+#runon = 'MC34x'
 #recoType = 'RECO'
 #recoType = 'PAT'
 recoType = 'PF'
@@ -100,7 +98,9 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 # Configure PAT to use PF2PAT instead of AOD sources
-from PhysicsTools.PatAlgos.tools.pfTools import *		
+from PhysicsTools.PatAlgos.tools.pfTools import *
+# Just to make it work...
+process.out = cms.OutputModule("PoolOutputModule",outputCommands=cms.untracked.vstring())
 usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5') 
 # Configure PAT to use AK5 jet collection	
 from PhysicsTools.PatAlgos.tools.jetTools import *
@@ -111,6 +111,7 @@ switchJetCollection(process,cms.InputTag(recoJet_src),
                     doType1MET   = False,
                     genJetCollection=cms.InputTag(genJet_src)
                     )
+process.ak5JetID.src = cms.InputTag(recoJet_src)                
 
 if runon=='data':
     process.patDefaultSequence.remove(process.genForPF2PATSequence)
@@ -167,7 +168,8 @@ process.analyze.isRealData	= cms.untracked.bool(runon=='data')
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
 process.p = cms.Path(
-    process.patDefaultSequence
+    process.ak5JetID
+    + process.patDefaultSequence
     + process.metCorSequence
     + process.mybtag
     + process.analyze
