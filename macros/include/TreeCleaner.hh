@@ -32,8 +32,6 @@ public:
 	void End();
 	void Reset();
 
-	TreeReader *fTR;
-
 	bool fClean;
 
 	TTree *fCleanTree;

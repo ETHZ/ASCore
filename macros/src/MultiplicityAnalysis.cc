@@ -6,7 +6,6 @@
 using namespace std;
 
 MultiplicityAnalysis::MultiplicityAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
-	fTR = tr;
 }
 
 MultiplicityAnalysis::~MultiplicityAnalysis(){

@@ -11,9 +11,7 @@
 using namespace std;
 
 TreeAnalyzer::TreeAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fTR = new TreeReader(tree);
 	fTree = tree;
-	fVerbose = false;
 
 	Util::SetStyle();
 
@@ -29,8 +27,6 @@ TreeAnalyzer::~TreeAnalyzer(){
 	delete fDiLeptonAnalysis;
 	delete fMultiplicityAnalysis;
 	delete fSignificanceAnalysis;
-	delete fTR;
-	if(!fTree) cout << "TreeAnalyzer ==> No chain!" << endl;
 }
 
 // Method for looping over the tree

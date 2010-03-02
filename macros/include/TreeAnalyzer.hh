@@ -13,16 +13,15 @@
 
 class TreeAnalyzer : public TreeAnalyzerBase {
 public:
-	TreeAnalyzer(TTree *tree = 0);
+	TreeAnalyzer(TTree *tree = NULL);
 	virtual ~TreeAnalyzer();
 	void BeginJob();
 	void EndJob();
 	void Loop();
 
 private:
-	
+
 	TTree *fTree;
-	TreeReader *fTR;
 	TreeCleaner *fTreeCleaner;
 	DiLeptonAnalysis *fDiLeptonAnalysis;
 	MultiplicityAnalysis *fMultiplicityAnalysis;

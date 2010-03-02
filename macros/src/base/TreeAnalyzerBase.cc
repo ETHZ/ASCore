@@ -12,6 +12,7 @@ TreeAnalyzerBase::TreeAnalyzerBase(TTree *tree) {
 
 TreeAnalyzerBase::~TreeAnalyzerBase(){
 	if(!fTR->fChain) cout << "TreeAnalyzerBase ==> No chain!" << endl;
+	delete fTR;
 }
 
 // Method for looping over the tree

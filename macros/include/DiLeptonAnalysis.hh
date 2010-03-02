@@ -32,8 +32,6 @@ public:
 	void Reset();
 	void End();
 
-	TreeReader *fTR;
-
 	Davismt2 *fMT2;
 
 private:

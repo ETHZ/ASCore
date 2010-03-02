@@ -9,8 +9,6 @@
 using namespace std;
 
 PhysQCAnalyzer::PhysQCAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fTR = new TreeReader(tree);
-	fVerbose = 0;
 	fTreeCleaner          = new TreeCleaner(fTR);
 	fPhysQCAnalysis       = new PhysQCAnalysis(fTR, fTreeCleaner);
 	fMultiplicityAnalysis = new MultiplicityAnalysis(fTR);
@@ -20,7 +18,6 @@ PhysQCAnalyzer::~PhysQCAnalyzer(){
 	delete fPhysQCAnalysis;
 	delete fTreeCleaner;
 	delete fMultiplicityAnalysis;
-	delete fTR;
 	if(!fTR->fChain) cout << "PhysQCAnalyzer ==> No chain!" << endl;
 }
 
@@ -30,8 +27,9 @@ void PhysQCAnalyzer::Loop(){
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
 	// nentries = 10;
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		if( jentry%200 == 0 ) cout << ">>> Processing event # " << jentry << endl;
+		if( jentry%200 == 0 ) cout << ">>> Processing event # " << jentry << endl;		
 		fTR->GetEntry(jentry);
+
 		fTreeCleaner         ->Analyze();
 		fPhysQCAnalysis      ->Analyze();
 		fMultiplicityAnalysis->Analyze();

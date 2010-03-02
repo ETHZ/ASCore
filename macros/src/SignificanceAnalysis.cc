@@ -5,7 +5,6 @@
 using namespace std;
 
 SignificanceAnalysis::SignificanceAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
-	fTR = tr;
 }
 
 SignificanceAnalysis::~SignificanceAnalysis(){

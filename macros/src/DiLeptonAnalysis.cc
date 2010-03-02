@@ -4,7 +4,6 @@
 using namespace std;
 
 DiLeptonAnalysis::DiLeptonAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
-	fTR = tr;
 }
 
 DiLeptonAnalysis::~DiLeptonAnalysis(){

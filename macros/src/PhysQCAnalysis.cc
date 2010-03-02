@@ -8,16 +8,15 @@
 using namespace std;
 
 PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBase(tr){
-	fTR = tr;
 	fTC = tc;
 	fTlat = new TLatex();
 	fAC = new AnaClass();
 	const unsigned int nmubins = 100;
 	Util::SetStyle();
-	fMuHistos[0] = new TH1D("MuDeltaPOverP", "Mu DeltaP/P",    nmubins, 0., 0.25 );
-	fMuHistos[1] = new TH1D("MuNChi2", "Mu Chi2/Ndof",         nmubins, 0., 20. );
-	fMuHistos[2] = new TH1D("MuNTkHits", "Mu # Tracker Hits",  nmubins, 0., 25. );
-	
+	fMuHistos[0] = new TH1D("MuDeltaPOverP", "Mu DeltaP/P",   nmubins, 0., 0.25 );
+	fMuHistos[1] = new TH1D("MuNChi2", "Mu Chi2/Ndof",        nmubins, 0., 20. );
+	fMuHistos[2] = new TH1D("MuNTkHits", "Mu # Tracker Hits", nmubins, 0., 25. );
+
 	const unsigned int nevbins = 100;
 	fMETHistos[0] = new TH1D("METR12", "MET R12", nevbins, 0, 6.283);
 	fMETHistos[1] = new TH1D("METR21", "MET R21", nevbins, 0, 6.283);

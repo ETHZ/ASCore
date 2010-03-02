@@ -2,6 +2,7 @@
 #define UserAnalysisBase_hh
 
 #include "TreeReader.hh"
+#include "helper/Utilities.hh"
 
 class UserAnalysisBase{
 public:

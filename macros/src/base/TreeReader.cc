@@ -1,11 +1,8 @@
 #include "base/TreeReader.hh"
 using namespace std;
 
-TreeReader::TreeReader(TTree *tree, int flag){
+TreeReader::TreeReader(TTree *tree) : TreeClassBase(tree){
 	if( tree == 0 ) cout << "TreeReader ==> No tree!" << endl;
-	
-	// Set all branch addresses, fChain = tree:
-	Init(tree);
 }
 
 TreeReader::~TreeReader(){

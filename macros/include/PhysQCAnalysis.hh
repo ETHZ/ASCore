@@ -34,14 +34,13 @@ public:
 	void MakePlots(TString, TTree*);
 	void PlotTriggerStats();
 	
-	TreeReader *fTR;
 	TreeCleaner *fTC;
 	AnaClass *fAC;
 
 private:
-	
+
 	TH1D *fMuHistos[3];
-	TH1D *fMETHistos[5];
+	TH1D *fMETHistos[2];
 
 };
 #endif

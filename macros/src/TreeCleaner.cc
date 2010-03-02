@@ -3,7 +3,6 @@
 using namespace std;
 
 TreeCleaner::TreeCleaner(TreeReader *tr) : UserAnalysisBase(tr){
-	fTR = tr;
 	fClean = true;
 }
 

@@ -30,8 +30,6 @@ public:
 	void Analyze();
 	void FillSigHistos(int part);
 	void End();
-	
-	TreeReader *fTR;
 
 private:
 	double getEta(double x, double y, double z);

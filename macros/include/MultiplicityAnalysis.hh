@@ -30,8 +30,6 @@ public:
 	void Begin(const char* filename = "MultiplicityPlots.root");
 	void Analyze();
 	void End();
-	
-	TreeReader *fTR;
 
 	void PlotMPSummary();
 	void PlotMPEffic();
