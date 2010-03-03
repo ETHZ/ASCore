@@ -15,8 +15,8 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 ### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
 # runon = 'data'
-runon = 'MC31x'
-# runon = 'MC34x'
+# runon = 'MC31x'
+runon = 'MC34x'
 recoType = 'RECO'
 # recoType = 'PAT'
 # recoType = 'PF'
@@ -50,11 +50,13 @@ if runon=='data':
     )
 elif runon=='MC31x':
     source_fileNames = cms.untracked.vstring(
-		'file:/data/14/stiegerb/SUSY/31X/TTbar4Jets_40GeVthreshold-alpgen-GEN-SIM-RECO-MC_31X_V3_7TeV-v3.root'   
+		# 'file:/data/14/stiegerb/SUSY/31X/TTbar4Jets_40GeVthreshold-alpgen-GEN-SIM-RECO-MC_31X_V3_7TeV-v3.root'   
+		'file:/data/14/stiegerb/MC/TTbar-Summer09-MC_31X_V9_Feb15-v1-GEN-SIM-RECO/F08AC9AF-831A-DF11-9AE4-001E0BE922E2.root'
     )
 elif runon=='MC34x':
     source_fileNames = cms.untracked.vstring(
-		'/store/mc/Summer09/MinBias/GEN-SIM-RECO/V16D_900GeV-v1/0001/FCD70794-F216-DF11-931A-0015170AC494.root'
+		# '/store/mc/Summer09/MinBias/GEN-SIM-RECO/V16D_900GeV-v1/0001/FCD70794-F216-DF11-931A-0015170AC494.root'
+		'file:/data/14/stiegerb/MC/TTbar-Summer09-MC_31X_V9_Feb15-v1-GEN-SIM-RECO/F08AC9AF-831A-DF11-9AE4-001E0BE922E2.root'
     )
 # Input
 process.source = cms.Source("PoolSource",
@@ -113,20 +115,6 @@ process.metMuonJESCorAK5.corrector = "L2L3JetCorrectorAK5Calo"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
-### Egamma Isolation ###########################################################
-# Produce eleIsoDeposits first!
-process.load("RecoEgamma.EgammaIsolationAlgos.eleIsoDeposits_cff")
-# Make isolation from deposits
-process.load("RecoEgamma.EgammaIsolationAlgos.eleIsoFromDeposits_cff")
-# Only keep the three main eleIsoDeposits
-process.eleIsoDeposits.remove(process.eleIsoDepositHcalDepth1FromTowers)
-process.eleIsoDeposits.remove(process.eleIsoDepositHcalDepth2FromTowers)
-process.eleIsoFromDeposits.remove(process.eleIsoFromDepsHcalDepth1FromTowers)
-process.eleIsoFromDeposits.remove(process.eleIsoFromDepsHcalDepth2FromTowers)
-
-# Example configuration
-process.eleIsoFromDepsEcalFromHits.deposits[0].deltaR = 0.4
-
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.tag_jets   = recoJet_src
@@ -142,7 +130,5 @@ process.p = cms.Path(
       process.L2L3CorJetAK5Calo
     + process.metCorSequence
     + process.mybtag
-    + process.eleIsoDeposits
-    + process.eleIsoFromDeposits
     + process.analyze
     )

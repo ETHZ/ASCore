@@ -49,8 +49,6 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# Electrons:
 	sel_minelpt     = cms.double(5.0),
 	sel_maxeleta    = cms.double(2.5),
-	sel_maxeliso    = cms.double(1e15),
-	sel_maxeld0     = cms.double(1e15),
 	# Jets:
 	sel_mincorjpt   = cms.double(20.0),
 	sel_minrawjpt   = cms.double(0.0),

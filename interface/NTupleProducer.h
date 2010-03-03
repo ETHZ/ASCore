@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.33 2010/02/03 18:09:18 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.34 2010/02/16 10:02:22 stiegerb Exp $
 //
 //
 
@@ -57,9 +57,7 @@ public:
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
-
-	vector<int> matchMuCand(const reco::Muon *Mu, const edm::Event& iEvent);
-	vector<int> matchElCand(const reco::GsfElectron *El, const edm::Event& iEvent);
+	vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
 	void switchDouble(double &, double &);
 	void switchInt(int &, int &);
 	void resetDouble(double *v, unsigned int size = 20);
@@ -83,11 +81,11 @@ private:
 
 	typedef pair<int,double> OrderPair;
 	struct IndexByPt {
-		const bool operator()(const OrderPair& j1, 
-		const OrderPair& j2 ) const {
+		const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
 			return j1.second > j2.second;
 		}
 	};
+	
 
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
@@ -135,8 +133,6 @@ private:
 	double fMaxmueta;
 	double fMinelpt;
 	double fMaxeleta;
-	double fMaxeliso;
-	double fMaxeld0;
 	double fMincorjpt;
 	double fMinrawjpt;
 	double fMaxjeta;
@@ -171,8 +167,6 @@ private:
 	double fRTMaxmueta;
 	double fRTMinelpt;
 	double fRTMaxeleta;
-	double fRTMaxeliso;
-	double fRTMaxeld0;
 	double fRTMinjpt;
 	double fRTMinrawjpt;
 	double fRTMaxjeta;
@@ -285,14 +279,34 @@ private:
 	int fTmuisGMPT[gMaxnmus];
 
 // - Gen Info:
-	int fTmuid[gMaxnmus];
-	int fTmumid[gMaxnmus];
+	int    fTGenMuId[gMaxnmus];
+	int    fTGenMuStatus[gMaxnmus];
+	int    fTGenMuCharge[gMaxnmus];
+	double fTGenMuPt[gMaxnmus];
+	double fTGenMuEta[gMaxnmus];
+	double fTGenMuPhi[gMaxnmus];
+	double fTGenMuE[gMaxnmus];
+	int    fTGenMuMId[gMaxnmus];
+	int    fTGenMuMStatus[gMaxnmus];
+	int    fTGenMuMCharge[gMaxnmus];
+	double fTGenMuMPt[gMaxnmus];
+	double fTGenMuMEta[gMaxnmus];
+	double fTGenMuMPhi[gMaxnmus];
+	double fTGenMuME[gMaxnmus];
+	int    fTGenMuGMId[gMaxnmus];
+	int    fTGenMuGMStatus[gMaxnmus];
+	int    fTGenMuGMCharge[gMaxnmus];
+	double fTGenMuGMPt[gMaxnmus];
+	double fTGenMuGMEta[gMaxnmus];
+	double fTGenMuGMPhi[gMaxnmus];
+	double fTGenMuGME[gMaxnmus];
 
 // Electrons:
 	int fTneles;
 	int fTnelestot; // before preselection
 	int fTgoodel[gMaxneles];
 	int fTeIsIso[gMaxneles];
+	int fTeChargeMisIDProb[gMaxneles];
 	double fTepx[gMaxneles];
 	double fTepy[gMaxneles];
 	double fTepz[gMaxneles];
@@ -309,15 +323,26 @@ private:
 	double fTedzpv[gMaxneles];
 	double fTedzE[gMaxneles];
 	double fTeiso[gMaxneles];
-	double fTePtsum[gMaxneles];
-	double fTeEmEtsum[gMaxneles];
-	double fTeHadEtsum[gMaxneles];
+	double fTdr03tksumpt[gMaxneles];
+	double fTdr04tksumpt[gMaxneles];
+	double fTdr03ecalrechitsumet[gMaxneles];
+	double fTdr04ecalrechitsumet[gMaxneles];
+	double fTdr03hcaltowersumet[gMaxneles];
+	double fTdr04hcaltowersumet[gMaxneles];
 	double fTenchi2[gMaxneles];
 	int fTeIDTight[gMaxneles];
 	int fTeIDLoose[gMaxneles];
 	int fTeIDRobustTight[gMaxneles];
 	int fTeIDRobustLoose[gMaxneles];
 	int fTecharge[gMaxneles];
+	int fTeCInfoIsGsfCtfCons[gMaxneles];
+	int fTeCInfoIsGsfCtfScPixCons[gMaxneles];
+	int fTeCInfoIsGsfScPixCons[gMaxneles];
+	int fTeCInfoScPixCharge[gMaxneles];
+	double fTeClosestCtfTrackpt[gMaxneles];
+	double fTeClosestCtfTracketa[gMaxneles];
+	double fTeClosestCtfTrackphi[gMaxneles];
+	int fTeClosestCtfTrackcharge[gMaxneles];
 	int fTeInGap[gMaxneles];  // seed crystal next to a gap
 	int fTeEcalDriven[gMaxneles];
 	int fTeTrackerDriven[gMaxneles];
@@ -340,17 +365,30 @@ private:
 	double fTeSharedPz[gMaxneles];
 	double fTeSharedEnergy[gMaxneles];
 	int fTeDupEl[gMaxneles];
-	double fTdr03tksumpt[gMaxneles];
-	double fTdr04tksumpt[gMaxneles];
-	double fTdr03ecalrechitsumet[gMaxneles];
-	double fTdr04ecalrechitsumet[gMaxneles];
-	double fTdr03hcaltowersumet[gMaxneles];
-	double fTdr04hcaltowersumet[gMaxneles];
 	double fTetheta[gMaxneles];
 
 // - Gen Info:
-	int fTeid[gMaxneles];
-	int fTemid[gMaxneles];
+	int    fTGenElId[gMaxneles];
+	int    fTGenElStatus[gMaxneles];
+	int    fTGenElCharge[gMaxneles];
+	double fTGenElPt[gMaxneles];
+	double fTGenElEta[gMaxneles];
+	double fTGenElPhi[gMaxneles];
+	double fTGenElE[gMaxneles];
+	int    fTGenElMId[gMaxneles];
+	int    fTGenElMStatus[gMaxneles];
+	int    fTGenElMCharge[gMaxneles];
+	double fTGenElMPt[gMaxneles];
+	double fTGenElMEta[gMaxneles];
+	double fTGenElMPhi[gMaxneles];
+	double fTGenElME[gMaxneles];
+	int    fTGenElGMId[gMaxneles];
+	int    fTGenElGMStatus[gMaxneles];
+	int    fTGenElGMCharge[gMaxneles];
+	double fTGenElGMPt[gMaxneles];
+	double fTGenElGMEta[gMaxneles];
+	double fTGenElGMPhi[gMaxneles];
+	double fTGenElGME[gMaxneles];
 
 // Photons:
 	int fTnphotons;
