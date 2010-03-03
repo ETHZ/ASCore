@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Feb  4 17:04:53 2010 by ROOT version 5.22/00d
+// Wed Mar  3 19:36:37 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: TTBar4Jets_NTP.root
+// found on file: NTupleProducer_34X_MC34x_RECO.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -51,195 +51,239 @@ public :
    Int_t           MaxPhotonsExceed;
    Int_t           NMus;
    Int_t           NMusTot;
-   Int_t           MuGood[5];   //[NMus]
-   Int_t           MuIsIso[5];   //[NMus]
-   Double_t        MuPx[5];   //[NMus]
-   Double_t        MuPy[5];   //[NMus]
-   Double_t        MuPz[5];   //[NMus]
-   Double_t        MuPt[5];   //[NMus]
-   Double_t        MuPtE[5];   //[NMus]
-   Double_t        MuE[5];   //[NMus]
-   Double_t        MuEt[5];   //[NMus]
-   Double_t        MuEta[5];   //[NMus]
-   Double_t        MuPhi[5];   //[NMus]
-   Int_t           MuCharge[5];   //[NMus]
-   Double_t        MuRelIso03[5];   //[NMus]
-   Double_t        MuIso03SumPt[5];   //[NMus]
-   Double_t        MuIso03EmEt[5];   //[NMus]
-   Double_t        MuIso03HadEt[5];   //[NMus]
-   Double_t        MuIso05SumPt[5];   //[NMus]
-   Double_t        MuIso05EmEt[5];   //[NMus]
-   Double_t        MuIso05HadEt[5];   //[NMus]
-   Double_t        MuEem[5];   //[NMus]
-   Double_t        MuEhad[5];   //[NMus]
-   Double_t        MuD0BS[5];   //[NMus]
-   Double_t        MuD0PV[5];   //[NMus]
-   Double_t        MuD0E[5];   //[NMus]
-   Double_t        MuDzBS[5];   //[NMus]
-   Double_t        MuDzPV[5];   //[NMus]
-   Double_t        MuDzE[5];   //[NMus]
-   Double_t        MuNChi2[5];   //[NMus]
-   Int_t           MuNGlHits[5];   //[NMus]
-   Int_t           MuNMuHits[5];   //[NMus]
-   Int_t           MuNTkHits[5];   //[NMus]
-   Int_t           MuNMatches[5];   //[NMus]
-   Int_t           MuNChambers[5];   //[NMus]
-   Double_t        MuCaloComp[5];   //[NMus]
-   Double_t        MuSegmComp[5];   //[NMus]
-   Int_t           MuTrackerMu[5];   //[NMus]
-   Int_t           MuGMPT[5];   //[NMus]
-   Int_t           MuID[5];   //[NMus]
-   Int_t           MuMID[5];   //[NMus]
+   Int_t           MuGood[20];   //[NMus]
+   Int_t           MuIsIso[20];   //[NMus]
+   Double_t        MuPx[20];   //[NMus]
+   Double_t        MuPy[20];   //[NMus]
+   Double_t        MuPz[20];   //[NMus]
+   Double_t        MuPt[20];   //[NMus]
+   Double_t        MuPtE[20];   //[NMus]
+   Double_t        MuE[20];   //[NMus]
+   Double_t        MuEt[20];   //[NMus]
+   Double_t        MuEta[20];   //[NMus]
+   Double_t        MuPhi[20];   //[NMus]
+   Int_t           MuCharge[20];   //[NMus]
+   Double_t        MuRelIso03[20];   //[NMus]
+   Double_t        MuIso03SumPt[20];   //[NMus]
+   Double_t        MuIso03EmEt[20];   //[NMus]
+   Double_t        MuIso03HadEt[20];   //[NMus]
+   Double_t        MuIso05SumPt[20];   //[NMus]
+   Double_t        MuIso05EmEt[20];   //[NMus]
+   Double_t        MuIso05HadEt[20];   //[NMus]
+   Double_t        MuEem[20];   //[NMus]
+   Double_t        MuEhad[20];   //[NMus]
+   Double_t        MuD0BS[20];   //[NMus]
+   Double_t        MuD0PV[20];   //[NMus]
+   Double_t        MuD0E[20];   //[NMus]
+   Double_t        MuDzBS[20];   //[NMus]
+   Double_t        MuDzPV[20];   //[NMus]
+   Double_t        MuDzE[20];   //[NMus]
+   Double_t        MuNChi2[20];   //[NMus]
+   Int_t           MuNGlHits[20];   //[NMus]
+   Int_t           MuNMuHits[20];   //[NMus]
+   Int_t           MuNTkHits[20];   //[NMus]
+   Int_t           MuNMatches[20];   //[NMus]
+   Int_t           MuNChambers[20];   //[NMus]
+   Double_t        MuCaloComp[20];   //[NMus]
+   Double_t        MuSegmComp[20];   //[NMus]
+   Int_t           MuTrackerMu[20];   //[NMus]
+   Int_t           MuGMPT[20];   //[NMus]
+   Int_t           MuGenID[20];   //[NMus]
+   Int_t           MuGenStatus[20];   //[NMus]
+   Int_t           MuGenCharge[20];   //[NMus]
+   Double_t        MuGenPt[20];   //[NMus]
+   Double_t        MuGenEta[20];   //[NMus]
+   Double_t        MuGenPhi[20];   //[NMus]
+   Double_t        MuGenE[20];   //[NMus]
+   Int_t           MuGenMID[20];   //[NMus]
+   Int_t           MuGenMStatus[20];   //[NMus]
+   Int_t           MuGenMCharge[20];   //[NMus]
+   Double_t        MuGenMPt[20];   //[NMus]
+   Double_t        MuGenMEta[20];   //[NMus]
+   Double_t        MuGenMPhi[20];   //[NMus]
+   Double_t        MuGenME[20];   //[NMus]
+   Int_t           MuGenGMID[20];   //[NMus]
+   Int_t           MuGenGMStatus[20];   //[NMus]
+   Int_t           MuGenGMCharge[20];   //[NMus]
+   Double_t        MuGenGMPt[20];   //[NMus]
+   Double_t        MuGenGMEta[20];   //[NMus]
+   Double_t        MuGenGMPhi[20];   //[NMus]
+   Double_t        MuGenGME[20];   //[NMus]
    Int_t           NEles;
    Int_t           NElesTot;
-   Int_t           ElGood[8];   //[NEles]
-   Int_t           ElIsIso[8];   //[NEles]
-   Double_t        ElPx[8];   //[NEles]
-   Double_t        ElPy[8];   //[NEles]
-   Double_t        ElPz[8];   //[NEles]
-   Double_t        ElPt[8];   //[NEles]
-   Double_t        ElPtE[8];   //[NEles]
-   Double_t        ElE[8];   //[NEles]
-   Double_t        ElEt[8];   //[NEles]
-   Double_t        ElEta[8];   //[NEles]
-   Double_t        ElTheta[8];   //[NEles]
-   Double_t        ElPhi[8];   //[NEles]
-   Double_t        ElD0BS[8];   //[NEles]
-   Double_t        ElD0PV[8];   //[NEles]
-   Double_t        ElD0E[8];   //[NEles]
-   Double_t        ElDzBS[8];   //[NEles]
-   Double_t        ElDzPV[8];   //[NEles]
-   Double_t        ElDzE[8];   //[NEles]
-   Double_t        ElIso[8];   //[NEles]
-   Double_t        ElPtSum[8];   //[NEles]
-   Double_t        ElEmEtSum[8];   //[NEles]
-   Double_t        ElHadEtSum[8];   //[NEles]
-   Double_t        ElNChi2[8];   //[NEles]
-   Int_t           ElCharge[8];   //[NEles]
-   Int_t           ElIDTight[8];   //[NEles]
-   Int_t           ElIDLoose[8];   //[NEles]
-   Int_t           ElIDRobustTight[8];   //[NEles]
-   Int_t           ElIDRobustLoose[8];   //[NEles]
-   Int_t           ElInGap[8];   //[NEles]
-   Int_t           ElEcalDriven[8];   //[NEles]
-   Int_t           ElTrackerDriven[8];   //[NEles]
-   Int_t           ElBasicClustersSize[8];   //[NEles]
-   Double_t        Elfbrem[8];   //[NEles]
-   Double_t        ElHcalOverEcal[8];   //[NEles]
-   Double_t        ElE5x5[8];   //[NEles]
-   Double_t        ElE2x5Max[8];   //[NEles]
-   Double_t        ElSigmaIetaIeta[8];   //[NEles]
-   Double_t        ElDeltaPhiSeedClusterAtCalo[8];   //[NEles]
-   Double_t        ElDeltaEtaSeedClusterAtCalo[8];   //[NEles]
-   Double_t        ElDeltaPhiSuperClusterAtVtx[8];   //[NEles]
-   Double_t        ElDeltaEtaSuperClusterAtVtx[8];   //[NEles]
-   Double_t        ElCaloEnergy[8];   //[NEles]
-   Double_t        ElTrkMomAtVtx[8];   //[NEles]
-   Double_t        ElESuperClusterOverP[8];   //[NEles]
-   Int_t           ElIsInJet[8];   //[NEles]
-   Double_t        ElSharedPx[8];   //[NEles]
-   Double_t        ElSharedPy[8];   //[NEles]
-   Double_t        ElSharedPz[8];   //[NEles]
-   Double_t        ElSharedEnergy[8];   //[NEles]
-   Int_t           ElDuplicateEl[8];   //[NEles]
-   Double_t        ElDR03TkSumPt[8];   //[NEles]
-   Double_t        ElDR04TkSumPt[8];   //[NEles]
-   Double_t        ElDR03EcalRecHitSumEt[8];   //[NEles]
-   Double_t        ElDR04EcalRecHitSumEt[8];   //[NEles]
-   Double_t        ElDR03HcalTowerSumEt[8];   //[NEles]
-   Double_t        ElDR04HcalTowerSumEt[8];   //[NEles]
-   Int_t           ElID[8];   //[NEles]
-   Int_t           ElMID[8];   //[NEles]
+   Int_t           ElGood[20];   //[NEles]
+   Int_t           ElIsIso[20];   //[NEles]
+   Int_t           ElChargeMisIDProb[20];   //[NEles]
+   Double_t        ElPx[20];   //[NEles]
+   Double_t        ElPy[20];   //[NEles]
+   Double_t        ElPz[20];   //[NEles]
+   Double_t        ElPt[20];   //[NEles]
+   Double_t        ElPtE[20];   //[NEles]
+   Double_t        ElE[20];   //[NEles]
+   Double_t        ElEt[20];   //[NEles]
+   Double_t        ElEta[20];   //[NEles]
+   Double_t        ElTheta[20];   //[NEles]
+   Double_t        ElPhi[20];   //[NEles]
+   Double_t        ElD0BS[20];   //[NEles]
+   Double_t        ElD0PV[20];   //[NEles]
+   Double_t        ElD0E[20];   //[NEles]
+   Double_t        ElDzBS[20];   //[NEles]
+   Double_t        ElDzPV[20];   //[NEles]
+   Double_t        ElDzE[20];   //[NEles]
+   Double_t        ElRelIso04[20];   //[NEles]
+   Double_t        ElDR03TkSumPt[20];   //[NEles]
+   Double_t        ElDR04TkSumPt[20];   //[NEles]
+   Double_t        ElDR03EcalRecHitSumEt[20];   //[NEles]
+   Double_t        ElDR04EcalRecHitSumEt[20];   //[NEles]
+   Double_t        ElDR03HcalTowerSumEt[20];   //[NEles]
+   Double_t        ElDR04HcalTowerSumEt[20];   //[NEles]
+   Double_t        ElNChi2[20];   //[NEles]
+   Int_t           ElCharge[20];   //[NEles]
+   Int_t           ElCInfoIsGsfCtfCons[20];   //[NEles]
+   Int_t           ElCInfoIsGsfCtfScPixCons[20];   //[NEles]
+   Int_t           ElCInfoIsGsfScPixCons[20];   //[NEles]
+   Int_t           ElScPixCharge[20];   //[NEles]
+   Double_t        ElClosestCtfTrackPt[20];   //[NEles]
+   Double_t        ElClosestCtfTrackEta[20];   //[NEles]
+   Double_t        ElClosestCtfTrackPhi[20];   //[NEles]
+   Int_t           ElClosestCtfTrackCharge[20];   //[NEles]
+   Int_t           ElIDTight[20];   //[NEles]
+   Int_t           ElIDLoose[20];   //[NEles]
+   Int_t           ElIDRobustTight[20];   //[NEles]
+   Int_t           ElIDRobustLoose[20];   //[NEles]
+   Int_t           ElInGap[20];   //[NEles]
+   Int_t           ElEcalDriven[20];   //[NEles]
+   Int_t           ElTrackerDriven[20];   //[NEles]
+   Int_t           ElBasicClustersSize[20];   //[NEles]
+   Double_t        Elfbrem[20];   //[NEles]
+   Double_t        ElHcalOverEcal[20];   //[NEles]
+   Double_t        ElE5x5[20];   //[NEles]
+   Double_t        ElE2x5Max[20];   //[NEles]
+   Double_t        ElSigmaIetaIeta[20];   //[NEles]
+   Double_t        ElDeltaPhiSeedClusterAtCalo[20];   //[NEles]
+   Double_t        ElDeltaEtaSeedClusterAtCalo[20];   //[NEles]
+   Double_t        ElDeltaPhiSuperClusterAtVtx[20];   //[NEles]
+   Double_t        ElDeltaEtaSuperClusterAtVtx[20];   //[NEles]
+   Double_t        ElCaloEnergy[20];   //[NEles]
+   Double_t        ElTrkMomAtVtx[20];   //[NEles]
+   Double_t        ElESuperClusterOverP[20];   //[NEles]
+   Int_t           ElIsInJet[20];   //[NEles]
+   Double_t        ElSharedPx[20];   //[NEles]
+   Double_t        ElSharedPy[20];   //[NEles]
+   Double_t        ElSharedPz[20];   //[NEles]
+   Double_t        ElSharedEnergy[20];   //[NEles]
+   Int_t           ElDuplicateEl[20];   //[NEles]
+   Int_t           ElGenID[20];   //[NEles]
+   Int_t           ElGenStatus[20];   //[NEles]
+   Int_t           ElGenCharge[20];   //[NEles]
+   Double_t        ElGenPt[20];   //[NEles]
+   Double_t        ElGenEta[20];   //[NEles]
+   Double_t        ElGenPhi[20];   //[NEles]
+   Double_t        ElGenE[20];   //[NEles]
+   Int_t           ElGenMID[20];   //[NEles]
+   Int_t           ElGenMStatus[20];   //[NEles]
+   Int_t           ElGenMCharge[20];   //[NEles]
+   Double_t        ElGenMPt[20];   //[NEles]
+   Double_t        ElGenMEta[20];   //[NEles]
+   Double_t        ElGenMPhi[20];   //[NEles]
+   Double_t        ElGenME[20];   //[NEles]
+   Int_t           ElGenGMID[20];   //[NEles]
+   Int_t           ElGenGMStatus[20];   //[NEles]
+   Int_t           ElGenGMCharge[20];   //[NEles]
+   Double_t        ElGenGMPt[20];   //[NEles]
+   Double_t        ElGenGMEta[20];   //[NEles]
+   Double_t        ElGenGMPhi[20];   //[NEles]
+   Double_t        ElGenGME[20];   //[NEles]
    Int_t           NPhotons;
    Int_t           NPhotonsTot;
-   Int_t           PhoGood[13];   //[NPhotons]
-   Int_t           PhoIsIso[13];   //[NPhotons]
-   Double_t        PhoPt[13];   //[NPhotons]
-   Double_t        PhoPx[13];   //[NPhotons]
-   Double_t        PhoPy[13];   //[NPhotons]
-   Double_t        PhoPz[13];   //[NPhotons]
-   Double_t        PhoEta[13];   //[NPhotons]
-   Double_t        PhoPhi[13];   //[NPhotons]
-   Double_t        PhoEnergy[13];   //[NPhotons]
-   Double_t        PhoIso03Ecal[13];   //[NPhotons]
-   Double_t        PhoIso03Hcal[13];   //[NPhotons]
-   Double_t        PhoIso03TrkSolid[13];   //[NPhotons]
-   Double_t        PhoIso03TrkHollow[13];   //[NPhotons]
-   Double_t        PhoIso03[13];   //[NPhotons]
-   Double_t        PhoCaloPositionX[13];   //[NPhotons]
-   Double_t        PhoCaloPositionY[13];   //[NPhotons]
-   Double_t        PhoCaloPositionZ[13];   //[NPhotons]
-   Double_t        PhoHoverE[13];   //[NPhotons]
-   Double_t        PhoH1overE[13];   //[NPhotons]
-   Double_t        PhoH2overE[13];   //[NPhotons]
-   Double_t        PhoSigmaIetaIeta[13];   //[NPhotons]
-   Int_t           PhoHasPixSeed[13];   //[NPhotons]
-   Int_t           PhoHasConvTrks[13];   //[NPhotons]
-   Int_t           PhoIsInJet[8];   //[NEles]
-   Double_t        PhoSharedPx[8];   //[NEles]
-   Double_t        PhoSharedPy[8];   //[NEles]
-   Double_t        PhoSharedPz[8];   //[NEles]
-   Double_t        PhoSharedEnergy[8];   //[NEles]
+   Int_t           PhoGood[20];   //[NPhotons]
+   Int_t           PhoIsIso[20];   //[NPhotons]
+   Double_t        PhoPt[20];   //[NPhotons]
+   Double_t        PhoPx[20];   //[NPhotons]
+   Double_t        PhoPy[20];   //[NPhotons]
+   Double_t        PhoPz[20];   //[NPhotons]
+   Double_t        PhoEta[20];   //[NPhotons]
+   Double_t        PhoPhi[20];   //[NPhotons]
+   Double_t        PhoEnergy[20];   //[NPhotons]
+   Double_t        PhoIso03Ecal[20];   //[NPhotons]
+   Double_t        PhoIso03Hcal[20];   //[NPhotons]
+   Double_t        PhoIso03TrkSolid[20];   //[NPhotons]
+   Double_t        PhoIso03TrkHollow[20];   //[NPhotons]
+   Double_t        PhoIso03[20];   //[NPhotons]
+   Double_t        PhoCaloPositionX[20];   //[NPhotons]
+   Double_t        PhoCaloPositionY[20];   //[NPhotons]
+   Double_t        PhoCaloPositionZ[20];   //[NPhotons]
+   Double_t        PhoHoverE[20];   //[NPhotons]
+   Double_t        PhoH1overE[20];   //[NPhotons]
+   Double_t        PhoH2overE[20];   //[NPhotons]
+   Double_t        PhoSigmaIetaIeta[20];   //[NPhotons]
+   Int_t           PhoHasPixSeed[20];   //[NPhotons]
+   Int_t           PhoHasConvTrks[20];   //[NPhotons]
+   Int_t           PhoIsInJet[20];   //[NPhotons]
+   Double_t        PhoSharedPx[20];   //[NPhotons]
+   Double_t        PhoSharedPy[20];   //[NPhotons]
+   Double_t        PhoSharedPz[20];   //[NPhotons]
+   Double_t        PhoSharedEnergy[20];   //[NPhotons]
    Int_t           NJets;
    Int_t           NJetsTot;
-   Int_t           JGood[15];   //[NJets]
-   Double_t        JPx[15];   //[NJets]
-   Double_t        JPy[15];   //[NJets]
-   Double_t        JPz[15];   //[NJets]
-   Double_t        JPt[15];   //[NJets]
-   Double_t        JE[15];   //[NJets]
-   Double_t        JEt[15];   //[NJets]
-   Double_t        JEta[15];   //[NJets]
-   Double_t        JPhi[15];   //[NJets]
-   Double_t        JEMfrac[15];   //[NJets]
-   Int_t           JNConstituents[15];   //[NJets]
-   Double_t        JID_HPD[15];   //[NJets]
-   Double_t        JID_RBX[15];   //[NJets]
-   Double_t        JID_n90Hits[15];   //[NJets]
-   Double_t        JID_SubDet1[15];   //[NJets]
-   Double_t        JID_SubDet2[15];   //[NJets]
-   Double_t        JID_SubDet3[15];   //[NJets]
-   Double_t        JID_SubDet4[15];   //[NJets]
-   Double_t        JID_resEMF[15];   //[NJets]
-   Double_t        JID_HCALTow[15];   //[NJets]
-   Double_t        JID_ECALTow[15];   //[NJets]
-   Double_t        JEtaEMrms[15];   //[NJets]
-   Double_t        JEtaHADrms[15];   //[NJets]
-   Double_t        JPhiEMrms[15];   //[NJets]
-   Double_t        JPhiHADrms[15];   //[NJets]
-   Double_t        JbTagProb[15];   //[NJets]
-   Double_t        JChfrac[15];   //[NJets]
-   Double_t        JMass[15];   //[NJets]
-   Int_t           JNAssoTracks[15];   //[NJets]
-   Double_t        Jtrk1px[15];   //[NJets]
-   Double_t        Jtrk1py[15];   //[NJets]
-   Double_t        Jtrk1pz[15];   //[NJets]
-   Double_t        Jtrk2px[15];   //[NJets]
-   Double_t        Jtrk2py[15];   //[NJets]
-   Double_t        Jtrk2pz[15];   //[NJets]
-   Double_t        Jtrk3px[15];   //[NJets]
-   Double_t        Jtrk3py[15];   //[NJets]
-   Double_t        Jtrk3pz[15];   //[NJets]
-   Double_t        JEcorr[15];   //[NJets]
-   Double_t        JeMinDR[15];   //[NJets]
-   Double_t        JVtxx[15];   //[NJets]
-   Double_t        JVtxy[15];   //[NJets]
-   Double_t        JVtxz[15];   //[NJets]
-   Double_t        JVtxExx[15];   //[NJets]
-   Double_t        JVtxEyx[15];   //[NJets]
-   Double_t        JVtxEyy[15];   //[NJets]
-   Double_t        JVtxEzy[15];   //[NJets]
-   Double_t        JVtxEzz[15];   //[NJets]
-   Double_t        JVtxEzx[15];   //[NJets]
-   Double_t        JVtxNChi2[15];   //[NJets]
+   Int_t           JGood[50];   //[NJets]
+   Double_t        JPx[50];   //[NJets]
+   Double_t        JPy[50];   //[NJets]
+   Double_t        JPz[50];   //[NJets]
+   Double_t        JPt[50];   //[NJets]
+   Double_t        JE[50];   //[NJets]
+   Double_t        JEt[50];   //[NJets]
+   Double_t        JEta[50];   //[NJets]
+   Double_t        JPhi[50];   //[NJets]
+   Double_t        JEMfrac[50];   //[NJets]
+   Int_t           JNConstituents[50];   //[NJets]
+   Double_t        JID_HPD[50];   //[NJets]
+   Double_t        JID_RBX[50];   //[NJets]
+   Double_t        JID_n90Hits[50];   //[NJets]
+   Double_t        JID_SubDet1[50];   //[NJets]
+   Double_t        JID_SubDet2[50];   //[NJets]
+   Double_t        JID_SubDet3[50];   //[NJets]
+   Double_t        JID_SubDet4[50];   //[NJets]
+   Double_t        JID_resEMF[50];   //[NJets]
+   Double_t        JID_HCALTow[50];   //[NJets]
+   Double_t        JID_ECALTow[50];   //[NJets]
+   Double_t        JEtaEMrms[50];   //[NJets]
+   Double_t        JEtaHADrms[50];   //[NJets]
+   Double_t        JPhiEMrms[50];   //[NJets]
+   Double_t        JPhiHADrms[50];   //[NJets]
+   Double_t        JbTagProb[50];   //[NJets]
+   Double_t        JChfrac[50];   //[NJets]
+   Double_t        JMass[50];   //[NJets]
+   Int_t           JNAssoTracks[50];   //[NJets]
+   Double_t        Jtrk1px[50];   //[NJets]
+   Double_t        Jtrk1py[50];   //[NJets]
+   Double_t        Jtrk1pz[50];   //[NJets]
+   Double_t        Jtrk2px[50];   //[NJets]
+   Double_t        Jtrk2py[50];   //[NJets]
+   Double_t        Jtrk2pz[50];   //[NJets]
+   Double_t        Jtrk3px[50];   //[NJets]
+   Double_t        Jtrk3py[50];   //[NJets]
+   Double_t        Jtrk3pz[50];   //[NJets]
+   Double_t        JEcorr[50];   //[NJets]
+   Double_t        JeMinDR[50];   //[NJets]
+   Double_t        JVtxx[50];   //[NJets]
+   Double_t        JVtxy[50];   //[NJets]
+   Double_t        JVtxz[50];   //[NJets]
+   Double_t        JVtxExx[50];   //[NJets]
+   Double_t        JVtxEyx[50];   //[NJets]
+   Double_t        JVtxEyy[50];   //[NJets]
+   Double_t        JVtxEzy[50];   //[NJets]
+   Double_t        JVtxEzz[50];   //[NJets]
+   Double_t        JVtxEzx[50];   //[NJets]
+   Double_t        JVtxNChi2[50];   //[NJets]
    Int_t           NTracks;
    Int_t           NTracksTot;
-   Int_t           TrkGood[9];   //[NTracks]
-   Double_t        TrkPt[9];   //[NTracks]
-   Double_t        TrkEta[9];   //[NTracks]
-   Double_t        TrkPhi[9];   //[NTracks]
-   Double_t        TrkNChi2[9];   //[NTracks]
-   Double_t        TrkNHits[9];   //[NTracks]
+   Int_t           TrkGood[500];   //[NTracks]
+   Double_t        TrkPt[500];   //[NTracks]
+   Double_t        TrkEta[500];   //[NTracks]
+   Double_t        TrkPhi[500];   //[NTracks]
+   Double_t        TrkNChi2[500];   //[NTracks]
+   Double_t        TrkNHits[500];   //[NTracks]
    Double_t        TrkPtSumx;
    Double_t        TrkPtSumy;
    Double_t        TrkPtSum;
@@ -351,12 +395,32 @@ public :
    TBranch        *b_MuSegmComp;   //!
    TBranch        *b_MuTrackerMu;   //!
    TBranch        *b_MuGMPT;   //!
-   TBranch        *b_MuID;   //!
-   TBranch        *b_MuMID;   //!
+   TBranch        *b_MuGenID;   //!
+   TBranch        *b_MuGenStatus;   //!
+   TBranch        *b_MuGenCharge;   //!
+   TBranch        *b_MuGenPt;   //!
+   TBranch        *b_MuGenEta;   //!
+   TBranch        *b_MuGenPhi;   //!
+   TBranch        *b_MuGenE;   //!
+   TBranch        *b_MuGenMID;   //!
+   TBranch        *b_MuGenMStatus;   //!
+   TBranch        *b_MuGenMCharge;   //!
+   TBranch        *b_MuGenMPt;   //!
+   TBranch        *b_MuGenMEta;   //!
+   TBranch        *b_MuGenMPhi;   //!
+   TBranch        *b_MuGenME;   //!
+   TBranch        *b_MuGenGMID;   //!
+   TBranch        *b_MuGenGMStatus;   //!
+   TBranch        *b_MuGenGMCharge;   //!
+   TBranch        *b_MuGenGMPt;   //!
+   TBranch        *b_MuGenGMEta;   //!
+   TBranch        *b_MuGenGMPhi;   //!
+   TBranch        *b_MuGenGME;   //!
    TBranch        *b_NEles;   //!
    TBranch        *b_NElesTot;   //!
    TBranch        *b_ElGood;   //!
    TBranch        *b_ElIsIso;   //!
+   TBranch        *b_ElChargeMisIDProb;   //!
    TBranch        *b_ElPx;   //!
    TBranch        *b_ElPy;   //!
    TBranch        *b_ElPz;   //!
@@ -373,12 +437,23 @@ public :
    TBranch        *b_ElDzBS;   //!
    TBranch        *b_ElDzPV;   //!
    TBranch        *b_ElDzE;   //!
-   TBranch        *b_ElIso;   //!
-   TBranch        *b_ElPtSum;   //!
-   TBranch        *b_ElEmEtSum;   //!
-   TBranch        *b_ElHadEtSum;   //!
+   TBranch        *b_ElRelIso04;   //!
+   TBranch        *b_ElDR03TkSumPt;   //!
+   TBranch        *b_ElDR04TkSumPt;   //!
+   TBranch        *b_ElDR03EcalRecHitSumEt;   //!
+   TBranch        *b_ElDR04EcalRecHitSumEt;   //!
+   TBranch        *b_ElDR03HcalTowerSumEt;   //!
+   TBranch        *b_ElDR04HcalTowerSumEt;   //!
    TBranch        *b_ElNChi2;   //!
    TBranch        *b_ElCharge;   //!
+   TBranch        *b_ElCInfoIsGsfCtfCons;   //!
+   TBranch        *b_ElCInfoIsGsfCtfScPixCons;   //!
+   TBranch        *b_ElCInfoIsGsfScPixCons;   //!
+   TBranch        *b_ElScPixCharge;   //!
+   TBranch        *b_ElClosestCtfTrackPt;   //!
+   TBranch        *b_ElClosestCtfTrackEta;   //!
+   TBranch        *b_ElClosestCtfTrackPhi;   //!
+   TBranch        *b_ElClosestCtfTrackCharge;   //!
    TBranch        *b_ElIDTight;   //!
    TBranch        *b_ElIDLoose;   //!
    TBranch        *b_ElIDRobustTight;   //!
@@ -405,14 +480,27 @@ public :
    TBranch        *b_ElSharedPz;   //!
    TBranch        *b_ElSharedEnergy;   //!
    TBranch        *b_ElDuplicateEl;   //!
-   TBranch        *b_ElDR03TkSumPt;   //!
-   TBranch        *b_ElDR04TkSumPt;   //!
-   TBranch        *b_ElDR03EcalRecHitSumEt;   //!
-   TBranch        *b_ElDR04EcalRecHitSumEt;   //!
-   TBranch        *b_ElDR03HcalTowerSumEt;   //!
-   TBranch        *b_ElDR04HcalTowerSumEt;   //!
-   TBranch        *b_ElID;   //!
-   TBranch        *b_ElMID;   //!
+   TBranch        *b_ElGenID;   //!
+   TBranch        *b_ElGenStatus;   //!
+   TBranch        *b_ElGenCharge;   //!
+   TBranch        *b_ElGenPt;   //!
+   TBranch        *b_ElGenEta;   //!
+   TBranch        *b_ElGenPhi;   //!
+   TBranch        *b_ElGenE;   //!
+   TBranch        *b_ElGenMID;   //!
+   TBranch        *b_ElGenMStatus;   //!
+   TBranch        *b_ElGenMCharge;   //!
+   TBranch        *b_ElGenMPt;   //!
+   TBranch        *b_ElGenMEta;   //!
+   TBranch        *b_ElGenMPhi;   //!
+   TBranch        *b_ElGenME;   //!
+   TBranch        *b_ElGenGMID;   //!
+   TBranch        *b_ElGenGMStatus;   //!
+   TBranch        *b_ElGenGMCharge;   //!
+   TBranch        *b_ElGenGMPt;   //!
+   TBranch        *b_ElGenGMEta;   //!
+   TBranch        *b_ElGenGMPhi;   //!
+   TBranch        *b_ElGenGME;   //!
    TBranch        *b_NPhotons;   //!
    TBranch        *b_NPhotonsTot;   //!
    TBranch        *b_PhoGood;   //!
@@ -562,10 +650,10 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("TTBar4Jets_NTP.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_34X_MC34x_RECO.root");
       if (!f) {
-         f = new TFile("TTBar4Jets_NTP.root");
-         f->cd("TTBar4Jets_NTP.root:/analyze");
+         f = new TFile("NTupleProducer_34X_MC34x_RECO.root");
+         f->cd("NTupleProducer_34X_MC34x_RECO.root:/analyze");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -686,12 +774,32 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuSegmComp", MuSegmComp, &b_MuSegmComp);
    fChain->SetBranchAddress("MuTrackerMu", MuTrackerMu, &b_MuTrackerMu);
    fChain->SetBranchAddress("MuGMPT", MuGMPT, &b_MuGMPT);
-   fChain->SetBranchAddress("MuID", MuID, &b_MuID);
-   fChain->SetBranchAddress("MuMID", MuMID, &b_MuMID);
+   fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
+   fChain->SetBranchAddress("MuGenStatus", MuGenStatus, &b_MuGenStatus);
+   fChain->SetBranchAddress("MuGenCharge", MuGenCharge, &b_MuGenCharge);
+   fChain->SetBranchAddress("MuGenPt", MuGenPt, &b_MuGenPt);
+   fChain->SetBranchAddress("MuGenEta", MuGenEta, &b_MuGenEta);
+   fChain->SetBranchAddress("MuGenPhi", MuGenPhi, &b_MuGenPhi);
+   fChain->SetBranchAddress("MuGenE", MuGenE, &b_MuGenE);
+   fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
+   fChain->SetBranchAddress("MuGenMStatus", MuGenMStatus, &b_MuGenMStatus);
+   fChain->SetBranchAddress("MuGenMCharge", MuGenMCharge, &b_MuGenMCharge);
+   fChain->SetBranchAddress("MuGenMPt", MuGenMPt, &b_MuGenMPt);
+   fChain->SetBranchAddress("MuGenMEta", MuGenMEta, &b_MuGenMEta);
+   fChain->SetBranchAddress("MuGenMPhi", MuGenMPhi, &b_MuGenMPhi);
+   fChain->SetBranchAddress("MuGenME", MuGenME, &b_MuGenME);
+   fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
+   fChain->SetBranchAddress("MuGenGMStatus", MuGenGMStatus, &b_MuGenGMStatus);
+   fChain->SetBranchAddress("MuGenGMCharge", MuGenGMCharge, &b_MuGenGMCharge);
+   fChain->SetBranchAddress("MuGenGMPt", MuGenGMPt, &b_MuGenGMPt);
+   fChain->SetBranchAddress("MuGenGMEta", MuGenGMEta, &b_MuGenGMEta);
+   fChain->SetBranchAddress("MuGenGMPhi", MuGenGMPhi, &b_MuGenGMPhi);
+   fChain->SetBranchAddress("MuGenGME", MuGenGME, &b_MuGenGME);
    fChain->SetBranchAddress("NEles", &NEles, &b_NEles);
    fChain->SetBranchAddress("NElesTot", &NElesTot, &b_NElesTot);
    fChain->SetBranchAddress("ElGood", ElGood, &b_ElGood);
    fChain->SetBranchAddress("ElIsIso", ElIsIso, &b_ElIsIso);
+   fChain->SetBranchAddress("ElChargeMisIDProb", ElChargeMisIDProb, &b_ElChargeMisIDProb);
    fChain->SetBranchAddress("ElPx", ElPx, &b_ElPx);
    fChain->SetBranchAddress("ElPy", ElPy, &b_ElPy);
    fChain->SetBranchAddress("ElPz", ElPz, &b_ElPz);
@@ -708,12 +816,23 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElDzBS", ElDzBS, &b_ElDzBS);
    fChain->SetBranchAddress("ElDzPV", ElDzPV, &b_ElDzPV);
    fChain->SetBranchAddress("ElDzE", ElDzE, &b_ElDzE);
-   fChain->SetBranchAddress("ElIso", ElIso, &b_ElIso);
-   fChain->SetBranchAddress("ElPtSum", ElPtSum, &b_ElPtSum);
-   fChain->SetBranchAddress("ElEmEtSum", ElEmEtSum, &b_ElEmEtSum);
-   fChain->SetBranchAddress("ElHadEtSum", ElHadEtSum, &b_ElHadEtSum);
+   fChain->SetBranchAddress("ElRelIso04", ElRelIso04, &b_ElRelIso04);
+   fChain->SetBranchAddress("ElDR03TkSumPt", ElDR03TkSumPt, &b_ElDR03TkSumPt);
+   fChain->SetBranchAddress("ElDR04TkSumPt", ElDR04TkSumPt, &b_ElDR04TkSumPt);
+   fChain->SetBranchAddress("ElDR03EcalRecHitSumEt", ElDR03EcalRecHitSumEt, &b_ElDR03EcalRecHitSumEt);
+   fChain->SetBranchAddress("ElDR04EcalRecHitSumEt", ElDR04EcalRecHitSumEt, &b_ElDR04EcalRecHitSumEt);
+   fChain->SetBranchAddress("ElDR03HcalTowerSumEt", ElDR03HcalTowerSumEt, &b_ElDR03HcalTowerSumEt);
+   fChain->SetBranchAddress("ElDR04HcalTowerSumEt", ElDR04HcalTowerSumEt, &b_ElDR04HcalTowerSumEt);
    fChain->SetBranchAddress("ElNChi2", ElNChi2, &b_ElNChi2);
    fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
+   fChain->SetBranchAddress("ElCInfoIsGsfCtfCons", ElCInfoIsGsfCtfCons, &b_ElCInfoIsGsfCtfCons);
+   fChain->SetBranchAddress("ElCInfoIsGsfCtfScPixCons", ElCInfoIsGsfCtfScPixCons, &b_ElCInfoIsGsfCtfScPixCons);
+   fChain->SetBranchAddress("ElCInfoIsGsfScPixCons", ElCInfoIsGsfScPixCons, &b_ElCInfoIsGsfScPixCons);
+   fChain->SetBranchAddress("ElScPixCharge", ElScPixCharge, &b_ElScPixCharge);
+   fChain->SetBranchAddress("ElClosestCtfTrackPt", ElClosestCtfTrackPt, &b_ElClosestCtfTrackPt);
+   fChain->SetBranchAddress("ElClosestCtfTrackEta", ElClosestCtfTrackEta, &b_ElClosestCtfTrackEta);
+   fChain->SetBranchAddress("ElClosestCtfTrackPhi", ElClosestCtfTrackPhi, &b_ElClosestCtfTrackPhi);
+   fChain->SetBranchAddress("ElClosestCtfTrackCharge", ElClosestCtfTrackCharge, &b_ElClosestCtfTrackCharge);
    fChain->SetBranchAddress("ElIDTight", ElIDTight, &b_ElIDTight);
    fChain->SetBranchAddress("ElIDLoose", ElIDLoose, &b_ElIDLoose);
    fChain->SetBranchAddress("ElIDRobustTight", ElIDRobustTight, &b_ElIDRobustTight);
@@ -740,14 +859,27 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElSharedPz", ElSharedPz, &b_ElSharedPz);
    fChain->SetBranchAddress("ElSharedEnergy", ElSharedEnergy, &b_ElSharedEnergy);
    fChain->SetBranchAddress("ElDuplicateEl", ElDuplicateEl, &b_ElDuplicateEl);
-   fChain->SetBranchAddress("ElDR03TkSumPt", ElDR03TkSumPt, &b_ElDR03TkSumPt);
-   fChain->SetBranchAddress("ElDR04TkSumPt", ElDR04TkSumPt, &b_ElDR04TkSumPt);
-   fChain->SetBranchAddress("ElDR03EcalRecHitSumEt", ElDR03EcalRecHitSumEt, &b_ElDR03EcalRecHitSumEt);
-   fChain->SetBranchAddress("ElDR04EcalRecHitSumEt", ElDR04EcalRecHitSumEt, &b_ElDR04EcalRecHitSumEt);
-   fChain->SetBranchAddress("ElDR03HcalTowerSumEt", ElDR03HcalTowerSumEt, &b_ElDR03HcalTowerSumEt);
-   fChain->SetBranchAddress("ElDR04HcalTowerSumEt", ElDR04HcalTowerSumEt, &b_ElDR04HcalTowerSumEt);
-   fChain->SetBranchAddress("ElID", ElID, &b_ElID);
-   fChain->SetBranchAddress("ElMID", ElMID, &b_ElMID);
+   fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
+   fChain->SetBranchAddress("ElGenStatus", ElGenStatus, &b_ElGenStatus);
+   fChain->SetBranchAddress("ElGenCharge", ElGenCharge, &b_ElGenCharge);
+   fChain->SetBranchAddress("ElGenPt", ElGenPt, &b_ElGenPt);
+   fChain->SetBranchAddress("ElGenEta", ElGenEta, &b_ElGenEta);
+   fChain->SetBranchAddress("ElGenPhi", ElGenPhi, &b_ElGenPhi);
+   fChain->SetBranchAddress("ElGenE", ElGenE, &b_ElGenE);
+   fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
+   fChain->SetBranchAddress("ElGenMStatus", ElGenMStatus, &b_ElGenMStatus);
+   fChain->SetBranchAddress("ElGenMCharge", ElGenMCharge, &b_ElGenMCharge);
+   fChain->SetBranchAddress("ElGenMPt", ElGenMPt, &b_ElGenMPt);
+   fChain->SetBranchAddress("ElGenMEta", ElGenMEta, &b_ElGenMEta);
+   fChain->SetBranchAddress("ElGenMPhi", ElGenMPhi, &b_ElGenMPhi);
+   fChain->SetBranchAddress("ElGenME", ElGenME, &b_ElGenME);
+   fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
+   fChain->SetBranchAddress("ElGenGMStatus", ElGenGMStatus, &b_ElGenGMStatus);
+   fChain->SetBranchAddress("ElGenGMCharge", ElGenGMCharge, &b_ElGenGMCharge);
+   fChain->SetBranchAddress("ElGenGMPt", ElGenGMPt, &b_ElGenGMPt);
+   fChain->SetBranchAddress("ElGenGMEta", ElGenGMEta, &b_ElGenGMEta);
+   fChain->SetBranchAddress("ElGenGMPhi", ElGenGMPhi, &b_ElGenGMPhi);
+   fChain->SetBranchAddress("ElGenGME", ElGenGME, &b_ElGenGME);
    fChain->SetBranchAddress("NPhotons", &NPhotons, &b_NPhotons);
    fChain->SetBranchAddress("NPhotonsTot", &NPhotonsTot, &b_NPhotonsTot);
    fChain->SetBranchAddress("PhoGood", PhoGood, &b_PhoGood);

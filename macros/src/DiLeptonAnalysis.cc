@@ -168,8 +168,8 @@ void DiLeptonAnalysis::Analyze(){
 		fTEl2pt       = fTR->ElPt[lep2index];
 		fTEl1eta      = fTR->ElEta[lep1index];
 		fTEl2eta      = fTR->ElEta[lep2index];
-		fTEl1iso      = fTR->ElIso[lep1index];
-		fTEl2iso      = fTR->ElIso[lep2index];
+		fTEl1iso      = fTR->ElRelIso04[lep1index];
+		fTEl2iso      = fTR->ElRelIso04[lep2index];
 		fTEl1d0       = fTR->ElD0BS[lep1index];
 		fTEl2d0       = fTR->ElD0BS[lep2index];
 
@@ -194,7 +194,7 @@ void DiLeptonAnalysis::Analyze(){
 		fTEl1pt       = fTR->ElPt[qualElInd[0]];
 		fTEl1charge   = fTR->ElCharge[qualElInd[0]];
 		fTEl1eta      = fTR->ElEta[qualElInd[0]];
-		fTEl1iso      = fTR->ElIso[qualElInd[0]];
+		fTEl1iso      = fTR->ElRelIso04[qualElInd[0]];
 		fTEl1d0       = fTR->ElD0BS[qualElInd[0]];
 	}
 	fDiLepTree_->Fill();

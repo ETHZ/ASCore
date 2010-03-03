@@ -529,7 +529,7 @@ void TreeCleaner::DecideIso(void){
 
 	// Electrons
 	for( int ichk = 0; ichk < fTR->NEles; ++ichk ){
-		if( fTR->ElIso[ichk] < fClean_ElecIsomax ) fTR->ElIsIso[ichk] = 1;
+		if( fTR->ElRelIso04[ichk] < fClean_ElecIsomax ) fTR->ElIsIso[ichk] = 1;
 		else fTR->ElIsIso[ichk] = 0;
 	}
 
@@ -1326,8 +1326,8 @@ void TreeCleaner::PutMuon(int inew, int iold){
 	fTR->MuSegmComp    [inew] = fTR->MuSegmComp    [iold];
 	fTR->MuTrackerMu   [inew] = fTR->MuTrackerMu   [iold];
 	fTR->MuGMPT        [inew] = fTR->MuGMPT        [iold];
-	fTR->MuID          [inew] = fTR->MuID          [iold];
-	fTR->MuMID         [inew] = fTR->MuMID         [iold];
+	fTR->MuGenID       [inew] = fTR->MuGenID       [iold];
+	fTR->MuGenMID      [inew] = fTR->MuGenMID      [iold];
 }
 
 void TreeCleaner::PutElectron(int inew, int iold){
@@ -1342,7 +1342,7 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElE                         [inew] = fTR->ElE                         [iold];
 	fTR->ElEt                        [inew] = fTR->ElEt                        [iold];
 	fTR->ElEta                       [inew] = fTR->ElEta                       [iold];
-	fTR->ElTheta                     [inew] = fTR->ElTheta                       [iold];
+	fTR->ElTheta                     [inew] = fTR->ElTheta                     [iold];
 	fTR->ElPhi                       [inew] = fTR->ElPhi                       [iold];
 	fTR->ElD0BS                      [inew] = fTR->ElD0BS                      [iold];
 	fTR->ElD0PV                      [inew] = fTR->ElD0PV                      [iold];
@@ -1350,10 +1350,7 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElDzBS                      [inew] = fTR->ElDzBS                      [iold];
 	fTR->ElDzPV                      [inew] = fTR->ElDzPV                      [iold];
 	fTR->ElDzE                       [inew] = fTR->ElDzE                       [iold];
-	fTR->ElIso                       [inew] = fTR->ElIso                       [iold];
-	fTR->ElPtSum                     [inew] = fTR->ElPtSum                     [iold];
-	fTR->ElEmEtSum                   [inew] = fTR->ElEmEtSum                   [iold];
-	fTR->ElHadEtSum                  [inew] = fTR->ElHadEtSum                  [iold];
+	fTR->ElRelIso04                  [inew] = fTR->ElRelIso04                  [iold];
 	fTR->ElNChi2                     [inew] = fTR->ElNChi2                     [iold];
 	fTR->ElCharge                    [inew] = fTR->ElCharge                    [iold];
 	fTR->ElIDTight                   [inew] = fTR->ElIDTight                   [iold];
@@ -1388,8 +1385,8 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElDR04EcalRecHitSumEt       [inew] = fTR->ElDR04EcalRecHitSumEt       [iold];
 	fTR->ElDR03HcalTowerSumEt        [inew] = fTR->ElDR03HcalTowerSumEt        [iold];
 	fTR->ElDR04HcalTowerSumEt        [inew] = fTR->ElDR04HcalTowerSumEt        [iold];
-	fTR->ElID                        [inew] = fTR->ElID                        [iold];
-	fTR->ElMID                       [inew] = fTR->ElMID                       [iold];
+	fTR->ElGenID                     [inew] = fTR->ElGenID                     [iold];
+	fTR->ElGenMID                    [inew] = fTR->ElGenMID                    [iold];
 }
 
 void TreeCleaner::PutPhoton(int inew, int iold){
