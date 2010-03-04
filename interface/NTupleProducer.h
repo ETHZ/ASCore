@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.35 2010/03/03 14:49:51 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.36 2010/03/04 10:19:05 fronga Exp $
 //
 //
 
@@ -59,6 +59,7 @@ public:
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
 	vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
+	const reco::GenJet* matchJet(const reco::Jet *jet, const edm::Event& iEvent);
 	void switchDouble(double &, double &);
 	void switchInt(int &, int &);
 	void resetDouble(double *v, unsigned int size = 20);
@@ -128,6 +129,7 @@ private:
 	edm::InputTag fPhotonTag;
 	edm::InputTag fCalTowTag;
 	edm::InputTag fGenPartTag;
+	edm::InputTag fGenJetTag;
 	edm::InputTag fL1TriggerTag;
 	edm::InputTag fHLTTriggerTag;
 
@@ -351,6 +353,7 @@ private:
 	int fTeBasicClustersSize[gMaxneles];
 	double fTefbrem[gMaxneles];
 	double fTeHcalOverEcal[gMaxneles];
+	double fTeE1x5[gMaxneles];                      // 5x5 arround seed
 	double fTeE5x5[gMaxneles];                      // 5x5 arround seed
 	double fTeE2x5Max[gMaxneles];                   // 2x5 arround seed
 	double fTeSigmaIetaIeta[gMaxneles];             // shower shape covariance
@@ -478,6 +481,13 @@ private:
 	double fTjetVtxEzz[gMaxnjets];
 	double fTjetVtxEzx[gMaxnjets];
 	double fTjetVtxNChi2[gMaxnjets];
+	double fTjetGenPt[gMaxnjets];
+	double fTjetGenEta[gMaxnjets];
+	double fTjetGenPhi[gMaxnjets];
+	double fTjetGenE[gMaxnjets];
+	double fTjetGenemE[gMaxnjets];
+	double fTjetGenhadE[gMaxnjets];
+	double fTjetGeninvE[gMaxnjets];
 
 // Tracks:
 	int fTntracks;
@@ -513,6 +523,15 @@ private:
 	double fTRawMETpx;
 	double fTRawMETpy;
 	double fTRawMETphi;
+	double fTRawMETemEtFrac;
+	double fTRawMETemEtInEB;
+	double fTRawMETemEtInEE;
+	double fTRawMETemEtInHF;
+	double fTRawMEThadEtFrac;
+	double fTRawMEThadEtInHB;
+	double fTRawMEThadEtInHE;
+	double fTRawMEThadEtInHF;
+	double fTRawMETSignificance;
 	double fTMuCorrMET;
 	double fTMuCorrMETpx;
 	double fTMuCorrMETpy;

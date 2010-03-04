@@ -37,6 +37,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_photons   = cms.untracked.InputTag('photons'),
 	tag_caltow   = cms.untracked.InputTag('towerMaker'),
 	tag_genpart  = cms.untracked.InputTag('genParticles'),
+	tag_genjets  = cms.untracked.InputTag('sisCone5GenJets'),
 	tag_l1trig   = cms.untracked.InputTag("gtDigis"),
 	tag_hlttrig  = cms.untracked.InputTag("TriggerResults","","HLT"),
 
