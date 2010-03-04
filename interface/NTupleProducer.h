@@ -14,13 +14,14 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.34 2010/02/16 10:02:22 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.35 2010/03/03 14:49:51 stiegerb Exp $
 //
 //
 
 
 // system include files
 #include <vector>
+#include <string>
 
 // ROOT includes
 #include "TH1.h"
@@ -115,6 +116,7 @@ private:
 	edm::InputTag fMuIsoDepHCTag;
 	edm::InputTag fSCTag;
 	edm::InputTag fJetTag;
+        string fJetCorrs;
 	edm::InputTag fBtagTag;
 	edm::InputTag fMET1Tag;
 	edm::InputTag fMET2Tag;

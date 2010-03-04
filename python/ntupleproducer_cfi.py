@@ -20,6 +20,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	
 	tag_sc       = cms.untracked.InputTag('correctedHybridSuperClusters'),
 	tag_jets     = cms.untracked.InputTag('antikt5CaloJets'),
+        jetCorrs     = cms.untracked.string('L2L3JetCorrectorAK5Calo'),
 	# tag_jets     = cms.untracked.InputTag('sisCone5CaloJets'),
 	tag_btag     = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),  
 	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
