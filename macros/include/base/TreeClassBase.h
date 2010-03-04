@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Mar  3 19:36:37 2010 by ROOT version 5.22/00d
+// Thu Mar  4 18:43:49 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: NTupleProducer_34X_MC34x_RECO.root
 //////////////////////////////////////////////////////////
@@ -157,6 +157,7 @@ public :
    Int_t           ElBasicClustersSize[20];   //[NEles]
    Double_t        Elfbrem[20];   //[NEles]
    Double_t        ElHcalOverEcal[20];   //[NEles]
+   Double_t        ElE1x5[20];   //[NEles]
    Double_t        ElE5x5[20];   //[NEles]
    Double_t        ElE2x5Max[20];   //[NEles]
    Double_t        ElSigmaIetaIeta[20];   //[NEles]
@@ -276,6 +277,13 @@ public :
    Double_t        JVtxEzz[50];   //[NJets]
    Double_t        JVtxEzx[50];   //[NJets]
    Double_t        JVtxNChi2[50];   //[NJets]
+   Double_t        JGenPt[50];   //[NJets]
+   Double_t        JGenEta[50];   //[NJets]
+   Double_t        JGenPhi[50];   //[NJets]
+   Double_t        JGenE[50];   //[NJets]
+   Double_t        JGenEmE[50];   //[NJets]
+   Double_t        JGenHadE[50];   //[NJets]
+   Double_t        JGenInvE[50];   //[NJets]
    Int_t           NTracks;
    Int_t           NTracksTot;
    Int_t           TrkGood[500];   //[NTracks]
@@ -307,6 +315,15 @@ public :
    Double_t        RawMETpx;
    Double_t        RawMETpy;
    Double_t        RawMETphi;
+   Double_t        RawMETemEtFrac;
+   Double_t        RawMETemEtInEB;
+   Double_t        RawMETemEtInEE;
+   Double_t        RawMETemEtInHF;
+   Double_t        RawMEThadEtFrac;
+   Double_t        RawMEThadEtInHB;
+   Double_t        RawMEThadEtInHE;
+   Double_t        RawMEThadEtInHF;
+   Double_t        RawMETSignificance;
    Double_t        MuCorrMET;
    Double_t        MuCorrMETpx;
    Double_t        MuCorrMETpy;
@@ -464,6 +481,7 @@ public :
    TBranch        *b_ElBasicClustersSize;   //!
    TBranch        *b_Elfbrem;   //!
    TBranch        *b_ElHcalOverEcal;   //!
+   TBranch        *b_ElE1x5;   //!
    TBranch        *b_ElE5x5;   //!
    TBranch        *b_ElE2x5Max;   //!
    TBranch        *b_ElSigmaIetaIeta;   //!
@@ -583,6 +601,13 @@ public :
    TBranch        *b_JVtxEzz;   //!
    TBranch        *b_JVtxEzx;   //!
    TBranch        *b_JVtxNChi2;   //!
+   TBranch        *b_JGenPt;   //!
+   TBranch        *b_JGenEta;   //!
+   TBranch        *b_JGenPhi;   //!
+   TBranch        *b_JGenE;   //!
+   TBranch        *b_JGenEmE;   //!
+   TBranch        *b_JGenHadE;   //!
+   TBranch        *b_JGenInvE;   //!
    TBranch        *b_NTracks;   //!
    TBranch        *b_NTracksTot;   //!
    TBranch        *b_TrkGood;   //!
@@ -614,6 +639,15 @@ public :
    TBranch        *b_RawMETpx;   //!
    TBranch        *b_RawMETpy;   //!
    TBranch        *b_RawMETphi;   //!
+   TBranch        *b_RawMETemEtFrac;   //!
+   TBranch        *b_RawMETemEtInEB;   //!
+   TBranch        *b_RawMETemEtInEE;   //!
+   TBranch        *b_RawMETemEtInHF;   //!
+   TBranch        *b_RawMEThadEtFrac;   //!
+   TBranch        *b_RawMEThadEtInHB;   //!
+   TBranch        *b_RawMEThadEtInHE;   //!
+   TBranch        *b_RawMEThadEtInHF;   //!
+   TBranch        *b_RawMETSignificance;   //!
    TBranch        *b_MuCorrMET;   //!
    TBranch        *b_MuCorrMETpx;   //!
    TBranch        *b_MuCorrMETpy;   //!
@@ -843,6 +877,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElBasicClustersSize", ElBasicClustersSize, &b_ElBasicClustersSize);
    fChain->SetBranchAddress("Elfbrem", Elfbrem, &b_Elfbrem);
    fChain->SetBranchAddress("ElHcalOverEcal", ElHcalOverEcal, &b_ElHcalOverEcal);
+   fChain->SetBranchAddress("ElE1x5", ElE1x5, &b_ElE1x5);
    fChain->SetBranchAddress("ElE5x5", ElE5x5, &b_ElE5x5);
    fChain->SetBranchAddress("ElE2x5Max", ElE2x5Max, &b_ElE2x5Max);
    fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
@@ -962,6 +997,13 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JVtxEzz", JVtxEzz, &b_JVtxEzz);
    fChain->SetBranchAddress("JVtxEzx", JVtxEzx, &b_JVtxEzx);
    fChain->SetBranchAddress("JVtxNChi2", JVtxNChi2, &b_JVtxNChi2);
+   fChain->SetBranchAddress("JGenPt", JGenPt, &b_JGenPt);
+   fChain->SetBranchAddress("JGenEta", JGenEta, &b_JGenEta);
+   fChain->SetBranchAddress("JGenPhi", JGenPhi, &b_JGenPhi);
+   fChain->SetBranchAddress("JGenE", JGenE, &b_JGenE);
+   fChain->SetBranchAddress("JGenEmE", JGenEmE, &b_JGenEmE);
+   fChain->SetBranchAddress("JGenHadE", JGenHadE, &b_JGenHadE);
+   fChain->SetBranchAddress("JGenInvE", JGenInvE, &b_JGenInvE);
    fChain->SetBranchAddress("NTracks", &NTracks, &b_NTracks);
    fChain->SetBranchAddress("NTracksTot", &NTracksTot, &b_NTracksTot);
    fChain->SetBranchAddress("TrkGood", TrkGood, &b_TrkGood);
@@ -993,6 +1035,15 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("RawMETpx", &RawMETpx, &b_RawMETpx);
    fChain->SetBranchAddress("RawMETpy", &RawMETpy, &b_RawMETpy);
    fChain->SetBranchAddress("RawMETphi", &RawMETphi, &b_RawMETphi);
+   fChain->SetBranchAddress("RawMETemEtFrac", &RawMETemEtFrac, &b_RawMETemEtFrac);
+   fChain->SetBranchAddress("RawMETemEtInEB", &RawMETemEtInEB, &b_RawMETemEtInEB);
+   fChain->SetBranchAddress("RawMETemEtInEE", &RawMETemEtInEE, &b_RawMETemEtInEE);
+   fChain->SetBranchAddress("RawMETemEtInHF", &RawMETemEtInHF, &b_RawMETemEtInHF);
+   fChain->SetBranchAddress("RawMEThadEtFrac", &RawMEThadEtFrac, &b_RawMEThadEtFrac);
+   fChain->SetBranchAddress("RawMEThadEtInHB", &RawMEThadEtInHB, &b_RawMEThadEtInHB);
+   fChain->SetBranchAddress("RawMEThadEtInHE", &RawMEThadEtInHE, &b_RawMEThadEtInHE);
+   fChain->SetBranchAddress("RawMEThadEtInHF", &RawMEThadEtInHF, &b_RawMEThadEtInHF);
+   fChain->SetBranchAddress("RawMETSignificance", &RawMETSignificance, &b_RawMETSignificance);
    fChain->SetBranchAddress("MuCorrMET", &MuCorrMET, &b_MuCorrMET);
    fChain->SetBranchAddress("MuCorrMETpx", &MuCorrMETpx, &b_MuCorrMETpx);
    fChain->SetBranchAddress("MuCorrMETpy", &MuCorrMETpy, &b_MuCorrMETpy);
