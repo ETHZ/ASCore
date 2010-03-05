@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.42 2010/03/04 10:19:07 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.43 2010/03/04 17:42:54 stiegerb Exp $
 //
 //
 
@@ -288,7 +288,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		Service<service::TriggerNamesService> tns;
 		tns->getTrigPaths(*triggers, triggernames);
 		for( unsigned int i = 0; i < tr.size(); i++ ){
-		//cout << "i " << i << " of " << tr.size() << " : " << tr[i].accept() << " : " << triggernames[i] << endl;
 			fHhltstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
 		}
 	// Add a warning about the shift between trigger bits and bin numbers:
@@ -593,29 +592,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			if(!fIsRealData){
 				vector<const GenParticle*> ElMatch = matchRecoCand(&(*El), iEvent);
 				if(ElMatch[0] != NULL){
-					fTGenElId[mqi]       = ElMatch[0]->pdgId();
-					fTGenElStatus[mqi]   = ElMatch[0]->status();
-					fTGenElCharge[mqi]   = ElMatch[0]->charge();
-					fTGenElPt[mqi]       = ElMatch[0]->pt();
-					fTGenElEta[mqi]      = ElMatch[0]->eta();
-					fTGenElPhi[mqi]      = ElMatch[0]->phi();
-					fTGenElE[mqi]        = ElMatch[0]->energy();
+					fTGenElId[eqi]       = ElMatch[0]->pdgId();
+					fTGenElStatus[eqi]   = ElMatch[0]->status();
+					fTGenElCharge[eqi]   = ElMatch[0]->charge();
+					fTGenElPt[eqi]       = ElMatch[0]->pt();
+					fTGenElEta[eqi]      = ElMatch[0]->eta();
+					fTGenElPhi[eqi]      = ElMatch[0]->phi();
+					fTGenElE[eqi]        = ElMatch[0]->energy();
 
-					fTGenElMId[mqi]      = ElMatch[1]->pdgId();
-					fTGenElMStatus[mqi]  = ElMatch[1]->status();
-					fTGenElMCharge[mqi]  = ElMatch[1]->charge();
-					fTGenElMPt[mqi]      = ElMatch[1]->pt();
-					fTGenElMEta[mqi]     = ElMatch[1]->eta();
-					fTGenElMPhi[mqi]     = ElMatch[1]->phi();
-					fTGenElME[mqi]       = ElMatch[1]->energy();
+					fTGenElMId[eqi]      = ElMatch[1]->pdgId();
+					fTGenElMStatus[eqi]  = ElMatch[1]->status();
+					fTGenElMCharge[eqi]  = ElMatch[1]->charge();
+					fTGenElMPt[eqi]      = ElMatch[1]->pt();
+					fTGenElMEta[eqi]     = ElMatch[1]->eta();
+					fTGenElMPhi[eqi]     = ElMatch[1]->phi();
+					fTGenElME[eqi]       = ElMatch[1]->energy();
 
-					fTGenElGMId[mqi]     = ElMatch[2]->pdgId();
-					fTGenElGMStatus[mqi] = ElMatch[2]->status();
-					fTGenElGMCharge[mqi] = ElMatch[2]->charge();
-					fTGenElGMPt[mqi]     = ElMatch[2]->pt();
-					fTGenElGMEta[mqi]    = ElMatch[2]->eta();
-					fTGenElGMPhi[mqi]    = ElMatch[2]->phi();
-					fTGenElGME[mqi]      = ElMatch[2]->energy();
+					fTGenElGMId[eqi]     = ElMatch[2]->pdgId();
+					fTGenElGMStatus[eqi] = ElMatch[2]->status();
+					fTGenElGMCharge[eqi] = ElMatch[2]->charge();
+					fTGenElGMPt[eqi]     = ElMatch[2]->pt();
+					fTGenElGMEta[eqi]    = ElMatch[2]->eta();
+					fTGenElGMPhi[eqi]    = ElMatch[2]->phi();
+					fTGenElGME[eqi]      = ElMatch[2]->energy();
 				}
 				ElMatch.clear();
 			}
