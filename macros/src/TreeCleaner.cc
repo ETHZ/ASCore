@@ -1,4 +1,5 @@
 #include "TreeCleaner.hh"
+#include "helper/Utilities.hh"
 
 using namespace std;
 
@@ -382,7 +383,7 @@ bool TreeCleaner::DuplicateMuon(int ichk){
 		if( j == ichk ) continue;
 		if( fTR->MuCharge[ichk] != fTR->MuCharge[j] ) continue;
 
-		double deltaR = GetDeltaR(fTR->MuEta[ichk], fTR->MuEta[j], fTR->MuPhi[ichk], fTR->MuPhi[j]);
+		double deltaR = Util::GetDeltaR(fTR->MuEta[ichk], fTR->MuEta[j], fTR->MuPhi[ichk], fTR->MuPhi[j]);
 		if( deltaR > fClean_dRSSmuonmax ) continue;
 
 		// Both are bad or both are good -> compare them
@@ -443,7 +444,7 @@ bool TreeCleaner::DuplicateElectron(int ichk){
 	int j = fTR->ElDuplicateEl[ichk];
 	if( j < 0 ) return false;
 
-	if( GetDeltaR(fTR->ElEta[ichk], fTR->ElEta[j], fTR->ElPhi[ichk], fTR->ElPhi[j]) < fClean_dRSSelecmax ){
+	if( Util::GetDeltaR(fTR->ElEta[ichk], fTR->ElEta[j], fTR->ElPhi[ichk], fTR->ElPhi[j]) < fClean_dRSSelecmax ){
 		// Both are bad or both are good -> compare them
 		if( (fTR->ElGood[ichk] == 0 && fTR->ElGood[j] == 0) || (fTR->ElGood[ichk] != 0 && fTR->ElGood[j] != 0) ){
 			double elecEoP = fTR->ElESuperClusterOverP[ichk];
@@ -510,7 +511,7 @@ bool TreeCleaner::ElectronJet(int ichk){
 	for( int j = 0; j < fTR->NEles; ++j ){
 		if( fTR->ElIsInJet[j] < 0 ) continue;
 		if( fTR->ElIsInJet[j] != ichk ) continue;
-		if( GetDeltaR(fTR->JEta[ichk], fTR->ElEta[j], fTR->JPhi[ichk], fTR->ElPhi[j]) > fClean_deltaRElecJetmax ) continue;
+		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->ElEta[j], fTR->JPhi[ichk], fTR->ElPhi[j]) > fClean_deltaRElecJetmax ) continue;
 		if( fTR->ElSharedEnergy[j] > fClean_elecbyJetEratio * fTR->JE[ichk] ){
 			isDuplicate = true;
 			break;
@@ -828,7 +829,7 @@ int TreeCleaner::CleanMET(double met, double metphi){
 	for( int i = 0; i < fTR->NJets; ++i ){
 		// Reject if the MET is along the jet
 		if(fTR->JGood[i] != 0) continue;
-		double dPhi =  DeltaPhi(fTR->JPhi[i], metphi);
+		double dPhi =  Util::DeltaPhi(fTR->JPhi[i], metphi);
 		if( dPhi < fClean_dPhiJetMETmin ) return 1;
 		// Else, pick up the 2 leading jets
 		if( fTR->JPt[i] > etmax1 ){
@@ -844,8 +845,8 @@ int TreeCleaner::CleanMET(double met, double metphi){
 
 	// Check dR12 and dR21
 	if( imax2 >= 0 ){
-		double dPhi1 = DeltaPhi(fTR->JPhi[imax1], metphi );
-		double dPhi2 = DeltaPhi(fTR->JPhi[imax2], metphi );
+		double dPhi1 = Util::DeltaPhi(fTR->JPhi[imax1], metphi );
+		double dPhi2 = Util::DeltaPhi(fTR->JPhi[imax2], metphi );
 		double pi = 3.141592654;
 		fR12 = sqrt(dPhi1*dPhi1 + (pi-dPhi2)*(pi-dPhi2) );
 		fR21 = sqrt(dPhi2*dPhi2 + (pi-dPhi1)*(pi-dPhi1) );
@@ -863,30 +864,13 @@ int TreeCleaner::FindNearestJet(double eta, double phi){
 
 	double deltaRmin = 999.;
 	for(int i = 0; i < fTR->NJets; ++i){
-		double deltaR = GetDeltaR(eta, fTR->JEta[i], phi, fTR->JPhi[i]);
+		double deltaR = Util::GetDeltaR(eta, fTR->JEta[i], phi, fTR->JPhi[i]);
 		if (deltaR < deltaRmin){
 			deltaRmin = deltaR;
 			iJetMin = i;
 		}
 	}
 	return iJetMin;
-}
-
-double TreeCleaner::DeltaPhi(double v1, double v2){
-// Computes the correctly normalized phi difference
-// v1, v2 = phi of object 1 and 2
-	const double pi    = 3.141592654;
-	double twopi = 6.283185307;
-
-	double diff = fabs(v2 - v1);
-	double corr = twopi - diff;
-	if (diff < pi){ return diff;} else { return corr;}
-}
-
-double TreeCleaner::GetDeltaR(double eta1, double eta2, double phi1, double phi2){
-// Computes the DeltaR of two objects from their eta and phi values
-	return sqrt( (eta1-eta2)*(eta1-eta2)
-		+ DeltaPhi(phi1, phi2)*DeltaPhi(phi1, phi2) );
 }
 
 void TreeCleaner::StatInit(const char* filename){
