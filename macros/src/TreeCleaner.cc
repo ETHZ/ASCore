@@ -1327,13 +1327,33 @@ void TreeCleaner::PutMuon(int inew, int iold){
 	fTR->MuTrackerMu   [inew] = fTR->MuTrackerMu   [iold];
 	fTR->MuGMPT        [inew] = fTR->MuGMPT        [iold];
 	fTR->MuGenID       [inew] = fTR->MuGenID       [iold];
+	fTR->MuGenStatus   [inew] = fTR->MuGenStatus   [iold];
+	fTR->MuGenCharge   [inew] = fTR->MuGenCharge   [iold];
+	fTR->MuGenPt       [inew] = fTR->MuGenPt       [iold];
+	fTR->MuGenEta      [inew] = fTR->MuGenEta      [iold];
+	fTR->MuGenPhi      [inew] = fTR->MuGenPhi      [iold];
+	fTR->MuGenE        [inew] = fTR->MuGenE        [iold];
 	fTR->MuGenMID      [inew] = fTR->MuGenMID      [iold];
+	fTR->MuGenMStatus  [inew] = fTR->MuGenMStatus  [iold];
+	fTR->MuGenMCharge  [inew] = fTR->MuGenMCharge  [iold];
+	fTR->MuGenMPt      [inew] = fTR->MuGenMPt      [iold];
+	fTR->MuGenMEta     [inew] = fTR->MuGenMEta     [iold];
+	fTR->MuGenMPhi     [inew] = fTR->MuGenMPhi     [iold];
+	fTR->MuGenME       [inew] = fTR->MuGenME       [iold];
+	fTR->MuGenGMID     [inew] = fTR->MuGenGMID     [iold];
+	fTR->MuGenGMStatus [inew] = fTR->MuGenGMStatus [iold];
+	fTR->MuGenGMCharge [inew] = fTR->MuGenGMCharge [iold];
+	fTR->MuGenGMPt     [inew] = fTR->MuGenGMPt     [iold];
+	fTR->MuGenGMEta    [inew] = fTR->MuGenGMEta    [iold];
+	fTR->MuGenGMPhi    [inew] = fTR->MuGenGMPhi    [iold];
+	fTR->MuGenGME      [inew] = fTR->MuGenGME      [iold];
 }
 
 void TreeCleaner::PutElectron(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
 	fTR->ElGood                      [inew] = fTR->ElGood                      [iold];
 	fTR->ElIsIso                     [inew] = fTR->ElIsIso                     [iold];
+	fTR->ElChargeMisIDProb           [inew] = fTR->ElChargeMisIDProb           [iold];
 	fTR->ElPx                        [inew] = fTR->ElPx                        [iold];
 	fTR->ElPy                        [inew] = fTR->ElPy                        [iold];
 	fTR->ElPz                        [inew] = fTR->ElPz                        [iold];
@@ -1351,8 +1371,22 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElDzPV                      [inew] = fTR->ElDzPV                      [iold];
 	fTR->ElDzE                       [inew] = fTR->ElDzE                       [iold];
 	fTR->ElRelIso04                  [inew] = fTR->ElRelIso04                  [iold];
+	fTR->ElDR03TkSumPt               [inew] = fTR->ElDR03TkSumPt               [iold];
+	fTR->ElDR04TkSumPt               [inew] = fTR->ElDR04TkSumPt               [iold];
+	fTR->ElDR03EcalRecHitSumEt       [inew] = fTR->ElDR03EcalRecHitSumEt       [iold];
+	fTR->ElDR04EcalRecHitSumEt       [inew] = fTR->ElDR04EcalRecHitSumEt       [iold];
+	fTR->ElDR03HcalTowerSumEt        [inew] = fTR->ElDR03HcalTowerSumEt        [iold];
+	fTR->ElDR04HcalTowerSumEt        [inew] = fTR->ElDR04HcalTowerSumEt        [iold];
 	fTR->ElNChi2                     [inew] = fTR->ElNChi2                     [iold];
 	fTR->ElCharge                    [inew] = fTR->ElCharge                    [iold];
+	fTR->ElCInfoIsGsfCtfCons         [inew] = fTR->ElCInfoIsGsfCtfCons         [iold];
+	fTR->ElCInfoIsGsfCtfScPixCons    [inew] = fTR->ElCInfoIsGsfCtfScPixCons    [iold];
+	fTR->ElCInfoIsGsfScPixCons       [inew] = fTR->ElCInfoIsGsfScPixCons       [iold];
+	fTR->ElScPixCharge               [inew] = fTR->ElScPixCharge               [iold];
+	fTR->ElClosestCtfTrackPt         [inew] = fTR->ElClosestCtfTrackPt         [iold];
+	fTR->ElClosestCtfTrackEta        [inew] = fTR->ElClosestCtfTrackEta        [iold];
+	fTR->ElClosestCtfTrackPhi        [inew] = fTR->ElClosestCtfTrackPhi        [iold];
+	fTR->ElClosestCtfTrackCharge     [inew] = fTR->ElClosestCtfTrackCharge     [iold];
 	fTR->ElIDTight                   [inew] = fTR->ElIDTight                   [iold];
 	fTR->ElIDLoose                   [inew] = fTR->ElIDLoose                   [iold];
 	fTR->ElIDRobustTight             [inew] = fTR->ElIDRobustTight             [iold];
@@ -1363,6 +1397,7 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElBasicClustersSize         [inew] = fTR->ElBasicClustersSize         [iold];
 	fTR->Elfbrem                     [inew] = fTR->Elfbrem                     [iold];
 	fTR->ElHcalOverEcal              [inew] = fTR->ElHcalOverEcal              [iold];
+	fTR->ElE1x5                      [inew] = fTR->ElE1x5                      [iold];
 	fTR->ElE5x5                      [inew] = fTR->ElE5x5                      [iold];
 	fTR->ElE2x5Max                   [inew] = fTR->ElE2x5Max                   [iold];
 	fTR->ElSigmaIetaIeta             [inew] = fTR->ElSigmaIetaIeta             [iold];
@@ -1379,14 +1414,27 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElSharedPz                  [inew] = fTR->ElSharedPz                  [iold];
 	fTR->ElSharedEnergy              [inew] = fTR->ElSharedEnergy              [iold];
 	fTR->ElDuplicateEl               [inew] = fTR->ElDuplicateEl               [iold];
-	fTR->ElDR03TkSumPt               [inew] = fTR->ElDR03TkSumPt               [iold];
-	fTR->ElDR04TkSumPt               [inew] = fTR->ElDR04TkSumPt               [iold];
-	fTR->ElDR03EcalRecHitSumEt       [inew] = fTR->ElDR03EcalRecHitSumEt       [iold];
-	fTR->ElDR04EcalRecHitSumEt       [inew] = fTR->ElDR04EcalRecHitSumEt       [iold];
-	fTR->ElDR03HcalTowerSumEt        [inew] = fTR->ElDR03HcalTowerSumEt        [iold];
-	fTR->ElDR04HcalTowerSumEt        [inew] = fTR->ElDR04HcalTowerSumEt        [iold];
 	fTR->ElGenID                     [inew] = fTR->ElGenID                     [iold];
+	fTR->ElGenStatus                 [inew] = fTR->ElGenStatus                 [iold];
+	fTR->ElGenCharge                 [inew] = fTR->ElGenCharge                 [iold];
+	fTR->ElGenPt                     [inew] = fTR->ElGenPt                     [iold];
+	fTR->ElGenEta                    [inew] = fTR->ElGenEta                    [iold];
+	fTR->ElGenPhi                    [inew] = fTR->ElGenPhi                    [iold];
+	fTR->ElGenE                      [inew] = fTR->ElGenE                      [iold];
 	fTR->ElGenMID                    [inew] = fTR->ElGenMID                    [iold];
+	fTR->ElGenMStatus                [inew] = fTR->ElGenMStatus                [iold];
+	fTR->ElGenMCharge                [inew] = fTR->ElGenMCharge                [iold];
+	fTR->ElGenMPt                    [inew] = fTR->ElGenMPt                    [iold];
+	fTR->ElGenMEta                   [inew] = fTR->ElGenMEta                   [iold];
+	fTR->ElGenMPhi                   [inew] = fTR->ElGenMPhi                   [iold];
+	fTR->ElGenME                     [inew] = fTR->ElGenME                     [iold];
+	fTR->ElGenGMID                   [inew] = fTR->ElGenGMID                   [iold];
+	fTR->ElGenGMStatus               [inew] = fTR->ElGenGMStatus               [iold];
+	fTR->ElGenGMCharge               [inew] = fTR->ElGenGMCharge               [iold];
+	fTR->ElGenGMPt                   [inew] = fTR->ElGenGMPt                   [iold];
+	fTR->ElGenGMEta                  [inew] = fTR->ElGenGMEta                  [iold];
+	fTR->ElGenGMPhi                  [inew] = fTR->ElGenGMPhi                  [iold];
+	fTR->ElGenGME                    [inew] = fTR->ElGenGME                    [iold];
 }
 
 void TreeCleaner::PutPhoton(int inew, int iold){
@@ -1473,5 +1521,11 @@ void TreeCleaner::PutJet(int inew, int iold){
 	fTR->JVtxEzz        [inew] = fTR->JVtxEzz        [iold];
 	fTR->JVtxEzx        [inew] = fTR->JVtxEzx        [iold];
 	fTR->JVtxNChi2      [inew] = fTR->JVtxNChi2      [iold];
+	fTR->JGenPt         [inew] = fTR->JGenPt         [iold];
+	fTR->JGenEta        [inew] = fTR->JGenEta        [iold];
+	fTR->JGenPhi        [inew] = fTR->JGenPhi        [iold];
+	fTR->JGenE          [inew] = fTR->JGenE          [iold];
+	fTR->JGenEmE        [inew] = fTR->JGenEmE        [iold];
+	fTR->JGenHadE       [inew] = fTR->JGenHadE       [iold];
+	fTR->JGenInvE       [inew] = fTR->JGenInvE       [iold];
 }
-
