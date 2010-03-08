@@ -27,7 +27,7 @@ void PhysQCAnalyzer::Loop(){
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
 	// nentries = 10;
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		if( jentry%200 == 0 ) cout << ">>> Processing event # " << jentry << endl;		
+		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
 
 		fTreeCleaner         ->Analyze();

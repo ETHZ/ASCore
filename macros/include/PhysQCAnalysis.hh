@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
 #include <TH2D.h>
 #include <TVector3.h>
@@ -33,14 +34,19 @@ public:
 	void End();
 	void MakePlots(TString, TTree*);
 	void PlotTriggerStats();
+	void PrintInfoStart(int nEntries);
+	double DeltaPhi(double v1, double v2);
+	void GetEvtEmChFrac(double & fracEm, double & fracCh);
 	
 	TreeCleaner *fTC;
 	AnaClass *fAC;
 
 private:
-
+	
 	TH1D *fMuHistos[3];
-	TH1D *fMETHistos[2];
+	TH1D *fElHistos[14];
+	TH1D *fMETHistos[5];
+	TH2D *fMETDphi12;
 
 };
 #endif
