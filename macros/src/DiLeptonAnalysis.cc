@@ -180,7 +180,7 @@ void DiLeptonAnalysis::Analyze(){
 
 		pa[0] = 0.; pb[0] = 0.; pmiss[0] = 0.;
 		pa[1] = fTR->ElPx[lep1index];
-		pa[2] = fTR->ElPz[lep1index];
+		pa[2] = fTR->ElPy[lep1index];
 		pb[1] = fTR->ElPx[lep2index];
 		pb[2] = fTR->ElPy[lep2index];
 		pmiss[1] = fTR->TCMETpx;
