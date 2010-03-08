@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.44 2010/03/05 14:41:35 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.45 2010/03/08 14:16:47 stiegerb Exp $
 //
 //
 
@@ -550,10 +550,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeCInfoIsGsfCtfScPixCons[eqi] = El->chargeInfo().isGsfCtfScPixConsistent ? 1:0;
 			fTeCInfoIsGsfScPixCons[eqi]    = El->chargeInfo().isGsfScPixConsistent ? 1:0;
 			fTeCInfoScPixCharge[eqi]       = El->chargeInfo().scPixCharge;
-			fTeClosestCtfTrackpt[eqi]      = (El->closestCtfTrack().ctfTrack)->pt();
-			fTeClosestCtfTracketa[eqi]     = (El->closestCtfTrack().ctfTrack)->eta();
-			fTeClosestCtfTrackphi[eqi]     = (El->closestCtfTrack().ctfTrack)->phi();
-			fTeClosestCtfTrackcharge[eqi]  = (El->closestCtfTrack().ctfTrack)->charge();
+			if( El->closestCtfTrackRef().isNonnull() ){
+				fTeClosestCtfTrackpt[eqi]      = (El->closestCtfTrack().ctfTrack)->pt();
+				fTeClosestCtfTracketa[eqi]     = (El->closestCtfTrack().ctfTrack)->eta();
+				fTeClosestCtfTrackphi[eqi]     = (El->closestCtfTrack().ctfTrack)->phi();
+				fTeClosestCtfTrackcharge[eqi]  = (El->closestCtfTrack().ctfTrack)->charge();
+			}
 			fTeInGap[eqi]    = El->isGap() ? 1:0;
 
 		//	Choose the "Driven" methods according to the CMSSW release			
