@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.43 2010/03/04 17:42:54 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.44 2010/03/05 14:41:35 stiegerb Exp $
 //
 //
 
@@ -64,6 +64,8 @@ Implementation:
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+
+#include "MagneticField/Engine/interface/MagneticField.h"
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
@@ -266,6 +268,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		iEvent.getByLabel("generator", genEvtInfo);
 		fTsigprocid = genEvtInfo->signalProcessID();		
 	}
+
+// Get Magnetic Field
+	edm::ESHandle<MagneticField> magfield;
+	iSetup.get<IdealMagneticFieldRecord>().get(magfield);
+
 
 // Dump trigger bits
 	Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
@@ -618,7 +625,20 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				}
 				ElMatch.clear();
 			}
-
+		// Conversion Information
+			GlobalPoint origin_point(0,0,0);
+			double Dist(0.), DCot(0.);
+			const float bFieldAtOrigin = magfield.product()->inTesla(origin_point).mag();
+			reco::TrackRef ConvPartnerTrack = getConversionPartnerTrack(*El, tracks, bFieldAtOrigin, Dist, DCot);
+			if( ConvPartnerTrack.isNonnull() ){
+				fTeConvPartTrackDist[eqi]   = Dist;
+				fTeConvPartTrackDCot[eqi]   = DCot;
+				fTeConvPartTrackPt[eqi]     = ConvPartnerTrack->pt();
+				fTeConvPartTrackEta[eqi]    = ConvPartnerTrack->eta();
+				fTeConvPartTrackPhi[eqi]    = ConvPartnerTrack->phi();
+				fTeConvPartTrackCharge[eqi] = ConvPartnerTrack->charge();				
+			}
+			
 			fTgoodel[eqi] = 0;
 			fTeIsIso[eqi] = 1;
 			fTeChargeMisIDProb[eqi] = 0;
@@ -1362,6 +1382,13 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("ElSharedEnergy"  ,&fTeSharedEnergy      ,"ElSharedEnergy[NEles]/D");
 	fEventTree->Branch("ElDuplicateEl"   ,&fTeDupEl             ,"ElDuplicateEl[NEles]/I");
 
+	fEventTree->Branch("ElConvPartnerTrkDist"   ,&fTeConvPartTrackDist   ,"ElConvPartnerTrkDist[NEles]/D");
+	fEventTree->Branch("ElConvPartnerTrkDCot"   ,&fTeConvPartTrackDCot   ,"ElConvPartnerTrkDCot[NEles]/D");
+	fEventTree->Branch("ElConvPartnerTrkPt"     ,&fTeConvPartTrackPt     ,"ElConvPartnerTrkPt[NEles]/D");
+	fEventTree->Branch("ElConvPartnerTrkEta"    ,&fTeConvPartTrackEta    ,"ElConvPartnerTrkEta[NEles]/D");
+	fEventTree->Branch("ElConvPartnerTrkPhi"    ,&fTeConvPartTrackPhi    ,"ElConvPartnerTrkPhi[NEles]/D");
+	fEventTree->Branch("ElConvPartnerTrkCharge" ,&fTeConvPartTrackCharge ,"ElConvPartnerTrkCharge[NEles]/D");
+
 	fEventTree->Branch("ElGenID"          ,&fTGenElId         ,"ElGenID[NEles]/I");
 	fEventTree->Branch("ElGenStatus"      ,&fTGenElStatus     ,"ElGenStatus[NEles]/I");
 	fEventTree->Branch("ElGenCharge"      ,&fTGenElCharge     ,"ElGenCharge[NEles]/I");
@@ -1749,6 +1776,13 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTedzE, gMaxneles);
 	resetDouble(fTenchi2, gMaxneles);
 	resetDouble(fTeiso, gMaxneles);
+	resetDouble(fTdr03tksumpt, gMaxneles);
+	resetDouble(fTdr04tksumpt, gMaxneles);
+	resetDouble(fTdr03ecalrechitsumet, gMaxneles);
+	resetDouble(fTdr04ecalrechitsumet, gMaxneles);
+	resetDouble(fTdr03hcaltowersumet, gMaxneles);
+	resetDouble(fTdr04hcaltowersumet, gMaxneles);
+	resetDouble(fTetheta, gMaxneles);
 	resetInt(fTecharge, gMaxneles);
 	resetInt(fTeCInfoIsGsfCtfCons, gMaxneles);
 	resetInt(fTeCInfoIsGsfCtfScPixCons, gMaxneles);
@@ -1782,13 +1816,12 @@ void NTupleProducer::resetTree(){
 	resetDouble(fTeSharedEnergy, gMaxneles);
 	resetInt(fTeDupEl, gMaxneles);
 
-	resetDouble(fTdr03tksumpt, gMaxneles);
-	resetDouble(fTdr04tksumpt, gMaxneles);
-	resetDouble(fTdr03ecalrechitsumet, gMaxneles);
-	resetDouble(fTdr04ecalrechitsumet, gMaxneles);
-	resetDouble(fTdr03hcaltowersumet, gMaxneles);
-	resetDouble(fTdr04hcaltowersumet, gMaxneles);
-	resetDouble(fTetheta, gMaxneles);
+	resetDouble(fTeConvPartTrackDist, gMaxneles);
+	resetDouble(fTeConvPartTrackDCot, gMaxneles);
+	resetDouble(fTeConvPartTrackPt, gMaxneles);
+	resetDouble(fTeConvPartTrackEta, gMaxneles);
+	resetDouble(fTeConvPartTrackPhi, gMaxneles);
+	resetDouble(fTeConvPartTrackCharge, gMaxneles);
 
 	resetInt(fTeIDTight, gMaxneles);
 	resetInt(fTeIDLoose, gMaxneles);
@@ -2086,6 +2119,98 @@ const reco::GenJet* NTupleProducer::matchJet(const reco::Jet* jet, const edm::Ev
 		genjet = &(*gjet);
 	}
 	return genjet;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Electron Conversion Information
+reco::TrackRef NTupleProducer::getConversionPartnerTrack(const reco::GsfElectron& gsfElectron, const edm::Handle<reco::TrackCollection>& track_h, const float bFieldAtOrigin, double& Dist, double& DCot, const float maxAbsDist, const float maxAbsDCot, const float minFracSharedHits){
+	using namespace edm;
+	using namespace reco;
+	const reco::TrackRef el_ctftrack = gsfElectron.closestCtfTrackRef();
+	const TrackCollection *ctftracks = track_h.product();
+
+	const reco::Track* el_track = getElectronTrack(gsfElectron, minFracSharedHits);
+	int ctfidx = -999;
+	int el_q   = el_track->charge();
+	LorentzVector el_tk_p4(el_track->px(), el_track->py(), el_track->pz(), el_track->p());
+	double el_d0 = el_track->d0();
+
+	if(el_ctftrack.isNonnull() && gsfElectron.shFracInnerHits() > minFracSharedHits)
+		ctfidx = static_cast<int>(el_ctftrack.key());
+
+	int tk_i = 0;
+	double mindR = 999;
+
+//make a null Track Ref
+	TrackRef ctfTrackRef = TrackRef() ;
+
+	for(TrackCollection::const_iterator tk = ctftracks->begin();
+	tk != ctftracks->end(); tk++, tk_i++) {
+	//if the general Track is the same one as made by the electron, skip it
+		if((tk_i == ctfidx)  &&  (gsfElectron.shFracInnerHits() > minFracSharedHits))
+			continue;
+
+
+		LorentzVector tk_p4 = LorentzVector(tk->px(), tk->py(),
+			tk->pz(), tk->p());
+
+	//look only in a cone of 0.3
+		double dR = deltaR(el_tk_p4, tk_p4);
+		if(dR > 0.3)
+			continue;
+
+		int tk_q = tk->charge();
+		double tk_d0 = tk->d0();
+
+	//the electron and track must be opposite charge
+		if(tk_q + el_q != 0)
+			continue;
+
+		std::pair<double, double> convInfo =  getConversionInfo(el_tk_p4, el_q, el_d0,
+			tk_p4, tk_q, tk_d0,
+			bFieldAtOrigin);
+
+		double dist = convInfo.first;
+		double dcot = convInfo.second;
+
+		if(fabs(dist) < maxAbsDist && fabs(dcot) < maxAbsDCot && dR < mindR) {
+			ctfTrackRef = reco::TrackRef(track_h, tk_i);
+			mindR = dR;
+			Dist = dist ;
+			DCot = dcot ;
+		}
+
+	}//track loop
+
+	return ctfTrackRef;
+}
+
+const reco::Track* NTupleProducer::getElectronTrack(const reco::GsfElectron& electron, const float minFracSharedHits) {
+	if(electron.closestCtfTrackRef().isNonnull() &&
+		electron.shFracInnerHits() > minFracSharedHits)
+		return (const reco::Track*)electron.closestCtfTrackRef().get();
+	return (const reco::Track*)(electron.gsfTrack().get());
+}
+
+std::pair<double, double> NTupleProducer::getConversionInfo(LorentzVector trk1_p4, int trk1_q, float trk1_d0, LorentzVector trk2_p4, int trk2_q, float trk2_d0, float bFieldAtOrigin) {
+
+  double tk1Curvature = -0.3*bFieldAtOrigin*(trk1_q/trk1_p4.pt())/100.;
+  double rTk1 = fabs(1./tk1Curvature);
+  double xTk1 = (1./tk1Curvature - trk1_d0)*cos(trk1_p4.phi());
+  double yTk1 = (1./tk1Curvature - trk1_d0)*sin(trk1_p4.phi());
+
+  double tk2Curvature = -0.3*bFieldAtOrigin*(trk2_q/trk2_p4.pt())/100.;
+  double rTk2 = fabs(1./tk2Curvature);
+  double xTk2 = (1./tk2Curvature - trk2_d0)*cos(trk2_p4.phi());
+  double yTk2 = (1./tk2Curvature - trk2_d0)*sin(trk2_p4.phi());
+
+  double dist = sqrt(pow(xTk1-xTk2, 2) + pow(yTk1-yTk2 , 2));
+  dist = dist - (rTk1 + rTk2);
+
+  double dcot = 1/tan(trk1_p4.theta()) - 1/tan(trk2_p4.theta());
+
+  return std::make_pair(dist, dcot);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

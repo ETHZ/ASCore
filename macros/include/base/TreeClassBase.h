@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Mar  4 18:43:49 2010 by ROOT version 5.22/00d
+// Mon Mar  8 15:05:08 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: NTupleProducer_34X_MC34x_RECO.root
 //////////////////////////////////////////////////////////
@@ -174,6 +174,12 @@ public :
    Double_t        ElSharedPz[20];   //[NEles]
    Double_t        ElSharedEnergy[20];   //[NEles]
    Int_t           ElDuplicateEl[20];   //[NEles]
+   Double_t        ElConvPartnerTrkDist[20];   //[NEles]
+   Double_t        ElConvPartnerTrkDCot[20];   //[NEles]
+   Double_t        ElConvPartnerTrkPt[20];   //[NEles]
+   Double_t        ElConvPartnerTrkEta[20];   //[NEles]
+   Double_t        ElConvPartnerTrkPhi[20];   //[NEles]
+   Double_t        ElConvPartnerTrkCharge[20];   //[NEles]
    Int_t           ElGenID[20];   //[NEles]
    Int_t           ElGenStatus[20];   //[NEles]
    Int_t           ElGenCharge[20];   //[NEles]
@@ -498,6 +504,12 @@ public :
    TBranch        *b_ElSharedPz;   //!
    TBranch        *b_ElSharedEnergy;   //!
    TBranch        *b_ElDuplicateEl;   //!
+   TBranch        *b_ElConvPartnerTrkDist;   //!
+   TBranch        *b_ElConvPartnerTrkDCot;   //!
+   TBranch        *b_ElConvPartnerTrkPt;   //!
+   TBranch        *b_ElConvPartnerTrkEta;   //!
+   TBranch        *b_ElConvPartnerTrkPhi;   //!
+   TBranch        *b_ElConvPartnerTrkCharge;   //!
    TBranch        *b_ElGenID;   //!
    TBranch        *b_ElGenStatus;   //!
    TBranch        *b_ElGenCharge;   //!
@@ -894,6 +906,12 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElSharedPz", ElSharedPz, &b_ElSharedPz);
    fChain->SetBranchAddress("ElSharedEnergy", ElSharedEnergy, &b_ElSharedEnergy);
    fChain->SetBranchAddress("ElDuplicateEl", ElDuplicateEl, &b_ElDuplicateEl);
+   fChain->SetBranchAddress("ElConvPartnerTrkDist", ElConvPartnerTrkDist, &b_ElConvPartnerTrkDist);
+   fChain->SetBranchAddress("ElConvPartnerTrkDCot", ElConvPartnerTrkDCot, &b_ElConvPartnerTrkDCot);
+   fChain->SetBranchAddress("ElConvPartnerTrkPt", ElConvPartnerTrkPt, &b_ElConvPartnerTrkPt);
+   fChain->SetBranchAddress("ElConvPartnerTrkEta", ElConvPartnerTrkEta, &b_ElConvPartnerTrkEta);
+   fChain->SetBranchAddress("ElConvPartnerTrkPhi", ElConvPartnerTrkPhi, &b_ElConvPartnerTrkPhi);
+   fChain->SetBranchAddress("ElConvPartnerTrkCharge", ElConvPartnerTrkCharge, &b_ElConvPartnerTrkCharge);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
    fChain->SetBranchAddress("ElGenStatus", ElGenStatus, &b_ElGenStatus);
    fChain->SetBranchAddress("ElGenCharge", ElGenCharge, &b_ElGenCharge);

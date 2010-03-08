@@ -1414,6 +1414,12 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElSharedPz                  [inew] = fTR->ElSharedPz                  [iold];
 	fTR->ElSharedEnergy              [inew] = fTR->ElSharedEnergy              [iold];
 	fTR->ElDuplicateEl               [inew] = fTR->ElDuplicateEl               [iold];
+	fTR->ElConvPartnerTrkDist        [inew] = fTR->ElConvPartnerTrkDist        [iold];
+	fTR->ElConvPartnerTrkDCot        [inew] = fTR->ElConvPartnerTrkDCot        [iold];
+	fTR->ElConvPartnerTrkPt          [inew] = fTR->ElConvPartnerTrkPt          [iold];
+	fTR->ElConvPartnerTrkEta         [inew] = fTR->ElConvPartnerTrkEta         [iold];
+	fTR->ElConvPartnerTrkPhi         [inew] = fTR->ElConvPartnerTrkPhi         [iold];
+	fTR->ElConvPartnerTrkCharge      [inew] = fTR->ElConvPartnerTrkCharge      [iold];
 	fTR->ElGenID                     [inew] = fTR->ElGenID                     [iold];
 	fTR->ElGenStatus                 [inew] = fTR->ElGenStatus                 [iold];
 	fTR->ElGenCharge                 [inew] = fTR->ElGenCharge                 [iold];

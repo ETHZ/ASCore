@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.36 2010/03/04 10:19:05 fronga Exp $
+// $Id: NTupleProducer.h,v 1.37 2010/03/04 17:43:03 stiegerb Exp $
 //
 //
 
@@ -42,11 +42,15 @@ Implementation:
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/JetReco/interface/Jet.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
 	
 // Helpers
 #include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
 
+#include "Math/VectorUtil.h"
 
+
+typedef math::XYZTLorentzVector LorentzVector;
 
 class NTupleProducer : public edm::EDAnalyzer {
 public:
@@ -68,6 +72,10 @@ public:
 	vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
 
 private:
+
+	const reco::Track* getElectronTrack(const reco::GsfElectron& gsfElectron, const float minFracSharedHits);
+	std::pair<double, double> getConversionInfo(math::XYZTLorentzVector trk1_p4,int trk1_q, float trk1_d0,math::XYZTLorentzVector trk2_p4,int trk2_q, float trk2_d0,float bFieldAtOrigin);
+	reco::TrackRef getConversionPartnerTrack(const reco::GsfElectron& gsfElectron, const edm::Handle<reco::TrackCollection>& track_h, const float bFieldAtOrigin, double& Dist, double& DCot, const float maxAbsDist = 0.02, const float maxAbsDCot = 0.02, const float minFracSharedHits = 0.45);
 
 	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
 	virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
@@ -320,6 +328,7 @@ private:
 	double fTeet[gMaxneles];
 	double fTeeta[gMaxneles];
 	double fTephi[gMaxneles];
+	double fTetheta[gMaxneles];
 	double fTed0bs[gMaxneles];
 	double fTed0pv[gMaxneles];
 	double fTed0E[gMaxneles];
@@ -370,7 +379,12 @@ private:
 	double fTeSharedPz[gMaxneles];
 	double fTeSharedEnergy[gMaxneles];
 	int fTeDupEl[gMaxneles];
-	double fTetheta[gMaxneles];
+	double fTeConvPartTrackDist[gMaxneles];
+	double fTeConvPartTrackDCot[gMaxneles];
+	double fTeConvPartTrackPt[gMaxneles];
+	double fTeConvPartTrackEta[gMaxneles];
+	double fTeConvPartTrackPhi[gMaxneles];
+	double fTeConvPartTrackCharge[gMaxneles];
 
 // - Gen Info:
 	int    fTGenElId[gMaxneles];
