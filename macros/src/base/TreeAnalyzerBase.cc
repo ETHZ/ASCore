@@ -7,6 +7,7 @@ using namespace std;
 
 TreeAnalyzerBase::TreeAnalyzerBase(TTree *tree) {
 	fTR = new TreeReader(tree);
+	fNEntries = fTR->GetEntries();
 	fVerbose = false;
 }
 
@@ -32,3 +33,14 @@ void TreeAnalyzerBase::BeginJob(){}
 
 // Method called after finishing the event loop
 void TreeAnalyzerBase::EndJob(){}
+
+// Method that prints the progress in reasonable frequency
+void TreeAnalyzerBase::PrintProgress(Long64_t entry){
+	bool print = false;
+	int step = 0;
+	step = fNEntries / 20;
+	if( step < 200 ) step = 200;
+	if( step > 10000 ) step = 10000;
+	print = (entry%step == 0);
+	if( print ) cout << ">>> Processing event # " << entry << endl;
+}

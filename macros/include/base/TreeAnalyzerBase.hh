@@ -13,12 +13,14 @@ public:
 	virtual void BeginJob();
 	virtual void EndJob();
 	virtual void Loop();
+	virtual void PrintProgress(Long64_t);
 
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	
 	TString fOutputDir;
 	int fVerbose;
+	int fNEntries;
 
 	TStyle *fStyle;
 	TreeReader *fTR;
