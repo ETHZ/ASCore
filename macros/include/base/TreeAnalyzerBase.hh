@@ -22,7 +22,6 @@ public:
 	int fVerbose;
 	int fNEntries;
 
-	TStyle *fStyle;
 	TreeReader *fTR;
 
 private:	
