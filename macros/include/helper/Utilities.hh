@@ -5,6 +5,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TString.h"
+#include "TMath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -97,12 +98,9 @@ namespace Util {
 	inline double DeltaPhi(double v1, double v2){
 		// Computes the correctly normalized phi difference
 		// v1, v2 = phi of object 1 and 2
-		const double pi = 3.141592654;
-		double twopi = 6.283185307;
-
 		double diff = fabs(v2 - v1);
-		double corr = twopi - diff;
-		if (diff < pi){ return diff;} else { return corr;}
+		double corr = TMath::TwoPi() - diff;
+		if (diff < TMath::Pi()){ return diff;} else { return corr;}
 	}
 
 	inline double GetDeltaR(double eta1, double eta2, double phi1, double phi2){
