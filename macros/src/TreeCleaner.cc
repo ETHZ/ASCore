@@ -274,7 +274,10 @@ void TreeCleaner::TagCleanObjects(void){
 	// Duplication (only after cleanness has been checked)
 	for( int ichk = 0; ichk < fTR->NMus; ++ichk )  if( DuplicateMuon(ichk)     ) fTR->MuGood[ichk] += 100;
 	for( int ichk = 0; ichk < fTR->NEles; ++ichk ) if( DuplicateElectron(ichk) ) fTR->ElGood[ichk] += 100;
-	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) if( ElectronJet(ichk)       ) fTR->JGood[ichk]  += 100;
+	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) {
+		if( ElectronJet(ichk)     ) fTR->JGood[ichk]  += 100;
+		if( PhotonJet(ichk)       ) fTR->JGood[ichk]  += 200;
+	}
 
 	// Event and MET can only be done later (after bad objects are removed)
 	fTR->GoodEvent = 0;
@@ -513,6 +516,26 @@ bool TreeCleaner::ElectronJet(int ichk){
 		if( fTR->ElIsInJet[j] != ichk ) continue;
 		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->ElEta[j], fTR->JPhi[ichk], fTR->ElPhi[j]) > fClean_deltaRElecJetmax ) continue;
 		if( fTR->ElSharedEnergy[j] > fClean_elecbyJetEratio * fTR->JE[ichk] ){
+			isDuplicate = true;
+			break;
+		}
+	}
+	return isDuplicate;
+}
+
+bool TreeCleaner::PhotonJet(int ichk){
+// checks for jets made from photons
+// ichk = index of the jet
+	if( ichk < 0 ) return false;
+
+	bool isDuplicate = false;
+
+// veto jets made of photons
+	for( int j = 0; j < fTR->NPhotons; ++j ){
+		if( fTR->PhoIsInJet[j] < 0 ) continue;
+		if( fTR->PhoIsInJet[j] != ichk ) continue;
+		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->PhoEta[j], fTR->JPhi[ichk], fTR->PhoPhi[j]) > fClean_deltaRElecJetmax ) continue;
+		if( fTR->PhoSharedEnergy[j] > fClean_elecbyJetEratio * fTR->JE[ichk] ){
 			isDuplicate = true;
 			break;
 		}
