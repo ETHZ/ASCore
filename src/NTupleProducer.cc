@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.45 2010/03/08 14:16:47 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.46 2010/03/08 16:36:53 stiegerb Exp $
 //
 //
 
@@ -560,7 +560,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		//	Choose the "Driven" methods according to the CMSSW release			
 		// CMSSW_3_3_X and before
-			fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;		
+			fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;
 			fTeTrackerDriven[eqi] = El->isTrackerDriven() ? 1:0;
 		// CMSSW_3_4_1 and later:
 		// fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
@@ -641,6 +641,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTeConvPartTrackCharge[eqi] = ConvPartnerTrack->charge();				
 			}
 			
+			fTeIsInJet[eqi] = -1;
+			fTeSharedPx[eqi] = 0.;
+			fTeSharedPy[eqi] = 0.;
+			fTeSharedPz[eqi] = 0.;
+			fTeSharedEnergy[eqi] = 0.;
+			
 			fTgoodel[eqi] = 0;
 			fTeIsIso[eqi] = 1;
 			fTeChargeMisIDProb[eqi] = 0;
@@ -694,6 +700,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTPhotSigmaIetaIeta[nqpho]  = ip->sigmaIetaIeta();
 		fTPhotHasPixSeed[nqpho]     = ip->hasPixelSeed() ? 1:0;
 		fTPhotHasConvTrks[nqpho]    = ip->hasConversionTracks() ? 1:0; 
+		fTPhotIsInJet[nqpho] = -1;
+		fTPhotSharedPx[nqpho] = 0.;
+		fTPhotSharedPy[nqpho] = 0.;
+		fTPhotSharedPz[nqpho] = 0.;
+		fTPhotSharedEnergy[nqpho] = 0.;
 		fTgoodphoton[nqpho]  = 0;
 		fTPhotIsIso[nqpho] = 1;
 	}
@@ -1079,6 +1090,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTntrackstot = tracks->size();
 	fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
 	for( TrackCollection::const_iterator it = tracks->begin(); it != tracks->end() ; ++it ){
+		fTTrkPtSumx += it->px(); // Calculated for ALL tracks
+		fTTrkPtSumy += it->py();
 		if(it->pt() < fMintrkpt) continue;
 		if(fabs(it->eta()) > fMaxtrketa) continue;
 		if(it->normalizedChi2() > fMaxtrknchi2) continue;
@@ -1092,9 +1105,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTgoodevent = 0;
 			break;
 		}
-
-		fTTrkPtSumx += it->px();
-		fTTrkPtSumy += it->py();
 		fTtrkpt[nqtrk]    = it->pt()*it->charge();
 		fTtrketa[nqtrk]   = it->eta();
 		fTtrkphi[nqtrk]   = it->phi();
@@ -2267,12 +2277,7 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 		}
 
 	// loop over the electrons
-		for (int j = 0; j < fTneles; ++j) {
-			fTeIsInJet[j] = -1;
-			fTeSharedPx[j] = 0.;
-			fTeSharedPy[j] = 0.;
-			fTeSharedPz[j] = 0.;
-			fTeSharedEnergy[j] = 0.;
+		for( int j = 0; j < fTneles; ++j ){
 			const SuperCluster* theElecSC = electrons[j];
 
 			math::XYZVector sharedP(0., 0., 0.);
@@ -2317,11 +2322,6 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 
 	// loop over the photons
 		for( int j = 0; j < fTnphotons; ++j ){
-			fTPhotIsInJet[j] = -1;
-			fTPhotSharedPx[j] = 0.;
-			fTPhotSharedPy[j] = 0.;
-			fTPhotSharedPz[j] = 0.;
-			fTPhotSharedEnergy[j] = 0.;
 			const SuperCluster* theSC = superclusters[j];
 
 			math::XYZVector sharedP(0., 0., 0.);
