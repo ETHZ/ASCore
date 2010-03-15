@@ -18,7 +18,7 @@ NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc \
+                 src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc \
                  src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysis.cc src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc \
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc
 
@@ -29,7 +29,7 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend PhysQC
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer
+all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
@@ -40,11 +40,15 @@ RunTreeAnalyzer: src/exe/RunTreeAnalyzer.C $(OBJS)
 RunPhysQCAnalyzer: src/exe/RunPhysQCAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
+RunTreeSkimmer: src/exe/RunTreeSkimmer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
+
 clean:
 	$(RM) $(OBJS)
 	$(RM) RunUserAnalyzer
 	$(RM) RunTreeAnalyzer
 	$(RM) RunPhysQCAnalyzer
+	$(RM) RunTreeSkimmer
 
 purge:
 	$(RM) $(OBJS)
@@ -107,11 +111,8 @@ src/UserAnalyzer.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 src/UserAnalyzer.o: /usr/lib/gcc/x86_64-redhat-linux/3.4.6/include/stdarg.h
 src/UserAnalyzer.o: /usr/include/bits/stdio_lim.h
 src/UserAnalyzer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
-src/UserAnalyzer.o: ./include/base/TreeReader.hh ./include/TreeCleaner.hh
+src/UserAnalyzer.o: ./include/base/TreeReader.hh ./include/UserAnalysis.hh
 src/UserAnalyzer.o: ./include/base/UserAnalysisBase.hh
-src/UserAnalyzer.o: ./include/helper/Davismt2.h /usr/include/math.h
-src/UserAnalyzer.o: /usr/include/bits/huge_val.h /usr/include/bits/mathdef.h
-src/UserAnalyzer.o: /usr/include/bits/mathcalls.h ./include/UserAnalysis.hh
 src/TreeAnalyzer.o: ./include/TreeAnalyzer.hh
 src/TreeAnalyzer.o: ./include/base/TreeAnalyzerBase.hh
 src/TreeAnalyzer.o: ./include/base/TreeReader.hh
@@ -163,6 +164,22 @@ src/PhysQCAnalyzer.o: ./include/helper/Utilities.hh
 src/PhysQCAnalyzer.o: ./include/MultiplicityAnalysis.hh
 src/PhysQCAnalyzer.o: ./include/helper/LeptJetStat.h
 src/PhysQCAnalyzer.o: ./include/DiLeptonAnalysis.hh
+src/TreeSkimmer.o: ./include/TreeSkimmer.hh
+src/TreeSkimmer.o: ./include/base/TreeAnalyzerBase.hh
+src/TreeSkimmer.o: ./include/base/TreeReader.hh
+src/TreeSkimmer.o: ./include/base/TreeClassBase.h
+src/TreeSkimmer.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/TreeSkimmer.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/TreeSkimmer.o: /usr/include/gnu/stubs.h
+src/TreeSkimmer.o: /usr/lib/gcc/x86_64-redhat-linux/3.4.6/include/stddef.h
+src/TreeSkimmer.o: /usr/include/bits/types.h /usr/include/bits/wordsize.h
+src/TreeSkimmer.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/TreeSkimmer.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/TreeSkimmer.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/TreeSkimmer.o: /usr/lib/gcc/x86_64-redhat-linux/3.4.6/include/stdarg.h
+src/TreeSkimmer.o: /usr/include/bits/stdio_lim.h
+src/TreeSkimmer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/TreeSkimmer.o: ./include/base/TreeReader.hh
 src/UserAnalysis.o: ./include/helper/Utilities.hh /usr/include/stdio.h
 src/UserAnalysis.o: /usr/include/features.h /usr/include/sys/cdefs.h
 src/UserAnalysis.o: /usr/include/gnu/stubs.h
