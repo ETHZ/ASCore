@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.37 2010/03/04 17:43:03 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.38 2010/03/08 14:16:48 stiegerb Exp $
 //
 //
 
@@ -114,18 +114,12 @@ private:
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
-	edm::InputTag fEleIsoTkTag;
-	edm::InputTag fEleIsoECTag;
-	edm::InputTag fEleIsoHCTag;
-	edm::InputTag fEleIsoDepTkTag;
-	edm::InputTag fEleIsoDepECTag;
-	edm::InputTag fEleIsoDepHCTag;
 	edm::InputTag fMuIsoDepTkTag;
 	edm::InputTag fMuIsoDepECTag;
 	edm::InputTag fMuIsoDepHCTag;
 	edm::InputTag fSCTag;
 	edm::InputTag fJetTag;
-        string fJetCorrs;
+	string fJetCorrs;
 	edm::InputTag fBtagTag;
 	edm::InputTag fMET1Tag;
 	edm::InputTag fMET2Tag;
@@ -230,7 +224,7 @@ private:
 	static const unsigned int gMaxhltbits = 200;
 	static const unsigned int gMaxl1physbits = 128;
 	static const unsigned int gMaxl1techbits = 64;
-	int fTHLTres[200];
+	int fTHLTres[gMaxhltbits];
 	int fTL1physres[gMaxl1physbits];
 	int fTL1techres[gMaxl1techbits];
 

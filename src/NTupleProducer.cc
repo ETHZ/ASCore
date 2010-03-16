@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.46 2010/03/08 16:36:53 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.47 2010/03/11 15:35:57 stiegerb Exp $
 //
 //
 
@@ -79,12 +79,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 // InputTags
 	fMuonTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_muons");
 	fElectronTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_electrons");
-	fEleIsoTkTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisotk");
-	fEleIsoECTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisoec");
-	fEleIsoHCTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisohc");
-	fEleIsoDepTkTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisodeptk");
-	fEleIsoDepECTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisodepec");
-	fEleIsoDepHCTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_elisodephc");
 	fMuIsoDepTkTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
 	fMuIsoDepECTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
 	fMuIsoDepHCTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
@@ -135,12 +129,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	edm::LogVerbatim("NTP") << "  Input Tags:";
 	edm::LogVerbatim("NTP") << "    fMuonTag        = " << fMuonTag.label()        ;
 	edm::LogVerbatim("NTP") << "    fElectronTag    = " << fElectronTag.label()    ;
-	edm::LogVerbatim("NTP") << "    fEleIsoTkTag    = " << fEleIsoTkTag.label()    ;
-	edm::LogVerbatim("NTP") << "    fEleIsoECTag    = " << fEleIsoECTag.label()    ;
-	edm::LogVerbatim("NTP") << "    fEleIsoHCTag    = " << fEleIsoHCTag.label()    ;
-	edm::LogVerbatim("NTP") << "    fEleIsoDepTkTag = " << fEleIsoDepTkTag.label() ;
-	edm::LogVerbatim("NTP") << "    fEleIsoDepECTag = " << fEleIsoDepECTag.label() ;
-	edm::LogVerbatim("NTP") << "    fEleIsoDepHCTag = " << fEleIsoDepHCTag.label() ;
 	edm::LogVerbatim("NTP") << "    fMuIsoDepTkTag  = " << fMuIsoDepTkTag.label()  ;
 	edm::LogVerbatim("NTP") << "    fMuIsoDepECTag  = " << fMuIsoDepECTag.label()  ;
 	edm::LogVerbatim("NTP") << "    fMuIsoDepHCTag  = " << fMuIsoDepHCTag.label()  ;
