@@ -7,7 +7,7 @@ dzVxmax               20.0
 sumPtTkfromVxmin      0.0
 
 # -- Vertex compatibility (of muons, electrons, photons and jets)
-distVxmax             5.0
+distVxmax             10.0
 
 # -- Muons:
 MuonDPbyPmax          0.5
@@ -42,16 +42,17 @@ FracEmminJet          0.01
 FracChminJet          0.05
 
 deltaRElecJetmax      0.5
-elecbyJetEratio       0.7
+elecbyJetEratio       0.65
 
 # -- Isolation:
-MuonIsomax            1.
-ElecIsomax            1.
-PhotIsomax            1.
+MuonIsomax            0.2
+ElecIsomax            0.2
+PhotIsomax            0.2
 
 # -- Event cleaning:
 FracChmin             0.1
 FracEmmin             0.175
+JetBadHardPtmin       50.
 
 # -- MET:
 METmin                50.0
