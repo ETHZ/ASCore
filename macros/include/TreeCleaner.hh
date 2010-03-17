@@ -57,6 +57,7 @@ private:
 	int CleanPhoton(int ichk);
 	int CleanJet(int ichk);
 	bool ElectronJet(int ichk);
+	bool PhotonJet(int ichk);
 	int FindNearestJet(double eta, double phi);
 	double DeltaPhi(double v1, double v2);
 	double GetDeltaR(double eta1, double eta2, double phi1, double phi2);
