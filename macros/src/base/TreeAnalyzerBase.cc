@@ -38,7 +38,8 @@ void TreeAnalyzerBase::EndJob(){}
 void TreeAnalyzerBase::PrintProgress(Long64_t entry){
 	bool print = false;
 	int step = 0;
-	step = fNEntries / 20;
+	step = (fNEntries/20)/100;
+	step *= 100;
 	if( step < 200 ) step = 200;
 	if( step > 10000 ) step = 10000;
 	print = (entry%step == 0);
