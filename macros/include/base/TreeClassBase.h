@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Mar  8 15:05:08 2010 by ROOT version 5.22/00d
+// Wed Mar 24 18:14:49 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: NTupleProducer_34X_MC34x_RECO.root
+// found on file: NTupleProducer_MC34x_RECO.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -22,6 +22,13 @@ public :
    Int_t           Event;
    Int_t           LumiSection;
    Int_t           SigProcID;
+   Double_t        PDFScalePDF;
+   Int_t           PDFID1;
+   Int_t           PDFID2;
+   Double_t        PDFx1;
+   Double_t        PDFx2;
+   Double_t        PDFxPDF1;
+   Double_t        PDFxPDF2;
    Double_t        ExtXSecLO;
    Double_t        IntXSec;
    Double_t        Weight;
@@ -352,6 +359,13 @@ public :
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSection;   //!
    TBranch        *b_SigProcID;   //!
+   TBranch        *b_PDFScalePDF;   //!
+   TBranch        *b_PDFID1;   //!
+   TBranch        *b_PDFID2;   //!
+   TBranch        *b_PDFx1;   //!
+   TBranch        *b_PDFx2;   //!
+   TBranch        *b_PDFxPDF1;   //!
+   TBranch        *b_PDFxPDF2;   //!
    TBranch        *b_ExtXSecLO;   //!
    TBranch        *b_IntXSec;   //!
    TBranch        *b_Weight;   //!
@@ -696,10 +710,10 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_34X_MC34x_RECO.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_MC34x_RECO.root");
       if (!f) {
-         f = new TFile("NTupleProducer_34X_MC34x_RECO.root");
-         f->cd("NTupleProducer_34X_MC34x_RECO.root:/analyze");
+         f = new TFile("NTupleProducer_MC34x_RECO.root");
+         f->cd("NTupleProducer_MC34x_RECO.root:/analyze");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -754,6 +768,13 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSection", &LumiSection, &b_LumiSection);
    fChain->SetBranchAddress("SigProcID", &SigProcID, &b_SigProcID);
+   fChain->SetBranchAddress("PDFScalePDF", &PDFScalePDF, &b_PDFScalePDF);
+   fChain->SetBranchAddress("PDFID1", &PDFID1, &b_PDFID1);
+   fChain->SetBranchAddress("PDFID2", &PDFID2, &b_PDFID2);
+   fChain->SetBranchAddress("PDFx1", &PDFx1, &b_PDFx1);
+   fChain->SetBranchAddress("PDFx2", &PDFx2, &b_PDFx2);
+   fChain->SetBranchAddress("PDFxPDF1", &PDFxPDF1, &b_PDFxPDF1);
+   fChain->SetBranchAddress("PDFxPDF2", &PDFxPDF2, &b_PDFxPDF2);
    fChain->SetBranchAddress("ExtXSecLO", &ExtXSecLO, &b_ExtXSecLO);
    fChain->SetBranchAddress("IntXSec", &IntXSec, &b_IntXSec);
    fChain->SetBranchAddress("Weight", &Weight, &b_Weight);

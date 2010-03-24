@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.38 2010/03/08 14:16:48 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.39 2010/03/16 15:51:31 stiegerb Exp $
 //
 //
 
@@ -199,6 +199,14 @@ private:
 	int fTeventnumber;
 	int fTlumisection;
 	int fTsigprocid;
+	double fTpdfscalePDF;
+	int fTpdfid1;
+	int fTpdfid2;
+	double fTpdfx1;
+	double fTpdfx2;
+	double fTpdfxPDF1;
+	double fTpdfxPDF2;
+
 	double fTextxslo;
 	double fTintxs;
 	double fTweight;

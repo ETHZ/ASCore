@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.47 2010/03/11 15:35:57 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.48 2010/03/16 15:51:31 stiegerb Exp $
 //
 //
 
@@ -254,7 +254,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<GenEventInfoProduct> genEvtInfo;
 	if(!fIsRealData){
 		iEvent.getByLabel("generator", genEvtInfo);
-		fTsigprocid = genEvtInfo->signalProcessID();		
+		fTsigprocid   = genEvtInfo->signalProcessID();
+		fTpdfscalePDF = genEvtInfo->pdf()->scalePDF;
+		fTpdfid1      = genEvtInfo->pdf()->id.first;
+		fTpdfid2      = genEvtInfo->pdf()->id.second;
+		fTpdfx1       = genEvtInfo->pdf()->x.first;
+		fTpdfx2       = genEvtInfo->pdf()->x.second;
+		fTpdfxPDF1    = genEvtInfo->pdf()->xPDF.first;
+		fTpdfxPDF2    = genEvtInfo->pdf()->xPDF.second;
 	}
 
 // Get Magnetic Field
@@ -1223,6 +1230,13 @@ void NTupleProducer::beginJob(const edm::EventSetup&){
 	fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/I");
 	fEventTree->Branch("LumiSection"      ,&fTlumisection     ,"LumiSection/I");
 	fEventTree->Branch("SigProcID"        ,&fTsigprocid       ,"SigProcID/I");
+	fEventTree->Branch("PDFScalePDF"      ,&fTpdfscalePDF     ,"PDFScalePDF/D");
+	fEventTree->Branch("PDFID1"           ,&fTpdfid1          ,"PDFID1/I");
+	fEventTree->Branch("PDFID2"           ,&fTpdfid2          ,"PDFID2/I");
+	fEventTree->Branch("PDFx1"            ,&fTpdfx1           ,"PDFx1/D");
+	fEventTree->Branch("PDFx2"            ,&fTpdfx2           ,"PDFx2/D");
+	fEventTree->Branch("PDFxPDF1"         ,&fTpdfxPDF1        ,"PDFxPDF1/D");
+	fEventTree->Branch("PDFxPDF2"         ,&fTpdfxPDF2        ,"PDFxPDF2/D");
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/D");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/D");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/D");
@@ -1661,6 +1675,14 @@ void NTupleProducer::resetTree(){
 	fTeventnumber = -999;
 	fTlumisection = -999;
 	fTsigprocid   = -999;
+	fTpdfscalePDF = -999.99;
+	fTpdfid1      = -999;
+	fTpdfid2      = -999;
+	fTpdfx1       = -999.99;
+	fTpdfx2       = -999.99;
+	fTpdfxPDF1    = -999.99;
+	fTpdfxPDF2    = -999.99;
+	
 	fTweight      = -999.99;
 	fTgoodvtx     = -999;
 	fTprimvtxx    = -999.99;
