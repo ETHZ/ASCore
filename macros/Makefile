@@ -20,10 +20,9 @@ GLIBS          = $(filter-out -lNew, $(NGLIBS))
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
                  src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc \
                  src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysis.cc src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc \
-                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc
+                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
-
 
 .SUFFIXES: .cc,.C,.hh,.h
 .PHONY : clean purge all depend PhysQC
@@ -319,3 +318,17 @@ src/helper/Davismt2.o: /usr/include/gnu/stubs.h /usr/include/bits/huge_val.h
 src/helper/Davismt2.o: /usr/include/bits/mathdef.h
 src/helper/Davismt2.o: /usr/include/bits/mathcalls.h
 src/helper/LeptJetStat.o: ./include/helper/LeptJetStat.h
+src/helper/Hemisphere.o: ./include/helper/Hemisphere.hh
+src/helper/Hemisphere.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/helper/Hemisphere.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/helper/Hemisphere.o: /usr/include/gnu/stubs.h
+src/helper/Hemisphere.o: /usr/lib/gcc/x86_64-redhat-linux/3.4.6/include/stddef.h
+src/helper/Hemisphere.o: /usr/include/bits/types.h
+src/helper/Hemisphere.o: /usr/include/bits/wordsize.h
+src/helper/Hemisphere.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/helper/Hemisphere.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/helper/Hemisphere.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/helper/Hemisphere.o: /usr/lib/gcc/x86_64-redhat-linux/3.4.6/include/stdarg.h
+src/helper/Hemisphere.o: /usr/include/bits/stdio_lim.h
+src/helper/Hemisphere.o: /usr/include/bits/sys_errlist.h
+src/helper/Hemisphere.o: /usr/include/stdlib.h
