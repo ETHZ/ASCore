@@ -30,9 +30,11 @@ public:
 	virtual ~PhysQCAnalysis();
 
 	void Begin();
-	void Analyze();
+	void Analyze1();
+	void Analyze2();
 	void End();
 	void MakePlots(TString, TTree*);
+	void MakeElIDPlots(TTree*);
 	void PlotTriggerStats();
 	void PrintInfoStart(int nEntries);
 	double DeltaPhi(double v1, double v2);
@@ -43,8 +45,9 @@ public:
 
 private:
 	
-	TH1D *fMuHistos[3];
-	TH1D *fElHistos[14];
+	TH1D *fMuHistos[5];
+	TH1D *fElHistos[18];
+	TH1D *fJHistos[4];
 	TH1D *fMETHistos[5];
 	TH2D *fMETDphi12;
 

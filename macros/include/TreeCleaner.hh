@@ -31,6 +31,7 @@ public:
 	void Analyze();
 	void End();
 	void Reset();
+	void StatWrite(TString fCleanerStats);
 
 	bool fClean;
 
@@ -135,6 +136,7 @@ private:
 	int fNumTotJetGood;  
 	int fNumTotJetBad;  
 	int fNumTotJetDuplElJet;
+	int fNumTotJetDuplPhoJet;
 	int fNumTotJetNotPrimaryTrk;
 	int fNumTotJetNotClean;
 	int fNumTotJetPgtE;
@@ -203,6 +205,7 @@ private:
 	// -- Event cleaning:
 	float fClean_FracChmin;             // = 0.1   // Min charge fraction in event
 	float fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
+	float fClean_JetBadHardPtmin;       // = 50.   // Min Pt for jet to trigger bad event
 	
 	// -- MET:
 	float fClean_METmin;                // = 50.0  // Min MET to be considered

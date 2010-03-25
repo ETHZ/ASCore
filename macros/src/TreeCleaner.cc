@@ -38,7 +38,7 @@ void TreeCleaner::Analyze(){
 			iclean++;
 		}
 		fTR->NMus = iclean;
-		
+
 		iclean = 0;
 		for( int i = 0; i < fTR->NEles; i++ ){
 			if( fTR->ElGood[i] != 0 ) continue;
@@ -46,7 +46,7 @@ void TreeCleaner::Analyze(){
 			iclean++;
 		}
 		fTR->NEles = iclean;
-		
+
 		iclean = 0;
 		for( int i = 0; i < fTR->NPhotons; i++ ){
 			if( fTR->PhoGood[i] != 0 ) continue;
@@ -54,7 +54,7 @@ void TreeCleaner::Analyze(){
 			iclean++;
 		}
 		fTR->NPhotons = iclean;
-		
+
 		iclean = 0;
 		for( int i = 0; i < fTR->NJets; i++ ){
 			if( fTR->JGood[i] != 0 ) continue;
@@ -62,7 +62,7 @@ void TreeCleaner::Analyze(){
 			iclean++;
 		}
 		fTR->NJets = iclean;
-		
+
 		// At this point the arrays only contain clean objects
 		// The non-clean object are overwritten
 		fCleanTree->Fill();
@@ -223,6 +223,9 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		if( !strcmp(ParName, "FracEmmin") ){
 			fClean_FracEmmin = float(ParValue); ok = true;
 		}
+		if( !strcmp(ParName, "JetBadHardPtmin") ){
+			fClean_JetBadHardPtmin = float(ParValue); ok = true;
+		}
 
 		// -- MET:
 		if( !strcmp(ParName, "METmin") ){
@@ -266,6 +269,7 @@ void TreeCleaner::TagCleanObjects(void){
 	}
 
 	// Jets
+	int jbad = 0;
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ){
 		fTR->JGood[ichk] = 10*IsFromPrimaryVx(4, ichk);
 		fTR->JGood[ichk] += CleanJet(ichk);
@@ -277,10 +281,11 @@ void TreeCleaner::TagCleanObjects(void){
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) {
 		if( ElectronJet(ichk)     ) fTR->JGood[ichk]  += 100;
 		if( PhotonJet(ichk)       ) fTR->JGood[ichk]  += 200;
+		if (fTR->JGood[ichk]%10 > 0 && fTR->JPt[ichk] > fClean_JetBadHardPtmin) jbad = 4;
 	}
 
 	// Event and MET can only be done later (after bad objects are removed)
-	fTR->GoodEvent = 0;
+	fTR->GoodEvent = jbad;
 	return;
 }
 
@@ -347,11 +352,19 @@ int TreeCleaner::IsFromPrimaryVx(int ipart, int ichk){
 	} else if( ipart == 3 ){ // Photons
 		return 1; // Photons not implemented yet
 	} else if( ipart == 4 ){ // Jets
-		d0  = sqrt((fTR->JVtxx[ichk]-fTR->PrimVtxx)*(fTR->JVtxx[ichk]-fTR->PrimVtxx)
-			+ (fTR->JVtxy[ichk]-fTR->PrimVtxy)*(fTR->JVtxy[ichk]-fTR->PrimVtxy) );
-		dd0 = sqrt(fTR->JVtxExx[ichk] + fTR->JVtxEyy[ichk] + drVxsq);
-		dz  = fTR->JVtxz[ichk] - fTR->PrimVtxz;
-		ddz = sqrt(fTR->JVtxEzz[ichk] + fTR->PrimVtxzE*fTR->PrimVtxzE);
+		d0  = 0.;
+		dd0 = 0.001;
+		dz  = 0.;
+		ddz = 0.001;
+//		if (fTR->JVtxNChi2 > 0) { // not defined when bad
+		double dztry = fTR->JVtxz[ichk] - fTR->PrimVtxz;
+		if (dztry > -100.) {
+			d0  = sqrt((fTR->JVtxx[ichk]-fTR->PrimVtxx)*(fTR->JVtxx[ichk]-fTR->PrimVtxx)
+				+ (fTR->JVtxy[ichk]-fTR->PrimVtxy)*(fTR->JVtxy[ichk]-fTR->PrimVtxy) );
+			dd0 = sqrt(fTR->JVtxExx[ichk] + fTR->JVtxEyy[ichk] + drVxsq);
+			dz  = fTR->JVtxz[ichk] - fTR->PrimVtxz;
+			ddz = sqrt(fTR->JVtxEzz[ichk] + fTR->PrimVtxzE*fTR->PrimVtxzE);
+		}
 	}
 
 // test that the distance is not too large
@@ -515,7 +528,8 @@ bool TreeCleaner::ElectronJet(int ichk){
 		if( fTR->ElIsInJet[j] < 0 ) continue;
 		if( fTR->ElIsInJet[j] != ichk ) continue;
 		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->ElEta[j], fTR->JPhi[ichk], fTR->ElPhi[j]) > fClean_deltaRElecJetmax ) continue;
-		if( fTR->ElSharedEnergy[j] > fClean_elecbyJetEratio * fTR->JE[ichk] ){
+		double jetEuncorr = fTR->JE[ichk] / fTR->JEcorr[ichk];
+		if( fTR->ElSharedEnergy[j] > fClean_elecbyJetEratio * jetEuncorr ){
 			isDuplicate = true;
 			break;
 		}
@@ -535,7 +549,8 @@ bool TreeCleaner::PhotonJet(int ichk){
 		if( fTR->PhoIsInJet[j] < 0 ) continue;
 		if( fTR->PhoIsInJet[j] != ichk ) continue;
 		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->PhoEta[j], fTR->JPhi[ichk], fTR->PhoPhi[j]) > fClean_deltaRElecJetmax ) continue;
-		if( fTR->PhoSharedEnergy[j] > fClean_elecbyJetEratio * fTR->JE[ichk] ){
+		double jetEuncorr = fTR->JE[ichk] / fTR->JEcorr[ichk];
+		if( fTR->PhoSharedEnergy[j] > fClean_elecbyJetEratio * jetEuncorr ){
 			isDuplicate = true;
 			break;
 		}
@@ -679,8 +694,15 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 				+ fTR->ElSharedPy[ichk]*fTR->ElSharedPy[ichk]);
 			emadd = fTR->ElPt[ichk] - sharedpt;
 		} else if( ipart == 3 ){
-			// cout << " *** Problem: adding photons is not foreseen" << endl;
-			return;
+			pxadd = fTR->PhoPx[ichk] - fTR->PhoSharedPx[ichk];
+			pyadd = fTR->PhoPy[ichk] - fTR->PhoSharedPy[ichk];
+			pzadd = fTR->PhoPz[ichk] - fTR->PhoSharedPz[ichk];
+			eadd  = fTR->PhoEnergy[ichk]  - fTR->PhoSharedEnergy[ichk];
+			ptadd = 0.;
+			double sharedpt = sqrt(fTR->PhoSharedPx[ichk]*fTR->PhoSharedPx[ichk]
+				+ fTR->PhoSharedPy[ichk]*fTR->PhoSharedPy[ichk]);
+			emadd = fTR->PhoPt[ichk] - sharedpt;
+			if (emadd < 0.) emadd = 0.;
 		} else if( ipart == 4 ){
 			pxadd = fTR->JPx[ichk];
 			pyadd = fTR->JPy[ichk];
@@ -737,9 +759,16 @@ void TreeCleaner::SubtrFromJet(int ipart, int ichk, int iJet){
 			double emshpt = sqrt(fTR->ElSharedPx[ichk]*fTR->ElSharedPx[ichk]
 				+ fTR->ElSharedPy[ichk]*fTR->ElSharedPy[ichk]);
 			emadd = fTR->ElPt[ichk] - emshpt;
+			if (emadd < 0.) emadd = 0.;
 		} else if( ipart == 3 ){
-			// cout << " *** Problem: adding photons is not foreseen" << endl;
-			return;
+			pxadd = fTR->PhoSharedPx[ichk];
+			pyadd = fTR->PhoSharedPy[ichk];
+			pzadd = fTR->PhoSharedPz[ichk];
+			eadd  = fTR->PhoSharedEnergy[ichk];
+			ptadd = 0.;
+			double emshpt = sqrt(fTR->PhoSharedPx[ichk]*fTR->PhoSharedPx[ichk]
+				+ fTR->PhoSharedPy[ichk]*fTR->PhoSharedPy[ichk]);
+			emadd = fTR->PhoPt[ichk] - emshpt;
 		} else if( ipart == 4 ){
 			pxadd = fTR->JPx[ichk];
 			pyadd = fTR->JPy[ichk];
@@ -807,6 +836,10 @@ int TreeCleaner::CleanEvent(void){
 		et_em += fTR->ElEt[i];
 		nChObj++;
 	}
+	for( int i = 0; i < fTR->NPhotons; ++i ){
+		if(fTR->PhoGood[i] != 0) continue;
+		et_em += fTR->PhoPt[i];
+	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
 		pt_track += fTR->JChfrac[i] * fTR->JPt[i];
@@ -827,7 +860,7 @@ int TreeCleaner::CleanEvent(void){
 	}
 	if( fracEm < fClean_FracEmmin ) return 2;
 	if( fracCh < fClean_FracChmin && (nPhot < 1 || nChObj > 0) ) return 3;
-	return 0;
+	return fTR->GoodEvent;
 }
 
 int TreeCleaner::CleanMET(double met, double metphi){
@@ -951,6 +984,7 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotJetGood           = 0;  
 	fNumTotJetBad            = 0;  
 	fNumTotJetDuplElJet      = 0;
+	fNumTotJetDuplPhoJet     = 0;
 	fNumTotJetNotPrimaryTrk  = 0;
 	fNumTotJetNotClean       = 0;
 	fNumTotJetPgtE           = 0;
@@ -1032,7 +1066,8 @@ void TreeCleaner::StatFill(void){
 		if( fTR->JGood[i] == 0 ){ fNumTotJetGood++; nObjects++; }
 		else {
 			fNumTotJetBad++;
-			if( fTR->JGood[i] / 100 != 0 ) fNumTotJetDuplElJet++;
+			if( fTR->JGood[i] / 100 == 1 ) fNumTotJetDuplElJet++;
+			if( fTR->JGood[i] / 100 == 2 ) fNumTotJetDuplPhoJet++;
 			if( fTR->JGood[i] % 100 / 10 != 0 ) fNumTotJetNotPrimaryTrk++;
 			int jetClean = fTR->JGood[i] % 10;
 			if( jetClean != 0 ){
@@ -1051,6 +1086,7 @@ void TreeCleaner::StatFill(void){
 	if( evClean == 1 ) fNumTotEvtCleanEmpty++;
 	if( evClean == 2 ) fNumTotEvtLtFem++;
 	if( evClean == 3 ) fNumTotEvtLtFch++;
+	if( evClean == 4 ) fNumTotEvtBadHardJet++;
 
 	evClean = fTR->GoodEvent / 1000;
 	if( evClean == 1 ) fNumTotEvtPfMETJet++;
@@ -1093,7 +1129,7 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotEvtLtFem / (float)fNumTotEvt << " %" << endl;
 		cout << "    too small track pT fraction     = " << fNumTotEvtLtFch
 			<< "  = " << 100.*(float)fNumTotEvtLtFch / (float)fNumTotEvt << " %" << endl;
-		cout << "    jet with pT > " <<  "30" <<  " and bad        = " << fNumTotEvtBadHardJet
+		cout << "    jet with pT > " << fClean_JetBadHardPtmin <<  " and bad        = " << fNumTotEvtBadHardJet
 			<< "  = " << 100.*(float)fNumTotEvtBadHardJet / (float)fNumTotEvt << " %" << endl;
 		cout << endl;
 		cout << "    caloMET aligned with jet        = " << fNumTotEvtCaMETJet
@@ -1207,6 +1243,8 @@ void TreeCleaner::StatPrint(void){
 		cout << endl;
 		cout << "   jets duplicated with elec        = " << fNumTotJetDuplElJet
 			<< "  = " << 100.*(float)fNumTotJetDuplElJet / (float)fNumTotJets << " %" << endl;
+		cout << "   jets duplicated with photon      = " << fNumTotJetDuplPhoJet
+			<< "  = " << 100.*(float)fNumTotJetDuplPhoJet / (float)fNumTotJets << " %" << endl;
 		cout << "   jets not from Primary Vertex     = " << fNumTotJetNotPrimaryTrk
 			<< "  = " << 100.*(float)fNumTotJetNotPrimaryTrk / (float)fNumTotJets << " %" << endl;
 		cout << "   jets not clean                   = " << fNumTotJetNotClean
@@ -1222,6 +1260,174 @@ void TreeCleaner::StatPrint(void){
 		cout << "  Total number of b-jets            = " << fNumTotBJets
 			<< "  = " << 100.*(float)fNumTotBJets / (float)fNumTotJets << " %" << endl;
 	}
+	return;  
+}
+
+void TreeCleaner::StatWrite(TString filename){
+// writes the cleaning statistics to file
+// to be called once at the end of the job
+
+	ofstream file;
+	file.open(filename, ios::out);
+
+	file << endl;
+	file << "Cleaning statistics from TreeCleaner " << endl;
+	// file << "  " << fNumTotElecGoodIso << "  " << fNumTotElecGoodNonIso
+	//         << "  " << fNumTotElecBadIso  << "  " << fNumTotElecBadNonIso << endl;
+
+	file << endl;
+	file << " Total number of events processed = " << fNumTotEvt << endl;
+
+// Statistics for events
+	if (fNumTotEvt > 0) {
+		file << endl;
+		file << "   events accepted                  = " 
+			<< fNumTotEvt-fNumTotEvtReject << endl;
+		file << "   events rejected (total)          = " << fNumTotEvtReject
+			<< "  = " << 100.*(float)fNumTotEvtReject / (float)fNumTotEvt << " %" << endl;
+		file << endl;
+		file << "    empty after cleaning+Iso        = " << fNumTotEvtEmpty
+			<< "  = " << 100.*(float)fNumTotEvtEmpty / (float)fNumTotEvt << " %" << endl;
+		file << "    empty after cleaning            = " << fNumTotEvtCleanEmpty
+			<< "  = " << 100.*(float)fNumTotEvtCleanEmpty / (float)fNumTotEvt << " %" << endl;
+		file << "    too small em fraction           = " << fNumTotEvtLtFem
+			<< "  = " << 100.*(float)fNumTotEvtLtFem / (float)fNumTotEvt << " %" << endl;
+		file << "    too small track pT fraction     = " << fNumTotEvtLtFch
+			<< "  = " << 100.*(float)fNumTotEvtLtFch / (float)fNumTotEvt << " %" << endl;
+		file << "    jet with pT > " << fClean_JetBadHardPtmin <<  " and bad        = " << fNumTotEvtBadHardJet
+			<< "  = " << 100.*(float)fNumTotEvtBadHardJet / (float)fNumTotEvt << " %" << endl;
+		file << endl;
+		file << "    caloMET aligned with jet        = " << fNumTotEvtCaMETJet
+			<< "  = " << 100.*(float)fNumTotEvtCaMETJet  / (float)fNumTotEvt << " %" << endl;
+		file << "    caloMET bad Rij                 = " << fNumTotEvtCaMETRij
+			<< "  = " << 100.*(float)fNumTotEvtCaMETRij  / (float)fNumTotEvt << " %" << endl;
+		file << "    tcMET aligned with jet          = " << fNumTotEvtCaMETJet
+			<< "  = " << 100.*(float)fNumTotEvtCaMETJet  / (float)fNumTotEvt << " %" << endl;
+		file << "    tcMET bad Rij                   = " << fNumTotEvtCaMETRij
+			<< "  = " << 100.*(float)fNumTotEvtCaMETRij  / (float)fNumTotEvt << " %" << endl;
+		file << "    pfMET aligned with jet          = " << fNumTotEvtCaMETJet
+			<< "  = " << 100.*(float)fNumTotEvtCaMETJet  / (float)fNumTotEvt << " %" << endl;
+		file << "    pfMET bad Rij                   = " << fNumTotEvtCaMETRij
+			<< "  = " << 100.*(float)fNumTotEvtCaMETRij  / (float)fNumTotEvt << " %" << endl ;
+	}
+
+// Statistics for muons
+	file << endl;
+	file << " Total number of muons              = " << fNumTotMuons << endl;
+	if (fNumTotMuons > 0) {
+		file << "  muons good+Iso                    = " << fNumTotMuonGoodIso
+			<< "  = " << 100.*(float)fNumTotMuonGoodIso / (float)fNumTotMuons << " %" << endl;
+		file << "  muons good+non-Iso                = " << fNumTotMuonGoodNonIso
+			<< "  = " << 100.*(float)fNumTotMuonGoodNonIso / (float)fNumTotMuons << " %" << endl;
+		file << "  muons bad+Iso                     = " << fNumTotMuonBadIso
+			<< "  = " << 100.*(float)fNumTotMuonBadIso / (float)fNumTotMuons << " %" << endl;
+		file << "  muons bad+non-Iso                 = " << fNumTotMuonBadNonIso
+			<< "  = " << 100.*(float)fNumTotMuonBadNonIso / (float)fNumTotMuons << " %" << endl;
+		file << endl;
+		int mubad = fNumTotMuonBadIso + fNumTotMuonBadNonIso;
+		file << "  muons bad total                   = " << mubad
+			<< "  = " << 100.*(float)mubad / (float)fNumTotMuons << " %" << endl;
+		file << "   muons duplicated                 = " << fNumTotMuonDupl
+			<< "  = " << 100.*(float)fNumTotMuonDupl / (float)fNumTotMuons << " %" << endl;
+		file << "   muons not from Primary Vertex    = " << fNumTotMuonNotPrimaryTrk
+			<< "  = " << 100.*(float)fNumTotMuonNotPrimaryTrk / (float)fNumTotMuons << " %" << endl;
+		file << "   muons not clean                  = " << fNumTotMuonNotClean
+			<< "  = " << 100.*(float)fNumTotMuonNotClean / (float)fNumTotMuons << " %" << endl;
+		file << "    muons with bad dP/P             = " << fNumTotMuonBadDpop
+			<< "  = " << 100.*(float)fNumTotMuonBadDpop / (float)fNumTotMuons << " %" << endl;
+		file << "    muons with bad chisquared       = " << fNumTotMuonBadChi2
+			<< "  = " << 100.*(float)fNumTotMuonBadChi2 / (float)fNumTotMuons << " %" << endl;
+		file << "    muons with bad #tracker hits    = " << fNumTotMuonBadNhit
+			<< "  = " << 100.*(float)fNumTotMuonBadNhit / (float)fNumTotMuons << " %" << endl;
+	}
+
+// Statistics for electrons
+	file << endl;
+	file << " Total number of electrons          = " << fNumTotElectrons << endl;
+	if (fNumTotElectrons > 0) {
+		file << "  elecs good+Iso                    = " << fNumTotElecGoodIso
+			<< "  = " << 100.*(float)fNumTotElecGoodIso / (float)fNumTotElectrons << " %" << endl;
+		file << "  elecs good+non-Iso                = " << fNumTotElecGoodNonIso
+			<< "  = " << 100.*(float)fNumTotElecGoodNonIso / (float)fNumTotElectrons << " %" << endl;
+		file << "  elecs bad+Iso                     = " << fNumTotElecBadIso
+			<< "  = " << 100.*(float)fNumTotElecBadIso / (float)fNumTotElectrons << " %" << endl;
+		file << "  elecs bad+non-Iso                 = " << fNumTotElecBadNonIso
+			<< "  = " << 100.*(float)fNumTotElecBadNonIso / (float)fNumTotElectrons << " %" << endl;
+		file << endl;
+		int elebad = fNumTotElecBadIso + fNumTotElecBadNonIso;
+		file << "  elecs bad total                   = " << elebad
+			<< "  = " << 100.*(float)elebad / (float)fNumTotElectrons << " %" << endl;
+		file << "   elecs duplicated                 = " << fNumTotElecDupl
+			<< "  = " << 100.*(float)fNumTotElecDupl / (float)fNumTotElectrons << " %" << endl;
+		file << "   elecs not from Primary Vertex    = " << fNumTotElecNotPrimaryTrk
+			<< "  = " << 100.*(float)fNumTotElecNotPrimaryTrk / (float)fNumTotElectrons << " %" << endl;
+		file << "   elecs not clean                  = " << fNumTotElecNotClean
+			<< "  = " << 100.*(float)fNumTotElecNotClean / (float)fNumTotElectrons << " %" << endl;
+		file << "    elecs with bad H/E              = " << fNumTotElecBadHoE
+			<< "  = " << 100.*(float)fNumTotElecBadHoE / (float)fNumTotElectrons << " %" << endl;
+		file << "    elecs with bad shower shape     = " << fNumTotElecBadShsh
+			<< "  = " << 100.*(float)fNumTotElecBadShsh / (float)fNumTotElectrons << " %" << endl;
+		file << "    elecs with bad track matching   = " << fNumTotElecBadTmat
+			<< "  = " << 100.*(float)fNumTotElecBadTmat / (float)fNumTotElectrons << " %" << endl;
+	}
+
+// Statistics for photons
+	file << endl;
+	file << " Total number of photons            = " << fNumTotPhotons << endl;
+	if (fNumTotPhotons > 0) {
+		file << "  photons good+Iso                  = " << fNumTotPhotGoodIso
+			<< "  = " << 100.*(float)fNumTotPhotGoodIso / (float)fNumTotPhotons << " %" << endl;
+		file << "  photons good+non-Iso              = " << fNumTotPhotGoodNonIso
+			<< "  = " << 100.*(float)fNumTotPhotGoodNonIso / (float)fNumTotPhotons << " %" << endl;
+		file << "  photons bad+Iso                   = " << fNumTotPhotBadIso
+			<< "  = " << 100.*(float)fNumTotPhotBadIso / (float)fNumTotPhotons << " %" << endl;
+		file << "  photons bad+non-Iso               = " << fNumTotPhotBadNonIso
+			<< "  = " << 100.*(float)fNumTotPhotBadNonIso / (float)fNumTotPhotons << " %" << endl;
+		file << endl;
+		int photbad = fNumTotPhotBadIso + fNumTotPhotBadNonIso;
+		file << "  photons bad total                 = " << photbad
+			<< "  = " << 100.*(float)photbad / (float)fNumTotPhotons << " %" << endl;
+		file << "   photons duplicated               = " << fNumTotPhotDupl
+			<< "  = " << 100.*(float)fNumTotPhotDupl / (float)fNumTotPhotons << " %" << endl;
+		file << "   photons not clean                = " << fNumTotPhotNotClean
+			<< "  = " << 100.*(float)fNumTotPhotNotClean / (float)fNumTotPhotons << " %" << endl;
+		file << "    photons with bad H/E            = " << fNumTotPhotBadHoE
+			<< "  = " << 100.*(float)fNumTotPhotBadHoE / (float)fNumTotPhotons << " %" << endl;
+		file << "    photons with bad shower shape   = " << fNumTotPhotBadShsh
+			<< "  = " << 100.*(float)fNumTotPhotBadShsh / (float)fNumTotPhotons << " %" << endl;
+	}
+
+// Statistics for jets
+	file << endl;
+	file << " Total number of jets               = " << fNumTotJets << endl;
+	if (fNumTotJets > 0) {
+		file << "  jets good                         = " << fNumTotJetGood
+			<< "  = " << 100.*(float)fNumTotJetGood / (float)fNumTotJets << " %" << endl;
+		file << "  jets bad                          = " << fNumTotJetBad
+			<< "  = " << 100.*(float)fNumTotJetBad / (float)fNumTotJets << " %" << endl;
+		file << endl;
+		file << "   jets duplicated with elec        = " << fNumTotJetDuplElJet
+			<< "  = " << 100.*(float)fNumTotJetDuplElJet / (float)fNumTotJets << " %" << endl;
+		file << "   jets duplicated with photon      = " << fNumTotJetDuplPhoJet
+			<< "  = " << 100.*(float)fNumTotJetDuplPhoJet / (float)fNumTotJets << " %" << endl;
+		file << "   jets not from Primary Vertex     = " << fNumTotJetNotPrimaryTrk
+			<< "  = " << 100.*(float)fNumTotJetNotPrimaryTrk / (float)fNumTotJets << " %" << endl;
+		file << "   jets not clean                   = " << fNumTotJetNotClean
+			<< "  = " << 100.*(float)fNumTotJetNotClean / (float)fNumTotJets << " %" << endl;
+		file << "    jets with P > E                 = " << fNumTotJetPgtE
+			<< "  = " << 100.*(float)fNumTotJetPgtE / (float)fNumTotJets << " %" << endl;
+		file << "    jets with too large Fem         = " << fNumTotJetGtFem
+			<< "  = " << 100.*(float)fNumTotJetGtFem / (float)fNumTotJets << " %" << endl;
+		file << "    jets with too small Fem         = " << fNumTotJetLtFem
+			<< "  = " << 100.*(float)fNumTotJetLtFem / (float)fNumTotJets << " %" << endl;
+		file << "    jets with too small Fch         = " << fNumTotJetLtFch
+			<< "  = " << 100.*(float)fNumTotJetLtFch / (float)fNumTotJets << " %" << endl;
+		file << "  Total number of b-jets            = " << fNumTotBJets
+			<< "  = " << 100.*(float)fNumTotBJets / (float)fNumTotJets << " %" << endl;
+	}
+
+	file.close();
+
 	return;  
 }
 

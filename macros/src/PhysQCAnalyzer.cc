@@ -30,8 +30,9 @@ void PhysQCAnalyzer::Loop(){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
 
+		fPhysQCAnalysis      ->Analyze1();
 		fTreeCleaner         ->Analyze();
-		fPhysQCAnalysis      ->Analyze();
+		fPhysQCAnalysis      ->Analyze2();
 		fMultiplicityAnalysis->Analyze();
 	}
 }
@@ -55,6 +56,7 @@ void PhysQCAnalyzer::BeginJob(){
 
 	fPhysQCAnalysis->PlotTriggerStats();
 	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", fTR->fChain);
+	fPhysQCAnalysis->MakeElIDPlots(fTR->fChain);
 }
 
 // Method called after finishing the event loop

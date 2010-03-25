@@ -12,9 +12,9 @@
 clean/ObjectKin/      NMus             0         10       0       10
 clean/ObjectKin/      NEles            0         10       0       10     
 clean/ObjectKin/      NJets            0         20       0       20     
-clean/ObjectKin/      MuPt             0         0        0       200.   0    10.
-clean/ObjectKin/      ElPt             0         0        0       200.   0    10.
-clean/ObjectKin/      JPt              0         0        0       500.   0    30.
+clean/ObjectKin/      MuPt             0         0        0       200.   1    10.
+clean/ObjectKin/      ElPt             0         0        0       200.   1    10.
+clean/ObjectKin/      JPt              0         0        0       500.   1    30.
 clean/ObjectKin/      MuEta            0         0        -2.5    2.5    0    -2.4   2.4
 clean/ObjectKin/      ElEta            0         0        -2.5    2.5    0    -2.4   2.4
 clean/ObjectKin/      JEta             0         0        -5.0    5.0    0    -3.    3.
@@ -45,7 +45,7 @@ clean/MuIso/          MuIso03SumPt     0         0        0.      10.
 clean/MuIso/          MuIso03EmEt      0         0        0.      10.
 clean/MuIso/          MuIso03HadEt     0         0        0.      10.
 # Electron isolation
-clean/ElIso/          ElIso            0         0        0.      10.    0    0.3
-clean/ElIso/          ElPtSum          0         0        0.      10.
-clean/ElIso/          ElEmEtSum        0         0        0.      20.
-clean/ElIso/          ElHadEtSum       0         0        0.      20.
+clean/ElIso/          ElRelIso04       0         0        0.      10.    2    0.3
+clean/ElIso/          ElDR04TkSumPt    0         0        0.      20.    1
+clean/ElIso/          ElDR04EcalRecHitSumEt 0    0        0.      20.
+clean/ElIso/          ElDR04HcalTowerSumEt 0     0        0.      20.    1
