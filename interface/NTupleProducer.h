@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.39 2010/03/16 15:51:31 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.40 2010/03/24 17:18:01 stiegerb Exp $
 //
 //
 
@@ -35,7 +35,7 @@ Implementation:
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h" //336 PhysicsTools/UtilAlgos/interface/TFileService.h
 
 // Data formats
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
@@ -57,7 +57,7 @@ public:
 	explicit NTupleProducer(const edm::ParameterSet&);
 	~NTupleProducer();
 
-	virtual void beginJob(const edm::EventSetup&);
+  virtual void beginJob(); //336  beginJob(const edm::EventSetup&)
 	virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();

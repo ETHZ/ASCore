@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.48 2010/03/16 15:51:31 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.49 2010/03/24 17:18:01 stiegerb Exp $
 //
 //
 
@@ -555,11 +555,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		//	Choose the "Driven" methods according to the CMSSW release			
 		// CMSSW_3_3_X and before
-			fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;
-			fTeTrackerDriven[eqi] = El->isTrackerDriven() ? 1:0;
+		//	fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;
+		//	fTeTrackerDriven[eqi] = El->isTrackerDriven() ? 1:0;
 		// CMSSW_3_4_1 and later:
-		// fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
-		// fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
+		 fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
+		 fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
 
 			fTeBasicClustersSize[eqi]         = El->basicClustersSize();
 			fTefbrem[eqi]                     = El->fbrem();
@@ -1055,16 +1055,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		AssociatedTTracks.clear();
 
 		// GenJet matching
-		const GenJet *matchedJet = matchJet(&(*jet), iEvent);
-		if( matchedJet != NULL ){
-			fTjetGenPt[jqi]   = matchedJet->pt();
-			fTjetGenEta[jqi]  = matchedJet->eta();
-			fTjetGenPhi[jqi]  = matchedJet->phi();
-			fTjetGenE[jqi]    = matchedJet->energy();
-			fTjetGenemE[jqi]  = matchedJet->emEnergy();
-			fTjetGenhadE[jqi] = matchedJet->hadEnergy();
-			fTjetGeninvE[jqi] = matchedJet->invisibleEnergy();
-		}
+                if (!fIsRealData) {
+		  const GenJet *matchedJet = matchJet(&(*jet), iEvent);
+		  if( matchedJet != NULL ){
+			  fTjetGenPt[jqi]   = matchedJet->pt();
+			  fTjetGenEta[jqi]  = matchedJet->eta();
+			  fTjetGenPhi[jqi]  = matchedJet->phi();
+			  fTjetGenE[jqi]    = matchedJet->energy();
+			  fTjetGenemE[jqi]  = matchedJet->emEnergy();
+			  fTjetGenhadE[jqi] = matchedJet->hadEnergy();
+			  fTjetGeninvE[jqi] = matchedJet->invisibleEnergy();
+		  }
+                }
 		fTgoodjet[jqi] = 0;
 	}
 	fTnjets = jqi+1;
@@ -1186,7 +1188,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 }
 
 // Method called once each job just before starting event loop
-void NTupleProducer::beginJob(const edm::EventSetup&){
+void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fNTotEvents = 0;
 	fNFillTree  = 0;
 	fFirstevent = true;
