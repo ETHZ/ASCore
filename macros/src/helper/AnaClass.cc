@@ -421,34 +421,46 @@ void AnaClass::plotAllBranches(int sampleindex){
 void AnaClass::plotEID(TCut req, TTree *t, TString tag){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-	TH1D *hfir = new TH1D("ElID","eID",5,0,5);
-	if(!hfir){ cout << "AnaClass::plotVar() ==> Error, missing input histogram ..." << endl; return;}
-
-	TCut tempreq = req && "ElIDTight[0]>0";
-	long n_tight  = t->Draw("ElIDTight[0]", tempreq, "goff");
-	tempreq = req && "ElIDLoose[0]>0";
-	long n_loose  = t->Draw("ElIDLoose[0]", tempreq, "goff");
-	tempreq = req && "ElIDRobustTight[0]>0";
-	long n_rtight = t->Draw("ElIDRobustTight[0]", tempreq, "goff");
-	tempreq = req && "ElIDRobustLoose[0]>0";
-	long n_rloose = t->Draw("ElIDRobustLoose[0]", tempreq, "goff");
-	tempreq = req && "ElIDTight[0]==0&&ElIDLoose[0]==0&&ElIDRobustTight[0]==0&&ElIDRobustLoose[0]==0";
-	long n_none = t->Draw("ElIDTight[0]", tempreq, "goff");
-	cout << tempreq << endl;
-	cout << n_none << endl;
 
 
-	hfir->SetBinContent(1, n_none);
-	hfir->GetXaxis()->SetBinLabel(1, "None");
-	hfir->SetBinContent(2, n_tight);
-	hfir->GetXaxis()->SetBinLabel(2, "Tight");
-	hfir->SetBinContent(3, n_loose);
-	hfir->GetXaxis()->SetBinLabel(3, "Loose");
-	hfir->SetBinContent(4, n_rtight);
-	hfir->GetXaxis()->SetBinLabel(4, "RobustTight");
-	hfir->SetBinContent(5, n_rloose);
-	hfir->GetXaxis()->SetBinLabel(5, "RobustLoose");
+        // The electron IDs to plot (add any and increments nIDs)
+        string IDs[] = { "Loose", "Tight", "RobustTight", "RobustLoose" };
+        int nIDs = 4;
+        gROOT->cd(); // Store this in root directory
+	TH1D* hfir = new TH1D("ElID","eID",nIDs+1,0.,nIDs+1.0);      
 
+        // Use TTreeFormulae and loop over tree entries
+        TTreeFormula* formulae[nIDs+1];
+        TCut none(req);
+        for ( int i=0; i<nIDs; ++i ) {
+          char cut[256]; sprintf(cut,"ElID%s[0]>0",IDs[i].c_str());
+          TCut tempreq = req&&cut;
+          none *= !TCut(cut);
+          formulae[i] = new TTreeFormula(IDs[i].c_str(),tempreq,t);
+        }
+        formulae[nIDs] = new TTreeFormula("None",none,t);
+        cout << "Plotting eID: this can take a while... " << flush;
+        // Have to do some gymnastics with the TChain
+        Long_t treenumber = t->GetTreeNumber(); 
+        for( int ientry=0; ientry<t->GetEntriesFast(); ++ientry ) 
+          { 
+            if ( t->LoadTree(ientry) < 0 ) break; 
+            if (t->GetTreeNumber() != treenumber) {
+              for ( int i=0; i<=nIDs; ++i ) formulae[i]->UpdateFormulaLeaves(); 
+              treenumber = t->GetTreeNumber(); 
+            } 
+            for ( int i=0; i<=nIDs; ++i )
+              if ( formulae[i]->GetNdata()>0 && formulae[i]->EvalInstance() )
+                hfir->Fill(i);
+          }
+        cout << "done." << endl;
+
+        // Set bin labels to ID names
+        for ( int i=1; i<=nIDs; ++i )
+          hfir->GetXaxis()->SetBinLabel(i, IDs[i].c_str());
+	hfir->GetXaxis()->SetBinLabel(nIDs+1, "None");
+
+        // Styling
 	hfir->SetLineWidth(2);
 	hfir->SetFillColor(15);
 	hfir->SetFillStyle(1001);

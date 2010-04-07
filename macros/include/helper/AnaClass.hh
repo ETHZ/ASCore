@@ -25,6 +25,7 @@
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TCut.h"
+#include "TTreeFormula.h"
 #include "TStyle.h"
 #include "TRandom.h"
 #include "TROOT.h"
