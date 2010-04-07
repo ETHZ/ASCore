@@ -75,10 +75,17 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+        Long_t nentries = theChain->GetEntries();
+        if ( nentries<1 ) {
+          cerr << "ERROR: Couldn't find any entry in files." << endl;
+          cerr << "       Check that files exist and URL is correct." << endl;
+          cerr << "       e.g.: dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/foo/foo.root" << endl;
+        }
+
 	cout << "--------------" << endl;
 	cout << "OutputDir is:     " << outputdir << endl;
 	cout << "Verbose level is: " << verbose << endl;
-	cout << "Number of events: " << theChain->GetEntries() << endl;
+	cout << "Number of events: " << nentries << endl;
 	cout << "--------------" << endl;
 
 	PhysQCAnalyzer *tA = new PhysQCAnalyzer(theChain);
