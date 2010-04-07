@@ -14,7 +14,7 @@ SOFLAGS        = -shared
 CXXFLAGS      += $(ROOTCFLAGS)
 LIBS           = $(ROOTLIBS) 
 
-NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2
+NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
