@@ -1,9 +1,12 @@
-#include "PhysQCAnalysis.hh"
+#include <TChainElement.h>
+
 #include "base/TreeReader.hh"
 #include "helper/AnaClass.hh"
 #include "base/TreeAnalyzerBase.hh"
 #include "TreeCleaner.hh"
 #include "helper/Utilities.hh"
+
+#include "PhysQCAnalysis.hh"
 
 using namespace std;
 
@@ -37,8 +40,8 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fElHistos[13] = new TH1D("ElESuperClusterOverPEnd", "El ESuperClusterOverP End",  nelbins, 0., 5.);
 	fElHistos[14] = new TH1D("Eld0signif", "El d0 significance;El d0 significance",  nelbins, 0., 15. );
 	fElHistos[15] = new TH1D("Eldzsignif", "El dz significance;El dz significance",  nelbins, 0., 15. );
-	fElHistos[16] = new TH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nmubins, 0., 3.2 );
-	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nmubins, 0., 3.2 );
+	fElHistos[16] = new TH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nelbins, 0., 3.2 );
+	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );        
 
 	const unsigned int njetbins = 100;
 	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
@@ -767,17 +770,51 @@ void PhysQCAnalysis::MakeElIDPlots(TTree *tree){
 
 void PhysQCAnalysis::PlotTriggerStats(){
 	const int nentries = fTR->fChain->GetEntries();
-	TFile *f = fTR->fChain->GetCurrentFile();
-	f->cd("analyze");
-	TH1I *hlt_stats = (TH1I*)gDirectory->Get("HLTTriggerStats");
+
+        TH1I* hlt_stats,* l1p_stats,* l1t_stats;
+        TString hltPath("analyze/HLTTriggerStats");
+        TString l1pPath("analyze/L1PhysTriggerStats");
+        TString l1tPath("analyze/L1TechTriggerStats");
+
+        // Loop over all files (if chain) and add histograms
+        if ( !fTR->isChain() ) {
+          TFile *f = fTR->fChain->GetCurrentFile();
+          hlt_stats = (TH1I*)f->Get(hltPath);
+          l1p_stats = (TH1I*)f->Get(l1pPath);
+          l1t_stats = (TH1I*)f->Get(l1tPath);
+        } else {
+          TObjArray *fileElements = ((TChain*)fTR->fChain)->GetListOfFiles();
+          TIter next(fileElements);
+          TChainElement *chEl=0;
+          bool firstFile = true;
+          while (( chEl=(TChainElement*)next() )) {
+            TFile f(chEl->GetTitle());
+            if ( firstFile ) {
+              firstFile = false;
+              hlt_stats = (TH1I*)f.Get(hltPath)->Clone();
+              l1p_stats = (TH1I*)f.Get(l1pPath)->Clone();
+              l1t_stats = (TH1I*)f.Get(l1tPath)->Clone();
+              hlt_stats->SetDirectory(0);
+              l1p_stats->SetDirectory(0);
+              l1t_stats->SetDirectory(0);
+            } else {
+              hlt_stats->Add( (TH1I*)f.Get(hltPath) );
+              l1p_stats->Add( (TH1I*)f.Get(l1pPath) );
+              l1t_stats->Add( (TH1I*)f.Get(l1tPath) );
+            }
+            f.Close();
+          }
+        }
+
+        // Set style
 	hlt_stats->GetXaxis()->LabelsOption("v");
 	hlt_stats->GetXaxis()->SetLabelSize(0.035);
 	hlt_stats->SetMaximum(nentries + 0.05*nentries);
-	TH1I *l1p_stats = (TH1I*)gDirectory->Get("L1PhysTriggerStats");
+
 	l1p_stats->GetXaxis()->LabelsOption("v");
 	l1p_stats->GetXaxis()->SetLabelSize(0.033);
 	l1p_stats->SetMaximum(nentries + 0.05*nentries);
-	TH1I *l1t_stats = (TH1I*)gDirectory->Get("L1TechTriggerStats");
+
 	l1t_stats->SetMaximum(nentries + 0.05*nentries);
 
 	fTlat->SetTextColor(kBlack);
@@ -868,4 +905,6 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	fTlat->DrawLatex(0.60,0.92, entries);
 	Util::PrintPNG(canv, "L1TStats", fOutputDir);
 	Util::PrintEPS(canv, "L1TStats", fOutputDir);
+
+        gROOT->cd(); // Leave local file
 }
