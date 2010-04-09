@@ -146,7 +146,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
 	    icon  = histoPrefix + line + "." + extIcon
             histo = histoPrefix + line + "." + ext
             fIcon  = myDir + subdir + "/" + icon
-            fHisto = myDir + subdir + '/' + ext + '/' + histo
+            fHisto = myDir + subdir + '/' + histo
             
 	    # check that the histos exist in the subdirectory
             hasIcon  = os.path.isfile(fIcon)
@@ -155,7 +155,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
             relsubdir = subdir.lstrip('/')
             f.write('    <td>')
             if hasHisto:
-                f.write('<a href="'+relsubdir+'/'+ext+'/'+histo+'" size="2">')
+                f.write('<a href="'+relsubdir+'/'+histo+'" size="2">')
             else:
                 print "WARNING:",fHisto,"not found"
             if hasIcon:
