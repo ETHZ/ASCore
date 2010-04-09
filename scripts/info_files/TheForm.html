@@ -1,0 +1,58 @@
+<html>
+<head>
+<title> ETHZ Physics Quality Checking </title>
+</head>
+<body text="#111111" bgcolor="#f0f0f0" link="#aa0000" vlink="#aa0000">
+<h1> <font color="#aa0000"><font size="+4"> Info form</font></font></h1>
+ 
+<p> </p>
+
+<FORM action="Save?dsName=$DSNAME" method="post">
+<p>
+<LABEL><B>Name of data set: </B></LABEL>
+     $DSNAME<BR>
+<LABEL><B>Time of run: <SPACER SIZE="20"> </B></LABEL>
+     $TIME<BR>
+</p>
+
+<p>
+<LABEL><B>Number of events:</B></LABEL>
+      $NEvents<BR/>
+<!-- Number of muons<BR>
+<!-- Number of electrons<BR>
+<!-- Number of photons<BR>
+<!-- Number of jets<BR>
+</p>
+
+<p>
+<LABEL for="CheckedBy"><B>Checked by: </B></LABEL>
+              <INPUT type="text" name="name" value=$name><BR>
+</p>
+<p>
+<B>Decision:</B>
+<img src="GetImage?dsname=$DSNAME" width="20" height="20"/>
+<font color="#AA0000">
+<INPUT type="radio" id="status"  name="status" value="GOOD" $GOODCHECKED> Good 
+<INPUT type="radio" id="status"  name="status" value="DUBIOUS" $DUBIOUSCHECKED> Dubious 
+<INPUT type="radio" id="status" name="status" value="BAD" $BADCHECKED> Bad<BR>
+</font>
+</p>
+
+<p>
+<B>Comments:</B><BR>
+<TEXTAREA name="comment" rows="20" cols="80">$comment
+</TEXTAREA>
+
+<p>
+   <INPUT type="submit" value="Send"> <INPUT type="reset">
+</p>
+</FORM>
+
+
+<center><BR><hr noshade="noshade" width="100%"></center> 
+<font color="#AA0000"><center> Last update: $LastUpdate </center>
+<BR> 
+<center> ETHZ SUSY Group </center> 
+<BR><BR> 
+</body> 
+</html> 

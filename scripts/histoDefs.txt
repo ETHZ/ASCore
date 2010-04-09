@@ -1,0 +1,130 @@
+* Trigger information: (for all events)
+** eps
+L1PStats1
+L1PStats2
+L1TStats
+HLTStats1
+HLTStats2
+
+* Primary vertex and track information: (for all events)
+** unclean/PrimVtxTrk/eps
+PrimVtxx-PrimVtxy
+PrimVtxx
+PrimVtxy
+PrimVtxz
+PrimVtxPtSum
+PrimVtxNTracks
+PrimVtxNChi2
+NTracksTot
+TrkPtSum
+TrkPtSumPhi
+
+* Muon identification checks: (after Muon acceptance cuts)
+** unclean/MuID/eps
+MuEem
+MuEhad
+MuNChi2
+MuNTkHits
+MuD0PV
+MuDzPV
+** Cleaning/Mu/eps
+Mud0signif
+Mudzsignif
+MuDeltaPOverP
+MuDRSS
+
+* Electron identification checks: (after Elec acceptance cuts)
+** unclean/ElID/eps
+Elfbrem
+ElD0PV
+ElDzPV
+** Cleaning/El/eps
+Eld0signif
+Eldzsignif
+ElHcalOverEcalBar
+ElSigmaIetaIetaBar
+ElDeltaPhiSeedClusterAtCaloBar
+ElDeltaEtaSeedClusterAtCaloBar
+ElDeltaPhiSuperClusterAtVtxBar
+ElDeltaEtaSuperClusterAtVtxBar
+ElESuperClusterOverPBar
+ElHcalOverEcalEnd
+ElSigmaIetaIetaEnd
+ElDeltaPhiSeedClusterAtCaloEnd
+ElDeltaEtaSeedClusterAtCaloEnd
+ElDeltaPhiSuperClusterAtVtxEnd
+ElDeltaEtaSuperClusterAtVtxEnd
+ElESuperClusterOverPEnd
+ElDRSS
+ElDROS
+
+* Jet identification checks: (after initial Jet acceptance cuts)
+** Cleaning/Jet/eps
+Jetd0PV
+JetdzPV
+Jetd0signif
+Jetdzsignif
+** unclean/JetID/eps
+JEMfrac
+JChfrac
+JEMfrac-JChfrac
+JNConstituents
+JNAssoTracks
+JbTagProb
+
+* Muon isolation checks: (after Muon cleaning cuts)
+** clean/MuIso/eps
+MuRelIso03
+MuIso03SumPt
+MuIso03EmEt
+MuIso03HadEt
+
+* Electron isolation checks: (after Elec cleaning cuts)
+** clean/ElIso/eps
+ElRelIso04
+ElDR04TkSumPt
+ElDR04EcalRecHitSumEt
+ElDR04HcalTowerSumEt
+
+* Event and MET checks: (after object cleaning + iso)
+** Cleaning/MET/eps
+EvtEmFrac
+EvtChFrac
+METDphi12
+METR12
+METR21
+
+* Kinematics distributions for objects: (after object+event cleaning)
+** clean/ObjectKin/eps
+NMus
+NEles
+NJets
+MuPt
+ElPt
+JPt
+MuEta
+ElEta
+JEta
+MuPhi
+ElPhi
+JPhi
+
+* Kinematics distributions for events: (after object+event cleaning)
+** clean/EventKin/eps
+MuJESCorrMET
+TCMET
+PFMET
+MuJESCorrMETphi
+TCMETphi
+PFMETphi
+SumEt
+ECALSumEt
+HCALSumEt
+
+* Multiplicity distributions: (after object+event cleaning)
+** MultiplicityPlots
+_ljMult
+_emuMult
+_emuEffic
+
+* end

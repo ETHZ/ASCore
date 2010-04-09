@@ -1,0 +1,146 @@
+* PrimVtxx
+  Mean value of PrimVtxx = 0.032286 +- 0.000147
+* PrimVtxy
+  Mean value of PrimVtxy = -0.100133 +- 0.000143
+* PrimVtxz
+  Mean value of PrimVtxz = 0.025708 +- 0.125495
+* PrimVtxPtSum
+  Mean value of PrimVtxPtSum = 165.811085 +- 2.484250
+  For 0.050000 of tail PrimVtxPtSum = 226.666667 +- 13.333333
+  For 0.010000 of tail PrimVtxPtSum = 446.666667 +- 13.333333
+* PrimVtxNTracks
+  Mean value of PrimVtxNTracks = 112.474000 +- 1.290795
+* PrimVtxNChi2
+  Mean value of PrimVtxNChi2 = 0.777250 +- 0.003589
+* NTracksTot
+* TrkPtSum
+  Mean value of TrkPtSum = 91.690394 +- 3.779787
+  For 0.050000 of tail TrkPtSum = 312.500000 +- 8.333333
+  For 0.010000 of tail TrkPtSum = -999.000000 +- 8.333333
+* TrkPtSumPhi
+* MuEem
+  Mean value of MuEem = 0.675613 +- 0.042793
+* MuEhad
+* MuD0PV
+  Mean value of MuD0PV = 0.003174 +- 0.001739
+  Ratio (-0.020000<MuD0PV<0.020000) / (-0.500000<MuD0PV<0.500000) = 0.798276 +- 0.016663
+* MuDzPV
+  Mean value of MuDzPV = 0.001987 +- 0.003285
+* MuNChi2
+  Mean value of MuNChi2 = 1.272362 +- 0.037642
+* MuNTkHits
+  Mean value of MuNTkHits = 17.606838 +- 0.120165
+* MuNMatches
+* MuSegmComp
+* MuCaloComp
+* MuTrackerMu
+* ElD0PV
+  Mean value of ElD0PV = 0.000182 +- 0.001837
+  Ratio (-0.020000<ElD0PV<0.020000) / (-0.500000<ElD0PV<0.500000) = 0.763566 +- 0.011830
+* ElDzPV
+  Mean value of ElDzPV = 0.002990 +- 0.003549
+* Elfbrem
+  Mean value of Elfbrem = 0.291791 +- 0.008361
+* ElNChi2
+* ElHcalOverEcal
+* ElSigmaIetaIeta
+* ElDeltaPhiSeedClusterAtCalo
+* ElDeltaEtaSeedClusterAtCalo
+* ElDeltaPhiSuperClusterAtVtx
+* ElDeltaEtaSuperClusterAtVtx
+* ElESuperClusterOverP
+* ElE2x5Max*(ElE5x5)^(-1)
+* JEMfrac
+  Mean value of JEMfrac = 0.590193 +- 0.003362
+* JChfrac
+* JNConstituents
+  Mean value of JNConstituents = 11.697174 +- 0.082542
+* JNAssoTracks
+* JEcorr
+* JbTagProb
+* NMus
+* NEles
+* NJets
+* MuPt
+  Mean value of MuPt = 37.837479 +- 1.757756
+  For 0.050000 of tail MuPt = 115.000000 +- 3.333333
+  For 0.010000 of tail MuPt = 158.333333 +- 3.333333
+* ElPt
+  Mean value of ElPt = 48.124694 +- 2.177888
+  For 0.050000 of tail ElPt = 118.333333 +- 3.333333
+  For 0.010000 of tail ElPt = 168.333333 +- 3.333333
+* JPt
+  Mean value of JPt = 70.469351 +- 0.768115
+  For 0.050000 of tail JPt = 178.125000 +- 6.250000
+  For 0.010000 of tail JPt = 309.375000 +- 6.250000
+* MuEta
+  Mean value of MuEta = 0.049433 +- 0.058554
+  Ratio (1.440000<MuEta<3.000000) / (-3.000000<MuEta<3.000000) = 0.136000 +- 0.017702
+  Ratio (-3.000000<MuEta<-1.440000) / (-3.000000<MuEta<3.000000) = 0.112000 +- 0.016285
+  Ratio (0.000000<MuEta<1.440000) / (-1.440000<MuEta<0.000000) = 0.958333 +- 0.114162
+* ElEta
+  Mean value of ElEta = -0.087485 +- 0.059679
+  Ratio (1.440000<ElEta<3.000000) / (-3.000000<ElEta<3.000000) = 0.053279 +- 0.014378
+  Ratio (-3.000000<ElEta<-1.440000) / (-3.000000<ElEta<3.000000) = 0.057377 +- 0.014888
+  Ratio (0.000000<ElEta<1.440000) / (-1.440000<ElEta<0.000000) = 0.750000 +- 0.102882
+* JEta
+  Mean value of JEta = -0.006184 +- 0.021644
+  Ratio (1.440000<JEta<3.000000) / (-3.000000<JEta<3.000000) = 0.142604 +- 0.005199
+  Ratio (-3.000000<JEta<-1.440000) / (-3.000000<JEta<3.000000) = 0.131992 +- 0.005033
+  Ratio (0.000000<JEta<1.440000) / (-1.440000<JEta<0.000000) = 0.974128 +- 0.034016
+* MuPhi
+* ElPhi
+* JPhi
+* MuCharge[0]
+* ElCharge[0]
+* RawMET
+* MuJESCorrMET
+  Mean value of MuJESCorrMET = 59.764331 +- 1.312025
+  For 0.050000 of tail MuJESCorrMET = 145.833333 +- 8.333333
+  For 0.010000 of tail MuJESCorrMET = 245.833333 +- 8.333333
+* TCMET
+  Mean value of TCMET = 48.613862 +- 1.238339
+  For 0.050000 of tail TCMET = 129.166667 +- 8.333333
+  For 0.010000 of tail TCMET = 220.833333 +- 8.333333
+* PFMET
+  Mean value of PFMET = 47.822814 +- 1.317260
+  For 0.050000 of tail PFMET = 137.500000 +- 8.333333
+  For 0.010000 of tail PFMET = 229.166667 +- 8.333333
+* ECALMET
+* HCALMET
+* RawMETphi
+* MuJESCorrMETphi
+* TCMETphi
+* PFMETphi
+* ECALMETPhi
+* HCALMETPhi
+* SumEt
+  Mean value of SumEt = 350.099446 +- 5.139126
+  For 0.050000 of tail SumEt = 650.000000 +- 33.333333
+  For 0.010000 of tail SumEt = 1083.333333 +- 33.333333
+* ECALSumEt
+  Mean value of ECALSumEt = 203.893591 +- 2.806464
+  For 0.050000 of tail ECALSumEt = 391.666667 +- 16.666667
+  For 0.010000 of tail ECALSumEt = 591.666667 +- 16.666667
+* HCALSumEt
+  Mean value of HCALSumEt = 145.293681 +- 2.588432
+  For 0.050000 of tail HCALSumEt = 291.666667 +- 16.666667
+  For 0.010000 of tail HCALSumEt = 541.666667 +- 16.666667
+* MuRelIso03
+  Mean value of MuRelIso03 = 1.092276 +- 0.104723
+  Ratio (0.000000<MuRelIso03<0.300000) / (0.000000<MuRelIso03<1.000000) = 0.895349 +- 0.019057
+* MuIso03SumPt
+  Mean value of MuIso03SumPt = 1.039315 +- 0.102508
+* MuIso03EmEt
+  Mean value of MuIso03EmEt = 1.315918 +- 0.115355
+* MuIso03HadEt
+  Mean value of MuIso03HadEt = 1.039234 +- 0.101729
+* ElIso
+  Mean value of ElIso = 0.468808 +- 0.065946
+  Ratio (0.000000<ElIso<0.300000) / (0.000000<ElIso<1.000000) = 0.863208 +- 0.023600
+* ElPtSum
+  Mean value of ElPtSum = 1.114702 +- 0.139161
+* ElEmEtSum
+  Mean value of ElEmEtSum = 3.620730 +- 0.242986
+* ElHadEtSum
+  Mean value of ElHadEtSum = 1.182317 +- 0.186823
