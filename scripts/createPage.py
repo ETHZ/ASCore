@@ -15,7 +15,6 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
 
 # histogram file extension and definition of histo blocks
     ext = "eps"
-#FR    extIcon = "jpg"
     extIcon = "png"
     histoDef = "histoDefs.txt"
     nhPerTr = 3
@@ -27,7 +26,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
     import checkListAnom
     import mainPageUpdate
 
-#   write the page title
+    #   write the page title
     if os.path.exists(myDir) == 0:
         print " CreatePage: directory ", myDir, "does not exist"
 	return
@@ -39,6 +38,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
         return
     f.write( "<html> \n")
     f.write( "<head> \n")
+    f.write( '<link type="text/css" href="/main.css" REL=stylesheet>')
     f.write( "<title> ETHZ checking histograms </title> \n")
     f.write( "</head> \n")
     f.write( "<body text=\"#111111\" bgcolor=\"#f0f0f0\" " +\
@@ -50,8 +50,13 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
     f.write( "  \n")
     f.write( "<p> </p> \n")
 
-#   show the directory name
+    # Global navigation
     f.write( "<hr noshade=\"noshade\" width=\"100%\">  \n")
+    f.write( '<DIV class="global_nav"><A HREF="/index.html">PhysQC</A>')
+    f.write( ' &gt; <A HREF="/'+mainPageFile+'">Data 2010</A>');
+    f.write( ' &gt; '+myDir+'</DIV>');
+    
+    # Show the directory name
     f.write( "<p><b><font color=\"#0000aa\"><font size=\"+2\"> Data set: " +\
     "<font color =\"#aa0000\">" + myDir + " </font></font></b> \n")
     f.write( "<p> </p> \n")
@@ -63,26 +68,20 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
     f.write("<p><font color=\"#008000\" + \
     <i>Histograms are ordered according to increasing tightness of cuts </i></font></p> \n")
 
-#   strip off the directory name
-#    adir = myDir + "/"
-#    nrem = len(adir)
-#    for i in range(len(flist)):
-#        dum = flist[i]
-#        flist[i] = dum[nrem:]
-#    print flist
+    # Local navigation menu
+    localMenu = '<div id="menu">'
 
-#   open the file with definitions of histogram blocks
+    #   open the file with definitions of histogram blocks
     fDef = open(histoDef, "r")
     histo = " "
-#    hname = [" ", " ", " ", " ", " "]
     hname = list(nhPerTr*" ")
 
-    #read the file line by line
+    # read the file line by line
+    iblock = 0
     for linefull in fDef:
         n = linefull.find("\n")
         if n <= 0: continue
         line = linefull[:n]
-#        print line
         # break the loop when the end is reached
 	if line == "* end": break
 	
@@ -103,28 +102,29 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
             
 	    # write the block title as a new header
 	    title = line[2:]
+            iblock = iblock+1
             f.write( "  \n")
             f.write( "<p> </p> \n")
-            f.write( "<hr noshade=\"noshade\" width=\"100%\">  \n")
-            f.write( "<p><b><font color=\"#0000aa\"><font size=\"+2\">" +\
-            title +"</font></font></b> \n")
+            f.write( '<hr noshade="noshade" width="100%">'+"\n")
+            f.write( '<a name="block'+str(iblock)+'"></a>' ) # Local navigation
+            f.write( '<p><b><font color="#0000aa"><font size="+2">')
+            f.write(  title +'</font></font></b></p>'+"\n")
             f.write( " <p>  </p> \n")
-            f.write( "<table border=\"3\" cellspacing=\"3\" cellpadding=\"10\">\n")
+            f.write( '<table border="3" cellspacing="3" cellpadding="10">'+"\n")
             f.write( "    <tbody> \n")
             icount = 0
 	    nnames = -1
+            # Add to local navigation menu
+            localMenu += '<a href="#block'+str(iblock)+'">'+title+'</a><br><br>'+"\n"
+            
 	
 	# else if a new subdirectory is found,
         elif line[0:2] == "**":
-            subdir = "/" + line[3:]
+            subdir = "/" + line.lstrip('* ')
 	    print subdir
             if os.path.exists(myDir) == 0:
                 print " wrong subdirectory", subdir, "in histoDefs"
-    
-#           create the list of available histograms in the subdirectory
-            flist = glob.glob(myDir + subdir + "/*." + ext)
-#            print flist
-        
+            
 	# if a new histogram name is found,
 	else:
             icount = icount + 1
@@ -141,38 +141,37 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
                     f.write("    </tr> \n")
 		    nnames = -1
 		f.write( "    <tr align=\"center\"> \n")
-            histo = histoPrefix + line + "." + ext
+
+            # Form file name and absolute path of plots
 	    icon  = histoPrefix + line + "." + extIcon
+            histo = histoPrefix + line + "." + ext
+            fIcon  = myDir + subdir + "/" + icon
+            fHisto = myDir + subdir + '/' + ext + '/' + histo
             
-	    # check that the histo exists in the subdirectory
-            ffound = ""
-	    try:
-                ind = flist.index(myDir + subdir + "/" + histo)
-            #if not, make an empty entry
-	    except ValueError:
-                ffound = ", " + histo + " not found"
-                f.write("    <td> <font color=\"#aa0000\">" + histo +\
-                " </font> </td> \n")
+	    # check that the histos exist in the subdirectory
+            hasIcon  = os.path.isfile(fIcon)
+            hasHisto = os.path.isfile(fHisto)
             # put the histo and its small icon in the table
-	    else:
-                if os.path.isfile(myDir + subdir + "/" + icon):
-                    pass
-                else:
-#                    print "file " + icon + " does not exist"
-                    fIcon = myDir + subdir + "/" + icon
-                    fHisto = myDir + subdir + "/" + histo
-                    print "convert " + fHisto + " to " + fIcon
-                    os.system("convert " + fHisto + " " + fIcon)
-                    print "created file ",fIcon
-                f.write( "    <td><a href= " + subdir[1:] + "/" + histo + " size=\"2\" " +\
-                "<img src= " + subdir[1:] + "/" + icon +\
-		" height=\"300\" width=\"280\" align=\"left\" </a></td> \n")
+            relsubdir = subdir.lstrip('/')
+            f.write('    <td>')
+            if hasHisto:
+                f.write('<a href="'+relsubdir+'/'+ext+'/'+histo+'" size="2">')
+            else:
+                print "WARNING:",fHisto,"not found"
+            if hasIcon:
+                f.write('<img src= "'+relsubdir+'/'+icon+'" height="300" width="280" align="left" >')
+            else:
+                print "WARNING:",fIcon,"not found"                
+                f.write('<font color="#aa0000">' + histo + '</font>')
+            if hasHisto: f.write('</a>')
+            f.write('</td>'+"\n")
+                
             nnames = nnames + 1
             hname[nnames] = line
 #            print icount, nnames, hname[nnames], ffound
 
     f.write( "    </tr> \n")
-    
+
     # when the table is completed, write the histo names of the last row
     f.write("    <tr align=\"center\"> \n")
     for i in range(nnames+1):
@@ -184,6 +183,8 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
     f.write( "    </tbody> \n")
     f.write( "</table> \n")
     fDef.close()
+
+    localMenu += '</div>'
 
     f.write( "  \n")
     
@@ -197,7 +198,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
     f.write("<BR>")
     f.write("<center> ETHZ SUSY Group </center>")
     f.write( "<BR><BR>")
-
+    f.write(localMenu)
     f.write( "</body> \n")
     f.write( "</html> \n")
 

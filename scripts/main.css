@@ -1,0 +1,10 @@
+div.global_nav   { font-size:12px; font-weight:bold; }
+div.global_nav a { text-decoration:none }
+div.global_nav a:hover { font-weight:bold; text-decoration:none; color:gray; }
+
+#menu { border-color:navy; border-style:solid; border-width:1px; background-color:lightgray;
+        color:navy; font-size:12px; padding:5px;
+        position:fixed; right:10px; top:10px; width:120px;
+        }
+#menu a { color:navy; }
+#menu a:hover { background-color:navy; color:white; }

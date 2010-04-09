@@ -1,85 +1,98 @@
+#!/bin/env python
 # Copies histo files
 #   from the NTupleProducer/macros directory 
 #   to the PhysQC directory
 
+from optparse import OptionParser
+import sys,os,shutil
 
-def copyHistos(myDir = None, mainPageFile = None):
-# myDir is the directory where the histos currently reside
+def copyHistos(inputDir,mainPageFile,options):
+# inputDir is the directory where the histos currently reside
 
-    import sys
-    import os
-    import shutil
-    
-    # check that a directory name was given
-    if myDir == None:
-        print " ===> please give the directory name "
-	return
-    if mainPageFile == None:
-        print " ===> please give the file name of the main page "
-	return
+    # check that input directory and file exist
+    if not os.path.exists(inputDir):
+        print " ===> couldn't find directory",inputDir
+	sys.exit(-1)
+    if not os.path.exists(mainPageFile):
+        print " ===> couldn't find main page",mainPageFile
+	sys.exit(-1)
 
-    # extract the Data Set name
-    print " start directory = ", myDir
-    ifnd = -1
-    for i in range(len(myDir)):
-        if myDir[i] == "/":
-	    ifnd = i
-    newDir = myDir[ifnd+1:len(myDir)]
-    print " new directory = ", newDir
-    if newDir == myDir:
-        print " ===> directory ", newDir, " already copied, will be completed"
-    
-    # check that the directory does not exist already
-    if os.path.exists(newDir) and newDir != myDir:
-        print " ===> directory ", newDir, "aready exists"
-	answ = raw_input("   do you want to overwrite it? (Y/N) ")
-	if answ in ("Y", "y"):
-            print "                ", newDir, " will be overwritten"
-	    shutil.rmtree(newDir, 1)
-	else:
-	    return
+    # Form the output directory (default: same name as input)
+    inputDir.rstrip('/') # remove trailing /
+    outputDir = os.path.basename(inputDir)
+    if options.output_dir: outputDir = options.output_dir
 
-    # create the new directory
-    try:
-        os.mkdir(newDir)
-    except OSError:
-	pass
+    print " input  directory =",inputDir
+    print " output directory =",outputDir
+
+    # Check and create output directory
+    if outputDir != inputDir:
+        if os.path.exists(outputDir):
+            # check that the directory does not exist already
+            print " ===> directory ", outputDir, "aready exists"
+            answ = raw_input("   do you want to overwrite it? (Y/N) ")
+            if answ in ("Y", "y"):
+                print "                ", outputDir, " will be overwritten"
+                shutil.rmtree(outputDir, 1)
+            else:
+                sys.exit(-2)
+                # create the new directory
+        os.mkdir(outputDir)
+    else:
+        print " ===> directory",outputDir,"already copied, will be completed"
+        
     
     # copy the files
-    if not os.path.exists(newDir + "/checkList.txt"):
-        shutil.copy(myDir + "/plots_uncleaned_checklist.txt", newDir + "/checkList.txt")
-        f1 = open(newDir + "/checkList.txt", "a")
-        f2 = open(myDir + "/plots_Cleaning_checklist.txt", "r")
-        f1.write(f2.read())
-        f3 = open(myDir + "/plots_cleaned_checklist.txt", "r")
-        f1.write(f3.read())
-        f1.close()
-        f2.close()
-        f3.close()
+    if not os.path.exists(outputDir + "/checkList.txt"):
+        dest = open(outputDir + "/checkList.txt", "w")
+        shutil.copyfileobj(open(inputDir + "/plots_uncleaned_checklist.txt"),dest)
+        shutil.copyfileobj(open(inputDir + "/plots_Cleaning_checklist.txt"),dest)
+        shutil.copyfileobj(open(inputDir + "/plots_cleaned_checklist.txt"),dest)
     if os.path.exists("refList.txt"):
-        shutil.copy("refList.txt", newDir + "/refList.txt")
-    
-    if newDir != myDir:
-        if os.path.exists(myDir + "/cleanerStats.txt"):
-            shutil.copy(myDir + "/cleanerStats.txt", newDir + "/cleanerStats.txt")
-        shutil.copy(myDir + "/info.txt", newDir + "/info.txt")
-        shutil.copytree(myDir + "/unclean", newDir + "/unclean")
-        shutil.copytree(myDir + "/Cleaning", newDir + "/Cleaning")
-        shutil.copytree(myDir + "/clean", newDir + "/clean")
-        shutil.copytree(myDir + "/eps", newDir + "/eps")
-        shutil.copytree(myDir + "/MultiplicityPlots/eps", newDir + "/MultiplicityPlots")
+        shutil.copy("refList.txt", outputDir + "/refList.txt")
+
+    if outputDir != inputDir:
+        if os.path.exists(inputDir + "/cleanerStats.txt"):
+            shutil.copy(inputDir + "/cleanerStats.txt", outputDir + "/cleanerStats.txt")
+        shutil.copy(inputDir + "/info.txt", outputDir + "/info.txt")
+        shutil.copytree(inputDir + "/unclean", outputDir + "/unclean")
+        shutil.copytree(inputDir + "/Cleaning", outputDir + "/Cleaning")
+        shutil.copytree(inputDir + "/clean", outputDir + "/clean")
+        shutil.copytree(inputDir + "/eps", outputDir + "/eps")
+        shutil.copytree(inputDir + "/MultiplicityPlots/eps", outputDir + "/MultiplicityPlots")
     
     # remove the info file to reinitialize the form
-    if os.path.exists("info_files/" + newDir):
-        os.remove("info_files/" + newDir)
+    if os.path.exists("info_files/" + outputDir):
+        os.remove("info_files/" + outputDir)
     
     # update the main html page
     import createPage
-    createPage.createPage(newDir, "", mainPageFile)
+    createPage.createPage(outputDir, "", mainPageFile)
      
 
 # This is to make copyHistos directly callable
 
 if __name__ == "__main__":
-    import sys
-    copyHistos(sys.argv[1], sys.argv[2])
+    usage = """%prog [options] <input directory> <HTML file>
+    where:
+       <input directory>  is the directory to process
+       <HTML file>        is the file to add the run to
+       (run --help to see options)"""
+
+    # Command-line options
+    parser = OptionParser(usage=usage)
+    parser.add_option("-o","--output-dir",dest="output_dir",metavar="DIR",
+                      default=None,
+                      help="Output directory (default is same as input)")
+    (options, args) = parser.parse_args()
+
+    # Check that we have an input directory
+    if len(args)<2:
+        parser.error('Need at least two arguments')
+
+    # Process arguments
+    idir     = args[0]
+    mainPage = args[1]
+
+    # Run it!
+    copyHistos(idir,mainPage,options)

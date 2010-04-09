@@ -1,5 +1,5 @@
 * Trigger information: (for all events)
-** eps
+** TriggerStats
 L1PStats1
 L1PStats2
 L1TStats
@@ -7,7 +7,7 @@ HLTStats1
 HLTStats2
 
 * Primary vertex and track information: (for all events)
-** unclean/PrimVtxTrk/eps
+** unclean/PrimVtxTrk
 PrimVtxx-PrimVtxy
 PrimVtxx
 PrimVtxy
@@ -20,25 +20,25 @@ TrkPtSum
 TrkPtSumPhi
 
 * Muon identification checks: (after Muon acceptance cuts)
-** unclean/MuID/eps
+** unclean/MuID
 MuEem
 MuEhad
 MuNChi2
 MuNTkHits
 MuD0PV
 MuDzPV
-** Cleaning/Mu/eps
+** Cleaning/Mu
 Mud0signif
 Mudzsignif
 MuDeltaPOverP
 MuDRSS
 
 * Electron identification checks: (after Elec acceptance cuts)
-** unclean/ElID/eps
+** unclean/ElID
 Elfbrem
 ElD0PV
 ElDzPV
-** Cleaning/El/eps
+** Cleaning/El
 Eld0signif
 Eldzsignif
 ElHcalOverEcalBar
@@ -59,12 +59,12 @@ ElDRSS
 ElDROS
 
 * Jet identification checks: (after initial Jet acceptance cuts)
-** Cleaning/Jet/eps
+** Cleaning/Jet
 Jetd0PV
 JetdzPV
 Jetd0signif
 Jetdzsignif
-** unclean/JetID/eps
+** unclean/JetID
 JEMfrac
 JChfrac
 JEMfrac-JChfrac
@@ -73,21 +73,21 @@ JNAssoTracks
 JbTagProb
 
 * Muon isolation checks: (after Muon cleaning cuts)
-** clean/MuIso/eps
+** clean/MuIso
 MuRelIso03
 MuIso03SumPt
 MuIso03EmEt
 MuIso03HadEt
 
 * Electron isolation checks: (after Elec cleaning cuts)
-** clean/ElIso/eps
+** clean/ElIso
 ElRelIso04
 ElDR04TkSumPt
 ElDR04EcalRecHitSumEt
 ElDR04HcalTowerSumEt
 
 * Event and MET checks: (after object cleaning + iso)
-** Cleaning/MET/eps
+** Cleaning/MET
 EvtEmFrac
 EvtChFrac
 METDphi12
@@ -95,7 +95,7 @@ METR12
 METR21
 
 * Kinematics distributions for objects: (after object+event cleaning)
-** clean/ObjectKin/eps
+** clean/ObjectKin
 NMus
 NEles
 NJets
@@ -110,7 +110,7 @@ ElPhi
 JPhi
 
 * Kinematics distributions for events: (after object+event cleaning)
-** clean/EventKin/eps
+** clean/EventKin
 MuJESCorrMET
 TCMET
 PFMET
