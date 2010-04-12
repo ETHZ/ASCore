@@ -12,33 +12,33 @@
 # 2 tmp/ var1, var2, sidx, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, req
 ##############################################################################################
 # Primary vertex and track info
-2 unclean/PrimVtxTrk/ PrimVtxx   PrimVtxy  0  0 -0.1 0.1 0 -0.1 0.1 "scat" 6
-unclean/PrimVtxTrk/   PrimVtxx         0         0        -0.1    0.1
-unclean/PrimVtxTrk/   PrimVtxy         0         0        -0.1    0.1
+2 unclean/PrimVtxTrk/ PrimVtxx   PrimVtxy  0  0 -0.2 0.2 0 -0.2 0.2 "scat" 6
+unclean/PrimVtxTrk/   PrimVtxx         0         0        -0.2    0.2
+unclean/PrimVtxTrk/   PrimVtxy         0         0        -0.2    0.2
 unclean/PrimVtxTrk/   PrimVtxz         0         0        -15.    15.
-unclean/PrimVtxTrk/   PrimVtxPtSum     0         0        0       800
-unclean/PrimVtxTrk/   PrimVtxNTracks   0         500      0       500
+unclean/PrimVtxTrk/   PrimVtxPtSum     0         0        0       500
+unclean/PrimVtxTrk/   PrimVtxNTracks   0         0        0       500
 unclean/PrimVtxTrk/   PrimVtxNChi2     0         0        0       10.    0     5.
-unclean/PrimVtxTrk/   NTracksTot       0         500      0       500
+unclean/PrimVtxTrk/   NTracksTot       0         0        0       500
 unclean/PrimVtxTrk/   TrkPtSum         0         0        0       500.   0     -999   -999  NTracks>0
 unclean/PrimVtxTrk/   TrkPtSumPhi      0         0        -3.2    3.2    0     -999   -999  NTracks>0
 # Muon identification
-unclean/MuID/        MuEem            0         0        0.      20.    1
-unclean/MuID/        MuEhad           0         0        0.      100.   1
-unclean/MuID/        MuD0PV           0         0        -0.5    0.5    1    -0.02  0.02
-unclean/MuID/        MuDzPV           0         0        -1.     1.     1
-unclean/MuID/        MuNChi2          0         0        0.      20.    0    10.
-unclean/MuID/        MuNTkHits        0         0        0       30     0    11
+unclean/MuID/        MuEem            0         20       0.      20.
+unclean/MuID/        MuEhad           0         50       0.      50.
+unclean/MuID/        MuD0PV           0         50       -0.5    0.5    0    -0.02  0.02
+unclean/MuID/        MuDzPV           0         50       -1.     1.
+unclean/MuID/        MuNChi2          0         20       0.      20.    0    10.
+unclean/MuID/        MuNTkHits        0         30       0       30     0    11
 unclean/MuID/        MuNMatches       0         10       0.      10.
-unclean/MuID/        MuSegmComp       0         0        0.      1.01
+unclean/MuID/        MuSegmComp       0         0        0.      1.
 unclean/MuID/        MuCaloComp       0         0        0.      1.
 unclean/MuID/        MuTrackerMu      0         2        0.      2.     
 # Electron identification
-unclean/ElID/        ElD0PV           0         0        -0.5    0.5    1    -0.02  0.02
-unclean/ElID/        ElDzPV           0         0        -2.     2.     1
+unclean/ElID/        ElD0PV           0         0        -0.5    0.5    0    -0.02  0.02
+unclean/ElID/        ElDzPV           0         0        -2.     2.    
 unclean/ElID/        Elfbrem          0         0        0.      1.1
 unclean/ElID/        ElNChi2          0         0        0.      20.    
-unclean/ElID/        ElHcalOverEcal   0         0        0.      5.     1
+unclean/ElID/        ElHcalOverEcal   0         0        0.      5.     0
 unclean/ElID/        ElSigmaIetaIeta  0         0        0.      0.1    0
 unclean/ElID/        ElDeltaPhiSeedClusterAtCalo 0  0    -0.1    0.1    0
 unclean/ElID/        ElDeltaEtaSeedClusterAtCalo 0  0    -0.1    0.1    0
@@ -52,5 +52,7 @@ unclean/JetID/       JEMfrac          0         0        -0.01     1.01   0    0
 unclean/JetID/       JChfrac          0         0        -1.01     5.     0    0.05
 unclean/JetID/       JNConstituents   0         0        0       50
 unclean/JetID/       JNAssoTracks     0         0        0       50
-unclean/JetID/       JEcorr           0         0        0.5     3.7     
-unclean/JetID/       JbTagProb        0         0        0.0     7.    
+unclean/JetID/       JEcorr           0         0        0.0     5.     
+unclean/JetID/       JbTagProb        0         0        0.0     10.    
+unclean/JetID/       JVtxNChi2        0         0        0.0     20.
+
