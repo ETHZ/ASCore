@@ -212,8 +212,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "MuDeltaPOverP";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fMuHistos[0]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[0]) << endl;
 
@@ -228,8 +227,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fMuHistos[1], distVxmax, 100., 0., 100.) << endl;
@@ -245,8 +243,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fMuHistos[2], distVxmax, 100., 0., 100.) << endl;
@@ -262,8 +259,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[3]) << endl;
 
@@ -279,8 +275,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[0], ElecHoverEBarmax, 100., 0., 100.) << endl;
@@ -296,8 +291,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[1], ElecSigmaEtaEtaBarmax, 100., 0., 100.) << endl;
@@ -317,8 +311,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[2], -ElecDeltaPhiOutBarmax, ElecDeltaPhiOutBarmax, -100., 100.) << endl;
@@ -327,8 +320,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "ElDeltaEtaSeedClusterAtCaloBar";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fElHistos[3]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[3]) << endl;
 
@@ -347,8 +339,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[4]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[4], -ElecDeltaPhiInBarmax, ElecDeltaPhiInBarmax, -100., 100.) << endl;
@@ -368,8 +359,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[5]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[5], -ElecDeltaEtaInBarmax, ElecDeltaEtaInBarmax, -100., 100.) << endl;
@@ -385,8 +375,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[6]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[6], 0., ElecEoverPInBarmin, 0., 100.) << endl;
@@ -402,8 +391,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[7]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[7], ElecHoverEEndmax, 100., 0., 100.) << endl;
@@ -419,8 +407,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[8]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[8], ElecSigmaEtaEtaEndmax, 100., 0., 100.) << endl;
@@ -440,8 +427,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[9]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[9], -ElecDeltaPhiOutEndmax, ElecDeltaPhiOutEndmax, -100., 100.) << endl;
@@ -450,8 +436,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "ElDeltaEtaSeedClusterAtCaloEnd";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fElHistos[10]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[10]) << endl;
 
@@ -470,8 +455,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[11]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[11], -ElecDeltaPhiInEndmax, ElecDeltaPhiInEndmax, -100., 100.) << endl;
@@ -491,8 +475,7 @@ void PhysQCAnalysis::End(){
 	l2->SetLineColor(kRed);
 	l2->SetLineWidth(2);
 	l2->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[12]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[12], -ElecDeltaEtaInEndmax, ElecDeltaEtaInEndmax, -100., 100.) << endl;
@@ -508,8 +491,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[13]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[13], 0., ElecEoverPInEndmin, 0., 100.) << endl;
@@ -525,8 +507,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[14]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[14], distVxmax, 100., 0., 100.) << endl;
@@ -542,8 +523,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[15]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[15], distVxmax, 100., 0., 100.) << endl;
@@ -552,8 +532,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "ElDRSS";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fElHistos[16]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);	
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[16]) << endl;
 
@@ -561,8 +540,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "ElDROS";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fElHistos[17]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);	
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[17]) << endl;
 
@@ -571,8 +549,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "Jetd0PV";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fJHistos[0]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[0], distVxmax, 100., 0., 100.) << endl;
@@ -581,8 +558,7 @@ void PhysQCAnalysis::End(){
 	tempstring2 = "JetdzPV";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	fJHistos[1]->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[1], distVxmax, 100., 0., 100.) << endl;
@@ -598,8 +574,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[2]) << endl;
 
@@ -614,8 +589,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[3]) << endl;
 
@@ -631,8 +605,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[0]) << endl;
 
@@ -647,8 +620,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[1]) << endl;
 
@@ -657,8 +629,7 @@ void PhysQCAnalysis::End(){
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fTR->GetEntries() < 100000) fMETDphi12->SetMarkerStyle(6);
 	fMETDphi12->DrawCopy();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 
 	tempstring1 = "Evt Em Frac";
 	tempstring2 = "EvtEmFrac";
@@ -671,8 +642,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[3]) << endl;
 
@@ -687,8 +657,7 @@ void PhysQCAnalysis::End(){
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
-	Util::PrintPNG(canv, tempstring2, outputdir);
-	Util::PrintEPS(canv, tempstring2, outputdir);
+	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[4]) << endl;
 
@@ -775,6 +744,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
         TString hltPath("analyze/HLTTriggerStats");
         TString l1pPath("analyze/L1PhysTriggerStats");
         TString l1tPath("analyze/L1TechTriggerStats");
+        TString subdir("TriggerStats");
 
         // Loop over all files (if chain) and add histograms
         if ( !fTR->isChain() ) {
@@ -788,21 +758,21 @@ void PhysQCAnalysis::PlotTriggerStats(){
           TChainElement *chEl=0;
           bool firstFile = true;
           while (( chEl=(TChainElement*)next() )) {
-            TFile f(chEl->GetTitle());
+            TFile* f = TFile::Open(chEl->GetTitle());
+            if ( f == NULL ) continue;
             if ( firstFile ) {
               firstFile = false;
-              hlt_stats = (TH1I*)f.Get(hltPath)->Clone();
-              l1p_stats = (TH1I*)f.Get(l1pPath)->Clone();
-              l1t_stats = (TH1I*)f.Get(l1tPath)->Clone();
+              hlt_stats = (TH1I*)f->Get(hltPath)->Clone();
+              l1p_stats = (TH1I*)f->Get(l1pPath)->Clone();
+              l1t_stats = (TH1I*)f->Get(l1tPath)->Clone();
               hlt_stats->SetDirectory(0);
               l1p_stats->SetDirectory(0);
               l1t_stats->SetDirectory(0);
             } else {
-              hlt_stats->Add( (TH1I*)f.Get(hltPath) );
-              l1p_stats->Add( (TH1I*)f.Get(l1pPath) );
-              l1t_stats->Add( (TH1I*)f.Get(l1tPath) );
+              hlt_stats->Add( (TH1I*)f->Get(hltPath) );
+              l1p_stats->Add( (TH1I*)f->Get(l1pPath) );
+              l1t_stats->Add( (TH1I*)f->Get(l1tPath) );
             }
-            f.Close();
           }
         }
 
@@ -840,8 +810,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintPNG(canv, "HLTStats1", fOutputDir);
-	Util::PrintEPS(canv, "HLTStats1", fOutputDir);
+	Util::PrintBoth(canv, "HLTStats1", fOutputDir+subdir);
 
 	tempstring = "HLT Trigger Bits (51-100)";
 	canv = new TCanvas("HLTStats2", tempstring , 0, 0, 900, 700);
@@ -856,8 +825,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);	
-	Util::PrintPNG(canv, "HLTStats2", fOutputDir);
-	Util::PrintEPS(canv, "HLTStats2", fOutputDir);
+	Util::PrintBoth(canv, "HLTStats2", fOutputDir+subdir);
 
 	tempstring = "L1 Phys Bits (0-63)";
 	canv = new TCanvas("L1PStats1", tempstring , 0, 0, 900, 700);
@@ -872,8 +840,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintPNG(canv, "L1PStats1", fOutputDir);
-	Util::PrintEPS(canv, "L1PStats1", fOutputDir);
+	Util::PrintBoth(canv, "L1PStats1", fOutputDir+subdir);
 
 	tempstring = "L1 Phys Bits (64-128)";
 	canv = new TCanvas("L1PStats2", tempstring , 0, 0, 900, 700);
@@ -888,8 +855,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintPNG(canv, "L1PStats2", fOutputDir);
-	Util::PrintEPS(canv, "L1PStats2", fOutputDir);
+	Util::PrintBoth(canv, "L1PStats2", fOutputDir+subdir);
 
 	tempstring = "L1 Tech Bits";
 	canv = new TCanvas("L1TStats", tempstring , 0, 0, 900, 700);
@@ -903,8 +869,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintPNG(canv, "L1TStats", fOutputDir);
-	Util::PrintEPS(canv, "L1TStats", fOutputDir);
+	Util::PrintBoth(canv, "L1TStats", fOutputDir+subdir);
 
         gROOT->cd(); // Leave local file
 }
