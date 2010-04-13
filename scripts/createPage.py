@@ -38,7 +38,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
         return
     f.write( "<html> \n")
     f.write( "<head> \n")
-    f.write( '<link type="text/css" href="/main.css" REL=stylesheet>')
+    f.write( '<link type="text/css" href="../main.css" REL=stylesheet>')
     f.write( "<title> ETHZ checking histograms </title> \n")
     f.write( "</head> \n")
     f.write( "<body text=\"#111111\" bgcolor=\"#f0f0f0\" " +\
@@ -95,7 +95,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
 		    f.write("    <tr align=\"center\"> \n")
 		    for i in range(nnames+1):
 		        f.write("    <td><B><font color=\"#00aa00\">" +\
-			hname[i] + "</font></B></td> \n")
+			hname[i] + " &uarr;</font></B></td> \n")
                 f.write( " <BR> \n")
                 f.write( "    </tbody> \n")
                 f.write( "</table> \n")
@@ -137,7 +137,7 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
 		    f.write("    <tr align=\"center\"> \n")
 		    for i in range(nnames+1):
 		        f.write("    <td><B><font color=\"#00aa00\">" +\
-			hname[i] + "</font></B></td> \n")
+			hname[i] + " &uarr;</font></B></td> \n")
                     f.write("    </tr> \n")
 		    nnames = -1
 		f.write( "    <tr align=\"center\"> \n")
