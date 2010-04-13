@@ -80,6 +80,7 @@ int main(int argc, char* argv[]) {
           cerr << "ERROR: Couldn't find any entry in files." << endl;
           cerr << "       Check that files exist and URL is correct." << endl;
           cerr << "       e.g.: dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/foo/foo.root" << endl;
+          exit(-1);
         }
 
 	cout << "--------------" << endl;
