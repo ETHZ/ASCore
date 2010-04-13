@@ -390,8 +390,7 @@ void AnaClass::plotAllBranches(TTree *tree, TString tag){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = tag + "_" + branchname;
-		Util::PrintPNG(c, outputname, fOutputSubDir);
-		Util::PrintEPS(c, outputname, fOutputSubDir);
+		Util::PrintBoth(c, outputname, fOutputSubDir);
 	}
 }
 void AnaClass::plotAllBranches(int sampleindex){
@@ -412,8 +411,7 @@ void AnaClass::plotAllBranches(int sampleindex){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = fTag[sampleindex] + "_" + branchname;
-		Util::PrintPNG(c, outputname, fOutputSubDir);
-		Util::PrintEPS(c, outputname, fOutputSubDir);
+		Util::PrintBoth(c, outputname, fOutputSubDir);
 	}
 }
 
@@ -456,8 +454,8 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag){
         cout << "done." << endl;
 
         // Set bin labels to ID names
-        for ( int i=1; i<=nIDs; ++i )
-          hfir->GetXaxis()->SetBinLabel(i, IDs[i].c_str());
+        for ( int i=0; i<nIDs; ++i )
+          hfir->GetXaxis()->SetBinLabel(i+1, IDs[i].c_str());
 	hfir->GetXaxis()->SetBinLabel(nIDs+1, "None");
 
         // Styling
@@ -480,8 +478,8 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag){
 	hfir->DrawCopy("hist");
 
 	TString outputname = tag + "ElID";
-	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+        fOutputSubDir = "/ElID";
+	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
 
 	delete col;
 	delete hfir;
@@ -580,8 +578,7 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 	refValues(var, hfir);
 
 	TString outputname = tag + ofilename;
-	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
 
 	printCheckList(var, hfir, fOutputDir + fChecklistFile);
 
@@ -880,8 +877,7 @@ void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TT
 	}
 
 	TString outputname = tag + convertVarName2(var1) + "-" + convertVarName2(var2);
-	Util::PrintPNG(col, outputname, fOutputDir + fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputDir + fOutputSubDir);
+	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
 
 	delete col;
 	delete h;
@@ -962,8 +958,7 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	}
 
 	TString outputname = fTag[index1] + "_" + fTag[index2] + "_" + convertVarName2(var);
-	Util::PrintPNG(col, outputname, fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputSubDir);
+	Util::PrintBoth(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1031,61 +1026,60 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	}
 	char out[100];
 	sprintf(out, "%s_%s-%s", fTag[sampleindex].Data(), convertVarName2(var1).Data(), convertVarName2(var2).Data());
-	Util::PrintPNG(col, out, fOutputSubDir);
-	Util::PrintEPS(col, out, fOutputSubDir);
+	Util::PrintBoth(col, out, fOutputSubDir);
 }
 
 /****************************************************************************/
 void AnaClass::plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy){
-/*		-	Creates an normalized overlay from a tree variable with two conditions
--	Arguments:
-var: tree. var to be drawn
-req1, req2: arguments to be used
-file: file to be used
-nbins, xmin, xmax: specification for the histogram
-logy toggle logarithmiy plot                                       */
-gStyle->SetOptStat("");
-if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+  // Creates an normalized overlay from a tree variable with two conditions
+  // -   Arguments:
+  //     var: tree. var to be drawn
+  //     req1, req2: arguments to be used
+  //     file: file to be used
+  //     nbins, xmin, xmax: specification for the histogram
+  //     logy toggle logarithmiy plot                                      
 
-if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
-if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+  gStyle->SetOptStat("");
+  if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+  if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+  TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+  TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
 
-hfir->SetXTitle(convertVarName(var));
-hfir->SetLineWidth(2);
-hfir->SetFillColor(15);
-hfir->SetFillStyle(1001);
-hsec->SetLineWidth(2);
-hsec->SetLineColor(kBlue);
-hsec->SetFillColor(kBlue);
-hsec->SetFillStyle(3005);
-TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-col->cd();
-if(logy) col->SetLogy(1);
-hfir = normHist(hfir);
-hsec = normHist(hsec);
-double max1 = hfir->GetMaximum();
-double max2 = hsec->GetMaximum();
-double max = (max1>max2)?max1:max2;
-if(logy) max = 5*max;
-else max = 1.05*max;
-hfir->SetMaximum(max);
-hsec->SetMaximum(max);
-
-TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
-leg->AddEntry(hfir,tag1,"f");
-leg->AddEntry(hsec,tag2,"f");
-leg->SetFillColor(0);
-leg->SetTextFont(fFont);
-
-hfir->DrawCopy("hist");
-hsec->DrawCopy("histsame");
-leg->Draw();
-TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
-Util::PrintPNG(col, outputname, fOutputSubDir);
-Util::PrintEPS(col, outputname, fOutputSubDir);
+  if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+  if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+  
+  hfir->SetXTitle(convertVarName(var));
+  hfir->SetLineWidth(2);
+  hfir->SetFillColor(15);
+  hfir->SetFillStyle(1001);
+  hsec->SetLineWidth(2);
+  hsec->SetLineColor(kBlue);
+  hsec->SetFillColor(kBlue);
+  hsec->SetFillStyle(3005);
+  TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+  col->cd();
+  if(logy) col->SetLogy(1);
+  hfir = normHist(hfir);
+  hsec = normHist(hsec);
+  double max1 = hfir->GetMaximum();
+  double max2 = hsec->GetMaximum();
+  double max = (max1>max2)?max1:max2;
+  if(logy) max = 5*max;
+  else max = 1.05*max;
+  hfir->SetMaximum(max);
+  hsec->SetMaximum(max);
+  
+  TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
+  leg->AddEntry(hfir,tag1,"f");
+  leg->AddEntry(hsec,tag2,"f");
+  leg->SetFillColor(0);
+  leg->SetTextFont(fFont);
+  
+  hfir->DrawCopy("hist");
+  hsec->DrawCopy("histsame");
+  leg->Draw();
+  TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
+  Util::PrintBoth(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1177,77 +1171,73 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "_" + fTag[index2] + "_" + fTag[index3];
-	Util::PrintPNG(col, outputname, fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputSubDir);
+	Util::PrintBoth(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
 void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy){
-/*			-	Creates an normalized overlay from a tree variable with three
-conditions
--	Arguments:
-var: tree. var to be drawn
-req1, req2, req3: arguments to be used
-file: file to be used
-nbins, xmin, xmax: specification for the histogram
-logy toggle logarithmiy plot                                       */
-gStyle->SetOptStat("");
-if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
-TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
-TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
+  // - Creates an normalized overlay from a tree variable with three conditions
+  // -	Arguments:
+  //    var: tree. var to be drawn
+  //    req1, req2, req3: arguments to be used
+  //    file: file to be used
+  //    nbins, xmin, xmax: specification for the histogram
+  //   logy toggle logarithmiy plotgStyle->SetOptStat("");
+  if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+  if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+  if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
+  TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+  TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+  TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
 
-if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+  if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+  if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+  if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
 
-hfir->SetXTitle(convertVarName(var));
-hfir->SetLineWidth(2);
-hfir->SetFillColor(15);
-hfir->SetFillStyle(1001);
-hsec->SetLineWidth(2);
-hsec->SetLineColor(kBlue);
-hsec->SetFillColor(kBlue);
-hsec->SetFillStyle(3005);
+  hfir->SetXTitle(convertVarName(var));
+  hfir->SetLineWidth(2);
+  hfir->SetFillColor(15);
+  hfir->SetFillStyle(1001);
+  hsec->SetLineWidth(2);
+  hsec->SetLineColor(kBlue);
+  hsec->SetFillColor(kBlue);
+  hsec->SetFillStyle(3005);
 
-hthr->SetLineWidth(2);
-hthr->SetLineColor(kRed);
-hthr->SetFillColor(kRed);
-hthr->SetFillStyle(3003);
+  hthr->SetLineWidth(2);
+  hthr->SetLineColor(kRed);
+  hthr->SetFillColor(kRed);
+  hthr->SetFillStyle(3003);
 
-TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-col->cd();
-if(logy) col->SetLogy(1);
-hfir = normHist(hfir);
-hsec = normHist(hsec);
-hthr = normHist(hthr);
-double max1 = hfir->GetMaximum();
-double max2 = hsec->GetMaximum();
-double max3 = hthr->GetMaximum();
-double tempmax = (max1>max2)?max1:max2;
-double max = (tempmax>max3)?tempmax:max3;
-if(logy) max = 5*max;
-else max = 1.05*max;
-hfir->SetMaximum(max);
-hsec->SetMaximum(max);
-hthr->SetMaximum(max);
+  TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+  col->cd();
+  if(logy) col->SetLogy(1);
+  hfir = normHist(hfir);
+  hsec = normHist(hsec);
+  hthr = normHist(hthr);
+  double max1 = hfir->GetMaximum();
+  double max2 = hsec->GetMaximum();
+  double max3 = hthr->GetMaximum();
+  double tempmax = (max1>max2)?max1:max2;
+  double max = (tempmax>max3)?tempmax:max3;
+  if(logy) max = 5*max;
+  else max = 1.05*max;
+  hfir->SetMaximum(max);
+  hsec->SetMaximum(max);
+  hthr->SetMaximum(max);
 
-TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
-leg->AddEntry(hfir,tag1,"f");
-leg->AddEntry(hsec,tag2,"f");
-leg->AddEntry(hthr,tag3,"f");
-leg->SetFillColor(0);
-leg->SetTextFont(fFont);
+  TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
+  leg->AddEntry(hfir,tag1,"f");
+  leg->AddEntry(hsec,tag2,"f");
+  leg->AddEntry(hthr,tag3,"f");
+  leg->SetFillColor(0);
+  leg->SetTextFont(fFont);
 
-hfir->DrawCopy("hist");
-hsec->DrawCopy("histsame");
-hthr->DrawCopy("histsame");
-leg->Draw();
-TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
-Util::PrintPNG(col, outputname, fOutputSubDir);
-Util::PrintEPS(col, outputname, fOutputSubDir);
+  hfir->DrawCopy("hist");
+  hsec->DrawCopy("histsame");
+  hthr->DrawCopy("histsame");
+  leg->Draw();
+  TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
+  Util::PrintBoth(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1355,8 +1345,7 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "-" + fTag[index2] + "-" + fTag[index3] + "-" + fTag[index4];
-	Util::PrintPNG(col, outputname, fOutputSubDir);
-	Util::PrintEPS(col, outputname, fOutputSubDir);
+	Util::PrintBoth(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
