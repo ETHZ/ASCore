@@ -52,8 +52,8 @@ def createPage(myDir, histoPrefix = "", mainPageFile = "index"):
 
     # Global navigation
     f.write( "<hr noshade=\"noshade\" width=\"100%\">  \n")
-    f.write( '<DIV class="global_nav"><A HREF="/index.html">PhysQC</A>')
-    f.write( ' &gt; <A HREF="/'+mainPageFile+'">Data 2010</A>');
+    f.write( '<DIV class="global_nav"><A HREF="../index.html">PhysQC</A>')
+    f.write( ' &gt; <A HREF="../'+mainPageFile+'">Data 2010</A>');
     f.write( ' &gt; '+myDir+'</DIV>');
     
     # Show the directory name
