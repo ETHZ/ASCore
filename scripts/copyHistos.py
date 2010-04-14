@@ -18,7 +18,7 @@ def copyHistos(inputDir,mainPageFile,options):
 	sys.exit(-1)
 
     # Form the output directory (default: same name as input)
-    inputDir.rstrip('/') # remove trailing /
+    if inputDir.endswith('/'): inputDir = inputDir[:-1] # remove trailing /
     outputDir = os.path.basename(inputDir)
     if options.output_dir: outputDir = options.output_dir
 
