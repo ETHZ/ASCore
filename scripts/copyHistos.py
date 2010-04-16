@@ -13,9 +13,9 @@ def copyHistos(inputDir,mainPageFile,options):
     if not os.path.exists(inputDir):
         print " ===> couldn't find directory",inputDir
 	sys.exit(-1)
-    if not os.path.exists(mainPageFile):
-        print " ===> couldn't find main page",mainPageFile
-	sys.exit(-1)
+#    if not os.path.exists(mainPageFile):
+#        print " ===> couldn't find main page",mainPageFile
+#	sys.exit(-1)
 
     # Form the output directory (default: same name as input)
     if inputDir.endswith('/'): inputDir = inputDir[:-1] # remove trailing /
@@ -58,8 +58,9 @@ def copyHistos(inputDir,mainPageFile,options):
         shutil.copytree(inputDir + "/unclean", outputDir + "/unclean")
         shutil.copytree(inputDir + "/Cleaning", outputDir + "/Cleaning")
         shutil.copytree(inputDir + "/clean", outputDir + "/clean")
-        shutil.copytree(inputDir + "/eps", outputDir + "/eps")
-        shutil.copytree(inputDir + "/MultiplicityPlots/eps", outputDir + "/MultiplicityPlots")
+#        shutil.copytree(inputDir + "/eps", outputDir + "/eps")
+        shutil.copytree(inputDir + "/TriggerStats", outputDir + "/TriggerStats")
+        shutil.copytree(inputDir + "/MultiplicityPlots", outputDir + "/MultiplicityPlots")
     
     # remove the info file to reinitialize the form
     if os.path.exists("info_files/" + outputDir):
