@@ -25,8 +25,8 @@ unclean/PrimVtxTrk/   TrkPtSumPhi      0         0        -3.2    3.2    0     -
 # Muon identification
 unclean/MuID/        MuEem            0         20       0.      20.
 unclean/MuID/        MuEhad           0         50       0.      50.
-unclean/MuID/        MuD0PV           0         50       -0.5    0.5    0    -0.02  0.02
-unclean/MuID/        MuDzPV           0         50       -1.     1.
+unclean/MuID/        MuD0PV           0         50       -0.5    0.5    1    -0.02  0.02
+unclean/MuID/        MuDzPV           0         50       -1.     1.     1
 unclean/MuID/        MuNChi2          0         20       0.      20.    0    10.
 unclean/MuID/        MuNTkHits        0         30       0       30     0    11
 unclean/MuID/        MuNMatches       0         10       0.      10.
@@ -34,8 +34,8 @@ unclean/MuID/        MuSegmComp       0         0        0.      1.
 unclean/MuID/        MuCaloComp       0         0        0.      1.
 unclean/MuID/        MuTrackerMu      0         2        0.      2.     
 # Electron identification
-unclean/ElID/        ElD0PV           0         0        -0.5    0.5    0    -0.02  0.02
-unclean/ElID/        ElDzPV           0         0        -2.     2.    
+unclean/ElID/        ElD0PV           0         0        -0.5    0.5    1    -0.02  0.02
+unclean/ElID/        ElDzPV           0         0        -2.     2.     1
 unclean/ElID/        Elfbrem          0         0        0.      1.1
 unclean/ElID/        ElNChi2          0         0        0.      20.    
 unclean/ElID/        ElHcalOverEcal   0         0        0.      5.     0

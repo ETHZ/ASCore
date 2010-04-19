@@ -9,12 +9,12 @@
 # 2 tmp/ var1, var2, sidx, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, req
 ##############################################################################################
 # Kinematics distributions for objects
-clean/ObjectKin/      NMus             0         10       0       10
-clean/ObjectKin/      NEles            0         10       0       10     
-clean/ObjectKin/      NJets            0         20       0       20     
-clean/ObjectKin/      MuPt             100       0        0       200.   0    10.
-clean/ObjectKin/      ElPt             100       0        0       200.   0    10.
-clean/ObjectKin/      JPt              100       0        0       500.   0    30.
+clean/ObjectKin/      NMus             0         10       0       10     1
+clean/ObjectKin/      NEles            0         10       0       10     1
+clean/ObjectKin/      NJets            0         20       0       20     1
+clean/ObjectKin/      MuPt             100       0        0       200.   1    10.
+clean/ObjectKin/      ElPt             100       0        0       200.   1    10.
+clean/ObjectKin/      JPt              100       0        0       500.   1    30.
 clean/ObjectKin/      MuEta            50        0        -2.5    2.5    0    -2.4   2.4
 clean/ObjectKin/      ElEta            50        0        -2.5    2.5    0    -2.4   2.4
 clean/ObjectKin/      JEta             50        0        -5.0    5.0    0    -3.    3.
@@ -24,21 +24,21 @@ clean/ObjectKin/      JPhi             50        0        -3.2    3.2
 clean/ObjectKin/      MuCharge[0]      0         3        -1.5    1.5    
 clean/ObjectKin/      ElCharge[0]      0         3        -1.5    1.5    
 # Kinematics distributions for events
-clean/EventKin/       RawMET           0         0        0       500.   
-clean/EventKin/       MuJESCorrMET     0         0        0       500.   0     100.
-clean/EventKin/       TCMET            0         0        0       500.   0     80.
-clean/EventKin/       PFMET            0         0        0       500.   0     80.
-clean/EventKin/       ECALMET          0         0        0       500.   
-clean/EventKin/       HCALMET          0         0        0       500.   
+clean/EventKin/       RawMET           0         0        0       500.   1
+clean/EventKin/       MuJESCorrMET     0         0        0       500.   1     100.
+clean/EventKin/       TCMET            0         0        0       500.   1     80.
+clean/EventKin/       PFMET            0         0        0       500.   1     80.
+clean/EventKin/       ECALMET          0         0        0       500.   1
+clean/EventKin/       HCALMET          0         0        0       500.   1
 clean/EventKin/       RawMETphi        0         0        -3.2    3.2    
 clean/EventKin/       MuJESCorrMETphi  0         0        -3.2    3.2    
 clean/EventKin/       TCMETphi         0         0        -3.2    3.2    
 clean/EventKin/       PFMETphi         0         0        -3.2    3.2    
 clean/EventKin/       ECALMETPhi       0         0        -3.2    3.2    
 clean/EventKin/       HCALMETPhi       0         0        -3.2    3.2    
-clean/EventKin/       SumEt            0         0        0.      2000
-clean/EventKin/       ECALSumEt        0         0        0       1000
-clean/EventKin/       HCALSumEt        0         0        0       1000
+clean/EventKin/       SumEt            0         0        0.      2000   1
+clean/EventKin/       ECALSumEt        0         0        0       1000   1
+clean/EventKin/       HCALSumEt        0         0        0       1000   1
 # Muon isolation
 clean/MuIso/          MuRelIso03       0         100      0.      10.    0    0.3
 clean/MuIso/          MuIso03SumPt     0         50       0.      10.
