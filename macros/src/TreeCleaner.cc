@@ -13,7 +13,6 @@ TreeCleaner::~TreeCleaner(){
 void TreeCleaner::Begin(){
 	ReadCleaningParameters();
 	StatInit();
-	Reset();
 	fCleanTreeFile = new TFile(fOutputDir + "CleanTree.root", "RECREATE");
 	fCleanTreeFile->mkdir("analyze", "analyze");
 	fCleanTreeFile->cd("analyze");
@@ -22,6 +21,7 @@ void TreeCleaner::Begin(){
 }
 
 void TreeCleaner::Analyze(){
+	Reset();
 	InitCleaning();
 	TagCleanObjects();
 	DecideIso();
