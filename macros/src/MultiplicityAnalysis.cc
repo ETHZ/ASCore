@@ -13,12 +13,10 @@ MultiplicityAnalysis::~MultiplicityAnalysis(){
 
 void MultiplicityAnalysis::Begin(const char* filename){
 	fMPHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
-	// Temp objects:
-	TString hname, htit;
 
 	fMyLeptJetStat = new LeptJetStat();
 	fHljMult  = new TH2D("ljMult", "Lepton / Jets multiplicity", 13, 0, 13, 7, 0, 7);
-	fHemuMult = new TH2D("emuMult", "e/mu multiplicity", 18, 0, 18, 7, 0, 7);
+	fHemuMult = new TH2D("emuMult", "e/mu multiplicity",         18, 0, 18, 7, 0, 7);
 	fHemuEff  = new TH1F("emuEffic", "e/mu Efficiency", 13, 0, 13);
 
 	fHljMult->SetStats(false);
@@ -127,8 +125,8 @@ void MultiplicityAnalysis::End(){
 	// int colors[ncol] = { 10, 16, 5, 28, 29, 8, 4, 9, 45, 46, 2};
 
 	TString subdir = "MultiplicityPlots";
-	TCanvas *canv;
 	TString canvtitle = "Lepton / Jets multiplicity";
+	TCanvas *canv;
 	canv = new TCanvas("ljMult", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
 	// gStyle->SetPalette(ncol, colors);
@@ -173,17 +171,18 @@ void MultiplicityAnalysis::PlotMPSummary(){
 
 //Collect the entries for the plot
 	int index;
-	int nperJets[9];
+	int nperJets[10];
 	const int nlept = 13;
 	const int njets = 7;
 	int multable[nlept][njets];
-	const char * lablx[nlept] = {"0l    ", "1l+   ", "1l-   ", "OSll  ", "OSem  ",
+	TString lablx[nlept] = {"0l    ", "1l+   ", "1l-   ", "OSll  ", "OSem  ",
 		"SSll  ", "SSem  ", "OS2ll+", "OS2ll-", "OSeml+",
 		"OSeml-", "SS3l  ", "4lincl"};
-	const char * lably[njets] = {" 0j"," 1j", " 2j", " 3j", " 4j", " 5j", ">5j"};
+	TString lably[njets] = {" 0j"," 1j", " 2j", " 3j", " 4j", " 5j", ">5j"};
+	// const char * lably[njets] = {" 0j"," 1j", " 2j", " 3j", " 4j", " 5j", ">5j"};
 	int indTab2l[10] = { 5,  3,  6,  4,  5,  4,  6,  5,  3,  5};
 	int indTab3l[20] = {11,  7, 11,  9,  8,  7,  8, 11,  7, 10,
-		11, 10, 11,  9,  8, 11, 11,  7,  8, 11};
+	                    11, 10, 11,  9,  8, 11, 11,  7,  8, 11};
 
 // initialize the multiplicity table
 	for (int i = 0; i < nlept; ++i) {
@@ -245,13 +244,15 @@ void MultiplicityAnalysis::PlotMPSummary(){
 	if(fVerbose) 	cout << " Contents of the lepton/jets multiplicity 2D plot " << endl;
 	for (int i = 0; i < nlept; ++i) {
 		if(fVerbose) cout << "  " << lablx[i];
+		fHljMult->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		for (int j = 0; j < njets; ++j) {
-			fHljMult->Fill(lablx[i], lably[j], multable[i][j]);
+			fHljMult->GetYaxis()->SetBinLabel(j+1, lably[j]);
+			fHljMult->SetBinContent(i+1, j+1, multable[i][j]);
 			if(fVerbose) cout << "  " << multable[i][j];
 		}
 		if(fVerbose) cout << endl;
 	}
-	return;
+	return;	
 }
 
 void MultiplicityAnalysis::PlotMPEffic(){
@@ -261,7 +262,7 @@ void MultiplicityAnalysis::PlotMPEffic(){
 
 //Collect the entries for the plot
 	int index;
-	int nperJets[9];
+	int nperJets[10];
 	const int nlept = 18;
 	const int njets = 7;
 	int multable[nlept][njets];
@@ -421,8 +422,10 @@ void MultiplicityAnalysis::PlotMPEffic(){
 	if(fVerbose) cout << " Contents of the e/mu multiplicity 2D plot " << endl;
 	for (int i = 0; i < nlept; ++i) {
 		if(fVerbose) cout << "  " << lablx[i];
+		fHemuMult->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		for (int j = 0; j < njets; ++j) {
-			fHemuMult->Fill(lablx[i], lably[j], multable[i][j]);
+			fHemuMult->GetYaxis()->SetBinLabel(j+1, lablx[j]);
+			fHemuMult->SetBinContent(i+1, j+1, multable[i][j]);
 			if(fVerbose) cout << "  " << multable[i][j];
 		}
 		if(fVerbose) cout << endl;
