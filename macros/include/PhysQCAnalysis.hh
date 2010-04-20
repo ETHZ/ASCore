@@ -33,7 +33,7 @@ public:
 	void Analyze1();
 	void Analyze2();
 	void End();
-	void MakePlots(TString, TTree*);
+	void MakePlots(TString, TTree*, TCut = "");
 	void MakeElIDPlots(TTree*);
 	void PlotTriggerStats();
 	void PrintInfoStart(int nEntries);

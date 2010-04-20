@@ -69,7 +69,7 @@ public:
 /*****************************************************************************
 ##################| Produce Plots |###########################################
 *****************************************************************************/
-	void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag");
+	void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag", TCut cut ="");
 	void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag");
 	void makePlotPanel(const TCut req = "", const int nbins = 100);
 	void plotAllBranches(TTree*, TString);

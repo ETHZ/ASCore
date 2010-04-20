@@ -291,7 +291,7 @@ void AnaClass::readVarNames(const char* filename){
 *****************************************************************************/
 
 /****************************************************************************/
-void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
+void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut cut){
 	int twod(0), sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
 	float ymin(0.), ymax(0.), y1(-999.), y2(-999.);
@@ -323,7 +323,7 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
 			if(tree==NULL) tree = fTree[sampleindex];
 			fOutputSubDir = TString(path);
 			if(!strcmp(var1name, "ElID")) plotEID(req, tree, tag);
-			else plotVar(var1name, req, tree, tag, nbinsx, xmin, xmax, "ofilename", logy, x1, x2);
+			else plotVar(var1name, req&&cut, tree, tag, nbinsx, xmin, xmax, "ofilename", logy, x1, x2);
 		}
 		if( readbuff[0] == '2' ){ // 2D plotting
 			int nargs = sscanf(readbuff, "%d %s %s %s %d %d %f %f %d %f %f %s %d %d %d %d %f %f %f %f %s", &twod, path, var1name, var2name, &sampleindex, &nbinsx, &xmin, &xmax, &nbinsy, &ymin, &ymax, topt, &mrkstl, &logx, &logy, &logz, &x1, &x2, &y1, &y2, reqbuff);
@@ -340,7 +340,7 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag){
 			if(tag=="tag") tag = fTag[sampleindex];
 			if(tree==NULL) tree = fTree[sampleindex];
 			fOutputSubDir = TString(path);
-			plotVar2D(var1name, var2name, req, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2);
+			plotVar2D(var1name, var2name, req&&cut, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2);
 		}
 	}
 	fOutputSubDir = temp;

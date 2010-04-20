@@ -729,8 +729,8 @@ void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
 
 }
 
-void PhysQCAnalysis::MakePlots(TString plotlist, TTree *tree){
-	fAC->plotPlotList(plotlist, tree, "");
+void PhysQCAnalysis::MakePlots(TString plotlist, TTree *tree, TCut cut){
+	fAC->plotPlotList(plotlist, tree, "", cut);
 }
 
 void PhysQCAnalysis::MakeElIDPlots(TTree *tree){
