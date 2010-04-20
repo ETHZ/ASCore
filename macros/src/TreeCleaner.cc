@@ -834,11 +834,13 @@ int TreeCleaner::CleanEvent(void){
 		if(fTR->ElGood[i] != 0) continue;
 		pt_track += fTR->ElPt[i];
 		et_em += fTR->ElEt[i];
+		if (et_em < 0.) et_em = 0.;
 		nChObj++;
 	}
 	for( int i = 0; i < fTR->NPhotons; ++i ){
 		if(fTR->PhoGood[i] != 0) continue;
 		et_em += fTR->PhoPt[i];
+		if (et_em < 0.) et_em = 0.;
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;

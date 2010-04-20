@@ -268,3 +268,21 @@ JNAssoTracks		# Associated Tracks (jets)
 JVtxNChi2		#chi^{2}/N_{dof}(Jet Vertices)
 HCALSumEt		#Sigma |E_{ #perp, had.}| (Calotowers)  [GeV]
 ECALSumEt		#Sigma |E_{ #perp, em.}| (Calotowers)  [GeV]
+PhoHoverE		E_{HCAL}/E_{ECAL} (#gamma)
+PhoHoverE[0]	E_{HCAL}/E_{ECAL} (#gamma_{1})
+PhoHoverE[1]	E_{HCAL}/E_{ECAL} (#gamma_{2})
+PhoSigmaIetaIeta	#sigma_{i#eta,i#eta} (#gamma)
+NPhotons		Number of Photons
+PhoPt			p_{#perp} (#gamma) [GeV]
+PhoPt[0]			p_{#perp} (#gamma_{1}) [GeV]
+PhoPt[1]			p_{#perp} (#gamma_{2}) [GeV]
+PhoEta			#eta(#gamma)
+PhoEta[0]		#eta(#gamma_{1})
+PhoEta[1]		#eta(#gamma_{2})
+PhoPhi			#phi(#gamma)
+PhoPhi[0]		#phi(#gamma_{1})
+PhoPhi[1]		#phi(#gamma_{2})
+PhoIso03			Photon Iso. #DeltaR=0.3
+PhoIso03TrkHollow	Photon Iso. #DeltaR=0.3 (Trk Hollow)
+PhoIso03Ecal	Photon Iso. #DeltaR=0.3 (ECal)
+PhoIso03Hcal	Photon Iso. #DeltaR=0.3 (HCal)

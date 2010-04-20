@@ -43,7 +43,7 @@ void PhysQCAnalyzer::BeginJob(){
 	fTreeCleaner->SetOutputDir(fOutputDir);
 	fTreeCleaner->fClean = true;
 	fTreeCleaner->fVerbose = fVerbose;
-	
+
 	fPhysQCAnalysis->SetOutputDir(fOutputDir);
 	fPhysQCAnalysis->fVerbose = fVerbose;
 
@@ -54,14 +54,16 @@ void PhysQCAnalyzer::BeginJob(){
 	fPhysQCAnalysis      ->Begin();
 	fMultiplicityAnalysis->Begin();
 
+	TCut select = "NMus+NEles+NPhotons+NJets>0";
 	fPhysQCAnalysis->PlotTriggerStats();
-	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", fTR->fChain, "NJets+NMus+NEles>0");
-	fPhysQCAnalysis->MakeElIDPlots(fTR->fChain);
+	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", fTR->fChain, select);
+	fPhysQCAnalysis->MakeElIDPlots(fTR->fChain, select);
 }
 
 // Method called after finishing the event loop
 void PhysQCAnalyzer::EndJob(){
-	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", fTreeCleaner->fCleanTree, "NJets+NMus+NEles>0");
+	TCut select = "GoodEvent==0 || (NMus+NEles+NPhotons+NJets)>0";
+	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", fTreeCleaner->fCleanTree, select);
 
 	fTreeCleaner         ->End();
 	fPhysQCAnalysis      ->End();

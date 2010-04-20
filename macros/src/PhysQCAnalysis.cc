@@ -22,7 +22,7 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fMuHistos[1] = new TH1D("Mud0signif", "Mu d0 significance;Mu d0 significance",  nmubins, 0., 15. );
 	fMuHistos[2] = new TH1D("Mudzsignif", "Mu dz significance;Mu dz significance",  nmubins, 0., 15. );
 	fMuHistos[3] = new TH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
-
+	
 	const unsigned int nelbins = 100;
 	fElHistos[0]  = new TH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.05);
 	fElHistos[1]  = new TH1D("ElSigmaIetaIetaBar", "El sigmaIetaIeta Bar",  nelbins, 0., 0.05);
@@ -41,20 +41,34 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fElHistos[14] = new TH1D("Eld0signif", "El d0 significance;El d0 significance",  nelbins, 0., 15. );
 	fElHistos[15] = new TH1D("Eldzsignif", "El dz significance;El dz significance",  nelbins, 0., 15. );
 	fElHistos[16] = new TH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nelbins, 0., 3.2 );
-	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );        
+	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );
+	fElHistos[18] = new TH1D("ElInvMSS", "El InvM Same Sign;El InvM Same Sign", nelbins, 0., 10. );
+	fElHistos[19] = new TH1D("ElInvMOS", "El InvM Opp Sign;El InvM Opp Sign",  nelbins, 0., 10. );
+
+	const unsigned int nphbins = 100;
+	fPhHistos[0]  = new TH1D("PhoHoverEBar", "Phot H/E Bar",  nphbins, 0., 0.05);
+	fPhHistos[1]  = new TH1D("PhoSigmaIetaIetaBar", "Phot sigmaIetaIeta Bar",  nphbins, 0., 0.05);
+	fPhHistos[2]  = new TH1D("PhoHoverEEnd", "Phot H/E End",  nphbins, 0., 0.05);
+	fPhHistos[3]  = new TH1D("PhoSigmaIetaIetaEnd", "Phot sigmaIetaIeta End",  nphbins, 0., 0.05);
+	fPhHistos[4] = new TH1D("PhDR", "Phot DR;Phot DR",  nphbins, 0., 3.2 );
+	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 15. );
 
 	const unsigned int njetbins = 100;
-	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
+	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, -0.5, 0.5 );
 	fJHistos[1] = new TH1D("JetdzPV", "Jet dz PV;Jet dz to PV",  njetbins, -2., 2. );
 	fJHistos[2] = new TH1D("Jetd0signif", "Jet d0 significance;Jet d0 significance",  njetbins, 0., 15. );
 	fJHistos[3] = new TH1D("Jetdzsignif", "Jet dz significance;Jet dz significance",  njetbins, 0., 15. );
-
+	
 	const unsigned int nevbins = 100;
-	fMETHistos[0] = new TH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
-	fMETHistos[1] = new TH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
-	fMETHistos[3] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
-	fMETHistos[4] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
+	fMETHistos[0] = new TH1D("DphiMETJet1", "Dphi(MET,j1)", nevbins, 0, 3.1416);
+	fMETHistos[1] = new TH1D("DphiMETJet2", "Dphi(MET,j2)", nevbins, 0, 3.1416);
+	fMETHistos[2] = new TH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
+	fMETHistos[3] = new TH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
+	fMETHistos[4] = new TH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 0, 6.283);
+	fMETHistos[5] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
+	fMETHistos[6] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
 	fMETDphi12    = new TH2D("METDphi12", "MET Dphi 12;Dphi(MET,j1);Dphi(MET,j2)", nevbins, 0, 3.142, nevbins, 0, 3.142);
+	fMETDphi12->SetMarkerSize(7);
 
 	// Histos for cleaned objects
 }
@@ -70,7 +84,13 @@ void PhysQCAnalysis::Begin(){
 
 void PhysQCAnalysis::Analyze1(){
 // Analysis before cleaning
-
+	
+	// skip empty events
+//	if (fTR->GoodEvent > 0) return;
+	if(fTR->NMus + fTR->NEles + fTR->NPhotons + fTR->NJets <= 0) return;
+	
+	double p1[4], p2[4], minv;
+	
 	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
 
 	for(size_t i = 0; i < fTR->NMus; ++i){
@@ -87,8 +107,10 @@ void PhysQCAnalysis::Analyze1(){
 
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		for(size_t j = i+1; j < fTR->NMus; ++j){
-			double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
-			fMuHistos[3]->Fill(deltaR);
+			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
+				double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
+				fMuHistos[3]->Fill(deltaR);
+			}
 		}
 	}
 
@@ -125,12 +147,65 @@ void PhysQCAnalysis::Analyze1(){
 			double deltaR = Util::GetDeltaR(fTR->ElEta[i], fTR->ElEta[j], fTR->ElPhi[i], fTR->ElPhi[j]);
 			if (fTR->ElCharge[i] == fTR->ElCharge[j]) {
 				fElHistos[16]->Fill(deltaR);
+				if (deltaR < 0.5) {
+					p1[0] = fTR->ElPx[i];
+					p1[1] = fTR->ElPy[i];
+					p1[2] = fTR->ElPz[i];
+					p1[3] = fTR->ElE[i];
+					p2[0] = fTR->ElPx[j];
+					p2[1] = fTR->ElPy[j];
+					p2[2] = fTR->ElPz[j];
+					p2[3] = fTR->ElE[j];
+					minv = invMass(p1, p2);
+					fElHistos[18]->Fill(minv);
+				}
 			} else {
 				fElHistos[17]->Fill(deltaR);
+				if (deltaR < 0.5) {
+					p1[0] = fTR->ElPx[i];
+					p1[1] = fTR->ElPy[i];
+					p1[2] = fTR->ElPz[i];
+					p1[3] = fTR->ElE[i];
+					p2[0] = fTR->ElPx[j];
+					p2[1] = fTR->ElPy[j];
+					p2[2] = fTR->ElPz[j];
+					p2[3] = fTR->ElE[j];
+					minv = invMass(p1, p2);
+					fElHistos[19]->Fill(minv);
+				}
 			}
 		}
 	}
-
+	
+	for(size_t i = 0; i < fTR->NPhotons; ++i){
+		if (fTR->PhoEta[i] < 1.479) {
+			fPhHistos[0]->Fill(fTR->PhoHoverE[i]);
+			fPhHistos[1]->Fill(fTR->PhoSigmaIetaIeta[i]);
+		} else {
+			fPhHistos[2]->Fill(fTR->PhoHoverE[i]);
+			fPhHistos[3]->Fill(fTR->PhoSigmaIetaIeta[i]);
+		}
+	}
+	
+	for(size_t i = 0; i < fTR->NPhotons; ++i){
+		for(size_t j = i+1; j < fTR->NPhotons; ++j){
+			double deltaR = Util::GetDeltaR(fTR->PhoEta[i], fTR->PhoEta[j], fTR->PhoPhi[i], fTR->PhoPhi[j]);
+			fPhHistos[4]->Fill(deltaR);
+			if (deltaR < 0.5) {
+				p1[0] = fTR->PhoPx[i];
+				p1[1] = fTR->PhoPy[i];
+				p1[2] = fTR->PhoPz[i];
+				p1[3] = fTR->PhoEnergy[i];
+				p2[0] = fTR->PhoPx[j];
+				p2[1] = fTR->PhoPy[j];
+				p2[2] = fTR->PhoPz[j];
+				p2[3] = fTR->PhoEnergy[j];
+				minv = invMass(p1, p2);
+				fPhHistos[5]->Fill(minv);
+			}
+		}
+	}
+	
 	for(size_t i = 0; i < fTR->NJets; ++i){
 		double d0  = 0.;
 		double dd0 = 0.001;
@@ -140,7 +215,7 @@ void PhysQCAnalysis::Analyze1(){
 		double dztry = fTR->JVtxz[i] - fTR->PrimVtxz;
 		if (dztry > -100.) {
 			d0  = sqrt((fTR->JVtxx[i]-fTR->PrimVtxx)*(fTR->JVtxx[i]-fTR->PrimVtxx)
-				+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
+			+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
 			dd0 = sqrt(fTR->JVtxExx[i] + fTR->JVtxEyy[i] + drVxsq);
 			if (dd0 <= 0.) dd0 = 0.001;
 			dz  = fTR->JVtxz[i] - fTR->PrimVtxz;
@@ -151,31 +226,41 @@ void PhysQCAnalysis::Analyze1(){
 		fJHistos[1]->Fill(dz);
 		fJHistos[2]->Fill(fabs(d0) / dd0);
 		fJHistos[3]->Fill(fabs(dz) / ddz);
-		if( fVerbose > 0 && (dz < -2.) ){
-			cout << " dz = " << dz << ", JVtxNChi2 = " << fTR->JVtxNChi2
-				<< ", JNAssoTracks = " << fTR->JNAssoTracks << endl;
-		}
+//		if (dz < -2.) {
+//		cout << " dz = " << dz << ", JVtxNChi2 = " << fTR->JVtxNChi2
+//		     << ", JNAssoTracks = " << fTR->JNAssoTracks << endl;
+//		}
 	}
 
-	fMETHistos[0]->Fill(fTC->fR12);
-	fMETHistos[1]->Fill(fTC->fR21);
 	double METPhi = fTR->MuCorrMETphi;
 	double MET = fTR->MuCorrMET;
-	double METBadJetmin = 50.;
+	double METBadJetmin = 20.;
 	if (fTR->NJets > 1 && MET > METBadJetmin) {
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
 		double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
+		fMETHistos[0]->Fill(dPhiMJ1);
+		fMETHistos[1]->Fill(dPhiMJ2);
 		fMETDphi12->Fill(dPhiMJ1, dPhiMJ2);
+		double pi = 3.141592654;
+		double fR12 = sqrt(dPhiMJ1*dPhiMJ1 + (pi-dPhiMJ2)*(pi-dPhiMJ2) );
+		double fR21 = sqrt(dPhiMJ2*dPhiMJ2 + (pi-dPhiMJ1)*(pi-dPhiMJ1) );
+		fMETHistos[2]->Fill(fR12);
+		fMETHistos[3]->Fill(fR21);
+		fMETHistos[4]->Fill(fR12+fR21);
 	}
+	
 	double fracEm, fracCh;
 	GetEvtEmChFrac(fracEm, fracCh);
-	fMETHistos[3]->Fill(fracEm);
-	fMETHistos[4]->Fill(fracCh);
+	fMETHistos[5]->Fill(fracEm);
+	fMETHistos[6]->Fill(fracCh);
 }
 
 void PhysQCAnalysis::Analyze2(){
 // Analysis after cleaning
-
+	
+	// skip empty events
+	if (fTR->NMus + fTR->NEles + fTR->NPhotons + fTR->NJets <= 0) return;
+	
 }
 
 void PhysQCAnalysis::End(){
@@ -194,6 +279,10 @@ void PhysQCAnalysis::End(){
 	double ElecDeltaPhiInEndmax  = 0.06;
 	double ElecDeltaPhiOutBarmax = 999.0;
 	double ElecDeltaPhiOutEndmax = 999.0;
+	double PhotHoverEBarmax      = 0.2;
+	double PhotHoverEEndmax      = 0.2;
+	double PhotSigmaEtaEtaBarmax = 0.011;
+	double PhotSigmaEtaEtaEndmax = 0.025;
 	double dR12min = 0.5;
 	double dR21min = 0.5;
 	double FracChmin = 0.1;
@@ -204,7 +293,7 @@ void PhysQCAnalysis::End(){
 	file.open(fChecklistFile, ios::out);
 	TLine *line, *l1, *l2;
 	double maxy;
-
+	
 	TCanvas *canv;
 	TString tempstring1, tempstring2, outputdir;
 	outputdir = fOutputDir + "Cleaning/Mu/";
@@ -495,7 +584,7 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[13]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[13], 0., ElecEoverPInEndmin, 0., 100.) << endl;
-
+	
 	tempstring1 = "El d0signif";
 	tempstring2 = "Eld0signif";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -511,7 +600,7 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[14]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[14], distVxmax, 100., 0., 100.) << endl;
-
+	
 	tempstring1 = "El dzsignif";
 	tempstring2 = "Eldzsignif";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -527,7 +616,7 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[15]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[15], distVxmax, 100., 0., 100.) << endl;
-
+	
 	tempstring1 = "El DR SS";
 	tempstring2 = "ElDRSS";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -535,7 +624,7 @@ void PhysQCAnalysis::End(){
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[16]) << endl;
-
+	
 	tempstring1 = "El DR OS";
 	tempstring2 = "ElDROS";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -544,6 +633,103 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[17]) << endl;
 
+	tempstring1 = "El InvM Same Sign";
+	tempstring2 = "ElInvMSS";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fElHistos[18]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElHistos[18]) << endl;
+
+	tempstring1 = "El InvM Opp Sign";
+	tempstring2 = "ElInvMOS";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fElHistos[19]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElHistos[19]) << endl;
+
+	outputdir = fOutputDir + "Cleaning/Ph/";
+	tempstring1 = "Phot H/E Bar";
+	tempstring2 = "PhoHoverEBar";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	maxy = fPhHistos[0]->GetMaximum();
+	maxy = 1.05*maxy;
+	fPhHistos[0]->SetMaximum(maxy);
+	fPhHistos[0]->DrawCopy();
+	line = new TLine(PhotHoverEBarmax,0,PhotHoverEBarmax,maxy);
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[0]) << endl;
+	file << fAC->printRatio(tempstring2, fPhHistos[0], PhotHoverEBarmax, 100., 0., 100.) << endl;
+
+	tempstring1 = "Phot sigmaIetaIeta Bar";
+	tempstring2 = "PhoSigmaIetaIetaBar";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	maxy = fPhHistos[1]->GetMaximum();
+	maxy = 1.05*maxy;
+	fPhHistos[1]->SetMaximum(maxy);
+	fPhHistos[1]->DrawCopy();
+	line = new TLine(PhotSigmaEtaEtaBarmax,0,PhotSigmaEtaEtaBarmax,maxy);
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[1]) << endl;
+	file << fAC->printRatio(tempstring2, fPhHistos[1], PhotSigmaEtaEtaBarmax, 100., 0., 100.) << endl;
+
+	tempstring1 = "Phot H/E End";
+	tempstring2 = "PhoHoverEEnd";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	maxy = fPhHistos[2]->GetMaximum();
+	maxy = 1.05*maxy;
+	fPhHistos[2]->SetMaximum(maxy);
+	fPhHistos[2]->DrawCopy();
+	line = new TLine(PhotHoverEEndmax,0,PhotHoverEEndmax,maxy);
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[2]) << endl;
+	file << fAC->printRatio(tempstring2, fPhHistos[2], PhotHoverEEndmax, 100., 0., 100.) << endl;
+
+	tempstring1 = "Phot sigmaIetaIeta End";
+	tempstring2 = "PhoSigmaIetaIetaEnd";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	maxy = fPhHistos[3]->GetMaximum();
+	maxy = 1.05*maxy;
+	fPhHistos[3]->SetMaximum(maxy);
+	fPhHistos[3]->DrawCopy();
+	line = new TLine(PhotSigmaEtaEtaEndmax,0,PhotSigmaEtaEtaEndmax,maxy);
+	line->SetLineColor(kRed);
+	line->SetLineWidth(2);
+	line->Draw();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[3]) << endl;
+	file << fAC->printRatio(tempstring2, fPhHistos[3], PhotSigmaEtaEtaEndmax, 100., 0., 100.) << endl;
+
+	tempstring1 = "Phot DR";
+	tempstring2 = "PhDR";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fPhHistos[4]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[4]) << endl;
+
+	tempstring1 = "Phot InvM";
+	tempstring2 = "PhInvM";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fPhHistos[5]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[5]) << endl;
+	
 	outputdir = fOutputDir + "Cleaning/Jet/";
 	tempstring1 = "Jet d0 PV";
 	tempstring2 = "Jetd0PV";
@@ -553,7 +739,7 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[0], distVxmax, 100., 0., 100.) << endl;
-
+	
 	tempstring1 = "Jet dz PV";
 	tempstring2 = "JetdzPV";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -562,7 +748,7 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[1], distVxmax, 100., 0., 100.) << endl;
-
+	
 	tempstring1 = "Jet d0signif";
 	tempstring2 = "Jetd0signif";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -577,7 +763,7 @@ void PhysQCAnalysis::End(){
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[2]) << endl;
-
+	
 	tempstring1 = "Jet dzsignif";
 	tempstring2 = "Jetdzsignif";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -594,35 +780,59 @@ void PhysQCAnalysis::End(){
 	file << fAC->printAverage(tempstring2, fJHistos[3]) << endl;
 
 	outputdir = fOutputDir + "Cleaning/MET/";
+	tempstring1 = "Dphi(MET,j1)";
+	tempstring2 = "DphiMETJet1";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fMETHistos[0]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[0]) << endl;
+
+	tempstring1 = "Dphi(MET,j2)";
+	tempstring2 = "DphiMETJet2";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fMETHistos[1]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[1]) << endl;
+
 	tempstring1 = "MET R12";
 	tempstring2 = "METR12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[0]->GetMaximum();
+	maxy = fMETHistos[2]->GetMaximum();
 	maxy = 1.05*maxy;
-	fMETHistos[0]->SetMaximum(maxy);
-	fMETHistos[0]->DrawCopy();
+	fMETHistos[2]->SetMaximum(maxy);
+	fMETHistos[2]->DrawCopy();
 	line = new TLine(dR12min,0,dR12min,maxy);
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[0]) << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[2]) << endl;
 
 	tempstring1 = "MET R21";
 	tempstring2 = "METR21";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[1]->GetMaximum();
+	maxy = fMETHistos[3]->GetMaximum();
 	maxy = 1.05*maxy;
-	fMETHistos[1]->SetMaximum(maxy);
-	fMETHistos[1]->DrawCopy();
+	fMETHistos[3]->SetMaximum(maxy);
+	fMETHistos[3]->DrawCopy();
 	line = new TLine(dR21min,0,dR21min,maxy);
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[1]) << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[3]) << endl;
+
+	tempstring1 = "MET Rsum";
+	tempstring2 = "METRsum";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	fMETHistos[4]->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[4]) << endl;
 
 	tempstring1 = "MET Dphi 12";
 	tempstring2 = "METDphi12";
@@ -634,35 +844,35 @@ void PhysQCAnalysis::End(){
 	tempstring1 = "Evt Em Frac";
 	tempstring2 = "EvtEmFrac";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[3]->GetMaximum();
+	maxy = fMETHistos[5]->GetMaximum();
 	maxy = 1.05*maxy;
-	fMETHistos[3]->SetMaximum(maxy);
-	fMETHistos[3]->DrawCopy();
+	fMETHistos[5]->SetMaximum(maxy);
+	fMETHistos[5]->DrawCopy();
 	line = new TLine(FracEmmin,0,FracEmmin,maxy);
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[3]) << endl;
+	file << fAC->printAverage(tempstring2, fMETHistos[5]) << endl;
 
 	tempstring1 = "Evt Ch Frac";
 	tempstring2 = "EvtChFrac";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[4]->GetMaximum();
+	maxy = fMETHistos[6]->GetMaximum();
 	maxy = 1.05*maxy;
-	fMETHistos[4]->SetMaximum(maxy);
-	fMETHistos[4]->DrawCopy();
+	fMETHistos[6]->SetMaximum(maxy);
+	fMETHistos[6]->DrawCopy();
 	line = new TLine(FracChmin,0,FracChmin,maxy);
 	line->SetLineColor(kRed);
 	line->SetLineWidth(2);
 	line->Draw();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[4]) << endl;
-
+	file << fAC->printAverage(tempstring2, fMETHistos[6]) << endl;
+	
 	file.close();
-
+	
 	// write out the cleaning statistics
 	TString cleanerstatfile = fOutputDir + "cleanerStats.txt";
 	fTC->StatWrite(cleanerstatfile);
@@ -729,12 +939,12 @@ void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
 
 }
 
-void PhysQCAnalysis::MakePlots(TString plotlist, TTree *tree, TCut cut){
-	fAC->plotPlotList(plotlist, tree, "", cut);
+void PhysQCAnalysis::MakePlots(TString plotlist, TTree *tree, TCut select){
+	fAC->plotPlotList(plotlist, tree, "", select);
 }
 
-void PhysQCAnalysis::MakeElIDPlots(TTree *tree){
-	fAC->plotEID("", tree, "");
+void PhysQCAnalysis::MakeElIDPlots(TTree *tree, TCut select){
+	fAC->plotEID(select, tree, "");
 }
 
 void PhysQCAnalysis::PlotTriggerStats(){
@@ -873,3 +1083,11 @@ void PhysQCAnalysis::PlotTriggerStats(){
 
         gROOT->cd(); // Leave local file
 }
+
+double PhysQCAnalysis::invMass(double p1[], double p2[]){
+	double msq = (p1[3]+p2[3])*(p1[3]+p2[3]) - (p1[0]+p2[0])*(p1[0]+p2[0])
+	           - (p1[1]+p2[1])*(p1[1]+p2[1]) - (p1[2]+p2[2])*(p1[2]+p2[2]);
+	if (msq < 0.) msq = 0.;
+	return sqrt(msq);
+}
+

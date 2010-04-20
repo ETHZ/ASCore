@@ -34,9 +34,10 @@ public:
 	void Analyze2();
 	void End();
 	void MakePlots(TString, TTree*, TCut = "");
-	void MakeElIDPlots(TTree*);
+	void MakeElIDPlots(TTree*, TCut = "");
 	void PlotTriggerStats();
 	void PrintInfoStart(int nEntries);
+	double invMass(double p1[], double p2[]);
 	double DeltaPhi(double v1, double v2);
 	void GetEvtEmChFrac(double & fracEm, double & fracCh);
 	
@@ -46,9 +47,10 @@ public:
 private:
 	
 	TH1D *fMuHistos[5];
-	TH1D *fElHistos[18];
+	TH1D *fElHistos[20];
+	TH1D *fPhHistos[6];
 	TH1D *fJHistos[4];
-	TH1D *fMETHistos[5];
+	TH1D *fMETHistos[7];
 	TH2D *fMETDphi12;
 
 };
