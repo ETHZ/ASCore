@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.49 2010/03/24 17:18:01 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.50 2010/04/01 10:59:33 fronga Exp $
 //
 //
 
@@ -254,6 +254,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<GenEventInfoProduct> genEvtInfo;
 	if(!fIsRealData){
 		iEvent.getByLabel("generator", genEvtInfo);
+		fTpthat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
 		fTsigprocid   = genEvtInfo->signalProcessID();
 		fTpdfscalePDF = genEvtInfo->pdf()->scalePDF;
 		fTpdfid1      = genEvtInfo->pdf()->id.first;
@@ -1231,6 +1232,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
 	fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/I");
 	fEventTree->Branch("LumiSection"      ,&fTlumisection     ,"LumiSection/I");
+	fEventTree->Branch("PtHat"            ,&fTpthat           ,"PtHat/D");
 	fEventTree->Branch("SigProcID"        ,&fTsigprocid       ,"SigProcID/I");
 	fEventTree->Branch("PDFScalePDF"      ,&fTpdfscalePDF     ,"PDFScalePDF/D");
 	fEventTree->Branch("PDFID1"           ,&fTpdfid1          ,"PDFID1/I");
@@ -1676,6 +1678,7 @@ void NTupleProducer::resetTree(){
 	fTrunnumber   = -999;
 	fTeventnumber = -999;
 	fTlumisection = -999;
+	fTpthat       = -999.99;
 	fTsigprocid   = -999;
 	fTpdfscalePDF = -999.99;
 	fTpdfid1      = -999;
