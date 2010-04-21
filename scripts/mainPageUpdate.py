@@ -92,6 +92,7 @@ def mainPageUpdate(myDir, mainPageFile, addel):
 
     f.close()
     tmp.close()
+    os.chmod(tmp.name,stat.S_IWGRP|stat.S_IRGRP) # Make sure it is group writable
     # replace the old main page with the newly written one
     os.rename("temp.html", myMain + ".html")
     print "===> Mainpage updated with " + myDir
