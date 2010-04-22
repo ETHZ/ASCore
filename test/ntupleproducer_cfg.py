@@ -14,9 +14,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 ### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
-runon = 'data'
+# runon = 'data'
 # runon = 'MC31x'
-# runon = 'MC34x'
+runon = 'MC35x'
 recoType = 'RECO'
 # recoType = 'PAT'
 # recoType = 'PF'
@@ -31,7 +31,7 @@ else:
     # CMSSW_3_4_X:
     # process.GlobalTag.globaltag = "MC_3XY_V18::All"
     # CMSSW_3_3_X:
-    process.GlobalTag.globaltag = "MC_31X_V3::All"
+    process.GlobalTag.globaltag = "START3X_V25B::All"
 
 ### b-tagging ##################################################################
 process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
@@ -46,7 +46,7 @@ process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssoc
 # Input
 process.source = cms.Source("PoolSource",
       fileNames = cms.untracked.vstring(
-     '/store/data/Commissioning10/MinimumBias/RAW-RECO/v7/000/132/440/0636C91D-4C3C-DF11-9A45-001A649747B0.root'
+     '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V25B_356ReReco-v1/0004/F44C3A4D-F73B-DF11-B42D-003048678B94.root'
     ),
 #Enable if you see duplicate error      duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )

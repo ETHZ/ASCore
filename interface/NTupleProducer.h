@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.41 2010/04/01 10:59:32 fronga Exp $
+// $Id: NTupleProducer.h,v 1.42 2010/04/20 12:51:04 stiegerb Exp $
 //
 //
 
@@ -69,7 +69,6 @@ public:
 	void resetDouble(double *v, unsigned int size = 20);
 	void resetInt(int *v, unsigned int size = 20);
 	void resetTree();
-	vector<const reco::Track*> FindAssociatedTracks(const reco::Jet *jet, const reco::TrackCollection *tracks);
 
 private:
 
@@ -121,6 +120,7 @@ private:
 	edm::InputTag fJetTag;
 	string fJetCorrs;
 	edm::InputTag fBtagTag;
+        edm::InputTag fJetTracksTag;
 	edm::InputTag fMET1Tag;
 	edm::InputTag fMET2Tag;
 	edm::InputTag fMET3Tag;
@@ -219,7 +219,7 @@ private:
 	double fTprimvtxyE;
 	double fTprimvtxzE;
 	double fTpvtxznchi2;
-	int fTpvtxntracks;
+        int    fTpvtxndof;
 	double fTpvtxptsum;
 
 	double fTbeamspotx;
