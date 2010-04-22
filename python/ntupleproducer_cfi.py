@@ -42,18 +42,18 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_maxmueta    = cms.double(2.4),
 	# Electrons:
 	sel_minelpt     = cms.double(5.0),
-	sel_maxeleta    = cms.double(2.5),
+	sel_maxeleta    = cms.double(2.4),
 	# Jets:
 	sel_mincorjpt   = cms.double(20.0),
 	sel_minrawjpt   = cms.double(0.0),
 	sel_maxjeta     = cms.double(10.0),
 	sel_minjemfrac  = cms.double(0.0),
 	# Tracks:
-	sel_mintrkpt    = cms.double(50.0),
+	sel_mintrkpt    = cms.double(1.0),
 	sel_maxtrketa   = cms.double(10.0),
 	sel_maxtrknchi2 = cms.double(1e15),
 	sel_mintrknhits = cms.int32(0),
 	# Photons
 	sel_minphopt    = cms.double(5.0),
-	sel_maxphoeta   = cms.double(2.5),            
+	sel_maxphoeta   = cms.double(2.4),            
 )
