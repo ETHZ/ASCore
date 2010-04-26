@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.51 2010/04/20 12:51:04 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.52 2010/04/22 12:12:56 fronga Exp $
 //
 //
 
@@ -36,6 +36,12 @@
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
+
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
+#include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
+#include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
+
+
 
 // Data formats
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -83,7 +89,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMuIsoDepTkTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
   fMuIsoDepECTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
   fMuIsoDepHCTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
-  fSCTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_sc");
   fJetTag         = iConfig.getUntrackedParameter<edm::InputTag>("tag_jets");
   fJetCorrs       = iConfig.getUntrackedParameter<string>("jetCorrs");
   fBtagTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag");
@@ -97,6 +102,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fTrackTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
   fPhotonTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_photons");
   fCalTowTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_caltow");
+  fEBRecHitsTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_EBrechits");
+  fEERecHitsTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_EErechits");
   fGenPartTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_genpart");
   fGenJetTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
@@ -134,7 +141,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << "    fMuIsoDepTkTag  = " << fMuIsoDepTkTag.label()  ;
   edm::LogVerbatim("NTP") << "    fMuIsoDepECTag  = " << fMuIsoDepECTag.label()  ;
   edm::LogVerbatim("NTP") << "    fMuIsoDepHCTag  = " << fMuIsoDepHCTag.label()  ;
-  edm::LogVerbatim("NTP") << "    fSCTag          = " << fSCTag.label()          ;
   edm::LogVerbatim("NTP") << "    fJetTag         = " << fJetTag.label()         ;
   edm::LogVerbatim("NTP") << "    fJetCorrs       = " << fJetCorrs               ;
   edm::LogVerbatim("NTP") << "    fMET1Tag        = " << fMET1Tag.label()        ;
@@ -251,6 +257,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Get CaloTowers
   edm::Handle<CaloTowerCollection> calotowers;
   iEvent.getByLabel(fCalTowTag,calotowers);
+
+  // For ECAL cleaning: rechit and channel status
+  edm::Handle<EcalRecHitCollection> ebRecHits;
+  edm::Handle<EcalRecHitCollection> eeRecHits;
+  iEvent.getByLabel(fEBRecHitsTag,ebRecHits);
+  iEvent.getByLabel(fEERecHitsTag,eeRecHits);
+  edm::ESHandle<EcalChannelStatus> chStatus;
+  iSetup.get<EcalChannelStatusRcd>().get(chStatus);
+  const EcalChannelStatus * channelStatus = chStatus.product();
 
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
@@ -554,11 +569,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       }
       fTeInGap[eqi]    = El->isGap() ? 1:0;
 
-      //	Choose the "Driven" methods according to the CMSSW release			
-      // CMSSW_3_3_X and before
-      //	fTeEcalDriven[eqi]    = El->isEcalDriven() ? 1:0;
-      //	fTeTrackerDriven[eqi] = El->isTrackerDriven() ? 1:0;
-      // CMSSW_3_4_1 and later:
       fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
       fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
 
@@ -578,6 +588,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTeESuperClusterOverP[eqi]        = El->eSuperClusterOverP();
       fTetheta[eqi]                     = El->superCluster()->position().theta();
 
+      if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( El->superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   El->superCluster()->seed()->seed(), *ebRecHits );
+        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( El->superCluster()->seed()->seed(), *ebRecHits );
+      } else if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( El->superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   El->superCluster()->seed()->seed(), *eeRecHits );
+        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( El->superCluster()->seed()->seed(), *eeRecHits );
+      } else
+        edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
+                                                
 
       // Read in Electron ID
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
@@ -703,6 +724,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTPhotSharedEnergy[nqpho] = 0.;
     fTgoodphoton[nqpho]  = 0;
     fTPhotIsIso[nqpho] = 1;
+
+    // Spike removal information
+    if ( ip->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+      fTPhotScSeedSeverity[nqpho] = EcalSeverityLevelAlgo::severityLevel( ip->superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+      fTPhotE1OverE9[nqpho] = EcalSeverityLevelAlgo::E1OverE9(   ip->superCluster()->seed()->seed(), *ebRecHits );
+      fTPhotS4OverS1[nqpho] = EcalSeverityLevelAlgo::swissCross( ip->superCluster()->seed()->seed(), *ebRecHits );
+    } else if ( ip->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+      fTPhotScSeedSeverity[nqpho] = EcalSeverityLevelAlgo::severityLevel( ip->superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+      fTPhotE1OverE9[nqpho] = EcalSeverityLevelAlgo::E1OverE9(   ip->superCluster()->seed()->seed(), *eeRecHits );
+      fTPhotS4OverS1[nqpho] = 1.0-EcalSeverityLevelAlgo::swissCross( ip->superCluster()->seed()->seed(), *eeRecHits );
+    } else
+      edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
+                                                
   }
   fTnphotons = nqpho+1;
 
@@ -1411,6 +1445,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElConvPartnerTrkEta"    ,&fTeConvPartTrackEta    ,"ElConvPartnerTrkEta[NEles]/D");
   fEventTree->Branch("ElConvPartnerTrkPhi"    ,&fTeConvPartTrackPhi    ,"ElConvPartnerTrkPhi[NEles]/D");
   fEventTree->Branch("ElConvPartnerTrkCharge" ,&fTeConvPartTrackCharge ,"ElConvPartnerTrkCharge[NEles]/D");
+  fEventTree->Branch("ElScSeedSeverity"       ,&fTeScSeedSeverity      ,"ElScSeedSeverity[NEles]/I");
+  fEventTree->Branch("ElE1OverE9"             ,&fTeE1OverE9            ,"ElE1OverE9[NEles]/D");
+  fEventTree->Branch("ElS4OverS1"             ,&fTeS4OverS1            ,"ElS4OverS1[NEles]/D");
 
   fEventTree->Branch("ElGenID"          ,&fTGenElId         ,"ElGenID[NEles]/I");
   fEventTree->Branch("ElGenStatus"      ,&fTGenElStatus     ,"ElGenStatus[NEles]/I");
@@ -1465,6 +1502,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/D");
   fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/D");
   fEventTree->Branch("PhoSharedEnergy"  ,&fTPhotSharedEnergy  ,"PhoSharedEnergy[NPhotons]/D");
+  fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
+  fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/D");
+  fEventTree->Branch("PhoS4OverS1"      ,&fTPhotS4OverS1      ,"PhoS4OverS1[NPhotons]/D");
 
 
   // Jets:
@@ -1855,6 +1895,10 @@ void NTupleProducer::resetTree(){
   resetDouble(fTeConvPartTrackPhi, gMaxneles);
   resetDouble(fTeConvPartTrackCharge, gMaxneles);
 
+  resetInt(fTeScSeedSeverity, gMaxneles);
+  resetDouble(fTeS4OverS1, gMaxneles);
+  resetDouble(fTeE1OverE9, gMaxneles);
+
   resetInt(fTeIDTight, gMaxneles);
   resetInt(fTeIDLoose, gMaxneles);
   resetInt(fTeIDRobustTight, gMaxneles);
@@ -1974,6 +2018,10 @@ void NTupleProducer::resetTree(){
   resetDouble(fTPhotSharedPy, gMaxnphos);
   resetDouble(fTPhotSharedPz, gMaxnphos);
   resetDouble(fTPhotSharedEnergy, gMaxnphos);
+
+  resetInt(fTPhotScSeedSeverity, gMaxnphos);
+  resetDouble(fTPhotS4OverS1, gMaxnphos);
+  resetDouble(fTPhotE1OverE9, gMaxnphos);
 
   fTTrkPtSumx          = -999.99;
   fTTrkPtSumy          = -999.99;
