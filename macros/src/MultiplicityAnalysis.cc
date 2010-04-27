@@ -132,7 +132,7 @@ void MultiplicityAnalysis::End(){
 	if(fVerbose) fMyLeptJetStat->PrintConfigs();
 	PlotMPSummary();
 	PlotMPEffic();
-
+	
 	fTlat->SetTextColor(kBlack);
 	fTlat->SetNDC(kTRUE);
 	fTlat->SetTextSize(0.04);
@@ -152,6 +152,7 @@ void MultiplicityAnalysis::End(){
 	fHljMult->DrawCopy("colz");
 	// fHljMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
+	if(fLumi != -999.99) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
 	Util::PrintBoth(canv, fTag + "_ljMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu multiplicity";
@@ -163,6 +164,7 @@ void MultiplicityAnalysis::End(){
 	fHemuMult->DrawCopy("colz");
 	// fHemuMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
+	if(fLumi != -999.99) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
 	Util::PrintBoth(canv, fTag + "_emuMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu Efficiency";
