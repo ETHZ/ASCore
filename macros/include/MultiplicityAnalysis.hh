@@ -33,14 +33,36 @@ public:
 
 	void PlotMPSummary();
 	void PlotMPEffic();
+	const char* fSetofCuts;  
+	float fLumi; 	// lumi to scale plots with xsection
+
 
 private:
+	void ReadCuts();
+	
 	// Multiplicity Plots Variables:
 	TFile *fMPHistFile;
 	LeptJetStat *fMyLeptJetStat;
 	TH2D *fHljMult;
 	TH2D *fHemuMult;
 	TH1F *fHemuEff;
+	
+	//  ---- set of cuts ---
+	TString fSetName;
+	// ---- Electrons
+	float fCut_ElPt;
+	float fCut_ElEta;
+	float fCut_ElRelIso04;
+	int   fCut_ElIDRobustTight;  
+	// ---- Muons
+	float fCut_MuPt;
+	float fCut_MuEta;
+	float fCut_MuRelIso03;
+	float fCut_MuNTkHits;
+	int   fCut_MuTrackerMu;
+	// ---- Jets
+	float fCut_JPt;
+	float fCut_JEta;
 
 
 

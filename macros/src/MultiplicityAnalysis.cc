@@ -6,6 +6,8 @@
 using namespace std;
 
 MultiplicityAnalysis::MultiplicityAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
+	fSetofCuts      = "multiplicity_cuts/default.dat";
+	fLumi           = -999.99;
 }
 
 MultiplicityAnalysis::~MultiplicityAnalysis(){
@@ -19,9 +21,13 @@ void MultiplicityAnalysis::Begin(const char* filename){
 	fHemuMult = new TH2D("emuMult", "e/mu multiplicity",         18, 0, 18, 7, 0, 7);
 	fHemuEff  = new TH1F("emuEffic", "e/mu Efficiency", 13, 0, 13);
 
-	fHljMult->SetStats(false);
+	fHljMult ->SetStats(false);
 	fHemuMult->SetStats(false);
-	fHemuEff->SetStats(false);
+	fHemuEff ->SetStats(false);
+
+	ReadCuts();
+
+
 }
 
 void MultiplicityAnalysis::Analyze(){
@@ -31,6 +37,7 @@ void MultiplicityAnalysis::Analyze(){
 	//category 2: e-
 	//category 3: mu+
 	//category 4: mu-
+	
 	const int NLepts = 40;
 	int LeptCat[NLepts];
 	double LeptPt[NLepts];
@@ -44,9 +51,11 @@ void MultiplicityAnalysis::Analyze(){
 	//loop over es and mus and fill the leptons array
 	int ILept=-1;
 	for(int i=0; i< fTR->NEles; ++i){
-		//////////////////////////////////
-		// Your electron selection here //
-		//////////////////////////////////
+		// ----------- Electron Cuts --------------------
+		if(fTR->ElPt[i]             < fCut_ElPt) { continue; }
+		if(fTR->ElEta[i]            > fCut_ElEta){ continue; }
+		if(fTR->ElRelIso04[i]       > fCut_ElRelIso04){ continue;}
+		if(fTR->ElIDRobustTight[i] != fCut_ElIDRobustTight){continue;}
 		ILept++;
 		LeptPt[ILept]  = fTR->ElPt[i];
 		LeptEta[ILept] = fTR->ElEta[i];
@@ -57,9 +66,14 @@ void MultiplicityAnalysis::Analyze(){
 		}
 	}
 	for(int i=0; i< fTR->NMus; ++i){
-		//////////////////////////////////
-		// Your muon selection here     //
-		//////////////////////////////////
+		// ----------- Muon Cuts --------------------
+		if(fTR->MuPt[i]        < fCut_MuPt) { continue; }
+		if(fTR->MuEta[i]       > fCut_MuEta){ continue; }
+		if(fTR->MuRelIso03[i]  > fCut_MuRelIso03){ continue;}
+		if(fTR->MuNTkHits[i]   < fCut_MuNTkHits){ continue;}
+		if(fCut_MuTrackerMu==1){
+			if(fTR->MuTrackerMu[i] != 1 ){ continue;}
+		}
 		ILept++;
 		LeptPt[ILept]  = fTR->MuPt[i];
 		LeptEta[ILept] = fTR->MuEta[i];
@@ -69,6 +83,8 @@ void MultiplicityAnalysis::Analyze(){
 			LeptCat[ILept]=4;
 		}
 	}
+	
+	
 	//total number of leptons in the event
 	int NLeptons= ILept+1;
 
@@ -94,7 +110,7 @@ void MultiplicityAnalysis::Analyze(){
 		}
 	} while (changed);
 
-// if too many leptons, remove the softest ones
+// if too many leptons, put it in the overflow bin
 	if (NLeptons > 4){
 		LeptCat[0]=5;
 	}
@@ -102,12 +118,12 @@ void MultiplicityAnalysis::Analyze(){
 // count number of good jets (beni)
 	unsigned int NQJets = 0;
 	for(int i=0; i < fTR->NJets; ++i){
-		//////////////////////////////////
-		// Your jet selection here      //
-		//////////////////////////////////		
+		// ----------- Jet Cuts --------------------
+		if(fTR->JPt[i]  < fCut_JPt) { continue; }
+		if(fTR->JEta[i] > fCut_JEta){ continue; }	
 		NQJets++;
 	}
-// convert the lepton config into the index and count
+	
 	fMyLeptJetStat->FillLeptJetStat(LeptCat, NQJets, 0);
 }
 
@@ -132,7 +148,7 @@ void MultiplicityAnalysis::End(){
 	// gStyle->SetPalette(ncol, colors);
 	gPad->SetTheta(50);
 	gPad->SetPhi(240);
-	fHljMult->SetMinimum(0);
+	gPad->SetLogz();
 	fHljMult->DrawCopy("colz");
 	// fHljMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
@@ -143,7 +159,7 @@ void MultiplicityAnalysis::End(){
 	canv->SetRightMargin(0.15);
 	gPad->SetTheta(50);
 	gPad->SetPhi(240);
-	fHemuMult->SetMinimum(0);
+	gPad->SetLogz();	
 	fHemuMult->DrawCopy("colz");
 	// fHemuMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
@@ -154,6 +170,7 @@ void MultiplicityAnalysis::End(){
 	canv->SetRightMargin(0.15);
 	gPad->SetTheta(50);
 	gPad->SetPhi(240);
+	gPad->SetLogz();	
 	fHemuEff->DrawCopy();
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	Util::PrintBoth(canv, fTag + "_emuEffic", fOutputDir+subdir);
@@ -247,7 +264,11 @@ void MultiplicityAnalysis::PlotMPSummary(){
 		fHljMult->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		for (int j = 0; j < njets; ++j) {
 			fHljMult->GetYaxis()->SetBinLabel(j+1, lably[j]);
-			fHljMult->SetBinContent(i+1, j+1, multable[i][j]);
+			if(fLumi > 0){
+				fHljMult->SetBinContent(i+1, j+1, (multable[i][j])*fLumi*(fTR->IntXSec)/(fTR->GetEntries()) );
+			}else{
+				fHljMult->SetBinContent(i+1, j+1, multable[i][j] );
+			}
 			if(fVerbose) cout << "  " << multable[i][j];
 		}
 		if(fVerbose) cout << endl;
@@ -424,8 +445,12 @@ void MultiplicityAnalysis::PlotMPEffic(){
 		if(fVerbose) cout << "  " << lablx[i];
 		fHemuMult->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		for (int j = 0; j < njets; ++j) {
-			fHemuMult->GetYaxis()->SetBinLabel(j+1, lablx[j]);
-			fHemuMult->SetBinContent(i+1, j+1, multable[i][j]);
+			fHemuMult->GetYaxis()->SetBinLabel(j+1, lably[j]);
+			if(fLumi > 0){
+				fHemuMult->SetBinContent(i+1, j+1, (multable[i][j])*fLumi*(fTR->IntXSec)/(fTR->GetEntries()) );
+			}else{
+				fHemuMult->SetBinContent(i+1, j+1, multable[i][j] );
+			}
 			if(fVerbose) cout << "  " << multable[i][j];
 		}
 		if(fVerbose) cout << endl;
@@ -572,3 +597,76 @@ void MultiplicityAnalysis::PlotMPEffic(){
 	return;
 }
 
+void MultiplicityAnalysis::ReadCuts(){
+	
+	ifstream IN(fSetofCuts);
+	char buffer[200];
+	char ParName[100];
+	char StringValue[100];	
+	float ParValue;
+	int   FlagValue;
+
+	bool verbose(true);
+	bool ok(false);
+	
+	
+	while( IN.getline(buffer, 200, '\n') ){
+		ok = false;
+		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
+
+		// strings
+		sscanf(buffer, "%s %s", ParName, StringValue);
+		if( !strcmp(ParName, "SetName") ){
+			fSetName = TString(StringValue); ok = true;
+			if(verbose){cout << "Reading cut parameters for set: " << fSetName << endl; }
+		}		
+	
+		// floats 
+		sscanf(buffer, "%s %f", ParName, &ParValue);
+		if( !strcmp(ParName, "ElPt") ){
+			fCut_ElPt          = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElEta") ){
+			fCut_ElEta         = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElRelIso04") ){
+			fCut_ElRelIso04    = float(ParValue); ok = true;
+		}		
+		if( !strcmp(ParName, "MuPt") ){
+			fCut_MuPt          = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "MuEta") ){
+			fCut_MuEta         = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "MuRelIso03") ){
+			fCut_MuRelIso03    = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "MuNTkHits") ){
+			fCut_MuNTkHits    = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "JPt") ){
+			fCut_JPt           = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "JEta") ){
+			fCut_JEta          = float(ParValue); ok = true;
+		}				
+		
+		// ints
+		sscanf(buffer, "%s %i", ParName, &FlagValue);
+		if( !strcmp(ParName, "ElIDRobustTight") ){
+			fCut_ElIDRobustTight = int(FlagValue); ok = true;
+		}	
+		if( !strcmp(ParName, "MuTrackerMu") ){
+			fCut_MuTrackerMu     = int(FlagValue); ok = true;
+		}							
+		
+		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
+	}	
+	if(verbose){
+		cout << "setting cuts to: " << endl;
+		cout << "  ElPt " << fCut_ElPt << " and ELEta " << fCut_ElEta << " fCut_ElRelIso04 < "<< fCut_ElRelIso04 << " IDRobustTight  "<< fCut_ElIDRobustTight <<endl;
+		cout << "  MuPt " << fCut_MuPt << " and MuEta " << fCut_MuEta << " fCut_MuRelIso03 < "<< fCut_MuRelIso03 << " MuNTkHits >=   "<< fCut_MuNTkHits       << " MuTrackerMu " << fCut_MuTrackerMu <<endl;
+		cout << "  JPt  " << fCut_JPt  << " and JEta  " << fCut_JEta  <<endl;
+		cout << "--------------"    << endl;	
+	}			
+}

@@ -1,0 +1,26 @@
+####################################################################
+## Set of cuts for MultiplicityAnalysis: default cuts
+#
+# ----- Set Name -------
+SetName          default
+# ----- Electrons ------
+ElPt               15.
+ElEta              2.4
+ElRelIso04         0.2
+ElIDRobustTight    1
+#
+# ------ Muons    ------
+MuPt               15.
+MuEta              2.4
+MuRelIso03         0.2
+MuNTkHits          11.0
+MuTrackerMu        1  
+# (MuTrackerMu cut ignored unless ==1)
+#
+# ------ Jets     ------
+JPt                30.
+JEta               3.0
+#
+#####################################################################
+# comments:
+# these cuts are applied after TreeCleaner (i.e. on goodJets, ...)
