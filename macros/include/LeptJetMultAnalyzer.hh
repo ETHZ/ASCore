@@ -6,7 +6,6 @@
 
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
-#include "LeptJetMultAnalysis.hh"
 #include "TreeCleaner.hh"
 #include "MultiplicityAnalysis.hh"
 
@@ -20,7 +19,6 @@ public:
 	void Loop();
 
 private:
-	LeptJetMultAnalysis *fLeptJetMultAnalysis;
 	TreeCleaner *fTreeCleaner;
 	MultiplicityAnalysis *fMultiplicityAnalysis;	
 };
