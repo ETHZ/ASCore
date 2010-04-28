@@ -22,16 +22,19 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fMuHistos[1] = new TH1D("Mud0signif", "Mu d0 significance;Mu d0 significance",  nmubins, 0., 15. );
 	fMuHistos[2] = new TH1D("Mudzsignif", "Mu dz significance;Mu dz significance",  nmubins, 0., 15. );
 	fMuHistos[3] = new TH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
+	fMuHistos[4] = new TH1D("MuDROS", "Mu DR Opp Sign;Mu DR Opp Sign",  nmubins, 0., 3.2 );
+	fMuHistos[5] = new TH1D("MuInvMSS", "Mu InvM Same Sign;Mu InvM Same Sign", nmubins, 0., 100. );
+	fMuHistos[6] = new TH1D("MuInvMOS", "Mu InvM Opp Sign;Mu InvM Opp Sign",  nmubins, 0., 100. );
 	
 	const unsigned int nelbins = 100;
-	fElHistos[0]  = new TH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.05);
+	fElHistos[0]  = new TH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.2);
 	fElHistos[1]  = new TH1D("ElSigmaIetaIetaBar", "El sigmaIetaIeta Bar",  nelbins, 0., 0.05);
 	fElHistos[2]  = new TH1D("ElDeltaPhiSeedClusterAtCaloBar", "El DeltaPhiSeedClusterAtCalo Bar",  nelbins, -0.1, 0.1);
 	fElHistos[3]  = new TH1D("ElDeltaEtaSeedClusterAtCaloBar", "El DeltaEtaSeedClusterAtCalo Bar",  nelbins, -0.05, 0.05);
 	fElHistos[4]  = new TH1D("ElDeltaPhiSuperClusterAtVtxBar", "El DeltaPhiSuperClusterAtVtx Bar",  nelbins, -0.1, 0.1);
 	fElHistos[5]  = new TH1D("ElDeltaEtaSuperClusterAtVtxBar", "El DeltaEtaSuperClusterAtVtx Bar",  nelbins, -0.05, 0.05);
 	fElHistos[6]  = new TH1D("ElESuperClusterOverPBar", "El ESuperClusterOverP Bar",  nelbins, 0., 5.);
-	fElHistos[7]  = new TH1D("ElHcalOverEcalEnd", "El H/E End",  nelbins, 0., 0.05);
+	fElHistos[7]  = new TH1D("ElHcalOverEcalEnd", "El H/E End",  nelbins, 0., 0.2);
 	fElHistos[8]  = new TH1D("ElSigmaIetaIetaEnd", "El sigmaIetaIeta End",  nelbins, 0., 0.05);
 	fElHistos[9]  = new TH1D("ElDeltaPhiSeedClusterAtCaloEnd", "El DeltaPhiSeedClusterAtCalo End",  nelbins, -0.1, 0.1);
 	fElHistos[10] = new TH1D("ElDeltaEtaSeedClusterAtCaloEnd", "El DeltaEtaSeedClusterAtCalo End",  nelbins, -0.05, 0.05);
@@ -42,19 +45,19 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fElHistos[15] = new TH1D("Eldzsignif", "El dz significance;El dz significance",  nelbins, 0., 15. );
 	fElHistos[16] = new TH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nelbins, 0., 3.2 );
 	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );
-	fElHistos[18] = new TH1D("ElInvMSS", "El InvM Same Sign;El InvM Same Sign", nelbins, 0., 10. );
-	fElHistos[19] = new TH1D("ElInvMOS", "El InvM Opp Sign;El InvM Opp Sign",  nelbins, 0., 10. );
+	fElHistos[18] = new TH1D("ElInvMSS", "El InvM Same Sign;El InvM Same Sign", nelbins, 0., 100. );
+	fElHistos[19] = new TH1D("ElInvMOS", "El InvM Opp Sign;El InvM Opp Sign",  nelbins, 0., 100. );
 
 	const unsigned int nphbins = 100;
-	fPhHistos[0]  = new TH1D("PhoHoverEBar", "Phot H/E Bar",  nphbins, 0., 0.05);
+	fPhHistos[0]  = new TH1D("PhoHoverEBar", "Phot H/E Bar",  nphbins, 0., 0.2);
 	fPhHistos[1]  = new TH1D("PhoSigmaIetaIetaBar", "Phot sigmaIetaIeta Bar",  nphbins, 0., 0.05);
 	fPhHistos[2]  = new TH1D("PhoHoverEEnd", "Phot H/E End",  nphbins, 0., 0.05);
 	fPhHistos[3]  = new TH1D("PhoSigmaIetaIetaEnd", "Phot sigmaIetaIeta End",  nphbins, 0., 0.05);
 	fPhHistos[4] = new TH1D("PhDR", "Phot DR;Phot DR",  nphbins, 0., 3.2 );
-	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 15. );
+	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 100. );
 
 	const unsigned int njetbins = 100;
-	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, -0.5, 0.5 );
+	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
 	fJHistos[1] = new TH1D("JetdzPV", "Jet dz PV;Jet dz to PV",  njetbins, -2., 2. );
 	fJHistos[2] = new TH1D("Jetd0signif", "Jet d0 significance;Jet d0 significance",  njetbins, 0., 15. );
 	fJHistos[3] = new TH1D("Jetdzsignif", "Jet dz significance;Jet dz significance",  njetbins, 0., 15. );
@@ -64,13 +67,44 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fMETHistos[1] = new TH1D("DphiMETJet2", "Dphi(MET,j2)", nevbins, 0, 3.1416);
 	fMETHistos[2] = new TH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
 	fMETHistos[3] = new TH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
-	fMETHistos[4] = new TH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 0, 6.283);
+	fMETHistos[4] = new TH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 3., 6.283);
 	fMETHistos[5] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
 	fMETHistos[6] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
 	fMETDphi12    = new TH2D("METDphi12", "MET Dphi 12;Dphi(MET,j1);Dphi(MET,j2)", nevbins, 0, 3.142, nevbins, 0, 3.142);
-	fMETDphi12->SetMarkerSize(7);
+	fMETR12R21    = new TH2D("METR12R21", "MET R21 vs R12;R12;R21", nevbins, 0, 6.283, nevbins, 0, 6.283);
+	fMETR12Dphij12 = new TH2D("METR12Dphij12", "MET R21 vs Dphijet12;R12;Dphij12", nevbins, 0, 6.283, nevbins, 0, 3.142);
 
-	// Histos for cleaned objects
+	// Histos for cleaned objects, CI = Clean+Isolated
+	const unsigned int nCIbins = 100;
+	const unsigned int ninvmbins = 100;
+	fMuCIHistos[0] = new TH1D("NMus", "Nber of Mus clean+iso", 10, 0, 10);
+	fMuCIHistos[1] = new TH1D("MuPt", "Pt of Mus clean+iso", nCIbins, 0, 100.);
+	fMuCIHistos[2] = new TH1D("MuEta", "Eta of Mus clean+iso", nCIbins, -2.5, 2.5);
+	fMuCIHistos[3] = new TH1D("MuPhi", "Phi of Mus clean+iso", nCIbins, -3.2, 3.2);
+	fElCIHistos[0] = new TH1D("NEles", "Nber of Eles clean+iso", 10, 0, 10);
+	fElCIHistos[1] = new TH1D("ElPt", "Pt of Eles clean+iso", nCIbins, 0, 100.);
+	fElCIHistos[2] = new TH1D("ElEta", "Eta of Eles clean+iso", nCIbins, -2.5, 2.5);
+	fElCIHistos[3] = new TH1D("ElPhi", "Phi of Eles clean+iso", nCIbins, -3.2, 3.2);
+	fElCIHistos[4] = new TH1D("ElSigmaIetaIetaClean", "ElSigmaIetaIeta of Eles clean+iso", nCIbins, 0., 0.015);
+	fPhCIHistos[0] = new TH1D("NPhotons", "Nber of Photons clean+iso", 20, 0, 20);
+	fPhCIHistos[1] = new TH1D("PhoPt", "Pt of Photons clean+iso", nCIbins, 0, 100.);
+	fPhCIHistos[2] = new TH1D("PhoEta", "Eta of Photons clean+iso", nCIbins, -2.5, 2.5);
+	fPhCIHistos[3] = new TH1D("PhoPhi", "Phi of Photons clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[0] = new TH1D("NJets", "Nber of Jets clean+iso", 20, 0, 20);
+	fJCIHistos[1] = new TH1D("JPt", "Pt of Jets clean+iso", nCIbins, 0, 250.);
+	fJCIHistos[2] = new TH1D("JEta", "Eta of Jets clean+iso", nCIbins, -5., 5.);
+	fJCIHistos[3] = new TH1D("JPhi", "Phi of Jets clean+iso", nCIbins, -3.2, 3.2);
+	fInvMHistos[0] = new TH1D("MuInvMSSClean", "Mu Clean InvM Same Sign;Mu InvM Same Sign", ninvmbins, 0., 100. );
+	fInvMHistos[1] = new TH1D("MuInvMSSCleanLow", "Mu Clean InvM Low Same Sign;Mu InvM Same Sign", ninvmbins, 0., 5. );
+	fInvMHistos[2] = new TH1D("MuInvMOSClean", "Mu Clean InvM Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 100. );
+	fInvMHistos[3] = new TH1D("MuInvMOSCleanLow", "Mu Clean InvM Low Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 5. );
+	fInvMHistos[4] = new TH1D("ElInvMSSClean", "El Clean InvM Same Sign;El InvM Same Sign", ninvmbins, 0., 100. );
+	fInvMHistos[5] = new TH1D("ElInvMSSCleanLow", "El Clean InvM Low Same Sign;El InvM Same Sign", ninvmbins, 0., 5. );
+	fInvMHistos[6] = new TH1D("ElInvMOSClean", "El Clean InvM Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 100. );
+	fInvMHistos[7] = new TH1D("ElInvMOSCleanLow", "El Clean InvM Low Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 5. );
+	fInvMHistos[8] = new TH1D("PhInvMClean", "Phot Clean InvM;Phot InvM", ninvmbins, 0., 100. );
+	fInvMHistos[9] = new TH1D("PhInvMCleanLow", "Phot Clean InvM Low;Phot InvM", ninvmbins, 0., 5. );
+
 }
 
 PhysQCAnalysis::~PhysQCAnalysis(){
@@ -87,7 +121,7 @@ void PhysQCAnalysis::Analyze1(){
 	
 	// skip empty events
 //	if (fTR->GoodEvent > 0) return;
-	if(fTR->NMus + fTR->NEles + fTR->NPhotons + fTR->NJets <= 0) return;
+	if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
 	
 	double p1[4], p2[4], minv;
 	
@@ -107,9 +141,27 @@ void PhysQCAnalysis::Analyze1(){
 
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		for(size_t j = i+1; j < fTR->NMus; ++j){
+			double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
+			p1[0] = fTR->MuPx[i];
+			p1[1] = fTR->MuPy[i];
+			p1[2] = fTR->MuPz[i];
+			p1[3] = fTR->MuE[i];
+			p2[0] = fTR->MuPx[j];
+			p2[1] = fTR->MuPy[j];
+			p2[2] = fTR->MuPz[j];
+			p2[3] = fTR->MuE[j];
 			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
-				double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
 				fMuHistos[3]->Fill(deltaR);
+				if (deltaR < 0.5) {
+					minv = invMass(p1, p2);
+					fMuHistos[5]->Fill(minv);
+				}
+			} else {
+				fMuHistos[4]->Fill(deltaR);
+				if (deltaR < 0.5) {
+					minv = invMass(p1, p2);
+					fMuHistos[6]->Fill(minv);
+				}
 			}
 		}
 	}
@@ -145,31 +197,23 @@ void PhysQCAnalysis::Analyze1(){
 	for(size_t i = 0; i < fTR->NEles; ++i){
 		for(size_t j = i+1; j < fTR->NEles; ++j){
 			double deltaR = Util::GetDeltaR(fTR->ElEta[i], fTR->ElEta[j], fTR->ElPhi[i], fTR->ElPhi[j]);
+			p1[0] = fTR->ElPx[i];
+			p1[1] = fTR->ElPy[i];
+			p1[2] = fTR->ElPz[i];
+			p1[3] = fTR->ElE[i];
+			p2[0] = fTR->ElPx[j];
+			p2[1] = fTR->ElPy[j];
+			p2[2] = fTR->ElPz[j];
+			p2[3] = fTR->ElE[j];
 			if (fTR->ElCharge[i] == fTR->ElCharge[j]) {
 				fElHistos[16]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					p1[0] = fTR->ElPx[i];
-					p1[1] = fTR->ElPy[i];
-					p1[2] = fTR->ElPz[i];
-					p1[3] = fTR->ElE[i];
-					p2[0] = fTR->ElPx[j];
-					p2[1] = fTR->ElPy[j];
-					p2[2] = fTR->ElPz[j];
-					p2[3] = fTR->ElE[j];
 					minv = invMass(p1, p2);
 					fElHistos[18]->Fill(minv);
 				}
 			} else {
 				fElHistos[17]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					p1[0] = fTR->ElPx[i];
-					p1[1] = fTR->ElPy[i];
-					p1[2] = fTR->ElPz[i];
-					p1[3] = fTR->ElE[i];
-					p2[0] = fTR->ElPx[j];
-					p2[1] = fTR->ElPy[j];
-					p2[2] = fTR->ElPz[j];
-					p2[3] = fTR->ElE[j];
 					minv = invMass(p1, p2);
 					fElHistos[19]->Fill(minv);
 				}
@@ -185,6 +229,7 @@ void PhysQCAnalysis::Analyze1(){
 			fPhHistos[2]->Fill(fTR->PhoHoverE[i]);
 			fPhHistos[3]->Fill(fTR->PhoSigmaIetaIeta[i]);
 		}
+
 	}
 	
 	for(size_t i = 0; i < fTR->NPhotons; ++i){
@@ -213,7 +258,7 @@ void PhysQCAnalysis::Analyze1(){
 		double ddz = 0.001;
 //		if (fTR->JVtxNChi2 > 0) { // not defined in this file
 		double dztry = fTR->JVtxz[i] - fTR->PrimVtxz;
-		if (dztry > -100.) {
+		if (fTR->JVtxz[i] != -888.88 && fTR->JVtxz[i] != -777.77) {
 			d0  = sqrt((fTR->JVtxx[i]-fTR->PrimVtxx)*(fTR->JVtxx[i]-fTR->PrimVtxx)
 			+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
 			dd0 = sqrt(fTR->JVtxExx[i] + fTR->JVtxEyy[i] + drVxsq);
@@ -221,11 +266,11 @@ void PhysQCAnalysis::Analyze1(){
 			dz  = fTR->JVtxz[i] - fTR->PrimVtxz;
 			ddz = sqrt(fTR->JVtxEzz[i] + fTR->PrimVtxzE*fTR->PrimVtxzE);
 			if (ddz <= 0.) ddz = 0.001;
+			fJHistos[0]->Fill(d0);
+			fJHistos[1]->Fill(dz);
+			fJHistos[2]->Fill(fabs(d0) / dd0);
+			fJHistos[3]->Fill(fabs(dz) / ddz);
 		}
-		fJHistos[0]->Fill(d0);
-		fJHistos[1]->Fill(dz);
-		fJHistos[2]->Fill(fabs(d0) / dd0);
-		fJHistos[3]->Fill(fabs(dz) / ddz);
 //		if (dz < -2.) {
 //		cout << " dz = " << dz << ", JVtxNChi2 = " << fTR->JVtxNChi2
 //		     << ", JNAssoTracks = " << fTR->JNAssoTracks << endl;
@@ -247,6 +292,9 @@ void PhysQCAnalysis::Analyze1(){
 		fMETHistos[2]->Fill(fR12);
 		fMETHistos[3]->Fill(fR21);
 		fMETHistos[4]->Fill(fR12+fR21);
+		fMETR12R21->Fill(fR12, fR21);
+		double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
+		fMETR12Dphij12->Fill(fR12, dPhij12);
 	}
 	
 	double fracEm, fracCh;
@@ -259,617 +307,616 @@ void PhysQCAnalysis::Analyze2(){
 // Analysis after cleaning
 	
 	// skip empty events
-	if (fTR->NMus + fTR->NEles + fTR->NPhotons + fTR->NJets <= 0) return;
+	if (fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
+	
+	double p1[4], p2[4], minv;
+	
+	fMuCIHistos[0]->Fill(fTR->NMus);
+	for(size_t i = 0; i < fTR->NMus; ++i){
+		if (fTR->MuIsIso[i] == 0) continue;
+		fMuCIHistos[1]->Fill(fTR->MuPt[i]);
+		fMuCIHistos[2]->Fill(fTR->MuEta[i]);
+		fMuCIHistos[3]->Fill(fTR->MuPhi[i]);
+		for(size_t j = i+1; j < fTR->NMus; ++j){
+			p1[0] = fTR->MuPx[i];
+			p1[1] = fTR->MuPy[i];
+			p1[2] = fTR->MuPz[i];
+			p1[3] = fTR->MuE[i];
+			p2[0] = fTR->MuPx[j];
+			p2[1] = fTR->MuPy[j];
+			p2[2] = fTR->MuPz[j];
+			p2[3] = fTR->MuE[j];
+			minv = invMass(p1, p2);
+			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
+				fInvMHistos[0]->Fill(minv);
+				fInvMHistos[1]->Fill(minv);
+			} else {
+				fInvMHistos[2]->Fill(minv);
+				fInvMHistos[3]->Fill(minv);
+			}
+		}
+	}
+
+	fElCIHistos[0]->Fill(fTR->NEles);
+	for(size_t i = 0; i < fTR->NEles; ++i){
+		if (fTR->ElIsIso[i] == 0) continue;
+		fElCIHistos[1]->Fill(fTR->ElPt[i]);
+		fElCIHistos[2]->Fill(fTR->ElEta[i]);
+		fElCIHistos[3]->Fill(fTR->ElPhi[i]);
+		fElCIHistos[4]->Fill(fTR->ElSigmaIetaIeta[i]);
+		for(size_t j = i+1; j < fTR->NEles; ++j){
+			p1[0] = fTR->ElPx[i];
+			p1[1] = fTR->ElPy[i];
+			p1[2] = fTR->ElPz[i];
+			p1[3] = fTR->ElE[i];
+			p2[0] = fTR->ElPx[j];
+			p2[1] = fTR->ElPy[j];
+			p2[2] = fTR->ElPz[j];
+			p2[3] = fTR->ElE[j];
+			minv = invMass(p1, p2);
+			if (fTR->ElCharge[i] == fTR->ElCharge[j]) {
+				fInvMHistos[4]->Fill(minv);
+				fInvMHistos[5]->Fill(minv);
+			} else {
+				fInvMHistos[6]->Fill(minv);
+				fInvMHistos[7]->Fill(minv);
+			}
+		}
+	}
+	
+	fPhCIHistos[0]->Fill(fTR->NPhotons);
+	for(size_t i = 0; i < fTR->NPhotons; ++i){
+		if (fTR->PhoIsIso[i] == 0) continue;
+		fPhCIHistos[1]->Fill(fTR->PhoPt[i]);
+		fPhCIHistos[2]->Fill(fTR->PhoEta[i]);
+		fPhCIHistos[3]->Fill(fTR->PhoPhi[i]);
+		for(size_t j = i+1; j < fTR->NPhotons; ++j){
+			p1[0] = fTR->PhoPx[i];
+			p1[1] = fTR->PhoPy[i];
+			p1[2] = fTR->PhoPz[i];
+			p1[3] = fTR->PhoEnergy[i];
+			p2[0] = fTR->PhoPx[j];
+			p2[1] = fTR->PhoPy[j];
+			p2[2] = fTR->PhoPz[j];
+			p2[3] = fTR->PhoEnergy[j];
+			minv = invMass(p1, p2);
+			fInvMHistos[8]->Fill(minv);
+			fInvMHistos[9]->Fill(minv);
+		}
+	}
+	
+	fJCIHistos[0]->Fill(fTR->NJets);
+	for(size_t i = 0; i < fTR->NJets; ++i){
+		fJCIHistos[1]->Fill(fTR->JPt[i]);
+		fJCIHistos[2]->Fill(fTR->JEta[i]);
+		fJCIHistos[3]->Fill(fTR->JPhi[i]);
+	}
 	
 }
 
 void PhysQCAnalysis::End(){
 
-	double distVxmax = 10.;
-	double dRSSmuonmax = 0.1;
-	double ElecHoverEBarmax      = 0.045;
-	double ElecHoverEEndmax      = 0.05;
-	double ElecSigmaEtaEtaBarmax = 0.011;
-	double ElecSigmaEtaEtaEndmax = 0.025;
-	double ElecEoverPInBarmin    = 0.3;
-	double ElecEoverPInEndmin    = 0.4;
-	double ElecDeltaEtaInBarmax  = 0.007;
-	double ElecDeltaEtaInEndmax  = 0.007;
-	double ElecDeltaPhiInBarmax  = 0.06;
-	double ElecDeltaPhiInEndmax  = 0.06;
-	double ElecDeltaPhiOutBarmax = 999.0;
-	double ElecDeltaPhiOutEndmax = 999.0;
-	double PhotHoverEBarmax      = 0.2;
-	double PhotHoverEEndmax      = 0.2;
-	double PhotSigmaEtaEtaBarmax = 0.011;
-	double PhotSigmaEtaEtaEndmax = 0.025;
-	double dR12min = 0.5;
-	double dR21min = 0.5;
-	double FracChmin = 0.1;
-	double FracEmmin = 0.175;
+	double distVxmax = fTC->fClean_distVxmax;
+	double dRSSmuonmax = fTC->fClean_dRSSmuonmax;
+	double ElecHoverEBarmax      = fTC->fClean_ElecHoverEBarmax;
+	double ElecHoverEEndmax      = fTC->fClean_ElecHoverEEndmax;
+	double ElecSigmaEtaEtaBarmax = fTC->fClean_ElecSigmaEtaEtaBarmax;
+	double ElecSigmaEtaEtaEndmax = fTC->fClean_ElecSigmaEtaEtaEndmax;
+	double ElecEoverPInBarmin    = fTC->fClean_ElecEoverPInBarmin;
+	double ElecEoverPInEndmin    = fTC->fClean_ElecEoverPInEndmin;
+	double ElecDeltaEtaInBarmax  = fTC->fClean_ElecDeltaEtaInBarmax;
+	double ElecDeltaEtaInEndmax  = fTC->fClean_ElecDeltaEtaInEndmax;
+	double ElecDeltaPhiInBarmax  = fTC->fClean_ElecDeltaPhiInBarmax;
+	double ElecDeltaPhiInEndmax  = fTC->fClean_ElecDeltaPhiInEndmax;
+	double ElecDeltaPhiOutBarmax = fTC->fClean_ElecDeltaPhiOutBarmax;
+	double ElecDeltaPhiOutEndmax = fTC->fClean_ElecDeltaPhiOutEndmax;
+	double PhotHoverEBarmax      = fTC->fClean_PhotHoverEBarmax;
+	double PhotHoverEEndmax      = fTC->fClean_PhotHoverEEndmax;
+	double PhotSigmaEtaEtaBarmax = fTC->fClean_PhotSigmaEtaEtaBarmax;
+	double PhotSigmaEtaEtaEndmax = fTC->fClean_PhotSigmaEtaEtaEndmax;
+	double FracChmin = fTC->fClean_FracChmin;
+	double FracEmmin = fTC->fClean_FracEmmin;
+	double dPhiJetMETmin = fTC->fClean_dPhiJetMETmin;
+	double dR12min = fTC->fClean_dR12min;
+	double dR21min = fTC->fClean_dR21min;
+	double MuPtmin = 10.;
+	double MuEtamax = 2.4;
+	double ElPtmin = 10.;
+	double ElEtamax = 2.4;
+	double PhPtmin = 10.;
+	double PhEtamax = 2.4;
+	double JPtmin = 30.;
+	double JEtamax = 3.;
 
 	TString fChecklistFile = fOutputDir + "plots_Cleaning_checklist.txt";
 	ofstream file;
 	file.open(fChecklistFile, ios::out);
 	TLine *line, *l1, *l2;
 	double maxy;
-	
-	TCanvas *canv;
 	TString tempstring1, tempstring2, outputdir;
+	
+	// uncleaned muons
 	outputdir = fOutputDir + "Cleaning/Mu/";
 	tempstring1 = "Mu DeltaP/P";
 	tempstring2 = "MuDeltaPOverP";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fMuHistos[0]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMuHistos[0], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[0]) << endl;
 
 	tempstring1 = "Mu d0signif";
 	tempstring2 = "Mud0signif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMuHistos[1]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMuHistos[1]->SetMaximum(maxy);
-	fMuHistos[1]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMuHistos[1], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fMuHistos[1], distVxmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Mu dzsignif";
 	tempstring2 = "Mudzsignif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMuHistos[2]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMuHistos[2]->SetMaximum(maxy);
-	fMuHistos[2]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMuHistos[2], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fMuHistos[2], distVxmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Mu DR SS";
 	tempstring2 = "MuDRSS";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMuHistos[3]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMuHistos[3]->SetMaximum(maxy);
-	fMuHistos[3]->DrawCopy();
-	line = new TLine(dRSSmuonmax,0,dRSSmuonmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMuHistos[3], tempstring1, tempstring2, outputdir, dRSSmuonmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[3]) << endl;
 
+	tempstring1 = "Mu DR OS";
+	tempstring2 = "MuDROS";
+	PrintHisto(fMuHistos[4], tempstring1, tempstring2, outputdir, dRSSmuonmax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuHistos[4]) << endl;
+
+	tempstring1 = "Mu InvM SS";
+	tempstring2 = "MuInvMSS";
+	PrintHisto(fMuHistos[5], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuHistos[5]) << endl;
+
+	tempstring1 = "Mu InvM OS";
+	tempstring2 = "MuInvMOS";
+	PrintHisto(fMuHistos[6], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuHistos[6]) << endl;
+
+	// uncleaned electrons
 	outputdir = fOutputDir + "Cleaning/El/";
 	tempstring1 = "El H/E Bar";
 	tempstring2 = "ElHcalOverEcalBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[0]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[0]->SetMaximum(maxy);
-	fElHistos[0]->DrawCopy();
-	line = new TLine(ElecHoverEBarmax,0,ElecHoverEBarmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[0], tempstring1, tempstring2, outputdir, ElecHoverEBarmax, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[0], ElecHoverEBarmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "El SigmaIetaIeta Bar";
 	tempstring2 = "ElSigmaIetaIetaBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[1]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[1]->SetMaximum(maxy);
-	fElHistos[1]->DrawCopy();
-	line = new TLine(ElecSigmaEtaEtaBarmax,0,ElecSigmaEtaEtaBarmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[1], tempstring1, tempstring2, outputdir, ElecSigmaEtaEtaBarmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[1], ElecSigmaEtaEtaBarmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "El DeltaPhiSeedClusterAtCalo Bar";
 	tempstring2 = "ElDeltaPhiSeedClusterAtCaloBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[2]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[2]->SetMaximum(maxy);
-	fElHistos[2]->DrawCopy();
-	l1 = new TLine(ElecDeltaPhiOutBarmax,0,ElecDeltaPhiOutBarmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaPhiOutBarmax,0,-ElecDeltaPhiOutBarmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[2], tempstring1, tempstring2, outputdir, ElecDeltaPhiOutBarmax, -ElecDeltaPhiOutBarmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[2], -ElecDeltaPhiOutBarmax, ElecDeltaPhiOutBarmax, -100., 100.) << endl;
 
 	tempstring1 = "El DeltaEtaSeedClusterAtCalo Bar";
 	tempstring2 = "ElDeltaEtaSeedClusterAtCaloBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[3]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[3], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[3]) << endl;
 
 	tempstring1 = "El DeltaPhiSuperClusterAtVtx Bar";
 	tempstring2 = "ElDeltaPhiSuperClusterAtVtxBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[4]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[4]->SetMaximum(maxy);
-	fElHistos[4]->DrawCopy();
-	l1 = new TLine(ElecDeltaPhiInBarmax,0,ElecDeltaPhiInBarmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaPhiInBarmax,0,-ElecDeltaPhiInBarmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[4], tempstring1, tempstring2, outputdir, ElecDeltaPhiInBarmax, -ElecDeltaPhiInBarmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[4]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[4], -ElecDeltaPhiInBarmax, ElecDeltaPhiInBarmax, -100., 100.) << endl;
 
 	tempstring1 = "El DeltaEtaSuperClusterAtVtx Bar";
 	tempstring2 = "ElDeltaEtaSuperClusterAtVtxBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[5]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[5]->SetMaximum(maxy);
-	fElHistos[5]->DrawCopy();
-	l1 = new TLine(ElecDeltaEtaInBarmax,0,ElecDeltaEtaInBarmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaEtaInBarmax,0,-ElecDeltaEtaInBarmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[5], tempstring1, tempstring2, outputdir, ElecDeltaEtaInBarmax, -ElecDeltaEtaInBarmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[5]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[5], -ElecDeltaEtaInBarmax, ElecDeltaEtaInBarmax, -100., 100.) << endl;
 
 	tempstring1 = "El ESuperClusterOverP Bar";
 	tempstring2 = "ElESuperClusterOverPBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[6]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[6]->SetMaximum(maxy);
-	fElHistos[6]->DrawCopy();
-	line = new TLine(ElecEoverPInBarmin,0,ElecEoverPInBarmin,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[6], tempstring1, tempstring2, outputdir, ElecEoverPInBarmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[6]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[6], 0., ElecEoverPInBarmin, 0., 100.) << endl;
 
 	tempstring1 = "El H/E End";
 	tempstring2 = "ElHcalOverEcalEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[7]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[7]->SetMaximum(maxy);
-	fElHistos[7]->DrawCopy();
-	line = new TLine(ElecHoverEEndmax,0,ElecHoverEEndmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[7], tempstring1, tempstring2, outputdir, ElecHoverEEndmax, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[7]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[7], ElecHoverEEndmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "El SigmaIetaIeta End";
 	tempstring2 = "ElSigmaIetaIetaEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[8]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[8]->SetMaximum(maxy);
-	fElHistos[8]->DrawCopy();
-	line = new TLine(ElecSigmaEtaEtaEndmax,0,ElecSigmaEtaEtaEndmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[8], tempstring1, tempstring2, outputdir, ElecSigmaEtaEtaEndmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[8]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[8], ElecSigmaEtaEtaEndmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "El DeltaPhiSeedClusterAtCalo End";
 	tempstring2 = "ElDeltaPhiSeedClusterAtCaloEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[9]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[9]->SetMaximum(maxy);
-	fElHistos[9]->DrawCopy();
-	l1 = new TLine(ElecDeltaPhiOutEndmax,0,ElecDeltaPhiOutEndmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaPhiOutEndmax,0,-ElecDeltaPhiOutEndmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[9], tempstring1, tempstring2, outputdir, ElecDeltaPhiOutEndmax, -ElecDeltaPhiOutEndmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[9]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[9], -ElecDeltaPhiOutEndmax, ElecDeltaPhiOutEndmax, -100., 100.) << endl;
 
 	tempstring1 = "El DeltaEtaSeedClusterAtCalo End";
 	tempstring2 = "ElDeltaEtaSeedClusterAtCaloEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[10]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[10], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[10]) << endl;
 
 	tempstring1 = "El DeltaPhiSuperClusterAtVtx End";
 	tempstring2 = "ElDeltaPhiSuperClusterAtVtxEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[11]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[11]->SetMaximum(maxy);
-	fElHistos[11]->DrawCopy();
-	l1 = new TLine(ElecDeltaPhiInEndmax,0,ElecDeltaPhiInEndmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaPhiInEndmax,0,-ElecDeltaPhiInEndmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[11], tempstring1, tempstring2, outputdir, ElecDeltaPhiInEndmax, -ElecDeltaPhiInEndmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[11]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[11], -ElecDeltaPhiInEndmax, ElecDeltaPhiInEndmax, -100., 100.) << endl;
 
 	tempstring1 = "El DeltaEtaSuperClusterAtVtx End";
 	tempstring2 = "ElDeltaEtaSuperClusterAtVtxEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[12]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[12]->SetMaximum(maxy);
-	fElHistos[12]->DrawCopy();
-	l1 = new TLine(ElecDeltaEtaInEndmax,0,ElecDeltaEtaInEndmax,maxy);
-	l1->SetLineColor(kRed);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	l2 = new TLine(-ElecDeltaEtaInEndmax,0,-ElecDeltaEtaInEndmax,maxy);
-	l2->SetLineColor(kRed);
-	l2->SetLineWidth(2);
-	l2->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[12], tempstring1, tempstring2, outputdir, ElecDeltaEtaInEndmax, -ElecDeltaEtaInEndmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[12]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[12], -ElecDeltaEtaInEndmax, ElecDeltaEtaInEndmax, -100., 100.) << endl;
 
 	tempstring1 = "El ESuperClusterOverP End";
 	tempstring2 = "ElESuperClusterOverPEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[13]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[13]->SetMaximum(maxy);
-	fElHistos[13]->DrawCopy();
-	line = new TLine(ElecEoverPInEndmin,0,ElecEoverPInEndmin,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[13], tempstring1, tempstring2, outputdir, ElecEoverPInEndmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[13]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[13], 0., ElecEoverPInEndmin, 0., 100.) << endl;
 	
 	tempstring1 = "El d0signif";
 	tempstring2 = "Eld0signif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[14]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[14]->SetMaximum(maxy);
-	fElHistos[14]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[14], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[14]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[14], distVxmax, 100., 0., 100.) << endl;
 	
 	tempstring1 = "El dzsignif";
 	tempstring2 = "Eldzsignif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fElHistos[15]->GetMaximum();
-	maxy = 1.05*maxy;
-	fElHistos[15]->SetMaximum(maxy);
-	fElHistos[15]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[15], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[15]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[15], distVxmax, 100., 0., 100.) << endl;
 	
 	tempstring1 = "El DR SS";
 	tempstring2 = "ElDRSS";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[16]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[16], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[16]) << endl;
 	
 	tempstring1 = "El DR OS";
 	tempstring2 = "ElDROS";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[17]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[17], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[17]) << endl;
 
 	tempstring1 = "El InvM Same Sign";
 	tempstring2 = "ElInvMSS";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[18]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[18], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[18]) << endl;
 
 	tempstring1 = "El InvM Opp Sign";
 	tempstring2 = "ElInvMOS";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fElHistos[19]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fElHistos[19], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[19]) << endl;
 
+	// uncleaned photons
 	outputdir = fOutputDir + "Cleaning/Ph/";
 	tempstring1 = "Phot H/E Bar";
 	tempstring2 = "PhoHoverEBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fPhHistos[0]->GetMaximum();
-	maxy = 1.05*maxy;
-	fPhHistos[0]->SetMaximum(maxy);
-	fPhHistos[0]->DrawCopy();
-	line = new TLine(PhotHoverEBarmax,0,PhotHoverEBarmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[0], tempstring1, tempstring2, outputdir, PhotHoverEBarmax, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fPhHistos[0], PhotHoverEBarmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Phot sigmaIetaIeta Bar";
 	tempstring2 = "PhoSigmaIetaIetaBar";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fPhHistos[1]->GetMaximum();
-	maxy = 1.05*maxy;
-	fPhHistos[1]->SetMaximum(maxy);
-	fPhHistos[1]->DrawCopy();
-	line = new TLine(PhotSigmaEtaEtaBarmax,0,PhotSigmaEtaEtaBarmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[1], tempstring1, tempstring2, outputdir, PhotSigmaEtaEtaBarmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fPhHistos[1], PhotSigmaEtaEtaBarmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Phot H/E End";
 	tempstring2 = "PhoHoverEEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fPhHistos[2]->GetMaximum();
-	maxy = 1.05*maxy;
-	fPhHistos[2]->SetMaximum(maxy);
-	fPhHistos[2]->DrawCopy();
-	line = new TLine(PhotHoverEEndmax,0,PhotHoverEEndmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[2], tempstring1, tempstring2, outputdir, PhotHoverEEndmax, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fPhHistos[2], PhotHoverEEndmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Phot sigmaIetaIeta End";
 	tempstring2 = "PhoSigmaIetaIetaEnd";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fPhHistos[3]->GetMaximum();
-	maxy = 1.05*maxy;
-	fPhHistos[3]->SetMaximum(maxy);
-	fPhHistos[3]->DrawCopy();
-	line = new TLine(PhotSigmaEtaEtaEndmax,0,PhotSigmaEtaEtaEndmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[3], tempstring1, tempstring2, outputdir, PhotSigmaEtaEtaEndmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[3]) << endl;
 	file << fAC->printRatio(tempstring2, fPhHistos[3], PhotSigmaEtaEtaEndmax, 100., 0., 100.) << endl;
 
 	tempstring1 = "Phot DR";
 	tempstring2 = "PhDR";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fPhHistos[4]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[4], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[4]) << endl;
 
 	tempstring1 = "Phot InvM";
 	tempstring2 = "PhInvM";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fPhHistos[5]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fPhHistos[5], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[5]) << endl;
 	
+	// uncleaned jets
 	outputdir = fOutputDir + "Cleaning/Jet/";
 	tempstring1 = "Jet d0 PV";
 	tempstring2 = "Jetd0PV";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fJHistos[0]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fJHistos[0], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[0], distVxmax, 100., 0., 100.) << endl;
 	
 	tempstring1 = "Jet dz PV";
 	tempstring2 = "JetdzPV";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fJHistos[1]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fJHistos[1], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[1], distVxmax, 100., 0., 100.) << endl;
 	
 	tempstring1 = "Jet d0signif";
 	tempstring2 = "Jetd0signif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fJHistos[2]->GetMaximum();
-	maxy = 1.05*maxy;
-	fJHistos[2]->SetMaximum(maxy);
-	fJHistos[2]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fJHistos[2], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[2]) << endl;
 	
 	tempstring1 = "Jet dzsignif";
 	tempstring2 = "Jetdzsignif";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fJHistos[3]->GetMaximum();
-	maxy = 1.05*maxy;
-	fJHistos[3]->SetMaximum(maxy);
-	fJHistos[3]->DrawCopy();
-	line = new TLine(distVxmax,0,distVxmax,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fJHistos[3], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[3]) << endl;
 
+	// uncleaned Event and MET
 	outputdir = fOutputDir + "Cleaning/MET/";
 	tempstring1 = "Dphi(MET,j1)";
 	tempstring2 = "DphiMETJet1";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fMETHistos[0]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[0], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[0]) << endl;
 
 	tempstring1 = "Dphi(MET,j2)";
 	tempstring2 = "DphiMETJet2";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fMETHistos[1]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[1], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[1]) << endl;
 
 	tempstring1 = "MET R12";
 	tempstring2 = "METR12";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[2]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMETHistos[2]->SetMaximum(maxy);
-	fMETHistos[2]->DrawCopy();
-	line = new TLine(dR12min,0,dR12min,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[2], tempstring1, tempstring2, outputdir, dR12min);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[2]) << endl;
 
 	tempstring1 = "MET R21";
 	tempstring2 = "METR21";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[3]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMETHistos[3]->SetMaximum(maxy);
-	fMETHistos[3]->DrawCopy();
-	line = new TLine(dR21min,0,dR21min,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[3], tempstring1, tempstring2, outputdir, dR21min);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[3]) << endl;
 
 	tempstring1 = "MET Rsum";
 	tempstring2 = "METRsum";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	fMETHistos[4]->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[4], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[4]) << endl;
 
+	TCanvas * canv;
 	tempstring1 = "MET Dphi 12";
 	tempstring2 = "METDphi12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	if(fTR->GetEntries() < 100000) fMETDphi12->SetMarkerStyle(6);
+	if(fMETDphi12->GetEntries() < 100000) fMETDphi12->SetMarkerStyle(6);
 	fMETDphi12->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "MET R12 R21";
+	tempstring2 = "METR12R21";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fMETR12R21->GetEntries() < 100000) fMETR12R21->SetMarkerStyle(6);
+	fMETR12R21->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "MET R12 Dphij12";
+	tempstring2 = "METR12Dphij12";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fMETR12Dphij12->GetEntries() < 100000) fMETR12Dphij12->SetMarkerStyle(6);
+	fMETR12Dphij12->DrawCopy();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 
 	tempstring1 = "Evt Em Frac";
 	tempstring2 = "EvtEmFrac";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[5]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMETHistos[5]->SetMaximum(maxy);
-	fMETHistos[5]->DrawCopy();
-	line = new TLine(FracEmmin,0,FracEmmin,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[5], tempstring1, tempstring2, outputdir, FracEmmin, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[5]) << endl;
 
 	tempstring1 = "Evt Ch Frac";
 	tempstring2 = "EvtChFrac";
-	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
-	maxy = fMETHistos[6]->GetMaximum();
-	maxy = 1.05*maxy;
-	fMETHistos[6]->SetMaximum(maxy);
-	fMETHistos[6]->DrawCopy();
-	line = new TLine(FracChmin,0,FracChmin,maxy);
-	line->SetLineColor(kRed);
-	line->SetLineWidth(2);
-	line->Draw();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	PrintHisto(fMETHistos[6], tempstring1, tempstring2, outputdir, FracChmin, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[6]) << endl;
+	
+	// Clean+iso objects distributions
+	outputdir = fOutputDir + "Cleaning/Obj/";
+	tempstring1 = "Number of Mus";
+	tempstring2 = "NMus";
+	PrintHisto(fMuCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuCIHistos[0]) << endl;
+
+	tempstring1 = "Muon Pt";
+	tempstring2 = "MuPt";
+	PrintHisto(fMuCIHistos[1], tempstring1, tempstring2, outputdir, MuPtmin, 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuCIHistos[1]) << endl;
+
+	tempstring1 = "Muon Eta";
+	tempstring2 = "MuEta";
+	PrintHisto(fMuCIHistos[2], tempstring1, tempstring2, outputdir, -MuEtamax, MuEtamax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuCIHistos[2]) << endl;
+
+	tempstring1 = "Muon Phi";
+	tempstring2 = "MuPhi";
+	PrintHisto(fMuCIHistos[3], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuCIHistos[3]) << endl;
+	
+	tempstring1 = "Number of Eles";
+	tempstring2 = "NEles";
+	PrintHisto(fElCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElCIHistos[0]) << endl;
+
+	tempstring1 = "Elec Pt";
+	tempstring2 = "ElPt";
+	PrintHisto(fElCIHistos[1], tempstring1, tempstring2, outputdir, ElPtmin, 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElCIHistos[1]) << endl;
+
+	tempstring1 = "Elec Eta";
+	tempstring2 = "ElEta";
+	PrintHisto(fElCIHistos[2], tempstring1, tempstring2, outputdir, -ElEtamax, ElEtamax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElCIHistos[2]) << endl;
+
+	tempstring1 = "Elec Phi";
+	tempstring2 = "ElPhi";
+	PrintHisto(fElCIHistos[3], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElCIHistos[3]) << endl;
+
+	tempstring1 = "Elec SigmaIetaIeta";
+	tempstring2 = "ElSigmaIetaIetaClean";
+	PrintHisto(fElCIHistos[4], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fElCIHistos[4]) << endl;
+	
+	tempstring1 = "Number of Photons";
+	tempstring2 = "NPhotons";
+	PrintHisto(fPhCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhCIHistos[0]) << endl;
+
+	tempstring1 = "Pho Pt";
+	tempstring2 = "PhoPt";
+	PrintHisto(fPhCIHistos[1], tempstring1, tempstring2, outputdir, PhPtmin, 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhCIHistos[1]) << endl;
+
+	tempstring1 = "Pho Eta";
+	tempstring2 = "PhoEta";
+	PrintHisto(fPhCIHistos[2], tempstring1, tempstring2, outputdir, -PhEtamax, PhEtamax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhCIHistos[2]) << endl;
+
+	tempstring1 = "Pho Phi";
+	tempstring2 = "PhoPhi";
+	PrintHisto(fPhCIHistos[3], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhCIHistos[3]) << endl;
+	
+	tempstring1 = "Number of Jets";
+	tempstring2 = "NJets";
+	PrintHisto(fJCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[0]) << endl;
+
+	tempstring1 = "Jet Pt";
+	tempstring2 = "JPt";
+	PrintHisto(fJCIHistos[1], tempstring1, tempstring2, outputdir, JPtmin, 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[1]) << endl;
+
+	tempstring1 = "Jet Eta";
+	tempstring2 = "JEta";
+	PrintHisto(fJCIHistos[2], tempstring1, tempstring2, outputdir, -JEtamax, JEtamax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[2]) << endl;
+
+	tempstring1 = "Jet Phi";
+	tempstring2 = "JPhi";
+	PrintHisto(fJCIHistos[3], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[3]) << endl;
+	
+	// Clean+iso objects, Inv Mass distributions
+	tempstring1 = "Mu Inv Mass SS Clean";
+	tempstring2 = "MuInvMSSClean";
+	PrintHisto(fInvMHistos[0], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[0]) << endl;
+
+	tempstring1 = "Mu Low Inv Mass SS Clean";
+	tempstring2 = "MuInvMSSCleanLow";
+	PrintHisto(fInvMHistos[1], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[1]) << endl;
+	
+	tempstring1 = "Mu Inv Mass OS Clean";
+	tempstring2 = "MuInvMOSClean";
+	PrintHisto(fInvMHistos[2], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[2]) << endl;
+
+	tempstring1 = "Mu Low Inv Mass OS Clean";
+	tempstring2 = "MuInvMOSCleanLow";
+	PrintHisto(fInvMHistos[3], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[3]) << endl;
+	
+	tempstring1 = "El Inv Mass SS Clean";
+	tempstring2 = "ElInvMSSClean";
+	PrintHisto(fInvMHistos[4], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[4]) << endl;
+
+	tempstring1 = "El Low Inv Mass SS Clean";
+	tempstring2 = "ElInvMSSCleanLow";
+	PrintHisto(fInvMHistos[5], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[5]) << endl;
+	
+	tempstring1 = "El Inv Mass OS Clean";
+	tempstring2 = "ElInvMOSClean";
+	PrintHisto(fInvMHistos[6], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[6]) << endl;
+
+	tempstring1 = "El Low Inv Mass OS Clean";
+	tempstring2 = "ElInvMOSCleanLow";
+	PrintHisto(fInvMHistos[7], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[7]) << endl;
+	
+	tempstring1 = "Ph Inv Mass Clean";
+	tempstring2 = "PhInvMClean";
+	PrintHisto(fInvMHistos[8], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[8]) << endl;
+
+	tempstring1 = "Ph Low Inv Mass Clean";
+	tempstring2 = "PhInvMCleanLow";
+	PrintHisto(fInvMHistos[9], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[9]) << endl;
 	
 	file.close();
 	
@@ -880,7 +927,34 @@ void PhysQCAnalysis::End(){
 	// write the info file
 	const int nentries = fTR->fChain->GetEntries();
 	PrintInfoStart(nentries);
+	
+}
 
+void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstring2, TString outputdir,
+		 double x1, double x2, int logy){
+
+	TCanvas * canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if (logy == 1) gPad->SetLogy();
+	hist->DrawCopy();
+	
+	double maxy;
+	if (x1 != 999.) {
+		maxy = hist->GetMaximum();
+		maxy = 1.05*maxy;
+		hist->SetMaximum(maxy);
+		hist->DrawCopy();
+		TLine * line = new TLine(x1, 0, x1, maxy);
+		line->SetLineColor(kRed);
+		line->SetLineWidth(2);
+		line->Draw();
+	}
+	if (x2 != 999.) {
+		TLine * line = new TLine(x2, 0, x2, maxy);
+		line->SetLineColor(kRed);
+		line->SetLineWidth(2);
+		line->Draw();
+	}
+	Util::PrintBoth(canv, tempstring2, outputdir);
 }
 
 void PhysQCAnalysis::PrintInfoStart(int nEntries){
@@ -902,33 +976,38 @@ void PhysQCAnalysis::PrintInfoStart(int nEntries){
 void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
 // Computes the event EM and Charged fractions
 
+	int nMuGood = 0;
 	double pt_track = 0.;
 	double et_em = 0.;
 	double et_had = 0.;
 	for( int i = 0; i < fTR->NMus; ++i ){
 		if(fTR->MuGood[i] != 0) continue;
 		pt_track += fTR->MuPt[i];
+		nMuGood++;
 	}
 	for( int i = 0; i < fTR->NEles; ++i ){
 		if(fTR->ElGood[i] != 0) continue;
 		pt_track += fTR->ElPt[i];
 		et_em += fTR->ElEt[i];
+		if (et_em < 0.) et_em = 0.;
 	}
 	for( int i = 0; i < fTR->NPhotons; ++i ){
 		if(fTR->PhoGood[i] != 0) continue;
 		et_em += fTR->PhoPt[i];
+		if (et_em < 0.) et_em = 0.;
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
 		pt_track += fTR->JChfrac[i] * fTR->JPt[i];
 		et_em    += fTR->JEMfrac[i] * fTR->JEt[i];
+		if (et_em < 0.) et_em = 0.;
 		et_had   += (1.-fTR->JEMfrac[i]) * fTR->JEt[i];
 	}
 
 	fracCh = 0.;
 	fracEm = 0.;
 	if( et_em + et_had <= 0. ){
-		if( fTR->NMus < 1 ) return;
+		if( nMuGood < 1 ) return;
 		fracCh = 1.;
 		fracEm = 1.;
 	} else {
@@ -939,11 +1018,11 @@ void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
 
 }
 
-void PhysQCAnalysis::MakePlots(TString plotlist, TTree *tree, TCut select){
+void PhysQCAnalysis::MakePlots(TString plotlist, TCut select, TTree *tree){
 	fAC->plotPlotList(plotlist, tree, "", select);
 }
 
-void PhysQCAnalysis::MakeElIDPlots(TTree *tree, TCut select){
+void PhysQCAnalysis::MakeElIDPlots(TCut select, TTree *tree){
 	fAC->plotEID(select, tree, "");
 }
 

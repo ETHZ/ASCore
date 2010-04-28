@@ -13,15 +13,16 @@ TreeCleaner::~TreeCleaner(){
 void TreeCleaner::Begin(){
 	ReadCleaningParameters();
 	StatInit();
+	Reset();
 	fCleanTreeFile = new TFile(fOutputDir + "CleanTree.root", "RECREATE");
 	fCleanTreeFile->mkdir("analyze", "analyze");
 	fCleanTreeFile->cd("analyze");
 	fCleanTree = fTR->fChain->CloneTree(0);
 	fCleanTree->CopyAddresses(fTR->fChain);
+	
 }
 
 void TreeCleaner::Analyze(){
-	Reset();
 	InitCleaning();
 	TagCleanObjects();
 	DecideIso();
@@ -80,7 +81,8 @@ void TreeCleaner::End(){
 	fCleanTreeFile->Close();
 	fHstatFile->cd();
 	fHstatHistos->Write();
-	fHstatFile->Close();	
+	fHstatFile->Close();
+	
 }
 
 void TreeCleaner::Reset(){
@@ -639,6 +641,11 @@ void TreeCleaner::DoCleanObjects(void){
 			if( fTR->ElIsIso[iel] ) SubtrFromJet(2, iel, ichk);
 			else AddToJet(2, iel, ichk);
 		}
+		for( int iph = 0; iph < fTR->NPhotons; ++iph ){
+			if( fTR->PhoIsInJet[iph] != ichk ) continue;
+			if( fTR->PhoIsIso[iph] ) SubtrFromJet(3, iph, ichk);
+			else AddToJet(3, iph, ichk);
+		}
 	}
 
 	// Check the event
@@ -822,11 +829,13 @@ int TreeCleaner::CleanEvent(void){
 // test total Fem and Ftrk in event
 	int nPhot = 0;
 	int nChObj = 0;
+	double pt_mu = 0.;
 	double pt_track = 0.;
 	double et_em = 0.;
 	double et_had = 0.;
 	for( int i = 0; i < fTR->NMus; ++i ){
 		if(fTR->MuGood[i] != 0) continue;
+		pt_mu += fTR->MuPt[i];
 		pt_track += fTR->MuPt[i];
 		nChObj++;
 	}
@@ -846,6 +855,7 @@ int TreeCleaner::CleanEvent(void){
 		if(fTR->JGood[i] != 0) continue;
 		pt_track += fTR->JChfrac[i] * fTR->JPt[i];
 		et_em    += fTR->JEMfrac[i] * fTR->JEt[i];
+		if (et_em < 0.) et_em = 0.;
 		et_had   += (1.-fTR->JEMfrac[i]) * fTR->JEt[i];
 		if( fTR->JChfrac[i] > 0. ) nChObj++;
 	}
@@ -857,8 +867,8 @@ int TreeCleaner::CleanEvent(void){
 		fracCh = 1.;
 		fracEm = 1.;
 	} else {
-		fracCh = pt_track / (et_em + et_had);
-		fracEm = et_em / (et_em + et_had);
+		fracCh = pt_track / (et_em + et_had + pt_mu);
+		fracEm = et_em / (et_em + et_had + pt_mu);
 	}
 	if( fracEm < fClean_FracEmmin ) return 2;
 	if( fracCh < fClean_FracChmin && (nPhot < 1 || nChObj > 0) ) return 3;

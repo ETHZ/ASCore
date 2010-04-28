@@ -44,6 +44,68 @@ public:
 	double fR12;
 	double fR21;
 
+	// Cleaning parameters:
+	// Number in comments are initial values
+	// -- Primary vertex:
+	float fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
+	float fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
+	float fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
+	float fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
+
+	// -- Vertex compatibility (of muons, electrons, photons and jets)
+	float fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
+	
+	// -- Muons:
+	float fClean_MuonDPbyPmax;          // = 0.5   // Max PtError/Pt
+	float fClean_MuonChi2max;           // = 10.0  // Max nchi2
+	float fClean_MuonNHitsmin;          // = 11.0  // Min number of tracker hits
+	float fClean_dRSSmuonmax;           // = 0.1   // Max delta R of same sign muon duplicate check
+	
+	// -- Electrons:
+	float fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
+	float fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
+	float fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
+	float fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
+	float fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
+	float fClean_ElecEoverPInEndmin;    // = 0.4   // Min ElESuperClusterOverP (endcap)
+	float fClean_ElecDeltaEtaInBarmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (barrel)
+	float fClean_ElecDeltaEtaInEndmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (endcap)
+	float fClean_ElecDeltaPhiInBarmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (barrel)
+	float fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
+	float fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
+	float fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
+	float fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
+
+	// -- Photons:
+	float fClean_PhotHoverEBarmax;      // = 0.2   // Max PhotonHcalOverEcal (barrel)
+	float fClean_PhotHoverEEndmax;      // = 0.2   // Max PhotonHcalOverEcal (endcap)
+	float fClean_PhotSigmaEtaEtaBarmax; // = 0.011 // Max PhotonSigmaIetaIeta (barrel)
+	float fClean_PhotSigmaEtaEtaEndmax; // = 0.025 // Max PhotonSigmaIetaIeta (endcap)
+	
+	// -- Jets:
+	float fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
+	float fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
+	float fClean_FracChminJet;          // = 0.05  // Min JChfrac
+
+	float fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
+	float fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
+	
+	// -- Isolation:
+	float fClean_MuonIsomax;            // = 1.    // Max relative iso cut (muons)
+	float fClean_ElecIsomax;            // = 1.    // Max relative iso cut (electrons)
+	float fClean_PhotIsomax;            // = 1.    // Max relative iso cut (photons)
+	
+	// -- Event cleaning:
+	float fClean_FracChmin;             // = 0.1   // Min charge fraction in event
+	float fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
+	float fClean_JetBadHardPtmin;       // = 50.   // Min Pt for jet to trigger bad event
+	
+	// -- MET:
+	float fClean_METmin;                // = 50.0  // Min MET to be considered
+	float fClean_dPhiJetMETmin;         // = 0.0   // Min phi distance of MET to closest jet
+	float fClean_dR12min;               // = 0.5   // Min R12 = sqrt(dPhi1^2 + (PI-dPhi2)^2)
+	float fClean_dR21min;               // = 0.5   // Min R21 = sqrt(dPhi2^2 + (PI-dPhi1)^2)
+
 private:
 
 	// Functions performing the cleaning and duplicate tagging 
@@ -150,68 +212,6 @@ private:
 	int fNElClean;
 	int fNPhClean;
 	int fNJClean;
-
-	// Cleaning parameters:
-	// Number in comments are initial values
-	// -- Primary vertex:
-	float fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
-	float fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
-	float fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
-	float fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
-
-	// -- Vertex compatibility (of muons, electrons, photons and jets)
-	float fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
-	
-	// -- Muons:
-	float fClean_MuonDPbyPmax;          // = 0.5   // Max PtError/Pt
-	float fClean_MuonChi2max;           // = 10.0  // Max nchi2
-	float fClean_MuonNHitsmin;          // = 11.0  // Min number of tracker hits
-	float fClean_dRSSmuonmax;           // = 0.1   // Max delta R of same sign muon duplicate check
-	
-	// -- Electrons:
-	float fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
-	float fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
-	float fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
-	float fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
-	float fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
-	float fClean_ElecEoverPInEndmin;    // = 0.4   // Min ElESuperClusterOverP (endcap)
-	float fClean_ElecDeltaEtaInBarmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (barrel)
-	float fClean_ElecDeltaEtaInEndmax;  // = 0.007 // Max ElDeltaEtaSuperClusterAtVtx (endcap)
-	float fClean_ElecDeltaPhiInBarmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (barrel)
-	float fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
-	float fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
-	float fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
-	float fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
-
-	// -- Photons:
-	float fClean_PhotHoverEBarmax;      // = 0.2   // Max PhotonHcalOverEcal (barrel)
-	float fClean_PhotHoverEEndmax;      // = 0.2   // Max PhotonHcalOverEcal (endcap)
-	float fClean_PhotSigmaEtaEtaBarmax; // = 0.011 // Max PhotonSigmaIetaIeta (barrel)
-	float fClean_PhotSigmaEtaEtaEndmax; // = 0.025 // Max PhotonSigmaIetaIeta (endcap)
-	
-	// -- Jets:
-	float fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
-	float fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
-	float fClean_FracChminJet;          // = 0.05  // Min JChfrac
-
-	float fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
-	float fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
-	
-	// -- Isolation:
-	float fClean_MuonIsomax;            // = 1.    // Max relative iso cut (muons)
-	float fClean_ElecIsomax;            // = 1.    // Max relative iso cut (electrons)
-	float fClean_PhotIsomax;            // = 1.    // Max relative iso cut (photons)
-	
-	// -- Event cleaning:
-	float fClean_FracChmin;             // = 0.1   // Min charge fraction in event
-	float fClean_FracEmmin;             // = 0.175 // Min EM fraction in event
-	float fClean_JetBadHardPtmin;       // = 50.   // Min Pt for jet to trigger bad event
-	
-	// -- MET:
-	float fClean_METmin;                // = 50.0  // Min MET to be considered
-	float fClean_dPhiJetMETmin;         // = 0.0   // Min phi distance of MET to closest jet
-	float fClean_dR12min;               // = 0.5   // Min R12 = sqrt(dPhi1^2 + (PI-dPhi2)^2)
-	float fClean_dR21min;               // = 0.5   // Min R21 = sqrt(dPhi2^2 + (PI-dPhi1)^2)
 	
 };
 #endif

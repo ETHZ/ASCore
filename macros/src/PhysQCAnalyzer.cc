@@ -30,8 +30,10 @@ void PhysQCAnalyzer::Loop(){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
 
+		if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) continue;
 		fPhysQCAnalysis      ->Analyze1();
 		fTreeCleaner         ->Analyze();
+		if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) continue;
 		fPhysQCAnalysis      ->Analyze2();
 		fMultiplicityAnalysis->Analyze();
 	}
@@ -48,22 +50,22 @@ void PhysQCAnalyzer::BeginJob(){
 	fPhysQCAnalysis->fVerbose = fVerbose;
 
 	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
-	fMultiplicityAnalysis->fVerbose = fVerbose;
+ 	fMultiplicityAnalysis->fVerbose = fVerbose;
 	
 	fTreeCleaner         ->Begin();
 	fPhysQCAnalysis      ->Begin();
 	fMultiplicityAnalysis->Begin();
 
-	TCut select = "NMus+NEles+NPhotons+NJets>0";
 	fPhysQCAnalysis->PlotTriggerStats();
-	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", fTR->fChain, select);
-	fPhysQCAnalysis->MakeElIDPlots(fTR->fChain, select);
+	TCut select = "NMus + NEles + NJets > 0";
+	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", select, fTR->fChain);
+	fPhysQCAnalysis->MakeElIDPlots(select, fTR->fChain);
 }
 
 // Method called after finishing the event loop
 void PhysQCAnalyzer::EndJob(){
-	TCut select = "GoodEvent==0 || (NMus+NEles+NPhotons+NJets)>0";
-	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", fTreeCleaner->fCleanTree, select);
+	TCut select = "GoodEvent == 0 || (NMus + NEles + NJets) > 0";
+	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", select, fTreeCleaner->fCleanTree);
 
 	fTreeCleaner         ->End();
 	fPhysQCAnalysis      ->End();
