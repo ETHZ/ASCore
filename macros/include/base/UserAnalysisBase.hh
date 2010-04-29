@@ -2,6 +2,7 @@
 #define UserAnalysisBase_hh
 
 #include "TreeReader.hh"
+#include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
 
 class UserAnalysisBase{
@@ -17,14 +18,18 @@ public:
 
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 
+	virtual void ReadPDGTable(const char* filename);
+
 	TreeReader *fTR;
 	TString fOutputDir;
 	TString fTag;
 	TLatex *fTlat;
 
 	int fVerbose;
+	map<int, pdgparticle> fPDGMap;	// Mapping of PDG ID Names
 
 private:
+
 	// Object quality cuts:
 	struct Cut{
 		TBranch *branch;
@@ -40,4 +45,5 @@ private:
 	std::vector<Cut> fJetCuts;
 	std::vector<Cut> fEvtSelCuts;
 };
+
 #endif

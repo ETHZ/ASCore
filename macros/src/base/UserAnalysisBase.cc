@@ -1,6 +1,7 @@
 #include "base/TreeReader.hh"
 #include <stdlib.h>
 
+#include "helper/pdgparticle.hh"
 #include "base/UserAnalysisBase.hh"
 
 using namespace std;
@@ -20,8 +21,28 @@ void UserAnalysisBase::Analyze(){}
 
 void UserAnalysisBase::End(){}
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-// Cut Stuff //////////////////////////////////////////////////////////////////////////////////
+void UserAnalysisBase::ReadPDGTable(const char* filename){
+// Fills the fPDGMap map from a textfile to associate pdgids with names
+	int pdgid(0), type(0);
+	string Name, Texname, Typename;
+	ifstream IN(filename);
+	char buff1[200], buff2[200], buff3[200];
+	char readbuff[200];
+	// Loop over lines of datafile
+	while( IN.getline(readbuff, 200, '\n') ){
+		if (readbuff[0] == '#') {continue;} // Skip lines commented with '#'
+		sscanf(readbuff, "%d %s %d %s %s", &type, buff1, &pdgid, buff2, buff3);
+		// Convert chararrays to strings
+		Typename = string(buff1); Name = string(buff2); Texname = string(buff3);
+		pdgparticle *p = new pdgparticle(pdgid, Name, Texname, type, Typename);
+		// Fill map
+		fPDGMap[pdgid] = *p;
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Cut Stuff //////////////////////////////////////////////////////////////////////////
 void UserAnalysisBase::ReadObjCuts(const char* filename){
 // Fills the vectors containing object quality cuts for muons, electrons and jets
 	ifstream IN(filename);
