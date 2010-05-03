@@ -86,6 +86,8 @@ public:
 	float fClean_FracEmmaxJet;          // = 1.0   // Max JEMfrac
 	float fClean_FracEmminJet;          // = 0.01  // Min JEMfrac
 	float fClean_FracChminJet;          // = 0.05  // Min JChfrac
+	float fClean_JID_n90Hitsmin;        // = 2     // Min JID_n90Hits
+	float fClean_JID_HPDmax;            // = 0.98  // Max JID_HPD
 
 	float fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
 	float fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
@@ -205,6 +207,8 @@ private:
 	int fNumTotJetGtFem;
 	int fNumTotJetLtFem;
 	int fNumTotJetLtFch;
+	int fNumTotJetLtn90hits;
+	int fNumTotJetGtfHPD;
 	int fNumTotBJets;  
 
 	// Cleaning variables:

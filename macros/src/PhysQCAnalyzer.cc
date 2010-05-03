@@ -50,7 +50,7 @@ void PhysQCAnalyzer::BeginJob(){
 	fPhysQCAnalysis->fVerbose = fVerbose;
 
 	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
- 	fMultiplicityAnalysis->fVerbose = fVerbose;
+	fMultiplicityAnalysis->fVerbose = fVerbose;
 	
 	fTreeCleaner         ->Begin();
 	fPhysQCAnalysis      ->Begin();

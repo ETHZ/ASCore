@@ -17,14 +17,22 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	Util::SetStyle();
 
 	// Histos for uncleaned objects
+	const unsigned int nvxbins = 100;
+	fPvxHistos[0] = new TH1D("PrimVtxNChi2", "Prim Vtx NChi2", nvxbins, 0., 10. );
+	fPvxHistos[1] = new TH1D("PrimVtxd0BS", "Prim Vtx d0 to BS", nvxbins, 0., 0.3 );
+	fPvxHistos[2] = new TH1D("PrimVtxdzBS", "Prim Vtx dz to BS", nvxbins, 0., 20.);
+	fPvxHistos[3] = new TH1D("PrimVtxPtSum", "Prim Vtx PtSum", nvxbins, 0., 300.);
+	
 	const unsigned int nmubins = 100;
 	fMuHistos[0] = new TH1D("MuDeltaPOverP", "Mu DeltaP/P;Mu DeltaP/P",    nmubins, 0., 0.25 );
 	fMuHistos[1] = new TH1D("Mud0signif", "Mu d0 significance;Mu d0 significance",  nmubins, 0., 15. );
 	fMuHistos[2] = new TH1D("Mudzsignif", "Mu dz significance;Mu dz significance",  nmubins, 0., 15. );
-	fMuHistos[3] = new TH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
-	fMuHistos[4] = new TH1D("MuDROS", "Mu DR Opp Sign;Mu DR Opp Sign",  nmubins, 0., 3.2 );
-	fMuHistos[5] = new TH1D("MuInvMSS", "Mu InvM Same Sign;Mu InvM Same Sign", nmubins, 0., 100. );
-	fMuHistos[6] = new TH1D("MuInvMOS", "Mu InvM Opp Sign;Mu InvM Opp Sign",  nmubins, 0., 100. );
+	fMuHistos[3] = new TH1D("MuNChi2", "Mu NChi2;Mu NChi2",  nmubins, 0., 20. );
+	fMuHistos[4] = new TH1D("MuNTkHits", "Mu NTkHits;Mu NTkHits",  30, 0., 30 );
+	fMuHistos[5] = new TH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
+	fMuHistos[6] = new TH1D("MuDROS", "Mu DR Opp Sign;Mu DR Opp Sign",  nmubins, 0., 3.2 );
+	fMuHistos[7] = new TH1D("MuInvMSS", "Mu InvM Same Sign;Mu InvM Same Sign", nmubins, 0., 100. );
+	fMuHistos[8] = new TH1D("MuInvMOS", "Mu InvM Opp Sign;Mu InvM Opp Sign",  nmubins, 0., 100. );
 	
 	const unsigned int nelbins = 100;
 	fElHistos[0]  = new TH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.2);
@@ -54,13 +62,21 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fPhHistos[2]  = new TH1D("PhoHoverEEnd", "Phot H/E End",  nphbins, 0., 0.05);
 	fPhHistos[3]  = new TH1D("PhoSigmaIetaIetaEnd", "Phot sigmaIetaIeta End",  nphbins, 0., 0.05);
 	fPhHistos[4] = new TH1D("PhDR", "Phot DR;Phot DR",  nphbins, 0., 3.2 );
-	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 100. );
+	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 50. );
+	fPhHistos[6] = new TH1D("PhInvMLow", "Phot InvM;Phot InvM", nphbins, 0., 5. );
 
 	const unsigned int njetbins = 100;
 	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
 	fJHistos[1] = new TH1D("JetdzPV", "Jet dz PV;Jet dz to PV",  njetbins, -2., 2. );
 	fJHistos[2] = new TH1D("Jetd0signif", "Jet d0 significance;Jet d0 significance",  njetbins, 0., 15. );
 	fJHistos[3] = new TH1D("Jetdzsignif", "Jet dz significance;Jet dz significance",  njetbins, 0., 15. );
+	fJHistos[4] = new TH1D("JetEMfrac", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
+	fJHistos[5] = new TH1D("JetChfrac", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
+	fJHistos[6] = new TH1D("JID_n90Hits", "Jet ID n90Hits;Jet ID n90Hits",  30, 0, 30 );
+	fJHistos[7] = new TH1D("JID_HPD", "Jet ID HPD;Jet ID HPD",  njetbins, 0, 1. );
+	fJChEMfrac  = new TH2D("JChEMfrac", "Jet Ch vs EM frac;Jet EM frac;Jet Ch frac", njetbins, -0.01, 1.01, njetbins, -1.01, 2.);
+	fJEMfracEta = new TH2D("JEMfracEta", "Jet EM frac vs Eta;Jet Eta;Jet EM frac", njetbins, -5., 5., njetbins, -1.01, 1.01);
+	fJChfracEta = new TH2D("JChfracEta", "Jet Ch frac vs Eta;Jet Eta;Jet Ch frac", njetbins, -5., 5., njetbins, -1.01, 2.01);
 	
 	const unsigned int nevbins = 100;
 	fMETHistos[0] = new TH1D("DphiMETJet1", "Dphi(MET,j1)", nevbins, 0, 3.1416);
@@ -68,15 +84,18 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fMETHistos[2] = new TH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
 	fMETHistos[3] = new TH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
 	fMETHistos[4] = new TH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 3., 6.283);
-	fMETHistos[5] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
-	fMETHistos[6] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
 	fMETDphi12    = new TH2D("METDphi12", "MET Dphi 12;Dphi(MET,j1);Dphi(MET,j2)", nevbins, 0, 3.142, nevbins, 0, 3.142);
 	fMETR12R21    = new TH2D("METR12R21", "MET R21 vs R12;R12;R21", nevbins, 0, 6.283, nevbins, 0, 6.283);
 	fMETR12Dphij12 = new TH2D("METR12Dphij12", "MET R21 vs Dphijet12;R12;Dphij12", nevbins, 0, 6.283, nevbins, 0, 3.142);
+	fMETR12Etaj12 = new TH2D("METR12Etaj12", "MET R21 vs Eta jet12;R12;Eta jet 1,2", nevbins, 0, 6.283, nevbins, -5., 5.);
+	fMETR12j12PtRat = new TH2D("METR12j12PtRat", "MET R21 vs Eta jet12;R12;Pt2/Pt1", nevbins, 0, 6.283, nevbins, 0., 1.);
+	fMETR12dRj12 = new TH2D("METR12dRj12", "MET R21 vs dR(j1,j2);R12;dR(j1,j2)", nevbins, 0, 6.283, nevbins, 0., 6.283);
+
+	fEvtHistos[0] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
+	fEvtHistos[1] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
 
 	// Histos for cleaned objects, CI = Clean+Isolated
 	const unsigned int nCIbins = 100;
-	const unsigned int ninvmbins = 100;
 	fMuCIHistos[0] = new TH1D("NMus", "Nber of Mus clean+iso", 10, 0, 10);
 	fMuCIHistos[1] = new TH1D("MuPt", "Pt of Mus clean+iso", nCIbins, 0, 100.);
 	fMuCIHistos[2] = new TH1D("MuEta", "Eta of Mus clean+iso", nCIbins, -2.5, 2.5);
@@ -94,6 +113,19 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fJCIHistos[1] = new TH1D("JPt", "Pt of Jets clean+iso", nCIbins, 0, 250.);
 	fJCIHistos[2] = new TH1D("JEta", "Eta of Jets clean+iso", nCIbins, -5., 5.);
 	fJCIHistos[3] = new TH1D("JPhi", "Phi of Jets clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[4] = new TH1D("JetEMfracClean", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
+	fJCIHistos[5] = new TH1D("JetChfracClean", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
+	fJCIHistos[6] = new TH1D("DphiMETJet1Clean", "Dphi(MET,j1)", nevbins, 0, 3.1416);
+	fJCIHistos[7] = new TH1D("DphiMETJet2Clean", "Dphi(MET,j2)", nevbins, 0, 3.1416);
+	fJCIHistos[8] = new TH1D("METR12Clean", "MET R12;MET R12", nevbins, 0, 6.283);
+	fJCIHistos[9] = new TH1D("METR21Clean", "MET R21;MET R21", nevbins, 0, 6.283);
+	fJCIHistos[10] = new TH1D("JPt1j", "Pt of mono-Jets clean+iso", nCIbins, 0, 250.);
+	fJCIHistos[11] = new TH1D("JEta1j", "Eta of mono-Jets clean+iso", nCIbins, -5., 5.);
+	fJCIHistos[12] = new TH1D("JPhi1j", "Phi of mono-Jets clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[13] = new TH1D("DphiMETmonoJetClean", "Dphi(MET,monoJet)", nevbins, 0, 3.1416);
+	
+	// Inv mass Histos for cleaned objects, CI = Clean+Isolated
+	const unsigned int ninvmbins = 100;
 	fInvMHistos[0] = new TH1D("MuInvMSSClean", "Mu Clean InvM Same Sign;Mu InvM Same Sign", ninvmbins, 0., 100. );
 	fInvMHistos[1] = new TH1D("MuInvMSSCleanLow", "Mu Clean InvM Low Same Sign;Mu InvM Same Sign", ninvmbins, 0., 5. );
 	fInvMHistos[2] = new TH1D("MuInvMOSClean", "Mu Clean InvM Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 100. );
@@ -104,6 +136,8 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fInvMHistos[7] = new TH1D("ElInvMOSCleanLow", "El Clean InvM Low Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 5. );
 	fInvMHistos[8] = new TH1D("PhInvMClean", "Phot Clean InvM;Phot InvM", ninvmbins, 0., 100. );
 	fInvMHistos[9] = new TH1D("PhInvMCleanLow", "Phot Clean InvM Low;Phot InvM", ninvmbins, 0., 5. );
+	fInvMHistos[10] = new TH1D("JInvM2jClean", "Jets Clean InvM dijets;dijet InvM", ninvmbins, 0., 300. );
+	fInvMHistos[11] = new TH1D("JInvMGT2jClean", "Jets Clean InvM >dijets;GT dijet InvM", ninvmbins, 0., 300. );
 
 }
 
@@ -123,10 +157,21 @@ void PhysQCAnalysis::Analyze1(){
 //	if (fTR->GoodEvent > 0) return;
 	if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
 	
+	// Primary vertex plots
+	fPvxHistos[0]->Fill(fTR->PrimVtxNChi2);
+	double xVx = fTR->PrimVtxx - fTR->Beamspotx;
+	double yVx = fTR->PrimVtxy - fTR->Beamspoty;
+	double zVx = fTR->PrimVtxz - fTR->Beamspotz;
+	double rVx = sqrt(xVx*xVx + yVx*yVx);
+	fPvxHistos[1]->Fill(rVx);
+	fPvxHistos[2]->Fill(zVx);
+	fPvxHistos[3]->Fill(fTR->PrimVtxPtSum);
+	
 	double p1[4], p2[4], minv;
 	
 	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
-
+	
+	// Muon plots
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		fMuHistos[0]->Fill(fTR->MuPtE[i]/fTR->MuPt[i]);
 		double d0  = fTR->MuD0PV[i];
@@ -137,6 +182,8 @@ void PhysQCAnalysis::Analyze1(){
 		if (ddz <= 0.) ddz = 0.001;
 		fMuHistos[1]->Fill(fabs(d0) / dd0);
 		fMuHistos[2]->Fill(fabs(dz) / ddz);
+		fMuHistos[3]->Fill(fTR->MuNChi2[i]);
+		fMuHistos[4]->Fill(fTR->MuNTkHits[i]);
 	}
 
 	for(size_t i = 0; i < fTR->NMus; ++i){
@@ -151,21 +198,22 @@ void PhysQCAnalysis::Analyze1(){
 			p2[2] = fTR->MuPz[j];
 			p2[3] = fTR->MuE[j];
 			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
-				fMuHistos[3]->Fill(deltaR);
+				fMuHistos[5]->Fill(deltaR);
 				if (deltaR < 0.5) {
 					minv = invMass(p1, p2);
-					fMuHistos[5]->Fill(minv);
+					fMuHistos[7]->Fill(minv);
 				}
 			} else {
-				fMuHistos[4]->Fill(deltaR);
+				fMuHistos[6]->Fill(deltaR);
 				if (deltaR < 0.5) {
 					minv = invMass(p1, p2);
-					fMuHistos[6]->Fill(minv);
+					fMuHistos[8]->Fill(minv);
 				}
 			}
 		}
 	}
-
+	
+	// Electron plots
 	for(size_t i = 0; i < fTR->NEles; ++i){
 		if (fTR->ElEta[i] < 1.479) {
 			fElHistos[0]->Fill(fTR->ElHcalOverEcal[i]);
@@ -221,6 +269,7 @@ void PhysQCAnalysis::Analyze1(){
 		}
 	}
 	
+	// Photon plots
 	for(size_t i = 0; i < fTR->NPhotons; ++i){
 		if (fTR->PhoEta[i] < 1.479) {
 			fPhHistos[0]->Fill(fTR->PhoHoverE[i]);
@@ -247,10 +296,12 @@ void PhysQCAnalysis::Analyze1(){
 				p2[3] = fTR->PhoEnergy[j];
 				minv = invMass(p1, p2);
 				fPhHistos[5]->Fill(minv);
+				fPhHistos[6]->Fill(minv);
 			}
 		}
 	}
 	
+	// Jet plots
 	for(size_t i = 0; i < fTR->NJets; ++i){
 		double d0  = 0.;
 		double dd0 = 0.001;
@@ -258,6 +309,7 @@ void PhysQCAnalysis::Analyze1(){
 		double ddz = 0.001;
 //		if (fTR->JVtxNChi2 > 0) { // not defined in this file
 		double dztry = fTR->JVtxz[i] - fTR->PrimVtxz;
+		// ignore jets with badly reconstructed vertices
 		if (fTR->JVtxz[i] != -888.88 && fTR->JVtxz[i] != -777.77) {
 			d0  = sqrt((fTR->JVtxx[i]-fTR->PrimVtxx)*(fTR->JVtxx[i]-fTR->PrimVtxx)
 			+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
@@ -271,43 +323,73 @@ void PhysQCAnalysis::Analyze1(){
 			fJHistos[2]->Fill(fabs(d0) / dd0);
 			fJHistos[3]->Fill(fabs(dz) / ddz);
 		}
+		fJHistos[4]->Fill(fTR->JEMfrac[i]);
+		fJHistos[5]->Fill(fTR->JChfrac[i]);
+		fJHistos[6]->Fill(fTR->JID_n90Hits[i]);
+		fJHistos[7]->Fill(fTR->JID_HPD[i]);
+		fJChEMfrac->Fill(fTR->JEMfrac[i], fTR->JChfrac[i]);
+		fJEMfracEta->Fill(fTR->JEta[i], fTR->JEMfrac[i]);
+		fJChfracEta->Fill(fTR->JEta[i], fTR->JChfrac[i]);
 //		if (dz < -2.) {
 //		cout << " dz = " << dz << ", JVtxNChi2 = " << fTR->JVtxNChi2
 //		     << ", JNAssoTracks = " << fTR->JNAssoTracks << endl;
 //		}
 	}
-
+	
+	// MET plots
 	double METPhi = fTR->MuCorrMETphi;
 	double MET = fTR->MuCorrMET;
 	double METBadJetmin = 20.;
+	double JEtaBar = 2.6;
 	if (fTR->NJets > 1 && MET > METBadJetmin) {
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
 		double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
-		fMETHistos[0]->Fill(dPhiMJ1);
-		fMETHistos[1]->Fill(dPhiMJ2);
-		fMETDphi12->Fill(dPhiMJ1, dPhiMJ2);
 		double pi = 3.141592654;
 		double fR12 = sqrt(dPhiMJ1*dPhiMJ1 + (pi-dPhiMJ2)*(pi-dPhiMJ2) );
 		double fR21 = sqrt(dPhiMJ2*dPhiMJ2 + (pi-dPhiMJ1)*(pi-dPhiMJ1) );
+		double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
+		double dRj12 = Util::GetDeltaR(fTR->JEta[0], fTR->JEta[1], fTR->JPhi[0], fTR->JPhi[1]);
+//		if (fabs(fTR->JEta[0]) < JEtaBar && fabs(fTR->JEta[1]) < JEtaBar) {
+		fMETHistos[0]->Fill(dPhiMJ1);
+		fMETHistos[1]->Fill(dPhiMJ2);
 		fMETHistos[2]->Fill(fR12);
 		fMETHistos[3]->Fill(fR21);
 		fMETHistos[4]->Fill(fR12+fR21);
+		fMETDphi12->Fill(dPhiMJ1, dPhiMJ2);
 		fMETR12R21->Fill(fR12, fR21);
-		double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
 		fMETR12Dphij12->Fill(fR12, dPhij12);
+		fMETR12Etaj12->Fill(fR12, fTR->JEta[0]);
+		fMETR12Etaj12->Fill(fR12, fTR->JEta[1]);
+		fMETR12j12PtRat->Fill(fR12, fTR->JPt[1]/fTR->JPt[0]);
+		fMETR12dRj12->Fill(fR12, dRj12);
+//		}
+		
+/*		if (fR12 > 3.1 && fR12 < 3.2) {
+		cout << "Event = " << fTR->Event << endl;
+		cout << " R12    = " << fR12   << ", dPhiMJ1 = " << dPhiMJ1 << ", dPhiMJ2 = " << dPhiMJ2 << endl;
+		cout << " METPhi = " << METPhi << ", Jet1Phi = " << fTR->JPhi[0] << ", Jet2Phi = " << fTR->JPhi[1] << endl;
+		cout << " MET    = " << MET    << ", Jet1Pt  = " << fTR->JPt[0]  << ", Jet2Pt  = " << fTR->JPt[1]  << endl;
+		cout << " dRj12  = " << dRj12  << "  Jet1Eta = " << fTR->JEta[0] << ", Jet2Eta = " << fTR->JEta[1] << endl;
+		cout << "          "           << "  Jet1fEM = " << fTR->JEMfrac[0] << ", Jet2fEM = " << fTR->JEMfrac[1] << endl;
+		cout << "          "           << "  Jet1fCh = " << fTR->JChfrac[0] << ", Jet2fCh = " << fTR->JChfrac[1] << endl;
+		cout << endl;
+		}
+*/
 	}
 	
+	// Event plots
 	double fracEm, fracCh;
 	GetEvtEmChFrac(fracEm, fracCh);
-	fMETHistos[5]->Fill(fracEm);
-	fMETHistos[6]->Fill(fracCh);
+	fEvtHistos[0]->Fill(fracEm);
+	fEvtHistos[1]->Fill(fracCh);
 }
 
 void PhysQCAnalysis::Analyze2(){
 // Analysis after cleaning
 	
-	// skip empty events
+	// skip empty and bad events
 	if (fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
+	if (fTR->GoodEvent > 0) return;
 	
 	double p1[4], p2[4], minv;
 	
@@ -390,13 +472,61 @@ void PhysQCAnalysis::Analyze2(){
 		fJCIHistos[1]->Fill(fTR->JPt[i]);
 		fJCIHistos[2]->Fill(fTR->JEta[i]);
 		fJCIHistos[3]->Fill(fTR->JPhi[i]);
+		fJCIHistos[4]->Fill(fTR->JEMfrac[i]);
+		fJCIHistos[5]->Fill(fTR->JChfrac[i]);
+		for(size_t j = i+1; j < fTR->NJets; ++j){
+			p1[0] = fTR->JPx[i];
+			p1[1] = fTR->JPy[i];
+			p1[2] = fTR->JPz[i];
+			p1[3] = fTR->JE[i];
+			p2[0] = fTR->JPx[j];
+			p2[1] = fTR->JPy[j];
+			p2[2] = fTR->JPz[j];
+			p2[3] = fTR->JE[j];
+			minv = invMass(p1, p2);
+			fInvMHistos[10]->Fill(minv);
+			if (fTR->NJets == 2) continue;
+			fInvMHistos[11]->Fill(minv);
+		}
+		if (fTR->NJets == 1) {
+			fJCIHistos[10]->Fill(fTR->JPt[i]);
+			fJCIHistos[11]->Fill(fTR->JEta[i]);
+			fJCIHistos[12]->Fill(fTR->JPhi[i]);
+		}
+	}
+
+	double MET = fTR->MuCorrMET;
+	double METBadJetmin = 20.;
+	if (fTR->NJets > 1 && MET > METBadJetmin) {
+		double METPhi = fTR->MuCorrMETphi;
+		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
+		double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
+		double pi = 3.141592654;
+		double fR12 = sqrt(dPhiMJ1*dPhiMJ1 + (pi-dPhiMJ2)*(pi-dPhiMJ2) );
+		double fR21 = sqrt(dPhiMJ2*dPhiMJ2 + (pi-dPhiMJ1)*(pi-dPhiMJ1) );
+		fJCIHistos[6]->Fill(dPhiMJ1);
+		fJCIHistos[7]->Fill(dPhiMJ2);
+		fJCIHistos[8]->Fill(fR12);
+		fJCIHistos[9]->Fill(fR21);
+	}
+	if (fTR->NJets == 1 && MET > METBadJetmin) {
+		double METPhi = fTR->MuCorrMETphi;
+		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
+		fJCIHistos[13]->Fill(dPhiMJ1);
 	}
 	
 }
 
 void PhysQCAnalysis::End(){
 
+	double chisqVxmax = fTC->fClean_chisqVxmax;
+	double dRVxmax = fTC->fClean_dRVxmax;
+	double dzVxmax = fTC->fClean_dzVxmax;
 	double distVxmax = fTC->fClean_distVxmax;
+	double PrimVtxPtSum = fTR->PrimVtxPtSum;
+	double MuonDPbyPmax = fTC->fClean_MuonDPbyPmax;
+	double MuonChi2max = fTC->fClean_MuonChi2max;
+	double MuonNHitsmin = fTC->fClean_MuonNHitsmin;
 	double dRSSmuonmax = fTC->fClean_dRSSmuonmax;
 	double ElecHoverEBarmax      = fTC->fClean_ElecHoverEBarmax;
 	double ElecHoverEEndmax      = fTC->fClean_ElecHoverEEndmax;
@@ -414,6 +544,11 @@ void PhysQCAnalysis::End(){
 	double PhotHoverEEndmax      = fTC->fClean_PhotHoverEEndmax;
 	double PhotSigmaEtaEtaBarmax = fTC->fClean_PhotSigmaEtaEtaBarmax;
 	double PhotSigmaEtaEtaEndmax = fTC->fClean_PhotSigmaEtaEtaEndmax;
+	double FracEmminJet      = fTC->fClean_FracEmminJet;
+	double FracEmmaxJet      = fTC->fClean_FracEmmaxJet;
+	double FracChminJet      = fTC->fClean_FracChminJet;
+	double JID_n90Hitsmin    = fTC->fClean_JID_n90Hitsmin;
+	double JID_HPDmax        = fTC->fClean_JID_HPDmax;
 	double FracChmin = fTC->fClean_FracChmin;
 	double FracEmmin = fTC->fClean_FracEmmin;
 	double dPhiJetMETmin = fTC->fClean_dPhiJetMETmin;
@@ -434,12 +569,41 @@ void PhysQCAnalysis::End(){
 	TLine *line, *l1, *l2;
 	double maxy;
 	TString tempstring1, tempstring2, outputdir;
+	TCanvas * canv;
+
+	// Primary vertices
+	outputdir = fOutputDir + "Cleaning/PVx/";
+	tempstring1 = "Prim Vtx NChi2";
+	tempstring2 = "PrimVtxNChi2";
+	PrintHisto(fPvxHistos[0], tempstring1, tempstring2, outputdir, chisqVxmax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPvxHistos[0]) << endl;
+	
+	tempstring1 = "Prim Vtx d0 BS";
+	tempstring2 = "PrimVtxd0BS";
+	PrintHisto(fPvxHistos[1], tempstring1, tempstring2, outputdir, dRVxmax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPvxHistos[1]) << endl;
+	
+	tempstring1 = "Prim Vtx dz BS";
+	tempstring2 = "PrimVtxdzBS";
+	PrintHisto(fPvxHistos[2], tempstring1, tempstring2, outputdir, dzVxmax);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPvxHistos[2]) << endl;
+	
+	tempstring1 = "Prim Vtx PtSum";
+	tempstring2 = "PrimVtxPtSum";
+	PrintHisto(fPvxHistos[3], tempstring1, tempstring2, outputdir, PrimVtxPtSum, 999., 1, 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPvxHistos[3]) << endl;
+	file << fAC->printTailFraction(tempstring2, fPvxHistos[3], 0.05) << endl;
+	file << fAC->printTailFraction(tempstring2, fPvxHistos[3], 0.01) << endl;
 	
 	// uncleaned muons
 	outputdir = fOutputDir + "Cleaning/Mu/";
 	tempstring1 = "Mu DeltaP/P";
 	tempstring2 = "MuDeltaPOverP";
-	PrintHisto(fMuHistos[0], tempstring1, tempstring2, outputdir);
+	PrintHisto(fMuHistos[0], tempstring1, tempstring2, outputdir, MuonDPbyPmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[0]) << endl;
 
@@ -457,29 +621,41 @@ void PhysQCAnalysis::End(){
 	file << fAC->printAverage(tempstring2, fMuHistos[2]) << endl;
 	file << fAC->printRatio(tempstring2, fMuHistos[2], distVxmax, 100., 0., 100.) << endl;
 
-	tempstring1 = "Mu DR SS";
-	tempstring2 = "MuDRSS";
-	PrintHisto(fMuHistos[3], tempstring1, tempstring2, outputdir, dRSSmuonmax);
+	tempstring1 = "Mu NChi2";
+	tempstring2 = "MuNChi2";
+	PrintHisto(fMuHistos[3], tempstring1, tempstring2, outputdir, MuonChi2max);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[3]) << endl;
 
-	tempstring1 = "Mu DR OS";
-	tempstring2 = "MuDROS";
-	PrintHisto(fMuHistos[4], tempstring1, tempstring2, outputdir, dRSSmuonmax);
+	tempstring1 = "Mu NTkHits";
+	tempstring2 = "MuNTkHits";
+	PrintHisto(fMuHistos[4], tempstring1, tempstring2, outputdir, MuonNHitsmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[4]) << endl;
 
-	tempstring1 = "Mu InvM SS";
-	tempstring2 = "MuInvMSS";
-	PrintHisto(fMuHistos[5], tempstring1, tempstring2, outputdir);
+	tempstring1 = "Mu DR SS";
+	tempstring2 = "MuDRSS";
+	PrintHisto(fMuHistos[5], tempstring1, tempstring2, outputdir, dRSSmuonmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[5]) << endl;
 
-	tempstring1 = "Mu InvM OS";
-	tempstring2 = "MuInvMOS";
-	PrintHisto(fMuHistos[6], tempstring1, tempstring2, outputdir);
+	tempstring1 = "Mu DR OS";
+	tempstring2 = "MuDROS";
+	PrintHisto(fMuHistos[6], tempstring1, tempstring2, outputdir, dRSSmuonmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuHistos[6]) << endl;
+
+	tempstring1 = "Mu InvM SS";
+	tempstring2 = "MuInvMSS";
+	PrintHisto(fMuHistos[7], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuHistos[7]) << endl;
+
+	tempstring1 = "Mu InvM OS";
+	tempstring2 = "MuInvMOS";
+	PrintHisto(fMuHistos[8], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fMuHistos[8]) << endl;
 
 	// uncleaned electrons
 	outputdir = fOutputDir + "Cleaning/El/";
@@ -658,6 +834,12 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fPhHistos[5], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[5]) << endl;
+
+	tempstring1 = "Phot InvM Low";
+	tempstring2 = "PhInvMLow";
+	PrintHisto(fPhHistos[6], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fPhHistos[6]) << endl;
 	
 	// uncleaned jets
 	outputdir = fOutputDir + "Cleaning/Jet/";
@@ -686,6 +868,51 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fJHistos[3], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[3]) << endl;
+
+	tempstring1 = "Jet EMfrac";
+	tempstring2 = "JetEMfrac";
+	PrintHisto(fJHistos[4], tempstring1, tempstring2, outputdir, FracEmminJet, FracEmmaxJet);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJHistos[4]) << endl;
+	
+	tempstring1 = "Jet Chfrac";
+	tempstring2 = "JetChfrac";
+	PrintHisto(fJHistos[5], tempstring1, tempstring2, outputdir, FracChminJet);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJHistos[5]) << endl;
+	
+	tempstring1 = "Jet ID n90Hits";
+	tempstring2 = "JID_n90Hits";
+	PrintHisto(fJHistos[6], tempstring1, tempstring2, outputdir, JID_n90Hitsmin);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJHistos[6]) << endl;
+	
+	tempstring1 = "Jet ID HPD";
+	tempstring2 = "JID_HPD";
+	PrintHisto(fJHistos[7], tempstring1, tempstring2, outputdir, JID_HPDmax, 999., 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJHistos[7]) << endl;
+
+	tempstring1 = "Jet Ch vs EMfrac";
+	tempstring2 = "JChEMfrac";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fJChEMfrac->GetEntries() < 100000) fJChEMfrac->SetMarkerStyle(6);
+	fJChEMfrac->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "Jet EMfrac vs Eta";
+	tempstring2 = "JEMfracEta";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fJEMfracEta->GetEntries() < 100000) fJEMfracEta->SetMarkerStyle(6);
+	fJEMfracEta->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "Jet Chfrac vs Eta";
+	tempstring2 = "JChfracEta";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fJChfracEta->GetEntries() < 100000) fJChfracEta->SetMarkerStyle(6);
+	fJChfracEta->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
 
 	// uncleaned Event and MET
 	outputdir = fOutputDir + "Cleaning/MET/";
@@ -719,7 +946,6 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMETHistos[4]) << endl;
 
-	TCanvas * canv;
 	tempstring1 = "MET Dphi 12";
 	tempstring2 = "METDphi12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
@@ -741,17 +967,38 @@ void PhysQCAnalysis::End(){
 	fMETR12Dphij12->DrawCopy();
 	Util::PrintBoth(canv, tempstring2, outputdir);
 
+	tempstring1 = "MET R12 Etaj1,2";
+	tempstring2 = "METR12Etaj12";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fMETR12Etaj12->GetEntries() < 100000) fMETR12Etaj12->SetMarkerStyle(6);
+	fMETR12Etaj12->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "MET R12 Ptj1/Ptj2";
+	tempstring2 = "METR12j12PtRat";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fMETR12j12PtRat->GetEntries() < 100000) fMETR12j12PtRat->SetMarkerStyle(6);
+	fMETR12j12PtRat->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
+	tempstring1 = "MET R12 dR(j1,j2)";
+	tempstring2 = "METR12dRj12";
+	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
+	if(fMETR12dRj12->GetEntries() < 100000) fMETR12dRj12->SetMarkerStyle(6);
+	fMETR12dRj12->DrawCopy();
+	Util::PrintBoth(canv, tempstring2, outputdir);
+
 	tempstring1 = "Evt Em Frac";
 	tempstring2 = "EvtEmFrac";
-	PrintHisto(fMETHistos[5], tempstring1, tempstring2, outputdir, FracEmmin, 999., 1);
+	PrintHisto(fEvtHistos[0], tempstring1, tempstring2, outputdir, FracEmmin, 999., 1);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[5]) << endl;
+	file << fAC->printAverage(tempstring2, fEvtHistos[0]) << endl;
 
 	tempstring1 = "Evt Ch Frac";
 	tempstring2 = "EvtChFrac";
-	PrintHisto(fMETHistos[6], tempstring1, tempstring2, outputdir, FracChmin, 999., 1);
+	PrintHisto(fEvtHistos[1], tempstring1, tempstring2, outputdir, FracChmin, 999., 1);
 	file << "* " << tempstring2 << endl;
-	file << fAC->printAverage(tempstring2, fMETHistos[6]) << endl;
+	file << fAC->printAverage(tempstring2, fEvtHistos[1]) << endl;
 	
 	// Clean+iso objects distributions
 	outputdir = fOutputDir + "Cleaning/Obj/";
@@ -763,7 +1010,7 @@ void PhysQCAnalysis::End(){
 
 	tempstring1 = "Muon Pt";
 	tempstring2 = "MuPt";
-	PrintHisto(fMuCIHistos[1], tempstring1, tempstring2, outputdir, MuPtmin, 999., 1);
+	PrintHisto(fMuCIHistos[1], tempstring1, tempstring2, outputdir, MuPtmin, 999., 1, 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuCIHistos[1]) << endl;
 
@@ -787,7 +1034,7 @@ void PhysQCAnalysis::End(){
 
 	tempstring1 = "Elec Pt";
 	tempstring2 = "ElPt";
-	PrintHisto(fElCIHistos[1], tempstring1, tempstring2, outputdir, ElPtmin, 999., 1);
+	PrintHisto(fElCIHistos[1], tempstring1, tempstring2, outputdir, ElPtmin, 999., 1, 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElCIHistos[1]) << endl;
 
@@ -817,7 +1064,7 @@ void PhysQCAnalysis::End(){
 
 	tempstring1 = "Pho Pt";
 	tempstring2 = "PhoPt";
-	PrintHisto(fPhCIHistos[1], tempstring1, tempstring2, outputdir, PhPtmin, 999., 1);
+	PrintHisto(fPhCIHistos[1], tempstring1, tempstring2, outputdir, PhPtmin, 999., 1, 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhCIHistos[1]) << endl;
 
@@ -841,7 +1088,7 @@ void PhysQCAnalysis::End(){
 
 	tempstring1 = "Jet Pt";
 	tempstring2 = "JPt";
-	PrintHisto(fJCIHistos[1], tempstring1, tempstring2, outputdir, JPtmin, 999., 1);
+	PrintHisto(fJCIHistos[1], tempstring1, tempstring2, outputdir, JPtmin, 999., 1, 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJCIHistos[1]) << endl;
 
@@ -856,7 +1103,67 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fJCIHistos[3], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJCIHistos[3]) << endl;
+
+	tempstring1 = "Jet EMfrac";
+	tempstring2 = "JetEMfracClean";
+	PrintHisto(fJCIHistos[4], tempstring1, tempstring2, outputdir, FracEmminJet, FracEmmaxJet);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[4]) << endl;
 	
+	tempstring1 = "Jet Chfrac";
+	tempstring2 = "JetChfracClean";
+	PrintHisto(fJCIHistos[5], tempstring1, tempstring2, outputdir, FracChminJet);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[5]) << endl;
+	
+	tempstring1 = "Dphi(MET,j1)";
+	tempstring2 = "DphiMETJet1Clean";
+	PrintHisto(fJCIHistos[6], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[6]) << endl;
+	
+	tempstring1 = "Dphi(MET,j2)";
+	tempstring2 = "DphiMETJet2Clean";
+	PrintHisto(fJCIHistos[7], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[7]) << endl;
+
+	tempstring1 = "MET R12";
+	tempstring2 = "METR12Clean";
+	PrintHisto(fJCIHistos[8], tempstring1, tempstring2, outputdir, dR12min);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[8]) << endl;
+
+	tempstring1 = "MET R21";
+	tempstring2 = "METR21Clean";
+	PrintHisto(fJCIHistos[9], tempstring1, tempstring2, outputdir, dR12min);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[9]) << endl;
+
+	tempstring1 = "mono-Jet Pt";
+	tempstring2 = "JPt1j";
+	PrintHisto(fJCIHistos[10], tempstring1, tempstring2, outputdir, JPtmin, 999., 1, 1);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[10]) << endl;
+
+	tempstring1 = "mono-Jet Eta";
+	tempstring2 = "JEta1j";
+	PrintHisto(fJCIHistos[11], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[11]) << endl;
+
+	tempstring1 = "mono-Jet Phi";
+	tempstring2 = "JPhi1j";
+	PrintHisto(fJCIHistos[12], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[12]) << endl;
+
+	tempstring1 = "Dphi(MET,mono-jet)";
+	tempstring2 = "DphiMETmonoJetClean";
+	PrintHisto(fJCIHistos[13], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fJCIHistos[13]) << endl;
+
 	// Clean+iso objects, Inv Mass distributions
 	tempstring1 = "Mu Inv Mass SS Clean";
 	tempstring2 = "MuInvMSSClean";
@@ -917,6 +1224,18 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[9], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[9]) << endl;
+
+	tempstring1 = "diJet Inv Mass Clean";
+	tempstring2 = "JInvM2jClean";
+	PrintHisto(fInvMHistos[10], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[10]) << endl;
+	
+	tempstring1 = "GT diJet Inv Mass Clean";
+	tempstring2 = "JInvMGT2jClean";
+	PrintHisto(fInvMHistos[11], tempstring1, tempstring2, outputdir);
+	file << "* " << tempstring2 << endl;
+	file << fAC->printAverage(tempstring2, fInvMHistos[11]) << endl;
 	
 	file.close();
 	
@@ -931,7 +1250,9 @@ void PhysQCAnalysis::End(){
 }
 
 void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstring2, TString outputdir,
-		 double x1, double x2, int logy){
+		 double x1, double x2, int logy, int fract){
+	double percent1 = 0.05;
+	double percent2 = 0.01;
 
 	TCanvas * canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if (logy == 1) gPad->SetLogy();
@@ -954,6 +1275,11 @@ void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstr
 		line->SetLineWidth(2);
 		line->Draw();
 	}
+	if (fract == 1) {
+		fAC->tailFraction(hist, percent1);
+		fAC->tailFraction(hist, percent2);
+	}
+	
 	Util::PrintBoth(canv, tempstring2, outputdir);
 }
 

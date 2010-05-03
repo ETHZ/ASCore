@@ -9,32 +9,15 @@
 # 2 tmp/ var1, var2, sidx, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, req
 ##############################################################################################
 # Kinematics distributions for objects
-clean/ObjectKin/      NMus             0         10       0       10     1
-clean/ObjectKin/      NEles            0         10       0       10     1
-clean/ObjectKin/      NJets            0         20       0       20     1
-clean/ObjectKin/      MuPt             100       0        0       100.   1    10.
-clean/ObjectKin/      ElPt             100       0        0       100.   1    10.
-clean/ObjectKin/      JPt              100       0        0       250.   1    30.
-clean/ObjectKin/      MuEta            50        0        -2.5    2.5    0    -2.4   2.4
-clean/ObjectKin/      ElEta            50        0        -2.5    2.5    0    -2.4   2.4
-clean/ObjectKin/      JEta             50        0        -5.0    5.0    0    -3.    3.
-clean/ObjectKin/      MuPhi            50        0        -3.2    3.2    
-clean/ObjectKin/      ElPhi            50        0        -3.2    3.2    
-clean/ObjectKin/      JPhi             50        0        -3.2    3.2    
 clean/ObjectKin/      MuCharge[0]      0         3        -1.5    1.5    
 clean/ObjectKin/      ElCharge[0]      0         3        -1.5    1.5    
-clean/ObjectKin/      ElSigmaIetaIeta  0         0        0.      0.015  0
-clean/ObjectKin/      NPhotons         0         0        0       20     1
-clean/ObjectKin/      PhoPt            100       0        0       100.   1    10.
-clean/ObjectKin/      PhoEta           50        0        -2.5    2.5    0    -2.4   2.4
-clean/ObjectKin/      PhoPhi           50        0        -3.2    3.2    
 # Kinematics distributions for events
-clean/EventKin/       RawMET           0         0        0       250.   1
+clean/EventKin/       RawMET           0         0        0       250.   
 clean/EventKin/       MuJESCorrMET     0         0        0       250.   1     100.
 clean/EventKin/       TCMET            0         0        0       250.   1     80.
 clean/EventKin/       PFMET            0         0        0       250.   1     80.
-clean/EventKin/       ECALMET          0         0        0       250.   1
-clean/EventKin/       HCALMET          0         0        0       250.   1
+clean/EventKin/       ECALMET          0         0        0       250.   
+clean/EventKin/       HCALMET          0         0        0       250.   
 clean/EventKin/       RawMETphi        0         0        -3.2    3.2    
 clean/EventKin/       MuJESCorrMETphi  0         0        -3.2    3.2    
 clean/EventKin/       TCMETphi         0         0        -3.2    3.2    
@@ -57,5 +40,5 @@ clean/ElIso/          ElDR04HcalTowerSumEt 0     50       0.      20.
 # Photon isolation
 clean/PhIso/          PhoIso03         0         100      0.      10.    0    0.3
 clean/PhIso/          PhoIso03TrkHollow 0        50       0.      10.
-clean/PhIso/          PhoIso03Ecal     0         50       0.      20.
-clean/PhIso/          PhoIso03Hcal     0         50       0.      20.
+clean/PhIso/          PhoIso03Ecal     0    50       0.      20.
+clean/PhIso/          PhoIso03Hcal     0     50       0.      20.

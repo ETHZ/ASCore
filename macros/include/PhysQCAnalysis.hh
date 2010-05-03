@@ -37,7 +37,7 @@ public:
 	void MakeElIDPlots(TCut, TTree*);
 	void PlotTriggerStats();
 	void PrintHisto(TH1D*, TString, TString, TString, 
-		double x1=999., double x2=999., int logy=0);
+		double x1=999., double x2=999., int logy=0, int fract=0);
 	void PrintInfoStart(int nEntries);
 	double invMass(double p1[], double p2[]);
 	double DeltaPhi(double v1, double v2);
@@ -48,19 +48,27 @@ public:
 
 private:
 	
-	TH1D *fMuHistos[7];
+	TH1D *fPvxHistos[4];
+	TH1D *fMuHistos[9];
 	TH1D *fElHistos[20];
-	TH1D *fPhHistos[6];
-	TH1D *fJHistos[4];
-	TH1D *fMETHistos[7];
+	TH1D *fPhHistos[7];
+	TH1D *fJHistos[8];
+	TH2D *fJChEMfrac;
+	TH2D *fJEMfracEta;
+	TH2D *fJChfracEta;
+	TH1D *fMETHistos[10];
 	TH2D *fMETDphi12;
 	TH2D *fMETR12R21;
+	TH2D *fMETR12Etaj12;
+	TH2D *fMETR12j12PtRat;
 	TH2D *fMETR12Dphij12;
+	TH2D *fMETR12dRj12;
+	TH1D *fEvtHistos[2];
 	TH1D *fMuCIHistos[4];
 	TH1D *fElCIHistos[5];
 	TH1D *fPhCIHistos[4];
-	TH1D *fJCIHistos[4];
-	TH1D *fInvMHistos[10];
+	TH1D *fJCIHistos[14];
+	TH1D *fInvMHistos[12];
 	
 };
 #endif

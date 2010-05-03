@@ -200,6 +200,12 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		if( !strcmp(ParName, "FracChminJet") ){
 			fClean_FracChminJet = float(ParValue); ok = true;
 		}
+		if( !strcmp(ParName, "JID_n90Hitsmin") ){
+			fClean_JID_n90Hitsmin = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "JID_HPDmax") ){
+			fClean_JID_HPDmax = float(ParValue); ok = true;
+		}
 		if( !strcmp(ParName, "deltaRElecJetmax") ){
 			fClean_deltaRElecJetmax = float(ParValue); ok = true;
 		}
@@ -515,6 +521,8 @@ int TreeCleaner::CleanJet(int ichk){
 	if( fTR->JEMfrac[ichk] > fClean_FracEmmaxJet ) return 2;
 	if( fTR->JEMfrac[ichk] < fClean_FracEmminJet ) return 3;
 	if( fTR->JChfrac[ichk] < fClean_FracChminJet && fabs(fTR->JEta[ichk]) < 2.1 ) return 4;
+	if( fTR->JID_n90Hits[ichk] < fClean_JID_n90Hitsmin ) return 5;
+	if( fTR->JID_HPD[ichk] > fClean_JID_HPDmax ) return 6;
 	return 0;
 }
 
@@ -1003,6 +1011,8 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotJetGtFem          = 0;
 	fNumTotJetLtFem          = 0;
 	fNumTotJetLtFch          = 0;
+	fNumTotJetLtn90hits      = 0;
+	fNumTotJetGtfHPD         = 0;
 	fNumTotBJets             = 0;  
 
 	// initialize cleaning statistics histogram
@@ -1088,6 +1098,8 @@ void TreeCleaner::StatFill(void){
 				if( jetClean == 2 ) fNumTotJetGtFem++;
 				if( jetClean == 3 ) fNumTotJetLtFem++;
 				if( jetClean == 4 ) fNumTotJetLtFch++;
+				if( jetClean == 5 ) fNumTotJetLtn90hits++;
+				if( jetClean == 6 ) fNumTotJetGtfHPD++;
 			}
 		}
 	}
@@ -1269,6 +1281,10 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotJetLtFem / (float)fNumTotJets << " %" << endl;
 		cout << "    jets with too small Fch         = " << fNumTotJetLtFch
 			<< "  = " << 100.*(float)fNumTotJetLtFch / (float)fNumTotJets << " %" << endl;
+		cout << "    jets with too small n90Hits     = " << fNumTotJetLtn90hits
+			<< "  = " << 100.*(float)fNumTotJetLtn90hits / (float)fNumTotJets << " %" << endl;
+		cout << "    jets with too large fHPD        = " << fNumTotJetGtfHPD
+			<< "  = " << 100.*(float)fNumTotJetGtfHPD / (float)fNumTotJets << " %" << endl;
 		cout << "  Total number of b-jets            = " << fNumTotBJets
 			<< "  = " << 100.*(float)fNumTotBJets / (float)fNumTotJets << " %" << endl;
 	}
