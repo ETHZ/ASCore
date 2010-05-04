@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Mar 24 18:14:49 2010 by ROOT version 5.22/00d
+// Mon May  3 08:39:57 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: NTupleProducer_MC34x_RECO.root
+// found on file: dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -21,6 +21,7 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSection;
+   Double_t        PtHat;
    Int_t           SigProcID;
    Double_t        PDFScalePDF;
    Int_t           PDFID1;
@@ -43,7 +44,7 @@ public :
    Double_t        PrimVtxyE;
    Double_t        PrimVtxzE;
    Double_t        PrimVtxNChi2;
-   Int_t           PrimVtxNTracks;
+   Int_t           PrimVtxNdof;
    Double_t        PrimVtxPtSum;
    Double_t        Beamspotx;
    Double_t        Beamspoty;
@@ -187,6 +188,9 @@ public :
    Double_t        ElConvPartnerTrkEta[20];   //[NEles]
    Double_t        ElConvPartnerTrkPhi[20];   //[NEles]
    Double_t        ElConvPartnerTrkCharge[20];   //[NEles]
+   Int_t           ElScSeedSeverity[20];   //[NEles]
+   Double_t        ElE1OverE9[20];   //[NEles]
+   Double_t        ElS4OverS1[20];   //[NEles]
    Int_t           ElGenID[20];   //[NEles]
    Int_t           ElGenStatus[20];   //[NEles]
    Int_t           ElGenCharge[20];   //[NEles]
@@ -238,6 +242,9 @@ public :
    Double_t        PhoSharedPy[20];   //[NPhotons]
    Double_t        PhoSharedPz[20];   //[NPhotons]
    Double_t        PhoSharedEnergy[20];   //[NPhotons]
+   Int_t           PhoScSeedSeverity[20];   //[NPhotons]
+   Double_t        PhoE1OverE9[20];   //[NPhotons]
+   Double_t        PhoS4OverS1[20];   //[NPhotons]
    Int_t           NJets;
    Int_t           NJetsTot;
    Int_t           JGood[50];   //[NJets]
@@ -358,6 +365,7 @@ public :
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSection;   //!
+   TBranch        *b_PtHat;   //!
    TBranch        *b_SigProcID;   //!
    TBranch        *b_PDFScalePDF;   //!
    TBranch        *b_PDFID1;   //!
@@ -380,7 +388,7 @@ public :
    TBranch        *b_PrimVtxyE;   //!
    TBranch        *b_PrimVtxzE;   //!
    TBranch        *b_PrimVtxNChi2;   //!
-   TBranch        *b_PrimVtxNTracks;   //!
+   TBranch        *b_PrimVtxNdof;   //!
    TBranch        *b_PrimVtxPtSum;   //!
    TBranch        *b_Beamspotx;   //!
    TBranch        *b_Beamspoty;   //!
@@ -524,6 +532,9 @@ public :
    TBranch        *b_ElConvPartnerTrkEta;   //!
    TBranch        *b_ElConvPartnerTrkPhi;   //!
    TBranch        *b_ElConvPartnerTrkCharge;   //!
+   TBranch        *b_ElScSeedSeverity;   //!
+   TBranch        *b_ElE1OverE9;   //!
+   TBranch        *b_ElS4OverS1;   //!
    TBranch        *b_ElGenID;   //!
    TBranch        *b_ElGenStatus;   //!
    TBranch        *b_ElGenCharge;   //!
@@ -575,6 +586,9 @@ public :
    TBranch        *b_PhoSharedPy;   //!
    TBranch        *b_PhoSharedPz;   //!
    TBranch        *b_PhoSharedEnergy;   //!
+   TBranch        *b_PhoScSeedSeverity;   //!
+   TBranch        *b_PhoE1OverE9;   //!
+   TBranch        *b_PhoS4OverS1;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_NJetsTot;   //!
    TBranch        *b_JGood;   //!
@@ -710,10 +724,10 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_MC34x_RECO.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root");
       if (!f) {
-         f = new TFile("NTupleProducer_MC34x_RECO.root");
-         f->cd("NTupleProducer_MC34x_RECO.root:/analyze");
+         f = new TFile("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root");
+         f->cd("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root:/analyze");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -767,6 +781,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSection", &LumiSection, &b_LumiSection);
+   fChain->SetBranchAddress("PtHat", &PtHat, &b_PtHat);
    fChain->SetBranchAddress("SigProcID", &SigProcID, &b_SigProcID);
    fChain->SetBranchAddress("PDFScalePDF", &PDFScalePDF, &b_PDFScalePDF);
    fChain->SetBranchAddress("PDFID1", &PDFID1, &b_PDFID1);
@@ -789,7 +804,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PrimVtxyE", &PrimVtxyE, &b_PrimVtxyE);
    fChain->SetBranchAddress("PrimVtxzE", &PrimVtxzE, &b_PrimVtxzE);
    fChain->SetBranchAddress("PrimVtxNChi2", &PrimVtxNChi2, &b_PrimVtxNChi2);
-   fChain->SetBranchAddress("PrimVtxNTracks", &PrimVtxNTracks, &b_PrimVtxNTracks);
+   fChain->SetBranchAddress("PrimVtxNdof", &PrimVtxNdof, &b_PrimVtxNdof);
    fChain->SetBranchAddress("PrimVtxPtSum", &PrimVtxPtSum, &b_PrimVtxPtSum);
    fChain->SetBranchAddress("Beamspotx", &Beamspotx, &b_Beamspotx);
    fChain->SetBranchAddress("Beamspoty", &Beamspoty, &b_Beamspoty);
@@ -933,6 +948,9 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElConvPartnerTrkEta", ElConvPartnerTrkEta, &b_ElConvPartnerTrkEta);
    fChain->SetBranchAddress("ElConvPartnerTrkPhi", ElConvPartnerTrkPhi, &b_ElConvPartnerTrkPhi);
    fChain->SetBranchAddress("ElConvPartnerTrkCharge", ElConvPartnerTrkCharge, &b_ElConvPartnerTrkCharge);
+   fChain->SetBranchAddress("ElScSeedSeverity", ElScSeedSeverity, &b_ElScSeedSeverity);
+   fChain->SetBranchAddress("ElE1OverE9", ElE1OverE9, &b_ElE1OverE9);
+   fChain->SetBranchAddress("ElS4OverS1", ElS4OverS1, &b_ElS4OverS1);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
    fChain->SetBranchAddress("ElGenStatus", ElGenStatus, &b_ElGenStatus);
    fChain->SetBranchAddress("ElGenCharge", ElGenCharge, &b_ElGenCharge);
@@ -984,6 +1002,9 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PhoSharedPy", PhoSharedPy, &b_PhoSharedPy);
    fChain->SetBranchAddress("PhoSharedPz", PhoSharedPz, &b_PhoSharedPz);
    fChain->SetBranchAddress("PhoSharedEnergy", PhoSharedEnergy, &b_PhoSharedEnergy);
+   fChain->SetBranchAddress("PhoScSeedSeverity", PhoScSeedSeverity, &b_PhoScSeedSeverity);
+   fChain->SetBranchAddress("PhoE1OverE9", PhoE1OverE9, &b_PhoE1OverE9);
+   fChain->SetBranchAddress("PhoS4OverS1", PhoS4OverS1, &b_PhoS4OverS1);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("NJetsTot", &NJetsTot, &b_NJetsTot);
    fChain->SetBranchAddress("JGood", JGood, &b_JGood);

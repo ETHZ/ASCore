@@ -5,7 +5,7 @@ PrimVtxx			Prim. Vtx. Pos. (x) [cm]
 PrimVtxy			Prim. Vtx. Pos. (y) [cm]
 PrimVtxz			Prim. Vtx. Pos. (z) [cm]
 PrimVtxPtSum		Prim. Vtx. #Sigma p_{#perp} [GeV]
-PrimVtxNTracks		Prim. Vtx. Number of Tracks
+PrimVtxNdof		Prim. Vtx. Number of degrees of freedom
 PrimVtxNChi2		Prim. Vtx. #chi^{2}/N_{dof}
 MuPt			p_{#perp} (#mu) [GeV]
 MuPt[0]			p_{#perp} (#mu_{1}) [GeV]
