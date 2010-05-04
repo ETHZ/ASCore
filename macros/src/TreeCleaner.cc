@@ -305,7 +305,7 @@ int TreeCleaner::CleanPrimaryVertex(void){
 //              = 4 for insufficient track pT AND 1 AND 2 AND 3
 	int iBad = 0;
 // Check that there are tracks at the Primary Vertex
-	if( fTR->PrimVtxNTracks <= 0 ){
+	if( fTR->PrimVtxNdof <= 0 ){
 		iBad = 1;
 		return iBad;
 	}
