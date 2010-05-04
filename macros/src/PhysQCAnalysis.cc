@@ -1416,6 +1416,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv = new TCanvas("HLTStats1", tempstring , 0, 0, 900, 700);
 	canv->SetBottomMargin(0.50);
 	gPad->SetGridy();
+	gPad->SetLogy();
 	hlt_stats->GetXaxis()->SetRange(0,50);
 	hlt_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 50, nentries);
@@ -1431,6 +1432,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv = new TCanvas("HLTStats2", tempstring , 0, 0, 900, 700);
 	canv->SetBottomMargin(0.50);
 	gPad->SetGridy();
+	gPad->SetLogy();
 	hlt_stats->GetXaxis()->SetRange(51,100);
 	hlt_stats->DrawCopy();
 	l1 = new TLine(50, nentries, 100, nentries);
@@ -1446,6 +1448,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv = new TCanvas("L1PStats1", tempstring , 0, 0, 900, 700);
 	canv->SetBottomMargin(0.42);
 	gPad->SetGridy();
+	gPad->SetLogy();
 	l1p_stats->GetXaxis()->SetRange(0,63);
 	l1p_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 63, nentries);
@@ -1461,6 +1464,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv = new TCanvas("L1PStats2", tempstring , 0, 0, 900, 700);
 	canv->SetBottomMargin(0.42);
 	gPad->SetGridy();
+	gPad->SetLogy();
 	l1p_stats->GetXaxis()->SetRange(64,128);
 	l1p_stats->DrawCopy();
 	l1 = new TLine(63, nentries, 128, nentries);
@@ -1475,6 +1479,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	tempstring = "L1 Tech Bits";
 	canv = new TCanvas("L1TStats", tempstring , 0, 0, 900, 700);
 	gPad->SetGridy();
+	gPad->SetLogy();
 	l1t_stats->GetXaxis()->SetRange(0,64);
 	l1t_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 64, nentries);

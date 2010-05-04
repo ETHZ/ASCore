@@ -40,6 +40,8 @@ PhotSigmaEtaEtaEndmax 0.025
 FracEmmaxJet          1.0
 FracEmminJet          0.01
 FracChminJet          0.05
+JID_n90Hitsmin        2
+JID_HPDmax            0.98
 
 deltaRElecJetmax      0.5
 elecbyJetEratio       0.65
@@ -55,7 +57,7 @@ FracEmmin             0.175
 JetBadHardPtmin       50.
 
 # -- MET:
-METmin                50.0
+METmin                20.0
 dPhiJetMETmin         0.0
 dR12min               0.5
 dR21min               0.5
