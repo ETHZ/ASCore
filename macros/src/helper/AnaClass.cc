@@ -674,7 +674,7 @@ void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
 		file << printRatio(var, h, 0., etaLow, -etaLow, 0.) << endl;
 	}
 	if( !strcmp(var, "PrimVtxx")       || !strcmp(var, "PrimVtxy")     || !strcmp(var, "PrimVtxz") ||
-		!strcmp(var, "PrimVtxNTracks") || !strcmp(var, "PrimVtxNChi2") ||!strcmp(var, "NTracks")   ||
+		!strcmp(var, "PrimVtxNdof") || !strcmp(var, "PrimVtxNChi2") ||!strcmp(var, "NTracks")   ||
 	!strcmp(var, "MuEem")          || !strcmp(var, "MuEHad") ){
 		file << "* " << var << endl;
 		file << printAverage(var, h) << endl;

@@ -18,14 +18,14 @@ TreeAnalyzerBase::~TreeAnalyzerBase(){
 
 // Method for looping over the tree
 void TreeAnalyzerBase::Loop(){
-	Long64_t nentries = fTR->GetEntries();
-	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-	// nentries = 10;
-	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		PrintProgress(jentry);
-		fTR->GetEntry(jentry);
+        Long64_t nentries = fTR->GetEntries();
+        cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+        // nentries = 10;
+        for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
+                PrintProgress(jentry);
+                fTR->GetEntry(jentry);
+        }
 
-	}
 }
 
 // Method called before starting the event loop
