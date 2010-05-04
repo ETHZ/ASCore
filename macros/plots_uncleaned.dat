@@ -16,7 +16,7 @@
 unclean/PrimVtxTrk/   PrimVtxx         0         0        -0.2    0.2
 unclean/PrimVtxTrk/   PrimVtxy         0         0        -0.2    0.2
 unclean/PrimVtxTrk/   PrimVtxz         0         0        -15.    15.
-unclean/PrimVtxTrk/   PrimVtxNdof      0         0        0       300
+unclean/PrimVtxTrk/   PrimVtxNdof      0         300      0       300
 unclean/PrimVtxTrk/   NTracksTot       0         250      0       250
 unclean/PrimVtxTrk/   TrkPtSum         0         0        0       500.   1     -999   -999  
 unclean/PrimVtxTrk/   TrkPtSumPhi      0         0        -3.2    3.2    0     -999   -999  
