@@ -22,10 +22,13 @@ PhysQCAnalyzer::~PhysQCAnalyzer(){
 }
 
 // Method for looping over the tree
-void PhysQCAnalyzer::Loop(){
+void PhysQCAnalyzer::Loop(Long64_t maxEvents){
 	Long64_t nentries = fTR->GetEntries();
-	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-	// nentries = 10;
+	cout << " total events in ntuples = " << nentries << endl;
+        if ( maxEvents>=0 ) { 
+          nentries = maxEvents;
+          cout << " processing only " << nentries << " events out of it" << endl;
+        }
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
@@ -65,7 +68,7 @@ void PhysQCAnalyzer::BeginJob(){
 // Method called after finishing the event loop
 void PhysQCAnalyzer::EndJob(){
 	TCut select = "GoodEvent == 0 || (NMus + NEles + NJets) > 0";
-	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", select, fTreeCleaner->fCleanTree);
+	//fPhysQCAnalysis->MakePlots("plots_cleaned.dat", select, fTreeCleaner->fCleanTree);
 
 	fTreeCleaner         ->End();
 	fPhysQCAnalysis      ->End();

@@ -29,7 +29,7 @@ public:
 	PhysQCAnalysis(TreeReader *tr = NULL, TreeCleaner *tc = NULL);
 	virtual ~PhysQCAnalysis();
 
-	void Begin();
+	void Begin(const char* filename = "PhysQCAnalysis.root" );
 	void Analyze1();
 	void Analyze2();
 	void End();
@@ -47,6 +47,8 @@ public:
 	AnaClass *fAC;
 
 private:
+
+        TFile* fHistFile; // Where all histograms will be saved
 	
 	TH1D *fPvxHistos[4];
 	TH1D *fMuHistos[9];

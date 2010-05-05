@@ -291,7 +291,7 @@ void AnaClass::readVarNames(const char* filename){
 *****************************************************************************/
 
 /****************************************************************************/
-void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut cut){
+void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut cut, TFile* file){
 	int twod(0), sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
 	float ymin(0.), ymax(0.), y1(-999.), y2(-999.);
@@ -323,7 +323,7 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut
 			if(tree==NULL) tree = fTree[sampleindex];
 			fOutputSubDir = TString(path);
 			if(!strcmp(var1name, "ElID")) plotEID(req, tree, tag);
-			else plotVar(var1name, req&&cut, tree, tag, nbinsx, xmin, xmax, "ofilename", logy, x1, x2);
+			else plotVar(var1name, req&&cut, tree, tag, nbinsx, xmin, xmax, "ofilename", logy, x1, x2, file );
 		}
 		if( readbuff[0] == '2' ){ // 2D plotting
 			int nargs = sscanf(readbuff, "%d %s %s %s %d %d %f %f %d %f %f %s %d %d %d %d %f %f %f %f %s", &twod, path, var1name, var2name, &sampleindex, &nbinsx, &xmin, &xmax, &nbinsy, &ymin, &ymax, topt, &mrkstl, &logx, &logy, &logz, &x1, &x2, &y1, &y2, reqbuff);
@@ -340,14 +340,14 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut
 			if(tag=="tag") tag = fTag[sampleindex];
 			if(tree==NULL) tree = fTree[sampleindex];
 			fOutputSubDir = TString(path);
-			plotVar2D(var1name, var2name, req&&cut, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2);
+			plotVar2D(var1name, var2name, req&&cut, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, file );
 		}
 	}
 	fOutputSubDir = temp;
 }
 
 /****************************************************************************/
-void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag){
+void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag, TFile* file){
 	int sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
 	float ymin(0.), ymax(0.), y1(-999.), y2(-999.);
@@ -369,7 +369,7 @@ void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag){
 		if(tag=="tag") tag = fTag[sampleindex];
 		if(tree==NULL) tree = fTree[sampleindex];
 		fOutputSubDir = TString(path);
-		plotVar2D(varname1, varname2, req, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2);
+		plotVar2D(varname1, varname2, req, tree, tag, nbinsx, xmin, xmax, nbinsy, ymin, ymax, topt, mrkstl, logx, logy, logz, x1, x2, y1, y2, file );
 	}
 }
 
@@ -390,7 +390,7 @@ void AnaClass::plotAllBranches(TTree *tree, TString tag){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = tag + "_" + branchname;
-		Util::PrintBoth(c, outputname, fOutputSubDir);
+		Util::Print(c, outputname, fOutputSubDir);
 	}
 }
 void AnaClass::plotAllBranches(int sampleindex){
@@ -411,12 +411,12 @@ void AnaClass::plotAllBranches(int sampleindex){
 		hists[i]->SetFillColor(15);
 		hists[i]->SetFillStyle(1001);
 		TString outputname = fTag[sampleindex] + "_" + branchname;
-		Util::PrintBoth(c, outputname, fOutputSubDir);
+		Util::Print(c, outputname, fOutputSubDir);
 	}
 }
 
 /****************************************************************************/
-void AnaClass::plotEID(TCut req, TTree *t, TString tag){
+void AnaClass::plotEID(TCut req, TTree *t, TString tag, TFile* file){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 
@@ -478,8 +478,8 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag){
 	hfir->DrawCopy("hist");
 
 	TString outputname = tag + "ElID";
-        fOutputSubDir = "/ElID";
-	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
+        fOutputSubDir = "ElID";
+	Util::Print(col, outputname, fOutputDir + fOutputSubDir, file);
 
 	delete col;
 	delete hfir;
@@ -535,7 +535,9 @@ TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, 
 }
 
 /****************************************************************************/
-void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename, bool logy, double line1x, double line2x){
+void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, 
+                       int nbins, double xmin, double xmax, TString ofilename, 
+                       bool logy, double line1x, double line2x, TFile* file){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 	TH1D *hfir = drawTree1D(var,reqs,convertVarName2(var),nbins,xmin,xmax,tree,false);
@@ -578,7 +580,7 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 	refValues(var, hfir);
 
 	TString outputname = tag + ofilename;
-	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
+	Util::Print(col, outputname, fOutputDir + fOutputSubDir, file );
 
 	printCheckList(var, hfir, fOutputDir + fChecklistFile);
 
@@ -813,7 +815,10 @@ TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, dou
 }
 
 /****************************************************************************/
-void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt, int markstyle, bool logx, bool logy, bool logz, double line1x, double line2x, double line1y, double line2y){
+void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, 
+                         int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt, 
+                         int markstyle, bool logx, bool logy, bool logz, double line1x, double line2x, double line1y, double line2y,
+                         TFile* file ){
 	gStyle->SetOptStat(1111111);
 	TString histn = Form("%svs%s", convertVarName2(var1).Data(), convertVarName2(var2).Data());
 	TH2D *h = drawTree2D(var1, var2, reqs, histn , nbinsx, xmin, xmax, nbinsy, ymin, ymax, tree, false);
@@ -877,7 +882,7 @@ void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TT
 	}
 
 	TString outputname = tag + convertVarName2(var1) + "-" + convertVarName2(var2);
-	Util::PrintBoth(col, outputname, fOutputDir + fOutputSubDir);
+	Util::Print(col, outputname, fOutputDir + fOutputSubDir, file );
 
 	delete col;
 	delete h;
@@ -958,7 +963,7 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	}
 
 	TString outputname = fTag[index1] + "_" + fTag[index2] + "_" + convertVarName2(var);
-	Util::PrintBoth(col, outputname, fOutputSubDir);
+	Util::Print(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1026,7 +1031,7 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	}
 	char out[100];
 	sprintf(out, "%s_%s-%s", fTag[sampleindex].Data(), convertVarName2(var1).Data(), convertVarName2(var2).Data());
-	Util::PrintBoth(col, out, fOutputSubDir);
+	Util::Print(col, out, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1079,7 +1084,7 @@ void AnaClass::plotOverlay2C(const char* var, const TCut req1, const TCut req2, 
   hsec->DrawCopy("histsame");
   leg->Draw();
   TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
-  Util::PrintBoth(col, outputname, fOutputSubDir);
+  Util::Print(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1171,7 +1176,7 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "_" + fTag[index2] + "_" + fTag[index3];
-	Util::PrintBoth(col, outputname, fOutputSubDir);
+	Util::Print(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1237,7 +1242,7 @@ void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, con
   hthr->DrawCopy("histsame");
   leg->Draw();
   TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
-  Util::PrintBoth(col, outputname, fOutputSubDir);
+  Util::Print(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/
@@ -1345,7 +1350,7 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 		l2->Draw();
 	}
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "-" + fTag[index2] + "-" + fTag[index3] + "-" + fTag[index4];
-	Util::PrintBoth(col, outputname, fOutputSubDir);
+	Util::Print(col, outputname, fOutputSubDir);
 }
 
 /****************************************************************************/

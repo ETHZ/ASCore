@@ -1,14 +1,17 @@
 #ifndef Utilities_hh
 #define Utilities_hh
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
 #include "TROOT.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TString.h"
 #include "TMath.h"
+#include "TFile.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 
 namespace Util {
   //__________________________________________________________________________
@@ -100,10 +103,69 @@ namespace Util {
   }
 
   //__________________________________________________________________________
-  inline void PrintBoth(TCanvas *cin, TString name, TString dir) {
-    // Print both EPS and PNG
+  inline TDirectory* FindOrCreate( TString& dir, TFile* file ) {
+    // Look for a directory and create it if it does not exist
+
+    // Start from the root of the file
+    file->cd();
+    // Remove deadly '/'s
+    while ( dir.BeginsWith("/") ) dir = dir.Strip(TString::kLeading,'/');
+    dir.ReplaceAll("//","/");
+
+    // Loop over sub-directories to create (ROOT's mkdir has no -p option...)
+    TString cdir(dir);
+    while ( cdir.First('/')>0 || cdir.Length()>0 ) {
+       // Create new subdirectory
+       Size_t index = (cdir.First('/')>0 ? cdir.First('/') : cdir.Length());
+       TString subdir = cdir(0,index);
+       if ( !gDirectory->GetDirectory(subdir) ) {
+          std::cout << "Creating directory " << subdir.Data() << std::endl;
+          gDirectory->mkdir( subdir.Data() );
+       }
+       gDirectory->cd(subdir);
+       cdir = cdir(index+1,cdir.Length());
+    }
+    return file->GetDirectory(dir);
+    
+  }
+  
+  //__________________________________________________________________________
+  inline void SaveAll(TCanvas *cin, TString dir, TFile* file) {
+    // Save all objects in a canvas to a file
+    //   dir is a sub-directory in the file
+    //   file is the file object (need to be already open)
+    
+    // A few checks
+    if ( !file || !file->IsOpen() ) {
+      std::cerr << "*** Util::SaveAll: file " << (file?file->GetName():"") << " does not exist" << std::endl;
+      exit(-1);
+    } 
+
+    // Go to directory (create it if needed)
+    TDirectory* cdir = Util::FindOrCreate(dir,file);
+    if ( !cdir) {
+      std::cerr << "Couldn't create directory " << dir << std::endl;
+      exit(-1);
+    }
+    cdir->cd();
+    
+    // Loop over canvas object and save some of them
+    TIter next(cin->GetListOfPrimitives());
+    while (TObject *obj = next()) {
+      if ( !strcmp(obj->ClassName(),"TFrame") ) continue;
+      if ( !strcmp(obj->ClassName(),"TLine") ) continue;
+      if ( !strcmp(obj->ClassName(),"TArrow") ) continue;
+      if ( !strcmp(obj->ClassName(),"TLatex") ) continue;
+      obj->Write(obj->GetName(),TObject::kOverwrite);
+    }
+  }
+
+  //__________________________________________________________________________
+  inline void Print(TCanvas *cin, TString name, TString dir, TFile* file=0) {
+    // Print plot (PNG, EPS and to file)
     Util::PrintPNG(cin,name,dir);
     Util::PrintEPS(cin,name,dir);
+    if ( file ) Util::SaveAll(cin,dir,file); 
   }
 
    //__________________________________________________________________________
@@ -121,6 +183,7 @@ namespace Util {
     return sqrt( (eta1-eta2)*(eta1-eta2)
                  + Util::DeltaPhi(phi1, phi2)*Util::DeltaPhi(phi1, phi2) );
   }
+
 
 }
 

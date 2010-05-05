@@ -153,7 +153,7 @@ void MultiplicityAnalysis::End(){
 	// fHljMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
-	Util::PrintBoth(canv, fTag + "_ljMult", fOutputDir + subdir);
+	Util::Print(canv, fTag + "_ljMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu multiplicity";
 	canv = new TCanvas("emuMult", canvtitle , 0, 0, 900, 700);
@@ -165,7 +165,7 @@ void MultiplicityAnalysis::End(){
 	// fHemuMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
-	Util::PrintBoth(canv, fTag + "_emuMult", fOutputDir + subdir);
+	Util::Print(canv, fTag + "_emuMult", fOutputDir + subdir);
 
 	canvtitle = "e/mu Efficiency";
 	canv = new TCanvas("emuEffic", canvtitle , 0, 0, 900, 700);
@@ -175,7 +175,7 @@ void MultiplicityAnalysis::End(){
 	gPad->SetLogz();	
 	fHemuEff->DrawCopy();
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
-	Util::PrintBoth(canv, fTag + "_emuEffic", fOutputDir+subdir);
+	Util::Print(canv, fTag + "_emuEffic", fOutputDir+subdir);
 
 	fMPHistFile->cd();
 	fHljMult->Write();

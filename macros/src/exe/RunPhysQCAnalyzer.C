@@ -35,13 +35,15 @@ int main(int argc, char* argv[]) {
 	bool isList = false;
 	TString outputdir = "TempOutput/";
 	int verbose = 0;
+        Long64_t maxEvents = -1;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:l:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:v:n:l:h?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
+                        case 'n': maxEvents = atoi(optarg); break;
 			case 'l': isList = true; break;
 			case '?':
 			case 'h': usage(0); break;
@@ -93,7 +95,7 @@ int main(int argc, char* argv[]) {
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
 	tA->BeginJob();
-	tA->Loop();
+	tA->Loop(maxEvents);
 	tA->EndJob();
 	delete tA;
 	return 0;

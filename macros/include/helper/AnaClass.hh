@@ -69,8 +69,8 @@ public:
 /*****************************************************************************
 ##################| Produce Plots |###########################################
 *****************************************************************************/
-	void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag", TCut cut ="");
-	void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag");
+	void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag", TCut cut ="", TFile* file = 0 );
+	void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag", TFile* file = 0 );
 	void makePlotPanel(const TCut req = "", const int nbins = 100);
 	void plotAllBranches(TTree*, TString);
 	
@@ -78,7 +78,7 @@ public:
 /*****************************************************************************
 ###################| Main Methods |###########################################
 *****************************************************************************/
-	void plotEID(TCut, TTree*, TString);
+	void plotEID(TCut, TTree*, TString, TFile* file = 0 );
 
 /*****************************************************************************
 ##################| Utilities |###############################################
@@ -86,14 +86,14 @@ public:
 	TTree* getTree(TString treename, TString filename, TString subdir = "");
 	TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw, const char* drawopt = "");
 	TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
-	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999.);
+	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999., TFile* file = 0 );
 	void refValues(const char* var, TH1D* h);
 	double tailFraction(TH1D* h, double frac);
 	void printCheckList(const char* var, TH1D* h, const char* filename);
 	TString printTailFraction(const char* var, TH1D* h, double frac);
 	TString printAverage(const char* var, TH1D* h);
 	TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
-	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999.);
+	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999., TFile* file = 0 );
 	void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	void plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy = false);

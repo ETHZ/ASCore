@@ -144,7 +144,8 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 PhysQCAnalysis::~PhysQCAnalysis(){
 }
 
-void PhysQCAnalysis::Begin(){
+void PhysQCAnalysis::Begin(const char* filename){
+        fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	fAC->readVarNames("varnames.dat");
 	fAC->setOutputDir(fOutputDir);
 	fAC->setGlobalTag(fTag);
@@ -898,21 +899,21 @@ void PhysQCAnalysis::End(){
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fJChEMfrac->GetEntries() < 100000) fJChEMfrac->SetMarkerStyle(6);
 	fJChEMfrac->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "Jet EMfrac vs Eta";
 	tempstring2 = "JEMfracEta";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fJEMfracEta->GetEntries() < 100000) fJEMfracEta->SetMarkerStyle(6);
 	fJEMfracEta->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "Jet Chfrac vs Eta";
 	tempstring2 = "JChfracEta";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fJChfracEta->GetEntries() < 100000) fJChfracEta->SetMarkerStyle(6);
 	fJChfracEta->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	// uncleaned Event and MET
 	outputdir = fOutputDir + "Cleaning/MET/";
@@ -951,42 +952,42 @@ void PhysQCAnalysis::End(){
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETDphi12->GetEntries() < 100000) fMETDphi12->SetMarkerStyle(6);
 	fMETDphi12->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "MET R12 R21";
 	tempstring2 = "METR12R21";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETR12R21->GetEntries() < 100000) fMETR12R21->SetMarkerStyle(6);
 	fMETR12R21->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "MET R12 Dphij12";
 	tempstring2 = "METR12Dphij12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETR12Dphij12->GetEntries() < 100000) fMETR12Dphij12->SetMarkerStyle(6);
 	fMETR12Dphij12->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "MET R12 Etaj1,2";
 	tempstring2 = "METR12Etaj12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETR12Etaj12->GetEntries() < 100000) fMETR12Etaj12->SetMarkerStyle(6);
 	fMETR12Etaj12->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "MET R12 Ptj1/Ptj2";
 	tempstring2 = "METR12j12PtRat";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETR12j12PtRat->GetEntries() < 100000) fMETR12j12PtRat->SetMarkerStyle(6);
 	fMETR12j12PtRat->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "MET R12 dR(j1,j2)";
 	tempstring2 = "METR12dRj12";
 	canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if(fMETR12dRj12->GetEntries() < 100000) fMETR12dRj12->SetMarkerStyle(6);
 	fMETR12dRj12->DrawCopy();
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 
 	tempstring1 = "Evt Em Frac";
 	tempstring2 = "EvtEmFrac";
@@ -1246,6 +1247,9 @@ void PhysQCAnalysis::End(){
 	// write the info file
 	const int nentries = fTR->fChain->GetEntries();
 	PrintInfoStart(nentries);
+
+        // Close files
+        fHistFile->Close();
 	
 }
 
@@ -1280,7 +1284,7 @@ void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstr
 		fAC->tailFraction(hist, percent2);
 	}
 	
-	Util::PrintBoth(canv, tempstring2, outputdir);
+	Util::Print(canv, tempstring2, outputdir, fHistFile);
 }
 
 void PhysQCAnalysis::PrintInfoStart(int nEntries){
@@ -1345,11 +1349,11 @@ void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
 }
 
 void PhysQCAnalysis::MakePlots(TString plotlist, TCut select, TTree *tree){
-	fAC->plotPlotList(plotlist, tree, "", select);
+	fAC->plotPlotList(plotlist, tree, "", select, fHistFile);
 }
 
 void PhysQCAnalysis::MakeElIDPlots(TCut select, TTree *tree){
-	fAC->plotEID(select, tree, "");
+	fAC->plotEID(select, tree, "", fHistFile);
 }
 
 void PhysQCAnalysis::PlotTriggerStats(){
@@ -1426,7 +1430,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintBoth(canv, "HLTStats1", fOutputDir+subdir);
+	Util::Print(canv, "HLTStats1", fOutputDir+subdir, fHistFile);
 
 	tempstring = "HLT Trigger Bits (51-100)";
 	canv = new TCanvas("HLTStats2", tempstring , 0, 0, 900, 700);
@@ -1442,7 +1446,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);	
-	Util::PrintBoth(canv, "HLTStats2", fOutputDir+subdir);
+	Util::Print(canv, "HLTStats2", fOutputDir+subdir, fHistFile);
 
 	tempstring = "L1 Phys Bits (0-63)";
 	canv = new TCanvas("L1PStats1", tempstring , 0, 0, 900, 700);
@@ -1458,7 +1462,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintBoth(canv, "L1PStats1", fOutputDir+subdir);
+	Util::Print(canv, "L1PStats1", fOutputDir+subdir, fHistFile);
 
 	tempstring = "L1 Phys Bits (64-128)";
 	canv = new TCanvas("L1PStats2", tempstring , 0, 0, 900, 700);
@@ -1474,7 +1478,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintBoth(canv, "L1PStats2", fOutputDir+subdir);
+	Util::Print(canv, "L1PStats2", fOutputDir+subdir, fHistFile);
 
 	tempstring = "L1 Tech Bits";
 	canv = new TCanvas("L1TStats", tempstring , 0, 0, 900, 700);
@@ -1489,7 +1493,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	l1->Draw();
 	fTlat->DrawLatex(0.17,0.92, tempstring);
 	fTlat->DrawLatex(0.60,0.92, entries);
-	Util::PrintBoth(canv, "L1TStats", fOutputDir+subdir);
+	Util::Print(canv, "L1TStats", fOutputDir+subdir, fHistFile);
 
         gROOT->cd(); // Leave local file
 }
