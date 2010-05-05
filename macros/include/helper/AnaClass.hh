@@ -106,6 +106,7 @@ public:
 	TH1D* normHist(const TH1D *ihist);
 	TH2D* normHist(const TH2D *ihist);
 	TCanvas* makeCanvas(const char*);
+	TH1D* bookTH1D(const char*, const char*, int, double, double);
 	TString numbForm(double);
 	int getExp(double e);
 	

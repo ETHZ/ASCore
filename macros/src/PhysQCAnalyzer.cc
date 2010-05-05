@@ -33,10 +33,8 @@ void PhysQCAnalyzer::Loop(Long64_t maxEvents){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
 
-		if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) continue;
 		fPhysQCAnalysis      ->Analyze1();
 		fTreeCleaner         ->Analyze();
-		if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) continue;
 		fPhysQCAnalysis      ->Analyze2();
 		fMultiplicityAnalysis->Analyze();
 	}
@@ -60,7 +58,7 @@ void PhysQCAnalyzer::BeginJob(){
 	fMultiplicityAnalysis->Begin();
 
 	fPhysQCAnalysis->PlotTriggerStats();
-	TCut select = "NMus + NEles + NJets > 0";
+	TCut select = "(NMus + NEles + NJets) > 0";
 	fPhysQCAnalysis->MakePlots("plots_uncleaned.dat", select, fTR->fChain);
 	fPhysQCAnalysis->MakeElIDPlots(select, fTR->fChain);
 }
@@ -68,7 +66,7 @@ void PhysQCAnalyzer::BeginJob(){
 // Method called after finishing the event loop
 void PhysQCAnalyzer::EndJob(){
 	TCut select = "GoodEvent == 0 || (NMus + NEles + NJets) > 0";
-	//fPhysQCAnalysis->MakePlots("plots_cleaned.dat", select, fTreeCleaner->fCleanTree);
+	fPhysQCAnalysis->MakePlots("plots_cleaned.dat", select, fTreeCleaner->fCleanTree);
 
 	fTreeCleaner         ->End();
 	fPhysQCAnalysis      ->End();

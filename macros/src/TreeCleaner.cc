@@ -31,7 +31,7 @@ void TreeCleaner::Analyze(){
 		DoCleanObjects();
 		StatFill();
 
-		// Write out a cleaned and skimmed tree
+		// Clean and skim the tree
 		int iclean = 0;
 		for( int i = 0; i < fTR->NMus; i++ ){
 			if( fTR->MuGood[i] != 0 ) continue;
@@ -1567,6 +1567,7 @@ void TreeCleaner::PutMuon(int inew, int iold){
 	fTR->MuSegmComp    [inew] = fTR->MuSegmComp    [iold];
 	fTR->MuTrackerMu   [inew] = fTR->MuTrackerMu   [iold];
 	fTR->MuGMPT        [inew] = fTR->MuGMPT        [iold];
+
 	fTR->MuGenID       [inew] = fTR->MuGenID       [iold];
 	fTR->MuGenStatus   [inew] = fTR->MuGenStatus   [iold];
 	fTR->MuGenCharge   [inew] = fTR->MuGenCharge   [iold];
@@ -1649,18 +1650,24 @@ void TreeCleaner::PutElectron(int inew, int iold){
 	fTR->ElCaloEnergy                [inew] = fTR->ElCaloEnergy                [iold];
 	fTR->ElTrkMomAtVtx               [inew] = fTR->ElTrkMomAtVtx               [iold];
 	fTR->ElESuperClusterOverP        [inew] = fTR->ElESuperClusterOverP        [iold];
+
 	fTR->ElIsInJet                   [inew] = fTR->ElIsInJet                   [iold];
 	fTR->ElSharedPx                  [inew] = fTR->ElSharedPx                  [iold];
 	fTR->ElSharedPy                  [inew] = fTR->ElSharedPy                  [iold];
 	fTR->ElSharedPz                  [inew] = fTR->ElSharedPz                  [iold];
 	fTR->ElSharedEnergy              [inew] = fTR->ElSharedEnergy              [iold];
 	fTR->ElDuplicateEl               [inew] = fTR->ElDuplicateEl               [iold];
+
 	fTR->ElConvPartnerTrkDist        [inew] = fTR->ElConvPartnerTrkDist        [iold];
 	fTR->ElConvPartnerTrkDCot        [inew] = fTR->ElConvPartnerTrkDCot        [iold];
 	fTR->ElConvPartnerTrkPt          [inew] = fTR->ElConvPartnerTrkPt          [iold];
 	fTR->ElConvPartnerTrkEta         [inew] = fTR->ElConvPartnerTrkEta         [iold];
 	fTR->ElConvPartnerTrkPhi         [inew] = fTR->ElConvPartnerTrkPhi         [iold];
 	fTR->ElConvPartnerTrkCharge      [inew] = fTR->ElConvPartnerTrkCharge      [iold];
+	fTR->ElScSeedSeverity            [inew] = fTR->ElScSeedSeverity            [iold];
+	fTR->ElE1OverE9                  [inew] = fTR->ElE1OverE9                  [iold];
+	fTR->ElS4OverS1                  [inew] = fTR->ElS4OverS1                  [iold];
+
 	fTR->ElGenID                     [inew] = fTR->ElGenID                     [iold];
 	fTR->ElGenStatus                 [inew] = fTR->ElGenStatus                 [iold];
 	fTR->ElGenCharge                 [inew] = fTR->ElGenCharge                 [iold];
@@ -1714,6 +1721,9 @@ void TreeCleaner::PutPhoton(int inew, int iold){
 	fTR->PhoSharedPy       [inew] = fTR->PhoSharedPy       [iold];
 	fTR->PhoSharedPz       [inew] = fTR->PhoSharedPz       [iold];
 	fTR->PhoSharedEnergy   [inew] = fTR->PhoSharedEnergy   [iold];
+	fTR->PhoScSeedSeverity [inew] = fTR->PhoScSeedSeverity [iold];
+	fTR->PhoE1OverE9       [inew] = fTR->PhoE1OverE9       [iold];
+	fTR->PhoS4OverS1       [inew] = fTR->PhoS4OverS1       [iold];
 }
 
 void TreeCleaner::PutJet(int inew, int iold){

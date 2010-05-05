@@ -195,11 +195,13 @@ JPhi[1]			#phi(j_{2})
 JPhi[2]			#phi(j_{3})
 JPhi[3]			#phi(j_{4})
 JEMfrac			EM Fraction
+JEMfracClean	EM Fraction
 JEMfrac[0]		EM Fraction of j_{1}
 JEMfrac[1]		EM Fraction of j_{2}
 JEMfrac[2]		EM Fraction of j_{3}
 JEMfrac[3]		EM Fraction of j_{4}
 JChfrac			Charge Fraction of jets
+JChfracClean	Charge Fraction of jets
 JChfrac[0]		Charge Fraction of j_{1}
 JChfrac[1]		Charge Fraction of j_{2}
 JChfrac[2]		Charge Fraction of j_{3}
@@ -225,6 +227,8 @@ JNAssoTracks[1]	Number of assoc. tracks of j_{2}
 JNAssoTracks[2]	Number of assoc. tracks of j_{3}
 JNAssoTracks[3]	Number of assoc. tracks of j_{4}
 JVtxNChi2		Jet vertex norm. #chi^{2}
+JID_n90Hits		JetID n90 Hits
+JID_HPD			JetID HPD
 RawMET			ME_{  #perp} (Raw)  [GeV]
 RawMETphi		#phi(ME_{#perp}) (Raw)
 MuCorrMET		ME_{  #perp} (MuCorr)  [GeV]
@@ -286,3 +290,71 @@ PhoIso03			Photon Iso. #DeltaR=0.3
 PhoIso03TrkHollow	Photon Iso. #DeltaR=0.3 (Trk Hollow)
 PhoIso03Ecal	Photon Iso. #DeltaR=0.3 (ECal)
 PhoIso03Hcal	Photon Iso. #DeltaR=0.3 (HCal)
+PrimVtxd0BS		Prim. Vtx. d_{  0} [cm]
+PrimVtxdzBS		Prim. Vtx. d_{  0} [cm]
+MuDeltaPOverP	#Deltap/p (#mu)
+Mud0signif		d_{0} Significance (#mu)
+Mudzsignif		d_{z} Significance (#mu)
+MuDRSS			#DeltaR (SS #mu's)
+MuDROS			#DeltaR (OS #mu's)
+MuInvMSS			Inv. Mass (SS #mu's)
+MuInvMOS			Inv. Mass (OS #mu's)
+Eld0signif		d_{0} Significance (e)
+Eldzsignif		d_{z} Significance (e)
+ElDRSS			#DeltaR (SS e's)
+ElDROS			#DeltaR (OS e's)
+ElInvMSS			Inv. Mass (SS e's)
+ElInvMOS			Inv. Mass (OS e's)
+ElHcalOverEcalBar						E_{HCAL}/E_{ECAL} (e, Barrel)
+ElSigmaIetaIetaBar					#sigma_{i#eta,i#eta} (e, Barrel)
+ElDeltaPhiSeedClusterAtCaloBar	#Delta #phi (SeedCluster, Trk at Calo.) (e, Barrel)
+ElDeltaEtaSeedClusterAtCaloBar	#Delta #eta (SeedCluster, Trk at Calo.) (e, Barrel)
+ElDeltaPhiSuperClusterAtVtxBar	#Delta #phi (SC, Trk at Vtx.) (e, Barrel)
+ElDeltaEtaSuperClusterAtVtxBar	#Delta #eta (SC, Trk at Vtx.) (e, Barrel)
+ElESuperClusterOverPBar				E_{SC} / p (e, Barrel)
+ElHcalOverEcalEnd						E_{HCAL}/E_{ECAL} (e, Endcap)
+ElSigmaIetaIetaEnd					#sigma_{i#eta,i#eta} (e, Endcap)
+ElSigmaIetaIetaClean					#sigma_{i#eta,i#eta} (e)
+ElDeltaPhiSeedClusterAtCaloEnd	#Delta #phi (SeedCluster, Trk at Calo.) (e, Endcap)
+ElDeltaEtaSeedClusterAtCaloEnd	#Delta #eta (SeedCluster, Trk at Calo.) (e, Endcap)
+ElDeltaPhiSuperClusterAtVtxEnd	#Delta #phi (SC, Trk at Vtx.) (e, Endcap)
+ElDeltaEtaSuperClusterAtVtxEnd	#Delta #eta (SC, Trk at Vtx.) (e, Endcap)
+ElESuperClusterOverPEnd				E_{SC} / p (e, Endcap)
+PhoHoverEBar		E_{HCAL}/E_{ECAL} (#gamma, Barrel)
+PhoHoverEEnd		E_{HCAL}/E_{ECAL} (#gamma, Endcap)
+PhoSigmaIetaIetaBar	#sigma_{i#eta,i#eta} (#gamma, Barrel)
+PhoSigmaIetaIetaEnd	#sigma_{i#eta,i#eta} (#gamma, Endcap)
+PhDR			#DeltaR (#gamma, #gamma)
+PhInvM		Inv. Mass (#gamma #gamma)
+PhInvMLow	Inv. Mass (#gamma #gamma)
+MuInvMSSClean			Inv. Mass (SS #mu's)
+MuInvMOSClean			Inv. Mass (OS #mu's)
+MuInvMSSCleanLow			Inv. Mass (SS #mu's)
+MuInvMOSCleanLow			Inv. Mass (OS #mu's)
+ElInvMSSClean			Inv. Mass (SS e's)
+ElInvMOSClean			Inv. Mass (OS e's)
+ElInvMSSCleanLow			Inv. Mass (SS e's)
+ElInvMOSCleanLow			Inv. Mass (OS e's)
+PhInvMClean		Inv. Mass (#gamma #gamma)
+PhInvMCleanLow	Inv. Mass (#gamma #gamma)
+Jetd0PV		d_{0}(j,PV) [cm]
+JetdzPV		d_{z}(j,PV) [cm]
+Jetd0signif		d_{0} Significance (j)
+Jetdzsignif		d_{z} Significance (j)
+DphiMETJet1		#Delta#phi (ME_{T}, j_{1})
+DphiMETJet2		#Delta#phi (ME_{T}, j_{2})
+DphiMETJet1Clean		#Delta#phi (ME_{T}, j_{1})
+DphiMETJet2Clean		#Delta#phi (ME_{T}, j_{2})
+METR12			ME_{T}R_{12}
+METR21			ME_{T}R_{21}
+METR12Clean			ME_{T}R_{12}
+METR21Clean			ME_{T}R_{21}
+METRsum			ME_{T}R_{sum}
+EvtEmFrac		Event EM Fraction
+EvtChFrac		Event Charged Fraction
+JInvM2jClean	Jet Inv. Mass
+JInvMGT2jClean	Jet Inv. Mass (Multijets)
+DRJ1J2			#DeltaR (j_{1}, j_{2})
+DphiJ1J21		#Delta#phi (j_{1}, j_{2})
+DetaJ1J21		#Delta#eta (j_{1}, j_{2})
+J1J2PtRatio		p_{#perp} (j_{1})/p_{#perp} (j_{2})

@@ -535,9 +535,7 @@ TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, 
 }
 
 /****************************************************************************/
-void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, 
-                       int nbins, double xmin, double xmax, TString ofilename, 
-                       bool logy, double line1x, double line2x, TFile* file){
+void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename, bool logy, double line1x, double line2x, TFile* file){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 	TH1D *hfir = drawTree1D(var,reqs,convertVarName2(var),nbins,xmin,xmax,tree,false);
@@ -636,7 +634,6 @@ double AnaClass::tailFraction(TH1D* h, double frac){
 	}
 
 	return binValue;
-
 }
 
 /****************************************************************************/
@@ -815,10 +812,7 @@ TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, dou
 }
 
 /****************************************************************************/
-void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, 
-                         int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt, 
-                         int markstyle, bool logx, bool logy, bool logz, double line1x, double line2x, double line1y, double line2y,
-                         TFile* file ){
+void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt, int markstyle, bool logx, bool logy, bool logz, double line1x, double line2x, double line1y, double line2y, TFile* file ){
 	gStyle->SetOptStat(1111111);
 	TString histn = Form("%svs%s", convertVarName2(var1).Data(), convertVarName2(var2).Data());
 	TH2D *h = drawTree2D(var1, var2, reqs, histn , nbinsx, xmin, xmax, nbinsy, ymin, ymax, tree, false);
@@ -1422,6 +1416,13 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 	int y = (int)gRandom->Uniform(0,70);
 	TCanvas* c1 = new TCanvas(name, name, x, y, 900, 700);
 	return c1;
+}
+
+/****************************************************************************/
+TH1D* AnaClass::bookTH1D(const char* name, const char* title, int nbins, double xlow, double xup){
+	TH1D *h = new TH1D(name, title, nbins, xlow, xup);
+	h->SetXTitle(convertVarName(name));
+	return h;
 }
 
 /****************************************************************************/

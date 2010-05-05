@@ -1,4 +1,5 @@
 #include <TChainElement.h>
+#include <TLorentzVector.h>
 
 #include "base/TreeReader.hh"
 #include "helper/AnaClass.hh"
@@ -15,149 +16,26 @@ PhysQCAnalysis::PhysQCAnalysis(TreeReader *tr, TreeCleaner *tc) : UserAnalysisBa
 	fTlat = new TLatex();
 	fAC = new AnaClass();
 	Util::SetStyle();
-
-	// Histos for uncleaned objects
-	const unsigned int nvxbins = 100;
-	fPvxHistos[0] = new TH1D("PrimVtxNChi2", "Prim Vtx NChi2", nvxbins, 0., 10. );
-	fPvxHistos[1] = new TH1D("PrimVtxd0BS", "Prim Vtx d0 to BS", nvxbins, 0., 0.3 );
-	fPvxHistos[2] = new TH1D("PrimVtxdzBS", "Prim Vtx dz to BS", nvxbins, 0., 20.);
-	fPvxHistos[3] = new TH1D("PrimVtxPtSum", "Prim Vtx PtSum", nvxbins, 0., 300.);
-	
-	const unsigned int nmubins = 100;
-	fMuHistos[0] = new TH1D("MuDeltaPOverP", "Mu DeltaP/P;Mu DeltaP/P",    nmubins, 0., 0.25 );
-	fMuHistos[1] = new TH1D("Mud0signif", "Mu d0 significance;Mu d0 significance",  nmubins, 0., 15. );
-	fMuHistos[2] = new TH1D("Mudzsignif", "Mu dz significance;Mu dz significance",  nmubins, 0., 15. );
-	fMuHistos[3] = new TH1D("MuNChi2", "Mu NChi2;Mu NChi2",  nmubins, 0., 20. );
-	fMuHistos[4] = new TH1D("MuNTkHits", "Mu NTkHits;Mu NTkHits",  30, 0., 30 );
-	fMuHistos[5] = new TH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
-	fMuHistos[6] = new TH1D("MuDROS", "Mu DR Opp Sign;Mu DR Opp Sign",  nmubins, 0., 3.2 );
-	fMuHistos[7] = new TH1D("MuInvMSS", "Mu InvM Same Sign;Mu InvM Same Sign", nmubins, 0., 100. );
-	fMuHistos[8] = new TH1D("MuInvMOS", "Mu InvM Opp Sign;Mu InvM Opp Sign",  nmubins, 0., 100. );
-	
-	const unsigned int nelbins = 100;
-	fElHistos[0]  = new TH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.2);
-	fElHistos[1]  = new TH1D("ElSigmaIetaIetaBar", "El sigmaIetaIeta Bar",  nelbins, 0., 0.05);
-	fElHistos[2]  = new TH1D("ElDeltaPhiSeedClusterAtCaloBar", "El DeltaPhiSeedClusterAtCalo Bar",  nelbins, -0.1, 0.1);
-	fElHistos[3]  = new TH1D("ElDeltaEtaSeedClusterAtCaloBar", "El DeltaEtaSeedClusterAtCalo Bar",  nelbins, -0.05, 0.05);
-	fElHistos[4]  = new TH1D("ElDeltaPhiSuperClusterAtVtxBar", "El DeltaPhiSuperClusterAtVtx Bar",  nelbins, -0.1, 0.1);
-	fElHistos[5]  = new TH1D("ElDeltaEtaSuperClusterAtVtxBar", "El DeltaEtaSuperClusterAtVtx Bar",  nelbins, -0.05, 0.05);
-	fElHistos[6]  = new TH1D("ElESuperClusterOverPBar", "El ESuperClusterOverP Bar",  nelbins, 0., 5.);
-	fElHistos[7]  = new TH1D("ElHcalOverEcalEnd", "El H/E End",  nelbins, 0., 0.2);
-	fElHistos[8]  = new TH1D("ElSigmaIetaIetaEnd", "El sigmaIetaIeta End",  nelbins, 0., 0.05);
-	fElHistos[9]  = new TH1D("ElDeltaPhiSeedClusterAtCaloEnd", "El DeltaPhiSeedClusterAtCalo End",  nelbins, -0.1, 0.1);
-	fElHistos[10] = new TH1D("ElDeltaEtaSeedClusterAtCaloEnd", "El DeltaEtaSeedClusterAtCalo End",  nelbins, -0.05, 0.05);
-	fElHistos[11] = new TH1D("ElDeltaPhiSuperClusterAtVtxEnd", "El DeltaPhiSuperClusterAtVtx End",  nelbins, -0.1, 0.1);
-	fElHistos[12] = new TH1D("ElDeltaEtaSuperClusterAtVtxEnd", "El DeltaEtaSuperClusterAtVtx End",  nelbins, -0.05, 0.05);
-	fElHistos[13] = new TH1D("ElESuperClusterOverPEnd", "El ESuperClusterOverP End",  nelbins, 0., 5.);
-	fElHistos[14] = new TH1D("Eld0signif", "El d0 significance;El d0 significance",  nelbins, 0., 15. );
-	fElHistos[15] = new TH1D("Eldzsignif", "El dz significance;El dz significance",  nelbins, 0., 15. );
-	fElHistos[16] = new TH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nelbins, 0., 3.2 );
-	fElHistos[17] = new TH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );
-	fElHistos[18] = new TH1D("ElInvMSS", "El InvM Same Sign;El InvM Same Sign", nelbins, 0., 100. );
-	fElHistos[19] = new TH1D("ElInvMOS", "El InvM Opp Sign;El InvM Opp Sign",  nelbins, 0., 100. );
-
-	const unsigned int nphbins = 100;
-	fPhHistos[0]  = new TH1D("PhoHoverEBar", "Phot H/E Bar",  nphbins, 0., 0.2);
-	fPhHistos[1]  = new TH1D("PhoSigmaIetaIetaBar", "Phot sigmaIetaIeta Bar",  nphbins, 0., 0.05);
-	fPhHistos[2]  = new TH1D("PhoHoverEEnd", "Phot H/E End",  nphbins, 0., 0.05);
-	fPhHistos[3]  = new TH1D("PhoSigmaIetaIetaEnd", "Phot sigmaIetaIeta End",  nphbins, 0., 0.05);
-	fPhHistos[4] = new TH1D("PhDR", "Phot DR;Phot DR",  nphbins, 0., 3.2 );
-	fPhHistos[5] = new TH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 50. );
-	fPhHistos[6] = new TH1D("PhInvMLow", "Phot InvM;Phot InvM", nphbins, 0., 5. );
-
-	const unsigned int njetbins = 100;
-	fJHistos[0] = new TH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
-	fJHistos[1] = new TH1D("JetdzPV", "Jet dz PV;Jet dz to PV",  njetbins, -2., 2. );
-	fJHistos[2] = new TH1D("Jetd0signif", "Jet d0 significance;Jet d0 significance",  njetbins, 0., 15. );
-	fJHistos[3] = new TH1D("Jetdzsignif", "Jet dz significance;Jet dz significance",  njetbins, 0., 15. );
-	fJHistos[4] = new TH1D("JetEMfrac", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
-	fJHistos[5] = new TH1D("JetChfrac", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
-	fJHistos[6] = new TH1D("JID_n90Hits", "Jet ID n90Hits;Jet ID n90Hits",  30, 0, 30 );
-	fJHistos[7] = new TH1D("JID_HPD", "Jet ID HPD;Jet ID HPD",  njetbins, 0, 1. );
-	fJChEMfrac  = new TH2D("JChEMfrac", "Jet Ch vs EM frac;Jet EM frac;Jet Ch frac", njetbins, -0.01, 1.01, njetbins, -1.01, 2.);
-	fJEMfracEta = new TH2D("JEMfracEta", "Jet EM frac vs Eta;Jet Eta;Jet EM frac", njetbins, -5., 5., njetbins, -1.01, 1.01);
-	fJChfracEta = new TH2D("JChfracEta", "Jet Ch frac vs Eta;Jet Eta;Jet Ch frac", njetbins, -5., 5., njetbins, -1.01, 2.01);
-	
-	const unsigned int nevbins = 100;
-	fMETHistos[0] = new TH1D("DphiMETJet1", "Dphi(MET,j1)", nevbins, 0, 3.1416);
-	fMETHistos[1] = new TH1D("DphiMETJet2", "Dphi(MET,j2)", nevbins, 0, 3.1416);
-	fMETHistos[2] = new TH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
-	fMETHistos[3] = new TH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
-	fMETHistos[4] = new TH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 3., 6.283);
-	fMETDphi12    = new TH2D("METDphi12", "MET Dphi 12;Dphi(MET,j1);Dphi(MET,j2)", nevbins, 0, 3.142, nevbins, 0, 3.142);
-	fMETR12R21    = new TH2D("METR12R21", "MET R21 vs R12;R12;R21", nevbins, 0, 6.283, nevbins, 0, 6.283);
-	fMETR12Dphij12 = new TH2D("METR12Dphij12", "MET R21 vs Dphijet12;R12;Dphij12", nevbins, 0, 6.283, nevbins, 0, 3.142);
-	fMETR12Etaj12 = new TH2D("METR12Etaj12", "MET R21 vs Eta jet12;R12;Eta jet 1,2", nevbins, 0, 6.283, nevbins, -5., 5.);
-	fMETR12j12PtRat = new TH2D("METR12j12PtRat", "MET R21 vs Eta jet12;R12;Pt2/Pt1", nevbins, 0, 6.283, nevbins, 0., 1.);
-	fMETR12dRj12 = new TH2D("METR12dRj12", "MET R21 vs dR(j1,j2);R12;dR(j1,j2)", nevbins, 0, 6.283, nevbins, 0., 6.283);
-
-	fEvtHistos[0] = new TH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
-	fEvtHistos[1] = new TH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
-
-	// Histos for cleaned objects, CI = Clean+Isolated
-	const unsigned int nCIbins = 100;
-	fMuCIHistos[0] = new TH1D("NMus", "Nber of Mus clean+iso", 10, 0, 10);
-	fMuCIHistos[1] = new TH1D("MuPt", "Pt of Mus clean+iso", nCIbins, 0, 100.);
-	fMuCIHistos[2] = new TH1D("MuEta", "Eta of Mus clean+iso", nCIbins, -2.5, 2.5);
-	fMuCIHistos[3] = new TH1D("MuPhi", "Phi of Mus clean+iso", nCIbins, -3.2, 3.2);
-	fElCIHistos[0] = new TH1D("NEles", "Nber of Eles clean+iso", 10, 0, 10);
-	fElCIHistos[1] = new TH1D("ElPt", "Pt of Eles clean+iso", nCIbins, 0, 100.);
-	fElCIHistos[2] = new TH1D("ElEta", "Eta of Eles clean+iso", nCIbins, -2.5, 2.5);
-	fElCIHistos[3] = new TH1D("ElPhi", "Phi of Eles clean+iso", nCIbins, -3.2, 3.2);
-	fElCIHistos[4] = new TH1D("ElSigmaIetaIetaClean", "ElSigmaIetaIeta of Eles clean+iso", nCIbins, 0., 0.015);
-	fPhCIHistos[0] = new TH1D("NPhotons", "Nber of Photons clean+iso", 20, 0, 20);
-	fPhCIHistos[1] = new TH1D("PhoPt", "Pt of Photons clean+iso", nCIbins, 0, 100.);
-	fPhCIHistos[2] = new TH1D("PhoEta", "Eta of Photons clean+iso", nCIbins, -2.5, 2.5);
-	fPhCIHistos[3] = new TH1D("PhoPhi", "Phi of Photons clean+iso", nCIbins, -3.2, 3.2);
-	fJCIHistos[0] = new TH1D("NJets", "Nber of Jets clean+iso", 20, 0, 20);
-	fJCIHistos[1] = new TH1D("JPt", "Pt of Jets clean+iso", nCIbins, 0, 250.);
-	fJCIHistos[2] = new TH1D("JEta", "Eta of Jets clean+iso", nCIbins, -5., 5.);
-	fJCIHistos[3] = new TH1D("JPhi", "Phi of Jets clean+iso", nCIbins, -3.2, 3.2);
-	fJCIHistos[4] = new TH1D("JetEMfracClean", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
-	fJCIHistos[5] = new TH1D("JetChfracClean", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
-	fJCIHistos[6] = new TH1D("DphiMETJet1Clean", "Dphi(MET,j1)", nevbins, 0, 3.1416);
-	fJCIHistos[7] = new TH1D("DphiMETJet2Clean", "Dphi(MET,j2)", nevbins, 0, 3.1416);
-	fJCIHistos[8] = new TH1D("METR12Clean", "MET R12;MET R12", nevbins, 0, 6.283);
-	fJCIHistos[9] = new TH1D("METR21Clean", "MET R21;MET R21", nevbins, 0, 6.283);
-	fJCIHistos[10] = new TH1D("JPt1j", "Pt of mono-Jets clean+iso", nCIbins, 0, 250.);
-	fJCIHistos[11] = new TH1D("JEta1j", "Eta of mono-Jets clean+iso", nCIbins, -5., 5.);
-	fJCIHistos[12] = new TH1D("JPhi1j", "Phi of mono-Jets clean+iso", nCIbins, -3.2, 3.2);
-	fJCIHistos[13] = new TH1D("DphiMETmonoJetClean", "Dphi(MET,monoJet)", nevbins, 0, 3.1416);
-	
-	// Inv mass Histos for cleaned objects, CI = Clean+Isolated
-	const unsigned int ninvmbins = 100;
-	fInvMHistos[0] = new TH1D("MuInvMSSClean", "Mu Clean InvM Same Sign;Mu InvM Same Sign", ninvmbins, 0., 100. );
-	fInvMHistos[1] = new TH1D("MuInvMSSCleanLow", "Mu Clean InvM Low Same Sign;Mu InvM Same Sign", ninvmbins, 0., 5. );
-	fInvMHistos[2] = new TH1D("MuInvMOSClean", "Mu Clean InvM Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 100. );
-	fInvMHistos[3] = new TH1D("MuInvMOSCleanLow", "Mu Clean InvM Low Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 5. );
-	fInvMHistos[4] = new TH1D("ElInvMSSClean", "El Clean InvM Same Sign;El InvM Same Sign", ninvmbins, 0., 100. );
-	fInvMHistos[5] = new TH1D("ElInvMSSCleanLow", "El Clean InvM Low Same Sign;El InvM Same Sign", ninvmbins, 0., 5. );
-	fInvMHistos[6] = new TH1D("ElInvMOSClean", "El Clean InvM Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 100. );
-	fInvMHistos[7] = new TH1D("ElInvMOSCleanLow", "El Clean InvM Low Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 5. );
-	fInvMHistos[8] = new TH1D("PhInvMClean", "Phot Clean InvM;Phot InvM", ninvmbins, 0., 100. );
-	fInvMHistos[9] = new TH1D("PhInvMCleanLow", "Phot Clean InvM Low;Phot InvM", ninvmbins, 0., 5. );
-	fInvMHistos[10] = new TH1D("JInvM2jClean", "Jets Clean InvM dijets;dijet InvM", ninvmbins, 0., 300. );
-	fInvMHistos[11] = new TH1D("JInvMGT2jClean", "Jets Clean InvM >dijets;GT dijet InvM", ninvmbins, 0., 300. );
-
 }
-
 PhysQCAnalysis::~PhysQCAnalysis(){
+	delete fTlat;
+	delete fAC;
 }
 
 void PhysQCAnalysis::Begin(const char* filename){
-        fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
+	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	fAC->readVarNames("varnames.dat");
 	fAC->setOutputDir(fOutputDir);
 	fAC->setGlobalTag(fTag);
+	BookHistos();
 }
 
 void PhysQCAnalysis::Analyze1(){
 // Analysis before cleaning
-	
-	// skip empty events
-//	if (fTR->GoodEvent > 0) return;
-	if(fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
-	
+
+	// Skip empty events
+	if((fTR->NMus + fTR->NEles + fTR->NJets) <= 0 && fTR->NPhotons < 1) return;
+
 	// Primary vertex plots
 	fPvxHistos[0]->Fill(fTR->PrimVtxNChi2);
 	double xVx = fTR->PrimVtxx - fTR->Beamspotx;
@@ -167,11 +45,12 @@ void PhysQCAnalysis::Analyze1(){
 	fPvxHistos[1]->Fill(rVx);
 	fPvxHistos[2]->Fill(zVx);
 	fPvxHistos[3]->Fill(fTR->PrimVtxPtSum);
-	
-	double p1[4], p2[4], minv;
-	
+
+	TLorentzVector p1(0.,0.,0.,0.), p2(0.,0.,0.,0.), psum(0.,0.,0.,0.);
+	double minv = -999.99;
+
 	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
-	
+
 	// Muon plots
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		fMuHistos[0]->Fill(fTR->MuPtE[i]/fTR->MuPt[i]);
@@ -190,33 +69,27 @@ void PhysQCAnalysis::Analyze1(){
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		for(size_t j = i+1; j < fTR->NMus; ++j){
 			double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
-			p1[0] = fTR->MuPx[i];
-			p1[1] = fTR->MuPy[i];
-			p1[2] = fTR->MuPz[i];
-			p1[3] = fTR->MuE[i];
-			p2[0] = fTR->MuPx[j];
-			p2[1] = fTR->MuPy[j];
-			p2[2] = fTR->MuPz[j];
-			p2[3] = fTR->MuE[j];
+			p1.SetPxPyPzE(fTR->MuPx[i],fTR->MuPy[i],fTR->MuPz[i],fTR->MuE[i]);
+			p2.SetPxPyPzE(fTR->MuPx[j],fTR->MuPy[j],fTR->MuPz[j],fTR->MuE[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
 				fMuHistos[5]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					minv = invMass(p1, p2);
 					fMuHistos[7]->Fill(minv);
 				}
 			} else {
 				fMuHistos[6]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					minv = invMass(p1, p2);
 					fMuHistos[8]->Fill(minv);
 				}
 			}
 		}
 	}
-	
+
 	// Electron plots
 	for(size_t i = 0; i < fTR->NEles; ++i){
-		if (fTR->ElEta[i] < 1.479) {
+		if (fabs(fTR->ElEta[i]) < 1.479) {
 			fElHistos[0]->Fill(fTR->ElHcalOverEcal[i]);
 			fElHistos[1]->Fill(fTR->ElSigmaIetaIeta[i]);
 			fElHistos[2]->Fill(fTR->ElDeltaPhiSeedClusterAtCalo[i]);
@@ -246,33 +119,27 @@ void PhysQCAnalysis::Analyze1(){
 	for(size_t i = 0; i < fTR->NEles; ++i){
 		for(size_t j = i+1; j < fTR->NEles; ++j){
 			double deltaR = Util::GetDeltaR(fTR->ElEta[i], fTR->ElEta[j], fTR->ElPhi[i], fTR->ElPhi[j]);
-			p1[0] = fTR->ElPx[i];
-			p1[1] = fTR->ElPy[i];
-			p1[2] = fTR->ElPz[i];
-			p1[3] = fTR->ElE[i];
-			p2[0] = fTR->ElPx[j];
-			p2[1] = fTR->ElPy[j];
-			p2[2] = fTR->ElPz[j];
-			p2[3] = fTR->ElE[j];
+			p1.SetPxPyPzE(fTR->ElPx[i],fTR->ElPy[i],fTR->ElPz[i],fTR->ElE[i]);
+			p2.SetPxPyPzE(fTR->ElPx[j],fTR->ElPy[j],fTR->ElPz[j],fTR->ElE[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			if (fTR->ElCharge[i] == fTR->ElCharge[j]) {
 				fElHistos[16]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					minv = invMass(p1, p2);
 					fElHistos[18]->Fill(minv);
 				}
 			} else {
 				fElHistos[17]->Fill(deltaR);
 				if (deltaR < 0.5) {
-					minv = invMass(p1, p2);
 					fElHistos[19]->Fill(minv);
 				}
 			}
 		}
 	}
-	
+
 	// Photon plots
 	for(size_t i = 0; i < fTR->NPhotons; ++i){
-		if (fTR->PhoEta[i] < 1.479) {
+		if (fabs(fTR->PhoEta[i]) < 1.479) {
 			fPhHistos[0]->Fill(fTR->PhoHoverE[i]);
 			fPhHistos[1]->Fill(fTR->PhoSigmaIetaIeta[i]);
 		} else {
@@ -281,39 +148,33 @@ void PhysQCAnalysis::Analyze1(){
 		}
 
 	}
-	
+
 	for(size_t i = 0; i < fTR->NPhotons; ++i){
 		for(size_t j = i+1; j < fTR->NPhotons; ++j){
 			double deltaR = Util::GetDeltaR(fTR->PhoEta[i], fTR->PhoEta[j], fTR->PhoPhi[i], fTR->PhoPhi[j]);
 			fPhHistos[4]->Fill(deltaR);
 			if (deltaR < 0.5) {
-				p1[0] = fTR->PhoPx[i];
-				p1[1] = fTR->PhoPy[i];
-				p1[2] = fTR->PhoPz[i];
-				p1[3] = fTR->PhoEnergy[i];
-				p2[0] = fTR->PhoPx[j];
-				p2[1] = fTR->PhoPy[j];
-				p2[2] = fTR->PhoPz[j];
-				p2[3] = fTR->PhoEnergy[j];
-				minv = invMass(p1, p2);
+				p1.SetPxPyPzE(fTR->PhoPx[i],fTR->PhoPy[i],fTR->PhoPz[i],fTR->PhoEnergy[i]);
+				p2.SetPxPyPzE(fTR->PhoPx[j],fTR->PhoPy[j],fTR->PhoPz[j],fTR->PhoEnergy[j]);
+				psum = p1 + p2;
+				minv = psum.M();
 				fPhHistos[5]->Fill(minv);
 				fPhHistos[6]->Fill(minv);
 			}
 		}
 	}
-	
+
 	// Jet plots
 	for(size_t i = 0; i < fTR->NJets; ++i){
 		double d0  = 0.;
 		double dd0 = 0.001;
 		double dz  = 0.;
 		double ddz = 0.001;
-//		if (fTR->JVtxNChi2 > 0) { // not defined in this file
 		double dztry = fTR->JVtxz[i] - fTR->PrimVtxz;
-		// ignore jets with badly reconstructed vertices
+		// Ignore jets with badly reconstructed vertices
 		if (fTR->JVtxz[i] != -888.88 && fTR->JVtxz[i] != -777.77) {
 			d0  = sqrt((fTR->JVtxx[i]-fTR->PrimVtxx)*(fTR->JVtxx[i]-fTR->PrimVtxx)
-			+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
+				+ (fTR->JVtxy[i]-fTR->PrimVtxy)*(fTR->JVtxy[i]-fTR->PrimVtxy) );
 			dd0 = sqrt(fTR->JVtxExx[i] + fTR->JVtxEyy[i] + drVxsq);
 			if (dd0 <= 0.) dd0 = 0.001;
 			dz  = fTR->JVtxz[i] - fTR->PrimVtxz;
@@ -331,55 +192,35 @@ void PhysQCAnalysis::Analyze1(){
 		fJChEMfrac->Fill(fTR->JEMfrac[i], fTR->JChfrac[i]);
 		fJEMfracEta->Fill(fTR->JEta[i], fTR->JEMfrac[i]);
 		fJChfracEta->Fill(fTR->JEta[i], fTR->JChfrac[i]);
-//		if (dz < -2.) {
-//		cout << " dz = " << dz << ", JVtxNChi2 = " << fTR->JVtxNChi2
-//		     << ", JNAssoTracks = " << fTR->JNAssoTracks << endl;
-//		}
 	}
-	
+
 	// MET plots
 	double METPhi = fTR->MuCorrMETphi;
 	double MET = fTR->MuCorrMET;
 	double METBadJetmin = 20.;
-	double JEtaBar = 2.6;
 	if (fTR->NJets > 1 && MET > METBadJetmin) {
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
 		double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
-		double pi = 3.141592654;
-		double fR12 = sqrt(dPhiMJ1*dPhiMJ1 + (pi-dPhiMJ2)*(pi-dPhiMJ2) );
-		double fR21 = sqrt(dPhiMJ2*dPhiMJ2 + (pi-dPhiMJ1)*(pi-dPhiMJ1) );
+		double R12 = sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
+		double R21 = sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
 		double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
 		double dRj12 = Util::GetDeltaR(fTR->JEta[0], fTR->JEta[1], fTR->JPhi[0], fTR->JPhi[1]);
-//		if (fabs(fTR->JEta[0]) < JEtaBar && fabs(fTR->JEta[1]) < JEtaBar) {
 		fMETHistos[0]->Fill(dPhiMJ1);
 		fMETHistos[1]->Fill(dPhiMJ2);
-		fMETHistos[2]->Fill(fR12);
-		fMETHistos[3]->Fill(fR21);
-		fMETHistos[4]->Fill(fR12+fR21);
+		fMETHistos[2]->Fill(R12);
+		fMETHistos[3]->Fill(R21);
+		fMETHistos[4]->Fill(R12+R21);
 		fMETDphi12->Fill(dPhiMJ1, dPhiMJ2);
-		fMETR12R21->Fill(fR12, fR21);
-		fMETR12Dphij12->Fill(fR12, dPhij12);
-		fMETR12Etaj12->Fill(fR12, fTR->JEta[0]);
-		fMETR12Etaj12->Fill(fR12, fTR->JEta[1]);
-		fMETR12j12PtRat->Fill(fR12, fTR->JPt[1]/fTR->JPt[0]);
-		fMETR12dRj12->Fill(fR12, dRj12);
-//		}
-		
-/*		if (fR12 > 3.1 && fR12 < 3.2) {
-		cout << "Event = " << fTR->Event << endl;
-		cout << " R12    = " << fR12   << ", dPhiMJ1 = " << dPhiMJ1 << ", dPhiMJ2 = " << dPhiMJ2 << endl;
-		cout << " METPhi = " << METPhi << ", Jet1Phi = " << fTR->JPhi[0] << ", Jet2Phi = " << fTR->JPhi[1] << endl;
-		cout << " MET    = " << MET    << ", Jet1Pt  = " << fTR->JPt[0]  << ", Jet2Pt  = " << fTR->JPt[1]  << endl;
-		cout << " dRj12  = " << dRj12  << "  Jet1Eta = " << fTR->JEta[0] << ", Jet2Eta = " << fTR->JEta[1] << endl;
-		cout << "          "           << "  Jet1fEM = " << fTR->JEMfrac[0] << ", Jet2fEM = " << fTR->JEMfrac[1] << endl;
-		cout << "          "           << "  Jet1fCh = " << fTR->JChfrac[0] << ", Jet2fCh = " << fTR->JChfrac[1] << endl;
-		cout << endl;
-		}
-*/
+		fMETR12R21->Fill(R12, R21);
+		fMETR12Dphij12->Fill(R12, dPhij12);
+		fMETR12Etaj12->Fill(R12, fTR->JEta[0]);
+		fMETR12Etaj12->Fill(R12, fTR->JEta[1]);
+		fMETR12j12PtRat->Fill(R12, fTR->JPt[1]/fTR->JPt[0]);
+		fMETR12dRj12->Fill(R12, dRj12);
 	}
-	
+
 	// Event plots
-	double fracEm, fracCh;
+	double fracEm(0.), fracCh(0.);
 	GetEvtEmChFrac(fracEm, fracCh);
 	fEvtHistos[0]->Fill(fracEm);
 	fEvtHistos[1]->Fill(fracCh);
@@ -387,13 +228,14 @@ void PhysQCAnalysis::Analyze1(){
 
 void PhysQCAnalysis::Analyze2(){
 // Analysis after cleaning
-	
+
 	// skip empty and bad events
-	if (fTR->NMus + fTR->NEles + fTR->NJets <= 0 && fTR->NPhotons < 1) return;
+	if ((fTR->NMus + fTR->NEles + fTR->NJets) <= 0 && fTR->NPhotons < 1) return;
 	if (fTR->GoodEvent > 0) return;
-	
-	double p1[4], p2[4], minv;
-	
+
+	TLorentzVector p1(0.,0.,0.,0.), p2(0.,0.,0.,0.), psum(0.,0.,0.,0.);
+	double minv = -999.99;
+
 	fMuCIHistos[0]->Fill(fTR->NMus);
 	for(size_t i = 0; i < fTR->NMus; ++i){
 		if (fTR->MuIsIso[i] == 0) continue;
@@ -401,15 +243,10 @@ void PhysQCAnalysis::Analyze2(){
 		fMuCIHistos[2]->Fill(fTR->MuEta[i]);
 		fMuCIHistos[3]->Fill(fTR->MuPhi[i]);
 		for(size_t j = i+1; j < fTR->NMus; ++j){
-			p1[0] = fTR->MuPx[i];
-			p1[1] = fTR->MuPy[i];
-			p1[2] = fTR->MuPz[i];
-			p1[3] = fTR->MuE[i];
-			p2[0] = fTR->MuPx[j];
-			p2[1] = fTR->MuPy[j];
-			p2[2] = fTR->MuPz[j];
-			p2[3] = fTR->MuE[j];
-			minv = invMass(p1, p2);
+			p1.SetPxPyPzE(fTR->MuPx[i],fTR->MuPy[i],fTR->MuPz[i],fTR->MuE[i]);
+			p2.SetPxPyPzE(fTR->MuPx[j],fTR->MuPy[j],fTR->MuPz[j],fTR->MuE[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			if (fTR->MuCharge[i] == fTR->MuCharge[j]) {
 				fInvMHistos[0]->Fill(minv);
 				fInvMHistos[1]->Fill(minv);
@@ -428,15 +265,10 @@ void PhysQCAnalysis::Analyze2(){
 		fElCIHistos[3]->Fill(fTR->ElPhi[i]);
 		fElCIHistos[4]->Fill(fTR->ElSigmaIetaIeta[i]);
 		for(size_t j = i+1; j < fTR->NEles; ++j){
-			p1[0] = fTR->ElPx[i];
-			p1[1] = fTR->ElPy[i];
-			p1[2] = fTR->ElPz[i];
-			p1[3] = fTR->ElE[i];
-			p2[0] = fTR->ElPx[j];
-			p2[1] = fTR->ElPy[j];
-			p2[2] = fTR->ElPz[j];
-			p2[3] = fTR->ElE[j];
-			minv = invMass(p1, p2);
+			p1.SetPxPyPzE(fTR->ElPx[i],fTR->ElPy[i],fTR->ElPz[i],fTR->ElE[i]);
+			p2.SetPxPyPzE(fTR->ElPx[j],fTR->ElPy[j],fTR->ElPz[j],fTR->ElE[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			if (fTR->ElCharge[i] == fTR->ElCharge[j]) {
 				fInvMHistos[4]->Fill(minv);
 				fInvMHistos[5]->Fill(minv);
@@ -446,7 +278,7 @@ void PhysQCAnalysis::Analyze2(){
 			}
 		}
 	}
-	
+
 	fPhCIHistos[0]->Fill(fTR->NPhotons);
 	for(size_t i = 0; i < fTR->NPhotons; ++i){
 		if (fTR->PhoIsIso[i] == 0) continue;
@@ -454,20 +286,15 @@ void PhysQCAnalysis::Analyze2(){
 		fPhCIHistos[2]->Fill(fTR->PhoEta[i]);
 		fPhCIHistos[3]->Fill(fTR->PhoPhi[i]);
 		for(size_t j = i+1; j < fTR->NPhotons; ++j){
-			p1[0] = fTR->PhoPx[i];
-			p1[1] = fTR->PhoPy[i];
-			p1[2] = fTR->PhoPz[i];
-			p1[3] = fTR->PhoEnergy[i];
-			p2[0] = fTR->PhoPx[j];
-			p2[1] = fTR->PhoPy[j];
-			p2[2] = fTR->PhoPz[j];
-			p2[3] = fTR->PhoEnergy[j];
-			minv = invMass(p1, p2);
+			p1.SetPxPyPzE(fTR->PhoPx[i],fTR->PhoPy[i],fTR->PhoPz[i],fTR->PhoEnergy[i]);
+			p2.SetPxPyPzE(fTR->PhoPx[j],fTR->PhoPy[j],fTR->PhoPz[j],fTR->PhoEnergy[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			fInvMHistos[8]->Fill(minv);
 			fInvMHistos[9]->Fill(minv);
 		}
 	}
-	
+
 	fJCIHistos[0]->Fill(fTR->NJets);
 	for(size_t i = 0; i < fTR->NJets; ++i){
 		fJCIHistos[1]->Fill(fTR->JPt[i]);
@@ -476,15 +303,10 @@ void PhysQCAnalysis::Analyze2(){
 		fJCIHistos[4]->Fill(fTR->JEMfrac[i]);
 		fJCIHistos[5]->Fill(fTR->JChfrac[i]);
 		for(size_t j = i+1; j < fTR->NJets; ++j){
-			p1[0] = fTR->JPx[i];
-			p1[1] = fTR->JPy[i];
-			p1[2] = fTR->JPz[i];
-			p1[3] = fTR->JE[i];
-			p2[0] = fTR->JPx[j];
-			p2[1] = fTR->JPy[j];
-			p2[2] = fTR->JPz[j];
-			p2[3] = fTR->JE[j];
-			minv = invMass(p1, p2);
+			p1.SetPxPyPzE(fTR->JPx[i],fTR->JPy[i],fTR->JPz[i],fTR->JE[i]);
+			p2.SetPxPyPzE(fTR->JPx[j],fTR->JPy[j],fTR->JPz[j],fTR->JE[j]);
+			psum = p1 + p2;
+			minv = psum.M();
 			fInvMHistos[10]->Fill(minv);
 			if (fTR->NJets == 2) continue;
 			fInvMHistos[11]->Fill(minv);
@@ -502,20 +324,19 @@ void PhysQCAnalysis::Analyze2(){
 		double METPhi = fTR->MuCorrMETphi;
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
 		double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
-		double pi = 3.141592654;
-		double fR12 = sqrt(dPhiMJ1*dPhiMJ1 + (pi-dPhiMJ2)*(pi-dPhiMJ2) );
-		double fR21 = sqrt(dPhiMJ2*dPhiMJ2 + (pi-dPhiMJ1)*(pi-dPhiMJ1) );
+		double R12 = sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
+		double R21 = sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
 		fJCIHistos[6]->Fill(dPhiMJ1);
 		fJCIHistos[7]->Fill(dPhiMJ2);
-		fJCIHistos[8]->Fill(fR12);
-		fJCIHistos[9]->Fill(fR21);
+		fJCIHistos[8]->Fill(R12);
+		fJCIHistos[9]->Fill(R21);
 	}
 	if (fTR->NJets == 1 && MET > METBadJetmin) {
 		double METPhi = fTR->MuCorrMETphi;
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
 		fJCIHistos[13]->Fill(dPhiMJ1);
 	}
-	
+
 }
 
 void PhysQCAnalysis::End(){
@@ -579,19 +400,19 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fPvxHistos[0], tempstring1, tempstring2, outputdir, chisqVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPvxHistos[0]) << endl;
-	
+
 	tempstring1 = "Prim Vtx d0 BS";
 	tempstring2 = "PrimVtxd0BS";
 	PrintHisto(fPvxHistos[1], tempstring1, tempstring2, outputdir, dRVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPvxHistos[1]) << endl;
-	
+
 	tempstring1 = "Prim Vtx dz BS";
 	tempstring2 = "PrimVtxdzBS";
 	PrintHisto(fPvxHistos[2], tempstring1, tempstring2, outputdir, dzVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPvxHistos[2]) << endl;
-	
+
 	tempstring1 = "Prim Vtx PtSum";
 	tempstring2 = "PrimVtxPtSum";
 	PrintHisto(fPvxHistos[3], tempstring1, tempstring2, outputdir, PrimVtxPtSum, 999., 1, 1);
@@ -599,7 +420,7 @@ void PhysQCAnalysis::End(){
 	file << fAC->printAverage(tempstring2, fPvxHistos[3]) << endl;
 	file << fAC->printTailFraction(tempstring2, fPvxHistos[3], 0.05) << endl;
 	file << fAC->printTailFraction(tempstring2, fPvxHistos[3], 0.01) << endl;
-	
+
 	// uncleaned muons
 	outputdir = fOutputDir + "Cleaning/Mu/";
 	tempstring1 = "Mu DeltaP/P";
@@ -755,27 +576,27 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[13]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[13], 0., ElecEoverPInEndmin, 0., 100.) << endl;
-	
+
 	tempstring1 = "El d0signif";
 	tempstring2 = "Eld0signif";
 	PrintHisto(fElHistos[14], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[14]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[14], distVxmax, 100., 0., 100.) << endl;
-	
+
 	tempstring1 = "El dzsignif";
 	tempstring2 = "Eldzsignif";
 	PrintHisto(fElHistos[15], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[15]) << endl;
 	file << fAC->printRatio(tempstring2, fElHistos[15], distVxmax, 100., 0., 100.) << endl;
-	
+
 	tempstring1 = "El DR SS";
 	tempstring2 = "ElDRSS";
 	PrintHisto(fElHistos[16], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElHistos[16]) << endl;
-	
+
 	tempstring1 = "El DR OS";
 	tempstring2 = "ElDROS";
 	PrintHisto(fElHistos[17], tempstring1, tempstring2, outputdir);
@@ -841,7 +662,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fPhHistos[6], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhHistos[6]) << endl;
-	
+
 	// uncleaned jets
 	outputdir = fOutputDir + "Cleaning/Jet/";
 	tempstring1 = "Jet d0 PV";
@@ -850,20 +671,20 @@ void PhysQCAnalysis::End(){
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[0]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[0], distVxmax, 100., 0., 100.) << endl;
-	
+
 	tempstring1 = "Jet dz PV";
 	tempstring2 = "JetdzPV";
 	PrintHisto(fJHistos[1], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[1]) << endl;
 	file << fAC->printRatio(tempstring2, fJHistos[1], distVxmax, 100., 0., 100.) << endl;
-	
+
 	tempstring1 = "Jet d0signif";
 	tempstring2 = "Jetd0signif";
 	PrintHisto(fJHistos[2], tempstring1, tempstring2, outputdir, distVxmax);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[2]) << endl;
-	
+
 	tempstring1 = "Jet dzsignif";
 	tempstring2 = "Jetdzsignif";
 	PrintHisto(fJHistos[3], tempstring1, tempstring2, outputdir, distVxmax);
@@ -875,19 +696,19 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fJHistos[4], tempstring1, tempstring2, outputdir, FracEmminJet, FracEmmaxJet);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[4]) << endl;
-	
+
 	tempstring1 = "Jet Chfrac";
 	tempstring2 = "JetChfrac";
 	PrintHisto(fJHistos[5], tempstring1, tempstring2, outputdir, FracChminJet);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[5]) << endl;
-	
+
 	tempstring1 = "Jet ID n90Hits";
 	tempstring2 = "JID_n90Hits";
 	PrintHisto(fJHistos[6], tempstring1, tempstring2, outputdir, JID_n90Hitsmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJHistos[6]) << endl;
-	
+
 	tempstring1 = "Jet ID HPD";
 	tempstring2 = "JID_HPD";
 	PrintHisto(fJHistos[7], tempstring1, tempstring2, outputdir, JID_HPDmax, 999., 1);
@@ -1000,7 +821,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fEvtHistos[1], tempstring1, tempstring2, outputdir, FracChmin, 999., 1);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fEvtHistos[1]) << endl;
-	
+
 	// Clean+iso objects distributions
 	outputdir = fOutputDir + "Cleaning/Obj/";
 	tempstring1 = "Number of Mus";
@@ -1026,7 +847,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fMuCIHistos[3], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fMuCIHistos[3]) << endl;
-	
+
 	tempstring1 = "Number of Eles";
 	tempstring2 = "NEles";
 	PrintHisto(fElCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
@@ -1056,7 +877,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fElCIHistos[4], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fElCIHistos[4]) << endl;
-	
+
 	tempstring1 = "Number of Photons";
 	tempstring2 = "NPhotons";
 	PrintHisto(fPhCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
@@ -1080,7 +901,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fPhCIHistos[3], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fPhCIHistos[3]) << endl;
-	
+
 	tempstring1 = "Number of Jets";
 	tempstring2 = "NJets";
 	PrintHisto(fJCIHistos[0], tempstring1, tempstring2, outputdir, 999., 999., 1);
@@ -1110,19 +931,19 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fJCIHistos[4], tempstring1, tempstring2, outputdir, FracEmminJet, FracEmmaxJet);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJCIHistos[4]) << endl;
-	
+
 	tempstring1 = "Jet Chfrac";
 	tempstring2 = "JetChfracClean";
 	PrintHisto(fJCIHistos[5], tempstring1, tempstring2, outputdir, FracChminJet);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJCIHistos[5]) << endl;
-	
+
 	tempstring1 = "Dphi(MET,j1)";
 	tempstring2 = "DphiMETJet1Clean";
 	PrintHisto(fJCIHistos[6], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fJCIHistos[6]) << endl;
-	
+
 	tempstring1 = "Dphi(MET,j2)";
 	tempstring2 = "DphiMETJet2Clean";
 	PrintHisto(fJCIHistos[7], tempstring1, tempstring2, outputdir, dPhiJetMETmin);
@@ -1177,7 +998,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[1], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[1]) << endl;
-	
+
 	tempstring1 = "Mu Inv Mass OS Clean";
 	tempstring2 = "MuInvMOSClean";
 	PrintHisto(fInvMHistos[2], tempstring1, tempstring2, outputdir);
@@ -1189,7 +1010,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[3], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[3]) << endl;
-	
+
 	tempstring1 = "El Inv Mass SS Clean";
 	tempstring2 = "ElInvMSSClean";
 	PrintHisto(fInvMHistos[4], tempstring1, tempstring2, outputdir);
@@ -1201,7 +1022,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[5], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[5]) << endl;
-	
+
 	tempstring1 = "El Inv Mass OS Clean";
 	tempstring2 = "ElInvMOSClean";
 	PrintHisto(fInvMHistos[6], tempstring1, tempstring2, outputdir);
@@ -1213,7 +1034,7 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[7], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[7]) << endl;
-	
+
 	tempstring1 = "Ph Inv Mass Clean";
 	tempstring2 = "PhInvMClean";
 	PrintHisto(fInvMHistos[8], tempstring1, tempstring2, outputdir);
@@ -1231,15 +1052,15 @@ void PhysQCAnalysis::End(){
 	PrintHisto(fInvMHistos[10], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[10]) << endl;
-	
+
 	tempstring1 = "GT diJet Inv Mass Clean";
 	tempstring2 = "JInvMGT2jClean";
 	PrintHisto(fInvMHistos[11], tempstring1, tempstring2, outputdir);
 	file << "* " << tempstring2 << endl;
 	file << fAC->printAverage(tempstring2, fInvMHistos[11]) << endl;
-	
+
 	file.close();
-	
+
 	// write out the cleaning statistics
 	TString cleanerstatfile = fOutputDir + "cleanerStats.txt";
 	fTC->StatWrite(cleanerstatfile);
@@ -1248,25 +1069,167 @@ void PhysQCAnalysis::End(){
 	const int nentries = fTR->fChain->GetEntries();
 	PrintInfoStart(nentries);
 
-        // Close files
-        fHistFile->Close();
-	
+		// Close files
+	fHistFile->Close();
+
 }
 
-void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstring2, TString outputdir,
-		 double x1, double x2, int logy, int fract){
+void PhysQCAnalysis::BookHistos(){
+	// Histos for uncleaned objects
+	const unsigned int nvxbins = 100;
+	fPvxHistos[0] = fAC->bookTH1D("PrimVtxNChi2", "Prim Vtx NChi2", nvxbins, 0., 10.);	
+	fPvxHistos[1] = fAC->bookTH1D("PrimVtxd0BS", "Prim Vtx d0 to BS", nvxbins, 0., 0.3 );
+	fPvxHistos[2] = fAC->bookTH1D("PrimVtxdzBS", "Prim Vtx dz to BS", nvxbins, 0., 20.);
+	fPvxHistos[3] = fAC->bookTH1D("PrimVtxPtSum", "Prim Vtx PtSum", nvxbins, 0., 300.);
+
+	const unsigned int nmubins = 100;
+	fMuHistos[0] = fAC->bookTH1D("MuDeltaPOverP", "Mu DeltaP/P;Mu DeltaP/P",    nmubins, 0., 0.25 );
+	fMuHistos[1] = fAC->bookTH1D("Mud0signif", "Mu d0 significance;Mu d0 significance",  nmubins, 0., 15. );
+	fMuHistos[2] = fAC->bookTH1D("Mudzsignif", "Mu dz significance;Mu dz significance",  nmubins, 0., 15. );
+	fMuHistos[3] = fAC->bookTH1D("MuNChi2", "Mu NChi2;Mu NChi2",  nmubins, 0., 20. );
+	fMuHistos[4] = fAC->bookTH1D("MuNTkHits", "Mu NTkHits;Mu NTkHits",  30, 0., 30 );
+	fMuHistos[5] = fAC->bookTH1D("MuDRSS", "Mu DR Same Sign;Mu DR Same Sign",  nmubins, 0., 3.2 );
+	fMuHistos[6] = fAC->bookTH1D("MuDROS", "Mu DR Opp Sign;Mu DR Opp Sign",  nmubins, 0., 3.2 );
+	fMuHistos[7] = fAC->bookTH1D("MuInvMSS", "Mu InvM Same Sign;Mu InvM Same Sign", nmubins, 0., 100. );
+	fMuHistos[8] = fAC->bookTH1D("MuInvMOS", "Mu InvM Opp Sign;Mu InvM Opp Sign",  nmubins, 0., 100. );
+
+	const unsigned int nelbins = 100;
+	fElHistos[0]  = fAC->bookTH1D("ElHcalOverEcalBar", "El H/E Bar",  nelbins, 0., 0.2);
+	fElHistos[1]  = fAC->bookTH1D("ElSigmaIetaIetaBar", "El sigmaIetaIeta Bar",  nelbins, 0., 0.05);
+	fElHistos[2]  = fAC->bookTH1D("ElDeltaPhiSeedClusterAtCaloBar", "El DeltaPhiSeedClusterAtCalo Bar",  nelbins, -0.1, 0.1);
+	fElHistos[3]  = fAC->bookTH1D("ElDeltaEtaSeedClusterAtCaloBar", "El DeltaEtaSeedClusterAtCalo Bar",  nelbins, -0.05, 0.05);
+	fElHistos[4]  = fAC->bookTH1D("ElDeltaPhiSuperClusterAtVtxBar", "El DeltaPhiSuperClusterAtVtx Bar",  nelbins, -0.1, 0.1);
+	fElHistos[5]  = fAC->bookTH1D("ElDeltaEtaSuperClusterAtVtxBar", "El DeltaEtaSuperClusterAtVtx Bar",  nelbins, -0.05, 0.05);
+	fElHistos[6]  = fAC->bookTH1D("ElESuperClusterOverPBar", "El ESuperClusterOverP Bar",  nelbins, 0., 5.);
+	fElHistos[7]  = fAC->bookTH1D("ElHcalOverEcalEnd", "El H/E End",  nelbins, 0., 0.2);
+	fElHistos[8]  = fAC->bookTH1D("ElSigmaIetaIetaEnd", "El sigmaIetaIeta End",  nelbins, 0., 0.05);
+	fElHistos[9]  = fAC->bookTH1D("ElDeltaPhiSeedClusterAtCaloEnd", "El DeltaPhiSeedClusterAtCalo End",  nelbins, -0.1, 0.1);
+	fElHistos[10] = fAC->bookTH1D("ElDeltaEtaSeedClusterAtCaloEnd", "El DeltaEtaSeedClusterAtCalo End",  nelbins, -0.05, 0.05);
+	fElHistos[11] = fAC->bookTH1D("ElDeltaPhiSuperClusterAtVtxEnd", "El DeltaPhiSuperClusterAtVtx End",  nelbins, -0.1, 0.1);
+	fElHistos[12] = fAC->bookTH1D("ElDeltaEtaSuperClusterAtVtxEnd", "El DeltaEtaSuperClusterAtVtx End",  nelbins, -0.05, 0.05);
+	fElHistos[13] = fAC->bookTH1D("ElESuperClusterOverPEnd", "El ESuperClusterOverP End",  nelbins, 0., 5.);
+	fElHistos[14] = fAC->bookTH1D("Eld0signif", "El d0 significance;El d0 significance",  nelbins, 0., 15. );
+	fElHistos[15] = fAC->bookTH1D("Eldzsignif", "El dz significance;El dz significance",  nelbins, 0., 15. );
+	fElHistos[16] = fAC->bookTH1D("ElDRSS", "El DR Same Sign;El DR Same Sign",  nelbins, 0., 3.2 );
+	fElHistos[17] = fAC->bookTH1D("ElDROS", "El DR Opp Sign;El DR Opp Sign",  nelbins, 0., 3.2 );
+	fElHistos[18] = fAC->bookTH1D("ElInvMSS", "El InvM Same Sign;El InvM Same Sign", nelbins, 0., 100. );
+	fElHistos[19] = fAC->bookTH1D("ElInvMOS", "El InvM Opp Sign;El InvM Opp Sign",  nelbins, 0., 100. );
+
+	const unsigned int nphbins = 100;
+	fPhHistos[0] = fAC->bookTH1D("PhoHoverEBar", "Phot H/E Bar",  nphbins, 0., 0.2);
+	fPhHistos[1] = fAC->bookTH1D("PhoSigmaIetaIetaBar", "Phot sigmaIetaIeta Bar",  nphbins, 0., 0.05);
+	fPhHistos[2] = fAC->bookTH1D("PhoHoverEEnd", "Phot H/E End",  nphbins, 0., 0.05);
+	fPhHistos[3] = fAC->bookTH1D("PhoSigmaIetaIetaEnd", "Phot sigmaIetaIeta End",  nphbins, 0., 0.05);
+	fPhHistos[4] = fAC->bookTH1D("PhDR", "Phot DR;Phot DR",  nphbins, 0., 3.2 );
+	fPhHistos[5] = fAC->bookTH1D("PhInvM", "Phot InvM;Phot InvM", nphbins, 0., 50. );
+	fPhHistos[6] = fAC->bookTH1D("PhInvMLow", "Phot InvM;Phot InvM", nphbins, 0., 5. );
+
+	const unsigned int njetbins = 100;
+	fJHistos[0] = fAC->bookTH1D("Jetd0PV", "Jet d0 PV;Jet d0 to PV",  njetbins, 0., 0.5 );
+	fJHistos[1] = fAC->bookTH1D("JetdzPV", "Jet dz PV;Jet dz to PV",  njetbins, -2., 2. );
+	fJHistos[2] = fAC->bookTH1D("Jetd0signif", "Jet d0 significance;Jet d0 significance",  njetbins, 0., 15. );
+	fJHistos[3] = fAC->bookTH1D("Jetdzsignif", "Jet dz significance;Jet dz significance",  njetbins, 0., 15. );
+	fJHistos[4] = fAC->bookTH1D("JEMfrac", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
+	fJHistos[5] = fAC->bookTH1D("JChfrac", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
+	fJHistos[6] = fAC->bookTH1D("JID_n90Hits", "Jet ID n90Hits;Jet ID n90Hits",  30, 0, 30 );
+	fJHistos[7] = fAC->bookTH1D("JID_HPD", "Jet ID HPD;Jet ID HPD",  njetbins, 0, 1. );
+	fJChEMfrac  = new TH2D("JChEMfrac", "Jet Ch vs EM frac;Jet EM frac;Jet Ch frac", njetbins, -0.01, 1.01, njetbins, -1.01, 2.);
+	fJChEMfrac->SetXTitle(fAC->convertVarName("JEMfrac"));
+	fJChEMfrac->SetYTitle(fAC->convertVarName("JChfrac"));
+	fJEMfracEta = new TH2D("JEMfracEta", "Jet EM frac vs Eta;Jet Eta;Jet EM frac", njetbins, -5., 5., njetbins, -1.01, 1.01);
+	fJEMfracEta->SetXTitle(fAC->convertVarName("JEta"));
+	fJEMfracEta->SetYTitle(fAC->convertVarName("JEMfrac"));
+	fJChfracEta = new TH2D("JChfracEta", "Jet Ch frac vs Eta;Jet Eta;Jet Ch frac", njetbins, -5., 5., njetbins, -1.01, 2.01);
+	fJChfracEta->SetXTitle(fAC->convertVarName("JEta"));
+	fJChfracEta->SetYTitle(fAC->convertVarName("JChfrac"));
+
+	const unsigned int nevbins = 100;
+	fMETHistos[0]   = fAC->bookTH1D("DphiMETJet1", "Dphi(MET,j1)", nevbins, 0, 3.1416);
+	fMETHistos[1]   = fAC->bookTH1D("DphiMETJet2", "Dphi(MET,j2)", nevbins, 0, 3.1416);
+	fMETHistos[2]   = fAC->bookTH1D("METR12", "MET R12;MET R12", nevbins, 0, 6.283);
+	fMETHistos[3]   = fAC->bookTH1D("METR21", "MET R21;MET R21", nevbins, 0, 6.283);
+	fMETHistos[4]   = fAC->bookTH1D("METRsum", "MET Rsum;MET Rsum", nevbins, 3., 6.283);
+
+	fMETDphi12      = new TH2D("METDphi12", "MET Dphi 12;Dphi(MET,j1);Dphi(MET,j2)", nevbins, 0, 3.142, nevbins, 0, 3.142);
+	fMETDphi12->SetXTitle(fAC->convertVarName("DphiMETJet1"));
+	fMETDphi12->SetYTitle(fAC->convertVarName("DphiMETJet2"));
+	fMETR12R21      = new TH2D("METR12R21", "MET R21 vs R12;R12;R21", nevbins, 0, 6.283, nevbins, 0, 6.283);
+	fMETR12R21->SetXTitle(fAC->convertVarName("METR12"));
+	fMETR12R21->SetYTitle(fAC->convertVarName("METR21"));
+	fMETR12Dphij12  = new TH2D("METR12Dphij12", "MET R21 vs Dphijet12;R12;Dphij12", nevbins, 0, 6.283, nevbins, 0, 3.142);
+	fMETR12Dphij12->SetXTitle(fAC->convertVarName("METR12"));
+	fMETR12Dphij12->SetYTitle(fAC->convertVarName("DphiJ1J21"));
+	fMETR12Etaj12   = new TH2D("METR12Etaj12", "MET R21 vs Eta jet12;R12;Eta jet 1,2", nevbins, 0, 6.283, nevbins, -5., 5.);
+	fMETR12Etaj12->SetXTitle(fAC->convertVarName("METR12"));
+	fMETR12Etaj12->SetYTitle(fAC->convertVarName("DetaJ1J21"));
+	fMETR12j12PtRat = new TH2D("METR12j12PtRat", "MET R21 vs Eta jet12;R12;Pt2/Pt1", nevbins, 0, 6.283, nevbins, 0., 1.);
+	fMETR12j12PtRat->SetXTitle(fAC->convertVarName("METR12"));
+	fMETR12j12PtRat->SetYTitle(fAC->convertVarName("J1J2PtRatio"));
+	fMETR12dRj12    = new TH2D("METR12dRj12", "MET R21 vs dR(j1,j2);R12;dR(j1,j2)", nevbins, 0, 6.283, nevbins, 0., 6.283);
+	fMETR12dRj12->SetXTitle(fAC->convertVarName("METR12"));
+	fMETR12dRj12->SetYTitle(fAC->convertVarName("DRJ1J2"));
+
+	fEvtHistos[0]   = fAC->bookTH1D("EvtEmFrac", "Evt Em Frac;Evt Em Frac", nevbins, 0, 1.05);
+	fEvtHistos[1]   = fAC->bookTH1D("EvtChFrac", "Evt Ch Frac;Evt Ch Frac", nevbins, 0, 1.05);
+
+	// Histos for cleaned objects, CI = Clean+Isolated
+	const unsigned int nCIbins = 100;
+	fMuCIHistos[0] = fAC->bookTH1D("NMus", "Nber of Mus clean+iso", 10, 0, 10);
+	fMuCIHistos[1] = fAC->bookTH1D("MuPt", "Pt of Mus clean+iso", nCIbins, 0, 100.);
+	fMuCIHistos[2] = fAC->bookTH1D("MuEta", "Eta of Mus clean+iso", nCIbins, -2.5, 2.5);
+	fMuCIHistos[3] = fAC->bookTH1D("MuPhi", "Phi of Mus clean+iso", nCIbins, -3.2, 3.2);
+	fElCIHistos[0] = fAC->bookTH1D("NEles", "Nber of Eles clean+iso", 10, 0, 10);
+	fElCIHistos[1] = fAC->bookTH1D("ElPt", "Pt of Eles clean+iso", nCIbins, 0, 100.);
+	fElCIHistos[2] = fAC->bookTH1D("ElEta", "Eta of Eles clean+iso", nCIbins, -2.5, 2.5);
+	fElCIHistos[3] = fAC->bookTH1D("ElPhi", "Phi of Eles clean+iso", nCIbins, -3.2, 3.2);
+	fElCIHistos[4] = fAC->bookTH1D("ElSigmaIetaIetaClean", "ElSigmaIetaIeta of Eles clean+iso", nCIbins, 0., 0.015);
+	fPhCIHistos[0] = fAC->bookTH1D("NPhotons", "Nber of Photons clean+iso", 20, 0, 20);
+	fPhCIHistos[1] = fAC->bookTH1D("PhoPt", "Pt of Photons clean+iso", nCIbins, 0, 100.);
+	fPhCIHistos[2] = fAC->bookTH1D("PhoEta", "Eta of Photons clean+iso", nCIbins, -2.5, 2.5);
+	fPhCIHistos[3] = fAC->bookTH1D("PhoPhi", "Phi of Photons clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[0]  = fAC->bookTH1D("NJets", "Nber of Jets clean+iso", 20, 0, 20);
+	fJCIHistos[1]  = fAC->bookTH1D("JPt", "Pt of Jets clean+iso", nCIbins, 0, 250.);
+	fJCIHistos[2]  = fAC->bookTH1D("JEta", "Eta of Jets clean+iso", nCIbins, -5., 5.);
+	fJCIHistos[3]  = fAC->bookTH1D("JPhi", "Phi of Jets clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[4]  = fAC->bookTH1D("JEMfracClean", "Jet EM fraction;Jet EM fraction",  njetbins, -0.01, 1.01 );
+	fJCIHistos[5]  = fAC->bookTH1D("JChfracClean", "Jet Charged fraction;Jet Charged fraction",  njetbins, -1.01, 5. );
+	fJCIHistos[6]  = fAC->bookTH1D("DphiMETJet1Clean", "Dphi(MET,j1)", nevbins, 0, 3.1416);
+	fJCIHistos[7]  = fAC->bookTH1D("DphiMETJet2Clean", "Dphi(MET,j2)", nevbins, 0, 3.1416);
+	fJCIHistos[8]  = fAC->bookTH1D("METR12Clean", "MET R12;MET R12", nevbins, 0, 6.283);
+	fJCIHistos[9]  = fAC->bookTH1D("METR21Clean", "MET R21;MET R21", nevbins, 0, 6.283);
+	fJCIHistos[10] = fAC->bookTH1D("JPt1j", "Pt of mono-Jets clean+iso", nCIbins, 0, 250.);
+	fJCIHistos[11] = fAC->bookTH1D("JEta1j", "Eta of mono-Jets clean+iso", nCIbins, -5., 5.);
+	fJCIHistos[12] = fAC->bookTH1D("JPhi1j", "Phi of mono-Jets clean+iso", nCIbins, -3.2, 3.2);
+	fJCIHistos[13] = fAC->bookTH1D("DphiMETmonoJetClean", "Dphi(MET,monoJet)", nevbins, 0, 3.1416);
+
+	// Inv mass Histos for cleaned objects, CI = Clean+Isolated
+	const unsigned int ninvmbins = 100;
+	fInvMHistos[0]  = fAC->bookTH1D("MuInvMSSClean", "Mu Clean InvM Same Sign;Mu InvM Same Sign", ninvmbins, 0., 100. );
+	fInvMHistos[1]  = fAC->bookTH1D("MuInvMSSCleanLow", "Mu Clean InvM Low Same Sign;Mu InvM Same Sign", ninvmbins, 0., 5. );
+	fInvMHistos[2]  = fAC->bookTH1D("MuInvMOSClean", "Mu Clean InvM Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 100. );
+	fInvMHistos[3]  = fAC->bookTH1D("MuInvMOSCleanLow", "Mu Clean InvM Low Opp Sign;Mu InvM Opp Sign",  ninvmbins, 0., 5. );
+	fInvMHistos[4]  = fAC->bookTH1D("ElInvMSSClean", "El Clean InvM Same Sign;El InvM Same Sign", ninvmbins, 0., 100. );
+	fInvMHistos[5]  = fAC->bookTH1D("ElInvMSSCleanLow", "El Clean InvM Low Same Sign;El InvM Same Sign", ninvmbins, 0., 5. );
+	fInvMHistos[6]  = fAC->bookTH1D("ElInvMOSClean", "El Clean InvM Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 100. );
+	fInvMHistos[7]  = fAC->bookTH1D("ElInvMOSCleanLow", "El Clean InvM Low Opp Sign;El InvM Opp Sign",  ninvmbins, 0., 5. );
+	fInvMHistos[8]  = fAC->bookTH1D("PhInvMClean", "Phot Clean InvM;Phot InvM", ninvmbins, 0., 100. );
+	fInvMHistos[9]  = fAC->bookTH1D("PhInvMCleanLow", "Phot Clean InvM Low;Phot InvM", ninvmbins, 0., 5. );
+	fInvMHistos[10] = fAC->bookTH1D("JInvM2jClean", "Jets Clean InvM dijets;dijet InvM", ninvmbins, 0., 300. );
+	fInvMHistos[11] = fAC->bookTH1D("JInvMGT2jClean", "Jets Clean InvM >dijets;GT dijet InvM", ninvmbins, 0., 300. );
+}
+
+void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstring2, TString outputdir, double x1, double x2, int logy, int fract){
 	double percent1 = 0.05;
 	double percent2 = 0.01;
 
 	TCanvas * canv = new TCanvas(tempstring2, tempstring1 , 0, 0, 900, 700);
 	if (logy == 1) gPad->SetLogy();
 	hist->DrawCopy();
-	
-	double maxy;
+
+	double maxy = hist->GetMaximum();
+	maxy = 1.05*maxy;
+	hist->SetMaximum(maxy);
 	if (x1 != 999.) {
-		maxy = hist->GetMaximum();
-		maxy = 1.05*maxy;
-		hist->SetMaximum(maxy);
 		hist->DrawCopy();
 		TLine * line = new TLine(x1, 0, x1, maxy);
 		line->SetLineColor(kRed);
@@ -1283,7 +1246,7 @@ void PhysQCAnalysis::PrintHisto(TH1D* hist, TString tempstring1, TString tempstr
 		fAC->tailFraction(hist, percent1);
 		fAC->tailFraction(hist, percent2);
 	}
-	
+
 	Util::Print(canv, tempstring2, outputdir, fHistFile);
 }
 
@@ -1359,43 +1322,43 @@ void PhysQCAnalysis::MakeElIDPlots(TCut select, TTree *tree){
 void PhysQCAnalysis::PlotTriggerStats(){
 	const int nentries = fTR->fChain->GetEntries();
 
-        TH1I* hlt_stats,* l1p_stats,* l1t_stats;
-        TString hltPath("analyze/HLTTriggerStats");
-        TString l1pPath("analyze/L1PhysTriggerStats");
-        TString l1tPath("analyze/L1TechTriggerStats");
-        TString subdir("TriggerStats");
+	TH1I *hlt_stats, *l1p_stats, *l1t_stats;
+	TString hltPath("analyze/HLTTriggerStats");
+	TString l1pPath("analyze/L1PhysTriggerStats");
+	TString l1tPath("analyze/L1TechTriggerStats");
+	TString subdir("TriggerStats");
 
-        // Loop over all files (if chain) and add histograms
-        if ( !fTR->isChain() ) {
-          TFile *f = fTR->fChain->GetCurrentFile();
-          hlt_stats = (TH1I*)f->Get(hltPath);
-          l1p_stats = (TH1I*)f->Get(l1pPath);
-          l1t_stats = (TH1I*)f->Get(l1tPath);
-        } else {
-          TObjArray *fileElements = ((TChain*)fTR->fChain)->GetListOfFiles();
-          TIter next(fileElements);
-          TChainElement *chEl=0;
-          bool firstFile = true;
-          while (( chEl=(TChainElement*)next() )) {
-            TFile* f = TFile::Open(chEl->GetTitle());
-            if ( f == NULL ) continue;
-            if ( firstFile ) {
-              firstFile = false;
-              hlt_stats = (TH1I*)f->Get(hltPath)->Clone();
-              l1p_stats = (TH1I*)f->Get(l1pPath)->Clone();
-              l1t_stats = (TH1I*)f->Get(l1tPath)->Clone();
-              hlt_stats->SetDirectory(0);
-              l1p_stats->SetDirectory(0);
-              l1t_stats->SetDirectory(0);
-            } else {
-              hlt_stats->Add( (TH1I*)f->Get(hltPath) );
-              l1p_stats->Add( (TH1I*)f->Get(l1pPath) );
-              l1t_stats->Add( (TH1I*)f->Get(l1tPath) );
-            }
-          }
-        }
+	// Loop over all files (if chain) and add histograms
+	if ( !fTR->isChain() ) {
+		TFile *f = fTR->fChain->GetCurrentFile();
+		hlt_stats = (TH1I*)f->Get(hltPath);
+		l1p_stats = (TH1I*)f->Get(l1pPath);
+		l1t_stats = (TH1I*)f->Get(l1tPath);
+	} else {
+		TObjArray *fileElements = ((TChain*)fTR->fChain)->GetListOfFiles();
+		TIter next(fileElements);
+		TChainElement *chEl=0;
+		bool firstFile = true;
+		while (( chEl=(TChainElement*)next() )) {
+			TFile *f = TFile::Open(chEl->GetTitle());
+			if ( f == NULL ) continue;
+			if ( firstFile ) {
+				firstFile = false;
+				hlt_stats = (TH1I*)f->Get(hltPath)->Clone();
+				l1p_stats = (TH1I*)f->Get(l1pPath)->Clone();
+				l1t_stats = (TH1I*)f->Get(l1tPath)->Clone();
+				hlt_stats->SetDirectory(0);
+				l1p_stats->SetDirectory(0);
+				l1t_stats->SetDirectory(0);
+			} else {
+				hlt_stats->Add( (TH1I*)f->Get(hltPath) );
+				l1p_stats->Add( (TH1I*)f->Get(l1pPath) );
+				l1t_stats->Add( (TH1I*)f->Get(l1tPath) );
+			}
+		}
+	}
 
-        // Set style
+	// Set style
 	hlt_stats->GetXaxis()->LabelsOption("v");
 	hlt_stats->GetXaxis()->SetLabelSize(0.035);
 	hlt_stats->SetMaximum(nentries + 0.05*nentries);
@@ -1421,6 +1384,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv->SetBottomMargin(0.50);
 	gPad->SetGridy();
 	gPad->SetLogy();
+	hlt_stats->SetName("HLTStats1");
 	hlt_stats->GetXaxis()->SetRange(0,50);
 	hlt_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 50, nentries);
@@ -1437,6 +1401,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv->SetBottomMargin(0.50);
 	gPad->SetGridy();
 	gPad->SetLogy();
+	hlt_stats->SetName("HLTStats2");
 	hlt_stats->GetXaxis()->SetRange(51,100);
 	hlt_stats->DrawCopy();
 	l1 = new TLine(50, nentries, 100, nentries);
@@ -1453,6 +1418,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv->SetBottomMargin(0.42);
 	gPad->SetGridy();
 	gPad->SetLogy();
+	l1p_stats->SetName("L1PStats1");
 	l1p_stats->GetXaxis()->SetRange(0,63);
 	l1p_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 63, nentries);
@@ -1469,6 +1435,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv->SetBottomMargin(0.42);
 	gPad->SetGridy();
 	gPad->SetLogy();
+	l1p_stats->SetName("L1PStats2");
 	l1p_stats->GetXaxis()->SetRange(64,128);
 	l1p_stats->DrawCopy();
 	l1 = new TLine(63, nentries, 128, nentries);
@@ -1484,6 +1451,7 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	canv = new TCanvas("L1TStats", tempstring , 0, 0, 900, 700);
 	gPad->SetGridy();
 	gPad->SetLogy();
+	l1t_stats->SetName("L1TStats");
 	l1t_stats->GetXaxis()->SetRange(0,64);
 	l1t_stats->DrawCopy();
 	l1 = new TLine(0, nentries, 64, nentries);
@@ -1495,13 +1463,5 @@ void PhysQCAnalysis::PlotTriggerStats(){
 	fTlat->DrawLatex(0.60,0.92, entries);
 	Util::Print(canv, "L1TStats", fOutputDir+subdir, fHistFile);
 
-        gROOT->cd(); // Leave local file
+	gROOT->cd(); // Leave local file
 }
-
-double PhysQCAnalysis::invMass(double p1[], double p2[]){
-	double msq = (p1[3]+p2[3])*(p1[3]+p2[3]) - (p1[0]+p2[0])*(p1[0]+p2[0])
-	           - (p1[1]+p2[1])*(p1[1]+p2[1]) - (p1[2]+p2[2])*(p1[2]+p2[2]);
-	if (msq < 0.) msq = 0.;
-	return sqrt(msq);
-}
-

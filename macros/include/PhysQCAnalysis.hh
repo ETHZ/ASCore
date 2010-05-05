@@ -33,14 +33,13 @@ public:
 	void Analyze1();
 	void Analyze2();
 	void End();
+	void BookHistos();
 	void MakePlots(TString, TCut, TTree*);
 	void MakeElIDPlots(TCut, TTree*);
 	void PlotTriggerStats();
 	void PrintHisto(TH1D*, TString, TString, TString, 
 		double x1=999., double x2=999., int logy=0, int fract=0);
 	void PrintInfoStart(int nEntries);
-	double invMass(double p1[], double p2[]);
-	double DeltaPhi(double v1, double v2);
 	void GetEvtEmChFrac(double & fracEm, double & fracCh);
 	
 	TreeCleaner *fTC;
@@ -48,8 +47,8 @@ public:
 
 private:
 
-        TFile* fHistFile; // Where all histograms will be saved
-	
+	TFile* fHistFile; // Where all histograms will be saved
+
 	TH1D *fPvxHistos[4];
 	TH1D *fMuHistos[9];
 	TH1D *fElHistos[20];
