@@ -4,6 +4,8 @@
 #include "TreeReader.hh"
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
+#include <map>
+#include <string>
 
 class UserAnalysisBase{
 public:
@@ -19,6 +21,9 @@ public:
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 
 	virtual void ReadPDGTable(const char* filename);
+	virtual void GetHLTNames();
+	virtual int GetHLTBit(string);
+	virtual bool GetHLTResult(string);
 
 	TreeReader *fTR;
 	TString fOutputDir;
@@ -26,7 +31,8 @@ public:
 	TLatex *fTlat;
 
 	int fVerbose;
-	map<int, pdgparticle> fPDGMap;	// Mapping of PDG ID Names
+	map<int, pdgparticle> fPDGMap;	// Mapping of PDG ID names
+	map<string, int> fHLTLabelMap;	// Mapping of HLT trigger bit names
 
 private:
 

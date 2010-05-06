@@ -3,6 +3,7 @@
 
 #include "helper/pdgparticle.hh"
 #include "base/UserAnalysisBase.hh"
+#include "TH1I.h"
 
 using namespace std;
 
@@ -40,6 +41,40 @@ void UserAnalysisBase::ReadPDGTable(const char* filename){
 	}
 }
 
+void UserAnalysisBase::GetHLTNames(){
+	TFile *f = fTR->fChain->GetCurrentFile();
+	TH1I *hlt_stats = (TH1I*)f->Get("analyze/HLTTriggerStats");
+
+	for( int i=0; i < hlt_stats->GetNbinsX(); i++ ){
+		fHLTLabelMap[hlt_stats->GetXaxis()->GetBinLabel(i+1)] = i;
+	}
+}
+
+int UserAnalysisBase::GetHLTBit(string theHltName){
+	if( fHLTLabelMap.empty() ) return -1;
+	else{
+		map<string,int>::iterator it = fHLTLabelMap.find(theHltName);
+		if(it == fHLTLabelMap.end()){
+			cout << "UserAnalysisBase::GetHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
+			return -1;
+		}
+		else{
+			return it->second;
+		}
+	}
+}
+
+bool UserAnalysisBase::GetHLTResult(string theHltName){
+	if( fHLTLabelMap.empty() ) return false;
+	else{
+		int bit = GetHLTBit(theHltName);
+		if(bit == -1){
+			cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
+			return false;
+		}
+		else return (bool)fTR->HLTResults[bit];
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Cut Stuff //////////////////////////////////////////////////////////////////////////
