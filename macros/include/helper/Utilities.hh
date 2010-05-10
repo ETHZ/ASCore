@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <cmath>
 
 #include "TROOT.h"
 #include "TCanvas.h"
@@ -169,22 +170,20 @@ namespace Util {
   }
 
    //__________________________________________________________________________
-  inline double DeltaPhi(double v1, double v2){
-    // Computes the correctly normalized phi difference
-    // v1, v2 = phi of object 1 and 2
-    double diff = fabs(v2 - v1);
-    double corr = TMath::TwoPi() - diff;
-    if (diff < TMath::Pi()){ return diff;} else { return corr;}
-  }
+	inline double DeltaPhi(double phi1, double phi2){
+		// From cmssw reco::deltaPhi()
+		double result = phi1 - phi2;
+		while( result >   TMath::Pi() ) result -= TMath::TwoPi();
+		while( result <= -TMath::Pi() ) result += TMath::TwoPi();
+		return TMath::Abs(result);
+	}
 
   //__________________________________________________________________________
   inline double GetDeltaR(double eta1, double eta2, double phi1, double phi2){
-    // Computes the DeltaR of two objects from their eta and phi values
-    return sqrt( (eta1-eta2)*(eta1-eta2)
-                 + Util::DeltaPhi(phi1, phi2)*Util::DeltaPhi(phi1, phi2) );
+    double deta = eta1 - eta2;
+    double dphi = Util::DeltaPhi(phi1, phi2);
+    return sqrt( deta*deta + dphi*dphi );
   }
-
-
 }
 
 #endif
