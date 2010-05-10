@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.52 2010/04/22 12:12:56 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.53 2010/04/26 16:56:29 fronga Exp $
 //
 //
 
@@ -572,6 +572,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
       fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
 
+
       fTeBasicClustersSize[eqi]         = El->basicClustersSize();
       fTefbrem[eqi]                     = El->fbrem();
       fTeHcalOverEcal[eqi]              = El->hcalOverEcal();                               
@@ -586,6 +587,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTecaloenergy[eqi]                = El->caloEnergy();
       fTetrkmomatvtx[eqi]               = El->trackMomentumAtVtx().R();
       fTeESuperClusterOverP[eqi]        = El->eSuperClusterOverP();
+		fTeNumberOfMissingInnerHits[eqi]  = El->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
       fTetheta[eqi]                     = El->superCluster()->position().theta();
 
       if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
@@ -1221,6 +1223,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTMuJESCorrMETpy  = (corrmujesmet->at(0)).py();
   fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
 
+  if(fTnjets > 1){
+    double dPhiMJ1 = TMath::Abs(reco::deltaPhi(fTjphi[0], fTMuJESCorrMETphi));
+    double dPhiMJ2 = TMath::Abs(reco::deltaPhi(fTjphi[1], fTMuJESCorrMETphi));
+    fTMETR12 = TMath::Sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
+    fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
+  }
+
   ////////////////////////////////////////////////////////////////////////////////
   // Fill Tree ///////////////////////////////////////////////////////////////////
   fEventTree->Fill();
@@ -1431,6 +1440,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElCaloEnergy"    ,&fTecaloenergy        ,"ElCaloEnergy[NEles]/D");
   fEventTree->Branch("ElTrkMomAtVtx"   ,&fTetrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/D");
   fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/D");
+  fEventTree->Branch("ElNumberOfMissingInnerHits"  ,&fTeNumberOfMissingInnerHits  ,"ElNumberOfMissingInnerHits[NEles]/I");
 
   fEventTree->Branch("ElIsInJet"       ,&fTeIsInJet           ,"ElIsInJet[NEles]/I");
   fEventTree->Branch("ElSharedPx"      ,&fTeSharedPx          ,"ElSharedPx[NEles]/D");
@@ -1627,6 +1637,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PFMETpx"            ,&fTPFMETpx             ,"PFMETpx/D");
   fEventTree->Branch("PFMETpy"            ,&fTPFMETpy             ,"PFMETpy/D");
   fEventTree->Branch("PFMETphi"           ,&fTPFMETphi            ,"PFMETphi/D");
+  fEventTree->Branch("METR12"             ,&fTMETR12              ,"METR12/D");
+  fEventTree->Branch("METR21"             ,&fTMETR21              ,"METR21/D");
 }
 
 // Method called once before each run
@@ -1881,6 +1893,7 @@ void NTupleProducer::resetTree(){
   resetDouble(fTecaloenergy, gMaxneles);
   resetDouble(fTetrkmomatvtx, gMaxneles);
   resetDouble(fTeESuperClusterOverP, gMaxneles);
+  resetInt(fTeNumberOfMissingInnerHits, gMaxneles);
   resetInt(fTeIsInJet, gMaxneles);
   resetDouble(fTeSharedPx, gMaxneles);
   resetDouble(fTeSharedPy, gMaxneles);
@@ -2071,6 +2084,8 @@ void NTupleProducer::resetTree(){
   fTPFMETpx            = -999.99;
   fTPFMETpy            = -999.99;
   fTPFMETphi           = -999.99;
+  fTMETR12             = -999.99;
+  fTMETR21             = -999.99;
 }
 
 // Method for matching of reco candidates

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.43 2010/04/22 12:12:56 fronga Exp $
+// $Id: NTupleProducer.h,v 1.44 2010/04/26 16:56:29 fronga Exp $
 //
 //
 
@@ -380,6 +380,7 @@ private:
   double fTecaloenergy[gMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
   double fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
   double fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
+  int fTeNumberOfMissingInnerHits[gMaxneles];
   int fTeIsInJet[gMaxneles];
   double fTeSharedPx[gMaxneles];
   double fTeSharedPy[gMaxneles];
@@ -578,5 +579,7 @@ private:
   double fTPFMETpx;
   double fTPFMETpy;
   double fTPFMETphi;
+  double fTMETR12;
+  double fTMETR21;
   ////////////////////////////////////////////////////////
 };
