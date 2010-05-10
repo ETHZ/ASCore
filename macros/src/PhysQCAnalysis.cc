@@ -195,8 +195,8 @@ void PhysQCAnalysis::Analyze1(){
 	}
 
 	// MET plots
-	double METPhi = fTR->MuCorrMETphi;
-	double MET = fTR->MuCorrMET;
+	double METPhi = fTR->MuJESCorrMETphi;
+	double MET = fTR->MuJESCorrMET;
 	double METBadJetmin = 20.;
 	if (fTR->NJets > 1 && MET > METBadJetmin) {
 		double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
