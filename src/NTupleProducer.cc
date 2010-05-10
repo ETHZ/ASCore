@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.53 2010/04/26 16:56:29 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.54 2010/05/10 15:07:39 stiegerb Exp $
 //
 //
 
@@ -720,6 +720,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTPhotHasPixSeed[nqpho]     = ip->hasPixelSeed() ? 1:0;
     fTPhotHasConvTrks[nqpho]    = ip->hasConversionTracks() ? 1:0; 
     fTPhotIsInJet[nqpho] = -1;
+    fTPhotDupEl[nqpho] = -1;
     fTPhotSharedPx[nqpho] = 0.;
     fTPhotSharedPy[nqpho] = 0.;
     fTPhotSharedPz[nqpho] = 0.;
@@ -1117,6 +1118,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   // Check electron duplication
   ElectronDuplicate(elecPtr, trckPtr);
+  // Check photon/electron duplication
+  PhotonElectronDuplicate(elecPtr, photSCs);
   // Check electron/jet duplication
   ElJetOverlap(jetPtr, elecPtr, calotowers);
   // Check photon/jet duplication
@@ -1508,6 +1511,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
   fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
   fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
+  fEventTree->Branch("PhoIsElDupl"      ,&fTPhotDupEl         ,"PhoIsElDupl[NPhotons]/I");
   fEventTree->Branch("PhoSharedPx"      ,&fTPhotSharedPx      ,"PhoSharedPx[NPhotons]/D");
   fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/D");
   fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/D");
@@ -2027,6 +2031,7 @@ void NTupleProducer::resetTree(){
   resetInt(fTgoodphoton,gMaxnphos);
   resetInt(fTPhotIsIso,gMaxnphos);
   resetInt(fTPhotIsInJet,gMaxnphos);
+  resetInt(fTPhotDupEl,gMaxnphos);
   resetDouble(fTPhotSharedPx, gMaxnphos);
   resetDouble(fTPhotSharedPy, gMaxnphos);
   resetDouble(fTPhotSharedPz, gMaxnphos);
@@ -2334,7 +2339,30 @@ void NTupleProducer::ElectronDuplicate(vector<const SuperCluster*> elecPtr, vect
   }
 
   return;
+}
 
+void NTupleProducer::PhotonElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const SuperCluster*> phoPtr) {
+  // Looks for duplication between photons and electrons
+  if( fTneles <= 0 ) return;
+  if( fTnphotons <= 0 ) return;
+
+  // loop over the photons
+  for( int i = 0; i < fTnphotons; ++i ){
+    const SuperCluster* phoSC = phoPtr[i];
+
+    // loop over the electrons again
+    for( int j = 0; j < fTneles; ++j ){
+      const SuperCluster* elSC = elecPtr[j];
+
+      // check if duplicate
+      if( elSC == phoSC ){
+        fTPhotDupEl[i] = j;
+        break;
+      }
+    }
+  }
+
+  return;
 }
 
 void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers){

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.44 2010/04/26 16:56:29 fronga Exp $
+// $Id: NTupleProducer.h,v 1.45 2010/05/10 15:07:40 stiegerb Exp $
 //
 //
 
@@ -77,6 +77,7 @@ private:
   reco::TrackRef getConversionPartnerTrack(const reco::GsfElectron& gsfElectron, const edm::Handle<reco::TrackCollection>& track_h, const float bFieldAtOrigin, double& Dist, double& DCot, const float maxAbsDist = 0.02, const float maxAbsDCot = 0.02, const float minFracSharedHits = 0.45);
 
   virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
+  virtual void PhotonElectronDuplicate(vector<const SuperCluster*>, vector<const SuperCluster*>);
   virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
   virtual void PhotonJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
   virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
@@ -449,6 +450,7 @@ private:
   int    fTPhotHasPixSeed[gMaxnphos];
   int    fTPhotHasConvTrks[gMaxnphos];
   int    fTPhotIsInJet[gMaxnphos];
+  int    fTPhotDupEl[gMaxnphos];
   double fTPhotSharedPx[gMaxnphos];
   double fTPhotSharedPy[gMaxnphos];
   double fTPhotSharedPz[gMaxnphos];
