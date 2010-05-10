@@ -30,6 +30,8 @@ public:
 	void Begin();
 	void Analyze();
 	void End();
+	void DoTagging();
+	void DoCleaning();
 	void Reset();
 	void StatWrite(TString fCleanerStats);
 
@@ -51,6 +53,7 @@ public:
 	float fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
 	float fClean_dzVxmax;               // = 20.0  // Max longitudinal distance to beamspot
 	float fClean_sumPtTkfromVxmin;      // = 0.0   // Min summed pt of tracks assoc. with vtx
+	int fClean_PrimVtxNdofmin;          // = 5     // Min Ndof for Primary Vertex fit
 
 	// -- Vertex compatibility (of muons, electrons, photons and jets)
 	float fClean_distVxmax;             // = 5.0   // Max deviation (in sigmas) for d0 and dz
@@ -64,6 +67,7 @@ public:
 	// -- Electrons:
 	float fClean_ElecHoverEBarmax;      // = 0.045 // Max ElHcalOverEcal (barrel)
 	float fClean_ElecHoverEEndmax;      // = 0.05  // Max ElHcalOverEcal (endcap)
+	float fClean_ElecSigmaEtaEtaBarmin; // = 0.002 // Min ElecSigmaEtaEta (barrel), against spikes
 	float fClean_ElecSigmaEtaEtaBarmax; // = 0.011 // Max ElSigmaIetaIeta (barrel)
 	float fClean_ElecSigmaEtaEtaEndmax; // = 0.025 // Max ElSigmaIetaIeta (endcap)
 	float fClean_ElecEoverPInBarmin;    // = 0.3   // Min ElESuperClusterOverP (barrel)
@@ -79,6 +83,7 @@ public:
 	// -- Photons:
 	float fClean_PhotHoverEBarmax;      // = 0.2   // Max PhotonHcalOverEcal (barrel)
 	float fClean_PhotHoverEEndmax;      // = 0.2   // Max PhotonHcalOverEcal (endcap)
+	float fClean_PhotSigmaEtaEtaBarmin; // = 0.002 // Min PhotonSigmaEtaEta (barrel), against spikes
 	float fClean_PhotSigmaEtaEtaBarmax; // = 0.011 // Max PhotonSigmaIetaIeta (barrel)
 	float fClean_PhotSigmaEtaEtaEndmax; // = 0.025 // Max PhotonSigmaIetaIeta (endcap)
 	
@@ -88,6 +93,7 @@ public:
 	float fClean_FracChminJet;          // = 0.05  // Min JChfrac
 	float fClean_JID_n90Hitsmin;        // = 2     // Min JID_n90Hits
 	float fClean_JID_HPDmax;            // = 0.98  // Max JID_HPD
+	float fClean_JID_RBXmax;            // = 0.95  // Max JID_RBX
 
 	float fClean_deltaRElecJetmax;      // = 0.5   // Max delta R of e and j for electron jet check
 	float fClean_elecbyJetEratio;       // = 0.7   // Min eE/jE to be considered electron jet
@@ -113,6 +119,7 @@ private:
 	// Functions performing the cleaning and duplicate tagging 
 	void ReadCleaningParameters(const char* filename = "cleaningparms.dat");
 	void TagCleanObjects(void);
+	void TagDuplObjects(void);
 	int CleanPrimaryVertex(void);
 	int IsFromPrimaryVx(int ipart, int ichk);
 	int CleanMuon(int ichk);

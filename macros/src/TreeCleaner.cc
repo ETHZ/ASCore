@@ -23,9 +23,24 @@ void TreeCleaner::Begin(){
 }
 
 void TreeCleaner::Analyze(){
+// Performs the tagging, isolation and the object cleaning
+
+	DoTagging();
+	DoCleaning();
+}
+
+void TreeCleaner::DoTagging(){
+// Performs only the tagging and isolation
+
 	InitCleaning();
 	TagCleanObjects();
 	DecideIso();
+	TagDuplObjects();
+}
+
+void TreeCleaner::DoCleaning(){
+// Performs only the object cleaning
+//   assumes that DoTagging() has been called
 
 	if( fClean ){
 		DoCleanObjects();
@@ -117,9 +132,14 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		if( !strcmp(ParName, "sumPtTkfromVxmin") ){
 			fClean_sumPtTkfromVxmin = float(ParValue); ok = true;
 		}
+		if( !strcmp(ParName, "PrimVtxNdofmin") ){
+			fClean_PrimVtxNdofmin = int(ParValue); ok = true;
+		}
+		
 		if( !strcmp(ParName, "distVxmax") ){
 			fClean_distVxmax = float(ParValue); ok = true;
 		}
+		
 
 		// -- Muons:
 		if( !strcmp(ParName, "MuonDPbyPmax") ){
@@ -141,6 +161,9 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		}
 		if( !strcmp(ParName, "ElecHoverEEndmax") ){
 			fClean_ElecHoverEEndmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElecSigmaEtaEtaBarmin") ){
+			fClean_ElecSigmaEtaEtaBarmin = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "ElecSigmaEtaEtaBarmax") ){
 			fClean_ElecSigmaEtaEtaBarmax = float(ParValue); ok = true;
@@ -189,6 +212,9 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		if( !strcmp(ParName, "PhotSigmaEtaEtaEndmax") ){
 			fClean_PhotSigmaEtaEtaEndmax = float(ParValue); ok = true;
 		}
+		if( !strcmp(ParName, "PhotSigmaEtaEtaBarmin") ){
+			fClean_PhotSigmaEtaEtaBarmin = float(ParValue); ok = true;
+		}
 
 		// -- Jets:
 		if( !strcmp(ParName, "FracEmmaxJet") ){
@@ -205,6 +231,9 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		}
 		if( !strcmp(ParName, "JID_HPDmax") ){
 			fClean_JID_HPDmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "JID_RBXmax") ){
+			fClean_JID_RBXmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "deltaRElecJetmax") ){
 			fClean_deltaRElecJetmax = float(ParValue); ok = true;
@@ -277,13 +306,18 @@ void TreeCleaner::TagCleanObjects(void){
 	}
 
 	// Jets
-	int jbad = 0;
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ){
 		fTR->JGood[ichk] = 10*IsFromPrimaryVx(4, ichk);
 		fTR->JGood[ichk] += CleanJet(ichk);
 	}
+	return;
+}
+
+void TreeCleaner::TagDuplObjects(void){
+// Steering for tagging clean/bad objects
 
 	// Duplication (only after cleanness has been checked)
+	int jbad = 0;
 	for( int ichk = 0; ichk < fTR->NMus; ++ichk )  if( DuplicateMuon(ichk)     ) fTR->MuGood[ichk] += 100;
 	for( int ichk = 0; ichk < fTR->NEles; ++ichk ) if( DuplicateElectron(ichk) ) fTR->ElGood[ichk] += 100;
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) {
@@ -305,7 +339,7 @@ int TreeCleaner::CleanPrimaryVertex(void){
 //              = 4 for insufficient track pT AND 1 AND 2 AND 3
 	int iBad = 0;
 // Check that there are tracks at the Primary Vertex
-	if( fTR->PrimVtxNdof <= 0 ){
+	if( fTR->PrimVtxNdof < fClean_PrimVtxNdofmin ){
 		iBad = 1;
 		return iBad;
 	}
@@ -342,10 +376,13 @@ int TreeCleaner::IsFromPrimaryVx(int ipart, int ichk){
 //       = 4 for jet
 // returns iBad = 1 for incompatible with primary vertex
 	int iBad = 0;
+	
 // take error from vertex and from track extrapolation into account
 	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
 	double d0, dd0, dz, ddz;
 	if( ipart <= 0 || ichk < 0 ){
+		return iBad;
+	} else if (fTR->PrimVtxGood != 0) {
 		return iBad;
 	} else if( ipart == 1 ){ // Muons
 		d0  = fTR->MuD0PV[ichk];
@@ -449,6 +486,7 @@ int TreeCleaner::CleanElectron(int ichk){
 		if(useDeltaEtaIn)  if( fabs(deltaEtaIn)  > fClean_ElecDeltaEtaInBarmax  ) return 3;
 		if(useDeltaPhiIn)  if( fabs(deltaPhiIn)  > fClean_ElecDeltaPhiInBarmax  ) return 3;
 		if(useDeltaPhiOut) if( fabs(deltaPhiOut) > fClean_ElecDeltaPhiOutBarmax ) return 3;
+		if(useSigmaEtaEta) if( sigmaee           < fClean_ElecSigmaEtaEtaBarmin ) return 4;
 	}
 	else{ // EndCap
 		if(useHoverE)      if( hOverE            > fClean_ElecHoverEEndmax      ) return 1;
@@ -493,6 +531,7 @@ int TreeCleaner::CleanPhoton(int ichk){
 	if( fabs(fTR->PhoEta[ichk]) < 1.479 ){ // Barrel
 		if(useHoverE)      if( fTR->PhoHoverE[ichk]        > fClean_PhotHoverEBarmax      ) return 1;
 		if(useSigmaEtaEta) if( fTR->PhoSigmaIetaIeta[ichk] > fClean_PhotSigmaEtaEtaBarmax ) return 2;
+		if(useSigmaEtaEta) if( fTR->PhoSigmaIetaIeta[ichk] < fClean_PhotSigmaEtaEtaBarmin ) return 3;
 	}
 	else{ // EndCap
 		if(useHoverE)      if( fTR->PhoHoverE[ichk]        > fClean_PhotHoverEEndmax      ) return 1;
@@ -511,6 +550,9 @@ int TreeCleaner::CleanJet(int ichk){
 //              = 2 for too large EM fraction
 //              = 3 for too small EM fraction
 //              = 4 for bad Trk pT fraction
+//              = 5 for too small JID_n90Hits
+//              = 6 for too high JID_HPD (= fraction in single HPD)
+//              = 7 for too high JID_RBX
 	int iBad = 0;
 	if( ichk < 0 ) return 0;
 
@@ -523,6 +565,7 @@ int TreeCleaner::CleanJet(int ichk){
 	if( fTR->JChfrac[ichk] < fClean_FracChminJet && fabs(fTR->JEta[ichk]) < 2.1 ) return 4;
 	if( fTR->JID_n90Hits[ichk] < fClean_JID_n90Hitsmin ) return 5;
 	if( fTR->JID_HPD[ichk] > fClean_JID_HPDmax ) return 6;
+	if (fTR->JID_RBX[ichk] > fClean_JID_RBXmax ) return 7;
 	return 0;
 }
 
@@ -537,6 +580,7 @@ bool TreeCleaner::ElectronJet(int ichk){
 	for( int j = 0; j < fTR->NEles; ++j ){
 		if( fTR->ElIsInJet[j] < 0 ) continue;
 		if( fTR->ElIsInJet[j] != ichk ) continue;
+		if (fTR->ElGood[j] != 0 || fTR->ElIsIso[j] == 0) continue;
 		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->ElEta[j], fTR->JPhi[ichk], fTR->ElPhi[j]) > fClean_deltaRElecJetmax ) continue;
 		double jetEuncorr = fTR->JE[ichk] / fTR->JEcorr[ichk];
 		if( fTR->ElSharedEnergy[j] > fClean_elecbyJetEratio * jetEuncorr ){
@@ -558,6 +602,7 @@ bool TreeCleaner::PhotonJet(int ichk){
 	for( int j = 0; j < fTR->NPhotons; ++j ){
 		if( fTR->PhoIsInJet[j] < 0 ) continue;
 		if( fTR->PhoIsInJet[j] != ichk ) continue;
+		if (fTR->PhoGood[j] != 0 || fTR->PhoIsIso[j] == 0) continue;
 		if( Util::GetDeltaR(fTR->JEta[ichk], fTR->PhoEta[j], fTR->JPhi[ichk], fTR->PhoPhi[j]) > fClean_deltaRElecJetmax ) continue;
 		double jetEuncorr = fTR->JE[ichk] / fTR->JEcorr[ichk];
 		if( fTR->PhoSharedEnergy[j] > fClean_elecbyJetEratio * jetEuncorr ){
@@ -1567,7 +1612,7 @@ void TreeCleaner::PutMuon(int inew, int iold){
 	fTR->MuSegmComp    [inew] = fTR->MuSegmComp    [iold];
 	fTR->MuTrackerMu   [inew] = fTR->MuTrackerMu   [iold];
 	fTR->MuGMPT        [inew] = fTR->MuGMPT        [iold];
-
+	
 	fTR->MuGenID       [inew] = fTR->MuGenID       [iold];
 	fTR->MuGenStatus   [inew] = fTR->MuGenStatus   [iold];
 	fTR->MuGenCharge   [inew] = fTR->MuGenCharge   [iold];
