@@ -136,6 +136,7 @@ const int JetFiller::fillBranches(const edm::Event& iEvent,
       fTe[ijet]   = Jit->energy();
       fTet[ijet]  = Jit->et();
       fTphi[ijet] = Jit->phi();
+      fTeta[ijet] = Jit->eta();
       fTscale[ijet] = scale;
       fTNConstituents[ijet] = Jit->nConstituents();
 
