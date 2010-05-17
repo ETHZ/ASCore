@@ -32,7 +32,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_genjets    = cms.untracked.InputTag('sisCone5GenJets'),
 	tag_l1trig     = cms.untracked.InputTag("gtDigis"),
 	tag_hlttrig    = cms.untracked.InputTag("TriggerResults","","HLT"),
-
+        
 	# Jet ID configuration
 	jetID = cms.PSet(),
 
@@ -55,5 +55,9 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_mintrknhits = cms.int32(0),
 	# Photons
 	sel_minphopt    = cms.double(5.0),
-	sel_maxphoeta   = cms.double(2.4),            
+	sel_maxphoeta   = cms.double(2.4),
+
+        # Additional jet collections
+        jets = cms.VPSet()
+
 )
