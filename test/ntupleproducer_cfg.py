@@ -46,7 +46,9 @@ process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssoc
 # Input
 process.source = cms.Source("PoolSource",
       fileNames = cms.untracked.vstring(
-     '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V25B_356ReReco-v1/0004/F44C3A4D-F73B-DF11-B42D-003048678B94.root'
+#     '/store/data/Commissioning10/MinimumBias/RAW-RECO/v7/000/132/440/0636C91D-4C3C-DF11-9A45-001A649747B0.root'
+#     '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V25B_356ReReco-v1/0004/F44C3A4D-F73B-DF11-B42D-003048678B94.root'
+      'file:////data/susy/data/MinBias-Spring10-START3X_V25B_356ReReco-v1-GEN-SIM-RECO.root'
     ),
 #Enable if you see duplicate error      duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
@@ -91,6 +93,22 @@ process.analyze.tag_jets   = recoJet_src
 process.analyze.isRealData = cms.untracked.bool(runon=='data')
 # Synchronise with Jet Corrections above
 process.analyze.jetCorrs   = 'L2L3JetCorrectorAK5Calo' 
+# Add some jet collections
+process.analyze.jets = (
+    # PF jets
+    cms.PSet( prefix = cms.untracked.string('PF'),
+              tag = cms.untracked.InputTag('ak5PFJets'),
+              sel_minpt  = process.analyze.sel_mincorjpt,
+              sel_maxeta = process.analyze.sel_maxjeta,
+              corrections = cms.string('L2L3JetCorrectorAK5PF'),
+              ),
+    cms.PSet( prefix = cms.untracked.string('CA'),
+              tag = cms.untracked.InputTag('ak5CaloJets'),
+              sel_minpt  = process.analyze.sel_mincorjpt,
+              sel_maxeta = process.analyze.sel_maxjeta,
+              corrections = cms.string('L2L3JetCorrectorAK5Calo'),
+              ),
+    )
 
 from RecoJets.JetProducers.JetIDParams_cfi import JetIDParams
 process.analyze.jetID = JetIDParams
