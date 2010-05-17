@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.54 2010/05/10 15:07:39 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.55 2010/05/10 16:09:25 stiegerb Exp $
 //
 //
 
@@ -129,6 +129,21 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
   fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
 
+  // Create histograms and trees
+  // - Histograms with trigger information
+  fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats", "HLTTriggerStatistics", gMaxhltbits+2, 0, gMaxhltbits+2);
+  fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
+  fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
+  // - Tree with run information
+  fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
+  // Tree with event information
+  fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
+
+  // Create additional jet fillers
+  std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
+  for (size_t i=0; i<jConfigs.size(); ++i)
+    jetFillers.push_back( new JetFiller(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
+
   edm::LogVerbatim("NTP") << "---------------------------------";
   edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
   edm::LogVerbatim("NTP") << endl;
@@ -188,6 +203,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   // Reset all the tree variables
   resetTree();
+  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+        it != jetFillers.end(); ++it )
+    (*it)->reset();
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // Get the collections /////////////////////////////////////////////////////////
@@ -876,7 +895,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       // fTjnAssoTracks[jqi] = pJ.associatedTracks().size();
     }
 
-
     //Look inside the calotowers for each jet
     double sumEtaEM=0.;
     double sumEta2EM=0;
@@ -1125,6 +1143,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Check photon/jet duplication
   PhotonJetOverlap(jetPtr, photSCs, calotowers);
 
+  // Process other jet collections, as configured
+  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+        it != jetFillers.end(); ++it )
+    (*it)->fillBranches(iEvent,iSetup);
+
   ////////////////////////////////////////////////////////
   // Get and Dump (M)E(T) Variables:
   // Tracks:
@@ -1244,12 +1267,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fNTotEvents = 0;
   fNFillTree  = 0;
   fFirstevent = true;
-  fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats", "HLTTriggerStatistics", gMaxhltbits+2, 0, gMaxhltbits+2);
-  fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
-  fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
 
-  // Tree with run information
-  fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
   fRunTree->Branch("Run"            ,&fRTrunnumber,      "Run/I");
   fRunTree->Branch("ExtXSecLO"      ,&fRTextxslo,        "ExtXSecLO/D");
   fRunTree->Branch("ExtXSecNLO"     ,&fRTextxsnlo,       "ExtXSecNLO/D");
@@ -1277,8 +1295,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fRunTree->Branch("MaxNTrks"       ,&fRTmaxntrk,        "MaxTtrk/I");
   fRunTree->Branch("MaxNPhotons"    ,&fRTmaxnphot,       "MaxTphot/I");
 
-  // Tree with event information
-  fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
   // Event information:
   fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
   fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/I");
@@ -1581,6 +1597,10 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JGenEmE"        ,&fTjetGenemE      ,"JGenEmE[NJets]/D");
   fEventTree->Branch("JGenHadE"       ,&fTjetGenhadE     ,"JGenHadE[NJets]/D");
   fEventTree->Branch("JGenInvE"       ,&fTjetGeninvE     ,"JGenInvE[NJets]/D");
+
+  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+        it != jetFillers.end(); ++it )
+    (*it)->createBranches();
 
   // Tracks:
   fEventTree->Branch("NTracks"        ,&fTntracks      ,"NTracks/I");

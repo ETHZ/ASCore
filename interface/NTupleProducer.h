@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.45 2010/05/10 15:07:40 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.46 2010/05/10 16:09:25 stiegerb Exp $
 //
 //
 
@@ -46,8 +46,11 @@
 	
 // Helpers
 #include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
-
 #include "Math/VectorUtil.h"
+
+// Local classes
+#include "DiLeptonAnalysis/NTupleProducer/interface/JetFiller.h"
+
 
 
 typedef math::XYZTLorentzVector LorentzVector;
@@ -100,6 +103,8 @@ private:
   // ----------member data ---------------------------
   edm::Service<TFileService> fTFileService;
   reco::helper::JetIDHelper jetIDHelper;
+
+  std::vector<JetFiller*> jetFillers;
 
   bool fIsRealData;
   bool fIsPat;
