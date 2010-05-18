@@ -56,43 +56,43 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 # Output
 process.TFileService = cms.Service("TFileService",
 # keep track of the type of data source and reco type in the ntuple file name
-	fileName = cms.string("NTupleProducer_35X_"+runon+"_"+recoType+".root"),  
+	fileName = cms.string("NTupleProducer_36X_"+runon+"_"+recoType+".root"),  
 	closeFileFast = cms.untracked.bool(True)
 )
 
 #### Parameterisation for Jet Corrections and JES ME Corrections ###############
-if runon=='MC31x':
-    recoJet_src = "antikt5CaloJets"
-    genJet_src = "antikt5GenJets"
-else:
-    recoJet_src = "ak5CaloJets"
-    genJet_src = "ak5GenJets"
+recoJet_src = "ak5CaloJets"
+genJet_src = "ak5GenJets"
+
+# Jet ID: add the ones you want
+process.load('RecoJets.Configuration.JetIDProducers_cff')
+process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 
 #### Jet Corrections ###########################################################
-# See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetAnalysis#CorrInstructions
+# See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
 # to check what cff to use
-if runon=='data':
-    process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
-else:
-    process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
-process.L2L3CorJetAK5Calo.src = recoJet_src
-# NB: also check the analysis input below.
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.jecCorSequence = cms.Sequence(
+    process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
+    )
+### NB: also check the analysis input below.
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
 process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
 process.metMuonJESCorAK5.inputUncorJetsLabel = recoJet_src
-process.metMuonJESCorAK5.corrector = "L2L3JetCorrectorAK5Calo"
+#[FR: already default] process.metMuonJESCorAK5.corrector = "ak5CaloL2L3"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
-process.analyze.tag_jets   = recoJet_src
 process.analyze.isRealData = cms.untracked.bool(runon=='data')
-# Synchronise with Jet Corrections above
-process.analyze.jetCorrs   = 'L2L3JetCorrectorAK5Calo' 
+# Synchronise with Jet configuration above (defaults to ak5)
+process.analyze.tag_jets  = recoJet_src
+process.analyze.jetCorrs  = 'ak5CaloL2L3'
+process.analyze.tag_jetID = 'ak5JetID'
 # Add some jet collections
 process.analyze.jets = (
     # PF jets
@@ -100,24 +100,23 @@ process.analyze.jets = (
               tag = cms.untracked.InputTag('ak5PFJets'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
-              corrections = cms.string('L2L3JetCorrectorAK5PF'),
+              corrections = cms.string('ak5PFL2L3'),
               ),
+    # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
-              corrections = cms.string('L2L3JetCorrectorAK5Calo'),
+              corrections = cms.string('ak5CaloL2L3'),
               ),
     )
-
-from RecoJets.JetProducers.JetIDParams_cfi import JetIDParams
-process.analyze.jetID = JetIDParams
 
 #### Path ######################################################################
 process.mybtag = cms.Sequence(   process.impactParameterTagInfos
                                * process.simpleSecondaryVertexBJetTags )
 process.p = cms.Path(
-      process.L2L3CorJetAK5Calo
+      process.jecCorSequence
+    + process.recoJetIdSequence
     + process.metCorSequence
     + process.mybtag
     + process.analyze
