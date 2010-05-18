@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:l:v:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:lv:h?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'l': isList = true; break;
