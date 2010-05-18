@@ -10,10 +10,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_muisodepec = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
 	tag_muisodephc = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
 	tag_electrons  = cms.untracked.InputTag('gsfElectrons'),	
-	tag_jets       = cms.untracked.InputTag('antikt5CaloJets'),
-	jetCorrs       = cms.untracked.string('L2L3JetCorrectorAK5Calo'),
+	tag_jets       = cms.untracked.InputTag('ak5CaloJets'),
+	jetCorrs       = cms.untracked.string('ak5CaloL2L3'),
 	tag_btag       = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),
         tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+        tag_jetID      = cms.untracked.InputTag('ak5JetID'),
 	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
 	tag_met1       = cms.untracked.InputTag('met'),
 	tag_met2       = cms.untracked.InputTag('corMetGlobalMuons'),
@@ -33,9 +34,6 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_l1trig     = cms.untracked.InputTag("gtDigis"),
 	tag_hlttrig    = cms.untracked.InputTag("TriggerResults","","HLT"),
         
-	# Jet ID configuration
-	jetID = cms.PSet(),
-
         # Event Selection Criteria
 	# Muons:
 	sel_minmupt     = cms.double(5.0),
