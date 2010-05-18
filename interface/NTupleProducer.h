@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.46 2010/05/10 16:09:25 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.47 2010/05/17 09:55:46 fronga Exp $
 //
 //
 
@@ -45,7 +45,6 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 	
 // Helpers
-#include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
 #include "Math/VectorUtil.h"
 
 // Local classes
@@ -102,7 +101,6 @@ private:
 
   // ----------member data ---------------------------
   edm::Service<TFileService> fTFileService;
-  reco::helper::JetIDHelper jetIDHelper;
 
   std::vector<JetFiller*> jetFillers;
 
@@ -126,6 +124,7 @@ private:
   string fJetCorrs;
   edm::InputTag fBtagTag;
   edm::InputTag fJetTracksTag;
+  edm::InputTag fJetIDTag;
   edm::InputTag fMET1Tag;
   edm::InputTag fMET2Tag;
   edm::InputTag fMET3Tag;
@@ -483,10 +482,6 @@ private:
   double fTjID_HPD[gMaxnjets];
   double fTjID_RBX[gMaxnjets];
   double fTjID_n90Hits[gMaxnjets];
-  double fTjID_SubDet1[gMaxnjets];
-  double fTjID_SubDet2[gMaxnjets];
-  double fTjID_SubDet3[gMaxnjets];
-  double fTjID_SubDet4[gMaxnjets];
   double fTjID_resEMF[gMaxnjets];
   double fTjID_HCALTow[gMaxnjets];
   double fTjID_ECALTow[gMaxnjets];

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.55 2010/05/10 16:09:25 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.56 2010/05/17 09:55:46 fronga Exp $
 //
 //
 
@@ -48,6 +48,7 @@
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/JetReco/interface/JetTracksAssociation.h"
+#include "DataFormats/JetReco/interface/JetID.h"
 
 #include "DataFormats/METReco/interface/METCollection.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
@@ -93,6 +94,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fJetCorrs       = iConfig.getUntrackedParameter<string>("jetCorrs");
   fBtagTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag");
   fJetTracksTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+  fJetIDTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetID");
   fMET1Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met1");
   fMET2Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met2");
   fMET3Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met3");
@@ -108,10 +110,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fGenJetTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
-
-  // Jet ID helper
-  if ( !fIsPat )
-    jetIDHelper = reco::helper::JetIDHelper(iConfig.getParameter<edm::ParameterSet>("jetID")  );
 
   // Event Selection
   fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -138,11 +136,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fRunTree = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
   // Tree with event information
   fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
-
-  // Create additional jet fillers
-  std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
-  for (size_t i=0; i<jConfigs.size(); ++i)
-    jetFillers.push_back( new JetFiller(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
 
   edm::LogVerbatim("NTP") << "---------------------------------";
   edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
@@ -187,6 +180,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta  ;
   edm::LogVerbatim("NTP") << endl;
   edm::LogVerbatim("NTP") << "---------------------------------" ;
+
+  // Create additional jet fillers
+  std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
+  for (size_t i=0; i<jConfigs.size(); ++i)
+    jetFillers.push_back( new JetFiller(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
+
 }
 
 NTupleProducer::~NTupleProducer(){}
@@ -227,6 +226,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Jet tracks association (already done in PAT)
   Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
   if ( !fIsPat ) iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
+
+  // Jet ID association (already done in PAT)
+  edm::Handle<reco::JetIDValueMap> jetIDMap;
+  if ( !fIsPat ) iEvent.getByLabel(fJetIDTag,jetIDMap);
 
   //Get Tracks collection
   Handle<TrackCollection> tracks;
@@ -1078,42 +1081,27 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTjetVtxEzx[jqi]   = -888.88;
       fTjetVtxNChi2[jqi] = -888.88;
     }
+    AssociatedTracks.clear();
+    AssociatedTTracks.clear();
 
     // CaloJet specific variables (embedded in PAT)
+    reco::JetID jetID;
     if ( !fIsPat ) {
       const CaloJet* cJ = static_cast<const CaloJet*>(jet);
       fTjemfrac[jqi] =  cJ->emEnergyFraction();
-
-      // jetID variables
-      // FIXME: should be calculated before correction (for fractions)
-      // => re-correct all fractions
-      jetIDHelper.calculate(iEvent, *cJ);
-      fTjID_HPD[jqi]      = jetIDHelper.fHPD()*fTjEcorr[jqi];
-      fTjID_RBX[jqi]      = jetIDHelper.fRBX()*fTjEcorr[jqi];
-      fTjID_n90Hits[jqi]  = jetIDHelper.n90Hits();
-      fTjID_SubDet1[jqi]  = jetIDHelper.fSubDetector1()*fTjEcorr[jqi];
-      fTjID_SubDet2[jqi]  = jetIDHelper.fSubDetector2()*fTjEcorr[jqi];
-      fTjID_SubDet3[jqi]  = jetIDHelper.fSubDetector3()*fTjEcorr[jqi];
-      fTjID_SubDet4[jqi]  = jetIDHelper.fSubDetector4()*fTjEcorr[jqi];
-      fTjID_resEMF[jqi]   = jetIDHelper.restrictedEMF();
-      fTjID_HCALTow[jqi]  = jetIDHelper.nHCALTowers();
-      fTjID_ECALTow[jqi]  = jetIDHelper.nECALTowers();
+      edm::RefToBase<reco::Jet> jetRef = jets->refAt(jqi);
+      jetID = (*jetIDMap)[ jetRef ];
     } else {
       const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
       fTjemfrac[jqi]      = pJ->emEnergyFraction();
-      fTjID_HPD[jqi]      = pJ->jetID().fHPD;
-      fTjID_RBX[jqi]      = pJ->jetID().fRBX;
-      fTjID_n90Hits[jqi]  = pJ->jetID().n90Hits;
-      fTjID_SubDet1[jqi]  = pJ->jetID().fSubDetector1;
-      fTjID_SubDet2[jqi]  = pJ->jetID().fSubDetector2;
-      fTjID_SubDet3[jqi]  = pJ->jetID().fSubDetector3;
-      fTjID_SubDet4[jqi]  = pJ->jetID().fSubDetector4;
-      fTjID_resEMF[jqi]   = pJ->jetID().restrictedEMF;
-      fTjID_HCALTow[jqi]  = pJ->jetID().nHCALTowers;
-      fTjID_ECALTow[jqi]  = pJ->jetID().nECALTowers;
+      jetID = pJ->jetID();
     }
-    AssociatedTracks.clear();
-    AssociatedTTracks.clear();
+    fTjID_HPD[jqi]      = jetID.fHPD;
+    fTjID_RBX[jqi]      = jetID.fRBX;
+    fTjID_n90Hits[jqi]  = jetID.n90Hits;
+    fTjID_resEMF[jqi]   = jetID.restrictedEMF;
+    fTjID_HCALTow[jqi]  = jetID.nHCALTowers;
+    fTjID_ECALTow[jqi]  = jetID.nECALTowers;
 
     // GenJet matching
     if (!fIsRealData) {
@@ -1554,10 +1542,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JID_HPD"        ,&fTjID_HPD        ,"JID_HPD[NJets]/D");
   fEventTree->Branch("JID_RBX"        ,&fTjID_RBX        ,"JID_RBX[NJets]/D");
   fEventTree->Branch("JID_n90Hits"    ,&fTjID_n90Hits    ,"JID_n90Hits[NJets]/D");
-  fEventTree->Branch("JID_SubDet1"    ,&fTjID_SubDet1    ,"JID_SubDet1[NJets]/D");
-  fEventTree->Branch("JID_SubDet2"    ,&fTjID_SubDet2    ,"JID_SubDet2[NJets]/D");
-  fEventTree->Branch("JID_SubDet3"    ,&fTjID_SubDet3    ,"JID_SubDet3[NJets]/D");
-  fEventTree->Branch("JID_SubDet4"    ,&fTjID_SubDet4    ,"JID_SubDet4[NJets]/D");
   fEventTree->Branch("JID_resEMF"     ,&fTjID_resEMF     ,"JID_resEMF[NJets]/D");
   fEventTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow    ,"JID_HCALTow[NJets]/D");
   fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow    ,"JID_ECALTow[NJets]/D");
@@ -1976,10 +1960,6 @@ void NTupleProducer::resetTree(){
   resetDouble(fTjID_HPD, gMaxnjets);
   resetDouble(fTjID_RBX, gMaxnjets);
   resetDouble(fTjID_n90Hits, gMaxnjets);
-  resetDouble(fTjID_SubDet1, gMaxnjets);
-  resetDouble(fTjID_SubDet2, gMaxnjets);
-  resetDouble(fTjID_SubDet3, gMaxnjets);
-  resetDouble(fTjID_SubDet4, gMaxnjets);
   resetDouble(fTjID_resEMF,  gMaxnjets);
   resetDouble(fTjID_HCALTow, gMaxnjets);
   resetDouble(fTjID_ECALTow, gMaxnjets);
