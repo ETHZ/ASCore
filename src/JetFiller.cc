@@ -43,10 +43,12 @@ JetFiller::JetFiller( const edm::ParameterSet& config, TTree* tree,
   fMaxeta   = config.getParameter<double>("sel_maxeta");
   fJetCorrs = config.getParameter<std::string>("corrections");
 
-  edm::LogVerbatim("NTP") << "---------------------------------";
   edm::LogVerbatim("NTP") << " ==> JetFiller Constructor - " << fPrefix;
-  edm::LogVerbatim("NTP") << "  Input Tag:" ;
-  edm::LogVerbatim("NTP") << "    fTag        = " << fTag.label();
+  edm::LogVerbatim("NTP") << "  Input Tag: " << fTag.label();
+  edm::LogVerbatim("NTP") << "    fMinpt      = " << fMinpt;
+  edm::LogVerbatim("NTP") << "    fMaxeta     = " << fMaxeta;
+  edm::LogVerbatim("NTP") << "    fJetCorrs   = " << fJetCorrs;
+  edm::LogVerbatim("NTP") << "---------------------------------";
 
 }
 
