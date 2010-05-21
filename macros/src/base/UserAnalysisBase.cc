@@ -41,6 +41,25 @@ void UserAnalysisBase::ReadPDGTable(const char* filename){
 	}
 }
 
+int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
+	if( fPDGMap.empty() ){
+		if(fVerbose > 0) cout << "UserAnalysisBase::GetPDGParticle ==> PDGMap not fille!" << endl;
+		return -1;
+	}
+	else{
+		map<int, pdgparticle>::iterator it = fPDGMap.find(id);
+		if(it == fPDGMap.end()){
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetPDGParticle ==> PDGParticle with ID " << id << " not found!" << endl;
+			return -1;
+		}
+		else{
+			part = it->second;
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void UserAnalysisBase::GetHLTNames(){
 	TFile *f = fTR->fChain->GetCurrentFile();
 	TH1I *hlt_stats = (TH1I*)f->Get("analyze/HLTTriggerStats");
@@ -55,7 +74,7 @@ int UserAnalysisBase::GetHLTBit(string theHltName){
 	else{
 		map<string,int>::iterator it = fHLTLabelMap.find(theHltName);
 		if(it == fHLTLabelMap.end()){
-			cout << "UserAnalysisBase::GetHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
+			if(fVerbose > 0) cout << "UserAnalysisBase::GetHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
 			return -1;
 		}
 		else{
@@ -69,7 +88,7 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	else{
 		int bit = GetHLTBit(theHltName);
 		if(bit == -1){
-			cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
+			if(fVerbose > 0) cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
 			return false;
 		}
 		else return (bool)fTR->HLTResults[bit];

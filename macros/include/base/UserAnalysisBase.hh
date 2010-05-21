@@ -20,7 +20,8 @@ public:
 
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 
-	virtual void ReadPDGTable(const char* filename);
+	virtual void ReadPDGTable(const char* filename = "pdgtable.txt");
+	virtual int GetPDGParticle(pdgparticle&, int);
 	virtual void GetHLTNames();
 	virtual int GetHLTBit(string);
 	virtual bool GetHLTResult(string);
