@@ -114,55 +114,77 @@ const int JetFiller::fillBranches(const edm::Event& iEvent,
   Handle<View<Jet> > jets;
   iEvent.getByLabel(fTag,jets);
 
-  unsigned int ijet(0);
+  const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
+
+  // First loop: just get corrected pt and corresponding indices
+  unsigned int iraw(0);
+  vector<OrderPair> corrIndices; // Vector of indices and pt of corr. jets
   for( View<Jet>::const_iterator Jit = jets->begin(); 
-       Jit != jets->end(); ++Jit )
+       Jit != jets->end(); ++Jit, ++iraw )
     {
-      // Cut on corrected pT
-      const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
+      // Store the (index,pt) pair, where pt is corrected
       double scale = jetCorr->correction(Jit->p4());
-      if(Jit->pt()*scale < fMinpt) continue;
-
-      // Save only the gMaxnjets first uncorrected jets
-      if (ijet >= gMaxnobjs){
-        edm::LogWarning("NTP") << "@SUB=FillBranches"
-                               << "Maximum number of jets exceeded: " 
-                               << ijet << " >= " << static_cast<int>(gMaxnobjs);
-        break;
-      }
-
-      fTpx[ijet]  = Jit->px();
-      fTpy[ijet]  = Jit->py();
-      fTpz[ijet]  = Jit->pz();
-      fTpt[ijet]  = Jit->pt();
-      fTe[ijet]   = Jit->energy();
-      fTet[ijet]  = Jit->et();
-      fTphi[ijet] = Jit->phi();
-      fTeta[ijet] = Jit->eta();
-      fTscale[ijet] = scale;
-      fTNConstituents[ijet] = Jit->nConstituents();
-
-      //FIXME: NEED A NICE WAY TO DISTINGUISH JET SPECIES (PAT?)
-      //      // Calo jet specific
-      //      if ( Jit->isCaloJet() ) {
-      //         const CaloJet* jet = static_cast<const CaloJet*>(&(*Jit));
-      //         fTEMfrac[ijet]  = jet->emEnergyFraction();
-      //         fTHadFrac[ijet] = jet->energyFractionHadronic();
-      //      }
-      //
-      //      // PF jet specific
-      //      if ( Jit->isPFJet() ) {
-      //         const PFJet* jet = static_cast<const PFJet*>(&(*Jit));
-      //         fTChHadFrac[ijet]  = jet->chargedHadronEnergyFraction();
-      //         fTNeuHadFrac[ijet] = jet->neutralHadronEnergyFraction();
-      //         fTChEmFrac[ijet]   = jet->chargedEmEnergyFraction();
-      //         fTNeuEmFrac[ijet]  = jet->chargedEmEnergyFraction();
-      //         fTMuonMultiplicity[ijet] = jet->muonMultiplicity();
-      //      }
-
-      ++ijet;
+      corrIndices.push_back(make_pair(iraw,Jit->pt()*scale));
     }
-  fTnobj = ijet+1;
+
+
+  // Now sort indices by decreasing corrected pt
+  IndexByPt indexComparator;
+  std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
+
+  // Second loop: get them ordered
+  unsigned int ijet(0);
+  for ( vector<OrderPair>::const_iterator it = corrIndices.begin(); 
+        it != corrIndices.end(); ++it ) {
+
+    unsigned int index = it->first;
+    const Jet* jet = &((*jets)[index]);
+
+    // Cut on corrected pT
+    double scale = jetCorr->correction(jet->p4());
+    if(jet->pt()*scale < fMinpt) continue;
+
+    // Save only the gMaxnjets first uncorrected jets
+    if (ijet >= gMaxnobjs){
+      edm::LogWarning("NTP") << "@SUB=FillBranches"
+                             << "Maximum number of jets exceeded: " 
+                             << ijet << " >= " << static_cast<int>(gMaxnobjs);
+      break;
+    }
+
+    // Store the information (corrected)
+    fTpx[ijet]    = jet->px()*scale;
+    fTpy[ijet]    = jet->py()*scale;
+    fTpz[ijet]    = jet->pz()*scale;
+    fTpt[ijet]    = jet->pt()*scale;
+    fTe[ijet]     = jet->energy()*scale;
+    fTet[ijet]    = jet->et()*scale;
+    fTphi[ijet]   = jet->phi();
+    fTeta[ijet]   = jet->eta();
+    fTscale[ijet] = scale;
+    fTNConstituents[ijet] = jet->nConstituents();
+    
+    //FIXME: NEED A NICE WAY TO DISTINGUISH JET SPECIES (PAT?)
+    //      // Calo jet specific
+    //      if ( jet->isCaloJet() ) {
+    //         const CaloJet* jet = static_cast<const CaloJet*>(&(*jet));
+    //         fTEMfrac[ijet]  = jet->emEnergyFraction();
+    //         fTHadFrac[ijet] = jet->energyFractionHadronic();
+    //      }
+    //
+    //      // PF jet specific
+    //      if ( jet->isPFJet() ) {
+    //         const PFJet* jet = static_cast<const PFJet*>(&(*jet));
+    //         fTChHadFrac[ijet]  = jet->chargedHadronEnergyFraction();
+    //         fTNeuHadFrac[ijet] = jet->neutralHadronEnergyFraction();
+    //         fTChEmFrac[ijet]   = jet->chargedEmEnergyFraction();
+    //         fTNeuEmFrac[ijet]  = jet->chargedEmEnergyFraction();
+    //         fTMuonMultiplicity[ijet] = jet->muonMultiplicity();
+    //      }
+    
+    ++ijet;
+  }
+  fTnobj = ijet;
 
   return 0;
 

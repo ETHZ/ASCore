@@ -10,11 +10,12 @@
 
 */
 //
-// $Id: $
+// $Id: JetFiller.h,v 1.1 2010/05/17 09:54:20 fronga Exp $
 //
 //
 
 #include <string>
+#include <vector>
 
 #include "TTree.h"
 
@@ -44,10 +45,17 @@ protected:
   /// Add a branch to the tree (takes care of prefixing branch names)
   const bool addBranch(const char* name, const char* type, 
                        void* address, const char* size = 0);
-
-
   void resetDouble(double* v, size_t size = 1);
   void resetInt(int* v, size_t size = 1);
+
+  // To order indices by pt
+  typedef std::pair<unsigned int,double> OrderPair;
+  struct IndexByPt {
+    const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
+      return j1.second > j2.second;
+    }
+  };
+
   
   std::string fPrefix;        /// Prefix for branches
   TTree* fTree;               /// Pointer to tree to fill
