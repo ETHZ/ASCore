@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.57 2010/05/18 13:53:56 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.58 2010/05/26 16:30:10 stiegerb Exp $
 //
 //
 
@@ -108,6 +108,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fGenJetTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
+  fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
   // Event Selection
   fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -286,6 +287,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   edm::ESHandle<EcalChannelStatus> chStatus;
   iSetup.get<EcalChannelStatusRcd>().get(chStatus);
   const EcalChannelStatus * channelStatus = chStatus.product();
+
+  // Retrieve HB/HE noise flag
+  edm::Handle<bool> hbHeNoiseFlag;
+  iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
+  fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
 
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
@@ -1397,6 +1403,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxUncJetExceed"  ,&fTflagmaxujetexc  ,"MaxUncJetExceed/I");
   fEventTree->Branch("MaxTrkExceed"     ,&fTflagmaxtrkexc   ,"MaxTrkExceed/I");
   fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc   ,"MaxPhotonsExceed/I");
+  fEventTree->Branch("HBHENoiseFlag",    &fTHBHENoiseFlag   ,"HBHENoiseFlag/I");
 
   // Muons:
   fEventTree->Branch("NMus"             ,&fTnmu              ,"NMus/I");
@@ -1884,6 +1891,7 @@ void NTupleProducer::resetTree(){
   fTbeamspoty   = -999.99;
   fTbeamspotz   = -999.99;
   fTNCaloTowers = -999;
+  fTHBHENoiseFlag = -999;
 
   fTgoodevent        = 1;
   fTflagmaxmuexc     = 0;

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.48 2010/05/18 13:54:01 fronga Exp $
+// $Id: NTupleProducer.h,v 1.49 2010/05/26 16:30:12 stiegerb Exp $
 //
 //
 
@@ -140,6 +140,7 @@ private:
   edm::InputTag fGenJetTag;
   edm::InputTag fL1TriggerTag;
   edm::InputTag fHLTTriggerTag;
+  edm::InputTag fHBHENoiseResultTag;
 
   double fMinmupt;
   double fMaxmueta;
@@ -216,6 +217,7 @@ private:
   double fTextxslo;
   double fTintxs;
   double fTweight;
+  int fTHBHENoiseFlag;
 
   int fTgoodvtx;
   double fTprimvtxx;
