@@ -13,7 +13,7 @@ JetFiller::JetFiller( const edm::ParameterSet& config, TTree* tree,
 {
 
   //FIXME: could be set from configuration file...
-  gMaxnobjs = 20;
+  gMaxnobjs = 100;
 
   // Define all arrays
   fTpx  = new double[gMaxnobjs];

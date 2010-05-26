@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.47 2010/05/17 09:55:46 fronga Exp $
+// $Id: NTupleProducer.h,v 1.48 2010/05/18 13:54:01 fronga Exp $
 //
 //
 
@@ -221,11 +221,13 @@ private:
   double fTprimvtxx;
   double fTprimvtxy;
   double fTprimvtxz;
+  double fTprimvtxrho;
   double fTprimvtxxE;
   double fTprimvtxyE;
   double fTprimvtxzE;
   double fTpvtxznchi2;
   int    fTpvtxndof;
+  int    fTpvtxisfake;
   double fTpvtxptsum;
 
   double fTbeamspotx;
@@ -254,8 +256,12 @@ private:
   // Muons:
   int fTnmu;
   int fTnmutot; // before preselection
+  int fTnglobalmu;
+  int fTntrackermu;
   int fTgoodmu[gMaxnmus];
   int fTmuIsIso[gMaxnmus];
+  int fTmuIsGM[gMaxnmus];
+  int fTmuIsTM[gMaxnmus];
   double fTmupx[gMaxnmus];
   double fTmupy[gMaxnmus];
   double fTmupz[gMaxnmus];
@@ -272,6 +278,8 @@ private:
   double fTmuIso03sumPt[gMaxnmus];
   double fTmuIso03emEt[gMaxnmus];
   double fTmuIso03hadEt[gMaxnmus];
+  double fTmuIso03emVetoEt[gMaxnmus];
+  double fTmuIso03hadVetoEt[gMaxnmus];
   double fTmuIso05sumPt[gMaxnmus];
   double fTmuIso05emEt[gMaxnmus];
   double fTmuIso05hadEt[gMaxnmus];
@@ -291,12 +299,42 @@ private:
   int fTmunglhits[gMaxnmus];
   int fTmunmuhits[gMaxnmus];
   int fTmuntkhits[gMaxnmus];
+  double fTmuinntknchi2[gMaxnmus];
   int fTmunmatches[gMaxnmus];
   int fTmunchambers[gMaxnmus];
   double fTmucalocomp[gMaxnmus];
   double fTmusegmcomp[gMaxnmus];
-  int fTmutrackermu[gMaxnmus];
-  int fTmuisGMPT[gMaxnmus];
+
+  int fTmuIsGMPT[gMaxnmus];
+  int fTmuIsGMTkChiComp[gMaxnmus];
+  int fTmuIsGMStaChiComp[gMaxnmus];
+  int fTmuIsGMTkKinkTight[gMaxnmus];
+  int fTmuIsAllStaMuons[gMaxnmus];
+  int fTmuIsAllTrkMuons[gMaxnmus];
+  int fTmuIsTrkMuArb[gMaxnmus];
+  int fTmuIsAllArb[gMaxnmus];
+  int fTmuIsTMLastStationLoose[gMaxnmus];
+  int fTmuIsTMLastStationTight[gMaxnmus];
+  int fTmuIsTM2DCompLoose[gMaxnmus];
+  int fTmuIsTM2DCompTight[gMaxnmus];
+  int fTmuIsTMOneStationLoose[gMaxnmus];
+  int fTmuIsTMOneStationTight[gMaxnmus];
+  int fTmuIsTMLSOPL[gMaxnmus];
+  int fTmuIsTMLastStationAngLoose[gMaxnmus];
+  int fTmuIsTMLastStationAngTight[gMaxnmus];
+  int fTmuIsTMOneStationAngTight[gMaxnmus];
+  int fTmuIsTMOneStationAngLoose[gMaxnmus];
+
+  double fTmuoutmomx[gMaxnmus];
+  double fTmuoutmomy[gMaxnmus];
+  double fTmuoutmomz[gMaxnmus];
+  double fTmuoutmomphi[gMaxnmus];
+  double fTmuoutmometa[gMaxnmus];
+  double fTmuoutmomtheta[gMaxnmus];
+  double fTmuoutposrad[gMaxnmus];
+  double fTmuoutposx[gMaxnmus];
+  double fTmuoutposy[gMaxnmus];
+  double fTmuoutposz[gMaxnmus];
 
   // - Gen Info:
   int    fTGenMuId[gMaxnmus];
@@ -338,6 +376,7 @@ private:
   double fTeeta[gMaxneles];
   double fTephi[gMaxneles];
   double fTetheta[gMaxneles];
+  double fTesceta[gMaxneles];
   // Impact parameter
   double fTed0bs[gMaxneles];
   double fTed0pv[gMaxneles];
@@ -491,6 +530,7 @@ private:
   double fTJPhiHADrms[gMaxnjets];
   double fTjbTagProb[gMaxnjets];
   double fTjChfrac[gMaxnjets];
+  double fTjEfracHadr[gMaxnjets];
   double fTjMass[gMaxnjets];
   int fTjnAssoTracks[gMaxnjets];
   double fTjtrk1px[gMaxnjets];
@@ -573,6 +613,7 @@ private:
   double fTTCMETpx;
   double fTTCMETpy;
   double fTTCMETphi;
+  double fTTCMETSignificance;
   double fTMuJESCorrMET;
   double fTMuJESCorrMETpx;
   double fTMuJESCorrMETpy;
@@ -581,6 +622,7 @@ private:
   double fTPFMETpx;
   double fTPFMETpy;
   double fTPFMETphi;
+  double fTPFMETSignificance;
   double fTMETR12;
   double fTMETR21;
   ////////////////////////////////////////////////////////

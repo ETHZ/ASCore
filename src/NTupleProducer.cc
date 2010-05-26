@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.56 2010/05/17 09:55:46 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.57 2010/05/18 13:53:56 fronga Exp $
 //
 //
 
@@ -40,8 +40,6 @@
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
-
-
 
 // Data formats
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -375,14 +373,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTweight = 1.0; // To be filled at some point?
 
   // Save position of primary vertex
-  fTprimvtxx    = primVtx->x();
-  fTprimvtxy    = primVtx->y();
-  fTprimvtxz    = primVtx->z();
-  fTprimvtxxE   = primVtx->xError();
-  fTprimvtxyE   = primVtx->yError();
-  fTprimvtxzE   = primVtx->zError();
-  fTpvtxznchi2  = primVtx->normalizedChi2();
-  fTpvtxndof = static_cast<int>(primVtx->ndof());
+  fTprimvtxx   = primVtx->x();
+  fTprimvtxy   = primVtx->y();
+  fTprimvtxz   = primVtx->z();
+  fTprimvtxrho = primVtx->position().rho();
+  fTprimvtxxE  = primVtx->xError();
+  fTprimvtxyE  = primVtx->yError();
+  fTprimvtxzE  = primVtx->zError();
+  fTpvtxznchi2 = primVtx->normalizedChi2();
+  fTpvtxndof   = static_cast<int>(primVtx->ndof());
+  fTpvtxisfake = primVtx->isFake();
   // fTpvtxntracks = primVtx->tracksSize();
 
   fTpvtxptsum = 0.;
@@ -397,114 +397,181 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTbeamspoty = (beamSpot.position()).y();
   fTbeamspotz = (beamSpot.position()).z();
 
-  ////////////////////////////////////////////////////////
-  // Muon Variables:
-  int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
-  fTnmutot = 0;
-  for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
-    // Check if maximum number of electrons is exceeded already:
-    if(mqi >= gMaxnmus){
-      edm::LogWarning("NTP") << "@SUB=analyze()"
-                             << "Maximum number of muons exceeded";
-      fTflagmaxmuexc = 1;
-      fTgoodevent = 0;
-      break;
-    }
-    mi++;
-    // Muon preselection:
-    if(!(Mit->isGlobalMuon())) continue;
-    fTnmutot++;
-    if(Mit->globalTrack()->pt() < fMinmupt) continue;
-    if(fabs(Mit->globalTrack()->eta()) > fMaxmueta) continue;
-    mqi++;
+	////////////////////////////////////////////////////////
+	// Muon Variables:
+	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
+	fTnmutot = 0;
+	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
+		// Check if maximum number of muons is exceeded already:
+		if(mqi >= gMaxnmus){
+			edm::LogWarning("NTP") << "@SUB=analyze()"
+				<< "Maximum number of muons exceeded";
+			fTflagmaxmuexc = 1;
+			fTgoodevent = 0;
+			break;
+		}
+		mi++;
+		// Muon preselection:
+		// Only consider global and trackermuons:
+		if(!(Mit->isGlobalMuon()) && !(Mit->isTrackerMuon())) continue;
+		fTnmutot++;
+		if(Mit->pt() < fMinmupt) continue;
+		if(fabs(Mit->eta()) > fMaxmueta) continue;
+		mqi++;
 
-    // Dump muon properties in tree variables
-    fTmupx[mqi]     = Mit->globalTrack()->px();
-    fTmupy[mqi]     = Mit->globalTrack()->py();
-    fTmupz[mqi]     = Mit->globalTrack()->pz();
-    fTmupt[mqi]     = Mit->globalTrack()->pt();
-    fTmuptE[mqi]    = Mit->globalTrack()->ptError();
-    fTmueta[mqi]    = Mit->globalTrack()->eta();
-    fTmuphi[mqi]    = Mit->globalTrack()->phi();
-    fTmue[mqi]      = Mit->energy();
-    fTmuet[mqi]     = Mit->et();
-    fTmucharge[mqi] = Mit->charge();
+		fTmuIsGM[mqi]   = Mit->isGlobalMuon() ? 1:0;
+		fTmuIsTM[mqi]   = Mit->isTrackerMuon() ? 1:0;
 
-    fTmuiso[mqi]        = (Mit->isolationR03().sumPt + Mit->isolationR03().emEt + Mit->isolationR03().hadEt) / Mit->globalTrack()->pt();
+		// Combined methods for Global and Tracker muons:
+		fTmupx[mqi]     = Mit->px();
+		fTmupy[mqi]     = Mit->py();
+		fTmupz[mqi]     = Mit->pz();
+		fTmupt[mqi]     = Mit->pt();
+		fTmueta[mqi]    = Mit->eta();
+		fTmuphi[mqi]    = Mit->phi();
+		fTmue[mqi]      = Mit->energy();
+		fTmuet[mqi]     = Mit->et();
+		fTmucharge[mqi] = Mit->charge();
 
-    fTmuIso03sumPt[mqi] = Mit->isolationR03().sumPt;
-    fTmuIso03emEt[mqi]  = Mit->isolationR03().emEt;
-    fTmuIso03hadEt[mqi] = Mit->isolationR03().hadEt;
-    fTmuIso05sumPt[mqi] = Mit->isolationR05().sumPt;
-    fTmuIso05emEt[mqi]  = Mit->isolationR05().emEt;
-    fTmuIso05hadEt[mqi] = Mit->isolationR05().hadEt;
+		fTmuiso[mqi]            = (Mit->isolationR03().sumPt + Mit->isolationR03().emEt + Mit->isolationR03().hadEt) / Mit->pt();
+		fTmuIso03sumPt[mqi]     = Mit->isolationR03().sumPt;
+		fTmuIso03emEt[mqi]      = Mit->isolationR03().emEt;
+		fTmuIso03hadEt[mqi]     = Mit->isolationR03().hadEt;
+		fTmuIso03emVetoEt[mqi]  = Mit->isolationR03().emVetoEt;
+		fTmuIso03hadVetoEt[mqi] = Mit->isolationR03().hadVetoEt;
+		fTmuIso05sumPt[mqi]     = Mit->isolationR05().sumPt;
+		fTmuIso05emEt[mqi]      = Mit->isolationR05().emEt;
+		fTmuIso05hadEt[mqi]     = Mit->isolationR05().hadEt;
 
-    // Isolation is embedded in PAT.
-    if ( !fIsPat ) {
-      Ref<View<Muon> > muonRef(muons,mi);
-      const reco::IsoDeposit ECDep = ECDepMap[muonRef];
-      const reco::IsoDeposit HCDep = HCDepMap[muonRef];
-      fTmueecal[mqi] = ECDep.candEnergy();
-      fTmuehcal[mqi] = HCDep.candEnergy();
-    } else {
-      const pat::Muon* pMuon =  static_cast<const pat::Muon*>(&(*Mit));
-      fTmueecal[mqi] = pMuon->ecalIsoDeposit()->candEnergy();
-      fTmuehcal[mqi] = pMuon->hcalIsoDeposit()->candEnergy();
-    }
+		fTmucalocomp[mqi] = Mit->caloCompatibility();
+		fTmusegmcomp[mqi] = muon::segmentCompatibility(*Mit);
 
-    fTmud0bs[mqi] = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
-    fTmud0pv[mqi] = -1.0*Mit->innerTrack()->dxy(primVtx->position());
-    fTmud0E[mqi]  = Mit->globalTrack()->dxyError();
-    fTmudzbs[mqi] = Mit->globalTrack()->dz(beamSpot.position());
-    fTmudzpv[mqi] = Mit->globalTrack()->dz(primVtx->position());
-    fTmudzE[mqi]  = Mit->globalTrack()->dzError();
+		// MuID Flags:
+		fTmuIsGMPT[mqi]                  = muon::isGoodMuon(*Mit, muon::GlobalMuonPromptTight) ? 1:0;
+		fTmuIsGMTkChiComp[mqi]           = muon::isGoodMuon(*Mit, muon::GMTkChiCompatibility) ? 1:0;
+		fTmuIsGMStaChiComp[mqi]          = muon::isGoodMuon(*Mit, muon::GMStaChiCompatibility) ? 1:0;
+		fTmuIsGMTkKinkTight[mqi]         = muon::isGoodMuon(*Mit, muon::GMTkKinkTight) ? 1:0;
+		fTmuIsAllStaMuons[mqi]           = muon::isGoodMuon(*Mit, muon::AllStandAloneMuons) ? 1:0;
+		fTmuIsAllTrkMuons[mqi]           = muon::isGoodMuon(*Mit, muon::AllTrackerMuons) ? 1:0;
+		fTmuIsTrkMuArb[mqi]              = muon::isGoodMuon(*Mit, muon::TrackerMuonArbitrated) ? 1:0;
+		fTmuIsAllArb[mqi]                = muon::isGoodMuon(*Mit, muon::AllArbitrated) ? 1:0;
+		fTmuIsTMLastStationLoose[mqi]    = muon::isGoodMuon(*Mit, muon::TMLastStationLoose) ? 1:0;
+		fTmuIsTMLastStationTight[mqi]    = muon::isGoodMuon(*Mit, muon::TMLastStationTight) ? 1:0;
+		fTmuIsTM2DCompLoose[mqi]         = muon::isGoodMuon(*Mit, muon::TM2DCompatibilityLoose) ? 1:0;
+		fTmuIsTM2DCompTight[mqi]         = muon::isGoodMuon(*Mit, muon::TM2DCompatibilityTight) ? 1:0;
+		fTmuIsTMOneStationLoose[mqi]     = muon::isGoodMuon(*Mit, muon::TMOneStationLoose) ? 1:0;
+		fTmuIsTMOneStationTight[mqi]     = muon::isGoodMuon(*Mit, muon::TMOneStationTight) ? 1:0;
+		fTmuIsTMLSOPL[mqi]               = muon::isGoodMuon(*Mit, muon::TMLastStationOptimizedLowPtLoose) ? 1:0;
+		fTmuIsTMLastStationAngLoose[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngLoose) ? 1:0;
+		fTmuIsTMLastStationAngTight[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngTight) ? 1:0;
+		fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngTight) ? 1:0;
+		fTmuIsTMOneStationAngLoose[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngLoose) ? 1:0;
 
-    fTmunchi2[mqi]     = Mit->globalTrack()->normalizedChi2();
-    fTmunglhits[mqi]   = Mit->globalTrack()->hitPattern().numberOfValidHits();
-    fTmunmuhits[mqi]   = Mit->outerTrack()->hitPattern().numberOfValidHits(); // always 0
-    fTmuntkhits[mqi]   = Mit->innerTrack()->hitPattern().numberOfValidHits();
-    fTmunmatches[mqi]  = Mit->numberOfMatches();
-    fTmunchambers[mqi] = Mit->numberOfChambers();
+		// Isolation is embedded in PAT.
+		if ( !fIsPat ) {
+			Ref<View<Muon> > muonRef(muons,mi);
+			const reco::IsoDeposit ECDep = ECDepMap[muonRef];
+			const reco::IsoDeposit HCDep = HCDepMap[muonRef];
+			fTmueecal[mqi] = ECDep.candEnergy();
+			fTmuehcal[mqi] = HCDep.candEnergy();
+		} else {
+			const pat::Muon* pMuon =  static_cast<const pat::Muon*>(&(*Mit));
+			fTmueecal[mqi] = pMuon->ecalIsoDeposit()->candEnergy();
+			fTmuehcal[mqi] = pMuon->hcalIsoDeposit()->candEnergy();
+		}
 
-    fTmucalocomp[mqi] = Mit->caloCompatibility();
-    fTmusegmcomp[mqi] = muon::segmentCompatibility(*Mit);
-    fTmutrackermu[mqi] = Mit->isTrackerMuon() ? 1:0;
-    fTmuisGMPT[mqi] = muon::isGoodMuon(*Mit, muon::GlobalMuonPromptTight) ? 1:0;
+		fTmud0bs[mqi] = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
+		fTmud0pv[mqi] = -1.0*Mit->innerTrack()->dxy(primVtx->position());
+		fTmudzbs[mqi] = Mit->innerTrack()->dz(beamSpot.position());
+		fTmudzpv[mqi] = Mit->innerTrack()->dz(primVtx->position());
+		fTmuinntknchi2[mqi] = Mit->innerTrack()->normalizedChi2();
 
-    // Matching
-    if(!fIsRealData){
-      vector<const GenParticle*> MuMatch = matchRecoCand(&(*Mit), iEvent);
-      if(MuMatch[0] != NULL){
-        fTGenMuId[mqi]       = MuMatch[0]->pdgId();
-        fTGenMuStatus[mqi]   = MuMatch[0]->status();
-        fTGenMuCharge[mqi]   = MuMatch[0]->charge();
-        fTGenMuPt[mqi]       = MuMatch[0]->pt();
-        fTGenMuEta[mqi]      = MuMatch[0]->eta();
-        fTGenMuPhi[mqi]      = MuMatch[0]->phi();
-        fTGenMuE[mqi]        = MuMatch[0]->energy();
+		// Separate methods:
+		if(fTmuIsTM[mqi]){ // Tracker Muons
+			fTntrackermu++;
+			fTmuptE[mqi]  = Mit->innerTrack()->ptError();
+			fTmud0E[mqi]  = Mit->innerTrack()->dxyError();
+			fTmudzE[mqi]  = Mit->innerTrack()->dzError();
 
-        fTGenMuMId[mqi]      = MuMatch[1]->pdgId();
-        fTGenMuMStatus[mqi]  = MuMatch[1]->status();
-        fTGenMuMCharge[mqi]  = MuMatch[1]->charge();
-        fTGenMuMPt[mqi]      = MuMatch[1]->pt();
-        fTGenMuMEta[mqi]     = MuMatch[1]->eta();
-        fTGenMuMPhi[mqi]     = MuMatch[1]->phi();
-        fTGenMuME[mqi]       = MuMatch[1]->energy();
+			fTmunchi2[mqi]      = fTmuinntknchi2[mqi]; // No difference for TM
+			fTmunglhits[mqi]    = 0;
+			fTmuntkhits[mqi]    = Mit->innerTrack()->hitPattern().numberOfValidHits();
+			fTmunmuhits[mqi]    = 0;
+			fTmunmatches[mqi]   = 0;
+			fTmunchambers[mqi]  = 0;
 
-        fTGenMuGMId[mqi]     = MuMatch[2]->pdgId();
-        fTGenMuGMStatus[mqi] = MuMatch[2]->status();
-        fTGenMuGMCharge[mqi] = MuMatch[2]->charge();
-        fTGenMuGMPt[mqi]     = MuMatch[2]->pt();
-        fTGenMuGMEta[mqi]    = MuMatch[2]->eta();
-        fTGenMuGMPhi[mqi]    = MuMatch[2]->phi();
-        fTGenMuGME[mqi]      = MuMatch[2]->energy();
-      }
-      MuMatch.clear();
-    }
-    fTgoodmu[mqi]  = 0;
-    fTmuIsIso[mqi] = 1;
-  }
-  fTnmu = mqi+1;
+			fTmuoutmomx[mqi]     = Mit->innerTrack()->outerMomentum().x();
+			fTmuoutmomy[mqi]     = Mit->innerTrack()->outerMomentum().z();
+			fTmuoutmomz[mqi]     = Mit->innerTrack()->outerMomentum().y();
+			fTmuoutmomphi[mqi]   = Mit->innerTrack()->outerPhi();
+			fTmuoutmometa[mqi]   = Mit->innerTrack()->outerEta();
+			fTmuoutmomtheta[mqi] = Mit->innerTrack()->outerTheta();
+
+			fTmuoutposrad[mqi]   = Mit->innerTrack()->outerRadius();
+			fTmuoutposx[mqi]     = Mit->innerTrack()->outerX();
+			fTmuoutposy[mqi]     = Mit->innerTrack()->outerY();
+			fTmuoutposz[mqi]     = Mit->innerTrack()->outerZ();
+		}
+		if(fTmuIsGM[mqi]){ // Global Muons
+			fTnglobalmu++;
+			fTmuptE[mqi]  = Mit->globalTrack()->ptError();
+			fTmud0E[mqi]  = Mit->globalTrack()->dxyError();
+			fTmudzE[mqi]  = Mit->globalTrack()->dzError();
+
+			fTmunchi2[mqi]      = Mit->globalTrack()->normalizedChi2();
+			fTmunglhits[mqi]    = Mit->globalTrack()->hitPattern().numberOfValidHits();
+			fTmuntkhits[mqi]    = Mit->innerTrack()->hitPattern().numberOfValidHits();
+			fTmunmuhits[mqi]    = Mit->outerTrack()->hitPattern().numberOfValidHits();
+			fTmunmatches[mqi]   = Mit->numberOfMatches();
+			fTmunchambers[mqi]  = Mit->numberOfChambers();
+
+			fTmuoutmomx[mqi]     = Mit->globalTrack()->outerMomentum().x();
+			fTmuoutmomy[mqi]     = Mit->globalTrack()->outerMomentum().z();
+			fTmuoutmomz[mqi]     = Mit->globalTrack()->outerMomentum().y();
+			fTmuoutmomphi[mqi]   = Mit->globalTrack()->outerPhi();
+			fTmuoutmometa[mqi]   = Mit->globalTrack()->outerEta();
+			fTmuoutmomtheta[mqi] = Mit->globalTrack()->outerTheta();
+
+			fTmuoutposrad[mqi]   = Mit->globalTrack()->outerRadius();
+			fTmuoutposx[mqi]     = Mit->globalTrack()->outerX();
+			fTmuoutposy[mqi]     = Mit->globalTrack()->outerY();
+			fTmuoutposz[mqi]     = Mit->globalTrack()->outerZ();
+		}
+
+		// MC Matching
+		if(!fIsRealData){
+			vector<const GenParticle*> MuMatch = matchRecoCand(&(*Mit), iEvent);
+			if(MuMatch[0] != NULL){
+				fTGenMuId[mqi]       = MuMatch[0]->pdgId();
+				fTGenMuStatus[mqi]   = MuMatch[0]->status();
+				fTGenMuCharge[mqi]   = MuMatch[0]->charge();
+				fTGenMuPt[mqi]       = MuMatch[0]->pt();
+				fTGenMuEta[mqi]      = MuMatch[0]->eta();
+				fTGenMuPhi[mqi]      = MuMatch[0]->phi();
+				fTGenMuE[mqi]        = MuMatch[0]->energy();
+
+				fTGenMuMId[mqi]      = MuMatch[1]->pdgId();
+				fTGenMuMStatus[mqi]  = MuMatch[1]->status();
+				fTGenMuMCharge[mqi]  = MuMatch[1]->charge();
+				fTGenMuMPt[mqi]      = MuMatch[1]->pt();
+				fTGenMuMEta[mqi]     = MuMatch[1]->eta();
+				fTGenMuMPhi[mqi]     = MuMatch[1]->phi();
+				fTGenMuME[mqi]       = MuMatch[1]->energy();
+
+				fTGenMuGMId[mqi]     = MuMatch[2]->pdgId();
+				fTGenMuGMStatus[mqi] = MuMatch[2]->status();
+				fTGenMuGMCharge[mqi] = MuMatch[2]->charge();
+				fTGenMuGMPt[mqi]     = MuMatch[2]->pt();
+				fTGenMuGMEta[mqi]    = MuMatch[2]->eta();
+				fTGenMuGMPhi[mqi]    = MuMatch[2]->phi();
+				fTGenMuGME[mqi]      = MuMatch[2]->energy();
+			}
+			MuMatch.clear();
+		}
+		fTgoodmu[mqi]  = 0;
+		fTmuIsIso[mqi] = 1;
+	}
+	fTnmu = mqi+1;
 
   ////////////////////////////////////////////////////////
   // Electron variables:
@@ -611,6 +678,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTeESuperClusterOverP[eqi]        = El->eSuperClusterOverP();
 		fTeNumberOfMissingInnerHits[eqi]  = El->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
       fTetheta[eqi]                     = El->superCluster()->position().theta();
+      fTesceta[eqi]                     = El->superCluster()->eta();
 
       if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
         fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( El->superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
@@ -851,7 +919,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTjphi[jqi] = jet->phi();
     fTje[jqi]   = jet->energy();
     fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
-    fTjNconstituents[jqi]  = jet->getJetConstituents().size(); 
+    fTjNconstituents[jqi]  = jet->getJetConstituents().size();
     fTjEcorr[jqi] = jet->px()/fJUNC_px_match[index];
 
     // Calculate the DR wrt the closest electron
@@ -1088,12 +1156,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     reco::JetID jetID;
     if ( !fIsPat ) {
       const CaloJet* cJ = static_cast<const CaloJet*>(jet);
-      fTjemfrac[jqi] =  cJ->emEnergyFraction();
+      fTjemfrac[jqi]    = cJ->emEnergyFraction();
+      fTjEfracHadr[jqi] = cJ->energyFractionHadronic();
       edm::RefToBase<reco::Jet> jetRef = jets->refAt(jqi);
       jetID = (*jetIDMap)[ jetRef ];
     } else {
       const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
       fTjemfrac[jqi]      = pJ->emEnergyFraction();
+      fTjEfracHadr[jqi]   = pJ->energyFractionHadronic();
       jetID = pJ->jetID();
     }
     fTjID_HPD[jqi]      = jetID.fHPD;
@@ -1215,7 +1285,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTRawMEThadEtInHB    = (calomet->at(0)).hadEtInHB();
   fTRawMEThadEtInHE    = (calomet->at(0)).hadEtInHE();
   fTRawMEThadEtInHF    = (calomet->at(0)).hadEtInHF();
-  fTRawMETSignificance = (calomet->at(0)).metSignificance();
+  fTRawMETSignificance = (calomet->at(0)).significance();
 
   fTMuCorrMET    = (corrmumet->at(0)).pt();
   fTMuCorrMETpx  = (corrmumet->at(0)).px();
@@ -1226,11 +1296,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTTCMETpx  = (tcmet->at(0)).px();
   fTTCMETpy  = (tcmet->at(0)).py();
   fTTCMETphi = (tcmet->at(0)).phi();
+  fTTCMETSignificance = (tcmet->at(0)).significance();
 
   fTPFMET    = (pfmet->front()).pt();
   fTPFMETpx  = (pfmet->front()).px();
   fTPFMETpy  = (pfmet->front()).py();
   fTPFMETphi = (pfmet->front()).phi();
+  fTPFMETSignificance = (pfmet->at(0)).significance();
 
   fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
   fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
@@ -1306,11 +1378,13 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx        ,"PrimVtxx/D");
   fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy        ,"PrimVtxy/D");
   fEventTree->Branch("PrimVtxz"         ,&fTprimvtxz        ,"PrimVtxz/D");	
+  fEventTree->Branch("PrimVtxRho"       ,&fTprimvtxrho      ,"PrimVtxRho/D");	
   fEventTree->Branch("PrimVtxxE"        ,&fTprimvtxxE       ,"PrimVtxxE/D");
   fEventTree->Branch("PrimVtxyE"        ,&fTprimvtxyE       ,"PrimVtxyE/D");
   fEventTree->Branch("PrimVtxzE"        ,&fTprimvtxzE       ,"PrimVtxzE/D");
   fEventTree->Branch("PrimVtxNChi2"     ,&fTpvtxznchi2      ,"PrimVtxNChi2/D");
-  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof     ,"PrimVtxNdof/I");
+  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof        ,"PrimVtxNdof/I");
+  fEventTree->Branch("PrimVtxIsFake"    ,&fTpvtxisfake      ,"PrimVtxIsFake/I");
   fEventTree->Branch("PrimVtxPtSum"     ,&fTpvtxptsum       ,"PrimVtxPtSum/D");
   fEventTree->Branch("Beamspotx"        ,&fTbeamspotx       ,"Beamspotx/D");
   fEventTree->Branch("Beamspoty"        ,&fTbeamspoty       ,"Beamspoty/D");
@@ -1325,45 +1399,81 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc   ,"MaxPhotonsExceed/I");
 
   // Muons:
-  fEventTree->Branch("NMus"             ,&fTnmu             ,"NMus/I");
-  fEventTree->Branch("NMusTot"          ,&fTnmutot          ,"NMusTot/I");
-  fEventTree->Branch("MuGood"           ,&fTgoodmu          ,"MuGood[NMus]/I");
-  fEventTree->Branch("MuIsIso"          ,&fTmuIsIso         ,"MuIsIso[NMus]/I");
-  fEventTree->Branch("MuPx"             ,&fTmupx            ,"MuPx[NMus]/D");
-  fEventTree->Branch("MuPy"             ,&fTmupy            ,"MuPy[NMus]/D");
-  fEventTree->Branch("MuPz"             ,&fTmupz            ,"MuPz[NMus]/D");
-  fEventTree->Branch("MuPt"             ,&fTmupt            ,"MuPt[NMus]/D");
-  fEventTree->Branch("MuPtE"            ,&fTmuptE           ,"MuPtE[NMus]/D");
-  fEventTree->Branch("MuE"              ,&fTmue             ,"MuE[NMus]/D");
-  fEventTree->Branch("MuEt"             ,&fTmuet            ,"MuEt[NMus]/D");
-  fEventTree->Branch("MuEta"            ,&fTmueta           ,"MuEta[NMus]/D");
-  fEventTree->Branch("MuPhi"            ,&fTmuphi           ,"MuPhi[NMus]/D");
-  fEventTree->Branch("MuCharge"         ,&fTmucharge        ,"MuCharge[NMus]/I");
-  fEventTree->Branch("MuRelIso03"       ,&fTmuiso           ,"MuRelIso03[NMus]/D");
-  fEventTree->Branch("MuIso03SumPt"     ,&fTmuIso03sumPt    ,"MuIso03SumPt[NMus]/D");
-  fEventTree->Branch("MuIso03EmEt"      ,&fTmuIso03emEt     ,"MuIso03EmEt[NMus]/D");
-  fEventTree->Branch("MuIso03HadEt"     ,&fTmuIso03hadEt    ,"MuIso03HadEt[NMus]/D");
-  fEventTree->Branch("MuIso05SumPt"     ,&fTmuIso05sumPt    ,"MuIso05SumPt[NMus]/D");
-  fEventTree->Branch("MuIso05EmEt"      ,&fTmuIso05emEt     ,"MuIso05EmEt[NMus]/D");
-  fEventTree->Branch("MuIso05HadEt"     ,&fTmuIso05hadEt    ,"MuIso05HadEt[NMus]/D");
-  fEventTree->Branch("MuEem"            ,&fTmueecal         ,"MuEem[NMus]/D");
-  fEventTree->Branch("MuEhad"           ,&fTmuehcal         ,"MuEhad[NMus]/D");
-  fEventTree->Branch("MuD0BS"           ,&fTmud0bs          ,"MuD0BS[NMus]/D");
-  fEventTree->Branch("MuD0PV"           ,&fTmud0pv          ,"MuD0PV[NMus]/D");
-  fEventTree->Branch("MuD0E"            ,&fTmud0E           ,"MuD0E[NMus]/D");
-  fEventTree->Branch("MuDzBS"           ,&fTmudzbs          ,"MuDzBS[NMus]/D");
-  fEventTree->Branch("MuDzPV"           ,&fTmudzpv          ,"MuDzPV[NMus]/D");
-  fEventTree->Branch("MuDzE"            ,&fTmudzE           ,"MuDzE[NMus]/D");
-  fEventTree->Branch("MuNChi2"          ,&fTmunchi2         ,"MuNChi2[NMus]/D");
-  fEventTree->Branch("MuNGlHits"        ,&fTmunglhits       ,"MuNGlHits[NMus]/I");
-  fEventTree->Branch("MuNMuHits"        ,&fTmunmuhits       ,"MuNMuHits[NMus]/I");
-  fEventTree->Branch("MuNTkHits"        ,&fTmuntkhits       ,"MuNTkHits[NMus]/I");
-  fEventTree->Branch("MuNMatches"       ,&fTmunmatches      ,"MuNMatches[NMus]/I");
-  fEventTree->Branch("MuNChambers"      ,&fTmunchambers     ,"MuNChambers[NMus]/I");
-  fEventTree->Branch("MuCaloComp"       ,&fTmucalocomp      ,"MuCaloComp[NMus]/D");
-  fEventTree->Branch("MuSegmComp"       ,&fTmusegmcomp      ,"MuSegmComp[NMus]/D");
-  fEventTree->Branch("MuTrackerMu"      ,&fTmutrackermu     ,"MuTrackerMu[NMus]/I");
-  fEventTree->Branch("MuGMPT"           ,&fTmuisGMPT        ,"MuGMPT[NMus]/I");
+  fEventTree->Branch("NMus"             ,&fTnmu              ,"NMus/I");
+  fEventTree->Branch("NMusTot"          ,&fTnmutot           ,"NMusTot/I");
+  fEventTree->Branch("NGMus"            ,&fTnglobalmu        ,"NGMus/I");
+  fEventTree->Branch("NTMus"            ,&fTntrackermu       ,"NTMus/I");
+  fEventTree->Branch("MuGood"           ,&fTgoodmu           ,"MuGood[NMus]/I");
+  fEventTree->Branch("MuIsIso"          ,&fTmuIsIso          ,"MuIsIso[NMus]/I");
+  fEventTree->Branch("MuIsGlobalMuon"   ,&fTmuIsGM           ,"MuIsGlobalMuon[NMus]/I");
+  fEventTree->Branch("MuIsTrackerMuon"  ,&fTmuIsTM           ,"MuIsTrackerMuon[NMus]/I");
+  fEventTree->Branch("MuPx"             ,&fTmupx             ,"MuPx[NMus]/D");
+  fEventTree->Branch("MuPy"             ,&fTmupy             ,"MuPy[NMus]/D");
+  fEventTree->Branch("MuPz"             ,&fTmupz             ,"MuPz[NMus]/D");
+  fEventTree->Branch("MuPt"             ,&fTmupt             ,"MuPt[NMus]/D");
+  fEventTree->Branch("MuPtE"            ,&fTmuptE            ,"MuPtE[NMus]/D");
+  fEventTree->Branch("MuE"              ,&fTmue              ,"MuE[NMus]/D");
+  fEventTree->Branch("MuEt"             ,&fTmuet             ,"MuEt[NMus]/D");
+  fEventTree->Branch("MuEta"            ,&fTmueta            ,"MuEta[NMus]/D");
+  fEventTree->Branch("MuPhi"            ,&fTmuphi            ,"MuPhi[NMus]/D");
+  fEventTree->Branch("MuCharge"         ,&fTmucharge         ,"MuCharge[NMus]/I");
+  fEventTree->Branch("MuRelIso03"       ,&fTmuiso            ,"MuRelIso03[NMus]/D");
+  fEventTree->Branch("MuIso03SumPt"     ,&fTmuIso03sumPt     ,"MuIso03SumPt[NMus]/D");
+  fEventTree->Branch("MuIso03EmEt"      ,&fTmuIso03emEt      ,"MuIso03EmEt[NMus]/D");
+  fEventTree->Branch("MuIso03HadEt"     ,&fTmuIso03hadEt     ,"MuIso03HadEt[NMus]/D");
+  fEventTree->Branch("MuIso03EMVetoEt"  ,&fTmuIso03emVetoEt  ,"MuIso03EMVetoEt[NMus]/D");
+  fEventTree->Branch("MuIso03HadVetoEt" ,&fTmuIso03hadVetoEt ,"MuIso03HadVetoEt[NMus]/D");
+  fEventTree->Branch("MuIso05SumPt"     ,&fTmuIso05sumPt     ,"MuIso05SumPt[NMus]/D");
+  fEventTree->Branch("MuIso05EmEt"      ,&fTmuIso05emEt      ,"MuIso05EmEt[NMus]/D");
+  fEventTree->Branch("MuIso05HadEt"     ,&fTmuIso05hadEt     ,"MuIso05HadEt[NMus]/D");
+  fEventTree->Branch("MuEem"            ,&fTmueecal          ,"MuEem[NMus]/D");
+  fEventTree->Branch("MuEhad"           ,&fTmuehcal          ,"MuEhad[NMus]/D");
+  fEventTree->Branch("MuD0BS"           ,&fTmud0bs           ,"MuD0BS[NMus]/D");
+  fEventTree->Branch("MuD0PV"           ,&fTmud0pv           ,"MuD0PV[NMus]/D");
+  fEventTree->Branch("MuD0E"            ,&fTmud0E            ,"MuD0E[NMus]/D");
+  fEventTree->Branch("MuDzBS"           ,&fTmudzbs           ,"MuDzBS[NMus]/D");
+  fEventTree->Branch("MuDzPV"           ,&fTmudzpv           ,"MuDzPV[NMus]/D");
+  fEventTree->Branch("MuDzE"            ,&fTmudzE            ,"MuDzE[NMus]/D");
+  fEventTree->Branch("MuNChi2"          ,&fTmunchi2          ,"MuNChi2[NMus]/D");
+  fEventTree->Branch("MuNGlHits"        ,&fTmunglhits        ,"MuNGlHits[NMus]/I");
+  fEventTree->Branch("MuNMuHits"        ,&fTmunmuhits        ,"MuNMuHits[NMus]/I");
+  fEventTree->Branch("MuNTkHits"        ,&fTmuntkhits        ,"MuNTkHits[NMus]/I");
+  fEventTree->Branch("MuInnerTkNChi2"   ,&fTmuinntknchi2     ,"MuInnerTkNChi2[NMus]/D");
+  fEventTree->Branch("MuNMatches"       ,&fTmunmatches       ,"MuNMatches[NMus]/I");
+  fEventTree->Branch("MuNChambers"      ,&fTmunchambers      ,"MuNChambers[NMus]/I");
+  fEventTree->Branch("MuCaloComp"       ,&fTmucalocomp       ,"MuCaloComp[NMus]/D");
+  fEventTree->Branch("MuSegmComp"       ,&fTmusegmcomp       ,"MuSegmComp[NMus]/D");
+
+  fEventTree->Branch("MuIsGMPT"                  ,&fTmuIsGMPT                  ,"MuIsGMPT[NMus]/I");
+  fEventTree->Branch("MuIsGMTkChiComp"           ,&fTmuIsGMTkChiComp           ,"MuIsGMTkChiComp[NMus]/I");
+  fEventTree->Branch("MuIsGMStaChiComp"          ,&fTmuIsGMStaChiComp          ,"MuIsGMStaChiComp[NMus]/I");
+  fEventTree->Branch("MuIsGMTkKinkTight"         ,&fTmuIsGMTkKinkTight         ,"MuIsGMTkKinkTight[NMus]/I");
+  fEventTree->Branch("MuIsAllStaMuons"           ,&fTmuIsAllStaMuons           ,"MuIsAllStaMuons[NMus]/I");
+  fEventTree->Branch("MuIsAllTrkMuons"           ,&fTmuIsAllTrkMuons           ,"MuIsAllTrkMuons[NMus]/I");
+  fEventTree->Branch("MuIsTrkMuonArbitrated"     ,&fTmuIsTrkMuArb              ,"MuIsTrkMuonArbitrated[NMus]/I");
+  fEventTree->Branch("MuIsAllArbitrated"         ,&fTmuIsAllArb                ,"MuIsAllArbitrated[NMus]/I");
+  fEventTree->Branch("MuIsTMLSLoose"             ,&fTmuIsTMLastStationLoose    ,"MuIsTMLSLoose[NMus]/I");
+  fEventTree->Branch("MuIsTMLSTight"             ,&fTmuIsTMLastStationTight    ,"MuIsTMLSTight[NMus]/I");
+  fEventTree->Branch("MuIsTM2DCompLoose"         ,&fTmuIsTM2DCompLoose         ,"MuIsTM2DCompLoose[NMus]/I");
+  fEventTree->Branch("MuIsTM2DCompTight"         ,&fTmuIsTM2DCompTight         ,"MuIsTM2DCompTight[NMus]/I");
+  fEventTree->Branch("MuIsTMOneStationLoose"     ,&fTmuIsTMOneStationLoose     ,"MuIsTMOneStationLoose[NMus]/I");
+  fEventTree->Branch("MuIsTMOneStationTight"     ,&fTmuIsTMOneStationTight     ,"MuIsTMOneStationTight[NMus]/I");
+  fEventTree->Branch("MuIsTMLSOptLowPtLoose"     ,&fTmuIsTMLSOPL               ,"MuIsTMLSOptLowPtLoose[NMus]/I");
+  fEventTree->Branch("MuIsTMLSAngLoose"          ,&fTmuIsTMLastStationAngLoose ,"MuIsTMLSAngLoose[NMus]/I");
+  fEventTree->Branch("MuIsTMLastStationAngTight" ,&fTmuIsTMLastStationAngTight ,"MuIsTMLastStationAngTight[NMus]/I");
+  fEventTree->Branch("MuIsTMOneStationAngTight"  ,&fTmuIsTMOneStationAngTight  ,"MuIsTMOneStationAngTight[NMus]/I");
+  fEventTree->Branch("MuIsTMOneStationAngLoose"  ,&fTmuIsTMOneStationAngLoose  ,"MuIsTMOneStationAngLoose[NMus]/I");
+
+  fEventTree->Branch("MuOutMomx"      ,&fTmuoutmomx        ,"MuOutMomx[NMus]/D");
+  fEventTree->Branch("MuOutMomy"      ,&fTmuoutmomy        ,"MuOutMomy[NMus]/D");
+  fEventTree->Branch("MuOutMomz"      ,&fTmuoutmomz        ,"MuOutMomz[NMus]/D");
+  fEventTree->Branch("MuOutMomPhi"    ,&fTmuoutmomphi      ,"MuOutMomPhi[NMus]/D");
+  fEventTree->Branch("MuOutMomEta"    ,&fTmuoutmometa      ,"MuOutMomEta[NMus]/D");
+  fEventTree->Branch("MuOutMomTheta"  ,&fTmuoutmomtheta    ,"MuOutMomTheta[NMus]/D");
+  fEventTree->Branch("MuOutPosRadius" ,&fTmuoutposrad      ,"MuOutPosRadius[NMus]/D");
+  fEventTree->Branch("MuOutPosX"      ,&fTmuoutposx        ,"MuOutPosX[NMus]/D");
+  fEventTree->Branch("MuOutPosY"      ,&fTmuoutposy        ,"MuOutPosY[NMus]/D");
+  fEventTree->Branch("MuOutPosZ"      ,&fTmuoutposz        ,"MuOutPosZ[NMus]/D");
 
   fEventTree->Branch("MuGenID"          ,&fTGenMuId         ,"MuGenID[NMus]/I");
   fEventTree->Branch("MuGenStatus"      ,&fTGenMuStatus     ,"MuGenStatus[NMus]/I");
@@ -1402,6 +1512,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElEt"          ,&fTeet         ,"ElEt[NEles]/D");
   fEventTree->Branch("ElEta"         ,&fTeeta        ,"ElEta[NEles]/D");
   fEventTree->Branch("ElTheta"       ,&fTetheta      ,"ElTheta[NEles]/D");
+  fEventTree->Branch("ElSCEta"       ,&fTesceta      ,"ElSCEta[NEles]/D");
   fEventTree->Branch("ElPhi"         ,&fTephi        ,"ElPhi[NEles]/D");
   fEventTree->Branch("ElD0BS"        ,&fTed0bs       ,"ElD0BS[NEles]/D");
   fEventTree->Branch("ElD0PV"        ,&fTed0pv       ,"ElD0PV[NEles]/D");
@@ -1551,6 +1662,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JPhiHADrms"     ,&fTJPhiHADrms     ,"JPhiHADrms[NJets]/D");
   fEventTree->Branch("JbTagProb"      ,&fTjbTagProb      ,"JbTagProb[NJets]/D");
   fEventTree->Branch("JChfrac"        ,&fTjChfrac        ,"JChfrac[NJets]/D");
+  fEventTree->Branch("JEFracHadronic" ,&fTjEfracHadr     ,"JEFracHadronic[NJets]/D");
   fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/D");
   fEventTree->Branch("JNAssoTracks"   ,&fTjnAssoTracks   ,"JNAssoTracks[NJets]/I");
   fEventTree->Branch("Jtrk1px"        ,&fTjtrk1px        ,"Jtrk1px[NJets]/D");
@@ -1637,6 +1749,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("TCMETpx"            ,&fTTCMETpx             ,"TCMETpx/D");
   fEventTree->Branch("TCMETpy"            ,&fTTCMETpy             ,"TCMETpy/D");
   fEventTree->Branch("TCMETphi"           ,&fTTCMETphi            ,"TCMETphi/D");
+  fEventTree->Branch("TCMETSignificance"  ,&fTTCMETSignificance   ,"TCMETSignificance/D");
   fEventTree->Branch("MuJESCorrMET"       ,&fTMuJESCorrMET        ,"MuJESCorrMET/D");
   fEventTree->Branch("MuJESCorrMETpx"     ,&fTMuJESCorrMETpx      ,"MuJESCorrMETpx/D");
   fEventTree->Branch("MuJESCorrMETpy"     ,&fTMuJESCorrMETpy      ,"MuJESCorrMETpy/D");
@@ -1645,6 +1758,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PFMETpx"            ,&fTPFMETpx             ,"PFMETpx/D");
   fEventTree->Branch("PFMETpy"            ,&fTPFMETpy             ,"PFMETpy/D");
   fEventTree->Branch("PFMETphi"           ,&fTPFMETphi            ,"PFMETphi/D");
+  fEventTree->Branch("PFMETSignificance"  ,&fTPFMETSignificance   ,"PFMETSignificance/D");
   fEventTree->Branch("METR12"             ,&fTMETR12              ,"METR12/D");
   fEventTree->Branch("METR21"             ,&fTMETR21              ,"METR21/D");
 }
@@ -1758,10 +1872,12 @@ void NTupleProducer::resetTree(){
   fTprimvtxx    = -999.99;
   fTprimvtxy    = -999.99;
   fTprimvtxz    = -999.99;
+  fTprimvtxrho  = -999.99;
   fTprimvtxxE   = -999.99;
   fTprimvtxyE   = -999.99;
   fTprimvtxzE   = -999.99;
   fTpvtxznchi2  = -999.99;
+  fTpvtxisfake  = -999;
   fTpvtxndof    = -999;
   fTpvtxptsum   = -999.99;
   fTbeamspotx   = -999.99;
@@ -1779,6 +1895,8 @@ void NTupleProducer::resetTree(){
 
   fTnmu         = 0;
   fTnmutot      = 0;
+  fTnglobalmu   = 0;
+  fTntrackermu  = 0;
   fTneles       = 0;
   fTnelestot    = 0;
   fTnjets       = 0;
@@ -1790,6 +1908,8 @@ void NTupleProducer::resetTree(){
 
   resetInt(fTgoodmu, gMaxnmus);
   resetInt(fTmuIsIso, gMaxnmus);
+  resetInt(fTmuIsGM, gMaxnmus);
+  resetInt(fTmuIsTM, gMaxnmus);
   resetDouble(fTmupx, gMaxnmus);
   resetDouble(fTmupy, gMaxnmus);
   resetDouble(fTmupz, gMaxnmus);
@@ -1804,6 +1924,8 @@ void NTupleProducer::resetTree(){
   resetDouble(fTmuIso03sumPt, gMaxnmus);
   resetDouble(fTmuIso03emEt, gMaxnmus);
   resetDouble(fTmuIso03hadEt, gMaxnmus);
+  resetDouble(fTmuIso03emVetoEt, gMaxnmus);
+  resetDouble(fTmuIso03hadVetoEt, gMaxnmus);
   resetDouble(fTmuIso05sumPt, gMaxnmus);
   resetDouble(fTmuIso05emEt, gMaxnmus);
   resetDouble(fTmuIso05hadEt, gMaxnmus);
@@ -1819,12 +1941,41 @@ void NTupleProducer::resetTree(){
   resetInt(fTmunglhits, gMaxnmus);
   resetInt(fTmunmuhits, gMaxnmus);
   resetInt(fTmuntkhits, gMaxnmus);
+  resetDouble(fTmuinntknchi2, gMaxnmus);
   resetInt(fTmunmatches, gMaxnmus);
   resetInt(fTmunchambers, gMaxnmus);
   resetDouble(fTmucalocomp, gMaxnmus);
   resetDouble(fTmusegmcomp, gMaxnmus);
-  resetInt(fTmutrackermu, gMaxnmus);
-  resetInt(fTmuisGMPT, gMaxnmus);
+  resetDouble(fTmuoutmomx, gMaxnmus);
+  resetDouble(fTmuoutmomy, gMaxnmus);
+  resetDouble(fTmuoutmomz, gMaxnmus);
+  resetDouble(fTmuoutmomphi, gMaxnmus);
+  resetDouble(fTmuoutmometa, gMaxnmus);
+  resetDouble(fTmuoutmomtheta, gMaxnmus);
+  resetDouble(fTmuoutposrad, gMaxnmus);
+  resetDouble(fTmuoutposx, gMaxnmus);
+  resetDouble(fTmuoutposy, gMaxnmus);
+  resetDouble(fTmuoutposz, gMaxnmus);
+
+  resetInt(fTmuIsGMPT, gMaxnmus);
+  resetInt(fTmuIsGMTkChiComp, gMaxnmus);
+  resetInt(fTmuIsGMStaChiComp, gMaxnmus);
+  resetInt(fTmuIsGMTkKinkTight, gMaxnmus);
+  resetInt(fTmuIsAllStaMuons, gMaxnmus);
+  resetInt(fTmuIsAllTrkMuons, gMaxnmus);
+  resetInt(fTmuIsTrkMuArb, gMaxnmus);
+  resetInt(fTmuIsAllArb, gMaxnmus);
+  resetInt(fTmuIsTMLastStationLoose, gMaxnmus);
+  resetInt(fTmuIsTMLastStationTight, gMaxnmus);
+  resetInt(fTmuIsTM2DCompLoose, gMaxnmus);
+  resetInt(fTmuIsTM2DCompTight, gMaxnmus);
+  resetInt(fTmuIsTMOneStationLoose, gMaxnmus);
+  resetInt(fTmuIsTMOneStationTight, gMaxnmus);
+  resetInt(fTmuIsTMLSOPL, gMaxnmus);
+  resetInt(fTmuIsTMLastStationAngLoose, gMaxnmus);
+  resetInt(fTmuIsTMLastStationAngTight, gMaxnmus);
+  resetInt(fTmuIsTMOneStationAngTight, gMaxnmus);
+  resetInt(fTmuIsTMOneStationAngLoose, gMaxnmus);
 
   resetInt(fTGenMuId, gMaxnmus);
   resetInt(fTGenMuStatus, gMaxnmus);
@@ -1875,6 +2026,7 @@ void NTupleProducer::resetTree(){
   resetDouble(fTdr03hcaltowersumet, gMaxneles);
   resetDouble(fTdr04hcaltowersumet, gMaxneles);
   resetDouble(fTetheta, gMaxneles);
+  resetDouble(fTesceta, gMaxneles);
   resetInt(fTecharge, gMaxneles);
   resetInt(fTeCInfoIsGsfCtfCons, gMaxneles);
   resetInt(fTeCInfoIsGsfCtfScPixCons, gMaxneles);
@@ -1965,6 +2117,7 @@ void NTupleProducer::resetTree(){
   resetDouble(fTjID_ECALTow, gMaxnjets);
   resetDouble(fTjbTagProb, gMaxnjets);
   resetDouble(fTjChfrac,   gMaxnjets);
+  resetDouble(fTjEfracHadr, gMaxnjets);
   resetDouble(fTjMass,   gMaxnjets);
   resetInt(fTjnAssoTracks, gMaxnjets);
   resetDouble(fTjtrk1px, gMaxnjets);
@@ -2081,6 +2234,7 @@ void NTupleProducer::resetTree(){
   fTTCMETpx            = -999.99;
   fTTCMETpy            = -999.99;
   fTTCMETphi           = -999.99;
+  fTTCMETSignificance  = -999.99;	
   fTMuJESCorrMET       = -999.99;
   fTMuJESCorrMETpx     = -999.99;
   fTMuJESCorrMETpy     = -999.99;
@@ -2089,6 +2243,7 @@ void NTupleProducer::resetTree(){
   fTPFMETpx            = -999.99;
   fTPFMETpy            = -999.99;
   fTPFMETphi           = -999.99;
+  fTPFMETSignificance  = -999.99;	
   fTMETR12             = -999.99;
   fTMETR21             = -999.99;
 }
