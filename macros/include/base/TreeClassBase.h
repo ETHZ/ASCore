@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon May  3 08:39:57 2010 by ROOT version 5.22/00d
+// Thu May 27 17:56:22 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root
+// found on file: /data/susy/ntuples/data/r132440-134725_json20100512.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -176,6 +176,7 @@ public :
    Double_t        ElCaloEnergy[20];   //[NEles]
    Double_t        ElTrkMomAtVtx[20];   //[NEles]
    Double_t        ElESuperClusterOverP[20];   //[NEles]
+   Int_t           ElNumberOfMissingInnerHits[20];   //[NEles]
    Int_t           ElIsInJet[20];   //[NEles]
    Double_t        ElSharedPx[20];   //[NEles]
    Double_t        ElSharedPy[20];   //[NEles]
@@ -214,96 +215,97 @@ public :
    Double_t        ElGenGME[20];   //[NEles]
    Int_t           NPhotons;
    Int_t           NPhotonsTot;
-   Int_t           PhoGood[20];   //[NPhotons]
-   Int_t           PhoIsIso[20];   //[NPhotons]
-   Double_t        PhoPt[20];   //[NPhotons]
-   Double_t        PhoPx[20];   //[NPhotons]
-   Double_t        PhoPy[20];   //[NPhotons]
-   Double_t        PhoPz[20];   //[NPhotons]
-   Double_t        PhoEta[20];   //[NPhotons]
-   Double_t        PhoPhi[20];   //[NPhotons]
-   Double_t        PhoEnergy[20];   //[NPhotons]
-   Double_t        PhoIso03Ecal[20];   //[NPhotons]
-   Double_t        PhoIso03Hcal[20];   //[NPhotons]
-   Double_t        PhoIso03TrkSolid[20];   //[NPhotons]
-   Double_t        PhoIso03TrkHollow[20];   //[NPhotons]
-   Double_t        PhoIso03[20];   //[NPhotons]
-   Double_t        PhoCaloPositionX[20];   //[NPhotons]
-   Double_t        PhoCaloPositionY[20];   //[NPhotons]
-   Double_t        PhoCaloPositionZ[20];   //[NPhotons]
-   Double_t        PhoHoverE[20];   //[NPhotons]
-   Double_t        PhoH1overE[20];   //[NPhotons]
-   Double_t        PhoH2overE[20];   //[NPhotons]
-   Double_t        PhoSigmaIetaIeta[20];   //[NPhotons]
-   Int_t           PhoHasPixSeed[20];   //[NPhotons]
-   Int_t           PhoHasConvTrks[20];   //[NPhotons]
-   Int_t           PhoIsInJet[20];   //[NPhotons]
-   Double_t        PhoSharedPx[20];   //[NPhotons]
-   Double_t        PhoSharedPy[20];   //[NPhotons]
-   Double_t        PhoSharedPz[20];   //[NPhotons]
-   Double_t        PhoSharedEnergy[20];   //[NPhotons]
-   Int_t           PhoScSeedSeverity[20];   //[NPhotons]
-   Double_t        PhoE1OverE9[20];   //[NPhotons]
-   Double_t        PhoS4OverS1[20];   //[NPhotons]
+   Int_t           PhoGood[50];   //[NPhotons]
+   Int_t           PhoIsIso[50];   //[NPhotons]
+   Double_t        PhoPt[50];   //[NPhotons]
+   Double_t        PhoPx[50];   //[NPhotons]
+   Double_t        PhoPy[50];   //[NPhotons]
+   Double_t        PhoPz[50];   //[NPhotons]
+   Double_t        PhoEta[50];   //[NPhotons]
+   Double_t        PhoPhi[50];   //[NPhotons]
+   Double_t        PhoEnergy[50];   //[NPhotons]
+   Double_t        PhoIso03Ecal[50];   //[NPhotons]
+   Double_t        PhoIso03Hcal[50];   //[NPhotons]
+   Double_t        PhoIso03TrkSolid[50];   //[NPhotons]
+   Double_t        PhoIso03TrkHollow[50];   //[NPhotons]
+   Double_t        PhoIso03[50];   //[NPhotons]
+   Double_t        PhoCaloPositionX[50];   //[NPhotons]
+   Double_t        PhoCaloPositionY[50];   //[NPhotons]
+   Double_t        PhoCaloPositionZ[50];   //[NPhotons]
+   Double_t        PhoHoverE[50];   //[NPhotons]
+   Double_t        PhoH1overE[50];   //[NPhotons]
+   Double_t        PhoH2overE[50];   //[NPhotons]
+   Double_t        PhoSigmaIetaIeta[50];   //[NPhotons]
+   Int_t           PhoHasPixSeed[50];   //[NPhotons]
+   Int_t           PhoHasConvTrks[50];   //[NPhotons]
+   Int_t           PhoIsInJet[50];   //[NPhotons]
+   Int_t           PhoIsElDupl[50];   //[NPhotons]
+   Double_t        PhoSharedPx[50];   //[NPhotons]
+   Double_t        PhoSharedPy[50];   //[NPhotons]
+   Double_t        PhoSharedPz[50];   //[NPhotons]
+   Double_t        PhoSharedEnergy[50];   //[NPhotons]
+   Int_t           PhoScSeedSeverity[50];   //[NPhotons]
+   Double_t        PhoE1OverE9[50];   //[NPhotons]
+   Double_t        PhoS4OverS1[50];   //[NPhotons]
    Int_t           NJets;
    Int_t           NJetsTot;
-   Int_t           JGood[50];   //[NJets]
-   Double_t        JPx[50];   //[NJets]
-   Double_t        JPy[50];   //[NJets]
-   Double_t        JPz[50];   //[NJets]
-   Double_t        JPt[50];   //[NJets]
-   Double_t        JE[50];   //[NJets]
-   Double_t        JEt[50];   //[NJets]
-   Double_t        JEta[50];   //[NJets]
-   Double_t        JPhi[50];   //[NJets]
-   Double_t        JEMfrac[50];   //[NJets]
-   Int_t           JNConstituents[50];   //[NJets]
-   Double_t        JID_HPD[50];   //[NJets]
-   Double_t        JID_RBX[50];   //[NJets]
-   Double_t        JID_n90Hits[50];   //[NJets]
-   Double_t        JID_SubDet1[50];   //[NJets]
-   Double_t        JID_SubDet2[50];   //[NJets]
-   Double_t        JID_SubDet3[50];   //[NJets]
-   Double_t        JID_SubDet4[50];   //[NJets]
-   Double_t        JID_resEMF[50];   //[NJets]
-   Double_t        JID_HCALTow[50];   //[NJets]
-   Double_t        JID_ECALTow[50];   //[NJets]
-   Double_t        JEtaEMrms[50];   //[NJets]
-   Double_t        JEtaHADrms[50];   //[NJets]
-   Double_t        JPhiEMrms[50];   //[NJets]
-   Double_t        JPhiHADrms[50];   //[NJets]
-   Double_t        JbTagProb[50];   //[NJets]
-   Double_t        JChfrac[50];   //[NJets]
-   Double_t        JMass[50];   //[NJets]
-   Int_t           JNAssoTracks[50];   //[NJets]
-   Double_t        Jtrk1px[50];   //[NJets]
-   Double_t        Jtrk1py[50];   //[NJets]
-   Double_t        Jtrk1pz[50];   //[NJets]
-   Double_t        Jtrk2px[50];   //[NJets]
-   Double_t        Jtrk2py[50];   //[NJets]
-   Double_t        Jtrk2pz[50];   //[NJets]
-   Double_t        Jtrk3px[50];   //[NJets]
-   Double_t        Jtrk3py[50];   //[NJets]
-   Double_t        Jtrk3pz[50];   //[NJets]
-   Double_t        JEcorr[50];   //[NJets]
-   Double_t        JeMinDR[50];   //[NJets]
-   Double_t        JVtxx[50];   //[NJets]
-   Double_t        JVtxy[50];   //[NJets]
-   Double_t        JVtxz[50];   //[NJets]
-   Double_t        JVtxExx[50];   //[NJets]
-   Double_t        JVtxEyx[50];   //[NJets]
-   Double_t        JVtxEyy[50];   //[NJets]
-   Double_t        JVtxEzy[50];   //[NJets]
-   Double_t        JVtxEzz[50];   //[NJets]
-   Double_t        JVtxEzx[50];   //[NJets]
-   Double_t        JVtxNChi2[50];   //[NJets]
-   Double_t        JGenPt[50];   //[NJets]
-   Double_t        JGenEta[50];   //[NJets]
-   Double_t        JGenPhi[50];   //[NJets]
-   Double_t        JGenE[50];   //[NJets]
-   Double_t        JGenEmE[50];   //[NJets]
-   Double_t        JGenHadE[50];   //[NJets]
-   Double_t        JGenInvE[50];   //[NJets]
+   Int_t           JGood[100];   //[NJets]
+   Double_t        JPx[100];   //[NJets]
+   Double_t        JPy[100];   //[NJets]
+   Double_t        JPz[100];   //[NJets]
+   Double_t        JPt[100];   //[NJets]
+   Double_t        JE[100];   //[NJets]
+   Double_t        JEt[100];   //[NJets]
+   Double_t        JEta[100];   //[NJets]
+   Double_t        JPhi[100];   //[NJets]
+   Double_t        JEMfrac[100];   //[NJets]
+   Int_t           JNConstituents[100];   //[NJets]
+   Double_t        JID_HPD[100];   //[NJets]
+   Double_t        JID_RBX[100];   //[NJets]
+   Double_t        JID_n90Hits[100];   //[NJets]
+   Double_t        JID_SubDet1[100];   //[NJets]
+   Double_t        JID_SubDet2[100];   //[NJets]
+   Double_t        JID_SubDet3[100];   //[NJets]
+   Double_t        JID_SubDet4[100];   //[NJets]
+   Double_t        JID_resEMF[100];   //[NJets]
+   Double_t        JID_HCALTow[100];   //[NJets]
+   Double_t        JID_ECALTow[100];   //[NJets]
+   Double_t        JEtaEMrms[100];   //[NJets]
+   Double_t        JEtaHADrms[100];   //[NJets]
+   Double_t        JPhiEMrms[100];   //[NJets]
+   Double_t        JPhiHADrms[100];   //[NJets]
+   Double_t        JbTagProb[100];   //[NJets]
+   Double_t        JChfrac[100];   //[NJets]
+   Double_t        JMass[100];   //[NJets]
+   Int_t           JNAssoTracks[100];   //[NJets]
+   Double_t        Jtrk1px[100];   //[NJets]
+   Double_t        Jtrk1py[100];   //[NJets]
+   Double_t        Jtrk1pz[100];   //[NJets]
+   Double_t        Jtrk2px[100];   //[NJets]
+   Double_t        Jtrk2py[100];   //[NJets]
+   Double_t        Jtrk2pz[100];   //[NJets]
+   Double_t        Jtrk3px[100];   //[NJets]
+   Double_t        Jtrk3py[100];   //[NJets]
+   Double_t        Jtrk3pz[100];   //[NJets]
+   Double_t        JEcorr[100];   //[NJets]
+   Double_t        JeMinDR[100];   //[NJets]
+   Double_t        JVtxx[100];   //[NJets]
+   Double_t        JVtxy[100];   //[NJets]
+   Double_t        JVtxz[100];   //[NJets]
+   Double_t        JVtxExx[100];   //[NJets]
+   Double_t        JVtxEyx[100];   //[NJets]
+   Double_t        JVtxEyy[100];   //[NJets]
+   Double_t        JVtxEzy[100];   //[NJets]
+   Double_t        JVtxEzz[100];   //[NJets]
+   Double_t        JVtxEzx[100];   //[NJets]
+   Double_t        JVtxNChi2[100];   //[NJets]
+   Double_t        JGenPt[100];   //[NJets]
+   Double_t        JGenEta[100];   //[NJets]
+   Double_t        JGenPhi[100];   //[NJets]
+   Double_t        JGenE[100];   //[NJets]
+   Double_t        JGenEmE[100];   //[NJets]
+   Double_t        JGenHadE[100];   //[NJets]
+   Double_t        JGenInvE[100];   //[NJets]
    Int_t           NTracks;
    Int_t           NTracksTot;
    Int_t           TrkGood[500];   //[NTracks]
@@ -360,6 +362,8 @@ public :
    Double_t        PFMETpx;
    Double_t        PFMETpy;
    Double_t        PFMETphi;
+   Double_t        METR12;
+   Double_t        METR21;
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -520,6 +524,7 @@ public :
    TBranch        *b_ElCaloEnergy;   //!
    TBranch        *b_ElTrkMomAtVtx;   //!
    TBranch        *b_ElESuperClusterOverP;   //!
+   TBranch        *b_ElNumberOfMissingInnerHits;   //!
    TBranch        *b_ElIsInJet;   //!
    TBranch        *b_ElSharedPx;   //!
    TBranch        *b_ElSharedPy;   //!
@@ -582,6 +587,7 @@ public :
    TBranch        *b_PhoHasPixSeed;   //!
    TBranch        *b_PhoHasConvTrks;   //!
    TBranch        *b_PhoIsInJet;   //!
+   TBranch        *b_PhoIsElDupl;   //!
    TBranch        *b_PhoSharedPx;   //!
    TBranch        *b_PhoSharedPy;   //!
    TBranch        *b_PhoSharedPz;   //!
@@ -704,6 +710,8 @@ public :
    TBranch        *b_PFMETpx;   //!
    TBranch        *b_PFMETpy;   //!
    TBranch        *b_PFMETphi;   //!
+   TBranch        *b_METR12;   //!
+   TBranch        *b_METR21;   //!
 
    TreeClassBase(TTree *tree=0);
    virtual ~TreeClassBase();
@@ -724,10 +732,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/data/susy/ntuples/data/r132440-134725_json20100512.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root");
-         f->cd("dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/data/r132598-133321_json20100421.root:/analyze");
+         f = new TFile("/data/susy/ntuples/data/r132440-134725_json20100512.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -936,6 +943,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElCaloEnergy", ElCaloEnergy, &b_ElCaloEnergy);
    fChain->SetBranchAddress("ElTrkMomAtVtx", ElTrkMomAtVtx, &b_ElTrkMomAtVtx);
    fChain->SetBranchAddress("ElESuperClusterOverP", ElESuperClusterOverP, &b_ElESuperClusterOverP);
+   fChain->SetBranchAddress("ElNumberOfMissingInnerHits", ElNumberOfMissingInnerHits, &b_ElNumberOfMissingInnerHits);
    fChain->SetBranchAddress("ElIsInJet", ElIsInJet, &b_ElIsInJet);
    fChain->SetBranchAddress("ElSharedPx", ElSharedPx, &b_ElSharedPx);
    fChain->SetBranchAddress("ElSharedPy", ElSharedPy, &b_ElSharedPy);
@@ -998,6 +1006,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PhoHasPixSeed", PhoHasPixSeed, &b_PhoHasPixSeed);
    fChain->SetBranchAddress("PhoHasConvTrks", PhoHasConvTrks, &b_PhoHasConvTrks);
    fChain->SetBranchAddress("PhoIsInJet", PhoIsInJet, &b_PhoIsInJet);
+   fChain->SetBranchAddress("PhoIsElDupl", PhoIsElDupl, &b_PhoIsElDupl);
    fChain->SetBranchAddress("PhoSharedPx", PhoSharedPx, &b_PhoSharedPx);
    fChain->SetBranchAddress("PhoSharedPy", PhoSharedPy, &b_PhoSharedPy);
    fChain->SetBranchAddress("PhoSharedPz", PhoSharedPz, &b_PhoSharedPz);
@@ -1120,6 +1129,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PFMETpx", &PFMETpx, &b_PFMETpx);
    fChain->SetBranchAddress("PFMETpy", &PFMETpy, &b_PFMETpy);
    fChain->SetBranchAddress("PFMETphi", &PFMETphi, &b_PFMETphi);
+   fChain->SetBranchAddress("METR12", &METR12, &b_METR12);
+   fChain->SetBranchAddress("METR21", &METR21, &b_METR21);
    Notify();
 }
 
