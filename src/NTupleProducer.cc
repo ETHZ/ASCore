@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.58 2010/05/26 16:30:10 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.59 2010/05/26 17:00:34 fronga Exp $
 //
 //
 
@@ -328,7 +328,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   if(tr.size() >= gMaxhltbits){
     edm::LogWarning("NTP") << "@SUB=analyze()"
                            << "More than " << static_cast<int>(gMaxhltbits) << " HLT trigger bits, increase length!";
-    fTgoodevent = 0;
+    fTgoodevent = 1;
   }
 
   if(fFirstevent){
@@ -413,7 +413,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			edm::LogWarning("NTP") << "@SUB=analyze()"
 				<< "Maximum number of muons exceeded";
 			fTflagmaxmuexc = 1;
-			fTgoodevent = 0;
+			fTgoodevent = 1;
 			break;
 		}
 		mi++;
@@ -470,8 +470,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIsTMLSOPL[mqi]               = muon::isGoodMuon(*Mit, muon::TMLastStationOptimizedLowPtLoose) ? 1:0;
 		fTmuIsTMLastStationAngLoose[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngLoose) ? 1:0;
 		fTmuIsTMLastStationAngTight[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngTight) ? 1:0;
-		fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngTight) ? 1:0;
 		fTmuIsTMOneStationAngLoose[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngLoose) ? 1:0;
+		fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngTight) ? 1:0;
 
 		// Isolation is embedded in PAT.
 		if ( !fIsPat ) {
@@ -506,6 +506,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmunmatches[mqi]   = 0;
 			fTmunchambers[mqi]  = 0;
 
+			fTmuoutposrad[mqi]   = Mit->innerTrack()->outerRadius();
+			fTmuoutposx[mqi]     = Mit->innerTrack()->outerX();
+			fTmuoutposy[mqi]     = Mit->innerTrack()->outerY();
+			fTmuoutposz[mqi]     = Mit->innerTrack()->outerZ();
+
 			fTmuoutmomx[mqi]     = Mit->innerTrack()->outerMomentum().x();
 			fTmuoutmomy[mqi]     = Mit->innerTrack()->outerMomentum().z();
 			fTmuoutmomz[mqi]     = Mit->innerTrack()->outerMomentum().y();
@@ -513,10 +518,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmuoutmometa[mqi]   = Mit->innerTrack()->outerEta();
 			fTmuoutmomtheta[mqi] = Mit->innerTrack()->outerTheta();
 
-			fTmuoutposrad[mqi]   = Mit->innerTrack()->outerRadius();
-			fTmuoutposx[mqi]     = Mit->innerTrack()->outerX();
-			fTmuoutposy[mqi]     = Mit->innerTrack()->outerY();
-			fTmuoutposz[mqi]     = Mit->innerTrack()->outerZ();
 		}
 		if(fTmuIsGM[mqi]){ // Global Muons
 			fTnglobalmu++;
@@ -531,6 +532,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmunmatches[mqi]   = Mit->numberOfMatches();
 			fTmunchambers[mqi]  = Mit->numberOfChambers();
 
+			fTmuoutposrad[mqi]   = Mit->globalTrack()->outerRadius();
+			fTmuoutposx[mqi]     = Mit->globalTrack()->outerX();
+			fTmuoutposy[mqi]     = Mit->globalTrack()->outerY();
+			fTmuoutposz[mqi]     = Mit->globalTrack()->outerZ();
+
 			fTmuoutmomx[mqi]     = Mit->globalTrack()->outerMomentum().x();
 			fTmuoutmomy[mqi]     = Mit->globalTrack()->outerMomentum().z();
 			fTmuoutmomz[mqi]     = Mit->globalTrack()->outerMomentum().y();
@@ -538,10 +544,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmuoutmometa[mqi]   = Mit->globalTrack()->outerEta();
 			fTmuoutmomtheta[mqi] = Mit->globalTrack()->outerTheta();
 
-			fTmuoutposrad[mqi]   = Mit->globalTrack()->outerRadius();
-			fTmuoutposx[mqi]     = Mit->globalTrack()->outerX();
-			fTmuoutposy[mqi]     = Mit->globalTrack()->outerY();
-			fTmuoutposz[mqi]     = Mit->globalTrack()->outerZ();
 		}
 
 		// MC Matching
@@ -612,7 +614,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
         edm::LogWarning("NTP") << "@SUB=analyze"
                                << "Maximum number of electrons exceeded..";
         fTflagmaxelexc = 1;
-        fTgoodevent = 0;
+        fTgoodevent = 1;
         break;
       }
       fTnelestot++;
@@ -787,7 +789,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of photons exceeded";
       fTflagmaxphoexc = 1;
-      fTgoodevent = 0;
+      fTgoodevent = 1;
       break;
     }
     // Save photon supercluster position
@@ -861,7 +863,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Found more than " << static_cast<int>(gMaxnjets) << " uncorrected jets, I'm scared ...";
       fTflagmaxujetexc = 1;
-      fTgoodevent = 0;			
+      fTgoodevent = 1;
       break;
     }
     if ( !fIsPat ) {
@@ -902,7 +904,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of jets exceeded";
       fTflagmaxjetexc = 1;
-      fTgoodevent = 0;
+      fTgoodevent = 1;
       break;
     }
     int index = it->first;
@@ -1231,7 +1233,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of tracks exceeded";
       fTflagmaxtrkexc = 1;
-      fTgoodevent = 0;
+      fTgoodevent = 1;
       break;
     }
     fTtrkpt[nqtrk]    = it->pt()*it->charge();
@@ -1471,16 +1473,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MuIsTMOneStationAngTight"  ,&fTmuIsTMOneStationAngTight  ,"MuIsTMOneStationAngTight[NMus]/I");
   fEventTree->Branch("MuIsTMOneStationAngLoose"  ,&fTmuIsTMOneStationAngLoose  ,"MuIsTMOneStationAngLoose[NMus]/I");
 
+  fEventTree->Branch("MuOutPosRadius" ,&fTmuoutposrad      ,"MuOutPosRadius[NMus]/D");
+  fEventTree->Branch("MuOutPosX"      ,&fTmuoutposx        ,"MuOutPosX[NMus]/D");
+  fEventTree->Branch("MuOutPosY"      ,&fTmuoutposy        ,"MuOutPosY[NMus]/D");
+  fEventTree->Branch("MuOutPosZ"      ,&fTmuoutposz        ,"MuOutPosZ[NMus]/D");
   fEventTree->Branch("MuOutMomx"      ,&fTmuoutmomx        ,"MuOutMomx[NMus]/D");
   fEventTree->Branch("MuOutMomy"      ,&fTmuoutmomy        ,"MuOutMomy[NMus]/D");
   fEventTree->Branch("MuOutMomz"      ,&fTmuoutmomz        ,"MuOutMomz[NMus]/D");
   fEventTree->Branch("MuOutMomPhi"    ,&fTmuoutmomphi      ,"MuOutMomPhi[NMus]/D");
   fEventTree->Branch("MuOutMomEta"    ,&fTmuoutmometa      ,"MuOutMomEta[NMus]/D");
   fEventTree->Branch("MuOutMomTheta"  ,&fTmuoutmomtheta    ,"MuOutMomTheta[NMus]/D");
-  fEventTree->Branch("MuOutPosRadius" ,&fTmuoutposrad      ,"MuOutPosRadius[NMus]/D");
-  fEventTree->Branch("MuOutPosX"      ,&fTmuoutposx        ,"MuOutPosX[NMus]/D");
-  fEventTree->Branch("MuOutPosY"      ,&fTmuoutposy        ,"MuOutPosY[NMus]/D");
-  fEventTree->Branch("MuOutPosZ"      ,&fTmuoutposz        ,"MuOutPosZ[NMus]/D");
 
   fEventTree->Branch("MuGenID"          ,&fTGenMuId         ,"MuGenID[NMus]/I");
   fEventTree->Branch("MuGenStatus"      ,&fTGenMuStatus     ,"MuGenStatus[NMus]/I");
@@ -1893,7 +1895,7 @@ void NTupleProducer::resetTree(){
   fTNCaloTowers = -999;
   fTHBHENoiseFlag = -999;
 
-  fTgoodevent        = 1;
+  fTgoodevent        = 0;
   fTflagmaxmuexc     = 0;
   fTflagmaxelexc     = 0;
   fTflagmaxujetexc = 0;
