@@ -32,6 +32,7 @@ public:
 	void End();
 	void DoTagging();
 	void DoCleaning();
+        void DoSkimTree();
 	void Reset();
 	void StatWrite(TString fCleanerStats);
 
@@ -48,6 +49,8 @@ public:
 
 	// Cleaning parameters:
 	// Number in comments are initial values
+        // -- Cut values
+        float fMinJetPt;                    // = 20.   // Min Pt of jets
 	// -- Primary vertex:
 	float fClean_chisqVxmax;            // = 5.0   // Max nchi2, nchi2 is also cut at > 0
 	float fClean_dRVxmax;               // = 0.25  // Max transverse distance to beamspot
@@ -78,6 +81,9 @@ public:
 	float fClean_ElecDeltaPhiInEndmax;  // = 0.06  // Max ElDeltaPhiSuperClusterAtVtx (endcap)
 	float fClean_ElecDeltaPhiOutBarmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (barrel)
 	float fClean_ElecDeltaPhiOutEndmax; // = 999.0 // Max ElDeltaPhiSeedClusterAtCalo (endcap)
+        float fClean_ElecConvPartTrackDistmax; // = 0.    // Max distance for conversion
+        float fClean_ElecConvPartTrackDCotmax; // = 0.    // Max dCosTheta for conversion
+        float fClean_ElecNMissHitsmax;      // = 1.    // Max number of missing hits
 	float fClean_dRSSelecmax;           // = 10.   // Max delta R of same sign elec. duplicate check
 
 	// -- Photons:
@@ -125,9 +131,10 @@ private:
 	int CleanMuon(int ichk);
 	bool DuplicateMuon(int ichk);
 	int CleanElectron(int ichk);
+        bool DuplPhotonElectron(int ichk);
 	bool DuplicateElectron(int ichk);
 	int CleanPhoton(int ichk);
-	int CleanJet(int ichk);
+        int CleanJet(int ichk, int itype);
 	bool ElectronJet(int ichk);
 	bool PhotonJet(int ichk);
 	int FindNearestJet(double eta, double phi);
@@ -180,6 +187,7 @@ private:
 	int fNumTotMuonBadDpop;
 	int fNumTotMuonBadChi2;  
 	int fNumTotMuonBadNhit;  
+	int fNumTotMuonBadGlTr;  
 
 	int fNumTotElectrons;
 	int fNumTotElecGoodIso;
@@ -192,6 +200,9 @@ private:
 	int fNumTotElecBadHoE;
 	int fNumTotElecBadShsh;
 	int fNumTotElecBadTmat;
+	int fNumTotElecBadSpik;
+	int fNumTotElecBadHits;
+	int fNumTotElecBadConv;
 
 	int fNumTotPhotons;
 	int fNumTotPhotGoodIso;
@@ -202,6 +213,7 @@ private:
 	int fNumTotPhotNotClean;
 	int fNumTotPhotBadHoE;
 	int fNumTotPhotBadShsh;
+	int fNumTotPhotBadSpik;
 
 	int fNumTotJets;  
 	int fNumTotJetGood;  
@@ -216,6 +228,7 @@ private:
 	int fNumTotJetLtFch;
 	int fNumTotJetLtn90hits;
 	int fNumTotJetGtfHPD;
+	int fNumTotJetGtfRBX;
 	int fNumTotBJets;  
 
 	// Cleaning variables:
