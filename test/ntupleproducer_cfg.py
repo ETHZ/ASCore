@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
+import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process("NTupleProducer")
 
@@ -13,50 +14,58 @@ process.MessageLogger.cerr.NTP = cms.untracked.PSet(
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
-### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
-# runon = 'data'
-# runon = 'MC31x'
-runon = 'MC35x'
-recoType = 'RECO'
-# recoType = 'PAT'
-# recoType = 'PF'
+### Parsing of command line parameters #############################################
+### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
+options = VarParsing.VarParsing ('standard')					# set 'standard'  options
+options.register ('runon',										# register 'runon' option
+                  'data',										# the default value
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Type of sample to run on: data (default), MC35X, MC31X")
+options.register ('recoType',									# register 'recoType' option
+                  'RECO',										# the default value
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Type of reconstruction to use: RECO (default), PAT, PF")
+# get and parse the command line arguments
+options.parseArguments()
+
+# set NTupleProducer defaults (override the output, files and maxEvents parameter)
+options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
+options.output='NTupleProducer_36X_'+options.runon+'_'+options.recoType+'.root'
 
 ### Running conditions #########################################################
+# See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
+# to check what cff to use
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-if runon=='data':
-    process.GlobalTag.globaltag = "GR10_P_V4::All"
+if options.runon=='data':
+    # CMSSW_3_6_X:
+    process.GlobalTag.globaltag = "GR_R_36X_V11::All"
 else:
-    # CMSSW_3_4_X:
-    # process.GlobalTag.globaltag = "MC_3XY_V18::All"
-    # CMSSW_3_3_X:
-    process.GlobalTag.globaltag = "START3X_V25B::All"
+    # CMSSW_3_6_X:
+    process.GlobalTag.globaltag = "START36_V9::All"
 
 ### b-tagging ##################################################################
-process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
-process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
-process.load("TrackingTools.TrackAssociator.default_cfi")
-process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
+# Simple SV (+IP) based algos
 process.load("RecoBTag.Configuration.RecoBTag_cff")
-# b-tagging for SC5
-process.impactParameterTagInfos.jetTracks = cms.InputTag("sisCone5JetTracksAssociatorAtVertex")
+process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex3TrkES_cfi")
+process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
+process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi")
 
 ### Input/Output ###############################################################
 # Input
 process.source = cms.Source("PoolSource",
-      fileNames = cms.untracked.vstring(
-#     '/store/data/Commissioning10/MinimumBias/RAW-RECO/v7/000/132/440/0636C91D-4C3C-DF11-9A45-001A649747B0.root'
-#     '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V25B_356ReReco-v1/0004/F44C3A4D-F73B-DF11-B42D-003048678B94.root'
-      'file:////data/susy/data/MinBias-Spring10-START3X_V25B_356ReReco-v1-GEN-SIM-RECO.root'
-    ),
+      fileNames = cms.untracked.vstring(options.files)
 #Enable if you see duplicate error      duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 # Output
 process.TFileService = cms.Service("TFileService",
 # keep track of the type of data source and reco type in the ntuple file name
-	fileName = cms.string("NTupleProducer_36X_"+runon+"_"+recoType+".root"),  
+	fileName = cms.string(options.output),  
 	closeFileFast = cms.untracked.bool(True)
 )
 
@@ -92,7 +101,7 @@ process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 process.cleaning = cms.Sequence(process.HBHENoiseFilterResultProducer)
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
-if runon=='data':
+if options.runon=='data':
     # require physics declared
     process.load('HLTrigger.special.hltPhysicsDeclared_cfi')
     process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
@@ -129,7 +138,7 @@ if runon=='data':
     
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
-process.analyze.isRealData = cms.untracked.bool(runon=='data')
+process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
 # Synchronise with Jet configuration above (defaults to ak5)
 process.analyze.tag_jets  = recoJet_src
 process.analyze.jetCorrs  = 'ak5CaloL2L3'
@@ -153,8 +162,8 @@ process.analyze.jets = (
     )
 
 #### Path ######################################################################
-process.mybtag = cms.Sequence(   process.impactParameterTagInfos
-                               * process.simpleSecondaryVertexBJetTags )
+process.mybtag = cms.Sequence(	process.simpleSecondaryVertexHighPurBJetTags
+								* process.simpleSecondaryVertexHighEffBJetTags )
 
 process.p = cms.Path(
     process.cleaning
