@@ -27,6 +27,7 @@ void TreeCleaner::Analyze(){
 
 	DoTagging();
 	DoCleaning();
+	DoSkimTree();
 }
 
 void TreeCleaner::DoTagging(){
@@ -45,7 +46,14 @@ void TreeCleaner::DoCleaning(){
 	if( fClean ){
 		DoCleanObjects();
 		StatFill();
+	}
+}
 
+void TreeCleaner::DoSkimTree(){
+// Performs only the tree skimming, removing bad objects
+//   assumes that DoTagging() and DoCleaning() have been called
+
+	if( fClean ){
 		// Clean and skim the tree
 		int iclean = 0;
 		for( int i = 0; i < fTR->NMus; i++ ){
@@ -118,6 +126,11 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		ok = false;
 		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
 		sscanf(buffer, "%s %f", ParName, &ParValue);
+
+		// final acceptance cuts
+		if( !strcmp(ParName, "minJetPt") ){
+			fMinJetPt = float(ParValue); ok = true;
+		}
 
 		// -- Primary vertex:
 		if( !strcmp(ParName, "chisqVxmax") ){
@@ -194,6 +207,15 @@ void TreeCleaner::ReadCleaningParameters(const char* filename){
 		}
 		if( !strcmp(ParName, "ElecDeltaPhiOutEndmax") ){
 			fClean_ElecDeltaPhiOutEndmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElecConvPartTrackDistmax") ){
+			fClean_ElecConvPartTrackDistmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElecConvPartTrackDCotmax") ){
+			fClean_ElecConvPartTrackDCotmax = float(ParValue); ok = true;
+		}
+		if( !strcmp(ParName, "ElecNMissHitsmax") ){
+			fClean_ElecNMissHitsmax = float(ParValue); ok = true;
 		}
 		if( !strcmp(ParName, "dRSSelecmax") ){
 			fClean_dRSSelecmax = float(ParValue); ok = true;
@@ -308,7 +330,7 @@ void TreeCleaner::TagCleanObjects(void){
 	// Jets
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ){
 		fTR->JGood[ichk] = 10*IsFromPrimaryVx(4, ichk);
-		fTR->JGood[ichk] += CleanJet(ichk);
+		fTR->JGood[ichk] += CleanJet(ichk, 1);
 	}
 	return;
 }
@@ -320,11 +342,13 @@ void TreeCleaner::TagDuplObjects(void){
 	int jbad = 0;
 	for( int ichk = 0; ichk < fTR->NMus; ++ichk )  if( DuplicateMuon(ichk)     ) fTR->MuGood[ichk] += 100;
 	for( int ichk = 0; ichk < fTR->NEles; ++ichk ) if( DuplicateElectron(ichk) ) fTR->ElGood[ichk] += 100;
-	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) {
-		if( ElectronJet(ichk)     ) fTR->JGood[ichk]  += 100;
-		if( PhotonJet(ichk)       ) fTR->JGood[ichk]  += 200;
-		if (fTR->JGood[ichk]%10 > 0 && fTR->JPt[ichk] > fClean_JetBadHardPtmin) jbad = 4;
-	}
+	for (int ichk = 0; ichk < fTR->NPhotons; ++ichk) if ( DuplPhotonElectron(ichk) ) fTR->PhoGood[ichk] += 100;
+	//	for( int ichk = 0; ichk < fTR->NJets; ++ichk ) {
+	//  should be done later
+	//		if( ElectronJet(ichk)     ) fTR->JGood[ichk]  += 100;
+	//		if( PhotonJet(ichk)       ) fTR->JGood[ichk]  += 200;
+	//		if (fTR->JGood[ichk]%10 > 0 && fTR->JPt[ichk] > fClean_JetBadHardPtmin) jbad = 4;
+	//	}
 
 	// Event and MET can only be done later (after bad objects are removed)
 	fTR->GoodEvent = jbad;
@@ -431,6 +455,7 @@ int TreeCleaner::CleanMuon(int ichk){
 	if( fTR->MuPtE[ichk] >= fClean_MuonDPbyPmax * fTR->MuPt[ichk] ) iBad = 1; // Maximum Delta p / p
 	else if( fTR->MuNChi2[ichk] > fClean_MuonChi2max )              iBad = 2; // Maximum Chisquared
 	else if( fTR->MuNTkHits[ichk] < fClean_MuonNHitsmin )           iBad = 3; // Minimum number of valid hits
+	if ( ! fTR->MuTrackerMu[ichk])                                  iBad = 4;
 	return iBad;
 }
 
@@ -477,6 +502,9 @@ int TreeCleaner::CleanElectron(int ichk){
 	double deltaEtaIn  = fTR->ElDeltaEtaSuperClusterAtVtx[ichk];
 	double deltaPhiIn  = fTR->ElDeltaPhiSuperClusterAtVtx[ichk];
 	double deltaPhiOut = fTR->ElDeltaPhiSeedClusterAtCalo[ichk];
+	double nMissHits   = fTR->ElNumberOfMissingInnerHits[ichk];
+	double trackDist   = fTR->ElConvPartnerTrkDist[ichk];
+	double trackDCot   = fTR->ElConvPartnerTrkDCot[ichk]; 
 
 	// Distinguish between barrel and endcap electrons
 	if( fabs(fTR->ElEta[ichk]) < 1.479 ){ // Barrel
@@ -496,6 +524,8 @@ int TreeCleaner::CleanElectron(int ichk){
 		if(useDeltaPhiIn)  if( fabs(deltaPhiIn)  > fClean_ElecDeltaPhiInEndmax  ) return 3;
 		if(useDeltaPhiOut) if( fabs(deltaPhiOut) > fClean_ElecDeltaPhiOutEndmax ) return 3;
 	}
+	if (  nMissHits > fClean_ElecNMissHitsmax )         return 5;
+	if (  trackDist < fClean_ElecConvPartTrackDistmax && trackDCot > fClean_ElecConvPartTrackDCotmax ) return 6;
 	return 0;
 }
 
@@ -541,7 +571,32 @@ int TreeCleaner::CleanPhoton(int ichk){
 	return 0;
 }
 
-int TreeCleaner::CleanJet(int ichk){
+bool TreeCleaner::DuplPhotonElectron(int ichk){
+// Checks for duplicate photons with electrons
+	if( ichk < 0 ) return false;
+
+	//	int j = fTR->PhotDupEl[ichk];
+	// fiddle because duplicate flag not in ntuple
+	double DR = 999.;
+	int j = -1;
+	for (int i = 0; i < fTR->NEles; ++i) {
+	    double DRnew =  Util::GetDeltaR(fTR->PhoEta[ichk], fTR->ElEta[i], fTR->PhoPhi[ichk], fTR->ElPhi[i]);
+	    if (DRnew < DR) {
+	      DR = DRnew;
+	      j = i;
+	    }
+	}
+	if( j < 0 ) return false;
+
+	// Both are bad or both are good -> photon is duplicate
+	if( (fTR->PhoGood[ichk] == 0 && fTR->ElGood[j] == 0) || (fTR->PhoGood[ichk] != 0 && fTR->ElGood[j] != 0) ) return true;
+
+	// One is good, one is bad -> take good one
+      	else if( fTR->ElGood[j] == 0 && fTR->PhoGood[ichk] != 0 ) return true;
+	return false;
+}
+
+int TreeCleaner::CleanJet(int ichk, int itype){
 // Verifies the jet reconstruction quality
 // and flags jets made from electrons
 // (electrons should be filled before cleaning the jets)
@@ -559,13 +614,23 @@ int TreeCleaner::CleanJet(int ichk){
 // veto jets with E<p
 	if( fTR->JEt[ichk] - fTR->JPt[ichk] < -0.0001 ) return 1;
 
+// check for noise
+	if (itype == 1 || itype == 3) {
+	    if( fTR->JID_n90Hits[ichk] < fClean_JID_n90Hitsmin ) return 5;
+	    if( fTR->JID_HPD[ichk] > fClean_JID_HPDmax ) return 6;
+	    if (fTR->JID_RBX[ichk] > fClean_JID_RBXmax ) return 7;
+	}
+
 // check EM and track pT fractions
-	if( fTR->JEMfrac[ichk] > fClean_FracEmmaxJet ) return 2;
-	if( fTR->JEMfrac[ichk] < fClean_FracEmminJet ) return 3;
-	if( fTR->JChfrac[ichk] < fClean_FracChminJet && fabs(fTR->JEta[ichk]) < 2.1 ) return 4;
-	if( fTR->JID_n90Hits[ichk] < fClean_JID_n90Hitsmin ) return 5;
-	if( fTR->JID_HPD[ichk] > fClean_JID_HPDmax ) return 6;
-	if (fTR->JID_RBX[ichk] > fClean_JID_RBXmax ) return 7;
+	// the fEM and fCh checks are better done afterwards
+	if (itype == 2 || itype == 3) {
+	    if( fTR->JEMfrac[ichk] > fClean_FracEmmaxJet ) return 2;
+	    if( fTR->JEMfrac[ichk] < fClean_FracEmminJet ) return 3;
+	    double fChmin = fClean_FracChminJet;
+	    if (fabs(fTR->JEta[ichk]) > 1.9) fChmin = fClean_FracChminJet * (1. - fabs(fTR->JEta[ichk]) + 1.9);
+	    fChmin < 0. ? 0. : fChmin;
+	    if( fTR->JChfrac[ichk] < fChmin && fabs(fTR->JEta[ichk]) < 2.9) return 4;
+	}
 	return 0;
 }
 
@@ -689,16 +754,40 @@ void TreeCleaner::DoCleanObjects(void){
 	for( int ichk = 0; ichk < fTR->NJets; ++ichk ){
 		if( fTR->JGood[ichk] != 0 ) continue;
 		fNJClean++;
+		for( int imu = 0; imu < fTR->NMus; ++imu ){
+		         if( ! fTR->MuIsIso[imu] ) {
+		                 fTR->MuGood[imu] += 1000;
+		                 AddToJet(1, imu, ichk);
+			 }
+		}
 		for( int iel = 0; iel < fTR->NEles; ++iel ){
 			if( fTR->ElIsInJet[iel] != ichk ) continue;
-			if( fTR->ElIsIso[iel] ) SubtrFromJet(2, iel, ichk);
-			else AddToJet(2, iel, ichk);
+			// ignore duplicated electrons
+      			if (fTR->ElGood[iel] > 99) continue;
+			if( fTR->ElIsIso[iel] ) {
+			        SubtrFromJet(2, iel, ichk);
+			        if (fTR->JPt[ichk] < fMinJetPt) fTR->JGood[ichk] += 100;
+			}
+			else {
+			        AddToJet(2, iel, ichk);
+				fTR->ElGood[iel] += 1000;
+			}
 		}
 		for( int iph = 0; iph < fTR->NPhotons; ++iph ){
 			if( fTR->PhoIsInJet[iph] != ichk ) continue;
-			if( fTR->PhoIsIso[iph] ) SubtrFromJet(3, iph, ichk);
-			else AddToJet(3, iph, ichk);
+			// ignore duplicated photons
+      			if (fTR->PhoGood[iph] > 99) continue;
+			if( fTR->PhoIsIso[iph] ) {
+			        SubtrFromJet(3, iph, ichk);
+			        if (fTR->JPt[ichk] < fMinJetPt) fTR->JGood[ichk] += 200;
+			}
+			else {
+			        AddToJet(3, iph, ichk);
+				fTR->PhoGood[iph] += 1000;
+			}
 		}
+		if (fTR->JGood[ichk]%10 == 0) fTR->JGood[ichk] += CleanJet(ichk, 2);
+		if (fTR->JGood[ichk]%10 > 0 && fTR->JPt[ichk] > fClean_JetBadHardPtmin) fTR->GoodEvent = 4;
 	}
 
 	// Check the event
@@ -737,14 +826,14 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 
 	if( ichk >= 0 && iJet >= 0 ){
 		double pxadd, pyadd, pzadd, eadd, ptadd, emadd;
-		if( ipart == 1 ){
+		if( ipart == 1 ){               // muon
 			pxadd = fTR->MuPx[ichk];
 			pyadd = fTR->MuPy[ichk];
 			pzadd = fTR->MuPz[ichk];
 			eadd  = fTR->MuE[ichk];
 			ptadd = fTR->MuPt[ichk];
 			emadd = 0.;
-		} else if( ipart == 2 ){
+		} else if( ipart == 2 ){        // electron
 			pxadd = fTR->ElPx[ichk] - fTR->ElSharedPx[ichk];
 			pyadd = fTR->ElPy[ichk] - fTR->ElSharedPy[ichk];
 			pzadd = fTR->ElPz[ichk] - fTR->ElSharedPz[ichk];
@@ -753,7 +842,8 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 			double sharedpt = sqrt(fTR->ElSharedPx[ichk]*fTR->ElSharedPx[ichk]
 				+ fTR->ElSharedPy[ichk]*fTR->ElSharedPy[ichk]);
 			emadd = fTR->ElPt[ichk] - sharedpt;
-		} else if( ipart == 3 ){
+			if (emadd < 0.) emadd = 0.;
+		} else if( ipart == 3 ){        // photon
 			pxadd = fTR->PhoPx[ichk] - fTR->PhoSharedPx[ichk];
 			pyadd = fTR->PhoPy[ichk] - fTR->PhoSharedPy[ichk];
 			pzadd = fTR->PhoPz[ichk] - fTR->PhoSharedPz[ichk];
@@ -763,15 +853,17 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 				+ fTR->PhoSharedPy[ichk]*fTR->PhoSharedPy[ichk]);
 			emadd = fTR->PhoPt[ichk] - sharedpt;
 			if (emadd < 0.) emadd = 0.;
-		} else if( ipart == 4 ){
+		} else if( ipart == 4 ){        // jet
 			pxadd = fTR->JPx[ichk];
 			pyadd = fTR->JPy[ichk];
 			pzadd = fTR->JPz[ichk];
 			eadd  = fTR->JE[ichk];
 			ptadd = fTR->JChfrac[ichk] * fTR->JPt[ichk];
 			emadd = fTR->JEMfrac[ichk] * fTR->JPt[ichk];
+			if (emadd < 0.) emadd = 0.;
 		}
 
+		if (eadd <= 0.) return;
 		fTR->JPx[iJet] += pxadd;
 		fTR->JPy[iJet] += pyadd;
 		fTR->JPz[iJet] += pzadd;
@@ -786,7 +878,7 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 			fTR->JEta[iJet] =  -log(tan(0.5*theta));
 		}
 		fTR->JPhi[iJet] =  atan2(fTR->JPy[iJet], fTR->JPx[iJet]);
-		fTR->JChfrac[iJet] += ptadd / fTR->JPt[iJet];
+		if (fTR->JChfrac[iJet] >= 0.)fTR->JChfrac[iJet] += ptadd / fTR->JPt[iJet];
 		fTR->JEMfrac[iJet] += emadd / fTR->JPt[iJet];
 	}
 	return;
@@ -801,7 +893,8 @@ void TreeCleaner::SubtrFromJet(int ipart, int ichk, int iJet){
 // ichk = index of the object to be subtracted
 // iJet = index of the jet
 
-	if( ichk >= 0 && iJet >= 0 ){
+  double jEcorr = fTR->JEcorr[ichk];
+  if( ichk >= 0 && iJet >= 0 ){             // muon
 		double pxadd, pyadd, pzadd, eadd, ptadd, emadd;
 		if( ipart == 1 ){
 			pxadd = fTR->MuPx[ichk];
@@ -810,32 +903,34 @@ void TreeCleaner::SubtrFromJet(int ipart, int ichk, int iJet){
 			eadd  = fTR->MuE[ichk];
 			ptadd = fTR->MuPt[ichk];
 			emadd = 0.;
-		} else if( ipart == 2 ){
-			pxadd = fTR->ElSharedPx[ichk];
-			pyadd = fTR->ElSharedPy[ichk];
-			pzadd = fTR->ElSharedPz[ichk];
-			eadd  = fTR->ElSharedEnergy[ichk];
+		} else if( ipart == 2 ){   // electron
+			pxadd = fTR->ElSharedPx[ichk] * jEcorr;
+			pyadd = fTR->ElSharedPy[ichk] * jEcorr;
+			pzadd = fTR->ElSharedPz[ichk] * jEcorr;
+			eadd  = fTR->ElSharedEnergy[ichk] * jEcorr;
 			ptadd = fTR->ElPt[ichk];
 			double emshpt = sqrt(fTR->ElSharedPx[ichk]*fTR->ElSharedPx[ichk]
 				+ fTR->ElSharedPy[ichk]*fTR->ElSharedPy[ichk]);
 			emadd = fTR->ElPt[ichk] - emshpt;
 			if (emadd < 0.) emadd = 0.;
-		} else if( ipart == 3 ){
-			pxadd = fTR->PhoSharedPx[ichk];
-			pyadd = fTR->PhoSharedPy[ichk];
-			pzadd = fTR->PhoSharedPz[ichk];
-			eadd  = fTR->PhoSharedEnergy[ichk];
+		} else if( ipart == 3 ){   // photon
+			pxadd = fTR->PhoSharedPx[ichk] * jEcorr;
+			pyadd = fTR->PhoSharedPy[ichk] * jEcorr;
+			pzadd = fTR->PhoSharedPz[ichk] * jEcorr;
+			eadd  = fTR->PhoSharedEnergy[ichk] * jEcorr;
 			ptadd = 0.;
 			double emshpt = sqrt(fTR->PhoSharedPx[ichk]*fTR->PhoSharedPx[ichk]
 				+ fTR->PhoSharedPy[ichk]*fTR->PhoSharedPy[ichk]);
 			emadd = fTR->PhoPt[ichk] - emshpt;
-		} else if( ipart == 4 ){
+			if (emadd < 0.) emadd = 0.;
+		} else if( ipart == 4 ){   // jet
 			pxadd = fTR->JPx[ichk];
 			pyadd = fTR->JPy[ichk];
 			pzadd = fTR->JPz[ichk];
 			eadd  = fTR->JE[ichk];
 			ptadd = fTR->JChfrac[ichk] * fTR->JPt[ichk];
 			emadd = fTR->JEMfrac[ichk] * fTR->JPt[ichk];
+			if (emadd < 0.) emadd = 0.;
 		}
 
 		fTR->JPx[iJet] -= pxadd;
@@ -851,7 +946,9 @@ void TreeCleaner::SubtrFromJet(int ipart, int ichk, int iJet){
 			fTR->JPx[iJet] *= scale;
 			fTR->JPy[iJet] *= scale;
 			fTR->JPz[iJet] *= scale;
+			fTR->JE[iJet] = egy;
 		}
+		double jPtOrigin = fTR->JPt[iJet];
 		fTR->JPt[iJet] = sqrt(fTR->JPx[iJet]*fTR->JPx[iJet] + fTR->JPy[iJet]*fTR->JPy[iJet]);
 		fTR->JEt[iJet] = fTR->JPt[iJet];
 		if( fabs(fTR->JPz[iJet]) <1.0e-5 ) fTR->JEta[iJet] = 0.;
@@ -861,8 +958,8 @@ void TreeCleaner::SubtrFromJet(int ipart, int ichk, int iJet){
 			fTR->JEta[iJet] = -log(tan(0.5*theta));
 		}
 		fTR->JPhi[iJet] = atan2(fTR->JPy[iJet], fTR->JPx[iJet]);
-		fTR->JChfrac[iJet] = ptadd / fTR->JPt[iJet];
-		fTR->JEMfrac[iJet] = emadd / fTR->JPt[iJet];
+		fTR->JChfrac[iJet] = (fTR->JChfrac[iJet]*jPtOrigin - ptadd) / fTR->JPt[iJet];
+		fTR->JEMfrac[iJet] = (fTR->JEMfrac[iJet]*jPtOrigin - emadd) / fTR->JPt[iJet];
 	}
 	return;
 }
@@ -895,21 +992,28 @@ int TreeCleaner::CleanEvent(void){
 	for( int i = 0; i < fTR->NEles; ++i ){
 		if(fTR->ElGood[i] != 0) continue;
 		pt_track += fTR->ElPt[i];
-		et_em += fTR->ElEt[i];
-		if (et_em < 0.) et_em = 0.;
+		double em = fTR->ElEt[i];
+		if (em < 0.) em = 0.;
+		et_em += em;
 		nChObj++;
 	}
 	for( int i = 0; i < fTR->NPhotons; ++i ){
 		if(fTR->PhoGood[i] != 0) continue;
-		et_em += fTR->PhoPt[i];
-		if (et_em < 0.) et_em = 0.;
+		double em = fTR->PhoPt[i];
+		if (em < 0.) em = 0.;
+		et_em += em;
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
-		pt_track += fTR->JChfrac[i] * fTR->JPt[i];
-		et_em    += fTR->JEMfrac[i] * fTR->JEt[i];
-		if (et_em < 0.) et_em = 0.;
-		et_had   += (1.-fTR->JEMfrac[i]) * fTR->JEt[i];
+		double pt = fTR->JChfrac[i] * fTR->JPt[i];
+		if (pt < 0.) pt = 0.;
+		double em = fTR->JEMfrac[i] * fTR->JEt[i];
+		if (em < 0.) em = 0.;
+		double had = fTR->JEt[i] - em;
+		if (had < 0.) had = 0.;
+		pt_track += pt;
+		et_em    += em;
+		et_had   += had;
 		if( fTR->JChfrac[i] > 0. ) nChObj++;
 	}
 
@@ -1022,6 +1126,7 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotMuonBadDpop       = 0;
 	fNumTotMuonBadChi2       = 0;  
 	fNumTotMuonBadNhit       = 0;  
+	fNumTotMuonBadGlTr       = 0;  
 
 	fNumTotElectrons         = 0;
 	fNumTotElecGoodIso       = 0;
@@ -1034,6 +1139,9 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotElecBadHoE        = 0;
 	fNumTotElecBadShsh       = 0;
 	fNumTotElecBadTmat       = 0;
+	fNumTotElecBadSpik       = 0;
+	fNumTotElecBadHits       = 0;
+	fNumTotElecBadConv       = 0;
 
 	fNumTotPhotons           = 0;
 	fNumTotPhotGoodIso       = 0;
@@ -1044,6 +1152,7 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotPhotNotClean      = 0;
 	fNumTotPhotBadHoE        = 0;
 	fNumTotPhotBadShsh       = 0;
+	fNumTotPhotBadSpik       = 0;
 
 	fNumTotJets              = 0;  
 	fNumTotJetGood           = 0;  
@@ -1058,6 +1167,7 @@ void TreeCleaner::StatInit(const char* filename){
 	fNumTotJetLtFch          = 0;
 	fNumTotJetLtn90hits      = 0;
 	fNumTotJetGtfHPD         = 0;
+	fNumTotJetGtfRBX         = 0;
 	fNumTotBJets             = 0;  
 
 	// initialize cleaning statistics histogram
@@ -1089,6 +1199,7 @@ void TreeCleaner::StatFill(void){
 				if( muClean == 1 ) fNumTotMuonBadDpop++;
 				if( muClean == 2 ) fNumTotMuonBadChi2++;
 				if( muClean == 3 ) fNumTotMuonBadNhit++;
+				if( muClean == 4 ) fNumTotMuonBadGlTr++;
 			}
 		}
 	}
@@ -1108,6 +1219,9 @@ void TreeCleaner::StatFill(void){
 				if( elClean == 1 ) fNumTotElecBadHoE++;
 				if( elClean == 2 ) fNumTotElecBadShsh++;
 				if( elClean == 3 ) fNumTotElecBadTmat++;
+				if( elClean == 4 ) fNumTotElecBadSpik++;
+				if( elClean == 5 ) fNumTotElecBadHits++;
+				if( elClean == 6 ) fNumTotElecBadConv++;
 			}
 		}
 	}
@@ -1124,6 +1238,7 @@ void TreeCleaner::StatFill(void){
 				fNumTotPhotNotClean++;
 				if( phClean == 1 ) fNumTotPhotBadHoE++;
 				if( phClean == 2 ) fNumTotPhotBadShsh++;
+				if( phClean == 3 ) fNumTotPhotBadSpik++;
 			}
 		}
 	}
@@ -1145,6 +1260,7 @@ void TreeCleaner::StatFill(void){
 				if( jetClean == 4 ) fNumTotJetLtFch++;
 				if( jetClean == 5 ) fNumTotJetLtn90hits++;
 				if( jetClean == 6 ) fNumTotJetGtfHPD++;
+				if( jetClean == 7 ) fNumTotJetGtfRBX++;
 			}
 		}
 	}
@@ -1243,6 +1359,8 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotMuonBadChi2 / (float)fNumTotMuons << " %" << endl;
 		cout << "    muons with bad #tracker hits    = " << fNumTotMuonBadNhit
 			<< "  = " << 100.*(float)fNumTotMuonBadNhit / (float)fNumTotMuons << " %" << endl;
+		cout << "    muons not global+tracker        = " << fNumTotMuonBadGlTr
+			<< "  = " << 100.*(float)fNumTotMuonBadGlTr / (float)fNumTotMuons << " %" << endl;
 	}
 
 // Statistics for electrons
@@ -1273,6 +1391,12 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotElecBadShsh / (float)fNumTotElectrons << " %" << endl;
 		cout << "    elecs with bad track matching   = " << fNumTotElecBadTmat
 			<< "  = " << 100.*(float)fNumTotElecBadTmat / (float)fNumTotElectrons << " %" << endl;
+		cout << "    elecs from spike                = " << fNumTotElecBadSpik
+			<< "  = " << 100.*(float)fNumTotElecBadSpik / (float)fNumTotElectrons << " %" << endl;
+		cout << "    elecs with missing inner hits   = " << fNumTotElecBadHits
+			<< "  = " << 100.*(float)fNumTotElecBadHits / (float)fNumTotElectrons << " %" << endl;
+		cout << "    elecs with conversion track     = " << fNumTotElecBadConv
+			<< "  = " << 100.*(float)fNumTotElecBadConv / (float)fNumTotElectrons << " %" << endl;
 	}
 
 // Statistics for photons
@@ -1299,6 +1423,8 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotPhotBadHoE / (float)fNumTotPhotons << " %" << endl;
 		cout << "    photons with bad shower shape   = " << fNumTotPhotBadShsh
 			<< "  = " << 100.*(float)fNumTotPhotBadShsh / (float)fNumTotPhotons << " %" << endl;
+		cout << "    photons from spike              = " << fNumTotPhotBadSpik
+			<< "  = " << 100.*(float)fNumTotPhotBadSpik / (float)fNumTotPhotons << " %" << endl;
 	}
 
 // Statistics for jets
@@ -1330,6 +1456,8 @@ void TreeCleaner::StatPrint(void){
 			<< "  = " << 100.*(float)fNumTotJetLtn90hits / (float)fNumTotJets << " %" << endl;
 		cout << "    jets with too large fHPD        = " << fNumTotJetGtfHPD
 			<< "  = " << 100.*(float)fNumTotJetGtfHPD / (float)fNumTotJets << " %" << endl;
+		cout << "    jets with too large fRBX        = " << fNumTotJetGtfRBX
+			<< "  = " << 100.*(float)fNumTotJetGtfRBX / (float)fNumTotJets << " %" << endl;
 		cout << "  Total number of b-jets            = " << fNumTotBJets
 			<< "  = " << 100.*(float)fNumTotBJets / (float)fNumTotJets << " %" << endl;
 	}
