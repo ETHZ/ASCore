@@ -4,7 +4,8 @@
 using namespace std;
 
 TreeCleaner::TreeCleaner(TreeReader *tr) : UserAnalysisBase(tr){
-	fClean = true;
+	SetClean(true);
+	SetSkim(true);
 }
 
 TreeCleaner::~TreeCleaner(){
@@ -14,25 +15,25 @@ void TreeCleaner::Begin(){
 	ReadCleaningParameters();
 	StatInit();
 	Reset();
-	fCleanTreeFile = new TFile(fOutputDir + "CleanTree.root", "RECREATE");
-	fCleanTreeFile->mkdir("analyze", "analyze");
-	fCleanTreeFile->cd("analyze");
-	fCleanTree = fTR->fChain->CloneTree(0);
-	fCleanTree->CopyAddresses(fTR->fChain);
-	
+	if(fSkim){
+		fCleanTreeFile = new TFile(fOutputDir + "CleanTree.root", "RECREATE");
+		fCleanTreeFile->mkdir("analyze", "analyze");
+		fCleanTreeFile->cd("analyze");
+		fCleanTree = fTR->fChain->CloneTree(0);
+		fCleanTree->CopyAddresses(fTR->fChain);
+	}
 }
 
 void TreeCleaner::Analyze(){
 // Performs the tagging, isolation and the object cleaning
 
 	DoTagging();
-	DoCleaning();
-	DoSkimTree();
+	if(fClean) DoCleaning();
+	if(fSkim)  DoSkimTree();
 }
 
 void TreeCleaner::DoTagging(){
 // Performs only the tagging and isolation
-
 	InitCleaning();
 	TagCleanObjects();
 	DecideIso();
@@ -42,11 +43,8 @@ void TreeCleaner::DoTagging(){
 void TreeCleaner::DoCleaning(){
 // Performs only the object cleaning
 //   assumes that DoTagging() has been called
-
-	if( fClean ){
-		DoCleanObjects();
-		StatFill();
-	}
+	DoCleanObjects();
+	StatFill();
 }
 
 void TreeCleaner::DoSkimTree(){
@@ -56,12 +54,17 @@ void TreeCleaner::DoSkimTree(){
 	if( fClean ){
 		// Clean and skim the tree
 		int iclean = 0;
+		int ntkmu(0), ngbmu(0);
 		for( int i = 0; i < fTR->NMus; i++ ){
 			if( fTR->MuGood[i] != 0 ) continue;
 			PutMuon(iclean, i);
 			iclean++;
+			if(fTR->MuIsTrackerMuon[i]) ntkmu++;
+			if(fTR->MuIsGlobalMuon[i]) ngbmu++;
 		}
 		fTR->NMus = iclean;
+		fTR->NTMus = ntkmu;
+		fTR->NGMus = ngbmu;
 
 		iclean = 0;
 		for( int i = 0; i < fTR->NEles; i++ ){
@@ -99,9 +102,11 @@ void TreeCleaner::End(){
 		StatHistos();
 	}
 
-	fCleanTreeFile->cd("analyze");
-	fCleanTree->Write();
-	fCleanTreeFile->Close();
+	if(fSkim){		
+		fCleanTreeFile->cd("analyze");
+		fCleanTree->Write();
+		fCleanTreeFile->Close();
+	}
 	fHstatFile->cd();
 	fHstatHistos->Write();
 	fHstatFile->Close();
@@ -312,8 +317,9 @@ void TreeCleaner::TagCleanObjects(void){
 
 	// Muons
 	for( int ichk = 0; ichk < fTR->NMus; ++ichk ){
+		if(fTR->MuIsGlobalMuon[ichk] == 0) continue; // Only consider global muons
 		fTR->MuGood[ichk] = 10*IsFromPrimaryVx(1, ichk);
-		fTR->MuGood[ichk] += CleanMuon(ichk);;
+		fTR->MuGood[ichk] += CleanMuon(ichk);
 	}
 
 	// Electrons
@@ -451,11 +457,10 @@ int TreeCleaner::CleanMuon(int ichk){
 //              = 3 for too few valid hits in tracker
 	int iBad = 0;
 	if( ichk < 0 ) return -1;
-
-	if( fTR->MuPtE[ichk] >= fClean_MuonDPbyPmax * fTR->MuPt[ichk] ) iBad = 1; // Maximum Delta p / p
-	else if( fTR->MuNChi2[ichk] > fClean_MuonChi2max )              iBad = 2; // Maximum Chisquared
-	else if( fTR->MuNTkHits[ichk] < fClean_MuonNHitsmin )           iBad = 3; // Minimum number of valid hits
-	if ( ! fTR->MuTrackerMu[ichk])                                  iBad = 4;
+	if( fTR->MuPtE[ichk] >= fClean_MuonDPbyPmax * fTR->MuPt[ichk] )  iBad = 1; // Maximum Delta p / p
+	else if( fTR->MuNChi2[ichk] > fClean_MuonChi2max )               iBad = 2; // Maximum Chisquared
+	else if( fTR->MuNTkHits[ichk] < fClean_MuonNHitsmin )            iBad = 3; // Minimum number of valid hits
+	if ( !fTR->MuIsGlobalMuon[ichk] || !fTR->MuIsTrackerMuon[ichk])  iBad = 4;
 	return iBad;
 }
 
@@ -1703,200 +1708,232 @@ void TreeCleaner::StatHistos(void){
 
 void TreeCleaner::PutMuon(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	fTR->MuGood        [inew] = fTR->MuGood        [iold];
-	fTR->MuIsIso       [inew] = fTR->MuIsIso       [iold];
-	fTR->MuPx          [inew] = fTR->MuPx          [iold];
-	fTR->MuPy          [inew] = fTR->MuPy          [iold];
-	fTR->MuPz          [inew] = fTR->MuPz          [iold];
-	fTR->MuPt          [inew] = fTR->MuPt          [iold];
-	fTR->MuPtE         [inew] = fTR->MuPtE         [iold];
-	fTR->MuE           [inew] = fTR->MuE           [iold];
-	fTR->MuEt          [inew] = fTR->MuEt          [iold];
-	fTR->MuEta         [inew] = fTR->MuEta         [iold];
-	fTR->MuPhi         [inew] = fTR->MuPhi         [iold];
-	fTR->MuCharge      [inew] = fTR->MuCharge      [iold];
-	fTR->MuRelIso03    [inew] = fTR->MuRelIso03    [iold];
-	fTR->MuIso03SumPt  [inew] = fTR->MuIso03SumPt  [iold];
-	fTR->MuIso03EmEt   [inew] = fTR->MuIso03EmEt   [iold];
-	fTR->MuIso03HadEt  [inew] = fTR->MuIso03HadEt  [iold];
-	fTR->MuIso05SumPt  [inew] = fTR->MuIso05SumPt  [iold];
-	fTR->MuIso05EmEt   [inew] = fTR->MuIso05EmEt   [iold];
-	fTR->MuIso05HadEt  [inew] = fTR->MuIso05HadEt  [iold];
-	fTR->MuEem         [inew] = fTR->MuEem         [iold];
-	fTR->MuEhad        [inew] = fTR->MuEhad        [iold];
-	fTR->MuD0BS        [inew] = fTR->MuD0BS        [iold];
-	fTR->MuD0PV        [inew] = fTR->MuD0PV        [iold];
-	fTR->MuD0E         [inew] = fTR->MuD0E         [iold];
-	fTR->MuDzBS        [inew] = fTR->MuDzBS        [iold];
-	fTR->MuDzPV        [inew] = fTR->MuDzPV        [iold];
-	fTR->MuDzE         [inew] = fTR->MuDzE         [iold];
-	fTR->MuNChi2       [inew] = fTR->MuNChi2       [iold];
-	fTR->MuNGlHits     [inew] = fTR->MuNGlHits     [iold];
-	fTR->MuNMuHits     [inew] = fTR->MuNMuHits     [iold];
-	fTR->MuNTkHits     [inew] = fTR->MuNTkHits     [iold];
-	fTR->MuNMatches    [inew] = fTR->MuNMatches    [iold];
-	fTR->MuNChambers   [inew] = fTR->MuNChambers   [iold];
-	fTR->MuCaloComp    [inew] = fTR->MuCaloComp    [iold];
-	fTR->MuSegmComp    [inew] = fTR->MuSegmComp    [iold];
-	fTR->MuTrackerMu   [inew] = fTR->MuTrackerMu   [iold];
-	fTR->MuGMPT        [inew] = fTR->MuGMPT        [iold];
-	
-	fTR->MuGenID       [inew] = fTR->MuGenID       [iold];
-	fTR->MuGenStatus   [inew] = fTR->MuGenStatus   [iold];
-	fTR->MuGenCharge   [inew] = fTR->MuGenCharge   [iold];
-	fTR->MuGenPt       [inew] = fTR->MuGenPt       [iold];
-	fTR->MuGenEta      [inew] = fTR->MuGenEta      [iold];
-	fTR->MuGenPhi      [inew] = fTR->MuGenPhi      [iold];
-	fTR->MuGenE        [inew] = fTR->MuGenE        [iold];
-	fTR->MuGenMID      [inew] = fTR->MuGenMID      [iold];
-	fTR->MuGenMStatus  [inew] = fTR->MuGenMStatus  [iold];
-	fTR->MuGenMCharge  [inew] = fTR->MuGenMCharge  [iold];
-	fTR->MuGenMPt      [inew] = fTR->MuGenMPt      [iold];
-	fTR->MuGenMEta     [inew] = fTR->MuGenMEta     [iold];
-	fTR->MuGenMPhi     [inew] = fTR->MuGenMPhi     [iold];
-	fTR->MuGenME       [inew] = fTR->MuGenME       [iold];
-	fTR->MuGenGMID     [inew] = fTR->MuGenGMID     [iold];
-	fTR->MuGenGMStatus [inew] = fTR->MuGenGMStatus [iold];
-	fTR->MuGenGMCharge [inew] = fTR->MuGenGMCharge [iold];
-	fTR->MuGenGMPt     [inew] = fTR->MuGenGMPt     [iold];
-	fTR->MuGenGMEta    [inew] = fTR->MuGenGMEta    [iold];
-	fTR->MuGenGMPhi    [inew] = fTR->MuGenGMPhi    [iold];
-	fTR->MuGenGME      [inew] = fTR->MuGenGME      [iold];
+	fTR->MuGood                   [inew] = fTR->MuGood                   [iold];
+	fTR->MuIsIso                  [inew] = fTR->MuIsIso                  [iold];
+	fTR->MuIsGlobalMuon           [inew] = fTR->MuIsGlobalMuon           [iold];
+	fTR->MuIsTrackerMuon          [inew] = fTR->MuIsTrackerMuon          [iold];
+	fTR->MuPx                     [inew] = fTR->MuPx                     [iold];
+	fTR->MuPy                     [inew] = fTR->MuPy                     [iold];
+	fTR->MuPz                     [inew] = fTR->MuPz                     [iold];
+	fTR->MuPt                     [inew] = fTR->MuPt                     [iold];
+	fTR->MuPtE                    [inew] = fTR->MuPtE                    [iold];
+	fTR->MuE                      [inew] = fTR->MuE                      [iold];
+	fTR->MuEt                     [inew] = fTR->MuEt                     [iold];
+	fTR->MuEta                    [inew] = fTR->MuEta                    [iold];
+	fTR->MuPhi                    [inew] = fTR->MuPhi                    [iold];
+	fTR->MuCharge                 [inew] = fTR->MuCharge                 [iold];
+	fTR->MuRelIso03               [inew] = fTR->MuRelIso03               [iold];
+	fTR->MuIso03SumPt             [inew] = fTR->MuIso03SumPt             [iold];
+	fTR->MuIso03EmEt              [inew] = fTR->MuIso03EmEt              [iold];
+	fTR->MuIso03HadEt             [inew] = fTR->MuIso03HadEt             [iold];
+	fTR->MuIso03EMVetoEt          [inew] = fTR->MuIso03EMVetoEt          [iold];
+	fTR->MuIso03HadVetoEt         [inew] = fTR->MuIso03HadVetoEt         [iold];
+	fTR->MuIso05SumPt             [inew] = fTR->MuIso05SumPt             [iold];
+	fTR->MuIso05EmEt              [inew] = fTR->MuIso05EmEt              [iold];
+	fTR->MuIso05HadEt             [inew] = fTR->MuIso05HadEt             [iold];
+	fTR->MuEem                    [inew] = fTR->MuEem                    [iold];
+	fTR->MuEhad                   [inew] = fTR->MuEhad                   [iold];
+	fTR->MuD0BS                   [inew] = fTR->MuD0BS                   [iold];
+	fTR->MuD0PV                   [inew] = fTR->MuD0PV                   [iold];
+	fTR->MuD0E                    [inew] = fTR->MuD0E                    [iold];
+	fTR->MuDzBS                   [inew] = fTR->MuDzBS                   [iold];
+	fTR->MuDzPV                   [inew] = fTR->MuDzPV                   [iold];
+	fTR->MuDzE                    [inew] = fTR->MuDzE                    [iold];
+	fTR->MuNChi2                  [inew] = fTR->MuNChi2                  [iold];
+	fTR->MuNGlHits                [inew] = fTR->MuNGlHits                [iold];
+	fTR->MuNMuHits                [inew] = fTR->MuNMuHits                [iold];
+	fTR->MuNTkHits                [inew] = fTR->MuNTkHits                [iold];
+	fTR->MuInnerTkNChi2           [inew] = fTR->MuInnerTkNChi2           [iold];
+	fTR->MuNMatches               [inew] = fTR->MuNMatches               [iold];
+	fTR->MuNChambers              [inew] = fTR->MuNChambers              [iold];
+	fTR->MuCaloComp               [inew] = fTR->MuCaloComp               [iold];
+	fTR->MuSegmComp               [inew] = fTR->MuSegmComp               [iold];
+	fTR->MuIsGMPT                 [inew] = fTR->MuIsGMPT                 [iold];
+	fTR->MuIsGMTkChiComp          [inew] = fTR->MuIsGMTkChiComp          [iold];
+	fTR->MuIsGMStaChiComp         [inew] = fTR->MuIsGMStaChiComp         [iold];
+	fTR->MuIsGMTkKinkTight        [inew] = fTR->MuIsGMTkKinkTight        [iold];
+	fTR->MuIsAllStaMuons          [inew] = fTR->MuIsAllStaMuons          [iold];
+	fTR->MuIsAllTrkMuons          [inew] = fTR->MuIsAllTrkMuons          [iold];
+	fTR->MuIsTrkMuonArbitrated    [inew] = fTR->MuIsTrkMuonArbitrated    [iold];
+	fTR->MuIsAllArbitrated        [inew] = fTR->MuIsAllArbitrated        [iold];
+	fTR->MuIsTMLSLoose            [inew] = fTR->MuIsTMLSLoose            [iold];
+	fTR->MuIsTMLSTight            [inew] = fTR->MuIsTMLSTight            [iold];
+	fTR->MuIsTM2DCompLoose        [inew] = fTR->MuIsTM2DCompLoose        [iold];
+	fTR->MuIsTM2DCompTight        [inew] = fTR->MuIsTM2DCompTight        [iold];
+	fTR->MuIsTMOneStationLoose    [inew] = fTR->MuIsTMOneStationLoose    [iold];
+	fTR->MuIsTMOneStationTight    [inew] = fTR->MuIsTMOneStationTight    [iold];
+	fTR->MuIsTMLSOptLowPtLoose    [inew] = fTR->MuIsTMLSOptLowPtLoose    [iold];
+	fTR->MuIsTMLSAngLoose         [inew] = fTR->MuIsTMLSAngLoose         [iold];
+	fTR->MuIsTMLastStationAngTight[inew] = fTR->MuIsTMLastStationAngTight[iold];
+	fTR->MuIsTMOneStationAngTight [inew] = fTR->MuIsTMOneStationAngTight [iold];
+	fTR->MuIsTMOneStationAngLoose [inew] = fTR->MuIsTMOneStationAngLoose [iold];
+	fTR->MuOutPosRadius           [inew] = fTR->MuOutPosRadius           [iold];
+	fTR->MuOutPosX                [inew] = fTR->MuOutPosX                [iold];
+	fTR->MuOutPosY                [inew] = fTR->MuOutPosY                [iold];
+	fTR->MuOutPosZ                [inew] = fTR->MuOutPosZ                [iold];
+	fTR->MuOutMomx                [inew] = fTR->MuOutMomx                [iold];
+	fTR->MuOutMomy                [inew] = fTR->MuOutMomy                [iold];
+	fTR->MuOutMomz                [inew] = fTR->MuOutMomz                [iold];
+	fTR->MuOutMomPhi              [inew] = fTR->MuOutMomPhi              [iold];
+	fTR->MuOutMomEta              [inew] = fTR->MuOutMomEta              [iold];
+	fTR->MuOutMomTheta            [inew] = fTR->MuOutMomTheta            [iold];
+	fTR->MuGenID                  [inew] = fTR->MuGenID                  [iold];
+	fTR->MuGenStatus              [inew] = fTR->MuGenStatus              [iold];
+	fTR->MuGenCharge              [inew] = fTR->MuGenCharge              [iold];
+	fTR->MuGenPt                  [inew] = fTR->MuGenPt                  [iold];
+	fTR->MuGenEta                 [inew] = fTR->MuGenEta                 [iold];
+	fTR->MuGenPhi                 [inew] = fTR->MuGenPhi                 [iold];
+	fTR->MuGenE                   [inew] = fTR->MuGenE                   [iold];
+	fTR->MuGenMID                 [inew] = fTR->MuGenMID                 [iold];
+	fTR->MuGenMStatus             [inew] = fTR->MuGenMStatus             [iold];
+	fTR->MuGenMCharge             [inew] = fTR->MuGenMCharge             [iold];
+	fTR->MuGenMPt                 [inew] = fTR->MuGenMPt                 [iold];
+	fTR->MuGenMEta                [inew] = fTR->MuGenMEta                [iold];
+	fTR->MuGenMPhi                [inew] = fTR->MuGenMPhi                [iold];
+	fTR->MuGenME                  [inew] = fTR->MuGenME                  [iold];
+	fTR->MuGenGMID                [inew] = fTR->MuGenGMID                [iold];
+	fTR->MuGenGMStatus            [inew] = fTR->MuGenGMStatus            [iold];
+	fTR->MuGenGMCharge            [inew] = fTR->MuGenGMCharge            [iold];
+	fTR->MuGenGMPt                [inew] = fTR->MuGenGMPt                [iold];
+	fTR->MuGenGMEta               [inew] = fTR->MuGenGMEta               [iold];
+	fTR->MuGenGMPhi               [inew] = fTR->MuGenGMPhi               [iold];
+	fTR->MuGenGME                 [inew] = fTR->MuGenGME                 [iold];
 }
 
 void TreeCleaner::PutElectron(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	fTR->ElGood                      [inew] = fTR->ElGood                      [iold];
-	fTR->ElIsIso                     [inew] = fTR->ElIsIso                     [iold];
-	fTR->ElChargeMisIDProb           [inew] = fTR->ElChargeMisIDProb           [iold];
-	fTR->ElPx                        [inew] = fTR->ElPx                        [iold];
-	fTR->ElPy                        [inew] = fTR->ElPy                        [iold];
-	fTR->ElPz                        [inew] = fTR->ElPz                        [iold];
-	fTR->ElPt                        [inew] = fTR->ElPt                        [iold];
-	fTR->ElPtE                       [inew] = fTR->ElPtE                       [iold];
-	fTR->ElE                         [inew] = fTR->ElE                         [iold];
-	fTR->ElEt                        [inew] = fTR->ElEt                        [iold];
-	fTR->ElEta                       [inew] = fTR->ElEta                       [iold];
-	fTR->ElTheta                     [inew] = fTR->ElTheta                     [iold];
-	fTR->ElPhi                       [inew] = fTR->ElPhi                       [iold];
-	fTR->ElD0BS                      [inew] = fTR->ElD0BS                      [iold];
-	fTR->ElD0PV                      [inew] = fTR->ElD0PV                      [iold];
-	fTR->ElD0E                       [inew] = fTR->ElD0E                       [iold];
-	fTR->ElDzBS                      [inew] = fTR->ElDzBS                      [iold];
-	fTR->ElDzPV                      [inew] = fTR->ElDzPV                      [iold];
-	fTR->ElDzE                       [inew] = fTR->ElDzE                       [iold];
-	fTR->ElRelIso04                  [inew] = fTR->ElRelIso04                  [iold];
-	fTR->ElDR03TkSumPt               [inew] = fTR->ElDR03TkSumPt               [iold];
-	fTR->ElDR04TkSumPt               [inew] = fTR->ElDR04TkSumPt               [iold];
-	fTR->ElDR03EcalRecHitSumEt       [inew] = fTR->ElDR03EcalRecHitSumEt       [iold];
-	fTR->ElDR04EcalRecHitSumEt       [inew] = fTR->ElDR04EcalRecHitSumEt       [iold];
-	fTR->ElDR03HcalTowerSumEt        [inew] = fTR->ElDR03HcalTowerSumEt        [iold];
-	fTR->ElDR04HcalTowerSumEt        [inew] = fTR->ElDR04HcalTowerSumEt        [iold];
-	fTR->ElNChi2                     [inew] = fTR->ElNChi2                     [iold];
-	fTR->ElCharge                    [inew] = fTR->ElCharge                    [iold];
-	fTR->ElCInfoIsGsfCtfCons         [inew] = fTR->ElCInfoIsGsfCtfCons         [iold];
-	fTR->ElCInfoIsGsfCtfScPixCons    [inew] = fTR->ElCInfoIsGsfCtfScPixCons    [iold];
-	fTR->ElCInfoIsGsfScPixCons       [inew] = fTR->ElCInfoIsGsfScPixCons       [iold];
-	fTR->ElScPixCharge               [inew] = fTR->ElScPixCharge               [iold];
-	fTR->ElClosestCtfTrackPt         [inew] = fTR->ElClosestCtfTrackPt         [iold];
-	fTR->ElClosestCtfTrackEta        [inew] = fTR->ElClosestCtfTrackEta        [iold];
-	fTR->ElClosestCtfTrackPhi        [inew] = fTR->ElClosestCtfTrackPhi        [iold];
-	fTR->ElClosestCtfTrackCharge     [inew] = fTR->ElClosestCtfTrackCharge     [iold];
-	fTR->ElIDTight                   [inew] = fTR->ElIDTight                   [iold];
-	fTR->ElIDLoose                   [inew] = fTR->ElIDLoose                   [iold];
-	fTR->ElIDRobustTight             [inew] = fTR->ElIDRobustTight             [iold];
-	fTR->ElIDRobustLoose             [inew] = fTR->ElIDRobustLoose             [iold];
-	fTR->ElInGap                     [inew] = fTR->ElInGap                     [iold];
-	fTR->ElEcalDriven                [inew] = fTR->ElEcalDriven                [iold];
-	fTR->ElTrackerDriven             [inew] = fTR->ElTrackerDriven             [iold];
-	fTR->ElBasicClustersSize         [inew] = fTR->ElBasicClustersSize         [iold];
-	fTR->Elfbrem                     [inew] = fTR->Elfbrem                     [iold];
-	fTR->ElHcalOverEcal              [inew] = fTR->ElHcalOverEcal              [iold];
-	fTR->ElE1x5                      [inew] = fTR->ElE1x5                      [iold];
-	fTR->ElE5x5                      [inew] = fTR->ElE5x5                      [iold];
-	fTR->ElE2x5Max                   [inew] = fTR->ElE2x5Max                   [iold];
-	fTR->ElSigmaIetaIeta             [inew] = fTR->ElSigmaIetaIeta             [iold];
-	fTR->ElDeltaPhiSeedClusterAtCalo [inew] = fTR->ElDeltaPhiSeedClusterAtCalo [iold];
-	fTR->ElDeltaEtaSeedClusterAtCalo [inew] = fTR->ElDeltaEtaSeedClusterAtCalo [iold];
-	fTR->ElDeltaPhiSuperClusterAtVtx [inew] = fTR->ElDeltaPhiSuperClusterAtVtx [iold];
-	fTR->ElDeltaEtaSuperClusterAtVtx [inew] = fTR->ElDeltaEtaSuperClusterAtVtx [iold];
-	fTR->ElCaloEnergy                [inew] = fTR->ElCaloEnergy                [iold];
-	fTR->ElTrkMomAtVtx               [inew] = fTR->ElTrkMomAtVtx               [iold];
-	fTR->ElESuperClusterOverP        [inew] = fTR->ElESuperClusterOverP        [iold];
-
-	fTR->ElIsInJet                   [inew] = fTR->ElIsInJet                   [iold];
-	fTR->ElSharedPx                  [inew] = fTR->ElSharedPx                  [iold];
-	fTR->ElSharedPy                  [inew] = fTR->ElSharedPy                  [iold];
-	fTR->ElSharedPz                  [inew] = fTR->ElSharedPz                  [iold];
-	fTR->ElSharedEnergy              [inew] = fTR->ElSharedEnergy              [iold];
-	fTR->ElDuplicateEl               [inew] = fTR->ElDuplicateEl               [iold];
-
-	fTR->ElConvPartnerTrkDist        [inew] = fTR->ElConvPartnerTrkDist        [iold];
-	fTR->ElConvPartnerTrkDCot        [inew] = fTR->ElConvPartnerTrkDCot        [iold];
-	fTR->ElConvPartnerTrkPt          [inew] = fTR->ElConvPartnerTrkPt          [iold];
-	fTR->ElConvPartnerTrkEta         [inew] = fTR->ElConvPartnerTrkEta         [iold];
-	fTR->ElConvPartnerTrkPhi         [inew] = fTR->ElConvPartnerTrkPhi         [iold];
-	fTR->ElConvPartnerTrkCharge      [inew] = fTR->ElConvPartnerTrkCharge      [iold];
-	fTR->ElScSeedSeverity            [inew] = fTR->ElScSeedSeverity            [iold];
-	fTR->ElE1OverE9                  [inew] = fTR->ElE1OverE9                  [iold];
-	fTR->ElS4OverS1                  [inew] = fTR->ElS4OverS1                  [iold];
-
-	fTR->ElGenID                     [inew] = fTR->ElGenID                     [iold];
-	fTR->ElGenStatus                 [inew] = fTR->ElGenStatus                 [iold];
-	fTR->ElGenCharge                 [inew] = fTR->ElGenCharge                 [iold];
-	fTR->ElGenPt                     [inew] = fTR->ElGenPt                     [iold];
-	fTR->ElGenEta                    [inew] = fTR->ElGenEta                    [iold];
-	fTR->ElGenPhi                    [inew] = fTR->ElGenPhi                    [iold];
-	fTR->ElGenE                      [inew] = fTR->ElGenE                      [iold];
-	fTR->ElGenMID                    [inew] = fTR->ElGenMID                    [iold];
-	fTR->ElGenMStatus                [inew] = fTR->ElGenMStatus                [iold];
-	fTR->ElGenMCharge                [inew] = fTR->ElGenMCharge                [iold];
-	fTR->ElGenMPt                    [inew] = fTR->ElGenMPt                    [iold];
-	fTR->ElGenMEta                   [inew] = fTR->ElGenMEta                   [iold];
-	fTR->ElGenMPhi                   [inew] = fTR->ElGenMPhi                   [iold];
-	fTR->ElGenME                     [inew] = fTR->ElGenME                     [iold];
-	fTR->ElGenGMID                   [inew] = fTR->ElGenGMID                   [iold];
-	fTR->ElGenGMStatus               [inew] = fTR->ElGenGMStatus               [iold];
-	fTR->ElGenGMCharge               [inew] = fTR->ElGenGMCharge               [iold];
-	fTR->ElGenGMPt                   [inew] = fTR->ElGenGMPt                   [iold];
-	fTR->ElGenGMEta                  [inew] = fTR->ElGenGMEta                  [iold];
-	fTR->ElGenGMPhi                  [inew] = fTR->ElGenGMPhi                  [iold];
-	fTR->ElGenGME                    [inew] = fTR->ElGenGME                    [iold];
+	fTR->ElGood                      [inew] = fTR->ElGood                     [iold];
+	fTR->ElIsIso                     [inew] = fTR->ElIsIso                    [iold];
+	fTR->ElChargeMisIDProb           [inew] = fTR->ElChargeMisIDProb          [iold];
+	fTR->ElPx                        [inew] = fTR->ElPx                       [iold];
+	fTR->ElPy                        [inew] = fTR->ElPy                       [iold];
+	fTR->ElPz                        [inew] = fTR->ElPz                       [iold];
+	fTR->ElPt                        [inew] = fTR->ElPt                       [iold];
+	fTR->ElPtE                       [inew] = fTR->ElPtE                      [iold];
+	fTR->ElE                         [inew] = fTR->ElE                        [iold];
+	fTR->ElEt                        [inew] = fTR->ElEt                       [iold];
+	fTR->ElEta                       [inew] = fTR->ElEta                      [iold];
+	fTR->ElTheta                     [inew] = fTR->ElTheta                    [iold];
+	fTR->ElSCEta                     [inew] = fTR->ElSCEta                    [iold];
+	fTR->ElPhi                       [inew] = fTR->ElPhi                      [iold];
+	fTR->ElD0BS                      [inew] = fTR->ElD0BS                     [iold];
+	fTR->ElD0PV                      [inew] = fTR->ElD0PV                     [iold];
+	fTR->ElD0E                       [inew] = fTR->ElD0E                      [iold];
+	fTR->ElDzBS                      [inew] = fTR->ElDzBS                     [iold];
+	fTR->ElDzPV                      [inew] = fTR->ElDzPV                     [iold];
+	fTR->ElDzE                       [inew] = fTR->ElDzE                      [iold];
+	// fTR->ElRelIso03                  [inew] = fTR->ElRelIso03                 [iold];
+	fTR->ElRelIso04                  [inew] = fTR->ElRelIso04                 [iold];
+	fTR->ElDR03TkSumPt               [inew] = fTR->ElDR03TkSumPt              [iold];
+	fTR->ElDR04TkSumPt               [inew] = fTR->ElDR04TkSumPt              [iold];
+	fTR->ElDR03EcalRecHitSumEt       [inew] = fTR->ElDR03EcalRecHitSumEt      [iold];
+	fTR->ElDR04EcalRecHitSumEt       [inew] = fTR->ElDR04EcalRecHitSumEt      [iold];
+	fTR->ElDR03HcalTowerSumEt        [inew] = fTR->ElDR03HcalTowerSumEt       [iold];
+	fTR->ElDR04HcalTowerSumEt        [inew] = fTR->ElDR04HcalTowerSumEt       [iold];
+	fTR->ElNChi2                     [inew] = fTR->ElNChi2                    [iold];
+	fTR->ElCharge                    [inew] = fTR->ElCharge                   [iold];
+	fTR->ElCInfoIsGsfCtfCons         [inew] = fTR->ElCInfoIsGsfCtfCons        [iold];
+	fTR->ElCInfoIsGsfCtfScPixCons    [inew] = fTR->ElCInfoIsGsfCtfScPixCons   [iold];
+	fTR->ElCInfoIsGsfScPixCons       [inew] = fTR->ElCInfoIsGsfScPixCons      [iold];
+	fTR->ElScPixCharge               [inew] = fTR->ElScPixCharge              [iold];
+	fTR->ElClosestCtfTrackPt         [inew] = fTR->ElClosestCtfTrackPt        [iold];
+	fTR->ElClosestCtfTrackEta        [inew] = fTR->ElClosestCtfTrackEta       [iold];
+	fTR->ElClosestCtfTrackPhi        [inew] = fTR->ElClosestCtfTrackPhi       [iold];
+	fTR->ElClosestCtfTrackCharge     [inew] = fTR->ElClosestCtfTrackCharge    [iold];
+	fTR->ElIDTight                   [inew] = fTR->ElIDTight                  [iold];
+	fTR->ElIDLoose                   [inew] = fTR->ElIDLoose                  [iold];
+	fTR->ElIDRobustTight             [inew] = fTR->ElIDRobustTight            [iold];
+	fTR->ElIDRobustLoose             [inew] = fTR->ElIDRobustLoose            [iold];
+	fTR->ElInGap                     [inew] = fTR->ElInGap                    [iold];
+	fTR->ElEcalDriven                [inew] = fTR->ElEcalDriven               [iold];
+	fTR->ElTrackerDriven             [inew] = fTR->ElTrackerDriven            [iold];
+	fTR->ElBasicClustersSize         [inew] = fTR->ElBasicClustersSize        [iold];
+	fTR->Elfbrem                     [inew] = fTR->Elfbrem                    [iold];
+	fTR->ElHcalOverEcal              [inew] = fTR->ElHcalOverEcal             [iold];
+	fTR->ElE1x5                      [inew] = fTR->ElE1x5                     [iold];
+	fTR->ElE5x5                      [inew] = fTR->ElE5x5                     [iold];
+	fTR->ElE2x5Max                   [inew] = fTR->ElE2x5Max                  [iold];
+	fTR->ElSigmaIetaIeta             [inew] = fTR->ElSigmaIetaIeta            [iold];
+	fTR->ElDeltaPhiSeedClusterAtCalo [inew] = fTR->ElDeltaPhiSeedClusterAtCalo[iold];
+	fTR->ElDeltaEtaSeedClusterAtCalo [inew] = fTR->ElDeltaEtaSeedClusterAtCalo[iold];
+	fTR->ElDeltaPhiSuperClusterAtVtx [inew] = fTR->ElDeltaPhiSuperClusterAtVtx[iold];
+	fTR->ElDeltaEtaSuperClusterAtVtx [inew] = fTR->ElDeltaEtaSuperClusterAtVtx[iold];
+	fTR->ElCaloEnergy                [inew] = fTR->ElCaloEnergy               [iold];
+	fTR->ElTrkMomAtVtx               [inew] = fTR->ElTrkMomAtVtx              [iold];
+	fTR->ElESuperClusterOverP        [inew] = fTR->ElESuperClusterOverP       [iold];
+	fTR->ElNumberOfMissingInnerHits  [inew] = fTR->ElNumberOfMissingInnerHits [iold];
+	fTR->ElIsInJet                   [inew] = fTR->ElIsInJet                  [iold];
+	fTR->ElSharedPx                  [inew] = fTR->ElSharedPx                 [iold];
+	fTR->ElSharedPy                  [inew] = fTR->ElSharedPy                 [iold];
+	fTR->ElSharedPz                  [inew] = fTR->ElSharedPz                 [iold];
+	fTR->ElSharedEnergy              [inew] = fTR->ElSharedEnergy             [iold];
+	fTR->ElDuplicateEl               [inew] = fTR->ElDuplicateEl              [iold];
+	fTR->ElConvPartnerTrkDist        [inew] = fTR->ElConvPartnerTrkDist       [iold];
+	fTR->ElConvPartnerTrkDCot        [inew] = fTR->ElConvPartnerTrkDCot       [iold];
+	fTR->ElConvPartnerTrkPt          [inew] = fTR->ElConvPartnerTrkPt         [iold];
+	fTR->ElConvPartnerTrkEta         [inew] = fTR->ElConvPartnerTrkEta        [iold];
+	fTR->ElConvPartnerTrkPhi         [inew] = fTR->ElConvPartnerTrkPhi        [iold];
+	fTR->ElConvPartnerTrkCharge      [inew] = fTR->ElConvPartnerTrkCharge     [iold];
+	fTR->ElScSeedSeverity            [inew] = fTR->ElScSeedSeverity           [iold];
+	fTR->ElE1OverE9                  [inew] = fTR->ElE1OverE9                 [iold];
+	fTR->ElS4OverS1                  [inew] = fTR->ElS4OverS1                 [iold];
+	fTR->ElGenID                     [inew] = fTR->ElGenID                    [iold];
+	fTR->ElGenStatus                 [inew] = fTR->ElGenStatus                [iold];
+	fTR->ElGenCharge                 [inew] = fTR->ElGenCharge                [iold];
+	fTR->ElGenPt                     [inew] = fTR->ElGenPt                    [iold];
+	fTR->ElGenEta                    [inew] = fTR->ElGenEta                   [iold];
+	fTR->ElGenPhi                    [inew] = fTR->ElGenPhi                   [iold];
+	fTR->ElGenE                      [inew] = fTR->ElGenE                     [iold];
+	fTR->ElGenMID                    [inew] = fTR->ElGenMID                   [iold];
+	fTR->ElGenMStatus                [inew] = fTR->ElGenMStatus               [iold];
+	fTR->ElGenMCharge                [inew] = fTR->ElGenMCharge               [iold];
+	fTR->ElGenMPt                    [inew] = fTR->ElGenMPt                   [iold];
+	fTR->ElGenMEta                   [inew] = fTR->ElGenMEta                  [iold];
+	fTR->ElGenMPhi                   [inew] = fTR->ElGenMPhi                  [iold];
+	fTR->ElGenME                     [inew] = fTR->ElGenME                    [iold];
+	fTR->ElGenGMID                   [inew] = fTR->ElGenGMID                  [iold];
+	fTR->ElGenGMStatus               [inew] = fTR->ElGenGMStatus              [iold];
+	fTR->ElGenGMCharge               [inew] = fTR->ElGenGMCharge              [iold];
+	fTR->ElGenGMPt                   [inew] = fTR->ElGenGMPt                  [iold];
+	fTR->ElGenGMEta                  [inew] = fTR->ElGenGMEta                 [iold];
+	fTR->ElGenGMPhi                  [inew] = fTR->ElGenGMPhi                 [iold];
+	fTR->ElGenGME                    [inew] = fTR->ElGenGME                   [iold];
 }
 
 void TreeCleaner::PutPhoton(int inew, int iold){
 	// This needs to be UPDATED every time the tree content changes!
-	fTR->PhoGood           [inew] = fTR->PhoGood           [iold];
-	fTR->PhoIsIso          [inew] = fTR->PhoIsIso          [iold];
-	fTR->PhoPt             [inew] = fTR->PhoPt             [iold];
-	fTR->PhoPx             [inew] = fTR->PhoPx             [iold];
-	fTR->PhoPy             [inew] = fTR->PhoPy             [iold];
-	fTR->PhoPz             [inew] = fTR->PhoPz             [iold];
-	fTR->PhoEta            [inew] = fTR->PhoEta            [iold];
-	fTR->PhoPhi            [inew] = fTR->PhoPhi            [iold];
-	fTR->PhoEnergy         [inew] = fTR->PhoEnergy         [iold];
-	fTR->PhoIso03Ecal      [inew] = fTR->PhoIso03Ecal      [iold];
-	fTR->PhoIso03Hcal      [inew] = fTR->PhoIso03Hcal      [iold];
-	fTR->PhoIso03TrkSolid  [inew] = fTR->PhoIso03TrkSolid  [iold];
-	fTR->PhoIso03TrkHollow [inew] = fTR->PhoIso03TrkHollow [iold];
-	fTR->PhoIso03          [inew] = fTR->PhoIso03          [iold];
-	fTR->PhoCaloPositionX  [inew] = fTR->PhoCaloPositionX  [iold];
-	fTR->PhoCaloPositionY  [inew] = fTR->PhoCaloPositionY  [iold];
-	fTR->PhoCaloPositionZ  [inew] = fTR->PhoCaloPositionZ  [iold];
-	fTR->PhoHoverE         [inew] = fTR->PhoHoverE         [iold];
-	fTR->PhoH1overE        [inew] = fTR->PhoH1overE        [iold];
-	fTR->PhoH2overE        [inew] = fTR->PhoH2overE        [iold];
-	fTR->PhoSigmaIetaIeta  [inew] = fTR->PhoSigmaIetaIeta  [iold];
-	fTR->PhoHasPixSeed     [inew] = fTR->PhoHasPixSeed     [iold];
-	fTR->PhoHasConvTrks    [inew] = fTR->PhoHasConvTrks    [iold];
-	fTR->PhoIsInJet        [inew] = fTR->PhoIsInJet        [iold];
-	fTR->PhoSharedPx       [inew] = fTR->PhoSharedPx       [iold];
-	fTR->PhoSharedPy       [inew] = fTR->PhoSharedPy       [iold];
-	fTR->PhoSharedPz       [inew] = fTR->PhoSharedPz       [iold];
-	fTR->PhoSharedEnergy   [inew] = fTR->PhoSharedEnergy   [iold];
-	fTR->PhoScSeedSeverity [inew] = fTR->PhoScSeedSeverity [iold];
-	fTR->PhoE1OverE9       [inew] = fTR->PhoE1OverE9       [iold];
-	fTR->PhoS4OverS1       [inew] = fTR->PhoS4OverS1       [iold];
+	fTR->PhoGood          [inew] = fTR->PhoGood          [iold];
+	fTR->PhoIsIso         [inew] = fTR->PhoIsIso         [iold];
+	fTR->PhoPt            [inew] = fTR->PhoPt            [iold];
+	fTR->PhoPx            [inew] = fTR->PhoPx            [iold];
+	fTR->PhoPy            [inew] = fTR->PhoPy            [iold];
+	fTR->PhoPz            [inew] = fTR->PhoPz            [iold];
+	fTR->PhoEta           [inew] = fTR->PhoEta           [iold];
+	fTR->PhoPhi           [inew] = fTR->PhoPhi           [iold];
+	fTR->PhoEnergy        [inew] = fTR->PhoEnergy        [iold];
+	fTR->PhoIso03Ecal     [inew] = fTR->PhoIso03Ecal     [iold];
+	fTR->PhoIso03Hcal     [inew] = fTR->PhoIso03Hcal     [iold];
+	fTR->PhoIso03TrkSolid [inew] = fTR->PhoIso03TrkSolid [iold];
+	fTR->PhoIso03TrkHollow[inew] = fTR->PhoIso03TrkHollow[iold];
+	fTR->PhoIso03         [inew] = fTR->PhoIso03         [iold];
+	fTR->PhoCaloPositionX [inew] = fTR->PhoCaloPositionX [iold];
+	fTR->PhoCaloPositionY [inew] = fTR->PhoCaloPositionY [iold];
+	fTR->PhoCaloPositionZ [inew] = fTR->PhoCaloPositionZ [iold];
+	fTR->PhoHoverE        [inew] = fTR->PhoHoverE        [iold];
+	fTR->PhoH1overE       [inew] = fTR->PhoH1overE       [iold];
+	fTR->PhoH2overE       [inew] = fTR->PhoH2overE       [iold];
+	fTR->PhoSigmaIetaIeta [inew] = fTR->PhoSigmaIetaIeta [iold];
+	fTR->PhoHasPixSeed    [inew] = fTR->PhoHasPixSeed    [iold];
+	fTR->PhoHasConvTrks   [inew] = fTR->PhoHasConvTrks   [iold];
+	fTR->PhoIsInJet       [inew] = fTR->PhoIsInJet       [iold];
+	fTR->PhoIsElDupl      [inew] = fTR->PhoIsElDupl      [iold];
+	fTR->PhoSharedPx      [inew] = fTR->PhoSharedPx      [iold];
+	fTR->PhoSharedPy      [inew] = fTR->PhoSharedPy      [iold];
+	fTR->PhoSharedPz      [inew] = fTR->PhoSharedPz      [iold];
+	fTR->PhoSharedEnergy  [inew] = fTR->PhoSharedEnergy  [iold];
+	fTR->PhoScSeedSeverity[inew] = fTR->PhoScSeedSeverity[iold];
+	fTR->PhoE1OverE9      [inew] = fTR->PhoE1OverE9      [iold];
+	fTR->PhoS4OverS1      [inew] = fTR->PhoS4OverS1      [iold];
 }
 
 void TreeCleaner::PutJet(int inew, int iold){
@@ -1915,10 +1952,6 @@ void TreeCleaner::PutJet(int inew, int iold){
 	fTR->JID_HPD        [inew] = fTR->JID_HPD        [iold];
 	fTR->JID_RBX        [inew] = fTR->JID_RBX        [iold];
 	fTR->JID_n90Hits    [inew] = fTR->JID_n90Hits    [iold];
-	fTR->JID_SubDet1    [inew] = fTR->JID_SubDet1    [iold];
-	fTR->JID_SubDet2    [inew] = fTR->JID_SubDet2    [iold];
-	fTR->JID_SubDet3    [inew] = fTR->JID_SubDet3    [iold];
-	fTR->JID_SubDet4    [inew] = fTR->JID_SubDet4    [iold];
 	fTR->JID_resEMF     [inew] = fTR->JID_resEMF     [iold];
 	fTR->JID_HCALTow    [inew] = fTR->JID_HCALTow    [iold];
 	fTR->JID_ECALTow    [inew] = fTR->JID_ECALTow    [iold];
@@ -1928,6 +1961,7 @@ void TreeCleaner::PutJet(int inew, int iold){
 	fTR->JPhiHADrms     [inew] = fTR->JPhiHADrms     [iold];
 	fTR->JbTagProb      [inew] = fTR->JbTagProb      [iold];
 	fTR->JChfrac        [inew] = fTR->JChfrac        [iold];
+	fTR->JEFracHadronic [inew] = fTR->JEFracHadronic [iold];
 	fTR->JMass          [inew] = fTR->JMass          [iold];
 	fTR->JNAssoTracks   [inew] = fTR->JNAssoTracks   [iold];
 	fTR->Jtrk1px        [inew] = fTR->Jtrk1px        [iold];

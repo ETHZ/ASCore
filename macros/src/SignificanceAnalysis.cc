@@ -92,6 +92,7 @@ void SignificanceAnalysis::FillSigHistos(int part){
 			//////////////////////////////////
 			// Your muon selection here     //
 			//////////////////////////////////
+			if(fTR->MuIsGlobalMuon[ip] == 0) continue;
 			fH_ptsum[part]   ->Fill(fTR->MuEta[ip], fTR->MuPhi[ip], fTR->MuPt[ip]);
 			fH_pt2sum[part]  ->Fill(fTR->MuEta[ip], fTR->MuPhi[ip], fTR->MuPt[ip]*fTR->MuPt[ip]);
 			fH_ptevt[part]   ->Fill(fTR->MuEta[ip], fTR->MuPhi[ip]);

@@ -44,14 +44,15 @@ void PhysQCAnalyzer::Loop(Long64_t maxEvents){
 void PhysQCAnalyzer::BeginJob(){
 	// Initialize UserAnalyses here:
 	fTreeCleaner->SetOutputDir(fOutputDir);
-	fTreeCleaner->fClean = true;
-	fTreeCleaner->fVerbose = fVerbose;
+	fTreeCleaner->SetClean(true);
+	fTreeCleaner->SetSkim(true);
+	fTreeCleaner->SetVerbose(fVerbose);
 
 	fPhysQCAnalysis->SetOutputDir(fOutputDir);
-	fPhysQCAnalysis->fVerbose = fVerbose;
+	fPhysQCAnalysis->SetVerbose(fVerbose);
 
 	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
-	fMultiplicityAnalysis->fVerbose = fVerbose;
+	fMultiplicityAnalysis->SetVerbose(fVerbose);
 	
 	fTreeCleaner         ->Begin();
 	fPhysQCAnalysis      ->Begin();

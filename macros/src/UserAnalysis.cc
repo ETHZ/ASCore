@@ -39,6 +39,7 @@ void UserAnalysis::Analyze(){
 	// Plot some muon quantities
 	int nqmus = 0;
 	for( int im = 0; im < fTR->NMus; ++im ){
+		if(fTR->MuIsGlobalMuon[im] == 0) continue;
 		fHmuPt->Fill(fTR->MuPt[im]);
 
 		// Some muon selection

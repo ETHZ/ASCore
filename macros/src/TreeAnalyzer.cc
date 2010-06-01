@@ -50,17 +50,18 @@ void TreeAnalyzer::Loop(){
 // Method called before starting the event loop
 void TreeAnalyzer::BeginJob(){
 	fTreeCleaner->SetOutputDir(fOutputDir);
-	fTreeCleaner->fClean = true;
-	fTreeCleaner->fVerbose = fVerbose;
+	fTreeCleaner->SetClean(true);
+	fTreeCleaner->SetSkim(true);
+	fTreeCleaner->SetVerbose(fVerbose);
 	
 	fDiLeptonAnalysis->SetOutputDir(fOutputDir);
-	fDiLeptonAnalysis->fVerbose = fVerbose;
+	fDiLeptonAnalysis->SetVerbose(fVerbose);
 	
 	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
-	fMultiplicityAnalysis->fVerbose = fVerbose;
+	fMultiplicityAnalysis->SetVerbose(fVerbose);
 	
 	fSignificanceAnalysis->SetOutputDir(fOutputDir);
-	fSignificanceAnalysis->fVerbose = fVerbose;
+	fSignificanceAnalysis->SetVerbose(fVerbose);
 	
 	fTreeCleaner         ->Begin();
 	fDiLeptonAnalysis    ->Begin();

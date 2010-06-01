@@ -55,6 +55,7 @@ void DiLeptonAnalysis::Analyze(){
 	vector<int> qualMuInd;
 	for(size_t imu = 0; imu < fTR->NMus; ++imu){
 		// Muon selection
+		if(fTR->MuIsGlobalMuon[imu] == 0) continue;
 		if(fTR->MuGood[imu] != 0) continue;
 		if(fTR->MuPt[imu] < 10) continue;
 		if(fabs(fTR->MuEta[imu]) > 2.4) continue;

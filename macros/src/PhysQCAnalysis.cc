@@ -53,6 +53,7 @@ void PhysQCAnalysis::Analyze1(){
 
 	// Muon plots
 	for(size_t i = 0; i < fTR->NMus; ++i){
+		if(fTR->MuIsGlobalMuon[i] == 0) continue;
 		fMuHistos[0]->Fill(fTR->MuPtE[i]/fTR->MuPt[i]);
 		double d0  = fTR->MuD0PV[i];
 		double dd0 = sqrt(fTR->MuD0E[i]*fTR->MuD0E[i] + drVxsq);
@@ -67,7 +68,9 @@ void PhysQCAnalysis::Analyze1(){
 	}
 
 	for(size_t i = 0; i < fTR->NMus; ++i){
+		if(fTR->MuIsGlobalMuon[i] == 0) continue;
 		for(size_t j = i+1; j < fTR->NMus; ++j){
+			if(fTR->MuIsGlobalMuon[j] == 0) continue;
 			double deltaR = Util::GetDeltaR(fTR->MuEta[i], fTR->MuEta[j], fTR->MuPhi[i], fTR->MuPhi[j]);
 			p1.SetPxPyPzE(fTR->MuPx[i],fTR->MuPy[i],fTR->MuPz[i],fTR->MuE[i]);
 			p2.SetPxPyPzE(fTR->MuPx[j],fTR->MuPy[j],fTR->MuPz[j],fTR->MuE[j]);
@@ -236,13 +239,15 @@ void PhysQCAnalysis::Analyze2(){
 	TLorentzVector p1(0.,0.,0.,0.), p2(0.,0.,0.,0.), psum(0.,0.,0.,0.);
 	double minv = -999.99;
 
-	fMuCIHistos[0]->Fill(fTR->NMus);
+	fMuCIHistos[0]->Fill(fTR->NGMus);
 	for(size_t i = 0; i < fTR->NMus; ++i){
+		if(fTR->MuIsGlobalMuon[i] == 0) continue;
 		if (fTR->MuIsIso[i] == 0) continue;
 		fMuCIHistos[1]->Fill(fTR->MuPt[i]);
 		fMuCIHistos[2]->Fill(fTR->MuEta[i]);
 		fMuCIHistos[3]->Fill(fTR->MuPhi[i]);
 		for(size_t j = i+1; j < fTR->NMus; ++j){
+			if(fTR->MuIsGlobalMuon[j] == 0) continue;
 			p1.SetPxPyPzE(fTR->MuPx[i],fTR->MuPy[i],fTR->MuPz[i],fTR->MuE[i]);
 			p2.SetPxPyPzE(fTR->MuPx[j],fTR->MuPy[j],fTR->MuPz[j],fTR->MuE[j]);
 			psum = p1 + p2;

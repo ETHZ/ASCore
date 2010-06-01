@@ -66,13 +66,14 @@ void MultiplicityAnalysis::Analyze(){
 		}
 	}
 	for(int i=0; i< fTR->NMus; ++i){
+		if(fTR->MuIsGlobalMuon[i] == 0) continue;
 		// ----------- Muon Cuts --------------------
 		if(fTR->MuPt[i]        < fCut_MuPt) { continue; }
 		if(fTR->MuEta[i]       > fCut_MuEta){ continue; }
 		if(fTR->MuRelIso03[i]  > fCut_MuRelIso03){ continue;}
 		if(fTR->MuNTkHits[i]   < fCut_MuNTkHits){ continue;}
 		if(fCut_MuTrackerMu==1){
-			if(fTR->MuTrackerMu[i] != 1 ){ continue;}
+			if(fTR->MuIsTrackerMuon[i] != 1 ){ continue;}
 		}
 		ILept++;
 		LeptPt[ILept]  = fTR->MuPt[i];

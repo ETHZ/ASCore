@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu May 27 17:56:22 2010 by ROOT version 5.22/00d
+// Tue Jun  1 16:37:15 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: /data/susy/ntuples/data/r132440-134725_json20100512.root
+// found on file: /data/susy/ntuples/data/r134987-135735_json20100526.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -40,11 +40,13 @@ public :
    Double_t        PrimVtxx;
    Double_t        PrimVtxy;
    Double_t        PrimVtxz;
+   Double_t        PrimVtxRho;
    Double_t        PrimVtxxE;
    Double_t        PrimVtxyE;
    Double_t        PrimVtxzE;
    Double_t        PrimVtxNChi2;
    Int_t           PrimVtxNdof;
+   Int_t           PrimVtxIsFake;
    Double_t        PrimVtxPtSum;
    Double_t        Beamspotx;
    Double_t        Beamspoty;
@@ -57,10 +59,15 @@ public :
    Int_t           MaxUncJetExceed;
    Int_t           MaxTrkExceed;
    Int_t           MaxPhotonsExceed;
+   Int_t           HBHENoiseFlag;
    Int_t           NMus;
    Int_t           NMusTot;
+   Int_t           NGMus;
+   Int_t           NTMus;
    Int_t           MuGood[20];   //[NMus]
    Int_t           MuIsIso[20];   //[NMus]
+   Int_t           MuIsGlobalMuon[20];   //[NMus]
+   Int_t           MuIsTrackerMuon[20];   //[NMus]
    Double_t        MuPx[20];   //[NMus]
    Double_t        MuPy[20];   //[NMus]
    Double_t        MuPz[20];   //[NMus]
@@ -75,6 +82,8 @@ public :
    Double_t        MuIso03SumPt[20];   //[NMus]
    Double_t        MuIso03EmEt[20];   //[NMus]
    Double_t        MuIso03HadEt[20];   //[NMus]
+   Double_t        MuIso03EMVetoEt[20];   //[NMus]
+   Double_t        MuIso03HadVetoEt[20];   //[NMus]
    Double_t        MuIso05SumPt[20];   //[NMus]
    Double_t        MuIso05EmEt[20];   //[NMus]
    Double_t        MuIso05HadEt[20];   //[NMus]
@@ -90,12 +99,40 @@ public :
    Int_t           MuNGlHits[20];   //[NMus]
    Int_t           MuNMuHits[20];   //[NMus]
    Int_t           MuNTkHits[20];   //[NMus]
+   Double_t        MuInnerTkNChi2[20];   //[NMus]
    Int_t           MuNMatches[20];   //[NMus]
    Int_t           MuNChambers[20];   //[NMus]
    Double_t        MuCaloComp[20];   //[NMus]
    Double_t        MuSegmComp[20];   //[NMus]
-   Int_t           MuTrackerMu[20];   //[NMus]
-   Int_t           MuGMPT[20];   //[NMus]
+   Int_t           MuIsGMPT[20];   //[NMus]
+   Int_t           MuIsGMTkChiComp[20];   //[NMus]
+   Int_t           MuIsGMStaChiComp[20];   //[NMus]
+   Int_t           MuIsGMTkKinkTight[20];   //[NMus]
+   Int_t           MuIsAllStaMuons[20];   //[NMus]
+   Int_t           MuIsAllTrkMuons[20];   //[NMus]
+   Int_t           MuIsTrkMuonArbitrated[20];   //[NMus]
+   Int_t           MuIsAllArbitrated[20];   //[NMus]
+   Int_t           MuIsTMLSLoose[20];   //[NMus]
+   Int_t           MuIsTMLSTight[20];   //[NMus]
+   Int_t           MuIsTM2DCompLoose[20];   //[NMus]
+   Int_t           MuIsTM2DCompTight[20];   //[NMus]
+   Int_t           MuIsTMOneStationLoose[20];   //[NMus]
+   Int_t           MuIsTMOneStationTight[20];   //[NMus]
+   Int_t           MuIsTMLSOptLowPtLoose[20];   //[NMus]
+   Int_t           MuIsTMLSAngLoose[20];   //[NMus]
+   Int_t           MuIsTMLastStationAngTight[20];   //[NMus]
+   Int_t           MuIsTMOneStationAngTight[20];   //[NMus]
+   Int_t           MuIsTMOneStationAngLoose[20];   //[NMus]
+   Double_t        MuOutMomx[20];   //[NMus]
+   Double_t        MuOutMomy[20];   //[NMus]
+   Double_t        MuOutMomz[20];   //[NMus]
+   Double_t        MuOutMomPhi[20];   //[NMus]
+   Double_t        MuOutMomEta[20];   //[NMus]
+   Double_t        MuOutMomTheta[20];   //[NMus]
+   Double_t        MuOutPosRadius[20];   //[NMus]
+   Double_t        MuOutPosX[20];   //[NMus]
+   Double_t        MuOutPosY[20];   //[NMus]
+   Double_t        MuOutPosZ[20];   //[NMus]
    Int_t           MuGenID[20];   //[NMus]
    Int_t           MuGenStatus[20];   //[NMus]
    Int_t           MuGenCharge[20];   //[NMus]
@@ -131,6 +168,7 @@ public :
    Double_t        ElEt[20];   //[NEles]
    Double_t        ElEta[20];   //[NEles]
    Double_t        ElTheta[20];   //[NEles]
+   Double_t        ElSCEta[20];   //[NEles]
    Double_t        ElPhi[20];   //[NEles]
    Double_t        ElD0BS[20];   //[NEles]
    Double_t        ElD0PV[20];   //[NEles]
@@ -263,10 +301,6 @@ public :
    Double_t        JID_HPD[100];   //[NJets]
    Double_t        JID_RBX[100];   //[NJets]
    Double_t        JID_n90Hits[100];   //[NJets]
-   Double_t        JID_SubDet1[100];   //[NJets]
-   Double_t        JID_SubDet2[100];   //[NJets]
-   Double_t        JID_SubDet3[100];   //[NJets]
-   Double_t        JID_SubDet4[100];   //[NJets]
    Double_t        JID_resEMF[100];   //[NJets]
    Double_t        JID_HCALTow[100];   //[NJets]
    Double_t        JID_ECALTow[100];   //[NJets]
@@ -276,6 +310,7 @@ public :
    Double_t        JPhiHADrms[100];   //[NJets]
    Double_t        JbTagProb[100];   //[NJets]
    Double_t        JChfrac[100];   //[NJets]
+   Double_t        JEFracHadronic[100];   //[NJets]
    Double_t        JMass[100];   //[NJets]
    Int_t           JNAssoTracks[100];   //[NJets]
    Double_t        Jtrk1px[100];   //[NJets]
@@ -306,6 +341,42 @@ public :
    Double_t        JGenEmE[100];   //[NJets]
    Double_t        JGenHadE[100];   //[NJets]
    Double_t        JGenInvE[100];   //[NJets]
+   Int_t           PFNJets;
+   Double_t        PFJPx[9];   //[PFNJets]
+   Double_t        PFJPy[9];   //[PFNJets]
+   Double_t        PFJPz[9];   //[PFNJets]
+   Double_t        PFJPt[9];   //[PFNJets]
+   Double_t        PFJE[9];   //[PFNJets]
+   Double_t        PFJEt[9];   //[PFNJets]
+   Double_t        PFJEta[9];   //[PFNJets]
+   Double_t        PFJPhi[9];   //[PFNJets]
+   Double_t        PFJScale[9];   //[PFNJets]
+   Int_t           PFJNConstituents[9];   //[PFNJets]
+   Double_t        PFJEMfrac[9];   //[PFNJets]
+   Double_t        PFJHadfrac[9];   //[PFNJets]
+   Double_t        PFJChHadfrac[9];   //[PFNJets]
+   Double_t        PFJNeuHadfrac[9];   //[PFNJets]
+   Double_t        PFJChEmfrac[9];   //[PFNJets]
+   Double_t        PFJNeuEmfrac[9];   //[PFNJets]
+   Int_t           PFJMuonMultiplicity[9];   //[PFNJets]
+   Int_t           CANJets;
+   Double_t        CAJPx[10];   //[CANJets]
+   Double_t        CAJPy[10];   //[CANJets]
+   Double_t        CAJPz[10];   //[CANJets]
+   Double_t        CAJPt[10];   //[CANJets]
+   Double_t        CAJE[10];   //[CANJets]
+   Double_t        CAJEt[10];   //[CANJets]
+   Double_t        CAJEta[10];   //[CANJets]
+   Double_t        CAJPhi[10];   //[CANJets]
+   Double_t        CAJScale[10];   //[CANJets]
+   Int_t           CAJNConstituents[10];   //[CANJets]
+   Double_t        CAJEMfrac[10];   //[CANJets]
+   Double_t        CAJHadfrac[10];   //[CANJets]
+   Double_t        CAJChHadfrac[10];   //[CANJets]
+   Double_t        CAJNeuHadfrac[10];   //[CANJets]
+   Double_t        CAJChEmfrac[10];   //[CANJets]
+   Double_t        CAJNeuEmfrac[10];   //[CANJets]
+   Int_t           CAJMuonMultiplicity[10];   //[CANJets]
    Int_t           NTracks;
    Int_t           NTracksTot;
    Int_t           TrkGood[500];   //[NTracks]
@@ -354,6 +425,7 @@ public :
    Double_t        TCMETpx;
    Double_t        TCMETpy;
    Double_t        TCMETphi;
+   Double_t        TCMETSignificance;
    Double_t        MuJESCorrMET;
    Double_t        MuJESCorrMETpx;
    Double_t        MuJESCorrMETpy;
@@ -362,6 +434,7 @@ public :
    Double_t        PFMETpx;
    Double_t        PFMETpy;
    Double_t        PFMETphi;
+   Double_t        PFMETSignificance;
    Double_t        METR12;
    Double_t        METR21;
 
@@ -388,11 +461,13 @@ public :
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
    TBranch        *b_PrimVtxz;   //!
+   TBranch        *b_PrimVtxRho;   //!
    TBranch        *b_PrimVtxxE;   //!
    TBranch        *b_PrimVtxyE;   //!
    TBranch        *b_PrimVtxzE;   //!
    TBranch        *b_PrimVtxNChi2;   //!
    TBranch        *b_PrimVtxNdof;   //!
+   TBranch        *b_PrimVtxIsFake;   //!
    TBranch        *b_PrimVtxPtSum;   //!
    TBranch        *b_Beamspotx;   //!
    TBranch        *b_Beamspoty;   //!
@@ -405,10 +480,15 @@ public :
    TBranch        *b_MaxUncJetExceed;   //!
    TBranch        *b_MaxTrkExceed;   //!
    TBranch        *b_MaxPhotonsExceed;   //!
+   TBranch        *b_HBHENoiseFlag;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_NMusTot;   //!
+   TBranch        *b_NGMus;   //!
+   TBranch        *b_NTMus;   //!
    TBranch        *b_MuGood;   //!
    TBranch        *b_MuIsIso;   //!
+   TBranch        *b_MuIsGlobalMuon;   //!
+   TBranch        *b_MuIsTrackerMuon;   //!
    TBranch        *b_MuPx;   //!
    TBranch        *b_MuPy;   //!
    TBranch        *b_MuPz;   //!
@@ -423,6 +503,8 @@ public :
    TBranch        *b_MuIso03SumPt;   //!
    TBranch        *b_MuIso03EmEt;   //!
    TBranch        *b_MuIso03HadEt;   //!
+   TBranch        *b_MuIso03EMVetoEt;   //!
+   TBranch        *b_MuIso03HadVetoEt;   //!
    TBranch        *b_MuIso05SumPt;   //!
    TBranch        *b_MuIso05EmEt;   //!
    TBranch        *b_MuIso05HadEt;   //!
@@ -438,12 +520,40 @@ public :
    TBranch        *b_MuNGlHits;   //!
    TBranch        *b_MuNMuHits;   //!
    TBranch        *b_MuNTkHits;   //!
+   TBranch        *b_MuInnerTkNChi2;   //!
    TBranch        *b_MuNMatches;   //!
    TBranch        *b_MuNChambers;   //!
    TBranch        *b_MuCaloComp;   //!
    TBranch        *b_MuSegmComp;   //!
-   TBranch        *b_MuTrackerMu;   //!
-   TBranch        *b_MuGMPT;   //!
+   TBranch        *b_MuIsGMPT;   //!
+   TBranch        *b_MuIsGMTkChiComp;   //!
+   TBranch        *b_MuIsGMStaChiComp;   //!
+   TBranch        *b_MuIsGMTkKinkTight;   //!
+   TBranch        *b_MuIsAllStaMuons;   //!
+   TBranch        *b_MuIsAllTrkMuons;   //!
+   TBranch        *b_MuIsTrkMuonArbitrated;   //!
+   TBranch        *b_MuIsAllArbitrated;   //!
+   TBranch        *b_MuIsTMLSLoose;   //!
+   TBranch        *b_MuIsTMLSTight;   //!
+   TBranch        *b_MuIsTM2DCompLoose;   //!
+   TBranch        *b_MuIsTM2DCompTight;   //!
+   TBranch        *b_MuIsTMOneStationLoose;   //!
+   TBranch        *b_MuIsTMOneStationTight;   //!
+   TBranch        *b_MuIsTMLSOptLowPtLoose;   //!
+   TBranch        *b_MuIsTMLSAngLoose;   //!
+   TBranch        *b_MuIsTMLastStationAngTight;   //!
+   TBranch        *b_MuIsTMOneStationAngTight;   //!
+   TBranch        *b_MuIsTMOneStationAngLoose;   //!
+   TBranch        *b_MuOutMomx;   //!
+   TBranch        *b_MuOutMomy;   //!
+   TBranch        *b_MuOutMomz;   //!
+   TBranch        *b_MuOutMomPhi;   //!
+   TBranch        *b_MuOutMomEta;   //!
+   TBranch        *b_MuOutMomTheta;   //!
+   TBranch        *b_MuOutPosRadius;   //!
+   TBranch        *b_MuOutPosX;   //!
+   TBranch        *b_MuOutPosY;   //!
+   TBranch        *b_MuOutPosZ;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenStatus;   //!
    TBranch        *b_MuGenCharge;   //!
@@ -479,6 +589,7 @@ public :
    TBranch        *b_ElEt;   //!
    TBranch        *b_ElEta;   //!
    TBranch        *b_ElTheta;   //!
+   TBranch        *b_ElSCEta;   //!
    TBranch        *b_ElPhi;   //!
    TBranch        *b_ElD0BS;   //!
    TBranch        *b_ElD0PV;   //!
@@ -611,10 +722,6 @@ public :
    TBranch        *b_JID_HPD;   //!
    TBranch        *b_JID_RBX;   //!
    TBranch        *b_JID_n90Hits;   //!
-   TBranch        *b_JID_SubDet1;   //!
-   TBranch        *b_JID_SubDet2;   //!
-   TBranch        *b_JID_SubDet3;   //!
-   TBranch        *b_JID_SubDet4;   //!
    TBranch        *b_JID_resEMF;   //!
    TBranch        *b_JID_HCALTow;   //!
    TBranch        *b_JID_ECALTow;   //!
@@ -624,6 +731,7 @@ public :
    TBranch        *b_JPhiHADrms;   //!
    TBranch        *b_JbTagProb;   //!
    TBranch        *b_JChfrac;   //!
+   TBranch        *b_JEFracHadronic;   //!
    TBranch        *b_JMass;   //!
    TBranch        *b_JNAssoTracks;   //!
    TBranch        *b_Jtrk1px;   //!
@@ -654,6 +762,42 @@ public :
    TBranch        *b_JGenEmE;   //!
    TBranch        *b_JGenHadE;   //!
    TBranch        *b_JGenInvE;   //!
+   TBranch        *b_PFNJets;   //!
+   TBranch        *b_PFJPx;   //!
+   TBranch        *b_PFJPy;   //!
+   TBranch        *b_PFJPz;   //!
+   TBranch        *b_PFJPt;   //!
+   TBranch        *b_PFJE;   //!
+   TBranch        *b_PFJEt;   //!
+   TBranch        *b_PFJEta;   //!
+   TBranch        *b_PFJPhi;   //!
+   TBranch        *b_PFJScale;   //!
+   TBranch        *b_PFJNConstituents;   //!
+   TBranch        *b_PFJEMfrac;   //!
+   TBranch        *b_PFJHadfrac;   //!
+   TBranch        *b_PFJChHadfrac;   //!
+   TBranch        *b_PFJNeuHadfrac;   //!
+   TBranch        *b_PFJChEmfrac;   //!
+   TBranch        *b_PFJNeuEmfrac;   //!
+   TBranch        *b_PFJMuonMultiplicity;   //!
+   TBranch        *b_CANJets;   //!
+   TBranch        *b_CAJPx;   //!
+   TBranch        *b_CAJPy;   //!
+   TBranch        *b_CAJPz;   //!
+   TBranch        *b_CAJPt;   //!
+   TBranch        *b_CAJE;   //!
+   TBranch        *b_CAJEt;   //!
+   TBranch        *b_CAJEta;   //!
+   TBranch        *b_CAJPhi;   //!
+   TBranch        *b_CAJScale;   //!
+   TBranch        *b_CAJNConstituents;   //!
+   TBranch        *b_CAJEMfrac;   //!
+   TBranch        *b_CAJHadfrac;   //!
+   TBranch        *b_CAJChHadfrac;   //!
+   TBranch        *b_CAJNeuHadfrac;   //!
+   TBranch        *b_CAJChEmfrac;   //!
+   TBranch        *b_CAJNeuEmfrac;   //!
+   TBranch        *b_CAJMuonMultiplicity;   //!
    TBranch        *b_NTracks;   //!
    TBranch        *b_NTracksTot;   //!
    TBranch        *b_TrkGood;   //!
@@ -702,6 +846,7 @@ public :
    TBranch        *b_TCMETpx;   //!
    TBranch        *b_TCMETpy;   //!
    TBranch        *b_TCMETphi;   //!
+   TBranch        *b_TCMETSignificance;   //!
    TBranch        *b_MuJESCorrMET;   //!
    TBranch        *b_MuJESCorrMETpx;   //!
    TBranch        *b_MuJESCorrMETpy;   //!
@@ -710,6 +855,7 @@ public :
    TBranch        *b_PFMETpx;   //!
    TBranch        *b_PFMETpy;   //!
    TBranch        *b_PFMETphi;   //!
+   TBranch        *b_PFMETSignificance;   //!
    TBranch        *b_METR12;   //!
    TBranch        *b_METR21;   //!
 
@@ -732,9 +878,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/data/susy/ntuples/data/r132440-134725_json20100512.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/data/susy/ntuples/data/r134987-135735_json20100526.root");
       if (!f) {
-         f = new TFile("/data/susy/ntuples/data/r132440-134725_json20100512.root");
+         f = new TFile("/data/susy/ntuples/data/r134987-135735_json20100526.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -807,11 +953,13 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
    fChain->SetBranchAddress("PrimVtxz", &PrimVtxz, &b_PrimVtxz);
+   fChain->SetBranchAddress("PrimVtxRho", &PrimVtxRho, &b_PrimVtxRho);
    fChain->SetBranchAddress("PrimVtxxE", &PrimVtxxE, &b_PrimVtxxE);
    fChain->SetBranchAddress("PrimVtxyE", &PrimVtxyE, &b_PrimVtxyE);
    fChain->SetBranchAddress("PrimVtxzE", &PrimVtxzE, &b_PrimVtxzE);
    fChain->SetBranchAddress("PrimVtxNChi2", &PrimVtxNChi2, &b_PrimVtxNChi2);
    fChain->SetBranchAddress("PrimVtxNdof", &PrimVtxNdof, &b_PrimVtxNdof);
+   fChain->SetBranchAddress("PrimVtxIsFake", &PrimVtxIsFake, &b_PrimVtxIsFake);
    fChain->SetBranchAddress("PrimVtxPtSum", &PrimVtxPtSum, &b_PrimVtxPtSum);
    fChain->SetBranchAddress("Beamspotx", &Beamspotx, &b_Beamspotx);
    fChain->SetBranchAddress("Beamspoty", &Beamspoty, &b_Beamspoty);
@@ -824,10 +972,15 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MaxUncJetExceed", &MaxUncJetExceed, &b_MaxUncJetExceed);
    fChain->SetBranchAddress("MaxTrkExceed", &MaxTrkExceed, &b_MaxTrkExceed);
    fChain->SetBranchAddress("MaxPhotonsExceed", &MaxPhotonsExceed, &b_MaxPhotonsExceed);
+   fChain->SetBranchAddress("HBHENoiseFlag", &HBHENoiseFlag, &b_HBHENoiseFlag);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("NMusTot", &NMusTot, &b_NMusTot);
+   fChain->SetBranchAddress("NGMus", &NGMus, &b_NGMus);
+   fChain->SetBranchAddress("NTMus", &NTMus, &b_NTMus);
    fChain->SetBranchAddress("MuGood", MuGood, &b_MuGood);
    fChain->SetBranchAddress("MuIsIso", MuIsIso, &b_MuIsIso);
+   fChain->SetBranchAddress("MuIsGlobalMuon", MuIsGlobalMuon, &b_MuIsGlobalMuon);
+   fChain->SetBranchAddress("MuIsTrackerMuon", MuIsTrackerMuon, &b_MuIsTrackerMuon);
    fChain->SetBranchAddress("MuPx", MuPx, &b_MuPx);
    fChain->SetBranchAddress("MuPy", MuPy, &b_MuPy);
    fChain->SetBranchAddress("MuPz", MuPz, &b_MuPz);
@@ -842,6 +995,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuIso03SumPt", MuIso03SumPt, &b_MuIso03SumPt);
    fChain->SetBranchAddress("MuIso03EmEt", MuIso03EmEt, &b_MuIso03EmEt);
    fChain->SetBranchAddress("MuIso03HadEt", MuIso03HadEt, &b_MuIso03HadEt);
+   fChain->SetBranchAddress("MuIso03EMVetoEt", MuIso03EMVetoEt, &b_MuIso03EMVetoEt);
+   fChain->SetBranchAddress("MuIso03HadVetoEt", MuIso03HadVetoEt, &b_MuIso03HadVetoEt);
    fChain->SetBranchAddress("MuIso05SumPt", MuIso05SumPt, &b_MuIso05SumPt);
    fChain->SetBranchAddress("MuIso05EmEt", MuIso05EmEt, &b_MuIso05EmEt);
    fChain->SetBranchAddress("MuIso05HadEt", MuIso05HadEt, &b_MuIso05HadEt);
@@ -857,12 +1012,40 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuNGlHits", MuNGlHits, &b_MuNGlHits);
    fChain->SetBranchAddress("MuNMuHits", MuNMuHits, &b_MuNMuHits);
    fChain->SetBranchAddress("MuNTkHits", MuNTkHits, &b_MuNTkHits);
+   fChain->SetBranchAddress("MuInnerTkNChi2", MuInnerTkNChi2, &b_MuInnerTkNChi2);
    fChain->SetBranchAddress("MuNMatches", MuNMatches, &b_MuNMatches);
    fChain->SetBranchAddress("MuNChambers", MuNChambers, &b_MuNChambers);
    fChain->SetBranchAddress("MuCaloComp", MuCaloComp, &b_MuCaloComp);
    fChain->SetBranchAddress("MuSegmComp", MuSegmComp, &b_MuSegmComp);
-   fChain->SetBranchAddress("MuTrackerMu", MuTrackerMu, &b_MuTrackerMu);
-   fChain->SetBranchAddress("MuGMPT", MuGMPT, &b_MuGMPT);
+   fChain->SetBranchAddress("MuIsGMPT", MuIsGMPT, &b_MuIsGMPT);
+   fChain->SetBranchAddress("MuIsGMTkChiComp", MuIsGMTkChiComp, &b_MuIsGMTkChiComp);
+   fChain->SetBranchAddress("MuIsGMStaChiComp", MuIsGMStaChiComp, &b_MuIsGMStaChiComp);
+   fChain->SetBranchAddress("MuIsGMTkKinkTight", MuIsGMTkKinkTight, &b_MuIsGMTkKinkTight);
+   fChain->SetBranchAddress("MuIsAllStaMuons", MuIsAllStaMuons, &b_MuIsAllStaMuons);
+   fChain->SetBranchAddress("MuIsAllTrkMuons", MuIsAllTrkMuons, &b_MuIsAllTrkMuons);
+   fChain->SetBranchAddress("MuIsTrkMuonArbitrated", MuIsTrkMuonArbitrated, &b_MuIsTrkMuonArbitrated);
+   fChain->SetBranchAddress("MuIsAllArbitrated", MuIsAllArbitrated, &b_MuIsAllArbitrated);
+   fChain->SetBranchAddress("MuIsTMLSLoose", MuIsTMLSLoose, &b_MuIsTMLSLoose);
+   fChain->SetBranchAddress("MuIsTMLSTight", MuIsTMLSTight, &b_MuIsTMLSTight);
+   fChain->SetBranchAddress("MuIsTM2DCompLoose", MuIsTM2DCompLoose, &b_MuIsTM2DCompLoose);
+   fChain->SetBranchAddress("MuIsTM2DCompTight", MuIsTM2DCompTight, &b_MuIsTM2DCompTight);
+   fChain->SetBranchAddress("MuIsTMOneStationLoose", MuIsTMOneStationLoose, &b_MuIsTMOneStationLoose);
+   fChain->SetBranchAddress("MuIsTMOneStationTight", MuIsTMOneStationTight, &b_MuIsTMOneStationTight);
+   fChain->SetBranchAddress("MuIsTMLSOptLowPtLoose", MuIsTMLSOptLowPtLoose, &b_MuIsTMLSOptLowPtLoose);
+   fChain->SetBranchAddress("MuIsTMLSAngLoose", MuIsTMLSAngLoose, &b_MuIsTMLSAngLoose);
+   fChain->SetBranchAddress("MuIsTMLastStationAngTight", MuIsTMLastStationAngTight, &b_MuIsTMLastStationAngTight);
+   fChain->SetBranchAddress("MuIsTMOneStationAngTight", MuIsTMOneStationAngTight, &b_MuIsTMOneStationAngTight);
+   fChain->SetBranchAddress("MuIsTMOneStationAngLoose", MuIsTMOneStationAngLoose, &b_MuIsTMOneStationAngLoose);
+   fChain->SetBranchAddress("MuOutMomx", MuOutMomx, &b_MuOutMomx);
+   fChain->SetBranchAddress("MuOutMomy", MuOutMomy, &b_MuOutMomy);
+   fChain->SetBranchAddress("MuOutMomz", MuOutMomz, &b_MuOutMomz);
+   fChain->SetBranchAddress("MuOutMomPhi", MuOutMomPhi, &b_MuOutMomPhi);
+   fChain->SetBranchAddress("MuOutMomEta", MuOutMomEta, &b_MuOutMomEta);
+   fChain->SetBranchAddress("MuOutMomTheta", MuOutMomTheta, &b_MuOutMomTheta);
+   fChain->SetBranchAddress("MuOutPosRadius", MuOutPosRadius, &b_MuOutPosRadius);
+   fChain->SetBranchAddress("MuOutPosX", MuOutPosX, &b_MuOutPosX);
+   fChain->SetBranchAddress("MuOutPosY", MuOutPosY, &b_MuOutPosY);
+   fChain->SetBranchAddress("MuOutPosZ", MuOutPosZ, &b_MuOutPosZ);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenStatus", MuGenStatus, &b_MuGenStatus);
    fChain->SetBranchAddress("MuGenCharge", MuGenCharge, &b_MuGenCharge);
@@ -898,6 +1081,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElEt", ElEt, &b_ElEt);
    fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
    fChain->SetBranchAddress("ElTheta", ElTheta, &b_ElTheta);
+   fChain->SetBranchAddress("ElSCEta", ElSCEta, &b_ElSCEta);
    fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
    fChain->SetBranchAddress("ElD0BS", ElD0BS, &b_ElD0BS);
    fChain->SetBranchAddress("ElD0PV", ElD0PV, &b_ElD0PV);
@@ -1030,10 +1214,6 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JID_HPD", JID_HPD, &b_JID_HPD);
    fChain->SetBranchAddress("JID_RBX", JID_RBX, &b_JID_RBX);
    fChain->SetBranchAddress("JID_n90Hits", JID_n90Hits, &b_JID_n90Hits);
-   fChain->SetBranchAddress("JID_SubDet1", JID_SubDet1, &b_JID_SubDet1);
-   fChain->SetBranchAddress("JID_SubDet2", JID_SubDet2, &b_JID_SubDet2);
-   fChain->SetBranchAddress("JID_SubDet3", JID_SubDet3, &b_JID_SubDet3);
-   fChain->SetBranchAddress("JID_SubDet4", JID_SubDet4, &b_JID_SubDet4);
    fChain->SetBranchAddress("JID_resEMF", JID_resEMF, &b_JID_resEMF);
    fChain->SetBranchAddress("JID_HCALTow", JID_HCALTow, &b_JID_HCALTow);
    fChain->SetBranchAddress("JID_ECALTow", JID_ECALTow, &b_JID_ECALTow);
@@ -1043,6 +1223,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JPhiHADrms", JPhiHADrms, &b_JPhiHADrms);
    fChain->SetBranchAddress("JbTagProb", JbTagProb, &b_JbTagProb);
    fChain->SetBranchAddress("JChfrac", JChfrac, &b_JChfrac);
+   fChain->SetBranchAddress("JEFracHadronic", JEFracHadronic, &b_JEFracHadronic);
    fChain->SetBranchAddress("JMass", JMass, &b_JMass);
    fChain->SetBranchAddress("JNAssoTracks", JNAssoTracks, &b_JNAssoTracks);
    fChain->SetBranchAddress("Jtrk1px", Jtrk1px, &b_Jtrk1px);
@@ -1073,6 +1254,42 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JGenEmE", JGenEmE, &b_JGenEmE);
    fChain->SetBranchAddress("JGenHadE", JGenHadE, &b_JGenHadE);
    fChain->SetBranchAddress("JGenInvE", JGenInvE, &b_JGenInvE);
+   fChain->SetBranchAddress("PFNJets", &PFNJets, &b_PFNJets);
+   fChain->SetBranchAddress("PFJPx", PFJPx, &b_PFJPx);
+   fChain->SetBranchAddress("PFJPy", PFJPy, &b_PFJPy);
+   fChain->SetBranchAddress("PFJPz", PFJPz, &b_PFJPz);
+   fChain->SetBranchAddress("PFJPt", PFJPt, &b_PFJPt);
+   fChain->SetBranchAddress("PFJE", PFJE, &b_PFJE);
+   fChain->SetBranchAddress("PFJEt", PFJEt, &b_PFJEt);
+   fChain->SetBranchAddress("PFJEta", PFJEta, &b_PFJEta);
+   fChain->SetBranchAddress("PFJPhi", PFJPhi, &b_PFJPhi);
+   fChain->SetBranchAddress("PFJScale", PFJScale, &b_PFJScale);
+   fChain->SetBranchAddress("PFJNConstituents", PFJNConstituents, &b_PFJNConstituents);
+   fChain->SetBranchAddress("PFJEMfrac", PFJEMfrac, &b_PFJEMfrac);
+   fChain->SetBranchAddress("PFJHadfrac", PFJHadfrac, &b_PFJHadfrac);
+   fChain->SetBranchAddress("PFJChHadfrac", PFJChHadfrac, &b_PFJChHadfrac);
+   fChain->SetBranchAddress("PFJNeuHadfrac", PFJNeuHadfrac, &b_PFJNeuHadfrac);
+   fChain->SetBranchAddress("PFJChEmfrac", PFJChEmfrac, &b_PFJChEmfrac);
+   fChain->SetBranchAddress("PFJNeuEmfrac", PFJNeuEmfrac, &b_PFJNeuEmfrac);
+   fChain->SetBranchAddress("PFJMuonMultiplicity", PFJMuonMultiplicity, &b_PFJMuonMultiplicity);
+   fChain->SetBranchAddress("CANJets", &CANJets, &b_CANJets);
+   fChain->SetBranchAddress("CAJPx", CAJPx, &b_CAJPx);
+   fChain->SetBranchAddress("CAJPy", CAJPy, &b_CAJPy);
+   fChain->SetBranchAddress("CAJPz", CAJPz, &b_CAJPz);
+   fChain->SetBranchAddress("CAJPt", CAJPt, &b_CAJPt);
+   fChain->SetBranchAddress("CAJE", CAJE, &b_CAJE);
+   fChain->SetBranchAddress("CAJEt", CAJEt, &b_CAJEt);
+   fChain->SetBranchAddress("CAJEta", CAJEta, &b_CAJEta);
+   fChain->SetBranchAddress("CAJPhi", CAJPhi, &b_CAJPhi);
+   fChain->SetBranchAddress("CAJScale", CAJScale, &b_CAJScale);
+   fChain->SetBranchAddress("CAJNConstituents", CAJNConstituents, &b_CAJNConstituents);
+   fChain->SetBranchAddress("CAJEMfrac", CAJEMfrac, &b_CAJEMfrac);
+   fChain->SetBranchAddress("CAJHadfrac", CAJHadfrac, &b_CAJHadfrac);
+   fChain->SetBranchAddress("CAJChHadfrac", CAJChHadfrac, &b_CAJChHadfrac);
+   fChain->SetBranchAddress("CAJNeuHadfrac", CAJNeuHadfrac, &b_CAJNeuHadfrac);
+   fChain->SetBranchAddress("CAJChEmfrac", CAJChEmfrac, &b_CAJChEmfrac);
+   fChain->SetBranchAddress("CAJNeuEmfrac", CAJNeuEmfrac, &b_CAJNeuEmfrac);
+   fChain->SetBranchAddress("CAJMuonMultiplicity", CAJMuonMultiplicity, &b_CAJMuonMultiplicity);
    fChain->SetBranchAddress("NTracks", &NTracks, &b_NTracks);
    fChain->SetBranchAddress("NTracksTot", &NTracksTot, &b_NTracksTot);
    fChain->SetBranchAddress("TrkGood", TrkGood, &b_TrkGood);
@@ -1121,6 +1338,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("TCMETpx", &TCMETpx, &b_TCMETpx);
    fChain->SetBranchAddress("TCMETpy", &TCMETpy, &b_TCMETpy);
    fChain->SetBranchAddress("TCMETphi", &TCMETphi, &b_TCMETphi);
+   fChain->SetBranchAddress("TCMETSignificance", &TCMETSignificance, &b_TCMETSignificance);
    fChain->SetBranchAddress("MuJESCorrMET", &MuJESCorrMET, &b_MuJESCorrMET);
    fChain->SetBranchAddress("MuJESCorrMETpx", &MuJESCorrMETpx, &b_MuJESCorrMETpx);
    fChain->SetBranchAddress("MuJESCorrMETpy", &MuJESCorrMETpy, &b_MuJESCorrMETpy);
@@ -1129,6 +1347,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PFMETpx", &PFMETpx, &b_PFMETpx);
    fChain->SetBranchAddress("PFMETpy", &PFMETpy, &b_PFMETpy);
    fChain->SetBranchAddress("PFMETphi", &PFMETphi, &b_PFMETphi);
+   fChain->SetBranchAddress("PFMETSignificance", &PFMETSignificance, &b_PFMETSignificance);
    fChain->SetBranchAddress("METR12", &METR12, &b_METR12);
    fChain->SetBranchAddress("METR21", &METR21, &b_METR21);
    Notify();

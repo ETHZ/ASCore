@@ -32,11 +32,14 @@ public:
 	void End();
 	void DoTagging();
 	void DoCleaning();
-        void DoSkimTree();
+	void DoSkimTree();
 	void Reset();
 	void StatWrite(TString fCleanerStats);
 
 	bool fClean;
+	bool fSkim;
+	inline void SetClean(bool clean){fClean = clean;};
+	inline void SetSkim(bool skim){fSkim = skim;};
 
 	TTree *fCleanTree;
 	TFile *fCleanTreeFile;
