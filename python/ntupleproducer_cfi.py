@@ -12,7 +12,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_electrons  = cms.untracked.InputTag('gsfElectrons'),	
 	tag_jets       = cms.untracked.InputTag('ak5CaloJets'),
 	jetCorrs       = cms.untracked.string('ak5CaloL2L3'),
-	tag_btag       = cms.untracked.InputTag('simpleSecondaryVertexBJetTags'),
+	tag_btag       = cms.untracked.InputTag('trackCountingHighEffBJetTags'),
         tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
         tag_jetID      = cms.untracked.InputTag('ak5JetID'),
 	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
