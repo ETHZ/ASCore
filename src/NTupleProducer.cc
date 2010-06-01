@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.59 2010/05/26 17:00:34 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.60 2010/05/27 09:55:32 stiegerb Exp $
 //
 //
 
@@ -652,7 +652,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTdr04tksumpt[eqi]         = El->dr04TkSumPt();
       fTdr04ecalrechitsumet[eqi] = El->dr04EcalRecHitSumEt();
       fTdr04hcaltowersumet[eqi]  = El->dr04HcalTowerSumEt();
-      fTeiso[eqi]                = (fTdr04tksumpt[eqi] + fTdr04ecalrechitsumet[eqi] + fTdr04hcaltowersumet[eqi]) / fTept[eqi];
+      fTeiso03[eqi]              = (fTdr03tksumpt[eqi] + fTdr03ecalrechitsumet[eqi] + fTdr03hcaltowersumet[eqi]) / fTept[eqi];
+	  fTeiso04[eqi]              = (fTdr04tksumpt[eqi] + fTdr04ecalrechitsumet[eqi] + fTdr04hcaltowersumet[eqi]) / fTept[eqi];
       fTecharge[eqi]   = El->charge();
       fTeCInfoIsGsfCtfCons[eqi]      = El->chargeInfo().isGsfCtfConsistent ? 1:0;
       fTeCInfoIsGsfCtfScPixCons[eqi] = El->chargeInfo().isGsfCtfScPixConsistent ? 1:0;
@@ -1529,7 +1530,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElDzBS"        ,&fTedzbs       ,"ElDzBS[NEles]/D");
   fEventTree->Branch("ElDzPV"        ,&fTedzpv       ,"ElDzPV[NEles]/D");
   fEventTree->Branch("ElDzE"         ,&fTedzE        ,"ElDzE[NEles]/D");
-  fEventTree->Branch("ElRelIso04"    ,&fTeiso        ,"ElRelIso04[NEles]/D");
+  fEventTree->Branch("ElRelIso03"    ,&fTeiso03      ,"ElRelIso03[NEles]/D");
+  fEventTree->Branch("ElRelIso04"    ,&fTeiso04      ,"ElRelIso04[NEles]/D");
   fEventTree->Branch("ElDR03TkSumPt" ,&fTdr03tksumpt ,"ElDR03TkSumPt[NEles]/D");
   fEventTree->Branch("ElDR04TkSumPt" ,&fTdr04tksumpt ,"ElDR04TkSumPt[NEles]/D");
   fEventTree->Branch("ElDR03EcalRecHitSumEt"    ,&fTdr03ecalrechitsumet     ,"ElDR03EcalRecHitSumEt[NEles]/D");
@@ -2028,7 +2030,8 @@ void NTupleProducer::resetTree(){
   resetDouble(fTedzpv, gMaxneles);
   resetDouble(fTedzE, gMaxneles);
   resetDouble(fTenchi2, gMaxneles);
-  resetDouble(fTeiso, gMaxneles);
+  resetDouble(fTeiso03, gMaxneles);
+  resetDouble(fTeiso04, gMaxneles);
   resetDouble(fTdr03tksumpt, gMaxneles);
   resetDouble(fTdr04tksumpt, gMaxneles);
   resetDouble(fTdr03ecalrechitsumet, gMaxneles);

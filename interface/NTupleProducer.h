@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.49 2010/05/26 16:30:12 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.50 2010/05/26 17:00:34 fronga Exp $
 //
 //
 
@@ -387,7 +387,8 @@ private:
   double fTedzpv[gMaxneles];
   double fTedzE[gMaxneles];
   // Isolation
-  double fTeiso[gMaxneles];
+  double fTeiso03[gMaxneles];
+  double fTeiso04[gMaxneles];
   double fTdr03tksumpt[gMaxneles];
   double fTdr04tksumpt[gMaxneles];
   double fTdr03ecalrechitsumet[gMaxneles];
