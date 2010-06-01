@@ -1,10 +1,13 @@
 ####################################################################
 ## Cleaning parameters:
+# -- final acceptance cuts
+minJetPt              20.
+
 # -- Primary vertex:
-PrimVtxNdofmin        0
+PrimVtxNdofmin        5
 chisqVxmax            5.0
-dRVxmax               0.25
-dzVxmax               20.0
+dRVxmax               0.20
+dzVxmax               15.0
 sumPtTkfromVxmin      30.0
 
 # -- Vertex compatibility (of muons, electrons and jets)
@@ -17,24 +20,27 @@ MuonNHitsmin          10.0
 dRSSmuonmax           0.1
 
 # -- Electrons:
-ElecHoverEBarmax      0.02
-ElecHoverEEndmax      0.0025
-ElecSigmaEtaEtaBarmin 0.002  
+ElecHoverEBarmax      0.04
+ElecHoverEEndmax      0.025
+ElecSigmaEtaEtaBarmin 0.002
 ElecSigmaEtaEtaBarmax 0.01
 ElecSigmaEtaEtaEndmax 0.03
 ElecEoverPInBarmin    0.
 ElecEoverPInEndmin    0.
-ElecDeltaEtaInBarmax  0.006
-ElecDeltaEtaInEndmax  0.003
-ElecDeltaPhiInBarmax  0.02
-ElecDeltaPhiInEndmax  0.02
+ElecDeltaEtaInBarmax  0.004
+ElecDeltaEtaInEndmax  0.007
+ElecDeltaPhiInBarmax  0.06
+ElecDeltaPhiInEndmax  0.03
 ElecDeltaPhiOutBarmax 999.0
 ElecDeltaPhiOutEndmax 999.0
+ElecConvPartTrackDistmax 0.
+ElecConvPartTrackDCotmax 0.
+ElecNMissHitsmax      1.
 dRSSelecmax           10.
 
 # -- Photons:
-PhotHoverEBarmax      0.2
-PhotHoverEEndmax      0.2
+PhotHoverEBarmax      0.04
+PhotHoverEEndmax      0.025
 PhotSigmaEtaEtaBarmin 0.002
 PhotSigmaEtaEtaBarmax 0.01
 PhotSigmaEtaEtaEndmax 0.03
