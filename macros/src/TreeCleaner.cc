@@ -760,7 +760,6 @@ void TreeCleaner::DoCleanObjects(void){
 		fNJClean++;
 		for( int imu = 0; imu < fTR->NMus; ++imu ){
 		         if( ! fTR->MuIsIso[imu] ) {
-		                 AddToJet(1, imu, ichk);
 		                 fTR->MuGood[imu] += 1000;
 			 }
 		}
