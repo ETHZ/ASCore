@@ -317,7 +317,6 @@ void TreeCleaner::TagCleanObjects(void){
 
 	// Muons
 	for( int ichk = 0; ichk < fTR->NMus; ++ichk ){
-		if(fTR->MuIsGlobalMuon[ichk] == 0) continue; // Only consider global muons
 		fTR->MuGood[ichk] = 10*IsFromPrimaryVx(1, ichk);
 		fTR->MuGood[ichk] += CleanMuon(ichk);
 	}
