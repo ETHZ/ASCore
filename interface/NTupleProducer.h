@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.50 2010/05/26 17:00:34 fronga Exp $
+// $Id: NTupleProducer.h,v 1.51 2010/06/01 10:07:00 predragm Exp $
 //
 //
 
@@ -486,6 +486,11 @@ private:
   double fTPhotIso03TrkSolid[gMaxnphos];
   double fTPhotIso03TrkHollow[gMaxnphos];
   double fTPhotIso03[gMaxnphos];
+  double fTPhotIso04Ecal[gMaxnphos];
+  double fTPhotIso04Hcal[gMaxnphos];
+  double fTPhotIso04TrkSolid[gMaxnphos];
+  double fTPhotIso04TrkHollow[gMaxnphos];
+  double fTPhotIso04[gMaxnphos];
   double fTPhotcaloPosX[gMaxnphos];
   double fTPhotcaloPosY[gMaxnphos];
   double fTPhotcaloPosZ[gMaxnphos];
