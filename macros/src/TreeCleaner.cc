@@ -579,8 +579,8 @@ bool TreeCleaner::DuplPhotonElectron(int ichk){
 // Checks for duplicate photons with electrons
 	if( ichk < 0 ) return false;
 
-	//	int j = fTR->PhotDupEl[ichk];
-	// fiddle because duplicate flag not in ntuple
+	int j = fTR->PhoIsElDupl[ichk];
+/*	// fiddle because duplicate flag not in ntuple
 	double DR = 999.;
 	int j = -1;
 	for (int i = 0; i < fTR->NEles; ++i) {
@@ -590,8 +590,8 @@ bool TreeCleaner::DuplPhotonElectron(int ichk){
 	      j = i;
 	    }
 	}
-	if( j < 0 ) return false;
-
+	if( j < 0 || DR > 0.3) return false;
+*/
 	// Both are bad or both are good -> photon is duplicate
 	if( (fTR->PhoGood[ichk] == 0 && fTR->ElGood[j] == 0) || (fTR->PhoGood[ichk] != 0 && fTR->ElGood[j] != 0) ) return true;
 
@@ -759,9 +759,15 @@ void TreeCleaner::DoCleanObjects(void){
 		if( fTR->JGood[ichk] != 0 ) continue;
 		fNJClean++;
 		for( int imu = 0; imu < fTR->NMus; ++imu ){
-		         if( ! fTR->MuIsIso[imu] ) {
+		        if( fTR->MuGood[imu] != 0 ) continue;
+		        if ( ! fTR->MuIsIso[imu] ) {
+			         int ij = FindNearestJet(fTR->MuEta[imu], fTR->MuPhi[imu]);
+				 double DR = Util::GetDeltaR(fTR->MuEta[imu], fTR->JEta[ichk], fTR->MuPhi[imu], fTR->JPhi[ichk]);
+				 if (DR > fClean_deltaRElecJetmax) continue;
+				 if (ij != ichk) continue;
+			         AddToJet(1, imu, ichk);
 		                 fTR->MuGood[imu] += 1000;
-			 }
+			}
 		}
 		for( int iel = 0; iel < fTR->NEles; ++iel ){
 			if( fTR->ElIsInJet[iel] != ichk ) continue;
@@ -883,6 +889,7 @@ void TreeCleaner::AddToJet(int ipart, int ichk, int iJet){
 		fTR->JPhi[iJet] =  atan2(fTR->JPy[iJet], fTR->JPx[iJet]);
 		if (fTR->JChfrac[iJet] >= 0.)fTR->JChfrac[iJet] += ptadd / fTR->JPt[iJet];
 		fTR->JEMfrac[iJet] += emadd / fTR->JPt[iJet];
+		if (fTR->JEMfrac[iJet] > 1.) fTR->JEMfrac[iJet] = 1.;
 	}
 	return;
 }
@@ -986,6 +993,7 @@ int TreeCleaner::CleanEvent(void){
 	double pt_track = 0.;
 	double et_em = 0.;
 	double et_had = 0.;
+	double ptsum = 0.;
 	for( int i = 0; i < fTR->NMus; ++i ){
 		if(fTR->MuGood[i] != 0) continue;
 		pt_mu += fTR->MuPt[i];
@@ -998,6 +1006,7 @@ int TreeCleaner::CleanEvent(void){
 		double em = fTR->ElEt[i];
 		if (em < 0.) em = 0.;
 		et_em += em;
+		ptsum += em;
 		nChObj++;
 	}
 	for( int i = 0; i < fTR->NPhotons; ++i ){
@@ -1005,6 +1014,7 @@ int TreeCleaner::CleanEvent(void){
 		double em = fTR->PhoPt[i];
 		if (em < 0.) em = 0.;
 		et_em += em;
+		ptsum += em;
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
@@ -1017,6 +1027,7 @@ int TreeCleaner::CleanEvent(void){
 		pt_track += pt;
 		et_em    += em;
 		et_had   += had;
+		if( fTR->JChfrac[i] > 0. ) ptsum += pt;
 		if( fTR->JChfrac[i] > 0. ) nChObj++;
 	}
 
@@ -1027,7 +1038,7 @@ int TreeCleaner::CleanEvent(void){
 		fracCh = 1.;
 		fracEm = 1.;
 	} else {
-		fracCh = pt_track / (et_em + et_had + pt_mu);
+		fracCh = pt_track / (ptsum + pt_mu);
 		fracEm = et_em / (et_em + et_had + pt_mu);
 	}
 	if( fracEm < fClean_FracEmmin ) return 2;
