@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.61 2010/06/01 10:06:11 predragm Exp $
+// $Id: NTupleProducer.cc,v 1.62 2010/06/02 10:03:03 stiegerb Exp $
 //
 //
 
@@ -90,7 +90,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMuIsoDepHCTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
   fJetTag         = iConfig.getUntrackedParameter<edm::InputTag>("tag_jets");
   fJetCorrs       = iConfig.getUntrackedParameter<string>("jetCorrs");
-  fBtagTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag");
+  fBtag1Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag1");
+  fBtag2Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
+  fBtag3Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
+  fBtag4Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag4");
   fJetTracksTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
   fJetIDTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetID");
   fMET1Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met1");
@@ -218,10 +221,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   Handle<View<Jet> > jets;
   iEvent.getByLabel(fJetTag,jets); // 'sisCone5CaloJets'
 
-  // collect information for b-tagging
-  Handle<JetTagCollection> jetsAndProbs;
-  iEvent.getByLabel(fBtagTag,jetsAndProbs);
+  // collect information for b-tagging (4 tags)
+  Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
+  iEvent.getByLabel(fBtag1Tag,jetsAndProbsTkCntHighEff);
 
+  Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
+  iEvent.getByLabel(fBtag2Tag,jetsAndProbsTkCntHighPur);
+
+  Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
+  iEvent.getByLabel(fBtag3Tag,jetsAndProbsSimpSVHighEff);
+
+  Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
+  iEvent.getByLabel(fBtag4Tag,jetsAndProbsSimpSVHighPur);
+	
   // Jet tracks association (already done in PAT)
   Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
   if ( !fIsPat ) iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
@@ -944,20 +956,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     }
     fTjeMinDR[jqi] = ejDRmin;
 
-    // B-tagging probability
+    // B-tagging probability (for 4 b-taggings)
     if( !fIsPat ){
-      for (unsigned int i = 0; i < jetsAndProbs->size(); i++){
+      for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
         // Match by pt between the two "collections"
-        if( fabs( (fJUNC_px_match[index] - (*jetsAndProbs)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
-            fabs( (fJUNC_py_match[index] - (*jetsAndProbs)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-            fabs( (fJUNC_pz_match[index] - (*jetsAndProbs)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-          fTjbTagProb[jqi]=(*jetsAndProbs)[i].second;
+        if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+            fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+            fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+          fTjbTagProbTkCntHighEff[jqi]=(*jetsAndProbsTkCntHighEff)[i].second;
           break;
         }
       }
+		for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
+			// Match by pt between the two "collections"
+			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+				fTjbTagProbTkCntHighPur[jqi]=(*jetsAndProbsTkCntHighPur)[i].second;
+				break;
+			}
+		}
+		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
+			// Match by pt between the two "collections"
+			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+				fTjbTagProbSimpSVHighEff[jqi]=(*jetsAndProbsSimpSVHighEff)[i].second;
+				break;
+			}
+		}
+		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
+			// Match by pt between the two "collections"
+			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+				fTjbTagProbSimpSVHighPur[jqi]=(*jetsAndProbsSimpSVHighPur)[i].second;
+				break;
+			}
+		}
     } else {
       const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
-      fTjbTagProb[jqi] = pJ->bDiscriminator(fBtagTag.label());
+      fTjbTagProbTkCntHighEff[jqi] = pJ->bDiscriminator(fBtag1Tag.label());
+	  fTjbTagProbTkCntHighPur[jqi] = pJ->bDiscriminator(fBtag2Tag.label());
+	  fTjbTagProbSimpSVHighEff[jqi] = pJ->bDiscriminator(fBtag3Tag.label());
+	  fTjbTagProbSimpSVHighPur[jqi] = pJ->bDiscriminator(fBtag4Tag.label());
     }
 
     // Jet-track association: get associated tracks
@@ -1679,7 +1721,10 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JEtaHADrms"     ,&fTJEtaHADrms     ,"JEtaHADrms[NJets]/D");
   fEventTree->Branch("JPhiEMrms"      ,&fTJPhiEMrms      ,"JPhiEMrms[NJets]/D");
   fEventTree->Branch("JPhiHADrms"     ,&fTJPhiHADrms     ,"JPhiHADrms[NJets]/D");
-  fEventTree->Branch("JbTagProb"      ,&fTjbTagProb      ,"JbTagProb[NJets]/D");
+  fEventTree->Branch("JbTagProbTkCntHighEff"    ,&fTjbTagProbTkCntHighEff   ,"JbTagProbTkCntHighEff[NJets]/D");
+  fEventTree->Branch("JbTagProbTkCntHighPur"    ,&fTjbTagProbTkCntHighPur   ,"JbTagProbTkCntHighPur[NJets]/D");
+  fEventTree->Branch("JbTagProbSimpSVHighEff"   ,&fTjbTagProbSimpSVHighEff  ,"JbTagProbSimpSVHighEff[NJets]/D");
+  fEventTree->Branch("JbTagProbSimpSVHighPur"   ,&fTjbTagProbSimpSVHighPur  ,"JbTagProbSimpSVHighPur[NJets]/D");	
   fEventTree->Branch("JChfrac"        ,&fTjChfrac        ,"JChfrac[NJets]/D");
   fEventTree->Branch("JEFracHadronic" ,&fTjEfracHadr     ,"JEFracHadronic[NJets]/D");
   fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/D");
@@ -2136,7 +2181,10 @@ void NTupleProducer::resetTree(){
   resetDouble(fTjID_resEMF,  gMaxnjets);
   resetDouble(fTjID_HCALTow, gMaxnjets);
   resetDouble(fTjID_ECALTow, gMaxnjets);
-  resetDouble(fTjbTagProb, gMaxnjets);
+  resetDouble(fTjbTagProbTkCntHighEff, gMaxnjets);
+  resetDouble(fTjbTagProbTkCntHighPur, gMaxnjets);
+  resetDouble(fTjbTagProbSimpSVHighEff, gMaxnjets);
+  resetDouble(fTjbTagProbSimpSVHighPur, gMaxnjets);
   resetDouble(fTjChfrac,   gMaxnjets);
   resetDouble(fTjEfracHadr, gMaxnjets);
   resetDouble(fTjMass,   gMaxnjets);

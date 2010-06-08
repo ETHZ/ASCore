@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.51 2010/06/01 10:07:00 predragm Exp $
+// $Id: NTupleProducer.h,v 1.52 2010/06/02 10:03:03 stiegerb Exp $
 //
 //
 
@@ -122,7 +122,10 @@ private:
   edm::InputTag fMuIsoDepHCTag;
   edm::InputTag fJetTag;
   string fJetCorrs;
-  edm::InputTag fBtagTag;
+  edm::InputTag fBtag1Tag;
+  edm::InputTag fBtag2Tag;
+  edm::InputTag fBtag3Tag;
+  edm::InputTag fBtag4Tag;
   edm::InputTag fJetTracksTag;
   edm::InputTag fJetIDTag;
   edm::InputTag fMET1Tag;
@@ -536,7 +539,10 @@ private:
   double fTJEtaHADrms[gMaxnjets];
   double fTJPhiEMrms[gMaxnjets];
   double fTJPhiHADrms[gMaxnjets];
-  double fTjbTagProb[gMaxnjets];
+  double fTjbTagProbTkCntHighEff[gMaxnjets];
+  double fTjbTagProbTkCntHighPur[gMaxnjets];
+  double fTjbTagProbSimpSVHighEff[gMaxnjets];
+  double fTjbTagProbSimpSVHighPur[gMaxnjets];
   double fTjChfrac[gMaxnjets];
   double fTjEfracHadr[gMaxnjets];
   double fTjMass[gMaxnjets];

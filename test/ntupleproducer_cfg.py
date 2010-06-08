@@ -32,6 +32,9 @@ options.parseArguments()
 
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+#options.files= '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V26A_356ReReco-v1/0009/FEFC70B6-F53D-DF11-B57E-003048679150.root'
+#options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
+
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 options.output='NTupleProducer_36X_'+options.runon+'_'+options.recoType+'.root'
 
@@ -49,11 +52,13 @@ else:
     process.GlobalTag.globaltag = "START36_V9::All"
 
 ### b-tagging ##################################################################
-# Simple SV (+IP) based algos
-process.load("RecoBTag.Configuration.RecoBTag_cff")
+# Simple SV and TrackCounting based algos
+process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
+process.load("RecoBTau.JetTagComputer.jetTagRecord_cfi")
+process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex2TrkES_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex3TrkES_cfi")
-process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi")
+process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
 
 ### Input/Output ###############################################################
 # Input
@@ -135,7 +140,14 @@ if options.runon=='data':
         process.primaryVertexFilter
         )
 
-    
+### GenJets ####################################################################
+# produce ak5GenJets (collection missing in case of some Spring10 samples)
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")	
+
+process.mygenjets = cms.Sequence( process.genParticlesForJets
+								* process.ak5GenJets )
+
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
@@ -166,10 +178,15 @@ process.mybtag = cms.Sequence(	process.simpleSecondaryVertexHighPurBJetTags
 								* process.simpleSecondaryVertexHighEffBJetTags )
 
 process.p = cms.Path(
-    process.cleaning
+	  process.mygenjets
+    + process.cleaning
     + process.jecCorSequence
     + process.recoJetIdSequence
     + process.metCorSequence
     + process.mybtag
     + process.analyze
     )
+
+# remove ak5GenJets from the path if it will run on data
+if options.runon=='data':
+	process.p.remove(process.mygenjets)
