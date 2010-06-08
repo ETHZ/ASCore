@@ -51,7 +51,7 @@ FracEmminJet          0.01
 FracChminJet          0.05
 JID_n90Hitsmin        2.
 JID_HPDmax            0.98
-JID_RBXmax            0.97
+JID_RBXmax            0.95
 
 deltaRElecJetmax      0.5
 elecbyJetEratio       0.65
