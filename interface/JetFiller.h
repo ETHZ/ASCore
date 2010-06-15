@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFiller.h,v 1.1 2010/05/17 09:54:20 fronga Exp $
+// $Id: JetFiller.h,v 1.2 2010/05/25 16:39:12 fronga Exp $
 //
 //
 
@@ -64,7 +64,9 @@ protected:
   size_t gMaxnobjs;
 
   //- Configuration parameters
-  edm::InputTag fTag;
+  edm::InputTag fTag; 
+  edm::InputTag fJetID;	
+	edm::InputTag fJetTracksTag;
   std::string fJetCorrs; 
 
   // Pre-selection
@@ -83,15 +85,27 @@ protected:
   double* fTphi;
   double* fTscale;
   int*    fTNConstituents;
-  // Calo jets
-  double* fTEMfrac;
-  double* fTHadFrac;
-  // PF jets
+  double* fTjChfrac;
+	double* fTEMfrac;
+  double* fTID_HPD; 
+  double* fTID_RBX;    
+  double* fTID_n90Hits;
+  double* fTID_resEMF; 
   double* fTChHadFrac;
   double* fTNeuHadFrac;
   double* fTChEmFrac;
   double* fTNeuEmFrac;
-  int*    fTMuonMultiplicity;
+	int*    fTNeuMult;
+	int*    fTChMult;
+	int*    fTjnAssoTracks;
+	
+
+
+	
+  enum JetType {
+		CALO, PF, JPT, unknown
+  };
+  JetType fJetType;	
 
 };
 

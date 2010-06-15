@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.52 2010/06/02 10:03:03 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.53 2010/06/08 15:17:04 predragm Exp $
 //
 //
 
@@ -109,11 +109,12 @@ private:
   int fNTotEvents;
   int fNFillTree;
 
-  static const int gMaxnmus  = 20;
-  static const int gMaxneles = 20;
-  static const int gMaxnjets = 100;
-  static const int gMaxntrks = 500;
-  static const int gMaxnphos = 50;
+  static const int gMaxnmus     = 20;
+  static const int gMaxneles    = 20;
+  static const int gMaxnjets    = 100;
+  static const int gMaxntrks    = 500;
+  static const int gMaxnphos    = 50;
+	static const int gMaxngenlept = 100;
 
   edm::InputTag fMuonTag;
   edm::InputTag fElectronTag;
@@ -156,10 +157,13 @@ private:
   double fMintrkpt;
   double fMaxtrketa;
   double fMaxtrknchi2;
-  int fMintrknhits;
+  int	fMintrknhits;
 
   double fMinphopt;
   double fMaxphoeta;
+	
+	double fMingenleptpt; 
+	double fMaxgenlepteta;
 
   double fJUNC_px_match[gMaxnjets];
   double fJUNC_py_match[gMaxnjets];
@@ -250,13 +254,34 @@ private:
   int fTL1techres[gMaxl1techbits];
 
   // Flags
-  int fTgoodevent;      // 1 for good events, 0 for bad events
-  int fTflagmaxmuexc;   // Found more than 20 muons in event (0 is good, 1 is bad)
-  int fTflagmaxelexc;   // Found more than 20 electrons in event
-  int fTflagmaxujetexc; // Found more than 50 jets in event
-  int fTflagmaxjetexc;  // Found more than 50 uncorrected jets in event
-  int fTflagmaxtrkexc;  // Found more than 500 tracks in event
-  int fTflagmaxphoexc;  // Found more than 500 photons in event
+  int fTgoodevent;         // 1 for good events, 0 for bad events
+  int fTflagmaxmuexc;      // Found more than 20 muons in event (0 is good, 1 is bad)
+  int fTflagmaxelexc;      // Found more than 20 electrons in event
+  int fTflagmaxujetexc;    // Found more than 50 jets in event
+  int fTflagmaxjetexc;     // Found more than 50 uncorrected jets in event
+  int fTflagmaxtrkexc;     // Found more than 500 tracks in event
+  int fTflagmaxphoexc;     // Found more than 500 photons in event
+	int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
+	
+	// GenLeptons
+	
+	int fTngenleptons;      
+	int fTGenLeptonId[gMaxngenlept];      
+	double fTGenLeptonPt[gMaxngenlept];      
+	double fTGenLeptonEta[gMaxngenlept];     
+	double fTGenLeptonPhi[gMaxngenlept];     
+	int fTGenLeptonMId[gMaxngenlept];     
+	int fTGenLeptonMStatus[gMaxngenlept]; 
+	double fTGenLeptonMPt[gMaxngenlept];     
+	double fTGenLeptonMEta[gMaxngenlept];    
+	double fTGenLeptonMPhi[gMaxngenlept];    
+	int fTGenLeptonGMId[gMaxngenlept];    
+	int fTGenLeptonGMStatus[gMaxngenlept];
+	double fTGenLeptonGMPt[gMaxngenlept];    
+	double fTGenLeptonGMEta[gMaxngenlept];   
+	double fTGenLeptonGMPhi[gMaxngenlept]; 
+	
+	
 
   // Muons:
   int fTnmu;
@@ -363,6 +388,7 @@ private:
   double fTGenMuGMEta[gMaxnmus];
   double fTGenMuGMPhi[gMaxnmus];
   double fTGenMuGME[gMaxnmus];
+
 
   // Electrons:
   int fTneles;

@@ -18,7 +18,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
 options = VarParsing.VarParsing ('standard')					# set 'standard'  options
 options.register ('runon',										# register 'runon' option
-                  'data',										# the default value
+                  'data',										  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC35X, MC31X")
@@ -31,8 +31,8 @@ options.register ('recoType',									# register 'recoType' option
 options.parseArguments()
 
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
-#options.files= '/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V26A_356ReReco-v1/0009/FEFC70B6-F53D-DF11-B57E-003048679150.root'
+#options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 #options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
 
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
@@ -74,6 +74,11 @@ process.TFileService = cms.Service("TFileService",
 	closeFileFast = cms.untracked.bool(True)
 )
 
+
+#### Produce JPT jets #########################################################
+process.load('RecoJets.Configuration.RecoJPTJets_cff')
+					
+					
 #### Parameterisation for Jet Corrections and JES ME Corrections ###############
 recoJet_src = "ak5CaloJets"
 genJet_src = "ak5GenJets"
@@ -87,9 +92,9 @@ process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 # to check what cff to use
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.jecCorSequence = cms.Sequence(
-    process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
+    process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3*process.ak5JPTJetsL2L3
     )
-### NB: also check the analysis input below.
+### NB: also check the analysis input below.		
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
@@ -148,6 +153,8 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 process.mygenjets = cms.Sequence( process.genParticlesForJets
 								* process.ak5GenJets )
 
+#process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
@@ -160,13 +167,26 @@ process.analyze.jets = (
     # PF jets
     cms.PSet( prefix = cms.untracked.string('PF'),
               tag = cms.untracked.InputTag('ak5PFJets'),
+							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+							jet_id = cms.untracked.InputTag('ak5JetID'),			  
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
               ),
+	# JPT
+	cms.PSet( prefix = cms.untracked.string('JPT'),
+              tag = cms.untracked.InputTag('ak5JPTJetsL2L3'),
+							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+							jet_id = cms.untracked.InputTag('ak5JetID'),
+              sel_minpt  = process.analyze.sel_mincorjpt,
+              sel_maxeta = process.analyze.sel_maxjeta,
+              corrections = cms.string('ak5JPTL2L3'),
+              ),		  		  
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
+							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+							jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5CaloL2L3'),
@@ -178,12 +198,14 @@ process.mybtag = cms.Sequence(	process.simpleSecondaryVertexHighPurBJetTags
 								* process.simpleSecondaryVertexHighEffBJetTags )
 
 process.p = cms.Path(
-	  process.mygenjets
+	 process.recoJPTJets  
+		+ process.mygenjets
     + process.cleaning
     + process.jecCorSequence
     + process.recoJetIdSequence
     + process.metCorSequence
     + process.mybtag
+	#	+ process.dump
     + process.analyze
     )
 

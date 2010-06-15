@@ -23,6 +23,7 @@ CLASSNAME = 'TreeClassBase'
 HEADERNAME = CLASSNAME + '.h'
 SOURCENAME = CLASSNAME + '.C'
 MAXNLEPT = 20
+MAXNGENLEPT = 100
 MAXNJETS = 100
 MAXNPHOS = 50
 MAXNTRKS = 500
@@ -44,6 +45,10 @@ if __name__=='__main__':
 	headerFile = open(HEADERNAME, 'w')
 	
 	for line in headerLines:
+		pos = line.find('//[NGenLeptons]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNGENLEPT) + line[pos-5:len(line)]
+			line = newline
 		pos = line.find('//[NMus]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNLEPT) + line[pos-5:len(line)]
@@ -57,6 +62,18 @@ if __name__=='__main__':
 			newline = line[0:line.find('[')+1] + str(MAXNPHOS) + line[pos-5:len(line)]
 			line = newline
 		pos = line.find('//[NJets]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[PFNJets]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[CANJets]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[JPTNJets]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
 			line = newline

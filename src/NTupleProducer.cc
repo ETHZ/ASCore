@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.62 2010/06/02 10:03:03 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.63 2010/06/08 15:17:50 predragm Exp $
 //
 //
 
@@ -128,6 +128,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
   fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
   fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
+	fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
+	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
 
   // Create histograms and trees
   // - Histograms with trigger information
@@ -166,20 +168,22 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << "    fGenJetTag      = " << fGenJetTag.label()      ;
   edm::LogVerbatim("NTP") << endl;
   edm::LogVerbatim("NTP") << "  Event Selection Parameters:";
-  edm::LogVerbatim("NTP") << "    fMinmupt        = " << fMinmupt    ;
-  edm::LogVerbatim("NTP") << "    fMaxmueta       = " << fMaxmueta   ;
-  edm::LogVerbatim("NTP") << "    fMinelpt        = " << fMinelpt    ;
-  edm::LogVerbatim("NTP") << "    fMaxeleta       = " << fMaxeleta   ;
-  edm::LogVerbatim("NTP") << "    fMincorjpt      = " << fMincorjpt  ;
-  edm::LogVerbatim("NTP") << "    fMinrawjpt      = " << fMinrawjpt  ;
-  edm::LogVerbatim("NTP") << "    fMaxjeta        = " << fMaxjeta    ;
-  edm::LogVerbatim("NTP") << "    fMinjemfrac     = " << fMinjemfrac ;
-  edm::LogVerbatim("NTP") << "    fMintrkpt       = " << fMintrkpt   ;
-  edm::LogVerbatim("NTP") << "    fMaxtrketa      = " << fMaxtrketa  ;
-  edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2;
-  edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits;
-  edm::LogVerbatim("NTP") << "    fMinphopt       = " << fMinphopt   ;
-  edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta  ;
+  edm::LogVerbatim("NTP") << "    fMinmupt        = " << fMinmupt       ;
+  edm::LogVerbatim("NTP") << "    fMaxmueta       = " << fMaxmueta      ;
+  edm::LogVerbatim("NTP") << "    fMinelpt        = " << fMinelpt       ;
+  edm::LogVerbatim("NTP") << "    fMaxeleta       = " << fMaxeleta      ;
+  edm::LogVerbatim("NTP") << "    fMincorjpt      = " << fMincorjpt     ;
+  edm::LogVerbatim("NTP") << "    fMinrawjpt      = " << fMinrawjpt     ;
+  edm::LogVerbatim("NTP") << "    fMaxjeta        = " << fMaxjeta       ;
+  edm::LogVerbatim("NTP") << "    fMinjemfrac     = " << fMinjemfrac    ;
+  edm::LogVerbatim("NTP") << "    fMintrkpt       = " << fMintrkpt      ;
+  edm::LogVerbatim("NTP") << "    fMaxtrketa      = " << fMaxtrketa     ;
+  edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2   ;
+  edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits   ;
+  edm::LogVerbatim("NTP") << "    fMinphopt       = " << fMinphopt      ;
+  edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta     ;
+  edm::LogVerbatim("NTP") << "    fMingenleptpt   = " << fMingenleptpt  ;
+  edm::LogVerbatim("NTP") << "    fMaxgenlepteta  = " << fMaxgenlepteta ;	
   edm::LogVerbatim("NTP") << endl;
   edm::LogVerbatim("NTP") << "---------------------------------" ;
 
@@ -748,7 +752,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
           fTGenElME[eqi]       = ElMatch[1]->energy();
 
           fTGenElGMId[eqi]     = ElMatch[2]->pdgId();
-          fTGenElGMStatus[eqi] = ElMatch[2]->status();
+          fTGenElGMStatus[eqi] = ElMatch[2]->status(); 
           fTGenElGMCharge[eqi] = ElMatch[2]->charge();
           fTGenElGMPt[eqi]     = ElMatch[2]->pt();
           fTGenElGMEta[eqi]    = ElMatch[2]->eta();
@@ -1159,6 +1163,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       }
 
       fTjChfrac[jqi] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / jet->pt();
+
       fTjMass[jqi]   = sqrt(E2tmp - pXtmp*pXtmp - pYtmp*pYtmp - pZtmp*pZtmp);
       fTjMass[jqi]   *= 1/fTjChfrac[jqi];
     } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
@@ -1371,6 +1376,108 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTMETR12 = TMath::Sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
     fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
   }
+	
+	
+	
+	////////////////////////////////////////////////////////////////////////////////
+	// Get GenLeptons (el, mu) with pt>5 (+ Mother and GMother)
+  
+	
+	edm::Handle<GenParticleCollection> gen;
+  iEvent.getByLabel(fGenPartTag, gen);
+  GenParticleCollection::const_iterator g_part;
+	
+  vector<const GenParticle*> gen_lepts;
+  vector<const GenParticle*> gen_moms;
+  vector<const GenParticle*> gen_gmoms;
+	
+	
+	// loop over genparticles to get gen_els and gen_mus
+	for(g_part = gen->begin(); g_part != gen->end(); g_part++){
+		
+		const GenParticle* gen_lept = new GenParticle();
+		const GenParticle* gen_mom  = new GenParticle();
+		const GenParticle* gen_gmom = new GenParticle();
+		
+		// select the stable gen_lepts with pt >5 
+		if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13) continue;
+		if( g_part->status() != 1 ) continue;
+		if( g_part->pt()  < fMingenleptpt ) continue;
+		if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
+
+		int gen_id= g_part->pdgId();
+		gen_lept = &(*g_part);
+		
+		// get mother of gen_lept
+		gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+		int m_id = gen_mom -> pdgId();
+		
+		if(m_id != gen_id);
+		else{
+			int id= m_id;
+			while(id == gen_id){
+				gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
+				id=gen_mom->pdgId();
+			}
+		}
+		m_id = gen_mom->pdgId();
+		
+		// get gmom of gen_lept
+		gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+		int gm_id = gen_gmom->pdgId();
+		if (m_id != gm_id);
+		else{
+			int id=gm_id;
+			while(id == m_id){
+				gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
+				id = gen_gmom->pdgId();
+			}
+		}
+		
+		gen_lepts.push_back(gen_lept);	
+		gen_moms.push_back(gen_mom);
+		gen_gmoms.push_back(gen_gmom);
+
+
+	}
+	
+	
+	// set variables
+	if(gen_lepts.size()!=gen_moms.size() || gen_lepts.size()!=gen_gmoms.size()){
+		edm::LogWarning("NTP") << "@SUB=analyze"
+		                       << "ERROR in filling of GenLeptons!! ";
+	}else{
+		fTngenleptons =gen_lepts.size(); 
+		for(int i=0; i<fTngenleptons; ++i){
+			if( i >= gMaxngenlept){
+				edm::LogWarning("NTP") << "@SUB=analyze" 
+				<< "Maximum number of gen-leptons exceeded..";
+				fTflagmaxgenleptexc = 1;
+				fTgoodevent = 1;
+				break;
+			}
+			
+			fTGenLeptonId[i]       =   gen_lepts[i]->pdgId();  
+			fTGenLeptonPt[i]       =   gen_lepts[i]->pt();     
+			fTGenLeptonEta[i]      =   gen_lepts[i]->eta();    
+			fTGenLeptonPhi[i]      =   gen_lepts[i]->phi(); 
+			
+			fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();  
+			fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
+			fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
+			fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
+			fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
+			
+			fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
+			fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
+			fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt(); 
+			fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
+			fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
+		}
+	}
+	
+	
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // Fill Tree ///////////////////////////////////////////////////////////////////
@@ -1455,6 +1562,28 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc   ,"MaxPhotonsExceed/I");
   fEventTree->Branch("HBHENoiseFlag",    &fTHBHENoiseFlag   ,"HBHENoiseFlag/I");
 
+	
+	// Gen-Leptons
+	fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
+  fEventTree->Branch("GenLeptonID"      ,&fTGenLeptonId         ,"GenLeptonID[NGenLeptons]/I");
+  fEventTree->Branch("GenLeptonPt"      ,&fTGenLeptonPt         ,"GenLeptonPt[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonEta"     ,&fTGenLeptonEta        ,"GenLeptonEta[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonPhi"     ,&fTGenLeptonPhi        ,"GenLeptonPhi[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonMID"     ,&fTGenLeptonMId        ,"GenLeptonMID[NGenLeptons]/I");
+  fEventTree->Branch("GenLeptonMStatus" ,&fTGenLeptonMStatus    ,"GenLeptonMStatus[NGenLeptons]/I");
+  fEventTree->Branch("GenLeptonMPt"     ,&fTGenLeptonMPt        ,"GenLeptonMPt[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonMEta"    ,&fTGenLeptonMEta       ,"GenLeptonMEta[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonMPhi"    ,&fTGenLeptonMPhi       ,"GenLeptonMPhi[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonGMID"    ,&fTGenLeptonGMId       ,"GenLeptonGMID[NGenLeptons]/I");
+  fEventTree->Branch("GenLeptonGMStatus",&fTGenLeptonGMStatus   ,"GenLeptonGMStatus[NGenLeptons]/I");
+  fEventTree->Branch("GenLeptonGMPt"    ,&fTGenLeptonGMPt       ,"GenLeptonGMPt[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonGMEta"   ,&fTGenLeptonGMEta      ,"GenLeptonGMEta[NGenLeptons]/D");
+  fEventTree->Branch("GenLeptonGMPhi"   ,&fTGenLeptonGMPhi      ,"GenLeptonGMPhi[NGenLeptons]/D");
+
+	
+	
+	
+	
   // Muons:
   fEventTree->Branch("NMus"             ,&fTnmu              ,"NMus/I");
   fEventTree->Branch("NMusTot"          ,&fTnmutot           ,"NMusTot/I");
@@ -1957,6 +2086,7 @@ void NTupleProducer::resetTree(){
   fTflagmaxjetexc    = 0;
   fTflagmaxtrkexc    = 0;
   fTflagmaxphoexc    = 0;
+	fTflagmaxgenleptexc= 0;
 
   fTnmu         = 0;
   fTnmutot      = 0;
@@ -1970,6 +2100,24 @@ void NTupleProducer::resetTree(){
   fTntrackstot  = 0;
   fTnphotons    = 0;
   fTnphotonstot = 0;
+	fTngenleptons = 0;
+	
+	
+	resetInt(fTGenLeptonId       ,gMaxngenlept);
+	resetDouble(fTGenLeptonPt    ,gMaxngenlept);
+	resetDouble(fTGenLeptonEta   ,gMaxngenlept);
+	resetDouble(fTGenLeptonPhi   ,gMaxngenlept);
+	resetInt(fTGenLeptonMId      ,gMaxngenlept);
+	resetInt(fTGenLeptonMStatus  ,gMaxngenlept);
+	resetDouble(fTGenLeptonMPt   ,gMaxngenlept);
+	resetDouble(fTGenLeptonMEta  ,gMaxngenlept);
+	resetDouble(fTGenLeptonMPhi  ,gMaxngenlept);
+	resetInt(fTGenLeptonGMId     ,gMaxngenlept);
+	resetInt(fTGenLeptonGMStatus ,gMaxngenlept);
+	resetDouble(fTGenLeptonGMPt  ,gMaxngenlept);
+	resetDouble(fTGenLeptonGMEta ,gMaxngenlept);
+	resetDouble(fTGenLeptonGMPhi ,gMaxngenlept);
+	
 
   resetInt(fTgoodmu, gMaxnmus);
   resetInt(fTmuIsIso, gMaxnmus);
