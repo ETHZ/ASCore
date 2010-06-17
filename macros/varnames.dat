@@ -211,11 +211,11 @@ JEcorr[0]		JES Correction Factor of j_{1}
 JEcorr[1]		JES Correction Factor of j_{2}
 JEcorr[2]		JES Correction Factor of j_{3}
 JEcorr[3]		JES Correction Factor of j_{4}
-JbTagProb		B-Tagging Probability of jets
-JbTagProb[0]		B-Tagging Probability of j_{1}
-JbTagProb[1]		B-Tagging Probability of j_{2}
-JbTagProb[2]		B-Tagging Probability of j_{3}
-JbTagProb[3]		B-Tagging Probability of j_{4}
+JbTagProbTkCntHighEff	B-Tagging Probability of jets (TkCntHighEff)
+JbTagProbTkCntHighEff[0]	B-Tagging Probability of j_{1} (TkCntHighEff)
+JbTagProbTkCntHighEff[1]	B-Tagging Probability of j_{2} (TkCntHighEff)
+JbTagProbTkCntHighEff[2]	B-Tagging Probability of j_{3} (TkCntHighEff)
+JbTagProbTkCntHighEff[3]	B-Tagging Probability of j_{4} (TkCntHighEff)
 JNConstituents		Number of Constituents of jets
 JNConstituents[0]			Number of Constituents of j_{1}
 JNConstituents[1]			Number of Constituents of j_{2}

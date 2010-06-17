@@ -1968,7 +1968,10 @@ void TreeCleaner::PutJet(int inew, int iold){
 	fTR->JEtaHADrms     [inew] = fTR->JEtaHADrms     [iold];
 	fTR->JPhiEMrms      [inew] = fTR->JPhiEMrms      [iold];
 	fTR->JPhiHADrms     [inew] = fTR->JPhiHADrms     [iold];
-	fTR->JbTagProb      [inew] = fTR->JbTagProb      [iold];
+	fTR->JbTagProbTkCntHighEff[inew]  = fTR->JbTagProbTkCntHighEff[iold];
+        fTR->JbTagProbTkCntHighPur[inew]  = fTR->JbTagProbTkCntHighPur[iold];
+        fTR->JbTagProbSimpSVHighEff[inew] = fTR->JbTagProbSimpSVHighEff[iold];
+        fTR->JbTagProbSimpSVHighPur[inew] = fTR->JbTagProbSimpSVHighPur[iold];
 	fTR->JChfrac        [inew] = fTR->JChfrac        [iold];
 	fTR->JEFracHadronic [inew] = fTR->JEFracHadronic [iold];
 	fTR->JMass          [inew] = fTR->JMass          [iold];
