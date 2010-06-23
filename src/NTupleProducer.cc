@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.64 2010/06/15 16:05:49 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.65 2010/06/23 14:03:44 fronga Exp $
 //
 //
 
@@ -1381,7 +1381,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Get GenLeptons (el, mu) with pt>5 (+ Mother and GMother)
-  
+   if(!fIsRealData){
 	
 	edm::Handle<GenParticleCollection> gen;
   iEvent.getByLabel(fGenPartTag, gen);
@@ -1471,6 +1471,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
 		}
 	}
+
+   }
 	
 	
 
