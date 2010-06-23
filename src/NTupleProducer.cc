@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.63 2010/06/08 15:17:50 predragm Exp $
+// $Id: NTupleProducer.cc,v 1.64 2010/06/15 16:05:49 pnef Exp $
 //
 //
 
@@ -1395,10 +1395,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// loop over genparticles to get gen_els and gen_mus
 	for(g_part = gen->begin(); g_part != gen->end(); g_part++){
 		
-		const GenParticle* gen_lept = new GenParticle();
-		const GenParticle* gen_mom  = new GenParticle();
-		const GenParticle* gen_gmom = new GenParticle();
-		
 		// select the stable gen_lepts with pt >5 
 		if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13) continue;
 		if( g_part->status() != 1 ) continue;
@@ -1406,10 +1402,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
 		int gen_id= g_part->pdgId();
-		gen_lept = &(*g_part);
+		const GenParticle* gen_lept = &(*g_part);
 		
 		// get mother of gen_lept
-		gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+		const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
 		int m_id = gen_mom -> pdgId();
 		
 		if(m_id != gen_id);
@@ -1423,7 +1419,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		m_id = gen_mom->pdgId();
 		
 		// get gmom of gen_lept
-		gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+		const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
 		int gm_id = gen_gmom->pdgId();
 		if (m_id != gm_id);
 		else{
