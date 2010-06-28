@@ -15,8 +15,7 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 ### Switch for type of run (data, MC) and reconstruction (RECO, PAT, PF) #######
 #runon = 'data'
-runon = 'MC31x'
-#runon = 'MC34x'
+runon = 'MC35x'
 #recoType = 'RECO'
 recoType = 'PAT'
 #recoType = 'PF'
@@ -28,10 +27,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if runon=='data':
     process.GlobalTag.globaltag = "GR09_R_34X_V3::All"
 else:
-    # CMSSW_3_4_X:
-    process.GlobalTag.globaltag = "MC_3XY_V18::All"
-    # CMSSW_3_3_X:
-    # process.GlobalTag.globaltag = "MC_31X_V3::All"
+    process.GlobalTag.globaltag = "START3X_V25B::All"
 
 ### b-tagging ##################################################################
 process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")

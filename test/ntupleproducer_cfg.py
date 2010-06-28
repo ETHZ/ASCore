@@ -16,9 +16,9 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 
 ### Parsing of command line parameters #############################################
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
-options = VarParsing.VarParsing ('standard')					# set 'standard'  options
-options.register ('runon',										# register 'runon' option
-                  'data',										  # the default value
+options = VarParsing.VarParsing ('standard') # set 'standard'  options
+options.register ('runon', # register 'runon' option
+                  'data', # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC35X, MC31X")
@@ -28,14 +28,14 @@ options.register ('recoType',									# register 'recoType' option
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
-options.parseArguments()
-
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 #options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
-
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
+
+# Now parse arguments from command line (might overwrite defaults)
+options.parseArguments()
 options.output='NTupleProducer_36X_'+options.runon+'_'+options.recoType+'.root'
 
 ### Running conditions #########################################################
@@ -138,12 +138,8 @@ if options.runon=='data':
                                                maxd0 = cms.double(2)
                                                )
     # Cleaning path
-    process.cleaning *= cms.Sequence(
-        process.hltLevel1GTSeed*
-        process.scrapingVeto*
-        process.hltPhysicsDeclared*
-        process.primaryVertexFilter
-        )
+    process.cleaning *= process.hltLevel1GTSeed*process.scrapingVeto*process.hltPhysicsDeclared*process.primaryVertexFilter
+        
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
@@ -152,8 +148,6 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 process.mygenjets = cms.Sequence( process.genParticlesForJets
 								* process.ak5GenJets )
-
-#process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
@@ -193,13 +187,24 @@ process.analyze.jets = (
               ),
     )
 
+#### DEBUG #####################################################################
+#process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+#    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
+#)
+#process.ProfilerService = cms.Service("ProfilerService",
+#                                      firstEvent = cms.untracked.int32(2),
+#                                      lastEvent = cms.untracked.int32(51),
+#                                      paths = cms.untracked.vstring(['p'])
+#                                      )
+
 #### Path ######################################################################
 process.mybtag = cms.Sequence(	process.simpleSecondaryVertexHighPurBJetTags
 								* process.simpleSecondaryVertexHighEffBJetTags )
 
 process.p = cms.Path(
-	 process.recoJPTJets  
-		+ process.mygenjets
+    process.recoJPTJets  
+    + process.mygenjets
     + process.cleaning
     + process.jecCorSequence
     + process.recoJetIdSequence
@@ -212,3 +217,4 @@ process.p = cms.Path(
 # remove ak5GenJets from the path if it will run on data
 if options.runon=='data':
 	process.p.remove(process.mygenjets)
+
