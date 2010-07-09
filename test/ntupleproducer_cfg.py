@@ -29,8 +29,8 @@ options.register ('recoType',									# register 'recoType' option
                   "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-#options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
-options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
+options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+#options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 #options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
@@ -46,10 +46,10 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_3_6_X:
-    process.GlobalTag.globaltag = "GR_R_36X_V11::All"
+    process.GlobalTag.globaltag = "GR_R_36X_V12::All"
 else:
     # CMSSW_3_6_X:
-    process.GlobalTag.globaltag = "START36_V9::All"
+    process.GlobalTag.globaltag = "START36_V10::All"
 
 ### b-tagging ##################################################################
 # Simple SV and TrackCounting based algos
@@ -124,12 +124,6 @@ if options.runon=='data':
                                         thresh = cms.untracked.double(0.2)
                                         )
 
-    # configure HLT
-    process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
-    process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
-    process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
-    process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39)')
-
     # require good primary vertex
     process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
                                                vertexCollection = cms.InputTag('offlinePrimaryVertices'),
@@ -138,8 +132,8 @@ if options.runon=='data':
                                                maxd0 = cms.double(2)
                                                )
     # Cleaning path
-    process.cleaning *= process.hltLevel1GTSeed*process.scrapingVeto*process.hltPhysicsDeclared*process.primaryVertexFilter
-        
+    process.cleaning *= process.scrapingVeto*process.hltPhysicsDeclared*process.primaryVertexFilter
+
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
