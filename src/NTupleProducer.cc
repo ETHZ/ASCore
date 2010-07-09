@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.65 2010/06/23 14:03:44 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.66 2010/06/23 14:21:28 fronga Exp $
 //
 //
 
@@ -85,6 +85,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // InputTags
   fMuonTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_muons");
   fElectronTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_electrons");
+  fEleIdWP        = iConfig.getUntrackedParameter<string>("tag_elidWP");
   fMuIsoDepTkTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
   fMuIsoDepECTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
   fMuIsoDepHCTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
@@ -113,6 +114,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
   fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
+
   // Event Selection
   fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
   fMaxmueta       = iConfig.getParameter<double>("sel_maxmueta");
@@ -128,8 +130,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
   fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
   fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
-	fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
-	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
+  fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
+  fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
 
   // Create histograms and trees
   // - Histograms with trigger information
@@ -150,6 +152,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << "  Input Tags:";
   edm::LogVerbatim("NTP") << "    fMuonTag        = " << fMuonTag.label()        ;
   edm::LogVerbatim("NTP") << "    fElectronTag    = " << fElectronTag.label()    ;
+  edm::LogVerbatim("NTP") << "    fEleIdWP        = " << fEleIdWP                ;
   edm::LogVerbatim("NTP") << "    fMuIsoDepTkTag  = " << fMuIsoDepTkTag.label()  ;
   edm::LogVerbatim("NTP") << "    fMuIsoDepECTag  = " << fMuIsoDepECTag.label()  ;
   edm::LogVerbatim("NTP") << "    fMuIsoDepHCTag  = " << fMuIsoDepHCTag.label()  ;
@@ -606,7 +609,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTnelestot = 0;
   if(electrons->size() > 0){
     // Read eID results
-    vector<Handle<ValueMap<float> > > eIDValueMap(4); 
+    vector<Handle<ValueMap<float> > > eIDValueMap(7); 
     // Robust-Loose 
     iEvent.getByLabel( "eidRobustLoose", eIDValueMap[0] ); 
     const ValueMap<float> & eIDmapRL = *eIDValueMap[0] ;
@@ -619,6 +622,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     // Tight 
     iEvent.getByLabel( "eidTight", eIDValueMap[3] ); 
     const ValueMap<float> & eIDmapT  = *eIDValueMap[3] ;
+	// WP from config
+    iEvent.getByLabel( fEleIdWP, eIDValueMap[4] ); 
+    const ValueMap<float> & eIDmapsimpleWP  = *eIDValueMap[4] ;
+	// WP80
+    iEvent.getByLabel( "simpleEleId80relIso", eIDValueMap[5] ); 
+    const ValueMap<float> & eIDmapsimpleWP80  = *eIDValueMap[5] ;
+	// WP95
+    iEvent.getByLabel( "simpleEleId95relIso", eIDValueMap[6] ); 
+    const ValueMap<float> & eIDmapsimpleWP95  = *eIDValueMap[6] ;
+
     eIDValueMap.clear();
 
     // Loop over electrons
@@ -646,9 +659,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       // Dump electron properties in tree variables
       eqi++;
 
-      fTepx[eqi]       = El->gsfTrack()->px();
-      fTepy[eqi]       = El->gsfTrack()->py();
-      fTepz[eqi]       = El->gsfTrack()->pz();
+      fTepx[eqi]       = El->px();
+      fTepy[eqi]       = El->py();
+      fTepz[eqi]       = El->pz();
       fTept[eqi]       = El->pt();
       fTeptE[eqi]      = El->gsfTrack()->ptError();
       fTeeta[eqi]      = El->eta();
@@ -720,16 +733,24 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       // Read in Electron ID
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
         Ref<View<GsfElectron> > electronRef(electrons,ei);
-        fTeIDTight[eqi]       = eIDmapT[electronRef]  ? 1:0;
-        fTeIDLoose[eqi]       = eIDmapL[electronRef]  ? 1:0;
-        fTeIDRobustTight[eqi] = eIDmapRT[electronRef] ? 1:0;
-        fTeIDRobustLoose[eqi] = eIDmapRL[electronRef] ? 1:0;
+        fTeIDTight[eqi]            = eIDmapT[electronRef]  ? 1:0;
+        fTeIDLoose[eqi]            = eIDmapL[electronRef]  ? 1:0;
+        fTeIDRobustTight[eqi]      = eIDmapRT[electronRef] ? 1:0;
+        fTeIDRobustLoose[eqi]      = eIDmapRL[electronRef] ? 1:0;
+		fTeIDsimpleWPrelIso[eqi]   = eIDmapsimpleWP[electronRef];
+		fTeIDsimpleWP95relIso[eqi] = eIDmapsimpleWP95[electronRef];
+		fTeIDsimpleWP80relIso[eqi] = eIDmapsimpleWP80[electronRef];
+		
       } else {
-        const pat::Electron* pEl = static_cast<const pat::Electron*>(&(*El));
-        fTeIDTight[eqi]       = pEl->electronID("eidTight") > 0. ? 1:0;
-        fTeIDLoose[eqi]       = pEl->electronID("eidLoose") > 0. ? 1:0;
-        fTeIDRobustTight[eqi] = pEl->electronID("eidRobustTight") > 0. ? 1:0;
-        fTeIDRobustLoose[eqi] = pEl->electronID("eidRobustLoose") > 0. ? 1:0;
+        const pat::Electron* pEl   = static_cast<const pat::Electron*>(&(*El));
+        fTeIDTight[eqi]            = pEl->electronID("eidTight") > 0. ? 1:0;
+        fTeIDLoose[eqi]            = pEl->electronID("eidLoose") > 0. ? 1:0;
+        fTeIDRobustTight[eqi]      = pEl->electronID("eidRobustTight") > 0. ? 1:0;
+        fTeIDRobustLoose[eqi]      = pEl->electronID("eidRobustLoose") > 0. ? 1:0;
+		fTeIDsimpleWPrelIso[eqi]   = pEl->electronID(fEleIdWP);
+		fTeIDsimpleWP95relIso[eqi] = pEl->electronID("simpleEleId95relIso");
+		fTeIDsimpleWP80relIso[eqi] = pEl->electronID("simpleEleId80relIso");
+		
       }
       // Matching
       if(!fIsRealData){
@@ -1726,6 +1747,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElIDLoose"                   ,&fTeIDLoose           ,"ElIDLoose[NEles]/I");
   fEventTree->Branch("ElIDRobustTight"             ,&fTeIDRobustTight     ,"ElIDRobustTight[NEles]/I");
   fEventTree->Branch("ElIDRobustLoose"             ,&fTeIDRobustLoose     ,"ElIDRobustLoose[NEles]/I");
+  fEventTree->Branch("ElIDsimpleWPrelIso"          ,&fTeIDsimpleWPrelIso    ,"ElIDsimpleWPrelIso[NEles]/I");
+  fEventTree->Branch("ElIDsimpleWP80relIso"        ,&fTeIDsimpleWP80relIso  ,"ElIDsimpleWP80relIso[NEles]/I");
+  fEventTree->Branch("ElIDsimpleWP95relIso"        ,&fTeIDsimpleWP95relIso  ,"ElIDsimpleWP95relIso[NEles]/I");
   fEventTree->Branch("ElInGap"                     ,&fTeInGap             ,"ElInGap[NEles]/I");
   fEventTree->Branch("ElEcalDriven"                ,&fTeEcalDriven        ,"ElEcalDriven[NEles]/I");
   fEventTree->Branch("ElTrackerDriven"             ,&fTeTrackerDriven     ,"ElTrackerDriven[NEles]/I");
@@ -2288,7 +2312,9 @@ void NTupleProducer::resetTree(){
   resetInt(fTeIDLoose, gMaxneles);
   resetInt(fTeIDRobustTight, gMaxneles);
   resetInt(fTeIDRobustLoose, gMaxneles);
-
+  resetInt(fTeIDsimpleWPrelIso, gMaxneles);
+  resetInt(fTeIDsimpleWP95relIso, gMaxneles);
+  resetInt(fTeIDsimpleWP80relIso, gMaxneles);
   resetInt(fTGenElId, gMaxneles);
   resetInt(fTGenElStatus, gMaxneles);
   resetInt(fTGenElCharge, gMaxneles);

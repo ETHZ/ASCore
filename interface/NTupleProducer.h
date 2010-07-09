@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.53 2010/06/08 15:17:04 predragm Exp $
+// $Id: NTupleProducer.h,v 1.54 2010/06/15 16:05:49 pnef Exp $
 //
 //
 
@@ -114,10 +114,11 @@ private:
   static const int gMaxnjets    = 100;
   static const int gMaxntrks    = 500;
   static const int gMaxnphos    = 50;
-	static const int gMaxngenlept = 100;
+  static const int gMaxngenlept = 100;
 
   edm::InputTag fMuonTag;
   edm::InputTag fElectronTag;
+  string fEleIdWP;
   edm::InputTag fMuIsoDepTkTag;
   edm::InputTag fMuIsoDepECTag;
   edm::InputTag fMuIsoDepHCTag;
@@ -430,6 +431,9 @@ private:
   int fTeIDLoose[gMaxneles];
   int fTeIDRobustTight[gMaxneles];
   int fTeIDRobustLoose[gMaxneles];
+  int fTeIDsimpleWPrelIso[gMaxneles];
+  int fTeIDsimpleWP95relIso[gMaxneles];
+  int fTeIDsimpleWP80relIso[gMaxneles];
   int fTecharge[gMaxneles];
   int fTeCInfoIsGsfCtfCons[gMaxneles];
   int fTeCInfoIsGsfCtfScPixCons[gMaxneles];

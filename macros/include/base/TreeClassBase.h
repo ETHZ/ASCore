@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Jun 15 17:56:36 2010 by ROOT version 5.22/00d
+// Fri Jul  9 15:26:59 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: ../test/TTbarJets_madgraph_Spring10_sync_20k_8/res/TTbar_20k.root
+// found on file: ../test/NTupleProducer_36X_MC35X_RECO.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -213,6 +213,9 @@ public :
    Int_t           ElIDLoose[20];   //[NEles]
    Int_t           ElIDRobustTight[20];   //[NEles]
    Int_t           ElIDRobustLoose[20];   //[NEles]
+   Int_t           ElIdsimpleWPrelIso[20];   //[NEles]
+   Int_t           ElIdsimpleWP80relIso[20];   //[NEles]
+   Int_t           ElIdsimpleWP95relIso[20];   //[NEles]
    Int_t           ElInGap[20];   //[NEles]
    Int_t           ElEcalDriven[20];   //[NEles]
    Int_t           ElTrackerDriven[20];   //[NEles]
@@ -672,6 +675,9 @@ public :
    TBranch        *b_ElIDLoose;   //!
    TBranch        *b_ElIDRobustTight;   //!
    TBranch        *b_ElIDRobustLoose;   //!
+   TBranch        *b_ElIdsimpleWPrelIso;   //!
+   TBranch        *b_ElIdsimpleWP80relIso;   //!
+   TBranch        *b_ElIdsimpleWP95relIso;   //!
    TBranch        *b_ElInGap;   //!
    TBranch        *b_ElEcalDriven;   //!
    TBranch        *b_ElTrackerDriven;   //!
@@ -954,9 +960,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/TTbarJets_madgraph_Spring10_sync_20k_8/res/TTbar_20k.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_36X_MC35X_RECO.root");
       if (!f) {
-         f = new TFile("../test/TTbarJets_madgraph_Spring10_sync_20k_8/res/TTbar_20k.root");
+         f = new TFile("../test/NTupleProducer_36X_MC35X_RECO.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1202,6 +1208,9 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElIDLoose", ElIDLoose, &b_ElIDLoose);
    fChain->SetBranchAddress("ElIDRobustTight", ElIDRobustTight, &b_ElIDRobustTight);
    fChain->SetBranchAddress("ElIDRobustLoose", ElIDRobustLoose, &b_ElIDRobustLoose);
+   fChain->SetBranchAddress("ElIdsimpleWPrelIso", ElIdsimpleWPrelIso, &b_ElIdsimpleWPrelIso);
+   fChain->SetBranchAddress("ElIdsimpleWP80relIso", ElIdsimpleWP80relIso, &b_ElIdsimpleWP80relIso);
+   fChain->SetBranchAddress("ElIdsimpleWP95relIso", ElIdsimpleWP95relIso, &b_ElIdsimpleWP95relIso);
    fChain->SetBranchAddress("ElInGap", ElInGap, &b_ElInGap);
    fChain->SetBranchAddress("ElEcalDriven", ElEcalDriven, &b_ElEcalDriven);
    fChain->SetBranchAddress("ElTrackerDriven", ElTrackerDriven, &b_ElTrackerDriven);

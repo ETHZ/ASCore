@@ -74,6 +74,8 @@ process.TFileService = cms.Service("TFileService",
 	closeFileFast = cms.untracked.bool(True)
 )
 
+#### Electron ID ##############################################################
+process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
 #### Produce JPT jets #########################################################
 process.load('RecoJets.Configuration.RecoJPTJets_cff')
@@ -202,6 +204,7 @@ process.p = cms.Path(
     + process.cleaning
     + process.jecCorSequence
     + process.recoJetIdSequence
+    + process.simpleEleIdSequence
     + process.metCorSequence
     + process.mybtag
 	#	+ process.dump
