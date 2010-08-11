@@ -27,6 +27,13 @@ namespace Util {
   }
 
   //__________________________________________________________________________
+  inline TFile* MakeOutputFile(TString filename){
+    if(!filename.EndsWith(".root")) filename += ".root";
+    TFile *file = new TFile(filename, "RECREATE");
+    return file;
+  }
+
+  //__________________________________________________________________________
   inline void SetStyle(){
     TStyle *style = new TStyle("ETHStyle", "Standard Plain");
     style->SetCanvasColor(0);
@@ -166,6 +173,13 @@ namespace Util {
     // Print plot (PNG, EPS and to file)
     Util::PrintPNG(cin,name,dir);
     Util::PrintEPS(cin,name,dir);
+    if ( file ) Util::SaveAll(cin,dir,file); 
+  }
+
+  //__________________________________________________________________________
+  inline void PrintNoEPS(TCanvas *cin, TString name, TString dir, TFile* file=0) {
+    // Print plot (PNG and to file)
+    Util::PrintPNG(cin,name,dir);
     if ( file ) Util::SaveAll(cin,dir,file); 
   }
 

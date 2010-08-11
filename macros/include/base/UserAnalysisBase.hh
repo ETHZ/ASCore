@@ -19,6 +19,7 @@ public:
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
+	inline void SetOutputFile(TString file){ fOutputFile = Util::MakeOutputFile(fOutputDir + file); };
 
 	virtual void ReadPDGTable(const char* filename = "pdgtable.txt");
 	virtual int GetPDGParticle(pdgparticle&, int);
@@ -28,12 +29,29 @@ public:
 
 	TreeReader *fTR;
 	TString fOutputDir;
+	TFile *fOutputFile;
 	TString fTag;
 	TLatex *fTlat;
 
 	int fVerbose;
 	map<int, pdgparticle> fPDGMap;	// Mapping of PDG ID names
 	map<string, int> fHLTLabelMap;	// Mapping of HLT trigger bit names
+
+	// Jet Selectors
+	virtual bool IsGoodBasicJet(int);
+
+	// Muon Selectors
+	virtual bool IsGoodBasicMu(int);
+	virtual bool IsTightMu(int);
+	virtual bool IsLooseMu(int);
+	virtual bool IsLooseNoTightMu(int);
+
+	// Event Selectors
+	virtual bool IsGoodMuEvent();
+	virtual bool IsGoodElEvent();
+	virtual bool SingleMuonSelection(int&);
+	virtual bool DiMuonSelection(int&, int&);
+	virtual bool SSDiMuonSelection(int &, int&);
 
 private:
 

@@ -95,6 +95,134 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	}
 }
 
+// Object selections:
+bool UserAnalysisBase::IsGoodBasicJet(int index){
+	// Basic Jet cleaning and ID cuts
+	if(fTR->JPt[index] < 30) return false;
+	if(fabs(fTR->JEta[index]) > 3.0) return false;
+
+	if(fTR->JEt[index] - fTR->JPt[index] < -0.0001 ) return false;
+	if(fTR->JID_n90Hits[index] < 2 ) return false;
+	if(fTR->JID_HPD[index] > 0.98 ) return false;
+	if(fTR->JID_RBX[index] > 0.95 ) return false;
+	if(fTR->JEMfrac[index] > 1. ) return false;
+	if(fTR->JEMfrac[index] < 0.01 ) return false;
+	// Have a linearly decreasing cut value in the transition region where
+	// the jet cones intersects with the tracker acceptance, i.e. between
+	// eta 1.9 and 2.9
+	const double chmin = 0.05;
+	double temp = chmin;
+	if(fabs(fTR->JEta[index]) > 1.9) temp = chmin * (1. - fabs(fTR->JEta[index]) + 1.9);
+	if(fabs(fTR->JEta[index]) > 2.9) temp = 0.;
+	if( fTR->JChfrac[index] < temp && fabs(fTR->JEta[index]) < 2.9) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodBasicMu(int index){
+	// Basic muon cleaning and ID cuts
+	if(fTR->MuIsGlobalMuon[index] == 0) return false;
+	if(fTR->MuIsTrackerMuon[index] == 0) return false;
+	if(fTR->MuPt[index] < 10) return false;
+	if(fTR->MuNChi2[index] > 10) return false;
+	if(fTR->MuNTkHits[index] < 11) return false;
+	if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsTightMu(int index){
+	if(!IsGoodBasicMu(index)) return false;
+	if(fTR->MuRelIso03[index] > 0.15) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsLooseMu(int index){
+	if(!IsGoodBasicMu(index)) return false;
+	if(fTR->MuRelIso03[index] > 1.0) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsLooseNoTightMu(int index){
+	if(IsLooseMu(index) && !IsTightMu(index)) return true;
+	else return false;
+}
+
+// Event selections:
+bool UserAnalysisBase::IsGoodMuEvent(){
+	// if(GetHLTResult("")) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodElEvent(){
+	// if(GetHLTResult("")) return false;
+	return true;
+}
+
+bool UserAnalysisBase::SingleMuonSelection(int &index){
+	// Selects events with (at least) one good muon and gives the index
+	// of the hardest one in the argument
+	// Assumes the muons are sorted by pt in the ntuple
+	if( fTR->NMus < 1 ) return false;
+	vector<int> MuInd;
+	for(size_t imu = 0; imu < fTR->NMus; ++imu){
+		if(fTR->MuPt[imu] < 10.) continue;
+		if(!IsGoodBasicMu(imu)) continue;
+		MuInd.push_back(imu);
+	}
+	if(MuInd.size() < 1) return false;
+	// Maybe add a sorting here, in case muons are not sorted prior
+	index = MuInd[0];
+	return true;
+}
+
+bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
+	// Selects events with (at least) two good muons and gives the indices
+	// of the hardest two in the argument
+	// Assumes the muons are sorted by pt in the ntuple
+	if( fTR->NMus < 2 ) return false;
+	vector<int> MuInd;
+	for(size_t imu = 0; imu < fTR->NMus; ++imu){
+		if(fTR->MuPt[imu] < 10.) continue;
+		if(!IsGoodBasicMu(imu)) continue;
+		MuInd.push_back(imu);
+	}
+	if(MuInd.size() < 2) return false;
+	ind1 = MuInd[0];
+	ind2 = MuInd[1];
+	return true;
+}
+
+bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
+	// Select events with either 2 muons or 2 electrons
+	if( fTR->NMus < 2 ) return false;
+
+	vector<int> priMuInd;
+	vector<int> secMuInd;
+	for(size_t imu = 0; imu < fTR->NMus; ++imu){
+		// Muon selection
+		if(fTR->MuPt[imu] < 10.) continue;
+		if(!IsGoodBasicMu(imu)) continue;
+
+		if(fTR->MuPt[imu] > 20. && fTR->MuRelIso03[imu] < 0.1) priMuInd.push_back(imu);
+		if(fTR->MuRelIso03[imu] < 2.0)                         secMuInd.push_back(imu);
+	}
+
+	unsigned nprimu = priMuInd.size();
+	unsigned nsecmu = secMuInd.size();
+
+	// Select events with at least one primary muon and at least one other
+	if(nprimu < 1 || nsecmu < 2) return false;
+
+	int ind1 = priMuInd[0];
+	int ind2 = secMuInd[0];
+	if(ind2 == ind1) ind2 = secMuInd[1];
+	// Select same sign muons
+	if(fTR->MuCharge[ind1] != fTR->MuCharge[ind2]) return false;
+	prim = ind1;
+	sec = ind2;
+	return true;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // Cut Stuff //////////////////////////////////////////////////////////////////////////
 void UserAnalysisBase::ReadObjCuts(const char* filename){
@@ -109,7 +237,7 @@ void UserAnalysisBase::ReadObjCuts(const char* filename){
 		sscanf(readbuff, "%s %f %f", branch, &inf, &sup);
 		TBranch *tempbranch = NULL;
 		if((tempbranch = fTR->fChain->FindBranch(branch)) == NULL){
-			cout << "TreeReader::ReadCuts ==> Branch \"" << branch << "\" not found, continuing... " << endl;
+			cout << "UserAnalysisBase::ReadObjCuts ==> Branch \"" << branch << "\" not found, continuing... " << endl;
 			continue;
 		}
 		Cut cut;
