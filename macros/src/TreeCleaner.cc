@@ -529,7 +529,7 @@ int TreeCleaner::CleanElectron(int ichk){
 		if(useDeltaPhiOut) if( fabs(deltaPhiOut) > fClean_ElecDeltaPhiOutEndmax ) return 3;
 	}
 	if (  nMissHits > fClean_ElecNMissHitsmax )         return 5;
-	if (  trackDist < fClean_ElecConvPartTrackDistmax && trackDCot > fClean_ElecConvPartTrackDCotmax ) return 6;
+	if (  trackDist < fClean_ElecConvPartTrackDistmax && trackDCot < fClean_ElecConvPartTrackDCotmax ) return 6;
 	return 0;
 }
 
