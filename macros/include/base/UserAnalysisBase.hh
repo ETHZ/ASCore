@@ -46,12 +46,28 @@ public:
 	virtual bool IsLooseMu(int);
 	virtual bool IsLooseNoTightMu(int);
 
+	// Electron Selectors
+	virtual bool IsGoodBasicEl(int);
+	virtual bool IsTightEl(int);
+	virtual bool IsLooseEl(int);
+	virtual bool IsLooseNoTightEl(int);
+
+	// Photon Selectors
+	virtual bool IsGoodBasicPho(int);
+
 	// Event Selectors
 	virtual bool IsGoodMuEvent();
 	virtual bool IsGoodElEvent();
+	virtual vector<int> MuonSelection();
+	virtual vector<int> ElectronSelection();
+	virtual vector<int> PhotonSelection();
+	virtual vector<int> JetSelection();
 	virtual bool SingleMuonSelection(int&);
 	virtual bool DiMuonSelection(int&, int&);
 	virtual bool SSDiMuonSelection(int &, int&);
+	virtual bool SingleElectronSelection(int&);
+	virtual bool DiElectronSelection(int&, int&);
+	virtual bool SSDiElectronSelection(int &, int&);	
 
 private:
 

@@ -146,14 +146,334 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 	else return false;
 }
 
-// Event selections:
-bool UserAnalysisBase::IsGoodMuEvent(){
-	// if(GetHLTResult("")) return false;
+bool UserAnalysisBase::IsGoodBasicEl(int index){
+	// Basic electron cleaning and ID cuts
+	// (corresponding to the 95% eff. WP without isolation cuts
+	// and with coversion rejection cuts)
+	
+	double pt	= fTR->ElPt[index];
+	double eta	= fTR->ElEta[index];
+
+	// barrel cut values
+	double ElecHoverEBarmax			= 0.15;
+	double ElecSigmaEtaEtaBarmin	= 0.002;
+	double ElecSigmaEtaEtaBarmax	= 0.01;
+	double ElecEoverPInBarmin		= 0.;
+	double ElecDeltaEtaInBarmax		= 0.007;
+	double ElecDeltaPhiInBarmax		= 0.8;
+	double ElecDeltaPhiOutBarmax	= 999.0;
+	// endcaps cut values
+	double ElecHoverEEndmax			= 0.07;
+	double ElecSigmaEtaEtaEndmax	= 0.03;
+	double ElecEoverPInEndmin		= 0.;
+	double ElecDeltaEtaInEndmax		= 999.0; // not used due to misalignement in the EndCaps
+	double ElecDeltaPhiInEndmax		= 0.7;
+	double ElecDeltaPhiOutEndmax	= 999.0;
+	// conversions cut values
+	double ElecConvPartTrackDistmin	= 0.02;
+	double ElecConvPartTrackDCotmin	= 0.02;
+	double ElecNMissHitsmax			= 1.;
+	// kinematics + ECAL gap cut values
+	double etamax					= 3.0;
+	double etaEgapUpperEdge			= 1.560;
+	double etaEgapLowerEdge			= 1.442;
+	double pTmin					= 10.;
+	
+	// electron ID
+	if( fabs(eta) < 1.479 ){ // Barrel
+		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
+	}
+	else{ // EndCap
+		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
+	}
+
+	// electrons from conversions
+	if (  fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		return false;
+	if (  fTR->ElConvPartnerTrkDist[index]	< ElecConvPartTrackDistmin &&
+		  fTR->ElConvPartnerTrkDCot[index]	< ElecConvPartTrackDCotmin )		return false;
+	
+	// electron kinematic cuts + the ECAL gap veto
+	if ( (fabs(eta) > etamax) ||
+	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+	if( pt < pTmin) return false;
+
 	return true;
 }
 
+bool UserAnalysisBase::IsTightEl(int index){
+	if(!IsGoodBasicEl(index)) return false;	
+	if(!fTR->ElIDsimpleWPrelIso[index]) return false; // corresponding to the 90% eff. WP with isolation cuts
+	
+	// combined relative isolation cut values (for tight electrons)
+	double ElecCombRelIsoEBarmax	= 0.15;
+	double ElecCombRelIsoEEndmax	= 0.1;
+	// electron isolation
+	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
+		if( combRelIso > ElecCombRelIsoEBarmax ) return false;
+	}
+	else{ // EndCap
+		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
+		if( combRelIso > ElecCombRelIsoEEndmax ) return false;
+	}
+	
+	return true;
+}
+
+bool UserAnalysisBase::IsLooseEl(int index){
+	if(!IsGoodBasicEl(index)) return false;
+
+	// combined relative isolation cut values (relaxed for loose electrons)
+	double ElecCombRelIsoEBarmax	= 1.;
+	double ElecCombRelIsoEEndmax	= 0.6;	
+	// electron isolation
+	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
+		if( combRelIso > ElecCombRelIsoEBarmax ) return false;
+	}
+	else{ // EndCap
+		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
+		if( combRelIso > ElecCombRelIsoEEndmax ) return false;
+	}
+
+	return true;
+}
+
+bool UserAnalysisBase::IsLooseNoTightEl(int index){
+	if(IsLooseEl(index) && !IsTightEl(index)) return true;
+	else return false;
+}
+
+bool UserAnalysisBase::IsGoodBasicPho(int index){
+	// Basic photon cleaning / ID cuts (to be completed)
+	
+	double pt	= fTR->PhoPt[index];
+	double eta	= fTR->PhoEta[index];
+	
+	// barrel cut values
+	double PhoHoverEBarmax		= 0.04;
+	double PhoSigmaEtaEtaBarmin	= 0.002;
+	double PhoSigmaEtaEtaBarmax	= 0.01;
+	// endcaps cut values
+	double PhoHoverEEndmax		= 0.025;
+	double PhoSigmaEtaEtaEndmax	= 0.03;
+	// kinematics + ECAL gap cut values
+	double etamax				= 3.0;
+	double etaEgapUpperEdge		= 1.560;
+	double etaEgapLowerEdge		= 1.442;
+	double pTmin				= 10.;
+	
+	// photon ID
+	if( fabs(eta) < 1.479 ){ // Barrel
+		if(	fTR->ElHcalOverEcal [index]	> PhoHoverEBarmax      ) return false;
+		if(	fTR->ElSigmaIetaIeta[index]	> PhoSigmaEtaEtaBarmax ) return false;
+		if(	fTR->ElSigmaIetaIeta[index]	< PhoSigmaEtaEtaBarmin ) return false;
+	}
+	else{ // EndCap
+		if(	fTR->ElHcalOverEcal [index]	> PhoHoverEEndmax      ) return false;
+		if(	fTR->ElSigmaIetaIeta[index]	> PhoSigmaEtaEtaEndmax ) return false;
+	}
+		
+	// photon kinematic cuts + the ECAL gap veto
+	if ( (fabs(eta) > etamax) ||
+	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+	if( pt < pTmin) return false;
+	
+	return true;
+}
+
+
+// Event selections:
+bool UserAnalysisBase::IsGoodMuEvent(){
+	string MuonHLTName = "HLT_Mu9"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1	
+	return GetHLTResult(MuonHLTName);	
+}
+
 bool UserAnalysisBase::IsGoodElEvent(){
-	// if(GetHLTResult("")) return false;
+	string ElectronHLTName;
+	int run = fTR->Run;	
+	if (run<=138000)				ElectronHLTName = "HLT_Ele10_LW_L1R"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1
+	if (run>138000 && run<=141900)	ElectronHLTName = "HLT_Ele15_LW_L1R";
+	if (run>141900)					ElectronHLTName = "HLT_Ele15_SW_L1R";
+	return GetHLTResult(ElectronHLTName);	
+}
+
+vector<int> UserAnalysisBase::ElectronSelection(){
+	// Returns the vector of indecies of
+	// good electrons sorted by Pt
+	vector<int>		selectedObjInd;
+	vector<double>	selectedObjPt;
+	// form the vector of indecies
+	for(int ind = 0; ind < fTR->NEles; ++ind){
+		// Electron selection
+		if(!IsGoodBasicEl(ind)) continue;
+		// additional kinematic cuts
+		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
+		if(fTR->ElPt[ind] < 15) continue;
+
+		selectedObjInd.push_back(ind);
+		selectedObjPt.push_back(fTR->ElPt[ind]);
+	}
+	int nselobj	= selectedObjInd.size	();
+	
+	// sort the vector of indecies by Pt
+	for(int i = 0; i < nselobj-1; ++i){
+		for(int j = i+1; j < nselobj; ++j){
+			int index_i = selectedObjInd[i];
+			int index_j = selectedObjInd[j];
+			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
+			selectedObjInd[i] = index_j;
+			selectedObjInd[j] = index_i;
+		}
+	}
+	
+	return selectedObjInd;
+}
+
+vector<int> UserAnalysisBase::JetSelection(){
+	// Returns the vector of indecies of
+	// good jets sorted by Pt
+	vector<int>		selectedObjInd;
+	vector<double>	selectedObjPt;
+	// form the vector of indecies
+	for(int ind = 0; ind < fTR->NEles; ++ind){
+		// selection
+		if(!IsGoodBasicJet(ind)) continue;
+		
+		selectedObjInd.push_back(ind);
+		selectedObjPt.push_back(fTR->JPt[ind]);
+	}
+	int nselobj	= selectedObjInd.size	();
+	
+	// sort the vector of indecies by Pt
+	for(int i = 0; i < nselobj-1; ++i){
+		for(int j = i+1; j < nselobj; ++j){
+			int index_i = selectedObjInd[i];
+			int index_j = selectedObjInd[j];
+			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
+			selectedObjInd[i] = index_j;
+			selectedObjInd[j] = index_i;
+		}
+	}
+	
+	return selectedObjInd;
+}
+
+vector<int> UserAnalysisBase::PhotonSelection(){
+	// Returns the vector of indecies of
+	// good photons sorted by Pt
+	vector<int>		selectedObjInd;
+	vector<double>	selectedObjPt;
+	// form the vector of indecies
+	for(int ind = 0; ind < fTR->NPhotons; ++ind){
+		// selection
+		if(!IsGoodBasicPho(ind)) continue;
+		
+		selectedObjInd.push_back(ind);
+		selectedObjPt.push_back(fTR->PhoPt[ind]);
+	}
+	int nselobj	= selectedObjInd.size	();
+	
+	// sort the vector of indecies by Pt
+	for(int i = 0; i < nselobj-1; ++i){
+		for(int j = i+1; j < nselobj; ++j){
+			int index_i = selectedObjInd[i];
+			int index_j = selectedObjInd[j];
+			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
+			selectedObjInd[i] = index_j;
+			selectedObjInd[j] = index_i;
+		}
+	}
+	
+	return selectedObjInd;
+}
+
+vector<int> UserAnalysisBase::MuonSelection(){
+	// Returns the vector of indecies of
+	// good muons sorted by Pt
+	vector<int>		selectedObjInd;
+	vector<double>	selectedObjPt;
+	// form the vector of indecies
+	for(int ind = 0; ind < fTR->NMus; ++ind){
+		// selection
+		if(!IsGoodBasicMu(ind)) continue;
+		
+		selectedObjInd.push_back(ind);
+		selectedObjPt.push_back(fTR->MuPt[ind]);
+	}
+	int nselobj	= selectedObjInd.size	();
+	
+	// sort the vector of indecies by Pt
+	for(int i = 0; i < nselobj-1; ++i){
+		for(int j = i+1; j < nselobj; ++j){
+			int index_i = selectedObjInd[i];
+			int index_j = selectedObjInd[j];
+			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
+			selectedObjInd[i] = index_j;
+			selectedObjInd[j] = index_i;
+		}
+	}
+	
+	return selectedObjInd;
+}
+
+bool UserAnalysisBase::SingleElectronSelection(int &index){
+	// Selects events with (at least) one good electron and gives the index
+	// of the hardest one in the argument
+	if( fTR->NEles < 1 ) return false;
+	vector<int> ElInd = ElectronSelection();
+	if(ElInd.size() < 1) return false;
+	index = ElInd[0];
+	return true;
+}
+
+bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2){
+	// Selects events with (at least) two good electrons and gives the indices
+	// of the hardest two in the argument
+	if( fTR->NEles < 2 ) return false;
+	vector<int> ElInd = ElectronSelection();
+	if(ElInd.size() < 2) return false;
+	ind1 = ElInd[0];
+	ind2 = ElInd[1];
+	return true;
+}
+
+bool UserAnalysisBase::SSDiElectronSelection(int &prim, int &sec){
+	// Select events with 2 SS electrons
+	if( fTR->NEles < 2 ) return false;
+	vector<int> ElInd = ElectronSelection();
+	
+	vector<int> priElInd;
+	vector<int> secElInd;
+	for(unsigned iel = 0; iel < ElInd.size(); ++iel){
+		if(fTR->ElPt[ElInd[iel]] > 20.)	priElInd.push_back(ElInd[iel]);
+		if(fTR->ElPt[ElInd[iel]] > 15.)	secElInd.push_back(ElInd[iel]);
+	}
+	
+	unsigned npriel = priElInd.size();
+	unsigned nsecel = secElInd.size();
+	
+	// Select events with at least one primary electron and at least one other
+	if(npriel < 1 || nsecel < 2) return false;
+	
+	int ind1 = priElInd[0];
+	int ind2 = secElInd[0];
+	if(ind2 == ind1) ind2 = secElInd[1];
+	// Select same sign electrons
+	if(fTR->ElCharge[ind1] != fTR->ElCharge[ind2]) return false;
+	prim = ind1;
+	sec = ind2;
 	return true;
 }
 
