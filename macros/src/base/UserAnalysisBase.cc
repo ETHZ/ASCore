@@ -259,10 +259,10 @@ bool UserAnalysisBase::IsLooseNoTightEl(int index){
 
 bool UserAnalysisBase::IsGoodBasicPho(int index){
 	// Basic photon cleaning / ID cuts (to be completed)
-	
+
 	double pt	= fTR->PhoPt[index];
 	double eta	= fTR->PhoEta[index];
-	
+
 	// barrel cut values
 	double PhoHoverEBarmax		= 0.04;
 	double PhoSigmaEtaEtaBarmin	= 0.002;
@@ -275,7 +275,7 @@ bool UserAnalysisBase::IsGoodBasicPho(int index){
 	double etaEgapUpperEdge		= 1.560;
 	double etaEgapLowerEdge		= 1.442;
 	double pTmin				= 10.;
-	
+
 	// photon ID
 	if( fabs(eta) < 1.479 ){ // Barrel
 		if(	fTR->ElHcalOverEcal [index]	> PhoHoverEBarmax      ) return false;
@@ -286,19 +286,18 @@ bool UserAnalysisBase::IsGoodBasicPho(int index){
 		if(	fTR->ElHcalOverEcal [index]	> PhoHoverEEndmax      ) return false;
 		if(	fTR->ElSigmaIetaIeta[index]	> PhoSigmaEtaEtaEndmax ) return false;
 	}
-		
+
 	// photon kinematic cuts + the ECAL gap veto
 	if ( (fabs(eta) > etamax) ||
-	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+		( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
 	if( pt < pTmin) return false;
-	
+
 	return true;
 }
 
-
 // Event selections:
 bool UserAnalysisBase::IsGoodMuEvent(){
-	string MuonHLTName = "HLT_Mu9"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1	
+	string MuonHLTName = "HLT_Mu9"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1
 	return GetHLTResult(MuonHLTName);	
 }
 
@@ -312,122 +311,64 @@ bool UserAnalysisBase::IsGoodElEvent(){
 }
 
 vector<int> UserAnalysisBase::ElectronSelection(){
-	// Returns the vector of indecies of
+	// Returns the vector of indices of
 	// good electrons sorted by Pt
-	vector<int>		selectedObjInd;
-	vector<double>	selectedObjPt;
-	// form the vector of indecies
+	vector<int>    selectedObjInd;
+	vector<double> selectedObjPt;
+	// form the vector of indices
 	for(int ind = 0; ind < fTR->NEles; ++ind){
-		// Electron selection
+		// selection
 		if(!IsGoodBasicEl(ind)) continue;
-		// additional kinematic cuts
-		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
-		if(fTR->ElPt[ind] < 15) continue;
-
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->ElPt[ind]);
 	}
-	int nselobj	= selectedObjInd.size	();
-	
-	// sort the vector of indecies by Pt
-	for(int i = 0; i < nselobj-1; ++i){
-		for(int j = i+1; j < nselobj; ++j){
-			int index_i = selectedObjInd[i];
-			int index_j = selectedObjInd[j];
-			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
-			selectedObjInd[i] = index_j;
-			selectedObjInd[j] = index_i;
-		}
-	}
-	
-	return selectedObjInd;
+	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
 vector<int> UserAnalysisBase::JetSelection(){
-	// Returns the vector of indecies of
+	// Returns the vector of indices of
 	// good jets sorted by Pt
-	vector<int>		selectedObjInd;
-	vector<double>	selectedObjPt;
-	// form the vector of indecies
+	vector<int>    selectedObjInd;
+	vector<double> selectedObjPt;
+	// form the vector of indices
 	for(int ind = 0; ind < fTR->NEles; ++ind){
 		// selection
 		if(!IsGoodBasicJet(ind)) continue;
-		
+
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->JPt[ind]);
 	}
-	int nselobj	= selectedObjInd.size	();
-	
-	// sort the vector of indecies by Pt
-	for(int i = 0; i < nselobj-1; ++i){
-		for(int j = i+1; j < nselobj; ++j){
-			int index_i = selectedObjInd[i];
-			int index_j = selectedObjInd[j];
-			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
-			selectedObjInd[i] = index_j;
-			selectedObjInd[j] = index_i;
-		}
-	}
-	
-	return selectedObjInd;
+	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
 vector<int> UserAnalysisBase::PhotonSelection(){
-	// Returns the vector of indecies of
+	// Returns the vector of indices of
 	// good photons sorted by Pt
-	vector<int>		selectedObjInd;
-	vector<double>	selectedObjPt;
-	// form the vector of indecies
+	vector<int>    selectedObjInd;
+	vector<double> selectedObjPt;
+	// form the vector of indices
 	for(int ind = 0; ind < fTR->NPhotons; ++ind){
 		// selection
 		if(!IsGoodBasicPho(ind)) continue;
-		
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->PhoPt[ind]);
 	}
-	int nselobj	= selectedObjInd.size	();
-	
-	// sort the vector of indecies by Pt
-	for(int i = 0; i < nselobj-1; ++i){
-		for(int j = i+1; j < nselobj; ++j){
-			int index_i = selectedObjInd[i];
-			int index_j = selectedObjInd[j];
-			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
-			selectedObjInd[i] = index_j;
-			selectedObjInd[j] = index_i;
-		}
-	}
-	
-	return selectedObjInd;
+	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
 vector<int> UserAnalysisBase::MuonSelection(){
-	// Returns the vector of indecies of
+	// Returns the vector of indices of
 	// good muons sorted by Pt
-	vector<int>		selectedObjInd;
+	vector<int>	selectedObjInd;
 	vector<double>	selectedObjPt;
-	// form the vector of indecies
+	// form the vector of indices
 	for(int ind = 0; ind < fTR->NMus; ++ind){
 		// selection
 		if(!IsGoodBasicMu(ind)) continue;
-		
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->MuPt[ind]);
-	}
-	int nselobj	= selectedObjInd.size	();
-	
-	// sort the vector of indecies by Pt
-	for(int i = 0; i < nselobj-1; ++i){
-		for(int j = i+1; j < nselobj; ++j){
-			int index_i = selectedObjInd[i];
-			int index_j = selectedObjInd[j];
-			if(selectedObjPt[i] >= selectedObjPt[j]) continue;
-			selectedObjInd[i] = index_j;
-			selectedObjInd[j] = index_i;
-		}
-	}
-	
-	return selectedObjInd;
+	}	
+	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
 bool UserAnalysisBase::SingleElectronSelection(int &index){
@@ -563,7 +504,6 @@ bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
 	sec = ind2;
 	return true;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Cut Stuff //////////////////////////////////////////////////////////////////////////
