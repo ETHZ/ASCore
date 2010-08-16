@@ -201,16 +201,16 @@ namespace Util {
   }
 
   //__________________________________________________________________________
-  inline std::vector<int> VSort(std::vector<double> vec, bool asc = false){
+  template<class T> inline std::vector<int> VSort(std::vector<T> vec, bool asc = false){
     // Sort a vector and return the vector of sorted indices
     // Simple bubble sort algorithm, don't use for more than a few entries!
     std::vector<int> ind;
     for(size_t i = 0; i < vec.size(); ++i) ind.push_back(i);
     for(size_t i = 0; i < vec.size()-1; ++i){
       int ind1 = ind[i];
-      double p1 = vec[ind1];
+      T p1 = vec[ind1];
       for(size_t j = i+1; j < vec.size(); ++j){
-        double p2 = vec[ind[j]];
+        T p2 = vec[ind[j]];
         if( (p1 < p2) ^ asc ){
           // Swap the two indices
           ind[i] = ind[j];
@@ -222,7 +222,7 @@ namespace Util {
   }
 
   //__________________________________________________________________________
-  inline std::vector<int> VSort(std::vector<int> ind, std::vector<double> vec, bool asc = false){
+  template<class T> inline std::vector<int> VSort(std::vector<int> ind, std::vector<T> vec, bool asc = false){
     // Sort a vector of ints (ind) according to the values in a second vector (vec)
     // of the same length
     // Simple bubble sort algorithm, don't use for more than a few entries!
