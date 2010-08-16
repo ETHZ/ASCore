@@ -125,7 +125,9 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuPt[index] < 10) return false;
 	if(fTR->MuNChi2[index] > 10) return false;
 	if(fTR->MuNTkHits[index] < 11) return false;
-	if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false;
+	if(fabs(fTR->MuD0PV[index]) > 0.02) return false;
+	if(fTR->MuIsGMPT[index] == 0) return false;
+	// if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false; // No effect after other cuts (on ~ 120/nb)
 	return true;
 }
 
@@ -151,61 +153,61 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	// (corresponding to the 95% eff. WP without isolation cuts
 	// and with coversion rejection cuts)
 	
-	double pt	= fTR->ElPt[index];
-	double eta	= fTR->ElEta[index];
+	double pt  = fTR->ElPt[index];
+	double eta = fTR->ElEta[index];
 
 	// barrel cut values
-	double ElecHoverEBarmax			= 0.15;
-	double ElecSigmaEtaEtaBarmin	= 0.002;
-	double ElecSigmaEtaEtaBarmax	= 0.01;
-	double ElecEoverPInBarmin		= 0.;
-	double ElecDeltaEtaInBarmax		= 0.007;
-	double ElecDeltaPhiInBarmax		= 0.8;
-	double ElecDeltaPhiOutBarmax	= 999.0;
+	double ElecHoverEBarmax         = 0.15;
+	double ElecSigmaEtaEtaBarmin    = 0.002;
+	double ElecSigmaEtaEtaBarmax    = 0.01;
+	double ElecEoverPInBarmin       = 0.;
+	double ElecDeltaEtaInBarmax     = 0.007;
+	double ElecDeltaPhiInBarmax     = 0.8;
+	double ElecDeltaPhiOutBarmax    = 999.0;
 	// endcaps cut values
-	double ElecHoverEEndmax			= 0.07;
-	double ElecSigmaEtaEtaEndmax	= 0.03;
-	double ElecEoverPInEndmin		= 0.;
-	double ElecDeltaEtaInEndmax		= 999.0; // not used due to misalignement in the EndCaps
-	double ElecDeltaPhiInEndmax		= 0.7;
-	double ElecDeltaPhiOutEndmax	= 999.0;
+	double ElecHoverEEndmax         = 0.07;
+	double ElecSigmaEtaEtaEndmax    = 0.03;
+	double ElecEoverPInEndmin       = 0.;
+	double ElecDeltaEtaInEndmax     = 999.0; // not used due to misalignement in the EndCaps
+	double ElecDeltaPhiInEndmax     = 0.7;
+	double ElecDeltaPhiOutEndmax    = 999.0;
 	// conversions cut values
-	double ElecConvPartTrackDistmin	= 0.02;
-	double ElecConvPartTrackDCotmin	= 0.02;
-	double ElecNMissHitsmax			= 1.;
+	double ElecConvPartTrackDistmin = 0.02;
+	double ElecConvPartTrackDCotmin = 0.02;
+	double ElecNMissHitsmax         = 1.;
 	// kinematics + ECAL gap cut values
-	double etamax					= 3.0;
-	double etaEgapUpperEdge			= 1.560;
-	double etaEgapLowerEdge			= 1.442;
-	double pTmin					= 10.;
+	double etamax                   = 3.0;
+	double etaEgapUpperEdge         = 1.560;
+	double etaEgapLowerEdge         = 1.442;
+	double pTmin                    = 10.;
 	
 	// electron ID
 	if( fabs(eta) < 1.479 ){ // Barrel
-		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
+		if( fTR->ElHcalOverEcal[index] > ElecHoverEBarmax ) return false;
+		if( fTR->ElESuperClusterOverP[index] < ElecEoverPInBarmin ) return false;
+		if( fTR->ElSigmaIetaIeta[index] > ElecSigmaEtaEtaBarmax ) return false;
+		if( fTR->ElSigmaIetaIeta[index] < ElecSigmaEtaEtaBarmin ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > ElecDeltaEtaInBarmax ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > ElecDeltaPhiInBarmax ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index]) > ElecDeltaPhiOutBarmax ) return false;
 	}
 	else{ // EndCap
-		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
+		if( fTR->ElHcalOverEcal[index] > ElecHoverEEndmax ) return false;
+		if( fTR->ElESuperClusterOverP[index] < ElecEoverPInEndmin ) return false;
+		if( fTR->ElSigmaIetaIeta[index] > ElecSigmaEtaEtaEndmax ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > ElecDeltaEtaInEndmax ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > ElecDeltaPhiInEndmax ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index]) > ElecDeltaPhiOutEndmax ) return false;
 	}
 
 	// electrons from conversions
-	if (  fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		return false;
-	if (  fTR->ElConvPartnerTrkDist[index]	< ElecConvPartTrackDistmin &&
-		  fTR->ElConvPartnerTrkDCot[index]	< ElecConvPartTrackDCotmin )		return false;
+	if ( fTR->ElNumberOfMissingInnerHits[index] > ElecNMissHitsmax ) return false;
+	if ( fTR->ElConvPartnerTrkDist[index] < ElecConvPartTrackDistmin &&
+	     fTR->ElConvPartnerTrkDCot[index] < ElecConvPartTrackDCotmin ) return false;
 	
 	// electron kinematic cuts + the ECAL gap veto
 	if ( (fabs(eta) > etamax) ||
-	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) ) return false;	
 	if( pt < pTmin) return false;
 
 	return true;
@@ -216,8 +218,8 @@ bool UserAnalysisBase::IsTightEl(int index){
 	if(!fTR->ElIDsimpleWPrelIso[index]) return false; // corresponding to the 90% eff. WP with isolation cuts
 	
 	// combined relative isolation cut values (for tight electrons)
-	double ElecCombRelIsoEBarmax	= 0.15;
-	double ElecCombRelIsoEEndmax	= 0.1;
+	double ElecCombRelIsoEBarmax = 0.15;
+	double ElecCombRelIsoEEndmax = 0.1;
 	// electron isolation
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
 		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
@@ -489,15 +491,19 @@ bool UserAnalysisBase::SingleMuonSelection(int &index){
 		MuInd.push_back(imu);
 	}
 	if(MuInd.size() < 1) return false;
-	// Maybe add a sorting here, in case muons are not sorted prior
-	index = MuInd[0];
+
+	int maxind = 0;
+	for(size_t i = 1; i < MuInd.size(); ++i){
+		if(fTR->MuPt[i] > fTR->MuPt[maxind]) maxind = i;
+	}
+
+	index = maxind;
 	return true;
 }
 
 bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
 	// Selects events with (at least) two good muons and gives the indices
 	// of the hardest two in the argument
-	// Assumes the muons are sorted by pt in the ntuple
 	if( fTR->NMus < 2 ) return false;
 	vector<int> MuInd;
 	for(size_t imu = 0; imu < fTR->NMus; ++imu){
@@ -506,8 +512,24 @@ bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
 		MuInd.push_back(imu);
 	}
 	if(MuInd.size() < 2) return false;
-	ind1 = MuInd[0];
-	ind2 = MuInd[1];
+
+	// Sort by pt
+	int maxind(0), maxind2(1);
+	for(size_t i = 1; i < MuInd.size(); ++i){
+		if(fTR->MuPt[i] > fTR->MuPt[maxind]){ maxind2 = maxind; maxind = i; }
+		else if(fTR->MuPt[i] > fTR->MuPt[maxind2]) maxind2 = i;
+	}
+		
+	ind1 = maxind;
+	ind2 = maxind2;
+	// ind1 = MuInd[0];
+	// ind2 = MuInd[1];
+	// // if(fTR->MuRelIso03[ind1] > fTR->MuRelIso03[ind2]){
+	// if(fTR->MuPt[ind1] < fTR->MuPt[ind2]){
+	// 	int temp = ind1;
+	// 	ind1 = ind2;
+	// 	ind2 = temp;
+	// }
 	return true;
 }
 
