@@ -427,17 +427,16 @@ bool UserAnalysisBase::SingleMuonSelection(int &index){
 	if( fTR->NMus < 1 ) return false;
 	vector<int> MuInd;
 	for(size_t imu = 0; imu < fTR->NMus; ++imu){
-		if(fTR->MuPt[imu] < 10.) continue;
 		if(!IsGoodBasicMu(imu)) continue;
 		MuInd.push_back(imu);
 	}
 	if(MuInd.size() < 1) return false;
-
+	
 	int maxind = 0;
-	for(size_t i = 1; i < MuInd.size(); ++i){
-		if(fTR->MuPt[i] > fTR->MuPt[maxind]) maxind = i;
+	for(size_t i = 0; i < MuInd.size(); ++i){
+		int ind = MuInd[i];
+		if(fTR->MuPt[ind] > fTR->MuPt[maxind]) maxind = ind;
 	}
-
 	index = maxind;
 	return true;
 }
@@ -457,20 +456,13 @@ bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
 	// Sort by pt
 	int maxind(0), maxind2(1);
 	for(size_t i = 1; i < MuInd.size(); ++i){
-		if(fTR->MuPt[i] > fTR->MuPt[maxind]){ maxind2 = maxind; maxind = i; }
-		else if(fTR->MuPt[i] > fTR->MuPt[maxind2]) maxind2 = i;
+		int index = MuInd[i];
+		if(fTR->MuPt[index] > fTR->MuPt[maxind]){ maxind2 = maxind; maxind = index; }
+		else if(fTR->MuPt[index] > fTR->MuPt[maxind2]) maxind2 = index;
 	}
 		
 	ind1 = maxind;
 	ind2 = maxind2;
-	// ind1 = MuInd[0];
-	// ind2 = MuInd[1];
-	// // if(fTR->MuRelIso03[ind1] > fTR->MuRelIso03[ind2]){
-	// if(fTR->MuPt[ind1] < fTR->MuPt[ind2]){
-	// 	int temp = ind1;
-	// 	ind1 = ind2;
-	// 	ind2 = temp;
-	// }
 	return true;
 }
 
