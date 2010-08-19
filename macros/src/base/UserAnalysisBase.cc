@@ -43,7 +43,7 @@ void UserAnalysisBase::ReadPDGTable(const char* filename){
 
 int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
 	if( fPDGMap.empty() ){
-		if(fVerbose > 0) cout << "UserAnalysisBase::GetPDGParticle ==> PDGMap not fille!" << endl;
+		if(fVerbose > 0) cout << "UserAnalysisBase::GetPDGParticle ==> PDGMap not filled!" << endl;
 		return -1;
 	}
 	else{
@@ -127,6 +127,7 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuNTkHits[index] < 11) return false;
 	if(fabs(fTR->MuD0PV[index]) > 0.02) return false;
 	if(fTR->MuIsGMPT[index] == 0) return false;
+	if(fTR->MuRelIso03[index] > 1.0) return false;
 	// if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false; // No effect after other cuts (on ~ 120/nb)
 	return true;
 }
@@ -432,7 +433,7 @@ bool UserAnalysisBase::SingleMuonSelection(int &index){
 	}
 	if(MuInd.size() < 1) return false;
 	
-	int maxind = 0;
+	int maxind = MuInd[0];
 	for(size_t i = 0; i < MuInd.size(); ++i){
 		int ind = MuInd[i];
 		if(fTR->MuPt[ind] > fTR->MuPt[maxind]) maxind = ind;
@@ -454,7 +455,7 @@ bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
 	if(MuInd.size() < 2) return false;
 
 	// Sort by pt
-	int maxind(0), maxind2(1);
+	int maxind(MuInd[0]), maxind2(MuInd[1]);
 	for(size_t i = 1; i < MuInd.size(); ++i){
 		int index = MuInd[i];
 		if(fTR->MuPt[index] > fTR->MuPt[maxind]){ maxind2 = maxind; maxind = index; }
