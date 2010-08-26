@@ -21,7 +21,7 @@ options.register ('runon', # register 'runon' option
                   'data', # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
-                  "Type of sample to run on: data (default), MC35X, MC31X")
+                  "Type of sample to run on: data (default), MC")
 options.register ('recoType',									# register 'recoType' option
                   'RECO',										# the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -157,17 +157,17 @@ process.analyze.jets = (
     # PF jets
     cms.PSet( prefix = cms.untracked.string('PF'),
               tag = cms.untracked.InputTag('ak5PFJets'),
-							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-							jet_id = cms.untracked.InputTag('ak5JetID'),			  
+              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+              jet_id = cms.untracked.InputTag('ak5JetID'),			  
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
               ),
-	# JPT
-	cms.PSet( prefix = cms.untracked.string('JPT'),
+    # JPT
+    cms.PSet( prefix = cms.untracked.string('JPT'),
               tag = cms.untracked.InputTag('ak5JPTJetsL2L3'),
-							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-							jet_id = cms.untracked.InputTag('ak5JetID'),
+              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+              jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5JPTL2L3'),
@@ -175,8 +175,8 @@ process.analyze.jets = (
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
-							tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-							jet_id = cms.untracked.InputTag('ak5JetID'),
+              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+              jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5CaloL2L3'),

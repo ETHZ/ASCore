@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.54 2010/06/15 16:05:49 pnef Exp $
+// $Id: NTupleProducer.h,v 1.55 2010/07/09 14:33:57 pnef Exp $
 //
 //
 
@@ -48,7 +48,7 @@
 #include "Math/VectorUtil.h"
 
 // Local classes
-#include "DiLeptonAnalysis/NTupleProducer/interface/JetFiller.h"
+#include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 
 
 
@@ -102,7 +102,7 @@ private:
   // ----------member data ---------------------------
   edm::Service<TFileService> fTFileService;
 
-  std::vector<JetFiller*> jetFillers;
+  std::vector<JetFillerBase*> jetFillers;
 
   bool fIsRealData;
   bool fIsPat;

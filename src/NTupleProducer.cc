@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.66 2010/06/23 14:21:28 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.67 2010/07/09 14:33:56 pnef Exp $
 //
 //
 
@@ -193,7 +193,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Create additional jet fillers
   std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
   for (size_t i=0; i<jConfigs.size(); ++i)
-    jetFillers.push_back( new JetFiller(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
+    if ( fIsPat ) ;
+    else
+      jetFillers.push_back( new JetFillerReco(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
 
 }
 
@@ -211,7 +213,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   // Reset all the tree variables
   resetTree();
-  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+  for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
         it != jetFillers.end(); ++it )
     (*it)->reset();
 
@@ -1284,7 +1286,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   PhotonJetOverlap(jetPtr, photSCs, calotowers);
 
   // Process other jet collections, as configured
-  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+  for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
         it != jetFillers.end(); ++it )
     (*it)->fillBranches(iEvent,iSetup);
 
@@ -1909,7 +1911,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JGenHadE"       ,&fTjetGenhadE     ,"JGenHadE[NJets]/D");
   fEventTree->Branch("JGenInvE"       ,&fTjetGeninvE     ,"JGenInvE[NJets]/D");
 
-  for ( std::vector<JetFiller*>::iterator it = jetFillers.begin(); 
+  for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
         it != jetFillers.end(); ++it )
     (*it)->createBranches();
 

@@ -1,16 +1,16 @@
-#ifndef __DiLeptonAnalysis_NTupleProducer_JetFiller_H__
-#define __DiLeptonAnalysis_NTupleProducer_JetFiller_H__
+#ifndef __DiLeptonAnalysis_NTupleProducer_JetFillerBase_H__
+#define __DiLeptonAnalysis_NTupleProducer_JetFillerBase_H__
 // 
 // Package: NTupleProducer
-// Class:   JetFiller
+// Class:   JetFillerBase
 //
-/* class JetFiller
-   JetFiller.h
-   Description:  generic class for basic jet dumper
+/* class JetFillerBase
+   JetFillerBase.h
+   Description:  generic class for basic jet information dumper
 
 */
 //
-// $Id: JetFiller.h,v 1.2 2010/05/25 16:39:12 fronga Exp $
+// $Id:  $
 //
 //
 
@@ -26,27 +26,39 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 
-class JetFiller {
+class JetFillerBase {
 public:
+  // Enumerate jet types
+  enum JetType {
+    CALO, PF, JPT, unknown
+  };
+
   /// Constructor: set pointer to tree
-  JetFiller( const edm::ParameterSet&, TTree* tree, 
+  JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, 
                  const bool& isPat, const bool& isRealData );
-  virtual ~JetFiller(void);
+  virtual ~JetFillerBase(void);
 
   /// Define all branches
-  virtual void createBranches(void);
-  /// Fill all branches
-  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& );
+  void createBranches(void);
   /// Reset all branch containers
-  virtual void reset(void);
+  void reset(void);
+
+  /// Fill all branches (needs to be implemented in specialised classes)
+  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& ) = 0;
+
 
 protected:
 
   /// Add a branch to the tree (takes care of prefixing branch names)
   const bool addBranch(const char* name, const char* type, 
                        void* address, const char* size = 0);
+  /// Resetting
   void resetDouble(double* v, size_t size = 1);
   void resetInt(int* v, size_t size = 1);
+
+  /// Set and get jet type
+  void setJetType( const JetType& type ) { fJetType = type; }
+  const JetType jetType(void) const { return fJetType; }
 
   // To order indices by pt
   typedef std::pair<unsigned int,double> OrderPair;
@@ -56,22 +68,12 @@ protected:
     }
   };
 
-  
+  JetType fJetType;	
   std::string fPrefix;        /// Prefix for branches
   TTree* fTree;               /// Pointer to tree to fill
   bool   fIsPat, fIsRealData; /// Global switches
 
   size_t gMaxnobjs;
-
-  //- Configuration parameters
-  edm::InputTag fTag; 
-  edm::InputTag fJetID;	
-	edm::InputTag fJetTracksTag;
-  std::string fJetCorrs; 
-
-  // Pre-selection
-  double fMinpt;
-  double fMaxeta;
 
   // Tree variables
   int     fTnobj;
@@ -86,26 +88,13 @@ protected:
   double* fTscale;
   int*    fTNConstituents;
   double* fTjChfrac;
-	double* fTEMfrac;
+  double* fTEMfrac;
+  int* fTChMult;
   double* fTID_HPD; 
   double* fTID_RBX;    
   double* fTID_n90Hits;
   double* fTID_resEMF; 
-  double* fTChHadFrac;
-  double* fTNeuHadFrac;
-  double* fTChEmFrac;
-  double* fTNeuEmFrac;
-	int*    fTNeuMult;
-	int*    fTChMult;
-	int*    fTjnAssoTracks;
-	
-
-
-	
-  enum JetType {
-		CALO, PF, JPT, unknown
-  };
-  JetType fJetType;	
+  int*    fTjnAssoTracks;
 
 };
 
