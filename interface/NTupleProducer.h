@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.55 2010/07/09 14:33:57 pnef Exp $
+// $Id: NTupleProducer.h,v 1.56 2010/08/26 11:39:44 fronga Exp $
 //
 //
 
@@ -253,7 +253,9 @@ private:
   int fTHLTres[gMaxhltbits];
   int fTL1physres[gMaxl1physbits];
   int fTL1techres[gMaxl1techbits];
-
+  std::vector<std::string> fTHLTnames;
+  std::vector<std::string> fTL1physnames;
+  
   // Flags
   int fTgoodevent;         // 1 for good events, 0 for bad events
   int fTflagmaxmuexc;      // Found more than 20 muons in event (0 is good, 1 is bad)
@@ -262,25 +264,25 @@ private:
   int fTflagmaxjetexc;     // Found more than 50 uncorrected jets in event
   int fTflagmaxtrkexc;     // Found more than 500 tracks in event
   int fTflagmaxphoexc;     // Found more than 500 photons in event
-	int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
-	
-	// GenLeptons
-	
-	int fTngenleptons;      
-	int fTGenLeptonId[gMaxngenlept];      
-	double fTGenLeptonPt[gMaxngenlept];      
-	double fTGenLeptonEta[gMaxngenlept];     
-	double fTGenLeptonPhi[gMaxngenlept];     
-	int fTGenLeptonMId[gMaxngenlept];     
-	int fTGenLeptonMStatus[gMaxngenlept]; 
-	double fTGenLeptonMPt[gMaxngenlept];     
-	double fTGenLeptonMEta[gMaxngenlept];    
-	double fTGenLeptonMPhi[gMaxngenlept];    
-	int fTGenLeptonGMId[gMaxngenlept];    
-	int fTGenLeptonGMStatus[gMaxngenlept];
-	double fTGenLeptonGMPt[gMaxngenlept];    
-	double fTGenLeptonGMEta[gMaxngenlept];   
-	double fTGenLeptonGMPhi[gMaxngenlept]; 
+  int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
+  
+  // GenLeptons
+  
+  int fTngenleptons;      
+  int fTGenLeptonId[gMaxngenlept];      
+  double fTGenLeptonPt[gMaxngenlept];      
+  double fTGenLeptonEta[gMaxngenlept];     
+  double fTGenLeptonPhi[gMaxngenlept];     
+  int fTGenLeptonMId[gMaxngenlept];     
+  int fTGenLeptonMStatus[gMaxngenlept]; 
+  double fTGenLeptonMPt[gMaxngenlept];     
+  double fTGenLeptonMEta[gMaxngenlept];    
+  double fTGenLeptonMPhi[gMaxngenlept];    
+  int fTGenLeptonGMId[gMaxngenlept];    
+  int fTGenLeptonGMStatus[gMaxngenlept];
+  double fTGenLeptonGMPt[gMaxngenlept];    
+  double fTGenLeptonGMEta[gMaxngenlept];   
+  double fTGenLeptonGMPhi[gMaxngenlept]; 
 	
 	
 
@@ -474,7 +476,7 @@ private:
   double fTeConvPartTrackPhi[gMaxneles];
   double fTeConvPartTrackCharge[gMaxneles];
   // Spike cleaning
-  int    fTeScSeedSeverity[gMaxneles];
+  int fTeScSeedSeverity[gMaxneles];
   double fTeE1OverE9[gMaxneles];
   double fTeS4OverS1[gMaxneles];
   

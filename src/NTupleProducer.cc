@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.67 2010/07/09 14:33:56 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.68 2010/08/26 11:39:44 fronga Exp $
 //
 //
 
@@ -348,31 +348,38 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   if(tr.size() >= gMaxhltbits){
     edm::LogWarning("NTP") << "@SUB=analyze()"
-                           << "More than " << static_cast<int>(gMaxhltbits) << " HLT trigger bits, increase length!";
+                           << "More than " << static_cast<int>(gMaxhltbits) 
+                           << " HLT trigger bits, increase length!";
     fTgoodevent = 1;
   }
 
-  if(fFirstevent){
-    fFirstevent = false;
-    vector<string> triggernames;
-    triggernames.reserve(tr.size());
-    Service<service::TriggerNamesService> tns;
-    tns->getTrigPaths(*triggers, triggernames);
-    for( unsigned int i = 0; i < tr.size(); i++ ){
+  vector<string> triggernames;
+  triggernames.reserve(tr.size());
+  Service<service::TriggerNamesService> tns;
+  tns->getTrigPaths(*triggers, triggernames);
+  for( unsigned int i = 0; i < tr.size(); i++ ){
+    if (fFirstevent) 
       fHhltstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
-    }
-    // Add a warning about the shift between trigger bits and bin numbers:
-    fHhltstat->GetXaxis()->SetBinLabel(gMaxhltbits+2, "Bin#=Bit#+1");
-    triggernames.clear();
-
-    ESHandle<L1GtTriggerMenu> menuRcd;
-    iSetup.get<L1GtTriggerMenuRcd>().get(menuRcd);
-    const L1GtTriggerMenu *menu = menuRcd.product();
-    const AlgorithmMap& algoMap=menu->gtAlgorithmMap();
-    for (AlgorithmMap::const_iterator it=algoMap.begin();it!=algoMap.end();++it) {
-      fHl1physstat->GetXaxis()->SetBinLabel((*it).second.algoBitNumber() + 1, TString((*it).first));
-    }
   }
+  fTHLTnames = triggernames; // Actually stored in run tree (but easier so)
+
+
+  // Add a warning about the shift between trigger bits and bin numbers:
+  if (fFirstevent) 
+    fHhltstat->GetXaxis()->SetBinLabel(gMaxhltbits+2, "Bin#=Bit#+1");
+  triggernames.clear();
+
+  ESHandle<L1GtTriggerMenu> menuRcd;
+  iSetup.get<L1GtTriggerMenuRcd>().get(menuRcd);
+  const L1GtTriggerMenu *menu = menuRcd.product();
+  const AlgorithmMap& algoMap=menu->gtAlgorithmMap();
+  for (AlgorithmMap::const_iterator it=algoMap.begin();it!=algoMap.end();++it) {
+    if (fFirstevent) 
+      fHl1physstat->GetXaxis()->SetBinLabel((*it).second.algoBitNumber() + 1, TString((*it).first));
+    fTL1physnames[(*it).second.algoBitNumber()] = std::string((*it).first); // Actually stored in run tree (but easier so)
+  }
+  
+  fFirstevent = false;
 
   for(unsigned int i = 0; i < tr.size(); i++ ){
     if(tr[i].accept())	fHhltstat->Fill(i);
@@ -1538,6 +1545,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fRunTree->Branch("MaxNJets"       ,&fRTmaxnjet,        "MaxTjet/I");
   fRunTree->Branch("MaxNTrks"       ,&fRTmaxntrk,        "MaxTtrk/I");
   fRunTree->Branch("MaxNPhotons"    ,&fRTmaxnphot,       "MaxTphot/I");
+  fRunTree->Branch("HLTNames"         ,&fTHLTnames );
+  fRunTree->Branch("L1PhysNames"      ,&fTL1physnames );
 
   // Event information:
   fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
@@ -1584,8 +1593,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("HBHENoiseFlag",    &fTHBHENoiseFlag   ,"HBHENoiseFlag/I");
 
 	
-	// Gen-Leptons
-	fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
+  // Gen-Leptons
+  fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
   fEventTree->Branch("GenLeptonID"      ,&fTGenLeptonId         ,"GenLeptonID[NGenLeptons]/I");
   fEventTree->Branch("GenLeptonPt"      ,&fTGenLeptonPt         ,"GenLeptonPt[NGenLeptons]/D");
   fEventTree->Branch("GenLeptonEta"     ,&fTGenLeptonEta        ,"GenLeptonEta[NGenLeptons]/D");
@@ -2071,6 +2080,9 @@ void NTupleProducer::resetTree(){
   resetInt(fTHLTres, gMaxhltbits);
   resetInt(fTL1physres, gMaxl1physbits);
   resetInt(fTL1techres, gMaxl1techbits);
+  fTHLTnames.clear();    fTHLTnames.resize(gMaxhltbits);
+  fTL1physnames.clear(); fTL1physnames.resize(gMaxl1physbits);
+
   fTrunnumber   = -999;
   fTeventnumber = -999;
   fTlumisection = -999;
