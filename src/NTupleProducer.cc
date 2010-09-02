@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.68 2010/08/26 11:39:44 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.69 2010/09/02 08:14:30 fronga Exp $
 //
 //
 
@@ -189,6 +189,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   edm::LogVerbatim("NTP") << "    fMaxgenlepteta  = " << fMaxgenlepteta ;	
   edm::LogVerbatim("NTP") << endl;
   edm::LogVerbatim("NTP") << "---------------------------------" ;
+
+  edm::LogVerbatim("NTP") << iConfig;
 
   // Create additional jet fillers
   std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
@@ -2065,6 +2067,10 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 
 // Method called once each job just after ending the event loop
 void NTupleProducer::endJob(){
+
+  // Build index in tree for fast retrieval by run
+  fRunTree->BuildIndex("Run","0");
+
   edm::LogVerbatim("NTP") << " ---------------------------------------------------";
   edm::LogVerbatim("NTP") << " ==> NTupleProducer::endJob() ...";
   edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
