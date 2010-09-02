@@ -51,6 +51,7 @@ else:
     # CMSSW_3_6_X:
     process.GlobalTag.globaltag = "START36_V10::All"
 
+
 ### b-tagging ##################################################################
 # Simple SV and TrackCounting based algos
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
@@ -182,6 +183,9 @@ process.analyze.jets = (
               corrections = cms.string('ak5CaloL2L3'),
               ),
     )
+if options.runon!='data':
+    process.analyze.tag_hlttrig = "TriggerResults::REDIGI"
+
 
 #### DEBUG #####################################################################
 #process.dump = cms.EDAnalyzer("EventContentAnalyzer")
