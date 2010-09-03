@@ -25,6 +25,10 @@ void UserAnalyzer::Loop(){
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
+                if ( fCurRun != fTR->Run ) {
+                  fCurRun = fTR->Run;
+                  fUserAnalysis->BeginRun(fCurRun);
+                 }
 
 		fUserAnalysis->Analyze();
 	}

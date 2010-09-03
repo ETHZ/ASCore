@@ -22,7 +22,7 @@ void UserAnalysis::Begin(){
 	fHmuPt    = new TH1D("muPt", "Pt of muons", 100, 0., 300.);
 }
 
-void UserAnalysis::Analyze(){	
+void UserAnalysis::Analyze(){
 	// Some event selection
 	if( fTR->NJets < 1 ) return;		
 	

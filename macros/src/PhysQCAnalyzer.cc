@@ -22,18 +22,29 @@ PhysQCAnalyzer::~PhysQCAnalyzer(){
 }
 
 // Method for looping over the tree
-void PhysQCAnalyzer::Loop(Long64_t maxEvents){
+void PhysQCAnalyzer::Loop(Long64_t maxEvents, Int_t prescale){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << nentries << endl;
         if ( maxEvents>=0 ) { 
           nentries = maxEvents;
           cout << " processing only " << nentries << " events out of it" << endl;
         }
+        if ( prescale>1 ) {
+          cout << " processing only every " << prescale << " events" << endl;
+        }
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
+                if ( prescale>1 && jentry%prescale ) continue; // Prescale processing...
 		fTR->GetEntry(jentry);
 
-		fPhysQCAnalysis      ->Analyze1();
+                if ( fCurRun != fTR->Run ) {
+                  fCurRun = fTR->Run;
+                  fPhysQCAnalysis      ->BeginRun(fCurRun);
+                  fTreeCleaner         ->BeginRun(fCurRun);
+                  fMultiplicityAnalysis->BeginRun(fCurRun);
+                }
+
+		fPhysQCAnalysis      ->Analyze();
 		fTreeCleaner         ->Analyze();
 		fPhysQCAnalysis      ->Analyze2();
 		fMultiplicityAnalysis->Analyze();

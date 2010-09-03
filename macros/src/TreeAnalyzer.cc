@@ -38,6 +38,14 @@ void TreeAnalyzer::Loop(){
 		PrintProgress(jentry);
 		fTree->GetEntry(jentry);
 
+                if ( fCurRun != fTR->Run ) {
+                  fCurRun = fTR->Run;
+                  fTreeCleaner         ->BeginRun(fCurRun);
+                  fDiLeptonAnalysis    ->BeginRun(fCurRun);
+                  fMultiplicityAnalysis->BeginRun(fCurRun);
+                  fSignificanceAnalysis->BeginRun(fCurRun);
+                }
+
 		// cout << &(fTR->TCMET) << endl;
 
 		fTreeCleaner         ->Analyze();
