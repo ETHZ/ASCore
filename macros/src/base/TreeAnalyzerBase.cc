@@ -9,6 +9,7 @@ TreeAnalyzerBase::TreeAnalyzerBase(TTree *tree) {
 	fTR = new TreeReader(tree);
 	fNEntries = fTR->GetEntries();
 	fVerbose = false;
+        fCurRun = -1; // Initialise to dummy value
 }
 
 TreeAnalyzerBase::~TreeAnalyzerBase(){

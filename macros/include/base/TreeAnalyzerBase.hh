@@ -21,6 +21,8 @@ public:
 	TString fOutputDir;
 	int fVerbose;
 	int fNEntries;
+  
+        Int_t fCurRun;
 
 	TreeReader *fTR;
 
