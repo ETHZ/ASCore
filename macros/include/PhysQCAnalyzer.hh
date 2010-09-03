@@ -17,7 +17,7 @@ public:
 	virtual ~PhysQCAnalyzer();
 	void BeginJob();
 	void EndJob();
-	void Loop(Long64_t maxEvents=-1);
+	void Loop(Long64_t maxEvents=-1, Int_t prescale=1);
 
 private:
 	AnaClass *fAnaClass;

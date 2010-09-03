@@ -16,15 +16,18 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunPhysQCAnalyzer [-d dir] [-v verbose] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunPhysQCAnalyzer [-d dir] [-v verbose] [-n max] [-p prescale] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
-	cout << "     dir      is the output directory               " << endl;
-	cout << "               default is TempOutput/               " << endl;
-	cout << "     verbose  sets the verbose level                " << endl;
-	cout << "               default is 0 (quiet mode)            " << endl;
-	cout << "     filen    are the input files (by default: ROOT files)" << endl;
-	cout << "              with option -l, these are read as text files" << endl;
-	cout << "              with one ROOT file name per line      " << endl;
+	cout << "     dir      is the output directory                       " << endl;
+	cout << "               default is TempOutput/                       " << endl;
+	cout << "     verbose  sets the verbose level                        " << endl;
+	cout << "               default is 0 (quiet mode)                    " << endl;
+        cout << "     max      is the maximum number of events to process    " << endl;
+        cout << "     prescale is the (inverse) fraction of events to process" << endl;
+        cout << "              (e.g., '-p 10' will process every 10 events   " << endl;
+	cout << "     filen    are the input files (by default: ROOT files)  " << endl;
+	cout << "              with option -l, these are read as text files  " << endl;
+	cout << "              with one ROOT file name per line              " << endl;
 	cout << endl;
 	exit(status);
 }
@@ -36,14 +39,16 @@ int main(int argc, char* argv[]) {
 	TString outputdir = "TempOutput/";
 	int verbose = 0;
         Long64_t maxEvents = -1;
+        Int_t prescale = 0;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:n:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:v:n:p:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
                         case 'n': maxEvents = atoi(optarg); break;
+                        case 'p': prescale  = atoi(optarg); break;
 			case 'l': isList = true; break;
 			case '?':
 			case 'h': usage(0); break;
@@ -95,7 +100,7 @@ int main(int argc, char* argv[]) {
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
 	tA->BeginJob();
-	tA->Loop(maxEvents);
+	tA->Loop(maxEvents,prescale);
 	tA->EndJob();
 	delete tA;
 	return 0;
