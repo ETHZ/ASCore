@@ -11,10 +11,11 @@ class UserAnalysisBase{
 public:
 	UserAnalysisBase(TreeReader *tr = 0);
 	virtual ~UserAnalysisBase();
-
-	virtual void Begin();
-	virtual void Analyze();
-	virtual void End();
+  
+	virtual void Begin() {}
+        virtual void BeginRun(Int_t& run);
+        virtual void Analyze() {}
+        virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 
@@ -23,7 +24,7 @@ public:
 
 	virtual void ReadPDGTable(const char* filename = "pdgtable.txt");
 	virtual int GetPDGParticle(pdgparticle&, int);
-	virtual void GetHLTNames();
+	virtual void GetHLTNames(Int_t& run);
 	virtual int GetHLTBit(string);
 	virtual bool GetHLTResult(string);
 

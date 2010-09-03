@@ -16,11 +16,12 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 UserAnalysisBase::~UserAnalysisBase(){
 }
 
-void UserAnalysisBase::Begin(){}
+void UserAnalysisBase::BeginRun(Int_t& run) {
+  // Called when run changes
+  // Need to re-create HLT map in case it changed
+  GetHLTNames(run);
+}
 
-void UserAnalysisBase::Analyze(){}
-
-void UserAnalysisBase::End(){}
 
 void UserAnalysisBase::ReadPDGTable(const char* filename){
 // Fills the fPDGMap map from a textfile to associate pdgids with names
@@ -60,13 +61,23 @@ int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
 	return 0;
 }
 
-void UserAnalysisBase::GetHLTNames(){
+void UserAnalysisBase::GetHLTNames(Int_t& run){
 	TFile *f = fTR->fChain->GetCurrentFile();
-	TH1I *hlt_stats = (TH1I*)f->Get("analyze/HLTTriggerStats");
+        TTree* runTree = (TTree*)f->Get("analyze/RunInfo");
+        std::vector<std::string>* HLTNames;
+        if ( !runTree ) {
+          std::cerr << "!!! UserAnalysisBase::GetHLTNames "
+                    << "Coudln't get analyze/RunInfo tree" << std::endl;
+          return;
+        }
+	//TH1I *hlt_stats = (TH1I*)f->Get("analyze/HLTTriggerStats");
 
-	for( int i=0; i < hlt_stats->GetNbinsX(); i++ ){
-		fHLTLabelMap[hlt_stats->GetXaxis()->GetBinLabel(i+1)] = i;
-	}
+        if ( fVerbose>0 ) std::cout << "Retrieving HLTNames for run " << run << std::endl;
+        runTree->SetBranchAddress("HLTNames",&HLTNames);
+        runTree->GetEntryWithIndex(run);
+
+	for( int i=0; i < HLTNames->size(); i++ ) 
+          fHLTLabelMap[(*HLTNames)[i]] = i; 
 }
 
 int UserAnalysisBase::GetHLTBit(string theHltName){
