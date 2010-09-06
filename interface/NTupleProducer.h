@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.56 2010/08/26 11:39:44 fronga Exp $
+// $Id: NTupleProducer.h,v 1.57 2010/09/02 08:14:29 fronga Exp $
 //
 //
 
@@ -135,6 +135,7 @@ private:
   edm::InputTag fMET3Tag;
   edm::InputTag fMET4Tag;
   edm::InputTag fMET5Tag;
+  edm::InputTag fMET6Tag;
   edm::InputTag fVertexTag;
   edm::InputTag fTrackTag;
   edm::InputTag fPhotonTag;
@@ -655,6 +656,10 @@ private:
   double fTMuCorrMETpx;
   double fTMuCorrMETpy;
   double fTMuCorrMETphi;
+  double fTGenMET;
+  double fTGenMETpx;
+  double fTGenMETpy;
+  double fTGenMETphi;
   double fTTCMET;
   double fTTCMETpx;
   double fTTCMETpy;

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.70 2010/09/02 17:12:06 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.71 2010/09/06 13:37:56 fronga Exp $
 //
 //
 
@@ -52,6 +52,8 @@
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/GenMET.h"
+
 
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -102,6 +104,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMET3Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met3");
   fMET4Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met4");
   fMET5Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met5");
+  fMET6Tag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_met6");
   fVertexTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
   fTrackTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
   fPhotonTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_photons");
@@ -232,6 +235,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   Handle<CaloMETCollection> corrmujesmet;
   iEvent.getByLabel(fMET5Tag, corrmujesmet);
+
+  Handle<View<GenMET> > GenMET;
+  iEvent.getByLabel(fMET6Tag, GenMET);
 
   // Get beamspot for d0 determination
   BeamSpot beamSpot;
@@ -1380,6 +1386,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTMuCorrMETpy  = (corrmumet->at(0)).py();
   fTMuCorrMETphi = (corrmumet->at(0)).phi();
 
+  fTGenMET    = (GenMET->front()).pt();
+  fTGenMETpx  = (GenMET->front()).px();
+  fTGenMETpy  = (GenMET->front()).py();
+  fTGenMETphi = (GenMET->front()).phi();
+
   fTTCMET    = (tcmet->at(0)).pt();
   fTTCMETpx  = (tcmet->at(0)).px();
   fTTCMETpy  = (tcmet->at(0)).py();
@@ -1968,6 +1979,10 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MuCorrMETpx"        ,&fTMuCorrMETpx         ,"MuCorrMETpx/D");
   fEventTree->Branch("MuCorrMETpy"        ,&fTMuCorrMETpy         ,"MuCorrMETpy/D");
   fEventTree->Branch("MuCorrMETphi"       ,&fTMuCorrMETphi        ,"MuCorrMETphi/D");
+  fEventTree->Branch("GenMET"             ,&fTGenMET              ,"GenMET/D");
+  fEventTree->Branch("GenMETpx"           ,&fTGenMETpx            ,"GenMETpx/D");
+  fEventTree->Branch("GenMETpy"           ,&fTGenMETpy            ,"GenMETpy/D");
+  fEventTree->Branch("GenMETphi"          ,&fTGenMETphi           ,"GenMETphi/D");
   fEventTree->Branch("TCMET"              ,&fTTCMET               ,"TCMET/D");
   fEventTree->Branch("TCMETpx"            ,&fTTCMETpx             ,"TCMETpx/D");
   fEventTree->Branch("TCMETpy"            ,&fTTCMETpy             ,"TCMETpy/D");
@@ -2491,6 +2506,10 @@ void NTupleProducer::resetTree(){
   fTMuCorrMETpx        = -999.99;
   fTMuCorrMETpy        = -999.99;
   fTMuCorrMETphi       = -999.99;
+  fTGenMET             = -999.99;
+  fTGenMETpx           = -999.99;
+  fTGenMETpy           = -999.99;
+  fTGenMETphi          = -999.99;
   fTTCMET              = -999.99;
   fTTCMETpx            = -999.99;
   fTTCMETpy            = -999.99;
