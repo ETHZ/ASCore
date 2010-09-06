@@ -2,12 +2,17 @@
 #include "base/TreeReader.hh"
 #include "helper/LeptJetStat.h"
 #include "helper/Utilities.hh"
+#include <iostream>
+#include <sstream>
 
 using namespace std;
 
 MultiplicityAnalysis::MultiplicityAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
 	fSetofCuts      = "multiplicity_cuts/default.dat";
-	fLumi           = -999.99;
+	fLumi           = -999.99; 
+	fRequiredHLT    = NULL;
+	fVetoedHLT      = NULL;
+	
 }
 
 MultiplicityAnalysis::~MultiplicityAnalysis(){
@@ -16,18 +21,27 @@ MultiplicityAnalysis::~MultiplicityAnalysis(){
 void MultiplicityAnalysis::Begin(const char* filename){
 	fMPHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 
-	fMyLeptJetStat = new LeptJetStat();
-	fHljMult  = new TH2D("ljMult", "Lepton / Jets multiplicity", 13, 0, 13, 7, 0, 7);
-	fHemuMult = new TH2D("emuMult", "e/mu multiplicity",         18, 0, 18, 7, 0, 7);
-	fHemuEff  = new TH1F("emuEffic", "e/mu Efficiency", 13, 0, 13);
+	fMyLeptJetStat       = new LeptJetStat();
+	fMyLeptJetStat_bjets = new LeptJetStat();
+	
+	fHljMult_alljets  = new TH2D("ljMult", "Lepton / Jets multiplicity", 13, 0, 13, 7, 0, 7);
+	fHemuMult_alljets = new TH2D("emuMult", "e/mu multiplicity",         18, 0, 18, 7, 0, 7);
+	fHemuEff          = new TH1F("emuEffic", "e/mu Efficiency",          13, 0, 13);
+	fHljMult_bjets    = new TH2D("ljMult_bjets", "Lepton / b-Jets multiplicity", 13, 0, 13, 7, 0, 7);
+	fHemuMult_bjets   = new TH2D("emuMult_bjets", "e/mu multiplicity for b_jets",18, 0, 18, 7, 0, 7);
 
-	fHljMult ->SetStats(false);
-	fHemuMult->SetStats(false);
+	fHljMult_alljets ->SetStats(false);
+	fHemuMult_alljets->SetStats(false);
 	fHemuEff ->SetStats(false);
+	fHljMult_bjets   ->SetStats(false);
+	fHemuMult_bjets  ->SetStats(false);
 
 	ReadCuts();
+	
+	
 
-
+	
+	
 }
 
 void MultiplicityAnalysis::Analyze(){
@@ -38,6 +52,9 @@ void MultiplicityAnalysis::Analyze(){
 	//category 3: mu+
 	//category 4: mu-
 	
+	// reset variables
+	Reset();
+	
 	const int NLepts = 40;
 	int LeptCat[NLepts];
 	double LeptPt[NLepts];
@@ -47,15 +64,42 @@ void MultiplicityAnalysis::Analyze(){
 		LeptCat[tmp]=0;
 		LeptPt[tmp]=-999.;
 		LeptEta[tmp]=-999.;
+	}	
+	
+	// HLT Results:
+	if((*fRequiredHLT).size() !=0 ){
+		bool HLT_fire(false);
+		for(int i=0; i<(*fRequiredHLT).size(); ++i){
+			if( GetHLTResult((*fRequiredHLT)[i]) ){  // require HLT bit
+				HLT_fire = true;
+			} 
+		}
+		if(! HLT_fire) return;
 	}
+	if((*fVetoedHLT).size() !=0){
+		for(int i=0; i<(*fVetoedHLT).size(); ++i){
+			if( GetHLTResult((*fVetoedHLT)[i]) ){   // veto HLT bit 
+				return;
+			} 
+		}
+	}
+
+//	// reject bas events from cleaning
+//	if(fTR->GoodEvent !=0 ) return;
+	
+	// Multiplicity Cuts (specified from input file)
+	if(fTR->PFMET < fCut_PFMET){
+		return;
+	}
+	
+
 	//loop over es and mus and fill the leptons array
 	int ILept=-1;
 	for(int i=0; i< fTR->NEles; ++i){
 		// ----------- Electron Cuts --------------------
-		if(fTR->ElPt[i]             < fCut_ElPt) { continue; }
-		if(fTR->ElEta[i]            > fCut_ElEta){ continue; }
-		if(fTR->ElRelIso04[i]       > fCut_ElRelIso04){ continue;}
-		if(fTR->ElIDRobustTight[i] != fCut_ElIDRobustTight){continue;}
+		if(! IsGoodEl_TDL(i) ) continue;
+		elecs.push_back(i);
+		// ----------------------------------------------
 		ILept++;
 		LeptPt[ILept]  = fTR->ElPt[i];
 		LeptEta[ILept] = fTR->ElEta[i];
@@ -66,15 +110,10 @@ void MultiplicityAnalysis::Analyze(){
 		}
 	}
 	for(int i=0; i< fTR->NMus; ++i){
-		if(fTR->MuIsGlobalMuon[i] == 0) continue;
-		// ----------- Muon Cuts --------------------
-		if(fTR->MuPt[i]        < fCut_MuPt) { continue; }
-		if(fTR->MuEta[i]       > fCut_MuEta){ continue; }
-		if(fTR->MuRelIso03[i]  > fCut_MuRelIso03){ continue;}
-		if(fTR->MuNTkHits[i]   < fCut_MuNTkHits){ continue;}
-		if(fCut_MuTrackerMu==1){
-			if(fTR->MuIsTrackerMuon[i] != 1 ){ continue;}
-		}
+		// ------------ Muon Cuts -----------
+		if(! IsGoodMu_TDL(i) ) continue;
+		muons.push_back(i);
+		// ----------------------------------
 		ILept++;
 		LeptPt[ILept]  = fTR->MuPt[i];
 		LeptEta[ILept] = fTR->MuEta[i];
@@ -118,21 +157,44 @@ void MultiplicityAnalysis::Analyze(){
 
 // count number of good jets (beni)
 	unsigned int NQJets = 0;
-	for(int i=0; i < fTR->NJets; ++i){
+	unsigned int NBJets = 0;
+	for(int ij=0; ij < fTR->NJets; ++ij){
 		// ----------- Jet Cuts --------------------
-		if(fTR->JPt[i]  < fCut_JPt) { continue; }
-		if(fTR->JEta[i] > fCut_JEta){ continue; }	
+		if(! IsGoodJ_TDL(ij) ) continue;
+		bool JGood(true);
+		for(int i=0; i<muons.size(); ++i){
+			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[muons[i]], fTR->JPhi[ij], fTR->MuPhi[muons[i]]);
+			if(deltaR < 0.4)   JGood=false;
+		}
+		for(int i=0; i<elecs.size(); ++i){
+			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[elecs[i]], fTR->JPhi[ij], fTR->ElPhi[elecs[i]]);
+			if(deltaR < 0.4)   JGood=false;
+		}
+		if(JGood=false) continue;
+		// -----------------------------------------
 		NQJets++;
+		// ------- b -jets -------------------------
+		if(! IsGoodbJ_TDL(ij) ) continue;
+		NBJets++;
 	}
+		
+	fMyLeptJetStat      ->FillLeptJetStat(LeptCat, NQJets, NBJets);
+	fMyLeptJetStat_bjets->FillLeptJetStat(LeptCat, NBJets, 0);
 	
-	fMyLeptJetStat->FillLeptJetStat(LeptCat, NQJets, 0);
 }
 
 void MultiplicityAnalysis::End(){
-	fMyLeptJetStat->FillShortTables();
-	if(fVerbose) fMyLeptJetStat->PrintConfigs();
-	PlotMPSummary();
-	PlotMPEffic();
+	fMyLeptJetStat             ->FillShortTables();
+	fMyLeptJetStat_bjets       ->FillShortTables();
+	
+	if(fVerbose) fMyLeptJetStat      ->PrintConfigs();
+	if(fVerbose) fMyLeptJetStat_bjets->PrintConfigs();
+	
+	PlotMPSummary(fMyLeptJetStat, fHljMult_alljets);
+	PlotMPSummary(fMyLeptJetStat_bjets, fHljMult_bjets);
+	PlotMPEffic(fMyLeptJetStat, fHemuMult_alljets, fHemuEff);
+	PlotMPEffic(fMyLeptJetStat_bjets, fHemuMult_bjets, NULL);
+	
 	
 	fTlat->SetTextColor(kBlack);
 	fTlat->SetNDC(kTRUE);
@@ -143,6 +205,7 @@ void MultiplicityAnalysis::End(){
 
 	TString subdir = "MultiplicityPlots";
 	TString canvtitle = "Lepton / Jets multiplicity";
+	TString canvtitle_bjets = "Lepton / b-Jets multiplicity";
 	TCanvas *canv;
 	canv = new TCanvas("ljMult", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
@@ -150,24 +213,54 @@ void MultiplicityAnalysis::End(){
 	gPad->SetTheta(50);
 	gPad->SetPhi(240);
 	gPad->SetLogz();
-	fHljMult->DrawCopy("colz");
+	fHljMult_alljets->DrawCopy("colz");
 	// fHljMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
 	Util::Print(canv, fTag + "_ljMult", fOutputDir + subdir);
-
+	delete canv;	
+	
+	canv = new TCanvas("ljMult_bjets", canvtitle_bjets , 0, 0, 900, 700);
+	canv->SetRightMargin(0.15);
+	// gStyle->SetPalette(ncol, colors);
+	gPad->SetTheta(50);
+	gPad->SetPhi(240);
+	gPad->SetLogz();
+	fHljMult_bjets->DrawCopy("colz");
+	// fHljMult->DrawCopy("lego2 Z");
+	fTlat->DrawLatex(0.11,0.92, canvtitle_bjets);
+	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
+	Util::Print(canv, fTag + "_ljMult_bjets", fOutputDir + subdir);
+	delete canv;
+	
+	
 	canvtitle = "e/mu multiplicity";
 	canv = new TCanvas("emuMult", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
 	gPad->SetTheta(50);
 	gPad->SetPhi(240);
-	if(fHemuMult->GetMaximum() > 0) gPad->SetLogz();	
-	fHemuMult->DrawCopy("colz");
+	if(fHemuMult_alljets->GetMaximum() > 0) gPad->SetLogz();	
+	fHemuMult_alljets->DrawCopy("colz");
 	// fHemuMult->DrawCopy("lego2 Z");
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
 	Util::Print(canv, fTag + "_emuMult", fOutputDir + subdir);
-
+	delete canv;
+	
+	canvtitle_bjets = "e/mu multiplicity for b-jets";
+	canv = new TCanvas("emuMult_bjets", canvtitle_bjets , 0, 0, 900, 700);
+	canv->SetRightMargin(0.15);
+	gPad->SetTheta(50);
+	gPad->SetPhi(240);
+	if(fHemuMult_bjets->GetMaximum() > 0) gPad->SetLogz();	
+	fHemuMult_bjets->DrawCopy("colz");
+	// fHemuMult->DrawCopy("lego2 Z");
+	fTlat->DrawLatex(0.11,0.92, canvtitle_bjets);
+	if(fLumi > 0) fTlat->DrawLatex(0.67, 0.92, Form("Events / %.0f pb^{ -1}", fLumi));
+	Util::Print(canv, fTag + "_emuMult_bjets", fOutputDir + subdir);
+	delete canv;
+	
+	
 	canvtitle = "e/mu Efficiency";
 	canv = new TCanvas("emuEffic", canvtitle , 0, 0, 900, 700);
 	canv->SetRightMargin(0.15);
@@ -177,15 +270,19 @@ void MultiplicityAnalysis::End(){
 	fHemuEff->DrawCopy();
 	fTlat->DrawLatex(0.11,0.92, canvtitle);
 	Util::Print(canv, fTag + "_emuEffic", fOutputDir+subdir);
+	delete canv;
 
 	fMPHistFile->cd();
-	fHljMult->Write();
-	fHemuMult->Write();
-	fHemuEff->Write();
+	fHljMult_alljets  ->Write();
+	fHemuMult_alljets ->Write();
+	fHemuEff          ->Write();
+	fHljMult_bjets    ->Write();
+	fHemuMult_bjets   ->Write();
 	fMPHistFile->Close();
+	
 }
 
-void MultiplicityAnalysis::PlotMPSummary(){
+void MultiplicityAnalysis::PlotMPSummary(LeptJetStat *fLeptJetStat, TH2D *fHljMult){
 // Makes a 2D plot of lepton configurations versus jet multiplicity
 //  in the lepton configurations, e and mu are summed
 
@@ -212,32 +309,32 @@ void MultiplicityAnalysis::PlotMPSummary(){
 	}
 	int imax = njets + 1;
 // nber of leptons = 0
-	index = fMyLeptJetStat->GetConfigfrOrder(0);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(0);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] = nperJets[i];}
 
 // nber of leptons = 1
-	index = fMyLeptJetStat->GetConfigfrOrder(1);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(1);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] = nperJets[i];}
 
-	index = fMyLeptJetStat->GetConfigfrOrder(3);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(3);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] += nperJets[i];}
 
-	index = fMyLeptJetStat->GetConfigfrOrder(2);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(2);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] = nperJets[i];}
 
-	index = fMyLeptJetStat->GetConfigfrOrder(4);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(4);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] += nperJets[i];}
 
 // nber of leptons = 2
 	for (int i = 0; i < 10; ++i) {
 		int ii = i + 5;
-		index = fMyLeptJetStat->GetConfigfrOrder(ii);
-		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+		index = fLeptJetStat->GetConfigfrOrder(ii);
+		fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 //    cout << " ii = << ii << "
 		for (int j = 1; j < 8; ++j) {multable[indTab2l[i]][j-1] += nperJets[j];}
 	}
@@ -246,16 +343,16 @@ void MultiplicityAnalysis::PlotMPSummary(){
 // nber of leptons = 3
 	for (int i = 0; i < 20; ++i) {
 		int ii = i + 15;
-		index = fMyLeptJetStat->GetConfigfrOrder(ii);
-		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+		index = fLeptJetStat->GetConfigfrOrder(ii);
+		fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 		for (int j = 1; j < imax; ++j) {multable[indTab3l[i]][j-1] += nperJets[j];}
 	}
 //  cout << " 3l done " << endl;
 
 // nber of leptons >= 4
 	for (int m = 35; m < 71; ++m){
-		index = fMyLeptJetStat->GetConfigfrOrder(m);
-		fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+		index = fLeptJetStat->GetConfigfrOrder(m);
+		fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 		for (int i = 1; i < imax; ++i) {multable[12][i-1] += nperJets[i];}
 	}
 
@@ -279,7 +376,7 @@ void MultiplicityAnalysis::PlotMPSummary(){
 	return;	
 }
 
-void MultiplicityAnalysis::PlotMPEffic(){
+void MultiplicityAnalysis::PlotMPEffic(LeptJetStat *fLeptJetStat, TH2D *fHemuMult, TH1F *fHemuEff){
 // Makes a 2D plot of lepton configurations versus jet multiplicity
 //  in the lepton configurations, + and - charges are summed
 // Makes a profile histogram of e/mu efficiency ratios
@@ -304,141 +401,141 @@ void MultiplicityAnalysis::PlotMPEffic(){
 	}
 	int imax = njets + 1;
 // nber of leptons = 1m
-	index = fMyLeptJetStat->GetConfigfrOrder(3);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(3);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(4);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(4);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[0][i-1] += nperJets[i];}
 
 // nber of leptons = 1e
-	index = fMyLeptJetStat->GetConfigfrOrder(1);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(1);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(2);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(2);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[1][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm
-	index = fMyLeptJetStat->GetConfigfrOrder(13);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(13);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[2][i-1] = nperJets[i];}
 
 // nber of leptons = OSem
-	index = fMyLeptJetStat->GetConfigfrOrder(8);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(8);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[3][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(10);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(10);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[3][i-1] += nperJets[i];}
 
 // nber of leptons = OSee
-	index = fMyLeptJetStat->GetConfigfrOrder(6);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(6);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[4][i-1] = nperJets[i];}
 
 // nber of leptons = SSmm
-	index = fMyLeptJetStat->GetConfigfrOrder(12);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(12);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[5][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(14);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(14);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[5][i-1] += nperJets[i];}
 
 // nber of leptons = SSem
-	index = fMyLeptJetStat->GetConfigfrOrder(7);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(7);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[6][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(11);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(11);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[6][i-1] += nperJets[i];}
 
 // nber of leptons = SSee
-	index = fMyLeptJetStat->GetConfigfrOrder(5);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(5);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[7][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(9);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(9);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[7][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm1m
-	index = fMyLeptJetStat->GetConfigfrOrder(32);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(32);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[8][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(33);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(33);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[8][i-1] += nperJets[i];}
 
 // nber of leptons = OSmm1e
-	index = fMyLeptJetStat->GetConfigfrOrder(23);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(23);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[9][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(29);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(29);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[9][i-1] += nperJets[i];}
 
 // nber of leptons = OSee1m
-	index = fMyLeptJetStat->GetConfigfrOrder(20);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(20);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[10][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(21);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(21);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[10][i-1] += nperJets[i];}
 
 // nber of leptons = OSee1e
-	index = fMyLeptJetStat->GetConfigfrOrder(16);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(16);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[11][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(19);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(19);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[11][i-1] += nperJets[i];}
 
 // nber of leptons = SSmm1e
-	index = fMyLeptJetStat->GetConfigfrOrder(28);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(28);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[12][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(24);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(24);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[12][i-1] += nperJets[i];}
 
 // nber of leptons = SSee1m
-	index = fMyLeptJetStat->GetConfigfrOrder(18);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(18);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[13][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(26);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(26);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[13][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmmm
-	index = fMyLeptJetStat->GetConfigfrOrder(31);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(31);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[14][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(34);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(34);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[14][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmme
-	index = fMyLeptJetStat->GetConfigfrOrder(22);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(22);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[15][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(30);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(30);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[15][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSmee
-	index = fMyLeptJetStat->GetConfigfrOrder(17);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(17);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[16][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(27);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(27);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[16][i-1] += nperJets[i];}
 
 // nber of leptons = 3SSeee
-	index = fMyLeptJetStat->GetConfigfrOrder(15);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(15);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[17][i-1] = nperJets[i];}
-	index = fMyLeptJetStat->GetConfigfrOrder(25);
-	fMyLeptJetStat->NEntriesPerJetMult(index, nperJets);
+	index = fLeptJetStat->GetConfigfrOrder(25);
+	fLeptJetStat->NEntriesPerJetMult(index, nperJets);
 	for (int i = 1; i < imax; ++i) {multable[17][i-1] += nperJets[i];}
 
 // now fill the 2D plot
@@ -460,6 +557,8 @@ void MultiplicityAnalysis::PlotMPEffic(){
 	}
 
 // Compute e/mu efficiency ratios
+
+	if(fHemuEff==NULL){return;}
 	const int neffRat = 13;
 	double effRat[neffRat], deffRat[neffRat];
 	const char * lablRat[neffRat] =
@@ -626,50 +725,22 @@ void MultiplicityAnalysis::ReadCuts(){
 	
 		// floats 
 		sscanf(buffer, "%s %f", ParName, &ParValue);
-		if( !strcmp(ParName, "ElPt") ){
-			fCut_ElPt          = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "ElEta") ){
-			fCut_ElEta         = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "ElRelIso04") ){
-			fCut_ElRelIso04    = float(ParValue); ok = true;
-		}		
-		if( !strcmp(ParName, "MuPt") ){
-			fCut_MuPt          = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "MuEta") ){
-			fCut_MuEta         = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "MuRelIso03") ){
-			fCut_MuRelIso03    = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "MuNTkHits") ){
-			fCut_MuNTkHits    = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "JPt") ){
-			fCut_JPt           = float(ParValue); ok = true;
-		}
-		if( !strcmp(ParName, "JEta") ){
-			fCut_JEta          = float(ParValue); ok = true;
-		}				
-		
-		// ints
-		sscanf(buffer, "%s %i", ParName, &FlagValue);
-		if( !strcmp(ParName, "ElIDRobustTight") ){
-			fCut_ElIDRobustTight = int(FlagValue); ok = true;
-		}	
-		if( !strcmp(ParName, "MuTrackerMu") ){
-			fCut_MuTrackerMu     = int(FlagValue); ok = true;
-		}							
-		
+		if( !strcmp(ParName, "PFMET") ){
+			fCut_PFMET          = float(ParValue); ok = true;
+		}			
+									
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
 	}	
 	if(verbose){
 		cout << "setting cuts to: " << endl;
-		cout << "  ElPt " << fCut_ElPt << " and ELEta " << fCut_ElEta << " fCut_ElRelIso04 < "<< fCut_ElRelIso04 << " IDRobustTight  "<< fCut_ElIDRobustTight <<endl;
-		cout << "  MuPt " << fCut_MuPt << " and MuEta " << fCut_MuEta << " fCut_MuRelIso03 < "<< fCut_MuRelIso03 << " MuNTkHits >=   "<< fCut_MuNTkHits       << " MuTrackerMu " << fCut_MuTrackerMu <<endl;
-		cout << "  JPt  " << fCut_JPt  << " and JEta  " << fCut_JEta  <<endl;
+		cout << "  PFMET " << fCut_PFMET <<endl;
 		cout << "--------------"    << endl;	
 	}			
+}
+
+
+
+void MultiplicityAnalysis::Reset(){
+	elecs.clear();
+	muons.clear();
 }

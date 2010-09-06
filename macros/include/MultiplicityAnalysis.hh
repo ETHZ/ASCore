@@ -31,40 +31,35 @@ public:
 	void Analyze();
 	void End();
 
-	void PlotMPSummary();
-	void PlotMPEffic();
+	void PlotMPSummary(LeptJetStat *fLeptJetStat, TH2D *fHljMult);
+	void PlotMPEffic(LeptJetStat *fLeptJetStat, TH2D *fHemuMult, TH1F *fHemuEff);
 	const char* fSetofCuts;  
 	float fLumi; 	// lumi to scale plots with xsection
-
+	std::vector<std::string>* fRequiredHLT; 
+	std::vector<std::string>* fVetoedHLT;
+	
 
 private:
 	void ReadCuts();
+	void Reset();
+	
+	std::vector<int> elecs;
+	std::vector<int> muons;
+	
 	
 	// Multiplicity Plots Variables:
 	TFile *fMPHistFile;
 	LeptJetStat *fMyLeptJetStat;
-	TH2D *fHljMult;
-	TH2D *fHemuMult;
+	LeptJetStat *fMyLeptJetStat_bjets;
+	TH2D *fHljMult_alljets;
+	TH2D *fHemuMult_alljets;
 	TH1F *fHemuEff;
+	TH2D *fHljMult_bjets;
+	TH2D *fHemuMult_bjets;
 	
 	//  ---- set of cuts ---
 	TString fSetName;
-	// ---- Electrons
-	float fCut_ElPt;
-	float fCut_ElEta;
-	float fCut_ElRelIso04;
-	int   fCut_ElIDRobustTight;  
-	// ---- Muons
-	float fCut_MuPt;
-	float fCut_MuEta;
-	float fCut_MuRelIso03;
-	float fCut_MuNTkHits;
-	int   fCut_MuTrackerMu;
-	// ---- Jets
-	float fCut_JPt;
-	float fCut_JEta;
-
-
-
+	float fCut_PFMET;
+	
 };
 #endif

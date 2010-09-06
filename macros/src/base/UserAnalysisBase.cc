@@ -107,6 +107,26 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 }
 
 // Object selections:
+
+
+bool UserAnalysisBase::IsGoodJ_TDL(int index) {
+
+	if( fTR->JPt[index] < 40. ) 			return false;
+	if( fabs(fTR->JEta[index]) > 2.5 ) 		return false;
+	if (fTR->JEMfrac[index] <= 0.01)  		return false;
+	if (fTR->JID_n90Hits[index] <= 1) 		return false;
+	if (fTR->JID_HPD[index] >= 0.98)  		return false;
+
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
+	if(! IsGoodJ_TDL(index)) return false;
+	if(fTR->JbTagProbSimpSVHighEff[index] < 1.74) return false;
+
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodBasicJet(int index){
 	// Basic Jet cleaning and ID cuts
 	if(fTR->JPt[index] < 30) return false;
@@ -136,10 +156,18 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuPt[index] < 10) return false;
 	if(fTR->MuNChi2[index] > 10) return false;
 	if(fTR->MuNTkHits[index] < 11) return false;
-	if(fabs(fTR->MuD0PV[index]) > 0.02) return false;
+	if(fabs(fTR->MuD0BS[index]) > 0.02) return false;
 	if(fTR->MuIsGMPT[index] == 0) return false;
 	if(fTR->MuRelIso03[index] > 1.0) return false;
 	// if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false; // No effect after other cuts (on ~ 120/nb)
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodMu_TDL(int index){
+	if(!IsGoodBasicMu(index)) return false;
+	if(fTR->MuPt[index] < 20) return false;
+	if( fabs(fTR->MuEta[index]) > 2.5 ) return false;
+	if(fTR->MuRelIso03[index] > 0.15) return false;
 	return true;
 }
 
@@ -158,6 +186,57 @@ bool UserAnalysisBase::IsLooseMu(int index){
 bool UserAnalysisBase::IsLooseNoTightMu(int index){
 	if(IsLooseMu(index) && !IsTightMu(index)) return true;
 	else return false;
+}
+
+bool UserAnalysisBase::IsGoodEl_TDL(int index){
+	// ---- electron selection from Top-Dilepton group  ----
+	// ---- El id WP90
+	double etaEgapUpperEdge         = 1.5660;
+	double etaEgapLowerEdge         = 1.4442;
+	
+	if( fTR->ElPt[index] < 20. ) 	return false;
+	if( fabs(fTR->ElEta[index]) > 2.5 ) return false;
+	if( fabs(fTR->ElEta[index]) > etaEgapLowerEdge && fabs(fTR->ElEta[index]) < etaEgapUpperEdge) return false;
+	if( fTR->ElD0BS[index] >= 0.04 ) return false;
+	
+	// conversion rejection
+	if( fTR->ElNumberOfMissingInnerHits[index] > 1) return false;
+	if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
+	
+	// el id
+	if(fabs(fTR->ElEta[index]) < etaEgapLowerEdge){// for barrel
+		if(fTR->ElSigmaIetaIeta[index] > 0.01) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.8) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
+		if( fTR->ElHcalOverEcal[index] > 0.12 ) return false;
+	}else if(fabs(fTR->ElEta[index]) > etaEgapUpperEdge){ // for endcap
+		if(fTR->ElSigmaIetaIeta[index] > 0.03) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.7) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.009) return false;
+		if( fTR->ElHcalOverEcal[index] > 0.05 ) return false;		
+	}
+	
+	// isolation
+	double elIsoEcal;
+	if( fabs(fTR->ElEta[index]) < etaEgapLowerEdge ){
+		elIsoEcal = fTR->ElDR03EcalRecHitSumEt[index] - 1.;
+		elIsoEcal = ((0. > elIsoEcal) ? 0. : elIsoEcal);
+	} else if(fabs(fTR->ElEta[index]) > etaEgapUpperEdge ){
+		elIsoEcal = fTR->ElDR03EcalRecHitSumEt[index];
+	}
+	double pt = ((20. > fTR->ElEt[index]) ? 20. : fTR->ElEt[index]);
+	double elIso = (fTR->ElDR03TkSumPt[index] + elIsoEcal + fTR->ElDR03HcalTowerSumEt[index]) / pt;
+	if( elIso > 0.15 ) return false;
+	
+	// rejection if matched to muon	
+	for( int im = 0; im < fTR->NMus; ++im ){
+		if( (fTR->MuIsGlobalMuon[im] == 0 || fTR->MuIsTrackerMuon[im] == 0) && ( fTR->MuNTkHits[im] > 10) ) {
+			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
+			if(deltaR <= 0.1) return false;
+		}
+	}
+	
+	return true;
 }
 
 bool UserAnalysisBase::IsGoodBasicEl(int index){

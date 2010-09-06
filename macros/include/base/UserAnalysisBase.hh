@@ -13,9 +13,9 @@ public:
 	virtual ~UserAnalysisBase();
   
 	virtual void Begin() {}
-        virtual void BeginRun(Int_t& run);
-        virtual void Analyze() {}
-        virtual void End() {}
+    virtual void BeginRun(Int_t& run);
+    virtual void Analyze() {}
+    virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 
@@ -40,18 +40,22 @@ public:
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
+	virtual bool IsGoodJ_TDL(int);
+	virtual bool IsGoodbJ_TDL(int);
 
 	// Muon Selectors
 	virtual bool IsGoodBasicMu(int);
 	virtual bool IsTightMu(int);
 	virtual bool IsLooseMu(int);
 	virtual bool IsLooseNoTightMu(int);
+	virtual bool IsGoodMu_TDL(int);
 
 	// Electron Selectors
 	virtual bool IsGoodBasicEl(int);
 	virtual bool IsTightEl(int);
 	virtual bool IsLooseEl(int);
 	virtual bool IsLooseNoTightEl(int);
+	virtual bool IsGoodEl_TDL(int);
 
 	// Photon Selectors
 	virtual bool IsGoodBasicPho(int);
