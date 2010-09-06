@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.69 2010/09/02 08:14:30 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.70 2010/09/02 17:12:06 fronga Exp $
 //
 //
 
@@ -143,53 +143,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Tree with event information
   fEventTree = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 
+  // Dump the full configuration
   edm::LogVerbatim("NTP") << "---------------------------------";
   edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
-  edm::LogVerbatim("NTP") << endl;
-  edm::LogVerbatim("NTP") << "  Processing Real Data: " << (fIsRealData?"ON":"OFF"); 
-  edm::LogVerbatim("NTP") << "  Processing PAT:       " << (fIsPat?"ON":"OFF"); 
-  edm::LogVerbatim("NTP") << endl;
-  edm::LogVerbatim("NTP") << "  Input Tags:";
-  edm::LogVerbatim("NTP") << "    fMuonTag        = " << fMuonTag.label()        ;
-  edm::LogVerbatim("NTP") << "    fElectronTag    = " << fElectronTag.label()    ;
-  edm::LogVerbatim("NTP") << "    fEleIdWP        = " << fEleIdWP                ;
-  edm::LogVerbatim("NTP") << "    fMuIsoDepTkTag  = " << fMuIsoDepTkTag.label()  ;
-  edm::LogVerbatim("NTP") << "    fMuIsoDepECTag  = " << fMuIsoDepECTag.label()  ;
-  edm::LogVerbatim("NTP") << "    fMuIsoDepHCTag  = " << fMuIsoDepHCTag.label()  ;
-  edm::LogVerbatim("NTP") << "    fJetTag         = " << fJetTag.label()         ;
-  edm::LogVerbatim("NTP") << "    fJetCorrs       = " << fJetCorrs               ;
-  edm::LogVerbatim("NTP") << "    fMET1Tag        = " << fMET1Tag.label()        ;
-  edm::LogVerbatim("NTP") << "    fMET2Tag        = " << fMET2Tag.label()        ;
-  edm::LogVerbatim("NTP") << "    fMET3Tag        = " << fMET3Tag.label()        ;
-  edm::LogVerbatim("NTP") << "    fMET4Tag        = " << fMET4Tag.label()        ;
-  edm::LogVerbatim("NTP") << "    fMET5Tag        = " << fMET5Tag.label()        ;
-  edm::LogVerbatim("NTP") << "    fVertexTag      = " << fVertexTag.label()      ;
-  edm::LogVerbatim("NTP") << "    fTrackTag       = " << fTrackTag.label()       ;
-  edm::LogVerbatim("NTP") << "    fPhotonTag      = " << fPhotonTag.label()      ;
-  edm::LogVerbatim("NTP") << "    fCalTowTag      = " << fCalTowTag.label()      ;
-  edm::LogVerbatim("NTP") << "    fGenPartTag     = " << fGenPartTag.label()     ;
-  edm::LogVerbatim("NTP") << "    fGenJetTag      = " << fGenJetTag.label()      ;
-  edm::LogVerbatim("NTP") << endl;
-  edm::LogVerbatim("NTP") << "  Event Selection Parameters:";
-  edm::LogVerbatim("NTP") << "    fMinmupt        = " << fMinmupt       ;
-  edm::LogVerbatim("NTP") << "    fMaxmueta       = " << fMaxmueta      ;
-  edm::LogVerbatim("NTP") << "    fMinelpt        = " << fMinelpt       ;
-  edm::LogVerbatim("NTP") << "    fMaxeleta       = " << fMaxeleta      ;
-  edm::LogVerbatim("NTP") << "    fMincorjpt      = " << fMincorjpt     ;
-  edm::LogVerbatim("NTP") << "    fMinrawjpt      = " << fMinrawjpt     ;
-  edm::LogVerbatim("NTP") << "    fMaxjeta        = " << fMaxjeta       ;
-  edm::LogVerbatim("NTP") << "    fMinjemfrac     = " << fMinjemfrac    ;
-  edm::LogVerbatim("NTP") << "    fMintrkpt       = " << fMintrkpt      ;
-  edm::LogVerbatim("NTP") << "    fMaxtrketa      = " << fMaxtrketa     ;
-  edm::LogVerbatim("NTP") << "    fMaxtrknchi2    = " << fMaxtrknchi2   ;
-  edm::LogVerbatim("NTP") << "    fMintrknhits    = " << fMintrknhits   ;
-  edm::LogVerbatim("NTP") << "    fMinphopt       = " << fMinphopt      ;
-  edm::LogVerbatim("NTP") << "    fMaxphoeta      = " << fMaxphoeta     ;
-  edm::LogVerbatim("NTP") << "    fMingenleptpt   = " << fMingenleptpt  ;
-  edm::LogVerbatim("NTP") << "    fMaxgenlepteta  = " << fMaxgenlepteta ;	
-  edm::LogVerbatim("NTP") << endl;
-  edm::LogVerbatim("NTP") << "---------------------------------" ;
-
   edm::LogVerbatim("NTP") << iConfig;
 
   // Create additional jet fillers
@@ -433,192 +389,232 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTbeamspoty = (beamSpot.position()).y();
   fTbeamspotz = (beamSpot.position()).z();
 
-	////////////////////////////////////////////////////////
-	// Muon Variables:
-	int mi(-1), mqi(-1); // index of all muons and qualified muons respectively
-	fTnmutot = 0;
-	for(View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); ++Mit){
-		// Check if maximum number of muons is exceeded already:
-		if(mqi >= gMaxnmus){
-			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maximum number of muons exceeded";
-			fTflagmaxmuexc = 1;
-			fTgoodevent = 1;
-			break;
-		}
-		mi++;
-		// Muon preselection:
-		// Only consider global and trackermuons:
-		if(!(Mit->isGlobalMuon()) && !(Mit->isTrackerMuon())) continue;
-		fTnmutot++;
-		if(Mit->pt() < fMinmupt) continue;
-		if(fabs(Mit->eta()) > fMaxmueta) continue;
-		mqi++;
+  IndexByPt indexComparator; // Need this to sort collections
 
-		fTmuIsGM[mqi]   = Mit->isGlobalMuon() ? 1:0;
-		fTmuIsTM[mqi]   = Mit->isTrackerMuon() ? 1:0;
+  ////////////////////////////////////////////////////////
+  // Muon Variables:
+  int mqi(-1);  // Index of qualified muons
+  fTnmutot = 0; // Total number of tracker&&global muons 
 
-		// Combined methods for Global and Tracker muons:
-		fTmupx[mqi]     = Mit->px();
-		fTmupy[mqi]     = Mit->py();
-		fTmupz[mqi]     = Mit->pz();
-		fTmupt[mqi]     = Mit->pt();
-		fTmueta[mqi]    = Mit->eta();
-		fTmuphi[mqi]    = Mit->phi();
-		fTmue[mqi]      = Mit->energy();
-		fTmuet[mqi]     = Mit->et();
-		fTmucharge[mqi] = Mit->charge();
+  // Get muons, order them by pt and apply selection
+  vector<OrderPair> muOrdered;
+  int muIndex(0);
+  for ( View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end(); 
+        ++Mit,++muIndex ) {
+    // Check if maximum number of muons is exceeded already:
+    if(mqi >= gMaxnmus){
+      edm::LogWarning("NTP") << "@SUB=analyze()"
+                             << "Maximum number of muons exceeded";
+      fTflagmaxmuexc = 1;
+      fTgoodevent = 1;
+      break;
+    }
+    // Muon preselection:
+    // Only consider global and trackermuons:
+    if(!(Mit->isGlobalMuon()) && !(Mit->isTrackerMuon())) continue;
+    fTnmutot++;
+    if(Mit->pt() < fMinmupt) continue;
+    if(fabs(Mit->eta()) > fMaxmueta) continue;
+    ++mqi; // Count how many we'll eventually store
+    muOrdered.push_back(make_pair(muIndex,Mit->pt()));
+  }
+  std::sort(muOrdered.begin(),muOrdered.end(),indexComparator);
+  fTnmu = muOrdered.size();
+  mqi = 0;
 
-		fTmuiso[mqi]            = (Mit->isolationR03().sumPt + Mit->isolationR03().emEt + Mit->isolationR03().hadEt) / Mit->pt();
-		fTmuIso03sumPt[mqi]     = Mit->isolationR03().sumPt;
-		fTmuIso03emEt[mqi]      = Mit->isolationR03().emEt;
-		fTmuIso03hadEt[mqi]     = Mit->isolationR03().hadEt;
-		fTmuIso03emVetoEt[mqi]  = Mit->isolationR03().emVetoEt;
-		fTmuIso03hadVetoEt[mqi] = Mit->isolationR03().hadVetoEt;
-		fTmuIso05sumPt[mqi]     = Mit->isolationR05().sumPt;
-		fTmuIso05emEt[mqi]      = Mit->isolationR05().emEt;
-		fTmuIso05hadEt[mqi]     = Mit->isolationR05().hadEt;
+  // Dump muon properties in tree variables
+  for (vector<OrderPair>::const_iterator it = muOrdered.begin();
+       it != muOrdered.end(); ++it, ++mqi ) {
+    int index = it->first;
+    const Muon& muon = (*muons)[index];
 
-		fTmucalocomp[mqi] = Mit->caloCompatibility();
-		fTmusegmcomp[mqi] = muon::segmentCompatibility(*Mit);
+    fTmuIsGM[mqi]   = muon.isGlobalMuon() ? 1:0;
+    fTmuIsTM[mqi]   = muon.isTrackerMuon() ? 1:0;
 
-		// MuID Flags:
-		fTmuIsGMPT[mqi]                  = muon::isGoodMuon(*Mit, muon::GlobalMuonPromptTight) ? 1:0;
-		fTmuIsGMTkChiComp[mqi]           = muon::isGoodMuon(*Mit, muon::GMTkChiCompatibility) ? 1:0;
-		fTmuIsGMStaChiComp[mqi]          = muon::isGoodMuon(*Mit, muon::GMStaChiCompatibility) ? 1:0;
-		fTmuIsGMTkKinkTight[mqi]         = muon::isGoodMuon(*Mit, muon::GMTkKinkTight) ? 1:0;
-		fTmuIsAllStaMuons[mqi]           = muon::isGoodMuon(*Mit, muon::AllStandAloneMuons) ? 1:0;
-		fTmuIsAllTrkMuons[mqi]           = muon::isGoodMuon(*Mit, muon::AllTrackerMuons) ? 1:0;
-		fTmuIsTrkMuArb[mqi]              = muon::isGoodMuon(*Mit, muon::TrackerMuonArbitrated) ? 1:0;
-		fTmuIsAllArb[mqi]                = muon::isGoodMuon(*Mit, muon::AllArbitrated) ? 1:0;
-		fTmuIsTMLastStationLoose[mqi]    = muon::isGoodMuon(*Mit, muon::TMLastStationLoose) ? 1:0;
-		fTmuIsTMLastStationTight[mqi]    = muon::isGoodMuon(*Mit, muon::TMLastStationTight) ? 1:0;
-		fTmuIsTM2DCompLoose[mqi]         = muon::isGoodMuon(*Mit, muon::TM2DCompatibilityLoose) ? 1:0;
-		fTmuIsTM2DCompTight[mqi]         = muon::isGoodMuon(*Mit, muon::TM2DCompatibilityTight) ? 1:0;
-		fTmuIsTMOneStationLoose[mqi]     = muon::isGoodMuon(*Mit, muon::TMOneStationLoose) ? 1:0;
-		fTmuIsTMOneStationTight[mqi]     = muon::isGoodMuon(*Mit, muon::TMOneStationTight) ? 1:0;
-		fTmuIsTMLSOPL[mqi]               = muon::isGoodMuon(*Mit, muon::TMLastStationOptimizedLowPtLoose) ? 1:0;
-		fTmuIsTMLastStationAngLoose[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngLoose) ? 1:0;
-		fTmuIsTMLastStationAngTight[mqi] = muon::isGoodMuon(*Mit, muon::TMLastStationAngTight) ? 1:0;
-		fTmuIsTMOneStationAngLoose[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngLoose) ? 1:0;
-		fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(*Mit, muon::TMOneStationAngTight) ? 1:0;
+    // Combined methods for Global and Tracker muons:
+    fTmupx[mqi]     = muon.px();
+    fTmupy[mqi]     = muon.py();
+    fTmupz[mqi]     = muon.pz();
+    fTmupt[mqi]     = muon.pt();
+    fTmueta[mqi]    = muon.eta();
+    fTmuphi[mqi]    = muon.phi();
+    fTmue[mqi]      = muon.energy();
+    fTmuet[mqi]     = muon.et();
+    fTmucharge[mqi] = muon.charge();
 
-		// Isolation is embedded in PAT.
-		if ( !fIsPat ) {
-			Ref<View<Muon> > muonRef(muons,mi);
-			const reco::IsoDeposit ECDep = ECDepMap[muonRef];
-			const reco::IsoDeposit HCDep = HCDepMap[muonRef];
-			fTmueecal[mqi] = ECDep.candEnergy();
-			fTmuehcal[mqi] = HCDep.candEnergy();
-		} else {
-			const pat::Muon* pMuon =  static_cast<const pat::Muon*>(&(*Mit));
-			fTmueecal[mqi] = pMuon->ecalIsoDeposit()->candEnergy();
-			fTmuehcal[mqi] = pMuon->hcalIsoDeposit()->candEnergy();
-		}
+    fTmuiso[mqi]            = (muon.isolationR03().sumPt + muon.isolationR03().emEt + muon.isolationR03().hadEt) / muon.pt();
+    fTmuIso03sumPt[mqi]     = muon.isolationR03().sumPt;
+    fTmuIso03emEt[mqi]      = muon.isolationR03().emEt;
+    fTmuIso03hadEt[mqi]     = muon.isolationR03().hadEt;
+    fTmuIso03emVetoEt[mqi]  = muon.isolationR03().emVetoEt;
+    fTmuIso03hadVetoEt[mqi] = muon.isolationR03().hadVetoEt;
+    fTmuIso05sumPt[mqi]     = muon.isolationR05().sumPt;
+    fTmuIso05emEt[mqi]      = muon.isolationR05().emEt;
+    fTmuIso05hadEt[mqi]     = muon.isolationR05().hadEt;
 
-		fTmud0bs[mqi] = -1.0*Mit->innerTrack()->dxy(beamSpot.position());
-		fTmud0pv[mqi] = -1.0*Mit->innerTrack()->dxy(primVtx->position());
-		fTmudzbs[mqi] = Mit->innerTrack()->dz(beamSpot.position());
-		fTmudzpv[mqi] = Mit->innerTrack()->dz(primVtx->position());
-		fTmuinntknchi2[mqi] = Mit->innerTrack()->normalizedChi2();
+    fTmucalocomp[mqi] = muon.caloCompatibility();
+    fTmusegmcomp[mqi] = muon::segmentCompatibility(muon);
 
-		// Separate methods:
-		if(fTmuIsTM[mqi]){ // Tracker Muons
-			fTntrackermu++;
-			fTmuptE[mqi]  = Mit->innerTrack()->ptError();
-			fTmud0E[mqi]  = Mit->innerTrack()->dxyError();
-			fTmudzE[mqi]  = Mit->innerTrack()->dzError();
+    // MuID Flags:
+    fTmuIsGMPT[mqi]                  = muon::isGoodMuon(muon, muon::GlobalMuonPromptTight) ? 1:0;
+    fTmuIsGMTkChiComp[mqi]           = muon::isGoodMuon(muon, muon::GMTkChiCompatibility) ? 1:0;
+    fTmuIsGMStaChiComp[mqi]          = muon::isGoodMuon(muon, muon::GMStaChiCompatibility) ? 1:0;
+    fTmuIsGMTkKinkTight[mqi]         = muon::isGoodMuon(muon, muon::GMTkKinkTight) ? 1:0;
+    fTmuIsAllStaMuons[mqi]           = muon::isGoodMuon(muon, muon::AllStandAloneMuons) ? 1:0;
+    fTmuIsAllTrkMuons[mqi]           = muon::isGoodMuon(muon, muon::AllTrackerMuons) ? 1:0;
+    fTmuIsTrkMuArb[mqi]              = muon::isGoodMuon(muon, muon::TrackerMuonArbitrated) ? 1:0;
+    fTmuIsAllArb[mqi]                = muon::isGoodMuon(muon, muon::AllArbitrated) ? 1:0;
+    fTmuIsTMLastStationLoose[mqi]    = muon::isGoodMuon(muon, muon::TMLastStationLoose) ? 1:0;
+    fTmuIsTMLastStationTight[mqi]    = muon::isGoodMuon(muon, muon::TMLastStationTight) ? 1:0;
+    fTmuIsTM2DCompLoose[mqi]         = muon::isGoodMuon(muon, muon::TM2DCompatibilityLoose) ? 1:0;
+    fTmuIsTM2DCompTight[mqi]         = muon::isGoodMuon(muon, muon::TM2DCompatibilityTight) ? 1:0;
+    fTmuIsTMOneStationLoose[mqi]     = muon::isGoodMuon(muon, muon::TMOneStationLoose) ? 1:0;
+    fTmuIsTMOneStationTight[mqi]     = muon::isGoodMuon(muon, muon::TMOneStationTight) ? 1:0;
+    fTmuIsTMLSOPL[mqi]               = muon::isGoodMuon(muon, muon::TMLastStationOptimizedLowPtLoose) ? 1:0;
+    fTmuIsTMLastStationAngLoose[mqi] = muon::isGoodMuon(muon, muon::TMLastStationAngLoose) ? 1:0;
+    fTmuIsTMLastStationAngTight[mqi] = muon::isGoodMuon(muon, muon::TMLastStationAngTight) ? 1:0;
+    fTmuIsTMOneStationAngLoose[mqi]  = muon::isGoodMuon(muon, muon::TMOneStationAngLoose) ? 1:0;
+    fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(muon, muon::TMOneStationAngTight) ? 1:0;
 
-			fTmunchi2[mqi]      = fTmuinntknchi2[mqi]; // No difference for TM
-			fTmunglhits[mqi]    = 0;
-			fTmuntkhits[mqi]    = Mit->innerTrack()->hitPattern().numberOfValidHits();
-			fTmunmuhits[mqi]    = 0;
-			fTmunmatches[mqi]   = 0;
-			fTmunchambers[mqi]  = 0;
+    // Isolation is embedded in PAT.
+    if ( !fIsPat ) {
+      Ref<View<Muon> > muonRef(muons,index);
+      const reco::IsoDeposit ECDep = ECDepMap[muonRef];
+      const reco::IsoDeposit HCDep = HCDepMap[muonRef];
+      fTmueecal[mqi] = ECDep.candEnergy();
+      fTmuehcal[mqi] = HCDep.candEnergy();
+    } else {
+      const pat::Muon* pMuon =  static_cast<const pat::Muon*>(&muon);
+      fTmueecal[mqi] = pMuon->ecalIsoDeposit()->candEnergy();
+      fTmuehcal[mqi] = pMuon->hcalIsoDeposit()->candEnergy();
+    }
 
-			fTmuoutposrad[mqi]   = Mit->innerTrack()->outerRadius();
-			fTmuoutposx[mqi]     = Mit->innerTrack()->outerX();
-			fTmuoutposy[mqi]     = Mit->innerTrack()->outerY();
-			fTmuoutposz[mqi]     = Mit->innerTrack()->outerZ();
+    fTmud0bs[mqi] = -1.0*muon.innerTrack()->dxy(beamSpot.position());
+    fTmud0pv[mqi] = -1.0*muon.innerTrack()->dxy(primVtx->position());
+    fTmudzbs[mqi] = muon.innerTrack()->dz(beamSpot.position());
+    fTmudzpv[mqi] = muon.innerTrack()->dz(primVtx->position());
+    fTmuinntknchi2[mqi] = muon.innerTrack()->normalizedChi2();
 
-			fTmuoutmomx[mqi]     = Mit->innerTrack()->outerMomentum().x();
-			fTmuoutmomy[mqi]     = Mit->innerTrack()->outerMomentum().z();
-			fTmuoutmomz[mqi]     = Mit->innerTrack()->outerMomentum().y();
-			fTmuoutmomphi[mqi]   = Mit->innerTrack()->outerPhi();
-			fTmuoutmometa[mqi]   = Mit->innerTrack()->outerEta();
-			fTmuoutmomtheta[mqi] = Mit->innerTrack()->outerTheta();
+    // Separate methods:
+    if(fTmuIsTM[mqi]){ // Tracker Muons
+      fTntrackermu++;
+      fTmuptE[mqi]  = muon.innerTrack()->ptError();
+      fTmud0E[mqi]  = muon.innerTrack()->dxyError();
+      fTmudzE[mqi]  = muon.innerTrack()->dzError();
 
-		}
-		if(fTmuIsGM[mqi]){ // Global Muons
-			fTnglobalmu++;
-			fTmuptE[mqi]  = Mit->globalTrack()->ptError();
-			fTmud0E[mqi]  = Mit->globalTrack()->dxyError();
-			fTmudzE[mqi]  = Mit->globalTrack()->dzError();
+      fTmunchi2[mqi]      = fTmuinntknchi2[mqi]; // No difference for TM
+      fTmunglhits[mqi]    = 0;
+      fTmuntkhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidHits();
+      fTmunmuhits[mqi]    = 0;
+      fTmunmatches[mqi]   = 0;
+      fTmunchambers[mqi]  = 0;
 
-			fTmunchi2[mqi]      = Mit->globalTrack()->normalizedChi2();
-			fTmunglhits[mqi]    = Mit->globalTrack()->hitPattern().numberOfValidHits();
-			fTmuntkhits[mqi]    = Mit->innerTrack()->hitPattern().numberOfValidHits();
-			fTmunmuhits[mqi]    = Mit->outerTrack()->hitPattern().numberOfValidHits();
-			fTmunmatches[mqi]   = Mit->numberOfMatches();
-			fTmunchambers[mqi]  = Mit->numberOfChambers();
+      fTmuoutposrad[mqi]   = muon.innerTrack()->outerRadius();
+      fTmuoutposx[mqi]     = muon.innerTrack()->outerX();
+      fTmuoutposy[mqi]     = muon.innerTrack()->outerY();
+      fTmuoutposz[mqi]     = muon.innerTrack()->outerZ();
 
-			fTmuoutposrad[mqi]   = Mit->globalTrack()->outerRadius();
-			fTmuoutposx[mqi]     = Mit->globalTrack()->outerX();
-			fTmuoutposy[mqi]     = Mit->globalTrack()->outerY();
-			fTmuoutposz[mqi]     = Mit->globalTrack()->outerZ();
+      fTmuoutmomx[mqi]     = muon.innerTrack()->outerMomentum().x();
+      fTmuoutmomy[mqi]     = muon.innerTrack()->outerMomentum().z();
+      fTmuoutmomz[mqi]     = muon.innerTrack()->outerMomentum().y();
+      fTmuoutmomphi[mqi]   = muon.innerTrack()->outerPhi();
+      fTmuoutmometa[mqi]   = muon.innerTrack()->outerEta();
+      fTmuoutmomtheta[mqi] = muon.innerTrack()->outerTheta();
 
-			fTmuoutmomx[mqi]     = Mit->globalTrack()->outerMomentum().x();
-			fTmuoutmomy[mqi]     = Mit->globalTrack()->outerMomentum().z();
-			fTmuoutmomz[mqi]     = Mit->globalTrack()->outerMomentum().y();
-			fTmuoutmomphi[mqi]   = Mit->globalTrack()->outerPhi();
-			fTmuoutmometa[mqi]   = Mit->globalTrack()->outerEta();
-			fTmuoutmomtheta[mqi] = Mit->globalTrack()->outerTheta();
+    }
+    if(fTmuIsGM[mqi]){ // Global Muons
+      fTnglobalmu++;
+      fTmuptE[mqi]  = muon.globalTrack()->ptError();
+      fTmud0E[mqi]  = muon.globalTrack()->dxyError();
+      fTmudzE[mqi]  = muon.globalTrack()->dzError();
 
-		}
+      fTmunchi2[mqi]      = muon.globalTrack()->normalizedChi2();
+      fTmunglhits[mqi]    = muon.globalTrack()->hitPattern().numberOfValidHits();
+      fTmuntkhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidHits();
+      fTmunmuhits[mqi]    = muon.outerTrack()->hitPattern().numberOfValidHits();
+      fTmunmatches[mqi]   = muon.numberOfMatches();
+      fTmunchambers[mqi]  = muon.numberOfChambers();
 
-		// MC Matching
-		if(!fIsRealData){
-			vector<const GenParticle*> MuMatch = matchRecoCand(&(*Mit), iEvent);
-			if(MuMatch[0] != NULL){
-				fTGenMuId[mqi]       = MuMatch[0]->pdgId();
-				fTGenMuStatus[mqi]   = MuMatch[0]->status();
-				fTGenMuCharge[mqi]   = MuMatch[0]->charge();
-				fTGenMuPt[mqi]       = MuMatch[0]->pt();
-				fTGenMuEta[mqi]      = MuMatch[0]->eta();
-				fTGenMuPhi[mqi]      = MuMatch[0]->phi();
-				fTGenMuE[mqi]        = MuMatch[0]->energy();
+      fTmuoutposrad[mqi]   = muon.globalTrack()->outerRadius();
+      fTmuoutposx[mqi]     = muon.globalTrack()->outerX();
+      fTmuoutposy[mqi]     = muon.globalTrack()->outerY();
+      fTmuoutposz[mqi]     = muon.globalTrack()->outerZ();
 
-				fTGenMuMId[mqi]      = MuMatch[1]->pdgId();
-				fTGenMuMStatus[mqi]  = MuMatch[1]->status();
-				fTGenMuMCharge[mqi]  = MuMatch[1]->charge();
-				fTGenMuMPt[mqi]      = MuMatch[1]->pt();
-				fTGenMuMEta[mqi]     = MuMatch[1]->eta();
-				fTGenMuMPhi[mqi]     = MuMatch[1]->phi();
-				fTGenMuME[mqi]       = MuMatch[1]->energy();
+      fTmuoutmomx[mqi]     = muon.globalTrack()->outerMomentum().x();
+      fTmuoutmomy[mqi]     = muon.globalTrack()->outerMomentum().z();
+      fTmuoutmomz[mqi]     = muon.globalTrack()->outerMomentum().y();
+      fTmuoutmomphi[mqi]   = muon.globalTrack()->outerPhi();
+      fTmuoutmometa[mqi]   = muon.globalTrack()->outerEta();
+      fTmuoutmomtheta[mqi] = muon.globalTrack()->outerTheta();
+    }
 
-				fTGenMuGMId[mqi]     = MuMatch[2]->pdgId();
-				fTGenMuGMStatus[mqi] = MuMatch[2]->status();
-				fTGenMuGMCharge[mqi] = MuMatch[2]->charge();
-				fTGenMuGMPt[mqi]     = MuMatch[2]->pt();
-				fTGenMuGMEta[mqi]    = MuMatch[2]->eta();
-				fTGenMuGMPhi[mqi]    = MuMatch[2]->phi();
-				fTGenMuGME[mqi]      = MuMatch[2]->energy();
-			}
-			MuMatch.clear();
-		}
-		fTgoodmu[mqi]  = 0;
-		fTmuIsIso[mqi] = 1;
-	}
-	fTnmu = mqi+1;
+    // MC Matching
+    if(!fIsRealData){
+      vector<const GenParticle*> MuMatch = matchRecoCand(&muon, iEvent);
+      if(MuMatch[0] != NULL){
+        fTGenMuId[mqi]       = MuMatch[0]->pdgId();
+        fTGenMuStatus[mqi]   = MuMatch[0]->status();
+        fTGenMuCharge[mqi]   = MuMatch[0]->charge();
+        fTGenMuPt[mqi]       = MuMatch[0]->pt();
+        fTGenMuEta[mqi]      = MuMatch[0]->eta();
+        fTGenMuPhi[mqi]      = MuMatch[0]->phi();
+        fTGenMuE[mqi]        = MuMatch[0]->energy();
+
+        fTGenMuMId[mqi]      = MuMatch[1]->pdgId();
+        fTGenMuMStatus[mqi]  = MuMatch[1]->status();
+        fTGenMuMCharge[mqi]  = MuMatch[1]->charge();
+        fTGenMuMPt[mqi]      = MuMatch[1]->pt();
+        fTGenMuMEta[mqi]     = MuMatch[1]->eta();
+        fTGenMuMPhi[mqi]     = MuMatch[1]->phi();
+        fTGenMuME[mqi]       = MuMatch[1]->energy();
+
+        fTGenMuGMId[mqi]     = MuMatch[2]->pdgId();
+        fTGenMuGMStatus[mqi] = MuMatch[2]->status();
+        fTGenMuGMCharge[mqi] = MuMatch[2]->charge();
+        fTGenMuGMPt[mqi]     = MuMatch[2]->pt();
+        fTGenMuGMEta[mqi]    = MuMatch[2]->eta();
+        fTGenMuGMPhi[mqi]    = MuMatch[2]->phi();
+        fTGenMuGME[mqi]      = MuMatch[2]->energy();
+      }
+      MuMatch.clear();
+    }
+    fTgoodmu[mqi]  = 0;
+    fTmuIsIso[mqi] = 1;
+  }
 
   ////////////////////////////////////////////////////////
   // Electron variables:
   // Keep pointers to electron superCluster in original collections
   vector<const SuperCluster*> elecPtr;
   vector<const GsfTrack*> trckPtr;
-  int eqi(-1),ei(-1); // counts # of qualified electrons
-  fTnelestot = 0;
+  int eqi(-1);                    // Index of qualified electrons
+  fTnelestot = electrons->size(); // Total number of electrons
+
   if(electrons->size() > 0){
+    // Get electrons, order them by pt and apply selection
+    vector<OrderPair> elOrdered;
+    int elIndex(0);
+    for( View<GsfElectron>::const_iterator El = electrons->begin(); 
+         El != electrons->end(); ++El, ++elIndex ) {
+      // Check if maximum number of electrons is exceeded already:
+      if(eqi >= gMaxneles) {
+        edm::LogWarning("NTP") << "@SUB=analyze"
+                               << "Maximum number of electrons exceeded..";
+        fTflagmaxelexc = 1;
+        fTgoodevent = 1;
+        break;
+      }
+      // Electron preselection:   
+      if(El->pt() < fMinelpt) continue;
+      if(fabs(El->eta()) > fMaxeleta) continue;
+
+      eqi++; // Count how many we'll eventually store
+      elOrdered.push_back(make_pair(elIndex,El->pt()));
+    }
+    std::sort(elOrdered.begin(),elOrdered.end(),indexComparator);
+    fTneles = elOrdered.size();
+    eqi = 0;
+
     // Read eID results
     vector<Handle<ValueMap<float> > > eIDValueMap(7); 
     // Robust-Loose 
@@ -633,139 +629,124 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     // Tight 
     iEvent.getByLabel( "eidTight", eIDValueMap[3] ); 
     const ValueMap<float> & eIDmapT  = *eIDValueMap[3] ;
-	// WP from config
+    // WP from config
     iEvent.getByLabel( fEleIdWP, eIDValueMap[4] ); 
     const ValueMap<float> & eIDmapsimpleWP  = *eIDValueMap[4] ;
-	// WP80
+    // WP80
     iEvent.getByLabel( "simpleEleId80relIso", eIDValueMap[5] ); 
     const ValueMap<float> & eIDmapsimpleWP80  = *eIDValueMap[5] ;
-	// WP95
+    // WP95
     iEvent.getByLabel( "simpleEleId95relIso", eIDValueMap[6] ); 
     const ValueMap<float> & eIDmapsimpleWP95  = *eIDValueMap[6] ;
 
     eIDValueMap.clear();
 
-    // Loop over electrons
-    for( View<GsfElectron>::const_iterator El = electrons->begin(); 
-         El != electrons->end(); ++El ) {
-      ++ei;
-      // Check if maximum number of electrons is exceeded already:
-      if(eqi >= gMaxneles){
-        edm::LogWarning("NTP") << "@SUB=analyze"
-                               << "Maximum number of electrons exceeded..";
-        fTflagmaxelexc = 1;
-        fTgoodevent = 1;
-        break;
-      }
-      fTnelestot++;
-      // Electron preselection:   
-      if(El->pt() < fMinelpt) continue;
-      if(fabs(El->eta()) > fMaxeleta) continue;
+    // Dump electron properties in tree variables
+    for( vector<OrderPair>::const_iterator it = elOrdered.begin();
+         it != elOrdered.end(); ++it, ++eqi ) {
+      
+      int index = it->first;
+      const GsfElectron& electron = (*electrons)[index];
 
       // Save the electron SuperCluster pointer
-      const SuperCluster* superCluster = &(*(El->superCluster()));
-      elecPtr.push_back(superCluster);
-      trckPtr.push_back(&(*(El->gsfTrack()) ) );
-
-      // Dump electron properties in tree variables
-      eqi++;
-
-      fTepx[eqi]       = El->px();
-      fTepy[eqi]       = El->py();
-      fTepz[eqi]       = El->pz();
-      fTept[eqi]       = El->pt();
-      fTeptE[eqi]      = El->gsfTrack()->ptError();
-      fTeeta[eqi]      = El->eta();
-      fTephi[eqi]      = El->phi();
-      fTee[eqi]        = El->energy();
-      fTeet[eqi]       = El->et(); // i know: it's the same as pt, still...
-      fTed0bs[eqi]     = -1.0*El->gsfTrack()->dxy(beamSpot.position());
-      fTed0pv[eqi]     = -1.0*El->gsfTrack()->dxy(primVtx->position());
-      fTed0E[eqi]      = El->gsfTrack()->dxyError();
-      fTedzbs[eqi]     = El->gsfTrack()->dz(beamSpot.position());
-      fTedzpv[eqi]     = El->gsfTrack()->dz(primVtx->position());
-      fTedzE[eqi]      = El->gsfTrack()->dzError();
-      fTenchi2[eqi]    = El->gsfTrack()->normalizedChi2();
-      fTdr03tksumpt[eqi]         = El->dr03TkSumPt();
-      fTdr03ecalrechitsumet[eqi] = El->dr03EcalRecHitSumEt();
-      fTdr03hcaltowersumet[eqi]  = El->dr03HcalTowerSumEt();
-      fTdr04tksumpt[eqi]         = El->dr04TkSumPt();
-      fTdr04ecalrechitsumet[eqi] = El->dr04EcalRecHitSumEt();
-      fTdr04hcaltowersumet[eqi]  = El->dr04HcalTowerSumEt();
+      elecPtr.push_back(&(*electron.superCluster()));
+      trckPtr.push_back(&(*electron.gsfTrack()));
+      
+      fTepx[eqi]       = electron.px();
+      fTepy[eqi]       = electron.py();
+      fTepz[eqi]       = electron.pz();
+      fTept[eqi]       = electron.pt();
+      fTeptE[eqi]      = electron.gsfTrack()->ptError();
+      fTeeta[eqi]      = electron.eta();
+      fTephi[eqi]      = electron.phi();
+      fTee[eqi]        = electron.energy();
+      fTeet[eqi]       = electron.et(); // i know: it's the same as pt, still...
+      fTed0bs[eqi]     = -1.0*electron.gsfTrack()->dxy(beamSpot.position());
+      fTed0pv[eqi]     = -1.0*electron.gsfTrack()->dxy(primVtx->position());
+      fTed0E[eqi]      = electron.gsfTrack()->dxyError();
+      fTedzbs[eqi]     = electron.gsfTrack()->dz(beamSpot.position());
+      fTedzpv[eqi]     = electron.gsfTrack()->dz(primVtx->position());
+      fTedzE[eqi]      = electron.gsfTrack()->dzError();
+      fTenchi2[eqi]    = electron.gsfTrack()->normalizedChi2();
+      fTdr03tksumpt[eqi]         = electron.dr03TkSumPt();
+      fTdr03ecalrechitsumet[eqi] = electron.dr03EcalRecHitSumEt();
+      fTdr03hcaltowersumet[eqi]  = electron.dr03HcalTowerSumEt();
+      fTdr04tksumpt[eqi]         = electron.dr04TkSumPt();
+      fTdr04ecalrechitsumet[eqi] = electron.dr04EcalRecHitSumEt();
+      fTdr04hcaltowersumet[eqi]  = electron.dr04HcalTowerSumEt();
       fTeiso03[eqi]              = (fTdr03tksumpt[eqi] + fTdr03ecalrechitsumet[eqi] + fTdr03hcaltowersumet[eqi]) / fTept[eqi];
-	  fTeiso04[eqi]              = (fTdr04tksumpt[eqi] + fTdr04ecalrechitsumet[eqi] + fTdr04hcaltowersumet[eqi]) / fTept[eqi];
-      fTecharge[eqi]   = El->charge();
-      fTeCInfoIsGsfCtfCons[eqi]      = El->chargeInfo().isGsfCtfConsistent ? 1:0;
-      fTeCInfoIsGsfCtfScPixCons[eqi] = El->chargeInfo().isGsfCtfScPixConsistent ? 1:0;
-      fTeCInfoIsGsfScPixCons[eqi]    = El->chargeInfo().isGsfScPixConsistent ? 1:0;
-      fTeCInfoScPixCharge[eqi]       = El->chargeInfo().scPixCharge;
-      if( El->closestCtfTrackRef().isNonnull() ){
-        fTeClosestCtfTrackpt[eqi]      = (El->closestCtfTrack().ctfTrack)->pt();
-        fTeClosestCtfTracketa[eqi]     = (El->closestCtfTrack().ctfTrack)->eta();
-        fTeClosestCtfTrackphi[eqi]     = (El->closestCtfTrack().ctfTrack)->phi();
-        fTeClosestCtfTrackcharge[eqi]  = (El->closestCtfTrack().ctfTrack)->charge();
+      fTeiso04[eqi]              = (fTdr04tksumpt[eqi] + fTdr04ecalrechitsumet[eqi] + fTdr04hcaltowersumet[eqi]) / fTept[eqi];
+      fTecharge[eqi]   = electron.charge();
+      fTeCInfoIsGsfCtfCons[eqi]      = electron.chargeInfo().isGsfCtfConsistent ? 1:0;
+      fTeCInfoIsGsfCtfScPixCons[eqi] = electron.chargeInfo().isGsfCtfScPixConsistent ? 1:0;
+      fTeCInfoIsGsfScPixCons[eqi]    = electron.chargeInfo().isGsfScPixConsistent ? 1:0;
+      fTeCInfoScPixCharge[eqi]       = electron.chargeInfo().scPixCharge;
+      if( electron.closestCtfTrackRef().isNonnull() ){
+        fTeClosestCtfTrackpt[eqi]      = (electron.closestCtfTrack().ctfTrack)->pt();
+        fTeClosestCtfTracketa[eqi]     = (electron.closestCtfTrack().ctfTrack)->eta();
+        fTeClosestCtfTrackphi[eqi]     = (electron.closestCtfTrack().ctfTrack)->phi();
+        fTeClosestCtfTrackcharge[eqi]  = (electron.closestCtfTrack().ctfTrack)->charge();
       }
-      fTeInGap[eqi]    = El->isGap() ? 1:0;
+      fTeInGap[eqi]    = electron.isGap() ? 1:0;
 
-      fTeEcalDriven[eqi]    = El->ecalDrivenSeed() ? 1:0;		
-      fTeTrackerDriven[eqi] = El->trackerDrivenSeed() ? 1:0;
+      fTeEcalDriven[eqi]    = electron.ecalDrivenSeed() ? 1:0;		
+      fTeTrackerDriven[eqi] = electron.trackerDrivenSeed() ? 1:0;
 
 
-      fTeBasicClustersSize[eqi]         = El->basicClustersSize();
-      fTefbrem[eqi]                     = El->fbrem();
-      fTeHcalOverEcal[eqi]              = El->hcalOverEcal();                               
-      fTeE1x5[eqi]                      = El->e1x5();                                           
-      fTeE5x5[eqi]                      = El->e5x5();                                           
-      fTeE2x5Max[eqi]                   = El->e2x5Max();                                           
-      fTeSigmaIetaIeta[eqi]             = El->sigmaIetaIeta();                         
-      fTeDeltaEtaSeedClusterAtCalo[eqi] = El->deltaEtaSeedClusterTrackAtCalo(); 
-      fTeDeltaPhiSeedClusterAtCalo[eqi] = El->deltaPhiSeedClusterTrackAtCalo(); 
-      fTeDeltaPhiSuperClusterAtVtx[eqi] = El->deltaPhiSuperClusterTrackAtVtx(); 
-      fTeDeltaEtaSuperClusterAtVtx[eqi] = El->deltaEtaSuperClusterTrackAtVtx(); 
-      fTecaloenergy[eqi]                = El->caloEnergy();
-      fTetrkmomatvtx[eqi]               = El->trackMomentumAtVtx().R();
-      fTeESuperClusterOverP[eqi]        = El->eSuperClusterOverP();
-		fTeNumberOfMissingInnerHits[eqi]  = El->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-      fTetheta[eqi]                     = El->superCluster()->position().theta();
-      fTesceta[eqi]                     = El->superCluster()->eta();
+      fTeBasicClustersSize[eqi]         = electron.basicClustersSize();
+      fTefbrem[eqi]                     = electron.fbrem();
+      fTeHcalOverEcal[eqi]              = electron.hcalOverEcal();                               
+      fTeE1x5[eqi]                      = electron.e1x5();                                           
+      fTeE5x5[eqi]                      = electron.e5x5();                                           
+      fTeE2x5Max[eqi]                   = electron.e2x5Max();                                           
+      fTeSigmaIetaIeta[eqi]             = electron.sigmaIetaIeta();                         
+      fTeDeltaEtaSeedClusterAtCalo[eqi] = electron.deltaEtaSeedClusterTrackAtCalo(); 
+      fTeDeltaPhiSeedClusterAtCalo[eqi] = electron.deltaPhiSeedClusterTrackAtCalo(); 
+      fTeDeltaPhiSuperClusterAtVtx[eqi] = electron.deltaPhiSuperClusterTrackAtVtx(); 
+      fTeDeltaEtaSuperClusterAtVtx[eqi] = electron.deltaEtaSuperClusterTrackAtVtx(); 
+      fTecaloenergy[eqi]                = electron.caloEnergy();
+      fTetrkmomatvtx[eqi]               = electron.trackMomentumAtVtx().R();
+      fTeESuperClusterOverP[eqi]        = electron.eSuperClusterOverP();
+      fTeNumberOfMissingInnerHits[eqi]  = electron.gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+      fTetheta[eqi]                     = electron.superCluster()->position().theta();
+      fTesceta[eqi]                     = electron.superCluster()->eta();
 
-      if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
-        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( El->superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
-        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   El->superCluster()->seed()->seed(), *ebRecHits );
-        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( El->superCluster()->seed()->seed(), *ebRecHits );
-      } else if ( El->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
-        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( El->superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
-        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   El->superCluster()->seed()->seed(), *eeRecHits );
-        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( El->superCluster()->seed()->seed(), *eeRecHits );
+      if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *ebRecHits );
+        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *ebRecHits );
+      } else if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+        fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *eeRecHits );
+        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *eeRecHits );
       } else
         edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
                                                 
 
       // Read in Electron ID
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
-        Ref<View<GsfElectron> > electronRef(electrons,ei);
+        Ref<View<GsfElectron> > electronRef(electrons,index);
         fTeIDTight[eqi]            = eIDmapT[electronRef]  ? 1:0;
         fTeIDLoose[eqi]            = eIDmapL[electronRef]  ? 1:0;
         fTeIDRobustTight[eqi]      = eIDmapRT[electronRef] ? 1:0;
         fTeIDRobustLoose[eqi]      = eIDmapRL[electronRef] ? 1:0;
-		fTeIDsimpleWPrelIso[eqi]   = eIDmapsimpleWP[electronRef];
-		fTeIDsimpleWP95relIso[eqi] = eIDmapsimpleWP95[electronRef];
-		fTeIDsimpleWP80relIso[eqi] = eIDmapsimpleWP80[electronRef];
+        fTeIDsimpleWPrelIso[eqi]   = eIDmapsimpleWP[electronRef];
+        fTeIDsimpleWP95relIso[eqi] = eIDmapsimpleWP95[electronRef];
+        fTeIDsimpleWP80relIso[eqi] = eIDmapsimpleWP80[electronRef];
 		
       } else {
-        const pat::Electron* pEl   = static_cast<const pat::Electron*>(&(*El));
+        const pat::Electron* pEl   = static_cast<const pat::Electron*>(&electron);
         fTeIDTight[eqi]            = pEl->electronID("eidTight") > 0. ? 1:0;
         fTeIDLoose[eqi]            = pEl->electronID("eidLoose") > 0. ? 1:0;
         fTeIDRobustTight[eqi]      = pEl->electronID("eidRobustTight") > 0. ? 1:0;
         fTeIDRobustLoose[eqi]      = pEl->electronID("eidRobustLoose") > 0. ? 1:0;
-		fTeIDsimpleWPrelIso[eqi]   = pEl->electronID(fEleIdWP);
-		fTeIDsimpleWP95relIso[eqi] = pEl->electronID("simpleEleId95relIso");
-		fTeIDsimpleWP80relIso[eqi] = pEl->electronID("simpleEleId80relIso");
-		
+        fTeIDsimpleWPrelIso[eqi]   = pEl->electronID(fEleIdWP);
+        fTeIDsimpleWP95relIso[eqi] = pEl->electronID("simpleEleId95relIso");
+        fTeIDsimpleWP80relIso[eqi] = pEl->electronID("simpleEleId80relIso");
       }
       // Matching
       if(!fIsRealData){
-        vector<const GenParticle*> ElMatch = matchRecoCand(&(*El), iEvent);
+        vector<const GenParticle*> ElMatch = matchRecoCand(&electron, iEvent);
         if(ElMatch[0] != NULL){
           fTGenElId[eqi]       = ElMatch[0]->pdgId();
           fTGenElStatus[eqi]   = ElMatch[0]->status();
@@ -797,7 +778,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       GlobalPoint origin_point(0,0,0);
       double Dist(0.), DCot(0.);
       const float bFieldAtOrigin = magfield.product()->inTesla(origin_point).mag();
-      reco::TrackRef ConvPartnerTrack = getConversionPartnerTrack(*El, tracks, bFieldAtOrigin, Dist, DCot);
+      reco::TrackRef ConvPartnerTrack 
+        = getConversionPartnerTrack(electron, tracks, bFieldAtOrigin, Dist, DCot);
       if( ConvPartnerTrack.isNonnull() ){
         fTeConvPartTrackDist[eqi]   = Dist;
         fTeConvPartTrackDCot[eqi]   = DCot;
@@ -819,81 +801,95 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTeDupEl[eqi] = -1;
     }
   }
-  fTneles = eqi+1;
 
 
   ////////////////////////////////////////////////////////
   // Photon Variables:
-  int nqpho(-1);
   // Keep pointers to superclusters for cross cleaning
   vector<const SuperCluster*> photSCs;
+  int phoqi(-1); // Index of qualified photons
   fTnphotonstot = photons->size();
-  for( View<Photon>::const_iterator ip = photons->begin(); ip != photons->end(); ++ip ){	
-    // Preselection
-    if(ip->pt() < fMinphopt) continue;
-    if(fabs(ip->eta()) > fMaxphoeta) continue;
-    nqpho++;
+
+  // Get electrons, order them by pt and apply selection
+  vector<OrderPair> phoOrdered;
+  int phoIndex(0);
+  for( View<Photon>::const_iterator ip = photons->begin(); 
+       ip != photons->end(); ++ip, ++phoIndex ){	
     // Check if maximum number of photons exceeded
-    if(nqpho>=gMaxnphos){
+    if(phoqi>=gMaxnphos){
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of photons exceeded";
       fTflagmaxphoexc = 1;
       fTgoodevent = 1;
       break;
     }
-    // Save photon supercluster position
-    const SuperCluster* superCluster = &(*(ip->superCluster()));
-    photSCs.push_back(superCluster);
+    // Preselection
+    if(ip->pt() < fMinphopt) continue;
+    if(fabs(ip->eta()) > fMaxphoeta) continue;
 
-    fTPhotPt[nqpho]     = ip->pt();
-    fTPhotPx[nqpho]     = ip->px();
-    fTPhotPy[nqpho]     = ip->py();
-    fTPhotPz[nqpho]     = ip->pz();
-    fTPhotEta[nqpho]    = ip->eta();
-    fTPhotPhi[nqpho]    = ip->phi();
-    fTPhotEnergy[nqpho] = ip->energy();
-    fTPhotIso03Ecal[nqpho]      = ip->ecalRecHitSumEtConeDR03();
-    fTPhotIso03Hcal[nqpho]      = ip->hcalTowerSumEtConeDR03();
-    fTPhotIso03TrkSolid[nqpho]  = ip->trkSumPtSolidConeDR03();
-    fTPhotIso03TrkHollow[nqpho] = ip->trkSumPtHollowConeDR03();
-    fTPhotIso03[nqpho]          = (fTPhotIso03TrkSolid[nqpho] + fTPhotIso03Ecal[nqpho] + fTPhotIso03Hcal[nqpho]) / fTPhotPt[nqpho];
-    fTPhotIso04Ecal[nqpho]      = ip->ecalRecHitSumEtConeDR04();
-    fTPhotIso04Hcal[nqpho]      = ip->hcalTowerSumEtConeDR04();
-    fTPhotIso04TrkSolid[nqpho]  = ip->trkSumPtSolidConeDR04();
-    fTPhotIso04TrkHollow[nqpho] = ip->trkSumPtHollowConeDR04();
-    fTPhotIso04[nqpho]          = (fTPhotIso04TrkSolid[nqpho] + fTPhotIso04Ecal[nqpho] + fTPhotIso04Hcal[nqpho]) / fTPhotPt[nqpho];
-    fTPhotcaloPosX[nqpho]       = ip->caloPosition().X();
-    fTPhotcaloPosY[nqpho]       = ip->caloPosition().Y();
-    fTPhotcaloPosZ[nqpho]       = ip->caloPosition().Z();
-    fTPhotHoverE[nqpho]         = ip->hadronicOverEm();
-    fTPhotH1overE[nqpho]        = ip->hadronicDepth1OverEm();
-    fTPhotH2overE[nqpho]        = ip->hadronicDepth2OverEm();
-    fTPhotSigmaIetaIeta[nqpho]  = ip->sigmaIetaIeta();
-    fTPhotHasPixSeed[nqpho]     = ip->hasPixelSeed() ? 1:0;
-    fTPhotHasConvTrks[nqpho]    = ip->hasConversionTracks() ? 1:0; 
-    fTPhotIsInJet[nqpho] = -1;
-    fTPhotDupEl[nqpho] = -1;
-    fTPhotSharedPx[nqpho] = 0.;
-    fTPhotSharedPy[nqpho] = 0.;
-    fTPhotSharedPz[nqpho] = 0.;
-    fTPhotSharedEnergy[nqpho] = 0.;
-    fTgoodphoton[nqpho]  = 0;
-    fTPhotIsIso[nqpho] = 1;
+    phoqi++; // Count how many we'll eventually store
+    phoOrdered.push_back(make_pair(phoIndex,ip->pt()));
+  }
+  std::sort(phoOrdered.begin(),phoOrdered.end(),indexComparator);
+  fTnphotons = phoOrdered.size();
+  phoqi = 0;
+
+  for (vector<OrderPair>::const_iterator it = phoOrdered.begin();
+       it != phoOrdered.end(); ++it, ++phoqi ) {
+
+    int index = it->first;
+    const Photon& photon = (*photons)[index];
+
+    // Save photon supercluster position
+    photSCs.push_back(&(*photon.superCluster()));
+
+    fTPhotPt[phoqi]     = photon.pt();
+    fTPhotPx[phoqi]     = photon.px();
+    fTPhotPy[phoqi]     = photon.py();
+    fTPhotPz[phoqi]     = photon.pz();
+    fTPhotEta[phoqi]    = photon.eta();
+    fTPhotPhi[phoqi]    = photon.phi();
+    fTPhotEnergy[phoqi] = photon.energy();
+    fTPhotIso03Ecal[phoqi]      = photon.ecalRecHitSumEtConeDR03();
+    fTPhotIso03Hcal[phoqi]      = photon.hcalTowerSumEtConeDR03();
+    fTPhotIso03TrkSolid[phoqi]  = photon.trkSumPtSolidConeDR03();
+    fTPhotIso03TrkHollow[phoqi] = photon.trkSumPtHollowConeDR03();
+    fTPhotIso03[phoqi]          = (fTPhotIso03TrkSolid[phoqi] + fTPhotIso03Ecal[phoqi] + fTPhotIso03Hcal[phoqi]) / fTPhotPt[phoqi];
+    fTPhotIso04Ecal[phoqi]      = photon.ecalRecHitSumEtConeDR04();
+    fTPhotIso04Hcal[phoqi]      = photon.hcalTowerSumEtConeDR04();
+    fTPhotIso04TrkSolid[phoqi]  = photon.trkSumPtSolidConeDR04();
+    fTPhotIso04TrkHollow[phoqi] = photon.trkSumPtHollowConeDR04();
+    fTPhotIso04[phoqi]          = (fTPhotIso04TrkSolid[phoqi] + fTPhotIso04Ecal[phoqi] + fTPhotIso04Hcal[phoqi]) / fTPhotPt[phoqi];
+    fTPhotcaloPosX[phoqi]       = photon.caloPosition().X();
+    fTPhotcaloPosY[phoqi]       = photon.caloPosition().Y();
+    fTPhotcaloPosZ[phoqi]       = photon.caloPosition().Z();
+    fTPhotHoverE[phoqi]         = photon.hadronicOverEm();
+    fTPhotH1overE[phoqi]        = photon.hadronicDepth1OverEm();
+    fTPhotH2overE[phoqi]        = photon.hadronicDepth2OverEm();
+    fTPhotSigmaIetaIeta[phoqi]  = photon.sigmaIetaIeta();
+    fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
+    fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0; 
+    fTPhotIsInJet[phoqi] = -1;
+    fTPhotDupEl[phoqi] = -1;
+    fTPhotSharedPx[phoqi] = 0.;
+    fTPhotSharedPy[phoqi] = 0.;
+    fTPhotSharedPz[phoqi] = 0.;
+    fTPhotSharedEnergy[phoqi] = 0.;
+    fTgoodphoton[phoqi]  = 0;
+    fTPhotIsIso[phoqi] = 1;
 
     // Spike removal information
-    if ( ip->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
-      fTPhotScSeedSeverity[nqpho] = EcalSeverityLevelAlgo::severityLevel( ip->superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
-      fTPhotE1OverE9[nqpho] = EcalSeverityLevelAlgo::E1OverE9(   ip->superCluster()->seed()->seed(), *ebRecHits );
-      fTPhotS4OverS1[nqpho] = EcalSeverityLevelAlgo::swissCross( ip->superCluster()->seed()->seed(), *ebRecHits );
-    } else if ( ip->superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
-      fTPhotScSeedSeverity[nqpho] = EcalSeverityLevelAlgo::severityLevel( ip->superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
-      fTPhotE1OverE9[nqpho] = EcalSeverityLevelAlgo::E1OverE9(   ip->superCluster()->seed()->seed(), *eeRecHits );
-      fTPhotS4OverS1[nqpho] = 1.0-EcalSeverityLevelAlgo::swissCross( ip->superCluster()->seed()->seed(), *eeRecHits );
+    if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+      fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+      fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *ebRecHits );
+      fTPhotS4OverS1[phoqi] = EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *ebRecHits );
+    } else if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+      fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+      fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *eeRecHits );
+      fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
     } else
       edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
-                                                
   }
-  fTnphotons = nqpho+1;
 
   ////////////////////////////////////////////////////////
   // Jet Variables:
@@ -946,7 +942,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   }
 
   // Sort corrected jet collection by decreasing pt
-  IndexByPt indexComparator; // Need this to use the uncorrected jets below...
   std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
 
   // Determine corrected jets
@@ -1003,39 +998,39 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
           break;
         }
       }
-		for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
-			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbTkCntHighPur[jqi]=(*jetsAndProbsTkCntHighPur)[i].second;
-				break;
-			}
-		}
-		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
-			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbSimpSVHighEff[jqi]=(*jetsAndProbsSimpSVHighEff)[i].second;
-				break;
-			}
-		}
-		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
-			   fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			   fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbSimpSVHighPur[jqi]=(*jetsAndProbsSimpSVHighPur)[i].second;
-				break;
-			}
-		}
+      for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
+        // Match by pt between the two "collections"
+        if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+            fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+            fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+          fTjbTagProbTkCntHighPur[jqi]=(*jetsAndProbsTkCntHighPur)[i].second;
+          break;
+        }
+      }
+      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
+        // Match by pt between the two "collections"
+        if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+            fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+            fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+          fTjbTagProbSimpSVHighEff[jqi]=(*jetsAndProbsSimpSVHighEff)[i].second;
+          break;
+        }
+      }
+      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
+        // Match by pt between the two "collections"
+        if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 && 
+            fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
+            fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
+          fTjbTagProbSimpSVHighPur[jqi]=(*jetsAndProbsSimpSVHighPur)[i].second;
+          break;
+        }
+      }
     } else {
       const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
       fTjbTagProbTkCntHighEff[jqi] = pJ->bDiscriminator(fBtag1Tag.label());
-	  fTjbTagProbTkCntHighPur[jqi] = pJ->bDiscriminator(fBtag2Tag.label());
-	  fTjbTagProbSimpSVHighEff[jqi] = pJ->bDiscriminator(fBtag3Tag.label());
-	  fTjbTagProbSimpSVHighPur[jqi] = pJ->bDiscriminator(fBtag4Tag.label());
+      fTjbTagProbTkCntHighPur[jqi] = pJ->bDiscriminator(fBtag2Tag.label());
+      fTjbTagProbSimpSVHighEff[jqi] = pJ->bDiscriminator(fBtag3Tag.label());
+      fTjbTagProbSimpSVHighPur[jqi] = pJ->bDiscriminator(fBtag4Tag.label());
     }
 
     // Jet-track association: get associated tracks
@@ -1411,100 +1406,100 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	
 	
 	
-	////////////////////////////////////////////////////////////////////////////////
-	// Get GenLeptons (el, mu) with pt>5 (+ Mother and GMother)
-   if(!fIsRealData){
+  ////////////////////////////////////////////////////////////////////////////////
+  // Get GenLeptons (el, mu) with pt>5 (+ Mother and GMother)
+  if(!fIsRealData){
 	
-	edm::Handle<GenParticleCollection> gen;
-  iEvent.getByLabel(fGenPartTag, gen);
-  GenParticleCollection::const_iterator g_part;
+    edm::Handle<GenParticleCollection> gen;
+    iEvent.getByLabel(fGenPartTag, gen);
+    GenParticleCollection::const_iterator g_part;
 	
-  vector<const GenParticle*> gen_lepts;
-  vector<const GenParticle*> gen_moms;
-  vector<const GenParticle*> gen_gmoms;
+    vector<const GenParticle*> gen_lepts;
+    vector<const GenParticle*> gen_moms;
+    vector<const GenParticle*> gen_gmoms;
 	
 	
-	// loop over genparticles to get gen_els and gen_mus
-	for(g_part = gen->begin(); g_part != gen->end(); g_part++){
+    // loop over genparticles to get gen_els and gen_mus
+    for(g_part = gen->begin(); g_part != gen->end(); g_part++){
 		
-		// select the stable gen_lepts with pt >5 
-		if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13) continue;
-		if( g_part->status() != 1 ) continue;
-		if( g_part->pt()  < fMingenleptpt ) continue;
-		if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
+      // select the stable gen_lepts with pt >5 
+      if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13) continue;
+      if( g_part->status() != 1 ) continue;
+      if( g_part->pt()  < fMingenleptpt ) continue;
+      if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
-		int gen_id= g_part->pdgId();
-		const GenParticle* gen_lept = &(*g_part);
+      int gen_id= g_part->pdgId();
+      const GenParticle* gen_lept = &(*g_part);
 		
-		// get mother of gen_lept
-		const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
-		int m_id = gen_mom -> pdgId();
+      // get mother of gen_lept
+      const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+      int m_id = gen_mom -> pdgId();
 		
-		if(m_id != gen_id);
-		else{
-			int id= m_id;
-			while(id == gen_id){
-				gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
-				id=gen_mom->pdgId();
-			}
-		}
-		m_id = gen_mom->pdgId();
+      if(m_id != gen_id);
+      else{
+        int id= m_id;
+        while(id == gen_id){
+          gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
+          id=gen_mom->pdgId();
+        }
+      }
+      m_id = gen_mom->pdgId();
 		
-		// get gmom of gen_lept
-		const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
-		int gm_id = gen_gmom->pdgId();
-		if (m_id != gm_id);
-		else{
-			int id=gm_id;
-			while(id == m_id){
-				gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
-				id = gen_gmom->pdgId();
-			}
-		}
+      // get gmom of gen_lept
+      const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+      int gm_id = gen_gmom->pdgId();
+      if (m_id != gm_id);
+      else{
+        int id=gm_id;
+        while(id == m_id){
+          gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
+          id = gen_gmom->pdgId();
+        }
+      }
 		
-		gen_lepts.push_back(gen_lept);	
-		gen_moms.push_back(gen_mom);
-		gen_gmoms.push_back(gen_gmom);
+      gen_lepts.push_back(gen_lept);	
+      gen_moms.push_back(gen_mom);
+      gen_gmoms.push_back(gen_gmom);
 
 
-	}
+    }
 	
 	
-	// set variables
-	if(gen_lepts.size()!=gen_moms.size() || gen_lepts.size()!=gen_gmoms.size()){
-		edm::LogWarning("NTP") << "@SUB=analyze"
-		                       << "ERROR in filling of GenLeptons!! ";
-	}else{
-		fTngenleptons =gen_lepts.size(); 
-		for(int i=0; i<fTngenleptons; ++i){
-			if( i >= gMaxngenlept){
-				edm::LogWarning("NTP") << "@SUB=analyze" 
-				<< "Maximum number of gen-leptons exceeded..";
-				fTflagmaxgenleptexc = 1;
-				fTgoodevent = 1;
-				break;
-			}
+    // set variables
+    if(gen_lepts.size()!=gen_moms.size() || gen_lepts.size()!=gen_gmoms.size()){
+      edm::LogWarning("NTP") << "@SUB=analyze"
+                             << "ERROR in filling of GenLeptons!! ";
+    }else{
+      fTngenleptons =gen_lepts.size(); 
+      for(int i=0; i<fTngenleptons; ++i){
+        if( i >= gMaxngenlept){
+          edm::LogWarning("NTP") << "@SUB=analyze" 
+                                 << "Maximum number of gen-leptons exceeded..";
+          fTflagmaxgenleptexc = 1;
+          fTgoodevent = 1;
+          break;
+        }
 			
-			fTGenLeptonId[i]       =   gen_lepts[i]->pdgId();  
-			fTGenLeptonPt[i]       =   gen_lepts[i]->pt();     
-			fTGenLeptonEta[i]      =   gen_lepts[i]->eta();    
-			fTGenLeptonPhi[i]      =   gen_lepts[i]->phi(); 
+        fTGenLeptonId[i]       =   gen_lepts[i]->pdgId();  
+        fTGenLeptonPt[i]       =   gen_lepts[i]->pt();     
+        fTGenLeptonEta[i]      =   gen_lepts[i]->eta();    
+        fTGenLeptonPhi[i]      =   gen_lepts[i]->phi(); 
 			
-			fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();  
-			fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
-			fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
-			fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
-			fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
+        fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();  
+        fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
+        fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
+        fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
+        fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
 			
-			fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
-			fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
-			fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt(); 
-			fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
-			fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
-		}
-	}
+        fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
+        fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
+        fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt(); 
+        fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
+        fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
+      }
+    }
 
-   }
+  }
 	
 	
 
@@ -2128,7 +2123,7 @@ void NTupleProducer::resetTree(){
   fTflagmaxjetexc    = 0;
   fTflagmaxtrkexc    = 0;
   fTflagmaxphoexc    = 0;
-	fTflagmaxgenleptexc= 0;
+  fTflagmaxgenleptexc= 0;
 
   fTnmu         = 0;
   fTnmutot      = 0;
@@ -2142,23 +2137,23 @@ void NTupleProducer::resetTree(){
   fTntrackstot  = 0;
   fTnphotons    = 0;
   fTnphotonstot = 0;
-	fTngenleptons = 0;
+  fTngenleptons = 0;
 	
 	
-	resetInt(fTGenLeptonId       ,gMaxngenlept);
-	resetDouble(fTGenLeptonPt    ,gMaxngenlept);
-	resetDouble(fTGenLeptonEta   ,gMaxngenlept);
-	resetDouble(fTGenLeptonPhi   ,gMaxngenlept);
-	resetInt(fTGenLeptonMId      ,gMaxngenlept);
-	resetInt(fTGenLeptonMStatus  ,gMaxngenlept);
-	resetDouble(fTGenLeptonMPt   ,gMaxngenlept);
-	resetDouble(fTGenLeptonMEta  ,gMaxngenlept);
-	resetDouble(fTGenLeptonMPhi  ,gMaxngenlept);
-	resetInt(fTGenLeptonGMId     ,gMaxngenlept);
-	resetInt(fTGenLeptonGMStatus ,gMaxngenlept);
-	resetDouble(fTGenLeptonGMPt  ,gMaxngenlept);
-	resetDouble(fTGenLeptonGMEta ,gMaxngenlept);
-	resetDouble(fTGenLeptonGMPhi ,gMaxngenlept);
+  resetInt(fTGenLeptonId       ,gMaxngenlept);
+  resetDouble(fTGenLeptonPt    ,gMaxngenlept);
+  resetDouble(fTGenLeptonEta   ,gMaxngenlept);
+  resetDouble(fTGenLeptonPhi   ,gMaxngenlept);
+  resetInt(fTGenLeptonMId      ,gMaxngenlept);
+  resetInt(fTGenLeptonMStatus  ,gMaxngenlept);
+  resetDouble(fTGenLeptonMPt   ,gMaxngenlept);
+  resetDouble(fTGenLeptonMEta  ,gMaxngenlept);
+  resetDouble(fTGenLeptonMPhi  ,gMaxngenlept);
+  resetInt(fTGenLeptonGMId     ,gMaxngenlept);
+  resetInt(fTGenLeptonGMStatus ,gMaxngenlept);
+  resetDouble(fTGenLeptonGMPt  ,gMaxngenlept);
+  resetDouble(fTGenLeptonGMEta ,gMaxngenlept);
+  resetDouble(fTGenLeptonGMPhi ,gMaxngenlept);
 	
 
   resetInt(fTgoodmu, gMaxnmus);
