@@ -10,7 +10,7 @@
 
 */
 //
-// $Id:  $
+// $Id: JetFillerBase.h,v 1.1 2010/08/26 11:39:44 fronga Exp $
 //
 //
 
@@ -89,12 +89,17 @@ protected:
   int*    fTNConstituents;
   double* fTjChfrac;
   double* fTEMfrac;
-  int* fTChMult;
+  int*    fTNeuMult;
+  int*    fTChMult;
   double* fTID_HPD; 
   double* fTID_RBX;    
   double* fTID_n90Hits;
   double* fTID_resEMF; 
   int*    fTjnAssoTracks;
+  double* fTChHadFrac;
+  double* fTNeuHadFrac;
+  double* fTChEmFrac;
+  double* fTNeuEmFrac;
 
 };
 

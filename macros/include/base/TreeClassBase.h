@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Sep  3 10:50:01 2010 by ROOT version 5.22/00d
+// Mon Sep  6 10:48:17 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/NTupleProducer_36X_MC_RECO_numEvent100.root
 //////////////////////////////////////////////////////////
@@ -378,6 +378,13 @@ public :
    Double_t        PFJEta[100];   //[PFNJets]
    Double_t        PFJPhi[100];   //[PFNJets]
    Double_t        PFJScale[100];   //[PFNJets]
+   Int_t           PFJChMult[100];   //[PFNJets]
+   Int_t           PFJNeuMult[100];   //[PFNJets]
+   Double_t        PFJChHadfrac[100];   //[PFNJets]
+   Double_t        PFJNeuHadfrac[100];   //[PFNJets]
+   Double_t        PFJChEmfrac[100];   //[PFNJets]
+   Double_t        PFJNeuEmfrac[100];   //[PFNJets]
+   Int_t           PFJNConstituents[100];   //[PFNJets]
    Int_t           JPTNJets;
    Double_t        JPTJPx[100];   //[JPTNJets]
    Double_t        JPTJPy[100];   //[JPTNJets]
@@ -833,6 +840,13 @@ public :
    TBranch        *b_PFJEta;   //!
    TBranch        *b_PFJPhi;   //!
    TBranch        *b_PFJScale;   //!
+   TBranch        *b_PFJChMult;   //!
+   TBranch        *b_PFJNeuMult;   //!
+   TBranch        *b_PFJChHadfrac;   //!
+   TBranch        *b_PFJNeuHadfrac;   //!
+   TBranch        *b_PFJChEmfrac;   //!
+   TBranch        *b_PFJNeuEmfrac;   //!
+   TBranch        *b_PFJNConstituents;   //!
    TBranch        *b_JPTNJets;   //!
    TBranch        *b_JPTJPx;   //!
    TBranch        *b_JPTJPy;   //!
@@ -1359,6 +1373,13 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PFJEta", PFJEta, &b_PFJEta);
    fChain->SetBranchAddress("PFJPhi", PFJPhi, &b_PFJPhi);
    fChain->SetBranchAddress("PFJScale", PFJScale, &b_PFJScale);
+   fChain->SetBranchAddress("PFJChMult", PFJChMult, &b_PFJChMult);
+   fChain->SetBranchAddress("PFJNeuMult", PFJNeuMult, &b_PFJNeuMult);
+   fChain->SetBranchAddress("PFJChHadfrac", PFJChHadfrac, &b_PFJChHadfrac);
+   fChain->SetBranchAddress("PFJNeuHadfrac", PFJNeuHadfrac, &b_PFJNeuHadfrac);
+   fChain->SetBranchAddress("PFJChEmfrac", PFJChEmfrac, &b_PFJChEmfrac);
+   fChain->SetBranchAddress("PFJNeuEmfrac", PFJNeuEmfrac, &b_PFJNeuEmfrac);
+   fChain->SetBranchAddress("PFJNConstituents", PFJNConstituents, &b_PFJNConstituents);
    fChain->SetBranchAddress("JPTNJets", &JPTNJets, &b_JPTNJets);
    fChain->SetBranchAddress("JPTJPx", JPTJPx, &b_JPTJPx);
    fChain->SetBranchAddress("JPTJPy", JPTJPy, &b_JPTJPy);

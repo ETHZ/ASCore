@@ -131,6 +131,36 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
       fTChMult[ijet]      = jptjet->chargedMultiplicity();
 
     }	  
+
+    // -------------------------------------------------
+    // PF jet specific
+    if (fJetType==PF) {
+      const PFJet* pjet = static_cast<const PFJet*>(&(*jet));
+      
+      double CHF=pjet->chargedHadronEnergyFraction();
+      double NHF=pjet->neutralHadronEnergyFraction();
+      double CEF=pjet->chargedEmEnergyFraction();
+      double NEF=pjet->neutralEmEnergyFraction();
+      double CMF=pjet->chargedMuEnergyFraction();
+      
+      double sum=CHF+NHF+CEF+NEF+CMF;
+      if (sum >0) {
+        CHF=CHF/sum;
+        NHF=NHF/sum;
+        CEF=CEF/sum;
+        NEF=NEF/sum;
+        CMF=CMF/sum;
+      } else {
+        edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
+      }
+      fTChHadFrac[ijet]     = CHF;
+      fTNeuHadFrac[ijet]    = NHF;
+      fTChEmFrac[ijet]      = CEF;
+      fTNeuEmFrac[ijet]     = NEF;
+      fTChMult[ijet]        = pjet->chargedMultiplicity();
+      fTNeuMult[ijet]       = pjet->neutralMultiplicity(); 
+      fTNConstituents[ijet] = pjet->nConstituents();  
+    }
 		
     // ------------------------------------------------------------
     // Calo jet specific
