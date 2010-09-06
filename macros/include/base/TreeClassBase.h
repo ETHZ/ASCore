@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Sep  6 10:48:17 2010 by ROOT version 5.22/00d
+// Mon Sep  6 18:28:31 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/NTupleProducer_36X_MC_RECO_numEvent100.root
 //////////////////////////////////////////////////////////
@@ -328,10 +328,8 @@ public :
    Double_t        JID_resEMF[100];   //[NJets]
    Double_t        JID_HCALTow[100];   //[NJets]
    Double_t        JID_ECALTow[100];   //[NJets]
-   Double_t        JEtaEMrms[100];   //[NJets]
-   Double_t        JEtaHADrms[100];   //[NJets]
-   Double_t        JPhiEMrms[100];   //[NJets]
-   Double_t        JPhiHADrms[100];   //[NJets]
+   Double_t        JEtaRms[100];   //[NJets]
+   Double_t        JPhiRms[100];   //[NJets]
    Double_t        JbTagProbTkCntHighEff[100];   //[NJets]
    Double_t        JbTagProbTkCntHighPur[100];   //[NJets]
    Double_t        JbTagProbSimpSVHighEff[100];   //[NJets]
@@ -462,6 +460,10 @@ public :
    Double_t        MuCorrMETpx;
    Double_t        MuCorrMETpy;
    Double_t        MuCorrMETphi;
+   Double_t        GenMET;
+   Double_t        GenMETpx;
+   Double_t        GenMETpy;
+   Double_t        GenMETphi;
    Double_t        TCMET;
    Double_t        TCMETpx;
    Double_t        TCMETpy;
@@ -790,10 +792,8 @@ public :
    TBranch        *b_JID_resEMF;   //!
    TBranch        *b_JID_HCALTow;   //!
    TBranch        *b_JID_ECALTow;   //!
-   TBranch        *b_JEtaEMrms;   //!
-   TBranch        *b_JEtaHADrms;   //!
-   TBranch        *b_JPhiEMrms;   //!
-   TBranch        *b_JPhiHADrms;   //!
+   TBranch        *b_JEtaRms;   //!
+   TBranch        *b_JPhiRms;   //!
    TBranch        *b_JbTagProbTkCntHighEff;   //!
    TBranch        *b_JbTagProbTkCntHighPur;   //!
    TBranch        *b_JbTagProbSimpSVHighEff;   //!
@@ -924,6 +924,10 @@ public :
    TBranch        *b_MuCorrMETpx;   //!
    TBranch        *b_MuCorrMETpy;   //!
    TBranch        *b_MuCorrMETphi;   //!
+   TBranch        *b_GenMET;   //!
+   TBranch        *b_GenMETpx;   //!
+   TBranch        *b_GenMETpy;   //!
+   TBranch        *b_GenMETphi;   //!
    TBranch        *b_TCMET;   //!
    TBranch        *b_TCMETpx;   //!
    TBranch        *b_TCMETpy;   //!
@@ -1323,10 +1327,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JID_resEMF", JID_resEMF, &b_JID_resEMF);
    fChain->SetBranchAddress("JID_HCALTow", JID_HCALTow, &b_JID_HCALTow);
    fChain->SetBranchAddress("JID_ECALTow", JID_ECALTow, &b_JID_ECALTow);
-   fChain->SetBranchAddress("JEtaEMrms", JEtaEMrms, &b_JEtaEMrms);
-   fChain->SetBranchAddress("JEtaHADrms", JEtaHADrms, &b_JEtaHADrms);
-   fChain->SetBranchAddress("JPhiEMrms", JPhiEMrms, &b_JPhiEMrms);
-   fChain->SetBranchAddress("JPhiHADrms", JPhiHADrms, &b_JPhiHADrms);
+   fChain->SetBranchAddress("JEtaRms", JEtaRms, &b_JEtaRms);
+   fChain->SetBranchAddress("JPhiRms", JPhiRms, &b_JPhiRms);
    fChain->SetBranchAddress("JbTagProbTkCntHighEff", JbTagProbTkCntHighEff, &b_JbTagProbTkCntHighEff);
    fChain->SetBranchAddress("JbTagProbTkCntHighPur", JbTagProbTkCntHighPur, &b_JbTagProbTkCntHighPur);
    fChain->SetBranchAddress("JbTagProbSimpSVHighEff", JbTagProbSimpSVHighEff, &b_JbTagProbSimpSVHighEff);
@@ -1457,6 +1459,10 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuCorrMETpx", &MuCorrMETpx, &b_MuCorrMETpx);
    fChain->SetBranchAddress("MuCorrMETpy", &MuCorrMETpy, &b_MuCorrMETpy);
    fChain->SetBranchAddress("MuCorrMETphi", &MuCorrMETphi, &b_MuCorrMETphi);
+   fChain->SetBranchAddress("GenMET", &GenMET, &b_GenMET);
+   fChain->SetBranchAddress("GenMETpx", &GenMETpx, &b_GenMETpx);
+   fChain->SetBranchAddress("GenMETpy", &GenMETpy, &b_GenMETpy);
+   fChain->SetBranchAddress("GenMETphi", &GenMETphi, &b_GenMETphi);
    fChain->SetBranchAddress("TCMET", &TCMET, &b_TCMET);
    fChain->SetBranchAddress("TCMETpx", &TCMETpx, &b_TCMETpx);
    fChain->SetBranchAddress("TCMETpy", &TCMETpy, &b_TCMETpy);

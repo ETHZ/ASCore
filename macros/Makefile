@@ -5,9 +5,9 @@ ROOTGLIBS      = $(shell root-config --glibs)
 INCLUDES       = -I./include
 
 CXX            = g++
-CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES)
+CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) 
 LD             = g++
-LDFLAGS        = -g
+LDFLAGS        = -g 
 SOFLAGS        = -shared
 
 
@@ -61,4 +61,3 @@ deps: $(SRCS)
 	makedepend $(INCLUDES) $^
 
 # DO NOT DELETE THIS LINE -- make depend needs it
-
