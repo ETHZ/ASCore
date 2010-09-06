@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.57 2010/09/02 08:14:29 fronga Exp $
+// $Id: NTupleProducer.h,v 1.58 2010/09/06 15:36:16 pnef Exp $
 //
 //
 
@@ -568,10 +568,8 @@ private:
   double fTjID_resEMF[gMaxnjets];
   double fTjID_HCALTow[gMaxnjets];
   double fTjID_ECALTow[gMaxnjets];
-  double fTJEtaEMrms[gMaxnjets];
-  double fTJEtaHADrms[gMaxnjets];
-  double fTJPhiEMrms[gMaxnjets];
-  double fTJPhiHADrms[gMaxnjets];
+  double fTJEtaRms[gMaxnjets];
+  double fTJPhiRms[gMaxnjets];
   double fTjbTagProbTkCntHighEff[gMaxnjets];
   double fTjbTagProbTkCntHighPur[gMaxnjets];
   double fTjbTagProbSimpSVHighEff[gMaxnjets];

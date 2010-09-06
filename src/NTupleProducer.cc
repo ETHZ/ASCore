@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.71 2010/09/06 13:37:56 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.72 2010/09/06 15:36:15 pnef Exp $
 //
 //
 
@@ -984,6 +984,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
     fTjNconstituents[jqi]  = jet->getJetConstituents().size();
     fTjEcorr[jqi] = jet->px()/fJUNC_px_match[index];
+    fTJEtaRms[jqi] = sqrt(jet->etaetaMoment());
+    fTJPhiRms[jqi] = sqrt(jet->etaphiMoment());
+
 
     // Calculate the DR wrt the closest electron
     double ejDRmin = 10.; // Default when no electrons previously selected
@@ -1058,84 +1061,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       // fTjChfrac[jqi] = pJ.jetCharge();
       // fTjnAssoTracks[jqi] = pJ.associatedTracks().size();
     }
-
-    //Look inside the calotowers for each jet
-    double sumEtaEM=0.;
-    double sumEta2EM=0;
-    double sumPhiEM=0.;
-    double sumPhi2EM=0;
-    double sumEtaHAD=0.;
-    double sumEta2HAD=0;
-    double sumPhiHAD=0.;
-    double sumPhi2HAD=0;
-    double sumEMWeights=0.;
-    double sumHADWeights=0.;
-    int NEM=0;
-    int NHAD=0;
-    double meanEtaEM=0.;
-    double meanPhiEM=0.;
-    double varianceEtaEM=0.;
-    double variancePhiEM=0.;
-    double meanEtaHAD=0.;
-    double meanPhiHAD=0.;
-    double varianceEtaHAD=0.;
-    double variancePhiHAD=0.;
-    double phioffset=0.; 
-
-    if( !fIsPat ){
-
-      // Cast and make a new copy of corrected calojet, to loop over the calotowers
-      const CaloJet* calojet = static_cast<const CaloJet*>(&(*jet));
-      vector<CaloTowerPtr> towers = calojet->getCaloConstituents();
-      for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin(); iTower!= towers.end(); ++iTower){
-
-        if(iTower == towers.begin()) phioffset = (*iTower)->phi();//calculate all phi coordinates wrt this offset
-
-        //calotowers EM energy
-        if((*iTower)->emEnergy()>0.) {
-          NEM+=1;
-          //eta
-          sumEtaEM  +=  (*iTower)->eta()*(*iTower)->emEnergy();
-          sumEta2EM += (*iTower)->eta()*(*iTower)->eta()*(*iTower)->emEnergy();
-          //phi
-          sumPhiEM  += reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->emEnergy();
-          sumPhi2EM += reco::deltaPhi((*iTower)->phi(),phioffset)*reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->emEnergy();
-          //weights
-          sumEMWeights += (*iTower)->emEnergy();
-        }
-        //calotowers HAD energy
-        if((*iTower)->hadEnergy()>0.){
-          NHAD += 1;
-          //eta
-          sumEtaHAD += (*iTower)->eta()*(*iTower)->hadEnergy();
-          sumEta2HAD += (*iTower)->eta()*(*iTower)->eta()*(*iTower)->hadEnergy();
-          //phi
-          sumPhiHAD  += reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->hadEnergy();
-          sumPhi2HAD += reco::deltaPhi((*iTower)->phi(),phioffset)*reco::deltaPhi((*iTower)->phi(),phioffset)*(*iTower)->hadEnergy();
-          //weight
-          sumHADWeights += (*iTower)->hadEnergy();
-        }
-      }
-      if(sumEMWeights>0. && NEM>1){
-        meanEtaEM = sumEtaEM/sumEMWeights;
-        meanPhiEM = sumPhiEM/sumEMWeights;
-        varianceEtaEM = (float(NEM)/float(NEM-1))*(sumEta2EM/sumEMWeights - meanEtaEM*meanEtaEM);
-        variancePhiEM = (float(NEM)/float(NEM-1))*(sumPhi2EM/sumEMWeights - meanPhiEM*meanPhiEM);
-      }
-      if(sumHADWeights>0. && NHAD>1){
-        meanEtaHAD = sumEtaHAD/sumHADWeights;
-        meanPhiHAD = sumPhiHAD/sumHADWeights;
-        varianceEtaHAD = (float(NHAD)/float(NHAD-1))*(sumEta2HAD/sumHADWeights - meanEtaHAD*meanEtaHAD);
-        variancePhiHAD = (float(NHAD)/float(NHAD-1))*(sumPhi2HAD/sumHADWeights - meanPhiHAD*meanPhiHAD);
-      }
-      towers.clear();
-    }else { 
-      //for the moment do nothing, the variables variance* are initialized to zero
-    }
-    fTJEtaEMrms[jqi]  = sqrt(varianceEtaEM);
-    fTJEtaHADrms[jqi] = sqrt(varianceEtaHAD);
-    fTJPhiEMrms[jqi]  = sqrt(variancePhiEM);
-    fTJPhiHADrms[jqi] = sqrt(variancePhiHAD);
 
     //Below save the momenta of the three leading tracks associated to the jet
     double pT1 =0.;
@@ -1385,11 +1310,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTMuCorrMETpx  = (corrmumet->at(0)).px();
   fTMuCorrMETpy  = (corrmumet->at(0)).py();
   fTMuCorrMETphi = (corrmumet->at(0)).phi();
-
-  fTGenMET    = (GenMET->front()).pt();
-  fTGenMETpx  = (GenMET->front()).px();
-  fTGenMETpy  = (GenMET->front()).py();
-  fTGenMETphi = (GenMET->front()).phi();
+  
+  if (!fIsRealData) {
+    fTGenMET    = (GenMET->front()).pt();
+    fTGenMETpx  = (GenMET->front()).px();
+    fTGenMETpy  = (GenMET->front()).py();
+    fTGenMETphi = (GenMET->front()).phi();
+  }
 
   fTTCMET    = (tcmet->at(0)).pt();
   fTTCMETpx  = (tcmet->at(0)).px();
@@ -1887,10 +1814,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("JID_resEMF"     ,&fTjID_resEMF     ,"JID_resEMF[NJets]/D");
   fEventTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow    ,"JID_HCALTow[NJets]/D");
   fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow    ,"JID_ECALTow[NJets]/D");
-  fEventTree->Branch("JEtaEMrms"      ,&fTJEtaEMrms      ,"JEtaEMrms[NJets]/D");
-  fEventTree->Branch("JEtaHADrms"     ,&fTJEtaHADrms     ,"JEtaHADrms[NJets]/D");
-  fEventTree->Branch("JPhiEMrms"      ,&fTJPhiEMrms      ,"JPhiEMrms[NJets]/D");
-  fEventTree->Branch("JPhiHADrms"     ,&fTJPhiHADrms     ,"JPhiHADrms[NJets]/D");
+  fEventTree->Branch("JEtaRms"        ,&fTJEtaRms        ,"JEtaRms[NJets]/D");
+  fEventTree->Branch("JPhiRms"        ,&fTJPhiRms        ,"JPhiRms[NJets]/D");
   fEventTree->Branch("JbTagProbTkCntHighEff"    ,&fTjbTagProbTkCntHighEff   ,"JbTagProbTkCntHighEff[NJets]/D");
   fEventTree->Branch("JbTagProbTkCntHighPur"    ,&fTjbTagProbTkCntHighPur   ,"JbTagProbTkCntHighPur[NJets]/D");
   fEventTree->Branch("JbTagProbSimpSVHighEff"   ,&fTjbTagProbSimpSVHighEff  ,"JbTagProbSimpSVHighEff[NJets]/D");
@@ -2412,6 +2337,8 @@ void NTupleProducer::resetTree(){
   resetDouble(fTjetVtxEzx, gMaxnjets);
   resetDouble(fTjetVtxNChi2, gMaxnjets);
   resetInt(fTjNconstituents, gMaxnjets);
+  resetDouble(fTJEtaRms,gMaxnjets );
+  resetDouble(fTJPhiRms,gMaxnjets );
   resetDouble(fTjetGenPt, gMaxnjets);
   resetDouble(fTjetGenEta, gMaxnjets);
   resetDouble(fTjetGenPhi, gMaxnjets);
