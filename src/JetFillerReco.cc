@@ -30,11 +30,6 @@ JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree,
 
   edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;
   edm::LogVerbatim("NTP") << "  Input Tag:        " << fTag.label();
-  edm::LogVerbatim("NTP") << "    fMinpt        = " << fMinpt;
-  edm::LogVerbatim("NTP") << "    fMaxeta       = " << fMaxeta;
-  edm::LogVerbatim("NTP") << "    fJetCorrs     = " << fJetCorrs;
-  edm::LogVerbatim("NTP") << "    fJetID        = " << fJetID.label();
-  edm::LogVerbatim("NTP") << "    fJetTracksTag = " << fJetTracksTag.label();
   edm::LogVerbatim("NTP") << "---------------------------------";
   
 }
