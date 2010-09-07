@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.72 2010/09/06 15:36:15 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.73 2010/09/06 16:27:57 fronga Exp $
 //
 //
 
@@ -235,9 +235,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   Handle<CaloMETCollection> corrmujesmet;
   iEvent.getByLabel(fMET5Tag, corrmujesmet);
-
-  Handle<View<GenMET> > GenMET;
-  iEvent.getByLabel(fMET6Tag, GenMET);
 
   // Get beamspot for d0 determination
   BeamSpot beamSpot;
@@ -1312,6 +1309,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTMuCorrMETphi = (corrmumet->at(0)).phi();
   
   if (!fIsRealData) {
+    Handle<View<GenMET> > GenMET;
+    iEvent.getByLabel(fMET6Tag, GenMET);
     fTGenMET    = (GenMET->front()).pt();
     fTGenMETpx  = (GenMET->front()).px();
     fTGenMETpy  = (GenMET->front()).py();
