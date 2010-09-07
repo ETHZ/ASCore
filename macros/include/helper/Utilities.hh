@@ -181,7 +181,7 @@ namespace Util {
   inline void PrintNoEPS(TCanvas *cin, TString name, TString dir, TFile* file=0) {
     // Print plot (PNG and to file)
     Util::PrintPNG(cin,name,dir);
-    if ( file ) Util::SaveAll(cin,dir,file); 
+    if ( file ) Util::SaveAll(cin,dir,file);
   }
 
   //__________________________________________________________________________
@@ -205,6 +205,7 @@ namespace Util {
     // Sort a vector and return the vector of sorted indices
     // Simple bubble sort algorithm, don't use for more than a few entries!
     std::vector<int> ind;
+    if(vec.size() == 0) return ind; // Return original empty vector
     for(size_t i = 0; i < vec.size(); ++i) ind.push_back(i);
     for(size_t i = 0; i < vec.size()-1; ++i){
       int ind1 = ind[i];
@@ -230,12 +231,12 @@ namespace Util {
       std::cout << "Util::VSort ==> Vectors don't match in size! Returning unsorted vector..." << std::endl;
       return ind;
     }
+    if(ind.size() == 0) return ind; // Return original empty vector
     std::vector<int> ind2 = VSort(vec, asc);
     std::vector<int> ind3;
     for(size_t i = 0; i < vec.size(); ++i) ind3.push_back(ind[ind2[i]]);
     return ind3;
   }
-
 }
 
 #endif
