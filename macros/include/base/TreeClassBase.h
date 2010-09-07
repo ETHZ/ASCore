@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Sep  7 18:23:24 2010 by ROOT version 5.22/00d
+// Tue Sep  7 18:50:53 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/NTupleProducer_36X_MC_RECO_numEvent100.root
 //////////////////////////////////////////////////////////
@@ -115,6 +115,7 @@ public :
    Int_t           MuNGlHits[20];   //[NMus]
    Int_t           MuNMuHits[20];   //[NMus]
    Int_t           MuNTkHits[20];   //[NMus]
+   Int_t           MuNPxHits[20];   //[NMus]
    Double_t        MuInnerTkNChi2[20];   //[NMus]
    Int_t           MuNMatches[20];   //[NMus]
    Int_t           MuNChambers[20];   //[NMus]
@@ -580,6 +581,7 @@ public :
    TBranch        *b_MuNGlHits;   //!
    TBranch        *b_MuNMuHits;   //!
    TBranch        *b_MuNTkHits;   //!
+   TBranch        *b_MuNPxHits;   //!
    TBranch        *b_MuInnerTkNChi2;   //!
    TBranch        *b_MuNMatches;   //!
    TBranch        *b_MuNChambers;   //!
@@ -1116,6 +1118,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuNGlHits", MuNGlHits, &b_MuNGlHits);
    fChain->SetBranchAddress("MuNMuHits", MuNMuHits, &b_MuNMuHits);
    fChain->SetBranchAddress("MuNTkHits", MuNTkHits, &b_MuNTkHits);
+   fChain->SetBranchAddress("MuNPxHits", MuNPxHits, &b_MuNPxHits);
    fChain->SetBranchAddress("MuInnerTkNChi2", MuInnerTkNChi2, &b_MuInnerTkNChi2);
    fChain->SetBranchAddress("MuNMatches", MuNMatches, &b_MuNMatches);
    fChain->SetBranchAddress("MuNChambers", MuNChambers, &b_MuNChambers);
