@@ -422,7 +422,7 @@ vector<int> UserAnalysisBase::JetSelection(){
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
-	for(int ind = 0; ind < fTR->NEles; ++ind){
+	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
 		if(!IsGoodBasicJet(ind)) continue;
 
