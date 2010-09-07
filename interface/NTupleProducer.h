@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.58 2010/09/06 15:36:16 pnef Exp $
+// $Id: NTupleProducer.h,v 1.59 2010/09/06 16:27:57 fronga Exp $
 //
 //
 
@@ -35,7 +35,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h" //336 PhysicsTools/UtilAlgos/interface/TFileService.h
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 // Data formats
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
@@ -176,6 +177,9 @@ private:
   TH1I *fHl1techstat;
   bool fFirstevent;
 
+  string fProcessName; // process name of (HLT) process for which to get HLT configuration
+  HLTConfigProvider fHltConfig;
+
   ////////////////////////////////////////////////////////
   // Trees:
   TTree *fRunTree;
@@ -254,6 +258,7 @@ private:
   int fTHLTres[gMaxhltbits];
   int fTL1physres[gMaxl1physbits];
   int fTL1techres[gMaxl1techbits];
+  int fTHLTprescale[gMaxhltbits];
   std::vector<std::string> fTHLTnames;
   std::vector<std::string> fTL1physnames;
   

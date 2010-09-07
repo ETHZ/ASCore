@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.73 2010/09/06 16:27:57 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.74 2010/09/07 10:45:08 fronga Exp $
 //
 //
 
@@ -117,6 +117,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
   fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
+  fProcessName = fHLTTriggerTag.process();
 
   // Event Selection
   fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -322,13 +323,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     if (fFirstevent) 
       fHhltstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
   }
-  fTHLTnames = triggernames; // Actually stored in run tree (but easier so)
-
+  fTHLTnames = triggernames; // Used below and stored in run tree at end of run
 
   // Add a warning about the shift between trigger bits and bin numbers:
   if (fFirstevent) 
     fHhltstat->GetXaxis()->SetBinLabel(gMaxhltbits+2, "Bin#=Bit#+1");
-  triggernames.clear();
 
   ESHandle<L1GtTriggerMenu> menuRcd;
   iSetup.get<L1GtTriggerMenuRcd>().get(menuRcd);
@@ -345,6 +344,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   for(unsigned int i = 0; i < tr.size(); i++ ){
     if(tr[i].accept())	fHhltstat->Fill(i);
     fTHLTres[i] = tr[i].accept() ? 1:0;
+    fTHLTprescale[i] = fHltConfig.prescaleValue(iEvent,iSetup,fTHLTnames[i]);
   }
 
   for( unsigned int i = 0; i < gMaxl1physbits; ++i ){
@@ -1501,6 +1501,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("HLTResults"       ,&fTHLTres          ,"HLTResults[200]/I");
   fEventTree->Branch("L1PhysResults"    ,&fTL1physres       ,"L1PhysResults[128]/I");
   fEventTree->Branch("L1TechResults"    ,&fTL1techres       ,"L1TechResults[64]/I");
+  fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     ,"HLTPrescale[200]/I");
   fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx         ,"PrimVtxGood/I");
   fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx        ,"PrimVtxx/D");
   fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy        ,"PrimVtxy/D");
@@ -1926,7 +1927,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 }
 
 // Method called once before each run
-void NTupleProducer::beginRun(const edm::Run& r, const edm::EventSetup&){
+void NTupleProducer::beginRun(const edm::Run& r, const edm::EventSetup& es){
   if(!fIsRealData){
     edm::Handle<GenRunInfoProduct> genRunInfo;
     r.getByLabel("generator", genRunInfo);
@@ -1934,6 +1935,18 @@ void NTupleProducer::beginRun(const edm::Run& r, const edm::EventSetup&){
     fTextxslo       = genRunInfo->externalXSecLO().value();
     fTintxs         = genRunInfo->internalXSec().value();
   }
+
+  bool changed(true);
+  // Trigger menu could have changed
+  if (fHltConfig.init(r,es,fProcessName,changed)) {
+    if ( changed ) { //FIXME: Could book trigger histos here
+    }
+  } else {
+    // Problem: init failed
+    edm::LogError("NTP") << " HLT config extraction failure with process name " 
+                         << fProcessName;
+  }
+
 }
 
 // Method called once after each run
@@ -2020,6 +2033,7 @@ void NTupleProducer::resetTree(){
   resetInt(fTHLTres, gMaxhltbits);
   resetInt(fTL1physres, gMaxl1physbits);
   resetInt(fTL1techres, gMaxl1techbits);
+  resetInt(fTHLTprescale, gMaxhltbits);
   fTHLTnames.clear();    fTHLTnames.resize(gMaxhltbits);
   fTL1physnames.clear(); fTL1physnames.resize(gMaxl1physbits);
 

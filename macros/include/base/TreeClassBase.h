@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Sep  6 18:28:31 2010 by ROOT version 5.22/00d
+// Tue Sep  7 18:23:24 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/NTupleProducer_36X_MC_RECO_numEvent100.root
 //////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ public :
    Int_t           HLTResults[200];
    Int_t           L1PhysResults[128];
    Int_t           L1TechResults[64];
+   Int_t           HLTPrescale[200];
    Int_t           PrimVtxGood;
    Double_t        PrimVtxx;
    Double_t        PrimVtxy;
@@ -500,6 +501,7 @@ public :
    TBranch        *b_HLTResults;   //!
    TBranch        *b_L1PhysResults;   //!
    TBranch        *b_L1TechResults;   //!
+   TBranch        *b_HLTPrescale;   //!
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -1035,6 +1037,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLTResults", HLTResults, &b_HLTResults);
    fChain->SetBranchAddress("L1PhysResults", L1PhysResults, &b_L1PhysResults);
    fChain->SetBranchAddress("L1TechResults", L1TechResults, &b_L1TechResults);
+   fChain->SetBranchAddress("HLTPrescale", HLTPrescale, &b_HLTPrescale);
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
