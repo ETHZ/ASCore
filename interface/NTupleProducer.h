@@ -338,6 +338,7 @@ private:
   int fTmunglhits[gMaxnmus];
   int fTmunmuhits[gMaxnmus];
   int fTmuntkhits[gMaxnmus];
+  int fTmunpxhits[gMaxnmus];
   double fTmuinntknchi2[gMaxnmus];
   int fTmunmatches[gMaxnmus];
   int fTmunchambers[gMaxnmus];

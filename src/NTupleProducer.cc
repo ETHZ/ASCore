@@ -508,6 +508,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTmunchi2[mqi]      = fTmuinntknchi2[mqi]; // No difference for TM
       fTmunglhits[mqi]    = 0;
       fTmuntkhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidHits();
+      fTmunpxhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidPixelHits();
       fTmunmuhits[mqi]    = 0;
       fTmunmatches[mqi]   = 0;
       fTmunchambers[mqi]  = 0;
@@ -530,10 +531,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       fTmuptE[mqi]  = muon.globalTrack()->ptError();
       fTmud0E[mqi]  = muon.globalTrack()->dxyError();
       fTmudzE[mqi]  = muon.globalTrack()->dzError();
-
+      
       fTmunchi2[mqi]      = muon.globalTrack()->normalizedChi2();
       fTmunglhits[mqi]    = muon.globalTrack()->hitPattern().numberOfValidHits();
       fTmuntkhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidHits();
+      fTmunpxhits[mqi]    = muon.innerTrack()->hitPattern().numberOfValidPixelHits();
       fTmunmuhits[mqi]    = muon.outerTrack()->hitPattern().numberOfValidHits();
       fTmunmatches[mqi]   = muon.numberOfMatches();
       fTmunchambers[mqi]  = muon.numberOfChambers();
@@ -1589,6 +1591,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MuNGlHits"        ,&fTmunglhits        ,"MuNGlHits[NMus]/I");
   fEventTree->Branch("MuNMuHits"        ,&fTmunmuhits        ,"MuNMuHits[NMus]/I");
   fEventTree->Branch("MuNTkHits"        ,&fTmuntkhits        ,"MuNTkHits[NMus]/I");
+  fEventTree->Branch("MuNPxHits"        ,&fTmunpxhits        ,"MuNPxHits[NMus]/I");
   fEventTree->Branch("MuInnerTkNChi2"   ,&fTmuinntknchi2     ,"MuInnerTkNChi2[NMus]/D");
   fEventTree->Branch("MuNMatches"       ,&fTmunmatches       ,"MuNMatches[NMus]/I");
   fEventTree->Branch("MuNChambers"      ,&fTmunchambers      ,"MuNChambers[NMus]/I");
@@ -2144,6 +2147,7 @@ void NTupleProducer::resetTree(){
   resetInt(fTmunglhits, gMaxnmus);
   resetInt(fTmunmuhits, gMaxnmus);
   resetInt(fTmuntkhits, gMaxnmus);
+  resetInt(fTmunpxhits, gMaxnmus);
   resetDouble(fTmuinntknchi2, gMaxnmus);
   resetInt(fTmunmatches, gMaxnmus);
   resetInt(fTmunchambers, gMaxnmus);
