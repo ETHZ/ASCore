@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.59 2010/09/06 16:27:57 fronga Exp $
+// $Id: NTupleProducer.h,v 1.61 2010/09/07 16:50:20 fronga Exp $
 //
 //
 
@@ -147,6 +147,7 @@ private:
   edm::InputTag fGenJetTag;
   edm::InputTag fL1TriggerTag;
   edm::InputTag fHLTTriggerTag;
+  edm::InputTag fHLTTrigEventTag;
   edm::InputTag fHBHENoiseResultTag;
 
   double fMinmupt;
@@ -165,8 +166,8 @@ private:
   double fMinphopt;
   double fMaxphoeta;
 	
-	double fMingenleptpt; 
-	double fMaxgenlepteta;
+  double fMingenleptpt; 
+  double fMaxgenlepteta;
 
   double fJUNC_px_match[gMaxnjets];
   double fJUNC_py_match[gMaxnjets];
@@ -177,6 +178,7 @@ private:
   TH1I *fHl1techstat;
   bool fFirstevent;
 
+  // Trigger stuff
   string fProcessName; // process name of (HLT) process for which to get HLT configuration
   HLTConfigProvider fHltConfig;
 
@@ -259,9 +261,18 @@ private:
   int fTL1physres[gMaxl1physbits];
   int fTL1techres[gMaxl1techbits];
   int fTHLTprescale[gMaxhltbits];
-  std::vector<std::string> fTHLTnames;
-  std::vector<std::string> fTL1physnames;
-  
+  std::vector<std::string> fTHLTmenu;
+  std::vector<std::string> fTL1physmenu;
+
+  static const unsigned int gMaxhltnpaths = 10;
+  static const unsigned int gMaxhltnobjs  = 10;
+  std::vector<std::string> fTHltLabels; // HLT Paths to store the triggering objects of
+  unsigned int fTNpaths;
+  int    fTHLTObjectID[gMaxhltnpaths][gMaxhltnobjs];
+  double fTHLTObjectPt[gMaxhltnpaths][gMaxhltnobjs];
+  double fTHLTObjectEta[gMaxhltnpaths][gMaxhltnobjs];
+  double fTHLTObjectPhi[gMaxhltnpaths][gMaxhltnobjs];
+
   // Flags
   int fTgoodevent;         // 1 for good events, 0 for bad events
   int fTflagmaxmuexc;      // Found more than 20 muons in event (0 is good, 1 is bad)

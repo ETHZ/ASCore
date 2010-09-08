@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.74 2010/09/07 10:45:08 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.76 2010/09/07 16:50:20 fronga Exp $
 //
 //
 
@@ -57,6 +57,8 @@
 
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
 #include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
@@ -115,6 +117,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fGenJetTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
+  fHLTTrigEventTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
   fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
   fProcessName = fHLTTriggerTag.process();
@@ -158,6 +161,16 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     if ( fIsPat ) ;
     else
       jetFillers.push_back( new JetFillerReco(jConfigs[i], fEventTree, fIsPat, fIsRealData) );
+
+  // Get list of trigger paths to store the triggering object info. of
+  fTHltLabels = iConfig.getUntrackedParameter<std::vector<std::string> >("hlt_labels");
+  fTNpaths = fTHltLabels.size();
+  if ( fTNpaths > gMaxhltnpaths ) {
+    edm::LogWarning("NTP") << "Number of trigger paths to store the objects of" << endl
+                           << "is too high: " <<fTNpaths << ">" << gMaxhltnpaths << endl
+                           << "Restricting to maximum of " << gMaxhltnpaths;
+    fTNpaths = gMaxhltnpaths;
+  }
 
 }
 
@@ -300,7 +313,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iSetup.get<IdealMagneticFieldRecord>().get(magfield);
 
 
-  // Dump trigger bits
+  //////////////////////////////////////////////////////////////////////////////
+  // Trigger information
   Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
   iEvent.getByLabel(fL1TriggerTag, l1GtReadoutRecord);
 
@@ -308,13 +322,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iEvent.getByLabel(fHLTTriggerTag, triggers);
   const TriggerResults& tr = *triggers;
 
+  // Get trigger menus
   if(tr.size() >= gMaxhltbits){
     edm::LogWarning("NTP") << "@SUB=analyze()"
                            << "More than " << static_cast<int>(gMaxhltbits) 
                            << " HLT trigger bits, increase length!";
     fTgoodevent = 1;
   }
-
   vector<string> triggernames;
   triggernames.reserve(tr.size());
   Service<service::TriggerNamesService> tns;
@@ -323,10 +337,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     if (fFirstevent) 
       fHhltstat->GetXaxis()->SetBinLabel(i+1, TString(triggernames[i]));
   }
-  fTHLTnames = triggernames; // Used below and stored in run tree at end of run
+  fTHLTmenu = triggernames; // Used below and stored in run tree at end of run
 
-  // Add a warning about the shift between trigger bits and bin numbers:
-  if (fFirstevent) 
+  if (fFirstevent)   // Add a warning about the shift between trigger bits and bin numbers:
     fHhltstat->GetXaxis()->SetBinLabel(gMaxhltbits+2, "Bin#=Bit#+1");
 
   ESHandle<L1GtTriggerMenu> menuRcd;
@@ -336,28 +349,51 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   for (AlgorithmMap::const_iterator it=algoMap.begin();it!=algoMap.end();++it) {
     if (fFirstevent) 
       fHl1physstat->GetXaxis()->SetBinLabel((*it).second.algoBitNumber() + 1, TString((*it).first));
-    fTL1physnames[(*it).second.algoBitNumber()] = std::string((*it).first); // Actually stored in run tree (but easier so)
+    fTL1physmenu[(*it).second.algoBitNumber()] = std::string((*it).first); // Actually stored in run tree (but easier so)
   }
   
   fFirstevent = false;
 
+  // Get trigger results
   for(unsigned int i = 0; i < tr.size(); i++ ){
     if(tr[i].accept())	fHhltstat->Fill(i);
     fTHLTres[i] = tr[i].accept() ? 1:0;
-    fTHLTprescale[i] = fHltConfig.prescaleValue(iEvent,iSetup,fTHLTnames[i]);
+    fTHLTprescale[i] = fHltConfig.prescaleValue(iEvent,iSetup,fTHLTmenu[i]);
   }
-
   for( unsigned int i = 0; i < gMaxl1physbits; ++i ){
     bool fired = l1GtReadoutRecord->decisionWord()[i];
     if(fired) fHl1physstat->Fill(i);
     fTL1physres[i] = fired ? 1:0;
   }  
-
   for( unsigned int i = 0; i < gMaxl1techbits; ++i){
     bool fired = l1GtReadoutRecord->technicalTriggerWord()[i];
     if(fired) fHl1techstat->Fill(i);
     fTL1techres[i] = fired ? 1:0;
   }
+
+  // Store information for some trigger paths
+  edm::Handle<trigger::TriggerEvent> trgEvent; 
+  iEvent.getByLabel(fHLTTrigEventTag, trgEvent);
+   
+  InputTag collectionTag;    
+  // Loop over path names and get related objects
+  for (size_t i=0; i<fTNpaths; ++i) { 
+    collectionTag = edm::InputTag(fTHltLabels[i],"",fProcessName);
+    size_t  filterIndex_ = trgEvent->filterIndex(collectionTag); 
+    if (filterIndex_<trgEvent->sizeFilters()) {
+      const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects()); 
+      const trigger::Keys& keys = trgEvent->filterKeys(filterIndex_);
+      // Loop over objects
+      for ( size_t hlto = 0; hlto<keys.size() && hlto<gMaxhltnobjs; ++hlto ) {
+        const trigger::TriggerObject& TO(TOC[keys[hlto]]);
+        fTHLTObjectID[i][hlto]  = TO.id();
+        fTHLTObjectPt[i][hlto]  = TO.pt();
+        fTHLTObjectEta[i][hlto] = TO.eta();
+        fTHLTObjectPhi[i][hlto] = TO.phi();
+      } 
+    } 
+  }
+
 
   ////////////////////////////////////////////////////////////////////////////////
   // Dump tree variables /////////////////////////////////////////////////////////
@@ -1481,8 +1517,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fRunTree->Branch("MaxNJets"       ,&fRTmaxnjet,        "MaxTjet/I");
   fRunTree->Branch("MaxNTrks"       ,&fRTmaxntrk,        "MaxTtrk/I");
   fRunTree->Branch("MaxNPhotons"    ,&fRTmaxnphot,       "MaxTphot/I");
-  fRunTree->Branch("HLTNames"         ,&fTHLTnames );
-  fRunTree->Branch("L1PhysNames"      ,&fTL1physnames );
+  fRunTree->Branch("HLTLabels"      ,&fTHltLabels );
+  fRunTree->Branch("HLTNames"       ,&fTHLTmenu );
+  fRunTree->Branch("L1PhysMenu"     ,&fTL1physmenu );
 
   // Event information:
   fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
@@ -1504,6 +1541,11 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("L1PhysResults"    ,&fTL1physres       ,"L1PhysResults[128]/I");
   fEventTree->Branch("L1TechResults"    ,&fTL1techres       ,"L1TechResults[64]/I");
   fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     ,"HLTPrescale[200]/I");
+  fEventTree->Branch("NPaths"           ,&fTNpaths          ,"NPaths/I");
+  fEventTree->Branch("HLTObjectID"      ,&fTHLTObjectID     ,"HLTObjectID[NPaths]/I");
+  fEventTree->Branch("HLTObjectPt"      ,&fTHLTObjectPt     ,"HLTObjectPt[NPaths]/D");
+  fEventTree->Branch("HLTObjectEta"     ,&fTHLTObjectEta    ,"HLTObjectEta[NPaths]/D");
+  fEventTree->Branch("HLTObjectPhi"     ,&fTHLTObjectPhi    ,"HLTObjectPhi[NPaths]/D");
   fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx         ,"PrimVtxGood/I");
   fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx        ,"PrimVtxx/D");
   fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy        ,"PrimVtxy/D");
@@ -2037,8 +2079,14 @@ void NTupleProducer::resetTree(){
   resetInt(fTL1physres, gMaxl1physbits);
   resetInt(fTL1techres, gMaxl1techbits);
   resetInt(fTHLTprescale, gMaxhltbits);
-  fTHLTnames.clear();    fTHLTnames.resize(gMaxhltbits);
-  fTL1physnames.clear(); fTL1physnames.resize(gMaxl1physbits);
+  for ( size_t i=0; i<gMaxhltnpaths; ++i ) {
+    resetInt(fTHLTObjectID[i],gMaxhltnobjs);
+    resetDouble(fTHLTObjectPt[i],gMaxhltnobjs);
+    resetDouble(fTHLTObjectEta[i],gMaxhltnobjs);
+    resetDouble(fTHLTObjectPhi[i],gMaxhltnobjs);
+  }
+  fTHLTmenu.clear();    fTHLTmenu.resize(gMaxhltbits);
+  fTL1physmenu.clear(); fTL1physmenu.resize(gMaxl1physbits);
 
   fTrunnumber   = -999;
   fTeventnumber = -999;

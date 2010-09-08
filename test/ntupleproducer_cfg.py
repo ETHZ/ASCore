@@ -29,9 +29,11 @@ options.register ('recoType',									# register 'recoType' option
                   "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
-#options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
+#options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 #options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
+#options.files= 'file:///data/susy/reco/TTbarJets-madgraph-Spring10-START3X_V26_S09-v1-GEN-SIM-RECO.root'
+#options.files= 'file:///data/susy/reco/Mu-Run2010A-RECO-142663.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -159,7 +161,7 @@ process.analyze.jets = (
     cms.PSet( prefix = cms.untracked.string('PF'),
               tag = cms.untracked.InputTag('ak5PFJets'),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-              jet_id = cms.untracked.InputTag('ak5JetID'),			  
+              jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
@@ -172,7 +174,7 @@ process.analyze.jets = (
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5JPTL2L3'),
-              ),		  		  
+              ),
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
@@ -183,8 +185,11 @@ process.analyze.jets = (
               corrections = cms.string('ak5CaloL2L3'),
               ),
     )
+# If MC, take the HLT from REDIGI
 if options.runon!='data':
     process.analyze.tag_hlttrig = "TriggerResults::REDIGI"
+# Dump object information for some HLT trigger filters (from confDB)
+process.analyze.hlt_labels = ['hltSingleMu9L3Filtered9']
 
 
 #### DEBUG #####################################################################

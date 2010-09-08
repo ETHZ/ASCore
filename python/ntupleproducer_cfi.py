@@ -40,7 +40,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_genjets    = cms.untracked.InputTag('ak5GenJets'),
 	tag_l1trig     = cms.untracked.InputTag("gtDigis"),
 	tag_hlttrig    = cms.untracked.InputTag("TriggerResults","","HLT"),
+	tag_hlttrigevent = cms.untracked.InputTag("hltTriggerSummaryAOD"),
 	tag_hcalnoise  = cms.untracked.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+
+        # Trigger paths to store the triggering object information of
+        hlt_labels = cms.untracked.vstring(),
         
 	# Event Selection Criteria
 	# Muons:
