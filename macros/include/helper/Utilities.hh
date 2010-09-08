@@ -206,21 +206,43 @@ namespace Util {
     // Simple bubble sort algorithm, don't use for more than a few entries!
     std::vector<int> ind;
     if(vec.size() == 0) return ind; // Return original empty vector
-    for(size_t i = 0; i < vec.size(); ++i) ind.push_back(i);
-    for(size_t i = 0; i < vec.size()-1; ++i){
-      int ind1 = ind[i];
-      T p1 = vec[ind1];
-      for(size_t j = i+1; j < vec.size(); ++j){
-        T p2 = vec[ind[j]];
-        if( (p1 < p2) ^ asc ){
-          // Swap the two indices
-          ind[i] = ind[j];
-          ind[j] = ind1;
-        }
-      }
+
+    std::vector<T> vecClone = vec; // clone orignal vector
+    sort(vecClone.begin(), vecClone.end()); // ascending order
+    if(!asc)reverse(vecClone.begin(), vecClone.end());  // sort in descending order  
+
+    int collectionSize = vec.size();
+//    ind.reserve(collectionSize); // better to initialize to a code value
+    for(int i=0;i<collectionSize;i++)ind.push_back(-999);
+   
+    
+    for(int i =0;i<collectionSize;i++) // loop in the sorted collection
+    {
+	for(int j =0;j<collectionSize;j++) // loop in the original unsorted collection
+	{
+	    if(vecClone[i]==vec[j]){ind[i]=j;}
+	}
     }
-    return ind;
+
+    bool success = true; // failsafe test 
+    for(int i=0;i<collectionSize;i++)
+    {
+       	if(ind[i]==-999)success=false;
+    }
+
+    if(!success)
+    {
+	std::cout<<"problem with the sorting"<<std::endl;
+	std::vector<int> dummy; 
+	return dummy;
+    }
+    else
+    {
+	return ind;
+    }
+
   }
+
 
   //__________________________________________________________________________
   template<class T> inline std::vector<int> VSort(std::vector<int> ind, std::vector<T> vec, bool asc = false){
