@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Sep  8 18:27:58 2010 by ROOT version 5.22/00d
+// Thu Sep  9 12:43:40 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
 // found on file: ../test/NTupleProducer_36X_MC_RECO_numEvent100.root
 //////////////////////////////////////////////////////////
@@ -37,11 +37,11 @@ public :
    Int_t           L1PhysResults[128];
    Int_t           L1TechResults[64];
    Int_t           HLTPrescale[200];
-   Int_t           NPaths;
-   Int_t           HLTObjectID[1];   //[NPaths]
-   Double_t        HLTObjectPt[1];   //[NPaths]
-   Double_t        HLTObjectEta[1];   //[NPaths]
-   Double_t        HLTObjectPhi[1];   //[NPaths]
+   Int_t           NHLTObjs;
+   Int_t           HLTObjectID[7][10];
+   Double_t        HLTObjectPt[7][10];
+   Double_t        HLTObjectEta[7][10];
+   Double_t        HLTObjectPhi[7][10];
    Int_t           PrimVtxGood;
    Double_t        PrimVtxx;
    Double_t        PrimVtxy;
@@ -508,7 +508,7 @@ public :
    TBranch        *b_L1PhysResults;   //!
    TBranch        *b_L1TechResults;   //!
    TBranch        *b_HLTPrescale;   //!
-   TBranch        *b_NPaths;   //!
+   TBranch        *b_NHLTObjs;   //!
    TBranch        *b_HLTObjectID;   //!
    TBranch        *b_HLTObjectPt;   //!
    TBranch        *b_HLTObjectEta;   //!
@@ -1050,7 +1050,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("L1PhysResults", L1PhysResults, &b_L1PhysResults);
    fChain->SetBranchAddress("L1TechResults", L1TechResults, &b_L1TechResults);
    fChain->SetBranchAddress("HLTPrescale", HLTPrescale, &b_HLTPrescale);
-   fChain->SetBranchAddress("NPaths", &NPaths, &b_NPaths);
+   fChain->SetBranchAddress("NHLTObjs", &NHLTObjs, &b_NHLTObjs);
    fChain->SetBranchAddress("HLTObjectID", HLTObjectID, &b_HLTObjectID);
    fChain->SetBranchAddress("HLTObjectPt", HLTObjectPt, &b_HLTObjectPt);
    fChain->SetBranchAddress("HLTObjectEta", HLTObjectEta, &b_HLTObjectEta);

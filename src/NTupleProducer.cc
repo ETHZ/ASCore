@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.76 2010/09/07 16:50:20 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.77 2010/09/08 16:37:32 fronga Exp $
 //
 //
 
@@ -165,17 +165,37 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Get list of trigger paths to store the triggering object info. of
   fTHltLabels = iConfig.getUntrackedParameter<std::vector<std::string> >("hlt_labels");
   fTNpaths = fTHltLabels.size();
-  if ( fTNpaths > gMaxhltnpaths ) {
-    edm::LogWarning("NTP") << "Number of trigger paths to store the objects of" << endl
-                           << "is too high: " <<fTNpaths << ">" << gMaxhltnpaths << endl
-                           << "Restricting to maximum of " << gMaxhltnpaths;
-    fTNpaths = gMaxhltnpaths;
-  }
 
+  // Close your eyes...
+  fTHLTObjectID    = new int*[fTNpaths]; 
+  fTHLTObjectID[0] = new int[fTNpaths*gMaxhltnobjs];
+  fTHLTObjectPt    = new double*[fTNpaths];
+  fTHLTObjectPt[0] = new double[fTNpaths*gMaxhltnobjs];
+  fTHLTObjectEta   = new double*[fTNpaths];
+  fTHLTObjectEta[0]= new double[fTNpaths*gMaxhltnobjs];
+  fTHLTObjectPhi   = new double*[fTNpaths];
+  fTHLTObjectPhi[0]= new double[fTNpaths*gMaxhltnobjs];
+  for ( size_t i=1; i<fTNpaths; ++i ) {
+    fTHLTObjectID[i]  = fTHLTObjectID[i-1]+gMaxhltnobjs;
+    fTHLTObjectPt[i]  = fTHLTObjectPt[i-1]+gMaxhltnobjs;
+    fTHLTObjectEta[i] = fTHLTObjectEta[i-1]+gMaxhltnobjs;
+    fTHLTObjectPhi[i] = fTHLTObjectPhi[i-1]+gMaxhltnobjs;
+  }
 }
 
-NTupleProducer::~NTupleProducer(){}
+//________________________________________________________________________________________
+NTupleProducer::~NTupleProducer(){
+  delete [] fTHLTObjectID[0];
+  delete [] fTHLTObjectPt[0];
+  delete [] fTHLTObjectEta[0];
+  delete [] fTHLTObjectPhi[0];
+  delete [] fTHLTObjectID;
+  delete [] fTHLTObjectPt;
+  delete [] fTHLTObjectEta;
+  delete [] fTHLTObjectPhi;
+}
 
+//________________________________________________________________________________________
 // Method called once for each event
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
@@ -375,7 +395,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   edm::Handle<trigger::TriggerEvent> trgEvent; 
   iEvent.getByLabel(fHLTTrigEventTag, trgEvent);
    
-  InputTag collectionTag;    
+  InputTag collectionTag;   
   // Loop over path names and get related objects
   for (size_t i=0; i<fTNpaths; ++i) { 
     collectionTag = edm::InputTag(fTHltLabels[i],"",fProcessName);
@@ -384,16 +404,23 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects()); 
       const trigger::Keys& keys = trgEvent->filterKeys(filterIndex_);
       // Loop over objects
-      for ( size_t hlto = 0; hlto<keys.size() && hlto<gMaxhltnobjs; ++hlto ) {
+      for ( size_t hlto = 0; hlto<keys.size(); ++hlto ) {
+        if (hlto>=gMaxhltnobjs) {
+          edm::LogWarning("NTP") << "@SUB=analyze()"
+                                 << "Maximum number of triggering objects exceeded"
+                                 << " for filter " << fTHltLabels[i];
+          break;
+        }
+        // Update number of objects stored
+        if ( hlto>=fTNHLTobjects ) fTNHLTobjects = hlto+1; // Not an index...
         const trigger::TriggerObject& TO(TOC[keys[hlto]]);
         fTHLTObjectID[i][hlto]  = TO.id();
         fTHLTObjectPt[i][hlto]  = TO.pt();
         fTHLTObjectEta[i][hlto] = TO.eta();
         fTHLTObjectPhi[i][hlto] = TO.phi();
-      } 
-    } 
+      }
+    }
   }
-
 
   ////////////////////////////////////////////////////////////////////////////////
   // Dump tree variables /////////////////////////////////////////////////////////
@@ -1541,11 +1568,14 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("L1PhysResults"    ,&fTL1physres       ,"L1PhysResults[128]/I");
   fEventTree->Branch("L1TechResults"    ,&fTL1techres       ,"L1TechResults[64]/I");
   fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     ,"HLTPrescale[200]/I");
-  fEventTree->Branch("NPaths"           ,&fTNpaths          ,"NPaths/I");
-  fEventTree->Branch("HLTObjectID"      ,&fTHLTObjectID     ,"HLTObjectID[NPaths]/I");
-  fEventTree->Branch("HLTObjectPt"      ,&fTHLTObjectPt     ,"HLTObjectPt[NPaths]/D");
-  fEventTree->Branch("HLTObjectEta"     ,&fTHLTObjectEta    ,"HLTObjectEta[NPaths]/D");
-  fEventTree->Branch("HLTObjectPhi"     ,&fTHLTObjectPhi    ,"HLTObjectPhi[NPaths]/D");
+  fEventTree->Branch("NHLTObjs"         ,&fTNHLTobjects     ,"NHLTObjs/I");
+  // First dimension of these arrays is fixed at run time
+  TString dimensions = TString::Format("[%d][%d]",fTNpaths,gMaxhltnobjs);
+  fEventTree->Branch("HLTObjectID" ,fTHLTObjectID[0]  ,TString("HLTObjectID"+dimensions+"/I"));
+  fEventTree->Branch("HLTObjectPt" ,fTHLTObjectPt[0]  ,TString("HLTObjectPt"+dimensions+"/D"));
+  fEventTree->Branch("HLTObjectEta",fTHLTObjectEta[0] ,TString("HLTObjectEta"+dimensions+"/D"));
+  fEventTree->Branch("HLTObjectPhi",fTHLTObjectPhi[0] ,TString("HLTObjectPhi"+dimensions+"/D"));
+  //
   fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx         ,"PrimVtxGood/I");
   fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx        ,"PrimVtxx/D");
   fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy        ,"PrimVtxy/D");
@@ -2079,7 +2109,9 @@ void NTupleProducer::resetTree(){
   resetInt(fTL1physres, gMaxl1physbits);
   resetInt(fTL1techres, gMaxl1techbits);
   resetInt(fTHLTprescale, gMaxhltbits);
-  for ( size_t i=0; i<gMaxhltnpaths; ++i ) {
+
+  fTNHLTobjects = 0;
+  for ( size_t i=0; i<fTNpaths; ++i ) {
     resetInt(fTHLTObjectID[i],gMaxhltnobjs);
     resetDouble(fTHLTObjectPt[i],gMaxhltnobjs);
     resetDouble(fTHLTObjectEta[i],gMaxhltnobjs);
