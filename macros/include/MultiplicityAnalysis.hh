@@ -19,10 +19,10 @@
 #include <TBranch.h>
 
 #include "base/TreeReader.hh"
-#include "base/UserAnalysisBase.hh"
+#include "MultiplicityAnalysisBase.hh"
 #include "helper/LeptJetStat.h"
 
-class MultiplicityAnalysis : public UserAnalysisBase{
+class MultiplicityAnalysis : public MultiplicityAnalysisBase{
 public:
 	MultiplicityAnalysis(TreeReader *tr = 0);
 	virtual ~MultiplicityAnalysis();
@@ -33,19 +33,11 @@ public:
 
 	void PlotMPSummary(LeptJetStat *fLeptJetStat, TH2D *fHljMult);
 	void PlotMPEffic(LeptJetStat *fLeptJetStat, TH2D *fHemuMult, TH1F *fHemuEff);
-	const char* fSetofCuts;  
 	float fLumi; 	// lumi to scale plots with xsection
-	std::vector<std::string>* fRequiredHLT; 
-	std::vector<std::string>* fVetoedHLT;
+
 	
 
 private:
-	void ReadCuts();
-	void Reset();
-	
-	std::vector<int> elecs;
-	std::vector<int> muons;
-	
 	
 	// Multiplicity Plots Variables:
 	TFile *fMPHistFile;
@@ -57,9 +49,7 @@ private:
 	TH2D *fHljMult_bjets;
 	TH2D *fHemuMult_bjets;
 	
-	//  ---- set of cuts ---
-	TString fSetName;
-	float fCut_PFMET;
+	int counter;
 	
 };
 #endif

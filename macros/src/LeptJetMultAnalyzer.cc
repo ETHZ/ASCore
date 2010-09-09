@@ -10,9 +10,9 @@
 using namespace std;
 
 LeptJetMultAnalyzer::LeptJetMultAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fTreeCleaner          = new TreeCleaner(fTR);
-	fMultiplicityAnalysis = new MultiplicityAnalysis(fTR);
-	fMassAnalysis         = new MassAnalysis(fTR);
+	fTreeCleaner              = new TreeCleaner(fTR);
+	fMultiplicityAnalysis     = new MultiplicityAnalysis(fTR);
+	fMassAnalysis             = new MassAnalysis(fTR);
 	Util::SetStyle();
 }
 
@@ -55,17 +55,18 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fTreeCleaner         ->fVerbose = fVerbose;
 	fTreeCleaner         ->Begin();
 	
-	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
-	fMultiplicityAnalysis->fVerbose        =fVerbose;	
-	fMultiplicityAnalysis->fRequiredHLT    =requiredHLT; 
-	fMultiplicityAnalysis->fVetoedHLT      =vetoedHLT; 
-	fMultiplicityAnalysis->fSetofCuts      =setofcuts;
-	fMultiplicityAnalysis->fLumi           =lumi;
-	fMultiplicityAnalysis->Begin(filename);
+	fMultiplicityAnalysis     ->ReadCuts(setofcuts);
+	fMultiplicityAnalysis     ->SetTriggers(requiredHLT, vetoedHLT);
+	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
+	fMultiplicityAnalysis     ->fVerbose        =fVerbose;	
+	fMultiplicityAnalysis     ->fLumi           =lumi;
+	fMultiplicityAnalysis     ->Begin(filename);
 	
-	fMassAnalysis        ->SetOutputDir(fOutputDir);
-	fMassAnalysis        ->fVerbose        = fVerbose;
-	fMassAnalysis        ->Begin();
+	fMassAnalysis             ->ReadCuts(setofcuts);
+	fMassAnalysis             ->SetTriggers(requiredHLT, vetoedHLT);
+	fMassAnalysis             ->SetOutputDir(fOutputDir);
+	fMassAnalysis             ->fVerbose        = fVerbose;
+	fMassAnalysis             ->Begin();
 
 
 }

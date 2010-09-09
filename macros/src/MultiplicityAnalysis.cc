@@ -7,12 +7,8 @@
 
 using namespace std;
 
-MultiplicityAnalysis::MultiplicityAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
-	fSetofCuts      = "multiplicity_cuts/default.dat";
+MultiplicityAnalysis::MultiplicityAnalysis(TreeReader *tr) : MultiplicityAnalysisBase(tr){
 	fLumi           = -999.99; 
-	fRequiredHLT    = NULL;
-	fVetoedHLT      = NULL;
-	
 }
 
 MultiplicityAnalysis::~MultiplicityAnalysis(){
@@ -32,29 +28,37 @@ void MultiplicityAnalysis::Begin(const char* filename){
 
 	fHljMult_alljets ->SetStats(false);
 	fHemuMult_alljets->SetStats(false);
-	fHemuEff ->SetStats(false);
+	fHemuEff         ->SetStats(false);
 	fHljMult_bjets   ->SetStats(false);
 	fHemuMult_bjets  ->SetStats(false);
-
-	ReadCuts();
 	
-	
-
-	
+	counter =0;
 	
 }
 
 void MultiplicityAnalysis::Analyze(){
+	
+	// ---------------------------------------------------
+	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
+	InitializeEvent();
+	// ----------------------------------------------------
+
+	// --------------------------------------------------------------------
+	// check if event passes selection cuts and trigger requirements
+	if(! IsGoodEvent()){return;}
+	// --------------------------------------------------------------------
+	counter ++;
+	
+	// ---------------------------------------------------------------------
+	// count el, mu, jets, bjets and call FillLeptJetStat
+	
 	//define an array for leptons (es+mus) with
 	//information on pt, eta and category
 	//category 1: e+
 	//category 2: e-
 	//category 3: mu+
 	//category 4: mu-
-	
-	// reset variables
-	Reset();
-	
+		
 	const int NLepts = 40;
 	int LeptCat[NLepts];
 	double LeptPt[NLepts];
@@ -66,69 +70,27 @@ void MultiplicityAnalysis::Analyze(){
 		LeptEta[tmp]=-999.;
 	}	
 	
-	// HLT Results:
-	if((*fRequiredHLT).size() !=0 ){
-		bool HLT_fire(false);
-		for(int i=0; i<(*fRequiredHLT).size(); ++i){
-			if( GetHLTResult((*fRequiredHLT)[i]) ){  // require HLT bit
-				HLT_fire = true;
-			} 
-		}
-		if(! HLT_fire) return;
-	}
-	if((*fVetoedHLT).size() !=0){
-		for(int i=0; i<(*fVetoedHLT).size(); ++i){
-			if( GetHLTResult((*fVetoedHLT)[i]) ){   // veto HLT bit 
-				return;
-			} 
-		}
-	}
-
-//	// reject bas events from cleaning
-//	if(fTR->GoodEvent !=0 ) return;
-	
-	// Multiplicity Cuts (specified from input file)
-	if(fTR->PFMET < fCut_PFMET){
-		return;
-	}
-	
-
 	//loop over es and mus and fill the leptons array
-	int ILept=-1;
-	for(int i=0; i< fTR->NEles; ++i){
-		// ----------- Electron Cuts --------------------
-		if(! IsGoodEl_TDL(i) ) continue;
-		elecs.push_back(i);
-		// ----------------------------------------------
-		ILept++;
-		LeptPt[ILept]  = fTR->ElPt[i];
-		LeptEta[ILept] = fTR->ElEta[i];
-		if(fTR->ElCharge[i]>0) {
-			LeptCat[ILept]=1;
-		} else {
-			LeptCat[ILept]=2;
-		}
+	int leptcounter=-1;
+	for(int i=0; i<fElecs.size(); ++i){
+		leptcounter++;
+		LeptPt[leptcounter] =fTR->ElPt[fElecs[i]];
+		LeptEta[leptcounter]=fTR->ElEta[fElecs[i]];
+		if(fTR->ElCharge[fElecs[i]]>0) {LeptCat[leptcounter]=1;}
+		else {LeptCat[leptcounter]=2;}
 	}
-	for(int i=0; i< fTR->NMus; ++i){
-		// ------------ Muon Cuts -----------
-		if(! IsGoodMu_TDL(i) ) continue;
-		muons.push_back(i);
-		// ----------------------------------
-		ILept++;
-		LeptPt[ILept]  = fTR->MuPt[i];
-		LeptEta[ILept] = fTR->MuEta[i];
-		if(fTR->MuCharge[i]>0) {
-			LeptCat[ILept]=3;
-		} else {
-			LeptCat[ILept]=4;
-		}
+	for(int i=0; i<fMuons.size(); ++i){
+		leptcounter++;
+		LeptPt[leptcounter] =fTR->MuPt[fMuons[i]];
+		LeptEta[leptcounter]=fTR->MuEta[fMuons[i]];
+		if(fTR->MuCharge[fMuons[i]]>0) {LeptCat[leptcounter]=3;}
+		else {LeptCat[leptcounter]=4;}
 	}
-	
-	
-	//total number of leptons in the event
-	int NLeptons= ILept+1;
 
-// reorder here ...
+	//total number of leptons in the event
+	int NLeptons= fElecs.size()+fMuons.size();
+	
+	// reorder here ...
 	bool changed = false;
 	do {
 		changed = false;
@@ -150,34 +112,16 @@ void MultiplicityAnalysis::Analyze(){
 		}
 	} while (changed);
 
-// if too many leptons, put it in the overflow bin
+	// if too many leptons, put it in the overflow bin
 	if (NLeptons > 4){
 		LeptCat[0]=5;
 	}
 
-// count number of good jets (beni)
-	unsigned int NQJets = 0;
-	unsigned int NBJets = 0;
-	for(int ij=0; ij < fTR->NJets; ++ij){
-		// ----------- Jet Cuts --------------------
-		if(! IsGoodJ_TDL(ij) ) continue;
-		bool JGood(true);
-		for(int i=0; i<muons.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[muons[i]], fTR->JPhi[ij], fTR->MuPhi[muons[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		for(int i=0; i<elecs.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[elecs[i]], fTR->JPhi[ij], fTR->ElPhi[elecs[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		if(JGood=false) continue;
-		// -----------------------------------------
-		NQJets++;
-		// ------- b -jets -------------------------
-		if(! IsGoodbJ_TDL(ij) ) continue;
-		NBJets++;
-	}
-		
+	
+	unsigned int NQJets = fJets.size();
+	unsigned int NBJets = fBJets.size();
+	
+
 	fMyLeptJetStat      ->FillLeptJetStat(LeptCat, NQJets, NBJets);
 	fMyLeptJetStat_bjets->FillLeptJetStat(LeptCat, NBJets, 0);
 	
@@ -279,6 +223,8 @@ void MultiplicityAnalysis::End(){
 	fHljMult_bjets    ->Write();
 	fHemuMult_bjets   ->Write();
 	fMPHistFile->Close();
+	
+	cout << "counter " << counter << endl;
 	
 }
 
@@ -699,48 +645,3 @@ void MultiplicityAnalysis::PlotMPEffic(LeptJetStat *fLeptJetStat, TH2D *fHemuMul
 	return;
 }
 
-void MultiplicityAnalysis::ReadCuts(){
-	
-	ifstream IN(fSetofCuts);
-	char buffer[200];
-	char ParName[100];
-	char StringValue[100];	
-	float ParValue;
-	int   FlagValue;
-
-	bool verbose(true);
-	bool ok(false);
-	
-	
-	while( IN.getline(buffer, 200, '\n') ){
-		ok = false;
-		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
-
-		// strings
-		sscanf(buffer, "%s %s", ParName, StringValue);
-		if( !strcmp(ParName, "SetName") ){
-			fSetName = TString(StringValue); ok = true;
-			if(verbose){cout << "Reading cut parameters for set: " << fSetName << endl; }
-		}		
-	
-		// floats 
-		sscanf(buffer, "%s %f", ParName, &ParValue);
-		if( !strcmp(ParName, "PFMET") ){
-			fCut_PFMET          = float(ParValue); ok = true;
-		}			
-									
-		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
-	}	
-	if(verbose){
-		cout << "setting cuts to: " << endl;
-		cout << "  PFMET " << fCut_PFMET <<endl;
-		cout << "--------------"    << endl;	
-	}			
-}
-
-
-
-void MultiplicityAnalysis::Reset(){
-	elecs.clear();
-	muons.clear();
-}

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-MassAnalysis::MassAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
+MassAnalysis::MassAnalysis(TreeReader *tr) : MultiplicityAnalysisBase(tr){
 	Util::SetStyle();	
 }
 
@@ -32,84 +32,31 @@ void MassAnalysis::Begin(){
 		fHMT2_SS[i]     = new TH1D(hist_name_SS , title_SS, 100, 0., 500.);
 		
 	}
+	
+	
 }
 
 void MassAnalysis::Analyze(){	
-	Reset();
+	
+	// ---------------------------------------------------
+	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
+	InitializeEvent();
+	// ----------------------------------------------------
+		
+	// --------------------------------------------------------------------
+	// check if event passes selection cuts and trigger requirements
+	if(! IsGoodEvent()){return;}
+	// --------------------------------------------------------------------
 
-	// -----------------------------------------------------
-	// Define jets, elecs, muons
-	
-	// get muon indices
-	for(int i=0; i< fTR->NMus; ++i){
-		if(! IsGoodMu_TDL(i) ) continue;
-		muons.push_back(i);
-	}
-	
-	// get electron indices
-	for(int i=0; i< fTR->NEles; ++i){
-		if(! IsGoodEl_TDL(i) ) continue;
-		elecs.push_back(i);
-	}
-	
-	// get calojet indices
-	for(int ij=0; ij < fTR->NJets; ++ij){
-		if(! IsGoodJ_TDL(ij) ) continue;
-		bool JGood(true);
-		for(int i=0; i<muons.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[muons[i]], fTR->JPhi[ij], fTR->MuPhi[muons[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		for(int i=0; i<elecs.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[elecs[i]], fTR->JPhi[ij], fTR->ElPhi[elecs[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		if(JGood=false) continue;
-		// -----------------------------------------
-		jets.push_back(ij);
-	}
-	
-	// ------------------------------------------------------
-	// find lepton config and set fLeptConfig to appropriate value;
-	// ! function can only be called after elecs and muons have been defined.
-	FindLeptonConfig();
 
 
 	// ----------------------------------------------------------
 	// Fill MT2 plots
 	MT2();
 	
-		
-
-	
 }
 
-void MassAnalysis::FindLeptonConfig(){
-	if(elecs.size()==1 && muons.size()==0){
-		fLeptConfig=e;
-	}else if(elecs.size()==0 && muons.size()==1) {
-		fLeptConfig=mu;
-	}else if(elecs.size() + muons.size() ==2){
-		int charge1, charge2;
-		bool GoodDiLept(true);
-		if(elecs.size()==2){
-			charge1=fTR->ElCharge[elecs[0]];
-			charge2=fTR->ElCharge[elecs[1]];
-			if(charge1*charge2==1){fLeptConfig=SS_ee;}
-			else{fLeptConfig=OS_ee;}
-		} else if(muons.size()==2){
-			charge1=fTR->MuCharge[muons[0]];
-			charge2=fTR->MuCharge[muons[1]];
-			if(charge1*charge2==1){fLeptConfig=SS_mumu;}
-			else{fLeptConfig=OS_mumu;}
-		} else{
-			charge1=fTR->ElCharge[elecs[0]];
-			charge2=fTR->MuCharge[muons[0]];			
-			if(charge1*charge2==1){fLeptConfig=SS_emu;}
-			else{fLeptConfig=OS_emu;}
-		}
-	}	
-}
+
 
 
 
@@ -123,20 +70,20 @@ void MassAnalysis::MT2(){
 	
 	if(fLeptConfig == null || fLeptConfig ==  e || fLeptConfig == mu){return;}
 	else if(fLeptConfig==OS_ee || fLeptConfig == SS_ee){
-		pa[1]=fTR->ElPx[elecs[0]];
-		pa[2]=fTR->ElPy[elecs[0]];
-		pb[1]=fTR->ElPx[elecs[1]];
-		pb[2]=fTR->ElPy[elecs[1]];
+		pa[1]=fTR->ElPx[fElecs[0]];
+		pa[2]=fTR->ElPy[fElecs[0]];
+		pb[1]=fTR->ElPx[fElecs[1]];
+		pb[2]=fTR->ElPy[fElecs[1]];
 	}else if(fLeptConfig==OS_mumu || fLeptConfig == SS_mumu){
-		pa[1]=fTR->MuPx[muons[0]];
-		pa[2]=fTR->MuPy[muons[0]];
-		pb[1]=fTR->MuPx[muons[1]];
-		pb[2]=fTR->MuPy[muons[1]];
+		pa[1]=fTR->MuPx[fMuons[0]];
+		pa[2]=fTR->MuPy[fMuons[0]];
+		pb[1]=fTR->MuPx[fMuons[1]];
+		pb[2]=fTR->MuPy[fMuons[1]];
 	}else if(fLeptConfig==OS_emu || fLeptConfig == SS_emu){
-		pa[1]=fTR->ElPx[elecs[0]];
-		pa[2]=fTR->ElPy[elecs[0]];
-		pb[1]=fTR->MuPx[muons[0]];
-		pb[2]=fTR->MuPy[muons[0]];
+		pa[1]=fTR->ElPx[fElecs[0]];
+		pa[2]=fTR->ElPy[fElecs[0]];
+		pb[1]=fTR->MuPx[fMuons[0]];
+		pb[2]=fTR->MuPy[fMuons[0]];
 	}
 	
 
@@ -176,15 +123,4 @@ void MassAnalysis::End(){
 	fHMT2_vs_M_OSDiLept ->Write();
 	
 	fHistFile->Close();
-}
-
-void MassAnalysis::Reset(){
-	elecs.clear();
-	muons.clear();
-	jets.clear();
-	bjets.clear();
-	fLeptConfig = null;
-
-	
-	
 }

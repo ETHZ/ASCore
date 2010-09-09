@@ -22,9 +22,9 @@ public:
 	std::vector<std::string>* fVetoedHLT;
 
 private:
-	TreeCleaner          *fTreeCleaner;
-	MultiplicityAnalysis *fMultiplicityAnalysis;
-	MassAnalysis         *fMassAnalysis;	
+	TreeCleaner              *fTreeCleaner;
+	MultiplicityAnalysis     *fMultiplicityAnalysis;
+	MassAnalysis             *fMassAnalysis;	
 		
 };
 #endif

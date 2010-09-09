@@ -12,11 +12,11 @@
 
 
 #include "base/TreeReader.hh"
-#include "base/UserAnalysisBase.hh"
+#include "MultiplicityAnalysisBase.hh"
 #include "helper/Davismt2.h"
 
 
-class MassAnalysis : public UserAnalysisBase{
+class MassAnalysis : public MultiplicityAnalysisBase{
 public:
 	MassAnalysis(TreeReader *tr = NULL);
 	virtual ~MassAnalysis();
@@ -24,23 +24,11 @@ public:
 	void Begin();
 	void Analyze();
 	void End();
-	void Reset();
 
 
 private:
-	
-	void FindLeptonConfig();
 	void MT2();
-	
-	std::vector<int> jets;
-	std::vector<int> bjets;
-	std::vector<int> elecs;
-	std::vector<int> muons;
-		
-	enum LeptConfig {
-	 	e, mu, OS_emu, OS_ee, OS_mumu, SS_emu, SS_ee, SS_mumu, null
-  	};
-	LeptConfig fLeptConfig;
+
 	
 	Davismt2 *fMT2;
 	int fMT2_histos_step;
