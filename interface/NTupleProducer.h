@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.61 2010/09/07 16:50:20 fronga Exp $
+// $Id: NTupleProducer.h,v 1.62 2010/09/08 16:37:31 fronga Exp $
 //
 //
 
@@ -264,14 +264,14 @@ private:
   std::vector<std::string> fTHLTmenu;
   std::vector<std::string> fTL1physmenu;
 
-  static const unsigned int gMaxhltnpaths = 10;
   static const unsigned int gMaxhltnobjs  = 10;
   std::vector<std::string> fTHltLabels; // HLT Paths to store the triggering objects of
   unsigned int fTNpaths;
-  int    fTHLTObjectID[gMaxhltnpaths][gMaxhltnobjs];
-  double fTHLTObjectPt[gMaxhltnpaths][gMaxhltnobjs];
-  double fTHLTObjectEta[gMaxhltnpaths][gMaxhltnobjs];
-  double fTHLTObjectPhi[gMaxhltnpaths][gMaxhltnobjs];
+  unsigned int fTNHLTobjects;
+  int**    fTHLTObjectID;
+  double** fTHLTObjectPt;
+  double** fTHLTObjectEta;
+  double** fTHLTObjectPhi;
 
   // Flags
   int fTgoodevent;         // 1 for good events, 0 for bad events
