@@ -64,10 +64,12 @@ void PhysQCAnalyzer::BeginJob(){
 
 	fMultiplicityAnalysis->SetOutputDir(fOutputDir);
 	fMultiplicityAnalysis->SetVerbose(fVerbose);
+	fMultiplicityAnalysis->ReadCuts("multiplicity_cuts/default.dat");
 	
 	fTreeCleaner         ->Begin();
 	fPhysQCAnalysis      ->Begin();
 	fMultiplicityAnalysis->Begin();
+	
 
 	fPhysQCAnalysis->PlotTriggerStats();
 	TCut select = "(NMus + NEles + NJets) > 0";
