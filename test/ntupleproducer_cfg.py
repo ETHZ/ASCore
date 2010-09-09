@@ -189,7 +189,7 @@ process.analyze.jets = (
 if options.runon!='data':
     process.analyze.tag_hlttrig = "TriggerResults::REDIGI"
 # Dump object information for some HLT trigger filters (from confDB)
-process.analyze.hlt_labels = ['hltSingleMu9L3Filtered9']
+process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3','hltSingleMu5L3Filtered5','hltSingleMu9L3Filtered9','hltL1NonIsoHLTNonIsoSingleElectronLWEt10PixelMatchFilter', 'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter','hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter','hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter']
 
 
 #### DEBUG #####################################################################
