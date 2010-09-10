@@ -1,17 +1,20 @@
-####################################################################
-## Set of cuts for MultiplicityAnalysis: MC cuts
-#
-# ----- Set Name ---------------------
-SetName                            MC
-# ----- MET --------------------------
-PFMET_min                          30
-HT_min                              0
-DiLeptInvMass_min                  10 
-DiLeptInvMass_max               9999.99  
-DiLeptOSSFInvMass_lowercut      9999.99        
-DiLeptOSSFInvMass_uppercut     -9999.99   
-Run_min                             0
-Run_max                       9999999
-#
-#####################################################################
-
+##################################################
+## Set of cuts for MultiplicityAnalysis:        ##
+#                                                #
+# ------------ Set Name -------------------------#
+SetName                                    default
+# ------------- Cuts ----------------------------#                                        
+PFMET_min                                        0
+HT_min                                           0
+JPt_hardest_min                                  0
+DiLeptInvMass_min                               20 
+DiLeptInvMass_max                          9999.99  
+DiLeptOSSFInvMass_lowercut                 9999.99        
+DiLeptOSSFInvMass_uppercut                -9999.99  
+# ------------ Trigger --------------------------#                                        
+HLT_required                              HLT_Mu3     
+#HLT_required                              HLT_Mu9 
+# ----------- Run -------------------------------#  
+Run_min                                          0   
+Run_max                                    9999999    
+###################################################

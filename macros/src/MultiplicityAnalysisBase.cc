@@ -16,8 +16,8 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
 	
-	fRequiredHLT                        = NULL;
-	fVetoedHLT                          = NULL;
+	fRequiredHLT.clear();
+	fVetoedHLT.clear();
 }
 
 MultiplicityAnalysisBase::~MultiplicityAnalysisBase(){
@@ -138,18 +138,18 @@ bool MultiplicityAnalysisBase::IsGoodEvent(){
 	}
 	
 	// HLT triggers
-	if((*fRequiredHLT).size() !=0 ){
+	if(fRequiredHLT.size() !=0 ){
 		bool HLT_fire(false);
-		for(int i=0; i<(*fRequiredHLT).size(); ++i){
-			if( GetHLTResult((*fRequiredHLT)[i]) ){  // require HLT bit
+		for(int i=0; i<fRequiredHLT.size(); ++i){
+			if( GetHLTResult(fRequiredHLT[i]) ){  // require HLT bit
 				HLT_fire = true;
 			} 
 		}
 		if(! HLT_fire) return false;
 	}
-	if((*fVetoedHLT).size() !=0){
-		for(int i=0; i<(*fVetoedHLT).size(); ++i){
-			if( GetHLTResult((*fVetoedHLT)[i]) ){   // veto HLT bit 
+	if(fVetoedHLT.size() !=0){
+		for(int i=0; i<fVetoedHLT.size(); ++i){
+			if( GetHLTResult(fVetoedHLT[i]) ){   // veto HLT bit 
 				return false;
 			} 
 		}
@@ -201,8 +201,12 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		if( !strcmp(ParName, "SetName") ){
 			fSetName = TString(StringValue); ok = true;
 			if(verbose){cout << "Reading cut parameters for set: " << fSetName << endl; }
+		} else if( !strcmp(ParName, "HLT_required") ){
+			fRequiredHLT.push_back(StringValue); ok = true;
+		} else if( !strcmp(ParName, "HLT_vetoed") ){
+			fVetoedHLT.push_back(StringValue); ok = true;
 		}	
-		
+
 		// ints
 		sscanf(buffer, "%s %i", ParName, &IntValue);
 		if( !strcmp(ParName, "Run_min") ){
@@ -210,7 +214,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		} else if( !strcmp(ParName, "Run_max") ){
 			fCut_Run_max = int(IntValue); ok = true;
 		}
-	
+
 		// floats 
 		sscanf(buffer, "%s %f", ParName, &ParValue);
 		if( !strcmp(ParName, "PFMET_min") ){
@@ -228,7 +232,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		} else if( !strcmp(ParName, "DiLeptOSSFInvMass_uppercut") ){
 			fCut_DiLeptOSSFInvMass_uppercut    = float(ParValue); ok = true;
 		}		
-							
+
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
 	}	
 	if(verbose){
@@ -242,13 +246,13 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  DiLeptOSSFInvMass_uppercut  " << fCut_DiLeptOSSFInvMass_uppercut <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
-		
-		
+
+		for(int i=0; i<fRequiredHLT.size(); ++i){
+			cout << "  HLTRequired (logic OR)      " << fRequiredHLT[i]                  <<endl;
+		}
+		for(int i=0; i<fVetoedHLT.size(); ++i){
+			cout << "  HLTVetoed                   " << fVetoedHLT[i]                    <<endl;
+		}
 		cout << "--------------"    << endl;	
 	}			
-}
-
-void MultiplicityAnalysisBase::SetTriggers(std::vector<std::string>* requiredHLT, std::vector<std::string>* vetoedHLT){
-	fRequiredHLT = requiredHLT;
-	fVetoedHLT   = vetoedHLT;
 }

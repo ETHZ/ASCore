@@ -4,20 +4,17 @@
 #include "base/TreeReader.hh"
 #include "MultiplicityAnalysis.hh"
 #include "MassAnalysis.hh"
-#include "TreeCleaner.hh"
 
 
 using namespace std;
 
 LeptJetMultAnalyzer::LeptJetMultAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fTreeCleaner              = new TreeCleaner(fTR);
 	fMultiplicityAnalysis     = new MultiplicityAnalysis(fTR);
 	fMassAnalysis             = new MassAnalysis(fTR);
 	Util::SetStyle();
 }
 
 LeptJetMultAnalyzer::~LeptJetMultAnalyzer(){
-	delete fTreeCleaner;
 	delete fMultiplicityAnalysis;
 	delete fMassAnalysis;
 	if(!fTR->fChain) cout << "LeptJetMultAnalyzer ==> No chain!" << endl;
@@ -36,34 +33,24 @@ void LeptJetMultAnalyzer::Loop(){
 		fTR->GetEntry(jentry);
         if ( fCurRun != fTR->Run ) {
         	fCurRun = fTR->Run;
-			fTreeCleaner         ->BeginRun(fCurRun);
 			fMultiplicityAnalysis->BeginRun(fCurRun);
 			fMassAnalysis        ->BeginRun(fCurRun);
 		}
-		fTreeCleaner         ->Analyze();
 		fMassAnalysis        ->Analyze();
 		fMultiplicityAnalysis->Analyze();		
 	}
 }
 
 // Method called before starting the event loop
-void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi, std::vector<std::string>* requiredHLT, std::vector<std::string>* vetoedHLT){
-	
-	fTreeCleaner         ->SetOutputDir(fOutputDir);
-	fTreeCleaner         ->fClean = true;       // if not specified: true, set to false if not-cleaned objects wanted. 
-	fTreeCleaner         ->SetSkim(false);      // do not skim the tree! 
-	fTreeCleaner         ->fVerbose = fVerbose;
-	fTreeCleaner         ->Begin();
+void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi){
 	
 	fMultiplicityAnalysis     ->ReadCuts(setofcuts);
-	fMultiplicityAnalysis     ->SetTriggers(requiredHLT, vetoedHLT);
 	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
 	fMultiplicityAnalysis     ->fVerbose        =fVerbose;	
 	fMultiplicityAnalysis     ->fLumi           =lumi;
 	fMultiplicityAnalysis     ->Begin(filename);
 	
 	fMassAnalysis             ->ReadCuts(setofcuts);
-	fMassAnalysis             ->SetTriggers(requiredHLT, vetoedHLT);
 	fMassAnalysis             ->SetOutputDir(fOutputDir);
 	fMassAnalysis             ->fVerbose        = fVerbose;
 	fMassAnalysis             ->Begin();
@@ -73,7 +60,6 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 
 // Method called after finishing the event loop
 void LeptJetMultAnalyzer::EndJob(){
-	fTreeCleaner          ->End();
 	fMassAnalysis         ->End();
 	fMultiplicityAnalysis ->End();
 }

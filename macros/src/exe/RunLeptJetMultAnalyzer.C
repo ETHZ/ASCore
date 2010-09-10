@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-v verbose] [-m set_of_cuts] [-x lumi] [-t HLT] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-v verbose] [-m set_of_cuts] [-x lumi] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
 	cout << "                   default is TempOutput/                                    " << endl;
@@ -26,8 +26,6 @@ void usage( int status = 0 ) {
 	cout << "                   default is cuts from cleaning                             " << endl;
 	cout << "     lumi          integrated lumi (Monte Carlo only!!)                      " << endl;
 	cout << "                   scale multiplicity plots with xsection to lumi            " << endl;
-	cout << "     HLT           set to 1 if HLT bits required/vetoed (default 0)          " << endl;
-	cout << "                   HLT triggers specified in HLTfile.dat                     " << endl;
 	cout << "                   this affects only the MultiplicityAnalysis                " << endl;
 	cout << "     filen         are the input files (by default: ROOT files)              " << endl;
 	cout << "                   with option -l, these are read as text files              " << endl;
@@ -42,7 +40,6 @@ int main(int argc, char* argv[]) {
 	bool isList = false;
 	TString outputdir = "TempOutput/";
 	TString setofcuts = "default";
-	int HLT      = 0;
 	int verbose  = 0;
 	float lumi   = -999.99;
 	
@@ -55,7 +52,6 @@ int main(int argc, char* argv[]) {
 			case 'v': verbose         = atoi(optarg); break;
 			case 'm': setofcuts       = TString(optarg); break;
 			case 'x': lumi     	      = atof(optarg); break; 	
-			case 't': HLT             = atoi(optarg); break; 				
 			case 'l': isList          = true; break;
 			case '?':
 			case 'h': usage(0); break;
@@ -91,29 +87,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	
-	
-	vector<std::string> requiredHLT;
-	vector<std::string> vetoedHLT;
-	if(HLT == 1){
-		ifstream IN("HLTfile.dat");
-		char buffer[200];
-		char StringValue[100];
-		char ParName[100];	
-		bool ok(false);
-	
-		while( IN.getline(buffer, 200, '\n') ){
-			ok = false;
-			if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
-			sscanf(buffer, "%s %s", ParName, StringValue);
-			if( !strcmp(ParName, "required") ){
-				requiredHLT.push_back(StringValue); ok = true;
-			}else if ( !strcmp(ParName, "vetoed") ){
-				vetoedHLT.push_back(StringValue); ok = true;
-			}
-			if(!ok) cout << "%% RunLeptJetMultAnalyzer ==> ERROR: " << ParName << " should be either required or vetoed." << endl;
-		}
-	}
-	
+
 	cout << "--------------" << endl;
 	cout << "OutputDir is:                   " << outputdir << endl;
 	cout << "Verbose level is:               " << verbose << endl;
@@ -123,27 +97,14 @@ int main(int argc, char* argv[]) {
 	if(lumi > 0){
 		cout << "scaling multiplicity plots with xsection for int lumi= " << lumi << endl;
 	}
-	if(requiredHLT.size()!=0){
-		cout << "require HLT trigger (logic OR): ";
-		for(int i=0; i<(requiredHLT.size()); ++i){
-			cout << requiredHLT[i] << "  ";
-		}
-		cout << endl;
-	}
-	if(vetoedHLT.size()!=0){
-		cout << "veto HLT trigger (logic OR):    ";
-		for(int i=0; i<vetoedHLT.size(); ++i){
-			cout << vetoedHLT[i] << " ";
-		}
-		cout << endl;
-	}
+
 	cout << "Number of events:               " << theChain->GetEntries() << endl;
 	cout << "--------------" << endl;
 
 	LeptJetMultAnalyzer *tA = new LeptJetMultAnalyzer(theChain);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
-	tA->BeginJob(filename, setofcuts, lumi, &requiredHLT, &vetoedHLT);
+	tA->BeginJob(filename, setofcuts, lumi);
 	tA->Loop();
 	tA->EndJob();
 	delete tA;
