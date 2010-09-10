@@ -19,7 +19,8 @@ GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
                  src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc src/MassAnalysis.cc \
-                 src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysis.cc  src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc \
+                 src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc \
+                 src/MultiplicityAnalysis.cc src/MultiplicityAnalysisBase.cc  src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc \
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
@@ -61,3 +62,4 @@ deps: $(SRCS)
 	makedepend $(INCLUDES) $^
 
 # DO NOT DELETE THIS LINE -- make depend needs it
+
