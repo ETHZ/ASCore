@@ -17,8 +17,6 @@ public:
 	void BeginJob(TString filename="Multiplicity.root" , TString setofcuts="default", float lumi=-999.99);
 	void EndJob();
 	void Loop();
-	std::vector<std::string>* fRequiredHLT; 
-	std::vector<std::string>* fVetoedHLT;
 
 private:
 	MultiplicityAnalysis     *fMultiplicityAnalysis;
