@@ -8,6 +8,8 @@
 #include "base/TreeReader.hh"
 #include "MultiplicityAnalysis.hh"
 #include "MassAnalysis.hh"
+#include "RatioAnalysis.hh"
+
 
 
 class LeptJetMultAnalyzer : public TreeAnalyzerBase {
@@ -20,7 +22,8 @@ public:
 
 private:
 	MultiplicityAnalysis     *fMultiplicityAnalysis;
-	MassAnalysis             *fMassAnalysis;	
+	MassAnalysis             *fMassAnalysis;
+	RatioAnalysis            *fRatioAnalysis;		
 		
 };
 #endif

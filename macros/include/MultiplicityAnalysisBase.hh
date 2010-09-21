@@ -42,6 +42,7 @@ public:
 	float fCut_DiLeptInvMass_max;
 	float fCut_DiLeptOSSFInvMass_lowercut;
 	float fCut_DiLeptOSSFInvMass_uppercut;
+	float fCut_PtHat_max;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
 	

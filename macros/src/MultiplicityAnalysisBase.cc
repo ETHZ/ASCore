@@ -13,6 +13,7 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_DiLeptInvMass_max              = 9999.99;
 	fCut_DiLeptOSSFInvMass_lowercut     = 9999.99;
 	fCut_DiLeptOSSFInvMass_uppercut     =-9999.99;
+	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
 	
@@ -98,6 +99,9 @@ bool MultiplicityAnalysisBase::IsGoodEvent(){
 	// Run
 	if(fTR->Run < fCut_Run_min ) {return false;}
 	if(fTR->Run > fCut_Run_max ) {return false;}
+	
+	//PtHat
+	if(fTR->PtHat > fCut_PtHat_max ){return false;}
 	
 	// MET
 	if(fTR->PFMET < fCut_PFMET_min){return false;}
@@ -231,6 +235,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_DiLeptOSSFInvMass_lowercut    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "DiLeptOSSFInvMass_uppercut") ){
 			fCut_DiLeptOSSFInvMass_uppercut    = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "PtHat_max")){
+			fCut_PtHat_max                     = float(ParValue); ok = true;
 		}		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
@@ -244,6 +250,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  DiLeptInvMass_max           " << fCut_DiLeptInvMass_max          <<endl;		
 		cout << "  DiLeptOSSFInvMass_lowercut  " << fCut_DiLeptOSSFInvMass_lowercut <<endl;
 		cout << "  DiLeptOSSFInvMass_uppercut  " << fCut_DiLeptOSSFInvMass_uppercut <<endl;
+		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
 

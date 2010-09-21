@@ -4,6 +4,8 @@
 #include "base/TreeReader.hh"
 #include "MultiplicityAnalysis.hh"
 #include "MassAnalysis.hh"
+#include "RatioAnalysis.hh"
+
 
 
 using namespace std;
@@ -11,12 +13,14 @@ using namespace std;
 LeptJetMultAnalyzer::LeptJetMultAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
 	fMultiplicityAnalysis     = new MultiplicityAnalysis(fTR);
 	fMassAnalysis             = new MassAnalysis(fTR);
+	fRatioAnalysis            = new RatioAnalysis(fTR);
 	Util::SetStyle();
 }
 
 LeptJetMultAnalyzer::~LeptJetMultAnalyzer(){
 	delete fMultiplicityAnalysis;
 	delete fMassAnalysis;
+	delete fRatioAnalysis;
 	if(!fTR->fChain) cout << "LeptJetMultAnalyzer ==> No chain!" << endl;
 }
 
@@ -24,8 +28,6 @@ LeptJetMultAnalyzer::~LeptJetMultAnalyzer(){
 void LeptJetMultAnalyzer::Loop(){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-
-
 	
 	// loop over all ntuple entries
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
@@ -35,9 +37,11 @@ void LeptJetMultAnalyzer::Loop(){
         	fCurRun = fTR->Run;
 			fMultiplicityAnalysis->BeginRun(fCurRun);
 			fMassAnalysis        ->BeginRun(fCurRun);
+			fRatioAnalysis       ->BeginRun(fCurRun);
 		}
 		fMassAnalysis        ->Analyze();
-		fMultiplicityAnalysis->Analyze();		
+		fMultiplicityAnalysis->Analyze();	
+		fRatioAnalysis       ->Analyze();	
 	}
 }
 
@@ -54,6 +58,11 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fMassAnalysis             ->SetOutputDir(fOutputDir);
 	fMassAnalysis             ->fVerbose        = fVerbose;
 	fMassAnalysis             ->Begin();
+	
+	fRatioAnalysis            ->ReadCuts(setofcuts);
+	fRatioAnalysis            ->SetOutputDir(fOutputDir);
+	fRatioAnalysis            ->fVerbose        = fVerbose;
+	fRatioAnalysis            ->Begin();
 
 
 }
@@ -62,4 +71,5 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 void LeptJetMultAnalyzer::EndJob(){
 	fMassAnalysis         ->End();
 	fMultiplicityAnalysis ->End();
+	fRatioAnalysis        ->End();
 }
