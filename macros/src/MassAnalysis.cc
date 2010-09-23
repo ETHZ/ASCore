@@ -18,10 +18,36 @@ void MassAnalysis::Begin(){
 	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	
 	fMT2_histos_step = 50;
-	fMT2_histos_number = 7;
+	fMT2_histos_number = 6;
 	
 	// Define the histograms
-	fHMT2_vs_M_OSDiLept = new TH2D("MT2_vs_M_OSDiLept", "MT2_vs_M_OSDiLept", 200, 0, 200, 100, 0, 500);
+	fHMT2_vs_M_OSDiLept = new TH2D("MT2_vs_M_OSDiLept"   , "MT2_vs_M_OSDiLept"       , 200, 0, 200, 100, 0, 500);
+	fHAlpahT_DiJet      = new TH1D("AlpahT_DiJet"        , "alpha_T for dijets"      , 100, 0., 5.);
+	fHAlpahT_PseudoJet  = new TH1D("AlpahT_PseudoJet"    , "alpha_T for pseudojets"  , 100, 0., 5.);
+	
+	fHMCT_DiJet         = new TH1D("MCT_DiJet"          , "di-Jets MCT"              , 100, 0., 500.);
+	fHMCT_DiBJet        = new TH1D("MCT_DiBJet"         , "di-B-Jets MCT"            , 100, 0., 500.);
+	fHMCT_OSee          = new TH1D("MCT_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
+	fHMCT_OSmumu        = new TH1D("MCT_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
+	fHMCT_OSemu         = new TH1D("MCT_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
+	                                                                                 
+	fHMCTperp_OSee      = new TH1D("MCTperp_OSee"        , "OS ee MCT perp"          ,  40, 0., 400.);	
+	fHMCTperp_OSmumu    = new TH1D("MCTperp_OSmumu"      , "OS mumu MCT perp"        ,  40, 0., 400.);	
+	fHMCTperp_OSemu     = new TH1D("MCTperp_OSemu"       , "OS emu MCT perp"         ,  40, 0., 400.);	                                                 
+	fHMCTperp_TTbar     = new TH1D("MCTperp_TTbar"       , "TTbar MCT perp"          ,  50, 0., 200.);
+	
+	fHMT2_TTbar        = new TH1D("MT2_TTbar"            , "MT2 for TTbar with Gen Info", 50, 0., 200.);
+	
+	fHInvMassOSee      = new TH1D("InvMass_OSee"  ,  " Inv Mass of OS di-leptons ee"   , 30, 0, 300);
+	fHInvMassOSmumu    = new TH1D("InvMass_OSmumu",  " Inv Mass of OS di-leptons mumu" , 30, 0, 300);
+	fHInvMassOSemu     = new TH1D("InvMass_OSemu" ,  " Inv Mass of OS di-leptons emu"  , 30, 0, 300);
+	fHInvMassOSll      = new TH1D("InvMass_OSll"  ,  " Inv Mass of OS di-leptons ll"   , 30, 0, 300);
+	fHInvMassSSee      = new TH1D("InvMass_SSee"  ,  " Inv Mass of SS di-leptons ee"   , 30, 0, 300);
+	fHInvMassSSmumu    = new TH1D("InvMass_SSmumu",  " Inv Mass of SS di-leptons mumu" , 30, 0, 300);
+	fHInvMassSSemu     = new TH1D("InvMass_SSemu" ,  " Inv Mass of SS di-leptons emu"  , 30, 0, 300);
+	fHInvMassSSll      = new TH1D("InvMass_SSll"  ,  " Inv Mass of SS di-leptons ll"   , 30, 0, 300);
+	
+		
 	for(int i=0; i<fMT2_histos_number; ++i){
 		std::stringstream out;
 		int mass = i*fMT2_histos_step;
@@ -52,13 +78,13 @@ void MassAnalysis::Begin(){
 		fHMT2_diBjet[i]          = new TH1D(hist_name_diBjet        , title_diBjet        , 100, 0., 500.);
 		fHMT2_dijet[i]           = new TH1D(hist_name_dijet         , title_dijet         , 100, 0., 500.);
 		fHMT2_pseudojet[i]       = new TH1D(hist_name_pseudojet     , title_pseudojet     , 100, 0., 500.);
-		fHMT2_OSll[i]            = new TH1D(hist_name_OSll          , title_OSll          , 100, 0., 500.);
-		fHMT2_OSee[i]            = new TH1D(hist_name_OSee          , title_OSee          , 100, 0., 500.);
-		fHMT2_OSmumu[i]          = new TH1D(hist_name_OSmumu        , title_OSmumu        , 100, 0., 500.);
-		fHMT2_OSemu[i]           = new TH1D(hist_name_OSemu         , title_OSemu         , 100, 0., 500.);
-		fHMT2_OSllminusemu[i]    = new TH1D(hist_name_OSllminusemu  , title_OSllminusemu  , 100, 0., 500.);
+		fHMT2_OSll[i]            = new TH1D(hist_name_OSll          , title_OSll          , 100, 0., 400.);
+		fHMT2_OSee[i]            = new TH1D(hist_name_OSee          , title_OSee          , 100, 0., 400.);
+		fHMT2_OSmumu[i]          = new TH1D(hist_name_OSmumu        , title_OSmumu        , 100, 0., 400.);
+		fHMT2_OSemu[i]           = new TH1D(hist_name_OSemu         , title_OSemu         , 100, 0., 400.);
+		fHMT2_OSllminusemu[i]    = new TH1D(hist_name_OSllminusemu  , title_OSllminusemu  , 100, 0., 400.);
 		
-		fHMT2_SSll[i]            = new TH1D(hist_name_SSll          , title_SSll            , 100, 0., 500.);
+		fHMT2_SSll[i]            = new TH1D(hist_name_SSll          , title_SSll          ,  20, 0., 400.);
 		
 	}
 	
@@ -77,16 +103,227 @@ void MassAnalysis::Analyze(){
 	// --------------------------------------------------------------------
 
 
-
 	// ----------------------------------------------------------
-	// Fill MT2 plots
+	// MT2 plots
 	DiLeptonMT2();
 	JetMT2();
+	
+	
+	// --------------------------------------------------------
+	// AlphaT 
+	std::vector<TLorentzVector> jets;
+	TLorentzVector v;
+
+	for(int i=0; i<fJets.size(); ++i){
+		v.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]], fTR->JPz[fJets[i]], fTR->JE[fJets[i]]);	
+		jets.push_back(v);
+	}		
+
+	double alphaT= GetAlphaT(jets);
+	if(fJets.size()==2){
+		fHAlpahT_DiJet->Fill(alphaT);
+	} else if (fJets.size() >2){
+		fHAlpahT_PseudoJet->Fill(alphaT);
+	}
+	
+	// -------------------------------------------------------------
+	// MCT ----------------------------------------------------------
+	TLorentzVector p1;
+	TLorentzVector p2;
+	if(fJets.size()==2){
+		p1.SetPxPyPzE(fTR->JPx[fJets[0]], fTR->JPy[fJets[0]], fTR->JPz[fJets[0]], fTR->JE[fJets[0]]);
+		p2.SetPxPyPzE(fTR->JPx[fJets[1]], fTR->JPy[fJets[1]], fTR->JPz[fJets[1]], fTR->JE[fJets[1]]);
+		double MCT=GetMCT(p1, p2);
+		fHMCT_DiJet -> Fill(MCT);
+	}
+	if(fBJets.size()==2){
+		p1.SetPxPyPzE(fTR->JPx[fBJets[0]], fTR->JPy[fBJets[0]], fTR->JPz[fBJets[0]], fTR->JE[fBJets[0]]);
+		p2.SetPxPyPzE(fTR->JPx[fBJets[1]], fTR->JPy[fBJets[1]], fTR->JPz[fBJets[1]], fTR->JE[fBJets[1]]);
+		double MCT=GetMCT(p1, p2);
+		fHMCT_DiBJet -> Fill(MCT);
+	}
+	if(fLeptConfig==OS_ee || fLeptConfig==OS_mumu || fLeptConfig==OS_emu){
+		
+		// define Upstream Transverse Momentum
+		TLorentzVector P_UTM(0.,0.,0.,0.);
+		for(int i=0; i<fJets.size(); ++i){
+			TLorentzVector p;
+			p.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]],fTR->JPz[fJets[i]],fTR->JE[fJets[i]]);
+			P_UTM +=p;
+		}
+		if(fLeptConfig==OS_ee){
+			p1.SetPtEtaPhiE(fTR->ElPt[fElecs[0]], fTR->ElEta[fElecs[0]], fTR->ElPhi[fElecs[0]], fTR->ElE[fElecs[0]]);
+			p2.SetPtEtaPhiE(fTR->ElPt[fElecs[1]], fTR->ElEta[fElecs[1]], fTR->ElPhi[fElecs[1]], fTR->ElE[fElecs[1]]);
+			double MCT=GetMCT(p1, p2);
+			double MCTperp=GetMCTperp(p1, p2, P_UTM);
+			fHMCT_OSee     -> Fill(MCT);	
+			fHMCTperp_OSee -> Fill(MCTperp);
+		
+		} else if(fLeptConfig==OS_mumu){
+			p1.SetPtEtaPhiM(fTR->MuPt[fMuons[0]], fTR->MuEta[fMuons[0]], fTR->MuPhi[fMuons[0]], 0.105);
+			p2.SetPtEtaPhiM(fTR->MuPt[fMuons[1]], fTR->MuEta[fMuons[1]], fTR->MuPhi[fMuons[1]], 0.105);
+			double MCT=GetMCT(p1, p2);
+			double MCTperp=GetMCTperp(p1, p2, P_UTM);
+			fHMCT_OSmumu   -> Fill(MCT);
+			fHMCTperp_OSmumu -> Fill(MCTperp);
+		 
+		} else if(fLeptConfig==OS_emu){
+			p1.SetPtEtaPhiE(fTR->ElPt[fElecs[0]], fTR->ElEta[fElecs[0]], fTR->ElPhi[fElecs[0]], fTR->ElE[fElecs[0]]);
+			p2.SetPtEtaPhiM(fTR->MuPt[fMuons[0]], fTR->MuEta[fMuons[0]], fTR->MuPhi[fMuons[0]], 0.105);
+			double MCT=GetMCT(p1, p2);
+			double MCTperp=GetMCTperp(p1, p2, P_UTM);
+			fHMCT_OSemu    -> Fill(MCT);
+			fHMCTperp_OSemu -> Fill(MCTperp);
+		}
+	}
+	
+	// MCTperp and MT2 for TTbar events
+	MassesForTTbar();
+	
+	// ----------------------------------------------------------------------------------
+	// Di-Lepton Inv Masses
+	TLorentzVector l1, l2;
+	if(fLeptConfig==OS_ee || fLeptConfig==SS_ee){
+		l1.SetPtEtaPhiE(fTR->ElPt[fElecs[0]],fTR->ElEta[fElecs[0]],fTR->ElPhi[fElecs[0]],fTR->ElE[fElecs[0]]);
+		l2.SetPtEtaPhiE(fTR->ElPt[fElecs[1]],fTR->ElEta[fElecs[1]],fTR->ElPhi[fElecs[1]],fTR->ElE[fElecs[1]]);
+		double mass=(l1+l2).M();
+		if(fLeptConfig==OS_ee) {
+			fHInvMassOSee -> Fill(mass);
+			fHInvMassOSll -> Fill(mass);
+		} else  {
+			fHInvMassSSee -> Fill(mass);
+			fHInvMassSSll  -> Fill(mass);
+		}
+	} else if (fLeptConfig==OS_mumu || fLeptConfig==SS_mumu){
+		l1.SetPtEtaPhiM(fTR->MuPt[fMuons[0]],fTR->MuEta[fMuons[0]],fTR->MuPhi[fMuons[0]],0.105);
+		l2.SetPtEtaPhiM(fTR->MuPt[fMuons[1]],fTR->MuEta[fMuons[1]],fTR->MuPhi[fMuons[1]],0.105);
+		double mass=(l1+l2).M();
+		if(fLeptConfig==OS_mumu) {
+			fHInvMassOSmumu -> Fill(mass);
+			fHInvMassOSll   -> Fill(mass);
+		} else {
+			fHInvMassSSmumu -> Fill(mass);
+			fHInvMassSSll  -> Fill(mass);
+		}
+	} else if (fLeptConfig==OS_emu || fLeptConfig==SS_emu){
+		l1.SetPtEtaPhiM(fTR->MuPt[fMuons[0]],fTR->MuEta[fMuons[0]],fTR->MuPhi[fMuons[0]],0.105);
+		l2.SetPtEtaPhiE(fTR->ElPt[fElecs[0]],fTR->ElEta[fElecs[0]],fTR->ElPhi[fElecs[0]],fTR->ElE[fElecs[0]]);
+		double mass=(l1+l2).M();
+		if(fLeptConfig==OS_emu)  {
+			fHInvMassOSemu -> Fill(mass);
+			fHInvMassOSll  -> Fill(mass);
+		} else {
+			fHInvMassSSemu -> Fill(mass);
+			fHInvMassSSll  -> Fill(mass);
+		}
+	}
+	
+	
 	
 	
 }
 
 
+ // ****************************************************************************************************
+double MassAnalysis::GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM){
+	double m1=p1.M();
+	double m2=p2.M();
+	
+	TVector3 p1_T(p1.Px(), p1.Py(), 0.);
+	TVector3 p2_T(p2.Px(), p2.Py(), 0.);
+	TVector3 pUTM_T(P_UTM.Px(), P_UTM.Py(), 0.);
+
+	double pUTM_T_norm2=pUTM_T.Mag2();
+	
+	TVector3 p1_T_perp = p1_T - 1/pUTM_T_norm2 * (p1_T.Dot(pUTM_T)) *pUTM_T ;	
+	TVector3 p2_T_perp = p2_T - 1/pUTM_T_norm2 * (p2_T.Dot(pUTM_T)) *pUTM_T ;
+	
+	double E1_T_perp = sqrt( pow(m1,2) + p1_T_perp.Mag2() );
+	double E2_T_perp = sqrt( pow(m2,2) + p2_T_perp.Mag2() );	
+	
+	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Dot(p2_T_perp)) );
+		
+	return MCT_perp;
+}
+
+// ****************************************************************************************************
+void MassAnalysis::MassesForTTbar(){
+	// MT2 and MCTperp for TTbar events using Gen Info
+	vector<TLorentzVector> leptons;
+	TLorentzVector P_UTM;
+	for(int i=0; i<fTR->NGenLeptons; ++i){
+		if(! (abs(fTR->GenLeptonID[i]) == 11 || abs(fTR->GenLeptonID[i]) == 13)) continue;
+		if(! (abs(fTR->GenLeptonMID[i]) == 24) ) continue;
+		if(! (abs(fTR->GenLeptonGMID[i]) == 6) ) continue;
+		TLorentzVector p;
+		p.SetPtEtaPhiM(fTR->GenLeptonPt[i],fTR->GenLeptonEta[i],fTR->GenLeptonPhi[i],0.);
+		leptons.push_back(p);
+	}
+	for(int i=0; i< fBJets.size(); ++i){
+		TLorentzVector p;
+		p.SetPtEtaPhiE(fTR->JGenPt[fBJets[i]],fTR->JGenEta[fBJets[i]],fTR->JGenPhi[fBJets[i]],fTR->JGenE[fBJets[i]]);
+		P_UTM +=p;
+	}
+	if(fBJets.size()==2 && leptons.size()==2){
+		// MCTperp
+		double MCTperp=GetMCTperp(leptons[0], leptons[1], P_UTM);
+		fHMCTperp_TTbar -> Fill(MCTperp);
+		
+		// MT2
+		double pa[3], pb[3], pmiss[3];
+		pa[0]=0;  // corresponds to mass of particle a
+		pa[1]=leptons[0].Px();  // px of particle a
+		pa[2]=leptons[0].Py();  // py of particle a
+		pb[0]=0;  // corresponds to mass of particle b
+		pb[1]=leptons[1].Px();  // px of particle b
+		pb[2]=leptons[1].Py();  // py of particle b
+		pmiss[0]=0; // this value is ignored in Davis code
+		pmiss[1]=fTR->GenMETpx;
+		pmiss[2]=fTR->GenMETpy;	
+		double MT2=GetMT2(pa, pb, pmiss, 0);
+		fHMT2_TTbar->Fill(MT2);
+	}
+}
+
+// ****************************************************************************************************
+double MassAnalysis::GetMCT(TLorentzVector p1, TLorentzVector p2){
+	double m1=p1.M();
+	double m2=p2.M();
+	double ET1=sqrt( pow(p1.Pt(),2) +pow(m1,2) );
+	double ET2=sqrt( pow(p2.Pt(),2) +pow(m2,2) );
+	
+	double MCTsquared=pow(m1,2) + pow(m2,2) +2*(ET1*ET2+ (p1.Px() * p2.Px()) + (p1.Py() * p2.Py()));
+	
+	return sqrt(MCTsquared);
+}
+
+// ****************************************************************************************************
+double MassAnalysis::GetAlphaT(std::vector<TLorentzVector>& p4s) {
+    if(p4s.size()<2) return 0;
+    
+    std::vector<double> pTs; for(unsigned i=0; i<p4s.size(); i++) pTs.push_back(p4s[i].Pt());
+    const std::vector<double> DHTper( DeltaSumPt_permutations(p4s) );
+    
+    const double mDHT = *(std::min_element( DHTper.begin(), DHTper.end() ));
+    const double sumPT = accumulate( pTs.begin(), pTs.end(), double(0) );
+    const TLorentzVector sumP4 = accumulate( p4s.begin(), p4s.end(), TLorentzVector() );
+
+    return 0.5 * ( sumPT - mDHT ) / sqrt( sumPT*sumPT - sumP4.Perp2() );
+}
+
+std::vector<double> MassAnalysis::DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s) {
+  	std::vector<std::vector<double> > ht( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); // initializiert einen vector ht der size 1<<(p4s.size()-1), wobei jeder eintrag ein vector (0,0) ist
+  	for(unsigned i=0; i < ht.size(); i++) {
+    	for(unsigned j=0; j < p4s.size(); j++) {
+			ht [i] [(i/(1<<j))%2] += p4s[j].Pt();
+    	}
+  	}
+  	std::vector<double> deltaHT; for(unsigned i=0; i<ht.size(); i++) deltaHT.push_back(fabs(ht[i][0]-ht[i][1]));
+  	return deltaHT;
+}
+
+
+// ****************************************************************************************************
 double MassAnalysis::GetMT2(double pa[], double pb[], double pmiss[], int m_invisible){
 	fMT2 = new Davismt2();
 	fMT2->set_momenta(pa, pb, pmiss);
@@ -96,12 +333,13 @@ double MassAnalysis::GetMT2(double pa[], double pb[], double pmiss[], int m_invi
 	return MT2;
 }
 
+// ****************************************************************************************************
 void MassAnalysis::JetMT2(){
 	double pa[3], pb[3], pmiss[3];
-	pa[0]=0;  // corresponds to mass uf particle a
+	pa[0]=0;  // corresponds to mass of particle a
 	pa[1]=0;  // px of particle a
 	pa[2]=0;  // py of particle a
-	pb[0]=0;  // corresponds to mass uf particle b
+	pb[0]=0;  // corresponds to mass of particle b
 	pb[1]=0;  // px of particle b
 	pb[2]=0;  // py of particle b
 	pmiss[0]=0; // this value is ignored in Davis code
@@ -170,10 +408,11 @@ void MassAnalysis::JetMT2(){
 	} 
 }
 
+// ****************************************************************************************************
 void MassAnalysis::DiLeptonMT2(){
 	double pa[3], pb[3], pmiss[3];
-	pa[0]=0;  // corresponds to mass uf particle a
-	pb[0]=0;  // corresponds to mass uf particle b
+	pa[0]=0;  // corresponds to mass of particle a
+	pb[0]=0;  // corresponds to mass of particle b
 	pmiss[0]=0; // this value is ignored in Davis code
 	pmiss[1]=fTR->PFMETpx;
 	pmiss[2]=fTR->PFMETpy;
@@ -228,6 +467,7 @@ void MassAnalysis::DiLeptonMT2(){
 	
 }
 
+// ****************************************************************************************************
 void MassAnalysis::End(){
 	fHistFile->cd();	
 	
@@ -253,5 +493,31 @@ void MassAnalysis::End(){
 	}
 	fHMT2_vs_M_OSDiLept      ->Write();
 	
-	fHistFile->Close();
+	fHAlpahT_DiJet           ->Write();
+	fHAlpahT_PseudoJet       ->Write();
+ 
+	
+	fHMCT_DiJet              ->Write();
+	fHMCT_DiBJet             ->Write();
+	fHMCT_OSee               ->Write();
+	fHMCT_OSmumu             ->Write();
+	fHMCT_OSemu              ->Write();
+	 
+	fHMCTperp_OSee           ->Write();
+	fHMCTperp_OSmumu         ->Write();
+	fHMCTperp_OSemu          ->Write();
+	fHMCTperp_TTbar          ->Write();
+	
+	fHMT2_TTbar              ->Write();
+	
+	fHInvMassOSee            ->Write();
+	fHInvMassOSmumu          ->Write();
+	fHInvMassOSemu           ->Write();
+	fHInvMassOSll            ->Write();
+	fHInvMassSSee            ->Write();
+	fHInvMassSSmumu          ->Write();
+	fHInvMassSSemu           ->Write();
+	fHInvMassSSll            ->Write();
+	
+	fHistFile                ->Close();
 }
