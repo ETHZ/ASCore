@@ -37,16 +37,23 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fJets.clear();
 	fBJets.clear();
 
+	vector<double> pt1;
+	vector<double> pt2;
 	for(int i=0; i< fTR->NMus; ++i){
 		if(! IsGoodMu_TDL(i) ) continue;
 		fMuons.push_back(i);
+		pt1.push_back(fTR->MuPt[i]);
 	}
-	
+	fMuons = Util::VSort(fMuons, pt1);
+	pt1.clear();	
 	for(int i=0; i< fTR->NEles; ++i){
 		if(! IsGoodEl_TDL(i) ) continue;
 		fElecs.push_back(i);
+		pt1.push_back(fTR->ElPt[i]);
 	}
-	
+	fElecs = Util::VSort(fElecs, pt1);
+	pt1.clear();	
+	pt2.clear();
 	for(int ij=0; ij < fTR->NJets; ++ij){
 		if(! IsGoodJ_TDL(ij) ) continue;
 		bool JGood(true);
@@ -60,10 +67,15 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		}
 		if(JGood=false) continue;
 		fJets.push_back(ij);
+		pt1.push_back(fTR->JPt[ij]);
+
 		// bjets
 		if(! IsGoodbJ_TDL(ij) ) continue;
 		fBJets.push_back(ij);
-	}	
+		pt2.push_back(fTR->JPt[ij]);	
+	}
+	fJets  = Util::VSort(fJets,  pt1);
+	fBJets = Util::VSort(fBJets, pt2);	
 }
 
 void MultiplicityAnalysisBase::FindLeptonConfig(){

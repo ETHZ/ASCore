@@ -37,8 +37,9 @@ private:
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
 	double GetMCT(TLorentzVector p1, TLorentzVector p2);
 	double GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM);
+	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
+	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
 	void MassesForTTbar();
-
 	Davismt2 *fMT2;
 	Hemisphere *fHemisphere;
 	
@@ -61,6 +62,10 @@ private:
 	TH1D* fHMT2_OSmumu[10];
 	TH1D* fHMT2_OSemu[10];
 	TH1D* fHMT2_OSllminusemu[10];
+	
+	TH1D* fHMT2perp_OSee[10];  
+	TH1D* fHMT2perp_OSmumu[10];
+	TH1D* fHMT2perp_OSemu[10];
 	      
 	TH1D* fHAlpahT_DiJet;      
 	TH1D* fHAlpahT_PseudoJet; 
@@ -74,9 +79,10 @@ private:
 	TH1D* fHMCTperp_OSee;  
 	TH1D* fHMCTperp_OSmumu;
 	TH1D* fHMCTperp_OSemu; 
-	TH1D* fHMCTperp_TTbar;	
 	
+	TH1D* fHMCTperp_TTbar;	
 	TH1D* fHMT2_TTbar;
+	TH1D* fHMT2perp_TTbar;
 	
 	TH1D* fHInvMassOSee;
 	TH1D* fHInvMassOSmumu;
