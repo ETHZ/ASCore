@@ -532,9 +532,10 @@ bool UserAnalysisBase::SingleMuonSelection(int &index){
 	return true;
 }
 
-bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
+bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2, int charge){
 	// Selects events with (at least) two good muons and gives the indices
 	// of the hardest two in the argument
+	// charge is the relative charge, 0 = no cut on charge, 1 = SS, -1 = OS
 	if( fTR->NMus < 2 ) return false;
 	vector<int> MuInd;
 	for(size_t imu = 0; imu < fTR->NMus; ++imu){
@@ -551,41 +552,19 @@ bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2){
 		if(fTR->MuPt[index] > fTR->MuPt[maxind]){ maxind2 = maxind; maxind = index; }
 		else if(fTR->MuPt[index] > fTR->MuPt[maxind2]) maxind2 = index;
 	}
-		
+	
 	ind1 = maxind;
 	ind2 = maxind2;
+	// Charge selection
+	if(charge != 0) if(fTR->MuCharge[ind1] * fTR->MuCharge[ind2] != charge) return false;
 	return true;
 }
 
 bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
-	// Select events with either 2 muons or 2 electrons
-	if( fTR->NMus < 2 ) return false;
-
-	vector<int> priMuInd;
-	vector<int> secMuInd;
-	for(size_t imu = 0; imu < fTR->NMus; ++imu){
-		// Muon selection
-		if(fTR->MuPt[imu] < 10.) continue;
-		if(!IsGoodBasicMu(imu)) continue;
-
-		if(fTR->MuPt[imu] > 20. && fTR->MuRelIso03[imu] < 0.1) priMuInd.push_back(imu);
-		if(fTR->MuRelIso03[imu] < 2.0)                         secMuInd.push_back(imu);
-	}
-
-	unsigned nprimu = priMuInd.size();
-	unsigned nsecmu = secMuInd.size();
-
-	// Select events with at least one primary muon and at least one other
-	if(nprimu < 1 || nsecmu < 2) return false;
-
-	int ind1 = priMuInd[0];
-	int ind2 = secMuInd[0];
-	if(ind2 == ind1) ind2 = secMuInd[1];
-	// Select same sign muons
-	if(fTR->MuCharge[ind1] != fTR->MuCharge[ind2]) return false;
-	prim = ind1;
-	sec = ind2;
-	return true;
+	// Selects events with (at least) two good muons and gives the indices
+	// of the hardest two in the argument
+	// charge is the relative charge, 0 = no cut on charge, 1 = SS, -1 = OS
+	return DiMuonSelection(prim, sec, 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
