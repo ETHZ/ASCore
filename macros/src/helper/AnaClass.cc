@@ -9,13 +9,13 @@
 // ClassImp(AnaClass);
 using namespace std;
 
-/****************************************************************************/
+//____________________________________________________________________________
 AnaClass::AnaClass(){
 // Default constructor, no samples are set
 	init();
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 AnaClass::AnaClass(const char* parfile, bool verbose){
 // Explicit constructor, reading from a parameter file
 	init(verbose);
@@ -23,10 +23,10 @@ AnaClass::AnaClass(const char* parfile, bool verbose){
 	loadSamples(parfile, verbose);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 AnaClass::~AnaClass(){}
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::init(bool verbose){
 	if(verbose) cout << "------------------------------------" << endl;
 	if(verbose) cout << "Initializing AnaClass ... " << endl;
@@ -35,7 +35,7 @@ void AnaClass::init(bool verbose){
 	Util::SetStyle();
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::loadSamples(TString parfile, bool verbose){
 	fParFile = parfile;
 	for(size_t i = 0; i < 20; ++i){ // Reset subdirnames before reading parfile
@@ -50,7 +50,7 @@ void AnaClass::loadSamples(TString parfile, bool verbose){
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::readParms(TString filename, bool verbose){
 /*		-	Reads in parameters for analysis from filename							*/
 	char buffer[200];
@@ -265,7 +265,7 @@ void AnaClass::readParms(TString filename, bool verbose){
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::readVarNames(const char* filename){
 // Fills the VarNameMap map from the varnames.dat file
 	TString branchname, texname;
@@ -290,7 +290,7 @@ void AnaClass::readVarNames(const char* filename){
 ###################| Main Methods |###########################################
 *****************************************************************************/
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut cut, TFile* file){
 	int twod(0), sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
@@ -346,7 +346,7 @@ void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut
 	fOutputSubDir = temp;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag, TFile* file){
 	int sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
 	float xmin(0.), xmax(0.), x1(-999.), x2(-999.);
@@ -373,7 +373,7 @@ void AnaClass::plotPlotList2D(const char* filename, TTree *tree, TString tag, TF
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotAllBranches(TTree *tree, TString tag){
 //  Plots all branches of a Tree and saves the histograms in a rootfile
 	gStyle->SetOptStat(1111);
@@ -415,50 +415,50 @@ void AnaClass::plotAllBranches(int sampleindex){
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotEID(TCut req, TTree *t, TString tag, TFile* file){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 
 
-        // The electron IDs to plot (add any and increments nIDs)
-        string IDs[] = { "Loose", "Tight", "RobustTight", "RobustLoose" };
-        int nIDs = 4;
-        gROOT->cd(); // Store this in root directory
+		// The electron IDs to plot (add any and increments nIDs)
+	string IDs[] = { "Loose", "Tight", "RobustTight", "RobustLoose" };
+	int nIDs = 4;
+	gROOT->cd(); // Store this in root directory
 	TH1D* hfir = new TH1D("ElID","eID",nIDs+1,0.,nIDs+1.0);      
 
-        // Use TTreeFormulae and loop over tree entries
-        TTreeFormula* formulae[nIDs+1];
-        TCut none(req);
-        for ( int i=0; i<nIDs; ++i ) {
-          char cut[256]; sprintf(cut,"ElID%s[0]>0",IDs[i].c_str());
-          TCut tempreq = req&&cut;
-          none *= !TCut(cut);
-          formulae[i] = new TTreeFormula(IDs[i].c_str(),tempreq,t);
-        }
-        formulae[nIDs] = new TTreeFormula("None",none,t);
-        cout << "Plotting eID: this can take a while... " << flush;
-        // Have to do some gymnastics with the TChain
-        Long_t treenumber = t->GetTreeNumber(); 
-        for( int ientry=0; ientry<t->GetEntriesFast(); ++ientry ) 
-          { 
-            if ( t->LoadTree(ientry) < 0 ) break; 
-            if (t->GetTreeNumber() != treenumber) {
-              for ( int i=0; i<=nIDs; ++i ) formulae[i]->UpdateFormulaLeaves(); 
-              treenumber = t->GetTreeNumber(); 
-            } 
-            for ( int i=0; i<=nIDs; ++i )
-              if ( formulae[i]->GetNdata()>0 && formulae[i]->EvalInstance() )
-                hfir->Fill(i);
-          }
-        cout << "done." << endl;
+		// Use TTreeFormulae and loop over tree entries
+	TTreeFormula* formulae[nIDs+1];
+	TCut none(req);
+	for ( int i=0; i<nIDs; ++i ) {
+		char cut[256]; sprintf(cut,"ElID%s[0]>0",IDs[i].c_str());
+		TCut tempreq = req&&cut;
+		none *= !TCut(cut);
+		formulae[i] = new TTreeFormula(IDs[i].c_str(),tempreq,t);
+	}
+	formulae[nIDs] = new TTreeFormula("None",none,t);
+	cout << "Plotting eID: this can take a while... " << flush;
+		// Have to do some gymnastics with the TChain
+	Long_t treenumber = t->GetTreeNumber(); 
+	for( int ientry=0; ientry<t->GetEntriesFast(); ++ientry ) 
+	{ 
+		if ( t->LoadTree(ientry) < 0 ) break; 
+		if (t->GetTreeNumber() != treenumber) {
+			for ( int i=0; i<=nIDs; ++i ) formulae[i]->UpdateFormulaLeaves(); 
+			treenumber = t->GetTreeNumber(); 
+		} 
+		for ( int i=0; i<=nIDs; ++i )
+			if ( formulae[i]->GetNdata()>0 && formulae[i]->EvalInstance() )
+			hfir->Fill(i);
+	}
+	cout << "done." << endl;
 
-        // Set bin labels to ID names
-        for ( int i=0; i<nIDs; ++i )
-          hfir->GetXaxis()->SetBinLabel(i+1, IDs[i].c_str());
+		// Set bin labels to ID names
+	for ( int i=0; i<nIDs; ++i )
+		hfir->GetXaxis()->SetBinLabel(i+1, IDs[i].c_str());
 	hfir->GetXaxis()->SetBinLabel(nIDs+1, "None");
 
-        // Styling
+		// Styling
 	hfir->SetLineWidth(2);
 	hfir->SetFillColor(15);
 	hfir->SetFillStyle(1001);
@@ -478,7 +478,7 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag, TFile* file){
 	hfir->DrawCopy("hist");
 
 	TString outputname = tag + "ElID";
-        fOutputSubDir = "ElID";
+	fOutputSubDir = "ElID";
 	Util::Print(col, outputname, fOutputDir + fOutputSubDir, file);
 
 	delete col;
@@ -489,7 +489,7 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag, TFile* file){
 ###################| Utilities |##############################################
 *****************************************************************************/
 
-/****************************************************************************/
+//____________________________________________________________________________
 TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
 	TFile *file = NULL;
 	TTree *tree = NULL;
@@ -511,37 +511,50 @@ TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
 	return tree;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* tree, bool draw, const char* drawopt){
 	int nbins_auto = nbins;
 	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
 	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xmin,xmax);
+	h1->SetXTitle(convertVarName(arg));
 	tree->Project(histn,arg,reqs);
 	if(draw) h1->Draw(drawopt);
 	return h1;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
+TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* tree, bool draw, const char* drawopt){
+	int nbins_auto = nbins;
+	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
+	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xbins);
+	h1->SetXTitle(convertVarName(arg));
+	tree->Project(histn,arg,reqs);
+	if(draw) h1->Draw(drawopt);
+	return h1;
+}
+
+//____________________________________________________________________________
 TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree* tree, bool draw, const char* drawopt){
 	char out[1000];
 	int nbinsx_auto(nbinsx), nbinsy_auto(nbinsy);
 	if(nbinsx == 0) nbinsx_auto = OptNBins(tree->Draw(arg1, reqs, "goff"));
 	if(nbinsy == 0) nbinsy_auto = OptNBins(tree->Draw(arg2, reqs, "goff"));
 	TH2D* h1 = new TH2D(histn,histn,nbinsx_auto,xmin,xmax,nbinsy_auto,ymin,ymax);
+	h1->SetXTitle(convertVarName(arg1));
+	h1->SetYTitle(convertVarName(arg2));
 	sprintf(out,"%s:%s",arg2,arg1);
 	tree->Project(histn,out,reqs);
 	if(draw) h1->Draw(drawopt);
 	return h1;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename, bool logy, double line1x, double line2x, TFile* file){
 	gStyle->SetOptStat(1111111);
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
 	TH1D *hfir = drawTree1D(var,reqs,convertVarName2(var),nbins,xmin,xmax,tree,false);
 	if(!hfir){ cout << "AnaClass::plotVar() ==> Error, missing input histogram ..." << endl; return;}
 	if(ofilename == "ofilename") ofilename = convertVarName2(var);
-	hfir->SetXTitle(convertVarName(var));
 	char ctitle[1000];
 	sprintf(ctitle,"Plot of %s: %s", var, tag.Data());
 	TCanvas *col = makeCanvas(ctitle);
@@ -586,7 +599,7 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 	delete hfir;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::refValues(const char* var, TH1D* h){
 	double percent1 = 0.05;
 	double percent2 = 0.01;
@@ -600,7 +613,7 @@ void AnaClass::refValues(const char* var, TH1D* h){
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 double AnaClass::tailFraction(TH1D* h, double frac){
 	double binValue = -999.;
 	int nbins = h->GetNbinsX();
@@ -636,7 +649,7 @@ double AnaClass::tailFraction(TH1D* h, double frac){
 	return binValue;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
 // Prints the CheckList to file filename
 	ofstream file;
@@ -690,7 +703,7 @@ void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
 	}
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 // Prints the value of the variable for which frac remains in the tail
 
@@ -733,7 +746,7 @@ TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 	return result;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::printAverage(const char* var, TH1D* h) {
 // Prints the average of the histogram
 
@@ -751,7 +764,7 @@ TString AnaClass::printAverage(const char* var, TH1D* h) {
 	return result;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2){
 // Prints the ratio of entries for which (x1<var<x2) / (y1<var<y2)
 
@@ -811,15 +824,13 @@ TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, dou
 	return result;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt, int markstyle, bool logx, bool logy, bool logz, double line1x, double line2x, double line1y, double line2y, TFile* file ){
 	gStyle->SetOptStat(1111111);
 	TString histn = Form("%svs%s", convertVarName2(var1).Data(), convertVarName2(var2).Data());
 	TH2D *h = drawTree2D(var1, var2, reqs, histn , nbinsx, xmin, xmax, nbinsy, ymin, ymax, tree, false);
 	if(!h){ cout << "AnaClass::plotVar2D() ==> Error, missing input histogram ..." << endl; return;}
 
-	h->SetXTitle(convertVarName(var1));
-	h->SetYTitle(convertVarName(var2));
 	h->GetYaxis()->SetTitleOffset(1.25);
 	h->SetMarkerStyle(markstyle);
 
@@ -882,7 +893,179 @@ void AnaClass::plotVar2D(const char* var1, const char* var2, const TCut reqs, TT
 	delete h;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
+void AnaClass::plotOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+	h1->SetLineWidth(2);
+	h1->SetFillColor(15);
+	h1->SetFillStyle(1001);
+	h2->SetLineWidth(2);
+	h2->SetLineColor(kBlue);
+	h2->SetFillColor(kBlue);
+	h2->SetFillStyle(3005);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+	h1->Sumw2();
+	h2->Sumw2();
+
+	h1->Scale(1.0/h1->Integral());
+	h2->Scale(1.0/h2->Integral());
+
+	// Determine plotting range
+	double max1 = h1->GetMaximum();
+	double max2 = h2->GetMaximum();
+	double max  = (max1>max2)?max1:max2;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	h1->SetMaximum(max);
+	h2->SetMaximum(max);
+	if(!logy){
+		h1->SetMinimum(0.0);
+		h2->SetMinimum(0.0);
+	}
+
+	TLegend *leg = new TLegend(0.65,0.75,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(1);
+
+	h1->DrawCopy("hist");
+	h2->DrawCopy("histsame");
+	leg->Draw();
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min  = (min1<min2)?min1:min2;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
+void AnaClass::plotOverlay2HNorm(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
+	h1->Sumw2();
+	h2->Sumw2();
+
+	h1->Scale(1.0/h1->Integral());
+	h2->Scale(1.0/h2->Integral());
+	plotOverlay2H(h1, tag1, h2, tag2, logy, line1x, line2x);
+}
+
+//____________________________________________________________________________
+void AnaClass::plotOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+	h1->SetLineWidth(2);
+	h1->SetFillColor(15);
+	h1->SetFillStyle(1001);
+	h2->SetLineWidth(2);
+	h2->SetLineColor(kBlue);
+	h2->SetFillColor(kBlue);
+	h2->SetFillStyle(3005);
+	h3->SetLineWidth(2);
+	h3->SetLineColor(kRed);
+	h3->SetFillColor(kRed);
+	h3->SetFillStyle(3004);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName());
+	sprintf(canvname,"%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+	h1->Sumw2();
+	h2->Sumw2();
+	h3->Sumw2();
+
+	h1->Scale(1.0/h1->Integral());
+	h2->Scale(1.0/h2->Integral());
+	h3->Scale(1.0/h3->Integral());
+
+	// Determine plotting range
+	double max1 = h1->GetMaximum();
+	double max2 = h2->GetMaximum();
+	double max3 = h3->GetMaximum();
+	double max12 = (max1>max2)?max1:max2;
+	double max = (max12>max3)?max12:max3;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	h1->SetMaximum(max);
+	h2->SetMaximum(max);
+	h3->SetMaximum(max);
+	if(!logy){
+		h1->SetMinimum(0.0);
+		h2->SetMinimum(0.0);
+		h3->SetMinimum(0.0);
+	}
+
+	TLegend *leg = new TLegend(0.65,0.69,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(1);
+
+	h1->DrawCopy("hist");
+	h2->DrawCopy("histsame");
+	h3->DrawCopy("histsame");
+	leg->Draw();
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min3 = h3->GetYaxis()->GetXmin();
+	double min12 = (min1<min2)?min1:min2;
+	double min = (min12<min3)?min12:min3;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
 void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
@@ -893,7 +1076,6 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	if(!hfir){ cout << "AnaClass::plotOverlay2T() ==> Error missing input histogram ..." << endl; return;}
 	if(!hsec){ cout << "AnaClass::plotOverlay2T() ==> Error missing input histogram ..." << endl; return;}
 
-	hfir->SetXTitle(convertVarName(var));
 	hfir->SetLineWidth(2);
 	hfir->SetFillColor(15);
 	hfir->SetFillStyle(1001);
@@ -960,7 +1142,7 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	Util::Print(col, outputname, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
@@ -971,7 +1153,6 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	if(!hfir){ cout << "AnaClass::plotOverlay1() ==> Error missing input histogram ..." << endl; return;}
 	if(!hsec){ cout << "AnaClass::plotOverlay1() ==> Error missing input histogram ..." << endl; return;}
 
-	hfir->SetXTitle(convertVarName(var1));
 	hfir->SetLineWidth(2);
 	hfir->SetFillColor(15);
 	hfir->SetFillStyle(1001);
@@ -1028,60 +1209,59 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	Util::Print(col, out, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy){
-  // Creates an normalized overlay from a tree variable with two conditions
-  // -   Arguments:
-  //     var: tree. var to be drawn
-  //     req1, req2: arguments to be used
-  //     file: file to be used
-  //     nbins, xmin, xmax: specification for the histogram
-  //     logy toggle logarithmiy plot                                      
+// Creates a normalized overlay from a tree variable with two conditions
+// -   Arguments:
+//     var: tree. var to be drawn
+//     req1, req2: arguments to be used
+//     file: file to be used
+//     nbins, xmin, xmax: specification for the histogram
+//     logy toggle logarithmiy plot                                      
 
-  gStyle->SetOptStat("");
-  if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-  if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-  TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-  TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+	gStyle->SetOptStat("");
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+	TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
 
-  if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
-  if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
-  
-  hfir->SetXTitle(convertVarName(var));
-  hfir->SetLineWidth(2);
-  hfir->SetFillColor(15);
-  hfir->SetFillStyle(1001);
-  hsec->SetLineWidth(2);
-  hsec->SetLineColor(kBlue);
-  hsec->SetFillColor(kBlue);
-  hsec->SetFillStyle(3005);
-  TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-  col->cd();
-  if(logy) col->SetLogy(1);
-  hfir = normHist(hfir);
-  hsec = normHist(hsec);
-  double max1 = hfir->GetMaximum();
-  double max2 = hsec->GetMaximum();
-  double max = (max1>max2)?max1:max2;
-  if(logy) max = 5*max;
-  else max = 1.05*max;
-  hfir->SetMaximum(max);
-  hsec->SetMaximum(max);
-  
-  TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
-  leg->AddEntry(hfir,tag1,"f");
-  leg->AddEntry(hsec,tag2,"f");
-  leg->SetFillColor(0);
-  leg->SetTextFont(fFont);
-  
-  hfir->DrawCopy("hist");
-  hsec->DrawCopy("histsame");
-  leg->Draw();
-  TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
-  Util::Print(col, outputname, fOutputSubDir);
+	if(!hfir){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hsec){ cout << "AnaClass::plotOverlay2C() ==> Error missing input histogram ..." << endl; return;}
+
+	hfir->SetLineWidth(2);
+	hfir->SetFillColor(15);
+	hfir->SetFillStyle(1001);
+	hsec->SetLineWidth(2);
+	hsec->SetLineColor(kBlue);
+	hsec->SetFillColor(kBlue);
+	hsec->SetFillStyle(3005);
+	TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+	col->cd();
+	if(logy) col->SetLogy(1);
+	hfir = normHist(hfir);
+	hsec = normHist(hsec);
+	double max1 = hfir->GetMaximum();
+	double max2 = hsec->GetMaximum();
+	double max = (max1>max2)?max1:max2;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	hfir->SetMaximum(max);
+	hsec->SetMaximum(max);
+
+	TLegend *leg = new TLegend(0.6,0.73,0.917,0.88);
+	leg->AddEntry(hfir,tag1,"f");
+	leg->AddEntry(hsec,tag2,"f");
+	leg->SetFillColor(0);
+	leg->SetTextFont(fFont);
+
+	hfir->DrawCopy("hist");
+	hsec->DrawCopy("histsame");
+	leg->Draw();
+	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
+	Util::Print(col, outputname, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int index2, int index3, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("h1")) h->Delete();
@@ -1096,7 +1276,6 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 		return;
 	}
 
-	h1->SetXTitle(convertVarName(var));
 	h1->SetLineWidth(2);
 	h1->SetFillColor(15);
 	h1->SetFillStyle(1001);
@@ -1173,73 +1352,72 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 	Util::Print(col, outputname, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy){
-  // - Creates an normalized overlay from a tree variable with three conditions
-  // -	Arguments:
-  //    var: tree. var to be drawn
-  //    req1, req2, req3: arguments to be used
-  //    file: file to be used
-  //    nbins, xmin, xmax: specification for the histogram
-  //   logy toggle logarithmiy plotgStyle->SetOptStat("");
-  if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
-  if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
-  if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
-  TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
-  TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
-  TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
+// - Creates a normalized overlay from a tree variable with three conditions
+// -	Arguments:
+//    var: tree. var to be drawn
+//    req1, req2, req3: arguments to be used
+//    file: file to be used
+//    nbins, xmin, xmax: specification for the histogram
+//   logy toggle logarithmiy plotgStyle->SetOptStat("");
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hsec")) h->Delete();
+	if( TH1D *h = (TH1D*)gROOT->FindObject("hthr")) h->Delete();
+	TH1D *hfir = drawTree1D(var,req1,"hfir",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hsec = drawTree1D(var,req2,"hsec",nbins,xmin,xmax,fTree[sampleindex],false);
+	TH1D *hthr = drawTree1D(var,req3,"hthr",nbins,xmin,xmax,fTree[sampleindex],false);
 
-  if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-  if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
-  if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hfir){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hsec){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
+	if(!hthr){ cout << "AnaClass::plotOverlay3C() ==> Error missing input histogram ..." << endl; return;}
 
-  hfir->SetXTitle(convertVarName(var));
-  hfir->SetLineWidth(2);
-  hfir->SetFillColor(15);
-  hfir->SetFillStyle(1001);
-  hsec->SetLineWidth(2);
-  hsec->SetLineColor(kBlue);
-  hsec->SetFillColor(kBlue);
-  hsec->SetFillStyle(3005);
+	hfir->SetLineWidth(2);
+	hfir->SetFillColor(15);
+	hfir->SetFillStyle(1001);
+	hsec->SetLineWidth(2);
+	hsec->SetLineColor(kBlue);
+	hsec->SetFillColor(kBlue);
+	hsec->SetFillStyle(3005);
 
-  hthr->SetLineWidth(2);
-  hthr->SetLineColor(kRed);
-  hthr->SetFillColor(kRed);
-  hthr->SetFillStyle(3003);
+	hthr->SetLineWidth(2);
+	hthr->SetLineColor(kRed);
+	hthr->SetFillColor(kRed);
+	hthr->SetFillStyle(3003);
 
-  TCanvas *col = makeCanvas(Form("Overlay of %s", var));
-  col->cd();
-  if(logy) col->SetLogy(1);
-  hfir = normHist(hfir);
-  hsec = normHist(hsec);
-  hthr = normHist(hthr);
-  double max1 = hfir->GetMaximum();
-  double max2 = hsec->GetMaximum();
-  double max3 = hthr->GetMaximum();
-  double tempmax = (max1>max2)?max1:max2;
-  double max = (tempmax>max3)?tempmax:max3;
-  if(logy) max = 5*max;
-  else max = 1.05*max;
-  hfir->SetMaximum(max);
-  hsec->SetMaximum(max);
-  hthr->SetMaximum(max);
+	TCanvas *col = makeCanvas(Form("Overlay of %s", var));
+	col->cd();
+	if(logy) col->SetLogy(1);
+	hfir = normHist(hfir);
+	hsec = normHist(hsec);
+	hthr = normHist(hthr);
+	double max1 = hfir->GetMaximum();
+	double max2 = hsec->GetMaximum();
+	double max3 = hthr->GetMaximum();
+	double tempmax = (max1>max2)?max1:max2;
+	double max = (tempmax>max3)?tempmax:max3;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	hfir->SetMaximum(max);
+	hsec->SetMaximum(max);
+	hthr->SetMaximum(max);
 
-  TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
-  leg->AddEntry(hfir,tag1,"f");
-  leg->AddEntry(hsec,tag2,"f");
-  leg->AddEntry(hthr,tag3,"f");
-  leg->SetFillColor(0);
-  leg->SetTextFont(fFont);
+	TLegend *leg = new TLegend(0.7,0.73,0.917,0.88);
+	leg->AddEntry(hfir,tag1,"f");
+	leg->AddEntry(hsec,tag2,"f");
+	leg->AddEntry(hthr,tag3,"f");
+	leg->SetFillColor(0);
+	leg->SetTextFont(fFont);
 
-  hfir->DrawCopy("hist");
-  hsec->DrawCopy("histsame");
-  hthr->DrawCopy("histsame");
-  leg->Draw();
-  TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
-  Util::Print(col, outputname, fOutputSubDir);
+	hfir->DrawCopy("hist");
+	hsec->DrawCopy("histsame");
+	hthr->DrawCopy("histsame");
+	leg->Draw();
+	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
+	Util::Print(col, outputname, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int index2, int index3, int index4, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("h1")) h->Delete();
@@ -1252,11 +1430,10 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 	TH1D *h4 = drawTree1D(var,reqs,"h4",nbins,xmin,xmax,fTree[index4],false);
 
 	if(!h1 || !h2 || !h3 || !h4){
-		cout << "AnaClass::plotOverlay3T() ==> Error missing input histogram ..." << endl;
+		cout << "AnaClass::plotOverlay4T() ==> Error missing input histogram ..." << endl;
 		return;
 	}
 
-	h1->SetXTitle(convertVarName(var));
 	h1->SetLineWidth(2);
 	h1->SetFillColor(15);
 	h1->SetFillStyle(1001);
@@ -1347,7 +1524,7 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 	Util::Print(col, outputname, fOutputSubDir);
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::convertVarName(const char* var){
 /*  - Converts the name of a tree variable into a label for the x-axis      */
 	TString temp = TString(var);
@@ -1359,7 +1536,7 @@ TString AnaClass::convertVarName(const char* var){
 	else return outp;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::convertVarName2(const char* var){
 /*  - Removes bracket signs from filenames to enable saving as .eps files  */
 	TString out_str = TString(var);
@@ -1371,7 +1548,7 @@ TString AnaClass::convertVarName2(const char* var){
 	return out_str;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 int AnaClass::OptNBins(int nentries){
 // Returns an 'optimal' number of bins for some number of entries
 	if(nentries < 100)  return 10;
@@ -1381,35 +1558,188 @@ int AnaClass::OptNBins(int nentries){
 	else return 200;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TH1D* AnaClass::normHist(const TH1D *ihist){
 /*		-	Normalizes a histogram (incl. errors) to unit integral
 I.e. divides each entry by the integral									*/
 	TH1D *ohist = new TH1D(*ihist);
-	double scale = ihist->Integral();
-	for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
-		ohist->SetBinContent(i,ihist->GetBinContent(i)/scale);
-		ohist->SetBinError(i,ihist->GetBinError(i)/scale);
-	}
-	return ohist;
+double scale = ihist->Integral();
+for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
+	ohist->SetBinContent(i,ihist->GetBinContent(i)/scale);
+	ohist->SetBinError(i,ihist->GetBinError(i)/scale);
+}
+return ohist;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TH2D* AnaClass::normHist(const TH2D *ihist){
 /*		-	Normalizes a histogram (incl. errors) to unit integral
 I.e. divides each entry by the integral									*/
 	TH2D *ohist = new TH2D(*ihist);
-	double scale = ihist->Integral();
+double scale = ihist->Integral();
+for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
+	for( int j = 0; j < ihist->GetNbinsY()+2; j++ ){
+		ohist->SetBinContent(i,j,ihist->GetBinContent(i,j)/scale);
+		ohist->SetBinError(i,j,ihist->GetBinError(i,j)/scale);
+	}
+}
+return ohist;
+}
+
+//____________________________________________________________________________
+TH1D* AnaClass::normHistBW(const TH1D *ihist, float scale){
+/*		-	Normalizes a histogram (incl. errors) with variable binwidth.
+			I.e. divides each entry by the binwidth									*/
+	TH1D *ohist = new TH1D(*ihist);
 	for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
-		for( int j = 0; j < ihist->GetNbinsY()+2; j++ ){
-			ohist->SetBinContent(i,j,ihist->GetBinContent(i,j)/scale);
-			ohist->SetBinError(i,j,ihist->GetBinError(i,j)/scale);
-		}
+		ohist->SetBinContent(i, scale * ihist->GetBinContent(i)/ihist->GetBinWidth(i));
+		ohist->SetBinError(i,   scale * ihist->GetBinError(i)/ihist->GetBinWidth(i));
 	}
 	return ohist;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
+const Double_t* AnaClass::getBinning(const TH1D *hist){
+	return hist->GetXaxis()->GetXbins()->GetArray();
+}
+
+//____________________________________________________________________________
+void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05	
+	float max1 = getMaxYExtension(h1);
+	float max2 = getMaxYExtension(h2);
+	
+	float max  = (max1>max2)?max1:max2;
+
+	float min1 = getMinYExtension(h1);
+	float min2 = getMinYExtension(h2);
+	float min  = (min1<min2)?min1:min2;
+	
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval1 = h1->GetBinContent(h1->GetMinimumBin());
+			float minval2 = h2->GetBinContent(h2->GetMinimumBin());
+			float minval = minval1<minval2?minval1:minval2;
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	h1->SetMinimum(min);
+	h1->SetMaximum(max);
+	h2->SetMinimum(min);
+	h2->SetMaximum(max);
+}
+
+//____________________________________________________________________________
+void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, TH1D *&h3, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05
+	float max1 = getMaxYExtension(h1);
+	float max2 = getMaxYExtension(h2);
+	float max3 = getMaxYExtension(h3);
+	float max12 = (max1>max2)?max1:max2;
+	float max   = (max12>max3)?max12:max3;
+
+	float min1 = getMinYExtension(h1);
+	float min2 = getMinYExtension(h2);
+	float min3 = getMinYExtension(h3);
+	float min12 = (min1<min2)?min1:min2;
+	float min   = (min12<min3)?min12:min3;
+	
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval1 = h1->GetBinContent(h1->GetMinimumBin());
+			float minval2 = h2->GetBinContent(h2->GetMinimumBin());
+			float minval3 = h3->GetBinContent(h3->GetMinimumBin());
+			float minval12 = minval1<minval2?minval1:minval2;
+			float minval = minval12<minval3?minval12:minval3;
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	h1->SetMinimum(min);
+	h1->SetMaximum(max);
+	h2->SetMinimum(min);
+	h2->SetMaximum(max);
+	h3->SetMinimum(min);
+	h3->SetMaximum(max);
+}
+
+//____________________________________________________________________________
+void AnaClass::setPlottingRange(std::vector<TH1*> &hists, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05
+	float max = hists[0]->GetMaximum();
+	float min = hists[0]->GetMinimum();
+	for(size_t i = 0; i < hists.size(); ++i){
+		float tempmax = getMaxYExtension(hists[i]);
+		float tempmin = getMinYExtension(hists[i]);
+		if(tempmax > max) max = tempmax;
+		if(tempmin < min) min = tempmin;
+	}
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval = hists[0]->GetBinContent(hists[0]->GetMinimumBin());
+			for(size_t i = 0; i < hists.size(); ++i){
+				float tempval = hists[i]->GetBinContent(hists[i]->GetMinimumBin());
+				if(tempval < minval) minval = tempval;
+			}
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	for(size_t i = 0; i < hists.size(); ++i){
+		hists[i]->SetMinimum(min);
+		hists[i]->SetMaximum(max);
+	}
+}
+
+//____________________________________________________________________________
+float AnaClass::getMaxYExtension(TH1 *h){
+	float max = h->GetMaximum();
+	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
+		float temp = h->GetBinContent(i) + h->GetBinError(i);
+		if(temp > max) max = temp;
+	}
+	return max;
+}
+
+//____________________________________________________________________________
+float AnaClass::getMinYExtension(TH1 *h){
+	float min = h->GetMinimum();
+	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
+		float temp = h->GetBinContent(i) - h->GetBinError(i);
+		if(temp < min) min = temp;
+	}
+	return min;
+}
+
+//____________________________________________________________________________
 TCanvas* AnaClass::makeCanvas(const char* name){
 /*		-	Creates a TCanvas at a somewhat random position							 */
 	int x = (int)gRandom->Uniform(10,200);
@@ -1418,14 +1748,26 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 	return c1;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
+void AnaClass::printHisto(TH1* h, TString canvname, TString canvtitle, Option_t *drawopt){
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	h->DrawCopy(drawopt);
+	gPad->RedrawAxis();
+	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
 TH1D* AnaClass::bookTH1D(const char* name, const char* title, int nbins, double xlow, double xup){
 	TH1D *h = new TH1D(name, title, nbins, xlow, xup);
 	h->SetXTitle(convertVarName(name));
 	return h;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 TString AnaClass::numbForm(double n){
 /*		-	Converts a number into a TString 											 */
 	int expo = getExp(n);
@@ -1447,7 +1789,7 @@ TString AnaClass::numbForm(double n){
 	return out;
 }
 
-/****************************************************************************/
+//____________________________________________________________________________
 int AnaClass::getExp(double e){
 /*		-	Returns exponent of input double												 */
 	int expo(0);

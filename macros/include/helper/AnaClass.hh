@@ -62,67 +62,85 @@ public:
 /*****************************************************************************
 ##################| Initialization and Setup |################################
 *****************************************************************************/
-	void init(bool = false);
-	void loadSamples(TString parfile = "parfile.dat", bool verbose = false);
-	void readParms(TString filename, bool verbose = false);
-	void readVarNames(const char* = "varnames.dat");
+	virtual void init(bool = false);
+	virtual void loadSamples(TString parfile = "parfile.dat", bool verbose = false);
+	virtual void readParms(TString filename, bool verbose = false);
+	virtual void readVarNames(const char* = "varnames.dat");
 /*****************************************************************************
 ##################| Produce Plots |###########################################
 *****************************************************************************/
-	void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag", TCut cut ="", TFile* file = 0 );
-	void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag", TFile* file = 0 );
-	void makePlotPanel(const TCut req = "", const int nbins = 100);
-	void plotAllBranches(TTree*, TString);
+	virtual void plotPlotList(const char* = "plotlist.dat", TTree *tree = NULL, TString tag = "tag", TCut cut ="", TFile* file = 0 );
+	virtual void plotPlotList2D(const char* = "plotlist2d.dat", TTree *tree = NULL, TString tag = "tag", TFile* file = 0 );
+	virtual void plotAllBranches(TTree*, TString);
 	
-	void plotAllBranches(int);
+	virtual void plotAllBranches(int);
 /*****************************************************************************
 ###################| Main Methods |###########################################
 *****************************************************************************/
-	void plotEID(TCut, TTree*, TString, TFile* file = 0 );
+	virtual void plotEID(TCut, TTree*, TString, TFile* file = 0 );
 
 /*****************************************************************************
 ##################| Utilities |###############################################
 *****************************************************************************/
-	TTree* getTree(TString treename, TString filename, TString subdir = "");
-	TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw, const char* drawopt = "");
-	TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
-	void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999., TFile* file = 0 );
-	void refValues(const char* var, TH1D* h);
-	double tailFraction(TH1D* h, double frac);
-	void printCheckList(const char* var, TH1D* h, const char* filename);
-	TString printTailFraction(const char* var, TH1D* h, double frac);
-	TString printAverage(const char* var, TH1D* h);
-	TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
-	void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999., TFile* file = 0 );
-	void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
-	void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
-	void plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy = false);
-	void plotOverlay3T(const char* var, const TCut reqs, int index1, int index2, int index3, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
-	void plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy = false);
-	void plotOverlay4T(const char* var, const TCut reqs, int index1, int index2, int index3, int index4, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
-	TString convertVarName(const char* var);
-	TString convertVarName2(const char* var);
-	int OptNBins(int);
-	TH1D* normHist(const TH1D *ihist);
-	TH2D* normHist(const TH2D *ihist);
-	TCanvas* makeCanvas(const char*);
-	TH1D* bookTH1D(const char*, const char*, int, double, double);
-	TString numbForm(double);
-	int getExp(double e);
+	virtual TTree* getTree(TString treename, TString filename, TString subdir = "");
+	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw = false, const char* drawopt = "");
+	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* t, bool draw = false, const char* drawopt = "");
+	virtual TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
+	virtual void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999., TFile* file = 0 );
+	virtual void refValues(const char* var, TH1D* h);
+	virtual double tailFraction(TH1D* h, double frac);
+	virtual void printCheckList(const char* var, TH1D* h, const char* filename);
+	virtual TString printTailFraction(const char* var, TH1D* h, double frac);
+	virtual TString printAverage(const char* var, TH1D* h);
+	virtual TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
+	virtual void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999., TFile* file = 0 );
+	virtual void plotOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay2HNorm(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+	virtual void plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+	virtual void plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy = false);
+	virtual void plotOverlay3T(const char* var, const TCut reqs, int index1, int index2, int index3, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+	virtual void plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy = false);
+	virtual void plotOverlay4T(const char* var, const TCut reqs, int index1, int index2, int index3, int index4, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+	virtual TString convertVarName(const char* var);
+	virtual TString convertVarName2(const char* var);
+	virtual int OptNBins(int);
+	virtual TH1D* normHist(const TH1D *ihist);
+	virtual TH2D* normHist(const TH2D *ihist);
+	virtual TH1D* normHistBW(const TH1D *ihist, float scale = 1);
+	virtual const Double_t* getBinning(const TH1D*);
+	virtual void setPlottingRange(TH1D *&, TH1D *&, float = 0.05, bool = false);
+	virtual void setPlottingRange(TH1D *&, TH1D *&, TH1D *&, float = 0.05, bool = false);
+	virtual void setPlottingRange(std::vector<TH1*>&, float = 0.05, bool = false);
+	virtual float getMaxYExtension(TH1*);
+	virtual float getMinYExtension(TH1*);
+	virtual TCanvas* makeCanvas(const char*);
+	virtual void printHisto(TH1* h, TString canvname, TString canvtitle, Option_t *drawopt = "");
+	virtual TH1D* bookTH1D(const char*, const char*, int, double, double);
+	virtual TString numbForm(double);
+	virtual int getExp(double e);
 	
 /*****************************************************************************
 ##################| Variables |###############################################
 *****************************************************************************/
-	inline void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
-	inline void setOutputSubDir(TString dir){ fOutputSubDir = Util::MakeOutputDir(dir); };
-	inline void setCheckListFile(TString file){ fChecklistFile = file; };
-	inline void setGlobalTag(TString tag){ fGlobalTag = tag; };
-	TFile *fFile[20];
-	TString fFileName[20];
-	TString fTreeSubDirName[20]; // Name of subdirectory inside rootfile where tree is
-	TTree *fTree[20];
-	TString fTag[20];
-	double fNorm[20];
+	inline virtual void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
+	inline virtual void setOutputSubDir(TString dir){ fOutputSubDir = Util::MakeOutputDir(dir); };
+	inline virtual void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
+	inline virtual void setCheckListFile(TString file){ fChecklistFile = file; };
+	inline virtual void setGlobalTag(TString tag){ fGlobalTag = tag; };
+	inline virtual void setVerbose(int v){ fVerbose = v;};
+
+	int fVerbose;
+	
+	std::vector<TFile*>  fFile;
+	std::vector<TString> fFileName;
+	std::vector<TString> fTreeSubDirName; // Name of subdirectory inside rootfile where tree is
+	std::vector<TTree*>  fTree;
+	std::vector<TString> fTag;
+	std::vector<TCut>    fCut;
+	std::vector<double>  fNorm;
+
 	std::map<TString, TString> fVarNameMap;	// Mapping of axis names
 
 	int fFont;				// Global font value for labels, titles, legends
@@ -140,6 +158,7 @@ public:
 	TString fOutputDir;	  // Output directory for plots
 	TString fOutputSubDir; // Output subdirectory for plots, changes for each use
 	TString fChecklistFile; // Name of checklist file
+	TFile *fOutputFile;  // File containing output histograms
 
 private:
 	// ClassDef(AnaClass,2)
