@@ -74,25 +74,9 @@ public:
 	virtual void plotAllBranches(TTree*, TString);
 	
 	virtual void plotAllBranches(int);
-/*****************************************************************************
-###################| Main Methods |###########################################
-*****************************************************************************/
 	virtual void plotEID(TCut, TTree*, TString, TFile* file = 0 );
 
-/*****************************************************************************
-##################| Utilities |###############################################
-*****************************************************************************/
-	virtual TTree* getTree(TString treename, TString filename, TString subdir = "");
-	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw = false, const char* drawopt = "");
-	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* t, bool draw = false, const char* drawopt = "");
-	virtual TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
 	virtual void plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename="ofilename", bool logy = false, double line1x = -999., double line2x = -999., TFile* file = 0 );
-	virtual void refValues(const char* var, TH1D* h);
-	virtual double tailFraction(TH1D* h, double frac);
-	virtual void printCheckList(const char* var, TH1D* h, const char* filename);
-	virtual TString printTailFraction(const char* var, TH1D* h, double frac);
-	virtual TString printAverage(const char* var, TH1D* h);
-	virtual TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
 	virtual void plotVar2D(const char* var1, const char* var2, const TCut reqs, TTree *tree, TString tag, int nbinsx, double xmin, double xmax, int nbinsy, double ymin, double ymax, Option_t *topt ="", int markstyle = 0, bool logx = false, bool logy = false, bool logz = false, double line1x = -999., double line2x = -999., double line1y = -999., double line2y = -999., TFile* file = 0 );
 	virtual void plotOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotOverlay2HNorm(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
@@ -103,6 +87,20 @@ public:
 	virtual void plotOverlay3T(const char* var, const TCut reqs, int index1, int index2, int index3, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
 	virtual void plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy = false);
 	virtual void plotOverlay4T(const char* var, const TCut reqs, int index1, int index2, int index3, int index4, int nbins, double xmin, double xmax, bool logy = false, double line1x = -999., double line2x = -999.);
+
+	virtual void plotPredOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);	
+	virtual void plotPredOverlay2HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);	
+	virtual void plotPredOverlay3HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2, TH1F *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+
+/*****************************************************************************
+##################| Utilities |###############################################
+*****************************************************************************/
+	virtual TTree* getTree(TString treename, TString filename, TString subdir = "");
+	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw = false, const char* drawopt = "");
+	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* t, bool draw = false, const char* drawopt = "");
+	virtual TH2D* drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree *tree, bool draw, const char* drawopt = "");
 	virtual TString convertVarName(const char* var);
 	virtual TString convertVarName2(const char* var);
 	virtual int OptNBins(int);
@@ -121,6 +119,12 @@ public:
 	virtual TString numbForm(double);
 	virtual int getExp(double e);
 	
+	virtual void refValues(const char* var, TH1D* h);
+	virtual double tailFraction(TH1D* h, double frac);
+	virtual void printCheckList(const char* var, TH1D* h, const char* filename);
+	virtual TString printTailFraction(const char* var, TH1D* h, double frac);
+	virtual TString printAverage(const char* var, TH1D* h);
+	virtual TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
 /*****************************************************************************
 ##################| Variables |###############################################
 *****************************************************************************/

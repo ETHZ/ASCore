@@ -286,10 +286,6 @@ void AnaClass::readVarNames(const char* filename){
 ###################| Produce Plots |##########################################
 *****************************************************************************/
 
-/*****************************************************************************
-###################| Main Methods |###########################################
-*****************************************************************************/
-
 //____________________________________________________________________________
 void AnaClass::plotPlotList(const char* filename, TTree *tree, TString tag, TCut cut, TFile* file){
 	int twod(0), sampleindex(0), nbinsx(0), nbinsy(0), logx(0), logy(0), logz(0), mrkstl(0);
@@ -378,6 +374,7 @@ void AnaClass::plotAllBranches(TTree *tree, TString tag){
 //  Plots all branches of a Tree and saves the histograms in a rootfile
 	gStyle->SetOptStat(1111);
 	fOutputSubDir = tag + "/" + "All/";
+
 	TObjArray *array = tree->GetListOfBranches();
 	TH1 *hists[array->GetEntries()];
 	for(size_t i = 0; i < array->GetEntries(); ++i){
@@ -393,26 +390,17 @@ void AnaClass::plotAllBranches(TTree *tree, TString tag){
 		Util::Print(c, outputname, fOutputSubDir);
 	}
 }
+
+//____________________________________________________________________________
 void AnaClass::plotAllBranches(int sampleindex){
 //  Plots all branches of a Tree and saves the histograms in a rootfile
 //  -- Overloaded to enable calling by the index in the parameter file
 	gStyle->SetOptStat(1111);
 	fOutputSubDir = fTag[sampleindex] + "/" + "AllBranches/";
 	TTree *tree = fTree[sampleindex];
-	TObjArray *array = tree->GetListOfBranches();
-	TH1 *hists[array->GetEntries()];
-	for(size_t i = 0; i < array->GetEntries(); ++i){
-		const char* branchname = array->At(i)->GetName();
-		TCanvas *c = makeCanvas(Form("c_%s", branchname));
-		tree->Draw(branchname);
-		hists[i] = (TH1*)gROOT->FindObject("htemp");
-		hists[i]->SetName(Form("h_%s", branchname));
-		hists[i]->SetLineWidth(2);
-		hists[i]->SetFillColor(15);
-		hists[i]->SetFillStyle(1001);
-		TString outputname = fTag[sampleindex] + "_" + branchname;
-		Util::Print(c, outputname, fOutputSubDir);
-	}
+	TString tag = fTag[sampleindex];
+
+	plotAllBranches(tree, tag);
 }
 
 //____________________________________________________________________________
@@ -485,69 +473,6 @@ void AnaClass::plotEID(TCut req, TTree *t, TString tag, TFile* file){
 	delete hfir;
 }
 
-/*****************************************************************************
-###################| Utilities |##############################################
-*****************************************************************************/
-
-//____________________________________________________________________________
-TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
-	TFile *file = NULL;
-	TTree *tree = NULL;
-	file = TFile::Open(filename);
-	if(file == NULL){
-		cout << "AnaClass::getTree ==> Input file '" << filename << "' not found, breaking!" << endl;
-		return NULL;
-	}
-	if(subdir != ""){
-		TString treepath = TString(subdir) + "/" + TString(treename);
-		tree = (TTree*)file->Get(treepath);
-	}
-	else tree = (TTree*)file->Get(treename);
-	if(tree == NULL){
-		if(subdir == "") cout << "AnaClass::getTree ==> Tree '" << treename << "' not found, breaking!" << endl;
-		if(subdir != "") cout << "AnaClass::getTree ==> Tree '" << treename << "' in subdir '"<< subdir <<"' not found, breaking!" << endl;
-		return NULL;
-	}
-	return tree;
-}
-
-//____________________________________________________________________________
-TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* tree, bool draw, const char* drawopt){
-	int nbins_auto = nbins;
-	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
-	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xmin,xmax);
-	h1->SetXTitle(convertVarName(arg));
-	tree->Project(histn,arg,reqs);
-	if(draw) h1->Draw(drawopt);
-	return h1;
-}
-
-//____________________________________________________________________________
-TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* tree, bool draw, const char* drawopt){
-	int nbins_auto = nbins;
-	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
-	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xbins);
-	h1->SetXTitle(convertVarName(arg));
-	tree->Project(histn,arg,reqs);
-	if(draw) h1->Draw(drawopt);
-	return h1;
-}
-
-//____________________________________________________________________________
-TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree* tree, bool draw, const char* drawopt){
-	char out[1000];
-	int nbinsx_auto(nbinsx), nbinsy_auto(nbinsy);
-	if(nbinsx == 0) nbinsx_auto = OptNBins(tree->Draw(arg1, reqs, "goff"));
-	if(nbinsy == 0) nbinsy_auto = OptNBins(tree->Draw(arg2, reqs, "goff"));
-	TH2D* h1 = new TH2D(histn,histn,nbinsx_auto,xmin,xmax,nbinsy_auto,ymin,ymax);
-	h1->SetXTitle(convertVarName(arg1));
-	h1->SetYTitle(convertVarName(arg2));
-	sprintf(out,"%s:%s",arg2,arg1);
-	tree->Project(histn,out,reqs);
-	if(draw) h1->Draw(drawopt);
-	return h1;
-}
-
 //____________________________________________________________________________
 void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString tag, int nbins, double xmin, double xmax, TString ofilename, bool logy, double line1x, double line2x, TFile* file){
 	gStyle->SetOptStat(1111111);
@@ -597,231 +522,6 @@ void AnaClass::plotVar(const char* var, const TCut reqs, TTree *tree, TString ta
 
 	delete col;
 	delete hfir;
-}
-
-//____________________________________________________________________________
-void AnaClass::refValues(const char* var, TH1D* h){
-	double percent1 = 0.05;
-	double percent2 = 0.01;
-	if (!strcmp(var, "MuPt")         || !strcmp(var, "ElPt")      || !strcmp(var, "JPt") ||
-		!strcmp(var, "MuJESCorrMET") || !strcmp(var, "TCMET")     ||
-		!strcmp(var, "PFMET")        || !strcmp(var, "SumEt")     ||
-		!strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
-	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ) {
-		tailFraction(h, percent1);
-		tailFraction(h, percent2);
-	}
-}
-
-//____________________________________________________________________________
-double AnaClass::tailFraction(TH1D* h, double frac){
-	double binValue = -999.;
-	int nbins = h->GetNbinsX();
-	double tail = frac * h->Integral();
-	double tailSum = 0.;
-
-	int loc = 0;
-	for (int i = nbins+1; i >= 0; --i) {
-		tailSum += h->GetBinContent(i);
-		if (tailSum < tail) loc = i;
-		if (tailSum >= tail) break;
-	}
-	if (loc > 0 && loc < nbins) {
-		binValue = h->GetBinCenter(loc);
-		double maxY = 0.5 * h->GetMaximum();
-		double minY = 0.05 * h->GetMaximum();
-		TArrow* arr = new TArrow(binValue, maxY, binValue, minY, 0.02, "|>");
-		arr->SetLineColor(4);
-		arr->SetFillColor(4);
-		arr->Draw();
-		TLatex l;
-		l.SetTextColor(4);
-		l.SetTextSize(0.04);
-		char tit[50];
-		l.SetTextAlign(23);
-		sprintf(tit, "%6.2f ", (float)frac);
-		l.DrawLatex(binValue, 1.1*maxY, tit);
-		l.SetTextAlign(12);
-		sprintf(tit, "%8.3f", (float)binValue);
-		l.DrawLatex(binValue, 0.8*maxY, tit);
-	}
-
-	return binValue;
-}
-
-//____________________________________________________________________________
-void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
-// Prints the CheckList to file filename
-	ofstream file;
-	file.open(filename, ios::app);
-	double percent1 = 0.05;
-	double percent2 = 0.01;
-	double etaLow = 1.44, etaHigh = 3.;
-	double d0PVLow = 0.02, d0PVHigh = 0.5;
-	double isoLow = 0.3, isoHigh = 1.;
-
-	if( !strcmp(var, "MuPt")         || !strcmp(var, "ElPt")         || !strcmp(var, "JPt") ||
-		!strcmp(var, "TCMET")        || !strcmp(var, "MuJESCorrMET") || !strcmp(var, "PFMET") ||
-		!strcmp(var, "SumEt")        || !strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
-	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;
-		file << printTailFraction(var, h, percent1) << endl;
-		file << printTailFraction(var, h, percent2) << endl;
-	}
-	if( !strcmp(var, "MuDzPV")       || !strcmp(var, "MuNChi2")      ||
-		!strcmp(var, "MuNTkHits")      || !strcmp(var, "ElDzPV")       ||
-		!strcmp(var, "Elfbrem")        || !strcmp(var, "JEMfrac")      || !strcmp(var, "JCHfrac")      ||
-		!strcmp(var, "JNConstituents") || !strcmp(var, "MuIso03SumPt") ||
-		!strcmp(var, "MuIso03EmEt")    || !strcmp(var, "MuIso03HadEt") || 
-	!strcmp(var, "ElPtSum")        || !strcmp(var, "ElEmEtSum")    || !strcmp(var, "ElHadEtSum") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;
-	}
-	if( !strcmp(var, "MuEta") || !strcmp(var, "ElEta") || !strcmp(var, "JEta") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;
-		file << printRatio(var, h, etaLow, etaHigh, -etaHigh, etaHigh) << endl;
-		file << printRatio(var, h, -etaHigh, -etaLow, -etaHigh, etaHigh) << endl;
-		file << printRatio(var, h, 0., etaLow, -etaLow, 0.) << endl;
-	}
-	if( !strcmp(var, "PrimVtxx")       || !strcmp(var, "PrimVtxy")     || !strcmp(var, "PrimVtxz") ||
-		!strcmp(var, "PrimVtxNdof") || !strcmp(var, "PrimVtxNChi2") ||!strcmp(var, "NTracks")   ||
-	!strcmp(var, "MuEem")          || !strcmp(var, "MuEHad") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;
-	}
-	if( !strcmp(var, "MuD0PV") || !strcmp(var, "ElD0PV") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;
-		file << printRatio(var, h, -d0PVLow, d0PVLow, -d0PVHigh, d0PVHigh) << endl;
-	}
-	if( !strcmp(var, "MuRelIso03") || !strcmp(var, "ElRelIso04") ){
-		file << "* " << var << endl;
-		file << printAverage(var, h) << endl;;
-		file << printRatio(var, h, 0., isoLow, 0., isoHigh) << endl;
-	}
-}
-
-//____________________________________________________________________________
-TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
-// Prints the value of the variable for which frac remains in the tail
-
-	double binValue = -999.;
-	double dbinValue = -999.;
-	int nbins = h->GetNbinsX();
-	double nevts = h->Integral();
-	double tail = frac * nevts;
-	double dtail = frac * sqrt(nevts);
-	double tailp = tail + dtail;
-	double tailm = tail - dtail;
-	double tailSum = 0.;
-
-	int loc = 0, locp = 0, locm = 0;
-	for (int i = nbins+1; i >= 0; --i) {
-		tailSum += h->GetBinContent(i);
-		if (tailSum < tail) loc = i;
-		if (tailSum < tailp) locp = i;
-		if (tailSum < tailm) locm = i;
-		if (tailSum >= tailp) break;
-	}
-	if (loc > 0 && loc < nbins){
-		binValue = h->GetBinCenter(loc);
-		if (locm > 0 && locp < nbins) {
-			dbinValue = 0.5*(h->GetBinCenter(locm)-h->GetBinCenter(locp));
-		} else if (locp <= 0 && locm < nbins) {
-			dbinValue = binValue - h->GetBinCenter(locp);
-		} else if (locp > 0 && locm >= nbins) {
-			dbinValue = h->GetBinCenter(locp) - binValue;
-		}
-	}
-	if (nevts > 0) {
-		double binSize = h->GetBinWidth(loc);
-		if (binSize > dbinValue) dbinValue = binSize;
-	} else {
-		binValue = 0.;
-		dbinValue = 0.;
-	}
-	TString result = Form("  For %f of tail %s = %f +- %f", frac, var, binValue, dbinValue);
-	return result;
-}
-
-//____________________________________________________________________________
-TString AnaClass::printAverage(const char* var, TH1D* h) {
-// Prints the average of the histogram
-
-	double nevts = h->GetEntries();
-	double aver, daver;
-	if (nevts > 0) {
-		aver = h->GetMean(1);
-		double rms = h->GetRMS(1);
-		daver = rms / sqrt(nevts);
-	} else {
-		aver = 0.;
-		daver = 0.;
-	}
-	TString result = Form("  Mean value of %s = %f +- %f", var, aver, daver);
-	return result;
-}
-
-//____________________________________________________________________________
-TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2){
-// Prints the ratio of entries for which (x1<var<x2) / (y1<var<y2)
-
-	int nbins = h->GetNbinsX();
-	double sumx1y1 = 0.;
-	double sumx2y2 = 0.;
-	double sumx1y2 = 0.;
-	double sumx2y1 = 0.;
-	double xmin = h->GetXaxis()->GetXmin();
-	double xmax = h->GetXaxis()->GetXmax();
-	if (x1 < xmin) x1 = xmin;
-	if (x2 > xmax) x2 = xmax;
-	if (y1 < xmin) y1 = xmin;
-	if (y2 > xmax) y2 = xmax;
-
-	for (int i = 1; i < nbins; ++i) {
-		double xy = h->GetBinCenter(i);
-		double content = h->GetBinContent(i);
-		if ( (xy - x1)*(xy - y1) < 0.) sumx1y1 += content;
-		if ( (xy - x2)*(xy - y2) < 0.) sumx2y2 += content;
-		if ( (xy - x1)*(xy - y2) < 0.) sumx1y2 += content;
-		if ( (xy - x2)*(xy - y1) < 0.) sumx2y1 += content;
-	}
-	double xy1 = (x1 - y1)*(x1 - y2);
-	double xy2 = (x2 - y1)*(x2 - y2);
-
-	double xunc = 0.;
-	double yunc = 0.;
-	double xycor = 0.;
-	if (xy1 <= 0. && xy2 <= 0.) {
-		xunc  = 0.;
-		yunc  = sumx1y1 + sumx2y2;
-		xycor = sumx1y2 - sumx2y2;
-	} else if (xy1 > 0. && xy2 <= 0.) {
-		xunc  = sumx1y1;
-		yunc  = sumx2y2;
-		xycor = sumx2y1;
-	} else if (xy1 > 0. && xy2 > 0.) {
-		xunc  = sumx1y1 - sumx2y1;
-		yunc  = sumx2y2 - sumx2y1;
-		xycor = 0.;
-	} else if (xy1 <= 0. && xy2 > 0.) {
-		xunc  = sumx2y2;
-		yunc  = sumx1y1;
-		xycor = sumx1y2;
-	}
-
-	double rat = -999., drat = -999.;
-	if (yunc+xycor != 0.) {
-		rat = (xunc+xycor) / (yunc+xycor);
-		drat = sqrt( (yunc+xycor)*(yunc+xycor)*xunc
-			+ (xunc+xycor)*(xunc+xycor)*yunc
-			+ (yunc-xunc)*(yunc-xunc)*xycor )
-			/ ( (yunc+xycor)*(yunc+xycor) );
-	}
-	TString result = Form("  Ratio (%f<%s<%f) / (%f<%s<%f) = %f +- %f", x1, var, x2, y1, var, y2, rat, drat);
-	return result;
 }
 
 //____________________________________________________________________________
@@ -1525,6 +1225,571 @@ void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int i
 }
 
 //____________________________________________________________________________
+void AnaClass::plotPredOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+	h1->SetFillColor(kBlue);
+	h1->SetLineColor(kBlue);
+	h1->SetLineWidth(2);
+	h1->SetLineStyle(0);
+	h1->SetFillStyle(3004);
+
+	h2->SetLineWidth(2);
+	h2->SetLineColor(kRed);
+	h2->SetFillColor(kRed);
+	// h2->SetFillStyle(3005);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+
+	setPlottingRange(h1, h2, 0.05, logy);
+
+	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.65,0.75,0.886,0.88); // Upper right
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("E2");
+	h2->DrawCopy("PE1same");
+	leg->Draw();
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min  = (min1<min2)?min1:min2;
+
+	double max1 = h1->GetYaxis()->GetXmax();
+	double max2 = h2->GetYaxis()->GetXmax();
+	double max  = (max1>max2)?max1:max2;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	if(logy) outputname += "_log";
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
+void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, bool logy, bool ratio, double line1x, double line2x){
+	TH1D *h1 = new TH1D(*hist1);
+	TH1D *h2 = new TH1D(*hist2);
+	
+	gStyle->SetOptStat("");
+	TH1D *h_ratio = new TH1D("h_ratio", "Ratio histogram", h1->GetNbinsX(), getBinning(h1));
+	Int_t color = 4;
+	h1->SetFillColor(color);
+	h1->SetLineColor(color);
+	h1->SetLineWidth(2);
+	h1->SetLineStyle(0);
+	h1->SetFillStyle(3004);
+
+	h2->SetLineWidth(2);
+	h2->SetFillColor(kRed);
+	h2->SetLineColor(kRed);
+	h2->SetFillColor(kRed);
+	// h2->SetFillStyle(3005);
+
+	float border = 0.3;
+	float scale = (1-border)/border;
+	h_ratio->SetXTitle(h1->GetXaxis()->GetTitle());
+	h_ratio->SetYTitle("Obs./Pred.");
+	h_ratio->GetXaxis()->SetTitleSize(scale * h1->GetXaxis()->GetTitleSize());
+	h_ratio->GetYaxis()->SetTitleSize(scale * h1->GetYaxis()->GetTitleSize());
+	h_ratio->GetXaxis()->SetLabelSize(scale * h1->GetXaxis()->GetLabelSize());
+	h_ratio->GetYaxis()->SetLabelSize(scale * h1->GetYaxis()->GetLabelSize());
+	h_ratio->GetXaxis()->SetTickLength(scale * h1->GetXaxis()->GetTickLength());
+	h_ratio->GetYaxis()->SetTickLength(h1->GetYaxis()->GetTickLength());
+	
+	h_ratio->SetFillStyle(3004);
+	h_ratio->SetLineWidth(2);
+	h_ratio->SetFillColor(color);
+	h_ratio->SetLineColor(color);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 900);
+	col->cd();
+	// col->SetFillStyle(0);
+	// col->SetFrameFillStyle(0);
+	// gPad->SetFillStyle(0);
+
+	TPad *p_plot  = new TPad("plotpad",  "Pad containing the overlay plot", 0.00, border, 1.00, 1.00, 0, 0);
+	p_plot->SetBottomMargin(0);
+	p_plot->Draw();
+	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio",        0.00, 0.00, 1.00, border, 0, 0);
+	p_ratio->SetTopMargin(0);
+	p_ratio->SetBottomMargin(0.35);
+	p_ratio->Draw();
+
+	p_plot->cd();
+	if(logy) p_plot->SetLogy(1);
+
+	setPlottingRange(h1, h2, 0.05, logy);
+	
+	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.65,0.75,0.886,0.88); // Upper right
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("E2");
+	h2->DrawCopy("PE1same");
+	leg->Draw();
+
+	float axmin1 = h1->GetYaxis()->GetXmin();
+	float axmin2 = h2->GetYaxis()->GetXmin();
+	float axmin  = (axmin1<axmin2)?axmin1:axmin2;
+	
+	float axmax1 = h1->GetYaxis()->GetXmax();
+	float axmax2 = h2->GetYaxis()->GetXmax();
+	float axmax  = (axmax1>axmax2)?axmax1:axmax2;
+	
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,axmin,line1x,axmax);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,axmin,line2x,axmax);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	p_plot->Draw();
+	// p_plot->Update();
+
+	p_ratio->cd();
+	if(ratio) h_ratio->Divide(h2,h1);
+	else      h_ratio->Divide(h1,h2);
+	h_ratio->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
+	h_ratio->GetYaxis()->SetTitle("Ratio");
+	h_ratio->DrawCopy("E2 ");
+	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 1.00, h1->GetXaxis()->GetXmax(), 1.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+	gPad->RedrawAxis();
+	p_ratio->Draw();
+
+	col->Update();
+
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	if(logy) outputname += "_log";
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	delete h1;
+	delete h2;
+}
+
+//____________________________________________________________________________
+void AnaClass::plotPredOverlay3HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, TH1D *hist3, TString tag3, bool logy, bool ratio, double line1x, double line2x){
+	TH1D *h1 = new TH1D(*hist1);
+	TH1D *h2 = new TH1D(*hist2);
+	TH1D *h3 = new TH1D(*hist3);
+	gStyle->SetOptStat("");
+	TH1D *h_ratio1 = new TH1D("h_ratio1", "Ratio histogram 1", h1->GetNbinsX(), getBinning(h1));
+	TH1D *h_ratio2 = new TH1D("h_ratio2", "Ratio histogram 2", h1->GetNbinsX(), getBinning(h1));
+	Int_t color1 = 4;
+	Int_t fillstyle1 = 3004;
+	Int_t color2 = 8;
+	Int_t fillstyle2 = 3005;
+	h1->SetLineWidth(2);
+	h1->SetFillColor(kRed);
+	h1->SetLineColor(kRed);
+	h1->SetFillColor(kRed);
+	// h1->SetFillStyle(3005);
+
+	h2->SetFillColor(color1);
+	h2->SetLineColor(color1);
+	h2->SetLineWidth(2);
+	h2->SetLineStyle(0);
+	h2->SetFillStyle(fillstyle1);
+
+	h3->SetFillColor(color2);
+	h3->SetLineColor(color2);
+	h3->SetLineWidth(2);
+	h3->SetLineStyle(0);
+	h3->SetFillStyle(fillstyle2);
+
+	float border = 0.3;
+	float scale = (1-border)/border;
+	h_ratio1->SetXTitle(h1->GetXaxis()->GetTitle());
+	h_ratio1->SetYTitle("Obs./Pred.");
+	h_ratio1->GetXaxis()->SetTitleSize(scale * h1->GetXaxis()->GetTitleSize());
+	h_ratio1->GetYaxis()->SetTitleSize(scale * h1->GetYaxis()->GetTitleSize());
+	h_ratio1->GetXaxis()->SetLabelSize(scale * h1->GetXaxis()->GetLabelSize());
+	h_ratio1->GetYaxis()->SetLabelSize(scale * h1->GetYaxis()->GetLabelSize());
+	h_ratio1->GetXaxis()->SetTickLength(scale * h1->GetXaxis()->GetTickLength());
+	h_ratio1->GetYaxis()->SetTickLength(h1->GetYaxis()->GetTickLength());
+	
+	h_ratio2->SetXTitle(h1->GetXaxis()->GetTitle());
+	h_ratio2->SetYTitle("Obs./Pred.");
+	h_ratio2->GetXaxis()->SetTitleSize(scale * h1->GetXaxis()->GetTitleSize());
+	h_ratio2->GetYaxis()->SetTitleSize(scale * h1->GetYaxis()->GetTitleSize());
+	h_ratio2->GetXaxis()->SetLabelSize(scale * h1->GetXaxis()->GetLabelSize());
+	h_ratio2->GetYaxis()->SetLabelSize(scale * h1->GetYaxis()->GetLabelSize());
+	h_ratio2->GetXaxis()->SetTickLength(scale * h1->GetXaxis()->GetTickLength());
+	h_ratio2->GetYaxis()->SetTickLength(h1->GetYaxis()->GetTickLength());
+	
+	h_ratio1->SetFillStyle(fillstyle1);
+	h_ratio1->SetLineWidth(2);
+	h_ratio1->SetFillColor(color1);
+	h_ratio1->SetLineColor(color1);
+
+	h_ratio2->SetFillStyle(fillstyle2);
+	h_ratio2->SetLineWidth(2);
+	h_ratio2->SetFillColor(color2);
+	h_ratio2->SetLineColor(color2);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName());
+	sprintf(canvname,"%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 900);
+	col->cd();
+	// col->SetFillStyle(0);
+	// col->SetFrameFillStyle(0);
+	// gPad->SetFillStyle(0);
+
+	TPad *p_plot  = new TPad("plotpad",  "Pad containing the overlay plot", 0.00, border, 1.00, 1.00, 0, 0);
+	p_plot->SetBottomMargin(0);
+	p_plot->Draw();
+	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio",        0.00, 0.00, 1.00, border, 0, 0);
+	p_ratio->SetTopMargin(0);
+	p_ratio->SetBottomMargin(0.35);
+	p_ratio->Draw();
+
+	p_plot->cd();
+	if(logy) p_plot->SetLogy(1);
+
+	setPlottingRange(h1, h2, h3, 0.05, logy);
+	
+	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.55,0.75,0.886,0.88); // Upper right
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h2->DrawCopy("E2");
+	h3->DrawCopy("E2, same");
+	h1->DrawCopy("PE1, same");
+	leg->Draw();
+
+	float axmin1  = h1->GetYaxis()->GetXmin();
+	float axmin2  = h2->GetYaxis()->GetXmin();
+	float axmin3  = h3->GetYaxis()->GetXmin();
+	float axmin12 = (axmin1<axmin2)?axmin1:axmin2;
+	float axmin   = (axmin12<axmin3)?axmin12:axmin3;
+	
+	float axmax1  = h1->GetYaxis()->GetXmax();
+	float axmax2  = h2->GetYaxis()->GetXmax();
+	float axmax3  = h3->GetYaxis()->GetXmax();
+	float axmax12 = (axmax1>axmax2)?axmax1:axmax2;
+	float axmax   = (axmax12>axmax3)?axmax12:axmax3;
+	
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,axmin,line1x,axmax);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,axmin,line2x,axmax);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	p_plot->Draw();
+	// p_plot->Update();
+
+	p_ratio->cd();
+	if(ratio){ h_ratio1->Divide(h1,h2); h_ratio2->Divide(h1,h3); }
+	else{      h_ratio1->Divide(h2,h1); h_ratio2->Divide(h3,h1); }
+	setPlottingRange(h_ratio1, h_ratio2, 0.2);
+	h_ratio1->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
+	h_ratio1->GetYaxis()->SetTitle("Ratio");
+	h_ratio1->DrawCopy("E2 ");
+	h_ratio2->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
+	h_ratio2->GetYaxis()->SetTitle("Ratio");
+	h_ratio2->DrawCopy("E2 same");
+	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 1.00, h1->GetXaxis()->GetXmax(), 1.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+	gPad->RedrawAxis();
+	p_ratio->Draw();
+
+	col->Update();
+
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
+	if(logy) outputname += "_log";
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	delete h1;
+	delete h2;
+	delete h3;
+}
+
+//____________________________________________________________________________
+void AnaClass::plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2, TH1F *h3, TString tag3, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+
+	h1->SetLineWidth(2);
+	h1->SetLineColor(kBlack);
+	h1->SetFillColor(kBlack);
+	h1->SetMarkerColor(kBlack);
+	h1->SetMarkerStyle(8);
+	h1->SetMarkerSize(1.2);
+
+	h2->SetLineWidth(2);
+	h2->SetLineColor(kBlue);
+	h2->SetFillColor(kBlue);
+	h2->SetMarkerColor(kBlue);
+	h2->SetMarkerStyle(8);
+	h2->SetMarkerSize(1.2);
+
+	h3->SetLineWidth(2);
+	h3->SetLineColor(kRed);
+	h3->SetFillColor(kRed);
+	h3->SetMarkerColor(kRed);
+	h3->SetMarkerStyle(8);
+	h3->SetMarkerSize(1.2);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName());
+	sprintf(canvname,"%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+	h1->Sumw2();
+	h2->Sumw2();
+	h3->Sumw2();
+
+	// Determine plotting range
+	double max1 = h1->GetMaximum();
+	double max2 = h2->GetMaximum();
+	double max3 = h3->GetMaximum();
+	double max12 = (max1>max2)?max1:max2;
+	double max = (max12>max3)?max12:max3;
+	if(logy) max = 5*max;
+	else max = 1.05*max;
+	h1->SetMaximum(max);
+	h2->SetMaximum(max);
+	h3->SetMaximum(max);
+	if(!logy){
+		h1->SetMinimum(0.0);
+		h2->SetMinimum(0.0);
+		h3->SetMinimum(0.0);
+	}
+
+	TLegend *leg = new TLegend(0.15,0.70,0.35,0.88);
+	// TLegend *leg = new TLegend(0.65,0.69,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("PE1");
+	h2->DrawCopy("PE1, same");
+	h3->DrawCopy("PE1, same");
+	leg->Draw();
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min3 = h3->GetYaxis()->GetXmin();
+	double min12 = (min1<min2)?min1:min2;
+	double min = (min12<min3)?min12:min3;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.58,0.85, "2.67 pb^{ -1} at  #sqrt{s} = 7 TeV");
+
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
+void AnaClass::plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+
+	h1->SetLineWidth(2);
+	h1->SetLineColor(kBlue);
+	h1->SetFillColor(kBlue);
+	h2->SetLineWidth(2);
+	h2->SetLineColor(kRed);
+	h2->SetFillColor(kRed);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	gPad->SetGridy(1);
+	if(logy) col->SetLogy(1);
+
+	setPlottingRange(h1, h2, 0.05, logy);
+
+	// TLegend *leg = new TLegend(0.65,0.45,0.886,0.58);
+	TLegend *leg = new TLegend(0.60,0.75,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("E1");
+	h2->DrawCopy("E1,same");
+	leg->Draw();
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min  = (min1<min2)?min1:min2;
+	double max1 = h1->GetYaxis()->GetXmax();
+	double max2 = h2->GetYaxis()->GetXmax();
+	double max  = (max1>max2)?max1:max2;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+}
+
+/*****************************************************************************
+###################| Utilities |##############################################
+*****************************************************************************/
+
+//____________________________________________________________________________
+TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
+	TFile *file = NULL;
+	TTree *tree = NULL;
+	file = TFile::Open(filename);
+	if(file == NULL){
+		cout << "AnaClass::getTree ==> Input file '" << filename << "' not found, breaking!" << endl;
+		return NULL;
+	}
+	if(subdir != ""){
+		TString treepath = TString(subdir) + "/" + TString(treename);
+		tree = (TTree*)file->Get(treepath);
+	}
+	else tree = (TTree*)file->Get(treename);
+	if(tree == NULL){
+		if(subdir == "") cout << "AnaClass::getTree ==> Tree '" << treename << "' not found, breaking!" << endl;
+		if(subdir != "") cout << "AnaClass::getTree ==> Tree '" << treename << "' in subdir '"<< subdir <<"' not found, breaking!" << endl;
+		return NULL;
+	}
+	return tree;
+}
+
+//____________________________________________________________________________
+TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* tree, bool draw, const char* drawopt){
+	int nbins_auto = nbins;
+	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
+	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xmin,xmax);
+	h1->SetXTitle(convertVarName(arg));
+	tree->Project(histn,arg,reqs);
+	if(draw) h1->Draw(drawopt);
+	return h1;
+}
+
+//____________________________________________________________________________
+TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* tree, bool draw, const char* drawopt){
+	int nbins_auto = nbins;
+	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
+	TH1D* h1 = new TH1D(histn,histn,nbins_auto,xbins);
+	h1->SetXTitle(convertVarName(arg));
+	tree->Project(histn,arg,reqs);
+	if(draw) h1->Draw(drawopt);
+	return h1;
+}
+
+//____________________________________________________________________________
+TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree* tree, bool draw, const char* drawopt){
+	char out[1000];
+	int nbinsx_auto(nbinsx), nbinsy_auto(nbinsy);
+	if(nbinsx == 0) nbinsx_auto = OptNBins(tree->Draw(arg1, reqs, "goff"));
+	if(nbinsy == 0) nbinsy_auto = OptNBins(tree->Draw(arg2, reqs, "goff"));
+	TH2D* h1 = new TH2D(histn,histn,nbinsx_auto,xmin,xmax,nbinsy_auto,ymin,ymax);
+	h1->SetXTitle(convertVarName(arg1));
+	h1->SetYTitle(convertVarName(arg2));
+	sprintf(out,"%s:%s",arg2,arg1);
+	tree->Project(histn,out,reqs);
+	if(draw) h1->Draw(drawopt);
+	return h1;
+}
+
+//____________________________________________________________________________
 TString AnaClass::convertVarName(const char* var){
 /*  - Converts the name of a tree variable into a label for the x-axis      */
 	TString temp = TString(var);
@@ -1800,3 +2065,229 @@ int AnaClass::getExp(double e){
 	expo = s.Atoi();
 	return expo;
 }
+
+//____________________________________________________________________________
+void AnaClass::refValues(const char* var, TH1D* h){
+	double percent1 = 0.05;
+	double percent2 = 0.01;
+	if (!strcmp(var, "MuPt")         || !strcmp(var, "ElPt")      || !strcmp(var, "JPt") ||
+		!strcmp(var, "MuJESCorrMET") || !strcmp(var, "TCMET")     ||
+		!strcmp(var, "PFMET")        || !strcmp(var, "SumEt")     ||
+		!strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
+	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ) {
+		tailFraction(h, percent1);
+		tailFraction(h, percent2);
+	}
+}
+
+//____________________________________________________________________________
+double AnaClass::tailFraction(TH1D* h, double frac){
+	double binValue = -999.;
+	int nbins = h->GetNbinsX();
+	double tail = frac * h->Integral();
+	double tailSum = 0.;
+
+	int loc = 0;
+	for (int i = nbins+1; i >= 0; --i) {
+		tailSum += h->GetBinContent(i);
+		if (tailSum < tail) loc = i;
+		if (tailSum >= tail) break;
+	}
+	if (loc > 0 && loc < nbins) {
+		binValue = h->GetBinCenter(loc);
+		double maxY = 0.5 * h->GetMaximum();
+		double minY = 0.05 * h->GetMaximum();
+		TArrow* arr = new TArrow(binValue, maxY, binValue, minY, 0.02, "|>");
+		arr->SetLineColor(4);
+		arr->SetFillColor(4);
+		arr->Draw();
+		TLatex l;
+		l.SetTextColor(4);
+		l.SetTextSize(0.04);
+		char tit[50];
+		l.SetTextAlign(23);
+		sprintf(tit, "%6.2f ", (float)frac);
+		l.DrawLatex(binValue, 1.1*maxY, tit);
+		l.SetTextAlign(12);
+		sprintf(tit, "%8.3f", (float)binValue);
+		l.DrawLatex(binValue, 0.8*maxY, tit);
+	}
+
+	return binValue;
+}
+
+//____________________________________________________________________________
+void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
+// Prints the CheckList to file filename
+	ofstream file;
+	file.open(filename, ios::app);
+	double percent1 = 0.05;
+	double percent2 = 0.01;
+	double etaLow = 1.44, etaHigh = 3.;
+	double d0PVLow = 0.02, d0PVHigh = 0.5;
+	double isoLow = 0.3, isoHigh = 1.;
+
+	if( !strcmp(var, "MuPt")         || !strcmp(var, "ElPt")         || !strcmp(var, "JPt") ||
+		!strcmp(var, "TCMET")        || !strcmp(var, "MuJESCorrMET") || !strcmp(var, "PFMET") ||
+		!strcmp(var, "SumEt")        || !strcmp(var, "ECALSumEt")    || !strcmp(var, "HCALSumEt") ||
+	!strcmp(var, "PrimVtxPtSum") || !strcmp(var, "TrkPtSum") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;
+		file << printTailFraction(var, h, percent1) << endl;
+		file << printTailFraction(var, h, percent2) << endl;
+	}
+	if( !strcmp(var, "MuDzPV")       || !strcmp(var, "MuNChi2")      ||
+		!strcmp(var, "MuNTkHits")      || !strcmp(var, "ElDzPV")       ||
+		!strcmp(var, "Elfbrem")        || !strcmp(var, "JEMfrac")      || !strcmp(var, "JCHfrac")      ||
+		!strcmp(var, "JNConstituents") || !strcmp(var, "MuIso03SumPt") ||
+		!strcmp(var, "MuIso03EmEt")    || !strcmp(var, "MuIso03HadEt") || 
+	!strcmp(var, "ElPtSum")        || !strcmp(var, "ElEmEtSum")    || !strcmp(var, "ElHadEtSum") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;
+	}
+	if( !strcmp(var, "MuEta") || !strcmp(var, "ElEta") || !strcmp(var, "JEta") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;
+		file << printRatio(var, h, etaLow, etaHigh, -etaHigh, etaHigh) << endl;
+		file << printRatio(var, h, -etaHigh, -etaLow, -etaHigh, etaHigh) << endl;
+		file << printRatio(var, h, 0., etaLow, -etaLow, 0.) << endl;
+	}
+	if( !strcmp(var, "PrimVtxx")       || !strcmp(var, "PrimVtxy")     || !strcmp(var, "PrimVtxz") ||
+		!strcmp(var, "PrimVtxNdof") || !strcmp(var, "PrimVtxNChi2") ||!strcmp(var, "NTracks")   ||
+	!strcmp(var, "MuEem")          || !strcmp(var, "MuEHad") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;
+	}
+	if( !strcmp(var, "MuD0PV") || !strcmp(var, "ElD0PV") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;
+		file << printRatio(var, h, -d0PVLow, d0PVLow, -d0PVHigh, d0PVHigh) << endl;
+	}
+	if( !strcmp(var, "MuRelIso03") || !strcmp(var, "ElRelIso04") ){
+		file << "* " << var << endl;
+		file << printAverage(var, h) << endl;;
+		file << printRatio(var, h, 0., isoLow, 0., isoHigh) << endl;
+	}
+}
+
+//____________________________________________________________________________
+TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
+// Prints the value of the variable for which frac remains in the tail
+
+	double binValue = -999.;
+	double dbinValue = -999.;
+	int nbins = h->GetNbinsX();
+	double nevts = h->Integral();
+	double tail = frac * nevts;
+	double dtail = frac * sqrt(nevts);
+	double tailp = tail + dtail;
+	double tailm = tail - dtail;
+	double tailSum = 0.;
+
+	int loc = 0, locp = 0, locm = 0;
+	for (int i = nbins+1; i >= 0; --i) {
+		tailSum += h->GetBinContent(i);
+		if (tailSum < tail) loc = i;
+		if (tailSum < tailp) locp = i;
+		if (tailSum < tailm) locm = i;
+		if (tailSum >= tailp) break;
+	}
+	if (loc > 0 && loc < nbins){
+		binValue = h->GetBinCenter(loc);
+		if (locm > 0 && locp < nbins) {
+			dbinValue = 0.5*(h->GetBinCenter(locm)-h->GetBinCenter(locp));
+		} else if (locp <= 0 && locm < nbins) {
+			dbinValue = binValue - h->GetBinCenter(locp);
+		} else if (locp > 0 && locm >= nbins) {
+			dbinValue = h->GetBinCenter(locp) - binValue;
+		}
+	}
+	if (nevts > 0) {
+		double binSize = h->GetBinWidth(loc);
+		if (binSize > dbinValue) dbinValue = binSize;
+	} else {
+		binValue = 0.;
+		dbinValue = 0.;
+	}
+	TString result = Form("  For %f of tail %s = %f +- %f", frac, var, binValue, dbinValue);
+	return result;
+}
+
+//____________________________________________________________________________
+TString AnaClass::printAverage(const char* var, TH1D* h) {
+// Prints the average of the histogram
+
+	double nevts = h->GetEntries();
+	double aver, daver;
+	if (nevts > 0) {
+		aver = h->GetMean(1);
+		double rms = h->GetRMS(1);
+		daver = rms / sqrt(nevts);
+	} else {
+		aver = 0.;
+		daver = 0.;
+	}
+	TString result = Form("  Mean value of %s = %f +- %f", var, aver, daver);
+	return result;
+}
+
+//____________________________________________________________________________
+TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2){
+// Prints the ratio of entries for which (x1<var<x2) / (y1<var<y2)
+
+	int nbins = h->GetNbinsX();
+	double sumx1y1 = 0.;
+	double sumx2y2 = 0.;
+	double sumx1y2 = 0.;
+	double sumx2y1 = 0.;
+	double xmin = h->GetXaxis()->GetXmin();
+	double xmax = h->GetXaxis()->GetXmax();
+	if (x1 < xmin) x1 = xmin;
+	if (x2 > xmax) x2 = xmax;
+	if (y1 < xmin) y1 = xmin;
+	if (y2 > xmax) y2 = xmax;
+
+	for (int i = 1; i < nbins; ++i) {
+		double xy = h->GetBinCenter(i);
+		double content = h->GetBinContent(i);
+		if ( (xy - x1)*(xy - y1) < 0.) sumx1y1 += content;
+		if ( (xy - x2)*(xy - y2) < 0.) sumx2y2 += content;
+		if ( (xy - x1)*(xy - y2) < 0.) sumx1y2 += content;
+		if ( (xy - x2)*(xy - y1) < 0.) sumx2y1 += content;
+	}
+	double xy1 = (x1 - y1)*(x1 - y2);
+	double xy2 = (x2 - y1)*(x2 - y2);
+
+	double xunc = 0.;
+	double yunc = 0.;
+	double xycor = 0.;
+	if (xy1 <= 0. && xy2 <= 0.) {
+		xunc  = 0.;
+		yunc  = sumx1y1 + sumx2y2;
+		xycor = sumx1y2 - sumx2y2;
+	} else if (xy1 > 0. && xy2 <= 0.) {
+		xunc  = sumx1y1;
+		yunc  = sumx2y2;
+		xycor = sumx2y1;
+	} else if (xy1 > 0. && xy2 > 0.) {
+		xunc  = sumx1y1 - sumx2y1;
+		yunc  = sumx2y2 - sumx2y1;
+		xycor = 0.;
+	} else if (xy1 <= 0. && xy2 > 0.) {
+		xunc  = sumx2y2;
+		yunc  = sumx1y1;
+		xycor = sumx1y2;
+	}
+
+	double rat = -999., drat = -999.;
+	if (yunc+xycor != 0.) {
+		rat = (xunc+xycor) / (yunc+xycor);
+		drat = sqrt( (yunc+xycor)*(yunc+xycor)*xunc
+			+ (xunc+xycor)*(xunc+xycor)*yunc
+			+ (yunc-xunc)*(yunc-xunc)*xycor )
+			/ ( (yunc+xycor)*(yunc+xycor) );
+	}
+	TString result = Form("  Ratio (%f<%s<%f) / (%f<%s<%f) = %f +- %f", x1, var, x2, y1, var, y2, rat, drat);
+	return result;
+}
+
