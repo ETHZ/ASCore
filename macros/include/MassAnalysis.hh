@@ -40,6 +40,10 @@ private:
 	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
 	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
 	void MassesForTTbar();
+	vector<TLorentzVector> GetLepton4Momenta();
+
+
+
 	Davismt2 *fMT2;
 	Hemisphere *fHemisphere;
 	
@@ -56,7 +60,11 @@ private:
 	TH1D* fHMT2_dijet[10];
 	TH1D* fHMT2_diBjet[10];
 	TH1D* fHMT2_pseudojet[10];
-	      
+	TH1D* fHMT2_diBjetdiLept[10];
+	TH1D* fHMT2_PseudoJetsWithB[10];      
+	TH1D* fHMT2_PseudoJetsWithLeptons[10];
+	TH1D* fHMT2_PseudoJetClean[10];       
+
 	TH1D* fHMT2_OSll[10];
 	TH1D* fHMT2_OSee[10];
 	TH1D* fHMT2_OSmumu[10];
@@ -79,7 +87,8 @@ private:
 	TH1D* fHMCTperp_OSee;  
 	TH1D* fHMCTperp_OSmumu;
 	TH1D* fHMCTperp_OSemu; 
-	
+
+	TH1D* fHMCT_TTbar;	
 	TH1D* fHMCTperp_TTbar;	
 	TH1D* fHMT2_TTbar;
 	TH1D* fHMT2perp_TTbar;
