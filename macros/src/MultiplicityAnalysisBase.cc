@@ -65,7 +65,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[fElecs[i]], fTR->JPhi[ij], fTR->ElPhi[fElecs[i]]);
 			if(deltaR < 0.4)   JGood=false;
 		}
-		if(JGood=false) continue;
+		if(JGood==false) continue;
 		fJets.push_back(ij);
 		pt1.push_back(fTR->JPt[ij]);
 
@@ -75,7 +75,10 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		pt2.push_back(fTR->JPt[ij]);	
 	}
 	fJets  = Util::VSort(fJets,  pt1);
-	fBJets = Util::VSort(fBJets, pt2);	
+	fBJets = Util::VSort(fBJets, pt2);
+
+
+
 }
 
 void MultiplicityAnalysisBase::FindLeptonConfig(){
