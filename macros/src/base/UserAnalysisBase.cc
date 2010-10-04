@@ -387,9 +387,25 @@ bool UserAnalysisBase::IsGoodBasicPho(int index){
 }
 
 // Event selections:
+bool UserAnalysisBase::IsGoodEvent(){
+	// Some cuts on the primary vertex
+	double pvx = fTR->PrimVtxx;
+	double pvy = fTR->PrimVtxy;
+	double pvz = fTR->PrimVtxz;
+	double bsx = fTR->Beamspotx;
+	double bsy = fTR->Beamspoty;
+	double bsz = fTR->Beamspotz;
+	if(fabs(pvz) > 20.) return false;
+	if(sqrt(pow((pvx-bsx),2) + pow((pvy-bsy),2)) > 0.02) return false;
+	if(fTR->PrimVtxNdof < 10) return false;
+	if(fTR->PrimVtxNChi2 > 10) return false;
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodMuEvent(){
-	string MuonHLTName = "HLT_Mu9"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1
-	return GetHLTResult(MuonHLTName);	
+	if(!IsGoodEvent()) return false;
+	string MuonHLTName = "HLT_Mu9";
+	return GetHLTResult(MuonHLTName);
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){

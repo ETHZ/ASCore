@@ -61,6 +61,7 @@ public:
 	virtual bool IsGoodBasicPho(int);
 
 	// Event Selectors
+	virtual bool IsGoodEvent();
 	virtual bool IsGoodMuEvent();
 	virtual bool IsGoodElEvent();
 	virtual vector<int> MuonSelection();
