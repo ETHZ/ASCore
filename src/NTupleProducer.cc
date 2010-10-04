@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.78 2010/09/09 10:39:37 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.79 2010/10/04 14:44:13 jueugste Exp $
 //
 //
 
@@ -453,6 +453,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   int countVrtx=-1;
   for(VertexCollection::const_iterator vertexit = vertices->begin(); vertexit != vertices->end(); ++vertexit) {
     countVrtx++;
+    if(countVrtx >= gMaxnvrtx){
+      edm::LogWarning("NTP") << "@SUB=analyze()"
+                             << "Maximum number of vertices exceeded";
+      fTgoodevent = 1;
+		fTflagmaxvrtxexc = 1;
+      break;
+    }
+
     fTvrtxx[countVrtx]     = vertexit->x();
     fTvrtxy[countVrtx]     = vertexit->y();
     fTvrtxz[countVrtx]     = vertexit->z();
@@ -463,6 +471,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTvrtxchi2[countVrtx]  = vertexit->normalizedChi2();
     fTvrtxntrks[countVrtx] = vertexit->nTracks();
     fTvrtxsumpt[countVrtx] = vertexit->p4().pt();
+    fTvrtxisfake[countVrtx] = vertexit->isFake();
   }
   fTnvrtx = countVrtx+1;
 
@@ -1593,32 +1602,33 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("HLTObjectEta",fTHLTObjectEta[0] ,TString("HLTObjectEta"+dimensions+"/D"));
   fEventTree->Branch("HLTObjectPhi",fTHLTObjectPhi[0] ,TString("HLTObjectPhi"+dimensions+"/D"));
   //
-  fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx         ,"PrimVtxGood/I");
-  fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx        ,"PrimVtxx/D");
-  fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy        ,"PrimVtxy/D");
-  fEventTree->Branch("PrimVtxz"         ,&fTprimvtxz        ,"PrimVtxz/D");	
-  fEventTree->Branch("PrimVtxRho"       ,&fTprimvtxrho      ,"PrimVtxRho/D");	
-  fEventTree->Branch("PrimVtxxE"        ,&fTprimvtxxE       ,"PrimVtxxE/D");
-  fEventTree->Branch("PrimVtxyE"        ,&fTprimvtxyE       ,"PrimVtxyE/D");
-  fEventTree->Branch("PrimVtxzE"        ,&fTprimvtxzE       ,"PrimVtxzE/D");
-  fEventTree->Branch("PrimVtxNChi2"     ,&fTpvtxznchi2      ,"PrimVtxNChi2/D");
-  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof        ,"PrimVtxNdof/I");
-  fEventTree->Branch("PrimVtxIsFake"    ,&fTpvtxisfake      ,"PrimVtxIsFake/I");
-  fEventTree->Branch("PrimVtxPtSum"     ,&fTpvtxptsum       ,"PrimVtxPtSum/D");
-  fEventTree->Branch("Beamspotx"        ,&fTbeamspotx       ,"Beamspotx/D");
-  fEventTree->Branch("Beamspoty"        ,&fTbeamspoty       ,"Beamspoty/D");
-  fEventTree->Branch("Beamspotz"        ,&fTbeamspotz       ,"Beamspotz/D");
-  fEventTree->Branch("NCaloTowers"      ,&fTNCaloTowers     ,"NCaloTowers/I");
-  fEventTree->Branch("GoodEvent"        ,&fTgoodevent       ,"GoodEvent/I");
-  fEventTree->Branch("MaxMuExceed"      ,&fTflagmaxmuexc    ,"MaxMuExceed/I");
-  fEventTree->Branch("MaxElExceed"      ,&fTflagmaxelexc    ,"MaxElExceed/I");
-  fEventTree->Branch("MaxJetExceed"     ,&fTflagmaxjetexc   ,"MaxJetExceed/I");
-  fEventTree->Branch("MaxUncJetExceed"  ,&fTflagmaxujetexc  ,"MaxUncJetExceed/I");
-  fEventTree->Branch("MaxTrkExceed"     ,&fTflagmaxtrkexc   ,"MaxTrkExceed/I");
-  fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc   ,"MaxPhotonsExceed/I");
-  fEventTree->Branch("HBHENoiseFlag",    &fTHBHENoiseFlag   ,"HBHENoiseFlag/I");
+  fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
+  fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/D");
+  fEventTree->Branch("PrimVtxy"         ,&fTprimvtxy          ,"PrimVtxy/D");
+  fEventTree->Branch("PrimVtxz"         ,&fTprimvtxz          ,"PrimVtxz/D");	
+  fEventTree->Branch("PrimVtxRho"       ,&fTprimvtxrho        ,"PrimVtxRho/D");	
+  fEventTree->Branch("PrimVtxxE"        ,&fTprimvtxxE         ,"PrimVtxxE/D");
+  fEventTree->Branch("PrimVtxyE"        ,&fTprimvtxyE         ,"PrimVtxyE/D");
+  fEventTree->Branch("PrimVtxzE"        ,&fTprimvtxzE         ,"PrimVtxzE/D");
+  fEventTree->Branch("PrimVtxNChi2"     ,&fTpvtxznchi2        ,"PrimVtxNChi2/D");
+  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof          ,"PrimVtxNdof/I");
+  fEventTree->Branch("PrimVtxIsFake"    ,&fTpvtxisfake        ,"PrimVtxIsFake/I");
+  fEventTree->Branch("PrimVtxPtSum"     ,&fTpvtxptsum         ,"PrimVtxPtSum/D");
+  fEventTree->Branch("Beamspotx"        ,&fTbeamspotx         ,"Beamspotx/D");
+  fEventTree->Branch("Beamspoty"        ,&fTbeamspoty         ,"Beamspoty/D");
+  fEventTree->Branch("Beamspotz"        ,&fTbeamspotz         ,"Beamspotz/D");
+  fEventTree->Branch("NCaloTowers"      ,&fTNCaloTowers       ,"NCaloTowers/I");
+  fEventTree->Branch("GoodEvent"        ,&fTgoodevent         ,"GoodEvent/I");
+  fEventTree->Branch("MaxMuExceed"      ,&fTflagmaxmuexc      ,"MaxMuExceed/I");
+  fEventTree->Branch("MaxElExceed"      ,&fTflagmaxelexc      ,"MaxElExceed/I");
+  fEventTree->Branch("MaxJetExceed"     ,&fTflagmaxjetexc     ,"MaxJetExceed/I");
+  fEventTree->Branch("MaxUncJetExceed"  ,&fTflagmaxujetexc    ,"MaxUncJetExceed/I");
+  fEventTree->Branch("MaxTrkExceed"     ,&fTflagmaxtrkexc     ,"MaxTrkExceed/I");
+  fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc     ,"MaxPhotonsExceed/I");
+  fEventTree->Branch("MaxGenLepExceed"  ,&fTflagmaxgenleptexc ,"MaxGenLepExceed/I");
+  fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
+  fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
 
-	
   // Gen-Leptons
   fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
   fEventTree->Branch("GenLeptonID"      ,&fTGenLeptonId         ,"GenLeptonID[NGenLeptons]/I");
@@ -1636,7 +1646,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("GenLeptonGMEta"   ,&fTGenLeptonGMEta      ,"GenLeptonGMEta[NGenLeptons]/D");
   fEventTree->Branch("GenLeptonGMPhi"   ,&fTGenLeptonGMPhi      ,"GenLeptonGMPhi[NGenLeptons]/D");
 
-	
   // Vertices:
   fEventTree->Branch("NVrtx",            &fTnvrtx           ,"NVrtx/I");
   fEventTree->Branch("VrtxX",            &fTvrtxx           ,"VrtxX[NVrtx]/D");
@@ -1649,6 +1658,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("VrtxChi2",         &fTvrtxchi2        ,"VrtxChi2[NVrtx]/D");
   fEventTree->Branch("VrtxNtrks",        &fTvrtxntrks       ,"VrtxNtrks[NVrtx]/D");
   fEventTree->Branch("VrtxSumPt",        &fTvrtxsumpt       ,"VrtxSumPt[NVrtx]/D");	
+  fEventTree->Branch("VrtxIsFake",       &fTvrtxisfake      ,"VrtxIsFake[NVrtx]/I");	
 	
   // Muons:
   fEventTree->Branch("NMus"             ,&fTnmu              ,"NMus/I");
@@ -2179,14 +2189,27 @@ void NTupleProducer::resetTree(){
   fTNCaloTowers = -999;
   fTHBHENoiseFlag = -999;
 
-  fTgoodevent        = 0;
-  fTflagmaxmuexc     = 0;
-  fTflagmaxelexc     = 0;
-  fTflagmaxujetexc = 0;
-  fTflagmaxjetexc    = 0;
-  fTflagmaxtrkexc    = 0;
-  fTflagmaxphoexc    = 0;
-  fTflagmaxgenleptexc= 0;
+  resetDouble(fTvrtxx,     gMaxnvrtx);
+  resetDouble(fTvrtxy,     gMaxnvrtx);
+  resetDouble(fTvrtxz,     gMaxnvrtx);
+  resetDouble(fTvrtxxE,    gMaxnvrtx);
+  resetDouble(fTvrtxyE,    gMaxnvrtx);
+  resetDouble(fTvrtxzE,    gMaxnvrtx);
+  resetDouble(fTvrtxndof,  gMaxnvrtx);
+  resetDouble(fTvrtxchi2,  gMaxnvrtx);
+  resetDouble(fTvrtxntrks, gMaxnvrtx);
+  resetDouble(fTvrtxsumpt, gMaxnvrtx);
+  resetInt(fTvrtxisfake,   gMaxnvrtx);
+ 
+  fTgoodevent         = 0;
+  fTflagmaxmuexc      = 0;
+  fTflagmaxelexc      = 0;
+  fTflagmaxujetexc    = 0;
+  fTflagmaxjetexc     = 0;
+  fTflagmaxtrkexc     = 0;
+  fTflagmaxphoexc     = 0;
+  fTflagmaxgenleptexc = 0;
+  fTflagmaxvrtxexc    = 0;
 
   fTnmu         = 0;
   fTnmutot      = 0;

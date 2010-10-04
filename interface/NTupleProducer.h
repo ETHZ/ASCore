@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.63 2010/09/09 10:39:36 fronga Exp $
+// $Id: NTupleProducer.h,v 1.64 2010/10/04 14:44:13 jueugste Exp $
 //
 //
 
@@ -263,6 +263,7 @@ private:
   double fTvrtxchi2[gMaxnvrtx];
   double fTvrtxntrks[gMaxnvrtx];
   double fTvrtxsumpt[gMaxnvrtx];
+  int fTvrtxisfake[gMaxnvrtx];
 
   int fTNCaloTowers;
 
@@ -287,7 +288,7 @@ private:
   double** fTHLTObjectPhi;
 
   // Flags
-  int fTgoodevent;         // 1 for good events, 0 for bad events
+  int fTgoodevent;         // 0 for good events, 1 for bad events
   int fTflagmaxmuexc;      // Found more than 20 muons in event (0 is good, 1 is bad)
   int fTflagmaxelexc;      // Found more than 20 electrons in event
   int fTflagmaxujetexc;    // Found more than 50 jets in event
@@ -295,6 +296,7 @@ private:
   int fTflagmaxtrkexc;     // Found more than 500 tracks in event
   int fTflagmaxphoexc;     // Found more than 500 photons in event
   int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
+  int fTflagmaxvrtxexc;    // Found more than 25 vertices in event
   
   // GenLeptons
   
