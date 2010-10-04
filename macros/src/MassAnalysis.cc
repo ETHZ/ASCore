@@ -199,34 +199,43 @@ void MassAnalysis::Analyze(){
 		// fill histos
 		if(fLeptConfig==OS_ee){
 			double MCT=GetMCT(p1, p2);
-			double MCTperp=GetMCTperp(p1, p2, P_UTM);
 			fHMCT_OSee     -> Fill(MCT);	
-			fHMCTperp_OSee -> Fill(MCTperp);
-			for(int i=0; i<fMT2_histos_number; ++i){
-				double m_inv =i*fMT2_histos_step;
-				double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
-				fHMT2perp_OSee[i] -> Fill(MT2perp);
+			if(P_UTM != (0.,0.,0.,0.)){
+				double MCTperp=GetMCTperp(p1, p2, P_UTM);
+				fHMCTperp_OSee -> Fill(MCTperp);
+			
+				for(int i=0; i<fMT2_histos_number; ++i){
+					double m_inv =i*fMT2_histos_step;
+					double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
+					fHMT2perp_OSee[i] -> Fill(MT2perp);
+				}
 			}
 		} else if(fLeptConfig==OS_mumu){
 			double MCT=GetMCT(p1, p2);
-			double MCTperp=GetMCTperp(p1, p2, P_UTM);
 			fHMCT_OSmumu     -> Fill(MCT);	
-			fHMCTperp_OSmumu -> Fill(MCTperp);
-			for(int i=0; i<fMT2_histos_number; ++i){
-				double m_inv =i*fMT2_histos_step;
-				double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
-				fHMT2perp_OSmumu[i] -> Fill(MT2perp);
+			if(P_UTM != (0.,0.,0.,0.)){
+				double MCTperp=GetMCTperp(p1, p2, P_UTM);
+				fHMCTperp_OSmumu -> Fill(MCTperp);
+
+				for(int i=0; i<fMT2_histos_number; ++i){
+					double m_inv =i*fMT2_histos_step;
+					double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
+					fHMT2perp_OSmumu[i] -> Fill(MT2perp);
+				}
 			}
 		} else if(fLeptConfig==OS_emu){
 			double MCT=GetMCT(p1, p2);
-			double MCTperp=GetMCTperp(p1, p2, P_UTM);
 			fHMCT_OSemu     -> Fill(MCT);	
-			fHMCTperp_OSemu -> Fill(MCTperp);
-			for(int i=0; i<fMT2_histos_number; ++i){
-				double m_inv =i*fMT2_histos_step;
-				double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
-				fHMT2perp_OSemu[i] -> Fill(MT2perp);
-			}
+			if(P_UTM != (0.,0.,0.,0.)){
+				double MCTperp=GetMCTperp(p1, p2, P_UTM);
+				fHMCTperp_OSemu -> Fill(MCTperp);
+			
+				for(int i=0; i<fMT2_histos_number; ++i){
+					double m_inv =i*fMT2_histos_step;
+					double MT2perp=GetMT2perp(p1, p2, P_UTM, m_inv);
+					fHMT2perp_OSemu[i] -> Fill(MT2perp);
+				}
+			}	
 		}
 		
 	}
@@ -283,11 +292,12 @@ double MassAnalysis::GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVe
 	TVector3 p1_T_perp  =  GetMomPerp(p1, P_UTM); 
 	TVector3 p2_T_perp  =  GetMomPerp(p2, P_UTM);
 	
-	double E1_T_perp = sqrt( pow(m1,2) + p1_T_perp.Mag2() );
-	double E2_T_perp = sqrt( pow(m2,2) + p2_T_perp.Mag2() );	
+	double E1_T_perp = pow( pow(m1,2) + p1_T_perp.Mag2() ,0.5);
+	double E2_T_perp = pow( pow(m2,2) + p2_T_perp.Mag2() ,0.5);	
 	
-	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Dot(p2_T_perp)) );
-		
+//	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Dot(p2_T_perp)) );
+	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Mag()*p2_T_perp.Mag()*cos(p1_T_perp.Angle(p2_T_perp))) );
+
 	return MCT_perp;
 }
 
@@ -296,7 +306,10 @@ double MassAnalysis::GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVe
 	TVector3 p1_T_perp =  GetMomPerp(p1, P_UTM);
 	TVector3 p2_T_perp =  GetMomPerp(p2, P_UTM);
 	
-	double A_T_perp   = 1/2.*(p1_T_perp.Mag()*p2_T_perp.Mag()+p1_T_perp.Dot(p2_T_perp) );
+	// double A_T_perp   = 1/2.*(p1_T_perp.Mag()*p2_T_perp.Mag()+p1_T_perp.Dot(p2_T_perp) );
+	// above implementation is problematic: A_T_perp is sometimes <0 (presicion problem) 
+	// workaround: implementation below
+	double A_T_perp   = 1/2.*( p1_T_perp.Mag()*p2_T_perp.Mag() * (1+cos(p1_T_perp.Angle(p2_T_perp)) ));
 	double MT2_perp   = sqrt(A_T_perp) + sqrt(A_T_perp + pow(m_inv,2));
 	
 	return MT2_perp;
