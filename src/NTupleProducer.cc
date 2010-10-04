@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.79 2010/10/04 14:44:13 jueugste Exp $
+// $Id: NTupleProducer.cc,v 1.80 2010/10/04 15:37:50 stiegerb Exp $
 //
 //
 
@@ -2224,7 +2224,7 @@ void NTupleProducer::resetTree(){
   fTnphotons    = 0;
   fTnphotonstot = 0;
   fTngenleptons = 0;
-	
+  fTnvrtx       = 0;
 	
   resetInt(fTGenLeptonId       ,gMaxngenlept);
   resetDouble(fTGenLeptonPt    ,gMaxngenlept);
