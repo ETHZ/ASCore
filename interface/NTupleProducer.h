@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.62 2010/09/08 16:37:31 fronga Exp $
+// $Id: NTupleProducer.h,v 1.63 2010/09/09 10:39:36 fronga Exp $
 //
 //
 
@@ -116,6 +116,7 @@ private:
   static const int gMaxntrks    = 500;
   static const int gMaxnphos    = 50;
   static const int gMaxngenlept = 100;
+  static const int gMaxnvrtx    = 25;
 
   edm::InputTag fMuonTag;
   edm::InputTag fElectronTag;
@@ -250,6 +251,18 @@ private:
   double fTbeamspotx;
   double fTbeamspoty;
   double fTbeamspotz;
+
+  int fTnvrtx;
+  double fTvrtxx[gMaxnvrtx];
+  double fTvrtxy[gMaxnvrtx];
+  double fTvrtxz[gMaxnvrtx];
+  double fTvrtxxE[gMaxnvrtx];
+  double fTvrtxyE[gMaxnvrtx];
+  double fTvrtxzE[gMaxnvrtx];
+  double fTvrtxndof[gMaxnvrtx];
+  double fTvrtxchi2[gMaxnvrtx];
+  double fTvrtxntrks[gMaxnvrtx];
+  double fTvrtxsumpt[gMaxnvrtx];
 
   int fTNCaloTowers;
 

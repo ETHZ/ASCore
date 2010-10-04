@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.77 2010/09/08 16:37:32 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.78 2010/09/09 10:39:37 fronga Exp $
 //
 //
 
@@ -448,6 +448,23 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     fTpvtxptsum += (*trackit)->pt();
   }
   fTgoodvtx     = 0;
+
+  // get all vertices
+  int countVrtx=-1;
+  for(VertexCollection::const_iterator vertexit = vertices->begin(); vertexit != vertices->end(); ++vertexit) {
+    countVrtx++;
+    fTvrtxx[countVrtx]     = vertexit->x();
+    fTvrtxy[countVrtx]     = vertexit->y();
+    fTvrtxz[countVrtx]     = vertexit->z();
+    fTvrtxxE[countVrtx]    = vertexit->xError();
+    fTvrtxyE[countVrtx]    = vertexit->yError();
+    fTvrtxzE[countVrtx]    = vertexit->zError(); 
+    fTvrtxndof[countVrtx]  = vertexit->ndof();
+    fTvrtxchi2[countVrtx]  = vertexit->normalizedChi2();
+    fTvrtxntrks[countVrtx] = vertexit->nTracks();
+    fTvrtxsumpt[countVrtx] = vertexit->p4().pt();
+  }
+  fTnvrtx = countVrtx+1;
 
 
   // Save position of beamspot
@@ -1620,8 +1637,18 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("GenLeptonGMPhi"   ,&fTGenLeptonGMPhi      ,"GenLeptonGMPhi[NGenLeptons]/D");
 
 	
-	
-	
+  // Vertices:
+  fEventTree->Branch("NVrtx",            &fTnvrtx           ,"NVrtx/I");
+  fEventTree->Branch("VrtxX",            &fTvrtxx           ,"VrtxX[NVrtx]/D");
+  fEventTree->Branch("VrtxY",            &fTvrtxy           ,"VrtxY[NVrtx]/D");
+  fEventTree->Branch("VrtxZ",            &fTvrtxz           ,"VrtxZ[NVrtx]/D");
+  fEventTree->Branch("VrtxXE",           &fTvrtxxE          ,"VrtxXE[NVrtx]/D");
+  fEventTree->Branch("VrtxYE",           &fTvrtxyE          ,"VrtxYE[NVrtx]/D");
+  fEventTree->Branch("VrtxZE",           &fTvrtxzE          ,"VrtxZE[NVrtx]/D");
+  fEventTree->Branch("VrtxNdof",         &fTvrtxndof        ,"VrtxNdof[NVrtx]/D");
+  fEventTree->Branch("VrtxChi2",         &fTvrtxchi2        ,"VrtxChi2[NVrtx]/D");
+  fEventTree->Branch("VrtxNtrks",        &fTvrtxntrks       ,"VrtxNtrks[NVrtx]/D");
+  fEventTree->Branch("VrtxSumPt",        &fTvrtxsumpt       ,"VrtxSumPt[NVrtx]/D");	
 	
   // Muons:
   fEventTree->Branch("NMus"             ,&fTnmu              ,"NMus/I");
