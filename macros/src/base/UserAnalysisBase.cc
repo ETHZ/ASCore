@@ -392,13 +392,14 @@ bool UserAnalysisBase::IsGoodEvent(){
 	double pvx = fTR->PrimVtxx;
 	double pvy = fTR->PrimVtxy;
 	double pvz = fTR->PrimVtxz;
-	double bsx = fTR->Beamspotx;
-	double bsy = fTR->Beamspoty;
-	double bsz = fTR->Beamspotz;
-	if(fabs(pvz) > 20.) return false;
-	if(sqrt(pow((pvx-bsx),2) + pow((pvy-bsy),2)) > 0.02) return false;
-	if(fTR->PrimVtxNdof < 10) return false;
-	if(fTR->PrimVtxNChi2 > 10) return false;
+	// double bsx = fTR->Beamspotx;
+	// double bsy = fTR->Beamspoty;
+	// double bsz = fTR->Beamspotz;
+	if(fTR->PrimVtxIsFake) return false;
+	if(fabs(pvz) > 24.) return false;
+	if(sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
+	// if(sqrt(pow((pvx-bsx),2) + pow((pvy-bsy),2)) > 0.05) return false; // Wrt the BS
+	if(fTR->PrimVtxNdof < 5) return false;
 	return true;
 }
 
