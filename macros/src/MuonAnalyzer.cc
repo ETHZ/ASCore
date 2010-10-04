@@ -33,6 +33,12 @@ void MuonAnalyzer::Loop(){
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTree->GetEntry(jentry);
+		if( fCurRun != fTR->Run ){
+			fCurRun = fTR->Run;
+			fMuonAnalysis->BeginRun(fCurRun);
+			fMuonAnalysisDi->BeginRun(fCurRun);
+			fMuonAnalysisSS->BeginRun(fCurRun);
+		}
 
 		fMuonAnalysis->Analyze();
 		fMuonAnalysisDi->AnalyzeDi();

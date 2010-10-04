@@ -20,18 +20,21 @@ void MuonAnalysis::Begin(){
 }
 
 void MuonAnalysis::Analyze(){
+	if(!IsGoodMuEvent()) return; // Trigger, etc.
 	int muind(-1);
 	if(!SingleMuonSelection(muind)) return;
 	FillMuonTree(muind);
 }
 
 void MuonAnalysis::AnalyzeDi(){
+	if(!IsGoodMuEvent()) return;
 	int muind1(-1), muind2(-1);
 	if(!DiMuonSelection(muind1, muind2, -1)) return;
 	FillMuonTree(muind1, muind2);
 }
 
 void MuonAnalysis::AnalyzeSS(){
+	if(!IsGoodMuEvent()) return;
 	int muind1(-1), muind2(-1);
 	if(!SSDiMuonSelection(muind1, muind2)) return;
 	FillMuonTree(muind1, muind2);
