@@ -12,7 +12,9 @@ process.MessageLogger.cerr.NTP = cms.untracked.PSet(
     reportEvery = cms.untracked.int32(1)
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
+                                      fileMode = cms.untracked.string("NOMERGE")
+                                    )
 
 ### Parsing of command line parameters #############################################
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
