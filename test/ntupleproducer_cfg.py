@@ -18,22 +18,19 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
 options = VarParsing.VarParsing ('standard') # set 'standard'  options
 options.register ('runon', # register 'runon' option
-                  'data', # the default value
+                  'data',  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
-options.register ('recoType',									# register 'recoType' option
-                  'RECO',										# the default value
+options.register ('recoType',    # register 'recoType' option
+                  'RECO',        # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-#options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
-options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-#options.files= '/store/mc/Spring10/MinBias_TuneD6T_7TeV-pythia6/GEN-SIM-RECO/START3X_V26B-v1/0012/F4FB0378-445F-DF11-84A1-003048779609.root'
-#options.files= 'file:///data/susy/reco/TTbarJets-madgraph-Spring10-START3X_V26_S09-v1-GEN-SIM-RECO.root'
-#options.files= 'file:///data/susy/reco/Mu-Run2010A-RECO-142663.root'
+options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+# options.files= 'file:///data/stiegerb/MC/QCD_Pt-20_TuneD6T_7TeV-pythia6/Summer10-START36_V10_multilepton-v1/GEN-SIM-RECO/F4E29097-7CA7-DF11-996A-90E6BA442F02.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -63,16 +60,20 @@ process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex3TrkES_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
 
+process.mybtag = cms.Sequence( process.simpleSecondaryVertexHighPurBJetTags
+                             * process.simpleSecondaryVertexHighEffBJetTags )
+
 ### Input/Output ###############################################################
 # Input
 process.source = cms.Source("PoolSource",
       fileNames = cms.untracked.vstring(options.files)
-#Enable if you see duplicate error      duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
+      # Enable if you see duplicate error:
+      # duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 # Output
 process.TFileService = cms.Service("TFileService",
-# keep track of the type of data source and reco type in the ntuple file name
+# Keep track of the type of data source and reco type in the ntuple file name
 	fileName = cms.string(options.output),  
 	closeFileFast = cms.untracked.bool(True)
 )
@@ -82,8 +83,7 @@ process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
 #### Produce JPT jets #########################################################
 process.load('RecoJets.Configuration.RecoJPTJets_cff')
-					
-					
+
 #### Parameterisation for Jet Corrections and JES ME Corrections ###############
 recoJet_src = "ak5CaloJets"
 genJet_src = "ak5GenJets"
@@ -96,48 +96,52 @@ process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
 # to check what cff to use
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.jecCorSequence = cms.Sequence(
-    process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3*process.ak5JPTJetsL2L3
-    )
-### NB: also check the analysis input below.		
+if options.runon=='data':
+	process.jecCorSequence = cms.Sequence(
+		process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL2L3Residual*process.ak5JPTJetsL2L3Residual
+	)
+else:
+	process.jecCorSequence = cms.Sequence(
+		process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3*process.ak5JPTJetsL2L3
+	)
+### NB: also check the analysis input below.
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
 process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
 process.metMuonJESCorAK5.inputUncorJetsLabel = recoJet_src
-#[FR: already default] process.metMuonJESCorAK5.corrector = "ak5CaloL2L3"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
 ### Cleaning ###################################################################
 # flag HB/HE noise
+# Need both since Filter does not put results in the event
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
-process.cleaning = cms.Sequence(process.HBHENoiseFilterResultProducer)
+process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
+process.cleaning = cms.Sequence(process.HBHENoiseFilter)
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 if options.runon=='data':
-    # require physics declared
-    process.load('HLTrigger.special.hltPhysicsDeclared_cfi')
-    process.hltPhysicsDeclared.L1GtReadoutRecordTag = 'gtDigis'
-
     # require scraping filter
     process.scrapingVeto = cms.EDFilter("FilterOutScraping",
-                                        applyfilter = cms.untracked.bool(True),
-                                        debugOn = cms.untracked.bool(False),
-                                        numtrack = cms.untracked.uint32(10),
-                                        thresh = cms.untracked.double(0.2)
-                                        )
+         applyfilter = cms.untracked.bool(True),
+         debugOn = cms.untracked.bool(False),
+         numtrack = cms.untracked.uint32(10),
+         thresh = cms.untracked.double(0.25)
+         )
 
     # require good primary vertex
     process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
-                                               vertexCollection = cms.InputTag('offlinePrimaryVertices'),
-                                               minimumNDOF = cms.uint32(4) ,
-                                               maxAbsZ = cms.double(15),
-                                               maxd0 = cms.double(2)
-                                               )
+         vertexCollection = cms.InputTag('offlinePrimaryVertices'),
+         minimumNDOF = cms.uint32(4) ,
+         maxAbsZ = cms.double(24),
+         maxd0 = cms.double(2)
+         )
     # Cleaning path
-    process.cleaning *= process.scrapingVeto*process.hltPhysicsDeclared*process.primaryVertexFilter
+    # Removed primary vertex cut, can cut offline
+    process.cleaning *= process.scrapingVeto
+    # process.cleaning *= process.scrapingVeto*process.primaryVertexFilter
 
 
 ### GenJets ####################################################################
@@ -145,8 +149,7 @@ if options.runon=='data':
 process.load("RecoJets.Configuration.GenJetParticles_cff")
 process.load("RecoJets.Configuration.RecoGenJets_cff")	
 
-process.mygenjets = cms.Sequence( process.genParticlesForJets
-								* process.ak5GenJets )
+process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJets )
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
@@ -185,11 +188,26 @@ process.analyze.jets = (
               corrections = cms.string('ak5CaloL2L3'),
               ),
     )
+
+# Add residual correction for running on data (temporary fix)
+if options.runon == 'data':
+        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual' 
+        for extJet in process.analyze.jets:
+            extJet.corrections = extJet.corrections.value() + 'Residual'
+            if extJet.prefix.value() == 'JPT':
+                extJet.tag = cms.untracked.InputTag(extJet.tag.value() + 'Residual')
+
 # If MC, take the HLT from REDIGI
-if options.runon!='data':
+if options.runon != 'data':
     process.analyze.tag_hlttrig = "TriggerResults::REDIGI"
 # Dump object information for some HLT trigger filters (from confDB)
-process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3','hltSingleMu5L3Filtered5','hltSingleMu9L3Filtered9','hltL1NonIsoHLTNonIsoSingleElectronLWEt10PixelMatchFilter', 'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter','hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter','hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter']
+process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
+                              'hltSingleMu5L3Filtered5',
+                              'hltSingleMu9L3Filtered9',
+                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
+                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter',
+                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter',
+                              'hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter']
 
 
 #### DEBUG #####################################################################
@@ -204,23 +222,20 @@ process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3','hltSingleMu5L3Filtered5
 #                                      )
 
 #### Path ######################################################################
-process.mybtag = cms.Sequence(	process.simpleSecondaryVertexHighPurBJetTags
-								* process.simpleSecondaryVertexHighEffBJetTags )
-
 process.p = cms.Path(
-    process.recoJPTJets  
+    process.cleaning *
+    ( process.recoJPTJets  
+    + process.HBHENoiseFilterResultProducer
     + process.mygenjets
-    + process.cleaning
     + process.jecCorSequence
     + process.recoJetIdSequence
     + process.simpleEleIdSequence
     + process.metCorSequence
     + process.mybtag
-	#	+ process.dump
-    + process.analyze
+    # + process.dump
+    + process.analyze )
     )
 
 # remove ak5GenJets from the path if it will run on data
 if options.runon=='data':
-	process.p.remove(process.mygenjets)
-
+    process.p.remove(process.mygenjets)
