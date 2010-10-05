@@ -109,8 +109,11 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 }
 
 
-bool MultiplicityAnalysisBase::IsGoodEvent(){
+bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	
+	// goodevt from UserAnalysisBase
+	if(!IsGoodEvent()) {return false;}
+
 	// Run
 	if(fTR->Run < fCut_Run_min ) {return false;}
 	if(fTR->Run > fCut_Run_max ) {return false;}

@@ -18,7 +18,7 @@ public:
 
 	void ReadCuts(const char* SetofCuts);
 
-	bool IsGoodEvent();
+	bool IsSelectedEvent();
 	void InitializeEvent();
 	double GetDiLeptInvMass();
 	

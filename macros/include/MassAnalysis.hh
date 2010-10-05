@@ -30,18 +30,21 @@ public:
 
 
 private:
-	void DiLeptonMT2();
-	void JetMT2();
-	double GetMT2(double pa[], double pb[], double pmiss[], int m_invisible);
+	void DiLeptonMasses();
+	void DiJetMasses();
+	void DiBJetMasses();
+	void PseudoJetMasses();
+	void OSDiLeptonMasses();
+	void MassesForTTbar();
+
+	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
 	double GetMCT(TLorentzVector p1, TLorentzVector p2);
 	double GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM);
 	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
 	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
-	void MassesForTTbar();
 	vector<TLorentzVector> GetLepton4Momenta();
-
 
 
 	Davismt2 *fMT2;

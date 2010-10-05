@@ -45,7 +45,7 @@ void MultiplicityAnalysis::Analyze(){
 
 	// --------------------------------------------------------------------
 	// check if event passes selection cuts and trigger requirements
-	if(! IsGoodEvent()){return;}
+	if(! IsSelectedEvent()){return;}
 	// --------------------------------------------------------------------
 	counter ++;
 	

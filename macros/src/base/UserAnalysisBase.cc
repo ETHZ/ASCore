@@ -199,22 +199,8 @@ bool UserAnalysisBase::IsGoodEl_TDL(int index){
 	if( fabs(fTR->ElEta[index]) > etaEgapLowerEdge && fabs(fTR->ElEta[index]) < etaEgapUpperEdge) return false;
 	if( fTR->ElD0BS[index] >= 0.04 ) return false;
 	
-	// conversion rejection
-	if( fTR->ElNumberOfMissingInnerHits[index] > 1) return false;
-	if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
-	
-	// el id
-	if(fabs(fTR->ElEta[index]) < etaEgapLowerEdge){// for barrel
-		if(fTR->ElSigmaIetaIeta[index] > 0.01) return false;
-		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.8) return false;
-		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
-		if( fTR->ElHcalOverEcal[index] > 0.12 ) return false;
-	}else if(fabs(fTR->ElEta[index]) > etaEgapUpperEdge){ // for endcap
-		if(fTR->ElSigmaIetaIeta[index] > 0.03) return false;
-		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.7) return false;
-		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.009) return false;
-		if( fTR->ElHcalOverEcal[index] > 0.05 ) return false;		
-	}
+	// conversion rejection && ID WP90
+	if(fTR->ElIDsimpleWPrelIso[index]!=5 && fTR->ElIDsimpleWPrelIso[index]!=7) return false;	
 	
 	// isolation
 	double elIsoEcal;
