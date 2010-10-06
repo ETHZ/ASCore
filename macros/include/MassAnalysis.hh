@@ -30,12 +30,15 @@ public:
 
 
 private:
+	void SingleLeptonMasses();
 	void DiLeptonMasses();
 	void DiJetMasses();
 	void DiBJetMasses();
+	void MultiBMasses();
 	void PseudoJetMasses();
 	void OSDiLeptonMasses();
 	void MassesForTTbar();
+	void ControlPlots();
 
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
@@ -45,7 +48,7 @@ private:
 	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
 	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
 	vector<TLorentzVector> GetLepton4Momenta();
-
+	bool IsCleanJetEvent();
 
 	Davismt2 *fMT2;
 	Hemisphere *fHemisphere;
@@ -104,9 +107,21 @@ private:
 	TH1D* fHInvMassSSee;
 	TH1D* fHInvMassSSmumu;
 	TH1D* fHInvMassSSemu; 	
-	TH1D* fHInvMassSSll;  	
-	
-	
+	TH1D* fHInvMassSSll;  
+	TH1D* fHInvMassDijet;	
+	TH1D* fHInvMassdiBHemi;
+	TH1D* fHInvMassDiBjet;
+
+	TH1D* fHJpt;   
+	TH1D* fHJEta;  
+	TH1D* fHBJpt; 
+	TH1D* fHBJEta; 
+
+	TH1D* fHMT_single_e;
+	TH1D* fHMT_single_mu;
+	TH1D* fHMT_single_e_nojets; 
+	TH1D* fHMT_single_mu_nojets;
+
 	TH2D *fHMT2_vs_M_OSDiLept;
 	
 	

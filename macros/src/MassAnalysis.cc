@@ -48,7 +48,20 @@ void MassAnalysis::Begin(){
 	fHInvMassSSmumu    = new TH1D("InvMass_SSmumu",  " Inv Mass of SS di-leptons mumu" , 30, 0, 300);
 	fHInvMassSSemu     = new TH1D("InvMass_SSemu" ,  " Inv Mass of SS di-leptons emu"  , 30, 0, 300);
 	fHInvMassSSll      = new TH1D("InvMass_SSll"  ,  " Inv Mass of SS di-leptons ll"   , 30, 0, 300);
-	
+	fHInvMassDijet     = new TH1D("InvMassDijet"  ,  " Inv Mass of cleaned Di-Jets"    ,100, 0, 500);
+	fHInvMassDiBjet    = new TH1D("InvMassDiBjet" ,  " Inv Mass of cleaned Di-BJets"   ,100, 0, 500);
+	fHInvMassdiBHemi   = new TH1D("InvMassdiBHemi",  " Inv Mass of two b jets in same hemosphere", 50, 0, 300);
+
+	fHJpt              = new TH1D("JPt"           ,  "Jet Pt, all selected jets",      100, 0., 500);  
+	fHJEta             = new TH1D("JEta"          ,  "Jet Eta, all selected jets",     100, -3,   3);
+	fHBJpt             = new TH1D("JBPt"          ,  "BJet Pt, all selected jets",     100, 0., 500);
+	fHBJEta            = new TH1D("JBEta"         ,  "BJet Eta, all selected jets",    100, -3,   3);
+
+	fHMT_single_e         = new TH1D("MT_single_e "  ,  " transverse mass of el, MET "    ,100, 0, 200);
+	fHMT_single_mu	      = new TH1D("MT_single_mu"  ,  " transverse mass of mu, MET "    ,100, 0, 200);
+	fHMT_single_e_nojets  = new TH1D("MT_single_e_nojets "  ,  " transverse mass of el, MET, no jets in event "    ,100, 0, 200);
+	fHMT_single_mu_nojets = new TH1D("MT_single_mu_nojets"  ,  " transverse mass of mu, MET, no jets in event "    ,100, 0, 200);
+
 		
 	for(int i=0; i<fMT2_histos_number; ++i){
 		std::stringstream out;
@@ -91,6 +104,12 @@ void MassAnalysis::Analyze(){
 	if(! IsSelectedEvent()){return;}
 	// --------------------------------------------------------------------
 
+	// Controll Plots
+	ControlPlots();
+
+	// Single Leptons (e, mu)
+	SingleLeptonMasses();
+
 	// Mass distributions for OS dileptons
 	DiLeptonMasses();
 
@@ -105,6 +124,24 @@ void MassAnalysis::Analyze(){
 
 	// Masses for TTbar on GenLevel
 	MassesForTTbar();
+
+}
+
+
+// ************************************************************************************************
+void MassAnalysis::ControlPlots(){
+	
+	// Jet Pt spectrum
+	for(int i=0; i<fJets.size(); ++i){
+		fHJpt  -> Fill(fTR->JPt[fJets[i]]);
+		fHJEta -> Fill(fTR->JEta[fJets[i]]);
+	}
+
+	// bjets PT spectrum
+	for(int i=0; i<fBJets.size(); ++i){
+		fHBJpt  -> Fill(fTR->JPt[fBJets[i]]);
+		fHBJEta -> Fill(fTR->JEta[fBJets[i]]);
+	}
 
 }
 
@@ -158,18 +195,11 @@ void MassAnalysis::PseudoJetMasses(){
 	}
 	delete fHemisphere;
 		
-	// count the number of jets > 30 GeV regardless of other acceptence and ID cuts
-	int jcounter =0;
-	for(int i=0; i<fTR->NJets; ++i){
-		if(fTR->JPt[i]>30) jcounter++; 
-	}
-	bool jet_acceptance(true);
-	if(jcounter != fJets.size()) jet_acceptance = false; 
-
+	// plot MT2 histos
 	for(int i=0; i<fMT2_histos_number; ++i){
 		double MT2=GetMT2(pseudojet1, 0., pseudojet2, 0., pmiss, i*fMT2_histos_step);
 		fHMT2_pseudojet[i] -> Fill(MT2);
-		if(fLeptConfig == null && jet_acceptance){fHMT2_PseudoJetClean[i]->Fill(MT2);}
+		if(fLeptConfig == null &&  IsCleanJetEvent()==true ){fHMT2_PseudoJetClean[i]->Fill(MT2);}
 		if(fLeptConfig!= null) {fHMT2_PseudoJetsWithLeptons[i] -> Fill(MT2);}
 		if(fBJets.size()>0) {fHMT2_PseudoJetsWithB[i]->Fill(MT2);} 
 	}
@@ -177,23 +207,18 @@ void MassAnalysis::PseudoJetMasses(){
 
 
 	// ----------------------------------------------
-	// AlphaT does not make sense....
-	std::vector<TLorentzVector> jets;
-	jcounter =0;
-	for(int i=0; i<fTR->NJets; ++i){
-		if(fTR->JPt[i]>30) jcounter++;
-	}
+	// AlphaT 
+	
 	// requiring no leptons, and no jets above 30 that failed the selection
-	if(fLeptConfig == null && fJets.size()!=0 && fTR->JPt[fJets[0]] > 150 && jcounter == fJets.size() ){
+	if( IsCleanJetEvent()==true && fTR->JPt[fJets[0]] > 150 ){
+		std::vector<TLorentzVector> jets;
 		for(int i=0; i<fJets.size(); ++i){
 			TLorentzVector v;
 	 		v.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]], fTR->JPz[fJets[i]], fTR->JE[fJets[i]]);
 	 		jets.push_back(v);
 	 	}
 	 	double alphaT= GetAlphaT(jets);
-	 	if(fJets.size()>2){  // should be jets.size()
-	 		fHAlpahT_PseudoJet->Fill(alphaT);
-	 	}
+	 	fHAlpahT_PseudoJet->Fill(alphaT);
 	}
 
 }
@@ -201,10 +226,15 @@ void MassAnalysis::PseudoJetMasses(){
 // **************************************************************************************************
 void MassAnalysis::DiBJetMasses(){
 	if(fBJets.size()!=2) return;
-		
+
 	TLorentzVector p1, p2;
 	p1.SetPxPyPzE(fTR->JPx[fBJets[0]], fTR->JPy[fBJets[0]], fTR->JPz[fBJets[0]], fTR->JE[fBJets[0]]);
 	p2.SetPxPyPzE(fTR->JPx[fBJets[1]], fTR->JPy[fBJets[1]], fTR->JPz[fBJets[1]], fTR->JE[fBJets[1]]);
+
+	// -------------------------------------------
+	// invariant mass
+	double mass = (p1+p2).M();
+	fHInvMassDiBjet -> Fill(mass);
 
 	// -------------------------------------------
 	// MCT
@@ -233,20 +263,62 @@ void MassAnalysis::DiBJetMasses(){
 			fHMT2_diBjetdiLept[i] -> Fill(MT2);
 		}
 	}
+
 }
 
+// ***************************************************************************************************
+void MassAnalysis::MultiBMasses(){
+	if( fBJets.size()<3 ) return;
+	
+	// inv mass of two bjets if they are in the same hemisphere
+	// the idea: in SUSY, higgs from decay of heavy particle -> boosted. H->b bbar, with two b in same hemi
+	vector<float> px, py, pz, E;
+	for(int i=0; i<fJets.size(); ++i ){
+		px.push_back(fTR->JPx[fJets[i]]);
+		py.push_back(fTR->JPy[fJets[i]]);
+		pz.push_back(fTR->JPz[fJets[i]]);
+		E.push_back(fTR->JE[fJets[i]]);
+	}
+		
+	fHemisphere = new Hemisphere(px, py, pz, E, 2, 3);
+	vector<int> grouping = fHemisphere->getGrouping();
+	vector<int> b_group1, b_group2;
+	for(int i=0; i<fJets.size(); ++i){
+		if(grouping[i]==1 && fTR->JbTagProbSimpSVHighPur[fJets[i]] > 2.0) b_group1.push_back(fJets[i]);
+		if(grouping[i]==2 && fTR->JbTagProbSimpSVHighPur[fJets[i]] > 2.0) b_group2.push_back(fJets[i]);
+	}
 
+	TLorentzVector b1, b2;
+	if(b_group1.size()==2 && b_group2.size()<2){
+		b1.SetPxPyPzE(fTR->JPx[b_group1[0]],fTR->JPy[b_group1[0]],fTR->JPz[b_group1[0]],fTR->JE[b_group1[0]]);
+		b2.SetPxPyPzE(fTR->JPx[b_group1[1]],fTR->JPy[b_group1[1]],fTR->JPz[b_group1[1]],fTR->JE[b_group1[1]]);
+	} else if(b_group1.size()<2 && b_group2.size()==2){
+		b1.SetPxPyPzE(fTR->JPx[b_group2[0]],fTR->JPy[b_group2[0]],fTR->JPz[b_group2[0]],fTR->JE[b_group2[0]]);
+		b2.SetPxPyPzE(fTR->JPx[b_group2[1]],fTR->JPy[b_group2[1]],fTR->JPz[b_group2[1]],fTR->JE[b_group2[1]]);
+	}
+
+	double invmass = (b1+b2).M();
+		
+	fHInvMassdiBHemi -> Fill(invmass);
+
+}
 
 
 
 // ***************************************************************************************************
 void MassAnalysis::DiJetMasses(){
-	if( fJets.size()!=2 ) return;
+	if( fJets.size()!=2 ) return;    // only look at dijets
+	if(! IsCleanJetEvent()) return;  // reject events that have selected leptons or more jets that fail the selection
+
 	TLorentzVector p1;
 	TLorentzVector p2;		
 	p1.SetPxPyPzE(fTR->JPx[fJets[0]], fTR->JPy[fJets[0]], fTR->JPz[fJets[0]], fTR->JE[fJets[0]]);
 	p2.SetPxPyPzE(fTR->JPx[fJets[1]], fTR->JPy[fJets[1]], fTR->JPz[fJets[1]], fTR->JE[fJets[1]]);
-		
+	
+	// --------------------------------------------------
+	// invariant mass
+	fHInvMassDijet -> Fill((p1+p2).M());
+
 	// ------------------------------------------------
 	// MCT
 	double MCT=GetMCT(p1, p2);
@@ -263,24 +335,41 @@ void MassAnalysis::DiJetMasses(){
 	}
 
 	// --------------------------------------------------
-	// alphaT : this implementation does not make sense...
-	std::vector<TLorentzVector> jets;
-	int jcounter =0;
-	for(int i=0; i<fTR->NJets; ++i){
-		        if(fTR->JPt[i]>30) jcounter++;
-	}
+	// alphaT  
 	// requiring no leptons, and no jets above 30 that failed the selection
-	if(fLeptConfig == null && fJets.size()!=0 && fTR->JPt[fJets[0]] > 150 && jcounter == fJets.size() ){
-		for(int i=0; i<fJets.size(); ++i){
-			TLorentzVector v;
-	 		v.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]], fTR->JPz[fJets[i]], fTR->JE[fJets[i]]);
-	 		jets.push_back(v);
-	 	}
+	if( fTR->JPt[fJets[0]] > 150 ){
+		std::vector<TLorentzVector> jets;
+		jets.push_back(p1);
+		jets.push_back(p2);
 	 	double alphaT= GetAlphaT(jets);
-	 	if(fJets.size()==2){  // should be jets.size()
-	 		fHAlpahT_DiJet->Fill(alphaT);
-	 	}
+	 	fHAlpahT_DiJet->Fill(alphaT);
 	}
+}
+
+// ****************************************************************************************************
+void MassAnalysis::SingleLeptonMasses(){
+	if(! (fLeptConfig==e || fLeptConfig==mu) ) return;
+
+	// compute transverse mass
+	TLorentzVector l;
+	if(fLeptConfig==e) {l.SetPtEtaPhiE(fTR->ElPt[fElecs[0]],fTR->ElEta[fElecs[0]],fTR->ElPhi[fElecs[0]],fTR->ElE[fElecs[0]]);}
+	if(fLeptConfig==mu){l.SetPtEtaPhiM(fTR->MuPt[fMuons[0]],fTR->MuEta[fMuons[0]],fTR->MuPhi[fMuons[0]],0.105);}
+
+	double ETlept = sqrt(l.M2() + l.Perp2());
+	double METpt  = fTR->PFMET;
+	double METpx  = fTR->PFMETpx;
+	double METpy  = fTR->PFMETpy;
+	double MT     = sqrt(2*METpt*ETlept - 2*l.Px()*METpx - 2*l.Py()*METpy );
+
+	if(fLeptConfig==e ){fHMT_single_e -> Fill(MT);}
+	if(fLeptConfig==mu){fHMT_single_mu-> Fill(MT);}
+
+	
+	if(fJets.size()!=0) return; // plots also MT in case there are no selected jets (pure W -> l nu selection..)
+
+	if(fLeptConfig==e ){fHMT_single_e_nojets -> Fill(MT);}
+	if(fLeptConfig==mu){fHMT_single_mu_nojets-> Fill(MT);}
+
 }
 
 // ****************************************************************************************************
@@ -307,7 +396,16 @@ void MassAnalysis::DiLeptonMasses(){
 
 	double MCT    =GetMCT(p1, p2);
 	double mass   =(p1+p2).M();
+
+	// check Zmass window for mass plots other than invmass
+	bool Zmassveto(false);
+	if(fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
+		if (mass > fCut_DiLeptOSSFInvMass_lowercut) Zmassveto=true;
+		if (mass < fCut_DiLeptOSSFInvMass_uppercut) Zmassveto=true;
+	}
+
 	
+	// calculate mass variables
 	if(P_UTM != (0.,0.,0.,0.)) {
 		MCTperp=GetMCTperp(p1, p2, P_UTM);
 	}
@@ -327,25 +425,29 @@ void MassAnalysis::DiLeptonMasses(){
 	if(fLeptConfig==OS_ee){
 		fHInvMassOSee   -> Fill(mass);
 		fHInvMassOSll   -> Fill(mass);	
-		if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSee -> Fill(MCTperp);
-		fHMCT_OSee      -> Fill(MCT);
-		for(int i=0; i<fMT2_histos_number; ++i){
-			fHMT2_OSll[i]     -> Fill(MT2[i]);
-			fHMT2_OSee[i]     -> Fill(MT2[i]);
-			if(P_UTM != (0.,0.,0.,0.)) {
-				fHMT2perp_OSee[i] -> Fill(MT2perp[i]);
+		if(Zmassveto==false){
+			if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSee -> Fill(MCTperp);
+			fHMCT_OSee      -> Fill(MCT);
+			for(int i=0; i<fMT2_histos_number; ++i){
+				fHMT2_OSll[i]     -> Fill(MT2[i]);
+				fHMT2_OSee[i]     -> Fill(MT2[i]);
+				if(P_UTM != (0.,0.,0.,0.)) {
+					fHMT2perp_OSee[i] -> Fill(MT2perp[i]);
+				}	
 			}
 		}
 	} else if(fLeptConfig==OS_mumu){
 		fHInvMassOSmumu -> Fill(mass);
 		fHInvMassOSll   -> Fill(mass);	
-		if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSmumu -> Fill(MCTperp);
-		fHMCT_OSmumu      -> Fill(MCT);
-		for(int i=0; i<fMT2_histos_number; ++i){
-			fHMT2_OSll[i]       -> Fill(MT2[i]);
-			fHMT2_OSmumu[i]     -> Fill(MT2[i]);
-			if(P_UTM != (0.,0.,0.,0.)) {
-				fHMT2perp_OSmumu[i] -> Fill(MT2perp[i]);
+		if(Zmassveto==false){
+			if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSmumu -> Fill(MCTperp);
+			fHMCT_OSmumu      -> Fill(MCT);
+			for(int i=0; i<fMT2_histos_number; ++i){
+				fHMT2_OSll[i]       -> Fill(MT2[i]);
+				fHMT2_OSmumu[i]     -> Fill(MT2[i]);
+				if(P_UTM != (0.,0.,0.,0.)) {
+					fHMT2perp_OSmumu[i] -> Fill(MT2perp[i]);
+				}
 			}
 		}
 	} else if(fLeptConfig==OS_emu){
@@ -535,6 +637,18 @@ vector<TLorentzVector> MassAnalysis::GetLepton4Momenta(){
 	return momenta;
 }
 
+// ***************************************************************************************************
+bool MassAnalysis::IsCleanJetEvent(){
+	// count the number of jets > 30 GeV regardless of other acceptence and ID cuts
+	int jcounter =0;
+	for(int i=0; i<fTR->NJets; ++i){
+		if(fTR->JPt[i]>30) jcounter++; 
+	}
+	if(jcounter != fJets.size()) return false;
+	if(fLeptConfig != null) return false;
+	return true;
+}
+
 // ****************************************************************************************************
 void MassAnalysis::End(){
 	fHistFile->cd();	
@@ -596,6 +710,19 @@ void MassAnalysis::End(){
 	fHInvMassSSmumu          ->Write();
 	fHInvMassSSemu           ->Write();
 	fHInvMassSSll            ->Write();
+	fHInvMassDijet           ->Write();
+	fHInvMassDiBjet          ->Write(); 
+	fHInvMassdiBHemi         ->Write();
 	
+	fHJpt                    ->Write();  
+	fHJEta                   ->Write();
+	fHBJpt                   ->Write();
+	fHBJEta                  ->Write();
+
+	fHMT_single_e            ->Write();
+	fHMT_single_mu           ->Write(); 
+	fHMT_single_e_nojets     ->Write();
+	fHMT_single_mu_nojets    ->Write();
+
 	fHistFile                ->Close();
 }
