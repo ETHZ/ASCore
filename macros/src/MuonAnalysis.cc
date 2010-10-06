@@ -5,6 +5,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TVector3.h>
+#include <TLorentzVector.h>
 
 using namespace std;
 
@@ -69,6 +70,14 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 	fTMET   = fTR->PFMET;
 	fTSumET = fTR->SumEt;
 	
+	// Calculate mT:
+	TLorentzVector pmu;
+	pmu.SetPtEtaPhiM(fTR->MuPt[ind1], fTR->MuEta[ind1], fTR->MuPhi[ind1], 0.105);
+	double ETlept = sqrt(pmu.M2() + pmu.Perp2());
+	double METpx  = fTR->PFMETpx;
+	double METpy  = fTR->PFMETpy;
+	fTMT          = sqrt( fTMET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
+	
 	// Muon Variables
 	int nmus(0);
 	for(size_t imu = 0; imu < fTR->NMus; ++imu) if(IsGoodBasicMu(imu)) nmus++;
@@ -114,9 +123,14 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 		fTmutype   [i] = mu.get_type();
 		fTmumotype [i] = mo.get_type();
 		fTmugmotype[i] = gmo.get_type();
-
 	}
 	fTnmus = nmus;
+	
+	TLorentzVector pmu1, pmu2;
+	pmu1.SetXYZM(fTR->MuPx[indices[0]], fTR->MuPy[indices[0]], fTR->MuPz[indices[0]], 0.105);
+	pmu2.SetXYZM(fTR->MuPx[indices[1]], fTR->MuPy[indices[1]], fTR->MuPz[indices[1]], 0.105);
+	TLorentzVector pdimu = pmu1 + pmu2;
+	fTMinv = pdimu.Mag();
 	
 	fMuTree->Fill();
 }
@@ -134,6 +148,8 @@ void MuonAnalysis::BookTree(){
 	fMuTree->Branch("HT"            ,&fTHT,        "HT/D");
 	fMuTree->Branch("MHT"           ,&fTMHT,       "MHT/D");
 	fMuTree->Branch("MET"           ,&fTMET,       "MET/D");
+	fMuTree->Branch("MT"            ,&fTMT,        "MT/D");
+	fMuTree->Branch("Minv"          ,&fTMinv,      "Minv/D");
 	fMuTree->Branch("SumET"         ,&fTSumET,     "SumET/D");
 	fMuTree->Branch("NMus"          ,&fTnmus,      "NMus/I");
 	fMuTree->Branch("MuPt"          ,&fTmupt,      "MuPt[2]/D");
@@ -169,6 +185,8 @@ void MuonAnalysis::ResetTree(){
 	fTMHT     = -999.99;
 	fTMET     = -999.99;
 	fTSumET   = -999.99;
+	fTMT      = -999.99;
+	fTMinv    = -999.99;
 	for(int i = 0; i<gMaxnjets; i++){
 		fTjpt[i]  = -999.99;
 		fTjeta[i] = -999.99;		

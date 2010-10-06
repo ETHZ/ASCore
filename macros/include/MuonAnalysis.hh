@@ -13,11 +13,6 @@
 #include "base/TreeReader.hh"
 #include "base/UserAnalysisBase.hh"
 
-static const int gNPtbins = 3;
-static const int gNEtabins = 5;
-static const double gPtbins[gNPtbins+1] = {10., 15., 20., 35.};
-static const double gEtabins[gNEtabins+1] = {-2.4, -1.4, -0.5, 0.5, 1.4, 2.4};
-
 class MuonAnalysis : public UserAnalysisBase{
 public:
 	MuonAnalysis(TreeReader *tr = 0);
@@ -48,6 +43,8 @@ private:
 	double fTHT;
 	double fTMHT;
 	double fTMET;
+	double fTMT;
+	double fTMinv;
 	double fTSumET; // Directly from NTupleProducer, i.e. scalar sum of all calotower.et()
 	int fTnmus;
 	double fTmupt[2];
