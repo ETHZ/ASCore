@@ -36,6 +36,12 @@ private:
 	int fTrun;
 	int fTevent;
 	int fTlumisec;
+	int fT_HLTMu9;
+	int fT_HLTDoubleMu3;
+	int fT_HLTJet30U;
+	int fT_HLTJet50U;
+	int fT_HLTJet70U;
+	int fT_HLTJet100U;
 	int fTnjets;
 	double fTjpt[gMaxnjets];
 	double fTjeta[gMaxnjets];

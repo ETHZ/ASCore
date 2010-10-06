@@ -22,7 +22,6 @@ void UserAnalysisBase::BeginRun(Int_t& run) {
   GetHLTNames(run);
 }
 
-
 void UserAnalysisBase::ReadPDGTable(const char* filename){
 // Fills the fPDGMap map from a textfile to associate pdgids with names
 	int pdgid(0), type(0);
@@ -63,21 +62,21 @@ int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
 
 void UserAnalysisBase::GetHLTNames(Int_t& run){
 	TFile *f = fTR->fChain->GetCurrentFile();
-        TTree* runTree = (TTree*)f->Get("analyze/RunInfo");
-        std::vector<std::string>* HLTNames;
-        if ( !runTree ) {
-          std::cerr << "!!! UserAnalysisBase::GetHLTNames "
-                    << "Coudln't get analyze/RunInfo tree" << std::endl;
-          return;
-        }
+	TTree* runTree = (TTree*)f->Get("analyze/RunInfo");
+	std::vector<std::string>* HLTNames;
+	if ( !runTree ) {
+		std::cerr << "!!! UserAnalysisBase::GetHLTNames "
+		          << "Couldn't get analyze/RunInfo tree" << std::endl;
+		return;
+	}
 	//TH1I *hlt_stats = (TH1I*)f->Get("analyze/HLTTriggerStats");
 
-        if ( fVerbose>0 ) std::cout << "Retrieving HLTNames for run " << run << std::endl;
-        runTree->SetBranchAddress("HLTNames",&HLTNames);
-        runTree->GetEntryWithIndex(run);
+	if ( fVerbose>0 ) std::cout << "Retrieving HLTNames for run " << run << std::endl;
+	runTree->SetBranchAddress("HLTNames",&HLTNames);
+	runTree->GetEntryWithIndex(run);
 
 	for( int i=0; i < HLTNames->size(); i++ ) 
-          fHLTLabelMap[(*HLTNames)[i]] = i; 
+		fHLTLabelMap[(*HLTNames)[i]] = i; 
 }
 
 int UserAnalysisBase::GetHLTBit(string theHltName){
@@ -107,8 +106,6 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 }
 
 // Object selections:
-
-
 bool UserAnalysisBase::IsGoodJ_TDL(int index) {
 
 	if( fTR->JPt[index] < 30. ) 			return false;
@@ -378,21 +375,22 @@ bool UserAnalysisBase::IsGoodEvent(){
 	double pvx = fTR->PrimVtxx;
 	double pvy = fTR->PrimVtxy;
 	double pvz = fTR->PrimVtxz;
-	// double bsx = fTR->Beamspotx;
-	// double bsy = fTR->Beamspoty;
-	// double bsz = fTR->Beamspotz;
 	if(fTR->PrimVtxIsFake) return false;
 	if(fabs(pvz) > 24.) return false;
 	if(sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
-	// if(sqrt(pow((pvx-bsx),2) + pow((pvy-bsy),2)) > 0.05) return false; // Wrt the BS
 	if(fTR->PrimVtxNdof < 5) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodMuEvent(){
 	if(!IsGoodEvent()) return false;
-	string MuonHLTName = "HLT_Mu9";
-	return GetHLTResult(MuonHLTName);
+	bool HLT_Mu9       = GetHLTResult("HLT_Mu9");
+	bool HLT_DoubleMu3 = GetHLTResult("HLT_DoubleMu3");
+	bool HLT_Jet30U    = GetHLTResult("HLT_Jet30U");
+	bool HLT_Jet50U    = GetHLTResult("HLT_Jet50U");
+	bool HLT_Jet70U    = GetHLTResult("HLT_Jet70U");
+	bool HLT_Jet100U   = GetHLTResult("HLT_Jet100U");
+	return (HLT_Mu9 || HLT_DoubleMu3 || HLT_Jet30U || HLT_Jet50U || HLT_Jet70U || HLT_Jet100U);
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){
