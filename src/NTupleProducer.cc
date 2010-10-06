@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.80 2010/10/04 15:37:50 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.81 2010/10/04 15:44:09 stiegerb Exp $
 //
 //
 
@@ -807,15 +807,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
       if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
         fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
-        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *ebRecHits );
-        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *ebRecHits );
+        fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *ebRecHits );
+        fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *ebRecHits );
       } else if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
         fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
-        fTeE1OverE9[eqi] = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *eeRecHits );
-        fTeS4OverS1[eqi] = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *eeRecHits );
-      } else
+        fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *eeRecHits );
+        fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *eeRecHits );
+      } else {
         edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
-                                                
+      }
 
       // Read in Electron ID
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
@@ -1451,7 +1451,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     for(g_part = gen->begin(); g_part != gen->end(); g_part++){
 		
       // select the stable gen_lepts with pt >5 
-      if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13) continue;
+      if( abs(g_part->pdgId()) != 11 && abs(g_part->pdgId()) != 13 && abs(g_part->pdgId()) != 12  && abs(g_part->pdgId()) != 14 ) continue;
       if( g_part->status() != 1 ) continue;
       if( g_part->pt()  < fMingenleptpt ) continue;
       if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
