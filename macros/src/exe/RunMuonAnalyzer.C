@@ -37,14 +37,16 @@ int main(int argc, char* argv[]) {
 	bool isList = false;
 	TString outputdir = "TempOutput/";
 	int verbose = 0;
+	int maxevents = -1;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:lv:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:lvm:h?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 'l': isList = true; break;
 			case 'v': verbose = atoi(optarg); break;
+			case 'm': maxevents = atoi(optarg); break;
 			// case 't': tag = TString(optarg); break;
 			case '?':
 			case 'h': usage(0); break;
@@ -87,6 +89,7 @@ int main(int argc, char* argv[]) {
 	MuonAnalyzer *tA = new MuonAnalyzer(theChain);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
+	tA->SetMaxEvents(maxevents);
 	tA->BeginJob();
 	tA->Loop();
 	tA->EndJob();

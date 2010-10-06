@@ -60,6 +60,7 @@ private:
 	int fTmucharge[2];
 	int fTmutight[2]; // 0 for loose (but not tight), 1 for tight
 	double fTDRjet[2];
+	double fTDRhardestjet[2];
 	double fTDPhijet[2];
 	double fTmucalocomp[2];
 	double fTmusegmcomp[2];

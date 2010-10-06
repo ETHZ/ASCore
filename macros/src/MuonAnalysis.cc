@@ -49,7 +49,7 @@ void MuonAnalysis::End(){
 
 void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 	ResetTree();
-	
+
 	// Trigger info
 	fT_HLTMu9       = GetHLTResult("HLT_Mu9")       ? 1:0;
 	fT_HLTDoubleMu3 = GetHLTResult("HLT_DoubleMu3") ? 1:0;
@@ -84,7 +84,7 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 	double ETlept = sqrt(pmu.M2() + pmu.Perp2());
 	double METpx  = fTR->PFMETpx;
 	double METpy  = fTR->PFMETpy;
-	fTMT          = sqrt( fTMET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
+	fTMT          = sqrt( 2*fTMET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
 	
 	// Muon Variables
 	int nmus(0);
@@ -119,6 +119,8 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 		}
 		fTDRjet[i] = mindr;
 		fTDPhijet[i] = mindphi;
+
+		fTDRhardestjet[i] = Util::GetDeltaR(fTjeta[0], fTmueta[i], fTjphi[0], fTmuphi[i]);
 
 		fTmuid     [i] = fTR->MuGenID  [index];
 		fTmumoid   [i] = fTR->MuGenMID [index];
@@ -174,6 +176,7 @@ void MuonAnalysis::BookTree(){
 	fMuTree->Branch("MuIso"         ,&fTmuiso,        "MuIso[2]/D");
 	fMuTree->Branch("MuDRJet"       ,&fTDRjet,        "MuDRJet[2]/D");
 	fMuTree->Branch("MuDPhiJet"     ,&fTDPhijet,      "MuDPhiJet[2]/D");
+	fMuTree->Branch("MuDRHardestJet",&fTDRhardestjet, "MuDRHardestJet[2]/D");
 	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,   "MuCaloComp[2]/D");
 	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,   "MuSegmComp[2]/D");
 	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,   "MuOuterRad[2]/D");
@@ -214,27 +217,28 @@ void MuonAnalysis::ResetTree(){
 	}
 	fTnmus = 0;
 	for(int i = 0; i<2; i++){
-		fTmupt      [i] = -999.99;
-		fTmueta     [i] = -999.99;
-		fTmuphi     [i] = -999.99;
-		fTmucharge  [i] = -999;
-		fTmutight   [i] = -999;
-		fTmuiso     [i] = -999.99;
-		fTDRjet     [i] = -999.99;
-		fTDPhijet   [i] = -999.99;
-		fTmucalocomp[i] = -999.99;
-		fTmusegmcomp[i] = -999.99;
-		fTmuouterrad[i] = -999.99;
-		fTmunchi2   [i] = -999.99;
-		fTmuntkhits [i] = -999;
-		fTmud0      [i] = -999.99;
-		fTmudz      [i] = -999.99;
-		fTmuptE     [i] = -999.99;
-		fTmuid      [i] = -999;
-		fTmumoid    [i] = -999;
-		fTmugmoid   [i] = -999;
-		fTmutype    [i] = -999;
-		fTmumotype  [i] = -999;
-		fTmugmotype [i] = -999;
+		fTmupt        [i] = -999.99;
+		fTmueta       [i] = -999.99;
+		fTmuphi       [i] = -999.99;
+		fTmucharge    [i] = -999;
+		fTmutight     [i] = -999;
+		fTmuiso       [i] = -999.99;
+		fTDRjet       [i] = -999.99;
+		fTDPhijet     [i] = -999.99;
+		fTDRhardestjet[i] = -999.99;
+		fTmucalocomp  [i] = -999.99;
+		fTmusegmcomp  [i] = -999.99;
+		fTmuouterrad  [i] = -999.99;
+		fTmunchi2     [i] = -999.99;
+		fTmuntkhits   [i] = -999;
+		fTmud0        [i] = -999.99;
+		fTmudz        [i] = -999.99;
+		fTmuptE       [i] = -999.99;
+		fTmuid        [i] = -999;
+		fTmumoid      [i] = -999;
+		fTmugmoid     [i] = -999;
+		fTmutype      [i] = -999;
+		fTmumotype    [i] = -999;
+		fTmugmotype   [i] = -999;
 	}
 }

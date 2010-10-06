@@ -25,6 +25,10 @@ MuonAnalyzer::~MuonAnalyzer(){
 void MuonAnalyzer::Loop(){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+	if(fMaxEvents > -1){
+		cout << " will run on " << fMaxEvents << " events..." << endl;
+		nentries = fMaxEvents;
+	}
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
