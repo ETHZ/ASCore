@@ -16,13 +16,15 @@ public:
 	virtual void PrintProgress(Long64_t);
 
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
+	inline virtual void SetMaxEvents(int maxevents){fMaxEvents = maxevents;};
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	
 	TString fOutputDir;
 	int fVerbose;
 	int fNEntries;
+	int fMaxEvents;
   
-        Int_t fCurRun;
+	Int_t fCurRun;
 
 	TreeReader *fTR;
 

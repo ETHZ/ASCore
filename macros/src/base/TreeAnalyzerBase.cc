@@ -8,8 +8,9 @@ using namespace std;
 TreeAnalyzerBase::TreeAnalyzerBase(TTree *tree) {
 	fTR = new TreeReader(tree);
 	fNEntries = fTR->GetEntries();
-	fVerbose = false;
-        fCurRun = -1; // Initialise to dummy value
+	fVerbose = 0;
+	fMaxEvents = -1;
+	fCurRun = -1; // Initialise to dummy value
 }
 
 TreeAnalyzerBase::~TreeAnalyzerBase(){
@@ -19,13 +20,16 @@ TreeAnalyzerBase::~TreeAnalyzerBase(){
 
 // Method for looping over the tree
 void TreeAnalyzerBase::Loop(){
-        Long64_t nentries = fTR->GetEntries();
-        cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-        // nentries = 10;
-        for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-                PrintProgress(jentry);
-                fTR->GetEntry(jentry);
-        }
+	Long64_t nentries = fTR->GetEntries();
+	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+	if(fMaxEvents > -1){
+		cout << " will run on " << fMaxEvents << " events..." << endl;
+		nentries = fMaxEvents;
+	}
+	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
+		PrintProgress(jentry);
+		fTR->GetEntry(jentry);
+	}
 
 }
 
