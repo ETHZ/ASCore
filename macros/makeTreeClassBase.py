@@ -22,11 +22,13 @@ FILENAME = sys.argv[1]
 CLASSNAME = 'TreeClassBase'
 HEADERNAME = CLASSNAME + '.h'
 SOURCENAME = CLASSNAME + '.C'
-MAXNLEPT = 20
+MAXNLEPT    = 20
 MAXNGENLEPT = 100
-MAXNJETS = 100
-MAXNPHOS = 50
-MAXNTRKS = 500
+MAXNJETS    = 100
+MAXNPHOS    = 50
+MAXNTRKS    = 500
+MAXHLTOBJ   = 10
+MAXNVTCS    = 25
 
 #______________________________________________________________
 def makeClass(filename, classname, treename):
@@ -80,6 +82,14 @@ if __name__=='__main__':
 		pos = line.find('//[NTracks]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNTRKS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[NPaths]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXHLTOBJ) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[NVrtx]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNVTCS) + line[pos-5:len(line)]
 			line = newline
 		headerFile.write(line)
 	
