@@ -49,6 +49,9 @@ void MuonAnalysis::End(){
 
 void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 	ResetTree();
+	fTrun     = fTR->Run;
+	fTevent   = fTR->Event;
+	fTlumisec = fTR->LumiSection;
 
 	// Trigger info
 	fT_HLTMu9       = GetHLTResult("HLT_Mu9")       ? 1:0;
