@@ -155,8 +155,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if( fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
 		double invmass = GetDiLeptInvMass();
 		
-		if(invmass > fCut_DiLeptOSSFInvMass_lowercut) {return false;}	
-		if(invmass < fCut_DiLeptOSSFInvMass_uppercut) {return false;}	
+	//	if( (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
 	}
 	
 	// HLT triggers

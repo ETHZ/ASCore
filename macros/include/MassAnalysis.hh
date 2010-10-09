@@ -39,6 +39,7 @@ private:
 	void OSDiLeptonMasses();
 	void MassesForTTbar();
 	void ControlPlots();
+	void VectorSumPt();
 
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
@@ -56,7 +57,12 @@ private:
 	// data members
 	int fMT2_histos_step;
   	int fMT2_histos_number;
-	
+	float fVectorSumPt;
+	vector<int> interesting_Run;
+	vector<int> interesting_Lumi;
+	vector<int> interesting_Event;
+	vector<string> interesting_Type;
+
 	// file for histograms:
 	TFile* fHistFile;
 
@@ -67,9 +73,9 @@ private:
 	TH1D* fHMT2_diBjet[10];
 	TH1D* fHMT2_pseudojet[10];
 	TH1D* fHMT2_diBjetdiLept[10];
-	TH1D* fHMT2_PseudoJetsWithB[10];      
-	TH1D* fHMT2_PseudoJetsWithLeptons[10];
-	TH1D* fHMT2_PseudoJetClean[10];       
+	TH1D* fHMT2_PseudoJetWithB[10];      
+	TH1D* fHMT2_PseudoJetWithLeptons[10];
+	TH1D* fHMT2_PseudoJetNoLeptons[10];
 
 	TH1D* fHMT2_OSll[10];
 	TH1D* fHMT2_OSee[10];
@@ -84,6 +90,10 @@ private:
 	TH1D* fHAlpahT_DiJet;      
 	TH1D* fHAlpahT_PseudoJet; 
 	    
+	TH1D* fHMCT_PseudoJet;
+	TH1D* fHMCT_PseudoJetWithLeptons;
+	TH1D* fHMCT_PseudoJetNoLeptons;
+	TH1D* fHMCT_PseudoJetWithB;
 	TH1D* fHMCT_DiJet;   
 	TH1D* fHMCT_DiBJet;  
 	TH1D* fHMCT_OSee;    
@@ -115,7 +125,10 @@ private:
 	TH1D* fHJpt;   
 	TH1D* fHJEta;  
 	TH1D* fHBJpt; 
-	TH1D* fHBJEta; 
+	TH1D* fHBJEta;
+       	TH1D* fHVectorSumPt;	
+	TH2D* fHVectorSumPtvsDiJetMT2;
+	TH2D* fHVectorSumPtvsPseudoJetMT2;
 
 	TH1D* fHMT_single_e;
 	TH1D* fHMT_single_mu;

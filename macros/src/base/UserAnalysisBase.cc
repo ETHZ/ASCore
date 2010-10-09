@@ -109,7 +109,7 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 bool UserAnalysisBase::IsGoodJ_TDL(int index) {
 
 	if( fTR->JPt[index] < 30. ) 			return false;
-	if( fabs(fTR->JEta[index]) > 3.0 ) 		return false;
+	if( fabs(fTR->JEta[index]) > 2.5 ) 		return false;
 	if (fTR->JEMfrac[index] <= 0.01)  		return false;
 	if (fTR->JID_n90Hits[index] <= 1) 		return false;
 	if (fTR->JID_HPD[index] >= 0.98)  		return false;
@@ -120,7 +120,7 @@ bool UserAnalysisBase::IsGoodJ_TDL(int index) {
 bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 	if(! IsGoodJ_TDL(index)) return false;
 	if(fTR->JbTagProbSimpSVHighPur[index] < 2.0) return false;
-
+	if(fabs(fTR->JEta[index]) > 2.0) return false;
 	return true;
 }
 
