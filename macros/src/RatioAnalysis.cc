@@ -16,8 +16,8 @@ RatioAnalysis::~RatioAnalysis(){
 void RatioAnalysis::Begin(){
 	const char* filename = "Ratio_histos.root";
 	fMPHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
-	
-	fRatHist  = new TH1D("RatioStats", "Histo of Ratio statistics", 55, 0, 55);
+
+	fRatHist  = new TH1D("RatioStats", "Histo of Ratio statistics", 63, 0, 63);	
 	fRatHist->SetStats(false);
 
 	fDRJ12  = new TH1D("DRJ12", "Delta R between 2 leading jets; DR(j1,j2)", 100, 0., 5.);
@@ -25,42 +25,48 @@ void RatioAnalysis::Begin(){
 	fPtJ1  = new TH1D("PtJ1", "Pt of leading jet 1 for DR<1", 100, 0., 250.);
 	fPtJ2  = new TH1D("PtJ2", "Pt of leading jet 2 for DR<1", 100, 0., 250.);
 	fEtaJets = new TH1D("EtaJets", "Eta of 2 leading jets", 50, -3., 3.);
-	fRptDPhi2j = new TH2D("RptDPhi2j", "dPhi(j1,j2) versus Ptj2/Ptj1 leading jets; Ptj2/Ptj1; dPhi(j1,j2)", 50, 0., 1., 50, 0., 2.);
+	fRptDPhi2j = new TH2D("RptDPhi2j", "dPhi(j1,j2) versus Ptj2/Ptj1 leading jets; Ptj2/Ptj1; dPhi(j1,j2)", 
+			      50, 0., 1., 50, 0., 2.);
 	fAlpT2j  = new TH1D("AlpT2j", "AlphaT in 2 jet events; AlphaT(j1,j2)", 100, 0., 3.);
 	fBProbJets = new TH1D("BProbJets", "b-tagging prob for all jets", 50, 0., 5.);
 
-
 	fEta2B = new TH1D("Eta2B", "Eta of bs in 2b events", 50, -3., 3.);
 	fdPhi2B = new TH1D("dPhi2B", "Delta Phi of 2 b in 2b events", 50, 0., 3.5);
+	fDR2B = new TH1D("DR2B", "dR(b1,b2) ; dR(b1,b2)", 50, 0., 6.);
 	//	fEta2Bcand = new TH1D("Eta2Bcand", "Eta of lost b in 1b events", 50, -5., 5.);
 	//	fdPhi2Bcand = new TH1D("dPhi2Bcand", "Delta Phi(b,bcand) in 1b events", 50, 0., 3.5);
 	fBProb2B = new TH1D("BProb2B", "b-tagging prob for 2b events", 50, 0., 5.);
 	//	fBProb2Bcand = new TH1D("BProb2Bcand", "b-tagging prob for b-jet candidate in 1b events", 50, 0., 5.);
 	fNjets2B = new TH1D("Njets2B", "Number of jets in 2b events", 10, 0., 10.);
-	fMass2B = new TH1D("Mass2B", "Mass of b-jets in 2b events", 50, 0., 250.);
-	fMass2Bunc = new TH1D("Mass2Bunc", "Uncorrected Mass of b-jets in 2b events", 50, 0., 250.);
+	fMass2B = new TH1D("Mass2B", "Mass of b-jets in 2b events", 50, 0., 50.);
 	fNjets2Bnear = new TH1D("Njets2Bnear", "Number of jets in 2b events with dPhi(2b) < 1.", 10, 0., 10.);
 	fMET2Bnear = new TH1D("MET2Bnear", "MET in 2b events with dPhi(2b) < 1.", 100, 0., 100.);
-	fdPhiJBnear = new TH2D("dPhiJBnear", "dPhi(b, nearest jet) in 2b events with dPhi(2b) < 1.;dPhi(b1,b2);dPhi(b,j)", 50, 0., 3.5, 50, 0., 3.5);
+	fdPhiJBnear = new TH2D("dPhiJBnear", "dPhi(b, nearest jet) in 2b events with dPhi(2b) < 1.;dPhi(b1,b2);dPhi(b,j)",
+			       50, 0., 3.5, 50, 0., 3.5);
 	fEta1B = new TH1D("Eta1B", "Eta of b in 1b events", 50, -3., 3.);
 	fBProb1B = new TH1D("BProb1B", "b-tagging prob for b in 1b events", 50, 0., 5.);
 	fNjets1B = new TH1D("Njets1B", "Number of jets in 1b events", 10, 0., 10.);
 	//	fNjets2Bcand = new TH1D("Njets2Bcand", "Number of jets in 1b events with b-candidate", 10, 0., 10.);
-	fMass1B = new TH1D("Mass1B", "Mass of b-jet in 1b events", 50, 0., 250.);
+	fMass1B = new TH1D("Mass1B", "Mass of b-jet in 1b events", 50, 0., 50.);
 	//	fMass2Bcand = new TH1D("Mass2Bcand", "Mass of b-jet candidate in 1b events", 50, 0., 250.);
-	fMass1Bunc = new TH1D("Mass1Bunc", "Uncorrected Mass of b-jet in 1b events", 50, 0., 250.);
-	//	fMass2Bcandunc = new TH1D("Mass2Bcandunc", "Uncorrected Mass of b-jet candidate in 1b events", 50, 0., 250.);
 	fMETdPhi1B = new TH2D("METdPhi1B", "MET vs dPhi(MET,b) in 1b events", 100, 0., 100., 50, 0., 3.5);
 	fdPhiMET1B = new TH1D("dPhiMET1B", "dPhi(MET,b) in 1b events for MET > 5.",50, 0., 3.5);
+
+	fJMult = new TH1D("JMult", "Jet multiplicity in events with >= 2 jets", 10, 0., 10.);
+	fJMult1B = new TH1D("JMult1B", "Jet multiplicity in 1b events", 10, 0., 10.);
+	fJMult2B = new TH1D("JMult2B", "Jet multiplicity in 2b events", 10, 0., 10.);
+	fJMult3B = new TH1D("JMult3B", "Jet multiplicity in 3b events", 10, 0., 10.);
+	fJMult4B = new TH1D("JMult4B", "Jet multiplicity in 4b events", 10, 0., 10.);
+
 
 	// set the efficiencies and fake rates
 	fEffe = 1.;
 	fEffm = 1.;
-	fEffb = 0.55;
+	fEffb = 0.5;
 	fdEffb = 0.05;
 	fFake = 0.;
 	fFakm = 0.;
-	fFakb = 0.01;
+	fFakb = 0.005;
 	
 	// initialize the counters
 	counter=0;
@@ -135,7 +141,13 @@ void RatioAnalysis::Begin(){
 	fNEvt4BOSem = 0;
 
 	fNevtAnom = 0;
-		
+
+	fPtSum1B = 0.;
+	fPtSumsq1B = 0.;
+	fPtSum2B = 0.;
+	fPtSumsq2B = 0.;
+
+	
 	
 }
 
@@ -281,17 +293,27 @@ void RatioAnalysis::Analyze(){
 	}
 
 	if (ib1 >= 0 && ib2 >= 0) {
+	  fPtSum2B += fTR->JPt[ib1];
+	  fPtSum2B += fTR->JPt[ib2];
+	  fPtSumsq2B += fTR->JPt[ib1] *  fTR->JPt[ib1];
+	  fPtSumsq2B += fTR->JPt[ib2] *  fTR->JPt[ib2];
 	  fEta2B->Fill(fTR->JEta[ib1]);
 	  fEta2B->Fill(fTR->JEta[ib2]);
 	  double dPhi2b = Util::DeltaPhi(fTR->JPhi[ib1], fTR->JPhi[ib2]);
 	  fdPhi2B->Fill(dPhi2b);
+	  double dR2B = Util::GetDeltaR(fTR->JEta[ib1], fTR->JEta[ib2], fTR->JPhi[ib1], fTR->JPhi[ib2]);
+	  fDR2B->Fill(dR2B);
 	  fBProb2B->Fill(fTR->JbTagProbSimpSVHighEff[ib1]);
 	  fBProb2B->Fill(fTR->JbTagProbSimpSVHighEff[ib2]);
 	  fNjets2B->Fill(fTR->NJets);
-	  fMass2B->Fill(fTR->JMass[ib1]);
-	  fMass2B->Fill(fTR->JMass[ib2]);
-	  fMass2Bunc->Fill(fTR->JMass[ib1]*fTR->JChfrac[ib1]);
-	  fMass2Bunc->Fill(fTR->JMass[ib2]*fTR->JChfrac[ib2]);
+	  double mass1 = sqrt(fTR->JE[ib1]*fTR->JE[ib1] - fTR->JPx[ib1]*fTR->JPx[ib1]
+			     - fTR->JPy[ib1]*fTR->JPy[ib1] - fTR->JPz[ib1]*fTR->JPz[ib1]);
+	  fMass2B->Fill(mass1);
+	  double mass2 = sqrt(fTR->JE[ib2]*fTR->JE[ib2] - fTR->JPx[ib2]*fTR->JPx[ib2]
+			     - fTR->JPy[ib2]*fTR->JPy[ib2] - fTR->JPz[ib2]*fTR->JPz[ib2]);
+	  fMass2B->Fill(mass2);
+	  //	  fMass2B->Fill(fTR->JMass[ib1]);
+	  //	  fMass2B->Fill(fTR->JMass[ib2]);
 	  if (dPhi2b < 1.) {
 	    fNjets2Bnear->Fill(fTR->NJets);
 	    fMET2Bnear->Fill(fTR->PFMET);
@@ -307,17 +329,27 @@ void RatioAnalysis::Analyze(){
 	  }
 	}
 	if (ib1 >= 0 && ib2 < 0) {
+	  fPtSum1B += fTR->JPt[ib1];
+	  fPtSumsq1B += fTR->JPt[ib1] *  fTR->JPt[ib1];
 	  fEta1B->Fill(fTR->JEta[ib1]);
 	  fBProb1B->Fill(fTR->JbTagProbSimpSVHighEff[ib1]);
 	  fNjets1B->Fill(fTR->NJets);
-	  fMass1B->Fill(fTR->JMass[ib1]);
-	  fMass1Bunc->Fill(fTR->JMass[ib1]*fTR->JChfrac[ib1]);
+	  double mass1 = sqrt(fTR->JE[ib1]*fTR->JE[ib1] - fTR->JPx[ib1]*fTR->JPx[ib1]
+			     - fTR->JPy[ib1]*fTR->JPy[ib1] - fTR->JPz[ib1]*fTR->JPz[ib1]);
+	  fMass1B->Fill(mass1);
+	  //	  fMass1B->Fill(fTR->JMass[ib1]);
 	  double dPhiMET1B = Util::DeltaPhi(fTR->JPhi[ib1], fTR->PFMETphi);
 	  fMETdPhi1B->Fill(fTR->PFMET, dPhiMET1B);
 	  if (fTR->PFMET > 5.) {
 	    fdPhiMET1B->Fill(dPhiMET1B);
 	  }
 	}
+	fJMult->Fill(fTR->NJets);
+	if (fNBJets == 1) fJMult1B->Fill(fTR->NJets);
+	else if (fNBJets == 2) fJMult2B->Fill(fTR->NJets);
+	else if (fNBJets == 3) fJMult3B->Fill(fTR->NJets);
+	else if (fNBJets == 4) fJMult4B->Fill(fTR->NJets);
+
 
 
 	// save the interesting numbers of events
@@ -385,6 +417,16 @@ void RatioAnalysis::Analyze(){
 	  fILumi.push_back(fTR->LumiSection);
 	  fINber.push_back(fTR->Event); 
 	  fINlep.push_back(-1);
+	}
+	if (fNBJets > 2) {
+	  fNevtAnom++;
+	  fIRun.push_back(fTR->Run);
+	  fILumi.push_back(fTR->LumiSection);
+	  fINber.push_back(fTR->Event); 
+	  if (fNBJets == 3) fINlep.push_back(-2);
+	  if (fNBJets == 4) fINlep.push_back(-3);
+	  // cout << " Event with " << fNBJets << " b-jets, flag = " << fINlep[fINlep.size()-1] << endl;
+	  // cout << " Run/Lum/Evt = " << fTR->Run << " " << fTR->LumiSection << " "  << fTR->Event << endl;
 	}
 
 	// for charge and lepton ratios
@@ -502,7 +544,7 @@ void RatioAnalysis::SaveLeptConfs() {
   	if (isSS2l != 0 || fLeptCat.size() > 2) {
    		fNevtAnom++;
 		fIRun.push_back(fTR->Run);
-    	fILumi.push_back(fTR->LumiSection);
+    		fILumi.push_back(fTR->LumiSection);
 		fINber.push_back(fTR->Event); 
   	 	fINlep.push_back(fLeptCat.size());
   	}	
@@ -518,13 +560,13 @@ void RatioAnalysis::End(){
   PrintDilRatios();
   PrintAnomEvts();
 
-  SaveRatioHist();
+   SaveRatioHist();
 
 }
 
 void RatioAnalysis::PrintJetRatios() {
 
-  cout << endl;
+cout << endl;
   cout << " Jet ratios " << endl;
   cout << " ========== " << endl;
   cout << endl;
@@ -566,6 +608,28 @@ void RatioAnalysis::PrintJetRatios() {
   cout << " Number of b-jet events (bare) = " << fNEvtBJets << " Ratio to >=2 jets = " << ratBbyall << endl;
   if (fNEvtBJets <= 0) return;
 
+  // compute the btag efficiencies
+  double pTav1B = fPtSum1B / (double)fNEvt1BJets;
+  double dpTav1B =  sqrt(fPtSumsq1B / (double)fNEvt1BJets - pTav1B*pTav1B);
+  double pTav2B = 0.5 * fPtSum2B / (double)fNEvt2BJets;
+  double dpTav2B =  sqrt(0.5 * fPtSumsq2B / (double)fNEvt2BJets - pTav2B*pTav2B);
+  cout << "  Average pT in 1b events = " << pTav1B << ", r.m.s. = " << dpTav1B << endl;
+  cout << "  Average pT in 2b events = " << pTav2B << ", r.m.s. = " << dpTav2B << endl;
+  // b-tagging efficiency
+  double effc, effuds;
+  GetEfficB (pTav1B, fEffb, fdEffb, effc, effuds);
+  double p = fEffb;
+  double dp = fdEffb;
+  double alp = 0.02 + 0.03 * effc / fEffb;
+  double dalp = 0.007;
+  fFakb = effuds;
+  double palp = p * alp;
+  double dpalp = sqrt(dp*dp/(p*p) + dalp*dalp/(alp*alp)) * p*alp;
+  cout << "  b-tag effic, p = " << p << " +- " << dp << ", b-tag effic for c-jets = " << effc << endl;
+  cout << "  GS prob, alpha = " << alp << " +- " << dalp;
+  cout << ", p.alpha = " << p*alp << " +- " << dpalp << endl;
+  cout << "  fake b probability (uds) = " << fFakb << endl;
+
   // compute numbers of b-jet events corrected for fakes
   double nEvt1BJets = fNEvt1BJets
     - (fNEvt1Jets+2.*fNEvt2Jets+3.*fNEvt3Jets+4.*fNEvt4Jets+5.*fNEvt5Jets+6.*fNEvt6Jets+7.*fNEvt7Jets+8.*fNEvt8Jets)*fFakb;
@@ -576,6 +640,7 @@ void RatioAnalysis::PrintJetRatios() {
   double nEvt4BJets = fNEvt4BJets
     - (fNEvt4Jets+5.*fNEvt5Jets+15.*fNEvt6Jets+35.*fNEvt7Jets+70.*fNEvt8Jets)*fFakb*fFakb*fFakb*fFakb;
   double nEvtBJets = nEvt1BJets + nEvt2BJets + nEvt3BJets + nEvt4BJets;
+  cout << endl;
   cout << " Number of events with 1-4 b-jets (corr fakes = " << fFakb << ") = " << nEvtBJets << endl;
   double rat1bjbyj = 0.;
   if (nEvtBJets > 0.) rat1bjbyj = nEvt1BJets/ nEvtBJets;
@@ -594,18 +659,7 @@ void RatioAnalysis::PrintJetRatios() {
   cout << "  Number of events with 4 b-jets uncorr = " << fNEvt4BJets << ", corr = "
        << nEvt4BJets << " Ratio to b-jets = " << rat4bjbyj << endl;
 
-  // b-tagging efficiency
-  double p = fEffb;
-  double dp = fdEffb;
-  double alp = 0.0255;
-  double dalp = 0.007;
-
   double ngs[4], dngs[4], ncorr[4], dncorr[4], npair[4],dnpair[4];
-  double palp = p * alp;
-  double dpalp = sqrt(dp*dp/(p*p) + dalp*dalp/(alp*alp)) * p*alp;
-  cout << endl;
-  cout << " b-tag effic, p = " << p << " +- " << dp << ", GS prob, alpha = " << alp << " +- " << dalp << endl;
-  cout << " p.alpha = " << p*alp << " +- " << dpalp << endl;
 
   double nbmul[4];
   nbmul[0] = nEvt1BJets;
@@ -741,6 +795,35 @@ void RatioAnalysis::PrintJetRatios() {
   }
 
 }
+
+void RatioAnalysis::GetEfficB (double pt, double &effb, double &deffb, double &effc, double &effuds) {
+
+  double tabPt[]    = {    30.,     50.,     70.,   100.,   170.,   200.};
+  double tabEffb[]  = {   0.25,    0.42,    0.48,   0.55,   0.55,   0.48};
+  double tabdEffb[] = {   0.02,    0.03,    0.03,   0.03,   0.03,   0.03};
+  double tabEffc[]  = {   0.03,    0.07,    0.08,   0.09,   0.09,   0.09};
+  double tabEffu[]  = {0.00018, 0.00048, 0.00076, 0.0011, 0.0018, 0.0020};
+
+  if (pt >= tabPt[0]) {
+    int ifnd = -1;
+    for (int i = 0; i < 5; ++i) {
+      if (pt < tabPt[i+1]) {
+	ifnd = i;
+	break;
+      }
+    }
+    if (ifnd < 0) ifnd = 4;
+    double rat = (pt - tabPt[ifnd]) / (tabPt[ifnd+1] - tabPt[ifnd]);
+    effb = tabEffb[ifnd] + rat*(tabEffb[ifnd+1] - tabEffb[ifnd]);
+    deffb = tabdEffb[ifnd] + rat*(tabdEffb[ifnd+1] - tabdEffb[ifnd]);
+    effc = tabEffc[ifnd] + rat*(tabEffc[ifnd+1] - tabEffc[ifnd]);
+    effuds = tabEffu[ifnd] + rat*(tabEffu[ifnd+1] - tabEffu[ifnd]);
+  }
+  else {
+  }
+
+}
+
 
 void RatioAnalysis::BSolve (double p, double dp, double ncorr[], double dncorr[],
 	     double npair[], double dnpair[]) {
@@ -1165,20 +1248,24 @@ void RatioAnalysis::PrintDilRatios() {
 
 }
 
+
+
 void RatioAnalysis::PrintAnomEvts() {
 
   cout << endl;
-  cout << " Anomalous events list: " << endl;
+  cout << " Anomalous events list: " << fIRun.size() << " events " << endl;
   cout << endl;
 
   if (fIRun.size() <= 0) return;
 
   int nEvtPrnt = fIRun.size();
-  if (nEvtPrnt > 50) nEvtPrnt = 50;
+  if (nEvtPrnt > 100) nEvtPrnt = 100;
   for (int i = 0; i < nEvtPrnt; ++i) {
     cout << " Run/Lumi/Event " << fIRun[i] << " " << fILumi[i] << " " << fINber[i];
     if (fINlep[i] > 0) cout << ", Nlept = " << fINlep[i] << endl;
     if (fINlep[i] == -1) cout << ", Acop leading jets " << endl;
+    if (fINlep[i] == -2) cout << ", 3 b-jets " << endl;
+    if (fINlep[i] == -3) cout << ", 4 b-jets " << endl;
  }
 
 }
@@ -1186,14 +1273,14 @@ void RatioAnalysis::PrintAnomEvts() {
 void RatioAnalysis::SaveRatioHist() {
 
   cout << " saving the plots" << endl;
-  const int nRatBins = 55;
+  const int nRatBins = 63;
   const char* lablx[nRatBins] = {"evj   ", "ev1j  ", "ev2j  ", "ev3j  ", "ev4j  ", "ev5j  ", "ev6j  ", "ev7j  ", "ev8j  ",
 				 "acop1 ", "acop2 ", "acop4",
  				 "evb   ", "ev1b  ", "ev2b  ", "ev3b  ", "ev4b  ",
 				 "ev1l  ", "ev11l ", "ev21l ", "ev31l ", "ev41l ", "ev51l ", "ev61l ", "ev71l ", "ev81l ",
 				 "evb1l ", "ev1b1l", "ev2b1l", "ev3b1l", "ev4b1l",
-				 "SSmm  ", "SSem  ", "SSee  ", "OSmm  ", "OSem  ", "OSee  ", 
-				 "SSmmB ", "SSemB ", "SSeeB ", "OSmmB ", "OSemB ", "OSeeB ",
+				 "mpmp  ", "mnmn  ", "epmp  ", "enmn  ", "epep  ", "enen  ", "mpmn  ", "epmn  ", "enmp  ", "epen  ",
+				 "mpmpB ", "mnmnB ", "epmpB ", "enmnB ", "epepB ", "enenB ", "mpmnB ", "epmnB ", "enmpB ", "epenB ",
 				 "SS2l1b", "SS2l2b", "SS2l3b", "SS2l4b", 
 				 "OS2l1b", "OS2l2b", "OS2l3b", "OS2l4b", 
 				 "OSem1b", "OSem2b", "OSem3b", "OSem4b"};
@@ -1230,30 +1317,38 @@ void RatioAnalysis::SaveRatioHist() {
   ratBin[28] = fNEvt2B1l;
   ratBin[29] = fNEvt3B1l;
   ratBin[30] = fNEvt4B1l;
-  ratBin[31] = fNEvtmpmp + fNEvtmnmn;
-  ratBin[32] = fNEvtepmp + fNEvtenmn;
-  ratBin[33] = fNEvtepep + fNEvtenen;
-  ratBin[34] = fNEvtmpmn;
-  ratBin[35] = fNEvtepmn + fNEvtenmp;
-  ratBin[36] = fNEvtepen;
-  ratBin[37] = fNEvtmpmpB + fNEvtmnmnB;
-  ratBin[38] = fNEvtepmpB + fNEvtenmnB;
-  ratBin[39] = fNEvtepepB + fNEvtenenB;
-  ratBin[40] = fNEvtmpmnB;
-  ratBin[41] = fNEvtepmnB + fNEvtenmpB;
-  ratBin[42] = fNEvtepenB;
-  ratBin[43] = fNEvt1BSS2l;
-  ratBin[44] = fNEvt2BSS2l;
-  ratBin[45] = fNEvt3BSS2l;
-  ratBin[46] = fNEvt4BSS2l;
-  ratBin[47] = fNEvt1BOS2l;
-  ratBin[48] = fNEvt2BOS2l;
-  ratBin[49] = fNEvt3BOS2l;
-  ratBin[50] = fNEvt4BOS2l;
-  ratBin[51] = fNEvt1BOSem;
-  ratBin[52] = fNEvt2BOSem;
-  ratBin[53] = fNEvt3BOSem;
-  ratBin[54] = fNEvt4BOSem;
+  ratBin[31] = fNEvtmpmp;
+  ratBin[32] = fNEvtmnmn;
+  ratBin[33] = fNEvtepmp;
+  ratBin[34] = fNEvtenmn;
+  ratBin[35] = fNEvtepep; 
+  ratBin[36] = fNEvtenen;
+  ratBin[37] = fNEvtmpmn;
+  ratBin[38] = fNEvtepmn;
+  ratBin[39] = fNEvtenmp;
+  ratBin[40] = fNEvtepen;
+  ratBin[41] = fNEvtmpmpB;
+  ratBin[42] = fNEvtmnmnB;
+  ratBin[43] = fNEvtepmpB;
+  ratBin[44] = fNEvtenmnB;
+  ratBin[45] = fNEvtepepB;
+  ratBin[46] = fNEvtenenB;
+  ratBin[47] = fNEvtmpmnB;
+  ratBin[48] = fNEvtepmnB;
+  ratBin[49] = fNEvtenmpB;
+  ratBin[50] = fNEvtepenB;
+  ratBin[51] = fNEvt1BSS2l;
+  ratBin[52] = fNEvt2BSS2l;
+  ratBin[53] = fNEvt3BSS2l;
+  ratBin[54] = fNEvt4BSS2l;
+  ratBin[55] = fNEvt1BOS2l;
+  ratBin[56] = fNEvt2BOS2l;
+  ratBin[57] = fNEvt3BOS2l;
+  ratBin[58] = fNEvt4BOS2l;
+  ratBin[59] = fNEvt1BOSem;
+  ratBin[60] = fNEvt2BOSem;
+  ratBin[61] = fNEvt3BOSem;
+  ratBin[62] = fNEvt4BOSem;
 	
   for (int i = 0; i < nRatBins; ++i) {
     fRatHist->GetXaxis()->SetBinLabel(i+1, lablx[i]);
@@ -1291,10 +1386,11 @@ void RatioAnalysis::SaveRatioHist() {
   fBProbJets->Write();
   fEta2B->Write();
   fdPhi2B->Write();
+  fEta2B->Write();
+  fDR2B->Write();
   fBProb2B->Write();
   fNjets2B->Write();
   fMass2B->Write();
-  fMass2Bunc->Write();
   fNjets2Bnear->Write();
   fMET2Bnear->Write();
   fdPhiJBnear->Write();
@@ -1302,9 +1398,13 @@ void RatioAnalysis::SaveRatioHist() {
   fBProb1B->Write();
   fNjets1B->Write();
   fMass1B->Write();
-  fMass1Bunc->Write();
   fMETdPhi1B->Write();
   fdPhiMET1B->Write();
+  fJMult->Write();
+  fJMult1B->Write();
+  fJMult2B->Write();
+  fJMult3B->Write();
+  fJMult4B->Write();
 
   cout << " wrote all plots" << endl;
   fMPHistFile->Close();
