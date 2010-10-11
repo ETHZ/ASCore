@@ -21,7 +21,7 @@ SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAn
                  src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc src/MassAnalysis.cc \
                  src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysisBase.cc \
                  src/MultiplicityAnalysis.cc  src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc src/RatioAnalysis.cc \
-                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc \
+                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc src/helper/MetaTreeClassBase.C \
                  src/MuonAnalysis.cc src/MuonAnalyzer.cc src/MuonPlotter.cc \
                  src/helper/FPRatios.cc \
 
@@ -72,3 +72,4 @@ deps: $(SRCS)
 	makedepend $(INCLUDES) $^
 
 # DO NOT DELETE THIS LINE -- make depend needs it
+

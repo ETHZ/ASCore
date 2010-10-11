@@ -50,9 +50,10 @@
 #include <time.h> // access to date/time
 
 #include "Utilities.hh"
+#include "MetaTreeClassBase.h"
 
 // class AnaClass: public TObject {
-class AnaClass{
+class AnaClass: public MetaTreeClassBase{
 
 public:
 	AnaClass();
@@ -62,7 +63,7 @@ public:
 /*****************************************************************************
 ##################| Initialization and Setup |################################
 *****************************************************************************/
-	virtual void init(bool = false);
+	virtual void init(bool = false); // Careful, MakeClass produces Init with capital I!
 	virtual void loadSamples(TString parfile = "parfile.dat", bool verbose = false);
 	virtual void readParms(TString filename, bool verbose = false);
 	virtual void readVarNames(const char* = "varnames.dat");
