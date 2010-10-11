@@ -31,17 +31,28 @@ void MassAnalysis::Begin(){
 	fHMCT_PseudoJetWithLeptons   = new TH1D("MCT_PseudoJetWithLeptons" , "pseudo jet MCT with leptons",  50, 0., 1000.);
 	fHMCT_PseudoJetNoLeptons     = new TH1D("MCT_PseudoJetNoLeptons"   , "pseudo jet MCT lepton veto ", 200, 0., 1500.);
 	fHMCT_PseudoJetWithB         = new TH1D("MCT_PseudoJetWithB"       , "pseudo jet MCT with b"      , 200, 0., 1500.);
-
-	fHMCT_OSee          = new TH1D("MCT_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
-	fHMCT_OSmumu        = new TH1D("MCT_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
-	fHMCT_OSemu         = new TH1D("MCT_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
+	fHMCT_OSee                   = new TH1D("MCT_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
+	fHMCT_OSmumu                 = new TH1D("MCT_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
+	fHMCT_OSemu                  = new TH1D("MCT_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
 	                                                                                 
+	fHMCTcorr_DiJet                  = new TH1D("MCTcorr_DiJet"                , "di-Jets MCT"                , 100, 0., 500.);
+	fHMCTcorr_DiBJet                 = new TH1D("MCTcorr_DiBJet"               , "di-B-Jets MCT"              , 100, 0., 500.);
+	fHMCTcorr_PseudoJet              = new TH1D("MCTcorr_PseudoJet"            , "pseudo jet MCT"             , 200, 0., 1500.);
+	fHMCTcorr_PseudoJetWithLeptons   = new TH1D("MCTcorr_PseudoJetWithLeptons" , "pseudo jet MCT with leptons",  50, 0., 1000.);
+	fHMCTcorr_PseudoJetNoLeptons     = new TH1D("MCTcorr_PseudoJetNoLeptons"   , "pseudo jet MCT lepton veto ", 200, 0., 1500.);
+	fHMCTcorr_PseudoJetWithB         = new TH1D("MCTcorr_PseudoJetWithB"       , "pseudo jet MCT with b"      , 200, 0., 1500.);
+	fHMCTcorr_OSee                   = new TH1D("MCTcorr_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
+	fHMCTcorr_OSmumu                 = new TH1D("MCTcorr_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
+	fHMCTcorr_OSemu                  = new TH1D("MCTcorr_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
+
+
 	fHMCTperp_OSee      = new TH1D("MCTperp_OSee"        , "OS ee MCT perp"          ,  40, 0., 400.);	
 	fHMCTperp_OSmumu    = new TH1D("MCTperp_OSmumu"      , "OS mumu MCT perp"        ,  40, 0., 400.);	
 	fHMCTperp_OSemu     = new TH1D("MCTperp_OSemu"       , "OS emu MCT perp"         ,  40, 0., 400.);	    
 	                                             
 	fHMCT_TTbar         = new TH1D("MCT_TTbar"           , "MCT for TTbar on GenLevel"      , 50, 0., 200.);
 	fHMCTperp_TTbar     = new TH1D("MCTperp_TTbar"       , "TTbar MCT perp"                 , 50, 0., 200.);
+	fHMCTcorr_TTbar     = new TH1D("MCTcorr_TTbar"       , "MCTcorr for TTbar on GenLevel"  , 50, 0., 200.);
 	fHMT2_TTbar         = new TH1D("MT2_TTbar"           , "MT2 for TTbar with Gen Info"    , 50, 0., 200.);
 	fHMT2perp_TTbar     = new TH1D("MT2perp_TTbar"       , "MT2perp for TTbar with Gen Info", 50, 0., 200.);
 	
@@ -57,6 +68,7 @@ void MassAnalysis::Begin(){
 	fHInvMassDiBjet    = new TH1D("InvMassDiBjet" ,  " Inv Mass of cleaned Di-BJets"   ,100, 0, 1000);
 	fHInvMassdiBHemi   = new TH1D("InvMassdiBHemi",  " Inv Mass of two b jets in same hemosphere", 20, 0, 300);
 
+	fHPFMET            = new TH1D("PFMET"         ,  "PFMET"                    ,      100, 0., 500.);
 	fHJpt              = new TH1D("JPt"           ,  "Jet Pt, all selected jets",      200, 0., 1000);  
 	fHJEta             = new TH1D("JEta"          ,  "Jet Eta, all selected jets",     100, -3,   3);
 	fHBJpt             = new TH1D("JBPt"          ,  "BJet Pt, all selected jets",     200, 0., 1000);
@@ -183,6 +195,8 @@ void MassAnalysis::ControlPlots(){
 		fHBJEta -> Fill(fTR->JEta[fBJets[i]]);
 	}
 
+	// MET
+	fHPFMET -> Fill (fTR->PFMET);
 
 }
 
@@ -221,8 +235,8 @@ void MassAnalysis::PseudoJetMasses(){
 	fHemisphere = new Hemisphere(px, py, pz, E, 2, 3);
 	vector<int> grouping = fHemisphere->getGrouping();
 
-	TLorentzVector pseudojet1=(0.,0.,0.,0.);
-	TLorentzVector pseudojet2=(0.,0.,0.,0.);
+	TLorentzVector pseudojet1(0.,0.,0.,0.);
+	TLorentzVector pseudojet2(0.,0.,0.,0.);
 	
 	TLorentzVector pmiss;
 	pmiss.SetPx(fTR->PFMETpx);
@@ -262,11 +276,20 @@ void MassAnalysis::PseudoJetMasses(){
 
 	// ---------------------------------------------
 	// MCT pseudojets
-	double MCT=GetMCT(pseudojet1, pseudojet2);
+	double MCT     =GetMCT(pseudojet1, pseudojet2);
+	TVector2 met;
+	met.Set(pmiss.Px(), pmiss.Py());
+	TLorentzVector DTM(0.,0.,0.,0.);
+	double MCTcorr =GetMCTcorr(pseudojet1, pseudojet2, DTM, met );
+
 	fHMCT_PseudoJet   -> Fill(MCT);
-	if(fLeptConfig!= null) {fHMCT_PseudoJetWithLeptons -> Fill(MCT);}
-	if(fLeptConfig== null) {fHMCT_PseudoJetNoLeptons  -> Fill(MCT);}
-	if(fBJets.size()>0)    {fHMCT_PseudoJetWithB       -> Fill(MCT);}
+	if(fLeptConfig!= null) {fHMCT_PseudoJetWithLeptons     -> Fill(MCT);}
+	if(fLeptConfig== null) {fHMCT_PseudoJetNoLeptons       -> Fill(MCT);}
+	if(fBJets.size()>0)    {fHMCT_PseudoJetWithB           -> Fill(MCT);}
+	fHMCTcorr_PseudoJet   -> Fill(MCTcorr);
+	if(fLeptConfig!= null) {fHMCTcorr_PseudoJetWithLeptons -> Fill(MCTcorr);}
+	if(fLeptConfig== null) {fHMCTcorr_PseudoJetNoLeptons   -> Fill(MCTcorr);}
+	if(fBJets.size()>0)    {fHMCTcorr_PseudoJetWithB       -> Fill(MCTcorr);}
 
 
 
@@ -328,6 +351,11 @@ void MassAnalysis::DiBJetMasses(){
 	// MCT
 	double MCT=GetMCT(p1, p2);
 	fHMCT_DiBJet -> Fill(MCT);
+	// MCTcorr
+	TVector2 met(fTR->PFMETpx, fTR->PFMETpy);
+	TLorentzVector DTM(0.,0.,0.,0.);
+	double MCTcorr = GetMCTcorr(p1, p2, DTM, met);
+	fHMCTcorr_DiBJet -> Fill(MCTcorr);
 
 	// ------------------------------------------
 	// MT2
@@ -400,6 +428,13 @@ void MassAnalysis::DiJetMasses(){
 	// MCT
 	double MCT=GetMCT(p1, p2);
 	fHMCT_DiJet -> Fill(MCT);
+
+	// MCTcorr
+	TVector2 met(fTR->PFMETpx, fTR->PFMETpy);
+	TLorentzVector DTM(0.,0.,0.,0.);
+	double MCTcorr = GetMCTcorr(p1, p2, DTM, met);
+	fHMCTcorr_DiJet ->Fill(MCTcorr);
+
 	if(MCT > 240){
 		interesting_Run.push_back(fTR->Run);
 		interesting_Event.push_back(fTR->Event);
@@ -481,11 +516,12 @@ void MassAnalysis::DiLeptonMasses(){
 
 	// calculate inv mass, MCT, MCTperp, MT2, MT2perp	
 	double MCTperp=-1.;
+	double MCTcorr=-1.;
 	double MT2perp[fMT2_histos_number];
 	double MT2[fMT2_histos_number];
 
-	double MCT    =GetMCT(p1, p2);
-	double mass   =(p1+p2).M();
+	double MCT     =GetMCT(p1, p2);
+	double mass    =(p1+p2).M();
 
 	// check Zmass window for mass plots other than invmass
 	bool Zmassveto(false);
@@ -496,7 +532,8 @@ void MassAnalysis::DiLeptonMasses(){
 	
 	// calculate mass variables
 	if(P_UTM != (0.,0.,0.,0.)) {
-		MCTperp=GetMCTperp(p1, p2, P_UTM);
+		MCTperp =GetMCTperp(p1, p2, P_UTM);
+		MCTcorr =GetMCTcorr(p1, p2, P_UTM);
 	}
 	TLorentzVector pmiss(0., 0., 0., 0.);
 	pmiss.SetPx(fTR->PFMETpx);
@@ -515,7 +552,10 @@ void MassAnalysis::DiLeptonMasses(){
 		fHInvMassOSee   -> Fill(mass);
 		fHInvMassOSll   -> Fill(mass);	
 		if(Zmassveto==false){
-			if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSee -> Fill(MCTperp);
+			if(P_UTM != (0.,0.,0.,0.)) {
+				fHMCTperp_OSee -> Fill(MCTperp);
+				fHMCTcorr_OSee -> Fill(MCTcorr);
+			}
 			fHMCT_OSee      -> Fill(MCT);
 			for(int i=0; i<fMT2_histos_number; ++i){
 				fHMT2_OSll[i]     -> Fill(MT2[i]);
@@ -529,7 +569,10 @@ void MassAnalysis::DiLeptonMasses(){
 		fHInvMassOSmumu -> Fill(mass);
 		fHInvMassOSll   -> Fill(mass);	
 		if(Zmassveto==false){
-			if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSmumu -> Fill(MCTperp);
+			if(P_UTM != (0.,0.,0.,0.)) {
+				fHMCTperp_OSmumu -> Fill(MCTperp);
+				fHMCTcorr_OSmumu -> Fill(MCTcorr);
+			}
 			fHMCT_OSmumu      -> Fill(MCT);
 			for(int i=0; i<fMT2_histos_number; ++i){
 				fHMT2_OSll[i]       -> Fill(MT2[i]);
@@ -542,7 +585,10 @@ void MassAnalysis::DiLeptonMasses(){
 	} else if(fLeptConfig==OS_emu){
 		fHInvMassOSemu  -> Fill(mass);
 		fHInvMassOSll   -> Fill(mass);	
-		if(P_UTM != (0.,0.,0.,0.)) fHMCTperp_OSemu -> Fill(MCTperp);
+		if(P_UTM != (0.,0.,0.,0.)) {
+			fHMCTperp_OSemu -> Fill(MCTperp);
+			fHMCTcorr_OSemu -> Fill(MCTcorr);
+		}
 		fHMCT_OSemu     -> Fill(MCT);
 		for(int i=0; i<fMT2_histos_number; ++i){
 			fHMT2_OSll[i]       -> Fill(MT2[i]);
@@ -576,9 +622,46 @@ double MassAnalysis::GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVe
 //	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Dot(p2_T_perp)) );
 	double MCT_perp= sqrt( pow(m1,2) + pow(m2,2) + 2 *(E1_T_perp*E2_T_perp + p1_T_perp.Mag()*p2_T_perp.Mag()*cos(p1_T_perp.Angle(p2_T_perp))) );
 
+
+	// compare to Tovey Impelemntation
+	TLorentzVector DTM(0.,0.,0.,0.);
+	TVector2       pmiss;
+	pmiss.Set(-P_UTM.Px()-p1.Px()-p2.Px(), -P_UTM.Py()-p1.Py()-p2.Py());
+	double ToveyMCTperp=GetToveyMCTperp(p1, p2, DTM, pmiss);
+	// if(fabs(MCT_perp - ToveyMCTperp)/ToveyMCTperp > 0.01) cout << "MCTperp" << MCT_perp << " Tovey " << ToveyMCTperp << endl;
+
+
 	return MCT_perp;
 }
 
+// *****************************************************************************************************
+double MassAnalysis::GetToveyMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector DTM, TVector2 pmiss){
+	fMCT = new TMctLib;
+	double MCTperp = fMCT -> mcy(p1, p2, DTM, pmiss);
+	delete fMCT;
+	return MCTperp;
+}
+
+// *****************************************************************************************************
+double MassAnalysis::GetMCTcorr(TLorentzVector p1, TLorentzVector p2, TLorentzVector DTM, TVector2 pmiss){
+	fMCT = new TMctLib;
+	double MCTcorr = fMCT -> mctcorr(p1, p2, DTM, pmiss, 7000., 0.);
+	delete fMCT;
+	return MCTcorr;
+}
+
+// ******************************************************************************************************
+double MassAnalysis::GetMCTcorr(TLorentzVector p1, TLorentzVector p2, TLorentzVector UTM){
+	TVector2 pmiss;
+	pmiss.Set(-UTM.Px()-p1.Px()-p2.Px(), -UTM.Py()-p1.Py()-p2.Py());
+	TLorentzVector DTM(0.,0.,0.,0.);
+
+	fMCT = new TMctLib;
+	double MCTcorr = fMCT -> mctcorr(p1, p2, DTM, pmiss, 7000., 0.);
+	delete fMCT;
+	return MCTcorr;
+
+}
 // ******************************************************************************************************
 double MassAnalysis::GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv){
 	TVector3 p1_T_perp =  GetMomPerp(p1, P_UTM);
@@ -639,10 +722,12 @@ void MassAnalysis::MassesForTTbar(){
 		double MCT    =GetMCT(leptons[0], leptons[1]);
 		double MCTperp=GetMCTperp(leptons[0], leptons[1], P_UTM);
 		double MT2perp=GetMT2perp(leptons[0], leptons[1], P_UTM, 0.);
+		double MCTcorr=GetMCTcorr(leptons[0], leptons[1], P_UTM);
 		fHMCT_TTbar     -> Fill(MCT);
 		fHMCTperp_TTbar -> Fill(MCTperp);
 		fHMT2perp_TTbar -> Fill(MT2perp);
 		fHMT2_TTbar     -> Fill(MT2);
+		fHMCTcorr_TTbar -> Fill(MCTcorr);
 	}
 }
 
@@ -655,6 +740,12 @@ double MassAnalysis::GetMCT(TLorentzVector p1, TLorentzVector p2){
 	
 	double MCTsquared=pow(m1,2) + pow(m2,2) +2*(ET1*ET2+ (p1.Px() * p2.Px()) + (p1.Py() * p2.Py()));
 	
+	// Tovey implementation
+	fMCT = new TMctLib();
+	double Tovey_MCT = fMCT -> mct(p1, p2);
+	delete fMCT;
+//	if(fabs(Tovey_MCT -sqrt(MCTsquared))/Tovey_MCT > 0.01) cout << "Tovey_MCT "<< Tovey_MCT << " MCT " << sqrt(MCTsquared) << endl;
+
 	return sqrt(MCTsquared);
 }
 
@@ -796,11 +887,23 @@ void MassAnalysis::End(){
 	fHMCT_OSee               ->Write();
 	fHMCT_OSmumu             ->Write();
 	fHMCT_OSemu              ->Write();
-	 
+	
+	fHMCTcorr_PseudoJet          ->Write();
+	fHMCTcorr_PseudoJetWithLeptons ->Write();
+	fHMCTcorr_PseudoJetNoLeptons ->Write();
+	fHMCTcorr_PseudoJetWithB     ->Write();
+	fHMCTcorr_DiJet              ->Write();
+	fHMCTcorr_DiBJet             ->Write();
+	fHMCTcorr_OSee               ->Write();
+	fHMCTcorr_OSmumu             ->Write();
+	fHMCTcorr_OSemu              ->Write();
+
+
 	fHMCTperp_OSee           ->Write();
 	fHMCTperp_OSmumu         ->Write();
 	fHMCTperp_OSemu          ->Write();
-	
+
+	fHMCTcorr_TTbar          ->Write();	
 	fHMCTperp_TTbar          ->Write();
 	fHMT2_TTbar              ->Write();
 	fHMT2perp_TTbar          ->Write();
@@ -817,7 +920,8 @@ void MassAnalysis::End(){
 	fHInvMassDijet           ->Write();
 	fHInvMassDiBjet          ->Write(); 
 	fHInvMassdiBHemi         ->Write();
-	
+
+	fHPFMET                  ->Write();	
 	fHJpt                    ->Write();  
 	fHJEta                   ->Write();
 	fHBJpt                   ->Write();

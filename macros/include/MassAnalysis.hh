@@ -16,6 +16,7 @@
 #include "base/TreeReader.hh"
 #include "MultiplicityAnalysisBase.hh"
 #include "helper/Davismt2.h"
+#include "helper/TMctLib.h"
 #include "helper/Hemisphere.hh"
 
 
@@ -46,12 +47,16 @@ private:
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
 	double GetMCT(TLorentzVector p1, TLorentzVector p2);
 	double GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM);
+	double GetToveyMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector DTM, TVector2 pmiss);
+	double GetMCTcorr(TLorentzVector p1, TLorentzVector p2, TLorentzVector DTM, TVector2 pmiss);
+	double GetMCTcorr(TLorentzVector p1, TLorentzVector p2, TLorentzVector UTM);
 	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
 	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
 	vector<TLorentzVector> GetLepton4Momenta();
 	bool IsCleanJetEvent();
 
 	Davismt2 *fMT2;
+	TMctLib  *fMCT;
 	Hemisphere *fHemisphere;
 	
 	// data members
@@ -99,12 +104,22 @@ private:
 	TH1D* fHMCT_OSee;    
 	TH1D* fHMCT_OSmumu;  
 	TH1D* fHMCT_OSemu;   
-	
+	TH1D* fHMCTcorr_PseudoJet;
+	TH1D* fHMCTcorr_PseudoJetWithLeptons;
+	TH1D* fHMCTcorr_PseudoJetNoLeptons;
+	TH1D* fHMCTcorr_PseudoJetWithB;
+	TH1D* fHMCTcorr_DiJet;   
+	TH1D* fHMCTcorr_DiBJet;  
+	TH1D* fHMCTcorr_OSee;    
+	TH1D* fHMCTcorr_OSmumu;  
+	TH1D* fHMCTcorr_OSemu;   
+
 	TH1D* fHMCTperp_OSee;  
 	TH1D* fHMCTperp_OSmumu;
 	TH1D* fHMCTperp_OSemu; 
 
 	TH1D* fHMCT_TTbar;	
+	TH1D* fHMCTcorr_TTbar;
 	TH1D* fHMCTperp_TTbar;	
 	TH1D* fHMT2_TTbar;
 	TH1D* fHMT2perp_TTbar;
@@ -122,6 +137,7 @@ private:
 	TH1D* fHInvMassdiBHemi;
 	TH1D* fHInvMassDiBjet;
 
+	TH1D* fHPFMET;
 	TH1D* fHJpt;   
 	TH1D* fHJEta;  
 	TH1D* fHBJpt; 
