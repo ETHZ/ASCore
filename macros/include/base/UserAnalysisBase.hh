@@ -40,6 +40,7 @@ public:
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
+	virtual bool IsGoodBasicPFJet(int);
 	virtual bool IsGoodJ_TDL(int);
 	virtual bool IsGoodbJ_TDL(int);
 

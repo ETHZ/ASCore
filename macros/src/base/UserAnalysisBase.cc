@@ -124,6 +124,22 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 	return true;
 }
 
+bool UserAnalysisBase::IsGoodBasicPFJet(int index) {
+        // Basic PF jet cleaning and ID cuts
+        if(fTR->PFJPt[index] < 30) return false;
+	if(fabs(fTR->PFJEta[index]) > 3.0) return false;
+        // Loose PF jet ID (WARNING: HF not included in our ntuple)
+        // See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
+        if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
+        if ( !(fTR->PFJNeuEmfrac[index]     < 0.99) ) return false;
+        if ( !(fTR->PFJNeuHadfrac[index]    < 0.99) ) return false;
+        if (fabs(fTR->PFJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
+           if ( !(fTR->PFJChEmfrac[index]  < 0.99) )  return false;
+           if ( !(fTR->PFJChHadfrac[index] > 0.00) )  return false;
+           if ( !(fTR->PFJChMult[index]    > 0   ) )  return false;
+        }
+}
+
 bool UserAnalysisBase::IsGoodBasicJet(int index){
 	// Basic Jet cleaning and ID cuts
 	if(fTR->JPt[index] < 30) return false;
