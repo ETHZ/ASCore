@@ -1346,7 +1346,7 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	p_plot->cd();
 	if(logy) p_plot->SetLogy(1);
 
-	setPlottingRange(h1, h2, 0.05, logy);
+	// setPlottingRange(h1, h2, 0.05, logy);
 	
 	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
 	TLegend *leg = new TLegend(0.65,0.75,0.886,0.88); // Upper right
@@ -1491,7 +1491,8 @@ void AnaClass::plotPredOverlay3HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	setPlottingRange(h1, h2, h3, 0.05, logy);
 	
 	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
-	TLegend *leg = new TLegend(0.55,0.75,0.886,0.88); // Upper right
+	// TLegend *leg = new TLegend(0.55,0.75,0.886,0.88); // Upper right
+	TLegend *leg = new TLegend(0.45,0.75,0.886,0.88); // Upper right
 	leg->AddEntry(h1, tag1,"f");
 	leg->AddEntry(h2, tag2,"f");
 	leg->AddEntry(h3, tag3,"f");
@@ -1664,15 +1665,136 @@ void AnaClass::plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2,
 }
 
 //____________________________________________________________________________
+void AnaClass::plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, TH1D *h4, TString tag4, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+
+	// h1->SetLineWidth(2);
+	// h1->SetLineColor(kBlack);
+	// h1->SetFillColor(kBlack);
+	// h1->SetMarkerColor(kBlack);
+	// h1->SetMarkerStyle(8);
+	// h1->SetMarkerSize(1.2);
+	// 
+	// h2->SetLineWidth(2);
+	// h2->SetLineColor(kBlue);
+	// h2->SetFillColor(kBlue);
+	// h2->SetMarkerColor(kBlue);
+	// h2->SetMarkerStyle(8);
+	// h2->SetMarkerSize(1.2);
+	// 
+	// h3->SetLineWidth(2);
+	// h3->SetLineColor(kRed);
+	// h3->SetFillColor(kRed);
+	// h3->SetMarkerColor(kRed);
+	// h3->SetMarkerStyle(8);
+	// h3->SetMarkerSize(1.2);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName(), h4->GetName());
+	sprintf(canvname,"%s:%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName(), h4->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+	h1->Sumw2();
+	h2->Sumw2();
+	h3->Sumw2();
+	h4->Sumw2();
+
+	// // Determine plotting range
+	// double max1 = h1->GetMaximum();
+	// double max2 = h2->GetMaximum();
+	// double max3 = h3->GetMaximum();
+	// double max12 = (max1>max2)?max1:max2;
+	// double max = (max12>max3)?max12:max3;
+	// if(logy) max = 5*max;
+	// else max = 1.05*max;
+	// h1->SetMaximum(max);
+	// h2->SetMaximum(max);
+	// h3->SetMaximum(max);
+	// if(!logy){
+	// 	h1->SetMinimum(0.0);
+	// 	h2->SetMinimum(0.0);
+	// 	h3->SetMinimum(0.0);
+	// }
+
+	// TLegend *leg = new TLegend(0.15,0.70,0.35,0.88);
+	// TLegend *leg = new TLegend(0.65,0.69,0.886,0.88);
+	TLegend *leg = new TLegend(0.65,0.66,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->AddEntry(h4, tag4,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("PE2");
+	h2->DrawCopy("PE1, same");
+	h3->DrawCopy("PE1, same");
+	h4->DrawCopy("PE1, same");
+	leg->Draw();
+
+	double max1 = h1->GetYaxis()->GetXmax();
+	double max2 = h2->GetYaxis()->GetXmax();
+	double max3 = h3->GetYaxis()->GetXmax();
+	double max4 = h4->GetYaxis()->GetXmax();
+	double max12 = (max1>max2)?max1:max2;
+	double max34 = (max3>max4)?max3:max4;
+	double max = (max12>max34)?max12:max34;
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min3 = h3->GetYaxis()->GetXmin();
+	double min4 = h4->GetYaxis()->GetXmin();
+	double min12 = (min1<min2)?min1:min2;
+	double min34 = (min3<min4)?min3:min4;
+	double min = (min12<min34)?min12:min34;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+
+	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 0.00, h1->GetXaxis()->GetXmax(), 0.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+
+	// TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	// lat->SetTextColor(kBlack);
+	// lat->SetTextSize(0.04);
+	// lat->DrawLatex(0.58,0.85, "2.67 pb^{ -1} at  #sqrt{s} = 7 TeV");
+
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName()) + "_" + TString(h4->GetName());
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
 void AnaClass::plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 
-	h1->SetLineWidth(2);
-	h1->SetLineColor(kBlue);
-	h1->SetFillColor(kBlue);
-	h2->SetLineWidth(2);
-	h2->SetLineColor(kRed);
-	h2->SetFillColor(kRed);
+	// h1->SetLineWidth(2);
+	// h1->SetLineColor(kBlue);
+	// h1->SetFillColor(kBlue);
+	// h2->SetLineWidth(2);
+	// h2->SetLineColor(kRed);
+	// h2->SetFillColor(kRed);
 
 	char canvtitle[100], canvname[100];
 	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
@@ -1685,18 +1807,19 @@ void AnaClass::plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2
 	gPad->SetGridy(1);
 	if(logy) col->SetLogy(1);
 
-	setPlottingRange(h1, h2, 0.05, logy);
+	// setPlottingRange(h1, h2, 0.05, logy);
 
 	// TLegend *leg = new TLegend(0.65,0.45,0.886,0.58);
-	TLegend *leg = new TLegend(0.60,0.75,0.886,0.88);
+	TLegend *leg = new TLegend(0.60,0.15,0.886,0.28); // Lower right
+	// TLegend *leg = new TLegend(0.60,0.75,0.886,0.88);
 	leg->AddEntry(h1, tag1,"f");
 	leg->AddEntry(h2, tag2,"f");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetBorderSize(0);
 
-	h1->DrawCopy("E1");
-	h2->DrawCopy("E1,same");
+	h1->DrawCopy("PE1");
+	h2->DrawCopy("PE1,same");
 	leg->Draw();
 
 	double min1 = h1->GetYaxis()->GetXmin();
@@ -1722,6 +1845,78 @@ void AnaClass::plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2
 	}
 	gPad->RedrawAxis();
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
+void AnaClass::plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+
+	// h1->SetLineWidth(2);
+	// h1->SetLineColor(kBlue);
+	// h1->SetFillColor(kBlue);
+	// h2->SetLineWidth(2);
+	// h2->SetLineColor(kRed);
+	// h2->SetFillColor(kRed);
+	// h3->SetLineWidth(2);
+	// h3->SetLineColor(kGreen);
+	// h3->SetFillColor(kGreen);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName());
+	sprintf(canvname,"%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	gPad->SetGridy(1);
+	if(logy) col->SetLogy(1);
+
+	// setPlottingRange(h1, h2, h3, 0.05, logy);
+
+	// TLegend *leg = new TLegend(0.65,0.45,0.886,0.58);
+	TLegend *leg = new TLegend(0.15,0.70,0.55,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("PE1");
+	h2->DrawCopy("PE1,same");
+	h3->DrawCopy("PE1,same");
+	leg->Draw();
+
+	double min1  = h1->GetYaxis()->GetXmin();
+	double min2  = h2->GetYaxis()->GetXmin();
+	double min3  = h3->GetYaxis()->GetXmin();
+	double min12 = (min1<min2)?min1:min2;
+	double min   = (min12<min3)?min12:min3;
+	double max1  = h1->GetYaxis()->GetXmax();
+	double max2  = h2->GetYaxis()->GetXmax();
+	double max3  = h3->GetYaxis()->GetXmax();
+	double max12 = (max1>max2)?max1:max2;
+	double max   = (max12>max3)?max12:max3;
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
 }
@@ -1948,7 +2143,7 @@ void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, TH1D *&h3, float margin, b
 }
 
 //____________________________________________________________________________
-void AnaClass::setPlottingRange(std::vector<TH1*> &hists, float margin, bool logy){
+void AnaClass::setPlottingRange(std::vector<TH1D*> &hists, float margin, bool logy){
 	// Determine plotting range
 	// Default margin is 0.05
 	float max = hists[0]->GetMaximum();

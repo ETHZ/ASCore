@@ -27,10 +27,12 @@
 // static const double gPtbins[gNPtbins+1] = {10., 30., 45., 60., 100., 200.};
 
 // For Analysis on Data
-// static const int gNPtbins = 1;
-// static const double gPtbins[gNPtbins+1] = {10., 100.};
-static const int gNPtbins = 3;
-static const double gPtbins[gNPtbins+1] = {20., 40., 60., 100.};
+// static const int gNPtbins = 4;
+// static const double gPtbins[gNPtbins+1] = {10., 20., 30., 40., 60.};
+static const int gNPtbins = 5;
+static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 75., 100.};
+static const int gNPt2bins = 6;
+static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 75., 100.};
 static const int gNEtabins = 1;
 static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
 
@@ -48,22 +50,41 @@ public:
 	void loadSamples(const char* filename = "samples.dat");
 
 	void makePlots();
+
+	void makefRatioPlots();
+	void makepRatioPlots();
 	void makeIsolationPlots();
 	void makePtPlots();
+	
+	void make100pbMCPredictionPlots();
+	void makePrediction();
+	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
+	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
 	void makeIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
 	
 	// Fake ratios
 	void produceRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	vector<double> produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
 
 	void fillfRatio(int, int);
+	void fillfRatio(vector<int>, int);
 	void fillfRatio(int, int, const int, const double*, const int, const double*);
+	void fillfRatio(vector<int>, int, const int, const double*, const int, const double*);
+
 	void fillpRatio(int, int);
+	void fillpRatio(vector<int>, int);
 	void fillpRatio(int, int, const int, const double*, const int, const double*);
+	void fillpRatio(vector<int>, int, const int, const double*, const int, const double*);
 	
 	TH1D* fillRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
+	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
+	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
+	TH2D* fillRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 
 	void plotRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
+	void plotRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
 
 	void makeSSNsigPredictionPlots();
 	void makeSSPredictionPlots(std::vector<int>);
@@ -74,11 +95,17 @@ public:
 
 	// Event and Object selectors:
 	bool isGoodEvent();
+	bool isMuTriggeredEvent();
+	bool isJetTriggeredEvent();
 	bool isSignalSuppressedEvent();
 	bool isZEvent();
 	bool isGenMatchedSUSYDiLepEvent();
+	bool isSSLLEvent();
 	bool isSSTTEvent();
+
 	bool isGoodMuon(int);
+	bool isGoodPrimMuon(int);
+	bool isGoodSecMuon(int);
 	bool isFakeTTbarMuon(int);
 	bool isPromptTTbarMuon(int);
 	bool isPromptSUSYMuon(int);
@@ -86,7 +113,11 @@ public:
 private:
 
 	FPRatios *fFPRatios;
-	
+
+	vector<int> fAllMCSi; // All MC samples with Single Muon Selection
+	vector<int> fAllMCDi; // All MC samples with Di Muon Selection
+	vector<int> fAllMCSS; // All MC samples with SS Muon Selection
+
 	struct sample{
 		TString name;
 		TString sname;
@@ -97,6 +128,8 @@ private:
 	};
 	
 	int fNJetsMin; // Cut on minimal number of jets
+	float fMinPt1; // Cut on pt of harder muon
+	float fMinPt2; // Cut on pt of softer muon
 	float fLumiNorm; // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 

@@ -93,7 +93,9 @@ public:
 	virtual void plotPredOverlay2HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);	
 	virtual void plotPredOverlay3HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2, TH1F *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, TH1D *h4, TString tag4, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 
 /*****************************************************************************
 ##################| Utilities |###############################################
@@ -111,7 +113,7 @@ public:
 	virtual const Double_t* getBinning(const TH1D*);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, TH1D *&, float = 0.05, bool = false);
-	virtual void setPlottingRange(std::vector<TH1*>&, float = 0.05, bool = false);
+	virtual void setPlottingRange(std::vector<TH1D*>&, float = 0.05, bool = false);
 	virtual float getMaxYExtension(TH1*);
 	virtual float getMinYExtension(TH1*);
 	virtual TCanvas* makeCanvas(const char*);
