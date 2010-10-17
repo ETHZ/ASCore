@@ -25,30 +25,30 @@ void MassAnalysis::Begin(){
 	fHAlpahT_DiJet      = new TH1D("AlpahT_DiJet"        , "alpha_T for dijets"      , 300, 0., 2.);
 	fHAlpahT_PseudoJet  = new TH1D("AlpahT_PseudoJet"    , "alpha_T for pseudojets"  , 300, 0., 2.);
 	
-	fHMCT_DiJet                  = new TH1D("MCT_DiJet"                , "di-Jets MCT"                , 100, 0., 500.);
-	fHMCT_DiBJet                 = new TH1D("MCT_DiBJet"               , "di-B-Jets MCT"              , 100, 0., 500.);
-	fHMCT_PseudoJet              = new TH1D("MCT_PseudoJet"            , "pseudo jet MCT"             , 200, 0., 1500.);
+	fHMCT_DiJet                  = new TH1D("MCT_DiJet"                , "di-Jets MCT"                ,  60, 0., 500.);
+	fHMCT_DiBJet                 = new TH1D("MCT_DiBJet"               , "di-B-Jets MCT"              ,  50, 0., 500.);
+	fHMCT_PseudoJet              = new TH1D("MCT_PseudoJet"            , "pseudo jet MCT"             , 150, 0., 1500.);
 	fHMCT_PseudoJetWithLeptons   = new TH1D("MCT_PseudoJetWithLeptons" , "pseudo jet MCT with leptons",  50, 0., 1000.);
-	fHMCT_PseudoJetNoLeptons     = new TH1D("MCT_PseudoJetNoLeptons"   , "pseudo jet MCT lepton veto ", 200, 0., 1500.);
-	fHMCT_PseudoJetWithB         = new TH1D("MCT_PseudoJetWithB"       , "pseudo jet MCT with b"      , 200, 0., 1500.);
+	fHMCT_PseudoJetNoLeptons     = new TH1D("MCT_PseudoJetNoLeptons"   , "pseudo jet MCT lepton veto ", 150, 0., 1500.);
+	fHMCT_PseudoJetWithB         = new TH1D("MCT_PseudoJetWithB"       , "pseudo jet MCT with b"      , 100, 0., 1500.);
 	fHMCT_OSee                   = new TH1D("MCT_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
 	fHMCT_OSmumu                 = new TH1D("MCT_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
 	fHMCT_OSemu                  = new TH1D("MCT_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
 	                                                                                 
-	fHMCTcorr_DiJet                  = new TH1D("MCTcorr_DiJet"                , "di-Jets MCT"                , 100, 0., 500.);
-	fHMCTcorr_DiBJet                 = new TH1D("MCTcorr_DiBJet"               , "di-B-Jets MCT"              , 100, 0., 500.);
+	fHMCTcorr_DiJet                  = new TH1D("MCTcorr_DiJet"                , "di-Jets MCT"                ,  60, 0., 400.);
+	fHMCTcorr_DiBJet                 = new TH1D("MCTcorr_DiBJet"               , "di-B-Jets MCT"              ,  30, 0., 300.);
 	fHMCTcorr_PseudoJet              = new TH1D("MCTcorr_PseudoJet"            , "pseudo jet MCT"             , 200, 0., 1500.);
 	fHMCTcorr_PseudoJetWithLeptons   = new TH1D("MCTcorr_PseudoJetWithLeptons" , "pseudo jet MCT with leptons",  50, 0., 1000.);
 	fHMCTcorr_PseudoJetNoLeptons     = new TH1D("MCTcorr_PseudoJetNoLeptons"   , "pseudo jet MCT lepton veto ", 200, 0., 1500.);
 	fHMCTcorr_PseudoJetWithB         = new TH1D("MCTcorr_PseudoJetWithB"       , "pseudo jet MCT with b"      , 200, 0., 1500.);
-	fHMCTcorr_OSee                   = new TH1D("MCTcorr_OSee"           , "OS ee MCT"                ,  40, 0., 400.);
-	fHMCTcorr_OSmumu                 = new TH1D("MCTcorr_OSmumu"         , "OS mumu MCT"              ,  40, 0., 400.);
-	fHMCTcorr_OSemu                  = new TH1D("MCTcorr_OSemu"          , "OS emu MCT"               ,  40, 0., 400.);
+	fHMCTcorr_OSee                   = new TH1D("MCTcorr_OSee"           , "OS ee MCT"                ,  20, 0., 200.);
+	fHMCTcorr_OSmumu                 = new TH1D("MCTcorr_OSmumu"         , "OS mumu MCT"              ,  20, 0., 200.);
+	fHMCTcorr_OSemu                  = new TH1D("MCTcorr_OSemu"          , "OS emu MCT"               ,  20, 0., 200.);
 
 
-	fHMCTperp_OSee      = new TH1D("MCTperp_OSee"        , "OS ee MCT perp"          ,  40, 0., 400.);	
-	fHMCTperp_OSmumu    = new TH1D("MCTperp_OSmumu"      , "OS mumu MCT perp"        ,  40, 0., 400.);	
-	fHMCTperp_OSemu     = new TH1D("MCTperp_OSemu"       , "OS emu MCT perp"         ,  40, 0., 400.);	    
+	fHMCTperp_OSee      = new TH1D("MCTperp_OSee"        , "OS ee MCT perp"          ,  20, 0., 200.);	
+	fHMCTperp_OSmumu    = new TH1D("MCTperp_OSmumu"      , "OS mumu MCT perp"        ,  20, 0., 200.);	
+	fHMCTperp_OSemu     = new TH1D("MCTperp_OSemu"       , "OS emu MCT perp"         ,  20, 0., 200.);	    
 	                                             
 	fHMCT_TTbar         = new TH1D("MCT_TTbar"           , "MCT for TTbar on GenLevel"      , 50, 0., 200.);
 	fHMCTperp_TTbar     = new TH1D("MCTperp_TTbar"       , "TTbar MCT perp"                 , 50, 0., 200.);
@@ -64,10 +64,11 @@ void MassAnalysis::Begin(){
 	fHInvMassSSmumu    = new TH1D("InvMass_SSmumu",  " Inv Mass of SS di-leptons mumu" , 30, 0, 300);
 	fHInvMassSSemu     = new TH1D("InvMass_SSemu" ,  " Inv Mass of SS di-leptons emu"  , 30, 0, 300);
 	fHInvMassSSll      = new TH1D("InvMass_SSll"  ,  " Inv Mass of SS di-leptons ll"   , 30, 0, 300);
-	fHInvMassDijet     = new TH1D("InvMassDijet"  ,  " Inv Mass of cleaned Di-Jets"    ,400, 0, 2500);
-	fHInvMassDiBjet    = new TH1D("InvMassDiBjet" ,  " Inv Mass of cleaned Di-BJets"   ,100, 0, 1000);
+	fHInvMassDijet     = new TH1D("InvMassDijet"  ,  " Inv Mass of cleaned Di-Jets"    ,100, 0, 2500);
+	fHInvMassDiBjet    = new TH1D("InvMassDiBjet" ,  " Inv Mass of cleaned Di-BJets"   , 50, 0, 1000);
 	fHInvMassdiBHemi   = new TH1D("InvMassdiBHemi",  " Inv Mass of two b jets in same hemosphere", 20, 0, 300);
 
+	fHDPhiJ1vsDPhiJ2   = new TH2D("DPhiJ1vsDPhiJ2",  "DPhiJ1 vs DPhiJ2"         , 100., 0., 3.2, 100., 0., 3.2);
 	fHPFMET            = new TH1D("PFMET"         ,  "PFMET"                    ,      100, 0., 500.);
 	fHJpt              = new TH1D("JPt"           ,  "Jet Pt, all selected jets",      200, 0., 1000);  
 	fHJEta             = new TH1D("JEta"          ,  "Jet Eta, all selected jets",     100, -3,   3);
@@ -81,7 +82,6 @@ void MassAnalysis::Begin(){
 	fHMT_single_mu	      = new TH1D("MT_single_mu"  ,  " transverse mass of mu, MET "    ,100, 0, 200);
 	fHMT_single_e_nojets  = new TH1D("MT_single_e_nojets "  ,  " transverse mass of el, MET, no jets in event "    ,100, 0, 200);
 	fHMT_single_mu_nojets = new TH1D("MT_single_mu_nojets"  ,  " transverse mass of mu, MET, no jets in event "    ,100, 0, 200);
-
 		
 	for(int i=0; i<fMT2_histos_number; ++i){
 		std::stringstream out;
@@ -89,8 +89,8 @@ void MassAnalysis::Begin(){
 		out << mass ;
 		TString Mass = (TString) out.str();
 				
-		fHMT2_diBjet[i]                = new TH1D("MT2_diBjet_M"+Mass,               " ",100, 0., 500.);
-		fHMT2_dijet[i]                 = new TH1D("MT2_dijet_M"+Mass,                " ",100, 0., 500.);
+		fHMT2_diBjet[i]                = new TH1D("MT2_diBjet_M"+Mass,               " ", 50, 0., 300.);
+		fHMT2_dijet[i]                 = new TH1D("MT2_dijet_M"+Mass,                " ", 80, 0., 500.);
 		fHMT2_diBjetdiLept[i]          = new TH1D("MT2_diBjetdiLept_M"+Mass,         " ",100, 0., 500.);
 		fHMT2_pseudojet[i]             = new TH1D("MT2_pseudojet_M"+Mass,            " ",100, 0., 500.);
 		fHMT2_PseudoJetWithB[i]        = new TH1D("MT2_PseudoJetsWithB_M"+Mass,      " ",100, 0., 500.);     
@@ -98,17 +98,17 @@ void MassAnalysis::Begin(){
 		fHMT2_PseudoJetNoLeptons[i]    = new TH1D("MT2_PseudoJetsNoLeptons_M"+Mass,  " ",100, 0., 500.);
 
 
-		fHMT2_OSll[i]                 = new TH1D("MT2_OSll_M"+Mass,               " ", 40, 0., 400.);
-		fHMT2_OSee[i]                 = new TH1D("MT2_OSee_M"+Mass,               " ", 40, 0., 400.);
-		fHMT2_OSmumu[i]               = new TH1D("MT2_OSmumu_M"+Mass,             " ", 40, 0., 400.);
-		fHMT2_OSemu[i]                = new TH1D("MT2_OSemu_M"+Mass,              " ", 40, 0., 400.);
-		fHMT2_OSllminusemu[i]         = new TH1D("MT2_OSllminusemu_M"+Mass,       " ", 40, 0., 400.);
+		fHMT2_OSll[i]                 = new TH1D("MT2_OSll_M"+Mass,               " ", 30, 0., 300.);
+		fHMT2_OSee[i]                 = new TH1D("MT2_OSee_M"+Mass,               " ", 30, 0., 300.);
+		fHMT2_OSmumu[i]               = new TH1D("MT2_OSmumu_M"+Mass,             " ", 30, 0., 300.);
+		fHMT2_OSemu[i]                = new TH1D("MT2_OSemu_M"+Mass,              " ", 30, 0., 300.);
+		fHMT2_OSllminusemu[i]         = new TH1D("MT2_OSllminusemu_M"+Mass,       " ", 30, 0., 300.);
 		
-		fHMT2_SSll[i]                 = new TH1D("MT2_SSll_M"+Mass,               " ", 20, 0., 400.);
+		fHMT2_SSll[i]                 = new TH1D("MT2_SSll_M"+Mass,               " ", 10, 0., 200.);
 		
-		fHMT2perp_OSee[i]             = new TH1D("MT2perp_OSee_M"+Mass,           " ", 40, 0., 400.);
-		fHMT2perp_OSmumu[i]           = new TH1D("MT2perp_OSmumu_M"+Mass,         " ", 40, 0., 400.);
-		fHMT2perp_OSemu[i]            = new TH1D("MT2perp_OSemu_M"+Mass,          " ", 40, 0., 400.);
+		fHMT2perp_OSee[i]             = new TH1D("MT2perp_OSee_M"+Mass,           " ", 20, 0., 200.);
+		fHMT2perp_OSmumu[i]           = new TH1D("MT2perp_OSmumu_M"+Mass,         " ", 20, 0., 200.);
+		fHMT2perp_OSemu[i]            = new TH1D("MT2perp_OSemu_M"+Mass,          " ", 20, 0., 200.);
 	}
 }
 
@@ -127,9 +127,6 @@ void MassAnalysis::Analyze(){
 	// Controll Plots
 	ControlPlots();
 
-	// Calculate and Plot the VectorSumPt
-	VectorSumPt();
-
 	// Single Leptons (e, mu)
 	SingleLeptonMasses();
 
@@ -138,8 +135,8 @@ void MassAnalysis::Analyze(){
 
 	// Masses for di-jets
 	DiJetMasses();
-
 	// Masses for di-bjets
+
 	DiBJetMasses();
 	
 	// Masses for at least three 3 jets
@@ -156,7 +153,7 @@ void MassAnalysis::Analyze(){
 // ***********************************************************************************************
 void MassAnalysis::VectorSumPt(){
 	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
-	
+
 	double px=0;
 	double py=0;
 	for(int i=0; i<fJets.size(); ++i){
@@ -182,6 +179,48 @@ void MassAnalysis::VectorSumPt(){
 
 // ************************************************************************************************
 void MassAnalysis::ControlPlots(){
+	// reset variables
+	fDeltaPhi1 = -999.99;
+	fDeltaPhi2 = -999.99;
+	fR12       = -999.99;
+	fR21       = -999.99;
+	fR12R21    =  false;
+
+
+	// Calculate and Plot the VectorSumPt
+	VectorSumPt();
+
+	// R12 and R21
+	bool R12R21(false);
+	if(fJets.size()>1 && fTR->PFMET > fCut_PFMET_min){
+		double pi = 3.14159265;
+		double phi_j1  = fTR->JPhi[fJets[0]];
+		double phi_j2  = fTR->JPhi[fJets[1]];
+		double phi_met = fTR->PFMETphi;
+
+		double d_phi1 = fabs(Util::DeltaPhi(phi_j1, phi_met));
+		double d_phi2 = fabs(Util::DeltaPhi(phi_j2, phi_met));
+	
+		fDeltaPhi1 = d_phi1;
+		fDeltaPhi2 = d_phi2;
+
+		double R12 = sqrt( d_phi1*d_phi1 + (pi-d_phi2)*(pi-d_phi2) );
+		double R21 = sqrt( d_phi2*d_phi2 + (pi-d_phi1)*(pi-d_phi1) );
+	
+		fR12 = R12;
+		fR21 = R21;
+
+		fHDPhiJ1vsDPhiJ2 -> Fill (d_phi1, d_phi2);
+
+		if(R12 > 0.5 && R21 > 0.5){R12R21 = true;}
+	}	
+	fR12R21 = R12R21;
+
+	// plots for cleaned events
+	if(! IsCleanJetEvent()) return;	
+	
+	// MET spectrum
+	fHPFMET -> Fill(fTR->PFMET);
 	
 	// Jet Pt spectrum
 	for(int i=0; i<fJets.size(); ++i){
@@ -194,10 +233,6 @@ void MassAnalysis::ControlPlots(){
 		fHBJpt  -> Fill(fTR->JPt[fBJets[i]]);
 		fHBJEta -> Fill(fTR->JEta[fBJets[i]]);
 	}
-
-	// MET
-	fHPFMET -> Fill (fTR->PFMET);
-
 }
 
 // *************************************************************************************************
@@ -270,6 +305,7 @@ void MassAnalysis::PseudoJetMasses(){
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
 			interesting_Type.push_back("pseudojetMT2");
+			if(fTR->Run == 143657 && fTR->LumiSection == 1628 && fTR->Event==1564073782) PrintEvent();
 		} 	
 	}
 
@@ -440,6 +476,10 @@ void MassAnalysis::DiJetMasses(){
 		interesting_Event.push_back(fTR->Event);
 		interesting_Lumi.push_back(fTR->LumiSection);
 		interesting_Type.push_back("dijetMCT");
+		if(fTR->Run == 143657 && fTR->LumiSection == 1310 && fTR->Event==1285062562) {
+			PrintEvent();
+			cout << "dijet mass " << (p1+p2).M() << endl;
+		}
 	}
 
 	// -------------------------------------------------
@@ -456,6 +496,7 @@ void MassAnalysis::DiJetMasses(){
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
 			interesting_Type.push_back("dijetMT2");
+
 		}
 	}
 
@@ -827,9 +868,37 @@ bool MassAnalysis::IsCleanJetEvent(){
 		if(fTR->JPt[i]>20) jcounter++; 
 	}
 //    	if(jcounter != fJets.size()) return false;
+
+	if(fR12R21 == false) return false;
+
 	return true;
 }
 
+// ***************************************************************************************************
+void MassAnalysis::PrintEvent(){
+	cout << "********************************************************************************" << endl;
+	cout << "PrintEvent for " << fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event      << endl;
+	cout << endl;
+	for(int i=0; i<fJets.size(); ++i){
+		cout << "Jet" << i+1 << ": Pt " << fTR->JPt[fJets[i]] 
+		     << " Phi " << fTR->JPhi[fJets[i]] << " Eta " << fTR->JEta[fJets[i]] 
+		     << " btag " << fTR->JbTagProbSimpSVHighPur[fJets[i]] << endl;
+	}
+	for(int i=0; i<fElecs.size(); ++i){
+		cout << "El"  << i+1 << ": Pt " << fTR->ElPt[fElecs[i]]
+		     << " Phi " << fTR->ElPhi[fElecs[i]] << " Eta " << fTR->ElPhi[fElecs[i]] << endl;
+	}
+	for(int i=0; i<fMuons.size(); ++i){
+		cout << "Mu"  << i+1 << ": Pt " << fTR->MuPt[fMuons[i]]
+		     << " Phi " << fTR->MuPhi[fMuons[i]] << " Eta " << fTR->MuPhi[fMuons[i]] << endl;
+	}
+	cout << "ptvectorsum " << fVectorSumPt << endl;
+	cout << "PFMET        " << fTR->PFMET          << " PFMETphi         " << fTR->PFMETphi        << endl;
+	cout << "MuJESCorrMET " << fTR->MuJESCorrMET   << " MuJESCorrMETphi  " << fTR->MuJESCorrMETphi << endl;
+	cout << "DeltaPhi1    " << fDeltaPhi1   << " DeltaPhi2 " << fDeltaPhi2 << endl;
+	cout << "R12          " << fR12  << " fR21 " << fR21 << endl;
+	cout << "*********************************************************************************" << endl;
+}
 // ****************************************************************************************************
 void MassAnalysis::End(){
 	// cout interesting events
@@ -921,6 +990,7 @@ void MassAnalysis::End(){
 	fHInvMassDiBjet          ->Write(); 
 	fHInvMassdiBHemi         ->Write();
 
+	fHDPhiJ1vsDPhiJ2         ->Write();
 	fHPFMET                  ->Write();	
 	fHJpt                    ->Write();  
 	fHJEta                   ->Write();

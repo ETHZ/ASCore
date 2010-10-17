@@ -41,6 +41,7 @@ private:
 	void MassesForTTbar();
 	void ControlPlots();
 	void VectorSumPt();
+	void PrintEvent();
 
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
@@ -63,6 +64,11 @@ private:
 	int fMT2_histos_step;
   	int fMT2_histos_number;
 	float fVectorSumPt;
+	float fDeltaPhi1;
+	float fDeltaPhi2;
+	float fR12;
+	float fR21;
+	bool fR12R21;
 	vector<int> interesting_Run;
 	vector<int> interesting_Lumi;
 	vector<int> interesting_Event;
@@ -137,6 +143,8 @@ private:
 	TH1D* fHInvMassdiBHemi;
 	TH1D* fHInvMassDiBjet;
 
+	TH2D* fHDPhiJ1vsDPhiJ2;
+	TH1D* fHPlotPedja;
 	TH1D* fHPFMET;
 	TH1D* fHJpt;   
 	TH1D* fHJEta;  
