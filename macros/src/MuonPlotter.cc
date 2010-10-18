@@ -780,7 +780,16 @@ void MuonPlotter::produceRatio(vector<int> samples, int muon, bool(MuonPlotter::
 		Init(tree);
 	   if (fChain == 0) return;
 	   Long64_t nentries = fChain->GetEntriesFast();
+
+		// TH2D *H_ntight_temp = new TH2D(Form("NTight-%s",fSamples[sample].sname.Data()), "NTight Muons", h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
+		// TH2D *H_nloose_temp = new TH2D(Form("NLoose-%s",fSamples[sample].sname.Data()), "NLoose Muons", h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
+		// H_ntight_temp->Sumw2();
+		// H_nloose_temp->Sumw2();
+
 		float scale = fLumiNorm / fSamples[sample].lumi;
+
+		// nentries = (Long64_t)nentries*scale;
+
 	   Long64_t nbytes = 0, nb = 0;
 	   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 	      Long64_t ientry = LoadTree(jentry);
@@ -790,9 +799,22 @@ void MuonPlotter::produceRatio(vector<int> samples, int muon, bool(MuonPlotter::
 			if((*this.*eventSelector)() == false) continue;
 			if((*this.*muonSelector)(muon) == false) continue;
 
+			// H_nloose_temp->Fill(MuPt[muon], MuEta[muon]); // Tight or loose
+			// if(MuTight[muon]) H_ntight_temp->Fill(MuPt[muon], MuEta[muon]); // Tight
+
+			// H_nloose->Fill(MuPt[muon], MuEta[muon]); // Tight or loose
+			// if(MuTight[muon]) H_ntight->Fill(MuPt[muon], MuEta[muon]); // Tight
 			H_nloose->Fill(MuPt[muon], MuEta[muon], scale); // Tight or loose
 			if(MuTight[muon]) H_ntight->Fill(MuPt[muon], MuEta[muon], scale); // Tight
 	   }
+	
+		// // Rescale errors:
+		// H_ntight_temp->SetBinError(1,1, H_ntight_temp->GetBinError(1,1) * 1.0 / sqrt(scale));
+		// H_nloose_temp->SetBinError(1,1, H_nloose_temp->GetBinError(1,1) * 1.0 / sqrt(scale));
+		// 
+		// H_ntight->Add(H_ntight_temp, scale);
+		// H_nloose->Add(H_nloose_temp, scale);
+	
 		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << endl;
 		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << endl;
 		if(fVerbose>2) cout << "  Ratio: " << (double)H_ntight->GetEntries()/(double)H_nloose->GetEntries() << endl;
@@ -1164,7 +1186,7 @@ void MuonPlotter::makePrediction(){
 	// > Further signal suppression for data?
 	// > Use InclusiveMu15 instead of QCD?
 
-	bool data = true; // Use ratios from data or mc?
+	bool data = false; // Use ratios from data or mc?
 	
 	// Samples
 	vector<int> ttbar;  ttbar.push_back(4);
@@ -1181,13 +1203,13 @@ void MuonPlotter::makePrediction(){
 	smonly.push_back(10); // QCD_Pt170toInf
 
 	// Which samples to use for nt2/nt1/nt0 input?
-	// vector<int> inputsamples = fAllMCSS;
+	vector<int> inputsamples = fAllMCSS;
 	// vector<int> inputsamples = smonly;
-	vector<int> inputsamples = datass;
+	// vector<int> inputsamples = datass;
 
 	// Which luminosity to use?
-	fLumiNorm = fSamples[1].lumi;
-	// fLumiNorm = 30.;
+	// fLumiNorm = fSamples[1].lumi;
+	fLumiNorm = 30.;
 	// fLumiNorm = 100.;
 	// fLumiNorm = 1000.;
 	
