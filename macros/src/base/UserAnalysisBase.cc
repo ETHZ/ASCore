@@ -163,16 +163,22 @@ bool UserAnalysisBase::IsGoodBasicJet(int index){
 }
 
 bool UserAnalysisBase::IsGoodBasicMu(int index){
-	// Basic muon cleaning and ID cuts
-	if(fTR->MuIsGlobalMuon[index] == 0) return false;
+	// Basic muon cleaning and ID
+	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
 	if(fTR->MuIsTrackerMuon[index] == 0) return false;
-	if(fTR->MuPt[index] < 10) return false;
-	if(fTR->MuNChi2[index] > 10) return false;
+
+	if(fTR->MuPt[index] < 5)          return false;
+	if(fabs(fTR->MuEta[index]) > 2.4) return false;
+
+	if(fTR->MuNChi2[index] > 10)   return false;
 	if(fTR->MuNTkHits[index] < 11) return false;
-	if(fabs(fTR->MuD0BS[index]) > 0.02) return false;
-	if(fTR->MuIsGMPT[index] == 0) return false;
+	if(fTR->MuNMuHits[index] < 1)  return false;
+
+	if(fabs(fTR->MuD0BS[index]) > 0.02)    return false;
+	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
+	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
+
 	if(fTR->MuRelIso03[index] > 1.0) return false;
-	// if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.5) return false; // No effect after other cuts (on ~ 120/nb)
 	return true;
 }
 
