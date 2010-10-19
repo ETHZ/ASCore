@@ -125,19 +125,19 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 }
 
 bool UserAnalysisBase::IsGoodBasicPFJet(int index) {
-        // Basic PF jet cleaning and ID cuts
-        if(fTR->PFJPt[index] < 30) return false;
+	// Basic PF jet cleaning and ID cuts
+	if(fTR->PFJPt[index] < 30) return false;
 	if(fabs(fTR->PFJEta[index]) > 3.0) return false;
-        // Loose PF jet ID (WARNING: HF not included in our ntuple)
-        // See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
-        if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
-        if ( !(fTR->PFJNeuEmfrac[index]     < 0.99) ) return false;
-        if ( !(fTR->PFJNeuHadfrac[index]    < 0.99) ) return false;
-        if (fabs(fTR->PFJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
-           if ( !(fTR->PFJChEmfrac[index]  < 0.99) )  return false;
-           if ( !(fTR->PFJChHadfrac[index] > 0.00) )  return false;
-           if ( !(fTR->PFJChMult[index]    > 0   ) )  return false;
-        }
+	// Loose PF jet ID (WARNING: HF not included in our ntuple)
+	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
+	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
+	if ( !(fTR->PFJNeuEmfrac[index]     < 0.99) ) return false;
+	if ( !(fTR->PFJNeuHadfrac[index]    < 0.99) ) return false;
+	if (fabs(fTR->PFJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
+		if ( !(fTR->PFJChEmfrac[index]  < 0.99) )  return false;
+		if ( !(fTR->PFJChHadfrac[index] > 0.00) )  return false;
+		if ( !(fTR->PFJChMult[index]    > 0   ) )  return false;
+	}
 }
 
 bool UserAnalysisBase::IsGoodBasicJet(int index){
@@ -174,7 +174,7 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuNTkHits[index] < 11) return false;
 	if(fTR->MuNMuHits[index] < 1)  return false;
 
-	if(fabs(fTR->MuD0BS[index]) > 0.02)    return false;
+	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
@@ -448,6 +448,22 @@ vector<int> UserAnalysisBase::JetSelection(){
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
 		if(!IsGoodBasicJet(ind)) continue;
+
+		selectedObjInd.push_back(ind);
+		selectedObjPt.push_back(fTR->JPt[ind]);
+	}
+	return Util::VSort(selectedObjInd, selectedObjPt);
+}
+
+vector<int> UserAnalysisBase::PFJetSelection(){
+	// Returns the vector of indices of
+	// good jets sorted by Pt
+	vector<int>    selectedObjInd;
+	vector<double> selectedObjPt;
+	// form the vector of indices
+	for(int ind = 0; ind < fTR->NJets; ++ind){
+		// selection
+		if(!IsGoodBasicPFJet(ind)) continue;
 
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->JPt[ind]);

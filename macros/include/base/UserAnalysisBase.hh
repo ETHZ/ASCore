@@ -69,6 +69,7 @@ public:
 	virtual vector<int> ElectronSelection();
 	virtual vector<int> PhotonSelection();
 	virtual vector<int> JetSelection();
+	virtual vector<int> PFJetSelection();
 	virtual bool SingleMuonSelection(int&);
 	virtual bool DiMuonSelection(int&, int&, int = 0);
 	virtual bool SSDiMuonSelection(int &, int&);
