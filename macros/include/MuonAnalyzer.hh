@@ -15,7 +15,5 @@ public:
 private:
 
 	MuonAnalysis *fMuonAnalysis;
-	MuonAnalysis *fMuonAnalysisDi;
-	MuonAnalysis *fMuonAnalysisSS;
 };
 #endif

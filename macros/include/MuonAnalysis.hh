@@ -20,17 +20,16 @@ public:
 
 	virtual void Begin();
 	virtual void Analyze();
-	virtual void AnalyzeDi();
-	virtual void AnalyzeSS();
 	virtual void End();
 
-	virtual void FillMuonTree(int, int = -1);
+	virtual void FillMuonTree(std::vector<int>);
 
 	virtual void BookTree();
 	virtual void ResetTree();
 	
 private:	
 	static const int gMaxnjets = 30;
+	static const int gMaxnmus = 5;
   
 	TTree *fMuTree;
 	int fTrun;
@@ -43,39 +42,42 @@ private:
 	int fT_HLTJet70U;
 	int fT_HLTJet100U;
 	int fTnjets;
-	double fTjpt[gMaxnjets];
-	double fTjeta[gMaxnjets];
-	double fTjphi[gMaxnjets];
-	double fTHT;
-	double fTMHT;
-	double fTMET;
-	double fTMT;
-	double fTMinv;
-	double fTSumET; // Directly from NTupleProducer, i.e. scalar sum of all calotower.et()
+	float fTjpt[gMaxnjets];
+	float fTjeta[gMaxnjets];
+	float fTjphi[gMaxnjets];
+	float fTHT;
+	float fTMHT;
+	float fTMET;
+	float fTMT;
+	float fTMinv;
+	float fTSumET; // Directly from NTupleProducer, i.e. scalar sum of all calotower.et()
 	int fTnmus;
-	double fTmupt[2];
-	double fTmueta[2];
-	double fTmuphi[2];
-	double fTmuiso[2];
-	int fTmucharge[2];
-	int fTmutight[2]; // 0 for loose (but not tight), 1 for tight
-	double fTDRjet[2];
-	double fTDRhardestjet[2];
-	double fTDPhijet[2];
-	double fTmucalocomp[2];
-	double fTmusegmcomp[2];
-	double fTmuouterrad[2];
-	double fTmunchi2[2];
-	int fTmuntkhits[2];
-	double fTmud0[2];
-	double fTmudz[2];
-	double fTmuptE[2];
-	int fTmuid[2];
-	int fTmumoid[2];
-	int fTmugmoid[2];
-	int fTmutype[2];
-	int fTmumotype[2];
-	int fTmugmotype[2];
+	float fTmupt[gMaxnmus];
+	float fTmueta[gMaxnmus];
+	float fTmuphi[gMaxnmus];
+	float fTmuiso[gMaxnmus];
+	int fTmucharge[gMaxnmus];
+	int fTmutight[gMaxnmus]; // 0 for loose (but not tight), 1 for tight
+	float fTDRjet[gMaxnmus];
+	float fTDRhardestjet[gMaxnmus];
+	float fTDPhijet[gMaxnmus];
+	float fTmucalocomp[gMaxnmus];
+	float fTmusegmcomp[gMaxnmus];
+	float fTmuouterrad[gMaxnmus];
+	float fTmunchi2[gMaxnmus];
+	int fTmuntkhits[gMaxnmus];
+	int fTmunmuhits[gMaxnmus];
+	float fTmuemvetoet[gMaxnmus];
+	float fTmuhadvetoet[gMaxnmus];
+	float fTmud0[gMaxnmus];
+	float fTmudz[gMaxnmus];
+	float fTmuptE[gMaxnmus];
+	int fTmuid[gMaxnmus];
+	int fTmumoid[gMaxnmus];
+	int fTmugmoid[gMaxnmus];
+	int fTmutype[gMaxnmus];
+	int fTmumotype[gMaxnmus];
+	int fTmugmotype[gMaxnmus];
 	
 };
 #endif

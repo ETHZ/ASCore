@@ -22,23 +22,7 @@ void MuonAnalysis::Begin(){
 
 void MuonAnalysis::Analyze(){
 	if(!IsGoodMuEvent()) return; // Trigger, etc.
-	int muind(-1);
-	if(!SingleMuonSelection(muind)) return;
-	FillMuonTree(muind);
-}
-
-void MuonAnalysis::AnalyzeDi(){
-	if(!IsGoodMuEvent()) return;
-	int muind1(-1), muind2(-1);
-	if(!DiMuonSelection(muind1, muind2, -1)) return;
-	FillMuonTree(muind1, muind2);
-}
-
-void MuonAnalysis::AnalyzeSS(){
-	if(!IsGoodMuEvent()) return;
-	int muind1(-1), muind2(-1);
-	if(!SSDiMuonSelection(muind1, muind2)) return;
-	FillMuonTree(muind1, muind2);
+	FillMuonTree(MuonSelection());
 }
 
 void MuonAnalysis::End(){
@@ -47,7 +31,8 @@ void MuonAnalysis::End(){
 	fOutputFile->Close();
 }
 
-void MuonAnalysis::FillMuonTree(int ind1, int ind2){
+void MuonAnalysis::FillMuonTree(vector<int> goodMuons){
+	if( goodMuons.size() < 1 ) return;
 	ResetTree();
 	fTrun     = fTR->Run;
 	fTevent   = fTR->Event;
@@ -62,55 +47,46 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 	fT_HLTJet100U   = GetHLTResult("HLT_Jet100U")   ? 1:0;
 
 	// Jet Variables
-	vector<int> goodJets = JetSelection();
+	vector<int> goodJets = PFJetSelection();
 	fTnjets = goodJets.size();
 	double ht = 0;
 	TVector3 mht(0.,0.,0.);
 	for(size_t i = 0; i < fTnjets; ++i){
 		int index = goodJets[i];
-		fTjpt [i] = fTR->JPt[index];
-		fTjeta[i] = fTR->JEta[index];
-		fTjphi[i] = fTR->JPhi[index];
-		ht += fTR->JPt[index];
-		mht(0) += fTR->JPx[index];
-		mht(1) += fTR->JPy[index];
-		mht(2) += fTR->JPz[index];
+		fTjpt [i] = fTR->PFJPt[index];
+		fTjeta[i] = fTR->PFJEta[index];
+		fTjphi[i] = fTR->PFJPhi[index];
+		ht += fTR->PFJPt[index];
+		mht(0) += fTR->PFJPx[index];
+		mht(1) += fTR->PFJPy[index];
+		mht(2) += fTR->PFJPz[index];
 	}
 	fTHT    = ht;
 	fTMHT   = mht.Mag();
 	fTMET   = fTR->PFMET;
 	fTSumET = fTR->SumEt;
-	
-	// Calculate mT:
-	TLorentzVector pmu;
-	pmu.SetPtEtaPhiM(fTR->MuPt[ind1], fTR->MuEta[ind1], fTR->MuPhi[ind1], 0.105);
-	double ETlept = sqrt(pmu.M2() + pmu.Perp2());
-	double METpx  = fTR->PFMETpx;
-	double METpy  = fTR->PFMETpy;
-	fTMT          = sqrt( 2*fTMET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
-	
+
 	// Muon Variables
-	int nmus(0);
-	for(size_t imu = 0; imu < fTR->NMus; ++imu) if(IsGoodBasicMu(imu)) nmus++;
-	int indices[2] = {ind1, ind2};
-	for(size_t i = 0; i < 2; ++i){
-		int index = indices[i];
-		if(index < 0) continue;
-		fTmupt      [i] = fTR->MuPt[index];
-		fTmueta     [i] = fTR->MuEta[index];
-		fTmuphi     [i] = fTR->MuPhi[index];
-		fTmucharge  [i] = fTR->MuCharge[index];
+	for(size_t i = 0; i < goodMuons.size(); ++i){
+		int index = goodMuons[i];
+		fTmupt       [i] = fTR->MuPt[index];
+		fTmueta      [i] = fTR->MuEta[index];
+		fTmuphi      [i] = fTR->MuPhi[index];
+		fTmucharge   [i] = fTR->MuCharge[index];
 		if(IsTightMu(index))        fTmutight[i] = 1;
 		if(IsLooseNoTightMu(index)) fTmutight[i] = 0;
-		fTmuiso     [i] = fTR->MuRelIso03[index];
-		fTmucalocomp[i] = fTR->MuCaloComp[index];
-		fTmusegmcomp[i] = fTR->MuSegmComp[index];
-		fTmuouterrad[i] = fTR->MuOutPosRadius[index];
-		fTmunchi2   [i] = fTR->MuNChi2[index];
-		fTmuntkhits [i] = fTR->MuNTkHits[index];
-		fTmud0      [i] = fTR->MuD0PV[index];
-		fTmudz      [i] = fTR->MuDzPV[index];
-		fTmuptE     [i] = fTR->MuPtE[index];
+		fTmuiso      [i] = fTR->MuRelIso03[index];
+		fTmucalocomp [i] = fTR->MuCaloComp[index];
+		fTmusegmcomp [i] = fTR->MuSegmComp[index];
+		fTmuouterrad [i] = fTR->MuOutPosRadius[index];
+		fTmunchi2    [i] = fTR->MuNChi2[index];
+		fTmuntkhits  [i] = fTR->MuNTkHits[index];
+		fTmunmuhits  [i] = fTR->MuNMuHits[index];
+		fTmuemvetoet [i] = fTR->MuIso03EMVetoEt[index];
+		fTmuhadvetoet[i] = fTR->MuIso03HadVetoEt[index];
+		fTmud0       [i] = fTR->MuD0PV[index];
+		fTmudz       [i] = fTR->MuDzPV[index];
+		fTmuptE      [i] = fTR->MuPtE[index];
 
 		double mindr(100.);
 		double mindphi(100.);
@@ -137,20 +113,28 @@ void MuonAnalysis::FillMuonTree(int ind1, int ind2){
 		fTmumotype [i] = mo.get_type();
 		fTmugmotype[i] = gmo.get_type();
 	}
-	fTnmus = nmus;
+	fTnmus = goodMuons.size();
 	
+	// Calculate invariant mass
 	TLorentzVector pmu1, pmu2;
-	pmu1.SetXYZM(fTR->MuPx[indices[0]], fTR->MuPy[indices[0]], fTR->MuPz[indices[0]], 0.105);
-	pmu2.SetXYZM(fTR->MuPx[indices[1]], fTR->MuPy[indices[1]], fTR->MuPz[indices[1]], 0.105);
+	pmu1.SetXYZM(fTR->MuPx[goodMuons[0]], fTR->MuPy[goodMuons[0]], fTR->MuPz[goodMuons[0]], 0.105);
+	pmu2.SetXYZM(fTR->MuPx[goodMuons[1]], fTR->MuPy[goodMuons[1]], fTR->MuPz[goodMuons[1]], 0.105);
 	TLorentzVector pdimu = pmu1 + pmu2;
 	fTMinv = pdimu.Mag();
+	
+	// Calculate mT:
+	double ETlept = sqrt(pmu1.M2() + pmu1.Perp2());
+	double METpx  = fTR->PFMETpx;
+	double METpy  = fTR->PFMETpy;
+	fTMT          = sqrt( 2*fTMET*ETlept - pmu1.Px()*METpx - pmu1.Py()*METpy );
+	
 	
 	fMuTree->Fill();
 }
 
 void MuonAnalysis::BookTree(){
 	fOutputFile->cd();
-	fMuTree = new TTree("MuonAnalysis", "MuonFakeAnalysisTree1");
+	fMuTree = new TTree("MuonAnalysis", "MuonAnalysisTree");
 	fMuTree->Branch("Run"           ,&fTrun,          "Run/I");
 	fMuTree->Branch("Event"         ,&fTevent,        "Event/I");
 	fMuTree->Branch("LumiSection"   ,&fTlumisec,      "LumiSection/I");
@@ -161,39 +145,42 @@ void MuonAnalysis::BookTree(){
 	fMuTree->Branch("HLTJet70U"     ,&fT_HLTJet70U,   "HLTJet70U/I");
 	fMuTree->Branch("HLTJet100U"    ,&fT_HLTJet100U,  "HLTJet100U/I");
 	fMuTree->Branch("NJets"         ,&fTnjets,        "NJets/I");
-	fMuTree->Branch("JPt"           ,&fTjpt,          "JPt[NJets]/D");
-	fMuTree->Branch("JEta"          ,&fTjeta,         "JEta[NJets]/D");
-	fMuTree->Branch("JPhi"          ,&fTjphi,         "JPhi[NJets]/D");
-	fMuTree->Branch("HT"            ,&fTHT,           "HT/D");
-	fMuTree->Branch("MHT"           ,&fTMHT,          "MHT/D");
-	fMuTree->Branch("MET"           ,&fTMET,          "MET/D");
-	fMuTree->Branch("MT"            ,&fTMT,           "MT/D");
-	fMuTree->Branch("Minv"          ,&fTMinv,         "Minv/D");
-	fMuTree->Branch("SumET"         ,&fTSumET,        "SumET/D");
+	fMuTree->Branch("JPt"           ,&fTjpt,          "JPt[NJets]/F");
+	fMuTree->Branch("JEta"          ,&fTjeta,         "JEta[NJets]/F");
+	fMuTree->Branch("JPhi"          ,&fTjphi,         "JPhi[NJets]/F");
+	fMuTree->Branch("HT"            ,&fTHT,           "HT/F");
+	fMuTree->Branch("MHT"           ,&fTMHT,          "MHT/F");
+	fMuTree->Branch("MET"           ,&fTMET,          "MET/F");
+	fMuTree->Branch("MT"            ,&fTMT,           "MT/F");
+	fMuTree->Branch("Minv"          ,&fTMinv,         "Minv/F");
+	fMuTree->Branch("SumET"         ,&fTSumET,        "SumET/F");
 	fMuTree->Branch("NMus"          ,&fTnmus,         "NMus/I");
-	fMuTree->Branch("MuPt"          ,&fTmupt,         "MuPt[2]/D");
-	fMuTree->Branch("MuEta"         ,&fTmueta,        "MuEta[2]/D");
-	fMuTree->Branch("MuPhi"         ,&fTmuphi,        "MuPhi[2]/D");
-	fMuTree->Branch("MuCharge"      ,&fTmucharge,     "MuCharge[2]/I");
-	fMuTree->Branch("MuTight"       ,&fTmutight,      "MuTight[2]/I");
-	fMuTree->Branch("MuIso"         ,&fTmuiso,        "MuIso[2]/D");
-	fMuTree->Branch("MuDRJet"       ,&fTDRjet,        "MuDRJet[2]/D");
-	fMuTree->Branch("MuDPhiJet"     ,&fTDPhijet,      "MuDPhiJet[2]/D");
-	fMuTree->Branch("MuDRHardestJet",&fTDRhardestjet, "MuDRHardestJet[2]/D");
-	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,   "MuCaloComp[2]/D");
-	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,   "MuSegmComp[2]/D");
-	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,   "MuOuterRad[2]/D");
-	fMuTree->Branch("MuNChi2"       ,&fTmunchi2,      "MuNChi2[2]/D");
-	fMuTree->Branch("MuNTkHits"     ,&fTmuntkhits,    "MuNTkHits[2]/I");
-	fMuTree->Branch("MuD0"          ,&fTmud0,         "MuD0[2]/D");
-	fMuTree->Branch("MuDz"          ,&fTmudz,         "MuDz[2]/D");
-	fMuTree->Branch("MuPtE"         ,&fTmuptE,        "MuPtE[2]/D");
-	fMuTree->Branch("MuGenID"       ,&fTmuid,         "MuGenID[2]/I");
-	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,       "MuGenMoID[2]/I");
-	fMuTree->Branch("MuGenGMoID"    ,&fTmugmoid,      "MuGenGMoID[2]/I");
-	fMuTree->Branch("MuGenType"     ,&fTmutype,       "MuGenType[2]/I");
-	fMuTree->Branch("MuGenMoType"   ,&fTmumotype,     "MuGenMoType[2]/I");
-	fMuTree->Branch("MuGenGMoType"  ,&fTmugmotype,    "MuGenGMoType[2]/I");
+	fMuTree->Branch("MuPt"          ,&fTmupt,         "MuPt[NMus]/F");
+	fMuTree->Branch("MuEta"         ,&fTmueta,        "MuEta[NMus]/F");
+	fMuTree->Branch("MuPhi"         ,&fTmuphi,        "MuPhi[NMus]/F");
+	fMuTree->Branch("MuCharge"      ,&fTmucharge,     "MuCharge[NMus]/I");
+	fMuTree->Branch("MuTight"       ,&fTmutight,      "MuTight[NMus]/I");
+	fMuTree->Branch("MuIso"         ,&fTmuiso,        "MuIso[NMus]/F");
+	fMuTree->Branch("MuDRJet"       ,&fTDRjet,        "MuDRJet[NMus]/F");
+	fMuTree->Branch("MuDPhiJet"     ,&fTDPhijet,      "MuDPhiJet[NMus]/F");
+	fMuTree->Branch("MuDRHardestJet",&fTDRhardestjet, "MuDRHardestJet[NMus]/F");
+	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,   "MuCaloComp[NMus]/F");
+	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,   "MuSegmComp[NMus]/F");
+	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,   "MuOuterRad[NMus]/F");
+	fMuTree->Branch("MuNChi2"       ,&fTmunchi2,      "MuNChi2[NMus]/F");
+	fMuTree->Branch("MuNTkHits"     ,&fTmuntkhits,    "MuNTkHits[NMus]/I");
+	fMuTree->Branch("MuNMuHits"     ,&fTmunmuhits,    "MuNMuHits[NMus]/I");
+	fMuTree->Branch("MuIsoEMVetoEt" ,&fTmuemvetoet,   "MuIsoEMVetoEt[NMus]/F");
+	fMuTree->Branch("MuIsoHadVetoEt",&fTmuhadvetoet,  "MuIsoHadVetoEt[NMus]/F");
+	fMuTree->Branch("MuD0"          ,&fTmud0,         "MuD0[NMus]/F");
+	fMuTree->Branch("MuDz"          ,&fTmudz,         "MuDz[NMus]/F");
+	fMuTree->Branch("MuPtE"         ,&fTmuptE,        "MuPtE[NMus]/F");
+	fMuTree->Branch("MuGenID"       ,&fTmuid,         "MuGenID[NMus]/I");
+	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,       "MuGenMoID[NMus]/I");
+	fMuTree->Branch("MuGenGMoID"    ,&fTmugmoid,      "MuGenGMoID[NMus]/I");
+	fMuTree->Branch("MuGenType"     ,&fTmutype,       "MuGenType[NMus]/I");
+	fMuTree->Branch("MuGenMoType"   ,&fTmumotype,     "MuGenMoType[NMus]/I");
+	fMuTree->Branch("MuGenGMoType"  ,&fTmugmotype,    "MuGenGMoType[NMus]/I");
 }
 
 void MuonAnalysis::ResetTree(){
@@ -213,13 +200,13 @@ void MuonAnalysis::ResetTree(){
 	fTSumET   = -999.99;
 	fTMT      = -999.99;
 	fTMinv    = -999.99;
-	for(int i = 0; i<gMaxnjets; i++){
+	for(int i = 0; i < gMaxnjets; i++){
 		fTjpt[i]  = -999.99;
 		fTjeta[i] = -999.99;		
 		fTjphi[i] = -999.99;
 	}
 	fTnmus = 0;
-	for(int i = 0; i<2; i++){
+	for(int i = 0; i < gMaxnmus; i++){
 		fTmupt        [i] = -999.99;
 		fTmueta       [i] = -999.99;
 		fTmuphi       [i] = -999.99;
@@ -234,6 +221,9 @@ void MuonAnalysis::ResetTree(){
 		fTmuouterrad  [i] = -999.99;
 		fTmunchi2     [i] = -999.99;
 		fTmuntkhits   [i] = -999;
+		fTmunmuhits   [i] = -999;
+		fTmuemvetoet  [i] = -999.99;
+		fTmuhadvetoet [i] = -999.99;
 		fTmud0        [i] = -999.99;
 		fTmudz        [i] = -999.99;
 		fTmuptE       [i] = -999.99;
