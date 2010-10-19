@@ -9,57 +9,53 @@
 
 using namespace std;
 
-FPRatios::FPRatios() : verbose(1), initTopol(0), initVar(0){}
+FPRatios::FPRatios() : fVerbose(1), fInitVar(0){}
 
 FPRatios::~FPRatios(){}
 
 // *************************************************************************
-int FPRatios::NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi){
+void FPRatios::NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi){
 // Defines the topologies
 // nemaxi = number of electrons
 // nmmaxi = number of muons
 // npassi = vector with number of events in each topology (Nti in the note)
 
-	ne = nemaxi;
-	nm = nmmaxi;
-	ntopol = npassi.size();
-	if (ntopol != (ne+1)*(nm+1) ){ 
-		if(verbose > 5) cout << " ntopol = " << ntopol <<  " ne = " << ne << " nm = " << nm << " is wrong!" << endl;
-		return 0; 
+	fNeles = nemaxi;
+	fNmuons = nmmaxi;
+	fNtopol = npassi.size();
+	if( fNtopol != (fNeles+1)*(fNmuons+1) ){ 
+		if(fVerbose > 5) cout << " fNtopol = " << fNtopol <<  " fNeles  = " << fNeles  << " fNmuons = " << fNmuons << " is wrong!" << endl;
+		return; 
 	}
 
-// define the number of events passing and failing
-// i.e. the lepton topologies, N_tx in the note
-// remember: #topologies = #of fake/prompt combinations (called FPcnfigs)
-	initTopol = 1;
-	for (int i = 0; i < ntopol; ++i) {
-		npass.push_back(npassi[i]);
+	// Define the number of events passing and failing
+	// i.e. the lepton topologies, N_tx in the note
+	// Remember: #topologies = #of fake/prompt combinations (called FPcnfigs)
+	for( int i = 0; i < fNtopol; ++i ) fNpass.push_back(npassi[i]);
+
+	if(fVerbose > 5){
+		cout << endl;
+		cout << " Calculation of prompts and fakes" << endl;
+		cout << " ================================" << endl;
+		cout << endl;
+		for (int i = 0; i < fNtopol; ++i) {
+			cout << " Nt" << i << " = " << fNpass[i];
+			if (i < fNtopol-1) cout << ", ";
+		}
+		cout << endl;
 	}
 
-	if(verbose > 5) cout << endl;
-	if(verbose > 5) cout << " Calculation of prompts and fakes" << endl;
-	if(verbose > 5) cout << " ================================" << endl;
-	if(verbose > 5) cout << endl;
-	for (int i = 0; i < ntopol; ++i) {
-		if(verbose > 5) cout << " Nt" << i << " = " << npass[i];
-		if (i < ntopol-1) if(verbose > 5) cout << ", ";
-	}
-	if(verbose > 5) cout << endl;
-
-// define the combinations of fakes and prompts for each topology
+	// Define the combinations of fakes and prompts for each topology
 	int ife = -1;
-	for (int i = 0; i < ntopol; ++i) {
-		int ifm = i % (nm+1);
-		if (ifm  == 0 ) {ife++;}
-	//    if(verbose > 5) cout << " ife = " << ife << ", ifm = " << ifm << endl;
-		nfetop.push_back(ife);
-		npetop.push_back(ne-ife);
-		nfmtop.push_back(ifm);
-		npmtop.push_back(nm-ifm);
+	for( int i = 0; i < fNtopol; ++i ){
+		int ifm = i % (fNmuons+1);
+		if( ifm  == 0 ) ife++;
+		fNfetop.push_back(ife);
+		fNpetop.push_back(fNeles-ife);
+		fNfmtop.push_back(ifm);
+		fNpmtop.push_back(fNmuons-ifm);
 	}
-
-	return 1;
-
+	return;
 }
 
 // *************************************************************************
@@ -68,7 +64,7 @@ void FPRatios::SetFratios(double pRatioei, double pRatiomi, double pRatioErrei, 
 	fFRatiom1 =  pRatiomi;
 	fFRatioErre1 = pRatioErrei;
 	fFRatioErrm1 = pRatioErrmi;
-	if(verbose > 5) cout << " fFRatioe1 = " << fFRatioe1 << " fFRatiom1 = " << fFRatiom1 
+	if(fVerbose > 5) cout << " fFRatioe1 = " << fFRatioe1 << " fFRatiom1 = " << fFRatiom1 
 	     << " fFRatioErre1 =  " << fFRatioErre1 << " fFRatioErrm1 = " << fFRatioErrm1 << endl;
 }
 
@@ -78,7 +74,7 @@ void FPRatios::SetPratios(double pRatioei, double pRatiomi, double pRatioErrei, 
 	fPRatiom1 =  pRatiomi;
 	fPRatioErre1 = pRatioErrei;
 	fPRatioErrm1 = pRatioErrmi;
-	if(verbose > 5) cout << " fPRatioe1 = " << fPRatioe1 << " fPRatiom1 = " << fPRatiom1 
+	if(fVerbose > 5) cout << " fPRatioe1 = " << fPRatioe1 << " fPRatiom1 = " << fPRatiom1 
 	     << " fPRatioErre1 =  " << fPRatioErre1 << " fPRatioErrm1 = " << fPRatioErrm1 << endl;
 }
 
@@ -88,7 +84,7 @@ void FPRatios::SetFratios2(double pRatioei, double pRatiomi, double pRatioErrei,
 	fFRatiom2 =  pRatiomi;
 	fFRatioErre2 = pRatioErrei;
 	fFRatioErrm2 = pRatioErrmi;
-	if(verbose > 5) cout << " fFRatioe2 = " << fFRatioe2 << " fFRatiom2 = " << fFRatiom2 
+	if(fVerbose > 5) cout << " fFRatioe2 = " << fFRatioe2 << " fFRatiom2 = " << fFRatiom2 
 	     << " fFRatioErre2 =  " << fFRatioErre2 << " fFRatioErrm2 = " << fFRatioErrm2 << endl;
 }
 
@@ -98,7 +94,7 @@ void FPRatios::SetPratios2(double pRatioei, double pRatiomi, double pRatioErrei,
 	fPRatiom2 =  pRatiomi;
 	fPRatioErre2 = pRatioErrei;
 	fPRatioErrm2 = pRatioErrmi;
-	if(verbose > 5) cout << " fPRatioe2 = " << fPRatioe2 << " fPRatiom2 = " << fPRatiom2 
+	if(fVerbose > 5) cout << " fPRatioe2 = " << fPRatioe2 << " fPRatiom2 = " << fPRatiom2 
 	     << " fPRatioErre2 =  " << fPRatioErre2 << " fPRatioErrm2 = " << fPRatioErrm2 << endl;
 }
 
@@ -116,22 +112,18 @@ vector<double> FPRatios::NevtPass(vector<double> vpt, vector<double> veta){
 	vector<double> result;
 // loop over all FPconfigs
 	int isav = 0;
-	for (int it = 0; it < ntopol; ++it) {
+	for (int it = 0; it < fNtopol; ++it) {
 
 	// define the number of fakes and prompts for this FPconfigs
-		int nfe = nfetop[it];
-		int npe = npetop[it];
-		int nfm = nfmtop[it];
-		int npm = npmtop[it];
+		int nfe = fNfetop[it];
+		int npe = fNpetop[it];
+		int nfm = fNfmtop[it];
+		int npm = fNpmtop[it];
 	// start with the topology with all leptons failing
 		vector<int> ipass;
-		for (int i = 0; i < ne; ++i) ipass.push_back(0);
-		for (int i = 0; i < nm; ++i) ipass.push_back(0);
-		if (verbose > 5) {
-			if(verbose > 5) cout << endl;
-			if(verbose > 5) cout << " nfe = " << nfe << ", npe = " << npe
-				<< ", nfm = " << nfm << ", npm = " << npm << endl;
-		}
+		for (int i = 0; i < fNeles ; ++i) ipass.push_back(0);
+		for (int i = 0; i < fNmuons; ++i) ipass.push_back(0);
+		if (fVerbose > 5) cout << endl << " nfe = " << nfe << ", npe = " << npe << ", nfm = " << nfm << ", npm = " << npm << endl;
 
 	// loop over all topologies of passing and failing leptons
 		int ie = 0;
@@ -143,10 +135,10 @@ vector<double> FPRatios::NevtPass(vector<double> vpt, vector<double> veta){
 		while (1) {
 		// loop: increase the number of electrons passing
 			while (1) {
-				if (verbose > 5) {
-					if(verbose > 5) cout << " pass = ";
-					for (int ipr = 0; ipr < ne+nm; ++ipr) if(verbose > 5) cout << " " << ipass[ipr];
-					if(verbose > 5) cout << endl;
+				if (fVerbose > 5) {
+					if(fVerbose > 5) cout << " pass = ";
+					for (int ipr = 0; ipr < fNeles +fNmuons; ++ipr) if(fVerbose > 5) cout << " " << ipass[ipr];
+					if(fVerbose > 5) cout << endl;
 				}
 
 	// compute the weight for this combination of prompt and fakes
@@ -156,24 +148,24 @@ vector<double> FPRatios::NevtPass(vector<double> vpt, vector<double> veta){
 	//	int isgn = abs(nfe + nfm - ie - im);
 
 				int isgn = abs(npe + npm + ie + im);
-	//      if(verbose > 5) cout << " isgn = " << isgn << endl;
+	//      if(fVerbose > 5) cout << " isgn = " << isgn << endl;
 				double sgn = 1.;
 				if (isgn%2 != 0) sgn = -1.;
 				wgt *= sgn;
 
-	// save the signed weights into the vector wgtitot (w_i in the note)
-				wgtitot.push_back(wgt);
+	// save the signed weights into the vector fWgtitot (w_i in the note)
+				fWgtitot.push_back(wgt);
 	// also save the weight contributions from e and mu
-				wgtitote.push_back(wgtie);
-				wgtitotm.push_back(wgtim);
+				fWgtitote.push_back(fWgtie);
+				fWgtitotm.push_back(fWgtim);
 
 	// compute the number of events for this topology and its errors
-				double ntop = wgt * npass[itop];
-				double dntopstat = wgt * wgt * npass[itop];
-				double dntopdpe = sgn * FPWeightError(1) * npass[itop];
-				double dntopdfe = sgn * FPWeightError(2) * npass[itop];
-				double dntopdpm = sgn * FPWeightError(3) * npass[itop];
-				double dntopdfm = sgn * FPWeightError(4) * npass[itop];
+				double ntop = wgt * fNpass[itop];
+				double dntopstat = wgt * wgt * fNpass[itop];
+				double dntopdpe = sgn * FPWeightError(1) * fNpass[itop];
+				double dntopdfe = sgn * FPWeightError(2) * fNpass[itop];
+				double dntopdpm = sgn * FPWeightError(3) * fNpass[itop];
+				double dntopdfm = sgn * FPWeightError(4) * fNpass[itop];
 
 	// add the weight of this topology to the total one and also the errors (for e and mu)
 				wgttot += wgt;
@@ -181,34 +173,34 @@ vector<double> FPRatios::NevtPass(vector<double> vpt, vector<double> veta){
 				dntotdfe += dntopdfe;
 				dntotdpm += dntopdpm;
 				dntotdfm += dntopdfm;
-				if (verbose > 5) {
-					if(verbose > 5) cout << " weight = " << wgt << ", dndpe = " << dntopdpe << ", dndfe = " << dntopdfe
+				if (fVerbose > 5) {
+					if(fVerbose > 5) cout << " weight = " << wgt << ", dndpe = " << dntopdpe << ", dndfe = " << dntopdfe
 						<< ", dndpm = " << dntopdpm<< ", dndfm = " << dntopdfm << endl;
-					if(verbose > 5) cout << " ntop = " << ntop << " +- " << sqrt(dntopstat) << "_stat" << endl;
+					if(fVerbose > 5) cout << " ntop = " << ntop << " +- " << sqrt(dntopstat) << "_stat" << endl;
 				}
 
 	// save errors on the weights for the calculation of correlations
 				vector<double> temp = GetWgtError(1);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(1) = " << temp[ite] << endl;
-				dwgtdptote.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(1) = " << temp[ite] << endl;
+				fDwgtdptote.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(2);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(2) = " << temp[ite] << endl;
-				dwgtdftote.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(2) = " << temp[ite] << endl;
+				fDwgtdftote.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(3);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(1) = " << temp[ite] << endl;
-				dwgtdptotm.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(1) = " << temp[ite] << endl;
+				fDwgtdptotm.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(4);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(2) = " << temp[ite] << endl;
-				dwgtdftotm.push_back(temp);
-				if (verbose > 5) {
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(2) = " << temp[ite] << endl;
+				fDwgtdftotm.push_back(temp);
+				if (fVerbose > 5) {
 					for (int iv = 0; iv < temp.size(); ++iv) {
-						if(verbose > 5) cout << " dwgtdptote = " << dwgtdptote[isav][iv] 
-							<< ", dwgtdftote = " << dwgtdftote[isav][iv]
-							<< ", dwgtdptotm = " << dwgtdptotm[isav][iv] 
-							<< ", dwgtdftotm = " << dwgtdftotm[isav][iv] << endl;
+						if(fVerbose > 5) cout << " fDwgtdptote = " << fDwgtdptote[isav][iv] 
+							<< ", fDwgtdftote = " << fDwgtdftote[isav][iv]
+							<< ", fDwgtdptotm = " << fDwgtdptotm[isav][iv] 
+							<< ", fDwgtdftotm = " << fDwgtdftotm[isav][iv] << endl;
 					}
 				}
 				temp.clear();
@@ -219,41 +211,41 @@ vector<double> FPRatios::NevtPass(vector<double> vpt, vector<double> veta){
 				dntotstat += dntopstat;
 
 	// declare next muons as passing
-				ipass[ne+im] = 1;
+				ipass[fNeles +im] = 1;
 				im++;
-				if (im > nm) break;
+				if (im > fNmuons) break;
 			}
 		// declare next electron as passing
 			ipass[ie] = 1;
-			for (int j = 0; j < nm; ++j) {
-				ipass[ne+j] = 0;
+			for (int j = 0; j < fNmuons; ++j) {
+				ipass[fNeles +j] = 0;
 			}
 			im = 0;
 			ie++;
-			if (ie > ne) break;
+			if (ie > fNeles ) break;
 		}
-		if (verbose > 6) {
-			if(verbose > 5) cout << " Total weight = " << wgttot 
+		if (fVerbose > 6) {
+			if(fVerbose > 5) cout << " Total weight = " << wgttot 
 				<< ", dntotdpe = " << dntotdpe << ", dntotdfe = " << dntotdfe
 				<< ", dntotdpm = " << dntotdpm << ", dntotdfm = " << dntotdfm << endl;
 		}
 	// compute for this FPconfig the final statistical and systematic errors
 		dntotstat = sqrt(dntotstat);
 		dntotsyst = sqrt(dntotdpe*dntotdpe + dntotdfe*dntotdfe + dntotdpm*dntotdpm + dntotdfm*dntotdfm);
-		if (verbose > 5) {
-			if(verbose > 5) cout << " N_nfe,npe,nfm,npm = N_" << nfe << "," << npe << "," << nfm << "," << npm << " = " 
+		if (fVerbose > 5) {
+			if(fVerbose > 5) cout << " N_nfe,npe,nfm,npm = N_" << nfe << "," << npe << "," << nfm << "," << npm << " = " 
 				<< ntot << " +- " << dntotstat << "_stat +- " 
 				<< dntotsyst << "_syst" << endl;
 		}
 		result.push_back(ntot);
-		ntotfp.push_back(ntot);
-		dNtotstat.push_back(dntotstat);
-		dNtotsyst.push_back(dntotsyst);
+		fNtotfp.push_back(ntot);
+		fDNtotstat.push_back(dntotstat);
+		fDNtotsyst.push_back(dntotsyst);
 	}
 // end loop over FPconfigs
 
 	return result;
-	// return ntotfp;
+	// return fNtotfp;
 }
 
 // *************************************************************************
@@ -262,20 +254,20 @@ vector<double> FPRatios::NevtPass(vector<double> f, vector<double> ferr, vector<
 	vector<double> result;
 // loop over all FPconfigs
 	int isav = 0;
-	for (int it = 0; it < ntopol; ++it) {
+	for (int it = 0; it < fNtopol; ++it) {
 
 	// define the number of fakes and prompts for this FPconfigs
-		int nfe = nfetop[it];
-		int npe = npetop[it];
-		int nfm = nfmtop[it];
-		int npm = npmtop[it];
+		int nfe = fNfetop[it];
+		int npe = fNpetop[it];
+		int nfm = fNfmtop[it];
+		int npm = fNpmtop[it];
 	// start with the topology with all leptons failing
 		vector<int> ipass;
-		for (int i = 0; i < ne; ++i) ipass.push_back(0);
-		for (int i = 0; i < nm; ++i) ipass.push_back(0);
-		if (verbose > 5) {
-			if(verbose > 5) cout << endl;
-			if(verbose > 5) cout << " nfe = " << nfe << ", npe = " << npe
+		for (int i = 0; i < fNeles ; ++i) ipass.push_back(0);
+		for (int i = 0; i < fNmuons; ++i) ipass.push_back(0);
+		if (fVerbose > 5) {
+			if(fVerbose > 5) cout << endl;
+			if(fVerbose > 5) cout << " nfe = " << nfe << ", npe = " << npe
 				<< ", nfm = " << nfm << ", npm = " << npm << endl;
 		}
 
@@ -289,10 +281,10 @@ vector<double> FPRatios::NevtPass(vector<double> f, vector<double> ferr, vector<
 		while (1) {
 		// loop: increase the number of electrons passing
 			while (1) {
-				if (verbose > 5) {
-					if(verbose > 5) cout << " pass = ";
-					for (int ipr = 0; ipr < ne+nm; ++ipr) if(verbose > 5) cout << " " << ipass[ipr];
-					if(verbose > 5) cout << endl;
+				if (fVerbose > 5) {
+					if(fVerbose > 5) cout << " pass = ";
+					for (int ipr = 0; ipr < fNeles +fNmuons; ++ipr) if(fVerbose > 5) cout << " " << ipass[ipr];
+					if(fVerbose > 5) cout << endl;
 				}
 
 	// compute the weight for this combination of prompt and fakes
@@ -302,24 +294,24 @@ vector<double> FPRatios::NevtPass(vector<double> f, vector<double> ferr, vector<
 	//	int isgn = abs(nfe + nfm - ie - im);
 
 				int isgn = abs(npe + npm + ie + im);
-	//      if(verbose > 5) cout << " isgn = " << isgn << endl;
+	//      if(fVerbose > 5) cout << " isgn = " << isgn << endl;
 				double sgn = 1.;
 				if (isgn%2 != 0) sgn = -1.;
 				wgt *= sgn;
 
-	// save the signed weights into the vector wgtitot (w_i in the note)
-				wgtitot.push_back(wgt);
+	// save the signed weights into the vector fWgtitot (w_i in the note)
+				fWgtitot.push_back(wgt);
 	// also save the weight contributions from e and mu
-				wgtitote.push_back(wgtie);
-				wgtitotm.push_back(wgtim);
+				fWgtitote.push_back(fWgtie);
+				fWgtitotm.push_back(fWgtim);
 
 	// compute the number of events for this topology and its errors
-				double ntop = wgt * npass[itop];
-				double dntopstat = wgt * wgt * npass[itop];
-				double dntopdpe = sgn * FPWeightError(1) * npass[itop];
-				double dntopdfe = sgn * FPWeightError(2) * npass[itop];
-				double dntopdpm = sgn * FPWeightError(3) * npass[itop];
-				double dntopdfm = sgn * FPWeightError(4) * npass[itop];
+				double ntop = wgt * fNpass[itop];
+				double dntopstat = wgt * wgt * fNpass[itop];
+				double dntopdpe = sgn * FPWeightError(1) * fNpass[itop];
+				double dntopdfe = sgn * FPWeightError(2) * fNpass[itop];
+				double dntopdpm = sgn * FPWeightError(3) * fNpass[itop];
+				double dntopdfm = sgn * FPWeightError(4) * fNpass[itop];
 
 	// add the weight of this topology to the total one and also the errors (for e and mu)
 				wgttot += wgt;
@@ -327,34 +319,34 @@ vector<double> FPRatios::NevtPass(vector<double> f, vector<double> ferr, vector<
 				dntotdfe += dntopdfe;
 				dntotdpm += dntopdpm;
 				dntotdfm += dntopdfm;
-				if (verbose > 5) {
-					if(verbose > 5) cout << " weight = " << wgt << ", dndpe = " << dntopdpe << ", dndfe = " << dntopdfe
+				if (fVerbose > 5) {
+					if(fVerbose > 5) cout << " weight = " << wgt << ", dndpe = " << dntopdpe << ", dndfe = " << dntopdfe
 						<< ", dndpm = " << dntopdpm<< ", dndfm = " << dntopdfm << endl;
-					if(verbose > 5) cout << " ntop = " << ntop << " +- " << sqrt(dntopstat) << "_stat" << endl;
+					if(fVerbose > 5) cout << " ntop = " << ntop << " +- " << sqrt(dntopstat) << "_stat" << endl;
 				}
 
 	// save errors on the weights for the calculation of correlations
 				vector<double> temp = GetWgtError(1);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(1) = " << temp[ite] << endl;
-				dwgtdptote.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(1) = " << temp[ite] << endl;
+				fDwgtdptote.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(2);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(2) = " << temp[ite] << endl;
-				dwgtdftote.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(2) = " << temp[ite] << endl;
+				fDwgtdftote.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(3);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(1) = " << temp[ite] << endl;
-				dwgtdptotm.push_back(temp);
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(1) = " << temp[ite] << endl;
+				fDwgtdptotm.push_back(temp);
 				temp.clear();
 				temp = GetWgtError(4);
-	//      for (int ite = 0; ite < temp.size(); ++ite) if(verbose > 5) cout << " temp(2) = " << temp[ite] << endl;
-				dwgtdftotm.push_back(temp);
-				if (verbose > 5) {
+	//      for (int ite = 0; ite < temp.size(); ++ite) if(fVerbose > 5) cout << " temp(2) = " << temp[ite] << endl;
+				fDwgtdftotm.push_back(temp);
+				if (fVerbose > 5) {
 					for (int iv = 0; iv < temp.size(); ++iv) {
-						if(verbose > 5) cout << " dwgtdptote = " << dwgtdptote[isav][iv] 
-							<< ", dwgtdftote = " << dwgtdftote[isav][iv]
-							<< ", dwgtdptotm = " << dwgtdptotm[isav][iv] 
-							<< ", dwgtdftotm = " << dwgtdftotm[isav][iv] << endl;
+						if(fVerbose > 5) cout << " fDwgtdptote = " << fDwgtdptote[isav][iv] 
+							<< ", fDwgtdftote = " << fDwgtdftote[isav][iv]
+							<< ", fDwgtdptotm = " << fDwgtdptotm[isav][iv] 
+							<< ", fDwgtdftotm = " << fDwgtdftotm[isav][iv] << endl;
 					}
 				}
 				temp.clear();
@@ -365,41 +357,41 @@ vector<double> FPRatios::NevtPass(vector<double> f, vector<double> ferr, vector<
 				dntotstat += dntopstat;
 
 	// declare next muons as passing
-				ipass[ne+im] = 1;
+				ipass[fNeles +im] = 1;
 				im++;
-				if (im > nm) break;
+				if (im > fNmuons) break;
 			}
 		// declare next electron as passing
 			ipass[ie] = 1;
-			for (int j = 0; j < nm; ++j) {
-				ipass[ne+j] = 0;
+			for (int j = 0; j < fNmuons; ++j) {
+				ipass[fNeles +j] = 0;
 			}
 			im = 0;
 			ie++;
-			if (ie > ne) break;
+			if (ie > fNeles ) break;
 		}
-		if (verbose > 6) {
-			if(verbose > 5) cout << " Total weight = " << wgttot 
+		if (fVerbose > 6) {
+			if(fVerbose > 5) cout << " Total weight = " << wgttot 
 				<< ", dntotdpe = " << dntotdpe << ", dntotdfe = " << dntotdfe
 				<< ", dntotdpm = " << dntotdpm << ", dntotdfm = " << dntotdfm << endl;
 		}
 	// compute for this FPconfig the final statistical and systematic errors
 		dntotstat = sqrt(dntotstat);
 		dntotsyst = sqrt(dntotdpe*dntotdpe + dntotdfe*dntotdfe + dntotdpm*dntotdpm + dntotdfm*dntotdfm);
-		if (verbose > 5) {
-			if(verbose > 5) cout << " N_nfe,npe,nfm,npm = N_" << nfe << "," << npe << "," << nfm << "," << npm << " = " 
+		if (fVerbose > 5) {
+			if(fVerbose > 5) cout << " N_nfe,npe,nfm,npm = N_" << nfe << "," << npe << "," << nfm << "," << npm << " = " 
 				<< ntot << " +- " << dntotstat << "_stat +- " 
 				<< dntotsyst << "_syst" << endl;
 		}
 		result.push_back(ntot);
-		ntotfp.push_back(ntot);
-		dNtotstat.push_back(dntotstat);
-		dNtotsyst.push_back(dntotsyst);
+		fNtotfp.push_back(ntot);
+		fDNtotstat.push_back(dntotstat);
+		fDNtotsyst.push_back(dntotsyst);
 	}
 // end loop over FPconfigs
 
 	return result;
-	// return ntotfp;
+	// return fNtotfp;
 }
 
 // *************************************************************************
@@ -412,14 +404,14 @@ double FPRatios::FPWeightError (int ityp){
 
 	double dwgt = 0.;
 // for e and mu systematic errors
-	double we = wgtie;
-	double wm = wgtim;
+	double we = fWgtie;
+	double wm = fWgtim;
 	if (we == 0.) we = 1.;
 	if (wm == 0.) wm = 1.;
-	if (ityp == 1)      dwgt = dwgtdpe*wm;
-	else if (ityp == 2) dwgt = dwgtdfe*wm;
-	else if (ityp == 3) dwgt = dwgtdpm*we;
-	else if (ityp == 4) dwgt = dwgtdfm*we;
+	if (ityp == 1)      dwgt = fDwgtdpe*wm;
+	else if (ityp == 2) dwgt = fDwgtdfe*wm;
+	else if (ityp == 3) dwgt = fDwgtdpm*we;
+	else if (ityp == 4) dwgt = fDwgtdfm*we;
 
 	return dwgt;
 }
@@ -433,20 +425,20 @@ vector<double> FPRatios::GetWgtError(int ityp){
 
 	vector<double> dwgt;
 	if (ityp == 1) {
-		for (int i = 0; i < dwgtdptope.size(); ++i) {
-			dwgt.push_back(dwgtdptope[i]);
+		for (int i = 0; i < fDwgtdptope.size(); ++i) {
+			dwgt.push_back(fDwgtdptope[i]);
 		}
 	} else if (ityp == 2) {
-		for (int i = 0; i < dwgtdftope.size(); ++i) {
-			dwgt.push_back(dwgtdftope[i]);
+		for (int i = 0; i < fDwgtdftope.size(); ++i) {
+			dwgt.push_back(fDwgtdftope[i]);
 		}
 	} else if (ityp == 3) {
-		for (int i = 0; i < dwgtdptopm.size(); ++i) {
-			dwgt.push_back(dwgtdptopm[i]);
+		for (int i = 0; i < fDwgtdptopm.size(); ++i) {
+			dwgt.push_back(fDwgtdptopm[i]);
 		}
 	} else {
-		for (int i = 0; i < dwgtdftopm.size(); ++i) {
-			dwgt.push_back(dwgtdftopm[i]);
+		for (int i = 0; i < fDwgtdftopm.size(); ++i) {
+			dwgt.push_back(fDwgtdftopm[i]);
 		}
 	}
 
@@ -457,97 +449,96 @@ vector<double> FPRatios::GetWgtError(int ityp){
 vector<double> FPRatios::NevtPassErrStat(){
 // return the vector of statistical errors for all FPconfigs
 
-	return dNtotstat;
+	return fDNtotstat;
 }
 
 // *************************************************************************
 vector<double> FPRatios::NevtPassErrSyst(){
 // return the vector of systematic errors for all FPconfigs
 
-	return dNtotsyst;
+	return fDNtotsyst;
 }
 
 // *************************************************************************
 void FPRatios::Varnf1nf2(){
 // Computes the variances for all the cross combinations of N_nf
 
-//  if(verbose > 5) cout << endl;
-//  if(verbose > 5) cout << " Computing correlations " << endl;
-	if (verbose > 5) {
-		for (int iv = 0; iv < dwgtdptote.size(); ++iv) {
-			for (int i = 0; i < dwgtdptote[iv].size(); ++i) {
-				if(verbose > 5) cout << " " << iv << " " << i << " dwgtdptote = " << dwgtdptote[iv][i]
-					<< ", dwgtdftote = " << dwgtdftote[iv][i]
-					<< ", dwgtdptotm = " << dwgtdptotm[iv][i]
-					<< ", dwgtdftotm = " << dwgtdftotm[iv][i] << endl;
+	//  if(fVerbose > 5) cout << endl;
+	//  if(fVerbose > 5) cout << " Computing correlations " << endl;
+	if (fVerbose > 5) {
+		for (int iv = 0; iv < fDwgtdptote.size(); ++iv) {
+			for (int i = 0; i < fDwgtdptote[iv].size(); ++i) {
+				if(fVerbose > 5) cout << " " << iv << " " << i << " fDwgtdptote = " << fDwgtdptote[iv][i]
+					<< ", fDwgtdftote = " << fDwgtdftote[iv][i]
+					<< ", fDwgtdptotm = " << fDwgtdptotm[iv][i]
+					<< ", fDwgtdftotm = " << fDwgtdftotm[iv][i] << endl;
 			}
 		}
 	}
-// loop over the first FPconfig
-	for (int nf1 = 0; nf1 < ntopol; ++nf1) {
-	// loop over the second FPconfig
-		for (int nf2 = nf1 + 1; nf2 < ntopol; ++nf2) {
-		//    for (int nf2 = 0; nf2 < ntopol; ++nf2) {
-			if (verbose > 5) {
-				if(verbose > 5) cout << endl;
-				if(verbose > 5) cout << " nf1 = " << nf1 << ", nf2 = " << nf2 << endl;
+	// loop over the first FPconfig
+	for (int nf1 = 0; nf1 < fNtopol; ++nf1) {
+		// loop over the second FPconfig
+		for (int nf2 = nf1 + 1; nf2 < fNtopol; ++nf2) {
+			// for (int nf2 = 0; nf2 < fNtopol; ++nf2) {
+			if (fVerbose > 5) {
+				if(fVerbose > 5) cout << endl;
+				if(fVerbose > 5) cout << " nf1 = " << nf1 << ", nf2 = " << nf2 << endl;
 			}
-		// get the variances on the weights into vector varwi for these two FPconfigs
+			// get the variances on the weights into vector varwi for these two FPconfigs
 			vector<double> varwi;
-			varwi = GetVarWeights(ntopol, nf1, nf2);
+			varwi = GetVarWeights(fNtopol, nf1, nf2);
 			double vstat = 0.;
 			double vsyst = 0;
 			int iwi = 0;
-		// loop over the topologies for the first FPconfig
-			for (int i = 0; i < ntopol; ++i) {
-				int ivar1 = nf1 * ntopol + i;
-				int ivar2 = nf2 * ntopol + i;
-	// the statistical variance
-				vstat += wgtitot[ivar1] * wgtitot[ivar2] * npass[i];
+			// loop over the topologies for the first FPconfig
+			for (int i = 0; i < fNtopol; ++i) {
+				int ivar1 = nf1 * fNtopol + i;
+				int ivar2 = nf2 * fNtopol + i;
+				// the statistical variance
+				vstat += fWgtitot[ivar1] * fWgtitot[ivar2] * fNpass[i];
 
-				int nfefake1 = nfetop[nf1];
-				int nfmfake1 = nfmtop[nf1];
-				int nepass1 = i / (nm+1);
-				int nmpass1 = i % (nm+1);
+				int nfefake1 = fNfetop[nf1];
+				int nfmfake1 = fNfmtop[nf1];
+				int nepass1 = i / (fNmuons+1);
+				int nmpass1 = i % (fNmuons+1);
 				int isgn;
-				isgn = nfefake1 - ne + nepass1 + nfmfake1 - nm + nmpass1;
+				isgn = nfefake1 - fNeles  + nepass1 + nfmfake1 - fNmuons + nmpass1;
 				double sgn1 = 1.;
 				if (isgn%2 != 0) sgn1 = -1.;
-	//	if(verbose > 5) cout << "  nfake1 = " << nfefake1 << " " << nfmfake1 << ", npass = " << nepass1 << " " << nmpass1 
-	//	     << "sgn = " << sgn1 << endl;
+				//	if(fVerbose > 5) cout << "  nfake1 = " << nfefake1 << " " << nfmfake1 << ", fNpass = " << nepass1 << " " << nmpass1 
+				//	     << "sgn = " << sgn1 << endl;
 
-	// loop over the topologies for the second FPconfig
-				for (int k = 0; k < ntopol; ++k) {
-					int nfefake2 = nfetop[nf2];
-					int nfmfake2 = nfmtop[nf2];
-					int nepass2 = k / (nm+1);
-					int nmpass2 = k % (nm+1);
-					isgn = nfefake2 - ne + nepass2 + nfmfake2 - nm + nmpass2;
+				// loop over the topologies for the second FPconfig
+				for (int k = 0; k < fNtopol; ++k) {
+					int nfefake2 = fNfetop[nf2];
+					int nfmfake2 = fNfmtop[nf2];
+					int nepass2 = k / (fNmuons+1);
+					int nmpass2 = k % (fNmuons+1);
+					isgn = nfefake2 - fNeles  + nepass2 + nfmfake2 - fNmuons + nmpass2;
 					double sgn2 = 1.;
 					if (isgn%2 != 0) sgn2 = -1.;
-	//	  if(verbose > 5) cout << "  nfake2 = " << nfefake2 << " " << nfmfake2 << ", npass = " << nepass2 << " " << nmpass2 
-	//	       << "sgn = " << sgn2 << endl;
-	// multiply them with the nbers of events in the topologies
-					double varnew = sgn1 * npass[i] * sgn2 * npass[k] * varwi[iwi];
-					if (verbose > 5) {
-						if(verbose > 5) cout << " sgn1 = " << sgn1 << " npass = " << npass[i]
-							<< ", sgn2 = " << sgn2 << " npass = " << npass[k] << ", varwi = " << varwi[iwi] 
+					//	  if(fVerbose > 5) cout << "  nfake2 = " << nfefake2 << " " << nfmfake2 << ", fNpass = " << nepass2 << " " << nmpass2 
+					//	       << "sgn = " << sgn2 << endl;
+					// multiply them with the nbers of events in the topologies
+					double varnew = sgn1 * fNpass[i] * sgn2 * fNpass[k] * varwi[iwi];
+					if (fVerbose > 5) {
+						if(fVerbose > 5) cout << " sgn1 = " << sgn1 << " fNpass = " << fNpass[i]
+							<< ", sgn2 = " << sgn2 << " fNpass = " << fNpass[k] << ", varwi = " << varwi[iwi] 
 							<< ", varnew = " << varnew << endl;
 					}
 					vsyst += varnew;
 					iwi++;
 				}
 			}
-			if (verbose > 5) {
-				if(verbose > 5) cout << " Variance stat = " << vstat << ", syst = " << vsyst << endl;
+			if (fVerbose > 5) {
+				if(fVerbose > 5) cout << " Variance stat = " << vstat << ", syst = " << vsyst << endl;
 			}
 
-		// save the stat and syst errors in global vectors
-			varstat.push_back(vstat);
-			varsyst.push_back(vsyst);
+			// save the stat and syst errors in global vectors
+			fVarstat.push_back(vstat);
+			fVarsyst.push_back(vsyst);
 		}
 	}
-
 
 	return;
 }
@@ -559,19 +550,19 @@ vector<double> FPRatios::GetVarWeights(int ntopol, int itop1, int itop2){
 	int i1 = itop1 * ntopol;
 	int i2 = itop2 * ntopol;
 	vector<double> varwi;
-	if (verbose > 6) {
-		if(verbose > 5) cout << " topol = " << itop1 << " " << itop2 << ", index = " << i1 << " " << i2 << endl;
+	if (fVerbose > 6) {
+		if(fVerbose > 5) cout << " topol = " << itop1 << " " << itop2 << ", index = " << i1 << " " << i2 << endl;
 	}
 
 // store the V(wi,wk) for all topologies in a vector
 	for (int j1 = i1; j1 < i1+ntopol; ++j1) {
-		double wgte1 = wgtitote[j1];
-		double wgtm1 = wgtitotm[j1];
+		double wgte1 = fWgtitote[j1];
+		double wgtm1 = fWgtitotm[j1];
 		if (wgte1 == 0.) wgte1 = 1.;
 		if (wgtm1 == 0.) wgtm1 = 1.;
 		for (int j2 = i2; j2 < i2+ntopol; ++j2) {
-			double wgte2 = wgtitote[j2];
-			double wgtm2 = wgtitotm[j2];
+			double wgte2 = fWgtitote[j2];
+			double wgtm2 = fWgtitotm[j2];
 			if (wgte2 == 0.) wgte2 = 1.;
 			if (wgtm2 == 0.) wgtm2 = 1.;
 			double sumwij = 0.;
@@ -583,26 +574,26 @@ vector<double> FPRatios::GetVarWeights(int ntopol, int itop1, int itop2){
 			double sumdwijdfe2 = 0.;
 			double sumdwijdpm2 = 0.;
 			double sumdwijdfm2 = 0.;
-			for (int k1 = 0; k1 < dwgtdptote[j1].size(); ++k1) {
-				sumdwijdpe1 += dwgtdptote[j1][k1];
-				sumdwijdfe1 += dwgtdftote[j1][k1];
-				sumdwijdpm1 += dwgtdptotm[j1][k1];
-				sumdwijdfm1 += dwgtdftotm[j1][k1];
+			for (int k1 = 0; k1 < fDwgtdptote[j1].size(); ++k1) {
+				sumdwijdpe1 += fDwgtdptote[j1][k1];
+				sumdwijdfe1 += fDwgtdftote[j1][k1];
+				sumdwijdpm1 += fDwgtdptotm[j1][k1];
+				sumdwijdfm1 += fDwgtdftotm[j1][k1];
 			}
-			for (int k2 = 0; k2 < dwgtdptote[j2].size(); ++k2) {
-				sumdwijdpe2 += dwgtdptote[j2][k2];
-				sumdwijdfe2 += dwgtdftote[j2][k2];
-				sumdwijdpm2 += dwgtdptotm[j2][k2];
-				sumdwijdfm2 += dwgtdftotm[j2][k2];
+			for (int k2 = 0; k2 < fDwgtdptote[j2].size(); ++k2) {
+				sumdwijdpe2 += fDwgtdptote[j2][k2];
+				sumdwijdfe2 += fDwgtdftote[j2][k2];
+				sumdwijdpm2 += fDwgtdptotm[j2][k2];
+				sumdwijdfm2 += fDwgtdftotm[j2][k2];
 			}
 			sumwij = sumdwijdpe1 * wgtm1 * sumdwijdpe2 * wgtm2
 				+ sumdwijdfe1 * wgtm1 * sumdwijdfe2 * wgtm2
 				+ sumdwijdpm1 * wgte1 * sumdwijdpm2 * wgte2
 				+ sumdwijdfm1 * wgte1 * sumdwijdfm2 * wgte2;
-	//	  if(verbose > 5) cout << " ( " << j1 << ", " << k1 << ") * ( " << j2 << ", " << k2 << ")" << endl;
+	//	  if(fVerbose > 5) cout << " ( " << j1 << ", " << k1 << ") * ( " << j2 << ", " << k2 << ")" << endl;
 			varwi.push_back(sumwij);
-			if (verbose > 6) {
-				if(verbose > 5) cout << " " << j1 << " " << j2 << " varwi = " << sumwij << endl;
+			if (fVerbose > 6) {
+				if(fVerbose > 5) cout << " " << j1 << " " << j2 << " varwi = " << sumwij << endl;
 			}
 		} 
 	}
@@ -613,17 +604,17 @@ vector<double> FPRatios::GetVarWeights(int ntopol, int itop1, int itop2){
 // *************************************************************************
 vector<double> FPRatios::VarStat(){
 // returns the statistical variances for all FPratio combinations into a vector
-	if (!initVar) {Varnf1nf2();}
-	initVar = 1;
-	return varstat;
+	if (!fInitVar) Varnf1nf2();
+	fInitVar = 1;
+	return fVarstat;
 }
 
 // *************************************************************************
 vector<double> FPRatios::VarSyst(){
 // returns the systematic variances for all FPratio combinations into a vector
-	if (!initVar) {Varnf1nf2();}
-	initVar = 1;
-	return varsyst;
+	if (!fInitVar) Varnf1nf2();
+	fInitVar = 1;
+	return fVarsyst;
 }
 
 // *************************************************************************
@@ -660,14 +651,14 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 	vector<double> fakrat, prorat;
 	vector<double> fakerr, proerr;
 	double wgt = 1.;
-	dwgtdpe = 0.;
-	dwgtdfe = 0.;
-	dwgtdpm = 0.;
-	dwgtdfm = 0.;
-	dwgtdptope.clear(); 
-	dwgtdftope.clear();
-	dwgtdptopm.clear(); 
-	dwgtdftopm.clear();
+	fDwgtdpe = 0.;
+	fDwgtdfe = 0.;
+	fDwgtdpm = 0.;
+	fDwgtdfm = 0.;
+	fDwgtdptope.clear(); 
+	fDwgtdftope.clear();
+	fDwgtdptopm.clear(); 
+	fDwgtdftopm.clear();
 
 	int ne = npe + nfe;
 	int ipeinit = npe - 1;
@@ -702,7 +693,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 			fakerr.push_back(FakeRatioError(2, vpt[i], veta[i]) );
 			proerr.push_back(PromptRatioError(2, vpt[i], veta[i]) );
 		}
-	//     if(verbose > 5) cout << " i = " << i << ", ind = " << ind[i] 
+	//     if(fVerbose > 5) cout << " i = " << i << ", ind = " << ind[i] 
 	//	  << ", pT = " << vpt[i] << ", eta = " << veta[i] 
 	//	  << ", fakrat = " << fakrat[i] << ", prorat = " << prorat[i] << endl;
 	}
@@ -720,21 +711,21 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 	int icycm = 3;
 	int nowmu = 0;
 	if (ne == 0) nowmu = 1;
-	wgtie = 0.;
-	wgtim = 0.;
+	fWgtie = 0.;
+	fWgtim = 0.;
 	wgt = 0.;
 
 // sum over all the weights wij of the various FPconfigs
 	while (1){
 
 		// for (int i = 0; i < ne; ++i) {
-		// 	if(verbose > 5) cout << " " << ind[i];
+		// 	if(fVerbose > 5) cout << " " << ind[i];
 		// }
-		// if(verbose > 5) cout << " | ";
+		// if(fVerbose > 5) cout << " | ";
 		// for (int i = ne; i < ne+nm; ++i) {
-		// 	if(verbose > 5) cout << " " << ind[i];
+		// 	if(fVerbose > 5) cout << " " << ind[i];
 		// }
-		// if(verbose > 5) cout << endl;
+		// if(fVerbose > 5) cout << endl;
 		// 
 
 		// compute the weight for this combination, 
@@ -823,35 +814,35 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 			dwgtnewdfe = wgtnewe * cfdfe * df;
 			dwgtnewdpm = wgtnewm * cpdpm * dp;
 			dwgtnewdfm = wgtnewm * cfdfm * df;
-			if (verbose > 6) {
+			if (fVerbose > 6) {
 				if (i < ne) {
-					if(verbose > 5) cout << " " << i << " wgtnewe = " << wgtnewe  << ", cpdpe = " << cpdpe << ", cfdfe = " << cfdfe
+					if(fVerbose > 5) cout << " " << i << " wgtnewe = " << wgtnewe  << ", cpdpe = " << cpdpe << ", cfdfe = " << cfdfe
 						<< ", dwgtnewdpe = " << dwgtnewdpe << ", dwgtnewdfe = " << dwgtnewdfe << endl;
 				} else {
-					if(verbose > 5) cout << " " << i << " wgtnewm = " << wgtnewm  << ", cpdpm = " << cpdpm << ", cfdfm = " << cfdfm
+					if(fVerbose > 5) cout << " " << i << " wgtnewm = " << wgtnewm  << ", cpdpm = " << cpdpm << ", cfdfm = " << cfdfm
 						<< ", dwgtnewdpm = " << dwgtnewdpm << ", dwgtnewdfm = " << dwgtnewdfm << endl;
 				}
 			}
 		}
-		wgtie += wgtnewe;
-		wgtim += wgtnewm;
+		fWgtie += wgtnewe;
+		fWgtim += wgtnewm;
 		double wgtnew;
 		if (wgtnewe == 0.) wgtnew = wgtnewm;
 		else if (wgtnewm == 0.) wgtnew = wgtnewe;
 		else wgtnew = wgtnewe * wgtnewm;
 		wgt += wgtnew;
-		dwgtdpe += dwgtnewdpe;
-		dwgtdfe += dwgtnewdfe;
-		dwgtdpm += dwgtnewdpm;
-		dwgtdfm += dwgtnewdfm;
-		dwgtdptope.push_back(dwgtnewdpe); 
-		dwgtdftope.push_back(dwgtnewdfe);
-		dwgtdptopm.push_back(dwgtnewdpm); 
-		dwgtdftopm.push_back(dwgtnewdfm);
+		fDwgtdpe += dwgtnewdpe;
+		fDwgtdfe += dwgtnewdfe;
+		fDwgtdpm += dwgtnewdpm;
+		fDwgtdfm += dwgtnewdfm;
+		fDwgtdptope.push_back(dwgtnewdpe); 
+		fDwgtdftope.push_back(dwgtnewdfe);
+		fDwgtdptopm.push_back(dwgtnewdpm); 
+		fDwgtdftopm.push_back(dwgtnewdfm);
 
 	// generate next combination for electrons
 		if (icyce == 1 && !nowmu) {
-		//       if(verbose > 5) cout << " cycle over the fakes, ife = " << ife << endl;
+		//       if(fVerbose > 5) cout << " cycle over the fakes, ife = " << ife << endl;
 			int temp = ind[ipeinit+1];
 			for (int i = ipeinit+1; i < ifeinit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -866,7 +857,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 		}
 
 		if (icyce == 2 && !nowmu) {
-		//       if(verbose > 5) cout << " cycle over the prompts, ipe = " << ipe << endl;
+		//       if(fVerbose > 5) cout << " cycle over the prompts, ipe = " << ipe << endl;
 			int temp = ind[0];
 			for (int i = 0; i < ipeinit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -883,7 +874,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 
 		if (icyce == 0 && !nowmu) {
 			if (ipemv >= 0 && ifemv > ipeinit) {
-	//          if(verbose > 5) cout << " move " << ipemv << " " << ifemv << endl;
+	//          if(fVerbose > 5) cout << " move " << ipemv << " " << ifemv << endl;
 				ind[ifemv] = 1;
 				ind[ipemv] = 0;
 				ipemv--;
@@ -898,14 +889,14 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 				ife = ifeinit;
 				ipemv = ipeinit;
 				ifemv = ifeinit;
-	//          if(verbose > 5) cout << " end cycling over electrons " << endl;
+	//          if(fVerbose > 5) cout << " end cycling over electrons " << endl;
 				nowmu = 1;
 			}
 		}
 
 	// generate next combination for muons
 		if (icycm == 4 && nowmu) {
-		//       if(verbose > 5) cout << " cycle over the fakes, ifm = " << ifm << endl;
+		//       if(fVerbose > 5) cout << " cycle over the fakes, ifm = " << ifm << endl;
 			int temp = ind[ipminit+1];
 			for (int i = ipminit+1; i < ifminit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -921,7 +912,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 		}
 
 		if (icycm == 5 && nowmu) {
-		//       if(verbose > 5) cout << " cycle over the prompts, ipm = " << ipm << endl;
+		//       if(fVerbose > 5) cout << " cycle over the prompts, ipm = " << ipm << endl;
 			int temp = ind[ne];
 			for (int i = ne; i < ipminit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -939,7 +930,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 
 		if (icycm == 3 && nowmu) {
 			if (ipmmv >= ne && ifmmv > ipminit) {
-	//          if(verbose > 5) cout << " move " << ipmmv << " " << ifmmv << endl;
+	//          if(fVerbose > 5) cout << " move " << ipmmv << " " << ifmmv << endl;
 				ind[ifmmv] = 1;
 				ind[ipmmv] = 0;
 				ipmmv--;
@@ -950,16 +941,16 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 				}
 				icycm = 4;
 			} else {
-	//          if(verbose > 5) cout << " end cycling over muons " << endl;
+	//          if(fVerbose > 5) cout << " end cycling over muons " << endl;
 				break;
 			}
 		}
 
 	}
 
-	if (verbose > 6) {
-		if(verbose > 5) cout << " wgt = " << wgt << ", dwgtdpe = " << dwgtdpe << ", dwgtdfe = " << dwgtdfe
-			<< ", dwgtdpm = " << dwgtdpm << ", dwgtdfm = " << dwgtdfm << endl;
+	if (fVerbose > 6) {
+		if(fVerbose > 5) cout << " wgt = " << wgt << ", fDwgtdpe = " << fDwgtdpe << ", fDwgtdfe = " << fDwgtdfe
+			<< ", fDwgtdpm = " << fDwgtdpm << ", fDwgtdfm = " << fDwgtdfm << endl;
 	}
 
 	ind.clear();
@@ -1005,14 +996,14 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 	vector<double> fakrat, prorat;
 	vector<double> fakerr, proerr;
 	double wgt = 1.;
-	dwgtdpe = 0.;
-	dwgtdfe = 0.;
-	dwgtdpm = 0.;
-	dwgtdfm = 0.;
-	dwgtdptope.clear(); 
-	dwgtdftope.clear();
-	dwgtdptopm.clear(); 
-	dwgtdftopm.clear();
+	fDwgtdpe = 0.;
+	fDwgtdfe = 0.;
+	fDwgtdpm = 0.;
+	fDwgtdfm = 0.;
+	fDwgtdptope.clear(); 
+	fDwgtdftope.clear();
+	fDwgtdptopm.clear(); 
+	fDwgtdftopm.clear();
 
 	int ne = npe + nfe;
 	int ipeinit = npe - 1;
@@ -1075,7 +1066,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 	// 		fakerr.push_back(FakeRatioError(2, vpt[i], veta[i]) );
 	// 		proerr.push_back(PromptRatioError(2, vpt[i], veta[i]) );
 	// 	}
-	// //     if(verbose > 5) cout << " i = " << i << ", ind = " << ind[i] 
+	// //     if(fVerbose > 5) cout << " i = " << i << ", ind = " << ind[i] 
 	// //	  << ", pT = " << vpt[i] << ", eta = " << veta[i] 
 	// //	  << ", fakrat = " << fakrat[i] << ", prorat = " << prorat[i] << endl;
 	// }
@@ -1093,21 +1084,21 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 	int icycm = 3;
 	int nowmu = 0;
 	if (ne == 0) nowmu = 1;
-	wgtie = 0.;
-	wgtim = 0.;
+	fWgtie = 0.;
+	fWgtim = 0.;
 	wgt = 0.;
 
 // sum over all the weights wij of the various FPconfigs
 	while (1){
 
 		// for (int i = 0; i < ne; ++i) {
-		// 	if(verbose > 5) cout << " " << ind[i];
+		// 	if(fVerbose > 5) cout << " " << ind[i];
 		// }
-		// if(verbose > 5) cout << " | ";
+		// if(fVerbose > 5) cout << " | ";
 		// for (int i = ne; i < ne+nm; ++i) {
-		// 	if(verbose > 5) cout << " " << ind[i];
+		// 	if(fVerbose > 5) cout << " " << ind[i];
 		// }
-		// if(verbose > 5) cout << endl;
+		// if(fVerbose > 5) cout << endl;
 		// 
 
 		// compute the weight for this combination, 
@@ -1196,35 +1187,35 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 			dwgtnewdfe = wgtnewe * cfdfe * df;
 			dwgtnewdpm = wgtnewm * cpdpm * dp;
 			dwgtnewdfm = wgtnewm * cfdfm * df;
-			if (verbose > 6) {
+			if (fVerbose > 6) {
 				if (i < ne) {
-					if(verbose > 5) cout << " " << i << " wgtnewe = " << wgtnewe  << ", cpdpe = " << cpdpe << ", cfdfe = " << cfdfe
+					if(fVerbose > 5) cout << " " << i << " wgtnewe = " << wgtnewe  << ", cpdpe = " << cpdpe << ", cfdfe = " << cfdfe
 						<< ", dwgtnewdpe = " << dwgtnewdpe << ", dwgtnewdfe = " << dwgtnewdfe << endl;
 				} else {
-					if(verbose > 5) cout << " " << i << " wgtnewm = " << wgtnewm  << ", cpdpm = " << cpdpm << ", cfdfm = " << cfdfm
+					if(fVerbose > 5) cout << " " << i << " wgtnewm = " << wgtnewm  << ", cpdpm = " << cpdpm << ", cfdfm = " << cfdfm
 						<< ", dwgtnewdpm = " << dwgtnewdpm << ", dwgtnewdfm = " << dwgtnewdfm << endl;
 				}
 			}
 		}
-		wgtie += wgtnewe;
-		wgtim += wgtnewm;
+		fWgtie += wgtnewe;
+		fWgtim += wgtnewm;
 		double wgtnew;
 		if (wgtnewe == 0.) wgtnew = wgtnewm;
 		else if (wgtnewm == 0.) wgtnew = wgtnewe;
 		else wgtnew = wgtnewe * wgtnewm;
 		wgt += wgtnew;
-		dwgtdpe += dwgtnewdpe;
-		dwgtdfe += dwgtnewdfe;
-		dwgtdpm += dwgtnewdpm;
-		dwgtdfm += dwgtnewdfm;
-		dwgtdptope.push_back(dwgtnewdpe); 
-		dwgtdftope.push_back(dwgtnewdfe);
-		dwgtdptopm.push_back(dwgtnewdpm); 
-		dwgtdftopm.push_back(dwgtnewdfm);
+		fDwgtdpe += dwgtnewdpe;
+		fDwgtdfe += dwgtnewdfe;
+		fDwgtdpm += dwgtnewdpm;
+		fDwgtdfm += dwgtnewdfm;
+		fDwgtdptope.push_back(dwgtnewdpe); 
+		fDwgtdftope.push_back(dwgtnewdfe);
+		fDwgtdptopm.push_back(dwgtnewdpm); 
+		fDwgtdftopm.push_back(dwgtnewdfm);
 
 	// generate next combination for electrons
 		if (icyce == 1 && !nowmu) {
-		//       if(verbose > 5) cout << " cycle over the fakes, ife = " << ife << endl;
+		//       if(fVerbose > 5) cout << " cycle over the fakes, ife = " << ife << endl;
 			int temp = ind[ipeinit+1];
 			for (int i = ipeinit+1; i < ifeinit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -1239,7 +1230,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 		}
 
 		if (icyce == 2 && !nowmu) {
-		//       if(verbose > 5) cout << " cycle over the prompts, ipe = " << ipe << endl;
+		//       if(fVerbose > 5) cout << " cycle over the prompts, ipe = " << ipe << endl;
 			int temp = ind[0];
 			for (int i = 0; i < ipeinit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -1256,7 +1247,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 
 		if (icyce == 0 && !nowmu) {
 			if (ipemv >= 0 && ifemv > ipeinit) {
-	//          if(verbose > 5) cout << " move " << ipemv << " " << ifemv << endl;
+	//          if(fVerbose > 5) cout << " move " << ipemv << " " << ifemv << endl;
 				ind[ifemv] = 1;
 				ind[ipemv] = 0;
 				ipemv--;
@@ -1271,14 +1262,14 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 				ife = ifeinit;
 				ipemv = ipeinit;
 				ifemv = ifeinit;
-	//          if(verbose > 5) cout << " end cycling over electrons " << endl;
+	//          if(fVerbose > 5) cout << " end cycling over electrons " << endl;
 				nowmu = 1;
 			}
 		}
 
 	// generate next combination for muons
 		if (icycm == 4 && nowmu) {
-		//       if(verbose > 5) cout << " cycle over the fakes, ifm = " << ifm << endl;
+		//       if(fVerbose > 5) cout << " cycle over the fakes, ifm = " << ifm << endl;
 			int temp = ind[ipminit+1];
 			for (int i = ipminit+1; i < ifminit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -1294,7 +1285,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 		}
 
 		if (icycm == 5 && nowmu) {
-		//       if(verbose > 5) cout << " cycle over the prompts, ipm = " << ipm << endl;
+		//       if(fVerbose > 5) cout << " cycle over the prompts, ipm = " << ipm << endl;
 			int temp = ind[ne];
 			for (int i = ne; i < ipminit+1; ++i) {
 				ind[i] = ind[i+1];
@@ -1312,7 +1303,7 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 
 		if (icycm == 3 && nowmu) {
 			if (ipmmv >= ne && ifmmv > ipminit) {
-	//          if(verbose > 5) cout << " move " << ipmmv << " " << ifmmv << endl;
+	//          if(fVerbose > 5) cout << " move " << ipmmv << " " << ifmmv << endl;
 				ind[ifmmv] = 1;
 				ind[ipmmv] = 0;
 				ipmmv--;
@@ -1323,16 +1314,16 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> f,
 				}
 				icycm = 4;
 			} else {
-	//          if(verbose > 5) cout << " end cycling over muons " << endl;
+	//          if(fVerbose > 5) cout << " end cycling over muons " << endl;
 				break;
 			}
 		}
 
 	}
 
-	if (verbose > 6) {
-		if(verbose > 5) cout << " wgt = " << wgt << ", dwgtdpe = " << dwgtdpe << ", dwgtdfe = " << dwgtdfe
-			<< ", dwgtdpm = " << dwgtdpm << ", dwgtdfm = " << dwgtdfm << endl;
+	if (fVerbose > 6) {
+		if(fVerbose > 5) cout << " wgt = " << wgt << ", fDwgtdpe = " << fDwgtdpe << ", fDwgtdfe = " << fDwgtdfe
+			<< ", fDwgtdpm = " << fDwgtdpm << ", fDwgtdfm = " << fDwgtdfm << endl;
 	}
 
 	ind.clear();

@@ -28,7 +28,7 @@ public:
 	virtual ~FPRatios();
 
 // set the level of verbosity (default = 0, no printout except initialization)
-	void SetVerbose(int verb) {verbose = verb;};
+	void SetVerbose(int verb) {fVerbose = verb;};
 
 // ***********************************************************************
 //
@@ -58,7 +58,7 @@ public:
 // nmmaxi = number of muons
 // npassi = vector with number of events in each topology (Nti in the note)
 //   in the order Nt0,0, Nt0,1, Nt0,2 ... , Nt1,0, ...
-	int NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi);
+	void NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi);
 
 // initialization providing the fake and prompt ratios and errors for e and mu
 	double fFRatioe1, fFRatiom1, fFRatioErre1, fFRatioErrm1;
@@ -141,23 +141,22 @@ private:
 	void Varnf1nf2();
 
 
-	int verbose;
+	int fVerbose;
 
-	int initTopol;
-	int initVar;
-	int ne, nm, ntopol;
-	vector<double> npass;
-	vector<int> nfetop, npetop, nfmtop, npmtop;
-	vector<double> ntotfp;
+	int fInitVar;
+	int fNeles, fNmuons, fNtopol;
+	vector<double> fNpass;
+	vector<int> fNfetop, fNpetop, fNfmtop, fNpmtop;
+	vector<double> fNtotfp;
 
-	vector<double> wgtitot;
-	double wgtie, wgtim;
-	double dwgtdpe, dwgtdfe;
-	double dwgtdpm, dwgtdfm;
-	vector<double> dwgtdptope, dwgtdftope;
-	vector<double> dwgtdptopm, dwgtdftopm;
+	vector<double> fWgtitot;
+	double fWgtie, fWgtim;
+	double fDwgtdpe, fDwgtdfe;
+	double fDwgtdpm, fDwgtdfm;
+	vector<double> fDwgtdptope, fDwgtdftope;
+	vector<double> fDwgtdptopm, fDwgtdftopm;
 
-	vector<double> dNtotstat, dNtotsyst;
+	vector<double> fDNtotstat, fDNtotsyst;
 
 // the following are vectors of vectors containing w_ij C_p,ij dp and similar for df
 // the 1st vector has in sequence:
@@ -167,20 +166,20 @@ private:
 //     for a given entry in the 1st vector
 // all are stored in the order in which they are produced
 // Example:
-//  0 npe = 2, nfe = 0, npass = 0
-//  1 npe = 2, nfe = 0, npass = 1
-//  2 npe = 2, nfe = 0, npass = 2
-//  3 npe = 1, nfe = 1, npass = 0 (2 entries in 2nd vector)
-//  4 npe = 1, nfe = 1, npass = 1 (2 entries in 2nd vector)
-//  5 npe = 1, nfe = 1, npass = 2 (2 entries in 2nd vector)
-//  6 npe = 1, nfe = 1, npass = 0
-//  7 npe = 1, nfe = 1, npass = 1
-//  8 npe = 1, nfe = 1, npass = 2
-	vector<vector<double> > dwgtdptote, dwgtdftote, dwgtdptotm, dwgtdftotm;
+//  0 npe = 2, nfe = 0, fNpass = 0
+//  1 npe = 2, nfe = 0, fNpass = 1
+//  2 npe = 2, nfe = 0, fNpass = 2
+//  3 npe = 1, nfe = 1, fNpass = 0 (2 entries in 2nd vector)
+//  4 npe = 1, nfe = 1, fNpass = 1 (2 entries in 2nd vector)
+//  5 npe = 1, nfe = 1, fNpass = 2 (2 entries in 2nd vector)
+//  6 npe = 1, nfe = 1, fNpass = 0
+//  7 npe = 1, nfe = 1, fNpass = 1
+//  8 npe = 1, nfe = 1, fNpass = 2
+	vector<vector<double> > fDwgtdptote, fDwgtdftote, fDwgtdptotm, fDwgtdftotm;
 
-	vector<double> wgtitote, wgtitotm;
+	vector<double> fWgtitote, fWgtitotm;
 
-	vector<double> varstat, varsyst;
+	vector<double> fVarstat, fVarsyst;
 
 
 };
