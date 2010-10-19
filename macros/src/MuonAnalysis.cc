@@ -22,7 +22,7 @@ void MuonAnalysis::Begin(){
 
 void MuonAnalysis::Analyze(){
 	if(!IsGoodMuEvent()) return; // Trigger, etc.
-	FillMuonTree(MuonSelection());
+	FillMuonTree();
 }
 
 void MuonAnalysis::End(){
@@ -31,7 +31,8 @@ void MuonAnalysis::End(){
 	fOutputFile->Close();
 }
 
-void MuonAnalysis::FillMuonTree(vector<int> goodMuons){
+void MuonAnalysis::FillMuonTree(){
+	vector<int> goodMuons = MuonSelection();
 	if( goodMuons.size() < 1 ) return;
 	ResetTree();
 	fTrun     = fTR->Run;
@@ -115,19 +116,21 @@ void MuonAnalysis::FillMuonTree(vector<int> goodMuons){
 	}
 	fTnmus = goodMuons.size();
 	
-	// Calculate invariant mass
-	TLorentzVector pmu1, pmu2;
+	// Calculate invariant mass, if more than 1 muon
+	TLorentzVector pmu1;
 	pmu1.SetXYZM(fTR->MuPx[goodMuons[0]], fTR->MuPy[goodMuons[0]], fTR->MuPz[goodMuons[0]], 0.105);
-	pmu2.SetXYZM(fTR->MuPx[goodMuons[1]], fTR->MuPy[goodMuons[1]], fTR->MuPz[goodMuons[1]], 0.105);
-	TLorentzVector pdimu = pmu1 + pmu2;
-	fTMinv = pdimu.Mag();
-	
+	if(goodMuons.size() > 1){	
+		TLorentzVector pmu2;
+		pmu2.SetXYZM(fTR->MuPx[goodMuons[1]], fTR->MuPy[goodMuons[1]], fTR->MuPz[goodMuons[1]], 0.105);
+		TLorentzVector pdimu = pmu1 + pmu2;
+		fTMinv = pdimu.Mag();
+	}
+
 	// Calculate mT:
 	double ETlept = sqrt(pmu1.M2() + pmu1.Perp2());
 	double METpx  = fTR->PFMETpx;
 	double METpy  = fTR->PFMETpy;
 	fTMT          = sqrt( 2*fTMET*ETlept - pmu1.Px()*METpx - pmu1.Py()*METpy );
-	
 	
 	fMuTree->Fill();
 }

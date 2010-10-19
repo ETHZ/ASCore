@@ -22,7 +22,7 @@ public:
 	virtual void Analyze();
 	virtual void End();
 
-	virtual void FillMuonTree(std::vector<int>);
+	virtual void FillMuonTree();
 
 	virtual void BookTree();
 	virtual void ResetTree();
