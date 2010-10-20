@@ -17,15 +17,17 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunMuonAnalyzer [-d dir] [-v verbose] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunMuonAnalyzer [-d dir] [-v verbose] [-m maxevents] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
-	cout << "     dir      is the output directory               " << endl;
-	cout << "               default is TempOutput/               " << endl;
-	cout << "     verbose  sets the verbose level                " << endl;
-	cout << "               default is 0 (quiet mode)            " << endl;
-	cout << "     filen    are the input files (by default: ROOT files)" << endl;
-	cout << "              with option -l, these are read as text files" << endl;
-	cout << "              with one ROOT file name per line      " << endl;
+	cout << "     dir       is the output directory               " << endl;
+	cout << "                default is TempOutput/               " << endl;
+	cout << "     verbose   sets the verbose level                " << endl;
+	cout << "                default is 0 (quiet mode)            " << endl;
+	cout << "     maxevents are the number of events to run over  " << endl;
+	cout << "               default is -1 (all)                   " << endl;
+	cout << "     filen     are the input files (by default: ROOT files)" << endl;
+	cout << "                with option -l, these are read as text files" << endl;
+	cout << "                with one ROOT file name per line      " << endl;
 	cout << endl;
 	exit(status);
 }
@@ -41,13 +43,12 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:lvm:h?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:v:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
-			case 'l': isList = true; break;
 			case 'v': verbose = atoi(optarg); break;
 			case 'm': maxevents = atoi(optarg); break;
-			// case 't': tag = TString(optarg); break;
+			case 'l': isList = true; break;
 			case '?':
 			case 'h': usage(0); break;
 			default:
