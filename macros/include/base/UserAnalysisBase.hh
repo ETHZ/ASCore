@@ -52,19 +52,31 @@ public:
 	virtual bool IsGoodMu_TDL(int);
 
 	// Electron Selectors
-	virtual bool IsGoodBasicEl(int);
-	virtual bool IsTightEl(int);
-	virtual bool IsLooseEl(int);
-	virtual bool IsLooseNoTightEl(int);
-	virtual bool IsGoodEl_TDL(int);
+	virtual bool IsElFromPrimaryVx	(int);
+	virtual bool IsGoodBasicEl		(int);
+	virtual bool IsGoodEl_TDL		(int);
+	virtual bool IsGoodElId_WP80		(int);
+	virtual bool IsGoodElId_WP90	(int);
+	virtual bool IsConvertedEl_WP80	(int);
+	virtual bool IsConvertedEl_WP90(int);
+	virtual bool IsIsolatedEl		(int, double, double);
+	virtual bool IsIsolatedEl_WP80	(int);
+	virtual bool IsIsolatedEl_WP90	(int);
+	virtual bool IsIsolatedEl_RA5	(int);
+	virtual bool IsIsolatedEl_LooseIso(int);
+	virtual bool IsTightEl			(int);
+	virtual bool IsLooseEl			(int);
+	virtual bool IsLooseNoTightEl	(int);
 
 	// Photon Selectors
 	virtual bool IsGoodBasicPho(int);
 
 	// Event Selectors
+	virtual bool isGoodBasicPrimaryVertex();
 	virtual bool IsGoodEvent();
 	virtual bool IsGoodMuEvent();
 	virtual bool IsGoodElEvent();
+	virtual bool IsGoodHadronicEvent	();
 	virtual vector<int> MuonSelection();
 	virtual vector<int> ElectronSelection();
 	virtual vector<int> PhotonSelection();
@@ -72,7 +84,7 @@ public:
 	virtual vector<int> PFJetSelection();
 	virtual bool SingleMuonSelection(int&);
 	virtual bool DiMuonSelection(int&, int&, int = 0);
-	virtual bool SSDiMuonSelection(int &, int&);
+	virtual bool SSDiMuonSelection(int &, int&);	
 	virtual bool SingleElectronSelection(int&);
 	virtual bool DiElectronSelection(int&, int&);
 	virtual bool SSDiElectronSelection(int &, int&);	

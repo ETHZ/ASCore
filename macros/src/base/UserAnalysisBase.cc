@@ -19,6 +19,7 @@ UserAnalysisBase::~UserAnalysisBase(){
 void UserAnalysisBase::BeginRun(Int_t& run) {
   // Called when run changes
   // Need to re-create HLT map in case it changed
+	
   GetHLTNames(run);
 }
 
@@ -61,6 +62,8 @@ int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
 }
 
 void UserAnalysisBase::GetHLTNames(Int_t& run){
+	
+	cout << "GetHLTNames... ";
 	TFile *f = fTR->fChain->GetCurrentFile();
 	TTree* runTree = (TTree*)f->Get("analyze/RunInfo");
 	std::vector<std::string>* HLTNames;
@@ -137,6 +140,7 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index) {
 		if ( !(fTR->PFJChHadfrac[index] > 0.00) )  return false;
 		if ( !(fTR->PFJChMult[index]    > 0   ) )  return false;
 	}
+	return true;
 }
 
 bool UserAnalysisBase::IsGoodBasicJet(int index){
@@ -270,10 +274,6 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	double ElecDeltaEtaInEndmax     = 999.0; // not used due to misalignement in the EndCaps
 	double ElecDeltaPhiInEndmax     = 0.7;
 	double ElecDeltaPhiOutEndmax    = 999.0;
-	// conversions cut values
-	double ElecConvPartTrackDistmin = 0.02;
-	double ElecConvPartTrackDCotmin = 0.02;
-	double ElecNMissHitsmax         = 1.;
 	// kinematics + ECAL gap cut values
 	double etamax                   = 3.0;
 	double etaEgapUpperEdge         = 1.560;
@@ -299,11 +299,6 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index]) > ElecDeltaPhiOutEndmax ) return false;
 	}
 
-	// electrons from conversions
-	if ( fTR->ElNumberOfMissingInnerHits[index] > ElecNMissHitsmax ) return false;
-	if ( fTR->ElConvPartnerTrkDist[index] < ElecConvPartTrackDistmin &&
-	     fTR->ElConvPartnerTrkDCot[index] < ElecConvPartTrackDCotmin ) return false;
-	
 	// electron kinematic cuts + the ECAL gap veto
 	if ( (fabs(eta) > etamax) ||
 	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) ) return false;	
@@ -312,33 +307,172 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	return true;
 }
 
-bool UserAnalysisBase::IsTightEl(int index){
-	if(!IsGoodBasicEl(index)) return false;	
-	if(!fTR->ElIDsimpleWPrelIso[index]) return false; // corresponding to the 90% eff. WP with isolation cuts
+bool UserAnalysisBase::IsGoodElId_WP90(int index){
+	// Converted electrons with WP90 cleaning and ID cuts
 	
-	// combined relative isolation cut values (for tight electrons)
-	double ElecCombRelIsoEBarmax = 0.15;
-	double ElecCombRelIsoEEndmax = 0.1;
-	// electron isolation
-	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
-		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
-		if( combRelIso > ElecCombRelIsoEBarmax ) return false;
+	double pt	= fTR->ElPt[index];
+	double eta	= fTR->ElEta[index];
+	
+	// barrel cut values
+	double ElecHoverEBarmax			= 0.12;
+	double ElecSigmaEtaEtaBarmin	= 0.002;
+	double ElecSigmaEtaEtaBarmax	= 0.01;
+	double ElecEoverPInBarmin		= 0.;
+	double ElecDeltaEtaInBarmax		= 0.007;
+	double ElecDeltaPhiInBarmax		= 0.8;
+	double ElecDeltaPhiOutBarmax	= 999.0;
+	// endcaps cut values
+	double ElecHoverEEndmax			= 0.05;
+	double ElecSigmaEtaEtaEndmax	= 0.03;
+	double ElecEoverPInEndmin		= 0.;
+	double ElecDeltaEtaInEndmax		= 0.009; // not used with 3_6_X data due to misalignement in the EndCaps
+	double ElecDeltaPhiInEndmax		= 0.7;
+	double ElecDeltaPhiOutEndmax	= 999.0;
+	// kinematics + ECAL gap cut values
+	double etamax					= 3.0;
+	double etaEgapUpperEdge			= 1.560;
+	double etaEgapLowerEdge			= 1.442;
+	double pTmin					= 10.;
+	
+	// electron ID
+	if( fabs(eta) < 1.479 ){ // Barrel
+		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
 	}
 	else{ // EndCap
-		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
-		if( combRelIso > ElecCombRelIsoEEndmax ) return false;
+		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
 	}
+	
+	// electron kinematic cuts + the ECAL gap veto
+	if ( (fabs(eta) > etamax) ||
+		( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+	if( pt < pTmin) return false;
 	
 	return true;
 }
 
-bool UserAnalysisBase::IsLooseEl(int index){
-	if(!IsGoodBasicEl(index)) return false;
+bool UserAnalysisBase::IsGoodElId_WP80(int index){
+	// Converted electrons with WP80 cleaning and ID cuts
+	
+	double pt	= fTR->ElPt[index];
+	double eta	= fTR->ElEta[index];
+	
+	// barrel cut values
+	double ElecHoverEBarmax			= 0.04;
+	double ElecSigmaEtaEtaBarmin	= 0.002;
+	double ElecSigmaEtaEtaBarmax	= 0.01;
+	double ElecEoverPInBarmin		= 0.;
+	double ElecDeltaEtaInBarmax		= 0.004;
+	double ElecDeltaPhiInBarmax		= 0.6;
+	double ElecDeltaPhiOutBarmax	= 999.0;
+	// endcaps cut values
+	double ElecHoverEEndmax			= 0.025;
+	double ElecSigmaEtaEtaEndmax	= 0.03;
+	double ElecEoverPInEndmin		= 0.;
+	double ElecDeltaEtaInEndmax		= 0.007; // not used with 3_6_X data due to misalignement in the EndCaps
+	double ElecDeltaPhiInEndmax		= 0.03;
+	double ElecDeltaPhiOutEndmax	= 999.0;
+	// kinematics + ECAL gap cut values
+	double etamax					= 3.0;
+	double etaEgapUpperEdge			= 1.560;
+	double etaEgapLowerEdge			= 1.442;
+	double pTmin					= 5.;
+	
+	// electron ID
+	if( fabs(eta) < 1.479 ){ // Barrel
+		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
+	}
+	else{ // EndCap
+		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
+		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
+		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
+		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
+		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
+	}
+	
+	// electron kinematic cuts + the ECAL gap veto
+	if ( (fabs(eta) > etamax) ||
+		( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
+	if( pt < pTmin) return false;
+	
+	return true;
+}
 
-	// combined relative isolation cut values (relaxed for loose electrons)
-	double ElecCombRelIsoEBarmax	= 1.;
-	double ElecCombRelIsoEEndmax	= 0.6;	
-	// electron isolation
+bool UserAnalysisBase::IsConvertedEl_WP90(int index){
+	// conversions cut values for WP90
+	double ElecConvPartTrackDistmin	= 0.02;
+	double ElecConvPartTrackDCotmin	= 0.02;
+	double ElecNMissHitsmax			= 1.;
+	
+	// return true if electron is conversion-like
+	if ( fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		 return true;
+	if ( fabs(fTR->ElConvPartnerTrkDist[index])	< ElecConvPartTrackDistmin &&
+		fabs(fTR->ElConvPartnerTrkDCot[index])	< ElecConvPartTrackDCotmin ) return true;
+	
+	return false;
+}
+
+bool UserAnalysisBase::IsConvertedEl_WP80(int index){
+	// conversions cut values
+	double ElecConvPartTrackDistmin	= 0.02;
+	double ElecConvPartTrackDCotmin	= 0.02;
+	double ElecNMissHitsmax			= 0.;
+	
+	// return true if electron is conversion-like
+	if (  fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		 return true;
+	if (  fabs(fTR->ElConvPartnerTrkDist[index])	< ElecConvPartTrackDistmin &&
+		fabs(fTR->ElConvPartnerTrkDCot[index])	< ElecConvPartTrackDCotmin ) return true;
+	
+	return false;
+}
+
+bool UserAnalysisBase::IsIsolatedEl_WP90(int index){
+	// combined relative isolation cut values for WP90
+	double ElecCombRelIsoEBarmax = 0.10;
+	double ElecCombRelIsoEEndmax = 0.07;	
+	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
+}
+
+bool UserAnalysisBase::IsIsolatedEl_WP80(int index){
+	// combined relative isolation cut values for WP80
+	double ElecCombRelIsoEBarmax = 0.07;
+	double ElecCombRelIsoEEndmax = 0.06;
+	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
+}
+
+bool UserAnalysisBase::IsIsolatedEl_RA5(int index){
+	// combined relative isolation cut values for WP90
+	double ElecCombRelIsoEBarmax = 0.1;
+	double ElecCombRelIsoEEndmax = 0.1;	
+	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
+}
+
+bool UserAnalysisBase::IsIsolatedEl_LooseIso(int index){
+	// combined relative isolation cut values for loose electrons
+	double ElecCombRelIsoEBarmax = 1.;
+	double ElecCombRelIsoEEndmax = 0.6;
+	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
+}
+
+bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, double ElecCombRelIsoEEndmax){
+	// combined relative electron isolation for given cut values
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
 		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
 		if( combRelIso > ElecCombRelIsoEBarmax ) return false;
@@ -347,13 +481,55 @@ bool UserAnalysisBase::IsLooseEl(int index){
 		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
 		if( combRelIso > ElecCombRelIsoEEndmax ) return false;
 	}
+	return true;
+}
 
+bool UserAnalysisBase::IsTightEl(int index){
+	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP90%)
+	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
+	
+	if(!IsGoodElId_WP80(index)) return false;	// corresponding to the 80% eff. WP without isolation cuts or conversion rejection
+	if(IsConvertedEl_WP80(index)) return false;	
+	if(!IsIsolatedEl_WP90(index)) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsLooseEl(int index){
+	// Definition of "Loose electron" (El.Id cuts: WP90%; El.Convers.Reject.: WP90%; El.RelIso: Loose)
+	if(!IsGoodElId_WP90(index)) return false;		// corresponding to the 90% eff. WP without isolation cuts or conversion rejection
+	if(IsConvertedEl_WP90(index)) return false;	
+	if(!IsIsolatedEl_LooseIso(index)) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsLooseNoTightEl(int index){
 	if(IsLooseEl(index) && !IsTightEl(index)) return true;
 	else return false;
+}
+
+bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
+	// Returns true if the electron is compatible with the primary vertex (false otherwise)
+	
+	double distVxmax = 10.;
+	double d0Vxmax = 0.02;
+	
+	// take error from vertex and from track extrapolation into account
+	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
+	double d0, dd0, dz, ddz;
+	if( ind < 0 || !isGoodBasicPrimaryVertex() ) return false;
+	
+	d0  = fTR->ElD0PV[ind];
+	dd0 = sqrt(fTR->ElD0E[ind]*fTR->ElD0E[ind] + drVxsq);
+	dz  = fTR->ElDzPV[ind];
+	ddz = sqrt(fTR->ElDzE[ind]*fTR->ElDzE[ind] + fTR->PrimVtxzE*fTR->PrimVtxzE);
+	
+	// test that the distance is not too large
+	if( fabs(d0) > distVxmax * dd0 || fabs(dz) > distVxmax * ddz ) return false;
+	
+	// test that the distance is within d0Vxmax cut
+	if( fabs(d0) > d0Vxmax ) return false;
+	
+	return true;
 }
 
 bool UserAnalysisBase::IsGoodBasicPho(int index){
@@ -395,6 +571,36 @@ bool UserAnalysisBase::IsGoodBasicPho(int index){
 }
 
 // Event selections:
+bool UserAnalysisBase::isGoodBasicPrimaryVertex(void){
+	// Basic primary vertex check
+	// (corresponding to TLeptonJEts recommendation)
+	
+	double	dzVxmax			= 24;
+	double	dRVxmax			= 2.;
+	int		PrimVtxNdofmin	= 5;
+	double	chisqVxmax		= 5.0;
+	double	sumPtTkfromVxmin= 30.0;
+	
+	// Check if the reconstructed primary vertex is fake
+	if ( fTR->PrimVtxIsFake )	return false;	
+	// Check that there are tracks at the Primary Vertex
+	if ( fTR->PrimVtxNdof < PrimVtxNdofmin )	return false;
+	// Check the chi2/ndof
+	if( fTR->PrimVtxNChi2 > chisqVxmax || fTR->PrimVtxNChi2 < 0. ) return false;
+	
+	// Check compatibility of vertex with beam spot
+	double xVx = fTR->PrimVtxx - fTR->Beamspotx;
+	double yVx = fTR->PrimVtxy - fTR->Beamspoty;
+	double zVx = fTR->PrimVtxz - fTR->Beamspotz;
+	double rVx = sqrt(xVx*xVx + yVx*yVx);	
+	if (rVx > dRVxmax || fabs(zVx) > dzVxmax) return false;
+	
+	// Check that there is sufficient Et in the tracks
+	if( fTR->PrimVtxPtSum < sumPtTkfromVxmin ) return false;
+	
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodEvent(){
 	// Some cuts on the primary vertex
 	double pvx = fTR->PrimVtxx;
@@ -419,12 +625,49 @@ bool UserAnalysisBase::IsGoodMuEvent(){
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){
-	string ElectronHLTName;
-	int run = fTR->Run;	
-	if (run<=138000)				ElectronHLTName = "HLT_Ele10_LW_L1R"; // needs also matching HLT object pt>15 GeV/c; this includes MC samples where run=1
-	if (run>138000 && run<=141900)	ElectronHLTName = "HLT_Ele15_LW_L1R";
-	if (run>141900)					ElectronHLTName = "HLT_Ele15_SW_L1R";
-	return GetHLTResult(ElectronHLTName);	
+	int run = fTR->Run;
+	// signle-e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
+	bool HLT_Ele10_LW_L1R =				GetHLTResult("HLT_Ele10_LW_L1R");
+	//bool HLT_Ele10_SW_L1R =				GetHLTResult("HLT_Ele10_SW_L1R"); // unused at the moment
+	bool HLT_Ele15_LW_L1R =				GetHLTResult("HLT_Ele15_LW_L1R");
+	//bool HLT_Ele15_SW_L1R =				GetHLTResult("HLT_Ele15_SW_L1R"); // unused at the moment
+	// double-e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
+	bool HLT_DoubleEle5_SW_L1R =		GetHLTResult("HLT_DoubleEle5_SW_L1R");
+	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
+	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	// e triggers with ElID or Iso cuts - (should not be used for FP ratio measurements?)
+	bool HLT_Ele10_LW_EleId_L1R =		GetHLTResult("HLT_Ele10_LW_EleId_L1R");
+	bool HLT_Ele10_SW_EleId_L1R =		GetHLTResult("HLT_Ele10_SW_EleId_L1R");
+	bool HLT_Ele15_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R");
+	bool HLT_Ele15_SW_EleId_L1R =		GetHLTResult("HLT_Ele15_SW_EleId_L1R");
+	bool HLT_Ele17_SW_LooseEleId_L1R =	GetHLTResult("HLT_Ele17_SW_LooseEleId_L1R");
+	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
+	bool HLT_Ele17_SW_EleId_L1R =		GetHLTResult("HLT_Ele17_SW_EleId_L1R");
+	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
+	//bool HLT_Ele17_SW_TightEleIdIsol_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightEleIdIsol_L1R_v1"); // unused at the moment
+
+	if (run==1)						return (HLT_Ele10_LW_L1R);
+	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R						 || HLT_Ele15_LW_L1R					|| HLT_DoubleEle5_SW_L1R);
+	if (run>=138000 && run<=141900)	return (HLT_Ele15_LW_L1R						 || HLT_Ele10_LW_EleId_L1R				|| HLT_DoubleEle5_SW_L1R);
+	if (run>141900)					return (HLT_Ele10_SW_EleId_L1R					 || HLT_Ele15_SW_CaloEleId_L1R			|| HLT_Ele15_SW_EleId_L1R ||
+											HLT_Ele17_SW_LooseEleId_L1R				 || HLT_Ele17_SW_CaloEleId_L1R			|| HLT_Ele17_SW_EleId_L1R || 
+											HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || /*HLT_Ele17_SW_TightEleIdIsol_L1R_v1  ||*/
+											HLT_DoubleEle10_SW_L1R					 || HLT_DoubleEle15_SW_L1R_v1);
+	return false;
+}
+
+bool UserAnalysisBase::IsGoodHadronicEvent(){
+	// HLT and Jet triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
+	bool HLT_Jet30U	= GetHLTResult("HLT_Jet30U");
+	bool HLT_Jet50U	= GetHLTResult("HLT_Jet50U");
+	bool HLT_Jet70U	= GetHLTResult("fTHLT_Jet70U");
+	bool HLT_Jet100U= GetHLTResult("fTHLT_Jet100U");
+	bool HLT_HT100U	= GetHLTResult("fTHLT_HT100U");
+	bool HLT_HT120U	= GetHLTResult("fTHLT_HT120U");
+	bool HLT_HT140U	= GetHLTResult("fTHLT_HT140U");
+	bool HLT_HT150U	= GetHLTResult("fTHLT_HT150U");
+	
+	return (HLT_Jet30U || HLT_Jet50U || HLT_Jet70U || HLT_Jet100U || HLT_HT100U || HLT_HT120U || HLT_HT140U || HLT_HT150U);
 }
 
 vector<int> UserAnalysisBase::ElectronSelection(){
@@ -435,7 +678,22 @@ vector<int> UserAnalysisBase::ElectronSelection(){
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NEles; ++ind){
 		// selection
-		if(!IsGoodBasicEl(ind)) continue;
+		if(!IsLooseEl(ind)) continue;
+		// additional kinematic cuts
+		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
+		if(fTR->ElPt[ind] < 5.) continue;
+		// additional cuts
+		if(fTR->ElDuplicateEl[ind] >= 0) continue;
+		if(!IsElFromPrimaryVx(ind)) continue;
+		
+		// rejection if matched to any muon	
+		for( int im = 0; im < fTR->NMus; ++im ){
+			if( (fTR->MuIsGlobalMuon[im] == 0 || fTR->MuIsTrackerMuon[im] == 0) && ( fTR->MuNTkHits[im] > 10) ) {
+				double deltaR = Util::GetDeltaR(fTR->ElEta[ind], fTR->MuEta[im], fTR->ElPhi[ind], fTR->MuPhi[im]);
+				if(deltaR <= 0.1) continue;
+			}
+		}
+		
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->ElPt[ind]);
 	}
@@ -483,6 +741,7 @@ vector<int> UserAnalysisBase::PhotonSelection(){
 	for(int ind = 0; ind < fTR->NPhotons; ++ind){
 		// selection
 		if(!IsGoodBasicPho(ind)) continue;
+		if(fTR->PhoIsElDupl[ind] >= 0) continue;
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->PhoPt[ind]);
 	}
@@ -533,8 +792,8 @@ bool UserAnalysisBase::SSDiElectronSelection(int &prim, int &sec){
 	vector<int> priElInd;
 	vector<int> secElInd;
 	for(unsigned iel = 0; iel < ElInd.size(); ++iel){
-		if(fTR->ElPt[ElInd[iel]] > 20.)	priElInd.push_back(ElInd[iel]);
-		if(fTR->ElPt[ElInd[iel]] > 15.)	secElInd.push_back(ElInd[iel]);
+		if(fTR->ElPt[ElInd[iel]] > 10.)	priElInd.push_back(ElInd[iel]);
+		if(fTR->ElPt[ElInd[iel]] > 10.)	secElInd.push_back(ElInd[iel]);
 	}
 	
 	unsigned npriel = priElInd.size();
