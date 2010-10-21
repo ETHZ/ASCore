@@ -616,12 +616,25 @@ bool UserAnalysisBase::IsGoodEvent(){
 bool UserAnalysisBase::IsGoodMuEvent(){
 	if(!IsGoodEvent()) return false;
 	bool HLT_Mu9       = GetHLTResult("HLT_Mu9");
+	bool HLT_Mu11      = GetHLTResult("HLT_Mu11");
+	bool HLT_Mu15      = GetHLTResult("HLT_Mu15");
+	bool HLT_DoubleMu0 = GetHLTResult("HLT_DoubleMu0");
 	bool HLT_DoubleMu3 = GetHLTResult("HLT_DoubleMu3");
+
 	bool HLT_Jet30U    = GetHLTResult("HLT_Jet30U");
 	bool HLT_Jet50U    = GetHLTResult("HLT_Jet50U");
 	bool HLT_Jet70U    = GetHLTResult("HLT_Jet70U");
 	bool HLT_Jet100U   = GetHLTResult("HLT_Jet100U");
-	return (HLT_Mu9 || HLT_DoubleMu3 || HLT_Jet30U || HLT_Jet50U || HLT_Jet70U || HLT_Jet100U);
+	return (HLT_Mu9 ||
+	        HLT_Mu11 ||
+	        HLT_Mu15 ||
+	        HLT_DoubleMu0 ||
+	        HLT_DoubleMu3 ||
+	        HLT_Jet30U ||
+	        HLT_Jet50U ||
+	        HLT_Jet70U ||
+	        HLT_Jet100U
+	);
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){
