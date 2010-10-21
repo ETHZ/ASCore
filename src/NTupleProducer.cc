@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.81 2010/10/04 15:44:09 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.82 2010/10/06 18:06:21 stiegerb Exp $
 //
 //
 
@@ -118,7 +118,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
   fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
   fHLTTrigEventTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
-  fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
+//  fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
   fProcessName = fHLTTriggerTag.process();
 
@@ -305,9 +305,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   const EcalChannelStatus * channelStatus = chStatus.product();
 
   // Retrieve HB/HE noise flag
-  edm::Handle<bool> hbHeNoiseFlag;
-  iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
-  fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
+//  edm::Handle<bool> hbHeNoiseFlag;
+//  iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
+//  fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
 
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
@@ -1627,7 +1627,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc     ,"MaxPhotonsExceed/I");
   fEventTree->Branch("MaxGenLepExceed"  ,&fTflagmaxgenleptexc ,"MaxGenLepExceed/I");
   fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
-  fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
+//  fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
 
   // Gen-Leptons
   fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
@@ -2187,7 +2187,7 @@ void NTupleProducer::resetTree(){
   fTbeamspoty   = -999.99;
   fTbeamspotz   = -999.99;
   fTNCaloTowers = -999;
-  fTHBHENoiseFlag = -999;
+//  fTHBHENoiseFlag = -999;
 
   resetDouble(fTvrtxx,     gMaxnvrtx);
   resetDouble(fTvrtxy,     gMaxnvrtx);
