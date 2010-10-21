@@ -107,7 +107,6 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 
 // Object selections:
 bool UserAnalysisBase::IsGoodJ_TDL(int index) {
-
 	if( fTR->JPt[index] < 30. ) 			return false;
 	if( fabs(fTR->JEta[index]) > 2.5 ) 		return false;
 	if (fTR->JEMfrac[index] <= 0.01)  		return false;
@@ -183,9 +182,13 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 }
 
 bool UserAnalysisBase::IsGoodMu_TDL(int index){
-	if(!IsGoodBasicMu(index)) return false;
-	if(fTR->MuPt[index] < 20) return false;
-	if( fabs(fTR->MuEta[index]) > 2.5 ) return false;
+	if(fabs(fTR->MuEta[index])>2.5) return false;
+	if(fTR->MuIsGMPT[index] == 0) return false;
+	if(fTR->MuIsGlobalMuon[index] == 0) return false;
+	if(fTR->MuNChi2[index] > 10) return false;
+	if(fabs(fTR->MuD0BS[index]) > 0.02) return false;
+	if(fTR->MuNTkHits[index] < 11) return false;
+	if(fTR->MuPt[index] < 10) return false;
 	if(fTR->MuRelIso03[index] > 0.15) return false;
 	return true;
 }
@@ -213,7 +216,7 @@ bool UserAnalysisBase::IsGoodEl_TDL(int index){
 	double etaEgapUpperEdge         = 1.5660;
 	double etaEgapLowerEdge         = 1.4442;
 	
-	if( fTR->ElPt[index] < 20. ) 	return false;
+	if( fTR->ElPt[index] < 10. ) 	return false;
 	if( fabs(fTR->ElEta[index]) > 2.5 ) return false;
 	if( fabs(fTR->ElEta[index]) > etaEgapLowerEdge && fabs(fTR->ElEta[index]) < etaEgapUpperEdge) return false;
 	if( fTR->ElD0BS[index] >= 0.04 ) return false;
