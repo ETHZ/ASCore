@@ -28,13 +28,13 @@ LeptJetMultAnalyzer::~LeptJetMultAnalyzer(){
 void LeptJetMultAnalyzer::Loop(){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-	
 	// loop over all ntuple entries
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
-        if ( fCurRun != fTR->Run ) {
-        	fCurRun = fTR->Run;
+//		if(fTR->Run != 143657) return;	
+        	if ( fCurRun != fTR->Run ) {
+        		fCurRun = fTR->Run;
 			fMultiplicityAnalysis->BeginRun(fCurRun);
 			fMassAnalysis        ->BeginRun(fCurRun);
 			fRatioAnalysis       ->BeginRun(fCurRun);
@@ -46,7 +46,7 @@ void LeptJetMultAnalyzer::Loop(){
 }
 
 // Method called before starting the event loop
-void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi){
+void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi, float weight){
 	
 	fMultiplicityAnalysis     ->ReadCuts(setofcuts);
 	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
@@ -55,6 +55,7 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fMultiplicityAnalysis     ->Begin(filename);
 	
 	fMassAnalysis             ->ReadCuts(setofcuts);
+	fMassAnalysis             ->SetWeight(weight);
 	fMassAnalysis             ->SetOutputDir(fOutputDir);
 	fMassAnalysis             ->fVerbose        = fVerbose;
 	fMassAnalysis             ->Begin();
@@ -71,5 +72,5 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 void LeptJetMultAnalyzer::EndJob(){
 	fMassAnalysis         ->End();
 	fMultiplicityAnalysis ->End();
-	fRatioAnalysis        ->End();
+//	fRatioAnalysis        ->End();
 }

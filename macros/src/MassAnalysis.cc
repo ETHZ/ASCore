@@ -16,7 +16,11 @@ void MassAnalysis::Begin(){
 	// Define the output file of histograms
 	const char* filename = "Mass_histos.root";
 	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
-	
+
+	// book tree
+	BookTree();
+
+		
 	fMT2_histos_step = 50;
 	fMT2_histos_number = 6;
 	
@@ -68,15 +72,35 @@ void MassAnalysis::Begin(){
 	fHInvMassDiBjet    = new TH1D("InvMassDiBjet" ,  " Inv Mass of cleaned Di-BJets"   , 50, 0, 1000);
 	fHInvMassdiBHemi   = new TH1D("InvMassdiBHemi",  " Inv Mass of two b jets in same hemosphere", 20, 0, 300);
 
-	fHDPhiJ1vsDPhiJ2   = new TH2D("DPhiJ1vsDPhiJ2",  "DPhiJ1 vs DPhiJ2"         , 100., 0., 3.2, 100., 0., 3.2);
-	fHPFMET            = new TH1D("PFMET"         ,  "PFMET"                    ,      100, 0., 500.);
-	fHJpt              = new TH1D("JPt"           ,  "Jet Pt, all selected jets",      200, 0., 1000);  
-	fHJEta             = new TH1D("JEta"          ,  "Jet Eta, all selected jets",     100, -3,   3);
-	fHBJpt             = new TH1D("JBPt"          ,  "BJet Pt, all selected jets",     200, 0., 1000);
-	fHBJEta            = new TH1D("JBEta"         ,  "BJet Eta, all selected jets",    100, -3,   3);
-	fHVectorSumPt      = new TH1D("VectorSumPt"   ,  "norm of vector sum of Pt of selected objets + MET", 100, 0., 500.);
+	fHDPhiJ1vsDPhiJ2         = new TH2D("DPhiJ1vsDPhiJ2"      ,  "DPhiJ1 vs DPhiJ2"         , 100., 0., 3.2, 100., 0., 3.2);
+	fHDPhiJ1vsDPhiJ2_clean   = new TH2D("DPhiJ1vsDPhiJ2_clean",  "DPhiJ1 vs DPhiJ2"         , 100., 0., 3.2, 100., 0., 3.2);
+	fHMHT                    = new TH1D("MHT"      , "MHT of jets only"                     , 100., 0., 700.);
+	fHMHT_clean              = new TH1D("MHT_clean", "MHT of jets only"                     , 100., 0., 700.);
+	fHPFMET_clean            = new TH1D("PFMET_clean"         ,  "PFMET"                    ,      100, 0., 500.);
+	fHPFMET                  = new TH1D("PFMET"               ,  "PFMET"                    ,      100, 0., 500.);
+	fHJpt_clean              = new TH1D("JPt_clean"           ,  "Jet Pt, all selected jets",      200, 0., 1000);  
+	fHJpt                    = new TH1D("JPt"                 ,  "Jet Pt, all selected jets",      200, 0., 1000);  
+	fHJEta_clean             = new TH1D("JEta_clean"          ,  "Jet Eta, all selected jets",     100, -3,   3);
+	fHJEta                   = new TH1D("JEta"                ,  "Jet Eta, all selected jets",     100, -3,   3);
+	fHBJpt                   = new TH1D("JBPt"                ,  "BJet Pt, all selected jets",     200, 0., 1000);
+	fHBJEta                  = new TH1D("JBEta"               ,  "BJet Eta, all selected jets",    100, -3,   3);
+	fHNJets                  = new TH1D("NJets",                 "NJets",                          15, 0., 15. );
+	fHNJets_clean            = new TH1D("NJets_clean",           "NJets",                          15, 0., 15. );
+	fHLeptConfig             = new TH1D("LeptConfig"      ,      "LeptConfig",                     12, 0., 12. );
+	fHLeptConfig_clean       = new TH1D("LeptConfig_clean",      "LeptConfig",                     12, 0., 12. );
+	fHPseudoJetMT2AxisdPhi   = new TH1D("PseudoJetMT2AxisdPhi",  "PseudoJetMT2AxisdPhi",           100, 0.,3.2 );
+	fHMPT                    = new TH1D("MPT",                   "MPT",                            100.,0.,500 );
+	fHMPT_selected           = new TH1D("MPTselected",           "MPT",                            100.,0.,500 );
+
+	fHVectorSumPt            = new TH1D("VectorSumPt"         ,  "norm of vector sum of Pt of selected objets + MET", 100, 0., 500.);
+	fHVectorSumPt_clean      = new TH1D("VectorSumPt_clean"   ,  "norm of vector sum of Pt of selected objets + MET", 100, 0., 500.);
 	fHVectorSumPtvsDiJetMT2     = new TH2D("VectorSumPtvsDiJetMT2", " VectorSumPT of Dijet MT2 M=0 ", 100, 0., 400., 100, 0., 300);
-	fHVectorSumPtvsPseudoJetMT2 = new TH2D("VectorSumPtvsPseudoJetMT2", " VectorSumPT of Pseudojet MT2 M=0 ", 100, 0., 400., 100, 0., 300);
+	fHPseudoJetMT2vsVectorSumPt = new TH2D("PseudoJetMT2vsVectorSumPt", " VectorSumPT of Pseudojet MT2 M=0 ", 100, 0., 300., 100, 0., 400);
+	fHPseudoJetMT2vsMETsign     = new TH2D("PseudoJetMT2vsMETsign", " METsign of Pseudojet MT2 M=0 ", 100, 0., 300., 60, 0., 20);
+	fHPseudoJetMT2vsMET         = new TH2D("PseudoJetMT2vsMET", "MT2 pseudojet vs MET", 100, 0., 300., 100, 0., 400);
+	fHPseudoJetMT2vsLeadingJEta = new TH2D("PseudoJetMT2vsLeadingJEta", "MT2 pseudojet vs leading JEta", 100, 0., 300., 100, -3., 3.);
+	fHPseudoJetMT2vsAlphaT      = new TH2D("PseudoJetMT2vsAlphaT", "MT2 pseudojet vs AlphaT", 100, 0., 300., 100, 0., 2.);
+	fHPseudoJetMT2vsMHT         = new TH2D("PseudoJetMT2vsMHT", "MT2 pseudojet vs jet MHT", 100, 0., 300., 100, 0., 700.);	
 
 	fHMT_single_e         = new TH1D("MT_single_e "  ,  " transverse mass of el, MET "    ,100, 0, 200);
 	fHMT_single_mu	      = new TH1D("MT_single_mu"  ,  " transverse mass of mu, MET "    ,100, 0, 200);
@@ -113,7 +137,7 @@ void MassAnalysis::Begin(){
 }
 
 void MassAnalysis::Analyze(){	
-	
+
 	// ---------------------------------------------------
 	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
@@ -124,6 +148,9 @@ void MassAnalysis::Analyze(){
 	if(! IsSelectedEvent()){return;}
 	// --------------------------------------------------------------------
 
+	// reset tree variables
+	ResetTree();
+	
 	// Controll Plots
 	ControlPlots();
 
@@ -148,84 +175,168 @@ void MassAnalysis::Analyze(){
 	// Masses for TTbar on GenLevel
 	MassesForTTbar();
 
+	// Fill Tree !! has to be called at the very end !!
+	MassAnalysis::FillTree();
+
 }
 
 // ***********************************************************************************************
-void MassAnalysis::VectorSumPt(){
-	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
+void MassAnalysis::BookTree(){
+	           
+	fMassTree = new TTree("MassAnalysis", "MassAnalysisTree");
+	
+	fMassTree->Branch("Run"                   ,&fTrun,                    "Run/I");         
+	fMassTree->Branch("Event"                 ,&fTevent,                  "Event/I");       
+	fMassTree->Branch("LumiSection"           ,&fTlumisec,                "LumiSection/I"); 
+	fMassTree->Branch("Weight"                ,&fWeight,                  "Weight/F");
+	fMassTree->Branch("NJets"                 ,&fTnjets,                  "NJets/I");       
+	fMassTree->Branch("NElecs"                ,&fTnelecs,                 "NElecs/I");       
+	fMassTree->Branch("NMuons"                ,&fTnmuons,                 "NMuons/I");       
+	fMassTree->Branch("LeptConfig"            ,&fTleptconfig,             "LeptConfig/I");       
+	fMassTree->Branch("IsCleanMultiJetEvent"  ,&fTisCleanMultiJetEvent,   "IsCleanMultiJetEvent/I");       
+	fMassTree->Branch("IsCleanJetEvent"       ,&fTisCleanJetEvent,        "IsCleanJetEvent/I");       
+	fMassTree->Branch("R12R21"                ,&fTr12r21,                 "R12R21/I");
+	fMassTree->Branch("NJetsPt50Eta25"        ,&fTnJetsPt50Eta25,         "NJetsPt50Eta25/I");
+	fMassTree->Branch("PseudoJetMT2"          ,&fTpseudoJetMT2,           "PseudoJetMT2/D");
+	fMassTree->Branch("PseudojetAlphaT"       ,&fTpseudojetAlphaT,        "PseudojetAlphaT/D");
+	fMassTree->Branch("Vectorsumpt"           ,&fTvectorsumpt,            "Vectorsumpt/D");
+	fMassTree->Branch("PFMET"                 ,&fTpfmet,                  "PFMET/D");
+	fMassTree->Branch("PFMETsign"             ,&fTpfmetsign,              "PFMETsign/D");
+	fMassTree->Branch("LeadingJetEta"         ,&fTleadingJetEta,          "LeadingJetEta/D");
+	fMassTree->Branch("DPhiJ1Met"             ,&fTdPhiJ1MET,              "DPhiJ1Met/D");
+	fMassTree->Branch("DPhiJ2Met"             ,&fTdPhiJ2MET,              "DPhiJ2Met/D");
+	fMassTree->Branch("PseudoJetMT2AxisdPhi"  ,&fTPseudoJetMT2AxisdPhi,   "PseudoJetMT2AxisdPhi/D");
+	fMassTree->Branch("R1221min"              ,&fTr1221min,               "R1221min/D");
+	fMassTree->Branch("MPT_sel"               ,&fTmpt_sel,                "MPT_sel/D");
+	fMassTree->Branch("MPT"                   ,&fTmpt,                    "MPT/D");
+	fMassTree->Branch("MHT"                   ,&fTmHT,                    "MHT/D");
+	fMassTree->Branch("DPhiMhtMpt"            ,&fTdPhiMhtMpt,             "DPhiMhtMpt/D");
+}
 
-	double px=0;
-	double py=0;
-	for(int i=0; i<fJets.size(); ++i){
-		px+=fTR->JPx[fJets[i]];
-		py+=fTR->JPy[fJets[i]];
-	}
-	for(int i=0; i<fMuons.size(); ++i){
-		px+=fTR->MuPx[fMuons[i]];
-		py+=fTR->MuPy[fMuons[i]];
-	}
-	for(int i=0; i<fElecs.size(); ++i){
-		px+=fTR->ElPx[fElecs[i]];
-		py+=fTR->ElPy[fElecs[i]];
-	}
-	px+=fTR->PFMETpx;
-	py+=fTR->PFMETpy;
+void MassAnalysis::ResetTree(){
+	fTrun                  =-1;
+	fTevent                =-1;
+	fTlumisec              =-1;
+	fTweight               =-99999.99;
+	fTnjets                =-1;
+	fTnelecs               =-1;
+	fTnmuons               =-1;
+	fTleptconfig           =-1;
+	fTisCleanMultiJetEvent =-1;
+	fTisCleanJetEvent      =-1;
+	fTr12r21               =-1;
+	fTnJetsPt50Eta25       =-1;
+	fTpseudoJetMT2         =-99999.99;
+	fTpseudojetAlphaT      =-99999.99;
+	fTvectorsumpt          =-99999.99;
+	fTmHT                  =-99999.99;
+	fTmpt_sel              =-99999.99;
+        fTmpt                  =-99999.99;	
+	fTpfmet                =-99999.99;
+	fTpfmetsign            =-99999.99;
+	fTleadingJetEta        =-99999.99;
+	fTdPhiJ1MET            =-99999.99;
+	fTdPhiJ2MET            =-99999.99;
+	fTPseudoJetMT2AxisdPhi =-99999.99;
+	fTr1221min             =-99999.99;
+	fTdPhiMhtMpt           =-99999.99;
 
-	double VectorSumPt = sqrt(px*px + py*py);
-	fHVectorSumPt -> Fill(VectorSumPt);
-	fVectorSumPt = VectorSumPt;
+}
 
+void MassAnalysis::FillTree(){
+	
+	fTrun                  = fTR->Run;
+	fTevent                = fTR->Event;
+	fTlumisec              = fTR->LumiSection;
+	fTweight               = fWeight;
+
+
+	fTnjets                = fJets.size();
+	fTnelecs               = fElecs.size();
+	fTnmuons               = fMuons.size();
+	fTleptconfig           = (int) fLeptConfig;
+	fTisCleanMultiJetEvent = (int) fIsCleanMultiJetEvent;
+	fTisCleanJetEvent      = (int) fIsCleanJetEvent;
+	fTr12r21               = (int) fR12R21;
+	fTnJetsPt50Eta25       = fNJetsPt50Eta25;
+	fTvectorsumpt          = fVectorSumPt;
+	fTmHT                  = fMHT;
+	fTpfmet                = fTR->PFMET;
+	fTpfmetsign            = (fTR->PFMET)/sqrt(fTR->SumEt);
+
+	if(fJets.size()>1 && fCut_PFMET_min > 0) fTr1221min  = (fR12 <= fR21) ? fR12 : fR21;
+	if(fJets.size()>0) fTleadingJetEta   = fTR-> JEta[fJets[0]];
+	if(fJets.size()>0 && fCut_PFMET_min > 0) fTdPhiJ1MET = fDeltaPhi1; 
+	if(fJets.size()>0 && fCut_PFMET_min > 0) fTdPhiJ2MET = fDeltaPhi2; 
+
+	// Tracks
+	TVector3 tracks(0.,0.,0.);
+	TVector3 track(0.,0.,0.);
+	for(int i=0; i< fTR->NTracks; ++i){
+		track.SetPtEtaPhi(fabs(fTR->TrkPt[i]), fTR->TrkEta[i], fTR->TrkPhi[i]);
+		tracks += track;
+	}	
+	fTmpt_sel= tracks.Pt();
+	fTmpt    = sqrt((fTR->TrkPtSumx)*(fTR->TrkPtSumx) + (fTR->TrkPtSumy)*(fTR->TrkPtSumy));
+	
+	double MHTphi=fMHTphi;
+	double MPTphi=tracks.Phi();
+	fTdPhiMhtMpt = fabs(Util::DeltaPhi(MHTphi, MPTphi));
+
+
+
+
+	// remaining variables are filles elsewhere
+	fMassTree           ->Fill();
 }
 
 // ************************************************************************************************
 void MassAnalysis::ControlPlots(){
-	// reset variables
-	fDeltaPhi1 = -999.99;
-	fDeltaPhi2 = -999.99;
-	fR12       = -999.99;
-	fR21       = -999.99;
-	fR12R21    =  false;
 
+	// NJets
+	fHNJets -> Fill(fJets.size());
+	if(fIsCleanMultiJetEvent){
+		fHNJets_clean -> Fill(fJets.size());
+	}
 
-	// Calculate and Plot the VectorSumPt
-	VectorSumPt();
+	// LeptConfig
+	fHLeptConfig ->Fill(fLeptConfig);
+	if(fIsCleanMultiJetEvent){
+		 fHLeptConfig_clean -> Fill(fLeptConfig);
+	}
 
-	// R12 and R21
-	bool R12R21(false);
-	if(fJets.size()>1 && fTR->PFMET > fCut_PFMET_min){
-		double pi = 3.14159265;
-		double phi_j1  = fTR->JPhi[fJets[0]];
-		double phi_j2  = fTR->JPhi[fJets[1]];
-		double phi_met = fTR->PFMETphi;
-
-		double d_phi1 = fabs(Util::DeltaPhi(phi_j1, phi_met));
-		double d_phi2 = fabs(Util::DeltaPhi(phi_j2, phi_met));
 	
-		fDeltaPhi1 = d_phi1;
-		fDeltaPhi2 = d_phi2;
+	// VSPT
+	fHVectorSumPt -> Fill(fVectorSumPt);
+	if(fIsCleanMultiJetEvent){
+		fHVectorSumPt_clean -> Fill(fVectorSumPt); 	
+	}
 
-		double R12 = sqrt( d_phi1*d_phi1 + (pi-d_phi2)*(pi-d_phi2) );
-		double R21 = sqrt( d_phi2*d_phi2 + (pi-d_phi1)*(pi-d_phi1) );
-	
-		fR12 = R12;
-		fR21 = R21;
-
-		fHDPhiJ1vsDPhiJ2 -> Fill (d_phi1, d_phi2);
-
-		if(R12 > 0.5 && R21 > 0.5){R12R21 = true;}
-	}	
-	fR12R21 = R12R21;
-
-	// plots for cleaned events
-	if(! IsCleanJetEvent()) return;	
-	
+	// delta Phi(j,MET)
+	fHDPhiJ1vsDPhiJ2 -> Fill(fDeltaPhi1, fDeltaPhi2); 	
+	if(fIsCleanMultiJetEvent){
+		fHDPhiJ1vsDPhiJ2_clean -> Fill(fDeltaPhi1, fDeltaPhi2); 	
+	}
 	// MET spectrum
 	fHPFMET -> Fill(fTR->PFMET);
-	
+	if(fIsCleanMultiJetEvent){
+		fHPFMET_clean -> Fill(fTR->PFMET); 
+	}
+
+	// MHT
+	fHMHT -> Fill(fMHT);
+	if(fIsCleanMultiJetEvent){
+		fHMHT_clean -> Fill(fMHT);
+	}
+
 	// Jet Pt spectrum
 	for(int i=0; i<fJets.size(); ++i){
 		fHJpt  -> Fill(fTR->JPt[fJets[i]]);
 		fHJEta -> Fill(fTR->JEta[fJets[i]]);
+		if(fIsCleanMultiJetEvent){
+			fHJpt_clean  -> Fill(fTR->JPt[fJets[i]]); 
+			fHJEta_clean -> Fill(fTR->JEta[fJets[i]]);
+		}
 	}
 
 	// bjets PT spectrum
@@ -233,6 +344,20 @@ void MassAnalysis::ControlPlots(){
 		fHBJpt  -> Fill(fTR->JPt[fBJets[i]]);
 		fHBJEta -> Fill(fTR->JEta[fBJets[i]]);
 	}
+
+
+	// MPT 
+	fHMPT -> Fill(sqrt((fTR->TrkPtSumx)*(fTR->TrkPtSumx) + (fTR->TrkPtSumy)*(fTR->TrkPtSumy)) );
+	TVector3 tracks(0.,0.,0.);
+	TVector3 track(0.,0.,0.);
+	for(int i=0; i< fTR->NTracks; ++i){
+		track.SetPtEtaPhi(fabs(fTR->TrkPt[i]), fTR->TrkEta[i], fTR->TrkPhi[i]);
+		tracks += track;
+	}
+	fHMPT_selected ->Fill(tracks.Pt());
+		
+
+
 }
 
 // *************************************************************************************************
@@ -241,7 +366,28 @@ void MassAnalysis::PseudoJetMasses(){
 
 	// ---------------------------------------------
 	// Cleaning
-	if(! IsCleanJetEvent()) return;
+	if(fIsCleanMultiJetEvent == false) return;
+
+
+	// ----------------------------------------------
+	// AlphaT 
+	double alphaT=-999.99;
+	if( fLeptConfig==null ){
+		std::vector<TLorentzVector> jets;
+		for(int i=0; i<fJets.size(); ++i){
+			TLorentzVector v;
+	 		v.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]], fTR->JPz[fJets[i]], fTR->JE[fJets[i]]);
+	 		jets.push_back(v);
+	 	}
+	 	alphaT= GetAlphaT(jets);
+	 	fHAlpahT_PseudoJet->Fill(alphaT);
+	}
+	// fill tree variable
+	fTpseudojetAlphaT = alphaT;
+
+
+
+
 
 	// ---------------------------------------------
 	// MT2
@@ -299,16 +445,32 @@ void MassAnalysis::PseudoJetMasses(){
 		if(fLeptConfig!= null) {fHMT2_PseudoJetWithLeptons[i] -> Fill(MT2);}
 		if(fLeptConfig== null) {fHMT2_PseudoJetNoLeptons[i]   -> Fill(MT2);}
 		if(fBJets.size()>0)    {fHMT2_PseudoJetWithB[i]       -> Fill(MT2);}
-	       	if(i==0)               {fHVectorSumPtvsPseudoJetMT2   -> Fill(fVectorSumPt, MT2);}
+	       	if(i==0)               {
+			fHPseudoJetMT2vsVectorSumPt   -> Fill(MT2, fVectorSumPt);
+			fHPseudoJetMT2vsMETsign       -> Fill(MT2, (fTR->PFMET)/sqrt(fTR->SumEt));
+			fHPseudoJetMT2vsMET           -> Fill(MT2, fTR->PFMET);
+			fHPseudoJetMT2vsAlphaT        -> Fill(MT2, alphaT);
+			fHPseudoJetMT2vsLeadingJEta   -> Fill(MT2, fTR->JEta[fJets[0]]);
+			fHPseudoJetMT2vsMHT           -> Fill(MT2, fMHT);
+		}
 		if(i==0 && MT2 > 240){
 			interesting_Run.push_back(fTR->Run);
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
 			interesting_Type.push_back("pseudojetMT2");
 			if(fTR->Run == 143657 && fTR->LumiSection == 1628 && fTR->Event==1564073782) PrintEvent();
-		} 	
+		}
+		if(i==0){
+		// fill tree variable
+		fTpseudoJetMT2 = MT2;		
+		}	
 	}
-
+	// get the delta_phi between the two axis
+	TVector3 vec1, vec2;
+	vec1.SetPtEtaPhi(pseudojet1.Pt(),pseudojet1.Eta(),pseudojet1.Phi());
+	vec2.SetPtEtaPhi(pseudojet2.Pt(),pseudojet2.Eta(),pseudojet2.Phi());
+	fTPseudoJetMT2AxisdPhi = vec1.Angle(vec2);
+	fHPseudoJetMT2AxisdPhi -> Fill(fTPseudoJetMT2AxisdPhi);	
 
 	// ---------------------------------------------
 	// MCT pseudojets
@@ -329,18 +491,7 @@ void MassAnalysis::PseudoJetMasses(){
 
 
 
-	// ----------------------------------------------
-	// AlphaT 
-	if( fLeptConfig==null && fTR->JPt[fJets[0]] > 150 ){
-		std::vector<TLorentzVector> jets;
-		for(int i=0; i<fJets.size(); ++i){
-			TLorentzVector v;
-	 		v.SetPxPyPzE(fTR->JPx[fJets[i]],fTR->JPy[fJets[i]], fTR->JPz[fJets[i]], fTR->JE[fJets[i]]);
-	 		jets.push_back(v);
-	 	}
-	 	double alphaT= GetAlphaT(jets);
-	 	fHAlpahT_PseudoJet->Fill(alphaT);
-	}
+
 
 
 
@@ -352,7 +503,7 @@ void MassAnalysis::DiBJetMasses(){
 	
 	// ---------------------------------------------
 	// Cleaning
-	if(! IsCleanJetEvent()) return;
+	if(fIsCleanJetEvent == false) return;
 
 	TLorentzVector p1, p2;
 	p1.SetPxPyPzE(fTR->JPx[fBJets[0]], fTR->JPy[fBJets[0]], fTR->JPz[fBJets[0]], fTR->JE[fBJets[0]]);
@@ -444,7 +595,7 @@ void MassAnalysis::MultiBMasses(){
 // ***************************************************************************************************
 void MassAnalysis::DiJetMasses(){
 	if( fJets.size()!=2 ) return;    // only look at dijets
-	if(! IsCleanJetEvent()) return;  // reject events that fails the cleaning requirements
+	if( fIsCleanJetEvent == false) return;  // reject events that fails the cleaning requirements
 	
 	// -------------------------------------------
 	// lepton veto
@@ -860,19 +1011,10 @@ vector<TLorentzVector> MassAnalysis::GetLepton4Momenta(){
 
 
 // ***************************************************************************************************
-bool MassAnalysis::IsCleanJetEvent(){
- 	if(fVectorSumPt > 80) return false;
-	// count the number of jets > 20 GeV regardless of other acceptence and ID cuts
-	int jcounter =0;
-	for(int i=0; i<fTR->NJets; ++i){
-		if(fTR->JPt[i]>20) jcounter++; 
-	}
-//    	if(jcounter != fJets.size()) return false;
-
-	if(fR12R21 == false) return false;
-
-	return true;
+void MassAnalysis::SetWeight(float weight){
+	fWeight = weight;
 }
+
 
 // ***************************************************************************************************
 void MassAnalysis::PrintEvent(){
@@ -912,7 +1054,10 @@ void MassAnalysis::End(){
 
 	
 	fHistFile->cd();	
-	
+
+	// write tree
+	fMassTree->Write();
+		
 	// fill OS ll minus emu MT2 histo
 	for(int i=0; i<fMT2_histos_number; ++i){
 		for(int bin=1; bin<= fHMT2_OSee[0]->GetNbinsX(); ++bin){
@@ -991,14 +1136,38 @@ void MassAnalysis::End(){
 	fHInvMassdiBHemi         ->Write();
 
 	fHDPhiJ1vsDPhiJ2         ->Write();
+	fHDPhiJ1vsDPhiJ2_clean   ->Write();
+
+	fHMPT                    ->Write();
+	fHMPT_selected           ->Write();
+	fHMHT                    ->Write();
+	fHMHT_clean              ->Write();
 	fHPFMET                  ->Write();	
+	fHPFMET_clean            ->Write();	
+	fHJpt_clean              ->Write();  
 	fHJpt                    ->Write();  
+	fHJEta_clean             ->Write();
 	fHJEta                   ->Write();
 	fHBJpt                   ->Write();
 	fHBJEta                  ->Write();
+	fHNJets                  ->Write();
+	fHNJets_clean            ->Write();
+	fHLeptConfig             ->Write();
+	fHLeptConfig_clean       ->Write();
+	fHVectorSumPt_clean      ->Write();
 	fHVectorSumPt            ->Write();
+	fHPseudoJetMT2AxisdPhi   ->Write();
+
 	fHVectorSumPtvsDiJetMT2  ->Write();
-	fHVectorSumPtvsPseudoJetMT2  ->Write();
+
+
+	fHPseudoJetMT2vsVectorSumPt  ->Write();
+	fHPseudoJetMT2vsMETsign      ->Write(); 
+	fHPseudoJetMT2vsMET          ->Write(); 
+	fHPseudoJetMT2vsAlphaT       ->Write(); 
+	fHPseudoJetMT2vsLeadingJEta  ->Write();
+       	fHPseudoJetMT2vsMHT	     ->Write();
+
 
 	fHMT_single_e            ->Write();
 	fHMT_single_mu           ->Write(); 

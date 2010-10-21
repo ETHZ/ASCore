@@ -9,6 +9,9 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_PFMET_min                      = 0;
 	fCut_HT_min                         = 0;
 	fCut_JPt_hardest_min                = 0;
+	fCut_3JetsAbove50                   = 0;
+	fCut_VSPT                           = 9999.99;
+	fCut_R12R21                         = 0;
 	fCut_DiLeptInvMass_min              = 0;
 	fCut_DiLeptInvMass_max              = 9999.99;
 	fCut_DiLeptOSSFInvMass_lowercut     = 9999.99;
@@ -16,7 +19,8 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
-	
+
+
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
 }
@@ -58,11 +62,13 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		if(! IsGoodJ_TDL(ij) ) continue;
 		bool JGood(true);
 		for(int i=0; i<fMuons.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[fMuons[i]], fTR->JPhi[ij], fTR->MuPhi[fMuons[i]]);
+			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[fMuons[i]], 
+					fTR->JPhi[ij], fTR->MuPhi[fMuons[i]]);
 			if(deltaR < 0.4)   JGood=false;
 		}
 		for(int i=0; i<fElecs.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[fElecs[i]], fTR->JPhi[ij], fTR->ElPhi[fElecs[i]]);
+			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[fElecs[i]], 
+					fTR->JPhi[ij], fTR->ElPhi[fElecs[i]]);
 			if(deltaR < 0.4)   JGood=false;
 		}
 		if(JGood==false) continue;
@@ -105,7 +111,10 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 			if(charge1*charge2==1){fLeptConfig=SS_emu;}
 			else{fLeptConfig=OS_emu;}
 		}
+	}else if(fElecs.size() + fMuons.size() >2){
+		fLeptConfig=multilept;
 	}
+
 }
 
 
@@ -124,40 +133,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	// MET
 	if(fTR->PFMET < fCut_PFMET_min){return false;}
 	
-	// HT
-	double HT=0;
-	for(int j=0; j<fJets.size(); ++j){
-		HT += fTR->JPt[fJets[j]];
-	}
-	if(HT<fCut_HT_min){return false;}
-	
-	// hardest jet
-	double hardest_jet=0;
-	for(int j=0; j<fJets.size(); ++j){
-		if(fTR->JPt[fJets[j]] > hardest_jet){
-			hardest_jet = fTR->JPt[fJets[j]];
-		}
-	}
-	if(hardest_jet<fCut_JPt_hardest_min){return false;}
-	
-	// DiLeptonInvMass_min DiLeptonInvMass_max
-	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee || fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ||
-	   fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
-		double invmass = GetDiLeptInvMass();
-		
-		if(invmass < fCut_DiLeptInvMass_min) {return false;}
-		if(invmass > fCut_DiLeptInvMass_max) {return false;}		 
-				 
-	}
-	
-	// Zmass cut
-	// DiLeptonInvMass_min
-	if( fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
-		double invmass = GetDiLeptInvMass();
-		
-	//	if( (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
-	}
-	
 	// HLT triggers
 	if(fRequiredHLT.size() !=0 ){
 		bool HLT_fire(false);
@@ -175,7 +150,130 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 			} 
 		}
 	}
+
+	// HT
+	double HT=0;
+	for(int j=0; j<fJets.size(); ++j){
+		if(fTR->JPt[fJets[j]] > 50 && fabs(fTR->JEta[fJets[j]])<2.5){
+			HT += fTR->JPt[fJets[j]];
+		}
+	}
+	if(HT<fCut_HT_min){return false;}
+
+
+	// hardest jet
+	double hardest_jet=0;
+	for(int j=0; j<fJets.size(); ++j){
+		if(fTR->JPt[fJets[j]] > hardest_jet){
+			hardest_jet = fTR->JPt[fJets[j]];
+		}
+	}
+	if(hardest_jet<fCut_JPt_hardest_min){return false;}
+
+
+	// DiLeptonInvMass_min DiLeptonInvMass_max
+	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee || fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ||
+	   fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
+		double invmass = GetDiLeptInvMass();
+		
+		if(invmass < fCut_DiLeptInvMass_min) {return false;}
+		if(invmass > fCut_DiLeptInvMass_max) {return false;}		 
+				 
+	}
 	
+	// Zmass cut
+	// DiLeptonInvMass_min
+	if( fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
+		double invmass = GetDiLeptInvMass();
+		
+	//	if( (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// cuts for clean multijet events
+	// if specified cuts are satisfied: fIsCleanMultiJetEvent == true  
+	
+	// 3JetsAbove50
+	int jcount=0;
+	for(int j=0; j<fJets.size(); ++j){
+		if(fTR->JPt[fJets[j]] > 50 && fabs(fTR->JEta[fJets[j]])<2.5){
+			jcount++;
+		}
+	}
+	fNJetsPt50Eta25 = jcount; 
+		
+	// R12 and R21
+	fR12R21    =  false;
+	fDeltaPhi1 = -999.99;
+	fDeltaPhi2 = -999.99;
+	fR12       = -999.99;
+	fR21       = -999.99;
+
+	if(fJets.size()>1 && fCut_PFMET_min > 0){
+		double pi = 3.14159265;
+		double phi_j1  = fTR->JPhi[fJets[0]];
+		double phi_j2  = fTR->JPhi[fJets[1]];
+		double phi_met = fTR->PFMETphi;
+
+		double d_phi1 = fabs(Util::DeltaPhi(phi_j1, phi_met));
+		double d_phi2 = fabs(Util::DeltaPhi(phi_j2, phi_met));
+	
+		fDeltaPhi1 = d_phi1;
+		fDeltaPhi2 = d_phi2;
+
+		fR12 = sqrt( d_phi1*d_phi1 + (pi-d_phi2)*(pi-d_phi2) );
+		fR21 = sqrt( d_phi2*d_phi2 + (pi-d_phi1)*(pi-d_phi1) );
+	
+		if(fR12 > 0.5 && fR21 > 0.5){fR12R21 = true;}
+	} else {
+		fR12R21= true;
+	}
+
+	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
+	double px=0;
+	double py=0;
+	for(int i=0; i<fJets.size(); ++i){
+		px+=fTR->JPx[fJets[i]];
+		py+=fTR->JPy[fJets[i]];
+	}
+	fMHT = sqrt(px*px + py*py); // MHT from all selected jets
+	TVector3 MHTvec(0.,0.,0.);
+	MHTvec.SetXYZ(px, py, 0.);
+	fMHTphi=MHTvec.Phi();
+
+	for(int i=0; i<fMuons.size(); ++i){
+		px+=fTR->MuPx[fMuons[i]];
+		py+=fTR->MuPy[fMuons[i]];
+	}
+	for(int i=0; i<fElecs.size(); ++i){
+		px+=fTR->ElPx[fElecs[i]];
+		py+=fTR->ElPy[fElecs[i]];
+	}
+	px+=fTR->PFMETpx;
+	py+=fTR->PFMETpy;
+
+	fVectorSumPt = sqrt(px*px + py*py);
+	
+	
+	// decide if clean event
+	fIsCleanMultiJetEvent=true;
+	fIsCleanJetEvent=true;
+
+	if(fCut_3JetsAbove50 ==1. && fNJetsPt50Eta25 <3){
+		fIsCleanMultiJetEvent = false;
+	}
+	if(fVectorSumPt > fCut_VSPT ){
+		fIsCleanMultiJetEvent = false;
+		fIsCleanJetEvent      = false;
+	}  		
+	if(fCut_R12R21 ==1. && fR12R21 ==false){
+		fIsCleanMultiJetEvent = false;
+		fIsCleanJetEvent      = false;
+	}
+	
+	// ------------------------------------------------------------------------------------------	
+
 	return true;	
 }
 
@@ -246,7 +344,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_JPt_hardest_min      = float(ParValue); ok = true;			
 		} else if( !strcmp(ParName, "DiLeptInvMass_min") ){
 			fCut_DiLeptInvMass_min    = float(ParValue); ok = true;
-		} 	else if( !strcmp(ParName, "DiLeptInvMass_max") ){
+		} else if( !strcmp(ParName, "DiLeptInvMass_max") ){
 			fCut_DiLeptInvMass_max    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "DiLeptOSSFInvMass_lowercut") ){
 			fCut_DiLeptOSSFInvMass_lowercut    = float(ParValue); ok = true;
@@ -254,7 +352,13 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_DiLeptOSSFInvMass_uppercut    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "PtHat_max")){
 			fCut_PtHat_max                     = float(ParValue); ok = true;
-		}		
+		} else if( !strcmp(ParName, "VSPT_max")){
+			fCut_VSPT                          = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "R12R21")){
+			fCut_R12R21                        = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "3JetsAbove50")){
+			fCut_3JetsAbove50                  = float(ParValue); ok = true;
+		}  		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
 	}	
@@ -263,6 +367,9 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  PFMET_min                   " << fCut_PFMET_min                  <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
+		cout << "  VSPT_max                    " << fCut_VSPT                       <<endl;
+		cout << "  R12R21                      " << fCut_R12R21                     <<endl; 
+		cout << "  3JetsAbove50                " << fCut_3JetsAbove50               <<endl;
 		cout << "  DiLeptInvMass_min           " << fCut_DiLeptInvMass_min          <<endl;
 		cout << "  DiLeptInvMass_max           " << fCut_DiLeptInvMass_max          <<endl;		
 		cout << "  DiLeptOSSFInvMass_lowercut  " << fCut_DiLeptOSSFInvMass_lowercut <<endl;

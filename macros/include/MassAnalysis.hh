@@ -28,6 +28,7 @@ public:
 	void Begin();
 	void Analyze();
 	void End();
+	void SetWeight(float weight);
 
 
 private:
@@ -40,8 +41,11 @@ private:
 	void OSDiLeptonMasses();
 	void MassesForTTbar();
 	void ControlPlots();
-	void VectorSumPt();
 	void PrintEvent();
+
+	void BookTree();
+	void FillTree();
+	void ResetTree(); 
 
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
@@ -54,7 +58,6 @@ private:
 	double GetMT2perp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM, double m_inv);
 	TVector3 GetMomPerp(TLorentzVector p, TLorentzVector P_UTM);
 	vector<TLorentzVector> GetLepton4Momenta();
-	bool IsCleanJetEvent();
 
 	Davismt2 *fMT2;
 	TMctLib  *fMCT;
@@ -63,12 +66,8 @@ private:
 	// data members
 	int fMT2_histos_step;
   	int fMT2_histos_number;
-	float fVectorSumPt;
-	float fDeltaPhi1;
-	float fDeltaPhi2;
-	float fR12;
-	float fR21;
-	bool fR12R21;
+	float fWeight;
+
 	vector<int> interesting_Run;
 	vector<int> interesting_Lumi;
 	vector<int> interesting_Event;
@@ -76,6 +75,39 @@ private:
 
 	// file for histograms:
 	TFile* fHistFile;
+
+	// Tree
+	TTree* fMassTree;
+
+	int    fTrun;
+	int    fTevent;
+	int    fTlumisec;
+	float  fTweight;
+		
+	int    fTnjets;
+	int    fTnelecs;
+	int    fTnmuons;
+	int    fTleptconfig;
+	
+	int    fTisCleanMultiJetEvent;
+	int    fTisCleanJetEvent;
+	int    fTnJetsPt50Eta25;
+	int    fTr12r21;
+	
+	double fTpseudoJetMT2;
+	double fTpseudojetAlphaT;
+	double fTleadingJetEta;
+	double fTvectorsumpt;
+	double fTpfmet;
+	double fTpfmetsign;
+	double fTmHT;
+	double fTmpt_sel;
+	double fTmpt;
+	double fTdPhiJ1MET;
+	double fTdPhiJ2MET;
+	double fTPseudoJetMT2AxisdPhi;
+	double fTr1221min;
+	double fTdPhiMhtMpt;
 
 	// histos
 	TH1D* fHMT2_SSll[10];
@@ -100,7 +132,7 @@ private:
 	      
 	TH1D* fHAlpahT_DiJet;      
 	TH1D* fHAlpahT_PseudoJet; 
-	    
+	   
 	TH1D* fHMCT_PseudoJet;
 	TH1D* fHMCT_PseudoJetWithLeptons;
 	TH1D* fHMCT_PseudoJetNoLeptons;
@@ -144,15 +176,35 @@ private:
 	TH1D* fHInvMassDiBjet;
 
 	TH2D* fHDPhiJ1vsDPhiJ2;
-	TH1D* fHPlotPedja;
+	TH2D* fHDPhiJ1vsDPhiJ2_clean;
+	TH1D* fHMHT;
+	TH1D* fHMHT_clean;
 	TH1D* fHPFMET;
-	TH1D* fHJpt;   
+	TH1D* fHPFMET_clean;
 	TH1D* fHJEta;  
+	TH1D* fHJEta_clean;  
+	TH1D* fHJpt;   
+	TH1D* fHJpt_clean;  	
 	TH1D* fHBJpt; 
 	TH1D* fHBJEta;
+	TH1D* fHNJets;
+	TH1D* fHNJets_clean;
        	TH1D* fHVectorSumPt;	
+	TH1D* fHVectorSumPt_clean;
+	TH1D* fHLeptConfig;
+	TH1D* fHLeptConfig_clean;		
+	TH1D* fHPseudoJetMT2AxisdPhi;
+	TH1D* fHMPT;
+	TH1D* fHMPT_selected;
+
 	TH2D* fHVectorSumPtvsDiJetMT2;
-	TH2D* fHVectorSumPtvsPseudoJetMT2;
+
+	TH2D* fHPseudoJetMT2vsVectorSumPt;
+	TH2D* fHPseudoJetMT2vsMETsign;
+	TH2D* fHPseudoJetMT2vsMET;
+	TH2D* fHPseudoJetMT2vsAlphaT;
+	TH2D* fHPseudoJetMT2vsLeadingJEta;
+	TH2D* fHPseudoJetMT2vsMHT;
 
 	TH1D* fHMT_single_e;
 	TH1D* fHMT_single_mu;

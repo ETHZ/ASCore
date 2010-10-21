@@ -6,6 +6,9 @@ SetName                                    default
 # ------------- Cuts ----------------------------#
 PFMET_min                                        0
 HT_min                                           0
+VSPT_max                                   9999.99
+R12R21                                           0
+3JetsAbove50                                     0
 JPt_hardest_min                                  0
 DiLeptInvMass_min                               20
 DiLeptInvMass_max                          9999.99

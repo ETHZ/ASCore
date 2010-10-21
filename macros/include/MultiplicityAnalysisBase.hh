@@ -28,7 +28,7 @@ public:
 	vector<int> fBJets;
 	
 	enum LeptConfig {
-	 	e, mu, OS_emu, OS_ee, OS_mumu, SS_emu, SS_ee, SS_mumu, null
+	 	e, mu, OS_emu, OS_ee, OS_mumu, SS_emu, SS_ee, SS_mumu, multilept, null
   	};
 	LeptConfig fLeptConfig;
 	
@@ -38,6 +38,9 @@ public:
 	float fCut_PFMET_min;
 	float fCut_HT_min;
 	float fCut_JPt_hardest_min;
+	float fCut_VSPT;
+	float fCut_R12R21;
+	float fCut_3JetsAbove50;
 	float fCut_DiLeptInvMass_min;
 	float fCut_DiLeptInvMass_max;
 	float fCut_DiLeptOSSFInvMass_lowercut;
@@ -45,7 +48,19 @@ public:
 	float fCut_PtHat_max;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
-	
+
+	// members
+	float fVectorSumPt;
+	float fDeltaPhi1;
+	float fDeltaPhi2;
+	float fR12;
+	float fR21;
+	bool  fR12R21;
+	bool  fIsCleanMultiJetEvent;
+	bool  fIsCleanJetEvent;
+	int   fNJetsPt50Eta25;
+	float fMHT;
+	float fMHTphi;	
 
 private:
 	void FindLeptonConfig();
