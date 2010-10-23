@@ -25,6 +25,7 @@ SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAn
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc src/helper/MetaTreeClassBase.C \
                  src/MuonAnalysis.cc src/MuonAnalyzer.cc src/MuonPlotter.cc \
                  src/helper/FPRatios.cc \
+                 src/SSDLAnalyzer.cc src/SSDLAnalysis.cc
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
@@ -32,7 +33,7 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend PhysQC
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer RunMuonAnalyzer MakeMuonPlots
+all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer RunMuonAnalyzer MakeMuonPlots RunSSDLAnalyzer
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
@@ -55,6 +56,8 @@ MakeMuonPlots: src/exe/MakeMuonPlots.C $(OBJS)
 RunMuonAnalyzer: src/exe/RunMuonAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
+RunSSDLAnalyzer: src/exe/RunSSDLAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 clean:
 	$(RM) $(OBJS)	
@@ -65,6 +68,7 @@ clean:
 	$(RM) RunLeptJetMultAnalyzer
 	$(RM) RunMuonAnalyzer
 	$(RM) MakeMuonPlots
+	$(RM) RunSSDLAnalyzer
 
 purge:
 	$(RM) $(OBJS)
