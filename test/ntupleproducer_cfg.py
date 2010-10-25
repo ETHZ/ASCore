@@ -11,6 +11,10 @@ process.MessageLogger.cerr.NTP = cms.untracked.PSet(
     limit = cms.untracked.int32(-1),
     reportEvery = cms.untracked.int32(1)
     )
+process.MessageLogger.categories.append('EcalSeverityLevelError')
+process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
+    limit = cms.untracked.int32(1),
+    )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                       fileMode = cms.untracked.string("NOMERGE")
@@ -85,9 +89,6 @@ process.TFileService = cms.Service("TFileService",
 #### Electron ID ##############################################################
 process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 
-#### Produce JPT jets #########################################################
-# process.load('RecoJets.Configuration.RecoJPTJets_cff')
-
 #### Parameterisation for Jet Corrections and JES ME Corrections ###############
 recoJet_src = "ak5CaloJets"
 genJet_src = "ak5GenJets"
@@ -98,13 +99,23 @@ process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 
 #### Jet Corrections ###########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
+# and http://indico.cern.ch/getFile.py/access?contribId=38&sessionId=4&resId=0&materialId=slides&confId=110072 slide 13
 # to check what cff to use
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.jecCorSequence = cms.Sequence(
- ##    process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3*process.ak5JPTJetsL2L3
- 	process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
- ##    process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL2L3Residual*process.ak5JPTJetsL2L3Residual
-)
+process.ak5CaloL2Relative.useCondDB = False
+process.ak5CaloL3Absolute.useCondDB = False
+process.ak5CaloResidual.useCondDB = False
+process.ak5PFL2Relative.useCondDB = False
+process.ak5PFL3Absolute.useCondDB = False
+process.ak5PFResidual.useCondDB = False
+if options.runon=='data':
+	process.jecCorSequence = cms.Sequence(
+		process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL2L3Residual
+	)
+else:
+	process.jecCorSequence = cms.Sequence(
+		process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
+	)
 
 ### NB: also check the analysis input below.
 
@@ -120,6 +131,7 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 ### Cleaning ###################################################################
 # flag HB/HE noise
 # Need both since Filter does not put results in the event
+# UPDATE: done by default in 3_8 (?)
 #process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 #process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
 #process.cleaning = cms.Sequence(process.HBHENoiseFilter)
@@ -170,15 +182,6 @@ process.analyze.jets = (
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
               ),
-    # JPT
-#    cms.PSet( prefix = cms.untracked.string('JPT'),
-#              tag = cms.untracked.InputTag('ak5JPTJetsL2L3'),
-#              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-#              jet_id = cms.untracked.InputTag('ak5JetID'),
-#              sel_minpt  = process.analyze.sel_mincorjpt,
-#              sel_maxeta = process.analyze.sel_maxjeta,
-#              corrections = cms.string('ak5JPTL2L3'),
-#              ),
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
@@ -191,12 +194,10 @@ process.analyze.jets = (
     )
 
 # Add residual correction for running on data (temporary fix)
-#if options.runon == 'data':
-#        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual' 
-#        for extJet in process.analyze.jets:
-#            extJet.corrections = extJet.corrections.value() + 'Residual'
-#            if extJet.prefix.value() == 'JPT':
-#                extJet.tag = cms.untracked.InputTag(extJet.tag.value() + 'Residual')
+if options.runon == 'data':
+        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual' 
+        for extJet in process.analyze.jets:
+            extJet.corrections = extJet.corrections.value() + 'Residual'
 
 # If MC, take the HLT from REDIGI
 if options.runon != 'data':
