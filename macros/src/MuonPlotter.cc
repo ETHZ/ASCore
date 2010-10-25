@@ -1510,6 +1510,7 @@ bool MuonPlotter::isZEvent(){
 	// if(isGoodEvent() == false) return false;
 	if(NJets < 2) return false;
 	if(isGoodMuon(0) == false || isGoodMuon(1) == false) return false;
+	if(MuCharge[0] == MuCharge[1]) return false;
 
 	// Z mass window cut
 	TLorentzVector p1, p2;
@@ -1536,6 +1537,8 @@ bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 bool MuonPlotter::isSSLLEvent(){
 	if(isGoodEvent() == false) return false;
 	if(isMuTriggeredEvent() == false) return false;
+	if(NMus < 2) return false;
+	if(MuCharge[0] != MuCharge[1]) return false;
 	if(isGoodPrimMuon(0) == false || isGoodSecMuon(1) == false) return false;
 	return true;
 }
@@ -1544,6 +1547,8 @@ bool MuonPlotter::isSSLLEvent(){
 bool MuonPlotter::isSSTTEvent(){
 	if(isGoodEvent() == false) return false;
 	if(isMuTriggeredEvent() == false) return false;
+	if(NMus < 2) return false;
+	if(MuCharge[0] != MuCharge[1]) return false;
 	if(isGoodPrimMuon(0) == false || isGoodSecMuon(1) == false) return false;
 	if(MuTight[0] == 1 && MuTight[1] == 1){
 		if(MuCharge[0] == MuCharge[1]) return true;
