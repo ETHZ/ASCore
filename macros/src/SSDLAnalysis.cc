@@ -2,6 +2,11 @@
 
 using namespace std;
 
+const int SSDLAnalysis::maxNjets;
+const int SSDLAnalysis::maxNmus;
+const int SSDLAnalysis::maxNeles;
+const int SSDLAnalysis::maxNphos;
+
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	//SetStyle();	
 }

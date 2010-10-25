@@ -32,7 +32,6 @@ public:
 	virtual ~SSDLAnalysis();
 	
 	Davismt2 *fMT2;
-	AnaClass *fAC; // to be used for plotting...
 	
 	void Begin(const char* filename = "SSDLTree.root");
 	void Analyze();
