@@ -181,7 +181,11 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
-	if(fTR->MuRelIso03[index] > 1.0) return false;
+	double iso = fTR->MuRelIso03[index];
+	double pt = fTR->MuPt[index];
+	double hybiso = iso*pt / std::max(20.,pt);
+	if(hybiso > 1.0) return false;
+
 	return true;
 }
 
