@@ -63,7 +63,6 @@ int UserAnalysisBase::GetPDGParticle(pdgparticle &part, int id){
 
 void UserAnalysisBase::GetHLTNames(Int_t& run){
 	
-	cout << "GetHLTNames... ";
 	TFile *f = fTR->fChain->GetCurrentFile();
 	TTree* runTree = (TTree*)f->Get("analyze/RunInfo");
 	std::vector<std::string>* HLTNames;
@@ -282,7 +281,7 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	double etamax                   = 3.0;
 	double etaEgapUpperEdge         = 1.560;
 	double etaEgapLowerEdge         = 1.442;
-	double pTmin                    = 10.;
+	double pTmin                    = 5.;
 	
 	// electron ID
 	if( fabs(eta) < 1.479 ){ // Barrel
@@ -336,7 +335,7 @@ bool UserAnalysisBase::IsGoodElId_WP90(int index){
 	double etamax					= 3.0;
 	double etaEgapUpperEdge			= 1.560;
 	double etaEgapLowerEdge			= 1.442;
-	double pTmin					= 10.;
+	double pTmin					= 5.;
 	
 	// electron ID
 	if( fabs(eta) < 1.479 ){ // Barrel
@@ -476,16 +475,23 @@ bool UserAnalysisBase::IsIsolatedEl_LooseIso(int index){
 }
 
 bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, double ElecCombRelIsoEEndmax){
-	// combined relative electron isolation for given cut values
+	// hybrid relative electron isolation for given cut values
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
-		double combRelIso = ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));
-		if( combRelIso > ElecCombRelIsoEBarmax ) return false;
+		if( hybRelElIso(index) > ElecCombRelIsoEBarmax ) return false;
 	}
 	else{ // EndCap
 		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
-		if( combRelIso > ElecCombRelIsoEEndmax ) return false;
+		if( hybRelElIso(index) > ElecCombRelIsoEEndmax ) return false;
 	}
 	return true;
+}
+
+double UserAnalysisBase::hybRelElIso(int index){
+	// the value of hybrid relative electron isolation
+	if( fabs(fTR->ElEta[index]) < 1.479 ) // Barrel
+		return ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));	
+	else // EndCap
+		return ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
 }
 
 bool UserAnalysisBase::IsTightEl(int index){
@@ -671,6 +677,16 @@ bool UserAnalysisBase::IsGoodElEvent(){
 											HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || /*HLT_Ele17_SW_TightEleIdIsol_L1R_v1  ||*/
 											HLT_DoubleEle10_SW_L1R					 || HLT_DoubleEle15_SW_L1R_v1);
 	return false;
+}
+
+bool UserAnalysisBase::IsGoodElFakesEvent(){
+	// signle-e triggers without ElID or Iso cuts to be used for FP ratio measurements
+	bool HLT_Ele10_LW_L1R =	GetHLTResult("HLT_Ele10_LW_L1R");
+	bool HLT_Ele10_SW_L1R =	GetHLTResult("HLT_Ele10_SW_L1R");
+	bool HLT_Ele15_LW_L1R =	GetHLTResult("HLT_Ele15_LW_L1R");
+	bool HLT_Ele15_SW_L1R =	GetHLTResult("HLT_Ele15_SW_L1R");
+	
+	return (HLT_Ele10_LW_L1R || HLT_Ele10_SW_L1R || HLT_Ele15_LW_L1R || HLT_Ele15_SW_L1R);
 }
 
 bool UserAnalysisBase::IsGoodHadronicEvent(){

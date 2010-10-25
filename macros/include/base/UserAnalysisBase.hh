@@ -55,10 +55,11 @@ public:
 	virtual bool IsElFromPrimaryVx	(int);
 	virtual bool IsGoodBasicEl		(int);
 	virtual bool IsGoodEl_TDL		(int);
-	virtual bool IsGoodElId_WP80		(int);
+	virtual bool IsGoodElId_WP80	(int);
 	virtual bool IsGoodElId_WP90	(int);
 	virtual bool IsConvertedEl_WP80	(int);
 	virtual bool IsConvertedEl_WP90(int);
+	virtual double hybRelElIso		(int);
 	virtual bool IsIsolatedEl		(int, double, double);
 	virtual bool IsIsolatedEl_WP80	(int);
 	virtual bool IsIsolatedEl_WP90	(int);
@@ -76,7 +77,8 @@ public:
 	virtual bool IsGoodEvent();
 	virtual bool IsGoodMuEvent();
 	virtual bool IsGoodElEvent();
-	virtual bool IsGoodHadronicEvent	();
+	virtual bool IsGoodElFakesEvent();
+	virtual bool IsGoodHadronicEvent();
 	virtual vector<int> MuonSelection();
 	virtual vector<int> ElectronSelection();
 	virtual vector<int> PhotonSelection();
