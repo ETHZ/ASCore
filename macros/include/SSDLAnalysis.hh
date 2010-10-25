@@ -143,20 +143,15 @@ private:
 	float	fTmueta[maxNmus];
 	float	fTmuphi[maxNmus];
 	float	fTmuiso[maxNmus];
+	float	fTmuisohyb[maxNmus];
 	int		fTmucharge[maxNmus];
 	int		fTmutight[maxNmus]; // 0 for loose (but not tight), 1 for tight
 	float	fTmuDRjet[maxNmus];
 	float	fTmuDRhardestjet[maxNmus];
-	float	fTmucalocomp[maxNmus];
-	float	fTmusegmcomp[maxNmus];
-	float	fTmuouterrad[maxNmus];
-	float	fTmunchi2[maxNmus];
-	int		fTmuntkhits[maxNmus];
-	int		fTmunmuhits[maxNmus];
-	float	fTmuemvetoet[maxNmus];
-	float	fTmuhadvetoet[maxNmus];
 	float	fTmud0[maxNmus];
 	float	fTmudz[maxNmus];
+	float	fTmud0bs[maxNmus];
+	float	fTmudzbs[maxNmus];
 	float	fTmuptE[maxNmus];
 	int		fTmuid[maxNmus];
 	int		fTmumoid[maxNmus];

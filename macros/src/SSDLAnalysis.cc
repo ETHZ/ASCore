@@ -65,32 +65,27 @@ void	SSDLAnalysis::BookTriggerVariables(TTree* fTriggerTree){
 
 void	SSDLAnalysis::BookMuonVariables(TTree* fMuTree){
 	// single-muon properties
-	fMuTree->Branch("NMus"          ,&fTnqmus,			"NMus/I");
-	fMuTree->Branch("MuPt"          ,&fTmupt,			"MuPt[NMus]/F");
-	fMuTree->Branch("MuEta"         ,&fTmueta,			"MuEta[NMus]/F");
-	fMuTree->Branch("MuPhi"         ,&fTmuphi,			"MuPhi[NMus]/F");
-	fMuTree->Branch("MuCharge"      ,&fTmucharge,		"MuCharge[NMus]/I");
-	fMuTree->Branch("MuTight"       ,&fTmutight,		"MuTight[NMus]/I");
-	fMuTree->Branch("MuIso"         ,&fTmuiso,			"MuIso[NMus]/F");
+	fMuTree->Branch("NMus"          ,&fTnqmus,         "NMus/I");
+	fMuTree->Branch("MuPt"          ,&fTmupt,         "MuPt[NMus]/F");
+	fMuTree->Branch("MuEta"         ,&fTmueta,        "MuEta[NMus]/F");
+	fMuTree->Branch("MuPhi"         ,&fTmuphi,        "MuPhi[NMus]/F");
+	fMuTree->Branch("MuCharge"      ,&fTmucharge,     "MuCharge[NMus]/I");
+	fMuTree->Branch("MuTight"       ,&fTmutight,      "MuTight[NMus]/I");
+	fMuTree->Branch("MuIso"         ,&fTmuiso,        "MuIso[NMus]/F");
+	fMuTree->Branch("MuIsoHybrid"   ,&fTmuisohyb,     "MuIsoHybrid[NMus]/F");
 	fMuTree->Branch("MuDRJet"       ,&fTmuDRjet,        "MuDRJet[NMus]/F");
 	fMuTree->Branch("MuDRHardestJet",&fTmuDRhardestjet, "MuDRHardestJet[NMus]/F");
-	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,		"MuCaloComp[NMus]/F");
-	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,		"MuSegmComp[NMus]/F");
-	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,		"MuOuterRad[NMus]/F");
-	fMuTree->Branch("MuNChi2"       ,&fTmunchi2,		"MuNChi2[NMus]/F");
-	fMuTree->Branch("MuNTkHits"     ,&fTmuntkhits,		"MuNTkHits[NMus]/I");
-	fMuTree->Branch("MuNMuHits"     ,&fTmunmuhits,		"MuNMuHits[NMus]/I");
-	fMuTree->Branch("MuIsoEMVetoEt" ,&fTmuemvetoet,		"MuIsoEMVetoEt[NMus]/F");
-	fMuTree->Branch("MuIsoHadVetoEt",&fTmuhadvetoet,	"MuIsoHadVetoEt[NMus]/F");
-	fMuTree->Branch("MuD0"          ,&fTmud0,			"MuD0[NMus]/F");
-	fMuTree->Branch("MuDz"          ,&fTmudz,			"MuDz[NMus]/F");
-	fMuTree->Branch("MuPtE"         ,&fTmuptE,			"MuPtE[NMus]/F");
-	fMuTree->Branch("MuGenID"       ,&fTmuid,			"MuGenID[NMus]/I");
-	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,			"MuGenMoID[NMus]/I");
-	fMuTree->Branch("MuGenGMoID"    ,&fTmugmoid,		"MuGenGMoID[NMus]/I");
-	fMuTree->Branch("MuGenType"     ,&fTmutype,			"MuGenType[NMus]/I");
-	fMuTree->Branch("MuGenMoType"   ,&fTmumotype,		"MuGenMoType[NMus]/I");
-	fMuTree->Branch("MuGenGMoType"  ,&fTmugmotype,		"MuGenGMoType[NMus]/I");
+	fMuTree->Branch("MuD0"          ,&fTmud0,         "MuD0[NMus]/F");
+	fMuTree->Branch("MuDz"          ,&fTmudz,         "MuDz[NMus]/F");
+	fMuTree->Branch("MuD0BS"        ,&fTmud0bs,       "MuD0BS[NMus]/F");
+	fMuTree->Branch("MuDzBS"        ,&fTmudzbs,       "MuDzBS[NMus]/F");
+	fMuTree->Branch("MuPtE"         ,&fTmuptE,        "MuPtE[NMus]/F");
+	fMuTree->Branch("MuGenID"       ,&fTmuid,         "MuGenID[NMus]/I");
+	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,       "MuGenMoID[NMus]/I");
+	fMuTree->Branch("MuGenGMoID"    ,&fTmugmoid,      "MuGenGMoID[NMus]/I");
+	fMuTree->Branch("MuGenType"     ,&fTmutype,       "MuGenType[NMus]/I");
+	fMuTree->Branch("MuGenMoType"   ,&fTmumotype,     "MuGenMoType[NMus]/I");
+	fMuTree->Branch("MuGenGMoType"  ,&fTmugmotype,    "MuGenGMoType[NMus]/I");
 	fMuTree->Branch("MuMT"          ,&fTmuMT,			"MuMT/F");
 	fMuTree->Branch("MuMinv"		,&fTmuMinv,			"MuMinv/F");
 }
@@ -392,18 +387,13 @@ void	SSDLAnalysis::ResetMuonVariables(){
 		fTmucharge    [i] = -999;
 		fTmutight     [i] = -999;
 		fTmuiso       [i] = -999.99;
-		fTmuDRjet		[i] = -999.99;
+		fTmuisohyb    [i] = -999.99;
+		fTmuDRjet       [i] = -999.99;
 		fTmuDRhardestjet[i] = -999.99;
-		fTmucalocomp  [i] = -999.99;
-		fTmusegmcomp  [i] = -999.99;
-		fTmuouterrad  [i] = -999.99;
-		fTmunchi2     [i] = -999.99;
-		fTmuntkhits   [i] = -999;
-		fTmunmuhits   [i] = -999;
-		fTmuemvetoet  [i] = -999.99;
-		fTmuhadvetoet [i] = -999.99;
 		fTmud0        [i] = -999.99;
 		fTmudz        [i] = -999.99;
+		fTmud0bs      [i] = -999.99;
+		fTmudzbs      [i] = -999.99;
 		fTmuptE       [i] = -999.99;
 		fTmuid        [i] = -999;
 		fTmumoid      [i] = -999;
@@ -953,7 +943,7 @@ void	SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd, TVector3 jtotP
 	if( nqmus < 1 ) return;
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
 	// Muon Variables
-	for(int i = 0; i < std::min(nqmus,maxNmus); ++i){
+	for(int i = 0; i < std::min(nqmus, maxNmus); ++i){
 		int index = selectedMuInd[i];
 		fTmupt       [i] = fTR->MuPt[index];
 		fTmueta      [i] = fTR->MuEta[index];
@@ -962,16 +952,12 @@ void	SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd, TVector3 jtotP
 		if(IsTightMu(index))        fTmutight[i] = 1;
 		if(IsLooseNoTightMu(index)) fTmutight[i] = 0;
 		fTmuiso      [i] = fTR->MuRelIso03[index];
-		fTmucalocomp [i] = fTR->MuCaloComp[index];
-		fTmusegmcomp [i] = fTR->MuSegmComp[index];
-		fTmuouterrad [i] = fTR->MuOutPosRadius[index];
-		fTmunchi2    [i] = fTR->MuNChi2[index];
-		fTmuntkhits  [i] = fTR->MuNTkHits[index];
-		fTmunmuhits  [i] = fTR->MuNMuHits[index];
-		fTmuemvetoet [i] = fTR->MuIso03EMVetoEt[index];
-		fTmuhadvetoet[i] = fTR->MuIso03HadVetoEt[index];
+		if(fTmupt[i] > 20.) fTmuisohyb[i] = fTmuiso[i];
+		else fTmuisohyb[i] = fTmuiso[i]*fTmupt[i] / 20.;
 		fTmud0       [i] = fTR->MuD0PV[index];
 		fTmudz       [i] = fTR->MuDzPV[index];
+		fTmud0bs     [i] = fTR->MuD0BS[index];
+		fTmudzbs     [i] = fTR->MuDzBS[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
 		
 		fTmuDRjet		[i]	= minDRtoJet(fTmueta[i], fTmuphi[i]);
