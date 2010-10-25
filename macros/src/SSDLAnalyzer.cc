@@ -1,12 +1,10 @@
 #include "SSDLAnalyzer.hh"
-
-#include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 
 using namespace std;
 
 SSDLAnalyzer::SSDLAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fSSDLAnalysis			= new SSDLAnalysis(fTR);
+	fSSDLAnalysis = new SSDLAnalysis(fTR);
 }
 
 SSDLAnalyzer::~SSDLAnalyzer(){
@@ -16,9 +14,6 @@ SSDLAnalyzer::~SSDLAnalyzer(){
 
 // Method for looping over the tree
 void SSDLAnalyzer::Loop(Long64_t maxEvents, Int_t prescale){
-		
-	std::cout << "Loop start..." << std::endl;	
-	
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << nentries << endl;
 	if ( maxEvents>=0 ) { 
@@ -37,22 +32,19 @@ void SSDLAnalyzer::Loop(Long64_t maxEvents, Int_t prescale){
 			fCurRun = fTR->Run;
 			fSSDLAnalysis->BeginRun(fCurRun);
 		}
-		
-		fSSDLAnalysis->Analyze();	// SSDL specific analysis (after cleaning)
-
+		fSSDLAnalysis->Analyze();
 	}
-	std::cout << "Loop end..." << std::endl;	
 }
 
 // Method called before starting the event loop
 void SSDLAnalyzer::BeginJob(){
-	// Initialize SSDLAnalysis here:
-	fSSDLAnalysis		->SetOutputDir(fOutputDir);
-	fSSDLAnalysis		->SetVerbose(fVerbose);
-	fSSDLAnalysis		->Begin();
+	fSSDLAnalysis->SetOutputDir(fOutputDir);
+	fSSDLAnalysis->SetOutputFile("SSDLTree");
+	fSSDLAnalysis->SetVerbose(fVerbose);
+	fSSDLAnalysis->Begin();
 }
 
 // Method called after finishing the event loop
 void SSDLAnalyzer::EndJob(){
-	fSSDLAnalysis			->End();
+	fSSDLAnalysis->End();
 }

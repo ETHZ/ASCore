@@ -10,327 +10,288 @@ SSDLAnalysis::~SSDLAnalysis(){
 }
 
 void	SSDLAnalysis::Begin(const char* filename){
-	fOutputFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	BookTree();
 }
 
 void	SSDLAnalysis::BookTree(){
-	// create electron-only tree (example)
-	BookElectronTree();
-	// create SSDL tree
-	//BookSSDLTree();
+	fOutputFile->cd();
+	// create one common tree
+	fAnalysisTree = new TTree("Analysis", "AnalysisTree");
+	// book trigger-only branches
+	BookTriggerVariables(fAnalysisTree);
+	// book muon-only branches
+	BookMuonVariables(fAnalysisTree);
+	// book electron-only branches
+	BookElectronVariables(fAnalysisTree);
+	// book branches of aux. variables (event, jet, photon properties etc.) 
+	BookAuxVariables(fAnalysisTree);
+	// book FP-Ratios branches (to be moved to the "offline" step)
+	BookFPRVariables(fAnalysisTree);
 }
 
-void	SSDLAnalysis::BookElectronTree(){
-	fElectronTree = new TTree("ElectronAnalysis", "ElectronAnalysisTree");
+void	SSDLAnalysis::BookTriggerVariables(TTree* fTriggerTree){
+	// muon-only triggers		
+	fTriggerTree->Branch("HLTMu9"						,&fT_HLTMu9,				"HLTMu9/I");
+	fTriggerTree->Branch("HLTMu11"						,&fT_HLTMu11,				"HLTMu11/I");
+	fTriggerTree->Branch("HLTMu15"						,&fT_HLTMu15,				"HLTMu15/I");
+	fTriggerTree->Branch("HLTDoubleMu0"					,&fT_HLTDoubleMu0,			"HLTDoubleMu0/I");
+	fTriggerTree->Branch("HLTDoubleMu3"					,&fT_HLTDoubleMu3,			"HLTDoubleMu3/I");
+	// hadronic-only triggers
+	fTriggerTree->Branch("HLT_Jet15U",					&fTHLT_Jet15U,				"HLT_Jet15U/I");
+	fTriggerTree->Branch("HLT_Jet30U",					&fTHLT_Jet30U,				"HLT_Jet30U/I");
+	fTriggerTree->Branch("HLT_Jet50U",					&fTHLT_Jet50U,				"HLT_Jet50U/I");
+	fTriggerTree->Branch("HLT_Jet70U",					&fTHLT_Jet70U,				"HLT_Jet70U/I");
+	fTriggerTree->Branch("HLT_Jet100U",					&fTHLT_Jet100U,				"HLT_Jet100U/I");
+	fTriggerTree->Branch("HLT_HT100U",					&fTHLT_HT100U,				"HLT_HT100U/I");
+	fTriggerTree->Branch("HLT_HT120U",					&fTHLT_HT120U,				"HLT_HT120U/I");
+	fTriggerTree->Branch("HLT_HT140U",					&fTHLT_HT140U,				"HLT_HT140U/I");
+	fTriggerTree->Branch("HLT_HT150U",					&fTHLT_HT150U,				"HLT_HT150U/I");
+	// electron-only triggers
+	fTriggerTree->Branch("HLT_Ele10_LW_L1R",			&fTHLT_Ele10_LW_L1R,		"HLT_Ele10_LW_L1R/I");
+	fTriggerTree->Branch("HLT_Ele10_SW_L1R",			&fTHLT_Ele10_SW_L1R,		"HLT_Ele10_SW_L1R/I");
+	fTriggerTree->Branch("HLT_Ele15_LW_L1R",			&fTHLT_Ele15_LW_L1R,		"HLT_Ele15_LW_L1R/I");
+	fTriggerTree->Branch("HLT_Ele15_SW_L1R",			&fTHLT_Ele15_SW_L1R,		"HLT_Ele15_SW_L1R/I");
+	fTriggerTree->Branch("HLT_Ele15_SW_CaloEleId_L1R",	&fTHLT_Ele15_SW_CaloEleId_L1R,	"HLT_Ele15_SW_CaloEleId_L1R/I");
+	fTriggerTree->Branch("HLT_Ele20_SW_L1R",			&fTHLT_Ele20_SW_L1R,		"HLT_Ele20_SW_L1R/I");
+	fTriggerTree->Branch("HLT_DoubleEle5_SW_L1R",		&fTHLT_DoubleEle5_SW_L1R,	"HLT_DoubleEle5_SW_L1R/I");
+	fTriggerTree->Branch("HLT_DoubleEle10_SW_L1R",		&fTHLT_DoubleEle10_SW_L1R,	"HLT_DoubleEle10_SW_L1R/I");
+	fTriggerTree->Branch("HLT_DoubleEle15_SW_L1R_v1",	&fTHLT_DoubleEle15_SW_L1R_v1,"HLT_DoubleEle15_SW_L1R_v1/I");
+	// summarized trigger properties of the event
+	fTriggerTree->Branch("HTL_GoodElEvent",				&fTHTL_GoodElEvent,			"HTL_GoodElEvent/I");
+	fTriggerTree->Branch("HTL_GoodElFakesEvent",		&fTHTL_GoodElFakesEvent,	"HTL_GoodElFakesEvent/I");
+	fTriggerTree->Branch("HTL_GoodMuEvent",				&fTHTL_GoodMuEvent,			"HTL_GoodMuEvent/I");
+	fTriggerTree->Branch("HTL_GoodHadronicEvent",		&fTHTL_GoodHadronicEvent,	"HTL_GoodHadronicEvent/I");
+}
 
-	// trigger properties
-	fElectronTree->Branch("HTL_GoodElEvent",	&fTHTL_GoodElEvent,			"HTL_GoodElEvent/I");
-	fElectronTree->Branch("HTL_GoodHadronicEvent",&fTHTL_GoodHadronicEvent,	"HLT_Jet15U/I");
-	fElectronTree->Branch("HLT_Jet15U",			&fTHLT_Jet15U,			"HLT_Jet15U/I");
-	fElectronTree->Branch("HLT_Jet30U",			&fTHLT_Jet30U,			"HLT_Jet30U/I");
-	fElectronTree->Branch("HLT_Jet50U",			&fTHLT_Jet50U,			"HLT_Jet50U/I");
-	fElectronTree->Branch("HLT_Jet70U",			&fTHLT_Jet70U,			"HLT_Jet70U/I");
-	fElectronTree->Branch("HLT_Jet100U",		&fTHLT_Jet100U,			"HLT_Jet100U/I");
-	fElectronTree->Branch("HLT_HT100U",			&fTHLT_HT100U,			"HLT_HT100U/I");
-	fElectronTree->Branch("HLT_HT120U",			&fTHLT_HT120U,			"HLT_HT120U/I");
-	fElectronTree->Branch("HLT_HT140U",			&fTHLT_HT140U,			"HLT_HT140U/I");
-	fElectronTree->Branch("HLT_HT150U",			&fTHLT_HT150U,			"HLT_HT150U/I");
-	fElectronTree->Branch("HLT_Ele10_LW_L1R", &fTHLT_Ele10_LW_L1R,	"HLT_Ele10_LW_L1R/I");
-	fElectronTree->Branch("HLT_Ele10_SW_L1R", &fTHLT_Ele10_SW_L1R,	"HLT_Ele10_SW_L1R/I");
-	fElectronTree->Branch("HLT_Ele15_LW_L1R", &fTHLT_Ele15_LW_L1R,	"HLT_Ele15_LW_L1R/I");
-	fElectronTree->Branch("HLT_Ele15_SW_L1R",	&fTHLT_Ele15_SW_L1R,	"HLT_Ele15_SW_L1R/I");
-	fElectronTree->Branch("HLT_Ele15_SW_CaloEleId_L1R",	&fTHLT_Ele15_SW_CaloEleId_L1R,	"HLT_Ele15_SW_CaloEleId_L1R/I");
-	fElectronTree->Branch("HLT_Ele20_SW_L1R",				&fTHLT_Ele20_SW_L1R,			"HLT_Ele20_SW_L1R/I");
-	fElectronTree->Branch("HLT_DoubleEle5_SW_L1R",		&fTHLT_DoubleEle5_SW_L1R,		"HLT_DoubleEle5_SW_L1R/I");
-	fElectronTree->Branch("HLT_DoubleEle10_SW_L1R",		&fTHLT_DoubleEle10_SW_L1R,		"HLT_DoubleEle10_SW_L1R/I");
-	fElectronTree->Branch("HLT_DoubleEle15_SW_L1R_v1",	&fTHLT_DoubleEle15_SW_L1R_v1,	"HLT_DoubleEle15_SW_L1R_v1/I");
+void	SSDLAnalysis::BookMuonVariables(TTree* fMuTree){
+	// single-muon properties
+	fMuTree->Branch("NMus"          ,&fTnqmus,			"NMus/I");
+	fMuTree->Branch("MuPt"          ,&fTmupt,			"MuPt[NMus]/F");
+	fMuTree->Branch("MuEta"         ,&fTmueta,			"MuEta[NMus]/F");
+	fMuTree->Branch("MuPhi"         ,&fTmuphi,			"MuPhi[NMus]/F");
+	fMuTree->Branch("MuCharge"      ,&fTmucharge,		"MuCharge[NMus]/I");
+	fMuTree->Branch("MuTight"       ,&fTmutight,		"MuTight[NMus]/I");
+	fMuTree->Branch("MuIso"         ,&fTmuiso,			"MuIso[NMus]/F");
+	fMuTree->Branch("MuDRJet"       ,&fTmuDRjet,        "MuDRJet[NMus]/F");
+	fMuTree->Branch("MuDRHardestJet",&fTmuDRhardestjet, "MuDRHardestJet[NMus]/F");
+	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,		"MuCaloComp[NMus]/F");
+	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,		"MuSegmComp[NMus]/F");
+	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,		"MuOuterRad[NMus]/F");
+	fMuTree->Branch("MuNChi2"       ,&fTmunchi2,		"MuNChi2[NMus]/F");
+	fMuTree->Branch("MuNTkHits"     ,&fTmuntkhits,		"MuNTkHits[NMus]/I");
+	fMuTree->Branch("MuNMuHits"     ,&fTmunmuhits,		"MuNMuHits[NMus]/I");
+	fMuTree->Branch("MuIsoEMVetoEt" ,&fTmuemvetoet,		"MuIsoEMVetoEt[NMus]/F");
+	fMuTree->Branch("MuIsoHadVetoEt",&fTmuhadvetoet,	"MuIsoHadVetoEt[NMus]/F");
+	fMuTree->Branch("MuD0"          ,&fTmud0,			"MuD0[NMus]/F");
+	fMuTree->Branch("MuDz"          ,&fTmudz,			"MuDz[NMus]/F");
+	fMuTree->Branch("MuPtE"         ,&fTmuptE,			"MuPtE[NMus]/F");
+	fMuTree->Branch("MuGenID"       ,&fTmuid,			"MuGenID[NMus]/I");
+	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,			"MuGenMoID[NMus]/I");
+	fMuTree->Branch("MuGenGMoID"    ,&fTmugmoid,		"MuGenGMoID[NMus]/I");
+	fMuTree->Branch("MuGenType"     ,&fTmutype,			"MuGenType[NMus]/I");
+	fMuTree->Branch("MuGenMoType"   ,&fTmumotype,		"MuGenMoType[NMus]/I");
+	fMuTree->Branch("MuGenGMoType"  ,&fTmugmotype,		"MuGenGMoType[NMus]/I");
+	fMuTree->Branch("MuMT"          ,&fTmuMT,			"MuMT/F");
+	fMuTree->Branch("MuMinv"		,&fTmuMinv,			"MuMinv/F");
+}
 
-	// electron properties
-	fElectronTree->Branch("NQEls",					&fTNqualel,				"NQEls/I");
-	fElectronTree->Branch("ElCh",					&fTElcharge,			"ElCh[NQEls]/I");
-	fElectronTree->Branch("ElChIsCons",				&fTElChargeIsCons,		"ElChIsCons[NQEls]/I");
-	fElectronTree->Branch("ElChIsGenCons",			&fTElChargeIsGenCons,	"ElChIsGenCons[NQEls]/I");
-	fElectronTree->Branch("ElPt",					&fTElpt,				"ElPt[NQEls]/F");
-	fElectronTree->Branch("ElEta",					&fTEleta,				"ElEta[NQEls]/F");
-	fElectronTree->Branch("ElPhi",					&fTElphi,				"ElPhi[NQEls]/F");
-	fElectronTree->Branch("ElD0",					&fTEld0,				"ElD0[NQEls]/F");
-	fElectronTree->Branch("ElD0Err",				&fTElD0Err,				"ElD0Err[NQEls]/F");
-	fElectronTree->Branch("ElEoverP",				&fTElEoverP,			"ElEoverP[NQEls]/F");
-	fElectronTree->Branch("ElHoverE",				&fTElHoverE,			"ElHoverE[NQEls]/F");
-	fElectronTree->Branch("ElSigmaIetaIeta",		&fTElSigmaIetaIeta,		"ElSigmaIetaIeta[NQEls]/F");
-	fElectronTree->Branch("ElDeltaPhiSuperClusterAtVtx",	&fTElDeltaPhiSuperClusterAtVtx,          "ElDeltaPhiSuperClusterAtVtx[NQEls]/F");
-	fElectronTree->Branch("ElDeltaEtaSuperClusterAtVtx",	&fTElDeltaEtaSuperClusterAtVtx,          "ElDeltaEtaSuperClusterAtVtx[NQEls]/F");
-	fElectronTree->Branch("ElRelIso",				&fTElRelIso,			"ElRelIso[NQEls]/F");
-	fElectronTree->Branch("ElDR04TkSumPt",			&fTElDR04TkSumPt,		"ElDR04TkSumPt[NQEls]/F");
-	fElectronTree->Branch("ElDR04EcalRecHitSumEt",	&fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt[NQEls]/F");
-	fElectronTree->Branch("ElDR04HcalTowerSumEt",	&fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt[NQEls]/F");
-	fElectronTree->Branch("ElS4OverS1",			&fTElS4OverS1,				"ElS4OverS1[NQEls]/F");
-	fElectronTree->Branch("ElConvPartnerTrkDist",	&fTElConvPartnerTrkDist,"ElConvPartnerTrkDist[NQEls]/F");
-	fElectronTree->Branch("ElConvPartnerTrkDCot",	&fTElConvPartnerTrkDCot,"ElConvPartnerTrkDCot[NQEls]/F");
-	fElectronTree->Branch("ElChargeMisIDProb",		&fTElChargeMisIDProb,	"ElChargeMisIDProb[NQEls]/F");
-	fElectronTree->Branch("ElMT",					&fTElMT,				"ElMT[NQEls]/F");
-	fElectronTree->Branch("ElDRjet",				&fTElDRjet,				"ElDRjet[NQEls]/F");
-	fElectronTree->Branch("ElDRhardestjet",			&fTElDRhardestjet,		"ElDRhardestjet[NQEls]/F");
-	fElectronTree->Branch("ElGenID",				&fTElGenID,				"ElGenID[NQEls]/I");
-	fElectronTree->Branch("ElGenStatus",			&fTElGenStatus,			"ElGenStatus[NQEls]/I");
-	fElectronTree->Branch("ElGenMID",				&fTElGenMID,			"ElGenMID[NQEls]/I");
-	fElectronTree->Branch("ElGenMStatus",			&fTElGenMStatus,		"ElGenMStatus[NQEls]/I");
-	fElectronTree->Branch("ElGenGMID",				&fTElGenGMID,			"ElGenGMID[NQEls]/I");
-	fElectronTree->Branch("ElGenGMStatus",			&fTElGenGMStatus,		"ElGenGMStatus[NQEls]/I");
-	fElectronTree->Branch("ElTight",				&fTElTight,				"ElTight[NQEls]/I");
-	
-	// dielectron properties
+void	SSDLAnalysis::BookElectronVariables(TTree* fElectronTree){
+	// single-electron properties
+	fElectronTree->Branch("NEls",					&fTnqels,				"NEls/I");
+	fElectronTree->Branch("ElCh",					&fTElcharge,			"ElCh[NEls]/I");
+	fElectronTree->Branch("ElChIsCons",				&fTElChargeIsCons,		"ElChIsCons[NEls]/I");
+	fElectronTree->Branch("ElChIsGenCons",			&fTElChargeIsGenCons,	"ElChIsGenCons[NEls]/I");
+	fElectronTree->Branch("ElPt",					&fTElpt,				"ElPt[NEls]/F");
+	fElectronTree->Branch("ElEta",					&fTEleta,				"ElEta[NEls]/F");
+	fElectronTree->Branch("ElPhi",					&fTElphi,				"ElPhi[NEls]/F");
+	fElectronTree->Branch("ElD0",					&fTEld0,				"ElD0[NEls]/F");
+	fElectronTree->Branch("ElD0Err",				&fTElD0Err,				"ElD0Err[NEls]/F");
+	fElectronTree->Branch("ElEoverP",				&fTElEoverP,			"ElEoverP[NEls]/F");
+	fElectronTree->Branch("ElHoverE",				&fTElHoverE,			"ElHoverE[NEls]/F");
+	fElectronTree->Branch("ElSigmaIetaIeta",		&fTElSigmaIetaIeta,		"ElSigmaIetaIeta[NEls]/F");
+	fElectronTree->Branch("ElDeltaPhiSuperClusterAtVtx",	&fTElDeltaPhiSuperClusterAtVtx,          "ElDeltaPhiSuperClusterAtVtx[NEls]/F");
+	fElectronTree->Branch("ElDeltaEtaSuperClusterAtVtx",	&fTElDeltaEtaSuperClusterAtVtx,          "ElDeltaEtaSuperClusterAtVtx[NEls]/F");
+	fElectronTree->Branch("ElRelIso",				&fTElRelIso,			"ElRelIso[NEls]/F");
+	fElectronTree->Branch("ElDR04TkSumPt",			&fTElDR04TkSumPt,		"ElDR04TkSumPt[NEls]/F");
+	fElectronTree->Branch("ElDR04EcalRecHitSumEt",	&fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt[NEls]/F");
+	fElectronTree->Branch("ElDR04HcalTowerSumEt",	&fTElDR04HcalTowerSumEt,"ElDR04HcalTowerSumEt[NEls]/F");
+	fElectronTree->Branch("ElS4OverS1",				&fTElS4OverS1,			"ElS4OverS1[NEls]/F");
+	fElectronTree->Branch("ElConvPartnerTrkDist",	&fTElConvPartnerTrkDist,"ElConvPartnerTrkDist[NEls]/F");
+	fElectronTree->Branch("ElConvPartnerTrkDCot",	&fTElConvPartnerTrkDCot,"ElConvPartnerTrkDCot[NEls]/F");
+	fElectronTree->Branch("ElChargeMisIDProb",		&fTElChargeMisIDProb,	"ElChargeMisIDProb[NEls]/F");
+	fElectronTree->Branch("ElDRjet",				&fTElDRjet,				"ElDRjet[NEls]/F");
+	fElectronTree->Branch("ElDRhardestjet",			&fTElDRhardestjet,		"ElDRhardestjet[NEls]/F");
+	fElectronTree->Branch("ElGenID",				&fTElGenID,				"ElGenID[NEls]/I");
+	fElectronTree->Branch("ElGenStatus",			&fTElGenStatus,			"ElGenStatus[NEls]/I");
+	fElectronTree->Branch("ElGenMID",				&fTElGenMID,			"ElGenMID[NEls]/I");
+	fElectronTree->Branch("ElGenMStatus",			&fTElGenMStatus,		"ElGenMStatus[NEls]/I");
+	fElectronTree->Branch("ElGenGMID",				&fTElGenGMID,			"ElGenGMID[NEls]/I");
+	fElectronTree->Branch("ElGenGMStatus",			&fTElGenGMStatus,		"ElGenGMStatus[NEls]/I");
+	fElectronTree->Branch("ElTight",				&fTElTight,				"ElTight[NEls]/I");
+	fElectronTree->Branch("ElHybRelIso",			&fTElHybRelIso,			"ElHybRelIso[NEls]/F");
+	fElectronTree->Branch("ElMT",					&fTElMT,				"ElMT[NEls]/F");
 	fElectronTree->Branch("ElMInv",					&fTElminv,				"ElMInv/F");
 	fElectronTree->Branch("ElMTInv",				&fTElmtinv,				"ElMTInv/F");
 }
 
-void	SSDLAnalysis::BookSSDLTree(){
-	fDiLeptonTree = new TTree("Analysis", "SSDLAnalysisTree");
-	
+void	SSDLAnalysis::BookAuxVariables(TTree* fAuxTree){
 	// run/sample properties
-	fDiLeptonTree->Branch("Run",		&fTRunNumber,	"Run/I");
-	fDiLeptonTree->Branch("Event",		&fTEventNumber,	"Event/I");
-	fDiLeptonTree->Branch("LumiSec",	&fTLumiSection,	"LumiSec/I");
-	fDiLeptonTree->Branch("ExtXSecLO",	&fTextxslo,		"ExtXSecLO/F");
-	fDiLeptonTree->Branch("IntXSec",	&fTintxs,		"IntXSec/F");
-	
-	// trigger properties
-	fDiLeptonTree->Branch("HTL_GoodElEvent",	&fTHTL_GoodElEvent,			"HTL_GoodElEvent/I");
-	fDiLeptonTree->Branch("HTL_GoodHadronicEvent",&fTHTL_GoodHadronicEvent,"HLT_Jet15U/I");
-	fDiLeptonTree->Branch("HLT_Jet15U",		&fTHLT_Jet15U,			"HLT_Jet15U/I");
-	fDiLeptonTree->Branch("HLT_Jet30U",		&fTHLT_Jet30U,			"HLT_Jet30U/I");
-	fDiLeptonTree->Branch("HLT_Jet50U",		&fTHLT_Jet50U,			"HLT_Jet50U/I");
-	fDiLeptonTree->Branch("HLT_Jet70U",		&fTHLT_Jet70U,			"HLT_Jet70U/I");
-	fDiLeptonTree->Branch("HLT_Jet100U",		&fTHLT_Jet100U,			"HLT_Jet100U/I");
-	fDiLeptonTree->Branch("HLT_HT100U",		&fTHLT_HT100U,			"HLT_HT100U/I");
-	fDiLeptonTree->Branch("HLT_HT120U",		&fTHLT_HT120U,			"HLT_HT120U/I");
-	fDiLeptonTree->Branch("HLT_HT140U",		&fTHLT_HT140U,			"HLT_HT140U/I");
-	fDiLeptonTree->Branch("HLT_Ele10_LW_L1R",	&fTHLT_Ele10_LW_L1R,	"HLT_Ele10_LW_L1R/I");
-	fDiLeptonTree->Branch("HLT_Ele10_SW_L1R",	&fTHLT_Ele10_SW_L1R,	"HLT_Ele10_SW_L1R/I");
-	fDiLeptonTree->Branch("HLT_Ele15_LW_L1R",	&fTHLT_Ele15_LW_L1R,	"HLT_Ele15_LW_L1R/I");
-	fDiLeptonTree->Branch("HLT_Ele15_SW_L1R",	&fTHLT_Ele15_SW_L1R,	"HLT_Ele15_SW_L1R/I");
-	fDiLeptonTree->Branch("HLT_Ele15_SW_CaloEleId_L1R",&fTHLT_Ele15_SW_CaloEleId_L1R,	"HLT_Ele15_SW_CaloEleId_L1R/I");
-	fDiLeptonTree->Branch("HLT_Ele20_SW_L1R",			&fTHLT_Ele20_SW_L1R,			"HLT_Ele20_SW_L1R/I");
-	fDiLeptonTree->Branch("HLT_DoubleEle5_SW_L1R",		&fTHLT_DoubleEle5_SW_L1R,		"HLT_DoubleEle5_SW_L1R/I");
-	fDiLeptonTree->Branch("HLT_DoubleEle10_SW_L1R",	&fTHLT_DoubleEle10_SW_L1R,		"HLT_DoubleEle10_SW_L1R/I");
-	fDiLeptonTree->Branch("HLT_DoubleEle15_SW_L1R_v1",	&fTHLT_DoubleEle15_SW_L1R_v1,	"HLT_DoubleEle15_SW_L1R_v1/I");
-
-	// jet properties
-	fDiLeptonTree->Branch("NQJets",			&fTNqualjet,	"NQJets/I");
-	fDiLeptonTree->Branch("JetPt",			&fTJetpt,		"JetPt[NQJets]/F");
-	fDiLeptonTree->Branch("JetEta",			&fTJeteta,		"JetEta[NQJets]/F");
-	fDiLeptonTree->Branch("JetPhi",			&fTJetphi,		"JetPhi[NQJets]/F");
+	fAuxTree->Branch("Run",				&fTRunNumber,	"Run/I");
+	fAuxTree->Branch("Event",			&fTEventNumber,	"Event/I");
+	fAuxTree->Branch("LumiSec",			&fTLumiSection,	"LumiSec/I");
+	fAuxTree->Branch("ExtXSecLO",		&fTextxslo,		"ExtXSecLO/F");
+	fAuxTree->Branch("IntXSec",			&fTintxs,		"IntXSec/F");
+	// event properties
+	fAuxTree->Branch("HT",				&fTHT,			"HT/F");
+	fAuxTree->Branch("SumEt",			&fTSumEt,		"SumEt/F");
+	fAuxTree->Branch("tcMET",			&fTtcMET,		"tcMET/F");
+	fAuxTree->Branch("pfMET",			&fTpfMET,		"pfMET/F");
+	fAuxTree->Branch("MuCorrMET",		&fTMuCorrMET,	"MuCorrMET/F");
+	// jet-MET properties
+	fAuxTree->Branch("NJets",			&fTnqjets,		"NJets/I");
+	fAuxTree->Branch("JetPt",			&fTJetpt,		"JetPt[NJets]/F");
+	fAuxTree->Branch("JetEta",			&fTJeteta,		"JetEta[NJets]/F");
+	fAuxTree->Branch("JetPhi",			&fTJetphi,		"JetPhi[NJets]/F");
+	fAuxTree->Branch("dPhiMJ1",			&fTdPhiMJ1,		"dPhiMJ1/F");
+	fAuxTree->Branch("dPhiMJ2",			&fTdPhiMJ2,		"dPhiMJ2/F");
+	fAuxTree->Branch("R12",				&fTR12,			"R12/F");
+	fAuxTree->Branch("R21",				&fTR21,			"R21/F");
+	fAuxTree->Branch("R12plusR21",		&fTR12plusR21,	"R12plusR21/F");
 	// photon properties
-	fDiLeptonTree->Branch("NQPhos",			&fTNqualpho,	"NQPhos/I");
-	fDiLeptonTree->Branch("PhoPt",			&fTPhopt,		"PhoPt[NQPhos]/F");
-	fDiLeptonTree->Branch("PhoEta",			&fTPhoeta,		"PhoEta[NQPhos]/F");
-	fDiLeptonTree->Branch("PhoPhi",			&fTPhophi,		"PhoPhi[NQPhos]/F");
-	fDiLeptonTree->Branch("PhoRelIso",		&fTPhoRelIso,	"PhoRelIso[NQPhos]/F");		
-	fDiLeptonTree->Branch("PhoDRjet",		&fTPhoDRjet,	"PhoDRjet[NQPhos]/F");
-	fDiLeptonTree->Branch("PhoDRhardestjet",&fTPhoDRhardestjet,"PhoDRhardestjet[NQPhos]/F");
-	//muon properties
-	fDiLeptonTree->Branch("NQMus",			&fTNqualmu,		"NQMus/I");
-	fDiLeptonTree->Branch("MuCh",			&fTMucharge,	"MuCh[NQMus]/I");
-	fDiLeptonTree->Branch("MuPt",			&fTMupt,		"MuPt[NQMus]/F");
-	fDiLeptonTree->Branch("MuEta",			&fTMueta,		"MuEta[NQMus]/F");
-	fDiLeptonTree->Branch("MuPhi",			&fTMuphi,		"MuPhi[NQMus]/F");
-	fDiLeptonTree->Branch("MuIso",			&fTMuiso,		"MuIso[NQMus]/F");
-	fDiLeptonTree->Branch("MuD0",			&fTMud0,		"MuD0[NQMus]/F");
-	fDiLeptonTree->Branch("MuNTkHits",		&fTMuntkhits,	"MuNTkHits[NQMus]/F");
-	fDiLeptonTree->Branch("MuMT",			&fTMuMT,		"MuMT[NQMus]/F");
-	fDiLeptonTree->Branch("MuDRjet",		&fTMuDRjet,		"MuDRjet[NQMus]/F");
-	fDiLeptonTree->Branch("MuDRhardestjet",&fTMuDRhardestjet,"MuDRhardestjet[NQMus]/F");
-	
-	// electron properties
-	fDiLeptonTree->Branch("NQEls",					&fTNqualel,				"NQEls/I");
-	fDiLeptonTree->Branch("ElCh",					&fTElcharge,			"ElCh[NQEls]/I");
-	fDiLeptonTree->Branch("ElChIsCons",				&fTElChargeIsCons,		"ElChIsCons[NQEls]/I");
-	fDiLeptonTree->Branch("ElChIsGenCons",			&fTElChargeIsGenCons,	"ElChIsGenCons[NQEls]/I");
-	fDiLeptonTree->Branch("ElPt",					&fTElpt,				"ElPt[NQEls]/F");
-	fDiLeptonTree->Branch("ElEta",					&fTEleta,				"ElEta[NQEls]/F");
-	fDiLeptonTree->Branch("ElPhi",					&fTElphi,				"ElPhi[NQEls]/F");
-	fDiLeptonTree->Branch("ElD0",					&fTEld0,				"ElD0[NQEls]/F");
-	fDiLeptonTree->Branch("ElD0Err",				&fTElD0Err,				"ElD0Err[NQEls]/F");
-	fDiLeptonTree->Branch("ElEoverP",				&fTElEoverP,			"ElEoverP[NQEls]/F");
-	fDiLeptonTree->Branch("ElHoverE",				&fTElHoverE,			"ElHoverE[NQEls]/F");
-	fDiLeptonTree->Branch("ElSigmaIetaIeta",		&fTElSigmaIetaIeta,		"ElSigmaIetaIeta[NQEls]/F");
-	fDiLeptonTree->Branch("ElDeltaPhiSuperClusterAtVtx",	&fTElDeltaPhiSuperClusterAtVtx,          "ElDeltaPhiSuperClusterAtVtx[NQEls]/F");
-	fDiLeptonTree->Branch("ElDeltaEtaSuperClusterAtVtx",	&fTElDeltaEtaSuperClusterAtVtx,          "ElDeltaEtaSuperClusterAtVtx[NQEls]/F");
-	fDiLeptonTree->Branch("ElRelIso",				&fTElRelIso,			"ElRelIso[NQEls]/F");
-	fDiLeptonTree->Branch("ElDR04TkSumPt",			&fTElDR04TkSumPt,		"ElDR04TkSumPt[NQEls]/F");
-	fDiLeptonTree->Branch("ElDR04EcalRecHitSumEt",	&fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt[NQEls]/F");
-	fDiLeptonTree->Branch("ElDR04HcalTowerSumEt",	&fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt[NQEls]/F");
-	fDiLeptonTree->Branch("ElS4OverS1",			&fTElS4OverS1,			"ElS4OverS1[NQEls]/F");
-	fDiLeptonTree->Branch("ElConvPartnerTrkDist",	&fTElConvPartnerTrkDist,"ElConvPartnerTrkDist[NQEls]/F");
-	fDiLeptonTree->Branch("ElConvPartnerTrkDCot",	&fTElConvPartnerTrkDCot,"ElConvPartnerTrkDCot[NQEls]/F");
-	fDiLeptonTree->Branch("ElChargeMisIDProb",		&fTElChargeMisIDProb,	"ElChargeMisIDProb[NQEls]/F");
-	fDiLeptonTree->Branch("ElMT",					&fTElMT,				"ElMT[NQEls]/F");
-	fDiLeptonTree->Branch("ElDRjet",				&fTElDRjet,				"ElDRjet[NQEls]/F");
-	fDiLeptonTree->Branch("ElDRhardestjet",			&fTElDRhardestjet,		"ElDRhardestjet[NQEls]/F");
-	fDiLeptonTree->Branch("ElGenID",				&fTElGenID,				"ElGenID[NQEls]/I");
-	fDiLeptonTree->Branch("ElGenStatus",			&fTElGenStatus,			"ElGenStatus[NQEls]/I");
-	fDiLeptonTree->Branch("ElGenMID",				&fTElGenMID,			"ElGenMID[NQEls]/I");
-	fDiLeptonTree->Branch("ElGenMStatus",			&fTElGenMStatus,		"ElGenMStatus[NQEls]/I");
-	fDiLeptonTree->Branch("ElGenGMID",				&fTElGenGMID,			"ElGenGMID[NQEls]/I");
-	fDiLeptonTree->Branch("ElGenGMStatus",			&fTElGenGMStatus,		"ElGenGMStatus[NQEls]/I");
-	fDiLeptonTree->Branch("ElTight",				&fTElTight,				"ElTight[NQEls]/I");
-	
-	// dilepton properties
-	fDiLeptonTree->Branch("ElMInv",			&fTElminv,			"ElMInv/F");
-	fDiLeptonTree->Branch("ElMTInv",		&fTElmtinv,			"ElMTInv/F");
-	fDiLeptonTree->Branch("ElMT2_0",		&fTElmt2_0,			"ElMT2_0/F");
-	fDiLeptonTree->Branch("ElMT2_50",		&fTElmt2_50,		"ElMT2_50/F");
-	fDiLeptonTree->Branch("ElMT2_100",		&fTElmt2_100,		"ElMT2_100/F");
-	fDiLeptonTree->Branch("ElMCT",			&fTElmCT,			"ElMCT/F");
-	fDiLeptonTree->Branch("ElMCTparl",		&fTElmCTparl,		"ElMCTparl/F");
-	fDiLeptonTree->Branch("ElMCTorth",		&fTElmCTorth,		"ElMCTorth/F");
-	fDiLeptonTree->Branch("ElMT2orth_0",	&fTElmT2orth_0,		"ElMT2orth_0/F");
-	fDiLeptonTree->Branch("ElMT2orth_50",	&fTElmT2orth_50,	"ElMT2orth_50/F");
-	fDiLeptonTree->Branch("ElMT2orth_100",	&fTElmT2orth_100,	"ElMT2orth_100/F");
-	
-	fDiLeptonTree->Branch("MuMInv",        &fTMuminv,			"MuMInv/F");
-	fDiLeptonTree->Branch("MuMTInv",       &fTMumtinv,			"MuMTInv/F");
-	fDiLeptonTree->Branch("MuMT2_0",       &fTMumt2_0,			"MuMT2_0/F");
-	fDiLeptonTree->Branch("MuMT2_50",      &fTMumt2_50,			"MuMT2_50/F");
-	fDiLeptonTree->Branch("MuMT2_100",     &fTMumt2_100,		"MuMT2_100/F");
-	fDiLeptonTree->Branch("MuMCT",		   &fTMumCT,			"MuMCT/F");	
-	fDiLeptonTree->Branch("MuMCTparl",     &fTMumCTparl,		"MuMCTparl/F");
-	fDiLeptonTree->Branch("MuMCTorth",     &fTMumCTorth,		"MuMCTorth/F");
-	fDiLeptonTree->Branch("MuMT2orth_0",   &fTMumT2orth_0,		"MuMT2orth_0/F");
-	fDiLeptonTree->Branch("MuMT2orth_50",  &fTMumT2orth_50,		"MuMT2orth_50/F");
-	fDiLeptonTree->Branch("MuMT2orth_100", &fTMumT2orth_100,	"MuMT2orth_100/F");
-	
-	//event properties
-	fDiLeptonTree->Branch("HT",			&fTHT,			"HT/F");
-	fDiLeptonTree->Branch("SumEt",		&fTSumEt,		"SumEt/F");
-	fDiLeptonTree->Branch("tcMET",		&fTtcMET,		"tcMET/F");
-	fDiLeptonTree->Branch("pfMET",		&fTpfMET,		"pfMET/F");
-	fDiLeptonTree->Branch("MuCorrMET",	&fTMuCorrMET,	"MuCorrMET/F");
-	
-	fDiLeptonTree->Branch("dPhiMJ1",	&fTdPhiMJ1,		"dPhiMJ1/F");
-	fDiLeptonTree->Branch("dPhiMJ2",	&fTdPhiMJ2,		"dPhiMJ2/F");
-	fDiLeptonTree->Branch("R12",		&fTR12,			"R12/F");
-	fDiLeptonTree->Branch("R21",		&fTR21,			"R21/F");
-	fDiLeptonTree->Branch("R12plusR21",	&fTR12plusR21,	"R12plusR21/F");
-	fDiLeptonTree->Branch("AlphaT_h",	&fTalphaT_h,		"AlphaT_h/F");
-	fDiLeptonTree->Branch("AlphaCT_h",	&fTalphaCT_h,		"AlphaCT_h/F");
-	fDiLeptonTree->Branch("AlphaT",		&fTalphaT,			"AlphaT/F");
-	fDiLeptonTree->Branch("AlphaCT",	&fTalphaCT,			"AlphaCT/F");
-	fDiLeptonTree->Branch("AlphaT_new",	&fTalphaT_new,		"AlphaT_new/F");
-	fDiLeptonTree->Branch("AlphaCT_new",&fTalphaCT_new,		"AlphaCT_new/F");
-	
-	// fake rate propeties
-	fDiLeptonTree->Branch("isSE_QCDLike",				&fTisSE_QCDLike,				"isSE_QCDLike/I");
-	fDiLeptonTree->Branch("SE_QCDLike_FakeElGenID",		&fTSE_QCDLike_FakeElGenID,		"SE_QCDLike_FakeElGenID/I");
-	fDiLeptonTree->Branch("SE_QCDLike_ElLoosePt",		&fTSE_QCDLike_ElLoosePt,		"SE_QCDLike_ElLoosePt/F");
-	fDiLeptonTree->Branch("SE_QCDLike_ElTightPt",		&fTSE_QCDLike_ElTightPt,		"SE_QCDLike_ElTightPt/F");
-	fDiLeptonTree->Branch("SE_QCDLike_ElLooseEta",		&fTSE_QCDLike_ElLooseEta,		"SE_QCDLike_ElLooseEta/F");
-	fDiLeptonTree->Branch("SE_QCDLike_ElTightEta",		&fTSE_QCDLike_ElTightEta,		"SE_QCDLike_ElTightEta/F");
+	fAuxTree->Branch("NPhos",			&fTnqphos,		"NPhos/I");
+	fAuxTree->Branch("PhoPt",			&fTPhopt,		"PhoPt[NPhos]/F");
+	fAuxTree->Branch("PhoEta",			&fTPhoeta,		"PhoEta[NPhos]/F");
+	fAuxTree->Branch("PhoPhi",			&fTPhophi,		"PhoPhi[NPhos]/F");
+	fAuxTree->Branch("PhoRelIso",		&fTPhoRelIso,	"PhoRelIso[NPhos]/F");		
+	fAuxTree->Branch("PhoDRjet",		&fTPhoDRjet,	"PhoDRjet[NPhos]/F");
+	fAuxTree->Branch("PhoDRhardestjet",	&fTPhoDRhardestjet,"PhoDRhardestjet[NPhos]/F");	
+}
 
-	fDiLeptonTree->Branch("isSE_AntiQCDLike",				&fTisSE_AntiQCDLike,				"isSE_AntiQCDLike/I");
-	fDiLeptonTree->Branch("SE_AntiQCDLike_FakeElGenID",		&fTSE_AntiQCDLike_FakeElGenID,		"SE_AntiQCDLike_FakeElGenID/I");
-	fDiLeptonTree->Branch("SE_AntiQCDLike_ElLoosePt",		&fTSE_AntiQCDLike_ElLoosePt,		"SE_AntiQCDLike_ElLoosePt/F");
-	fDiLeptonTree->Branch("SE_AntiQCDLike_ElTightPt",		&fTSE_AntiQCDLike_ElTightPt,		"SE_AntiQCDLike_ElTightPt/F");
-	fDiLeptonTree->Branch("SE_AntiQCDLike_ElLooseEta",		&fTSE_AntiQCDLike_ElLooseEta,		"SE_AntiQCDLike_ElLooseEta/F");
-	fDiLeptonTree->Branch("SE_AntiQCDLike_ElTightEta",		&fTSE_AntiQCDLike_ElTightEta,		"SE_AntiQCDLike_ElTightEta/F");
+void	SSDLAnalysis::BookFPRVariables(TTree* fFPRTree){
+	// other properties
+	fFPRTree->Branch("AlphaT_h",		&fTalphaT_h,		"AlphaT_h/F");
+	fFPRTree->Branch("AlphaCT_h",		&fTalphaCT_h,		"AlphaCT_h/F");
+	fFPRTree->Branch("AlphaT",			&fTalphaT,			"AlphaT/F");
+	fFPRTree->Branch("AlphaCT",			&fTalphaCT,			"AlphaCT/F");
+	fFPRTree->Branch("AlphaT_new",		&fTalphaT_new,		"AlphaT_new/F");
+	fFPRTree->Branch("AlphaCT_new",		&fTalphaCT_new,		"AlphaCT_new/F");
+	fFPRTree->Branch("ElMT2_0",			&fTElmt2_0,			"ElMT2_0/F");
+	fFPRTree->Branch("ElMT2_50",		&fTElmt2_50,		"ElMT2_50/F");
+	fFPRTree->Branch("ElMT2_100",		&fTElmt2_100,		"ElMT2_100/F");
+	fFPRTree->Branch("ElMCT",			&fTElmCT,			"ElMCT/F");
+	fFPRTree->Branch("ElMCTparl",		&fTElmCTparl,		"ElMCTparl/F");
+	fFPRTree->Branch("ElMCTorth",		&fTElmCTorth,		"ElMCTorth/F");
+	fFPRTree->Branch("ElMT2orth_0",		&fTElmT2orth_0,		"ElMT2orth_0/F");
+	fFPRTree->Branch("ElMT2orth_50",	&fTElmT2orth_50,	"ElMT2orth_50/F");
+	fFPRTree->Branch("ElMT2orth_100",	&fTElmT2orth_100,	"ElMT2orth_100/F");
+	fFPRTree->Branch("MuMT2_0",			&fTMumt2_0,			"MuMT2_0/F");
+	fFPRTree->Branch("MuMT2_50",		&fTMumt2_50,		"MuMT2_50/F");
+	fFPRTree->Branch("MuMT2_100",		&fTMumt2_100,		"MuMT2_100/F");
+	fFPRTree->Branch("MuMCT",			&fTMumCT,			"MuMCT/F");	
+	fFPRTree->Branch("MuMCTparl",		&fTMumCTparl,		"MuMCTparl/F");
+	fFPRTree->Branch("MuMCTorth",		&fTMumCTorth,		"MuMCTorth/F");
+	fFPRTree->Branch("MuMT2orth_0",		&fTMumT2orth_0,		"MuMT2orth_0/F");
+	fFPRTree->Branch("MuMT2orth_50",	&fTMumT2orth_50,	"MuMT2orth_50/F");
+	fFPRTree->Branch("MuMT2orth_100",	&fTMumT2orth_100,	"MuMT2orth_100/F");
 	
-	fDiLeptonTree->Branch("isDE_ZJetsLike",						&fTisDE_ZJetsLike,			"isDE_ZJetsLike/I");
-	fDiLeptonTree->Branch("DE_ZJetsLike_ElLoosePt",				&fTDE_ZJetsLike_ElLoosePt,	"DE_ZJetsLike_ElLoosePt/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_ElTightPt",				&fTDE_ZJetsLike_ElTightPt,	"DE_ZJetsLike_ElTightPt/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_ElLooseEta",			&fTDE_ZJetsLike_ElLooseEta,	"DE_ZJetsLike_ElLooseEta/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_ElTightEta",			&fTDE_ZJetsLike_ElTightEta,	"DE_ZJetsLike_ElTightEta/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_PromptElGenLoosePt",	&fTDE_ZJetsLike_PromptElGenLoosePt,	"DE_ZJetsLike_PromptElGenLoosePt/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_PromptElGenTightPt",	&fTDE_ZJetsLike_PromptElGenTightPt,	"DE_ZJetsLike_PromptElGenTightPt/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_PromptElGenLooseEta",	&fTDE_ZJetsLike_PromptElGenLooseEta,	"DE_ZJetsLike_PromptElGenLooseEta/F");
-	fDiLeptonTree->Branch("DE_ZJetsLike_PromptElGenTightEta",	&fTDE_ZJetsLike_PromptElGenTightEta,	"DE_ZJetsLike_PromptElGenTightEta/F");
+	// fake ratio propeties
+	fFPRTree->Branch("isSE_QCDLike",				&fTisSE_QCDLike,				"isSE_QCDLike/I");
+	fFPRTree->Branch("SE_QCDLike_FakeElGenID",		&fTSE_QCDLike_FakeElGenID,		"SE_QCDLike_FakeElGenID/I");
+	fFPRTree->Branch("SE_QCDLike_ElLoosePt",		&fTSE_QCDLike_ElLoosePt,		"SE_QCDLike_ElLoosePt/F");
+	fFPRTree->Branch("SE_QCDLike_ElTightPt",		&fTSE_QCDLike_ElTightPt,		"SE_QCDLike_ElTightPt/F");
+	fFPRTree->Branch("SE_QCDLike_ElLooseEta",		&fTSE_QCDLike_ElLooseEta,		"SE_QCDLike_ElLooseEta/F");
+	fFPRTree->Branch("SE_QCDLike_ElTightEta",		&fTSE_QCDLike_ElTightEta,		"SE_QCDLike_ElTightEta/F");
 	
-	fDiLeptonTree->Branch("isDE_WJetsLike",					&fTisDE_WJetsLike,			"isDE_WJetsLike/I");
-	fDiLeptonTree->Branch("DE_WJetsLike_FakeElGenID",		&fTDE_WJetsLike_FakeElGenID,"DE_WJetsLike_FakeElGenID/I");
-	fDiLeptonTree->Branch("DE_WJetsLike_ElLoosePt",			&fTDE_WJetsLike_ElLoosePt,	"DE_WJetsLike_ElLoosePt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_ElTightPt",			&fTDE_WJetsLike_ElTightPt,	"DE_WJetsLike_ElTightPt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_ElLooseEta",		&fTDE_WJetsLike_ElLooseEta,	"DE_WJetsLike_ElLooseEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_ElTightEta",		&fTDE_WJetsLike_ElTightEta,	"DE_WJetsLike_ElTightEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_ElTightMT",			&fTDE_WJetsLike_ElTightMT,	"DE_WJetsLike_ElTightMT/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_FakeElGenLoosePt",	&fTDE_WJetsLike_FakeElGenLoosePt,	"DE_WJetsLike_FakeElGenLoosePt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_FakeElGenTightPt",	&fTDE_WJetsLike_FakeElGenTightPt,	"DE_WJetsLike_FakeElGenTightPt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_FakeElGenLooseEta",	&fTDE_WJetsLike_FakeElGenLooseEta,	"DE_WJetsLike_FakeElGenLooseEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_FakeElGenTightEta",	&fTDE_WJetsLike_FakeElGenTightEta,	"DE_WJetsLike_FakeElGenTightEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_PromptElGenLoosePt",	&fTDE_WJetsLike_PromptElGenLoosePt,	"DE_WJetsLike_PromptElGenLoosePt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_PromptElGenTightPt",	&fTDE_WJetsLike_PromptElGenTightPt,	"DE_WJetsLike_PromptElGenTightPt/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_PromptElGenLooseEta",	&fTDE_WJetsLike_PromptElGenLooseEta,	"DE_WJetsLike_PromptElGenLooseEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_PromptElGenTightEta",	&fTDE_WJetsLike_PromptElGenTightEta,	"DE_WJetsLike_PromptElGenTightEta/F");
-	fDiLeptonTree->Branch("DE_WJetsLike_PromptElGenMT",			&fTDE_WJetsLike_PromptElGenMT,	"DE_WJetsLike_PromptElGenMT/F");
+	fFPRTree->Branch("isSE_AntiQCDLike",			&fTisSE_AntiQCDLike,				"isSE_AntiQCDLike/I");
+	fFPRTree->Branch("SE_AntiQCDLike_FakeElGenID",	&fTSE_AntiQCDLike_FakeElGenID,		"SE_AntiQCDLike_FakeElGenID/I");
+	fFPRTree->Branch("SE_AntiQCDLike_ElLoosePt",	&fTSE_AntiQCDLike_ElLoosePt,		"SE_AntiQCDLike_ElLoosePt/F");
+	fFPRTree->Branch("SE_AntiQCDLike_ElTightPt",	&fTSE_AntiQCDLike_ElTightPt,		"SE_AntiQCDLike_ElTightPt/F");
+	fFPRTree->Branch("SE_AntiQCDLike_ElLooseEta",	&fTSE_AntiQCDLike_ElLooseEta,		"SE_AntiQCDLike_ElLooseEta/F");
+	fFPRTree->Branch("SE_AntiQCDLike_ElTightEta",	&fTSE_AntiQCDLike_ElTightEta,		"SE_AntiQCDLike_ElTightEta/F");
 	
-	fDiLeptonTree->Branch("isDE_AntiWJetsLike",				&fTisDE_AntiWJetsLike,			"isDE_AntiWJetsLike/I");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_FakeElGenID",	&fTDE_AntiWJetsLike_FakeElGenID,"DE_AntiWJetsLike_FakeElGenID/I");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_ElLoosePt",		&fTDE_AntiWJetsLike_ElLoosePt,	"DE_AntiWJetsLike_ElLoosePt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_ElTightPt",		&fTDE_AntiWJetsLike_ElTightPt,	"DE_AntiWJetsLike_ElTightPt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_ElLooseEta",	&fTDE_AntiWJetsLike_ElLooseEta,	"DE_AntiWJetsLike_ElLooseEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_ElTightEta",	&fTDE_AntiWJetsLike_ElTightEta,	"DE_AntiWJetsLike_ElTightEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_ElTightMT",		&fTDE_AntiWJetsLike_ElTightMT,	"DE_AntiWJetsLike_ElTightMT/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_FakeElGenLoosePt",	&fTDE_AntiWJetsLike_FakeElGenLoosePt,	"DE_AntiWJetsLike_FakeElGenLoosePt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_FakeElGenTightPt",	&fTDE_AntiWJetsLike_FakeElGenTightPt,	"DE_AntiWJetsLike_FakeElGenTightPt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_FakeElGenLooseEta",	&fTDE_AntiWJetsLike_FakeElGenLooseEta,	"DE_AntiWJetsLike_FakeElGenLooseEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_FakeElGenTightEta",	&fTDE_AntiWJetsLike_FakeElGenTightEta,	"DE_AntiWJetsLike_FakeElGenTightEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_PromptElGenLoosePt",	&fTDE_AntiWJetsLike_PromptElGenLoosePt,	"DE_AntiWJetsLike_PromptElGenLoosePt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_PromptElGenTightPt",	&fTDE_AntiWJetsLike_PromptElGenTightPt,	"DE_AntiWJetsLike_PromptElGenTightPt/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_PromptElGenLooseEta",	&fTDE_AntiWJetsLike_PromptElGenLooseEta,"DE_AntiWJetsLike_PromptElGenLooseEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_PromptElGenTightEta",	&fTDE_AntiWJetsLike_PromptElGenTightEta,"DE_AntiWJetsLike_PromptElGenTightEta/F");
-	fDiLeptonTree->Branch("DE_AntiWJetsLike_PromptElGenMT",			&fTDE_AntiWJetsLike_PromptElGenMT,		"DE_AntiWJetsLike_PromptElGenMT/F");
+	fFPRTree->Branch("isDE_ZJetsLike",				&fTisDE_ZJetsLike,			"isDE_ZJetsLike/I");
+	fFPRTree->Branch("DE_ZJetsLike_ElLoosePt",		&fTDE_ZJetsLike_ElLoosePt,	"DE_ZJetsLike_ElLoosePt/F");
+	fFPRTree->Branch("DE_ZJetsLike_ElTightPt",		&fTDE_ZJetsLike_ElTightPt,	"DE_ZJetsLike_ElTightPt/F");
+	fFPRTree->Branch("DE_ZJetsLike_ElLooseEta",		&fTDE_ZJetsLike_ElLooseEta,	"DE_ZJetsLike_ElLooseEta/F");
+	fFPRTree->Branch("DE_ZJetsLike_ElTightEta",		&fTDE_ZJetsLike_ElTightEta,	"DE_ZJetsLike_ElTightEta/F");
+	fFPRTree->Branch("DE_ZJetsLike_PromptElGenLoosePt",	&fTDE_ZJetsLike_PromptElGenLoosePt,	"DE_ZJetsLike_PromptElGenLoosePt/F");
+	fFPRTree->Branch("DE_ZJetsLike_PromptElGenTightPt",	&fTDE_ZJetsLike_PromptElGenTightPt,	"DE_ZJetsLike_PromptElGenTightPt/F");
+	fFPRTree->Branch("DE_ZJetsLike_PromptElGenLooseEta",	&fTDE_ZJetsLike_PromptElGenLooseEta,	"DE_ZJetsLike_PromptElGenLooseEta/F");
+	fFPRTree->Branch("DE_ZJetsLike_PromptElGenTightEta",	&fTDE_ZJetsLike_PromptElGenTightEta,	"DE_ZJetsLike_PromptElGenTightEta/F");
 	
-	fDiLeptonTree->Branch("isDE_SignalLike",&fTisDE_SignalLike,		"isDE_SignalLike/I");
-	fDiLeptonTree->Branch("DE_Ntt_El1Pt",	&fTDE_Ntt_El1Pt,		"DE_Ntt_El1Pt/F");
-	fDiLeptonTree->Branch("DE_Ntt_El2Pt",	&fTDE_Ntt_El2Pt,		"DE_Ntt_El2Pt/F");
-	fDiLeptonTree->Branch("DE_Ntt_El1Eta",	&fTDE_Ntt_El1Eta,		"DE_Ntt_El1Eta/F");
-	fDiLeptonTree->Branch("DE_Ntt_El2Eta",	&fTDE_Ntt_El2Eta,		"DE_Ntt_El2Eta/F");
-	fDiLeptonTree->Branch("DE_Ntl_El1Pt",	&fTDE_Ntl_El1Pt,		"DE_Ntl_El1Pt/F");
-	fDiLeptonTree->Branch("DE_Ntl_El2Pt",	&fTDE_Ntl_El2Pt,		"DE_Ntl_El2Pt/F");
-	fDiLeptonTree->Branch("DE_Ntl_El1Eta",	&fTDE_Ntl_El1Eta,		"DE_Ntl_El1Eta/F");
-	fDiLeptonTree->Branch("DE_Ntl_El2Eta",	&fTDE_Ntl_El2Eta,		"DE_Ntl_El2Eta/F");
-	fDiLeptonTree->Branch("DE_Nlt_El1Pt",	&fTDE_Nlt_El1Pt,		"DE_Nlt_El1Pt/F");
-	fDiLeptonTree->Branch("DE_Nlt_El2Pt",	&fTDE_Nlt_El2Pt,		"DE_Nlt_El2Pt/F");
-	fDiLeptonTree->Branch("DE_Nlt_El1Eta",	&fTDE_Nlt_El1Eta,		"DE_Nlt_El1Eta/F");
-	fDiLeptonTree->Branch("DE_Nlt_El2Eta",	&fTDE_Nlt_El2Eta,		"DE_Nlt_El2Eta/F");
-	fDiLeptonTree->Branch("DE_Nll_El1Pt",	&fTDE_Nll_El1Pt,		"DE_Nll_El1Pt/F");
-	fDiLeptonTree->Branch("DE_Nll_El2Pt",	&fTDE_Nll_El2Pt,		"DE_Nll_El2Pt/F");
-	fDiLeptonTree->Branch("DE_Nll_El1Eta",	&fTDE_Nll_El1Eta,		"DE_Nll_El1Eta/F");
-	fDiLeptonTree->Branch("DE_Nll_El2Eta",	&fTDE_Nll_El2Eta,		"DE_Nll_El2Eta/F");
+	fFPRTree->Branch("isDE_WJetsLike",					&fTisDE_WJetsLike,			"isDE_WJetsLike/I");
+	fFPRTree->Branch("DE_WJetsLike_FakeElGenID",		&fTDE_WJetsLike_FakeElGenID,"DE_WJetsLike_FakeElGenID/I");
+	fFPRTree->Branch("DE_WJetsLike_ElLoosePt",			&fTDE_WJetsLike_ElLoosePt,	"DE_WJetsLike_ElLoosePt/F");
+	fFPRTree->Branch("DE_WJetsLike_ElTightPt",			&fTDE_WJetsLike_ElTightPt,	"DE_WJetsLike_ElTightPt/F");
+	fFPRTree->Branch("DE_WJetsLike_ElLooseEta",			&fTDE_WJetsLike_ElLooseEta,	"DE_WJetsLike_ElLooseEta/F");
+	fFPRTree->Branch("DE_WJetsLike_ElTightEta",			&fTDE_WJetsLike_ElTightEta,	"DE_WJetsLike_ElTightEta/F");
+	fFPRTree->Branch("DE_WJetsLike_ElTightMT",			&fTDE_WJetsLike_ElTightMT,	"DE_WJetsLike_ElTightMT/F");
+	fFPRTree->Branch("DE_WJetsLike_FakeElGenLoosePt",	&fTDE_WJetsLike_FakeElGenLoosePt,	"DE_WJetsLike_FakeElGenLoosePt/F");
+	fFPRTree->Branch("DE_WJetsLike_FakeElGenTightPt",	&fTDE_WJetsLike_FakeElGenTightPt,	"DE_WJetsLike_FakeElGenTightPt/F");
+	fFPRTree->Branch("DE_WJetsLike_FakeElGenLooseEta",	&fTDE_WJetsLike_FakeElGenLooseEta,	"DE_WJetsLike_FakeElGenLooseEta/F");
+	fFPRTree->Branch("DE_WJetsLike_FakeElGenTightEta",	&fTDE_WJetsLike_FakeElGenTightEta,	"DE_WJetsLike_FakeElGenTightEta/F");
+	fFPRTree->Branch("DE_WJetsLike_PromptElGenLoosePt",	&fTDE_WJetsLike_PromptElGenLoosePt,	"DE_WJetsLike_PromptElGenLoosePt/F");
+	fFPRTree->Branch("DE_WJetsLike_PromptElGenTightPt",	&fTDE_WJetsLike_PromptElGenTightPt,	"DE_WJetsLike_PromptElGenTightPt/F");
+	fFPRTree->Branch("DE_WJetsLike_PromptElGenLooseEta",	&fTDE_WJetsLike_PromptElGenLooseEta,	"DE_WJetsLike_PromptElGenLooseEta/F");
+	fFPRTree->Branch("DE_WJetsLike_PromptElGenTightEta",	&fTDE_WJetsLike_PromptElGenTightEta,	"DE_WJetsLike_PromptElGenTightEta/F");
+	fFPRTree->Branch("DE_WJetsLike_PromptElGenMT",			&fTDE_WJetsLike_PromptElGenMT,	"DE_WJetsLike_PromptElGenMT/F");
+	
+	fFPRTree->Branch("isDE_AntiWJetsLike",				&fTisDE_AntiWJetsLike,			"isDE_AntiWJetsLike/I");
+	fFPRTree->Branch("DE_AntiWJetsLike_FakeElGenID",	&fTDE_AntiWJetsLike_FakeElGenID,"DE_AntiWJetsLike_FakeElGenID/I");
+	fFPRTree->Branch("DE_AntiWJetsLike_ElLoosePt",		&fTDE_AntiWJetsLike_ElLoosePt,	"DE_AntiWJetsLike_ElLoosePt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_ElTightPt",		&fTDE_AntiWJetsLike_ElTightPt,	"DE_AntiWJetsLike_ElTightPt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_ElLooseEta",		&fTDE_AntiWJetsLike_ElLooseEta,	"DE_AntiWJetsLike_ElLooseEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_ElTightEta",		&fTDE_AntiWJetsLike_ElTightEta,	"DE_AntiWJetsLike_ElTightEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_ElTightMT",		&fTDE_AntiWJetsLike_ElTightMT,	"DE_AntiWJetsLike_ElTightMT/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_FakeElGenLoosePt",	&fTDE_AntiWJetsLike_FakeElGenLoosePt,	"DE_AntiWJetsLike_FakeElGenLoosePt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_FakeElGenTightPt",	&fTDE_AntiWJetsLike_FakeElGenTightPt,	"DE_AntiWJetsLike_FakeElGenTightPt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_FakeElGenLooseEta",	&fTDE_AntiWJetsLike_FakeElGenLooseEta,	"DE_AntiWJetsLike_FakeElGenLooseEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_FakeElGenTightEta",	&fTDE_AntiWJetsLike_FakeElGenTightEta,	"DE_AntiWJetsLike_FakeElGenTightEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_PromptElGenLoosePt",	&fTDE_AntiWJetsLike_PromptElGenLoosePt,	"DE_AntiWJetsLike_PromptElGenLoosePt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_PromptElGenTightPt",	&fTDE_AntiWJetsLike_PromptElGenTightPt,	"DE_AntiWJetsLike_PromptElGenTightPt/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_PromptElGenLooseEta",	&fTDE_AntiWJetsLike_PromptElGenLooseEta,"DE_AntiWJetsLike_PromptElGenLooseEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_PromptElGenTightEta",	&fTDE_AntiWJetsLike_PromptElGenTightEta,"DE_AntiWJetsLike_PromptElGenTightEta/F");
+	fFPRTree->Branch("DE_AntiWJetsLike_PromptElGenMT",			&fTDE_AntiWJetsLike_PromptElGenMT,		"DE_AntiWJetsLike_PromptElGenMT/F");
+	
+	fFPRTree->Branch("isDE_SignalLike",&fTisDE_SignalLike,		"isDE_SignalLike/I");
+	fFPRTree->Branch("DE_Ntt_El1Pt",	&fTDE_Ntt_El1Pt,		"DE_Ntt_El1Pt/F");
+	fFPRTree->Branch("DE_Ntt_El2Pt",	&fTDE_Ntt_El2Pt,		"DE_Ntt_El2Pt/F");
+	fFPRTree->Branch("DE_Ntt_El1Eta",	&fTDE_Ntt_El1Eta,		"DE_Ntt_El1Eta/F");
+	fFPRTree->Branch("DE_Ntt_El2Eta",	&fTDE_Ntt_El2Eta,		"DE_Ntt_El2Eta/F");
+	fFPRTree->Branch("DE_Ntl_El1Pt",	&fTDE_Ntl_El1Pt,		"DE_Ntl_El1Pt/F");
+	fFPRTree->Branch("DE_Ntl_El2Pt",	&fTDE_Ntl_El2Pt,		"DE_Ntl_El2Pt/F");
+	fFPRTree->Branch("DE_Ntl_El1Eta",	&fTDE_Ntl_El1Eta,		"DE_Ntl_El1Eta/F");
+	fFPRTree->Branch("DE_Ntl_El2Eta",	&fTDE_Ntl_El2Eta,		"DE_Ntl_El2Eta/F");
+	fFPRTree->Branch("DE_Nlt_El1Pt",	&fTDE_Nlt_El1Pt,		"DE_Nlt_El1Pt/F");
+	fFPRTree->Branch("DE_Nlt_El2Pt",	&fTDE_Nlt_El2Pt,		"DE_Nlt_El2Pt/F");
+	fFPRTree->Branch("DE_Nlt_El1Eta",	&fTDE_Nlt_El1Eta,		"DE_Nlt_El1Eta/F");
+	fFPRTree->Branch("DE_Nlt_El2Eta",	&fTDE_Nlt_El2Eta,		"DE_Nlt_El2Eta/F");
+	fFPRTree->Branch("DE_Nll_El1Pt",	&fTDE_Nll_El1Pt,		"DE_Nll_El1Pt/F");
+	fFPRTree->Branch("DE_Nll_El2Pt",	&fTDE_Nll_El2Pt,		"DE_Nll_El2Pt/F");
+	fFPRTree->Branch("DE_Nll_El1Eta",	&fTDE_Nll_El1Eta,		"DE_Nll_El1Eta/F");
+	fFPRTree->Branch("DE_Nll_El2Eta",	&fTDE_Nll_El2Eta,		"DE_Nll_El2Eta/F");	
 }
 
 void	SSDLAnalysis::Analyze(){
 	
 	//--------------------------------------------------------------------------
-	// initial event selection: good primary vertex, good event
+	// initial event selection: good event trigger, good primary vertex...
 	//--------------------------------------------------------------------------
-	// Select events which have good primary vertex
-	if( !isGoodBasicPrimaryVertex() ) return;
-	
-	//--------------------------------------------------------------------------
-	// Form array of indecies of qualified muons, electrons, jets and photons sorted by Pt
-	//--------------------------------------------------------------------------
-	vector<int>		selectedMuInd	= MuonSelection();
-	vector<int>		selectedElInd	= ElectronSelection(); 
-	vector<int>		selectedJetInd	= PFJetSelection();
-	vector<int>		selectedPhoInd	= PhotonSelection();
-
-	int nqmus	= selectedMuInd.size	();
-	int nqels	= selectedElInd.size	();
-	int nqjets	= selectedJetInd.size	();
-	int nqphos	= selectedPhoInd.size	();
-	
-	// Select events with at least one qualified muon or electron or jet
-	if(nqmus + nqels + nqjets < 1) return;
-	// reset trees
+	if( !IsGoodMuEvent() && !IsGoodElEvent() && !IsGoodElFakesEvent() && !IsGoodHadronicEvent() ) return;
+	if( !IsGoodEvent() ) return;
 	ResetTree();
-	// electron/hadronic trigger requirements
-	fTHTL_GoodElEvent		= IsGoodElEvent();
-	fTHTL_GoodHadronicEvent = IsGoodHadronicEvent();
-	// object numbers
-	fTNqualmu	= nqmus;
-	fTNqualel	= nqels;
-	fTNqualjet	= nqjets;
-	fTNqualpho	= nqphos;
+
+	//--------------------------------------------------------------------------
+	// Form array of indices of good muons, electrons, jets and photons
+	//--------------------------------------------------------------------------
+	vector<int>	selectedMuInd	= MuonSelection();
+	vector<int>	selectedElInd	= ElectronSelection(); 
+	vector<int>	selectedJetInd	= PFJetSelection();
+	vector<int>	selectedPhoInd	= PhotonSelection();
+	fTnqmus		= selectedMuInd.size();
+	fTnqels		= selectedElInd.size();
+	fTnqjets	= selectedJetInd.size();
+	fTnqphos	= selectedPhoInd.size();
 	
 	//--------------------------------------------------------------------------
 	// Dump basic run and trigger information
@@ -338,7 +299,7 @@ void	SSDLAnalysis::Analyze(){
 	DumpRunAndTiggerProperties();
 
 	//--------------------------------------------------------------------------
-	// Jets (and jet-related properties, up to maxNjets):
+	// Jets and jet-related properties, up to min(fTnqjets, maxNjets)
 	//--------------------------------------------------------------------------
 	DumpJetMETProperties(selectedJetInd);
 	// get the total 4-momenta,  total transverse 3-momenta 
@@ -346,17 +307,17 @@ void	SSDLAnalysis::Analyze(){
 	TVector3		jtotPT(jtotP.Px(), jtotP.Py(), 0.);	
 	
 	//--------------------------------------------------------------------------
-	// Photons (up to maxNphos):	
+	// Photons up to min(fTnqphos, maxNphos)
 	//--------------------------------------------------------------------------
 	DumpPhotonProperties(selectedPhoInd, jtotPT);
 	
 	//--------------------------------------------------------------------------
-	// Muons (up to maxNmus):
+	// Muons up to min(fTnqmus, maxNmus)
 	//--------------------------------------------------------------------------
 	DumpMuonProperties(selectedMuInd, jtotPT);
 
 	//--------------------------------------------------------------------------
-	// Electrons (up to maxNeles):
+	// Electrons up to min(fTnqels, maxNeles)
 	//--------------------------------------------------------------------------
 	DumpElectronProperties(selectedElInd, jtotPT);
 
@@ -364,211 +325,98 @@ void	SSDLAnalysis::Analyze(){
 	// Calculate different con/transverse (leptonic) alphas for the event with
 	// (at least two) electron(s), muon(s), photon(s) and jet(s)
 	//--------------------------------------------------------------------------
-	if (nqmus + nqels + nqjets >= 2)
+	if (fTnqmus + fTnqels + fTnqjets >= 2)
 		transverseAlphas(selectedElInd, selectedMuInd, selectedPhoInd, selectedJetInd, fTalphaT_h, fTalphaCT_h, fTalphaT, fTalphaCT, fTalphaT_new, fTalphaCT_new);
 
 	//--------------------------------------------------------------------------
 	// Event flagging and dumping of pt and eta for fake ratio analysis
 	//--------------------------------------------------------------------------
-	int el1index(-1), el2index(-1);
-	bool  singleElectronSelection	= SingleElectronSelection(el1index);
-	bool  diElectronSelection		= DiElectronSelection(el1index, el2index);
-	
-	// QCD-like event (MET < 20.) with only one loose/tight electron
-	if (singleElectronSelection && !diElectronSelection &&
-		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
-		(fTpfMET<20.)) {
-		fTisSE_QCDLike = true;
-		fTSE_QCDLike_FakeElGenID		= fTR->ElGenID[el1index];
-		// store pt and eta if event is QCD-like
-		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_QCDLike_ElLoosePt, fTSE_QCDLike_ElTightPt, fTSE_QCDLike_ElLooseEta, fTSE_QCDLike_ElTightEta);
-	}
-	// Anti-QCD-like event (MET > 30.) with only one loose/tight electron
-	if (singleElectronSelection && !diElectronSelection &&
-		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
-		(fTpfMET>30.)) {
-		fTisSE_AntiQCDLike = true;
-		fTSE_AntiQCDLike_FakeElGenID	= fTR->ElGenID[el1index];
-		// store pt and eta if event is Anti-QCD-like
-		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_AntiQCDLike_ElLoosePt, fTSE_AntiQCDLike_ElTightPt, fTSE_AntiQCDLike_ElLooseEta, fTSE_AntiQCDLike_ElTightEta);
-	}
-	
-	// ZJets-like event (76. < mT(El1,El2) < 106.) with one tight and one loose/tight electron
-	if (diElectronSelection && nqels<3 &&
-		(IsTightEl(el1index) || IsTightEl(el2index)) &&
-		(fTElmtinv>76.)&&(fTElmtinv< 106.)) {
-		fTisDE_ZJetsLike = true;
-		
-		// Loose and Tight (tag and probe)
-		// decide which electron is the looser
-		int elLooserIndex(-1);
-		if (IsLooseEl(el1index) && IsTightEl(el2index)) elLooserIndex = el1index;
-		if (IsTightEl(el1index) && IsLooseEl(el2index)) elLooserIndex = el2index;
-		// store pt and eta of the "looser" electron if event is ZJets-like
-		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_ZJetsLike_ElLoosePt, fTDE_ZJetsLike_ElTightPt, fTDE_ZJetsLike_ElLooseEta, fTDE_ZJetsLike_ElTightEta);
-
-		// Prompt info (Tag and Probe)
-		int elPromptTagIndex(-1);
-		// check if electron is from Z
-		bool el1IsFromZ = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==23; 
-		bool el2IsFromZ = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==23;
-		if (el1IsFromZ && el2IsFromZ) {
-			// decide which electron is the tag one (from Z)
-			elPromptTagIndex = el2index;
-			// store pt and eta if event is ZJets-like and gen metched as coming from the Z
-			DumpElectronLooseAndTighPtAndEta(elPromptTagIndex,	fTDE_ZJetsLike_PromptElGenLoosePt, fTDE_ZJetsLike_PromptElGenTightPt, fTDE_ZJetsLike_PromptElGenLooseEta, fTDE_ZJetsLike_PromptElGenTightEta);
-		}
-	}
-
-	bool  ssdiElectronSelection = SSDiElectronSelection(el1index, el2index);
-	// TTbar&WJets-like event (30. < MET < 80.) with one tight and one loose/tight electron
-	if (ssdiElectronSelection && nqels<3 &&
-		(IsTightEl(el1index) || IsTightEl(el2index)) &&
-		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
-		(fTpfMET>30.)&&(fTpfMET< 80.)) {
-		fTisDE_WJetsLike = true;
-		
-		// Loose and Tight
-		// decide which electron is the looser one and store the MT for the tighter one
-		int elLooserIndex(-1);
-		if (IsLooseEl(el1index) && IsTightEl(el2index)) {
-			elLooserIndex = el1index;
-			fTDE_WJetsLike_ElTightMT = fTElMT[2];
-		}
-		if (IsTightEl(el1index) && IsLooseEl(el2index)) {
-			elLooserIndex = el2index;
-			fTDE_WJetsLike_ElTightMT = fTElMT[1];
-		}
-		// store pt and eta of the "looser" electron if event is TTbar&WJets-like
-		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_WJetsLike_ElLoosePt, fTDE_WJetsLike_ElTightPt, fTDE_WJetsLike_ElLooseEta, fTDE_WJetsLike_ElTightEta);
-
-		// Fake (non-prompt) and Prompt
-		int elFakeIndex(-1);
-		int elPromptIndex(-1);
-		// check if electron is from W
-		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
-		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24;
-		if (el1IsFromW ^ el2IsFromW) {
-			// decide which electron is the prompt one (from W) and store the MT for that one
-			if ( !el1IsFromW && el2IsFromW ) {
-				elFakeIndex = el1index;
-				elPromptIndex = el2index;
-				fTDE_WJetsLike_PromptElGenMT = fTElMT[2];				
-			}
-			if ( el1IsFromW && !el2IsFromW ) {
-				elFakeIndex = el2index;
-				elPromptIndex = el1index;
-				fTDE_WJetsLike_PromptElGenMT = fTElMT[1];
-			}
-			fTDE_WJetsLike_FakeElGenID		= fTR->ElGenID[elFakeIndex];
-			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
-			DumpElectronLooseAndTighPtAndEta(elFakeIndex,	fTDE_WJetsLike_FakeElGenLoosePt,	fTDE_WJetsLike_FakeElGenTightPt,	fTDE_WJetsLike_FakeElGenLooseEta,	fTDE_WJetsLike_FakeElGenTightEta);
-			DumpElectronLooseAndTighPtAndEta(elPromptIndex,	fTDE_WJetsLike_PromptElGenLoosePt,	fTDE_WJetsLike_PromptElGenTightPt,	fTDE_WJetsLike_PromptElGenLooseEta, fTDE_WJetsLike_PromptElGenTightEta);
-		}		
-	}
-	// Anti-TTbar&WJets-like event (MET > 80.) with one tight and one loose/tight electron
-	if (ssdiElectronSelection &&
-		(IsTightEl(el1index) || IsTightEl(el2index)) &&
-		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
-		(fTpfMET> 80.)) {
-		fTisDE_AntiWJetsLike = true;
-
-		// Loose and Tight
-		// decide which electron is the looser one and store the MT for the tighter one
-		int elLooserIndex(-1);
-		if (IsLooseEl(el1index) && IsTightEl(el2index)) {
-			elLooserIndex = el1index;
-			fTDE_AntiWJetsLike_ElTightMT = fTElMT[2];
-		}
-		if (IsTightEl(el1index) && IsLooseEl(el2index)) {
-			elLooserIndex = el2index;
-			fTDE_AntiWJetsLike_ElTightMT = fTElMT[1];
-		}
-		// store pt and eta if event is TTbar&WJets-like
-		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_AntiWJetsLike_ElLoosePt, fTDE_AntiWJetsLike_ElTightPt, fTDE_AntiWJetsLike_ElLooseEta, fTDE_AntiWJetsLike_ElTightEta);
-
-		// Fake (non-prompt) and Prompt		
-		int elFakeIndex(-1);
-		int elPromptIndex(-1);				
-		// check if electron is from W
-		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
-		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24; 
-
-		if (el1IsFromW ^ el2IsFromW) {
-			// decide which electron is the prompt one (from W) and store the MT for that one
-			if ( !el1IsFromW && el2IsFromW ) {
-				elFakeIndex = el1index;
-				elPromptIndex = el2index;
-				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[2];				
-			}
-			if ( el1IsFromW && !el2IsFromW ) {
-				elFakeIndex = el2index;
-				elPromptIndex = el1index;
-				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[1];				
-			}
-			fTDE_AntiWJetsLike_FakeElGenID		= fTR->ElGenID[elFakeIndex];
-			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
-			DumpElectronLooseAndTighPtAndEta(elFakeIndex,	fTDE_AntiWJetsLike_FakeElGenLoosePt,	fTDE_AntiWJetsLike_FakeElGenTightPt,	fTDE_AntiWJetsLike_FakeElGenLooseEta,	fTDE_AntiWJetsLike_FakeElGenTightEta);
-			DumpElectronLooseAndTighPtAndEta(elPromptIndex,	fTDE_AntiWJetsLike_PromptElGenLoosePt,	fTDE_AntiWJetsLike_PromptElGenTightPt,	fTDE_AntiWJetsLike_PromptElGenLooseEta, fTDE_AntiWJetsLike_PromptElGenTightEta);
-		}
-	}
-
-	// Signal-like event (MET>80.) with two loose/tight electrons
-	if (ssdiElectronSelection &&
-		(fTpfMET> 30.)) {
-		fTisDE_SignalLike = true;
-		std::cout <<	"Signal-like event [" << "RunNumber: " << fTRunNumber << ", EventNumber: " << fTEventNumber << ", LumiSection: " << fTLumiSection << "]" << std::endl <<
-						"                  [nqmus: " << nqmus << ", nqels: " << nqels << ", nqjets: " << nqjets << "]" << std::endl;
-		if (IsTightEl(el1index) && IsTightEl(el2index))				
-			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntt_El1Pt, fTDE_Ntt_El2Pt, fTDE_Ntt_El1Eta, fTDE_Ntt_El2Eta);
-		if (IsTightEl(el1index) && IsLooseNoTightEl(el2index))		
-			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntl_El1Pt, fTDE_Ntl_El2Pt, fTDE_Ntl_El1Eta, fTDE_Ntl_El2Eta);
-		if (IsLooseNoTightEl(el1index) && IsTightEl(el2index))		
-			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nlt_El1Pt, fTDE_Nlt_El2Pt, fTDE_Nlt_El1Eta, fTDE_Nlt_El2Eta);
-		if (IsLooseNoTightEl(el1index) && IsLooseNoTightEl(el2index))
-			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nll_El1Pt, fTDE_Nll_El2Pt, fTDE_Nll_El1Eta, fTDE_Nll_El2Eta);
-	}	
+	DumpFPRatioProperties();
 	
 	FillTree();
 }
 
 void	SSDLAnalysis::FillTree(){
-	// fill electron-only tree
-	fElectronTree->Fill();
-	// fill SSDL tree
-	//fDiLeptonTree->Fill();
+	fAnalysisTree->Fill();
 }
 
 void	SSDLAnalysis::ResetTree(){
-	ResetElectronTree();
-//	ResetSSDLTree();
+	ResetTriggerVariables	();
+	ResetMuonVariables		();
+	ResetElectronVariables	();
+	ResetAuxVariables		();
+	ResetFPRVariables		();
 }
 
-void	SSDLAnalysis::ResetElectronTree(){
-	// electron/hadronic trigger
-	fTHTL_GoodElEvent		= -999;
-	fTHTL_GoodHadronicEvent	= -999;
-	fTHLT_Jet15U			= -999;
-	fTHLT_Jet30U			= -999;
-	fTHLT_Jet50U			= -999;
-	fTHLT_Jet70U			= -999;
-	fTHLT_Jet100U			= -999;
-	fTHLT_HT100U			= -999;
-	fTHLT_HT120U			= -999;
-	fTHLT_HT140U			= -999;
-	fTHLT_HT150U			= -999;
-	fTHLT_Ele10_LW_L1R		= -999;
-	fTHLT_Ele10_SW_L1R		= -999;
-	fTHLT_Ele15_LW_L1R		= -999;
-	fTHLT_Ele15_SW_L1R		= -999;
-	fTHLT_Ele15_SW_CaloEleId_L1R= -999;
-	fTHLT_Ele20_SW_L1R		= -999;
-	fTHLT_DoubleEle5_SW_L1R	= -999;	
-	fTHLT_DoubleEle10_SW_L1R= -999;	
-	fTHLT_DoubleEle15_SW_L1R_v1	= -999;	
-	
+void	SSDLAnalysis::ResetTriggerVariables(){
+	// muon trigger
+	fT_HLTMu9				= 0;
+	fT_HLTMu11				= 0;
+	fT_HLTMu15				= 0;
+	fT_HLTDoubleMu3			= 0;
+	// hadronic trigger
+	fTHLT_Jet15U			= 0;
+	fTHLT_Jet30U			= 0;
+	fTHLT_Jet50U			= 0;
+	fTHLT_Jet70U			= 0;
+	fTHLT_Jet100U			= 0;
+	fTHLT_HT100U			= 0;
+	fTHLT_HT120U			= 0;
+	fTHLT_HT140U			= 0;
+	fTHLT_HT150U			= 0;
+	// electron trigger
+	fTHLT_Ele10_LW_L1R		= 0;
+	fTHLT_Ele10_SW_L1R		= 0;
+	fTHLT_Ele15_LW_L1R		= 0;
+	fTHLT_Ele15_SW_L1R		= 0;
+	fTHLT_Ele15_SW_CaloEleId_L1R= 0;
+	fTHLT_Ele20_SW_L1R		= 0;
+	fTHLT_DoubleEle5_SW_L1R	= 0;	
+	fTHLT_DoubleEle10_SW_L1R= 0;	
+	fTHLT_DoubleEle15_SW_L1R_v1	= 0;	
+	// trigger summary
+	fTHTL_GoodMuEvent		= 0;
+	fTHTL_GoodElEvent		= 0;
+	fTHTL_GoodElFakesEvent	= 0;
+	fTHTL_GoodHadronicEvent	= 0;
+}
+
+void	SSDLAnalysis::ResetMuonVariables(){
+	fTmuMT      = -999.99;
+	fTmuMinv    = -999.99;
+	fTnqmus = 0;
+	for(int i = 0; i < maxNmus; i++){
+		fTmupt        [i] = -999.99;
+		fTmueta       [i] = -999.99;
+		fTmuphi       [i] = -999.99;
+		fTmucharge    [i] = -999;
+		fTmutight     [i] = -999;
+		fTmuiso       [i] = -999.99;
+		fTmuDRjet		[i] = -999.99;
+		fTmuDRhardestjet[i] = -999.99;
+		fTmucalocomp  [i] = -999.99;
+		fTmusegmcomp  [i] = -999.99;
+		fTmuouterrad  [i] = -999.99;
+		fTmunchi2     [i] = -999.99;
+		fTmuntkhits   [i] = -999;
+		fTmunmuhits   [i] = -999;
+		fTmuemvetoet  [i] = -999.99;
+		fTmuhadvetoet [i] = -999.99;
+		fTmud0        [i] = -999.99;
+		fTmudz        [i] = -999.99;
+		fTmuptE       [i] = -999.99;
+		fTmuid        [i] = -999;
+		fTmumoid      [i] = -999;
+		fTmugmoid     [i] = -999;
+		fTmutype      [i] = -999;
+		fTmumotype    [i] = -999;
+		fTmugmotype   [i] = -999;
+	}	
+}
+
+void	SSDLAnalysis::ResetElectronVariables(){
 	// electron properties
-	fTNqualel					= 0;
+	fTnqels					= 0;
 	for(int i = 0; i < maxNeles; i++){
 		fTElcharge			[i]	= -999;
 		fTElChargeIsCons	[i]	= -999;
@@ -604,52 +452,40 @@ void	SSDLAnalysis::ResetElectronTree(){
 		fTElGenGMID						[i]	= -999;
 		fTElGenGMStatus					[i]	= -999;	
 		fTElTight						[i]	= -999;	
+		fTElHybRelIso					[i]	= -999.99;	
 	}
 		
-	// event properties	
+	// di-electron properties	
 	fTElminv				= -999.99;
 	fTElmtinv				= -999.99;
 }
 
-void	SSDLAnalysis::ResetSSDLTree(){
+void	SSDLAnalysis::ResetAuxVariables(){
 	// sample/run
-	fTRunNumber				= -999;
-	fTEventNumber			= -999;
-	fTLumiSection			= -999;
-	fTextxslo				= -999.99;
-	fTintxs					= -999.99;
-	
-	// electron/hadronic trigger
-	fTHTL_GoodElEvent		= -999;
-	fTHTL_GoodHadronicEvent	= -999;
-	fTHLT_Jet15U			= -999;
-	fTHLT_Jet30U			= -999;
-	fTHLT_Jet50U			= -999;
-	fTHLT_Jet70U			= -999;
-	fTHLT_Jet100U			= -999;
-	fTHLT_HT100U			= -999;
-	fTHLT_HT120U			= -999;
-	fTHLT_HT140U			= -999;
-	fTHLT_HT150U			= -999;
-	fTHLT_Ele10_LW_L1R		= -999;
-	fTHLT_Ele10_SW_L1R		= -999;
-	fTHLT_Ele15_LW_L1R		= -999;
-	fTHLT_Ele15_SW_L1R		= -999;
-	fTHLT_Ele15_SW_CaloEleId_L1R= -999;
-	fTHLT_Ele20_SW_L1R		= -999;
-	fTHLT_DoubleEle5_SW_L1R	= -999;	
-	fTHLT_DoubleEle10_SW_L1R= -999;	
-	fTHLT_DoubleEle15_SW_L1R_v1	= -999;	
-	
-	// jet properties
-	fTNqualjet					= 0;
+	fTRunNumber		= 0;
+	fTEventNumber	= 0;
+	fTLumiSection	= 0;
+	fTextxslo		= -999.99;
+	fTintxs			= -999.99;
+	// jet-MET properties
+	fTnqjets		= 0;
 	for(int i = 0; i < maxNjets; i++){
 		fTJetpt				[i]	= -999.99;
 		fTJeteta			[i]	= -999.99;
 		fTJetphi			[i]	= -999.99;
 	}
+	fTHT			= -999.99;
+	fTSumEt			= -999.99;
+	fTtcMET			= -999.99;
+	fTpfMET			= -999.99;
+	fTMuCorrMET		= -999.99;
+	fTdPhiMJ1		= -999.99;
+	fTdPhiMJ2		= -999.99;
+	fTR12			= -999.99;
+	fTR21			= -999.99;
+	fTR12plusR21	= -999.99;
 	// photon properties
-	fTNqualpho					= 0;
+	fTnqphos		= 0;
 	for(int i = 0; i < maxNphos; i++){
 		fTPhopt				[i]	= -999.99;
 		fTPhoeta			[i]	= -999.99;
@@ -658,63 +494,16 @@ void	SSDLAnalysis::ResetSSDLTree(){
 		fTPhoDRjet			[i]	= -999.99;
 		fTPhoDRhardestjet	[i]	= -999.99;
 	}
-	//muon properties
-	fTNqualmu					= 0;
-	for(int i = 0; i < maxNmus; i++){
-		fTMucharge			[i]	= -999;
-		fTMupt				[i]	= -999.99;
-		fTMueta				[i]	= -999.99;
-		fTMuphi				[i]	= -999.99;
-		fTMuiso				[i]	= -999.99;
-		fTMud0				[i]	= -999.99;
-		fTMuntkhits			[i]	= -999.99;
-		fTMuMT				[i]	= -999.99;
-		fTMuDRjet			[i]	= -999.99;
-		fTMuDRhardestjet	[i]	= -999.99;
-	}
+}
 
-	// electron properties
-	fTNqualel					= 0;
-	for(int i = 0; i < maxNeles; i++){
-		fTElcharge			[i]	= -999;
-		fTElChargeIsCons	[i]	= -999;
-		fTElChargeIsGenCons	[i]	= -999;
-		fTElpt				[i]	= -999.99;
-		fTEleta				[i]	= -999.99;
-		fTElphi				[i]	= -999.99;
-		fTEld0				[i]	= -999.99;
-		fTElD0Err			[i]	= -999.99;
-		fTElEoverP			[i]	= -999.99;
-		fTElHoverE			[i]	= -999.99;
-		fTElSigmaIetaIeta	[i]	= -999.99;
-		fTElDeltaPhiSuperClusterAtVtx	[i]	= -999.99;
-		fTElDeltaPhiSuperClusterAtVtx	[i]	= -999.99;
-		fTElIDsimpleWP80relIso			[i]	= -999.99;
-		fTElIDsimpleWPrelIso			[i]	= -999.99;
-		fTElIDsimpleWP95relIso			[i]	= -999.99;
-		fTElRelIso						[i]	= -999.99;
-		fTElDR04TkSumPt					[i]	= -999.99;
-		fTElDR04EcalRecHitSumEt			[i]	= -999.99;
-		fTElDR04HcalTowerSumEt			[i]	= -999.99;
-		fTElS4OverS1					[i]	= -999.99;
-		fTElConvPartnerTrkDist			[i]	= -999.99;
-		fTElConvPartnerTrkDCot			[i]	= -999.99;
-		fTElChargeMisIDProb				[i]	= -999.99;
-		fTElMT							[i]	= -999.99;
-		fTElDRjet						[i]	= -999.99;
-		fTElDRhardestjet				[i]	= -999.99;
-		fTElGenID						[i]	= -999;
-		fTElGenStatus					[i]	= -999;
-		fTElGenMID						[i]	= -999;
-		fTElGenMStatus					[i]	= -999;
-		fTElGenGMID						[i]	= -999;
-		fTElGenGMStatus					[i]	= -999;	
-		fTElTight						[i]	= -999;	
-	}
-
-	// dilepton properties
-	fTElminv				= -999.99;
-	fTElmtinv				= -999.99;
+void	SSDLAnalysis::ResetFPRVariables(){
+	// other properties
+	fTalphaT_h		= -999.99;
+	fTalphaCT_h		= -999.99;
+	fTalphaT		= -999.99;
+	fTalphaCT		= -999.99;
+	fTalphaT_new	= -999.99;
+	fTalphaCT_new	= -999.99;
 	fTElmt2_0				= -999.99;
 	fTElmt2_50				= -999.99;
 	fTElmt2_100				= -999.99;
@@ -724,9 +513,6 @@ void	SSDLAnalysis::ResetSSDLTree(){
 	fTElmT2orth_0			= -999.99;
 	fTElmT2orth_50			= -999.99;
 	fTElmT2orth_100			= -999.99;	
-
-	fTMuminv				= -999.99;
-	fTMumtinv				= -999.99;
 	fTMumt2_0				= -999.99;
 	fTMumt2_50				= -999.99;
 	fTMumt2_100				= -999.99;
@@ -736,25 +522,6 @@ void	SSDLAnalysis::ResetSSDLTree(){
 	fTMumT2orth_0			= -999.99;
 	fTMumT2orth_50			= -999.99;
 	fTMumT2orth_100			= -999.99;
-	
-	// event properties	
-	fTHT			= -999.99;
-	fTSumEt			= -999.99;
-	fTtcMET			= -999.99;
-	fTpfMET			= -999.99;
-	fTMuCorrMET		= -999.99;
-	
-	fTdPhiMJ1		= -999.99;
-	fTdPhiMJ2		= -999.99;
-	fTR12			= -999.99;
-	fTR21			= -999.99;
-	fTR12plusR21	= -999.99;
-	fTalphaT_h		= -999.99;
-	fTalphaCT_h		= -999.99;
-	fTalphaT		= -999.99;
-	fTalphaCT		= -999.99;
-	fTalphaT_new	= -999.99;
-	fTalphaCT_new	= -999.99;
 	
 	// fake rate propeties
 	fTisSE_QCDLike			= -999;
@@ -835,10 +602,8 @@ void	SSDLAnalysis::ResetSSDLTree(){
 }
 
 void	SSDLAnalysis::End(){
-	// perform SSDLAnalysis specific end jobs
 	fOutputFile			->cd();
-	fElectronTree		->Write();
-//	fDiLeptonTree		->Write();
+	fAnalysisTree		->Write();
 	fOutputFile			->Close();
 }
 
@@ -898,7 +663,7 @@ float	SSDLAnalysis::jetHT(vector<int>& selectedJetInd){
 
 float	SSDLAnalysis::minDRtoJet(float lepEta, float lepPhi) {
 	float mindr(-1);
-	for(int j = 0; j < fTNqualjet; ++j){
+	for(int j = 0; j < fTnqjets; ++j){
 		float dr   = Util::GetDeltaR(fTJeteta[j], lepEta, fTJetphi[j], lepPhi); 
 		mindr = mindr>dr? dr:mindr;
 	}
@@ -1101,15 +866,12 @@ void	SSDLAnalysis::DumpRunAndTiggerProperties() {
 	fTLumiSection				= fTR->LumiSection;
 	fTextxslo					= fTR->ExtXSecLO;
 	fTintxs						= fTR->IntXSec;
-	// hadronic triggers
-	fTHLT_Jet30U				= GetHLTResult("HLT_Jet30U"); 
-	fTHLT_Jet50U				= GetHLTResult("HLT_Jet50U"); 
-	fTHLT_Jet70U				= GetHLTResult("HLT_Jet70U"); 
-	fTHLT_Jet100U				= GetHLTResult("HLT_Jet100U"); 
-	fTHLT_HT100U				= GetHLTResult("HLT_HT100U"); 
-	fTHLT_HT120U				= GetHLTResult("HLT_HT120U"); 
-	fTHLT_HT140U				= GetHLTResult("HLT_HT140U"); 
-	fTHLT_HT150U				= GetHLTResult("HLT_HT150U"); 
+	// muon triggers
+	fT_HLTMu9					= GetHLTResult("HLT_Mu9");
+	fT_HLTMu11					= GetHLTResult("HLT_Mu11");
+	fT_HLTMu15					= GetHLTResult("HLT_Mu15");
+	fT_HLTDoubleMu0				= GetHLTResult("HLT_DoubleMu0");
+	fT_HLTDoubleMu3				= GetHLTResult("HLT_DoubleMu3");
 	// e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)	
 	fTHLT_Ele10_LW_L1R			= GetHLTResult("HLT_Ele10_LW_L1R");
 	fTHLT_Ele10_SW_L1R			= GetHLTResult("HLT_Ele10_SW_L1R");
@@ -1120,6 +882,20 @@ void	SSDLAnalysis::DumpRunAndTiggerProperties() {
 	fTHLT_DoubleEle5_SW_L1R		= GetHLTResult("HLT_DoubleEle5_SW_L1R");
 	fTHLT_DoubleEle10_SW_L1R	= GetHLTResult("HLT_DoubleEle10_SW_L1R");
 	fTHLT_DoubleEle15_SW_L1R_v1	= GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	// hadronic triggers
+	fTHLT_Jet30U				= GetHLTResult("HLT_Jet30U"); 
+	fTHLT_Jet50U				= GetHLTResult("HLT_Jet50U"); 
+	fTHLT_Jet70U				= GetHLTResult("HLT_Jet70U"); 
+	fTHLT_Jet100U				= GetHLTResult("HLT_Jet100U"); 
+	fTHLT_HT100U				= GetHLTResult("HLT_HT100U"); 
+	fTHLT_HT120U				= GetHLTResult("HLT_HT120U"); 
+	fTHLT_HT140U				= GetHLTResult("HLT_HT140U"); 
+	fTHLT_HT150U				= GetHLTResult("HLT_HT150U"); 
+	// summary of muon/electron/hadronic trigger requirements
+	fTHTL_GoodMuEvent			= IsGoodMuEvent();
+	fTHTL_GoodElEvent			= IsGoodElEvent();
+	fTHTL_GoodElFakesEvent		= IsGoodElFakesEvent();
+	fTHTL_GoodHadronicEvent		= IsGoodHadronicEvent();
 }
 	
 void	SSDLAnalysis::DumpJetMETProperties(vector<int>& selectedJetInd){
@@ -1172,32 +948,62 @@ void	SSDLAnalysis::DumpPhotonProperties(vector<int>& selectedPhoInd, TVector3 jt
 }
 
 void	SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd, TVector3 jtotPT){
-	// Dump basic muon properties
-	int muindex(-1);
+	// Dump basic muon properties (basically copy/past from Benjamin's Muon Analysis)
 	int nqmus	= selectedMuInd.size();
-	TLorentzVector p[nqmus];
+	if( nqmus < 1 ) return;
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
-	for(int ind=0; ind<std::min(nqmus,maxNmus); ind++){
-		muindex = selectedMuInd[ind];
-		fTMupt		[ind] = fTR->MuPt		[muindex];
-		fTMucharge	[ind] = fTR->MuCharge	[muindex];
-		fTMueta		[ind] = fTR->MuEta		[muindex];
-		fTMuphi     [ind] = fTR->MuPhi		[muindex];
-		fTMuiso		[ind] = fTR->MuRelIso03	[muindex];
-		fTMud0		[ind] = fTR->MuD0PV		[muindex];
-		fTMuntkhits	[ind] = fTR->MuNTkHits	[muindex];
+	// Muon Variables
+	for(int i = 0; i < std::min(nqmus,maxNmus); ++i){
+		int index = selectedMuInd[i];
+		fTmupt       [i] = fTR->MuPt[index];
+		fTmueta      [i] = fTR->MuEta[index];
+		fTmuphi      [i] = fTR->MuPhi[index];
+		fTmucharge   [i] = fTR->MuCharge[index];
+		if(IsTightMu(index))        fTmutight[i] = 1;
+		if(IsLooseNoTightMu(index)) fTmutight[i] = 0;
+		fTmuiso      [i] = fTR->MuRelIso03[index];
+		fTmucalocomp [i] = fTR->MuCaloComp[index];
+		fTmusegmcomp [i] = fTR->MuSegmComp[index];
+		fTmuouterrad [i] = fTR->MuOutPosRadius[index];
+		fTmunchi2    [i] = fTR->MuNChi2[index];
+		fTmuntkhits  [i] = fTR->MuNTkHits[index];
+		fTmunmuhits  [i] = fTR->MuNMuHits[index];
+		fTmuemvetoet [i] = fTR->MuIso03EMVetoEt[index];
+		fTmuhadvetoet[i] = fTR->MuIso03HadVetoEt[index];
+		fTmud0       [i] = fTR->MuD0PV[index];
+		fTmudz       [i] = fTR->MuDzPV[index];
+		fTmuptE      [i] = fTR->MuPtE[index];
+		
+		fTmuDRjet		[i]	= minDRtoJet(fTmueta[i], fTmuphi[i]);
+		fTmuDRhardestjet[i] = Util::GetDeltaR(fTJeteta[0], fTmueta[i], fTJetphi[0], fTmuphi[i]);
 
-		p[ind] = TLorentzVector(fTR->MuPx[muindex], fTR->MuPy[muindex], fTR->MuPz[muindex], fTR->MuE[muindex]);
-		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
-		fTMuMT[ind]				= mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);		
-		fTMuDRjet[ind]			= minDRtoJet(fTMueta[ind], fTMuphi[ind]);
-		fTMuDRhardestjet[ind]	= Util::GetDeltaR(fTJeteta[0], fTMueta[ind], fTJetphi[0], fTMuphi[ind]);
-	}		
-	
-	// calculate different con/transverse/invariant masses for the pair of two hardest muons
-	if (nqmus>=2) {
-		transverseMasses(p[0], p[1], jtotPT, fTMuminv, fTMumtinv, fTMumCT, fTMumCTorth, fTMumCTparl, fTMumt2_0, fTMumt2_50, fTMumt2_100, fTMumT2orth_0, fTMumT2orth_50, fTMumT2orth_100 );	
+		fTmuid     [i] = fTR->MuGenID  [index];
+		fTmumoid   [i] = fTR->MuGenMID [index];
+		fTmugmoid  [i] = fTR->MuGenGMID[index];
+		pdgparticle mu, mo, gmo;
+		GetPDGParticle(mu,  abs(fTR->MuGenID  [index]));
+		GetPDGParticle(mo,  abs(fTR->MuGenMID [index]));
+		GetPDGParticle(gmo, abs(fTR->MuGenGMID[index]));
+		fTmutype   [i] = mu.get_type();
+		fTmumotype [i] = mo.get_type();
+		fTmugmotype[i] = gmo.get_type();
 	}
+	
+	// Calculate invariant mass, if more than 1 muon
+	TLorentzVector pmu1;
+	pmu1.SetXYZM(fTR->MuPx[selectedMuInd[0]], fTR->MuPy[selectedMuInd[0]], fTR->MuPz[selectedMuInd[0]], 0.105);
+	if(selectedMuInd.size() > 1){	
+		TLorentzVector pmu2;
+		pmu2.SetXYZM(fTR->MuPx[selectedMuInd[1]], fTR->MuPy[selectedMuInd[1]], fTR->MuPz[selectedMuInd[1]], 0.105);
+		TLorentzVector pdimu = pmu1 + pmu2;
+		fTmuMinv = pdimu.Mag();
+	}
+	
+	// Calculate mT:
+	double ETlept	= sqrt(pmu1.M2() + pmu1.Perp2());
+	double METpx	= fTR->PFMETpx;
+	double METpy	= fTR->PFMETpy;
+	fTmuMT			= sqrt( 2*fTpfMET*ETlept - pmu1.Px()*METpx - pmu1.Py()*METpy );
 }
 
 void	SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 jtotPT){
@@ -1206,7 +1012,7 @@ void	SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 	int nqels	= selectedElInd.size();
 	TLorentzVector p[nqels];
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
-	for(int ind=0; ind<nqels; ind++){
+	for(int ind=0; ind<std::min(nqels,maxNeles); ind++){
 		elindex = selectedElInd[ind];
 		fTElpt							[ind] = fTR->ElPt					[elindex];
 		fTElcharge						[ind] = fTR->ElCharge				[elindex];
@@ -1224,10 +1030,10 @@ void	SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		fTElIDsimpleWP80relIso			[ind] = fTR->ElIDsimpleWP80relIso	[elindex];
 		fTElIDsimpleWPrelIso			[ind] = fTR->ElIDsimpleWPrelIso		[elindex];
 		fTElIDsimpleWP95relIso			[ind] = fTR->ElIDsimpleWP95relIso	[elindex];		
-		fTElRelIso						[ind] = fTR->ElRelIso04				[elindex];
-		fTElDR04TkSumPt					[ind] = fTR->ElDR04TkSumPt			[elindex];
-		fTElDR04EcalRecHitSumEt			[ind] = fTR->ElDR04EcalRecHitSumEt	[elindex];
-		fTElDR04HcalTowerSumEt			[ind] = fTR->ElDR04HcalTowerSumEt	[elindex];		
+		fTElRelIso						[ind] = fTR->ElRelIso03				[elindex];
+		fTElDR04TkSumPt					[ind] = fTR->ElDR03TkSumPt			[elindex];
+		fTElDR04EcalRecHitSumEt			[ind] = fTR->ElDR03EcalRecHitSumEt	[elindex];
+		fTElDR04HcalTowerSumEt			[ind] = fTR->ElDR03HcalTowerSumEt	[elindex];		
 		fTElS4OverS1					[ind] = fTR->ElS4OverS1				[elindex];
 		fTElConvPartnerTrkDist			[ind] = fTR->ElConvPartnerTrkDist	[elindex];
 		fTElConvPartnerTrkDCot			[ind] = fTR->ElConvPartnerTrkDCot	[elindex];
@@ -1241,10 +1047,11 @@ void	SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		
 		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
 		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
-		fTElMT[ind]				= mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);		
-		fTElDRjet[ind]			= minDRtoJet(fTEleta[ind], fTElphi[ind]);
+		fTElMT			[ind]	= mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);		
+		fTElDRjet		[ind]	= minDRtoJet(fTEleta[ind], fTElphi[ind]);
 		fTElDRhardestjet[ind]	= Util::GetDeltaR(fTJeteta[0], fTEleta[ind], fTJetphi[0], fTElphi[ind]);	
-		fTElTight[ind]			= IsTightEl(elindex);
+		fTElTight		[ind]	= IsTightEl(elindex);
+		fTElHybRelIso	[ind]	= hybRelElIso(elindex);
 	}		
 
 	// calculate different con/transverse/invariant masses for the pair of two hardest electrons
@@ -1252,6 +1059,168 @@ void	SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		transverseMasses(p[0], p[1], jtotPT, fTElminv, fTElmtinv, fTElmCT, fTElmCTorth, fTElmCTparl, fTElmt2_0, fTElmt2_50, fTElmt2_100, fTElmT2orth_0, fTElmT2orth_50, fTElmT2orth_100 );	
 	}
 }
+
+void	SSDLAnalysis::DumpFPRatioProperties(){
+	// Event flagging and dumping of pt and eta for fake ratio analysis
+	int el1index(-1), el2index(-1);
+	bool  singleElectronSelection	= SingleElectronSelection(el1index);
+	bool  diElectronSelection		= DiElectronSelection(el1index, el2index);
+	
+	// QCD-like event (MET < 20.) with only one loose/tight electron
+	if (singleElectronSelection && !diElectronSelection &&
+		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
+		(fTpfMET<20.)) {
+		fTisSE_QCDLike = true;
+		fTSE_QCDLike_FakeElGenID		= fTR->ElGenID[el1index];
+		// store pt and eta if event is QCD-like
+		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_QCDLike_ElLoosePt, fTSE_QCDLike_ElTightPt, fTSE_QCDLike_ElLooseEta, fTSE_QCDLike_ElTightEta);
+	}
+	// Anti-QCD-like event (MET > 30.) with only one loose/tight electron
+	if (singleElectronSelection && !diElectronSelection &&
+		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
+		(fTpfMET>30.)) {
+		fTisSE_AntiQCDLike = true;
+		fTSE_AntiQCDLike_FakeElGenID	= fTR->ElGenID[el1index];
+		// store pt and eta if event is Anti-QCD-like
+		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_AntiQCDLike_ElLoosePt, fTSE_AntiQCDLike_ElTightPt, fTSE_AntiQCDLike_ElLooseEta, fTSE_AntiQCDLike_ElTightEta);
+	}
+	
+	// ZJets-like event (76. < mT(El1,El2) < 106.) with one tight and one loose/tight electron
+	if (diElectronSelection && fTnqels<3 &&
+		(IsTightEl(el1index) || IsTightEl(el2index)) &&
+		(fTElmtinv>76.)&&(fTElmtinv< 106.)) {
+		fTisDE_ZJetsLike = true;
+		
+		// Loose and Tight (tag and probe)
+		// decide which electron is the looser
+		int elLooserIndex(-1);
+		if (IsLooseEl(el1index) && IsTightEl(el2index)) elLooserIndex = el1index;
+		if (IsTightEl(el1index) && IsLooseEl(el2index)) elLooserIndex = el2index;
+		// store pt and eta of the "looser" electron if event is ZJets-like
+		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_ZJetsLike_ElLoosePt, fTDE_ZJetsLike_ElTightPt, fTDE_ZJetsLike_ElLooseEta, fTDE_ZJetsLike_ElTightEta);
+		
+		// Prompt info (Tag and Probe)
+		int elPromptTagIndex(-1);
+		// check if electron is from Z
+		bool el1IsFromZ = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==23; 
+		bool el2IsFromZ = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==23;
+		if (el1IsFromZ && el2IsFromZ) {
+			// decide which electron is the tag one (from Z)
+			elPromptTagIndex = el2index;
+			// store pt and eta if event is ZJets-like and gen metched as coming from the Z
+			DumpElectronLooseAndTighPtAndEta(elPromptTagIndex,	fTDE_ZJetsLike_PromptElGenLoosePt, fTDE_ZJetsLike_PromptElGenTightPt, fTDE_ZJetsLike_PromptElGenLooseEta, fTDE_ZJetsLike_PromptElGenTightEta);
+		}
+	}
+	
+	bool  ssdiElectronSelection = SSDiElectronSelection(el1index, el2index);
+	// TTbar&WJets-like event (30. < MET < 80.) with one tight and one loose/tight electron
+	if (ssdiElectronSelection && fTnqels<3 &&
+		(IsTightEl(el1index) || IsTightEl(el2index)) &&
+		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
+		(fTpfMET>30.)&&(fTpfMET< 80.)) {
+		fTisDE_WJetsLike = true;
+		
+		// Loose and Tight
+		// decide which electron is the looser one and store the MT for the tighter one
+		int elLooserIndex(-1);
+		if (IsLooseEl(el1index) && IsTightEl(el2index)) {
+			elLooserIndex = el1index;
+			fTDE_WJetsLike_ElTightMT = fTElMT[2];
+		}
+		if (IsTightEl(el1index) && IsLooseEl(el2index)) {
+			elLooserIndex = el2index;
+			fTDE_WJetsLike_ElTightMT = fTElMT[1];
+		}
+		// store pt and eta of the "looser" electron if event is TTbar&WJets-like
+		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_WJetsLike_ElLoosePt, fTDE_WJetsLike_ElTightPt, fTDE_WJetsLike_ElLooseEta, fTDE_WJetsLike_ElTightEta);
+		
+		// Fake (non-prompt) and Prompt
+		int elFakeIndex(-1);
+		int elPromptIndex(-1);
+		// check if electron is from W
+		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
+		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24;
+		if (el1IsFromW ^ el2IsFromW) {
+			// decide which electron is the prompt one (from W) and store the MT for that one
+			if ( !el1IsFromW && el2IsFromW ) {
+				elFakeIndex = el1index;
+				elPromptIndex = el2index;
+				fTDE_WJetsLike_PromptElGenMT = fTElMT[2];				
+			}
+			if ( el1IsFromW && !el2IsFromW ) {
+				elFakeIndex = el2index;
+				elPromptIndex = el1index;
+				fTDE_WJetsLike_PromptElGenMT = fTElMT[1];
+			}
+			fTDE_WJetsLike_FakeElGenID		= fTR->ElGenID[elFakeIndex];
+			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
+			DumpElectronLooseAndTighPtAndEta(elFakeIndex,	fTDE_WJetsLike_FakeElGenLoosePt,	fTDE_WJetsLike_FakeElGenTightPt,	fTDE_WJetsLike_FakeElGenLooseEta,	fTDE_WJetsLike_FakeElGenTightEta);
+			DumpElectronLooseAndTighPtAndEta(elPromptIndex,	fTDE_WJetsLike_PromptElGenLoosePt,	fTDE_WJetsLike_PromptElGenTightPt,	fTDE_WJetsLike_PromptElGenLooseEta, fTDE_WJetsLike_PromptElGenTightEta);
+		}		
+	}
+	// Anti-TTbar&WJets-like event (MET > 80.) with one tight and one loose/tight electron
+	if (ssdiElectronSelection &&
+		(IsTightEl(el1index) || IsTightEl(el2index)) &&
+		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
+		(fTpfMET> 80.)) {
+		fTisDE_AntiWJetsLike = true;
+		
+		// Loose and Tight
+		// decide which electron is the looser one and store the MT for the tighter one
+		int elLooserIndex(-1);
+		if (IsLooseEl(el1index) && IsTightEl(el2index)) {
+			elLooserIndex = el1index;
+			fTDE_AntiWJetsLike_ElTightMT = fTElMT[2];
+		}
+		if (IsTightEl(el1index) && IsLooseEl(el2index)) {
+			elLooserIndex = el2index;
+			fTDE_AntiWJetsLike_ElTightMT = fTElMT[1];
+		}
+		// store pt and eta if event is TTbar&WJets-like
+		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_AntiWJetsLike_ElLoosePt, fTDE_AntiWJetsLike_ElTightPt, fTDE_AntiWJetsLike_ElLooseEta, fTDE_AntiWJetsLike_ElTightEta);
+		
+		// Fake (non-prompt) and Prompt		
+		int elFakeIndex(-1);
+		int elPromptIndex(-1);				
+		// check if electron is from W
+		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
+		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24; 
+		
+		if (el1IsFromW ^ el2IsFromW) {
+			// decide which electron is the prompt one (from W) and store the MT for that one
+			if ( !el1IsFromW && el2IsFromW ) {
+				elFakeIndex = el1index;
+				elPromptIndex = el2index;
+				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[2];				
+			}
+			if ( el1IsFromW && !el2IsFromW ) {
+				elFakeIndex = el2index;
+				elPromptIndex = el1index;
+				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[1];				
+			}
+			fTDE_AntiWJetsLike_FakeElGenID		= fTR->ElGenID[elFakeIndex];
+			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
+			DumpElectronLooseAndTighPtAndEta(elFakeIndex,	fTDE_AntiWJetsLike_FakeElGenLoosePt,	fTDE_AntiWJetsLike_FakeElGenTightPt,	fTDE_AntiWJetsLike_FakeElGenLooseEta,	fTDE_AntiWJetsLike_FakeElGenTightEta);
+			DumpElectronLooseAndTighPtAndEta(elPromptIndex,	fTDE_AntiWJetsLike_PromptElGenLoosePt,	fTDE_AntiWJetsLike_PromptElGenTightPt,	fTDE_AntiWJetsLike_PromptElGenLooseEta, fTDE_AntiWJetsLike_PromptElGenTightEta);
+		}
+	}
+
+	// Signal-like event (MET>80.) with two loose/tight electrons
+	if (ssdiElectronSelection &&
+		(fTpfMET> 80.)) {
+		fTisDE_SignalLike = true;
+		std::cout <<	"Signal-like event [" << "RunNumber: " << fTRunNumber << ", EventNumber: " << fTEventNumber << ", LumiSection: " << fTLumiSection << "]" << std::endl <<
+		"                  [nqmus: " << fTnqmus << ", nqels: " << fTnqels << ", nqjets: " << fTnqjets << "]" << std::endl;
+		if (IsTightEl(el1index) && IsTightEl(el2index))				
+			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntt_El1Pt, fTDE_Ntt_El2Pt, fTDE_Ntt_El1Eta, fTDE_Ntt_El2Eta);
+		if (IsTightEl(el1index) && IsLooseNoTightEl(el2index))		
+			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntl_El1Pt, fTDE_Ntl_El2Pt, fTDE_Ntl_El1Eta, fTDE_Ntl_El2Eta);
+		if (IsLooseNoTightEl(el1index) && IsTightEl(el2index))		
+			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nlt_El1Pt, fTDE_Nlt_El2Pt, fTDE_Nlt_El1Eta, fTDE_Nlt_El2Eta);
+		if (IsLooseNoTightEl(el1index) && IsLooseNoTightEl(el2index))
+			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nll_El1Pt, fTDE_Nll_El2Pt, fTDE_Nll_El1Eta, fTDE_Nll_El2Eta);
+	}	
+}	
 
 void	SSDLAnalysis::DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta) {
 	if (IsLooseEl(elindex))	elLoosePt	= fTR->ElPt [elindex];

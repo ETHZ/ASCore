@@ -38,19 +38,26 @@ public:
 	void Analyze();
 	void End();
 
-	virtual void BookTree();
-	virtual void BookElectronTree();
-	virtual void BookSSDLTree();
-	virtual void ResetTree();
-	virtual void ResetElectronTree();
-	virtual void ResetSSDLTree();
-	virtual void FillTree();
+	virtual void BookTree				();
+	virtual void BookTriggerVariables	(TTree* fAnalysisTree);
+	virtual void BookMuonVariables		(TTree* fAnalysisTree);
+	virtual void BookElectronVariables	(TTree* fAnalysisTree);
+	virtual void BookAuxVariables		(TTree* fAnalysisTree);
+	virtual void BookFPRVariables		(TTree* fAnalysisTree);
+	virtual void ResetTree				();
+	virtual void ResetTriggerVariables	();
+	virtual void ResetMuonVariables		();
+	virtual void ResetElectronVariables	();
+	virtual void ResetAuxVariables		();
+	virtual void ResetFPRVariables		();
+	virtual void FillTree				();
 	
 	TLorentzVector	jetTotalP		(vector<int>& qualJetInd);
 	TLorentzVector	elTotalP		(vector<int>& qualElInd);
 	TLorentzVector	muTotalP		(vector<int>& qualMuInd);
 	TLorentzVector	phoTotalP		(vector<int>& qualPhoInd);
 	float			jetHT			(vector<int>& qualJetInd);	
+	float			minDRtoJet		(float lepEta, float lepPhi);
 	void			transverseMasses(TLorentzVector p1, TLorentzVector p2, TVector3 jtotPT, float &fTLepminv, float &fTLepmtinv, float &fTLepmCT, float &fTLepmCTorth, float &fTLepmCTparl, float &fTLepmt2_0, float &fTLepmt2_50, float &fTLepmt2_100, float &fTLepmT2orth_0, float &fTLepmT2orth_50, float &fTLepmT2orth_100 );	
 	void			transverseAlphas(vector<int> qualElInd, vector<int> qualMuInd, vector<int> qualPhoInd, vector<int> qualJetInd, float &alphaT_h, float &alphaCT_h, float &alphaT, float &alphaCT, float &alphaT_new, float &alphaCT_new);
 
@@ -59,9 +66,9 @@ public:
 	void			DumpPhotonProperties			(vector<int>& selectedPhoInd,	TVector3 jtotPT);
 	void			DumpMuonProperties				(vector<int>& selectedMuInd,	TVector3 jtotPT);
 	void			DumpElectronProperties			(vector<int>& selectedElInd,	TVector3 jtotPT);
+	void			DumpFPRatioProperties			();
 	void			DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta);
 	void			DumpTwoElectronPtAndEta			(int el1index, int el2index, float &el1Pt, float &el2Pt, float &el1Eta, float &el2Eta);	
-	float			minDRtoJet						(float lepEta, float lepPhi);
 
 private:
 	static const int maxNjets	= 30;
@@ -69,8 +76,7 @@ private:
 	static const int maxNeles	= 5;
 	static const int maxNphos	= 5;
 
-	TTree*	fDiLeptonTree;
-	TTree*	fElectronTree;
+	TTree*	fAnalysisTree;
 	
 	// run/sample properties
 	int		fTRunNumber;
@@ -78,8 +84,13 @@ private:
 	int		fTLumiSection;
 	float	fTextxslo;
 	float	fTintxs;
-		
+
 	// trigger properties
+	int		fT_HLTMu9;
+	int		fT_HLTMu11;
+	int		fT_HLTMu15;
+	int		fT_HLTDoubleMu3;
+	int		fT_HLTDoubleMu0;
 	int		fTHLT_Jet15U;
 	int		fTHLT_Jet30U;
 	int		fTHLT_Jet50U;
@@ -99,35 +110,65 @@ private:
 	int		fTHLT_DoubleEle10_SW_L1R;
 	int		fTHLT_DoubleEle15_SW_L1R_v1;
 	int		fTHTL_GoodElEvent;
+	int		fTHTL_GoodElFakesEvent;
 	int		fTHTL_GoodHadronicEvent;
-	
-	// jet properties
-	int		fTNqualjet;
+	int		fTHTL_GoodMuEvent;
+	// jet-MET properties
+	int		fTnqjets;
 	float	fTJetpt[maxNjets];
 	float	fTJeteta[maxNjets];
 	float	fTJetphi[maxNjets];
+	float	fTHT;
+	float	fTSumEt;
+	float	fTtcMET;
+	float	fTpfMET;
+	float	fTMuCorrMET;
+	float	fTdPhiMJ1;
+	float	fTdPhiMJ2;
+	float	fTR12;
+	float	fTR21;
+	float	fTR12plusR21;
 	// photon properties
-	int		fTNqualpho;
+	int		fTnqphos;
 	float	fTPhopt[maxNphos];
 	float	fTPhoeta[maxNphos];
 	float	fTPhophi[maxNphos];
 	float	fTPhoRelIso[maxNphos];
 	float	fTPhoDRjet[maxNphos];
 	float	fTPhoDRhardestjet[maxNphos];
+	
 	//muon properties
-	int		fTNqualmu;
-	int		fTMucharge[maxNmus];
-	float	fTMupt[maxNmus];
-	float	fTMueta[maxNmus];
-	float	fTMuphi[maxNmus];
-	float	fTMuiso[maxNmus];
-	float	fTMud0[maxNmus];
-	float	fTMuntkhits[maxNmus];
-	float	fTMuMT[maxNmus];
-	float	fTMuDRjet[maxNmus];
-	float	fTMuDRhardestjet[maxNmus];
+	int		fTnqmus;
+	float	fTmupt[maxNmus];
+	float	fTmueta[maxNmus];
+	float	fTmuphi[maxNmus];
+	float	fTmuiso[maxNmus];
+	int		fTmucharge[maxNmus];
+	int		fTmutight[maxNmus]; // 0 for loose (but not tight), 1 for tight
+	float	fTmuDRjet[maxNmus];
+	float	fTmuDRhardestjet[maxNmus];
+	float	fTmucalocomp[maxNmus];
+	float	fTmusegmcomp[maxNmus];
+	float	fTmuouterrad[maxNmus];
+	float	fTmunchi2[maxNmus];
+	int		fTmuntkhits[maxNmus];
+	int		fTmunmuhits[maxNmus];
+	float	fTmuemvetoet[maxNmus];
+	float	fTmuhadvetoet[maxNmus];
+	float	fTmud0[maxNmus];
+	float	fTmudz[maxNmus];
+	float	fTmuptE[maxNmus];
+	int		fTmuid[maxNmus];
+	int		fTmumoid[maxNmus];
+	int		fTmugmoid[maxNmus];
+	int		fTmutype[maxNmus];
+	int		fTmumotype[maxNmus];
+	int		fTmugmotype[maxNmus];
+	float	fTmuMT;
+	float	fTmuMinv;
+	
 	// electron properties
-	int		fTNqualel;
+	int		fTnqels;
 	int		fTElcharge[maxNeles];
 	int		fTElChargeIsCons[maxNeles];
 	int		fTElChargeIsGenCons[maxNeles];
@@ -162,10 +203,11 @@ private:
 	int		fTElGenGMID[maxNeles];
 	int		fTElGenGMStatus[maxNeles];
 	int		fTElTight[maxNeles];
-	
-	// dilepton properties
+	float	fTElHybRelIso[maxNeles];
 	float	fTElminv;
 	float	fTElmtinv;
+
+	// other properties
 	float	fTElmt2_0;
 	float	fTElmt2_50;
 	float	fTElmt2_100;
@@ -175,9 +217,6 @@ private:
 	float	fTElmT2orth_0;
 	float	fTElmT2orth_50;
 	float	fTElmT2orth_100;	
-	
-	float	fTMuminv;
-	float	fTMumtinv;
 	float	fTMumt2_0;
 	float	fTMumt2_50;
 	float	fTMumt2_100;
@@ -187,20 +226,6 @@ private:
 	float	fTMumT2orth_0;
 	float	fTMumT2orth_50;
 	float	fTMumT2orth_100;
-	
-	// event properties
-	float	fTHT;
-	float	fTSumEt;
-	float	fTtcMET;
-	float	fTpfMET;
-	float	fTMuCorrMET;
-	
-	float	fTdPhiMJ1;
-	float	fTdPhiMJ2;
-	float	fTR12;
-	float	fTR21;
-	float	fTR12plusR21;
-		
 	float	fTalphaT_h;
 	float	fTalphaCT_h;	
 	float	fTalphaT;
@@ -208,7 +233,7 @@ private:
 	float	fTalphaT_new;
 	float	fTalphaCT_new;
 
-	// fake rate propeties
+	// fake ratio propeties
 	int		fTisSE_QCDLike;
 	int		fTSE_QCDLike_FakeElGenID;
 	float	fTSE_QCDLike_ElLoosePt;
