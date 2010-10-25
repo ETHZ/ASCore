@@ -38,9 +38,13 @@ void MuonAnalysis::FillMuonTree(){
 	fTrun     = fTR->Run;
 	fTevent   = fTR->Event;
 	fTlumisec = fTR->LumiSection;
+	fThbhenoiseflag = fTR->HBHENoiseFlag;
 
 	// Trigger info
 	fT_HLTMu9       = GetHLTResult("HLT_Mu9")       ? 1:0;
+	fT_HLTMu11      = GetHLTResult("HLT_Mu11")      ? 1:0;
+	fT_HLTMu15      = GetHLTResult("HLT_Mu15")   ? 1:0;
+	fT_HLTDoubleMu0 = GetHLTResult("HLT_DoubleMu0") ? 1:0;
 	fT_HLTDoubleMu3 = GetHLTResult("HLT_DoubleMu3") ? 1:0;
 	fT_HLTJet30U    = GetHLTResult("HLT_Jet30U")    ? 1:0;
 	fT_HLTJet50U    = GetHLTResult("HLT_Jet50U")    ? 1:0;
@@ -64,7 +68,8 @@ void MuonAnalysis::FillMuonTree(){
 	}
 	fTHT    = ht;
 	fTMHT   = mht.Mag();
-	fTMET   = fTR->PFMET;
+	fTPFMET   = fTR->PFMET;
+	fTTCMET   = fTR->TCMET;
 	fTSumET = fTR->SumEt;
 
 	// Muon Variables
@@ -77,16 +82,12 @@ void MuonAnalysis::FillMuonTree(){
 		if(IsTightMu(index))        fTmutight[i] = 1;
 		if(IsLooseNoTightMu(index)) fTmutight[i] = 0;
 		fTmuiso      [i] = fTR->MuRelIso03[index];
-		fTmucalocomp [i] = fTR->MuCaloComp[index];
-		fTmusegmcomp [i] = fTR->MuSegmComp[index];
-		fTmuouterrad [i] = fTR->MuOutPosRadius[index];
-		fTmunchi2    [i] = fTR->MuNChi2[index];
-		fTmuntkhits  [i] = fTR->MuNTkHits[index];
-		fTmunmuhits  [i] = fTR->MuNMuHits[index];
-		fTmuemvetoet [i] = fTR->MuIso03EMVetoEt[index];
-		fTmuhadvetoet[i] = fTR->MuIso03HadVetoEt[index];
+		if(fTmupt[i] > 20.) fTmuisohyb[i] = fTmuiso[i];
+		else fTmuisohyb[i] = fTmuiso[i]*fTmupt[i] / 20.;
 		fTmud0       [i] = fTR->MuD0PV[index];
 		fTmudz       [i] = fTR->MuDzPV[index];
+		fTmud0bs     [i] = fTR->MuD0BS[index];
+		fTmudzbs     [i] = fTR->MuDzBS[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
 
 		double mindr(100.);
@@ -130,7 +131,7 @@ void MuonAnalysis::FillMuonTree(){
 	double ETlept = sqrt(pmu1.M2() + pmu1.Perp2());
 	double METpx  = fTR->PFMETpx;
 	double METpy  = fTR->PFMETpy;
-	fTMT          = sqrt( 2*fTMET*ETlept - pmu1.Px()*METpx - pmu1.Py()*METpy );
+	fTMT          = sqrt( 2*fTPFMET*ETlept - pmu1.Px()*METpx - pmu1.Py()*METpy );
 	
 	fMuTree->Fill();
 }
@@ -141,22 +142,30 @@ void MuonAnalysis::BookTree(){
 	fMuTree->Branch("Run"           ,&fTrun,          "Run/I");
 	fMuTree->Branch("Event"         ,&fTevent,        "Event/I");
 	fMuTree->Branch("LumiSection"   ,&fTlumisec,      "LumiSection/I");
+	fMuTree->Branch("HBHENoiseFlag" ,&fThbhenoiseflag,"HBHENoiseFlag/I");
 	fMuTree->Branch("HLTMu9"        ,&fT_HLTMu9,      "HLTMu9/I");
+	fMuTree->Branch("HLTMu11"       ,&fT_HLTMu11,     "HLTMu11/I");
+	fMuTree->Branch("HLTMu15"       ,&fT_HLTMu15,     "HLTMu15/I");
+	fMuTree->Branch("HLTDoubleMu0"  ,&fT_HLTDoubleMu0,"HLTDoubleMu0/I");
 	fMuTree->Branch("HLTDoubleMu3"  ,&fT_HLTDoubleMu3,"HLTDoubleMu3/I");
 	fMuTree->Branch("HLTJet30U"     ,&fT_HLTJet30U,   "HLTJet30U/I");
 	fMuTree->Branch("HLTJet50U"     ,&fT_HLTJet50U,   "HLTJet50U/I");
 	fMuTree->Branch("HLTJet70U"     ,&fT_HLTJet70U,   "HLTJet70U/I");
 	fMuTree->Branch("HLTJet100U"    ,&fT_HLTJet100U,  "HLTJet100U/I");
+
+	fMuTree->Branch("HT"            ,&fTHT,           "HT/F");
+	fMuTree->Branch("MHT"           ,&fTMHT,          "MHT/F");
+	fMuTree->Branch("PFMET"         ,&fTPFMET,        "PFMET/F");
+	fMuTree->Branch("TCMET"         ,&fTTCMET,        "TCMET/F");
+	fMuTree->Branch("SumET"         ,&fTSumET,        "SumET/F");
+	fMuTree->Branch("MT"            ,&fTMT,           "MT/F");
+	fMuTree->Branch("Minv"          ,&fTMinv,         "Minv/F");
+
 	fMuTree->Branch("NJets"         ,&fTnjets,        "NJets/I");
 	fMuTree->Branch("JPt"           ,&fTjpt,          "JPt[NJets]/F");
 	fMuTree->Branch("JEta"          ,&fTjeta,         "JEta[NJets]/F");
 	fMuTree->Branch("JPhi"          ,&fTjphi,         "JPhi[NJets]/F");
-	fMuTree->Branch("HT"            ,&fTHT,           "HT/F");
-	fMuTree->Branch("MHT"           ,&fTMHT,          "MHT/F");
-	fMuTree->Branch("MET"           ,&fTMET,          "MET/F");
-	fMuTree->Branch("MT"            ,&fTMT,           "MT/F");
-	fMuTree->Branch("Minv"          ,&fTMinv,         "Minv/F");
-	fMuTree->Branch("SumET"         ,&fTSumET,        "SumET/F");
+
 	fMuTree->Branch("NMus"          ,&fTnmus,         "NMus/I");
 	fMuTree->Branch("MuPt"          ,&fTmupt,         "MuPt[NMus]/F");
 	fMuTree->Branch("MuEta"         ,&fTmueta,        "MuEta[NMus]/F");
@@ -164,19 +173,14 @@ void MuonAnalysis::BookTree(){
 	fMuTree->Branch("MuCharge"      ,&fTmucharge,     "MuCharge[NMus]/I");
 	fMuTree->Branch("MuTight"       ,&fTmutight,      "MuTight[NMus]/I");
 	fMuTree->Branch("MuIso"         ,&fTmuiso,        "MuIso[NMus]/F");
+	fMuTree->Branch("MuIsoHybrid"   ,&fTmuisohyb,     "MuIsoHybrid[NMus]/F");
 	fMuTree->Branch("MuDRJet"       ,&fTDRjet,        "MuDRJet[NMus]/F");
 	fMuTree->Branch("MuDPhiJet"     ,&fTDPhijet,      "MuDPhiJet[NMus]/F");
 	fMuTree->Branch("MuDRHardestJet",&fTDRhardestjet, "MuDRHardestJet[NMus]/F");
-	fMuTree->Branch("MuCaloComp"    ,&fTmucalocomp,   "MuCaloComp[NMus]/F");
-	fMuTree->Branch("MuSegmComp"    ,&fTmusegmcomp,   "MuSegmComp[NMus]/F");
-	fMuTree->Branch("MuOuterRad"    ,&fTmuouterrad,   "MuOuterRad[NMus]/F");
-	fMuTree->Branch("MuNChi2"       ,&fTmunchi2,      "MuNChi2[NMus]/F");
-	fMuTree->Branch("MuNTkHits"     ,&fTmuntkhits,    "MuNTkHits[NMus]/I");
-	fMuTree->Branch("MuNMuHits"     ,&fTmunmuhits,    "MuNMuHits[NMus]/I");
-	fMuTree->Branch("MuIsoEMVetoEt" ,&fTmuemvetoet,   "MuIsoEMVetoEt[NMus]/F");
-	fMuTree->Branch("MuIsoHadVetoEt",&fTmuhadvetoet,  "MuIsoHadVetoEt[NMus]/F");
 	fMuTree->Branch("MuD0"          ,&fTmud0,         "MuD0[NMus]/F");
 	fMuTree->Branch("MuDz"          ,&fTmudz,         "MuDz[NMus]/F");
+	fMuTree->Branch("MuD0BS"        ,&fTmud0bs,       "MuD0BS[NMus]/F");
+	fMuTree->Branch("MuDzBS"        ,&fTmudzbs,       "MuDzBS[NMus]/F");
 	fMuTree->Branch("MuPtE"         ,&fTmuptE,        "MuPtE[NMus]/F");
 	fMuTree->Branch("MuGenID"       ,&fTmuid,         "MuGenID[NMus]/I");
 	fMuTree->Branch("MuGenMoID"     ,&fTmumoid,       "MuGenMoID[NMus]/I");
@@ -190,8 +194,12 @@ void MuonAnalysis::ResetTree(){
 	fTrun     = 0;
 	fTevent   = 0;
 	fTlumisec = 0;
+	fThbhenoiseflag = 0;
 	fTnjets   = 0;
 	fT_HLTMu9       = 0;
+	fT_HLTMu11      = 0;
+	fT_HLTMu15      = 0;
+	fT_HLTDoubleMu0 = 0;
 	fT_HLTDoubleMu3 = 0;
 	fT_HLTJet30U    = 0;
 	fT_HLTJet50U    = 0;
@@ -199,7 +207,8 @@ void MuonAnalysis::ResetTree(){
 	fT_HLTJet100U   = 0;	
 	fTHT      = -999.99;
 	fTMHT     = -999.99;
-	fTMET     = -999.99;
+	fTPFMET   = -999.99;
+	fTTCMET   = -999.99;
 	fTSumET   = -999.99;
 	fTMT      = -999.99;
 	fTMinv    = -999.99;
@@ -216,19 +225,14 @@ void MuonAnalysis::ResetTree(){
 		fTmucharge    [i] = -999;
 		fTmutight     [i] = -999;
 		fTmuiso       [i] = -999.99;
+		fTmuisohyb    [i] = -999.99;
 		fTDRjet       [i] = -999.99;
 		fTDPhijet     [i] = -999.99;
 		fTDRhardestjet[i] = -999.99;
-		fTmucalocomp  [i] = -999.99;
-		fTmusegmcomp  [i] = -999.99;
-		fTmuouterrad  [i] = -999.99;
-		fTmunchi2     [i] = -999.99;
-		fTmuntkhits   [i] = -999;
-		fTmunmuhits   [i] = -999;
-		fTmuemvetoet  [i] = -999.99;
-		fTmuhadvetoet [i] = -999.99;
 		fTmud0        [i] = -999.99;
 		fTmudz        [i] = -999.99;
+		fTmud0bs      [i] = -999.99;
+		fTmudzbs      [i] = -999.99;
 		fTmuptE       [i] = -999.99;
 		fTmuid        [i] = -999;
 		fTmumoid      [i] = -999;

@@ -35,7 +35,11 @@ private:
 	int fTrun;
 	int fTevent;
 	int fTlumisec;
+	int fThbhenoiseflag;
 	int fT_HLTMu9;
+	int fT_HLTMu11;
+	int fT_HLTMu15;
+	int fT_HLTDoubleMu0;
 	int fT_HLTDoubleMu3;
 	int fT_HLTJet30U;
 	int fT_HLTJet50U;
@@ -47,7 +51,8 @@ private:
 	float fTjphi[gMaxnjets];
 	float fTHT;
 	float fTMHT;
-	float fTMET;
+	float fTPFMET;
+	float fTTCMET;
 	float fTMT;
 	float fTMinv;
 	float fTSumET; // Directly from NTupleProducer, i.e. scalar sum of all calotower.et()
@@ -56,21 +61,16 @@ private:
 	float fTmueta[gMaxnmus];
 	float fTmuphi[gMaxnmus];
 	float fTmuiso[gMaxnmus];
+	float fTmuisohyb[gMaxnmus];
 	int fTmucharge[gMaxnmus];
 	int fTmutight[gMaxnmus]; // 0 for loose (but not tight), 1 for tight
 	float fTDRjet[gMaxnmus];
 	float fTDRhardestjet[gMaxnmus];
 	float fTDPhijet[gMaxnmus];
-	float fTmucalocomp[gMaxnmus];
-	float fTmusegmcomp[gMaxnmus];
-	float fTmuouterrad[gMaxnmus];
-	float fTmunchi2[gMaxnmus];
-	int fTmuntkhits[gMaxnmus];
-	int fTmunmuhits[gMaxnmus];
-	float fTmuemvetoet[gMaxnmus];
-	float fTmuhadvetoet[gMaxnmus];
 	float fTmud0[gMaxnmus];
 	float fTmudz[gMaxnmus];
+	float fTmud0bs[gMaxnmus];
+	float fTmudzbs[gMaxnmus];
 	float fTmuptE[gMaxnmus];
 	int fTmuid[gMaxnmus];
 	int fTmumoid[gMaxnmus];
