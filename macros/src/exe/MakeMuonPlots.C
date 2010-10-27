@@ -63,7 +63,9 @@ int main(int argc, char* argv[]) {
 	cout << "Using sample file: " << samples << endl;
 	cout << "--------------" << endl;
 
-	MuonPlotter *tA = new MuonPlotter(outputdir, "MuonPlots.root");
+	MuonPlotter *tA = new MuonPlotter();
+	tA->setOutputDir(outputdir);
+	tA->setOutputFile("MuonPlots.root");
 	tA->setVerbose(verbose);
 	tA->init(samples);
 	tA->makePlots();

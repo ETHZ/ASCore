@@ -16,6 +16,7 @@ using namespace std;
 //____________________________________________________________________________
 MuonPlotter::MuonPlotter(){
 // Default constructor, no samples are set
+	cout << "Mooooep" << endl;
 }
 
 //____________________________________________________________________________
@@ -55,34 +56,14 @@ void MuonPlotter::init(TString filename){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 	
-	fAllMCSS.push_back(4);  // TTbar
-	fAllMCSS.push_back(5);  // WJets
-	fAllMCSS.push_back(6);  // ZJets
-	fAllMCSS.push_back(7);  // QCD_Pt15to30
-	fAllMCSS.push_back(8);  // QCD_Pt30to80
-	fAllMCSS.push_back(9);  // QCD_Pt80to170
-	fAllMCSS.push_back(10); // QCD_Pt170toInf
-	fAllMCSS.push_back(11); // LM0
-	// fAllMCSS.push_back(30); // InclusiveMu15
-
-	fAllMCSi.push_back(12); // TTbar
-	fAllMCSi.push_back(13); // WJets
-	fAllMCSi.push_back(14); // ZJets
-	fAllMCSi.push_back(15); // QCD_Pt15to30
-	fAllMCSi.push_back(16); // QCD_Pt30to80
-	fAllMCSi.push_back(17); // QCD_Pt80to170
-	fAllMCSi.push_back(18); // QCD_Pt170toInf
-	fAllMCSi.push_back(19); // LM0
-	
-	fAllMCDi.push_back(20); // TTbar
-	fAllMCDi.push_back(21); // WJets
-	fAllMCDi.push_back(22); // ZJets
-	fAllMCDi.push_back(23); // QCD_Pt15to30
-	fAllMCDi.push_back(24); // QCD_Pt30to80
-	fAllMCDi.push_back(25); // QCD_Pt80to170
-	fAllMCDi.push_back(26); // QCD_Pt170toInf
-	fAllMCDi.push_back(27); // LM0
-	
+	// fAllMCSS.push_back(4);  // TTbar
+	// fAllMCSS.push_back(5);  // WJets
+	// fAllMCSS.push_back(6);  // ZJets
+	// fAllMCSS.push_back(7);  // QCD_Pt15to30
+	// fAllMCSS.push_back(8);  // QCD_Pt30to80
+	// fAllMCSS.push_back(9);  // QCD_Pt80to170
+	// fAllMCSS.push_back(10); // QCD_Pt170toInf
+	// fAllMCSS.push_back(11); // LM0
 }
 
 //____________________________________________________________________________
@@ -115,7 +96,8 @@ void MuonPlotter::loadSamples(const char* filename){
 			sscanf(buffer, "File\t%s", StringValue);
 			TFile *f = TFile::Open(StringValue);
 			s.file = f;
-			s.tree = (TTree*)f->Get("MuonAnalysis");
+			s.tree = (TTree*)f->Get("Analysis");
+			if(s.tree == NULL){ cout << " Tree not found in file!" << endl; break; }
 
 			IN.getline(buffer, 200, '\n');
 			sscanf(buffer, "Lumi\t%f", &ParValue);
@@ -144,7 +126,7 @@ void MuonPlotter::loadSamples(const char* filename){
 
 //____________________________________________________________________________
 void MuonPlotter::makePlots(){
-	makePrediction();
+	// makePrediction();
 
 	// makefRatioPlots();
 	// makepRatioPlots();
@@ -1491,15 +1473,15 @@ bool MuonPlotter::isMuTriggeredEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isJetTriggeredEvent(){
-	if(HLTJet30U == 0 && HLTJet50U == 0) return false;
+	if(HLT_Jet30U == 0 && HLT_Jet50U == 0) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isSignalSuppressedEvent(){
 	if(isGoodEvent() == false) return false;
-	if(MT > 20.) return false;
-	if(MET > 20.) return false;
+	if(MuMT > 20.) return false;
+	if(pfMET > 20.) return false;
 	if(NMus > 1) return false;
 	if(isJetTriggeredEvent() == false) return false;
 	return true;
