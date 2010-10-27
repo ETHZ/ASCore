@@ -16,13 +16,13 @@ public:
 	virtual void PrintProgress(Long64_t);
 
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
-	inline virtual void SetMaxEvents(int maxevents){fMaxEvents = maxevents;};
+	inline virtual void SetMaxEvents(Long64_t maxevents){fMaxEvents = maxevents;};
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	
 	TString fOutputDir;
 	int fVerbose;
 	int fNEntries;
-	int fMaxEvents;
+	Long64_t fMaxEvents;
   
 	Int_t fCurRun;
 
