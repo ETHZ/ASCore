@@ -13,22 +13,30 @@ SSDLAnalyzer::~SSDLAnalyzer(){
 }
 
 // Method for looping over the tree
-void SSDLAnalyzer::Loop(Long64_t maxEvents, Int_t prescale){
+void SSDLAnalyzer::Loop(Int_t prescale){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << nentries << endl;
-	if ( maxEvents>=0 ) { 
-		nentries = maxEvents;
-		cout << " processing only " << nentries << " events out of it" << endl;
+
+	if( fMaxEvents > -1 ){
+		cout << " will run on " << fMaxEvents << " events..." << endl;
+		nentries = fMaxEvents;
 	}
-	if ( prescale>1 ) cout << " processing only every " << prescale << " events" << endl;
+
+	if( prescale>1 ) cout << " processing only every " << prescale << " events" << endl;
 	
-	//nentries = 1000;
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
-		if ( prescale>1 && jentry%prescale ) continue; // Prescale processing...
+
+		// Prescale processing...
+		if ( prescale>1 && jentry%prescale ) continue;
+
 		fTR->GetEntry(jentry);
 
-		if ( fCurRun != fTR->Run ) {
+		// Upper Pt Hat cut
+		if( fPtHatCut > -1.0 )
+			if( fTR->PtHat > fPtHatCut ) continue;
+
+		if( fCurRun != fTR->Run ) {
 			fCurRun = fTR->Run;
 			fSSDLAnalysis->BeginRun(fCurRun);
 		}

@@ -14,10 +14,12 @@ public:
 	virtual ~SSDLAnalyzer();
 	void BeginJob	();
 	void EndJob		();
-	void Loop		(Long64_t maxEvents=-1, Int_t prescale=1);
+	void Loop		(Int_t prescale=1);
+	inline void SetPtHatCut(float cut){fPtHatCut = cut;};
 
 private:
 	AnaClass		*fAnaClass;
 	SSDLAnalysis	*fSSDLAnalysis;
+	float fPtHatCut;
 };
 #endif
