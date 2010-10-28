@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.64 2010/10/04 14:44:13 jueugste Exp $
+// $Id: NTupleProducer.h,v 1.65 2010/10/04 15:37:51 stiegerb Exp $
 //
 //
 
@@ -462,6 +462,7 @@ private:
   double fTdr04hcaltowersumet[gMaxneles];
   double fTenchi2[gMaxneles];
   // Electron ID
+  double fTeIDMva[gMaxneles];
   int fTeIDTight[gMaxneles];
   int fTeIDLoose[gMaxneles];
   int fTeIDRobustTight[gMaxneles];
