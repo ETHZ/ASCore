@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.82 2010/10/06 18:06:21 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.83 2010/10/21 09:42:03 pnef Exp $
 //
 //
 
@@ -818,6 +818,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       }
 
       // Read in Electron ID
+      fTeIDMva[eqi] = electron.mva();
       if ( !fIsPat ) { // Electron ID is embedded in PAT => switch
         Ref<View<GsfElectron> > electronRef(electrons,index);
         fTeIDTight[eqi]            = eIDmapT[electronRef]  ? 1:0;
@@ -1801,6 +1802,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElClosestCtfTrackEta"        ,&fTeClosestCtfTracketa     ,"ElClosestCtfTrackEta[NEles]/D");
   fEventTree->Branch("ElClosestCtfTrackPhi"        ,&fTeClosestCtfTrackphi     ,"ElClosestCtfTrackPhi[NEles]/D");
   fEventTree->Branch("ElClosestCtfTrackCharge"     ,&fTeClosestCtfTrackcharge  ,"ElClosestCtfTrackCharge[NEles]/I");
+  fEventTree->Branch("ElIDMva"                     ,&fTeIDMva             ,"ElIDMva[NEles]/D");
   fEventTree->Branch("ElIDTight"                   ,&fTeIDTight           ,"ElIDTight[NEles]/I");
   fEventTree->Branch("ElIDLoose"                   ,&fTeIDLoose           ,"ElIDLoose[NEles]/I");
   fEventTree->Branch("ElIDRobustTight"             ,&fTeIDRobustTight     ,"ElIDRobustTight[NEles]/I");
@@ -2410,6 +2412,7 @@ void NTupleProducer::resetTree(){
   resetDouble(fTeS4OverS1, gMaxneles);
   resetDouble(fTeE1OverE9, gMaxneles);
 
+  resetDouble(fTeIDMva, gMaxneles);
   resetInt(fTeIDTight, gMaxneles);
   resetInt(fTeIDLoose, gMaxneles);
   resetInt(fTeIDRobustTight, gMaxneles);
