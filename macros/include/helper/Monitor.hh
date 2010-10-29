@@ -1,3 +1,5 @@
+#ifndef DILEPTONANALYSIS_NTUPLEPRODUCER_HH
+#define DILEPTONANALYSIS_NTUPLEPRODUCER_HH
 //
 // Class to count selected events
 //
@@ -56,19 +58,19 @@ struct eqstr
 
 class Monitor {
 
-  typedef map<const std::string, int, eqstr> Cmap;
+  typedef map<const std::string, float, eqstr> Cmap;
 
 public:
   Monitor() : maxLength(50) {}
 
-  void fill( const std::string& counter ) {
+  void fill( const std::string& counter, const float& weight=1. ) {
     Cmap::iterator it;
     if ( ( it = counters.find(counter)) == counters.end() ) {
       countNames.push_back( counter ); // Store name in ordered list
       if ( counter.length()>maxLength ) maxLength = counter.length();
-      counters.insert( std::make_pair(counter,1) ); // Increment counter
+      counters.insert( std::make_pair(counter,weight) ); // Increment counter
     } else {
-      (*it).second++;
+      (*it).second += weight;
     }
   }
   void print() {
@@ -76,7 +78,7 @@ public:
     for ( std::vector<std::string>::const_iterator it = countNames.begin(); 
           it != countNames.end(); ++it ) {
       std::cout << setw(maxLength+5) << left << (*it) 
-                << counters[*it] << std::endl;
+                << right << counters[*it] << std::endl;
     }
   }
 
@@ -86,3 +88,4 @@ private:
   int maxLength;
 
 };
+#endif
