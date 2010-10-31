@@ -86,7 +86,7 @@ int UserAnalysisBase::GetHLTBit(string theHltName){
 	else{
 		map<string,int>::iterator it = fHLTLabelMap.find(theHltName);
 		if(it == fHLTLabelMap.end()){
-			if(fVerbose > 0) cout << "UserAnalysisBase::GetHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
 			return -1;
 		}
 		else{
@@ -100,7 +100,7 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	else{
 		int bit = GetHLTBit(theHltName);
 		if(bit == -1){
-			if(fVerbose > 0) cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
 			return false;
 		}
 		else return (bool)fTR->HLTResults[bit];
