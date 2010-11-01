@@ -32,49 +32,50 @@ public:
 	
 	Davismt2 *fMT2;
 	
-	void Begin(const char* filename = "SSDLTree.root");
-	void Analyze();
-	void End();
+	void           Begin(const char* filename = "SSDLTree.root");
+	void           Analyze();
+	void           End();
 
-	void BookTree();
-	void BookTriggerVariables(TTree* tree);
-	void BookMuonVariables(TTree* tree);
-	void BookElectronVariables(TTree* tree);
-	void BookAuxVariables(TTree* tree);
-	void BookFPRVariables(TTree* tree);
-	void ResetTree();
-	void ResetTriggerVariables();
-	void ResetMuonVariables();
-	void ResetElectronVariables();
-	void ResetAuxVariables();
-	void ResetFPRVariables();
+	void           BookTree();
+	void           BookRunAndTriggerVariables(TTree* tree);
+	void           BookMuonVariables(TTree* tree);
+	void           BookElectronVariables(TTree* tree);
+	void           BookJetMETVariables(TTree* tree);
+	void           BookFPRVariables(TTree* tree);
+
+	void           ResetTree();
+	void           ResetRunAndTriggerVariables();
+	void           ResetMuonVariables();
+	void           ResetElectronVariables();
+	void           ResetJetMETVariables();
+	void           ResetFPRVariables();
 	
 	TLorentzVector jetTotalP(vector<int>& qualJetInd);
-	TLorentzVector elTotalP(vector<int>& qualElInd);
-	TLorentzVector muTotalP(vector<int>& qualMuInd);
+	TLorentzVector elTotalP (vector<int>& qualElInd);
+	TLorentzVector muTotalP (vector<int>& qualMuInd);
 	TLorentzVector phoTotalP(vector<int>& qualPhoInd);
-	float jetHT(vector<int>& qualJetInd);	
-	float minDRtoJet(float lepEta, float lepPhi);
-	void transverseMasses(TLorentzVector p1, TLorentzVector p2, TVector3 jtotPT, float &lepminv, float &lepmtinv, float &lepmct, float &lepmctort, float &lepmctparl, float &lepmt2_0, float &lepmt2_50, float &lepmt2_100, float &lepmt2orth_0, float &lepmt2orth_50, float &lepmt2orth_100);
-	void transverseAlphas(vector<int> qualElInd, vector<int> qualMuInd, vector<int> qualPhoInd, vector<int> qualJetInd, float &alphaT_h, float &alphaCT_h, float &alphaT, float &alphaCT, float &alphaT_new, float &alphaCT_new);
+	float          jetHT(vector<int>& qualJetInd);	
+	float          minDRtoJet(float lepEta, float lepPhi);
+	void           transverseMasses(TLorentzVector p1, TLorentzVector p2, TVector3 jtotPT, float &lepminv, float &lepmtinv, float &lepmct, float &lepmctort, float &lepmctparl, float &lepmt2_0, float &lepmt2_50, float &lepmt2_100, float &lepmt2orth_0, float &lepmt2orth_50, float &lepmt2orth_100);
+	void           transverseAlphas(vector<int> qualElInd, vector<int> qualMuInd, vector<int> qualPhoInd, vector<int> qualJetInd, float &alphaT_h, float &alphaCT_h, float &alphaT, float &alphaCT, float &alphaT_new, float &alphaCT_new);
 
-	void DumpRunAndTiggerProperties();
-	void DumpJetMETProperties(vector<int>& selectedJetInd);
-	void DumpPhotonProperties(vector<int>& selectedPhoInd);
-	void DumpMuonProperties(vector<int>& selectedMuInd);
-	void DumpElectronProperties(vector<int>& selectedElInd, TVector3 jtotPT);
-	void DumpFPRatioProperties();
-	void DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta);
-	void DumpTwoElectronPtAndEta(int el1index, int el2index, float &el1Pt, float &el2Pt, float &el1Eta, float &el2Eta);
+	void           DumpRunAndTiggerProperties();
+	void           DumpJetMETProperties(vector<int>& selectedJetInd);
+	void           DumpPhotonProperties(vector<int>& selectedPhoInd);
+	void           DumpMuonProperties(vector<int>& selectedMuInd);
+	void           DumpElectronProperties(vector<int>& selectedElInd, TVector3 jtotPT);
+	void           DumpFPRatioProperties();
+	void           DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta);
+	void           DumpTwoElectronPtAndEta(int el1index, int el2index, float &el1Pt, float &el2Pt, float &el1Eta, float &el2Eta);
 
 private:
-	static const int gMaxNjets = 30;
-	static const int gMaxNmus  = 5;
-	static const int gMaxNeles = 5;
-	static const int gMaxNphos = 5;
+	static const int fMaxNjets = 30;
+	static const int fMaxNmus  = 5;
+	static const int fMaxNeles = 5;
+	static const int fMaxNphos = 5;
 
 	TTree* fAnalysisTree;
-	
+
 	// run/sample properties
 	int fTRunNumber;
 	int fTEventNumber;
@@ -191,11 +192,11 @@ private:
 	float fTElDRjet                    [gMaxNeles];
 	float fTElDRhardestjet             [gMaxNeles];
 	int fTElGenID                      [gMaxNeles];
-	int fTElGenStatus                  [gMaxNeles];
 	int fTElGenMID                     [gMaxNeles];
-	int fTElGenMStatus                 [gMaxNeles];
 	int fTElGenGMID                    [gMaxNeles];
-	int fTElGenGMStatus                [gMaxNeles];
+	int fTElGenType                    [gMaxNeles];
+	int fTElGenMType                   [gMaxNeles];
+	int fTElGenGMType                  [gMaxNeles];
 	int fTElTight                      [gMaxNeles];
 	float fTElHybRelIso                [gMaxNeles];
 	float fTElminv;

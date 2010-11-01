@@ -2,13 +2,13 @@
 
 using namespace std;
 
-const int SSDLAnalysis::gMaxNjets;
-const int SSDLAnalysis::gMaxNmus;
-const int SSDLAnalysis::gMaxNeles;
-const int SSDLAnalysis::gMaxNphos;
+const int SSDLAnalysis::fMaxNjets;
+const int SSDLAnalysis::fMaxNmus;
+const int SSDLAnalysis::fMaxNeles;
+const int SSDLAnalysis::fMaxNphos;
 
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
-	//SetStyle();	
+	//SetStyle();
 }
 
 SSDLAnalysis::~SSDLAnalysis(){
@@ -25,18 +25,24 @@ void SSDLAnalysis::End(){
 	fOutputFile->Close();
 }
 
-
 void SSDLAnalysis::BookTree(){
 	fOutputFile->cd();
 	fAnalysisTree = new TTree("Analysis", "AnalysisTree");
-	BookTriggerVariables  (fAnalysisTree);
-	BookMuonVariables     (fAnalysisTree);
-	BookElectronVariables (fAnalysisTree);
-	BookAuxVariables      (fAnalysisTree);
-	BookFPRVariables      (fAnalysisTree);
+	BookRunAndTriggerVariables (fAnalysisTree);
+	BookMuonVariables          (fAnalysisTree);
+	BookElectronVariables      (fAnalysisTree);
+	BookJetMETVariables        (fAnalysisTree);
+	BookFPRVariables           (fAnalysisTree);
 }
 
-void SSDLAnalysis::BookTriggerVariables(TTree* tree){
+void SSDLAnalysis::BookRunAndTriggerVariables(TTree* tree){
+		// run/sample properties
+	tree->Branch("Run",                        &fTRunNumber,                  "Run/I");
+	tree->Branch("Event",                      &fTEventNumber,                "Event/I");
+	tree->Branch("LumiSec",                    &fTLumiSection,                "LumiSec/I");
+	tree->Branch("ExtXSecLO",                  &fTextxslo,                    "ExtXSecLO/F");
+	tree->Branch("IntXSec",                    &fTintxs,                      "IntXSec/F");
+	// triggers
 	tree->Branch("HLT_Mu9",                    &fT_HLTMu9,                    "HLT_Mu9/I");
 	tree->Branch("HLT_Mu11",                   &fT_HLTMu11,                   "HLT_Mu11/I");
 	tree->Branch("HLT_Mu15",                   &fT_HLTMu15,                   "HLT_Mu15/I");
@@ -120,11 +126,11 @@ void SSDLAnalysis::BookElectronVariables(TTree* tree){
 	tree->Branch("ElDRjet",                &fTElDRjet,             "ElDRjet[NEls]/F");
 	tree->Branch("ElDRhardestjet",         &fTElDRhardestjet,      "ElDRhardestjet[NEls]/F");
 	tree->Branch("ElGenID",                &fTElGenID,             "ElGenID[NEls]/I");
-	tree->Branch("ElGenStatus",            &fTElGenStatus,         "ElGenStatus[NEls]/I");
 	tree->Branch("ElGenMID",               &fTElGenMID,            "ElGenMID[NEls]/I");
-	tree->Branch("ElGenMStatus",           &fTElGenMStatus,        "ElGenMStatus[NEls]/I");
 	tree->Branch("ElGenGMID",              &fTElGenGMID,           "ElGenGMID[NEls]/I");
-	tree->Branch("ElGenGMStatus",          &fTElGenGMStatus,       "ElGenGMStatus[NEls]/I");
+	tree->Branch("ElGenType",              &fTElGenType,           "ElGenType[NEls]/I");
+	tree->Branch("ElGenMType",             &fTElGenMType,          "ElGenMType[NEls]/I");
+	tree->Branch("ElGenGMType",            &fTElGenGMType,         "ElGenGMType[NEls]/I");
 	tree->Branch("ElTight",                &fTElTight,             "ElTight[NEls]/I");
 	tree->Branch("ElHybRelIso",            &fTElHybRelIso,         "ElHybRelIso[NEls]/F");
 	tree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
@@ -132,13 +138,7 @@ void SSDLAnalysis::BookElectronVariables(TTree* tree){
 	tree->Branch("ElMTInv",                &fTElmtinv,             "ElMTInv/F");
 }
 
-void SSDLAnalysis::BookAuxVariables(TTree* tree){
-	// run/sample properties
-	tree->Branch("Run",             &fTRunNumber,   "Run/I");
-	tree->Branch("Event",           &fTEventNumber, "Event/I");
-	tree->Branch("LumiSec",         &fTLumiSection, "LumiSec/I");
-	tree->Branch("ExtXSecLO",       &fTextxslo,     "ExtXSecLO/F");
-	tree->Branch("IntXSec",         &fTintxs,       "IntXSec/F");
+void SSDLAnalysis::BookJetMETVariables(TTree* tree){
 	// event properties
 	tree->Branch("HT",              &fTHT,          "HT/F");
 	tree->Branch("SumEt",           &fTSumEt,       "SumEt/F");
@@ -185,13 +185,13 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("MuMT2_0",			&fTMumt2_0,			"MuMT2_0/F");
 	tree->Branch("MuMT2_50",		&fTMumt2_50,		"MuMT2_50/F");
 	tree->Branch("MuMT2_100",		&fTMumt2_100,		"MuMT2_100/F");
-	tree->Branch("MuMCT",			&fTMumCT,			"MuMCT/F");	
+	tree->Branch("MuMCT",			&fTMumCT,			"MuMCT/F");
 	tree->Branch("MuMCTparl",		&fTMumCTparl,		"MuMCTparl/F");
 	tree->Branch("MuMCTorth",		&fTMumCTorth,		"MuMCTorth/F");
 	tree->Branch("MuMT2orth_0",		&fTMumT2orth_0,		"MuMT2orth_0/F");
 	tree->Branch("MuMT2orth_50",	&fTMumT2orth_50,	"MuMT2orth_50/F");
 	tree->Branch("MuMT2orth_100",	&fTMumT2orth_100,	"MuMT2orth_100/F");
-	
+
 	// fake ratio propeties
 	tree->Branch("isSE_QCDLike",				&fTisSE_QCDLike,				"isSE_QCDLike/I");
 	tree->Branch("SE_QCDLike_FakeElGenID",		&fTSE_QCDLike_FakeElGenID,		"SE_QCDLike_FakeElGenID/I");
@@ -199,14 +199,14 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("SE_QCDLike_ElTightPt",		&fTSE_QCDLike_ElTightPt,		"SE_QCDLike_ElTightPt/F");
 	tree->Branch("SE_QCDLike_ElLooseEta",		&fTSE_QCDLike_ElLooseEta,		"SE_QCDLike_ElLooseEta/F");
 	tree->Branch("SE_QCDLike_ElTightEta",		&fTSE_QCDLike_ElTightEta,		"SE_QCDLike_ElTightEta/F");
-	
+
 	tree->Branch("isSE_AntiQCDLike",			&fTisSE_AntiQCDLike,				"isSE_AntiQCDLike/I");
 	tree->Branch("SE_AntiQCDLike_FakeElGenID",	&fTSE_AntiQCDLike_FakeElGenID,		"SE_AntiQCDLike_FakeElGenID/I");
 	tree->Branch("SE_AntiQCDLike_ElLoosePt",	&fTSE_AntiQCDLike_ElLoosePt,		"SE_AntiQCDLike_ElLoosePt/F");
 	tree->Branch("SE_AntiQCDLike_ElTightPt",	&fTSE_AntiQCDLike_ElTightPt,		"SE_AntiQCDLike_ElTightPt/F");
 	tree->Branch("SE_AntiQCDLike_ElLooseEta",	&fTSE_AntiQCDLike_ElLooseEta,		"SE_AntiQCDLike_ElLooseEta/F");
 	tree->Branch("SE_AntiQCDLike_ElTightEta",	&fTSE_AntiQCDLike_ElTightEta,		"SE_AntiQCDLike_ElTightEta/F");
-	
+
 	tree->Branch("isDE_ZJetsLike",				&fTisDE_ZJetsLike,			"isDE_ZJetsLike/I");
 	tree->Branch("DE_ZJetsLike_ElLoosePt",		&fTDE_ZJetsLike_ElLoosePt,	"DE_ZJetsLike_ElLoosePt/F");
 	tree->Branch("DE_ZJetsLike_ElTightPt",		&fTDE_ZJetsLike_ElTightPt,	"DE_ZJetsLike_ElTightPt/F");
@@ -216,7 +216,7 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("DE_ZJetsLike_PromptElGenTightPt",	&fTDE_ZJetsLike_PromptElGenTightPt,	"DE_ZJetsLike_PromptElGenTightPt/F");
 	tree->Branch("DE_ZJetsLike_PromptElGenLooseEta",	&fTDE_ZJetsLike_PromptElGenLooseEta,	"DE_ZJetsLike_PromptElGenLooseEta/F");
 	tree->Branch("DE_ZJetsLike_PromptElGenTightEta",	&fTDE_ZJetsLike_PromptElGenTightEta,	"DE_ZJetsLike_PromptElGenTightEta/F");
-	
+
 	tree->Branch("isDE_WJetsLike",					&fTisDE_WJetsLike,			"isDE_WJetsLike/I");
 	tree->Branch("DE_WJetsLike_FakeElGenID",		&fTDE_WJetsLike_FakeElGenID,"DE_WJetsLike_FakeElGenID/I");
 	tree->Branch("DE_WJetsLike_ElLoosePt",			&fTDE_WJetsLike_ElLoosePt,	"DE_WJetsLike_ElLoosePt/F");
@@ -233,7 +233,7 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("DE_WJetsLike_PromptElGenLooseEta",	&fTDE_WJetsLike_PromptElGenLooseEta,	"DE_WJetsLike_PromptElGenLooseEta/F");
 	tree->Branch("DE_WJetsLike_PromptElGenTightEta",	&fTDE_WJetsLike_PromptElGenTightEta,	"DE_WJetsLike_PromptElGenTightEta/F");
 	tree->Branch("DE_WJetsLike_PromptElGenMT",			&fTDE_WJetsLike_PromptElGenMT,	"DE_WJetsLike_PromptElGenMT/F");
-	
+
 	tree->Branch("isDE_AntiWJetsLike",				&fTisDE_AntiWJetsLike,			"isDE_AntiWJetsLike/I");
 	tree->Branch("DE_AntiWJetsLike_FakeElGenID",	&fTDE_AntiWJetsLike_FakeElGenID,"DE_AntiWJetsLike_FakeElGenID/I");
 	tree->Branch("DE_AntiWJetsLike_ElLoosePt",		&fTDE_AntiWJetsLike_ElLoosePt,	"DE_AntiWJetsLike_ElLoosePt/F");
@@ -250,7 +250,7 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("DE_AntiWJetsLike_PromptElGenLooseEta",	&fTDE_AntiWJetsLike_PromptElGenLooseEta,"DE_AntiWJetsLike_PromptElGenLooseEta/F");
 	tree->Branch("DE_AntiWJetsLike_PromptElGenTightEta",	&fTDE_AntiWJetsLike_PromptElGenTightEta,"DE_AntiWJetsLike_PromptElGenTightEta/F");
 	tree->Branch("DE_AntiWJetsLike_PromptElGenMT",			&fTDE_AntiWJetsLike_PromptElGenMT,		"DE_AntiWJetsLike_PromptElGenMT/F");
-	
+
 	tree->Branch("isDE_SignalLike",&fTisDE_SignalLike,		"isDE_SignalLike/I");
 	tree->Branch("DE_Ntt_El1Pt",	&fTDE_Ntt_El1Pt,		"DE_Ntt_El1Pt/F");
 	tree->Branch("DE_Ntt_El2Pt",	&fTDE_Ntt_El2Pt,		"DE_Ntt_El2Pt/F");
@@ -267,7 +267,7 @@ void SSDLAnalysis::BookFPRVariables(TTree* tree){
 	tree->Branch("DE_Nll_El1Pt",	&fTDE_Nll_El1Pt,		"DE_Nll_El1Pt/F");
 	tree->Branch("DE_Nll_El2Pt",	&fTDE_Nll_El2Pt,		"DE_Nll_El2Pt/F");
 	tree->Branch("DE_Nll_El1Eta",	&fTDE_Nll_El1Eta,		"DE_Nll_El1Eta/F");
-	tree->Branch("DE_Nll_El2Eta",	&fTDE_Nll_El2Eta,		"DE_Nll_El2Eta/F");	
+	tree->Branch("DE_Nll_El2Eta",	&fTDE_Nll_El2Eta,		"DE_Nll_El2Eta/F");
 }
 
 void SSDLAnalysis::Analyze(){
@@ -282,39 +282,42 @@ void SSDLAnalysis::Analyze(){
 	// Form array of indices of good muons, electrons, jets and photons
 	//--------------------------------------------------------------------------
 	vector<int>	selectedMuInd  = MuonSelection();
-	vector<int>	selectedElInd  = ElectronSelection(); 
+	vector<int>	selectedElInd  = ElectronSelection();
 	vector<int>	selectedJetInd = PFJetSelection();
 	vector<int>	selectedPhoInd = PhotonSelection();
 	fTnqmus   = selectedMuInd.size();
 	fTnqels   = selectedElInd.size();
 	fTnqjets  = selectedJetInd.size();
 	fTnqphos  = selectedPhoInd.size();
-	
+
+	// Require at least one lepton
+	if( (fTnqmus + fTnqels) < 1 ) return;
+
 	//--------------------------------------------------------------------------
 	// Dump basic run and trigger information
 	//--------------------------------------------------------------------------
 	DumpRunAndTiggerProperties();
 
 	//--------------------------------------------------------------------------
-	// Jets and jet-related properties, up to min(fTnqjets, gMaxNjets)
+	// Jets and jet-related properties, up to min(fTnqjets, fMaxNjets)
 	//--------------------------------------------------------------------------
 	DumpJetMETProperties(selectedJetInd);
-	// get the total 4-momenta,  total transverse 3-momenta 
+	// get the total 4-momenta,  total transverse 3-momenta
 	TLorentzVector jtotP = jetTotalP(selectedJetInd);
-	TVector3       jtotPT(jtotP.Px(), jtotP.Py(), 0.);	
-	
+	TVector3       jtotPT(jtotP.Px(), jtotP.Py(), 0.);
+
 	//--------------------------------------------------------------------------
-	// Photons up to min(fTnqphos, gMaxNphos)
+	// Photons up to min(fTnqphos, fMaxNphos)
 	//--------------------------------------------------------------------------
 	DumpPhotonProperties(selectedPhoInd);
-	
+
 	//--------------------------------------------------------------------------
-	// Muons up to min(fTnqmus, gMaxNmus)
+	// Muons up to min(fTnqmus, fMaxNmus)
 	//--------------------------------------------------------------------------
 	DumpMuonProperties(selectedMuInd);
 
 	//--------------------------------------------------------------------------
-	// Electrons up to min(fTnqels, gMaxNeles)
+	// Electrons up to min(fTnqels, fMaxNeles)
 	//--------------------------------------------------------------------------
 	DumpElectronProperties(selectedElInd, jtotPT);
 
@@ -329,56 +332,62 @@ void SSDLAnalysis::Analyze(){
 	// Event flagging and dumping of pt and eta for fake ratio analysis
 	//--------------------------------------------------------------------------
 	DumpFPRatioProperties();
-	
+
 	fAnalysisTree->Fill();
 }
 
 void SSDLAnalysis::ResetTree(){
-	ResetTriggerVariables	();
-	ResetMuonVariables		();
-	ResetElectronVariables	();
-	ResetAuxVariables		();
-	ResetFPRVariables		();
+	ResetRunAndTriggerVariables();
+	ResetMuonVariables();
+	ResetElectronVariables();
+	ResetJetMETVariables();
+	ResetFPRVariables();
 }
 
-void SSDLAnalysis::ResetTriggerVariables(){
+void SSDLAnalysis::ResetRunAndTriggerVariables(){
+	// sample/run
+	fTRunNumber                  = 0;
+	fTEventNumber                = 0;
+	fTLumiSection                = 0;
+	fTextxslo                    = -999.99;
+	fTintxs                      = -999.99;
 	// muon trigger
-	fT_HLTMu9				= 0;
-	fT_HLTMu11				= 0;
-	fT_HLTMu15				= 0;
-	fT_HLTDoubleMu3			= 0;
+	fT_HLTMu9                    = 0;
+	fT_HLTMu11                   = 0;
+	fT_HLTMu15                   = 0;
+	fT_HLTDoubleMu3              = 0;
 	// hadronic trigger
-	fTHLT_Jet15U			= 0;
-	fTHLT_Jet30U			= 0;
-	fTHLT_Jet50U			= 0;
-	fTHLT_Jet70U			= 0;
-	fTHLT_Jet100U			= 0;
-	fTHLT_HT100U			= 0;
-	fTHLT_HT120U			= 0;
-	fTHLT_HT140U			= 0;
-	fTHLT_HT150U			= 0;
+	fTHLT_Jet15U                 = 0;
+	fTHLT_Jet30U                 = 0;
+	fTHLT_Jet50U                 = 0;
+	fTHLT_Jet70U                 = 0;
+	fTHLT_Jet100U                = 0;
+	fTHLT_HT100U                 = 0;
+	fTHLT_HT120U                 = 0;
+	fTHLT_HT140U                 = 0;
+	fTHLT_HT150U                 = 0;
 	// electron trigger
-	fTHLT_Ele10_LW_L1R		= 0;
-	fTHLT_Ele10_SW_L1R		= 0;
-	fTHLT_Ele15_LW_L1R		= 0;
-	fTHLT_Ele15_SW_L1R		= 0;
-	fTHLT_Ele15_SW_CaloEleId_L1R= 0;
-	fTHLT_Ele20_SW_L1R		= 0;
-	fTHLT_DoubleEle5_SW_L1R	= 0;	
-	fTHLT_DoubleEle10_SW_L1R= 0;	
-	fTHLT_DoubleEle15_SW_L1R_v1	= 0;	
+	fTHLT_Ele10_LW_L1R           = 0;
+	fTHLT_Ele10_SW_L1R           = 0;
+	fTHLT_Ele15_LW_L1R           = 0;
+	fTHLT_Ele15_SW_L1R           = 0;
+	fTHLT_Ele15_SW_CaloEleId_L1R = 0;
+	fTHLT_Ele20_SW_L1R           = 0;
+	fTHLT_DoubleEle5_SW_L1R      = 0;
+	fTHLT_DoubleEle10_SW_L1R     = 0;
+	fTHLT_DoubleEle15_SW_L1R_v1  = 0;
 	// trigger summary
-	fTHTL_GoodMuEvent		= 0;
-	fTHTL_GoodElEvent		= 0;
-	fTHTL_GoodElFakesEvent	= 0;
-	fTHTL_GoodHadronicEvent	= 0;
+	fTHTL_GoodMuEvent            = 0;
+	fTHTL_GoodElEvent            = 0;
+	fTHTL_GoodElFakesEvent       = 0;
+	fTHTL_GoodHadronicEvent      = 0;
 }
 
 void SSDLAnalysis::ResetMuonVariables(){
 	fTmuMT      = -999.99;
 	fTmuMinv    = -999.99;
 	fTnqmus = 0;
-	for(int i = 0; i < gMaxNmus; i++){
+	for(int i = 0; i < fMaxNmus; i++){
 		fTmupt          [i] = -999.99;
 		fTmueta         [i] = -999.99;
 		fTmuphi         [i] = -999.99;
@@ -399,13 +408,13 @@ void SSDLAnalysis::ResetMuonVariables(){
 		fTmutype        [i] = -999;
 		fTmumotype      [i] = -999;
 		fTmugmotype     [i] = -999;
-	}	
+	}
 }
 
 void SSDLAnalysis::ResetElectronVariables(){
 	// electron properties
 	fTnqels = 0;
-	for(int i = 0; i < gMaxNeles; i++){
+	for(int i = 0; i < fMaxNeles; i++){
 		fTElcharge			[i]	= -999;
 		fTElChargeIsCons	[i]	= -999;
 		fTElChargeIsGenCons	[i]	= -999;
@@ -434,30 +443,24 @@ void SSDLAnalysis::ResetElectronVariables(){
 		fTElDRjet						[i]	= -999.99;
 		fTElDRhardestjet				[i]	= -999.99;
 		fTElGenID						[i]	= -999;
-		fTElGenStatus					[i]	= -999;
 		fTElGenMID						[i]	= -999;
-		fTElGenMStatus					[i]	= -999;
 		fTElGenGMID						[i]	= -999;
-		fTElGenGMStatus					[i]	= -999;	
-		fTElTight						[i]	= -999;	
-		fTElHybRelIso					[i]	= -999.99;	
+		fTElGenType						[i]	= -999;
+		fTElGenMType					[i]	= -999;
+		fTElGenGMType					[i]	= -999;
+		fTElTight						[i]	= -999;
+		fTElHybRelIso					[i]	= -999.99;
 	}
-		
-	// di-electron properties	
+
+	// di-electron properties
 	fTElminv				= -999.99;
 	fTElmtinv				= -999.99;
 }
 
-void SSDLAnalysis::ResetAuxVariables(){
-	// sample/run
-	fTRunNumber		= 0;
-	fTEventNumber	= 0;
-	fTLumiSection	= 0;
-	fTextxslo		= -999.99;
-	fTintxs			= -999.99;
+void SSDLAnalysis::ResetJetMETVariables(){
 	// jet-MET properties
 	fTnqjets		= 0;
-	for(int i = 0; i < gMaxNjets; i++){
+	for(int i = 0; i < fMaxNjets; i++){
 		fTJetpt				[i]	= -999.99;
 		fTJeteta			[i]	= -999.99;
 		fTJetphi			[i]	= -999.99;
@@ -474,7 +477,7 @@ void SSDLAnalysis::ResetAuxVariables(){
 	fTR12plusR21	= -999.99;
 	// photon properties
 	fTnqphos		= 0;
-	for(int i = 0; i < gMaxNphos; i++){
+	for(int i = 0; i < fMaxNphos; i++){
 		fTPhopt				[i]	= -999.99;
 		fTPhoeta			[i]	= -999.99;
 		fTPhophi			[i]	= -999.99;
@@ -500,7 +503,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTElmCTparl				= -999.99;
 	fTElmT2orth_0			= -999.99;
 	fTElmT2orth_50			= -999.99;
-	fTElmT2orth_100			= -999.99;	
+	fTElmT2orth_100			= -999.99;
 	fTMumt2_0				= -999.99;
 	fTMumt2_50				= -999.99;
 	fTMumt2_100				= -999.99;
@@ -510,7 +513,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTMumT2orth_0			= -999.99;
 	fTMumT2orth_50			= -999.99;
 	fTMumT2orth_100			= -999.99;
-	
+
 	// fake rate propeties
 	fTisSE_QCDLike			= -999;
 	fTSE_QCDLike_FakeElGenID= -999;
@@ -518,14 +521,14 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTSE_QCDLike_ElTightPt	= -999.99;
 	fTSE_QCDLike_ElLooseEta	= -999.99;
 	fTSE_QCDLike_ElTightEta	= -999.99;
-	
+
 	fTisSE_AntiQCDLike			= -999;
 	fTSE_AntiQCDLike_FakeElGenID= -999;
 	fTSE_AntiQCDLike_ElLoosePt	= -999.99;
 	fTSE_AntiQCDLike_ElTightPt	= -999.99;
 	fTSE_AntiQCDLike_ElLooseEta	= -999.99;
 	fTSE_AntiQCDLike_ElTightEta	= -999.99;
-	
+
 	fTisDE_ZJetsLike			= -999;
 	fTDE_ZJetsLike_ElLoosePt	= -999.99;
 	fTDE_ZJetsLike_ElTightPt	= -999.99;
@@ -535,7 +538,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTDE_ZJetsLike_PromptElGenTightPt	= -999.99;
 	fTDE_ZJetsLike_PromptElGenLooseEta	= -999.99;
 	fTDE_ZJetsLike_PromptElGenTightEta	= -999.99;
-	
+
 	fTisDE_WJetsLike			= -999;
 	fTDE_WJetsLike_FakeElGenID	= -999;
 	fTDE_WJetsLike_ElLoosePt	= -999.99;
@@ -552,7 +555,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTDE_WJetsLike_PromptElGenLooseEta	= -999.99;
 	fTDE_WJetsLike_PromptElGenTightEta	= -999.99;
 	fTDE_WJetsLike_PromptElGenMT		= -999.99;
-	
+
 	fTisDE_AntiWJetsLike			= -999;
 	fTDE_AntiWJetsLike_FakeElGenID	= -999;
 	fTDE_AntiWJetsLike_ElLoosePt	= -999.99;
@@ -569,7 +572,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTDE_AntiWJetsLike_PromptElGenLooseEta	= -999.99;
 	fTDE_AntiWJetsLike_PromptElGenTightEta	= -999.99;
 	fTDE_AntiWJetsLike_PromptElGenMT		= -999.99;
-	
+
 	fTisDE_SignalLike	= -999;
 	fTDE_Ntt_El1Pt = -999.99;
 	fTDE_Ntt_El2Pt = -999.99;
@@ -578,7 +581,7 @@ void SSDLAnalysis::ResetFPRVariables(){
 	fTDE_Nlt_El1Pt = -999.99;
 	fTDE_Nlt_El2Pt = -999.99;
 	fTDE_Nll_El1Pt = -999.99;
-	fTDE_Nll_El2Pt = -999.99;		
+	fTDE_Nll_El2Pt = -999.99;
 	fTDE_Ntt_El1Eta = -999.99;
 	fTDE_Ntt_El2Eta = -999.99;
 	fTDE_Ntl_El1Eta = -999.99;
@@ -647,7 +650,7 @@ float SSDLAnalysis::minDRtoJet(float lepEta, float lepPhi){
 	// Note, this can only be called after Jet properties have been dumped
 	float mindr(100.);
 	for(int j = 0; j < fTnqjets; ++j){
-		float dr = Util::GetDeltaR(fTJeteta[j], lepEta, fTJetphi[j], lepPhi); 
+		float dr = Util::GetDeltaR(fTJeteta[j], lepEta, fTJetphi[j], lepPhi);
 		mindr = mindr>dr? dr:mindr;
 	}
 	return mindr;
@@ -658,17 +661,17 @@ void SSDLAnalysis::transverseMasses(TLorentzVector p1, TLorentzVector p2, TVecto
 	// con-transverse invariant mass for the given pair of 4-momenta (standard, plus orthogonal and paralel to the jtotPT vector),
 	// and orthogonal MT2 for three test masses (0, 50 and 100 GeV)
 	// Needs testing/comparison with other codes...
-	
+
 	// initialize test masses
 	float testMass1 = 1.e-3;
 	float testMass2 = 50.;
 	float testMass3 = 100.;
-	
+
 	// invariant mass of the pair
 	fTLepminv = (p1+p2).Mag();
 	float mtsquare = (p1+p2).Et()*(p1+p2).Et() - (p1+p2).Pt()*(p1+p2).Pt();
 	fTLepmtinv = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-	
+
 	// MT2 for three test masses
 	fMT2 = new Davismt2();
 	double pa[3], pb[3], pmiss[3];
@@ -687,12 +690,12 @@ void SSDLAnalysis::transverseMasses(TLorentzVector p1, TLorentzVector p2, TVecto
 	fMT2->set_mn(testMass3);
 	fTLepmt2_100 = fMT2->get_mt2();
 	delete fMT2;
-	
+
 	// con-transverse invariant masses (standard, orthogonal, paralel)
-	TVector3 p1T(p1.Px(), p1.Py(), 0.); 
+	TVector3 p1T(p1.Px(), p1.Py(), 0.);
 	TVector3 p2T(p2.Px(), p2.Py(), 0.);
-	TVector3 p1Tparl = (1/p1T.Mag2())*( (p1T.Dot(jtotPT))*p1T  ); 
-	TVector3 p2Tparl = (1/p2T.Mag2())*( (p2T.Dot(jtotPT))*p2T  ); 
+	TVector3 p1Tparl = (1/p1T.Mag2())*( (p1T.Dot(jtotPT))*p1T  );
+	TVector3 p2Tparl = (1/p2T.Mag2())*( (p2T.Dot(jtotPT))*p2T  );
 	TVector3 p1Torth = p1T - p1Tparl;
 	TVector3 p2Torth = p2T - p2Tparl;
 	float e1T = sqrt(p1.M2()+p1T.Mag2());
@@ -701,15 +704,15 @@ void SSDLAnalysis::transverseMasses(TLorentzVector p1, TLorentzVector p2, TVecto
 	float e2Torth = sqrt(p2.M2()+p2Torth.Mag2());
 	float e1Tparl = sqrt(p1.M2()+p1Tparl.Mag2());
 	float e2Tparl = sqrt(p2.M2()+p2Tparl.Mag2());
-	float ATorth	= 0.5*( p1Torth.Mag()*p2Torth.Mag() + p1Torth.Dot(p2Torth) );		
-	fTLepmCT			= sqrt( p1.M2()+p2.M2() + 2*( e1T*e2T+p1T*p2T ) );		
+	float ATorth	= 0.5*( p1Torth.Mag()*p2Torth.Mag() + p1Torth.Dot(p2Torth) );
+	fTLepmCT			= sqrt( p1.M2()+p2.M2() + 2*( e1T*e2T+p1T*p2T ) );
 	fTLepmCTorth		= sqrt( p1.M2()+p2.M2() + 2*( e1Torth*e2Torth+p1Torth*p2Torth ) );
 	fTLepmCTparl		= sqrt( p1.M2()+p2.M2() + 2*( e1Tparl*e2Tparl+p1Tparl*p2Tparl ) );
 
 	// orthogonal MT2 for three test masses (0, 50, 100 GeV)
-	fTLepmT2orth_0		= sqrt(ATorth) + sqrt(ATorth+testMass1*testMass1);		
-	fTLepmT2orth_50		= sqrt(ATorth) + sqrt(ATorth+testMass2*testMass2);		
-	fTLepmT2orth_100	= sqrt(ATorth) + sqrt(ATorth+testMass3*testMass3);		
+	fTLepmT2orth_0		= sqrt(ATorth) + sqrt(ATorth+testMass1*testMass1);
+	fTLepmT2orth_50		= sqrt(ATorth) + sqrt(ATorth+testMass2*testMass2);
+	fTLepmT2orth_100	= sqrt(ATorth) + sqrt(ATorth+testMass3*testMass3);
 }
 
 void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selectedMuInd, vector<int> selectedPhoInd, vector<int> selectedJetInd, float &alphaT_h, float &alphaCT_h, float &alphaT, float &alphaCT, float &alphaT_new, float &alphaCT_new){
@@ -723,15 +726,15 @@ void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selec
 	unsigned nJets	= selectedJetInd.size();
 	unsigned nTot	= nEls + nMus + nPhos + nJets;
 	if (nTot < 2) return;
-	
-	// set the maximum number of particles for the calculation of alpha variables to be 15	
+
+	// set the maximum number of particles for the calculation of alpha variables to be 15
 	unsigned nMax = (nTot<15)?(nTot):(15);
-	
+
 	TLorentzVector eltotP	= elTotalP(selectedElInd);
 	TLorentzVector mutotP	= muTotalP(selectedMuInd);
 	TLorentzVector phototP	= phoTotalP(selectedPhoInd);
 	TLorentzVector jtotP	= jetTotalP(selectedJetInd);
-	
+
 	TLorentzVector totP = eltotP + mutotP + phototP + jtotP;
 	// get Mt and Et for all the particles together
 	//	float tot_mT = totP.Mt();
@@ -754,7 +757,7 @@ void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selec
 		}
 		tot_EtSum += ((  ((int)(pow(2.,(int)nMax)) - 1)  & 1<<k) > 0) * tempP.Et();
 	}
-	
+
 	//	float minDiff_groupP1_EtSum = tot_EtSum;
 	float minDiff_groupP1_Et_h = 0.;
 	float minDiff_groupP2_Et_h = 0.;
@@ -768,7 +771,7 @@ void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selec
 	float minDiff_mInvT = 0.;
 	float minDiff_mInvCT_new = 0.;
 	float minDiff_mInvT_new = 0.;
-	
+
 	// find two groups of particles in the system jets+electrons+muons with minimum difference in the scalar sum of their Et
 	for(unsigned n=1; n < pow(2.,(int)nMax) - 1; n++) {
 		TLorentzVector groupP1( 0. , 0. , 0. , 0. );
@@ -792,46 +795,46 @@ void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selec
 			groupP1 += ((n & 1<<k) > 0) * tempP;
 			groupP1_EtSum += ((n & 1<<k) > 0) * tempP.Et();
 		}
-		TLorentzVector groupP2 = totP-groupP1;		
+		TLorentzVector groupP2 = totP-groupP1;
 		groupP2_EtSum = tot_EtSum-groupP1_EtSum;
 		float mtsquare;
-		
+
 		if (fabs(groupP1_EtSum -  groupP2_EtSum) < fabs(minDiff_groupP1P2_EtSum)) {
 			TVector3 p1T (groupP1.Px(), groupP1.Py(), 0.);
-			TVector3 p2T (groupP2.Px(), groupP2.Py(), 0.);			
+			TVector3 p2T (groupP2.Px(), groupP2.Py(), 0.);
 			minDiff_groupP1_Et_h = groupP1_EtSum;
 			minDiff_groupP2_Et_h = groupP2_EtSum;
 			minDiff_groupP1P2_EtSum = fabs(minDiff_groupP1_Et_h - minDiff_groupP2_Et_h);
-			
+
 			mtsquare = pow(tot_EtSum,(int)2) - (p1T - p2T).Mag2();
 			minDiff_mInvCT_h =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-			
+
 			mtsquare = pow(tot_EtSum,(int)2) - (p1T + p2T).Mag2();
 			minDiff_mInvT_h  =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
 		}
 		if (fabs(groupP1.Et() -  groupP2.Et()) < fabs(minDiff_groupP1P2)) {
 			TVector3 p1T (groupP1.Px(), groupP1.Py(), 0.);
-			TVector3 p2T (groupP2.Px(), groupP2.Py(), 0.);			
+			TVector3 p2T (groupP2.Px(), groupP2.Py(), 0.);
 			float e1T = groupP1.Et();
 			float e2T = groupP2.Et();
 			minDiff_groupP1_Et = groupP1.Et();
 			minDiff_groupP2_Et = groupP2.Et();
 			minDiff_groupP1P2 = fabs(minDiff_groupP1_Et - minDiff_groupP2_Et);
-			
+
 			mtsquare = pow(e1T+e2T,(int)2) - (p1T - p2T).Mag2();
 			minDiff_mInvCT  =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-			
+
 			mtsquare = pow(e1T+e2T,(int)2) - (p1T + p2T).Mag2();
 			minDiff_mInvT  =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-			
+
 			mtsquare = groupP1.M2()+groupP2.M2() + 2*( e1T*e2T-p1T.Dot(p2T) );
 			minDiff_mInvCT_new  =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-			
+
 			mtsquare = groupP1.M2()+groupP2.M2() + 2*( e1T*e2T+p1T.Dot(p2T) );
 			minDiff_mInvT_new  =	mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
 		}
 	}
-	
+
 	// calculate the alphaT and alphaCT variables for pseudo-dijet system built out of nJets + nEls + nMus particles
 	alphaT_h	= ((minDiff_groupP1_Et_h<(minDiff_groupP2_Et_h))?(minDiff_groupP1_Et_h)	:(minDiff_groupP2_Et_h))/minDiff_mInvT_h ;
 	alphaCT_h	= ((minDiff_groupP1_Et_h<(minDiff_groupP2_Et_h))?(minDiff_groupP1_Et_h)	:(minDiff_groupP2_Et_h))/minDiff_mInvCT_h ;
@@ -839,7 +842,7 @@ void SSDLAnalysis::transverseAlphas(vector<int> selectedElInd, vector<int> selec
 	alphaCT		= ((minDiff_groupP1_Et<(minDiff_groupP2_Et))	?(minDiff_groupP1_Et)	:(minDiff_groupP2_Et))/minDiff_mInvCT ;
 	alphaT_new	= ((minDiff_groupP1_Et<(minDiff_groupP2_Et))	?(minDiff_groupP1_Et)	:(minDiff_groupP2_Et))/minDiff_mInvT_new ;
 	alphaCT_new = ((minDiff_groupP1_Et<(minDiff_groupP2_Et))	?(minDiff_groupP1_Et)	:(minDiff_groupP2_Et))/minDiff_mInvCT_new ;
-	
+
 }
 
 void SSDLAnalysis::DumpRunAndTiggerProperties() {
@@ -855,7 +858,7 @@ void SSDLAnalysis::DumpRunAndTiggerProperties() {
 	fT_HLTMu15                   = GetHLTResult("HLT_Mu15");
 	fT_HLTDoubleMu0              = GetHLTResult("HLT_DoubleMu0");
 	fT_HLTDoubleMu3              = GetHLTResult("HLT_DoubleMu3");
-	// e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)	
+	// e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
 	fTHLT_Ele10_LW_L1R           = GetHLTResult("HLT_Ele10_LW_L1R");
 	fTHLT_Ele10_SW_L1R           = GetHLTResult("HLT_Ele10_SW_L1R");
 	fTHLT_Ele15_LW_L1R           = GetHLTResult("HLT_Ele15_LW_L1R");
@@ -866,14 +869,14 @@ void SSDLAnalysis::DumpRunAndTiggerProperties() {
 	fTHLT_DoubleEle10_SW_L1R     = GetHLTResult("HLT_DoubleEle10_SW_L1R");
 	fTHLT_DoubleEle15_SW_L1R_v1  = GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
 	// hadronic triggers
-	fTHLT_Jet30U                 = GetHLTResult("HLT_Jet30U"); 
-	fTHLT_Jet50U                 = GetHLTResult("HLT_Jet50U"); 
-	fTHLT_Jet70U                 = GetHLTResult("HLT_Jet70U"); 
-	fTHLT_Jet100U                = GetHLTResult("HLT_Jet100U"); 
-	fTHLT_HT100U                 = GetHLTResult("HLT_HT100U"); 
-	fTHLT_HT120U                 = GetHLTResult("HLT_HT120U"); 
-	fTHLT_HT140U                 = GetHLTResult("HLT_HT140U"); 
-	fTHLT_HT150U                 = GetHLTResult("HLT_HT150U"); 
+	fTHLT_Jet30U                 = GetHLTResult("HLT_Jet30U");
+	fTHLT_Jet50U                 = GetHLTResult("HLT_Jet50U");
+	fTHLT_Jet70U                 = GetHLTResult("HLT_Jet70U");
+	fTHLT_Jet100U                = GetHLTResult("HLT_Jet100U");
+	fTHLT_HT100U                 = GetHLTResult("HLT_HT100U");
+	fTHLT_HT120U                 = GetHLTResult("HLT_HT120U");
+	fTHLT_HT140U                 = GetHLTResult("HLT_HT140U");
+	fTHLT_HT150U                 = GetHLTResult("HLT_HT150U");
 	// summary of muon/electron/hadronic trigger requirements
 	fTHTL_GoodMuEvent            = IsGoodMuEvent();
 	fTHTL_GoodElEvent            = IsGoodElEvent();
@@ -885,7 +888,7 @@ void SSDLAnalysis::DumpJetMETProperties(vector<int>& selectedJetInd){
 	// Dump basic jet and MET properties
 	int jetindex(-1);
 	int nqjets = selectedJetInd.size();
-	for(int ind=0; ind<std::min(nqjets,gMaxNjets); ind++){
+	for(int ind=0; ind<std::min(nqjets,fMaxNjets); ind++){
 		jetindex = selectedJetInd[ind];
 		// dump properties
 		fTJetpt  [ind] = fTR->PFJPt  [jetindex];
@@ -896,7 +899,7 @@ void SSDLAnalysis::DumpJetMETProperties(vector<int>& selectedJetInd){
 	fTSumEt     = fTR->SumEt;
 	fTtcMET     = fTR->TCMET;
 	fTpfMET     = fTR->PFMET;
-	fTMuCorrMET = fTR->MuCorrMET;	
+	fTMuCorrMET = fTR->MuCorrMET;
 	fTHT        = jetHT(selectedJetInd);
 	// get dPhi and R12, R21 variables for J1, J2 and MET
 	if( nqjets >= 2 ){
@@ -918,7 +921,7 @@ void SSDLAnalysis::DumpPhotonProperties(vector<int>& selectedPhoInd){
 	// Dump basic photon properties
 	int phoindex(-1);
 	int nqphos	= selectedPhoInd.size();
-	for(int ind=0; ind<std::min(nqphos,gMaxNphos); ind++){
+	for(int ind=0; ind<std::min(nqphos,fMaxNphos); ind++){
 		phoindex = selectedPhoInd[ind];
 		// dump properties
 		fTPhopt		[ind] = fTR->PhoPt		[phoindex];
@@ -926,14 +929,14 @@ void SSDLAnalysis::DumpPhotonProperties(vector<int>& selectedPhoInd){
 		fTPhophi    [ind] = fTR->PhoPhi		[phoindex];
 		fTPhoRelIso	[ind] = fTR->PhoIso03	[phoindex];
 		fTPhoDRjet[ind]			= minDRtoJet(fTPhoeta[ind], fTPhophi[ind]);
-		fTPhoDRhardestjet[ind]	= Util::GetDeltaR(fTJeteta[0], fTPhoeta[ind], fTJetphi[0], fTPhophi[ind]);		
-	}		
+		fTPhoDRhardestjet[ind]	= Util::GetDeltaR(fTJeteta[0], fTPhoeta[ind], fTJetphi[0], fTPhophi[ind]);
+	}
 }
 
 void SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd){
 	int nqmus = selectedMuInd.size();
 	if( nqmus < 1 ) return;
-	for(int i = 0; i < std::min(nqmus, gMaxNmus); ++i){
+	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
 		int index = selectedMuInd[i];
 		fTmupt       [i] = fTR->MuPt[index];
 		fTmueta      [i] = fTR->MuEta[index];
@@ -949,7 +952,7 @@ void SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd){
 		fTmud0bs     [i] = fTR->MuD0BS[index];
 		fTmudzbs     [i] = fTR->MuDzBS[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
-		
+
 		fTmuDRjet		[i]	= minDRtoJet(fTmueta[i], fTmuphi[i]);
 		fTmuDRhardestjet[i] = Util::GetDeltaR(fTJeteta[0], fTmueta[i], fTJetphi[0], fTmuphi[i]);
 
@@ -964,7 +967,7 @@ void SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd){
 		fTmumotype [i] = mo.get_type();
 		fTmugmotype[i] = gmo.get_type();
 	}
-	
+
 	// Calculate invariant mass, if more than 1 muon
 	TLorentzVector pmu1;
 	pmu1.SetXYZM(fTR->MuPx[selectedMuInd[0]], fTR->MuPy[selectedMuInd[0]], fTR->MuPz[selectedMuInd[0]], 0.105);
@@ -987,9 +990,8 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 	int elindex(-1);
 	int nqels	= selectedElInd.size();
 	TLorentzVector p[nqels];
-	/////// BUG ?? //////////
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
-	for(int ind=0; ind<std::min(nqels,gMaxNeles); ind++){
+	for(int ind=0; ind<std::min(nqels,fMaxNeles); ind++){
 		elindex = selectedElInd[ind];
 		fTElpt							[ind] = fTR->ElPt					[elindex];
 		fTElcharge						[ind] = fTR->ElCharge				[elindex];
@@ -998,7 +1000,7 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		fTEleta							[ind] = fTR->ElEta					[elindex];
 		fTElphi							[ind] = fTR->ElPhi					[elindex];
 		fTEld0							[ind] = fTR->ElD0PV					[elindex];
-		fTElD0Err						[ind] = fTR->ElD0E					[elindex];		
+		fTElD0Err						[ind] = fTR->ElD0E					[elindex];
 		fTElEoverP						[ind] = fTR->ElESuperClusterOverP	[elindex];
 		fTElHoverE						[ind] = fTR->ElHcalOverEcal			[elindex];
 		fTElSigmaIetaIeta				[ind] = fTR->ElSigmaIetaIeta		[elindex];
@@ -1006,35 +1008,39 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		fTElDeltaEtaSuperClusterAtVtx	[ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
 		fTElIDsimpleWP80relIso			[ind] = fTR->ElIDsimpleWP80relIso	[elindex];
 		fTElIDsimpleWPrelIso			[ind] = fTR->ElIDsimpleWPrelIso		[elindex];
-		fTElIDsimpleWP95relIso			[ind] = fTR->ElIDsimpleWP95relIso	[elindex];		
+		fTElIDsimpleWP95relIso			[ind] = fTR->ElIDsimpleWP95relIso	[elindex];
 		fTElRelIso						[ind] = fTR->ElRelIso03				[elindex];
 		fTElDR04TkSumPt					[ind] = fTR->ElDR03TkSumPt			[elindex];
 		fTElDR04EcalRecHitSumEt			[ind] = fTR->ElDR03EcalRecHitSumEt	[elindex];
-		fTElDR04HcalTowerSumEt			[ind] = fTR->ElDR03HcalTowerSumEt	[elindex];		
+		fTElDR04HcalTowerSumEt			[ind] = fTR->ElDR03HcalTowerSumEt	[elindex];
 		fTElS4OverS1					[ind] = fTR->ElS4OverS1				[elindex];
 		fTElConvPartnerTrkDist			[ind] = fTR->ElConvPartnerTrkDist	[elindex];
 		fTElConvPartnerTrkDCot			[ind] = fTR->ElConvPartnerTrkDCot	[elindex];
-		fTElChargeMisIDProb				[ind] = fTR->ElChargeMisIDProb		[elindex];		
+		fTElChargeMisIDProb				[ind] = fTR->ElChargeMisIDProb		[elindex];
 		fTElGenID						[ind] = fTR->ElGenID				[elindex];
-		fTElGenStatus					[ind] = fTR->ElGenStatus			[elindex];
 		fTElGenMID						[ind] = fTR->ElGenMID				[elindex];
-		fTElGenMStatus					[ind] = fTR->ElGenMStatus			[elindex];
 		fTElGenGMID						[ind] = fTR->ElGenGMID				[elindex];
-		fTElGenGMStatus					[ind] = fTR->ElGenGMStatus			[elindex];
-		
+
+		pdgparticle el, emo, egmo;
+		GetPDGParticle(el,   abs(fTR->ElGenID  [elindex]));
+		GetPDGParticle(emo,  abs(fTR->ElGenMID [elindex]));
+		GetPDGParticle(egmo, abs(fTR->ElGenGMID[elindex]));
+		fTElGenType  [ind] = el.get_type();
+		fTElGenMType [ind] = emo.get_type();
+		fTElGenGMType[ind] = egmo.get_type();
+
 		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
-		/////// BUG ?? //////////
 		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
-		fTElMT			[ind]	= mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);		
-		fTElDRjet		[ind]	= minDRtoJet(fTEleta[ind], fTElphi[ind]);
-		fTElDRhardestjet[ind]	= Util::GetDeltaR(fTJeteta[0], fTEleta[ind], fTJetphi[0], fTElphi[ind]);	
-		fTElTight		[ind]	= IsTightEl(elindex);
-		fTElHybRelIso	[ind]	= hybRelElIso(elindex);
-	}		
+		fTElMT			[ind]	 = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
+		fTElDRjet		[ind]	 = minDRtoJet(fTEleta[ind], fTElphi[ind]);
+		fTElDRhardestjet[ind] = Util::GetDeltaR(fTJeteta[0], fTEleta[ind], fTJetphi[0], fTElphi[ind]);
+		fTElTight		[ind]	 = IsTightEl(elindex);
+		fTElHybRelIso	[ind]	 = hybRelElIso(elindex);
+	}
 
 	// calculate different con/transverse/invariant masses for the pair of two hardest electrons
 	if (nqels>=2) {
-		transverseMasses(p[0], p[1], jtotPT, fTElminv, fTElmtinv, fTElmCT, fTElmCTorth, fTElmCTparl, fTElmt2_0, fTElmt2_50, fTElmt2_100, fTElmT2orth_0, fTElmT2orth_50, fTElmT2orth_100 );	
+		transverseMasses(p[0], p[1], jtotPT, fTElminv, fTElmtinv, fTElmCT, fTElmCTorth, fTElmCTparl, fTElmt2_0, fTElmt2_50, fTElmt2_100, fTElmT2orth_0, fTElmT2orth_50, fTElmT2orth_100 );
 	}
 }
 
@@ -1043,7 +1049,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 	int el1index(-1), el2index(-1);
 	bool  singleElectronSelection	= SingleElectronSelection(el1index);
 	bool  diElectronSelection		= DiElectronSelection(el1index, el2index);
-	
+
 	// QCD-like event (MET < 20.) with only one loose/tight electron
 	if (singleElectronSelection && !diElectronSelection &&
 		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
@@ -1062,13 +1068,13 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		// store pt and eta if event is Anti-QCD-like
 		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_AntiQCDLike_ElLoosePt, fTSE_AntiQCDLike_ElTightPt, fTSE_AntiQCDLike_ElLooseEta, fTSE_AntiQCDLike_ElTightEta);
 	}
-	
+
 	// ZJets-like event (76. < mT(El1,El2) < 106.) with one tight and one loose/tight electron
 	if (diElectronSelection && fTnqels<3 &&
 		(IsTightEl(el1index) || IsTightEl(el2index)) &&
 		(fTElmtinv>76.)&&(fTElmtinv< 106.)) {
 		fTisDE_ZJetsLike = true;
-		
+
 		// Loose and Tight (tag and probe)
 		// decide which electron is the looser
 		int elLooserIndex(-1);
@@ -1076,11 +1082,11 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		if (IsTightEl(el1index) && IsLooseEl(el2index)) elLooserIndex = el2index;
 		// store pt and eta of the "looser" electron if event is ZJets-like
 		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_ZJetsLike_ElLoosePt, fTDE_ZJetsLike_ElTightPt, fTDE_ZJetsLike_ElLooseEta, fTDE_ZJetsLike_ElTightEta);
-		
+
 		// Prompt info (Tag and Probe)
 		int elPromptTagIndex(-1);
 		// check if electron is from Z
-		bool el1IsFromZ = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==23; 
+		bool el1IsFromZ = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==23;
 		bool el2IsFromZ = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==23;
 		if (el1IsFromZ && el2IsFromZ) {
 			// decide which electron is the tag one (from Z)
@@ -1089,7 +1095,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 			DumpElectronLooseAndTighPtAndEta(elPromptTagIndex,	fTDE_ZJetsLike_PromptElGenLoosePt, fTDE_ZJetsLike_PromptElGenTightPt, fTDE_ZJetsLike_PromptElGenLooseEta, fTDE_ZJetsLike_PromptElGenTightEta);
 		}
 	}
-	
+
 	bool  ssdiElectronSelection = SSDiElectronSelection(el1index, el2index);
 	// TTbar&WJets-like event (30. < MET < 80.) with one tight and one loose/tight electron
 	if (ssdiElectronSelection && fTnqels<3 &&
@@ -1097,7 +1103,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
 		(fTpfMET>30.)&&(fTpfMET< 80.)) {
 		fTisDE_WJetsLike = true;
-		
+
 		// Loose and Tight
 		// decide which electron is the looser one and store the MT for the tighter one
 		int elLooserIndex(-1);
@@ -1111,19 +1117,19 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		}
 		// store pt and eta of the "looser" electron if event is TTbar&WJets-like
 		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_WJetsLike_ElLoosePt, fTDE_WJetsLike_ElTightPt, fTDE_WJetsLike_ElLooseEta, fTDE_WJetsLike_ElTightEta);
-		
+
 		// Fake (non-prompt) and Prompt
 		int elFakeIndex(-1);
 		int elPromptIndex(-1);
 		// check if electron is from W
-		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
+		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24;
 		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24;
 		if (el1IsFromW ^ el2IsFromW) {
 			// decide which electron is the prompt one (from W) and store the MT for that one
 			if ( !el1IsFromW && el2IsFromW ) {
 				elFakeIndex = el1index;
 				elPromptIndex = el2index;
-				fTDE_WJetsLike_PromptElGenMT = fTElMT[2];				
+				fTDE_WJetsLike_PromptElGenMT = fTElMT[2];
 			}
 			if ( el1IsFromW && !el2IsFromW ) {
 				elFakeIndex = el2index;
@@ -1134,7 +1140,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
 			DumpElectronLooseAndTighPtAndEta(elFakeIndex,	fTDE_WJetsLike_FakeElGenLoosePt,	fTDE_WJetsLike_FakeElGenTightPt,	fTDE_WJetsLike_FakeElGenLooseEta,	fTDE_WJetsLike_FakeElGenTightEta);
 			DumpElectronLooseAndTighPtAndEta(elPromptIndex,	fTDE_WJetsLike_PromptElGenLoosePt,	fTDE_WJetsLike_PromptElGenTightPt,	fTDE_WJetsLike_PromptElGenLooseEta, fTDE_WJetsLike_PromptElGenTightEta);
-		}		
+		}
 	}
 	// Anti-TTbar&WJets-like event (MET > 80.) with one tight and one loose/tight electron
 	if (ssdiElectronSelection &&
@@ -1142,7 +1148,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		!((fTElmtinv>76.)&&(fTElmtinv< 106.)) &&
 		(fTpfMET> 80.)) {
 		fTisDE_AntiWJetsLike = true;
-		
+
 		// Loose and Tight
 		// decide which electron is the looser one and store the MT for the tighter one
 		int elLooserIndex(-1);
@@ -1156,25 +1162,25 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		}
 		// store pt and eta if event is TTbar&WJets-like
 		DumpElectronLooseAndTighPtAndEta(elLooserIndex,	fTDE_AntiWJetsLike_ElLoosePt, fTDE_AntiWJetsLike_ElTightPt, fTDE_AntiWJetsLike_ElLooseEta, fTDE_AntiWJetsLike_ElTightEta);
-		
-		// Fake (non-prompt) and Prompt		
+
+		// Fake (non-prompt) and Prompt
 		int elFakeIndex(-1);
-		int elPromptIndex(-1);				
+		int elPromptIndex(-1);
 		// check if electron is from W
-		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24; 
-		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24; 
-		
+		bool el1IsFromW = abs(fTR->ElGenID[el1index])==11 && abs(fTR->ElGenMID[el1index])==24;
+		bool el2IsFromW = abs(fTR->ElGenID[el2index])==11 && abs(fTR->ElGenMID[el2index])==24;
+
 		if (el1IsFromW ^ el2IsFromW) {
 			// decide which electron is the prompt one (from W) and store the MT for that one
 			if ( !el1IsFromW && el2IsFromW ) {
 				elFakeIndex = el1index;
 				elPromptIndex = el2index;
-				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[2];				
+				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[2];
 			}
 			if ( el1IsFromW && !el2IsFromW ) {
 				elFakeIndex = el2index;
 				elPromptIndex = el1index;
-				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[1];				
+				fTDE_AntiWJetsLike_PromptElGenMT = fTElMT[1];
 			}
 			fTDE_AntiWJetsLike_FakeElGenID		= fTR->ElGenID[elFakeIndex];
 			// store pt and eta if event is TTbar&WJets-like and gen metched as coming from the W
@@ -1189,16 +1195,16 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		fTisDE_SignalLike = true;
 		if(fVerbose > 0) cout <<	"Signal-like event [" << "RunNumber: " << fTRunNumber << ", EventNumber: " << fTEventNumber << ", LumiSection: " << fTLumiSection << "]" << std::endl <<
 		"                  [nqmus: " << fTnqmus << ", nqels: " << fTnqels << ", nqjets: " << fTnqjets << "]" << endl;
-		if (IsTightEl(el1index) && IsTightEl(el2index))				
+		if (IsTightEl(el1index) && IsTightEl(el2index))
 			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntt_El1Pt, fTDE_Ntt_El2Pt, fTDE_Ntt_El1Eta, fTDE_Ntt_El2Eta);
-		if (IsTightEl(el1index) && IsLooseNoTightEl(el2index))		
+		if (IsTightEl(el1index) && IsLooseNoTightEl(el2index))
 			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Ntl_El1Pt, fTDE_Ntl_El2Pt, fTDE_Ntl_El1Eta, fTDE_Ntl_El2Eta);
-		if (IsLooseNoTightEl(el1index) && IsTightEl(el2index))		
+		if (IsLooseNoTightEl(el1index) && IsTightEl(el2index))
 			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nlt_El1Pt, fTDE_Nlt_El2Pt, fTDE_Nlt_El1Eta, fTDE_Nlt_El2Eta);
 		if (IsLooseNoTightEl(el1index) && IsLooseNoTightEl(el2index))
 			DumpTwoElectronPtAndEta(el1index, el2index, fTDE_Nll_El1Pt, fTDE_Nll_El2Pt, fTDE_Nll_El1Eta, fTDE_Nll_El2Eta);
-	}	
-}	
+	}
+}
 
 void SSDLAnalysis::DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta) {
 	if (IsLooseEl(elindex))	elLoosePt	= fTR->ElPt [elindex];
