@@ -480,7 +480,6 @@ bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, dou
 		if( hybRelElIso(index) > ElecCombRelIsoEBarmax ) return false;
 	}
 	else{ // EndCap
-		double combRelIso = ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
 		if( hybRelElIso(index) > ElecCombRelIsoEEndmax ) return false;
 	}
 	return true;
@@ -497,7 +496,7 @@ double UserAnalysisBase::hybRelElIso(int index){
 bool UserAnalysisBase::IsTightEl(int index){
 	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP90%)
 	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
-	
+
 	if(!IsGoodElId_WP80(index)) return false;	// corresponding to the 80% eff. WP without isolation cuts or conversion rejection
 	if(IsConvertedEl_WP80(index)) return false;	
 	if(!IsIsolatedEl_WP90(index)) return false;
@@ -509,6 +508,8 @@ bool UserAnalysisBase::IsLooseEl(int index){
 	if(!IsGoodElId_WP90(index)) return false;		// corresponding to the 90% eff. WP without isolation cuts or conversion rejection
 	if(IsConvertedEl_WP90(index)) return false;	
 	if(!IsIsolatedEl_LooseIso(index)) return false;
+	if(fTR->ElCaloEnergy[index]<10.) return false;
+	if(!fTR->ElEcalDriven[index]) return false;
 	return true;
 }
 
@@ -648,17 +649,46 @@ bool UserAnalysisBase::IsGoodMuEvent(){
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){
-	int run = fTR->Run;
-	// signle-e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
+	// signle-e triggers without ElID or Iso cuts
 	bool HLT_Ele10_LW_L1R =				GetHLTResult("HLT_Ele10_LW_L1R");
-	//bool HLT_Ele10_SW_L1R =				GetHLTResult("HLT_Ele10_SW_L1R"); // unused at the moment
+	bool HLT_Ele10_SW_L1R =				GetHLTResult("HLT_Ele10_SW_L1R");
 	bool HLT_Ele15_LW_L1R =				GetHLTResult("HLT_Ele15_LW_L1R");
-	//bool HLT_Ele15_SW_L1R =				GetHLTResult("HLT_Ele15_SW_L1R"); // unused at the moment
-	// double-e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
+	bool HLT_Ele15_SW_L1R =				GetHLTResult("HLT_Ele15_SW_L1R");
+	bool HLT_Ele20_SW_L1R =				GetHLTResult("HLT_Ele20_SW_L1R");
+	// double-e triggers without ElID or Iso cuts
 	bool HLT_DoubleEle5_SW_L1R =		GetHLTResult("HLT_DoubleEle5_SW_L1R");
 	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
 	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
-	// e triggers with ElID or Iso cuts - (should not be used for FP ratio measurements?)
+	// e triggers with ElID or Iso cuts
+	bool HLT_Ele10_LW_EleId_L1R =		GetHLTResult("HLT_Ele10_LW_EleId_L1R");
+	bool HLT_Ele10_SW_EleId_L1R =		GetHLTResult("HLT_Ele10_SW_EleId_L1R");
+	bool HLT_Ele15_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R");
+	bool HLT_Ele15_SW_EleId_L1R =		GetHLTResult("HLT_Ele15_SW_EleId_L1R");
+	bool HLT_Ele17_SW_LooseEleId_L1R =	GetHLTResult("HLT_Ele17_SW_LooseEleId_L1R");
+	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
+	bool HLT_Ele17_SW_EleId_L1R =		GetHLTResult("HLT_Ele17_SW_EleId_L1R");
+	bool HLT_Ele17_SW_TightEleId_L1R =	GetHLTResult("HLT_Ele17_SW_TightEleId_L1R");
+	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
+	bool HLT_Ele17_SW_TightEleIdIsol_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightEleIdIsol_L1R_v1");
+	
+	return (HLT_Ele10_LW_L1R				|| HLT_Ele15_LW_L1R							|| HLT_DoubleEle5_SW_L1R				||
+			HLT_Ele10_SW_L1R				|| HLT_Ele15_SW_L1R							|| HLT_Ele20_SW_L1R                     ||
+			HLT_Ele10_LW_EleId_L1R			|| HLT_Ele10_SW_EleId_L1R					|| HLT_Ele15_SW_CaloEleId_L1R			||
+			HLT_Ele15_SW_EleId_L1R			|| HLT_Ele17_SW_LooseEleId_L1R				|| HLT_Ele17_SW_CaloEleId_L1R			||
+			HLT_Ele17_SW_EleId_L1R			|| HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || HLT_Ele17_SW_TightEleIdIsol_L1R_v1	||
+			HLT_Ele17_SW_TightEleId_L1R     || HLT_DoubleEle10_SW_L1R			|| HLT_DoubleEle15_SW_L1R_v1);
+}
+
+bool UserAnalysisBase::IsGoodElEvent_RA5(){
+	int run = fTR->Run;
+	// signle-e triggers without ElID or Iso cuts
+	bool HLT_Ele10_LW_L1R =				GetHLTResult("HLT_Ele10_LW_L1R");
+	bool HLT_Ele15_LW_L1R =				GetHLTResult("HLT_Ele15_LW_L1R");
+	// double-e triggers without ElID or Iso cuts
+	bool HLT_DoubleEle5_SW_L1R =		GetHLTResult("HLT_DoubleEle5_SW_L1R");
+	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
+	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	// e triggers with ElID or Iso cuts
 	bool HLT_Ele10_LW_EleId_L1R =		GetHLTResult("HLT_Ele10_LW_EleId_L1R");
 	bool HLT_Ele10_SW_EleId_L1R =		GetHLTResult("HLT_Ele10_SW_EleId_L1R");
 	bool HLT_Ele15_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R");
@@ -667,7 +697,6 @@ bool UserAnalysisBase::IsGoodElEvent(){
 	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
 	bool HLT_Ele17_SW_EleId_L1R =		GetHLTResult("HLT_Ele17_SW_EleId_L1R");
 	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
-	//bool HLT_Ele17_SW_TightEleIdIsol_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightEleIdIsol_L1R_v1"); // unused at the moment
 
 	if (run==1)						return (HLT_Ele10_LW_L1R);
 	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R						 || HLT_Ele15_LW_L1R					|| HLT_DoubleEle5_SW_L1R);
@@ -676,6 +705,32 @@ bool UserAnalysisBase::IsGoodElEvent(){
 											HLT_Ele17_SW_LooseEleId_L1R				 || HLT_Ele17_SW_CaloEleId_L1R			|| HLT_Ele17_SW_EleId_L1R || 
 											HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || /*HLT_Ele17_SW_TightEleIdIsol_L1R_v1  ||*/
 											HLT_DoubleEle10_SW_L1R					 || HLT_DoubleEle15_SW_L1R_v1);
+	return false;
+}
+
+bool UserAnalysisBase::IsGoodElEvent_TDL(){
+	int run = fTR->Run;
+	// signle-e triggers without ElID or Iso cuts
+	bool HLT_Ele10_LW_L1R =				GetHLTResult("HLT_Ele10_LW_L1R");
+	bool HLT_Ele15_LW_L1R =				GetHLTResult("HLT_Ele15_LW_L1R");
+	bool HLT_Ele15_SW_L1R =				GetHLTResult("HLT_Ele15_SW_L1R");
+	bool HLT_Ele20_SW_L1R =				GetHLTResult("HLT_Ele20_SW_L1R");
+	// double-e triggers without ElID or Iso cuts
+	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
+	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	// e triggers with ElID or Iso cuts
+	bool HLT_Ele15_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R");
+	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
+	bool HLT_Ele17_SW_TightEleId_L1R =	GetHLTResult("HLT_Ele17_SW_TightEleId_L1R");
+	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
+	
+	if (run==1)						return (HLT_Ele10_LW_L1R);
+	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R);
+	if (run>=138000 && run<141900)	return (HLT_Ele15_LW_L1R);
+	if (run>=141900 && run<144000)	return (HLT_Ele15_SW_L1R);
+	if (run>=144000 && run<144114)	return (HLT_Ele15_SW_CaloEleId_L1R	|| HLT_Ele20_SW_L1R							|| HLT_DoubleEle10_SW_L1R );
+	if (run>=146000 && run<147120)	return (HLT_DoubleEle10_SW_L1R		|| HLT_Ele17_SW_CaloEleId_L1R);
+	if (run>=147120)				return (HLT_DoubleEle15_SW_L1R_v1	|| HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1	|| HLT_Ele17_SW_TightEleId_L1R);
 	return false;
 }
 
@@ -720,12 +775,15 @@ vector<int> UserAnalysisBase::ElectronSelection(){
 		if(!IsElFromPrimaryVx(ind)) continue;
 		
 		// rejection if matched to any muon	
+		bool elMuDR04Matched(0);
+		// rejection if matched to any muon	
 		for( int im = 0; im < fTR->NMus; ++im ){
 			if( (fTR->MuIsGlobalMuon[im] == 0 || fTR->MuIsTrackerMuon[im] == 0) && ( fTR->MuNTkHits[im] > 10) ) {
 				double deltaR = Util::GetDeltaR(fTR->ElEta[ind], fTR->MuEta[im], fTR->ElPhi[ind], fTR->MuPhi[im]);
-				if(deltaR <= 0.1) continue;
+				if(deltaR <= 0.1) elMuDR04Matched = true;
 			}
 		}
+		if (elMuDR04Matched) continue;
 		
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->ElPt[ind]);
@@ -742,7 +800,9 @@ vector<int> UserAnalysisBase::JetSelection(){
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
 		if(!IsGoodBasicJet(ind)) continue;
-
+		// additional kinematic cuts
+		if(fabs(fTR->JEta[ind]) > 2.5) continue;
+		
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->JPt[ind]);
 	}
@@ -758,6 +818,8 @@ vector<int> UserAnalysisBase::PFJetSelection(){
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
 		if(!IsGoodBasicPFJet(ind)) continue;
+		// additional kinematic cuts
+		if(fabs(fTR->PFJEta[ind]) > 2.5) continue;
 
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->JPt[ind]);

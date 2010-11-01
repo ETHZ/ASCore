@@ -91,6 +91,10 @@ public:
 	virtual bool DiElectronSelection(int&, int&);
 	virtual bool SSDiElectronSelection(int &, int&);	
 
+	// TDL & RA5
+	virtual bool IsGoodElEvent_TDL();
+	virtual bool IsGoodElEvent_RA5();
+
 private:
 
 	// Object quality cuts:
