@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.83 2010/10/21 09:42:03 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.84 2010/10/28 16:44:42 fronga Exp $
 //
 //
 
@@ -485,7 +485,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
   ////////////////////////////////////////////////////////
   // Muon Variables:
-  int mqi(-1);  // Index of qualified muons
+  int mqi(0);  // Index of qualified muons
   fTnmutot = 0; // Total number of tracker&&global muons 
 
   // Get muons, order them by pt and apply selection
@@ -681,7 +681,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Keep pointers to electron superCluster in original collections
   vector<const SuperCluster*> elecPtr;
   vector<const GsfTrack*> trckPtr;
-  int eqi(-1);                    // Index of qualified electrons
+  int eqi(0);                    // Index of qualified electrons
   fTnelestot = electrons->size(); // Total number of electrons
 
   if(electrons->size() > 0){
@@ -902,7 +902,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Photon Variables:
   // Keep pointers to superclusters for cross cleaning
   vector<const SuperCluster*> photSCs;
-  int phoqi(-1); // Index of qualified photons
+  int phoqi(0); // Index of qualified photons
   fTnphotonstot = photons->size();
 
   // Get electrons, order them by pt and apply selection
@@ -1044,7 +1044,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Loop over corr. jet indices
   for(vector<OrderPair>::const_iterator it = corrIndices.begin(); it != corrIndices.end(); ++it ) {
     // Check if maximum number of jets is exceeded already
-    if(jqi >= gMaxnjets) {
+    if(jqi >= gMaxnjets-1) {
       edm::LogWarning("NTP") << "@SUB=analyze"
                              << "Maximum number of jets exceeded";
       fTflagmaxjetexc = 1;
