@@ -18,15 +18,22 @@
 #include "helper/Monitor.hh"
 
 
+struct lepton {
+  TLorentzVector p;
+  int charge;
+  int type; //0==electron 1==muon 2==tau 
+  int index;
+};
 
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
 	JZBAnalysis(TreeReader *tr = NULL);
 	virtual ~JZBAnalysis();
-	bool IsCustomMu(int);
-	bool IsCustomEl(int);
-	bool IsCustomJet(int index);
+	const bool IsCustomMu(const int);
+	const bool IsCustomEl(const int);
+	const bool IsCustomJet(const int index);
+        const bool passTrigger(void);
 
 	string outputFileName_; // public name of the output file name
 
@@ -37,6 +44,11 @@ public:
 
 
 private:
+
+        enum counters_t { count_begin, EV=count_begin, MU, EL, JE, count_end };
+        Monitor counters[count_end];
+
+        vector<lepton> sortLeptonsByPt(vector<lepton>&);
 
   	template<class T> std::string any2string(T i);
 	// file for histograms:

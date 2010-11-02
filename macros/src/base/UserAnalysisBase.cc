@@ -125,10 +125,10 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 	return true;
 }
 
-bool UserAnalysisBase::IsGoodBasicPFJet(int index) {
+bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	// Basic PF jet cleaning and ID cuts
-	if(fTR->PFJPt[index] < 30) return false;
-	if(fabs(fTR->PFJEta[index]) > 3.0) return false;
+	if(doSel && fTR->PFJPt[index] < 30) return false;
+	if(doSel && fabs(fTR->PFJEta[index]) > 3.0) return false;
 	// Loose PF jet ID (WARNING: HF not included in our ntuple)
 	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
 	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
