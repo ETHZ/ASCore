@@ -1,6 +1,6 @@
 #include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
-#include "/shome/theofil/setTDRStyle.C"
+//#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
 
@@ -194,7 +194,7 @@ nanoEvent nEvent;
 
 JZBAnalysis::JZBAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
 //	Util::SetStyle();	
-	setTDRStyle();	
+//	setTDRStyle();	
 }
 
 JZBAnalysis::~JZBAnalysis(){
