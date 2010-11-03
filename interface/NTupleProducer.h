@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.66 2010/10/28 16:44:42 fronga Exp $
+// $Id: NTupleProducer.h,v 1.67 2010/11/03 11:43:39 stiegerb Exp $
 //
 //
 
@@ -244,7 +244,7 @@ private:
   double fTprimvtxyE;
   double fTprimvtxzE;
   double fTpvtxznchi2;
-  int    fTpvtxndof;
+  double fTpvtxndof;
   int    fTpvtxisfake;
   double fTpvtxptsum;
 

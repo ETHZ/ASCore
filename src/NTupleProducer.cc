@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.84 2010/10/28 16:44:42 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.85 2010/11/02 18:47:00 stiegerb Exp $
 //
 //
 
@@ -439,7 +439,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   fTprimvtxyE  = primVtx->yError();
   fTprimvtxzE  = primVtx->zError();
   fTpvtxznchi2 = primVtx->normalizedChi2();
-  fTpvtxndof   = static_cast<int>(primVtx->ndof());
+  fTpvtxndof   = primVtx->ndof();
   fTpvtxisfake = primVtx->isFake();
   // fTpvtxntracks = primVtx->tracksSize();
 
@@ -1612,7 +1612,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("PrimVtxyE"        ,&fTprimvtxyE         ,"PrimVtxyE/D");
   fEventTree->Branch("PrimVtxzE"        ,&fTprimvtxzE         ,"PrimVtxzE/D");
   fEventTree->Branch("PrimVtxNChi2"     ,&fTpvtxznchi2        ,"PrimVtxNChi2/D");
-  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof          ,"PrimVtxNdof/I");
+  fEventTree->Branch("PrimVtxNdof"      ,&fTpvtxndof          ,"PrimVtxNdof/D");
   fEventTree->Branch("PrimVtxIsFake"    ,&fTpvtxisfake        ,"PrimVtxIsFake/I");
   fEventTree->Branch("PrimVtxPtSum"     ,&fTpvtxptsum         ,"PrimVtxPtSum/D");
   fEventTree->Branch("Beamspotx"        ,&fTbeamspotx         ,"Beamspotx/D");
@@ -2183,7 +2183,7 @@ void NTupleProducer::resetTree(){
   fTprimvtxzE   = -999.99;
   fTpvtxznchi2  = -999.99;
   fTpvtxisfake  = -999;
-  fTpvtxndof    = -999;
+  fTpvtxndof    = -999.99;
   fTpvtxptsum   = -999.99;
   fTbeamspotx   = -999.99;
   fTbeamspoty   = -999.99;
