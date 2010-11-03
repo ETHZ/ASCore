@@ -441,7 +441,7 @@ void JZBAnalysis::Analyze(){
     counters[EV].fill("... has at least 2 OS leptons");
     
     // Preselection
-    if(sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 10) {
+    if(sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
       
       nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
       nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
