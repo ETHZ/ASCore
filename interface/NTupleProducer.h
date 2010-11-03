@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.65 2010/10/04 15:37:51 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.66 2010/10/28 16:44:42 fronga Exp $
 //
 //
 
@@ -110,7 +110,7 @@ private:
   int fNTotEvents;
   int fNFillTree;
 
-  static const int gMaxnmus     = 20;
+  static const int gMaxnmus     = 30;
   static const int gMaxneles    = 20;
   static const int gMaxnjets    = 100;
   static const int gMaxntrks    = 500;
