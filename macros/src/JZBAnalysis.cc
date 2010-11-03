@@ -192,7 +192,7 @@ TTree *myTree;
 nanoEvent nEvent;
 
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
+JZBAnalysis::JZBAnalysis(TreeReader *tr, bool isData ) : UserAnalysisBase(tr), fIsData_(isData) {
 //	Util::SetStyle();	
 //	setTDRStyle();	
 }
@@ -353,8 +353,10 @@ const bool JZBAnalysis::passTrigger() {
 void JZBAnalysis::Analyze(){
   
   counters[EV].fill("All events");
-  if(!passTrigger()) return;
-  counters[EV].fill("... pass all trigger requirements");
+  if ( fIsData_ ) {
+    if(!passTrigger()) return;
+    counters[EV].fill("... pass all trigger requirements");
+  }
 
   
   // #--- analysis global parameters

@@ -6,8 +6,8 @@
 
 using namespace std;
 
-JZBAnalyzer::JZBAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fJZBAnalysis = new JZBAnalysis(fTR);
+JZBAnalyzer::JZBAnalyzer(TTree *tree, bool isData) : TreeAnalyzerBase(tree) {
+	fJZBAnalysis = new JZBAnalysis(fTR,isData);
 }
 
 JZBAnalyzer::~JZBAnalyzer(){

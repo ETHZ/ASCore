@@ -28,7 +28,7 @@ struct lepton {
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
-	JZBAnalysis(TreeReader *tr = NULL);
+	JZBAnalysis(TreeReader *tr = NULL, bool isData = false);
 	virtual ~JZBAnalysis();
 	const bool IsCustomMu(const int);
 	const bool IsCustomEl(const int);
@@ -65,5 +65,7 @@ private:
 	TH2F *fHMDPhiPt;
 	TH2F *fHMZPtJ1Pt;
 	TH2F *fHMZPtuJ1Pt;
+
+        bool fIsData_;
 };
 #endif
