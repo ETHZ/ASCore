@@ -11,7 +11,7 @@
 
 class JZBAnalyzer : public TreeAnalyzerBase {
 public:
-	JZBAnalyzer(TTree *tree = 0);
+	JZBAnalyzer(TTree *tree = 0, bool isData = false );
 	virtual ~JZBAnalyzer();
 	void BeginJob();
 	void EndJob();
