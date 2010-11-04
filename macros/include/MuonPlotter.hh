@@ -10,23 +10,6 @@
 #include "helper/FPRatios.hh"
 
 // Binning ///////////////////////////////////////////////////////////////////////
-// For ttbar Analysis
-// static const int gNPtbins = 1;
-// static const double gPtbins[gNPtbins+1] = {10., 150.};
-// static const int gNPtbins = 5;
-// static const double gPtbins[gNPtbins+1] = {10., 15., 20., 35., 65., 150.};
-// static const int gNEtabins = 1;
-// static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
-// static const int gNEtabins = 5;
-// static const double gEtabins[gNEtabins+1] = {-2.4, -1.4, -0.5, 0.5, 1.4, 2.4};
-
-// For SS Analysis
-// static const int gNPtbins = 5;
-// static const double gPtbins[gNPtbins+1] = {10., 20., 30., 40., 50., 100.};
-// static const int gNPtbins = 5;
-// static const double gPtbins[gNPtbins+1] = {10., 30., 45., 60., 100., 200.};
-
-// For Analysis on Data
 // static const int gNPtbins = 4;
 // static const double gPtbins[gNPtbins+1] = {10., 20., 30., 40., 60.};
 static const int gNPtbins = 5;
@@ -51,6 +34,8 @@ public:
 
 	void makePlots();
 
+	//////////////////////////////
+	// Plots
 	void makefRatioPlots();
 	void makepRatioPlots();
 	void makeIsolationPlots();
@@ -63,7 +48,9 @@ public:
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
 	void makeIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
 	
+	//////////////////////////////
 	// Fake ratios
+	// Produce from tree, with given selections:
 	void produceRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
 	vector<double> produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
@@ -87,14 +74,34 @@ public:
 	void plotRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
 	void plotRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
 
+	// Calculate from pre stored numbers, with fixed selections:
+	TH1D* fillRatioPt(int, int, bool = false);
+	TH1D* fillRatioPt(vector<int>, int, bool = false);
+
+	void calculateRatio(vector<int>, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
+
+	//////////////////////////////
+	// Predictions
 	void makeSSNsigPredictionPlots();
-	void makeSSPredictionPlots(std::vector<int>);
+	void makeSSPredictionPlots(vector<int>);
 	
-	void NObs(TH1D *&, std::vector<int>, bool(MuonPlotter::*)());
+	void NObs(TH1D *&, vector<int>, bool(MuonPlotter::*)());
 	
-	std::vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
+	vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
 	
-	void printYields(std::vector<int>, bool = false);
+	void fillYields();                 // All samples
+	void fillYields(int);              // One sample
+	void fillYields(vector<int>); // List of samples
+	void printYields();
+	void printYields(int);
+	void printYields(vector<int>);
+
+	//////////////////////////////
+	// I/O
+	void bookHistos();
+	void writeHistos();
+	int readHistos(TString);
+
 
 	// Event and Object selectors:
 	bool isGoodEvent();
@@ -126,19 +133,59 @@ private:
 
 	FPRatios *fFPRatios;
 
+	vector<int> fAllSamples;
 	vector<int> fMCBG;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
 	vector<int> fJMData;  // JetMET data samples
 
+	struct numberset{
+		long nt2;
+		long nt1;
+		long nt0;
+		long nsst;
+		long nssl;
+		long nzl;
+		long nzt;
+	};
+	
+	struct lthistos{
+		TH2D *h_ntight;
+		TH2D *h_nloose;
+		TH1D *h_ntight_pt;
+		TH1D *h_nloose_pt;
+		TH1D *h_ntight_eta;
+		TH1D *h_nloose_eta;
+
+		TH2D *h_ratio;
+		TH1D *h_ratio_pt;
+		TH1D *h_ratio_eta;
+	};
+
+	struct NThistos{
+		TH2D *h_nt2;
+		TH1D *h_nt2_pt;
+		TH1D *h_nt2_eta;
+		TH2D *h_nt1;
+		TH1D *h_nt1_pt;
+		TH1D *h_nt1_eta;
+		TH2D *h_nt0;
+		TH1D *h_nt0_pt;
+		TH1D *h_nt0_eta;
+	};
+	
 	struct sample{
 		TString name;
 		TString sname;
 		TFile *file;
 		TTree *tree;
 		float lumi;
-		int color;
+		bool isdata;
+		NThistos nthistos;
+		numberset numbers;
+		lthistos fhistos;
+		lthistos phistos;
 	};
 	
 	int fNJetsMin; // Cut on minimal number of jets
@@ -148,8 +195,11 @@ private:
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
-	std::vector<sample> fSamples;
+	vector<sample> fSamples;
 	map<TString, int> fSampleMap;	// Mapping of sample number to name
+	
+	TFile *fStorageFile;
+	TString fOutputFileName;
 	
 	TH2D *fH2D_fRatio;
 	TH1D *fH1D_fRatioPt;
