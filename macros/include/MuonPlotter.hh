@@ -93,9 +93,12 @@ public:
 	void NObs(TH1D *&, std::vector<int>, bool(MuonPlotter::*)());
 	
 	std::vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
+	
+	void printYields(std::vector<int>, bool = false);
 
 	// Event and Object selectors:
 	bool isGoodEvent();
+	bool passesNJetCut(int=2);
 	bool isMuTriggeredEvent();
 	bool isJetTriggeredEvent();
 	bool isSignalSuppressedEvent();
@@ -116,6 +119,8 @@ public:
 	bool isFakeTTbarMuon(int);
 	bool isPromptTTbarMuon(int);
 	bool isPromptSUSYMuon(int);
+
+	bool isTightElectron(int);
 
 private:
 

@@ -141,11 +141,14 @@ void MuonPlotter::makePlots(){
 	// cout << " TTbar sample is number: " << fSampleMap["TTbar"] << endl;
 	// cout << " Name of sample TTbar is " << fSamples[TTbar].sname << endl;
 
-	// makePrediction();
+	makePrediction();
+
+	// printYields(fMCBGSig, false);
+	// printYields(fMuData, true);
 
 	// makefRatioPlots();
 	// makepRatioPlots();
-	make100pbMCPredictionPlots();
+	// make100pbMCPredictionPlots();
 }
 
 //____________________________________________________________________________
@@ -1471,16 +1474,114 @@ vector<TH1D*> MuonPlotter::NsigPredFromFPRatios(const int sample, bool output){
 	return res;
 }
 
+//____________________________________________________________________________
+void MuonPlotter::printYields(vector<int> samples, bool trigger){
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+
+		// Counters
+		int nt2(0), nt1(0), nt0(0);
+		int ntsigsupp(0), nlsigsupp(0);
+		int nzt(0), nzl(0);
+
+		TTree *tree = fSamples[index].tree;
+		tree->ResetBranchAddresses();
+		Init(tree);
+		if (fChain == 0) return;
+		Long64_t nentries = fChain->GetEntriesFast();
+		Long64_t nbytes = 0, nb = 0;
+		for (Long64_t jentry=0; jentry<nentries;jentry++) {
+			Long64_t ientry = LoadTree(jentry);
+			if (ientry < 0) break;
+			nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+			if(!trigger){
+				if(isSSLLEvent()){
+					if(  isTightMuon(0) &&  isTightMuon(1) ) nt2++; // Tight-tight
+					if(  isTightMuon(0) && !isTightMuon(1) ) nt1++; // Tight-loose
+					if( !isTightMuon(0) &&  isTightMuon(1) ) nt1++; // Loose-tight
+					if( !isTightMuon(0) && !isTightMuon(1) ) nt0++; // Loose-loose				
+				}
+				if(isSignalSuppressedEvent()){
+					if( isLooseMuon(0) ) nlsigsupp++;
+					if( isTightMuon(0) ) ntsigsupp++;
+				}
+				if(isZEvent()){
+					if( isLooseMuon(0) ) nzl++;
+					if( isTightMuon(0) ) nzt++;
+				}
+			}
+			if(trigger){
+				if(isSSLLEventTRG()){
+					if(  isTightMuon(0) &&  isTightMuon(1) ) nt2++; // Tight-tight
+					if(  isTightMuon(0) && !isTightMuon(1) ) nt1++; // Tight-loose
+					if( !isTightMuon(0) &&  isTightMuon(1) ) nt1++; // Loose-tight
+					if( !isTightMuon(0) && !isTightMuon(1) ) nt0++; // Loose-loose				
+				}
+				if(isSignalSuppressedEventTRG()){
+					if( isLooseMuon(0) ) nlsigsupp++;
+					if( isTightMuon(0) ) ntsigsupp++;
+				}
+				if(isZEventTRG()){
+					if( isLooseMuon(0) ) nzl++;
+					if( isTightMuon(0) ) nzt++;
+				}				
+			}
+		}
+		
+		cout << "-----------------------" << endl;
+		cout << " Sample: " << fSamples[index].sname << endl;
+		cout << "   Nt2 = "       << nt2 <<       "  Nt1 = "       << nt1 << "  Nt0 = " << nt0 << endl;
+		cout << "   Nss tight = " << ntsigsupp << "  Nss loose = " << nlsigsupp << endl;
+		cout << "   NZ tight  = " << nzt <<       "  NZ  loose = " << nzl << endl;
+		cout << endl;
+		float scale = (fSamples[MuA].lumi + fSamples[MuB].lumi) / fSamples[index].lumi;
+		cout << "  scaled to " << fSamples[MuA].lumi + fSamples[MuB].lumi << " /pb" << endl;
+		cout << "   Nt2 = "       << scale*nt2 <<       "  Nt1 = "       << scale*nt1 << "  Nt0 = " << scale*nt0 << endl;
+		cout << "   Nss tight = " << scale*ntsigsupp << "  Nss loose = " << scale*nlsigsupp << endl;
+		cout << "   NZ tight  = " << scale*nzt <<       "  NZ  loose = " << scale*nzl << endl;		
+		cout << endl;
+		scale = 100. / fSamples[index].lumi;
+		cout << "  scaled to 100/pb" << " /pb" << endl;
+		cout << "   Nt2 = "       << scale*nt2 <<       "  Nt1 = "       << scale*nt1 << "  Nt0 = " << scale*nt0 << endl;
+		cout << "   Nss tight = " << scale*ntsigsupp << "  Nss loose = " << scale*nlsigsupp << endl;
+		cout << "   NZ tight  = " << scale*nzt <<       "  NZ  loose = " << scale*nzl << endl;		
+	}
+	cout << "-----------------------" << endl;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Event Selections:
 //____________________________________________________________________________
 bool MuonPlotter::isGoodEvent(){
 	// Some global cuts
 	if(NMus < 1) return false;
-	if(NJets < 2) return false;
+	// if(NJets < 2) return false;
+	if(!passesNJetCut(2)) return false;
 	if(isLooseMuon(0) == false) return false;
 	if(NMus > 1) if(isLooseMuon(1) == false) return false;
 	return true;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesNJetCut(int cut){
+	int njets(0);
+	for(size_t i = 0; i < NJets; ++i){
+		bool good(true);
+		for(size_t imu = 0; imu < NMus; ++imu){
+			if(!isTightMuon(imu)) continue;
+			if(Util::GetDeltaR(MuEta[imu], JetEta[i], MuPhi[imu], JetPhi[i]) > 0.4 ) continue;
+			good = false;
+		}
+		for(size_t iel = 0; iel < NEls; ++iel){
+			if(!isTightElectron(iel)) continue;
+			if(Util::GetDeltaR(ElEta[iel], JetEta[i], ElPhi[iel], JetPhi[i]) > 0.4 ) continue;
+			good = false;
+		}
+		if(good) njets++;
+	}
+	return njets>=cut;
 }
 
 //____________________________________________________________________________
@@ -1594,19 +1695,31 @@ bool MuonPlotter::isSSTTEvent(){
 	return false;
 }
 
+// //____________________________________________________________________________
+// bool MuonPlotter::isAddZVetoEvent(){
+// 	// Some global cuts
+// 	if(NMus > 1) return false;
+// 	if(NJets < 2) return false;
+// 	if(isLooseMuon(0) == false) return false;
+// 	if(NMus > 1) if(isLooseMuon(1) == false) return false;
+// 	return true;
+// }
+
 //////////////////////////////////////////////////////////////////////////////
 // Object selections:
 //____________________________________________________________________________
 bool MuonPlotter::isGoodMuon(int muon){
 	if(MuPt[muon] < 10.) return false;
 	if(fabs(MuEta[muon]) > 2.4) return false;
+	if(fabs(MuD0BS[muon]) > 0.02) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isLooseMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
-	if(MuIso[muon] > 1.00) return false;
+	// if(MuIso[muon] > 1.00) return false;
+	if(MuIsoHybrid[muon] > 1.00) return false;
 	return true;
 }
 
@@ -1614,7 +1727,8 @@ bool MuonPlotter::isLooseMuon(int muon){
 bool MuonPlotter::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(isLooseMuon(muon) == false) return false;
-	if(MuIso[muon] > 0.15) return false;
+	// if(MuIso[muon] > 0.15) return false;
+	if(MuIsoHybrid[muon] > 0.1) return false;
 	return true;
 }
 
@@ -1658,5 +1772,11 @@ bool MuonPlotter::isPromptSUSYMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
 	if( abs(MuGenMoType[muon]) == 9 || abs(MuGenMoType[muon]) == 4  || abs(MuGenMoType[muon]) == 2 ) return true;
 	return false;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::isTightElectron(int ele){
+	if(ElTight[ele] != 1) return false;
+	return true;
 }
 
