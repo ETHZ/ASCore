@@ -78,10 +78,9 @@ public:
 	void fillpRatio(int, int, const int, const double*, const int, const double*);
 	void fillpRatio(vector<int>, int, const int, const double*, const int, const double*);
 	
-	TH1D* fillRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-	TH2D* fillRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
+	TH1D* fillRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
+	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
+	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 	TH2D* fillRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 
 	void plotRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
@@ -99,18 +98,12 @@ public:
 	bool isMuTriggeredEvent();
 	bool isJetTriggeredEvent();
 	bool isSignalSuppressedEvent();
-	bool isSignalSuppressedEventTRG();
 	bool isZEvent();
-	bool isZEventTRG();
 	bool isGenMatchedSUSYDiLepEvent();
 	bool isSSLLEvent();
-	bool isSSLLEventTRG();
 	bool isSSTTEvent();
 
 	bool isGoodMuon(int);
-	bool isLooseMuon(int);
-	bool isTightMuon(int);
-	bool isLooseNoTightMuon(int);
 	bool isGoodPrimMuon(int);
 	bool isGoodSecMuon(int);
 	bool isFakeTTbarMuon(int);
@@ -121,11 +114,9 @@ private:
 
 	FPRatios *fFPRatios;
 
-	vector<int> fMCBG;    // SM background MC samples
-	vector<int> fMCBGSig; // SM background + LM0 signal samples
-	vector<int> fMuData;  // Muon data samples
-	vector<int> fEGData;  // EG data samples
-	vector<int> fJMData;  // JetMET data samples
+	vector<int> fAllMCSi; // All MC samples with Single Muon Selection
+	vector<int> fAllMCDi; // All MC samples with Di Muon Selection
+	vector<int> fAllMCSS; // All MC samples with SS Muon Selection
 
 	struct sample{
 		TString name;
@@ -139,13 +130,10 @@ private:
 	int fNJetsMin; // Cut on minimal number of jets
 	float fMinPt1; // Cut on pt of harder muon
 	float fMinPt2; // Cut on pt of softer muon
-
-	float fLumiNorm;      // Normalize everything to this luminosity
+	float fLumiNorm; // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
 	std::vector<sample> fSamples;
-	map<TString, int> fSampleMap;	// Mapping of sample number to name
-	
 	TH2D *fH2D_fRatio;
 	TH1D *fH1D_fRatioPt;
 	TH1D *fH1D_fRatioEta;
