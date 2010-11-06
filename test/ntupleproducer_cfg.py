@@ -52,11 +52,11 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_3_8_X:
-#    process.GlobalTag.globaltag = "GR_R_38X_V13::All"
-     process.GlobalTag.globaltag = "GR10_P_V11::All"
+    process.GlobalTag.globaltag = "GR_R_38X_V14::All"
+#     process.GlobalTag.globaltag = "GR10_P_V11::All"
 else:
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "START38_V12::All"
+    process.GlobalTag.globaltag = "START38_V14::All"
 
 
 ### b-tagging ##################################################################
@@ -116,9 +116,7 @@ else:
 	process.jecCorSequence = cms.Sequence(
 		process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
 	)
-
 ### NB: also check the analysis input below.
-
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
