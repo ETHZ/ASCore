@@ -176,7 +176,7 @@ process.analyze.jets = (
               tag = cms.untracked.InputTag('ak5PFJets'),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
-              sel_minpt  = cms.untracked.double(15.0),
+              sel_minpt  = cms.double(15.0),
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
               ),
