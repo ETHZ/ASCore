@@ -56,8 +56,7 @@ if options.runon=='data':
 #     process.GlobalTag.globaltag = "GR10_P_V11::All"
 else:
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "START38_V14::All"
-
+    process.GlobalTag.globaltag = "START38_V13::All"
 
 ### b-tagging ##################################################################
 # Simple SV and TrackCounting based algos
