@@ -58,6 +58,7 @@ else:
     # CMSSW_3_8_X:
     process.GlobalTag.globaltag = "START38_V13::All"
 
+
 ### b-tagging ##################################################################
 # Simple SV and TrackCounting based algos
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
@@ -175,7 +176,7 @@ process.analyze.jets = (
               tag = cms.untracked.InputTag('ak5PFJets'),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
-              sel_minpt  = 15,
+              sel_minpt  = cms.untracked.double(15.0),
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
               ),
