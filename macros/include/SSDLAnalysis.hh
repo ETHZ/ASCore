@@ -35,14 +35,14 @@ public:
 	void           Begin(const char* filename = "SSDLTree.root");
 	void           Analyze();
 	void           End();
-
+	
 	void           BookTree();
 	void           BookRunAndTriggerVariables(TTree* tree);
 	void           BookMuonVariables(TTree* tree);
 	void           BookElectronVariables(TTree* tree);
 	void           BookJetMETVariables(TTree* tree);
 	void           BookFPRVariables(TTree* tree);
-
+	
 	void           ResetTree();
 	void           ResetRunAndTriggerVariables();
 	void           ResetMuonVariables();
@@ -58,7 +58,7 @@ public:
 	float          minDRtoJet(float lepEta, float lepPhi);
 	void           transverseMasses(TLorentzVector p1, TLorentzVector p2, TVector3 jtotPT, float &lepminv, float &lepmtinv, float &lepmct, float &lepmctort, float &lepmctparl, float &lepmt2_0, float &lepmt2_50, float &lepmt2_100, float &lepmt2orth_0, float &lepmt2orth_50, float &lepmt2orth_100);
 	void           transverseAlphas(vector<int> qualElInd, vector<int> qualMuInd, vector<int> qualPhoInd, vector<int> qualJetInd, float &alphaT_h, float &alphaCT_h, float &alphaT, float &alphaCT, float &alphaT_new, float &alphaCT_new);
-
+	
 	void           DumpRunAndTiggerProperties();
 	void           DumpJetMETProperties  (vector<int>& selectedJetInd);
 	void           DumpPhotonProperties  (vector<int>& selectedPhoInd);
@@ -67,22 +67,22 @@ public:
 	void           DumpFPRatioProperties();
 	void           DumpElectronLooseAndTighPtAndEta(int elindex, float &elLoosePt, float &elTightPt, float &elLooseEta, float &elTightEta);
 	void           DumpTwoElectronPtAndEta(int el1index, int el2index, float &el1Pt, float &el2Pt, float &el1Eta, float &el2Eta);
-
+	
 private:
 	static const int fMaxNjets = 30;
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;
 	static const int fMaxNphos = 5;
-
+	
 	TTree* fAnalysisTree;
-
+	
 	// run/sample properties
 	int   fTRunNumber;
 	int   fTEventNumber;
 	int   fTLumiSection;
 	float fTextxslo;
 	float fTintxs;
-
+	
 	// trigger properties
 	int   fT_HLTMu9;
 	int   fT_HLTMu11;
@@ -138,7 +138,7 @@ private:
 	float fTR12;
 	float fTR21;
 	float fTR12plusR21;
-
+	
 	// photon properties
 	int   fTnqphos;
 	float fTPhopt          [fMaxNphos];
@@ -178,27 +178,29 @@ private:
 	int   fTElcharge                   [fMaxNeles];
 	int   fTElChargeIsCons             [fMaxNeles];
 	int   fTElChargeIsGenCons          [fMaxNeles];
+	int   fTElEcalDriven               [fMaxNeles];
+	float fTElCaloEnergy               [fMaxNeles];
 	float fTElpt                       [fMaxNeles];
 	float fTEleta                      [fMaxNeles];
 	float fTElphi                      [fMaxNeles];
 	float fTEld0                       [fMaxNeles];
 	float fTElD0Err                    [fMaxNeles];
+	float fTEldz                       [fMaxNeles];
+	float fTElDzErr                    [fMaxNeles];
 	float fTElEoverP                   [fMaxNeles];
 	float fTElHoverE                   [fMaxNeles];
 	float fTElSigmaIetaIeta            [fMaxNeles];
 	float fTElDeltaPhiSuperClusterAtVtx[fMaxNeles];
 	float fTElDeltaEtaSuperClusterAtVtx[fMaxNeles];
-	float fTElIDsimpleWP80relIso       [fMaxNeles];
-	float fTElIDsimpleWPrelIso         [fMaxNeles];
-	float fTElIDsimpleWP95relIso       [fMaxNeles];	
 	float fTElRelIso                   [fMaxNeles];
-	float fTElDR04TkSumPt              [fMaxNeles];
-	float fTElDR04EcalRecHitSumEt      [fMaxNeles];
-	float fTElDR04HcalTowerSumEt       [fMaxNeles];
+	int   fTElIsGoodElId_WP80          [fMaxNeles];
+	int   fTElIsGoodElId_WP90          [fMaxNeles];
+	int   fTElIsGoodElId_WP95          [fMaxNeles];
+	int   fTElIsConvertedEl_WP80       [fMaxNeles];
+	int   fTElIsConvertedEl_WP90       [fMaxNeles];
 	float fTElS4OverS1                 [fMaxNeles];
 	float fTElConvPartnerTrkDist       [fMaxNeles];
 	float fTElConvPartnerTrkDCot       [fMaxNeles];
-	float fTElChargeMisIDProb          [fMaxNeles];
 	float fTElMT                       [fMaxNeles];
 	float fTElDRjet                    [fMaxNeles];
 	float fTElDRhardestjet             [fMaxNeles];
@@ -212,7 +214,7 @@ private:
 	float fTElHybRelIso                [fMaxNeles];
 	float fTElminv;
 	float fTElmtinv;
-
+	
 	// other properties
 	float fTElmt2_0;
 	float fTElmt2_50;
@@ -238,7 +240,7 @@ private:
 	float fTalphaCT;	
 	float fTalphaT_new;
 	float fTalphaCT_new;
-
+	
 	// fake ratio propeties
 	int		fTisSE_QCDLike;
 	int		fTSE_QCDLike_FakeElGenID;
@@ -263,7 +265,7 @@ private:
 	float	fTDE_ZJetsLike_PromptElGenTightPt;
 	float	fTDE_ZJetsLike_PromptElGenLooseEta;
 	float	fTDE_ZJetsLike_PromptElGenTightEta;
-
+	
 	int		fTisDE_WJetsLike;
 	int		fTDE_WJetsLike_FakeElGenID;
 	float	fTDE_WJetsLike_ElLoosePt;
