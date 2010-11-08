@@ -63,6 +63,7 @@ public:
 	virtual bool IsIsolatedEl		(int, double, double);
 	virtual bool IsIsolatedEl_WP80	(int);
 	virtual bool IsIsolatedEl_WP90	(int);
+	virtual bool IsIsolatedEl_WP95  (int);
 	virtual bool IsIsolatedEl_RA5	(int);
 	virtual bool IsIsolatedEl_LooseIso(int);
 	virtual bool IsTightEl			(int);
@@ -88,8 +89,9 @@ public:
 	virtual bool DiMuonSelection(int&, int&, int = 0);
 	virtual bool SSDiMuonSelection(int &, int&);	
 	virtual bool SingleElectronSelection(int&);
-	virtual bool DiElectronSelection(int&, int&);
-	virtual bool SSDiElectronSelection(int &, int&);	
+	virtual bool DiElectronSelection(int&, int&, int = 0);
+	virtual bool SSDiElectronSelection(int&, int&);
+	virtual bool OSDiElectronSelection(int&, int&);
 
 	// TDL & RA5
 	virtual bool IsGoodElEvent_TDL();

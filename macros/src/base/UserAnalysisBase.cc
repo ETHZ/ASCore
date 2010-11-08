@@ -446,6 +446,13 @@ bool UserAnalysisBase::IsConvertedEl_WP80(int index){
 	return false;
 }
 
+bool UserAnalysisBase::IsIsolatedEl_WP95(int index){
+	// combined relative isolation cut values for WP95
+	double ElecCombRelIsoEBarmax = 0.15;
+	double ElecCombRelIsoEEndmax = 0.15;
+	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
+}
+
 bool UserAnalysisBase::IsIsolatedEl_WP90(int index){
 	// combined relative isolation cut values for WP90
 	double ElecCombRelIsoEBarmax = 0.10;
@@ -494,12 +501,12 @@ double UserAnalysisBase::hybRelElIso(int index){
 }
 
 bool UserAnalysisBase::IsTightEl(int index){
-	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP90%)
+	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP95%)
 	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
 
 	if(!IsGoodElId_WP80(index)) return false;	// corresponding to the 80% eff. WP without isolation cuts or conversion rejection
 	if(IsConvertedEl_WP80(index)) return false;	
-	if(!IsIsolatedEl_WP90(index)) return false;
+	if(!IsIsolatedEl_WP95(index)) return false;
 	return true;
 }
 
@@ -769,7 +776,7 @@ vector<int> UserAnalysisBase::ElectronSelection(){
 		if(!IsLooseEl(ind)) continue;
 		// additional kinematic cuts
 		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
-		if(fTR->ElPt[ind] < 5.) continue;
+		if(fTR->ElPt[ind] < 10.) continue;
 		// additional cuts
 		if(fTR->ElDuplicateEl[ind] >= 0) continue;
 		if(!IsElFromPrimaryVx(ind)) continue;
@@ -868,43 +875,26 @@ bool UserAnalysisBase::SingleElectronSelection(int &index){
 	return true;
 }
 
-bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2){
+bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2, int charge){
 	// Selects events with (at least) two good electrons and gives the indices
-	// of the hardest two in the argument
+	// of the hardest two in the argument (if selected)
+	// charge is the relative charge, 0 = no cut on charge (default), 1 = SS, -1 = OS
 	if( fTR->NEles < 2 ) return false;
 	vector<int> ElInd = ElectronSelection();
 	if(ElInd.size() < 2) return false;
+	// Charge selection
+	if(charge != 0) if(fTR->ElCharge[ElInd[0]] * fTR->ElCharge[ElInd[1]] != charge) return false;
 	ind1 = ElInd[0];
 	ind2 = ElInd[1];
 	return true;
 }
 
 bool UserAnalysisBase::SSDiElectronSelection(int &prim, int &sec){
-	// Select events with 2 SS electrons
-	if( fTR->NEles < 2 ) return false;
-	vector<int> ElInd = ElectronSelection();
-	
-	vector<int> priElInd;
-	vector<int> secElInd;
-	for(unsigned iel = 0; iel < ElInd.size(); ++iel){
-		if(fTR->ElPt[ElInd[iel]] > 10.)	priElInd.push_back(ElInd[iel]);
-		if(fTR->ElPt[ElInd[iel]] > 10.)	secElInd.push_back(ElInd[iel]);
-	}
-	
-	unsigned npriel = priElInd.size();
-	unsigned nsecel = secElInd.size();
-	
-	// Select events with at least one primary electron and at least one other
-	if(npriel < 1 || nsecel < 2) return false;
-	
-	int ind1 = priElInd[0];
-	int ind2 = secElInd[0];
-	if(ind2 == ind1) ind2 = secElInd[1];
-	// Select same sign electrons
-	if(fTR->ElCharge[ind1] != fTR->ElCharge[ind2]) return false;
-	prim = ind1;
-	sec = ind2;
-	return true;
+	return DiElectronSelection(prim, sec, 1);
+}
+
+bool UserAnalysisBase::OSDiElectronSelection(int &prim, int &sec){
+	return DiElectronSelection(prim, sec, -1);
 }
 
 bool UserAnalysisBase::SingleMuonSelection(int &index){
