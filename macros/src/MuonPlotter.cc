@@ -16,6 +16,23 @@ using namespace std;
 // This enum has to correspond to the content of the samples.dat file
 enum gSamples{MuA, MuB, EGA, EGB, JMA, JMB, TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170, LM0};
 
+int gSWITCH = 1; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
+
+// Binning ///////////////////////////////////////////////////////////////////////
+static const int gNPtbins = 5;
+static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 65., 80.};
+
+// static const int gNPt2bins = 6;
+// static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 65., 80.};
+static const int gNPt2bins = 7;
+static const double gPt2bins[gNPt2bins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
+
+static const int gNEtabins = 1;
+static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
 //____________________________________________________________________________
 MuonPlotter::MuonPlotter(){
 // Default constructor, no samples are set
@@ -155,22 +172,21 @@ void MuonPlotter::loadSamples(const char* filename){
 
 //____________________________________________________________________________
 void MuonPlotter::makePlots(){
-	// makePrediction();
+	if(readHistos(fOutputFileName) != 0) return;
 
-	fillYields();
-	// if(readHistos(fOutputFileName) != 0) return;
 	// printYields();
+	// printYields(fMCBGSig);
+	// printYields(fMuData);
 
-	// printYields(fMCBGSig, false);
-	// printYields(fMuData, true);
+	makeIntPrediction();
 
 	// makefRatioPlots();
 	// makepRatioPlots();
-	// make100pbMCPredictionPlots();
+	// makeDiffPredictionPlots();
 }
 
 //____________________________________________________________________________
-void MuonPlotter::make100pbMCPredictionPlots(){
+void MuonPlotter::makeDiffPredictionPlots(){
 	// Fill the ratios
 	fLumiNorm = 1000.;
 
@@ -189,58 +205,71 @@ void MuonPlotter::make100pbMCPredictionPlots(){
 
 //____________________________________________________________________________
 void MuonPlotter::makefRatioPlots(){
-	TH1D *h_fdata  = fillRatioPt(fMuData, 0, &MuonPlotter::isSignalSuppressedEventTRG, &MuonPlotter::isLooseMuon);      // JetMET Dataset (Single Muon Selection)
-	TH1D *h_fttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent,                &MuonPlotter::isFakeTTbarMuon); // TTbarJets MC
-	TH1D *h_fallmc = fillRatioPt(fMCBG,   0, &MuonPlotter::isSignalSuppressedEvent,    &MuonPlotter::isLooseMuon);      // QCD MC
-	// TH1D *h_fdata  = fillRatioPt(fMuData, 1);      // JetMET Dataset (Single Muon Selection)
-	// TH1D *h_fallmc = fillRatioPt(fMCBG,   1);      // QCD MC
-	// TH1D *h_fttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent, &MuonPlotter::isFakeTTbarMuon); // TTbarJets MC
-	h_fdata ->SetName("fRatioData");
+	// TH1D *h_fdata  = fillRatioPt(fMuData, 0, &MuonPlotter::isSignalSuppressedEventTRG, &MuonPlotter::isLooseMuon);      // JetMET Dataset (Single Muon Selection)
+	// TH1D *h_fttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent,                &MuonPlotter::isFakeTTbarMuon); // TTbarJets MC
+	// TH1D *h_fallmc = fillRatioPt(fMCBG,   0, &MuonPlotter::isSignalSuppressedEvent,    &MuonPlotter::isLooseMuon);      // QCD MC
+	fLumiNorm = fSamples[JMA].lumi + fSamples[JMB].lumi;
+	TH1D *h_fdata1 = fillRatioPt(fJMData, 1);      // JetMET Dataset (Single Muon Selection)
+	TH1D *h_fdata2 = fillRatioPt(fMuData, 1);
+	TH1D *h_fallmc = fillRatioPt(fMCBG,   1);      // QCD MC
+	TH1D *h_fttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent, &MuonPlotter::isFakeTTbarMuon); // TTbarJets MC
+	h_fdata1->SetName("fRatioData");
+	h_fdata2->SetName("fRatioDataMu");
 	h_fttbar->SetName("fRatioTTbar");
 	h_fallmc->SetName("fRatioAllMC");
 
-	setPlottingRange(h_fdata, h_fttbar, h_fallmc);
+	// setPlottingRange(h_fdata1, h_fttbar, h_fallmc);
 
-	h_fdata ->SetMinimum(0.);
+	h_fdata1->SetMinimum(0.);
+	h_fdata2->SetMinimum(0.);
 	h_fttbar->SetMinimum(0.);
 	h_fallmc->SetMinimum(0.);
 
-	h_fdata ->SetMarkerColor(kBlack);
+	h_fdata1->SetMarkerColor(kBlack);
+	h_fdata2->SetMarkerColor(kBlue);
 	h_fttbar->SetMarkerColor(kBlue);
 	h_fallmc->SetMarkerColor(kRed);
 
-	h_fdata ->SetMarkerStyle(20);
+	h_fdata1->SetMarkerStyle(20);
+	h_fdata2->SetMarkerStyle(20);
 	h_fttbar->SetMarkerStyle(20);
 	h_fallmc->SetMarkerStyle(20);
 
-	// h_fdata ->SetMarkerSize(2);
+	// h_fdata1->SetMarkerSize(2);
+	// h_fdata2->SetMarkerSize(2);
 	// h_fttbar->SetMarkerSize(2);
 	// h_fallmc->SetMarkerSize(2);
 
-	h_fdata ->SetLineWidth(2);
+	h_fdata1->SetLineWidth(2);
+	h_fdata2->SetLineWidth(2);
 	h_fttbar->SetLineWidth(2);
 	h_fallmc->SetLineWidth(2);
 
-	h_fdata ->SetLineColor(kBlack);
+	h_fdata1->SetLineColor(kBlack);
+	h_fdata2->SetLineColor(kBlue);
 	h_fttbar->SetLineColor(kBlue);
 	h_fallmc->SetLineColor(kRed);
 
-	h_fdata ->SetFillColor(kBlack);
+	h_fdata1->SetFillColor(kBlack);
+	h_fdata2->SetFillColor(kBlue);
 	h_fttbar->SetFillColor(kBlue);
 	h_fallmc->SetFillColor(kRed);
 
-	plotRatioOverlay3H(h_fdata, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-	// plotRatioOverlay3H(h_fdata, "Data (Mu, L = 21.3 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
+	plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
+	// setPlottingRange(h_fdata1, h_fdata2);
+	plotRatioOverlay2H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fdata2, "Data (Muon, L = 21.3 pb^{-1})");
+	// plotRatioOverlay3H(h_fdata2, "Data (Mu, L = 21.3 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
 }
 
 //____________________________________________________________________________
 void MuonPlotter::makepRatioPlots(){
-	TH1D *h_pdata  = fillRatioPt(fMuData, 0, &MuonPlotter::isZEventTRG, &MuonPlotter::isLooseMuon); // Mu Dataset (Di Muon Selection)
-	TH1D *h_pttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent, &MuonPlotter::isPromptTTbarMuon); // TTbar
-	TH1D *h_pallmc = fillRatioPt(fMCBG,   0, &MuonPlotter::isZEvent,    &MuonPlotter::isLooseMuon); // all MC
-	// TH1D *h_pdata  = fillRatioPt(fMuData, 2);
-	// TH1D *h_pallmc = fillRatioPt(fMCBG,   2);
+	// TH1D *h_pdata  = fillRatioPt(fMuData, 0, &MuonPlotter::isZMuMuEventTRG, &MuonPlotter::isLooseMuon); // Mu Dataset (Di Muon Selection)
 	// TH1D *h_pttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent, &MuonPlotter::isPromptTTbarMuon); // TTbar
+	// TH1D *h_pallmc = fillRatioPt(fMCBG,   0, &MuonPlotter::isZMuMuEvent,    &MuonPlotter::isLooseMuon); // all MC
+	fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
+	TH1D *h_pdata  = fillRatioPt(fMuData, 2);
+	TH1D *h_pallmc = fillRatioPt(fMCBG,   2);
+	TH1D *h_pttbar = fillRatioPt(TTbar,   0, &MuonPlotter::isGoodEvent, &MuonPlotter::isPromptTTbarMuon); // TTbar
 	h_pdata ->SetName("pRatioData");
 	h_pttbar->SetName("pRatioTTbar");
 	h_pallmc->SetName("pRatioAllMC");
@@ -285,7 +314,6 @@ void MuonPlotter::makepRatioPlots(){
 	h_pttbar->SetDrawOption("E1");
 	h_pallmc->SetDrawOption("E1");
 
-	plotRatioOverlay2H(h_pttbar, "t#bar{t} Prompt GenMatch", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
 	// plotRatioOverlay3H(h_pdata, "Data (Jet, L = 21.7 pb^{-1})", h_pttbar, "t#bar{t} Prompt GenMatch", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
 	plotRatioOverlay3H(h_pdata, "Data (Mu, L = 21.3 pb^{-1})", h_pttbar, "t#bar{t} Prompt GenMatch", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
 }
@@ -811,14 +839,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		if (fChain == 0) return;
 		Long64_t nentries = fChain->GetEntriesFast();
 
-		// TH2D *H_ntight_temp = new TH2D(Form("NTight-%s",fSamples[sample].sname.Data()), "NTight Muons", h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
-		// TH2D *H_nloose_temp = new TH2D(Form("NLoose-%s",fSamples[sample].sname.Data()), "NLoose Muons", h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
-		// H_ntight_temp->Sumw2();
-		// H_nloose_temp->Sumw2();
-
 		float scale = fLumiNorm / fSamples[sample].lumi;
-
-		// nentries = (Long64_t)nentries*scale;
 
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -829,22 +850,12 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 			if((*this.*eventSelector)() == false) continue;
 			if((*this.*muonSelector)(muon) == false) continue;
 
-			// H_nloose_temp->Fill(MuPt[muon], MuEta[muon]); // Tight or loose
-			// if(isTightMuon(muon)) H_ntight_temp->Fill(MuPt[muon], MuEta[muon]); // Tight
-
 			if(isLooseMuon(muon)) H_nloose->Fill(MuPt[muon], MuEta[muon], scale); // Tight or loose
 			if(isTightMuon(muon)) H_ntight->Fill(MuPt[muon], MuEta[muon], scale); // Tight
 		}
 
-		// // Rescale errors:
-		// H_ntight_temp->SetBinError(1,1, H_ntight_temp->GetBinError(1,1) * 1.0 / sqrt(scale));
-		// H_nloose_temp->SetBinError(1,1, H_nloose_temp->GetBinError(1,1) * 1.0 / sqrt(scale));
-		// 
-		// H_ntight->Add(H_ntight_temp, scale);
-		// H_nloose->Add(H_nloose_temp, scale);
-
-		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << endl;
-		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << endl;
+		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << " / " << H_ntight->Integral() << endl;
+		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << " / " << H_nloose->Integral() << endl;
 		if(fVerbose>2) cout << "  Ratio: " << (double)H_ntight->GetEntries()/(double)H_nloose->GetEntries() << endl;
 	}
 	h_2d->Divide(H_ntight, H_nloose);
@@ -853,7 +864,6 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	TH1D *hmulooseeta = H_nloose->ProjectionY();
 	TH1D *hmutightpt  = H_ntight->ProjectionX();
 	TH1D *hmutighteta = H_ntight->ProjectionY();
-
 	h_pt ->Divide(hmutightpt, hmuloosept);
 	h_eta->Divide(hmutighteta, hmulooseeta);
 
@@ -868,10 +878,6 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	// asymErrors->Draw("same");
 	// Util::PrintNoEPS(c1, "test", fOutputDir);
 
-	// h_pt ->SetMinimum(0);
-	// h_eta->SetMinimum(0);
-	// h_pt ->SetMaximum(0.3);
-	// h_eta->SetMaximum(0.3);
 	h_pt ->SetXTitle(convertVarName("MuPt[1]"));
 	h_eta->SetXTitle(convertVarName("MuEta[1]"));
 	h_pt ->SetYTitle("# Tight / # Loose");
@@ -978,7 +984,7 @@ void MuonPlotter::fillpRatio(vector<int> samples, int muon, const int nptbins, c
 	fH1D_pRatioPt ->SetYTitle("# Tight / # Loose");
 	fH1D_pRatioEta->SetYTitle("# Tight / # Loose");
 
-	produceRatio(samples, muon, &MuonPlotter::isZEvent, &MuonPlotter::isLooseMuon, fH2D_pRatio, fH1D_pRatioPt, fH1D_pRatioEta, true);
+	produceRatio(samples, muon, &MuonPlotter::isZMuMuEvent, &MuonPlotter::isLooseMuon, fH2D_pRatio, fH1D_pRatioPt, fH1D_pRatioEta, true);
 }
 
 //____________________________________________________________________________
@@ -1065,7 +1071,7 @@ TH1D* MuonPlotter::fillRatioPt(vector<int> samples, int forp, bool output){
 	TH1D *h_eta = new TH1D("RatioEta", "Ratio of tight to loose Muons vs Eta",       gNEtabins, gEtabins);
 
 	h_pt->SetXTitle(convertVarName("MuPt[0]"));
-	h_pt ->SetYTitle("# Tight / # Loose");
+	h_pt->SetYTitle("# Tight / # Loose");
 	h_pt->GetYaxis()->SetTitleOffset(1.2);
 
 	calculateRatio(samples, forp, h_2d, h_pt, h_eta, output);
@@ -1073,6 +1079,12 @@ TH1D* MuonPlotter::fillRatioPt(vector<int> samples, int forp, bool output){
 };
 
 //____________________________________________________________________________
+void MuonPlotter::calculateRatio(vector<int> samples, int forp, TH2D*& h_2d, bool output){
+	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", 1, 0.,1.);
+	TH1D *h_dummy2 = new TH1D("dummy2", "dummy2", 1, 0.,1.);
+	calculateRatio(samples, forp, h_2d, h_dummy1, h_dummy2, output);
+	delete h_dummy1, h_dummy2;
+}
 void MuonPlotter::calculateRatio(vector<int> samples, int forp, TH2D*& h_2d, TH1D*& h_pt, TH1D*&h_eta, bool output){
 /*
 TODO Fix treatment of statistical errors and luminosity scaling here!
@@ -1104,8 +1116,8 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 			H_nloose->Add(fSamples[sample].phistos.h_nloose, scale);			
 		}
 
-		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << endl;
-		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << endl;
+		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << " / " << H_ntight->Integral() << endl;
+		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << " / " << H_nloose->Integral() << endl;
 		if(fVerbose>2) cout << "  Ratio so far       : " << (double)H_ntight->GetEntries()/(double)H_nloose->GetEntries() << endl;
 	}
 	h_2d->Divide(H_ntight, H_nloose);
@@ -1129,10 +1141,6 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	// asymErrors->Draw("same");
 	// Util::PrintNoEPS(c1, "test", fOutputDir);
 
-	// h_pt ->SetMinimum(0);
-	// h_eta->SetMinimum(0);
-	// h_pt ->SetMaximum(0.3);
-	// h_eta->SetMaximum(0.3);
 	h_pt ->SetXTitle(convertVarName("MuPt[1]"));
 	h_eta->SetXTitle(convertVarName("MuEta[1]"));
 	h_pt ->SetYTitle("# Tight / # Loose");
@@ -1153,35 +1161,24 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		printHisto(h_eta, TString("RatioEta") + name, "Fake Ratio vs eta",    "PE1");
 	}
 }
-
-//____________________________________________________________________________
-void MuonPlotter::makeSSNsigPredictionPlots(){
-	// Fake Ratios: ////////////////////////////////////////////////////////////////////
-	fillfRatio(0, 0); // QCD-Pt20
-	fillpRatio(7, 0); // Zjets
-
-	// Prediction: /////////////////////////////////////////////////////////////////////
-	TH1D *H_nsigpred = new TH1D("Nsigpred", "Predicted N_sig in Pt1 bins", gNPtbins,  gPtbins);
-	bool output = true;
-	H_nsigpred->Add(NsigPredFromFPRatios(2, output)[0], fLumiNorm/fSamples[2].lumi); // LM0
-	H_nsigpred->Add(NsigPredFromFPRatios(4, output)[0], fLumiNorm/fSamples[4].lumi); // ttbar
-
-	// Observation: ////////////////////////////////////////////////////////////////////
-	TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins",  gNPtbins,  gPtbins);
-	vector<int> samples;
-	samples.push_back(2);
-	NObs(H_nsigobs, samples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
-
-	// Output
-	H_nsigobs->SetXTitle(convertVarName("MuPt[1]"));
-	H_nsigobs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
-
-	// Normalize to binwidth
-	H_nsigobs  = normHistBW(H_nsigobs,  fBinWidthScale);
-	H_nsigpred = normHistBW(H_nsigpred, fBinWidthScale);
-
-	plotPredOverlay2HWithRatio(H_nsigobs, "Observed", H_nsigpred, "Predicted");
-	plotPredOverlay2HWithRatio(H_nsigobs, "Observed", H_nsigpred, "Predicted", true);
+void MuonPlotter::calculateRatio(vector<int> samples, int forp, float &ratio, float &ratioe, bool output){
+	double ntight(0.), nloose(0.);
+	double ntighte2(0.), nloosee2(0.);
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+		float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
+		if(forp == 1){
+			ntight += scale * fSamples[index].numbers.nsst;
+			nloose += scale * fSamples[index].numbers.nssl;
+		}
+		if(forp == 2){
+			ntight += scale * fSamples[index].numbers.nzt;
+			nloose += scale * fSamples[index].numbers.nzl;
+		}
+	}
+	ratio = ntight/nloose;
+	ratioe = TMath::Sqrt( ntight*(1.0-ntight/nloose) ) / nloose;                  // Binomial
+	// ratioe = TMath::Sqrt( ntight*ntight*(nloose+ntight)/(nloose*nloose*nloose) ); // Poissonian
 }
 
 //____________________________________________________________________________
@@ -1310,7 +1307,7 @@ void MuonPlotter::NObs(TH1D *&hist, vector<int> samples, bool(MuonPlotter::*even
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makePrediction(){
+void MuonPlotter::makeIntPrediction(){
 	// Memory:
 	// > Further signal suppression for data?
 	// > Use InclusiveMu15 instead of QCD?
@@ -1330,111 +1327,122 @@ void MuonPlotter::makePrediction(){
 
 	// Dummy binning
 	const int nptbins = 1;
-	const double ptbins[nptbins+1] = {10., 1000.};
+	const double ptbins[nptbins+1] = {5., 1000.};
 	const int netabins = 1;
 	const double etabins[netabins+1] = {-2.5, 2.5};
 
 	// Fill the ratios
-	TH2D *fratio_allmc = fillRatio(fMCBG, 0, &MuonPlotter::isSignalSuppressedEvent, &MuonPlotter::isLooseMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  fRatio from all MC         = " << fratio_allmc->GetBinContent(1,1) << " +/- " << fratio_allmc->GetBinError(1,1) << endl;
+	TH2D *H_fratio_allmc = new TH2D("fRatioAllMC", "fRatio for all MC", nptbins, ptbins, netabins, etabins);
+	TH2D *H_fratio_data  = new TH2D("fRatioData", "fRatio for Mu Data", nptbins, ptbins, netabins, etabins);
+	TH2D *H_pratio_allmc = new TH2D("pRatioAllMC", "pRatio for all MC", nptbins, ptbins, netabins, etabins);
+	TH2D *H_pratio_data  = new TH2D("pRatioData", "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
 
-	TH2D *fratio_ttbar = fillRatio(TTbar,    0, &MuonPlotter::isGoodEvent,             &MuonPlotter::isFakeTTbarMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  fRatio from ttbar genmatch = " << fratio_ttbar->GetBinContent(1,1) << " +/- " << fratio_ttbar->GetBinError(1,1) << endl;
+	TH2D *H_fratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodEvent, &MuonPlotter::isFakeTTbarMuon, nptbins, ptbins, netabins, etabins);
+	TH2D *H_pratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodEvent, &MuonPlotter::isPromptTTbarMuon, nptbins, ptbins, netabins, etabins);
+	H_fratio_ttbar->SetName("fRatioTTbar");
+	H_pratio_ttbar->SetName("pRatioTTbar");
 
-	TH2D *fratio_data = fillRatio(fMuData,    0, &MuonPlotter::isSignalSuppressedEvent, &MuonPlotter::isLooseMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  fRatio from data           = " << fratio_data->GetBinContent(1,1) << " +/- " << fratio_data->GetBinError(1,1) << endl;
+	float fratio_allmc(0.), fratio_allmc_e(0.);
+	float fratio_data(0.), fratio_data_e(0.);
+	float pratio_allmc(0.), pratio_allmc_e(0.);
+	float pratio_data(0.), pratio_data_e(0.);
 
+	float fratio_ttbar   = H_fratio_ttbar->GetBinContent(1,1);
+	float fratio_ttbar_e = H_fratio_ttbar->GetBinError(1,1);
+
+	float pratio_ttbar   = H_pratio_ttbar->GetBinContent(1,1);
+	float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
+
+	calculateRatio(fMCBG,   1, fratio_allmc, fratio_allmc_e);
+	calculateRatio(fMuData, 1, fratio_data,  fratio_data_e);
+	calculateRatio(fMCBG,   2, pratio_allmc, pratio_allmc_e);
+	calculateRatio(fMuData, 2, pratio_data,  pratio_data_e);
+
+	H_fratio_allmc->SetBinContent(1,1,fratio_allmc);
+	H_fratio_allmc->SetBinError  (1,1,fratio_allmc_e);
+	H_fratio_data ->SetBinContent(1,1,fratio_data);
+	H_fratio_data ->SetBinError  (1,1,fratio_data_e);
+
+	H_pratio_allmc->SetBinContent(1,1,pratio_allmc);
+	H_pratio_allmc->SetBinError  (1,1,pratio_allmc_e);
+	H_pratio_data ->SetBinContent(1,1,pratio_data);
+	H_pratio_data ->SetBinError  (1,1,pratio_data_e);
+
+	cout << "  fRatio from all MC         = " << fratio_allmc << " +/- " << fratio_allmc_e << endl;
+	cout << "  fRatio from ttbar genmatch = " << fratio_ttbar << " +/- " << fratio_ttbar_e << endl;
+	cout << "  fRatio from data           = " << fratio_data  << " +/- " << fratio_data_e << endl;
 	cout << " ------------------------------------" << endl;
-	TH2D *pratio_allmc = fillRatio(fMCBG, 0,  &MuonPlotter::isZEvent, &MuonPlotter::isLooseMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  pRatio from all MC         = " << pratio_allmc->GetBinContent(1,1) << " +/- " << pratio_allmc->GetBinError(1,1) << endl;
-
-	TH2D *pratio_ttbar = fillRatio(TTbar,    0,  &MuonPlotter::isGoodEvent,            &MuonPlotter::isPromptTTbarMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  pRatio from ttbar genmatch = " << pratio_ttbar->GetBinContent(1,1) << " +/- " << pratio_ttbar->GetBinError(1,1) << endl;
-
-	TH2D *pratio_data = fillRatio(fMuData,    0,  &MuonPlotter::isZEvent, &MuonPlotter::isLooseMuon, nptbins, ptbins, netabins, etabins);
-	cout << "  pRatio from data           = " << pratio_data->GetBinContent(1,1) << " +/- " << pratio_data->GetBinError(1,1) << endl;
+	cout << "  pRatio from all MC         = " << pratio_allmc << " +/- " << pratio_allmc_e << endl;
+	cout << "  pRatio from ttbar genmatch = " << pratio_ttbar << " +/- " << pratio_ttbar_e << endl;
+	cout << "  pRatio from data           = " << pratio_data  << " +/- " << pratio_data_e << endl;
 	cout << " ------------------------------------" << endl;
 
 	// Add systematics to ratios
-	float ratioallmc(0.), ratiottbar(0.), deviation(0.), olderror(0.), newerror(0.);
-	ratioallmc = fratio_allmc->GetBinContent(1,1);
-	ratiottbar = fratio_ttbar->GetBinContent(1,1);
-	deviation  = fabs(ratioallmc - ratiottbar);
+	float deviation(0.), olderror(0.), newerror(0.);
+	deviation = fabs(fratio_allmc - fratio_ttbar);
 	// Add to mc ratios
-	olderror   = fratio_allmc->GetBinError(1,1);
-	newerror   = sqrt(olderror*olderror + deviation*deviation);
-	fratio_allmc->SetBinError(1,1,newerror);
+	olderror = H_fratio_allmc->GetBinError(1,1);
+	newerror = sqrt(olderror*olderror + deviation*deviation);
+	H_fratio_allmc->SetBinError(1,1,newerror);
+	fratio_allmc_e = newerror;
 	// Add to data ratios
-	olderror = fratio_data->GetBinError(1,1);
-	newerror   = sqrt(olderror*olderror + deviation*deviation);
-	fratio_data->SetBinError(1,1,newerror);
-	cout << "  new fRatio (all MC)        = " << fratio_allmc->GetBinContent(1,1) << " +/- " << fratio_allmc->GetBinError(1,1) << endl;
-	cout << "  new fRatio (data)          = " << fratio_data->GetBinContent(1,1) << " +/- " << fratio_data->GetBinError(1,1) << endl;
+	olderror = H_fratio_data->GetBinError(1,1);
+	newerror = sqrt(olderror*olderror + deviation*deviation);
+	H_fratio_data->SetBinError(1,1,newerror);
+	fratio_data_e = newerror;
+	cout << "  new fRatio (all MC)        = " << H_fratio_allmc->GetBinContent(1,1) << " +/- " << H_fratio_allmc->GetBinError(1,1) << endl;
+	cout << "  new fRatio (data)          = " << H_fratio_data ->GetBinContent(1,1) << " +/- " << H_fratio_data ->GetBinError(1,1) << endl;
 
-	ratioallmc = pratio_allmc->GetBinContent(1,1);
-	ratiottbar = pratio_ttbar->GetBinContent(1,1);
-	deviation  = fabs(ratioallmc - ratiottbar);
+	deviation  = fabs(pratio_allmc - pratio_ttbar);
 	// Add to mc ratios
-	olderror   = pratio_allmc->GetBinError(1,1);
-	newerror   = sqrt(olderror*olderror + deviation*deviation);
-	pratio_allmc->SetBinError(1,1,newerror);
+	olderror = pratio_allmc_e;
+	newerror = sqrt(olderror*olderror + deviation*deviation);
+	H_pratio_allmc->SetBinError(1,1,newerror);
+	pratio_allmc_e = newerror;
 	// Add to data ratios
-	olderror   = pratio_data->GetBinError(1,1);
-	newerror   = sqrt(olderror*olderror + deviation*deviation);
-	pratio_data->SetBinError(1,1,newerror);
-	cout << "  new pRatio (all MC)        = " << pratio_allmc->GetBinContent(1,1) << " +/- " << pratio_allmc->GetBinError(1,1) << endl;
-	cout << "  new pRatio (data)          = " << pratio_data->GetBinContent(1,1) << " +/- " << pratio_data->GetBinError(1,1) << endl;
+	olderror = pratio_data_e;
+	newerror = sqrt(olderror*olderror + deviation*deviation);
+	H_pratio_data->SetBinError(1,1,newerror);
+	pratio_data_e = newerror;
+	cout << "  new pRatio (all MC)        = " << H_pratio_allmc->GetBinContent(1,1) << " +/- " << H_pratio_allmc->GetBinError(1,1) << endl;
+	cout << "  new pRatio (data)          = " << H_pratio_data ->GetBinContent(1,1) << " +/- " << H_pratio_data ->GetBinError(1,1) << endl;
 	cout << " ------------------------------------" << endl;
 
-	// Get Nt0/Nt1/Nt2
-	TH1D *h_nt0 = new TH1D("nt0", "nt0", 1, 0, 10.);
-	TH1D *h_nt1 = new TH1D("nt1", "nt1", 1, 0, 10.);
-	TH1D *h_nt2 = new TH1D("nt2", "nt2", 1, 0, 10.);
+	double nt2(0.), nt1(0.), nt0(0.);
+	double nt2_e2(0.), nt1_e2(0.), nt0_e2(0.);
 	for(size_t i = 0; i < inputsamples.size(); ++i){
 		int index = inputsamples[i];
 		float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
-		// Fill histograms from tree
-		TTree *tree = fSamples[index].tree;
-		tree->ResetBranchAddresses();
-		Init(tree);
-		if (fChain == 0) return;
-		Long64_t nentries = fChain->GetEntriesFast();
-		Long64_t nbytes = 0, nb = 0;
-		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			Long64_t ientry = LoadTree(jentry);
-			if (ientry < 0) break;
-			nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-			if(isSSLLEvent() == false) continue;
-
-			if(  isTightMuon(0) &&  isTightMuon(1) ) h_nt2->Fill(1); // Tight-tight
-			if(  isTightMuon(0) && !isTightMuon(1) ) h_nt1->Fill(1); // Tight-loose
-			if( !isTightMuon(0) &&  isTightMuon(1) ) h_nt1->Fill(1); // Loose-tight
-			if( !isTightMuon(0) && !isTightMuon(1) ) h_nt0->Fill(1); // Loose-loose
-			// if(  isTightMuon(0) &&  isTightMuon(1) ) h_nt2->Fill(1, scale); // Tight-tight
-			// if(  isTightMuon(0) && !isTightMuon(1) ) h_nt1->Fill(1, scale); // Tight-loose
-			// if( !isTightMuon(0) &&  isTightMuon(1) ) h_nt1->Fill(1, scale); // Loose-tight
-			// if( !isTightMuon(0) && !isTightMuon(1) ) h_nt0->Fill(1, scale); // Loose-loose
-		}
+		if(data) scale = 1.;
+		nt2 += scale * fSamples[index].numbers.nt2;
+		nt1 += scale * fSamples[index].numbers.nt1;
+		nt0 += scale * fSamples[index].numbers.nt0;
+		nt2_e2 += scale*scale * fSamples[index].numbers.nt2;
+		nt1_e2 += scale*scale * fSamples[index].numbers.nt1;
+		nt0_e2 += scale*scale * fSamples[index].numbers.nt0;
 	}
-	double nt2 = h_nt2->GetBinContent(1);
-	double nt1 = h_nt1->GetBinContent(1);
-	double nt0 = h_nt0->GetBinContent(1);
-	cout << "  Found " << nt2 << " +/- " << h_nt2->GetBinError(1) << " events in Nt2" << endl;
-	cout << "  Found " << nt1 << " +/- " << h_nt1->GetBinError(1) << " events in Nt1" << endl;
-	cout << "  Found " << nt0 << " +/- " << h_nt0->GetBinError(1) << " events in Nt0" << endl;
+	if(data){
+		cout << "  Found " << nt2 << " events in Nt2" << endl;
+		cout << "  Found " << nt1 << " events in Nt1" << endl;
+		cout << "  Found " << nt0 << " events in Nt0" << endl;
+	}
+	if(!data){
+		cout << "  Found " << nt2 << " +/- " << TMath::Sqrt(nt2_e2) << " events in Nt2" << endl;
+		cout << "  Found " << nt1 << " +/- " << TMath::Sqrt(nt1_e2) << " events in Nt1" << endl;
+		cout << "  Found " << nt0 << " +/- " << TMath::Sqrt(nt0_e2) << " events in Nt0" << endl;		
+	}
 	cout << " ------------------------------------" << endl;
 
 	// Make prediction
 	fFPRatios = new FPRatios();
 	fFPRatios->SetVerbose(fVerbose);
 	if(data){
-		fFPRatios->SetMuFratios(fratio_data);
-		fFPRatios->SetMuPratios(pratio_data);		
+		fFPRatios->SetMuFratios(H_fratio_data);
+		fFPRatios->SetMuPratios(H_pratio_data);
 	}
 	else{
-		fFPRatios->SetMuFratios(fratio_allmc);
-		fFPRatios->SetMuPratios(pratio_allmc);		
+		fFPRatios->SetMuFratios(H_fratio_allmc);
+		fFPRatios->SetMuPratios(H_pratio_allmc);
 	}
 	vector<double> nt;
 	nt.push_back(nt0); nt.push_back(nt1); nt.push_back(nt2);
@@ -1451,18 +1459,24 @@ void MuonPlotter::makePrediction(){
 	cout << "  Prediction for Npp: " << nevFP[0] << " +/- " << nevFPEstat[0] << " (stat) +/- " << nevFPEsyst[0] << " (syst)" << endl;
 	cout << "  Prediction for Nfp: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
 	cout << "  Prediction for Nff: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
+	cout << "  Total fakes:        " << nevFP[1]+nevFP[2] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2])<< " (syst)" << endl;
 	cout << " ------------------------------------" << endl;
 
 	// Get observation
-	TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins", nptbins, ptbins);
-	NObs(H_nsigobs, inputsamples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
+	// TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins", nptbins, ptbins);
+	// NObs(H_nsigobs, inputsamples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
 
-	TH1D *H_nt2obs = new TH1D("Nt2obsttbar", "Observed N_t2 in Pt1 bins, ttbar only",  nptbins,  ptbins);
-	NObs(H_nt2obs, fMCBG, &MuonPlotter::isSSTTEvent);	
-
-	cout << "  Observation from LM0:      " << H_nsigobs->GetBinContent(1) << " +/- " << H_nsigobs->GetBinError(1) << endl;
-	cout << "  Nt2 observed from SM only: " << H_nt2obs->GetBinContent(1) << " +/- " << H_nt2obs->GetBinError(1) << endl;
-
+	// cout << "  Observation from LM0:      " << H_nsigobs->GetBinContent(1) << " +/- " << H_nsigobs->GetBinError(1) << endl;
+	cout << "  Nt2 observed (TTbar only):  " << fLumiNorm/fSamples[TTbar].lumi *fSamples[TTbar].numbers.nt2 << endl;
+	cout << "  Nt2 observed (VVjets only): " << fLumiNorm/fSamples[VVJets].lumi*fSamples[VVJets].numbers.nt2 << endl;
+	cout << "  Nt2 observed (Wjets only):  " << fLumiNorm/fSamples[WJets].lumi *fSamples[WJets].numbers.nt2 << endl;
+	cout << "  Nt2 observed (Zjets only):  " << fLumiNorm/fSamples[ZJets].lumi *fSamples[ZJets].numbers.nt2 << endl;
+	float nt2qcd = fLumiNorm/fSamples[QCD15].lumi*fSamples[QCD15].numbers.nt2;
+	nt2qcd += fLumiNorm/fSamples[QCD30].lumi*fSamples[QCD30].numbers.nt2;
+	nt2qcd += fLumiNorm/fSamples[QCD80].lumi*fSamples[QCD80].numbers.nt2;
+	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].numbers.nt2;
+	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
+	cout << " ------------------------------------" << endl;
 }
 
 //____________________________________________________________________________
@@ -1603,7 +1617,7 @@ void MuonPlotter::fillYields(vector<int> samples){
 		}
 
 		TTree *tree = fSamples[index].tree;
-		bool isdata = fSamples[index].isdata;
+		const bool isdata = fSamples[index].isdata;
 
 		NThistos nthistos = fSamples[index].nthistos;
 		lthistos fhistos  = fSamples[index].fhistos;
@@ -1619,9 +1633,10 @@ void MuonPlotter::fillYields(vector<int> samples){
 			if (ientry < 0) break;
 			nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+			isdata == true; // Use triggers for all
 			if(isdata){
 				if(isSSLLEventTRG()){
-					if(  isTightMuon(0) &&  isTightMuon(1) ){  // Tight-tight
+					if(  isTightMuon(0) &&  isTightMuon(1) ){ // Tight-tight
 						nthistos.h_nt2    ->Fill(MuPt[0], MuPt[1]);
 						nthistos.h_nt2_pt ->Fill(MuPt[0]);
 						nthistos.h_nt2_eta->Fill(MuEta[0]);
@@ -1644,25 +1659,25 @@ void MuonPlotter::fillYields(vector<int> samples){
 				}
 				if(isSignalSuppressedEventTRG()){ // f Ratio
 					if( isLooseMuon(0) ){
-						fhistos.h_nloose->Fill(MuPt[0], MuEta[0]);
-						fhistos.h_nloose_pt->Fill(MuPt[0]);
+						fhistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
+						fhistos.h_nloose_pt ->Fill(MuPt[0]);
 						fhistos.h_nloose_eta->Fill(MuEta[0]);
 					}
 					if( isTightMuon(0) ){
-						fhistos.h_ntight->Fill(MuPt[0], MuEta[0]);
-						fhistos.h_ntight_pt->Fill(MuPt[0]);
+						fhistos.h_ntight    ->Fill(MuPt[0], MuEta[0]);
+						fhistos.h_ntight_pt ->Fill(MuPt[0]);
 						fhistos.h_ntight_eta->Fill(MuEta[0]);
 					}
 				}
-				if(isZEventTRG()){ // p Ratio
+				if(isZMuMuEventTRG()){ // p Ratio
 					if( isLooseMuon(0) ){
-						phistos.h_nloose->Fill(MuPt[0], MuEta[0]);
-						phistos.h_nloose_pt->Fill(MuPt[0]);
+						phistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
+						phistos.h_nloose_pt ->Fill(MuPt[0]);
 						phistos.h_nloose_eta->Fill(MuEta[0]);
 					}
 					if( isTightMuon(0) ){
-						phistos.h_ntight->Fill(MuPt[0], MuEta[0]);
-						phistos.h_ntight_pt->Fill(MuPt[0]);
+						phistos.h_ntight    ->Fill(MuPt[0], MuEta[0]);
+						phistos.h_ntight_pt ->Fill(MuPt[0]);
 						phistos.h_ntight_eta->Fill(MuEta[0]);
 					}
 				}				
@@ -1693,25 +1708,25 @@ void MuonPlotter::fillYields(vector<int> samples){
 				}
 				if(isSignalSuppressedEvent()){ // f Ratio
 					if( isLooseMuon(0) ){
-						fhistos.h_nloose->Fill(MuPt[0], MuEta[0]);
-						fhistos.h_nloose_pt->Fill(MuPt[0]);
+						fhistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
+						fhistos.h_nloose_pt ->Fill(MuPt[0]);
 						fhistos.h_nloose_eta->Fill(MuEta[0]);
 					}
 					if( isTightMuon(0) ){
-						fhistos.h_ntight->Fill(MuPt[0], MuEta[0]);
-						fhistos.h_ntight_pt->Fill(MuPt[0]);
+						fhistos.h_ntight    ->Fill(MuPt[0], MuEta[0]);
+						fhistos.h_ntight_pt ->Fill(MuPt[0]);
 						fhistos.h_ntight_eta->Fill(MuEta[0]);
 					}
 				}
-				if(isZEvent()){ // p Ratio
+				if(isZMuMuEvent()){ // p Ratio
 					if( isLooseMuon(0) ){
-						phistos.h_nloose->Fill(MuPt[0], MuEta[0]);
-						phistos.h_nloose_pt->Fill(MuPt[0]);
+						phistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
+						phistos.h_nloose_pt ->Fill(MuPt[0]);
 						phistos.h_nloose_eta->Fill(MuEta[0]);
 					}
 					if( isTightMuon(0) ){
-						phistos.h_ntight->Fill(MuPt[0], MuEta[0]);
-						phistos.h_ntight_pt->Fill(MuPt[0]);
+						phistos.h_ntight    ->Fill(MuPt[0], MuEta[0]);
+						phistos.h_ntight_pt ->Fill(MuPt[0]);
 						phistos.h_ntight_eta->Fill(MuEta[0]);
 					}
 				}
@@ -1910,14 +1925,12 @@ int MuonPlotter::readHistos(TString filename){
 	return 0;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Event Selections:
 //____________________________________________________________________________
 bool MuonPlotter::isGoodEvent(){
-	// Some global cuts
+	// Some global cuts, select events with >1 jets and >0 loose muons
 	if(NMus < 1) return false;
-	// if(NJets < 2) return false;
 	if(!passesNJetCut(2)) return false;
 	if(isLooseMuon(0) == false) return false;
 	if(NMus > 1) if(isLooseMuon(1) == false) return false;
@@ -1927,21 +1940,103 @@ bool MuonPlotter::isGoodEvent(){
 //____________________________________________________________________________
 bool MuonPlotter::passesNJetCut(int cut){
 	int njets(0);
-	for(size_t i = 0; i < NJets; ++i){
-		bool good(true);
-		for(size_t imu = 0; imu < NMus; ++imu){
-			if(!isTightMuon(imu)) continue;
-			if(Util::GetDeltaR(MuEta[imu], JetEta[i], MuPhi[imu], JetPhi[i]) > 0.4 ) continue;
-			good = false;
-		}
-		for(size_t iel = 0; iel < NEls; ++iel){
-			if(!isTightElectron(iel)) continue;
-			if(Util::GetDeltaR(ElEta[iel], JetEta[i], ElPhi[iel], JetPhi[i]) > 0.4 ) continue;
-			good = false;
-		}
-		if(good) njets++;
-	}
+	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) njets++;
 	return njets>=cut;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesHTCut(float cut){
+	float ht(0.);
+	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) ht += JetPt[i];
+	return ht >= cut;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesZVeto(float dm){
+// Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
+// has invariant mass closer than dm to the Z mass, returns true if none found
+	const float MMU = 0.1057;
+	const float MEL = 0.0005;
+	const float MZ  = 91.2;
+
+	if(NEls < 2 && NMus < 2) return true;
+	// First muon
+	for(size_t i = 0; i < NMus-1; ++i){
+		if(isTightMuon(i)){
+			TLorentzVector pmu1, pmu2;
+			pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], MMU);
+
+			// Second muon
+			for(size_t j = i+1; j < NMus; ++j){ 
+				if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
+					pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], MMU);
+					if(fabs((pmu1+pmu2).M() - MZ) < dm) return false;
+				}
+			}
+		}
+	}
+
+	if(NEls < 2) return true;
+	// First electron
+	for(size_t i = 0; i < NEls-1; ++i){
+		if(isTightElectron(i)){
+			TLorentzVector pel1, pel2;
+			pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], MEL);
+
+			// Second electron
+			for(size_t j = i+1; j < NEls; ++j){
+				if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
+					pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], MEL);
+					if(fabs((pel1+pel2).M() - MZ) < dm) return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesMllVeto(float cut){
+// Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
+// has invariant mass smaller than cut, returns true if none found
+	const float MMU = 0.1057;
+	const float MEL = 0.0005;
+	const float MZ  = 91.2;
+
+	if(NEls < 2 && NMus < 2) return true;
+	// First muon
+	for(size_t i = 0; i < NMus-1; ++i){
+		if(isTightMuon(i)){
+			TLorentzVector pmu1, pmu2;
+			pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], MMU);
+
+			// Second muon
+			for(size_t j = i+1; j < NMus; ++j){ 
+				if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
+					pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], MMU);
+					if((pmu1+pmu2).M() < cut) return false;
+				}
+			}
+		}
+	}
+
+	if(NEls < 2) return true;
+	// First electron
+	for(size_t i = 0; i < NEls-1; ++i){
+		if(isTightElectron(i)){
+			TLorentzVector pel1, pel2;
+			pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], MEL);
+
+			// Second electron
+			for(size_t j = i+1; j < NEls; ++j){
+				if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
+					pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], MEL);
+					if((pel1+pel2).M() < cut) return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 //____________________________________________________________________________
@@ -1971,6 +2066,16 @@ bool MuonPlotter::isJetTriggeredEvent(){
 }
 
 //____________________________________________________________________________
+bool MuonPlotter::isHTTriggeredEvent(){
+	if(HLT_HT100U == 0  &&
+		HLT_HT120U == 0  &&
+		HLT_HT140U == 0  &&
+		HLT_HT150U == 0
+		) return false;
+	return true;
+}
+
+//____________________________________________________________________________
 bool MuonPlotter::isSignalSuppressedEvent(){
 	if(isGoodEvent() == false) return false;
 	if(MuMT > 20.) return false;
@@ -1988,7 +2093,7 @@ bool MuonPlotter::isSignalSuppressedEventTRG(){
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isZEvent(){
+bool MuonPlotter::isZMuMuEvent(){
 	// if(isGoodEvent() == false) return false;
 	if(NJets < 2) return false;
 	if(NMus != 2) return false;
@@ -2008,9 +2113,9 @@ bool MuonPlotter::isZEvent(){
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isZEventTRG(){
+bool MuonPlotter::isZMuMuEventTRG(){
 	if(isMuTriggeredEvent() == false) return false;
-	if(isZEvent() == false) return false;
+	if(isZMuMuEvent() == false) return false;
 	return true;
 }
 
@@ -2019,7 +2124,7 @@ bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 	if(isGoodEvent() == false) return false;
 	// if(isMuTriggeredEvent() == false) return false;
 	if(NMus < 2) return false;
-	if(isGoodPrimMuon(0) == false || isGoodSecMuon(1) == false) return false;
+	if(!isGoodPrimMuon(0) || !isGoodSecMuon(1)) return false;
 	if(isPromptSUSYMuon(0) && isPromptSUSYMuon(1)){
 		if(isTightMuon(0) == 1 && isTightMuon(1) == 1) return true;
 	}
@@ -2028,58 +2133,60 @@ bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isSSLLEvent(){
-	if(isGoodEvent() == false) return false;
-	if(NMus < 2) return false;
-	if(MuCharge[0] != MuCharge[1]) return false;
-	if(isGoodPrimMuon(0) == false || isGoodSecMuon(1) == false) return false;
+	// This should include all the cuts for the final selection
+	if(!isGoodEvent()) return false;                          // >1 jets, >0 loose muons
+	if(NMus < 2) return false;                                // >1 muons
+	if(!passesZVeto()) return false;                          // no Zs in event
+	if(gSWITCH == 0) if(!passesMllVeto(12)) return false;     // no low mass OSSF pairs
+	if(gSWITCH == 1) if(!passesMllVeto(5) ) return false;
+	if(gSWITCH == 0) if(!passesHTCut(60.) ) return false;     // ht cut
+	if(gSWITCH == 1) if(!passesHTCut(250.)) return false;
+	if(MuCharge[0] != MuCharge[1]) return false;              // SS
+	if(!isGoodPrimMuon(0) || !isGoodSecMuon(1)) return false; // pt cuts
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isSSLLEventTRG(){
-	if(isMuTriggeredEvent() == false) return false;
-	if(isSSLLEvent() == false) return false;
+	if(gSWITCH == 0) if(!isMuTriggeredEvent()) return false;
+	if(gSWITCH == 1) if(!isHTTriggeredEvent()) return false;
+	if(!isSSLLEvent()) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isSSTTEvent(){
-	if(isGoodEvent() == false) return false;
-	// if(isMuTriggeredEvent() == false) return false;
-	if(NMus < 2) return false;
-	if(MuCharge[0] != MuCharge[1]) return false;
-	if(isGoodPrimMuon(0) == false || isGoodSecMuon(1) == false) return false;
-	if(isTightMuon(0) == 1 && isTightMuon(1) == 1){
-		if(MuCharge[0] == MuCharge[1]) return true;
-	}
-	return false;
+	if(!isSSLLEvent()) return false;
+	if(isTightMuon(0) == 0 || isTightMuon(1) == 0) return false;
+	return true;
 }
 
-// //____________________________________________________________________________
-// bool MuonPlotter::isAddZVetoEvent(){
-// 	// Some global cuts
-// 	if(NMus > 1) return false;
-// 	if(NJets < 2) return false;
-// 	if(isLooseMuon(0) == false) return false;
-// 	if(NMus > 1) if(isLooseMuon(1) == false) return false;
-// 	return true;
-// }
+//____________________________________________________________________________
+bool MuonPlotter::isSSTTEventTRG(){
+	if(!isSSLLEventTRG()) return false;
+	if(isTightMuon(0) == 0 || isTightMuon(1) == 0) return false;
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Object selections:
 //____________________________________________________________________________
 bool MuonPlotter::isGoodMuon(int muon){
-	if(MuPt[muon] < 10.) return false;
+	float ptcut(5.);
+	if(gSWITCH == 0) ptcut = 10.;
+	if(gSWITCH == 1) ptcut = 5.;
+	if(MuPt[muon] < ptcut) return false;
 	if(fabs(MuEta[muon]) > 2.4) return false;
 	if(fabs(MuD0BS[muon]) > 0.02) return false;
+	if(fabs(MuDz[muon]) > 1.0) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isLooseMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
-	// if(MuIso[muon] > 1.00) return false;
-	if(MuIsoHybrid[muon] > 1.00) return false;
+	if(gSWITCH == 0) if(MuIsoHybrid[muon] > 1.00) return false;
+	if(gSWITCH == 1) if(MuIso[muon]       > 1.00) return false;
 	return true;
 }
 
@@ -2087,8 +2194,8 @@ bool MuonPlotter::isLooseMuon(int muon){
 bool MuonPlotter::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(isLooseMuon(muon) == false) return false;
-	// if(MuIso[muon] > 0.15) return false;
-	if(MuIsoHybrid[muon] > 0.1) return false;
+	if(gSWITCH == 0) if(MuIsoHybrid[muon] > 0.10) return false;
+	if(gSWITCH == 1) if(MuIso[muon]       > 0.15) return false;
 	return true;
 }
 
@@ -2101,14 +2208,16 @@ bool MuonPlotter::isLooseNoTightMuon(int muon){
 //____________________________________________________________________________
 bool MuonPlotter::isGoodPrimMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
-	if(MuPt[muon] < fMinPt1) return false;
+	if(gSWITCH == 0) if(MuPt[muon] < 20.) return false;
+	if(gSWITCH == 1) if(MuPt[muon] < 5. ) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isGoodSecMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
-	if(MuPt[muon] < fMinPt2) return false;
+	if(gSWITCH == 0) if(MuPt[muon] < 10.) return false;
+	if(gSWITCH == 1) if(MuPt[muon] < 5. ) return false;
 	return true;
 }
 
@@ -2137,6 +2246,22 @@ bool MuonPlotter::isPromptSUSYMuon(int muon){
 //____________________________________________________________________________
 bool MuonPlotter::isTightElectron(int ele){
 	if(ElTight[ele] != 1) return false;
+	if(ElChIsCons[ele] != 1) return false;
 	return true;
 }
 
+//____________________________________________________________________________
+bool MuonPlotter::isGoodJet(int jet){
+	float minDR = 0.4;
+	for(size_t imu = 0; imu < NMus; ++imu){
+		if(!isTightMuon(imu)) continue;
+		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
+		return false;
+	}
+	for(size_t iel = 0; iel < NEls; ++iel){
+		if(!isTightElectron(iel)) continue;
+		if(Util::GetDeltaR(ElEta[iel], JetEta[jet], ElPhi[iel], JetPhi[jet]) > minDR ) continue;
+		return false;
+	}
+	return true;
+}

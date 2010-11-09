@@ -16,13 +16,14 @@ using namespace std;
 //_____________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunUserAnalyzer [-d dir] [-v verbose] [-s sample]" << endl;
+	cout << "Usage: RunUserAnalyzer [-d dir] [-v verbose] [-s sample] [-m mode]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
 	cout << "               default is TempOutput/               " << endl;
 	cout << "     verbose  sets the verbose level                " << endl;
 	cout << "               default is 0 (quiet mode)            " << endl;
 	cout << "     sample   is the file with the list of samples" << endl;
+	cout << "     mode     switches between different paths" << endl;
 	cout << endl;
 	exit(status);
 }
@@ -33,14 +34,16 @@ int main(int argc, char* argv[]) {
 	TString outputdir = "MuonPlots/";
 	TString samples = "samples.dat";
 	int verbose = 0;
+	int mode = 0;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:s:v:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:s:v:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
 			case 's': samples = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
+			case 'm': mode = atoi(optarg); break;
 			case '?':
 			case 'h': usage(0); break;
 			default:
@@ -58,9 +61,12 @@ int main(int argc, char* argv[]) {
 	// }
 
 	cout << "--------------" << endl;
-	cout << "OutputDir is:     " << outputdir << endl;
-	cout << "Verbose level is: " << verbose << endl;
+	cout << "OutputDir is:      " << outputdir << endl;
+	cout << "Verbose level is:  " << verbose << endl;
 	cout << "Using sample file: " << samples << endl;
+	string mode_str = "read";
+	if(mode == 2) mode_str = "write";
+	cout << "Mode:              " << mode_str << endl;
 	cout << "--------------" << endl;
 
 	MuonPlotter *tA = new MuonPlotter();
@@ -68,7 +74,8 @@ int main(int argc, char* argv[]) {
 	tA->setOutputFile("MuonPlots.root");
 	tA->setVerbose(verbose);
 	tA->init(samples);
-	tA->makePlots();
+	if(mode == 2) tA->fillYields();
+	else tA->makePlots();
 	delete tA;
 	return 0;
 }

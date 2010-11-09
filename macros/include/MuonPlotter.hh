@@ -9,18 +9,6 @@
 #include "helper/AnaClass.hh"
 #include "helper/FPRatios.hh"
 
-// Binning ///////////////////////////////////////////////////////////////////////
-// static const int gNPtbins = 4;
-// static const double gPtbins[gNPtbins+1] = {10., 20., 30., 40., 60.};
-static const int gNPtbins = 5;
-static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 75., 100.};
-static const int gNPt2bins = 6;
-static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 75., 100.};
-static const int gNEtabins = 1;
-static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
-
-//////////////////////////////////////////////////////////////////////////////////
-
 class MuonPlotter : public AnaClass{
 
 public:
@@ -41,8 +29,8 @@ public:
 	void makeIsolationPlots();
 	void makePtPlots();
 	
-	void make100pbMCPredictionPlots();
-	void makePrediction();
+	void makeDiffPredictionPlots();
+	void makeIntPrediction();
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
@@ -78,15 +66,14 @@ public:
 	TH1D* fillRatioPt(int, int, bool = false);
 	TH1D* fillRatioPt(vector<int>, int, bool = false);
 
+	void calculateRatio(vector<int>, int, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, int, float&, float&, bool = false);
 
 	//////////////////////////////
 	// Predictions
-	void makeSSNsigPredictionPlots();
 	void makeSSPredictionPlots(vector<int>);
-	
 	void NObs(TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	
 	vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
 	
 	void fillYields();                 // All samples
@@ -106,16 +93,23 @@ public:
 	// Event and Object selectors:
 	bool isGoodEvent();
 	bool passesNJetCut(int=2);
+	bool passesHTCut(float);
+	bool passesZVeto(float = 15.);
+	bool passesMllVeto(float = 12.);
+
 	bool isMuTriggeredEvent();
 	bool isJetTriggeredEvent();
+	bool isHTTriggeredEvent();
+
 	bool isSignalSuppressedEvent();
 	bool isSignalSuppressedEventTRG();
-	bool isZEvent();
-	bool isZEventTRG();
+	bool isZMuMuEvent();
+	bool isZMuMuEventTRG();
 	bool isGenMatchedSUSYDiLepEvent();
 	bool isSSLLEvent();
 	bool isSSLLEventTRG();
 	bool isSSTTEvent();
+	bool isSSTTEventTRG();
 
 	bool isGoodMuon(int);
 	bool isLooseMuon(int);
@@ -128,6 +122,7 @@ public:
 	bool isPromptSUSYMuon(int);
 
 	bool isTightElectron(int);
+	bool isGoodJet(int);
 
 private:
 
