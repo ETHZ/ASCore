@@ -60,6 +60,7 @@ public:
 	bool  fIsCleanJetEvent;
 	int   fNJetsPt50Eta25;
 	float fMHT;
+	float fHT;
 	float fMHTphi;	
 
 private:

@@ -78,6 +78,7 @@ private:
 
 	// Tree
 	TTree* fMassTree;
+	static const int gMaxnjets = 30;
 
 	int    fTrun;
 	int    fTevent;
@@ -95,12 +96,16 @@ private:
 	int    fTr12r21;
 	
 	double fTpseudoJetMT2;
+	double fTpseudoJetMCT;
+	double fTpseudoJet1Pt;
+	double fTpseudoJet2Pt;
 	double fTpseudojetAlphaT;
 	double fTleadingJetEta;
 	double fTvectorsumpt;
 	double fTpfmet;
 	double fTpfmetsign;
 	double fTmHT;
+	double fThT;
 	double fTmpt_sel;
 	double fTmpt;
 	double fTdPhiJ1MET;
@@ -108,6 +113,7 @@ private:
 	double fTPseudoJetMT2AxisdPhi;
 	double fTr1221min;
 	double fTdPhiMhtMpt;
+	double fTjpt[gMaxnjets];
 
 	// histos
 	TH1D* fHMT2_SSll[10];

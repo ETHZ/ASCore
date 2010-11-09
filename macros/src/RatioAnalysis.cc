@@ -247,13 +247,13 @@ void RatioAnalysis::Analyze(){
 	int ib2 = -1;
 	
 	for(int ij=0; ij<fJets.size(); ++ij){
-		if(fTR->JPt[fJets[ij]] > ptJet1){
+		if(fTR->PFJPt[fJets[ij]] > ptJet1){
 			ptJet2 = ptJet1;
 		  	ij2 = ij1;
-			ptJet1 = fTR->JPt[fJets[ij]];
+			ptJet1 = fTR->PFJPt[fJets[ij]];
 			ij1 = fJets[ij];
-		} else if( fTR->JPt[fJets[ij]] > ptJet2 ){
-			ptJet2 = fTR->JPt[fJets[ij]];
+		} else if( fTR->PFJPt[fJets[ij]] > ptJet2 ){
+			ptJet2 = fTR->PFJPt[fJets[ij]];
 			ij2 = fJets[ij];
 		}
 	}
@@ -265,27 +265,27 @@ void RatioAnalysis::Analyze(){
 
 	double deltaRj12 = 999.;
 	if (ij2 >= 0) {
-	  deltaRj12 = Util::GetDeltaR(fTR->JEta[ij1], fTR->JEta[ij2], fTR->JPhi[ij1], fTR->JPhi[ij2]);
+	  deltaRj12 = Util::GetDeltaR(fTR->PFJEta[ij1], fTR->PFJEta[ij2], fTR->JPhi[ij1], fTR->JPhi[ij2]);
 	  double dPhi2j = Util::DeltaPhi(fTR->JPhi[ij1], fTR->JPhi[ij2]);
 	  fDRJ12->Fill(deltaRj12);
-	  fPtJets ->Fill(fTR->JPt[ij1]);
-	  fPtJets ->Fill(fTR->JPt[ij2]);
-	  fRptDPhi2j->Fill(fTR->JPt[ij2]/fTR->JPt[ij1], dPhi2j);
+	  fPtJets ->Fill(fTR->PFJPt[ij1]);
+	  fPtJets ->Fill(fTR->PFJPt[ij2]);
+	  fRptDPhi2j->Fill(fTR->PFJPt[ij2]/fTR->PFJPt[ij1], dPhi2j);
 
 	  if( fJets.size()==2){
 //	  if (fTR->NJets == 2) { 
-	    double mT = sqrt((fTR->JPt[ij1]+fTR->JPt[ij2])*(fTR->JPt[ij1]+fTR->JPt[ij2])
-	      - (fTR->JPx[ij1]+fTR->JPx[ij2])*(fTR->JPx[ij1]+fTR->JPx[ij2])
-	      - (fTR->JPy[ij1]+fTR->JPy[ij2])*(fTR->JPy[ij1]+fTR->JPy[ij2]) );
-	    double alpT = fTR->JPt[ij2] / mT;
+	    double mT = sqrt((fTR->PFJPt[ij1]+fTR->PFJPt[ij2])*(fTR->PFJPt[ij1]+fTR->PFJPt[ij2])
+	      - (fTR->PFJPx[ij1]+fTR->PFJPx[ij2])*(fTR->PFJPx[ij1]+fTR->PFJPx[ij2])
+	      - (fTR->PFJPy[ij1]+fTR->PFJPy[ij2])*(fTR->PFJPy[ij1]+fTR->PFJPy[ij2]) );
+	    double alpT = fTR->PFJPt[ij2] / mT;
 	    fAlpT2j->Fill(alpT);
 	  }
 	}
 	if (deltaRj12 < 1.) {
-	  fPtJ1->Fill(fTR->JPt[ij1]);
-	  fPtJ2->Fill(fTR->JPt[ij2]);
-	  fEtaJets ->Fill(fTR->JEta[ij1]);
-	  fEtaJets ->Fill(fTR->JEta[ij2]);
+	  fPtJ1->Fill(fTR->PFJPt[ij1]);
+	  fPtJ2->Fill(fTR->PFJPt[ij2]);
+	  fEtaJets ->Fill(fTR->PFJEta[ij1]);
+	  fEtaJets ->Fill(fTR->PFJEta[ij2]);
 	}
 
 	for(int ij=0; ij < fJets.size(); ++ij){
@@ -293,24 +293,24 @@ void RatioAnalysis::Analyze(){
 	}
 
 	if (ib1 >= 0 && ib2 >= 0) {
-	  fPtSum2B += fTR->JPt[ib1];
-	  fPtSum2B += fTR->JPt[ib2];
-	  fPtSumsq2B += fTR->JPt[ib1] *  fTR->JPt[ib1];
-	  fPtSumsq2B += fTR->JPt[ib2] *  fTR->JPt[ib2];
-	  fEta2B->Fill(fTR->JEta[ib1]);
-	  fEta2B->Fill(fTR->JEta[ib2]);
+	  fPtSum2B += fTR->PFJPt[ib1];
+	  fPtSum2B += fTR->PFJPt[ib2];
+	  fPtSumsq2B += fTR->PFJPt[ib1] *  fTR->PFJPt[ib1];
+	  fPtSumsq2B += fTR->PFJPt[ib2] *  fTR->PFJPt[ib2];
+	  fEta2B->Fill(fTR->PFJEta[ib1]);
+	  fEta2B->Fill(fTR->PFJEta[ib2]);
 	  double dPhi2b = Util::DeltaPhi(fTR->JPhi[ib1], fTR->JPhi[ib2]);
 	  fdPhi2B->Fill(dPhi2b);
-	  double dR2B = Util::GetDeltaR(fTR->JEta[ib1], fTR->JEta[ib2], fTR->JPhi[ib1], fTR->JPhi[ib2]);
+	  double dR2B = Util::GetDeltaR(fTR->PFJEta[ib1], fTR->PFJEta[ib2], fTR->JPhi[ib1], fTR->JPhi[ib2]);
 	  fDR2B->Fill(dR2B);
 	  fBProb2B->Fill(fTR->JbTagProbSimpSVHighEff[ib1]);
 	  fBProb2B->Fill(fTR->JbTagProbSimpSVHighEff[ib2]);
 	  fNjets2B->Fill(fTR->NJets);
-	  double mass1 = sqrt(fTR->JE[ib1]*fTR->JE[ib1] - fTR->JPx[ib1]*fTR->JPx[ib1]
-			     - fTR->JPy[ib1]*fTR->JPy[ib1] - fTR->JPz[ib1]*fTR->JPz[ib1]);
+	  double mass1 = sqrt(fTR->PFJE[ib1]*fTR->PFJE[ib1] - fTR->PFJPx[ib1]*fTR->PFJPx[ib1]
+			     - fTR->PFJPy[ib1]*fTR->PFJPy[ib1] - fTR->PFJPz[ib1]*fTR->PFJPz[ib1]);
 	  fMass2B->Fill(mass1);
-	  double mass2 = sqrt(fTR->JE[ib2]*fTR->JE[ib2] - fTR->JPx[ib2]*fTR->JPx[ib2]
-			     - fTR->JPy[ib2]*fTR->JPy[ib2] - fTR->JPz[ib2]*fTR->JPz[ib2]);
+	  double mass2 = sqrt(fTR->PFJE[ib2]*fTR->PFJE[ib2] - fTR->PFJPx[ib2]*fTR->PFJPx[ib2]
+			     - fTR->PFJPy[ib2]*fTR->PFJPy[ib2] - fTR->PFJPz[ib2]*fTR->PFJPz[ib2]);
 	  fMass2B->Fill(mass2);
 	  //	  fMass2B->Fill(fTR->JMass[ib1]);
 	  //	  fMass2B->Fill(fTR->JMass[ib2]);
@@ -329,13 +329,13 @@ void RatioAnalysis::Analyze(){
 	  }
 	}
 	if (ib1 >= 0 && ib2 < 0) {
-	  fPtSum1B += fTR->JPt[ib1];
-	  fPtSumsq1B += fTR->JPt[ib1] *  fTR->JPt[ib1];
-	  fEta1B->Fill(fTR->JEta[ib1]);
+	  fPtSum1B += fTR->PFJPt[ib1];
+	  fPtSumsq1B += fTR->PFJPt[ib1] *  fTR->PFJPt[ib1];
+	  fEta1B->Fill(fTR->PFJEta[ib1]);
 	  fBProb1B->Fill(fTR->JbTagProbSimpSVHighEff[ib1]);
 	  fNjets1B->Fill(fTR->NJets);
-	  double mass1 = sqrt(fTR->JE[ib1]*fTR->JE[ib1] - fTR->JPx[ib1]*fTR->JPx[ib1]
-			     - fTR->JPy[ib1]*fTR->JPy[ib1] - fTR->JPz[ib1]*fTR->JPz[ib1]);
+	  double mass1 = sqrt(fTR->PFJE[ib1]*fTR->PFJE[ib1] - fTR->PFJPx[ib1]*fTR->PFJPx[ib1]
+			     - fTR->PFJPy[ib1]*fTR->PFJPy[ib1] - fTR->PFJPz[ib1]*fTR->PFJPz[ib1]);
 	  fMass1B->Fill(mass1);
 	  //	  fMass1B->Fill(fTR->JMass[ib1]);
 	  double dPhiMET1B = Util::DeltaPhi(fTR->JPhi[ib1], fTR->PFMETphi);
