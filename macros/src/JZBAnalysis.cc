@@ -327,22 +327,64 @@ vector<lepton> JZBAnalysis::sortLeptonsByPt(vector<lepton>& leptons) {
 
 
 //------------------------------------------------------------------------------
-const bool JZBAnalysis::passTrigger() {
-  
-  
-  if(  GetHLTResult("HLT_Ele15_SW_L1R") || 
-       GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R") ||
-       GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R") || 
-       GetHLTResult("HLT_Ele17_SW_TightEleId_L1R") ||
-       GetHLTResult("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1") ) {
-    counters[EV].fill("... pass electron triggers");
-    return true;
-  }
-  if (GetHLTResult("HLT_Mu9") || GetHLTResult("HLT_Mu15_v1")) {
-    counters[EV].fill("... pass muon triggers");
-    return true;
-  }
+const bool JZBAnalysis::passElTriggers() {
 
+  if ( GetHLTResult("HLT_Ele17_SW_TightEleId_L1R") )                return true;
+  if ( GetHLTResult("HLT_Ele17_SW_TighterEleId_L1R_v1") )           return true;
+  if ( GetHLTResult("HLT_DoubleEle15_SW_L1R_v1") )                  return true;
+  if ( GetHLTResult("HLT_DoubleEle17_SW_L1R_v1") )                  return true;
+  if ( GetHLTResult("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1") )  return true;
+  if ( GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1") )   return true;
+  if ( GetHLTResult("HLT_DoubleEle10_SW_L1R") )                     return true;
+  if ( GetHLTResult("HLT_DoubleEle5_SW_L1R") )                      return true;
+  if ( GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R") )                 return true;
+  if ( GetHLTResult("HLT_Ele17_SW_EleId_L1R") )                     return true;
+  if ( GetHLTResult("HLT_Ele17_SW_LooseEleId_L1R") )                return true;
+  if ( GetHLTResult("HLT_Ele15_SW_CaloEleId_L1R") )                 return true;
+  if ( GetHLTResult("HLT_Ele15_SW_EleId_L1R") )                     return true;
+  if ( GetHLTResult("HLT_Ele15_SW_L1R") )                           return true;
+  if ( GetHLTResult("HLT_Ele15_LW_L1R") )                           return true;
+  if ( GetHLTResult("HLT_Ele20_SW_L1R") )                           return true;
+  if ( GetHLTResult("HLT_Ele10_SW_EleId_L1R") )                     return true;
+  if ( GetHLTResult("HLT_Ele10_LW_EleId_L1R") )                     return true;
+  if ( GetHLTResult("HLT_Ele10_LW_L1R") )                           return true;
+  if ( GetHLTResult("HLT_Ele10_SW_L1R") )                           return true;
+  if ( GetHLTResult("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2") )       return true;
+  if ( GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v2") )           return true;
+  if ( GetHLTResult("HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1") )    return true;
+  if ( GetHLTResult("HLT_Ele32_SW_TighterEleId_L1R_v2") )           return true;
+  if ( GetHLTResult("HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1") )    return true;
+  if ( GetHLTResult("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v2") )      return true;
+  if ( GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v3") )           return true;
+  if ( GetHLTResult("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v2") )      return true;
+
+  return false;
+
+}
+
+//------------------------------------------------------------------------------
+const bool JZBAnalysis::passMuTriggers() {
+
+  if ( GetHLTResult("HLT_Mu9") )            return true;
+  if ( GetHLTResult("HLT_Mu11") )           return true;
+  if ( GetHLTResult("HLT_Mu15") )           return true;
+  if ( GetHLTResult("HLT_Mu9_v1") )         return true;
+  if ( GetHLTResult("HLT_Mu11_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu15_v1") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu3") )      return true;
+  if ( GetHLTResult("HLT_DoubleMu3_v2") )   return true;
+  if ( GetHLTResult("HLT_DoubleMu5_v1") )   return true;
+  if ( GetHLTResult("HLT_Mu5_Ele5_v1") )    return true;
+  if ( GetHLTResult("HLT_Mu5_Ele9_v1") )    return true;
+  if ( GetHLTResult("HLT_Mu11_Ele8_v1") )   return true;
+  if ( GetHLTResult("HLT_Mu8_Ele8_v1") )    return true;
+  if ( GetHLTResult("HLT_Mu5_Ele13_v2") )   return true;
+  if ( GetHLTResult("HLT_Mu5_Ele13_v2") )   return true;
+  if ( GetHLTResult("HLT_Mu5_Ele17_v1") )   return true;
+  if ( GetHLTResult("HLT_Mu7") )            return true;
+  if ( GetHLTResult("HLT_Mu5") )            return true;
+  if ( GetHLTResult("HLT_Mu17_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu19_v1") )        return true; 
   return false;
     
 } 
@@ -354,22 +396,32 @@ void JZBAnalysis::Analyze(){
   
   counters[EV].fill("All events");
   if ( fIsData_ ) {
-    if(!passTrigger()) return;
+    //FIXME: NEED TO TEST IN WHICH STREAM WE ARE (electron/muon)
+    if( passMuTriggers() ) {
+      counters[EV].fill("... pass muon triggers");
+    } else if ( passElTriggers() ) {
+      counters[EV].fill("... pass electron triggers");
+    } else {
+      return;
+    }
     counters[EV].fill("... pass all trigger requirements");
   }
-
   
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
   nEvent.reset();
   
-  // #--- trigger selection, vtx requirement
   // #--- Vertex info
   nEvent.numVtx = fTR->NVrtx;
-
   float rho = sqrt(fTR->PrimVtxx*fTR->PrimVtxx + fTR->PrimVtxy*fTR->PrimVtxy);
-  if(fTR->PrimVtxGood)nEvent.goodVtx |=2; // save bits of vertex quality
-  if(fTR->PrimVtxGood==0 && fTR->PrimVtxIsFake==0 && fTR->PrimVtxNdof>4 && fabs(fTR->PrimVtxz)<24 && rho<2)nEvent.goodVtx |=4;
+  if(fTR->PrimVtxGood) nEvent.goodVtx |=2; // save bits of vertex quality
+  if (fTR->PrimVtxGood==0 && fTR->PrimVtxIsFake==0 && fTR->PrimVtxNdof>4 && fabs(fTR->PrimVtxz)<24 && rho<2)
+    nEvent.goodVtx |=4;
+  
+  // Good event requirement: essentially vertex requirements
+  if ( !IsGoodEvent() ) return;
+  counters[EV].fill("... pass good event requirements");
+
   
   vector<lepton> leptons;
   
@@ -761,7 +813,8 @@ void JZBAnalysis::Analyze(){
     
     if(sortedGoodLeptons[PosLepton1].type == 1 && sortedGoodLeptons[PosLepton2].type == 1)
       {
-	caloVector = -caloMETvector + s1 + s2; // add the muons
+	//caloVector = -caloMETvector + s1 + s2; // add the muons
+	caloVector = -caloMETvector; // add the muons -> NO!
 	pfNoCutsJetVector = -pfMETvector - s1 - s2; // remove the muons
       }
     
@@ -781,8 +834,11 @@ void JZBAnalysis::Analyze(){
     nEvent.sumJetPt[2] = recoil.Pt(); 
     nEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
     
-	
+    
     nEvent.jzb[3] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
+    nEvent.sumJetPt[3] = sumOfPFJets.Pt();
+    nEvent.met[6] = (sumOfPFJets + s1 + s2).Pt();
+    nEvent.met[7] = (recoilID + s1 + s2).Pt();
     
     
     // ----------------------------------------

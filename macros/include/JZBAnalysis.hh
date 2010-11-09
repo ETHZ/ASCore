@@ -33,7 +33,8 @@ public:
 	const bool IsCustomMu(const int);
 	const bool IsCustomEl(const int);
 	const bool IsCustomJet(const int index);
-        const bool passTrigger(void);
+        const bool passElTriggers(void);
+        const bool passMuTriggers(void);
 
 	string outputFileName_; // public name of the output file name
 
