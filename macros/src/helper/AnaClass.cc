@@ -1786,10 +1786,15 @@ void AnaClass::plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1
 }
 
 //____________________________________________________________________________
-void AnaClass::plotRatioOverlay2H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, bool logy, double line1x, double line2x){
+void AnaClass::plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
-	TH1D *h1 = new TH1D(*h1in);
-	TH1D *h2 = new TH1D(*h2in);
+
+	// h1->SetLineWidth(2);
+	// h1->SetLineColor(kBlue);
+	// h1->SetFillColor(kBlue);
+	// h2->SetLineWidth(2);
+	// h2->SetLineColor(kRed);
+	// h2->SetFillColor(kRed);
 
 	char canvtitle[100], canvname[100];
 	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
@@ -1845,11 +1850,18 @@ void AnaClass::plotRatioOverlay2H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 }
 
 //____________________________________________________________________________
-void AnaClass::plotRatioOverlay3H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, bool logy, double line1x, double line2x){
+void AnaClass::plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
-	TH1D *h1 = new TH1D(*h1in);
-	TH1D *h2 = new TH1D(*h2in);
-	TH1D *h3 = new TH1D(*h3in);
+
+	// h1->SetLineWidth(2);
+	// h1->SetLineColor(kBlue);
+	// h1->SetFillColor(kBlue);
+	// h2->SetLineWidth(2);
+	// h2->SetLineColor(kRed);
+	// h2->SetFillColor(kRed);
+	// h3->SetLineWidth(2);
+	// h3->SetLineColor(kGreen);
+	// h3->SetFillColor(kGreen);
 
 	char canvtitle[100], canvname[100];
 	sprintf(canvtitle,"%s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName());
@@ -1862,7 +1874,7 @@ void AnaClass::plotRatioOverlay3H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 	gPad->SetGridy(1);
 	if(logy) col->SetLogy(1);
 
-	setPlottingRange(h1, h2, h3, 0.05, logy);
+	// setPlottingRange(h1, h2, h3, 0.05, logy);
 
 	// TLegend *leg = new TLegend(0.65,0.45,0.886,0.58);
 	TLegend *leg = new TLegend(0.15,0.70,0.55,0.88);
