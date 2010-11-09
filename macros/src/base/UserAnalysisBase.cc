@@ -176,7 +176,9 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuNTkHits[index] < 11) return false;
 	if(fTR->MuNMuHits[index] < 1)  return false;
 
-	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
+	if(fabs(fTR->MuD0BS[index]) > 0.02)    return false;
+	if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
+
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
@@ -527,26 +529,8 @@ bool UserAnalysisBase::IsLooseNoTightEl(int index){
 
 bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
 	// Returns true if the electron is compatible with the primary vertex (false otherwise)
-	
-	double distVxmax = 10.;
-	double d0Vxmax = 0.02;
-	
-	// take error from vertex and from track extrapolation into account
-	double drVxsq = fTR->PrimVtxxE*fTR->PrimVtxxE + fTR->PrimVtxyE*fTR->PrimVtxyE;
-	double d0, dd0, dz, ddz;
-	if( ind < 0 || !isGoodBasicPrimaryVertex() ) return false;
-	
-	d0  = fTR->ElD0PV[ind];
-	dd0 = sqrt(fTR->ElD0E[ind]*fTR->ElD0E[ind] + drVxsq);
-	dz  = fTR->ElDzPV[ind];
-	ddz = sqrt(fTR->ElDzE[ind]*fTR->ElDzE[ind] + fTR->PrimVtxzE*fTR->PrimVtxzE);
-	
-	// test that the distance is not too large
-	if( fabs(d0) > distVxmax * dd0 || fabs(dz) > distVxmax * ddz ) return false;
-	
-	// test that the distance is within d0Vxmax cut
-	if( fabs(d0) > d0Vxmax ) return false;
-	
+	if(fabs(fTR->ElD0BS[ind]) > 0.02) return false;
+	if(fabs(fTR->ElDzPV[ind]) > 1.0) return false;
 	return true;
 }
 
