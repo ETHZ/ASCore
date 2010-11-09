@@ -38,7 +38,7 @@ void MuonAnalysis::FillMuonTree(){
 	fTrun     = fTR->Run;
 	fTevent   = fTR->Event;
 	fTlumisec = fTR->LumiSection;
-	fThbhenoiseflag = fTR->HBHENoiseFlag;
+	//fThbhenoiseflag = fTR->HBHENoiseFlag;
 
 	// Trigger info
 	fT_HLTMu9       = GetHLTResult("HLT_Mu9")       ? 1:0;
