@@ -839,39 +839,39 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   // Basic muon cleaning and ID
 
   // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 10) )       return false;
-  counters[MU].fill("... pt > 10");
+  if ( !(fTR->MuPt[index] > 20) )       return false;
+  counters[MU].fill(" ... pt > 20");
   if ( !(fabs(fTR->MuEta[index])<2.5) ) return false;
-  counters[MU].fill("... |eta|<2.5");
+  counters[MU].fill(" ... |eta| < 2.5");
 
   // Quality cuts
   if ( !fTR->MuIsGMPT[index] )        return false;
-  counters[MU].fill("... is global muon prompt tight");
+  counters[MU].fill(" ... is global muon prompt tight");
   if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  counters[MU].fill("... is global muon");
+  counters[MU].fill(" ... is global muon");
   if ( !fTR->MuIsTrackerMuon[index] ) return false;
-  counters[MU].fill("... is tracker muon");
+  counters[MU].fill(" ... is tracker muon");
   if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-  counters[MU].fill("... dpt/pt < 0.1");
+  counters[MU].fill(" ... dpt/pt < 0.1");
   
   // Hits
   if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-  counters[MU].fill("... nTkHits >= 11");
+  counters[MU].fill(" ... nTkHits >= 11");
   if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-  counters[MU].fill("... nPxHits > 0");
+  counters[MU].fill(" ... nPxHits > 0");
   if ( !(fTR->MuNMatches[index] > 1) )      return false;
-  counters[MU].fill("... nMatches > 1");
+  counters[MU].fill(" ... nMatches > 1");
 
   // Vertex compatibility
   if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-  counters[MU].fill("... D0(pv) < 0.02");
+  counters[MU].fill(" ... D0(pv) < 0.02");
   if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-  counters[MU].fill("... DZ(pv) < 1.0");
+  counters[MU].fill(" ... DZ(pv) < 1.0");
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
   double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max(20.,fTR->MuPt[index]);
   if ( !(hybridIso < 0.15) ) return false;
-  counters[MU].fill("... hybridIso < 0.15");
+  counters[MU].fill(" ... hybridIso < 0.15");
 
   return true;
 }
@@ -880,27 +880,27 @@ const bool JZBAnalysis::IsCustomMu(const int index){
 const bool JZBAnalysis::IsCustomEl(const int index){
 
   // kinematic acceptance
-  if(!(fTR->ElPt[index]>10) )return false;
-  counters[EL].fill("... pt>10");
+  if(!(fTR->ElPt[index]>20) )return false;
+  counters[EL].fill(" ... pt > 20");
   if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
-  counters[EL].fill("... |eta| < 2.5");
+  counters[EL].fill(" ... |eta| < 2.5");
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-  counters[EL].fill("... missing inner hits <= 1");
+  counters[EL].fill(" ... missing inner hits <= 1");
   if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-  counters[EL].fill("... D0(pv) < 0.04");
+  counters[EL].fill(" ... D0(pv) < 0.04");
   if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-  counters[EL].fill("... DZ(pv) < 1.0");
+  counters[EL].fill(" ... DZ(pv) < 1.0");
 
   // Electron ID
   int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
   if(elIDWP95!=7) return false;
-  counters[EL].fill("... passes WP95 ID");
+  counters[EL].fill(" ... passes WP95 ID");
 
   // Flat isolation below 20 GeV (only for synch.)
   double hybridIso = fTR->ElRelIso03[index]
     *fTR->ElPt[index]/std::max(20.,fTR->ElPt[index]);
   if ( !(hybridIso < 0.15) ) return false;  
-  counters[EL].fill("... hybridIso < 0.15");
+  counters[EL].fill(" ... hybridIso < 0.15");
 
   //   // Other choices for electron ID
   //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
@@ -920,9 +920,9 @@ const bool JZBAnalysis::IsCustomJet(const int index){
   // See https://twiki.cern.ch/twiki/bin/view/CMS/JetID
 
   if ( !(fTR->JID_n90Hits[index] > 1) ) return false;
-  counters[JE].fill("...   n90Hits > 1");
+  counters[JE].fill(" ... n90Hits > 1");
   if ( !(fTR->JID_HPD[index] < 0.98)  ) return false;
-  counters[JE].fill("...   HPD < 0.98");
+  counters[JE].fill(" ... HPD < 0.98");
 
   if ( fabs(fTR->JEta[index])<2.6 ) {
     if ( !(fTR->JEMfrac[index] > 0.01)  ) return false;
@@ -930,7 +930,7 @@ const bool JZBAnalysis::IsCustomJet(const int index){
     if ( !(fTR->JEMfrac[index] > -0.9)  ) return false;
     if ( fTR->JPt[index] > 80 && !(fTR->JEMfrac[index]<1) ) return false;
   }
-  counters[JE].fill("...   pass EMfrac cut");
+  counters[JE].fill(" ... pass EMfrac cut");
 
   return true;
 }
