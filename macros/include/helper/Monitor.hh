@@ -75,10 +75,19 @@ public:
   }
   void print() {
     // This needs to be improved
+    float maxc = counters[countNames[0]];
+    float prev = maxc;
     for ( std::vector<std::string>::const_iterator it = countNames.begin(); 
           it != countNames.end(); ++it ) {
+      float count = counters[*it];
       std::cout << setw(maxLength+5) << left << (*it) 
-                << right << counters[*it] << std::endl;
+                << setw(6) << right << count << " " //FIXME: get size from maxcount
+                << setw(3) << right
+                << static_cast<int>(maxc>0.?count/maxc*100.:0.) << "% "
+                << setw(3) << right
+                << static_cast<int>(prev>0.?count/prev*100.:0.) << "% "
+                << std::endl;
+      prev = count;
     }
   }
 
