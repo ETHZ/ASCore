@@ -128,7 +128,7 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	// Basic PF jet cleaning and ID cuts
 	if(doSel && fTR->PFJPt[index] < 30) return false;
-	if(doSel && fabs(fTR->PFJEta[index]) > 3.0) return false;
+	if(doSel && fabs(fTR->PFJEta[index]) > 2.5) return false;
 	// Loose PF jet ID (WARNING: HF not included in our ntuple)
 	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
 	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
@@ -247,7 +247,7 @@ bool UserAnalysisBase::IsGoodEl_TDL(int index){
 	
 	// rejection if matched to muon	
 	for( int im = 0; im < fTR->NMus; ++im ){
-		if( (fTR->MuIsGlobalMuon[im] == 0 || fTR->MuIsTrackerMuon[im] == 0) && ( fTR->MuNTkHits[im] > 10) ) {
+		if( (fTR->MuIsGlobalMuon[im] == 1 || fTR->MuIsTrackerMuon[im] == 1) && ( fTR->MuNTkHits[im] > 10) ) {
 			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
 			if(deltaR <= 0.1) return false;
 		}
