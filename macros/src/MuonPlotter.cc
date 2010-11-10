@@ -16,16 +16,18 @@ using namespace std;
 // This enum has to correspond to the content of the samples.dat file
 enum gSamples{MuA, MuB, EGA, EGB, JMA, JMB, TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170, LM0};
 
-int gSWITCH = 1; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
+int gSWITCH = 0; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
 
 // Binning ///////////////////////////////////////////////////////////////////////
 static const int gNPtbins = 5;
 static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 65., 80.};
+// static const int gNPtbins = 7;
+// static const double gPtbins[gNPtbins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
 
-// static const int gNPt2bins = 6;
-// static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 65., 80.};
-static const int gNPt2bins = 7;
-static const double gPt2bins[gNPt2bins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
+static const int gNPt2bins = 6;
+static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 65., 80.};
+// static const int gNPt2bins = 7;
+// static const double gPt2bins[gNPt2bins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
 
 static const int gNEtabins = 1;
 static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
@@ -173,22 +175,27 @@ void MuonPlotter::loadSamples(const char* filename){
 //____________________________________________________________________________
 void MuonPlotter::makePlots(){
 	if(readHistos(fOutputFileName) != 0) return;
-
-	// printYields();
-	// printYields(fMCBGSig);
-	// printYields(fMuData);
-
-	makeIntPrediction();
+	
+	// float scale = fSamples[MuA].lumi + fSamples[MuB].lumi;
+	// scale = 22.;
+	// printYields(scale);
+	// makeIntPrediction();
 
 	// makefRatioPlots();
 	// makepRatioPlots();
-	// makeDiffPredictionPlots();
+
+	makeDiffPredictionPlots();
+
+	// fLumiNorm = 22.;
+	// makeIsoVsPtPlot(fMCBG, 0, &MuonPlotter::isSignalSuppressedEvent, &MuonPlotter::isLooseMuon, fMuData, 0, &MuonPlotter::isSignalSuppressedEventTRG, &MuonPlotter::isLooseMuon, "IsoVsPt_SigSuppressed", false);
+
 }
 
 //____________________________________________________________________________
 void MuonPlotter::makeDiffPredictionPlots(){
 	// Fill the ratios
 	fLumiNorm = 1000.;
+	// printYields(fLumiNorm);
 
 	cout << "Producing prediction for :" << endl;
 	for(size_t i = 0; i < fMCBGSig.size(); ++i){
@@ -542,48 +549,62 @@ void MuonPlotter::makeIsoVsPtPlot(int sample1, int muon1, TCut c1, int sample2, 
 
 //____________________________________________________________________________
 void MuonPlotter::makeIsoVsPtPlot(int sample1, int muon1, bool(MuonPlotter::*eventSelector1)(), bool(MuonPlotter::*muonSelector1)(int), int sample2, int muon2, bool(MuonPlotter::*eventSelector2)(), bool(MuonPlotter::*muonSelector2)(int), TString outputname, bool logy){
-	const int nbins = 20;
-	TH2D *h2_sig = new TH2D("h2_sig", "Isolation vs Pt for muons in data",       nbins, 0., 1., gNPtbins, gPtbins);
-	TH2D *h2_bg  = new TH2D("h2_bg",  "Isolation vs Pt for fake muons in ttbar", nbins, 0., 1., gNPtbins, gPtbins);
+	vector<int> samples1; samples1.push_back(sample1);
+	vector<int> samples2; samples2.push_back(sample2);
+	makeIsoVsPtPlot(samples1, muon1, eventSelector1, muonSelector1, samples2, muon2, eventSelector2, muonSelector2, outputname, logy);
+}
+void MuonPlotter::makeIsoVsPtPlot(vector<int> samples1, int muon1, bool(MuonPlotter::*eventSelector1)(), bool(MuonPlotter::*muonSelector1)(int), vector<int> samples2, int muon2, bool(MuonPlotter::*eventSelector2)(), bool(MuonPlotter::*muonSelector2)(int), TString outputname, bool logy){
+	const int nbins = 30;
+	TH2D *h2_sig = new TH2D("h2_sig", "Isolation vs Pt for muons in data",       nbins, 0., 1., gNPt2bins, gPt2bins);
+	TH2D *h2_bg  = new TH2D("h2_bg",  "Isolation vs Pt for fake muons in ttbar", nbins, 0., 1., gNPt2bins, gPt2bins);
 	h2_sig->SetXTitle(convertVarName("MuIso[0]"));
 	h2_bg ->SetXTitle(convertVarName("MuIso[0]"));
 	h2_sig->SetYTitle(convertVarName("MuPt[0]"));
 	h2_bg ->SetYTitle(convertVarName("MuPt[0]"));
+	
+	TTree *tree = NULL;
+	for(size_t i = 0; i < samples1.size(); ++i){
+		int index = samples1[i];
+	
+		tree = fSamples[index].tree;
+		float scale = fLumiNorm / fSamples[index].lumi;
+		if(fSamples[index].isdata) scale = 1.;
+		tree->ResetBranchAddresses();
+		Init(tree);
+		if (fChain == 0) return;
+		Long64_t nentries = fChain->GetEntriesFast();
+		Long64_t nbytes = 0, nb = 0;
+		for (Long64_t jentry=0; jentry<nentries;jentry++) {
+			Long64_t ientry = LoadTree(jentry);
+			if (ientry < 0) break;
+			nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-	TTree *tree = fSamples[sample1].tree;
-	float scale = fLumiNorm / fSamples[sample1].lumi;
-	scale = 1.;
-	tree->ResetBranchAddresses();
-	Init(tree);
-	if (fChain == 0) return;
-	Long64_t nentries = fChain->GetEntriesFast();
-	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-		Long64_t ientry = LoadTree(jentry);
-		if (ientry < 0) break;
-		nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-		if((*this.*eventSelector1)() == false) continue;
-		if((*this.*muonSelector1)(muon1) == false) continue;
-		h2_sig->Fill(MuIso[muon1], MuPt[muon1], scale);
+			if((*this.*eventSelector1)() == false) continue;
+			if((*this.*muonSelector1)(muon1) == false) continue;
+			h2_sig->Fill(MuIso[muon1], MuPt[muon1], scale);
+		}
 	}
 
-	tree = fSamples[sample2].tree;
-	scale = fLumiNorm / fSamples[sample2].lumi;
-	scale = 1.;
-	tree->ResetBranchAddresses();
-	Init(tree);
-	if (fChain == 0) return;
-	nentries = fChain->GetEntriesFast();
-	nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-		Long64_t ientry = LoadTree(jentry);
-		if (ientry < 0) break;
-		nb = fChain->GetEntry(jentry);   nbytes += nb;
+	for(size_t i = 0; i < samples1.size(); ++i){
+		int index = samples2[i];
 
-		if((*this.*eventSelector2)() == false) continue;
-		if((*this.*muonSelector2)(muon2) == false) continue;
-		h2_bg->Fill(MuIso[muon2], MuPt[muon2], scale);
+		tree = fSamples[index].tree;
+		float scale = fLumiNorm / fSamples[index].lumi;
+		if(fSamples[index].isdata) scale = 1.;
+		tree->ResetBranchAddresses();
+		Init(tree);
+		if (fChain == 0) return;
+		Long64_t nentries = fChain->GetEntriesFast();
+		Long64_t nbytes = 0, nb = 0;
+		for (Long64_t jentry=0; jentry<nentries;jentry++) {
+			Long64_t ientry = LoadTree(jentry);
+			if (ientry < 0) break;
+			nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+			if((*this.*eventSelector2)() == false) continue;
+			if((*this.*muonSelector2)(muon2) == false) continue;
+			h2_bg->Fill(MuIso[muon2], MuPt[muon2], scale);
+		}
 	}
 
 	// fSamples[sample1].tree->Project("h2_bg", Form("MuPt[%d]:MuIso[%d]", muon1, muon1), c1);
@@ -596,12 +617,14 @@ void MuonPlotter::makeIsoVsPtPlot(int sample1, int muon1, bool(MuonPlotter::*eve
 
 	TCanvas *c_temp = new TCanvas("IsoVsPt", "Isolating in Pt bins", 0, 0, 1200, 800);
 	c_temp->Divide(3,2);
-	c_temp->cd(6);
-	if(logy) gPad->SetLogz(1);
-	h2_sig->DrawCopy("colz");
-	lat->DrawLatex(0.11,0.92, fSamples[sample1].sname);
+	// TCanvas *c_temp = new TCanvas("IsoVsPt", "Isolating in Pt bins", 0, 0, 1200, 1200);
+	// c_temp->Divide(3,3);
+	// c_temp->cd(9);
+	// if(logy) gPad->SetLogz(1);
+	// h2_sig->DrawCopy("colz");
+	// lat->DrawLatex(0.11,0.92, fSamples[TTbar].sname);
 
-	for(size_t i = 1; i <= 5; ++i){
+	for(size_t i = 1; i <= gNPt2bins; ++i){
 		c_temp->cd(i);
 		gStyle->SetOptStat(1111);
 		TH1D *h1 = h2_sig->ProjectionX(Form("h2_sigx_%d", i), i, i);	
@@ -639,10 +662,10 @@ void MuonPlotter::makeIsoVsPtPlot(int sample1, int muon1, bool(MuonPlotter::*eve
 			h2->SetMinimum(0.0);
 		}
 
-		TLegend *leg = new TLegend(0.55,0.75,0.75,0.88);
+		TLegend *leg = new TLegend(0.45,0.75,0.65,0.88);
 		if(i == 1){
-			leg->AddEntry(h1, fSamples[sample1].sname,"f");
-			leg->AddEntry(h2, fSamples[sample2].sname,"f");
+			leg->AddEntry(h1, fSamples[TTbar].sname,"f");
+			leg->AddEntry(h2, fSamples[MuB].sname,"f");
 			leg->SetFillStyle(0);
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
@@ -675,7 +698,7 @@ void MuonPlotter::makeIsoVsPtPlot(int sample1, int muon1, bool(MuonPlotter::*eve
 
 		lat->SetTextColor(kBlack);
 		lat->SetTextSize(0.05);
-		lat->DrawLatex(0.11,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", gPtbins[i-1], gPtbins[i]));
+		lat->DrawLatex(0.11,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", gPt2bins[i-1], gPt2bins[i]));
 
 		int bin0 = h1->FindBin(0.00);
 		int bin15 = h1->FindBin(0.15);
@@ -961,7 +984,8 @@ void MuonPlotter::fillfRatio(vector<int> samples, int muon, const int nptbins, c
 	fH1D_fRatioPt ->SetYTitle("# Tight / # Loose");
 	fH1D_fRatioEta->SetYTitle("# Tight / # Loose");
 
-	produceRatio(samples, muon, &MuonPlotter::isSignalSuppressedEvent, &MuonPlotter::isLooseMuon, fH2D_fRatio, fH1D_fRatioPt, fH1D_fRatioEta, true);
+	// produceRatio(samples, muon, &MuonPlotter::isSignalSuppressedEvent, &MuonPlotter::isLooseMuon, fH2D_fRatio, fH1D_fRatioPt, fH1D_fRatioEta, true);
+	calculateRatio(samples, 1, fH2D_fRatio, fH1D_fRatioPt, fH1D_fRatioEta, false);
 }
 
 //____________________________________________________________________________
@@ -984,7 +1008,8 @@ void MuonPlotter::fillpRatio(vector<int> samples, int muon, const int nptbins, c
 	fH1D_pRatioPt ->SetYTitle("# Tight / # Loose");
 	fH1D_pRatioEta->SetYTitle("# Tight / # Loose");
 
-	produceRatio(samples, muon, &MuonPlotter::isZMuMuEvent, &MuonPlotter::isLooseMuon, fH2D_pRatio, fH1D_pRatioPt, fH1D_pRatioEta, true);
+	// produceRatio(samples, muon, &MuonPlotter::isZMuMuEvent, &MuonPlotter::isLooseMuon, fH2D_pRatio, fH1D_pRatioPt, fH1D_pRatioEta, true);
+	calculateRatio(samples, 2, fH2D_pRatio, fH1D_pRatioPt, fH1D_pRatioEta, false);
 }
 
 //____________________________________________________________________________
@@ -1202,14 +1227,17 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 
 	// Observation: ////////////////////////////////////////////////////////////////////
 	TH1D *H_nsigobs  = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins",  gNPtbins,  gPtbins);
-	NObs(H_nsigobs, samples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
+	vector<int> lm0sample; lm0sample.push_back(LM0);
+	NObs(H_nsigobs, lm0sample, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
 
 	TH1D *H_nt2obs  = new TH1D("Nt2obs", "Observed N_t2 in Pt1 bins",  gNPtbins,  gPtbins);
-	NObs(H_nt2obs, samples, &MuonPlotter::isSSTTEvent);
+	NObs(H_nt2obs, samples);
+	// NObs(H_nt2obs, samples, &MuonPlotter::isSSTTEvent);
 
 	TH1D *H_nt2obsttbar = new TH1D("Nt2obsttbar", "Observed N_t2 in Pt1 bins, ttbar only",  gNPtbins,  gPtbins);
-	vector<int> ttbarsample; ttbarsample.push_back(4);
-	NObs(H_nt2obsttbar, ttbarsample, &MuonPlotter::isSSTTEvent);	
+	vector<int> ttbarsample; ttbarsample.push_back(TTbar);
+	NObs(H_nt2obsttbar, fMCBG);
+	// NObs(H_nt2obsttbar, ttbarsample, &MuonPlotter::isSSTTEvent);	
 
 	// Output
 	H_nsigobs->SetXTitle(convertVarName("MuPt[0]"));
@@ -1261,7 +1289,7 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	hists.push_back(H_nsigpred);
 	hists.push_back(H_nfppred);
 	hists.push_back(H_nffpred);
-	setPlottingRange(hists);
+	// setPlottingRange(hists);
 
 	plotOverlay4H(H_nt2obs, "N_{ t2}", H_nsigpred, "N_{ pp}" , H_nfppred, "N_{ fp}", H_nffpred, "N_{ ff}");
 
@@ -1279,7 +1307,7 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	H_nsigpred->SetMaximum(14.);
 	H_nsigpred->SetMinimum(0.);
 	plotPredOverlay2HWithRatio(H_nsigobs, "Observed N_{sig}", H_nsigpred, "Predicted N_{sig}");
-	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsttbar, "Obs. N_{t2} (t#bar{t}+jets)", false, false);
+	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsttbar, "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets)", false, false);
 }
 
 //____________________________________________________________________________
@@ -1302,6 +1330,29 @@ void MuonPlotter::NObs(TH1D *&hist, vector<int> samples, bool(MuonPlotter::*even
 
 			if((*this.*eventSelector)() == false) continue;
 			hist->Fill(MuPt[0], scale);
+		}
+	}	
+}
+
+//____________________________________________________________________________
+void MuonPlotter::NObs(TH1D *&hist, vector<int> samples){
+	hist->Sumw2();
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+		float scale = fLumiNorm / fSamples[index].lumi;
+		TH1D *h_temp = fSamples[index].nthistos.h_nt2_pt;
+		for(int j = 1; j <= h_temp->GetNbinsX(); ++j){
+			double bincenter = h_temp->GetBinCenter(j);
+			double content = h_temp->GetBinContent(j);
+			int newbin = hist->FindBin(bincenter);
+
+			double oldcontent = hist->GetBinContent(newbin);
+			double olderror = hist->GetBinError(newbin);
+			double newerror = TMath::Sqrt(olderror*olderror + content*scale*scale);
+			double newcontent = oldcontent + content*scale;
+			hist->SetBinContent(newbin, newcontent);
+			hist->SetBinError(newbin, newerror);
+			
 		}
 	}	
 }
@@ -1498,24 +1549,28 @@ vector<TH1D*> MuonPlotter::NsigPredFromFPRatios(const int sample, bool output){
 	TH2D *H_nt1mes   = new TH2D(Form("Nt1mes_%s",   fSamples[sample].sname.Data()), "Measured N_t1 in Pt1/2 bins", gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
 	TH2D *H_nt0mes   = new TH2D(Form("Nt0mes_%s",   fSamples[sample].sname.Data()), "Measured N_t0 in Pt1/2 bins", gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
 
-	// Fill histograms from tree
-	TTree *tree = fSamples[sample].tree;
-	Init(tree);
-	if (fChain == 0) return res;
-	Long64_t nentries = fChain->GetEntriesFast();
-	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-		Long64_t ientry = LoadTree(jentry);
-		if (ientry < 0) break;
-		nb = fChain->GetEntry(jentry);   nbytes += nb;
+	// // Fill histograms from tree
+	// TTree *tree = fSamples[sample].tree;
+	// Init(tree);
+	// if (fChain == 0) return res;
+	// Long64_t nentries = fChain->GetEntriesFast();
+	// Long64_t nbytes = 0, nb = 0;
+	// for (Long64_t jentry=0; jentry<nentries;jentry++) {
+	// 	Long64_t ientry = LoadTree(jentry);
+	// 	if (ientry < 0) break;
+	// 	nb = fChain->GetEntry(jentry);   nbytes += nb;
+	// 
+	// 	if(isSSLLEvent() == false) continue;
+	// 
+	// 	if(  isTightMuon(0) &&  isTightMuon(1) ) H_nt2mes->Fill(MuPt[0], MuPt[1]); // Tight-tight
+	// 	if(  isTightMuon(0) && !isTightMuon(1) ) H_nt1mes->Fill(MuPt[0], MuPt[1]); // Tight-loose
+	// 	if( !isTightMuon(0) &&  isTightMuon(1) ) H_nt1mes->Fill(MuPt[1], MuPt[0]); // Loose-tight
+	// 	if( !isTightMuon(0) && !isTightMuon(1) ) H_nt0mes->Fill(MuPt[0], MuPt[1]); // Loose-loose
+	// }
 
-		if(isSSLLEvent() == false) continue;
-
-		if(  isTightMuon(0) &&  isTightMuon(1) ) H_nt2mes->Fill(MuPt[0], MuPt[1]); // Tight-tight
-		if(  isTightMuon(0) && !isTightMuon(1) ) H_nt1mes->Fill(MuPt[0], MuPt[1]); // Tight-loose
-		if( !isTightMuon(0) &&  isTightMuon(1) ) H_nt1mes->Fill(MuPt[1], MuPt[0]); // Loose-tight
-		if( !isTightMuon(0) && !isTightMuon(1) ) H_nt0mes->Fill(MuPt[0], MuPt[1]); // Loose-loose
-	}
+	H_nt2mes = fSamples[sample].nthistos.h_nt2;
+	H_nt1mes = fSamples[sample].nthistos.h_nt1;
+	H_nt0mes = fSamples[sample].nthistos.h_nt0;
 
 	if(fVerbose > 2){
 		cout << " Found " << H_nt2mes->GetEntries() << " events with tight-tight (Nt2)" << endl;
@@ -1754,28 +1809,26 @@ void MuonPlotter::fillYields(vector<int> samples){
 
 //____________________________________________________________________________
 void MuonPlotter::printYields(){ printYields(fAllSamples); }
+void MuonPlotter::printYields(float scale){ printYields(fAllSamples, scale); }
 void MuonPlotter::printYields(int sample){ vector<int> samples; samples.push_back(sample); printYields(samples); }
-void MuonPlotter::printYields(vector<int> samples){
+void MuonPlotter::printYields(vector<int> samples, float lumiscale){
+	cout << "-----------------------" << endl;
+	if(lumiscale > -1.0) cout << " Numbers scaled to " << lumiscale << " /pb" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		numberset numbers = fSamples[index].numbers;
-		cout << "-----------------------" << endl;
 		cout << " Sample: " << fSamples[index].sname << endl;
-		cout << "   Nt2 = "       << numbers.nt2 <<  "  Nt1 = "       << numbers.nt1 << "  Nt0 = " << numbers.nt0 << endl;
-		cout << "   Nss tight = " << numbers.nsst << "  Nss loose = " << numbers.nssl << endl;
-		cout << "   NZ tight  = " << numbers.nzt <<  "  NZ  loose = " << numbers.nzl << endl;
-		cout << endl;
-		float scale = (fSamples[MuA].lumi + fSamples[MuB].lumi) / fSamples[index].lumi;
-		cout << "  scaled to " << fSamples[MuA].lumi + fSamples[MuB].lumi << " /pb" << endl;
+		// cout << "   Nt2 = "       << numbers.nt2 <<  "  Nt1 = "       << numbers.nt1 << "  Nt0 = " << numbers.nt0 << endl;
+		// cout << "   Nss tight = " << numbers.nsst << "  Nss loose = " << numbers.nssl << endl;
+		// cout << "   NZ tight  = " << numbers.nzt <<  "  NZ  loose = " << numbers.nzl << endl;
+		// cout << endl;
+		float scale = lumiscale / fSamples[index].lumi;
+		if(scale < 0) scale = 1;
+		if(fSamples[index].isdata) scale = 1;
 		cout << "   Nt2 = "       << scale*numbers.nt2 <<  "  Nt1 = "       << scale*numbers.nt1 << "  Nt0 = " << scale*numbers.nt0 << endl;
 		cout << "   Nss tight = " << scale*numbers.nsst << "  Nss loose = " << scale*numbers.nssl << endl;
 		cout << "   NZ tight  = " << scale*numbers.nzt <<  "  NZ  loose = " << scale*numbers.nzl << endl;		
 		cout << endl;
-		scale = 100. / fSamples[index].lumi;
-		cout << "  scaled to 100/pb" << " /pb" << endl;
-		cout << "   Nt2 = "       << scale*numbers.nt2 <<  "  Nt1 = "       << scale*numbers.nt1 << "  Nt0 = " << scale*numbers.nt0 << endl;
-		cout << "   Nss tight = " << scale*numbers.nsst << "  Nss loose = " << scale*numbers.nssl << endl;
-		cout << "   NZ tight  = " << scale*numbers.nzt <<  "  NZ  loose = " << scale*numbers.nzl << endl;		
 
 		// printHisto(fSamples[index].fhistos.h_ntight_pt, fSamples[index].sname + "_ntight_pt", "Number of tight muons in " + fSamples[index].sname, "hist");
 		// printHisto(fSamples[index].fhistos.h_nloose_pt, fSamples[index].sname + "_nloose_pt", "Number of loose muons in " + fSamples[index].sname, "hist");
@@ -1952,6 +2005,12 @@ bool MuonPlotter::passesHTCut(float cut){
 }
 
 //____________________________________________________________________________
+bool MuonPlotter::passesMETCut(float cut){
+	if(pfMET < cut) return false;
+	return true;
+}
+
+//____________________________________________________________________________
 bool MuonPlotter::passesZVeto(float dm){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
@@ -1996,7 +2055,53 @@ bool MuonPlotter::passesZVeto(float dm){
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::passesMllVeto(float cut){
+bool MuonPlotter::passesZVeto(float lower, float upper){
+// Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
+// has invariant mass closer than dm to the Z mass, returns true if none found
+	const float MMU = 0.1057;
+	const float MEL = 0.0005;
+	const float MZ  = 91.2;
+
+	if(NEls < 2 && NMus < 2) return true;
+	// First muon
+	for(size_t i = 0; i < NMus-1; ++i){
+		if(isTightMuon(i)){
+			TLorentzVector pmu1, pmu2;
+			pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], MMU);
+
+			// Second muon
+			for(size_t j = i+1; j < NMus; ++j){ 
+				if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
+					pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], MMU);
+					float mass = (pmu1+pmu2).M();
+					if(mass < lower || mass > upper) return false;
+				}
+			}
+		}
+	}
+
+	if(NEls < 2) return true;
+	// First electron
+	for(size_t i = 0; i < NEls-1; ++i){
+		if(isTightElectron(i)){
+			TLorentzVector pel1, pel2;
+			pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], MEL);
+
+			// Second electron
+			for(size_t j = i+1; j < NEls; ++j){
+				if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
+					pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], MEL);
+					float mass = (pel1+pel2).M();
+					if(mass < lower || mass > upper) return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
 // has invariant mass smaller than cut, returns true if none found
 	const float MMU = 0.1057;
@@ -2123,8 +2228,7 @@ bool MuonPlotter::isZMuMuEventTRG(){
 bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 	if(isGoodEvent() == false) return false;
 	// if(isMuTriggeredEvent() == false) return false;
-	if(NMus < 2) return false;
-	if(!isGoodPrimMuon(0) || !isGoodSecMuon(1)) return false;
+	if(!isSSTTEvent()) return false;
 	if(isPromptSUSYMuon(0) && isPromptSUSYMuon(1)){
 		if(isTightMuon(0) == 1 && isTightMuon(1) == 1) return true;
 	}
@@ -2136,11 +2240,19 @@ bool MuonPlotter::isSSLLEvent(){
 	// This should include all the cuts for the final selection
 	if(!isGoodEvent()) return false;                          // >1 jets, >0 loose muons
 	if(NMus < 2) return false;                                // >1 muons
-	if(!passesZVeto()) return false;                          // no Zs in event
-	if(gSWITCH == 0) if(!passesMllVeto(12)) return false;     // no low mass OSSF pairs
-	if(gSWITCH == 1) if(!passesMllVeto(5) ) return false;
-	if(gSWITCH == 0) if(!passesHTCut(60.) ) return false;     // ht cut
-	if(gSWITCH == 1) if(!passesHTCut(250.)) return false;
+
+	if(gSWITCH == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
+	if(gSWITCH == 1) if(!passesZVeto(15.))       return false;
+
+	if(gSWITCH == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
+	if(gSWITCH == 1) if(!passesMllEventVeto(5.) ) return false;
+
+	if(gSWITCH == 0) if(!passesHTCut(60.) )  return false;    // ht cut
+	if(gSWITCH == 1) if(!passesHTCut(250.))  return false;
+
+	if(gSWITCH == 0) if(!passesMETCut(30.) ) return false;    // met cut
+	if(gSWITCH == 1) if(!passesMETCut(40.))  return false;
+
 	if(MuCharge[0] != MuCharge[1]) return false;              // SS
 	if(!isGoodPrimMuon(0) || !isGoodSecMuon(1)) return false; // pt cuts
 	return true;
@@ -2178,7 +2290,7 @@ bool MuonPlotter::isGoodMuon(int muon){
 	if(MuPt[muon] < ptcut) return false;
 	if(fabs(MuEta[muon]) > 2.4) return false;
 	if(fabs(MuD0BS[muon]) > 0.02) return false;
-	if(fabs(MuDz[muon]) > 1.0) return false;
+	if(fabs(MuDz[muon]) > 1.0) return false; // wrt PV
 	return true;
 }
 
@@ -2245,8 +2357,13 @@ bool MuonPlotter::isPromptSUSYMuon(int muon){
 
 //____________________________________________________________________________
 bool MuonPlotter::isTightElectron(int ele){
-	if(ElTight[ele] != 1) return false;
+	if(ElIsGoodElId_WP80[ele] != 1)    return false;
+	if(ElIsConvertedEl_WP80[ele] == 1) return false;
 	if(ElChIsCons[ele] != 1) return false;
+	
+	if(gSWITCH == 0) if(ElHybRelIso[ele] > 0.10) return false;
+	if(gSWITCH == 1) if(ElRelIso[ele]    > 0.15) return false;
+	
 	return true;
 }
 

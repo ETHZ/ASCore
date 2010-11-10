@@ -34,6 +34,7 @@ public:
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
+	void makeIsoVsPtPlot(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
 	void makeIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
 	
 	//////////////////////////////
@@ -74,14 +75,16 @@ public:
 	// Predictions
 	void makeSSPredictionPlots(vector<int>);
 	void NObs(TH1D *&, vector<int>, bool(MuonPlotter::*)());
+	void NObs(TH1D *&, vector<int>);
 	vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
 	
 	void fillYields();                 // All samples
 	void fillYields(int);              // One sample
 	void fillYields(vector<int>); // List of samples
 	void printYields();
+	void printYields(float);
 	void printYields(int);
-	void printYields(vector<int>);
+	void printYields(vector<int>, float = -1.0);
 
 	//////////////////////////////
 	// I/O
@@ -94,8 +97,10 @@ public:
 	bool isGoodEvent();
 	bool passesNJetCut(int=2);
 	bool passesHTCut(float);
-	bool passesZVeto(float = 15.);
-	bool passesMllVeto(float = 12.);
+	bool passesMETCut(float = -1.);
+	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
+	bool passesZVeto(float, float); // cut in this window
+	bool passesMllEventVeto(float = 12.);
 
 	bool isMuTriggeredEvent();
 	bool isJetTriggeredEvent();
