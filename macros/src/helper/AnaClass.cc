@@ -1346,7 +1346,7 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	p_plot->cd();
 	if(logy) p_plot->SetLogy(1);
 
-	// setPlottingRange(h1, h2, 0.05, logy);
+	setPlottingRange(h1, h2, 0.05, logy);
 	
 	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
 	TLegend *leg = new TLegend(0.65,0.75,0.886,0.88); // Upper right
@@ -1665,8 +1665,13 @@ void AnaClass::plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2,
 }
 
 //____________________________________________________________________________
-void AnaClass::plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, TH1D *h4, TString tag4, bool logy, double line1x, double line2x){
+void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, TH1D *h4in, TString tag4, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
+
+	TH1D *h1 = new TH1D(*h1in);
+	TH1D *h2 = new TH1D(*h2in);
+	TH1D *h3 = new TH1D(*h3in);
+	TH1D *h4 = new TH1D(*h4in);
 
 	// h1->SetLineWidth(2);
 	// h1->SetLineColor(kBlack);
@@ -1719,7 +1724,13 @@ void AnaClass::plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1
 	// 	h2->SetMinimum(0.0);
 	// 	h3->SetMinimum(0.0);
 	// }
-
+	vector<TH1D*> hists;
+	hists.push_back(h1);
+	hists.push_back(h2);
+	hists.push_back(h3);
+	hists.push_back(h4);
+	setPlottingRange(hists, 0.05, logy);
+	
 	// TLegend *leg = new TLegend(0.15,0.70,0.35,0.88);
 	// TLegend *leg = new TLegend(0.65,0.69,0.886,0.88);
 	TLegend *leg = new TLegend(0.65,0.66,0.886,0.88);
