@@ -406,7 +406,6 @@ void JZBAnalysis::Analyze(){
   
   counters[EV].fill("All events");
   if ( fDataType_ != "mc" ) {
-    //FIXME: NEED TO TEST IN WHICH STREAM WE ARE (electron/muon)
     if( (fDataType_=="mu") && passMuTriggers() ) {
       counters[EV].fill("... pass muon triggers");
     } else if ( (fDataType_=="el") && passElTriggers() ) {
@@ -552,7 +551,8 @@ void JZBAnalysis::Analyze(){
 	float jesC    = fTR->JEcorr[i];
 	bool isJetID  = IsCustomJet(i);
 	
-	if (!isJetID) continue; //consider only Jets passing JetID
+        // Consider only Jets passing JetID
+	if (!isJetID) continue;
         //FIXME: throw away event if good jet does not pass JetID?
         counters[JE].fill("... pass jet ID");
 	
@@ -575,8 +575,8 @@ void JZBAnalysis::Analyze(){
         }
 
         // Acceptance cuts before we use this jet
-        if ( fabs(jeta)>2.6 && jpt>15. ) continue;
-        counters[JE].fill("... |eta|<2.6 && pt>15.");
+        if ( !(fabs(jeta)<2.6 && jpt>20.) ) continue;
+        counters[JE].fill("... |eta|<2.6 && pt>20.");
 	
         recoil+=aJet;
 	
@@ -618,7 +618,9 @@ void JZBAnalysis::Analyze(){
 	float jesC = fTR->PFJScale[i];
 	bool isJetID = IsGoodBasicPFJet(i,false);
 	
+        // Consider only Jets passing JetID
 	if (!isJetID) continue;
+        //FIXME: throw away event if good jet does not pass JetID?
         counters[PJ].fill("... pass Jet ID");
 
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
@@ -639,28 +641,26 @@ void JZBAnalysis::Analyze(){
           counters[PJ].fill("... pass lepton 2 veto");
         }
 	
-	
+
+        if ( !(fabs(jeta)<2.6 && jpt>20) ) continue;
+        counters[JE].fill("... |eta|<2.6 && pt>20.");
+
 	nEvent.pfJetPt[nEvent.pfJetNum] = jpt;
 	nEvent.pfJetEta[nEvent.pfJetNum] = jeta;
 	nEvent.pfJetPhi[nEvent.pfJetNum] = jphi;
 	nEvent.pfJetNum = nEvent.pfJetNum +1;
 	nEvent.pfHT += jpt;
-	
-	//This was added by Pablo
-	if(isJetID && abs(jeta)<2.6 && jpt>15)
-	  {
-            counters[PJ].fill("... pass loose jet selection");
-	    nEvent.pfGoodHT += jpt;
-	    sumOfPFJets += aJet;
-	    if ( jpt>30 ) {
-              counters[PJ].fill("... pass tight jet selection");
-	      nEvent.pfTightHT += jpt;
-	      nEvent.pfJetGoodPt[nEvent.pfJetGoodNum]  = jpt;
-	      nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
-	      nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
-	      nEvent.pfJetGoodNum++;
-	    }
-	  }
+        nEvent.pfGoodHT += jpt; // Obsolete...
+        sumOfPFJets += aJet;
+
+        if ( jpt>30 ) {
+          counters[PJ].fill("... pass tight jet selection");
+          nEvent.pfTightHT += jpt;
+          nEvent.pfJetGoodPt[nEvent.pfJetGoodNum]  = jpt;
+          nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
+          nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
+          nEvent.pfJetGoodNum++;
+        }
       }
     
     
@@ -839,8 +839,8 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   // Basic muon cleaning and ID
 
   // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 20) )       return false;
-  counters[MU].fill(" ... pt > 20");
+  if ( !(fTR->MuPt[index] > 10) )       return false;
+  counters[MU].fill(" ... pt > 10");
   if ( !(fabs(fTR->MuEta[index])<2.5) ) return false;
   counters[MU].fill(" ... |eta| < 2.5");
 
@@ -880,8 +880,8 @@ const bool JZBAnalysis::IsCustomMu(const int index){
 const bool JZBAnalysis::IsCustomEl(const int index){
 
   // kinematic acceptance
-  if(!(fTR->ElPt[index]>20) )return false;
-  counters[EL].fill(" ... pt > 20");
+  if(!(fTR->ElPt[index]>10) )return false;
+  counters[EL].fill(" ... pt > 10");
   if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
   counters[EL].fill(" ... |eta| < 2.5");
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
