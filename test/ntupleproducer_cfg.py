@@ -36,8 +36,8 @@ options.register ('recoType',    # register 'recoType' option
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
+#options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 options.files= '/store/data/Run2010B/Mu/RECO/PromptReco-v2/000/146/428/9A7CDCF5-AAC6-DF11-8BC3-001D09F276CF.root'
-# options.files= 'file:///data/stiegerb/MC/QCD_Pt-20_TuneD6T_7TeV-pythia6/Summer10-START36_V10_multilepton-v1/GEN-SIM-RECO/F4E29097-7CA7-DF11-996A-90E6BA442F02.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -179,6 +179,7 @@ process.analyze.jets = (
               sel_minpt  = cms.double(15.0),
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
+	      btag_matchdeltaR = cms.double(0.25),
               ),
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
@@ -188,6 +189,7 @@ process.analyze.jets = (
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5CaloL2L3'),
+	      btag_matchdeltaR = cms.double(0.25),
               ),
     )
 

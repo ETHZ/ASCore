@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: $
+// $Id: JetFillerReco.h,v 1.1 2010/08/26 11:39:44 fronga Exp $
 //
 //
 
@@ -51,6 +51,7 @@ private:
   // Pre-selection
   double fMinpt;
   double fMaxeta;
+  double fBtagMatchdeltaR;
 	
 };
 

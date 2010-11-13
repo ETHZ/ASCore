@@ -36,15 +36,19 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
   gMaxnobjs = 100;
 
   // Define all arrays
-  fTpx    = new double[gMaxnobjs];
-  fTpy    = new double[gMaxnobjs];
-  fTpz    = new double[gMaxnobjs];
-  fTpt    = new double[gMaxnobjs];
-  fTe     = new double[gMaxnobjs];
-  fTet    = new double[gMaxnobjs];
-  fTeta   = new double[gMaxnobjs];
-  fTphi   = new double[gMaxnobjs];
-  fTscale = new double[gMaxnobjs];
+  fTpx                     = new double[gMaxnobjs];
+  fTpy                     = new double[gMaxnobjs];
+  fTpz                     = new double[gMaxnobjs];
+  fTpt                     = new double[gMaxnobjs];
+  fTe                      = new double[gMaxnobjs];
+  fTet                     = new double[gMaxnobjs];
+  fTeta                    = new double[gMaxnobjs];
+  fTphi                    = new double[gMaxnobjs];
+  fTscale                  = new double[gMaxnobjs];
+  fTjbTagProbTkCntHighEff  = new double[gMaxnobjs];
+  fTjbTagProbTkCntHighPur  = new double[gMaxnobjs];
+  fTjbTagProbSimpSVHighEff = new double[gMaxnobjs];
+  fTjbTagProbSimpSVHighPur = new double[gMaxnobjs];
   
   if(fJetType==CALO) {
     fTID_HPD        = new double[gMaxnobjs];
@@ -86,6 +90,10 @@ JetFillerBase::~JetFillerBase(void) {
   delete [] fTeta;
   delete [] fTphi;
   delete [] fTscale;
+  delete [] fTjbTagProbTkCntHighEff ;
+  delete [] fTjbTagProbTkCntHighPur ;
+  delete [] fTjbTagProbSimpSVHighEff;
+  delete [] fTjbTagProbSimpSVHighPur;
   
   if (fJetType==CALO) {
     delete [] fTID_HPD;
@@ -127,6 +135,11 @@ void JetFillerBase::createBranches(void) {
   addBranch("JEta",   "D", fTeta,  "NJets" );
   addBranch("JPhi",   "D", fTphi,  "NJets" );
   addBranch("JScale", "D", fTscale,"NJets" );
+  addBranch("JbTagProbTkCntHighEff" , "D", fTjbTagProbTkCntHighEff , "NJets" );
+  addBranch("JbTagProbTkCntHighPur" , "D", fTjbTagProbTkCntHighPur , "NJets" );
+  addBranch("JbTagProbSimpSVHighEff", "D", fTjbTagProbSimpSVHighEff, "NJets" );
+  addBranch("JbTagProbSimpSVHighPur", "D", fTjbTagProbSimpSVHighPur, "NJets" );
+
 
 	
   if(fJetType==CALO) {
@@ -160,14 +173,18 @@ void JetFillerBase::reset(void) {
 
   fTnobj = 0;
 	
-  resetDouble(fTpx,gMaxnobjs);
-  resetDouble(fTpy,gMaxnobjs);
-  resetDouble(fTpz,gMaxnobjs);
-  resetDouble(fTpt,gMaxnobjs);
-  resetDouble(fTe,gMaxnobjs);
-  resetDouble(fTet,gMaxnobjs);
+  resetDouble(fTpx ,gMaxnobjs);
+  resetDouble(fTpy ,gMaxnobjs);
+  resetDouble(fTpz ,gMaxnobjs);
+  resetDouble(fTpt ,gMaxnobjs);
+  resetDouble(fTe  ,gMaxnobjs);
+  resetDouble(fTet ,gMaxnobjs);
   resetDouble(fTeta,gMaxnobjs);
   resetDouble(fTphi,gMaxnobjs);
+  resetDouble(fTjbTagProbTkCntHighEff ,gMaxnobjs);
+  resetDouble(fTjbTagProbTkCntHighPur ,gMaxnobjs);
+  resetDouble(fTjbTagProbSimpSVHighEff,gMaxnobjs);
+  resetDouble(fTjbTagProbSimpSVHighPur,gMaxnobjs);
 
 	
   if (fJetType==CALO) {	

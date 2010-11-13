@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.1 2010/08/26 11:39:44 fronga Exp $
+// $Id: JetFillerBase.h,v 1.2 2010/09/06 08:49:16 fronga Exp $
 //
 //
 
@@ -86,6 +86,12 @@ protected:
   double* fTeta;
   double* fTphi;
   double* fTscale;
+  // b-taggers
+  double* fTjbTagProbTkCntHighEff ;
+  double* fTjbTagProbTkCntHighPur ;
+  double* fTjbTagProbSimpSVHighEff;
+  double* fTjbTagProbSimpSVHighPur;
+  // jet algo dependant info
   int*    fTNConstituents;
   double* fTjChfrac;
   double* fTEMfrac;

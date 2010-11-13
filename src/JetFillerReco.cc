@@ -2,11 +2,15 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/JPTJetCollection.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/JetReco/interface/JetID.h"
+#include "DataFormats/JetReco/interface/Jet.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/JetReco/interface/JetTracksAssociation.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 #include <iostream>
@@ -19,13 +23,14 @@ JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree,
 {
 	
   // Retrieve configuration parameters
-  fPrefix         = config.getUntrackedParameter<std::string>("prefix");
-  fTag            = config.getUntrackedParameter<edm::InputTag>("tag");
-  fMinpt          = config.getParameter<double>("sel_minpt");
-  fMaxeta         = config.getParameter<double>("sel_maxeta");
-  fJetCorrs       = config.getParameter<std::string>("corrections");
-  fJetID          = config.getUntrackedParameter<edm::InputTag>("jet_id");		
-  fJetTracksTag   = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+  fPrefix          = config.getUntrackedParameter<std::string>("prefix");
+  fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
+  fMinpt           = config.getParameter<double>("sel_minpt");
+  fMaxeta          = config.getParameter<double>("sel_maxeta");
+  fJetCorrs        = config.getParameter<std::string>("corrections");
+  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
+  fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+  fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;
@@ -58,6 +63,19 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
   ESHandle<TransientTrackBuilder> theB;
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
 	  
+  // collect information for b-tagging (4 tags)
+  Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
+  iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
+
+  Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
+  iEvent.getByLabel("trackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
+
+  Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
+  iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
+
+  Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
+  iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
+
   const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
   
   // First loop: just get corrected pt and corresponding indices
@@ -106,6 +124,61 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
     fTphi[ijet]   = jet->phi();
     fTeta[ijet]   = jet->eta();
     fTscale[ijet] = scale;
+
+    // B-tagging probability (for 4 b-taggings)
+    if( !fIsPat ){
+      double mindr(999.99);
+      for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
+        // Angular match between the two "collections"
+	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				      (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
+				      (*jetsAndProbsTkCntHighEff)[i].first->phi());
+        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+	  fTjbTagProbTkCntHighEff[ijet]=(*jetsAndProbsTkCntHighEff)[i].second;
+	  mindr = deltar;
+	}
+      }
+      mindr = 999.99;
+      for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
+        // Angular match between the two "collections"
+	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				      (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
+				      (*jetsAndProbsTkCntHighPur)[i].first->phi());
+        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+	  fTjbTagProbTkCntHighPur[ijet]=(*jetsAndProbsTkCntHighPur)[i].second;
+	  mindr = deltar;
+	}
+      }
+      mindr = 999.99;
+      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
+        // Angular match between the two "collections"
+	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				      (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
+				      (*jetsAndProbsSimpSVHighEff)[i].first->phi());
+        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+	  fTjbTagProbSimpSVHighEff[ijet]=(*jetsAndProbsSimpSVHighEff)[i].second;
+	  mindr = deltar;
+	}
+      }
+      mindr = 999.99;
+      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
+        // Angular match between the two "collections"
+	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				      (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
+				      (*jetsAndProbsSimpSVHighPur)[i].first->phi());
+        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+	  fTjbTagProbSimpSVHighPur[ijet]=(*jetsAndProbsSimpSVHighPur)[i].second;
+	  mindr = deltar;
+	}
+      }
+    } else {
+      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
+      fTjbTagProbTkCntHighEff [ijet] = pJ->bDiscriminator("trackCountingHighEffBJetTags"        );
+      fTjbTagProbTkCntHighPur [ijet] = pJ->bDiscriminator("trackCountingHighPurBJetTags"        );
+      fTjbTagProbSimpSVHighEff[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+      fTjbTagProbSimpSVHighPur[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+    }
+
 		
     // -----------------------------------------
     // JPT jet specific
