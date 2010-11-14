@@ -128,11 +128,13 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
 ### Cleaning ###################################################################
 # flag HB/HE noise
-# Need both since Filter does not put results in the event
-# UPDATE: done by default in 3_8 (?)
-#process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
-#process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-#process.cleaning = cms.Sequence(process.HBHENoiseFilter)
+# info: https://twiki.cern.ch/twiki/bin/view/CMS/HcalNoiseInfoLibrary
+# uncomment following two lines to filer HCAL noise rather than to flag it!
+# process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
+# process.HBHENoiseFilter.maxRBXEMF = cms.double(0.01)
+# the next two lines produce the HCAL noise summary flag with an additional cut on RBX
+process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 # require scraping filter
@@ -227,9 +229,9 @@ process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
 process.p = cms.Path(
     process.scrapingVeto *
     ( 
-#   process.recoJPTJets  
-#    process.HBHENoiseFilterResultProducer
-    process.mygenjets
+#   process.recoJPTJets   
+    process.HBHENoiseFilterResultProducer
+    + process.mygenjets
     + process.jecCorSequence
     + process.recoJetIdSequence
     + process.simpleEleIdSequence
