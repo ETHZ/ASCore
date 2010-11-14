@@ -116,11 +116,15 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	TString dPhirange  = (TString) o0.str()+(TString) o1.str() + (TString) o2.str() +(TString) o3.str();
 	
 	std::vector<sample>  QCDSamples;
+	std::vector<sample>  Samples_NOTData;
 	std::vector<sample>  QCDandDataSamples;
 	for(int i=0; i< fSamples.size(); ++i){
 		if(fSamples[i].sname=="QCD"){
 			QCDSamples.push_back(fSamples[i]);
 			QCDandDataSamples.push_back(fSamples[i]);
+		}
+		if(fSamples[i].type!="data"){
+			Samples_NOTData.push_back(fSamples[i]);
 		}
 		if(fSamples[i].type=="data"){
 			QCDandDataSamples.push_back(fSamples[i]);
@@ -144,7 +148,10 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 
 
+//	MakePlot(Samples_NOTData,        "PseudoJetMT2", gNMT2bins,     gMT2bins,     cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_nodata"+cleanflag       , "none", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins,     gMT2bins,     cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
+//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2Leptonbins,     gMT2Leptonbins,     cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
+//	MakePlot(fSamples  ,        "PseudoJetMT2", gNJPtbins,     gJPtbins,     cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMCT", gNMT2bins,     gMT2bins,     cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2Normbins, gMT2Normbins, cleaned, true, "DPhiMhtMpt", ZerotoPi,    "overHT", "all_overHT"+cleanflag , "none", fudgefactor);
 
@@ -250,6 +257,9 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 				h_samples[i]                ->Fill(yvalue     , weight);
 				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && yvalue < 50){h_prediction -> Fill(yvalue     , weight);}
 			}
+			if(option == "overHT")  {
+				h_samples[i]                ->Fill(yvalue/HT     , weight);
+			}
 		}
 	}
 	if(prediction!="none"){
@@ -263,7 +273,6 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 			h_samples[i] -> SetMinimum(0.01);
 			h_stack.Add(h_samples[i]);
 			h_mc_sum->Add(h_samples[i]);
-			cout << Samples[i].sname << endl;
 			Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
 		}
 		if(Samples[i].sname!="QCD" && Samples[i].type!="data"){
