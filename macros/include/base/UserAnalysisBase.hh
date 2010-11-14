@@ -92,10 +92,13 @@ public:
 	virtual bool DiElectronSelection(int&, int&, int = 0);
 	virtual bool SSDiElectronSelection(int&, int&);
 	virtual bool OSDiElectronSelection(int&, int&);
-
 	// TDL & RA5
 	virtual bool IsGoodElEvent_TDL();
 	virtual bool IsGoodElEvent_RA5();
+
+	// Print interesting event
+	virtual void EventPrint();
+	virtual void GetEvtEmChFrac(double & fracEm, double & fracCh);
 
 private:
 
