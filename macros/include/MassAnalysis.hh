@@ -71,6 +71,7 @@ private:
 	vector<int> interesting_Run;
 	vector<int> interesting_Lumi;
 	vector<int> interesting_Event;
+	vector<double> interesting_value;
 	vector<string> interesting_Type;
 
 	// file for histograms:
@@ -219,7 +220,8 @@ private:
 
 	TH2D *fHMT2_vs_M_OSDiLept;
 	
-	
+	TH1D *fHPFandCalo_deltaR;
+	TH1D *fHPFJ1J2DeltaR;	
 	
 };
 #endif

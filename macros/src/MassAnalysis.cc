@@ -106,7 +106,10 @@ void MassAnalysis::Begin(){
 	fHMT_single_mu	      = new TH1D("MT_single_mu"  ,  " transverse mass of mu, MET "    ,100, 0, 200);
 	fHMT_single_e_nojets  = new TH1D("MT_single_e_nojets "  ,  " transverse mass of el, MET, no jets in event "    ,100, 0, 200);
 	fHMT_single_mu_nojets = new TH1D("MT_single_mu_nojets"  ,  " transverse mass of mu, MET, no jets in event "    ,100, 0, 200);
-		
+
+	fHPFandCalo_deltaR   = new TH1D("PFandCalo_deltaR", "", 200, 0., 10);
+	fHPFJ1J2DeltaR       = new TH1D("PFJ1J2DeltaR", "", 200, 0, 10. );
+
 	for(int i=0; i<fMT2_histos_number; ++i){
 		std::stringstream out;
 		int mass = i*fMT2_histos_step;
@@ -367,8 +370,12 @@ void MassAnalysis::ControlPlots(){
 	}
 	fHMPT_selected ->Fill(tracks.Pt());
 		
-
-
+	if(fJets.size()>1) {
+		double delta_R=Util::GetDeltaR(fTR->PFJEta[0], fTR->JEta[0], fTR->PFJPhi[0], fTR->JPhi[0]);	
+		fHPFandCalo_deltaR -> Fill(delta_R);
+		delta_R       =Util::GetDeltaR(fTR->PFJEta[0], fTR->PFJEta[1], fTR->PFJPhi[0], fTR->PFJPhi[1]);
+		fHPFJ1J2DeltaR -> Fill(delta_R);	
+	}
 }
 
 // *************************************************************************************************
@@ -469,8 +476,9 @@ void MassAnalysis::PseudoJetMasses(){
 			interesting_Run.push_back(fTR->Run);
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
+			interesting_value.push_back(MT2);
 			interesting_Type.push_back("pseudojetMT2");
-			if(fTR->Run == 143657 && fTR->LumiSection == 1628 && fTR->Event==1564073782) PrintEvent();
+			if(fSetName=="JetMET_Prompt" || fSetName=="MultiJetRunB") UserAnalysisBase::EventPrint();
 		}
 		if(i==0){
 			// fill tree variable
@@ -646,6 +654,7 @@ void MassAnalysis::DiJetMasses(){
 		interesting_Run.push_back(fTR->Run);
 		interesting_Event.push_back(fTR->Event);
 		interesting_Lumi.push_back(fTR->LumiSection);
+		interesting_value.push_back(MCT);
 		interesting_Type.push_back("dijetMCT");
 		if(fTR->Run == 143657 && fTR->LumiSection == 1310 && fTR->Event==1285062562) {
 			PrintEvent();
@@ -666,6 +675,7 @@ void MassAnalysis::DiJetMasses(){
 			interesting_Run.push_back(fTR->Run);
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
+			interesting_value.push_back(MT2);
 			interesting_Type.push_back("dijetMT2");
 
 		}
@@ -1066,8 +1076,8 @@ void MassAnalysis::End(){
 	cout << " *************************************************************** " << endl;
 	cout << " interesting events                                              " << endl;
 	for(int i=0; i< interesting_Event.size(); ++i){
-		cout << interesting_Type[i] << " Run " << interesting_Run[i] << " lumisection " << interesting_Lumi[i]
-		     << " Event " << interesting_Event[i] << endl;	     
+		cout << interesting_Type[i] << "Run:Lumi:Evt" << " " << interesting_Run[i] << ":" << interesting_Lumi[i]
+		     << ":" << interesting_Event[i] << " value " << interesting_value[i] << endl;	     
 	}
 	cout << " *************************************************************** " << endl;
 
@@ -1193,5 +1203,7 @@ void MassAnalysis::End(){
 	fHMT_single_e_nojets     ->Write();
 	fHMT_single_mu_nojets    ->Write();
 
+	fHPFandCalo_deltaR       ->Write();
+	fHPFJ1J2DeltaR           ->Write();
 	fHistFile                ->Close();
 }
