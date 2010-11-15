@@ -74,6 +74,7 @@ public:
     }
   }
   void print() {
+    if ( !(countNames.size()>0) ) return;
     // This needs to be improved
     float maxc = counters[countNames[0]];
     float prev = maxc;
