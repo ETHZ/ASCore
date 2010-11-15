@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov  2 13:01:29 2010 by ROOT version 5.25/04
+// Wed Nov 10 14:02:56 2010 by ROOT version 5.25/04
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/RA5Nov01/TTbarJets-madgraph/SSDLTree.root
+// found on file: SSDLTrees/RA5Nov09/LM0/SSDLTree.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -37,6 +37,17 @@ public :
    Int_t           HLT_HT120U;
    Int_t           HLT_HT140U;
    Int_t           HLT_HT150U;
+   Int_t           HLT_HT130U;
+   Int_t           HLT_HT200U;
+   Int_t           HLT_Mu5_HT70U_v1;
+   Int_t           HLT_Mu5_HT100U_v1;
+   Int_t           HLT_DoubleMu3_HT50U;
+   Int_t           HLT_Ele10_HT70U;
+   Int_t           HLT_Ele10_HT100U;
+   Int_t           HLT_Ele10_EleId_HT70U;
+   Int_t           HLT_DoubleEle8_SW_HT70U_LR1_v1;
+   Int_t           HLT_Mu5_Ele5;
+   Int_t           HLT_Mu3_Ele8_HT70U_v1;
    Int_t           HLT_Ele10_LW_L1R;
    Int_t           HLT_Ele10_SW_L1R;
    Int_t           HLT_Ele15_LW_L1R;
@@ -62,61 +73,64 @@ public :
    Int_t           HTL_GoodMuEvent;
    Int_t           HTL_GoodHadronicEvent;
    Int_t           NMus;
-   Float_t         MuPt[4];   //[NMus]
-   Float_t         MuEta[4];   //[NMus]
-   Float_t         MuPhi[4];   //[NMus]
-   Int_t           MuCharge[4];   //[NMus]
-   Int_t           MuTight[4];   //[NMus]
-   Float_t         MuIso[4];   //[NMus]
-   Float_t         MuIsoHybrid[4];   //[NMus]
-   Float_t         MuDRJet[4];   //[NMus]
-   Float_t         MuDRHardestJet[4];   //[NMus]
-   Float_t         MuD0[4];   //[NMus]
-   Float_t         MuDz[4];   //[NMus]
-   Float_t         MuD0BS[4];   //[NMus]
-   Float_t         MuDzBS[4];   //[NMus]
-   Float_t         MuPtE[4];   //[NMus]
-   Int_t           MuGenID[4];   //[NMus]
-   Int_t           MuGenMoID[4];   //[NMus]
-   Int_t           MuGenGMoID[4];   //[NMus]
-   Int_t           MuGenType[4];   //[NMus]
-   Int_t           MuGenMoType[4];   //[NMus]
-   Int_t           MuGenGMoType[4];   //[NMus]
+   Float_t         MuPt[5];   //[NMus]
+   Float_t         MuEta[5];   //[NMus]
+   Float_t         MuPhi[5];   //[NMus]
+   Int_t           MuCharge[5];   //[NMus]
+   Int_t           MuTight[5];   //[NMus]
+   Float_t         MuIso[5];   //[NMus]
+   Float_t         MuIsoHybrid[5];   //[NMus]
+   Float_t         MuDRJet[5];   //[NMus]
+   Float_t         MuDRHardestJet[5];   //[NMus]
+   Float_t         MuD0[5];   //[NMus]
+   Float_t         MuDz[5];   //[NMus]
+   Float_t         MuD0BS[5];   //[NMus]
+   Float_t         MuDzBS[5];   //[NMus]
+   Float_t         MuPtE[5];   //[NMus]
+   Int_t           MuGenID[5];   //[NMus]
+   Int_t           MuGenMoID[5];   //[NMus]
+   Int_t           MuGenGMoID[5];   //[NMus]
+   Int_t           MuGenType[5];   //[NMus]
+   Int_t           MuGenMoType[5];   //[NMus]
+   Int_t           MuGenGMoType[5];   //[NMus]
    Float_t         MuMT;
    Float_t         MuMinv;
    Int_t           NEls;
-   Int_t           ElCh[4];   //[NEls]
-   Int_t           ElChIsCons[4];   //[NEls]
-   Int_t           ElChIsGenCons[4];   //[NEls]
-   Float_t         ElPt[4];   //[NEls]
-   Float_t         ElEta[4];   //[NEls]
-   Float_t         ElPhi[4];   //[NEls]
-   Float_t         ElD0[4];   //[NEls]
-   Float_t         ElD0Err[4];   //[NEls]
-   Float_t         ElEoverP[4];   //[NEls]
-   Float_t         ElHoverE[4];   //[NEls]
-   Float_t         ElSigmaIetaIeta[4];   //[NEls]
-   Float_t         ElDeltaPhiSuperClusterAtVtx[4];   //[NEls]
-   Float_t         ElDeltaEtaSuperClusterAtVtx[4];   //[NEls]
-   Float_t         ElRelIso[4];   //[NEls]
-   Float_t         ElDR04TkSumPt[4];   //[NEls]
-   Float_t         ElDR04EcalRecHitSumEt[4];   //[NEls]
-   Float_t         ElDR04HcalTowerSumEt[4];   //[NEls]
-   Float_t         ElS4OverS1[4];   //[NEls]
-   Float_t         ElConvPartnerTrkDist[4];   //[NEls]
-   Float_t         ElConvPartnerTrkDCot[4];   //[NEls]
-   Float_t         ElChargeMisIDProb[4];   //[NEls]
-   Float_t         ElDRjet[4];   //[NEls]
-   Float_t         ElDRhardestjet[4];   //[NEls]
-   Int_t           ElGenID[4];   //[NEls]
-   Int_t           ElGenMID[4];   //[NEls]
-   Int_t           ElGenGMID[4];   //[NEls]
-   Int_t           ElGenType[4];   //[NEls]
-   Int_t           ElGenMType[4];   //[NEls]
-   Int_t           ElGenGMType[4];   //[NEls]
-   Int_t           ElTight[4];   //[NEls]
-   Float_t         ElHybRelIso[4];   //[NEls]
-   Float_t         ElMT[4];   //[NEls]
+   Int_t           ElCh[5];   //[NEls]
+   Int_t           ElChIsCons[5];   //[NEls]
+   Int_t           ElChIsGenCons[5];   //[NEls]
+   Int_t           ElEcalDriven[5];   //[NEls]
+   Float_t         ElCaloEnergy[5];   //[NEls]
+   Float_t         ElPt[5];   //[NEls]
+   Float_t         ElEta[5];   //[NEls]
+   Float_t         ElPhi[5];   //[NEls]
+   Float_t         ElD0[5];   //[NEls]
+   Float_t         ElD0Err[5];   //[NEls]
+   Float_t         ElDz[5];   //[NEls]
+   Float_t         ElDzErr[5];   //[NEls]
+   Float_t         ElEoverP[5];   //[NEls]
+   Float_t         ElHoverE[5];   //[NEls]
+   Float_t         ElSigmaIetaIeta[5];   //[NEls]
+   Float_t         ElDeltaPhiSuperClusterAtVtx[5];   //[NEls]
+   Float_t         ElDeltaEtaSuperClusterAtVtx[5];   //[NEls]
+   Float_t         ElRelIso[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP80[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP90[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP95[5];   //[NEls]
+   Int_t           ElIsConvertedEl_WP80[5];   //[NEls]
+   Int_t           ElIsConvertedEl_WP90[5];   //[NEls]
+   Float_t         ElS4OverS1[5];   //[NEls]
+   Float_t         ElDRjet[5];   //[NEls]
+   Float_t         ElDRhardestjet[5];   //[NEls]
+   Int_t           ElGenID[5];   //[NEls]
+   Int_t           ElGenMID[5];   //[NEls]
+   Int_t           ElGenGMID[5];   //[NEls]
+   Int_t           ElGenType[5];   //[NEls]
+   Int_t           ElGenMType[5];   //[NEls]
+   Int_t           ElGenGMType[5];   //[NEls]
+   Int_t           ElTight[5];   //[NEls]
+   Float_t         ElHybRelIso[5];   //[NEls]
+   Float_t         ElMT[5];   //[NEls]
    Float_t         ElMInv;
    Float_t         ElMTInv;
    Float_t         HT;
@@ -125,21 +139,21 @@ public :
    Float_t         pfMET;
    Float_t         MuCorrMET;
    Int_t           NJets;
-   Float_t         JetPt[12];   //[NJets]
-   Float_t         JetEta[12];   //[NJets]
-   Float_t         JetPhi[12];   //[NJets]
+   Float_t         JetPt[30];   //[NJets]
+   Float_t         JetEta[30];   //[NJets]
+   Float_t         JetPhi[30];   //[NJets]
    Float_t         dPhiMJ1;
    Float_t         dPhiMJ2;
    Float_t         R12;
    Float_t         R21;
    Float_t         R12plusR21;
    Int_t           NPhos;
-   Float_t         PhoPt[4];   //[NPhos]
-   Float_t         PhoEta[4];   //[NPhos]
-   Float_t         PhoPhi[4];   //[NPhos]
-   Float_t         PhoRelIso[4];   //[NPhos]
-   Float_t         PhoDRjet[4];   //[NPhos]
-   Float_t         PhoDRhardestjet[4];   //[NPhos]
+   Float_t         PhoPt[5];   //[NPhos]
+   Float_t         PhoEta[5];   //[NPhos]
+   Float_t         PhoPhi[5];   //[NPhos]
+   Float_t         PhoRelIso[5];   //[NPhos]
+   Float_t         PhoDRjet[5];   //[NPhos]
+   Float_t         PhoDRhardestjet[5];   //[NPhos]
    Float_t         AlphaT_h;
    Float_t         AlphaCT_h;
    Float_t         AlphaT;
@@ -255,6 +269,17 @@ public :
    TBranch        *b_HLT_HT120U;   //!
    TBranch        *b_HLT_HT140U;   //!
    TBranch        *b_HLT_HT150U;   //!
+   TBranch        *b_HLT_HT130U;   //!
+   TBranch        *b_HLT_HT200U;   //!
+   TBranch        *b_HLT_Mu5_HT70U_v1;   //!
+   TBranch        *b_HLT_Mu5_HT100U_v1;   //!
+   TBranch        *b_HLT_DoubleMu3_HT50U;   //!
+   TBranch        *b_HLT_Ele10_HT70U;   //!
+   TBranch        *b_HLT_Ele10_HT100U;   //!
+   TBranch        *b_HLT_Ele10_EleId_HT70U;   //!
+   TBranch        *b_HLT_DoubleEle8_SW_HT70U_LR1_v1;   //!
+   TBranch        *b_HLT_Mu5_Ele5;   //!
+   TBranch        *b_HLT_Mu3_Ele8_HT70U_v1;   //!
    TBranch        *b_HLT_Ele10_LW_L1R;   //!
    TBranch        *b_HLT_Ele10_SW_L1R;   //!
    TBranch        *b_HLT_Ele15_LW_L1R;   //!
@@ -306,24 +331,27 @@ public :
    TBranch        *b_ElCh;   //!
    TBranch        *b_ElChIsCons;   //!
    TBranch        *b_ElChIsGenCons;   //!
+   TBranch        *b_ElEcalDriven;   //!
+   TBranch        *b_ElCaloEnergy;   //!
    TBranch        *b_ElPt;   //!
    TBranch        *b_ElEta;   //!
    TBranch        *b_ElPhi;   //!
    TBranch        *b_ElD0;   //!
    TBranch        *b_ElD0Err;   //!
+   TBranch        *b_ElDz;   //!
+   TBranch        *b_ElDzErr;   //!
    TBranch        *b_ElEoverP;   //!
    TBranch        *b_ElHoverE;   //!
    TBranch        *b_ElSigmaIetaIeta;   //!
    TBranch        *b_ElDeltaPhiSuperClusterAtVtx;   //!
    TBranch        *b_ElDeltaEtaSuperClusterAtVtx;   //!
    TBranch        *b_ElRelIso;   //!
-   TBranch        *b_ElDR04TkSumPt;   //!
-   TBranch        *b_ElDR04EcalRecHitSumEt;   //!
-   TBranch        *b_ElDR04HcalTowerSumEt;   //!
+   TBranch        *b_ElIsGoodElId_WP80;   //!
+   TBranch        *b_ElIsGoodElId_WP90;   //!
+   TBranch        *b_ElIsGoodElId_WP95;   //!
+   TBranch        *b_ElIsConvertedEl_WP80;   //!
+   TBranch        *b_ElIsConvertedEl_WP90;   //!
    TBranch        *b_ElS4OverS1;   //!
-   TBranch        *b_ElConvPartnerTrkDist;   //!
-   TBranch        *b_ElConvPartnerTrkDCot;   //!
-   TBranch        *b_ElChargeMisIDProb;   //!
    TBranch        *b_ElDRjet;   //!
    TBranch        *b_ElDRhardestjet;   //!
    TBranch        *b_ElGenID;   //!
@@ -472,9 +500,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov01/TTbarJets-madgraph/SSDLTree.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov09/LM0/SSDLTree.root");
       if (!f) {
-         f = new TFile("SSDLTrees/RA5Nov01/TTbarJets-madgraph/SSDLTree.root");
+         f = new TFile("SSDLTrees/RA5Nov09/LM0/SSDLTree.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -544,6 +572,17 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_HT120U", &HLT_HT120U, &b_HLT_HT120U);
    fChain->SetBranchAddress("HLT_HT140U", &HLT_HT140U, &b_HLT_HT140U);
    fChain->SetBranchAddress("HLT_HT150U", &HLT_HT150U, &b_HLT_HT150U);
+   fChain->SetBranchAddress("HLT_HT130U", &HLT_HT130U, &b_HLT_HT130U);
+   fChain->SetBranchAddress("HLT_HT200U", &HLT_HT200U, &b_HLT_HT200U);
+   fChain->SetBranchAddress("HLT_Mu5_HT70U_v1", &HLT_Mu5_HT70U_v1, &b_HLT_Mu5_HT70U_v1);
+   fChain->SetBranchAddress("HLT_Mu5_HT100U_v1", &HLT_Mu5_HT100U_v1, &b_HLT_Mu5_HT100U_v1);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT50U", &HLT_DoubleMu3_HT50U, &b_HLT_DoubleMu3_HT50U);
+   fChain->SetBranchAddress("HLT_Ele10_HT70U", &HLT_Ele10_HT70U, &b_HLT_Ele10_HT70U);
+   fChain->SetBranchAddress("HLT_Ele10_HT100U", &HLT_Ele10_HT100U, &b_HLT_Ele10_HT100U);
+   fChain->SetBranchAddress("HLT_Ele10_EleId_HT70U", &HLT_Ele10_EleId_HT70U, &b_HLT_Ele10_EleId_HT70U);
+   fChain->SetBranchAddress("HLT_DoubleEle8_SW_HT70U_LR1_v1", &HLT_DoubleEle8_SW_HT70U_LR1_v1, &b_HLT_DoubleEle8_SW_HT70U_LR1_v1);
+   fChain->SetBranchAddress("HLT_Mu5_Ele5", &HLT_Mu5_Ele5, &b_HLT_Mu5_Ele5);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_HT70U_v1", &HLT_Mu3_Ele8_HT70U_v1, &b_HLT_Mu3_Ele8_HT70U_v1);
    fChain->SetBranchAddress("HLT_Ele10_LW_L1R", &HLT_Ele10_LW_L1R, &b_HLT_Ele10_LW_L1R);
    fChain->SetBranchAddress("HLT_Ele10_SW_L1R", &HLT_Ele10_SW_L1R, &b_HLT_Ele10_SW_L1R);
    fChain->SetBranchAddress("HLT_Ele15_LW_L1R", &HLT_Ele15_LW_L1R, &b_HLT_Ele15_LW_L1R);
@@ -595,24 +634,27 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElCh", ElCh, &b_ElCh);
    fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
    fChain->SetBranchAddress("ElChIsGenCons", ElChIsGenCons, &b_ElChIsGenCons);
+   fChain->SetBranchAddress("ElEcalDriven", ElEcalDriven, &b_ElEcalDriven);
+   fChain->SetBranchAddress("ElCaloEnergy", ElCaloEnergy, &b_ElCaloEnergy);
    fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
    fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
    fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
    fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
    fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
+   fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
+   fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElEoverP", ElEoverP, &b_ElEoverP);
    fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
    fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
    fChain->SetBranchAddress("ElDeltaPhiSuperClusterAtVtx", ElDeltaPhiSuperClusterAtVtx, &b_ElDeltaPhiSuperClusterAtVtx);
    fChain->SetBranchAddress("ElDeltaEtaSuperClusterAtVtx", ElDeltaEtaSuperClusterAtVtx, &b_ElDeltaEtaSuperClusterAtVtx);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
-   fChain->SetBranchAddress("ElDR04TkSumPt", ElDR04TkSumPt, &b_ElDR04TkSumPt);
-   fChain->SetBranchAddress("ElDR04EcalRecHitSumEt", ElDR04EcalRecHitSumEt, &b_ElDR04EcalRecHitSumEt);
-   fChain->SetBranchAddress("ElDR04HcalTowerSumEt", ElDR04HcalTowerSumEt, &b_ElDR04HcalTowerSumEt);
+   fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
+   fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
+   fChain->SetBranchAddress("ElIsGoodElId_WP95", ElIsGoodElId_WP95, &b_ElIsGoodElId_WP95);
+   fChain->SetBranchAddress("ElIsConvertedEl_WP80", ElIsConvertedEl_WP80, &b_ElIsConvertedEl_WP80);
+   fChain->SetBranchAddress("ElIsConvertedEl_WP90", ElIsConvertedEl_WP90, &b_ElIsConvertedEl_WP90);
    fChain->SetBranchAddress("ElS4OverS1", ElS4OverS1, &b_ElS4OverS1);
-   fChain->SetBranchAddress("ElConvPartnerTrkDist", ElConvPartnerTrkDist, &b_ElConvPartnerTrkDist);
-   fChain->SetBranchAddress("ElConvPartnerTrkDCot", ElConvPartnerTrkDCot, &b_ElConvPartnerTrkDCot);
-   fChain->SetBranchAddress("ElChargeMisIDProb", ElChargeMisIDProb, &b_ElChargeMisIDProb);
    fChain->SetBranchAddress("ElDRjet", ElDRjet, &b_ElDRjet);
    fChain->SetBranchAddress("ElDRhardestjet", ElDRhardestjet, &b_ElDRhardestjet);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
