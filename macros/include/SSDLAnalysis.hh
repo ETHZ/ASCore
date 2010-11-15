@@ -82,22 +82,39 @@ private:
 	int   fTLumiSection;
 	float fTextxslo;
 	float fTintxs;
-	
 	// trigger properties
-	int   fT_HLTMu9;
-	int   fT_HLTMu11;
-	int   fT_HLTMu15;
-	int   fT_HLTDoubleMu3;
-	int   fT_HLTDoubleMu0;
+	int   fTHLT_Mu9;
+	int   fTHLT_Mu11;
+	int   fTHLT_Mu13_v1;
+	int   fTHLT_Mu15;
+	int   fTHLT_Mu15_v1;
+	int   fTHLT_DoubleMu0;
+	int   fTHLT_DoubleMu3;
+	int   fTHLT_DoubleMu3_v2;
+	int   fTHLT_DoubleMu5_v2;
 	int   fTHLT_Jet15U;
 	int   fTHLT_Jet30U;
 	int   fTHLT_Jet50U;
 	int   fTHLT_Jet70U;
 	int   fTHLT_Jet100U;
+	int   fTHLT_Jet100U_v2;
+	int   fTHLT_Jet100U_v3;
 	int   fTHLT_HT100U;
 	int   fTHLT_HT120U;
 	int   fTHLT_HT140U;
 	int   fTHLT_HT150U;
+	int   fTHLT_HT150U_v3;
+	int   fTHLT_HT130U;
+	int   fTHLT_HT200U;
+	int   fTHLT_Mu5_HT70U_v1;
+	int   fTHLT_Mu5_HT100U_v1;
+	int   fTHLT_DoubleMu3_HT50U;
+	int   fTHLT_Ele10_HT70U;
+	int   fTHLT_Ele10_HT100U;
+	int   fTHLT_Ele10_EleId_HT70U;
+	int   fTHLT_DoubleEle8_SW_HT70U_LR1_v1;
+	int   fTHLT_Mu5_Ele5;
+	int   fTHLT_Mu3_Ele8_HT70U_v1;
 	int   fTHLT_Ele10_LW_L1R;
 	int   fTHLT_Ele10_SW_L1R;
 	int   fTHLT_Ele15_LW_L1R;
@@ -106,6 +123,7 @@ private:
 	int   fTHLT_DoubleEle5_SW_L1R;
 	int   fTHLT_DoubleEle10_SW_L1R;
 	int   fTHLT_DoubleEle15_SW_L1R_v1;
+	int   fTHLT_DoubleEle17_SW_L1R_v1;
 	int   fTHLT_Ele10_LW_EleId_L1R;
 	int   fTHLT_Ele10_SW_EleId_L1R;
 	int   fTHLT_Ele15_SW_CaloEleId_L1R;
@@ -116,12 +134,18 @@ private:
 	int   fTHLT_Ele17_SW_EleId_L1R;
 	int   fTHLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1;
 	int   fTHLT_Ele17_SW_TightEleIdIsol_L1R_v1;
-	int   fTHTL_GoodElEvent;
-	int   fTHTL_GoodElEvent_RA5;
-	int   fTHTL_GoodElEvent_TDL;
-	int   fTHTL_GoodElFakesEvent;
-	int   fTHTL_GoodHadronicEvent;
-	int   fTHTL_GoodMuEvent;
+	int   fTHLT_Ele17_SW_TighterEleId_L1R_v1;
+	int   fTHLT_Ele22_SW_TighterEleId_L1R_v2;
+	int   fTHLT_Ele22_SW_TighterEleId_L1R_v3;
+	int   fTHLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1;
+	int   fTHLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1;
+	int   fTHLT_Ele32_SW_TighterEleId_L1R_v2;
+	int   fTHLT_GoodElEvent;
+	int   fTHLT_GoodElEvent_RA5;
+	int   fTHLT_GoodElEvent_TDL;
+	int   fTHLT_GoodElFakesEvent;
+	int   fTHLT_GoodHadronicEvent;
+	int   fTHLT_GoodMuEvent;
 	
 	// jet-MET properties
 	int   fTnqjets;
