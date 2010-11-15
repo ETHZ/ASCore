@@ -506,7 +506,6 @@ double UserAnalysisBase::hybRelElIso(int index){
 bool UserAnalysisBase::IsTightEl(int index){
 	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP95%)
 	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
-
 	if(!IsGoodElId_WP80(index)) return false;	// corresponding to the 80% eff. WP without isolation cuts or conversion rejection
 	if(IsConvertedEl_WP80(index)) return false;	
 	if(!IsIsolatedEl_WP95(index)) return false;
@@ -514,12 +513,23 @@ bool UserAnalysisBase::IsTightEl(int index){
 }
 
 bool UserAnalysisBase::IsLooseEl(int index){
-	// Definition of "Loose electron" (El.Id cuts: WP90%; El.Convers.Reject.: WP90%; El.RelIso: Loose)
-	if(!IsGoodElId_WP90(index)) return false;		// corresponding to the 90% eff. WP without isolation cuts or conversion rejection
-	if(IsConvertedEl_WP90(index)) return false;	
-	if(!IsIsolatedEl_LooseIso(index)) return false;
-	if(fTR->ElCaloEnergy[index]<10.) return false;
+	// Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
+    // basic reco cuts
 	if(!fTR->ElEcalDriven[index]) return false;
+	if(fTR->ElCaloEnergy[index]<10.) return false;
+	if(fTR->ElDuplicateEl[index] >= 0) return false;
+    // (El.Id cuts: WP90%; El.Convers.Reject.: WP90%; El.RelIso: Loose)	
+	if(!IsGoodElId_WP90(index)) return false;		// corresponding to the 90% eff. WP without isolation cuts or conversion rejection
+	if(IsConvertedEl_WP90(index)) return false;
+	if(!IsIsolatedEl_LooseIso(index)) return false;
+	// rejection if matched to any muon which passes basic quility cuts
+	for( int im = 0; im < fTR->NMus; ++im ){
+		if( (fTR->MuIsGlobalMuon[im] == 1 && fTR->MuIsTrackerMuon[im] == 1) &&
+		    (fTR->MuNTkHits[im] > 10) && (fTR->MuNChi2[index] < 11) && (fTR->MuNMuHits[index] > 0)) {
+			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
+			if(deltaR <= 0.1) return false;
+		}
+	}
 	return true;
 }
 
@@ -620,24 +630,23 @@ bool UserAnalysisBase::IsGoodMuEvent(){
 	if(!IsGoodEvent()) return false;
 	bool HLT_Mu9       = GetHLTResult("HLT_Mu9");
 	bool HLT_Mu11      = GetHLTResult("HLT_Mu11");
+	bool HLT_Mu13_v1   = GetHLTResult("HLT_Mu13_v1");
 	bool HLT_Mu15      = GetHLTResult("HLT_Mu15");
+	bool HLT_Mu15_v1   = GetHLTResult("HLT_Mu15_v1");
 	bool HLT_DoubleMu0 = GetHLTResult("HLT_DoubleMu0");
 	bool HLT_DoubleMu3 = GetHLTResult("HLT_DoubleMu3");
-
-	bool HLT_Jet30U    = GetHLTResult("HLT_Jet30U");
-	bool HLT_Jet50U    = GetHLTResult("HLT_Jet50U");
-	bool HLT_Jet70U    = GetHLTResult("HLT_Jet70U");
-	bool HLT_Jet100U   = GetHLTResult("HLT_Jet100U");
-	return (HLT_Mu9 ||
-	        HLT_Mu11 ||
-	        HLT_Mu15 ||
-	        HLT_DoubleMu0 ||
-	        HLT_DoubleMu3 ||
-	        HLT_Jet30U ||
-	        HLT_Jet50U ||
-	        HLT_Jet70U ||
-	        HLT_Jet100U
-	);
+	bool HLT_DoubleMu3_v2 = GetHLTResult("HLT_DoubleMu3_v2");
+	bool HLT_DoubleMu5_v2 = GetHLTResult("HLT_DoubleMu5_v2");
+	
+	return (HLT_Mu9     ||
+	        HLT_Mu11    ||
+	        HLT_Mu13_v1 ||
+	        HLT_Mu15    ||
+	        HLT_Mu15_v1 ||
+	        HLT_DoubleMu0    ||
+	        HLT_DoubleMu3    ||
+	        HLT_DoubleMu3_v2 ||
+	        HLT_DoubleMu5_v2);
 }
 
 bool UserAnalysisBase::IsGoodElEvent(){
@@ -651,6 +660,7 @@ bool UserAnalysisBase::IsGoodElEvent(){
 	bool HLT_DoubleEle5_SW_L1R =		GetHLTResult("HLT_DoubleEle5_SW_L1R");
 	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
 	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	bool HLT_DoubleEle17_SW_L1R_v1 =    GetHLTResult("HLT_DoubleEle17_SW_L1R_v1");
 	// e triggers with ElID or Iso cuts
 	bool HLT_Ele10_LW_EleId_L1R =		GetHLTResult("HLT_Ele10_LW_EleId_L1R");
 	bool HLT_Ele10_SW_EleId_L1R =		GetHLTResult("HLT_Ele10_SW_EleId_L1R");
@@ -661,25 +671,38 @@ bool UserAnalysisBase::IsGoodElEvent(){
 	bool HLT_Ele17_SW_EleId_L1R =		GetHLTResult("HLT_Ele17_SW_EleId_L1R");
 	bool HLT_Ele17_SW_TightEleId_L1R =	GetHLTResult("HLT_Ele17_SW_TightEleId_L1R");
 	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
-	bool HLT_Ele17_SW_TightEleIdIsol_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightEleIdIsol_L1R_v1");
-	
-	return (HLT_Ele10_LW_L1R				|| HLT_Ele15_LW_L1R							|| HLT_DoubleEle5_SW_L1R				||
-			HLT_Ele10_SW_L1R				|| HLT_Ele15_SW_L1R							|| HLT_Ele20_SW_L1R                     ||
-			HLT_Ele10_LW_EleId_L1R			|| HLT_Ele10_SW_EleId_L1R					|| HLT_Ele15_SW_CaloEleId_L1R			||
-			HLT_Ele15_SW_EleId_L1R			|| HLT_Ele17_SW_LooseEleId_L1R				|| HLT_Ele17_SW_CaloEleId_L1R			||
-			HLT_Ele17_SW_EleId_L1R			|| HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || HLT_Ele17_SW_TightEleIdIsol_L1R_v1	||
-			HLT_Ele17_SW_TightEleId_L1R     || HLT_DoubleEle10_SW_L1R			|| HLT_DoubleEle15_SW_L1R_v1);
+	bool HLT_Ele17_SW_TightEleIdIsol_L1R_v1 =       GetHLTResult("HLT_Ele17_SW_TightEleIdIsol_L1R_v1");
+	bool HLT_Ele17_SW_TighterEleId_L1R_v1 =         GetHLTResult("HLT_Ele17_SW_TighterEleId_L1R_v1");
+	bool HLT_Ele22_SW_TighterEleId_L1R_v2 =         GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v2");
+	bool HLT_Ele22_SW_TighterEleId_L1R_v3 =         GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v3");
+	bool HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 =  GetHLTResult("HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1");
+	bool HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 =  GetHLTResult("HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1");
+	bool HLT_Ele32_SW_TighterEleId_L1R_v2 =         GetHLTResult("HLT_Ele32_SW_TighterEleId_L1R_v2");
+
+	return (HLT_Ele10_LW_L1R				|| HLT_Ele15_LW_L1R            || HLT_DoubleEle5_SW_L1R				    ||
+			HLT_Ele10_SW_L1R				|| HLT_Ele15_SW_L1R            || HLT_Ele20_SW_L1R                      ||
+			HLT_Ele10_LW_EleId_L1R			|| HLT_Ele10_SW_EleId_L1R      || HLT_Ele15_SW_CaloEleId_L1R			|| HLT_Ele15_SW_EleId_L1R ||
+            HLT_Ele17_SW_LooseEleId_L1R     || HLT_Ele17_SW_CaloEleId_L1R  || HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 ||
+			HLT_Ele17_SW_EleId_L1R          || HLT_Ele17_SW_TightEleId_L1R || HLT_Ele17_SW_TightEleIdIsol_L1R_v1    || HLT_Ele17_SW_TighterEleId_L1R_v1     || 
+			HLT_Ele20_SW_L1R                ||
+            HLT_Ele22_SW_TighterEleId_L1R_v2        || HLT_Ele22_SW_TighterEleId_L1R_v3 || HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
+			HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 || HLT_Ele32_SW_TighterEleId_L1R_v2 ||
+			HLT_DoubleEle10_SW_L1R                  || HLT_DoubleEle15_SW_L1R_v1        || HLT_DoubleEle17_SW_L1R_v1);
 }
 
 bool UserAnalysisBase::IsGoodElEvent_RA5(){
 	int run = fTR->Run;
 	// signle-e triggers without ElID or Iso cuts
-	bool HLT_Ele10_LW_L1R =				GetHLTResult("HLT_Ele10_LW_L1R");
-	bool HLT_Ele15_LW_L1R =				GetHLTResult("HLT_Ele15_LW_L1R");
+	bool HLT_Ele10_LW_L1R =          GetHLTResult("HLT_Ele10_LW_L1R");
+	bool HLT_Ele10_SW_L1R =          GetHLTResult("HLT_Ele10_SW_L1R");
+	bool HLT_Ele15_LW_L1R =          GetHLTResult("HLT_Ele15_LW_L1R");
+	bool HLT_Ele15_SW_L1R =          GetHLTResult("HLT_Ele15_SW_L1R");
+	bool HLT_Ele20_SW_L1R =          GetHLTResult("HLT_Ele20_SW_L1R");
 	// double-e triggers without ElID or Iso cuts
-	bool HLT_DoubleEle5_SW_L1R =		GetHLTResult("HLT_DoubleEle5_SW_L1R");
-	bool HLT_DoubleEle10_SW_L1R =		GetHLTResult("HLT_DoubleEle10_SW_L1R");
-	bool HLT_DoubleEle15_SW_L1R_v1 =	GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	bool HLT_DoubleEle5_SW_L1R =     GetHLTResult("HLT_DoubleEle5_SW_L1R");
+	bool HLT_DoubleEle10_SW_L1R =    GetHLTResult("HLT_DoubleEle10_SW_L1R");
+	bool HLT_DoubleEle15_SW_L1R_v1 = GetHLTResult("HLT_DoubleEle15_SW_L1R_v1");
+	bool HLT_DoubleEle17_SW_L1R_v1 = GetHLTResult("HLT_DoubleEle17_SW_L1R_v1");
 	// e triggers with ElID or Iso cuts
 	bool HLT_Ele10_LW_EleId_L1R =		GetHLTResult("HLT_Ele10_LW_EleId_L1R");
 	bool HLT_Ele10_SW_EleId_L1R =		GetHLTResult("HLT_Ele10_SW_EleId_L1R");
@@ -688,15 +711,23 @@ bool UserAnalysisBase::IsGoodElEvent_RA5(){
 	bool HLT_Ele17_SW_LooseEleId_L1R =	GetHLTResult("HLT_Ele17_SW_LooseEleId_L1R");
 	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
 	bool HLT_Ele17_SW_EleId_L1R =		GetHLTResult("HLT_Ele17_SW_EleId_L1R");
-	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
-
+	bool HLT_Ele17_SW_TightEleId_L1R =  GetHLTResult("HLT_Ele17_SW_TightEleId_L1R");
+	bool HLT_Ele17_SW_TighterEleId_L1R_v1 =         GetHLTResult("HLT_Ele17_SW_TighterEleId_L1R_v1");
+	bool HLT_Ele22_SW_TighterEleId_L1R_v2 =         GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v2");
+	bool HLT_Ele22_SW_TighterEleId_L1R_v3 =         GetHLTResult("HLT_Ele22_SW_TighterEleId_L1R_v3");
+	bool HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 =  GetHLTResult("HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1");
+	bool HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 =  GetHLTResult("HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1");
+	bool HLT_Ele32_SW_TighterEleId_L1R_v2 =         GetHLTResult("HLT_Ele32_SW_TighterEleId_L1R_v2");
+	
 	if (run==1)						return (HLT_Ele10_LW_L1R);
-	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R						 || HLT_Ele15_LW_L1R					|| HLT_DoubleEle5_SW_L1R);
-	if (run>=138000 && run<=141900)	return (HLT_Ele15_LW_L1R						 || HLT_Ele10_LW_EleId_L1R				|| HLT_DoubleEle5_SW_L1R);
-	if (run>141900)					return (HLT_Ele10_SW_EleId_L1R					 || HLT_Ele15_SW_CaloEleId_L1R			|| HLT_Ele15_SW_EleId_L1R ||
-											HLT_Ele17_SW_LooseEleId_L1R				 || HLT_Ele17_SW_CaloEleId_L1R			|| HLT_Ele17_SW_EleId_L1R || 
-											HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 || /*HLT_Ele17_SW_TightEleIdIsol_L1R_v1  ||*/
-											HLT_DoubleEle10_SW_L1R					 || HLT_DoubleEle15_SW_L1R_v1);
+	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R            || HLT_Ele10_SW_L1R           || HLT_Ele15_LW_L1R           || HLT_DoubleEle5_SW_L1R);
+	if (run>=138000 && run<=141900)	return (HLT_Ele15_LW_L1R            || HLT_Ele15_SW_L1R           || HLT_Ele10_LW_EleId_L1R     || HLT_DoubleEle5_SW_L1R);
+	if (run>141900)					return (HLT_Ele10_SW_EleId_L1R      || HLT_Ele15_SW_CaloEleId_L1R || HLT_Ele15_SW_EleId_L1R ||
+											HLT_Ele17_SW_LooseEleId_L1R || HLT_Ele17_SW_CaloEleId_L1R || HLT_Ele17_SW_EleId_L1R || 
+											HLT_Ele17_SW_TightEleId_L1R || HLT_Ele17_SW_TighterEleId_L1R_v1 || HLT_Ele20_SW_L1R ||
+											HLT_Ele22_SW_TighterEleId_L1R_v2        || HLT_Ele22_SW_TighterEleId_L1R_v3 || HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
+											HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 || HLT_Ele32_SW_TighterEleId_L1R_v2 ||
+											HLT_DoubleEle10_SW_L1R      || HLT_DoubleEle15_SW_L1R_v1  || HLT_DoubleEle17_SW_L1R_v1);
 	return false;
 }
 
@@ -715,7 +746,7 @@ bool UserAnalysisBase::IsGoodElEvent_TDL(){
 	bool HLT_Ele17_SW_CaloEleId_L1R =	GetHLTResult("HLT_Ele17_SW_CaloEleId_L1R");
 	bool HLT_Ele17_SW_TightEleId_L1R =	GetHLTResult("HLT_Ele17_SW_TightEleId_L1R");
 	bool HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1 = GetHLTResult("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1");
-	
+
 	if (run==1)						return (HLT_Ele10_LW_L1R);
 	if (run>1		&& run<138000)	return (HLT_Ele10_LW_L1R);
 	if (run>=138000 && run<141900)	return (HLT_Ele15_LW_L1R);
@@ -740,14 +771,33 @@ bool UserAnalysisBase::IsGoodHadronicEvent(){
 	// HLT and Jet triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
 	bool HLT_Jet30U	= GetHLTResult("HLT_Jet30U");
 	bool HLT_Jet50U	= GetHLTResult("HLT_Jet50U");
-	bool HLT_Jet70U	= GetHLTResult("fTHLT_Jet70U");
-	bool HLT_Jet100U= GetHLTResult("fTHLT_Jet100U");
-	bool HLT_HT100U	= GetHLTResult("fTHLT_HT100U");
-	bool HLT_HT120U	= GetHLTResult("fTHLT_HT120U");
-	bool HLT_HT140U	= GetHLTResult("fTHLT_HT140U");
-	bool HLT_HT150U	= GetHLTResult("fTHLT_HT150U");
-	
-	return (HLT_Jet30U || HLT_Jet50U || HLT_Jet70U || HLT_Jet100U || HLT_HT100U || HLT_HT120U || HLT_HT140U || HLT_HT150U);
+	bool HLT_Jet70U	= GetHLTResult("HLT_Jet70U");
+	bool HLT_Jet100U= GetHLTResult("HLT_Jet100U");
+	bool HLT_Jet100U_v2= GetHLTResult("HLT_Jet100U_v2");
+	bool HLT_Jet100U_v3= GetHLTResult("HLT_Jet100U_v3");
+	bool HLT_HT100U	= GetHLTResult("HLT_HT100U");
+	bool HLT_HT120U	= GetHLTResult("HLT_HT120U");
+	bool HLT_HT130U	= GetHLTResult("HLT_HT130U");
+	bool HLT_HT140U	= GetHLTResult("HLT_HT140U");
+	bool HLT_HT150U	= GetHLTResult("HLT_HT150U");
+	bool HLT_HT150U_v3	        = GetHLTResult("HLT_HT150U_v3");
+	bool HLT_HT200U	            = GetHLTResult("HLT_HT200U");
+	// HLT cross-triggers
+	bool HLT_Mu5_HT70U_v1	    = GetHLTResult("HLT_Mu5_HT70U_v1");
+	bool HLT_Mu5_HT100U_v1	    = GetHLTResult("HLT_Mu5_HT100U_v1");
+	bool HLT_DoubleMu3_HT50U    = GetHLTResult("HLT_DoubleMu3_HT50U");
+	bool HLT_Ele10_HT70U	    = GetHLTResult("HLT_Ele10_HT70U");
+	bool HLT_Ele10_HT100U	    = GetHLTResult("HLT_Ele10_HT100U");
+	bool HLT_Ele10_EleId_HT70U	= GetHLTResult("HLT_Ele10_EleId_HT70U");
+	bool HLT_DoubleEle8_SW_HT70U_LR1_v1	= GetHLTResult("HLT_DoubleEle8_SW_HT70U_LR1_v1");
+	bool HLT_Mu5_Ele5	        = GetHLTResult("HLT_Mu5_Ele5");
+	bool HLT_Mu3_Ele8_HT70U_v1	= GetHLTResult("HLT_Mu3_Ele8_HT70U_v1");
+
+	return (HLT_Jet30U       || HLT_Jet50U        || HLT_Jet70U            || HLT_Jet100U || HLT_Jet100U_v2 || HLT_Jet100U_v3 ||
+			HLT_HT100U       || HLT_HT120U        || HLT_HT130U            || HLT_HT140U  || HLT_HT150U || HLT_HT200U || HLT_HT150U_v3 ||
+			HLT_Mu5_HT70U_v1 || HLT_Mu5_HT100U_v1 || HLT_DoubleMu3_HT50U   ||
+			HLT_Ele10_HT70U  || HLT_Ele10_HT100U  || HLT_Ele10_EleId_HT70U || HLT_DoubleEle8_SW_HT70U_LR1_v1 ||
+			HLT_Mu5_Ele5     || HLT_Mu3_Ele8_HT70U_v1);
 }
 
 vector<int> UserAnalysisBase::ElectronSelection(){
@@ -759,24 +809,12 @@ vector<int> UserAnalysisBase::ElectronSelection(){
 	for(int ind = 0; ind < fTR->NEles; ++ind){
 		// selection
 		if(!IsLooseEl(ind)) continue;
-		// additional kinematic cuts
+		// kinematic cuts
 		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
 		if(fTR->ElPt[ind] < 10.) continue;
 		// additional cuts
-		if(fTR->ElDuplicateEl[ind] >= 0) continue;
 		if(!IsElFromPrimaryVx(ind)) continue;
-		
-		// rejection if matched to any muon	
-		bool elMuDR04Matched(0);
-		// rejection if matched to any muon	
-		for( int im = 0; im < fTR->NMus; ++im ){
-			if( (fTR->MuIsGlobalMuon[im] == 0 || fTR->MuIsTrackerMuon[im] == 0) && ( fTR->MuNTkHits[im] > 10) ) {
-				double deltaR = Util::GetDeltaR(fTR->ElEta[ind], fTR->MuEta[im], fTR->ElPhi[ind], fTR->MuPhi[im]);
-				if(deltaR <= 0.1) elMuDR04Matched = true;
-			}
-		}
-		if (elMuDR04Matched) continue;
-		
+
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->ElPt[ind]);
 	}
