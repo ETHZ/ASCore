@@ -74,6 +74,9 @@ public:
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
 
+  int pfJetGoodNum25;
+  int pfJetGoodNum35;
+
   float recoilpt[rMax];
   float dphiRecoilLep[rMax];
   float vjetpt[rMax];
@@ -178,6 +181,9 @@ void nanoEvent::reset()
     pfJetGoodPhi[jCounter]=0;
   }
   pfJetGoodNum=0;
+  pfJetGoodNum25=0;
+  pfJetGoodNum35=0;
+
 
   eventNum=0;
   runNum=0;
@@ -300,6 +306,9 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetGoodPt",nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
+
+  myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
+  myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
 
   myTree->Branch("jzb",nEvent.jzb,"jzb[30]/F");
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
@@ -603,6 +612,8 @@ void JZBAnalysis::Analyze(){
     TLorentzVector sumOfPFJets(0,0,0,0);
     nEvent.pfJetNum=0;
     nEvent.pfJetGoodNum=0;
+    nEvent.pfJetGoodNum25=0;
+    nEvent.pfJetGoodNum35=0;
     for(int i =0 ; i<fTR->PFNJets;i++) // jet loop
       {
         counters[PJ].fill("All PF jets");
@@ -661,6 +672,8 @@ void JZBAnalysis::Analyze(){
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
           nEvent.pfJetGoodNum++;
         }
+        if ( jpt>25 ) nEvent.pfJetGoodNum25++;
+        if ( jpt>35 ) nEvent.pfJetGoodNum35++;
       }
     
     
