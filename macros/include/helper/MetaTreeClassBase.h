@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Nov 10 14:02:56 2010 by ROOT version 5.25/04
+// Tue Nov 16 22:21:14 2010 by ROOT version 5.25/04
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/RA5Nov09/LM0/SSDLTree.root
+// found on file: SSDLTrees/RA5Nov16/LM0/SSDLTree.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -25,18 +25,25 @@ public :
    Float_t         IntXSec;
    Int_t           HLT_Mu9;
    Int_t           HLT_Mu11;
+   Int_t           HLT_Mu13_v1;
+   Int_t           HLT_Mu15_v1;
    Int_t           HLT_Mu15;
    Int_t           HLT_DoubleMu0;
    Int_t           HLT_DoubleMu3;
+   Int_t           HLT_DoubleMu3_v2;
+   Int_t           HLT_DoubleMu5_v2;
    Int_t           HLT_Jet15U;
    Int_t           HLT_Jet30U;
    Int_t           HLT_Jet50U;
    Int_t           HLT_Jet70U;
    Int_t           HLT_Jet100U;
+   Int_t           HLT_Jet100U_v2;
+   Int_t           HLT_Jet100U_v3;
    Int_t           HLT_HT100U;
    Int_t           HLT_HT120U;
    Int_t           HLT_HT140U;
    Int_t           HLT_HT150U;
+   Int_t           HLT_HT150U_v3;
    Int_t           HLT_HT130U;
    Int_t           HLT_HT200U;
    Int_t           HLT_Mu5_HT70U_v1;
@@ -56,6 +63,7 @@ public :
    Int_t           HLT_DoubleEle5_SW_L1R;
    Int_t           HLT_DoubleEle10_SW_L1R;
    Int_t           HLT_DoubleEle15_SW_L1R_v1;
+   Int_t           HLT_DoubleEle17_SW_L1R_v1;
    Int_t           HLT_Ele10_LW_EleId_L1R;
    Int_t           HLT_Ele10_SW_EleId_L1R;
    Int_t           HLT_Ele15_SW_CaloEleId_L1R;
@@ -66,12 +74,18 @@ public :
    Int_t           HLT_Ele17_SW_EleId_L1R;
    Int_t           HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1;
    Int_t           HLT_Ele17_SW_TightEleIdIsol_L1R_v1;
-   Int_t           HTL_GoodElEvent;
-   Int_t           HTL_GoodElFakesEvent;
-   Int_t           HTL_GoodElEvent_RA5;
-   Int_t           HTL_GoodElEvent_TDL;
-   Int_t           HTL_GoodMuEvent;
-   Int_t           HTL_GoodHadronicEvent;
+   Int_t           HLT_Ele17_SW_TighterEleId_L1R_v1;
+   Int_t           HLT_Ele22_SW_TighterEleId_L1R_v2;
+   Int_t           HLT_Ele22_SW_TighterEleId_L1R_v3;
+   Int_t           HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1;
+   Int_t           HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1;
+   Int_t           HLT_Ele32_SW_TighterEleId_L1R_v2;
+   Int_t           HLT_GoodElEvent;
+   Int_t           HLT_GoodElFakesEvent;
+   Int_t           HLT_GoodElEvent_RA5;
+   Int_t           HLT_GoodElEvent_TDL;
+   Int_t           HLT_GoodMuEvent;
+   Int_t           HLT_GoodHadronicEvent;
    Int_t           NMus;
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
@@ -139,21 +153,21 @@ public :
    Float_t         pfMET;
    Float_t         MuCorrMET;
    Int_t           NJets;
-   Float_t         JetPt[30];   //[NJets]
-   Float_t         JetEta[30];   //[NJets]
-   Float_t         JetPhi[30];   //[NJets]
+   Float_t         JetPt[20];   //[NJets]
+   Float_t         JetEta[20];   //[NJets]
+   Float_t         JetPhi[20];   //[NJets]
    Float_t         dPhiMJ1;
    Float_t         dPhiMJ2;
    Float_t         R12;
    Float_t         R21;
    Float_t         R12plusR21;
    Int_t           NPhos;
-   Float_t         PhoPt[5];   //[NPhos]
-   Float_t         PhoEta[5];   //[NPhos]
-   Float_t         PhoPhi[5];   //[NPhos]
-   Float_t         PhoRelIso[5];   //[NPhos]
-   Float_t         PhoDRjet[5];   //[NPhos]
-   Float_t         PhoDRhardestjet[5];   //[NPhos]
+   Float_t         PhoPt[4];   //[NPhos]
+   Float_t         PhoEta[4];   //[NPhos]
+   Float_t         PhoPhi[4];   //[NPhos]
+   Float_t         PhoRelIso[4];   //[NPhos]
+   Float_t         PhoDRjet[4];   //[NPhos]
+   Float_t         PhoDRhardestjet[4];   //[NPhos]
    Float_t         AlphaT_h;
    Float_t         AlphaCT_h;
    Float_t         AlphaT;
@@ -257,18 +271,25 @@ public :
    TBranch        *b_IntXSec;   //!
    TBranch        *b_HLT_Mu9;   //!
    TBranch        *b_HLT_Mu11;   //!
+   TBranch        *b_HLT_Mu13_v1;   //!
+   TBranch        *b_HLT_Mu15_v1;   //!
    TBranch        *b_HLT_Mu15;   //!
    TBranch        *b_HLT_DoubleMu0;   //!
    TBranch        *b_HLT_DoubleMu3;   //!
+   TBranch        *b_HLT_DoubleMu3_v2;   //!
+   TBranch        *b_HLT_DoubleMu5_v2;   //!
    TBranch        *b_HLT_Jet15U;   //!
    TBranch        *b_HLT_Jet30U;   //!
    TBranch        *b_HLT_Jet50U;   //!
    TBranch        *b_HLT_Jet70U;   //!
    TBranch        *b_HLT_Jet100U;   //!
+   TBranch        *b_HLT_Jet100U_v2;   //!
+   TBranch        *b_HLT_Jet100U_v3;   //!
    TBranch        *b_HLT_HT100U;   //!
    TBranch        *b_HLT_HT120U;   //!
    TBranch        *b_HLT_HT140U;   //!
    TBranch        *b_HLT_HT150U;   //!
+   TBranch        *b_HLT_HT150U_v3;   //!
    TBranch        *b_HLT_HT130U;   //!
    TBranch        *b_HLT_HT200U;   //!
    TBranch        *b_HLT_Mu5_HT70U_v1;   //!
@@ -288,6 +309,7 @@ public :
    TBranch        *b_HLT_DoubleEle5_SW_L1R;   //!
    TBranch        *b_HLT_DoubleEle10_SW_L1R;   //!
    TBranch        *b_HLT_DoubleEle15_SW_L1R_v1;   //!
+   TBranch        *b_HLT_DoubleEle17_SW_L1R_v1;   //!
    TBranch        *b_HLT_Ele10_LW_EleId_L1R;   //!
    TBranch        *b_HLT_Ele10_SW_EleId_L1R;   //!
    TBranch        *b_HLT_Ele15_SW_CaloEleId_L1R;   //!
@@ -298,12 +320,18 @@ public :
    TBranch        *b_HLT_Ele17_SW_EleId_L1R;   //!
    TBranch        *b_HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1;   //!
    TBranch        *b_HLT_Ele17_SW_TightEleIdIsol_L1R_v1;   //!
-   TBranch        *b_HTL_GoodElEvent;   //!
-   TBranch        *b_HTL_GoodElFakesEvent;   //!
-   TBranch        *b_HTL_GoodElEvent_RA5;   //!
-   TBranch        *b_HTL_GoodElEvent_TDL;   //!
-   TBranch        *b_HTL_GoodMuEvent;   //!
-   TBranch        *b_HTL_GoodHadronicEvent;   //!
+   TBranch        *b_HLT_Ele17_SW_TighterEleId_L1R_v1;   //!
+   TBranch        *b_HLT_Ele22_SW_TighterEleId_L1R_v2;   //!
+   TBranch        *b_HLT_Ele22_SW_TighterEleId_L1R_v3;   //!
+   TBranch        *b_HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1;   //!
+   TBranch        *b_HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1;   //!
+   TBranch        *b_HLT_Ele32_SW_TighterEleId_L1R_v2;   //!
+   TBranch        *b_HLT_GoodElEvent;   //!
+   TBranch        *b_HLT_GoodElFakesEvent;   //!
+   TBranch        *b_HLT_GoodElEvent_RA5;   //!
+   TBranch        *b_HLT_GoodElEvent_TDL;   //!
+   TBranch        *b_HLT_GoodMuEvent;   //!
+   TBranch        *b_HLT_GoodHadronicEvent;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
@@ -500,9 +528,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov09/LM0/SSDLTree.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov16/LM0/SSDLTree.root");
       if (!f) {
-         f = new TFile("SSDLTrees/RA5Nov09/LM0/SSDLTree.root");
+         f = new TFile("SSDLTrees/RA5Nov16/LM0/SSDLTree.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -560,18 +588,25 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("IntXSec", &IntXSec, &b_IntXSec);
    fChain->SetBranchAddress("HLT_Mu9", &HLT_Mu9, &b_HLT_Mu9);
    fChain->SetBranchAddress("HLT_Mu11", &HLT_Mu11, &b_HLT_Mu11);
+   fChain->SetBranchAddress("HLT_Mu13_v1", &HLT_Mu13_v1, &b_HLT_Mu13_v1);
+   fChain->SetBranchAddress("HLT_Mu15_v1", &HLT_Mu15_v1, &b_HLT_Mu15_v1);
    fChain->SetBranchAddress("HLT_Mu15", &HLT_Mu15, &b_HLT_Mu15);
    fChain->SetBranchAddress("HLT_DoubleMu0", &HLT_DoubleMu0, &b_HLT_DoubleMu0);
    fChain->SetBranchAddress("HLT_DoubleMu3", &HLT_DoubleMu3, &b_HLT_DoubleMu3);
+   fChain->SetBranchAddress("HLT_DoubleMu3_v2", &HLT_DoubleMu3_v2, &b_HLT_DoubleMu3_v2);
+   fChain->SetBranchAddress("HLT_DoubleMu5_v2", &HLT_DoubleMu5_v2, &b_HLT_DoubleMu5_v2);
    fChain->SetBranchAddress("HLT_Jet15U", &HLT_Jet15U, &b_HLT_Jet15U);
    fChain->SetBranchAddress("HLT_Jet30U", &HLT_Jet30U, &b_HLT_Jet30U);
    fChain->SetBranchAddress("HLT_Jet50U", &HLT_Jet50U, &b_HLT_Jet50U);
    fChain->SetBranchAddress("HLT_Jet70U", &HLT_Jet70U, &b_HLT_Jet70U);
    fChain->SetBranchAddress("HLT_Jet100U", &HLT_Jet100U, &b_HLT_Jet100U);
+   fChain->SetBranchAddress("HLT_Jet100U_v2", &HLT_Jet100U_v2, &b_HLT_Jet100U_v2);
+   fChain->SetBranchAddress("HLT_Jet100U_v3", &HLT_Jet100U_v3, &b_HLT_Jet100U_v3);
    fChain->SetBranchAddress("HLT_HT100U", &HLT_HT100U, &b_HLT_HT100U);
    fChain->SetBranchAddress("HLT_HT120U", &HLT_HT120U, &b_HLT_HT120U);
    fChain->SetBranchAddress("HLT_HT140U", &HLT_HT140U, &b_HLT_HT140U);
    fChain->SetBranchAddress("HLT_HT150U", &HLT_HT150U, &b_HLT_HT150U);
+   fChain->SetBranchAddress("HLT_HT150U_v3", &HLT_HT150U_v3, &b_HLT_HT150U_v3);
    fChain->SetBranchAddress("HLT_HT130U", &HLT_HT130U, &b_HLT_HT130U);
    fChain->SetBranchAddress("HLT_HT200U", &HLT_HT200U, &b_HLT_HT200U);
    fChain->SetBranchAddress("HLT_Mu5_HT70U_v1", &HLT_Mu5_HT70U_v1, &b_HLT_Mu5_HT70U_v1);
@@ -591,6 +626,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_DoubleEle5_SW_L1R", &HLT_DoubleEle5_SW_L1R, &b_HLT_DoubleEle5_SW_L1R);
    fChain->SetBranchAddress("HLT_DoubleEle10_SW_L1R", &HLT_DoubleEle10_SW_L1R, &b_HLT_DoubleEle10_SW_L1R);
    fChain->SetBranchAddress("HLT_DoubleEle15_SW_L1R_v1", &HLT_DoubleEle15_SW_L1R_v1, &b_HLT_DoubleEle15_SW_L1R_v1);
+   fChain->SetBranchAddress("HLT_DoubleEle17_SW_L1R_v1", &HLT_DoubleEle17_SW_L1R_v1, &b_HLT_DoubleEle17_SW_L1R_v1);
    fChain->SetBranchAddress("HLT_Ele10_LW_EleId_L1R", &HLT_Ele10_LW_EleId_L1R, &b_HLT_Ele10_LW_EleId_L1R);
    fChain->SetBranchAddress("HLT_Ele10_SW_EleId_L1R", &HLT_Ele10_SW_EleId_L1R, &b_HLT_Ele10_SW_EleId_L1R);
    fChain->SetBranchAddress("HLT_Ele15_SW_CaloEleId_L1R", &HLT_Ele15_SW_CaloEleId_L1R, &b_HLT_Ele15_SW_CaloEleId_L1R);
@@ -601,12 +637,18 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Ele17_SW_EleId_L1R", &HLT_Ele17_SW_EleId_L1R, &b_HLT_Ele17_SW_EleId_L1R);
    fChain->SetBranchAddress("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1", &HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1, &b_HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1);
    fChain->SetBranchAddress("HLT_Ele17_SW_TightEleIdIsol_L1R_v1", &HLT_Ele17_SW_TightEleIdIsol_L1R_v1, &b_HLT_Ele17_SW_TightEleIdIsol_L1R_v1);
-   fChain->SetBranchAddress("HTL_GoodElEvent", &HTL_GoodElEvent, &b_HTL_GoodElEvent);
-   fChain->SetBranchAddress("HTL_GoodElFakesEvent", &HTL_GoodElFakesEvent, &b_HTL_GoodElFakesEvent);
-   fChain->SetBranchAddress("HTL_GoodElEvent_RA5", &HTL_GoodElEvent_RA5, &b_HTL_GoodElEvent_RA5);
-   fChain->SetBranchAddress("HTL_GoodElEvent_TDL", &HTL_GoodElEvent_TDL, &b_HTL_GoodElEvent_TDL);
-   fChain->SetBranchAddress("HTL_GoodMuEvent", &HTL_GoodMuEvent, &b_HTL_GoodMuEvent);
-   fChain->SetBranchAddress("HTL_GoodHadronicEvent", &HTL_GoodHadronicEvent, &b_HTL_GoodHadronicEvent);
+   fChain->SetBranchAddress("HLT_Ele17_SW_TighterEleId_L1R_v1", &HLT_Ele17_SW_TighterEleId_L1R_v1, &b_HLT_Ele17_SW_TighterEleId_L1R_v1);
+   fChain->SetBranchAddress("HLT_Ele22_SW_TighterEleId_L1R_v2", &HLT_Ele22_SW_TighterEleId_L1R_v2, &b_HLT_Ele22_SW_TighterEleId_L1R_v2);
+   fChain->SetBranchAddress("HLT_Ele22_SW_TighterEleId_L1R_v3", &HLT_Ele22_SW_TighterEleId_L1R_v3, &b_HLT_Ele22_SW_TighterEleId_L1R_v3);
+   fChain->SetBranchAddress("HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1", &HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1, &b_HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1);
+   fChain->SetBranchAddress("HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1", &HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1, &b_HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1);
+   fChain->SetBranchAddress("HLT_Ele32_SW_TighterEleId_L1R_v2", &HLT_Ele32_SW_TighterEleId_L1R_v2, &b_HLT_Ele32_SW_TighterEleId_L1R_v2);
+   fChain->SetBranchAddress("HLT_GoodElEvent", &HLT_GoodElEvent, &b_HLT_GoodElEvent);
+   fChain->SetBranchAddress("HLT_GoodElFakesEvent", &HLT_GoodElFakesEvent, &b_HLT_GoodElFakesEvent);
+   fChain->SetBranchAddress("HLT_GoodElEvent_RA5", &HLT_GoodElEvent_RA5, &b_HLT_GoodElEvent_RA5);
+   fChain->SetBranchAddress("HLT_GoodElEvent_TDL", &HLT_GoodElEvent_TDL, &b_HLT_GoodElEvent_TDL);
+   fChain->SetBranchAddress("HLT_GoodMuEvent", &HLT_GoodMuEvent, &b_HLT_GoodMuEvent);
+   fChain->SetBranchAddress("HLT_GoodHadronicEvent", &HLT_GoodHadronicEvent, &b_HLT_GoodHadronicEvent);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);

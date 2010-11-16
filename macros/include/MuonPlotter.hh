@@ -12,6 +12,20 @@
 class MuonPlotter : public AnaClass{
 
 public:
+	
+	// This enum has to correspond to the content of the samples.dat file
+	enum gSample {
+		MuA, MuB, EGA, EGB, JMA, JMB,
+		TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170,
+		LM0
+	};
+	
+	enum gChannel {
+		Muon,
+		EMu,
+		Electron
+	};
+	
 	MuonPlotter();
 	MuonPlotter(TString);
 	MuonPlotter(TString, TString);
@@ -30,7 +44,10 @@ public:
 	void makePtPlots();
 	
 	void makeDiffPredictionPlots();
-	void makeIntPrediction();
+	void makeIntPrediction(gChannel);
+	void makeIntPredictionMuMu();
+	void makeIntPredictionEMu();
+	void makeIntPredictionEE();
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
@@ -67,9 +84,9 @@ public:
 	TH1D* fillRatioPt(int, int, bool = false);
 	TH1D* fillRatioPt(vector<int>, int, bool = false);
 
-	void calculateRatio(vector<int>, int, TH2D*&, bool = false);
-	void calculateRatio(vector<int>, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, int, float&, float&, bool = false);
+	void calculateRatio(vector<int>, gChannel, int, TH2D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, int, float&, float&, bool = false);
 
 	//////////////////////////////
 	// Predictions
@@ -95,6 +112,9 @@ public:
 
 	// Event and Object selectors:
 	bool isGoodEvent();
+	bool isGoodMuEvent();
+	bool isGoodElEvent();
+	bool isGoodElMuEvent();
 	bool passesNJetCut(int=2);
 	bool passesHTCut(float);
 	bool passesMETCut(float = -1.);
@@ -103,18 +123,35 @@ public:
 	bool passesMllEventVeto(float = 12.);
 
 	bool isMuTriggeredEvent();
+	bool isElTriggeredEvent();
 	bool isJetTriggeredEvent();
 	bool isHTTriggeredEvent();
 
-	bool isSignalSuppressedEvent();
-	bool isSignalSuppressedEventTRG();
+	bool isSigSupMuEvent();
+	bool isSigSupMuEventTRG();
 	bool isZMuMuEvent();
 	bool isZMuMuEventTRG();
+
+	bool isSigSupElEvent();
+	bool isSigSupElEventTRG();
+	bool isZElElEvent();
+	bool isZElElEventTRG();
+
 	bool isGenMatchedSUSYDiLepEvent();
-	bool isSSLLEvent();
-	bool isSSLLEventTRG();
-	bool isSSTTEvent();
-	bool isSSTTEventTRG();
+	bool isSSLLMuEvent();
+	bool isSSLLMuEventTRG();
+	bool isSSTTMuEvent();
+	bool isSSTTMuEventTRG();
+
+	bool isSSLLElEvent();
+	bool isSSLLElEventTRG();
+	bool isSSTTElEvent();
+	bool isSSTTElEventTRG();
+
+	bool isSSLLElMuEvent();
+	bool isSSLLElMuEventTRG();
+	bool isSSTTElMuEvent();
+	bool isSSTTElMuEventTRG();
 
 	bool isGoodMuon(int);
 	bool isLooseMuon(int);
@@ -126,7 +163,12 @@ public:
 	bool isPromptTTbarMuon(int);
 	bool isPromptSUSYMuon(int);
 
+	bool isGoodElectron(int);
+	bool isLooseElectron(int);
 	bool isTightElectron(int);
+	bool isGoodPrimElectron(int);
+	bool isGoodSecElectron(int);
+
 	bool isGoodJet(int);
 
 private:
@@ -142,7 +184,8 @@ private:
 
 	struct numberset{
 		long nt2;
-		long nt1;
+		long nt10;
+		long nt01;
 		long nt0;
 		long nsst;
 		long nssl;
@@ -167,12 +210,22 @@ private:
 		TH2D *h_nt2;
 		TH1D *h_nt2_pt;
 		TH1D *h_nt2_eta;
-		TH2D *h_nt1;
-		TH1D *h_nt1_pt;
-		TH1D *h_nt1_eta;
+		TH2D *h_nt10;    // Only this is used for EE/MuMu
+		TH1D *h_nt10_pt;
+		TH1D *h_nt10_eta;
+		TH2D *h_nt01;    // See notation in FR Note
+		TH1D *h_nt01_pt;
+		TH1D *h_nt01_eta;
 		TH2D *h_nt0;
 		TH1D *h_nt0_pt;
 		TH1D *h_nt0_eta;
+	};
+	
+	struct channel{
+		NThistos nthistos;
+		lthistos fhistos;
+		lthistos phistos;
+		numberset numbers;
 	};
 	
 	struct sample{
@@ -182,10 +235,9 @@ private:
 		TTree *tree;
 		float lumi;
 		bool isdata;
-		NThistos nthistos;
-		numberset numbers;
-		lthistos fhistos;
-		lthistos phistos;
+		channel mumu;
+		channel emu;
+		channel ee;
 	};
 	
 	int fNJetsMin; // Cut on minimal number of jets
