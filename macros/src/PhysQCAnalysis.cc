@@ -1272,51 +1272,6 @@ void PhysQCAnalysis::PrintInfoStart(int nEntries){
 
 }
 
-void PhysQCAnalysis::GetEvtEmChFrac(double & fracEm, double & fracCh){
-// Computes the event EM and Charged fractions
-
-	int nMuGood = 0;
-	double pt_track = 0.;
-	double et_em = 0.;
-	double et_had = 0.;
-	for( int i = 0; i < fTR->NMus; ++i ){
-		if(fTR->MuGood[i] != 0) continue;
-		pt_track += fTR->MuPt[i];
-		nMuGood++;
-	}
-	for( int i = 0; i < fTR->NEles; ++i ){
-		if(fTR->ElGood[i] != 0) continue;
-		pt_track += fTR->ElPt[i];
-		et_em += fTR->ElEt[i];
-		if (et_em < 0.) et_em = 0.;
-	}
-	for( int i = 0; i < fTR->NPhotons; ++i ){
-		if(fTR->PhoGood[i] != 0) continue;
-		et_em += fTR->PhoPt[i];
-		if (et_em < 0.) et_em = 0.;
-	}
-	for( int i = 0; i < fTR->NJets; ++i ){
-		if(fTR->JGood[i] != 0) continue;
-		pt_track += fTR->JChfrac[i] * fTR->JPt[i];
-		et_em    += fTR->JEMfrac[i] * fTR->JEt[i];
-		if (et_em < 0.) et_em = 0.;
-		et_had   += (1.-fTR->JEMfrac[i]) * fTR->JEt[i];
-	}
-
-	fracCh = 0.;
-	fracEm = 0.;
-	if( et_em + et_had <= 0. ){
-		if( nMuGood < 1 ) return;
-		fracCh = 1.;
-		fracEm = 1.;
-	} else {
-		fracCh = pt_track / (et_em + et_had);
-		fracEm = et_em / (et_em + et_had);
-	}
-	return;
-
-}
-
 void PhysQCAnalysis::MakePlots(TString plotlist, TCut select, TTree *tree){
 	fAC->plotPlotList(plotlist, tree, "", select, fHistFile);
 }

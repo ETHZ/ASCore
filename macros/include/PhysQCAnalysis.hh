@@ -40,7 +40,6 @@ public:
 	void PrintHisto(TH1D*, TString, TString, TString, 
 		double x1=999., double x2=999., int logy=0, int fract=0);
 	void PrintInfoStart(int nEntries);
-	void GetEvtEmChFrac(double & fracEm, double & fracCh);
 	
 	TreeCleaner *fTC;
 	AnaClass *fAC;
