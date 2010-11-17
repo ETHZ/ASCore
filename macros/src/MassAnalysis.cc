@@ -190,10 +190,12 @@ void MassAnalysis::BookTree(){
 	
 	fMassTree->Branch("Run"                   ,&fTrun,                    "Run/I");         
 	fMassTree->Branch("Event"                 ,&fTevent,                  "Event/I");       
-	fMassTree->Branch("LumiSection"           ,&fTlumisec,                "LumiSection/I"); 
+	fMassTree->Branch("LumiSection"           ,&fTlumisec,                "LumiSection/I");
+	fMassTree->Branch("HCALNoiseFlag"         ,&fThcalnoiseflag,          "HCALNoiseFlag/I");
 	fMassTree->Branch("Weight"                ,&fWeight,                  "Weight/F");
 	fMassTree->Branch("NJets"                 ,&fTnjets,                  "NJets/I");       
 	fMassTree->Branch("JPt"                   ,&fTjpt,                    "JPt[NJets]/D");       
+	fMassTree->Branch("DPhiJetsMet"           ,&fTjetmetdphi,             "DPhiJetsMet[NJets]/D");       
 	fMassTree->Branch("NElecs"                ,&fTnelecs,                 "NElecs/I");       
 	fMassTree->Branch("NMuons"                ,&fTnmuons,                 "NMuons/I");       
 	fMassTree->Branch("LeptConfig"            ,&fTleptconfig,             "LeptConfig/I");       
@@ -202,7 +204,11 @@ void MassAnalysis::BookTree(){
 	fMassTree->Branch("R12R21"                ,&fTr12r21,                 "R12R21/I");
 	fMassTree->Branch("NJetsPt50Eta25"        ,&fTnJetsPt50Eta25,         "NJetsPt50Eta25/I");
 	fMassTree->Branch("PseudoJetMT2"          ,&fTpseudoJetMT2,           "PseudoJetMT2/D");
+	fMassTree->Branch("PseudoJetMT2massive"   ,&fTpseudoJetMT2massive,    "PseudoJetMT2massive/D");
+	fMassTree->Branch("PseudoJetMT2simple"    ,&fTpseudoJetMT2simple,     "PseudoJetMT2simple/D");
 	fMassTree->Branch("PseudoJetMCT"          ,&fTpseudoJetMCT,           "PseudoJetMCT/D");
+	fMassTree->Branch("PseudoJetMCTMinusMass" ,&fTpseudoJetMCTMinusMass,  "PseudoJetMCTMinusMass/D");
+	fMassTree->Branch("PseudoJetMCTMassless"  ,&fTpseudoJetMCTmassless ,  "PseudoJetMCTMassless/D");
 	fMassTree->Branch("PseudoJet1Pt"          ,&fTpseudoJet1Pt,           "PseudoJet1Pt/D");
 	fMassTree->Branch("PseudoJet2Pt"          ,&fTpseudoJet2Pt,           "PseudoJet2Pt/D");
 	fMassTree->Branch("PseudojetAlphaT"       ,&fTpseudojetAlphaT,        "PseudojetAlphaT/D");
@@ -225,6 +231,7 @@ void MassAnalysis::ResetTree(){
 	fTrun                  =-1;
 	fTevent                =-1;
 	fTlumisec              =-1;
+	fThcalnoiseflag        =-1;
 	fTweight               =-99999.99;
 	fTnjets                =-1;
 	fTnelecs               =-1;
@@ -235,7 +242,11 @@ void MassAnalysis::ResetTree(){
 	fTr12r21               =-1;
 	fTnJetsPt50Eta25       =-1;
 	fTpseudoJetMT2         =-99999.99;
+	fTpseudoJetMT2massive  =-99999.99;
+	fTpseudoJetMT2simple   =-99999.99;
 	fTpseudoJetMCT         =-99999.99;
+	fTpseudoJetMCTMinusMass=-99999.99;
+	fTpseudoJetMCTmassless =-99999.99;
 	fTpseudoJet1Pt         =-99999.99;
 	fTpseudoJet2Pt         =-99999.99;
 	fTpseudojetAlphaT      =-99999.99;
@@ -254,7 +265,8 @@ void MassAnalysis::ResetTree(){
 	fTdPhiMhtMpt           =-99999.99;
 	
 	for(int i=0; i<gMaxnjets; ++i){
-		fTjpt[i]=-99999.99;
+		fTjpt[i]       =-99999.99;
+		fTjetmetdphi[i]=-99999.99;
 	}
 
 }
@@ -264,6 +276,7 @@ void MassAnalysis::FillTree(){
 	fTrun                  = fTR->Run;
 	fTevent                = fTR->Event;
 	fTlumisec              = fTR->LumiSection;
+	fThcalnoiseflag        = fTR->HBHENoiseFlag;
 	fTweight               = fWeight;
 
 
@@ -303,7 +316,8 @@ void MassAnalysis::FillTree(){
 	// control variables
 	// jpt
 	for(int i=0; i<fJets.size(); ++i){
-		fTjpt[i]=fTR->PFJPt[fJets[i]];
+		fTjpt[i]       =fTR->PFJPt[fJets[i]];
+		fTjetmetdphi[i]=Util::DeltaPhi(fTR->PFJPhi[fJets[i]], fTR->PFMETphi); 
 	}
 
 	// remaining variables are filles elsewhere
@@ -459,7 +473,8 @@ void MassAnalysis::PseudoJetMasses(){
 		
 	// plot MT2 histos
 	for(int i=0; i<fMT2_histos_number; ++i){
-		double MT2=GetMT2(pseudojet1, 0., pseudojet2, 0., pmiss, i*fMT2_histos_step);
+		double MT2       =GetMT2(pseudojet1, 0., pseudojet2, 0., pmiss, i*fMT2_histos_step);
+		double MT2massive=GetMT2(pseudojet1, pseudojet1.M(), pseudojet2, pseudojet2.M(), pmiss, i*fMT2_histos_step);
 		fHMT2_pseudojet[i] -> Fill(MT2);
 		if(fLeptConfig!= null) {fHMT2_PseudoJetWithLeptons[i] -> Fill(MT2);}
 		if(fLeptConfig== null) {fHMT2_PseudoJetNoLeptons[i]   -> Fill(MT2);}
@@ -472,7 +487,7 @@ void MassAnalysis::PseudoJetMasses(){
 			fHPseudoJetMT2vsLeadingJEta   -> Fill(MT2, fTR->PFJEta[fJets[0]]);
 			fHPseudoJetMT2vsMHT           -> Fill(MT2, fMHT);
 		}
-		if(i==0 && MT2 > 240){
+		if(i==0 && MT2 > 240  ){
 			interesting_Run.push_back(fTR->Run);
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
@@ -482,7 +497,8 @@ void MassAnalysis::PseudoJetMasses(){
 		}
 		if(i==0){
 			// fill tree variable
-			fTpseudoJetMT2 = MT2;
+			fTpseudoJetMT2        = MT2;
+			fTpseudoJetMT2massive = MT2massive;
 			if(pseudojet1.Pt() > pseudojet2.Pt()){
 				fTpseudoJet1Pt = pseudojet1.Pt();
 				fTpseudoJet2Pt = pseudojet2.Pt();
@@ -492,6 +508,14 @@ void MassAnalysis::PseudoJetMasses(){
 			}		
 		}	
 	}
+	// simplified MT2
+	TVector3 vpseudojet1, vpseudojet2;
+	vpseudojet1.SetXYZ(pseudojet1.Px(), pseudojet1.Py(), pseudojet1.Pz());
+	vpseudojet2.SetXYZ(pseudojet2.Px(), pseudojet2.Py(), pseudojet2.Pz());
+
+	fTpseudoJetMT2simple=sqrt(2*pseudojet1.Perp()*pseudojet2.Perp()*(1+cos(vpseudojet1.Angle(vpseudojet2))));
+
+
 	// get the delta_phi between the two axis
 	TVector3 vec1, vec2;
 	vec1.SetPtEtaPhi(pseudojet1.Pt(),pseudojet1.Eta(),pseudojet1.Phi());
@@ -505,8 +529,16 @@ void MassAnalysis::PseudoJetMasses(){
 	TVector2 met;
 	met.Set(pmiss.Px(), pmiss.Py());
 	TLorentzVector DTM(0.,0.,0.,0.);
-	double MCTcorr =GetMCTcorr(pseudojet1, pseudojet2, DTM, met );
-	fTpseudoJetMCT = MCTcorr;
+	double MCTcorr          =GetMCTcorr(pseudojet1, pseudojet2, DTM, met );
+	TLorentzVector pseudojet1massless, pseudojet2massless;
+	pseudojet1massless.SetXYZM(pseudojet1.Px(), pseudojet1.Py(), pseudojet1.Pz(), 0.);
+	pseudojet2massless.SetXYZM(pseudojet2.Px(), pseudojet2.Py(), pseudojet2.Pz(), 0.);
+	double MCTcorrMassless  =GetMCTcorr(pseudojet1massless, pseudojet2massless, DTM, met );
+	double MCTcorrMinusMass =sqrt(MCTcorr*MCTcorr - pseudojet1.M2() -pseudojet2.M2());
+
+	fTpseudoJetMCT          = MCTcorr;
+	fTpseudoJetMCTMinusMass = MCTcorrMinusMass;
+	fTpseudoJetMCTmassless  = MCTcorrMassless;
 
 	fHMCT_PseudoJet   -> Fill(MCT);
 	if(fLeptConfig!= null) {fHMCT_PseudoJetWithLeptons     -> Fill(MCT);}
@@ -518,8 +550,10 @@ void MassAnalysis::PseudoJetMasses(){
 	if(fBJets.size()>0)    {fHMCTcorr_PseudoJetWithB       -> Fill(MCTcorr);}
 
 
-
-
+	if(fVerbose > 1) {
+		cout << "MT2 " << fTpseudoJetMT2 << " MT2massive " << fTpseudoJetMT2massive << "  MT2simplified " << fTpseudoJetMT2simple << 
+		" MCTcorr " << fTpseudoJetMCT << " MCTcorr minus masses " << fTpseudoJetMCTMinusMass << " MCTcorr massless " << MCTcorrMassless << endl;
+	}
 
 
 

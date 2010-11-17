@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Oct 23 13:38:07 2010 by ROOT version 5.22/00d
+// Tue Nov 16 10:07:37 2010 by ROOT version 5.22/00d
 // from TTree MassAnalysis/MassAnalysisTree
-// found on file: Mass_histos.root
+// found on file: /shome/pnef/SUSY/SUSY_macros/analyzed/RunLeptJetMultAnalyzer/20101115_Jet_RunB_V01-08-00/Jet_RunB_PromptReco_V01-08-00/Mass_histos.root
 //////////////////////////////////////////////////////////
 
 #ifndef MassAnalysisTreeClass_h
@@ -21,9 +21,11 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSection;
+   Int_t           HCALNoiseFlag;
    Float_t         Weight;
    Int_t           NJets;
-   Double_t        JPt[30];   //[NJets]
+   Double_t        JPt[11];   //[NJets]
+   Double_t        DPhiJetsMet[11];   //[NJets]
    Int_t           NElecs;
    Int_t           NMuons;
    Int_t           LeptConfig;
@@ -32,7 +34,11 @@ public :
    Int_t           R12R21;
    Int_t           NJetsPt50Eta25;
    Double_t        PseudoJetMT2;
+   Double_t        PseudoJetMT2massive;
+   Double_t        PseudoJetMT2simple;
    Double_t        PseudoJetMCT;
+   Double_t        PseudoJetMCTMinusMass;
+   Double_t        PseudoJetMCTMassless;
    Double_t        PseudoJet1Pt;
    Double_t        PseudoJet2Pt;
    Double_t        PseudojetAlphaT;
@@ -54,9 +60,11 @@ public :
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSection;   //!
+   TBranch        *b_HCALNoiseFlag;   //!
    TBranch        *b_Weight;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JPt;   //!
+   TBranch        *b_DPhiJetsMet;   //!
    TBranch        *b_NElecs;   //!
    TBranch        *b_NMuons;   //!
    TBranch        *b_LeptConfig;   //!
@@ -65,9 +73,13 @@ public :
    TBranch        *b_R12R21;   //!
    TBranch        *b_NJetsPt50Eta25;   //!
    TBranch        *b_PseudoJetMT2;   //!
+   TBranch        *b_PseudoJetMT2massive;   //!
+   TBranch        *b_PseudoJetMT2simple;   //!
    TBranch        *b_PseudoJetMCT;   //!
-   TBranch        *b_PseudoJet2Pt;   //!
+   TBranch        *b_PseudoJetMCTMinusMass;   //!
+   TBranch        *b_PseudoJetMCTMassless;   //!
    TBranch        *b_PseudoJet1Pt;   //!
+   TBranch        *b_PseudoJet2Pt;   //!
    TBranch        *b_PseudojetAlphaT;   //!
    TBranch        *b_Vectorsumpt;   //!
    TBranch        *b_PFMET;   //!
@@ -102,9 +114,9 @@ MassAnalysisTreeClass::MassAnalysisTreeClass(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/SUSY_macros/analyzed/RunLeptJetMultAnalyzer/20101029_Jet_notcleaned_v2/LM0-V01-03-01/Mass_histos.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/SUSY_macros/analyzed/RunLeptJetMultAnalyzer/20101115_Jet_RunB_V01-08-00/Jet_RunB_PromptReco_V01-08-00/Mass_histos.root");
       if (!f) {
-         f = new TFile("/shome/pnef/SUSY/SUSY_macros/analyzed/RunLeptJetMultAnalyzer/20101029_Jet_notcleaned_v2/LM0-V01-03-01/Mass_histos.root");
+         f = new TFile("/shome/pnef/SUSY/SUSY_macros/analyzed/RunLeptJetMultAnalyzer/20101115_Jet_RunB_V01-08-00/Jet_RunB_PromptReco_V01-08-00/Mass_histos.root");
       }
       tree = (TTree*)gDirectory->Get("MassAnalysis");
 
@@ -158,9 +170,11 @@ void MassAnalysisTreeClass::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSection", &LumiSection, &b_LumiSection);
+   fChain->SetBranchAddress("HCALNoiseFlag", &HCALNoiseFlag, &b_HCALNoiseFlag);
    fChain->SetBranchAddress("Weight", &Weight, &b_Weight);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JPt", JPt, &b_JPt);
+   fChain->SetBranchAddress("DPhiJetsMet", DPhiJetsMet, &b_DPhiJetsMet);
    fChain->SetBranchAddress("NElecs", &NElecs, &b_NElecs);
    fChain->SetBranchAddress("NMuons", &NMuons, &b_NMuons);
    fChain->SetBranchAddress("LeptConfig", &LeptConfig, &b_LeptConfig);
@@ -169,9 +183,13 @@ void MassAnalysisTreeClass::Init(TTree *tree)
    fChain->SetBranchAddress("R12R21", &R12R21, &b_R12R21);
    fChain->SetBranchAddress("NJetsPt50Eta25", &NJetsPt50Eta25, &b_NJetsPt50Eta25);
    fChain->SetBranchAddress("PseudoJetMT2", &PseudoJetMT2, &b_PseudoJetMT2);
+   fChain->SetBranchAddress("PseudoJetMT2massive", &PseudoJetMT2massive, &b_PseudoJetMT2massive);
+   fChain->SetBranchAddress("PseudoJetMT2simple", &PseudoJetMT2simple, &b_PseudoJetMT2simple);
    fChain->SetBranchAddress("PseudoJetMCT", &PseudoJetMCT, &b_PseudoJetMCT);
-   fChain->SetBranchAddress("PseudoJet1Pt", &PseudoJet1Pt, &b_PseudoJet2Pt);
-   fChain->SetBranchAddress("PseudoJet2Pt", &PseudoJet2Pt, &b_PseudoJet1Pt);
+   fChain->SetBranchAddress("PseudoJetMCTMinusMass", &PseudoJetMCTMinusMass, &b_PseudoJetMCTMinusMass);
+   fChain->SetBranchAddress("PseudoJetMCTMassless", &PseudoJetMCTMassless, &b_PseudoJetMCTMassless);
+   fChain->SetBranchAddress("PseudoJet1Pt", &PseudoJet1Pt, &b_PseudoJet1Pt);
+   fChain->SetBranchAddress("PseudoJet2Pt", &PseudoJet2Pt, &b_PseudoJet2Pt);
    fChain->SetBranchAddress("PseudojetAlphaT", &PseudojetAlphaT, &b_PseudojetAlphaT);
    fChain->SetBranchAddress("Vectorsumpt", &Vectorsumpt, &b_Vectorsumpt);
    fChain->SetBranchAddress("PFMET", &PFMET, &b_PFMET);
