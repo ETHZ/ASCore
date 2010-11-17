@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.87 2010/11/14 10:57:26 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.88 2010/11/17 14:32:10 pnef Exp $
 //
 //
 
@@ -74,6 +74,9 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+
+#include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
+#include "PhysicsTools/EcalAnomalousEventFilter/interface/EcalBoundaryInfoCalculator.h"
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 
@@ -302,6 +305,25 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iSetup.get<EcalChannelStatusRcd>().get(chStatus);
   const EcalChannelStatus * channelStatus = chStatus.product();
 
+  // Ecal dead cells: boundary energy check:
+  // fTEcalDeadCellBEFlag ==0 if >24 dead cells with >10 GeV boundary energy 
+  edm::InputTag ecalAnomalousFilterTag("EcalAnomalousEventFilter","anomalousECALVariables");
+  Handle<AnomalousECALVariables> anomalousECALvarsHandle;
+  iEvent.getByLabel(ecalAnomalousFilterTag, anomalousECALvarsHandle);
+  AnomalousECALVariables anomalousECALvars;
+  if (anomalousECALvarsHandle.isValid()) {
+     anomalousECALvars = *anomalousECALvarsHandle;
+  } else {
+     edm::LogError("NTP") << " anomalous ECAL Vars not valid/found ";	  
+  }
+  if(anomalousECALvars.isEcalNoise()==1){
+     fTEcalDeadCellBEFlag = 0;
+  }else{
+     fTEcalDeadCellBEFlag = 1;
+  }
+
+  
+  
   // Retrieve HB/HE noise flag
   edm::Handle<bool> hbHeNoiseFlag;
   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
@@ -329,6 +351,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   // Get Magnetic Field
   edm::ESHandle<MagneticField> magfield;
   iSetup.get<IdealMagneticFieldRecord>().get(magfield);
+  
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1644,6 +1667,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxGenLepExceed"  ,&fTflagmaxgenleptexc ,"MaxGenLepExceed/I");
   fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
   fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
+  fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 
   // Gen-Leptons
   fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
@@ -2165,37 +2189,38 @@ void NTupleProducer::resetTree(){
   fTHLTmenu.clear();    fTHLTmenu.resize(gMaxhltbits);
   fTL1physmenu.clear(); fTL1physmenu.resize(gMaxl1physbits);
 
-  fTrunnumber   = -999;
-  fTeventnumber = -999;
-  fTlumisection = -999;
-  fTpthat       = -999.99;
-  fTsigprocid   = -999;
-  fTpdfscalePDF = -999.99;
-  fTpdfid1      = -999;
-  fTpdfid2      = -999;
-  fTpdfx1       = -999.99;
-  fTpdfx2       = -999.99;
-  fTpdfxPDF1    = -999.99;
-  fTpdfxPDF2    = -999.99;
+  fTrunnumber         = -999;
+  fTeventnumber       = -999;
+  fTlumisection       = -999;
+  fTpthat             = -999.99;
+  fTsigprocid         = -999;
+  fTpdfscalePDF       = -999.99;
+  fTpdfid1            = -999;
+  fTpdfid2            = -999;
+  fTpdfx1             = -999.99;
+  fTpdfx2             = -999.99;
+  fTpdfxPDF1          = -999.99;
+  fTpdfxPDF2          = -999.99;
 	
-  fTweight      = -999.99;
-  fTgoodvtx     = -999;
-  fTprimvtxx    = -999.99;
-  fTprimvtxy    = -999.99;
-  fTprimvtxz    = -999.99;
-  fTprimvtxrho  = -999.99;
-  fTprimvtxxE   = -999.99;
-  fTprimvtxyE   = -999.99;
-  fTprimvtxzE   = -999.99;
-  fTpvtxznchi2  = -999.99;
-  fTpvtxisfake  = -999;
-  fTpvtxndof    = -999.99;
-  fTpvtxptsum   = -999.99;
-  fTbeamspotx   = -999.99;
-  fTbeamspoty   = -999.99;
-  fTbeamspotz   = -999.99;
-  fTNCaloTowers = -999;
-  fTHBHENoiseFlag = -999;
+  fTweight            = -999.99;
+  fTgoodvtx           = -999;
+  fTprimvtxx          = -999.99;
+  fTprimvtxy          = -999.99;
+  fTprimvtxz          = -999.99;
+  fTprimvtxrho        = -999.99;
+  fTprimvtxxE         = -999.99;
+  fTprimvtxyE         = -999.99;
+  fTprimvtxzE         = -999.99;
+  fTpvtxznchi2        = -999.99;
+  fTpvtxisfake        = -999;
+  fTpvtxndof          = -999.99;
+  fTpvtxptsum         = -999.99;
+  fTbeamspotx         = -999.99;
+  fTbeamspoty         = -999.99;
+  fTbeamspotz         = -999.99;
+  fTNCaloTowers       = -999;
+  fTHBHENoiseFlag     = -999;
+  fTEcalDeadCellBEFlag= -999;
 
   resetDouble(fTvrtxx,     gMaxnvrtx);
   resetDouble(fTvrtxy,     gMaxnvrtx);
