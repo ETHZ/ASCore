@@ -39,7 +39,6 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_genpart      = cms.untracked.InputTag('genParticles'),
 	tag_genjets      = cms.untracked.InputTag('ak5GenJets'),
 	tag_l1trig       = cms.untracked.InputTag("gtDigis"),
-	tag_hlttrig      = cms.untracked.InputTag("TriggerResults","","HLT"),
 	tag_hlttrigevent = cms.untracked.InputTag("hltTriggerSummaryAOD"),
 	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
 

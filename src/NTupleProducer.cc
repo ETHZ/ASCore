@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.86 2010/11/03 11:57:24 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.87 2010/11/14 10:57:26 pnef Exp $
 //
 //
 
@@ -116,11 +116,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fGenPartTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_genpart");
   fGenJetTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
   fL1TriggerTag   = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
-  fHLTTriggerTag  = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrig");
   fHLTTrigEventTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
   fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 
-  fProcessName = fHLTTriggerTag.process();
 
   // Event Selection
   fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -338,9 +336,26 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;
   iEvent.getByLabel(fL1TriggerTag, l1GtReadoutRecord);
 
+  Handle<trigger::TriggerEvent> triggerEventHLT;
+  iEvent.getByLabel("hltTriggerSummaryAOD", triggerEventHLT);
+  
+  fProcessName = triggerEventHLT.provenance()->processName();
+  InputTag trigResultsTag("TriggerResults","",fProcessName); 
+
   Handle<TriggerResults> triggers;
-  iEvent.getByLabel(fHLTTriggerTag, triggers);
+  iEvent.getByLabel(trigResultsTag, triggers);
   const TriggerResults& tr = *triggers;
+
+  bool changed(true);
+  // Trigger menu could have changed
+  if (fHltConfig.init(iEvent.getRun(),iSetup,fProcessName,changed)) {
+    if ( changed ) { //fixme: could book trigger histos here
+    }
+  } else {
+    // problem: init failed
+    edm::LogError("NTP") << " hlt config extraction failure with process name " 
+                         << fProcessName;
+  }
 
   // Get trigger menus
   if(tr.size() >= gMaxhltbits){
@@ -2050,16 +2065,7 @@ void NTupleProducer::beginRun(const edm::Run& r, const edm::EventSetup& es){
     fTintxs         = genRunInfo->internalXSec().value();
   }
 
-  bool changed(true);
-  // Trigger menu could have changed
-  if (fHltConfig.init(r,es,fProcessName,changed)) {
-    if ( changed ) { //FIXME: Could book trigger histos here
-    }
-  } else {
-    // Problem: init failed
-    edm::LogError("NTP") << " HLT config extraction failure with process name " 
-                         << fProcessName;
-  }
+
 
 }
 

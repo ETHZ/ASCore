@@ -37,7 +37,8 @@ options.register ('recoType',    # register 'recoType' option
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-options.files= '/store/data/Run2010B/Mu/RECO/PromptReco-v2/000/146/428/9A7CDCF5-AAC6-DF11-8BC3-001D09F276CF.root'
+#options.files= '/store/data/Run2010B/Mu/RECO/PromptReco-v2/000/146/428/9A7CDCF5-AAC6-DF11-8BC3-001D09F276CF.root'
+#options.files= 'file:/shome/pnef/SUSY/reco-data/data/QCD_Pt_5to15_TuneZ2_7TeV_pythia6_GEN-SIM-RECO_START38_V12-v1_0006_AE83724B-C9C9-DF11-BA54-001F296BE5FA.root.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -201,9 +202,6 @@ if options.runon == 'data':
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
 
-# If MC, take the HLT from REDIGI
-if options.runon != 'data':
-    process.analyze.tag_hlttrig = "TriggerResults::HLT"
 # Dump object information for some HLT trigger filters (from confDB)
 process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
                               'hltSingleMu5L3Filtered5',
