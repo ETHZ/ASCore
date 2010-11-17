@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov  9 12:56:48 2010 by ROOT version 5.22/00d
+// Mon Nov 15 20:20:45 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: /shome/pnef/NTupleProducer_38X_data_RECO_90_2_9uW.root
+// found on file: /shome/pnef/Ntuple.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -67,6 +67,7 @@ public :
    Int_t           MaxPhotonsExceed;
    Int_t           MaxGenLepExceed;
    Int_t           MaxVerticesExceed;
+   Int_t           HBHENoiseFlag;
    Int_t           NGenLeptons;
    Int_t           GenLeptonID[100];   //[NGenLeptons]
    Double_t        GenLeptonPt[100];   //[NGenLeptons]
@@ -397,6 +398,10 @@ public :
    Double_t        PFJEta[100];   //[PFNJets]
    Double_t        PFJPhi[100];   //[PFNJets]
    Double_t        PFJScale[100];   //[PFNJets]
+   Double_t        PFJbTagProbTkCntHighEff[100];   //[PFNJets]
+   Double_t        PFJbTagProbTkCntHighPur[100];   //[PFNJets]
+   Double_t        PFJbTagProbSimpSVHighEff[100];   //[PFNJets]
+   Double_t        PFJbTagProbSimpSVHighPur[100];   //[PFNJets]
    Int_t           PFJChMult[100];   //[PFNJets]
    Int_t           PFJNeuMult[100];   //[PFNJets]
    Double_t        PFJChHadfrac[100];   //[PFNJets]
@@ -414,6 +419,10 @@ public :
    Double_t        CAJEta[100];   //[CANJets]
    Double_t        CAJPhi[100];   //[CANJets]
    Double_t        CAJScale[100];   //[CANJets]
+   Double_t        CAJbTagProbTkCntHighEff[100];   //[CANJets]
+   Double_t        CAJbTagProbTkCntHighPur[100];   //[CANJets]
+   Double_t        CAJbTagProbSimpSVHighEff[100];   //[CANJets]
+   Double_t        CAJbTagProbSimpSVHighPur[100];   //[CANJets]
    Double_t        CAJID_HPD[100];   //[CANJets]
    Double_t        CAJID_RBX[100];   //[CANJets]
    Double_t        CAJID_n90Hits[100];   //[CANJets]
@@ -537,6 +546,7 @@ public :
    TBranch        *b_MaxPhotonsExceed;   //!
    TBranch        *b_MaxGenLepExceed;   //!
    TBranch        *b_MaxVerticesExceed;   //!
+   TBranch        *b_HBHENoiseFlag;   //!
    TBranch        *b_NGenLeptons;   //!
    TBranch        *b_GenLeptonID;   //!
    TBranch        *b_GenLeptonPt;   //!
@@ -867,6 +877,10 @@ public :
    TBranch        *b_PFJEta;   //!
    TBranch        *b_PFJPhi;   //!
    TBranch        *b_PFJScale;   //!
+   TBranch        *b_PFJbTagProbTkCntHighEff;   //!
+   TBranch        *b_PFJbTagProbTkCntHighPur;   //!
+   TBranch        *b_PFJbTagProbSimpSVHighEff;   //!
+   TBranch        *b_PFJbTagProbSimpSVHighPur;   //!
    TBranch        *b_PFJChMult;   //!
    TBranch        *b_PFJNeuMult;   //!
    TBranch        *b_PFJChHadfrac;   //!
@@ -884,6 +898,10 @@ public :
    TBranch        *b_CAJEta;   //!
    TBranch        *b_CAJPhi;   //!
    TBranch        *b_CAJScale;   //!
+   TBranch        *b_CAJbTagProbTkCntHighEff;   //!
+   TBranch        *b_CAJbTagProbTkCntHighPur;   //!
+   TBranch        *b_CAJbTagProbSimpSVHighEff;   //!
+   TBranch        *b_CAJbTagProbSimpSVHighPur;   //!
    TBranch        *b_CAJID_HPD;   //!
    TBranch        *b_CAJID_RBX;   //!
    TBranch        *b_CAJID_n90Hits;   //!
@@ -976,9 +994,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/NTupleProducer_38X_data_RECO_90_2_9uW.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/Ntuple.root");
       if (!f) {
-         f = new TFile("/shome/pnef/NTupleProducer_38X_data_RECO_90_2_9uW.root");
+         f = new TFile("/shome/pnef/Ntuple.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1078,6 +1096,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MaxPhotonsExceed", &MaxPhotonsExceed, &b_MaxPhotonsExceed);
    fChain->SetBranchAddress("MaxGenLepExceed", &MaxGenLepExceed, &b_MaxGenLepExceed);
    fChain->SetBranchAddress("MaxVerticesExceed", &MaxVerticesExceed, &b_MaxVerticesExceed);
+   fChain->SetBranchAddress("HBHENoiseFlag", &HBHENoiseFlag, &b_HBHENoiseFlag);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
    fChain->SetBranchAddress("GenLeptonID", &GenLeptonID, &b_GenLeptonID);
    fChain->SetBranchAddress("GenLeptonPt", &GenLeptonPt, &b_GenLeptonPt);
@@ -1408,6 +1427,10 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PFJEta", PFJEta, &b_PFJEta);
    fChain->SetBranchAddress("PFJPhi", PFJPhi, &b_PFJPhi);
    fChain->SetBranchAddress("PFJScale", PFJScale, &b_PFJScale);
+   fChain->SetBranchAddress("PFJbTagProbTkCntHighEff", PFJbTagProbTkCntHighEff, &b_PFJbTagProbTkCntHighEff);
+   fChain->SetBranchAddress("PFJbTagProbTkCntHighPur", PFJbTagProbTkCntHighPur, &b_PFJbTagProbTkCntHighPur);
+   fChain->SetBranchAddress("PFJbTagProbSimpSVHighEff", PFJbTagProbSimpSVHighEff, &b_PFJbTagProbSimpSVHighEff);
+   fChain->SetBranchAddress("PFJbTagProbSimpSVHighPur", PFJbTagProbSimpSVHighPur, &b_PFJbTagProbSimpSVHighPur);
    fChain->SetBranchAddress("PFJChMult", PFJChMult, &b_PFJChMult);
    fChain->SetBranchAddress("PFJNeuMult", PFJNeuMult, &b_PFJNeuMult);
    fChain->SetBranchAddress("PFJChHadfrac", PFJChHadfrac, &b_PFJChHadfrac);
@@ -1425,6 +1448,10 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("CAJEta", CAJEta, &b_CAJEta);
    fChain->SetBranchAddress("CAJPhi", CAJPhi, &b_CAJPhi);
    fChain->SetBranchAddress("CAJScale", CAJScale, &b_CAJScale);
+   fChain->SetBranchAddress("CAJbTagProbTkCntHighEff", CAJbTagProbTkCntHighEff, &b_CAJbTagProbTkCntHighEff);
+   fChain->SetBranchAddress("CAJbTagProbTkCntHighPur", CAJbTagProbTkCntHighPur, &b_CAJbTagProbTkCntHighPur);
+   fChain->SetBranchAddress("CAJbTagProbSimpSVHighEff", CAJbTagProbSimpSVHighEff, &b_CAJbTagProbSimpSVHighEff);
+   fChain->SetBranchAddress("CAJbTagProbSimpSVHighPur", CAJbTagProbSimpSVHighPur, &b_CAJbTagProbSimpSVHighPur);
    fChain->SetBranchAddress("CAJID_HPD", CAJID_HPD, &b_CAJID_HPD);
    fChain->SetBranchAddress("CAJID_RBX", CAJID_RBX, &b_CAJID_RBX);
    fChain->SetBranchAddress("CAJID_n90Hits", CAJID_n90Hits, &b_CAJID_n90Hits);
