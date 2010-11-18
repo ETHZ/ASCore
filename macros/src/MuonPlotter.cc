@@ -7,9 +7,12 @@
 #include "helper/AnaClass.hh"
 #include "helper/Utilities.hh"
 #include "helper/FPRatios.hh"
+#include "helper/Monitor.hh"
 
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
+
+#include <iomanip>
 
 using namespace std;
 
@@ -65,7 +68,7 @@ void MuonPlotter::init(TString filename){
 	// fLumiNorm = fSamples[0].lumi; // Normalize everything to this lumi in /pb
 	fLumiNorm = 100; // Normalize everything to this lumi in /pb
 	fBinWidthScale = 10.; // Normalize Y axis to this binwidth
-
+	fDoCounting = false; // Disable counters by default
 	fMinPt1 = 20.;
 	fMinPt2 = 10.;
 
@@ -80,6 +83,9 @@ void MuonPlotter::init(TString filename){
 	fMCBG.push_back(QCD30);
 	fMCBG.push_back(QCD80);
 	fMCBG.push_back(QCD170);
+	fMCBG.push_back(SSWWDPS);
+	fMCBG.push_back(SSWWSPSPos);
+	fMCBG.push_back(SSWWSPSNeg);
 
 	fMCBGSig = fMCBG;
 	fMCBGSig.push_back(LM0);
@@ -90,6 +96,7 @@ void MuonPlotter::init(TString filename){
 	fEGData.push_back(EGB);
 	fJMData.push_back(JMA);
 	fJMData.push_back(JMB);
+	fJMData.push_back(MultiJet);
 
 	fAllSamples.push_back(MuA);
 	fAllSamples.push_back(MuB);
@@ -97,6 +104,7 @@ void MuonPlotter::init(TString filename){
 	fAllSamples.push_back(EGB);
 	fAllSamples.push_back(JMA);
 	fAllSamples.push_back(JMB);
+	fAllSamples.push_back(MultiJet);
 	fAllSamples.push_back(TTbar);
 	fAllSamples.push_back(WJets);
 	fAllSamples.push_back(ZJets);
@@ -105,6 +113,9 @@ void MuonPlotter::init(TString filename){
 	fAllSamples.push_back(QCD30);
 	fAllSamples.push_back(QCD80);
 	fAllSamples.push_back(QCD170);
+	fAllSamples.push_back(SSWWDPS);
+	fAllSamples.push_back(SSWWSPSPos);
+	fAllSamples.push_back(SSWWSPSNeg);
 	fAllSamples.push_back(LM0);
 
 	bookHistos();
@@ -174,8 +185,13 @@ void MuonPlotter::makePlots(){
 	if(readHistos(fOutputFileName) != 0) return;
 	
 	// float scale = fSamples[MuA].lumi + fSamples[MuB].lumi;
-	fLumiNorm = 22.;
-	// printYields(fLumiNorm);
+	fLumiNorm = 35.;
+	// printYields(Muon);
+	// printYields(Electron);
+	// printYields(EMu);
+	printYields(Muon,     fLumiNorm);
+	printYields(Electron, fLumiNorm);
+	printYields(EMu,      fLumiNorm);
 
 	makeIntPrediction(Muon);
 	makeIntPrediction(Electron);
@@ -1372,13 +1388,31 @@ void MuonPlotter::NObs(TH1D *&hist, vector<int> samples){
 
 //____________________________________________________________________________
 void MuonPlotter::makeIntPrediction(gChannel chan){
-	if(chan == Muon)     makeIntPredictionMuMu();
-	if(chan == Electron) makeIntPredictionEE();
-	if(chan == EMu)      makeIntPredictionEMu();
+	vector<int> samples;
+	if(chan == Muon){
+		if(gSWITCH == 0) samples = fMuData;
+		if(gSWITCH == 1) samples = fJMData;
+		makeIntPredictionMuMu(samples);
+	}
+	if(chan == Electron){
+		if(gSWITCH == 0) samples = fEGData;
+		if(gSWITCH == 1) samples = fJMData;
+		makeIntPredictionEE(samples);
+	}
+	if(chan == EMu){
+		if(gSWITCH == 0){
+			samples.push_back(MuA);
+			samples.push_back(MuB);
+			samples.push_back(EGA);
+			samples.push_back(EGB);
+		}
+		if(gSWITCH == 1) samples = fJMData;
+		makeIntPredictionEMu(samples);
+	}
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPredictionMuMu(){
+void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 	cout << "-----------------------------------" << endl;
 	cout << " Producing prediction for MuMu channel" << endl << endl;
 	bool data = true; // Use ratios from data or mc?
@@ -1386,11 +1420,10 @@ void MuonPlotter::makeIntPredictionMuMu(){
 	// Which samples to use for nt2/nt1/nt0 input?
 	// vector<int> inputsamples = fMCBG;
 	// vector<int> inputsamples = fMCBGSig;
-	vector<int> inputsamples = fMuData;
+	// vector<int> inputsamples = fMuData;
 
 	// Which luminosity to use?
 	// fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
-	fLumiNorm = 22.;
 
 	// Dummy binning
 	const int nptbins = 1;
@@ -1421,7 +1454,7 @@ void MuonPlotter::makeIntPredictionMuMu(){
 	float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
 
 	calculateRatio(fMCBG,   Muon, 1, fratio_allmc, fratio_allmc_e);
-	calculateRatio(fMuData, Muon, 1, fratio_data,  fratio_data_e);
+	calculateRatio(fJMData, Muon, 1, fratio_data,  fratio_data_e);
 	calculateRatio(fMCBG,   Muon, 2, pratio_allmc, pratio_allmc_e);
 	calculateRatio(fMuData, Muon, 2, pratio_data,  pratio_data_e);
 
@@ -1502,7 +1535,7 @@ void MuonPlotter::makeIntPredictionMuMu(){
 	cout << " ------------------------------------" << endl;
 
 	// Make prediction
-	fFPRatios = new FPRatios();
+	FPRatios *fFPRatios = new FPRatios();
 	fFPRatios->SetVerbose(fVerbose);
 	if(data){
 		fFPRatios->SetMuFratios(H_fratio_data);
@@ -1545,10 +1578,11 @@ void MuonPlotter::makeIntPredictionMuMu(){
 	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].mumu.numbers.nt2;
 	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
 	cout << " ------------------------------------" << endl;
+	delete fFPRatios;
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPredictionEE(){
+void MuonPlotter::makeIntPredictionEE(vector<int> inputsamples){
 	cout << "-----------------------------------" << endl;
 	cout << " Producing prediction for EE channel" << endl << endl;
 	bool data = true; // Use ratios from data or mc?
@@ -1556,11 +1590,10 @@ void MuonPlotter::makeIntPredictionEE(){
 	// Which samples to use for nt2/nt1/nt0 input?
 	// vector<int> inputsamples = fMCBG;
 	// vector<int> inputsamples = fMCBGSig;
-	vector<int> inputsamples = fEGData;
+	// vector<int> inputsamples = fEGData;
 
 	// Which luminosity to use?
 	// fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
-	fLumiNorm = 22.;
 
 	// Dummy binning
 	const int nptbins = 1;
@@ -1591,9 +1624,10 @@ void MuonPlotter::makeIntPredictionEE(){
 	// float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
 
 	calculateRatio(fMCBG,   Electron, 1, elfratio_allmc, elfratio_allmc_e);
-	calculateRatio(fMuData, Electron, 1, elfratio_data,  elfratio_data_e);
+	if(gSWITCH == 0) calculateRatio(fEGData, Electron, 1, elfratio_data,  elfratio_data_e);
+	if(gSWITCH == 1) calculateRatio(fJMData, Electron, 1, elfratio_data,  elfratio_data_e);
 	calculateRatio(fMCBG,   Electron, 2, elpratio_allmc, elpratio_allmc_e);
-	calculateRatio(fMuData, Electron, 2, elpratio_data,  elpratio_data_e);
+	calculateRatio(fEGData, Electron, 2, elpratio_data,  elpratio_data_e);
 
 	H_el_fratio_allmc->SetBinContent(1,1,elfratio_allmc);
 	H_el_fratio_allmc->SetBinError  (1,1,elfratio_allmc_e);
@@ -1672,7 +1706,7 @@ void MuonPlotter::makeIntPredictionEE(){
 	cout << " ------------------------------------" << endl;
 
 	// Make prediction
-	fFPRatios = new FPRatios();
+	FPRatios *fFPRatios = new FPRatios();
 	fFPRatios->SetVerbose(fVerbose);
 	if(data){
 		fFPRatios->SetElFratios(H_el_fratio_data);
@@ -1718,22 +1752,14 @@ void MuonPlotter::makeIntPredictionEE(){
 	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].ee.numbers.nt2;
 	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
 	cout << " ------------------------------------" << endl;
+	delete fFPRatios;
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPredictionEMu(){
+void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
 	cout << "-----------------------------------" << endl;
 	cout << " Producing prediction for EMu channel" << endl << endl;
 	bool data = true; // Use ratios from data or mc?
-
-	// Which samples to use for nt2/nt1/nt0 input?
-	// vector<int> inputsamples = fMCBG;
-	// vector<int> inputsamples = fMCBGSig;
-	vector<int> inputsamples = fMuData;
-
-	// Which luminosity to use?
-	// fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
-	fLumiNorm = 22.;
 
 	// Dummy binning
 	const int nptbins = 1;
@@ -1772,14 +1798,15 @@ void MuonPlotter::makeIntPredictionEMu(){
 	// float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
 
 	calculateRatio(fMCBG,   Muon, 1, mufratio_allmc, mufratio_allmc_e);
-	calculateRatio(fMuData, Muon, 1, mufratio_data,  mufratio_data_e);
+	calculateRatio(fJMData, Muon, 1, mufratio_data,  mufratio_data_e);
 	calculateRatio(fMCBG,   Muon, 2, mupratio_allmc, mupratio_allmc_e);
 	calculateRatio(fMuData, Muon, 2, mupratio_data,  mupratio_data_e);
 
 	calculateRatio(fMCBG,   Electron, 1, elfratio_allmc, elfratio_allmc_e);
-	calculateRatio(fMuData, Electron, 1, elfratio_data,  elfratio_data_e);
+	if(gSWITCH == 0) calculateRatio(fEGData, Electron, 1, elfratio_data,  elfratio_data_e);
+	if(gSWITCH == 1) calculateRatio(fJMData, Electron, 1, elfratio_data,  elfratio_data_e);
 	calculateRatio(fMCBG,   Electron, 2, elpratio_allmc, elpratio_allmc_e);
-	calculateRatio(fMuData, Electron, 2, elpratio_data,  elpratio_data_e);
+	calculateRatio(fEGData, Electron, 2, elpratio_data,  elpratio_data_e);
 
 	H_mu_fratio_allmc->SetBinContent(1,1,mufratio_allmc);
 	H_mu_fratio_allmc->SetBinError  (1,1,mufratio_allmc_e);
@@ -1863,6 +1890,7 @@ void MuonPlotter::makeIntPredictionEMu(){
 		nt01_e2 += scale*scale * cha->numbers.nt01;
 		nt0_e2  += scale*scale * cha->numbers.nt0;
 	}
+
 	if(data){
 		cout << "  Found " << nt2  << " events in Nt2" << endl;
 		cout << "  Found " << nt10 << " events in Nt10" << endl;
@@ -1878,7 +1906,7 @@ void MuonPlotter::makeIntPredictionEMu(){
 	cout << " ------------------------------------" << endl;
 
 	// Make prediction
-	fFPRatios = new FPRatios();
+	FPRatios *fFPRatios = new FPRatios();
 	fFPRatios->SetVerbose(fVerbose);
 	if(data){
 		fFPRatios->SetMuFratios(H_mu_fratio_data);
@@ -1892,6 +1920,7 @@ void MuonPlotter::makeIntPredictionEMu(){
 		fFPRatios->SetElFratios(H_el_fratio_allmc);
 		fFPRatios->SetElPratios(H_el_pratio_allmc);
 	}
+		
 	vector<double> nt;
 	nt.push_back(nt0);
 	nt.push_back(nt01); // e passes
@@ -1909,9 +1938,10 @@ void MuonPlotter::makeIntPredictionEMu(){
 	vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
 
 	cout << "  Prediction for Npp: " << nevFP[0] << " +/- " << nevFPEstat[0] << " (stat) +/- " << nevFPEsyst[0] << " (syst)" << endl;
-	cout << "  Prediction for Nfp: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
-	cout << "  Prediction for Nff: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
-	cout << "  Total fakes:        " << nevFP[1]+nevFP[2] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2])<< " (syst)" << endl;
+	cout << "  Prediction for Npf: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
+	cout << "  Prediction for Nfp: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
+	cout << "  Prediction for Nff: " << nevFP[3] << " +/- " << nevFPEstat[3] << " (stat) +/- " << nevFPEsyst[3] << " (syst)" << endl;
+	cout << "  Total fakes:        " << nevFP[1]+nevFP[2]+nevFP[3] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2] + nevFPEstat[3]*nevFPEstat[3]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2] + nevFPEsyst[3]*nevFPEsyst[3])<< " (syst)" << endl;
 	cout << " ------------------------------------" << endl;
 
 	// Get observation
@@ -1929,6 +1959,7 @@ void MuonPlotter::makeIntPredictionEMu(){
 	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].emu.numbers.nt2;
 	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
 	cout << " ------------------------------------" << endl;
+	delete fFPRatios;
 }
 
 //____________________________________________________________________________
@@ -2002,7 +2033,7 @@ vector<TH1D*> MuonPlotter::NsigPredFromFPRatios(const int sample, bool output){
 			if(fVerbose > 2) cout << "   Pt2 = " << pt2 << endl;
 			if(fVerbose > 2) cout << "   nt2: " << nt2 << "  nt1: " << nt1 << "  nt0: " << nt0 << endl;
 
-			fFPRatios = new FPRatios();
+			FPRatios *fFPRatios = new FPRatios();
 			fFPRatios->SetVerbose(fVerbose);
 			fFPRatios->SetMuFratios(fH2D_fRatio);
 			fFPRatios->SetMuPratios(fH2D_pRatio);
@@ -2066,6 +2097,10 @@ vector<TH1D*> MuonPlotter::NsigPredFromFPRatios(const int sample, bool output){
 void MuonPlotter::fillYields(){ fillYields(fAllSamples); }
 void MuonPlotter::fillYields(int sample){ vector<int> samples; samples.push_back(sample); fillYields(samples); }
 void MuonPlotter::fillYields(vector<int> samples){
+	fDoCounting = true;
+	TString eventfilename = fOutputDir + "InterestingEvents.txt";
+	ofstream OUT(eventfilename.Data(), ios::trunc);
+	
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		if(fVerbose > 1){
@@ -2076,9 +2111,59 @@ void MuonPlotter::fillYields(vector<int> samples){
 		TTree *tree = fSamples[index].tree;
 		const bool isdata = fSamples[index].isdata;
 
+		fCurrentSample = index;
+		gSample sample = gSample(index);
+
 		channel mumu = fSamples[index].mumu;
 		channel ee   = fSamples[index].ee;
 		channel emu  = fSamples[index].emu;
+
+		fCounters[fCurrentSample][Muon]    .fill("All events",                             0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... is good run",                       0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... passes triggers",                   0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... has at least 2 jets, 1 loose muon", 0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... has 2 loose muons",                 0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... passes Z veto",                     0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... passes Minv veto",                  0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... passes HT cut",                     0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... passes MET cut",                    0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... has same-sign muons",               0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... second muon passes pt cut",         0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... first muon passes pt cut",          0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... first muon passes tight cut",       0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... second muon passes tight cut",      0.);
+		fCounters[fCurrentSample][Muon]    .fill(" ... both muons pass tight cut",         0.);
+
+		fCounters[fCurrentSample][EMu]     .fill("All events",                             0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... is good run",                       0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... passes triggers",                   0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... has at least 1 j, loose e/mu pair", 0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... passes Z veto",                     0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... passes Minv veto",                  0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... passes HT cut",                     0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... passes MET cut",                    0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... has same-sign electron muon pair",  0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... muon passes pt cut",                0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... electron passes pt cut",            0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... muon passes tight cut",             0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... electron passes tight cut",         0.);
+		fCounters[fCurrentSample][EMu]     .fill(" ... both e and mu pass tight cuts",     0.);
+
+		fCounters[fCurrentSample][Electron].fill("All events",                             0.);
+		fCounters[fCurrentSample][Electron].fill(" ... is good run",                       0.);
+		fCounters[fCurrentSample][Electron].fill(" ... passes triggers",                   0.);
+		fCounters[fCurrentSample][Electron].fill(" ... has at least 2 jets, 1 loose el",   0.);
+		fCounters[fCurrentSample][Electron].fill(" ... has 2 loose electrons",             0.);
+		fCounters[fCurrentSample][Electron].fill(" ... passes Z veto",                     0.);
+		fCounters[fCurrentSample][Electron].fill(" ... passes Minv veto",                  0.);
+		fCounters[fCurrentSample][Electron].fill(" ... passes HT cut",                     0.);
+		fCounters[fCurrentSample][Electron].fill(" ... passes MET cut",                    0.);
+		fCounters[fCurrentSample][Electron].fill(" ... has same-sign electrons",           0.);
+		fCounters[fCurrentSample][Electron].fill(" ... second electron passes pt cut",     0.);
+		fCounters[fCurrentSample][Electron].fill(" ... first electron passes pt cut",      0.);
+		fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut",   0.);
+		fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut",  0.);
+		fCounters[fCurrentSample][Electron].fill(" ... both electrons pass tight cut",     0.);
 		
 		tree->ResetBranchAddresses();
 		Init(tree);
@@ -2090,19 +2175,37 @@ void MuonPlotter::fillYields(vector<int> samples){
 			if (ientry < 0) break;
 			nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+			fCounters[fCurrentSample][Muon].fill("All events");
+			fCounters[fCurrentSample][EMu].fill("All events");
+			fCounters[fCurrentSample][Electron].fill("All events");
+			
+			// Select mutually exclusive runs for Jet and MultiJet datasets
+			if(!isGoodRun(index)) continue;
+			
+			fCounters[fCurrentSample][Muon].fill(" ... is good run");
+			fCounters[fCurrentSample][EMu].fill(" ... is good run");
+			fCounters[fCurrentSample][Electron].fill(" ... is good run");
+			
 			// MuMu Channel
-			if(isSSLLMuEventTRG()){
+			if( (isdata && isSSLLMuEventTRG()) || (!isdata && isSSLLMuEvent()) ){
+			// if(isSSLLMuEventTRG()){
 				if(  isTightMuon(0) &&  isTightMuon(1) ){ // Tight-tight
+					fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
+					fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
+					fCounters[fCurrentSample][Muon].fill(" ... both muons pass tight cut");
 					mumu.nthistos.h_nt2    ->Fill(MuPt[0], MuPt[1]);
 					mumu.nthistos.h_nt2_pt ->Fill(MuPt[0]);
 					mumu.nthistos.h_nt2_eta->Fill(MuEta[0]);
+					if(isdata) OUT << " Mu/Mu Tight-Tight event in run " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << fSamples[index].sname << endl;
 				}
 				if(  isTightMuon(0) && !isTightMuon(1) ){ // Tight-loose
+					fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
 					mumu.nthistos.h_nt10    ->Fill(MuPt[0], MuPt[1]);
 					mumu.nthistos.h_nt10_pt ->Fill(MuPt[0]);
 					mumu.nthistos.h_nt10_eta->Fill(MuEta[0]);
 				}
 				if( !isTightMuon(0) &&  isTightMuon(1) ){ // Loose-tight
+					fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
 					mumu.nthistos.h_nt10    ->Fill(MuPt[1], MuPt[0]);
 					mumu.nthistos.h_nt10_pt ->Fill(MuPt[1]);
 					mumu.nthistos.h_nt10_eta->Fill(MuEta[1]);
@@ -2113,7 +2216,8 @@ void MuonPlotter::fillYields(vector<int> samples){
 					mumu.nthistos.h_nt0_eta->Fill(MuEta[0]);
 				}
 			}
-			if(isSigSupMuEventTRG()){ // f Ratio
+			if( (isdata && isSigSupMuEventTRG()) || (!isdata && isSigSupMuEvent()) ){ // f Ratio
+			// if(isSigSupMuEventTRG()){ // f Ratio
 				if( isLooseMuon(0) ){
 					mumu.fhistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
 					mumu.fhistos.h_nloose_pt ->Fill(MuPt[0]);
@@ -2125,7 +2229,8 @@ void MuonPlotter::fillYields(vector<int> samples){
 					mumu.fhistos.h_ntight_eta->Fill(MuEta[0]);
 				}
 			}
-			if(isZMuMuEventTRG()){ // p Ratio
+			if( (isdata && isZMuMuEventTRG()) || (!isdata && isZMuMuEvent()) ){ // p Ratio
+			// if(isZMuMuEventTRG()){ // p Ratio
 				if( isLooseMuon(0) ){
 					mumu.phistos.h_nloose    ->Fill(MuPt[0], MuEta[0]);
 					mumu.phistos.h_nloose_pt ->Fill(MuPt[0]);
@@ -2139,18 +2244,25 @@ void MuonPlotter::fillYields(vector<int> samples){
 			}				
 			
 			// EE Channel
-			if(isSSLLElEventTRG()){
+			if( (isdata && isSSLLElEventTRG()) || (!isdata && isSSLLElEvent()) ){
+			// if(isSSLLElEventTRG()){
 				if(  isTightElectron(0) &&  isTightElectron(1) ){ // Tight-tight
+					fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
+					fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
+					fCounters[fCurrentSample][Electron].fill(" ... both electrons pass tight cut");
 					ee.nthistos.h_nt2    ->Fill(ElPt[0], ElPt[1]);
 					ee.nthistos.h_nt2_pt ->Fill(ElPt[0]);
 					ee.nthistos.h_nt2_eta->Fill(ElEta[0]);
+					if(isdata) OUT << " E/E Tight-Tight event in run   " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << fSamples[index].sname << endl;
 				}
 				if(  isTightElectron(0) && !isTightElectron(1) ){ // Tight-loose
+					fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
 					ee.nthistos.h_nt10    ->Fill(ElPt[0], ElPt[1]);
 					ee.nthistos.h_nt10_pt ->Fill(ElPt[0]);
 					ee.nthistos.h_nt10_eta->Fill(ElEta[0]);
 				}
 				if( !isTightElectron(0) &&  isTightElectron(1) ){ // Loose-tight
+					fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
 					ee.nthistos.h_nt10    ->Fill(ElPt[1], ElPt[0]);
 					ee.nthistos.h_nt10_pt ->Fill(ElPt[1]);
 					ee.nthistos.h_nt10_eta->Fill(ElEta[1]);
@@ -2161,7 +2273,8 @@ void MuonPlotter::fillYields(vector<int> samples){
 					ee.nthistos.h_nt0_eta->Fill(ElEta[0]);
 				}
 			}
-			if(isSigSupElEventTRG()){ // f Ratio
+			if( (isdata && isSigSupElEventTRG()) || (!isdata && isSigSupElEvent()) ){ // f Ratio
+			// if(isSigSupElEventTRG()){ // f Ratio
 				if( isLooseElectron(0) ){
 					ee.fhistos.h_nloose    ->Fill(ElPt[0], ElEta[0]);
 					ee.fhistos.h_nloose_pt ->Fill(ElPt[0]);
@@ -2173,32 +2286,41 @@ void MuonPlotter::fillYields(vector<int> samples){
 					ee.fhistos.h_ntight_eta->Fill(ElEta[0]);
 				}
 			}
-			if(isZElElEventTRG()){ // p Ratio
-				if( isLooseElectron(0) ){
-					ee.phistos.h_nloose    ->Fill(ElPt[0], ElEta[0]);
-					ee.phistos.h_nloose_pt ->Fill(ElPt[0]);
-					ee.phistos.h_nloose_eta->Fill(ElEta[0]);
+			int elind;
+			if( (isdata && isZElElEventTRG(elind)) || (!isdata && isZElElEvent(elind)) ){ // p Ratio
+			// if(isZElElEventTRG(elind)){ // p Ratio
+				if( isLooseElectron(elind) ){
+					ee.phistos.h_nloose    ->Fill(ElPt [elind], ElEta[elind]);
+					ee.phistos.h_nloose_pt ->Fill(ElPt [elind]);
+					ee.phistos.h_nloose_eta->Fill(ElEta[elind]);
 				}
-				if( isTightElectron(0) ){
-					ee.phistos.h_ntight    ->Fill(ElPt[0], ElEta[0]);
-					ee.phistos.h_ntight_pt ->Fill(ElPt[0]);
-					ee.phistos.h_ntight_eta->Fill(ElEta[0]);
+				if( isTightElectron(elind) ){
+					ee.phistos.h_ntight    ->Fill(ElPt [elind], ElEta[elind]);
+					ee.phistos.h_ntight_pt ->Fill(ElPt [elind]);
+					ee.phistos.h_ntight_eta->Fill(ElEta[elind]);
 				}
 			}
 						
 			// EMu Channel
-			if(isSSLLElMuEventTRG()){
+			if( (isdata && isSSLLElMuEventTRG(sample)) || (!isdata && isSSLLElMuEvent()) ){
+			// if(isSSLLElMuEventTRG()){
 				if(  isTightElectron(0) &&  isTightMuon(0) ){ // Tight-tight
+					fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
+					fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
+					fCounters[fCurrentSample][EMu].fill(" ... both e and mu pass tight cuts");
 					emu.nthistos.h_nt2    ->Fill(MuPt [0], ElPt[0]);
 					emu.nthistos.h_nt2_pt ->Fill(MuPt [0]);
 					emu.nthistos.h_nt2_eta->Fill(MuEta[0]);
+					if(isdata) OUT << " E/Mu Tight-Tight event in run  " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << fSamples[index].sname << endl;
 				}
 				if( !isTightElectron(0) &&  isTightMuon(0) ){ // Tight-loose
+					fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
 					emu.nthistos.h_nt10    ->Fill(MuPt [0], ElPt[0]);
 					emu.nthistos.h_nt10_pt ->Fill(MuPt [0]);
 					emu.nthistos.h_nt10_eta->Fill(MuEta[0]);
 				}
 				if(  isTightElectron(0) && !isTightMuon(0) ){ // Loose-tight
+					fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
 					emu.nthistos.h_nt01    ->Fill(MuPt [0], ElPt[0]);
 					emu.nthistos.h_nt01_pt ->Fill(MuPt [0]);
 					emu.nthistos.h_nt01_eta->Fill(MuEta[0]);
@@ -2250,32 +2372,202 @@ void MuonPlotter::fillYields(vector<int> samples){
 		numbers.nzt  = ee.phistos.h_ntight->GetEntries();
 		numbers.nzl  = ee.phistos.h_nloose->GetEntries();
 		fSamples[index].ee.numbers = numbers;
+
+		// cout << "------------------------------------------------------------------------------" << endl;
+		// cout << "Printing cut flow for " << fSamples[fCurrentSample].sname << endl;
+		// cout << "MuMu channel:" << endl;
+		// fCounters[fCurrentSample][Muon].print();
+		// cout << "EE channel:  " << endl;
+		// fCounters[fCurrentSample][Electron].print();
+		// cout << "EMu channel: " << endl;
+		// fCounters[fCurrentSample][EMu].print();
 	}
+	OUT.close();
 	writeHistos();
+	printCutFlows(fOutputDir + "CutFlow.txt");
+	// printYields(Muon);
+	// printYields(Electron);
+	// printYields(EMu);
+	fDoCounting = false;
 }
 
 //____________________________________________________________________________
-void MuonPlotter::printYields(){ printYields(fAllSamples); }
-void MuonPlotter::printYields(float scale){ printYields(fAllSamples, scale); }
-void MuonPlotter::printYields(int sample){ vector<int> samples; samples.push_back(sample); printYields(samples); }
-void MuonPlotter::printYields(vector<int> samples, float lumiscale){
-	cout << "-----------------------" << endl;
+void MuonPlotter::printCutFlows(TString filename){
+	// Remove existing cutflow file
+	// char cmd[100];
+	// sprintf(cmd,"rm -f %s", filename.Data());
+	// system(cmd);
+
+	ofstream OUT(filename.Data(), ios::trunc);
+	vector<string>::const_iterator countit;
+	
+	OUT << " Printing Cutflow for Mu/Mu channel..." << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 0) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][Muon].countNames.begin(); countit != fCounters[0][Muon].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 0) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][Muon].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 1) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][Muon].countNames.begin(); countit != fCounters[0][Muon].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 1) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][Muon].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << endl << endl;
+	OUT << " Printing Cutflow for E/Mu channel..." << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 0) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][EMu].countNames.begin(); countit != fCounters[0][EMu].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 0) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][EMu].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 1) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][EMu].countNames.begin(); countit != fCounters[0][EMu].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 1) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][EMu].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << endl << endl;
+	OUT << " Printing Cutflow for E/E channel..." << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 0) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][Electron].countNames.begin(); countit != fCounters[0][Electron].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 0) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][Electron].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << " Cutname                                 | ";
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		if(fSamples[i].isdata == 1) continue;
+		OUT << setw(9) << fSamples[i].sname;
+		OUT << " | ";
+	}
+	OUT << endl;
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+
+    for( countit = fCounters[0][Electron].countNames.begin(); countit != fCounters[0][Electron].countNames.end(); ++countit ){
+		OUT << setw(40) << *countit;
+		OUT << " | ";
+		
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			if(fSamples[i].isdata == 1) continue;
+			OUT << setw(9) << setprecision(3) << fCounters[i][Electron].counts(*countit) << " | ";
+		}
+		OUT << endl;
+	}
+	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT.close();
+}
+
+//____________________________________________________________________________
+void MuonPlotter::printYields(gChannel chan){ printYields(chan, fAllSamples); }
+void MuonPlotter::printYields(gChannel chan, float scale){ printYields(chan, fAllSamples, scale); }
+void MuonPlotter::printYields(gChannel chan, int sample, float lumiscale){ vector<int> samples; samples.push_back(sample); printYields(chan, samples, lumiscale); }
+void MuonPlotter::printYields(gChannel chan, vector<int> samples, float lumiscale){
+	cout << setfill('-') << setw(94) << "-" << endl;
+	TString name = "Mu/Mu";
+	if(chan == Electron) name = "E/E";
+	if(chan == EMu) name = "E/Mu";
+	cout << " Printing yields for " << name << " channel..." << endl;
 	if(lumiscale > -1.0) cout << " Numbers scaled to " << lumiscale << " /pb" << endl;
+	cout << "        Name |   Nt2   |   Nt10  |   Nt01  |   Nt0   |   Nsst  |   Nssl  |   NZ t  |   NZ l  |" << endl;
+	cout << setfill('-') << setw(94) << "-" << endl;
+	cout << setfill(' ');
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
-		channel cha = fSamples[index].mumu;
-		numberset numbers = cha.numbers;
-		cout << " Sample: " << fSamples[index].sname << endl;
+		channel *cha = &fSamples[index].mumu;
+		if(chan == Electron) cha = &fSamples[index].ee;
+		if(chan == EMu)      cha = &fSamples[index].emu;
+		numberset numbers = cha->numbers;
 		float scale = lumiscale / fSamples[index].lumi;
 		if(scale < 0) scale = 1;
 		if(fSamples[index].isdata) scale = 1;
-		cout << "   Nt2 = "       << scale*numbers.nt2 <<  "  Nt1 = "       << scale*numbers.nt10 << "  Nt0 = " << scale*numbers.nt0 << endl;
-		cout << "   Nss tight = " << scale*numbers.nsst << "  Nss loose = " << scale*numbers.nssl << endl;
-		cout << "   NZ tight  = " << scale*numbers.nzt <<  "  NZ  loose = " << scale*numbers.nzl << endl;		
+		cout << setw(12) << fSamples[index].sname << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nt2  << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nt10 << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nt01 << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nt0  << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nsst << " |"; 
+		cout << setw(8)  << setprecision(3) << scale*numbers.nssl << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nzt  << " |";
+		cout << setw(8)  << setprecision(3) << scale*numbers.nzl  << " |";
 		cout << endl;
 	}
 
-	cout << "-----------------------" << endl;
+	cout << setfill('-') << setw(94) << "-" << endl;
 }
 
 void MuonPlotter::bookHistos(){
@@ -2661,7 +2953,7 @@ bool MuonPlotter::passesZVeto(float lower, float upper){
 					if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
 						pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], MMU);
 						float mass = (pmu1+pmu2).M();
-						if(mass < lower || mass > upper) return false;
+						if(mass > lower && mass < upper) return false;
 					}
 				}
 			}
@@ -2680,7 +2972,7 @@ bool MuonPlotter::passesZVeto(float lower, float upper){
 					if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
 						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], MEL);
 						float mass = (pel1+pel2).M();
-						if(mass < lower || mass > upper) return false;
+						if(mass > lower && mass < upper) return false;
 					}
 				}
 			}
@@ -2753,15 +3045,32 @@ bool MuonPlotter::isMuTriggeredEvent(){
 //____________________________________________________________________________
 bool MuonPlotter::isElTriggeredEvent(){
 	// Leptonic triggers from UCSD/UCSB/FNAL list
-	if (Run==1)                     return  HLT_Ele10_LW_L1R;
-	if (Run>1       && Run<138000)  return (HLT_Ele10_LW_L1R            || HLT_Ele10_SW_L1R           || HLT_Ele15_LW_L1R           || HLT_DoubleEle5_SW_L1R);
-	if (Run>=138000 && Run<=141900) return (HLT_Ele15_LW_L1R            || HLT_Ele15_SW_L1R           || HLT_Ele10_LW_EleId_L1R     || HLT_DoubleEle5_SW_L1R);
-	if (Run>141900)                 return (HLT_Ele10_SW_EleId_L1R      || HLT_Ele15_SW_CaloEleId_L1R || HLT_Ele15_SW_EleId_L1R ||
-	                                        HLT_Ele17_SW_LooseEleId_L1R || HLT_Ele17_SW_CaloEleId_L1R || HLT_Ele17_SW_EleId_L1R || 
-	                                        HLT_Ele17_SW_TightEleId_L1R || HLT_Ele17_SW_TighterEleId_L1R_v1 || HLT_Ele20_SW_L1R ||
-	                                        HLT_Ele22_SW_TighterEleId_L1R_v2        || HLT_Ele22_SW_TighterEleId_L1R_v3 || HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
-	                                        HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 || HLT_Ele32_SW_TighterEleId_L1R_v2 ||
-	                                        HLT_DoubleEle10_SW_L1R      || HLT_DoubleEle15_SW_L1R_v1  || HLT_DoubleEle17_SW_L1R_v1);
+	if(Run == 1)                       return  HLT_Ele10_LW_L1R;
+	if(Run >  1      && Run <  138000) return( HLT_Ele10_LW_L1R ||
+	                                           HLT_Ele10_SW_L1R ||
+	                                           HLT_Ele15_LW_L1R ||
+	                                           HLT_DoubleEle5_SW_L1R );
+	if(Run >= 138000 && Run <= 141900) return( HLT_Ele15_LW_L1R ||
+	                                           HLT_Ele15_SW_L1R ||
+	                                           HLT_Ele10_LW_EleId_L1R ||
+	                                           HLT_DoubleEle5_SW_L1R);
+	if(Run >  141900)                  return( HLT_Ele10_SW_EleId_L1R ||
+	                                           HLT_Ele15_SW_CaloEleId_L1R ||
+	                                           HLT_Ele15_SW_EleId_L1R ||
+	                                           HLT_Ele17_SW_LooseEleId_L1R ||
+	                                           HLT_Ele17_SW_CaloEleId_L1R ||
+	                                           HLT_Ele17_SW_EleId_L1R ||
+	                                           HLT_Ele17_SW_TightEleId_L1R ||
+	                                           HLT_Ele17_SW_TighterEleId_L1R_v1 ||
+	                                           HLT_Ele20_SW_L1R ||
+	                                           HLT_Ele22_SW_TighterEleId_L1R_v2 ||
+	                                           HLT_Ele22_SW_TighterEleId_L1R_v3 ||
+	                                           HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
+	                                           HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 ||
+	                                           HLT_Ele32_SW_TighterEleId_L1R_v2 ||
+	                                           HLT_DoubleEle10_SW_L1R ||
+	                                           HLT_DoubleEle15_SW_L1R_v1 ||
+	                                           HLT_DoubleEle17_SW_L1R_v1 );
 	return false;
 }
 
@@ -2780,20 +3089,28 @@ bool MuonPlotter::isJetTriggeredEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isHTTriggeredEvent(){
-	if(HLT_HT100U == 0  &&
-	   HLT_HT120U == 0  &&
-	   HLT_HT130U == 0  &&
-	   HLT_HT140U == 0  &&
-	   HLT_HT150U == 0  &&
-	   HLT_HT150U_v3 == 0 &&
-	   HLT_HT200U == 0
-	) return false;
+	// Selects run ranges and HT triggers
+	if(Run == 1) if(HLT_HT100U == 1) return true;
+	if(Run >= 140160 && Run <= 147116 ) if(HLT_HT100U    == 1) return true; // RunA
+	if(Run >= 147196 && Run <= 148058 ) if(HLT_HT140U    == 1) return true; // Jet dataset
+	if(Run >= 148822 && Run <= 149294 ) if(HLT_HT150U_v3 == 1) return true; // Multijet dataset
+	return false;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::isGoodRun(int sample){
+	// Select runs such that JetB and MultiJet datasets are mutually exclusive
+	// if(gSample(sample) == JMB)      if(Run > 147195) return false;
+	// if(gSample(sample) == MultiJet) if(Run < 147196) return false;
+	if(gSample(sample) == JMB)      if(Run > 148058) return false;
+	if(gSample(sample) == MultiJet) if(Run < 148822) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isSigSupMuEvent(){
 	if(isGoodMuEvent() == false) return false;
+	// if(!passesHTCut(300.)) return false;
 	if(MuMT > 20.) return false;
 	if(pfMET > 20.) return false;
 	if(NMus > 1) return false;
@@ -2802,7 +3119,7 @@ bool MuonPlotter::isSigSupMuEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isSigSupMuEventTRG(){
-	if(!isJetTriggeredEvent() && !isHTTriggeredEvent()) return false;
+	if(!isHTTriggeredEvent() || !passesHTCut(300.)) return false;
 	if(!isSigSupMuEvent()) return false;
 	return true;
 }
@@ -2834,10 +3151,12 @@ bool MuonPlotter::isZMuMuEventTRG(){
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isZElElEvent(){
+bool MuonPlotter::isZElElEvent(int &elind){
 	if(isGoodElEvent() == false) return false;
 	if(NEls != 2) return false;
-	if(isLooseElectron(0) == false || isLooseElectron(1) == false) return false;
+	if(!isLooseElectron(0) || !isLooseElectron(1)) return false; // both loose
+	if(!isTightElectron(0) && !isTightElectron(1)) return false; // at least one tight
+
 	if(ElCh[0] == ElCh[1]) return false;
 
 	// Z mass window cut
@@ -2849,19 +3168,24 @@ bool MuonPlotter::isZElElEvent(){
 
 	if(pfMET > 20.) return false;
 
+	// If only the harder one tight or both tight, return the softer one
+	// If only the softer one tight, return the harder one
+	elind = 1;
+	if(isTightElectron(1) && !isTightElectron(0)) elind = 0;
 	return true;
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isZElElEventTRG(){
+bool MuonPlotter::isZElElEventTRG(int &elind){
 	if(isElTriggeredEvent() == false) return false;
-	if(isZElElEvent() == false) return false;
+	if(isZElElEvent(elind) == false) return false;
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isSigSupElEvent(){
 	if(!isGoodElEvent()) return false;
+	if(gSWITCH == 1) if(!passesHTCut(300.)) return false;
 	if(ElMT[0] > 20.) return false;
 	if(pfMET > 20.)   return false;
 	if(NEls > 1)      return false;
@@ -2870,11 +3194,10 @@ bool MuonPlotter::isSigSupElEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isSigSupElEventTRG(){
-	if( HLT_Ele10_LW_L1R == 0 &&
-	    HLT_Ele10_SW_L1R == 0 &&
-	    HLT_Ele15_LW_L1R == 0 &&
-		HLT_Ele15_SW_L1R == 0 ) return false;
-	if(!isSigSupMuEvent()) return false;
+	// if(!isElTriggeredEvent()) return false;
+	if(gSWITCH == 0) if(!isElTriggeredEvent()) return false;
+	if(gSWITCH == 1) if(!isHTTriggeredEvent() || !passesHTCut(300.)) return false;
+	if(!isSigSupElEvent()) return false;
 	return true;
 }
 
@@ -2892,24 +3215,38 @@ bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 //____________________________________________________________________________
 bool MuonPlotter::isSSLLMuEvent(){
 	// This should include all the cuts for the final selection
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes triggers");
+
 	if(!isGoodMuEvent()) return false; // >1 jets, >0 loose muons
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has at least 2 jets, 1 loose muon");
 	if(NMus < 2) return false;         // >1 muons
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has 2 loose muons");
 
 	if(gSWITCH == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
 	if(gSWITCH == 1) if(!passesZVeto(15.))       return false;
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Z veto");
 	
 	if(gSWITCH == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
 	if(gSWITCH == 1) if(!passesMllEventVeto(5.) ) return false;
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Minv veto");
 	
 	if(gSWITCH == 0) if(!passesHTCut(60.) )  return false;    // ht cut
 	if(gSWITCH == 1) if(!passesHTCut(300.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes HT cut");
 	
 	if(gSWITCH == 0) if(!passesMETCut(30.) ) return false;    // met cut
 	if(gSWITCH == 1) if(!passesMETCut(30.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes MET cut");
 
 	if(MuCharge[0] != MuCharge[1]) return false;              // SS
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has same-sign muons");
 
-	if(!isGoodPrimMuon(0) || !isGoodSecMuon(1)) return false; // pt cuts
+	if(!isGoodSecMuon(1)) return false; // pt cuts
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... second muon passes pt cut");
+
+	if(!isGoodPrimMuon(0)) return false;
+	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... first muon passes pt cut");		
+
 	return true;
 }
 
@@ -2938,23 +3275,38 @@ bool MuonPlotter::isSSTTMuEventTRG(){
 //____________________________________________________________________________
 bool MuonPlotter::isSSLLElEvent(){
 	// This should include all the cuts for the final selection
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes triggers");
+
 	if(!isGoodElEvent()) return false; // >1 jets, >0 loose eles
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has at least 2 jets, 1 loose el");
 	if(NEls < 2) return false;         // >1 eles
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has 2 loose electrons");
 
 	if(gSWITCH == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
 	if(gSWITCH == 1) if(!passesZVeto(15.))       return false;
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Z veto");
 
 	if(gSWITCH == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
 	if(gSWITCH == 1) if(!passesMllEventVeto(5.) ) return false;
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Minv veto");
 
 	if(gSWITCH == 0) if(!passesHTCut(60.) )  return false;    // ht cut
 	if(gSWITCH == 1) if(!passesHTCut(300.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes HT cut");
 
 	if(gSWITCH == 0) if(!passesMETCut(30.) ) return false;    // met cut
 	if(gSWITCH == 1) if(!passesMETCut(30.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes MET cut");
 
 	if(ElCh[0] != ElCh[1]) return false;              // SS
-	if(!isGoodPrimElectron(0) || !isGoodSecElectron(1)) return false; // pt cuts
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has same-sign electrons");
+
+	if(!isGoodSecElectron(1)) return false; // pt cuts
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... second electron passes pt cut");
+	
+	if(!isGoodPrimElectron(0)) return false;
+	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... first electron passes pt cut");
+	
 	return true;
 }
 
@@ -2983,33 +3335,58 @@ bool MuonPlotter::isSSTTElEventTRG(){
 //____________________________________________________________________________
 bool MuonPlotter::isSSLLElMuEvent(){
 	// This should include all the cuts for the final selection
-	if(!isGoodElMuEvent()) return false; // >1 jets, >0 loose eles
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes triggers");
+
+	if(!isGoodElMuEvent()) return false; // >1 jets, >0 loose eles or muons
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has at least 1 j, loose e/mu pair");
 
 	if(gSWITCH == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
 	if(gSWITCH == 1) if(!passesZVeto(15.))       return false;
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Z veto");
 
 	if(gSWITCH == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
 	if(gSWITCH == 1) if(!passesMllEventVeto(5.) ) return false;
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Minv veto");
 
 	if(gSWITCH == 0) if(!passesHTCut(60.) )  return false;    // ht cut
 	if(gSWITCH == 1) if(!passesHTCut(300.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes HT cut");
 
 	if(gSWITCH == 0) if(!passesMETCut(20.) ) return false;    // met cut
 	if(gSWITCH == 1) if(!passesMETCut(30.))  return false;
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes MET cut");
 
 	if(ElCh[0] != MuCharge[0]) return false;              // SS
-	if(!isGoodPrimElectron(0) || !isGoodSecMuon(0) && 
-	   !isGoodSecElectron(0)  || !isGoodPrimMuon(0)) return false; // pt cuts
+	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has same-sign electron muon pair");
+
+	if(MuPt[0] > ElPt[0]){
+		if(!isGoodPrimMuon(0))    return false;
+		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... muon passes pt cut");
+		if(!isGoodSecElectron(0)) return false;
+		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... electron passes pt cut");
+	}
+	else if(MuPt[0] < ElPt[0]){
+		if(!isGoodPrimElectron(0)) return false;
+		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... electron passes pt cut");
+		if(!isGoodSecMuon(0))      return false;
+		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... muon passes pt cut");
+	}
 	return true;
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isSSLLElMuEventTRG(){
+bool MuonPlotter::isSSLLElMuEventTRG(gSample sample){
 	// For UCSD/SB/FNAL just use OR of all lepton triggers
-	if(gSWITCH == 0) if(!isElTriggeredEvent() && !isMuTriggeredEvent()) return false;
+	if(gSWITCH == 0){
+		// Take all muon triggered events from muon datasets
+		if(sample == MuA || sample == MuB) if(!isMuTriggeredEvent()) return false;
+		// Take only electron but NOT muon triggered events from electron datasets
+		if(sample == EGA || sample == EGB) if(!isElTriggeredEvent() ||  isMuTriggeredEvent()) return false;
+		if(!isElTriggeredEvent() && !isMuTriggeredEvent()) return false;
+	}
 	if(gSWITCH == 1) if(!isHTTriggeredEvent()) return false;
-	if(!isSSLLElMuEvent()) return false;
-	return true;
+	if(isSSLLElMuEvent()) return true;
+	return false;
 }
 
 //____________________________________________________________________________
@@ -3021,7 +3398,10 @@ bool MuonPlotter::isSSTTElMuEvent(){
 
 //____________________________________________________________________________
 bool MuonPlotter::isSSTTElMuEventTRG(){
-	if(!isSSLLElMuEventTRG()) return false;
+	/*
+		TODO fixme: If this method is ever used, check trigger and dataset selections!
+	*/
+	if(!isSSLLElMuEventTRG(MuA)) return false;
 	if(!isTightElectron(0) || !isTightMuon(0)) return false;
 	return true;
 }
@@ -3145,11 +3525,13 @@ bool MuonPlotter::isGoodJet(int jet){
 	float minDR = 0.4;
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isTightMuon(imu)) continue;
+		if(!isGoodSecMuon(imu)) continue;
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
 	for(size_t iel = 0; iel < NEls; ++iel){
 		if(!isTightElectron(iel)) continue;
+		if(!isGoodSecElectron(iel)) continue;
 		if(Util::GetDeltaR(ElEta[iel], JetEta[jet], ElPhi[iel], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}

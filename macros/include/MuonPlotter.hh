@@ -8,6 +8,7 @@
 
 #include "helper/AnaClass.hh"
 #include "helper/FPRatios.hh"
+#include "helper/Monitor.hh"
 
 class MuonPlotter : public AnaClass{
 
@@ -15,11 +16,13 @@ public:
 	
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
-		MuA, MuB, EGA, EGB, JMA, JMB,
+		sample_begin,
+		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
 		TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170,
-		LM0
+		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
+		LM0,
+		gNSAMPLES
 	};
-	
 	enum gChannel {
 		Muon,
 		EMu,
@@ -45,9 +48,9 @@ public:
 	
 	void makeDiffPredictionPlots();
 	void makeIntPrediction(gChannel);
-	void makeIntPredictionMuMu();
-	void makeIntPredictionEMu();
-	void makeIntPredictionEE();
+	void makeIntPredictionMuMu(vector<int>);
+	void makeIntPredictionEMu(vector<int>);
+	void makeIntPredictionEE(vector<int>);
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
@@ -98,10 +101,13 @@ public:
 	void fillYields();                 // All samples
 	void fillYields(int);              // One sample
 	void fillYields(vector<int>); // List of samples
-	void printYields();
-	void printYields(float);
-	void printYields(int);
-	void printYields(vector<int>, float = -1.0);
+	
+	void printCutFlows(TString);
+	
+	void printYields(gChannel = Muon);
+	void printYields(gChannel, float);
+	void printYields(gChannel, int, float = -1.0);
+	void printYields(gChannel, vector<int>, float = -1.0);
 
 	//////////////////////////////
 	// I/O
@@ -126,6 +132,7 @@ public:
 	bool isElTriggeredEvent();
 	bool isJetTriggeredEvent();
 	bool isHTTriggeredEvent();
+	bool isGoodRun(int sample);
 
 	bool isSigSupMuEvent();
 	bool isSigSupMuEventTRG();
@@ -134,8 +141,8 @@ public:
 
 	bool isSigSupElEvent();
 	bool isSigSupElEventTRG();
-	bool isZElElEvent();
-	bool isZElElEventTRG();
+	bool isZElElEvent(int&);
+	bool isZElElEventTRG(int&);
 
 	bool isGenMatchedSUSYDiLepEvent();
 	bool isSSLLMuEvent();
@@ -149,7 +156,7 @@ public:
 	bool isSSTTElEventTRG();
 
 	bool isSSLLElMuEvent();
-	bool isSSLLElMuEventTRG();
+	bool isSSLLElMuEventTRG(gSample);
 	bool isSSTTElMuEvent();
 	bool isSSTTElMuEventTRG();
 
@@ -172,8 +179,12 @@ public:
 	bool isGoodJet(int);
 
 private:
+	// Counters
+	Monitor fCounters[gNSAMPLES][3];
+	bool fDoCounting;
+	int fCurrentSample;
 
-	FPRatios *fFPRatios;
+	// FPRatios *fFPRatios;
 
 	vector<int> fAllSamples;
 	vector<int> fMCBG;    // SM background MC samples
