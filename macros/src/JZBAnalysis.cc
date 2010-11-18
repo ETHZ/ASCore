@@ -74,6 +74,9 @@ public:
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
 
+  int pfJetGoodNum25;
+  int pfJetGoodNum35;
+
   float recoilpt[rMax];
   float dphiRecoilLep[rMax];
   float vjetpt[rMax];
@@ -85,12 +88,17 @@ public:
 
   float met[metMax];
   float dphiMetLep[metMax];
+  float dphiMetJet[metMax];
+  float dphiMetSumJetPt[metMax];
+  float metPerp[metMax];
+  float metPar[metMax];
   int eventNum;
   int runNum;
   int lumi;
   int goodVtx;
   int numVtx;
   float totEvents; // tot events processed by the ntuple producer (job submission efficiency), no need to keep this as int, better as float
+  int badJet;
 
   float jzb[rMax];
   float dphi_sumJetVSZ[rMax];
@@ -160,6 +168,11 @@ void nanoEvent::reset()
   for(int metCounter=0;metCounter<metMax;metCounter++){
     met[metCounter]=0;
     dphiMetLep[metCounter]=0;
+    dphiMetJet[metCounter]=0;
+    dphiMetSumJetPt[metCounter]=0;
+    metPerp[metCounter]=0;
+    metPar[metCounter]=0;
+   
   }
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
@@ -178,12 +191,16 @@ void nanoEvent::reset()
     pfJetGoodPhi[jCounter]=0;
   }
   pfJetGoodNum=0;
+  pfJetGoodNum25=0;
+  pfJetGoodNum35=0;
+
 
   eventNum=0;
   runNum=0;
   lumi=0;
   goodVtx=0;
   numVtx=0;
+  badJet=0;
   totEvents=0;
 
   for(int rCounter=0;rCounter<rMax;rCounter++){
@@ -279,6 +296,10 @@ void JZBAnalysis::Begin(){
 
   myTree->Branch("met",nEvent.met,"met[30]/F");
   myTree->Branch("dphiMetLep",nEvent.dphiMetLep,"dphiMetLep[30]/F");
+  myTree->Branch("dphiMetJet",nEvent.dphiMetJet,"dphiMetJet[30]/F");
+  myTree->Branch("dphiMetSumJetPt",nEvent.dphiMetSumJetPt,"dphiMetSumJetPt[30]/F");
+  myTree->Branch("metPerp",nEvent.metPerp,"metPerp[30]/F");
+  myTree->Branch("metPar",nEvent.metPar,"metPar[30]/F");
 
 
   myTree->Branch("eventNum",&nEvent.eventNum,"eventNum/I");
@@ -286,6 +307,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("lumi",&nEvent.lumi,"lumi/I");
   myTree->Branch("goodVtx",&nEvent.goodVtx,"goodVtx/I");
   myTree->Branch("numVtx",&nEvent.numVtx,"numVtx/I");
+  myTree->Branch("badJet",&nEvent.badJet,"badJet/I");
   myTree->Branch("totEvents",&nEvent.totEvents,"totEvents/F");
 
   myTree->Branch("pfJetNum",&nEvent.pfJetNum,"pfJetNum/I");
@@ -300,6 +322,9 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetGoodPt",nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
+
+  myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
+  myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
 
   myTree->Branch("jzb",nEvent.jzb,"jzb[30]/F");
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
@@ -603,6 +628,9 @@ void JZBAnalysis::Analyze(){
     TLorentzVector sumOfPFJets(0,0,0,0);
     nEvent.pfJetNum=0;
     nEvent.pfJetGoodNum=0;
+    nEvent.pfJetGoodNum25=0;
+    nEvent.pfJetGoodNum35=0;
+    vector<lepton> pfGoodJets;
     for(int i =0 ; i<fTR->PFNJets;i++) // jet loop
       {
         counters[PJ].fill("All PF jets");
@@ -618,10 +646,6 @@ void JZBAnalysis::Analyze(){
 	float jesC = fTR->PFJScale[i];
 	bool isJetID = IsGoodBasicPFJet(i,false);
 	
-        // Consider only Jets passing JetID
-	if (!isJetID) continue;
-        //FIXME: throw away event if good jet does not pass JetID?
-        counters[PJ].fill("... pass Jet ID");
 
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
 	
@@ -645,6 +669,13 @@ void JZBAnalysis::Analyze(){
         if ( !(fabs(jeta)<2.6 && jpt>20) ) continue;
         counters[JE].fill("... |eta|<2.6 && pt>20.");
 
+        // Flag good jets failing ID
+	if (!isJetID) { 
+          nEvent.badJet = 1;
+        } else {
+          counters[PJ].fill("... pass Jet ID");
+        }
+
 	nEvent.pfJetPt[nEvent.pfJetNum] = jpt;
 	nEvent.pfJetEta[nEvent.pfJetNum] = jeta;
 	nEvent.pfJetPhi[nEvent.pfJetNum] = jphi;
@@ -652,6 +683,13 @@ void JZBAnalysis::Analyze(){
 	nEvent.pfHT += jpt;
         nEvent.pfGoodHT += jpt; // Obsolete...
         sumOfPFJets += aJet;
+
+        lepton tmpLepton;
+        tmpLepton.p = aJet;
+        tmpLepton.charge = 0;
+        tmpLepton.index = i;
+        tmpLepton.type = -1;
+        pfGoodJets.push_back(tmpLepton);
 
         if ( jpt>30 ) {
           counters[PJ].fill("... pass tight jet selection");
@@ -661,6 +699,8 @@ void JZBAnalysis::Analyze(){
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
           nEvent.pfJetGoodNum++;
         }
+        if ( jpt>25 ) nEvent.pfJetGoodNum25++;
+        if ( jpt>35 ) nEvent.pfJetGoodNum35++;
       }
     
     
@@ -726,25 +766,16 @@ void JZBAnalysis::Analyze(){
     TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
     
     
-    
-    
-    if(sortedGoodLeptons[PosLepton1].type == 0 && sortedGoodLeptons[PosLepton2].type == 0)
-      {
-	caloVector = -caloMETvector - s1 -s2; // subtract the electrons
-	pfNoCutsJetVector = -pfMETvector - s1 - s2; // remove the electrons
-	
-      }
-    
-    if(sortedGoodLeptons[PosLepton1].type == 1 && sortedGoodLeptons[PosLepton2].type == 1)
-      {
-	//caloVector = -caloMETvector + s1 + s2; // add the muons
-	caloVector = -caloMETvector; // add the muons -> NO!
-	pfNoCutsJetVector = -pfMETvector - s1 - s2; // remove the muons
-      }
+    // Remove electrons from MET
+    caloVector = -caloMETvector;
+    if ( sortedGoodLeptons[PosLepton1].type == 0 ) caloVector -= s1;
+    if ( sortedGoodLeptons[PosLepton2].type == 0 ) caloVector -= s2;
+
+    // remove the leptons from PFMET
+    pfNoCutsJetVector = -pfMETvector - s1 - s2;
     
     
     // #--- different versions of JZB
-    
     nEvent.dphi_sumJetVSZ[0]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
     nEvent.sumJetPt[0]=caloVector.Pt();
     nEvent.jzb[0] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
@@ -788,6 +819,18 @@ void JZBAnalysis::Analyze(){
       if ( fabs((recoil + s1 + s2).DeltaPhi(lp)) > nEvent.dphiMetLep[7] )
         nEvent.dphiMetLep[7] = (recoil + s1 + s2).DeltaPhi(lp);
     }
+
+    // Store minimum dphi between some mets and any good jet
+    for ( size_t i=0; i<pfGoodJets.size(); ++i ) {
+      TLorentzVector jp(pfGoodJets[i].p);
+      if ( fabs(pfMETvector.DeltaPhi(jp))>nEvent.dphiMetJet[4] )
+        nEvent.dphiMetJet[4] = pfMETvector.DeltaPhi(jp);
+    }
+    nEvent.dphiMetSumJetPt[4] = pfNoCutsJetVector.DeltaPhi(pfMETvector);
+
+    // Store some additional MET information
+    nEvent.metPar[4]  = pfMETvector.Dot(s1+s2);
+    nEvent.metPerp[4] = pfMETvector.Perp((s1+s2).Vect());
     
     myTree->Fill();
   }
@@ -841,8 +884,8 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   // Acceptance cuts
   if ( !(fTR->MuPt[index] > 10) )       return false;
   counters[MU].fill(" ... pt > 10");
-  if ( !(fabs(fTR->MuEta[index])<2.5) ) return false;
-  counters[MU].fill(" ... |eta| < 2.5");
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  counters[MU].fill(" ... |eta| < 2.4");
 
   // Quality cuts
   if ( !fTR->MuIsGMPT[index] )        return false;

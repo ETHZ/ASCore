@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.67 2010/11/03 11:43:39 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.69 2010/11/17 14:32:10 pnef Exp $
 //
 //
 
@@ -147,7 +147,6 @@ private:
   edm::InputTag fGenPartTag;
   edm::InputTag fGenJetTag;
   edm::InputTag fL1TriggerTag;
-  edm::InputTag fHLTTriggerTag;
   edm::InputTag fHLTTrigEventTag;
   edm::InputTag fHBHENoiseResultTag;
 
@@ -234,6 +233,7 @@ private:
   double fTintxs;
   double fTweight;
   int fTHBHENoiseFlag;
+  int fTEcalDeadCellBEFlag;
 
   int fTgoodvtx;
   double fTprimvtxx;
