@@ -81,6 +81,7 @@ public:
   // My functions here
   Double_t PseudoJetDPhi (); // is this = misc.PseudoJetMT2AxisdPhi?
   Double_t PseudoJetAngle(); // or is this one?
+  Double_t GetMT2(double testmass=0, bool massive=false);
 
   MT2Misc misc;
   Int_t   NJets;

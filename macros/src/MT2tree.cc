@@ -1,5 +1,7 @@
 #include "MT2tree.hh"
 
+#include "helper/Davismt2.h"
+
 #include <vector>
 
 #include "TLorentzVector.h"
@@ -114,6 +116,32 @@ Double_t MT2tree::PseudoJetAngle() {
   if (NJets<2)
     return -999;
   return TMath::Abs(pseudoJets[0].Angle(pseudoJets[1].Vect()));
+}
+
+Double_t MT2tree::GetMT2(double testmass, bool massive) {
+  if (NJets<2)
+    return -999;
+
+	double pa[3];
+	double pb[3];
+	double pmiss[3];
+
+	pmiss[0] = 0;
+	pmiss[1] = pfmet[0].Px();
+	pmiss[2] = pfmet[0].Py();
+
+	pa[0] = massive ? pseudoJets[0].M() : 0;
+	pa[1] = pseudoJets[0].Px();
+	pa[2] = pseudoJets[0].Py();
+
+	pb[0] = massive ? pseudoJets[1].M() : 0;
+	pb[1] = pseudoJets[1].Px();
+	pb[2] = pseudoJets[1].Py();
+
+	Davismt2 *mt2 = new Davismt2();
+	mt2->set_momenta(pa, pb, pmiss);
+	mt2->set_mn(testmass);
+	return mt2->get_mt2();
 }
 
 ClassImp(MT2Misc)
