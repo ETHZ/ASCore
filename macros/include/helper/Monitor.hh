@@ -99,7 +99,7 @@ public:
     }
   }
 
-private:
+public:
   std::vector<std::string> countNames;
   Cmap counters;
   int maxLength;
