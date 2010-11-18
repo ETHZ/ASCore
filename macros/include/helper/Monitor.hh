@@ -45,6 +45,7 @@
 
 
 #include <iomanip>
+#include <sstream>
 #include <string>
 
 struct eqstr 
