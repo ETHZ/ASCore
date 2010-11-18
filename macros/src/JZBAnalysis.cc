@@ -29,42 +29,44 @@ public:
   float phi1;
   float phi2;
   float dphi;
+  float dphiMet1;
+  float dphiMet2;
   int id1;
   int id2;
-  int iso1;
-  int iso2;
   int ch1;
   int ch2;
+  int chid1; // old id (kostas convention)
+  int chid2;
 
-
-  int centraljetNum;
-  float centraljetpt[jMax]; // jets in the barrel
-  float centraljeteta[jMax];
-  float centraljetphi[jMax];
-  float centraljetpx[jMax];
-  float centraljetpy[jMax];
-  float centraljetpz[jMax];
-  float centraljetenergy[jMax];
-  float centraljetscale[jMax];
-  int centraljetID[jMax];
 
   int jetNum;
   int goodJetNum;
   float jetpt[jMax]; // jets in barrel + endcaps
   float jeteta[jMax];
   float jetphi[jMax];
-  float jetpx[jMax];
-  float jetpy[jMax];
-  float jetpz[jMax];
-  float jetenergy[jMax];
   float jetscale[jMax];
   int jetID[jMax];
+
+
+  int leptonNum; // store all leptons (reduntant for the 2 leptons that form the Z)
+  float leptonPt[jMax]; 
+  float leptonEta[jMax];
+  float leptonPhi[jMax];
+  int leptonId[jMax];
+  int leptonCharge[jMax];
+
+  int leptonPairNum;
+  int leptonPairId[jMax];
+  float leptonPairMass[jMax];
+  float leptonPairDphi[jMax];
 
 
   int pfJetNum;
   float pfJetPt[jMax];
   float pfJetEta[jMax];
   float pfJetPhi[jMax];
+  float pfJetID[jMax];
+  float pfJetDphiMet[jMax];
   float pfHT;
   float pfGoodHT;
   float pfTightHT;
@@ -87,6 +89,7 @@ public:
   float recoileta[rMax];
 
   float met[metMax];
+  float metPhi[metMax];
   float dphiMetLep[metMax];
   float dphiMetJet[metMax];
   float dphiMetSumJetPt[metMax];
@@ -117,42 +120,44 @@ void nanoEvent::reset()
   eta2=0;
   phi1=0;
   phi2=0;
+  dphiMet1=0;
+  dphiMet2=0;
   dphi=0;
   id1=0;
   id2=0;
-  iso1=0;
-  iso2=0;
   ch1=0;
   ch2=0;
+  chid1=0;
+  chid2=0;
 
 
-  for(int jCounter=0;jCounter<jMax;jCounter++){
-    centraljetpt[jCounter]=0; // jets in the barrel
-    centraljeteta[jCounter]=0;
-    centraljetphi[jCounter]=0;
-    centraljetpx[jCounter]=0;
-    centraljetpy[jCounter]=0;
-    centraljetpz[jCounter]=0;
-    centraljetenergy[jCounter]=0;
-    centraljetscale[jCounter]=0;
-    centraljetID[jCounter]=0;
-  }
-  centraljetNum=0;
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
     jetpt[jCounter]=0; // jets in barrel + endcaps
     jeteta[jCounter]=0;
     jetphi[jCounter]=0;
-    jetpx[jCounter]=0;
-    jetpy[jCounter]=0;
-    jetpz[jCounter]=0;
-    jetenergy[jCounter]=0;
     jetscale[jCounter]=0;
     jetID[jCounter]=0;
   }
   jetNum=0;
   goodJetNum=0;
 
+  for(int jCounter=0;jCounter<jMax;jCounter++){
+    leptonPt[jCounter]=0; 
+    leptonEta[jCounter]=0;
+    leptonPhi[jCounter]=0;
+    leptonId[jCounter]=0;
+    leptonCharge[jCounter]=0;
+  }
+  leptonNum=0;
+
+  for(int jCounter=0;jCounter<jMax;jCounter++){
+    leptonPairMass[jCounter]=0;
+    leptonPairDphi[jCounter]=0;
+    leptonPairId[jCounter]=0;
+  } 
+  leptonPairNum=0;
+ 
   for(int rCounter=0;rCounter<rMax;rCounter++){
     recoilpt[rCounter]=0;
     dphiRecoilLep[rCounter]=0;
@@ -167,6 +172,7 @@ void nanoEvent::reset()
     
   for(int metCounter=0;metCounter<metMax;metCounter++){
     met[metCounter]=0;
+    metPhi[metCounter]=0;
     dphiMetLep[metCounter]=0;
     dphiMetJet[metCounter]=0;
     dphiMetSumJetPt[metCounter]=0;
@@ -179,6 +185,8 @@ void nanoEvent::reset()
     pfJetPt[jCounter]=0;
     pfJetEta[jCounter]=0;
     pfJetPhi[jCounter]=0;
+    pfJetID[jCounter]=0;
+    pfJetDphiMet[jCounter]=0;
   }
   pfJetNum=0;
   pfHT=0;
@@ -252,25 +260,16 @@ void JZBAnalysis::Begin(){
   myTree->Branch("eta2",&nEvent.eta2,"eta2/F");
   myTree->Branch("phi1",&nEvent.phi1,"phi1/F");
   myTree->Branch("phi2",&nEvent.phi2,"phi2/F");
+  myTree->Branch("dphiMet1",&nEvent.dphiMet1,"dphiMet1/F");
+  myTree->Branch("dphiMet2",&nEvent.dphiMet2,"dphiMet2/F");
   myTree->Branch("dphi",&nEvent.dphi,"dphi/F");
 
   myTree->Branch("id1",&nEvent.id1,"id1/I");
   myTree->Branch("id2",&nEvent.id2,"id2/I");
-  myTree->Branch("iso1",&nEvent.iso1,"iso1/I");
-  myTree->Branch("iso2",&nEvent.iso2,"iso2/I");
   myTree->Branch("ch1",&nEvent.ch1,"ch1/I");
   myTree->Branch("ch2",&nEvent.ch2,"ch2/I");
-
-  myTree->Branch("centraljetNum",&nEvent.centraljetNum,"centraljetNum/I");
-  myTree->Branch("centraljetID",nEvent.centraljetID,"centraljetID[centraljetNum]/I");
-  myTree->Branch("centraljetpt",nEvent.centraljetpt,"centraljetpt[centraljetNum]/F");
-  myTree->Branch("centraljeteta",nEvent.centraljeteta,"centraljeteta[centraljetNum]/F");
-  myTree->Branch("centraljetphi",nEvent.centraljetphi,"centraljetphi[centraljetNum]/F");
-  myTree->Branch("centraljetpx",nEvent.centraljetpx,"centraljetpx[centraljetNum]/F");
-  myTree->Branch("centraljetpy",nEvent.centraljetpy,"centraljetpy[centraljetNum]/F");
-  myTree->Branch("centraljetpz",nEvent.centraljetpz,"centraljetpz[centraljetNum]/F");
-  myTree->Branch("centraljetenergy",nEvent.centraljetenergy,"centraljetenergy[centraljetNum]/F");
-  myTree->Branch("centraljetscale",nEvent.centraljetscale,"centraljetscale[centraljetNum]/F");
+  myTree->Branch("chid1",&nEvent.chid1,"chid1/I");
+  myTree->Branch("chid2",&nEvent.chid2,"chid2/I");
 
   myTree->Branch("jetNum",&nEvent.jetNum,"jetNum/I");
   myTree->Branch("goodJetNum",&nEvent.goodJetNum,"goodJetNum/I");
@@ -278,11 +277,19 @@ void JZBAnalysis::Begin(){
   myTree->Branch("jetpt",nEvent.jetpt,"jetpt[jetNum]/F");
   myTree->Branch("jeteta",nEvent.jeteta,"jeteta[jetNum]/F");
   myTree->Branch("jetphi",nEvent.jetphi,"jetphi[jetNum]/F");
-  myTree->Branch("jetpx",nEvent.jetpx,"jetpx[jetNum]/F");
-  myTree->Branch("jetpy",nEvent.jetpy,"jetpy[jetNum]/F");
-  myTree->Branch("jetpz",nEvent.jetpz,"jetpz[jetNum]/F");
-  myTree->Branch("jetenergy",nEvent.jetenergy,"jetenergy[jetNum]/F");
   myTree->Branch("jetscale",nEvent.jetscale,"jetscale[jetNum]/F");
+
+  myTree->Branch("leptonNum",&nEvent.leptonNum,"leptonNum/I");
+  myTree->Branch("leptonPt",nEvent.leptonPt,"leptonPt[leptonNum]/F");
+  myTree->Branch("leptonEta",nEvent.leptonEta,"leptonEta[leptonNum]/F");
+  myTree->Branch("leptonPhi",nEvent.leptonPhi,"leptonPhi[leptonNum]/F");
+  myTree->Branch("leptonId",nEvent.leptonId,"leptonId[leptonNum]/I");
+  myTree->Branch("leptonCharge",nEvent.leptonCharge,"leptonCharge[leptonNum]/I");
+
+  myTree->Branch("leptonPairNum",&nEvent.leptonPairNum,"leptonPairNum/I");
+  myTree->Branch("leptonPairMass",nEvent.leptonPairMass,"leptonPairMass[leptonPairNum]/F");
+  myTree->Branch("leptonPairDphi",nEvent.leptonPairDphi,"leptonPairDphi[leptonPairNum]/F");
+  myTree->Branch("leptonPairId",nEvent.leptonPairId,"leptonPairId[leptonPairNum]/I");
 
   myTree->Branch("recoilpt",nEvent.recoilpt,"recoilpt[30]/F");
   myTree->Branch("dphiRecoilLep",nEvent.dphiRecoilLep,"dphiRecoilLep[30]/F");
@@ -295,6 +302,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("vjetphi",nEvent.vjetphi,"vjetphi[30]/F");
 
   myTree->Branch("met",nEvent.met,"met[30]/F");
+  myTree->Branch("metPhi",nEvent.metPhi,"metPhi[30]/F");
   myTree->Branch("dphiMetLep",nEvent.dphiMetLep,"dphiMetLep[30]/F");
   myTree->Branch("dphiMetJet",nEvent.dphiMetJet,"dphiMetJet[30]/F");
   myTree->Branch("dphiMetSumJetPt",nEvent.dphiMetSumJetPt,"dphiMetSumJetPt[30]/F");
@@ -314,6 +322,8 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetPt",nEvent.pfJetPt,"pfJetPt[pfJetNum]/F");
   myTree->Branch("pfJetEta",nEvent.pfJetEta,"pfJetEta[pfJetNum]/F");
   myTree->Branch("pfJetPhi",nEvent.pfJetPhi,"pfJetPhi[pfJetNum]/F");
+  myTree->Branch("pfJetID",nEvent.pfJetID,"pfJetID[pfJetNum]/F");
+  myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
@@ -536,17 +546,19 @@ void JZBAnalysis::Analyze(){
       nEvent.phi1 = sortedGoodLeptons[PosLepton1].p.Phi();
       nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
       nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
+      nEvent.chid1 = (sortedGoodLeptons[PosLepton1].type+1)*sortedGoodLeptons[PosLepton1].charge;
       
       nEvent.eta2 = sortedGoodLeptons[PosLepton2].p.Eta();
       nEvent.pt2 = sortedGoodLeptons[PosLepton2].p.Pt();
       nEvent.phi2 = sortedGoodLeptons[PosLepton2].p.Phi();
       nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
       nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
+      nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
       
       nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
       nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
       nEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
-      nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton2].p);
+      nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
       
     } else {
       
@@ -559,7 +571,6 @@ void JZBAnalysis::Analyze(){
     
     // #--- construct different recoil models, initial the recoil vector will hold only the sum over the hard jets, only in the end we will add-up the lepton system
     TLorentzVector recoil(0,0,0,0); // different constructions of recoil model (under dev, need cleaning)    
-    nEvent.centraljetNum=0; // barrel jet counting
     nEvent.jetNum=0;        // total jet counting
     nEvent.goodJetNum=0;    // Jets passing tighter pt cut
     for(int i =0 ; i<fTR->NJets;i++) // jet loop
@@ -608,10 +619,6 @@ void JZBAnalysis::Analyze(){
 	nEvent.jetpt[nEvent.jetNum]  = aJet.Pt();
 	nEvent.jeteta[nEvent.jetNum] = aJet.Eta();
 	nEvent.jetphi[nEvent.jetNum] = aJet.Phi();
-	nEvent.jetpx[nEvent.jetNum]  = aJet.Px();
-	nEvent.jetpy[nEvent.jetNum]  = aJet.Py();
-	nEvent.jetpz[nEvent.jetNum]  = aJet.Pz();
-	nEvent.jetenergy[nEvent.jetNum] = aJet.E();
 	nEvent.jetscale[nEvent.jetNum]  = jesC;
 	if(isJetID) nEvent.jetID[nEvent.jetNum] = 1;
 	
@@ -624,6 +631,15 @@ void JZBAnalysis::Analyze(){
 		
       }
     
+    // --- construct met vectors here
+    float caloMETpx = fTR->RawMETpx;
+    float caloMETpy = fTR->RawMETpy;
+    
+    float pfMETpx = fTR->PFMETpx;
+    float pfMETpy = fTR->PFMETpy;
+    
+    TLorentzVector caloMETvector(caloMETpx,caloMETpy,0,0);
+    TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
     
     TLorentzVector sumOfPFJets(0,0,0,0);
     nEvent.pfJetNum=0;
@@ -666,8 +682,21 @@ void JZBAnalysis::Analyze(){
         }
 	
 
-        if ( !(fabs(jeta)<2.6 && jpt>20) ) continue;
-        counters[JE].fill("... |eta|<2.6 && pt>20.");
+        // Keep jets over min. pt threshold
+        if ( !(jpt>20) ) continue;  
+        counters[PJ].fill("... pt>20.");
+
+	nEvent.pfJetPt[nEvent.pfJetNum] = jpt;
+	nEvent.pfJetEta[nEvent.pfJetNum] = jeta;
+	nEvent.pfJetPhi[nEvent.pfJetNum] = jphi;
+        nEvent.pfJetID[nEvent.pfJetNum]  = static_cast<int>(isJetID);
+	nEvent.pfJetDphiMet[nEvent.pfJetNum] = aJet.DeltaPhi(pfMETvector);
+	nEvent.pfJetNum = nEvent.pfJetNum +1;
+	nEvent.pfHT += jpt;
+
+        // Keep central jets
+        if ( !(fabs(jeta)<2.6 ) ) continue;
+        counters[PJ].fill("... |eta|<2.6");
 
         // Flag good jets failing ID
 	if (!isJetID) { 
@@ -675,13 +704,7 @@ void JZBAnalysis::Analyze(){
         } else {
           counters[PJ].fill("... pass Jet ID");
         }
-
-	nEvent.pfJetPt[nEvent.pfJetNum] = jpt;
-	nEvent.pfJetEta[nEvent.pfJetNum] = jeta;
-	nEvent.pfJetPhi[nEvent.pfJetNum] = jphi;
-	nEvent.pfJetNum = nEvent.pfJetNum +1;
-	nEvent.pfHT += jpt;
-        nEvent.pfGoodHT += jpt; // Obsolete...
+        nEvent.pfGoodHT += jpt;
         sumOfPFJets += aJet;
 
         lepton tmpLepton;
@@ -752,18 +775,18 @@ void JZBAnalysis::Analyze(){
     
     nEvent.totEvents = fTR->GetEntries();
     
-    float caloMETpx = fTR->RawMETpx;
-    float caloMETpy = fTR->RawMETpy;
-    
-    float pfMETpx = fTR->PFMETpx;
-    float pfMETpy = fTR->PFMETpy;
-    
-    TLorentzVector caloMETvector(caloMETpx,caloMETpy,0,0);
-    TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
     
     TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
     TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
     TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
+    
+    
+    nEvent.metPhi[0]=caloMETvector.Phi();
+    nEvent.metPhi[1]=0.;
+    nEvent.metPhi[2]=0.;
+    nEvent.metPhi[3]=0.;
+    nEvent.metPhi[4]=pfMETvector.Phi();
+    nEvent.metPhi[5]=0.;
     
     
     // Remove electrons from MET
@@ -806,7 +829,36 @@ void JZBAnalysis::Analyze(){
 	nEvent.recoilphi[index]=recoil.Phi();
       }
     
+     // --- store number of good leptons in the event 
+    nEvent.leptonNum = int(sortedGoodLeptons.size());
+    for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
+      TLorentzVector lp(sortedGoodLeptons[i].p);
+      nEvent.leptonPt[i] = lp.Pt();
+      nEvent.leptonEta[i] = lp.Eta();
+      nEvent.leptonPhi[i] = lp.Phi();
+      nEvent.leptonCharge[i] = sortedGoodLeptons[i].charge;
+      nEvent.leptonId[i] = sortedGoodLeptons[i].type ;
 
+
+	for(size_t j=i+1; j<sortedGoodLeptons.size();j++) // store lepton pair masses
+	{
+	    TLorentzVector lp1(sortedGoodLeptons[i].p);
+	    TLorentzVector lp2(sortedGoodLeptons[j].p);
+	    int old_id1 = (sortedGoodLeptons[i].type+1)*sortedGoodLeptons[i].charge;
+	    int old_id2 = (sortedGoodLeptons[j].type+1)*sortedGoodLeptons[j].charge;
+	    if(nEvent.leptonPairNum<jMax)
+	    {
+		nEvent.leptonPairMass[nEvent.leptonPairNum] = (lp1+lp2).M();
+		nEvent.leptonPairDphi[nEvent.leptonPairNum] = lp1.DeltaPhi(lp2);
+		nEvent.leptonPairId[nEvent.leptonPairNum] = old_id1*old_id2;
+		nEvent.leptonPairNum=nEvent.leptonPairNum+1;
+	    }
+	}
+    }
+
+    nEvent.dphiMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(pfMETvector);
+    nEvent.dphiMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(pfMETvector);
+    
     // Store minimum dphi between some mets and any kind of lepton
     for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
       TLorentzVector lp(sortedGoodLeptons[i].p);
@@ -839,17 +891,6 @@ void JZBAnalysis::Analyze(){
 
 void JZBAnalysis::End(){
   fHistFile->cd();	
-  /*
-    fHElectronPtEta->Write();
-    fHElectronIDPtEta->Write();
-    fHElectronIDIsoPtEta->Write();
-    for(int i =0;i<20;i++)fHMee[i]->Write();
-    fHMeeDPhi->Write();
-    fHMeePt->Write();
-    fHMDPhiPt->Write();
-    fHMZPtJ1Pt->Write();
-    fHMZPtuJ1Pt->Write();
-  */
 
   myTree->Write();
 
