@@ -73,16 +73,23 @@ public:
       (*it).second += weight;
     }
   }
+
+  const float counts( const std::string& counter ) { 
+     return counters[counter];
+  }
+
   void print() {
     if ( !(countNames.size()>0) ) return;
     // This needs to be improved
     float maxc = counters[countNames[0]];
     float prev = maxc;
+    ostringstream maxclen; maxclen << maxc;
+    size_t maxwidth = maxclen.str().length();
     for ( std::vector<std::string>::const_iterator it = countNames.begin(); 
           it != countNames.end(); ++it ) {
       float count = counters[*it];
       std::cout << setw(maxLength+5) << left << (*it) 
-                << setw(6) << right << count << " " //FIXME: get size from maxcount
+                << setw(maxwidth) << right << count << " " 
                 << setw(3) << right
                 << static_cast<int>(maxc>0.?count/maxc*100.:0.) << "% "
                 << setw(3) << right
