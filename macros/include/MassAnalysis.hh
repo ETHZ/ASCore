@@ -18,7 +18,7 @@
 #include "helper/Davismt2.h"
 #include "helper/TMctLib.h"
 #include "helper/Hemisphere.hh"
-#include "ETHnt.hh"
+#include "MT2tree.hh"
 
 
 class MassAnalysis : public MultiplicityAnalysisBase{
@@ -78,9 +78,9 @@ private:
 	// file for histograms:
 	TFile* fHistFile;
 
-        // ETH mini-tree
-        ETHnt* fETHnt;
-        TTree* fETHtree;
+        // MT2 mini-tree
+        MT2tree* fMT2tree;
+        TTree* fATree;
 
 	// Tree
 	TTree* fMassTree;
