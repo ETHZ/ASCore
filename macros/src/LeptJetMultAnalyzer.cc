@@ -11,16 +11,16 @@
 using namespace std;
 
 LeptJetMultAnalyzer::LeptJetMultAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-//	fMultiplicityAnalysis     = new MultiplicityAnalysis(fTR);
+	fMultiplicityAnalysis     = new MultiplicityAnalysis(fTR);
 	fMassAnalysis             = new MassAnalysis(fTR);
-//	fRatioAnalysis            = new RatioAnalysis(fTR);
+	fRatioAnalysis            = new RatioAnalysis(fTR);
 	Util::SetStyle();
 }
 
 LeptJetMultAnalyzer::~LeptJetMultAnalyzer(){
-//	delete fMultiplicityAnalysis;
+	delete fMultiplicityAnalysis;
 	delete fMassAnalysis;
-//	delete fRatioAnalysis;
+	delete fRatioAnalysis;
 	if(!fTR->fChain) cout << "LeptJetMultAnalyzer ==> No chain!" << endl;
 }
 
@@ -34,24 +34,24 @@ void LeptJetMultAnalyzer::Loop(){
 		fTR->GetEntry(jentry);
         	if ( fCurRun != fTR->Run ) {
         		fCurRun = fTR->Run;
-//			fMultiplicityAnalysis->BeginRun(fCurRun);
+			fMultiplicityAnalysis->BeginRun(fCurRun);
 			fMassAnalysis        ->BeginRun(fCurRun);
-//			fRatioAnalysis       ->BeginRun(fCurRun);
+			fRatioAnalysis       ->BeginRun(fCurRun);
 		}
 		fMassAnalysis        ->Analyze();
-//		fMultiplicityAnalysis->Analyze();	
-//		fRatioAnalysis       ->Analyze();	
+		fMultiplicityAnalysis->Analyze();	
+		fRatioAnalysis       ->Analyze();	
 	}
 }
 
 // Method called before starting the event loop
 void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi, float weight){
 	
-//	fMultiplicityAnalysis     ->ReadCuts(setofcuts);
-//	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
-//	fMultiplicityAnalysis     ->fVerbose        =fVerbose;	
-//	fMultiplicityAnalysis     ->fLumi           =lumi;
-//	fMultiplicityAnalysis     ->Begin(filename);
+	fMultiplicityAnalysis     ->ReadCuts(setofcuts);
+	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
+	fMultiplicityAnalysis     ->fVerbose        =fVerbose;	
+	fMultiplicityAnalysis     ->fLumi           =lumi;
+	fMultiplicityAnalysis     ->Begin(filename);
 	
 	fMassAnalysis             ->ReadCuts(setofcuts);
 	fMassAnalysis             ->SetWeight(weight);
@@ -59,10 +59,10 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fMassAnalysis             ->fVerbose        = fVerbose;
 	fMassAnalysis             ->Begin();
 	
-//	fRatioAnalysis            ->ReadCuts(setofcuts);
-//	fRatioAnalysis            ->SetOutputDir(fOutputDir);
-//	fRatioAnalysis            ->fVerbose        = fVerbose;
-//	fRatioAnalysis            ->Begin();
+	fRatioAnalysis            ->ReadCuts(setofcuts);
+	fRatioAnalysis            ->SetOutputDir(fOutputDir);
+	fRatioAnalysis            ->fVerbose        = fVerbose;
+	fRatioAnalysis            ->Begin();
 
 
 }
@@ -70,6 +70,6 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 // Method called after finishing the event loop
 void LeptJetMultAnalyzer::EndJob(){
 	fMassAnalysis         ->End();
-//	fMultiplicityAnalysis ->End();
+	fMultiplicityAnalysis ->End();
 //	fRatioAnalysis        ->End();
 }

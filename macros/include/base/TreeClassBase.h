@@ -51,7 +51,7 @@ public :
    Double_t        PrimVtxyE;
    Double_t        PrimVtxzE;
    Double_t        PrimVtxNChi2;
-   Int_t           PrimVtxNdof;
+   Double_t        PrimVtxNdof;
    Int_t           PrimVtxIsFake;
    Double_t        PrimVtxPtSum;
    Double_t        Beamspotx;
