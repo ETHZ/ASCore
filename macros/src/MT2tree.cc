@@ -1,6 +1,7 @@
 #include "MT2tree.hh"
 
 #include "helper/Davismt2.h"
+#include "helper/TMctLib.h"
 
 #include <vector>
 
@@ -109,39 +110,92 @@ void MT2tree::SetNMuons(int n) {
 Double_t MT2tree::PseudoJetDPhi() {
   if (NJets<2)
     return -999;
-  return pseudoJets[0].DeltaPhi(pseudoJets[1]);
+  return TMath::Abs(pseudoJets[0].DeltaPhi(pseudoJets[1]));
 }
 
 Double_t MT2tree::PseudoJetAngle() {
   if (NJets<2)
     return -999;
-  return TMath::Abs(pseudoJets[0].Angle(pseudoJets[1].Vect()));
+  return pseudoJets[0].Angle(pseudoJets[1].Vect());
+}
+
+Double_t MT2tree::JetsDPhi(int j1, int j2){
+  if (j1>=NJets || j2>=NJets)
+    return -999;
+  return TMath::Abs(jet[j1].lv.DeltaPhi(jet[j2].lv));
+}
+
+Double_t MT2tree::MetJetDPhi(int ijet) {
+  if (ijet>=NJets)
+    return -999;
+  return TMath::Abs(jet[ijet].lv.DeltaPhi(pfmet[0]));
+}
+
+Double_t MT2tree::MinMetJetDPhi() {
+  if (NJets<1)
+    return -999;
+  Double_t minDPhi=10;
+  for (int i=0; i<NJets; i++){
+    Double_t dphi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+    if(dphi<minDPhi)  minDPhi=dphi;
+  }
+  return minDPhi;
+}
+
+Int_t MT2tree::MinMetJetDPhiIndex() {
+  if (NJets<1)
+    return -999;
+  Double_t minDPhi=10;
+  Int_t    imin;
+  for (int i=0; i<NJets; i++){
+    Double_t dphi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+    if(dphi<minDPhi)  {
+      minDPhi=dphi;
+      imin = i;
+    }
+  }
+  return imin;
 }
 
 Double_t MT2tree::GetMT2(double testmass, bool massive) {
   if (NJets<2)
     return -999;
 
-	double pa[3];
-	double pb[3];
-	double pmiss[3];
+  double pa[3];
+  double pb[3];
+  double pmiss[3];
+  
+  pmiss[0] = 0;
+  pmiss[1] = pfmet[0].Px();
+  pmiss[2] = pfmet[0].Py();
+  
+  pa[0] = massive ? pseudoJets[0].M() : 0;
+  pa[1] = pseudoJets[0].Px();
+  pa[2] = pseudoJets[0].Py();
+  
+  pb[0] = massive ? pseudoJets[1].M() : 0;
+  pb[1] = pseudoJets[1].Px();
+  pb[2] = pseudoJets[1].Py();
+  
+  Davismt2 *mt2 = new Davismt2();
+  mt2->set_momenta(pa, pb, pmiss);
+  mt2->set_mn(testmass);
+  return mt2->get_mt2();
+}
 
-	pmiss[0] = 0;
-	pmiss[1] = pfmet[0].Px();
-	pmiss[2] = pfmet[0].Py();
+Double_t MT2tree::GetMCT(bool massive, double ecm, double mxlo) {
+  if (NJets<2)
+    return -999;
 
-	pa[0] = massive ? pseudoJets[0].M() : 0;
-	pa[1] = pseudoJets[0].Px();
-	pa[2] = pseudoJets[0].Py();
+  TLorentzVector DTM(0,0,0,0);
+  TLorentzVector p1, p2;
+  p1.SetXYZM(pseudoJets[0].Px(), pseudoJets[0].Py(), pseudoJets[0].Pz(), massive ? pseudoJets[0].M() : 0);
+  p2.SetXYZM(pseudoJets[1].Px(), pseudoJets[1].Py(), pseudoJets[1].Pz(), massive ? pseudoJets[1].M() : 0);
+  TVector2 pmiss;
+  pmiss.Set(pfmet[0].Px(), pfmet[0].Py());
 
-	pb[0] = massive ? pseudoJets[1].M() : 0;
-	pb[1] = pseudoJets[1].Px();
-	pb[2] = pseudoJets[1].Py();
-
-	Davismt2 *mt2 = new Davismt2();
-	mt2->set_momenta(pa, pb, pmiss);
-	mt2->set_mn(testmass);
-	return mt2->get_mt2();
+  TMctLib *mct = new TMctLib();
+  return mct -> mctcorr(p1, p2, DTM, pmiss, ecm, mxlo);
 }
 
 ClassImp(MT2Misc)

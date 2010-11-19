@@ -79,9 +79,14 @@ public:
   void SetNMuons(int n);
   
   // My functions here
-  Double_t PseudoJetDPhi (); // is this = misc.PseudoJetMT2AxisdPhi?
-  Double_t PseudoJetAngle(); // or is this one?
-  Double_t GetMT2(double testmass=0, bool massive=false);
+  Double_t PseudoJetDPhi ();
+  Double_t PseudoJetAngle();
+  Double_t JetsDPhi(int j1=1, int j2=0);
+  Double_t MetJetDPhi(int ijet = 0);
+  Double_t MinMetJetDPhi();
+  Int_t    MinMetJetDPhiIndex();
+  Double_t GetMT2(double testmass=0 , bool massive=false);
+  Double_t GetMCT(bool massive=false, double ecm=7000., double mxlo=0.);
 
   MT2Misc misc;
   Int_t   NJets;
