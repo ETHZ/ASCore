@@ -143,6 +143,22 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	return true;
 }
 
+bool UserAnalysisBase::IsGoodPFJetMedium(int index, bool doSel=true) {
+	// Medium PF JID
+	IsGoodBasicPFJet(index, true);
+	if ( !(fTR->PFJNeuHadfrac[index]    < 0.95) ) return false;
+	if ( !(fTR->PFJNeuEmfrac[index]     < 0.95) ) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodPFJetTight(int index, bool doSel=true) {
+	// Tight PF JID
+	IsGoodBasicPFJet(index, true);
+	if ( !(fTR->PFJNeuHadfrac[index]    < 0.90) ) return false;
+	if ( !(fTR->PFJNeuEmfrac[index]     < 0.90) ) return false;
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodBasicJet(int index){
 	// Basic Jet cleaning and ID cuts
 	if(fTR->JPt[index] < 30) return false;

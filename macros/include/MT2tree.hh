@@ -57,10 +57,22 @@ public:
 
   TLorentzVector lv;
 
-  Double_t bTagProbTCHE ;
-  Double_t bTagProbTCHP ;
+  Double_t bTagProbTCHE;
+  Double_t bTagProbTCHP;
   Double_t bTagProbSSVHE;
   Double_t bTagProbSSVHP;
+
+  Bool_t isPFIDLoose;
+  Bool_t isPFIDMedium;
+  Bool_t isPFIDTight;
+
+  Double_t ChHadFrac;
+  Double_t NeuHadFrac;
+  Double_t ChEmFrac;
+  Int_t    ChMult;
+  Int_t    NeuMult;
+  Int_t    NConstituents;
+
   Int_t    inHemisphere;
 
   ClassDef(MT2Jet, 1)
@@ -86,7 +98,7 @@ public:
   Double_t MinMetJetDPhi();
   Int_t    MinMetJetDPhiIndex();
   Double_t GetMT2(double testmass=0 , bool massive=false);
-  Double_t GetMCT(bool massive=false, double ecm=7000., double mxlo=0.);
+  Double_t GetMCT(bool massive=false);
 
   MT2Misc misc;
   Int_t   NJets;

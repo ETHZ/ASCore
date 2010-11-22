@@ -90,16 +90,14 @@ void MassPlotter::init(TString filename){
 
 //___________________________________________________________________________
 void MassPlotter::makePlots(){
-
-//	double dPhisplit[4]={0., 1.0, 2.0, 3.142};
-//	MakeMT2PredictionAndPlots(true,  dPhisplit, 4);  // cleaned, fudgefactor 4
-//	MakeMT2PredictionAndPlots(false, dPhisplit, 3);  // not cleaned, fudgefactor 3
-
+	
 	double dPhisplit[4]={0., 1.0, 1.5, 3.142};
-//	MakeMT2PredictionAndPlots(true,  dPhisplit, 3);  // cleaned, fudgefactor 2
 	MakeMT2PredictionAndPlots(false, dPhisplit, 2.5);  // not cleaned, fudgefactor 2
 
 }
+
+
+
 //__________________________________________________________________________
 
 void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor){
@@ -137,26 +135,15 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 //	MakePlot(QCDSamples,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "QCD_"+cleanflag+"_0toPi"             , "none", fudgefactor);
 //	MakePlot(QCDSamples,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "QCD_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
 //	MakePlot(QCDandDataSamples, "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "QCDdata_"+cleanflag+"_"+dPhirange2   , "data", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"             , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMCTMassless", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"             , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "all_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
+	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"             , "none", fudgefactor);
+	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "all_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "QCD" , fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "data", fudgefactor);
+	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "data", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "none", fudgefactor);
 
 
 //	ABCD_MT2("DPhiMhtMpt", dPhisplit, "none", gNMT2bins, gMT2bins, "QCD_"+cleanflag+dPhirange ,cleaned,  "QCD",  "mc");
 
-
-
-	MakePlot(fSamples  ,        "PseudoJetMT2",         gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"  , "none", fudgefactor);
-	MakePlot(fSamples  ,        "PseudoJetMCTMassless", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"  , "none", fudgefactor);
-//	MakePlot(Samples_NOTData,   "PseudoJetMT2",         gNMT2bins,       gMT2bins,      cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_nodata"+cleanflag       , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2",         gNMT2bins,       gMT2bins,      cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2",         gNMT2Leptonbins, gMT2Leptonbins,cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2",         gNJPtbins,       gJPtbins,      cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMCT",         gNMT2bins,       gMT2bins,      cleaned, true, "DPhiMhtMpt", ZerotoPi,    "none",   "all_"+cleanflag       , "none", fudgefactor);
-//	MakePlot(fSamples  ,        "PseudoJetMT2",         gNMT2Normbins,   gMT2Normbins,  cleaned, true, "DPhiMhtMpt", ZerotoPi,    "overHT", "all_overHT"+cleanflag , "none", fudgefactor);
 
 
 
@@ -218,61 +205,32 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 			h_samples[i] -> SetLineColor(kBlack);
 			h_samples[i] -> SetLineStyle(kDotted);
 		}
-		TTree *tree = Samples[i].tree;
 		Double_t weight = Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
 		if(fVerbose>2) cout << "MakePlot: looping over " << Samples[i].sname << endl;
-		if(fVerbose>2) cout << "           sample has weight " << weight << endl; 
-		tree->ResetBranchAddresses();	
-		Init(tree);
-		
-		TBranch* branch = fChain->GetBranch(branch_name);
-		Double_t yvalue;	
-		fChain->SetBranchAddress(branch_name, &yvalue, &branch);
-
-		TBranch* cut_branch = fChain ->GetBranch(cut_branch_name);
-		Double_t cut_branch_value;
-		fChain ->SetBranchAddress(cut_branch_name, &cut_branch_value, &cut_branch);
-
-		if (fChain == 0) {cout << "fChain ==0" << endl; return;}
+		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
+	
+		fMT2tree = new MT2tree();
+		Samples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+		Long64_t nentries =  Samples[i].tree->GetEntries();
 		Long64_t nbytes = 0, nb = 0;
-		Long64_t nentries = fChain->GetEntriesFast();
-		
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			Long64_t ientry = LoadTree(jentry);
-			nb = fChain->GetEntry(jentry);   nbytes += nb;
+			nb =  Samples[i].tree->GetEntry(jentry);   nbytes += nb;
 				
 			// cleaning & cuts
-			if(cut_branch_value > upper_cut) continue;
-			if(cut_branch_value < lower_cut) continue;
-			if(LeptConfig !=LeptConfigCut  ) continue; //lepton veto
-			if(Vectorsumpt > VectorSumPtCut) continue;
-			if( NJets < NJetsCut )           continue;
-			if( NJets > MaxNJetsCut )        continue;
-			if( PFMET < MinPFMET)            continue;
-			if( HCALNoiseVeto==1){
-				if(HCALNoiseFlag==0)     continue;
-			}	
-			bool dPhiGood(true);
-			for(int j=0; j<NJets; ++j){
-				if(JPt[j]>DPhiJetsMetMinJpt && DPhiJetsMet[j]< dPhiJetsMET ) dPhiGood=false;
-			}
-			if(! dPhiGood ) continue;	
-			if(branch_name=="PseudoJetMT2"){
-				if(yvalue      < 0  ) continue;
-			} else if(PseudoJetMT2 < 0  ) continue;      
-
-			if(PrintRunLumiEvt==1 && Samples[i].type=="data" && yvalue > 135){
-				cout << "Run:Lumi:Evt " << Run<< ":" << LumiSection << ":" << Event << " MT2 " << yvalue  << " " << Samples[i].name << endl; 
-			}			
+			if( fMT2tree->misc.DPhiMhtMpt > upper_cut) continue;
+			if( fMT2tree->misc.DPhiMhtMpt < lower_cut) continue;
+			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
+			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
+			if( fMT2tree->NJets < NJetsCut )           continue;
+			if( fMT2tree->NJets > MaxNJetsCut )        continue;
+			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
 			// fill histo
 			if(option == "none")  {
-				h_samples[i]                ->Fill(yvalue     , weight);
-				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && yvalue < 50){h_prediction -> Fill(yvalue     , weight);}
-			}
-			if(option == "overHT")  {
-				h_samples[i]                ->Fill(yvalue/HT     , weight);
+				h_samples[i]                ->Fill(fMT2tree->misc.PseudoJetMT2     , weight);
+				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && fMT2tree->misc.PseudoJetMT2 < 50){h_prediction -> Fill(fMT2tree->misc.PseudoJetMT2     , weight);}
 			}
 		}
+		delete fMT2tree;
 	}
 	if(prediction!="none"){
 		h_stack.Add(h_prediction);
@@ -358,6 +316,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 	delete h_mc_sum_susy;
 }
 
+
 //_____________________________________________________________________________________
 TH1D* MassPlotter::GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor ){
 
@@ -380,49 +339,28 @@ TH1D* MassPlotter::GetPrediction(TString branch_name, const int nbins, const dou
 		if(data==false && fSamples[i].sname != "QCD") continue;
 		if(data==true  && fSamples[i].type  != "data") continue;
 
-		TTree *tree = fSamples[i].tree;
 		Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
-		tree->ResetBranchAddresses();	
-		Init(tree);
-		
-		TBranch* branch = fChain->GetBranch(branch_name);
-		Double_t yvalue;	
-		fChain->SetBranchAddress(branch_name, &yvalue, &branch);
 
-		TBranch* cut_branch = fChain ->GetBranch(cut_branch_name);
-		Double_t cut_branch_value;
-		fChain ->SetBranchAddress(cut_branch_name, &cut_branch_value, &cut_branch);
-
-		if (fChain == 0) {cout << "fChain ==0" << endl; return NULL;}
+		fMT2tree = new MT2tree();
+		fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+		Long64_t nentries =  fSamples[i].tree->GetEntries();
 		Long64_t nbytes = 0, nb = 0;
-		Long64_t nentries = fChain->GetEntriesFast();
 		
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			Long64_t ientry = LoadTree(jentry);
-			nb = fChain->GetEntry(jentry);   nbytes += nb;
+			nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
 				
 			// cleaning & cuts
-			if(cut_branch_value > upper_cut) continue;
-			if(cut_branch_value < lower_cut) continue;
-			if(LeptConfig != LeptConfigCut ) continue; //lepton veto
-			if(Vectorsumpt > VectorSumPtCut) continue;
-			if( NJets < NJetsCut )            continue;
-			if( PFMET < MinPFMET)            continue;
-			if( NJets > MaxNJetsCut )        continue;
-			if( HCALNoiseVeto==1){
-				if(HCALNoiseFlag==0)     continue;
-			}
-			bool dPhiGood(true);
-			for(int j=0; j<NJets; ++j){
-				if(JPt[j]>DPhiJetsMetMinJpt && DPhiJetsMet[j]< dPhiJetsMET ) dPhiGood=false;
-			}
-			if(! dPhiGood ) continue;	
-			if(branch_name=="PseudoJetMT2"){
-				if(yvalue      < 0  ) continue;
-			} else if(PseudoJetMT2 < 0  ) continue;      
+			if( fMT2tree->misc.DPhiMhtMpt > upper_cut) continue;
+			if( fMT2tree->misc.DPhiMhtMpt < lower_cut) continue;
+			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
+			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
+			if( fMT2tree->NJets < NJetsCut )           continue;
+			if( fMT2tree->NJets > MaxNJetsCut )        continue;
+			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
 			// fill histo
-			if(yvalue > 50) h_prediction     ->Fill(yvalue     , weight);
+			if(fMT2tree->misc.PseudoJetMT2 > 50) h_prediction     ->Fill(fMT2tree->misc.PseudoJetMT2     , weight);
 		}
+		delete fMT2tree;
 	}
 	h_prediction->Multiply(h_fudge);
 	return h_prediction;	
@@ -448,54 +386,37 @@ void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option,
 		if(type  !="none"  && fSamples[i].type != type  ) continue;
 		if(sname !="none"  && fSamples[i].sname!= sname ) continue;
 
-		TTree *tree = fSamples[i].tree;
+		fMT2tree = new MT2tree();
+		fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+		Long64_t nentries =  fSamples[i].tree->GetEntries();
+		Long64_t nbytes = 0, nb = 0;
+		
 		Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
 		if(fVerbose>2) cout << "ABCD: looping over " << fSamples[i].sname << endl;
 		if(fVerbose>2) cout << "      sample has weight " << weight << endl; 
 		
-		tree->ResetBranchAddresses();
-		Init(tree);
-		if (fChain == 0) {cout << "fChain ==0" << endl; return;}
-		Long64_t nbytes = 0, nb = 0;
-		Long64_t nentries = fChain->GetEntriesFast();
-		
-		TBranch* branch = fChain->GetBranch(branch_name);
-		Double_t yvalue;	
-		fChain->SetBranchAddress(branch_name, &yvalue, &branch);
-		
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			Long64_t ientry = LoadTree(jentry);
-			nb = fChain->GetEntry(jentry);   nbytes += nb;
+			nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
 			
-			// cuts & selection
-			if( PseudoJetMT2 <0 ) continue;
-			if( Vectorsumpt > VectorSumPtCut) continue;
-			if( NJets < NJetsCut )            continue;
-			if( PFMET < MinPFMET)            continue;
-			if( NJets > MaxNJetsCut )        continue;
-			if( LeptConfig !=LeptConfigCut  ) continue;
-			if( HCALNoiseVeto==1){
-				if(HCALNoiseFlag==0)     continue;
-			}	
-			bool dPhiGood(true);
-			for(int j=0; j<NJets; ++j){
-				if(JPt[j]>DPhiJetsMetMinJpt && DPhiJetsMet[j]< dPhiJetsMET ) dPhiGood=false;
-			}
-			if(! dPhiGood ) continue;	
+			// cleaning & cuts
+			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
+			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
+			if( fMT2tree->NJets < NJetsCut )           continue;
+			if( fMT2tree->NJets > MaxNJetsCut )        continue;
+			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
+			
 			// fill histo
-			double xvalue=-999.99;
-			if      (option == "none")  {xvalue = PseudoJetMT2;}
-			else if (option == "overHT"){xvalue = PseudoJetMT2/HT;} 
-			if(  yvalue > ysplit[0] && yvalue < ysplit[1] ){
-				h_ABCD_lower_y_band -> Fill(xvalue, weight);
-				h_ABCD_MT2          -> Fill(xvalue, yvalue, weight);
+			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[0] && fMT2tree->misc.DPhiMhtMpt < ysplit[1] ){
+				h_ABCD_lower_y_band -> Fill(fMT2tree->misc.PseudoJetMT2, weight);
+				h_ABCD_MT2          -> Fill(fMT2tree->misc.PseudoJetMT2, fMT2tree->misc.DPhiMhtMpt, weight);
 			}
-			if(  yvalue > ysplit[2] && yvalue < ysplit[3] ){
-				h_ABCD_upper_y_band -> Fill(xvalue, weight);
-				h_ABCD_MT2          -> Fill(xvalue, yvalue, weight);
+			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[2] && fMT2tree->misc.DPhiMhtMpt < ysplit[3] ){
+				h_ABCD_upper_y_band -> Fill(fMT2tree->misc.PseudoJetMT2, weight);
+				h_ABCD_MT2          -> Fill(fMT2tree->misc.PseudoJetMT2, fMT2tree->misc.DPhiMhtMpt, weight);
 			}
 
 		}
+		delete fMT2tree;
 	}
 
 		
@@ -535,6 +456,7 @@ void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option,
 	delete h_ABCD_upper_y_band;
 
 }
+
 
 
 //_________________________________________________________________________________
@@ -972,7 +894,7 @@ void MassPlotter::loadSamples(const char* filename){
 			TString file =fPath+StringValue;
 			TFile *f = TFile::Open(file);
 			s.file = f;
-			s.tree = (TTree*)f->Get("MassAnalysis");
+			s.tree = (TTree*)f->Get("MassTree");
 			
 			IN.getline(buffer, 200, '\n');
 			sscanf(buffer, "Xsection\t%f", &ParValue);

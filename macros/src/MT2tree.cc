@@ -62,6 +62,17 @@ void MT2Jet::Reset() {
   bTagProbSSVHE = -99999.99;
   bTagProbSSVHP = -99999.99;
   inHemisphere  = -1;
+
+  isPFIDLoose   = 0;
+  isPFIDMedium  = 0;
+  isPFIDTight   = 0;
+  ChHadFrac     = -99999.99; 
+  NeuHadFrac    = -99999.99; 
+  ChEmFrac      = -99999.99; 
+  ChMult        = -1; 
+  NeuMult       = -1; 
+  NConstituents = -1; 
+
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
@@ -183,7 +194,7 @@ Double_t MT2tree::GetMT2(double testmass, bool massive) {
   return mt2->get_mt2();
 }
 
-Double_t MT2tree::GetMCT(bool massive, double ecm, double mxlo) {
+Double_t MT2tree::GetMCT(bool massive) {
   if (NJets<2)
     return -999;
 
@@ -195,7 +206,7 @@ Double_t MT2tree::GetMCT(bool massive, double ecm, double mxlo) {
   pmiss.Set(pfmet[0].Px(), pfmet[0].Py());
 
   TMctLib *mct = new TMctLib();
-  return mct -> mctcorr(p1, p2, DTM, pmiss, ecm, mxlo);
+  return mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
 }
 
 ClassImp(MT2Misc)

@@ -326,24 +326,25 @@ void MassAnalysis::FillTree(){
 		fTjetmetdphi[i]=Util::DeltaPhi(fTR->PFJPhi[fJets[i]], fTR->PFMETphi); 
 	}
 
-	fMT2tree->misc.Run                   = fTR->Run;
+	fMT2tree->misc.Run                 = fTR->Run;
 	fMT2tree->misc.Event		   = fTR->Event;
 	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
 	fMT2tree->misc.Weight		   = fWeight;
-	fMT2tree->misc.LeptConfig		   = (int) fLeptConfig;
+	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.IsCleanMultiJetEvent  = fIsCleanMultiJetEvent;
 	fMT2tree->misc.IsCleanJetEvent	   = fIsCleanJetEvent;
 	fMT2tree->misc.R12R21		   = (int) fR12R21;
 	fMT2tree->misc.NJetsPt50Eta25	   = fNJetsPt50Eta25;
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
-	fMT2tree->misc.MHT                   = fMHT;
-	fMT2tree->misc.HT	                   = fHT;
+	fMT2tree->misc.MHT                 = fMHT;
+	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMET	  	   = fTR->PFMET;
 	fMT2tree->misc.PFMETphi	  	   = fTR->PFMETphi;
-	fMT2tree->misc.PFMETsign	           = (fTR->PFMET)/sqrt(fTR->SumEt);
+	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
 	fMT2tree->misc.MPT_sel	           = tracks.Pt();
 	fMT2tree->misc.MPT	           = sqrt((fTR->TrkPtSumx)*(fTR->TrkPtSumx) + (fTR->TrkPtSumy)*(fTR->TrkPtSumy));
-	fMT2tree->misc.DPhiMhtMpt            = fabs(Util::DeltaPhi(MHTphi, MPTphi));
+	fMT2tree->misc.DPhiMhtMpt          = fabs(Util::DeltaPhi(MHTphi, MPTphi));
+
 	if(fJets.size()>1 && fCut_PFMET_min > 0) fMT2tree->misc.R1221min        = (fR12 <= fR21) ? fR12 : fR21;
 	if(fJets.size()>0)                       fMT2tree->misc.LeadingJetEta   = fTR-> PFJEta[fJets[0]];
 	if(fJets.size()>0 && fCut_PFMET_min > 0) fMT2tree->misc.DPhiJ1Met       = fDeltaPhi1; 
@@ -354,15 +355,22 @@ void MassAnalysis::FillTree(){
 	fMT2tree->SetNEles ((Int_t)fElecs.size());
 	fMT2tree->SetNMuons((Int_t)fMuons.size());
 
-	// Fill jets 4-momenta
+	// Fill jets 4-momenta & ID's
 	for(int i=0; i<fJets.size(); ++i) {
-	  fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PFJPx[fJets[i]], fTR->PFJPy[fJets[i]], 
+	  	fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PFJPx[fJets[i]], fTR->PFJPy[fJets[i]], 
 					fTR->PFJPz[fJets[i]], fTR->PFJE [fJets[i]]); //SetLV(GetJet4Momenta(fJets[i]));
-	  // b-tag info now should be available
-	  // fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighEff [fJets[i]];
-	  // fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighPur [fJets[i]];
-	  // fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighEff[fJets[i]];
-	  // fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
+		// b-tag info now should be available
+		// fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighEff [fJets[i]];
+		// fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighPur [fJets[i]];
+		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighEff[fJets[i]];
+		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
+	  
+		// Jet id variables
+		if(IsGoodBasicPFJet(i, true))  fMT2tree->jet[i].isPFIDLoose=true;
+		if(IsGoodPFJetMedium(i, true)) fMT2tree->jet[i].isPFIDMedium=true;
+		if(IsGoodPFJetTight(i, true))  fMT2tree->jet[i].isPFIDTight=true;
+
+
 	}
 	// Fill leptons 4-momenta
 	for(int i=0; i<fElecs.size(); ++i) {
@@ -546,13 +554,13 @@ void MassAnalysis::PseudoJetMasses(){
 			fHPseudoJetMT2vsLeadingJEta   -> Fill(MT2, fTR->PFJEta[fJets[0]]);
 			fHPseudoJetMT2vsMHT           -> Fill(MT2, fMHT);
 		}
-		if(i==0 && MT2 > 240  ){
+		if(i==0 && MT2 > 135  && fLeptConfig==null && fVectorSumPt < 50  ){
 			interesting_Run.push_back(fTR->Run);
 			interesting_Event.push_back(fTR->Event);
 			interesting_Lumi.push_back(fTR->LumiSection);
 			interesting_value.push_back(MT2);
 			interesting_Type.push_back("pseudojetMT2");
-			if(fSetName=="JetMET_Prompt" || fSetName=="MultiJetRunB") UserAnalysisBase::EventPrint();
+			if(fSetName=="JetMET_Prompt" || fSetName=="MultiJetRunB" && fTR->HBHENoiseFlag==1) UserAnalysisBase::EventPrint();
 		}
 		if(i==0){
 			// fill tree variable
