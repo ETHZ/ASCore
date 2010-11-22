@@ -145,7 +145,7 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 
 bool UserAnalysisBase::IsGoodPFJetMedium(int index, bool doSel=true) {
 	// Medium PF JID
-	IsGoodBasicPFJet(index, true);
+	if ( ! IsGoodBasicPFJet(index, doSel)       ) return false;
 	if ( !(fTR->PFJNeuHadfrac[index]    < 0.95) ) return false;
 	if ( !(fTR->PFJNeuEmfrac[index]     < 0.95) ) return false;
 	return true;
@@ -153,7 +153,7 @@ bool UserAnalysisBase::IsGoodPFJetMedium(int index, bool doSel=true) {
 
 bool UserAnalysisBase::IsGoodPFJetTight(int index, bool doSel=true) {
 	// Tight PF JID
-	IsGoodBasicPFJet(index, true);
+	if ( ! IsGoodBasicPFJet(index, doSel)       ) return false;
 	if ( !(fTR->PFJNeuHadfrac[index]    < 0.90) ) return false;
 	if ( !(fTR->PFJNeuEmfrac[index]     < 0.90) ) return false;
 	return true;
