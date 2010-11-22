@@ -24,23 +24,13 @@ public:
 
   float pt1; // leading leptons
   float pt2;
-  float genZPt; // leading legenPtons
-  float genPt1; // leading legenPtons
-  float genPt2;
   float eta1; // leading leptons
   float eta2;
   float phi1;
   float phi2;
   float dphi;
-  float dphiZpfMet;
-  float dphiZs1;
-  float dphiZs2;
   float dphiMet1;
   float dphiMet2;
-  float dphitcMet1;
-  float dphitcMet2;
-  float dphipfRecoilMet1;
-  float dphipfRecoilMet2;
   int id1;
   int id2;
   int ch1;
@@ -130,15 +120,8 @@ void nanoEvent::reset()
   eta2=0;
   phi1=0;
   phi2=0;
-  dphiZpfMet=0;
-  dphiZs1=0;
-  dphiZs2=0;
   dphiMet1=0;
   dphiMet2=0;
-  dphitcMet1=0;
-  dphitcMet2=0;
-  dphipfRecoilMet1=0;
-  dphipfRecoilMet2=0;
   dphi=0;
   id1=0;
   id2=0;
@@ -273,22 +256,12 @@ void JZBAnalysis::Begin(){
   myTree->Branch("phi",&nEvent.phi,"phi/F");
   myTree->Branch("pt1",&nEvent.pt1,"pt1/F");
   myTree->Branch("pt2",&nEvent.pt2,"pt2/F");
-  myTree->Branch("genZPt",&nEvent.genZPt,"genZPt/F");
-  myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
-  myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
   myTree->Branch("eta1",&nEvent.eta1,"eta1/F");
   myTree->Branch("eta2",&nEvent.eta2,"eta2/F");
   myTree->Branch("phi1",&nEvent.phi1,"phi1/F");
   myTree->Branch("phi2",&nEvent.phi2,"phi2/F");
-  myTree->Branch("dphiZpfMet",&nEvent.dphiZpfMet,"dphiZpfMet/F");
-  myTree->Branch("dphiZs1",&nEvent.dphiZs1,"dphiZs1/F");
-  myTree->Branch("dphiZs2",&nEvent.dphiZs2,"dphiZs2/F");
   myTree->Branch("dphiMet1",&nEvent.dphiMet1,"dphiMet1/F");
   myTree->Branch("dphiMet2",&nEvent.dphiMet2,"dphiMet2/F");
-  myTree->Branch("dphitcMet1",&nEvent.dphitcMet1,"dphitcMet1/F");
-  myTree->Branch("dphitcMet2",&nEvent.dphitcMet2,"dphitcMet2/F");
-  myTree->Branch("dphipfRecoilMet1",&nEvent.dphipfRecoilMet1,"dphipfRecoilMet1/F");
-  myTree->Branch("dphipfRecoilMet2",&nEvent.dphipfRecoilMet2,"dphipfRecoilMet2/F");
   myTree->Branch("dphi",&nEvent.dphi,"dphi/F");
 
   myTree->Branch("id1",&nEvent.id1,"id1/I");
@@ -515,12 +488,6 @@ void JZBAnalysis::Analyze(){
 	  tmpLepton.charge = tmpCharge;
 	  tmpLepton.index = muIndex;
 	  tmpLepton.type = 1;
-	  tmpLepton.genPt = 0.;
-	  if(fTR->MuGenMID[muIndex]==23 || fTR->MuGenGMID[muIndex]==23)
-	  {
-	    tmpLepton.genPt = fTR->MuGenPt[muIndex];
-	    if(fTR->MuGenMID[muIndex]==23)nEvent.genZPt = fTR->MuGenMPt[muIndex];
-	  }
 
 	  leptons.push_back(tmpLepton);
 	}
@@ -546,13 +513,6 @@ void JZBAnalysis::Analyze(){
 	  tmpLepton.charge = tmpCharge;
 	  tmpLepton.index = elIndex;
 	  tmpLepton.type = 0;
-	  tmpLepton.genPt = 0.;
-	  if(fTR->ElGenMID[elIndex]==23 || fTR->ElGenGMID[elIndex]==23)
-	  {
-	    tmpLepton.genPt = fTR->ElGenPt[elIndex];
-
-	    if(fTR->ElGenMID[elIndex]==23)nEvent.genZPt = fTR->ElGenMPt[elIndex];
-	  }
 
 	  leptons.push_back(tmpLepton);
 	}
@@ -583,7 +543,6 @@ void JZBAnalysis::Analyze(){
       
       nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
       nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
-      nEvent.genPt1 = sortedGoodLeptons[PosLepton1].genPt;
       nEvent.phi1 = sortedGoodLeptons[PosLepton1].p.Phi();
       nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
       nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
@@ -591,7 +550,6 @@ void JZBAnalysis::Analyze(){
       
       nEvent.eta2 = sortedGoodLeptons[PosLepton2].p.Eta();
       nEvent.pt2 = sortedGoodLeptons[PosLepton2].p.Pt();
-      nEvent.genPt2 = sortedGoodLeptons[PosLepton2].genPt;
       nEvent.phi2 = sortedGoodLeptons[PosLepton2].p.Phi();
       nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
       nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
@@ -679,13 +637,9 @@ void JZBAnalysis::Analyze(){
     
     float pfMETpx = fTR->PFMETpx;
     float pfMETpy = fTR->PFMETpy;
-
-    float tcMETpx = fTR->TCMETpx;
-    float tcMETpy = fTR->TCMETpy;
     
     TLorentzVector caloMETvector(caloMETpx,caloMETpy,0,0);
     TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
-    TLorentzVector tcMETvector(tcMETpx,tcMETpy,0,0);
     
     TLorentzVector sumOfPFJets(0,0,0,0);
     nEvent.pfJetNum=0;
@@ -825,12 +779,11 @@ void JZBAnalysis::Analyze(){
     TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
     TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
     TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
-    TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
     
     
     nEvent.metPhi[0]=caloMETvector.Phi();
     nEvent.metPhi[1]=0.;
-    nEvent.metPhi[2]=tcMETvector.Phi();
+    nEvent.metPhi[2]=0.;
     nEvent.metPhi[3]=0.;
     nEvent.metPhi[4]=pfMETvector.Phi();
     nEvent.metPhi[5]=0.;
@@ -843,7 +796,6 @@ void JZBAnalysis::Analyze(){
 
     // remove the leptons from PFMET
     pfNoCutsJetVector = -pfMETvector - s1 - s2;
-    tcNoCutsJetVector = -tcMETvector - s1 - s2;
     
     
     // #--- different versions of JZB
@@ -863,14 +815,7 @@ void JZBAnalysis::Analyze(){
     
     nEvent.jzb[3] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
     nEvent.sumJetPt[3] = sumOfPFJets.Pt();
-
-
-    nEvent.dphi_sumJetVSZ[4] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
-    nEvent.sumJetPt[4] = tcNoCutsJetVector.Pt(); 
-    nEvent.jzb[4] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
-
-    // --- recoil met and pf recoil met
-    nEvent.met[6] = (sumOfPFJets + s1 + s2).Pt(); 
+    nEvent.met[6] = (sumOfPFJets + s1 + s2).Pt();
     nEvent.met[7] = (recoil + s1 + s2).Pt();
     
     // ----------------------------------------
@@ -911,15 +856,8 @@ void JZBAnalysis::Analyze(){
 	}
     }
 
-    nEvent.dphiZpfMet = (s1+s2).DeltaPhi(pfMETvector);
-    nEvent.dphiZs1 = (s1+s2).DeltaPhi(s1);
-    nEvent.dphiZs2 = (s1+s2).DeltaPhi(s2);
     nEvent.dphiMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(pfMETvector);
     nEvent.dphiMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(pfMETvector);
-    nEvent.dphitcMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(tcMETvector);
-    nEvent.dphitcMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(tcMETvector);
-    nEvent.dphipfRecoilMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
-    nEvent.dphipfRecoilMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
     
     // Store minimum dphi between some mets and any kind of lepton
     for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
