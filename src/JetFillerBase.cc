@@ -159,7 +159,7 @@ void JetFillerBase::createBranches(void) {
     addBranch("JID_resEMF", "D",fTID_resEMF  ,"NJets" );
   } else if (fJetType==PF) {
     addBranch("JChMult",    "I", fTChMult,    "NJets");   													
-    addBranch("JNeuMult",   "I", fTChMult,    "NJets");		
+    addBranch("JNeuMult",   "I", fTNeuMult,    "NJets");		
     addBranch("JChHadfrac", "D", fTChHadFrac, "NJets" );
     addBranch("JNeuHadfrac","D", fTNeuHadFrac,"NJets" );
     addBranch("JChEmfrac",  "D", fTChEmFrac,  "NJets" );
