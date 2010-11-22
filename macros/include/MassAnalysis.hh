@@ -82,51 +82,6 @@ private:
         MT2tree* fMT2tree;
         TTree* fATree;
 
-	// Tree
-	TTree* fMassTree;
-	static const int gMaxnjets = 30;
-
-	int    fTrun;
-	int    fTevent;
-	int    fTlumisec;
-	int    fThcalnoiseflag;
-	float  fTweight;
-		
-	int    fTnjets;
-	int    fTnelecs;
-	int    fTnmuons;
-	int    fTleptconfig;
-	
-	int    fTisCleanMultiJetEvent;
-	int    fTisCleanJetEvent;
-	int    fTnJetsPt50Eta25;
-	int    fTr12r21;
-	
-	double fTpseudoJetMT2;
-	double fTpseudoJetMT2massive;
-	double fTpseudoJetMT2simple;
-	double fTpseudoJetMCT;
-	double fTpseudoJetMCTMinusMass;
-	double fTpseudoJetMCTmassless;
-	double fTpseudoJet1Pt;
-	double fTpseudoJet2Pt;
-	double fTpseudojetAlphaT;
-	double fTleadingJetEta;
-	double fTvectorsumpt;
-	double fTpfmet;
-	double fTpfmetsign;
-	double fTmHT;
-	double fThT;
-	double fTmpt_sel;
-	double fTmpt;
-	double fTdPhiJ1MET;
-	double fTdPhiJ2MET;
-	double fTPseudoJetMT2AxisdPhi;
-	double fTr1221min;
-	double fTdPhiMhtMpt;
-	double fTjpt[gMaxnjets];
-	double fTjetmetdphi[gMaxnjets];
-
 	// histos
 	TH1D* fHMT2_SSll[10];
 	      

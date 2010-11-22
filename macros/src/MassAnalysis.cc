@@ -190,166 +190,24 @@ void MassAnalysis::BookTree(){
 	fATree = new TTree("MassTree", "MassTree");
 	fATree->Branch("MT2tree" , "MT2tree" , &fMT2tree);
 
-	fMassTree = new TTree("MassAnalysis", "MassAnalysisTree");
-	
-	fMassTree->Branch("Run"                   ,&fTrun,                    "Run/I");         
-	fMassTree->Branch("Event"                 ,&fTevent,                  "Event/I");       
-	fMassTree->Branch("LumiSection"           ,&fTlumisec,                "LumiSection/I");
-	fMassTree->Branch("HCALNoiseFlag"         ,&fThcalnoiseflag,          "HCALNoiseFlag/I");
-	fMassTree->Branch("Weight"                ,&fWeight,                  "Weight/F");
-	fMassTree->Branch("NJets"                 ,&fTnjets,                  "NJets/I");       
-	fMassTree->Branch("JPt"                   ,&fTjpt,                    "JPt[NJets]/D");       
-	fMassTree->Branch("DPhiJetsMet"           ,&fTjetmetdphi,             "DPhiJetsMet[NJets]/D");       
-	fMassTree->Branch("NElecs"                ,&fTnelecs,                 "NElecs/I");       
-	fMassTree->Branch("NMuons"                ,&fTnmuons,                 "NMuons/I");       
-	fMassTree->Branch("LeptConfig"            ,&fTleptconfig,             "LeptConfig/I");       
-	fMassTree->Branch("IsCleanMultiJetEvent"  ,&fTisCleanMultiJetEvent,   "IsCleanMultiJetEvent/I");       
-	fMassTree->Branch("IsCleanJetEvent"       ,&fTisCleanJetEvent,        "IsCleanJetEvent/I");       
-	fMassTree->Branch("R12R21"                ,&fTr12r21,                 "R12R21/I");
-	fMassTree->Branch("NJetsPt50Eta25"        ,&fTnJetsPt50Eta25,         "NJetsPt50Eta25/I");
-	fMassTree->Branch("PseudoJetMT2"          ,&fTpseudoJetMT2,           "PseudoJetMT2/D");
-	fMassTree->Branch("PseudoJetMT2massive"   ,&fTpseudoJetMT2massive,    "PseudoJetMT2massive/D");
-	fMassTree->Branch("PseudoJetMT2simple"    ,&fTpseudoJetMT2simple,     "PseudoJetMT2simple/D");
-	fMassTree->Branch("PseudoJetMCT"          ,&fTpseudoJetMCT,           "PseudoJetMCT/D");
-	fMassTree->Branch("PseudoJetMCTMinusMass" ,&fTpseudoJetMCTMinusMass,  "PseudoJetMCTMinusMass/D");
-	fMassTree->Branch("PseudoJetMCTMassless"  ,&fTpseudoJetMCTmassless ,  "PseudoJetMCTMassless/D");
-	fMassTree->Branch("PseudoJet1Pt"          ,&fTpseudoJet1Pt,           "PseudoJet1Pt/D");
-	fMassTree->Branch("PseudoJet2Pt"          ,&fTpseudoJet2Pt,           "PseudoJet2Pt/D");
-	fMassTree->Branch("PseudojetAlphaT"       ,&fTpseudojetAlphaT,        "PseudojetAlphaT/D");
-	fMassTree->Branch("Vectorsumpt"           ,&fTvectorsumpt,            "Vectorsumpt/D");
-	fMassTree->Branch("PFMET"                 ,&fTpfmet,                  "PFMET/D");
-	fMassTree->Branch("PFMETsign"             ,&fTpfmetsign,              "PFMETsign/D");
-	fMassTree->Branch("LeadingJetEta"         ,&fTleadingJetEta,          "LeadingJetEta/D");
-	fMassTree->Branch("DPhiJ1Met"             ,&fTdPhiJ1MET,              "DPhiJ1Met/D");
-	fMassTree->Branch("DPhiJ2Met"             ,&fTdPhiJ2MET,              "DPhiJ2Met/D");
-	fMassTree->Branch("PseudoJetMT2AxisdPhi"  ,&fTPseudoJetMT2AxisdPhi,   "PseudoJetMT2AxisdPhi/D");
-	fMassTree->Branch("R1221min"              ,&fTr1221min,               "R1221min/D");
-	fMassTree->Branch("MPT_sel"               ,&fTmpt_sel,                "MPT_sel/D");
-	fMassTree->Branch("MPT"                   ,&fTmpt,                    "MPT/D");
-	fMassTree->Branch("MHT"                   ,&fTmHT,                    "MHT/D");
-	fMassTree->Branch("HT"                    ,&fThT,                     "HT/D");
-	fMassTree->Branch("DPhiMhtMpt"            ,&fTdPhiMhtMpt,             "DPhiMhtMpt/D");
 }
 
 void MassAnalysis::ResetTree(){
         fMT2tree->Reset();
-
-	fTrun                  =-1;
-	fTevent                =-1;
-	fTlumisec              =-1;
-	fThcalnoiseflag        =-1;
-	fTweight               =-99999.99;
-	fTnjets                =-1;
-	fTnelecs               =-1;
-	fTnmuons               =-1;
-	fTleptconfig           =-1;
-	fTisCleanMultiJetEvent =-1;
-	fTisCleanJetEvent      =-1;
-	fTr12r21               =-1;
-	fTnJetsPt50Eta25       =-1;
-	fTpseudoJetMT2         =-99999.99;
-	fTpseudoJetMT2massive  =-99999.99;
-	fTpseudoJetMT2simple   =-99999.99;
-	fTpseudoJetMCT         =-99999.99;
-	fTpseudoJetMCTMinusMass=-99999.99;
-	fTpseudoJetMCTmassless =-99999.99;
-	fTpseudoJet1Pt         =-99999.99;
-	fTpseudoJet2Pt         =-99999.99;
-	fTpseudojetAlphaT      =-99999.99;
-	fTvectorsumpt          =-99999.99;
-	fTmHT                  =-99999.99;
-	fTmpt_sel              =-99999.99;
-        fTmpt                  =-99999.99;	
-	fThT                   =-99999.99;
-	fTpfmet                =-99999.99;
-	fTpfmetsign            =-99999.99;
-	fTleadingJetEta        =-99999.99;
-	fTdPhiJ1MET            =-99999.99;
-	fTdPhiJ2MET            =-99999.99;
-	fTPseudoJetMT2AxisdPhi =-99999.99;
-	fTr1221min             =-99999.99;
-	fTdPhiMhtMpt           =-99999.99;
-	
-	for(int i=0; i<gMaxnjets; ++i){
-		fTjpt[i]       =-99999.99;
-		fTjetmetdphi[i]=-99999.99;
-	}
-
 }
 
 void MassAnalysis::FillTree(){
 	
-	fTrun                  = fTR->Run;
-	fTevent                = fTR->Event;
-	fTlumisec              = fTR->LumiSection;
-	fThcalnoiseflag        = fTR->HBHENoiseFlag;
-	fTweight               = fWeight;
-
-
-	fTnjets                = fJets.size();
-	fTnelecs               = fElecs.size();
-	fTnmuons               = fMuons.size();
-	fTleptconfig           = (int) fLeptConfig;
-	fTisCleanMultiJetEvent = (int) fIsCleanMultiJetEvent;
-	fTisCleanJetEvent      = (int) fIsCleanJetEvent;
-	fTr12r21               = (int) fR12R21;
-	fTnJetsPt50Eta25       = fNJetsPt50Eta25;
-	fTvectorsumpt          = fVectorSumPt;
-	fTmHT                  = fMHT;
-	fThT                   = fHT;
-	fTpfmet                = fTR->PFMET;
-	fTpfmetsign            = (fTR->PFMET)/sqrt(fTR->SumEt);
-
-	if(fJets.size()>1 && fCut_PFMET_min > 0) fTr1221min  = (fR12 <= fR21) ? fR12 : fR21;
-	if(fJets.size()>0) fTleadingJetEta   = fTR-> PFJEta[fJets[0]];
-	if(fJets.size()>0 && fCut_PFMET_min > 0) fTdPhiJ1MET = fDeltaPhi1; 
-	if(fJets.size()>0 && fCut_PFMET_min > 0) fTdPhiJ2MET = fDeltaPhi2; 
-
-	// Tracks
-	TVector3 tracks(0.,0.,0.);
-	TVector3 track(0.,0.,0.);
-	for(int i=0; i< fTR->NTracks; ++i){
-		track.SetPtEtaPhi(fabs(fTR->TrkPt[i]), fTR->TrkEta[i], fTR->TrkPhi[i]);
-		tracks += track;
-	}	
-	fTmpt_sel= tracks.Pt();
-	fTmpt    = sqrt((fTR->TrkPtSumx)*(fTR->TrkPtSumx) + (fTR->TrkPtSumy)*(fTR->TrkPtSumy));
-	
-	double MHTphi=fMHTphi;
-	double MPTphi=tracks.Phi();
-	fTdPhiMhtMpt = fabs(Util::DeltaPhi(MHTphi, MPTphi));
-
-	// control variables
-	// jpt
-	for(int i=0; i<fJets.size(); ++i){
-		fTjpt[i]       =fTR->PFJPt[fJets[i]];
-		fTjetmetdphi[i]=Util::DeltaPhi(fTR->PFJPhi[fJets[i]], fTR->PFMETphi); 
-	}
-
 	fMT2tree->misc.Run                 = fTR->Run;
 	fMT2tree->misc.Event		   = fTR->Event;
 	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
-	fMT2tree->misc.Weight		   = fWeight;
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
-	fMT2tree->misc.IsCleanMultiJetEvent  = fIsCleanMultiJetEvent;
 	fMT2tree->misc.IsCleanJetEvent	   = fIsCleanJetEvent;
-	fMT2tree->misc.R12R21		   = (int) fR12R21;
-	fMT2tree->misc.NJetsPt50Eta25	   = fNJetsPt50Eta25;
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
-	fMT2tree->misc.MHT                 = fMHT;
 	fMT2tree->misc.HT                  = fHT;
-	fMT2tree->misc.PFMET	  	   = fTR->PFMET;
-	fMT2tree->misc.PFMETphi	  	   = fTR->PFMETphi;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
-	fMT2tree->misc.MPT_sel	           = tracks.Pt();
-	fMT2tree->misc.MPT	           = sqrt((fTR->TrkPtSumx)*(fTR->TrkPtSumx) + (fTR->TrkPtSumy)*(fTR->TrkPtSumy));
-	fMT2tree->misc.DPhiMhtMpt          = fabs(Util::DeltaPhi(MHTphi, MPTphi));
-
-	if(fJets.size()>1 && fCut_PFMET_min > 0) fMT2tree->misc.R1221min        = (fR12 <= fR21) ? fR12 : fR21;
-	if(fJets.size()>0)                       fMT2tree->misc.LeadingJetEta   = fTR-> PFJEta[fJets[0]];
-	if(fJets.size()>0 && fCut_PFMET_min > 0) fMT2tree->misc.DPhiJ1Met       = fDeltaPhi1; 
-	if(fJets.size()>0 && fCut_PFMET_min > 0) fMT2tree->misc.DPhiJ2Met       = fDeltaPhi2; 
-
+	
+	
 
 	fMT2tree->SetNJets ((Int_t)fJets .size());
 	fMT2tree->SetNEles ((Int_t)fElecs.size());
@@ -366,12 +224,18 @@ void MassAnalysis::FillTree(){
 		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
 	  
 		// Jet id variables
-		if(IsGoodBasicPFJet(i, true))  fMT2tree->jet[i].isPFIDLoose=true;
-		if(IsGoodPFJetMedium(i, true)) fMT2tree->jet[i].isPFIDMedium=true;
-		if(IsGoodPFJetTight(i, true))  fMT2tree->jet[i].isPFIDTight=true;
-
-
+		if(IsGoodBasicPFJet (fJets[i], true))  fMT2tree->jet[i].isPFIDLoose=true;
+		if(IsGoodPFJetMedium(fJets[i], true))  fMT2tree->jet[i].isPFIDMedium=true;
+		if(IsGoodPFJetTight (fJets[i], true))  fMT2tree->jet[i].isPFIDTight=true;
+		fMT2tree->jet[i].ChHadFrac      = fTR->PFJChHadfrac     [fJets[i]];	
+		fMT2tree->jet[i].NeuHadFrac     = fTR->PFJNeuHadfrac    [fJets[i]];
+		fMT2tree->jet[i].ChEmFrac       = fTR->PFJChEmfrac      [fJets[i]];
+		fMT2tree->jet[i].NeuEmFrac      = fTR->PFJNeuEmfrac     [fJets[i]];
+		fMT2tree->jet[i].ChMult         = fTR->PFJChMult        [fJets[i]];
+		fMT2tree->jet[i].NeuMult        = fTR->PFJNeuMult       [fJets[i]];
+		fMT2tree->jet[i].NConstituents  = fTR->PFJNConstituents [fJets[i]];
 	}
+
 	// Fill leptons 4-momenta
 	for(int i=0; i<fElecs.size(); ++i) {
 	  fMT2tree->ele[i].SetPtEtaPhiE(fTR->ElPt [fElecs[i]], fTR->ElEta[fElecs[i]], 
@@ -384,8 +248,19 @@ void MassAnalysis::FillTree(){
 	// Fill met
 	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMET,0,fTR->PFMETphi,0);
 
-	// remaining variables are filles elsewhere
-	fMassTree           ->Fill();
+	// Fill vector sum of tracks
+	TVector3 tracks(0.,0.,0.);
+	for(int i=0; i< fTR->NTracks; ++i){
+		TVector3 track;
+		track.SetPtEtaPhi(fabs(fTR->TrkPt[i]), fTR->TrkEta[i], fTR->TrkPhi[i]);
+		tracks += track;
+	}	
+	fMT2tree->MPT[0].SetXYZM(-tracks.Px(), -tracks.Py(), 0, 0);
+
+	// DPhiMhtMpt: should be replaced by method to calculate it on the fly. 
+	fMT2tree->misc.DPhiMhtMpt=Util::DeltaPhi(fMHTphi, fMT2tree->MPT[0].Phi());	
+
+	// fill tree
 	fATree            ->Fill();
 }
 
@@ -481,7 +356,6 @@ void MassAnalysis::PseudoJetMasses(){
 	 	fHAlpahT_PseudoJet->Fill(alphaT);
 	}
 	// fill tree variable
-	fTpseudojetAlphaT = alphaT;
 	fMT2tree->misc.PseudojetAlphaT = alphaT;
 
 
@@ -564,12 +438,8 @@ void MassAnalysis::PseudoJetMasses(){
 		}
 		if(i==0){
 			// fill tree variable
-			fTpseudoJetMT2        = MT2;
-			fTpseudoJetMT2massive = MT2massive;
 			fMT2tree->misc.PseudoJetMT2 = MT2;
 			if(pseudojet1.Pt() > pseudojet2.Pt()){
-				fTpseudoJet1Pt = pseudojet1.Pt();
-				fTpseudoJet2Pt = pseudojet2.Pt();
 				fMT2tree->misc.PseudoJet1Pt = pseudojet1.Pt();
 				fMT2tree->misc.PseudoJet2Pt = pseudojet2.Pt();
 				fMT2tree->pseudoJets[0].SetPxPyPzE(pseudojet1.Px(), pseudojet1.Py(),
@@ -577,8 +447,6 @@ void MassAnalysis::PseudoJetMasses(){
 				fMT2tree->pseudoJets[1].SetPxPyPzE(pseudojet2.Px(), pseudojet2.Py(),
 								 pseudojet2.Pz(), pseudojet2.E ());
 			} else {
-				fTpseudoJet1Pt = pseudojet2.Pt();
-				fTpseudoJet2Pt = pseudojet1.Pt();
 				fMT2tree->misc.PseudoJet1Pt = pseudojet2.Pt();
 				fMT2tree->misc.PseudoJet2Pt = pseudojet1.Pt();
 				fMT2tree->pseudoJets[1].SetPxPyPzE(pseudojet1.Px(), pseudojet1.Py(),
@@ -588,21 +456,12 @@ void MassAnalysis::PseudoJetMasses(){
 			}		
 		}	
 	}
-	// simplified MT2
-	TVector3 vpseudojet1, vpseudojet2;
-	vpseudojet1.SetXYZ(pseudojet1.Px(), pseudojet1.Py(), pseudojet1.Pz());
-	vpseudojet2.SetXYZ(pseudojet2.Px(), pseudojet2.Py(), pseudojet2.Pz());
-
-	fTpseudoJetMT2simple=sqrt(2*pseudojet1.Perp()*pseudojet2.Perp()*(1+cos(vpseudojet1.Angle(vpseudojet2))));
-
 
 	// get the delta_phi between the two axis
 	TVector3 vec1, vec2;
 	vec1.SetPtEtaPhi(pseudojet1.Pt(),pseudojet1.Eta(),pseudojet1.Phi());
 	vec2.SetPtEtaPhi(pseudojet2.Pt(),pseudojet2.Eta(),pseudojet2.Phi());
-	fTPseudoJetMT2AxisdPhi = vec1.Angle(vec2);
-	fMT2tree->misc.PseudoJetMT2AxisdPhi = vec1.Angle(vec2);
-	fHPseudoJetMT2AxisdPhi -> Fill(fTPseudoJetMT2AxisdPhi);	
+	fHPseudoJetMT2AxisdPhi -> Fill(vec1.Angle(vec2));	
 
 	// ---------------------------------------------
 	// MCT pseudojets
@@ -617,9 +476,6 @@ void MassAnalysis::PseudoJetMasses(){
 	double MCTcorrMassless  =GetMCTcorr(pseudojet1massless, pseudojet2massless, DTM, met );
 	double MCTcorrMinusMass =sqrt(MCTcorr*MCTcorr - pseudojet1.M2() -pseudojet2.M2());
 
-	fTpseudoJetMCT          = MCTcorr;
-	fTpseudoJetMCTMinusMass = MCTcorrMinusMass;
-	fTpseudoJetMCTmassless  = MCTcorrMassless;
 	fMT2tree->misc.PseudoJetMCT  = MCTcorr;
 
 	fHMCT_PseudoJet   -> Fill(MCT);
@@ -630,14 +486,6 @@ void MassAnalysis::PseudoJetMasses(){
 	if(fLeptConfig!= null) {fHMCTcorr_PseudoJetWithLeptons -> Fill(MCTcorr);}
 	if(fLeptConfig== null) {fHMCTcorr_PseudoJetNoLeptons   -> Fill(MCTcorr);}
 	if(fBJets.size()>0)    {fHMCTcorr_PseudoJetWithB       -> Fill(MCTcorr);}
-
-
-	if(fVerbose > 1) {
-		cout << "MT2 " << fTpseudoJetMT2 << " MT2massive " << fTpseudoJetMT2massive << "  MT2simplified " << fTpseudoJetMT2simple << 
-		" MCTcorr " << fTpseudoJetMCT << " MCTcorr minus masses " << fTpseudoJetMCTMinusMass << " MCTcorr massless " << MCTcorrMassless << endl;
-	}
-
-
 
 }
 
@@ -1201,7 +1049,6 @@ void MassAnalysis::End(){
 	fHistFile->cd();	
 
 	// write tree
-	fMassTree->Write();
 	fATree->Write();
 		
 	// fill OS ll minus emu MT2 histo

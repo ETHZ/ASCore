@@ -21,31 +21,17 @@ void MT2Misc::Reset() {
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
-  Weight		  = -99999.99;
   LeptConfig		  = -1;	  
-  IsCleanMultiJetEvent	  =  0;	  
   IsCleanJetEvent	  =  0;	  
-  R12R21		  = -1;	  
-  NJetsPt50Eta25	  = -1;	  
   PseudoJetMT2		  = -99999.99;
   PseudoJetMCT		  = -99999.99;
   PseudoJet1Pt		  = -99999.99;
   PseudoJet2Pt		  = -99999.99;
   PseudojetAlphaT	  = -99999.99;
   Vectorsumpt		  = -99999.99;
-  PFMET		  	  = -99999.99;
-  PFMETphi		  = -99999.99;
   PFMETsign		  = -99999.99;
-  LeadingJetEta	  	  = -99999.99;
-  DPhiJ1Met		  = -99999.99;
-  DPhiJ2Met		  = -99999.99;
-  PseudoJetMT2AxisdPhi	  = -99999.99;
-  R1221min		  = -99999.99;
-  MPT_sel		  = -99999.99;
-  MPT			  = -99999.99;
-  MHT			  = -99999.99;
   HT			  = -99999.99;
-  DPhiMhtMpt		  = -99999.99;
+  DPhiMhtMpt              = -99999.99;
 }
 
 MT2Jet::MT2Jet(){
@@ -68,7 +54,8 @@ void MT2Jet::Reset() {
   isPFIDTight   = 0;
   ChHadFrac     = -99999.99; 
   NeuHadFrac    = -99999.99; 
-  ChEmFrac      = -99999.99; 
+  ChEmFrac      = -99999.99;
+  NeuEmFrac     = -99999.99; 
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1; 
@@ -95,14 +82,15 @@ void MT2tree::Reset() {
     jet[i].Reset();
   }
   for (int i = 0; i < m_eleSize; ++i) {
-    ele[i].SetPxPyPzE(0, 0, 0, 0);
+    ele[i].SetPxPyPzE(0., 0., 0., 0.);
   }
   for (int i = 0; i < m_muoSize; ++i) {
-    muo[i].SetPxPyPzE(0, 0, 0, 0);
+    muo[i].SetPxPyPzE(0., 0., 0., 0.);
   }
-  pfmet     [0].SetPxPyPzE(0, 0, 0, 0);
-  pseudoJets[0].SetPxPyPzE(0, 0, 0, 0);
-  pseudoJets[1].SetPxPyPzE(0, 0, 0, 0);
+  pfmet     [0].SetPxPyPzE(0., 0., 0., 0.);
+  MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
+  pseudoJets[0].SetPxPyPzE(0., 0., 0., 0.);
+  pseudoJets[1].SetPxPyPzE(0., 0., 0., 0.);
 
 }
 
