@@ -23,7 +23,6 @@ struct lepton {
   int charge;
   int type; //0==electron 1==muon 2==tau 
   int index;
-  float genPt;
 };
 
 
