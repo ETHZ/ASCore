@@ -34,6 +34,8 @@ public:
 	MuonPlotter(TString, TString);
 	virtual ~MuonPlotter();
 
+	inline void setSelection(int sel){ fSelectionSwitch = sel; };
+
 	void init(TString filename = "samples.dat");
 	void loadSamples(const char* filename = "samples.dat");
 
@@ -49,7 +51,6 @@ public:
 	void makeDiffPredictionPlots();
 	void makeIntPrediction(TString);
 	void makeIntPredictionMuMu(vector<int>);
-	void testFPRatios(float, float, float, float, float, float, float, float);
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
@@ -107,6 +108,7 @@ public:
 	void printYields(gChannel, float);
 	void printYields(gChannel, int, float = -1.0);
 	void printYields(gChannel, vector<int>, float = -1.0);
+	void printYieldsShort(float = -1);
 
 	//////////////////////////////
 	// I/O
@@ -121,6 +123,7 @@ public:
 	bool isGoodElEvent();
 	bool isGoodElMuEvent();
 	bool passesNJetCut(int=2);
+	bool passesNJetCut_LooseLep(int=2);
 	bool passesHTCut(float);
 	bool passesMETCut(float = -1.);
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
@@ -176,12 +179,14 @@ public:
 	bool isGoodSecElectron(int);
 
 	bool isGoodJet(int);
+	bool isGoodJet_LooseLep(int);
 
 private:
 	// Counters
 	Monitor fCounters[gNSAMPLES][3];
 	bool fDoCounting;
 	int fCurrentSample;
+	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
 
 	// FPRatios *fFPRatios;
 
