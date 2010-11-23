@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.69 2010/11/17 14:32:10 pnef Exp $
+// $Id: NTupleProducer.h,v 1.70 2010/11/17 21:54:58 pnef Exp $
 //
 //
 
@@ -232,8 +232,14 @@ private:
   double fTextxslo;
   double fTintxs;
   double fTweight;
+  
+  // ECAL & HCAL Noise
   int fTHBHENoiseFlag;
   int fTEcalDeadCellBEFlag;
+  static const unsigned int gMaxnECALGapClusters = 50;
+  unsigned int fTnECALGapClusters;
+  double fTEcalGapBE[gMaxnECALGapClusters];
+  int fTEcalGapClusterSize[gMaxnECALGapClusters];
 
   int fTgoodvtx;
   double fTprimvtxx;

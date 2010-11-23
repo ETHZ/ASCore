@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.88 2010/11/17 14:32:10 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.89 2010/11/17 21:54:58 pnef Exp $
 //
 //
 
@@ -316,14 +316,52 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   } else {
      edm::LogError("NTP") << " anomalous ECAL Vars not valid/found ";	  
   }
+  // default call to isEcalNoise() returns true if 
+  //      1. highestEnergyDepositAroundDeadCell > 10 (maxBoundaryEnergy) 
+  //   && 2. DeadClusterSize > 24 (minDeadClusterSize)
+  //   to change default values: call isEcalNoise(minDeadClusterSize, maxBoundaryEnergy)
   if(anomalousECALvars.isEcalNoise()==1){
      fTEcalDeadCellBEFlag = 0;
   }else{
      fTEcalDeadCellBEFlag = 1;
   }
+  // ------------------------------
+  // ECAL GAP energy
+  double maxGapBoundaryEnergy  = 5; 
+  // do not set this to a lower value than cutBoundEnergyGapEE/cutBoundEnergyGapEB 
+  // specified in ecalanomalouseventfilter_cfi.py 
+  fTnECALGapClusters=0;
+  // EB
+  for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EB.size(); ++i) {
+     BoundaryInformation bInfo =anomalousECALvars.v_enNeighboursGap_EB[i];
+     if (bInfo.boundaryEnergy > maxGapBoundaryEnergy){
+        fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
+	fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
+	fTnECALGapClusters++;
+	if(fTnECALGapClusters >= gMaxnECALGapClusters){
+           edm::LogWarning("NTP") << "@SUB=analyze()"
+                                  << "More than " << static_cast<int>(gMaxnECALGapClusters) 
+                                  << " ECAL GAP Clusters!!";
+	   break;
+	}
+     }
+  }
+  // EE
+  for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EE.size(); ++i) {
+     BoundaryInformation bInfo = anomalousECALvars.v_enNeighboursGap_EE[i];
+     if (bInfo.boundaryEnergy > maxGapBoundaryEnergy){
+        fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
+	fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
+	fTnECALGapClusters++;
+	if(fTnECALGapClusters >= gMaxnECALGapClusters){
+           edm::LogWarning("NTP") << "@SUB=analyze()"
+                                  << "More than " << static_cast<int>(gMaxnECALGapClusters) 
+                                  << " ECAL GAP Clusters!!";
+           break;
+	}
+     }
+  }
 
-  
-  
   // Retrieve HB/HE noise flag
   edm::Handle<bool> hbHeNoiseFlag;
   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
@@ -1668,6 +1706,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
   fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
   fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
+  fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
+  fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/D");
+  fEventTree->Branch("EcalGapClusterSize",&fTEcalGapClusterSize,"EcalGapClusterSize[NECALGapClusters]/I");
 
   // Gen-Leptons
   fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
@@ -2220,7 +2261,11 @@ void NTupleProducer::resetTree(){
   fTbeamspotz         = -999.99;
   fTNCaloTowers       = -999;
   fTHBHENoiseFlag     = -999;
+  
   fTEcalDeadCellBEFlag= -999;
+  fTnECALGapClusters  = 0;
+  resetDouble(fTEcalGapBE, gMaxnECALGapClusters);
+  resetInt   (fTEcalGapClusterSize, gMaxnECALGapClusters);
 
   resetDouble(fTvrtxx,     gMaxnvrtx);
   resetDouble(fTvrtxy,     gMaxnvrtx);
