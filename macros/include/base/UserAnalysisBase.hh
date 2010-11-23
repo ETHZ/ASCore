@@ -40,9 +40,10 @@ public:
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
+	virtual bool IsGoodBasicPFJet(int);
 	virtual bool IsGoodBasicPFJet(int, bool);
-        virtual bool IsGoodPFJetMedium(int, bool);
-        virtual bool IsGoodPFJetTight(int, bool);
+	virtual bool IsGoodPFJetMedium(int, bool);
+	virtual bool IsGoodPFJetTight(int, bool);
 	virtual bool IsGoodJ_TDL(int);
 	virtual bool IsGoodbJ_TDL(int);
 
@@ -76,17 +77,16 @@ public:
 	virtual bool IsGoodBasicPho(int);
 
 	// Event Selectors
-	virtual bool isGoodBasicPrimaryVertex();
 	virtual bool IsGoodEvent();
 	virtual bool IsGoodMuEvent();
 	virtual bool IsGoodElEvent();
 	virtual bool IsGoodElFakesEvent();
 	virtual bool IsGoodHadronicEvent();
-	virtual vector<int> MuonSelection();
-	virtual vector<int> ElectronSelection();
-	virtual vector<int> PhotonSelection();
-	virtual vector<int> JetSelection();
-	virtual vector<int> PFJetSelection();
+	virtual vector<int> MuonSelection(    bool(UserAnalysisBase::*muonSelector)(int) = NULL);
+	virtual vector<int> ElectronSelection(bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+	virtual vector<int> PhotonSelection(  bool(UserAnalysisBase::*phoSelector)(int) = NULL);
+	virtual vector<int> JetSelection(     bool(UserAnalysisBase::*jetSelector)(int) = NULL);
+	virtual vector<int> PFJetSelection(   bool(UserAnalysisBase::*pfjetSelector)(int) = NULL);
 	virtual bool SingleMuonSelection(int&);
 	virtual bool DiMuonSelection(int&, int&, int = 0);
 	virtual bool SSDiMuonSelection(int &, int&);	

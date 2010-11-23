@@ -108,7 +108,63 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	}
 }
 
+void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
+// Computes the event EM and Charged fractions
+
+	int nMuGood = 0;
+	double pt_mu = 0.;
+	double pt_track = 0.;
+	double et_em = 0.;
+	double et_had = 0.;
+	for( int i = 0; i < fTR->NMus; ++i ){
+		if(fTR->MuGood[i] != 0) continue;
+		pt_mu += fTR->MuPt[i];
+		pt_track += fTR->MuPt[i];
+		nMuGood++;
+	}
+	for( int i = 0; i < fTR->NEles; ++i ){
+		if(fTR->ElGood[i] != 0) continue;
+		pt_track += fTR->ElPt[i];
+		double em = fTR->ElEt[i];
+		if (em < 0.) em = 0.;
+		et_em += em;
+	}
+	for( int i = 0; i < fTR->NPhotons; ++i ){
+		if(fTR->PhoGood[i] != 0) continue;
+		double em = fTR->PhoPt[i];
+		if (em < 0.) em = 0.;
+		et_em += em;
+	}
+	for( int i = 0; i < fTR->NJets; ++i ){
+		if(fTR->JGood[i] != 0) continue;
+		double pt = fTR->JChfrac[i] * fTR->JPt[i];
+		if (pt < 0.) pt = 0.;
+		double em = fTR->JEMfrac[i] * fTR->JEt[i];
+		if (em < 0.) em = 0.;
+		double had = fTR->JEt[i] - em;
+		if (had < 0.) had = 0.;
+		pt_track += pt;
+		et_em    += em;
+		et_had   += had;
+	}
+
+	fracCh = 0.;
+	fracEm = 0.;
+	if( et_em + et_had <= 0. ){
+		if( nMuGood < 1 ) return;
+		fracCh = 1.;
+		fracEm = 1.;
+	} else {
+		fracCh = pt_track / (et_em + et_had + pt_mu);
+		fracEm = et_em / (et_em + et_had + pt_mu);
+	}
+	return;
+
+}
+
+///////////////////////////////////////////////////////////////
 // Object selections:
+// JETS
 bool UserAnalysisBase::IsGoodJ_TDL(int index) {
 	if( fTR->JPt[index] < 30. ) 			return false;
 	if( fabs(fTR->JEta[index]) > 2.5 ) 		return false;
@@ -126,6 +182,11 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 	return true;
 }
 
+bool UserAnalysisBase::IsGoodBasicPFJet(int index){
+	// This is a 'manual default argument overload'
+	// I.e. PFJetSelection can use this as a default selector
+	return IsGoodBasicPFJet(index, true);
+}
 bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	// Basic PF jet cleaning and ID cuts
 	if(doSel && fTR->PFJPt[index] < 30) return false;
@@ -181,6 +242,7 @@ bool UserAnalysisBase::IsGoodBasicJet(int index){
 	return true;
 }
 
+// MUONS
 bool UserAnalysisBase::IsGoodBasicMu(int index){
 	// Basic muon cleaning and ID
 	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
@@ -236,6 +298,7 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 	else return false;
 }
 
+// ELECTRONS
 bool UserAnalysisBase::IsGoodEl_TDL(int index){
 	// ---- electron selection from Top-Dilepton group  ----
 	// ---- El id WP90
@@ -561,6 +624,7 @@ bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
 	return true;
 }
 
+// PHOTONS
 bool UserAnalysisBase::IsGoodBasicPho(int index){
 	// Basic photon cleaning / ID cuts (to be completed)
 
@@ -599,37 +663,8 @@ bool UserAnalysisBase::IsGoodBasicPho(int index){
 	return true;
 }
 
+///////////////////////////////////////////////////////////////
 // Event selections:
-bool UserAnalysisBase::isGoodBasicPrimaryVertex(void){
-	// Basic primary vertex check
-	// (corresponding to TLeptonJEts recommendation)
-	
-	double	dzVxmax			= 24;
-	double	dRVxmax			= 2.;
-	int		PrimVtxNdofmin	= 5;
-	double	chisqVxmax		= 5.0;
-	double	sumPtTkfromVxmin= 30.0;
-	
-	// Check if the reconstructed primary vertex is fake
-	if ( fTR->PrimVtxIsFake )	return false;	
-	// Check that there are tracks at the Primary Vertex
-	if ( fTR->PrimVtxNdof < PrimVtxNdofmin )	return false;
-	// Check the chi2/ndof
-	if( fTR->PrimVtxNChi2 > chisqVxmax || fTR->PrimVtxNChi2 < 0. ) return false;
-	
-	// Check compatibility of vertex with beam spot
-	double xVx = fTR->PrimVtxx - fTR->Beamspotx;
-	double yVx = fTR->PrimVtxy - fTR->Beamspoty;
-	double zVx = fTR->PrimVtxz - fTR->Beamspotz;
-	double rVx = sqrt(xVx*xVx + yVx*yVx);	
-	if (rVx > dRVxmax || fabs(zVx) > dzVxmax) return false;
-	
-	// Check that there is sufficient Et in the tracks
-	if( fTR->PrimVtxPtSum < sumPtTkfromVxmin ) return false;
-	
-	return true;
-}
-
 bool UserAnalysisBase::IsGoodEvent(){
 	// Some cuts on the primary vertex
 	double pvx = fTR->PrimVtxx;
@@ -816,15 +851,17 @@ bool UserAnalysisBase::IsGoodHadronicEvent(){
 			HLT_Mu5_Ele5     || HLT_Mu3_Ele8_HT70U_v1);
 }
 
-vector<int> UserAnalysisBase::ElectronSelection(){
+vector<int> UserAnalysisBase::ElectronSelection(bool(UserAnalysisBase::*eleSelector)(int)){
 	// Returns the vector of indices of
 	// good electrons sorted by Pt
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsLooseEl;
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NEles; ++ind){
 		// selection
-		if(!IsLooseEl(ind)) continue;
+		if((*this.*eleSelector)(ind) == false) continue;
+
 		// kinematic cuts
 		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
 		if(fTR->ElPt[ind] < 10.) continue;
@@ -837,15 +874,17 @@ vector<int> UserAnalysisBase::ElectronSelection(){
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-vector<int> UserAnalysisBase::JetSelection(){
+vector<int> UserAnalysisBase::JetSelection(bool(UserAnalysisBase::*jetSelector)(int)){
 	// Returns the vector of indices of
 	// good jets sorted by Pt
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
+	if(jetSelector == NULL) jetSelector = &UserAnalysisBase::IsGoodBasicJet;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
-		if(!IsGoodBasicJet(ind)) continue;
+		if((*this.*jetSelector)(ind) == false) continue;
+
 		// additional kinematic cuts
 		if(fabs(fTR->JEta[ind]) > 2.5) continue;
 		
@@ -855,15 +894,16 @@ vector<int> UserAnalysisBase::JetSelection(){
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-vector<int> UserAnalysisBase::PFJetSelection(){
+vector<int> UserAnalysisBase::PFJetSelection(bool(UserAnalysisBase::*pfjetSelector)(int)){
 	// Returns the vector of indices of
 	// good jets sorted by Pt
+	if(pfjetSelector == NULL) pfjetSelector = &UserAnalysisBase::IsGoodBasicPFJet;
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
-		if(!IsGoodBasicPFJet(ind)) continue;
+		if((*this.*pfjetSelector)(ind) == false) continue;
 		// additional kinematic cuts
 		if(fabs(fTR->PFJEta[ind]) > 2.5) continue;
 
@@ -873,15 +913,16 @@ vector<int> UserAnalysisBase::PFJetSelection(){
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-vector<int> UserAnalysisBase::PhotonSelection(){
+vector<int> UserAnalysisBase::PhotonSelection(bool(UserAnalysisBase::*phoSelector)(int)){
 	// Returns the vector of indices of
 	// good photons sorted by Pt
+	if(phoSelector == NULL) phoSelector = &UserAnalysisBase::IsGoodBasicPho;
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NPhotons; ++ind){
 		// selection
-		if(!IsGoodBasicPho(ind)) continue;
+		if((*this.*phoSelector)(ind) == false) continue;
 		if(fTR->PhoIsElDupl[ind] >= 0) continue;
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->PhoPt[ind]);
@@ -889,15 +930,16 @@ vector<int> UserAnalysisBase::PhotonSelection(){
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-vector<int> UserAnalysisBase::MuonSelection(){
+vector<int> UserAnalysisBase::MuonSelection(bool(UserAnalysisBase::*muonSelector)(int)){
 	// Returns the vector of indices of
 	// good muons sorted by Pt
+	if(muonSelector == NULL) muonSelector = &UserAnalysisBase::IsGoodBasicMu;
 	vector<int>	selectedObjInd;
 	vector<double>	selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NMus; ++ind){
 		// selection
-		if(!IsGoodBasicMu(ind)) continue;
+		if((*this.*muonSelector)(ind) == false) continue;
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->MuPt[ind]);
 	}	
@@ -992,8 +1034,8 @@ bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
 	return DiMuonSelection(prim, sec, 1);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-// Cut Stuff //////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+// Cut Stuff
 void UserAnalysisBase::ReadObjCuts(const char* filename){
 // Fills the vectors containing object quality cuts for muons, electrons and jets
 	ifstream IN(filename);
@@ -1304,59 +1346,5 @@ void UserAnalysisBase::EventPrint() {
       cout << " Inv. mass (phot" << i << ", phot" << j << ") = " << minv << endl;
     }
   }
-
-}
-
-void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
-// Computes the event EM and Charged fractions
-
-	int nMuGood = 0;
-	double pt_mu = 0.;
-	double pt_track = 0.;
-	double et_em = 0.;
-	double et_had = 0.;
-	for( int i = 0; i < fTR->NMus; ++i ){
-		if(fTR->MuGood[i] != 0) continue;
-		pt_mu += fTR->MuPt[i];
-		pt_track += fTR->MuPt[i];
-		nMuGood++;
-	}
-	for( int i = 0; i < fTR->NEles; ++i ){
-		if(fTR->ElGood[i] != 0) continue;
-		pt_track += fTR->ElPt[i];
-		double em = fTR->ElEt[i];
-		if (em < 0.) em = 0.;
-		et_em += em;
-	}
-	for( int i = 0; i < fTR->NPhotons; ++i ){
-		if(fTR->PhoGood[i] != 0) continue;
-		double em = fTR->PhoPt[i];
-		if (em < 0.) em = 0.;
-		et_em += em;
-	}
-	for( int i = 0; i < fTR->NJets; ++i ){
-		if(fTR->JGood[i] != 0) continue;
-		double pt = fTR->JChfrac[i] * fTR->JPt[i];
-		if (pt < 0.) pt = 0.;
-		double em = fTR->JEMfrac[i] * fTR->JEt[i];
-		if (em < 0.) em = 0.;
-		double had = fTR->JEt[i] - em;
-		if (had < 0.) had = 0.;
-		pt_track += pt;
-		et_em    += em;
-		et_had   += had;
-	}
-
-	fracCh = 0.;
-	fracEm = 0.;
-	if( et_em + et_had <= 0. ){
-		if( nMuGood < 1 ) return;
-		fracCh = 1.;
-		fracEm = 1.;
-	} else {
-		fracCh = pt_track / (et_em + et_had + pt_mu);
-		fracEm = et_em / (et_em + et_had + pt_mu);
-	}
-	return;
 
 }
