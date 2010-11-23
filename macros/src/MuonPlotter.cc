@@ -16,18 +16,18 @@
 
 using namespace std;
 
-int gSWITCH = 0; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
+int gSWITCH = 1; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
 
 // Binning ///////////////////////////////////////////////////////////////////////
-static const int gNPtbins = 5;
-static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 65., 80.};
-static const int gNPt2bins = 6;
-static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 65., 80.};
+// static const int gNPtbins = 5;
+// static const double gPtbins[gNPtbins+1] = {20., 30., 40., 50., 65., 80.};
+// static const int gNPt2bins = 6;
+// static const double gPt2bins[gNPt2bins+1] = {10., 20., 30., 40., 50., 65., 80.};
 
-// static const int gNPtbins = 7;
-// static const double gPtbins[gNPtbins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
-// static const int gNPt2bins = 7;
-// static const double gPt2bins[gNPt2bins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
+static const int gNPtbins = 7;
+static const double gPtbins[gNPtbins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
+static const int gNPt2bins = 7;
+static const double gPt2bins[gNPt2bins+1] = {5., 10., 20., 30., 40., 50., 65., 80.};
 
 static const int gNEtabins = 1;
 static const double gEtabins[gNEtabins+1] = {-2.4, 2.4};
@@ -182,20 +182,19 @@ void MuonPlotter::loadSamples(const char* filename){
 
 //____________________________________________________________________________
 void MuonPlotter::makePlots(){
-	if(readHistos(fOutputFileName) != 0) return;
+	// if(readHistos(fOutputFileName) != 0) return;
 	
 	// float scale = fSamples[MuA].lumi + fSamples[MuB].lumi;
 	fLumiNorm = 35.;
 	// printYields(Muon);
 	// printYields(Electron);
 	// printYields(EMu);
-	printYields(Muon,     fLumiNorm);
-	printYields(Electron, fLumiNorm);
-	printYields(EMu,      fLumiNorm);
+	// printYields(Muon,     fLumiNorm);
+	// printYields(Electron, fLumiNorm);
+	// printYields(EMu,      fLumiNorm);
 
-	makeIntPrediction(Muon);
-	makeIntPrediction(Electron);
-	makeIntPrediction(EMu);
+	// makeIntPrediction(fOutputDir + "Yields.txt");
+	testFPRatios(0.05, 0.95, 0.05, 0.995, 13, 54, 32, 1130);
 
 	// makefRatioPlots();
 	// makepRatioPlots();
@@ -1387,43 +1386,352 @@ void MuonPlotter::NObs(TH1D *&hist, vector<int> samples){
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPrediction(gChannel chan){
-	vector<int> samples;
-	if(chan == Muon){
-		if(gSWITCH == 0) samples = fMuData;
-		if(gSWITCH == 1) samples = fJMData;
-		makeIntPredictionMuMu(samples);
+void MuonPlotter::makeIntPrediction(TString filename){
+	ofstream OUT(filename.Data(), ios::trunc);
+
+	vector<int> musamples;
+	vector<int> elsamples;
+	vector<int> emusamples;
+
+	if(gSWITCH == 0){
+		musamples = fMuData;
+		elsamples = fEGData;
+		emusamples.push_back(MuA);
+		emusamples.push_back(MuB);
+		emusamples.push_back(EGA);
+		emusamples.push_back(EGB);
 	}
-	if(chan == Electron){
-		if(gSWITCH == 0) samples = fEGData;
-		if(gSWITCH == 1) samples = fJMData;
-		makeIntPredictionEE(samples);
+	if(gSWITCH == 1){
+		musamples  = fJMData;
+		elsamples  = fJMData;
+		emusamples = fJMData;
 	}
-	if(chan == EMu){
-		if(gSWITCH == 0){
-			samples.push_back(MuA);
-			samples.push_back(MuB);
-			samples.push_back(EGA);
-			samples.push_back(EGB);
-		}
-		if(gSWITCH == 1) samples = fJMData;
-		makeIntPredictionEMu(samples);
-	}
+
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << " Producing integrated predictions" << endl << endl;
+
+	// Dummy binning
+	const int nptbins = 1;
+	const double ptbins[nptbins+1] = {5., 1000.};
+	const int netabins = 1;
+	const double etabins[netabins+1] = {-2.5, 2.5};
+
+	// Fill the ratios
+	TH2D *H_mu_fratio_allmc = new TH2D("MufRatioAllMC", "fRatio for all MC",  nptbins, ptbins, netabins, etabins);
+	TH2D *H_mu_fratio_data  = new TH2D("MufRatioData",  "fRatio for Mu Data", nptbins, ptbins, netabins, etabins);
+	TH2D *H_mu_pratio_allmc = new TH2D("MupRatioAllMC", "pRatio for all MC",  nptbins, ptbins, netabins, etabins);
+	TH2D *H_mu_pratio_data  = new TH2D("MupRatioData",  "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
+	TH2D *H_el_fratio_allmc = new TH2D("ElfRatioAllMC", "fRatio for all MC",  nptbins, ptbins, netabins, etabins);
+	TH2D *H_el_fratio_data  = new TH2D("ElfRatioData",  "fRatio for Mu Data", nptbins, ptbins, netabins, etabins);
+	TH2D *H_el_pratio_allmc = new TH2D("ElpRatioAllMC", "pRatio for all MC",  nptbins, ptbins, netabins, etabins);
+	TH2D *H_el_pratio_data  = new TH2D("ElpRatioData",  "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
+
+	float mufratio_allmc(0.), mufratio_allmc_e(0.);
+	float mufratio_data(0.),  mufratio_data_e(0.);
+	float mupratio_allmc(0.), mupratio_allmc_e(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.);
+	float elfratio_allmc(0.), elfratio_allmc_e(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.);
+	float elpratio_allmc(0.), elpratio_allmc_e(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.);
+
+	calculateRatio(fMCBG,   Muon, 1, mufratio_allmc, mufratio_allmc_e);
+	calculateRatio(fJMData, Muon, 1, mufratio_data,  mufratio_data_e);
+	calculateRatio(fMCBG,   Muon, 2, mupratio_allmc, mupratio_allmc_e);
+	calculateRatio(fMuData, Muon, 2, mupratio_data,  mupratio_data_e);
+
+	calculateRatio(fMCBG,   Electron, 1, elfratio_allmc, elfratio_allmc_e);
+	if(gSWITCH == 0) calculateRatio(fEGData, Electron, 1, elfratio_data,  elfratio_data_e);
+	if(gSWITCH == 1) calculateRatio(fJMData, Electron, 1, elfratio_data,  elfratio_data_e);
+	calculateRatio(fMCBG,   Electron, 2, elpratio_allmc, elpratio_allmc_e);
+	calculateRatio(fEGData, Electron, 2, elpratio_data,  elpratio_data_e);
+
+	H_mu_fratio_allmc->SetBinContent(1,1,mufratio_allmc);
+	H_mu_fratio_allmc->SetBinError  (1,1,mufratio_allmc_e);
+	H_mu_fratio_data ->SetBinContent(1,1,mufratio_data);
+	H_mu_fratio_data ->SetBinError  (1,1,mufratio_data_e);
+	H_el_fratio_allmc->SetBinContent(1,1,elfratio_allmc);
+	H_el_fratio_allmc->SetBinError  (1,1,elfratio_allmc_e);
+	H_el_fratio_data ->SetBinContent(1,1,elfratio_data);
+	H_el_fratio_data ->SetBinError  (1,1,elfratio_data_e);
+
+	H_mu_pratio_allmc->SetBinContent(1,1,mupratio_allmc);
+	H_mu_pratio_allmc->SetBinError  (1,1,mupratio_allmc_e);
+	H_mu_pratio_data ->SetBinContent(1,1,mupratio_data);
+	H_mu_pratio_data ->SetBinError  (1,1,mupratio_data_e);
+	H_el_pratio_allmc->SetBinContent(1,1,elpratio_allmc);
+	H_el_pratio_allmc->SetBinError  (1,1,elpratio_allmc_e);
+	H_el_pratio_data ->SetBinContent(1,1,elpratio_data);
+	H_el_pratio_data ->SetBinError  (1,1,elpratio_data_e);
+	
+
+	float nt2_mumu(0.),    nt10_mumu(0.),    nt0_mumu(0.);
+	float nt2_mumu_e2(0.), nt10_mumu_e2(0.), nt0_mumu_e2(0.);
+	float nt2_emu(0.),    nt10_emu(0.),    nt01_emu(0.),    nt0_emu(0.);
+	float nt2_emu_e2(0.), nt10_emu_e2(0.), nt01_emu_e2(0.), nt0_emu_e2(0.);	
+	float nt2_ee(0.),    nt10_ee(0.),    nt0_ee(0.);
+	float nt2_ee_e2(0.), nt10_ee_e2(0.), nt0_ee_e2(0.);
+	
+
+	for(size_t i = 0; i < musamples.size(); ++i){
+		int index = musamples[i];
+		// float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
+		float scale = 1.;
+		channel *mumu = &fSamples[index].mumu;
+		nt2_mumu  += scale * mumu->numbers.nt2;
+		nt10_mumu += scale * mumu->numbers.nt10;
+		nt0_mumu  += scale * mumu->numbers.nt0;
+		nt2_mumu_e2  += scale*scale * mumu->numbers.nt2;
+		nt10_mumu_e2 += scale*scale * mumu->numbers.nt10;
+		nt0_mumu_e2  += scale*scale * mumu->numbers.nt0;
+	}		
+	for(size_t i = 0; i < emusamples.size(); ++i){
+		int index = emusamples[i];
+		// float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
+		float scale = 1.;
+		channel *emu = &fSamples[index].emu;
+		nt2_emu  += scale * emu->numbers.nt2;
+		nt10_emu += scale * emu->numbers.nt10;
+		nt01_emu += scale * emu->numbers.nt01;
+		nt0_emu  += scale * emu->numbers.nt0;
+		nt2_emu_e2  += scale*scale * emu->numbers.nt2;
+		nt10_emu_e2 += scale*scale * emu->numbers.nt10;
+		nt01_emu_e2 += scale*scale * emu->numbers.nt01;
+		nt0_emu_e2  += scale*scale * emu->numbers.nt0;
+	}		
+	for(size_t i = 0; i < elsamples.size(); ++i){
+		int index = elsamples[i];
+		// float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
+		float scale = 1.;
+		channel *ee = &fSamples[index].ee;
+		nt2_ee  += scale * ee->numbers.nt2;
+		nt10_ee += scale * ee->numbers.nt10;
+		nt0_ee  += scale * ee->numbers.nt0;
+		nt2_ee_e2  += scale*scale * ee->numbers.nt2;
+		nt10_ee_e2 += scale*scale * ee->numbers.nt10;
+		nt0_ee_e2  += scale*scale * ee->numbers.nt0;
+	}		
+	
+	// Make predictions
+	FPRatios *fMuMuFPRatios = new FPRatios();
+	FPRatios *fEMuFPRatios  = new FPRatios();
+	FPRatios *fEEFPRatios   = new FPRatios();
+	fMuMuFPRatios->SetVerbose(fVerbose);
+	fEMuFPRatios ->SetVerbose(fVerbose);
+	fEEFPRatios  ->SetVerbose(fVerbose);
+
+	// MuMu Channel
+	fMuMuFPRatios->SetMuFratios(H_mu_fratio_data);
+	fMuMuFPRatios->SetMuPratios(H_mu_pratio_data);
+	// fMuMuFPRatios->SetMuFratios(H_mu_fratio_allmc);
+	// fMuMuFPRatios->SetMuPratios(H_mu_pratio_allmc);
+		
+	vector<double> nt_mumu;
+	nt_mumu.push_back(nt0_mumu);
+	nt_mumu.push_back(nt10_mumu); // mu passes
+	nt_mumu.push_back(nt2_mumu);
+	
+	fMuMuFPRatios->NevtTopol(0, 2, nt_mumu);
+
+	vector<double> vpt, veta;
+	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas (first electron then muon)
+	veta.push_back(0.); veta.push_back(0.);
+
+	vector<double> MuMu_nevFP      = fMuMuFPRatios->NevtPass(vpt, veta);
+	vector<double> MuMu_nevFPEstat = fMuMuFPRatios->NevtPassErrStat();
+	vector<double> MuMu_nevFPEsyst = fMuMuFPRatios->NevtPassErrSyst();
+	
+	// EMu Channel
+	fEMuFPRatios->SetMuFratios(H_mu_fratio_data);
+	fEMuFPRatios->SetMuPratios(H_mu_pratio_data);
+	fEMuFPRatios->SetElFratios(H_el_fratio_data);
+	fEMuFPRatios->SetElPratios(H_el_pratio_data);
+	// fEMuFPRatios->SetMuFratios(H_mu_fratio_allmc);
+	// fEMuFPRatios->SetMuPratios(H_mu_pratio_allmc);
+	// fEMuFPRatios->SetElFratios(H_el_fratio_allmc);
+	// fEMuFPRatios->SetElPratios(H_el_pratio_allmc);
+		
+	vector<double> nt_emu;
+	nt_emu.push_back(nt0_emu);
+	nt_emu.push_back(nt01_emu); // e passes
+	nt_emu.push_back(nt10_emu); // mu passes
+	nt_emu.push_back(nt2_emu);
+	
+	fEMuFPRatios->NevtTopol(1, 1, nt_emu);
+
+	vector<double> EMu_nevFP      = fEMuFPRatios->NevtPass(vpt, veta);
+	vector<double> EMu_nevFPEstat = fEMuFPRatios->NevtPassErrStat();
+	vector<double> EMu_nevFPEsyst = fEMuFPRatios->NevtPassErrSyst();
+	
+	// EE Channel
+	fEEFPRatios->SetElFratios(H_el_fratio_data);
+	fEEFPRatios->SetElPratios(H_el_pratio_data);
+	// fEEFPRatios->SetElFratios(H_el_fratio_allmc);
+	// fEEFPRatios->SetElPratios(H_el_pratio_allmc);
+		
+	vector<double> nt_ee;
+	nt_ee.push_back(nt0_ee);
+	nt_ee.push_back(nt10_ee); // mu passes
+	nt_ee.push_back(nt2_ee);
+	
+	fEEFPRatios->NevtTopol(2, 0, nt_ee);
+
+	vector<double> EE_nevFP      = fEEFPRatios->NevtPass(vpt, veta);
+	vector<double> EE_nevFPEstat = fEEFPRatios->NevtPassErrStat();
+	vector<double> EE_nevFPEsyst = fEEFPRatios->NevtPassErrSyst();
+	
+	OUT << "--------------------------------------------------------------------------------------------------" << endl;
+	OUT << "  RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
+	OUT << "--------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(10) << " allMC    ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
+	OUT << endl;
+	OUT << setw(10) << " data     ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_data  << " +/- " << setw(7) << setprecision(2) << mufratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_data  << " +/- " << setw(7) << setprecision(2) << mupratio_data_e  << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_data  << " +/- " << setw(7) << setprecision(2) << elfratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_data  << " +/- " << setw(7) << setprecision(2) << elpratio_data_e  << " ||";
+	OUT << endl;
+	OUT << "--------------------------------------------------------------------------------------------------" << endl << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "          ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+	OUT << "  YIELDS  ||   Nt2   |   Nt1   |   Nt0   ||   Nt2   |   Nt10  |   Nt01  |   Nt0   ||   Nt2   |   Nt1   |   Nt0   ||" << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	
+	float nt2sum_mumu(0.), nt10sum_mumu(0.), nt0sum_mumu(0.);
+	float nt2sum_emu(0.), nt10sum_emu(0.), nt01sum_emu(0.), nt0sum_emu(0.);
+	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
+	for(size_t i = 0; i < fMCBG.size(); ++i){
+		int index = fMCBG[i];
+		float scale = fLumiNorm / fSamples[index].lumi;
+		nt2sum_mumu  += scale*fSamples[index].mumu.numbers.nt2;
+		nt10sum_mumu += scale*fSamples[index].mumu.numbers.nt10;
+		nt0sum_mumu  += scale*fSamples[index].mumu.numbers.nt0;
+		nt2sum_emu   += scale*fSamples[index].emu .numbers.nt2;
+		nt10sum_emu  += scale*fSamples[index].emu .numbers.nt10;
+		nt01sum_emu  += scale*fSamples[index].emu .numbers.nt01;
+		nt0sum_emu   += scale*fSamples[index].emu .numbers.nt0;
+		nt2sum_ee    += scale*fSamples[index].ee  .numbers.nt2;
+		nt10sum_ee   += scale*fSamples[index].ee  .numbers.nt10;
+		nt0sum_ee    += scale*fSamples[index].ee  .numbers.nt0;
+
+		OUT << setw(9) << fSamples[index].sname << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].mumu.numbers.nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].mumu.numbers.nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].mumu.numbers.nt0  << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].emu.numbers.nt2   << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].emu.numbers.nt10  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].emu.numbers.nt01  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].emu.numbers.nt0   << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].ee.numbers.nt2    << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].ee.numbers.nt10   << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*fSamples[index].ee.numbers.nt0    << " || ";
+		OUT << endl;
+	}	
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(9) << "MC sum" << " || ";
+	OUT << setw(7) << setprecision(2) << nt2sum_mumu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt10sum_mumu << " | ";
+	OUT << setw(7) << setprecision(2) << nt0sum_mumu  << " || ";
+	OUT << setw(7) << setprecision(2) << nt2sum_emu   << " | ";
+	OUT << setw(7) << setprecision(2) << nt10sum_emu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt01sum_emu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt0sum_emu   << " || ";
+	OUT << setw(7) << setprecision(2) << nt2sum_ee    << " | ";
+	OUT << setw(7) << setprecision(2) << nt10sum_ee   << " | ";
+	OUT << setw(7) << setprecision(2) << nt0sum_ee    << " || ";
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(9) << fSamples[LM0].sname << " || ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt2  << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt10 << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt0  << " || ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].emu .numbers.nt2  << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].emu .numbers.nt10 << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].emu .numbers.nt01 << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].emu .numbers.nt0  << " || ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].ee  .numbers.nt2  << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].ee  .numbers.nt10 << " | ";
+	OUT << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].ee  .numbers.nt0  << " || ";
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(9) << "data"  << " || ";
+	OUT << setw(7) << setprecision(2) << nt2_mumu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt10_mumu << " | ";
+	OUT << setw(7) << setprecision(2) << nt0_mumu  << " || ";
+	OUT << setw(7) << setprecision(2) << nt2_emu   << " | ";
+	OUT << setw(7) << setprecision(2) << nt10_emu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt01_emu  << " | ";
+	OUT << setw(7) << setprecision(2) << nt0_emu   << " || ";
+	OUT << setw(7) << setprecision(2) << nt2_ee    << " | ";
+	OUT << setw(7) << setprecision(2) << nt10_ee   << " | ";
+	OUT << setw(7) << setprecision(2) << nt0_ee    << " || ";
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << endl;
+	OUT << "  PREDICTIONS" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " Mu/Mu Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << MuMu_nevFP[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_nevFPEstat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_nevFPEsyst[0] << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << MuMu_nevFP[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_nevFPEstat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_nevFPEsyst[1] << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << MuMu_nevFP[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_nevFPEstat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_nevFPEsyst[2] << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << MuMu_nevFP[1]+MuMu_nevFP[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(MuMu_nevFPEstat[1]*MuMu_nevFPEstat[1] + MuMu_nevFPEstat[2]*MuMu_nevFPEstat[2]);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(MuMu_nevFPEsyst[1]*MuMu_nevFPEsyst[1] + MuMu_nevFPEsyst[2]*MuMu_nevFPEsyst[2]) << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/Mu Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << EMu_nevFP[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_nevFPEstat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_nevFPEsyst[0] << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EMu_nevFP[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_nevFPEstat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_nevFPEsyst[1] << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << EMu_nevFP[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_nevFPEstat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_nevFPEsyst[2] << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << EMu_nevFP[3];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_nevFPEstat[3];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_nevFPEsyst[3] << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << EMu_nevFP[1]+EMu_nevFP[2]+EMu_nevFP[3];
+	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(EMu_nevFPEstat[1]*EMu_nevFPEstat[1] + EMu_nevFPEstat[2]*EMu_nevFPEstat[2] + EMu_nevFPEstat[3]*EMu_nevFPEstat[3]);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(EMu_nevFPEsyst[1]*EMu_nevFPEsyst[1] + EMu_nevFPEsyst[2]*EMu_nevFPEsyst[2] + EMu_nevFPEsyst[3]*EMu_nevFPEsyst[3]) << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/E Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << EE_nevFP[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EE_nevFPEstat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EE_nevFPEsyst[0] << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EE_nevFP[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EE_nevFPEstat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EE_nevFPEsyst[1] << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << EE_nevFP[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EE_nevFPEstat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EE_nevFPEsyst[2] << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << EE_nevFP[1]+EE_nevFP[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(EE_nevFPEstat[1]*EE_nevFPEstat[1] + EE_nevFPEstat[2]*EE_nevFPEstat[2]);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(EE_nevFPEsyst[1]*EE_nevFPEsyst[1] + EE_nevFPEsyst[2]*EE_nevFPEsyst[2]) << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+
+	OUT.close();
+	delete fMuMuFPRatios;
+	delete fEMuFPRatios;
+	delete fEEFPRatios;
 }
 
 //____________________________________________________________________________
 void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
-	cout << "-----------------------------------" << endl;
+	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	cout << " Producing prediction for MuMu channel" << endl << endl;
 	bool data = true; // Use ratios from data or mc?
-
-	// Which samples to use for nt2/nt1/nt0 input?
-	// vector<int> inputsamples = fMCBG;
-	// vector<int> inputsamples = fMCBGSig;
-	// vector<int> inputsamples = fMuData;
-
-	// Which luminosity to use?
-	// fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
 
 	// Dummy binning
 	const int nptbins = 1;
@@ -1468,15 +1776,6 @@ void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 	H_pratio_data ->SetBinContent(1,1,pratio_data);
 	H_pratio_data ->SetBinError  (1,1,pratio_data_e);
 
-	cout << "  fRatio from all MC         = " << fratio_allmc << " +/- " << fratio_allmc_e << endl;
-	cout << "  fRatio from ttbar genmatch = " << fratio_ttbar << " +/- " << fratio_ttbar_e << endl;
-	cout << "  fRatio from data           = " << fratio_data  << " +/- " << fratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-	cout << "  pRatio from all MC         = " << pratio_allmc << " +/- " << pratio_allmc_e << endl;
-	cout << "  pRatio from ttbar genmatch = " << pratio_ttbar << " +/- " << pratio_ttbar_e << endl;
-	cout << "  pRatio from data           = " << pratio_data  << " +/- " << pratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-
 	// Add systematics to ratios
 	float deviation(0.), olderror(0.), newerror(0.);
 	deviation = fabs(fratio_allmc - fratio_ttbar);
@@ -1490,8 +1789,6 @@ void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 	newerror = sqrt(olderror*olderror + deviation*deviation);
 	H_fratio_data->SetBinError(1,1,newerror);
 	fratio_data_e = newerror;
-	cout << "  new fRatio (all MC)        = " << H_fratio_allmc->GetBinContent(1,1) << " +/- " << H_fratio_allmc->GetBinError(1,1) << endl;
-	cout << "  new fRatio (data)          = " << H_fratio_data ->GetBinContent(1,1) << " +/- " << H_fratio_data ->GetBinError(1,1) << endl;
 
 	deviation  = fabs(pratio_allmc - pratio_ttbar);
 	// Add to mc ratios
@@ -1504,9 +1801,6 @@ void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 	newerror = sqrt(olderror*olderror + deviation*deviation);
 	H_pratio_data->SetBinError(1,1,newerror);
 	pratio_data_e = newerror;
-	cout << "  new pRatio (all MC)        = " << H_pratio_allmc->GetBinContent(1,1) << " +/- " << H_pratio_allmc->GetBinError(1,1) << endl;
-	cout << "  new pRatio (data)          = " << H_pratio_data ->GetBinContent(1,1) << " +/- " << H_pratio_data ->GetBinError(1,1) << endl;
-	cout << " ------------------------------------" << endl;
 
 	double nt2(0.), nt1(0.), nt0(0.);
 	double nt2_e2(0.), nt1_e2(0.), nt0_e2(0.);
@@ -1522,17 +1816,6 @@ void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 		nt1_e2 += scale*scale * cha.numbers.nt10;
 		nt0_e2 += scale*scale * cha.numbers.nt0;
 	}
-	if(data){
-		cout << "  Found " << nt2 << " events in Nt2" << endl;
-		cout << "  Found " << nt1 << " events in Nt1" << endl;
-		cout << "  Found " << nt0 << " events in Nt0" << endl;
-	}
-	if(!data){
-		cout << "  Found " << nt2 << " +/- " << TMath::Sqrt(nt2_e2) << " events in Nt2" << endl;
-		cout << "  Found " << nt1 << " +/- " << TMath::Sqrt(nt1_e2) << " events in Nt1" << endl;
-		cout << "  Found " << nt0 << " +/- " << TMath::Sqrt(nt0_e2) << " events in Nt0" << endl;		
-	}
-	cout << " ------------------------------------" << endl;
 
 	// Make prediction
 	FPRatios *fFPRatios = new FPRatios();
@@ -1557,208 +1840,82 @@ void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
 	vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
 	vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
 
-	cout << "  Prediction for Npp: " << nevFP[0] << " +/- " << nevFPEstat[0] << " (stat) +/- " << nevFPEsyst[0] << " (syst)" << endl;
-	cout << "  Prediction for Nfp: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
-	cout << "  Prediction for Nff: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
-	cout << "  Total fakes:        " << nevFP[1]+nevFP[2] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2])<< " (syst)" << endl;
-	cout << " ------------------------------------" << endl;
-
-	// Get observation
-	// TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins", nptbins, ptbins);
-	// NObs(H_nsigobs, inputsamples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
-
-	// cout << "  Observation from LM0:      " << H_nsigobs->GetBinContent(1) << " +/- " << H_nsigobs->GetBinError(1) << endl;
-	cout << "  Nt2 observed (TTbar only):  " << fLumiNorm/fSamples[TTbar].lumi *fSamples[TTbar].mumu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (VVjets only): " << fLumiNorm/fSamples[VVJets].lumi*fSamples[VVJets].mumu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Wjets only):  " << fLumiNorm/fSamples[WJets].lumi *fSamples[WJets].mumu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Zjets only):  " << fLumiNorm/fSamples[ZJets].lumi *fSamples[ZJets].mumu.numbers.nt2 << endl;
-	float nt2qcd = fLumiNorm/fSamples[QCD15].lumi*fSamples[QCD15].mumu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD30].lumi*fSamples[QCD30].mumu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD80].lumi*fSamples[QCD80].mumu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].mumu.numbers.nt2;
-	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
-	cout << " ------------------------------------" << endl;
-	delete fFPRatios;
-}
-
-//____________________________________________________________________________
-void MuonPlotter::makeIntPredictionEE(vector<int> inputsamples){
-	cout << "-----------------------------------" << endl;
-	cout << " Producing prediction for EE channel" << endl << endl;
-	bool data = true; // Use ratios from data or mc?
-
-	// Which samples to use for nt2/nt1/nt0 input?
-	// vector<int> inputsamples = fMCBG;
-	// vector<int> inputsamples = fMCBGSig;
-	// vector<int> inputsamples = fEGData;
-
-	// Which luminosity to use?
-	// fLumiNorm = fSamples[MuA].lumi + fSamples[MuB].lumi;
-
-	// Dummy binning
-	const int nptbins = 1;
-	const double ptbins[nptbins+1] = {5., 1000.};
-	const int netabins = 1;
-	const double etabins[netabins+1] = {-2.5, 2.5};
-
-	// Fill the ratios
-	TH2D *H_el_fratio_allmc = new TH2D("ElfRatioAllMC", "fRatio for all MC", nptbins, ptbins, netabins, etabins);
-	TH2D *H_el_fratio_data  = new TH2D("ElfRatioData",  "fRatio for Mu Data", nptbins, ptbins, netabins, etabins);
-	TH2D *H_el_pratio_allmc = new TH2D("ElpRatioAllMC", "pRatio for all MC", nptbins, ptbins, netabins, etabins);
-	TH2D *H_el_pratio_data  = new TH2D("ElpRatioData",  "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
-
-	// TH2D *H_fratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isFakeTTbarMuon, nptbins, ptbins, netabins, etabins);
-	// TH2D *H_pratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isPromptTTbarMuon, nptbins, ptbins, netabins, etabins);
-	// H_fratio_ttbar->SetName("fRatioTTbar");
-	// H_pratio_ttbar->SetName("pRatioTTbar");
-
-	float elfratio_allmc(0.), elfratio_allmc_e(0.);
-	float elfratio_data(0.),  elfratio_data_e(0.);
-	float elpratio_allmc(0.), elpratio_allmc_e(0.);
-	float elpratio_data(0.),  elpratio_data_e(0.);
-
-	// float fratio_ttbar   = H_fratio_ttbar->GetBinContent(1,1);
-	// float fratio_ttbar_e = H_fratio_ttbar->GetBinError(1,1);
-
-	// float pratio_ttbar   = H_pratio_ttbar->GetBinContent(1,1);
-	// float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
-
-	calculateRatio(fMCBG,   Electron, 1, elfratio_allmc, elfratio_allmc_e);
-	if(gSWITCH == 0) calculateRatio(fEGData, Electron, 1, elfratio_data,  elfratio_data_e);
-	if(gSWITCH == 1) calculateRatio(fJMData, Electron, 1, elfratio_data,  elfratio_data_e);
-	calculateRatio(fMCBG,   Electron, 2, elpratio_allmc, elpratio_allmc_e);
-	calculateRatio(fEGData, Electron, 2, elpratio_data,  elpratio_data_e);
-
-	H_el_fratio_allmc->SetBinContent(1,1,elfratio_allmc);
-	H_el_fratio_allmc->SetBinError  (1,1,elfratio_allmc_e);
-	H_el_fratio_data ->SetBinContent(1,1,elfratio_data);
-	H_el_fratio_data ->SetBinError  (1,1,elfratio_data_e);
-
-	H_el_pratio_allmc->SetBinContent(1,1,elpratio_allmc);
-	H_el_pratio_allmc->SetBinError  (1,1,elpratio_allmc_e);
-	H_el_pratio_data ->SetBinContent(1,1,elpratio_data);
-	H_el_pratio_data ->SetBinError  (1,1,elpratio_data_e);
-
-	cout << "  Electron fRatio from all MC     = " << elfratio_allmc << " +/- " << elfratio_allmc_e << endl;
-	// cout << "  fRatio from ttbar genmatch = " << elfratio_ttbar << " +/- " << elfratio_ttbar_e << endl;
-	cout << "  Electron fRatio from data       = " << elfratio_data  << " +/- " << elfratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-	cout << "  Electron pRatio from all MC     = " << elpratio_allmc << " +/- " << elpratio_allmc_e << endl;
-	// cout << "  pRatio from ttbar genmatch = " << elpratio_ttbar << " +/- " << elspratio_ttbar_e << endl;
-	cout << "  Electron pRatio from data       = " << elpratio_data  << " +/- " << elpratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-
-	// // Add systematics to ratios
-	// float deviation(0.), olderror(0.), newerror(0.);
-	// deviation = fabs(fratio_allmc - fratio_ttbar);
-	// // Add to mc ratios
-	// olderror = H_fratio_allmc->GetBinError(1,1);
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_fratio_allmc->SetBinError(1,1,newerror);
-	// fratio_allmc_e = newerror;
-	// // Add to data ratios
-	// olderror = H_fratio_data->GetBinError(1,1);
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_fratio_data->SetBinError(1,1,newerror);
-	// fratio_data_e = newerror;
-	// cout << "  new fRatio (all MC)        = " << H_fratio_allmc->GetBinContent(1,1) << " +/- " << H_fratio_allmc->GetBinError(1,1) << endl;
-	// cout << "  new fRatio (data)          = " << H_fratio_data ->GetBinContent(1,1) << " +/- " << H_fratio_data ->GetBinError(1,1) << endl;
-	// 
-	// deviation  = fabs(pratio_allmc - pratio_ttbar);
-	// // Add to mc ratios
-	// olderror = pratio_allmc_e;
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_pratio_allmc->SetBinError(1,1,newerror);
-	// pratio_allmc_e = newerror;
-	// // Add to data ratios
-	// olderror = pratio_data_e;
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_pratio_data->SetBinError(1,1,newerror);
-	// pratio_data_e = newerror;
-	// cout << "  new pRatio (all MC)        = " << H_pratio_allmc->GetBinContent(1,1) << " +/- " << H_pratio_allmc->GetBinError(1,1) << endl;
-	// cout << "  new pRatio (data)          = " << H_pratio_data ->GetBinContent(1,1) << " +/- " << H_pratio_data ->GetBinError(1,1) << endl;
-	// cout << " ------------------------------------" << endl;
-
-	double nt2(0.),    nt1(0.),    nt0(0.);
-	double nt2_e2(0.), nt1_e2(0.), nt0_e2(0.);
-	for(size_t i = 0; i < inputsamples.size(); ++i){
-		int index = inputsamples[i];
-		float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
-		channel *cha = &fSamples[index].ee;
-		if(data) scale = 1.;
-		nt2 += scale * cha->numbers.nt2;
-		nt1 += scale * cha->numbers.nt10;
-		nt0 += scale * cha->numbers.nt0;
-		nt2_e2 += scale*scale * cha->numbers.nt2;
-		nt1_e2 += scale*scale * cha->numbers.nt10;
-		nt0_e2 += scale*scale * cha->numbers.nt0;
-	}
-	if(data){
-		cout << "  Found " << nt2 << " events in Nt2" << endl;
-		cout << "  Found " << nt1 << " events in Nt1" << endl;
-		cout << "  Found " << nt0 << " events in Nt0" << endl;
-	}
-	if(!data){
-		cout << "  Found " << nt2 << " +/- " << TMath::Sqrt(nt2_e2) << " events in Nt2" << endl;
-		cout << "  Found " << nt1 << " +/- " << TMath::Sqrt(nt1_e2) << " events in Nt1" << endl;
-		cout << "  Found " << nt0 << " +/- " << TMath::Sqrt(nt0_e2) << " events in Nt0" << endl;		
-	}
-	cout << " ------------------------------------" << endl;
-
-	// Make prediction
-	FPRatios *fFPRatios = new FPRatios();
-	fFPRatios->SetVerbose(fVerbose);
-	if(data){
-		fFPRatios->SetElFratios(H_el_fratio_data);
-		fFPRatios->SetElPratios(H_el_pratio_data);
-	}
-	else{
-		fFPRatios->SetElFratios(H_el_fratio_allmc);
-		fFPRatios->SetElPratios(H_el_pratio_allmc);
-	}
-	vector<double> nt;
-	nt.push_back(nt0);
-	nt.push_back(nt1);
-	nt.push_back(nt2);
+	cout << "          |       fRatio       |       pRatio       |" << endl;
+	cout << "-----------------------------------------------------" << endl;
+	cout << setw(10) << " allMC    |";
+	cout << setw(7)  << setprecision(2) << fratio_allmc << " +/- " << setw(7) << setprecision(2) << fratio_allmc_e << " |";
+	cout << setw(7)  << setprecision(2) << pratio_allmc << " +/- " << setw(7) << setprecision(2) << pratio_allmc_e << " |";
+	cout << endl;
+	cout << setw(10) << " data     |";
+	cout << setw(7)  << setprecision(2) << fratio_data  << " +/- " << setw(7) << setprecision(2) << fratio_data_e  << " |";
+	cout << setw(7)  << setprecision(2) << pratio_data  << " +/- " << setw(7) << setprecision(2) << pratio_data_e  << " |";
+	cout << endl;
+	cout << setw(10) << " ttbar    |";
+	cout << setw(7)  << setprecision(2) << fratio_ttbar << " +/- " << setw(7) << setprecision(2) << fratio_ttbar_e << " |";
+	cout << setw(7)  << setprecision(2) << pratio_ttbar << " +/- " << setw(7) << setprecision(2) << pratio_ttbar_e << " |";
+	cout << endl;
+	cout << "-----------------------------------------------------" << endl;
+	cout << "          |   Nt2   |   Nt1   |   Nt0   |" << endl;
+	cout << "-----------------------------------------" << endl;
+	cout << setw(9) << "data"  << " | ";
+	cout << setw(7) << setprecision(2) << nt2 << " | ";
+	cout << setw(7) << setprecision(2) << nt1 << " | ";
+	cout << setw(7) << setprecision(2) << nt0 << " | ";
+	cout << endl;
+	cout << "-----------------------------------------" << endl;
 	
-	fFPRatios->NevtTopol(2, 0, nt);
-
-	vector<double> vpt, veta;
-	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas (first electron then muon)
-	veta.push_back(0.); veta.push_back(0.);
-
-	vector<double> nevFP = fFPRatios->NevtPass(vpt, veta);
-	vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
-	vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
-
-	cout << "  Prediction for Npp: " << nevFP[0] << " +/- " << nevFPEstat[0] << " (stat) +/- " << nevFPEsyst[0] << " (syst)" << endl;
-	cout << "  Prediction for Nfp: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
-	cout << "  Prediction for Nff: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
-	cout << "  Total fakes:        " << nevFP[1]+nevFP[2] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2])<< " (syst)" << endl;
-	cout << " ------------------------------------" << endl;
-
-	// Get observation
-	// TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins", nptbins, ptbins);
-	// NObs(H_nsigobs, inputsamples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
-
-	// cout << "  Observation from LM0:      " << H_nsigobs->GetBinContent(1) << " +/- " << H_nsigobs->GetBinError(1) << endl;
-	cout << "  Nt2 observed (TTbar only):  " << fLumiNorm/fSamples[TTbar].lumi *fSamples[TTbar].ee.numbers.nt2 << endl;
-	cout << "  Nt2 observed (VVjets only): " << fLumiNorm/fSamples[VVJets].lumi*fSamples[VVJets].ee.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Wjets only):  " << fLumiNorm/fSamples[WJets].lumi *fSamples[WJets].ee.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Zjets only):  " << fLumiNorm/fSamples[ZJets].lumi *fSamples[ZJets].ee.numbers.nt2 << endl;
-	float nt2qcd = fLumiNorm/fSamples[QCD15].lumi*fSamples[QCD15].ee.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD30].lumi*fSamples[QCD30].ee.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD80].lumi*fSamples[QCD80].ee.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].ee.numbers.nt2;
-	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
-	cout << " ------------------------------------" << endl;
+	float nt2sum(0.), nt10sum(0.), nt01sum(0.), nt0sum(0.);
+	for(size_t i = 0; i < fMCBG.size(); ++i){
+		int index = fMCBG[i];
+		channel *cha = &fSamples[index].mumu;
+		numberset numbers = cha->numbers;
+		float scale = fLumiNorm / fSamples[index].lumi;
+		nt2sum += scale*numbers.nt2;
+		nt10sum += scale*numbers.nt10;
+		nt01sum += scale*numbers.nt01;
+		nt0sum += scale*numbers.nt0;
+		cout << setw(9) << fSamples[index].sname << " | ";
+		cout << setw(7)  << setprecision(2) << scale*numbers.nt2  << " | ";
+		cout << setw(7)  << setprecision(2) << scale*numbers.nt10 << " | ";
+		cout << setw(7)  << setprecision(2) << scale*numbers.nt0  << " | ";
+		cout << endl;
+	}	
+	cout << "-----------------------------------------" << endl;
+	cout << setw(9) << "MC sum" << " | ";
+	cout << setw(7) << setprecision(2) << nt2sum  << " | ";
+	cout << setw(7) << setprecision(2) << nt10sum << " | ";
+	cout << setw(7) << setprecision(2) << nt0sum << " | ";
+	cout << endl;
+	cout << "-----------------------------------------" << endl;
+	cout << setw(9) << fSamples[LM0].sname << " | ";
+	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt2  << " | ";
+	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt10 << " | ";
+	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt0  << " | ";
+	cout << endl << endl;
+	cout << "--------------------------------------------------------------" << endl;
+	cout << "  Predictions:" << endl;
+	cout << "--------------------------------------------------------------" << endl;
+	cout << "  Npp:           " << setw(7) << setprecision(3) << nevFP[0];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[0];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[0] << " (syst)" << endl;
+	cout << "  Nfp:           " << setw(7) << setprecision(3) << nevFP[1];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[1];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[1] << " (syst)" << endl;
+	cout << "  Nff:           " << setw(7) << setprecision(3) << nevFP[2];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[2];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[2] << " (syst)" << endl;
+	cout << "  Total fakes:   " << setw(7) << setprecision(3) << nevFP[1]+nevFP[2];
+	cout << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]);
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2]) << " (syst)" << endl;
+	cout << "--------------------------------------------------------------" << endl;
+	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	delete fFPRatios;
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
-	cout << "-----------------------------------" << endl;
-	cout << " Producing prediction for EMu channel" << endl << endl;
+void MuonPlotter::testFPRatios(float muf, float mup, float elf, float elp, float nt2, float nt10, float nt01, float nt0){
+	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	cout << " Running test on FPRatios code" << endl << endl;
 	bool data = true; // Use ratios from data or mc?
 
 	// Dummy binning
@@ -1777,11 +1934,6 @@ void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
 	TH2D *H_el_pratio_allmc = new TH2D("ElpRatioAllMC", "pRatio for all MC", nptbins, ptbins, netabins, etabins);
 	TH2D *H_el_pratio_data  = new TH2D("ElpRatioData",  "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
 
-	// TH2D *H_fratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isFakeTTbarMuon, nptbins, ptbins, netabins, etabins);
-	// TH2D *H_pratio_ttbar = fillRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isPromptTTbarMuon, nptbins, ptbins, netabins, etabins);
-	// H_fratio_ttbar->SetName("fRatioTTbar");
-	// H_pratio_ttbar->SetName("pRatioTTbar");
-
 	float mufratio_allmc(0.), mufratio_allmc_e(0.);
 	float mufratio_data(0.),  mufratio_data_e(0.);
 	float mupratio_allmc(0.), mupratio_allmc_e(0.);
@@ -1791,22 +1943,24 @@ void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
 	float elpratio_allmc(0.), elpratio_allmc_e(0.);
 	float elpratio_data(0.),  elpratio_data_e(0.);
 
-	// float fratio_ttbar   = H_fratio_ttbar->GetBinContent(1,1);
-	// float fratio_ttbar_e = H_fratio_ttbar->GetBinError(1,1);
+	mufratio_allmc   = muf;
+	mupratio_allmc   = mup;
+	elfratio_allmc   = elf;
+	elpratio_allmc   = elp;
 
-	// float pratio_ttbar   = H_pratio_ttbar->GetBinContent(1,1);
-	// float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
+	mufratio_allmc_e = 0.1 * mufratio_allmc;
+	mufratio_data    =       mufratio_allmc;
+	mufratio_data_e  = 0.1 * mufratio_allmc;
+	mupratio_allmc_e = 0.1 * mupratio_allmc;
+	mupratio_data    =       mupratio_allmc;
+	mupratio_data_e  = 0.1 * mupratio_allmc;
 
-	calculateRatio(fMCBG,   Muon, 1, mufratio_allmc, mufratio_allmc_e);
-	calculateRatio(fJMData, Muon, 1, mufratio_data,  mufratio_data_e);
-	calculateRatio(fMCBG,   Muon, 2, mupratio_allmc, mupratio_allmc_e);
-	calculateRatio(fMuData, Muon, 2, mupratio_data,  mupratio_data_e);
-
-	calculateRatio(fMCBG,   Electron, 1, elfratio_allmc, elfratio_allmc_e);
-	if(gSWITCH == 0) calculateRatio(fEGData, Electron, 1, elfratio_data,  elfratio_data_e);
-	if(gSWITCH == 1) calculateRatio(fJMData, Electron, 1, elfratio_data,  elfratio_data_e);
-	calculateRatio(fMCBG,   Electron, 2, elpratio_allmc, elpratio_allmc_e);
-	calculateRatio(fEGData, Electron, 2, elpratio_data,  elpratio_data_e);
+	elfratio_allmc_e = 0.1 * elfratio_allmc;
+	elfratio_data    =       elfratio_allmc;
+	elfratio_data_e  = 0.1 * elfratio_allmc;
+	elpratio_allmc_e = 0.1 * elpratio_allmc;
+	elpratio_data    =       elpratio_allmc;
+	elpratio_data_e  = 0.1 * elpratio_allmc;
 
 	H_mu_fratio_allmc->SetBinContent(1,1,mufratio_allmc);
 	H_mu_fratio_allmc->SetBinError  (1,1,mufratio_allmc_e);
@@ -1826,100 +1980,16 @@ void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
 	H_el_pratio_data ->SetBinContent(1,1,elpratio_data);
 	H_el_pratio_data ->SetBinError  (1,1,elpratio_data_e);
 
-	cout << "  Muon fRatio from all MC         = " << mufratio_allmc << " +/- " << mufratio_allmc_e << endl;
-	// cout << "  fRatio from ttbar genmatch = " << mufratio_ttbar << " +/- " << mufratio_ttbar_e << endl;
-	cout << "  Muon fRatio from data           = " << mufratio_data  << " +/- " << mufratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-	cout << "  Electron fRatio from all MC     = " << elfratio_allmc << " +/- " << elfratio_allmc_e << endl;
-	// cout << "  fRatio from ttbar genmatch = " << elfratio_ttbar << " +/- " << elfratio_ttbar_e << endl;
-	cout << "  Electron fRatio from data       = " << elfratio_data  << " +/- " << elfratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-	cout << "  Muon pRatio from all MC         = " << mupratio_allmc << " +/- " << mupratio_allmc_e << endl;
-	// cout << "  pRatio from ttbar genmatch = " << mupratio_ttbar << " +/- " << mupratio_ttbar_e << endl;
-	cout << "  Muon pRatio from data           = " << mupratio_data  << " +/- " << mupratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-	cout << "  Electron pRatio from all MC     = " << elpratio_allmc << " +/- " << elpratio_allmc_e << endl;
-	// cout << "  pRatio from ttbar genmatch = " << elpratio_ttbar << " +/- " << elspratio_ttbar_e << endl;
-	cout << "  Electron pRatio from data       = " << elpratio_data  << " +/- " << elpratio_data_e << endl;
-	cout << " ------------------------------------" << endl;
-
-	// // Add systematics to ratios
-	// float deviation(0.), olderror(0.), newerror(0.);
-	// deviation = fabs(fratio_allmc - fratio_ttbar);
-	// // Add to mc ratios
-	// olderror = H_fratio_allmc->GetBinError(1,1);
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_fratio_allmc->SetBinError(1,1,newerror);
-	// fratio_allmc_e = newerror;
-	// // Add to data ratios
-	// olderror = H_fratio_data->GetBinError(1,1);
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_fratio_data->SetBinError(1,1,newerror);
-	// fratio_data_e = newerror;
-	// cout << "  new fRatio (all MC)        = " << H_fratio_allmc->GetBinContent(1,1) << " +/- " << H_fratio_allmc->GetBinError(1,1) << endl;
-	// cout << "  new fRatio (data)          = " << H_fratio_data ->GetBinContent(1,1) << " +/- " << H_fratio_data ->GetBinError(1,1) << endl;
-	// 
-	// deviation  = fabs(pratio_allmc - pratio_ttbar);
-	// // Add to mc ratios
-	// olderror = pratio_allmc_e;
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_pratio_allmc->SetBinError(1,1,newerror);
-	// pratio_allmc_e = newerror;
-	// // Add to data ratios
-	// olderror = pratio_data_e;
-	// newerror = sqrt(olderror*olderror + deviation*deviation);
-	// H_pratio_data->SetBinError(1,1,newerror);
-	// pratio_data_e = newerror;
-	// cout << "  new pRatio (all MC)        = " << H_pratio_allmc->GetBinContent(1,1) << " +/- " << H_pratio_allmc->GetBinError(1,1) << endl;
-	// cout << "  new pRatio (data)          = " << H_pratio_data ->GetBinContent(1,1) << " +/- " << H_pratio_data ->GetBinError(1,1) << endl;
-	// cout << " ------------------------------------" << endl;
-
-	double nt2(0.),    nt10(0.),    nt01(0.),    nt0(0.);
-	double nt2_e2(0.), nt10_e2(0.), nt01_e2(0.), nt0_e2(0.);
-	for(size_t i = 0; i < inputsamples.size(); ++i){
-		int index = inputsamples[i];
-		float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
-		channel *cha = &fSamples[index].emu;
-		if(data) scale = 1.;
-		nt2  += scale * cha->numbers.nt2;
-		nt10 += scale * cha->numbers.nt10;
-		nt01 += scale * cha->numbers.nt01;
-		nt0  += scale * cha->numbers.nt0;
-		nt2_e2  += scale*scale * cha->numbers.nt2;
-		nt10_e2 += scale*scale * cha->numbers.nt10;
-		nt01_e2 += scale*scale * cha->numbers.nt01;
-		nt0_e2  += scale*scale * cha->numbers.nt0;
-	}
-
-	if(data){
-		cout << "  Found " << nt2  << " events in Nt2" << endl;
-		cout << "  Found " << nt10 << " events in Nt10" << endl;
-		cout << "  Found " << nt01 << " events in Nt01" << endl;
-		cout << "  Found " << nt0  << " events in Nt0" << endl;
-	}
-	if(!data){
-		cout << "  Found " << nt2  << " +/- " << TMath::Sqrt(nt2_e2)  << " events in Nt2" << endl;
-		cout << "  Found " << nt10 << " +/- " << TMath::Sqrt(nt10_e2) << " events in Nt10" << endl;
-		cout << "  Found " << nt01 << " +/- " << TMath::Sqrt(nt01_e2) << " events in Nt01" << endl;
-		cout << "  Found " << nt0  << " +/- " << TMath::Sqrt(nt0_e2)  << " events in Nt0" << endl;		
-	}
-	cout << " ------------------------------------" << endl;
+	// float nt2(0.),    nt10(0.),    nt01(0.),    nt0(0.);
+	// float nt2_e2(0.), nt10_e2(0.), nt01_e2(0.), nt0_e2(0.);
 
 	// Make prediction
 	FPRatios *fFPRatios = new FPRatios();
 	fFPRatios->SetVerbose(fVerbose);
-	if(data){
-		fFPRatios->SetMuFratios(H_mu_fratio_data);
-		fFPRatios->SetMuPratios(H_mu_pratio_data);
-		fFPRatios->SetElFratios(H_el_fratio_data);
-		fFPRatios->SetElPratios(H_el_pratio_data);
-	}
-	else{
-		fFPRatios->SetMuFratios(H_mu_fratio_allmc);
-		fFPRatios->SetMuPratios(H_mu_pratio_allmc);
-		fFPRatios->SetElFratios(H_el_fratio_allmc);
-		fFPRatios->SetElPratios(H_el_pratio_allmc);
-	}
+	fFPRatios->SetMuFratios(H_mu_fratio_data);
+	fFPRatios->SetMuPratios(H_mu_pratio_data);
+	fFPRatios->SetElFratios(H_el_fratio_data);
+	fFPRatios->SetElPratios(H_el_pratio_data);
 		
 	vector<double> nt;
 	nt.push_back(nt0);
@@ -1937,28 +2007,45 @@ void MuonPlotter::makeIntPredictionEMu(vector<int> inputsamples){
 	vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
 	vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
 
-	cout << "  Prediction for Npp: " << nevFP[0] << " +/- " << nevFPEstat[0] << " (stat) +/- " << nevFPEsyst[0] << " (syst)" << endl;
-	cout << "  Prediction for Npf: " << nevFP[1] << " +/- " << nevFPEstat[1] << " (stat) +/- " << nevFPEsyst[1] << " (syst)" << endl;
-	cout << "  Prediction for Nfp: " << nevFP[2] << " +/- " << nevFPEstat[2] << " (stat) +/- " << nevFPEsyst[2] << " (syst)" << endl;
-	cout << "  Prediction for Nff: " << nevFP[3] << " +/- " << nevFPEstat[3] << " (stat) +/- " << nevFPEsyst[3] << " (syst)" << endl;
-	cout << "  Total fakes:        " << nevFP[1]+nevFP[2]+nevFP[3] << " +/- " << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2] + nevFPEstat[3]*nevFPEstat[3]) << " (stat) +/- " << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2] + nevFPEsyst[3]*nevFPEsyst[3])<< " (syst)" << endl;
-	cout << " ------------------------------------" << endl;
+	cout << "          |     Mu-fRatio      |     Mu-pRatio      |     El-fRatio      |     El-pRatio      |" << endl;
+	cout << "-----------------------------------------------------------------------------------------------" << endl;
+	cout << setw(10) << " allMC    |";
+	cout << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
+	cout << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " |";
+	cout << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
+	cout << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " |";
+	cout << endl;
+	cout << "-----------------------------------------------------------------------------------------------" << endl;
+	cout << "          |   Nt2   |   Nt10  |   Nt01  |   Nt0   |" << endl;
+	cout << "---------------------------------------------------" << endl;
+	cout << setw(9) << "data"  << " | ";
+	cout << setw(7) << setprecision(2) << nt2  << " | ";
+	cout << setw(7) << setprecision(2) << nt10 << " | ";
+	cout << setw(7) << setprecision(2) << nt01 << " | ";
+	cout << setw(7) << setprecision(2) << nt0  << " | ";
+	cout << endl;
+	cout << "---------------------------------------------------" << endl;
+	
+	cout << "  Predictions:" << endl;
+	cout << " -------------------------------------------------------------" << endl;
+	cout << "  Npp:           " << setw(7) << setprecision(3) << nevFP[0];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[0];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[0] << " (syst)" << endl;
+	cout << "  Nfp:           " << setw(7) << setprecision(3) << nevFP[1];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[1];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[1] << " (syst)" << endl;
+	cout << "  Npf:           " << setw(7) << setprecision(3) << nevFP[2];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[2];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[2] << " (syst)" << endl;
+	cout << "  Nff:           " << setw(7) << setprecision(3) << nevFP[3];
+	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[3];
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[3] << " (syst)" << endl;
+	cout << "  Total fakes:   " << setw(7) << setprecision(3) << nevFP[1]+nevFP[2]+nevFP[3];
+	cout << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2] + nevFPEstat[3]*nevFPEstat[3]);
+	cout << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2] + nevFPEsyst[3]*nevFPEsyst[3]) << " (syst)" << endl;
+	cout << " -------------------------------------------------------------" << endl;
+	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
 
-	// Get observation
-	// TH1D *H_nsigobs = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins", nptbins, ptbins);
-	// NObs(H_nsigobs, inputsamples, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
-
-	// cout << "  Observation from LM0:      " << H_nsigobs->GetBinContent(1) << " +/- " << H_nsigobs->GetBinError(1) << endl;
-	cout << "  Nt2 observed (TTbar only):  " << fLumiNorm/fSamples[TTbar].lumi *fSamples[TTbar].emu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (VVjets only): " << fLumiNorm/fSamples[VVJets].lumi*fSamples[VVJets].emu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Wjets only):  " << fLumiNorm/fSamples[WJets].lumi *fSamples[WJets].emu.numbers.nt2 << endl;
-	cout << "  Nt2 observed (Zjets only):  " << fLumiNorm/fSamples[ZJets].lumi *fSamples[ZJets].emu.numbers.nt2 << endl;
-	float nt2qcd = fLumiNorm/fSamples[QCD15].lumi*fSamples[QCD15].emu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD30].lumi*fSamples[QCD30].emu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD80].lumi*fSamples[QCD80].emu.numbers.nt2;
-	nt2qcd += fLumiNorm/fSamples[QCD170].lumi*fSamples[QCD170].emu.numbers.nt2;
-	cout << "  Nt2 observed (QCD only):    " << nt2qcd << endl;
-	cout << " ------------------------------------" << endl;
 	delete fFPRatios;
 }
 

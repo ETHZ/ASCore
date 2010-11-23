@@ -47,10 +47,9 @@ public:
 	void makePtPlots();
 	
 	void makeDiffPredictionPlots();
-	void makeIntPrediction(gChannel);
+	void makeIntPrediction(TString);
 	void makeIntPredictionMuMu(vector<int>);
-	void makeIntPredictionEMu(vector<int>);
-	void makeIntPredictionEE(vector<int>);
+	void testFPRatios(float, float, float, float, float, float, float, float);
 	
 	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
