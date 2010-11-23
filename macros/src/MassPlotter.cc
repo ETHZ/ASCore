@@ -132,13 +132,10 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	double ZerotoPi[4]    ={0., 3.142, 3.142, 3.142};
 	double controlsplit[4]={dPhisplit[2], dPhisplit[3], dPhisplit[3], dPhisplit[3]};
 
-//	MakePlot(QCDSamples,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "QCD_"+cleanflag+"_0toPi"             , "none", fudgefactor);
-//	MakePlot(QCDSamples,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "QCD_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
-//	MakePlot(QCDandDataSamples, "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "QCDdata_"+cleanflag+"_"+dPhirange2   , "data", fudgefactor);
-	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"             , "none", fudgefactor);
-	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "all_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
+ 	//MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", ZerotoPi,     "none", "all_"+cleanflag+"_0toPi"             , "none", fudgefactor);
+	//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", controlsplit, "none", "all_"+cleanflag+"_"+dPhirange2       , "none", fudgefactor);
+	//	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "data", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "QCD" , fudgefactor);
-	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "data", fudgefactor);
 //	MakePlot(fSamples  ,        "PseudoJetMT2", gNMT2bins, gMT2bins, cleaned, true, "DPhiMhtMpt", dPhisplit,    "none", "all_"+cleanflag+"_"+dPhirange1       , "none", fudgefactor);
 
 
@@ -146,8 +143,144 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 
 
+	MakePlot(fSamples  ,"MetJetDPhi(1)"  ,60,0,TMath::Pi(),false,false,true);
+	MakePlot(fSamples  ,"MomMetJetDPhi()",60,0,TMath::Pi(),false,false,true);
 
 }
+
+//________________________________________________________________________
+
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, const int nbins, const double min, const double max, bool cleaned, bool logflag, bool ratio){
+
+  double bins[nbins];
+  bins[0] = min;
+  for(int i=0; i<nbins; i++)
+    bins[i+1] = min+i*(max-min)/nbins;
+  MakePlot(Samples, var, nbins, bins, cleaned, logflag, ratio);
+
+}
+//________________________________________________________________________
+
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, const int nbins, const double *bins, bool cleaned, bool logflag, bool ratio){
+
+        TString varname = var;
+	varname.ReplaceAll("(","");
+	varname.ReplaceAll(")","");
+
+	THStack h_stack(varname, "");
+  	TH1D*   h_data       = new TH1D(varname+"data"  , "", nbins, bins );
+	TH1D*   h_mc_sum     = new TH1D(varname+"mc_sum", "", nbins, bins );
+
+	// h_data
+	h_data -> Sumw2();
+	h_data -> SetMarkerStyle(1);
+	h_data -> SetMarkerColor(kRed);
+	h_data -> SetLineColor(kRed);
+	h_data -> SetStats(false);
+
+	h_mc_sum -> SetFillStyle(3004);
+	h_mc_sum -> SetFillColor(kBlack);
+	h_mc_sum -> SetStats(0);
+	
+	h_mc_sum    ->Sumw2();
+
+
+	// vector of all histos
+	vector<TH1D*> h_samples;
+
+
+	// legend
+	TLegend* Legend1 = new TLegend(.6,.5,.9,.85);
+
+	for(size_t i = 0; i < Samples.size(); ++i){
+		h_samples.push_back(new TH1D(varname+"_"+Samples[i].name, "", nbins, bins));
+		h_samples[i] -> Sumw2();
+		h_samples[i] -> SetFillColor(Samples[i].color);
+		h_samples[i] -> SetLineColor(Samples[i].color);
+		h_samples[i] -> SetMarkerColor(Samples[i].color);
+		h_samples[i] -> SetStats(false);
+		if(Samples[i].type == "susy" ){
+			h_samples[i] -> SetLineColor(kBlack);
+			h_samples[i] -> SetLineStyle(kDotted);
+		}
+		Double_t weight = Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
+		if(fVerbose>2) cout << "MakePlot: looping over " << Samples[i].sname << endl;
+		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
+	
+
+
+		TString variable = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
+
+		std::ostringstream cutStream;
+		cutStream << "misc.LeptConfig == " << LeptConfigCut  << "&&"
+			  << "misc.Vectorsumpt < " << VectorSumPtCut << "&&"
+			  << "NJets >= "           << NJetsCut       << "&&"
+			  << "misc.PseudoJetMT2 >=0";
+
+		TString cuts = TString::Format("(%f) * (%s)",weight,cutStream.str().c_str());
+// 		TString cuts = TString::Format("( misc.LeptConfig == %d && misc.Vectorsumpt < %f && NJets > %d && misc.PseudoJetMT2 >=0 )",LeptConfigCut, VectorSumPtCut, NJetsCut);
+// 		cuts.Form("(%f) * (%s)",weight,cuts.Data());
+		  
+		if(fVerbose>2) cout << "+++++ Drawing " << variable << endl
+				    << "\twith cuts: "  << cuts     << endl;
+
+		int nev = Samples[i].tree->Draw(variable.Data(),cuts.Data(),"goff");
+
+		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
+				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
+		
+	}
+
+// 	if(prediction!="none"){
+// 		h_stack.Add(h_prediction);
+// 		Legend1 ->AddEntry(h_prediction, "data-driven QCD", "f");
+// 		h_mc_sum->Add(h_prediction);
+// 	}
+	for(int i=0; i<Samples.size(); ++i){
+	        if((Samples[i].sname=="QCD" )){
+			h_samples[i] -> SetMinimum(0.01);
+			h_stack.Add(h_samples[i]);
+			h_mc_sum->Add(h_samples[i]);
+			Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
+		}
+		if(Samples[i].sname!="QCD" && Samples[i].type!="data"){
+			h_stack.Add(h_samples[i]);
+			if(Samples[i].type!="susy") h_mc_sum->Add(h_samples[i]);
+			if(Samples[i].name != "PhotonJets_Pt40to100-V01-03-01" && Samples[i].name != "PhotonJets_Pt100to200-V01-03-01"){
+				Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
+			}
+		}
+		if(Samples[i].type == "data"){
+			h_data -> Add(h_samples[i]);
+		}
+
+	}
+	if(h_data->Integral()>0){
+		Legend1     ->AddEntry(h_data, "data", "l");
+	}
+
+
+	TString xtitle = var + " [GeV]";
+	TString ytitle = "Events";
+
+	// print histo without QCD prediction
+// 	printHisto(h_stack, h_data,   Legend1 , branch_name+"_"+version, "hist", logflag, xtitle, ytitle);
+// 	plotRatioStack(h_stack,  h_mc_sum, h_data,  true, false, branch_name+"_"+version+"ratio", Legend1, xtitle, ytitle);
+
+
+	printHisto(h_stack, h_data, h_mc_sum, Legend1 , varname, "hist", logflag, xtitle, ytitle);
+	if (ratio) 
+	  plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, varname+"ratio", Legend1, xtitle, ytitle);
+	
+	for(int i=0; i<h_samples.size(); ++i){
+		delete h_samples[i];
+	}
+	delete h_mc_sum;
+	delete Legend1;
+	delete h_data;
+	
+}
+
 //________________________________________________________________________
 void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, const int nbins, const double bins[], bool cleaned, bool logflag, 
 		           TString cut_branch_name, double ysplit[], TString option, TString version, TString prediction, double factor ){
@@ -181,7 +314,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 
 
 	// legend
-	TLegend* Legend1 = new TLegend(.6,.5,.9,.88);
+	TLegend* Legend1 = new TLegend(.6,.5,.9,.85);
 	
 	// get prediction
 	TH1D* h_prediction    = new TH1D("prediction",    "", nbins, bins);
@@ -213,9 +346,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 		Samples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
 		Long64_t nentries =  Samples[i].tree->GetEntries();
 		Long64_t nbytes = 0, nb = 0;
+		int nev =0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
 			nb =  Samples[i].tree->GetEntry(jentry);   nbytes += nb;
-				
+		        Samples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+
+			if ( fVerbose>2 && jentry % 5000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
+	
 			// cleaning & cuts
 			if( fMT2tree->misc.DPhiMhtMpt > upper_cut) continue;
 			if( fMT2tree->misc.DPhiMhtMpt < lower_cut) continue;
@@ -229,7 +366,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 				h_samples[i]                ->Fill(fMT2tree->misc.PseudoJetMT2     , weight);
 				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && fMT2tree->misc.PseudoJetMT2 < 50){h_prediction -> Fill(fMT2tree->misc.PseudoJetMT2     , weight);}
 			}
+			nev++;
 		}
+		if(fVerbose>2) cout << "\tEvents found:  " << nev << endl
+				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
+
 		delete fMT2tree;
 	}
 	if(prediction!="none"){
@@ -525,7 +666,7 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	gPad->RedrawAxis();
 
 	if(leg != NULL ){
-		leg -> SetFillColor(0);
+		leg -> SetFillColor(10);
 		leg -> SetBorderSize(0);
 		leg -> Draw();
 	} 
@@ -650,7 +791,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	gPad->RedrawAxis();
 
 	if(leg != NULL ){
-		leg -> SetFillColor(0);
+		leg -> SetFillColor(10);
 		leg -> SetBorderSize(0);
 		leg -> Draw();
 	} 
@@ -774,7 +915,7 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 		h_data       ->Draw("same");
 	}
 	if(leg != NULL ){
-		leg -> SetFillColor(0);
+		leg -> SetFillColor(10);
 		leg -> SetBorderSize(0);
 		leg -> Draw();
 	} 
@@ -797,6 +938,7 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 	lat.DrawLatex(0.9, 0.05, xtitle);
 	gPad->RedrawAxis();
 	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
+	Util::PrintEPS(col, canvname, fOutputDir);
 	delete col;
 
 }
@@ -821,7 +963,7 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canv
 		h_data  ->Draw("same, E1");
 	}
 	if(leg != NULL ){
-		leg -> SetFillColor(0);
+		leg -> SetFillColor(10);
 		leg -> SetBorderSize(0);
 		leg -> Draw();
 	} 
