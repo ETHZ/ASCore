@@ -827,8 +827,11 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 		fWgtie += wgtnewe;
 		fWgtim += wgtnewm;
 		double wgtnew;
-		if (wgtnewe == 0.) wgtnew = wgtnewm;
-		else if (wgtnewm == 0.) wgtnew = wgtnewe;
+		if(      fNeles == 0 && fNmuons >  0 ) wgtnew = wgtnewm;
+		else if( fNeles >  0 && fNmuons == 0 ) wgtnew = wgtnewe;
+		// previous (buggy for e/mu):
+		// if (wgtnewe == 0.) wgtnew = wgtnewm; // if ne == 0 && nm > 0
+		// else if (wgtnewm == 0.) wgtnew = wgtnewe; // if nm == 0 && ne > 0
 		else wgtnew = wgtnewe * wgtnewm;
 		wgt += wgtnew;
 		fDwgtdpe += dwgtnewdpe;
