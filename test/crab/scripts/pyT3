@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Process a list of files for ...
+#
+
+# Avoid wild cards
+# set noglob
+
+if [ $# -lt 2 ]; then
+   echo "Usage: $0 <exe> \"<arguments>\""
+   echo "   where: <exe> is the path to the python script to run"
+   echo "          <arguments> is the list of arguments for the script"
+   exit -1
+fi
+
+EXE=$1
+shift
+ARGUMENTS=$1
+shift
+FILES="$*"
+
+echo "Processing $ARGUMENTS with $EXE..."
+NAME_A=`echo $ARGUMENTS | sed 's/\.\.\///' | sed 's/\//-/g' | sed 's/ /_/g'`
+
+qsub -N qspy"$NAME_A" -o ../scripts/logs/"$NAME_A".out -e ../scripts/logs/"$NAME_A".err -j y -v EXE="$EXE" -v ARGUMENTS="$ARGUMENTS" ../scripts/batch/pyBatch.sh
+
+exit 0
