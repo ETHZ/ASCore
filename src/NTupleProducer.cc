@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.89 2010/11/17 21:54:58 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.90 2010/11/23 09:14:45 pnef Exp $
 //
 //
 
@@ -327,38 +327,32 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   }
   // ------------------------------
   // ECAL GAP energy
-  double maxGapBoundaryEnergy  = 5; 
-  // do not set this to a lower value than cutBoundEnergyGapEE/cutBoundEnergyGapEB 
-  // specified in ecalanomalouseventfilter_cfi.py 
+  // minimal BE spefified as cutBoundEnergyGapEE/cutBoundEnergyGapEB in cfi.py
   fTnECALGapClusters=0;
   // EB
   for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EB.size(); ++i) {
      BoundaryInformation bInfo =anomalousECALvars.v_enNeighboursGap_EB[i];
-     if (bInfo.boundaryEnergy > maxGapBoundaryEnergy){
-        fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
-	fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
-	fTnECALGapClusters++;
-	if(fTnECALGapClusters >= gMaxnECALGapClusters){
-           edm::LogWarning("NTP") << "@SUB=analyze()"
-                                  << "More than " << static_cast<int>(gMaxnECALGapClusters) 
-                                  << " ECAL GAP Clusters!!";
-	   break;
-	}
+     fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
+     fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
+     fTnECALGapClusters++;
+     if(fTnECALGapClusters >= gMaxnECALGapClusters){
+       edm::LogWarning("NTP") << "@SUB=analyze()"
+                              << "More than " << static_cast<int>(gMaxnECALGapClusters) 
+                              << " ECAL GAP Clusters!!";
+       break;
      }
   }
   // EE
   for (int i = 0; i < (int) anomalousECALvars.v_enNeighboursGap_EE.size(); ++i) {
      BoundaryInformation bInfo = anomalousECALvars.v_enNeighboursGap_EE[i];
-     if (bInfo.boundaryEnergy > maxGapBoundaryEnergy){
-        fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
-	fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
-	fTnECALGapClusters++;
-	if(fTnECALGapClusters >= gMaxnECALGapClusters){
-           edm::LogWarning("NTP") << "@SUB=analyze()"
-                                  << "More than " << static_cast<int>(gMaxnECALGapClusters) 
-                                  << " ECAL GAP Clusters!!";
-           break;
-	}
+     fTEcalGapBE[fTnECALGapClusters]           = bInfo.boundaryEnergy;
+     fTEcalGapClusterSize[fTnECALGapClusters]  = bInfo.neighboursWithSameFlag.size()+1;
+     fTnECALGapClusters++;
+     if(fTnECALGapClusters >= gMaxnECALGapClusters){
+        edm::LogWarning("NTP") << "@SUB=analyze()"
+                               << "More than " << static_cast<int>(gMaxnECALGapClusters) 
+                               << " ECAL GAP Clusters!!";
+        break;
      }
   }
 

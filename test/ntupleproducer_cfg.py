@@ -137,9 +137,13 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
-# ECAL dead cells: this is not a filter. Only a flag is stored. 
+# ECAL dead cells: this is not a filter. Only a flag is stored.
+# Ecal gap boundary energy: specify minimal gap BE here.  
 process.load("PhysicsTools/EcalAnomalousEventFilter/ecalanomalouseventfilter_cfi")
-process.HBHENoiseFilterResultProducer.FilterAlgo = cms.untracked.string("TuningMode")
+process.EcalAnomalousEventFilter.FilterAlgo = cms.untracked.string("TuningMode")
+process.EcalAnomalousEventFilter.cutBoundEnergyGapEE = cms.untracked.double(5)
+process.EcalAnomalousEventFilter.cutBoundEnergyGapEB = cms.untracked.double(5)
+process.EcalAnomalousEventFilter.enableGap           = cms.untracked.bool(True)
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 # require scraping filter
