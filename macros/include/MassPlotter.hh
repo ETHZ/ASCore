@@ -89,17 +89,27 @@ private:
 	TTree*   fTree;
 
 	void ControlPlot();
-	void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
+        void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
+        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString xtitle="MT2 [GeV]", 
+		      const int nbins=50, const double min=0, const double max=1, 
+		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
+		      bool overlaySUSY=false, float overlayScale = 0);
+        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString xtitle="MT2 [GeV]", 
+		      const int nbins=gNMT2bins, const double *bins=gMT2bins, 
+		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
+		      bool overlaySUSY=false, float overlayScale = 0);
 	void MakePlot(std::vector<sample> Samples, TString branch_name, const int nbins, const double bins[], bool cleaned, bool logflag, 
 		      TString cut_branch_name, double ysplit[], TString option, TString version, TString prediction, double factor );
 	void printHisto(THStack h, TString canvname, Option_t *drawopt,  bool logflag);
 	void printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canvname, Option_t *drawopt,  bool logflag, TString xtitle, TString ytitle);
 	void printHisto(THStack h, TH1* h_data, TH1* h_prediction, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle);
+	void printHisto(THStack h, TH1* h_data, TH1* h_prediction, TH1* h_susy, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, float overlayScale=0);
 	void printHisto(TH1* h, TString canvname, Option_t *drawopt, bool logflag);
 	void ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], bool cleaned, TString sname, TString type);
 	void ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], TString version, bool cleaned, TString sname, TString type);
 	void plotRatio(TH1* h1, TH1* h2, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle);
 	void plotRatioStack(THStack hstack, TH1* h1, TH1* h2, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle);
+	void plotRatioStack(THStack hstack, TH1* h1, TH1* h2, TH1* h3, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle, float overlayScale=0);
 	void FillRatioHistdPhi(TString cut_branch_name, double lower_cut, double middle_cut, double upper_cut, TString version, bool cleaned);
 	void FillRatioHistHT(TString version, bool cleaned);
 
