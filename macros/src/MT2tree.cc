@@ -4,7 +4,7 @@
 #include "helper/TMctLib.h"
 
 #include <vector>
-
+#include "helper/Hemisphere.hh"
 #include "TLorentzVector.h"
 #include "TMath.h"
 
@@ -22,6 +22,7 @@ void MT2Misc::Reset() {
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
   LeptConfig		  = -1;	  
+  NJetsEta5Pt20           = -1;
   IsCleanJetEvent	  =  0;	  
   PseudoJetMT2		  = -99999.99;
   PseudoJetMCT		  = -99999.99;
@@ -74,9 +75,13 @@ MT2tree::~MT2tree(){
 }
 
 void MT2tree::Reset() {
-  NJets  = 0;
-  NEles  = 0;
-  NMuons = 0;
+  NJets         = 0;
+  NEles         = 0;
+  NMuons        = 0;
+  NJetsIDLoose  = 0;
+  NJetsIDMedium = 0;
+  NJetsIDTight  = 0;
+
   misc.Reset();
   for (int i = 0; i < m_jetSize; ++i) {
     jet[i].Reset();
@@ -91,11 +96,23 @@ void MT2tree::Reset() {
   MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
   pseudoJets[0].SetPxPyPzE(0., 0., 0., 0.);
   pseudoJets[1].SetPxPyPzE(0., 0., 0., 0.);
-
+  MHTloose  [0].SetPxPyPzE(0., 0., 0., 0.);
 }
 
 void MT2tree::SetNJets(int n) {
   NJets = n;
+}
+
+void MT2tree::SetNJetsIDLoose(int n) {
+  NJetsIDLoose = n;
+}
+
+void MT2tree::SetNJetsIDMedium(int n) {
+  NJetsIDMedium = n;
+}
+
+void MT2tree::SetNJetsIDTight(int n) {
+  NJetsIDTight = n;
 }
 
 void MT2tree::SetNEles(int n) {
@@ -156,34 +173,112 @@ Int_t MT2tree::MinMetJetDPhiIndex() {
   return imin;
 }
 
+Int_t MT2tree::GetNJets(double minJPt, std::string PFJID){
+  int njets=0;
+  for(int i=0; i<NJets; ++i){
+	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
+	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
+	if(jet[i].lv.Pt() < minJPt )                      continue;
+	njets++;
+  }
+  return njets;
+}
+
 Double_t MT2tree::GetMT2(double testmass, bool massive) {
-  if (NJets<2)
+  if (NJetsIDLoose<2)
     return -999;
 
+  return CalcMT2(testmass, massive, pseudoJets[0], pseudoJets[1], pfmet[0]);
+}
+
+Double_t MT2tree::GetMT2Leading(double testmass, bool massive, std::string PFJID){
+  
+  TLorentzVector leadingJets[2]; 
+  int index=0; 
+  for(int i=0; i<NJets; ++i){
+	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
+	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
+	if(index >1                                     ) continue;
+	leadingJets[index] = jet[i].lv;
+	index++;
+  }
+  if(index!=2) return -999;
+  return CalcMT2(testmass, massive, leadingJets[0], leadingJets[1], pfmet[0]);
+
+}
+
+Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, std::string PFJID, double minJPt, int hemi_association) {
+  vector<float> px, py, pz, E;
+  for(int i=0; i<NJets; ++i){
+	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
+	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
+	if(jet[i].lv.Pt() < minJPt )                      continue;
+  	px.push_back(jet[i].lv.Px());
+	py.push_back(jet[i].lv.Py());
+	pz.push_back(jet[i].lv.Pz());
+	 E.push_back(jet[i].lv.E());
+  }
+		
+  if (px.size()<2) return -999;
+  
+
+  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
+  Hemisphere* hemi = new Hemisphere(px, py, pz, E, 2, hemi_association);
+  vector<int> grouping = hemi->getGrouping();
+
+  TLorentzVector pseudojet1(0.,0.,0.,0.);
+  TLorentzVector pseudojet2(0.,0.,0.,0.);
+	
+  for(int i=0; i<px.size(); ++i){
+	if(grouping[i]==1){
+		pseudojet1.SetPx(pseudojet1.Px() + px[i]);
+		pseudojet1.SetPy(pseudojet1.Py() + py[i]);
+		pseudojet1.SetPz(pseudojet1.Pz() + pz[i]);
+		pseudojet1.SetE( pseudojet1.E()  + E[i]);	
+	}else if(grouping[i] == 2){
+		pseudojet2.SetPx(pseudojet2.Px() + px[i]);
+		pseudojet2.SetPy(pseudojet2.Py() + py[i]);
+		pseudojet2.SetPz(pseudojet2.Pz() + pz[i]);
+		pseudojet2.SetE( pseudojet2.E()  + E[i]);
+	}
+  }
+  delete hemi;
+ 
+  return CalcMT2(testmass, massive, pseudojet1, pseudojet2, pfmet[0]); 
+}
+
+Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
+  
   double pa[3];
   double pb[3];
   double pmiss[3];
   
   pmiss[0] = 0;
-  pmiss[1] = pfmet[0].Px();
-  pmiss[2] = pfmet[0].Py();
+  pmiss[1] = MET.Px();
+  pmiss[2] = MET.Py();
   
-  pa[0] = massive ? pseudoJets[0].M() : 0;
-  pa[1] = pseudoJets[0].Px();
-  pa[2] = pseudoJets[0].Py();
+  pa[0] = massive ? visible1.M() : 0;
+  pa[1] = visible1.Px();
+  pa[2] = visible1.Py();
   
-  pb[0] = massive ? pseudoJets[1].M() : 0;
-  pb[1] = pseudoJets[1].Px();
-  pb[2] = pseudoJets[1].Py();
+  pb[0] = massive ? visible2.M() : 0;
+  pb[1] = visible2.Px();
+  pb[2] = visible2.Py();
   
   Davismt2 *mt2 = new Davismt2();
   mt2->set_momenta(pa, pb, pmiss);
   mt2->set_mn(testmass);
-  return mt2->get_mt2();
+  Double_t MT2=mt2->get_mt2();
+  delete mt2;
+  return MT2;
+
 }
 
 Double_t MT2tree::GetMCT(bool massive) {
-  if (NJets<2)
+  if (NJetsIDLoose<2)
     return -999;
 
   TLorentzVector DTM(0,0,0,0);
@@ -194,7 +289,9 @@ Double_t MT2tree::GetMCT(bool massive) {
   pmiss.Set(pfmet[0].Px(), pfmet[0].Py());
 
   TMctLib *mct = new TMctLib();
-  return mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
+  Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
+  delete mct;
+  return MCT;
 }
 
 ClassImp(MT2Misc)

@@ -143,7 +143,7 @@ void MassAnalysis::Begin(){
 void MassAnalysis::Analyze(){	
 
 	// ---------------------------------------------------
-	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
+	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
 	// ----------------------------------------------------
 	
@@ -206,13 +206,23 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
-	
-	
 
-	fMT2tree->SetNJets ((Int_t)fJets .size());
-	fMT2tree->SetNEles ((Int_t)fElecs.size());
-	fMT2tree->SetNMuons((Int_t)fMuons.size());
+	// get number of jets with pt > 20 and |eta| < 5
+	int npfjets=0;
+	for(int i=0; i<fTR->PFNJets; ++i){
+		if(fTR->PFJPt[i]>20 && fabs(fTR->PFJEta[i])<5.0){
+			npfjets++;	
+		}
+	}	
+	fMT2tree->misc.NJetsEta5Pt20 = npfjets;
 
+	fMT2tree->SetNJets         ((Int_t)fJets.size());
+	fMT2tree->SetNJetsIDLoose  ((Int_t)fJetsLoose.size());
+	fMT2tree->SetNJetsIDMedium ((Int_t)fJetsMedium.size());
+	fMT2tree->SetNJetsIDTight  ((Int_t)fJetsTight.size());
+	fMT2tree->SetNEles         ((Int_t)fElecs.size());
+	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
+	
 	// Fill jets 4-momenta & ID's
 	for(int i=0; i<fJets.size(); ++i) {
 	  	fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PFJPx[fJets[i]], fTR->PFJPy[fJets[i]], 
@@ -235,7 +245,7 @@ void MassAnalysis::FillTree(){
 		fMT2tree->jet[i].NeuMult        = fTR->PFJNeuMult       [fJets[i]];
 		fMT2tree->jet[i].NConstituents  = fTR->PFJNConstituents [fJets[i]];
 	}
-
+	
 	// Fill leptons 4-momenta
 	for(int i=0; i<fElecs.size(); ++i) {
 	  fMT2tree->ele[i].SetPtEtaPhiE(fTR->ElPt [fElecs[i]], fTR->ElEta[fElecs[i]], 
@@ -256,6 +266,15 @@ void MassAnalysis::FillTree(){
 		tracks += track;
 	}	
 	fMT2tree->MPT[0].SetXYZM(-tracks.Px(), -tracks.Py(), 0, 0);
+	// fill MHT
+	TVector3 MHT(0., 0., 0.);
+        for(int i=0; i<fJets.size(); ++i) {
+		if(! IsGoodBasicPFJet (fJets[i], true)) continue;
+		TVector3 jet(0., 0., 0.);
+		jet.SetPtEtaPhi(fTR->PFJPt[fJets[i]], fTR->PFJEta[fJets[i]], fTR->PFJPhi[fJets[i]]);
+		MHT += jet;
+	}	
+	fMT2tree->MHTloose[0].SetXYZM(-MHT.Px(), -MHT.Py(), 0, 0);
 
 	// DPhiMhtMpt: should be replaced by method to calculate it on the fly. 
 	fMT2tree->misc.DPhiMhtMpt=Util::DeltaPhi(fMHTphi, fMT2tree->MPT[0].Phi());	
@@ -268,9 +287,9 @@ void MassAnalysis::FillTree(){
 void MassAnalysis::ControlPlots(){
 
 	// NJets
-	fHNJets -> Fill(fJets.size());
+	fHNJets -> Fill(fJetsLoose.size());
 	if(fIsCleanMultiJetEvent){
-		fHNJets_clean -> Fill(fJets.size());
+		fHNJets_clean -> Fill(fJetsLoose.size());
 	}
 
 	// LeptConfig
@@ -304,12 +323,12 @@ void MassAnalysis::ControlPlots(){
 	}
 
 	// Jet Pt spectrum
-	for(int i=0; i<fJets.size(); ++i){
-		fHJpt  -> Fill(fTR->PFJPt[fJets[i]]);
-		fHJEta -> Fill(fTR->PFJEta[fJets[i]]);
+	for(int i=0; i<fJetsLoose.size(); ++i){
+		fHJpt  -> Fill(fTR->PFJPt[fJetsLoose[i]]);
+		fHJEta -> Fill(fTR->PFJEta[fJetsLoose[i]]);
 		if(fIsCleanMultiJetEvent){
-			fHJpt_clean  -> Fill(fTR->PFJPt[fJets[i]]); 
-			fHJEta_clean -> Fill(fTR->PFJEta[fJets[i]]);
+			fHJpt_clean  -> Fill(fTR->PFJPt[fJetsLoose[i]]); 
+			fHJEta_clean -> Fill(fTR->PFJEta[fJetsLoose[i]]);
 		}
 	}
 
@@ -324,7 +343,7 @@ void MassAnalysis::ControlPlots(){
 	}
 	fHMPT_selected ->Fill(tracks.Pt());
 		
-	if(fJets.size()>1) {
+	if(fJetsLoose.size()>1) {
 		double delta_R=Util::GetDeltaR(fTR->PFJEta[0], fTR->JEta[0], fTR->PFJPhi[0], fTR->JPhi[0]);	
 		fHPFandCalo_deltaR -> Fill(delta_R);
 		delta_R       =Util::GetDeltaR(fTR->PFJEta[0], fTR->PFJEta[1], fTR->PFJPhi[0], fTR->PFJPhi[1]);
@@ -334,7 +353,7 @@ void MassAnalysis::ControlPlots(){
 
 // *************************************************************************************************
 void MassAnalysis::PseudoJetMasses(){
-	if(fJets.size() <2 ) return;
+	if(fJetsLoose.size() <2 ) return;
 
 	// ---------------------------------------------
 	// Cleaning
@@ -347,9 +366,9 @@ void MassAnalysis::PseudoJetMasses(){
 	double alphaT=-999.99;
 	if( fLeptConfig==null ){
 		std::vector<TLorentzVector> jets;
-		for(int i=0; i<fJets.size(); ++i){
+		for(int i=0; i<fJetsLoose.size(); ++i){
 			TLorentzVector v;
-	 		v.SetPxPyPzE(fTR->PFJPx[fJets[i]],fTR->PFJPy[fJets[i]], fTR->PFJPz[fJets[i]], fTR->PFJE[fJets[i]]);
+	 		v.SetPxPyPzE(fTR->PFJPx[fJetsLoose[i]],fTR->PFJPy[fJetsLoose[i]], fTR->PFJPz[fJetsLoose[i]], fTR->PFJE[fJetsLoose[i]]);
 	 		jets.push_back(v);
 	 	}
 	 	alphaT= GetAlphaT(jets);
@@ -369,11 +388,11 @@ void MassAnalysis::PseudoJetMasses(){
 	
 	// make pseudojets with hemispheres
 	vector<float> px, py, pz, E;
-	for(int i=0; i<fJets.size(); ++i){
-		px.push_back(fTR->PFJPx[fJets[i]]);
-		py.push_back(fTR->PFJPy[fJets[i]]);
-		pz.push_back(fTR->PFJPz[fJets[i]]);
-		 E.push_back(fTR->PFJE[fJets[i]]);
+	for(int i=0; i<fJetsLoose.size(); ++i){
+		px.push_back(fTR->PFJPx[fJetsLoose[i]]);
+		py.push_back(fTR->PFJPy[fJetsLoose[i]]);
+		pz.push_back(fTR->PFJPz[fJetsLoose[i]]);
+		 E.push_back(fTR->PFJE[fJetsLoose[i]]);
 	}
 		
 	vector<TLorentzVector> leptonmomenta = GetLepton4Momenta();
@@ -425,7 +444,7 @@ void MassAnalysis::PseudoJetMasses(){
 			fHPseudoJetMT2vsMETsign       -> Fill(MT2, (fTR->PFMET)/sqrt(fTR->SumEt));
 			fHPseudoJetMT2vsMET           -> Fill(MT2, fTR->PFMET);
 			fHPseudoJetMT2vsAlphaT        -> Fill(MT2, alphaT);
-			fHPseudoJetMT2vsLeadingJEta   -> Fill(MT2, fTR->PFJEta[fJets[0]]);
+			fHPseudoJetMT2vsLeadingJEta   -> Fill(MT2, fTR->PFJEta[fJetsLoose[0]]);
 			fHPseudoJetMT2vsMHT           -> Fill(MT2, fMHT);
 		}
 		if(i==0 && MT2 > 135  && fLeptConfig==null && fVectorSumPt < 50  ){
@@ -552,19 +571,19 @@ void MassAnalysis::MultiBMasses(){
 	// inv mass of two bjets if they are in the same hemisphere
 	// the idea: in SUSY, higgs from decay of heavy particle -> boosted. H->b bbar, with two b in same hemi
 	vector<float> px, py, pz, E;
-	for(int i=0; i<fJets.size(); ++i ){
-		px.push_back(fTR->JPx[fJets[i]]);
-		py.push_back(fTR->JPy[fJets[i]]);
-		pz.push_back(fTR->JPz[fJets[i]]);
-		E.push_back(fTR->JE[fJets[i]]);
+	for(int i=0; i<fJetsLoose.size(); ++i ){
+		px.push_back(fTR->JPx[fJetsLoose[i]]);
+		py.push_back(fTR->JPy[fJetsLoose[i]]);
+		pz.push_back(fTR->JPz[fJetsLoose[i]]);
+		E.push_back(fTR->JE[fJetsLoose[i]]);
 	}
 		
 	fHemisphere = new Hemisphere(px, py, pz, E, 2, 3);
 	vector<int> grouping = fHemisphere->getGrouping();
 	vector<int> b_group1, b_group2;
-	for(int i=0; i<fJets.size(); ++i){
-		if(grouping[i]==1 && fTR->JbTagProbSimpSVHighPur[fJets[i]] > 2.0) b_group1.push_back(fJets[i]);
-		if(grouping[i]==2 && fTR->JbTagProbSimpSVHighPur[fJets[i]] > 2.0) b_group2.push_back(fJets[i]);
+	for(int i=0; i<fJetsLoose.size(); ++i){
+		if(grouping[i]==1 && fTR->JbTagProbSimpSVHighPur[fJetsLoose[i]] > 2.0) b_group1.push_back(fJetsLoose[i]);
+		if(grouping[i]==2 && fTR->JbTagProbSimpSVHighPur[fJetsLoose[i]] > 2.0) b_group2.push_back(fJetsLoose[i]);
 	}
 
 	TLorentzVector b1, b2;
@@ -586,7 +605,7 @@ void MassAnalysis::MultiBMasses(){
 
 // ***************************************************************************************************
 void MassAnalysis::DiJetMasses(){
-	if( fJets.size()!=2 ) return;    // only look at dijets
+	if( fJetsLoose.size()!=2 ) return;    // only look at dijets
 	if( fIsCleanJetEvent == false) return;  // reject events that fails the cleaning requirements
 	
 	// -------------------------------------------
@@ -596,8 +615,8 @@ void MassAnalysis::DiJetMasses(){
 	// filling of jets 
 	TLorentzVector p1;
 	TLorentzVector p2;		
-	p1.SetPxPyPzE(fTR->PFJPx[fJets[0]], fTR->PFJPy[fJets[0]], fTR->PFJPz[fJets[0]], fTR->PFJE[fJets[0]]);
-	p2.SetPxPyPzE(fTR->PFJPx[fJets[1]], fTR->PFJPy[fJets[1]], fTR->PFJPz[fJets[1]], fTR->PFJE[fJets[1]]);
+	p1.SetPxPyPzE(fTR->PFJPx[fJetsLoose[0]], fTR->PFJPy[fJetsLoose[0]], fTR->PFJPz[fJetsLoose[0]], fTR->PFJE[fJetsLoose[0]]);
+	p2.SetPxPyPzE(fTR->PFJPx[fJetsLoose[1]], fTR->PFJPy[fJetsLoose[1]], fTR->PFJPz[fJetsLoose[1]], fTR->PFJE[fJetsLoose[1]]);
 	
 	// --------------------------------------------------
 	// invariant mass
@@ -647,7 +666,7 @@ void MassAnalysis::DiJetMasses(){
 
 	// --------------------------------------------------
 	// alphaT  
-	if( fTR->PFJPt[fJets[0]] > 150 ){
+	if( fTR->PFJPt[fJetsLoose[0]] > 150 ){
 		std::vector<TLorentzVector> jets;
 		jets.push_back(p1);
 		jets.push_back(p2);
@@ -676,7 +695,7 @@ void MassAnalysis::SingleLeptonMasses(){
 	if(fLeptConfig==mu){fHMT_single_mu-> Fill(MT);}
 
 	
-	if(fJets.size()!=0) return; // plots also MT in case there are no selected jets (pure W -> l nu selection..)
+	if(fJetsLoose.size()!=0) return; // plots also MT in case there are no selected jets (pure W -> l nu selection..)
 
 	if(fLeptConfig==e ){fHMT_single_e_nojets -> Fill(MT);}
 	if(fLeptConfig==mu){fHMT_single_mu_nojets-> Fill(MT);}
@@ -694,9 +713,9 @@ void MassAnalysis::DiLeptonMasses(){
 
 	// define Upstream Transverse Momentum
 	TLorentzVector P_UTM(0.,0.,0.,0.);
-	for(int i=0; i<fJets.size(); ++i){
+	for(int i=0; i<fJetsLoose.size(); ++i){
 		TLorentzVector p;
-		p.SetPxPyPzE(fTR->PFJPx[fJets[i]],fTR->PFJPy[fJets[i]],fTR->PFJPz[fJets[i]],fTR->PFJE[fJets[i]]);
+		p.SetPxPyPzE(fTR->PFJPx[fJetsLoose[i]],fTR->PFJPy[fJetsLoose[i]],fTR->PFJPz[fJetsLoose[i]],fTR->PFJE[fJetsLoose[i]]);
 		P_UTM +=p;
 	}
 
@@ -1015,9 +1034,9 @@ void MassAnalysis::PrintEvent(){
 	cout << "********************************************************************************" << endl;
 	cout << "PrintEvent for " << fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event      << endl;
 	cout << endl;
-	for(int i=0; i<fJets.size(); ++i){
-		cout << "Jet" << i+1 << ": Pt " << fTR->PFJPt[fJets[i]]  
-		     << " Phi " << fTR->PFJPhi[fJets[i]] << " Eta " << fTR->PFJEta[fJets[i]] <<endl;
+	for(int i=0; i<fJetsLoose.size(); ++i){
+		cout << "Jet" << i+1 << ": Pt " << fTR->PFJPt[fJetsLoose[i]]  
+		     << " Phi " << fTR->PFJPhi[fJetsLoose[i]] << " Eta " << fTR->PFJEta[fJetsLoose[i]] <<endl;
 	}
 	for(int i=0; i<fElecs.size(); ++i){
 		cout << "El"  << i+1 << ": Pt " << fTR->ElPt[fElecs[i]]

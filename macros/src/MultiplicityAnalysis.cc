@@ -39,7 +39,7 @@ void MultiplicityAnalysis::Begin(const char* filename){
 void MultiplicityAnalysis::Analyze(){
 	
 	// ---------------------------------------------------
-	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
+	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
 	// ----------------------------------------------------
 
@@ -118,7 +118,7 @@ void MultiplicityAnalysis::Analyze(){
 	}
 
 	
-	unsigned int NQJets = fJets.size();
+	unsigned int NQJets = fJetsLoose.size();
 	unsigned int NBJets = fBJets.size();
 	
 

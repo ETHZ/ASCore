@@ -39,6 +39,9 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fElecs.clear();
 	fMuons.clear();
 	fJets.clear();
+	fJetsLoose.clear();
+	fJetsMedium.clear();
+	fJetsTight.clear();
 	fBJets.clear();
 
 	vector<double> pt1;
@@ -56,10 +59,15 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		pt1.push_back(fTR->ElPt[i]);
 	}
 	fElecs = Util::VSort(fElecs, pt1);
-	pt1.clear();	
+	pt1.clear();
+	vector<double> pfloose;
+	vector<double> pfmedium;
+	vector<double> pftight;
 	bool doSel(true);
 	for(int ij=0; ij < fTR->PFNJets; ++ij){
-		if(! IsGoodBasicPFJet(ij, true) ) continue;
+		fJets.push_back(ij);
+		pt1.push_back(fTR->PFJPt[ij]);
+
 		bool JGood(true);
 		for(int i=0; i<fMuons.size(); ++i){
 			double deltaR = Util::GetDeltaR(fTR->PFJEta[ij], fTR->MuEta[fMuons[i]], 
@@ -72,11 +80,24 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 			if(deltaR < 0.4)   JGood=false;
 		}
 		if(JGood==false) continue;
-		fJets.push_back(ij);
-		pt1.push_back(fTR->PFJPt[ij]);
-
+		if(! IsGoodBasicPFJet(ij, true) ) continue;
+		fJetsLoose.push_back(ij);
+		pfloose.push_back(fTR->PFJPt[ij]);
+		if(! IsGoodPFJetMedium(ij, true) ) continue;
+		fJetsMedium.push_back(ij);
+		pfmedium.push_back(fTR->PFJPt[ij]);
+		if(! IsGoodPFJetTight(ij, true) ) continue;
+		fJetsTight.push_back(ij);
+		pftight.push_back(fTR->PFJPt[ij]);
 	}
-	fJets  = Util::VSort(fJets,  pt1);
+	fJets        = Util::VSort(fJets     ,  pt1);
+	fJetsLoose   = Util::VSort(fJetsLoose,  pfloose);
+	fJetsMedium  = Util::VSort(fJetsMedium, pfmedium);
+	fJetsTight   = Util::VSort(fJetsTight,  pftight);
+	pfloose.clear();
+	pfmedium.clear();
+	pftight.clear();
+	pt1.clear();
 	
 	pt2.clear();
 	for(int ij=0; ij < fTR->NJets; ++ij){
@@ -167,9 +188,9 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	}
 	// HT
 	double HT=0;
-	for(int j=0; j<fJets.size(); ++j){
-		if(fTR->PFJPt[fJets[j]] > 50 && fabs(fTR->PFJEta[fJets[j]])<2.5){
-			HT += fTR->PFJPt[fJets[j]];
+	for(int j=0; j<fJetsLoose.size(); ++j){
+		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.5){
+			HT += fTR->PFJPt[fJetsLoose[j]];
 		}
 	}
 	fHT = HT;
@@ -178,9 +199,9 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 
 	// hardest jet
 	double hardest_jet=0;
-	for(int j=0; j<fJets.size(); ++j){
-		if(fTR->PFJPt[fJets[j]] > hardest_jet){
-			hardest_jet = fTR->PFJPt[fJets[j]];
+	for(int j=0; j<fJetsLoose.size(); ++j){
+		if(fTR->PFJPt[fJetsLoose[j]] > hardest_jet){
+			hardest_jet = fTR->PFJPt[fJetsLoose[j]];
 		}
 	}
 	if(hardest_jet<fCut_JPt_hardest_min){return false;}
@@ -211,8 +232,8 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	
 	// 3JetsAbove50
 	int jcount=0;
-	for(int j=0; j<fJets.size(); ++j){
-		if(fTR->PFJPt[fJets[j]] > 50 && fabs(fTR->PFJEta[fJets[j]])<2.5){
+	for(int j=0; j<fJetsLoose.size(); ++j){
+		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.5){
 			jcount++;
 		}
 	}
@@ -225,10 +246,10 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	fR12       = -999.99;
 	fR21       = -999.99;
 
-	if(fJets.size()>1 && fCut_PFMET_min > 0){
+	if(fJetsLoose.size()>1 && fCut_PFMET_min > 0){
 		double pi = 3.14159265;
-		double phi_j1  = fTR->PFJPhi[fJets[0]];
-		double phi_j2  = fTR->PFJPhi[fJets[1]];
+		double phi_j1  = fTR->PFJPhi[fJetsLoose[0]];
+		double phi_j2  = fTR->PFJPhi[fJetsLoose[1]];
 		double phi_met = fTR->PFMETphi;
 
 		double d_phi1 = fabs(Util::DeltaPhi(phi_j1, phi_met));
@@ -248,9 +269,9 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
 	double px=0;
 	double py=0;
-	for(int i=0; i<fJets.size(); ++i){
-		px+=fTR->PFJPx[fJets[i]];
-		py+=fTR->PFJPy[fJets[i]];
+	for(int i=0; i<fJetsLoose.size(); ++i){
+		px+=fTR->PFJPx[fJetsLoose[i]];
+		py+=fTR->PFJPy[fJetsLoose[i]];
 	}
 	fMHT = sqrt(px*px + py*py); // MHT from all selected jets
 	TVector3 MHTvec(0.,0.,0.);

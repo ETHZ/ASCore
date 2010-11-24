@@ -162,7 +162,7 @@ void RatioAnalysis::Analyze(){
 	fLeptCat.clear();
   
 	// ---------------------------------------------------
-	// Initialize fElecs, fJets, fBJets, fMuons, fLeptConfig 
+	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
 	// ----------------------------------------------------
 		
@@ -237,7 +237,7 @@ void RatioAnalysis::Analyze(){
 
 	// count number of jets
 	
-	fNQJets = fJets.size();
+	fNQJets = fJetsLoose.size();
 	fNBJets = fBJets.size();
 	
 	
@@ -246,15 +246,15 @@ void RatioAnalysis::Analyze(){
 	int ib1 = -1;
 	int ib2 = -1;
 	
-	for(int ij=0; ij<fJets.size(); ++ij){
-		if(fTR->PFJPt[fJets[ij]] > ptJet1){
+	for(int ij=0; ij<fJetsLoose.size(); ++ij){
+		if(fTR->PFJPt[fJetsLoose[ij]] > ptJet1){
 			ptJet2 = ptJet1;
 		  	ij2 = ij1;
-			ptJet1 = fTR->PFJPt[fJets[ij]];
-			ij1 = fJets[ij];
-		} else if( fTR->PFJPt[fJets[ij]] > ptJet2 ){
-			ptJet2 = fTR->PFJPt[fJets[ij]];
-			ij2 = fJets[ij];
+			ptJet1 = fTR->PFJPt[fJetsLoose[ij]];
+			ij1 = fJetsLoose[ij];
+		} else if( fTR->PFJPt[fJetsLoose[ij]] > ptJet2 ){
+			ptJet2 = fTR->PFJPt[fJetsLoose[ij]];
+			ij2 = fJetsLoose[ij];
 		}
 	}
 	for(int ij=0; ij<fBJets.size(); ++ij){
@@ -272,7 +272,7 @@ void RatioAnalysis::Analyze(){
 	  fPtJets ->Fill(fTR->PFJPt[ij2]);
 	  fRptDPhi2j->Fill(fTR->PFJPt[ij2]/fTR->PFJPt[ij1], dPhi2j);
 
-	  if( fJets.size()==2){
+	  if( fJetsLoose.size()==2){
 //	  if (fTR->NJets == 2) { 
 	    double mT = sqrt((fTR->PFJPt[ij1]+fTR->PFJPt[ij2])*(fTR->PFJPt[ij1]+fTR->PFJPt[ij2])
 	      - (fTR->PFJPx[ij1]+fTR->PFJPx[ij2])*(fTR->PFJPx[ij1]+fTR->PFJPx[ij2])
@@ -288,8 +288,8 @@ void RatioAnalysis::Analyze(){
 	  fEtaJets ->Fill(fTR->PFJEta[ij2]);
 	}
 
-	for(int ij=0; ij < fJets.size(); ++ij){
-	  fBProbJets->Fill(fTR->JbTagProbSimpSVHighEff[fJets[ij]]);
+	for(int ij=0; ij < fJetsLoose.size(); ++ij){
+	  fBProbJets->Fill(fTR->JbTagProbSimpSVHighEff[fJetsLoose[ij]]);
 	}
 
 	if (ib1 >= 0 && ib2 >= 0) {

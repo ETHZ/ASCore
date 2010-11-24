@@ -25,6 +25,9 @@ public:
 	vector<int> fElecs;
 	vector<int> fMuons;
 	vector<int> fJets;
+	vector<int> fJetsLoose;
+	vector<int> fJetsMedium;
+	vector<int> fJetsTight;
 	vector<int> fBJets;
 	
 	enum LeptConfig {
