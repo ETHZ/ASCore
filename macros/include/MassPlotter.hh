@@ -90,19 +90,19 @@ private:
 
 	void ControlPlot();
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
-        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString xtitle="MT2 [GeV]", 
-		      const int nbins=50, const double min=0, const double max=1, 
+        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="NJets>=2", 
+		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0, const double max=1, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
-		      bool overlaySUSY=false, float overlayScale = 0);
-        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString xtitle="MT2 [GeV]", 
-		      const int nbins=gNMT2bins, const double *bins=gMT2bins, 
+		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
+        void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="NJets>=2", 
+		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
-		      bool overlaySUSY=false, float overlayScale = 0);
+		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
 	void MakePlot(std::vector<sample> Samples, TString branch_name, const int nbins, const double bins[], bool cleaned, bool logflag, 
 		      TString cut_branch_name, double ysplit[], TString option, TString version, TString prediction, double factor );
 	void printHisto(THStack h, TString canvname, Option_t *drawopt,  bool logflag);
 	void printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canvname, Option_t *drawopt,  bool logflag, TString xtitle, TString ytitle);
-	void printHisto(THStack h, TH1* h_data, TH1* h_prediction, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle);
+        void printHisto(THStack h, TH1* h_data, TH1* h_prediction, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, bool stacked=true);
 	void printHisto(THStack h, TH1* h_data, TH1* h_prediction, TH1* h_susy, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, float overlayScale=0);
 	void printHisto(TH1* h, TString canvname, Option_t *drawopt, bool logflag);
 	void ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], bool cleaned, TString sname, TString type);

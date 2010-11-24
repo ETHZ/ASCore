@@ -142,31 +142,44 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 //	ABCD_MT2("DPhiMhtMpt", dPhisplit, "none", gNMT2bins, gMT2bins, "QCD_"+cleanflag+dPhirange ,cleaned,  "QCD",  "mc");
 
 
+	std::ostringstream cutStream;
+	cutStream << "misc.LeptConfig == " << LeptConfigCut  << "&&"
+		  << "misc.Vectorsumpt < " << VectorSumPtCut << "&&"
+		  << "NJets >= "           << NJetsCut       << "&&"
+		  << "misc.PseudoJetMT2 >=0";
+	
+	TString cuts = cutStream.str().c_str();
 
-	//       samples   , variable          ,    xtitle                  ,nbins    , bins[],  cleaned,  log  , comp , ratio, overlay
-	MakePlot(fSamples  ,"misc.PseudoJetMT2", "MT2"                      ,gNMT2bins, gMT2bins,  false,  true , true,   true, false);
-	//       samples   , variable        ,    xtitle                  ,nbins,min,max,     cleaned,  log  , comp , ratio, overlay
-// 	MakePlot(fSamples  ,"MetJetDPhi(0)"  , "#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(),  false,  false, true,   true,  true);
-// 	MakePlot(fSamples  ,"MetJetDPhi(1)"  , "#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(),  false,  false, true,   true,  true);
-// 	MakePlot(fSamples  ,"MetJetDPhi(2)"  , "#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(),  false,  false, true,   true,  true);
-// 	MakePlot(fSamples  ,"MinMetJetDPhi()", "#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(),  false,  false, true,   true,  true);
+	//       samples   , variable, cuts    ,    xtitle             ,nbins    , bins[],  cleaned,  log  , comp , ratio, stack, overlay
+	MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"              ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
+	//       samples   , variable, cuts  ,    xtitle                  ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
+   	//MakePlot(fSamples,"MetJetDPhi(0)"  ,cuts,"#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+   	//MakePlot(fSamples,"MetJetDPhi(1)"  ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+   	//MakePlot(fSamples,"MetJetDPhi(2)"  ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+   	//MakePlot(fSamples,"MinMetJetDPhi()",cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
 
 }
 
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xtitle, const int nbins, const double min, const double max, bool cleaned, bool logflag, bool composited, bool ratio, bool overlaySUSY, float overlayScale){
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, 
+			   TString xtitle, const int nbins, const double min, const double max,
+			   bool cleaned, bool logflag, bool composited, bool ratio, 
+			   bool stacked, bool overlaySUSY, float overlayScale){
 
   double bins[nbins];
   bins[0] = min;
   for(int i=0; i<nbins; i++)
     bins[i+1] = min+i*(max-min)/nbins;
-  MakePlot(Samples, var, xtitle, nbins, bins, cleaned, logflag, composited, ratio, overlaySUSY, overlayScale);
+  MakePlot(Samples, var, cuts, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 }
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xtitle, const int nbins, const double *bins, bool cleaned, bool logflag, bool composited, bool ratio, bool overlaySUSY, float overlayScale){
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, 
+			   TString xtitle, const int nbins, const double *bins, 
+			   bool cleaned, bool logflag, bool composited, bool ratio, 
+			   bool stacked, bool overlaySUSY, float overlayScale){
 
         TString varname = var;
 	varname.ReplaceAll("(","");
@@ -202,8 +215,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 	for (int i=0; i<5; i++){
 	  h_composited[i] = new TH1D(varname+"_"+cnames[i], "", nbins, bins);
 	  h_composited[i] -> Sumw2();
-	  h_composited[i] -> SetFillColor  (ccolor[i]);
+	  h_composited[i] -> SetFillColor  (stacked ? ccolor[i] : 0);
 	  h_composited[i] -> SetLineColor  (ccolor[i]);
+	  if (!stacked) {
+	    h_composited[i] -> SetLineWidth(4);
+	  }
 	  h_composited[i] -> SetMarkerColor(ccolor[i]);
 	  h_composited[i] -> SetStats(false);
 	}
@@ -215,8 +231,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 	for(size_t i = 0; i < Samples.size(); ++i){
 		h_samples.push_back(new TH1D(varname+"_"+Samples[i].name, "", nbins, bins));
 		h_samples[i] -> Sumw2();
-		h_samples[i] -> SetFillColor(Samples[i].color);
+		h_samples[i] -> SetFillColor(stacked ? Samples[i].color : 0);
 		h_samples[i] -> SetLineColor(Samples[i].color);
+		if (!stacked) {
+		  h_samples[i] -> SetLineWidth(4);
+		}
 		h_samples[i] -> SetMarkerColor(Samples[i].color);
 		h_samples[i] -> SetStats(false);
 		if(Samples[i].type == "susy" ){
@@ -229,22 +248,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 		if(fVerbose>2) cout << "MakePlot: looping over " << Samples[i].sname << endl;
 		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
 	
-		TString variable = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
-
-		std::ostringstream cutStream;
-		cutStream << "misc.LeptConfig == " << LeptConfigCut  << "&&"
-			  << "misc.Vectorsumpt < " << VectorSumPtCut << "&&"
-			  << "NJets >= "           << NJetsCut       << "&&"
-			  << "misc.PseudoJetMT2 >=0";
-
-		TString cuts = TString::Format("(%f) * (%s)",weight,cutStream.str().c_str());
-// 		TString cuts = TString::Format("( misc.LeptConfig == %d && misc.Vectorsumpt < %f && NJets > %d && misc.PseudoJetMT2 >=0 )",LeptConfigCut, VectorSumPtCut, NJetsCut);
-// 		cuts.Form("(%f) * (%s)",weight,cuts.Data());
+		TString variable  = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
+		TString selection = TString::Format("(%f) * (%s)",weight,cuts.Data());
 		  
-		if(fVerbose>2) cout << "+++++ Drawing " << variable << endl
-				    << "\twith cuts: "  << cuts     << endl;
+		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
+				    << "\twith cuts: "  << selection << endl;
 
-		int nev = Samples[i].tree->Draw(variable.Data(),cuts.Data(),"goff");
+		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
 
 		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
 				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
@@ -270,23 +280,32 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 
 	if (composited){
 	  for (int i=0; i<4; ++i){
-	    if( i!=3 || !overlaySUSY) h_stack  .Add(h_composited[i]);
-	    if( i==3)                 h_susy  ->Add(h_composited[i]);
-	    else        	      h_mc_sum->Add(h_composited[i]);
+	    if (!stacked)  {
+	      h_composited[i]->Scale(1./h_composited[i]->Integral());
+	      h_composited[i] -> SetMinimum(0.00005);
+	      //if (fVerbose>2) cout << " h_composited[" << i<< "]->Integral = " << h_composited[i]->Integral()  << endl;
+	    }
+	    if( i!=3 || !overlaySUSY) h_stack  .  Add(h_composited[i]);
+	    if( i==3)                 h_susy   -> Add(h_composited[i]);
+	    else        	      h_mc_sum -> Add(h_composited[i]);
 	    if( i==3 && overlaySUSY)
 	      Legend1 ->AddEntry(h_composited[i], cnames[i] + (overlayScale ? 
 							      TString::Format(" x %.0f",overlayScale) :
 							      " scaled to data")   , "f");  
 	    else
-	      Legend1 ->AddEntry(h_composited[i], cnames[i], "f");
+	      Legend1 ->AddEntry(h_composited[i], cnames[i], stacked ? "f" : "l");
 	  }
 	  h_data->Add(h_composited[4]);
-	  if(h_data->Integral()>0){
+	  if(h_data->Integral()>0 && stacked){
 	    Legend1     ->AddEntry(h_data, "data", "l");
 	  }
 	}
 	else{
 	  for(int i=0; i<Samples.size(); ++i){
+	    if (!stacked) {
+	      h_samples[i]->Scale(1./h_samples[i]->Integral());
+	      h_samples[i] -> SetMinimum(0.0001);
+	    }
 	    if((Samples[i].sname=="QCD" )){
 	      h_samples[i] -> SetMinimum(0.01);
 	      h_stack.Add(h_samples[i]);
@@ -303,7 +322,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 								       TString::Format(" x %.0f",overlayScale) :
 								       " scaled to data")   , "f") ;
 		else
-		  Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
+		  Legend1 ->AddEntry(h_samples[i], Samples[i].sname, stacked ? "f" : "l");
 		
 	      }
 	    }
@@ -319,20 +338,25 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString xti
 
 	TString ytitle = "Events";
 
-	// print histo without QCD prediction
-// 	printHisto(h_stack, h_data,   Legend1 , branch_name+"_"+version, "hist", logflag, xtitle, ytitle);
-// 	plotRatioStack(h_stack,  h_mc_sum, h_data,  true, false, branch_name+"_"+version+"ratio", Legend1, xtitle, ytitle);
+	if(!stacked) {
+	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
+	    + "_shape";
+	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, false);
 
-
-	if (!overlaySUSY){
-	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , varname, "hist", logflag, xtitle, ytitle);
+	}
+	else if (!overlaySUSY){
+	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
+	    + (composited ? "_comp" : "");
+	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle);
 	  if (ratio) 
-	    plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, varname+"ratio", Legend1, xtitle, ytitle);
+	    plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, outname, Legend1, xtitle, ytitle);
 	}
 	else {
-	  printHisto(h_stack, h_data, h_mc_sum, h_susy, Legend1 , varname, "hist", logflag, xtitle, ytitle);
+	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
+	    + (composited ? "_comp" : "") + "_overlay";	  
+	  printHisto(h_stack, h_data, h_mc_sum, h_susy, Legend1 , outname, "hist", logflag, xtitle, ytitle);
 	  if (ratio) 
-	    plotRatioStack(h_stack,  h_mc_sum, h_data, h_susy,  logflag, false, varname+"ratio", Legend1, xtitle, ytitle);
+	    plotRatioStack(h_stack,  h_mc_sum, h_data, h_susy,  logflag, false, outname, Legend1, xtitle, ytitle);
 
 	}
 	
@@ -1087,7 +1111,7 @@ void MassPlotter::printHisto(THStack h, TString canvname, Option_t *drawopt, boo
 
 }
 //____________________________________________________________________________
-void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle){
+void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, bool stacked){
 
 	TCanvas *col = new TCanvas(canvname, "", 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -1096,16 +1120,16 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 	gPad->SetFillStyle(0);
 	if(logflag) {
 		gPad->SetLogy(1);
-		h.SetMinimum(0.01);
-		h_mc_sum -> SetMinimum(0.01);
-		h_data->SetMinimum(0.01);
+		h        .  SetMinimum(stacked ? 0.05 : 0.0001);
+		h_mc_sum -> SetMinimum(0.05);
+		h_data   -> SetMinimum(0.05);
 	}else{
 		h.SetMinimum(0);
 	}
 
-	h.Draw(drawopt);
+	h.Draw(stacked ? drawopt : "histnostack");
 	//h_mc_sum -> Draw("same, E2");
-	if(h_data->Integral()>0) {
+	if(h_data->Integral()>0 && stacked) {
 		h_data       ->Draw("same");
 	}
 	if(leg != NULL ){
@@ -1146,10 +1170,10 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy,
 	gPad->SetFillStyle(0);
 	if(logflag) {
 		gPad->SetLogy(1);
-		h.SetMinimum(0.01);
-		h_mc_sum -> SetMinimum(0.01);
-		h_data->SetMinimum(0.01);
-		h_susy->SetMinimum(0.01);
+		h        .  SetMinimum(0.05);
+		h_mc_sum -> SetMinimum(0.05);
+		h_data   -> SetMinimum(0.05);
+		h_susy   -> SetMinimum(0.05);
 	}else{
 		h.SetMinimum(0);
 	}
