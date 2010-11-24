@@ -18,12 +18,14 @@ using namespace std;
 void usage( int status = 0 ) {
 	cout << "Usage: RunUserAnalyzer [-d dir] [-v verbose] [-s sample] [-m mode]" << endl;
 	cout << "  where:" << endl;
-	cout << "     dir      is the output directory               " << endl;
-	cout << "               default is TempOutput/               " << endl;
-	cout << "     verbose  sets the verbose level                " << endl;
-	cout << "               default is 0 (quiet mode)            " << endl;
-	cout << "     sample   is the file with the list of samples" << endl;
-	cout << "     mode     switches between different paths" << endl;
+	cout << "     dir        is the output directory               " << endl;
+	cout << "                 default is TempOutput/               " << endl;
+	cout << "     verbose    sets the verbose level                " << endl;
+	cout << "                 default is 0 (quiet mode)            " << endl;
+	// cout << "     sample   is the file with the list of samples" << endl;
+	cout << "     selection  switches between UCSD and Florida selections" << endl;
+	cout << "                 default is 0 (UCSD), 1 is Florida    " << endl;
+	cout << "     mode       switches between different paths" << endl;
 	cout << endl;
 	exit(status);
 }
@@ -35,13 +37,15 @@ int main(int argc, char* argv[]) {
 	TString samples = "samples.dat";
 	int verbose = 0;
 	int mode = 0;
+	int selection = 0; // UCSD default
 
 // Parse options
 	char ch;
 	while ((ch = getopt(argc, argv, "d:s:v:m:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir = TString(optarg); break;
-			case 's': samples = TString(optarg); break;
+			case 's': selection = atoi(optarg); break;
+			// case 's': samples = TString(optarg); break;
 			case 'v': verbose = atoi(optarg); break;
 			case 'm': mode = atoi(optarg); break;
 			case '?':
@@ -72,6 +76,7 @@ int main(int argc, char* argv[]) {
 	MuonPlotter *tA = new MuonPlotter();
 	tA->setOutputDir(outputdir);
 	tA->setOutputFile("MuonPlots.root");
+	tA->setSelection(selection);
 	tA->setVerbose(verbose);
 	tA->init(samples);
 	if(mode == 2) tA->fillYields();
