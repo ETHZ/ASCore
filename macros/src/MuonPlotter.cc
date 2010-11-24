@@ -17,6 +17,7 @@
 using namespace std;
 
 // int fSelectionSwitch = 1; // 0: high/pt, low HT, hybiso, 1: low/pt, high HT, stand iso
+int gChargeSwitch = 1; // 0: SS, 1: OS
 
 // Binning ///////////////////////////////////////////////////////////////////////
 // static const int gNPtbins = 5;
@@ -65,6 +66,7 @@ void MuonPlotter::init(TString filename){
 		if(fSelectionSwitch == 0)      cout << "UCSD/UCSB/FNAL selection." << endl;
 		else if(fSelectionSwitch == 1) cout << "UFlorida selection." << endl;
 		else cout << "???" << endl;
+		if(gChargeSwitch == 1) cout << " ... using opposite-sign charge selection" << endl;
 	}
 	Util::SetStyle();
 	loadSamples(filename);
@@ -200,9 +202,9 @@ void MuonPlotter::makePlots(){
 	// printYields(Electron, fLumiNorm);
 	// printYields(EMu,      fLumiNorm);
 
-	// printYieldsShort();
+	printYieldsShort();
 
-	makeIntPrediction(fOutputDir + "Yields.txt");
+	// makeIntPrediction(fOutputDir + "Yields.txt");
 
 	// makefRatioPlots();
 	// makepRatioPlots();
@@ -2106,8 +2108,8 @@ void MuonPlotter::fillYields(vector<int> samples){
 		TTree *tree = fSamples[index].tree;
 		const bool isdata = fSamples[index].isdata;
 
-		fCurrentSample = index;
-		gSample sample = gSample(index);
+		fCurrentSample = gSample(index);
+		// gSample sample = gSample(index);
 
 		channel mumu = fSamples[index].mumu;
 		channel ee   = fSamples[index].ee;
@@ -2170,18 +2172,19 @@ void MuonPlotter::fillYields(vector<int> samples){
 			if (ientry < 0) break;
 			nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-			fCounters[fCurrentSample][Muon].fill("All events");
-			fCounters[fCurrentSample][EMu].fill("All events");
+			fCounters[fCurrentSample][Muon]    .fill("All events");
+			fCounters[fCurrentSample][EMu]     .fill("All events");
 			fCounters[fCurrentSample][Electron].fill("All events");
 			
 			// Select mutually exclusive runs for Jet and MultiJet datasets
 			if(!isGoodRun(index)) continue;
 			
-			fCounters[fCurrentSample][Muon].fill(" ... is good run");
-			fCounters[fCurrentSample][EMu].fill(" ... is good run");
+			fCounters[fCurrentSample][Muon]    .fill(" ... is good run");
+			fCounters[fCurrentSample][EMu]     .fill(" ... is good run");
 			fCounters[fCurrentSample][Electron].fill(" ... is good run");
 			
 			// MuMu Channel
+			fCurrentChannel = Muon;
 			if( (isdata && isSSLLMuEventTRG()) || (!isdata && isSSLLMuEvent()) ){
 			// if(isSSLLMuEventTRG()){
 				if(  isTightMuon(0) &&  isTightMuon(1) ){ // Tight-tight
@@ -2239,6 +2242,7 @@ void MuonPlotter::fillYields(vector<int> samples){
 			}				
 			
 			// EE Channel
+			fCurrentChannel = Electron;
 			if( (isdata && isSSLLElEventTRG()) || (!isdata && isSSLLElEvent()) ){
 			// if(isSSLLElEventTRG()){
 				if(  isTightElectron(0) &&  isTightElectron(1) ){ // Tight-tight
@@ -2297,7 +2301,8 @@ void MuonPlotter::fillYields(vector<int> samples){
 			}
 						
 			// EMu Channel
-			if( (isdata && isSSLLElMuEventTRG(sample)) || (!isdata && isSSLLElMuEvent()) ){
+			fCurrentChannel = EMu;
+			if( (isdata && isSSLLElMuEventTRG()) || (!isdata && isSSLLElMuEvent()) ){
 			// if(isSSLLElMuEventTRG()){
 				if(  isTightElectron(0) &&  isTightMuon(0) ){ // Tight-tight
 					fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
@@ -2714,17 +2719,17 @@ void MuonPlotter::printYieldsShort(float luminorm){
 void MuonPlotter::bookHistos(){
 	for(size_t i = 0; i < fSamples.size(); ++i){
 		TString name = fSamples[i].sname;
-		fSamples[i].mumu.nthistos.h_nt2       = new TH2D(name + "_MuMu_NT2",        "NT2",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].mumu.nthistos.h_nt2_pt    = new TH1D(name + "_MuMu_NT2_pt",     "NT2",        gNPt2bins,  gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt2       = new TH2D(name + "_MuMu_NT2",        "NT2",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt2_pt    = new TH1D(name + "_MuMu_NT2_pt",     "NT2",        gNPt2bins, gPt2bins);
 		fSamples[i].mumu.nthistos.h_nt2_eta   = new TH1D(name + "_MuMu_NT2_eta",    "NT2",        gNEtabins, gEtabins);
-		fSamples[i].mumu.nthistos.h_nt10      = new TH2D(name + "_MuMu_NT10",       "NT10",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].mumu.nthistos.h_nt10_pt   = new TH1D(name + "_MuMu_NT10_pt",    "NT10 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt10      = new TH2D(name + "_MuMu_NT10",       "NT10",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt10_pt   = new TH1D(name + "_MuMu_NT10_pt",    "NT10 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].mumu.nthistos.h_nt10_eta  = new TH1D(name + "_MuMu_NT10_eta",   "NT10 vs eta",gNEtabins, gEtabins);
-		fSamples[i].mumu.nthistos.h_nt01      = new TH2D(name + "_MuMu_NT01",       "NT01",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].mumu.nthistos.h_nt01_pt   = new TH1D(name + "_MuMu_NT01_pt",    "NT01 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt01      = new TH2D(name + "_MuMu_NT01",       "NT01",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt01_pt   = new TH1D(name + "_MuMu_NT01_pt",    "NT01 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].mumu.nthistos.h_nt01_eta  = new TH1D(name + "_MuMu_NT01_eta",   "NT01 vs eta",gNEtabins, gEtabins);
-		fSamples[i].mumu.nthistos.h_nt0       = new TH2D(name + "_MuMu_NT0",        "NT0",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].mumu.nthistos.h_nt0_pt    = new TH1D(name + "_MuMu_NT0_pt",     "NT0 vs pt",  gNPt2bins,  gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt0       = new TH2D(name + "_MuMu_NT0",        "NT0",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].mumu.nthistos.h_nt0_pt    = new TH1D(name + "_MuMu_NT0_pt",     "NT0 vs pt",  gNPt2bins, gPt2bins);
 		fSamples[i].mumu.nthistos.h_nt0_eta   = new TH1D(name + "_MuMu_NT0_eta",    "NT0 vs eta", gNEtabins, gEtabins);
 		fSamples[i].mumu.fhistos.h_ntight     = new TH2D(name + "_MuMu_fTight",     "NTight Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
 		fSamples[i].mumu.fhistos.h_nloose     = new TH2D(name + "_MuMu_fLoose",     "NLoose Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
@@ -2762,17 +2767,17 @@ void MuonPlotter::bookHistos(){
 		fSamples[i].mumu.phistos.h_ratio_pt   ->Sumw2(); fSamples[i].mumu.phistos.h_ratio_eta  ->Sumw2();
 		fSamples[i].mumu.phistos.h_ratio      ->Sumw2(); 
 
-		fSamples[i].emu.nthistos.h_nt2       = new TH2D(name + "_EMu_NT2",        "NT2",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].emu.nthistos.h_nt2_pt    = new TH1D(name + "_EMu_NT2_pt",     "NT2",        gNPt2bins,  gPt2bins);
+		fSamples[i].emu.nthistos.h_nt2       = new TH2D(name + "_EMu_NT2",        "NT2",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].emu.nthistos.h_nt2_pt    = new TH1D(name + "_EMu_NT2_pt",     "NT2",        gNPt2bins, gPt2bins);
 		fSamples[i].emu.nthistos.h_nt2_eta   = new TH1D(name + "_EMu_NT2_eta",    "NT2",        gNEtabins, gEtabins);
-		fSamples[i].emu.nthistos.h_nt10      = new TH2D(name + "_EMu_NT10",       "NT10",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].emu.nthistos.h_nt10_pt   = new TH1D(name + "_EMu_NT10_pt",    "NT10 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].emu.nthistos.h_nt10      = new TH2D(name + "_EMu_NT10",       "NT10",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].emu.nthistos.h_nt10_pt   = new TH1D(name + "_EMu_NT10_pt",    "NT10 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].emu.nthistos.h_nt10_eta  = new TH1D(name + "_EMu_NT10_eta",   "NT10 vs eta",gNEtabins, gEtabins);
-		fSamples[i].emu.nthistos.h_nt01      = new TH2D(name + "_EMu_NT01",       "NT01",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].emu.nthistos.h_nt01_pt   = new TH1D(name + "_EMu_NT01_pt",    "NT01 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].emu.nthistos.h_nt01      = new TH2D(name + "_EMu_NT01",       "NT01",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].emu.nthistos.h_nt01_pt   = new TH1D(name + "_EMu_NT01_pt",    "NT01 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].emu.nthistos.h_nt01_eta  = new TH1D(name + "_EMu_NT01_eta",   "NT01 vs eta",gNEtabins, gEtabins);
-		fSamples[i].emu.nthistos.h_nt0       = new TH2D(name + "_EMu_NT0",        "NT0",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].emu.nthistos.h_nt0_pt    = new TH1D(name + "_EMu_NT0_pt",     "NT0 vs pt",  gNPt2bins,  gPt2bins);
+		fSamples[i].emu.nthistos.h_nt0       = new TH2D(name + "_EMu_NT0",        "NT0",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].emu.nthistos.h_nt0_pt    = new TH1D(name + "_EMu_NT0_pt",     "NT0 vs pt",  gNPt2bins, gPt2bins);
 		fSamples[i].emu.nthistos.h_nt0_eta   = new TH1D(name + "_EMu_NT0_eta",    "NT0 vs eta", gNEtabins, gEtabins);
 		fSamples[i].emu.fhistos.h_ntight     = new TH2D(name + "_EMu_fTight",     "NTight Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
 		fSamples[i].emu.fhistos.h_nloose     = new TH2D(name + "_EMu_fLoose",     "NLoose Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
@@ -2810,17 +2815,17 @@ void MuonPlotter::bookHistos(){
 		fSamples[i].emu.phistos.h_ratio_pt  ->Sumw2(); fSamples[i].emu.phistos.h_ratio_eta  ->Sumw2();
 		fSamples[i].emu.phistos.h_ratio     ->Sumw2(); 
 
-		fSamples[i].ee.nthistos.h_nt2       = new TH2D(name + "_EE_NT2",        "NT2",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].ee.nthistos.h_nt2_pt    = new TH1D(name + "_EE_NT2_pt",     "NT2",        gNPt2bins,  gPt2bins);
+		fSamples[i].ee.nthistos.h_nt2       = new TH2D(name + "_EE_NT2",        "NT2",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].ee.nthistos.h_nt2_pt    = new TH1D(name + "_EE_NT2_pt",     "NT2",        gNPt2bins, gPt2bins);
 		fSamples[i].ee.nthistos.h_nt2_eta   = new TH1D(name + "_EE_NT2_eta",    "NT2",        gNEtabins, gEtabins);
-		fSamples[i].ee.nthistos.h_nt10      = new TH2D(name + "_EE_NT10",       "NT10",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].ee.nthistos.h_nt10_pt   = new TH1D(name + "_EE_NT10_pt",    "NT10 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].ee.nthistos.h_nt10      = new TH2D(name + "_EE_NT10",       "NT10",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].ee.nthistos.h_nt10_pt   = new TH1D(name + "_EE_NT10_pt",    "NT10 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].ee.nthistos.h_nt10_eta  = new TH1D(name + "_EE_NT10_eta",   "NT10 vs eta",gNEtabins, gEtabins);
-		fSamples[i].ee.nthistos.h_nt01      = new TH2D(name + "_EE_NT01",       "NT01",       gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].ee.nthistos.h_nt01_pt   = new TH1D(name + "_EE_NT01_pt",    "NT01 vs pt", gNPt2bins,  gPt2bins);
+		fSamples[i].ee.nthistos.h_nt01      = new TH2D(name + "_EE_NT01",       "NT01",       gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].ee.nthistos.h_nt01_pt   = new TH1D(name + "_EE_NT01_pt",    "NT01 vs pt", gNPt2bins, gPt2bins);
 		fSamples[i].ee.nthistos.h_nt01_eta  = new TH1D(name + "_EE_NT01_eta",   "NT01 vs eta",gNEtabins, gEtabins);
-		fSamples[i].ee.nthistos.h_nt0       = new TH2D(name + "_EE_NT0",        "NT0",        gNPt2bins,  gPt2bins, gNPt2bins, gPt2bins);
-		fSamples[i].ee.nthistos.h_nt0_pt    = new TH1D(name + "_EE_NT0_pt",     "NT0 vs pt",  gNPt2bins,  gPt2bins);
+		fSamples[i].ee.nthistos.h_nt0       = new TH2D(name + "_EE_NT0",        "NT0",        gNPt2bins, gPt2bins, gNPt2bins, gPt2bins);
+		fSamples[i].ee.nthistos.h_nt0_pt    = new TH1D(name + "_EE_NT0_pt",     "NT0 vs pt",  gNPt2bins, gPt2bins);
 		fSamples[i].ee.nthistos.h_nt0_eta   = new TH1D(name + "_EE_NT0_eta",    "NT0 vs eta", gNEtabins, gEtabins);
 		fSamples[i].ee.fhistos.h_ntight     = new TH2D(name + "_EE_fTight",     "NTight Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
 		fSamples[i].ee.fhistos.h_nloose     = new TH2D(name + "_EE_fLoose",     "NLoose Muons for sig. supp. selection",      gNPt2bins, gPt2bins, gNEtabins, gEtabins);
@@ -3040,13 +3045,16 @@ bool MuonPlotter::passesMETCut(float cut){
 bool MuonPlotter::passesZVeto(float dm){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
+// Default for dm is 15 GeV
 	const float MMU = 0.1057;
 	const float MEL = 0.0005;
 	const float MZ  = 91.2;
 
 	if(NMus > 1){
+		unsigned start = 0;
+		if(fCurrentChannel == Muon) start = 1; // For mumu, ignore first mu
 		// First muon
-		for(size_t i = 0; i < NMus-1; ++i){
+		for(size_t i = start; i < NMus-1; ++i){
 			if(isTightMuon(i)){
 				TLorentzVector pmu1, pmu2;
 				pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], MMU);
@@ -3063,8 +3071,10 @@ bool MuonPlotter::passesZVeto(float dm){
 	}
 	
 	if(NEls > 1){
+		unsigned start = 0;
+		if(fCurrentChannel == Electron) start = 1; // For ee, ignore first e
 		// First electron
-		for(size_t i = 0; i < NEls-1; ++i){
+		for(size_t i = start; i < NEls-1; ++i){
 			if(isTightElectron(i)){
 				TLorentzVector pel1, pel2;
 				pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], MEL);
@@ -3078,54 +3088,6 @@ bool MuonPlotter::passesZVeto(float dm){
 				}
 			}
 		}		
-	}
-	return true;
-}
-
-//____________________________________________________________________________
-bool MuonPlotter::passesZVeto(float lower, float upper){
-// Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
-// has invariant mass closer than dm to the Z mass, returns true if none found
-	const float MMU = 0.1057;
-	const float MEL = 0.0005;
-	const float MZ  = 91.2;
-
-	if(NMus > 1){
-		// First muon
-		for(size_t i = 0; i < NMus-1; ++i){
-			if(isTightMuon(i)){
-				TLorentzVector pmu1, pmu2;
-				pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], MMU);
-
-				// Second muon
-				for(size_t j = i+1; j < NMus; ++j){ 
-					if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
-						pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], MMU);
-						float mass = (pmu1+pmu2).M();
-						if(mass > lower && mass < upper) return false;
-					}
-				}
-			}
-		}
-	}
-
-	if(NEls > 1){
-		// First electron
-		for(size_t i = 0; i < NEls-1; ++i){
-			if(isTightElectron(i)){
-				TLorentzVector pel1, pel2;
-				pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], MEL);
-
-				// Second electron
-				for(size_t j = i+1; j < NEls; ++j){
-					if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
-						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], MEL);
-						float mass = (pel1+pel2).M();
-						if(mass > lower && mass < upper) return false;
-					}
-				}
-			}
-		}
 	}
 	return true;
 }
@@ -3375,8 +3337,7 @@ bool MuonPlotter::isSSLLMuEvent(){
 	if(NMus < 2) return false;         // >1 muons
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has 2 loose muons");
 
-	if(fSelectionSwitch == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
-	if(fSelectionSwitch == 1) if(!passesZVeto(15.))       return false;
+	if(!passesZVeto()) return false; // no Zs in event
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Z veto");
 	
 	if(fSelectionSwitch == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
@@ -3391,8 +3352,8 @@ bool MuonPlotter::isSSLLMuEvent(){
 	if(fSelectionSwitch == 1) if(!passesMETCut(30.))  return false;
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes MET cut");
 
-	// if(MuCharge[0] == MuCharge[1]) return false;              // OS
-	if(MuCharge[0] != MuCharge[1]) return false;              // SS
+	if(MuCharge[0] != MuCharge[1] && gChargeSwitch == 0) return false;              // SS
+	if(MuCharge[0] == MuCharge[1] && gChargeSwitch == 1) return false;              // OS
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has same-sign muons");
 
 	if(!isGoodSecMuon(1)) return false; // pt cuts
@@ -3436,8 +3397,7 @@ bool MuonPlotter::isSSLLElEvent(){
 	if(NEls < 2) return false;         // >1 eles
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has 2 loose electrons");
 
-	if(fSelectionSwitch == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
-	if(fSelectionSwitch == 1) if(!passesZVeto(15.))       return false;
+	if(!passesZVeto()) return false; // no Zs in event
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Z veto");
 
 	if(fSelectionSwitch == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
@@ -3452,8 +3412,8 @@ bool MuonPlotter::isSSLLElEvent(){
 	if(fSelectionSwitch == 1) if(!passesMETCut(30.))  return false;
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes MET cut");
 
-	// if(ElCh[0] == ElCh[1]) return false;              // OS
-	if(ElCh[0] != ElCh[1]) return false;              // SS
+	if(ElCh[0] != ElCh[1] && gChargeSwitch == 0) return false;              // SS
+	if(ElCh[0] == ElCh[1] && gChargeSwitch == 1) return false;              // OS
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has same-sign electrons");
 
 	if(!isGoodSecElectron(1)) return false; // pt cuts
@@ -3495,8 +3455,7 @@ bool MuonPlotter::isSSLLElMuEvent(){
 	if(!isGoodElMuEvent()) return false; // >1 jets, >0 loose eles or muons
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has at least 1 j, loose e/mu pair");
 
-	if(fSelectionSwitch == 0) if(!passesZVeto(76., 106.)) return false; // no Zs in event
-	if(fSelectionSwitch == 1) if(!passesZVeto(15.))       return false;
+	if(!passesZVeto())       return false;
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Z veto");
 
 	if(fSelectionSwitch == 0) if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
@@ -3511,8 +3470,8 @@ bool MuonPlotter::isSSLLElMuEvent(){
 	if(fSelectionSwitch == 1) if(!passesMETCut(30.))  return false;
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes MET cut");
 
-	// if(ElCh[0] == MuCharge[0]) return false;              // OS
-	if(ElCh[0] != MuCharge[0]) return false;              // SS
+	if(ElCh[0] != MuCharge[0] && gChargeSwitch == 0) return false;              // SS
+	if(ElCh[0] == MuCharge[0] && gChargeSwitch == 1) return false;              // OS
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has same-sign electron muon pair");
 
 	if(MuPt[0] > ElPt[0]){
@@ -3531,13 +3490,13 @@ bool MuonPlotter::isSSLLElMuEvent(){
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isSSLLElMuEventTRG(gSample sample){
+bool MuonPlotter::isSSLLElMuEventTRG(){
 	// For UCSD/SB/FNAL just use OR of all lepton triggers
 	if(fSelectionSwitch == 0){
 		// Take all muon triggered events from muon datasets
-		if(sample == MuA || sample == MuB) if(!isMuTriggeredEvent()) return false;
+		if(fCurrentSample == MuA || fCurrentSample == MuB) if(!isMuTriggeredEvent()) return false;
 		// Take only electron but NOT muon triggered events from electron datasets
-		if(sample == EGA || sample == EGB) if(!isElTriggeredEvent() ||  isMuTriggeredEvent()) return false;
+		if(fCurrentSample == EGA || fCurrentSample == EGB) if(!isElTriggeredEvent() ||  isMuTriggeredEvent()) return false;
 		if(!isElTriggeredEvent() && !isMuTriggeredEvent()) return false;
 	}
 	if(fSelectionSwitch == 1) if(!isHTTriggeredEvent()) return false;
@@ -3557,7 +3516,7 @@ bool MuonPlotter::isSSTTElMuEventTRG(){
 	/*
 		TODO fixme: If this method is ever used, check trigger and dataset selections!
 	*/
-	if(!isSSLLElMuEventTRG(MuA)) return false;
+	if(!isSSLLElMuEventTRG()) return false;
 	if(!isTightElectron(0) || !isTightMuon(0)) return false;
 	return true;
 }

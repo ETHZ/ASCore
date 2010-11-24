@@ -127,7 +127,6 @@ public:
 	bool passesHTCut(float);
 	bool passesMETCut(float = -1.);
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
-	bool passesZVeto(float, float); // cut in this window
 	bool passesMllEventVeto(float = 12.);
 
 	bool isMuTriggeredEvent();
@@ -158,7 +157,7 @@ public:
 	bool isSSTTElEventTRG();
 
 	bool isSSLLElMuEvent();
-	bool isSSLLElMuEventTRG(gSample);
+	bool isSSLLElMuEventTRG();
 	bool isSSTTElMuEvent();
 	bool isSSTTElMuEventTRG();
 
@@ -182,10 +181,11 @@ public:
 	bool isGoodJet_LooseLep(int);
 
 private:
-	// Counters
 	Monitor fCounters[gNSAMPLES][3];
 	bool fDoCounting;
-	int fCurrentSample;
+	gSample fCurrentSample;
+	gChannel fCurrentChannel;
+
 	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
 
 	// FPRatios *fFPRatios;
