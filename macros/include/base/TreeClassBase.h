@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Nov 15 20:20:45 2010 by ROOT version 5.22/00d
+// Thu Nov 25 11:33:19 2010 by ROOT version 5.22/00d
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: /shome/pnef/Ntuple.root
+// found on file: /shome/pnef/SUSY/CMSSW_3_8_6/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_38X_data_RECO.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -68,6 +68,10 @@ public :
    Int_t           MaxGenLepExceed;
    Int_t           MaxVerticesExceed;
    Int_t           HBHENoiseFlag;
+   Int_t           EcalDeadCellBEFlag;
+   Int_t           NECALGapClusters;
+   Double_t        EcalGapBE[13];   //[NECALGapClusters]
+   Int_t           EcalGapClusterSize[13];   //[NECALGapClusters]
    Int_t           NGenLeptons;
    Int_t           GenLeptonID[100];   //[NGenLeptons]
    Double_t        GenLeptonPt[100];   //[NGenLeptons]
@@ -547,6 +551,10 @@ public :
    TBranch        *b_MaxGenLepExceed;   //!
    TBranch        *b_MaxVerticesExceed;   //!
    TBranch        *b_HBHENoiseFlag;   //!
+   TBranch        *b_EcalDeadCellBEFlag;   //!
+   TBranch        *b_NECALGapClusters;   //!
+   TBranch        *b_EcalGapBE;   //!
+   TBranch        *b_EcalGapClusterSize;   //!
    TBranch        *b_NGenLeptons;   //!
    TBranch        *b_GenLeptonID;   //!
    TBranch        *b_GenLeptonPt;   //!
@@ -994,9 +1002,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/Ntuple.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/CMSSW_3_8_6/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_38X_data_RECO.root");
       if (!f) {
-         f = new TFile("/shome/pnef/Ntuple.root");
+         f = new TFile("/shome/pnef/SUSY/CMSSW_3_8_6/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_38X_data_RECO.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1097,6 +1105,10 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MaxGenLepExceed", &MaxGenLepExceed, &b_MaxGenLepExceed);
    fChain->SetBranchAddress("MaxVerticesExceed", &MaxVerticesExceed, &b_MaxVerticesExceed);
    fChain->SetBranchAddress("HBHENoiseFlag", &HBHENoiseFlag, &b_HBHENoiseFlag);
+   fChain->SetBranchAddress("EcalDeadCellBEFlag", &EcalDeadCellBEFlag, &b_EcalDeadCellBEFlag);
+   fChain->SetBranchAddress("NECALGapClusters", &NECALGapClusters, &b_NECALGapClusters);
+   fChain->SetBranchAddress("EcalGapBE", EcalGapBE, &b_EcalGapBE);
+   fChain->SetBranchAddress("EcalGapClusterSize", EcalGapClusterSize, &b_EcalGapClusterSize);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
    fChain->SetBranchAddress("GenLeptonID", &GenLeptonID, &b_GenLeptonID);
    fChain->SetBranchAddress("GenLeptonPt", &GenLeptonPt, &b_GenLeptonPt);
