@@ -10,6 +10,7 @@
 
 using std::vector;
 
+// MT2Misc -----------------------------------
 MT2Misc::MT2Misc(){
   Reset();
 }
@@ -35,6 +36,7 @@ void MT2Misc::Reset() {
   DPhiMhtMpt              = -99999.99;
 }
 
+// MT2Jet -----------------------------------
 MT2Jet::MT2Jet(){
   Reset();
 }
@@ -60,13 +62,48 @@ void MT2Jet::Reset() {
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1; 
-
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
   lv = v;
 }
 
+
+// MT2Muon -----------------------------------
+MT2Muon::MT2Muon(){
+  Reset();
+}
+
+MT2Muon::~MT2Muon(){
+}
+
+void MT2Muon::Reset() {
+  lv.SetPxPyPzE(0, 0, 0, 0);
+  isTight       = 0;
+}
+
+void MT2Muon::SetLV(const TLorentzVector v) {
+  lv = v;
+}
+
+// MT2Elec -----------------------------------
+MT2Elec::MT2Elec(){
+  Reset();
+}
+
+MT2Elec::~MT2Elec(){
+}
+
+void MT2Elec::Reset() {
+  lv.SetPxPyPzE(0, 0, 0, 0);
+  isTight       = 0;
+}
+
+void MT2Elec::SetLV(const TLorentzVector v) {
+  lv = v;
+}
+
+// MT2tree ----------------------------------
 MT2tree::MT2tree(){
   Reset();
 }
@@ -76,21 +113,23 @@ MT2tree::~MT2tree(){
 
 void MT2tree::Reset() {
   NJets         = 0;
-  NEles         = 0;
-  NMuons        = 0;
   NJetsIDLoose  = 0;
   NJetsIDMedium = 0;
   NJetsIDTight  = 0;
+  NEles         = 0;
+  NElesLoose    = 0;
+  NMuons        = 0;
+  NMuonsLoose   = 0;
 
   misc.Reset();
   for (int i = 0; i < m_jetSize; ++i) {
     jet[i].Reset();
   }
   for (int i = 0; i < m_eleSize; ++i) {
-    ele[i].SetPxPyPzE(0., 0., 0., 0.);
+    ele[i].Reset();
   }
   for (int i = 0; i < m_muoSize; ++i) {
-    muo[i].SetPxPyPzE(0., 0., 0., 0.);
+    muo[i].Reset();
   }
   pfmet     [0].SetPxPyPzE(0., 0., 0., 0.);
   MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
@@ -119,8 +158,16 @@ void MT2tree::SetNEles(int n) {
   NEles = n;
 }
 
+void MT2tree::SetNElesLoose(int n) {
+  NElesLoose = n;
+}
+
 void MT2tree::SetNMuons(int n) {
   NMuons = n;
+}
+
+void MT2tree::SetNMuonsLoose(int n) {
+  NMuonsLoose = n;
 }
 
 Double_t MT2tree::PseudoJetDPhi() {
@@ -135,36 +182,60 @@ Double_t MT2tree::PseudoJetAngle() {
   return pseudoJets[0].Angle(pseudoJets[1].Vect());
 }
 
-Double_t MT2tree::JetsDPhi(int j1, int j2){
-  if (j1>=NJets || j2>=NJets)
-    return -999;
-  return TMath::Abs(jet[j1].lv.DeltaPhi(jet[j2].lv));
+Double_t MT2tree::JetsDPhi(int j1, int j2, std::string PFJID){
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+	indices.push_back(i);
+  }
+  if (j1>=indices.size() || j2>=indices.size())  return -999;
+  return TMath::Abs(jet[indices[j1]].lv.DeltaPhi(jet[indices[j2]].lv));
 }
 
-Double_t MT2tree::MetJetDPhi(int ijet) {
-  if (ijet>=NJets)
-    return -999;
-  return TMath::Abs(jet[ijet].lv.DeltaPhi(pfmet[0]));
+Double_t MT2tree::MetJetDPhi(int ijet, std::string PFJID) {
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+	indices.push_back(i);
+  }
+  if (ijet>=indices.size())  return -999;
+  return TMath::Abs(jet[indices[ijet]].lv.DeltaPhi(pfmet[0]));
 }
 
-Double_t MT2tree::MinMetJetDPhi() {
-  if (NJets<1)
-    return -999;
+Double_t MT2tree::MinMetJetDPhi(std::string PFJID) {
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+	indices.push_back(i);
+  }
+  if(indices.size()<1)  return -999;
   Double_t minDPhi=10;
-  for (int i=0; i<NJets; i++){
-    Double_t dphi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+  for (int i=0; i<indices.size(); i++){
+    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(pfmet[0]));
     if(dphi<minDPhi)  minDPhi=dphi;
   }
   return minDPhi;
 }
 
-Int_t MT2tree::MinMetJetDPhiIndex() {
-  if (NJets<1)
-    return -999;
+Int_t MT2tree::MinMetJetDPhiIndex(std::string PFJID) {
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+	indices.push_back(i);
+  }
+  if(indices.size()<1)  return -999;
   Double_t minDPhi=10;
   Int_t    imin;
-  for (int i=0; i<NJets; i++){
-    Double_t dphi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+  for (int i=0; i<indices.size(); i++){
+    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(pfmet[0]));
     if(dphi<minDPhi)  {
       minDPhi=dphi;
       imin = i;
@@ -296,4 +367,6 @@ Double_t MT2tree::GetMCT(bool massive) {
 
 ClassImp(MT2Misc)
 ClassImp(MT2Jet)
+ClassImp(MT2Elec)
+ClassImp(MT2Muon)
 ClassImp(MT2tree)

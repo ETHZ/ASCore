@@ -221,7 +221,9 @@ void MassAnalysis::FillTree(){
 	fMT2tree->SetNJetsIDMedium ((Int_t)fJetsMedium.size());
 	fMT2tree->SetNJetsIDTight  ((Int_t)fJetsTight.size());
 	fMT2tree->SetNEles         ((Int_t)fElecs.size());
+	fMT2tree->SetNElesLoose    ((Int_t)fElecsLoose.size());
 	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
+	fMT2tree->SetNMuonsLoose   ((Int_t)fMuonsLoose.size());
 	
 	// Fill jets 4-momenta & ID's
 	for(int i=0; i<fJets.size(); ++i) {
@@ -246,15 +248,22 @@ void MassAnalysis::FillTree(){
 		fMT2tree->jet[i].NConstituents  = fTR->PFJNConstituents [fJets[i]];
 	}
 	
-	// Fill leptons 4-momenta
-	for(int i=0; i<fElecs.size(); ++i) {
-	  fMT2tree->ele[i].SetPtEtaPhiE(fTR->ElPt [fElecs[i]], fTR->ElEta[fElecs[i]], 
-				      fTR->ElPhi[fElecs[i]], fTR->ElE  [fElecs[i]]); // = GetEle4Momenta(fElecs[i]);
+	// Fill leptons 4-momenta & tight_flag
+	for(int i=0; i<fElecsLoose.size(); ++i) {
+	  	fMT2tree->ele[i].lv.SetPtEtaPhiE(fTR->ElPt [fElecsLoose[i]], fTR->ElEta[fElecsLoose[i]], 
+				      fTR->ElPhi[fElecsLoose[i]], fTR->ElE  [fElecsLoose[i]]); // = GetEle4Momenta(fElecs[i]);
+	  	for(int l=0; l<fElecs.size(); ++l) {
+	  		if(fElecs[l]==fElecsLoose[i]) fMT2tree->ele[i].isTight=true;
+	  	}
 	}
-	for(int i=0; i<fMuons.size(); ++i) {
-	  fMT2tree->muo[i].SetPtEtaPhiM(fTR->MuPt [fMuons[i]], fTR->MuEta[fMuons[i]], 
-				      fTR->MuPhi[fMuons[i]], 0.106);                     // = GetMuo4Momenta(fMuons[i]);
+	for(int i=0; i<fMuonsLoose.size(); ++i) {
+	  	fMT2tree->muo[i].lv.SetPtEtaPhiM(fTR->MuPt [fMuonsLoose[i]], fTR->MuEta[fMuonsLoose[i]], 
+				      fTR->MuPhi[fMuonsLoose[i]], 0.106);                     // = GetMuo4Momenta(fMuons[i]);
+	  	for(int l=0; l<fMuons.size(); ++l) {
+	  		if(fMuons[l]==fMuonsLoose[i]) fMT2tree->muo[i].isTight=true;
+	  	}
 	}
+	
 	// Fill met
 	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMET,0,fTR->PFMETphi,0);
 

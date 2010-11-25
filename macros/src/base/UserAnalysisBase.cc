@@ -190,7 +190,7 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index){
 bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	// Basic PF jet cleaning and ID cuts
 	if(doSel && fTR->PFJPt[index] < 20) return false;
-	if(doSel && fabs(fTR->PFJEta[index]) > 2.5) return false;
+	if(doSel && fabs(fTR->PFJEta[index]) > 2.4) return false;
 	// Loose PF jet ID (WARNING: HF not included in our ntuple)
 	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
 	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
@@ -301,17 +301,17 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 // ELECTRONS
 bool UserAnalysisBase::IsGoodEl_TDL(int index){
 	// ---- electron selection from Top-Dilepton group  ----
-	// ---- El id WP90
+	// ---- El id WP95
 	double etaEgapUpperEdge         = 1.5660;
 	double etaEgapLowerEdge         = 1.4442;
 	
-	if( fTR->ElPt[index] < 10. ) 	return false;
-	if( fabs(fTR->ElEta[index]) > 2.5 ) return false;
+	if( fTR->ElPt[index]        < 5.    ) return false;
+	if( fabs(fTR->ElEta[index]) > 2.4   ) return false;
 	if( fabs(fTR->ElEta[index]) > etaEgapLowerEdge && fabs(fTR->ElEta[index]) < etaEgapUpperEdge) return false;
-	if( fTR->ElD0BS[index] >= 0.04 ) return false;
+	if( fTR->ElD0BS[index]      >= 0.04 ) return false;
 	
-	// conversion rejection && ID WP90
-	if(fTR->ElIDsimpleWPrelIso[index]!=5 && fTR->ElIDsimpleWPrelIso[index]!=7) return false;	
+	// conversion rejection && ID WP95
+	if(fTR->ElIDsimpleWP95relIso[index]!=5 && fTR->ElIDsimpleWP95relIso[index]!=7) return false;	
 	
 	// isolation
 	double elIsoEcal;
