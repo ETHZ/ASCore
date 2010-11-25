@@ -24,7 +24,8 @@ void MT2Misc::Reset() {
   LumiSection		  = -1;	  
   LeptConfig		  = -1;	  
   NJetsEta5Pt20           = -1;
-  IsCleanJetEvent	  =  0;	  
+  IsCleanJetEvent	  =  0;	 
+  HBHENoiseFlag           =  0; 
   PseudoJetMT2		  = -99999.99;
   PseudoJetMCT		  = -99999.99;
   PseudoJet1Pt		  = -99999.99;

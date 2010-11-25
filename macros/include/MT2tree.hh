@@ -22,6 +22,7 @@ public:
   Int_t    LeptConfig;
   Int_t    NJetsEta5Pt20;
   Bool_t   IsCleanJetEvent;
+  Bool_t   HBHENoiseFlag;
   Double_t PseudoJetMT2;
   Double_t PseudoJetMCT;
   Double_t PseudoJet1Pt;

@@ -203,6 +203,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.IsCleanJetEvent	   = fIsCleanJetEvent;
+	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
