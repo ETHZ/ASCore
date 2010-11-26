@@ -151,10 +151,10 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	TString cuts = cutStream.str().c_str();
 
 	//       samples   , variable, cuts    ,    xtitle             ,nbins    , bins[],  cleaned,  log  , comp , ratio, stack, overlay
-	MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"              ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
+	//MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"              ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
 	//       samples   , variable, cuts  ,    xtitle                  ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
    	//MakePlot(fSamples,"MetJetDPhi(0)"  ,cuts,"#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
-   	//MakePlot(fSamples,"MetJetDPhi(1)"  ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+   	MakePlot(fSamples,"MetJetDPhi(1)"  ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
    	//MakePlot(fSamples,"MetJetDPhi(2)"  ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
    	//MakePlot(fSamples,"MinMetJetDPhi()",cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
 
@@ -169,8 +169,8 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 
   double bins[nbins];
   bins[0] = min;
-  for(int i=0; i<nbins; i++)
-    bins[i+1] = min+i*(max-min)/nbins;
+  for(int i=1; i<=nbins; i++)
+    bins[i] = min+i*(max-min)/nbins;
   MakePlot(Samples, var, cuts, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 }
@@ -254,7 +254,34 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
 				    << "\twith cuts: "  << selection << endl;
 
+		// Add underflow & overflow bins
+		// This failed for older ROOT version when the first(last) bin is empty
+		// and there are underflow (overflow) events --- must check whether this 
+		// is still the case
 		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
+
+		cout << "bin 0 = "   << h_samples[i]->GetBinContent(0)
+		     << "; bin 1 = " << h_samples[i]->GetBinContent(1) << endl;
+		h_samples[i]->SetBinContent(1,
+				    h_samples[i]->GetBinContent(0) + h_samples[i]->GetBinContent(1));
+		h_samples[i]->SetBinError(1,
+				  sqrt(h_samples[i]->GetBinError(0)*h_samples[i]->GetBinError(0)+
+				       h_samples[i]->GetBinError(1)*h_samples[i]->GetBinError(1) ));
+		cout << "bin 0 = "   << h_samples[i]->GetBinContent(0)
+		     << "; bin 1 = " << h_samples[i]->GetBinContent(1) << endl;
+		cout << "bin n = "     << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX())
+		     << "; bin n+1 = " << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) << endl;
+		h_samples[i]->SetBinContent(h_samples[i]->GetNbinsX(),
+					    h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()  )+ 
+					    h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) );
+		h_samples[i]->SetBinError(h_samples[i]->GetNbinsX(),
+					  sqrt(h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()  )*
+					       h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()  )+
+					       h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()+1)*
+					       h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()+1)  ));
+		
+		cout << "bin n = "     << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX())
+		     << "; bin n+1 = " << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) << endl;
 
 		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
 				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
@@ -405,7 +432,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 	TLegend* Legend1 = new TLegend(.6,.5,.89,.88);
 	
 	// get prediction
-	TH1D* h_prediction    = new TH1D("prediction",    "", nbins, bins);
+	TH1D* h_prediction    = new TH1D("predict",    "", nbins, bins);
 	if(prediction!="none"){
 		if(prediction == "QCD"){	
 			h_prediction=GetPrediction(branch_name, gNMT2bins, gMT2bins, cleaned, cut_branch_name, ysplit[2], ysplit[3], false, factor );
