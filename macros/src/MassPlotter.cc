@@ -260,17 +260,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		// is still the case
 		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
 
-		cout << "bin 0 = "   << h_samples[i]->GetBinContent(0)
-		     << "; bin 1 = " << h_samples[i]->GetBinContent(1) << endl;
 		h_samples[i]->SetBinContent(1,
 				    h_samples[i]->GetBinContent(0) + h_samples[i]->GetBinContent(1));
 		h_samples[i]->SetBinError(1,
 				  sqrt(h_samples[i]->GetBinError(0)*h_samples[i]->GetBinError(0)+
 				       h_samples[i]->GetBinError(1)*h_samples[i]->GetBinError(1) ));
-		cout << "bin 0 = "   << h_samples[i]->GetBinContent(0)
-		     << "; bin 1 = " << h_samples[i]->GetBinContent(1) << endl;
-		cout << "bin n = "     << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX())
-		     << "; bin n+1 = " << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) << endl;
 		h_samples[i]->SetBinContent(h_samples[i]->GetNbinsX(),
 					    h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()  )+ 
 					    h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) );
@@ -280,9 +274,6 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 					       h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()+1)*
 					       h_samples[i]->GetBinError(h_samples[i]->GetNbinsX()+1)  ));
 		
-		cout << "bin n = "     << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX())
-		     << "; bin n+1 = " << h_samples[i]->GetBinContent(h_samples[i]->GetNbinsX()+1) << endl;
-
 		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
 				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
 		
