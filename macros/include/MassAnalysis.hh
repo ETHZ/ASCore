@@ -186,6 +186,9 @@ private:
 
 	TH2D *fHMT2_vs_M_OSDiLept;
 	
+	TH1D* fHHLT_turnon_triggered; 
+	TH1D* fHHLT_turnon_HT;      
+	TH1D* fHHLT_turnon;      
 	TH1D *fHPFandCalo_deltaR;
 	TH1D *fHPFJ1J2DeltaR;	
 	

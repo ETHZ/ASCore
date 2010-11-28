@@ -39,10 +39,8 @@ static const double VectorSumPtCut=50;
 static const int    LeptConfigCut =9;
 static const int    NJetsCut      =3;
 static const int    MaxNJetsCut   =100;
-static const int    HCALNoiseVeto =1;  // set to 1 to veto HCAL noise (incl RBX)
 static const double dPhiJetsMET   =0.0;
 static const double DPhiJetsMetMinJpt=50;
-static const double MinPFMET       = 30;
 
 static const int    PrintRunLumiEvt=1;
 

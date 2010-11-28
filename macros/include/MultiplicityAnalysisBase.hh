@@ -41,6 +41,7 @@ public:
 	//  ---- set of cuts ---
 	TString fSetName;
 	float fCut_PFMET_min;
+	float fCut_MHT_min;
 	float fCut_HT_min;
 	float fCut_JPt_hardest_min;
 	float fCut_VSPT;
@@ -65,6 +66,7 @@ public:
 	bool  fIsCleanJetEvent;
 	int   fNJetsPt50Eta25;
 	float fMHT;
+	float fMHTall;
 	float fHT;
 	float fMHTphi;	
 

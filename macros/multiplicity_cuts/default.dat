@@ -5,6 +5,7 @@
 SetName                                    default
 # ------------- Cuts ----------------------------#
 PFMET_min                                        0
+MHT_min                                         40
 HT_min                                           0
 VSPT_max                                   9999.99
 R12R21                                           0

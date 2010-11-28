@@ -7,6 +7,7 @@ using namespace std;
 MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysisBase(tr){
 	Util::SetStyle();	
 	fCut_PFMET_min                      = 0;
+	fCut_MHT_min                        = 0;
 	fCut_HT_min                         = 0;
 	fCut_JPt_hardest_min                = 0;
 	fCut_3JetsAbove50                   = 0;
@@ -82,6 +83,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	vector<double> pftight;
 	bool doSel(true);
 	for(int ij=0; ij < fTR->PFNJets; ++ij){
+		if(fTR->PFJPt[ij] < 15) continue;  // note: ETH ntuple only stores PFJets > 15 GeV (defualt config)
 		fJets.push_back(ij);
 		pt1.push_back(fTR->PFJPt[ij]);
 
@@ -213,6 +215,15 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
 
+	// MHT
+	TVector3 MHTall(0., 0., 0.);
+        for(int i=0; i<fTR->PFNJets; ++i) {
+		TVector3 jet;
+		jet.SetPtEtaPhi(fTR->PFJPt[i], fTR->PFJEta[i], fTR->PFJPhi[i]);
+		MHTall += jet;
+	}	
+	fMHTall = MHTall.Pt();
+	if(fMHTall < fCut_MHT_min) {return false;}
 
 	// hardest jet
 	double hardest_jet=0;
@@ -391,6 +402,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		sscanf(buffer, "%s %f", ParName, &ParValue);
 		if( !strcmp(ParName, "PFMET_min") ){
 			fCut_PFMET_min            = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "MHT_min") ){
+			fCut_MHT_min              = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "HT_min") ){
 			fCut_HT_min               = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "JPt_hardest_min") ){
@@ -418,6 +431,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 	if(verbose){
 		cout << "setting cuts to: " << endl;
 		cout << "  PFMET_min                   " << fCut_PFMET_min                  <<endl;
+		cout << "  MHT_min                     " << fCut_MHT_min                    <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
 		cout << "  VSPT_max                    " << fCut_VSPT                       <<endl;

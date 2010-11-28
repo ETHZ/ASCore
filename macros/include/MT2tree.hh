@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 20, m_eleSize = 10, m_muoSize = 10};
+enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -124,20 +124,23 @@ public:
   void SetNMuonsLoose   (int n);
   
   // My functions here
+  // NJets
+  Int_t    GetNJets(double minJPt=20, double maxJEta=5, int PFJID=1);
+  // dPhi and friends
   Double_t PseudoJetDPhi ();
   Double_t PseudoJetAngle();
-  Double_t JetsDPhi(int j1=1, int j2=0, std::string PFJID="loose");
-  Double_t MetJetDPhi(int ijet = 0, std::string PFJID="loose");
-  Double_t MinMetJetDPhi(std::string PFJID="loose");
-  Int_t    MinMetJetDPhiIndex(std::string PFJID="loose");
-  Int_t    GetNJets(double minJPt=20, std::string PFJID="loose");
-  Double_t GetMT2(double testmass=0 , bool massive=false);
-  Double_t GetMT2Leading(double testmass=0, bool massive=true, std::string PFJID="loose");
-  Double_t GetMT2Hemi(double testmass=0, bool massive=false, std::string PFJID="loose", 
-		  double minJPt=20, int hemi_association=3);
+  Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
+  Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
+  Double_t MinMetJetDPhi(int PFJID=1, int met=1);
+  Int_t    MinMetJetDPhiIndex(int PFJID=1, int met=1);
+  // MT2 & friends
+  Double_t GetMT2(double testmass=0 , bool massive=false, int met=1);
+  Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);
+  Double_t GetMT2Hemi(double testmass=0, bool massive=false, int PFJID=1, 
+		  double minJPt=20, int hemi_association=3, int met=1);
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
-  Double_t GetMCT(bool massive=false);
+  Double_t GetMCT(bool massive=false, int met=1);
 
   MT2Misc misc;
   Int_t   NJets;
@@ -153,11 +156,12 @@ public:
   MT2Muon        muo[m_muoSize];
   TLorentzVector pfmet[2];
   TLorentzVector MPT[2];
+  TLorentzVector MHT[2];
   TLorentzVector MHTloose[2];
   TLorentzVector pseudoJets[2];
 
   
-  ClassDef(MT2tree, 4)
+  ClassDef(MT2tree, 5)
 };
 
 #endif

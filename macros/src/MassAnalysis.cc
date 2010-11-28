@@ -111,6 +111,10 @@ void MassAnalysis::Begin(){
 	fHPFandCalo_deltaR   = new TH1D("PFandCalo_deltaR", "", 200, 0., 10);
 	fHPFJ1J2DeltaR       = new TH1D("PFJ1J2DeltaR", "", 200, 0, 10. );
 
+	fHHLT_turnon_triggered = new TH1D("HLT_turnon_triggered", "", 50, 0, 500);
+	fHHLT_turnon_HT        = new TH1D("HLT_turnon_HT"       , "", 50, 0, 500);
+	fHHLT_turnon           = new TH1D("HLT_turnon"          , "", 50, 0, 500);
+
 	for(int i=0; i<fMT2_histos_number; ++i){
 		std::stringstream out;
 		int mass = i*fMT2_histos_step;
@@ -146,7 +150,24 @@ void MassAnalysis::Analyze(){
 	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
 	// ----------------------------------------------------
+
+	// trigger turnon
+	// calculate HT
 	
+//	if(fTR->Run < fCut_Run_min ) {return ;}
+//	if(fTR->Run > fCut_Run_max ) {return ;}
+//	double HT=0;
+//	for(int i=0; i<fJetsLoose.size(); ++i){
+//		if(fTR->PFJPt[fJetsLoose[i]]>50 && fabs(fTR->PFJEta[fJetsLoose[i]])<2.4){
+//			HT+=fTR->PFJPt[fJetsLoose[i]];			
+//		} 
+//	}
+//	bool HLT(false);
+//	if(GetHLTResult("HLT_HT150U_v3")) HLT=true;	
+//	fHHLT_turnon_HT                  -> Fill(HT);
+//	if(HLT) fHHLT_turnon_triggered   -> Fill(HT);
+//
+//	return;
 	// --------------------------------------------------------------------
 	// check if event passes selection cuts and trigger requirements
 	if(! IsSelectedEvent()){return;}
@@ -277,14 +298,17 @@ void MassAnalysis::FillTree(){
 	}	
 	fMT2tree->MPT[0].SetXYZM(-tracks.Px(), -tracks.Py(), 0, 0);
 	// fill MHT
-	TVector3 MHT(0., 0., 0.);
-        for(int i=0; i<fJets.size(); ++i) {
-		if(! IsGoodBasicPFJet (fJets[i], true)) continue;
-		TVector3 jet(0., 0., 0.);
-		jet.SetPtEtaPhi(fTR->PFJPt[fJets[i]], fTR->PFJEta[fJets[i]], fTR->PFJPhi[fJets[i]]);
-		MHT += jet;
+	TVector3 MHTidloose(0., 0., 0.);
+	TVector3 MHTall(0., 0., 0.);
+        for(int i=0; i<fTR->PFNJets; ++i) {
+		TVector3 jet;
+		jet.SetPtEtaPhi(fTR->PFJPt[i], fTR->PFJEta[i], fTR->PFJPhi[i]);
+		MHTall += jet;
+		if(! IsGoodBasicPFJet (i, true)) continue;
+		MHTidloose += jet;
 	}	
-	fMT2tree->MHTloose[0].SetXYZM(-MHT.Px(), -MHT.Py(), 0, 0);
+	fMT2tree->MHTloose[0].SetXYZM(-MHTidloose.Px(), -MHTidloose.Py(), 0, 0);
+	fMT2tree->MHT     [0].SetXYZM(-MHTall.Px()    , -MHTall.Py()    , 0, 0);
 
 	// DPhiMhtMpt: should be replaced by method to calculate it on the fly. 
 	fMT2tree->misc.DPhiMhtMpt=Util::DeltaPhi(fMHTphi, fMT2tree->MPT[0].Phi());	
@@ -1189,6 +1213,14 @@ void MassAnalysis::End(){
 	fHPseudoJetMT2vsAlphaT       ->Write(); 
 	fHPseudoJetMT2vsLeadingJEta  ->Write();
        	fHPseudoJetMT2vsMHT	     ->Write();
+	
+	fHHLT_turnon_triggered->Sumw2();
+	fHHLT_turnon_HT       ->Sumw2();
+	fHHLT_turnon          ->Sumw2();
+	fHHLT_turnon->Divide(fHHLT_turnon_triggered,fHHLT_turnon_HT);
+	fHHLT_turnon             ->Write();
+	fHHLT_turnon_HT          ->Write();
+	fHHLT_turnon_triggered   ->Write();
 
 
 	fHMT_single_e            ->Write();

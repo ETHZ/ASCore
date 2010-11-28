@@ -143,20 +143,33 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 
 	std::ostringstream cutStream;
-	cutStream << "misc.LeptConfig == " << LeptConfigCut  << "&&"
-		  << "misc.Vectorsumpt < " << VectorSumPtCut << "&&"
-		  << "NJets >= "           << NJetsCut       << "&&"
-		  << "misc.PseudoJetMT2 >=0";
+	cutStream << "misc.LeptConfig == "     << LeptConfigCut     << "&&"
+		  << "misc.Vectorsumpt < "     << VectorSumPtCut    << "&&"
+		  << "NJets >= "               << NJetsCut          << "&&"
+		  << "misc.HT             > 350 "                   << "&&"
+		  << "jet[0].isPFIDLoose == 1"                      << "&&" 
+		  << "jet[1].isPFIDLoose == 1"                      << "&&" 
+		  << "jet[1].lv.Pt()      > 150"                    << "&&"     
+		  << "GetNJets(15, 100, 0)-GetNJets(20, 2.4, 1)==0" << "&&"
+	//	  << "misc.PseudoJetMT2  >= 0"                      << "&&"
+		  << "misc.HBHENoiseFlag == 1"                   ;
 	
 	TString cuts = cutStream.str().c_str();
 
-	//       samples   , variable, cuts    ,    xtitle             ,nbins    , bins[],  cleaned,  log  , comp , ratio, stack, overlay
-	//MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"              ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
-	//       samples   , variable, cuts  ,    xtitle                  ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
-   	//MakePlot(fSamples,"MetJetDPhi(0)"  ,cuts,"#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
-   	MakePlot(fSamples,"MetJetDPhi(1)"  ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
-   	//MakePlot(fSamples,"MetJetDPhi(2)"  ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
-   	//MakePlot(fSamples,"MinMetJetDPhi()",cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
+
+	//       samples , variable,        cuts  ,    xtitle           ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
+	//MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"             ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
+	//MakePlot(fSamples,"pfmet[0].Pt()"   ,cuts, "PFMET"              ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
+	//MakePlot(fSamples,"MHT[0].Pt()"     ,cuts, "MHT"                ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
+
+	//       samples   , variable, cuts  ,    xtitle                         ,nbins,min,max,   cleaned,  log  , comp , ratio, stack, overlay
+   	MakePlot(fSamples,  "jet[0].lv.Pt()"  ,cuts,"leading JPt"                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
+   	MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
+   	//MakePlot(fSamples,"MetJetDPhi(0)"   ,cuts,"#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+   	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true,  true,  true);
+   	//MakePlot(fSamples,"NJets"           ,cuts  ,     "NJets"                ,15,0,15,          false, true , true ,  true,  true,  true);
+   	//MakePlot(fSamples,"MetJetDPhi(2)"   ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+    	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
 
 }
 
@@ -1345,7 +1358,7 @@ void MassPlotter::loadSamples(const char* filename){
 			s.lumi = ParValue;
 
 			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "Type\t%s", &StringValue);
+			sscanf(buffer, "Type\t%s", StringValue);
 			s.type = StringValue;
 			
 			IN.getline(buffer, 200, '\n');

@@ -137,6 +137,7 @@ void MT2tree::Reset() {
   pseudoJets[0].SetPxPyPzE(0., 0., 0., 0.);
   pseudoJets[1].SetPxPyPzE(0., 0., 0., 0.);
   MHTloose  [0].SetPxPyPzE(0., 0., 0., 0.);
+  MHT       [0].SetPxPyPzE(0., 0., 0., 0.);
 }
 
 void MT2tree::SetNJets(int n) {
@@ -183,60 +184,75 @@ Double_t MT2tree::PseudoJetAngle() {
   return pseudoJets[0].Angle(pseudoJets[1].Vect());
 }
 
-Double_t MT2tree::JetsDPhi(int j1, int j2, std::string PFJID){
+Double_t MT2tree::JetsDPhi(int j1, int j2, int PFJID){
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2 )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID==2  )continue;
 	indices.push_back(i);
   }
   if (j1>=indices.size() || j2>=indices.size())  return -999;
   return TMath::Abs(jet[indices[j1]].lv.DeltaPhi(jet[indices[j2]].lv));
 }
 
-Double_t MT2tree::MetJetDPhi(int ijet, std::string PFJID) {
+Double_t MT2tree::MetJetDPhi(int ijet, int PFJID, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
 	indices.push_back(i);
   }
   if (ijet>=indices.size())  return -999;
-  return TMath::Abs(jet[indices[ijet]].lv.DeltaPhi(pfmet[0]));
+  return TMath::Abs(jet[indices[ijet]].lv.DeltaPhi(MET));
 }
 
-Double_t MT2tree::MinMetJetDPhi(std::string PFJID) {
+Double_t MT2tree::MinMetJetDPhi(int PFJID, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2 )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
 	indices.push_back(i);
   }
   if(indices.size()<1)  return -999;
   Double_t minDPhi=10;
   for (int i=0; i<indices.size(); i++){
-    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(pfmet[0]));
+    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(MET));
     if(dphi<minDPhi)  minDPhi=dphi;
   }
   return minDPhi;
 }
 
-Int_t MT2tree::MinMetJetDPhiIndex(std::string PFJID) {
+Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID=="loose"  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID=="medium" )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID=="tight"  )continue;
+  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
 	indices.push_back(i);
   }
   if(indices.size()<1)  return -999;
   Double_t minDPhi=10;
   Int_t    imin;
   for (int i=0; i<indices.size(); i++){
-    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(pfmet[0]));
+    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(MET));
     if(dphi<minDPhi)  {
       minDPhi=dphi;
       imin = i;
@@ -245,49 +261,65 @@ Int_t MT2tree::MinMetJetDPhiIndex(std::string PFJID) {
   return imin;
 }
 
-Int_t MT2tree::GetNJets(double minJPt, std::string PFJID){
+Int_t MT2tree::GetNJets(double minJPt, double maxJEta, int PFJID){
   int njets=0;
   for(int i=0; i<NJets; ++i){
-	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
-	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
-	if(jet[i].lv.Pt() < minJPt )                      continue;
+	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID==2  && jet[i].isPFIDMedium==false) continue;
+	if(PFJID==3  && jet[i].isPFIDTight ==false) continue;
+	if(jet[i].lv.Pt()         < minJPt )        continue;
+	if(fabs(jet[i].lv.Eta()) > maxJEta )        continue;
 	njets++;
   }
   return njets;
 }
 
-Double_t MT2tree::GetMT2(double testmass, bool massive) {
+Double_t MT2tree::GetMT2(double testmass, bool massive, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   if (NJetsIDLoose<2)
     return -999;
 
-  return CalcMT2(testmass, massive, pseudoJets[0], pseudoJets[1], pfmet[0]);
+  return CalcMT2(testmass, massive, pseudoJets[0], pseudoJets[1], MET);
 }
 
-Double_t MT2tree::GetMT2Leading(double testmass, bool massive, std::string PFJID){
+Double_t MT2tree::GetMT2Leading(double testmass, bool massive, int PFJID, int met){
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   
   TLorentzVector leadingJets[2]; 
   int index=0; 
   for(int i=0; i<NJets; ++i){
-	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
-	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
-	if(index >1                                     ) continue;
+	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID==2  && jet[i].isPFIDMedium==false) continue;
+	if(PFJID==3  && jet[i].isPFIDTight ==false) continue;
+	if(index >1                               ) continue;
 	leadingJets[index] = jet[i].lv;
 	index++;
   }
   if(index!=2) return -999;
-  return CalcMT2(testmass, massive, leadingJets[0], leadingJets[1], pfmet[0]);
+  return CalcMT2(testmass, massive, leadingJets[0], leadingJets[1], MET);
 
 }
 
-Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, std::string PFJID, double minJPt, int hemi_association) {
+Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double minJPt, int hemi_association, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   vector<float> px, py, pz, E;
   for(int i=0; i<NJets; ++i){
-	if(PFJID=="loose"  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID=="medium" && jet[i].isPFIDMedium==false) continue;
-	if(PFJID=="tight"  && jet[i].isPFIDTight ==false) continue;
-	if(jet[i].lv.Pt() < minJPt )                      continue;
+	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
+	if(PFJID==1  && jet[i].isPFIDMedium==false) continue;
+	if(PFJID==1  && jet[i].isPFIDTight ==false) continue;
+	if(jet[i].lv.Pt() < minJPt )                continue;
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
@@ -319,7 +351,7 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, std::string PFJID, d
   }
   delete hemi;
  
-  return CalcMT2(testmass, massive, pseudojet1, pseudojet2, pfmet[0]); 
+  return CalcMT2(testmass, massive, pseudojet1, pseudojet2, MET); 
 }
 
 Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
@@ -349,7 +381,12 @@ Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1
 
 }
 
-Double_t MT2tree::GetMCT(bool massive) {
+Double_t MT2tree::GetMCT(bool massive, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
   if (NJetsIDLoose<2)
     return -999;
 
@@ -358,7 +395,7 @@ Double_t MT2tree::GetMCT(bool massive) {
   p1.SetXYZM(pseudoJets[0].Px(), pseudoJets[0].Py(), pseudoJets[0].Pz(), massive ? pseudoJets[0].M() : 0);
   p2.SetXYZM(pseudoJets[1].Px(), pseudoJets[1].Py(), pseudoJets[1].Pz(), massive ? pseudoJets[1].M() : 0);
   TVector2 pmiss;
-  pmiss.Set(pfmet[0].Px(), pfmet[0].Py());
+  pmiss.Set(MET.Px(), MET.Py());
 
   TMctLib *mct = new TMctLib();
   Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
