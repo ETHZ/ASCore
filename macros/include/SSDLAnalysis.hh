@@ -220,8 +220,6 @@ private:
 	int   fTElIsGoodElId_WP80          [fMaxNeles];
 	int   fTElIsGoodElId_WP90          [fMaxNeles];
 	int   fTElIsGoodElId_WP95          [fMaxNeles];
-	int   fTElIsConvertedEl_WP80       [fMaxNeles];
-	int   fTElIsConvertedEl_WP90       [fMaxNeles];
 	float fTElS4OverS1                 [fMaxNeles];
 	float fTElConvPartnerTrkDist       [fMaxNeles];
 	float fTElConvPartnerTrkDCot       [fMaxNeles];

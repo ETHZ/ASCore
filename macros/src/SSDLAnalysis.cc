@@ -163,8 +163,6 @@ void SSDLAnalysis::BookElectronVariables(TTree* tree){
 	tree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
 	tree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
 	tree->Branch("ElIsGoodElId_WP95",      &fTElIsGoodElId_WP95,   "ElIsGoodElId_WP95[NEls]/I");
-	tree->Branch("ElIsConvertedEl_WP80",   &fTElIsConvertedEl_WP80,"ElIsConvertedEl_WP80[NEls]/I");
-	tree->Branch("ElIsConvertedEl_WP90",   &fTElIsConvertedEl_WP90,"ElIsConvertedEl_WP90[NEls]/I");
 	tree->Branch("ElS4OverS1",             &fTElS4OverS1,          "ElS4OverS1[NEls]/F");
 	tree->Branch("ElDRjet",                &fTElDRjet,             "ElDRjet[NEls]/F");
 	tree->Branch("ElDRhardestjet",         &fTElDRhardestjet,      "ElDRhardestjet[NEls]/F");
@@ -324,9 +322,9 @@ void SSDLAnalysis::Analyze(){
 	//--------------------------------------------------------------------------
 	// Form array of indices of good muons, electrons, jets and photons
 	//--------------------------------------------------------------------------
-	vector<int> selectedMuInd  = MuonSelection();
-	vector<int> selectedElInd  = ElectronSelection();
-	vector<int> selectedJetInd = PFJetSelection();
+	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
+	vector<int> selectedElInd  = ElectronSelection(&UserAnalysisBase::IsLooseEl);
+	vector<int> selectedJetInd = PFJetSelection(30., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	vector<int> selectedPhoInd = PhotonSelection();
 	fTnqmus  = std::min((int) selectedMuInd .size(), fMaxNmus);
 	fTnqels  = std::min((int) selectedElInd .size(), fMaxNeles);
@@ -516,8 +514,6 @@ void SSDLAnalysis::ResetElectronVariables(){
 		fTElIsGoodElId_WP80          [i] = -999;
 		fTElIsGoodElId_WP90          [i] = -999;
 		fTElIsGoodElId_WP95          [i] = -999;
-		fTElIsConvertedEl_WP80       [i] = -999;
-		fTElIsConvertedEl_WP90       [i] = -999;
 		fTElS4OverS1                 [i] = -999.99;
 		fTElMT                       [i] = -999.99;
 		fTElDRjet                    [i] = -999.99;
@@ -1151,8 +1147,6 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		fTElIsGoodElId_WP80   [ind] = IsGoodElId_WP80(elindex);
 		fTElIsGoodElId_WP90   [ind] = IsGoodElId_WP90(elindex);
 		fTElIsGoodElId_WP95   [ind] = IsGoodBasicEl(elindex);
-		fTElIsConvertedEl_WP80[ind] = IsConvertedEl_WP80(elindex);
-		fTElIsConvertedEl_WP90[ind] = IsConvertedEl_WP90(elindex);
 	}
 	
 	// calculate different con/transverse/invariant masses for the pair of two hardest electrons
@@ -1164,8 +1158,8 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 void SSDLAnalysis::DumpFPRatioProperties(){
 	// Event flagging and dumping of pt and eta for fake ratio analysis
 	int el1index(-1), el2index(-1);
-	bool  singleElectronSelection	= SingleElectronSelection(el1index);
-	bool  diElectronSelection		= DiElectronSelection(el1index, el2index);
+	bool  singleElectronSelection	= SingleElectronSelection(el1index, &UserAnalysisBase::IsLooseEl);
+	bool  diElectronSelection		= DiElectronSelection(el1index, el2index, 0, &UserAnalysisBase::IsLooseEl);
 	// QCD-like event (MET < 20.) with only one loose/tight electron
 	if (singleElectronSelection && !diElectronSelection &&
 		(fTpfMET<1000.)) {
@@ -1183,7 +1177,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 		DumpElectronLooseAndTighPtAndEta(el1index,	fTSE_AntiQCDLike_ElLoosePt, fTSE_AntiQCDLike_ElTightPt, fTSE_AntiQCDLike_ElLooseEta, fTSE_AntiQCDLike_ElTightEta);
 	}
 
-	bool  ssdiElectronSelection = SSDiElectronSelection(el1index, el2index);
+	bool  ssdiElectronSelection = SSDiElectronSelection(el1index, el2index, &UserAnalysisBase::IsLooseEl);
 	// TTbar&WJets-like event (30. < MET < 80.) with one tight and one loose/tight electron
 	if (ssdiElectronSelection && fTnqels<3 &&
 		(IsTightEl(el1index) || IsTightEl(el2index)) &&
@@ -1293,7 +1287,7 @@ void SSDLAnalysis::DumpFPRatioProperties(){
 	}
 
 	// ZJets-like event (76. < mT(El1,El2) < 106.) with one tight and one loose/tight electron
-	bool  osdiElectronSelection = OSDiElectronSelection(el1index, el2index);
+	bool  osdiElectronSelection = OSDiElectronSelection(el1index, el2index, &UserAnalysisBase::IsLooseEl);
 	if (osdiElectronSelection &&
 		(IsTightEl(el1index) || IsTightEl(el2index)) &&
 		(fTElmtinv>76.)&&(fTElmtinv< 106.)) {
