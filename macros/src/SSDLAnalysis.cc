@@ -324,14 +324,14 @@ void SSDLAnalysis::Analyze(){
 	//--------------------------------------------------------------------------
 	// Form array of indices of good muons, electrons, jets and photons
 	//--------------------------------------------------------------------------
-	vector<int>	selectedMuInd  = MuonSelection();
-	vector<int>	selectedElInd  = ElectronSelection();
-	vector<int>	selectedJetInd = PFJetSelection();
-	vector<int>	selectedPhoInd = PhotonSelection();
-	fTnqmus   = std::min((int) selectedMuInd.size(), fMaxNmus);
-	fTnqels   = std::min((int) selectedElInd.size(), fMaxNeles);
-	fTnqjets  = std::min((int)selectedJetInd.size(), fMaxNjets);
-	fTnqphos  = std::min((int)selectedPhoInd.size(), fMaxNphos);
+	vector<int> selectedMuInd  = MuonSelection();
+	vector<int> selectedElInd  = ElectronSelection();
+	vector<int> selectedJetInd = PFJetSelection();
+	vector<int> selectedPhoInd = PhotonSelection();
+	fTnqmus  = std::min((int) selectedMuInd .size(), fMaxNmus);
+	fTnqels  = std::min((int) selectedElInd .size(), fMaxNeles);
+	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
+	fTnqphos = std::min((int) selectedPhoInd.size(), fMaxNphos);
 	
 	// Require at least one lepton
 	if( (fTnqmus + fTnqels) < 1 ) return;
@@ -455,12 +455,12 @@ void SSDLAnalysis::ResetRunAndTriggerVariables(){
 	fTHLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 = 0;
 	fTHLT_Ele32_SW_TighterEleId_L1R_v2        = 0;
 	// trigger summary
-	fTHLT_GoodMuEvent		= 0;
-	fTHLT_GoodElEvent		= 0;
-	fTHLT_GoodElEvent_RA5	= 0;
-	fTHLT_GoodElEvent_TDL	= 0;
-	fTHLT_GoodElFakesEvent	= 0;
-	fTHLT_GoodHadronicEvent	= 0;	
+	fTHLT_GoodMuEvent       = 0;
+	fTHLT_GoodElEvent       = 0;
+	fTHLT_GoodElEvent_RA5   = 0;
+	fTHLT_GoodElEvent_TDL   = 0;
+	fTHLT_GoodElFakesEvent  = 0;
+	fTHLT_GoodHadronicEvent = 0;	
 }
 
 void SSDLAnalysis::ResetMuonVariables(){
@@ -495,75 +495,75 @@ void SSDLAnalysis::ResetElectronVariables(){
 	// electron properties
 	fTnqels = 0;
 	for(int i = 0; i < fMaxNeles; i++){
-		fTElcharge			[i]	= -999;
-		fTElChargeIsCons	[i]	= -999;
+		fTElcharge          [i] = -999;
+		fTElChargeIsCons    [i] = -999;
 		fTElEcalDriven      [i] = -999;
-		fTElChargeIsGenCons	[i]	= -999;
+		fTElChargeIsGenCons [i] = -999;
 		fTElCaloEnergy      [i] = -999.99;
-		fTElpt				[i]	= -999.99;
-		fTEleta				[i]	= -999.99;
-		fTElphi				[i]	= -999.99;
-		fTEld0				[i]	= -999.99;
-		fTElD0Err			[i]	= -999.99;
-		fTEldz				[i]	= -999.99;
-		fTElDzErr			[i]	= -999.99;
-		fTElEoverP			[i]	= -999.99;
-		fTElHoverE			[i]	= -999.99;
-		fTElSigmaIetaIeta	[i]	= -999.99;
-		fTElDeltaPhiSuperClusterAtVtx	[i]	= -999.99;
-		fTElDeltaPhiSuperClusterAtVtx	[i]	= -999.99;
-		fTElRelIso						[i]	= -999.99;
-		fTElIsGoodElId_WP80             [i]	= -999;
-		fTElIsGoodElId_WP90             [i]	= -999;
-		fTElIsGoodElId_WP95             [i]	= -999;
-		fTElIsConvertedEl_WP80          [i]	= -999;
-		fTElIsConvertedEl_WP90          [i]	= -999;
-		fTElS4OverS1					[i]	= -999.99;
-		fTElMT							[i]	= -999.99;
-		fTElDRjet						[i]	= -999.99;
-		fTElDRhardestjet				[i]	= -999.99;
-		fTElGenID						[i]	= -999;
-		fTElGenMID						[i]	= -999;
-		fTElGenGMID						[i]	= -999;
-		fTElGenType						[i]	= -999;
-		fTElGenMType					[i]	= -999;
-		fTElGenGMType					[i]	= -999;
-		fTElTight						[i]	= -999;
-		fTElHybRelIso					[i]	= -999.99;
+		fTElpt              [i] = -999.99;
+		fTEleta             [i] = -999.99;
+		fTElphi             [i] = -999.99;
+		fTEld0              [i] = -999.99;
+		fTElD0Err           [i] = -999.99;
+		fTEldz              [i] = -999.99;
+		fTElDzErr           [i] = -999.99;
+		fTElEoverP          [i] = -999.99;
+		fTElHoverE          [i] = -999.99;
+		fTElSigmaIetaIeta   [i] = -999.99;
+		fTElDeltaPhiSuperClusterAtVtx[i] = -999.99;
+		fTElDeltaPhiSuperClusterAtVtx[i] = -999.99;
+		fTElRelIso                   [i] = -999.99;
+		fTElIsGoodElId_WP80          [i] = -999;
+		fTElIsGoodElId_WP90          [i] = -999;
+		fTElIsGoodElId_WP95          [i] = -999;
+		fTElIsConvertedEl_WP80       [i] = -999;
+		fTElIsConvertedEl_WP90       [i] = -999;
+		fTElS4OverS1                 [i] = -999.99;
+		fTElMT                       [i] = -999.99;
+		fTElDRjet                    [i] = -999.99;
+		fTElDRhardestjet             [i] = -999.99;
+		fTElGenID                    [i] = -999;
+		fTElGenMID                   [i] = -999;
+		fTElGenGMID                  [i] = -999;
+		fTElGenType                  [i] = -999;
+		fTElGenMType                 [i] = -999;
+		fTElGenGMType                [i] = -999;
+		fTElTight                    [i] = -999;
+		fTElHybRelIso                [i] = -999.99;
 	}
 	
 	// di-electron properties
-	fTElminv				= -999.99;
-	fTElmtinv				= -999.99;
+	fTElminv  = -999.99;
+	fTElmtinv = -999.99;
 }
 
 void SSDLAnalysis::ResetJetMETVariables(){
 	// jet-MET properties
-	fTnqjets		= 0;
+	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt				[i]	= -999.99;
-		fTJeteta			[i]	= -999.99;
-		fTJetphi			[i]	= -999.99;
+		fTJetpt [i] = -999.99;
+		fTJeteta[i] = -999.99;
+		fTJetphi[i] = -999.99;
 	}
-	fTHT			= -999.99;
-	fTSumEt			= -999.99;
-	fTtcMET			= -999.99;
-	fTpfMET			= -999.99;
-	fTMuCorrMET		= -999.99;
-	fTdPhiMJ1		= -999.99;
-	fTdPhiMJ2		= -999.99;
-	fTR12			= -999.99;
-	fTR21			= -999.99;
-	fTR12plusR21	= -999.99;
+	fTHT         = -999.99;
+	fTSumEt      = -999.99;
+	fTtcMET      = -999.99;
+	fTpfMET      = -999.99;
+	fTMuCorrMET  = -999.99;
+	fTdPhiMJ1    = -999.99;
+	fTdPhiMJ2    = -999.99;
+	fTR12        = -999.99;
+	fTR21        = -999.99;
+	fTR12plusR21 = -999.99;
 	// photon properties
-	fTnqphos		= 0;
+	fTnqphos = 0;
 	for(int i = 0; i < fMaxNphos; i++){
-		fTPhopt				[i]	= -999.99;
-		fTPhoeta			[i]	= -999.99;
-		fTPhophi			[i]	= -999.99;
-		fTPhoRelIso			[i]	= -999.99;
-		fTPhoDRjet			[i]	= -999.99;
-		fTPhoDRhardestjet	[i]	= -999.99;
+		fTPhopt          [i] = -999.99;
+		fTPhoeta         [i] = -999.99;
+		fTPhophi         [i] = -999.99;
+		fTPhoRelIso      [i] = -999.99;
+		fTPhoDRjet       [i] = -999.99;
+		fTPhoDRhardestjet[i] = -999.99;
 	}
 }
 
@@ -935,13 +935,13 @@ void SSDLAnalysis::DumpRunAndTiggerProperties() {
 	// muon triggers
 	fTHLT_Mu9                    = GetHLTResult("HLT_Mu9");
 	fTHLT_Mu11                   = GetHLTResult("HLT_Mu11");
-	fTHLT_Mu13_v1               = GetHLTResult("HLT_Mu13_v1");
+	fTHLT_Mu13_v1                = GetHLTResult("HLT_Mu13_v1");
 	fTHLT_Mu15                   = GetHLTResult("HLT_Mu15");
-	fTHLT_Mu15_v1               = GetHLTResult("HLT_Mu15_v1");
+	fTHLT_Mu15_v1                = GetHLTResult("HLT_Mu15_v1");
 	fTHLT_DoubleMu0              = GetHLTResult("HLT_DoubleMu0");
 	fTHLT_DoubleMu3              = GetHLTResult("HLT_DoubleMu3");
-	fTHLT_DoubleMu3_v2          = GetHLTResult("HLT_DoubleMu3_v2");
-	fTHLT_DoubleMu5_v2          = GetHLTResult("HLT_DoubleMu5_v2");
+	fTHLT_DoubleMu3_v2           = GetHLTResult("HLT_DoubleMu3_v2");
+	fTHLT_DoubleMu5_v2           = GetHLTResult("HLT_DoubleMu5_v2");
 	// e triggers without ElID or Iso cuts - (should be used for FP ratio measurements)
 	fTHLT_Ele10_LW_L1R           = GetHLTResult("HLT_Ele10_LW_L1R");
 	fTHLT_Ele10_SW_L1R           = GetHLTResult("HLT_Ele10_SW_L1R");
@@ -1008,9 +1008,9 @@ void SSDLAnalysis::DumpJetMETProperties(vector<int>& selectedJetInd){
 	for(int ind=0; ind<std::min(nqjets,fMaxNjets); ind++){
 		jetindex = selectedJetInd[ind];
 		// dump properties
-		fTJetpt  [ind] = fTR->PFJPt  [jetindex];
-		fTJeteta [ind] = fTR->PFJEta [jetindex];
-		fTJetphi [ind] = fTR->JPhi   [jetindex];
+		fTJetpt  [ind] = fTR->PFJPt [jetindex];
+		fTJeteta [ind] = fTR->PFJEta[jetindex];
+		fTJetphi [ind] = fTR->PFJPhi[jetindex];
 	}
 	// get SumEt and METs and and Ht of all "good" jets
 	fTSumEt     = fTR->SumEt;
@@ -1105,33 +1105,33 @@ void SSDLAnalysis::DumpMuonProperties(vector<int>& selectedMuInd){
 void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 jtotPT){
 	// Dump basic electron properties
 	int elindex(-1);
-	int nqels	= selectedElInd.size();
+	int nqels = selectedElInd.size();
 	TLorentzVector p[nqels];
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
 	for(int ind=0; ind<std::min(nqels,fMaxNeles); ind++){
 		elindex = selectedElInd[ind];
-		fTElcharge                      [ind] = fTR->ElCharge				[elindex];
+		fTElcharge                      [ind] = fTR->ElCharge                [elindex];
 		fTElChargeIsCons                [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
 		fTElChargeIsGenCons             [ind] = (fTR->ElCharge[elindex])==(fTR->ElGenCharge[elindex]);
-		fTElEcalDriven                  [ind] = fTR->ElEcalDriven			[elindex];
-		fTElCaloEnergy                  [ind] = fTR->ElCaloEnergy			[elindex];
-		fTElpt							[ind] = fTR->ElPt					[elindex];
-		fTEleta							[ind] = fTR->ElEta					[elindex];
-		fTElphi							[ind] = fTR->ElPhi					[elindex];
-		fTEld0							[ind] = fTR->ElD0PV					[elindex];
-		fTElD0Err						[ind] = fTR->ElD0E					[elindex];
-		fTEldz                          [ind] = fTR->ElDzPV					[elindex];
-		fTElDzErr                       [ind] = fTR->ElDzE					[elindex];
-		fTElEoverP						[ind] = fTR->ElESuperClusterOverP	[elindex];
-		fTElHoverE						[ind] = fTR->ElHcalOverEcal			[elindex];
-		fTElSigmaIetaIeta				[ind] = fTR->ElSigmaIetaIeta		[elindex];
-		fTElDeltaPhiSuperClusterAtVtx	[ind] = fTR->ElDeltaPhiSuperClusterAtVtx[elindex];
-		fTElDeltaEtaSuperClusterAtVtx	[ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
-		fTElRelIso						[ind] = fTR->ElRelIso03				[elindex];
-		fTElS4OverS1					[ind] = fTR->ElS4OverS1				[elindex];
-		fTElGenID						[ind] = fTR->ElGenID				[elindex];
-		fTElGenMID						[ind] = fTR->ElGenMID				[elindex];
-		fTElGenGMID						[ind] = fTR->ElGenGMID				[elindex];
+		fTElEcalDriven                  [ind] = fTR->ElEcalDriven           [elindex];
+		fTElCaloEnergy                  [ind] = fTR->ElCaloEnergy           [elindex];
+		fTElpt                          [ind] = fTR->ElPt                   [elindex];
+		fTEleta                         [ind] = fTR->ElEta                  [elindex];
+		fTElphi                         [ind] = fTR->ElPhi                  [elindex];
+		fTEld0                          [ind] = fTR->ElD0PV                 [elindex];
+		fTElD0Err                       [ind] = fTR->ElD0E                  [elindex];
+		fTEldz                          [ind] = fTR->ElDzPV                 [elindex];
+		fTElDzErr                       [ind] = fTR->ElDzE                  [elindex];
+		fTElEoverP                      [ind] = fTR->ElESuperClusterOverP   [elindex];
+		fTElHoverE                      [ind] = fTR->ElHcalOverEcal         [elindex];
+		fTElSigmaIetaIeta               [ind] = fTR->ElSigmaIetaIeta        [elindex];
+		fTElDeltaPhiSuperClusterAtVtx   [ind] = fTR->ElDeltaPhiSuperClusterAtVtx[elindex];
+		fTElDeltaEtaSuperClusterAtVtx   [ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
+		fTElRelIso                      [ind] = fTR->ElRelIso03                 [elindex];
+		fTElS4OverS1                    [ind] = fTR->ElS4OverS1                 [elindex];
+		fTElGenID                       [ind] = fTR->ElGenID                    [elindex];
+		fTElGenMID                      [ind] = fTR->ElGenMID                   [elindex];
+		fTElGenGMID                     [ind] = fTR->ElGenGMID                  [elindex];
 		
 		pdgparticle el, emo, egmo;
 		GetPDGParticle(el,   abs(fTR->ElGenID  [elindex]));
@@ -1143,14 +1143,14 @@ void SSDLAnalysis::DumpElectronProperties(vector<int>& selectedElInd, TVector3 j
 		
 		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
 		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
-		fTElMT			[ind] = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-		fTElDRjet		[ind] = minDRtoJet(fTEleta[ind], fTElphi[ind]);
+		fTElMT          [ind] = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
+		fTElDRjet       [ind] = minDRtoJet(fTEleta[ind], fTElphi[ind]);
 		fTElDRhardestjet[ind] = Util::GetDeltaR(fTJeteta[0], fTEleta[ind], fTJetphi[0], fTElphi[ind]);		
-		fTElTight		[ind] =   IsTightEl(elindex);
-		fTElHybRelIso	[ind] = hybRelElIso(elindex);
-		fTElIsGoodElId_WP80   [ind] =    IsGoodElId_WP80(elindex);
-		fTElIsGoodElId_WP90   [ind] =    IsGoodElId_WP90(elindex);
-		fTElIsGoodElId_WP95   [ind] =    IsGoodBasicEl(elindex);
+		fTElTight       [ind] = IsTightEl(elindex);
+		fTElHybRelIso   [ind] = hybRelElIso(elindex);
+		fTElIsGoodElId_WP80   [ind] = IsGoodElId_WP80(elindex);
+		fTElIsGoodElId_WP90   [ind] = IsGoodElId_WP90(elindex);
+		fTElIsGoodElId_WP95   [ind] = IsGoodBasicEl(elindex);
 		fTElIsConvertedEl_WP80[ind] = IsConvertedEl_WP80(elindex);
 		fTElIsConvertedEl_WP90[ind] = IsConvertedEl_WP90(elindex);
 	}
@@ -1331,6 +1331,6 @@ void SSDLAnalysis::DumpElectronLooseAndTighPtAndEta(int elindex, float &elLooseP
 void SSDLAnalysis::DumpTwoElectronPtAndEta(int el1index, int el2index, float &el1Pt, float &el2Pt, float &el1Eta, float &el2Eta) {
 	el1Pt		= fTR->ElPt [el1index];
 	el2Pt		= fTR->ElPt [el2index];
-	el1Eta		= fTR->ElEta [el1index];
-	el2Eta		= fTR->ElEta [el2index];
+	el1Eta		= fTR->ElEta[el1index];
+	el2Eta		= fTR->ElEta[el2index];
 }
