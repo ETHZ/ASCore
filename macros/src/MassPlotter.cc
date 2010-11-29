@@ -159,12 +159,12 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 	//       samples , variable,        cuts  ,    xtitle           ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
 	//MakePlot(fSamples,"misc.PseudoJetMT2",cuts, "MT2"             ,gNMT2bins, gMT2bins,  false,  true , true,   true, false, false);
-	//MakePlot(fSamples,"pfmet[0].Pt()"   ,cuts, "PFMET"              ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
-	//MakePlot(fSamples,"MHT[0].Pt()"     ,cuts, "MHT"                ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
+	MakePlot(fSamples,"pfmet[0].Pt()"   ,cuts, "PFMET"              ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
+	MakePlot(fSamples,"MHT[0].Pt()"     ,cuts, "MHT"                ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
 
 	//       samples   , variable, cuts  ,    xtitle                         ,nbins,min,max,   cleaned,  log  , comp , ratio, stack, overlay
-   	MakePlot(fSamples,  "jet[0].lv.Pt()"  ,cuts,"leading JPt"                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
-   	MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
+   	//MakePlot(fSamples,  "jet[0].lv.Pt()"  ,cuts,"leading JPt"                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
+   	//MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "                 ,400,0   ,800,     false, true,   true,  true,  true,  false);
    	//MakePlot(fSamples,"MetJetDPhi(0)"   ,cuts,"#Delta#phi(#slash{E},jet1)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
    	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#Delta#phi(#slash{E},jet2)"  ,60,0,TMath::Pi(), false, false, true,   true,  true,  true);
    	//MakePlot(fSamples,"NJets"           ,cuts  ,     "NJets"                ,15,0,15,          false, true , true ,  true,  true,  true);
