@@ -40,10 +40,9 @@ public:
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
-	virtual bool IsGoodBasicPFJet(int);
-	virtual bool IsGoodBasicPFJet(int, bool);
-	virtual bool IsGoodPFJetMedium(int, bool);
-	virtual bool IsGoodPFJetTight(int, bool);
+	virtual bool IsGoodBasicPFJet( int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetMedium(int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetTight( int, double = 30., double = 2.5);
 	virtual bool IsGoodJ_TDL(int);
 	virtual bool IsGoodbJ_TDL(int);
 
@@ -55,23 +54,21 @@ public:
 	virtual bool IsGoodMu_TDL(int);
 
 	// Electron Selectors
-	virtual bool IsElFromPrimaryVx	(int);
 	virtual bool IsGoodBasicEl		(int);
+	virtual bool IsElInGap(int);
+	virtual bool IsElFromPrimaryVx	(int);
+
 	virtual bool IsGoodEl_TDL		(int);
+
 	virtual bool IsGoodElId_WP80	(int);
 	virtual bool IsGoodElId_WP90	(int);
-	virtual bool IsConvertedEl_WP80	(int);
-	virtual bool IsConvertedEl_WP90(int);
-	virtual double hybRelElIso		(int);
-	virtual bool IsIsolatedEl		(int, double, double);
-	virtual bool IsIsolatedEl_WP80	(int);
-	virtual bool IsIsolatedEl_WP90	(int);
-	virtual bool IsIsolatedEl_WP95  (int);
-	virtual bool IsIsolatedEl_RA5	(int);
-	virtual bool IsIsolatedEl_LooseIso(int);
+
 	virtual bool IsTightEl			(int);
 	virtual bool IsLooseEl			(int);
 	virtual bool IsLooseNoTightEl	(int);
+	
+	virtual double hybRelElIso		(int);
+	virtual bool IsIsolatedEl		(int, double, double);
 
 	// Photon Selectors
 	virtual bool IsGoodBasicPho(int);
@@ -86,14 +83,14 @@ public:
 	virtual vector<int> ElectronSelection(bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	virtual vector<int> PhotonSelection(  bool(UserAnalysisBase::*phoSelector)(int) = NULL);
 	virtual vector<int> JetSelection(     bool(UserAnalysisBase::*jetSelector)(int) = NULL);
-	virtual vector<int> PFJetSelection(   bool(UserAnalysisBase::*pfjetSelector)(int) = NULL);
+	virtual vector<int> PFJetSelection(double ptcut = 30., double absetacut = 2.5,   bool(UserAnalysisBase::*pfjetSelector)(int, double, double) = NULL);
 	virtual bool SingleMuonSelection(int&);
 	virtual bool DiMuonSelection(int&, int&, int = 0);
 	virtual bool SSDiMuonSelection(int &, int&);	
-	virtual bool SingleElectronSelection(int&);
-	virtual bool DiElectronSelection(int&, int&, int = 0);
-	virtual bool SSDiElectronSelection(int&, int&);
-	virtual bool OSDiElectronSelection(int&, int&);
+	virtual bool SingleElectronSelection(int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+	virtual bool DiElectronSelection(int&, int&, int = 0, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+	virtual bool SSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+	virtual bool OSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	// TDL & RA5
 	virtual bool IsGoodElEvent_TDL();
 	virtual bool IsGoodElEvent_RA5();

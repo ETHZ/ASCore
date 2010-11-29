@@ -182,15 +182,12 @@ bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
 	return true;
 }
 
-bool UserAnalysisBase::IsGoodBasicPFJet(int index){
-	// This is a 'manual default argument overload'
-	// I.e. PFJetSelection can use this as a default selector
-	return IsGoodBasicPFJet(index, true);
-}
-bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
+bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacut){
 	// Basic PF jet cleaning and ID cuts
-	if(doSel && fTR->PFJPt[index] < 20) return false;
-	if(doSel && fabs(fTR->PFJEta[index]) > 2.4) return false;
+	// cut at pt of ptcut (default = 30 GeV)
+	// cut at abs(eta) of absetacut (default = 2.5)
+	if(fTR->PFJPt[index] < ptcut           ) return false;
+	if(fabs(fTR->PFJEta[index]) > absetacut) return false;
 	// Loose PF jet ID (WARNING: HF not included in our ntuple)
 	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
 	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
@@ -204,19 +201,19 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, bool doSel=true) {
 	return true;
 }
 
-bool UserAnalysisBase::IsGoodPFJetMedium(int index, bool doSel=true) {
+bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetacut) {
 	// Medium PF JID
-	if ( ! IsGoodBasicPFJet(index, doSel)       ) return false;
-	if ( !(fTR->PFJNeuHadfrac[index]    < 0.95) ) return false;
-	if ( !(fTR->PFJNeuEmfrac[index]     < 0.95) ) return false;
+	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
+	if ( !(fTR->PFJNeuHadfrac[index] < 0.95)         ) return false;
+	if ( !(fTR->PFJNeuEmfrac[index]  < 0.95)         ) return false;
 	return true;
 }
 
-bool UserAnalysisBase::IsGoodPFJetTight(int index, bool doSel=true) {
+bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacut) {
 	// Tight PF JID
-	if ( ! IsGoodBasicPFJet(index, doSel)       ) return false;
-	if ( !(fTR->PFJNeuHadfrac[index]    < 0.90) ) return false;
-	if ( !(fTR->PFJNeuEmfrac[index]     < 0.90) ) return false;
+	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
+	if ( !(fTR->PFJNeuHadfrac[index] < 0.90)         ) return false;
+	if ( !(fTR->PFJNeuEmfrac[index]  < 0.90)         ) return false;
 	return true;
 }
 
@@ -337,230 +334,32 @@ bool UserAnalysisBase::IsGoodEl_TDL(int index){
 }
 
 bool UserAnalysisBase::IsGoodBasicEl(int index){
-	// Basic electron cleaning and ID cuts
-	// (corresponding to the 95% eff. WP without isolation cuts
-	// and with coversion rejection cuts)
+	// Electrons with WP95 ID and conv. rej.
+	// No isolation cut
+	// ECAL gap veto
+	if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false; // Ele ID WP 80
+	if(IsElInGap(index)) return false;
+	if(!IsElFromPrimaryVx(index)) return false;
 	
-	double pt  = fTR->ElPt[index];
-	double eta = fTR->ElEta[index];
-
-	// barrel cut values
-	double ElecHoverEBarmax         = 0.15;
-	double ElecSigmaEtaEtaBarmin    = 0.002;
-	double ElecSigmaEtaEtaBarmax    = 0.01;
-	double ElecEoverPInBarmin       = 0.;
-	double ElecDeltaEtaInBarmax     = 0.007;
-	double ElecDeltaPhiInBarmax     = 0.8;
-	double ElecDeltaPhiOutBarmax    = 999.0;
-	// endcaps cut values
-	double ElecHoverEEndmax         = 0.07;
-	double ElecSigmaEtaEtaEndmax    = 0.03;
-	double ElecEoverPInEndmin       = 0.;
-	double ElecDeltaEtaInEndmax     = 999.0; // not used due to misalignement in the EndCaps
-	double ElecDeltaPhiInEndmax     = 0.7;
-	double ElecDeltaPhiOutEndmax    = 999.0;
-	// kinematics + ECAL gap cut values
-	double etamax                   = 3.0;
-	double etaEgapUpperEdge         = 1.560;
-	double etaEgapLowerEdge         = 1.442;
-	double pTmin                    = 5.;
-	
-	// electron ID
-	if( fabs(eta) < 1.479 ){ // Barrel
-		if( fTR->ElHcalOverEcal[index] > ElecHoverEBarmax ) return false;
-		if( fTR->ElESuperClusterOverP[index] < ElecEoverPInBarmin ) return false;
-		if( fTR->ElSigmaIetaIeta[index] > ElecSigmaEtaEtaBarmax ) return false;
-		if( fTR->ElSigmaIetaIeta[index] < ElecSigmaEtaEtaBarmin ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > ElecDeltaEtaInBarmax ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > ElecDeltaPhiInBarmax ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index]) > ElecDeltaPhiOutBarmax ) return false;
-	}
-	else{ // EndCap
-		if( fTR->ElHcalOverEcal[index] > ElecHoverEEndmax ) return false;
-		if( fTR->ElESuperClusterOverP[index] < ElecEoverPInEndmin ) return false;
-		if( fTR->ElSigmaIetaIeta[index] > ElecSigmaEtaEtaEndmax ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > ElecDeltaEtaInEndmax ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > ElecDeltaPhiInEndmax ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index]) > ElecDeltaPhiOutEndmax ) return false;
-	}
-
-	// electron kinematic cuts + the ECAL gap veto
-	if ( (fabs(eta) > etamax) ||
-	   ( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) ) return false;	
-	if( pt < pTmin) return false;
-
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodElId_WP90(int index){
-	// Converted electrons with WP90 cleaning and ID cuts
-	
-	double pt	= fTR->ElPt[index];
-	double eta	= fTR->ElEta[index];
-	
-	// barrel cut values
-	double ElecHoverEBarmax			= 0.12;
-	double ElecSigmaEtaEtaBarmin	= 0.002;
-	double ElecSigmaEtaEtaBarmax	= 0.01;
-	double ElecEoverPInBarmin		= 0.;
-	double ElecDeltaEtaInBarmax		= 0.007;
-	double ElecDeltaPhiInBarmax		= 0.8;
-	double ElecDeltaPhiOutBarmax	= 999.0;
-	// endcaps cut values
-	double ElecHoverEEndmax			= 0.05;
-	double ElecSigmaEtaEtaEndmax	= 0.03;
-	double ElecEoverPInEndmin		= 0.;
-	double ElecDeltaEtaInEndmax		= 0.009; // not used with 3_6_X data due to misalignement in the EndCaps
-	double ElecDeltaPhiInEndmax		= 0.7;
-	double ElecDeltaPhiOutEndmax	= 999.0;
-	// kinematics + ECAL gap cut values
-	double etamax					= 3.0;
-	double etaEgapUpperEdge			= 1.560;
-	double etaEgapLowerEdge			= 1.442;
-	double pTmin					= 5.;
-	
-	// electron ID
-	if( fabs(eta) < 1.479 ){ // Barrel
-		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
-	}
-	else{ // EndCap
-		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
-	}
-	
-	// electron kinematic cuts + the ECAL gap veto
-	if ( (fabs(eta) > etamax) ||
-		( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
-	if( pt < pTmin) return false;
-	
+	// Electrons with WP90 ID and conv. rej.
+	// No isolation cut
+	// ECAL gap veto
+	if(!IsGoodBasicEl(index)) return false;
+	if(fTR->ElIDsimpleWPrelIso[index] != 5 && fTR->ElIDsimpleWPrelIso[index] != 7) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodElId_WP80(int index){
-	// Converted electrons with WP80 cleaning and ID cuts
-	
-	double pt	= fTR->ElPt[index];
-	double eta	= fTR->ElEta[index];
-	
-	// barrel cut values
-	double ElecHoverEBarmax			= 0.04;
-	double ElecSigmaEtaEtaBarmin	= 0.002;
-	double ElecSigmaEtaEtaBarmax	= 0.01;
-	double ElecEoverPInBarmin		= 0.;
-	double ElecDeltaEtaInBarmax		= 0.004;
-	double ElecDeltaPhiInBarmax		= 0.6;
-	double ElecDeltaPhiOutBarmax	= 999.0;
-	// endcaps cut values
-	double ElecHoverEEndmax			= 0.025;
-	double ElecSigmaEtaEtaEndmax	= 0.03;
-	double ElecEoverPInEndmin		= 0.;
-	double ElecDeltaEtaInEndmax		= 0.007; // not used with 3_6_X data due to misalignement in the EndCaps
-	double ElecDeltaPhiInEndmax		= 0.03;
-	double ElecDeltaPhiOutEndmax	= 999.0;
-	// kinematics + ECAL gap cut values
-	double etamax					= 3.0;
-	double etaEgapUpperEdge			= 1.560;
-	double etaEgapLowerEdge			= 1.442;
-	double pTmin					= 5.;
-	
-	// electron ID
-	if( fabs(eta) < 1.479 ){ // Barrel
-		if(		 fTR->ElHcalOverEcal[index]					> ElecHoverEBarmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInBarmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaBarmax ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				< ElecSigmaEtaEtaBarmin ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInBarmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutBarmax ) return false;
-	}
-	else{ // EndCap
-		if( 	 fTR->ElHcalOverEcal[index]					> ElecHoverEEndmax      ) return false;
-		if(		 fTR->ElESuperClusterOverP[index]			< ElecEoverPInEndmin    ) return false;
-		if(		 fTR->ElSigmaIetaIeta[index]				> ElecSigmaEtaEtaEndmax ) return false;
-		if( fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])	> ElecDeltaEtaInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])	> ElecDeltaPhiInEndmax  ) return false;
-		if( fabs(fTR->ElDeltaPhiSeedClusterAtCalo[index])	> ElecDeltaPhiOutEndmax ) return false;
-	}
-	
-	// electron kinematic cuts + the ECAL gap veto
-	if ( (fabs(eta) > etamax) ||
-		( (fabs(eta) > etaEgapLowerEdge) && (fabs(eta) < etaEgapUpperEdge) ) )	return false;	
-	if( pt < pTmin) return false;
-	
+	// Electrons with WP80 ID and conv. rej. cuts
+	// No isolation cut
+	// ECAL gap veto	
+	if(!IsGoodBasicEl(index)) return false;
+	if(fTR->ElIDsimpleWP80relIso[index] != 5 && fTR->ElIDsimpleWP80relIso[index] != 7) return false; // Ele ID WP 80
 	return true;
-}
-
-bool UserAnalysisBase::IsConvertedEl_WP90(int index){
-	// conversions cut values for WP90
-	double ElecConvPartTrackDistmin	= 0.02;
-	double ElecConvPartTrackDCotmin	= 0.02;
-	double ElecNMissHitsmax			= 1.;
-	
-	// return true if electron is conversion-like
-	if ( fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		 return true;
-	if ( fabs(fTR->ElConvPartnerTrkDist[index])	< ElecConvPartTrackDistmin &&
-		fabs(fTR->ElConvPartnerTrkDCot[index])	< ElecConvPartTrackDCotmin ) return true;
-	
-	return false;
-}
-
-bool UserAnalysisBase::IsConvertedEl_WP80(int index){
-	// conversions cut values
-	double ElecConvPartTrackDistmin	= 0.02;
-	double ElecConvPartTrackDCotmin	= 0.02;
-	double ElecNMissHitsmax			= 0.;
-	
-	// return true if electron is conversion-like
-	if (  fTR->ElNumberOfMissingInnerHits[index]	> ElecNMissHitsmax )		 return true;
-	if (  fabs(fTR->ElConvPartnerTrkDist[index])	< ElecConvPartTrackDistmin &&
-		fabs(fTR->ElConvPartnerTrkDCot[index])	< ElecConvPartTrackDCotmin ) return true;
-	
-	return false;
-}
-
-bool UserAnalysisBase::IsIsolatedEl_WP95(int index){
-	// combined relative isolation cut values for WP95
-	double ElecCombRelIsoEBarmax = 0.15;
-	double ElecCombRelIsoEEndmax = 0.15;
-	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
-}
-
-bool UserAnalysisBase::IsIsolatedEl_WP90(int index){
-	// combined relative isolation cut values for WP90
-	double ElecCombRelIsoEBarmax = 0.10;
-	double ElecCombRelIsoEEndmax = 0.07;	
-	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
-}
-
-bool UserAnalysisBase::IsIsolatedEl_WP80(int index){
-	// combined relative isolation cut values for WP80
-	double ElecCombRelIsoEBarmax = 0.07;
-	double ElecCombRelIsoEEndmax = 0.06;
-	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
-}
-
-bool UserAnalysisBase::IsIsolatedEl_RA5(int index){
-	// combined relative isolation cut values for WP90
-	double ElecCombRelIsoEBarmax = 0.1;
-	double ElecCombRelIsoEEndmax = 0.1;	
-	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
-}
-
-bool UserAnalysisBase::IsIsolatedEl_LooseIso(int index){
-	// combined relative isolation cut values for loose electrons
-	double ElecCombRelIsoEBarmax = 1.;
-	double ElecCombRelIsoEEndmax = 0.6;
-	return IsIsolatedEl(index, ElecCombRelIsoEBarmax, ElecCombRelIsoEEndmax);
 }
 
 bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, double ElecCombRelIsoEEndmax){
@@ -585,26 +384,31 @@ double UserAnalysisBase::hybRelElIso(int index){
 bool UserAnalysisBase::IsTightEl(int index){
 	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP95%)
 	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
-	if(!IsGoodElId_WP80(index)) return false;	// corresponding to the 80% eff. WP without isolation cuts or conversion rejection
-	if(IsConvertedEl_WP80(index)) return false;	
-	if(!IsIsolatedEl_WP95(index)) return false;
+
+	if(!IsGoodElId_WP80(index)) return false;
+	if(!IsIsolatedEl(index, 0.15, 0.15)) return false; // corresponds to WP 95 isolation
+
 	return true;
 }
 
 bool UserAnalysisBase::IsLooseEl(int index){
 	// Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
-    // basic reco cuts
+	if(fTR->ElPt[index] < 10.) return false;
+	if(fabs(fTR->ElEta[index]) > 2.4) return false;
+
 	if(!fTR->ElEcalDriven[index]) return false;
-	if(fTR->ElCaloEnergy[index]<10.) return false;
+	if(fTR->ElCaloEnergy[index] < 10.) return false;
 	if(fTR->ElDuplicateEl[index] >= 0) return false;
-    // (El.Id cuts: WP90%; El.Convers.Reject.: WP90%; El.RelIso: Loose)	
-	if(!IsGoodElId_WP90(index)) return false;		// corresponding to the 90% eff. WP without isolation cuts or conversion rejection
-	if(IsConvertedEl_WP90(index)) return false;
-	if(!IsIsolatedEl_LooseIso(index)) return false;
+	
+    // (El.Id cuts: WP90%; El.Convers.Reject.: WP80%; El.RelIso: Loose)	
+	if(!IsGoodElId_WP90(index)) return false;
+	if(fTR->ElNumberOfMissingInnerHits[index] > 0) return false; // Ask for tighter WP80 conversion rejection
+	if(!IsIsolatedEl(index, 1.0, 0.6)) return false;
+
 	// rejection if matched to any muon which passes basic quility cuts
 	for( int im = 0; im < fTR->NMus; ++im ){
 		if( (fTR->MuIsGlobalMuon[im] == 1 && fTR->MuIsTrackerMuon[im] == 1) &&
-		    (fTR->MuNTkHits[im] > 10) && (fTR->MuNChi2[index] < 11) && (fTR->MuNMuHits[index] > 0)) {
+		    (fTR->MuNTkHits[im] > 10) && (fTR->MuNChi2[im] < 11) && (fTR->MuNMuHits[im] > 0)) {
 			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
 			if(deltaR <= 0.1) return false;
 		}
@@ -622,6 +426,12 @@ bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
 	if(fabs(fTR->ElD0BS[ind]) > 0.02) return false;
 	if(fabs(fTR->ElDzPV[ind]) > 1.0) return false;
 	return true;
+}
+
+bool UserAnalysisBase::IsElInGap(int ind){
+	// ECAL gap veto
+	if ( fabs(fTR->ElEta[ind]) > 1.442 && fabs(fTR->ElEta[ind]) < 1.560 )  return false;	
+	return true;	
 }
 
 // PHOTONS
@@ -854,19 +664,13 @@ bool UserAnalysisBase::IsGoodHadronicEvent(){
 vector<int> UserAnalysisBase::ElectronSelection(bool(UserAnalysisBase::*eleSelector)(int)){
 	// Returns the vector of indices of
 	// good electrons sorted by Pt
-	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsLooseEl;
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsGoodBasicEl;
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NEles; ++ind){
 		// selection
 		if((*this.*eleSelector)(ind) == false) continue;
-
-		// kinematic cuts
-		if(fabs(fTR->ElEta[ind]) > 2.4) continue;
-		if(fTR->ElPt[ind] < 10.) continue;
-		// additional cuts
-		if(!IsElFromPrimaryVx(ind)) continue;
 
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->ElPt[ind]);
@@ -894,16 +698,18 @@ vector<int> UserAnalysisBase::JetSelection(bool(UserAnalysisBase::*jetSelector)(
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-vector<int> UserAnalysisBase::PFJetSelection(bool(UserAnalysisBase::*pfjetSelector)(int)){
+vector<int> UserAnalysisBase::PFJetSelection(double ptcut, double absetacut, bool(UserAnalysisBase::*pfjetSelector)(int, double, double)){
 	// Returns the vector of indices of
 	// good jets sorted by Pt
+	// cut at pt of ptcut (default = 30.)
+	// cut at abs(eta) of absetacut (default = 2.5)
 	if(pfjetSelector == NULL) pfjetSelector = &UserAnalysisBase::IsGoodBasicPFJet;
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
 	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
-		if((*this.*pfjetSelector)(ind) == false) continue;
+		if((*this.*pfjetSelector)(ptcut, absetacut, ind) == false) continue;
 		// additional kinematic cuts
 		if(fabs(fTR->PFJEta[ind]) > 2.5) continue;
 
@@ -946,22 +752,24 @@ vector<int> UserAnalysisBase::MuonSelection(bool(UserAnalysisBase::*muonSelector
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
-bool UserAnalysisBase::SingleElectronSelection(int &index){
+bool UserAnalysisBase::SingleElectronSelection(int &index, bool(UserAnalysisBase::*eleSelector)(int)){
 	// Selects events with (at least) one good electron and gives the index
 	// of the hardest one in the argument
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsGoodBasicEl;
 	if( fTR->NEles < 1 ) return false;
-	vector<int> ElInd = ElectronSelection();
+	vector<int> ElInd = ElectronSelection(eleSelector);
 	if(ElInd.size() < 1) return false;
 	index = ElInd[0];
 	return true;
 }
 
-bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2, int charge){
+bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2, int charge, bool(UserAnalysisBase::*eleSelector)(int)){
 	// Selects events with (at least) two good electrons and gives the indices
 	// of the hardest two in the argument (if selected)
 	// charge is the relative charge, 0 = no cut on charge (default), 1 = SS, -1 = OS
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsGoodBasicEl;
 	if( fTR->NEles < 2 ) return false;
-	vector<int> ElInd = ElectronSelection();
+	vector<int> ElInd = ElectronSelection(eleSelector);
 	if(ElInd.size() < 2) return false;
 	// Charge selection
 	if(charge != 0) if(fTR->ElCharge[ElInd[0]] * fTR->ElCharge[ElInd[1]] != charge) return false;
@@ -970,12 +778,14 @@ bool UserAnalysisBase::DiElectronSelection(int &ind1, int &ind2, int charge){
 	return true;
 }
 
-bool UserAnalysisBase::SSDiElectronSelection(int &prim, int &sec){
-	return DiElectronSelection(prim, sec, 1);
+bool UserAnalysisBase::SSDiElectronSelection(int &prim, int &sec, bool(UserAnalysisBase::*eleSelector)(int)){
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsGoodBasicEl;
+	return DiElectronSelection(prim, sec, 1, eleSelector);
 }
 
-bool UserAnalysisBase::OSDiElectronSelection(int &prim, int &sec){
-	return DiElectronSelection(prim, sec, -1);
+bool UserAnalysisBase::OSDiElectronSelection(int &prim, int &sec, bool(UserAnalysisBase::*eleSelector)(int)){
+	if(eleSelector == NULL) eleSelector = &UserAnalysisBase::IsGoodBasicEl;
+	return DiElectronSelection(prim, sec, -1, eleSelector);
 }
 
 bool UserAnalysisBase::SingleMuonSelection(int &index){
