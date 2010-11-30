@@ -9,6 +9,8 @@
 #include "helper/AnaClass.hh"
 #include "helper/FPRatios.hh"
 #include "helper/Monitor.hh"
+#include "TLorentzVector.h"
+
 
 class MuonPlotter : public AnaClass{
 
@@ -28,6 +30,12 @@ public:
 		EMu,
 		Electron
 	};
+	struct lepton{
+		TLorentzVector p;
+		int charge;
+		int type; // -1(unknown), 0(mu), 1(ele)
+		int index;
+	};
 	
 	MuonPlotter();
 	MuonPlotter(TString);
@@ -46,6 +54,7 @@ public:
 	void makefRatioPlots();
 	void makepRatioPlots();
 	void makeIsolationPlots();
+	void makeIsolationPlot();
 	void makePtPlots();
 	
 	void makeDiffPredictionPlots();
@@ -116,7 +125,6 @@ public:
 	void writeHistos();
 	int readHistos(TString);
 
-
 	// Event and Object selectors:
 	bool isGoodEvent();
 	bool isGoodMuEvent();
@@ -146,20 +154,25 @@ public:
 	bool isZElElEventTRG(int&);
 
 	bool isGenMatchedSUSYDiLepEvent();
-	bool isSSLLMuEvent();
-	bool isSSLLMuEventTRG();
-	bool isSSTTMuEvent();
-	bool isSSTTMuEventTRG();
+	bool isGenMatchedSUSYDiLepEvent(int&, int&);
 
-	bool isSSLLElEvent();
-	bool isSSLLElEventTRG();
-	bool isSSTTElEvent();
-	bool isSSTTElEventTRG();
+	int isSSLLEvent(int&, int&);
+	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 
-	bool isSSLLElMuEvent();
-	bool isSSLLElMuEventTRG();
-	bool isSSTTElMuEvent();
-	bool isSSTTElMuEventTRG();
+	bool isSSLLMuEvent(   int&, int&);
+	bool isSSLLMuEventTRG(int&, int&);
+	bool isSSTTMuEvent(   int&, int&);
+	bool isSSTTMuEventTRG(int&, int&);
+
+	bool isSSLLElEvent(   int&, int&);
+	bool isSSLLElEventTRG(int&, int&);
+	bool isSSTTElEvent(   int&, int&);
+	bool isSSTTElEventTRG(int&, int&);
+
+	bool isSSLLElMuEvent(   int&, int&);
+	bool isSSLLElMuEventTRG(int&, int&);
+	bool isSSTTElMuEvent(   int&, int&);
+	bool isSSTTElMuEventTRG(int&, int&);
 
 	bool isGoodMuon(int);
 	bool isLooseMuon(int);
@@ -188,15 +201,13 @@ private:
 
 	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
 
-	// FPRatios *fFPRatios;
-
 	vector<int> fAllSamples;
 	vector<int> fMCBG;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
 	vector<int> fJMData;  // JetMET data samples
-
+	
 	struct numberset{
 		long nt2;
 		long nt10;
@@ -249,6 +260,7 @@ private:
 		TFile *file;
 		TTree *tree;
 		float lumi;
+		int color;
 		bool isdata;
 		channel mumu;
 		channel emu;
