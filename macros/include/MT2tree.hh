@@ -45,6 +45,7 @@ public:
 
   void Reset();
   void SetLV(const TLorentzVector v);
+  Bool_t IsGoodPFJet(double minJPt=20., double maxJEta=2.4, int PFJID=1); // PFJID: 1 - loose, 2 - medium, 3 - tight
 
   TLorentzVector lv;
 
@@ -125,7 +126,8 @@ public:
   
   // My functions here
   // NJets
-  Int_t    GetNJets(double minJPt=20, double maxJEta=5, int PFJID=1);
+  Int_t    GetNJets(double minJPt=20, double maxJEta=5., int PFJID=1);  // PFJETID includes ptmin (20GeV) and etamax (2.4)
+  Int_t    GetNjets(double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
   // dPhi and friends
   Double_t PseudoJetDPhi ();
   Double_t PseudoJetAngle();

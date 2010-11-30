@@ -69,6 +69,39 @@ void MT2Jet::SetLV(const TLorentzVector v) {
   lv = v;
 }
 
+Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
+
+  double pt = lv.Pt();
+  double eta = lv.Eta();
+  if ( pt < minJPt || fabs(eta) > maxJEta )     return false;
+  
+  switch (PFJID) {
+  case 3:               // TIGHT
+    if ( !(NeuEmFrac     < 0.90) ) return false;
+    if ( !(NeuHadFrac    < 0.90) ) return false;
+    // break;   // No break: medium contains tight -> check common cuts
+  case 2:               // MEDIUM
+    if ( !(NeuEmFrac     < 0.95) ) return false;
+    if ( !(NeuHadFrac    < 0.95) ) return false;
+    // break;   // No break: loose contains medium -> check common cuts
+  case 1:               // LOOSE
+    if ( !(NConstituents > 1) )    return false;
+    if ( !(NeuEmFrac     < 0.99) ) return false;
+    if ( !(NeuHadFrac    < 0.99) ) return false;
+    if ( fabs(eta) < 2.4 ) { // Cuts for |eta|<2.4
+      if ( !(ChEmFrac  < 0.99) )  return false;
+      if ( !(ChHadFrac > 0.00) )  return false;
+      if ( !(ChMult    > 0   ) )  return false;
+    }
+    break;
+  defaul:
+    // None of the above. Do we want any default cut?
+    break;
+  }
+
+  return true;
+}
+
 
 // MT2Muon -----------------------------------
 MT2Muon::MT2Muon(){
@@ -188,8 +221,8 @@ Double_t MT2tree::JetsDPhi(int j1, int j2, int PFJID){
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
   	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID==2 )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID==2  )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
+  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
 	indices.push_back(i);
   }
   if (j1>=indices.size() || j2>=indices.size())  return -999;
@@ -222,7 +255,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, int met) {
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
   	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID==2 )continue;
+  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
   	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
 	indices.push_back(i);
   }
@@ -274,6 +307,15 @@ Int_t MT2tree::GetNJets(double minJPt, double maxJEta, int PFJID){
   return njets;
 }
 
+Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
+  int njets=0;
+  for(int i=0; i<NJets; ++i){
+	if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+	njets++;
+  }
+  return njets;
+}
+
 Double_t MT2tree::GetMT2(double testmass, bool massive, int met) {
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
@@ -317,8 +359,8 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
   vector<float> px, py, pz, E;
   for(int i=0; i<NJets; ++i){
 	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID==1  && jet[i].isPFIDMedium==false) continue;
-	if(PFJID==1  && jet[i].isPFIDTight ==false) continue;
+	if(PFJID==2  && jet[i].isPFIDMedium==false) continue;
+	if(PFJID==3  && jet[i].isPFIDTight ==false) continue;
 	if(jet[i].lv.Pt() < minJPt )                continue;
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
