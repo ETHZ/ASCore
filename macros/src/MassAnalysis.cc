@@ -258,9 +258,9 @@ void MassAnalysis::FillTree(){
 		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
 	  
 		// Jet id variables
-		if(IsGoodBasicPFJet (fJets[i], true))  fMT2tree->jet[i].isPFIDLoose=true;
-		if(IsGoodPFJetMedium(fJets[i], true))  fMT2tree->jet[i].isPFIDMedium=true;
-		if(IsGoodPFJetTight (fJets[i], true))  fMT2tree->jet[i].isPFIDTight=true;
+		if(IsGoodBasicPFJet (fJets[i], 20., 2.4))  fMT2tree->jet[i].isPFIDLoose =true;
+		if(IsGoodPFJetMedium(fJets[i], 20., 2.4))  fMT2tree->jet[i].isPFIDMedium=true;
+		if(IsGoodPFJetTight (fJets[i], 20., 2.4))  fMT2tree->jet[i].isPFIDTight =true;
 		fMT2tree->jet[i].ChHadFrac      = fTR->PFJChHadfrac     [fJets[i]];	
 		fMT2tree->jet[i].NeuHadFrac     = fTR->PFJNeuHadfrac    [fJets[i]];
 		fMT2tree->jet[i].ChEmFrac       = fTR->PFJChEmfrac      [fJets[i]];
@@ -304,7 +304,7 @@ void MassAnalysis::FillTree(){
 		TVector3 jet;
 		jet.SetPtEtaPhi(fTR->PFJPt[i], fTR->PFJEta[i], fTR->PFJPhi[i]);
 		MHTall += jet;
-		if(! IsGoodBasicPFJet (i, true)) continue;
+		if(! IsGoodBasicPFJet (i, 20., 2.4)) continue;
 		MHTidloose += jet;
 	}	
 	fMT2tree->MHTloose[0].SetXYZM(-MHTidloose.Px(), -MHTidloose.Py(), 0, 0);

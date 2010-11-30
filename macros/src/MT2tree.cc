@@ -94,7 +94,7 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
       if ( !(ChMult    > 0   ) )  return false;
     }
     break;
-  defaul:
+  default:
     // None of the above. Do we want any default cut?
     break;
   }

@@ -99,13 +99,13 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 			if(deltaR < 0.4)   JGood=false;
 		}
 		if(JGood==false) continue;
-		if(! IsGoodBasicPFJet(ij, true) ) continue;
+		if(! IsGoodBasicPFJet(ij,  20., 2.4) ) continue;
 		fJetsLoose.push_back(ij);
 		pfloose.push_back(fTR->PFJPt[ij]);
-		if(! IsGoodPFJetMedium(ij, true) ) continue;
+		if(! IsGoodPFJetMedium(ij, 20., 2.4) ) continue;
 		fJetsMedium.push_back(ij);
 		pfmedium.push_back(fTR->PFJPt[ij]);
-		if(! IsGoodPFJetTight(ij, true) ) continue;
+		if(! IsGoodPFJetTight(ij,  20., 2.4) ) continue;
 		fJetsTight.push_back(ij);
 		pftight.push_back(fTR->PFJPt[ij]);
 	}
