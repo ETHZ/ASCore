@@ -45,8 +45,10 @@
 
 
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <string>
+
 
 struct eqstr 
 {
@@ -59,7 +61,7 @@ struct eqstr
 
 class Monitor {
 
-  typedef map<const std::string, float, eqstr> Cmap;
+  typedef std::map<const std::string, float, eqstr> Cmap;
 
 public:
   Monitor() : maxLength(50) {}
@@ -69,7 +71,7 @@ public:
     if ( ( it = counters.find(counter)) == counters.end() ) {
       countNames.push_back( counter ); // Store name in ordered list
       if ( counter.length()>maxLength ) maxLength = counter.length();
-      counters.insert( std::make_pair(counter,weight) ); // Increment counter
+      counters.insert( make_pair(counter,weight) ); // Increment counter
     } else {
       (*it).second += weight;
     }
@@ -80,22 +82,23 @@ public:
   }
 
   void print() {
+    using namespace std;
     if ( !(countNames.size()>0) ) return;
     // This needs to be improved
     float maxc = counters[countNames[0]];
     float prev = maxc;
     ostringstream maxclen; maxclen << maxc;
     size_t maxwidth = maxclen.str().length();
-    for ( std::vector<std::string>::const_iterator it = countNames.begin(); 
+    for ( vector<string>::const_iterator it = countNames.begin(); 
           it != countNames.end(); ++it ) {
       float count = counters[*it];
-      std::cout << setw(maxLength+5) << left << (*it) 
+      cout << setw(maxLength+5) << left << (*it) 
                 << setw(maxwidth) << right << count << " " 
                 << setw(3) << right
                 << static_cast<int>(maxc>0.?count/maxc*100.:0.) << "% "
                 << setw(3) << right
                 << static_cast<int>(prev>0.?count/prev*100.:0.) << "% "
-                << std::endl;
+                << endl;
       prev = count;
     }
   }
