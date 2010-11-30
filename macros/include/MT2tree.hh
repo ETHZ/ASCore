@@ -128,13 +128,15 @@ public:
   // NJets
   Int_t    GetNJets(double minJPt=20, double maxJEta=5., int PFJID=1);  // PFJETID includes ptmin (20GeV) and etamax (2.4)
   Int_t    GetNjets(double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
+  Int_t    GetJetIndex(int ijet=0, int PFJID=1);
+  Double_t JetPt      (int ijet=0, int PFJID=1);
   // dPhi and friends
   Double_t PseudoJetDPhi ();
   Double_t PseudoJetAngle();
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
   Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
-  Double_t MinMetJetDPhi(int PFJID=1, int met=1);
-  Int_t    MinMetJetDPhiIndex(int PFJID=1, int met=1);
+  Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
+  Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
   // MT2 & friends
   Double_t GetMT2(double testmass=0 , bool massive=false, int met=1);
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);

@@ -246,29 +246,17 @@ Double_t MT2tree::MetJetDPhi(int ijet, int PFJID, int met) {
   return TMath::Abs(jet[indices[ijet]].lv.DeltaPhi(MET));
 }
 
-Double_t MT2tree::MinMetJetDPhi(int PFJID, int met) {
+Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int met) {
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else            return -999;
 
-  std::vector<int> indices;
-  for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
-	indices.push_back(i);
-  }
-  if(indices.size()<1)  return -999;
-  Double_t minDPhi=10;
-  for (int i=0; i<indices.size(); i++){
-    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(MET));
-    if(dphi<minDPhi)  minDPhi=dphi;
-  }
-  return minDPhi;
+  int index = MinMetJetDPhiIndex(PFJID,met,minJPt,maxJEta);
+  return TMath::Abs(jet[index].lv.DeltaPhi(MET));
 }
 
-Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, int met) {
+Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int met) {
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
@@ -276,9 +264,7 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, int met) {
 
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if(jet[i].isPFIDLoose ==false && PFJID==1  )continue;
-  	if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
-  	if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
+	if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
 	indices.push_back(i);
   }
   if(indices.size()<1)  return -999;
@@ -288,7 +274,7 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, int met) {
     Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(MET));
     if(dphi<minDPhi)  {
       minDPhi=dphi;
-      imin = i;
+      imin = indices[i];
     }
   }
   return imin;
@@ -314,6 +300,24 @@ Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
 	njets++;
   }
   return njets;
+}
+
+Double_t MT2tree::JetPt(int ijet, int PFJID) {
+  int index = GetJetIndex(ijet, PFJID);
+  if ( index < 0 )       return -999.;
+  return jet[index].lv.Pt();
+}
+
+Int_t MT2tree::GetJetIndex(int ijet, int PFJID) {
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+  	if     (jet[i].isPFIDLoose ==false && PFJID==1  )continue;
+  	else if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
+  	else if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
+	indices.push_back(i);
+  }
+  if (ijet>=indices.size())  return -9;
+  return indices[ijet];
 }
 
 Double_t MT2tree::GetMT2(double testmass, bool massive, int met) {
