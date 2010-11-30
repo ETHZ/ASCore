@@ -143,25 +143,10 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 
 	//       samples , variable,        cuts  ,    xtitle           ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
-	MakePlot(fSamples,"GetMT2Hemi(0,false,1,30,3,1)",cuts, "MT2"      ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true,  false);
-	//MakePlot(fSamples,"pfmet[0].Pt()"   ,cuts, "PFMET"              ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
-	//MakePlot(fSamples,"MHT[0].Pt()"     ,cuts, "MHT"                ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true, false);
+	MakePlot(fSamples,"GetMT2Hemi(0,false,1,30,3,1)",cuts, "MT2"     ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true,  false);
 
-	//       samples   , variable, cuts  ,    xtitle                         ,nbins,min,max,   cleaned,  log  , comp , ratio, stack, overlay
-   	//MakePlot(fSamples,  "jet[0].lv.Pt()"  ,cuts,"leading JPt"                 ,50,0   ,800,     false, true,   true,  false,  false,  false);
-   	//MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "                 ,50,0   ,800,     false, true,   true,  false,  false,  false);
-   	//MakePlot(fSamples,  "misc.HT"         ,cuts,"second JPt "                 ,200,0  ,800,     false, true,   true,  false,  false,  false);
-   	//MakePlot(fSamples,"MetJetDPhi(0)"   ,cuts,"#Delta#phi(#slash{E},jet1)"  ,   60,0,TMath::Pi(), false, false, true, true, true, true);
-   	//MakePlot(fSamples,"jet[MinMetJetDPhiIndex(0,1)].lv.Pt()" ,cuts,"JPt[Min#Delta#phiIndex(#slash{E},jet)]",50,0,500, false, true, true, false,false,false);
-   	//MakePlot(fSamples,"MinMetJetDPhi(0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,true, true);
-   	//MakePlot(fSamples,"MinMetJetDPhi(0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,false,false);
-   	//MakePlot(fSamples,"MetJetDPhi(0,1,1)"  ,cuts,"#Delta#phi(#slash{E},jet0)" ,60,0,TMath::Pi(), false, true, true, false,false,false);
-   	//MakePlot(fSamples,"MetJetDPhi(0,1,1)"  ,cuts,"#Delta#phi(#slash{E},jet0)" ,60,0,TMath::Pi(), false, true, true, false,true ,false);
-   	//MakePlot(fSamples,"MetJetDPhi(1,1,1)"  ,cuts,"#Delta#phi(#slash{E},jet1)" ,60,0,TMath::Pi(), false, true, true, false,false,false);
-   	//MakePlot(fSamples,"MetJetDPhi(1,1,1)"  ,cuts,"#Delta#phi(#slash{E},jet1)" ,60,0,TMath::Pi(), false, true, true, false,true ,false);
-   	//MakePlot(fSamples,"NJets"           ,cuts  ,     "NJets"                ,15,0,15,          false, true , true ,  true,  true,  true);
-   	//MakePlot(fSamples,"MetJetDPhi(2)"   ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
-    	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
+	//       samples   , variable, cuts  ,    xtitle                ,nbins,min,max,   cleaned,  log  , comp , ratio, stack, overlay
+   	//MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "     ,50,0   ,800,     false, true,   true,  false,  false,  false);
 
 }
 
