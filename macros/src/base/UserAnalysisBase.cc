@@ -404,7 +404,6 @@ bool UserAnalysisBase::IsLooseEl(int index){
 	if(!IsGoodElId_WP90(index)) return false;
 	if(fTR->ElNumberOfMissingInnerHits[index] > 0) return false; // Ask for tighter WP80 conversion rejection
 	if(!IsIsolatedEl(index, 1.0, 0.6)) return false;
-
 	// rejection if matched to any muon which passes basic quility cuts
 	for( int im = 0; im < fTR->NMus; ++im ){
 		if( (fTR->MuIsGlobalMuon[im] == 1 && fTR->MuIsTrackerMuon[im] == 1) &&
@@ -707,11 +706,9 @@ vector<int> UserAnalysisBase::PFJetSelection(double ptcut, double absetacut, boo
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
-	for(int ind = 0; ind < fTR->NJets; ++ind){
+	for(int ind = 0; ind < fTR->PFNJets; ++ind){
 		// selection
-		if((*this.*pfjetSelector)(ptcut, absetacut, ind) == false) continue;
-		// additional kinematic cuts
-		if(fabs(fTR->PFJEta[ind]) > 2.5) continue;
+		if((*this.*pfjetSelector)(ind, ptcut, absetacut) == false) continue;
 
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->JPt[ind]);
