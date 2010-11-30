@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "helper/pdgparticle.hh"
+#include "helper/Monitor.hh"
 #include "base/UserAnalysisBase.hh"
 #include "TH1I.h"
 #include "TLorentzVector.h"
@@ -429,8 +430,8 @@ bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
 
 bool UserAnalysisBase::IsElInGap(int ind){
 	// ECAL gap veto
-	if ( fabs(fTR->ElEta[ind]) > 1.442 && fabs(fTR->ElEta[ind]) < 1.560 )  return false;	
-	return true;	
+	if ( fabs(fTR->ElEta[ind]) > 1.442 && fabs(fTR->ElEta[ind]) < 1.560 )  return true;
+	return false;
 }
 
 // PHOTONS
@@ -711,7 +712,7 @@ vector<int> UserAnalysisBase::PFJetSelection(double ptcut, double absetacut, boo
 		if((*this.*pfjetSelector)(ind, ptcut, absetacut) == false) continue;
 
 		selectedObjInd.push_back(ind);
-		selectedObjPt.push_back(fTR->JPt[ind]);
+		selectedObjPt.push_back(fTR->PFJPt[ind]);
 	}
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
