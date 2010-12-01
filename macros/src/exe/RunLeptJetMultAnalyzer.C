@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-v verbose] [-m set_of_cuts] [-w sigma*lumi] [-x lumi] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-v verbose] [-m set_of_cuts] [-n maxEvents] [-x lumi] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
 	cout << "                   default is TempOutput/                                    " << endl;
@@ -27,7 +27,7 @@ void usage( int status = 0 ) {
 	cout << "     lumi          integrated lumi (Monte Carlo only!!)                      " << endl;
 	cout << "                   scale multiplicity plots with xsection to lumi            " << endl;
 	cout << "                   this affects only the MultiplicityAnalysis                " << endl;
-	cout << "     sigma*lumi    gives weight (sigma*lumi)/nentries                        " << endl;
+	cout << "     maxEvents     number of events to analyze                               " << endl;
 	cout << "     filen         are the input files (by default: ROOT files)              " << endl;
 	cout << "                   with option -l, these are read as text files              " << endl;
 	cout << "                   with one ROOT file name per line                          " << endl;
@@ -42,19 +42,19 @@ int main(int argc, char* argv[]) {
 	TString outputdir = "TempOutput/";
 	TString setofcuts = "default";
 	int verbose  = 0;
-	float weight = 1.;
+	int maxEvents=-1;
 	float lumi   = -999.99;
 	
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:m:x:w:t:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:v:m:n:x:t:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir       = TString(optarg); break;
 			case 'v': verbose         = atoi(optarg); break;
 			case 'm': setofcuts       = TString(optarg); break;
+			case 'n': maxEvents       = atoi(optarg); break;
 			case 'x': lumi     	  = atof(optarg); break;
-			case 'w': weight          = atof(optarg); break;	  
 			case 'l': isList          = true; break;
 			case '?':
 			case 'h': usage(0); break;
@@ -89,9 +89,6 @@ int main(int argc, char* argv[]) {
 			}
 		}
 	}
-	if(weight!=1.){
-		weight = weight/(theChain->GetEntries());
-	}
 
 
 	cout << "--------------" << endl;
@@ -103,9 +100,6 @@ int main(int argc, char* argv[]) {
 	if(lumi > 0){
 		cout << "scaling multiplicity plots with xsection for int lumi= " << lumi << endl;
 	}
-	if(weight !=1.){
-		cout << "weight " << weight << endl;
-	}
 
 	cout << "Number of events:               " << theChain->GetEntries() << endl;
 	cout << "--------------" << endl;
@@ -113,7 +107,8 @@ int main(int argc, char* argv[]) {
 	LeptJetMultAnalyzer *tA = new LeptJetMultAnalyzer(theChain);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
-	tA->BeginJob(filename, setofcuts, lumi, weight);
+	tA->SetMaxEvents(maxEvents);
+	tA->BeginJob(filename, setofcuts, lumi);
 	tA->Loop();
 	tA->EndJob();
 	delete tA;
