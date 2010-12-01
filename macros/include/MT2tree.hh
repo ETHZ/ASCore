@@ -135,6 +135,7 @@ public:
   Double_t PseudoJetAngle();
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
   Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
+  Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
   Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
   Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
   // MT2 & friends

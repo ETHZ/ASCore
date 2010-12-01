@@ -5,6 +5,7 @@
 
 #include <vector>
 #include "helper/Hemisphere.hh"
+#include "helper/Utilities.hh"
 #include "TLorentzVector.h"
 #include "TMath.h"
 
@@ -217,6 +218,27 @@ Double_t MT2tree::PseudoJetAngle() {
   return pseudoJets[0].Angle(pseudoJets[1].Vect());
 }
 
+Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met){
+	TLorentzVector MET(0., 0., 0., 0.);
+	if(met==1)      MET=pfmet[0];
+        else if(met==2) MET=MHT[0];
+	else            return -900;
+
+	vector<int> indices;
+	for(int i=0; i<NJets; ++i){
+		if( jet[i].IsGoodPFJet(minJPt, maxJEta, PFJID)==false) continue;
+		indices.push_back(i);
+	}
+	if(indices.size()<2) return -999;
+	double d_phi1 = fabs(Util::DeltaPhi(jet[indices[0]].lv.Phi(), MET.Phi()));	
+	double d_phi2 = fabs(Util::DeltaPhi(jet[indices[1]].lv.Phi(), MET.Phi()));	
+	double R12    = sqrt( d_phi1*d_phi1 + (TMath::Pi()-d_phi2)*(TMath::Pi()-d_phi2) );
+	double R21    = sqrt( d_phi2*d_phi2 + (TMath::Pi()-d_phi1)*(TMath::Pi()-d_phi1) );
+
+	if(R12<R21) return R12;
+	else        return R21;
+}
+
 Double_t MT2tree::JetsDPhi(int j1, int j2, int PFJID){
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
@@ -252,7 +274,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int me
   else if(met==2) MET = MHTloose[0];
   else            return -999;
 
-  int index = MinMetJetDPhiIndex(PFJID,met,minJPt,maxJEta);
+  int index = MinMetJetDPhiIndex(PFJID, minJPt, maxJEta, met);
   return TMath::Abs(jet[index].lv.DeltaPhi(MET));
 }
 
