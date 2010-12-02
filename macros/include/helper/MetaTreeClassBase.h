@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov 16 22:21:14 2010 by ROOT version 5.25/04
+// Wed Dec  1 15:37:25 2010 by ROOT version 5.25/04
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/RA5Nov16/LM0/SSDLTree.root
+// found on file: SSDLTrees/RA5Nov30/LM0/SSDLTree.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -131,8 +131,6 @@ public :
    Int_t           ElIsGoodElId_WP80[5];   //[NEls]
    Int_t           ElIsGoodElId_WP90[5];   //[NEls]
    Int_t           ElIsGoodElId_WP95[5];   //[NEls]
-   Int_t           ElIsConvertedEl_WP80[5];   //[NEls]
-   Int_t           ElIsConvertedEl_WP90[5];   //[NEls]
    Float_t         ElS4OverS1[5];   //[NEls]
    Float_t         ElDRjet[5];   //[NEls]
    Float_t         ElDRhardestjet[5];   //[NEls]
@@ -153,21 +151,21 @@ public :
    Float_t         pfMET;
    Float_t         MuCorrMET;
    Int_t           NJets;
-   Float_t         JetPt[20];   //[NJets]
-   Float_t         JetEta[20];   //[NJets]
-   Float_t         JetPhi[20];   //[NJets]
+   Float_t         JetPt[30];   //[NJets]
+   Float_t         JetEta[30];   //[NJets]
+   Float_t         JetPhi[30];   //[NJets]
    Float_t         dPhiMJ1;
    Float_t         dPhiMJ2;
    Float_t         R12;
    Float_t         R21;
    Float_t         R12plusR21;
    Int_t           NPhos;
-   Float_t         PhoPt[4];   //[NPhos]
-   Float_t         PhoEta[4];   //[NPhos]
-   Float_t         PhoPhi[4];   //[NPhos]
-   Float_t         PhoRelIso[4];   //[NPhos]
-   Float_t         PhoDRjet[4];   //[NPhos]
-   Float_t         PhoDRhardestjet[4];   //[NPhos]
+   Float_t         PhoPt[5];   //[NPhos]
+   Float_t         PhoEta[5];   //[NPhos]
+   Float_t         PhoPhi[5];   //[NPhos]
+   Float_t         PhoRelIso[5];   //[NPhos]
+   Float_t         PhoDRjet[5];   //[NPhos]
+   Float_t         PhoDRhardestjet[5];   //[NPhos]
    Float_t         AlphaT_h;
    Float_t         AlphaCT_h;
    Float_t         AlphaT;
@@ -377,8 +375,6 @@ public :
    TBranch        *b_ElIsGoodElId_WP80;   //!
    TBranch        *b_ElIsGoodElId_WP90;   //!
    TBranch        *b_ElIsGoodElId_WP95;   //!
-   TBranch        *b_ElIsConvertedEl_WP80;   //!
-   TBranch        *b_ElIsConvertedEl_WP90;   //!
    TBranch        *b_ElS4OverS1;   //!
    TBranch        *b_ElDRjet;   //!
    TBranch        *b_ElDRhardestjet;   //!
@@ -528,9 +524,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov16/LM0/SSDLTree.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/RA5Nov30/LM0/SSDLTree.root");
       if (!f) {
-         f = new TFile("SSDLTrees/RA5Nov16/LM0/SSDLTree.root");
+         f = new TFile("SSDLTrees/RA5Nov30/LM0/SSDLTree.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -694,8 +690,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
    fChain->SetBranchAddress("ElIsGoodElId_WP95", ElIsGoodElId_WP95, &b_ElIsGoodElId_WP95);
-   fChain->SetBranchAddress("ElIsConvertedEl_WP80", ElIsConvertedEl_WP80, &b_ElIsConvertedEl_WP80);
-   fChain->SetBranchAddress("ElIsConvertedEl_WP90", ElIsConvertedEl_WP90, &b_ElIsConvertedEl_WP90);
    fChain->SetBranchAddress("ElS4OverS1", ElS4OverS1, &b_ElS4OverS1);
    fChain->SetBranchAddress("ElDRjet", ElDRjet, &b_ElDRjet);
    fChain->SetBranchAddress("ElDRhardestjet", ElDRhardestjet, &b_ElDRhardestjet);
