@@ -22,7 +22,7 @@ public:
 		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
 		TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170,
 		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
-		LM0,
+		LM0, InclMu,
 		gNSAMPLES
 	};
 	enum gChannel {
@@ -43,9 +43,11 @@ public:
 	virtual ~MuonPlotter();
 
 	inline void setSelection(int sel){ fSelectionSwitch = sel; };
+	inline void setCharge(int charge){ fChargeSwitch = charge; };
 
 	void init(TString filename = "samples.dat");
 	void loadSamples(const char* filename = "samples.dat");
+	void setBinning();
 
 	void makePlots();
 
@@ -157,6 +159,7 @@ public:
 	bool isGenMatchedSUSYDiLepEvent(int&, int&);
 
 	int isSSLLEvent(int&, int&);
+	int isOSLLEvent(int&, int&);
 	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 
 	bool isSSLLMuEvent(   int&, int&);
@@ -194,15 +197,24 @@ public:
 	bool isGoodJet_LooseLep(int);
 
 private:
+	const int     getNPtBins();
+	const double *getPtBins();
+	const int     getNPt2Bins();
+	const double *getPt2Bins();
+	const int     getNEtaBins();
+	const double *getEtaBins();
+	
 	Monitor fCounters[gNSAMPLES][3];
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
 
 	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
+	int fChargeSwitch;    // 0 for SS, 1 for OS
 
 	vector<int> fAllSamples;
 	vector<int> fMCBG;    // SM background MC samples
+	vector<int> fMCBGMuEnr;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
