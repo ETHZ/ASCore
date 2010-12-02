@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys, os, shlex, pwd, commands
 
-#print sys.argv[1:]
 # check the command line arguments
 if (len(sys.argv[1:]) < 3 or len(sys.argv[1:]) > 4):                                # if not all three arguments are specified,
 	print 'Usage:' 
@@ -45,6 +44,7 @@ command_report = 'crab -c '+jobName+' -report'
 command_lumiCalc = 'lumiCalc.py -i '+jobName+'/res/lumiSummary.json --nowarning overview > '+jobName+'-'+ntupleVersion+'_lumi.txt'
 command_lumiSumm = 'mv '+jobName+'/res/lumiSummary.json '+jobName+'-'+ntupleVersion+'_lumiSummary.json.txt'
 command_getSize = "srmls "+T3SRMDIR+" | awk 'BEGIN{size=0}{size+=$1}END{printf( \"Size(GB): %5.1f , Entries: %d\",size/1e9,NR-2)}'"
+command_getEvents = "python ../scripts/GetNEvents_CrabReport.py "+jobDir
 
 # check if multicrab config file exists and get the dataset name
 datasetFound = 0
@@ -69,6 +69,14 @@ if status != 0:
 else:
 	datasetSize = shlex.split(output)[1]
 
+# get number of events ib the dataset
+status, output = commands.getstatusoutput(command_getEvents)
+if status != 0:
+	print 'Problem with getting number of events for the job '+jobName+'. Exiting...'
+	datasetEvents = "XX.X"
+else:
+	datasetEvents = shlex.split(output)[0]
+
 # perform crab tasks for data jobs
 if (datamc=="data"):
 	return_value = os.system(command_status)
@@ -79,7 +87,7 @@ if (datamc=="data"):
 	return_value = os.system(command_getoutput)
 	if return_value != 0:
 		print 'Problem with crab -getoutput of the job '+jobName+'. Exiting...'
-		sys.exit()
+		#sys.exit()
 
 	return_value = os.system(command_report)
 	if return_value != 0:
@@ -97,6 +105,6 @@ if (datamc=="data"):
 		sys.exit()
 	format_Twiki = "| [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumiSummary.json.txt][...-...]] | "+datasetName+" | "+datasetSize+" GB | ...M | [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumi.txt][... /pb]] | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 3_8_6 | "+ntupleVersion+" | "+userNickName+" | |"
 else:
-	format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" GB | ...M | ... pb | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 3_8_6 | "+ntupleVersion+" | "+userNickName+" | |"
+	format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" GB | "+datasetEvents+" | ... pb | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 3_8_6 | "+ntupleVersion+" | "+userNickName+" | |"
 
 print format_Twiki
