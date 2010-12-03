@@ -57,12 +57,12 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fMultiplicityAnalysis     ->SetOutputDir(fOutputDir);
 	fMultiplicityAnalysis     ->fVerbose        =fVerbose;	
 	fMultiplicityAnalysis     ->fLumi           =lumi;
-	fMultiplicityAnalysis     ->Begin(filename);
+	fMultiplicityAnalysis     ->Begin();
 	
 	fMassAnalysis             ->ReadCuts(setofcuts);
 	fMassAnalysis             ->SetOutputDir(fOutputDir);
 	fMassAnalysis             ->fVerbose        = fVerbose;
-	fMassAnalysis             ->Begin();
+	fMassAnalysis             ->Begin(filename);
 	
 	fRatioAnalysis            ->ReadCuts(setofcuts);
 	fRatioAnalysis            ->SetOutputDir(fOutputDir);

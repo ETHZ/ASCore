@@ -26,10 +26,9 @@ public:
 	MassAnalysis(TreeReader *tr = NULL);
 	virtual ~MassAnalysis();
 
-	void Begin();
+	void Begin(const char* filename = "Mass_histos.root");
 	void Analyze();
 	void End();
-	void SetWeight(float weight);
 
 
 private:
@@ -67,7 +66,6 @@ private:
 	// data members
 	int fMT2_histos_step;
   	int fMT2_histos_number;
-	float fWeight;
 
 	vector<int> interesting_Run;
 	vector<int> interesting_Lumi;

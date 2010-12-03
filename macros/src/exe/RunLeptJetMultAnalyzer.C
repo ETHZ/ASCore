@@ -16,10 +16,11 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-v verbose] [-m set_of_cuts] [-n maxEvents] [-x lumi] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-o filename] [-v verbose] [-m set_of_cuts] [-n maxEvents] [-x lumi] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
 	cout << "                   default is TempOutput/                                    " << endl;
+	cout << "     filename      is the output filename for the MassAnalysis               " << endl;
 	cout << "     verbose       sets the verbose level                                    " << endl;
 	cout << "                   default is 0 (quiet mode)                                 " << endl;
 	cout << "     set_of_cuts   optional cuts for MultiplicityAnalysis                    " << endl;
@@ -40,6 +41,7 @@ int main(int argc, char* argv[]) {
 // Default options
 	bool isList = false;
 	TString outputdir = "TempOutput/";
+	TString filename  = "MassTree.root";
 	TString setofcuts = "default";
 	int verbose  = 0;
 	int maxEvents=-1;
@@ -48,9 +50,10 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:m:n:x:t:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "d:o:v:m:n:x:t:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir       = TString(optarg); break;
+			case 'o': filename        = TString(optarg); break;
 			case 'v': verbose         = atoi(optarg); break;
 			case 'm': setofcuts       = TString(optarg); break;
 			case 'n': maxEvents       = atoi(optarg); break;
@@ -71,8 +74,8 @@ int main(int argc, char* argv[]) {
 	if( argc<1 ) {
 		usage(-1);
 	}
-	TString  filename="multiplicity.root";
-	setofcuts="multiplicity_cuts/"+setofcuts+".dat";
+	// setofcuts="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/20101129_macros/multiplicity_cuts/"+setofcuts+".dat";
+	setofcuts="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
 	
 	TChain *theChain = new TChain("analyze/Analysis");
 	for(int i = 0; i < argc; i++){

@@ -26,6 +26,5 @@ private:
 	MassAnalysis             *fMassAnalysis;
 	RatioAnalysis            *fRatioAnalysis;		
   	int fMaxEvents;
-		
 };
 #endif

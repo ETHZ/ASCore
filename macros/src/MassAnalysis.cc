@@ -12,9 +12,8 @@ MassAnalysis::MassAnalysis(TreeReader *tr) : MultiplicityAnalysisBase(tr){
 MassAnalysis::~MassAnalysis(){
 }
 
-void MassAnalysis::Begin(){
+void MassAnalysis::Begin(const char* filename){
 	// Define the output file of histograms
-	const char* filename = "Mass_histos.root";
 	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 
 	fMT2tree = new MT2tree();
@@ -252,10 +251,10 @@ void MassAnalysis::FillTree(){
 	  	fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PFJPx[fJets[i]], fTR->PFJPy[fJets[i]], 
 					fTR->PFJPz[fJets[i]], fTR->PFJE [fJets[i]]); //SetLV(GetJet4Momenta(fJets[i]));
 		// b-tag info now should be available
-		// fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighEff [fJets[i]];
-		// fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighPur [fJets[i]];
-		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighEff[fJets[i]];
-		// fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
+	 	fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighEff [fJets[i]];
+		fMT2tree->jet[i].bTagProbTCHE  =  fTR->PFJbTagProbTkCntHighPur [fJets[i]];
+		fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighEff[fJets[i]];
+		fMT2tree->jet[i].bTagProbSSVHE =  fTR->PFJbTagProbSimpSVHighPur[fJets[i]];
 	  
 		// Jet id variables
 		if(IsGoodBasicPFJet (fJets[i], 20., 2.4))  fMT2tree->jet[i].isPFIDLoose =true;
@@ -1057,10 +1056,6 @@ vector<TLorentzVector> MassAnalysis::GetLepton4Momenta(){
 }
 
 
-// ***************************************************************************************************
-void MassAnalysis::SetWeight(float weight){
-	fWeight = weight;
-}
 
 
 // ***************************************************************************************************
