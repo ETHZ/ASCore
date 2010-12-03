@@ -134,19 +134,22 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	std::ostringstream cutStream;
 	cutStream << "misc.LeptConfig == "     << LeptConfigCut     << "&&"
 		  << "NJetsIDLoose      >2"                         << "&&"
-		  << "MinMetJetDPhi(0,1)>0.25"                      << "&&" 
-		  << "MetJetDPhi(0,1,1) >0.5"                       << "&&" 
-		  << "MetJetDPhi(1,1,1) >0.5"                       << "&&" 
+//		  << "MinMetJetDPhi(0,1)>0.25"                      << "&&" 
+//		  << "MetJetDPhi(0,1,1) >0.5"                       << "&&" 
+//		  << "MetJetDPhi(1,1,1) >0.5"                       << "&&" 
+//		  << "misc.PseudoJetMT2>130"                        << "&&"
 		  << "misc.HBHENoiseFlag == 1"                   ;
 	
 	TString cuts = cutStream.str().c_str();
 
 
-	//       samples , variable,        cuts  ,    xtitle           ,nbins,min,max,     cleaned,  log  , comp , ratio, stack, overlay
-	MakePlot(fSamples,"GetMT2Hemi(0,false,1,30,3,1)",cuts, "MT2"     ,gNMT2bins, gMT2bins,  false,  true , true,   true,  true,  false);
+	//       samples , variable,                     cuts  ,    xtitle   ,nbins,   min,  max,                cleaned,  log  , comp , ratio, stack, overlay
+	//MakePlot(fSamples,"GetMT2Hemi(0,false,1,20,3,1)",cuts, "MT2massless"   ,gNMT2bins,        gMT2bins,         false,  true , true,   true,  true,  false);
 
-	//       samples   , variable, cuts  ,    xtitle                ,nbins,min,max,   cleaned,  log  , comp , ratio, stack, overlay
-   	//MakePlot(fSamples,  "jet[1].lv.Pt()"  ,cuts,"second JPt "     ,50,0   ,800,     false, true,   true,  false,  false,  false);
+	//       samples   , variable,                     cuts,xtitle     ,nbins,min,max,   cleaned, log, comp, ratio, stack, overlay
+   	  MakePlot(fSamples,"jet[0].lv.Pt()" ,               cuts,"leading JPt",  150,0,800,    false,   true, true, false, true, false);
+   	//MakePlot(fSamples,"MetJetDPhi(2)"   ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
+    	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
 
 }
 
@@ -171,7 +174,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 			   bool cleaned, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
 
-        TString varname = var;
+	TString varname = var;
 	varname.ReplaceAll("(","");
 	varname.ReplaceAll(")","");
 
@@ -270,10 +273,10 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		if (Samples[i].sname.Contains("QCD")) {
 		  h_composited[0]->Add(h_samples[i]);
 		}
-		else if(Samples[i].sname.Contains("Jets")){
+		else if(Samples[i].sname=="DY" || Samples[i].sname=="Wtolnu" || Samples[i].sname=="VV"){
 		  h_composited[1]->Add(h_samples[i]);
 		}
-		else if(Samples[i].sname.Contains("Top") || Samples[i].sname.Contains("TT")){
+		else if(Samples[i].sname.Contains("Top")){
 		  h_composited[2]->Add(h_samples[i]);
 		}
 		else if(Samples[i].type.Contains("susy")){
@@ -307,6 +310,14 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	  if(h_data->Integral()>0 && stacked){
 	    Legend1     ->AddEntry(h_data, "data", "l");
 	  }
+	  if(fVerbose > 2 && composited) {
+		           cout << "------------------------------------"                << endl
+	                        << "QCD Integral:      " << h_composited[0]->Integral()  << endl
+			        << "W/Z/gamma Integral:" << h_composited[1]->Integral()  << endl
+			        << "Top Integral:      " << h_composited[2]->Integral()  << endl
+			        << "SUSY:              " << h_composited[3]->Integral()  << endl
+			        << "Data:              " << h_composited[4]->Integral()  << endl;
+	  }
 	}
 	else{
 	  for(int i=0; i<Samples.size(); ++i){
@@ -324,15 +335,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	      if(Samples[i].type=="susy") h_susy->Add(h_samples[i]);
 	      if(Samples[i].type!="susy" || !overlaySUSY) h_stack.Add(h_samples[i]);
 	      if(Samples[i].type!="susy") h_mc_sum->Add(h_samples[i]);
-	      if(Samples[i].name != "PhotonJets_Pt40to100-V01-03-01" && Samples[i].name != "PhotonJets_Pt100to200-V01-03-01"){
-		if(Samples[i].type=="susy" && overlaySUSY)
-		  Legend1 ->AddEntry(h_samples[i], Samples[i].sname + (overlayScale ? 
+	      if(Samples[i].type=="susy" && overlaySUSY){
+	         Legend1 ->AddEntry(h_samples[i], Samples[i].sname + (overlayScale ? 
 								       TString::Format(" x %.0f",overlayScale) :
 								       " scaled to data")   , "f") ;
-		else
-		  Legend1 ->AddEntry(h_samples[i], Samples[i].sname, stacked ? "f" : "l");
-		
-	      }
+	      }else{
+		 Legend1 ->AddEntry(h_samples[i], Samples[i].sname, stacked ? "f" : "l");
+	      }	
 	    }
 	    if(Samples[i].type == "data"){
 	      h_data -> Add(h_samples[i]);
