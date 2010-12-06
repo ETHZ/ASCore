@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.90 2010/11/23 09:14:45 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.91 2010/11/23 10:53:01 pnef Exp $
 //
 //
 
@@ -200,7 +200,8 @@ NTupleProducer::~NTupleProducer(){
 // Method called once for each event
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
-  fNTotEvents++;
+  ++fNTotEvents;
+
   using namespace edm;
   using namespace std;
   using namespace reco;
@@ -2698,6 +2699,12 @@ vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoC
   GenCand = new GenParticle();
   GenMom  = new GenParticle();
   GenGMom = new GenParticle();
+  // initialize the results
+  // btw, this is a little memory leak
+  res.push_back(GenCand);
+  res.push_back(GenMom);
+  res.push_back(GenGMom);
+
   bool matched = false;
 
   // Try to match the reco candidate to a generator object
@@ -2724,9 +2731,13 @@ vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoC
     GenCand = &(*gpart);
   }
 
+
   // Fill generator information in case match was successful
   if(matched){
+    // update the results
+    res[0]=GenCand;
     id  = GenCand->pdgId();
+    if ( !GenCand->mother() ) return res;
 
     // Determine mother object of matched gen object:
     // (Make sure that the mother has a different PDG ID)
@@ -2741,7 +2752,10 @@ vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoC
       }
     }
     mid = GenMom->pdgId();
+    //update the results
+    res[1] = GenMom;
 
+    if ( !GenMom->mother() ) return res;
     // Determine grand-mother object of matched gen object:
     // (Make sure that the grand-mother has a different PDG ID than the mother)
     GenGMom = static_cast<const GenParticle*>(GenMom->mother());
@@ -2755,14 +2769,7 @@ vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoC
       }
     }
 
-    res.push_back(GenCand);
-    res.push_back(GenMom);
-    res.push_back(GenGMom);
-  }
-  else{
-    res.push_back(GenCand);
-    res.push_back(GenMom);
-    res.push_back(GenGMom);
+    res[2] = GenGMom;
   }
   return res;
 }
