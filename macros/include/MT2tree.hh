@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15};
+enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -32,8 +32,13 @@ public:
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
   Double_t HT;
+  Int_t    EcalDeadCellBEFlag;
+  Int_t    NECALGapClusters;
+  Double_t EcalGapClusterSize[50];
+  Double_t EcalGapBE[50];
+  Int_t    NVertices;  
 
-  ClassDef(MT2Misc, 3)
+  ClassDef(MT2Misc, 4)
 };
 
 // MT2Jet ----------------------------------
@@ -106,6 +111,26 @@ public:
 };
 
 
+// MT2GenLept ----------------------------------
+class MT2GenLept : public TObject {
+
+public:
+  MT2GenLept();
+  virtual ~MT2GenLept();
+
+  void Reset();
+
+  TLorentzVector lv;
+  Int_t          ID;
+  Int_t          MID;
+  Int_t          MStatus;
+  Int_t          GMID;
+  Int_t          GMStatus;
+
+
+  ClassDef(MT2GenLept, 1)
+};
+
 // MT2tree ----------------------------------
 class MT2tree : public TObject {
 
@@ -159,6 +184,7 @@ public:
   MT2Jet         jet[m_jetSize];
   MT2Elec        ele[m_eleSize];
   MT2Muon        muo[m_muoSize];
+  MT2GenLept     genlept[m_genleptSize];
   TLorentzVector pfmet[2];
   TLorentzVector MPT[2];
   TLorentzVector MHT[2];
@@ -166,7 +192,7 @@ public:
   TLorentzVector pseudoJets[2];
 
   
-  ClassDef(MT2tree, 5)
+  ClassDef(MT2tree, 6)
 };
 
 #endif

@@ -36,6 +36,13 @@ void MT2Misc::Reset() {
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
   DPhiMhtMpt              = -99999.99;
+  EcalDeadCellBEFlag      = -1;
+  NECALGapClusters        = -1;
+  for(int i=0; i<50; ++i){
+    EcalGapClusterSize[i] = -1;
+    EcalGapBE[i]          = -99999.99;    
+  }
+  NVertices               = -1;
 }
 
 // MT2Jet -----------------------------------
@@ -103,6 +110,23 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   return true;
 }
 
+// MT2GenLept -----------------------------------
+MT2GenLept::MT2GenLept(){
+  Reset();
+}
+
+MT2GenLept::~MT2GenLept(){
+}
+
+void MT2GenLept::Reset(){
+  lv.  SetPxPyPzE(0, 0, 0, 0);
+
+  ID       = -999;
+  MID      = -999;
+  MStatus  = -999;
+  GMID     = -999;
+  GMStatus = -999;
+}
 
 // MT2Muon -----------------------------------
 MT2Muon::MT2Muon(){
@@ -165,6 +189,9 @@ void MT2tree::Reset() {
   }
   for (int i = 0; i < m_muoSize; ++i) {
     muo[i].Reset();
+  }
+  for (int i = 0; i < m_genleptSize; ++i) {
+    genlept[i].Reset();
   }
   pfmet     [0].SetPxPyPzE(0., 0., 0., 0.);
   MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
@@ -475,4 +502,5 @@ ClassImp(MT2Misc)
 ClassImp(MT2Jet)
 ClassImp(MT2Elec)
 ClassImp(MT2Muon)
+ClassImp(MT2GenLept)
 ClassImp(MT2tree)

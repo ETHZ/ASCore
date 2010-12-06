@@ -227,6 +227,22 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
+	fMT2tree->misc.EcalDeadCellBEFlag  = fTR->EcalDeadCellBEFlag;
+	fMT2tree->misc.NECALGapClusters    = fTR->NECALGapClusters;
+	for(int i=0; i<fMT2tree->misc.NECALGapClusters; ++i){
+		fMT2tree->misc.EcalGapClusterSize[i] = fTR->EcalGapClusterSize[i];
+		fMT2tree->misc.EcalGapBE[i]          = fTR->EcalGapBE[i];
+	}
+
+	// NVertices
+	int nvertex=0;
+	for(int i=0; i<fTR->NVrtx; ++i){
+		if(fabs(fTR->VrtxZ[i]) > 24) continue;
+		if(sqrt( (fTR->VrtxX[i])*(fTR->VrtxX[i]) + (fTR->VrtxY[i])*(fTR->VrtxY[i])) > 2) continue;
+		if(fTR->VrtxNdof[i]<=4) continue;
+		nvertex++;
+	}
+	fMT2tree->misc.NVertices=nvertex;
 
 	// get number of jets with pt > 20 and |eta| < 5
 	int npfjets=0;
@@ -285,6 +301,21 @@ void MassAnalysis::FillTree(){
 	  	}
 	}
 	
+	// Genleptons
+	for(int i=0; i<fTR->NGenLeptons; ++i){
+		double mass=0;
+		if     (abs(fTR->GenLeptonID[i]) == 15) mass=1.776;
+		else if(abs(fTR->GenLeptonID[i]) == 13) mass=0.106;
+
+		fMT2tree->genlept[i].lv.SetPtEtaPhiM(fTR->GenLeptonPt[i], fTR->GenLeptonEta[i], fTR->GenLeptonPhi[i], mass);
+		fMT2tree->genlept[i].ID       = fTR->GenLeptonID[i];
+		fMT2tree->genlept[i].MID      = fTR->GenLeptonMID[i];
+		fMT2tree->genlept[i].MStatus  = fTR->GenLeptonMStatus[i];
+		fMT2tree->genlept[i].GMID     = fTR->GenLeptonGMID[i];
+		fMT2tree->genlept[i].GMStatus = fTR->GenLeptonGMStatus[i];
+	}
+
+
 	// Fill met
 	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMET,0,fTR->PFMETphi,0);
 
