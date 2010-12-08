@@ -8,6 +8,7 @@
 #pragma link C++ class MT2Jet;
 #pragma link C++ class MT2Elec;
 #pragma link C++ class MT2Muon;
+#pragma link C++ class MT2GenLept;
 
 #endif
 
