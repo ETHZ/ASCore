@@ -86,8 +86,8 @@ int main(int argc, char* argv[]) {
 	tA->setCharge(charge);
 	tA->setVerbose(verbose);
 	tA->init(samples);
-	if(mode == 2) tA->fillYields();
-	else tA->makePlots();
+	if(mode == 2) tA->doLoop();
+	else tA->doAnalysis();
 	delete tA;
 	return 0;
 }

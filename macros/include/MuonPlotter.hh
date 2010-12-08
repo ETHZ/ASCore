@@ -49,8 +49,9 @@ public:
 	void loadSamples(const char* filename = "samples.dat");
 	void setBinning();
 
-	void makePlots();
-
+	void doAnalysis();
+	void doLoop();
+	
 	//////////////////////////////
 	// Plots
 	void makefRatioPlots();
@@ -113,6 +114,9 @@ public:
 	void fillYields(int);              // One sample
 	void fillYields(vector<int>); // List of samples
 	
+	void initCounters(int = -1);
+	void storeNumbers();
+	void storeNumbers(gChannel);
 	void printCutFlows(TString);
 	
 	void printYields(gChannel = Muon);
@@ -208,6 +212,7 @@ private:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
+	ofstream fOUTSTREAM;
 
 	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
 	int fChargeSwitch;    // 0 for SS, 1 for OS
@@ -238,10 +243,6 @@ private:
 		TH1D *h_nloose_pt;
 		TH1D *h_ntight_eta;
 		TH1D *h_nloose_eta;
-
-		TH2D *h_ratio;
-		TH1D *h_ratio_pt;
-		TH1D *h_ratio_eta;
 	};
 
 	struct NThistos{
