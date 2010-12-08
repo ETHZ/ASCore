@@ -118,7 +118,9 @@ public:
 	virtual float getMinYExtension(TH1*);
 	virtual TCanvas* makeCanvas(const char*);
 	virtual void printHisto(TH1* h, TString canvname, TString canvtitle, Option_t *drawopt = "");
+	virtual void printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt = "");
 	virtual TH1D* bookTH1D(const char*, const char*, int, double, double);
+	virtual void printProgress(int, const int, TString, const int = 5000);
 	virtual TString numbForm(double);
 	virtual int getExp(double e);
 	

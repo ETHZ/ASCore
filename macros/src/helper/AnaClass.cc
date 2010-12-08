@@ -2220,6 +2220,18 @@ void AnaClass::printHisto(TH1* h, TString canvname, TString canvtitle, Option_t 
 }
 
 //____________________________________________________________________________
+void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt){
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	o->Draw(drawopt);
+	gPad->RedrawAxis();
+	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
+}
+
+//____________________________________________________________________________
 TH1D* AnaClass::bookTH1D(const char* name, const char* title, int nbins, double xlow, double xup){
 	TH1D *h = new TH1D(name, title, nbins, xlow, xup);
 	h->SetXTitle(convertVarName(name));
@@ -2246,6 +2258,11 @@ TString AnaClass::numbForm(double n){
 	// else if(expo < 7 ) out.Form("%4.0f", n);
 	else               out.Form("%1.2f E%i", n/scale, expo);
 	return out;
+}
+
+//____________________________________________________________________________
+void AnaClass::printProgress(int entry, const int nentries, TString header, const int step){
+	if(entry%step == 0 || (entry+1 == nentries) ) cout << " Processing " << setw(40) << left << header << setw(4) << right << (int)((float)(entry+1)/(float)nentries*100.) << " %      \r" << flush;
 }
 
 //____________________________________________________________________________
