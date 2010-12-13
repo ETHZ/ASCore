@@ -308,7 +308,7 @@ int Hemisphere::Reconstruct(){
 			Axis2[4] = Object_E[J_Max];
 		}
 		
-		if (dbg >= 0) {
+		if (dbg > 0) {
 			cout << " Axis 1 is Object = " << I_Max  << " with Pt " << Object_Pt[I_Max]<< endl;
 			cout << " Axis 2 is Object = " << J_Max  << " with Pt " << Object_Pt[J_Max]<< endl;
 		}
