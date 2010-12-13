@@ -264,11 +264,61 @@ int Hemisphere::Reconstruct(){
 			cout << " Axis 2 is Object = " << J_Max << endl;
 		}
 
+	} else if (seed_meth == 4) {
+
+		float P_Max1 = 0.;
+		float P_Max2 = 0.;
+
+	// take largest Pt object as first seed
+		for (int i = 0; i < vsize; ++i){
+			Object_Group[i] = 0;
+			if (Object_Noseed[i] == 0 && P_Max1 < Object_Pt[i]){
+				P_Max1 = Object_Pt[i];
+				I_Max = i;
+			}
+		}
+		if(I_Max < 0) return 0;
+
+	// take second largest Pt object as second seed, but require dR(seed1, seed2) > dRminSeed1 
+		for (int i = 0; i < vsize; ++i){
+			if( i == I_Max) continue;
+			float DeltaR = Util::GetDeltaR(Object_Eta[i], Object_Eta[I_Max], Object_Phi[i], Object_Phi[I_Max]); 
+			if (Object_Noseed[i] == 0 && P_Max2 < Object_Pt[i] && DeltaR > dRminSeed1){
+				P_Max2 = Object_Pt[i];
+				J_Max = i;
+			}
+		}
+		if(J_Max < 0) return 0;
+
+	// save first seed as initial hemisphere 1 axis
+		if (I_Max >= 0){
+			Axis1[0] = Object_Px[I_Max] /  Object_P[I_Max];
+			Axis1[1] = Object_Py[I_Max] /  Object_P[I_Max];
+			Axis1[2] = Object_Pz[I_Max] /  Object_P[I_Max];
+			Axis1[3] = Object_P[I_Max];
+			Axis1[4] = Object_E[I_Max];
+		} 
+
+	// save second seed as initial hemisphere 2 axis
+		if (J_Max >= 0){
+			Axis2[0] = Object_Px[J_Max] /  Object_P[J_Max];
+			Axis2[1] = Object_Py[J_Max] /  Object_P[J_Max];
+			Axis2[2] = Object_Pz[J_Max] /  Object_P[J_Max];
+			Axis2[3] = Object_P[J_Max];
+			Axis2[4] = Object_E[J_Max];
+		}
+		
+		if (dbg >= 0) {
+			cout << " Axis 1 is Object = " << I_Max  << " with Pt " << Object_Pt[I_Max]<< endl;
+			cout << " Axis 2 is Object = " << J_Max  << " with Pt " << Object_Pt[J_Max]<< endl;
+		}
+
 	} else {
 		cout << "Please give a valid seeding method!" << endl;
 		return 0;
 	}
-
+	
+	
 	// seeding done
 	// now do the hemisphere association
 

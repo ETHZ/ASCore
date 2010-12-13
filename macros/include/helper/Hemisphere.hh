@@ -13,6 +13,7 @@
 *                                          Updated: 15 Sept 2006
 *                                          Updated: 15 November 2006
 *                                          Updated: 01 November 2008
+*                                          Updated: 12 November 2010
 */
 
 
@@ -38,6 +39,7 @@ public:
 //   1: 1st: max P ; 2nd: max P * delta R wrt first one (if delta R > 0.5)
 //   2: 2 objects who give maximal invariant mass (recommended)
 //   3: 2 objects who give maximal transverse mass
+//   4: 2 leading jets (min dR can be set by SetDRminSeed1())
 //
 // Hemisphere association method:
 //   1: maximum pt longitudinal projected on the axes
