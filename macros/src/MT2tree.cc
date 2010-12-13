@@ -70,7 +70,9 @@ void MT2Jet::Reset() {
   NeuEmFrac     = -99999.99; 
   ChMult        = -1; 
   NeuMult       = -1; 
-  NConstituents = -1; 
+  NConstituents = -1;
+
+  inHemisphere  = -1;	
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
@@ -109,6 +111,30 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
 
   return true;
 }
+
+
+// MT2Hemisphere -----------------------------------
+MT2Hemi::MT2Hemi(){
+  Reset();
+}
+
+MT2Hemi::~MT2Hemi(){
+}
+
+void MT2Hemi::Reset(){
+  seed_method    = -1;
+  assoc_method   = -1;
+
+  for(int i=0; i<m_jetSize; ++i){
+  	jindices1[i]=-1;
+  	jindices2[i]=-1;
+  }
+  
+  lv1. SetPxPyPzE(0, 0, 0, 0);
+  lv2. SetPxPyPzE(0, 0, 0, 0);
+  met. SetPxPyPzE(0, 0, 0, 0);
+}
+
 
 // MT2GenLept -----------------------------------
 MT2GenLept::MT2GenLept(){
@@ -369,6 +395,49 @@ Int_t MT2tree::GetJetIndex(int ijet, int PFJID) {
   return indices[ijet];
 }
 
+
+
+Int_t MT2tree::JetIsInHemi(int jindex, int hemi_seed, int hemi_association, float MaxDR){
+  // returns 1 or 2 depending if jet is associated to hemi 1 or 2
+  // returns 0 if jet is not associated to either of the two hemispheres
+
+  // hemi_seed   = 2: max invariant mass, 4: two leading jet
+  // hemi_assoc  = 2: min invariant mass, 3: minial lund distance, 
+  // MaxDR: if >0 RejectISRDRmax(MaxDR) is called for hemi            
+
+  
+  vector<float> px, py, pz, E;
+  vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
+  for(int i=0; i<NJets; ++i){
+	if(jet[i].isPFIDLoose ==false) continue;
+  	px.push_back(jet[i].lv.Px());
+	py.push_back(jet[i].lv.Py());
+	pz.push_back(jet[i].lv.Pz());
+	 E.push_back(jet[i].lv.E());
+	jsel.push_back(i);
+  }
+		
+  if (px.size()<2) return -10;
+
+  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
+  Hemisphere* hemi = new Hemisphere(px, py, pz, E, hemi_seed, hemi_association);
+  hemi->SetDebug(0);
+  if(MaxDR > 0) hemi->RejectISRDRmax(MaxDR);
+  vector<int> grouping = hemi->getGrouping();
+  delete hemi;
+  
+  vector<int>    jused; // contains indices of jets used for pseudojets
+  for(int i=0; i<px.size(); ++i){
+	if(grouping[i]==1){
+		if(jsel[i]==jindex) return 1;
+	}else if(grouping[i] == 2){
+		if(jsel[i]==jindex) return 2;
+	}
+  }
+  return -1;
+
+}
+
 Double_t MT2tree::GetMT2(double testmass, bool massive, int met) {
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
@@ -399,8 +468,73 @@ Double_t MT2tree::GetMT2Leading(double testmass, bool massive, int PFJID, int me
 	index++;
   }
   if(index!=2) return -999;
+  cout << "leadingjets " <<leadingJets[0].Pt() << " " << leadingJets[1].Pt() << endl;
   return CalcMT2(testmass, massive, leadingJets[0], leadingJets[1], MET);
 
+}
+
+Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_association, float MaxDR, int met) {
+  // hemi_seed   = 2: max invariant mass, 4: two leading jet
+  // hemi_assoc  = 2: min invariant mass, 3: minial lund distance, 
+  // MaxDR: if >0 RejectISRDRmax(MaxDR) is called for hemi            
+  // met ==3 option adds jets > jet_for_met_threshold GeV rejected by the chosen hemispheres to the MET
+  float jet_for_met_threshold=20;
+
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1 || met==3)  MET = pfmet[0];
+  else if(met==2)       MET = MHTloose[0];
+  else return -999;
+ 
+
+  vector<float> px, py, pz, E;
+  vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
+  for(int i=0; i<NJets; ++i){
+	if(jet[i].isPFIDLoose ==false) continue;
+  	px.push_back(jet[i].lv.Px());
+	py.push_back(jet[i].lv.Py());
+	pz.push_back(jet[i].lv.Pz());
+	 E.push_back(jet[i].lv.E());
+	jsel.push_back(i);
+  }
+		
+  if (px.size()<2) return -999;
+
+  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
+  Hemisphere* hemi = new Hemisphere(px, py, pz, E, hemi_seed, hemi_association);
+  hemi->SetDebug(0);
+  if(MaxDR > 0) hemi->RejectISRDRmax(MaxDR);
+  vector<int> grouping = hemi->getGrouping();
+
+  TLorentzVector pseudojet1(0.,0.,0.,0.);
+  TLorentzVector pseudojet2(0.,0.,0.,0.);
+  vector<int>    jused; // contains indices of jets used for pseudojets
+  for(int i=0; i<px.size(); ++i){
+	if(grouping[i]==1){
+		jused     .push_back(jsel[i]);
+		pseudojet1.SetPx(pseudojet1.Px() + px[i]);
+		pseudojet1.SetPy(pseudojet1.Py() + py[i]);
+		pseudojet1.SetPz(pseudojet1.Pz() + pz[i]);
+		pseudojet1.SetE( pseudojet1.E()  + E[i]);	
+	}else if(grouping[i] == 2){
+		jused     .push_back(jsel[i]);
+		pseudojet2.SetPx(pseudojet2.Px() + px[i]);
+		pseudojet2.SetPy(pseudojet2.Py() + py[i]);
+		pseudojet2.SetPz(pseudojet2.Pz() + pz[i]);
+		pseudojet2.SetE( pseudojet2.E()  + E[i]);
+	}
+  }
+  delete hemi;
+ 
+  for(int i=0; i<NJets; ++i){
+	bool used(false);  
+  	for(int j=0; j<jused.size(); ++j){
+		if(jused[j] == i) used=true; 
+	}
+	TLorentzVector unused_jet(0, 0, 0, 0);
+	if(! used && jet[0].lv.Pt()>jet_for_met_threshold && met==3) unused_jet.SetXYZM(jet[i].lv.Px(), jet[i].lv.Py(), 0, 0);
+        MET += unused_jet; // adding all jets that were rejected by hemisphere algo to MET	
+  }
+  return CalcMT2(0, massive, pseudojet1, pseudojet2, MET); 
 }
 
 Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double minJPt, int hemi_association, int met) {
@@ -502,5 +636,6 @@ ClassImp(MT2Misc)
 ClassImp(MT2Jet)
 ClassImp(MT2Elec)
 ClassImp(MT2Muon)
+ClassImp(MT2Hemi)
 ClassImp(MT2GenLept)
 ClassImp(MT2tree)
