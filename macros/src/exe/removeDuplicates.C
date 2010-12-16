@@ -18,8 +18,7 @@ bool duplicate( TTree* ref, Int_t& run, Int_t& lumi, Int_t& event ) {
     
     // Check if this event already exists in the tree
     char cut[256]; sprintf(cut,"runNum==%d&&lumi==%d&&eventNum==%d",run,lumi,event);
-    ref->Draw("runNum",cut,"goff");
-    return (ref->GetSelectedRows()>0);
+    return (ref->GetEntries(cut)>0);
     
 }
 
