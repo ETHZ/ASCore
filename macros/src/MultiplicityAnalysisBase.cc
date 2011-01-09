@@ -10,17 +10,17 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_MHT_min                        = 0;
 	fCut_HT_min                         = 0;
 	fCut_JPt_hardest_min                = 0;
-	fCut_3JetsAbove50                   = 0;
+	fCut_JPt_second_min                 = 0;
 	fCut_VSPT                           = 9999.99;
-	fCut_R12R21                         = 0;
 	fCut_DiLeptInvMass_min              = 0;
 	fCut_DiLeptInvMass_max              = 9999.99;
+	fCut_Zselector                      = 0;
+	fCut_Zveto                          = 0;
 	fCut_DiLeptOSSFInvMass_lowercut     = 9999.99;
 	fCut_DiLeptOSSFInvMass_uppercut     =-9999.99;
 	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
-
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
@@ -84,8 +84,6 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	bool doSel(true);
 	for(int ij=0; ij < fTR->PFNJets; ++ij){
 		if(fTR->PFJPt[ij] < 15) continue;  // note: ETH ntuple only stores PFJets > 15 GeV (defualt config)
-		fJets.push_back(ij);
-		pt1.push_back(fTR->PFJPt[ij]);
 
 		bool JGood(true);
 		for(int i=0; i<fMuons.size(); ++i){
@@ -99,6 +97,9 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 			if(deltaR < 0.4)   JGood=false;
 		}
 		if(JGood==false) continue;
+		
+		fJets.push_back(ij);                 // fJets has all jets except for duplicates with selected leptons
+		pt1.push_back(fTR->PFJPt[ij]);
 		if(! IsGoodBasicPFJet(ij,  20., 2.4) ) continue;
 		fJetsLoose.push_back(ij);
 		pfloose.push_back(fTR->PFJPt[ij]);
@@ -215,6 +216,32 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
 
+	// leading jets
+	int index1=-1;
+	int index2=-1;
+	double pt1=0;
+	double pt2=0;
+
+	for(int i=0; i<fTR->PFNJets; ++i){
+		if(fTR->PFJPt[i]>pt1){
+			index2 = index1;
+			index1 = i;
+			pt2    = pt1;
+			pt1    = fTR->PFJPt[i];
+		}else if(fTR->PFJPt[i]>pt2){
+			index2 = i;
+			pt2    = fTR->PFJPt[i];
+		}
+	}
+	bool leadingjets(true);
+	if(index1 !=-1 && index2 !=-1){
+		if(IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false){leadingjets=false;}
+		if(IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false){leadingjets=false;}
+	}else{leadingjets = false;}
+
+	if(leadingjets = false) return false;
+	
+	
 	// MHT
 	TVector3 MHTall(0., 0., 0.);
         for(int i=0; i<fTR->PFNJets; ++i) {
@@ -225,16 +252,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	fMHTall = MHTall.Pt();
 	if(fMHTall < fCut_MHT_min) {return false;}
 
-	// hardest jet
-	double hardest_jet=0;
-	for(int j=0; j<fJetsLoose.size(); ++j){
-		if(fTR->PFJPt[fJetsLoose[j]] > hardest_jet){
-			hardest_jet = fTR->PFJPt[fJetsLoose[j]];
-		}
-	}
-	if(hardest_jet<fCut_JPt_hardest_min){return false;}
-
-
+	
 	// DiLeptonInvMass_min DiLeptonInvMass_max
 	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee || fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ||
 	   fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
@@ -245,54 +263,13 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 				 
 	}
 	
-	// Zmass cut
-	// DiLeptonInvMass_min
+	// Z-bosoon selector or veto
 	if( fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
 		double invmass = GetDiLeptInvMass();
-		
-	//	if( (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
-	}
+		if( fCut_Zselector==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return true; }	
+		if( fCut_Zveto    ==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
+	} else if(fCut_Zselector ==1 ) {return false;}
 
-
-	// ------------------------------------------------------------------------------------------------
-	// cuts for clean multijet events
-	// if specified cuts are satisfied: fIsCleanMultiJetEvent == true  
-	
-	// 3JetsAbove50
-	int jcount=0;
-	for(int j=0; j<fJetsLoose.size(); ++j){
-		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.5){
-			jcount++;
-		}
-	}
-	fNJetsPt50Eta25 = jcount; 
-		
-	// R12 and R21
-	fR12R21    =  false;
-	fDeltaPhi1 = -999.99;
-	fDeltaPhi2 = -999.99;
-	fR12       = -999.99;
-	fR21       = -999.99;
-
-	if(fJetsLoose.size()>1 && fCut_PFMET_min > 0){
-		double pi = 3.14159265;
-		double phi_j1  = fTR->PFJPhi[fJetsLoose[0]];
-		double phi_j2  = fTR->PFJPhi[fJetsLoose[1]];
-		double phi_met = fTR->PFMETphi;
-
-		double d_phi1 = fabs(Util::DeltaPhi(phi_j1, phi_met));
-		double d_phi2 = fabs(Util::DeltaPhi(phi_j2, phi_met));
-	
-		fDeltaPhi1 = d_phi1;
-		fDeltaPhi2 = d_phi2;
-
-		fR12 = sqrt( d_phi1*d_phi1 + (pi-d_phi2)*(pi-d_phi2) );
-		fR21 = sqrt( d_phi2*d_phi2 + (pi-d_phi1)*(pi-d_phi1) );
-	
-		if(fR12 > 0.5 && fR21 > 0.5){fR12R21 = true;}
-	} else {
-		fR12R21= true;
-	}
 
 	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
 	double px=0;
@@ -318,24 +295,9 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	py+=fTR->PFMETpy;
 
 	fVectorSumPt = sqrt(px*px + py*py);
-	
-	
-	// decide if clean event
-	fIsCleanMultiJetEvent=true;
-	fIsCleanJetEvent=true;
 
-	if(fCut_3JetsAbove50 ==1. && fNJetsPt50Eta25 <3){
-		fIsCleanMultiJetEvent = false;
-	}
-	if(fVectorSumPt > fCut_VSPT ){
-		fIsCleanMultiJetEvent = false;
-		fIsCleanJetEvent      = false;
-	}  		
-	if(fCut_R12R21 ==1. && fR12R21 ==false){
-		fIsCleanMultiJetEvent = false;
-		fIsCleanJetEvent      = false;
-	}
-	
+	if(fVectorSumPt > fCut_VSPT)    return false;
+
 	// ------------------------------------------------------------------------------------------	
 
 	return true;	
@@ -396,6 +358,10 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_Run_min = int(IntValue); ok = true;
 		} else if( !strcmp(ParName, "Run_max") ){
 			fCut_Run_max = int(IntValue); ok = true;
+		} else if( !strcmp(ParName, "Zselector") ){
+			fCut_Zselector = int(IntValue); ok = true;
+		} else if( !strcmp(ParName, "Zveto") ){
+			fCut_Zveto   = int(IntValue); ok = true;
 		}
 
 		// floats 
@@ -408,6 +374,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_HT_min               = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "JPt_hardest_min") ){
 			fCut_JPt_hardest_min      = float(ParValue); ok = true;			
+		} else if( !strcmp(ParName, "JPt_second_min") ){
+			fCut_JPt_second_min      = float(ParValue); ok = true;			
 		} else if( !strcmp(ParName, "DiLeptInvMass_min") ){
 			fCut_DiLeptInvMass_min    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "DiLeptInvMass_max") ){
@@ -420,10 +388,6 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_PtHat_max                     = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "VSPT_max")){
 			fCut_VSPT                          = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "R12R21")){
-			fCut_R12R21                        = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "3JetsAbove50")){
-			fCut_3JetsAbove50                  = float(ParValue); ok = true;
 		}  		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
@@ -434,11 +398,12 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  MHT_min                     " << fCut_MHT_min                    <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
+		cout << "  JPt_second_min              " << fCut_JPt_second_min             <<endl;
 		cout << "  VSPT_max                    " << fCut_VSPT                       <<endl;
-		cout << "  R12R21                      " << fCut_R12R21                     <<endl; 
-		cout << "  3JetsAbove50                " << fCut_3JetsAbove50               <<endl;
 		cout << "  DiLeptInvMass_min           " << fCut_DiLeptInvMass_min          <<endl;
 		cout << "  DiLeptInvMass_max           " << fCut_DiLeptInvMass_max          <<endl;		
+		cout << "  Zveto                       " << fCut_Zveto                      <<endl;
+		cout << "  Zselector                   " << fCut_Zselector                  <<endl;
 		cout << "  DiLeptOSSFInvMass_lowercut  " << fCut_DiLeptOSSFInvMass_lowercut <<endl;
 		cout << "  DiLeptOSSFInvMass_uppercut  " << fCut_DiLeptOSSFInvMass_uppercut <<endl;
 		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;

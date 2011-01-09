@@ -21,13 +21,14 @@ public:
   Int_t    LumiSection;
   Int_t    LeptConfig;
   Int_t    NJetsEta5Pt20;
-  Bool_t   IsCleanJetEvent;
   Bool_t   HBHENoiseFlag;
-  Double_t PseudoJetMT2;
-  Double_t PseudoJetMCT;
-  Double_t PseudoJet1Pt;
-  Double_t PseudoJet2Pt;
-  Double_t PseudojetAlphaT;
+  Double_t MT2;
+  Double_t MT2leading;
+  Double_t MT2noISR;
+  Double_t MCT;
+  Double_t AlphaT;
+  Double_t MET;
+  Double_t METPhi;
   Double_t Vectorsumpt;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
@@ -38,7 +39,7 @@ public:
   Double_t EcalGapBE[50];
   Int_t    NVertices;  
 
-  ClassDef(MT2Misc, 4)
+  ClassDef(MT2Misc, 6)
 };
 
 // MT2Jet ----------------------------------
@@ -85,14 +86,20 @@ public:
   void Reset();
   Int_t          seed_method;
   Int_t          assoc_method;
+  Double_t       MT2;
+  Double_t       MCT;
 
-  Int_t          jindices1[m_jetSize];
-  Int_t          jindices2[m_jetSize];
+  Int_t          jindices1  [m_jetSize];
+  Int_t          jindices2  [m_jetSize];
+  Int_t          eleindices1[m_eleSize];
+  Int_t          eleindices2[m_eleSize];
+  Int_t          muoindices1[m_muoSize];
+  Int_t          muoindices2[m_muoSize];
   TLorentzVector lv1;
   TLorentzVector lv2;
-  TLorentzVector met;
+  TLorentzVector UTM;
 
-  ClassDef(MT2Hemi, 1)
+  ClassDef(MT2Hemi, 2)
 };
 
 
@@ -175,9 +182,8 @@ public:
   Int_t    GetNjets(double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
   Int_t    GetJetIndex(int ijet=0, int PFJID=1);
   Double_t JetPt      (int ijet=0, int PFJID=1);
+
   // dPhi and friends
-  Double_t PseudoJetDPhi ();
-  Double_t PseudoJetAngle();
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
   Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
   Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
@@ -185,7 +191,6 @@ public:
   Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
   // MT2 & friends
   Int_t    JetIsInHemi(int jindex=0, int hemi_seed=2, int hemi_association=3, float MaxDR=0);
-  Double_t GetMT2(double testmass=0 , bool massive=false, int met=1);
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);
   Double_t GetMT2Hemi(double testmass=0, bool massive=false, int PFJID=1, 
 		  double minJPt=20, int hemi_association=3, int met=1);
@@ -204,7 +209,7 @@ public:
   Int_t   NMuons;
   Int_t   NMuonsLoose;
   MT2Jet         jet[m_jetSize];
-  MT2Jet         hemis[m_hemiSize];
+  MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];
   MT2Muon        muo[m_muoSize];
   MT2GenLept     genlept[m_genleptSize];
@@ -212,10 +217,9 @@ public:
   TLorentzVector MPT[2];
   TLorentzVector MHT[2];
   TLorentzVector MHTloose[2];
-  TLorentzVector pseudoJets[2];
 
   
-  ClassDef(MT2tree, 7)
+  ClassDef(MT2tree, 8)
 };
 
 #endif

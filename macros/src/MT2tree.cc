@@ -25,13 +25,14 @@ void MT2Misc::Reset() {
   LumiSection		  = -1;	  
   LeptConfig		  = -1;	  
   NJetsEta5Pt20           = -1;
-  IsCleanJetEvent	  =  0;	 
-  HBHENoiseFlag           =  0; 
-  PseudoJetMT2		  = -99999.99;
-  PseudoJetMCT		  = -99999.99;
-  PseudoJet1Pt		  = -99999.99;
-  PseudoJet2Pt		  = -99999.99;
-  PseudojetAlphaT	  = -99999.99;
+  HBHENoiseFlag           =  0;
+  MT2                     = -99999.99;
+  MT2leading              = -99999.99;
+  MT2noISR                = -99999.99;
+  MCT                     = -99999.99;
+  AlphaT                  = -99999.99;
+  MET                     = -99999.99;
+  METPhi                  = -99999.99;
   Vectorsumpt		  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
@@ -71,8 +72,6 @@ void MT2Jet::Reset() {
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1;
-
-  inHemisphere  = -1;	
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
@@ -124,15 +123,24 @@ MT2Hemi::~MT2Hemi(){
 void MT2Hemi::Reset(){
   seed_method    = -1;
   assoc_method   = -1;
-
+  MT2            = -99999.99;
+  MCT            = -99999.99;
   for(int i=0; i<m_jetSize; ++i){
-  	jindices1[i]=-1;
-  	jindices2[i]=-1;
+  	jindices1[i]  =-1;
+  	jindices2[i]  =-1;
+  }
+  for(int i=0; i<m_eleSize; ++i){
+  	eleindices1[i]=-1;
+  	eleindices2[i]=-1;
+  }
+  for(int i=0; i<m_muoSize; ++i){
+  	muoindices1[i]=-1;
+  	muoindices2[i]=-1;
   }
   
   lv1. SetPxPyPzE(0, 0, 0, 0);
   lv2. SetPxPyPzE(0, 0, 0, 0);
-  met. SetPxPyPzE(0, 0, 0, 0);
+  UTM. SetPxPyPzE(0, 0, 0, 0); 
 }
 
 
@@ -219,10 +227,11 @@ void MT2tree::Reset() {
   for (int i = 0; i < m_genleptSize; ++i) {
     genlept[i].Reset();
   }
+  for (int i = 0; i < m_hemiSize; ++i) {
+    hemi[i].Reset();
+  }
   pfmet     [0].SetPxPyPzE(0., 0., 0., 0.);
   MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
-  pseudoJets[0].SetPxPyPzE(0., 0., 0., 0.);
-  pseudoJets[1].SetPxPyPzE(0., 0., 0., 0.);
   MHTloose  [0].SetPxPyPzE(0., 0., 0., 0.);
   MHT       [0].SetPxPyPzE(0., 0., 0., 0.);
 }
@@ -257,18 +266,6 @@ void MT2tree::SetNMuons(int n) {
 
 void MT2tree::SetNMuonsLoose(int n) {
   NMuonsLoose = n;
-}
-
-Double_t MT2tree::PseudoJetDPhi() {
-  if (NJets<2)
-    return -999;
-  return TMath::Abs(pseudoJets[0].DeltaPhi(pseudoJets[1]));
-}
-
-Double_t MT2tree::PseudoJetAngle() {
-  if (NJets<2)
-    return -999;
-  return pseudoJets[0].Angle(pseudoJets[1].Vect());
 }
 
 Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met){
@@ -438,18 +435,6 @@ Int_t MT2tree::JetIsInHemi(int jindex, int hemi_seed, int hemi_association, floa
 
 }
 
-Double_t MT2tree::GetMT2(double testmass, bool massive, int met) {
-  TLorentzVector MET(0., 0., 0., 0.);
-  if(met==1)      MET = pfmet[0];
-  else if(met==2) MET = MHTloose[0];
-  else            return -999;
-
-  if (NJetsIDLoose<2)
-    return -999;
-
-  return CalcMT2(testmass, massive, pseudoJets[0], pseudoJets[1], MET);
-}
-
 Double_t MT2tree::GetMT2Leading(double testmass, bool massive, int PFJID, int met){
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
@@ -610,7 +595,7 @@ Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1
 
 }
 
-Double_t MT2tree::GetMCT(bool massive, int met) {
+Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
@@ -621,15 +606,15 @@ Double_t MT2tree::GetMCT(bool massive, int met) {
 
   TLorentzVector DTM(0,0,0,0);
   TLorentzVector p1, p2;
-  p1.SetXYZM(pseudoJets[0].Px(), pseudoJets[0].Py(), pseudoJets[0].Pz(), massive ? pseudoJets[0].M() : 0);
-  p2.SetXYZM(pseudoJets[1].Px(), pseudoJets[1].Py(), pseudoJets[1].Pz(), massive ? pseudoJets[1].M() : 0);
+//  p1.SetXYZM(pseudoJets[0].Px(), pseudoJets[0].Py(), pseudoJets[0].Pz(), massive ? pseudoJets[0].M() : 0);
+//  p2.SetXYZM(pseudoJets[1].Px(), pseudoJets[1].Py(), pseudoJets[1].Pz(), massive ? pseudoJets[1].M() : 0);
   TVector2 pmiss;
   pmiss.Set(MET.Px(), MET.Py());
 
   TMctLib *mct = new TMctLib();
   Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
   delete mct;
-  return MCT;
+  return -999.99;
 }
 
 ClassImp(MT2Misc)

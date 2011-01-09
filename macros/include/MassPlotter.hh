@@ -16,8 +16,8 @@ static const double  gMT2bins[gNMT2bins+1]   = {0, 5, 10, 15, 20, 25, 30, 35, 40
 static const int gNMT2dijetM                    = 20;
 static const double  gMT2dijetM[gNMT2dijetM+1]  = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 85, 105, 135, 180, 260, 360, 500, 800}; 	
 
-static const int gNMT2Massivebins                          = 23;
-static const double  gMT2Massivebins[gNMT2Massivebins+1]   = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 85, 105, 135, 180, 260, 360, 500, 700, 900, 1500, 2000}; 	
+static const int gNMT2Massivebins                          = 16;
+static const double  gMT2Massivebins[gNMT2Massivebins+1]   = {0, 10, 20, 30, 40, 50, 60, 70, 85, 105, 135, 180, 260, 360, 500, 700, 900}; 	
 
 static const int gNMT2Leptonbins                   = 11;
 static const double  gMT2Leptonbins[gNMT2Leptonbins+1]   = {0, 10, 20, 30, 45,  65,  100, 140, 180, 260, 360, 500}; 	

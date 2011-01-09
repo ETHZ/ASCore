@@ -44,27 +44,20 @@ public:
 	float fCut_MHT_min;
 	float fCut_HT_min;
 	float fCut_JPt_hardest_min;
+	float fCut_JPt_second_min;
 	float fCut_VSPT;
-	float fCut_R12R21;
-	float fCut_3JetsAbove50;
 	float fCut_DiLeptInvMass_min;
 	float fCut_DiLeptInvMass_max;
 	float fCut_DiLeptOSSFInvMass_lowercut;
 	float fCut_DiLeptOSSFInvMass_uppercut;
 	float fCut_PtHat_max;
+	int   fCut_Zselector;
+	int   fCut_Zveto;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
 
 	// members
 	float fVectorSumPt;
-	float fDeltaPhi1;
-	float fDeltaPhi2;
-	float fR12;
-	float fR21;
-	bool  fR12R21;
-	bool  fIsCleanMultiJetEvent;
-	bool  fIsCleanJetEvent;
-	int   fNJetsPt50Eta25;
 	float fMHT;
 	float fMHTall;
 	float fHT;

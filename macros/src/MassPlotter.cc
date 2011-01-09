@@ -132,22 +132,60 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	double controlsplit[4]={dPhisplit[2], dPhisplit[3], dPhisplit[3], dPhisplit[3]};
 
 	std::ostringstream cutStream;
-	cutStream << "misc.LeptConfig == "     << LeptConfigCut     << "&&"
-		  << "NJetsIDLoose      >2"                         << "&&"
-//		  << "MinMetJetDPhi(0,1)>0.25"                      << "&&" 
-//		  << "MetJetDPhi(0,1,1) >0.5"                       << "&&" 
-//		  << "MetJetDPhi(1,1,1) >0.5"                       << "&&" 
-//		  << "misc.PseudoJetMT2>130"                        << "&&"
+	cutStream  
+		  << "misc.LeptConfig==9"                           << "&&"
+		  << "NJetsIDLoose > 1"                             << "&&"
+		  << "jet[0].IsGoodPFJet(100,2.4,1)==1"             << "&&"
+		  << "jet[1].IsGoodPFJet(100,2.4,1)==1"             << "&&"
+		  << "misc.Vectorsumpt<70"                          << "&&"
+	//	  << "GetNjets(50.,2.4,0)-GetNjets(50.,2.4,1)==0"   << "&&"
+	//	  << "GetMinR12R21(0,20,5.0,1)>0.5"                 << "&&" 
+		  << "MinMetJetDPhi(0,20,5.0,1)>0.3"                << "&&" 
+	//	  << "GetMT2Hemi(0,false,1,20,3,1)>90"              << "&&"
+	//	  << "GetMT2Hemi(0,false,1,20,3,1)<180"             << "&&"
+	//	  << "misc.MT2 > 100"                      << "&&"
+	//	  << "pfmet[0].Pt()>100"                            << "&&" 
+		  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
+	//	  << "GetMT2Hemi(0,false,1,20,3,1)/pfmet[0].Pt()>0.75" << "&&"
+	//	  << "pfmet[0].Pt()>100"                            << "&&"
+		  << "GetMT2HemiNoISR(false,4,2,2,1)>100"           << "&&"
 		  << "misc.HBHENoiseFlag == 1"                   ;
 	
 	TString cuts = cutStream.str().c_str();
+	
+	//       samples , variable,                         cuts,   xtitle ,nbins,          min,  max,       cleaned,  log, comp    ,ratio, stack, overlay
+	//    MakePlot(fSamples,"GetMT2Hemi(0,false,1,20,3,1)" ,  cuts, "MT2" ,gNMT2bins,gMT2bins,                 false,  true , true,    true,  true,  false);
+	    MakePlot(fSamples,"GetMT2HemiNoISR(false,4,2,2,1)" ,cuts, "MT2" ,gNMT2bins,gMT2bins,                 false,  true , true,   true,  true,  false);
+	//  MakePlot(fSamples,"GetMT2Hemi(0,false,1,20,3,1)" ,cuts, "MT2" ,gNMT2bins,gMT2bins,                 false,  true , true,    false, false, false);
+	//  MakePlot(fSamples,"GetMT2Leading(0,true,1,1)"    ,cuts, "MT2" ,gNMT2bins,gMT2bins,                 false,  true , true,    true,  true,  false);
+	//  MakePlot(fSamples,"GetMT2Hemi(0,true,1,20,2,1)"  ,cuts, "MT2" ,gNMT2Massivebins,gMT2Massivebins,   false,  true , true,    true,  true,  false);
+  	//  MakePlot(fSamples,"GetMT2HemiNoISR(false,4,2,1,1)",cuts, "MT2" ,gNMT2Massivebins,gMT2Massivebins,   false,  true , true,    true,  true,  false);
+  	//  MakePlot(fSamples,"GetMT2HemiNoISR(4,2,0.7)"     ,cuts, "MT2" ,gNMT2Massivebins,gMT2Massivebins,   false,  true , true,    true,  true,  false);
+  	//  MakePlot(fSamples,"GetMT2HemiNoISR(4,2,1.0)"     ,cuts, "MT2" ,gNMT2Massivebins,gMT2Massivebins,   false,  true , true,    true,  true,  false);
 
-
-	//       samples , variable,                     cuts  ,    xtitle   ,nbins,   min,  max,                cleaned,  log  , comp , ratio, stack, overlay
-	//MakePlot(fSamples,"GetMT2Hemi(0,false,1,20,3,1)",cuts, "MT2massless"   ,gNMT2bins,        gMT2bins,         false,  true , true,   true,  true,  false);
-
-	//       samples   , variable,                     cuts,xtitle     ,nbins,min,max,   cleaned, log, comp, ratio, stack, overlay
-   	  MakePlot(fSamples,"jet[0].lv.Pt()" ,               cuts,"leading JPt",  150,0,800,    false,   true, true, false, true, false);
+	//       samples   , variable,                         cuts,xtitle      ,nbins,min,max,  cleaned, log, comp, ratio, stack, overlay
+   	//      MakePlot(QCDandDataSamples, "misc.Vectorsumpt",  cuts,"VSPT",     100, 0,  600,    false, true,  true,  false,  true, false);
+   	//      MakePlot(QCDandDataSamples, "misc.Vectorsumpt",  cuts,"VSPT",     100, 0,  600,    false, true,  false, false,  false, false);
+   	//    MakePlot(QCDandDataSamples,"jet[0].lv.Pt()" ,    cuts,"leading JPt",  200, 0, 1000,    false, true, true, true, true, true);
+   	//    MakePlot(QCDandDataSamples,"jet[1].lv.Pt()" ,    cuts,"second JPt" ,  200, 0, 1000,    false, true, true, true, true, true);
+   	//    MakePlot(QCDandDataSamples,"jet[2].lv.Pt()" ,    cuts,"third JPt"  ,  200, 0, 1000,    false, true, true, true, true, true);
+   	//    MakePlot(QCDandDataSamples,"jet[0].lv.Eta()" ,   cuts,"leading JEta", 200,-5.0,5.0,    false, true, true, true, true, false);
+   	//    MakePlot(QCDandDataSamples,"jet[0].lv.Phi()" ,   cuts,"leading JPhi", 60,0,TMath::Pi(),false, true, true, true, true, false);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 15, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, true, true);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 15, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, false,false);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 20, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, true, true);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 20, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, false,false);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 25, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, true, true);
+   	//  MakePlot(fSamples,"GetMinR12R21(0, 25, 5.0, 1)" ,cuts,"MinR12R21",60,0,TMath::Pi(), false, true, true, false, false,false);
+   	//  MakePlot(fSamples,"jet[MinMetJetDPhiIndex(0,15,6.0,1)].lv.Pt()" ,cuts,"JPt[Min#Delta#phiIndex(#slash{E},jet)]",50,0,500, false, true, true, false,false,false);
+   	//  MakePlot(fSamples,"jet[MinMetJetDPhiIndex(0,15,6.0,1)].lv.Pt()" ,cuts,"JPt[Min#Delta#phiIndex(#slash{E},jet)]",50,0,500, false, true, true, false,true ,true);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,15,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,false, false);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,15,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,true , true);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,20,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,true, true);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,20,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,false,false);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,25,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,true, true);
+   	//  MakePlot(fSamples,"MinMetJetDPhi(0,25,5.0,1)" ,cuts,"Min#Delta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, true, true, false,false,false);
+   	//MakePlot(fSamples,"NJets"           ,cuts  ,     "NJets"                ,15,0,15,          false, true , true ,  true,  true,  true);
    	//MakePlot(fSamples,"MetJetDPhi(2)"   ,cuts,"#Delta#phi(#slash{E},jet3)"  ,60,0,TMath::Pi(), false, false, true,   true, true, true);
     	//MakePlot(fSamples,"MinMetJetDPhi()" ,cuts,"#minDelta#phi(#slash{E},jet)",60,0,TMath::Pi(), false, false, true,   true, true, true);
 
@@ -273,7 +311,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		if (Samples[i].sname.Contains("QCD")) {
 		  h_composited[0]->Add(h_samples[i]);
 		}
-		else if(Samples[i].sname=="DY" || Samples[i].sname=="Wtolnu" || Samples[i].sname=="VV"){
+		else if(Samples[i].sname=="DY" || Samples[i].sname=="Wtolnu" || Samples[i].sname=="VV" || Samples[i].sname=="Photons" || Samples[i].sname=="VGamma"){
 		  h_composited[1]->Add(h_samples[i]);
 		}
 		else if(Samples[i].sname.Contains("Top")){
@@ -465,11 +503,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
 			if( fMT2tree->NJets < NJetsCut )           continue;
 			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
+			if( fMT2tree->misc.MT2 <0)        continue;			
 			// fill histo
 			if(option == "none")  {
-				h_samples[i]                ->Fill(fMT2tree->misc.PseudoJetMT2     , weight);
-				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && fMT2tree->misc.PseudoJetMT2 < 50){h_prediction -> Fill(fMT2tree->misc.PseudoJetMT2     , weight);}
+				h_samples[i]                ->Fill(fMT2tree->misc.MT2     , weight);
+				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && fMT2tree->misc.MT2 < 50){h_prediction -> Fill(fMT2tree->misc.MT2     , weight);}
 			}
 			nev++;
 		}
@@ -602,9 +640,9 @@ TH1D* MassPlotter::GetPrediction(TString branch_name, const int nbins, const dou
 			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
 			if( fMT2tree->NJets < NJetsCut )           continue;
 			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
+			if( fMT2tree->misc.MT2 <0)        continue;			
 			// fill histo
-			if(fMT2tree->misc.PseudoJetMT2 > 50) h_prediction     ->Fill(fMT2tree->misc.PseudoJetMT2     , weight);
+			if(fMT2tree->misc.MT2 > 50) h_prediction     ->Fill(fMT2tree->misc.MT2     , weight);
 		}
 		delete fMT2tree;
 	}
@@ -649,16 +687,16 @@ void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option,
 			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
 			if( fMT2tree->NJets < NJetsCut )           continue;
 			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.PseudoJetMT2 <0)        continue;			
+			if( fMT2tree->misc.MT2 <0)        continue;			
 			
 			// fill histo
 			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[0] && fMT2tree->misc.DPhiMhtMpt < ysplit[1] ){
-				h_ABCD_lower_y_band -> Fill(fMT2tree->misc.PseudoJetMT2, weight);
-				h_ABCD_MT2          -> Fill(fMT2tree->misc.PseudoJetMT2, fMT2tree->misc.DPhiMhtMpt, weight);
+				h_ABCD_lower_y_band -> Fill(fMT2tree->misc.MT2, weight);
+				h_ABCD_MT2          -> Fill(fMT2tree->misc.MT2, fMT2tree->misc.DPhiMhtMpt, weight);
 			}
 			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[2] && fMT2tree->misc.DPhiMhtMpt < ysplit[3] ){
-				h_ABCD_upper_y_band -> Fill(fMT2tree->misc.PseudoJetMT2, weight);
-				h_ABCD_MT2          -> Fill(fMT2tree->misc.PseudoJetMT2, fMT2tree->misc.DPhiMhtMpt, weight);
+				h_ABCD_upper_y_band -> Fill(fMT2tree->misc.MT2, weight);
+				h_ABCD_MT2          -> Fill(fMT2tree->misc.MT2, fMT2tree->misc.DPhiMhtMpt, weight);
 			}
 
 		}

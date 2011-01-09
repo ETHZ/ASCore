@@ -32,21 +32,25 @@ public:
 
 
 private:
-	void SingleLeptonMasses();
-	void DiLeptonMasses();
-	void DiJetMasses();
-	void DiBJetMasses();
-	void MultiBMasses();
 	void PseudoJetMasses();
-	void OSDiLeptonMasses();
-	void MassesForTTbar();
-	void ControlPlots();
-	void PrintEvent();
 
 	void BookTree();
 	void FillTree();
 	void ResetTree(); 
 
+	struct HemiObject {string type; int index; int hemi;} fHemiObject;
+	struct HemiObjects{
+		vector<HemiObject> objects;
+		TLorentzVector pjet1;
+		TLorentzVector pjet2;
+		TLorentzVector UTM ;
+		double MT2;
+		double MCT;
+		int seed;
+		int assoc;	
+	} fHemiObjects[3];
+	
+	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject);
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
@@ -62,7 +66,8 @@ private:
 	Davismt2 *fMT2;
 	TMctLib  *fMCT;
 	Hemisphere *fHemisphere;
-	
+
+
 	// data members
 	int fMT2_histos_step;
   	int fMT2_histos_number;
@@ -79,116 +84,6 @@ private:
         // MT2 mini-tree
         MT2tree* fMT2tree;
         TTree* fATree;
-
-	// histos
-	TH1D* fHMT2_SSll[10];
-	      
-	TH1D* fHMT2_dijet[10];
-	TH1D* fHMT2_diBjet[10];
-	TH1D* fHMT2_pseudojet[10];
-	TH1D* fHMT2_diBjetdiLept[10];
-	TH1D* fHMT2_PseudoJetWithB[10];      
-	TH1D* fHMT2_PseudoJetWithLeptons[10];
-	TH1D* fHMT2_PseudoJetNoLeptons[10];
-
-	TH1D* fHMT2_OSll[10];
-	TH1D* fHMT2_OSee[10];
-	TH1D* fHMT2_OSmumu[10];
-	TH1D* fHMT2_OSemu[10];
-	TH1D* fHMT2_OSllminusemu[10];
-	
-	TH1D* fHMT2perp_OSee[10];  
-	TH1D* fHMT2perp_OSmumu[10];
-	TH1D* fHMT2perp_OSemu[10];
-	      
-	TH1D* fHAlpahT_DiJet;      
-	TH1D* fHAlpahT_PseudoJet; 
-	   
-	TH1D* fHMCT_PseudoJet;
-	TH1D* fHMCT_PseudoJetWithLeptons;
-	TH1D* fHMCT_PseudoJetNoLeptons;
-	TH1D* fHMCT_PseudoJetWithB;
-	TH1D* fHMCT_DiJet;   
-	TH1D* fHMCT_DiBJet;  
-	TH1D* fHMCT_OSee;    
-	TH1D* fHMCT_OSmumu;  
-	TH1D* fHMCT_OSemu;   
-	TH1D* fHMCTcorr_PseudoJet;
-	TH1D* fHMCTcorr_PseudoJetWithLeptons;
-	TH1D* fHMCTcorr_PseudoJetNoLeptons;
-	TH1D* fHMCTcorr_PseudoJetWithB;
-	TH1D* fHMCTcorr_DiJet;   
-	TH1D* fHMCTcorr_DiBJet;  
-	TH1D* fHMCTcorr_OSee;    
-	TH1D* fHMCTcorr_OSmumu;  
-	TH1D* fHMCTcorr_OSemu;   
-
-	TH1D* fHMCTperp_OSee;  
-	TH1D* fHMCTperp_OSmumu;
-	TH1D* fHMCTperp_OSemu; 
-
-	TH1D* fHMCT_TTbar;	
-	TH1D* fHMCTcorr_TTbar;
-	TH1D* fHMCTperp_TTbar;	
-	TH1D* fHMT2_TTbar;
-	TH1D* fHMT2perp_TTbar;
-	
-	TH1D* fHInvMassOSee;
-	TH1D* fHInvMassOSmumu;
-	TH1D* fHInvMassOSemu;
-	TH1D* fHInvMassOSll;
-	
-	TH1D* fHInvMassSSee;
-	TH1D* fHInvMassSSmumu;
-	TH1D* fHInvMassSSemu; 	
-	TH1D* fHInvMassSSll;  
-	TH1D* fHInvMassDijet;	
-	TH1D* fHInvMassdiBHemi;
-	TH1D* fHInvMassDiBjet;
-
-	TH2D* fHDPhiJ1vsDPhiJ2;
-	TH2D* fHDPhiJ1vsDPhiJ2_clean;
-	TH1D* fHMHT;
-	TH1D* fHMHT_clean;
-	TH1D* fHPFMET;
-	TH1D* fHPFMET_clean;
-	TH1D* fHJEta;  
-	TH1D* fHJEta_clean;  
-	TH1D* fHJpt;   
-	TH1D* fHJpt_clean;  	
-	TH1D* fHBJpt; 
-	TH1D* fHBJEta;
-	TH1D* fHNJets;
-	TH1D* fHNJets_clean;
-       	TH1D* fHVectorSumPt;	
-	TH1D* fHVectorSumPt_clean;
-	TH1D* fHLeptConfig;
-	TH1D* fHLeptConfig_clean;		
-	TH1D* fHPseudoJetMT2AxisdPhi;
-	TH1D* fHMPT;
-	TH1D* fHMPT_selected;
-
-	TH2D* fHVectorSumPtvsDiJetMT2;
-
-	TH2D* fHPseudoJetMT2vsVectorSumPt;
-	TH2D* fHPseudoJetMT2vsMETsign;
-	TH2D* fHPseudoJetMT2vsMET;
-	TH2D* fHPseudoJetMT2vsAlphaT;
-	TH2D* fHPseudoJetMT2vsLeadingJEta;
-	TH2D* fHPseudoJetMT2vsMHT;
-
-	TH1D* fHMT_single_e;
-	TH1D* fHMT_single_mu;
-	TH1D* fHMT_single_e_nojets; 
-	TH1D* fHMT_single_mu_nojets;
-
-	TH2D *fHMT2_vs_M_OSDiLept;
-	
-	TH1D* fHHLT_turnon_triggered; 
-	TH1D* fHHLT_turnon_HT;      
-	TH1D* fHHLT_turnon;      
-	TH1D *fHPFandCalo_deltaR;
-	TH1D *fHPFJ1J2DeltaR;	
 	
 };
 #endif
