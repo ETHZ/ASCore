@@ -71,9 +71,7 @@ public:
   Int_t    NeuMult;
   Int_t    NConstituents;
 
-  Int_t    inHemisphere;
-
-  ClassDef(MT2Jet, 4)
+  ClassDef(MT2Jet, 5)
 };
 
 // MT2Hemi ---------------------------
@@ -88,6 +86,8 @@ public:
   Int_t          assoc_method;
   Double_t       MT2;
   Double_t       MCT;
+  Double_t       AlphaT;
+  Double_t       minDHT;
 
   Int_t          jindices1  [m_jetSize];
   Int_t          jindices2  [m_jetSize];
@@ -99,7 +99,7 @@ public:
   TLorentzVector lv2;
   TLorentzVector UTM;
 
-  ClassDef(MT2Hemi, 2)
+  ClassDef(MT2Hemi, 3)
 };
 
 
@@ -199,7 +199,6 @@ public:
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
   Double_t GetMCT(bool massive=false, int met=1);
 
-  MT2Misc misc;
   Int_t   NJets;
   Int_t   NJetsIDLoose;
   Int_t   NJetsIDMedium;
@@ -208,6 +207,7 @@ public:
   Int_t   NElesLoose;
   Int_t   NMuons;
   Int_t   NMuonsLoose;
+  MT2Misc        misc;
   MT2Jet         jet[m_jetSize];
   MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];

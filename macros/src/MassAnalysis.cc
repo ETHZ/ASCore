@@ -63,6 +63,7 @@ void MassAnalysis::Analyze(){
 	
 	// -----------------------------------------------------------
 	// fill fHemiObjects1,2,3
+	for(int i=0; i<gNHemispheres; ++i){ fHemiObjects[i].Reset();}
 	   // ************************************************* //
 	   // changes here affect misc.MT2 type variables !!!!  //
 	   // ************************************************  //
@@ -72,11 +73,11 @@ void MassAnalysis::Analyze(){
 	GetMT2Variables(4, 3, 0.1, 20, 2.4, fHemiObjects[1]); 
 	   // seed: leading jets, assoc: minimal lund distance, maxdR=1
 	GetMT2Variables(4, 3, 1.0, 20, 2.4, fHemiObjects[2]); 
+	   // minimizing deltaHT
+	bool minimizeDHT(true);
+	GetMT2Variables(minimizeDHT, 20, 2.4, fHemiObjects[3]); 
 	// -----------------------------------------------------------
-	
 
-	// Masses for pseudojets
-	PseudoJetMasses();
 
 	// Fill Tree !! has to be called at the very end !!
 	MassAnalysis::FillTree();
@@ -95,9 +96,6 @@ void MassAnalysis::ResetTree(){
 }
 
 void MassAnalysis::FillTree(){
-
-
-
 	// ------------------------------------------------------------------
 	// fill misc 
 	fMT2tree->misc.Run                 = fTR->Run;
@@ -114,10 +112,11 @@ void MassAnalysis::FillTree(){
 		fMT2tree->misc.EcalGapClusterSize[i] = fTR->EcalGapClusterSize[i];
 		fMT2tree->misc.EcalGapBE[i]          = fTR->EcalGapBE[i];
 	}
-	fMT2tree->misc.MT2                 = fHemiObjects[0].MT2;   // note: this is a bit dangerous, 
+	fMT2tree->misc.MT2                 = fHemiObjects[0].MT2;    // note: this is a bit dangerous, 
 	fMT2tree->misc.MCT                 = fHemiObjects[0].MCT;
-	fMT2tree->misc.MT2leading          = fHemiObjects[1].MT2;   //       as the definition of fHemiObjects1,2,3
-	fMT2tree->misc.MT2noISR            = fHemiObjects[2].MT2;   //       is interchangable
+	fMT2tree->misc.MT2leading          = fHemiObjects[1].MT2;    //       as the definition of fHemiObjects1,2,3,4
+	fMT2tree->misc.MT2noISR            = fHemiObjects[2].MT2;    //       is interchangable
+	fMT2tree->misc.AlphaT              = fHemiObjects[3].alphaT; 
 
 	fMT2tree->misc.MET                 = fTR->PFMET;
 	fMT2tree->misc.METPhi              = fTR->PFMETphi;
@@ -143,11 +142,13 @@ void MassAnalysis::FillTree(){
 
 	// ----------------------------------------------------------------
 	// fill MT2Hemi
-	for(int h=0; h<3; ++h){
+	for(int h=0; h<gNHemispheres; ++h){
 		fMT2tree->hemi[h].assoc_method  = fHemiObjects[h].assoc;
 		fMT2tree->hemi[h].seed_method   = fHemiObjects[h].seed;
 		fMT2tree->hemi[h].MT2           = fHemiObjects[h].MT2;
 		fMT2tree->hemi[h].MCT           = fHemiObjects[h].MCT;
+		fMT2tree->hemi[h].AlphaT        = fHemiObjects[h].alphaT;
+		fMT2tree->hemi[h].minDHT        = fHemiObjects[h].minDHT;
 		fMT2tree->hemi[h].lv1           = fHemiObjects[h].pjet1;
 		fMT2tree->hemi[h].lv2           = fHemiObjects[h].pjet2;
 		fMT2tree->hemi[h].UTM           = fHemiObjects[h].UTM;
@@ -290,12 +291,13 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	hemiobject.UTM     .Clear();
 	hemiobject.MT2     =-999.99;
 	hemiobject.MCT     =-999.99;
-	hemiobject.seed    =-1;
-	hemiobject.assoc   =-1;
 
 	// fill stuff
-	hemiobject.assoc   =hemi_assoc;
-	hemiobject.seed    =hemi_seed;
+	hemiobject.assoc   = hemi_assoc;
+	hemiobject.seed    = hemi_seed;
+	hemiobject.minDHT  =-999.99;
+	hemiobject.alphaT  =-999.99;
+
 
 	// make pseudojets with hemispheres
 	vector<float> px, py, pz, E;
@@ -354,7 +356,10 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	TLorentzVector pmiss;
 	pmiss.SetPx(fTR->PFMETpx);
 	pmiss.SetPy(fTR->PFMETpy);
-	
+
+	// fill UTM
+	hemiobject.UTM          = - pmiss - pseudojet1 - pseudojet2;
+
 	// fill MT2
 	hemiobject.MT2   =GetMT2(pseudojet1, 0., pseudojet2, 0., pmiss, 0.);
 	
@@ -378,42 +383,82 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	// --------------------------------
 }
 
-// ************************************************************************************************
+void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJEta, HemiObjects& hemiobject){
 
-void MassAnalysis::PseudoJetMasses(){
-	if(fJetsLoose.size() <2 ) return;
+	// FIXME: save info about which jet is in which hemisphere e.g. fHemiObject.hemi 
+	if(minimizeDHT !=1){ cout << "MassAnalysis::GetMT2Variables: ERROR: got minimizeDHT!=1" << endl; return; }
 
-	// ----------------------------------------------
-	// AlphaT 
-	double alphaT=-999.99;
-	if( fLeptConfig==null ){
-		std::vector<TLorentzVector> jets;
-		for(int i=0; i<fJetsLoose.size(); ++i){
-			TLorentzVector v;
-	 		v.SetPxPyPzE(fTR->PFJPx[fJetsLoose[i]],fTR->PFJPy[fJetsLoose[i]], fTR->PFJPz[fJetsLoose[i]], fTR->PFJE[fJetsLoose[i]]);
-	 		jets.push_back(v);
-	 	}
-	 	alphaT= GetAlphaT(jets);
-//	 	fHAlpahT_PseudoJet->Fill(alphaT);
+	// clear hemiobject
+	hemiobject.objects .clear();
+	hemiobject.pjet1   .Clear();
+	hemiobject.pjet2   .Clear();
+	hemiobject.UTM     .Clear();
+	hemiobject.MT2     =-999.99;
+	hemiobject.MCT     =-999.99;
+
+	// fill stuff
+	hemiobject.assoc   = -1;
+	hemiobject.seed    = -1;
+
+
+	// make pseudojets with hemispheres
+	vector<TLorentzVector> p4s;
+	for(int i=0; i<fJets.size(); ++i){
+		if(IsGoodBasicPFJet(i, minJPt, maxJEta)==false) continue;
+		TLorentzVector v; 
+		v.SetPxPyPzE(fTR->PFJPx[fJets[i]], fTR->PFJPy[fJets[i]], fTR->PFJPz[fJets[i]], fTR->PFJE[fJets[i]]);
+		p4s.push_back(v);
+		fHemiObject.type="jet"; fHemiObject.index=fJets[i]; fHemiObject.hemi=-1;
+		hemiobject.objects.push_back(fHemiObject);
 	}
-	// fill tree variable
-	fMT2tree->misc.AlphaT = alphaT;
+	for(int i=0; i< fElecs.size(); ++i){
+		TLorentzVector v;
+		v.SetPxPyPzE(fTR->ElPx[fElecs[i]], fTR->ElPy[fElecs[i]], fTR->ElPz[fElecs[i]],fTR->ElE[fElecs[i]]);
+		p4s.push_back(v);
+		fHemiObject.type="ele"; fHemiObject.index=fElecs[i]; fHemiObject.hemi=-1;
+		hemiobject.objects.push_back(fHemiObject);
+	}
+	for(int i=0; i< fMuons.size(); ++i){
+		TLorentzVector v;
+		v.SetPxPyPzE(fTR->MuPx[fMuons[i]], fTR->MuPy[fMuons[i]], fTR->MuPz[fMuons[i]], fTR->MuE[fMuons[i]]);
+		p4s.push_back(v);
+		fHemiObject.type="muo"; fHemiObject.index=fMuons[i]; fHemiObject.hemi=-1;
+		hemiobject.objects.push_back(fHemiObject);
+	}
+	
+	// get pseudojets and minDHT
+	TLorentzVector pj1, pj2;
+	hemiobject.minDHT  =MinDeltaHt_pseudojets(p4s, pj1, pj2);
+	
+    	std::vector<double> pTs; for(unsigned i=0; i<p4s.size(); i++) pTs.push_back(p4s[i].Pt());
+    	const double sumPT = accumulate( pTs.begin(), pTs.end(), double(0) );
+	const TLorentzVector sumP4 = accumulate( p4s.begin(), p4s.end(), TLorentzVector() );
 
-	// ---------------------------------------------
-	// MCT pseudojets
-//	TVector2 met;
-//	met.Set(pmiss.Px(), pmiss.Py());
-//	TLorentzVector DTM(0.,0.,0.,0.);
-//	double MCTcorr          =GetMCTcorr(pseudojet1, pseudojet2, DTM, met );
-//	fMT2tree->misc.PseudoJetMCT  = MCTcorr;
-//	fHMCTcorr_PseudoJet   -> Fill(MCTcorr);
-//	if(fLeptConfig!= null) {fHMCTcorr_PseudoJetWithLeptons -> Fill(MCTcorr);}
-//	if(fLeptConfig== null) {fHMCTcorr_PseudoJetNoLeptons   -> Fill(MCTcorr);}
-//	if(fBJets.size()>0)    {fHMCTcorr_PseudoJetWithB       -> Fill(MCTcorr);}
+    	hemiobject.alphaT  = 0.5 * ( sumPT - hemiobject.minDHT ) / sqrt( sumPT*sumPT - sumP4.Perp2() );
+		
+	TLorentzVector pmiss;
+	pmiss.SetPx(fTR->PFMETpx);
+	pmiss.SetPy(fTR->PFMETpy);
+	
+	// fill UTM
+	hemiobject.UTM          = - pmiss - pj1 - pj2;
+
+	// fill MT2
+	hemiobject.MT2   =GetMT2(pj1, 0., pj2, 0., pmiss, 0.);
+	
+	// fill MCT
+	TVector2 pmiss_vector2;
+	pmiss_vector2.Set(fTR->PFMETpx, fTR->PFMETpy);
+	TLorentzVector downstream(0.,0.,0.,0.); // no particles are downstream, i.e. not selected jets are upstream. 
+	hemiobject.MCT   =GetMCTcorr(pj1, pj2, downstream, pmiss_vector2);
+	
+	// fill pseudojets
+	hemiobject.pjet1 =pj1;
+	hemiobject.pjet2 =pj2;
 
 }
 
- // ****************************************************************************************************
+// ****************************************************************************************************
 double MassAnalysis::GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM){
 	double m1=p1.M();
 	double m2=p2.M();
@@ -525,13 +570,41 @@ double MassAnalysis::GetAlphaT(std::vector<TLorentzVector>& p4s) {
 
 std::vector<double> MassAnalysis::DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s) {
   	std::vector<std::vector<double> > ht( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); // initializiert einen vector ht der size 1<<(p4s.size()-1), wobei jeder eintrag ein vector (0,0) ist
-  	for(unsigned i=0; i < ht.size(); i++) {
+  	for(unsigned i=0; i < ht.size(); i++) {                                                  // 1<<(p4s.size()-1) = 2^(p4s.size() -1)
     	for(unsigned j=0; j < p4s.size(); j++) {
 			ht [i] [(i/(1<<j))%2] += p4s[j].Pt();
     	}
   	}
   	std::vector<double> deltaHT; for(unsigned i=0; i<ht.size(); i++) deltaHT.push_back(fabs(ht[i][0]-ht[i][1]));
   	return deltaHT;
+}
+
+// ***************************************************************************************************
+double MassAnalysis::MinDeltaHt_pseudojets(std::vector<TLorentzVector>& p4s, TLorentzVector& pj1, TLorentzVector& pj2){
+
+  	std::vector<std::vector<double> > ht( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); // initializiert einen vector ht der size 1<<(p4s.size()-1), wobei jeder eintrag ein vector (0,0) ist
+												 // 1<<(p4s.size()-1) = 2^(p4s.size() -1)
+       	
+  	std::vector<std::vector<double> > px( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > py( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > pz( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > E ( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+
+  	for(unsigned i=0; i < ht.size(); i++) {                                             
+    	for(unsigned j=0; j < p4s.size(); j++) {
+			ht [i] [(i/(1<<j))%2] += p4s[j].Pt();
+			px [i] [(i/(1<<j))%2] += p4s[j].Px();
+			py [i] [(i/(1<<j))%2] += p4s[j].Py();
+			pz [i] [(i/(1<<j))%2] += p4s[j].Pz();
+			E  [i] [(i/(1<<j))%2] += p4s[j].E();
+    	}
+  	}
+  	std::vector<double> deltaHT; for(unsigned i=0; i<ht.size(); i++) deltaHT.push_back(fabs(ht[i][0]-ht[i][1]));
+	const double mDHT = *(std::min_element( deltaHT.begin(), deltaHT.end() ));
+	int pos=distance(deltaHT.begin(), min_element(deltaHT.begin(), deltaHT.end()));
+	pj1.SetPxPyPzE(px[pos][0], py[pos][0], pz[pos][0], E[pos][0]);
+	pj2.SetPxPyPzE(px[pos][1], py[pos][1], pz[pos][1], E[pos][1]);
+	return mDHT;
 }
 
 

@@ -20,6 +20,7 @@
 #include "helper/Hemisphere.hh"
 #include "MT2tree.hh"
 
+static const int gNHemispheres = 4;
 
 class MassAnalysis : public MultiplicityAnalysisBase{
 public:
@@ -32,7 +33,6 @@ public:
 
 
 private:
-	void PseudoJetMasses();
 
 	void BookTree();
 	void FillTree();
@@ -46,13 +46,24 @@ private:
 		TLorentzVector UTM ;
 		double MT2;
 		double MCT;
+		double alphaT;
+		double minDHT;
 		int seed;
-		int assoc;	
-	} fHemiObjects[3];
+		int assoc;
+		void Reset(){ MT2=-999.99; MCT = -999.99; alphaT = -999.99; minDHT = -999.99;
+	       	              seed = -1; assoc = -1; 
+		              objects.clear();
+		              pjet1.Clear(); pjet1.Clear(); UTM.Clear();
+		}
+	} fHemiObjects[gNHemispheres];
 	
+
+
 	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject);
+	void   GetMT2Variables(bool minimizeDHT, double minJPt, double maxJEta, HemiObjects& hemiobject);
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
+	double MinDeltaHt_pseudojets(std::vector<TLorentzVector>& p4s, TLorentzVector& pj1, TLorentzVector& pj2);
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
 	double GetMCT(TLorentzVector p1, TLorentzVector p2);
 	double GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM);

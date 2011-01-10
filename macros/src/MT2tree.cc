@@ -60,7 +60,6 @@ void MT2Jet::Reset() {
   bTagProbTCHP  = -99999.99;
   bTagProbSSVHE = -99999.99;
   bTagProbSSVHP = -99999.99;
-  inHemisphere  = -1;
 
   isPFIDLoose   = 0;
   isPFIDMedium  = 0;
@@ -125,6 +124,8 @@ void MT2Hemi::Reset(){
   assoc_method   = -1;
   MT2            = -99999.99;
   MCT            = -99999.99;
+  AlphaT         = -99999.99;
+  minDHT         = -99999.99;
   for(int i=0; i<m_jetSize; ++i){
   	jindices1[i]  =-1;
   	jindices2[i]  =-1;
