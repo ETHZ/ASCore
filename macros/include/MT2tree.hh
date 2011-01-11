@@ -89,6 +89,7 @@ public:
   Double_t       AlphaT;
   Double_t       minDHT;
   Double_t       maxDR;
+  Double_t       dPhi;
 
   Int_t          jindices1  [m_jetSize];
   Int_t          jindices2  [m_jetSize];
@@ -185,6 +186,7 @@ public:
   Double_t JetPt      (int ijet=0, int PFJID=1);
 
   // dPhi and friends
+  Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
   Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
   Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);

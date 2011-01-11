@@ -127,6 +127,7 @@ void MT2Hemi::Reset(){
   AlphaT         = -99999.99;
   minDHT         = -99999.99;
   maxDR          = -99999.99;
+  dPhi           = -99999.99;
   for(int i=0; i<m_jetSize; ++i){
   	jindices1[i]  =-1;
   	jindices2[i]  =-1;
@@ -289,6 +290,15 @@ Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met
 
 	if(R12<R21) return R12;
 	else        return R21;
+}
+
+Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
+	int njets=0;
+		for(int i=0; i<NJets; ++i){
+			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta &&
+				jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
+		}
+	return true;
 }
 
 Double_t MT2tree::JetsDPhi(int j1, int j2, int PFJID){
