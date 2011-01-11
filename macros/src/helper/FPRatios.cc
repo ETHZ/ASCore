@@ -59,6 +59,46 @@ void FPRatios::NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi){
 }
 
 // *************************************************************************
+void FPRatios::SetFratios(double pRatioei, double pRatiomi, double pRatioErrei, double pRatioErrmi){
+	fFRatioe1 =  pRatioei;
+	fFRatiom1 =  pRatiomi;
+	fFRatioErre1 = pRatioErrei;
+	fFRatioErrm1 = pRatioErrmi;
+	if(fVerbose > 5) cout << " fFRatioe1 = " << fFRatioe1 << " fFRatiom1 = " << fFRatiom1 
+	     << " fFRatioErre1 =  " << fFRatioErre1 << " fFRatioErrm1 = " << fFRatioErrm1 << endl;
+}
+
+// *************************************************************************
+void FPRatios::SetPratios(double pRatioei, double pRatiomi, double pRatioErrei, double pRatioErrmi){
+	fPRatioe1 =  pRatioei;
+	fPRatiom1 =  pRatiomi;
+	fPRatioErre1 = pRatioErrei;
+	fPRatioErrm1 = pRatioErrmi;
+	if(fVerbose > 5) cout << " fPRatioe1 = " << fPRatioe1 << " fPRatiom1 = " << fPRatiom1 
+	     << " fPRatioErre1 =  " << fPRatioErre1 << " fPRatioErrm1 = " << fPRatioErrm1 << endl;
+}
+
+// *************************************************************************
+void FPRatios::SetFratios2(double pRatioei, double pRatiomi, double pRatioErrei, double pRatioErrmi){
+	fFRatioe2 =  pRatioei;
+	fFRatiom2 =  pRatiomi;
+	fFRatioErre2 = pRatioErrei;
+	fFRatioErrm2 = pRatioErrmi;
+	if(fVerbose > 5) cout << " fFRatioe2 = " << fFRatioe2 << " fFRatiom2 = " << fFRatiom2 
+	     << " fFRatioErre2 =  " << fFRatioErre2 << " fFRatioErrm2 = " << fFRatioErrm2 << endl;
+}
+
+// *************************************************************************
+void FPRatios::SetPratios2(double pRatioei, double pRatiomi, double pRatioErrei, double pRatioErrmi){
+	fPRatioe2 =  pRatioei;
+	fPRatiom2 =  pRatiomi;
+	fPRatioErre2 = pRatioErrei;
+	fPRatioErrm2 = pRatioErrmi;
+	if(fVerbose > 5) cout << " fPRatioe2 = " << fPRatioe2 << " fPRatiom2 = " << fPRatiom2 
+	     << " fPRatioErre2 =  " << fPRatioErre2 << " fPRatioErrm2 = " << fPRatioErrm2 << endl;
+}
+
+// *************************************************************************
 vector<double> FPRatios::NevtPass(){
 	vector<double> vpt, veta;
 	vpt.push_back(0.);
@@ -630,27 +670,27 @@ double FPRatios::FPWeight (int npe, int nfe, int npm, int nfm, vector<double> vp
 	for (int i = 0; i < ne+nm; ++i) {
 		if (i < npe) {
 			ind.push_back(1);
-			fakrat.push_back(FakeRatio(       1, vpt[i], veta[i]) );
-			prorat.push_back(PromptRatio(     1, vpt[i], veta[i]) );
-			fakerr.push_back(FakeRatioError(  1, vpt[i], veta[i]) );
+			fakrat.push_back(FakeRatio(1, vpt[i], veta[i]) );
+			prorat.push_back(PromptRatio(1, vpt[i], veta[i]) );
+			fakerr.push_back(FakeRatioError(1, vpt[i], veta[i]) );
 			proerr.push_back(PromptRatioError(1, vpt[i], veta[i]) );
 		} else if (i < ne) {
 			ind.push_back(0); 
-			fakrat.push_back(FakeRatio(       1, vpt[i], veta[i]) );
-			prorat.push_back(PromptRatio(     1, vpt[i], veta[i]) );
-			fakerr.push_back(FakeRatioError(  1, vpt[i], veta[i]) );
+			fakrat.push_back(FakeRatio(1, vpt[i], veta[i]) );
+			prorat.push_back(PromptRatio(1, vpt[i], veta[i]) );
+			fakerr.push_back(FakeRatioError(1, vpt[i], veta[i]) );
 			proerr.push_back(PromptRatioError(1, vpt[i], veta[i]) );
 		} else if (i < ne+npm) {
 			ind.push_back(1);
-			fakrat.push_back(FakeRatio(       2, vpt[i], veta[i]) );
-			prorat.push_back(PromptRatio(     2, vpt[i], veta[i]) );
-			fakerr.push_back(FakeRatioError(  2, vpt[i], veta[i]) );
+			fakrat.push_back(FakeRatio(2, vpt[i], veta[i]) );
+			prorat.push_back(PromptRatio(2, vpt[i], veta[i]) );
+			fakerr.push_back(FakeRatioError(2, vpt[i], veta[i]) );
 			proerr.push_back(PromptRatioError(2, vpt[i], veta[i]) );
 		} else {
 			ind.push_back(0);
-			fakrat.push_back(FakeRatio(       2, vpt[i], veta[i]) );
-			prorat.push_back(PromptRatio(     2, vpt[i], veta[i]) );
-			fakerr.push_back(FakeRatioError(  2, vpt[i], veta[i]) );
+			fakrat.push_back(FakeRatio(2, vpt[i], veta[i]) );
+			prorat.push_back(PromptRatio(2, vpt[i], veta[i]) );
+			fakerr.push_back(FakeRatioError(2, vpt[i], veta[i]) );
 			proerr.push_back(PromptRatioError(2, vpt[i], veta[i]) );
 		}
 	//     if(fVerbose > 5) cout << " i = " << i << ", ind = " << ind[i] 
@@ -1304,10 +1344,18 @@ double FPRatios::FakeRatio (int emu, double pt, double eta){
 // emu = 1 for electrons
 //     = 2 for muons
 	if(emu == 1){ // Electrons
+		if(fElefRatio == NULL || fElefRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fFRatioe1;
+		}
 		return fElefRatio->GetBinContent(fElefRatio->FindBin(pt, eta));
 	}
 
 	if(emu == 2){ // Muons
+		if(fMufRatio == NULL || fMufRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fFRatiom1;
+		}
 		return fMufRatio->GetBinContent(fMufRatio->FindBin(pt, eta));
 	}
 }
@@ -1318,10 +1366,18 @@ double FPRatios::FakeRatioError (int emu, double pt, double eta){
 // emu = 1 for electrons
 //     = 2 for muons
 	if(emu == 1){ // Electrons
+		if(fElefRatio == NULL || fElefRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fFRatioErre1;
+		}
 		return fElefRatio->GetBinError(fElefRatio->FindBin(pt, eta));
 	}
 
 	if(emu == 2){ // Muons
+		if(fMufRatio == NULL || fMufRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fFRatioErrm1;
+		}
 		return fMufRatio->GetBinError(fMufRatio->FindBin(pt, eta));
 	}
 }
@@ -1333,10 +1389,18 @@ double FPRatios::PromptRatio (int emu, double pt, double eta){
 //     = 2 for muons
 // Dummy function
 	if(emu == 1){ // Electrons
+		if(fElepRatio == NULL || fElepRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fPRatioe1;
+		}
 		return fElepRatio->GetBinContent(fElepRatio->FindBin(pt, eta));
 	}
 
 	if(emu == 2){ // Muons
+		if(fMupRatio == NULL || fMupRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fPRatiom1;
+		}
 		return fMupRatio->GetBinContent(fMupRatio->FindBin(pt, eta));
 	}
 }
@@ -1347,85 +1411,19 @@ double FPRatios::PromptRatioError (int emu, double pt, double eta){
 // emu = 1 for electrons
 //     = 2 for muons
 	if(emu == 1){ // Electrons
+		if(fElepRatio == NULL || fElepRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fPRatioErre1;
+		}
 		return fElepRatio->GetBinError(fElepRatio->FindBin(pt, eta));
 	}
 
 	if(emu == 2){ // Muons
+		if(fMupRatio == NULL || fMupRatio->GetEntries() == 0){
+			// Return fixed value if histogram is not set
+			return fPRatioErrm1;
+		}
 		return fMupRatio->GetBinError(fMupRatio->FindBin(pt, eta));
 	}
-}
-
-// *************************************************************************
-void FPRatios::SetFratios(double elf, double elf_e, double muf, double muf_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fElefRatio = new TH2D("ElefRatio", "fRatio for electrons", 1, ptbins, 1, etabins);
-	fElefRatio->SetBinContent(1, 1, elf);
-	fElefRatio->SetBinError  (1, 1, elf_e);
-
-	fMufRatio  = new TH2D("MufRatio",  "fRatio for muons",     1, ptbins, 1, etabins);
-	fMufRatio ->SetBinContent(1, 1, muf);
-	fMufRatio ->SetBinError  (1, 1, muf_e);
-}
-
-// *************************************************************************
-void FPRatios::SetElFratios(double elf, double elf_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fElefRatio = new TH2D("ElefRatio", "fRatio for electrons", 1, ptbins, 1, etabins);
-	fElefRatio->SetBinContent(1, 1, elf);
-	fElefRatio->SetBinError  (1, 1, elf_e);
-}
-
-// *************************************************************************
-void FPRatios::SetMuFratios(double muf, double muf_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fMufRatio  = new TH2D("MufRatio",  "fRatio for muons",     1, ptbins, 1, etabins);
-	fMufRatio ->SetBinContent(1, 1, muf);
-	fMufRatio ->SetBinError  (1, 1, muf_e);
-}
-
-// *************************************************************************
-void FPRatios::SetPratios(double elp, double elp_e, double mup, double mup_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fElepRatio = new TH2D("ElepRatio", "pRatio for electrons", 1, ptbins, 1, etabins);
-	fElepRatio->SetBinContent(1, 1, elp);
-	fElepRatio->SetBinError  (1, 1, elp_e);
-
-	fMupRatio  = new TH2D("MupRatio",  "pRatio for muons",     1, ptbins, 1, etabins);
-	fMupRatio ->SetBinContent(1, 1, mup);
-	fMupRatio ->SetBinError  (1, 1, mup_e);
-}
-
-// *************************************************************************
-void FPRatios::SetElPratios(double elp, double elp_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fElepRatio = new TH2D("ElepRatio", "pRatio for electrons", 1, ptbins, 1, etabins);
-	fElepRatio->SetBinContent(1, 1, elp);
-	fElepRatio->SetBinError  (1, 1, elp_e);
-}
-
-// *************************************************************************
-void FPRatios::SetMuPratios(double mup, double mup_e){
-	// Dummy binning	
-	const double ptbins[2]  = {5., 1000.};
-	const double etabins[2] = {-3.0, 3.0};
-
-	fMupRatio  = new TH2D("MupRatio",  "pRatio for muons",     1, ptbins, 1, etabins);
-	fMupRatio ->SetBinContent(1, 1, mup);
-	fMupRatio ->SetBinError  (1, 1, mup_e);
 }
 

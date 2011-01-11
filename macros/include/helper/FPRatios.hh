@@ -61,7 +61,36 @@ public:
 	void NevtTopol(int nemaxi, int nmmaxi, vector<double> npassi);
 
 // initialization providing the fake and prompt ratios and errors for e and mu
+	double fFRatioe1, fFRatiom1, fFRatioErre1, fFRatioErrm1;
+	double fPRatioe1, fPRatiom1, fPRatioErre1, fPRatioErrm1;
+	double fFRatioe2, fFRatiom2, fFRatioErre2, fFRatioErrm2;
+	double fPRatioe2, fPRatiom2, fPRatioErre2, fPRatioErrm2;
 
+	void SetPratios(double, double, double, double);
+	void SetFratios(double, double, double, double);
+	void SetPratios2(double, double, double, double);
+	void SetFratios2(double, double, double, double);
+
+	inline void SetMuFratio(double f, double e){ fFRatiom1 = f; fFRatioErrm1 = e;};
+	inline void SetMuPratio(double f, double e){ fPRatiom1 = f; fPRatioErrm1 = e;};
+	inline void SetMuFratio(double f){ fFRatiom1 = f; fFRatioErrm1 = 0.1*f;}; // 10% error if none provided
+	inline void SetMuPratio(double f){ fPRatiom1 = f; fPRatioErrm1 = 0.1*f;};
+
+	inline void SetElFratio(double f, double e){ fFRatioe1 = f; fFRatioErre1 = e;};
+	inline void SetElPratio(double f, double e){ fPRatioe1 = f; fPRatioErre1 = e;};
+	inline void SetElFratio(double f){ fFRatioe1 = f; fFRatioErre1 = 0.1*f;}; // 10% error if none provided
+	inline void SetElPratio(double f){ fPRatioe1 = f; fPRatioErre1 = 0.1*f;};
+	
+	inline void SetMu2Fratio(double f, double e){ fFRatiom2 = f; fFRatioErrm2 = e;};
+	inline void SetMu2Pratio(double f, double e){ fPRatiom2 = f; fPRatioErrm2 = e;};
+	inline void SetMu2Fratio(double f){ fFRatiom2 = f; fFRatioErrm2 = 0.1*f;}; // 10% error if none provided
+	inline void SetMu2Pratio(double f){ fPRatiom2 = f; fPRatioErrm2 = 0.1*f;};
+
+	inline void SetEl2Fratio(double f, double e){ fFRatioe2 = f; fFRatioErre2 = e;};
+	inline void SetEl2Pratio(double f, double e){ fPRatioe2 = f; fPRatioErre2 = e;};
+	inline void SetEl2Fratio(double f){ fFRatioe2 = f; fFRatioErre2 = 0.1*f;}; // 10% error if none provided
+	inline void SetEl2Pratio(double f){ fPRatioe2 = f; fPRatioErre2 = 0.1*f;};
+	
 // Histograms containing the fake ratios, and methods to set them:
 	TH2D *fElefRatio, *fMufRatio, *fElepRatio, *fMupRatio;
 	inline void SetFratios(TH2D* hel, TH2D* hmu){ fElefRatio = hel; fMufRatio = hmu; };
@@ -70,13 +99,6 @@ public:
 	inline void SetPratios(TH2D* hel, TH2D* hmu){ fElepRatio = hel; fMupRatio = hmu; };
 	inline void SetElPratios(TH2D* h){ fElepRatio = h;};
 	inline void SetMuPratios(TH2D* h){ fMupRatio = h;};
-	// methods using dummy histograms as interface (to be able to just provide the numbers directly)
-	void SetFratios(double elf, double elf_e, double muf, double muf_e);
-	void SetElFratios(double elf, double elf_e);
-	void SetMuFratios(double muf, double muf_e);
-	void SetPratios(double elp, double elp_e, double mup, double mup_e);
-	void SetElPratios(double elp, double elp_e);
-	void SetMuPratios(double mup, double mup_e);
 
 // Get the numbers of events:
 // returns a vector with the number of events for all FPconfigs, the N_nfe,npe,nfm,npm in the Note
