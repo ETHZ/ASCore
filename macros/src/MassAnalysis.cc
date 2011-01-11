@@ -69,11 +69,14 @@ void MassAnalysis::Analyze(){
 	   // ************************************************  //
 	   // seed: max inv mass, assoc: minimal lund distance, no dR cut (i.e. third parameter is 0)
 	GetMT2Variables(2, 3, 0.0, 20, 2.4, fHemiObjects[0]); 
-	   // MT2 for two leading jets, maxdR=0.1, i.e. smaller than jet cone size
+	
+     	// MT2 for two leading jets, maxdR=0.1, i.e. smaller than jet cone size
 	GetMT2Variables(4, 3, 0.1, 20, 2.4, fHemiObjects[1]); 
-	   // seed: leading jets, assoc: minimal lund distance, maxdR=1
+
+	// seed: leading jets, assoc: minimal lund distance, maxdR=1
 	GetMT2Variables(4, 3, 1.0, 20, 2.4, fHemiObjects[2]); 
-	   // minimizing deltaHT
+
+	// minimizing deltaHT
 	bool minimizeDHT(true);
 	GetMT2Variables(minimizeDHT, 20, 2.4, fHemiObjects[3]); 
 	// -----------------------------------------------------------
@@ -351,7 +354,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 			hemiobject.objects[i].hemi=2;
 		}
 	}
-	delete fHemisphere;
+	delete hemi;
 
 	TLorentzVector pmiss;
 	pmiss.SetPx(fTR->PFMETpx);
