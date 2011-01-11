@@ -153,6 +153,7 @@ void MassAnalysis::FillTree(){
 		fMT2tree->hemi[h].MCT           = fHemiObjects[h].MCT;
 		fMT2tree->hemi[h].AlphaT        = fHemiObjects[h].alphaT;
 		fMT2tree->hemi[h].minDHT        = fHemiObjects[h].minDHT;
+		fMT2tree->hemi[h].dPhi          = fHemiObjects[h].dPhi;
 		fMT2tree->hemi[h].lv1           = fHemiObjects[h].pjet1;
 		fMT2tree->hemi[h].lv2           = fHemiObjects[h].pjet2;
 		fMT2tree->hemi[h].UTM           = fHemiObjects[h].UTM;
@@ -302,6 +303,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	hemiobject.maxDR   = maxDR;
 	hemiobject.minDHT  =-999.99;
 	hemiobject.alphaT  =-999.99;
+	hemiobject.dPhi    =-999.99;
 
 
 	// make pseudojets with hemispheres
@@ -381,6 +383,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	// fill pseudojets
 	hemiobject.pjet1 =pseudojet1;
 	hemiobject.pjet2 =pseudojet2;
+	hemiobject.dPhi  =Util::DeltaPhi(pseudojet1.Phi(), pseudojet2.Phi());
 
 	// --------------------------------
 	// testing: comparing to ToveyMT2	
@@ -405,6 +408,7 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	hemiobject.MT2     =-999.99;
 	hemiobject.MCT     =-999.99;
 	hemiobject.maxDR   =-999.99;
+	hemiobject.dPhi    =-999.99;
 
 	// fill stuff
 	hemiobject.assoc   = -1;
@@ -469,6 +473,7 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	// fill pseudojets
 	hemiobject.pjet1 =pj1;
 	hemiobject.pjet2 =pj2;
+	hemiobject.dPhi  =Util::DeltaPhi(pj1.Phi(), pj2.Phi());
 
 }
 

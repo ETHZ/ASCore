@@ -141,7 +141,6 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fBJets = Util::VSort(fBJets, pt2);
 
 
-
 }
 
 void MultiplicityAnalysisBase::FindLeptonConfig(){
@@ -206,6 +205,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 			} 
 		}
 	}
+
 	// HT
 	double HT=0;
 	for(int j=0; j<fJetsLoose.size(); ++j){
@@ -215,6 +215,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	}
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
+
 
 	// leading jets
 	int index1=-1;
@@ -235,8 +236,8 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	}
 	bool leadingjets(true);
 	if(index1 !=-1 && index2 !=-1){
-		if(IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false){leadingjets=false;}
-		if(IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false){leadingjets=false;}
+		if(IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false && fCut_JPt_hardest_min > 0){leadingjets=false;}
+		if(IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false && fCut_JPt_second_min  > 0){leadingjets=false;}
 	}else{leadingjets = false;}
 
 	if(leadingjets == false) return false;
@@ -269,7 +270,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		if( fCut_Zselector==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return true; }	
 		if( fCut_Zveto    ==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
 	} else if(fCut_Zselector ==1 ) {return false;}
-
 
 	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
 	double px=0;

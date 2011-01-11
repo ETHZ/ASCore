@@ -49,10 +49,11 @@ private:
 		double alphaT;
 		double minDHT;
 		double maxDR;
+		double dPhi;
 		int seed;
 		int assoc;
 		void Reset(){ MT2=-999.99; MCT = -999.99; alphaT = -999.99; minDHT = -999.99; maxDR=-999.99;
-	       	              seed = -1; assoc = -1; 
+	       	              dPhi = -999.99; seed = -1; assoc = -1; 
 		              objects.clear();
 		              pjet1.Clear(); pjet1.Clear(); UTM.Clear();
 		}
