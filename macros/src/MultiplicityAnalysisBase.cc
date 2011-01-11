@@ -239,7 +239,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		if(IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false){leadingjets=false;}
 	}else{leadingjets = false;}
 
-	if(leadingjets = false) return false;
+	if(leadingjets == false) return false;
 	
 	
 	// MHT

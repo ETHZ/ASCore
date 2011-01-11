@@ -88,6 +88,7 @@ public:
   Double_t       MCT;
   Double_t       AlphaT;
   Double_t       minDHT;
+  Double_t       maxDR;
 
   Int_t          jindices1  [m_jetSize];
   Int_t          jindices2  [m_jetSize];

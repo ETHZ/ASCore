@@ -126,6 +126,7 @@ void MT2Hemi::Reset(){
   MCT            = -99999.99;
   AlphaT         = -99999.99;
   minDHT         = -99999.99;
+  maxDR          = -99999.99;
   for(int i=0; i<m_jetSize; ++i){
   	jindices1[i]  =-1;
   	jindices2[i]  =-1;

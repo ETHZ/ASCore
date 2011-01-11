@@ -148,6 +148,7 @@ void MassAnalysis::FillTree(){
 	for(int h=0; h<gNHemispheres; ++h){
 		fMT2tree->hemi[h].assoc_method  = fHemiObjects[h].assoc;
 		fMT2tree->hemi[h].seed_method   = fHemiObjects[h].seed;
+		fMT2tree->hemi[h].maxDR         = fHemiObjects[h].maxDR;
 		fMT2tree->hemi[h].MT2           = fHemiObjects[h].MT2;
 		fMT2tree->hemi[h].MCT           = fHemiObjects[h].MCT;
 		fMT2tree->hemi[h].AlphaT        = fHemiObjects[h].alphaT;
@@ -298,6 +299,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	// fill stuff
 	hemiobject.assoc   = hemi_assoc;
 	hemiobject.seed    = hemi_seed;
+	hemiobject.maxDR   = maxDR;
 	hemiobject.minDHT  =-999.99;
 	hemiobject.alphaT  =-999.99;
 
@@ -329,6 +331,10 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 		 fHemiObject.type="muo"; fHemiObject.index=fMuons[i]; fHemiObject.hemi=0;
 		 hemiobject.objects.push_back(fHemiObject);
 	}
+	if(px.size()<2) {
+		return; // protection against events with only one jet
+	}	
+
 	// get hemispheres 
 	Hemisphere* hemi      = new Hemisphere(px, py, pz, E, hemi_seed, hemi_assoc);
 	if(maxDR>0) hemi      -> RejectISRDRmax(maxDR);  // consider only jets withing dR < maxDR from hemi-axix for pseudojets
@@ -398,6 +404,7 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	hemiobject.UTM     .Clear();
 	hemiobject.MT2     =-999.99;
 	hemiobject.MCT     =-999.99;
+	hemiobject.maxDR   =-999.99;
 
 	// fill stuff
 	hemiobject.assoc   = -1;
@@ -429,11 +436,15 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 		hemiobject.objects.push_back(fHemiObject);
 	}
 	
+	if(p4s.size()<2) {
+		return; // protection against events with only one jet
+	}
+
 	// get pseudojets and minDHT
 	TLorentzVector pj1, pj2;
 	hemiobject.minDHT  =MinDeltaHt_pseudojets(p4s, pj1, pj2);
-	
-    	std::vector<double> pTs; for(unsigned i=0; i<p4s.size(); i++) pTs.push_back(p4s[i].Pt());
+    	
+	std::vector<double> pTs; for(unsigned i=0; i<p4s.size(); i++) pTs.push_back(p4s[i].Pt());
     	const double sumPT = accumulate( pTs.begin(), pTs.end(), double(0) );
 	const TLorentzVector sumP4 = accumulate( p4s.begin(), p4s.end(), TLorentzVector() );
 
