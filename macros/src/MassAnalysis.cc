@@ -280,6 +280,13 @@ void MassAnalysis::FillTree(){
 	fMT2tree->MHTloose[0].SetXYZM(-MHTidloose.Px(), -MHTidloose.Py(), 0, 0);
 	fMT2tree->MHT     [0].SetXYZM(-MHTall.Px()    , -MHTall.Py()    , 0, 0);
 
+	// ----------------------------------------------------------------------------------
+	// warning: these MT2tree methods are only to be called once all needed variables are filled!
+	// warning: hardcoded values!
+	fMT2tree->misc.MinMetJetDPhi = fMT2tree->MinMetJetDPhi(0,20,5.0,1);
+	fMT2tree->misc.PassJetID     = fMT2tree->PassJetID(50,5,1);
+	fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,1);
+	fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet(100,2.4,1);
 
 	// -----------------------------------------------------------------------
 	// fill tree

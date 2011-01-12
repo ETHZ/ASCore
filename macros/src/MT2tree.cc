@@ -23,8 +23,12 @@ void MT2Misc::Reset() {
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
+  NVertices               = -1;
   LeptConfig		  = -1;	  
   NJetsEta5Pt20           = -1;
+  PassJetID               = -1;
+  Jet0Pass                = -1;
+  Jet1Pass                = -1;
   HBHENoiseFlag           =  0;
   MT2                     = -99999.99;
   MT2leading              = -99999.99;
@@ -37,13 +41,13 @@ void MT2Misc::Reset() {
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
   DPhiMhtMpt              = -99999.99;
+  MinMetJetDPhi           = -99999.99;
   EcalDeadCellBEFlag      = -1;
   NECALGapClusters        = -1;
   for(int i=0; i<50; ++i){
     EcalGapClusterSize[i] = -1;
     EcalGapBE[i]          = -99999.99;    
   }
-  NVertices               = -1;
 }
 
 // MT2Jet -----------------------------------
@@ -301,6 +305,12 @@ Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
 	return true;
 }
 
+Double_t MT2tree::JetsInvMass(int j1, int j2){
+	if(NJets < 2) return -999.99;
+	TLorentzVector sum = jet[j1].lv + jet[j2].lv;
+	return sum.M();
+}
+
 Double_t MT2tree::JetsDPhi(int j1, int j2, int PFJID){
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
@@ -331,6 +341,7 @@ Double_t MT2tree::MetJetDPhi(int ijet, int PFJID, int met) {
 }
 
 Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int met) {
+// Attention: electrons and muons are not considered for minDPhi
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
@@ -341,6 +352,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int me
 }
 
 Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int met) {
+// Attention: electrons and muons are not considered for minDPhi
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
@@ -362,19 +374,6 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
     }
   }
   return imin;
-}
-
-Int_t MT2tree::GetNJets(double minJPt, double maxJEta, int PFJID){
-  int njets=0;
-  for(int i=0; i<NJets; ++i){
-	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID==2  && jet[i].isPFIDMedium==false) continue;
-	if(PFJID==3  && jet[i].isPFIDTight ==false) continue;
-	if(jet[i].lv.Pt()         < minJPt )        continue;
-	if(fabs(jet[i].lv.Eta()) > maxJEta )        continue;
-	njets++;
-  }
-  return njets;
 }
 
 Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){

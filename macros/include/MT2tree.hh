@@ -19,9 +19,16 @@ public:
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
+  Int_t    NVertices;  
   Int_t    LeptConfig;
   Int_t    NJetsEta5Pt20;
-  Bool_t   HBHENoiseFlag;
+  Int_t    Jet0Pass;
+  Int_t    Jet1Pass;
+  Int_t    PassJetID;
+  Int_t    EcalDeadCellBEFlag;
+  Int_t    NECALGapClusters;
+  Double_t EcalGapClusterSize[50];
+  Double_t EcalGapBE[50];
   Double_t MT2;
   Double_t MT2leading;
   Double_t MT2noISR;
@@ -32,12 +39,9 @@ public:
   Double_t Vectorsumpt;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
+  Double_t MinMetJetDPhi;
   Double_t HT;
-  Int_t    EcalDeadCellBEFlag;
-  Int_t    NECALGapClusters;
-  Double_t EcalGapClusterSize[50];
-  Double_t EcalGapBE[50];
-  Int_t    NVertices;  
+  Bool_t   HBHENoiseFlag;
 
   ClassDef(MT2Misc, 6)
 };
@@ -180,7 +184,6 @@ public:
   
   // My functions here
   // NJets
-  Int_t    GetNJets(double minJPt=20, double maxJEta=5., int PFJID=1);  // PFJETID includes ptmin (20GeV) and etamax (2.4)
   Int_t    GetNjets(double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
   Int_t    GetJetIndex(int ijet=0, int PFJID=1);
   Double_t JetPt      (int ijet=0, int PFJID=1);
@@ -188,10 +191,11 @@ public:
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
+  Double_t JetsInvMass(int j1=0, int j2=1);
   Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
-  Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
-  Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
-  Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1);
+  Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   // MT2 & friends
   Int_t    JetIsInHemi(int jindex=0, int hemi_seed=2, int hemi_association=3, float MaxDR=0);
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);
