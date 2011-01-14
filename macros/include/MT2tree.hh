@@ -184,10 +184,16 @@ public:
   
   // My functions here
   // NJets
-  Int_t    GetNjets(double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
-  Int_t    GetJetIndex(int ijet=0, int PFJID=1);
-  Double_t JetPt      (int ijet=0, int PFJID=1);
+  Int_t    GetNjets (double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
+  Int_t    GetJetIndex(int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Int_t    GetNBtags (int algo=3, double value=2., double minJPt=20, double maxJEta=2.4, int PFJID=1);  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
+  Double_t JetPt      (int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
 
+  // MHT, ...
+  TLorentzVector GetMHTlv(int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHT        (int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHTPhi     (int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHTminusMET(int PFJID=1, double minJPt=20, double maxJEta=2.4);
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);

@@ -385,24 +385,73 @@ Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
   return njets;
 }
 
-Double_t MT2tree::JetPt(int ijet, int PFJID) {
-  int index = GetJetIndex(ijet, PFJID);
+Int_t MT2tree::GetNBtags (int algo, double value, double minJPt, double maxJEta, int PFJID){  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
+  int nbjets=0;
+  for(int i=0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    switch(algo){
+    case 0: 
+      if( jet[i].bTagProbTCHE < value ) continue;
+      break;
+    case 1: 
+      if( jet[i].bTagProbTCHP < value ) continue;
+      break;
+    case 2: 
+      if( jet[i].bTagProbSSVHE < value ) continue;
+      break;
+    case 3: 
+      if( jet[i].bTagProbSSVHP < value ) continue;
+      break;
+    default:
+      continue;
+      break;
+    }
+    nbjets++; 
+  }
+  return nbjets;
+}
+
+Double_t MT2tree::JetPt(int ijet, int PFJID, double minJPt, double maxJEta) {
+  int index = GetJetIndex(ijet, PFJID,minJPt,maxJEta);
   if ( index < 0 )       return -999.;
   return jet[index].lv.Pt();
 }
 
-Int_t MT2tree::GetJetIndex(int ijet, int PFJID) {
+Int_t MT2tree::GetJetIndex(int ijet, int PFJID, double minJPt, double maxJEta) {
   std::vector<int> indices;
   for(int i = 0; i<NJets; ++i){
-  	if     (jet[i].isPFIDLoose ==false && PFJID==1  )continue;
-  	else if(jet[i].isPFIDMedium==false && PFJID==2  )continue;
-  	else if(jet[i].isPFIDTight ==false && PFJID==3  )continue;
-	indices.push_back(i);
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    indices.push_back(i);
   }
   if (ijet>=indices.size())  return -9;
   return indices[ijet];
 }
 
+TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
+  TLorentzVector mht(0,0,0,0);
+  TLorentzVector j(0,0,0,0);
+  for(int i = 0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    j.SetPtEtaPhiM(jet[i].lv.Pt(),0,jet[i].lv.Phi(),0);
+    mht-=j;
+  }
+  return mht;
+}
+
+Double_t MT2tree::GetMHT(int PFJID, double minJPt, double maxJEta){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+  return mht.Pt();
+}
+
+Double_t MT2tree::GetMHTPhi(int PFJID, double minJPt, double maxJEta){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+  return mht.Phi();
+}
+
+Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+  return (mht-pfmet[0]).Pt();
+}
 
 
 Int_t MT2tree::JetIsInHemi(int jindex, int hemi_seed, int hemi_association, float MaxDR){
@@ -463,8 +512,8 @@ Double_t MT2tree::GetMT2Leading(double testmass, bool massive, int PFJID, int me
 	leadingJets[index] = jet[i].lv;
 	index++;
   }
-  if(index!=2) return -999;
-  cout << "leadingjets " <<leadingJets[0].Pt() << " " << leadingJets[1].Pt() << endl;
+  //if(index!=2) return -999;
+  //cout << "leadingjets " <<leadingJets[0].Pt() << " " << leadingJets[1].Pt() << endl;
   return CalcMT2(testmass, massive, leadingJets[0], leadingJets[1], MET);
 
 }
