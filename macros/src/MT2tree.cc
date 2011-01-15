@@ -167,6 +167,7 @@ void MT2GenLept::Reset(){
   MStatus  = -999;
   GMID     = -999;
   GMStatus = -999;
+  MT       = -9999.99;
 }
 
 // MT2Muon -----------------------------------
@@ -180,6 +181,7 @@ MT2Muon::~MT2Muon(){
 void MT2Muon::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
   isTight       = 0;
+  MT            = -9999.99;
 }
 
 void MT2Muon::SetLV(const TLorentzVector v) {
@@ -197,6 +199,7 @@ MT2Elec::~MT2Elec(){
 void MT2Elec::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
   isTight       = 0;
+  MT            = -9999.99;
 }
 
 void MT2Elec::SetLV(const TLorentzVector v) {
@@ -220,6 +223,7 @@ void MT2tree::Reset() {
   NElesLoose    = 0;
   NMuons        = 0;
   NMuonsLoose   = 0;
+  NGenLepts     = 0;
 
   misc.Reset();
   for (int i = 0; i < m_jetSize; ++i) {
@@ -238,6 +242,7 @@ void MT2tree::Reset() {
     hemi[i].Reset();
   }
   pfmet     [0].SetPxPyPzE(0., 0., 0., 0.);
+  genmet    [0].SetPxPyPzE(0., 0., 0., 0.);
   MPT       [0].SetPxPyPzE(0., 0., 0., 0.);
   MHTloose  [0].SetPxPyPzE(0., 0., 0., 0.);
   MHT       [0].SetPxPyPzE(0., 0., 0., 0.);

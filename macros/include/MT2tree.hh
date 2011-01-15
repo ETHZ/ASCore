@@ -43,7 +43,7 @@ public:
   Double_t HT;
   Bool_t   HBHENoiseFlag;
 
-  ClassDef(MT2Misc, 6)
+  ClassDef(MT2Misc, 7)
 };
 
 // MT2Jet ----------------------------------
@@ -105,7 +105,7 @@ public:
   TLorentzVector lv2;
   TLorentzVector UTM;
 
-  ClassDef(MT2Hemi, 3)
+  ClassDef(MT2Hemi, 4)
 };
 
 
@@ -121,9 +121,10 @@ public:
 
   TLorentzVector lv;
 
-  Bool_t isTight;
+  Bool_t   isTight;
+  Double_t MT;
 
-  ClassDef(MT2Elec, 1)
+  ClassDef(MT2Elec, 2)
 };
 
 // MT2Muon ----------------------------------
@@ -138,9 +139,10 @@ public:
 
   TLorentzVector lv;
 
-  Bool_t isTight;
+  Bool_t   isTight;
+  Double_t MT;
 
-  ClassDef(MT2Muon, 1)
+  ClassDef(MT2Muon, 2)
 };
 
 
@@ -159,9 +161,10 @@ public:
   Int_t          MStatus;
   Int_t          GMID;
   Int_t          GMStatus;
+  Double_t       MT;
 
 
-  ClassDef(MT2GenLept, 1)
+  ClassDef(MT2GenLept, 2)
 };
 
 // MT2tree ----------------------------------
@@ -220,6 +223,7 @@ public:
   Int_t   NElesLoose;
   Int_t   NMuons;
   Int_t   NMuonsLoose;
+  Int_t   NGenLepts;
   MT2Misc        misc;
   MT2Jet         jet[m_jetSize];
   MT2Hemi        hemi[m_hemiSize];
@@ -227,12 +231,13 @@ public:
   MT2Muon        muo[m_muoSize];
   MT2GenLept     genlept[m_genleptSize];
   TLorentzVector pfmet[2];
+  TLorentzVector genmet[2];
   TLorentzVector MPT[2];
   TLorentzVector MHT[2];
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 8)
+  ClassDef(MT2tree, 9)
 };
 
 #endif

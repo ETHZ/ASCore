@@ -299,7 +299,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fVectorSumPt > fCut_VSPT)    return false;
 
 	// ------------------------------------------------------------------------------------------	
-
 	return true;	
 }
 

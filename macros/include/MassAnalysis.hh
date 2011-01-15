@@ -67,6 +67,8 @@ private:
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
 	double MinDeltaHt_pseudojets(std::vector<TLorentzVector>& p4s, TLorentzVector& pj1, TLorentzVector& pj2);
 	std::vector<double> DeltaSumPt_permutations(std::vector<TLorentzVector>& p4s);
+	double GetMT(TLorentzVector lv1, double m1, TLorentzVector lv2, double m2);
+	double GetMT(TLorentzVector lv1, TLorentzVector lv2);
 	double GetMCT(TLorentzVector p1, TLorentzVector p2);
 	double GetMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector P_UTM);
 	double GetToveyMCTperp(TLorentzVector p1, TLorentzVector p2, TLorentzVector DTM, TVector2 pmiss);

@@ -220,12 +220,16 @@ void MassAnalysis::FillTree(){
 	
 	// -----------------------------------------------------------------
 	// Fill leptons 4-momenta & tight_flag
+	TLorentzVector METlv;
+	METlv.SetPtEtaPhiM(fTR->PFMET, 0., fTR->PFMETphi, 0.);
+
 	for(int i=0; i<fElecsLoose.size(); ++i) {
 	  	fMT2tree->ele[i].lv.SetPtEtaPhiE(fTR->ElPt [fElecsLoose[i]], fTR->ElEta[fElecsLoose[i]], 
 				      fTR->ElPhi[fElecsLoose[i]], fTR->ElE  [fElecsLoose[i]]); // = GetEle4Momenta(fElecs[i]);
 	  	for(int l=0; l<fElecs.size(); ++l) {
 	  		if(fElecs[l]==fElecsLoose[i]) fMT2tree->ele[i].isTight=true;
 	  	}
+		fMT2tree->ele[i].MT =GetMT(fMT2tree->ele[i].lv, 0., METlv, 0.); 
 	}
 	for(int i=0; i<fMuonsLoose.size(); ++i) {
 	  	fMT2tree->muo[i].lv.SetPtEtaPhiM(fTR->MuPt [fMuonsLoose[i]], fTR->MuEta[fMuonsLoose[i]], 
@@ -233,23 +237,36 @@ void MassAnalysis::FillTree(){
 	  	for(int l=0; l<fMuons.size(); ++l) {
 	  		if(fMuons[l]==fMuonsLoose[i]) fMT2tree->muo[i].isTight=true;
 	  	}
+		fMT2tree->muo[i].MT =GetMT(fMT2tree->muo[i].lv, fMT2tree->muo[i].lv.M(), METlv, 0.); 
 	}
-	
+
+	// ---------------------------------------------------------------
+	// GenMET	
+	fMT2tree->genmet[0].SetPtEtaPhiM(fTR->GenMET, 0., fTR->GenMETphi, 0.);
 	// -------------------------------------------------------------------
 	// Genleptons
+	int NGenLepts=0;
 	for(int i=0; i<fTR->NGenLeptons; ++i){
 		double mass=0;
-		if     (abs(fTR->GenLeptonID[i]) == 15) mass=1.776;
-		else if(abs(fTR->GenLeptonID[i]) == 13) mass=0.106;
-
+		if     (abs(fTR->GenLeptonID[i]) == 15)   mass=1.776; // tau
+		else if(abs(fTR->GenLeptonID[i]) == 13)   mass=0.106; // mu
+		else if(abs(fTR->GenLeptonID[i]) == 11)   mass=0.;    // el 
+		else if(abs(fTR->GenLeptonID[i]) == 12 || 
+			abs(fTR->GenLeptonID[i]) == 14 || 
+			abs(fTR->GenLeptonID[i]) == 16)   mass=0.;    // nu 
+		else   continue;
+		NGenLepts++;
 		fMT2tree->genlept[i].lv.SetPtEtaPhiM(fTR->GenLeptonPt[i], fTR->GenLeptonEta[i], fTR->GenLeptonPhi[i], mass);
 		fMT2tree->genlept[i].ID       = fTR->GenLeptonID[i];
 		fMT2tree->genlept[i].MID      = fTR->GenLeptonMID[i];
 		fMT2tree->genlept[i].MStatus  = fTR->GenLeptonMStatus[i];
 		fMT2tree->genlept[i].GMID     = fTR->GenLeptonGMID[i];
 		fMT2tree->genlept[i].GMStatus = fTR->GenLeptonGMStatus[i];
+		if(abs(fMT2tree->genlept[i].ID) == 11 || abs(fMT2tree->genlept[i].ID) == 13  ){
+			fMT2tree->genlept[i].MT = GetMT(fMT2tree->genlept[i].lv, fMT2tree->genlept[i].lv.M(), fMT2tree->genmet[0], 0.);
+		}
 	}
-
+	fMT2tree->NGenLepts = NGenLepts;
 
 	// --------------------------------------------------------------------
 	// MET, MHT and MPT
@@ -482,6 +499,20 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	hemiobject.pjet2 =pj2;
 	hemiobject.dPhi  =Util::DeltaPhi(pj1.Phi(), pj2.Phi());
 
+}
+
+// ****************************************************************************************************
+double MassAnalysis::GetMT(TLorentzVector lv1, double m1, TLorentzVector lv2, double m2){
+	// returns Mt. Not not rely on Pz measurement -> also suitable if one lv == MET  
+	double ET_1 = sqrt(m1*m1 + lv1.Perp2());
+	double ET_2 = sqrt(m2*m2 + lv2.Perp2());
+	double MTsquared = m1*m1 + m2*m2 + 2*ET_1*ET_2 - 2*lv1.Px()*lv2.Px() - 2*lv1.Py()*lv2.Py();
+	if(MTsquared < 0) return -sqrt(MTsquared);
+	else              return  sqrt(MTsquared);
+}
+
+double MassAnalysis::GetMT(TLorentzVector lv1, TLorentzVector lv2){
+	return GetMT(lv1, 0., lv2, 0.);
 }
 
 // ****************************************************************************************************
