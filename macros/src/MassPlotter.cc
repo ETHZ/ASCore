@@ -7,6 +7,8 @@
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
 #include "helper/Utilities.hh"
+#include "helper/MassAnalysisTreeClass.h"
+#include "helper/Monitor.hh"
 
 #include "TLatex.h"
 #include "TLegend.h"
@@ -45,7 +47,6 @@
 #include <iomanip>
 #include <math.h>
 #include <vector>
-#include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <map>
@@ -82,7 +83,7 @@ MassPlotter::~MassPlotter(){
 void MassPlotter::init(TString filename){
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
 	if(fVerbose > 0) cout << "Initializing MassPlotter ... " << endl;
-	Util::SetStyle();
+	//Util::SetStyle();
 	loadSamples(filename);
 
 }
@@ -153,13 +154,293 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	
 	TString cuts = cutStream.str().c_str();
 	
-	MakePlot(fSamples,"GetMT2HemiNoISR(false,4,2,2,1)" ,cuts, "MT2" ,gNMT2bins,gMT2bins,                 false,  true , true,   true,  true,  false);
+	MakePlot(fSamples,"GetMT2HemiNoISR(false,4,2,2,1)" ,cuts, -3, 0, "MT2" ,gNMT2bins,gMT2bins,   
+		 false,  true , true,   true,  true,  false);
 
 }
 
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, 
+void MassPlotter::makePlot(TString var, TString cuts, int njets, int nleps, TString xtitle,
+			   const int nbins, const double min, const double max,
+			   bool cleaned, bool logflag, bool composited, bool ratio, bool stacked, 
+			   bool overlaySUSY, float overlayScale){
+
+  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, min, max, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  
+
+}
+
+//________________________________________________________________________
+
+void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TString xtitle, 
+			   const int nbins,  const double *bins,
+			   bool cleaned, bool logflag, bool composited, bool ratio, bool stacked, 
+			   bool overlaySUSY, float overlayScale){
+
+  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+
+
+}
+
+//________________________________________________________________________
+
+void MassPlotter::PrintCutFlow(int njets, int nleps){
+  
+  Monitor counters[fSamples.size()];
+  
+  TString  cnames[12] = {"QCD", "W+jets", "Z+jets", "Top","Other", "Total Bkg.", "data", "LM0", "LM1", "LM4", "LM9", "LM13"};
+  Monitor  ccount[12], ccount_100[12];
+
+  for(size_t i = 0; i < fSamples.size(); ++i){
+
+    Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
+    if(fVerbose>2) cout << "PrintCutFlow: looping over " << fSamples[i].name << endl;
+    if(fVerbose>2) cout << "              sample has weight " << weight << " and " << fSamples[i].tree->GetEntries() << " entries" << endl; 
+
+    fMT2tree = new MT2tree();
+    fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+    Long64_t nentries =  fSamples[i].tree->GetEntries();
+    Long64_t nbytes = 0, nb = 0;
+    int nev =0;
+    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+      nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
+      fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
+      
+      if ( fVerbose>2 && jentry % 50000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
+
+
+       bool isMT2gt100 = fMT2tree->misc.MT2 > 100.;
+
+      //if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->jet[0].IsGoodPFJet(100, 2.4, 1) )  continue;
+      //if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->jet[1].IsGoodPFJet(100, 2.4, 1) )  continue;
+      if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->misc.Jet0Pass )  continue;
+      if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->misc.Jet1Pass )  continue;
+
+      if     (njets>1) {
+	if(fMT2tree->NJetsIDLoose != njets) continue;
+	TString text = TString::Format("All events (jets == %d)",njets);
+	counters[i].fill(text.Data(),weight);
+	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, text, weight);
+	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, text, weight);
+      }
+      else if(njets <-1) {
+	if(fMT2tree->NJetsIDLoose < abs(njets)) continue;
+	TString text = TString::Format("All events(jets >= %d)",abs(njets));
+	counters[i].fill(text.Data(),weight);
+	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, text, weight);
+	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, text, weight);
+      }
+
+      //if( fMT2tree-> MinMetJetDPhi(0,20) < 0.3 )  continue;
+      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
+      counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+
+      if( fMT2tree->misc.HBHENoiseFlag != 1 )  continue;
+      counters[i].fill("HBHE noise veto",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
+
+      if( fMT2tree->misc.EcalDeadCellBEFlag != 1 )  continue;
+      counters[i].fill("Boundary energy veto (dead ecal)",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
+
+      if( fMT2tree->misc.Vectorsumpt > 70. )  continue;
+      counters[i].fill("VectorSumPt < 70",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "VectorSumPt < 70", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "VectorSumPt < 70", weight);
+
+      //if( !fMT2tree->PassJetID(50, 6. ,1) )  continue;
+      if( !fMT2tree->misc.PassJetID )  continue;
+      counters[i].fill("jets > 50GeV failing PFID event veto",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "jets > 50GeV failing PFID event veto", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "jets > 50GeV failing PFID event veto", weight);
+
+      // Only considering (so far): no lepton requirement (<0);  1 lepton (==1), lepton veto (otherwise)
+      if(nleps==1){ // exactly 1 lepton
+	if( fMT2tree->misc.LeptConfig != 0 && fMT2tree->misc.LeptConfig != 1)  continue;
+	counters[i].fill("NLeps == 1",weight);
+	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "NLeps == 1", weight);
+	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "NLeps == 1", weight);
+
+      }
+      else if( !(nleps<0) ) { // lepton veto (no lepton requirement if nleps < 0)
+	if( fMT2tree->misc.LeptConfig != 9 )  continue;
+	counters[i].fill("Lepton veto",weight);
+	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Lepton veto", weight);
+	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Lepton veto", weight);
+      }
+      
+      if( fMT2tree->misc.MT2 < 80. )  continue;
+      counters[i].fill("MT2 > 80 GeV" ,weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 80 GeV", weight);
+      if( fMT2tree->misc.MT2 < 100. )  continue;
+      counters[i].fill("MT2 > 100 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 100 GeV", weight);
+      if( fMT2tree->misc.MT2 < 120. )  continue;
+      counters[i].fill("MT2 > 120 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 120 GeV", weight);
+      if( fMT2tree->misc.MT2 < 135. )  continue;
+      counters[i].fill("MT2 > 135 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 135 GeV", weight);
+      if( fMT2tree->misc.MT2 < 150. )  continue;
+      counters[i].fill("MT2 > 150 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 150 GeV", weight);
+      if( fMT2tree->misc.MT2 < 165. )  continue;
+      counters[i].fill("MT2 > 165 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 165 GeV", weight);
+      if( fMT2tree->misc.MT2 < 180. )  continue;
+      counters[i].fill("MT2 > 180 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 180 GeV", weight);
+      if( fMT2tree->misc.MT2 < 200. )  continue;
+      counters[i].fill("MT2 > 200 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 200 GeV", weight);
+      if( fMT2tree->misc.MT2 < 225. )  continue;
+      counters[i].fill("MT2 > 225 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 225 GeV", weight);
+      if( fMT2tree->misc.MT2 < 250. )  continue;
+      counters[i].fill("MT2 > 250 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 250 GeV", weight);
+      if( fMT2tree->misc.MT2 < 275. )  continue;
+      counters[i].fill("MT2 > 275 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 275 GeV", weight);
+      if( fMT2tree->misc.MT2 < 300. )  continue;
+      counters[i].fill("MT2 > 300 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 300 GeV", weight);
+      
+    }
+    delete fMT2tree;
+  }
+
+  std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+  std::cout << "Statistics - by sample" << std::endl;
+  std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;
+  for ( size_t i = 0; i < fSamples.size(); ++i){
+    std::cout << "++++  " << fSamples[i].name << std::endl;  
+    std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
+    counters[i].print();
+    std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;    
+  }  
+
+  std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+  std::cout << "Statistics - by process" << std::endl;
+  std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;
+  for ( size_t i = 0; i < 12; ++i){
+    std::cout << "++++  " << cnames[i] << std::endl;  
+    std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
+    ccount[i].print();
+    std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;    
+  }  
+
+  std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+  std::cout << "Statistics - by process (MT2 > 100GeV)" << std::endl;
+  std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;
+  for ( size_t i = 0; i < 12; ++i){
+    std::cout << "++++  " << cnames[i] << std::endl;  
+    std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
+    ccount_100[i].print();
+    std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;    
+  }  
+
+}
+
+//________________________________________________________________________
+
+void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight){
+  if     (sname == "QCD"    ) 	count[ 0].fill(cut.Data(),weight);
+  else if(sname == "Wtolnu" ) 	count[ 1].fill(cut.Data(),weight);
+  else if(sname == "DY"     ) 	count[ 2].fill(cut.Data(),weight);
+  else if(sname == "Top"    )	count[ 3].fill(cut.Data(),weight);
+  else if(sname == "VV" || sname == "VGamma" || sname == "Photons") 	
+                                count[ 4].fill(cut.Data(),weight);
+  if     (type  == "mc"     )   count[ 5].fill(cut.Data(),weight);
+  else if(type  == "data"   )	count[ 6].fill(cut.Data(),weight);
+  else if(sname == "LM0"    )	count[ 7].fill(cut.Data(),weight);
+  else if(sname == "LM1"    )	count[ 8].fill(cut.Data(),weight);
+  else if(sname == "LM4"    )	count[ 9].fill(cut.Data(),weight);
+  else if(sname == "LM9"    )	count[10].fill(cut.Data(),weight);
+  else if(sname == "LM13"    )	count[11].fill(cut.Data(),weight);
+}
+
+//________________________________________________________________________
+
+void MassPlotter::plotSig(TString var, TString cuts, TString xtitle, int nbins, double min, double max, bool cleaned, int type ){
+
+        TString varname = Util::removeFunnyChar(var.Data());
+
+	TH1D*    h_mc_sum    = new TH1D   (varname+"mc_sum", "", nbins, min, max );
+	TH1D*    h_susy      = new TH1D   (varname+"susy"  , "", nbins, min, max );	
+	h_mc_sum    ->Sumw2();
+	h_susy      ->Sumw2();
+	// vector of all histos
+	vector<TH1D*> h_samples;
+
+	for(size_t i = 0; i < fSamples.size(); ++i){
+	        if(!(fSamples[i].type=="susy") && !(fSamples[i].type=="mc")) continue;
+
+		h_samples.push_back(new TH1D(varname+"_"+fSamples[i].name, "", nbins, min, max));
+		h_samples[i] -> Sumw2();
+
+		Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
+
+		if(fVerbose>2) cout << "MakePlot: looping over " << fSamples[i].sname << endl;
+		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << fSamples[i].tree->GetEntries() << " entries" << endl; 
+	
+		TString variable  = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
+		TString selection = TString::Format("(%f) * (%s)",weight,cuts.Data());
+		  
+		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
+				    << "\twith cuts: "  << selection << endl;
+
+		int nev = fSamples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
+		
+		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
+				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
+		
+		if( fSamples[i].type=="mc"        )   h_mc_sum->Add(h_samples[i]);
+		else if( fSamples[i].type=="susy" )   h_susy  ->Add(h_samples[i]);
+	}
+	Float_t  x[nbins], y[nbins];
+	for (int i = 1; i <=nbins+1; i++){
+	  x[i-1] = h_mc_sum->GetBinLowEdge(i);
+	  float s = h_susy  ->Integral(i,nbins+1);
+	  float b = h_mc_sum->Integral(i,nbins+1);
+	  switch (type){
+	  case 0:
+	    y[i-1] = s/sqrt(b);
+	    break;
+	  case 1:
+	    y[i-1] = s/sqrt(s+b);
+	    break;
+	  case 2:
+	    y[i-1] = s/b;
+	    break;
+	  }
+	}
+	TGraph *sig = new TGraph(nbins+1,x,y);
+	sig->SetTitle("");
+	sig->GetXaxis()->SetTitle(xtitle);
+	sig->SetMarkerStyle(20);
+	switch (type){
+	case 0:
+	  sig->GetYaxis()->SetTitle("S/#sqrt{B}");
+	  break;
+	case 1:
+	  sig->GetYaxis()->SetTitle("S/#sqrt{S+B}");
+	  break;
+	case 2:
+	  sig->GetYaxis()->SetTitle("S/B");
+	  break;
+	}
+	sig->Draw("ACP");
+}
+
+//________________________________________________________________________
+
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
 			   TString xtitle, const int nbins, const double min, const double max,
 			   bool cleaned, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
@@ -168,24 +449,29 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
   bins[0] = min;
   for(int i=1; i<=nbins; i++)
     bins[i] = min+i*(max-min)/nbins;
-  MakePlot(Samples, var, cuts, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(Samples, var, cuts, njets, nleps, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 }
+
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, 
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
 			   TString xtitle, const int nbins, const double *bins, 
 			   bool cleaned, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
 
-	TString varname = var;
-	varname.ReplaceAll("(","");
-	varname.ReplaceAll(")","");
+        TString varname = Util::removeFunnyChar(var.Data());
 
-	THStack h_stack(varname, "");
-  	TH1D*   h_data       = new TH1D(varname+"data"  , "", nbins, bins );
-	TH1D*   h_mc_sum     = new TH1D(varname+"mc_sum", "", nbins, bins );
-	TH1D*   h_susy       = new TH1D(varname+"susy"  , "", nbins, bins );	
+	TString nJets = "NJetsIDLoose";
+	nJets += njets < 0 ? ">=" : "==";
+	nJets += TString::Format("%d",abs(njets));
+
+	TString  nLeps = nleps < 0 ? "" : (nleps==1 ? " && (misc.LeptConfig == 0 || misc.LeptConfig == 1)" : "&& misc.LeptConfig ==  9");
+
+	THStack* h_stack     = new THStack(varname, "");
+  	TH1D*    h_data      = new TH1D   (varname+"data"  , "", nbins, bins );
+	TH1D*    h_mc_sum    = new TH1D   (varname+"mc_sum", "", nbins, bins );
+	TH1D*    h_susy      = new TH1D   (varname+"susy"  , "", nbins, bins );	
 
 	// h_data
 	h_data -> Sumw2();
@@ -206,10 +492,12 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	vector<TH1D*> h_samples;
 
 	// arrays of composited stuff
-	TH1D    *h_composited[5];
-	TString  cnames[5] = {"QCD", "W/Z/#gamma production", "Top production", "susy", "data"};
-	int      ccolor[5] = {401, 418, 602, 0};
-	for (int i=0; i<5; i++){
+	TH1D    *h_composited[7];
+	//TString  cnames[5] = {"QCD", "W/Z/#gamma production", "Top production", "susy", "data"};
+	//int      ccolor[5] = {401, 418, 602, 0, 632};
+	TString  cnames[7] = {"QCD", "W+jets", "Z+jets", "Top", "Other", "susy", "data"};
+	int      ccolor[7] = {401, 417, 419, 600, 603, 0, 632};
+	for (int i=0; i<7; i++){
 	  h_composited[i] = new TH1D(varname+"_"+cnames[i], "", nbins, bins);
 	  h_composited[i] -> Sumw2();
 	  h_composited[i] -> SetFillColor  (stacked ? ccolor[i] : 0);
@@ -222,7 +510,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	}
 
 	// legend
-	TLegend* Legend1 = new TLegend(.6,.5,.89,.88);
+	TLegend* Legend1 = new TLegend(.71,.54,.91,.92);
 	//TLegend* Legend1 = new TLegend(.3,.5,.6,.88);
 
 	for(size_t i = 0; i < Samples.size(); ++i){
@@ -238,25 +526,26 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		if(Samples[i].type == "susy" ){
 			h_samples[i] -> SetLineColor(kBlack);
 			h_samples[i] -> SetLineStyle(kDotted);
-			h_composited[3] -> SetLineColor(kBlack);
-			h_composited[3] -> SetLineStyle(kDotted);
+			h_composited[5] -> SetLineColor(kBlack);
+			h_composited[5] -> SetLineStyle(kDotted);
 		}
 		Double_t weight = Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
 		if(fVerbose>2) cout << "MakePlot: looping over " << Samples[i].sname << endl;
 		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
 	
 		TString variable  = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
-		TString selection = TString::Format("(%f) * (%s)",weight,cuts.Data());
+		TString theCuts = nJets + nLeps + "&&" + cuts;
+		TString selection = TString::Format("(%f) * (%s)",weight,theCuts.Data());
 		  
 		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
 				    << "\twith cuts: "  << selection << endl;
+
+		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
 
 		// Add underflow & overflow bins
 		// This failed for older ROOT version when the first(last) bin is empty
 		// and there are underflow (overflow) events --- must check whether this 
 		// is still the case
-		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
-
 		h_samples[i]->SetBinContent(1,
 				    h_samples[i]->GetBinContent(0) + h_samples[i]->GetBinContent(1));
 		h_samples[i]->SetBinError(1,
@@ -277,50 +566,58 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		if (Samples[i].sname.Contains("QCD")) {
 		  h_composited[0]->Add(h_samples[i]);
 		}
-		else if(Samples[i].sname=="DY" || Samples[i].sname=="Wtolnu" || Samples[i].sname=="VV" || Samples[i].sname=="Photons" || Samples[i].sname=="VGamma"){
+		else if(Samples[i].sname.Contains("Top") ){
+		  h_composited[3]->Add(h_samples[i]);
+		}
+		else if(Samples[i].sname=="Wtolnu") {
 		  h_composited[1]->Add(h_samples[i]);
 		}
-		else if(Samples[i].sname.Contains("Top")){
+		else if(Samples[i].sname=="DY") {
 		  h_composited[2]->Add(h_samples[i]);
 		}
+		else if(Samples[i].sname=="VV" || Samples[i].sname=="VGamma" || Samples[i].sname=="Photons") {
+		  h_composited[4]->Add(h_samples[i]);
+		}
 		else if(Samples[i].type.Contains("susy")){
-		  h_composited[3]->Add(h_samples[i]);
-		  cnames[3] = Samples[i].sname;
+		  h_composited[5]->Add(h_samples[i]);
+		  cnames[5] = Samples[i].sname;
 		}
 		else if(Samples[i].type.Contains("data")){
-		  h_composited[4]->Add(h_samples[i]);
+		  h_composited[6]->Add(h_samples[i]);
 		}
 
 	}
 
 	if (composited){
-	  for (int i=0; i<4; ++i){
+	  for (int i=0; i<6; ++i){
 	    if (!stacked)  {
 	      h_composited[i]->Scale(1./h_composited[i]->Integral());
 	      h_composited[i] -> SetMinimum(0.00005);
 	      //if (fVerbose>2) cout << " h_composited[" << i<< "]->Integral = " << h_composited[i]->Integral()  << endl;
 	    }
-	    if( i!=3 || !overlaySUSY) h_stack  .  Add(h_composited[i]);
-	    if( i==3)                 h_susy   -> Add(h_composited[i]);
+	    if( i!=5 || !overlaySUSY) h_stack  -> Add(h_composited[i]);
+	    if( i==5)                 h_susy   -> Add(h_composited[i]);
 	    else        	      h_mc_sum -> Add(h_composited[i]);
-	    if( i==3 && overlaySUSY)
+	    if( i==5 && overlaySUSY)
 	      Legend1 ->AddEntry(h_composited[i], cnames[i] + (overlayScale ? 
 							      TString::Format(" x %.0f",overlayScale) :
 							      " scaled to data")   , "f");  
 	    else
 	      Legend1 ->AddEntry(h_composited[i], cnames[i], stacked ? "f" : "l");
 	  }
-	  h_data->Add(h_composited[4]);
+	  h_data->Add(h_composited[6]);
 	  if(h_data->Integral()>0 && stacked){
 	    Legend1     ->AddEntry(h_data, "data", "l");
 	  }
 	  if(fVerbose > 2 && composited) {
 		           cout << "------------------------------------"                << endl
 	                        << "QCD Integral:      " << h_composited[0]->Integral()  << endl
-			        << "W/Z/gamma Integral:" << h_composited[1]->Integral()  << endl
-			        << "Top Integral:      " << h_composited[2]->Integral()  << endl
-			        << "SUSY:              " << h_composited[3]->Integral()  << endl
-			        << "Data:              " << h_composited[4]->Integral()  << endl;
+			        << "W+jets Integral:   " << h_composited[1]->Integral()  << endl
+			        << "Z+jets Integral:   " << h_composited[2]->Integral()  << endl
+			        << "Top Integral:      " << h_composited[3]->Integral()  << endl
+			        << "Other Integral:    " << h_composited[4]->Integral()  << endl
+			        << "SUSY:              " << h_composited[5]->Integral()  << endl
+			        << "Data:              " << h_composited[6]->Integral()  << endl;
 	  }
 	}
 	else{
@@ -331,13 +628,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	    }
 	    if((Samples[i].sname=="QCD" )){
 	      h_samples[i] -> SetMinimum(0.01);
-	      h_stack.Add(h_samples[i]);
+	      h_stack->Add(h_samples[i]);
 	      h_mc_sum->Add(h_samples[i]);
 	      Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
 	    }
 	    if(Samples[i].sname!="QCD" && Samples[i].type!="data"){
 	      if(Samples[i].type=="susy") h_susy->Add(h_samples[i]);
-	      if(Samples[i].type!="susy" || !overlaySUSY) h_stack.Add(h_samples[i]);
+	      if(Samples[i].type!="susy" || !overlaySUSY) h_stack->Add(h_samples[i]);
 	      if(Samples[i].type!="susy") h_mc_sum->Add(h_samples[i]);
 	      if(Samples[i].type=="susy" && overlaySUSY){
 	         Legend1 ->AddEntry(h_samples[i], Samples[i].sname + (overlayScale ? 
@@ -359,34 +656,56 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 
 	TString ytitle = "Events";
 
+	TString oname = var+ "_CUT_";
+	oname += njets < 0 ? TString::Format("ge%dJets",abs(njets)) : TString::Format("%dJets",abs(njets));
+	oname += nleps < 0 ? "_anyLep_" : (nleps == 1 ? "_1Lep_" : "_0Lep_");
+	oname += cuts;
+	oname.ReplaceAll(">=" ,".ge");
+	oname.ReplaceAll("<=" ,".le");
+	oname.ReplaceAll(">" ,".gt");
+	oname.ReplaceAll("<" ,".lt");
+	oname.ReplaceAll("==",".eq");
+	oname.ReplaceAll("!=",".ne");
+	oname.ReplaceAll("&&","_");
+	oname.ReplaceAll("||","_");
+	oname.ReplaceAll("misc.","");
+	oname.ReplaceAll("LeptConfig","LepCfg");
+	oname.ReplaceAll("Vectorsumpt","VSPT");
+	oname.ReplaceAll("EcalDeadCellBEFlag","BEFlg");
+	oname.ReplaceAll("HBHENoiseFlag","HBHEFlg");
+	oname.ReplaceAll("NJetsIDLoose","NJLoose");
+	oname.ReplaceAll("isPFIDLoose","isJLoose");
+	oname.ReplaceAll("IsGoodPFJet","IsGoodPFJ");
+	oname.ReplaceAll("MinMetJetDPhi","MinDPhi");
+	oname.ReplaceAll(",","-");
+        TString outname = Util::removeFunnyChar(oname.Data());
+
 	if(!stacked) {
-	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
-	    + "_shape";
-	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, false);
+	  outname = outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + "_shape";
+	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps, false);
 
 	}
 	else if (!overlaySUSY){
-	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
-	    + (composited ? "_comp" : "");
-	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle);
+	  outname = outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "");
+	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps);
 	  if (ratio) 
-	    plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, outname, Legend1, xtitle, ytitle);
+	    plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, outname, Legend1, xtitle, ytitle, njets, nleps);
 	}
 	else {
-	  TString outname = varname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") 
-	    + (composited ? "_comp" : "") + "_overlay";	  
-	  printHisto(h_stack, h_data, h_mc_sum, h_susy, Legend1 , outname, "hist", logflag, xtitle, ytitle);
+	  outname =  outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "") + "_overlay";	  
+	  printHisto(h_stack, h_data, h_mc_sum, h_susy, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps, overlayScale);
 	  if (ratio) 
-	    plotRatioStack(h_stack,  h_mc_sum, h_data, h_susy,  logflag, false, outname, Legend1, xtitle, ytitle);
+	    plotRatioStack(h_stack,  h_mc_sum, h_data, h_susy,  logflag, false, outname, Legend1, xtitle, ytitle, njets, nleps, overlayScale);
 
 	}
 	
-	for(int i=0; i<h_samples.size(); ++i){
-		delete h_samples[i];
-	}
-	delete h_mc_sum;
-	delete Legend1;
-	delete h_data;
+// 	for(int i=0; i<h_samples.size(); ++i){
+// 		delete h_samples[i];
+// 	}
+// 	delete h_mc_sum;
+// 	delete Legend1;
+// 	delete h_data;
+// 	delete h_susy;
 	
 }
 
@@ -396,7 +715,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 	
 	double lower_cut =  ysplit[0];
 	double upper_cut =  ysplit[1];
-	THStack h_stack(branch_name, "");
+	THStack* h_stack     = new THStack(branch_name, "");
 	TH1D*   h_data       = new TH1D("data"  , "", nbins, bins );
 	TH1D*   h_mc_sum     = new TH1D("mc_sum", "", nbins, bins );
 	TH1D*   h_mc_sum_susy     = new TH1D("mc_sum_susy", "", nbins, bins );
@@ -483,7 +802,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 		delete fMT2tree;
 	}
 	if(prediction!="none"){
-		h_stack.Add(h_prediction);
+		h_stack ->Add(h_prediction);
 		Legend1 ->AddEntry(h_prediction, "data-driven QCD", "f");
 		h_mc_sum->Add(h_prediction);
 	}
@@ -491,12 +810,12 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, con
 		if(Samples[i].type=="mc" || Samples[i].type=="susy") h_mc_sum_susy->Add(h_samples[i]);
 		if((Samples[i].sname=="QCD" && prediction=="none")){
 			h_samples[i] -> SetMinimum(0.01);
-			h_stack.Add(h_samples[i]);
+			h_stack ->Add(h_samples[i]);
 			h_mc_sum->Add(h_samples[i]);
 			Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
 		}
 		if(Samples[i].sname!="QCD" && Samples[i].type!="data"){
-			h_stack.Add(h_samples[i]);
+			h_stack->Add(h_samples[i]);
 			if(Samples[i].type!="susy") h_mc_sum->Add(h_samples[i]);
 			if(Samples[i].type=="susy") h_susy  ->Add(h_samples[i]);
 			if(Samples[i].name != "PhotonJets_Pt40to100-V01-03-01" && Samples[i].name != "PhotonJets_Pt100to200-V01-03-01"){
@@ -710,7 +1029,7 @@ void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option,
 
 
 //_________________________________________________________________________________
-void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle){
+void MassPlotter::plotRatioStack(THStack* hstack, TH1* h1_orig, TH1* h2_orig, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle,int njets, int nleps){
 	// define canvas and pads 
 	TH1D *h1 = (TH1D*)h1_orig->Clone("h1_copy");
 	TH1D *h2 = (TH1D*)h2_orig->Clone("h2_copy");
@@ -748,22 +1067,23 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	double max1 = h1->GetMaximum();
 	double max2 = h2->GetMaximum();
 	double max  = (max1>max2)?max1:max2;
-	if(logflag) max = 5*max, "3";
+	if(logflag) max = 2*max;
 	else max = 1.05*max;
 	h1->SetMaximum(max);
 	h2->SetMaximum(max);
+	hstack->SetMaximum(max);
 //	h1->SetMinimum(0.000000001);
 //	h2->SetMinimum(0.000000001);
 
-	hstack.SetMinimum(0.02);
-	hstack.Draw("hist");
-	h2      ->Draw("same");
+	hstack->SetMinimum(0.02);
+	hstack ->Draw("hist");
+	h2     ->Draw("same");
 
 	// title
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.05);
+	lat.SetTextSize(0.1);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -771,6 +1091,13 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	lat.SetTextAngle(90);
 	lat.DrawLatex(0.035, 0.9, ytitle);
 		
+	TLatex TitleBox;
+	TitleBox.SetNDC();
+	TitleBox.SetTextSize(0.05);
+	TString text = njets < 0 ? TString::Format("#geq %d Jets",abs(njets)) : TString::Format("%d Jets",abs(njets));
+	text += nleps == 1 ? ", 1 Lepton" : "";
+	TitleBox.DrawLatex(0.18,0.943,text.Data());
+
  	p_plot ->Draw();
 	gPad->RedrawAxis();
 
@@ -782,7 +1109,7 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	
 	// draw the ratio plot
  	p_ratio ->cd();
-	gPad->SetLogy();
+	//gPad->SetLogy();
  
 	TH1D *h_ratio = (TH1D*)h2_orig->Clone("h2_copy");	
 
@@ -800,8 +1127,8 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	h_ratio ->SetMarkerSize(0.1);
 
  	h_ratio ->Divide(h2, h1);
- 	h_ratio ->SetMinimum(0.1);
- 	h_ratio ->SetMaximum(8.0);
+ 	h_ratio ->SetMinimum(0.4);
+ 	h_ratio ->SetMaximum(3.0);
 	h_ratio ->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
 
 	h_ratio ->DrawCopy("E2");
@@ -813,14 +1140,16 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	// ratio title
 	lat.SetTextAlign(33);
 	lat.SetTextColor(1);
-	lat.SetTextSize(0.1);
+	lat.SetTextSize(0.15);
 	lat.SetNDC(1);
 	lat.SetTextAngle(90);
 	lat.DrawLatex(0.035, 1.0, "data / MC");
 	
 	// x axis title
+	lat.SetTextSize(0.2);
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.15, xtitle);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.23 : 0.16;
+	lat.DrawLatex(0.9, ypos, xtitle);
 	gPad->RedrawAxis();
  	p_ratio ->Draw();
  	c1->Update();
@@ -828,16 +1157,16 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, boo
 	TString save=name+"_ratio";
 	Util::Print(c1, save, fOutputDir, fOutputFile);	
 
-	delete h1;
-	delete h2;
-	delete h_ratio;
-	delete p_plot;
-	delete p_ratio;
-	delete c1;
+// 	delete h1;
+// 	delete h2;
+// 	delete h_ratio;
+// 	delete p_plot;
+// 	delete p_ratio;
+// 	delete c1;
 
 }
 //_________________________________________________________________________________
-void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1* h3, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle, float overlayScale){
+void MassPlotter::plotRatioStack(THStack* hstack, TH1* h1_orig, TH1* h2_orig, TH1* h3, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle,int njets, int nleps, float overlayScale){
 	// define canvas and pads 
 	TH1D *h1 = (TH1D*)h1_orig->Clone("h1_copy");
 	TH1D *h2 = (TH1D*)h2_orig->Clone("h2_copy");
@@ -875,25 +1204,27 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	double max1 = h1->GetMaximum();
 	double max2 = h2->GetMaximum();
 	double max  = (max1>max2)?max1:max2;
-	if(logflag) max = 5*max, "3";
+	if(logflag) max = 2*max;
 	else max = 1.05*max;
 	h1->SetMaximum(max);
 	h2->SetMaximum(max);
+	hstack->SetMaximum(max);
 //	h1->SetMinimum(0.000000001);
 //	h2->SetMinimum(0.000000001);
 
-	hstack.SetMinimum(0.02);
-	hstack.Draw("hist");
-	h2      ->Draw("same");
+	hstack->SetMinimum(0.02);
+	hstack->Draw("hist");
+	h2    ->Draw("same");
 	h3->Scale(overlayScale ? overlayScale : h2->Integral() / h3->Integral());
 	h3->SetFillColor(0);
+	h3->SetLineStyle(kDotted);
 	h3->Draw("samehist");
 
 	// title
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.05);
+	lat.SetTextSize(0.1);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -901,6 +1232,13 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	lat.SetTextAngle(90);
 	lat.DrawLatex(0.035, 0.9, ytitle);
 		
+	TLatex TitleBox;
+	TitleBox.SetNDC();
+	TitleBox.SetTextSize(0.05);
+	TString text = njets < 0 ? TString::Format("#geq %d Jets",abs(njets)) : TString::Format("%d Jets",abs(njets));
+	text += nleps == 1 ? ", 1 Lepton" : "";
+	TitleBox.DrawLatex(0.18,0.943,text.Data());
+
  	p_plot ->Draw();
 	gPad->RedrawAxis();
 
@@ -912,7 +1250,7 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	
 	// draw the ratio plot
  	p_ratio ->cd();
-	gPad->SetLogy();
+	//gPad->SetLogy();
  
 	TH1D *h_ratio = (TH1D*)h2_orig->Clone("h2_copy");	
 
@@ -930,8 +1268,8 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	h_ratio ->SetMarkerSize(0.1);
 
  	h_ratio ->Divide(h2, h1);
- 	h_ratio ->SetMinimum(0.1);
- 	h_ratio ->SetMaximum(8.0);
+ 	h_ratio ->SetMinimum(0.4);
+ 	h_ratio ->SetMaximum(3.0);
 	h_ratio ->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
 
 	h_ratio ->DrawCopy("E2");
@@ -943,14 +1281,16 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	// ratio title
 	lat.SetTextAlign(33);
 	lat.SetTextColor(1);
-	lat.SetTextSize(0.1);
+	lat.SetTextSize(0.15);
 	lat.SetNDC(1);
 	lat.SetTextAngle(90);
 	lat.DrawLatex(0.035, 1.0, "data / MC");
 	
 	// x axis title
+	lat.SetTextSize(0.2);
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.15, xtitle);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.23 : 0.16;
+	lat.DrawLatex(0.9, ypos, xtitle);
 	gPad->RedrawAxis();
  	p_ratio ->Draw();
  	c1->Update();
@@ -958,12 +1298,12 @@ void MassPlotter::plotRatioStack(THStack hstack, TH1* h1_orig, TH1* h2_orig, TH1
 	TString save=name+"_ratio";
 	Util::Print(c1, save, fOutputDir, fOutputFile);	
 
-	delete h1;
-	delete h2;
-	delete h_ratio;
-	delete p_plot;
-	delete p_ratio;
-	delete c1;
+// 	delete h1;
+// 	delete h2;
+// 	delete h_ratio;
+// 	delete p_plot;
+// 	delete p_ratio;
+// 	delete c1;
 
 }
 //_________________________________________________________________________________
@@ -1005,7 +1345,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	double max1 = h1->GetMaximum();
 	double max2 = h2->GetMaximum();
 	double max  = (max1>max2)?max1:max2;
-	if(logflag) max = 5*max, "3";
+	if(logflag) max = 2*max;
 	else max = 1.05*max;
 	h1->SetMaximum(max);
 	h2->SetMaximum(max);
@@ -1018,7 +1358,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.05);
+	lat.SetTextSize(0.07);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -1054,8 +1394,8 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	h_ratio ->SetMarkerSize(0.1);
 
  	h_ratio ->Divide(h1, h2);
- 	h_ratio ->SetMinimum(0.2);
- 	h_ratio ->SetMaximum(15.0);
+ 	h_ratio ->SetMinimum(0.4);
+ 	h_ratio ->SetMaximum(3.0);
 	h_ratio ->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
 
 	h_ratio ->DrawCopy("E2");
@@ -1074,8 +1414,9 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	
 	// x axis title
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.15, xtitle);
-	gPad->SetLogy(1);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.23 : 0.16;
+	lat.DrawLatex(0.9, ypos, xtitle);
+	//gPad->SetLogy(1);
 	gPad->RedrawAxis();
  	p_ratio ->Draw();
  	c1->Update();
@@ -1083,12 +1424,12 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	TString save=name+"_ratio";
 	Util::PrintNoEPS(c1, save, fOutputDir, fOutputFile);	
 
-	delete h1;
-	delete h2;
-	delete h_ratio;
-	delete p_plot;
-	delete p_ratio;
-	delete c1;
+// 	delete h1;
+// 	delete h2;
+// 	delete h_ratio;
+// 	delete p_plot;
+// 	delete p_ratio;
+// 	delete c1;
 
 }
 //___________________________________________________________________________
@@ -1115,7 +1456,7 @@ void MassPlotter::printHisto(TH1* h_orig, TString canvname,  Option_t *drawopt, 
 }
 
 //____________________________________________________________________________
-void MassPlotter::printHisto(THStack h, TString canvname, Option_t *drawopt, bool logflag){
+void MassPlotter::printHisto(THStack* h, TString canvname, Option_t *drawopt, bool logflag){
 	
 	TCanvas *col = new TCanvas(canvname, "", 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -1123,7 +1464,7 @@ void MassPlotter::printHisto(THStack h, TString canvname, Option_t *drawopt, boo
 	col->cd();
 	gPad->SetFillStyle(0);
 	if(logflag) gPad->SetLogy(1);
-	h.Draw(drawopt);
+	h->Draw(drawopt);
 	gPad->RedrawAxis();
 	col ->Update();
 	gPad->RedrawAxis();
@@ -1132,7 +1473,7 @@ void MassPlotter::printHisto(THStack h, TString canvname, Option_t *drawopt, boo
 
 }
 //____________________________________________________________________________
-void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, bool stacked){
+void MassPlotter::printHisto(THStack* h, TH1* h_data, TH1* h_mc_sum, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle,int njets, int nleps, bool stacked){
 
 	TCanvas *col = new TCanvas(canvname, "", 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -1141,14 +1482,24 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 	gPad->SetFillStyle(0);
 	if(logflag) {
 		gPad->SetLogy(1);
-		h        .  SetMinimum(stacked ? 0.05 : 0.0001);
+		h        -> SetMinimum(stacked ? 0.05 : 0.0001);
 		h_mc_sum -> SetMinimum(0.05);
 		h_data   -> SetMinimum(0.05);
 	}else{
-		h.SetMinimum(0);
+		h->SetMinimum(0);
 	}
 
-	h.Draw(stacked ? drawopt : "histnostack");
+	// Determine plotting range
+	double max1 = h_data->GetMaximum();
+	double max2 = h_mc_sum->GetMaximum();
+	double max  = (max1>max2)?max1:max2;
+	if(logflag) max = 2*max;
+	else max = 1.05*max;
+	h_data  ->SetMaximum(max);
+	h_mc_sum->SetMaximum(max);
+	h       ->SetMaximum(max);
+
+	h->Draw(stacked ? drawopt : "histnostack");
 	//h_mc_sum -> Draw("same, E2");
 	if(h_data->Integral()>0 && stacked) {
 		h_data       ->Draw("same");
@@ -1160,11 +1511,19 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 	} 
 	gPad->RedrawAxis();
 	col ->Update();
+
+	TLatex TitleBox;
+	TitleBox.SetNDC();
+	TitleBox.SetTextSize(0.05);
+	TString text = njets < 0 ? TString::Format("#geq %d Jets",abs(njets)) : TString::Format("%d Jets",abs(njets));
+	text += nleps == 1 ? ", 1 Lepton" : "";
+	TitleBox.DrawLatex(0.18,0.943,text.Data());
+
 	// title
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.04);
+	lat.SetTextSize(0.07);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -1174,15 +1533,16 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TLegend* leg
 	
 	// x axis title
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.05, xtitle);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.1 : 0.06;
+	lat.DrawLatex(0.9, ypos, xtitle);
 	gPad->RedrawAxis();
 	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
 	Util::PrintEPS(col, canvname, fOutputDir);
-	delete col;
+// 	delete col;
 
 }
 //____________________________________________________________________________
-void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle, float overlayScale){
+void MassPlotter::printHisto(THStack* h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle,int njets, int nleps, float overlayScale){
 
 	TCanvas *col = new TCanvas(canvname, "", 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -1191,20 +1551,31 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy,
 	gPad->SetFillStyle(0);
 	if(logflag) {
 		gPad->SetLogy(1);
-		h        .  SetMinimum(0.05);
+		h        -> SetMinimum(0.05);
 		h_mc_sum -> SetMinimum(0.05);
 		h_data   -> SetMinimum(0.05);
 		h_susy   -> SetMinimum(0.05);
 	}else{
-		h.SetMinimum(0);
+		h->SetMinimum(0);
 	}
 
-	h.Draw(drawopt);
+	// Determine plotting range
+	double max1 = h_data->GetMaximum();
+	double max2 = h_mc_sum->GetMaximum();
+	double max  = (max1>max2)?max1:max2;
+	if(logflag) max = 2*max;
+	else max = 1.05*max;
+	h_data  ->SetMaximum(max);
+	h_mc_sum->SetMaximum(max);
+	h       ->SetMaximum(max);
+
+	h->Draw(drawopt);
 	//h_mc_sum -> Draw("same, E2");
 	if(h_data->Integral()>0) {
 		h_data       ->Draw("same");
 	}
 	h_susy->Scale(overlayScale ? overlayScale : h_data->Integral() / h_susy->Integral());
+	h_susy->SetLineStyle(kDotted);
 	h_susy->SetFillColor(0);
 	h_susy->Draw("samehist");
 	if(leg != NULL ){
@@ -1214,11 +1585,19 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy,
 	} 
 	gPad->RedrawAxis();
 	col ->Update();
+
+	TLatex TitleBox;
+	TitleBox.SetNDC();
+	TitleBox.SetTextSize(0.05);
+	TString text = njets < 0 ? TString::Format("#geq %d Jets",abs(njets)) : TString::Format("%d Jets",abs(njets));
+	text += nleps == 1 ? ", 1 Lepton" : "";
+	TitleBox.DrawLatex(0.18,0.943,text.Data());
+
 	// title
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.04);
+	lat.SetTextSize(0.07);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -1228,15 +1607,16 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy,
 	
 	// x axis title
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.05, xtitle);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.1 : 0.06;
+	lat.DrawLatex(0.9, ypos, xtitle);
 	gPad->RedrawAxis();
 	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
 	Util::PrintEPS(col, canvname, fOutputDir);
-	delete col;
+// 	delete col;
 
 }
 //____________________________________________________________________________
-void MassPlotter::printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag , TString xtitle, TString ytitle){
+void MassPlotter::printHisto(THStack* h, TH1* h_data, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag , TString xtitle, TString ytitle){
 
 	TCanvas *col = new TCanvas(canvname, "", 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -1245,13 +1625,22 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canv
 	gPad->SetFillStyle(0);
 	if(logflag) {
 		gPad->SetLogy(1);
-		h.SetMinimum(0.01);
+		h->SetMinimum(0.01);
 		h_data->SetMinimum(0.01);
 	}else{
-		h.SetMinimum(0);
+		h->SetMinimum(0);
 	}
 
-	h.Draw(drawopt);
+	// Determine plotting range
+	double max1 = h_data->GetMaximum();
+	double max2 = h     ->GetMaximum();
+	double max  = (max1>max2)?max1:max2;
+	if(logflag) max = 2*max;
+	else max = 1.05*max;
+	h_data  ->SetMaximum(max);
+	h       ->SetMaximum(max);
+
+	h->Draw(drawopt);
 	if(h_data->Integral()>0) {
 		h_data  ->Draw("same, E1");
 	}
@@ -1267,7 +1656,7 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canv
 	TLatex lat;
 	lat.SetNDC(1);
 	lat.SetTextColor(4);
-	lat.SetTextSize(0.04);
+	lat.SetTextSize(0.07);
 
 	// y axis title 
 	lat.SetTextAlign(33); 
@@ -1277,7 +1666,8 @@ void MassPlotter::printHisto(THStack h, TH1* h_data, TLegend* leg,  TString canv
 	
 	// x axis title
 	lat.SetTextAngle(0);
-	lat.DrawLatex(0.9, 0.05, xtitle);
+	float ypos = xtitle.Contains("slash") || xtitle.Contains("_") || xtitle.Contains("^") ? 0.1 : 0.06;
+	lat.DrawLatex(0.9, ypos, xtitle);
 	gPad->RedrawAxis();
 	col ->Update();
 	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
