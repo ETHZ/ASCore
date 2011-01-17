@@ -7,7 +7,6 @@
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
 #include "helper/Utilities.hh"
-#include "helper/MassAnalysisTreeClass.h"
 #include "helper/Monitor.hh"
 
 #include "TLatex.h"
