@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <string>
 #include <cmath>
 
 #include "TROOT.h"
@@ -258,6 +259,18 @@ namespace Util {
     std::vector<int> ind3;
     for(size_t i = 0; i < vec.size(); ++i) ind3.push_back(ind[ind2[i]]);
     return ind3;
+  }
+
+  //__________________________________________________________________________
+  inline std::string removeFunnyChar(const std::string& input){
+    const std::string excluded = " ()[]/\\~;:{}*&$<>`!@#%^+|\'\",?";
+    std::string answer(input);
+    std::string::size_type pos = answer.find_first_of(excluded);
+    while (pos != std::string::npos) {
+      answer.erase(pos, 1);
+      pos = answer.find_first_of(excluded);
+    }    
+    return answer;
   }
 }
 
