@@ -219,7 +219,7 @@ void MassAnalysis::FillTree(){
 	}
 	
 	// -----------------------------------------------------------------
-	// Fill leptons 4-momenta & tight_flag
+	// Fill leptons 4-momenta & tight_flag & charge
 	TLorentzVector METlv;
 	METlv.SetPtEtaPhiM(fTR->PFMET, 0., fTR->PFMETphi, 0.);
 
@@ -229,7 +229,8 @@ void MassAnalysis::FillTree(){
 	  	for(int l=0; l<fElecs.size(); ++l) {
 	  		if(fElecs[l]==fElecsLoose[i]) fMT2tree->ele[i].isTight=true;
 	  	}
-		fMT2tree->ele[i].MT =GetMT(fMT2tree->ele[i].lv, 0., METlv, 0.); 
+		fMT2tree->ele[i].MT     =GetMT(fMT2tree->ele[i].lv, 0., METlv, 0.); 
+		fMT2tree->ele[i].Charge =fTR->ElCharge[fElecsLoose[i]];
 	}
 	for(int i=0; i<fMuonsLoose.size(); ++i) {
 	  	fMT2tree->muo[i].lv.SetPtEtaPhiM(fTR->MuPt [fMuonsLoose[i]], fTR->MuEta[fMuonsLoose[i]], 
@@ -237,7 +238,8 @@ void MassAnalysis::FillTree(){
 	  	for(int l=0; l<fMuons.size(); ++l) {
 	  		if(fMuons[l]==fMuonsLoose[i]) fMT2tree->muo[i].isTight=true;
 	  	}
-		fMT2tree->muo[i].MT =GetMT(fMT2tree->muo[i].lv, fMT2tree->muo[i].lv.M(), METlv, 0.); 
+		fMT2tree->muo[i].MT     =GetMT(fMT2tree->muo[i].lv, fMT2tree->muo[i].lv.M(), METlv, 0.); 
+		fMT2tree->muo[i].Charge =fTR->MuCharge[fMuonsLoose[i]];
 	}
 
 	// ---------------------------------------------------------------
@@ -302,8 +304,12 @@ void MassAnalysis::FillTree(){
 	// warning: hardcoded values!
 	fMT2tree->misc.MinMetJetDPhi = fMT2tree->MinMetJetDPhi(0,20,5.0,1);
 	fMT2tree->misc.PassJetID     = fMT2tree->PassJetID(50,5,1);
-	fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,1);
-	fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet(100,2.4,1);
+	if(fMT2tree->NJets > 0) {
+		fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,1);
+	} else  fMT2tree->misc.Jet0Pass      = 0; 
+	if(fMT2tree->NJets > 1) {
+		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet(100,2.4,1);
+	} else  fMT2tree->misc.Jet1Pass      = 0;
 
 	// -----------------------------------------------------------------------
 	// fill tree

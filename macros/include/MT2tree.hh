@@ -123,8 +123,9 @@ public:
 
   Bool_t   isTight;
   Double_t MT;
+  Int_t    Charge;
 
-  ClassDef(MT2Elec, 2)
+  ClassDef(MT2Elec, 4)
 };
 
 // MT2Muon ----------------------------------
@@ -141,8 +142,9 @@ public:
 
   Bool_t   isTight;
   Double_t MT;
+  Int_t    Charge;
 
-  ClassDef(MT2Muon, 2)
+  ClassDef(MT2Muon, 4)
 };
 
 
@@ -164,7 +166,7 @@ public:
   Double_t       MT;
 
 
-  ClassDef(MT2GenLept, 2)
+  ClassDef(MT2GenLept, 3)
 };
 
 // MT2tree ----------------------------------
@@ -214,6 +216,9 @@ public:
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
   Double_t GetMCT(bool massive=false, int met=1);
+  // Leptons
+  Double_t GetDiLeptonInvMass(int same_sign=0, int same_flavour=1, int flavour=0, int tight=-1, double pt=10, bool exclDiLept=false);
+  Bool_t   GenDiLeptonfromZ(unsigned int pid=11, double pt=10., double eta=2.4, double lower_Minv=60, double upper_Minv=120);
 
   Int_t   NJets;
   Int_t   NJetsIDLoose;
@@ -237,7 +242,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 9)
+  ClassDef(MT2tree, 10)
 };
 
 #endif

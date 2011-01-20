@@ -182,6 +182,7 @@ void MT2Muon::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
   isTight       = 0;
   MT            = -9999.99;
+  Charge        = -999;
 }
 
 void MT2Muon::SetLV(const TLorentzVector v) {
@@ -200,6 +201,7 @@ void MT2Elec::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
   isTight       = 0;
   MT            = -9999.99;
+  Charge        = -999;
 }
 
 void MT2Elec::SetLV(const TLorentzVector v) {
@@ -528,11 +530,13 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   // hemi_assoc  = 2: min invariant mass, 3: minial lund distance, 
   // MaxDR: if >0 RejectISRDRmax(MaxDR) is called for hemi            
   // met ==3 option adds jets > jet_for_met_threshold GeV rejected by the chosen hemispheres to the MET
+  // met ==4 option takes sets \vec{MET} = -\vec{pj1} - \vec{pj2}, i.e. UTM is zero. 
   float jet_for_met_threshold=20;
 
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1 || met==3)  MET = pfmet[0];
   else if(met==2)       MET = MHTloose[0];
+  else if(met==4)       MET.Clear();
   else return -999;
  
 
@@ -584,6 +588,7 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
 	if(! used && jet[0].lv.Pt()>jet_for_met_threshold && met==3) unused_jet.SetXYZM(jet[i].lv.Px(), jet[i].lv.Py(), 0, 0);
         MET += unused_jet; // adding all jets that were rejected by hemisphere algo to MET	
   }
+  if(met==4) MET = -pseudojet1 - pseudojet2;
   return CalcMT2(0, massive, pseudojet1, pseudojet2, MET); 
 }
 
@@ -680,6 +685,79 @@ Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
   delete mct;
   return -999.99;
+}
+
+Bool_t   MT2tree::GenDiLeptonfromZ(unsigned int pid, double pt, double eta, double lower_Minv, double upper_Minv){
+	// returns true if there are 
+	//  - two particles with abs(ID)=pid
+	//  - they have opposite charge
+	//  - they come from a Z boson
+	//  - they have Pt() > pt and |Eta()| < eta
+	//  - their inv mass is in (lower_Minv, upper_Minv)
+	vector<int> indices;	
+	for(int i=0; i<NGenLepts; ++i){
+		if(abs(genlept[i].ID)       !=pid  ) continue;
+		if(    genlept[i].MID       !=23   ) continue;
+		if(    genlept[i].lv.Pt()   < pt   ) continue;
+		if(fabs(genlept[i].lv.Eta())> eta  ) continue;
+		indices.push_back(i);
+	}
+	if(indices.size()!=2)                                         return false;
+	if( (genlept[indices[0]].ID) * (genlept[indices[1]].ID) >=0 ) return false;
+	double Mass= (genlept[indices[0]].lv + genlept[indices[1]].lv).M();
+	if(Mass<0) Mass = -Mass;
+        if(Mass < lower_Minv || Mass > upper_Minv)                    return false;	
+	return true;
+}
+
+Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavour, int tight, double pt, bool exclDiLept){
+	// flavour == 0 : don't care if el or mu
+	// flavour == 1 : only electrons
+	// flavour == 2 : only muons
+	
+	struct lepton {TLorentzVector lv; int charge; string flavour; bool isTight;} lepts[NElesLoose + NMuonsLoose];	
+	for(int i=0; i<NElesLoose; ++i){
+		lepts[i].lv=ele[i].lv; lepts[i].charge =ele[i].Charge; lepts[i].flavour ="ele"; lepts[i].isTight=ele[i].isTight;
+	}
+	for(int i=0; i<NMuonsLoose; ++i){
+		lepts[i].lv=muo[i].lv; lepts[i].charge =muo[i].Charge; lepts[i].flavour ="muo"; lepts[i].isTight=muo[i].isTight;
+	}
+	
+	int index1=-1, index2=-1;
+	if( (NElesLoose + NMuonsLoose) <= 1)                                               return -10;
+	if( (NElesLoose + NMuonsLoose) >  2 && exclDiLept)                                 return -100;
+	else if( (NElesLoose + NMuonsLoose) >  2 && !exclDiLept){
+		double pt1=0, pt2=0;
+		for(int i=0; i<(NElesLoose + NMuonsLoose); ++i){
+			if(lepts[i].lv.Pt()>pt1){
+				pt2 =pt1;
+				index2=index1;
+				pt1 =lepts[i].lv.Pt();
+				index1=i;
+			} else if(lepts[i].lv.Pt()>pt2){
+				index2=i;
+				pt2   =lepts[i].lv.Pt();
+			}
+		}	
+	
+	}else if ((NElesLoose + NMuonsLoose)==2) {
+		index1=0; index2=1; 
+	}
+
+	if(  lepts[index1].charge * lepts[index2].charge ==  1 && same_sign ==0)             return -200;
+	if(  lepts[index1].charge * lepts[index2].charge == -1 && same_sign ==1)             return -300;
+	if(  lepts[index1].lv.Pt() < pt || lepts[index2].lv.Pt() < pt )                      return -400;
+	if(  lepts[index1].flavour != lepts[index2].flavour && same_flavour == 1 )           return -500;
+	if(  lepts[index1].flavour == lepts[index2].flavour && same_flavour == 0 )           return -600;
+	if( (lepts[index1].isTight ==0 || lepts[index2].isTight==0) && tight == 1 )          return -700;
+	if( (lepts[index1].isTight ==1 || lepts[index2].isTight==1) && tight == 0 )          return -800;
+	if( (lepts[index1].flavour =="muo" || lepts[index2].flavour=="muo") && flavour == 1) return -910;
+	if( (lepts[index1].flavour =="ele" || lepts[index2].flavour=="ele") && flavour == 2) return -920;
+
+	TLorentzVector sum = lepts[index1].lv + lepts[index2].lv;
+	double mass = sum.M();
+	if(mass < 0) return -mass;
+	else return mass;
 }
 
 ClassImp(MT2Misc)
