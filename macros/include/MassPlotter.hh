@@ -61,6 +61,7 @@ public:
 	void loadSamples(const char* filename = "samples.dat");
 
 	void makePlots();
+	void makeZnunu();
 
 	void setVerbose(int v){ fVerbose = v;};
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
@@ -79,7 +80,6 @@ public:
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
-
 private:
 
 	TString fOutputDir;
@@ -104,6 +104,7 @@ private:
 	MT2tree* fMT2tree;
 	TTree*   fTree;
 
+	void PrintZllKinAcceptance(sample Sample);
 	void ControlPlot();
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 

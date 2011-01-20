@@ -89,12 +89,16 @@ void MassPlotter::init(TString filename){
 
 //___________________________________________________________________________
 void MassPlotter::makePlots(){
-	
 	double dPhisplit[4]={0., 1.0, 1.5, 3.142};
 	MakeMT2PredictionAndPlots(false, dPhisplit, 2.5);  // not cleaned, fudgefactor 2
-
 }
 
+// _________________________________________________________________________
+void MassPlotter::makeZnunu(){
+	for(int i=0; i<fSamples.size(); ++i){
+		if(fSamples[i].sname=="ZToLL") PrintZllKinAcceptance(fSamples[i]);	
+	}
+}
 
 
 //__________________________________________________________________________
@@ -135,26 +139,18 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	cutStream  
 		  << "misc.LeptConfig==9"                           << "&&"
 		  << "NJetsIDLoose > 1"                             << "&&"
-		  << "jet[0].IsGoodPFJet(100,2.4,1)==1"             << "&&"
-		  << "jet[1].IsGoodPFJet(100,2.4,1)==1"             << "&&"
+		  << "misc.Jet0Pass == 1"                           << "&&"
+		  << "misc.Jet1Pass == 1"                           << "&&"
+		  << "misc.PassJetID == 1"                          << "&&"
 		  << "misc.Vectorsumpt<70"                          << "&&"
-	//	  << "GetNjets(50.,2.4,0)-GetNjets(50.,2.4,1)==0"   << "&&"
-	//	  << "GetMinR12R21(0,20,5.0,1)>0.5"                 << "&&" 
-		  << "MinMetJetDPhi(0,20,5.0,1)>0.3"                << "&&" 
-	//	  << "GetMT2Hemi(0,false,1,20,3,1)>90"              << "&&"
-	//	  << "GetMT2Hemi(0,false,1,20,3,1)<180"             << "&&"
-	//	  << "misc.MT2 > 100"                      << "&&"
-	//	  << "pfmet[0].Pt()>100"                            << "&&" 
+		  << "misc.MinMetJetDPhi>0.3"                       << "&&" 
 		  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
-	//	  << "GetMT2Hemi(0,false,1,20,3,1)/pfmet[0].Pt()>0.75" << "&&"
-	//	  << "pfmet[0].Pt()>100"                            << "&&"
-		  << "GetMT2HemiNoISR(false,4,2,2,1)>100"           << "&&"
 		  << "misc.HBHENoiseFlag == 1"                   ;
 	
 	TString cuts = cutStream.str().c_str();
 	
-	MakePlot(fSamples,"GetMT2HemiNoISR(false,4,2,2,1)" ,cuts, -3, 0, "MT2" ,gNMT2bins,gMT2bins,   
-		 false,  true , true,   true,  true,  false);
+	//                 variable                         cuts njets  nlepts title     bins            cleaned  log  composite   ratio  stacked overlay 
+	MakePlot(fSamples,"misc.MT2" ,                      cuts, -3,   0,     "MT2" ,gNMT2bins,gMT2bins, false,  true , true,     true,  true,  false);
 
 }
 
@@ -180,6 +176,104 @@ void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TStr
   MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 
+}
+
+
+// ________________________________________________________________________
+void MassPlotter::PrintZllKinAcceptance(sample Sample){
+	Long64_t nevents=10000000;
+
+      	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+	cout << "printing kinetic & geom. acceptance for Z->ll for sample: \n"
+	     << Sample.name << endl;	
+      	std::cout << setfill('-') << std::setw(70) << "" << std::endl;
+
+        enum counters_t { count_begin, all=count_begin, presel,  HCAL_ECAL_noise, VectorSumPt ,Jet01Pass ,PassJetID, MinMetJetDPhi, count_end };
+ 	Monitor counters[count_end];
+	TString lablx[count_end] = {"all events", "presel", "Cal_Noise", "VectorSumPt", "Jet01Pass", "PassJetID", "MinMetJetDPhi"};
+
+    	fMT2tree = new MT2tree();
+    	Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
+    	Long64_t nentries =  Sample.tree->GetEntries();
+    	Long64_t nbytes = 0, nb = 0;
+    	for (Long64_t jentry=0; jentry<min(nentries, nevents);jentry++) {
+      		nb = Sample.tree->GetEntry(jentry);   nbytes += nb;
+      		Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
+      
+      		if ( fVerbose>2 && jentry % 50000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
+
+		// check if event has Z->e+e- within acceptance	
+		bool ZeeAccepted = fMT2tree->GenDiLeptonfromZ(11, 10, 2.4, 60,  120);
+		bool Zee         = fMT2tree->GenDiLeptonfromZ(11,  0, 10 , 0, 10000);
+		// all events
+		if(Zee)         counters[all].fill("all events");
+		if(ZeeAccepted) counters[all].fill("Zee within acceptance");
+		
+		// presel
+		if(fMT2tree->misc.HT  < 300)  continue;
+		if(fMT2tree->misc.MET < 30)   continue;
+		if(Zee)         counters[presel].fill("presel");
+		if(ZeeAccepted) counters[presel].fill("Zee within acceptance");
+		
+		// ECAL HCAL Noise
+		if(fMT2tree->misc.EcalDeadCellBEFlag  == 0)  continue;
+		if(fMT2tree->misc.HBHENoiseFlag       == 0)  continue;
+		if(Zee)         counters[HCAL_ECAL_noise].fill("Cal_Noise");
+		if(ZeeAccepted) counters[HCAL_ECAL_noise].fill("Zee within acceptance");
+		
+		// VectorSumPt
+		if(fMT2tree->misc.Vectorsumpt  > 70       )  continue;
+		if(Zee)         counters[VectorSumPt].fill("VectorSumPt");
+		if(ZeeAccepted) counters[VectorSumPt].fill("Zee within acceptance");
+		
+		// Jet01Pass
+		if(fMT2tree->misc.Jet0Pass  ==0       )  continue;
+		if(fMT2tree->misc.Jet1Pass  ==0       )  continue;
+		if(Zee)         counters[Jet01Pass].fill("Jet01Pass");
+		if(ZeeAccepted) counters[Jet01Pass].fill("Zee within acceptance");
+		
+		// PassJetID
+		if(fMT2tree->misc.PassJetID  ==0      )  continue;
+		if(Zee)         counters[PassJetID].fill("PassJetID");
+		if(ZeeAccepted) counters[PassJetID].fill("Zee within acceptance");
+		
+		// MinMetJetDPhi
+		if(fMT2tree->misc.MinMetJetDPhi  <0.3      )  continue;
+		if(Zee)         counters[MinMetJetDPhi].fill("MinMetJetDPhi");
+		if(ZeeAccepted) counters[MinMetJetDPhi].fill("Zee within acceptance");
+      	}
+
+	// print stats     
+      	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+       	std::cout << "Statistics" << std::endl;
+       	std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
+       	for ( counters_t iCount=count_begin; iCount<count_end; iCount = counters_t(iCount+1) ) {
+         	counters[iCount].print();
+         	std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;  
+       	}
+  	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+
+	// fill histo
+	TH1D* h_Zaccept_num = new TH1D("h_Zaccept_num", "", count_end, 0., (double) count_end );
+	TH1D* h_Zaccept_den = new TH1D("h_Zaccept_den", "", count_end, 0., (double) count_end );
+	TH1D* h_Zaccept     = new TH1D("h_Zaccept"    , "", count_end, 0., (double) count_end );
+	for(int i=0; i<count_end; ++i){
+		h_Zaccept->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_Zaccept_num->SetBinContent(i+1,counters[i].counts("Zee within acceptance"));
+		h_Zaccept_den->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
+	}
+	h_Zaccept    ->Sumw2();
+	h_Zaccept    ->Divide(h_Zaccept_num,h_Zaccept_den);	
+	TCanvas *col = new TCanvas("GenDYToLLAcceptance", "", 0, 0, 900, 700);
+	col -> cd();
+	h_Zaccept    ->SetLineColor(kBlue);
+	h_Zaccept    ->Draw("E");
+	string name  ="GenDYToLLAcceptance"+(string) Sample.name; 
+	Util::PrintEPS(col, name, fOutputDir);
+	delete h_Zaccept;
+	delete h_Zaccept_den;
+	delete h_Zaccept_num;
+	delete col;
 }
 
 //________________________________________________________________________
