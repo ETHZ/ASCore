@@ -235,11 +235,14 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		}
 	}
 	bool leadingjets(true);
-	if(index1 !=-1 && index2 !=-1){
-		if(IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false && fCut_JPt_hardest_min > 0){leadingjets=false;}
-		if(IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false && fCut_JPt_second_min  > 0){leadingjets=false;}
-	}else{leadingjets = false;}
-
+	if(fCut_JPt_hardest_min > 0){
+		if(index1 !=-1 && IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false ){leadingjets=false;}
+		else {leadingjets = false;}
+	}
+	if(fCut_JPt_second_min > 0){
+		if(index2 !=-1 && IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false ){leadingjets=false;}
+		else {leadingjets = false;}
+	}
 	if(leadingjets == false) return false;
 	
 	
