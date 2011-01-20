@@ -43,22 +43,17 @@ public:
 	virtual bool IsGoodBasicPFJet( int, double = 30., double = 2.5);
 	virtual bool IsGoodPFJetMedium(int, double = 30., double = 2.5);
 	virtual bool IsGoodPFJetTight( int, double = 30., double = 2.5);
-	virtual bool IsGoodJ_TDL(int);
-	virtual bool IsGoodbJ_TDL(int);
 
 	// Muon Selectors
 	virtual bool IsGoodBasicMu(int);
 	virtual bool IsTightMu(int);
 	virtual bool IsLooseMu(int);
 	virtual bool IsLooseNoTightMu(int);
-	virtual bool IsGoodMu_TDL(int);
 
 	// Electron Selectors
 	virtual bool IsGoodBasicEl		(int);
 	virtual bool IsElInGap(int);
 	virtual bool IsElFromPrimaryVx	(int);
-
-	virtual bool IsGoodEl_TDL		(int);
 
 	virtual bool IsGoodElId_WP80	(int);
 	virtual bool IsGoodElId_WP90	(int);

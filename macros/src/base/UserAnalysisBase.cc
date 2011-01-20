@@ -166,22 +166,6 @@ void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 ///////////////////////////////////////////////////////////////
 // Object selections:
 // JETS
-bool UserAnalysisBase::IsGoodJ_TDL(int index) {
-	if( fTR->JPt[index] < 30. ) 			return false;
-	if( fabs(fTR->JEta[index]) > 2.5 ) 		return false;
-	if (fTR->JEMfrac[index] <= 0.01)  		return false;
-	if (fTR->JID_n90Hits[index] <= 1) 		return false;
-	if (fTR->JID_HPD[index] >= 0.98)  		return false;
-
-	return true;
-}
-
-bool UserAnalysisBase::IsGoodbJ_TDL(int index) {
-	if(! IsGoodJ_TDL(index)) return false;
-	if(fTR->JbTagProbSimpSVHighPur[index] < 2.0) return false;
-	if(fabs(fTR->JEta[index]) > 2.0) return false;
-	return true;
-}
 
 bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacut){
 	// Basic PF jet cleaning and ID cuts
@@ -267,18 +251,6 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	return true;
 }
 
-bool UserAnalysisBase::IsGoodMu_TDL(int index){
-	if(fabs(fTR->MuEta[index])>2.5) return false;
-	if(fTR->MuIsGMPT[index] == 0) return false;
-	if(fTR->MuIsGlobalMuon[index] == 0) return false;
-	if(fTR->MuNChi2[index] > 10) return false;
-	if(fabs(fTR->MuD0BS[index]) > 0.02) return false;
-	if(fTR->MuNTkHits[index] < 11) return false;
-	if(fTR->MuPt[index] < 10) return false;
-	if(fTR->MuRelIso03[index] > 0.15) return false;
-	return true;
-}
-
 bool UserAnalysisBase::IsTightMu(int index){
 	if(!IsGoodBasicMu(index)) return false;
 	if(fTR->MuRelIso03[index] > 0.15) return false;
@@ -297,42 +269,6 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 }
 
 // ELECTRONS
-bool UserAnalysisBase::IsGoodEl_TDL(int index){
-	// ---- electron selection from Top-Dilepton group  ----
-	// ---- El id WP95
-	double etaEgapUpperEdge         = 1.5660;
-	double etaEgapLowerEdge         = 1.4442;
-	
-	if( fTR->ElPt[index]        < 5.    ) return false;
-	if( fabs(fTR->ElEta[index]) > 2.4   ) return false;
-	if( fabs(fTR->ElEta[index]) > etaEgapLowerEdge && fabs(fTR->ElEta[index]) < etaEgapUpperEdge) return false;
-	if( fTR->ElD0BS[index]      >= 0.04 ) return false;
-	
-	// conversion rejection && ID WP95
-	if(fTR->ElIDsimpleWP95relIso[index]!=5 && fTR->ElIDsimpleWP95relIso[index]!=7) return false;	
-	
-	// isolation
-	double elIsoEcal;
-	if( fabs(fTR->ElEta[index]) < etaEgapLowerEdge ){
-		elIsoEcal = fTR->ElDR03EcalRecHitSumEt[index] - 1.;
-		elIsoEcal = ((0. > elIsoEcal) ? 0. : elIsoEcal);
-	} else if(fabs(fTR->ElEta[index]) > etaEgapUpperEdge ){
-		elIsoEcal = fTR->ElDR03EcalRecHitSumEt[index];
-	}
-	double pt = ((20. > fTR->ElEt[index]) ? 20. : fTR->ElEt[index]);
-	double elIso = (fTR->ElDR03TkSumPt[index] + elIsoEcal + fTR->ElDR03HcalTowerSumEt[index]) / pt;
-	if( elIso > 0.15 ) return false;
-	
-	// rejection if matched to muon	
-	for( int im = 0; im < fTR->NMus; ++im ){
-		if( (fTR->MuIsGlobalMuon[im] == 1 || fTR->MuIsTrackerMuon[im] == 1) && ( fTR->MuNTkHits[im] > 10) ) {
-			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
-			if(deltaR <= 0.1) return false;
-		}
-	}
-	
-	return true;
-}
 
 bool UserAnalysisBase::IsGoodBasicEl(int index){
 	// Electrons with WP95 ID and conv. rej.
