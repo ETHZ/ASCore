@@ -23,9 +23,7 @@ public:
 	double GetDiLeptInvMass();
 	
 	vector<int> fElecs;
-	vector<int> fElecsLoose;
 	vector<int> fMuons;
-	vector<int> fMuonsLoose;
 	vector<int> fJets;
 	vector<int> fJetsLoose;
 	vector<int> fJetsMedium;

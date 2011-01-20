@@ -38,46 +38,38 @@ void MultiplicityAnalysisBase::InitializeEvent(){
 
 void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fElecs.clear();
-	fElecsLoose.clear();
 	fMuons.clear();
-	fMuonsLoose.clear();
 	fJets.clear();
 	fJetsLoose.clear();
 	fJetsMedium.clear();
 	fJetsTight.clear();
 	fBJets.clear();
 
-	vector<double> muloose;
 	vector<double> mutight;
 	for(int i=0; i< fTR->NMus; ++i){
-		if(! IsTightMu(i)            ) continue;
-		if(! (fTR->MuPt[i] > 7)      ) continue;
-		fMuonsLoose.push_back(i);
-		muloose.push_back(fTR->MuPt[i]);
+		if(! IsGoodBasicMu(i)        ) continue;
 		if(! (fTR->MuPt[i] > 10)     ) continue;
+		double iso    = fTR->MuRelIso03[i];
+		double pt     = fTR->MuPt[i];
+		double hybiso = iso*pt / std::max(20.,pt);
+		if(! (hybiso < 0.15)         ) continue;
 		fMuons.push_back(i);
 		mutight.push_back(fTR->MuPt[i]);
 	}
 	fMuons      = Util::VSort(fMuons     , mutight);
-	fMuonsLoose = Util::VSort(fMuonsLoose, muloose);
 	
-	vector<double> elloose;
 	vector<double> eltight;
 	for(int i=0; i< fTR->NEles; ++i){
-		if(! IsGoodEl_TDL(i)                 ) continue;
-		if(! (fTR->ElPt[i] > 7 )             ) continue;
-		fElecsLoose.push_back(i);
-		elloose.push_back(fTR->ElPt[i]);
-		if(! (fTR->ElPt[i] > 10)             ) continue;
-		if(fTR->ElIDsimpleWPrelIso[i]!=5 && fTR->ElIDsimpleWPrelIso[i]!=7) continue;
+		if(! IsLooseEl(i)               ) continue;
+		if(! (fTR->ElPt[i] > 10)        ) continue;
+		if(! IsIsolatedEl(i, 0.15, 0.15)) continue; //hybiso 
 		fElecs.push_back(i);
 		eltight.push_back(fTR->ElPt[i]);
-
 	}
 	fElecs      = Util::VSort(fElecs     , eltight);
-	fElecsLoose = Util::VSort(fElecsLoose, elloose);
 
 	vector<double> pt1;
+	vector<double> pt2;
 	vector<double> pfloose;
 	vector<double> pfmedium;
 	vector<double> pftight;
@@ -103,6 +95,10 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		if(! IsGoodBasicPFJet(ij,  20., 2.4) ) continue;
 		fJetsLoose.push_back(ij);
 		pfloose.push_back(fTR->PFJPt[ij]);
+		if( fTR->PFJbTagProbTkCntHighEff[ij] > 3.3){
+			fBJets.push_back(ij);
+			pt2.push_back(fTR->JPt[ij]);	
+		}
 		if(! IsGoodPFJetMedium(ij, 20., 2.4) ) continue;
 		fJetsMedium.push_back(ij);
 		pfmedium.push_back(fTR->PFJPt[ij]);
@@ -110,7 +106,8 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		fJetsTight.push_back(ij);
 		pftight.push_back(fTR->PFJPt[ij]);
 	}
-	fJets        = Util::VSort(fJets     ,  pt1);
+	fJets        = Util::VSort(fJets,       pt1);
+	fBJets       = Util::VSort(fBJets,      pt2);
 	fJetsLoose   = Util::VSort(fJetsLoose,  pfloose);
 	fJetsMedium  = Util::VSort(fJetsMedium, pfmedium);
 	fJetsTight   = Util::VSort(fJetsTight,  pftight);
@@ -118,29 +115,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	pfmedium.clear();
 	pftight.clear();
 	pt1.clear();
-	
-	vector<double> pt2;
-	for(int ij=0; ij < fTR->NJets; ++ij){
-		if(! IsGoodbJ_TDL(ij) ) continue;
-		bool JGood(true);
-		for(int i=0; i<fMuons.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->MuEta[fMuons[i]], 
-					fTR->JPhi[ij], fTR->MuPhi[fMuons[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		for(int i=0; i<fElecs.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->JEta[ij], fTR->ElEta[fElecs[i]], 
-					fTR->JPhi[ij], fTR->ElPhi[fElecs[i]]);
-			if(deltaR < 0.4)   JGood=false;
-		}
-		if(JGood==false) continue;
-
-		fBJets.push_back(ij);
-		pt2.push_back(fTR->JPt[ij]);	
-	}
-	fBJets = Util::VSort(fBJets, pt2);
-
-
+	pt2.clear();
 }
 
 void MultiplicityAnalysisBase::FindLeptonConfig(){

@@ -121,11 +121,11 @@ public:
 
   TLorentzVector lv;
 
-  Bool_t   isTight;
   Double_t MT;
+  Double_t Iso;
   Int_t    Charge;
 
-  ClassDef(MT2Elec, 4)
+  ClassDef(MT2Elec, 5)
 };
 
 // MT2Muon ----------------------------------
@@ -140,11 +140,11 @@ public:
 
   TLorentzVector lv;
 
-  Bool_t   isTight;
   Double_t MT;
+  Double_t Iso;
   Int_t    Charge;
 
-  ClassDef(MT2Muon, 4)
+  ClassDef(MT2Muon, 5)
 };
 
 
@@ -183,9 +183,7 @@ public:
   void SetNJetsIDMedium (int n);
   void SetNJetsIDTight  (int n);
   void SetNEles         (int n);
-  void SetNElesLoose    (int n);
   void SetNMuons        (int n);
-  void SetNMuonsLoose   (int n);
   
   // My functions here
   // NJets
@@ -217,7 +215,7 @@ public:
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
   Double_t GetMCT(bool massive=false, int met=1);
   // Leptons
-  Double_t GetDiLeptonInvMass(int same_sign=0, int same_flavour=1, int flavour=0, int tight=-1, double pt=10, bool exclDiLept=false);
+  Double_t GetDiLeptonInvMass(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, bool exclDiLept=false);
   Bool_t   GenDiLeptonfromZ(unsigned int pid=11, double pt=10., double eta=2.4, double lower_Minv=60, double upper_Minv=120);
 
   Int_t   NJets;
@@ -242,7 +240,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 10)
+  ClassDef(MT2tree, 11)
 };
 
 #endif

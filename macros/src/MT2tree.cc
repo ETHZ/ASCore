@@ -180,8 +180,8 @@ MT2Muon::~MT2Muon(){
 
 void MT2Muon::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
-  isTight       = 0;
   MT            = -9999.99;
+  Iso           = -9999.99;
   Charge        = -999;
 }
 
@@ -199,8 +199,8 @@ MT2Elec::~MT2Elec(){
 
 void MT2Elec::Reset() {
   lv.SetPxPyPzE(0, 0, 0, 0);
-  isTight       = 0;
   MT            = -9999.99;
+  Iso           = -9999.99;
   Charge        = -999;
 }
 
@@ -222,9 +222,7 @@ void MT2tree::Reset() {
   NJetsIDMedium = 0;
   NJetsIDTight  = 0;
   NEles         = 0;
-  NElesLoose    = 0;
   NMuons        = 0;
-  NMuonsLoose   = 0;
   NGenLepts     = 0;
 
   misc.Reset();
@@ -270,16 +268,8 @@ void MT2tree::SetNEles(int n) {
   NEles = n;
 }
 
-void MT2tree::SetNElesLoose(int n) {
-  NElesLoose = n;
-}
-
 void MT2tree::SetNMuons(int n) {
   NMuons = n;
-}
-
-void MT2tree::SetNMuonsLoose(int n) {
-  NMuonsLoose = n;
 }
 
 Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met){
@@ -710,25 +700,25 @@ Bool_t   MT2tree::GenDiLeptonfromZ(unsigned int pid, double pt, double eta, doub
 	return true;
 }
 
-Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavour, int tight, double pt, bool exclDiLept){
+Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavour, double pt, bool exclDiLept){
 	// flavour == 0 : don't care if el or mu
 	// flavour == 1 : only electrons
 	// flavour == 2 : only muons
 	
-	struct lepton {TLorentzVector lv; int charge; string flavour; bool isTight;} lepts[NElesLoose + NMuonsLoose];	
-	for(int i=0; i<NElesLoose; ++i){
-		lepts[i].lv=ele[i].lv; lepts[i].charge =ele[i].Charge; lepts[i].flavour ="ele"; lepts[i].isTight=ele[i].isTight;
+	struct lepton {TLorentzVector lv; int charge; string flavour;} lepts[NEles + NMuons];	
+	for(int i=0; i<NEles; ++i){
+		lepts[i].lv=ele[i].lv; lepts[i].charge =ele[i].Charge; lepts[i].flavour ="ele";
 	}
-	for(int i=0; i<NMuonsLoose; ++i){
-		lepts[i].lv=muo[i].lv; lepts[i].charge =muo[i].Charge; lepts[i].flavour ="muo"; lepts[i].isTight=muo[i].isTight;
+	for(int i=0; i<NMuons; ++i){
+		lepts[i].lv=muo[i].lv; lepts[i].charge =muo[i].Charge; lepts[i].flavour ="muo"; 
 	}
 	
 	int index1=-1, index2=-1;
-	if( (NElesLoose + NMuonsLoose) <= 1)                                               return -10;
-	if( (NElesLoose + NMuonsLoose) >  2 && exclDiLept)                                 return -100;
-	else if( (NElesLoose + NMuonsLoose) >  2 && !exclDiLept){
+	if( (NEles + NMuons) <= 1)                                               return -10;
+	if( (NEles + NMuons) >  2 && exclDiLept)                                 return -100;
+	else if( (NEles + NMuons) >  2 && !exclDiLept){
 		double pt1=0, pt2=0;
-		for(int i=0; i<(NElesLoose + NMuonsLoose); ++i){
+		for(int i=0; i<(NEles + NMuons); ++i){
 			if(lepts[i].lv.Pt()>pt1){
 				pt2 =pt1;
 				index2=index1;
@@ -740,7 +730,7 @@ Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavou
 			}
 		}	
 	
-	}else if ((NElesLoose + NMuonsLoose)==2) {
+	}else if ((NEles + NMuons)==2) {
 		index1=0; index2=1; 
 	}
 
@@ -749,8 +739,6 @@ Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavou
 	if(  lepts[index1].lv.Pt() < pt || lepts[index2].lv.Pt() < pt )                      return -400;
 	if(  lepts[index1].flavour != lepts[index2].flavour && same_flavour == 1 )           return -500;
 	if(  lepts[index1].flavour == lepts[index2].flavour && same_flavour == 0 )           return -600;
-	if( (lepts[index1].isTight ==0 || lepts[index2].isTight==0) && tight == 1 )          return -700;
-	if( (lepts[index1].isTight ==1 || lepts[index2].isTight==1) && tight == 0 )          return -800;
 	if( (lepts[index1].flavour =="muo" || lepts[index2].flavour=="muo") && flavour == 1) return -910;
 	if( (lepts[index1].flavour =="ele" || lepts[index2].flavour=="ele") && flavour == 2) return -920;
 
