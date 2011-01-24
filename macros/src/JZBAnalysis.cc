@@ -467,7 +467,7 @@ const bool JZBAnalysis::passMuTriggers() {
 void JZBAnalysis::Analyze(){
   
   counters[EV].fill("All events");
-  if ( fDataType_ != "mc" ) {
+  if ( fDataType_ == "mu" || fDataType_ == "el" ) {
     if( (fDataType_=="mu") && passMuTriggers() ) {
       counters[EV].fill("... pass muon triggers");
     } else if ( (fDataType_=="el") && passElTriggers() ) {
@@ -477,7 +477,7 @@ void JZBAnalysis::Analyze(){
     }
     counters[EV].fill("... pass all trigger requirements");
   }
-  
+
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
   nEvent.reset();
@@ -1039,7 +1039,7 @@ const bool JZBAnalysis::IsCustomEl(const int index){
 
   // Electron ID
   int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if(elIDWP95!=7) return false;
+  if (elIDWP95!=7) return false;
   counters[EL].fill(" ... passes WP95 ID");
 
   // Flat isolation below 20 GeV (only for synch.)

@@ -416,10 +416,10 @@ bool UserAnalysisBase::IsGoodEvent(){
 	double pvx = fTR->PrimVtxx;
 	double pvy = fTR->PrimVtxy;
 	double pvz = fTR->PrimVtxz;
-	if(fTR->PrimVtxIsFake) return false;
-	if(fabs(pvz) > 24.) return false;
-	if(sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
-	if(fTR->PrimVtxNdof < 5) return false;
+	if (fTR->PrimVtxIsFake) return false;
+	if (fabs(pvz) > 24.) return false;
+	if (sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
+	if (fTR->PrimVtxNdof < 5) return false;
 	return true;
 }
 
