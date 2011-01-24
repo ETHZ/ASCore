@@ -42,6 +42,7 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 		}
 		fSSDLAnalysis->Analyze();
 	}
+	cout << endl;
 }
 
 // Method called before starting the event loop
