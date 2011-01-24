@@ -20,7 +20,7 @@ public:
 	enum gSample {
 		sample_begin,
 		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
-		TTbar, WJets, ZJets, VVJets, QCD15, QCD30, QCD80, QCD170,
+		TTbar, WJets, ZJets, AstarJets, VVJets, QCD15, QCD30, QCD80, QCD170,
 		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
 		LM0, InclMu,
 		gNSAMPLES
@@ -54,61 +54,75 @@ public:
 	
 	//////////////////////////////
 	// Plots
-	void makefRatioPlots();
-	void makepRatioPlots();
-	void makeIsolationPlots();
-	void makeIsolationPlot();
-	void makePtPlots();
+	void makeMufRatioPlots();
+	void makeMupRatioPlots();
+	void makeElfRatioPlots();
+	void makeElpRatioPlots();
+	void makeMuIsolationPlots();
+	void makeMuIsolationPlot();
+	void makeMuPtPlots();
 	
 	void makeDiffPredictionPlots();
+	void makeDataClosurePlots();
+	void makeNT012Plots();
+
 	void makeIntPrediction(TString);
 	void makeIntPredictionMuMu(vector<int>);
 	
-	void makeIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
-	void makeIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
-	void makeIsoVsPtPlot(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
-	void makeIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
+	void makeMuIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
+	void makeMuIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
+	void makeMuIsoVsPtPlot(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
+	void makeMuIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
 	
 	//////////////////////////////
 	// Fake ratios
 	// Produce from tree, with given selections:
-	void produceRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	vector<double> produceRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int));
+	void produceMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void produceMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
 
-	void fillfRatio(int, int);
-	void fillfRatio(vector<int>, int);
-	void fillfRatio(int, int, const int, const double*, const int, const double*);
-	void fillfRatio(vector<int>, int, const int, const double*, const int, const double*);
+	void produceElRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void produceElRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
 
-	void fillpRatio(int, int);
-	void fillpRatio(vector<int>, int);
-	void fillpRatio(int, int, const int, const double*, const int, const double*);
-	void fillpRatio(vector<int>, int, const int, const double*, const int, const double*);
+	void fillMufRatio(int, int);
+	void fillMufRatio(vector<int>, int);
+	void fillMufRatio(int, int, const int, const double*, const int, const double*);
+	void fillMufRatio(vector<int>, int, const int, const double*, const int, const double*);
+
+	void fillMupRatio(int, int);
+	void fillMupRatio(vector<int>, int);
+	void fillMupRatio(int, int, const int, const double*, const int, const double*);
+	void fillMupRatio(vector<int>, int, const int, const double*, const int, const double*);
 	
-	TH1D* fillRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-	TH2D* fillRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
-	TH2D* fillRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
+	TH1D* fillMuRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
+	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
+	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
+	TH2D* fillMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
+	TH2D* fillMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 
-	void plotRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
-	void plotRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
+	void plotMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
+	void plotMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
 
 	// Calculate from pre stored numbers, with fixed selections:
-	TH1D* fillRatioPt(int, int, bool = false);
-	TH1D* fillRatioPt(vector<int>, int, bool = false);
+	TH1D* fillMuRatioPt(int, int, bool = false);
+	TH1D* fillMuRatioPt(vector<int>, int, bool = false);
+	TH1D* fillElRatioPt(int, int, bool = false);
+	TH1D* fillElRatioPt(vector<int>, int, bool = false);
 
 	void calculateRatio(vector<int>, gChannel, int, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, int, float&, float&, bool = false);
+	void calculateRatio(vector<int>, gChannel, int, float&, float&, float&, bool = false);
+
+	void ratioWithBinomErrors(float, float, float&, float&);
+	void ratioWithPoissErrors(float, float, float&, float&);
+	void ratioWithAsymmCPErrors(int, int, float&, float&, float&);
 
 	//////////////////////////////
 	// Predictions
 	void makeSSPredictionPlots(vector<int>);
 	void NObs(TH1D *&, vector<int>, bool(MuonPlotter::*)());
 	void NObs(TH1D *&, vector<int>);
-	vector<TH1D*> NsigPredFromFPRatios(const int, bool = false);
+	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	
 	void fillYields();                 // All samples
 	void fillYields(int);              // One sample
@@ -151,6 +165,8 @@ public:
 
 	bool isSigSupMuEvent();
 	bool isSigSupMuEventTRG();
+	bool isSigSupOSMuMuEvent(int&, int&);
+	bool isSigSupSSMuMuEvent(int&, int&);
 	bool isZMuMuEvent();
 	bool isZMuMuEventTRG();
 
@@ -201,13 +217,20 @@ public:
 	bool isGoodJet_LooseLep(int);
 
 private:
-	const int     getNPtBins();
-	const double *getPtBins();
-	const int     getNPt2Bins();
-	const double *getPt2Bins();
-	const int     getNEtaBins();
-	const double *getEtaBins();
+	const int     getNMuPtBins();
+	const double *getMuPtBins();
+	const int     getNMuPt2Bins();
+	const double *getMuPt2Bins();
+	const int     getNMuEtaBins();
+	const double *getMuEtaBins();
 	
+	const int     getNElPtBins();
+	const double *getElPtBins();
+	const int     getNElPt2Bins();
+	const double *getElPt2Bins();
+	const int     getNElEtaBins();
+	const double *getElEtaBins();
+
 	Monitor fCounters[gNSAMPLES][3];
 	bool fDoCounting;
 	gSample fCurrentSample;
@@ -293,12 +316,19 @@ private:
 	TFile *fStorageFile;
 	TString fOutputFileName;
 	
-	TH2D *fH2D_fRatio;
-	TH1D *fH1D_fRatioPt;
-	TH1D *fH1D_fRatioEta;
-	TH2D *fH2D_pRatio;
-	TH1D *fH1D_pRatioPt;
-	TH1D *fH1D_pRatioEta;
+	TH2D *fH2D_MufRatio;
+	TH1D *fH1D_MufRatioPt;
+	TH1D *fH1D_MufRatioEta;
+	TH2D *fH2D_MupRatio;
+	TH1D *fH1D_MupRatioPt;
+	TH1D *fH1D_MupRatioEta;
+
+	TH2D *fH2D_ElfRatio;
+	TH1D *fH1D_ElfRatioPt;
+	TH1D *fH1D_ElfRatioEta;
+	TH2D *fH2D_ElpRatio;
+	TH1D *fH1D_ElpRatioPt;
+	TH1D *fH1D_ElpRatioEta;
 };
 
 #endif
