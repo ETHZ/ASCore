@@ -1404,8 +1404,8 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
 	if(logy) outputname += "_log";
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
-	delete h1;
-	delete h2;
+	// delete h1;
+	// delete h2;
 }
 
 //____________________________________________________________________________
@@ -1703,10 +1703,10 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 	col->cd();
 	gPad->SetFillStyle(0);
 	if(logy) col->SetLogy(1);
-	h1->Sumw2();
-	h2->Sumw2();
-	h3->Sumw2();
-	h4->Sumw2();
+	// h1->Sumw2();
+	// h2->Sumw2();
+	// h3->Sumw2();
+	// h4->Sumw2();
 
 	// // Determine plotting range
 	// double max1 = h1->GetMaximum();
@@ -2261,8 +2261,18 @@ TString AnaClass::numbForm(double n){
 }
 
 //____________________________________________________________________________
-void AnaClass::printProgress(int entry, const int nentries, TString header, const int step){
-	if(entry%step == 0 || (entry+1 == nentries) ) cout << " Processing " << setw(40) << left << header << setw(4) << right << (int)((float)(entry+1)/(float)nentries*100.) << " %      \r" << flush;
+void AnaClass::printProgress(int entry, const int nentries, TString header, int step){
+	if(step == -1){
+		step = nentries/20;
+		if( step < 200 )   step = 200;
+		if( step > 10000 ) step = 10000;
+	}
+	if(entry%step != 0 && (entry+1 != nentries) ) return;
+	
+	float progress_f = (float)(entry+1)/(float)(nentries)*100.;
+	char progress[10];
+	sprintf(progress, "%5.1f", progress_f);
+	cout << " Processing " << setw(40) << left << header << setw(6) << right << progress << " %      \r" << flush;
 }
 
 //____________________________________________________________________________
