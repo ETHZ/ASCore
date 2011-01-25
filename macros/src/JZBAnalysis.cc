@@ -86,8 +86,12 @@ public:
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
 
-  int pfJetGoodNum25;
   int pfJetGoodNum35;
+  int pfJetGoodNum33;
+  int pfJetGoodNum315;
+  int pfJetGoodNum285;
+  int pfJetGoodNum27;
+  int pfJetGoodNum25;
 
   float recoilpt[rMax];
   float dphiRecoilLep[rMax];
@@ -116,6 +120,9 @@ public:
   float jzb[rMax];
   float dphi_sumJetVSZ[rMax];
   float sumJetPt[rMax];
+
+  float weight;
+
 };
 
 nanoEvent::nanoEvent(){};
@@ -217,6 +224,10 @@ void nanoEvent::reset()
   }
   pfJetGoodNum=0;
   pfJetGoodNum25=0;
+  pfJetGoodNum27=0;
+  pfJetGoodNum285=0;
+  pfJetGoodNum315=0;
+  pfJetGoodNum33=0;
   pfJetGoodNum35=0;
 
 
@@ -233,6 +244,8 @@ void nanoEvent::reset()
     dphi_sumJetVSZ[rCounter]=0;
     sumJetPt[rCounter]=0;
   }
+
+  weight = 1.0;
 }
 
 
@@ -361,11 +374,16 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
 
   myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
+  myTree->Branch("pfJetGoodNum27",&nEvent.pfJetGoodNum27,"pfJetGoodNum27/I");
+  myTree->Branch("pfJetGoodNum285",&nEvent.pfJetGoodNum285,"pfJetGoodNum285/I");
+  myTree->Branch("pfJetGoodNum315",&nEvent.pfJetGoodNum315,"pfJetGoodNum315/I");
+  myTree->Branch("pfJetGoodNum33",&nEvent.pfJetGoodNum33,"pfJetGoodNum33/I");
   myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
 
   myTree->Branch("jzb",nEvent.jzb,"jzb[30]/F");
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
   myTree->Branch("sumJetPt",nEvent.sumJetPt,"sumJetPt[30]/F");
+  myTree->Branch("weight", &nEvent.weight,"weight/F");
 
   // Define event counters (so we have them in the right order)
   counters[EV].fill("All events",0.);
@@ -561,7 +579,7 @@ void JZBAnalysis::Analyze(){
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   
-  nEvent.reset();
+  //nEvent.reset();
   
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
   
@@ -691,6 +709,10 @@ void JZBAnalysis::Analyze(){
     nEvent.pfJetNum=0;
     nEvent.pfJetGoodNum=0;
     nEvent.pfJetGoodNum25=0;
+    nEvent.pfJetGoodNum27=0;
+    nEvent.pfJetGoodNum285=0;
+    nEvent.pfJetGoodNum315=0;
+    nEvent.pfJetGoodNum33=0;
     nEvent.pfJetGoodNum35=0;
     vector<lepton> pfGoodJets;
     for(int i =0 ; i<fTR->PFNJets;i++) // jet loop
@@ -769,6 +791,10 @@ void JZBAnalysis::Analyze(){
           nEvent.pfJetGoodNum++;
         }
         if ( jpt>25 ) nEvent.pfJetGoodNum25++;
+        if ( jpt>27 ) nEvent.pfJetGoodNum27++;
+        if ( jpt>285 ) nEvent.pfJetGoodNum285++;
+        if ( jpt>315 ) nEvent.pfJetGoodNum315++;
+        if ( jpt>33 ) nEvent.pfJetGoodNum33++;
         if ( jpt>35 ) nEvent.pfJetGoodNum35++;
       }
     
