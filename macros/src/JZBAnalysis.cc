@@ -24,9 +24,17 @@ public:
 
   float pt1; // leading leptons
   float pt2;
-  float genZPt; // leading legenPtons
   float genPt1; // leading legenPtons
   float genPt2;
+  int   genMID;
+  int   genGMID;
+  float genMET;
+  float genZPt;    // True Z Pt
+  float genRecoil;
+  float genJZB;
+  float genRecoilSel;
+  float genZPtSel; // Z candidate from selected leptons
+  float genJZBSel;
   float eta1; // leading leptons
   float eta2;
   float phi1;
@@ -133,6 +141,20 @@ void nanoEvent::reset()
   pt=0;
   phi=0;
 
+  pt1=0;
+  pt2=0;
+  genPt1=0;
+  genPt2=0;
+  genMET=0;
+  genZPt=0;
+  genRecoil=0;
+  genJZB = 0;
+  genZPtSel=0;
+  genRecoilSel=0;
+  genJZBSel = 0;
+  genMID = 0;
+  genGMID = 0;
+  
   eta1=0; // leading leptons
   eta2=0;
   phi1=0;
@@ -286,9 +308,17 @@ void JZBAnalysis::Begin(){
   myTree->Branch("phi",&nEvent.phi,"phi/F");
   myTree->Branch("pt1",&nEvent.pt1,"pt1/F");
   myTree->Branch("pt2",&nEvent.pt2,"pt2/F");
-  myTree->Branch("genZPt",&nEvent.genZPt,"genZPt/F");
   myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
   myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
+  myTree->Branch("genMET",&nEvent.genMET,"genMET/F");
+  myTree->Branch("genZPt",&nEvent.genZPt,"genZPt/F");
+  myTree->Branch("genRecoil",&nEvent.genRecoil,"genRecoil/F");
+  myTree->Branch("genJZB",&nEvent.genJZB,"genJZB/F");
+  myTree->Branch("genZPtSel",&nEvent.genZPtSel,"genZPtSel/F");
+  myTree->Branch("genRecoilSel",&nEvent.genRecoilSel,"genRecoilSel/F");
+  myTree->Branch("genJZBSel",&nEvent.genJZBSel,"genJZBSel/F");
+  myTree->Branch("genMID",&nEvent.genMID,"genMID/I");
+  myTree->Branch("genGMID",&nEvent.genGMID,"genGMID/I");
   myTree->Branch("eta1",&nEvent.eta1,"eta1/F");
   myTree->Branch("eta2",&nEvent.eta2,"eta2/F");
   myTree->Branch("phi1",&nEvent.phi1,"phi1/F");
@@ -387,9 +417,11 @@ void JZBAnalysis::Begin(){
 
   // Define event counters (so we have them in the right order)
   counters[EV].fill("All events",0.);
-  counters[EV].fill("... pass electron triggers",0.);
-  counters[EV].fill("... pass muon triggers",0.);
-  counters[EV].fill("... pass all trigger requirements",0.);
+  if ( fDataType_ != "mc" ) {
+    counters[EV].fill("... pass electron triggers",0.);
+    counters[EV].fill("... pass muon triggers",0.);
+    counters[EV].fill("... pass all trigger requirements",0.);
+  }
   std::string types[3] = { "ee","mm","em" };
   for ( size_t itype=0; itype<3; ++itype ) {
     counters[EV].fill("... "+types[itype]+" pairs",0.); 
@@ -513,7 +545,7 @@ void JZBAnalysis::Analyze(){
 
   
   vector<lepton> leptons;
-  
+  TLorentzVector genZvector; // To store the true Z vector
   // #--- muon loop
   for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
     {
@@ -534,10 +566,22 @@ void JZBAnalysis::Analyze(){
 	  tmpLepton.index = muIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
+          // Store generator information if from Z0
 	  if(fTR->MuGenMID[muIndex]==23 || fTR->MuGenGMID[muIndex]==23)
 	  {
+            nEvent.genMID = fTR->MuGenMID[muIndex];
+            nEvent.genGMID = fTR->MuGenGMID[muIndex];
 	    tmpLepton.genPt = fTR->MuGenPt[muIndex];
-	    if(fTR->MuGenMID[muIndex]==23)nEvent.genZPt = fTR->MuGenMPt[muIndex];
+	    if (fTR->MuGenMID[muIndex]==23)
+              genZvector.SetPtEtaPhiE(fTR->MuGenMPt[muIndex],
+                                      fTR->MuGenMEta[muIndex],
+                                      fTR->MuGenMPhi[muIndex],
+                                      fTR->MuGenME[muIndex]);
+            else
+              genZvector.SetPtEtaPhiE(fTR->MuGenGMPt[muIndex],
+                                      fTR->MuGenGMEta[muIndex],
+                                      fTR->MuGenGMPhi[muIndex],
+                                      fTR->MuGenGME[muIndex]);
 	  }
 
 	  leptons.push_back(tmpLepton);
@@ -565,11 +609,22 @@ void JZBAnalysis::Analyze(){
 	  tmpLepton.index = elIndex;
 	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
+          // Store generator information if from Z0
 	  if(fTR->ElGenMID[elIndex]==23 || fTR->ElGenGMID[elIndex]==23)
 	  {
 	    tmpLepton.genPt = fTR->ElGenPt[elIndex];
-
-	    if(fTR->ElGenMID[elIndex]==23)nEvent.genZPt = fTR->ElGenMPt[elIndex];
+            nEvent.genMID = fTR->ElGenMID[elIndex];
+            nEvent.genGMID = fTR->ElGenGMID[elIndex];
+	    if (fTR->ElGenMID[elIndex]==23)
+              genZvector.SetPtEtaPhiE(fTR->ElGenMPt[elIndex],
+                                      fTR->ElGenMEta[elIndex],
+                                      fTR->ElGenMPhi[elIndex],
+                                      fTR->ElGenME[elIndex]);
+            else
+              genZvector.SetPtEtaPhiE(fTR->ElGenGMPt[elIndex],
+                                      fTR->ElGenGMEta[elIndex],
+                                      fTR->ElGenGMPhi[elIndex],
+                                      fTR->ElGenGME[elIndex]);
 	  }
 
 	  leptons.push_back(tmpLepton);
@@ -579,10 +634,8 @@ void JZBAnalysis::Analyze(){
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   
-  //nEvent.reset();
-  
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
-  
+
   if(sortedGoodLeptons.size() > 1) {
     
     counters[EV].fill("... has at least 2 leptons");
@@ -972,6 +1025,24 @@ void JZBAnalysis::Analyze(){
     nEvent.metPar[4]  = pfMETvector.Dot(s1+s2);
     nEvent.metPerp[4] = pfMETvector.Perp((s1+s2).Vect());
     
+    // Store some generator information
+    // Both from selected lepton and actual leptons from Z
+    TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
+    int i1 = sortedGoodLeptons[PosLepton1].index;
+    int i2 = sortedGoodLeptons[PosLepton2].index;
+    TLorentzVector genLep1; 
+    genLep1.SetPtEtaPhiE(fTR->MuGenPt[i1],fTR->MuGenEta[i1],fTR->MuGenPhi[i1],fTR->MuGenE[i1]);
+    TLorentzVector genLep2;
+    genLep2.SetPtEtaPhiE(fTR->MuGenPt[i2],fTR->MuGenEta[i2],fTR->MuGenPhi[i2],fTR->MuGenE[i2]);
+
+    nEvent.genMET       = fTR->GenMET;
+    nEvent.genRecoil    = (-GenMETvector - genZvector).Pt();
+    nEvent.genZPt       = genZvector.Pt();
+    nEvent.genJZB       = nEvent.genRecoil - genZvector.Pt();
+    nEvent.genRecoilSel = (-GenMETvector - genLep1 - genLep2).Pt();
+    nEvent.genZPtSel    = (genLep1 + genLep2).Pt();
+    nEvent.genJZBSel    = nEvent.genRecoilSel - (genLep1 + genLep2).Pt();
+
     myTree->Fill();
   }
     
