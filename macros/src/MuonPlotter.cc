@@ -22,33 +22,33 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-static const int gNMuPtbins_0  = 3;
-static const double gMuPtbins_0 [gNMuPtbins_0+1]  = {20., 30., 40., 100.};
+static const int gNMuPtbins_0  = 6;
+static const double gMuPtbins_0 [gNMuPtbins_0+1]  = {20., 30., 40., 50., 60., 70., 100.};
 
-static const int gNMuPtbins_1  = 4;
-static const double gMuPtbins_1 [gNMuPtbins_1+1]  = { 5., 10., 20., 30., 40}; // ., 50., 65., 80.};
+static const int gNMuPtbins_1  = 7;
+static const double gMuPtbins_1 [gNMuPtbins_1+1]  = { 5., 10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
 
-static const int gNMuPt2bins_0 = 4;
-static const double gMuPt2bins_0[gNMuPt2bins_0+1] = {10., 20., 30., 40., 100.};
+static const int gNMuPt2bins_0  = 7;
+static const double gMuPt2bins_0 [gNMuPt2bins_0+1]  = {10., 20., 30., 40., 50., 60., 70., 100.};
 
-static const int gNMuPt2bins_1 = 4;
-static const double gMuPt2bins_1[gNMuPt2bins_1+1] = { 5., 10., 20., 30., 40}; // ., 50., 65., 80.};
+static const int gNMuPt2bins_1 = 7;
+static const double gMuPt2bins_1[gNMuPt2bins_1+1] = { 5., 10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
 
 static const int    gNMuEtabins = 1;
 static const double gMuEtabins[gNMuEtabins+1] = {-2.4, 2.4};
 
 // Electron Binning //////////////////////////////////////////////////////////////
-static const int gNElPtbins_0  = 3;
-static const double gElPtbins_0 [gNElPtbins_0+1]  = {20., 30., 40., 100.};
+static const int gNElPtbins_0  = 6;
+static const double gElPtbins_0 [gNElPtbins_0+1]  = {20., 30., 40., 50., 60., 70., 100.};
 
-static const int gNElPtbins_1  = 4;
-static const double gElPtbins_1 [gNElPtbins_1+1]  = { 5., 10., 20., 30., 40}; // ., 50., 65., 80.};
+static const int gNElPtbins_1  = 6;
+static const double gElPtbins_1 [gNElPtbins_1+1]  = {10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
 
-static const int gNElPt2bins_0 = 4;
-static const double gElPt2bins_0[gNElPt2bins_0+1] = {10., 20., 30., 40., 100.};
+static const int gNElPt2bins_0 = 7;
+static const double gElPt2bins_0[gNElPt2bins_0+1] = {10., 20., 30., 40., 50., 60., 70., 100.};
 
-static const int gNElPt2bins_1 = 4;
-static const double gElPt2bins_1[gNElPt2bins_1+1] = { 5., 10., 20., 30., 40}; // ., 50., 65., 80.};
+static const int gNElPt2bins_1 = 6;
+static const double gElPt2bins_1[gNElPt2bins_1+1] = {10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
 
 static const int    gNElEtabins = 1;
 static const double gElEtabins[gNElEtabins+1] = {-2.4, 2.4};
@@ -161,6 +161,7 @@ void MuonPlotter::init(TString filename){
 	fAllSamples.push_back(InclMu);
 
 	bookHistos();
+	bookRatioHistos();
 }
 
 //____________________________________________________________________________
@@ -287,7 +288,7 @@ const double *MuonPlotter::getElEtaBins(){
 void MuonPlotter::doAnalysis(){
 	if(readHistos(fOutputFileName) != 0) return;
 	
-	fLumiNorm = 35.;
+	// fLumiNorm = 35.;
 	// printYields(Muon);
 	// printYields(Electron);
 	// printYields(EMu);
@@ -301,14 +302,18 @@ void MuonPlotter::doAnalysis(){
 	// makeIntPrediction(fOutputDir + "Yields.txt");
 	// makeMuIsolationPlot();
 	
-	makeMufRatioPlots();
-	makeMupRatioPlots();
-	makeElfRatioPlots();
-	makeElpRatioPlots();
+	// makeMufRatioPlots();
+	// makeMupRatioPlots();
+	// makeElfRatioPlots();
+	// makeElpRatioPlots();
 
-	// makeDiffPredictionPlots();
+	fLumiNorm = 1000.;
+	makeDiffPredictionPlots(fMCBG);
 	// makeDataClosurePlots();
-	// makeNT012Plots();
+
+	makeNT012Plots(fMCBG, Muon);
+	makeNT012Plots(fMCBG, Electron);
+	makeNT012Plots(fMCBG, EMu);
 
 	// makeMuIsoVsPtPlot(fMCBG, 0, &MuonPlotter::isSigSupMuEvent, &MuonPlotter::isLooseMuon, fMuData, 0, &MuonPlotter::isSigSupMuEventTRG, &MuonPlotter::isLooseMuon, "IsoVsPt_SigSuppressed", false);
 }
@@ -379,27 +384,15 @@ void MuonPlotter::doLoop(){
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeDiffPredictionPlots(){
+void MuonPlotter::makeDiffPredictionPlots(vector<int> samples){
 	// Fill the ratios
-	fLumiNorm = 1000.;
-	// printYields(fLumiNorm);
+	
+	fillMuElRatios(samples);
+	fixPRatios(); // puts p ratios to 1 whereever they are 0 (no entries)
 
-	cout << "Producing prediction for :" << endl;
-	for(size_t i = 0; i < fMCBGSig.size(); ++i){
-		int ind = fMCBGSig[i];
-		cout << " " << fSamples[ind].sname << flush;
-	}
-	cout << endl;
-
-	// fillfRatio(fJMData, 0);
-	// fillpRatio(fMuData, 0);
-	// 
-	// makeSSPredictionPlots(fMuData);
-
-	fillMufRatio(fMCBGSig, 0);
-	fillMupRatio(fMCBGSig, 0);
-
-	makeSSPredictionPlots(fMCBGSig);
+	makeSSMuMuPredictionPlots(samples);
+	makeSSElElPredictionPlots(samples);
+	makeSSElMuPredictionPlots(samples);
 }
 
 //____________________________________________________________________________
@@ -526,8 +519,98 @@ void MuonPlotter::makeDataClosurePlots(){
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeNT012Plots(){
-	vector<int> mcsamples = fMCBG;
+void MuonPlotter::makeNT012Plots(vector<int> mcsamples, gChannel chan){
+	TString name;
+	if(chan == Muon) name = "MuMu";
+	if(chan == Electron) name = "ElEl";
+	if(chan == EMu) name = "ElMu";
+	
+	fOutputSubDir = name + "Predictions";
+	
+	THStack *hnt2_stack = new THStack(Form("%s_nt2_stack", name.Data()), "Observed Nt2");
+	THStack *hnt1_stack = new THStack(Form("%s_nt1_stack", name.Data()), "Observed Nt1");
+	THStack *hnt0_stack = new THStack(Form("%s_nt0_stack", name.Data()), "Observed Nt0");
+	const unsigned int nmcsamples = mcsamples.size();
+	TH1D* hnt2[nmcsamples];
+	TH1D* hnt1[nmcsamples];
+	TH1D* hnt0[nmcsamples];
+
+	for(size_t i = 0; i < mcsamples.size(); ++i){
+		int index = mcsamples[i];
+		float scale = fLumiNorm / fSamples[index].lumi;
+		channel *cha;
+		if(chan == Muon)     cha = &fSamples[index].mumu;
+		if(chan == Electron) cha = &fSamples[index].ee;
+		if(chan == EMu)      cha = &fSamples[index].emu;
+		hnt2[i] = (TH1D*)(cha->nthistos.h_nt2_pt )->Clone();
+		hnt1[i] = (TH1D*)(cha->nthistos.h_nt10_pt)->Clone();
+		hnt0[i] = (TH1D*)(cha->nthistos.h_nt0_pt )->Clone();
+		hnt2[i]->Scale(scale);
+		hnt1[i]->Scale(scale);
+		hnt0[i]->Scale(scale);
+		
+		hnt2[i]->SetFillColor(fSamples[index].color);
+		hnt1[i]->SetFillColor(fSamples[index].color);
+		hnt0[i]->SetFillColor(fSamples[index].color);
+
+		hnt2[i] = normHistBW(hnt2[i], fBinWidthScale);
+		hnt1[i] = normHistBW(hnt1[i], fBinWidthScale);
+		hnt0[i] = normHistBW(hnt0[i], fBinWidthScale);
+
+		hnt2_stack->Add(hnt2[i]);
+		hnt1_stack->Add(hnt1[i]);
+		hnt0_stack->Add(hnt0[i]);
+	}
+	
+	hnt2_stack->Draw();
+	hnt2_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
+	hnt1_stack->Draw();
+	hnt1_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
+	hnt0_stack->Draw();
+	hnt0_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
+		
+	TCanvas *c2 = new TCanvas(Form("%s_Nt2", name.Data()), "Observed Nt2", 0, 0, 800, 600);
+	TCanvas *c1 = new TCanvas(Form("%s_Nt1", name.Data()), "Observed Nt1", 0, 0, 800, 600);
+	TCanvas *c0 = new TCanvas(Form("%s_Nt0", name.Data()), "Observed Nt0", 0, 0, 800, 600);
+
+	// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
+	TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+	for(size_t i = 0; i < nmcsamples; ++i){
+		int index = mcsamples[i];
+		leg->AddEntry(hnt2[i], fSamples[index].sname.Data(), "f");
+	}
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	c2->cd();
+	hnt2_stack->Draw("hist");
+	leg->Draw();
+
+	c1->cd();
+	hnt1_stack->Draw("hist");
+	leg->Draw();
+
+	c0->cd();
+	hnt0_stack->Draw("hist");
+	leg->Draw();
+
+
+	Util::PrintNoEPS(c2, name + "ObservedNt2", fOutputDir + fOutputSubDir, fOutputFile);
+	Util::PrintNoEPS(c1, name + "ObservedNt1", fOutputDir + fOutputSubDir, fOutputFile);
+	Util::PrintNoEPS(c0, name + "ObservedNt0", fOutputDir + fOutputSubDir, fOutputFile);
+	delete c2, c1, c0;
+	// for(size_t i = 0; i < nmcsamples; ++i){
+	// 	delete hnt2[i];
+	// 	delete hnt1[i];
+	// 	delete hnt0[i];
+	// }
+	fOutputSubDir = "";
+}
+
+//____________________________________________________________________________
+void MuonPlotter::makeMuNT012Plots(vector<int> mcsamples, bool(MuonPlotter::*eventSelector)(int&, int&)){
+	// vector<int> mcsamples = fMCBG;
 	const bool read = false;
 
 	THStack *hnt2_stack = new THStack("nt2_stack", "Observed Nt2");
@@ -584,7 +667,8 @@ void MuonPlotter::makeNT012Plots(){
 				nb = fChain->GetEntry(jentry);   nbytes += nb;
 
 				int mu1(-1), mu2(-1);
-				if(!isSigSupSSMuMuEvent(mu1, mu2)) continue;
+				if((*this.*eventSelector)(mu1, mu2) == false) continue;
+				// if(!isSigSupSSMuMuEvent(mu1, mu2)) continue;
 
 				if( isTightMuon(mu1) &&  isTightMuon(mu2)) hnt2[i]->Fill(MuPt[mu1], scale);
 				if( isTightMuon(mu1) && !isTightMuon(mu2)) hnt1[i]->Fill(MuPt[mu1], scale);
@@ -1986,18 +2070,6 @@ void MuonPlotter::fillMufRatio(int sample, int muon, const int nptbins, const do
 	fillMufRatio(samples, muon, nptbins, ptbins, netabins, etabins);
 }
 void MuonPlotter::fillMufRatio(vector<int> samples, int muon, const int nptbins, const double *ptbins, const int netabins, const double *etabins){
-	gStyle->SetOptStat(0);
-	fH2D_MufRatio    = new TH2D("MufRatio", "Ratio of tight to loose Muons vs Pt vs Eta", nptbins, ptbins, netabins, etabins);
-	fH1D_MufRatioPt  = new TH1D("MufRatioPt",  "Ratio of tight to loose Muons vs Pt",     nptbins, ptbins);
-	fH1D_MufRatioEta = new TH1D("MufRatioEta", "Ratio of tight to loose Muons vs Eta",    netabins, etabins);
-
-	fH1D_MufRatioPt->SetXTitle(convertVarName("MuPt[0]"));
-	fH1D_MufRatioEta->SetXTitle(convertVarName("MuEta[0]"));
-	fH2D_MufRatio->SetXTitle(convertVarName("MuPt[0]"));
-	fH2D_MufRatio->SetYTitle(convertVarName("MuEta[0]"));
-	fH1D_MufRatioPt ->SetYTitle("# Tight / # Loose");
-	fH1D_MufRatioEta->SetYTitle("# Tight / # Loose");
-
 	produceMuRatio(samples, muon, &MuonPlotter::isSigSupMuEventTRG, &MuonPlotter::isLooseMuon, fH2D_MufRatio, fH1D_MufRatioPt, fH1D_MufRatioEta, true);
 	// calculateRatio(samples, Muon, 1, fH2D_MufRatio, fH1D_MufRatioPt, fH1D_MufRatioEta, false);
 }
@@ -2010,18 +2082,7 @@ void MuonPlotter::fillMupRatio(int sample, int muon, const int nptbins, const do
 	fillMupRatio(samples, muon, nptbins, ptbins, netabins, etabins);
 }
 void MuonPlotter::fillMupRatio(vector<int> samples, int muon, const int nptbins, const double *ptbins, const int netabins, const double *etabins){
-	gStyle->SetOptStat(0);
 	// This is supposed to be run on a ZJets selection!
-	fH2D_MupRatio    = new TH2D("MupRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", nptbins, ptbins, netabins, etabins);
-	fH1D_MupRatioPt  = new TH1D("MupRatioPt",  "Ratio of tight to loose Muons vs Pt", nptbins, ptbins);
-	fH1D_MupRatioEta = new TH1D("MupRatioEta", "Ratio of tight to loose Muons vs Eta", netabins, etabins);
-	fH1D_MupRatioPt->SetXTitle(convertVarName("MuPt[0]"));
-	fH1D_MupRatioEta->SetXTitle(convertVarName("MuEta[0]"));
-	fH2D_MupRatio->SetXTitle(convertVarName("MuPt[0]"));
-	fH2D_MupRatio->SetYTitle(convertVarName("MuEta[0]"));
-	fH1D_MupRatioPt ->SetYTitle("# Tight / # Loose");
-	fH1D_MupRatioEta->SetYTitle("# Tight / # Loose");
-
 	produceMuRatio(samples, muon, &MuonPlotter::isZMuMuEventTRG, &MuonPlotter::isLooseMuon, fH2D_MupRatio, fH1D_MupRatioPt, fH1D_MupRatioEta, true);
 	// calculateRatio(samples, Muon, 2, fH2D_MupRatio, fH1D_MupRatioPt, fH1D_MupRatioEta, false);
 }
@@ -2099,11 +2160,25 @@ TH2D* MuonPlotter::fillMuRatio(vector<int> samples, int muon, bool(MuonPlotter::
 }
 
 //____________________________________________________________________________
-TH1D* MuonPlotter::fillMuRatioPt(int sample, int forp, bool output){
-	vector<int> samples; samples.push_back(sample);
-	return fillMuRatioPt(samples, forp, output);
+void MuonPlotter::fillMuElRatios(vector<int> samples){
+	fillMuRatios(samples);
+	fillElRatios(samples);
 }
-TH1D* MuonPlotter::fillMuRatioPt(vector<int> samples, int forp, bool output){
+void MuonPlotter::fillMuRatios(vector<int> samples){
+	calculateRatio(samples, Muon, 1, fH2D_MufRatio, fH1D_MufRatioPt, fH1D_MufRatioEta);
+	calculateRatio(samples, Muon, 2, fH2D_MupRatio, fH1D_MupRatioPt, fH1D_MupRatioEta);
+}
+void MuonPlotter::fillElRatios(vector<int> samples){
+	calculateRatio(samples, Electron, 1, fH2D_ElfRatio, fH1D_ElfRatioPt, fH1D_ElfRatioEta);
+	calculateRatio(samples, Electron, 2, fH2D_ElpRatio, fH1D_ElpRatioPt, fH1D_ElpRatioEta);
+}
+
+//____________________________________________________________________________
+TH1D* MuonPlotter::fillMuRatioPt(int sample, int forp){
+	vector<int> samples; samples.push_back(sample);
+	return fillMuRatioPt(samples, forp);
+}
+TH1D* MuonPlotter::fillMuRatioPt(vector<int> samples, int forp){
 	gStyle->SetOptStat(0);
 	TH2D *h_2d  = new TH2D("MuRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
 	TH1D *h_pt  = new TH1D("MuRatioPt",  "Ratio of tight to loose Muons vs Pt",        getNMuPt2Bins(), getMuPt2Bins());
@@ -2113,16 +2188,16 @@ TH1D* MuonPlotter::fillMuRatioPt(vector<int> samples, int forp, bool output){
 	h_pt->SetYTitle("# Tight / # Loose");
 	h_pt->GetYaxis()->SetTitleOffset(1.2);
 
-	calculateRatio(samples, Muon, forp, h_2d, h_pt, h_eta, output);
+	calculateRatio(samples, Muon, forp, h_2d, h_pt, h_eta);
 	return h_pt;
 };
 
 //____________________________________________________________________________
-TH1D* MuonPlotter::fillElRatioPt(int sample, int forp, bool output){
+TH1D* MuonPlotter::fillElRatioPt(int sample, int forp){
 	vector<int> samples; samples.push_back(sample);
-	return fillMuRatioPt(samples, forp, output);
+	return fillElRatioPt(samples, forp);
 }
-TH1D* MuonPlotter::fillElRatioPt(vector<int> samples, int forp, bool output){
+TH1D* MuonPlotter::fillElRatioPt(vector<int> samples, int forp){
 	gStyle->SetOptStat(0);
 	TH2D *h_2d  = new TH2D("ElRatio",    "Ratio of tight to loose Electrons vs Pt vs Eta", getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
 	TH1D *h_pt  = new TH1D("ElRatioPt",  "Ratio of tight to loose Electrons vs Pt",        getNMuPt2Bins(), getMuPt2Bins());
@@ -2132,15 +2207,15 @@ TH1D* MuonPlotter::fillElRatioPt(vector<int> samples, int forp, bool output){
 	h_pt->SetYTitle("# Tight / # Loose");
 	h_pt->GetYaxis()->SetTitleOffset(1.2);
 
-	calculateRatio(samples, Electron, forp, h_2d, h_pt, h_eta, output);
+	calculateRatio(samples, Electron, forp, h_2d, h_pt, h_eta);
 	return h_pt;
 };
 
 //____________________________________________________________________________
-void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, TH2D*& h_2d, bool output){
+void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, TH2D*& h_2d){
 	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", 1, 0.,1.);
 	TH1D *h_dummy2 = new TH1D("dummy2", "dummy2", 1, 0.,1.);
-	calculateRatio(samples, chan, forp, h_2d, h_dummy1, h_dummy2, output);
+	calculateRatio(samples, chan, forp, h_2d, h_dummy1, h_dummy2);
 	delete h_dummy1, h_dummy2;
 }
 void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, TH2D*& h_2d, TH1D*& h_pt, TH1D*&h_eta, bool output){
@@ -2171,11 +2246,11 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 
 		if(forp == 1){
 			H_ntight->Add(cha->fhistos.h_ntight, scale);
-			H_nloose->Add(cha->fhistos.h_nloose, scale);			
+			H_nloose->Add(cha->fhistos.h_nloose, scale);
 		}
 		if(forp == 2){
 			H_ntight->Add(cha->phistos.h_ntight, scale);
-			H_nloose->Add(cha->phistos.h_nloose, scale);			
+			H_nloose->Add(cha->phistos.h_nloose, scale);
 		}
 
 		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << " / " << H_ntight->Integral() << endl;
@@ -2203,12 +2278,12 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	// asymErrors->Draw("same");
 	// Util::PrintNoEPS(c1, "test", fOutputDir);
 
-	h_pt ->SetXTitle(convertVarName("MuPt[1]"));
-	h_eta->SetXTitle(convertVarName("MuEta[1]"));
-	h_pt ->SetYTitle("# Tight / # Loose");
-	h_eta->SetYTitle("# Tight / # Loose");
-	h_2d->SetXTitle(convertVarName("MuPt[1]"));
-	h_2d->SetYTitle(convertVarName("MuEta[1]"));
+	// h_pt ->SetXTitle(convertVarName("MuPt[1]"));
+	// h_eta->SetXTitle(convertVarName("MuEta[1]"));
+	// h_pt ->SetYTitle("# Tight / # Loose");
+	// h_eta->SetYTitle("# Tight / # Loose");
+	// h_2d->SetXTitle(convertVarName("MuPt[1]"));
+	// h_2d->SetYTitle(convertVarName("MuEta[1]"));
 	delete H_ntight, H_nloose, hmuloosept, hmulooseeta, hmutightpt, hmutighteta;
 	TString name = "";
 	for(size_t i = 0; i < samples.size(); ++i){
@@ -2223,7 +2298,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		printHisto(h_eta, TString("RatioEta") + name, "Fake Ratio vs eta",    "PE1");
 	}
 }
-void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, float &ratio, float &ratioe, bool output){
+void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, float &ratio, float &ratioe){
 	double ntight(0.), nloose(0.);
 	double ntighte2(0.), nloosee2(0.);
 	vector<int> v_ntight, v_nloose;
@@ -2283,7 +2358,7 @@ void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, f
 		cout << "--------------------------------------------------------" << endl;
 	}
 }
-void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, float &ratio, float &ratioeup, float &ratioelow, bool output){
+void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, int forp, float &ratio, float &ratioeup, float &ratioelow){
 	// Careful, this method only takes integer numbers for passed/total events, therefore
 	// only makes sense for application on data right now.
 	int ntight(0), nloose(0);
@@ -2370,14 +2445,15 @@ void MuonPlotter::ratioWithAsymmCPErrors(int passed, int total, float &ratio, fl
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
-	// Need filled ratios before calling this function!
+void MuonPlotter::makeSSMuMuPredictionPlots(vector<int> samples){
+	fOutputSubDir = "MuMuPredictions";
+	// Need filled muon ratios before calling this function!
 
 	// Prediction: /////////////////////////////////////////////////////////////////////
-	TH1D *H_nsigpred = new TH1D("Nsigpred", "Predicted N_sig in Pt1 bins",       getNMuPt2Bins(),  getMuPt2Bins());
-	TH1D *H_nfppred  = new TH1D("Nfppred",  "Predicted N_fp in Pt1 bins",        getNMuPt2Bins(),  getMuPt2Bins());
-	TH1D *H_nffpred  = new TH1D("Nffpred",  "Predicted N_ff in Pt1 bins",        getNMuPt2Bins(),  getMuPt2Bins());
-	TH1D *H_nFpred   = new TH1D("NFpred",   "Total predicted fakes in Pt1 bins", getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nsigpred = new TH1D("MuMuNsigpred", "Predicted N_sig in Pt1 bins",       getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nfppred  = new TH1D("MuMuNfppred",  "Predicted N_fp in Pt1 bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nffpred  = new TH1D("MuMuNffpred",  "Predicted N_ff in Pt1 bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nFpred   = new TH1D("MuMuNFpred",   "Total predicted fakes in Pt1 bins", getNMuPt2Bins(),  getMuPt2Bins());
 	bool output = false;
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
@@ -2394,16 +2470,19 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	// Observation: ////////////////////////////////////////////////////////////////////
 	TH1D *H_nsigobs  = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins",  getNMuPt2Bins(),  getMuPt2Bins());
 	vector<int> lm0sample; lm0sample.push_back(LM0);
-	NObs(H_nsigobs, lm0sample, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
+	NObs(Muon, H_nsigobs, lm0sample, &MuonPlotter::isGenMatchedSUSYDiLepEvent);
 
 	TH1D *H_nt2obs  = new TH1D("Nt2obs", "Observed N_t2 in Pt1 bins",  getNMuPt2Bins(),  getMuPt2Bins());
-	NObs(H_nt2obs, samples);
-	// NObs(H_nt2obs, samples, &MuonPlotter::isSSTTEvent);
+	NObs(Muon, H_nt2obs, samples);
+	// NObs(Muon, H_nt2obs, samples, &MuonPlotter::isSSTTEvent);
 
-	TH1D *H_nt2obsttbar = new TH1D("Nt2obsttbar", "Observed N_t2 in Pt1 bins, ttbar only",  getNMuPt2Bins(),  getMuPt2Bins());
-	vector<int> ttbarsample; ttbarsample.push_back(TTbar);
-	NObs(H_nt2obsttbar, fMCBG);
-	// NObs(H_nt2obsttbar, ttbarsample, &MuonPlotter::isSSTTEvent);	
+	// THStack *HS_nt2obs = new THStack("Nt2obs_stacked", "Observed N_t2 in Pt1 bins");
+	// NObs(Muon, HS_nt2obs, samples);
+
+	TH1D *H_nt2obsSM = new TH1D("Nt2obsSM", "Observed N_t2 in Pt1 bins, ttbar only",  getNMuPt2Bins(),  getMuPt2Bins());
+	NObs(Muon, H_nt2obsSM, fMCBG);
+	// vector<int> ttbarsample; ttbarsample.push_back(TTbar);
+	// NObs(Muon, H_nt2obsttbar, ttbarsample, &MuonPlotter::isSSTTEvent);	
 
 	// Output
 	H_nsigobs->SetXTitle(convertVarName("MuPt[0]"));
@@ -2415,17 +2494,17 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	H_nFpred->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
 	H_nt2obs->SetXTitle(convertVarName("MuPt[0]"));
 	H_nt2obs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
-	H_nt2obsttbar->SetXTitle(convertVarName("MuPt[0]"));
-	H_nt2obsttbar->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+	H_nt2obsSM->SetXTitle(convertVarName("MuPt[0]"));
+	H_nt2obsSM->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
 
 	// Normalize to binwidth
-	H_nsigpred    = normHistBW(H_nsigpred,    fBinWidthScale);
-	H_nsigobs     = normHistBW(H_nsigobs,     fBinWidthScale);
-	H_nfppred     = normHistBW(H_nfppred,     fBinWidthScale);
-	H_nffpred     = normHistBW(H_nffpred,     fBinWidthScale);
-	H_nFpred      = normHistBW(H_nFpred,      fBinWidthScale);
-	H_nt2obs      = normHistBW(H_nt2obs,      fBinWidthScale);
-	H_nt2obsttbar = normHistBW(H_nt2obsttbar, fBinWidthScale);
+	H_nsigpred = normHistBW(H_nsigpred, fBinWidthScale);
+	H_nsigobs  = normHistBW(H_nsigobs,  fBinWidthScale);
+	H_nfppred  = normHistBW(H_nfppred,  fBinWidthScale);
+	H_nffpred  = normHistBW(H_nffpred,  fBinWidthScale);
+	H_nFpred   = normHistBW(H_nFpred,   fBinWidthScale);
+	H_nt2obs   = normHistBW(H_nt2obs,   fBinWidthScale);
+	H_nt2obsSM = normHistBW(H_nt2obsSM, fBinWidthScale);
 
 	H_nt2obs->SetFillColor(kBlue);
 	H_nt2obs->SetLineColor(kBlue);
@@ -2456,7 +2535,7 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	H_nt2obs->SetMinimum(0.);
 	H_nsigobs->SetMinimum(0.);
 	H_nsigpred->SetMinimum(0.);
-	H_nt2obsttbar->SetMinimum(0.);
+	H_nt2obsSM->SetMinimum(0.);
 
 	H_nsigpred->SetMarkerColor(kRed);
 	H_nFpred->SetMarkerColor(kRed);
@@ -2464,12 +2543,229 @@ void MuonPlotter::makeSSPredictionPlots(vector<int> samples){
 	H_nsigobs->SetMaximum(14.);
 	H_nsigpred->SetMaximum(14.);
 	H_nsigpred->SetMinimum(0.);
+	
 	plotPredOverlay2HWithRatio(H_nsigobs, "Observed N_{sig}", H_nsigpred, "Predicted N_{sig}");
-	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsttbar, "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets)", false, false);
+	plotPredOverlay2HWithRatio(H_nt2obs, "Observed N_{t2}", H_nFpred, "Predicted Fakes");
+	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsSM, "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets)", false, false);
+	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
-void MuonPlotter::NObs(TH1D *&hist, vector<int> samples, bool(MuonPlotter::*eventSelector)()){
+void MuonPlotter::makeSSElElPredictionPlots(vector<int> samples){
+	fOutputSubDir = "ElElPredictions";
+	// Need filled electron ratios before calling this function!
+
+	// Prediction: /////////////////////////////////////////////////////////////////////
+	TH1D *H_nsigpred = new TH1D("ElElNsigpred", "Predicted N_sig in Pt1 bins",       getNElPt2Bins(),  getElPt2Bins());
+	TH1D *H_nfppred  = new TH1D("ElElNfppred",  "Predicted N_fp in Pt1 bins",        getNElPt2Bins(),  getElPt2Bins());
+	TH1D *H_nffpred  = new TH1D("ElElNffpred",  "Predicted N_ff in Pt1 bins",        getNElPt2Bins(),  getElPt2Bins());
+	TH1D *H_nFpred   = new TH1D("ElElNFpred",   "Total predicted fakes in Pt1 bins", getNElPt2Bins(),  getElPt2Bins());
+	bool output = false;
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+		float scale = fLumiNorm/fSamples[samples[i]].lumi;
+
+		channel cha = fSamples[index].ee;
+		vector<TH1D*> prediction = ElElFPPrediction(fH2D_ElfRatio, fH2D_ElpRatio, cha.nthistos.h_nt2, cha.nthistos.h_nt10, cha.nthistos.h_nt0, output);
+		H_nsigpred->Add(prediction[0], scale);
+		H_nfppred ->Add(prediction[1], scale);
+		H_nffpred ->Add(prediction[2], scale);
+	}
+
+	// Observation: ////////////////////////////////////////////////////////////////////
+	TH1D *H_nsigobs  = new TH1D("Nsigobs", "Observed N_sig in Pt1 bins",  getNElPt2Bins(),  getElPt2Bins());
+	vector<int> lm0sample; lm0sample.push_back(LM0);
+	NObs(Electron, H_nsigobs, lm0sample, &MuonPlotter::isGenMatchedSUSYEEEvent);
+
+	TH1D *H_nt2obs  = new TH1D("Nt2obs", "Observed N_t2 in Pt1 bins",  getNElPt2Bins(),  getElPt2Bins());
+	NObs(Electron, H_nt2obs, samples);
+	// NObs(H_nt2obs, samples, &MuonPlotter::isSSTTEvent);
+
+	TH1D *H_nt2obsSM = new TH1D("Nt2obsSM", "Observed N_t2 in Pt1 bins, ttbar only",  getNElPt2Bins(),  getElPt2Bins());
+	// vector<int> ttbarsample; ttbarsample.push_back(TTbar);
+	NObs(Electron, H_nt2obsSM, fMCBG);
+	// NObs(Electron, H_nt2obsttbar, ttbarsample, &MuonPlotter::isSSTTEvent);	
+
+	// Output
+	H_nsigobs->SetXTitle(convertVarName("ElPt[0]"));
+	H_nsigobs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+
+	H_nFpred->Add(H_nfppred);
+	H_nFpred->Add(H_nffpred);
+	H_nFpred->SetXTitle(convertVarName("ElPt[0]"));
+	H_nFpred->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+	H_nt2obs->SetXTitle(convertVarName("ElPt[0]"));
+	H_nt2obs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+	H_nt2obsSM->SetXTitle(convertVarName("ElPt[0]"));
+	H_nt2obsSM->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+
+	// Normalize to binwidth
+	H_nsigpred = normHistBW(H_nsigpred, fBinWidthScale);
+	H_nsigobs  = normHistBW(H_nsigobs,  fBinWidthScale);
+	H_nfppred  = normHistBW(H_nfppred,  fBinWidthScale);
+	H_nffpred  = normHistBW(H_nffpred,  fBinWidthScale);
+	H_nFpred   = normHistBW(H_nFpred,   fBinWidthScale);
+	H_nt2obs   = normHistBW(H_nt2obs,   fBinWidthScale);
+	H_nt2obsSM = normHistBW(H_nt2obsSM, fBinWidthScale);
+
+	H_nt2obs->SetFillColor(kBlue);
+	H_nt2obs->SetLineColor(kBlue);
+	H_nt2obs->SetFillStyle(3004);
+	H_nt2obs->SetLineWidth(2);
+
+	H_nsigpred->SetFillColor(8);
+	H_nsigpred->SetMarkerColor(8);
+	H_nsigpred->SetMarkerStyle(20);
+	H_nsigpred->SetLineColor(8);
+	H_nsigpred->SetLineWidth(2);
+
+	H_nfppred->SetFillColor(kRed);
+	H_nfppred->SetMarkerColor(kRed);
+	H_nfppred->SetMarkerStyle(20);
+	H_nfppred->SetLineColor(kRed);
+	H_nfppred->SetLineWidth(2);
+
+	H_nffpred->SetFillColor(13);
+	H_nffpred->SetMarkerColor(13);
+	H_nffpred->SetLineColor(13);
+	H_nffpred->SetMarkerStyle(20);
+	H_nffpred->SetLineWidth(2);
+
+	plotOverlay4H(H_nt2obs, "N_{ t2}", H_nsigpred, "N_{ pp}" , H_nfppred, "N_{ f p}", H_nffpred, "N_{ f f}");
+
+	H_nFpred->SetMinimum(0.);
+	H_nt2obs->SetMinimum(0.);
+	H_nsigobs->SetMinimum(0.);
+	H_nsigpred->SetMinimum(0.);
+	H_nt2obsSM->SetMinimum(0.);
+
+	H_nsigpred->SetMarkerColor(kRed);
+	H_nFpred->SetMarkerColor(kRed);
+	H_nFpred->SetMarkerStyle(20);
+	H_nsigobs->SetMaximum(14.);
+	H_nsigpred->SetMaximum(14.);
+	H_nsigpred->SetMinimum(0.);
+		
+	plotPredOverlay2HWithRatio(H_nsigobs, "Observed N_{sig}", H_nsigpred, "Predicted N_{sig}");
+	plotPredOverlay2HWithRatio(H_nt2obs, "Observed N_{t2}", H_nFpred, "Predicted Fakes");
+	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsSM, "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets)", false, false);
+	fOutputSubDir = "";
+}
+
+//____________________________________________________________________________
+void MuonPlotter::makeSSElMuPredictionPlots(vector<int> samples){
+	fOutputSubDir = "ElMuPredictions";
+	// Need filled electron ratios before calling this function!
+
+	// Prediction: /////////////////////////////////////////////////////////////////////
+	TH1D *H_npppred = new TH1D("ElMuNpppred", "Predicted N_pp in MuPt bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nfppred = new TH1D("ElMuNfppred", "Predicted N_fp in MuPt bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_npfpred = new TH1D("ElMuNpfpred", "Predicted N_pf in MuPt bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nffpred = new TH1D("ElMuNffpred", "Predicted N_ff in MuPt bins",        getNMuPt2Bins(),  getMuPt2Bins());
+	TH1D *H_nFpred  = new TH1D("ElMuNFpred",  "Total predicted fakes in MuPt bins", getNMuPt2Bins(),  getMuPt2Bins());
+	bool output = false;
+	for(size_t i = 0; i < samples.size(); ++i){
+		int index = samples[i];
+		float scale = fLumiNorm/fSamples[samples[i]].lumi;
+
+		channel cha = fSamples[index].emu;
+		if(fVerbose > 2) cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+		if(fVerbose > 2) cout << "Calling FPRatios for " << fSamples[samples[i]].sname << endl;
+		vector<TH1D*> prediction = ElMuFPPrediction(fH2D_MufRatio, fH2D_MupRatio, fH2D_ElfRatio, fH2D_ElpRatio, cha.nthistos.h_nt2, cha.nthistos.h_nt10, cha.nthistos.h_nt01, cha.nthistos.h_nt0, output);
+		H_npppred->Add(prediction[0], scale);
+		H_nfppred->Add(prediction[1], scale);
+		H_npfpred->Add(prediction[2], scale);
+		H_nffpred->Add(prediction[3], scale);
+	}
+
+	// Observation: ////////////////////////////////////////////////////////////////////
+	TH1D *H_nsigobs  = new TH1D("Nsigobs", "Observed N_sig in MuPt bins",  getNMuPt2Bins(),  getMuPt2Bins());
+	vector<int> lm0sample; lm0sample.push_back(LM0);
+	NObs(EMu, H_nsigobs, lm0sample, &MuonPlotter::isGenMatchedSUSYEMuEvent);
+
+	TH1D *H_nt2obs  = new TH1D("Nt2obs", "Observed N_t2 in MuPt bins",  getNMuPt2Bins(),  getMuPt2Bins());
+	NObs(EMu, H_nt2obs, samples);
+
+	TH1D *H_nt2obsSM = new TH1D("Nt2obsSM", "Observed N_t2 in MuPt bins, ttbar only",  getNMuPt2Bins(),  getMuPt2Bins());
+	NObs(EMu, H_nt2obsSM, fMCBG);
+
+	// Output
+	H_nsigobs->SetXTitle(convertVarName("MuPt[0]"));
+	H_nsigobs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+
+	H_nFpred->Add(H_nfppred);
+	H_nFpred->Add(H_npfpred);
+	H_nFpred->Add(H_nffpred);
+	H_nFpred->SetXTitle(convertVarName("MuPt[0]"));
+	H_nFpred->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+	H_nt2obs->SetXTitle(convertVarName("MuPt[0]"));
+	H_nt2obs->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+	H_nt2obsSM->SetXTitle(convertVarName("MuPt[0]"));
+	H_nt2obsSM->SetYTitle(Form("Events / %2.0f GeV", fBinWidthScale));
+
+	// Normalize to binwidth
+	H_npppred  = normHistBW(H_npppred,  fBinWidthScale);
+	H_nsigobs  = normHistBW(H_nsigobs,  fBinWidthScale);
+	H_nfppred  = normHistBW(H_nfppred,  fBinWidthScale);
+	H_npfpred  = normHistBW(H_npfpred,  fBinWidthScale);
+	H_nffpred  = normHistBW(H_nffpred,  fBinWidthScale);
+	H_nFpred   = normHistBW(H_nFpred,   fBinWidthScale);
+	H_nt2obs   = normHistBW(H_nt2obs,   fBinWidthScale);
+	H_nt2obsSM = normHistBW(H_nt2obsSM, fBinWidthScale);
+
+	H_nt2obs->SetFillColor(kBlue);
+	H_nt2obs->SetLineColor(kBlue);
+	H_nt2obs->SetFillStyle(3004);
+	H_nt2obs->SetLineWidth(2);
+
+	int ppcolor = 8;
+	H_npppred->SetFillColor(  ppcolor);
+	H_npppred->SetMarkerColor(ppcolor);
+	H_npppred->SetLineColor(  ppcolor);
+	H_npppred->SetMarkerStyle(20);
+	H_npppred->SetLineWidth(2);
+
+	int fpcolor = 2;
+	H_nfppred->SetFillColor(  fpcolor);
+	H_nfppred->SetMarkerColor(fpcolor);
+	H_nfppred->SetLineColor(  fpcolor);
+	H_nfppred->SetMarkerStyle(20);
+	H_nfppred->SetLineWidth(2);
+
+	int pfcolor = 51;
+	H_npfpred->SetFillColor(  pfcolor);
+	H_npfpred->SetMarkerColor(pfcolor);
+	H_npfpred->SetLineColor(  pfcolor);
+	H_npfpred->SetMarkerStyle(20);
+	H_npfpred->SetLineWidth(2);
+
+	int ffcolor = 13;
+	H_nffpred->SetFillColor(  ffcolor);
+	H_nffpred->SetMarkerColor(ffcolor);
+	H_nffpred->SetLineColor(  ffcolor);
+	H_nffpred->SetMarkerStyle(20);
+	H_nffpred->SetLineWidth(2);
+
+	plotOverlay4H(H_nt2obs, "N_{ t2}", H_npppred, "N_{ pp}" , H_nfppred, "N_{ f p}", H_nffpred, "N_{ f f}");
+
+	H_nFpred->SetMinimum(0.);
+	H_nt2obs->SetMinimum(0.);
+	H_nsigobs->SetMinimum(0.);
+	H_npppred->SetMinimum(0.);
+	H_nt2obsSM->SetMinimum(0.);
+
+	H_npppred->SetMarkerColor(kRed);
+	H_nFpred->SetMarkerColor(kRed);
+	H_nFpred->SetMarkerStyle(20);
+	
+	plotPredOverlay2HWithRatio(H_nsigobs, "Observed N_{sig}", H_npppred, "Predicted N_{sig}");
+	plotPredOverlay2HWithRatio(H_nt2obs, "Observed N_{t2}", H_nFpred, "Predicted Fakes");
+	plotPredOverlay3HWithRatio(H_nFpred, "Predicted Fakes", H_nt2obs,  "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets, LM0)", H_nt2obsSM, "Obs. N_{t2} (QCD, t#bar{t}+jets, V+jets)", false, false);
+	fOutputSubDir = "";
+}
+
+//____________________________________________________________________________
+void MuonPlotter::NObs(gChannel chan, TH1D *&hist, vector<int> samples, bool(MuonPlotter::*eventSelector)()){
 /* This fills a histogram with the pt of the first muon for a given selection */
 	hist->Sumw2();
 	for(size_t i = 0; i < samples.size(); ++i){
@@ -2489,32 +2785,59 @@ void MuonPlotter::NObs(TH1D *&hist, vector<int> samples, bool(MuonPlotter::*even
 			printProgress(jentry, nentries, fSamples[index].name);
 
 			if((*this.*eventSelector)() == false) continue;
-			hist->Fill(MuPt[0], scale);
+
+			if((chan == Muon || chan == EMu) && NMus > 0) hist->Fill(MuPt[0], scale);
+			if( chan == Electron             && NEls > 0) hist->Fill(ElPt[0], scale);
 		}
 	}	
 }
 
 //____________________________________________________________________________
-void MuonPlotter::NObs(TH1D *&hist, vector<int> samples){
+void MuonPlotter::NObs(gChannel chan, TH1D *&hist, vector<int> samples){
 	hist->Sumw2();
 	for(size_t i = 0; i < samples.size(); ++i){
 		int index = samples[i];
 		float scale = fLumiNorm / fSamples[index].lumi;
-		channel cha = fSamples[index].mumu;
-		TH1D *h_temp = cha.nthistos.h_nt2_pt;
-		for(int j = 1; j <= h_temp->GetNbinsX(); ++j){
-			double bincenter = h_temp->GetBinCenter(j);
-			double content = h_temp->GetBinContent(j);
-			int newbin = hist->FindBin(bincenter);
+		channel cha;
+		if(chan == Muon)     cha = fSamples[index].mumu;
+		if(chan == EMu)      cha = fSamples[index].emu;
+		if(chan == Electron) cha = fSamples[index].ee;
+		hist->Add(cha.nthistos.h_nt2_pt, scale);
+		// Previous code, gives exactly the same result (at least when binning is equal)
+		// Why did I implement this in the first place?!
+		// TH1D *h_temp = cha.nthistos.h_nt2_pt;
+		// for(int j = 1; j <= h_temp->GetNbinsX(); ++j){
+		// 	double bincenter = h_temp->GetBinCenter(j);
+		// 	double content = h_temp->GetBinContent(j);
+		// 	int newbin = hist->FindBin(bincenter);
+		// 
+		// 	double oldcontent = hist->GetBinContent(newbin);
+		// 	double olderror = hist->GetBinError(newbin);
+		// 	double newerror = TMath::Sqrt(olderror*olderror + content*scale*scale);
+		// 	double newcontent = oldcontent + content*scale;
+		// 	hist->SetBinContent(newbin, newcontent);
+		// 	hist->SetBinError(newbin, newerror);
+		// }
+	}	
+}
 
-			double oldcontent = hist->GetBinContent(newbin);
-			double olderror = hist->GetBinError(newbin);
-			double newerror = TMath::Sqrt(olderror*olderror + content*scale*scale);
-			double newcontent = oldcontent + content*scale;
-			hist->SetBinContent(newbin, newcontent);
-			hist->SetBinError(newbin, newerror);
-			
-		}
+//____________________________________________________________________________
+void MuonPlotter::NObs(gChannel chan, THStack *&stack, vector<int> samples){
+	// hist->Sumw2();
+	const int nsamples = samples.size();
+	TH1D *hnt2[nsamples];
+	for(size_t i = 0; i < nsamples; ++i){
+		int index = samples[i];
+		float scale = fLumiNorm / fSamples[index].lumi;
+		channel cha;
+		if(chan == Muon)     cha = fSamples[index].mumu;
+		if(chan == EMu)      cha = fSamples[index].emu;
+		if(chan == Electron) cha = fSamples[index].ee;
+		hnt2[i] = (TH1D*)cha.nthistos.h_nt2_pt->Clone(Form("Nt2_%s", fSamples[index].sname.Data()));
+		hnt2[i]->SetFillColor(fSamples[index].color);
+		hnt2[i]->Sumw2();
+		hnt2[i]->Scale(scale);
+		stack->Add(hnt2[i]);
 	}	
 }
 
@@ -2909,191 +3232,6 @@ void MuonPlotter::makeIntPrediction(TString filename){
 }
 
 //____________________________________________________________________________
-void MuonPlotter::makeIntPredictionMuMu(vector<int> inputsamples){
-	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
-	cout << " Producing prediction for MuMu channel" << endl << endl;
-	bool data = true; // Use ratios from data or mc?
-
-	// Dummy binning
-	const int nptbins = 1;
-	const double ptbins[nptbins+1] = {5., 1000.};
-	const int netabins = 1;
-	const double etabins[netabins+1] = {-2.5, 2.5};
-
-	// Fill the ratios
-	TH2D *H_fratio_allmc = new TH2D("fRatioAllMC", "fRatio for all MC", nptbins, ptbins, netabins, etabins);
-	TH2D *H_fratio_data  = new TH2D("fRatioData", "fRatio for Mu Data", nptbins, ptbins, netabins, etabins);
-	TH2D *H_pratio_allmc = new TH2D("pRatioAllMC", "pRatio for all MC", nptbins, ptbins, netabins, etabins);
-	TH2D *H_pratio_data  = new TH2D("pRatioData", "pRatio for Mu Data", nptbins, ptbins, netabins, etabins);
-
-	TH2D *H_fratio_ttbar = fillMuRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isFakeTTbarMuon, nptbins, ptbins, netabins, etabins);
-	TH2D *H_pratio_ttbar = fillMuRatio(TTbar, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isPromptTTbarMuon, nptbins, ptbins, netabins, etabins);
-	H_fratio_ttbar->SetName("fRatioTTbar");
-	H_pratio_ttbar->SetName("pRatioTTbar");
-
-	float fratio_allmc(0.), fratio_allmc_e(0.);
-	float fratio_data(0.), fratio_data_e(0.);
-	float pratio_allmc(0.), pratio_allmc_e(0.);
-	float pratio_data(0.), pratio_data_e(0.);
-
-	float fratio_ttbar   = H_fratio_ttbar->GetBinContent(1,1);
-	float fratio_ttbar_e = H_fratio_ttbar->GetBinError(1,1);
-
-	float pratio_ttbar   = H_pratio_ttbar->GetBinContent(1,1);
-	float pratio_ttbar_e = H_pratio_ttbar->GetBinError(1,1);
-
-	calculateRatio(fMCBG,   Muon, 1, fratio_allmc, fratio_allmc_e);
-	calculateRatio(fJMData, Muon, 1, fratio_data,  fratio_data_e);
-	calculateRatio(fMCBG,   Muon, 2, pratio_allmc, pratio_allmc_e);
-	calculateRatio(fMuData, Muon, 2, pratio_data,  pratio_data_e);
-
-	H_fratio_allmc->SetBinContent(1,1,fratio_allmc);
-	H_fratio_allmc->SetBinError  (1,1,fratio_allmc_e);
-	H_fratio_data ->SetBinContent(1,1,fratio_data);
-	H_fratio_data ->SetBinError  (1,1,fratio_data_e);
-
-	H_pratio_allmc->SetBinContent(1,1,pratio_allmc);
-	H_pratio_allmc->SetBinError  (1,1,pratio_allmc_e);
-	H_pratio_data ->SetBinContent(1,1,pratio_data);
-	H_pratio_data ->SetBinError  (1,1,pratio_data_e);
-
-	// Add systematics to ratios
-	float deviation(0.), olderror(0.), newerror(0.);
-	deviation = fabs(fratio_allmc - fratio_ttbar);
-	// Add to mc ratios
-	olderror = H_fratio_allmc->GetBinError(1,1);
-	newerror = sqrt(olderror*olderror + deviation*deviation);
-	H_fratio_allmc->SetBinError(1,1,newerror);
-	fratio_allmc_e = newerror;
-	// Add to data ratios
-	olderror = H_fratio_data->GetBinError(1,1);
-	newerror = sqrt(olderror*olderror + deviation*deviation);
-	H_fratio_data->SetBinError(1,1,newerror);
-	fratio_data_e = newerror;
-
-	deviation  = fabs(pratio_allmc - pratio_ttbar);
-	// Add to mc ratios
-	olderror = pratio_allmc_e;
-	newerror = sqrt(olderror*olderror + deviation*deviation);
-	H_pratio_allmc->SetBinError(1,1,newerror);
-	pratio_allmc_e = newerror;
-	// Add to data ratios
-	olderror = pratio_data_e;
-	newerror = sqrt(olderror*olderror + deviation*deviation);
-	H_pratio_data->SetBinError(1,1,newerror);
-	pratio_data_e = newerror;
-
-	double nt2(0.), nt1(0.), nt0(0.);
-	double nt2_e2(0.), nt1_e2(0.), nt0_e2(0.);
-	for(size_t i = 0; i < inputsamples.size(); ++i){
-		int index = inputsamples[i];
-		float scale = fLumiNorm/fSamples[index].lumi; // Normalize all
-		channel cha = fSamples[index].mumu;
-		if(data) scale = 1.;
-		nt2 += scale * cha.numbers.nt2;
-		nt1 += scale * cha.numbers.nt10;
-		nt0 += scale * cha.numbers.nt0;
-		nt2_e2 += scale*scale * cha.numbers.nt2;
-		nt1_e2 += scale*scale * cha.numbers.nt10;
-		nt0_e2 += scale*scale * cha.numbers.nt0;
-	}
-
-	// Make prediction
-	FPRatios *fFPRatios = new FPRatios();
-	fFPRatios->SetVerbose(fVerbose);
-	if(data){
-		fFPRatios->SetMuFratios(H_fratio_data);
-		fFPRatios->SetMuPratios(H_pratio_data);
-	}
-	else{
-		fFPRatios->SetMuFratios(H_fratio_allmc);
-		fFPRatios->SetMuPratios(H_pratio_allmc);
-	}
-	vector<double> nt;
-	nt.push_back(nt0); nt.push_back(nt1); nt.push_back(nt2);
-	fFPRatios->NevtTopol(0, 2, nt);
-
-	vector<double> vpt, veta;
-	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas
-	veta.push_back(0.); veta.push_back(0.);
-
-	vector<double> nevFP = fFPRatios->NevtPass(vpt, veta);
-	vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
-	vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
-
-	cout << "          |       fRatio       |       pRatio       |" << endl;
-	cout << "-----------------------------------------------------" << endl;
-	cout << setw(10) << " allMC    |";
-	cout << setw(7)  << setprecision(2) << fratio_allmc << " +/- " << setw(7) << setprecision(2) << fratio_allmc_e << " |";
-	cout << setw(7)  << setprecision(2) << pratio_allmc << " +/- " << setw(7) << setprecision(2) << pratio_allmc_e << " |";
-	cout << endl;
-	cout << setw(10) << " data     |";
-	cout << setw(7)  << setprecision(2) << fratio_data  << " +/- " << setw(7) << setprecision(2) << fratio_data_e  << " |";
-	cout << setw(7)  << setprecision(2) << pratio_data  << " +/- " << setw(7) << setprecision(2) << pratio_data_e  << " |";
-	cout << endl;
-	cout << setw(10) << " ttbar    |";
-	cout << setw(7)  << setprecision(2) << fratio_ttbar << " +/- " << setw(7) << setprecision(2) << fratio_ttbar_e << " |";
-	cout << setw(7)  << setprecision(2) << pratio_ttbar << " +/- " << setw(7) << setprecision(2) << pratio_ttbar_e << " |";
-	cout << endl;
-	cout << "-----------------------------------------------------" << endl;
-	cout << "          |   Nt2   |   Nt1   |   Nt0   |" << endl;
-	cout << "-----------------------------------------" << endl;
-	cout << setw(9) << "data"  << " | ";
-	cout << setw(7) << setprecision(2) << nt2 << " | ";
-	cout << setw(7) << setprecision(2) << nt1 << " | ";
-	cout << setw(7) << setprecision(2) << nt0 << " | ";
-	cout << endl;
-	cout << "-----------------------------------------" << endl;
-	
-	float nt2sum(0.), nt10sum(0.), nt01sum(0.), nt0sum(0.);
-	for(size_t i = 0; i < fMCBG.size(); ++i){
-		int index = fMCBG[i];
-		channel *cha = &fSamples[index].mumu;
-		numberset numbers = cha->numbers;
-		float scale = fLumiNorm / fSamples[index].lumi;
-		nt2sum += scale*numbers.nt2;
-		nt10sum += scale*numbers.nt10;
-		nt01sum += scale*numbers.nt01;
-		nt0sum += scale*numbers.nt0;
-		cout << setw(9) << fSamples[index].sname << " | ";
-		cout << setw(7)  << setprecision(2) << scale*numbers.nt2  << " | ";
-		cout << setw(7)  << setprecision(2) << scale*numbers.nt10 << " | ";
-		cout << setw(7)  << setprecision(2) << scale*numbers.nt0  << " | ";
-		cout << endl;
-	}	
-	cout << "-----------------------------------------" << endl;
-	cout << setw(9) << "MC sum" << " | ";
-	cout << setw(7) << setprecision(2) << nt2sum  << " | ";
-	cout << setw(7) << setprecision(2) << nt10sum << " | ";
-	cout << setw(7) << setprecision(2) << nt0sum << " | ";
-	cout << endl;
-	cout << "-----------------------------------------" << endl;
-	cout << setw(9) << fSamples[LM0].sname << " | ";
-	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt2  << " | ";
-	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt10 << " | ";
-	cout << setw(7)  << setprecision(2) << fLumiNorm / fSamples[LM0].lumi * fSamples[LM0].mumu.numbers.nt0  << " | ";
-	cout << endl << endl;
-	cout << "--------------------------------------------------------------" << endl;
-	cout << "  Predictions:" << endl;
-	cout << "--------------------------------------------------------------" << endl;
-	cout << "  Npp:           " << setw(7) << setprecision(3) << nevFP[0];
-	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[0];
-	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[0] << " (syst)" << endl;
-	cout << "  Nfp:           " << setw(7) << setprecision(3) << nevFP[1];
-	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[1];
-	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[1] << " (syst)" << endl;
-	cout << "  Nff:           " << setw(7) << setprecision(3) << nevFP[2];
-	cout << " +/- "             << setw(7) << setprecision(3) << nevFPEstat[2];
-	cout << " (stat) +/- "      << setw(7) << setprecision(3) << nevFPEsyst[2] << " (syst)" << endl;
-	cout << "  Total fakes:   " << setw(7) << setprecision(3) << nevFP[1]+nevFP[2];
-	cout << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEstat[1]*nevFPEstat[1] + nevFPEstat[2]*nevFPEstat[2]);
-	cout << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(nevFPEsyst[1]*nevFPEsyst[1] + nevFPEsyst[2]*nevFPEsyst[2]) << " (syst)" << endl;
-	cout << "--------------------------------------------------------------" << endl;
-	cout << "/////////////////////////////////////////////////////////////////////////////" << endl;
-	delete fFPRatios;
-}
-
-//____________________________________________________________________________
 vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D* H_nt2mes, TH2D* H_nt1mes, TH2D* H_nt0mes, bool output){
 	///////////////////////////////////////////////////////////////////////////
 	// Note: Careful, this is only a workaround at the moment, and is only
@@ -3102,23 +3240,20 @@ vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 	//       pass it the ratios directly to have full control
 	///////////////////////////////////////////////////////////////////////////
 	vector<TH1D*> res;
+	const int nptbins = getNMuPt2Bins();
 
-	TH1D *H_dummy    = new TH1D("Dummyhist", "Dummy",                      H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
-	TH1D *H_nsigpred = new TH1D("Nsigpred", "Predicted N_sig in Pt1 bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
-	TH1D *H_nfppred  = new TH1D("Nfppred",  "Predicted N_fp in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
-	TH1D *H_nffpred  = new TH1D("Nffpred",  "Predicted N_ff in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());	
-	// TH1D *H_dummy    = new TH1D("Dummyhist", "Dummy", getNMuPt2Bins(), getMuPt2Bins());
-	// TH1D *H_nsigpred = new TH1D("Nsigpred", "Predicted N_sig in Pt1 bins", getNMuPtBins(), getMuPtBins());
-	// TH1D *H_nfppred  = new TH1D("Nfppred",  "Predicted N_fp in Pt1 bins",  getNMuPtBins(), getMuPtBins());
-	// TH1D *H_nffpred  = new TH1D("Nffpred",  "Predicted N_ff in Pt1 bins",  getNMuPtBins(), getMuPtBins());	
+	TH1D *H_dummy    = new TH1D("MuDummyhist","Dummy",                       H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nsigpred = new TH1D("MuNsigpred", "Predicted N_sig in Pt1 bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nfppred  = new TH1D("MuNfppred",  "Predicted N_fp in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nffpred  = new TH1D("MuNffpred",  "Predicted N_ff in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());	
 
 	if(fVerbose > 2){
-		cout << " Found " << H_nt2mes->GetEntries() << " events with tight-tight (Nt2)" << endl;
-		cout << " Found " << H_nt1mes->GetEntries() << " events with tight-loose (Nt1)" << endl;
-		cout << " Found " << H_nt0mes->GetEntries() << " events with loose-loose (Nt0)" << endl;
+		cout << " Nt2 = " << H_nt2mes->GetEntries();
+		cout << " Nt1 = " << H_nt1mes->GetEntries();
+		cout << " Nt0 = " << H_nt0mes->GetEntries() << endl;
 	}
 
-	for(size_t i = 1; i <= getNMuPt2Bins(); ++i){
+	for(size_t i = 1; i <= nptbins; ++i){
 		double pt1 = H_dummy->GetBinCenter(i);
 		if(fVerbose > 2){
 			cout << "=======================================" << endl;
@@ -3128,7 +3263,7 @@ vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 		double npppred(0.0), npppredEstat2(0.0), npppredEsyst2(0.0);
 		double nfppred(0.0), nfppredEstat2(0.0), nfppredEsyst2(0.0);
 		double nffpred(0.0), nffpredEstat2(0.0), nffpredEsyst2(0.0);
-		for(size_t j = 1; j <= getNMuPt2Bins(); ++j){
+		for(size_t j = 1; j <= nptbins; ++j){
 			if(fVerbose > 2) cout << " --------" << endl;
 			double pt2 = H_dummy->GetBinCenter(j);
 
@@ -3179,14 +3314,14 @@ vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 	if(fVerbose > 2) cout << " Predict " << H_nfppred->Integral() <<  " fake-prompt events (f*p*Nfp) from this sample" << endl;
 	if(fVerbose > 2) cout << " Predict " << H_nffpred->Integral() <<  " fake-fake events (f*f*Nff) from this sample" << endl;
 	// Output
-	H_nsigpred->SetXTitle(convertVarName("MuPt[1]"));
+	H_nsigpred->SetXTitle(convertVarName("MuPt[0]"));
 	if(output){
-		H_nt2mes->SetXTitle(convertVarName("MuPt[1]"));
-		H_nt2mes->SetYTitle(convertVarName("MuPt[1]"));
-		H_nt1mes->SetXTitle(convertVarName("MuPt[1]"));
-		H_nt1mes->SetYTitle(convertVarName("MuPt[1]"));
-		H_nt0mes->SetXTitle(convertVarName("MuPt[1]"));
-		H_nt0mes->SetYTitle(convertVarName("MuPt[1]"));
+		H_nt2mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt2mes->SetYTitle(convertVarName("MuPt[0]"));
+		H_nt1mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt1mes->SetYTitle(convertVarName("MuPt[0]"));
+		H_nt0mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt0mes->SetYTitle(convertVarName("MuPt[0]"));
 		// if(H_nsigpred->GetMinimum() < 0) H_nsigpred->SetMaximum(0);
 		// if(H_nsigpred->GetMinimum() > 0) H_nsigpred->SetMinimum(0);
 		printHisto(H_nsigpred, H_nsigpred->GetName(), H_nsigpred->GetTitle());
@@ -3196,6 +3331,234 @@ vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 	}
 	res.push_back(H_nsigpred);
 	res.push_back(H_nfppred);
+	res.push_back(H_nffpred);
+	return res;
+}
+
+//____________________________________________________________________________
+vector<TH1D*> MuonPlotter::ElElFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D* H_nt2mes, TH2D* H_nt1mes, TH2D* H_nt0mes, bool output){
+	///////////////////////////////////////////////////////////////////////////
+	// Note: Careful, this is only a workaround at the moment, and is only
+	//       really valid for one single eta bin!
+	//       In the future we should rewrite the interface to FPRatios and
+	//       pass it the ratios directly to have full control
+	///////////////////////////////////////////////////////////////////////////
+	vector<TH1D*> res;
+	const int nptbins = getNElPt2Bins();
+
+	TH1D *H_dummy    = new TH1D("ElDummyhist", "Dummy",                      H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nsigpred = new TH1D("ElNsigpred", "Predicted N_sig in Pt1 bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nfppred  = new TH1D("ElNfppred",  "Predicted N_fp in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nffpred  = new TH1D("ElNffpred",  "Predicted N_ff in Pt1 bins",  H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());	
+
+	if(fVerbose > 2){
+		cout << " Nt2 = " << H_nt2mes->GetEntries();
+		cout << " Nt1 = " << H_nt1mes->GetEntries();
+		cout << " Nt0 = " << H_nt0mes->GetEntries() << endl;
+	}
+
+	for(size_t i = 1; i <= nptbins; ++i){
+		double pt1 = H_dummy->GetBinCenter(i);
+		if(fVerbose > 2){
+			cout << "=======================================" << endl;
+			cout << "Pt1 = " << pt1 << endl;
+		}
+		double eta1 = 0.0;
+		double npppred(0.0), npppredEstat2(0.0), npppredEsyst2(0.0);
+		double nfppred(0.0), nfppredEstat2(0.0), nfppredEsyst2(0.0);
+		double nffpred(0.0), nffpredEstat2(0.0), nffpredEsyst2(0.0);
+		for(size_t j = 1; j <= nptbins; ++j){
+			if(fVerbose > 2) cout << " --------" << endl;
+			double pt2 = H_dummy->GetBinCenter(j);
+
+			double eta2 = 0.0;
+			double nt2 = H_nt2mes->GetBinContent(i,j);
+			double nt1 = H_nt1mes->GetBinContent(i,j);
+			double nt0 = H_nt0mes->GetBinContent(i,j);
+
+			if(fVerbose > 2) cout << "   Pt2 = " << pt2 << endl;
+			if(fVerbose > 2) cout << "   nt2: " << nt2 << "  nt1: " << nt1 << "  nt0: " << nt0 << endl;
+
+			FPRatios *fFPRatios = new FPRatios();
+			fFPRatios->SetVerbose(fVerbose);
+			fFPRatios->SetElFratios(H_fratio);
+			fFPRatios->SetElPratios(H_pratio);
+			vector<double> nt;
+			nt.push_back(nt0); nt.push_back(nt1); nt.push_back(nt2);
+			fFPRatios->NevtTopol(2, 0, nt);
+
+			vector<double> vpt, veta;
+			vpt.push_back(pt1); vpt.push_back(pt2);
+			veta.push_back(eta1); veta.push_back(eta2);
+
+			vector<double> nevFP = fFPRatios->NevtPass(vpt, veta);
+			vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
+			vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
+			npppred += nevFP[0];
+			nfppred += nevFP[1];
+			nffpred += nevFP[2];
+			npppredEstat2 += nevFPEstat[0]*nevFPEstat[0];
+			npppredEsyst2 += nevFPEsyst[0]*nevFPEsyst[0];
+			nfppredEstat2 += nevFPEstat[1]*nevFPEstat[1];
+			nfppredEsyst2 += nevFPEsyst[1]*nevFPEsyst[1];
+			nffpredEstat2 += nevFPEstat[2]*nevFPEstat[2];
+			nffpredEsyst2 += nevFPEsyst[2]*nevFPEsyst[2];
+			delete fFPRatios;
+		}
+		Int_t bin = H_nsigpred->FindBin(pt1);
+		H_nsigpred->SetBinContent(bin, npppred);
+		H_nfppred ->SetBinContent(bin, nfppred);
+		H_nffpred ->SetBinContent(bin, nffpred);
+		H_nsigpred->SetBinError(bin, sqrt(npppredEstat2 + npppredEsyst2));
+		H_nfppred ->SetBinError(bin, sqrt(nfppredEstat2 + nfppredEsyst2));
+		H_nffpred ->SetBinError(bin, sqrt(nffpredEstat2 + nffpredEsyst2));
+	}	
+
+	if(fVerbose > 2) cout << " Predict " << H_nsigpred->Integral() << " signal events (Nsig = p^2*Npp) from this sample" << endl;
+	if(fVerbose > 2) cout << " Predict " << H_nfppred->Integral() <<  " fake-prompt events (f*p*Nfp) from this sample" << endl;
+	if(fVerbose > 2) cout << " Predict " << H_nffpred->Integral() <<  " fake-fake events (f*f*Nff) from this sample" << endl;
+	// Output
+	H_nsigpred->SetXTitle(convertVarName("ElPt[0]"));
+	if(output){
+		H_nt2mes->SetXTitle(convertVarName("ElPt[0]"));
+		H_nt2mes->SetYTitle(convertVarName("ElPt[0]"));
+		H_nt1mes->SetXTitle(convertVarName("ElPt[0]"));
+		H_nt1mes->SetYTitle(convertVarName("ElPt[0]"));
+		H_nt0mes->SetXTitle(convertVarName("ElPt[0]"));
+		H_nt0mes->SetYTitle(convertVarName("ElPt[0]"));
+		// if(H_nsigpred->GetMinimum() < 0) H_nsigpred->SetMaximum(0);
+		// if(H_nsigpred->GetMinimum() > 0) H_nsigpred->SetMinimum(0);
+		printHisto(H_nsigpred, H_nsigpred->GetName(), H_nsigpred->GetTitle());
+		printHisto(H_nt2mes, H_nt2mes->GetName(), H_nt2mes->GetTitle(), "colz");
+		printHisto(H_nt1mes, H_nt1mes->GetName(), H_nt1mes->GetTitle(), "colz");
+		printHisto(H_nt0mes, H_nt0mes->GetName(), H_nt0mes->GetTitle(), "colz");
+	}
+	res.push_back(H_nsigpred);
+	res.push_back(H_nfppred);
+	res.push_back(H_nffpred);
+	return res;
+}
+
+//____________________________________________________________________________
+vector<TH1D*> MuonPlotter::ElMuFPPrediction(TH2D* H_mufratio, TH2D* H_mupratio, TH2D* H_elfratio, TH2D* H_elpratio, TH2D* H_nt2mes, TH2D* H_nt10mes, TH2D* H_nt01mes, TH2D* H_nt0mes, bool output){
+	///////////////////////////////////////////////////////////////////////////
+	// Note: Careful, this is only a workaround at the moment, and is only
+	//       really valid for one single eta bin!
+	//       In the future we should rewrite the interface to FPRatios and
+	//       pass it the ratios directly to have full control
+	///////////////////////////////////////////////////////////////////////////
+	vector<TH1D*> res;
+
+	TH1D *H_mudummy = new TH1D("ElMuDummy",   "Dummy1",                      H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray()); // x axis is muon
+	TH1D *H_eldummy = new TH1D("MuElDummy",   "Dummy2",                      H_nt2mes->GetNbinsY(), H_nt2mes->GetYaxis()->GetXbins()->GetArray()); // y axis is electron
+	TH1D *H_npppred = new TH1D("ElMuNpppred", "Predicted N_pp in MuPt bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nfppred = new TH1D("ElMuNfppred", "Predicted N_fp in MuPt bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_npfpred = new TH1D("ElMuNpfpred", "Predicted N_pf in MuPt bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());
+	TH1D *H_nffpred = new TH1D("ElMuNffpred", "Predicted N_ff in MuPt bins", H_nt2mes->GetNbinsX(), H_nt2mes->GetXaxis()->GetXbins()->GetArray());	
+
+	if(fVerbose > 2){
+		cout << " Nt2  = " << H_nt2mes->GetEntries();
+		cout << " Nt10 = " << H_nt10mes->GetEntries();
+		cout << " Nt01 = " << H_nt01mes->GetEntries();
+		cout << " Nt0  = " << H_nt0mes->GetEntries() << endl;
+	}
+
+	const double eta = 0.0;
+	for(size_t i = 1; i <= H_mudummy->GetNbinsX(); ++i){ // loop on mu bins
+		double mupt = H_mudummy->GetBinCenter(i);
+		if(fVerbose > 2){
+			cout << "=======================================" << endl;
+			cout << "MuPt = " << mupt << "  MufRatio = " << H_mufratio->GetBinContent(i, 1) << "  MupRatio = " << H_mupratio->GetBinContent(i, 1) << endl;
+		}
+		double npppred(0.0), npppredEstat2(0.0), npppredEsyst2(0.0);
+		double nfppred(0.0), nfppredEstat2(0.0), nfppredEsyst2(0.0);
+		double npfpred(0.0), npfpredEstat2(0.0), npfpredEsyst2(0.0);
+		double nffpred(0.0), nffpredEstat2(0.0), nffpredEsyst2(0.0);
+		for(size_t j = 1; j <= H_eldummy->GetNbinsX(); ++j){ // loop on el bins
+			if(fVerbose > 2) cout << " --------" << endl;
+			double elpt = H_eldummy->GetBinCenter(j);
+
+			double nt2  = H_nt2mes->GetBinContent(i,j);
+			double nt01 = H_nt10mes->GetBinContent(i,j);
+			double nt10 = H_nt01mes->GetBinContent(i,j);
+			double nt0  = H_nt0mes->GetBinContent(i,j);
+
+			if(fVerbose > 2) cout << "ElPt = " << elpt << "  ElfRatio = " << H_elfratio->GetBinContent(j, 1) << "  ElpRatio = " << H_elpratio->GetBinContent(j, 1) << endl;
+			if(fVerbose > 2) cout << "   nt2: " << nt2 << "  nt10: " << nt10  << "  nt01: " << nt01 << "  nt0: " << nt0 << endl;
+
+			FPRatios *fFPRatios = new FPRatios();
+			fFPRatios->SetVerbose(fVerbose);
+			fFPRatios->SetMuFratios(H_mufratio);
+			fFPRatios->SetMuPratios(H_mupratio);
+			fFPRatios->SetElFratios(H_elfratio);
+			fFPRatios->SetElPratios(H_elpratio);
+			vector<double> nt;
+			nt.push_back(nt0);  // none pass
+			nt.push_back(nt01); // e passes
+			nt.push_back(nt10); // mu passes
+			nt.push_back(nt2);  // both pass
+			fFPRatios->NevtTopol(1, 1, nt);
+
+			vector<double> vpt, veta;
+			vpt.push_back(elpt); vpt.push_back(mupt);
+			veta.push_back(eta); veta.push_back(eta);
+
+			vector<double> nevFP = fFPRatios->NevtPass(vpt, veta);
+			vector<double> nevFPEstat = fFPRatios->NevtPassErrStat();
+			vector<double> nevFPEsyst = fFPRatios->NevtPassErrSyst();
+			npppred += nevFP[0];
+			nfppred += nevFP[1];
+			npfpred += nevFP[2];
+			nffpred += nevFP[3];
+			if(fVerbose > 2) cout << "   npp: " << nevFP[0] << "  nfp: " << nevFP[1]  << "  npf: " << nevFP[2] << "  nff: " << nevFP[3] << endl;
+			npppredEstat2 += nevFPEstat[0]*nevFPEstat[0];
+			npppredEsyst2 += nevFPEsyst[0]*nevFPEsyst[0];
+			nfppredEstat2 += nevFPEstat[1]*nevFPEstat[1];
+			nfppredEsyst2 += nevFPEsyst[1]*nevFPEsyst[1];
+			npfpredEstat2 += nevFPEstat[2]*nevFPEstat[2];
+			npfpredEsyst2 += nevFPEsyst[2]*nevFPEsyst[2];
+			nffpredEstat2 += nevFPEstat[3]*nevFPEstat[3];
+			nffpredEsyst2 += nevFPEsyst[3]*nevFPEsyst[3];
+			delete fFPRatios;
+		}
+		Int_t bin = H_npppred->FindBin(mupt);
+		H_npppred->SetBinContent(bin, npppred);
+		H_nfppred->SetBinContent(bin, nfppred);
+		H_npfpred->SetBinContent(bin, npfpred);
+		H_nffpred->SetBinContent(bin, nffpred);
+		H_npppred->SetBinError(bin, sqrt(npppredEstat2 + npppredEsyst2));
+		H_nfppred->SetBinError(bin, sqrt(nfppredEstat2 + nfppredEsyst2));
+		H_npfpred->SetBinError(bin, sqrt(npfpredEstat2 + npfpredEsyst2));
+		H_nffpred->SetBinError(bin, sqrt(nffpredEstat2 + nffpredEsyst2));
+	}	
+
+	// if(fVerbose > 2) cout << " Predict " << H_npppred->Integral() << " signal events (Nsig = p^2*Npp) from this sample" << endl;
+	// if(fVerbose > 2) cout << " Predict " << H_nfppred->Integral() << " fake-prompt events (f*p*Nfp) from this sample" << endl;
+	// if(fVerbose > 2) cout << " Predict " << H_npfpred->Integral() << " prompt-fake events (p*f*Npf) from this sample" << endl;
+	// if(fVerbose > 2) cout << " Predict " << H_nffpred->Integral() << " fake-fake events (f*f*Nff) from this sample" << endl;
+	if(fVerbose > 2) cout << " Total: ";
+	if(fVerbose > 2) cout << "   npp: " << H_npppred->Integral() << "  nfp: " << H_nfppred->Integral()  << "  npf: " << H_npfpred->Integral() << "  nff: " << H_nffpred->Integral() << endl;
+
+	// Output
+	H_npppred->SetXTitle(convertVarName("MuPt[0]"));
+	if(output){
+		H_nt2mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt2mes->SetYTitle(convertVarName("MuPt[0]"));
+		H_nt10mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt10mes->SetYTitle(convertVarName("MuPt[0]"));
+		H_nt01mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt01mes->SetYTitle(convertVarName("MuPt[0]"));
+		H_nt0mes->SetXTitle(convertVarName("MuPt[0]"));
+		H_nt0mes->SetYTitle(convertVarName("MuPt[0]"));
+		printHisto(H_npppred, H_npppred->GetName(), H_npppred->GetTitle());
+		printHisto(H_nt2mes,  H_nt2mes->GetName(),  H_nt2mes->GetTitle(),  "colz");
+		printHisto(H_nt10mes, H_nt10mes->GetName(), H_nt10mes->GetTitle(), "colz");
+		printHisto(H_nt01mes, H_nt01mes->GetName(), H_nt01mes->GetTitle(), "colz");
+		printHisto(H_nt0mes,  H_nt0mes->GetName(),  H_nt0mes->GetTitle(),  "colz");
+	}
+	res.push_back(H_npppred);
+	res.push_back(H_nfppred);
+	res.push_back(H_npfpred);
 	res.push_back(H_nffpred);
 	return res;
 }
@@ -3795,16 +4158,16 @@ void MuonPlotter::bookHistos(){
 		fSamples[i].mumu.phistos.h_ntight_pt  ->Sumw2(); fSamples[i].mumu.phistos.h_nloose_pt  ->Sumw2();
 		fSamples[i].mumu.phistos.h_ntight_eta ->Sumw2(); fSamples[i].mumu.phistos.h_nloose_eta ->Sumw2();
 
-		fSamples[i].emu.nthistos.h_nt2       = new TH2D(name + "_EMu_NT2",        "NT2",        getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
+		fSamples[i].emu.nthistos.h_nt2       = new TH2D(name + "_EMu_NT2",        "NT2",        getNMuPt2Bins(), getMuPt2Bins(), getNElPt2Bins(), getElPt2Bins());
 		fSamples[i].emu.nthistos.h_nt2_pt    = new TH1D(name + "_EMu_NT2_pt",     "NT2",        getNMuPt2Bins(), getMuPt2Bins());
 		fSamples[i].emu.nthistos.h_nt2_eta   = new TH1D(name + "_EMu_NT2_eta",    "NT2",        getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].emu.nthistos.h_nt10      = new TH2D(name + "_EMu_NT10",       "NT10",       getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
+		fSamples[i].emu.nthistos.h_nt10      = new TH2D(name + "_EMu_NT10",       "NT10",       getNMuPt2Bins(), getMuPt2Bins(), getNElPt2Bins(), getElPt2Bins());
 		fSamples[i].emu.nthistos.h_nt10_pt   = new TH1D(name + "_EMu_NT10_pt",    "NT10 vs pt", getNMuPt2Bins(), getMuPt2Bins());
 		fSamples[i].emu.nthistos.h_nt10_eta  = new TH1D(name + "_EMu_NT10_eta",   "NT10 vs eta",getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].emu.nthistos.h_nt01      = new TH2D(name + "_EMu_NT01",       "NT01",       getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
+		fSamples[i].emu.nthistos.h_nt01      = new TH2D(name + "_EMu_NT01",       "NT01",       getNMuPt2Bins(), getMuPt2Bins(), getNElPt2Bins(), getElPt2Bins());
 		fSamples[i].emu.nthistos.h_nt01_pt   = new TH1D(name + "_EMu_NT01_pt",    "NT01 vs pt", getNMuPt2Bins(), getMuPt2Bins());
 		fSamples[i].emu.nthistos.h_nt01_eta  = new TH1D(name + "_EMu_NT01_eta",   "NT01 vs eta",getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].emu.nthistos.h_nt0       = new TH2D(name + "_EMu_NT0",        "NT0",        getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
+		fSamples[i].emu.nthistos.h_nt0       = new TH2D(name + "_EMu_NT0",        "NT0",        getNMuPt2Bins(), getMuPt2Bins(), getNElPt2Bins(), getElPt2Bins());
 		fSamples[i].emu.nthistos.h_nt0_pt    = new TH1D(name + "_EMu_NT0_pt",     "NT0 vs pt",  getNMuPt2Bins(), getMuPt2Bins());
 		fSamples[i].emu.nthistos.h_nt0_eta   = new TH1D(name + "_EMu_NT0_eta",    "NT0 vs eta", getNMuEtaBins(), getMuEtaBins());
 		fSamples[i].emu.fhistos.h_ntight     = new TH2D(name + "_EMu_fTight",     "NTight Muons for sig. supp. selection",      getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
@@ -3833,30 +4196,30 @@ void MuonPlotter::bookHistos(){
 		// fSamples[i].emu.phistos.h_ntight_pt ->Sumw2(); fSamples[i].emu.phistos.h_nloose_pt  ->Sumw2();
 		// fSamples[i].emu.phistos.h_ntight_eta->Sumw2(); fSamples[i].emu.phistos.h_nloose_eta ->Sumw2();
 
-		fSamples[i].ee.nthistos.h_nt2       = new TH2D(name + "_EE_NT2",        "NT2",        getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt2_pt    = new TH1D(name + "_EE_NT2_pt",     "NT2",        getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt2_eta   = new TH1D(name + "_EE_NT2_eta",    "NT2",        getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.nthistos.h_nt10      = new TH2D(name + "_EE_NT10",       "NT10",       getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt10_pt   = new TH1D(name + "_EE_NT10_pt",    "NT10 vs pt", getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt10_eta  = new TH1D(name + "_EE_NT10_eta",   "NT10 vs eta",getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.nthistos.h_nt01      = new TH2D(name + "_EE_NT01",       "NT01",       getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt01_pt   = new TH1D(name + "_EE_NT01_pt",    "NT01 vs pt", getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt01_eta  = new TH1D(name + "_EE_NT01_eta",   "NT01 vs eta",getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.nthistos.h_nt0       = new TH2D(name + "_EE_NT0",        "NT0",        getNMuPt2Bins(), getMuPt2Bins(), getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt0_pt    = new TH1D(name + "_EE_NT0_pt",     "NT0 vs pt",  getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.nthistos.h_nt0_eta   = new TH1D(name + "_EE_NT0_eta",    "NT0 vs eta", getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.fhistos.h_ntight     = new TH2D(name + "_EE_fTight",     "NTight Muons for sig. supp. selection",      getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.fhistos.h_nloose     = new TH2D(name + "_EE_fLoose",     "NLoose Muons for sig. supp. selection",      getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.fhistos.h_ntight_pt  = new TH1D(name + "_EE_fTight_pt",  "NTight Muons for sig. supp. selection",      getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.fhistos.h_nloose_pt  = new TH1D(name + "_EE_fLoose_pt",  "NLoose Muons for sig. supp. selection",      getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.fhistos.h_ntight_eta = new TH1D(name + "_EE_fTight_eta", "NTight Muons for sig. supp. selection",      getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.fhistos.h_nloose_eta = new TH1D(name + "_EE_fLoose_eta", "NLoose Muons for sig. supp. selection",      getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.phistos.h_ntight     = new TH2D(name + "_EE_pTight",     "NTight Muons for Z decay selection",      getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.phistos.h_nloose     = new TH2D(name + "_EE_pLoose",     "NLoose Muons for Z decay selection",      getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.phistos.h_ntight_pt  = new TH1D(name + "_EE_pTight_pt",  "NTight Muons for Z decay selection",      getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.phistos.h_nloose_pt  = new TH1D(name + "_EE_pLoose_pt",  "NLoose Muons for Z decay selection",      getNMuPt2Bins(), getMuPt2Bins());
-		fSamples[i].ee.phistos.h_ntight_eta = new TH1D(name + "_EE_pTight_eta", "NTight Muons for Z decay selection",      getNMuEtaBins(), getMuEtaBins());
-		fSamples[i].ee.phistos.h_nloose_eta = new TH1D(name + "_EE_pLoose_eta", "NLoose Muons for Z decay selection",      getNMuEtaBins(), getMuEtaBins());		
+		fSamples[i].ee.nthistos.h_nt2       = new TH2D(name + "_EE_NT2",        "NT2",        getNElPt2Bins(), getElPt2Bins(), getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt2_pt    = new TH1D(name + "_EE_NT2_pt",     "NT2",        getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt2_eta   = new TH1D(name + "_EE_NT2_eta",    "NT2",        getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.nthistos.h_nt10      = new TH2D(name + "_EE_NT10",       "NT10",       getNElPt2Bins(), getElPt2Bins(), getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt10_pt   = new TH1D(name + "_EE_NT10_pt",    "NT10 vs pt", getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt10_eta  = new TH1D(name + "_EE_NT10_eta",   "NT10 vs eta",getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.nthistos.h_nt01      = new TH2D(name + "_EE_NT01",       "NT01",       getNElPt2Bins(), getElPt2Bins(), getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt01_pt   = new TH1D(name + "_EE_NT01_pt",    "NT01 vs pt", getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt01_eta  = new TH1D(name + "_EE_NT01_eta",   "NT01 vs eta",getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.nthistos.h_nt0       = new TH2D(name + "_EE_NT0",        "NT0",        getNElPt2Bins(), getElPt2Bins(), getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt0_pt    = new TH1D(name + "_EE_NT0_pt",     "NT0 vs pt",  getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.nthistos.h_nt0_eta   = new TH1D(name + "_EE_NT0_eta",    "NT0 vs eta", getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.fhistos.h_ntight     = new TH2D(name + "_EE_fTight",     "NTight Muons for sig. supp. selection",   getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.fhistos.h_nloose     = new TH2D(name + "_EE_fLoose",     "NLoose Muons for sig. supp. selection",   getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.fhistos.h_ntight_pt  = new TH1D(name + "_EE_fTight_pt",  "NTight Muons for sig. supp. selection",   getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.fhistos.h_nloose_pt  = new TH1D(name + "_EE_fLoose_pt",  "NLoose Muons for sig. supp. selection",   getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.fhistos.h_ntight_eta = new TH1D(name + "_EE_fTight_eta", "NTight Muons for sig. supp. selection",   getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.fhistos.h_nloose_eta = new TH1D(name + "_EE_fLoose_eta", "NLoose Muons for sig. supp. selection",   getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.phistos.h_ntight     = new TH2D(name + "_EE_pTight",     "NTight Muons for Z decay selection",      getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.phistos.h_nloose     = new TH2D(name + "_EE_pLoose",     "NLoose Muons for Z decay selection",      getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.phistos.h_ntight_pt  = new TH1D(name + "_EE_pTight_pt",  "NTight Muons for Z decay selection",      getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.phistos.h_nloose_pt  = new TH1D(name + "_EE_pLoose_pt",  "NLoose Muons for Z decay selection",      getNElPt2Bins(), getElPt2Bins());
+		fSamples[i].ee.phistos.h_ntight_eta = new TH1D(name + "_EE_pTight_eta", "NTight Muons for Z decay selection",      getNElEtaBins(), getElEtaBins());
+		fSamples[i].ee.phistos.h_nloose_eta = new TH1D(name + "_EE_pLoose_eta", "NLoose Muons for Z decay selection",      getNElEtaBins(), getElEtaBins());		
 
 		fSamples[i].ee.nthistos.h_nt2->Sumw2();       fSamples[i].ee.nthistos.h_nt2_pt->Sumw2();  fSamples[i].ee.nthistos.h_nt2_eta->Sumw2();
 		fSamples[i].ee.nthistos.h_nt10->Sumw2();      fSamples[i].ee.nthistos.h_nt10_pt->Sumw2(); fSamples[i].ee.nthistos.h_nt10_eta->Sumw2();
@@ -3954,6 +4317,14 @@ int MuonPlotter::readHistos(TString filename){
 			cha->phistos.h_ntight_eta = (TH1D*)pFile->Get(fSamples[i].sname + "/" + cha->phistos.h_ntight_eta->GetName());
 			cha->phistos.h_nloose_eta = (TH1D*)pFile->Get(fSamples[i].sname + "/" + cha->phistos.h_nloose_eta->GetName());
 			numberset numbers;
+			// numbers.nt2  = cha->nthistos.h_nt2_pt  ->Integral();
+			// numbers.nt10 = cha->nthistos.h_nt10_pt ->Integral();
+			// numbers.nt01 = cha->nthistos.h_nt01_pt ->Integral();
+			// numbers.nt0  = cha->nthistos.h_nt0_pt  ->Integral();
+			// numbers.nsst = cha->fhistos.h_ntight_pt->Integral();
+			// numbers.nssl = cha->fhistos.h_nloose_pt->Integral();
+			// numbers.nzt  = cha->phistos.h_ntight_pt->Integral();
+			// numbers.nzl  = cha->phistos.h_nloose_pt->Integral();
 			numbers.nt2  = cha->nthistos.h_nt2->GetEntries();
 			numbers.nt10 = cha->nthistos.h_nt10->GetEntries();
 			numbers.nt01 = cha->nthistos.h_nt01->GetEntries();
@@ -3966,6 +4337,78 @@ int MuonPlotter::readHistos(TString filename){
 		}
 	}
 	return 0;
+}
+
+void MuonPlotter::bookRatioHistos(){
+	gStyle->SetOptStat(0);
+
+	fH2D_MufRatio    = new TH2D("MufRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
+	fH1D_MufRatioPt  = new TH1D("MufRatioPt",  "Ratio of tight to loose Muons vs Pt",        getNMuPt2Bins(), getMuPt2Bins());
+	fH1D_MufRatioEta = new TH1D("MufRatioEta", "Ratio of tight to loose Muons vs Eta",       getNMuEtaBins(), getMuEtaBins());
+	fH1D_MufRatioPt->SetXTitle(convertVarName("MuPt[0]"));
+	fH1D_MufRatioEta->SetXTitle(convertVarName("MuEta[0]"));
+	fH2D_MufRatio->SetXTitle(convertVarName("MuPt[0]"));
+	fH2D_MufRatio->SetYTitle(convertVarName("MuEta[0]"));
+	fH1D_MufRatioPt ->SetYTitle("# Tight / # Loose");
+	fH1D_MufRatioEta->SetYTitle("# Tight / # Loose");
+	fH1D_MufRatioPt->GetYaxis()->SetTitleOffset(1.2);
+	fH1D_MufRatioEta->GetYaxis()->SetTitleOffset(1.2);
+	
+	fH2D_ElfRatio    = new TH2D("ElfRatio",    "Ratio of tight to loose Electrons vs Pt vs Eta", getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+	fH1D_ElfRatioPt  = new TH1D("ElfRatioPt",  "Ratio of tight to loose Electrons vs Pt",        getNElPt2Bins(), getElPt2Bins());
+	fH1D_ElfRatioEta = new TH1D("ElfRatioEta", "Ratio of tight to loose Electrons vs Eta",       getNElEtaBins(), getElEtaBins());
+	fH1D_ElfRatioPt->SetXTitle(convertVarName("ElPt[0]"));
+	fH1D_ElfRatioEta->SetXTitle(convertVarName("ElEta[0]"));
+	fH2D_ElfRatio->SetXTitle(convertVarName("ElPt[0]"));
+	fH2D_ElfRatio->SetYTitle(convertVarName("ElEta[0]"));
+	fH1D_ElfRatioPt ->SetYTitle("# Tight / # Loose");
+	fH1D_ElfRatioEta->SetYTitle("# Tight / # Loose");
+	fH1D_ElfRatioPt->GetYaxis()->SetTitleOffset(1.2);
+	fH1D_ElfRatioEta->GetYaxis()->SetTitleOffset(1.2);
+	
+	fH2D_MupRatio    = new TH2D("MupRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", getNMuPt2Bins(), getMuPt2Bins(), getNMuEtaBins(), getMuEtaBins());
+	fH1D_MupRatioPt  = new TH1D("MupRatioPt",  "Ratio of tight to loose Muons vs Pt",        getNMuPt2Bins(), getMuPt2Bins());
+	fH1D_MupRatioEta = new TH1D("MupRatioEta", "Ratio of tight to loose Muons vs Eta",       getNMuEtaBins(), getMuEtaBins());
+	fH1D_MupRatioPt->SetXTitle(convertVarName("MuPt[0]"));
+	fH1D_MupRatioEta->SetXTitle(convertVarName("MuEta[0]"));
+	fH2D_MupRatio->SetXTitle(convertVarName("MuPt[0]"));
+	fH2D_MupRatio->SetYTitle(convertVarName("MuEta[0]"));
+	fH1D_MupRatioPt ->SetYTitle("# Tight / # Loose");
+	fH1D_MupRatioEta->SetYTitle("# Tight / # Loose");
+	fH1D_MupRatioPt->GetYaxis()->SetTitleOffset(1.2);
+	fH1D_MupRatioEta->GetYaxis()->SetTitleOffset(1.2);
+	
+	fH2D_ElpRatio    = new TH2D("ElpRatio",    "Ratio of tight to loose Electrons vs Pt vs Eta", getNElPt2Bins(), getElPt2Bins(), getNElEtaBins(), getElEtaBins());
+	fH1D_ElpRatioPt  = new TH1D("ElpRatioPt",  "Ratio of tight to loose Electrons vs Pt",        getNElPt2Bins(), getElPt2Bins());
+	fH1D_ElpRatioEta = new TH1D("ElpRatioEta", "Ratio of tight to loose Electrons vs Eta",       getNElEtaBins(), getElEtaBins());
+	fH1D_ElpRatioPt->SetXTitle(convertVarName("ElPt[0]"));
+	fH1D_ElpRatioEta->SetXTitle(convertVarName("ElEta[0]"));
+	fH2D_ElpRatio->SetXTitle(convertVarName("ElPt[0]"));
+	fH2D_ElpRatio->SetYTitle(convertVarName("ElEta[0]"));
+	fH1D_ElpRatioPt ->SetYTitle("# Tight / # Loose");
+	fH1D_ElpRatioEta->SetYTitle("# Tight / # Loose");
+	fH1D_ElpRatioPt->GetYaxis()->SetTitleOffset(1.2);
+	fH1D_ElpRatioEta->GetYaxis()->SetTitleOffset(1.2);	
+}
+
+void MuonPlotter::fixPRatios(){
+	// Checks if any bin of p ratio histo is empty and puts it to 1
+	for(size_t i = 1; i <= fH2D_MupRatio->GetNbinsX(); ++i){
+		for(size_t j = 1; j <= fH2D_MupRatio->GetNbinsY(); ++j){
+			if(fH2D_MupRatio->GetBinContent(i,j) == 0.0){
+				fH2D_MupRatio->SetBinContent(i,j, 1.0);
+				fH2D_MupRatio->SetBinError(i,j, 0.5);
+			}
+		}
+	}
+	for(size_t i = 1; i <= fH2D_ElpRatio->GetNbinsX(); ++i){
+		for(size_t j = 1; j <= fH2D_ElpRatio->GetNbinsY(); ++j){
+			if(fH2D_ElpRatio->GetBinContent(i,j) == 0.0){
+				fH2D_ElpRatio->SetBinContent(i,j, 1.0);
+				fH2D_ElpRatio->SetBinError(i,j, 0.5);
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -4558,13 +5001,26 @@ bool MuonPlotter::isGenMatchedSUSYDiLepEvent(){
 	return isGenMatchedSUSYDiLepEvent(ind1, ind2);
 }
 bool MuonPlotter::isGenMatchedSUSYDiLepEvent(int &mu1, int &mu2){
-	if(isGoodMuEvent() == false) return false;
+	if(!isGoodMuEvent()) return false;
 	// if(isMuTriggeredEvent() == false) return false;
 	if(!isSSTTMuEvent(mu1, mu2)) return false;
-	if(isPromptSUSYMuon(mu1) && isPromptSUSYMuon(mu2)){
-		// PT Cuts??
-		if(isTightMuon(mu1) == 1 && isTightMuon(mu2) == 1) return true;
-	}
+	if(isPromptSUSYMuon(mu1) && isPromptSUSYMuon(mu2)) return true;
+	return false;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::isGenMatchedSUSYEEEvent(){
+	int ind1(-1), ind2(-1);
+	if(!isSSTTElEvent(ind1, ind2)) return false;
+	if(isPromptSUSYElectron(ind1) && isPromptSUSYElectron(ind2)) return true;
+	return false;
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::isGenMatchedSUSYEMuEvent(){
+	int muind(-1), elind(-1);
+	if(!isSSTTElMuEvent(muind, elind)) return false;
+	if(isPromptSUSYMuon(muind) && isPromptSUSYElectron(elind)) return true;
 	return false;
 }
 
@@ -4783,6 +5239,7 @@ bool MuonPlotter::isSSTTElMuEventTRG(int& mu, int& el){
 // Muons
 //____________________________________________________________________________
 bool MuonPlotter::isGoodMuon(int muon){
+	if(muon >= NMus) return false; // Sanity check
 	float ptcut(5.);
 	if(fSelectionSwitch == 0) ptcut = 10.;
 	if(fSelectionSwitch == 1) ptcut = 5.;
@@ -4849,12 +5306,14 @@ bool MuonPlotter::isPromptSUSYMuon(int muon){
 // Electrons
 //____________________________________________________________________________
 bool MuonPlotter::isGoodElectron(int ele){
+	if(ele >= NEls) return false; // Sanity check
 	return true;
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isLooseElectron(int ele){
 	// All electrons are already loose in the high-pt selection (hybiso)
+	if(isGoodElectron(ele) == false) return false;
 	if(fSelectionSwitch == 1){
 		if( fabs(ElEta[ele]) < 1.479 ) if(ElRelIso[ele] > 1.00) return false;
 		else                           if(ElRelIso[ele] > 0.60) return false;		
@@ -4891,7 +5350,15 @@ bool MuonPlotter::isGoodSecElectron(int ele){
 }
 
 //____________________________________________________________________________
+bool MuonPlotter::isPromptSUSYElectron(int ele){
+	if(isLooseElectron(ele) == false) return false;
+	if( abs(ElGenMType[ele]) == 9 || abs(ElGenMType[ele]) == 4  || abs(ElGenMType[ele]) == 2 ) return true;
+	return false;
+}
+
+//____________________________________________________________________________
 bool MuonPlotter::isGoodJet(int jet){
+	if(jet >= NJets) return false; // Sanity check
 	float minDR = 0.4;
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isTightMuon(imu)) continue;
@@ -4910,6 +5377,7 @@ bool MuonPlotter::isGoodJet(int jet){
 
 //____________________________________________________________________________
 bool MuonPlotter::isGoodJet_LooseLep(int jet){
+	if(jet >= NJets) return false; // Sanity check
 	float minDR = 0.4;
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isLooseMuon(imu)) continue;

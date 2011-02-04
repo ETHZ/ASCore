@@ -62,12 +62,12 @@ public:
 	void makeMuIsolationPlot();
 	void makeMuPtPlots();
 	
-	void makeDiffPredictionPlots();
+	void makeDiffPredictionPlots(vector<int>);
 	void makeDataClosurePlots();
-	void makeNT012Plots();
+	void makeNT012Plots(vector<int>, gChannel);
+	void makeMuNT012Plots(vector<int>, bool(MuonPlotter::*)(int&, int&));
 
 	void makeIntPrediction(TString);
-	void makeIntPredictionMuMu(vector<int>);
 	
 	void makeMuIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
 	void makeMuIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
@@ -92,6 +92,12 @@ public:
 	void fillMupRatio(vector<int>, int);
 	void fillMupRatio(int, int, const int, const double*, const int, const double*);
 	void fillMupRatio(vector<int>, int, const int, const double*, const int, const double*);
+
+	void fillElfRatio(int, int);
+	void fillElfRatio(vector<int>, int);
+	void fillElpRatio(int, int);
+	void fillElpRatio(vector<int>, int);
+
 	
 	TH1D* fillMuRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
 	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
@@ -103,15 +109,19 @@ public:
 	void plotMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
 
 	// Calculate from pre stored numbers, with fixed selections:
-	TH1D* fillMuRatioPt(int, int, bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool = false);
-	TH1D* fillElRatioPt(int, int, bool = false);
-	TH1D* fillElRatioPt(vector<int>, int, bool = false);
+	void fillMuElRatios(vector<int>);
+	void fillMuRatios(vector<int>);
+	void fillElRatios(vector<int>);
 
-	void calculateRatio(vector<int>, gChannel, int, TH2D*&, bool = false);
+	TH1D* fillMuRatioPt(int, int);
+	TH1D* fillMuRatioPt(vector<int>, int);
+	TH1D* fillElRatioPt(int, int);
+	TH1D* fillElRatioPt(vector<int>, int);
+
+	void calculateRatio(vector<int>, gChannel, int, TH2D*&);
 	void calculateRatio(vector<int>, gChannel, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, int, float&, float&, bool = false);
-	void calculateRatio(vector<int>, gChannel, int, float&, float&, float&, bool = false);
+	void calculateRatio(vector<int>, gChannel, int, float&, float&);
+	void calculateRatio(vector<int>, gChannel, int, float&, float&, float&);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -119,10 +129,15 @@ public:
 
 	//////////////////////////////
 	// Predictions
-	void makeSSPredictionPlots(vector<int>);
-	void NObs(TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	void NObs(TH1D *&, vector<int>);
+	void makeSSMuMuPredictionPlots(vector<int>);
+	void makeSSElElPredictionPlots(vector<int>);
+	void makeSSElMuPredictionPlots(vector<int>);
+	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
+	void NObs(gChannel, TH1D *&, vector<int>);
+	void NObs(gChannel, THStack *&, vector<int>);
 	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
+	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
+	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
 	void fillYields();                 // All samples
 	void fillYields(int);              // One sample
@@ -144,6 +159,9 @@ public:
 	void bookHistos();
 	void writeHistos();
 	int readHistos(TString);
+	
+	void bookRatioHistos();
+	void fixPRatios();
 
 	// Event and Object selectors:
 	bool isGoodEvent();
@@ -177,6 +195,9 @@ public:
 
 	bool isGenMatchedSUSYDiLepEvent();
 	bool isGenMatchedSUSYDiLepEvent(int&, int&);
+
+	bool isGenMatchedSUSYEEEvent();
+	bool isGenMatchedSUSYEMuEvent();
 
 	int isSSLLEvent(int&, int&);
 	int isOSLLEvent(int&, int&);
@@ -212,6 +233,7 @@ public:
 	bool isTightElectron(int);
 	bool isGoodPrimElectron(int);
 	bool isGoodSecElectron(int);
+	bool isPromptSUSYElectron(int);
 
 	bool isGoodJet(int);
 	bool isGoodJet_LooseLep(int);
