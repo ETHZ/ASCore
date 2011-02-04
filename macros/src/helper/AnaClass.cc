@@ -1391,6 +1391,7 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	else      h_ratio->Divide(h1,h2);
 	h_ratio->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
 	h_ratio->GetYaxis()->SetTitle("Ratio");
+	setPlottingRange(h_ratio, 0.3);
 	h_ratio->DrawCopy("E2 ");
 	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 1.00, h1->GetXaxis()->GetXmax(), 1.00);
 	l3->SetLineWidth(2);
@@ -1403,9 +1404,140 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
 	if(logy) outputname += "_log";
-	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 	// delete h1;
 	// delete h2;
+}
+
+//____________________________________________________________________________
+void AnaClass::plotPredOverlay2HWithRatio(THStack *stack, TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, bool logy, bool ratio, double line1x, double line2x){
+	THStack *h1s = new THStack(*stack);
+	TH1D *h1 = new TH1D(*hist1);
+	TH1D *h2 = new TH1D(*hist2);
+	
+	gStyle->SetOptStat("");
+	TH1D *h_ratio = new TH1D("h_ratio", "Ratio histogram", h2->GetNbinsX(), getBinning(h2));
+	for(size_t i = 0; i < h1s->GetHists()->GetSize(); ++i){
+		TH1D *hist = (TH1D*)h1s->GetHists()->At(i);
+		hist->SetLineWidth(1);
+		hist->SetFillStyle(1);
+		// hist->SetFillStyle(3002);
+	}
+
+	Int_t color1 = 1;
+	h1->SetLineWidth(2);
+	h1->SetLineColor(color1);
+	h1->SetFillColor(color1);
+	h1->SetFillStyle(3001);
+
+	Int_t color2 = 2;
+	h2->SetLineWidth(2.5);
+	h2->SetFillColor(color2);
+	h2->SetLineColor(color2);
+	h2->SetMarkerColor(color2);
+	h2->SetMarkerSize(1.5);
+	// h2->SetFillStyle(3005);
+
+	float border = 0.3;
+	float scale = (1-border)/border;
+	h_ratio->SetXTitle(h2->GetXaxis()->GetTitle());
+	h_ratio->SetYTitle("Obs./Pred.");
+	h_ratio->GetXaxis()->SetTitleSize(scale * h2->GetXaxis()->GetTitleSize());
+	h_ratio->GetYaxis()->SetTitleSize(scale * h2->GetYaxis()->GetTitleSize());
+	h_ratio->GetXaxis()->SetLabelSize(scale * h2->GetXaxis()->GetLabelSize());
+	h_ratio->GetYaxis()->SetLabelSize(scale * h2->GetYaxis()->GetLabelSize());
+	h_ratio->GetXaxis()->SetTickLength(scale * h2->GetXaxis()->GetTickLength());
+	h_ratio->GetYaxis()->SetTickLength(h2->GetYaxis()->GetTickLength());
+	
+	Int_t color = 1;
+	// h_ratio->SetFillStyle(3004);
+	h_ratio->SetLineWidth(2);
+	h_ratio->SetFillColor(color);
+	h_ratio->SetLineColor(color);
+	h_ratio->SetMarkerColor(color);
+	// h_ratio->SetMarkerSize(1.5);
+	h_ratio->SetMarkerStyle(20);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1s->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1s->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 900);
+	col->cd();
+	// col->SetFillStyle(0);
+	// col->SetFrameFillStyle(0);
+	// gPad->SetFillStyle(0);
+
+	TPad *p_plot  = new TPad("plotpad",  "Pad containing the overlay plot", 0.00, border, 1.00, 1.00, 0, 0);
+	p_plot->SetBottomMargin(0);
+	p_plot->Draw();
+	TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio",        0.00, 0.00, 1.00, border, 0, 0);
+	p_ratio->SetTopMargin(0);
+	p_ratio->SetBottomMargin(0.35);
+	p_ratio->Draw();
+
+	p_plot->cd();
+	if(logy) p_plot->SetLogy(1);
+	
+	// TLegend *leg = new TLegend(0.65,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.62,0.50,0.99,0.88); // Upper right
+	leg->AddEntry(h2, tag2,"f");
+	for(size_t i = 0; i < h1s->GetHists()->GetSize(); ++i)leg->AddEntry((TH1D*)h1s->GetHists()->At(i), ((TH1D*)h1s->GetHists()->At(i))->GetName(), "f");
+
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	setPlottingRange(h1, h2, 0.05, logy);
+
+	h1s->Draw("hist");
+	// h1->DrawCopy("E2 same");
+	h2->DrawCopy("PE X0 same");
+	leg->Draw();
+
+	float axmin1 = h1->GetYaxis()->GetXmin();
+	float axmin2 = h2->GetYaxis()->GetXmin();
+	float axmin  = (axmin1<axmin2)?axmin1:axmin2;
+	
+	float axmax1 = h1->GetYaxis()->GetXmax();
+	float axmax2 = h2->GetYaxis()->GetXmax();
+	float axmax  = (axmax1>axmax2)?axmax1:axmax2;
+	
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,axmin,line1x,axmax);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,axmin,line2x,axmax);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+	gPad->RedrawAxis();
+	p_plot->Draw();
+
+	p_ratio->cd();
+	if(ratio) h_ratio->Divide(h2,h1);
+	else      h_ratio->Divide(h1,h2);
+	h_ratio->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
+	h_ratio->GetYaxis()->SetTitle("Ratio");
+	setPlottingRange(h_ratio, 0.2);
+	h_ratio->DrawCopy("PE X0");
+	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 1.00, h1->GetXaxis()->GetXmax(), 1.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+	gPad->RedrawAxis();	
+	p_ratio->Draw();
+
+	col->Update();
+
+	TString outputname = TString(h1s->GetName()) + "_" + TString(h2->GetName());
+	if(logy) outputname += "_log";
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
@@ -1556,7 +1688,7 @@ void AnaClass::plotPredOverlay3HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
 	if(logy) outputname += "_log";
-	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 	delete h1;
 	delete h2;
 	delete h3;
@@ -1793,7 +1925,7 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 	gPad->RedrawAxis();
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName()) + "_" + TString(h4->GetName());
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
-	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
@@ -1851,8 +1983,8 @@ void AnaClass::plotRatioOverlay2H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 	}
 	gPad->RedrawAxis();
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
-	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
-	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
@@ -1916,8 +2048,8 @@ void AnaClass::plotRatioOverlay3H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 	}
 	gPad->RedrawAxis();
 	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName());
-	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
-	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 /*****************************************************************************
@@ -2060,6 +2192,32 @@ TH1D* AnaClass::normHistBW(const TH1D *ihist, float scale){
 //____________________________________________________________________________
 const Double_t* AnaClass::getBinning(const TH1D *hist){
 	return hist->GetXaxis()->GetXbins()->GetArray();
+}
+
+//____________________________________________________________________________
+void AnaClass::setPlottingRange(TH1D *&h1, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05	
+	float max = getMaxYExtension(h1);
+	float min = getMinYExtension(h1);
+	
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval = h1->GetBinContent(h1->GetMinimumBin());
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	h1->SetMinimum(min);
+	h1->SetMaximum(max);
 }
 
 //____________________________________________________________________________

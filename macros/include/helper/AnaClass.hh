@@ -91,6 +91,7 @@ public:
 
 	virtual void plotPredOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);	
 	virtual void plotPredOverlay2HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);	
+	virtual void plotPredOverlay2HWithRatio(THStack *h1s, TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);	
 	virtual void plotPredOverlay3HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
@@ -111,6 +112,7 @@ public:
 	virtual TH2D* normHist(const TH2D *ihist);
 	virtual TH1D* normHistBW(const TH1D *ihist, float scale = 1);
 	virtual const Double_t* getBinning(const TH1D*);
+	virtual void setPlottingRange(TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(std::vector<TH1D*>&, float = 0.05, bool = false);
