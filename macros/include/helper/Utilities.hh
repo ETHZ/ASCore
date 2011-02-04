@@ -70,10 +70,7 @@ namespace Util {
     //  name is the bare output filename, e.g. "fit_4_8",
     //  dir is the output directory (inside the overall output dir.)
     // Create sub directories if needed
-    if(!dir.EndsWith("/")) dir += "/";
-    char cmd[100];
-    sprintf(cmd,"mkdir -p %s", dir.Data());
-    system(cmd);
+	dir = MakeOutputDir(dir);
 
     dir += name;
     dir += ".png";
@@ -86,10 +83,7 @@ namespace Util {
     //  name is the bare output filename, e.g. "fit_4_8",
     //  dir is the output directory (inside the overall output dir.)
     // Create sub directories if needed
-    if(!dir.EndsWith("/")) dir += "/";
-    char cmd[100];
-    sprintf(cmd,"mkdir -p %s", dir.Data());
-    system(cmd);
+	dir = MakeOutputDir(dir);
 
     dir += name;
     dir += ".pdf";
@@ -102,10 +96,7 @@ namespace Util {
     //  name is the bare output filename, e.g. "fit_4_8",
     //  dir is the output directory (inside the overall output dir.)
     // Create sub directories if needed
-    if(!dir.EndsWith("/")) dir += "/";
-    char cmd[100];
-    sprintf(cmd,"mkdir -p %s", dir.Data());
-    system(cmd);
+	dir = MakeOutputDir(dir);
 
     dir += name;
     dir += ".eps";
@@ -243,7 +234,6 @@ namespace Util {
     }
 
   }
-
 
   //__________________________________________________________________________
   template<class T> inline std::vector<int> VSort(std::vector<int> ind, std::vector<T> vec, bool asc = false){
