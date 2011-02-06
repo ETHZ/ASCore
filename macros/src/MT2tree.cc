@@ -586,8 +586,24 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
+  else if(met==3) MET = pfmet[0]; //plus OS dileptons
   else            return -999;
 
+  if( met ==3 ){
+  // adding OS dilepton LV to MET
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	if(dilept_invmass < 120 && dilept_invmass > 60){
+		for(int i=0; i<NEles; ++i){
+			MET = MET + ele[i].lv;
+		}
+		for(int i=0; i<NMuons; ++i){
+			MET = MET + muo[i].lv;
+		}
+	} else {return -111;}
+  }
+
+  if(MET.Pt()<30) {return -222;}
+  
   vector<float> px, py, pz, E;
   for(int i=0; i<NJets; ++i){
 	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
@@ -677,27 +693,36 @@ Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   return -999.99;
 }
 
-Bool_t   MT2tree::GenDiLeptonfromZ(unsigned int pid, double pt, double eta, double lower_Minv, double upper_Minv){
-	// returns true if there are 
-	//  - two particles with abs(ID)=pid
-	//  - they have opposite charge
-	//  - they come from a Z boson
-	//  - they have Pt() > pt and |Eta()| < eta
-	//  - their inv mass is in (lower_Minv, upper_Minv)
+Double_t MT2tree::GenOSDiLeptonInvMass(unsigned int pid, unsigned int mother, double pt, double eta){
+	 // returns true if there are 
+	 //  - two particles with abs(ID)=pid
+	 //  - they have opposite charge
+	 //  - they come from "mother"
+	 //  - they have Pt() > pt and |Eta()| < eta
+	 //  - their inv mass is in (lower_Minv, upper_Minv)
 	vector<int> indices;	
 	for(int i=0; i<NGenLepts; ++i){
-		if(abs(genlept[i].ID)       !=pid  ) continue;
-		if(    genlept[i].MID       !=23   ) continue;
-		if(    genlept[i].lv.Pt()   < pt   ) continue;
-		if(fabs(genlept[i].lv.Eta())> eta  ) continue;
+		if(abs(genlept[i].ID)       !=pid   ) continue;
+		if(abs(genlept[i].MID)      !=mother) continue;
+		if(    genlept[i].lv.Pt()   < pt    ) continue;
+		if(fabs(genlept[i].lv.Eta())> eta   ) continue;
 		indices.push_back(i);
 	}
-	if(indices.size()!=2)                                         return false;
-	if( (genlept[indices[0]].ID) * (genlept[indices[1]].ID) >=0 ) return false;
+	if(indices.size()!=2)                                         return -100;
+	if( (genlept[indices[0]].ID) * (genlept[indices[1]].ID) >=0 ) return -150;
+	
 	double Mass= (genlept[indices[0]].lv + genlept[indices[1]].lv).M();
 	if(Mass<0) Mass = -Mass;
-        if(Mass < lower_Minv || Mass > upper_Minv)                    return false;	
-	return true;
+	return Mass;
+
+}
+
+
+Bool_t   MT2tree::IsGenOSDiLepton(unsigned int pid, unsigned int mother, double pt, double eta, double lower_mass, double upper_mass){
+	 double Mass = GenOSDiLeptonInvMass(pid, mother, pt, eta);
+	 if(Mass < 0 ) return false;
+	 if(Mass < lower_mass || Mass > upper_mass) return false;
+	 return true;
 }
 
 Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavour, double pt, bool exclDiLept){
@@ -706,11 +731,14 @@ Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavou
 	// flavour == 2 : only muons
 	
 	struct lepton {TLorentzVector lv; int charge; string flavour;} lepts[NEles + NMuons];	
+	int counter = 0;
 	for(int i=0; i<NEles; ++i){
-		lepts[i].lv=ele[i].lv; lepts[i].charge =ele[i].Charge; lepts[i].flavour ="ele";
+		lepts[counter].lv=ele[i].lv; lepts[counter].charge =ele[i].Charge; lepts[counter].flavour ="ele";
+		counter++;
 	}
 	for(int i=0; i<NMuons; ++i){
-		lepts[i].lv=muo[i].lv; lepts[i].charge =muo[i].Charge; lepts[i].flavour ="muo"; 
+		lepts[counter].lv=muo[i].lv; lepts[counter].charge =muo[i].Charge; lepts[counter].flavour ="muo"; 
+		counter++;
 	}
 	
 	int index1=-1, index2=-1;
@@ -747,6 +775,70 @@ Double_t MT2tree::GetDiLeptonInvMass(int same_sign, int same_flavour, int flavou
 	if(mass < 0) return -mass;
 	else return mass;
 }
+
+Double_t MT2tree::GetMETPlusLepts(int OSDiLeptFromZ){
+	if(OSDiLeptFromZ ==1) {
+		double mass = GetDiLeptonInvMass(0,1,0,10,1);
+		if(mass < 0 )               return -2000;
+		if(mass < 60 || mass > 120) return -1000; 
+	}
+	TLorentzVector lv = pfmet[0];
+	for(int i=0; i<NEles; ++i){
+		lv+=ele[i].lv;
+	}
+	for(int i=0; i<NMuons; ++i){
+		lv+=muo[i].lv;
+	}
+	return lv.Pt();
+}
+
+Double_t MT2tree::GetDiLeptonPt(int same_sign, int same_flavour, int flavour, double pt, double lower_mass, double upper_mass){
+	double mass = GetDiLeptonInvMass(same_sign, same_flavour, flavour, pt, 1);
+	if(mass < 0 )                              return -2000;
+	if(mass < lower_mass || mass > upper_mass) return -1000; 
+	TLorentzVector lv(0., 0., 0., 0.);
+	for(int i=0; i<NEles; ++i){
+		lv+=ele[i].lv;
+	}
+	for(int i=0; i<NMuons; ++i){
+		lv+=muo[i].lv;
+	}
+	return lv.Pt();
+}
+
+Double_t MT2tree::GetMETPlusGenLepts(int met, int RemoveOSSFDiLepts, int require_cuts,  unsigned int pid, unsigned int mother, double pt, double eta, double lower_mass, double upper_mass ){
+
+	TLorentzVector lv;
+        if(met==1) lv= genmet[0];
+        if(met==0) lv= pfmet[0];
+
+
+	vector<int> indices;	
+	if(RemoveOSSFDiLepts ==1 || require_cuts ==1 ) {
+		for(int i=0; i<NGenLepts; ++i){
+			if(pid==1113) {if(abs(genlept[i].ID) !=11 && abs(genlept[i].ID)!=13  ) continue;}
+			if(pid!=1113) {if(abs(genlept[i].ID) !=pid   ) continue;}
+			if(abs(genlept[i].MID)               !=mother) continue;
+			if(    genlept[i].lv.Pt()            < pt    ) continue;
+			if(fabs(genlept[i].lv.Eta())         > eta   ) continue;
+			indices.push_back(i);
+		}
+		if(indices.size()!=2)                                         return -100;
+		if( (genlept[indices[0]].ID) * (genlept[indices[1]].ID) >=0 ) return -150;
+		
+		double Mass= (genlept[indices[0]].lv + genlept[indices[1]].lv).M();
+		if(Mass<0) Mass = -Mass;
+		if(Mass > upper_mass || Mass < lower_mass)                    return -200;
+		if(RemoveOSSFDiLepts ==1) {
+			lv+=genlept[indices[0]].lv;
+			lv+=genlept[indices[1]].lv;
+		}
+	}
+	
+	return lv.Pt();
+}
+
+
 
 ClassImp(MT2Misc)
 ClassImp(MT2Jet)

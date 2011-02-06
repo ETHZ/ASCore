@@ -95,9 +95,56 @@ void MassPlotter::makePlots(){
 
 // _________________________________________________________________________
 void MassPlotter::makeZnunu(){
+	// get samples
+	vector<sample> Samples;
 	for(int i=0; i<fSamples.size(); ++i){
-		if(fSamples[i].sname=="ZToLL") PrintZllKinAcceptance(fSamples[i]);	
+		if(fSamples[i].sname=="DYToLL")   Samples.push_back(fSamples[i]); 
+		if(fSamples[i].sname=="DYToNuNu") Samples.push_back(fSamples[i]); 
 	}
+	
+	// -------------
+	// reco and geom efficiency
+	for(int i=0; i<fSamples.size(); ++i){
+//		if(fSamples[i].type =="data"    )     PrintZllEfficiency(fSamples[i], true, "ele");
+//		if(fSamples[i].sname=="DYToLL")       PrintZllEfficiency(fSamples[i], false, "ele");	
+//		if(fSamples[i].sname=="DYToNuNu")     PrintZllEfficiency(fSamples[i], false, "neutrinos");	
+	}
+
+	// --------------
+	// comparing Z->nunu with Z->ll
+	std::ostringstream cutStream;
+	cutStream  
+	//	  << "misc.HT       >300"                           << "&&"
+	//	  << "misc.MET      >30"                            << "&&"
+		  << "misc.Jet0Pass == 1"                           << "&&"
+	//	  << "misc.Jet1Pass == 1"                           << "&&"
+	//	  << "misc.PassJetID == 1"                          << "&&"
+	//	  << "misc.Vectorsumpt<70"                          << "&&"
+	//	  << "misc.MinMetJetDPhi>0.3"                       << "&&" 
+	//	  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
+		  << "misc.HBHENoiseFlag == 1"                   ;
+	
+	TString cuts = cutStream.str().c_str();
+
+	// declare a few maps	
+	// to be used for Z->nunu                               to be used for Z->ll
+	RemoveLeptMap["GetMT2Hemi(0,false,1,20,3,1)"]        = "GetMT2Hemi(0,false,1,20,3,3)";
+	RemoveLeptMap["misc.MET"]                            = "GetMETPlusLepts(1)";
+//	RemoveLeptMap["pfmet[0].Pt()"]                       = "GetDiLeptonPt()";
+	RemoveLeptMap["pfmet[0].Pt()"]                       = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)";
+
+	TString isZtoll    = "GetDiLeptonInvMass(0,1,0,10,true) > 60 && GetDiLeptonInvMass(0,1,0,10,true) < 120";
+	TString removed_ee = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)>=0";
+	TString isZtoll2   = "GetDiLeptonPt()>-1";
+//                            variable for Z->nunu                cuts,  optcut, replace_cut   xtitle        bins                 add_underflow   logflag  scale_factor normalized
+//	CompSamples(Samples, "NJetsIDLoose",                      cuts, isZtoll,       false,      "NJetsIDLoose", 10 , 0 , 10,         false,          true,    1,           true);
+//	CompSamples(Samples, "misc.HT"     ,                      cuts, "_",           false,      "HT"          , 50, 50, 500,         false,          true,    1,           true);
+//	CompSamples(Samples, "GetGenMET(0,1,14,23,10,2.4,60,120)",cuts, "_",           true,       "GetMET"      , gNMT2bins, gMT2bins, false,          true,    1,           true);
+	CompSamples(Samples, "misc.MET"                          ,cuts, "_",           true,       "MET"         , 50,          0, 500, false,          true,    1,           true);
+//	CompSamples(Samples, "GetMHT(1,20,2.4)"                  ,cuts, isZtoll,       false,      "MHT"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
+//	CompSamples(Samples, "pfmet[0].Pt()"                     ,cuts, removed_ee,    true,       "MET"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
+//	CompSamples(Samples, "pfmet[0].Pt()"                     ,cuts, removed_ee,    true,       "MET"         , 100, 0, 500        , false,          true,    1,           true);
+//	CompSamples(Samples, "GetMT2Hemi(0,false,1,20,3,1)"      ,cuts, "_",           true,       "MT2"         , gNMT2bins, gMT2bins ,false,          true,    1,           true);
 }
 
 
@@ -137,8 +184,8 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 	std::ostringstream cutStream;
 	cutStream  
-		  << "misc.LeptConfig==9"                           << "&&"
-		  << "NJetsIDLoose > 1"                             << "&&"
+		  << "misc.MET > 30"                                << "&&"
+		  << "misc.HT > 300"                                << "&&"
 		  << "misc.Jet0Pass == 1"                           << "&&"
 		  << "misc.Jet1Pass == 1"                           << "&&"
 		  << "misc.PassJetID == 1"                          << "&&"
@@ -146,11 +193,11 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 		  << "misc.MinMetJetDPhi>0.3"                       << "&&" 
 		  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
 		  << "misc.HBHENoiseFlag == 1"                   ;
-	
+
 	TString cuts = cutStream.str().c_str();
 	
-	//                 variable                         cuts njets  nlepts title     bins            cleaned  log  composite   ratio  stacked overlay 
-	MakePlot(fSamples,"misc.MT2" ,                      cuts, -3,   0,     "MT2" ,gNMT2bins,gMT2bins, false,  true , true,     true,  true,  false);
+	//                 variable                            cuts njets  nlepts title     bins               cleaned  log  composite    ratio  stacked overlay 
+	MakePlot(fSamples,"misc.MT2" ,                         cuts, -2,   0,      "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
 
 }
 
@@ -178,19 +225,23 @@ void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TStr
 
 }
 
-
 // ________________________________________________________________________
-void MassPlotter::PrintZllKinAcceptance(sample Sample){
-	Long64_t nevents=10000000;
+void MassPlotter::PrintZllEfficiency(sample Sample , bool data, std::string lept){
+	Long64_t nevents=1000000000;
 
       	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
 	cout << "printing kinetic & geom. acceptance for Z->ll for sample: \n"
 	     << Sample.name << endl;	
       	std::cout << setfill('-') << std::setw(70) << "" << std::endl;
 
-        enum counters_t { count_begin, all=count_begin, presel,  HCAL_ECAL_noise, VectorSumPt ,Jet01Pass ,PassJetID, MinMetJetDPhi, count_end };
+        enum counters_t { count_begin, all=count_begin, presel,  HCAL_ECAL_noise, VectorSumPt ,PassJetID, MinMetJetDPhi, MET, count_end };
  	Monitor counters[count_end];
-	TString lablx[count_end] = {"all events", "presel", "Cal_Noise", "VectorSumPt", "Jet01Pass", "PassJetID", "MinMetJetDPhi"};
+	TString lablx[count_end] = {"all events", "presel", "Cal_Noise", "VectorSumPt", "PassJetID", "MinMetJetDPhi", "MET"};
+
+	int pid, flavour; 
+	if(lept == "ele" )            {pid = 11; flavour = 1;} 
+	else if(lept == "muo" )       {pid = 13; flavour = 2;} 
+	else if(lept != "neutrinos")  {cout << "choose appropriate lepton flavour" << endl; return;}
 
     	fMT2tree = new MT2tree();
     	Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
@@ -203,44 +254,59 @@ void MassPlotter::PrintZllKinAcceptance(sample Sample){
       		if ( fVerbose>2 && jentry % 50000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
 
 		// check if event has Z->e+e- within acceptance	
-		bool ZeeAccepted = fMT2tree->GenDiLeptonfromZ(11, 10, 2.4, 60,  120);
-		bool Zee         = fMT2tree->GenDiLeptonfromZ(11,  0, 10 , 0, 10000);
+		
+		bool Zee(false);         
+		bool ZeeAccepted(false); 
+		bool ZeeReco(false); 
+		if(! data) Zee              = fMT2tree->IsGenOSDiLepton(pid,23,0,10,0,10000);
+		if(  data) Zee              = (fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) > 60 && fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) < 120);
+		if(! data) ZeeAccepted      = fMT2tree->IsGenOSDiLepton(pid,23,10,2.4,60,120);
+		if(! data) ZeeReco          = (fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) > 60 && fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) < 120);
+		if(lept=="neutrinos"){ Zee  = true;}
+
 		// all events
 		if(Zee)         counters[all].fill("all events");
 		if(ZeeAccepted) counters[all].fill("Zee within acceptance");
+		if(ZeeReco)     counters[all].fill("Zee Reco");
 		
 		// presel
-		if(fMT2tree->misc.HT  < 300)  continue;
-		if(fMT2tree->misc.MET < 30)   continue;
+		if(fMT2tree->misc.HT  < 300)             continue;
+		if(fMT2tree->misc.Jet0Pass  ==0       )  continue;
+		if(fMT2tree->misc.Jet1Pass  ==0       )  continue;
 		if(Zee)         counters[presel].fill("presel");
 		if(ZeeAccepted) counters[presel].fill("Zee within acceptance");
+		if(ZeeReco)     counters[presel].fill("Zee Reco");
 		
 		// ECAL HCAL Noise
 		if(fMT2tree->misc.EcalDeadCellBEFlag  == 0)  continue;
 		if(fMT2tree->misc.HBHENoiseFlag       == 0)  continue;
 		if(Zee)         counters[HCAL_ECAL_noise].fill("Cal_Noise");
 		if(ZeeAccepted) counters[HCAL_ECAL_noise].fill("Zee within acceptance");
+		if(ZeeReco)     counters[HCAL_ECAL_noise].fill("Zee Reco");
 		
 		// VectorSumPt
 		if(fMT2tree->misc.Vectorsumpt  > 70       )  continue;
 		if(Zee)         counters[VectorSumPt].fill("VectorSumPt");
 		if(ZeeAccepted) counters[VectorSumPt].fill("Zee within acceptance");
-		
-		// Jet01Pass
-		if(fMT2tree->misc.Jet0Pass  ==0       )  continue;
-		if(fMT2tree->misc.Jet1Pass  ==0       )  continue;
-		if(Zee)         counters[Jet01Pass].fill("Jet01Pass");
-		if(ZeeAccepted) counters[Jet01Pass].fill("Zee within acceptance");
+		if(ZeeReco)     counters[VectorSumPt].fill("Zee Reco");
 		
 		// PassJetID
 		if(fMT2tree->misc.PassJetID  ==0      )  continue;
 		if(Zee)         counters[PassJetID].fill("PassJetID");
 		if(ZeeAccepted) counters[PassJetID].fill("Zee within acceptance");
+		if(ZeeReco)     counters[PassJetID].fill("Zee Reco");
 		
 		// MinMetJetDPhi
 		if(fMT2tree->misc.MinMetJetDPhi  <0.3      )  continue;
 		if(Zee)         counters[MinMetJetDPhi].fill("MinMetJetDPhi");
 		if(ZeeAccepted) counters[MinMetJetDPhi].fill("Zee within acceptance");
+		if(ZeeReco)     counters[MinMetJetDPhi].fill("Zee Reco");
+		
+		// MET
+		if(fMT2tree->misc.MET<30                   )  continue;
+		if(Zee)         counters[MET].fill("MET");
+		if(ZeeAccepted) counters[MET].fill("Zee within acceptance");
+		if(ZeeReco)     counters[MET].fill("Zee Reco");
       	}
 
 	// print stats     
@@ -253,27 +319,50 @@ void MassPlotter::PrintZllKinAcceptance(sample Sample){
        	}
   	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
 
+	if(data) return;
+
 	// fill histo
 	TH1D* h_Zaccept_num = new TH1D("h_Zaccept_num", "", count_end, 0., (double) count_end );
 	TH1D* h_Zaccept_den = new TH1D("h_Zaccept_den", "", count_end, 0., (double) count_end );
 	TH1D* h_Zaccept     = new TH1D("h_Zaccept"    , "", count_end, 0., (double) count_end );
+	TH1D* h_ZReco_num   = new TH1D("h_ZReco_num"  , "", count_end, 0., (double) count_end );
+	TH1D* h_ZReco_den   = new TH1D("h_ZReco_den"  , "", count_end, 0., (double) count_end );
+	TH1D* h_ZReco       = new TH1D("h_ZReco"      , "", count_end, 0., (double) count_end );
 	for(int i=0; i<count_end; ++i){
-		h_Zaccept->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_Zaccept    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		h_Zaccept_num->SetBinContent(i+1,counters[i].counts("Zee within acceptance"));
 		h_Zaccept_den->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
+		h_ZReco      ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_ZReco_num  ->SetBinContent(i+1,counters[i].counts("Zee Reco"));
+		h_ZReco_den  ->SetBinContent(i+1,counters[i].counts("Zee within acceptance"));
 	}
 	h_Zaccept    ->Sumw2();
 	h_Zaccept    ->Divide(h_Zaccept_num,h_Zaccept_den);	
-	TCanvas *col = new TCanvas("GenDYToLLAcceptance", "", 0, 0, 900, 700);
+	h_ZReco      ->Sumw2();
+	h_ZReco      ->Divide(h_ZReco_num,h_ZReco_den);	
+	TCanvas *col  = new TCanvas("GenDYToLLAcceptance", "", 0, 0, 900, 700);
+	TCanvas *col2 = new TCanvas("GenDYToLLReco"      , "", 0, 0, 900, 700);
+	
 	col -> cd();
 	h_Zaccept    ->SetLineColor(kBlue);
 	h_Zaccept    ->Draw("E");
 	string name  ="GenDYToLLAcceptance"+(string) Sample.name; 
 	Util::PrintEPS(col, name, fOutputDir);
+	
+	col2 -> cd();
+	h_ZReco    ->SetLineColor(kBlue);
+	h_ZReco    ->Draw("E");
+	string name2  ="GenDYToLLReco"+(string) Sample.name; 
+	Util::PrintEPS(col2, name2, fOutputDir);
+
 	delete h_Zaccept;
 	delete h_Zaccept_den;
 	delete h_Zaccept_num;
+	delete h_ZReco;
+	delete h_ZReco_den;
+	delete h_ZReco_num;
 	delete col;
+	delete col2;
 }
 
 //________________________________________________________________________
@@ -529,6 +618,98 @@ void MassPlotter::plotSig(TString var, TString cuts, TString xtitle, int nbins, 
 	  break;
 	}
 	sig->Draw("ACP");
+}
+// _______________________________________________________________________
+void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts,
+			   TString xtitle, const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize){
+
+  	double bins[nbins];
+  	bins[0] = min;
+  	for(int i=1; i<=nbins; i++)
+    	bins[i] = min+i*(max-min)/nbins;
+  	CompSamples(Samples, var, cuts, optcut, RemoveLepts, xtitle, nbins, bins, add_underflow, logflag, scale_factor, normalize);
+
+}
+// __________________________________________________________________________
+void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts,
+			   TString xtitle, const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize){
+
+        TString varname = Util::removeFunnyChar(var.Data());
+
+	TH1D*    histos[2];
+	histos[0] = new TH1D(varname+Samples[0].sname  , "", nbins, bins);
+	histos[1] = new TH1D(varname+Samples[1].sname  , "", nbins, bins);
+
+	histos[0] -> Sumw2(); 
+	histos[1] -> Sumw2();
+	histos[0] -> SetLineColor(kBlue); 
+	histos[1] -> SetLineColor(kRed); 
+	histos[0] -> SetLineWidth(4);
+	histos[1] -> SetLineWidth(4);
+
+	// legend
+	TLegend* Legend1 = new TLegend(.71,.54,.91,.92);
+
+	for(int i=0; i<2; ++i){
+		Double_t weight = scale_factor * Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
+		if(fVerbose>2) cout << "GetHisto: looping over " << Samples[i].sname << endl;
+		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
+
+		// exchange variable to plot with the corresponding one with removed leptons;	
+		TString variable; 
+		TString selection; 
+		if(RemoveLepts && Samples[i].sname == "DYToLL"){
+			MapType::iterator iter = RemoveLeptMap.begin();
+			iter = RemoveLeptMap.find(var);
+			if (iter != RemoveLeptMap.end() ){
+				variable = iter -> second;
+			} else {cout << "found RemoveLepts==true, but no corresponding map" << endl; variable = var;}
+		}else {
+			variable = var;
+		}
+		if(optcut!="_" && Samples[i].sname == "DYToLL"){
+			TString newcuts = cuts + "&&" + optcut;  
+			selection      = TString::Format("(%f) * (%s)",weight,newcuts.Data());
+		} else {
+			selection      = TString::Format("(%f) * (%s)",weight,cuts.Data());
+		}
+
+		variable          = TString::Format("%s>>%s",variable.Data(),histos[i]->GetName());
+		
+			  
+		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
+				    << "\twith cuts: "  << selection << endl;
+
+		int nev = Samples[i].tree->Draw(variable.Data(),selection.Data(),"goff");
+
+		// Add underflow & overflow bins
+		// This failed for older ROOT version when the first(last) bin is empty
+		// and there are underflow (overflow) events --- must check whether this 
+		// is still the case
+		if(add_underflow) {
+			histos[i]->SetBinContent(1,
+				    histos[i]->GetBinContent(0) + histos[i]->GetBinContent(1));
+			histos[i]->SetBinError(1,
+				  sqrt(histos[i]->GetBinError(0)*histos[i]->GetBinError(0)+
+				       histos[i]->GetBinError(1)*histos[i]->GetBinError(1) ));
+		}
+		histos[i]->SetBinContent(histos[i]->GetNbinsX(),
+					    histos[i]->GetBinContent(histos[i]->GetNbinsX()  )+ 
+					    histos[i]->GetBinContent(histos[i]->GetNbinsX()+1) );
+		histos[i]->SetBinError(histos[i]->GetNbinsX(),
+					  sqrt(histos[i]->GetBinError(histos[i]->GetNbinsX()  )*
+					       histos[i]->GetBinError(histos[i]->GetNbinsX()  )+
+					       histos[i]->GetBinError(histos[i]->GetNbinsX()+1)*
+					       histos[i]->GetBinError(histos[i]->GetNbinsX()+1)  ));
+		
+		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
+				    << "\t->Integral() : "  <<  histos[i]->Integral() << endl;
+	     	Legend1 ->AddEntry(histos[i], Samples[i].sname, "l"); 
+	}
+	
+	plotRatio(histos[0], histos[1], logflag, normalize, varname+"_"+Samples[0].sname+"_"+Samples[1].sname, Legend1 , xtitle, "");
+	
+	
 }
 
 //________________________________________________________________________
@@ -1401,7 +1582,7 @@ void MassPlotter::plotRatioStack(THStack* hstack, TH1* h1_orig, TH1* h2_orig, TH
 }
 //_________________________________________________________________________________
 void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle){
-	// define canvas and pads 
+	// define canvas and pads
 	TH1D *h1 = (TH1D*)h1_orig->Clone("h1_copy");
 	TH1D *h2 = (TH1D*)h2_orig->Clone("h2_copy");
 
@@ -1411,7 +1592,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	TCanvas* c1 = new TCanvas("c1","", 20,100,1000,700);
 	c1 -> cd();
 	
-	float border = 0.4;
+	float border = 0.3;
  	float scale = (1-border)/border;
  
  	TPad *p_plot  = new TPad("plotpad",  "Pad containing the overlay plot", 0.00, border, 1.00, 1.00, 0, 0);
@@ -1422,6 +1603,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
  	p_ratio->SetBottomMargin(0.35);
  	p_ratio->Draw();
  
+	gPad->SetFillStyle(0);
 	// draw overlay plot
  	p_plot ->cd();
 
@@ -1491,6 +1673,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
  	h_ratio ->SetMaximum(3.0);
 	h_ratio ->GetYaxis()->SetTitleOffset(h1->GetYaxis()->GetTitleOffset());
 
+	gPad->SetFillStyle(0);
 	h_ratio ->DrawCopy("E2");
  
 	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 1.00, h1->GetXaxis()->GetXmax(), 1.00);
@@ -1503,7 +1686,7 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	lat.SetTextSize(0.07);
 	lat.SetNDC(1);
 	lat.SetTextAngle(90);
-	lat.DrawLatex(0.035, 1.0, "lower / upper");
+	lat.DrawLatex(0.035, 1.0, "ratio");
 	
 	// x axis title
 	lat.SetTextAngle(0);
@@ -1515,14 +1698,14 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
  	c1->Update();
 
 	TString save=name+"_ratio";
-	Util::PrintNoEPS(c1, save, fOutputDir, fOutputFile);	
+	Util::PrintEPS(c1, save, fOutputDir);	
 
-// 	delete h1;
-// 	delete h2;
-// 	delete h_ratio;
-// 	delete p_plot;
-// 	delete p_ratio;
-// 	delete c1;
+ 	delete h1;
+ 	delete h2;
+ 	delete h_ratio;
+ 	delete p_plot;
+ 	delete p_ratio;
+ 	delete c1;
 
 }
 //___________________________________________________________________________

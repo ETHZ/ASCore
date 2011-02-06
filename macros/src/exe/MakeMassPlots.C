@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
 	tA->setVerbose(verbose);
 	tA->init(samples);
 	tA->makePlots();
+//	tA->makeZnunu();
 	delete tA;
 	return 0;
 }

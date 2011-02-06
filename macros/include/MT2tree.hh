@@ -214,9 +214,15 @@ public:
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
   Double_t GetMCT(bool massive=false, int met=1);
+
   // Leptons
+  Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);
   Double_t GetDiLeptonInvMass(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, bool exclDiLept=false);
-  Bool_t   GenDiLeptonfromZ(unsigned int pid=11, double pt=10., double eta=2.4, double lower_Minv=60, double upper_Minv=120);
+  Bool_t   IsGenOSDiLepton(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=60, double upper_mass=120);
+  Double_t GetMETPlusLepts(int OSDiLeptFromZ =1);
+  Double_t GetMETPlusGenLepts(int met, int RemoveOSSFDiLepts=0, int require_cuts=1, unsigned int pid=11, 
+		              unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=60, double upper_mass=120);
+  Double_t GetDiLeptonPt(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, double lower_mass=60, double upper_mass=120);
 
   Int_t   NJets;
   Int_t   NJetsIDLoose;

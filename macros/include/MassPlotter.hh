@@ -10,6 +10,7 @@
 #include "helper/Monitor.hh"
 #include "THStack.h"
 #include "TTree.h"
+#include <map>
 
 static const int gNMT2bins                   = 19;
 static const double  gMT2bins[gNMT2bins+1]   = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 85, 105, 135, 180, 260, 360, 500}; 	
@@ -47,6 +48,8 @@ static const double dPhiJetsMET   =0.0;
 static const double DPhiJetsMetMinJpt=50;
 
 static const int    PrintRunLumiEvt=1;
+	
+
 
 //________________________________________________________________________________
 class MassPlotter  {
@@ -63,6 +66,20 @@ public:
 	void makePlots();
 	void makeZnunu();
 
+	struct sample{
+		TString name;
+		TString sname;
+		TString type;
+		TFile *file;
+		TTree *tree;
+		float xsection;
+		float nevents;
+		float kfact;
+		float lumi;
+		int color;
+	};
+ 
+	std::vector<sample>  fSamples;
 	void setVerbose(int v){ fVerbose = v;};
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
@@ -80,32 +97,24 @@ public:
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
+	void PrintZllEfficiency(sample Sample, bool data, std::string lept );
+	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
+			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
+	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
+			  const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 private:
 
 	TString fOutputDir;
 	TFile *fOutputFile;
 	int fVerbose;
 	TString fPath;
+	
+	typedef std::map <TString, TString> MapType;
+	MapType RemoveLeptMap;
 
-	struct sample{
-		TString name;
-		TString sname;
-		TString type;
-		TFile *file;
-		TTree *tree;
-		float xsection;
-		float nevents;
-		float kfact;
-		float lumi;
-		int color;
-	};
-
-	std::vector<sample>  fSamples;
 	MT2tree* fMT2tree;
 	TTree*   fTree;
 
-	void PrintZllKinAcceptance(sample Sample);
-	void ControlPlot();
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
 		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
@@ -134,7 +143,7 @@ private:
 
 	double ExpoFitTesting(double *x, double *par);
 	TH1D* FillRatioHist(TString branch_name, float MT2plit[], float ysplit[], TString option, const int nbins, const double bins[], TString version,  bool cleaned);
-	TH1D*  GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor );
+	TH1D* GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor );
 };
 
 #endif
