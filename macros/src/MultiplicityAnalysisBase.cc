@@ -21,6 +21,8 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
+	fCut_ElectronTrigger                = 0;
+	fCut_MuonTrigger                    = 0;
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
@@ -47,12 +49,13 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 
 	vector<double> mutight;
 	for(int i=0; i< fTR->NMus; ++i){
-		if(! IsGoodBasicMu(i)        ) continue;
-		if(! (fTR->MuPt[i] > 10)     ) continue;
+		if(! IsGoodBasicMu(i)           ) continue;
+		if(! (fTR->MuPt[i] > 10)        ) continue;
+		if(! (fabs(fTR->MuEta[i]) < 2.4)) continue;
 		double iso    = fTR->MuRelIso03[i];
 		double pt     = fTR->MuPt[i];
 		double hybiso = iso*pt / std::max(20.,pt);
-		if(! (hybiso < 0.15)         ) continue;
+		if(! (hybiso < 0.15)            ) continue;
 		fMuons.push_back(i);
 		mutight.push_back(fTR->MuPt[i]);
 	}
@@ -62,6 +65,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	for(int i=0; i< fTR->NEles; ++i){
 		if(! IsLooseEl(i)               ) continue;
 		if(! (fTR->ElPt[i] > 10)        ) continue;
+		if(! (fabs(fTR->ElEta[i]) < 2.4)) continue;
 		if(! IsIsolatedEl(i, 0.15, 0.15)) continue; //hybiso 
 		fElecs.push_back(i);
 		eltight.push_back(fTR->ElPt[i]);
@@ -180,6 +184,12 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 			} 
 		}
 	}
+//	if(fCut_ElectronTrigger == 1){
+//		if(! IsGoodElEvent_RA5()) return false;
+//	}
+//	if(fCut_MuonTrigger ==1 ){
+//		if(! IsGoodMuEvent()) return false;
+//	}
 
 	// HT
 	double HT=0;
@@ -193,30 +203,14 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 
 
 	// leading jets
-	int index1=-1;
-	int index2=-1;
-	double pt1=0;
-	double pt2=0;
-
-	for(int i=0; i<fTR->PFNJets; ++i){
-		if(fTR->PFJPt[i]>pt1){
-			index2 = index1;
-			index1 = i;
-			pt2    = pt1;
-			pt1    = fTR->PFJPt[i];
-		}else if(fTR->PFJPt[i]>pt2){
-			index2 = i;
-			pt2    = fTR->PFJPt[i];
-		}
-	}
 	bool leadingjets(true);
 	if(fCut_JPt_hardest_min > 0){
-		if(index1 !=-1 && IsGoodBasicPFJet(index1, fCut_JPt_hardest_min, 2.4) == false ){leadingjets=false;}
-		else {leadingjets = false;}
+		if(fJets.size() <1) leadingjets=false;
+		else if(IsGoodBasicPFJet(fJets[0], fCut_JPt_hardest_min, 2.4) == false ){leadingjets=false;}
 	}
 	if(fCut_JPt_second_min > 0){
-		if(index2 !=-1 && IsGoodBasicPFJet(index2, fCut_JPt_second_min,  2.4) == false ){leadingjets=false;}
-		else {leadingjets = false;}
+		if(fJets.size() <2) leadingjets=false;
+		else if(IsGoodBasicPFJet(fJets[1], fCut_JPt_second_min,  2.4) == false ){leadingjets=false;}
 	}
 	if(leadingjets == false) return false;
 	
@@ -339,6 +333,10 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_Zselector = int(IntValue); ok = true;
 		} else if( !strcmp(ParName, "Zveto") ){
 			fCut_Zveto   = int(IntValue); ok = true;
+		} else if( !strcmp(ParName, "ElectronTrigger") ){
+			fCut_ElectronTrigger   = int(IntValue); ok = true;
+		} else if( !strcmp(ParName, "MuonTrigger") ){
+			fCut_MuonTrigger   = int(IntValue); ok = true;
 		}
 
 		// floats 
@@ -386,6 +384,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
+		cout << "  ElectronTrigger             " << fCut_ElectronTrigger            <<endl;
+		cout << "  MuonTrigger                 " << fCut_MuonTrigger                <<endl;
 
 		for(int i=0; i<fRequiredHLT.size(); ++i){
 			cout << "  HLTRequired (logic OR)      " << fRequiredHLT[i]                  <<endl;

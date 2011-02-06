@@ -53,6 +53,8 @@ public:
 	int   fCut_Zveto;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
+	int   fCut_ElectronTrigger;
+	int   fCut_MuonTrigger;
 
 	// members
 	float fVectorSumPt;
