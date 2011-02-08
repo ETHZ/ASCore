@@ -341,7 +341,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int me
 // Attention: electrons and muons are not considered for minDPhi
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
-  else if(met==2) MET = MHTloose[0];
+  else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else            return -999;
 
   int index = MinMetJetDPhiIndex(PFJID, minJPt, maxJEta, met);
@@ -352,7 +352,7 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
 // Attention: electrons and muons are not considered for minDPhi
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
-  else if(met==2) MET = MHTloose[0];
+  else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else            return -999;
 
   std::vector<int> indices;
@@ -582,11 +582,12 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   return CalcMT2(0, massive, pseudojet1, pseudojet2, MET); 
 }
 
-Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double minJPt, int hemi_association, int met) {
+Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double minJPt, double maxJEta, int hemi_association, int met) {
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else if(met==3) MET = pfmet[0]; //plus OS dileptons
+  else if(met==4) MET.Clear();
   else            return -999;
 
   if( met ==3 ){
@@ -602,14 +603,10 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
 	} else {return -111;}
   }
 
-  if(MET.Pt()<30) {return -222;}
   
   vector<float> px, py, pz, E;
   for(int i=0; i<NJets; ++i){
-	if(PFJID==1  && jet[i].isPFIDLoose ==false) continue;
-	if(PFJID==2  && jet[i].isPFIDMedium==false) continue;
-	if(PFJID==3  && jet[i].isPFIDTight ==false) continue;
-	if(jet[i].lv.Pt() < minJPt )                continue;
+	if(jet[i].IsGoodPFJet(minJPt, maxJEta, PFJID) ==false) continue;
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
@@ -640,9 +637,70 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
 	}
   }
   delete hemi;
- 
+
+  if(met==4) {MET = -pseudojet1 - pseudojet2;} 
+  if(MET.Pt()<30) {return -222;}
   return CalcMT2(testmass, massive, pseudojet1, pseudojet2, MET); 
 }
+
+Double_t MT2tree::GetMT2HemiMinDHT(double testmass, bool massive, int PFJID, double minJPt, double maxJEta, int met) {
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else if(met==3) MET = pfmet[0]; //plus OS dileptons
+  else if(met==4) MET.Clear();
+  else            return -999;
+
+  if( met ==3 ){
+  // adding OS dilepton LV to MET
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	if(dilept_invmass < 120 && dilept_invmass > 60){
+		for(int i=0; i<NEles; ++i){
+			MET = MET + ele[i].lv;
+		}
+		for(int i=0; i<NMuons; ++i){
+			MET = MET + muo[i].lv;
+		}
+	} else {return -111;}
+  }
+
+  
+  vector<TLorentzVector> p4s;
+  for(int i=0; i<NJets; ++i){
+	if(jet[i].IsGoodPFJet(minJPt, maxJEta, PFJID) ==false) continue;
+	p4s.push_back(jet[i].lv);
+  }
+
+  if(p4s.size() < 2) return -200;
+
+  std::vector<std::vector<double> > ht( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); // initializiert einen vector ht der size 1<<(p4s.size()-1), wobei jeder eintrag ein vector (0,0) ist
+
+  std::vector<std::vector<double> > px( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  std::vector<std::vector<double> > py( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  std::vector<std::vector<double> > pz( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  std::vector<std::vector<double> > E ( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+
+  for(unsigned i=0; i < ht.size(); i++) {                                             
+  for(unsigned j=0; j < p4s.size(); j++) {
+		ht [i] [(i/(1<<j))%2] += p4s[j].Pt();
+		px [i] [(i/(1<<j))%2] += p4s[j].Px();
+		py [i] [(i/(1<<j))%2] += p4s[j].Py();
+		pz [i] [(i/(1<<j))%2] += p4s[j].Pz();
+		E  [i] [(i/(1<<j))%2] += p4s[j].E();
+  }  
+  }
+  std::vector<double> deltaHT; for(unsigned i=0; i<ht.size(); i++) deltaHT.push_back(fabs(ht[i][0]-ht[i][1]));
+  const double mDHT = *(std::min_element( deltaHT.begin(), deltaHT.end() ));
+  int pos=distance(deltaHT.begin(), min_element(deltaHT.begin(), deltaHT.end()));
+  TLorentzVector pj1, pj2;
+  pj1.SetPxPyPzE(px[pos][0], py[pos][0], pz[pos][0], E[pos][0]);
+  pj2.SetPxPyPzE(px[pos][1], py[pos][1], pz[pos][1], E[pos][1]);
+
+  if(met==4) {MET = -pj1 - pj2;} 
+  if(MET.Pt()<30) {return -222;}
+  return CalcMT2(testmass, massive, pj1, pj2, MET); 
+}
+
 
 Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET ){
   
@@ -691,6 +749,79 @@ Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
   delete mct;
   return -999.99;
+}
+
+Double_t MT2tree::GetPseudoJetsdPhi(int hemi_seed, int hemi_association, int PFJID, double minJPt, double maxJEta){
+
+  vector<float> px, py, pz, E;
+  for(int i=0; i<NJets; ++i){
+	if(jet[i].IsGoodPFJet(minJPt, maxJEta, PFJID) ==false) continue;
+  	px.push_back(jet[i].lv.Px());
+	py.push_back(jet[i].lv.Py());
+	pz.push_back(jet[i].lv.Pz());
+	 E.push_back(jet[i].lv.E());
+  }
+		
+  if (px.size()<2) return -999;
+
+  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
+  Hemisphere* hemi = new Hemisphere(px, py, pz, E, hemi_seed, hemi_association);
+  vector<int> grouping = hemi->getGrouping();
+
+  TLorentzVector pseudojet1(0.,0.,0.,0.);
+  TLorentzVector pseudojet2(0.,0.,0.,0.);
+	
+  for(int i=0; i<px.size(); ++i){
+	if(grouping[i]==1){
+		pseudojet1.SetPx(pseudojet1.Px() + px[i]);
+		pseudojet1.SetPy(pseudojet1.Py() + py[i]);
+		pseudojet1.SetPz(pseudojet1.Pz() + pz[i]);
+		pseudojet1.SetE( pseudojet1.E()  + E[i]);	
+	}else if(grouping[i] == 2){
+		pseudojet2.SetPx(pseudojet2.Px() + px[i]);
+		pseudojet2.SetPy(pseudojet2.Py() + py[i]);
+		pseudojet2.SetPz(pseudojet2.Pz() + pz[i]);
+		pseudojet2.SetE( pseudojet2.E()  + E[i]);
+	}
+  }
+  delete hemi;
+  return Util::DeltaPhi(pseudojet1.Phi(), pseudojet2.Phi());
+}
+
+Double_t MT2tree::GetPseudoJetsdPhiMinDHT(int PFJID, double minJPt, double maxJEta){
+	// hemispheres minimizing deltaHT
+	vector<TLorentzVector> p4s;
+	for(int i=0; i<NJets; ++i){
+		if(jet[i].IsGoodPFJet(minJPt, maxJEta, PFJID) ==false) continue;
+		p4s.push_back(jet[i].lv);
+	}
+
+	if(p4s.size() < 2) return -200;
+
+  	std::vector<std::vector<double> > ht( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); // initializiert einen vector ht der size 1<<(p4s.size()-1), wobei jeder eintrag ein vector (0,0) ist
+       	
+  	std::vector<std::vector<double> > px( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > py( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > pz( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+  	std::vector<std::vector<double> > E ( 1<<(p4s.size()-1) , std::vector<double>( 2, 0.) ); 
+
+  	for(unsigned i=0; i < ht.size(); i++) {                                             
+    	for(unsigned j=0; j < p4s.size(); j++) {
+			ht [i] [(i/(1<<j))%2] += p4s[j].Pt();
+			px [i] [(i/(1<<j))%2] += p4s[j].Px();
+			py [i] [(i/(1<<j))%2] += p4s[j].Py();
+			pz [i] [(i/(1<<j))%2] += p4s[j].Pz();
+			E  [i] [(i/(1<<j))%2] += p4s[j].E();
+    	}
+  	}
+  	std::vector<double> deltaHT; for(unsigned i=0; i<ht.size(); i++) deltaHT.push_back(fabs(ht[i][0]-ht[i][1]));
+	const double mDHT = *(std::min_element( deltaHT.begin(), deltaHT.end() ));
+	int pos=distance(deltaHT.begin(), min_element(deltaHT.begin(), deltaHT.end()));
+	TLorentzVector pj1, pj2;
+	pj1.SetPxPyPzE(px[pos][0], py[pos][0], pz[pos][0], E[pos][0]);
+	pj2.SetPxPyPzE(px[pos][1], py[pos][1], pz[pos][1], E[pos][1]);
+
+	return Util::DeltaPhi(pj1.Phi(), pj2.Phi());
 }
 
 Double_t MT2tree::GenOSDiLeptonInvMass(unsigned int pid, unsigned int mother, double pt, double eta){

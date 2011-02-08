@@ -60,12 +60,14 @@ public:
 	MassPlotter(TString, TString);
 	virtual ~MassPlotter();
 
+
 	void init(TString filename = "samples.dat");
 	void loadSamples(const char* filename = "samples.dat");
 
 	void makePlots();
 	void makeZnunu();
-
+	void makeSmallCopy(int nevents, int sample);
+	
 	struct sample{
 		TString name;
 		TString sname;
@@ -78,8 +80,8 @@ public:
 		float lumi;
 		int color;
 	};
- 
 	std::vector<sample>  fSamples;
+ 
 	void setVerbose(int v){ fVerbose = v;};
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
@@ -98,9 +100,9 @@ public:
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
 	void PrintZllEfficiency(sample Sample, bool data, std::string lept );
-	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
+	void CompSamples(TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
-	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
+	void compSamples(TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 private:
 
@@ -144,6 +146,10 @@ private:
 	double ExpoFitTesting(double *x, double *par);
 	TH1D* FillRatioHist(TString branch_name, float MT2plit[], float ysplit[], TString option, const int nbins, const double bins[], TString version,  bool cleaned);
 	TH1D* GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor );
+	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
+			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
+	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
+			  const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 };
 
 #endif

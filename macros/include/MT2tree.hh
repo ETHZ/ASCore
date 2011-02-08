@@ -205,11 +205,16 @@ public:
   Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, 
+		                   int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+
   // MT2 & friends
   Int_t    JetIsInHemi(int jindex=0, int hemi_seed=2, int hemi_association=3, float MaxDR=0);
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);
   Double_t GetMT2Hemi(double testmass=0, bool massive=false, int PFJID=1, 
-		  double minJPt=20, int hemi_association=3, int met=1);
+		  double minJPt=20, double maxJEta=2.4, int hemi_association=3, int met=1);
+  Double_t GetMT2HemiMinDHT(double testmass=0, bool massive=false, int PFJID=0, double minJPt=20, double maxJEta=2.4, int met=1);
   Double_t GetMT2HemiNoISR(bool massive = false, int hemi_seed=4, int hemi_association=2, float MaxDR=0, int met=1);
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
@@ -246,7 +251,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 11)
+  ClassDef(MT2tree, 12)
 };
 
 #endif

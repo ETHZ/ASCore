@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
 	tA->init(samples);
 	tA->makePlots();
 //	tA->makeZnunu();
+//	tA->makeSmallCopy(100000, 0);
 	delete tA;
 	return 0;
 }

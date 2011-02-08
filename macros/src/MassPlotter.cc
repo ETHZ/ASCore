@@ -88,6 +88,26 @@ void MassPlotter::init(TString filename){
 }
 
 //___________________________________________________________________________
+void MassPlotter::makeSmallCopy(int nevents, int sample){
+	if(fSamples.size()<sample) return;
+	cout << "making small copy of tree " << fSamples[sample].name << endl;
+	TFile *newfile = new TFile(fOutputDir+"/"+fSamples[sample].name+"_small.root","recreate");
+	TTree *newtree = fSamples[sample].tree->CloneTree(0);
+	Int_t nentries = (Int_t)fSamples[sample].tree->GetEntries();
+
+	for (Int_t i=0;i<nentries; i++) {
+		if(i > nevents) continue;
+		fSamples[sample].tree->GetEntry(i);
+		newtree->Fill();
+	}
+
+
+	newfile->Write();
+
+	delete newfile;
+
+}
+//___________________________________________________________________________
 void MassPlotter::makePlots(){
 	double dPhisplit[4]={0., 1.0, 1.5, 3.142};
 	MakeMT2PredictionAndPlots(false, dPhisplit, 2.5);  // not cleaned, fudgefactor 2
@@ -97,9 +117,11 @@ void MassPlotter::makePlots(){
 void MassPlotter::makeZnunu(){
 	// get samples
 	vector<sample> Samples;
+	cout << fSamples.size() << endl;
 	for(int i=0; i<fSamples.size(); ++i){
-		if(fSamples[i].sname=="DYToLL")   Samples.push_back(fSamples[i]); 
-		if(fSamples[i].sname=="DYToNuNu") Samples.push_back(fSamples[i]); 
+	//	if(fSamples[i].sname=="DYToLL"           )   Samples.push_back(fSamples[i]); 
+	//	if(fSamples[i].sname=="DYToNuNu"         ) Samples.push_back(fSamples[i]); 
+		if(fSamples[i].sname.Contains("QCD")     ) Samples.push_back(fSamples[i]); 
 	}
 	
 	// -------------
@@ -114,11 +136,11 @@ void MassPlotter::makeZnunu(){
 	// comparing Z->nunu with Z->ll
 	std::ostringstream cutStream;
 	cutStream  
-	//	  << "misc.HT       >300"                           << "&&"
+		  << "misc.HT       >300"                           << "&&"
 	//	  << "misc.MET      >30"                            << "&&"
 		  << "misc.Jet0Pass == 1"                           << "&&"
-	//	  << "misc.Jet1Pass == 1"                           << "&&"
-	//	  << "misc.PassJetID == 1"                          << "&&"
+		  << "misc.Jet1Pass == 1"                           << "&&"
+		  << "misc.PassJetID == 1"                          << "&&"
 	//	  << "misc.Vectorsumpt<70"                          << "&&"
 	//	  << "misc.MinMetJetDPhi>0.3"                       << "&&" 
 	//	  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
@@ -128,23 +150,28 @@ void MassPlotter::makeZnunu(){
 
 	// declare a few maps	
 	// to be used for Z->nunu                               to be used for Z->ll
-	RemoveLeptMap["GetMT2Hemi(0,false,1,20,3,1)"]        = "GetMT2Hemi(0,false,1,20,3,3)";
-	RemoveLeptMap["misc.MET"]                            = "GetMETPlusLepts(1)";
-//	RemoveLeptMap["pfmet[0].Pt()"]                       = "GetDiLeptonPt()";
-	RemoveLeptMap["pfmet[0].Pt()"]                       = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)";
+	RemoveLeptMap["GetMT2Hemi(0,false,1,20,3,1)"]                = "GetMT2Hemi(0,false,1,20,3,3)";
+//	RemoveLeptMap["misc.MET"]                                    = "GetMETPlusLepts(1)";
+//	RemoveLeptMap["pfmet[0].Pt()"]                               = "GetDiLeptonPt()";
+	RemoveLeptMap["pfmet[0].Pt()"]                               = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)";
+	RemoveLeptMap["misc.MET"]                                    = "GetMHT(0,15,5)";
+	RemoveLeptMap["GetMHT(0,20,5)"]                              = "GetMHT(0,20,3)";
+	RemoveLeptMap["MinMetJetDPhi(0,20,2.4,1)"]                   = "MinMetJetDPhi(0,20,2.4,2)";
+	RemoveLeptMap["GetPseudoJetsMETmindPhi(2,3,0,20,2.4,1)"]     = "GetPseudoJetsMETmindPhi(2,3,0,20,2.4,2)";
 
 	TString isZtoll    = "GetDiLeptonInvMass(0,1,0,10,true) > 60 && GetDiLeptonInvMass(0,1,0,10,true) < 120";
 	TString removed_ee = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)>=0";
 	TString isZtoll2   = "GetDiLeptonPt()>-1";
-//                            variable for Z->nunu                cuts,  optcut, replace_cut   xtitle        bins                 add_underflow   logflag  scale_factor normalized
-//	CompSamples(Samples, "NJetsIDLoose",                      cuts, isZtoll,       false,      "NJetsIDLoose", 10 , 0 , 10,         false,          true,    1,           true);
-//	CompSamples(Samples, "misc.HT"     ,                      cuts, "_",           false,      "HT"          , 50, 50, 500,         false,          true,    1,           true);
-//	CompSamples(Samples, "GetGenMET(0,1,14,23,10,2.4,60,120)",cuts, "_",           true,       "GetMET"      , gNMT2bins, gMT2bins, false,          true,    1,           true);
-	CompSamples(Samples, "misc.MET"                          ,cuts, "_",           true,       "MET"         , 50,          0, 500, false,          true,    1,           true);
-//	CompSamples(Samples, "GetMHT(1,20,2.4)"                  ,cuts, isZtoll,       false,      "MHT"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
-//	CompSamples(Samples, "pfmet[0].Pt()"                     ,cuts, removed_ee,    true,       "MET"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
-//	CompSamples(Samples, "pfmet[0].Pt()"                     ,cuts, removed_ee,    true,       "MET"         , 100, 0, 500        , false,          true,    1,           true);
-//	CompSamples(Samples, "GetMT2Hemi(0,false,1,20,3,1)"      ,cuts, "_",           true,       "MT2"         , gNMT2bins, gMT2bins ,false,          true,    1,           true);
+//                            variable for Z->nunu                     cuts,  optcut, replace_cut   xtitle        bins                 add_underflow   logflag  scale_factor normalized
+//	CompSamples(Samples, "NJetsIDLoose",                           cuts, isZtoll,       false,      "NJetsIDLoose", 10 , 0 , 10,         false,          true,    1,           true);
+//	CompSamples(Samples, "misc.HT"     ,                           cuts, "_",           false,      "HT"          , 50, 50, 500,         false,          true,    1,           true);
+//	CompSamples(Samples, "GetGenMET(0,1,14,23,10,2.4,60,120)",     cuts, "_",           true,       "GetMET"      , gNMT2bins, gMT2bins, false,          true,    1,           true);
+//	CompSamples(Samples, "GetMHT(1,20,2.4)"                  ,     cuts, isZtoll,       false,      "MHT"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
+//	CompSamples(Samples, "pfmet[0].Pt()"                     ,     cuts, removed_ee,    true,       "MET"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
+//	CompSamples(Samples, "pfmet[0].Pt()"                     ,     cuts, removed_ee,    true,       "MET"         , 100, 0, 500        , false,          true,    1,           true);
+//	CompSamples(Samples, "GetMT2Hemi(0,false,1,20,3,1)"      ,     cuts, "_",           true,       "MT2"         , gNMT2bins, gMT2bins ,false,          true,    1,           true);
+	CompSamples(Samples, "GetPseudoJetsMETmindPhi(2,3,0,20,2.4,1)",cuts, "_",           true,       "minJetMETdPhi" ,50,        0, 3.2  ,false,          true,    1,           true);
+	
 }
 
 
@@ -619,6 +646,19 @@ void MassPlotter::plotSig(TString var, TString cuts, TString xtitle, int nbins, 
 	}
 	sig->Draw("ACP");
 }
+//__________________________________________________________________________
+void MassPlotter::CompSamples(TString var, TString cuts, TString optcut, bool RemoveLepts, 
+		              TString xtitle, const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize){
+
+  	CompSamples(fSamples, var, cuts, optcut, RemoveLepts, xtitle, nbins, bins, add_underflow, logflag, scale_factor, normalize);
+}
+//___________________________________________________________________________________________________________________
+void MassPlotter::compSamples(TString var, TString cuts, TString optcut, bool RemoveLepts,
+			   TString xtitle, const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize){
+
+  	CompSamples(fSamples, var, cuts, optcut, RemoveLepts, xtitle, nbins, min, max, add_underflow, logflag, scale_factor, normalize);
+
+}
 // _______________________________________________________________________
 void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts,
 			   TString xtitle, const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize){
@@ -635,8 +675,8 @@ void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString 
 			   TString xtitle, const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize){
 
         TString varname = Util::removeFunnyChar(var.Data());
-
 	TH1D*    histos[2];
+	cout << Samples.size() << endl;
 	histos[0] = new TH1D(varname+Samples[0].sname  , "", nbins, bins);
 	histos[1] = new TH1D(varname+Samples[1].sname  , "", nbins, bins);
 
@@ -654,11 +694,10 @@ void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString 
 		Double_t weight = scale_factor * Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
 		if(fVerbose>2) cout << "GetHisto: looping over " << Samples[i].sname << endl;
 		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
-
 		// exchange variable to plot with the corresponding one with removed leptons;	
 		TString variable; 
 		TString selection; 
-		if(RemoveLepts && Samples[i].sname == "DYToLL"){
+		if(RemoveLepts && (Samples[i].sname == "DYToLL" || Samples[i].sname=="QCD_2")){
 			MapType::iterator iter = RemoveLeptMap.begin();
 			iter = RemoveLeptMap.find(var);
 			if (iter != RemoveLeptMap.end() ){
