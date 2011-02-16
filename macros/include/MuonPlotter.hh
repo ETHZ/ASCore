@@ -25,16 +25,92 @@ public:
 		LM0, InclMu,
 		gNSAMPLES
 	};
+	enum gRegion {
+		region_begin,
+		Signal = region_begin,
+		SigSup,
+		ZDecay,
+		gNREGIONS
+	};
 	enum gChannel {
-		Muon,
+		channels_begin,
+		Muon = channels_begin,
 		EMu,
-		Electron
+		Electron,
+		gNCHANNELS
 	};
 	struct lepton{
 		TLorentzVector p;
 		int charge;
 		int type; // -1(unknown), 0(mu), 1(ele)
 		int index;
+	};
+	
+	struct NumberSet{
+		long nt2;
+		long nt10;
+		long nt01;
+		long nt0;
+		long nsst;
+		long nssl;
+		long nzl;
+		long nzt;
+	};
+
+	struct Pt_Eta_Histos{ // Doesn't really make much sense to store also pt and eta histos
+		TH2D *h_2d;
+		TH1D *h_pt;
+		TH1D *h_eta;
+	};
+	
+	// struct Histos{
+	// 	TH2D *nt20_pt; // pt1 vs pt2
+	// 	TH2D *nt10_pt;
+	// 	TH2D *nt01_pt; // only filled for e/mu
+	// 	TH2D *nt00_pt;
+	// 	TH2D *nt20_eta; // eta1 vs eta2
+	// 	TH2D *nt10_eta;
+	// 	TH2D *nt01_eta;
+	// 	TH2D *nt00_eta;
+	// 	TH2D *ntight; // pt vs eta
+	// 	TH2D *nloose; // pt vs eta
+	// };		
+
+	struct NT012Histos{
+		Pt_Eta_Histos nt20;
+		Pt_Eta_Histos nt10;
+		Pt_Eta_Histos nt01; // these are only filled for e/mu
+		Pt_Eta_Histos nt00;
+		Pt_Eta_Histos ntight;
+		Pt_Eta_Histos nloose;
+	};
+
+	struct Channel{ // like mumu, emu, ee
+		TString name;
+		TString sname;
+		NT012Histos nthistos;
+		// Histos histos;
+	};
+	
+	struct Region{ // like signal, control, sideband, etc.
+		TString name;
+		TString sname;
+		Channel mumu;
+		Channel emu;
+		Channel ee;
+	};
+	
+	struct Sample{
+		TString name;
+		TString sname;
+		TFile *file;
+		TTree *tree;
+		float lumi;
+		int color;
+		bool isdata;
+		bool isfilled; // check if this has been read in
+		Region region[gNREGIONS];
+		NumberSet numbers[3]; // summary of integrated numbers
 	};
 	
 	MuonPlotter();
@@ -52,20 +128,22 @@ public:
 	void doAnalysis();
 	void doLoop();
 	
+	void sandBox();
+	
 	//////////////////////////////
 	// Plots
-	void makeMufRatioPlots();
-	void makeMupRatioPlots();
-	void makeElfRatioPlots();
-	void makeElpRatioPlots();
+	void makeMufRatioPlots(bool = false);
+	void makeMupRatioPlots(bool = false);
+	void makeElfRatioPlots(bool = false);
+	void makeElpRatioPlots(bool = false);
 	void makeMuIsolationPlots();
 	void makeMuIsolationPlot();
 	void makeMuPtPlots();
 	
-	void makeDiffPredictionPlots(vector<int>);
+	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
-	void makeNT012Plots(vector<int>, gChannel);
-	void makeMuNT012Plots(vector<int>, bool(MuonPlotter::*)(int&, int&));
+	void makeNT012Plots(vector<int>, gChannel, gRegion = Signal);
+	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
 	void makeIntPrediction(TString);
 	
@@ -77,28 +155,9 @@ public:
 	//////////////////////////////
 	// Fake ratios
 	// Produce from tree, with given selections:
-	void produceMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void produceRatio(gChannel, int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void produceRatio(gChannel, vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
 
-	void produceElRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceElRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-
-	void fillMufRatio(int, int);
-	void fillMufRatio(vector<int>, int);
-	void fillMufRatio(int, int, const int, const double*, const int, const double*);
-	void fillMufRatio(vector<int>, int, const int, const double*, const int, const double*);
-
-	void fillMupRatio(int, int);
-	void fillMupRatio(vector<int>, int);
-	void fillMupRatio(int, int, const int, const double*, const int, const double*);
-	void fillMupRatio(vector<int>, int, const int, const double*, const int, const double*);
-
-	void fillElfRatio(int, int);
-	void fillElfRatio(vector<int>, int);
-	void fillElpRatio(int, int);
-	void fillElpRatio(vector<int>, int);
-
-	
 	TH1D* fillMuRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
 	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
 	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
@@ -113,15 +172,15 @@ public:
 	void fillMuRatios(vector<int>);
 	void fillElRatios(vector<int>);
 
-	TH1D* fillMuRatioPt(int, int);
-	TH1D* fillMuRatioPt(vector<int>, int);
-	TH1D* fillElRatioPt(int, int);
-	TH1D* fillElRatioPt(vector<int>, int);
+	TH1D* fillMuRatioPt(int, gRegion, bool = false);
+	TH1D* fillMuRatioPt(vector<int>, gRegion, bool = false);
+	TH1D* fillElRatioPt(int, gRegion, bool = false);
+	TH1D* fillElRatioPt(vector<int>, gRegion, bool = false);
 
-	void calculateRatio(vector<int>, gChannel, int, TH2D*&);
-	void calculateRatio(vector<int>, gChannel, int, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, int, float&, float&);
-	void calculateRatio(vector<int>, gChannel, int, float&, float&, float&);
+	void calculateRatio(vector<int>, gChannel, gRegion, TH2D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gRegion, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&);
+	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&, float&);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -133,19 +192,17 @@ public:
 	void makeSSElElPredictionPlots(vector<int>);
 	void makeSSElMuPredictionPlots(vector<int>);
 	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	void NObs(gChannel, TH1D *&, vector<int>);
-	void NObs(gChannel, THStack *&, vector<int>);
+	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Signal);
+	void NObs(gChannel, THStack *&, vector<int>, gRegion = Signal);
 	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
-	void fillYields();                 // All samples
-	void fillYields(int);              // One sample
-	void fillYields(vector<int>); // List of samples
+	void fillYieldHistos(gChannel, Pt_Eta_Histos *, int, int);
+	void fillYields(Sample*);
 	
 	void initCounters(int = -1);
-	void storeNumbers();
-	void storeNumbers(gChannel);
+	void storeNumbers(Sample*, gChannel);
 	void printCutFlows(TString);
 	
 	void printYields(gChannel = Muon);
@@ -191,6 +248,7 @@ public:
 	bool isSigSupElEvent();
 	bool isSigSupElEventTRG();
 	bool isZElElEvent(int&);
+	bool isZElElEventTRG();
 	bool isZElElEventTRG(int&);
 
 	bool isGenMatchedSUSYDiLepEvent();
@@ -204,6 +262,8 @@ public:
 	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 
 	bool isSSLLMuEvent(   int&, int&);
+	bool isSSLLMuEventInvMETTRG(int&, int&);
+	bool isSSLLMuEventHTControlTRG(int&, int&);
 	bool isSSLLMuEventTRG(int&, int&);
 	bool isSSTTMuEvent(   int&, int&);
 	bool isSSTTMuEventTRG(int&, int&);
@@ -214,6 +274,8 @@ public:
 	bool isSSTTElEventTRG(int&, int&);
 
 	bool isSSLLElMuEvent(   int&, int&);
+	bool isSSLLElMuEventInvMETTRG(int&, int&);
+	bool isOSLLElMuEventTRG(int&, int&);
 	bool isSSLLElMuEventTRG(int&, int&);
 	bool isSSTTElMuEvent(   int&, int&);
 	bool isSSTTElMuEventTRG(int&, int&);
@@ -239,20 +301,13 @@ public:
 	bool isGoodJet_LooseLep(int);
 
 private:
-	const int     getNMuPtBins();
-	const double *getMuPtBins();
-	const int     getNMuPt2Bins();
-	const double *getMuPt2Bins();
-	const int     getNMuEtaBins();
-	const double *getMuEtaBins();
+	const int     getNPtBins (gChannel);
+	const double *getPtBins  (gChannel);
+	const int     getNPt2Bins(gChannel);
+	const double *getPt2Bins (gChannel);
+	const int     getNEtaBins(gChannel);
+	const double *getEtaBins (gChannel);
 	
-	const int     getNElPtBins();
-	const double *getElPtBins();
-	const int     getNElPt2Bins();
-	const double *getElPt2Bins();
-	const int     getNElEtaBins();
-	const double *getElEtaBins();
-
 	Monitor fCounters[gNSAMPLES][3];
 	bool fDoCounting;
 	gSample fCurrentSample;
@@ -270,61 +325,6 @@ private:
 	vector<int> fEGData;  // EG data samples
 	vector<int> fJMData;  // JetMET data samples
 	
-	struct numberset{
-		long nt2;
-		long nt10;
-		long nt01;
-		long nt0;
-		long nsst;
-		long nssl;
-		long nzl;
-		long nzt;
-	};
-	
-	struct lthistos{
-		TH2D *h_ntight;
-		TH2D *h_nloose;
-		TH1D *h_ntight_pt;
-		TH1D *h_nloose_pt;
-		TH1D *h_ntight_eta;
-		TH1D *h_nloose_eta;
-	};
-
-	struct NThistos{
-		TH2D *h_nt2;
-		TH1D *h_nt2_pt;
-		TH1D *h_nt2_eta;
-		TH2D *h_nt10;    // Only this is used for EE/MuMu
-		TH1D *h_nt10_pt;
-		TH1D *h_nt10_eta;
-		TH2D *h_nt01;    // See notation in FR Note
-		TH1D *h_nt01_pt;
-		TH1D *h_nt01_eta;
-		TH2D *h_nt0;
-		TH1D *h_nt0_pt;
-		TH1D *h_nt0_eta;
-	};
-	
-	struct channel{
-		NThistos nthistos;
-		lthistos fhistos;
-		lthistos phistos;
-		numberset numbers;
-	};
-	
-	struct sample{
-		TString name;
-		TString sname;
-		TFile *file;
-		TTree *tree;
-		float lumi;
-		int color;
-		bool isdata;
-		channel mumu;
-		channel emu;
-		channel ee;
-	};
-	
 	int fNJetsMin; // Cut on minimal number of jets
 	float fMinPt1; // Cut on pt of harder muon
 	float fMinPt2; // Cut on pt of softer muon
@@ -332,7 +332,7 @@ private:
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
-	vector<sample> fSamples;
+	vector<Sample> fSamples;
 	map<TString, int> fSampleMap;	// Mapping of sample number to name
 	
 	TFile *fStorageFile;
