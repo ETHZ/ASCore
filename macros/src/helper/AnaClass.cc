@@ -1929,6 +1929,105 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 }
 
 //____________________________________________________________________________
+void AnaClass::plotOverlay5H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, TH1D *h4in, TString tag4, TH1D *h5in, TString tag5, bool logy, double line1x, double line2x){
+	gStyle->SetOptStat("");
+
+	TH1D *h1 = new TH1D(*h1in);
+	TH1D *h2 = new TH1D(*h2in);
+	TH1D *h3 = new TH1D(*h3in);
+	TH1D *h4 = new TH1D(*h4in);
+	TH1D *h5 = new TH1D(*h5in);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s vs %s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName(), h4->GetName(), h5->GetName());
+	sprintf(canvname,"%s:%s:%s:%s:%s", h1->GetName(), h2->GetName(), h3->GetName(), h4->GetName(), h5->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	if(logy) col->SetLogy(1);
+
+	vector<TH1D*> hists;
+	hists.push_back(h1);
+	hists.push_back(h2);
+	hists.push_back(h3);
+	hists.push_back(h4);
+	hists.push_back(h5);
+	setPlottingRange(hists, 0.05, logy);
+	
+	// TLegend *leg = new TLegend(0.15,0.70,0.35,0.88);
+	// TLegend *leg = new TLegend(0.65,0.69,0.886,0.88);
+	TLegend *leg = new TLegend(0.65,0.66,0.886,0.88);
+	leg->AddEntry(h1, tag1,"f");
+	leg->AddEntry(h2, tag2,"f");
+	leg->AddEntry(h3, tag3,"f");
+	leg->AddEntry(h4, tag4,"f");
+	leg->AddEntry(h5, tag5,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->DrawCopy("PE2");
+	h2->DrawCopy("PE1, same");
+	h3->DrawCopy("PE1, same");
+	h4->DrawCopy("PE1, same");
+	h5->DrawCopy("PE1, same");
+	leg->Draw();
+
+	double max1 = h1->GetYaxis()->GetXmax();
+	double max2 = h2->GetYaxis()->GetXmax();
+	double max3 = h3->GetYaxis()->GetXmax();
+	double max4 = h4->GetYaxis()->GetXmax();
+	double max5 = h5->GetYaxis()->GetXmax();
+	double max12   = std::max(max1, max2);
+	double max34   = std::max(max3, max4);
+	double max1234 = std::max(max12, max34);
+	double max     = std::max(max1234, max5);
+
+	double min1 = h1->GetYaxis()->GetXmin();
+	double min2 = h2->GetYaxis()->GetXmin();
+	double min3 = h3->GetYaxis()->GetXmin();
+	double min4 = h4->GetYaxis()->GetXmin();
+	double min5 = h5->GetYaxis()->GetXmin();
+	double min12   = std::min(min1, min2);
+	double min34   = std::min(min3, min4);
+	double min1234 = std::min(min12, min34);
+	double min     = std::min(min1234, min5);
+
+	TLine *l1, *l2;
+	if(line1x != -999.){
+		l1 = new TLine(line1x,min,line1x,max);
+		l1->SetLineColor(kRed);
+		l1->SetLineWidth(2);
+		l1->Draw();
+	}
+
+	if(line2x != -999.){
+		l2 = new TLine(line2x,min,line2x,max);
+		l2->SetLineColor(kRed);
+		l2->SetLineWidth(2);
+		l2->Draw();
+	}
+
+	TLine *l3 = new TLine(h1->GetXaxis()->GetXmin(), 0.00, h1->GetXaxis()->GetXmax(), 0.00);
+	l3->SetLineWidth(2);
+	l3->SetLineStyle(7);
+	l3->Draw();
+
+	// TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	// lat->SetTextColor(kBlack);
+	// lat->SetTextSize(0.04);
+	// lat->DrawLatex(0.58,0.85, "2.67 pb^{ -1} at  #sqrt{s} = 7 TeV");
+
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName()) + "_" + TString(h3->GetName()) + "_" + TString(h4->GetName()) + "_" + TString(h5->GetName());
+	// Util::Print(col, outputname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+}
+
+//____________________________________________________________________________
 void AnaClass::plotRatioOverlay2H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	TH1D *h1 = new TH1D(*h1in);
@@ -2374,7 +2473,7 @@ void AnaClass::printHisto(TH1* h, TString canvname, TString canvtitle, Option_t 
 	gPad->SetFillStyle(0);
 	h->DrawCopy(drawopt);
 	gPad->RedrawAxis();
-	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________

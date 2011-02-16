@@ -96,7 +96,9 @@ public:
 	virtual void plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2, TH1F *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+
 	virtual void plotOverlay4H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, TH1D *h4, TString tag4, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotOverlay5H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, TH1D *h4, TString tag4, TH1D *h5, TString tag5, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 
 /*****************************************************************************
 ##################| Utilities |###############################################
