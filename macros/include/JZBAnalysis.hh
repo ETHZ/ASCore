@@ -12,6 +12,7 @@
 #include <TH1F.h>
 #include <TH2F.h>
 #include "TLorentzVector.h"
+#include <TRandom.h>
 
 #include "base/TreeReader.hh"
 #include "base/UserAnalysisBase.hh"
@@ -43,7 +44,8 @@ public:
   void Analyze();
   void End();
 
-
+  // Fill generator information
+  void GeneratorInfo();
 
 private:
 
@@ -70,6 +72,8 @@ private:
 
   std::string fDataType_;
   bool fFullCleaning_;
+
+  TRandom* rand_;
 
 };
 #endif
