@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.71 2010/11/23 09:14:45 pnef Exp $
+// $Id: NTupleProducer.h,v 1.72 2011/02/11 14:30:00 buchmann Exp $
 //
 //
 
@@ -476,6 +476,7 @@ private:
   int fTeIDRobustLoose[gMaxneles];
   int fTeIDsimpleWPrelIso[gMaxneles];
   int fTeIDsimpleWP95relIso[gMaxneles];
+  int fTeIDsimpleWP90relIso[gMaxneles];
   int fTeIDsimpleWP80relIso[gMaxneles];
   int fTecharge[gMaxneles];
   int fTeCInfoIsGsfCtfCons[gMaxneles];
