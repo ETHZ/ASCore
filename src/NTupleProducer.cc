@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.93 2011/02/11 14:30:00 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.94 2011/02/17 10:35:51 buchmann Exp $
 //
 //
 
@@ -781,7 +781,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     eqi = 0;
 
     // Read eID results
-    vector<Handle<ValueMap<float> > > eIDValueMap(8); 
+    vector<Handle<ValueMap<float> > > eIDValueMap(9); 
     // Robust-Loose 
     iEvent.getByLabel( "eidRobustLoose", eIDValueMap[0] ); 
     const ValueMap<float> & eIDmapRL = *eIDValueMap[0] ;
@@ -800,12 +800,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     // WP80
     iEvent.getByLabel( "simpleEleId80relIso", eIDValueMap[5] ); 
     const ValueMap<float> & eIDmapsimpleWP80  = *eIDValueMap[5] ;
+    // WP85
+    iEvent.getByLabel( "simpleEleId85relIso", eIDValueMap[6] ); 
+    const ValueMap<float> & eIDmapsimpleWP85  = *eIDValueMap[6] ;
     // WP90
-    iEvent.getByLabel( "simpleEleId90relIso", eIDValueMap[6] ); 
-    const ValueMap<float> & eIDmapsimpleWP90  = *eIDValueMap[6] ;
+    iEvent.getByLabel( "simpleEleId90relIso", eIDValueMap[7] ); 
+    const ValueMap<float> & eIDmapsimpleWP90  = *eIDValueMap[7] ;
     // WP95
-    iEvent.getByLabel( "simpleEleId95relIso", eIDValueMap[7] ); 
-    const ValueMap<float> & eIDmapsimpleWP95  = *eIDValueMap[7];
+    iEvent.getByLabel( "simpleEleId95relIso", eIDValueMap[8] ); 
+    const ValueMap<float> & eIDmapsimpleWP95  = *eIDValueMap[8];
 
     eIDValueMap.clear();
 
@@ -902,6 +905,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
         fTeIDsimpleWPrelIso[eqi]   = eIDmapsimpleWP[electronRef];
         fTeIDsimpleWP95relIso[eqi] = eIDmapsimpleWP95[electronRef];
         fTeIDsimpleWP90relIso[eqi] = eIDmapsimpleWP90[electronRef];
+        fTeIDsimpleWP85relIso[eqi] = eIDmapsimpleWP85[electronRef];
         fTeIDsimpleWP80relIso[eqi] = eIDmapsimpleWP80[electronRef];
 		
       } else {
@@ -1888,6 +1892,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
   fEventTree->Branch("ElIDRobustLoose"             ,&fTeIDRobustLoose     ,"ElIDRobustLoose[NEles]/I");
   fEventTree->Branch("ElIDsimpleWPrelIso"          ,&fTeIDsimpleWPrelIso    ,"ElIDsimpleWPrelIso[NEles]/I");
   fEventTree->Branch("ElIDsimpleWP80relIso"        ,&fTeIDsimpleWP80relIso  ,"ElIDsimpleWP80relIso[NEles]/I");
+  fEventTree->Branch("ElIDsimpleWP85relIso"        ,&fTeIDsimpleWP85relIso  ,"ElIDsimpleWP85relIso[NEles]/I");
   fEventTree->Branch("ElIDsimpleWP90relIso"        ,&fTeIDsimpleWP90relIso  ,"ElIDsimpleWP90relIso[NEles]/I");
   fEventTree->Branch("ElIDsimpleWP95relIso"        ,&fTeIDsimpleWP95relIso  ,"ElIDsimpleWP95relIso[NEles]/I");
   fEventTree->Branch("ElInGap"                     ,&fTeInGap             ,"ElInGap[NEles]/I");
@@ -2496,6 +2501,7 @@ void NTupleProducer::resetTree(){
   resetInt(fTeIDsimpleWPrelIso, gMaxneles);
   resetInt(fTeIDsimpleWP95relIso, gMaxneles);
   resetInt(fTeIDsimpleWP90relIso, gMaxneles);
+  resetInt(fTeIDsimpleWP85relIso, gMaxneles);
   resetInt(fTeIDsimpleWP80relIso, gMaxneles);
   resetInt(fTGenElId, gMaxneles);
   resetInt(fTGenElStatus, gMaxneles);
