@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerPat.h,v 1.1 2010/08/26 11:39:44 fronga Exp $
+// $Id: JetFillerPat.h,v 1.2 2010/11/13 14:31:06 pnef Exp $
 //
 //
 
@@ -51,6 +51,7 @@ private:
   // Pre-selection
   double fMinpt;
   double fMaxeta;
+  double fBtagMatchdeltaR;
 	
 };
 

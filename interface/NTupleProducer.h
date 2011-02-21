@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.73 2011/02/17 10:35:51 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.71 2010/11/23 09:14:45 pnef Exp $
 //
 //
 
@@ -50,8 +50,7 @@
 
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
-
-
+#include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
 
@@ -70,7 +69,6 @@ public:
   void switchDouble(double &, double &);
   void switchInt(int &, int &);
   void resetDouble(double *v, unsigned int size = 20);
-  void resetFloat(float *v, unsigned int size = 20);
   void resetInt(int *v, unsigned int size = 20);
   void resetTree();
 
@@ -113,6 +111,7 @@ private:
 
   static const int gMaxnmus     = 30;
   static const int gMaxneles    = 20;
+  static const int gMaxntaus    = 20;
   static const int gMaxnjets    = 100;
   static const int gMaxntrks    = 500;
   static const int gMaxnphos    = 50;
@@ -120,7 +119,10 @@ private:
   static const int gMaxnvrtx    = 25;
 
   edm::InputTag fMuonTag;
+  edm::InputTag fPfMuonTag;
   edm::InputTag fElectronTag;
+  edm::InputTag fPfElectronTag;
+  edm::InputTag fPfTauTag;
   string fEleIdWP;
   edm::InputTag fMuIsoDepTkTag;
   edm::InputTag fMuIsoDepECTag;
@@ -151,28 +153,28 @@ private:
   edm::InputTag fHLTTrigEventTag;
   edm::InputTag fHBHENoiseResultTag;
 
-  float fMinmupt;
-  float fMaxmueta;
-  float fMinelpt;
-  float fMaxeleta;
-  float fMincorjpt;
-  float fMinrawjpt;
-  float fMaxjeta;
-  float fMinjemfrac;
-  float fMintrkpt;
-  float fMaxtrketa;
-  float fMaxtrknchi2;
+  double fMinmupt;
+  double fMaxmueta;
+  double fMinelpt;
+  double fMaxeleta;
+  double fMincorjpt;
+  double fMinrawjpt;
+  double fMaxjeta;
+  double fMinjemfrac;
+  double fMintrkpt;
+  double fMaxtrketa;
+  double fMaxtrknchi2;
   int	fMintrknhits;
 
-  float fMinphopt;
-  float fMaxphoeta;
+  double fMinphopt;
+  double fMaxphoeta;
 	
-  float fMingenleptpt; 
-  float fMaxgenlepteta;
+  double fMingenleptpt; 
+  double fMaxgenlepteta;
 
-  float fJUNC_px_match[gMaxnjets];
-  float fJUNC_py_match[gMaxnjets];
-  float fJUNC_pz_match[gMaxnjets];
+  double fJUNC_px_match[gMaxnjets];
+  double fJUNC_py_match[gMaxnjets];
+  double fJUNC_pz_match[gMaxnjets];
 
   TH1I *fHhltstat; // Added to keep track of trigger names
   TH1I *fHl1physstat;
@@ -188,26 +190,26 @@ private:
   TTree *fRunTree;
 
   int fRTrunnumber;
-  float fRTextxslo;
-  float fRTextxsnlo;
-  float fRTintxs;
+  double fRTextxslo;
+  double fRTextxsnlo;
+  double fRTintxs;
 
-  float fRTMinmupt;
-  float fRTMaxmueta;
-  float fRTMinelpt;
-  float fRTMaxeleta;
-  float fRTMinjpt;
-  float fRTMinrawjpt;
-  float fRTMaxjeta;
-  float fRTMinjemfrac;
+  double fRTMinmupt;
+  double fRTMaxmueta;
+  double fRTMinelpt;
+  double fRTMaxeleta;
+  double fRTMinjpt;
+  double fRTMinrawjpt;
+  double fRTMaxjeta;
+  double fRTMinjemfrac;
 
-  float fRTMintrkpt;
-  float fRTMaxtrketa;
-  float fRTMaxtrknchi2;
+  double fRTMintrkpt;
+  double fRTMaxtrketa;
+  double fRTMaxtrknchi2;
   int fRTMintrknhits;
 
-  float fRTMinphopt;
-  float fRTMaxphoeta;
+  double fRTMinphopt;
+  double fRTMaxphoeta;
 
   int fRTmaxnmu;
   int fRTmaxnel;
@@ -221,55 +223,55 @@ private:
   int fTrunnumber;
   int fTeventnumber;
   int fTlumisection;
-  float fTpthat;
+  double fTpthat;
   int fTsigprocid;
-  float fTpdfscalePDF;
+  double fTpdfscalePDF;
   int fTpdfid1;
   int fTpdfid2;
-  float fTpdfx1;
-  float fTpdfx2;
-  float fTpdfxPDF1;
-  float fTpdfxPDF2;
-  float fTextxslo;
-  float fTintxs;
-  float fTweight;
+  double fTpdfx1;
+  double fTpdfx2;
+  double fTpdfxPDF1;
+  double fTpdfxPDF2;
+  double fTextxslo;
+  double fTintxs;
+  double fTweight;
   
   // ECAL & HCAL Noise
   int fTHBHENoiseFlag;
   int fTEcalDeadCellBEFlag;
   static const unsigned int gMaxnECALGapClusters = 50;
   unsigned int fTnECALGapClusters;
-  float fTEcalGapBE[gMaxnECALGapClusters];
+  double fTEcalGapBE[gMaxnECALGapClusters];
   int fTEcalGapClusterSize[gMaxnECALGapClusters];
 
   int fTgoodvtx;
-  float fTprimvtxx;
-  float fTprimvtxy;
-  float fTprimvtxz;
-  float fTprimvtxrho;
-  float fTprimvtxxE;
-  float fTprimvtxyE;
-  float fTprimvtxzE;
-  float fTpvtxznchi2;
-  float fTpvtxndof;
+  double fTprimvtxx;
+  double fTprimvtxy;
+  double fTprimvtxz;
+  double fTprimvtxrho;
+  double fTprimvtxxE;
+  double fTprimvtxyE;
+  double fTprimvtxzE;
+  double fTpvtxznchi2;
+  double fTpvtxndof;
   int    fTpvtxisfake;
-  float fTpvtxptsum;
+  double fTpvtxptsum;
 
-  float fTbeamspotx;
-  float fTbeamspoty;
-  float fTbeamspotz;
+  double fTbeamspotx;
+  double fTbeamspoty;
+  double fTbeamspotz;
 
   int fTnvrtx;
-  float fTvrtxx[gMaxnvrtx];
-  float fTvrtxy[gMaxnvrtx];
-  float fTvrtxz[gMaxnvrtx];
-  float fTvrtxxE[gMaxnvrtx];
-  float fTvrtxyE[gMaxnvrtx];
-  float fTvrtxzE[gMaxnvrtx];
-  float fTvrtxndof[gMaxnvrtx];
-  float fTvrtxchi2[gMaxnvrtx];
-  float fTvrtxntrks[gMaxnvrtx];
-  float fTvrtxsumpt[gMaxnvrtx];
+  double fTvrtxx[gMaxnvrtx];
+  double fTvrtxy[gMaxnvrtx];
+  double fTvrtxz[gMaxnvrtx];
+  double fTvrtxxE[gMaxnvrtx];
+  double fTvrtxyE[gMaxnvrtx];
+  double fTvrtxzE[gMaxnvrtx];
+  double fTvrtxndof[gMaxnvrtx];
+  double fTvrtxchi2[gMaxnvrtx];
+  double fTvrtxntrks[gMaxnvrtx];
+  double fTvrtxsumpt[gMaxnvrtx];
   int fTvrtxisfake[gMaxnvrtx];
 
   int fTNCaloTowers;
@@ -290,9 +292,9 @@ private:
   unsigned int fTNpaths;
   unsigned int fTNHLTobjects;
   int**    fTHLTObjectID;
-  float** fTHLTObjectPt;
-  float** fTHLTObjectEta;
-  float** fTHLTObjectPhi;
+  double** fTHLTObjectPt;
+  double** fTHLTObjectEta;
+  double** fTHLTObjectPhi;
 
   // Flags
   int fTgoodevent;         // 0 for good events, 1 for bad events
@@ -309,19 +311,19 @@ private:
   
   int fTngenleptons;      
   int fTGenLeptonId[gMaxngenlept];      
-  float fTGenLeptonPt[gMaxngenlept];      
-  float fTGenLeptonEta[gMaxngenlept];     
-  float fTGenLeptonPhi[gMaxngenlept];     
+  double fTGenLeptonPt[gMaxngenlept];      
+  double fTGenLeptonEta[gMaxngenlept];     
+  double fTGenLeptonPhi[gMaxngenlept];     
   int fTGenLeptonMId[gMaxngenlept];     
   int fTGenLeptonMStatus[gMaxngenlept]; 
-  float fTGenLeptonMPt[gMaxngenlept];     
-  float fTGenLeptonMEta[gMaxngenlept];    
-  float fTGenLeptonMPhi[gMaxngenlept];    
+  double fTGenLeptonMPt[gMaxngenlept];     
+  double fTGenLeptonMEta[gMaxngenlept];    
+  double fTGenLeptonMPhi[gMaxngenlept];    
   int fTGenLeptonGMId[gMaxngenlept];    
   int fTGenLeptonGMStatus[gMaxngenlept];
-  float fTGenLeptonGMPt[gMaxngenlept];    
-  float fTGenLeptonGMEta[gMaxngenlept];   
-  float fTGenLeptonGMPhi[gMaxngenlept]; 
+  double fTGenLeptonGMPt[gMaxngenlept];    
+  double fTGenLeptonGMEta[gMaxngenlept];   
+  double fTGenLeptonGMPhi[gMaxngenlept]; 
 	
 	
 
@@ -334,49 +336,49 @@ private:
   int fTmuIsIso[gMaxnmus];
   int fTmuIsGM[gMaxnmus];
   int fTmuIsTM[gMaxnmus];
-  float fTmupx[gMaxnmus];
-  float fTmupy[gMaxnmus];
-  float fTmupz[gMaxnmus];
-  float fTmue[gMaxnmus];
-  float fTmuet[gMaxnmus];
-  float fTmupt[gMaxnmus];
-  float fTmuptE[gMaxnmus];
-  float fTmueta[gMaxnmus];
-  float fTmuphi[gMaxnmus];
+  double fTmupx[gMaxnmus];
+  double fTmupy[gMaxnmus];
+  double fTmupz[gMaxnmus];
+  double fTmue[gMaxnmus];
+  double fTmuet[gMaxnmus];
+  double fTmupt[gMaxnmus];
+  double fTmuptE[gMaxnmus];
+  double fTmueta[gMaxnmus];
+  double fTmuphi[gMaxnmus];
   int fTmucharge[gMaxnmus];
 
   // - Isolation Variables
-  float fTmuiso[gMaxnmus];
-  float fTmuIso03sumPt[gMaxnmus];
-  float fTmuIso03emEt[gMaxnmus];
-  float fTmuIso03hadEt[gMaxnmus];
-  float fTmuIso03emVetoEt[gMaxnmus];
-  float fTmuIso03hadVetoEt[gMaxnmus];
-  float fTmuIso05sumPt[gMaxnmus];
-  float fTmuIso05emEt[gMaxnmus];
-  float fTmuIso05hadEt[gMaxnmus];
-  float fTmueecal[gMaxnmus];
-  float fTmuehcal[gMaxnmus];
+  double fTmuiso[gMaxnmus];
+  double fTmuIso03sumPt[gMaxnmus];
+  double fTmuIso03emEt[gMaxnmus];
+  double fTmuIso03hadEt[gMaxnmus];
+  double fTmuIso03emVetoEt[gMaxnmus];
+  double fTmuIso03hadVetoEt[gMaxnmus];
+  double fTmuIso05sumPt[gMaxnmus];
+  double fTmuIso05emEt[gMaxnmus];
+  double fTmuIso05hadEt[gMaxnmus];
+  double fTmueecal[gMaxnmus];
+  double fTmuehcal[gMaxnmus];
 
   // - Impact Parameters
-  float fTmud0bs[gMaxnmus];
-  float fTmud0pv[gMaxnmus];
-  float fTmud0E[gMaxnmus];
-  float fTmudzbs[gMaxnmus];
-  float fTmudzpv[gMaxnmus];
-  float fTmudzE[gMaxnmus];
+  double fTmud0bs[gMaxnmus];
+  double fTmud0pv[gMaxnmus];
+  double fTmud0E[gMaxnmus];
+  double fTmudzbs[gMaxnmus];
+  double fTmudzpv[gMaxnmus];
+  double fTmudzE[gMaxnmus];
 
   // - MuID Variables
-  float fTmunchi2[gMaxnmus];
+  double fTmunchi2[gMaxnmus];
   int fTmunglhits[gMaxnmus];
   int fTmunmuhits[gMaxnmus];
   int fTmuntkhits[gMaxnmus];
   int fTmunpxhits[gMaxnmus];
-  float fTmuinntknchi2[gMaxnmus];
+  double fTmuinntknchi2[gMaxnmus];
   int fTmunmatches[gMaxnmus];
   int fTmunchambers[gMaxnmus];
-  float fTmucalocomp[gMaxnmus];
-  float fTmusegmcomp[gMaxnmus];
+  double fTmucalocomp[gMaxnmus];
+  double fTmusegmcomp[gMaxnmus];
 
   int fTmuIsGMPT[gMaxnmus];
   int fTmuIsGMTkChiComp[gMaxnmus];
@@ -398,39 +400,82 @@ private:
   int fTmuIsTMOneStationAngTight[gMaxnmus];
   int fTmuIsTMOneStationAngLoose[gMaxnmus];
 
-  float fTmuoutmomx[gMaxnmus];
-  float fTmuoutmomy[gMaxnmus];
-  float fTmuoutmomz[gMaxnmus];
-  float fTmuoutmomphi[gMaxnmus];
-  float fTmuoutmometa[gMaxnmus];
-  float fTmuoutmomtheta[gMaxnmus];
-  float fTmuoutposrad[gMaxnmus];
-  float fTmuoutposx[gMaxnmus];
-  float fTmuoutposy[gMaxnmus];
-  float fTmuoutposz[gMaxnmus];
+  double fTmuoutmomx[gMaxnmus];
+  double fTmuoutmomy[gMaxnmus];
+  double fTmuoutmomz[gMaxnmus];
+  double fTmuoutmomphi[gMaxnmus];
+  double fTmuoutmometa[gMaxnmus];
+  double fTmuoutmomtheta[gMaxnmus];
+  double fTmuoutposrad[gMaxnmus];
+  double fTmuoutposx[gMaxnmus];
+  double fTmuoutposy[gMaxnmus];
+  double fTmuoutposz[gMaxnmus];
 
   // - Gen Info:
   int    fTGenMuId[gMaxnmus];
   int    fTGenMuStatus[gMaxnmus];
   int    fTGenMuCharge[gMaxnmus];
-  float fTGenMuPt[gMaxnmus];
-  float fTGenMuEta[gMaxnmus];
-  float fTGenMuPhi[gMaxnmus];
-  float fTGenMuE[gMaxnmus];
+  double fTGenMuPt[gMaxnmus];
+  double fTGenMuEta[gMaxnmus];
+  double fTGenMuPhi[gMaxnmus];
+  double fTGenMuE[gMaxnmus];
   int    fTGenMuMId[gMaxnmus];
   int    fTGenMuMStatus[gMaxnmus];
   int    fTGenMuMCharge[gMaxnmus];
-  float fTGenMuMPt[gMaxnmus];
-  float fTGenMuMEta[gMaxnmus];
-  float fTGenMuMPhi[gMaxnmus];
-  float fTGenMuME[gMaxnmus];
+  double fTGenMuMPt[gMaxnmus];
+  double fTGenMuMEta[gMaxnmus];
+  double fTGenMuMPhi[gMaxnmus];
+  double fTGenMuME[gMaxnmus];
   int    fTGenMuGMId[gMaxnmus];
   int    fTGenMuGMStatus[gMaxnmus];
   int    fTGenMuGMCharge[gMaxnmus];
-  float fTGenMuGMPt[gMaxnmus];
-  float fTGenMuGMEta[gMaxnmus];
-  float fTGenMuGMPhi[gMaxnmus];
-  float fTGenMuGME[gMaxnmus];
+  double fTGenMuGMPt[gMaxnmus];
+  double fTGenMuGMEta[gMaxnmus];
+  double fTGenMuGMPhi[gMaxnmus];
+  double fTGenMuGME[gMaxnmus];
+
+  // PfMuons:
+  int fTnpfmu;
+  int fTnpfmutot; // before preselection
+  double fTpfmupx[gMaxnmus];
+  double fTpfmupy[gMaxnmus];
+  double fTpfmupz[gMaxnmus];
+  double fTpfmue[gMaxnmus];
+  double fTpfmuet[gMaxnmus];
+  double fTpfmupt[gMaxnmus];
+  double fTpfmuptE[gMaxnmus];
+  double fTpfmueta[gMaxnmus];
+  double fTpfmuphi[gMaxnmus];
+  int fTpfmucharge[gMaxnmus];
+
+  // - Isolation Variables
+  double fTpfmuparticleiso[gMaxnmus];
+  double fTpfmuchargedhadroniso[gMaxnmus];
+  double fTpfmuneutralhadroniso[gMaxnmus];
+  double fTpfmuphotoniso[gMaxnmus];
+
+  // - Gen Info:
+  int    fTGenPfMuId[gMaxnmus];
+  int    fTGenPfMuStatus[gMaxnmus];
+  int    fTGenPfMuCharge[gMaxnmus];
+  double fTGenPfMuPt[gMaxnmus];
+  double fTGenPfMuEta[gMaxnmus];
+  double fTGenPfMuPhi[gMaxnmus];
+  double fTGenPfMuE[gMaxnmus];
+  int    fTGenPfMuMId[gMaxnmus];
+  int    fTGenPfMuMStatus[gMaxnmus];
+  int    fTGenPfMuMCharge[gMaxnmus];
+  double fTGenPfMuMPt[gMaxnmus];
+  double fTGenPfMuMEta[gMaxnmus];
+  double fTGenPfMuMPhi[gMaxnmus];
+  double fTGenPfMuME[gMaxnmus];
+  int    fTGenPfMuGMId[gMaxnmus];
+  int    fTGenPfMuGMStatus[gMaxnmus];
+  int    fTGenPfMuGMCharge[gMaxnmus];
+  double fTGenPfMuGMPt[gMaxnmus];
+  double fTGenPfMuGMEta[gMaxnmus];
+  double fTGenPfMuGMPhi[gMaxnmus];
+  double fTGenPfMuGME[gMaxnmus];
 
 
   // Electrons:
@@ -440,281 +485,365 @@ private:
   int fTeIsIso[gMaxneles];
   int fTeChargeMisIDProb[gMaxneles];
   // Kinematics
-  float fTepx[gMaxneles];
-  float fTepy[gMaxneles];
-  float fTepz[gMaxneles];
-  float fTept[gMaxneles];
-  float fTeptE[gMaxneles];
-  float fTee[gMaxneles];
-  float fTeet[gMaxneles];
-  float fTeeta[gMaxneles];
-  float fTephi[gMaxneles];
-  float fTetheta[gMaxneles];
-  float fTesceta[gMaxneles];
+  double fTepx[gMaxneles];
+  double fTepy[gMaxneles];
+  double fTepz[gMaxneles];
+  double fTept[gMaxneles];
+  double fTeptE[gMaxneles];
+  double fTee[gMaxneles];
+  double fTeet[gMaxneles];
+  double fTeeta[gMaxneles];
+  double fTephi[gMaxneles];
+  double fTetheta[gMaxneles];
+  double fTesceta[gMaxneles];
   // Impact parameter
-  float fTed0bs[gMaxneles];
-  float fTed0pv[gMaxneles];
-  float fTed0E[gMaxneles];
-  float fTedzbs[gMaxneles];
-  float fTedzpv[gMaxneles];
-  float fTedzE[gMaxneles];
+  double fTed0bs[gMaxneles];
+  double fTed0pv[gMaxneles];
+  double fTed0E[gMaxneles];
+  double fTedzbs[gMaxneles];
+  double fTedzpv[gMaxneles];
+  double fTedzE[gMaxneles];
   // Isolation
-  float fTeiso03[gMaxneles];
-  float fTeiso04[gMaxneles];
-  float fTdr03tksumpt[gMaxneles];
-  float fTdr04tksumpt[gMaxneles];
-  float fTdr03ecalrechitsumet[gMaxneles];
-  float fTdr04ecalrechitsumet[gMaxneles];
-  float fTdr03hcaltowersumet[gMaxneles];
-  float fTdr04hcaltowersumet[gMaxneles];
-  float fTenchi2[gMaxneles];
+  double fTeiso03[gMaxneles];
+  double fTeiso04[gMaxneles];
+  double fTdr03tksumpt[gMaxneles];
+  double fTdr04tksumpt[gMaxneles];
+  double fTdr03ecalrechitsumet[gMaxneles];
+  double fTdr04ecalrechitsumet[gMaxneles];
+  double fTdr03hcaltowersumet[gMaxneles];
+  double fTdr04hcaltowersumet[gMaxneles];
+  double fTenchi2[gMaxneles];
   // Electron ID
-  float fTeIDMva[gMaxneles];
+  double fTeIDMva[gMaxneles];
   int fTeIDTight[gMaxneles];
   int fTeIDLoose[gMaxneles];
   int fTeIDRobustTight[gMaxneles];
   int fTeIDRobustLoose[gMaxneles];
   int fTeIDsimpleWPrelIso[gMaxneles];
   int fTeIDsimpleWP95relIso[gMaxneles];
-  int fTeIDsimpleWP90relIso[gMaxneles];
-  int fTeIDsimpleWP85relIso[gMaxneles];
   int fTeIDsimpleWP80relIso[gMaxneles];
   int fTecharge[gMaxneles];
   int fTeCInfoIsGsfCtfCons[gMaxneles];
   int fTeCInfoIsGsfCtfScPixCons[gMaxneles];
   int fTeCInfoIsGsfScPixCons[gMaxneles];
   int fTeCInfoScPixCharge[gMaxneles];
-  float fTeClosestCtfTrackpt[gMaxneles];
-  float fTeClosestCtfTracketa[gMaxneles];
-  float fTeClosestCtfTrackphi[gMaxneles];
+  double fTeClosestCtfTrackpt[gMaxneles];
+  double fTeClosestCtfTracketa[gMaxneles];
+  double fTeClosestCtfTrackphi[gMaxneles];
   int fTeClosestCtfTrackcharge[gMaxneles];
   int fTeInGap[gMaxneles];  // seed crystal next to a gap
   int fTeEcalDriven[gMaxneles];
   int fTeTrackerDriven[gMaxneles];
   int fTeBasicClustersSize[gMaxneles];
-  float fTefbrem[gMaxneles];
-  float fTeHcalOverEcal[gMaxneles];
-  float fTeE1x5[gMaxneles];                      // 5x5 arround seed
-  float fTeE5x5[gMaxneles];                      // 5x5 arround seed
-  float fTeE2x5Max[gMaxneles];                   // 2x5 arround seed
-  float fTeSigmaIetaIeta[gMaxneles];             // shower shape covariance
-  float fTeDeltaPhiSeedClusterAtCalo[gMaxneles]; // Dphi (seed-track) at calo from p_out
-  float fTeDeltaEtaSeedClusterAtCalo[gMaxneles]; // outermost track state extrapolated at calo
-  float fTeDeltaPhiSuperClusterAtVtx[gMaxneles]; // Dphi (sc-track) at calo extrapolated from p_in
-  float fTeDeltaEtaSuperClusterAtVtx[gMaxneles]; // Deta (sc-track) at calo extrapolated from p_in
-  float fTecaloenergy[gMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
-  float fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
-  float fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
+  double fTefbrem[gMaxneles];
+  double fTeHcalOverEcal[gMaxneles];
+  double fTeE1x5[gMaxneles];                      // 5x5 arround seed
+  double fTeE5x5[gMaxneles];                      // 5x5 arround seed
+  double fTeE2x5Max[gMaxneles];                   // 2x5 arround seed
+  double fTeSigmaIetaIeta[gMaxneles];             // shower shape covariance
+  double fTeDeltaPhiSeedClusterAtCalo[gMaxneles]; // Dphi (seed-track) at calo from p_out
+  double fTeDeltaEtaSeedClusterAtCalo[gMaxneles]; // outermost track state extrapolated at calo
+  double fTeDeltaPhiSuperClusterAtVtx[gMaxneles]; // Dphi (sc-track) at calo extrapolated from p_in
+  double fTeDeltaEtaSuperClusterAtVtx[gMaxneles]; // Deta (sc-track) at calo extrapolated from p_in
+  double fTecaloenergy[gMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
+  double fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
+  double fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
   int fTeNumberOfMissingInnerHits[gMaxneles];
   int fTeIsInJet[gMaxneles];
-  float fTeSharedPx[gMaxneles];
-  float fTeSharedPy[gMaxneles];
-  float fTeSharedPz[gMaxneles];
-  float fTeSharedEnergy[gMaxneles];
+  double fTeSharedPx[gMaxneles];
+  double fTeSharedPy[gMaxneles];
+  double fTeSharedPz[gMaxneles];
+  double fTeSharedEnergy[gMaxneles];
   int    fTeDupEl[gMaxneles];
-  float fTeConvPartTrackDist[gMaxneles];
-  float fTeConvPartTrackDCot[gMaxneles];
-  float fTeConvPartTrackPt[gMaxneles];
-  float fTeConvPartTrackEta[gMaxneles];
-  float fTeConvPartTrackPhi[gMaxneles];
-  float fTeConvPartTrackCharge[gMaxneles];
+  double fTeConvPartTrackDist[gMaxneles];
+  double fTeConvPartTrackDCot[gMaxneles];
+  double fTeConvPartTrackPt[gMaxneles];
+  double fTeConvPartTrackEta[gMaxneles];
+  double fTeConvPartTrackPhi[gMaxneles];
+  double fTeConvPartTrackCharge[gMaxneles];
   // Spike cleaning
   int fTeScSeedSeverity[gMaxneles];
-  float fTeE1OverE9[gMaxneles];
-  float fTeS4OverS1[gMaxneles];
+  double fTeE1OverE9[gMaxneles];
+  double fTeS4OverS1[gMaxneles];
   
 
   // - Gen Info:
   int    fTGenElId[gMaxneles];
   int    fTGenElStatus[gMaxneles];
   int    fTGenElCharge[gMaxneles];
-  float fTGenElPt[gMaxneles];
-  float fTGenElEta[gMaxneles];
-  float fTGenElPhi[gMaxneles];
-  float fTGenElE[gMaxneles];
+  double fTGenElPt[gMaxneles];
+  double fTGenElEta[gMaxneles];
+  double fTGenElPhi[gMaxneles];
+  double fTGenElE[gMaxneles];
   int    fTGenElMId[gMaxneles];
   int    fTGenElMStatus[gMaxneles];
   int    fTGenElMCharge[gMaxneles];
-  float fTGenElMPt[gMaxneles];
-  float fTGenElMEta[gMaxneles];
-  float fTGenElMPhi[gMaxneles];
-  float fTGenElME[gMaxneles];
+  double fTGenElMPt[gMaxneles];
+  double fTGenElMEta[gMaxneles];
+  double fTGenElMPhi[gMaxneles];
+  double fTGenElME[gMaxneles];
   int    fTGenElGMId[gMaxneles];
   int    fTGenElGMStatus[gMaxneles];
   int    fTGenElGMCharge[gMaxneles];
-  float fTGenElGMPt[gMaxneles];
-  float fTGenElGMEta[gMaxneles];
-  float fTGenElGMPhi[gMaxneles];
-  float fTGenElGME[gMaxneles];
+  double fTGenElGMPt[gMaxneles];
+  double fTGenElGMEta[gMaxneles];
+  double fTGenElGMPhi[gMaxneles];
+  double fTGenElGME[gMaxneles];
+
+  // PfElectrons:
+  int fTnpfel;
+  int fTnpfeltot; // before preselection
+  double fTpfelpx[gMaxneles];
+  double fTpfelpy[gMaxneles];
+  double fTpfelpz[gMaxneles];
+  double fTpfele[gMaxneles];
+  double fTpfelet[gMaxneles];
+  double fTpfelpt[gMaxneles];
+  double fTpfelptE[gMaxneles];
+  double fTpfeleta[gMaxneles];
+  double fTpfelphi[gMaxneles];
+  int fTpfelcharge[gMaxneles];
+
+  // - Isolation Variables
+  double fTpfelparticleiso[gMaxneles];
+  double fTpfelchargedhadroniso[gMaxneles];
+  double fTpfelneutralhadroniso[gMaxneles];
+  double fTpfelphotoniso[gMaxneles];
+
+  // - Gen Info:
+  int    fTGenPfElId[gMaxneles];
+  int    fTGenPfElStatus[gMaxneles];
+  int    fTGenPfElCharge[gMaxneles];
+  double fTGenPfElPt[gMaxneles];
+  double fTGenPfElEta[gMaxneles];
+  double fTGenPfElPhi[gMaxneles];
+  double fTGenPfElE[gMaxneles];
+  int    fTGenPfElMId[gMaxneles];
+  int    fTGenPfElMStatus[gMaxneles];
+  int    fTGenPfElMCharge[gMaxneles];
+  double fTGenPfElMPt[gMaxneles];
+  double fTGenPfElMEta[gMaxneles];
+  double fTGenPfElMPhi[gMaxneles];
+  double fTGenPfElME[gMaxneles];
+  int    fTGenPfElGMId[gMaxneles];
+  int    fTGenPfElGMStatus[gMaxneles];
+  int    fTGenPfElGMCharge[gMaxneles];
+  double fTGenPfElGMPt[gMaxneles];
+  double fTGenPfElGMEta[gMaxneles];
+  double fTGenPfElGMPhi[gMaxneles];
+  double fTGenPfElGME[gMaxneles];
+
+  // PfTaus:
+  int fTnpftau;
+  int fTnpftautot; // before prestauection
+  double fTpftaupx[gMaxntaus];
+  double fTpftaupy[gMaxntaus];
+  double fTpftaupz[gMaxntaus];
+  double fTpftaue[gMaxntaus];
+  double fTpftauet[gMaxntaus];
+  double fTpftaupt[gMaxntaus];
+  double fTpftauptE[gMaxntaus];
+  double fTpftaueta[gMaxntaus];
+  double fTpftauphi[gMaxntaus];
+  int fTpftaucharge[gMaxntaus];
+
+  // - Isolation Variables
+  double fTpftauparticleiso[gMaxntaus];
+  double fTpftauchargedhadroniso[gMaxntaus];
+  double fTpftauneutralhadroniso[gMaxntaus];
+  double fTpftauphotoniso[gMaxntaus];
+
+  // - Gen Info:
+  int    fTGenPfTauId[gMaxntaus];
+  int    fTGenPfTauStatus[gMaxntaus];
+  int    fTGenPfTauCharge[gMaxntaus];
+  double fTGenPfTauPt[gMaxntaus];
+  double fTGenPfTauEta[gMaxntaus];
+  double fTGenPfTauPhi[gMaxntaus];
+  double fTGenPfTauE[gMaxntaus];
+  int    fTGenPfTauMId[gMaxntaus];
+  int    fTGenPfTauMStatus[gMaxntaus];
+  int    fTGenPfTauMCharge[gMaxntaus];
+  double fTGenPfTauMPt[gMaxntaus];
+  double fTGenPfTauMEta[gMaxntaus];
+  double fTGenPfTauMPhi[gMaxntaus];
+  double fTGenPfTauME[gMaxntaus];
+  int    fTGenPfTauGMId[gMaxntaus];
+  int    fTGenPfTauGMStatus[gMaxntaus];
+  int    fTGenPfTauGMCharge[gMaxntaus];
+  double fTGenPfTauGMPt[gMaxntaus];
+  double fTGenPfTauGMEta[gMaxntaus];
+  double fTGenPfTauGMPhi[gMaxntaus];
+  double fTGenPfTauGME[gMaxntaus];
 
   // Photons:
   int fTnphotons;
   int fTnphotonstot; // before preselection
   int fTgoodphoton[gMaxnphos];
   int fTPhotIsIso[gMaxnphos];
-  float fTPhotPt[gMaxnphos];  
-  float fTPhotPx[gMaxnphos];  
-  float fTPhotPy[gMaxnphos];  
-  float fTPhotPz[gMaxnphos];  
-  float fTPhotEta[gMaxnphos];
-  float fTPhotPhi[gMaxnphos];
-  float fTPhotEnergy[gMaxnphos];
-  float fTPhotIso03Ecal[gMaxnphos];
-  float fTPhotIso03Hcal[gMaxnphos];
-  float fTPhotIso03TrkSolid[gMaxnphos];
-  float fTPhotIso03TrkHollow[gMaxnphos];
-  float fTPhotIso03[gMaxnphos];
-  float fTPhotIso04Ecal[gMaxnphos];
-  float fTPhotIso04Hcal[gMaxnphos];
-  float fTPhotIso04TrkSolid[gMaxnphos];
-  float fTPhotIso04TrkHollow[gMaxnphos];
-  float fTPhotIso04[gMaxnphos];
-  float fTPhotcaloPosX[gMaxnphos];
-  float fTPhotcaloPosY[gMaxnphos];
-  float fTPhotcaloPosZ[gMaxnphos];
-  float fTPhotHoverE[gMaxnphos];
-  float fTPhotH1overE[gMaxnphos];
-  float fTPhotH2overE[gMaxnphos];
-  float fTPhotSigmaIetaIeta[gMaxnphos];
+  double fTPhotPt[gMaxnphos];  
+  double fTPhotPx[gMaxnphos];  
+  double fTPhotPy[gMaxnphos];  
+  double fTPhotPz[gMaxnphos];  
+  double fTPhotEta[gMaxnphos];
+  double fTPhotPhi[gMaxnphos];
+  double fTPhotEnergy[gMaxnphos];
+  double fTPhotIso03Ecal[gMaxnphos];
+  double fTPhotIso03Hcal[gMaxnphos];
+  double fTPhotIso03TrkSolid[gMaxnphos];
+  double fTPhotIso03TrkHollow[gMaxnphos];
+  double fTPhotIso03[gMaxnphos];
+  double fTPhotIso04Ecal[gMaxnphos];
+  double fTPhotIso04Hcal[gMaxnphos];
+  double fTPhotIso04TrkSolid[gMaxnphos];
+  double fTPhotIso04TrkHollow[gMaxnphos];
+  double fTPhotIso04[gMaxnphos];
+  double fTPhotcaloPosX[gMaxnphos];
+  double fTPhotcaloPosY[gMaxnphos];
+  double fTPhotcaloPosZ[gMaxnphos];
+  double fTPhotHoverE[gMaxnphos];
+  double fTPhotH1overE[gMaxnphos];
+  double fTPhotH2overE[gMaxnphos];
+  double fTPhotSigmaIetaIeta[gMaxnphos];
   int    fTPhotHasPixSeed[gMaxnphos];
   int    fTPhotHasConvTrks[gMaxnphos];
   int    fTPhotIsInJet[gMaxnphos];
   int    fTPhotDupEl[gMaxnphos];
-  float fTPhotSharedPx[gMaxnphos];
-  float fTPhotSharedPy[gMaxnphos];
-  float fTPhotSharedPz[gMaxnphos];
-  float fTPhotSharedEnergy[gMaxnphos];
+  double fTPhotSharedPx[gMaxnphos];
+  double fTPhotSharedPy[gMaxnphos];
+  double fTPhotSharedPz[gMaxnphos];
+  double fTPhotSharedEnergy[gMaxnphos];
   // Spike cleaning
   int    fTPhotScSeedSeverity[gMaxnphos];
-  float fTPhotE1OverE9[gMaxnphos];
-  float fTPhotS4OverS1[gMaxnphos];
+  double fTPhotE1OverE9[gMaxnphos];
+  double fTPhotS4OverS1[gMaxnphos];
 	
 
   // Jets:
   int fTnjets;
   int fTnjetstot; // before preselection
   int fTgoodjet[gMaxnjets];
-  float fTjpx[gMaxnjets];
-  float fTjpy[gMaxnjets];
-  float fTjpz[gMaxnjets];
-  float fTje[gMaxnjets];
-  float fTjet[gMaxnjets];
-  float fTjpt[gMaxnjets];
-  float fTjeta[gMaxnjets];
-  float fTjphi[gMaxnjets];
-  float fTjemfrac[gMaxnjets];
+  double fTjpx[gMaxnjets];
+  double fTjpy[gMaxnjets];
+  double fTjpz[gMaxnjets];
+  double fTje[gMaxnjets];
+  double fTjet[gMaxnjets];
+  double fTjpt[gMaxnjets];
+  double fTjeta[gMaxnjets];
+  double fTjphi[gMaxnjets];
+  double fTjemfrac[gMaxnjets];
   int fTjNconstituents[gMaxnjets];
-  float fTjID_HPD[gMaxnjets];
-  float fTjID_RBX[gMaxnjets];
-  float fTjID_n90Hits[gMaxnjets];
-  float fTjID_resEMF[gMaxnjets];
-  float fTjID_HCALTow[gMaxnjets];
-  float fTjID_ECALTow[gMaxnjets];
-  float fTJEtaRms[gMaxnjets];
-  float fTJPhiRms[gMaxnjets];
-  float fTjbTagProbTkCntHighEff[gMaxnjets];
-  float fTjbTagProbTkCntHighPur[gMaxnjets];
-  float fTjbTagProbSimpSVHighEff[gMaxnjets];
-  float fTjbTagProbSimpSVHighPur[gMaxnjets];
-  float fTjChfrac[gMaxnjets];
-  float fTjEfracHadr[gMaxnjets];
-  float fTjMass[gMaxnjets];
+  double fTjID_HPD[gMaxnjets];
+  double fTjID_RBX[gMaxnjets];
+  double fTjID_n90Hits[gMaxnjets];
+  double fTjID_resEMF[gMaxnjets];
+  double fTjID_HCALTow[gMaxnjets];
+  double fTjID_ECALTow[gMaxnjets];
+  double fTJEtaRms[gMaxnjets];
+  double fTJPhiRms[gMaxnjets];
+  double fTjbTagProbTkCntHighEff[gMaxnjets];
+  double fTjbTagProbTkCntHighPur[gMaxnjets];
+  double fTjbTagProbSimpSVHighEff[gMaxnjets];
+  double fTjbTagProbSimpSVHighPur[gMaxnjets];
+  double fTjChfrac[gMaxnjets];
+  double fTjEfracHadr[gMaxnjets];
+  double fTjMass[gMaxnjets];
   int fTjnAssoTracks[gMaxnjets];
-  float fTjtrk1px[gMaxnjets];
-  float fTjtrk1py[gMaxnjets];
-  float fTjtrk1pz[gMaxnjets];
-  float fTjtrk2px[gMaxnjets];
-  float fTjtrk2py[gMaxnjets];
-  float fTjtrk2pz[gMaxnjets];
-  float fTjtrk3px[gMaxnjets];
-  float fTjtrk3py[gMaxnjets];
-  float fTjtrk3pz[gMaxnjets];
-  float fTjEcorr[gMaxnjets];
-  float fTjeMinDR[gMaxnjets];
-  float fTjetVtxx[gMaxnjets];
-  float fTjetVtxy[gMaxnjets];
-  float fTjetVtxz[gMaxnjets];
-  float fTjetVtxExx[gMaxnjets];
-  float fTjetVtxEyx[gMaxnjets];
-  float fTjetVtxEyy[gMaxnjets];
-  float fTjetVtxEzy[gMaxnjets];
-  float fTjetVtxEzz[gMaxnjets];
-  float fTjetVtxEzx[gMaxnjets];
-  float fTjetVtxNChi2[gMaxnjets];
-  float fTjetGenPt[gMaxnjets];
-  float fTjetGenEta[gMaxnjets];
-  float fTjetGenPhi[gMaxnjets];
-  float fTjetGenE[gMaxnjets];
-  float fTjetGenemE[gMaxnjets];
-  float fTjetGenhadE[gMaxnjets];
-  float fTjetGeninvE[gMaxnjets];
+  double fTjtrk1px[gMaxnjets];
+  double fTjtrk1py[gMaxnjets];
+  double fTjtrk1pz[gMaxnjets];
+  double fTjtrk2px[gMaxnjets];
+  double fTjtrk2py[gMaxnjets];
+  double fTjtrk2pz[gMaxnjets];
+  double fTjtrk3px[gMaxnjets];
+  double fTjtrk3py[gMaxnjets];
+  double fTjtrk3pz[gMaxnjets];
+  double fTjEcorr[gMaxnjets];
+  double fTjeMinDR[gMaxnjets];
+  double fTjetVtxx[gMaxnjets];
+  double fTjetVtxy[gMaxnjets];
+  double fTjetVtxz[gMaxnjets];
+  double fTjetVtxExx[gMaxnjets];
+  double fTjetVtxEyx[gMaxnjets];
+  double fTjetVtxEyy[gMaxnjets];
+  double fTjetVtxEzy[gMaxnjets];
+  double fTjetVtxEzz[gMaxnjets];
+  double fTjetVtxEzx[gMaxnjets];
+  double fTjetVtxNChi2[gMaxnjets];
+  double fTjetGenPt[gMaxnjets];
+  double fTjetGenEta[gMaxnjets];
+  double fTjetGenPhi[gMaxnjets];
+  double fTjetGenE[gMaxnjets];
+  double fTjetGenemE[gMaxnjets];
+  double fTjetGenhadE[gMaxnjets];
+  double fTjetGeninvE[gMaxnjets];
 
   // Tracks:
   int fTntracks;
   int fTntrackstot; // before preselection
   int fTgoodtrk[gMaxntrks];
-  float fTtrkpt[gMaxntrks]; // this is actually charge*pt
-  float fTtrketa[gMaxntrks];
-  float fTtrkphi[gMaxntrks];
-  float fTtrknchi2[gMaxntrks];
-  float fTtrknhits[gMaxntrks];
+  double fTtrkpt[gMaxntrks]; // this is actually charge*pt
+  double fTtrketa[gMaxntrks];
+  double fTtrkphi[gMaxntrks];
+  double fTtrknchi2[gMaxntrks];
+  double fTtrknhits[gMaxntrks];
 
   // (M)E(T):
-  float fTTrkPtSumx;
-  float fTTrkPtSumy;
-  float fTTrkPtSumphi;
-  float fTTrkPtSum;
-  float fTSumEt;
-  float fTECALSumEt;
-  float fTHCALSumEt;
-  float fTECALEsumx;
-  float fTECALEsumy;
-  float fTECALEsumz;
-  float fTECALMETphi;
-  float fTECALMETeta;
-  float fTECALMET;
-  float fTHCALEsumx;
-  float fTHCALEsumy;
-  float fTHCALEsumz;
-  float fTHCALMETphi;
-  float fTHCALMETeta;
-  float fTHCALMET;
-  float fTRawMET;
-  float fTRawMETpx;
-  float fTRawMETpy;
-  float fTRawMETphi;
-  float fTRawMETemEtFrac;
-  float fTRawMETemEtInEB;
-  float fTRawMETemEtInEE;
-  float fTRawMETemEtInHF;
-  float fTRawMEThadEtFrac;
-  float fTRawMEThadEtInHB;
-  float fTRawMEThadEtInHE;
-  float fTRawMEThadEtInHF;
-  float fTRawMETSignificance;
-  float fTMuCorrMET;
-  float fTMuCorrMETpx;
-  float fTMuCorrMETpy;
-  float fTMuCorrMETphi;
-  float fTGenMET;
-  float fTGenMETpx;
-  float fTGenMETpy;
-  float fTGenMETphi;
-  float fTTCMET;
-  float fTTCMETpx;
-  float fTTCMETpy;
-  float fTTCMETphi;
-  float fTTCMETSignificance;
-  float fTMuJESCorrMET;
-  float fTMuJESCorrMETpx;
-  float fTMuJESCorrMETpy;
-  float fTMuJESCorrMETphi;
-  float fTPFMET;
-  float fTPFMETpx;
-  float fTPFMETpy;
-  float fTPFMETphi;
-  float fTPFMETSignificance;
-  float fTMETR12;
-  float fTMETR21;
+  double fTTrkPtSumx;
+  double fTTrkPtSumy;
+  double fTTrkPtSumphi;
+  double fTTrkPtSum;
+  double fTSumEt;
+  double fTECALSumEt;
+  double fTHCALSumEt;
+  double fTECALEsumx;
+  double fTECALEsumy;
+  double fTECALEsumz;
+  double fTECALMETphi;
+  double fTECALMETeta;
+  double fTECALMET;
+  double fTHCALEsumx;
+  double fTHCALEsumy;
+  double fTHCALEsumz;
+  double fTHCALMETphi;
+  double fTHCALMETeta;
+  double fTHCALMET;
+  double fTRawMET;
+  double fTRawMETpx;
+  double fTRawMETpy;
+  double fTRawMETphi;
+  double fTRawMETemEtFrac;
+  double fTRawMETemEtInEB;
+  double fTRawMETemEtInEE;
+  double fTRawMETemEtInHF;
+  double fTRawMEThadEtFrac;
+  double fTRawMEThadEtInHB;
+  double fTRawMEThadEtInHE;
+  double fTRawMEThadEtInHF;
+  double fTRawMETSignificance;
+  double fTMuCorrMET;
+  double fTMuCorrMETpx;
+  double fTMuCorrMETpy;
+  double fTMuCorrMETphi;
+  double fTGenMET;
+  double fTGenMETpx;
+  double fTGenMETpy;
+  double fTGenMETphi;
+  double fTTCMET;
+  double fTTCMETpx;
+  double fTTCMETpy;
+  double fTTCMETphi;
+  double fTTCMETSignificance;
+  double fTMuJESCorrMET;
+  double fTMuJESCorrMETpx;
+  double fTMuJESCorrMETpy;
+  double fTMuJESCorrMETphi;
+  double fTPFMET;
+  double fTPFMETpx;
+  double fTPFMETpy;
+  double fTPFMETphi;
+  double fTPFMETSignificance;
+  double fTMETR12;
+  double fTMETR21;
   ////////////////////////////////////////////////////////
 };
