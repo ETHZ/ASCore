@@ -13,8 +13,7 @@
 <use name=DataFormats/BeamSpot>
 <use name=DataFormats/BTauReco>
 <use name=DataFormats/L1GlobalTrigger>
-<use name="HLTrigger/HLTcore">
-<use name="DataFormats/L1GlobalTrigger">
+<use name=HLTrigger/HLTcore>
 <use name=TrackingTools/Records>
 <use name=TrackingTools/TransientTrack>
 <use name=RecoVertex/AdaptiveVertexFit>

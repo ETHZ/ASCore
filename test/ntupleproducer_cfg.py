@@ -35,10 +35,10 @@ options.register ('recoType',    # register 'recoType' option
                   "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
+
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-options.files= '/store/data/Run2010B/Mu/RECO/PromptReco-v2/000/146/428/9A7CDCF5-AAC6-DF11-8BC3-001D09F276CF.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/data/QCD_Pt_5to15_TuneZ2_7TeV_pythia6_GEN-SIM-RECO_START38_V12-v1_0006_AE83724B-C9C9-DF11-BA54-001F296BE5FA.root.root'
+options.files= 'file:/scratch/buchmann/82F80C67-E111-E011-8089-003048D2910A.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -58,6 +58,34 @@ if options.runon=='data':
 else:
     # CMSSW_3_8_X:
     process.GlobalTag.globaltag = "START38_V13::All"
+
+
+############PF2PAT##########################################
+# import skeleton process
+from PhysicsTools.PatAlgos.patTemplate_cfg import *
+
+# load the standard PAT config 
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+
+# Configure PAT to use PF2PAT instead of AOD sources
+from PhysicsTools.PatAlgos.tools.pfTools import *
+
+postfix = "PF"
+
+if options.runon == 'data':
+	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=False, postfix=postfix)
+
+else:
+	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=True, postfix=postfix)
+
+# turn to false when running on data and MC (for the moment)
+getattr(process, "patElectrons"+postfix).embedGenMatch = False
+getattr(process, "patMuons"+postfix).embedGenMatch = False
+
+process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
+process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
+process.patJetCorrFactorsPF.levels = cms.vstring()
 
 
 ### b-tagging ##################################################################
@@ -88,7 +116,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 #### Electron ID ##############################################################
-process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
 #### Parameterisation for Jet Corrections and JES ME Corrections ###############
 recoJet_src = "ak5CaloJets"
@@ -139,11 +167,12 @@ process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
 # ECAL dead cells: this is not a filter. Only a flag is stored.
 # Ecal gap boundary energy: specify minimal gap BE here.  
-process.load("PhysicsTools/EcalAnomalousEventFilter/ecalanomalouseventfilter_cfi")
-process.EcalAnomalousEventFilter.FilterAlgo = cms.untracked.string("TuningMode")
-process.EcalAnomalousEventFilter.cutBoundEnergyGapEE = cms.untracked.double(5)
-process.EcalAnomalousEventFilter.cutBoundEnergyGapEB = cms.untracked.double(5)
-process.EcalAnomalousEventFilter.enableGap           = cms.untracked.bool(True)
+### NOTE: THIS PART WAS REDUCED TO ENSURE COMPATIBILITY WITH CMSSW 3_9_7. THIS IS TEMPORARY!
+#process.load("PhysicsTools/EcalAnomalousEventFilter/ecalanomalouseventfilter_cfi")
+#process.EcalAnomalousEventFilter.FilterAlgo = cms.untracked.string("TuningMode")
+#process.EcalAnomalousEventFilter.cutBoundEnergyGapEE = cms.untracked.double(5)
+#process.EcalAnomalousEventFilter.cutBoundEnergyGapEB = cms.untracked.double(5)
+#process.EcalAnomalousEventFilter.enableGap           = cms.untracked.bool(True)
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 # require scraping filter
@@ -185,22 +214,35 @@ process.analyze.jets = (
     # PF jets
     cms.PSet( prefix = cms.untracked.string('PF'),
               tag = cms.untracked.InputTag('ak5PFJets'),
+              isPat = cms.untracked.bool(False),	      
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = cms.double(15.0),
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5PFL2L3'),
-	      btag_matchdeltaR = cms.double(0.25),
+              btag_matchdeltaR = cms.double(0.25),
               ),
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
+              isPat = cms.untracked.bool(False),	      
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
               sel_maxeta = process.analyze.sel_maxjeta,
               corrections = cms.string('ak5CaloL2L3'),
-	      btag_matchdeltaR = cms.double(0.25),
+              btag_matchdeltaR = cms.double(0.25),
+              ),
+    # PF jets from PF2PAT
+    cms.PSet( prefix = cms.untracked.string('PF2PAT'),
+              tag = cms.untracked.InputTag('patJetsPF'),
+              isPat = cms.untracked.bool(True),
+              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+              jet_id = cms.untracked.InputTag('ak5JetID'),
+              sel_minpt  = cms.double(15.0),
+              sel_maxeta = process.analyze.sel_maxjeta,
+              corrections = cms.string('ak5PFL2L3'),
+              btag_matchdeltaR = cms.double(0.25),
               ),
     )
 
@@ -233,19 +275,23 @@ process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
 
 #### Path ######################################################################
 process.p = cms.Path(
-    process.scrapingVeto *
-    ( 
-#   process.recoJPTJets   
-    process.HBHENoiseFilterResultProducer
-    + process.EcalAnomalousEventFilter  
-    + process.mygenjets
-    + process.jecCorSequence
-    + process.recoJetIdSequence
-    + process.simpleEleIdSequence
-    + process.metCorSequence
-    + process.mybtag
-    + process.analyze )
+    process.scrapingVeto * ( 
+        process.HBHENoiseFilterResultProducer
+        # + process.EcalAnomalousEventFilter  
+        + process.mygenjets
+        + process.jecCorSequence
+        + process.recoJetIdSequence
+        + process.simpleEleIdSequence
+        + process.metCorSequence
+        + process.mybtag
+        + process.patPF2PATSequencePF
+        + process.analyze
+        )
     )
+
+# remove output path from patTemplate_cfg
+process.p.remove(process.out)
+
 
 # remove ak5GenJets from the path if it will run on data
 if options.runon=='data':
