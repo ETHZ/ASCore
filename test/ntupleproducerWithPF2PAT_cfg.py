@@ -24,7 +24,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
 options = VarParsing.VarParsing ('standard') # set 'standard'  options
 options.register ('runon', # register 'runon' option
-                  'MC',  # the default value
+                  'data',  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
@@ -40,6 +40,7 @@ options.register ('recoType',    # register 'recoType' option
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 #options.files= 'file:/hadoop/phedexExtension/oviedo/cms/store/mc/Fall10/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/E7TeV_ProbDist_2010Data_BX156_START38_V12-v3/0000/FE975D38-3909-E011-9175-485B39800C0F.root'
 options.files= 'file:/pool/fanae20/TT_RECO_Fall10PU.root'
+#options.files= 'file:/pool/fanae20/DiLeptonMu.root'
 
 #options.files= 'file:/shome/pnef/SUSY/reco-data/data/QCD_Pt_5to15_TuneZ2_7TeV_pythia6_GEN-SIM-RECO_START38_V12-v1_0006_AE83724B-C9C9-DF11-BA54-001F296BE5FA.root.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
@@ -84,8 +85,8 @@ else:
 getattr(process, "patElectrons"+postfix).embedGenMatch = False
 getattr(process, "patMuons"+postfix).embedGenMatch = False
 
-process.pfIsolatedMuons.combinedIsolationCut = cms.double(0.15)
-process.pfIsolatedElectrons.combinedIsolationCut = cms.double(0.15)
+process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
+process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
 process.patJetCorrFactorsPF.levels = cms.vstring()
 
 
