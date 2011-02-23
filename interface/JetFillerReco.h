@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerReco.h,v 1.1 2010/08/26 11:39:44 fronga Exp $
+// $Id: JetFillerReco.h,v 1.2 2010/11/13 14:31:06 pnef Exp $
 //
 //
 
@@ -31,8 +31,7 @@
 class JetFillerReco : public JetFillerBase {
 public:
   /// Constructor: set pointer to tree
-  JetFillerReco( const edm::ParameterSet&, TTree* tree, 
-                 const bool& isPat, const bool& isRealData );
+  JetFillerReco( const edm::ParameterSet&, TTree* tree, const bool& isRealData );
   virtual ~JetFillerReco(void) {}
 
   /// Fill all branches
@@ -46,7 +45,6 @@ private:
   edm::InputTag fJetID;	
   edm::InputTag fJetTracksTag;
   std::string fJetCorrs; 
-  bool fIsRealData;         /// Global switch
 
   // Pre-selection
   double fMinpt;

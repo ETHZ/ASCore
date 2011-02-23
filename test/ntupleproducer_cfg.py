@@ -28,11 +28,6 @@ options.register ('runon', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
-options.register ('recoType',    # register 'recoType' option
-                  'RECO',        # the default value
-                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                  VarParsing.VarParsing.varType.string,         # string, int, or float
-                  "Type of reconstruction to use: RECO (default), PAT, PF")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 
@@ -43,7 +38,7 @@ options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will b
 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
-options.output='NTupleProducer_38X_'+options.runon+'_'+options.recoType+'.root'
+options.output='NTupleProducer_38X_'+options.runon+'.root'
 
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
@@ -60,13 +55,18 @@ else:
     process.GlobalTag.globaltag = "START38_V13::All"
 
 
-############PF2PAT##########################################
-# import skeleton process
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
-
-# load the standard PAT config 
+############ PF2PAT ##########################################
+# load the standard PAT config
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 
+# Add a pro forma output module because PF2PAT complains otherwise...
+process.out = cms.OutputModule("PoolOutputModule",
+      # save only events passing the full path
+      SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+      # save PAT Layer 1 output; you need a '*' to
+      outputCommands = cms.untracked.vstring('drop *', *patEventContent )
+      )
 
 # Configure PAT to use PF2PAT instead of AOD sources
 from PhysicsTools.PatAlgos.tools.pfTools import *
@@ -111,7 +111,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxE
 # Output
 process.TFileService = cms.Service("TFileService",
 # Keep track of the type of data source and reco type in the ntuple file name
-	fileName = cms.string(options.output),  
+	fileName = cms.string(options.output),
 	closeFileFast = cms.untracked.bool(True)
 )
 
@@ -166,7 +166,7 @@ process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
 # ECAL dead cells: this is not a filter. Only a flag is stored.
-# Ecal gap boundary energy: specify minimal gap BE here.  
+# Ecal gap boundary energy: specify minimal gap BE here.
 ### NOTE: THIS PART WAS REDUCED TO ENSURE COMPATIBILITY WITH CMSSW 3_9_7. THIS IS TEMPORARY!
 #process.load("PhysicsTools/EcalAnomalousEventFilter/ecalanomalouseventfilter_cfi")
 #process.EcalAnomalousEventFilter.FilterAlgo = cms.untracked.string("TuningMode")
@@ -198,7 +198,7 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
 process.load("RecoJets.Configuration.GenJetParticles_cff")
-process.load("RecoJets.Configuration.RecoGenJets_cff")	
+process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJets )
 
@@ -214,7 +214,7 @@ process.analyze.jets = (
     # PF jets
     cms.PSet( prefix = cms.untracked.string('PF'),
               tag = cms.untracked.InputTag('ak5PFJets'),
-              isPat = cms.untracked.bool(False),	      
+              isPat = cms.untracked.bool(False),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = cms.double(15.0),
@@ -225,7 +225,7 @@ process.analyze.jets = (
     # Calo jets (for cross-check)
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
-              isPat = cms.untracked.bool(False),	      
+              isPat = cms.untracked.bool(False),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = process.analyze.sel_mincorjpt,
@@ -248,7 +248,7 @@ process.analyze.jets = (
 
 # Add residual correction for running on data (temporary fix)
 if options.runon == 'data':
-        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual' 
+        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
 
@@ -256,7 +256,7 @@ if options.runon == 'data':
 process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
                               'hltSingleMu5L3Filtered5',
                               'hltSingleMu9L3Filtered9',
-                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
+                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilteroHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
                               'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter',
                               'hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter',
                               'hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter']
@@ -275,9 +275,9 @@ process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
 
 #### Path ######################################################################
 process.p = cms.Path(
-    process.scrapingVeto * ( 
+    process.scrapingVeto * (
         process.HBHENoiseFilterResultProducer
-        # + process.EcalAnomalousEventFilter  
+        # + process.EcalAnomalousEventFilter
         + process.mygenjets
         + process.jecCorSequence
         + process.recoJetIdSequence
@@ -290,7 +290,7 @@ process.p = cms.Path(
     )
 
 # remove output path from patTemplate_cfg
-process.p.remove(process.out)
+# process.p.remove(process.out)
 
 
 # remove ak5GenJets from the path if it will run on data
@@ -298,4 +298,4 @@ if options.runon=='data':
     process.p.remove(process.mygenjets)
 if options.runon!='data':
     process.p.remove(process.scrapingVeto)
-    
+

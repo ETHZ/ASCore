@@ -18,18 +18,17 @@
 
 
 //________________________________________________________________________________________
-JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, 
-                              const bool& isPat, const bool& isRealData )
-  : JetFillerBase( config, tree, isPat, isRealData )
+JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, const bool& isRealData )
+  : JetFillerBase( config, tree, isRealData )
 {
-	
+
   // Retrieve configuration parameters
   fPrefix          = config.getUntrackedParameter<std::string>("prefix");
   fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
   fJetCorrs        = config.getParameter<std::string>("corrections");
-  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
+  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");
   fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
   fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
@@ -37,12 +36,12 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree,
   edm::LogVerbatim("NTP") << " ==> JetFillerPat Constructor - " << fPrefix;
   edm::LogVerbatim("NTP") << "  Input Tag:        " << fTag.label();
   edm::LogVerbatim("NTP") << "---------------------------------";
-  
+
 }
 
 
 //________________________________________________________________________________________
-const int JetFillerPat::fillBranches(const edm::Event& iEvent, 
+const int JetFillerPat::fillBranches(const edm::Event& iEvent,
                                       const edm::EventSetup& iSetup ) {
 
   using namespace edm;
@@ -53,18 +52,18 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
   Handle<View<pat::Jet> > jetsHandle;
   iEvent.getByLabel(fTag,jetsHandle);
   View<pat::Jet> jets = *jetsHandle;
-	
+
   // Jet tracks association (already done in PAT)
   Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
   iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
-	
+
   Handle<edm::ValueMap<reco::JetID> > jetsID;
   iEvent.getByLabel(fJetID,jetsID);
-	
+
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-	  
+
   // collect information for b-tagging (4 tags)
   Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
   iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
@@ -79,11 +78,11 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
   iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
 
   const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
-  
+
   // First loop: just get corrected pt and corresponding indices
   unsigned int iraw(0);
   vector<OrderPair> corrIndices; // Vector of indices and pt of corr. jets
-  for( View<pat::Jet>::const_iterator Jit = jets.begin(); 
+  for( View<pat::Jet>::const_iterator Jit = jets.begin();
        Jit != jets.end(); ++Jit, ++iraw )
     {
       // Store the (index,pt) pair, where pt is corrected
@@ -98,7 +97,7 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
 
   // Second loop: get them ordered
   unsigned int ijet(0);
-  for ( vector<OrderPair>::const_iterator it = corrIndices.begin(); 
+  for ( vector<OrderPair>::const_iterator it = corrIndices.begin();
         it != corrIndices.end(); ++it ) {
 
     unsigned int index = it->first;
@@ -111,7 +110,7 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
     // Save only the gMaxnjets first uncorrected jets
     if (ijet >= gMaxnobjs){
       edm::LogWarning("NTP") << "@SUB=FillBranches"
-                             << "Maximum number of jets exceeded: " 
+                             << "Maximum number of jets exceeded: "
                              << ijet << " >= " << static_cast<int>(gMaxnobjs);
       break;
     }
@@ -128,45 +127,45 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
     fTscale[ijet] = scale;
 
     // B-tagging probability (for 4 b-taggings)
-      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
+      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
       fTjbTagProbTkCntHighEff [ijet] = pJ->bDiscriminator("trackCountingHighEffBJetTags"        );
       fTjbTagProbTkCntHighPur [ijet] = pJ->bDiscriminator("trackCountingHighPurBJetTags"        );
       fTjbTagProbSimpSVHighEff[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
       fTjbTagProbSimpSVHighPur[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-    
 
-		
+
+
     // -----------------------------------------
     // JPT jet specific
     if ( jetType()==JPT ) {
       reco::JetID jetID;
       const JPTJet* jptjet = static_cast<const JPTJet*>(&(*jet));
       edm::RefToBase<reco::Jet>  jetRef = jptjet->getCaloJetRef();
-			
+
       //		jptjet->printJet();
-			
+
       jetID = (*jetsID)[ jetRef ];
-			
+
       fTID_HPD[ijet]      = jetID.fHPD;
       fTID_RBX[ijet]      = jetID.fRBX;
       fTID_n90Hits[ijet]  = jetID.n90Hits;
       fTID_resEMF[ijet]   = jetID.restrictedEMF;
-			
+
       fTChMult[ijet]      = jptjet->chargedMultiplicity();
 
-    }	  
+    }
 
     // -------------------------------------------------
     // PF jet specific
     if (fJetType==PF) {
       const PFJet* pjet = static_cast<const PFJet*>(&(*jet));
-      
+
       double CHF=pjet->chargedHadronEnergyFraction();
       double NHF=pjet->neutralHadronEnergyFraction();
       double CEF=pjet->chargedEmEnergyFraction();
       double NEF=pjet->neutralEmEnergyFraction();
       double CMF=pjet->chargedMuEnergyFraction();
-      
+
       double sum=CHF+NHF+CEF+NEF+CMF;
       if (sum >0) {
         CHF=CHF/sum;
@@ -182,10 +181,10 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTChEmFrac[ijet]      = CEF;
       fTNeuEmFrac[ijet]     = NEF;
       fTChMult[ijet]        = pjet->chargedMultiplicity();
-      fTNeuMult[ijet]       = pjet->neutralMultiplicity(); 
-      fTNConstituents[ijet] = pjet->nConstituents();  
+      fTNeuMult[ijet]       = pjet->neutralMultiplicity();
+      fTNConstituents[ijet] = pjet->nConstituents();
     }
-		
+
     // ------------------------------------------------------------
     // Calo jet specific
 /*    if ( jetType()==CALO ) {
@@ -194,27 +193,27 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       const CaloJet* cjet = static_cast<const CaloJet*>(&(*jet));
       edm::RefToBase<reco::Jet> jetRef = jets.refAt(ijet);
       jetID = (*jetsID)[ jetRef ];
-				
+
       fTID_HPD[ijet]      = jetID.fHPD;
       fTID_RBX[ijet]      = jetID.fRBX;
       fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;      
-			
+      fTID_resEMF[ijet]   = jetID.restrictedEMF;
+
       fTEMfrac[ijet]        = cjet->emEnergyFraction();
       fTNConstituents[ijet] = cjet->nConstituents();
-      
-			
+
+
       /////////////////////////////////////////////////////
       // calculate charge fraction
-			
+
       // Jet-track association: get associated tracks
       vector<const reco::Track*> AssociatedTracks;
-			
+
       const reco::TrackRefVector& tracks = JetTracksAssociation::getValue(*(jetTracksAssoc.product()),jetRef);
       for ( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ){
         AssociatedTracks.push_back( it->get() );
       }
-			
+
       // Jet-track association: make transient tracks and store information
       vector<TransientTrack> AssociatedTTracks;
       fTjnAssoTracks[ijet] = 0;
@@ -232,20 +231,20 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
           }
         }
         fTjChfrac[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
-			
+
       } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
         fTjChfrac[ijet] = -1.;
       }
       AssociatedTracks.clear();
       AssociatedTTracks.clear();
-			
+
     } // ----------------------------
-*/	  
-	
+*/
+
     ++ijet;
   }
   fTnobj = ijet;
 
   return 0;
- 
+
 }

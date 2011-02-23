@@ -5,23 +5,22 @@ import FWCore.ParameterSet.Config as cms
 analyze = cms.EDAnalyzer('NTupleProducer',
 	# Main settings
 	isRealData       = cms.untracked.bool(False),
-	isPat            = cms.untracked.bool(False), 
 	# Collections
 	tag_muons        = cms.untracked.InputTag('muons'),
 	tag_pfmuons        = cms.untracked.InputTag('patMuonsPF'),
 	tag_muisodeptk   = cms.untracked.InputTag('muIsoDepositTk'),
 	tag_muisodepec   = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
 	tag_muisodephc   = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
-	tag_electrons    = cms.untracked.InputTag('gsfElectrons'),	
-	tag_pfelectrons  = cms.untracked.InputTag('patElectronsPF'),	
-	tag_pftaus       = cms.untracked.InputTag('patTausPF'),	
-	tag_elidWP       = cms.untracked.string('simpleEleId90relIso'),	
+	tag_electrons    = cms.untracked.InputTag('gsfElectrons'),
+	tag_pfelectrons  = cms.untracked.InputTag('patElectronsPF'),
+	tag_pftaus       = cms.untracked.InputTag('patTausPF'),
+	tag_elidWP       = cms.untracked.string('simpleEleId90relIso'),
 	tag_jets         = cms.untracked.InputTag('ak5CaloJets'),
 	jetCorrs         = cms.untracked.string('ak5CaloL2L3'),
-	tag_btag1        = cms.untracked.InputTag('trackCountingHighEffBJetTags'), 
-	tag_btag2        = cms.untracked.InputTag('trackCountingHighPurBJetTags'), 
-	tag_btag3        = cms.untracked.InputTag('simpleSecondaryVertexHighEffBJetTags'), 
-	tag_btag4        = cms.untracked.InputTag('simpleSecondaryVertexHighPurBJetTags'), 		
+	tag_btag1        = cms.untracked.InputTag('trackCountingHighEffBJetTags'),
+	tag_btag2        = cms.untracked.InputTag('trackCountingHighPurBJetTags'),
+	tag_btag3        = cms.untracked.InputTag('simpleSecondaryVertexHighEffBJetTags'),
+	tag_btag4        = cms.untracked.InputTag('simpleSecondaryVertexHighPurBJetTags'),
 	tag_jetTracks    = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
 	tag_jetID        = cms.untracked.InputTag('ak5JetID'),
 	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
@@ -47,12 +46,12 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring(),
-        
+
 	# Event Selection Criteria
 	# Muons:
 	sel_minmupt       = cms.double(5.0),
 	sel_maxmueta      = cms.double(2.5),
-	# Electrons: 
+	# Electrons:
 	sel_minelpt       = cms.double(5.0),
 	sel_maxeleta      = cms.double(2.5),
 	# Jets:
@@ -69,8 +68,8 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	sel_minphopt      = cms.double(5.0),
 	sel_maxphoeta     = cms.double(2.5),
 	# GenLeptons
-	sel_mingenleptpt  = cms.double(5.0),
-	sel_maxgenlepteta = cms.double(10),	
+	sel_mingenleptpt  = cms.double(2.0),
+	sel_maxgenlepteta = cms.double(10),
 
 	# Additional jet collections
 	jets = cms.VPSet()

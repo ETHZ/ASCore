@@ -13,10 +13,8 @@
 
 
 //________________________________________________________________________________________
-JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, 
-                              const bool& isPat, const bool& isRealData )
-  : fTree(tree),fIsPat(isPat),fIsRealData(isRealData)
-{
+JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, const bool& isRealData )
+  : fTree(tree),fIsRealData(isRealData){
 	
   // Retrieve configuration parameters
   fPrefix = cfg.getUntrackedParameter<std::string>("prefix");

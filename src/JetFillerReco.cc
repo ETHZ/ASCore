@@ -17,278 +17,265 @@
 
 
 //________________________________________________________________________________________
-JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree, 
-                              const bool& isPat, const bool& isRealData )
-  : JetFillerBase( config, tree, isPat, isRealData )
+JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree, const bool& isRealData )
+	: JetFillerBase( config, tree, isRealData )
 {
-	
-  // Retrieve configuration parameters
-  fPrefix          = config.getUntrackedParameter<std::string>("prefix");
-  fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
-  fMinpt           = config.getParameter<double>("sel_minpt");
-  fMaxeta          = config.getParameter<double>("sel_maxeta");
-  fJetCorrs        = config.getParameter<std::string>("corrections");
-  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
-  fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
-  fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
+
+// Retrieve configuration parameters
+	fPrefix          = config.getUntrackedParameter<std::string>("prefix");
+	fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
+	fMinpt           = config.getParameter<double>("sel_minpt");
+	fMaxeta          = config.getParameter<double>("sel_maxeta");
+	fJetCorrs        = config.getParameter<std::string>("corrections");
+	fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
+	fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+	fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
 
-  edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;
-  edm::LogVerbatim("NTP") << "  Input Tag:        " << fTag.label();
-  edm::LogVerbatim("NTP") << "---------------------------------";
-  
+	edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;
+	edm::LogVerbatim("NTP") << "  Input Tag:        " << fTag.label();
+	edm::LogVerbatim("NTP") << "---------------------------------";
+
 }
 
 
 //________________________________________________________________________________________
 const int JetFillerReco::fillBranches(const edm::Event& iEvent, 
-                                      const edm::EventSetup& iSetup ) {
+const edm::EventSetup& iSetup ) {
 
-  using namespace edm;
-  using namespace std;
-  using namespace reco;
+	using namespace edm;
+	using namespace std;
+	using namespace reco;
 
-  // Retrieve collections
-  Handle<View<Jet> > jets;
-  iEvent.getByLabel(fTag,jets);
-	
-  // Jet tracks association (already done in PAT)
-  Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
-  iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
-	
-  Handle<edm::ValueMap<reco::JetID> > jetsID;
-  iEvent.getByLabel(fJetID,jetsID);
-	
-  // Get Transient Track Builder
-  ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-	  
-  // collect information for b-tagging (4 tags)
-  Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
-  iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
+// Retrieve collections
+	Handle<View<Jet> > jets;
+	iEvent.getByLabel(fTag,jets);
 
-  Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
-  iEvent.getByLabel("trackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
+// Jet tracks association (already done in PAT)
+	Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
+	iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
 
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
-  iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
+	Handle<edm::ValueMap<reco::JetID> > jetsID;
+	iEvent.getByLabel(fJetID,jetsID);
 
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
-  iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
+// Get Transient Track Builder
+	ESHandle<TransientTrackBuilder> theB;
+	iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
 
-  const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
-  
-  // First loop: just get corrected pt and corresponding indices
-  unsigned int iraw(0);
-  vector<OrderPair> corrIndices; // Vector of indices and pt of corr. jets
-  for( View<Jet>::const_iterator Jit = jets->begin(); 
-       Jit != jets->end(); ++Jit, ++iraw )
-    {
-      // Store the (index,pt) pair, where pt is corrected
-      double scale = jetCorr->correction(Jit->p4());
-      corrIndices.push_back(make_pair(iraw,Jit->pt()*scale));
-    }
+// collect information for b-tagging (4 tags)
+	Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
+	iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
 
+	Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
+	iEvent.getByLabel("trackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
 
-  // Now sort indices by decreasing corrected pt
-  IndexByPt indexComparator;
-  std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
+	Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
+	iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
 
-  // Second loop: get them ordered
-  unsigned int ijet(0);
-  for ( vector<OrderPair>::const_iterator it = corrIndices.begin(); 
-        it != corrIndices.end(); ++it ) {
+	Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
+	iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
 
-    unsigned int index = it->first;
-    const Jet* jet = &((*jets)[index]);
+	const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
 
-    // Cut on corrected pT
-    double scale = jetCorr->correction(jet->p4());
-    if(jet->pt()*scale < fMinpt) continue;
-
-    // Save only the gMaxnjets first uncorrected jets
-    if (ijet >= gMaxnobjs){
-      edm::LogWarning("NTP") << "@SUB=FillBranches"
-                             << "Maximum number of jets exceeded: " 
-                             << ijet << " >= " << static_cast<int>(gMaxnobjs);
-      break;
-    }
-
-    // Store the information (corrected)
-    fTpx[ijet]    = jet->px()*scale;
-    fTpy[ijet]    = jet->py()*scale;
-    fTpz[ijet]    = jet->pz()*scale;
-    fTpt[ijet]    = jet->pt()*scale;
-    fTe[ijet]     = jet->energy()*scale;
-    fTet[ijet]    = jet->et()*scale;
-    fTphi[ijet]   = jet->phi();
-    fTeta[ijet]   = jet->eta();
-    fTscale[ijet] = scale;
-
-    // B-tagging probability (for 4 b-taggings)
-    if( !fIsPat ){
-      double mindr(999.99);
-      for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
-        // Angular match between the two "collections"
-	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-				      (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
-				      (*jetsAndProbsTkCntHighEff)[i].first->phi());
-        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-	  fTjbTagProbTkCntHighEff[ijet]=(*jetsAndProbsTkCntHighEff)[i].second;
-	  mindr = deltar;
+// First loop: just get corrected pt and corresponding indices
+	unsigned int iraw(0);
+	vector<OrderPair> corrIndices; // Vector of indices and pt of corr. jets
+	for( View<Jet>::const_iterator Jit = jets->begin(); 
+	Jit != jets->end(); ++Jit, ++iraw )
+	{
+	// Store the (index,pt) pair, where pt is corrected
+		double scale = jetCorr->correction(Jit->p4());
+		corrIndices.push_back(make_pair(iraw,Jit->pt()*scale));
 	}
-      }
-      mindr = 999.99;
-      for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
-        // Angular match between the two "collections"
-	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-				      (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
-				      (*jetsAndProbsTkCntHighPur)[i].first->phi());
-        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-	  fTjbTagProbTkCntHighPur[ijet]=(*jetsAndProbsTkCntHighPur)[i].second;
-	  mindr = deltar;
-	}
-      }
-      mindr = 999.99;
-      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
-        // Angular match between the two "collections"
-	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-				      (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
-				      (*jetsAndProbsSimpSVHighEff)[i].first->phi());
-        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-	  fTjbTagProbSimpSVHighEff[ijet]=(*jetsAndProbsSimpSVHighEff)[i].second;
-	  mindr = deltar;
-	}
-      }
-      mindr = 999.99;
-      for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
-        // Angular match between the two "collections"
-	double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-				      (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
-				      (*jetsAndProbsSimpSVHighPur)[i].first->phi());
-        if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-	  fTjbTagProbSimpSVHighPur[ijet]=(*jetsAndProbsSimpSVHighPur)[i].second;
-	  mindr = deltar;
-	}
-      }
-    } else {
-      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);      
-      fTjbTagProbTkCntHighEff [ijet] = pJ->bDiscriminator("trackCountingHighEffBJetTags"        );
-      fTjbTagProbTkCntHighPur [ijet] = pJ->bDiscriminator("trackCountingHighPurBJetTags"        );
-      fTjbTagProbSimpSVHighEff[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-      fTjbTagProbSimpSVHighPur[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-    }
 
-		
-    // -----------------------------------------
-    // JPT jet specific
-    if ( jetType()==JPT ) {
-      reco::JetID jetID;
-      const JPTJet* jptjet = static_cast<const JPTJet*>(&(*jet));
-      edm::RefToBase<reco::Jet>  jetRef = jptjet->getCaloJetRef();
-			
-      //		jptjet->printJet();
-			
-      jetID = (*jetsID)[ jetRef ];
-			
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-			
-      fTChMult[ijet]      = jptjet->chargedMultiplicity();
 
-    }	  
+// Now sort indices by decreasing corrected pt
+	IndexByPt indexComparator;
+	std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
 
-    // -------------------------------------------------
-    // PF jet specific
-    if (fJetType==PF) {
-      const PFJet* pjet = static_cast<const PFJet*>(&(*jet));
-      
-      double CHF=pjet->chargedHadronEnergyFraction();
-      double NHF=pjet->neutralHadronEnergyFraction();
-      double CEF=pjet->chargedEmEnergyFraction();
-      double NEF=pjet->neutralEmEnergyFraction();
-      double CMF=pjet->chargedMuEnergyFraction();
-      
-      double sum=CHF+NHF+CEF+NEF+CMF;
-      if (sum >0) {
-        CHF=CHF/sum;
-        NHF=NHF/sum;
-        CEF=CEF/sum;
-        NEF=NEF/sum;
-        CMF=CMF/sum;
-      } else {
-        edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
-      }
-      fTChHadFrac[ijet]     = CHF;
-      fTNeuHadFrac[ijet]    = NHF;
-      fTChEmFrac[ijet]      = CEF;
-      fTNeuEmFrac[ijet]     = NEF;
-      fTChMult[ijet]        = pjet->chargedMultiplicity();
-      fTNeuMult[ijet]       = pjet->neutralMultiplicity(); 
-      fTNConstituents[ijet] = pjet->nConstituents();  
-    }
-		
-    // ------------------------------------------------------------
-    // Calo jet specific
-    if ( jetType()==CALO ) {
-      reco::JetID jetID;
-      const CaloJet* cjet = static_cast<const CaloJet*>(&(*jet));
-      edm::RefToBase<reco::Jet> jetRef = jets->refAt(ijet);
-      jetID = (*jetsID)[ jetRef ];
-				
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-			
-      fTEMfrac[ijet]        = cjet->emEnergyFraction();
-      fTNConstituents[ijet] = cjet->nConstituents();
+// Second loop: get them ordered
+	unsigned int ijet(0);
+	for ( vector<OrderPair>::const_iterator it = corrIndices.begin(); 
+	it != corrIndices.end(); ++it ) {
 
-			
-      /////////////////////////////////////////////////////
-      // calculate charge fraction
-			
-      // Jet-track association: get associated tracks
-      vector<const reco::Track*> AssociatedTracks;
-			
-      const reco::TrackRefVector& tracks = JetTracksAssociation::getValue(*(jetTracksAssoc.product()),jetRef);
-      for ( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ){
-        AssociatedTracks.push_back( it->get() );
-      }
-			
-      // Jet-track association: make transient tracks and store information
-      vector<TransientTrack> AssociatedTTracks;
-      fTjnAssoTracks[ijet] = 0;
-      fTjChfrac[ijet] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
-      if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
+		unsigned int index = it->first;
+		const Jet* jet = &((*jets)[index]);
+
+	// Cut on corrected pT
+		double scale = jetCorr->correction(jet->p4());
+		if(jet->pt()*scale < fMinpt) continue;
+
+	// Save only the gMaxnjets first uncorrected jets
+		if (ijet >= gMaxnobjs){
+			edm::LogWarning("NTP") << "@SUB=FillBranches"
+				<< "Maximum number of jets exceeded: " 
+				<< ijet << " >= " << static_cast<int>(gMaxnobjs);
+			break;
+		}
+
+	// Store the information (corrected)
+		fTpx[ijet]    = jet->px()*scale;
+		fTpy[ijet]    = jet->py()*scale;
+		fTpz[ijet]    = jet->pz()*scale;
+		fTpt[ijet]    = jet->pt()*scale;
+		fTe[ijet]     = jet->energy()*scale;
+		fTet[ijet]    = jet->et()*scale;
+		fTphi[ijet]   = jet->phi();
+		fTeta[ijet]   = jet->eta();
+		fTscale[ijet] = scale;
+
+		// B-tagging probability (for 4 b-taggings)
+		double mindr(999.99);
+		for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
+			// Angular match between the two "collections"
+			double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				(*jetsAndProbsTkCntHighEff)[i].first->eta(), 
+				(*jetsAndProbsTkCntHighEff)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbTkCntHighEff[ijet]=(*jetsAndProbsTkCntHighEff)[i].second;
+				mindr = deltar;
+			}
+		}
+		mindr = 999.99;
+		for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
+			// Angular match between the two "collections"
+			double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				(*jetsAndProbsTkCntHighPur)[i].first->eta(), 
+				(*jetsAndProbsTkCntHighPur)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbTkCntHighPur[ijet]=(*jetsAndProbsTkCntHighPur)[i].second;
+				mindr = deltar;
+			}
+		}
+		mindr = 999.99;
+		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
+			// Angular match between the two "collections"
+			double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				(*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
+				(*jetsAndProbsSimpSVHighEff)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbSimpSVHighEff[ijet]=(*jetsAndProbsSimpSVHighEff)[i].second;
+				mindr = deltar;
+			}
+		}
+		mindr = 999.99;
+		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
+			// Angular match between the two "collections"
+			double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+				(*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
+				(*jetsAndProbsSimpSVHighPur)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbSimpSVHighPur[ijet]=(*jetsAndProbsSimpSVHighPur)[i].second;
+				mindr = deltar;
+			}
+		}
+
+		// -----------------------------------------
+		// JPT jet specific
+		if ( jetType()==JPT ) {
+			reco::JetID jetID;
+			const JPTJet* jptjet = static_cast<const JPTJet*>(&(*jet));
+			edm::RefToBase<reco::Jet>  jetRef = jptjet->getCaloJetRef();
+			jetID = (*jetsID)[ jetRef ];
+
+			fTID_HPD[ijet]      = jetID.fHPD;
+			fTID_RBX[ijet]      = jetID.fRBX;
+			fTID_n90Hits[ijet]  = jetID.n90Hits;
+			fTID_resEMF[ijet]   = jetID.restrictedEMF;
+
+			fTChMult[ijet]      = jptjet->chargedMultiplicity();
+
+		}	  
+
+		// -------------------------------------------------
+		// PF jet specific
+		if (fJetType==PF) {
+			const PFJet* pjet = static_cast<const PFJet*>(&(*jet));
+
+			double CHF=pjet->chargedHadronEnergyFraction();
+			double NHF=pjet->neutralHadronEnergyFraction();
+			double CEF=pjet->chargedEmEnergyFraction();
+			double NEF=pjet->neutralEmEnergyFraction();
+			double CMF=pjet->chargedMuEnergyFraction();
+
+			double sum=CHF+NHF+CEF+NEF+CMF;
+			if (sum >0) {
+				CHF=CHF/sum;
+				NHF=NHF/sum;
+				CEF=CEF/sum;
+				NEF=NEF/sum;
+				CMF=CMF/sum;
+			} else {
+				edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
+			}
+			fTChHadFrac[ijet]     = CHF;
+			fTNeuHadFrac[ijet]    = NHF;
+			fTChEmFrac[ijet]      = CEF;
+			fTNeuEmFrac[ijet]     = NEF;
+			fTChMult[ijet]        = pjet->chargedMultiplicity();
+			fTNeuMult[ijet]       = pjet->neutralMultiplicity(); 
+			fTNConstituents[ijet] = pjet->nConstituents();  
+		}
+
+		// ------------------------------------------------------------
+		// Calo jet specific
+		if ( jetType()==CALO ) {
+			reco::JetID jetID;
+			const CaloJet* cjet = static_cast<const CaloJet*>(&(*jet));
+			edm::RefToBase<reco::Jet> jetRef = jets->refAt(ijet);
+			jetID = (*jetsID)[ jetRef ];
+
+			fTID_HPD[ijet]      = jetID.fHPD;
+			fTID_RBX[ijet]      = jetID.fRBX;
+			fTID_n90Hits[ijet]  = jetID.n90Hits;
+			fTID_resEMF[ijet]   = jetID.restrictedEMF;
+
+			fTEMfrac[ijet]        = cjet->emEnergyFraction();
+			fTNConstituents[ijet] = cjet->nConstituents();
+
+
+			/////////////////////////////////////////////////////
+			// calculate charge fraction
+
+			// Jet-track association: get associated tracks
+			vector<const reco::Track*> AssociatedTracks;
+
+			const reco::TrackRefVector& tracks = JetTracksAssociation::getValue(*(jetTracksAssoc.product()),jetRef);
+			for ( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ){
+				AssociatedTracks.push_back( it->get() );
+			}
+
+			// Jet-track association: make transient tracks and store information
+			vector<TransientTrack> AssociatedTTracks;
+			fTjnAssoTracks[ijet] = 0;
+			fTjChfrac[ijet] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
+			if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 				// Tmp variables for vectorial sum of pt of tracks
-        double pXtmp(0.), pYtmp(0.);
-        // Loop over associated tracks:
-        for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-          AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks
-          if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-            pXtmp += AssociatedTracks[t]->px();
-            pYtmp += AssociatedTracks[t]->py();
-            fTjnAssoTracks[ijet]++;
-          }
-        }
-        fTjChfrac[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
-			
-      } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-        fTjChfrac[ijet] = -1.;
-      }
-      AssociatedTracks.clear();
-      AssociatedTTracks.clear();
-			
-    } // ----------------------------
-	  
-	
-    ++ijet;
-  }
-  fTnobj = ijet;
+				double pXtmp(0.), pYtmp(0.);
+				// Loop over associated tracks:
+				for(size_t t = 0; t < AssociatedTracks.size(); ++t){
+					AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks
+					if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
+						pXtmp += AssociatedTracks[t]->px();
+						pYtmp += AssociatedTracks[t]->py();
+						fTjnAssoTracks[ijet]++;
+					}
+				}
+				fTjChfrac[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
 
-  return 0;
- 
+			} else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
+				fTjChfrac[ijet] = -1.;
+			}
+			AssociatedTracks.clear();
+			AssociatedTTracks.clear();
+
+		} // ----------------------------
+
+
+		++ijet;
+	}
+	fTnobj = ijet;
+
+	return 0;
+
 }

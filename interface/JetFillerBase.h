@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.2 2010/09/06 08:49:16 fronga Exp $
+// $Id: JetFillerBase.h,v 1.3 2010/11/13 14:31:06 pnef Exp $
 //
 //
 
@@ -34,8 +34,7 @@ public:
   };
 
   /// Constructor: set pointer to tree
-  JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, 
-                 const bool& isPat, const bool& isRealData );
+  JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, const bool& isRealData );
   virtual ~JetFillerBase(void);
 
   /// Define all branches
@@ -71,7 +70,7 @@ protected:
   JetType fJetType;	
   std::string fPrefix;        /// Prefix for branches
   TTree* fTree;               /// Pointer to tree to fill
-  bool   fIsPat, fIsRealData; /// Global switches
+  bool   fIsRealData;         /// Global switch
 
   size_t gMaxnobjs;
 
