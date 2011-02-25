@@ -442,10 +442,10 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       }
 
       //if( fMT2tree-> MinMetJetDPhi(0,20) < 0.3 )  continue;
-      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
-      counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
-      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
-      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+//       if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
+//       counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
+//       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+//       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
 
       if( fMT2tree->misc.HBHENoiseFlag != 1 )  continue;
       counters[i].fill("HBHE noise veto",weight);
@@ -1249,96 +1249,319 @@ TH1D* MassPlotter::GetPrediction(TString branch_name, const int nbins, const dou
 }
 
 
-//_________________________________________________________________________
-void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], bool cleaned, TString sname, TString type){
-	ABCD_MT2(branch_name, ysplit, option, nbins, bins, "1", cleaned, sname, type);
+//__________________________________________________________________________
+void MassPlotter::abcd_MT2(TString var, TString basecut, TString upper_cut, TString lower_cut, const int nbins,const double min, const double max, double fit_min, double fit_max){
+
+  double bins[nbins];
+  bins[0] = min;
+  for(int i=1; i<=nbins; i++)
+    bins[i] = min+i*(max-min)/nbins;
+  ABCD_MT2(var, basecut, upper_cut, lower_cut, nbins, bins);
+  
 }
 
 //__________________________________________________________________________
-void MassPlotter::ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[],  TString version, bool cleaned, TString sname, TString type){
-	TH2D *h_ABCD_MT2            = new TH2D("ABCD_MT2_"+branch_name+"_"+version           , "",  nbins, bins, 100, ysplit[0], ysplit[3]);
-	TH1D *h_ABCD_lower_y_band   = new TH1D("ABCD_lower_y_band_"+branch_name+"_"+version  , "",  nbins, bins);
-	TH1D *h_ABCD_upper_y_band   = new TH1D("ABCD_upper_y_band_"+branch_name+"_"+version  , "",  nbins, bins);
+void MassPlotter::ABCD_MT2(TString var, TString basecut, TString upper_cut, TString lower_cut, const int nbins, const double *bins, double fit_min, double fit_max){
+  TH2D *h_ABCD_MT2_qcd           = new TH2D("ABCD_MT2_"+var+"_qcd"           , "",  100, 0, 600, 180, 0, TMath::Pi());  h_ABCD_MT2_qcd          ->Sumw2();
+  TH2D *h_ABCD_MT2_susy          = new TH2D("ABCD_MT2_"+var+"_susy"          , "",  100, 0, 600, 180, 0, TMath::Pi());  h_ABCD_MT2_susy         ->Sumw2();
+  TH1D *h_ABCD_upper_y_band_susy = new TH1D("ABCD_upper_y_band_"+var+"_susy" , "",  nbins, bins);		        h_ABCD_upper_y_band_susy->Sumw2();
+  TH1D *h_ABCD_lower_y_band_data = new TH1D("ABCD_lower_y_band_"+var+"_data" , "",  nbins, bins);		        h_ABCD_lower_y_band_data->Sumw2();
+  TH1D *h_ABCD_upper_y_band_data = new TH1D("ABCD_upper_y_band_"+var+"_data" , "",  nbins, bins);		        h_ABCD_upper_y_band_data->Sumw2();
+  TH1D *h_ABCD_lower_y_band_qcd  = new TH1D("ABCD_lower_y_band_"+var+"_qcd"  , "",  nbins, bins);		        h_ABCD_lower_y_band_qcd ->Sumw2();
+  TH1D *h_ABCD_upper_y_band_qcd  = new TH1D("ABCD_upper_y_band_"+var+"_qcd"  , "",  nbins, bins);		        h_ABCD_upper_y_band_qcd ->Sumw2();
+  TH1D *h_ABCD_lower_y_band_mc   = new TH1D("ABCD_lower_y_band_"+var+"_mc"   , "",  nbins, bins);		        h_ABCD_lower_y_band_mc  ->Sumw2();
+  TH1D *h_ABCD_upper_y_band_mc   = new TH1D("ABCD_upper_y_band_"+var+"_mc"   , "",  nbins, bins);		        h_ABCD_upper_y_band_mc  ->Sumw2();
+  TH1D *h_ABCD_lower_y_band_sub  = new TH1D("ABCD_lower_y_band_"+var+"_sub"  , "",  nbins, bins);		        h_ABCD_lower_y_band_sub ->Sumw2();
+  TH1D *h_ABCD_upper_y_band_sub  = new TH1D("ABCD_upper_y_band_"+var+"_sub"  , "",  nbins, bins);		        h_ABCD_upper_y_band_sub ->Sumw2();
+  TH1D *ratio_data               = new TH1D("ratio_"+var+"_data"             , "",  nbins, bins);		        ratio_data              ->Sumw2();
+  TH1D *ratio_qcd                = new TH1D("ratio_"+var+"_qcd"              , "",  nbins, bins);		        ratio_qcd               ->Sumw2();
+  TH1D *ratio_sub                = new TH1D("ratio_"+var+"_sub"              , "",  nbins, bins);		        ratio_sub               ->Sumw2();
+  
+  for(size_t i = 0; i < fSamples.size(); ++i){
+    
+    Long64_t nentries =  fSamples[i].tree->GetEntries();
+    Long64_t nbytes = 0, nb = 0;
+    
+    Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
+    if(fVerbose>2) cout << "ABCD: looping over " << fSamples[i].name << endl;
+    if(fVerbose>2) cout << "      sample has weight " << weight << endl; 
+    
+//     TEntryList *elist = new TEntryList("elist","elist");
+//     int nev = fSamples[i].tree->Draw(">>elist",basecut.Data(),"entrylist");
+//     fSamples[i].tree->SetEntryList(elist);
+    
+    TString selection = TString::Format("(%f) * (%s)"      ,weight,basecut.Data());
+    TString sel_up    = TString::Format("(%f) * (%s && %s)",weight,basecut.Data(),upper_cut.Data());
+    TString sel_lo    = TString::Format("(%f) * (%s && %s)",weight,basecut.Data(),lower_cut.Data());
 
-	h_ABCD_MT2          ->Sumw2();
-	h_ABCD_lower_y_band ->Sumw2();
-	h_ABCD_upper_y_band ->Sumw2();
+    TString variable;
+    TString var2 = "misc.MT2";
+    if (fSamples[i].type == "data"){
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_lower_y_band_data->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_upper_y_band_data->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+      if(fVerbose>2) cout << "\tData lower, events found : "  <<  nevL << endl
+			  << "\t->Integral() : "  <<  h_ABCD_lower_y_band_data->Integral() + h_ABCD_lower_y_band_data->GetBinContent(nbins+1) << endl;
+      if(fVerbose>2) cout << "\tData upper, events found : "  <<  nevU << endl
+			  << "\t->Integral() : "  <<  h_ABCD_upper_y_band_data->Integral() + h_ABCD_upper_y_band_data->GetBinContent(nbins+1) << endl;
+    }
+    else if (fSamples[i].type == "mc" && fSamples[i].name == "QCD_Pt_120to170"){   // WARNING: checking statistical fluctuation in this pt bin!!!
+      variable  = TString::Format("%s:misc.MT2>>+%s",var.Data(),h_ABCD_MT2_qcd->GetName());
+      TString sel_u    = TString::Format("(%f) * (%s && misc.MT2<100&& %s)",weight,basecut.Data(),upper_cut.Data());
+      TString sel_l    = TString::Format("(%f) * (%s && misc.MT2<100&& %s)",weight,basecut.Data(),lower_cut.Data());
+      int nev2d= fSamples[i].tree->Draw(variable,selection,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_lower_y_band_qcd->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_l,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_upper_y_band_qcd->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_u,"goff");
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " lower, events found : "  <<  nevL << endl
+			  << "\t->Integral() : "  <<  h_ABCD_lower_y_band_qcd->Integral() + h_ABCD_lower_y_band_qcd->GetBinContent(nbins+1) << endl;
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " upper, events found : "  <<  nevU << endl
+			  << "\t->Integral() : "  <<  h_ABCD_upper_y_band_qcd->Integral() + h_ABCD_upper_y_band_qcd->GetBinContent(nbins+1) << endl;
+    }
+    else if (fSamples[i].type == "mc" && fSamples[i].sname == "QCD"){
+      variable  = TString::Format("%s:misc.MT2>>+%s",var.Data(),h_ABCD_MT2_qcd->GetName());
+      int nev2d= fSamples[i].tree->Draw(variable,selection,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_lower_y_band_qcd->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_upper_y_band_qcd->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " lower, events found : "  <<  nevL << endl
+			  << "\t->Integral() : "  <<  h_ABCD_lower_y_band_qcd->Integral() + h_ABCD_lower_y_band_qcd->GetBinContent(nbins+1) << endl;
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " upper, events found : "  <<  nevU << endl
+			  << "\t->Integral() : "  <<  h_ABCD_upper_y_band_qcd->Integral() + h_ABCD_upper_y_band_qcd->GetBinContent(nbins+1) << endl;
+    }
+    else if (fSamples[i].type == "mc"){
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_lower_y_band_mc->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_upper_y_band_mc->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " lower, events found : "  <<  nevL << endl
+			  << "\t->Integral() : "  <<  h_ABCD_lower_y_band_mc->Integral() + h_ABCD_lower_y_band_mc->GetBinContent(nbins+1) << endl;
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " upper, events found : "  <<  nevU << endl
+			  << "\t->Integral() : "  <<  h_ABCD_upper_y_band_mc->Integral() + h_ABCD_upper_y_band_mc->GetBinContent(nbins+1) << endl;
+    }
+    else if (fSamples[i].type == "susy"){
+      variable  = TString::Format("%s:misc.MT2>>+%s",var.Data(),h_ABCD_MT2_susy->GetName());
+      int nev2d= fSamples[i].tree->Draw(variable,selection,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_ABCD_upper_y_band_susy->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+      if(fVerbose>2) cout << "\t" << fSamples[i].name << " upper, events found : "  <<  nevU << endl
+			  << "\t->Integral() : "  <<  h_ABCD_upper_y_band_susy->Integral() + h_ABCD_upper_y_band_susy->GetBinContent(nbins+1) << endl;
+    }
+  }
+  
+  
+  h_ABCD_lower_y_band_sub->Add(h_ABCD_lower_y_band_data,h_ABCD_lower_y_band_mc,1,-1);
+  h_ABCD_upper_y_band_sub->Add(h_ABCD_upper_y_band_data,h_ABCD_upper_y_band_mc,1,-1);
 
-	for(size_t i = 0; i < fSamples.size(); ++i){
-		if(type  !="none"  && fSamples[i].type != type  ) continue;
-		if(sname !="none"  && fSamples[i].sname!= sname ) continue;
+  for (int i= 0; i<=nbins; i++){
+    if (h_ABCD_lower_y_band_sub->GetBinContent(i)<0)  h_ABCD_lower_y_band_sub->SetBinContent(i, 0.);
+    if (h_ABCD_upper_y_band_sub->GetBinContent(i)<0)  h_ABCD_upper_y_band_sub->SetBinContent(i, 0.);
+  }
 
-		fMT2tree = new MT2tree();
-		fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
-		Long64_t nentries =  fSamples[i].tree->GetEntries();
-		Long64_t nbytes = 0, nb = 0;
-		
-		Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
-		if(fVerbose>2) cout << "ABCD: looping over " << fSamples[i].sname << endl;
-		if(fVerbose>2) cout << "      sample has weight " << weight << endl; 
-		
-		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
-			
-			// cleaning & cuts
-			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
-			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
-			if( fMT2tree->NJets < NJetsCut )           continue;
-			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.MT2 <0)        continue;			
-			
-			// fill histo
-			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[0] && fMT2tree->misc.DPhiMhtMpt < ysplit[1] ){
-				h_ABCD_lower_y_band -> Fill(fMT2tree->misc.MT2, weight);
-				h_ABCD_MT2          -> Fill(fMT2tree->misc.MT2, fMT2tree->misc.DPhiMhtMpt, weight);
-			}
-			if(  fMT2tree->misc.DPhiMhtMpt > ysplit[2] && fMT2tree->misc.DPhiMhtMpt < ysplit[3] ){
-				h_ABCD_upper_y_band -> Fill(fMT2tree->misc.MT2, weight);
-				h_ABCD_MT2          -> Fill(fMT2tree->misc.MT2, fMT2tree->misc.DPhiMhtMpt, weight);
-			}
+  ratio_qcd ->Divide(h_ABCD_upper_y_band_qcd ,h_ABCD_lower_y_band_qcd );
+  ratio_data->Divide(h_ABCD_upper_y_band_data,h_ABCD_lower_y_band_data);
+  ratio_sub ->Divide(h_ABCD_upper_y_band_sub ,h_ABCD_lower_y_band_sub );
+  
+  h_ABCD_lower_y_band_data->SetLineColor(1);  h_ABCD_upper_y_band_data->SetLineColor(2);
+  h_ABCD_lower_y_band_qcd ->SetLineColor(1);  h_ABCD_upper_y_band_qcd ->SetLineColor(2);
+  h_ABCD_lower_y_band_sub ->SetLineColor(1);  h_ABCD_upper_y_band_sub ->SetLineColor(2);
+  h_ABCD_lower_y_band_sub ->SetLineStyle(3);  h_ABCD_upper_y_band_sub ->SetLineStyle(3);   ratio_sub->SetLineStyle(3);
+  ratio_qcd ->SetMarkerStyle(24);   ratio_qcd ->SetMarkerSize(0.8);
+  ratio_data->SetMarkerStyle(24);   ratio_data->SetMarkerSize(0.8);
+  ratio_sub ->SetMarkerStyle(24);   ratio_sub ->SetMarkerSize(0.8);
+  ratio_qcd ->SetXTitle("M_{T2}");   ratio_qcd ->SetYTitle("ratio");
+  ratio_sub ->SetXTitle("M_{T2}");   ratio_sub ->SetYTitle("ratio");
 
-		}
-		delete fMT2tree;
-	}
+  TF1 *f_qcd = new TF1("f_qcd","pol0(0)+expo(1)",bins[0], bins[nbins]);   f_qcd->SetLineColor(8);
+  TF1 *f_sub = new TF1("f_sub","pol0(0)+expo(1)",bins[0], bins[nbins]);   f_sub->SetLineColor(8);
 
-		
-	h_ABCD_upper_y_band->SetLineColor(kBlack);
-	h_ABCD_upper_y_band->SetLineStyle(kBlack);	
+  gStyle->SetPalette(1);
+  gStyle->SetOptFit (0);
 
-	h_ABCD_lower_y_band->SetMarkerStyle(1);
-	h_ABCD_lower_y_band->SetLineColor(kRed);
-	h_ABCD_lower_y_band->SetLineStyle(kDashed);
-	h_ABCD_lower_y_band->SetMarkerColor(kRed);
-	
-	// title and legend for ratio plot
- 	TLegend* Legend1 = new TLegend(.55,.6,.89,.88);
-	std::ostringstream o0, o1, o2, o3;
-	o0 << ysplit[0];
-	o1 << ysplit[1];
-	o2 << ysplit[2];
-	o3 << ysplit[3];
-	TString leg1 = "MT2 for DPhi(MPT, MHT) in ("+(TString) o0.str()+ ", " + (TString) o1.str() + ")"; 
-	TString leg2 = "MT2 for DPhi(MPT, MHT) in ("+(TString) o2.str()+ ", " + (TString) o3.str() + ")"; 
+  TCanvas *can = new TCanvas("can", "2d qcd", 0, 0, 900, 700);
+  can->SetLogz(1);
+  h_ABCD_MT2_qcd->SetMinimum(0.0001);
+  h_ABCD_MT2_qcd->Draw("colz");
+  TCanvas *ccan = new TCanvas("ccan", "2d susy", 0, 0, 900, 700);
+  ccan->SetLogz(1);
+  h_ABCD_MT2_susy->SetMinimum(0.0001);
+  h_ABCD_MT2_susy->Draw("colz");
+  TCanvas *can2 = new TCanvas("can2", "qcd", 0, 0, 900, 700);
+  can2->SetLogy(1);
+  h_ABCD_lower_y_band_qcd ->Draw();  
+  h_ABCD_upper_y_band_qcd ->Draw("same");
+  TCanvas *can3 = new TCanvas("can3", "data w/ and w/o substraction", 0, 0, 900, 700);
+  can3->SetLogy(1);
+  h_ABCD_lower_y_band_data->Draw();  
+  h_ABCD_upper_y_band_data->Draw("same");
+  h_ABCD_lower_y_band_sub ->Draw("same");  
+  h_ABCD_upper_y_band_sub ->Draw("same");
+  TCanvas *can4 = new TCanvas("can4", "ratio qcd", 0, 0, 900, 700);
+  can4->SetLogy(1);
+  ratio_qcd->Draw("E1");
+  f_qcd->FixParameter(0,0.006);
+  ratio_qcd->Fit("f_qcd","0","",fit_min,fit_max);
+  f_qcd->Draw("same");
+  TLine *l_qcd_min = new TLine(fit_min,f_qcd->GetYaxis()->GetXmin(),fit_min,f_qcd->GetMaximum()); l_qcd_min->SetLineStyle(2); l_qcd_min->Draw("same");
+  TLine *l_qcd_max = new TLine(fit_max,f_qcd->GetYaxis()->GetXmin(),fit_max,f_qcd->GetMaximum()); l_qcd_max->SetLineStyle(2); l_qcd_max->Draw("same");
 
-	Legend1 -> AddEntry(h_ABCD_lower_y_band, leg1 , "l");	
-	Legend1 -> AddEntry(h_ABCD_upper_y_band, leg2 , "l");	
-	
-	TString xtitle = "MT2 (GeV)";
-	TString ytitle = "events (normalized)";
+  TCanvas *can5 = new TCanvas("can5", "ratio data", 0, 0, 900, 700);
+  can5->SetLogy(1);
+  ratio_sub ->Draw("PE1");
+  ratio_data->Draw("sameE1");
+  //float p0 = f_qcd->GetParameter(0);
+  f_sub->FixParameter(0,0.006);
+  ratio_sub->Fit("f_sub","0","",fit_min,fit_max);
+  f_sub->Draw("same");
+  TLine *l_sub_min = new TLine(fit_min,f_sub->GetYaxis()->GetXmin(),fit_min,f_sub->GetMaximum()); l_sub_min->SetLineStyle(2); l_sub_min->Draw("same");
+  TLine *l_sub_max = new TLine(fit_max,f_sub->GetYaxis()->GetXmin(),fit_max,f_sub->GetMaximum()); l_sub_max->SetLineStyle(2); l_sub_max->Draw("same");
 
-	// make plots
-	printHisto(h_ABCD_MT2         ,   "MT2_pseudojet_vs_"+branch_name+"_"+version                , "colz", false);
-	printHisto(h_ABCD_lower_y_band,   "MT2_pseudojet_vs_"+branch_name+"_"+version+"_lower_y_band", "hist", true);
-	printHisto(h_ABCD_upper_y_band,   "MT2_pseudojet_vs_"+branch_name+"_"+version+"_upper_y_band", "hist", true);
 
-	plotRatio(h_ABCD_lower_y_band, h_ABCD_upper_y_band, true, false, "MT2_pseudojet_vs_"+branch_name+"_"+version, Legend1, xtitle, ytitle);
-
-	delete h_ABCD_MT2;
-	delete h_ABCD_lower_y_band;
-	delete h_ABCD_upper_y_band;
-
+  PrintABCDPredictions(var, basecut, upper_cut, lower_cut, f_qcd,f_sub);
+  
 }
 
+//_________________________________________________________________________________
+void MassPlotter::PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub){  
+  TH1D *h_pred_lower_y_band_data = new TH1D("pred_lower_y_band_"+var+"_data" , "", 180,100,1000);		        h_pred_lower_y_band_data->Sumw2();
+  TH1D *h_pred_upper_y_band_data = new TH1D("pred_upper_y_band_"+var+"_data" , "", 180,100,1000);		        h_pred_upper_y_band_data->Sumw2();
+  TH1D *h_pred_lower_y_band_qcd  = new TH1D("pred_lower_y_band_"+var+"_qcd"  , "", 180,100,1000);		        h_pred_lower_y_band_qcd ->Sumw2();
+  TH1D *h_pred_upper_y_band_qcd  = new TH1D("pred_upper_y_band_"+var+"_qcd"  , "", 180,100,1000);		        h_pred_upper_y_band_qcd ->Sumw2();
+  TH1D *h_pred_lower_y_band_mc   = new TH1D("pred_lower_y_band_"+var+"_mc"   , "", 180,100,1000);		        h_pred_lower_y_band_mc  ->Sumw2();
+  TH1D *h_pred_upper_y_band_mc   = new TH1D("pred_upper_y_band_"+var+"_mc"   , "", 180,100,1000);		        h_pred_upper_y_band_mc  ->Sumw2();
+  TH1D *h_pred_lower_y_band_sub  = new TH1D("pred_lower_y_band_"+var+"_sub"  , "", 180,100,1000);		        h_pred_lower_y_band_sub ->Sumw2();
+  TH1D *h_pred_upper_y_band_sub  = new TH1D("pred_upper_y_band_"+var+"_sub"  , "", 180,100,1000);		        h_pred_upper_y_band_sub ->Sumw2();
+  TF1 *f_qcd = new TF1("f_qcd","pol0(0)+expo(1)",100,1000);
+  TF1 *f_sub = new TF1("f_sub","pol0(0)+expo(1)",100,1000);
+  f_qcd->SetParameters(func_qcd->GetParameter(0),func_qcd->GetParameter(1),func_qcd->GetParameter(2));
+  f_sub->SetParameters(func_sub->GetParameter(0),func_sub->GetParameter(1),func_sub->GetParameter(2));
+
+  for(size_t i = 0; i < fSamples.size(); ++i){
+   
+    Long64_t nentries =  fSamples[i].tree->GetEntries();
+    Long64_t nbytes = 0, nb = 0;
+    
+    Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
+    if(fVerbose>2) cout << "ABCD: looping over " << fSamples[i].name << endl;
+    if(fVerbose>2) cout << "      sample has weight " << weight << endl; 
+
+    TString selection = TString::Format("(%f) * (%s)"      ,weight,basecut.Data());
+    TString sel_up    = TString::Format("(%f) * (%s && %s)",weight,basecut.Data(),upper_cut.Data());
+    TString sel_lo    = TString::Format("(%f) * (%s && %s)",weight,basecut.Data(),lower_cut.Data());
+
+    TString variable;
+    TString var2 = "misc.MT2";
+    if (fSamples[i].type == "data"){
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_lower_y_band_data->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_upper_y_band_data->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+    }
+    else if (fSamples[i].type == "mc" && fSamples[i].name == "QCD_Pt_120to170"){   // WARNING: checking statistical fluctuation in this pt bin!!!
+      TString sel_u    = TString::Format("(%f) * (%s && misc.MT2<100&& %s)",weight,basecut.Data(),upper_cut.Data());
+      TString sel_l    = TString::Format("(%f) * (%s && misc.MT2<100&& %s)",weight,basecut.Data(),lower_cut.Data());
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_lower_y_band_qcd->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_l,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_upper_y_band_qcd->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_u,"goff");
+    }
+    else if (fSamples[i].type == "mc" && fSamples[i].sname == "QCD"){
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_lower_y_band_qcd->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_upper_y_band_qcd->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+    }
+    else if (fSamples[i].type == "mc"){
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_lower_y_band_mc->GetName());
+      int nevL = fSamples[i].tree->Draw(variable,sel_lo,"goff");
+      variable  = TString::Format("%s>>+%s",var2.Data(),h_pred_upper_y_band_mc->GetName());
+      int nevU = fSamples[i].tree->Draw(variable,sel_up,"goff");
+    }
+  }
+  
+  
+  h_pred_lower_y_band_sub->Add(h_pred_lower_y_band_data,h_pred_lower_y_band_mc,1,-1);
+  h_pred_upper_y_band_sub->Add(h_pred_upper_y_band_data,h_pred_upper_y_band_mc,1,-1);
+
+  for (int i= 0; i<=181; i++){
+    if (h_pred_lower_y_band_sub->GetBinContent(i)<0)  h_pred_lower_y_band_sub->SetBinContent(i, 0.);
+    if (h_pred_upper_y_band_sub->GetBinContent(i)<0)  h_pred_upper_y_band_sub->SetBinContent(i, 0.);
+  }
+
+  TH1D *h_pred_lower_y_band_data_2 = (TH1D*)h_pred_lower_y_band_data->Clone("h_pred_lower_y_band_data_2");       h_pred_lower_y_band_data->Sumw2();
+  TH1D *h_pred_lower_y_band_qcd_2  = (TH1D*)h_pred_lower_y_band_qcd ->Clone("h_pred_lower_y_band_qcd_2" );       h_pred_lower_y_band_qcd ->Sumw2();
+  TH1D *h_pred_lower_y_band_sub_2  = (TH1D*)h_pred_lower_y_band_sub ->Clone("h_pred_lower_y_band_sub_2" );       h_pred_lower_y_band_sub ->Sumw2();
+
+  h_pred_lower_y_band_data  ->Multiply(f_qcd);
+  h_pred_lower_y_band_qcd   ->Multiply(f_qcd);
+  h_pred_lower_y_band_sub   ->Multiply(f_qcd);
+  h_pred_lower_y_band_data_2->Multiply(f_sub);
+  h_pred_lower_y_band_qcd_2 ->Multiply(f_sub);
+  h_pred_lower_y_band_sub_2 ->Multiply(f_sub);
+
+  double yield;
+  double error;
+  cout << "QCD prediction:" << endl;
+  yield = Util::IntegralAndError(h_pred_upper_y_band_qcd, 1,181, error);
+  cout << "MT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_upper_y_band_qcd,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_upper_y_band_qcd,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from QCD (fit to QCD):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from QCD (fit to data):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd_2, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd_2,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_qcd_2,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from data (fit to QCD):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from data (fit to data):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data_2, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data_2,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_data_2,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from EWK subtracted data (fit to QCD):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+  cout << "QCD estimation from EWK subtracted data (fit to data):" << endl;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub_2, 1,181, error);
+  cout << "\tMT2>100 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub_2,11,181, error);
+  cout << "\tMT2>150 = " << yield  << " +/- " << error;
+  yield = Util::IntegralAndError(h_pred_lower_y_band_sub_2,21,181, error);
+  cout << "\tMT2>200 = " << yield  << " +/- " << error << endl
+       << "------------------------------------" << endl;
+
+}
 
 
 //_________________________________________________________________________________
@@ -1810,9 +2033,11 @@ void MassPlotter::printHisto(THStack* h, TH1* h_data, TH1* h_mc_sum, TLegend* le
 	double max  = (max1>max2)?max1:max2;
 	if(logflag) max = 2*max;
 	else max = 1.05*max;
-	h_data  ->SetMaximum(max);
-	h_mc_sum->SetMaximum(max);
-	h       ->SetMaximum(max);
+	if(stacked){
+	  h_data  ->SetMaximum(max);
+	  h_mc_sum->SetMaximum(max);
+	  h       ->SetMaximum(max);
+	}
 
 	h->Draw(stacked ? drawopt : "histnostack");
 	//h_mc_sum -> Draw("same, E2");

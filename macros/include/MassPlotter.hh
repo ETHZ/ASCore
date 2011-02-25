@@ -51,6 +51,7 @@ static const int    PrintRunLumiEvt=1;
 	
 
 
+
 //________________________________________________________________________________
 class MassPlotter  {
 
@@ -99,11 +100,19 @@ public:
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
+        void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
+		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
+		      const int nbins=100, const double min=0., const double max=380., double fit_min=40., double fit_max=100.);
+        void ABCD_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
+		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
+		      const int nbins=gNMT2bins, const double *bins=gMT2bins, double fit_min=40., double fit_max=100.);
+
 	void PrintZllEfficiency(sample Sample, bool data, std::string lept );
 	void CompSamples(TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 	void compSamples(TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double min, const double max, bool add_underflow, bool logflag, double scale_factor, bool normalize);
+
 private:
 
 	TString fOutputDir;
@@ -117,7 +126,9 @@ private:
 	MT2tree* fMT2tree;
 	TTree*   fTree;
 
+
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
+        void PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
 		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0, const double max=1, 
@@ -135,8 +146,6 @@ private:
         void printHisto(THStack* h, TH1* h_data, TH1* h_prediction, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle,int njets=-2, int nleps=0, bool stacked=true);
 	void printHisto(THStack* h, TH1* h_data, TH1* h_prediction, TH1* h_susy, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle,int njets=-2, int nleps=0, float overlayScale=0);
 	void printHisto(TH1* h, TString canvname, Option_t *drawopt, bool logflag);
-	void ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], bool cleaned, TString sname, TString type);
-	void ABCD_MT2(TString branch_name, double ysplit[], TString option, const int nbins, const double bins[], TString version, bool cleaned, TString sname, TString type);
 	void plotRatio(TH1* h1, TH1* h2, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle);
 	void plotRatioStack(THStack* hstack, TH1* h1, TH1* h2, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle,int njets=-2, int nleps=0);
 	void plotRatioStack(THStack* hstack, TH1* h1, TH1* h2, TH1* h3, bool logflag, bool normalize, TString name, TLegend* leg, TString xtitle, TString ytitle,int njets=-2, int nleps=0, float overlayScale=0);
