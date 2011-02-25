@@ -14,6 +14,7 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TFile.h"
+#include "TH1.h"
 
 
 namespace Util {
@@ -261,6 +262,18 @@ namespace Util {
       pos = answer.find_first_of(excluded);
     }    
     return answer;
+  }
+  //__________________________________________________________________________
+  inline double IntegralAndError(TH1 *hist, int bin1, int bin2, double &err){  // not implemented before ROOT v2.26
+    double_t integral = 0;
+    double_t igerr2 = 0;
+    for (Int_t bin = bin1; bin <= bin2; ++bin) {
+      integral += hist->GetBinContent(bin);
+      igerr2   += hist->GetBinError(bin)*hist->GetBinError(bin);
+      
+    }
+    err = TMath::Sqrt(igerr2);
+    return integral;
   }
 }
 
