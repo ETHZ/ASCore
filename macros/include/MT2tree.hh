@@ -189,10 +189,12 @@ public:
   // NJets
   Int_t    GetNjets (double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
   Int_t    GetJetIndex(int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Int_t    GetJetIndexByEta(int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
   Int_t    GetNBtags (int algo=3, double value=2., double minJPt=20, double maxJEta=2.4, int PFJID=1);  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
   Double_t JetPt      (int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
 
-  // MHT, ...
+  // HT, MHT, ...
+  Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
   TLorentzVector GetMHTlv(int PFJID=1, double minJPt=20, double maxJEta=2.4);
   Double_t GetMHT        (int PFJID=1, double minJPt=20, double maxJEta=2.4);
   Double_t GetMHTPhi     (int PFJID=1, double minJPt=20, double maxJEta=2.4);
@@ -205,6 +207,8 @@ public:
   Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MaxMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Int_t    MaxMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, 
 		                   int PFJID=1, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
@@ -218,7 +222,9 @@ public:
   Double_t GetMT2HemiNoISR(bool massive = false, int hemi_seed=4, int hemi_association=2, float MaxDR=0, int met=1);
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
+  Double_t SimpleMT2(bool pseudo=true);
   Double_t GetMCT(bool massive=false, int met=1);
+  Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=1, double minJPt=20, double maxJEta=2.4,int met=1);
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);

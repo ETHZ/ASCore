@@ -373,6 +373,42 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
   return imin;
 }
 
+Double_t MT2tree::MaxMetJetDPhi(int PFJID, double minJPt, double maxJEta, int met) {
+// Attention: electrons and muons are not considered for minDPhi
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
+  int index = MaxMetJetDPhiIndex(PFJID, minJPt, maxJEta, met);
+  return TMath::Abs(jet[index].lv.DeltaPhi(MET));
+}
+
+Int_t MT2tree::MaxMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int met) {
+// Attention: electrons and muons are not considered for minDPhi
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
+  std::vector<int> indices;
+  for(int i = 0; i<NJets; ++i){
+	if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+	indices.push_back(i);
+  }
+  if(indices.size()<1)  return -999;
+  Double_t maxDPhi=0.;
+  Int_t    imax;
+  for (int i=0; i<indices.size(); i++){
+    Double_t dphi = TMath::Abs(jet[indices[i]].lv.DeltaPhi(MET));
+    if(dphi>maxDPhi)  {
+      maxDPhi=dphi;
+      imax = indices[i];
+    }
+  }
+  return imax;
+}
+
 Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
   int njets=0;
   for(int i=0; i<NJets; ++i){
@@ -422,6 +458,28 @@ Int_t MT2tree::GetJetIndex(int ijet, int PFJID, double minJPt, double maxJEta) {
   }
   if (ijet>=indices.size())  return -9;
   return indices[ijet];
+}
+
+Int_t MT2tree::GetJetIndexByEta(int ijet, int PFJID, double minJPt, double maxJEta) {
+  std::vector<int> indices, indx;
+  std::vector<double> etas;
+  for(int i = 0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    indices.push_back(i);
+    etas.push_back(fabs(jet[i].lv.Eta()));
+  }
+  if (ijet>=indices.size())  return -9;
+  indx = Util::VSort(indices,etas,true);
+  return indx[ijet];
+}
+
+Double_t MT2tree::GetHT(int PFJID, double minJPt, double maxJEta){
+  Double_t ht=0;
+  for(int i = 0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    ht+=jet[i].lv.Pt();
+  }
+  return ht;
 }
 
 TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
@@ -610,7 +668,7 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
-	 E.push_back(jet[i].lv.E());
+	E .push_back(jet[i].lv.E ());
   }
 		
   if (px.size()<2) return -999;
@@ -729,6 +787,17 @@ Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1
 
 }
 
+Double_t MT2tree::SimpleMT2(bool pseudo){
+  if (!pseudo){
+    if(NJets < 2) return -999.99;
+    return sqrt(2*jet[0].lv.Pt()*jet[1].lv.Pt()*(1+TMath::Cos(jet[0].lv.DeltaPhi(jet[1].lv))));
+  }
+  else{
+    if(NJetsIDLoose < 2) return -999.99;
+    return sqrt(2*hemi[0].lv1.Pt()*hemi[0].lv2.Pt()*(1+TMath::Cos(hemi[0].lv1.DeltaPhi(hemi[0].lv2))));
+  }
+}
+
 Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
@@ -749,6 +818,30 @@ Double_t MT2tree::GetMCT(bool massive, int met) { // FIXME!!
   Double_t MCT =  mct -> mctcorr(p1, p2, DTM, pmiss, 7000, 0.);
   delete mct;
   return -999.99;
+}
+
+Double_t MT2tree::GetSqrtS(double testmass, bool massive, int PFJID, double minJPt, double maxJEta,int met){
+  TLorentzVector MET(0., 0., 0., 0.);
+  if(met==1)      MET = pfmet[0];
+  else if(met==2) MET = MHTloose[0];
+  else            return -999;
+
+  TLorentzVector obj(0,0,0,0);
+  TLorentzVector vis(0,0,0,0);
+  for(int i = 0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    obj.SetPtEtaPhiM(jet[i].lv.Pt(),jet[i].lv.Eta(),jet[i].lv.Phi(),massive ? jet[i].lv.M() : 0);
+    vis+=obj;
+  }
+  for(int i = 0; i<NEles; ++i){
+    obj.SetPtEtaPhiM(ele[i].lv.Pt(),ele[i].lv.Eta(),ele[i].lv.Phi(),ele[i].lv.M());
+    vis+=obj;
+  }
+  for(int i = 0; i<NMuons; ++i){
+    obj.SetPtEtaPhiM(muo[i].lv.Pt(),muo[i].lv.Eta(),muo[i].lv.Phi(),muo[i].lv.M());
+    vis+=obj;
+  }
+  return sqrt(TMath::Power(vis.M(),2)+TMath::Power(vis.Pt(),2)) + sqrt(TMath::Power(2*testmass,2)+TMath::Power(MET.Pt(),2));
 }
 
 Double_t MT2tree::GetPseudoJetsdPhi(int hemi_seed, int hemi_association, int PFJID, double minJPt, double maxJEta){
