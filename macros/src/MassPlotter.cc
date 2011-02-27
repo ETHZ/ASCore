@@ -85,6 +85,9 @@ void MassPlotter::init(TString filename){
 	//Util::SetStyle();
 	loadSamples(filename);
 
+	// map for Z->nunu plots
+	// to be used for Z->nunu           to be used for Z->ll
+	RemoveLeptMap["pfmet[0].Pt()"]       = "GetMETPlusLepts(1)";
 }
 
 //___________________________________________________________________________
@@ -113,70 +116,8 @@ void MassPlotter::makePlots(){
 	MakeMT2PredictionAndPlots(false, dPhisplit, 2.5);  // not cleaned, fudgefactor 2
 }
 
-// _________________________________________________________________________
-void MassPlotter::makeZnunu(){
-	// get samples
-	vector<sample> Samples;
-	cout << fSamples.size() << endl;
-	for(int i=0; i<fSamples.size(); ++i){
-	//	if(fSamples[i].sname=="DYToLL"           )   Samples.push_back(fSamples[i]); 
-	//	if(fSamples[i].sname=="DYToNuNu"         ) Samples.push_back(fSamples[i]); 
-		if(fSamples[i].sname.Contains("QCD")     ) Samples.push_back(fSamples[i]); 
-	}
-	
-	// -------------
-	// reco and geom efficiency
-	for(int i=0; i<fSamples.size(); ++i){
-//		if(fSamples[i].type =="data"    )     PrintZllEfficiency(fSamples[i], true, "ele");
-//		if(fSamples[i].sname=="DYToLL")       PrintZllEfficiency(fSamples[i], false, "ele");	
-//		if(fSamples[i].sname=="DYToNuNu")     PrintZllEfficiency(fSamples[i], false, "neutrinos");	
-	}
-
-	// --------------
-	// comparing Z->nunu with Z->ll
-	std::ostringstream cutStream;
-	cutStream  
-		  << "misc.HT       >300"                           << "&&"
-	//	  << "misc.MET      >30"                            << "&&"
-		  << "misc.Jet0Pass == 1"                           << "&&"
-		  << "misc.Jet1Pass == 1"                           << "&&"
-		  << "misc.PassJetID == 1"                          << "&&"
-	//	  << "misc.Vectorsumpt<70"                          << "&&"
-	//	  << "misc.MinMetJetDPhi>0.3"                       << "&&" 
-	//	  << "misc.EcalDeadCellBEFlag==1"                   << "&&"
-		  << "misc.HBHENoiseFlag == 1"                   ;
-	
-	TString cuts = cutStream.str().c_str();
-
-	// declare a few maps	
-	// to be used for Z->nunu                               to be used for Z->ll
-	RemoveLeptMap["GetMT2Hemi(0,false,1,20,3,1)"]                = "GetMT2Hemi(0,false,1,20,3,3)";
-//	RemoveLeptMap["misc.MET"]                                    = "GetMETPlusLepts(1)";
-//	RemoveLeptMap["pfmet[0].Pt()"]                               = "GetDiLeptonPt()";
-	RemoveLeptMap["pfmet[0].Pt()"]                               = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)";
-	RemoveLeptMap["misc.MET"]                                    = "GetMHT(0,15,5)";
-	RemoveLeptMap["GetMHT(0,20,5)"]                              = "GetMHT(0,20,3)";
-	RemoveLeptMap["MinMetJetDPhi(0,20,2.4,1)"]                   = "MinMetJetDPhi(0,20,2.4,2)";
-	RemoveLeptMap["GetPseudoJetsMETmindPhi(2,3,0,20,2.4,1)"]     = "GetPseudoJetsMETmindPhi(2,3,0,20,2.4,2)";
-
-	TString isZtoll    = "GetDiLeptonInvMass(0,1,0,10,true) > 60 && GetDiLeptonInvMass(0,1,0,10,true) < 120";
-	TString removed_ee = "GetMETPlusGenLepts(0,1,1,1113,23,0,100,0,10000)>=0";
-	TString isZtoll2   = "GetDiLeptonPt()>-1";
-//                            variable for Z->nunu                     cuts,  optcut, replace_cut   xtitle        bins                 add_underflow   logflag  scale_factor normalized
-//	CompSamples(Samples, "NJetsIDLoose",                           cuts, isZtoll,       false,      "NJetsIDLoose", 10 , 0 , 10,         false,          true,    1,           true);
-//	CompSamples(Samples, "misc.HT"     ,                           cuts, "_",           false,      "HT"          , 50, 50, 500,         false,          true,    1,           true);
-//	CompSamples(Samples, "GetGenMET(0,1,14,23,10,2.4,60,120)",     cuts, "_",           true,       "GetMET"      , gNMT2bins, gMT2bins, false,          true,    1,           true);
-//	CompSamples(Samples, "GetMHT(1,20,2.4)"                  ,     cuts, isZtoll,       false,      "MHT"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
-//	CompSamples(Samples, "pfmet[0].Pt()"                     ,     cuts, removed_ee,    true,       "MET"         , gNMT2bins, gMT2bins, false,          true,    1,           true);
-//	CompSamples(Samples, "pfmet[0].Pt()"                     ,     cuts, removed_ee,    true,       "MET"         , 100, 0, 500        , false,          true,    1,           true);
-//	CompSamples(Samples, "GetMT2Hemi(0,false,1,20,3,1)"      ,     cuts, "_",           true,       "MT2"         , gNMT2bins, gMT2bins ,false,          true,    1,           true);
-	CompSamples(Samples, "GetPseudoJetsMETmindPhi(2,3,0,20,2.4,1)",cuts, "_",           true,       "minJetMETdPhi" ,50,        0, 3.2  ,false,          true,    1,           true);
-	
-}
-
 
 //__________________________________________________________________________
-
 void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor){
 	TString cleanflag;
 	if(cleaned) cleanflag="cleaned";
@@ -253,8 +194,8 @@ void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TStr
 }
 
 // ________________________________________________________________________
-void MassPlotter::PrintZllEfficiency(sample Sample , bool data, std::string lept){
-	Long64_t nevents=1000000000;
+void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass){
+	sample Sample = fSamples[sample_index];
 
       	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
 	cout << "printing kinetic & geom. acceptance for Z->ll for sample: \n"
@@ -265,10 +206,11 @@ void MassPlotter::PrintZllEfficiency(sample Sample , bool data, std::string lept
  	Monitor counters[count_end];
 	TString lablx[count_end] = {"all events", "presel", "Cal_Noise", "VectorSumPt", "PassJetID", "MinMetJetDPhi", "MET"};
 
-	int pid, flavour; 
-	if(lept == "ele" )            {pid = 11; flavour = 1;} 
-	else if(lept == "muo" )       {pid = 13; flavour = 2;} 
-	else if(lept != "neutrinos")  {cout << "choose appropriate lepton flavour" << endl; return;}
+	int pid=-1, flavour=-1; 
+	string to_measure;
+	if(lept == "ele" )            {pid = 11; flavour = 1; to_measure = "Zee recoed";} 
+	else if(lept == "muo" )       {pid = 13; flavour = 2; to_measure = "Zmumu recoed";} 
+	else if(lept == "neutrinos")  {pid = 12; flavour = 0; to_measure = "Znunu within acceptance";}
 
     	fMT2tree = new MT2tree();
     	Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
@@ -282,58 +224,86 @@ void MassPlotter::PrintZllEfficiency(sample Sample , bool data, std::string lept
 
 		// check if event has Z->e+e- within acceptance	
 		
-		bool Zee(false);         
-		bool ZeeAccepted(false); 
-		bool ZeeReco(false); 
-		if(! data) Zee              = fMT2tree->IsGenOSDiLepton(pid,23,0,10,0,10000);
-		if(  data) Zee              = (fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) > 60 && fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) < 120);
-		if(! data) ZeeAccepted      = fMT2tree->IsGenOSDiLepton(pid,23,10,2.4,60,120);
-		if(! data) ZeeReco          = (fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) > 60 && fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) < 120);
-		if(lept=="neutrinos"){ Zee  = true;}
+		bool Zll(false);         
+		bool ZllSelect(false); 
+		bool ZllGood(false); 
+		if(  data) Zll              = (fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) > 71 && fMT2tree->GetDiLeptonInvMass(0,1,flavour,10,1) < 111);
+		if(! data){ 
+			if     (pid ==11) {
+				ZllSelect =   (fMT2tree->Znunu.GenZee_mll_acc   > lower_mass && fMT2tree->Znunu.GenZee_mll_acc   < upper_mass  );
+				ZllGood     = (fMT2tree->Znunu.RecoOSee_mll     > lower_mass && fMT2tree->Znunu.RecoOSee_mll     < upper_mass  && ZllSelect );
+			}else if(pid ==13) {
+				ZllSelect =   (fMT2tree->Znunu.GenZmumu_mll_acc > lower_mass && fMT2tree->Znunu.GenZmumu_mll_acc < upper_mass  );
+				ZllGood     = (fMT2tree->Znunu.RecoOSmumu_mll   > lower_mass && fMT2tree->Znunu.RecoOSmumu_mll   < upper_mass  && ZllSelect  );
+			}else if(lept=="neutrinos"){
+				ZllSelect   =  ((fMT2tree->Znunu.GenZnunu_e_mll        > lower_mass && fMT2tree->Znunu.GenZnunu_e_mll    < upper_mass)  || 
+					 	(fMT2tree->Znunu.GenZnunu_mu_mll       > lower_mass && fMT2tree->Znunu.GenZnunu_mu_mll   < upper_mass)  ||  
+					        (fMT2tree->Znunu.GenZnunu_tau_mll      > lower_mass && fMT2tree->Znunu.GenZnunu_tau_mll  < upper_mass));	
+				ZllGood     =  ((fMT2tree->Znunu.GenZnunu_e_mll_acc    > lower_mass && fMT2tree->Znunu.GenZnunu_e_mll_acc    < upper_mass)  || 
+					 	(fMT2tree->Znunu.GenZnunu_mu_mll_acc   > lower_mass && fMT2tree->Znunu.GenZnunu_mu_mll_acc   < upper_mass)  ||  
+					        (fMT2tree->Znunu.GenZnunu_tau_mll_acc  > lower_mass && fMT2tree->Znunu.GenZnunu_tau_mll_acc  < upper_mass));	
+			}else {cout << "choose appropriate lepton" << endl; return;}
+
+		}
 
 		// all events
-		if(Zee)         counters[all].fill("all events");
-		if(ZeeAccepted) counters[all].fill("Zee within acceptance");
-		if(ZeeReco)     counters[all].fill("Zee Reco");
+		if(ZllSelect)   counters[all].fill("all events");
+		if(ZllGood    ) counters[all].fill(to_measure);
 		
 		// presel
-		if(fMT2tree->misc.HT  < 300)             continue;
-		if(fMT2tree->misc.Jet0Pass  ==0       )  continue;
-		if(fMT2tree->misc.Jet1Pass  ==0       )  continue;
-		if(Zee)         counters[presel].fill("presel");
-		if(ZeeAccepted) counters[presel].fill("Zee within acceptance");
-		if(ZeeReco)     counters[presel].fill("Zee Reco");
+		if(pid == 11 || pid == 13){
+			if(fMT2tree->Znunu.HTmatched              <300    )  continue;
+			if(fMT2tree->Znunu.Jet0Pass_matched       ==0     )  continue;
+			if(fMT2tree->Znunu.Jet1Pass_matched       ==0     )  continue;
+		} else if(lept == "neutrinos"){
+			if(fMT2tree->misc.HT                      <300    )  continue;
+			if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
+			if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
+		}
+		if(ZllSelect)   counters[presel].fill("presel");
+		if(ZllGood    ) counters[presel].fill(to_measure);
 		
 		// ECAL HCAL Noise
-		if(fMT2tree->misc.EcalDeadCellBEFlag  == 0)  continue;
-		if(fMT2tree->misc.HBHENoiseFlag       == 0)  continue;
-		if(Zee)         counters[HCAL_ECAL_noise].fill("Cal_Noise");
-		if(ZeeAccepted) counters[HCAL_ECAL_noise].fill("Zee within acceptance");
-		if(ZeeReco)     counters[HCAL_ECAL_noise].fill("Zee Reco");
+		if(fMT2tree->misc.EcalDeadCellBEFlag              ==0     )  continue;
+		if(fMT2tree->misc.HBHENoiseFlag                   ==0     )  continue;
+		if(ZllSelect)   counters[HCAL_ECAL_noise].fill("Cal_Noise");
+		if(ZllGood    ) counters[HCAL_ECAL_noise].fill(to_measure);
 		
 		// VectorSumPt
-		if(fMT2tree->misc.Vectorsumpt  > 70       )  continue;
-		if(Zee)         counters[VectorSumPt].fill("VectorSumPt");
-		if(ZeeAccepted) counters[VectorSumPt].fill("Zee within acceptance");
-		if(ZeeReco)     counters[VectorSumPt].fill("Zee Reco");
+		if(pid == 11 || pid == 13){
+			if(fMT2tree->Znunu.Vectorsumpt_matched    >70     )  continue;
+		} else if(lept == "neutrinos"){
+			if(fMT2tree->misc.Vectorsumpt             >70     )  continue;
+		}
+		if(ZllSelect)   counters[VectorSumPt].fill("VectorSumPt");
+		if(ZllGood    ) counters[VectorSumPt].fill(to_measure);
 		
 		// PassJetID
-		if(fMT2tree->misc.PassJetID  ==0      )  continue;
-		if(Zee)         counters[PassJetID].fill("PassJetID");
-		if(ZeeAccepted) counters[PassJetID].fill("Zee within acceptance");
-		if(ZeeReco)     counters[PassJetID].fill("Zee Reco");
+		if(pid ==11 || pid == 13){
+			if(fMT2tree->Znunu.PassJetID_matched      ==0     ) continue;
+		}else if (lept == "neutrinos"){
+			if(fMT2tree->misc.PassJetID               ==0     ) continue;
+		}
+		if(ZllSelect)   counters[PassJetID].fill("PassJetID");
+		if(ZllGood    ) counters[PassJetID].fill(to_measure);
 		
 		// MinMetJetDPhi
-		if(fMT2tree->misc.MinMetJetDPhi  <0.3      )  continue;
-		if(Zee)         counters[MinMetJetDPhi].fill("MinMetJetDPhi");
-		if(ZeeAccepted) counters[MinMetJetDPhi].fill("Zee within acceptance");
-		if(ZeeReco)     counters[MinMetJetDPhi].fill("Zee Reco");
+		if(pid ==11 || pid == 13){
+			if(fMT2tree->Znunu.MinMetplusLeptJetDPhi  <0.3    )  continue;
+		}else if (lept == "neutrinos"){
+			if(fMT2tree->misc.MinMetJetDPhi           <0.3    )  continue;
+		}
+		if(ZllSelect)   counters[MinMetJetDPhi].fill("MinMetJetDPhi");
+		if(ZllGood    ) counters[MinMetJetDPhi].fill(to_measure);
 		
 		// MET
-		if(fMT2tree->misc.MET<30                   )  continue;
-		if(Zee)         counters[MET].fill("MET");
-		if(ZeeAccepted) counters[MET].fill("Zee within acceptance");
-		if(ZeeReco)     counters[MET].fill("Zee Reco");
+		if(pid ==11 || pid == 13){
+			if(fMT2tree->Znunu.METplusLeptsPt         < 30    ) continue;
+		}else if (lept == "neutrinos"){
+			if(fMT2tree->misc.MET                     < 30    )  continue;
+		}
+		if(ZllSelect)   counters[MET].fill("MET");
+		if(ZllGood    ) counters[MET].fill(to_measure);
       	}
 
 	// print stats     
@@ -349,47 +319,44 @@ void MassPlotter::PrintZllEfficiency(sample Sample , bool data, std::string lept
 	if(data) return;
 
 	// fill histo
-	TH1D* h_Zaccept_num = new TH1D("h_Zaccept_num", "", count_end, 0., (double) count_end );
-	TH1D* h_Zaccept_den = new TH1D("h_Zaccept_den", "", count_end, 0., (double) count_end );
-	TH1D* h_Zaccept     = new TH1D("h_Zaccept"    , "", count_end, 0., (double) count_end );
-	TH1D* h_ZReco_num   = new TH1D("h_ZReco_num"  , "", count_end, 0., (double) count_end );
-	TH1D* h_ZReco_den   = new TH1D("h_ZReco_den"  , "", count_end, 0., (double) count_end );
-	TH1D* h_ZReco       = new TH1D("h_ZReco"      , "", count_end, 0., (double) count_end );
+	TH1D* h_Z_num = new TH1D("h_Z_num", "", count_end, 0., (double) count_end );
+	TH1D* h_Z_den = new TH1D("h_Z_den", "", count_end, 0., (double) count_end );
+	TH1D* h_Z     = new TH1D("h_Z"    , "", count_end, 0., (double) count_end );
 	for(int i=0; i<count_end; ++i){
-		h_Zaccept    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
-		h_Zaccept_num->SetBinContent(i+1,counters[i].counts("Zee within acceptance"));
-		h_Zaccept_den->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
-		h_ZReco      ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
-		h_ZReco_num  ->SetBinContent(i+1,counters[i].counts("Zee Reco"));
-		h_ZReco_den  ->SetBinContent(i+1,counters[i].counts("Zee within acceptance"));
+		h_Z    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_Z_num->SetBinContent(i+1,counters[i].counts(to_measure));
+		h_Z_den->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
 	}
-	h_Zaccept    ->Sumw2();
-	h_Zaccept    ->Divide(h_Zaccept_num,h_Zaccept_den);	
-	h_ZReco      ->Sumw2();
-	h_ZReco      ->Divide(h_ZReco_num,h_ZReco_den);	
-	TCanvas *col  = new TCanvas("GenDYToLLAcceptance", "", 0, 0, 900, 700);
-	TCanvas *col2 = new TCanvas("GenDYToLLReco"      , "", 0, 0, 900, 700);
-	
+	h_Z    ->Sumw2();
+	h_Z    ->Divide(h_Z_num,h_Z_den);	
+	TCanvas *col  = new TCanvas("GenDYToLL", "", 0, 0, 900, 700);
 	col -> cd();
-	h_Zaccept    ->SetLineColor(kBlue);
-	h_Zaccept    ->Draw("E");
-	string name  ="GenDYToLLAcceptance"+(string) Sample.name; 
+	h_Z    ->SetLineColor(kBlue);
+	h_Z    ->SetMarkerStyle(20);
+	h_Z    ->SetDrawOption("E");
+	h_Z    ->Draw();
+	string name  ="GenDYToLL_"+lept+"_"+(string) Sample.name; 
 	Util::PrintEPS(col, name, fOutputDir);
 	
-	col2 -> cd();
-	h_ZReco    ->SetLineColor(kBlue);
-	h_ZReco    ->Draw("E");
-	string name2  ="GenDYToLLReco"+(string) Sample.name; 
-	Util::PrintEPS(col2, name2, fOutputDir);
 
-	delete h_Zaccept;
-	delete h_Zaccept_den;
-	delete h_Zaccept_num;
-	delete h_ZReco;
-	delete h_ZReco_den;
-	delete h_ZReco_num;
+	//__________________________________
+	if(lept=="ele") {
+		fZtonunu_efficiency.ele_reco     =h_Z  ->GetBinContent(count_end); 
+		fZtonunu_efficiency.ele_reco_err =h_Z  ->GetBinError  (count_end);
+	}
+	if(lept=="muo") {
+		fZtonunu_efficiency.muo_reco     =h_Z  ->GetBinContent(count_end); 
+		fZtonunu_efficiency.muo_reco_err =h_Z  ->GetBinError  (count_end); 
+	}
+	if(lept=="neutrinos") {
+		fZtonunu_efficiency.nu_acc       =h_Z  ->GetBinContent(count_end);
+		fZtonunu_efficiency.nu_acc_err   =h_Z  ->GetBinError  (count_end);
+	}
+	//_________________________________
+	delete h_Z;
+	delete h_Z_den;
+	delete h_Z_num;
 	delete col;
-	delete col2;
 }
 
 //________________________________________________________________________
@@ -1962,12 +1929,12 @@ void MassPlotter::plotRatio(TH1* h1_orig, TH1* h2_orig, bool logflag, bool norma
 	TString save=name+"_ratio";
 	Util::PrintEPS(c1, save, fOutputDir);	
 
- 	delete h1;
- 	delete h2;
- 	delete h_ratio;
- 	delete p_plot;
- 	delete p_ratio;
- 	delete c1;
+// 	delete h1;
+//	delete h2;
+//	delete h_ratio;
+// 	delete p_plot;
+// 	delete p_ratio;
+// 	delete c1;
 
 }
 //___________________________________________________________________________
@@ -2216,6 +2183,7 @@ void MassPlotter::printHisto(THStack* h, TH1* h_data, TLegend* leg,  TString can
 }
 //____________________________________________________________________________
 void MassPlotter::loadSamples(const char* filename){
+	fSamples.clear();
 	char buffer[200];
 	ifstream IN(filename);
 

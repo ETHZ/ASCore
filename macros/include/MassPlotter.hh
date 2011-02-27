@@ -66,7 +66,6 @@ public:
 	void loadSamples(const char* filename = "samples.dat");
 
 	void makePlots();
-	void makeZnunu();
 	void makeSmallCopy(int nevents, int sample);
 	
 	struct sample{
@@ -82,7 +81,30 @@ public:
 		int color;
 	};
 	std::vector<sample>  fSamples;
- 
+	
+	struct efficiency{
+		double ele_reco;
+		double ele_reco_err;
+		double muo_reco;
+		double muo_reco_err;
+		double nu_acc;
+		double nu_acc_err;
+		double R(std::string lept){
+			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
+			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
+			else   {return -1;}
+		}
+		double R_err(std::string lept){
+			// error propagation
+			if(lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else            return -1;
+		}
+	} fZtonunu_efficiency;
+	
+	typedef std::map <TString, TString> MapType;
+	MapType RemoveLeptMap;
+
 	void setVerbose(int v){ fVerbose = v;};
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
@@ -100,6 +122,7 @@ public:
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
+	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
         void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
 		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
 		      const int nbins=100, const double min=0., const double max=380., double fit_min=40., double fit_max=100.);
@@ -107,7 +130,6 @@ public:
 		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
 		      const int nbins=gNMT2bins, const double *bins=gMT2bins, double fit_min=40., double fit_max=100.);
 
-	void PrintZllEfficiency(sample Sample, bool data, std::string lept );
 	void CompSamples(TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 	void compSamples(TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
@@ -119,9 +141,6 @@ private:
 	TFile *fOutputFile;
 	int fVerbose;
 	TString fPath;
-	
-	typedef std::map <TString, TString> MapType;
-	MapType RemoveLeptMap;
 
 	MT2tree* fMT2tree;
 	TTree*   fTree;
