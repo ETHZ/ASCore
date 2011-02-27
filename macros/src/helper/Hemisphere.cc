@@ -313,7 +313,7 @@ int Hemisphere::Reconstruct(){
 			cout << " Axis 2 is Object = " << J_Max  << " with Pt " << Object_Pt[J_Max]<< endl;
 		}
 
-	} else {
+	} else if ( !(seed_meth == 0 && (hemi_meth == 8 || hemi_meth ==9) ) ) {
 		cout << "Please give a valid seeding method!" << endl;
 		return 0;
 	}
@@ -330,10 +330,10 @@ int Hemisphere::Reconstruct(){
 	int numLoop = 0;
 	bool I_Move = true;
 
-	// iterate to associate all objects to hemispheres
+	// iterate to associate all objects to hemispheres (methods 1 to 3 only)
 	//   until no objects are moved from one to the other hemisphere
 	//   or the maximum number of iterations is reached
-	while (I_Move && (numLoop < nItermax)){
+	while (I_Move && (numLoop < nItermax) && hemi_meth != 8 && hemi_meth !=9){
 
 		I_Move = false;
 		numLoop++;
@@ -513,6 +513,74 @@ int Hemisphere::Reconstruct(){
 
 	} // end of iteration
 
+	// associate all objects to hemispheres for method 8
+	if (hemi_meth == 8 || hemi_meth == 9) {
+	        float sumtot = 0.;
+		for (int i = 0; i < vsize; ++i){
+		        if (Object_Noassoc[i] != 0) continue;
+			if(hemi_meth==8){ sumtot += Object_E[i]; }
+			else sumtot += Object_Pt[i];
+		}
+		float sumdiff = fabs(sumtot - 2*Object_E[0]);
+                float sum1strt = 0.;
+		int ibest = 0, jbest = 0;
+
+		// start by choosing object 0 in hemi 1, all others in hemi 2
+		// then add each of the other objects one by one to hemi 1
+		// then add object 1 to hemi one and add each of the others in turn, etc
+		if(vsize > 2){
+			for (int i = 0; i < vsize-1; ++i){
+				 if (Object_Noassoc[i] != 0) continue;
+				 if (hemi_meth ==8 ){sum1strt += Object_E[i];}
+				 else               {sum1strt += Object_Pt[i];}
+				 for (int j = i+1; j < vsize; ++j){
+					  if (Object_Noassoc[j] != 0) continue;
+					  float sum1_E =0;
+					  if (hemi_meth ==8 ){
+						  sum1_E = sum1strt + Object_E[j];
+					  }else {
+						  sum1_E = sum1strt + Object_Pt[j];
+					  }
+					  float sum2_E = sumtot - sum1_E;
+					  if(sumdiff >= fabs(sum1_E - sum2_E)) {
+						   sumdiff = fabs(sum1_E - sum2_E);
+						   ibest = i;
+						   jbest = j;
+					  }
+				 }
+		       }
+	       }
+	    
+	       // then store the best combination into the hemisphere axes
+	       float Sum1_Px=0, Sum1_Py=0, Sum1_Pz=0, Sum1_E=0;
+	       float Sum2_Px=0, Sum2_Py=0, Sum2_Pz=0, Sum2_E=0;
+               for (int i = 0; i < vsize; ++i){
+		         if (Object_Noassoc[i] != 0) Object_Group[i] = 0;
+		         else if (i <= ibest || i == jbest) {
+			          Sum1_Px += Object_Px[i];
+				  Sum1_Py += Object_Py[i];
+				  Sum1_Pz += Object_Pz[i];
+				  Sum1_E += Object_E[i];
+				  Object_Group[i] = 1;
+			 } else {
+			          Sum2_Px += Object_Px[i];
+				  Sum2_Py += Object_Py[i];
+				  Sum2_Pz += Object_Pz[i];
+				  Sum2_E += Object_E[i];
+				  Object_Group[i] = 2;
+			 }
+ 	       }
+	       Axis1[3] = sqrt(Sum1_Px*Sum1_Px + Sum1_Py*Sum1_Py + Sum1_Pz*Sum1_Pz);
+	       Axis1[0] = Sum1_Px / Axis1[3];
+	       Axis1[1] = Sum1_Py / Axis1[3];
+	       Axis1[2] = Sum1_Pz / Axis1[3];
+	       Axis1[4] = Sum1_E;
+	       Axis2[3] = sqrt(Sum2_Px*Sum2_Px + Sum2_Py*Sum2_Py + Sum2_Pz*Sum2_Pz);
+	       Axis2[0] = Sum2_Px / Axis2[3];
+	       Axis2[1] = Sum2_Py / Axis2[3];
+	       Axis2[2] = Sum2_Pz / Axis2[3];
+	       Axis2[4] = Sum2_E;
+	}
 
 	status = 1;
 	return 1;
