@@ -5,6 +5,7 @@
 
 #pragma link C++ class MT2tree;
 #pragma link C++ class MT2Misc;
+#pragma link C++ class MT2Znunu;
 #pragma link C++ class MT2Jet;
 #pragma link C++ class MT2Elec;
 #pragma link C++ class MT2Muon;

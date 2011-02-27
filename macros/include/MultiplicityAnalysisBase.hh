@@ -62,6 +62,8 @@ public:
 	float fMHTall;
 	float fHT;
 	float fMHTphi;	
+	int   fNJets_toremove_ele;
+	int   fNJets_toremove_muo;
 
 private:
 	void FindLeptonConfig();

@@ -20,7 +20,7 @@
 #include "helper/Hemisphere.hh"
 #include "MT2tree.hh"
 
-static const int gNHemispheres = 4;
+static const int gNHemispheres = 5;
 
 class MassAnalysis : public MultiplicityAnalysisBase{
 public:
@@ -37,6 +37,7 @@ private:
 	void BookTree();
 	void FillTree();
 	void ResetTree(); 
+	void InterestingEvents();
 
 	struct HemiObject {string type; int index; int hemi;} fHemiObject;
 	struct HemiObjects{

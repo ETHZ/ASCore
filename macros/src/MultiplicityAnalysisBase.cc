@@ -77,6 +77,16 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	vector<double> pfloose;
 	vector<double> pfmedium;
 	vector<double> pftight;
+
+	fNJets_toremove_ele=0;
+	fNJets_toremove_muo=0;
+	for(int i=0; i<fElecs.size(); ++i){
+		if(fTR->ElPt[fElecs[i]] > 15) fNJets_toremove_ele ++;
+	}	
+	for(int i=0; i<fMuons.size(); ++i){
+		if(fTR->MuPt[fMuons[i]] > 15) fNJets_toremove_muo ++;
+	}	
+
 	bool doSel(true);
 	for(int ij=0; ij < fTR->PFNJets; ++ij){
 		if(fTR->PFJPt[ij] < 15) continue;  // note: ETH ntuple only stores PFJets > 15 GeV (defualt config)
@@ -85,12 +95,12 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		for(int i=0; i<fMuons.size(); ++i){
 			double deltaR = Util::GetDeltaR(fTR->PFJEta[ij], fTR->MuEta[fMuons[i]], 
 					fTR->PFJPhi[ij], fTR->MuPhi[fMuons[i]]);
-			if(deltaR < 0.4)   JGood=false;
+			if(deltaR < 0.4)   {JGood=false; fNJets_toremove_muo--;}
 		}
 		for(int i=0; i<fElecs.size(); ++i){
 			double deltaR = Util::GetDeltaR(fTR->PFJEta[ij], fTR->ElEta[fElecs[i]], 
 					fTR->PFJPhi[ij], fTR->ElPhi[fElecs[i]]);
-			if(deltaR < 0.4)   JGood=false;
+			if(deltaR < 0.4)   {JGood=false; fNJets_toremove_ele--;}
 		}
 		if(JGood==false) continue;
 		
@@ -194,7 +204,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	// HT
 	double HT=0;
 	for(int j=0; j<fJetsLoose.size(); ++j){
-		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.5){
+		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.4){
 			HT += fTR->PFJPt[fJetsLoose[j]];
 		}
 	}

@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=4};
+enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=5};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -16,6 +16,7 @@ public:
 
   void Reset();
   
+  Bool_t   HBHENoiseFlag;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
@@ -41,9 +42,45 @@ public:
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
-  Bool_t   HBHENoiseFlag;
 
-  ClassDef(MT2Misc, 7)
+  ClassDef(MT2Misc, 10)
+};
+
+
+// MT2Znunu --------------------------------
+class MT2Znunu : public TObject {
+
+public:
+	MT2Znunu();
+	virtual ~MT2Znunu();
+	void Reset();
+
+  	Int_t    NJetsToRemoveMuo;
+  	Int_t    NJetsToRemoveEle;
+	Int_t    NJetsIDLoose_matched;
+	Double_t GenZee_mll;
+	Double_t GenZee_mll_acc; 
+	Double_t GenZmumu_mll;
+	Double_t GenZmumu_mll_acc;
+	Double_t GenZnunu_e_mll;
+	Double_t GenZnunu_e_mll_acc;
+	Double_t GenZnunu_mu_mll;
+	Double_t GenZnunu_mu_mll_acc;
+	Double_t GenZnunu_tau_mll;
+	Double_t GenZnunu_tau_mll_acc;
+	Double_t RecoOSee_mll;
+	Double_t RecoOSmumu_mll;
+	Double_t HTmatched;
+	Double_t METplusLeptsPt;
+	Double_t METplusLeptsPtReco;
+	Double_t MinMetplusLeptJetDPhi;
+	Double_t MinMetplusLeptJetDPhiReco;
+	Double_t PassJetID_matched;
+	Double_t Jet1Pass_matched;
+	Double_t Jet0Pass_matched;
+	Double_t Vectorsumpt_matched;
+
+	ClassDef(MT2Znunu, 2);
 };
 
 // MT2Jet ----------------------------------
@@ -229,22 +266,29 @@ public:
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);
   Double_t GetDiLeptonInvMass(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, bool exclDiLept=false);
-  Bool_t   IsGenOSDiLepton(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=60, double upper_mass=120);
+  Bool_t   IsDiLeptonMll(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, bool exclDiLept=false, double lower_mass=71, double upper_mass=111);
+  Bool_t   IsGenOSDiLepton(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=71, double upper_mass=111);
+  TLorentzVector GetMETPlusLeptsLV(int OSDiLeptFromZ =1);
   Double_t GetMETPlusLepts(int OSDiLeptFromZ =1);
   Double_t GetMETPlusGenLepts(int met, int RemoveOSSFDiLepts=0, int require_cuts=1, unsigned int pid=11, 
-		              unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=60, double upper_mass=120);
-  Double_t GetDiLeptonPt(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, double lower_mass=60, double upper_mass=120);
+		              unsigned int mother=23, double pt=10, double eta=2.4, double lower_mass=71, double upper_mass=111);
+  Double_t GetDiLeptonPt(int same_sign=0, int same_flavour=1, int flavour=0, double pt=10, double lower_mass=71, double upper_mass=111);
+  Double_t GetGenLeptPt(int which, int pid, int mother, double pt, double eta);
+  Double_t GetGenLeptEta(int which, int pid, int mother, double pt, double eta);
+  Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
 
-  Int_t   NJets;
-  Int_t   NJetsIDLoose;
-  Int_t   NJetsIDMedium;
-  Int_t   NJetsIDTight;
-  Int_t   NEles;
-  Int_t   NElesLoose;
-  Int_t   NMuons;
-  Int_t   NMuonsLoose;
-  Int_t   NGenLepts;
+  Int_t     NJets;
+  Int_t     NJetsIDLoose;
+  Int_t     NJetsIDMedium;
+  Int_t     NJetsIDTight;
+  Int_t     NEles;
+  Int_t     NElesLoose;
+  Int_t     NMuons;
+  Int_t     NMuonsLoose;
+  Int_t     NGenLepts;
+
   MT2Misc        misc;
+  MT2Znunu       Znunu;
   MT2Jet         jet[m_jetSize];
   MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];
@@ -257,7 +301,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 12)
+  ClassDef(MT2tree, 14)
 };
 
 #endif

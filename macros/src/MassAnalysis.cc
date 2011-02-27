@@ -79,11 +79,17 @@ void MassAnalysis::Analyze(){
 	// minimizing deltaHT
 	bool minimizeDHT(true);
 	GetMT2Variables(minimizeDHT, 20, 2.4, fHemiObjects[3]); 
+	
+	// luc's code minimizing deltaHT
+	GetMT2Variables(0, 9, 0.0, 20, 2.4,   fHemiObjects[4]); 
 	// -----------------------------------------------------------
 
 
 	// Fill Tree !! has to be called at the very end !!
 	MassAnalysis::FillTree();
+	
+	// print interesting events
+//	InterestingEvents();
 }
 
 // ***********************************************************************************************
@@ -307,9 +313,175 @@ void MassAnalysis::FillTree(){
 		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet(100,2.4,1);
 	} else  fMT2tree->misc.Jet1Pass      = 0;
 
-	// -----------------------------------------------------------------------
+	
+	// stuff for Z->nunu (close your eyes...)	
+	vector<int>    jindi;
+	vector<double> jpt;
+	bool PassJetID_matched(true);
+	double HTmatched=0, vectorsumpt_matched_px=0, vectorsumpt_matched_py=0;
+	int    NJetsIDLoose_matched=0;
+	for(int i=0; i<fTR->PFNJets; ++i){
+		if(fTR->PFJPt[i] < 15) continue;  
+		bool jet(true);
+		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
+			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
+				double deltaR = Util::GetDeltaR(fTR->PFJEta[i], fMT2tree->genlept[gen].lv.Eta(), fTR->PFJPhi[i], fMT2tree->genlept[gen].lv.Phi());
+				if(deltaR < 0.4) jet=false;
+			}
+		}
+		if(  jet == false) continue;	
+		if(fTR->PFJPt[i] > 50 && fabs(fTR->PFJEta[i])<5 && IsGoodBasicPFJet(i,  50., 5)==false ){
+			PassJetID_matched  = false;
+		}
+		jindi.push_back(i); jpt.push_back(fTR->PFJPt[i]);
+		if(! IsGoodBasicPFJet(i,  20., 2.4) ) continue;
+		vectorsumpt_matched_px+=fTR->PFJPx[i];
+		vectorsumpt_matched_py+=fTR->PFJPy[i];
+		NJetsIDLoose_matched++;
+		if(! IsGoodBasicPFJet(i,  50., 2.4) ) continue;
+		HTmatched += fTR->PFJPt[i];
+	}
+	TLorentzVector MET = fMT2tree->pfmet[0];
+	for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
+		if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
+			vectorsumpt_matched_px+=fMT2tree->genlept[gen].lv.Px();
+			vectorsumpt_matched_py+=fMT2tree->genlept[gen].lv.Py();
+			MET +=fMT2tree->genlept[gen].lv;
+		}
+	}
+	double mindPhi=10;
+	if(jindi.size()<1){mindPhi = -999.99;}
+	else{
+		for(int i=0; i<jindi.size(); ++i){
+			if(fTR->PFJPt[jindi[i]]       < 20 ) continue;
+			if(fabs(fTR->PFJEta[jindi[i]])> 5.0) continue;
+			TLorentzVector lv(fTR->PFJPx[jindi[i]],fTR->PFJPy[jindi[i]],fTR->PFJPz[jindi[i]],fTR->PFJE[jindi[i]]);
+			double dphi = TMath::Abs(lv.DeltaPhi(MET));
+			if(dphi < mindPhi){ 
+				mindPhi = dphi;
+			}
+		}
+	}
+	if(mindPhi==10.){
+		fMT2tree->Znunu.MinMetplusLeptJetDPhi      = -999.99;
+	} else  fMT2tree->Znunu.MinMetplusLeptJetDPhi      =  mindPhi;
+	fMT2tree->Znunu.MinMetplusLeptJetDPhiReco          =  fMT2tree->MinMetJetDPhi(0, 20, 5.0 ,3);
+
+	jindi   = Util::VSort(jindi, jpt);
+	if(jindi.size() >0){
+		fMT2tree->Znunu.Jet0Pass_matched   = (Int_t) IsGoodBasicPFJet(jindi[0],  100., 2.4);
+	} else  fMT2tree->Znunu.Jet0Pass_matched   =0; 
+	if(jindi.size() >1){
+		fMT2tree->Znunu.Jet1Pass_matched   = (Int_t) IsGoodBasicPFJet(jindi[1],  100., 2.4);
+	} else  fMT2tree->Znunu.Jet1Pass_matched   =0;
+	fMT2tree->Znunu.PassJetID_matched          = (Int_t) PassJetID_matched;
+	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETpy,2));
+	
+	fMT2tree->Znunu.HTmatched                  = HTmatched;
+	fMT2tree->Znunu.NJetsIDLoose_matched       = NJetsIDLoose_matched;
+
+	fMT2tree->Znunu.NJetsToRemoveEle           = fNJets_toremove_ele;
+	fMT2tree->Znunu.NJetsToRemoveMuo           = fNJets_toremove_muo;
+
+	fMT2tree->Znunu.RecoOSee_mll               = fMT2tree->GetDiLeptonInvMass(0, 1, 1, 10, 1); 
+	fMT2tree->Znunu.RecoOSmumu_mll             = fMT2tree->GetDiLeptonInvMass(0, 1, 2, 10, 1); 
+
+	fMT2tree->Znunu.GenZee_mll                 = fMT2tree->GenOSDiLeptonInvMass(11,23,0,100);
+	fMT2tree->Znunu.GenZee_mll_acc             = fMT2tree->GenOSDiLeptonInvMass(11,23,10,2.4);
+	fMT2tree->Znunu.GenZmumu_mll               = fMT2tree->GenOSDiLeptonInvMass(13,23,0,100);
+	fMT2tree->Znunu.GenZmumu_mll_acc           = fMT2tree->GenOSDiLeptonInvMass(13,23,10,2.4);
+
+	fMT2tree->Znunu.GenZnunu_e_mll             = fMT2tree->GenOSDiLeptonInvMass(12,23,0,100);
+	fMT2tree->Znunu.GenZnunu_e_mll_acc         = fMT2tree->GenOSDiLeptonInvMass(12,23,10,2.4);
+	fMT2tree->Znunu.GenZnunu_mu_mll            = fMT2tree->GenOSDiLeptonInvMass(14,23,0,100);
+	fMT2tree->Znunu.GenZnunu_mu_mll_acc        = fMT2tree->GenOSDiLeptonInvMass(14,23,10,2.4);
+	fMT2tree->Znunu.GenZnunu_tau_mll           = fMT2tree->GenOSDiLeptonInvMass(16,23,0,100);
+	fMT2tree->Znunu.GenZnunu_tau_mll_acc       = fMT2tree->GenOSDiLeptonInvMass(16,23,10,2.4);
+
+	fMT2tree->Znunu.METplusLeptsPt             = fMT2tree->GetMETPlusGenLepts(0, 1, 1,  1113, 23, 0, 100, 0, 10000);
+	fMT2tree->Znunu.METplusLeptsPtReco         = fMT2tree->GetMETPlusLepts(1);
+	// ----------------------------------------------------------------------
 	// fill tree
 	fATree            ->Fill();
+}
+
+void MassAnalysis::InterestingEvents(){
+	
+	if(fMT2tree->hemi[0].MT2 < 200          ) return; 	
+	if(fMT2tree->misc.MET < 30              ) return; 	
+	if(fMT2tree->misc.HT < 300              ) return; 	
+	if(fMT2tree->misc.Jet0Pass == 0         ) return; 	
+	if(fMT2tree->misc.Jet1Pass == 0         ) return; 	
+	if(fMT2tree->misc.PassJetID == 0        ) return; 	
+	if(fMT2tree->misc.Vectorsumpt>70        ) return; 	
+	if(fMT2tree->misc.MinMetJetDPhi<0.3     ) return; 	
+	if(fMT2tree->misc.EcalDeadCellBEFlag==0 ) return; 	
+	if(fMT2tree->misc.HBHENoiseFlag == 0    ) return; 	
+	if(fMT2tree->misc.LeptConfig != 9       ) return; 	
+
+	cout << "-------------------------------------------------------------------------------" << endl;	
+	EventPrint();
+	cout << "++++ MT2 Prtinouts: ++++ " << endl;
+	cout << "  MT2 "                  << fMT2tree->hemi[0].MT2     << endl;
+	cout << "   association method: " << fMT2tree->hemi[0].assoc_method << " seed method " << fMT2tree->hemi[0].seed_method << endl;
+	cout << "   pseudojet 1: pt "     << fMT2tree->hemi[0].lv1.Pt()     << " eta "         << fMT2tree->hemi[0].lv1.Eta()   << " phi " << fMT2tree->hemi[0].lv1.Phi() << endl;
+	cout << "   pseudojet 2: pt "     << fMT2tree->hemi[0].lv2.Pt()     << " eta "         << fMT2tree->hemi[0].lv2.Eta()   << " phi " << fMT2tree->hemi[0].lv2.Phi() << endl;
+	cout << "   pseudojets dPhi "     << fMT2tree->hemi[0].dPhi         << endl;
+	cout << "   sqrt(2*pj1*pj2*(1+cosTheta)) " << sqrt(2*fMT2tree->hemi[0].lv1.Pt()*fMT2tree->hemi[0].lv2.Pt() *(1+cos(fMT2tree->hemi[0].dPhi))) << endl;
+	cout << "   jets in hemi 1: "     << endl;
+	for(int i=0; i<10; ++i){
+		if(fMT2tree->hemi[0].jindices1[i]!=-1){
+			cout << "     jet " << fMT2tree->hemi[0].jindices1[i] << " pt " << fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.Pt() 
+			     <<     " eta " << fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.Eta() 
+		             <<     " phi " << fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.Phi()
+		             <<     " Mass "<< fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.M()   << endl;	     
+	       	}
+	}
+	cout << "   jets in hemi 2: "     << endl;
+	for(int i=0; i<10; ++i){
+		if(fMT2tree->hemi[0].jindices2[i]!=-1){
+			cout << "     jet " << fMT2tree->hemi[0].jindices2[i] << " pt " << fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.Pt() 
+			     <<     " eta " << fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.Eta() 
+		             <<     " phi " << fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.Phi()
+		             <<     " Mass "<< fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.M()   << endl;	     
+	       	}
+	}
+	cout << "   electrons in hemi 1: " << endl;
+	for(int i=0; i<5; ++i){
+		if(fMT2tree->hemi[0].eleindices1[i]==-1) continue;
+		cout << "     ele " << fMT2tree->hemi[0].eleindices1[i] << " pt " << fMT2tree->ele[fMT2tree->hemi[0].eleindices1[i]].lv.Pt() 
+		     <<     " eta " << fMT2tree->ele[fMT2tree->hemi[0].eleindices1[i]].lv.Eta() 
+		     <<     " phi " << fMT2tree->ele[fMT2tree->hemi[0].eleindices1[i]].lv.Phi() << endl;
+	}
+	cout << "   electrons in hemi 2: " << endl;
+	for(int i=0; i<5; ++i){
+		if(fMT2tree->hemi[0].eleindices2[i]==-1) continue;
+		cout << "     ele " << fMT2tree->hemi[0].eleindices2[i] << " pt " << fMT2tree->ele[fMT2tree->hemi[0].eleindices2[i]].lv.Pt() 
+		     <<     " eta " << fMT2tree->ele[fMT2tree->hemi[0].eleindices2[i]].lv.Eta() 
+		     <<     " phi " << fMT2tree->ele[fMT2tree->hemi[0].eleindices2[i]].lv.Phi() << endl;
+	}
+	cout << "   muons in hemi 1: " << endl;
+	for(int i=0; i<5; ++i){
+		if(fMT2tree->hemi[0].muoindices1[i]==-1) continue;
+		cout << "     muo " << fMT2tree->hemi[0].muoindices1[i] << " pt " << fMT2tree->muo[fMT2tree->hemi[0].muoindices1[i]].lv.Pt() 
+		     <<     " eta " << fMT2tree->muo[fMT2tree->hemi[0].muoindices1[i]].lv.Eta() 
+		     <<     " phi " << fMT2tree->muo[fMT2tree->hemi[0].muoindices1[i]].lv.Phi() << endl;
+	}
+	cout << "   muons in hemi 2: " << endl;
+	for(int i=0; i<5; ++i){
+		if(fMT2tree->hemi[0].muoindices2[i]==-1) continue;
+		cout << "     muo " << fMT2tree->hemi[0].muoindices2[i] << " pt " << fMT2tree->muo[fMT2tree->hemi[0].muoindices2[i]].lv.Pt() 
+		     <<     " eta " << fMT2tree->muo[fMT2tree->hemi[0].muoindices2[i]].lv.Eta() 
+		     <<     " phi " << fMT2tree->muo[fMT2tree->hemi[0].muoindices2[i]].lv.Phi() << endl;
+	}
+	cout << "  genlepton info " << endl;
+	for(int i=0; i<fMT2tree->NGenLepts; ++i){
+		if(abs(fMT2tree->genlept[i].MID) == 23 || abs(fMT2tree->genlept[i].MID) == 24 || abs(fMT2tree->genlept[i].MID) == 15 ){
+			cout << "    genlepton with PID " << fMT2tree->genlept[i].ID  << " with Mother " << fMT2tree->genlept[i].MID << " and GrandMother " << fMT2tree->genlept[i].GMID 
+			     <<              " with Pt  " << fMT2tree->genlept[i].lv.Pt() << " eta " << fMT2tree->genlept[i].lv.Eta() << " phi "  << fMT2tree->genlept[i].lv.Phi() << endl;
+		}
+	}
+	cout << "-------------------------------------------------------------------------------" << endl;	
 }
 
 // ************************************************************************************************************************************* 
@@ -340,7 +512,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 		py.push_back(fTR->PFJPy[fJets[i]]);
 		pz.push_back(fTR->PFJPz[fJets[i]]);
 		 E.push_back(fTR->PFJE[fJets[i]]);
-		 fHemiObject.type="jet"; fHemiObject.index=fJets[i]; fHemiObject.hemi=0;
+		 fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=0;
 		 hemiobject.objects.push_back(fHemiObject);
 	}
 	for(int i=0; i< fElecs.size(); ++i){
@@ -348,7 +520,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 		py.push_back(fTR->ElPy[fElecs[i]]);
 		pz.push_back(fTR->ElPz[fElecs[i]]);
 		 E.push_back(fTR->ElE [fElecs[i]]);
-		 fHemiObject.type="ele"; fHemiObject.index=fElecs[i]; fHemiObject.hemi=0;
+		 fHemiObject.type="ele"; fHemiObject.index=i; fHemiObject.hemi=0;
 		 hemiobject.objects.push_back(fHemiObject);
 	}
 	for(int i=0; i< fMuons.size(); ++i){
@@ -356,7 +528,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 		py.push_back(fTR->MuPy[fMuons[i]]);
 		pz.push_back(fTR->MuPz[fMuons[i]]);
 		 E.push_back(fTR->MuE [fMuons[i]]);
-		 fHemiObject.type="muo"; fHemiObject.index=fMuons[i]; fHemiObject.hemi=0;
+		 fHemiObject.type="muo"; fHemiObject.index=i; fHemiObject.hemi=0;
 		 hemiobject.objects.push_back(fHemiObject);
 	}
 	if(px.size()<2) {
@@ -372,7 +544,9 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	
 	TLorentzVector pseudojet1(0.,0.,0.,0.);
 	TLorentzVector pseudojet2(0.,0.,0.,0.);
-	
+
+	double dHT = 0;	
+	int counter=0;
 	for(int i=0; i<px.size(); ++i){
 		if(grouping[i]==1){
 			pseudojet1.SetPx(pseudojet1.Px() + px[i]);
@@ -380,19 +554,33 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 			pseudojet1.SetPz(pseudojet1.Pz() + pz[i]);
 			pseudojet1.SetE( pseudojet1.E()  + E[i]);
 			hemiobject.objects[i].hemi=1;
+			dHT += sqrt(px[i]*px[i] + py[i]*py[i]);	
+			counter ++;
+
 		}else if(grouping[i] == 2){
 			pseudojet2.SetPx(pseudojet2.Px() + px[i]);
 			pseudojet2.SetPy(pseudojet2.Py() + py[i]);
 			pseudojet2.SetPz(pseudojet2.Pz() + pz[i]);
 			pseudojet2.SetE( pseudojet2.E()  + E[i]);
 			hemiobject.objects[i].hemi=2;
+			dHT -= sqrt(px[i]*px[i] + py[i]*py[i]);	
+			counter ++;
 		}
 	}
 	delete hemi;
 
+	if(pseudojet1.Pt()==0 || pseudojet2.Pt()==0 ){
+		cout << "++ ERROR : hemi seed " <<  hemi_seed  << " hemi assoc " << hemi_assoc << " n input " << grouping.size() << " n objets in hemi " << counter 
+		     << " pseudojet1 pt " << pseudojet1.Pt() << " pseudojet2 pt " << pseudojet2.Pt() << endl;
+		return;
+	}
+
 	TLorentzVector pmiss;
 	pmiss.SetPx(fTR->PFMETpx);
 	pmiss.SetPy(fTR->PFMETpy);
+
+	// fill mindHT (minimized for assoc method 9)
+	hemiobject.minDHT = dHT;
 
 	// fill UTM
 	hemiobject.UTM          = - pmiss - pseudojet1 - pseudojet2;
