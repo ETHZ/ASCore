@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.76 2011/02/22 16:56:17 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.77 2011/02/23 19:34:29 stiegerb Exp $
 //
 //
 
@@ -637,6 +637,8 @@ private:
 	float fTPhotIso04TrkSolid[gMaxnphos];
 	float fTPhotIso04TrkHollow[gMaxnphos];
 	float fTPhotIso04[gMaxnphos];
+	float fTPhotR9[gMaxnphos];
+	float fTPhotSCEnergy[gMaxnphos];
 	float fTPhotcaloPosX[gMaxnphos];
 	float fTPhotcaloPosY[gMaxnphos];
 	float fTPhotcaloPosZ[gMaxnphos];
@@ -644,6 +646,8 @@ private:
 	float fTPhotH1overE[gMaxnphos];
 	float fTPhotH2overE[gMaxnphos];
 	float fTPhotSigmaIetaIeta[gMaxnphos];
+	float fTPhotSCEtaWidth[gMaxnphos];
+	float fTPhotSCSigmaPhiPhi[gMaxnphos];
 	int   fTPhotHasPixSeed[gMaxnphos];
 	int   fTPhotHasConvTrks[gMaxnphos];
 	int   fTPhotIsInJet[gMaxnphos];

@@ -28,4 +28,5 @@
 <use name=CondFormats/L1TObjects>
 <use name=RecoJets/JetAlgorithms>
 <use name=RecoLocalCalo/EcalRecAlgos>
+<use name=RecoEcal/EgammaCoreTools>
 <flags EDM_PLUGIN=1>

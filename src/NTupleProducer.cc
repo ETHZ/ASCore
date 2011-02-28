@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.97 2011/02/22 16:56:17 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.98 2011/02/23 19:34:29 stiegerb Exp $
 //
 //
 
@@ -38,6 +38,7 @@ Implementation:
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
 
@@ -313,6 +314,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::ESHandle<EcalChannelStatus> chStatus;
 	iSetup.get<EcalChannelStatusRcd>().get(chStatus);
 	const EcalChannelStatus * channelStatus = chStatus.product();
+
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -1170,12 +1172,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotIso03Hcal[phoqi]      = photon.hcalTowerSumEtConeDR03();
 	fTPhotIso03TrkSolid[phoqi]  = photon.trkSumPtSolidConeDR03();
 	fTPhotIso03TrkHollow[phoqi] = photon.trkSumPtHollowConeDR03();
-	fTPhotIso03[phoqi]          = (fTPhotIso03TrkSolid[phoqi] + fTPhotIso03Ecal[phoqi] + fTPhotIso03Hcal[phoqi]) / fTPhotPt[phoqi];
+	fTPhotIso03[phoqi]          = (fTPhotIso03TrkHollow[phoqi] + fTPhotIso03Ecal[phoqi] + fTPhotIso03Hcal[phoqi]) / fTPhotPt[phoqi];
 	fTPhotIso04Ecal[phoqi]      = photon.ecalRecHitSumEtConeDR04();
 	fTPhotIso04Hcal[phoqi]      = photon.hcalTowerSumEtConeDR04();
 	fTPhotIso04TrkSolid[phoqi]  = photon.trkSumPtSolidConeDR04();
 	fTPhotIso04TrkHollow[phoqi] = photon.trkSumPtHollowConeDR04();
-	fTPhotIso04[phoqi]          = (fTPhotIso04TrkSolid[phoqi] + fTPhotIso04Ecal[phoqi] + fTPhotIso04Hcal[phoqi]) / fTPhotPt[phoqi];
+	fTPhotIso04[phoqi]          = (fTPhotIso04TrkHollow[phoqi] + fTPhotIso04Ecal[phoqi] + fTPhotIso04Hcal[phoqi]) / fTPhotPt[phoqi];
+	fTPhotR9[phoqi]             = photon.r9();
 	fTPhotcaloPosX[phoqi]       = photon.caloPosition().X();
 	fTPhotcaloPosY[phoqi]       = photon.caloPosition().Y();
 	fTPhotcaloPosZ[phoqi]       = photon.caloPosition().Z();
@@ -1183,6 +1186,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotH1overE[phoqi]        = photon.hadronicDepth1OverEm();
 	fTPhotH2overE[phoqi]        = photon.hadronicDepth2OverEm();
 	fTPhotSigmaIetaIeta[phoqi]  = photon.sigmaIetaIeta();
+	
+	EcalClusterLazyTools *lazyTools = new EcalClusterLazyTools(iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE"));
+
+	fTPhotSCEnergy[phoqi]       = photon.superCluster()->rawEnergy();
+	fTPhotSCEtaWidth[phoqi]     = photon.superCluster()->etaWidth();
+	fTPhotSCSigmaPhiPhi[phoqi]  = lazyTools->covariances(*(photon.superCluster()->seed())).at(2);
 	fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
 	fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0;
 
@@ -2138,6 +2147,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoIso04TrkSolid" ,&fTPhotIso04TrkSolid ,"PhoIso04TrkSolid[NPhotons]/F");
 	fEventTree->Branch("PhoIso04TrkHollow",&fTPhotIso04TrkHollow,"PhoIso04TrkHollow[NPhotons]/F");
 	fEventTree->Branch("PhoIso04"         ,&fTPhotIso04         ,"PhoIso04[NPhotons]/F");
+	fEventTree->Branch("PhoR9"            ,&fTPhotR9            ,"PhoR9[NPhotons]/F");
 	fEventTree->Branch("PhoCaloPositionX" ,&fTPhotcaloPosX      ,"PhoCaloPositionX[NPhotons]/F");
 	fEventTree->Branch("PhoCaloPositionY" ,&fTPhotcaloPosY      ,"PhoCaloPositionY[NPhotons]/F");
 	fEventTree->Branch("PhoCaloPositionZ" ,&fTPhotcaloPosZ      ,"PhoCaloPositionZ[NPhotons]/F");
@@ -2145,6 +2155,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoH1overE"       ,&fTPhotH1overE       ,"PhoH1overE[NPhotons]/F");
 	fEventTree->Branch("PhoH2overE"       ,&fTPhotH2overE       ,"PhoH2overE[NPhotons]/F");
 	fEventTree->Branch("PhoSigmaIetaIeta" ,&fTPhotSigmaIetaIeta ,"PhoSigmaIetaIeta[NPhotons]/F");
+	fEventTree->Branch("PhoSCRawEnergy"   ,&fTPhotSCEnergy      ,"PhoSCRawEnergy[NPhotons]/F");
+	fEventTree->Branch("PhoSCEtaWidth"    ,&fTPhotSCEtaWidth    ,"PhoSCEtaWidth[NPhotons]/F");
+	fEventTree->Branch("PhoSCSigmaPhiPhi" ,&fTPhotSCSigmaPhiPhi ,"PhoSCSigmaPhiPhi[NPhotons]/F");
 	fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
 	fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
 	fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
@@ -2813,16 +2826,17 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPhotEta,gMaxnphos);
 	resetFloat(fTPhotPhi,gMaxnphos);
 	resetFloat(fTPhotEnergy,gMaxnphos);
-	resetFloat(fTPhotIso03Ecal);
-	resetFloat(fTPhotIso03Hcal);
-	resetFloat(fTPhotIso03TrkSolid);
-	resetFloat(fTPhotIso03TrkHollow);
-	resetFloat(fTPhotIso03);
-	resetFloat(fTPhotIso04Ecal);
-	resetFloat(fTPhotIso04Hcal);
-	resetFloat(fTPhotIso04TrkSolid);
-	resetFloat(fTPhotIso04TrkHollow);
-	resetFloat(fTPhotIso04);
+	resetFloat(fTPhotIso03Ecal,gMaxnphos);
+	resetFloat(fTPhotIso03Hcal,gMaxnphos);
+	resetFloat(fTPhotIso03TrkSolid,gMaxnphos);
+	resetFloat(fTPhotIso03TrkHollow,gMaxnphos);
+	resetFloat(fTPhotIso03,gMaxnphos);
+	resetFloat(fTPhotIso04Ecal,gMaxnphos);
+	resetFloat(fTPhotIso04Hcal,gMaxnphos);
+	resetFloat(fTPhotIso04TrkSolid,gMaxnphos);
+	resetFloat(fTPhotIso04TrkHollow,gMaxnphos);
+	resetFloat(fTPhotIso04,gMaxnphos);
+	resetFloat(fTPhotR9,gMaxnphos);
 	resetFloat(fTPhotcaloPosX,gMaxnphos);
 	resetFloat(fTPhotcaloPosY,gMaxnphos);
 	resetFloat(fTPhotcaloPosZ,gMaxnphos);
@@ -2830,6 +2844,9 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTPhotH1overE,gMaxnphos);
 	resetFloat(fTPhotH2overE,gMaxnphos);
 	resetFloat(fTPhotSigmaIetaIeta,gMaxnphos);
+	resetFloat(fTPhotSCEnergy,gMaxnphos);
+	resetFloat(fTPhotSCEtaWidth,gMaxnphos);
+	resetFloat(fTPhotSCSigmaPhiPhi,gMaxnphos);
 	resetInt(fTPhotHasPixSeed,gMaxnphos);
 	resetInt(fTPhotHasConvTrks,gMaxnphos);
 	resetInt(fTgoodphoton,gMaxnphos);
