@@ -1,7 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
-
-## !! mu, el photon eta changed from 2.4 to 2.5 !!
 analyze = cms.EDAnalyzer('NTupleProducer',
 	# Main settings
 	isRealData       = cms.untracked.bool(False),
@@ -15,25 +13,19 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_pfelectrons  = cms.untracked.InputTag('patElectronsPF'),
 	tag_pftaus       = cms.untracked.InputTag('patTausPF'),
 	tag_elidWP       = cms.untracked.string('simpleEleId90relIso'),
-	tag_jets         = cms.untracked.InputTag('ak5CaloJets'),
-	jetCorrs         = cms.untracked.string('ak5CaloL2L3'),
+	tag_jets         = cms.untracked.InputTag('ak5PFJets'),
+	jetCorrs         = cms.untracked.string('ak5PFL2L3'),
 	tag_btag1        = cms.untracked.InputTag('trackCountingHighEffBJetTags'),
 	tag_btag2        = cms.untracked.InputTag('trackCountingHighPurBJetTags'),
 	tag_btag3        = cms.untracked.InputTag('simpleSecondaryVertexHighEffBJetTags'),
 	tag_btag4        = cms.untracked.InputTag('simpleSecondaryVertexHighPurBJetTags'),
-	tag_jetTracks    = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-	tag_jetID        = cms.untracked.InputTag('ak5JetID'),
-	#trackCountingHighPurBJetTags #jetProbabilityBJetTags
-	tag_met1         = cms.untracked.InputTag('met'),
-	tag_met2         = cms.untracked.InputTag('corMetGlobalMuons'),
-	tag_met3         = cms.untracked.InputTag('tcMet'),
-	tag_met4         = cms.untracked.InputTag('pfMet'),
-	tag_met5         = cms.untracked.InputTag('metMuonJESCorAK5'),
-	tag_met6         = cms.untracked.InputTag('genMetTrue'),
+	tag_rawcalomet   = cms.untracked.InputTag('met'),
+	tag_tcmet        = cms.untracked.InputTag('tcMet'),
+	tag_pfmet        = cms.untracked.InputTag('pfMet'),
+	tag_corrcalomet  = cms.untracked.InputTag('metMuonJESCorAK5'),
+	tag_genmet       = cms.untracked.InputTag('genMetTrue'),
 	tag_vertex       = cms.untracked.InputTag('offlinePrimaryVertices'),
-	# tag_vertex     = cms.untracked.InputTag('offlinePrimaryVertices','','REVERTEX'),
 	tag_tracks       = cms.untracked.InputTag('generalTracks'),
-	# tag_tracks     = cms.untracked.InputTag('generalTracks','','RETRACK'),
 	tag_photons      = cms.untracked.InputTag('photons'),
 	tag_caltow       = cms.untracked.InputTag('towerMaker'),
 	tag_EBrechits    = cms.untracked.InputTag('ecalRecHit:EcalRecHitsEB'),
@@ -45,7 +37,13 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
 
 	# Trigger paths to store the triggering object information of
-	hlt_labels = cms.untracked.vstring(),
+	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',
+	                              'hltSingleMu5L3Filtered5',
+	                              'hltSingleMu9L3Filtered9',
+	                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilteroHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
+	                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter',
+	                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter',
+	                              'hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter'),
 
 	# Event Selection Criteria
 	# Muons:
@@ -70,6 +68,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(2.0),
 	sel_maxgenlepteta = cms.double(10),
+	# GenJets
+	sel_mingenjetpt  = cms.double(10.0),
+	sel_maxgenjeteta = cms.double(6.0),
+
+	btag_matchdeltaR = cms.double(0.25),
 
 	# Additional jet collections
 	jets = cms.VPSet()

@@ -33,7 +33,9 @@ options.register ('runon', # register 'runon' option
 
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-options.files= 'file:/scratch/buchmann/82F80C67-E111-E011-8089-003048D2910A.root'
+# options.files= 'file:/data/stiegerb/tempfiles/MuData.root'
+options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_RECO.root'
+# options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_AOD.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -115,18 +117,14 @@ process.TFileService = cms.Service("TFileService",
 	closeFileFast = cms.untracked.bool(True)
 )
 
-#### Electron ID ##############################################################
+### Electron ID ##############################################################
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
-#### Parameterisation for Jet Corrections and JES ME Corrections ###############
-recoJet_src = "ak5CaloJets"
-genJet_src = "ak5GenJets"
-
-# Jet ID: add the ones you want
+### Jet ID ###################################################################
 process.load('RecoJets.Configuration.JetIDProducers_cff')
 process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 
-#### Jet Corrections ###########################################################
+### Jet Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
 # and http://indico.cern.ch/getFile.py/access?contribId=38&sessionId=4&resId=0&materialId=slides&confId=110072 slide 13
 # to check what cff to use
@@ -145,13 +143,12 @@ else:
 	process.jecCorSequence = cms.Sequence(
 		process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
 	)
-### NB: also check the analysis input below.
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
 process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
-process.metMuonJESCorAK5.inputUncorJetsLabel = recoJet_src
+process.metMuonJESCorAK5.inputUncorJetsLabel = "ak5CaloJets"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
@@ -183,46 +180,19 @@ process.scrapingVeto = cms.EDFilter("FilterOutScraping",
      thresh = cms.untracked.double(0.25)
      )
 
-# require good primary vertex
-process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
-    vertexCollection = cms.InputTag('offlinePrimaryVertices'),
-    minimumNDOF = cms.uint32(4) ,
-    maxAbsZ = cms.double(24),
-    maxd0 = cms.double(2)
-    )
-# Cleaning path
-# Removed primary vertex cut, can cut offline
-# process.cleaning *= process.scrapingVeto*process.primaryVertexFilter
-
-
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
 process.load("RecoJets.Configuration.GenJetParticles_cff")
 process.load("RecoJets.Configuration.RecoGenJets_cff")
-
 process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJets )
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
-# Synchronise with Jet configuration above (defaults to ak5)
-process.analyze.tag_jets  = recoJet_src
-process.analyze.jetCorrs  = 'ak5CaloL2L3'
-process.analyze.tag_jetID = 'ak5JetID'
+
 # Add some jet collections
 process.analyze.jets = (
-    # PF jets
-    cms.PSet( prefix = cms.untracked.string('PF'),
-              tag = cms.untracked.InputTag('ak5PFJets'),
-              isPat = cms.untracked.bool(False),
-              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-              jet_id = cms.untracked.InputTag('ak5JetID'),
-              sel_minpt  = cms.double(15.0),
-              sel_maxeta = process.analyze.sel_maxjeta,
-              corrections = cms.string('ak5PFL2L3'),
-              btag_matchdeltaR = cms.double(0.25),
-              ),
-    # Calo jets (for cross-check)
+    # Calo jets
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
               isPat = cms.untracked.bool(False),
@@ -252,22 +222,12 @@ if options.runon == 'data':
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
 
-# Dump object information for some HLT trigger filters (from confDB)
-process.analyze.hlt_labels = ['hltSingleMu3L3Filtered3',
-                              'hltSingleMu5L3Filtered5',
-                              'hltSingleMu9L3Filtered9',
-                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilteroHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
-                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilter',
-                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt15PixelMatchFilter',
-                              'hltL1NonIsoHLTNonIsoSinglePhotonEt10HcalIsolFilter']
-
-
 #### DEBUG #####################################################################
-#process.dump = cms.EDAnalyzer("EventContentAnalyzer")
-#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+# process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+# process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
-#)
-#process.ProfilerService = cms.Service("ProfilerService",
+# )
+# process.ProfilerService = cms.Service("ProfilerService",
 #                                      firstEvent = cms.untracked.int32(2),
 #                                      lastEvent = cms.untracked.int32(51),
 #                                      paths = cms.untracked.vstring(['p'])
@@ -288,10 +248,6 @@ process.p = cms.Path(
         + process.analyze
         )
     )
-
-# remove output path from patTemplate_cfg
-# process.p.remove(process.out)
-
 
 # remove ak5GenJets from the path if it will run on data
 if options.runon=='data':

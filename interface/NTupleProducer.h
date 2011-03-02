@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.77 2011/02/23 19:34:29 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.78 2011/02/28 17:14:56 stiegerb Exp $
 //
 //
 
@@ -111,6 +111,7 @@ private:
 	static const int gMaxntrks    = 500;
 	static const int gMaxnphos    = 50;
 	static const int gMaxngenlept = 100;
+	static const int gMaxngenjets = 100;
 	static const int gMaxnvrtx    = 25;
 
 	edm::InputTag fMuonTag;
@@ -128,14 +129,11 @@ private:
 	edm::InputTag fBtag2Tag;
 	edm::InputTag fBtag3Tag;
 	edm::InputTag fBtag4Tag;
-	edm::InputTag fJetTracksTag;
-	edm::InputTag fJetIDTag;
-	edm::InputTag fMET1Tag;
-	edm::InputTag fMET2Tag;
-	edm::InputTag fMET3Tag;
-	edm::InputTag fMET4Tag;
-	edm::InputTag fMET5Tag;
-	edm::InputTag fMET6Tag;
+	edm::InputTag fRawCaloMETTag;
+	edm::InputTag fTCMETTag;
+	edm::InputTag fPFMETTag;
+	edm::InputTag fCorrCaloMETTag;
+	edm::InputTag fGenMETTag;
 	edm::InputTag fVertexTag;
 	edm::InputTag fTrackTag;
 	edm::InputTag fPhotonTag;
@@ -160,17 +158,15 @@ private:
 	float fMaxtrketa;
 	float fMaxtrknchi2;
 	int	fMintrknhits;
-
 	float fMinphopt;
 	float fMaxphoeta;
 
 	float fMingenleptpt; 
 	float fMaxgenlepteta;
-
-	float fJUNC_px_match[gMaxnjets];
-	float fJUNC_py_match[gMaxnjets];
-	float fJUNC_pz_match[gMaxnjets];
-
+	float fMingenjetpt;
+	float fMaxgenjeteta;
+	
+	float fBtagMatchdeltaR;
 
 	TH1I *fHhltstat; // Added to keep track of trigger names
 	TH1I *fHl1physstat;
@@ -303,6 +299,7 @@ private:
 	int fTflagmaxtrkexc;     // Found more than 500 tracks in event
 	int fTflagmaxphoexc;     // Found more than 500 photons in event
 	int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
+	int fTflagmaxgenjetexc;  // Found more than 100 genjets in event
 	int fTflagmaxvrtxexc;    // Found more than 25 vertices in event
 
 // GenLeptons
@@ -321,6 +318,16 @@ private:
 	float fTGenLeptonGMPt[gMaxngenlept];    
 	float fTGenLeptonGMEta[gMaxngenlept];   
 	float fTGenLeptonGMPhi[gMaxngenlept]; 
+
+// GenJets
+	int   fTNGenJets;
+	float fTGenJetPt  [gMaxngenjets];
+	float fTGenJetEta [gMaxngenjets];
+	float fTGenJetPhi [gMaxngenjets];
+	float fTGenJetE   [gMaxngenjets];
+	float fTGenJetemE [gMaxngenjets];
+	float fTGenJethadE[gMaxngenjets];
+	float fTGenJetinvE[gMaxngenjets];
 
 
 // Muons:
@@ -657,7 +664,7 @@ private:
 	float fTPhotSharedPz[gMaxnphos];
 	float fTPhotSharedEnergy[gMaxnphos];
 // Spike cleaning
-	int    fTPhotScSeedSeverity[gMaxnphos];
+	int   fTPhotScSeedSeverity[gMaxnphos];
 	float fTPhotE1OverE9[gMaxnphos];
 	float fTPhotS4OverS1[gMaxnphos];
 
@@ -674,24 +681,25 @@ private:
 	float fTjpt[gMaxnjets];
 	float fTjeta[gMaxnjets];
 	float fTjphi[gMaxnjets];
-	float fTjemfrac[gMaxnjets];
-	int fTjNconstituents[gMaxnjets];
-	float fTjID_HPD[gMaxnjets];
-	float fTjID_RBX[gMaxnjets];
-	float fTjID_n90Hits[gMaxnjets];
-	float fTjID_resEMF[gMaxnjets];
-	float fTjID_HCALTow[gMaxnjets];
-	float fTjID_ECALTow[gMaxnjets];
+	float fTjEcorr[gMaxnjets];
+
 	float fTJEtaRms[gMaxnjets];
 	float fTJPhiRms[gMaxnjets];
+
+	int fTjNconstituents[gMaxnjets];
+	int fTjChMult[gMaxnjets];
+	int fTjNeuMult[gMaxnjets];
+	float fTjChHadFrac[gMaxnjets];
+	float fTjNeuHadFrac[gMaxnjets];
+	float fTjChEmFrac[gMaxnjets];
+	float fTjNeuEmFrac[gMaxnjets];
+	float fTjChMuEFrac[gMaxnjets];
+
 	float fTjbTagProbTkCntHighEff[gMaxnjets];
 	float fTjbTagProbTkCntHighPur[gMaxnjets];
 	float fTjbTagProbSimpSVHighEff[gMaxnjets];
 	float fTjbTagProbSimpSVHighPur[gMaxnjets];
-	float fTjChfrac[gMaxnjets];
-	float fTjEfracHadr[gMaxnjets];
 	float fTjMass[gMaxnjets];
-	int fTjnAssoTracks[gMaxnjets];
 	float fTjtrk1px[gMaxnjets];
 	float fTjtrk1py[gMaxnjets];
 	float fTjtrk1pz[gMaxnjets];
@@ -701,7 +709,6 @@ private:
 	float fTjtrk3px[gMaxnjets];
 	float fTjtrk3py[gMaxnjets];
 	float fTjtrk3pz[gMaxnjets];
-	float fTjEcorr[gMaxnjets];
 	float fTjeMinDR[gMaxnjets];
 	float fTjetVtxx[gMaxnjets];
 	float fTjetVtxy[gMaxnjets];
@@ -713,6 +720,7 @@ private:
 	float fTjetVtxEzz[gMaxnjets];
 	float fTjetVtxEzx[gMaxnjets];
 	float fTjetVtxNChi2[gMaxnjets];
+	
 	float fTjetGenPt[gMaxnjets];
 	float fTjetGenEta[gMaxnjets];
 	float fTjetGenPhi[gMaxnjets];
@@ -764,10 +772,6 @@ private:
 	float fTRawMEThadEtInHE;
 	float fTRawMEThadEtInHF;
 	float fTRawMETSignificance;
-	float fTMuCorrMET;
-	float fTMuCorrMETpx;
-	float fTMuCorrMETpy;
-	float fTMuCorrMETphi;
 	float fTGenMET;
 	float fTGenMETpx;
 	float fTGenMETpy;

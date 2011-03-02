@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.98 2011/02/23 19:34:29 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.99 2011/02/28 17:14:56 stiegerb Exp $
 //
 //
 
@@ -46,7 +46,6 @@ Implementation:
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
-#include "DataFormats/JetReco/interface/JetTracksAssociation.h"
 #include "DataFormats/JetReco/interface/JetID.h"
 
 #include "DataFormats/METReco/interface/METCollection.h"
@@ -108,14 +107,11 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fBtag2Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
 	fBtag3Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
 	fBtag4Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag4");
-	fJetTracksTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
-	fJetIDTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_jetID");
-	fMET1Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met1");
-	fMET2Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met2");
-	fMET3Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met3");
-	fMET4Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met4");
-	fMET5Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met5");
-	fMET6Tag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_met6");
+	fRawCaloMETTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_rawcalomet");
+	fTCMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tcmet");
+	fPFMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmet");
+	fCorrCaloMETTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_corrcalomet");
+	fGenMETTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genmet");
 	fVertexTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
 	fTrackTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
 	fPhotonTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_photons");
@@ -146,6 +142,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
 	fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
 	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
+	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
+	fMaxgenjeteta   = iConfig.getParameter<double>("sel_maxgenjeteta");
+
+	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
 	// Create histograms and trees
 	fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
@@ -249,14 +249,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
 	iEvent.getByLabel(fBtag4Tag,jetsAndProbsSimpSVHighPur);
 
-	// Jet tracks association
-	Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
-	iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
-
-	// Jet ID association
-	edm::Handle<reco::JetIDValueMap> jetIDMap;
-	iEvent.getByLabel(fJetIDTag,jetIDMap);
-
 	//Get Tracks collection
 	Handle<TrackCollection> tracks;
 	iEvent.getByLabel(fTrackTag, tracks);
@@ -267,19 +259,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// MET
 	Handle<CaloMETCollection> calomet;
-	iEvent.getByLabel(fMET1Tag, calomet);
-
-	Handle<CaloMETCollection> corrmumet;
-	iEvent.getByLabel(fMET2Tag, corrmumet);
+	iEvent.getByLabel(fRawCaloMETTag, calomet);
 
 	Handle<METCollection> tcmet;
-	iEvent.getByLabel(fMET3Tag, tcmet);
+	iEvent.getByLabel(fTCMETTag, tcmet);
 
 	Handle<View<PFMET> > pfmet;
-	iEvent.getByLabel(fMET4Tag, pfmet);
+	iEvent.getByLabel(fPFMETTag, pfmet);
 
 	Handle<CaloMETCollection> corrmujesmet;
-	iEvent.getByLabel(fMET5Tag, corrmujesmet);
+	iEvent.getByLabel(fCorrCaloMETTag, corrmujesmet);
 
 	// Get beamspot for d0 determination
 	BeamSpot beamSpot;
@@ -304,7 +293,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Get CaloTowers
 	edm::Handle<CaloTowerCollection> calotowers;
-	iEvent.getByLabel(fCalTowTag,calotowers);
+	iEvent.getByLabel(fCalTowTag, calotowers);
 
 	// For ECAL cleaning: rechit and channel status
 	edm::Handle<EcalRecHitCollection> ebRecHits;
@@ -1219,14 +1208,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	////////////////////////////////////////////////////////
 	// Jet Variables:
-	// Keep pointers to jets in original collections
-	vector<const Jet*> jetPtr;
-	// Jet corrections
-	vector<const Jet*> corrJets;
-	corrJets.reserve(jets->size()); // Speed up push-backs
+	const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs, iSetup);
 	vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
-	// Save here px, py, pz for uncorrected jets
-	// used later for matching jets with b-tagging information
 	int itag(-1);
 	fTnjetstot = jets->size();
 	// Loop over uncorr. jets
@@ -1242,23 +1225,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTgoodevent = 1;
 			break;
 		}
-		// Cast and make a new (non-const) copy to apply corrections
-		const CaloJet* jet = static_cast<const CaloJet*>(&(*Jit));
-		CaloJet* j = new CaloJet(*jet);
-		fJUNC_px_match[itag] = j->px();
-		fJUNC_py_match[itag] = j->py();
-		fJUNC_pz_match[itag] = j->pz();
-		// Apply L2 and L3 JetCorrections
-		const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
-		j->scaleEnergy(jetCorr->correction(j->p4()));
-
-		corrJets.push_back(j);
-		corrIndices.push_back(make_pair(itag,j->pt()));
+		double scale = jetCorr->correction(Jit->p4());
+		corrIndices.push_back(make_pair(itag, scale*Jit->pt()));
 	}
-
+	
 	// Sort corrected jet collection by decreasing pt
 	std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
-
+	
 	// Determine corrected jets
 	int jqi(-1); // counts # of qualified jets
 	// Loop over corr. jet indices
@@ -1272,206 +1245,189 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			break;
 		}
 		int index = it->first;
+		const PFJet* cojet = static_cast<const PFJet*>( &((*jets)[index]) ); // look away...
+		PFJet* jet = new PFJet(*cojet);
 
+		// Apply L2L3 corrections
+		double scale = jetCorr->correction(jet->p4());
+		jet->scaleEnergy(scale);
+	
 		// Jet preselection
-		const Jet* jet = corrJets[index];
 		if(jet->pt() < fMincorjpt) continue;
 		if(fabs(jet->eta()) > fMaxjeta) continue;
 		jqi++;
 
-		// Save the jet pointer
-		jetPtr.push_back(jet);
 		// Dump jet properties into tree variables
-		fTjpx[jqi]  = jet->px();
-		fTjpy[jqi]  = jet->py();
-		fTjpz[jqi]  = jet->pz();
-		fTjpt[jqi]  = jet->pt();
-		fTjeta[jqi] = jet->eta();
-		fTjphi[jqi] = jet->phi();
-		fTje[jqi]   = jet->energy();
-		fTjet[jqi]  = jet->et(); // i know: it's the same as pt, still...
-		fTjNconstituents[jqi]  = jet->getJetConstituents().size();
-		fTjEcorr[jqi] = jet->px()/fJUNC_px_match[index];
+		fTjpx    [jqi] = jet->px();
+		fTjpy    [jqi] = jet->py();
+		fTjpz    [jqi] = jet->pz();
+		fTjpt    [jqi] = jet->pt();
+		fTjeta   [jqi] = jet->eta();
+		fTjphi   [jqi] = jet->phi();
+		fTje     [jqi] = jet->energy();
+		fTjet    [jqi] = jet->et();
+		fTjEcorr [jqi] = scale;
 		fTJEtaRms[jqi] = sqrt(jet->etaetaMoment());
 		fTJPhiRms[jqi] = sqrt(jet->etaphiMoment());
 
+		fTjNconstituents[jqi] = jet->nConstituents();
+		fTjChMult       [jqi] = jet->chargedMultiplicity(); // do it the pf way...
+		fTjNeuMult      [jqi] = jet->neutralMultiplicity(); 
+		fTjChHadFrac    [jqi] = jet->chargedHadronEnergyFraction();
+		fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergyFraction();
+		fTjChEmFrac     [jqi] = jet->chargedEmEnergyFraction();
+		fTjNeuEmFrac    [jqi] = jet->neutralEmEnergyFraction();
+		fTjChMuEFrac    [jqi] = jet->chargedMuEnergyFraction();
 
 		// Calculate the DR wrt the closest electron
-		double ejDRmin = 10.; // Default when no electrons previously selected
+		float ejDRmin = 10.; // Default when no electrons previously selected
 		for( int j = 0; j < fTneles; j++ ){
-			double ejDR = reco::deltaR(jet->eta(), jet->phi(), fTeeta[j], fTephi[j]);
+			float ejDR = reco::deltaR(jet->eta(), jet->phi(), fTeeta[j], fTephi[j]);
 			if(ejDR<ejDRmin) ejDRmin = ejDR;
 		}
 		fTjeMinDR[jqi] = ejDRmin;
 
-		// B-tagging probability (for 4 b-taggings)
-		for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 &&
-				fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbTkCntHighEff[jqi]=(*jetsAndProbsTkCntHighEff)[i].second;
-				break;
+		// B-tagging probability (for 4 b-taggings), with delta R matching for now
+		float mindr(999.99);
+		for( size_t i = 0; i < jetsAndProbsTkCntHighEff->size(); i++ ){
+			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighEff)[i].first->eta(), (*jetsAndProbsTkCntHighEff)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbTkCntHighEff[jqi] = (*jetsAndProbsTkCntHighEff)[i].second;
+				mindr = deltar;
 			}
 		}
-		for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 &&
-				fabs( (fJUNC_py_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			fabs( (fJUNC_pz_match[index] - (*jetsAndProbsTkCntHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbTkCntHighPur[jqi]=(*jetsAndProbsTkCntHighPur)[i].second;
-				break;
+		mindr = 999.99;
+		for( size_t i = 0; i < jetsAndProbsTkCntHighPur->size(); i++ ){
+			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighPur)[i].first->eta(), (*jetsAndProbsTkCntHighPur)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbTkCntHighPur[jqi] = (*jetsAndProbsTkCntHighPur)[i].second;
+				mindr = deltar;
 			}
 		}
-		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->px())/fJUNC_px_match[index]) < 0.00001 &&
-				fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighEff)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbSimpSVHighEff[jqi]=(*jetsAndProbsSimpSVHighEff)[i].second;
-				break;
+		mindr = 999.99;
+		for( size_t i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++ ){
+			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighEff)[i].first->eta(), (*jetsAndProbsSimpSVHighEff)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[i].second;
+				mindr = deltar;
 			}
 		}
-		for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
-			// Match by pt between the two "collections"
-			if( fabs( (fJUNC_px_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->px())/fJUNC_px_match[index]) < 0.00001 &&
-				fabs( (fJUNC_py_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->py())/fJUNC_py_match[index]) < 0.00001 &&
-			fabs( (fJUNC_pz_match[index] - (*jetsAndProbsSimpSVHighPur)[i].first->pz())/fJUNC_pz_match[index]) < 0.00001 ){
-				fTjbTagProbSimpSVHighPur[jqi]=(*jetsAndProbsSimpSVHighPur)[i].second;
-				break;
+		mindr = 999.99;
+		for( size_t i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++ ){
+			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighPur)[i].first->eta(), (*jetsAndProbsSimpSVHighPur)[i].first->phi());
+			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+				fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[i].second;
+				mindr = deltar;
 			}
 		}
 
 		// Jet-track association: get associated tracks
+		const reco::TrackRefVector& tracks = jet->getTrackRefs();
 		vector<const reco::Track*> AssociatedTracks;
-		edm::RefToBase<reco::Jet> jetRef = jets->refAt(jqi);
-		const reco::TrackRefVector& tracks = JetTracksAssociation::getValue(*(jetTracksAssoc.product()),jetRef);
-		for ( TrackRefVector::iterator it = tracks.begin();
-		it != tracks.end(); ++it )
-			AssociatedTracks.push_back( it->get() );
-
-		//Below save the momenta of the three leading tracks associated to the jet
-		double pT1 =0.;
-		double pT2 =0.;
-		double pT3 =0.;
-		int idx1=-1;
-		int idx2=-1;
-		int idx3=-1;
+		for( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ) AssociatedTracks.push_back( it->get() );
+			
+		// Below save the momenta of the three leading tracks associated to the jet
+		float pT1(0.), pT2(0.), pT3(0.);
+		int idx1(-1), idx2(-1), idx3(-1);
+			
 		// Jet-track association: make transient tracks and store information
 		vector<TransientTrack> AssociatedTTracks;
-		fTjnAssoTracks[jqi] = 0;
-		fTjChfrac[jqi] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
 		fTjMass[jqi] = 0.;
 		if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
-		// Tmp variables for vectorial sum of pt of tracks
+			// Tmp variables for vectorial sum of pt of tracks
 			double pXtmp(0.), pYtmp(0.), pZtmp(0.), E2tmp(0.);
 			const double trkmass = 0.; // Assumed mass for tracks
-	// Loop over associated tracks:
+
+			// Loop over associated tracks:
 			for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-				AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks
+				AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks for vertex fitting below
 				if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
 					pXtmp += AssociatedTracks[t]->px();
 					pYtmp += AssociatedTracks[t]->py();
 					pZtmp += AssociatedTracks[t]->pz();
 					E2tmp += trkmass*trkmass + pXtmp*pXtmp + pYtmp*pYtmp + pZtmp*pZtmp;
-					fTjnAssoTracks[jqi]++;
 				}
-		// Find the three highest pT tracks
-				if(AssociatedTracks[t]->pt()>pT1 && AssociatedTracks.size()>=1){
+				// Find the three highest pT tracks
+				if(AssociatedTracks[t]->pt() > pT1 && AssociatedTracks.size() >= 1){
 					pT1=AssociatedTracks[t]->pt();
 					idx3=idx2;
 					idx2=idx1;
 					idx1=t;
-				} else if (AssociatedTracks[t]->pt()<pT1 && AssociatedTracks[t]->pt()>pT2 && AssociatedTracks.size()>=2) {
+				} else if (AssociatedTracks[t]->pt() < pT1 && AssociatedTracks[t]->pt() > pT2 && AssociatedTracks.size() >= 2) {
 					pT2=AssociatedTracks[t]->pt();
 					idx3=idx2;
 					idx2=t;
-				} else if (AssociatedTracks[t]->pt()<pT2 && AssociatedTracks[t]->pt()>pT3 && AssociatedTracks.size()>=3){
+				} else if (AssociatedTracks[t]->pt() < pT2 && AssociatedTracks[t]->pt() > pT3 && AssociatedTracks.size() >= 3){
 					pT3=AssociatedTracks[t]->pt();
 					idx3=t;
 				}
 			}
-	// Fill the momenta
+			// Fill the momenta
 			if(AssociatedTracks.size()>=1){
-				fTjtrk1px[jqi] =AssociatedTracks[idx1]->px();
-				fTjtrk1py[jqi] =AssociatedTracks[idx1]->py();
-				fTjtrk1pz[jqi] =AssociatedTracks[idx1]->pz();
+				fTjtrk1px[jqi] = AssociatedTracks[idx1]->px();
+				fTjtrk1py[jqi] = AssociatedTracks[idx1]->py();
+				fTjtrk1pz[jqi] = AssociatedTracks[idx1]->pz();
 			}
 			if(AssociatedTracks.size()>=2){
-				fTjtrk2px[jqi] =AssociatedTracks[idx2]->px();
-				fTjtrk2py[jqi] =AssociatedTracks[idx2]->py();
-				fTjtrk2pz[jqi] =AssociatedTracks[idx2]->pz();
+				fTjtrk2px[jqi] = AssociatedTracks[idx2]->px();
+				fTjtrk2py[jqi] = AssociatedTracks[idx2]->py();
+				fTjtrk2pz[jqi] = AssociatedTracks[idx2]->pz();
 			}
 			if(AssociatedTracks.size()>=3){
-				fTjtrk3px[jqi] =AssociatedTracks[idx3]->px();
-				fTjtrk3py[jqi] =AssociatedTracks[idx3]->py();
-				fTjtrk3pz[jqi] =AssociatedTracks[idx3]->pz();
+				fTjtrk3px[jqi] = AssociatedTracks[idx3]->px();
+				fTjtrk3py[jqi] = AssociatedTracks[idx3]->py();
+				fTjtrk3pz[jqi] = AssociatedTracks[idx3]->pz();
 			}
-
-			fTjChfrac[jqi] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / jet->pt();
-
+			
 			fTjMass[jqi]   = sqrt(E2tmp - pXtmp*pXtmp - pYtmp*pYtmp - pZtmp*pZtmp);
-			fTjMass[jqi]   *= 1/fTjChfrac[jqi];
+			if(fTjChMult[jqi] > 0) fTjMass[jqi] *= fTjNconstituents[jqi]/fTjChMult[jqi]; // apparantly there ARE cases where ChMult is 0, but we still end up here...
+			else fTjMass[jqi] = 0.;
 		} else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-			fTjChfrac[jqi] = -1.;
-			fTjMass[jqi]   = -1.;
+			fTjMass[jqi] = -888.88;
 		}
 
-	// Convert tracks to transient tracks for vertex fitting
+		// Do a vertex fitting with the tracks
 		if(AssociatedTTracks.size() > 1) {
 			AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
 			TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
 			if(jetVtx.isValid()){
-				fTjetVtxx[jqi]  = jetVtx.position().x();
-				fTjetVtxy[jqi]  = jetVtx.position().y();
-				fTjetVtxz[jqi]  = jetVtx.position().z();
-				fTjetVtxExx[jqi] = jetVtx.positionError().cxx();
-				fTjetVtxEyx[jqi] = jetVtx.positionError().cyx();
-				fTjetVtxEyy[jqi] = jetVtx.positionError().cyy();
-				fTjetVtxEzy[jqi] = jetVtx.positionError().czy();
-				fTjetVtxEzz[jqi] = jetVtx.positionError().czz();
-				fTjetVtxEzx[jqi] = jetVtx.positionError().czx();
+				fTjetVtxx    [jqi] = jetVtx.position().x();
+				fTjetVtxy    [jqi] = jetVtx.position().y();
+				fTjetVtxz    [jqi] = jetVtx.position().z();
+				fTjetVtxExx  [jqi] = jetVtx.positionError().cxx();
+				fTjetVtxEyx  [jqi] = jetVtx.positionError().cyx();
+				fTjetVtxEyy  [jqi] = jetVtx.positionError().cyy();
+				fTjetVtxEzy  [jqi] = jetVtx.positionError().czy();
+				fTjetVtxEzz  [jqi] = jetVtx.positionError().czz();
+				fTjetVtxEzx  [jqi] = jetVtx.positionError().czx();
 				fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
 			}else{
-				fTjetVtxx[jqi]     = -777.77;
-				fTjetVtxy[jqi]     = -777.77;
-				fTjetVtxz[jqi]     = -777.77;
-				fTjetVtxExx[jqi]   = -777.77;
-				fTjetVtxEyx[jqi]   = -777.77;
-				fTjetVtxEyy[jqi]   = -777.77;
-				fTjetVtxEzy[jqi]   = -777.77;
-				fTjetVtxEzz[jqi]   = -777.77;
-				fTjetVtxEzx[jqi]   = -777.77;
+				fTjetVtxx    [jqi] = -777.77;
+				fTjetVtxy    [jqi] = -777.77;
+				fTjetVtxz    [jqi] = -777.77;
+				fTjetVtxExx  [jqi] = -777.77;
+				fTjetVtxEyx  [jqi] = -777.77;
+				fTjetVtxEyy  [jqi] = -777.77;
+				fTjetVtxEzy  [jqi] = -777.77;
+				fTjetVtxEzz  [jqi] = -777.77;
+				fTjetVtxEzx  [jqi] = -777.77;
 				fTjetVtxNChi2[jqi] = -777.77;
 			}
 		}else{
-			fTjetVtxx[jqi]     = -888.88;
-			fTjetVtxy[jqi]     = -888.88;
-			fTjetVtxz[jqi]     = -888.88;
-			fTjetVtxExx[jqi]   = -888.88;
-			fTjetVtxEyx[jqi]   = -888.88;
-			fTjetVtxEyy[jqi]   = -888.88;
-			fTjetVtxEzy[jqi]   = -888.88;
-			fTjetVtxEzz[jqi]   = -888.88;
-			fTjetVtxEzx[jqi]   = -888.88;
+			fTjetVtxx    [jqi] = -888.88;
+			fTjetVtxy    [jqi] = -888.88;
+			fTjetVtxz    [jqi] = -888.88;
+			fTjetVtxExx  [jqi] = -888.88;
+			fTjetVtxEyx  [jqi] = -888.88;
+			fTjetVtxEyy  [jqi] = -888.88;
+			fTjetVtxEzy  [jqi] = -888.88;
+			fTjetVtxEzz  [jqi] = -888.88;
+			fTjetVtxEzx  [jqi] = -888.88;
 			fTjetVtxNChi2[jqi] = -888.88;
 		}
 		AssociatedTracks.clear();
 		AssociatedTTracks.clear();
-
-		// CaloJet specific variables (embedded in PAT)
-		reco::JetID jetID;
-		const CaloJet* cJ = static_cast<const CaloJet*>(jet);
-		fTjemfrac[jqi]    = cJ->emEnergyFraction();
-		fTjEfracHadr[jqi] = cJ->energyFractionHadronic();
-		jetID = (*jetIDMap)[ jetRef ];
-		fTjID_HPD[jqi]      = jetID.fHPD;
-		fTjID_RBX[jqi]      = jetID.fRBX;
-		fTjID_n90Hits[jqi]  = jetID.n90Hits;
-		fTjID_resEMF[jqi]   = jetID.restrictedEMF;
-		fTjID_HCALTow[jqi]  = jetID.nHCALTowers;
-		fTjID_ECALTow[jqi]  = jetID.nECALTowers;
-
+	
 		// GenJet matching
 		if (!fIsRealData) {
 			const GenJet *matchedJet = matchJet(&(*jet), iEvent);
@@ -1488,17 +1444,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTgoodjet[jqi] = 0;
 	}
 	fTnjets = jqi+1;
-	corrJets.clear();
+	// corrJets.clear();
 	corrIndices.clear();
 
 	// Check electron duplication
 	ElectronDuplicate(elecPtr, trckPtr);
 	// Check photon/electron duplication
 	PhotonElectronDuplicate(elecPtr, photSCs);
+
+	// These don't work for pf jets yet
 	// Check electron/jet duplication
-	ElJetOverlap(jetPtr, elecPtr, calotowers);
+	// ElJetOverlap(jetPtr, elecPtr, calotowers);
 	// Check photon/jet duplication
-	PhotonJetOverlap(jetPtr, photSCs, calotowers);
+	// PhotonJetOverlap(jetPtr, photSCs, calotowers);
 
 	////////////////////////////////////////////////////////
 	// Process other jet collections, as configured
@@ -1587,14 +1545,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTRawMEThadEtInHF    = (calomet->at(0)).hadEtInHF();
 	fTRawMETSignificance = (calomet->at(0)).significance();
 
-	fTMuCorrMET    = (corrmumet->at(0)).pt();
-	fTMuCorrMETpx  = (corrmumet->at(0)).px();
-	fTMuCorrMETpy  = (corrmumet->at(0)).py();
-	fTMuCorrMETphi = (corrmumet->at(0)).phi();
-
 	if (!fIsRealData) {
 		Handle<View<GenMET> > GenMET;
-		iEvent.getByLabel(fMET6Tag, GenMET);
+		iEvent.getByLabel(fGenMETTag, GenMET);
 		fTGenMET    = (GenMET->front()).pt();
 		fTGenMETpx  = (GenMET->front()).px();
 		fTGenMETpy  = (GenMET->front()).py();
@@ -1720,9 +1673,40 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
 			}
 		}
-
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Get GenJets
+	if(!fIsRealData){
+		edm::Handle<GenJetCollection> genjets;
+		iEvent.getByLabel(fGenJetTag, genjets);
+		GenJetCollection::const_iterator gjet;
+		
+		int jqi=-1;
+		for(gjet = genjets->begin(); gjet != genjets->end(); gjet++){
+			// Preselection
+			if(gjet->pt() < fMingenjetpt) continue;
+			if(fabs(gjet->eta()) > fMaxgenjeteta) continue;
+			jqi++;
+			if( jqi >= gMaxngenjets){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+					<< "Maximum number of gen-jets exceeded..";
+				fTflagmaxgenjetexc = 1;
+				fTgoodevent = 1;
+				break;
+			}
+			
+			fTGenJetPt  [jqi] = gjet->pt();
+			fTGenJetEta [jqi] = gjet->eta();
+			fTGenJetPhi [jqi] = gjet->phi();
+			fTGenJetE   [jqi] = gjet->energy();
+			fTGenJetemE [jqi] = gjet->emEnergy();
+			fTGenJethadE[jqi] = gjet->hadEnergy();
+			fTGenJetinvE[jqi] = gjet->invisibleEnergy();
+		}
+		fTNGenJets = jqi+1;
+	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
@@ -1818,6 +1802,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxTrkExceed"     ,&fTflagmaxtrkexc     ,"MaxTrkExceed/I");
 	fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc     ,"MaxPhotonsExceed/I");
 	fEventTree->Branch("MaxGenLepExceed"  ,&fTflagmaxgenleptexc ,"MaxGenLepExceed/I");
+	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
 	fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
@@ -1841,6 +1826,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("GenLeptonGMPt"    ,&fTGenLeptonGMPt       ,"GenLeptonGMPt[NGenLeptons]/F");
 	fEventTree->Branch("GenLeptonGMEta"   ,&fTGenLeptonGMEta      ,"GenLeptonGMEta[NGenLeptons]/F");
 	fEventTree->Branch("GenLeptonGMPhi"   ,&fTGenLeptonGMPhi      ,"GenLeptonGMPhi[NGenLeptons]/F");
+
+	// Gen-Jets
+	fEventTree->Branch("NGenJets"    ,&fTNGenJets   ,"NGenJets/I");
+	fEventTree->Branch("GenJetPt"    ,&fTGenJetPt   ,"GenJetPt[NGenJets]/F");
+	fEventTree->Branch("GenJetEta"   ,&fTGenJetEta  ,"GenJetEta[NGenJets]/F");
+	fEventTree->Branch("GenJetPhi"   ,&fTGenJetPhi  ,"GenJetPhi[NGenJets]/F");
+	fEventTree->Branch("GenJetE"     ,&fTGenJetE    ,"GenJetE[NGenJets]/F");
+	fEventTree->Branch("GenJetEmE"   ,&fTGenJetemE  ,"GenJetEmE[NGenJets]/F");
+	fEventTree->Branch("GenJetHadE"  ,&fTGenJethadE ,"GenJetHadE[NGenJets]/F");
+	fEventTree->Branch("GenJetInvE"  ,&fTGenJetinvE ,"GenJetInvE[NGenJets]/F");
 
 	// Vertices:
 	fEventTree->Branch("NVrtx",            &fTnvrtx           ,"NVrtx/I");
@@ -2182,24 +2177,26 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("JEt"            ,&fTjet            ,"JEt[NJets]/F");
 	fEventTree->Branch("JEta"           ,&fTjeta           ,"JEta[NJets]/F");
 	fEventTree->Branch("JPhi"           ,&fTjphi           ,"JPhi[NJets]/F");
-	fEventTree->Branch("JEMfrac"        ,&fTjemfrac        ,"JEMfrac[NJets]/F");
-	fEventTree->Branch("JNConstituents" ,&fTjNconstituents ,"JNConstituents[NJets]/I");
-	fEventTree->Branch("JID_HPD"        ,&fTjID_HPD        ,"JID_HPD[NJets]/F");
-	fEventTree->Branch("JID_RBX"        ,&fTjID_RBX        ,"JID_RBX[NJets]/F");
-	fEventTree->Branch("JID_n90Hits"    ,&fTjID_n90Hits    ,"JID_n90Hits[NJets]/F");
-	fEventTree->Branch("JID_resEMF"     ,&fTjID_resEMF     ,"JID_resEMF[NJets]/F");
-	fEventTree->Branch("JID_HCALTow"    ,&fTjID_HCALTow    ,"JID_HCALTow[NJets]/F");
-	fEventTree->Branch("JID_ECALTow"    ,&fTjID_ECALTow    ,"JID_ECALTow[NJets]/F");
-	fEventTree->Branch("JEtaRms"        ,&fTJEtaRms        ,"JEtaRms[NJets]/F");
-	fEventTree->Branch("JPhiRms"        ,&fTJPhiRms        ,"JPhiRms[NJets]/F");
-	fEventTree->Branch("JbTagProbTkCntHighEff"    ,&fTjbTagProbTkCntHighEff   ,"JbTagProbTkCntHighEff[NJets]/F");
-	fEventTree->Branch("JbTagProbTkCntHighPur"    ,&fTjbTagProbTkCntHighPur   ,"JbTagProbTkCntHighPur[NJets]/F");
-	fEventTree->Branch("JbTagProbSimpSVHighEff"   ,&fTjbTagProbSimpSVHighEff  ,"JbTagProbSimpSVHighEff[NJets]/F");
-	fEventTree->Branch("JbTagProbSimpSVHighPur"   ,&fTjbTagProbSimpSVHighPur  ,"JbTagProbSimpSVHighPur[NJets]/F");
-	fEventTree->Branch("JChfrac"        ,&fTjChfrac        ,"JChfrac[NJets]/F");
-	fEventTree->Branch("JEFracHadronic" ,&fTjEfracHadr     ,"JEFracHadronic[NJets]/F");
+	fEventTree->Branch("JEcorr"         ,&fTjEcorr         ,"JEcorr[NJets]/F");
+
+	fEventTree->Branch("JEtaRms"             ,&fTJEtaRms        ,"JEtaRms[NJets]/F");
+	fEventTree->Branch("JPhiRms"             ,&fTJPhiRms        ,"JPhiRms[NJets]/F");
+	fEventTree->Branch("JNConstituents"      ,&fTjNconstituents ,"JNConstituents[NJets]/I");
+	fEventTree->Branch("JNAssoTracks"        ,&fTjChMult        ,"JNAssoTracks[NJets]/I");
+	fEventTree->Branch("JNNeutrals"          ,&fTjNeuMult       ,"JNNeutrals[NJets]/I");
+	fEventTree->Branch("JChargedEmFrac"      ,&fTjChEmFrac      ,"JChargedEmFrac[NJets]/F");
+	fEventTree->Branch("JNeutralEmFrac"      ,&fTjNeuEmFrac     ,"JNeutralEmFrac[NJets]/F");
+	fEventTree->Branch("JChargedHadFrac"     ,&fTjChHadFrac     ,"JChargedHadFrac[NJets]/F");
+	fEventTree->Branch("JNeutralHadFrac"     ,&fTjNeuHadFrac    ,"JNeutralHadFrac[NJets]/F");
+	fEventTree->Branch("JChargedMuEnergyFrac",&fTjChMuEFrac     ,"JChargedMuEnergyFrac[NJets]/F");
+
+	fEventTree->Branch("JeMinDR"               ,&fTjeMinDR               ,"JeMinDR[NJets]/F");
+	fEventTree->Branch("JbTagProbTkCntHighEff" ,&fTjbTagProbTkCntHighEff ,"JbTagProbTkCntHighEff[NJets]/F");
+	fEventTree->Branch("JbTagProbTkCntHighPur" ,&fTjbTagProbTkCntHighPur ,"JbTagProbTkCntHighPur[NJets]/F");
+	fEventTree->Branch("JbTagProbSimpSVHighEff",&fTjbTagProbSimpSVHighEff,"JbTagProbSimpSVHighEff[NJets]/F");
+	fEventTree->Branch("JbTagProbSimpSVHighPur",&fTjbTagProbSimpSVHighPur,"JbTagProbSimpSVHighPur[NJets]/F");
+
 	fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/F");
-	fEventTree->Branch("JNAssoTracks"   ,&fTjnAssoTracks   ,"JNAssoTracks[NJets]/I");
 	fEventTree->Branch("Jtrk1px"        ,&fTjtrk1px        ,"Jtrk1px[NJets]/F");
 	fEventTree->Branch("Jtrk1py"        ,&fTjtrk1py        ,"Jtrk1py[NJets]/F");
 	fEventTree->Branch("Jtrk1pz"        ,&fTjtrk1pz        ,"Jtrk1pz[NJets]/F");
@@ -2209,8 +2206,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("Jtrk3px"        ,&fTjtrk3px        ,"Jtrk3px[NJets]/F");
 	fEventTree->Branch("Jtrk3py"        ,&fTjtrk3py        ,"Jtrk3py[NJets]/F");
 	fEventTree->Branch("Jtrk3pz"        ,&fTjtrk3pz        ,"Jtrk3pz[NJets]/F");
-	fEventTree->Branch("JEcorr"         ,&fTjEcorr         ,"JEcorr[NJets]/F");
-	fEventTree->Branch("JeMinDR"        ,&fTjeMinDR        ,"JeMinDR[NJets]/F");
 	fEventTree->Branch("JVtxx"          ,&fTjetVtxx        ,"JVtxx[NJets]/F");
 	fEventTree->Branch("JVtxy"          ,&fTjetVtxy        ,"JVtxy[NJets]/F");
 	fEventTree->Branch("JVtxz"          ,&fTjetVtxz        ,"JVtxz[NJets]/F");
@@ -2277,10 +2272,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("RawMEThadEtInHE"    ,&fTRawMEThadEtInHE     ,"RawMEThadEtInHE/F");
 	fEventTree->Branch("RawMEThadEtInHF"    ,&fTRawMEThadEtInHF     ,"RawMEThadEtInHF/F");
 	fEventTree->Branch("RawMETSignificance" ,&fTRawMETSignificance  ,"RawMETSignificance/F");
-	fEventTree->Branch("MuCorrMET"          ,&fTMuCorrMET           ,"MuCorrMET/F");
-	fEventTree->Branch("MuCorrMETpx"        ,&fTMuCorrMETpx         ,"MuCorrMETpx/F");
-	fEventTree->Branch("MuCorrMETpy"        ,&fTMuCorrMETpy         ,"MuCorrMETpy/F");
-	fEventTree->Branch("MuCorrMETphi"       ,&fTMuCorrMETphi        ,"MuCorrMETphi/F");
 	fEventTree->Branch("GenMET"             ,&fTGenMET              ,"GenMET/F");
 	fEventTree->Branch("GenMETpx"           ,&fTGenMETpx            ,"GenMETpx/F");
 	fEventTree->Branch("GenMETpy"           ,&fTGenMETpy            ,"GenMETpy/F");
@@ -2467,6 +2458,7 @@ void NTupleProducer::resetTree(){
 	fTflagmaxtrkexc     = 0;
 	fTflagmaxphoexc     = 0;
 	fTflagmaxgenleptexc = 0;
+	fTflagmaxgenjetexc = 0;
 	fTflagmaxvrtxexc    = 0;
 
 	fTnmu         = 0;
@@ -2482,6 +2474,7 @@ void NTupleProducer::resetTree(){
 	fTnphotons    = 0;
 	fTnphotonstot = 0;
 	fTngenleptons = 0;
+	fTNGenJets    = 0;
 	fTnvrtx       = 0;
 
 	resetInt(fTGenLeptonId       ,gMaxngenlept);
@@ -2499,6 +2492,13 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTGenLeptonGMEta ,gMaxngenlept);
 	resetFloat(fTGenLeptonGMPhi ,gMaxngenlept);
 
+	resetFloat(fTGenJetPt   ,gMaxngenjets);
+	resetFloat(fTGenJetEta  ,gMaxngenjets);
+	resetFloat(fTGenJetPhi  ,gMaxngenjets);
+	resetFloat(fTGenJetE    ,gMaxngenjets);
+	resetFloat(fTGenJetemE  ,gMaxngenjets);
+	resetFloat(fTGenJethadE ,gMaxngenjets);
+	resetFloat(fTGenJetinvE ,gMaxngenjets);
 
 	resetInt(fTgoodmu, gMaxnmus);
 	resetInt(fTmuIsIso, gMaxnmus);
@@ -2762,21 +2762,23 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjpt,  gMaxnjets);
 	resetFloat(fTjeta, gMaxnjets);
 	resetFloat(fTjphi, gMaxnjets);
-	resetFloat(fTjemfrac, gMaxnjets);
-	resetFloat(fTjID_HPD, gMaxnjets);
-	resetFloat(fTjID_RBX, gMaxnjets);
-	resetFloat(fTjID_n90Hits, gMaxnjets);
-	resetFloat(fTjID_resEMF,  gMaxnjets);
-	resetFloat(fTjID_HCALTow, gMaxnjets);
-	resetFloat(fTjID_ECALTow, gMaxnjets);
+	resetFloat(fTJEtaRms,gMaxnjets );
+	resetFloat(fTJPhiRms,gMaxnjets );
+	resetFloat(fTjMass,   gMaxnjets);
+
+	resetInt  (fTjNconstituents, gMaxnjets);
+	resetInt  (fTjChMult, gMaxnjets);
+	resetInt  (fTjNeuMult, gMaxnjets);
+	resetFloat(fTjChHadFrac, gMaxnjets);
+	resetFloat(fTjNeuHadFrac, gMaxnjets);
+	resetFloat(fTjChEmFrac, gMaxnjets);
+	resetFloat(fTjNeuEmFrac, gMaxnjets);
+	resetFloat(fTjChMuEFrac, gMaxnjets);
+
 	resetFloat(fTjbTagProbTkCntHighEff, gMaxnjets);
 	resetFloat(fTjbTagProbTkCntHighPur, gMaxnjets);
 	resetFloat(fTjbTagProbSimpSVHighEff, gMaxnjets);
 	resetFloat(fTjbTagProbSimpSVHighPur, gMaxnjets);
-	resetFloat(fTjChfrac,   gMaxnjets);
-	resetFloat(fTjEfracHadr, gMaxnjets);
-	resetFloat(fTjMass,   gMaxnjets);
-	resetInt(fTjnAssoTracks, gMaxnjets);
 	resetFloat(fTjtrk1px, gMaxnjets);
 	resetFloat(fTjtrk1py, gMaxnjets);
 	resetFloat(fTjtrk1pz, gMaxnjets);
@@ -2797,9 +2799,7 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjetVtxEzz, gMaxnjets);
 	resetFloat(fTjetVtxEzx, gMaxnjets);
 	resetFloat(fTjetVtxNChi2, gMaxnjets);
-	resetInt(fTjNconstituents, gMaxnjets);
-	resetFloat(fTJEtaRms,gMaxnjets );
-	resetFloat(fTJPhiRms,gMaxnjets );
+
 	resetFloat(fTjetGenPt, gMaxnjets);
 	resetFloat(fTjetGenEta, gMaxnjets);
 	resetFloat(fTjetGenPhi, gMaxnjets);
@@ -2807,10 +2807,6 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjetGenemE, gMaxnjets);
 	resetFloat(fTjetGenhadE, gMaxnjets);
 	resetFloat(fTjetGeninvE, gMaxnjets);
-
-	resetFloat(fJUNC_px_match, gMaxnjets);
-	resetFloat(fJUNC_py_match, gMaxnjets);
-	resetFloat(fJUNC_pz_match, gMaxnjets);
 
 	resetInt(fTgoodtrk,  gMaxntrks);
 	resetFloat(fTtrkpt, gMaxntrks);
@@ -2894,10 +2890,6 @@ void NTupleProducer::resetTree(){
 	fTRawMEThadEtInHE    = -999.99;
 	fTRawMEThadEtInHF    = -999.99;
 	fTRawMETSignificance = -999.99;
-	fTMuCorrMET          = -999.99;
-	fTMuCorrMETpx        = -999.99;
-	fTMuCorrMETpy        = -999.99;
-	fTMuCorrMETphi       = -999.99;
 	fTGenMET             = -999.99;
 	fTGenMETpx           = -999.99;
 	fTGenMETpy           = -999.99;
