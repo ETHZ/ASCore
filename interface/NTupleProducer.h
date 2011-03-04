@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.78 2011/02/28 17:14:56 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.79 2011/03/02 17:51:55 stiegerb Exp $
 //
 //
 
@@ -418,21 +418,18 @@ private:
 // - Gen Info:
 	int   fTGenMuId      [gMaxnmus];
 	int   fTGenMuStatus  [gMaxnmus];
-	int   fTGenMuCharge  [gMaxnmus];
 	float fTGenMuPt      [gMaxnmus];
 	float fTGenMuEta     [gMaxnmus];
 	float fTGenMuPhi     [gMaxnmus];
 	float fTGenMuE       [gMaxnmus];
 	int   fTGenMuMId     [gMaxnmus];
 	int   fTGenMuMStatus [gMaxnmus];
-	int   fTGenMuMCharge [gMaxnmus];
 	float fTGenMuMPt     [gMaxnmus];
 	float fTGenMuMEta    [gMaxnmus];
 	float fTGenMuMPhi    [gMaxnmus];
 	float fTGenMuME      [gMaxnmus];
 	int   fTGenMuGMId    [gMaxnmus];
 	int   fTGenMuGMStatus[gMaxnmus];
-	int   fTGenMuGMCharge[gMaxnmus];
 	float fTGenMuGMPt    [gMaxnmus];
 	float fTGenMuGMEta   [gMaxnmus];
 	float fTGenMuGMPhi   [gMaxnmus];
@@ -561,21 +558,18 @@ private:
 // - Gen Info:
 	int   fTGenElId[gMaxneles];
 	int   fTGenElStatus[gMaxneles];
-	int   fTGenElCharge[gMaxneles];
 	float fTGenElPt[gMaxneles];
 	float fTGenElEta[gMaxneles];
 	float fTGenElPhi[gMaxneles];
 	float fTGenElE[gMaxneles];
 	int   fTGenElMId[gMaxneles];
 	int   fTGenElMStatus[gMaxneles];
-	int   fTGenElMCharge[gMaxneles];
 	float fTGenElMPt[gMaxneles];
 	float fTGenElMEta[gMaxneles];
 	float fTGenElMPhi[gMaxneles];
 	float fTGenElME[gMaxneles];
 	int   fTGenElGMId[gMaxneles];
 	int   fTGenElGMStatus[gMaxneles];
-	int   fTGenElGMCharge[gMaxneles];
 	float fTGenElGMPt[gMaxneles];
 	float fTGenElGMEta[gMaxneles];
 	float fTGenElGMPhi[gMaxneles];

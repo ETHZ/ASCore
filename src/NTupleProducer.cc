@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.99 2011/02/28 17:14:56 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.100 2011/03/02 17:51:55 stiegerb Exp $
 //
 //
 
@@ -715,7 +715,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			if(MuMatch[0] != NULL){
 				fTGenMuId[mqi]       = MuMatch[0]->pdgId();
 				fTGenMuStatus[mqi]   = MuMatch[0]->status();
-				fTGenMuCharge[mqi]   = MuMatch[0]->charge();
 				fTGenMuPt[mqi]       = MuMatch[0]->pt();
 				fTGenMuEta[mqi]      = MuMatch[0]->eta();
 				fTGenMuPhi[mqi]      = MuMatch[0]->phi();
@@ -723,7 +722,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 				fTGenMuMId[mqi]      = MuMatch[1]->pdgId();
 				fTGenMuMStatus[mqi]  = MuMatch[1]->status();
-				fTGenMuMCharge[mqi]  = MuMatch[1]->charge();
 				fTGenMuMPt[mqi]      = MuMatch[1]->pt();
 				fTGenMuMEta[mqi]     = MuMatch[1]->eta();
 				fTGenMuMPhi[mqi]     = MuMatch[1]->phi();
@@ -731,7 +729,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 				fTGenMuGMId[mqi]     = MuMatch[2]->pdgId();
 				fTGenMuGMStatus[mqi] = MuMatch[2]->status();
-				fTGenMuGMCharge[mqi] = MuMatch[2]->charge();
 				fTGenMuGMPt[mqi]     = MuMatch[2]->pt();
 				fTGenMuGMEta[mqi]    = MuMatch[2]->eta();
 				fTGenMuGMPhi[mqi]    = MuMatch[2]->phi();
@@ -956,7 +953,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				if(ElMatch[0] != NULL){
 					fTGenElId[eqi]       = ElMatch[0]->pdgId();
 					fTGenElStatus[eqi]   = ElMatch[0]->status();
-					fTGenElCharge[eqi]   = ElMatch[0]->charge();
 					fTGenElPt[eqi]       = ElMatch[0]->pt();
 					fTGenElEta[eqi]      = ElMatch[0]->eta();
 					fTGenElPhi[eqi]      = ElMatch[0]->phi();
@@ -964,7 +960,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 					fTGenElMId[eqi]      = ElMatch[1]->pdgId();
 					fTGenElMStatus[eqi]  = ElMatch[1]->status();
-					fTGenElMCharge[eqi]  = ElMatch[1]->charge();
 					fTGenElMPt[eqi]      = ElMatch[1]->pt();
 					fTGenElMEta[eqi]     = ElMatch[1]->eta();
 					fTGenElMPhi[eqi]     = ElMatch[1]->phi();
@@ -972,7 +967,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 					fTGenElGMId[eqi]     = ElMatch[2]->pdgId();
 					fTGenElGMStatus[eqi] = ElMatch[2]->status();
-					fTGenElGMCharge[eqi] = ElMatch[2]->charge();
 					fTGenElGMPt[eqi]     = ElMatch[2]->pt();
 					fTGenElGMEta[eqi]    = ElMatch[2]->eta();
 					fTGenElGMPhi[eqi]    = ElMatch[2]->phi();
@@ -1932,21 +1926,18 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 
 	fEventTree->Branch("MuGenID"          ,&fTGenMuId         ,"MuGenID[NMus]/I");
 	fEventTree->Branch("MuGenStatus"      ,&fTGenMuStatus     ,"MuGenStatus[NMus]/I");
-	fEventTree->Branch("MuGenCharge"      ,&fTGenMuCharge     ,"MuGenCharge[NMus]/I");
 	fEventTree->Branch("MuGenPt"          ,&fTGenMuPt         ,"MuGenPt[NMus]/F");
 	fEventTree->Branch("MuGenEta"         ,&fTGenMuEta        ,"MuGenEta[NMus]/F");
 	fEventTree->Branch("MuGenPhi"         ,&fTGenMuPhi        ,"MuGenPhi[NMus]/F");
 	fEventTree->Branch("MuGenE"           ,&fTGenMuE          ,"MuGenE[NMus]/F");
 	fEventTree->Branch("MuGenMID"         ,&fTGenMuMId        ,"MuGenMID[NMus]/I");
 	fEventTree->Branch("MuGenMStatus"     ,&fTGenMuMStatus    ,"MuGenMStatus[NMus]/I");
-	fEventTree->Branch("MuGenMCharge"     ,&fTGenMuMCharge    ,"MuGenMCharge[NMus]/I");
 	fEventTree->Branch("MuGenMPt"         ,&fTGenMuMPt        ,"MuGenMPt[NMus]/F");
 	fEventTree->Branch("MuGenMEta"        ,&fTGenMuMEta       ,"MuGenMEta[NMus]/F");
 	fEventTree->Branch("MuGenMPhi"        ,&fTGenMuMPhi       ,"MuGenMPhi[NMus]/F");
 	fEventTree->Branch("MuGenME"          ,&fTGenMuME         ,"MuGenME[NMus]/F");
 	fEventTree->Branch("MuGenGMID"        ,&fTGenMuGMId       ,"MuGenGMID[NMus]/I");
 	fEventTree->Branch("MuGenGMStatus"    ,&fTGenMuGMStatus   ,"MuGenGMStatus[NMus]/I");
-	fEventTree->Branch("MuGenGMCharge"    ,&fTGenMuGMCharge   ,"MuGenGMCharge[NMus]/I");
 	fEventTree->Branch("MuGenGMPt"        ,&fTGenMuGMPt       ,"MuGenGMPt[NMus]/F");
 	fEventTree->Branch("MuGenGMEta"       ,&fTGenMuGMEta      ,"MuGenGMEta[NMus]/F");
 	fEventTree->Branch("MuGenGMPhi"       ,&fTGenMuGMPhi      ,"MuGenGMPhi[NMus]/F");
@@ -2064,21 +2055,18 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElS4OverS1"                  ,&fTeS4OverS1            ,"ElS4OverS1[NEles]/F");
 	fEventTree->Branch("ElGenID"                     ,&fTGenElId         ,"ElGenID[NEles]/I");
 	fEventTree->Branch("ElGenStatus"                 ,&fTGenElStatus     ,"ElGenStatus[NEles]/I");
-	fEventTree->Branch("ElGenCharge"                 ,&fTGenElCharge     ,"ElGenCharge[NEles]/I");
 	fEventTree->Branch("ElGenPt"                     ,&fTGenElPt         ,"ElGenPt[NEles]/F");
 	fEventTree->Branch("ElGenEta"                    ,&fTGenElEta        ,"ElGenEta[NEles]/F");
 	fEventTree->Branch("ElGenPhi"                    ,&fTGenElPhi        ,"ElGenPhi[NEles]/F");
 	fEventTree->Branch("ElGenE"                      ,&fTGenElE          ,"ElGenE[NEles]/F");
 	fEventTree->Branch("ElGenMID"                    ,&fTGenElMId        ,"ElGenMID[NEles]/I");
 	fEventTree->Branch("ElGenMStatus"                ,&fTGenElMStatus    ,"ElGenMStatus[NEles]/I");
-	fEventTree->Branch("ElGenMCharge"                ,&fTGenElMCharge    ,"ElGenMCharge[NEles]/I");
 	fEventTree->Branch("ElGenMPt"                    ,&fTGenElMPt        ,"ElGenMPt[NEles]/F");
 	fEventTree->Branch("ElGenMEta"                   ,&fTGenElMEta       ,"ElGenMEta[NEles]/F");
 	fEventTree->Branch("ElGenMPhi"                   ,&fTGenElMPhi       ,"ElGenMPhi[NEles]/F");
 	fEventTree->Branch("ElGenME"                     ,&fTGenElME         ,"ElGenME[NEles]/F");
 	fEventTree->Branch("ElGenGMID"                   ,&fTGenElGMId       ,"ElGenGMID[NEles]/I");
 	fEventTree->Branch("ElGenGMStatus"               ,&fTGenElGMStatus   ,"ElGenGMStatus[NEles]/I");
-	fEventTree->Branch("ElGenGMCharge"               ,&fTGenElGMCharge   ,"ElGenGMCharge[NEles]/I");
 	fEventTree->Branch("ElGenGMPt"                   ,&fTGenElGMPt       ,"ElGenGMPt[NEles]/F");
 	fEventTree->Branch("ElGenGMEta"                  ,&fTGenElGMEta      ,"ElGenGMEta[NEles]/F");
 	fEventTree->Branch("ElGenGMPhi"                  ,&fTGenElGMPhi      ,"ElGenGMPhi[NEles]/F");
@@ -2575,21 +2563,18 @@ void NTupleProducer::resetTree(){
 
 	resetInt(fTGenMuId, gMaxnmus);
 	resetInt(fTGenMuStatus, gMaxnmus);
-	resetInt(fTGenMuCharge, gMaxnmus);
 	resetFloat(fTGenMuPt, gMaxnmus);
 	resetFloat(fTGenMuEta, gMaxnmus);
 	resetFloat(fTGenMuPhi, gMaxnmus);
 	resetFloat(fTGenMuE, gMaxnmus);
 	resetInt(fTGenMuMId, gMaxnmus);
 	resetInt(fTGenMuMStatus, gMaxnmus);
-	resetInt(fTGenMuMCharge, gMaxnmus);
 	resetFloat(fTGenMuMPt, gMaxnmus);
 	resetFloat(fTGenMuMEta, gMaxnmus);
 	resetFloat(fTGenMuMPhi, gMaxnmus);
 	resetFloat(fTGenMuME, gMaxnmus);
 	resetInt(fTGenMuGMId, gMaxnmus);
 	resetInt(fTGenMuGMStatus, gMaxnmus);
-	resetInt(fTGenMuGMCharge, gMaxnmus);
 	resetFloat(fTGenMuGMPt, gMaxnmus);
 	resetFloat(fTGenMuGMEta, gMaxnmus);
 	resetFloat(fTGenMuGMPhi, gMaxnmus);
@@ -2703,21 +2688,18 @@ void NTupleProducer::resetTree(){
 	resetInt(fTeIDsimpleWP80relIso, gMaxneles);
 	resetInt(fTGenElId, gMaxneles);
 	resetInt(fTGenElStatus, gMaxneles);
-	resetInt(fTGenElCharge, gMaxneles);
 	resetFloat(fTGenElPt, gMaxneles);
 	resetFloat(fTGenElEta, gMaxneles);
 	resetFloat(fTGenElPhi, gMaxneles);
 	resetFloat(fTGenElE, gMaxneles);
 	resetInt(fTGenElMId, gMaxneles);
 	resetInt(fTGenElMStatus, gMaxneles);
-	resetInt(fTGenElMCharge, gMaxneles);
 	resetFloat(fTGenElMPt, gMaxneles);
 	resetFloat(fTGenElMEta, gMaxneles);
 	resetFloat(fTGenElMPhi, gMaxneles);
 	resetFloat(fTGenElME, gMaxneles);
 	resetInt(fTGenElGMId, gMaxneles);
 	resetInt(fTGenElGMStatus, gMaxneles);
-	resetInt(fTGenElGMCharge, gMaxneles);
 	resetFloat(fTGenElGMPt, gMaxneles);
 	resetFloat(fTGenElGMEta, gMaxneles);
 	resetFloat(fTGenElGMPhi, gMaxneles);
