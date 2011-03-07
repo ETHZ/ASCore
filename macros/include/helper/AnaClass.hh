@@ -32,6 +32,9 @@
 #include "TVirtualPad.h"
 #include "TClonesArray.h"
 
+#include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
+
 #include "TGraph2D.h"
 #include "TMatrixD.h"
 #include "TMatrixT.h"
@@ -94,6 +97,8 @@ public:
 	virtual void plotPredOverlay2HWithRatio(THStack *h1s, TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);	
 	virtual void plotPredOverlay3HWithRatio(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, bool ratio = true, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotRatioOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy = false, double line1x = -999.99, double line2x = -999.99);
+	virtual void plotEffOverlayEG(TEfficiency *h1, TString tag1, TGraphAsymmErrors *h2, TString tag2, bool logy = false);
+	virtual void plotEffOverlayEE(TEfficiency *h1, TString tag1, TEfficiency *h2, TString tag2, bool logy = false);
 	virtual void plotRatioOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 	virtual void plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2, TH1F *h3, TString tag3, bool logy = false, double line1x = -999.99, double line2x = -999.99);
 
@@ -121,7 +126,6 @@ public:
 	virtual float getMaxYExtension(TH1*);
 	virtual float getMinYExtension(TH1*);
 	virtual TCanvas* makeCanvas(const char*);
-	virtual void printHisto(TH1* h, TString canvname, TString canvtitle, Option_t *drawopt = "");
 	virtual void printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt = "");
 	virtual TH1D* bookTH1D(const char*, const char*, int, double, double);
 	virtual void printProgress(int, const int, TString, const int = -1);

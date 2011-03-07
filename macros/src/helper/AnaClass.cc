@@ -666,8 +666,6 @@ void AnaClass::plotOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, boo
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay2HNorm(TH1D *h1, TString tag1, TH1D *h2, TString tag2, bool logy, double line1x, double line2x){
 	h1->Sumw2();
 	h2->Sumw2();
@@ -676,8 +674,6 @@ void AnaClass::plotOverlay2HNorm(TH1D *h1, TString tag1, TH1D *h2, TString tag2,
 	h2->Scale(1.0/h2->Integral());
 	plotOverlay2H(h1, tag1, h2, tag2, logy, line1x, line2x);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1D *h3, TString tag3, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	h1->SetLineWidth(2);
@@ -764,8 +760,6 @@ void AnaClass::plotOverlay3H(TH1D *h1, TString tag1, TH1D *h2, TString tag2, TH1
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int index2, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
@@ -841,8 +835,6 @@ void AnaClass::plotOverlay2T(const char* var, const TCut reqs, int index1, int i
 	TString outputname = fTag[index1] + "_" + fTag[index2] + "_" + convertVarName2(var);
 	Util::Print(col, outputname, fOutputSubDir);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut reqs, int sampleindex, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("hfir")) h->Delete();
@@ -908,8 +900,6 @@ void AnaClass::plotOverlay1T2V(const char* var1, const char* var2, const TCut re
 	sprintf(out, "%s_%s-%s", fTag[sampleindex].Data(), convertVarName2(var1).Data(), convertVarName2(var2).Data());
 	Util::Print(col, out, fOutputSubDir);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay2C(const char* var, const TCut req1, const TCut req2, int sampleindex, TString tag1, TString tag2, int nbins, double xmin, double xmax, bool logy){
 // Creates a normalized overlay from a tree variable with two conditions
 // -   Arguments:
@@ -960,8 +950,6 @@ void AnaClass::plotOverlay2C(const char* var, const TCut req1, const TCut req2, 
 	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2;
 	Util::Print(col, outputname, fOutputSubDir);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int index2, int index3, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("h1")) h->Delete();
@@ -1051,8 +1039,6 @@ void AnaClass::plotOverlay3T(const char* var, const TCut reqs, int index1, int i
 	TString outputname = convertVarName2(var) + "_" + fTag[index1] + "_" + fTag[index2] + "_" + fTag[index3];
 	Util::Print(col, outputname, fOutputSubDir);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, const TCut req2, TString tag2, const TCut req3, TString tag3, int sampleindex, int nbins, double xmin, double xmax, bool logy){
 // - Creates a normalized overlay from a tree variable with three conditions
 // -	Arguments:
@@ -1116,8 +1102,6 @@ void AnaClass::plotOverlay3C(const char* var, const TCut req1, TString tag1, con
 	TString outputname = fTag[sampleindex] + "_" + convertVarName2(var) + "_" + tag1 + "-" + tag2 + "-" + tag3;
 	Util::Print(col, outputname, fOutputSubDir);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay4T(const char* var, const TCut reqs, int index1, int index2, int index3, int index4, int nbins, double xmin, double xmax, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	if( TH1D *h = (TH1D*)gROOT->FindObject("h1")) h->Delete();
@@ -1289,8 +1273,6 @@ void AnaClass::plotPredOverlay2H(TH1D *h1, TString tag1, TH1D *h2, TString tag2,
 	if(logy) outputname += "_log";
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, bool logy, bool ratio, double line1x, double line2x){
 	TH1D *h1 = new TH1D(*hist1);
 	TH1D *h2 = new TH1D(*hist2);
@@ -1408,8 +1390,6 @@ void AnaClass::plotPredOverlay2HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2
 	// delete h1;
 	// delete h2;
 }
-
-//____________________________________________________________________________
 void AnaClass::plotPredOverlay2HWithRatio(THStack *stack, TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, bool logy, bool ratio, double line1x, double line2x){
 	THStack *h1s = new THStack(*stack);
 	TH1D *h1 = new TH1D(*hist1);
@@ -1539,8 +1519,6 @@ void AnaClass::plotPredOverlay2HWithRatio(THStack *stack, TH1D *hist1, TString t
 	if(logy) outputname += "_log";
 	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotPredOverlay3HWithRatio(TH1D *hist1, TString tag1, TH1D *hist2, TString tag2, TH1D *hist3, TString tag3, bool logy, bool ratio, double line1x, double line2x){
 	TH1D *h1 = new TH1D(*hist1);
 	TH1D *h2 = new TH1D(*hist2);
@@ -1795,8 +1773,6 @@ void AnaClass::plotOverlay3HData(TH1F *h1, TString tag1, TH1F *h2, TString tag2,
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
 	Util::PrintNoEPS(col, outputname, fOutputDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, TH1D *h4in, TString tag4, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 
@@ -1804,27 +1780,6 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 	TH1D *h2 = new TH1D(*h2in);
 	TH1D *h3 = new TH1D(*h3in);
 	TH1D *h4 = new TH1D(*h4in);
-
-	// h1->SetLineWidth(2);
-	// h1->SetLineColor(kBlack);
-	// h1->SetFillColor(kBlack);
-	// h1->SetMarkerColor(kBlack);
-	// h1->SetMarkerStyle(8);
-	// h1->SetMarkerSize(1.2);
-	// 
-	// h2->SetLineWidth(2);
-	// h2->SetLineColor(kBlue);
-	// h2->SetFillColor(kBlue);
-	// h2->SetMarkerColor(kBlue);
-	// h2->SetMarkerStyle(8);
-	// h2->SetMarkerSize(1.2);
-	// 
-	// h3->SetLineWidth(2);
-	// h3->SetLineColor(kRed);
-	// h3->SetFillColor(kRed);
-	// h3->SetMarkerColor(kRed);
-	// h3->SetMarkerStyle(8);
-	// h3->SetMarkerSize(1.2);
 
 	char canvtitle[100], canvname[100];
 	sprintf(canvtitle,"%s vs %s vs %s vs %s", h1->GetName(), h2->GetName(), h3->GetName(), h4->GetName());
@@ -1835,27 +1790,7 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 	col->cd();
 	gPad->SetFillStyle(0);
 	if(logy) col->SetLogy(1);
-	// h1->Sumw2();
-	// h2->Sumw2();
-	// h3->Sumw2();
-	// h4->Sumw2();
 
-	// // Determine plotting range
-	// double max1 = h1->GetMaximum();
-	// double max2 = h2->GetMaximum();
-	// double max3 = h3->GetMaximum();
-	// double max12 = (max1>max2)?max1:max2;
-	// double max = (max12>max3)?max12:max3;
-	// if(logy) max = 5*max;
-	// else max = 1.05*max;
-	// h1->SetMaximum(max);
-	// h2->SetMaximum(max);
-	// h3->SetMaximum(max);
-	// if(!logy){
-	// 	h1->SetMinimum(0.0);
-	// 	h2->SetMinimum(0.0);
-	// 	h3->SetMinimum(0.0);
-	// }
 	vector<TH1D*> hists;
 	hists.push_back(h1);
 	hists.push_back(h2);
@@ -1927,8 +1862,6 @@ void AnaClass::plotOverlay4H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2,
 	// Util::Print(col, outputname, fOutputDir, fOutputFile);
 	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotOverlay5H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, TH1D *h4in, TString tag4, TH1D *h5in, TString tag5, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 
@@ -2085,8 +2018,6 @@ void AnaClass::plotRatioOverlay2H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
-
-//____________________________________________________________________________
 void AnaClass::plotRatioOverlay3H(TH1D *h1in, TString tag1, TH1D *h2in, TString tag2, TH1D *h3in, TString tag3, bool logy, double line1x, double line2x){
 	gStyle->SetOptStat("");
 	TH1D *h1 = new TH1D(*h1in);
@@ -2150,6 +2081,75 @@ void AnaClass::plotRatioOverlay3H(TH1D *h1in, TString tag1, TH1D *h2in, TString 
 	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
 }
+
+//____________________________________________________________________________
+void AnaClass::plotEffOverlayEG(TEfficiency *h1in, TString tag1, TGraphAsymmErrors *h2in, TString tag2, bool logy){
+	gStyle->SetOptStat("");
+	TEfficiency       *h1 = new TEfficiency(*h1in);
+	TGraphAsymmErrors *h2 = new TGraphAsymmErrors(*h2in);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	gPad->SetGridy(1);
+	if(logy) col->SetLogy(1);
+
+	// TLegend *leg = new TLegend(0.60,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.60,0.75,0.886,0.88); // Upper right
+	leg->AddEntry(h1, tag1,"P");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->Draw("AP");
+	h2->Draw("Psame");
+	leg->Draw();
+
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+}
+void AnaClass::plotEffOverlayEE(TEfficiency *h1in, TString tag1, TEfficiency *h2in, TString tag2, bool logy){
+	gStyle->SetOptStat("");
+	TEfficiency *h1 = new TEfficiency(*h1in);
+	TEfficiency *h2 = new TEfficiency(*h2in);
+
+	char canvtitle[100], canvname[100];
+	sprintf(canvtitle,"%s vs %s", h1->GetName(), h2->GetName());
+	sprintf(canvname,"%s:%s", h1->GetName(), h2->GetName());
+	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+	col->SetFillStyle(0);
+	col->SetFrameFillStyle(0);
+	col->cd();
+	gPad->SetFillStyle(0);
+	gPad->SetGridy(1);
+	if(logy) col->SetLogy(1);
+
+	// TLegend *leg = new TLegend(0.60,0.15,0.886,0.28); // Lower right
+	TLegend *leg = new TLegend(0.60,0.75,0.886,0.88); // Upper right
+	leg->AddEntry(h1, tag1,"P");
+	leg->AddEntry(h2, tag2,"f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	h1->Draw("AP");
+	h2->Draw("Psame");
+	leg->Draw();
+
+	gPad->RedrawAxis();
+	TString outputname = TString(h1->GetName()) + "_" + TString(h2->GetName());
+	Util::PrintNoEPS(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+	// Util::Print(col, outputname, fOutputDir + fOutputSubDir, fOutputFile);
+}
+
 
 /*****************************************************************************
 ###################| Utilities |##############################################
@@ -2465,18 +2465,6 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 }
 
 //____________________________________________________________________________
-void AnaClass::printHisto(TH1* h, TString canvname, TString canvtitle, Option_t *drawopt){
-	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
-	col->SetFillStyle(0);
-	col->SetFrameFillStyle(0);
-	col->cd();
-	gPad->SetFillStyle(0);
-	h->DrawCopy(drawopt);
-	gPad->RedrawAxis();
-	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
-}
-
-//____________________________________________________________________________
 void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt){
 	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
 	col->SetFillStyle(0);
@@ -2485,7 +2473,7 @@ void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Opti
 	gPad->SetFillStyle(0);
 	o->Draw(drawopt);
 	gPad->RedrawAxis();
-	Util::PrintNoEPS(col, canvname, fOutputDir, fOutputFile);
+	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
