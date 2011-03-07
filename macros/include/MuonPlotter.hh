@@ -11,6 +11,9 @@
 #include "helper/Monitor.hh"
 #include "TLorentzVector.h"
 
+#include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
+
 
 class MuonPlotter : public AnaClass{
 
@@ -57,46 +60,28 @@ public:
 		long nzt;
 	};
 
-	struct Pt_Eta_Histos{ // Doesn't really make much sense to store also pt and eta histos
-		TH2D *h_2d;
-		TH1D *h_pt;
-		TH1D *h_eta;
-	};
-	
-	// struct Histos{
-	// 	TH2D *nt20_pt; // pt1 vs pt2
-	// 	TH2D *nt10_pt;
-	// 	TH2D *nt01_pt; // only filled for e/mu
-	// 	TH2D *nt00_pt;
-	// 	TH2D *nt20_eta; // eta1 vs eta2
-	// 	TH2D *nt10_eta;
-	// 	TH2D *nt01_eta;
-	// 	TH2D *nt00_eta;
-	// 	TH2D *ntight; // pt vs eta
-	// 	TH2D *nloose; // pt vs eta
-	// };		
-
-	struct NT012Histos{
-		Pt_Eta_Histos nt20;
-		Pt_Eta_Histos nt10;
-		Pt_Eta_Histos nt01; // these are only filled for e/mu
-		Pt_Eta_Histos nt00;
-		Pt_Eta_Histos ntight;
-		Pt_Eta_Histos nloose;
-	};
-
 	struct Channel{ // like mumu, emu, ee
 		TString name;
 		TString sname;
-		NT012Histos nthistos;
-		// Histos histos;
+		TH2D *nt20_pt; // pt1 vs pt2
+		TH2D *nt10_pt;
+		TH2D *nt01_pt; // only filled for e/mu
+		TH2D *nt00_pt;
+		TH2D *nt20_eta; // eta1 vs eta2
+		TH2D *nt10_eta;
+		TH2D *nt01_eta;
+		TH2D *nt00_eta;
+		TH2D *fntight; // pt vs eta
+		TH2D *fnloose; 
+		TH2D *pntight; // pt vs eta
+		TH2D *pnloose;
 	};
 	
-	struct Region{ // like signal, control, sideband, etc.
+	struct Region{ // different binnings and or selections cuts, e.g. florida vs surfturf
 		TString name;
 		TString sname;
-		Channel mumu;
-		Channel emu;
+		Channel mm;
+		Channel em;
 		Channel ee;
 	};
 	
@@ -108,9 +93,9 @@ public:
 		float lumi;
 		int color;
 		bool isdata;
-		bool isfilled; // check if this has been read in
+		bool isfilled; // check if this has been read in -- not implemented yet
 		Region region[gNREGIONS];
-		NumberSet numbers[3]; // summary of integrated numbers
+		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
 	};
 	
 	MuonPlotter();
@@ -136,6 +121,9 @@ public:
 	void makeMupRatioPlots(bool = false);
 	void makeElfRatioPlots(bool = false);
 	void makeElpRatioPlots(bool = false);
+
+	void makeMufEffPlots(bool = false);
+
 	void makeMuIsolationPlots();
 	void makeMuIsolationPlot();
 	void makeMuPtPlots();
@@ -169,8 +157,6 @@ public:
 
 	// Calculate from pre stored numbers, with fixed selections:
 	void fillMuElRatios(vector<int>);
-	void fillMuRatios(vector<int>);
-	void fillElRatios(vector<int>);
 
 	TH1D* fillMuRatioPt(int, gRegion, bool = false);
 	TH1D* fillMuRatioPt(vector<int>, gRegion, bool = false);
@@ -181,6 +167,12 @@ public:
 	void calculateRatio(vector<int>, gChannel, gRegion, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&, float&);
+	
+	TEfficiency *mergeDataEfficiencies(vector<int>, gChannel, gRegion, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
+	TEfficiency *getEfficiency(Sample*, gChannel, gRegion, int = 0, bool = false);
+	TGraphAsymmErrors *combineMCEfficiencies(vector<int>, gChannel, gRegion, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
+
+	void getPassedTotal(vector<int>, gChannel, gRegion, TH2D*&, TH2D*&, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -188,9 +180,9 @@ public:
 
 	//////////////////////////////
 	// Predictions
-	void makeSSMuMuPredictionPlots(vector<int>);
-	void makeSSElElPredictionPlots(vector<int>);
-	void makeSSElMuPredictionPlots(vector<int>);
+	void makeSSMuMuPredictionPlots(vector<int>, bool = false);
+	void makeSSElElPredictionPlots(vector<int>, bool = false);
+	void makeSSElMuPredictionPlots(vector<int>, bool = false);
 	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
 	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Signal);
 	void NObs(gChannel, THStack *&, vector<int>, gRegion = Signal);
@@ -198,7 +190,6 @@ public:
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
-	void fillYieldHistos(gChannel, Pt_Eta_Histos *, int, int);
 	void fillYields(Sample*);
 	
 	void initCounters(int = -1);
@@ -319,8 +310,9 @@ private:
 
 	vector<int> fAllSamples;
 	vector<int> fMCBG;    // SM background MC samples
-	vector<int> fMCBGMuEnr;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
+	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
+	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
 	vector<int> fJMData;  // JetMET data samples

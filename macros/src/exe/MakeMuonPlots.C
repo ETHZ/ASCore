@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 	MuonPlotter *tA = new MuonPlotter();
 	tA->setOutputDir(outputdir);
 	tA->setOutputFile("MuonPlots.root");
-	tA->setSelection(selection);
+	tA->setSelection(selection); // surfturf vs florida
 	tA->setCharge(charge);
 	tA->setVerbose(verbose);
 	tA->init(samples);
