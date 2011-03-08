@@ -438,18 +438,29 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "jets > 50GeV failing PFID event veto", weight);
 
       // Only considering (so far): no lepton requirement (<0);  1 lepton (==1), lepton veto (otherwise)
-      if(nleps==1){ // exactly 1 lepton
-	if( fMT2tree->misc.LeptConfig != 0 && fMT2tree->misc.LeptConfig != 1)  continue;
-	counters[i].fill("NLeps == 1",weight);
-	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "NLeps == 1", weight);
-	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "NLeps == 1", weight);
-
-      }
-      else if( !(nleps<0) ) { // lepton veto (no lepton requirement if nleps < 0)
-	if( fMT2tree->misc.LeptConfig != 9 )  continue;
-	counters[i].fill("Lepton veto",weight);
-	FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Lepton veto", weight);
-	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Lepton veto", weight);
+      string nLeps = (std::string) TString::Format("%d",abs(nleps));
+      if(nleps !=-10){ 
+	      if(nleps>0){ // exactly nleps lepton
+		string cut_name = "NLeps == "+nLeps;
+		if( (fMT2tree->NEles + fMT2tree->NMuons) != abs(nleps))  continue;
+		counters[i].fill(cut_name,weight);
+		FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+		if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+	      }
+	      else if( nleps==0 ) { // lepton veto
+		string cut_name = "Lepton veto";
+		if( fMT2tree->misc.LeptConfig != 9 )  continue;
+		counters[i].fill(cut_name,weight);
+		FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+		if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+	      }
+	      else if(nleps<0){ // at least nleps lepton
+		string cut_name = "NLeps >= "+nLeps;
+		if( (fMT2tree->NEles + fMT2tree->NMuons) < abs(nleps))  continue;
+		counters[i].fill(cut_name ,weight);
+		FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+		if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, cut_name, weight);
+	      }
       }
       
       if( fMT2tree->misc.MT2 < 80. )  continue;
