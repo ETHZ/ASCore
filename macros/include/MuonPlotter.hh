@@ -123,6 +123,9 @@ public:
 	void makeElpRatioPlots(bool = false);
 
 	void makeMufEffPlots(bool = false);
+	void makeElfEffPlots(bool = false);
+	void makeMupEffPlots(bool = false);
+	void makeElpEffPlots(bool = false);
 
 	void makeMuIsolationPlots();
 	void makeMuIsolationPlot();
