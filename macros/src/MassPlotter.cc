@@ -165,7 +165,9 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 	TString cuts = cutStream.str().c_str();
 	
 	//                 variable                            cuts njets  nlepts title     bins               cleaned  log  composite    ratio  stacked overlay 
-	MakePlot(fSamples,"misc.MT2" ,                         cuts, -2,   0,      "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
+	MakePlot(fSamples,"misc.MT2" ,                         cuts, -3,   0,      "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
+//	MakePlot(fSamples,"hemi[0].lv1.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
+//	MakePlot(fSamples,"hemi[0].lv2.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
 
 }
 
@@ -409,10 +411,10 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       }
 
       //if( fMT2tree-> MinMetJetDPhi(0,20) < 0.3 )  continue;
-//       if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
-//       counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
-//       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
-//       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+//      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
+//      counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
+//      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+//      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
 
       if( fMT2tree->misc.HBHENoiseFlag != 1 )  continue;
       counters[i].fill("HBHE noise veto",weight);
@@ -746,7 +748,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	nJets += njets < 0 ? ">=" : "==";
 	nJets += TString::Format("%d",abs(njets));
 
-	TString  nLeps = nleps < 0 ? "" : (nleps==1 ? " && (misc.LeptConfig == 0 || misc.LeptConfig == 1)" : "&& misc.LeptConfig ==  9");
+	TString  nLeps;
+	if     (nleps < 0 )  nLeps = " && (NEles + NMuons) >=";
+	else if(nleps >=0  ) nLeps = " && (NEles + NMuons) ==";
+	nLeps += TString::Format("%d",abs(nleps));
+	if     (nleps ==-10) nLeps = " "; 
 
 	THStack* h_stack     = new THStack(varname, "");
   	TH1D*    h_data      = new TH1D   (varname+"data"  , "", nbins, bins );
