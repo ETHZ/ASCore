@@ -35,8 +35,9 @@ public:
 	TLatex *fTlat;
 
 	int fVerbose;
-	map<int, pdgparticle> fPDGMap;	// Mapping of PDG ID names
-	map<string, int> fHLTLabelMap;	// Mapping of HLT trigger bit names
+	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
+	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
+	vector<string>   fHLTLabels;   // Vector with current HLT names
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);

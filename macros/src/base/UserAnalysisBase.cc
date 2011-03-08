@@ -79,8 +79,12 @@ void UserAnalysisBase::GetHLTNames(Int_t& run){
 	runTree->SetBranchAddress("HLTNames",&HLTNames);
 	runTree->GetEntryWithIndex(run);
 
-	for( int i=0; i < HLTNames->size(); i++ ) 
+	fHLTLabels.clear();
+	fHLTLabels.reserve(HLTNames->size());
+	for( int i=0; i < HLTNames->size(); i++ ){
 		fHLTLabelMap[(*HLTNames)[i]] = i; 
+		fHLTLabels.push_back((*HLTNames)[i]);
+	}
 }
 
 int UserAnalysisBase::GetHLTBit(string theHltName){
