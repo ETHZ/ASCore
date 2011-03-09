@@ -24,17 +24,19 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
 options = VarParsing.VarParsing ('standard') # set 'standard'  options
 options.register ('runon', # register 'runon' option
-                  'data',  # the default value
+                  'MC',  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 
+options.files= '/store/mc/Fall10/ZbbToLL_M-40_PtB1-15_TuneZ2_7TeV-madgraph-pythia6/GEN-SIM-RECO/START38_V12-v1/0001/14CCFBFC-DC0D-E011-AAE0-001A64789D70.root'
+#options.files= '/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0000/00309820-0FEA-DF11-AE59-E0CB4E1A118E.root'
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
 # options.files= 'file:/data/stiegerb/tempfiles/MuData.root'
-options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_RECO.root'
+# options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_RECO.root'
 # options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_AOD.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
@@ -57,37 +59,6 @@ else:
     process.GlobalTag.globaltag = "START38_V13::All"
 
 
-############ PF2PAT ##########################################
-# load the standard PAT config
-process.load("PhysicsTools.PatAlgos.patSequences_cff")
-from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
-
-# Add a pro forma output module because PF2PAT complains otherwise...
-process.out = cms.OutputModule("PoolOutputModule",
-      # save only events passing the full path
-      SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-      # save PAT Layer 1 output; you need a '*' to
-      outputCommands = cms.untracked.vstring('drop *', *patEventContent )
-      )
-
-# Configure PAT to use PF2PAT instead of AOD sources
-from PhysicsTools.PatAlgos.tools.pfTools import *
-
-postfix = "PF"
-
-if options.runon == 'data':
-	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=False, postfix=postfix)
-
-else:
-	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=True, postfix=postfix)
-
-# turn to false when running on data and MC (for the moment)
-getattr(process, "patElectrons"+postfix).embedGenMatch = False
-getattr(process, "patMuons"+postfix).embedGenMatch = False
-
-process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
-process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
-process.patJetCorrFactorsPF.levels = cms.vstring()
 
 
 ### b-tagging ##################################################################
@@ -151,6 +122,87 @@ process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
 process.metMuonJESCorAK5.inputUncorJetsLabel = "ak5CaloJets"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
+
+############ PF2PAT ##########################################
+# load the standard PAT config
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+
+# Add a pro forma output module because PF2PAT complains otherwise...
+process.out = cms.OutputModule("PoolOutputModule",
+      # save only events passing the full path
+      SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+      # save PAT Layer 1 output; you need a '*' to
+      outputCommands = cms.untracked.vstring('drop *', *patEventContent )
+      )
+
+# Configure PAT to use PF2PAT instead of AOD sources
+from PhysicsTools.PatAlgos.tools.pfTools import *
+
+postfix = "PF"
+
+if options.runon == 'data':
+	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=False, postfix=postfix)
+
+else:
+	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=True, postfix=postfix)
+
+process.goodVertices = cms.EDFilter("VertexSelector",
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
+	filter = cms.bool(False),
+	)
+
+# turn to false when running on data and MC (for the moment)
+getattr(process, "patElectrons"+postfix).embedGenMatch = False
+getattr(process, "patMuons"+postfix).embedGenMatch = False
+
+# muon selection cuts
+process.pfMuonsFromVertexPF.vertices=cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
+process.pfMuonsFromVertexPF.d0Cut   =cms.double(0.02) # transverse IP w.r.t. PV
+process.pfMuonsFromVertexPF.dzCut   =cms.double(1.)  # longitudinal IP w.r.t. PV
+process.pfSelectedMuonsPF.cut = cms.string(
+		"abs( eta ) < 2.4 && pt > 10" 
+		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
+   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
+  		+" && muonRef().globalTrack().normalizedChi2() < 10"
+   		+" && muonRef().track().numberOfValidHits() > 10"
+   		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
+   		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
+	)
+# electron selection cuts
+process.pfElectronsFromVertexPF.vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
+process.pfElectronsFromVertexPF.d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
+process.pfElectronsFromVertexPF.dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
+process.pfSelectedElectronsPF.cut = cms.string(
+		"abs( eta ) < 2.4 && pt > 10" 
+		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() > 1"
+		+"&& mva_e_pi > 0.6"
+	)
+
+# PatElectronID
+process.patElectronsPF.addElectronID = cms.bool(True)
+process.patElectronsPF.electronIDSources = cms.PSet(
+	simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
+	simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
+	simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
+      	simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
+   	simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
+       	simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
+    	simpleEleId95cIso  = cms.InputTag("simpleEleId95cIso"),
+       	simpleEleId90cIso  = cms.InputTag("simpleEleId90cIso"),
+    	simpleEleId85cIso  = cms.InputTag("simpleEleId85cIso"),
+        simpleEleId80cIso  = cms.InputTag("simpleEleId80cIso"),
+    	simpleEleId70cIso  = cms.InputTag("simpleEleId70cIso"),
+        simpleEleId60cIso  = cms.InputTag("simpleEleId60cIso"),
+)
+
+# ele and mu isolation
+process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
+process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
+
+# Jet corrections 
+process.patJetCorrFactorsPF.levels = cms.vstring()
 
 ### Cleaning ###################################################################
 # flag HB/HE noise
@@ -236,7 +288,8 @@ if options.runon == 'data':
 #### Path ######################################################################
 process.p = cms.Path(
     process.scrapingVeto * (
-        process.HBHENoiseFilterResultProducer
+	process.goodVertices
+        + process.HBHENoiseFilterResultProducer
         # + process.EcalAnomalousEventFilter
         + process.mygenjets
         + process.jecCorSequence
