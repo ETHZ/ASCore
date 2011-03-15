@@ -62,16 +62,7 @@ else:
 
 
 ### b-tagging ##################################################################
-# Simple SV and TrackCounting based algos
-process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
-process.load("RecoBTau.JetTagComputer.jetTagRecord_cfi")
-process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex2TrkES_cfi")
-process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex3TrkES_cfi")
-process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi")
-process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
-
-process.mybtag = cms.Sequence( process.simpleSecondaryVertexHighPurBJetTags
-                             * process.simpleSecondaryVertexHighEffBJetTags )
+# NOW: Taken from AOD, with simple matching
 
 ### Input/Output ###############################################################
 # Input
@@ -92,8 +83,7 @@ process.TFileService = cms.Service("TFileService",
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
 ### Jet ID ###################################################################
-process.load('RecoJets.Configuration.JetIDProducers_cff')
-process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
+# NOW: Taken from AOD
 
 ### Jet Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
@@ -293,10 +283,8 @@ process.p = cms.Path(
         # + process.EcalAnomalousEventFilter
         + process.mygenjets
         + process.jecCorSequence
-        + process.recoJetIdSequence
         + process.simpleEleIdSequence
         + process.metCorSequence
-        + process.mybtag
         + process.patPF2PATSequencePF
         + process.analyze
         )

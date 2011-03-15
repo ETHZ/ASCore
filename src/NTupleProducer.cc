@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.100 2011/03/02 17:51:55 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.101 2011/03/04 18:02:30 stiegerb Exp $
 //
 //
 
@@ -668,19 +668,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmunmuhits[mqi]    = 0;
 			fTmunmatches[mqi]   = 0;
 			fTmunchambers[mqi]  = 0;
-
-			fTmuoutposrad[mqi]   = muon.innerTrack()->outerRadius();
-			fTmuoutposx[mqi]     = muon.innerTrack()->outerX();
-			fTmuoutposy[mqi]     = muon.innerTrack()->outerY();
-			fTmuoutposz[mqi]     = muon.innerTrack()->outerZ();
-
-			fTmuoutmomx[mqi]     = muon.innerTrack()->outerMomentum().x();
-			fTmuoutmomy[mqi]     = muon.innerTrack()->outerMomentum().z();
-			fTmuoutmomz[mqi]     = muon.innerTrack()->outerMomentum().y();
-			fTmuoutmomphi[mqi]   = muon.innerTrack()->outerPhi();
-			fTmuoutmometa[mqi]   = muon.innerTrack()->outerEta();
-			fTmuoutmomtheta[mqi] = muon.innerTrack()->outerTheta();
-
 		}
 		if(fTmuIsGM[mqi]){ // Global Muons
 			fTnglobalmu++;
@@ -695,18 +682,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTmunmuhits[mqi]    = muon.outerTrack()->hitPattern().numberOfValidHits();
 			fTmunmatches[mqi]   = muon.numberOfMatches();
 			fTmunchambers[mqi]  = muon.numberOfChambers();
-
-			fTmuoutposrad[mqi]   = muon.globalTrack()->outerRadius();
-			fTmuoutposx[mqi]     = muon.globalTrack()->outerX();
-			fTmuoutposy[mqi]     = muon.globalTrack()->outerY();
-			fTmuoutposz[mqi]     = muon.globalTrack()->outerZ();
-
-			fTmuoutmomx[mqi]     = muon.globalTrack()->outerMomentum().x();
-			fTmuoutmomy[mqi]     = muon.globalTrack()->outerMomentum().z();
-			fTmuoutmomz[mqi]     = muon.globalTrack()->outerMomentum().y();
-			fTmuoutmomphi[mqi]   = muon.globalTrack()->outerPhi();
-			fTmuoutmometa[mqi]   = muon.globalTrack()->outerEta();
-			fTmuoutmomtheta[mqi] = muon.globalTrack()->outerTheta();
 		}
 
 		// MC Matching
@@ -847,6 +822,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		const ValueMap<float> &eIDmapsimpleWP95 = *eIDValueMap[8];  // WP95
 		eIDValueMap.clear();
 
+
 		// Dump electron properties in tree variables
 		for( vector<OrderPair>::const_iterator it = elOrdered.begin();
 		it != elOrdered.end(); ++it, ++eqi ) {
@@ -922,17 +898,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTetheta[eqi]                     = electron.superCluster()->position().theta();
 			fTesceta[eqi]                     = electron.superCluster()->eta();
 
-			if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
-				fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
-				fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *ebRecHits );
-				fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *ebRecHits );
-			} else if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
-				fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
-				fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *eeRecHits );
-				fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *eeRecHits );
-			} else {
-				edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
-			}
+// DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
+// 			if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+//                           fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+//                           fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *ebRecHits );
+//                           fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *ebRecHits );
+// 			} else if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+//                           fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+//                           fTeE1OverE9[eqi]       = EcalSeverityLevelAlgo::E1OverE9(   electron.superCluster()->seed()->seed(), *eeRecHits );
+//                           fTeS4OverS1[eqi]       = EcalSeverityLevelAlgo::swissCross( electron.superCluster()->seed()->seed(), *eeRecHits );
+// 			} else {
+// 				edm::LogWarning("NTP") << "Electron supercluster seed crystal neither in EB nor in EE!";
+// 			}
 
 			// Read in Electron ID
 			fTeIDMva[eqi] = electron.mva();
@@ -975,6 +952,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				ElMatch.clear();
 			}
 
+
 			// Conversion Information
 			reco::GsfElectron::ConversionRejection ConvRejVars = electron.conversionRejectionVariables();
 			reco::TrackBaseRef ConvPartnerTrack = ConvRejVars.partner;
@@ -986,6 +964,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTeConvPartTrackPhi[eqi]    = ConvPartnerTrack->phi();
 				fTeConvPartTrackCharge[eqi] = ConvPartnerTrack->charge();
 			}
+
 
 			fTeIsInJet[eqi] = -1;
 			fTeSharedPx[eqi] = 0.;
@@ -1174,7 +1153,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	fTPhotSCEnergy[phoqi]       = photon.superCluster()->rawEnergy();
 	fTPhotSCEtaWidth[phoqi]     = photon.superCluster()->etaWidth();
-	fTPhotSCSigmaPhiPhi[phoqi]  = lazyTools->covariances(*(photon.superCluster()->seed())).at(2);
+// DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
+// 	fTPhotSCSigmaPhiPhi[phoqi]  = lazyTools->covariances(*(photon.superCluster()->seed())).at(2);
 	fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
 	fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0;
 
@@ -1187,18 +1167,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTgoodphoton[phoqi]       = 0;
 	fTPhotIsIso[phoqi]        = 1;
 
-	// Spike removal information
-	if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
-		fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
-		fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *ebRecHits );
-		fTPhotS4OverS1[phoqi] = EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *ebRecHits );
-	} else if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
-		fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
-		fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *eeRecHits );
-		fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
-		} else
-			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
-	}
+// DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
+// 	// Spike removal information
+// 	if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
+// 		fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
+// 		fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *ebRecHits );
+// 		fTPhotS4OverS1[phoqi] = EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *ebRecHits );
+// 	} else if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_ENDCAP ) ) {
+// 		fTPhotScSeedSeverity[phoqi] = EcalSeverityLevelAlgo::severityLevel( photon.superCluster()->seed()->seed(), *eeRecHits, *channelStatus );
+// 		fTPhotE1OverE9[phoqi] = EcalSeverityLevelAlgo::E1OverE9(   photon.superCluster()->seed()->seed(), *eeRecHits );
+// 		fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
+//      } else
+// 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
+ 	}
 
 	////////////////////////////////////////////////////////
 	// Jet Variables:
