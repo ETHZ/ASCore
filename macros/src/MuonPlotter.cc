@@ -325,11 +325,11 @@ const double *MuonPlotter::getEtaBins (gChannel chan){
 
 //____________________________________________________________________________
 void MuonPlotter::doAnalysis(){
-	if(readHistos(fOutputFileName) != 0) return;
+	// if(readHistos(fOutputFileName) != 0) return;
 
 	// sandBox();
 	
-	// fLumiNorm = 35.;
+	fLumiNorm = 35.;
 	// printYields(Muon);
 	// printYields(Electron);
 	// printYields(EMu);
@@ -341,18 +341,18 @@ void MuonPlotter::doAnalysis(){
 	// printYieldsShort();
 
 	// makeIntPrediction(fOutputDir + "Yields.txt");
-	// makeMuIsolationPlot();
+	makeMuIsolationPlot();
 	
 	// makeMufEffPlots(false);
 	// makeElfEffPlots(false);
 	// makeMupEffPlots(false);
 	// makeElpEffPlots(false);
 
-	makeMufRatioPlots(false);
-	makeMupRatioPlots(false);
-	makeElfRatioPlots(false);
-	makeElpRatioPlots(false);
-	makeMCClosurePlots(fMCBG);
+	// makeMufRatioPlots(false);
+	// makeMupRatioPlots(false);
+	// makeElfRatioPlots(false);
+	// makeElpRatioPlots(false);
+	// makeMCClosurePlots(fMCBG);
 	
 	// makeDataClosurePlots();
 	// makeNT012Plots(EMu, fJMData, &MuonPlotter::isOSLLElMuEventTRG, "JMData_OS_");
@@ -1660,136 +1660,154 @@ void MuonPlotter::makeElpEffPlots(bool output){
 
 //____________________________________________________________________________
 void MuonPlotter::makeMuIsolationPlot(){
+	const bool read = true;
+	TString filename = "IsoHistos.root";
+	const unsigned nselections = 2;
+	const unsigned nbins = 20.;
+	const float ptcut = 20.;
+
+	TString sel_name[nselections];
+	sel_name[0] = "Base";
+	sel_name[1] = "SigSup";
+
+	TH1D    *hiso     [nselections][gNSAMPLES];
+	TH1D    *hiso_data[nselections];
+	THStack *hiso_mc  [nselections];
+	for(size_t i = 0; i < nselections; ++i){
+		for(gSample j = sample_begin; j < gNSAMPLES; j=gSample(j+1)){
+			hiso[i][j] = new TH1D(Form("hiso_%s_%s", sel_name[i].Data(), fSamples[j].sname.Data()), fSamples[j].sname.Data(), nbins, 0., 1.);
+			hiso[i][j]->SetFillColor(fSamples[j].color);
+			hiso[i][j]->Sumw2();
+		}
+		hiso_data[i] = new TH1D("IsoData_"  + sel_name[i], "Muon Isolation in Data for " + sel_name[i], nbins, 0., 1.);
+		hiso_mc[i]   = new THStack("IsoMC_" + sel_name[i], "Muon Isolation in MC for "   + sel_name[i]);
+	}
+	// hiso_mc[i] = new TH1D(Form("iso_mc_%s", fSamples[index].sname.Data()), "Muon Isolation in MC", nbins, 0., 1.);
+
+	TFile *file;
+	if(!read){
+		file = new TFile(fOutputDir + filename, "RECREATE");
+		file->cd();
+		fDoCounting = false;
+		// Sample loop
+		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+			Sample *S = &fSamples[i];
+			fCurrentSample = gSample(i);
+
+			TTree *tree = S->tree;
+
+			// Event loop
+			tree->ResetBranchAddresses();
+			Init(tree);
+			if (fChain == 0) return;
+			Long64_t nentries = fChain->GetEntriesFast();
+			Long64_t nbytes = 0, nb = 0;
+			for (Long64_t jentry=0; jentry<nentries;jentry++) {
+				printProgress(jentry, nentries, S->name);
+
+				Long64_t ientry = LoadTree(jentry);
+				if (ientry < 0) break;
+				nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+				// Select mutually exclusive runs for Jet and MultiJet datasets
+				if(!isGoodRun(i)) continue;
+
+				////////////////////////////////////////////////////
+				// MOST LOOSE SELECTION
+				if(isGoodMuEvent() && isMuTriggeredEvent()){
+					if(isLooseMuon(0) == false) continue;
+					if(MuPt[0] < ptcut) continue;
+
+					hiso[0][i]->Fill(MuIso[0]);
+				}
+				////////////////////////////////////////////////////
+				// SIGNAL SUPPRESSED SELECTION
+				if(isSigSupMuEventTRG()){
+					if(isLooseMuon(0) == false) continue;
+					if(MuPt[0] < ptcut) continue;
+
+					hiso[1][i]->Fill(MuIso[0]);
+				}
+				////////////////////////////////////////////////////
+			}
+			cout << endl;
+
+			// Write histos
+			for(size_t j = 0; j < nselections; ++j){
+				TDirectory* dir = Util::FindOrCreate(sel_name[j], file);
+				dir->cd();
+				hiso[j][i]->Write(hiso[j][i]->GetName(), TObject::kWriteDelete);
+			}
+		}
+		file->Close();
+	}
+	else{
+		file = TFile::Open(fOutputDir + filename, "READ");
+		if(file == NULL){
+			cout << "File " << filename << " does not exist!" << endl;
+			return;
+		}
+		file->cd();
+		
+		for(size_t i = 0; i < nselections; ++i){
+			for(gSample j = sample_begin; j < gNSAMPLES; j=gSample(j+1)){
+				TString getname = sel_name[i] + "/" + hiso[0][j]->GetName(); // had bug when storing file, change this after rerunning!
+				hiso[i][j] = (TH1D*)file->Get(getname);
+				hiso[i][j]->SetFillColor(fSamples[j].color);
+			}
+		}
+	}
+	
 	// vector<int> mcsamples = fMCBG;
 	vector<int> mcsamples = fMCBGMuEnr;
 	// vector<int> datasamples = fJMData;
 	vector<int> datasamples = fMuData;
-	const bool read = false;
-	const float ptcut = 20.;
-	const int nbins = 20.;
-
-	int step = 5000;
-	TH1D *hiso_data = new TH1D("iso_data", "Muon Isolation in Data", nbins, 0., 1.);
-	THStack *hiso_mc_stack = new THStack("iso_mc_stack", "Muon Isolation in MC");
-	const unsigned int nmcsamples = mcsamples.size();
-	TH1D *hiso_mc[nmcsamples];
-
-	if(read){
-		hiso_data     = (TH1D*)   fOutputFile->Get(fOutputDir + "/iso_data");
-		hiso_mc_stack = (THStack*)fOutputFile->Get(fOutputDir + "/iso_mc_stack");
-		TList *list = hiso_mc_stack->GetHists();
-		if(list->GetSize() != nmcsamples) return;
-		for(size_t i = 0; i < nmcsamples; ++i){
-			int index = mcsamples[i];
-			hiso_mc[i] = (TH1D*)list->At(i);
-			hiso_mc[i]->SetFillColor(fSamples[index].color);
+	
+	for(size_t i = 0; i < nselections; ++i){
+		hiso_data[i]->SetXTitle(convertVarName("MuIso[0]"));
+		hiso_data[i]->SetLineWidth(3);
+		hiso_data[i]->SetLineColor(kBlack);
+		hiso_data[i]->SetMarkerStyle(8);
+		hiso_data[i]->SetMarkerColor(kBlack);
+		hiso_data[i]->SetMarkerSize(1.2);
+	
+		// Apply weights
+		for(size_t j = 0; j < gNSAMPLES; ++j){
+			float scale = fLumiNorm / fSamples[j].lumi;
+			if(fSamples[j].isdata) continue;
+			else hiso[i][j]->Scale(scale);
 		}
-	}
 	
-	if(!read){
-		TTree *tree = NULL;
-		for(size_t i = 0; i < datasamples.size(); ++i){
-			int index = datasamples[i];
-
-			tree = fSamples[index].tree;
-			tree->ResetBranchAddresses();
-			Init(tree);
-			if (fChain == 0) return;
-			Long64_t nentries = fChain->GetEntriesFast();
-			Long64_t nbytes = 0, nb = 0;
-			for (Long64_t jentry=0; jentry<nentries;jentry++) {
-				Long64_t ientry = LoadTree(jentry);
-				if (ientry < 0) break;
-				if(fVerbose > 1) printProgress(jentry, nentries, fSamples[index].name);
-				nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-				if(isGoodMuEvent() == false) continue;
-				if(isMuTriggeredEvent() == false) continue;
-  				// if(isSigSupMuEventTRG() == false) continue;
-
-				if(isLooseMuon(0)       == false) continue;
-				if(MuPt[0] < ptcut) continue;
-
-				hiso_data->Fill(MuIso[0]);
-			}
-			if(fVerbose > 1) cout << endl;
-		}
-		for(size_t i = 0; i < mcsamples.size(); ++i){
-			int index = mcsamples[i];
-			tree = fSamples[index].tree;
-			hiso_mc[i] = new TH1D(Form("iso_mc_%s", fSamples[index].sname.Data()), "Muon Isolation in MC", nbins, 0., 1.);
-			hiso_mc[i]->SetFillColor(fSamples[index].color);
-			hiso_mc[i]->Sumw2();
-			float scale = fLumiNorm / fSamples[index].lumi;
-			tree->ResetBranchAddresses();
-			Init(tree);
-			if (fChain == 0) return;
-			Long64_t nentries = fChain->GetEntriesFast();
-			Long64_t nbytes = 0, nb = 0;
-			for (Long64_t jentry=0; jentry<nentries;jentry++) {
-				Long64_t ientry = LoadTree(jentry);
-				if (ientry < 0) break;
-				if(fVerbose > 1) printProgress(jentry, nentries, fSamples[index].name);
-				nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-				if(isGoodMuEvent() == false) continue;
-				if(isMuTriggeredEvent() == false) continue;
-				// if(isSigSupMuEventTRG() == false) continue;
-
-				if(isLooseMuon(0)       == false) continue;
-				if(MuPt[0] < ptcut) continue;
-
-				hiso_mc[i]->Fill(MuIso[0], scale);
-			}
-			hiso_mc_stack->Add(hiso_mc[i]);
-			if(fVerbose > 1) cout << endl;
-		}
-	}
-
-	hiso_data->SetXTitle(convertVarName("MuIso[0]"));
-	hiso_data->SetLineWidth(3);
-	hiso_data->SetLineColor(kBlack);
-	hiso_data->SetMarkerStyle(8);
-	hiso_data->SetMarkerColor(kBlack);
-	hiso_data->SetMarkerSize(1.2);
+		// Fill stacks
+		for(size_t j = 0; j < datasamples.size(); ++j) hiso_data[i]->Add(hiso[i][datasamples[j]]);
+		for(size_t j = 0; j < mcsamples.size();   ++j) hiso_mc[i]  ->Add(hiso[i][mcsamples  [j]]);
 	
-	hiso_mc_stack->Draw();
-	hiso_mc_stack->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		double max1 = hiso_mc  [i]->GetMaximum();
+		double max2 = hiso_data[i]->GetMaximum();
+		double max = max1>max2?max1:max2;
 	
-	// // Apply fudge factor:
-	// const float fudge = 2.0;
-	// for(size_t i = 0; i < nmcsamples; ++i){
-	// 	hiso_mc[i]->Scale(fudge);
-	// }
+		// hiso_mc  [i]->SetMinimum(10);
+		// hiso_data[i]->SetMinimum(10);
+		hiso_mc  [i]->SetMaximum(1.2*max);
 	
-	double max1 = hiso_mc_stack->GetMaximum();
-	double max2 = hiso_data->GetMaximum();
-	double max = max1>max2?max1:max2;
+		TCanvas *c_temp = new TCanvas("Iso" + sel_name[i], "Isolation in Data vs MC", 0, 0, 800, 600);
+		c_temp->cd();
 	
-	hiso_mc_stack->SetMinimum(0);
-	hiso_data->SetMinimum(0);
-	hiso_mc_stack->SetMaximum(1.2*max);
+		TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
+		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		leg->AddEntry(hiso_data[i], "Data","p");
+		for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(hiso[i][mcsamples[j]], fSamples[mcsamples[j]].sname.Data(), "f");
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetBorderSize(0);
+		
+		// gPad->SetLogy();
+		hiso_mc[i]->Draw("hist");
+		hiso_data[i]->DrawCopy("PE X0 same");
+		leg->Draw();
 	
-	TCanvas *c_temp = new TCanvas("Iso", "Isolation in Data vs MC", 0, 0, 800, 600);
-	c_temp->cd();
-
-	TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-	// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-	leg->AddEntry(hiso_data, "Data","p");
-	for(size_t i = 0; i < nmcsamples; ++i){
-		int index = mcsamples[i];
-		leg->AddEntry(hiso_mc[i], fSamples[index].sname.Data(), "f");
-	}
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-	
-	
-	hiso_mc_stack->Draw("hist");
-	hiso_data->DrawCopy("PE X0 same");
-	leg->Draw();
-
-	Util::PrintNoEPS(c_temp, "Isolation", fOutputDir, fOutputFile);	
+		Util::PrintNoEPS(c_temp, "Iso" + sel_name[i], fOutputDir, NULL);	
+	}	
 }
 
 //____________________________________________________________________________
