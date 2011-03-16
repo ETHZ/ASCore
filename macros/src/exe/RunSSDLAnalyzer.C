@@ -17,10 +17,10 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLAnalyzer [-d dir] [-v verbose] [-m maxevents] [-p pthat] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-v verbose] [-m maxevents] [-p pthat] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
-	cout << "     dir       is the output directory               " << endl;
-	cout << "                default is TempOutput/               " << endl;
+	cout << "     outfile   is the output file                    " << endl;
+	cout << "                default is ssdlfile.root             " << endl;
 	cout << "     verbose   sets the verbose level                " << endl;
 	cout << "                default is 0 (quiet mode)            " << endl;
 	cout << "     maxevents are the number of events to run over  " << endl;
@@ -38,16 +38,17 @@ void usage( int status = 0 ) {
 int main(int argc, char* argv[]) {
 // Default options
 	bool isList = false;
-	TString outputdir = "TempOutput/";
+	// TString outputdir = "TempOutput/";
+	TString outputfile = "ssdlfile.root";
 	int verbose = 0;
 	Long64_t maxevents = -1;
 	float pthatcut = -1.0;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:p:m:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "o:v:p:m:lh?")) != -1 ) {
 		switch (ch) {
-			case 'd': outputdir = TString(optarg); break;
+			case 'o': outputfile = TString(optarg); break;
 			case 'l': isList = true; break;
 			case 'v': verbose = atoi(optarg); break;
 			case 'p': pthatcut = atof(optarg); break;
@@ -85,14 +86,14 @@ int main(int argc, char* argv[]) {
 	}
 
 	cout << "--------------" << endl;
-	cout << "OutputDir is:     " << outputdir << endl;
+	cout << "OutputFile is:    " << outputfile << endl;
 	cout << "Verbose level is: " << verbose << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 	if(pthatcut > -1.) cout << "Lower pthat cut: " << pthatcut << endl;
 	cout << "--------------" << endl;
 
 	SSDLAnalyzer *tA = new SSDLAnalyzer(theChain);
-	tA->SetOutputDir(outputdir);
+	tA->SetOutputFile(outputfile);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxevents);
 	tA->SetPtHatCut(pthatcut);

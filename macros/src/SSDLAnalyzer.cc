@@ -47,8 +47,8 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 
 // Method called before starting the event loop
 void SSDLAnalyzer::BeginJob(){
-	fSSDLAnalysis->SetOutputDir(fOutputDir);
-	fSSDLAnalysis->SetOutputFile("SSDLTree");
+	// fSSDLAnalysis->SetOutputDir(fOutputDir);
+	fSSDLAnalysis->SetOutputFile(fOutputFile);
 	fSSDLAnalysis->SetVerbose(fVerbose);
 	fSSDLAnalysis->Begin();
 }

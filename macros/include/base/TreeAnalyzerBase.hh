@@ -18,8 +18,10 @@ public:
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 	inline virtual void SetMaxEvents(Long64_t maxevents){fMaxEvents = maxevents;};
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
+	inline void SetOutputFile(TString file){ fOutputFile = file; };
 	
 	TString fOutputDir;
+	TString fOutputFile;
 	int fVerbose;
 	int fNEntries;
 	Long64_t fMaxEvents;

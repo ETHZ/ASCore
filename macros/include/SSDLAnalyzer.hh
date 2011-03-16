@@ -5,7 +5,6 @@
 #include <TStyle.h>
 
 #include "base/TreeAnalyzerBase.hh"
-#include "helper/AnaClass.hh"
 #include "SSDLAnalysis.hh"
 
 class SSDLAnalyzer : public TreeAnalyzerBase {
@@ -18,7 +17,6 @@ public:
 	inline void SetPtHatCut(float cut){fPtHatCut = cut;};
 
 private:
-	AnaClass		*fAnaClass;
 	SSDLAnalysis	*fSSDLAnalysis;
 	float fPtHatCut;
 };
