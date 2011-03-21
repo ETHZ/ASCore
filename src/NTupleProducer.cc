@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.101 2011/03/04 18:02:30 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.102 2011/03/15 09:42:06 fronga Exp $
 //
 //
 
@@ -70,6 +70,8 @@ Implementation:
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
+
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -300,9 +302,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<EcalRecHitCollection> eeRecHits;
 	iEvent.getByLabel(fEBRecHitsTag,ebRecHits);
 	iEvent.getByLabel(fEERecHitsTag,eeRecHits);
-	edm::ESHandle<EcalChannelStatus> chStatus;
-	iSetup.get<EcalChannelStatusRcd>().get(chStatus);
-	const EcalChannelStatus * channelStatus = chStatus.product();
+	// edm::ESHandle<EcalChannelStatus> chStatus;
+	// iSetup.get<EcalChannelStatusRcd>().get(chStatus);
+	// const EcalChannelStatus * channelStatus = chStatus.product();
 
 
 /*
@@ -371,6 +373,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Get GenEventInfoProduct
 	edm::Handle<GenEventInfoProduct> genEvtInfo;
+	edm::Handle<PileupSummaryInfo> pileupInfo;
 	if(!fIsRealData){
 		iEvent.getByLabel("generator", genEvtInfo);
 		fTpthat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
@@ -382,12 +385,25 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTpdfx2       = genEvtInfo->pdf()->x.second;
 		fTpdfxPDF1    = genEvtInfo->pdf()->xPDF.first;
 		fTpdfxPDF2    = genEvtInfo->pdf()->xPDF.second;
+		
+		iEvent.getByLabel("addPileupInfo", pileupInfo);
+		fTpuNumInteractions  = pileupInfo->getPU_NumInteractions();
+		if(fTpuNumInteractions > gMaxnpileup){
+			edm::LogWarning("NTP") << "@SUB=analyze()"
+				<< "More than " << static_cast<int>(gMaxnpileup)
+				<< " generated Pileup events found, increase size!";
+			fTgoodevent = 1;
+		}
+		for(int i = 0; i < pileupInfo->getPU_NumInteractions(); i++){
+			if(i >= gMaxnpileup) break; // hard protection
+			fTpuZpositions[i]   = pileupInfo->getPU_zpositions()[i];
+			fTpuSumpT_lowpT[i]  = pileupInfo->getPU_sumpT_lowpT()[i];
+			fTpuSumpT_highpT[i] = pileupInfo->getPU_sumpT_highpT()[i];
+			fTpuNtrks_lowpT[i]  = pileupInfo->getPU_ntrks_lowpT()[i];
+			fTpuNtrks_highpT[i] = pileupInfo->getPU_ntrks_highpT()[i];
+			// fTpuInstLumi[i]     = pileupInfo->getPU_instLumi()[i];
+		}		
 	}
-
-	// Get Magnetic Field // What did we need this for?
-	// edm::ESHandle<MagneticField> magfield;
-	// iSetup.get<IdealMagneticFieldRecord>().get(magfield);
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Trigger information
@@ -1149,7 +1165,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotH2overE[phoqi]        = photon.hadronicDepth2OverEm();
 	fTPhotSigmaIetaIeta[phoqi]  = photon.sigmaIetaIeta();
 	
-	EcalClusterLazyTools *lazyTools = new EcalClusterLazyTools(iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE"));
+	// EcalClusterLazyTools *lazyTools = new EcalClusterLazyTools(iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE"));
 
 	fTPhotSCEnergy[phoqi]       = photon.superCluster()->rawEnergy();
 	fTPhotSCEtaWidth[phoqi]     = photon.superCluster()->etaWidth();
@@ -1740,6 +1756,14 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PDFxPDF2"         ,&fTpdfxPDF2        ,"PDFxPDF2/F");
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/F");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
+	// Pile-Up information:
+	fEventTree->Branch("PUnumInteractions",&fTpuNumInteractions,"PUnumInteractions/I");
+	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumInteractions]/F");
+	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumInteractions]/F");
+	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
+	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumInteractions]/F");
+	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumInteractions]/F");
+	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumInteractions]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
 	fEventTree->Branch("HLTResults"       ,&fTHLTres          ,"HLTResults[200]/I");
 	fEventTree->Branch("L1PhysResults"    ,&fTL1physres       ,"L1PhysResults[128]/I");
@@ -2418,6 +2442,15 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTvrtxntrks, gMaxnvrtx);
 	resetFloat(fTvrtxsumpt, gMaxnvrtx);
 	resetInt(fTvrtxisfake,   gMaxnvrtx);
+
+	// Pile-up
+	fTpuNumInteractions = 0;
+	resetFloat(fTpuZpositions   ,gMaxnpileup);
+	resetFloat(fTpuSumpT_lowpT  ,gMaxnpileup);
+	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);
+	resetFloat(fTpuNtrks_lowpT  ,gMaxnpileup);
+	resetFloat(fTpuNtrks_highpT ,gMaxnpileup);
+	// resetFloat(fTpuInstLumi     ,gMaxnpileup);
 
 	fTgoodevent         = 0;
 	fTflagmaxmuexc      = 0;
