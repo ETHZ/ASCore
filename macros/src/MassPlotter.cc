@@ -164,7 +164,7 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 	TString cuts = cutStream.str().c_str();
 	
-	//                 variable                            cuts njets  nlepts title     bins               cleaned  log  composite    ratio  stacked overlay 
+	//                 variable                            cuts njets  nlepts title     bins               flip_order  log  composite    ratio  stacked overlay 
 	MakePlot(fSamples,"misc.MT2" ,                         cuts, -3,   0,      "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
 //	MakePlot(fSamples,"hemi[0].lv1.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
 //	MakePlot(fSamples,"hemi[0].lv2.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
@@ -175,10 +175,10 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 void MassPlotter::makePlot(TString var, TString cuts, int njets, int nleps, TString xtitle,
 			   const int nbins, const double min, const double max,
-			   bool cleaned, bool logflag, bool composited, bool ratio, bool stacked, 
+			   bool flip_order, bool logflag, bool composited, bool ratio, bool stacked, 
 			   bool overlaySUSY, float overlayScale){
 
-  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, min, max, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, min, max, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
   
 
 }
@@ -187,14 +187,173 @@ void MassPlotter::makePlot(TString var, TString cuts, int njets, int nleps, TStr
 
 void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TString xtitle, 
 			   const int nbins,  const double *bins,
-			   bool cleaned, bool logflag, bool composited, bool ratio, bool stacked, 
+			   bool flip_order, bool logflag, bool composited, bool ratio, bool stacked, 
 			   bool overlaySUSY, float overlayScale){
 
-  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 
 }
 
+// ________________________________________________________________________
+void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t nevents){
+	sample Sample = fSamples[sample_index];
+
+      	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+	cout << "printing W efficiency: \n"
+	     << Sample.name << endl;	
+      	std::cout << setfill('-') << std::setw(70) << "" << std::endl;
+
+        enum counters_t { count_begin, all=count_begin, MET, presel, NJetsIDLoose, HCAL_ECAL_noise, PassJetID, MinMetJetDPhi, VectorSumPt, MT2,  count_end };
+ 	Monitor counters[count_end];
+	TString lablx[count_end] = {"all events","MET", "presel", "NJetsIDLoose" ,"Cal_Noise", "PassJetID", "MinMetJetDPhi", "VectorSumPt", "MT2"};
+
+	string to_measure;
+	if(lept == "ele" )            {to_measure = "W->enu  recoed";} 
+	else if(lept == "muo" )       {to_measure = "W->munu recoed";} 
+
+    	fMT2tree = new MT2tree();
+    	Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
+    	Long64_t nentries =  Sample.tree->GetEntries();
+    	Long64_t nbytes = 0, nb = 0;
+    	for (Long64_t jentry=0; jentry<min(nentries, nevents);jentry++) {
+      		nb = Sample.tree->GetEntry(jentry);   nbytes += nb;
+      		Sample.tree->SetBranchAddress("MT2tree", &fMT2tree);
+      
+      		if ( fVerbose>2 && jentry % 50000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
+
+		bool leptfound(false);
+		bool eventgood(false);
+		bool acceptance(false);
+		if(lept=="ele" && fMT2tree->GenLeptFromW(11, 0 , 100)==true)                                              eventgood =true;
+		if(lept=="muo" && fMT2tree->GenLeptFromW(13, 0 , 100)==true)                                              eventgood =true;
+		if(lept=="ele" && fMT2tree->GenLeptFromW(11,10,  2.4)==true)                                              acceptance=true;
+		if(lept=="muo" && fMT2tree->GenLeptFromW(13,10,  2.4)==true)                                              acceptance=true;
+		if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && fMT2tree->GenLeptFromW(11, 0, 100)==true) leptfound =true;
+		if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && fMT2tree->GenLeptFromW(13, 0, 100)==true) leptfound =true;
+
+		// all events
+		if(eventgood)   counters[all].fill("all events");
+		if(acceptance)  counters[all].fill("acceptance");
+		if(leptfound)   counters[all].fill(to_measure);
+		
+		// MET
+		if(fMT2tree->misc.MET                     < 30    )  continue;
+		if(eventgood)   counters[MET].fill("MET");
+		if(acceptance)  counters[MET].fill("acceptance");
+		if(leptfound)   counters[MET].fill(to_measure);
+		
+		// presel
+		if(fMT2tree->misc.HT                      <300    )  continue;
+		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
+		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
+		if(eventgood)   counters[presel].fill("presel");
+		if(acceptance)  counters[presel].fill("acceptance");
+		if(leptfound)   counters[presel].fill(to_measure);
+		
+		// NJetsIDLoose
+		if(fMT2tree->NJetsIDLoose                 <2     ) continue;  
+		if(eventgood)   counters[NJetsIDLoose].fill("NJetsIDLoose");
+		if(acceptance)  counters[NJetsIDLoose].fill("acceptance");
+		if(leptfound)   counters[NJetsIDLoose].fill(to_measure);
+
+		
+		// ECAL HCAL Noise
+		if(fMT2tree->misc.EcalDeadCellBEFlag              ==0     )  continue;
+		if(fMT2tree->misc.HBHENoiseFlag                   ==0     )  continue;
+		if(eventgood)   counters[HCAL_ECAL_noise].fill("Cal_Noise");
+		if(acceptance)  counters[HCAL_ECAL_noise].fill("acceptance");
+		if(leptfound)   counters[HCAL_ECAL_noise].fill(to_measure);
+		
+		// PassJetID
+		if(fMT2tree->misc.PassJetID               ==0     ) continue;
+		if(eventgood)   counters[PassJetID].fill("PassJetID");
+		if(acceptance)  counters[PassJetID].fill("acceptance");
+		if(leptfound)   counters[PassJetID].fill(to_measure);
+		
+		// MinMetJetDPhi
+		if(fMT2tree->misc.MinMetJetDPhi           <0.3    )  continue;
+		if(eventgood)   counters[MinMetJetDPhi].fill("MinMetJetDPhi");
+		if(acceptance)  counters[MinMetJetDPhi].fill("acceptance");
+		if(leptfound)   counters[MinMetJetDPhi].fill(to_measure);
+		
+		// VectorSumPt
+		if(fMT2tree->misc.Vectorsumpt             >70     )  continue;
+		if(eventgood)   counters[VectorSumPt].fill("VectorSumPt");
+		if(acceptance)  counters[VectorSumPt].fill("acceptance");
+		if(leptfound)   counters[VectorSumPt].fill(to_measure);
+		
+		// MT2
+		if(fMT2tree->misc.MT2             <100     )  continue;
+		if(eventgood)   counters[MT2].fill("MT2");
+		if(acceptance)  counters[MT2].fill("acceptance");
+		if(leptfound)   counters[MT2].fill(to_measure);
+		
+      	}
+
+	// print stats     
+      	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+       	std::cout << "Statistics" << std::endl;
+       	std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
+       	for ( counters_t iCount=count_begin; iCount<count_end; iCount = counters_t(iCount+1) ) {
+         	counters[iCount].print();
+         	std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;  
+       	}
+  	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
+
+	// fill histo
+	TH1D* h_all = new TH1D("h_all", "", count_end, 0., (double) count_end );
+	TH1D* h_acc = new TH1D("h_acc", "", count_end, 0., (double) count_end );
+	TH1D* h_rec = new TH1D("h_rec", "", count_end, 0., (double) count_end );
+	TH1D* h_1   = new TH1D("h_1"  , "", count_end, 0., (double) count_end );
+	TH1D* h_2   = new TH1D("h_2"  , "", count_end, 0., (double) count_end );
+	for(int i=0; i<count_end; ++i){
+		h_1    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_2    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_all->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
+		h_acc->SetBinContent(i+1,counters[i].counts("acceptance"));
+		h_rec->SetBinContent(i+1,counters[i].counts(to_measure));
+	}
+	h_1    ->Sumw2();
+	h_2    ->Sumw2();
+	h_1    ->Divide(h_acc,h_all);	
+	h_2    ->Divide(h_rec,h_acc);	
+	TCanvas *col  = new TCanvas("Wevents", "", 0, 0, 900, 700);
+	col -> cd();
+	h_1    ->SetLineColor(kBlue);
+	h_1    ->SetMarkerStyle(20);
+	h_1    ->SetDrawOption("E");
+	h_1    ->Draw();
+	string name  ="Wevents_"+lept+"_acceptance_"+(string) Sample.name; 
+	Util::PrintEPS(col, name, fOutputDir);
+	h_2    ->SetLineColor(kBlue);
+	h_2    ->SetMarkerStyle(20);
+	h_2    ->SetDrawOption("E");
+	h_2    ->Draw();
+	name  ="Wevents_"+lept+"_reco_"+(string) Sample.name; 
+	Util::PrintEPS(col, name, fOutputDir);
+	
+	//__________________________________
+	if(lept=="ele") {
+		fWpred.Wenu_acc        =h_1->GetBinContent(count_end);
+		fWpred.Wenu_acc_err    =h_1->GetBinError(count_end); 
+		fWpred.Wenu_rec        =h_2->GetBinContent(count_end);
+		fWpred.Wenu_rec_err    =h_2->GetBinError(count_end);  
+	}else if (lept=="muo") {
+		fWpred.Wmunu_acc       =h_1->GetBinContent(count_end);
+		fWpred.Wmunu_acc_err   =h_1->GetBinError(count_end); 
+		fWpred.Wmunu_rec       =h_2->GetBinContent(count_end);
+		fWpred.Wmunu_rec_err   =h_2->GetBinError(count_end); 
+	}
+
+	//_________________________________
+	delete h_1;
+	delete h_2;
+	delete h_all;
+	delete h_acc;
+	delete h_rec;
+	delete col;
+}
 // ________________________________________________________________________
 void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass){
 	sample Sample = fSamples[sample_index];
@@ -410,11 +569,10 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
 	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, text, weight);
       }
 
-      //if( fMT2tree-> MinMetJetDPhi(0,20) < 0.3 )  continue;
-//      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
-//      counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
-//      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
-//      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
+      counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
+      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
 
       if( fMT2tree->misc.HBHENoiseFlag != 1 )  continue;
       counters[i].fill("HBHE noise veto",weight);
@@ -556,7 +714,7 @@ void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TStri
 
 //________________________________________________________________________
 
-void MassPlotter::plotSig(TString var, TString cuts, TString xtitle, int nbins, double min, double max, bool cleaned, int type ){
+void MassPlotter::plotSig(TString var, TString cuts, TString xtitle, int nbins, double min, double max, bool flip_order, int type ){
 
         TString varname = Util::removeFunnyChar(var.Data());
 
@@ -735,14 +893,14 @@ void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString 
 
 void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
 			   TString xtitle, const int nbins, const double min, const double max,
-			   bool cleaned, bool logflag, bool composited, bool ratio, 
+			   bool flip_order, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
 
   double bins[nbins];
   bins[0] = min;
   for(int i=1; i<=nbins; i++)
     bins[i] = min+i*(max-min)/nbins;
-  MakePlot(Samples, var, cuts, njets, nleps, xtitle, nbins, bins, cleaned, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(Samples, var, cuts, njets, nleps, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 }
 
@@ -750,7 +908,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 
 void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
 			   TString xtitle, const int nbins, const double *bins, 
-			   bool cleaned, bool logflag, bool composited, bool ratio, 
+			   bool flip_order, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
 
         TString varname = Util::removeFunnyChar(var.Data());
@@ -764,6 +922,8 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	else if(nleps >=0  ) nLeps = " && (NEles + NMuons) ==";
 	nLeps += TString::Format("%d",abs(nleps));
 	if     (nleps ==-10) nLeps = " "; 
+	if     (nleps ==-11) nLeps = " && NEles ==1 && NMuons ==0"; 
+	if     (nleps ==-13) nLeps = " && NEles ==0 && NMuons ==1"; 
 
 	THStack* h_stack     = new THStack(varname, "");
   	TH1D*    h_data      = new TH1D   (varname+"data"  , "", nbins, bins );
@@ -886,21 +1046,41 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	}
 
 	if (composited){
-	  for (int i=0; i<6; ++i){
-	    if (!stacked)  {
-	      h_composited[i]->Scale(1./h_composited[i]->Integral());
-	      h_composited[i] -> SetMinimum(0.00005);
-	      //if (fVerbose>2) cout << " h_composited[" << i<< "]->Integral = " << h_composited[i]->Integral()  << endl;
-	    }
-	    if( i!=5 || !overlaySUSY) h_stack  -> Add(h_composited[i]);
-	    if( i==5)                 h_susy   -> Add(h_composited[i]);
-	    else        	      h_mc_sum -> Add(h_composited[i]);
-	    if( i==5 && overlaySUSY)
-	      Legend1 ->AddEntry(h_composited[i], cnames[i] + (overlayScale ? 
+	  if(flip_order){
+	    for (int i=5; i>=0; --i){
+	      if (!stacked)  {
+	        h_composited[i]->Scale(1./h_composited[i]->Integral());
+	        h_composited[i] -> SetMinimum(0.00005);
+	        //if (fVerbose>2) cout << " h_composited[" << i<< "]->Integral = " << h_composited[i]->Integral()  << endl;
+	      }
+	      if( i!=5 || !overlaySUSY) h_stack  -> Add(h_composited[i]);
+	      if( i==5)                 h_susy   -> Add(h_composited[i]);
+	      else        	        h_mc_sum -> Add(h_composited[i]);
+	      if( i==5 && overlaySUSY)
+	        Legend1 ->AddEntry(h_composited[i], cnames[i] + (overlayScale ? 
 							      TString::Format(" x %.0f",overlayScale) :
 							      " scaled to data")   , "f");  
-	    else
-	      Legend1 ->AddEntry(h_composited[i], cnames[i], stacked ? "f" : "l");
+	      else
+	        Legend1 ->AddEntry(h_composited[i], cnames[i], stacked ? "f" : "l");
+	    }
+	  }
+	  else{
+	    for (int i=0; i<6; ++i){
+	      if (!stacked)  {
+	        h_composited[i]->Scale(1./h_composited[i]->Integral());
+	        h_composited[i] -> SetMinimum(0.00005);
+	        //if (fVerbose>2) cout << " h_composited[" << i<< "]->Integral = " << h_composited[i]->Integral()  << endl;
+	      }
+	      if( i!=5 || !overlaySUSY) h_stack  -> Add(h_composited[i]);
+	      if( i==5)                 h_susy   -> Add(h_composited[i]);
+	      else        	      h_mc_sum -> Add(h_composited[i]);
+	      if( i==5 && overlaySUSY)
+	        Legend1 ->AddEntry(h_composited[i], cnames[i] + (overlayScale ? 
+		  					      TString::Format(" x %.0f",overlayScale) :
+		  					      " scaled to data")   , "f");  
+	      else
+	        Legend1 ->AddEntry(h_composited[i], cnames[i], stacked ? "f" : "l");
+	    }
 	  }
 	  h_data->Add(h_composited[6]);
 	  if(h_data->Integral()>0 && stacked){
@@ -915,6 +1095,18 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 			        << "Other Integral:    " << h_composited[4]->Integral()  << endl
 			        << "SUSY:              " << h_composited[5]->Integral()  << endl
 			        << "Data:              " << h_composited[6]->Integral()  << endl;
+			  // save nevents for W background prediction
+			  if(nleps==-11){
+			  	fWpred.QCD_bg_e   = h_composited[0]->Integral();	
+				fWpred.Z_bg_e     = h_composited[2]->Integral();
+				fWpred.Top_bg_e   = h_composited[3]->Integral();
+				fWpred.Other_bg_e = h_composited[4]->Integral();
+			  }else if(nleps==-13){
+			  	fWpred.QCD_bg_mu   = h_composited[0]->Integral();	
+				fWpred.Z_bg_mu     = h_composited[2]->Integral();
+				fWpred.Top_bg_mu   = h_composited[3]->Integral();
+				fWpred.Other_bg_mu = h_composited[4]->Integral();
+			  } 
 	  }
 	}
 	else{
@@ -978,18 +1170,18 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
         TString outname = Util::removeFunnyChar(oname.Data());
 
 	if(!stacked) {
-	  outname = outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + "_shape";
+	  outname = outname + (flip_order ? "_flipped" : "") + (logflag ? "_log" : "") + "_shape";
 	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps, false);
 
 	}
 	else if (!overlaySUSY){
-	  outname = outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "");
+	  outname = outname + (flip_order ? "_flipped" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "");
 	  printHisto(h_stack, h_data, h_mc_sum, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps);
 	  if (ratio) 
 	    plotRatioStack(h_stack,  h_mc_sum, h_data,  logflag, false, outname, Legend1, xtitle, ytitle, njets, nleps);
 	}
 	else {
-	  outname =  outname + (cleaned ? "_cleaned" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "") + "_overlay";	  
+	  outname =  outname + (flip_order ? "_flipped" : "") + (logflag ? "_log" : "") + (composited ? "_comp" : "") + "_overlay";	  
 	  printHisto(h_stack, h_data, h_mc_sum, h_susy, Legend1 , outname, "hist", logflag, xtitle, ytitle, njets, nleps, overlayScale);
 	  if (ratio) 
 	    plotRatioStack(h_stack,  h_mc_sum, h_data, h_susy,  logflag, false, outname, Legend1, xtitle, ytitle, njets, nleps, overlayScale);
@@ -1006,231 +1198,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	
 }
 
-//________________________________________________________________________
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString branch_name, const int nbins, const double bins[], bool cleaned, bool logflag, 
-		           TString cut_branch_name, double ysplit[], TString option, TString version, TString prediction, double factor ){
-	
-	double lower_cut =  ysplit[0];
-	double upper_cut =  ysplit[1];
-	THStack* h_stack     = new THStack(branch_name, "");
-	TH1D*   h_data       = new TH1D("data"  , "", nbins, bins );
-	TH1D*   h_mc_sum     = new TH1D("mc_sum", "", nbins, bins );
-	TH1D*   h_mc_sum_susy     = new TH1D("mc_sum_susy", "", nbins, bins );
-	TH1D*   h_susy  = new TH1D("mc_w_susy", "", nbins, bins);	
 
-	// h_data
-	h_data -> Sumw2();
-	h_data -> SetMarkerStyle(1);
-	h_data -> SetMarkerColor(kRed);
-	h_data -> SetLineColor(kRed);
-	h_data -> SetStats(false);
-
-	h_mc_sum -> SetFillStyle(3004);
-	h_mc_sum -> SetFillColor(kBlack);
-	h_mc_sum -> SetStats(0);
-	
-	h_mc_sum    ->Sumw2();
-	h_susy 	    ->Sumw2();
-	h_mc_sum_susy -> Sumw2();
-
-
-	// vector of all histos
-	vector<TH1D*> h_samples;
-
-
-	// legend
-	TLegend* Legend1 = new TLegend(.6,.5,.89,.88);
-	
-	// get prediction
-	TH1D* h_prediction    = new TH1D("predict",    "", nbins, bins);
-	if(prediction!="none"){
-		if(prediction == "QCD"){	
-			h_prediction=GetPrediction(branch_name, gNMT2bins, gMT2bins, cleaned, cut_branch_name, ysplit[2], ysplit[3], false, factor );
-		}else if(prediction == "data"){
-			h_prediction=GetPrediction(branch_name, gNMT2bins, gMT2bins, cleaned, cut_branch_name, ysplit[2], ysplit[3], true,  factor );
-		}
-	}
-	h_prediction -> SetFillColor(401);
-	h_prediction -> SetLineColor(402);
-	for(size_t i = 0; i < Samples.size(); ++i){
-		h_samples.push_back(new TH1D(branch_name+"_"+Samples[i].name, "", nbins, bins));
-		h_samples[i] -> Sumw2();
-		h_samples[i] -> SetFillColor(Samples[i].color);
-		h_samples[i] -> SetLineColor(Samples[i].color);
-		h_samples[i] -> SetMarkerColor(Samples[i].color);
-		h_samples[i] -> SetStats(false);
-		if(Samples[i].type == "susy" ){
-			h_samples[i] -> SetLineColor(kBlack);
-			h_samples[i] -> SetLineStyle(kDotted);
-		}
-		Double_t weight = Samples[i].xsection * Samples[i].kfact * Samples[i].lumi / (Samples[i].nevents);
-		if(fVerbose>2) cout << "MakePlot: looping over " << Samples[i].sname << endl;
-		if(fVerbose>2) cout << "           sample has weight " << weight << " and " << Samples[i].tree->GetEntries() << " entries" << endl; 
-	
-		fMT2tree = new MT2tree();
-		Samples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
-		Long64_t nentries =  Samples[i].tree->GetEntries();
-		Long64_t nbytes = 0, nb = 0;
-		int nev =0;
-		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			nb =  Samples[i].tree->GetEntry(jentry);   nbytes += nb;
-		        Samples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
-
-			if ( fVerbose>2 && jentry % 5000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
-	
-			// cleaning & cuts
-			if( fMT2tree->misc.DPhiMhtMpt > upper_cut) continue;
-			if( fMT2tree->misc.DPhiMhtMpt < lower_cut) continue;
-			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
-			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
-			if( fMT2tree->NJets < NJetsCut )           continue;
-			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.MT2 <0)        continue;			
-			// fill histo
-			if(option == "none")  {
-				h_samples[i]                ->Fill(fMT2tree->misc.MT2     , weight);
-				if(Samples[i].type == "mc"  &&  Samples[i].sname == "QCD" && fMT2tree->misc.MT2 < 50){h_prediction -> Fill(fMT2tree->misc.MT2     , weight);}
-			}
-			nev++;
-		}
-		if(fVerbose>2) cout << "\tEvents found:  " << nev << endl
-				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
-
-		delete fMT2tree;
-	}
-	if(prediction!="none"){
-		h_stack ->Add(h_prediction);
-		Legend1 ->AddEntry(h_prediction, "data-driven QCD", "f");
-		h_mc_sum->Add(h_prediction);
-	}
-	for(int i=0; i<Samples.size(); ++i){
-		if(Samples[i].type=="mc" || Samples[i].type=="susy") h_mc_sum_susy->Add(h_samples[i]);
-		if((Samples[i].sname=="QCD" && prediction=="none")){
-			h_samples[i] -> SetMinimum(0.01);
-			h_stack ->Add(h_samples[i]);
-			h_mc_sum->Add(h_samples[i]);
-			Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
-		}
-		if(Samples[i].sname!="QCD" && Samples[i].type!="data"){
-			h_stack->Add(h_samples[i]);
-			if(Samples[i].type!="susy") h_mc_sum->Add(h_samples[i]);
-			if(Samples[i].type=="susy") h_susy  ->Add(h_samples[i]);
-			if(Samples[i].name != "PhotonJets_Pt40to100-V01-03-01" && Samples[i].name != "PhotonJets_Pt100to200-V01-03-01"){
-				Legend1 ->AddEntry(h_samples[i], Samples[i].sname, "f");
-			}
-		}
-		if(Samples[i].type == "data"){
-			h_data -> Add(h_samples[i]);
-		}
-
-	}
-	if(h_data->Integral()>0){
-		Legend1     ->AddEntry(h_data, "data", "l");
-	}
-
-
-	TString xtitle = branch_name + " (GeV)";
-//	TString xtitle = "leading JPT (GeV)";
-	if(option =="overHT") xtitle = branch_name + " / HT (GeV)";
-	TString ytitle = "events";
-
-	// print histo without QCD prediction
-	printHisto(h_stack, h_data,   Legend1 , branch_name+"_"+version, "hist", logflag, xtitle, ytitle);
-	plotRatioStack(h_stack,  h_mc_sum, h_data,  true, false, branch_name+"_"+version+"ratio", Legend1, xtitle, ytitle);
-
-
-	if(prediction!="none"){
-		// print histo with SM prediction
-		printHisto(h_stack, h_data, h_mc_sum, Legend1 , branch_name+"_"+version+"_prediction_from_"+prediction, "hist", logflag, xtitle, ytitle);
-	}
-	
-
-	// _____________________________________________________
-	double data_error      =0;
-	double mc_sum_error    =0;
-	double susy_error      = 0;
-	double sm_w_susy_error = 0;
-	for(int bin=16; bin <= h_mc_sum->GetNbinsX(); ++bin){
-		data_error      += h_data   ->GetBinError(bin)*h_data  ->GetBinError(bin);
-		mc_sum_error    += h_mc_sum ->GetBinError(bin)*h_mc_sum->GetBinError(bin);
-		susy_error      += h_susy   ->GetBinError(bin) * h_susy ->GetBinError(bin);
-		sm_w_susy_error += h_mc_sum_susy   ->GetBinError(bin) * h_mc_sum_susy->GetBinError(bin);
-	}
-	data_error       = sqrt(data_error);
-	mc_sum_error     = sqrt(mc_sum_error);
-	susy_error       = sqrt(susy_error);
-	sm_w_susy_error  = sqrt(sm_w_susy_error);
-
-	cout << "____________________________________________________" << endl;
-	cout << "Prediction for QCD based on "   << prediction   << " cleaned "   << cleaned        << endl;
-	cout << " " << cut_branch_name << " in " << ysplit[0]   <<  " and " << ysplit[1] << endl; 
-	cout << "  # events with MT2 > 135:                          " << endl;
-	cout << "  MC data driven:           " << h_mc_sum->Integral(16, 100)    <<  " plusminus " << mc_sum_error    << endl;
-	cout << "  data:                     " << h_data  ->Integral(16, 100)    <<  " plusminus " << data_error      << endl;
-	cout << "  SUSY:                     " << h_susy->Integral(16, 100)      <<  " plusminus " << susy_error      << endl; 
-	cout << "  SM with SUSY:             " << h_mc_sum_susy->Integral(16, 100)      <<  " plusminus " << sm_w_susy_error      << endl; 
-	cout << "  h_mc_sum in bin 16        " << h_mc_sum->GetBinContent(16) <<endl;
-	// _________________________________________________________
-	for(int i=0; i<h_samples.size(); ++i){
-		delete h_samples[i];
-	}
-	delete h_prediction;
-	delete h_mc_sum;
-	delete Legend1;
-	delete h_data;
-	delete h_susy;
-	delete h_mc_sum_susy;
-}
-
-
-//_____________________________________________________________________________________
-TH1D* MassPlotter::GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor ){
-
-	TH1D*   h_prediction       = new TH1D("prediction", "", nbins, bins );
-	TH1D*   h_fudge            = new TH1D("fudge_factor", "", nbins, bins);
-	
-	// fill h_fudge
-	for(int i=1; i<=nbins+1; ++i ){
-		if(h_fudge->GetBinLowEdge(i) <50) continue;
-		h_fudge->SetBinContent(i, factor);
-		h_fudge->SetBinError(i, 0.5*factor);
-	}
-
-
-	// h_data
-	h_prediction -> Sumw2();
-	h_prediction -> SetStats(false);
-
-	for(size_t i = 0; i < fSamples.size(); ++i){
-		if(data==false && fSamples[i].sname != "QCD") continue;
-		if(data==true  && fSamples[i].type  != "data") continue;
-
-		Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
-
-		fMT2tree = new MT2tree();
-		fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
-		Long64_t nentries =  fSamples[i].tree->GetEntries();
-		Long64_t nbytes = 0, nb = 0;
-		
-		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
-				
-			// cleaning & cuts
-			if( fMT2tree->misc.DPhiMhtMpt > upper_cut) continue;
-			if( fMT2tree->misc.DPhiMhtMpt < lower_cut) continue;
-			if( fMT2tree->misc.LeptConfig !=LeptConfigCut  ) continue; //lepton veto
-			if( fMT2tree->misc.Vectorsumpt > VectorSumPtCut) continue;
-			if( fMT2tree->NJets < NJetsCut )           continue;
-			if( fMT2tree->NJets > MaxNJetsCut )        continue;
-			if( fMT2tree->misc.MT2 <0)        continue;			
-			// fill histo
-			if(fMT2tree->misc.MT2 > 50) h_prediction     ->Fill(fMT2tree->misc.MT2     , weight);
-		}
-		delete fMT2tree;
-	}
-	h_prediction->Multiply(h_fudge);
-	return h_prediction;	
-}
 
 
 //__________________________________________________________________________

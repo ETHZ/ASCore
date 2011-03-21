@@ -92,16 +92,48 @@ public:
 		double R(std::string lept){
 			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
 			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
-			else   {return -1;}
+			else return -1;
 		}
 		double R_err(std::string lept){
 			// error propagation
-			if(lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			else            return -1;
+			if     (lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else return -1;
 		}
 	} fZtonunu_efficiency;
+
+	// probability for W->lnu event to be reconstructed and identified. 
+	struct Wprediction{
+		double Wenu_acc;
+		double Wenu_acc_err;
+		double Wenu_rec;
+		double Wenu_rec_err;
+		double Wmunu_acc;
+		double Wmunu_acc_err;
+		double Wmunu_rec;
+		double Wmunu_rec_err;
+		double W_prob(std::string lept){
+			if     (lept == "ele" && Wenu_acc  >0 && Wenu_rec  >0){return Wenu_acc *Wenu_rec;}
+			else if(lept == "muo" && Wmunu_acc >0 && Wmunu_rec >0){return Wmunu_acc*Wmunu_rec;}
+			else return -1;
+		}
+		double W_prob_err(std::string lept){
+			if     (lept == "ele" && W_prob("ele")>0){return sqrt(pow(Wenu_acc *Wenu_rec_err ,2) + pow(Wenu_rec *Wenu_acc_err ,2));}
+			else if(lept == "muo" && W_prob("muo")>0){return sqrt(pow(Wmunu_acc*Wmunu_rec_err,2) + pow(Wmunu_rec*Wmunu_acc_err,2));}
+			else return -1;
+		};
+		double QCD_bg_e;
+		double QCD_bg_mu;
+		double Top_bg_e;
+		double Top_bg_mu;
+		double Z_bg_e;
+		double Z_bg_mu;
+		double Other_bg_e;
+		double Other_bg_mu;
+	} fWpred;
+	// -----------------
 	
+
 	typedef std::map <TString, TString> MapType;
 	MapType RemoveLeptMap;
 
@@ -123,6 +155,7 @@ public:
 	void PrintCutFlow(int njets=-2, int nleps=0);
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
 	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
+	void PrintWEfficiency(int sample_index , std::string lept, Long64_t nevents);
         void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
 		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
 		      const int nbins=100, const double min=0., const double max=380., double fit_min=40., double fit_max=100.);
@@ -158,8 +191,6 @@ private:
 		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
-	void MakePlot(std::vector<sample> Samples, TString branch_name, const int nbins, const double bins[], bool cleaned, bool logflag, 
-		      TString cut_branch_name, double ysplit[], TString option, TString version, TString prediction, double factor );
 	void printHisto(THStack* h, TString canvname, Option_t *drawopt,  bool logflag);
 	void printHisto(THStack* h, TH1* h_data, TLegend* leg,  TString canvname, Option_t *drawopt,  bool logflag, TString xtitle, TString ytitle);
         void printHisto(THStack* h, TH1* h_data, TH1* h_prediction, TLegend* leg,  TString canvname, Option_t *drawopt, bool logflag, TString xtitle, TString ytitle,int njets=-2, int nleps=0, bool stacked=true);
@@ -173,7 +204,6 @@ private:
 
 	double ExpoFitTesting(double *x, double *par);
 	TH1D* FillRatioHist(TString branch_name, float MT2plit[], float ysplit[], TString option, const int nbins, const double bins[], TString version,  bool cleaned);
-	TH1D* GetPrediction(TString branch_name, const int nbins, const double bins[], bool cleaned, TString cut_branch_name, double lower_cut, double upper_cut, bool data, double factor );
 	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut, bool RemoveLepts, TString xtitle, 
 			  const int nbins, const double *bins, bool add_underflow, bool logflag, double scale_factor, bool normalize);
 	void  CompSamples(std::vector<sample> Samples, TString var, TString cuts, TString optcut,  bool RemoveLepts, TString xtitle, 
