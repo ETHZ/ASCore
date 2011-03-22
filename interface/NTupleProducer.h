@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.80 2011/03/04 18:02:30 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.81 2011/03/21 17:39:36 stiegerb Exp $
 //
 //
 
@@ -241,11 +241,11 @@ private:
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;
-	int fTEcalDeadCellBEFlag;
-	static const unsigned int gMaxnECALGapClusters = 50;
-	unsigned int fTnECALGapClusters;
-	float fTEcalGapBE[gMaxnECALGapClusters];
-	int fTEcalGapClusterSize[gMaxnECALGapClusters];
+	// int fTEcalDeadCellBEFlag;
+	// static const unsigned int gMaxnECALGapClusters = 50;
+	// unsigned int fTnECALGapClusters;
+	// float fTEcalGapBE[gMaxnECALGapClusters];
+	// int fTEcalGapClusterSize[gMaxnECALGapClusters];
 
 	int fTgoodvtx;
 	float fTprimvtxx;
@@ -413,17 +413,6 @@ private:
 	int fTmuIsTMOneStationAngTight [gMaxnmus];
 	int fTmuIsTMOneStationAngLoose [gMaxnmus];
 
-	float fTmuoutmomx    [gMaxnmus];
-	float fTmuoutmomy    [gMaxnmus];
-	float fTmuoutmomz    [gMaxnmus];
-	float fTmuoutmomphi  [gMaxnmus];
-	float fTmuoutmometa  [gMaxnmus];
-	float fTmuoutmomtheta[gMaxnmus];
-	float fTmuoutposrad  [gMaxnmus];
-	float fTmuoutposx    [gMaxnmus];
-	float fTmuoutposy    [gMaxnmus];
-	float fTmuoutposz    [gMaxnmus];
-
 // - Gen Info:
 	int   fTGenMuId      [gMaxnmus];
 	int   fTGenMuStatus  [gMaxnmus];
@@ -546,12 +535,12 @@ private:
 	float fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
 	float fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
 	int fTeNumberOfMissingInnerHits[gMaxneles];
-	int fTeIsInJet[gMaxneles];
-	float fTeSharedPx[gMaxneles];
-	float fTeSharedPy[gMaxneles];
-	float fTeSharedPz[gMaxneles];
-	float fTeSharedEnergy[gMaxneles];
-	int fTeDupEl[gMaxneles];
+	// int fTeIsInJet[gMaxneles];
+	// float fTeSharedPx[gMaxneles];
+	// float fTeSharedPy[gMaxneles];
+	// float fTeSharedPz[gMaxneles];
+	// float fTeSharedEnergy[gMaxneles];
+	// int fTeDupEl[gMaxneles];
 	float fTeConvPartTrackDist[gMaxneles];
 	float fTeConvPartTrackDCot[gMaxneles];
 	float fTeConvPartTrackPt[gMaxneles];
@@ -660,12 +649,12 @@ private:
 	float fTPhotSCSigmaPhiPhi[gMaxnphos];
 	int   fTPhotHasPixSeed[gMaxnphos];
 	int   fTPhotHasConvTrks[gMaxnphos];
-	int   fTPhotIsInJet[gMaxnphos];
-	int   fTPhotDupEl[gMaxnphos];
-	float fTPhotSharedPx[gMaxnphos];
-	float fTPhotSharedPy[gMaxnphos];
-	float fTPhotSharedPz[gMaxnphos];
-	float fTPhotSharedEnergy[gMaxnphos];
+	// int   fTPhotIsInJet[gMaxnphos];
+	// int   fTPhotDupEl[gMaxnphos];
+	// float fTPhotSharedPx[gMaxnphos];
+	// float fTPhotSharedPy[gMaxnphos];
+	// float fTPhotSharedPz[gMaxnphos];
+	// float fTPhotSharedEnergy[gMaxnphos];
 // Spike cleaning
 	int   fTPhotScSeedSeverity[gMaxnphos];
 	float fTPhotE1OverE9[gMaxnphos];

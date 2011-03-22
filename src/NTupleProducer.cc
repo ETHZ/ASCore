@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.102 2011/03/15 09:42:06 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.103 2011/03/21 17:39:36 stiegerb Exp $
 //
 //
 
@@ -982,16 +982,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			}
 
 
-			fTeIsInJet[eqi] = -1;
-			fTeSharedPx[eqi] = 0.;
-			fTeSharedPy[eqi] = 0.;
-			fTeSharedPz[eqi] = 0.;
-			fTeSharedEnergy[eqi] = 0.;
+			// fTeIsInJet[eqi] = -1;
+			// fTeSharedPx[eqi] = 0.;
+			// fTeSharedPy[eqi] = 0.;
+			// fTeSharedPz[eqi] = 0.;
+			// fTeSharedEnergy[eqi] = 0.;
 
 			fTgoodel[eqi] = 0;
 			fTeIsIso[eqi] = 1;
 			fTeChargeMisIDProb[eqi] = 0;
-			fTeDupEl[eqi] = -1;
+			// fTeDupEl[eqi] = -1;
 		}
 	}
 
@@ -1174,12 +1174,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotHasPixSeed[phoqi]     = photon.hasPixelSeed() ? 1:0;
 	fTPhotHasConvTrks[phoqi]    = photon.hasConversionTracks() ? 1:0;
 
-	fTPhotIsInJet[phoqi]      = -1;
-	fTPhotDupEl[phoqi]        = -1;
-	fTPhotSharedPx[phoqi]     = 0.;
-	fTPhotSharedPy[phoqi]     = 0.;
-	fTPhotSharedPz[phoqi]     = 0.;
-	fTPhotSharedEnergy[phoqi] = 0.;
+	// fTPhotIsInJet[phoqi]      = -1;
+	// fTPhotDupEl[phoqi]        = -1;
+	// fTPhotSharedPx[phoqi]     = 0.;
+	// fTPhotSharedPy[phoqi]     = 0.;
+	// fTPhotSharedPz[phoqi]     = 0.;
+	// fTPhotSharedEnergy[phoqi] = 0.;
 	fTgoodphoton[phoqi]       = 0;
 	fTPhotIsIso[phoqi]        = 1;
 
@@ -1804,10 +1804,10 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
-	fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
-	fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
-	fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
-	fEventTree->Branch("EcalGapClusterSize",&fTEcalGapClusterSize,"EcalGapClusterSize[NECALGapClusters]/I");
+	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
+	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
+	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
+	// fEventTree->Branch("EcalGapClusterSize",&fTEcalGapClusterSize,"EcalGapClusterSize[NECALGapClusters]/I");
 
 	// Gen-Leptons
 	fEventTree->Branch("NGenLeptons"      ,&fTngenleptons         ,"NGenLeptons/I");
@@ -1917,17 +1917,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MuIsTMLastStationAngTight" ,&fTmuIsTMLastStationAngTight ,"MuIsTMLastStationAngTight[NMus]/I");
 	fEventTree->Branch("MuIsTMOneStationAngTight"  ,&fTmuIsTMOneStationAngTight  ,"MuIsTMOneStationAngTight[NMus]/I");
 	fEventTree->Branch("MuIsTMOneStationAngLoose"  ,&fTmuIsTMOneStationAngLoose  ,"MuIsTMOneStationAngLoose[NMus]/I");
-
-	fEventTree->Branch("MuOutPosRadius" ,&fTmuoutposrad      ,"MuOutPosRadius[NMus]/F");
-	fEventTree->Branch("MuOutPosX"      ,&fTmuoutposx        ,"MuOutPosX[NMus]/F");
-	fEventTree->Branch("MuOutPosY"      ,&fTmuoutposy        ,"MuOutPosY[NMus]/F");
-	fEventTree->Branch("MuOutPosZ"      ,&fTmuoutposz        ,"MuOutPosZ[NMus]/F");
-	fEventTree->Branch("MuOutMomx"      ,&fTmuoutmomx        ,"MuOutMomx[NMus]/F");
-	fEventTree->Branch("MuOutMomy"      ,&fTmuoutmomy        ,"MuOutMomy[NMus]/F");
-	fEventTree->Branch("MuOutMomz"      ,&fTmuoutmomz        ,"MuOutMomz[NMus]/F");
-	fEventTree->Branch("MuOutMomPhi"    ,&fTmuoutmomphi      ,"MuOutMomPhi[NMus]/F");
-	fEventTree->Branch("MuOutMomEta"    ,&fTmuoutmometa      ,"MuOutMomEta[NMus]/F");
-	fEventTree->Branch("MuOutMomTheta"  ,&fTmuoutmomtheta    ,"MuOutMomTheta[NMus]/F");
 
 	fEventTree->Branch("MuGenID"          ,&fTGenMuId         ,"MuGenID[NMus]/I");
 	fEventTree->Branch("MuGenStatus"      ,&fTGenMuStatus     ,"MuGenStatus[NMus]/I");
@@ -2043,12 +2032,12 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/F");
 	fEventTree->Branch("ElNumberOfMissingInnerHits"  ,&fTeNumberOfMissingInnerHits  ,"ElNumberOfMissingInnerHits[NEles]/I");
 
-	fEventTree->Branch("ElIsInJet"                   ,&fTeIsInJet           ,"ElIsInJet[NEles]/I");
-	fEventTree->Branch("ElSharedPx"                  ,&fTeSharedPx          ,"ElSharedPx[NEles]/F");
-	fEventTree->Branch("ElSharedPy"                  ,&fTeSharedPy          ,"ElSharedPy[NEles]/F");
-	fEventTree->Branch("ElSharedPz"                  ,&fTeSharedPz          ,"ElSharedPz[NEles]/F");
-	fEventTree->Branch("ElSharedEnergy"              ,&fTeSharedEnergy      ,"ElSharedEnergy[NEles]/F");
-	fEventTree->Branch("ElDuplicateEl"               ,&fTeDupEl             ,"ElDuplicateEl[NEles]/I");
+	// fEventTree->Branch("ElIsInJet"                   ,&fTeIsInJet           ,"ElIsInJet[NEles]/I");
+	// fEventTree->Branch("ElSharedPx"                  ,&fTeSharedPx          ,"ElSharedPx[NEles]/F");
+	// fEventTree->Branch("ElSharedPy"                  ,&fTeSharedPy          ,"ElSharedPy[NEles]/F");
+	// fEventTree->Branch("ElSharedPz"                  ,&fTeSharedPz          ,"ElSharedPz[NEles]/F");
+	// fEventTree->Branch("ElSharedEnergy"              ,&fTeSharedEnergy      ,"ElSharedEnergy[NEles]/F");
+	// fEventTree->Branch("ElDuplicateEl"               ,&fTeDupEl             ,"ElDuplicateEl[NEles]/I");
 	fEventTree->Branch("ElConvPartnerTrkDist"        ,&fTeConvPartTrackDist   ,"ElConvPartnerTrkDist[NEles]/F");
 	fEventTree->Branch("ElConvPartnerTrkDCot"        ,&fTeConvPartTrackDCot   ,"ElConvPartnerTrkDCot[NEles]/F");
 	fEventTree->Branch("ElConvPartnerTrkPt"          ,&fTeConvPartTrackPt     ,"ElConvPartnerTrkPt[NEles]/F");
@@ -2058,6 +2047,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElScSeedSeverity"            ,&fTeScSeedSeverity      ,"ElScSeedSeverity[NEles]/I");
 	fEventTree->Branch("ElE1OverE9"                  ,&fTeE1OverE9            ,"ElE1OverE9[NEles]/F");
 	fEventTree->Branch("ElS4OverS1"                  ,&fTeS4OverS1            ,"ElS4OverS1[NEles]/F");
+
 	fEventTree->Branch("ElGenID"                     ,&fTGenElId         ,"ElGenID[NEles]/I");
 	fEventTree->Branch("ElGenStatus"                 ,&fTGenElStatus     ,"ElGenStatus[NEles]/I");
 	fEventTree->Branch("ElGenPt"                     ,&fTGenElPt         ,"ElGenPt[NEles]/F");
@@ -2148,12 +2138,12 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoSCSigmaPhiPhi" ,&fTPhotSCSigmaPhiPhi ,"PhoSCSigmaPhiPhi[NPhotons]/F");
 	fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
 	fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
-	fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
-	fEventTree->Branch("PhoIsElDupl"      ,&fTPhotDupEl         ,"PhoIsElDupl[NPhotons]/I");
-	fEventTree->Branch("PhoSharedPx"      ,&fTPhotSharedPx      ,"PhoSharedPx[NPhotons]/F");
-	fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/F");
-	fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/F");
-	fEventTree->Branch("PhoSharedEnergy"  ,&fTPhotSharedEnergy  ,"PhoSharedEnergy[NPhotons]/F");
+	// fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
+	// fEventTree->Branch("PhoIsElDupl"      ,&fTPhotDupEl         ,"PhoIsElDupl[NPhotons]/I");
+	// fEventTree->Branch("PhoSharedPx"      ,&fTPhotSharedPx      ,"PhoSharedPx[NPhotons]/F");
+	// fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/F");
+	// fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/F");
+	// fEventTree->Branch("PhoSharedEnergy"  ,&fTPhotSharedEnergy  ,"PhoSharedEnergy[NPhotons]/F");
 	fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
 	fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/F");
 	fEventTree->Branch("PhoS4OverS1"      ,&fTPhotS4OverS1      ,"PhoS4OverS1[NPhotons]/F");
@@ -2426,10 +2416,10 @@ void NTupleProducer::resetTree(){
 	fTNCaloTowers       = -999;
 	fTHBHENoiseFlag     = -999;
 
-	fTEcalDeadCellBEFlag= -999;
-	fTnECALGapClusters  = 0;
-	resetFloat(fTEcalGapBE, gMaxnECALGapClusters);
-	resetInt   (fTEcalGapClusterSize, gMaxnECALGapClusters);
+	// fTEcalDeadCellBEFlag= -999;
+	// fTnECALGapClusters  = 0;
+	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);
+	// resetInt   (fTEcalGapClusterSize, gMaxnECALGapClusters);
 
 	resetFloat(fTvrtxx,     gMaxnvrtx);
 	resetFloat(fTvrtxy,     gMaxnvrtx);
@@ -2544,16 +2534,6 @@ void NTupleProducer::resetTree(){
 	resetInt(fTmunchambers, gMaxnmus);
 	resetFloat(fTmucalocomp, gMaxnmus);
 	resetFloat(fTmusegmcomp, gMaxnmus);
-	resetFloat(fTmuoutmomx, gMaxnmus);
-	resetFloat(fTmuoutmomy, gMaxnmus);
-	resetFloat(fTmuoutmomz, gMaxnmus);
-	resetFloat(fTmuoutmomphi, gMaxnmus);
-	resetFloat(fTmuoutmometa, gMaxnmus);
-	resetFloat(fTmuoutmomtheta, gMaxnmus);
-	resetFloat(fTmuoutposrad, gMaxnmus);
-	resetFloat(fTmuoutposx, gMaxnmus);
-	resetFloat(fTmuoutposy, gMaxnmus);
-	resetFloat(fTmuoutposz, gMaxnmus);
 
 	resetInt(fTmuIsGMPT, gMaxnmus);
 	resetInt(fTmuIsGMTkChiComp, gMaxnmus);
@@ -2672,12 +2652,12 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTetrkmomatvtx, gMaxneles);
 	resetFloat(fTeESuperClusterOverP, gMaxneles);
 	resetInt(fTeNumberOfMissingInnerHits, gMaxneles);
-	resetInt(fTeIsInJet, gMaxneles);
-	resetFloat(fTeSharedPx, gMaxneles);
-	resetFloat(fTeSharedPy, gMaxneles);
-	resetFloat(fTeSharedPz, gMaxneles);
-	resetFloat(fTeSharedEnergy, gMaxneles);
-	resetInt(fTeDupEl, gMaxneles);
+	// resetInt(fTeIsInJet, gMaxneles);
+	// resetFloat(fTeSharedPx, gMaxneles);
+	// resetFloat(fTeSharedPy, gMaxneles);
+	// resetFloat(fTeSharedPz, gMaxneles);
+	// resetFloat(fTeSharedEnergy, gMaxneles);
+	// resetInt(fTeDupEl, gMaxneles);
 
 	resetFloat(fTeConvPartTrackDist, gMaxneles);
 	resetFloat(fTeConvPartTrackDCot, gMaxneles);
@@ -2843,12 +2823,12 @@ void NTupleProducer::resetTree(){
 	resetInt(fTPhotHasConvTrks,gMaxnphos);
 	resetInt(fTgoodphoton,gMaxnphos);
 	resetInt(fTPhotIsIso,gMaxnphos);
-	resetInt(fTPhotIsInJet,gMaxnphos);
-	resetInt(fTPhotDupEl,gMaxnphos);
-	resetFloat(fTPhotSharedPx, gMaxnphos);
-	resetFloat(fTPhotSharedPy, gMaxnphos);
-	resetFloat(fTPhotSharedPz, gMaxnphos);
-	resetFloat(fTPhotSharedEnergy, gMaxnphos);
+	// resetInt(fTPhotIsInJet,gMaxnphos);
+	// resetInt(fTPhotDupEl,gMaxnphos);
+	// resetFloat(fTPhotSharedPx, gMaxnphos);
+	// resetFloat(fTPhotSharedPy, gMaxnphos);
+	// resetFloat(fTPhotSharedPz, gMaxnphos);
+	// resetFloat(fTPhotSharedEnergy, gMaxnphos);
 
 	resetInt(fTPhotScSeedSeverity, gMaxnphos);
 	resetFloat(fTPhotS4OverS1, gMaxnphos);
@@ -3057,8 +3037,8 @@ void NTupleProducer::ElectronDuplicate(vector<const SuperCluster*> elecPtr, vect
 
 			// check if duplicate
 			if (newsuper == supercluster || newtrack == eletrack){
-				fTeDupEl[i] = j;
-				fTeDupEl[j] = i;
+				// fTeDupEl[i] = j;
+				// fTeDupEl[j] = i;
 				break;
 			}
 		}
@@ -3082,7 +3062,7 @@ void NTupleProducer::PhotonElectronDuplicate(vector<const SuperCluster*> elecPtr
 
 			// check if duplicate
 			if( elSC == phoSC ){
-				fTPhotDupEl[i] = j;
+				// fTPhotDupEl[i] = j;
 				break;
 			}
 		}
@@ -3114,15 +3094,13 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 
 			math::XYZVector sharedP(0., 0., 0.);
 			bool isInJet = IsEMObjectInJet(theElecSC, jetCaloRefs, calotowers, &sharedP);
-			float sharedE = sqrt(sharedP.X()*sharedP.X()
-				+ sharedP.Y()*sharedP.Y()
-				+ sharedP.Z()*sharedP.Z() );
+			// float sharedE = sqrt(sharedP.X()*sharedP.X() + sharedP.Y()*sharedP.Y() + sharedP.Z()*sharedP.Z() );
 			if (isInJet) {
-				fTeIsInJet[j] = i;
-				fTeSharedPx[j] = sharedP.X();
-				fTeSharedPy[j] = sharedP.Y();
-				fTeSharedPz[j] = sharedP.Z();
-				fTeSharedEnergy[j] = sharedE;
+				// fTeIsInJet[j] = i;
+				// fTeSharedPx[j] = sharedP.X();
+				// fTeSharedPy[j] = sharedP.Y();
+				// fTeSharedPz[j] = sharedP.Z();
+				// fTeSharedEnergy[j] = sharedE;
 				break;
 			}
 		}
@@ -3152,15 +3130,13 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 
 			math::XYZVector sharedP(0., 0., 0.);
 			bool isInJet = IsEMObjectInJet(theSC, jetCaloRefs, calotowers, &sharedP);
-			float sharedE = sqrt(sharedP.X()*sharedP.X()
-				+ sharedP.Y()*sharedP.Y()
-				+ sharedP.Z()*sharedP.Z() );
+			// float sharedE = sqrt(sharedP.X()*sharedP.X() + sharedP.Y()*sharedP.Y() + sharedP.Z()*sharedP.Z() );
 			if( isInJet ){
-				fTPhotIsInJet[j] = i;
-				fTPhotSharedPx[j] = sharedP.X();
-				fTPhotSharedPy[j] = sharedP.Y();
-				fTPhotSharedPz[j] = sharedP.Z();
-				fTPhotSharedEnergy[j] = sharedE;
+				// fTPhotIsInJet[j] = i;
+				// fTPhotSharedPx[j] = sharedP.X();
+				// fTPhotSharedPy[j] = sharedP.Y();
+				// fTPhotSharedPz[j] = sharedP.Z();
+				// fTPhotSharedEnergy[j] = sharedE;
 				break;
 			}
 		}
