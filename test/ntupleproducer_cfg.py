@@ -24,14 +24,15 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
 options = VarParsing.VarParsing ('standard') # set 'standard'  options
 options.register ('runon', # register 'runon' option
-                  'MC',  # the default value
+                  'data',  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 
-options.files= '/store/mc/Fall10/ZbbToLL_M-40_PtB1-15_TuneZ2_7TeV-madgraph-pythia6/GEN-SIM-RECO/START38_V12-v1/0001/14CCFBFC-DC0D-E011-AAE0-001A64789D70.root'
+options.files= 'file:/scratch/stiegerb/MuData.root'
+#options.files= '/store/mc/Fall10/ZbbToLL_M-40_PtB1-15_TuneZ2_7TeV-madgraph-pythia6/GEN-SIM-RECO/START38_V12-v1/0001/14CCFBFC-DC0D-E011-AAE0-001A64789D70.root'
 #options.files= '/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0000/00309820-0FEA-DF11-AE59-E0CB4E1A118E.root'
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
@@ -52,17 +53,17 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "GR_R_38X_V14::All"
+    process.GlobalTag.globaltag = "GR_R_311_V2::All"
 #     process.GlobalTag.globaltag = "GR10_P_V11::All"
 else:
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "START38_V13::All"
+    process.GlobalTag.globaltag = "START311_V2::All"
 
 
 
 
 ### b-tagging ##################################################################
-# NOW: Taken from AOD, with simple matching
+# NOW: Take from AOD, and do matching
 
 ### Input/Output ###############################################################
 # Input
@@ -83,26 +84,40 @@ process.TFileService = cms.Service("TFileService",
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
 ### Jet ID ###################################################################
-# NOW: Taken from AOD
+#process.load('RecoJets.Configuration.JetIDProducers_cff')
+#process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
 
 ### Jet Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
 # and http://indico.cern.ch/getFile.py/access?contribId=38&sessionId=4&resId=0&materialId=slides&confId=110072 slide 13
 # to check what cff to use
+# note: this runs the L1Fast-Jet corrections for PF jets. not applied on Calo
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.ak5CaloL2Relative.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak5CaloResidual.useCondDB = False
-process.ak5PFL2Relative.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-process.ak5PFResidual.useCondDB = False
+process.load('RecoJets.Configuration.RecoPFJets_cff')
+# Turn-on the FastJet density calculation -----------------------
+process.kt6PFJets.doRhoFastjet = True
+process.kt6PFJets.Rho_EtaMax = cms.double(4.4)
+process.kt6PFJets.Ghost_EtaMax = cms.double(5.0)
+# Turn-on the FastJet jet area calculation 
+process.ak5PFJets.doAreaFastjet = True
+process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
+
+# Disable DB acccess for the ones that are not in Global Tag yet
+process.ak5PFL1Fastjet.useCondDB    = False
+# process.ak5CaloL2Relative.useCondDB = False
+# process.ak5CaloL3Absolute.useCondDB = False
+# process.ak5CaloResidual.useCondDB   = False
+# process.ak5PFL2Relative.useCondDB   = False
+# process.ak5PFL3Absolute.useCondDB   = False
+# process.ak5PFResidual.useCondDB     = False
+
 if options.runon=='data':
 	process.jecCorSequence = cms.Sequence(
-		process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL2L3Residual
+		process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL1FastL2L3Residual
 	)
 else:
 	process.jecCorSequence = cms.Sequence(
-		process.ak5CaloJetsL2L3*process.ak5PFJetsL2L3
+		process.ak5CaloJetsL2L3*process.ak5PFJetsL1FastL2L3
 	)
 
 ### JES MET Corrections ########################################################
@@ -130,12 +145,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
 postfix = "PF"
-
-if options.runon == 'data':
-	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=False, postfix=postfix)
-
-else:
-	usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=True, postfix=postfix)
+usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=postfix)
 
 process.goodVertices = cms.EDFilter("VertexSelector",
 	src = cms.InputTag("offlinePrimaryVertices"),
@@ -154,7 +164,7 @@ process.pfMuonsFromVertexPF.dzCut   =cms.double(1.)  # longitudinal IP w.r.t. PV
 process.pfSelectedMuonsPF.cut = cms.string(
 		"abs( eta ) < 2.4 && pt > 10" 
 		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
-   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
+  		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
   		+" && muonRef().globalTrack().normalizedChi2() < 10"
    		+" && muonRef().track().numberOfValidHits() > 10"
    		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
@@ -192,7 +202,11 @@ process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
 process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
 
 # Jet corrections 
-process.patJetCorrFactorsPF.levels = cms.vstring()
+#process.patJetCorrFactorsPF.levels = cms.vstring()
+process.patJetCorrFactorsPF.levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+process.patJetCorrFactorsPF.rho    = cms.InputTag('kt6PFJets','rho')
+process.pfJetsPF.doAreaFastjet = True
+process.pfJetsPF.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
 
 ### Cleaning ###################################################################
 # flag HB/HE noise
@@ -234,7 +248,7 @@ process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
 
 # Add some jet collections
 process.analyze.jets = (
-    # Calo jets
+   # Calo jets
     cms.PSet( prefix = cms.untracked.string('CA'),
               tag = cms.untracked.InputTag('ak5CaloJets'),
               isPat = cms.untracked.bool(False),
@@ -253,7 +267,8 @@ process.analyze.jets = (
               jet_id = cms.untracked.InputTag('ak5JetID'),
               sel_minpt  = cms.double(15.0),
               sel_maxeta = process.analyze.sel_maxjeta,
-              corrections = cms.string('ak5PFL2L3'),
+              # The corrections are irrelevant for PF2PAT
+              corrections = cms.string(''), 
               btag_matchdeltaR = cms.double(0.25),
               ),
     )
@@ -275,12 +290,17 @@ if options.runon == 'data':
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
 
+# To disable pileup on PF uncomment
+#process.pfNoPileUpPF.enable = False
+
+
 #### Path ######################################################################
 process.p = cms.Path(
     process.scrapingVeto * (
 	process.goodVertices
         + process.HBHENoiseFilterResultProducer
         # + process.EcalAnomalousEventFilter
+	+ process.kt6PFJets
         + process.mygenjets
         + process.jecCorSequence
         + process.simpleEleIdSequence
