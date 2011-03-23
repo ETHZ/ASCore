@@ -77,172 +77,74 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
   Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
   iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
 
-  const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
-
-  // First loop: just get corrected pt and corresponding indices
-  unsigned int iraw(0);
-  vector<OrderPair> corrIndices; // Vector of indices and pt of corr. jets
-  for( View<pat::Jet>::const_iterator Jit = jets.begin();
-       Jit != jets.end(); ++Jit, ++iraw )
-    {
-      // Store the (index,pt) pair, where pt is corrected
-      double scale = jetCorr->correction(Jit->p4());
-      corrIndices.push_back(make_pair(iraw,Jit->pt()*scale));
-    }
-
-
-  // Now sort indices by decreasing corrected pt
-  IndexByPt indexComparator;
-  std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
-
-  // Second loop: get them ordered
+  // PAT jets are already ordered by corrected pt: no need to re-order
   unsigned int ijet(0);
-  for ( vector<OrderPair>::const_iterator it = corrIndices.begin();
-        it != corrIndices.end(); ++it ) {
+  for( View<pat::Jet>::const_iterator Jit = jets.begin();
+       Jit != jets.end(); ++Jit )
+    {
 
-    unsigned int index = it->first;
-    const Jet* jet = &((jets)[index]);
+      // Cut on corrected pT
+      if(Jit->pt() < fMinpt) continue;
 
-    // Cut on corrected pT
-    double scale = jetCorr->correction(jet->p4());
-    if(jet->pt()*scale < fMinpt) continue;
-
-    // Save only the gMaxnjets first uncorrected jets
-    if (ijet >= gMaxnobjs){
-      edm::LogWarning("NTP") << "@SUB=FillBranches"
-                             << "Maximum number of jets exceeded: "
-                             << ijet << " >= " << static_cast<int>(gMaxnobjs);
-      break;
-    }
-
-    // Store the information (corrected)
-    fTpx[ijet]    = jet->px()*scale;
-    fTpy[ijet]    = jet->py()*scale;
-    fTpz[ijet]    = jet->pz()*scale;
-    fTpt[ijet]    = jet->pt()*scale;
-    fTe[ijet]     = jet->energy()*scale;
-    fTet[ijet]    = jet->et()*scale;
-    fTphi[ijet]   = jet->phi();
-    fTeta[ijet]   = jet->eta();
-    fTscale[ijet] = scale;
-
-    // B-tagging probability (for 4 b-taggings)
-      const pat::Jet* pJ = static_cast<const pat::Jet*>(jet);
-      fTjbTagProbTkCntHighEff [ijet] = pJ->bDiscriminator("trackCountingHighEffBJetTags"        );
-      fTjbTagProbTkCntHighPur [ijet] = pJ->bDiscriminator("trackCountingHighPurBJetTags"        );
-      fTjbTagProbSimpSVHighEff[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-      fTjbTagProbSimpSVHighPur[ijet] = pJ->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-
-
-
-    // -----------------------------------------
-    // JPT jet specific
-    if ( jetType()==JPT ) {
-      reco::JetID jetID;
-      const JPTJet* jptjet = static_cast<const JPTJet*>(&(*jet));
-      edm::RefToBase<reco::Jet>  jetRef = jptjet->getCaloJetRef();
-
-      //		jptjet->printJet();
-
-      jetID = (*jetsID)[ jetRef ];
-
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-
-      fTChMult[ijet]      = jptjet->chargedMultiplicity();
-
-    }
-
-    // -------------------------------------------------
-    // PF jet specific
-    if (fJetType==PF) {
-      const PFJet* pjet = static_cast<const PFJet*>(&(*jet));
-
-      double CHF=pjet->chargedHadronEnergyFraction();
-      double NHF=pjet->neutralHadronEnergyFraction();
-      double CEF=pjet->chargedEmEnergyFraction();
-      double NEF=pjet->neutralEmEnergyFraction();
-      double CMF=pjet->chargedMuEnergyFraction();
-
-      double sum=CHF+NHF+CEF+NEF+CMF;
-      if (sum >0) {
-        CHF=CHF/sum;
-        NHF=NHF/sum;
-        CEF=CEF/sum;
-        NEF=NEF/sum;
-        CMF=CMF/sum;
-      } else {
-        edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
-      }
-      fTChHadFrac[ijet]     = CHF;
-      fTNeuHadFrac[ijet]    = NHF;
-      fTChEmFrac[ijet]      = CEF;
-      fTNeuEmFrac[ijet]     = NEF;
-      fTChMult[ijet]        = pjet->chargedMultiplicity();
-      fTNeuMult[ijet]       = pjet->neutralMultiplicity();
-      fTNConstituents[ijet] = pjet->nConstituents();
-    }
-
-    // ------------------------------------------------------------
-    // Calo jet specific
-/*    if ( jetType()==CALO ) {
-      reco::JetID jetID;
-
-      const CaloJet* cjet = static_cast<const CaloJet*>(&(*jet));
-      edm::RefToBase<reco::Jet> jetRef = jets.refAt(ijet);
-      jetID = (*jetsID)[ jetRef ];
-
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-
-      fTEMfrac[ijet]        = cjet->emEnergyFraction();
-      fTNConstituents[ijet] = cjet->nConstituents();
-
-
-      /////////////////////////////////////////////////////
-      // calculate charge fraction
-
-      // Jet-track association: get associated tracks
-      vector<const reco::Track*> AssociatedTracks;
-
-      const reco::TrackRefVector& tracks = JetTracksAssociation::getValue(*(jetTracksAssoc.product()),jetRef);
-      for ( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ){
-        AssociatedTracks.push_back( it->get() );
+      // Save only the gMaxnjets first uncorrected jets
+      if ( ijet >= gMaxnobjs ) {
+        edm::LogWarning("NTP") << "@SUB=FillBranches"
+                               << "Maximum number of jets exceeded: "
+                               << ijet << " >= " << static_cast<int>(gMaxnobjs);
+        break;
       }
 
-      // Jet-track association: make transient tracks and store information
-      vector<TransientTrack> AssociatedTTracks;
-      fTjnAssoTracks[ijet] = 0;
-      fTjChfrac[ijet] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
-      if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
-				// Tmp variables for vectorial sum of pt of tracks
-        double pXtmp(0.), pYtmp(0.);
-        // Loop over associated tracks:
-        for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-          AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks
-          if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-            pXtmp += AssociatedTracks[t]->px();
-            pYtmp += AssociatedTracks[t]->py();
-            fTjnAssoTracks[ijet]++;
-          }
+      // Store the information (corrected)
+      fTpx[ijet]    = Jit->px();
+      fTpy[ijet]    = Jit->py();
+      fTpz[ijet]    = Jit->pz();
+      fTpt[ijet]    = Jit->pt();
+      fTe[ijet]     = Jit->energy();
+      fTet[ijet]    = Jit->et();
+      fTphi[ijet]   = Jit->phi();
+      fTeta[ijet]   = Jit->eta();
+      fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
+
+      //      cout << "PFtoPAT jet " << Jit->p4() << " scale " << 1.0/Jit->jecFactor("Uncorrected") << endl;
+
+      // B-tagging probability (for 4 b-taggings)
+      fTjbTagProbTkCntHighEff [ijet] = Jit->bDiscriminator("trackCountingHighEffBJetTags"        );
+      fTjbTagProbTkCntHighPur [ijet] = Jit->bDiscriminator("trackCountingHighPurBJetTags"        );
+      fTjbTagProbSimpSVHighEff[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+      fTjbTagProbSimpSVHighPur[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+
+
+
+      // -------------------------------------------------
+      // PF jet specific
+      if (fJetType==PF) {
+        double CHF=Jit->chargedHadronEnergyFraction();
+        double NHF=Jit->neutralHadronEnergyFraction();
+        double CEF=Jit->chargedEmEnergyFraction();
+        double NEF=Jit->neutralEmEnergyFraction();
+        double CMF=Jit->chargedMuEnergyFraction();
+        
+        double sum=CHF+NHF+CEF+NEF+CMF;
+        if (sum >0) {
+          CHF=CHF/sum;
+          NHF=NHF/sum;
+          CEF=CEF/sum;
+          NEF=NEF/sum;
+          CMF=CMF/sum;
+        } else {
+          edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
         }
-        fTjChfrac[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
-
-      } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-        fTjChfrac[ijet] = -1.;
+        fTChHadFrac[ijet]     = CHF;
+        fTNeuHadFrac[ijet]    = NHF;
+        fTChEmFrac[ijet]      = CEF;
+        fTNeuEmFrac[ijet]     = NEF;
+        fTChMult[ijet]        = Jit->chargedMultiplicity();
+        fTNeuMult[ijet]       = Jit->neutralMultiplicity();
+        fTNConstituents[ijet] = Jit->nConstituents();
       }
-      AssociatedTracks.clear();
-      AssociatedTTracks.clear();
 
-    } // ----------------------------
-*/
-
-    ++ijet;
-  }
+      ijet++;
+    }
   fTnobj = ijet;
 
   return 0;
