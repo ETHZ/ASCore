@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.81 2011/03/21 17:39:36 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.82 2011/03/22 10:00:02 stiegerb Exp $
 //
 //
 
@@ -44,6 +44,8 @@ Implementation:
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 // Helpers
 #include "Math/VectorUtil.h"
@@ -65,7 +67,7 @@ public:
 	virtual void analyze(const edm::Event&, const edm::EventSetup&);
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
-	vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
+	std::vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
 	const reco::GenJet* matchJet(const reco::Jet *jet, const edm::Event& iEvent);
 	void resetDouble(double *v, unsigned int size = 20);
 	void resetFloat(float *v, unsigned int size = 20);
@@ -74,11 +76,11 @@ public:
 
 private:
 
-	virtual void ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr);
-	virtual void PhotonElectronDuplicate(vector<const SuperCluster*>, vector<const SuperCluster*>);
-	virtual void ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-	virtual void PhotonJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
+	virtual void ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr);
+	virtual void PhotonElectronDuplicate(std::vector<const SuperCluster*>, std::vector<const SuperCluster*>);
+	virtual void ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+	virtual void PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
 	virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
 	virtual float CaloTowerSizePhi(float eta);
 	virtual float CaloTowerSizeEta(float eta);
@@ -87,7 +89,7 @@ private:
 	virtual float GetPhiMin(float phi1, float phi2);
 	virtual float GetPhiMax(float phi1, float phi2);
 
-	typedef pair<int,double> OrderPair;
+        typedef std::pair<int,double> OrderPair;
 	struct IndexByPt {
 		const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
 			return j1.second > j2.second;
@@ -120,12 +122,12 @@ private:
 	edm::InputTag fElectronTag;
 	edm::InputTag fPfElectronTag;
 	edm::InputTag fPfTauTag;
-	string fEleIdWP;
+        std::string fEleIdWP;
 	edm::InputTag fMuIsoDepTkTag;
 	edm::InputTag fMuIsoDepECTag;
 	edm::InputTag fMuIsoDepHCTag;
 	edm::InputTag fJetTag;
-	string fJetCorrs;
+        std::string fJetCorrs;
 	edm::InputTag fBtag1Tag;
 	edm::InputTag fBtag2Tag;
 	edm::InputTag fBtag3Tag;
@@ -174,12 +176,12 @@ private:
 	TH1I *fHl1techstat;
 	bool fFirstevent;
 
-// Trigger stuff
-	string fProcessName; // process name of (HLT) process for which to get HLT configuration
+        // Trigger stuff
+        std::string fProcessName; // process name of (HLT) process for which to get HLT configuration
 	HLTConfigProvider fHltConfig;
 
-////////////////////////////////////////////////////////
-// Trees:
+        ////////////////////////////////////////////////////////
+        // Trees:
 	TTree *fRunTree;
 
 	int fRTrunnumber;

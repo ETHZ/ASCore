@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.103 2011/03/21 17:39:36 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.104 2011/03/22 10:00:02 stiegerb Exp $
 //
 //
 
@@ -47,6 +47,7 @@ Implementation:
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/JetReco/interface/JetID.h"
+#include "DataFormats/JetReco/interface/JetCollection.h"
 
 #include "DataFormats/METReco/interface/METCollection.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
@@ -98,13 +99,13 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fPfMuonTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmuons");
 	fElectronTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_electrons");
 	fPfElectronTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfelectrons");
-	fPfTauTag  	        = iConfig.getUntrackedParameter<edm::InputTag>("tag_pftaus");
-	fEleIdWP            = iConfig.getUntrackedParameter<string>("tag_elidWP");
+	fPfTauTag  	    = iConfig.getUntrackedParameter<edm::InputTag>("tag_pftaus");
+	fEleIdWP            = iConfig.getUntrackedParameter<std::string>("tag_elidWP");
 	fMuIsoDepTkTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
 	fMuIsoDepECTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
 	fMuIsoDepHCTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
 	fJetTag             = iConfig.getUntrackedParameter<edm::InputTag>("tag_jets");
-	fJetCorrs           = iConfig.getUntrackedParameter<string>("jetCorrs");
+	fJetCorrs           = iConfig.getUntrackedParameter<std::string>("jetCorrs");
 	fBtag1Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag1");
 	fBtag2Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
 	fBtag3Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
@@ -438,7 +439,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			<< " HLT trigger bits, increase length!";
 		fTgoodevent = 1;
 	}
-	vector<string> triggernames;
+	std::vector<string> triggernames;
 	triggernames.reserve(tr.size());
 	Service<service::TriggerNamesService> tns;
 	tns->getTrigPaths(*triggers, triggernames);
@@ -533,7 +534,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTpvtxisfake = primVtx->isFake();
 
 	fTpvtxptsum = 0.;
-	for(vector<TrackBaseRef>::const_iterator trackit = primVtx->tracks_begin(); trackit != primVtx->tracks_end(); ++trackit){
+	for(std::vector<TrackBaseRef>::const_iterator trackit = primVtx->tracks_begin(); trackit != primVtx->tracks_end(); ++trackit){
 		fTpvtxptsum += (*trackit)->pt();
 	}
 	fTgoodvtx = 0;
@@ -578,7 +579,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnmutot = 0; // Total number of tracker&&global muons
 
 	// Get muons, order them by pt and apply selection
-	vector<OrderPair> muOrdered;
+	std::vector<OrderPair> muOrdered;
 	int muIndex(0);
 	for ( View<Muon>::const_iterator Mit = muons->begin(); Mit != muons->end();
 	++Mit,++muIndex ) {
@@ -604,7 +605,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	mqi = 0;
 
 	// Dump muon properties in tree variables
-	for (vector<OrderPair>::const_iterator it = muOrdered.begin();
+	for (std::vector<OrderPair>::const_iterator it = muOrdered.begin();
 	it != muOrdered.end(); ++it, ++mqi ) {
 		int index = it->first;
 		const Muon& muon = (*muons)[index];
@@ -702,7 +703,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		// MC Matching
 		if(!fIsRealData){
-			vector<const GenParticle*> MuMatch = matchRecoCand(&muon, iEvent);
+			std::vector<const GenParticle*> MuMatch = matchRecoCand(&muon, iEvent);
 			if(MuMatch[0] != NULL){
 				fTGenMuId[mqi]       = MuMatch[0]->pdgId();
 				fTGenMuStatus[mqi]   = MuMatch[0]->status();
@@ -737,7 +738,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnpfmutot = 0; // Total number of tracker&&global muons
 
 	// Get muons, order them by pt and apply selection
-	vector<OrderPair> pfmuOrdered;
+	std::vector<OrderPair> pfmuOrdered;
 	int pfmuIndex(0);
 	for ( View<pat::Muon>::const_iterator Mit = pfmuons->begin(); Mit != pfmuons->end();
 	++Mit,++pfmuIndex ) {
@@ -761,7 +762,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	pfmqi = 0;
 
 	// Dump muon properties in tree variables
-	for (vector<OrderPair>::const_iterator it = pfmuOrdered.begin();
+	for (std::vector<OrderPair>::const_iterator it = pfmuOrdered.begin();
 	it != pfmuOrdered.end(); ++it, ++pfmqi ) {
 		int index = it->first;
 		const pat::Muon& muon = (*pfmuons)[index];
@@ -786,14 +787,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	////////////////////////////////////////////////////////
 	// Electron variables:
 	// Keep pointers to electron superCluster in original collections
-	vector<const SuperCluster*> elecPtr;
-	vector<const GsfTrack*> trckPtr;
+	std::vector<const SuperCluster*> elecPtr;
+	std::vector<const GsfTrack*> trckPtr;
 	int eqi(0);                    // Index of qualified electrons
 	fTnelestot = electrons->size(); // Total number of electrons
 
 	if(electrons->size() > 0){
 		// Get electrons, order them by pt and apply selection
-		vector<OrderPair> elOrdered;
+		std::vector<OrderPair> elOrdered;
 		int elIndex(0);
 		for( View<GsfElectron>::const_iterator El = electrons->begin();
 		El != electrons->end(); ++El, ++elIndex ) {
@@ -817,7 +818,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		eqi = 0;
 
 		// Read eID results
-		vector<Handle<ValueMap<float> > > eIDValueMap(9);
+		std::vector<Handle<ValueMap<float> > > eIDValueMap(9);
 		iEvent.getByLabel( "eidRobustLoose",      eIDValueMap[0]);
 		iEvent.getByLabel( "eidRobustTight",      eIDValueMap[1]);
 		iEvent.getByLabel( "eidLoose",            eIDValueMap[2]);
@@ -840,7 +841,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 		// Dump electron properties in tree variables
-		for( vector<OrderPair>::const_iterator it = elOrdered.begin();
+		for( std::vector<OrderPair>::const_iterator it = elOrdered.begin();
 		it != elOrdered.end(); ++it, ++eqi ) {
 
 			int index = it->first;
@@ -942,7 +943,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			// MC Matching
 			if(!fIsRealData){
-				vector<const GenParticle*> ElMatch = matchRecoCand(&electron, iEvent);
+				std::vector<const GenParticle*> ElMatch = matchRecoCand(&electron, iEvent);
 				if(ElMatch[0] != NULL){
 					fTGenElId[eqi]       = ElMatch[0]->pdgId();
 					fTGenElStatus[eqi]   = ElMatch[0]->status();
@@ -1001,14 +1002,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnpfeltot = 0; // Total number of electrons
 
 	// Get electrons, order them by pt and apply selection
-	vector<OrderPair> pfelOrdered;
+	std::vector<OrderPair> pfelOrdered;
 	int pfelIndex(0);
 	for ( View<pat::Electron>::const_iterator Eit = pfelectrons->begin(); Eit != pfelectrons->end();
 	++Eit,++pfelIndex ) {
 		// Check if maxielm number of electrons is exceeded already:
 		if(pfeqi >= gMaxneles){
 			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maxielm number of PF electrons exceeded";
+				<< "Maximum number of PF electrons exceeded";
 			fTflagmaxelexc = 1;
 			fTgoodevent = 1;
 			break;
@@ -1025,7 +1026,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	pfeqi = 0;
 
 	// Dump electron properties in tree variables
-	for (vector<OrderPair>::const_iterator it = pfelOrdered.begin();
+	for (std::vector<OrderPair>::const_iterator it = pfelOrdered.begin();
 	it != pfelOrdered.end(); ++it, ++pfeqi ) {
 		int index = it->first;
 		const pat::Electron& electron = (*pfelectrons)[index];
@@ -1052,14 +1053,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnpftautot = 0; // Total number of taus
 
 	// Get taus, order them by pt and apply selection
-	vector<OrderPair> pftauOrdered;
+	std::vector<OrderPair> pftauOrdered;
 	int pftauIndex(0);
 	for ( View<pat::Tau>::const_iterator Tit = pftaus->begin(); Tit != pftaus->end();
 	++Tit,++pftauIndex ) {
 		// Check if maxielm number of taus is exceeded already:
-		if(pftqi >= gMaxneles){
+		if(pftqi >= gMaxntaus){
 			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maxielm number of PF taus exceeded";
+				<< "Maximum number of PF taus exceeded";
 			fTflagmaxelexc = 1;
 			fTgoodevent = 1;
 			break;
@@ -1076,7 +1077,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	pftqi = 0;
 
 	// Dump tau properties in tree variables
-	for (vector<OrderPair>::const_iterator it = pftauOrdered.begin();
+	for (std::vector<OrderPair>::const_iterator it = pftauOrdered.begin();
 	it != pftauOrdered.end(); ++it, ++pftqi ) {
 		int index = it->first;
 		const pat::Tau& tau = (*pftaus)[index];
@@ -1102,17 +1103,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	////////////////////////////////////////////////////////
 	// Photon Variables:
 	// Keep pointers to superclusters for cross cleaning
-	vector<const SuperCluster*> photSCs;
+	std::vector<const SuperCluster*> photSCs;
 	int phoqi(0); // Index of qualified photons
 	fTnphotonstot = photons->size();
 
 	// Get electrons, order them by pt and apply selection
-	vector<OrderPair> phoOrdered;
+	std::vector<OrderPair> phoOrdered;
 	int phoIndex(0);
 	for( View<Photon>::const_iterator ip = photons->begin();
 	ip != photons->end(); ++ip, ++phoIndex ){
 		// Check if maximum number of photons exceeded
-		if(phoqi>=gMaxnphos){
+		if(phoqi >= gMaxnphos){
 			edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of photons exceeded";
 			fTflagmaxphoexc = 1;
@@ -1130,7 +1131,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTnphotons = phoOrdered.size();
 	phoqi = 0;
 
-	for (vector<OrderPair>::const_iterator it = phoOrdered.begin();
+	for (std::vector<OrderPair>::const_iterator it = phoOrdered.begin();
 	it != phoOrdered.end(); ++it, ++phoqi ) {
 
 	int index = it->first;
@@ -1200,24 +1201,25 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	////////////////////////////////////////////////////////
 	// Jet Variables:
 	const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs, iSetup);
-	vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
-	int itag(-1);
+	std::vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
+	int iraw(0);
 	fTnjetstot = jets->size();
 	// Loop over uncorr. jets
-	for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit){
+	for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit, ++iraw){
 		// Cut on uncorrected pT (for startup)
 		if(Jit->pt() < fMinrawjpt) continue;
-		itag++;
 		// Save only the gMaxnjets first uncorrected jets
-		if(itag >= gMaxnjets){
+		if(iraw >= gMaxnjets){
 			edm::LogWarning("NTP") << "@SUB=analyze"
-				<< "Found more than " << static_cast<int>(gMaxnjets) << " uncorrected jets, I'm scared ...";
+                                               << "Found more than " << static_cast<int>(gMaxnjets) << " uncorrected jets, I'm scared ...";
 			fTflagmaxujetexc = 1;
 			fTgoodevent = 1;
 			break;
 		}
-		double scale = jetCorr->correction(Jit->p4());
-		corrIndices.push_back(make_pair(itag, scale*Jit->pt()));
+                
+                JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
+		double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
+		corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
 	}
 	
 	// Sort corrected jet collection by decreasing pt
@@ -1226,10 +1228,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Determine corrected jets
 	int jqi(-1); // counts # of qualified jets
 	// Loop over corr. jet indices
-	for(vector<OrderPair>::const_iterator it = corrIndices.begin(); it != corrIndices.end(); ++it ) {
+	for(std::vector<OrderPair>::const_iterator it = corrIndices.begin(); it != corrIndices.end(); ++it ) {
 		// Check if maximum number of jets is exceeded already
 		if(jqi >= gMaxnjets-1) {
-			edm::LogWarning("NTP") << "@SUB=analyze"
+                  edm::LogWarning("NTP") << "@SUB=analyze"
 				<< "Maximum number of jets exceeded";
 			fTflagmaxjetexc = 1;
 			fTgoodevent = 1;
@@ -1239,14 +1241,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		const PFJet* cojet = static_cast<const PFJet*>( &((*jets)[index]) ); // look away...
 		PFJet* jet = new PFJet(*cojet);
 
-		// Apply L2L3 corrections
-		double scale = jetCorr->correction(jet->p4());
+		// The correction was calculated above: use it
+		double scale = it->second/jet->pt();
 		jet->scaleEnergy(scale);
 	
 		// Jet preselection
 		if(jet->pt() < fMincorjpt) continue;
 		if(fabs(jet->eta()) > fMaxjeta) continue;
 		jqi++;
+
+                // cout << "PFJET p " << jet->p4() << " scale " << scale << endl; 
 
 		// Dump jet properties into tree variables
 		fTjpx    [jqi] = jet->px();
@@ -1314,7 +1318,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		// Jet-track association: get associated tracks
 		const reco::TrackRefVector& tracks = jet->getTrackRefs();
-		vector<const reco::Track*> AssociatedTracks;
+		std::vector<const reco::Track*> AssociatedTracks;
 		for( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ) AssociatedTracks.push_back( it->get() );
 			
 		// Below save the momenta of the three leading tracks associated to the jet
@@ -1322,7 +1326,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		int idx1(-1), idx2(-1), idx3(-1);
 			
 		// Jet-track association: make transient tracks and store information
-		vector<TransientTrack> AssociatedTTracks;
+		std::vector<TransientTrack> AssociatedTTracks;
 		fTjMass[jqi] = 0.;
 		if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 			// Tmp variables for vectorial sum of pt of tracks
@@ -1578,15 +1582,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		iEvent.getByLabel(fGenPartTag, gen);
 		GenParticleCollection::const_iterator g_part;
 
-		vector<const GenParticle*> gen_lepts;
-		vector<const GenParticle*> gen_moms;
-		vector<const GenParticle*> gen_gmoms;
+		std::vector<const GenParticle*> gen_lepts;
+		std::vector<const GenParticle*> gen_moms;
+		std::vector<const GenParticle*> gen_gmoms;
 
 
 		// loop over genparticles to get gen_els and gen_mus
 		for(g_part = gen->begin(); g_part != gen->end(); g_part++){
 			// select stable leptons
-			if( abs(g_part->pdgId()) != 11
+			if( abs(g_part->pdgId()) !=  5  // b jets
+			 && abs(g_part->pdgId()) != 11
 			 && abs(g_part->pdgId()) != 12
 			 && abs(g_part->pdgId()) != 13
 			 && abs(g_part->pdgId()) != 14
@@ -2889,11 +2894,12 @@ void NTupleProducer::resetTree(){
 }
 
 // Method for matching of reco candidates
-vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent){
+std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent){
+        using namespace std;
 	const GenParticle *GenCand = NULL;
 	const GenParticle *GenMom  = NULL;
 	const GenParticle *GenGMom = NULL;
-	vector<const GenParticle*> res;
+	std::vector<const GenParticle*> res;
 	if(fIsRealData){
 		edm::LogWarning("NTP") << "@SUB=matchRecoCand"
 			<< "Trying to access generator info on real data...";
@@ -3021,7 +3027,7 @@ const reco::GenJet* NTupleProducer::matchJet(const reco::Jet* jet, const edm::Ev
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Cleaning methods
-void NTupleProducer::ElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const GsfTrack*> trckPtr) {
+void NTupleProducer::ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr) {
 	// Looks for duplication among electrons
 	if( fTneles <= 0 ) return;
 
@@ -3047,7 +3053,7 @@ void NTupleProducer::ElectronDuplicate(vector<const SuperCluster*> elecPtr, vect
 	return;
 }
 
-void NTupleProducer::PhotonElectronDuplicate(vector<const SuperCluster*> elecPtr, vector<const SuperCluster*> phoPtr) {
+void NTupleProducer::PhotonElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const SuperCluster*> phoPtr) {
 	// Looks for duplication between photons and electrons
 	if( fTneles <= 0 ) return;
 	if( fTnphotons <= 0 ) return;
@@ -3071,7 +3077,7 @@ void NTupleProducer::PhotonElectronDuplicate(vector<const SuperCluster*> elecPtr
 	return;
 }
 
-void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers){
+void NTupleProducer::ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers){
 	// checks for jets made from electrons
 	// jetIndex and elecIndex contain the indices of the selected jets and
 	//   electrons in the Views
@@ -3079,7 +3085,7 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 	if (fTnjets <= 0) return;
 	if (fTneles <= 0) return;
 
-	vector<CaloTowerPtr> jetCaloRefs;
+	std::vector<CaloTowerPtr> jetCaloRefs;
 
 	// loop over the jets
 	for (int i = 0; i < fTnjets; ++i) {
@@ -3109,13 +3115,13 @@ void NTupleProducer::ElJetOverlap(vector<const Jet*> jets, vector<const SuperClu
 	return;
 }
 
-void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const SuperCluster*> superclusters, edm::Handle<CaloTowerCollection> calotowers){
+void NTupleProducer::PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> superclusters, edm::Handle<CaloTowerCollection> calotowers){
 	// checks for jets made from photons
 	// (photons and jets should be filled in the ntuple before checking)
 	if( fTnjets <= 0 ) return;
 	if( fTnphotons <= 0 ) return;
 
-	vector<CaloTowerPtr> jetCaloRefs;
+	std::vector<CaloTowerPtr> jetCaloRefs;
 
 	// loop over the jets
 	for( int i = 0; i < fTnjets; ++i ){
@@ -3145,7 +3151,7 @@ void NTupleProducer::PhotonJetOverlap(vector<const Jet*> jets, vector<const Supe
 	return;
 }
 
-bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
+bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
 // Checks whether an electron or photon is included in the jet energy
 // and if true, it returns the momentum vector shared by the two
 
@@ -3155,10 +3161,10 @@ bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, vector<CaloTowe
 	if (!window){ return false;}
 
 	// Collect the CaloTowers inside this window, save their detId in a vector
-	vector<CaloTowerDetId> eleDetId;
-	vector<float> eleTowerEnergy;
-	vector<float> eleTowerEta;
-	vector<float> eleTowerPhi;
+	std::vector<CaloTowerDetId> eleDetId;
+	std::vector<float> eleTowerEnergy;
+	std::vector<float> eleTowerEta;
+	std::vector<float> eleTowerPhi;
 	float eleEnergySum = 0.;
 	CaloTowerCollection::const_iterator calo;
 	for (calo = calotowers->begin(); calo != calotowers->end(); ++calo ){
