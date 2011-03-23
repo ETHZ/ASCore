@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=5};
+enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=10};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -249,6 +249,7 @@ public:
   Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, 
 		                   int PFJID=1, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Double_t GetPseudoJetMetDPhi(int hemi_index=0, int pj=1, int whichmet=1, double met=30);
 
   // MT2 & friends
   Int_t    JetIsInHemi(int jindex=0, int hemi_seed=2, int hemi_association=3, float MaxDR=0);
@@ -262,6 +263,7 @@ public:
   Double_t SimpleMT2(bool pseudo=true);
   Double_t GetMCT(bool massive=false, int met=1);
   Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=1, double minJPt=20, double maxJEta=2.4,int met=1);
+  Double_t GetMaxHemiMass(int hemi_index=0);
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);
@@ -276,6 +278,7 @@ public:
   Double_t GetGenLeptPt(int which, int pid, int mother, double pt, double eta);
   Double_t GetGenLeptEta(int which, int pid, int mother, double pt, double eta);
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
+  Bool_t   GenLeptFromW(int pid, double pt, double eta);
 
   Int_t     NJets;
   Int_t     NJetsIDLoose;
@@ -301,7 +304,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 14)
+  ClassDef(MT2tree, 15)
 };
 
 #endif

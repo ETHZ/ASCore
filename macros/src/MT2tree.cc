@@ -893,6 +893,10 @@ Double_t MT2tree::GetSqrtS(double testmass, bool massive, int PFJID, double minJ
   return sqrt(TMath::Power(vis.M(),2)+TMath::Power(vis.Pt(),2)) + sqrt(TMath::Power(2*testmass,2)+TMath::Power(MET.Pt(),2));
 }
 
+Double_t MT2tree::GetMaxHemiMass(int hemi_index){
+	return TMath::Max(hemi[hemi_index].lv1.M(),hemi[hemi_index].lv2.M());
+}
+
 Double_t MT2tree::GetPseudoJetsdPhi(int hemi_seed, int hemi_association, int PFJID, double minJPt, double maxJEta){
 
   vector<float> px, py, pz, E;
@@ -964,6 +968,20 @@ Double_t MT2tree::GetPseudoJetsdPhiMinDHT(int PFJID, double minJPt, double maxJE
 	pj2.SetPxPyPzE(px[pos][1], py[pos][1], pz[pos][1], E[pos][1]);
 
 	return Util::DeltaPhi(pj1.Phi(), pj2.Phi());
+}
+
+Double_t MT2tree::GetPseudoJetMetDPhi(int hemi_index, int pj, int whichmet, double met){
+	if(whichmet==1 && pfmet[0].Pt() < met)                                    return -777;
+	if(whichmet==2 && (hemi[hemi_index].lv1+hemi[hemi_index].lv2).Pt() < met) return -777;
+	if(pj ==1){
+		if(whichmet==1)        return TMath::Abs(hemi[hemi_index].lv1.DeltaPhi(pfmet[0]));
+		else if (whichmet ==2) return TMath::Abs(hemi[hemi_index].lv1.DeltaPhi(-hemi[hemi_index].lv1 -hemi[hemi_index].lv2));
+		else                   return -111;
+	}else if (pj ==2){
+		if(whichmet==1)        return TMath::Abs(hemi[hemi_index].lv2.DeltaPhi(pfmet[0]));
+		else if (whichmet ==2) return TMath::Abs(hemi[hemi_index].lv2.DeltaPhi(-hemi[hemi_index].lv1 -hemi[hemi_index].lv2));
+		else                   return -111;       
+	}else {return -999.99;}
 }
 
 Double_t MT2tree::GenOSDiLeptonInvMass(unsigned int pid, unsigned int mother, double pt, double eta){
@@ -1165,6 +1183,18 @@ Double_t MT2tree::GetGenLeptPt(int which, int pid, int mother, double pt, double
 	Int_t index = GetGenLeptIndex(which, pid, mother, pt, eta);	
 	if(index ==-1) return -999.99;
 	else           return genlept[index].lv.Pt();	
+}
+
+Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta){
+	bool good(false);
+	for(int i=0; i<NGenLepts; ++i){
+		if(abs(genlept[i].ID)       !=pid) continue;
+		if(abs(genlept[i].MID)      !=24 ) continue;
+		if(genlept[i].lv.Pt()       < pt ) continue;
+		if(fabs(genlept[i].lv.Eta())>eta ) continue;
+		good=true;
+	}
+	return good;	
 }
 
 ClassImp(MT2Misc)
