@@ -104,12 +104,6 @@ process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
 
 # Disable DB acccess for the ones that are not in Global Tag yet
 process.ak5PFL1Fastjet.useCondDB    = False
-# process.ak5CaloL2Relative.useCondDB = False
-# process.ak5CaloL3Absolute.useCondDB = False
-# process.ak5CaloResidual.useCondDB   = False
-# process.ak5PFL2Relative.useCondDB   = False
-# process.ak5PFL3Absolute.useCondDB   = False
-# process.ak5PFResidual.useCondDB     = False
 
 if options.runon=='data':
 	process.jecCorSequence = cms.Sequence(
@@ -273,7 +267,7 @@ process.analyze.jets = (
               ),
     )
 
-# Add residual correction for running on data (temporary fix)
+# Add residual correction for running on data
 if options.runon == 'data':
         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
         for extJet in process.analyze.jets:
@@ -302,6 +296,7 @@ process.p = cms.Path(
         + process.HBHENoiseFilterResultProducer
         # + process.EcalAnomalousEventFilter
 	+ process.kt6PFJets
+	+ process.ak5PFJets
         + process.mygenjets
         + process.jecCorSequence
         + process.simpleEleIdSequence
