@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.104 2011/03/22 10:00:02 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.105 2011/03/23 17:09:47 fronga Exp $
 //
 //
 
@@ -374,7 +374,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Get GenEventInfoProduct
 	edm::Handle<GenEventInfoProduct> genEvtInfo;
-	edm::Handle<PileupSummaryInfo> pileupInfo;
+	edm::Handle<std::vector<PileupSummaryInfo> > pileupInfo;
+	// If need to run on MC prior to Spring11 (CMSSW_3_9_X series) change code accordingly here:
+	// edm::Handle<PileupSummaryInfo> pileupInfo; 
 	if(!fIsRealData){
 		iEvent.getByLabel("generator", genEvtInfo);
 		fTpthat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
@@ -388,24 +390,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTpdfxPDF2    = genEvtInfo->pdf()->xPDF.second;
 		
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
-		fTpuNumInteractions  = pileupInfo->getPU_NumInteractions();
-		if(fTpuNumInteractions > gMaxnpileup){
-			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "More than " << static_cast<int>(gMaxnpileup)
-				<< " generated Pileup events found, increase size!";
-			fTgoodevent = 1;
-		}
-		for(int i = 0; i < pileupInfo->getPU_NumInteractions(); i++){
-			if(i >= gMaxnpileup) break; // hard protection
-			fTpuZpositions[i]   = pileupInfo->getPU_zpositions()[i];
-			fTpuSumpT_lowpT[i]  = pileupInfo->getPU_sumpT_lowpT()[i];
-			fTpuSumpT_highpT[i] = pileupInfo->getPU_sumpT_highpT()[i];
-			fTpuNtrks_lowpT[i]  = pileupInfo->getPU_ntrks_lowpT()[i];
-			fTpuNtrks_highpT[i] = pileupInfo->getPU_ntrks_highpT()[i];
-			// fTpuInstLumi[i]     = pileupInfo->getPU_instLumi()[i];
-		}		
-	}
+		std::vector<PileupSummaryInfo>::const_iterator PVI;
+		for (PVI = pileupInfo->begin(); PVI !=pileupInfo->end(); ++PVI){
+			if( PVI->getBunchCrossing() != 0 ) continue; // only look at in-time pileup
 
+			fTpuNumInteractions  = PVI->getPU_NumInteractions();
+			if(fTpuNumInteractions > gMaxnpileup){
+				edm::LogWarning("NTP") << "@SUB=analyze()"
+					<< "More than " << static_cast<int>(gMaxnpileup)
+					<< " generated Pileup events found, increase size!";
+				fTgoodevent = 1;
+			}
+			for(int i = 0; i < PVI->getPU_NumInteractions(); i++){
+				if(i >= gMaxnpileup) break; // hard protection
+				fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
+				fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
+				fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
+				fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
+				fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
+				// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
+			}		
+		}
+	}
+	
 	//////////////////////////////////////////////////////////////////////////////
 	// Trigger information
 	Handle<L1GlobalTriggerReadoutRecord> l1GtReadoutRecord;

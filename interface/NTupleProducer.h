@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.82 2011/03/22 10:00:02 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.83 2011/03/23 17:09:47 fronga Exp $
 //
 //
 
@@ -282,7 +282,7 @@ private:
 	int fTNCaloTowers;
 
 // Trigger
-	static const unsigned int gMaxhltbits = 200;
+	static const unsigned int gMaxhltbits = 300;
 	static const unsigned int gMaxl1physbits = 128;
 	static const unsigned int gMaxl1techbits = 64;
 	int fTHLTres[gMaxhltbits];
