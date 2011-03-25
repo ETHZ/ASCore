@@ -162,23 +162,23 @@ process.pfMuonsFromVertexPF.vertices=cms.InputTag("goodVertices") # require muon
 process.pfMuonsFromVertexPF.d0Cut   =cms.double(0.02) # transverse IP w.r.t. PV
 process.pfMuonsFromVertexPF.dzCut   =cms.double(1.)  # longitudinal IP w.r.t. PV
 process.pfSelectedMuonsPF.cut = cms.string(
-		"abs( eta ) < 2.4 && pt > 10" 
-		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
-  		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
-  		+" && muonRef().globalTrack().normalizedChi2() < 10"
-   		+" && muonRef().track().numberOfValidHits() > 10"
-   		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
-   		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
-	)
+ 		"abs( eta ) < 2.4 && pt > 10" 
+ 		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
+   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
+   		+" && muonRef().globalTrack().normalizedChi2() < 10"
+    		+" && muonRef().track().numberOfValidHits() > 10"
+    		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
+    		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
+ 	)
 # electron selection cuts
 process.pfElectronsFromVertexPF.vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
 process.pfElectronsFromVertexPF.d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
 process.pfElectronsFromVertexPF.dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
 process.pfSelectedElectronsPF.cut = cms.string(
-		"abs( eta ) < 2.4 && pt > 10" 
-		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() > 1"
-		+"&& mva_e_pi > 0.6"
-	)
+ 		"abs( eta ) < 2.4 && pt > 10" 
+ 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() > 1"
+ 		+"&& mva_e_pi > 0.6"
+ 	)
 
 # PatElectronID
 process.patElectronsPF.addElectronID = cms.bool(True)
@@ -278,6 +278,7 @@ if options.runon == 'data':
         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
+        process.patJetCorrFactorsPF.levels.extend( ['L2L3Residual'] )
 
 #### DEBUG #####################################################################
 # process.dump = cms.EDAnalyzer("EventContentAnalyzer")
