@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.105 2011/03/23 17:09:47 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.106 2011/03/25 14:12:58 stiegerb Exp $
 //
 //
 
@@ -78,6 +78,11 @@ Implementation:
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+
 
 /*
 #include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
@@ -147,6 +152,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
 	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
 	fMaxgenjeteta   = iConfig.getParameter<double>("sel_maxgenjeteta");
+	fMinebrechitE   = iConfig.getParameter<double>("sel_fminebrechitE");
 
 	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
@@ -306,6 +312,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// edm::ESHandle<EcalChannelStatus> chStatus;
 	// iSetup.get<EcalChannelStatusRcd>().get(chStatus);
 	// const EcalChannelStatus * channelStatus = chStatus.product();
+
+	edm::ESHandle<CaloGeometry> geometry ;
+	iSetup.get<CaloGeometryRecord>().get(geometry);
+
 
 
 /*
@@ -922,6 +932,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTetheta[eqi]                     = electron.superCluster()->position().theta();
 			fTesceta[eqi]                     = electron.superCluster()->eta();
 
+
+
 // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
 // 			if ( electron.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
 //                           fTeScSeedSeverity[eqi] = EcalSeverityLevelAlgo::severityLevel( electron.superCluster()->seed()->seed(), *ebRecHits, *channelStatus );
@@ -1001,6 +1013,43 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeChargeMisIDProb[eqi] = 0;
 			// fTeDupEl[eqi] = -1;
 		}
+	}
+
+	fTnEBhits=0;
+	for(EcalRecHitCollection::const_iterator ecalrechit = ebRecHits->begin(); ecalrechit!=ebRecHits->end() ; ++ecalrechit)
+	{
+		double energy = ecalrechit->energy();
+		if(energy<fMinebrechitE)continue; 
+		if(fTnEBhits>gMaxnEBhits)
+		{
+			edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of EB rechits exceeded"; fTgoodevent = 1; break;
+		}
+
+		double time = ecalrechit->time();
+		double chi2 = ecalrechit->chi2();
+
+		EBDetId ebDetId = (*ecalrechit).id();	
+		const GlobalPoint p ( geometry->getPosition( ebDetId ) ) ;
+		TVector3 hitPos(p.x(),p.y(),p.z());
+		hitPos *= 1.0/hitPos.Mag();
+		hitPos *= energy;	
+		float e4oe1 = EcalSeverityLevelAlgo::swissCross( ebDetId , *ebRecHits );
+		float e2oe9 =EcalSeverityLevelAlgo::E2overE9(ebDetId , *ebRecHits );
+
+		fTEBrechitE[fTnEBhits] =  hitPos.Mag();
+		fTEBrechitPt[fTnEBhits] =  hitPos.Pt();
+		fTEBrechitEta[fTnEBhits] =  hitPos.Eta();
+		fTEBrechitPhi[fTnEBhits] = hitPos.Phi() ;
+		fTEBrechitTime[fTnEBhits] = time;
+		fTEBrechitChi2[fTnEBhits] = chi2;
+		fTEBrechitE4oE1[fTnEBhits] =e4oe1 ;
+		fTEBrechitE2oE9[fTnEBhits] = e2oe9;
+
+	//	cout << "ebrechit P =" << fTEBrechitE[fTnEBhits] << " Pt = " << fTEBrechitPt[fTnEBhits] ;
+	//	cout << " eta = " << fTEBrechitEta[fTnEBhits] << "phi = " << fTEBrechitPhi[fTnEBhits] << " time = "<< fTEBrechitTime[fTnEBhits] ;
+	//	cout << " chi2 = "<< fTEBrechitChi2[fTnEBhits] << " e4oe1 = "<< fTEBrechitE4oE1[fTnEBhits] << " e2oe9 = " << e2oe9 << endl;
+
+		fTnEBhits++;
 	}
 
 	////////////////////////////////////////////////////////
@@ -1966,6 +2015,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PfMuChargedHadronIso" ,&fTpfmuchargedhadroniso ,"PfMuChargedHadronIso[NPfMus]/F");
 	fEventTree->Branch("PfMuNeutralHadronIso" ,&fTpfmuneutralhadroniso ,"PfMuNeutralHadronIso[NPfMus]/F");
 	fEventTree->Branch("PfMuPhotonIso"        ,&fTpfmuphotoniso        ,"PfMuPhotonIso[NPfMus]/F");
+
+	fEventTree->Branch("NEBhits"              ,&fTnEBhits              ,"NEBhits/I");
+	fEventTree->Branch("EBrechitE"            ,&fTEBrechitE            ,"EBrechitE[NEBhits]/F");
+	fEventTree->Branch("EBrechitPt"           ,&fTEBrechitPt           ,"EBrechitPt[NEBhits]/F");
+	fEventTree->Branch("EBrechitEta"          ,&fTEBrechitEta          ,"EBrechitEta[NEBhits]/F");
+	fEventTree->Branch("EBrechitPhi"          ,&fTEBrechitPhi          ,"EBrechitPhi[NEBhits]/F");
+	fEventTree->Branch("EBrechitChi2"         ,&fTEBrechitChi2         ,"EBrechitChi2[NEBhits]/F");
+	fEventTree->Branch("EBrechitTime"         ,&fTEBrechitTime         ,"EBrechitTime[NEBhits]/F");
+	fEventTree->Branch("EBrechitE4oE1"        ,&fTEBrechitE4oE1        ,"EBrechitE4oE1[NEBhits]/F");
+	fEventTree->Branch("EBrechitE2oE9"        ,&fTEBrechitE2oE9        ,"EBrechitE2oE9[NEBhits]/F");
 
 	// Electrons:
 	fEventTree->Branch("NEles"                       ,&fTneles            ,"NEles/I");

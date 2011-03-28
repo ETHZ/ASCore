@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.83 2011/03/23 17:09:47 fronga Exp $
+// $Id: NTupleProducer.h,v 1.84 2011/03/25 14:12:58 stiegerb Exp $
 //
 //
 
@@ -116,6 +116,7 @@ private:
 	static const int gMaxngenjets = 100;
 	static const int gMaxnvrtx    = 25;
 	static const int gMaxnpileup  = 50;
+	static const int gMaxnEBhits  = 20;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fPfMuonTag;
@@ -213,6 +214,8 @@ private:
 	int fRTmaxntrk;
 	int fRTmaxnphot;
 
+	float fMinebrechitE; 
+
 	TTree *fEventTree;
 
 	// General event information
@@ -243,6 +246,17 @@ private:
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;
+
+	int fTnEBhits;
+	float fTEBrechitE[gMaxnEBhits];
+	float fTEBrechitPt[gMaxnEBhits];
+	float fTEBrechitEta[gMaxnEBhits];
+	float fTEBrechitPhi[gMaxnEBhits];
+	float fTEBrechitChi2[gMaxnEBhits];
+	float fTEBrechitTime[gMaxnEBhits];
+	float fTEBrechitE4oE1[gMaxnEBhits];
+	float fTEBrechitE2oE9[gMaxnEBhits];
+	
 	// int fTEcalDeadCellBEFlag;
 	// static const unsigned int gMaxnECALGapClusters = 50;
 	// unsigned int fTnECALGapClusters;

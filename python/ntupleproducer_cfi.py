@@ -74,6 +74,9 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 
 	btag_matchdeltaR = cms.double(0.25),
 
+	# EB rechits
+        sel_fminebrechitE = cms.double(20.),
+
 	# Additional jet collections
 	jets = cms.VPSet()
 
