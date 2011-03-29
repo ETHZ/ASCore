@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.3 2010/11/13 14:31:06 pnef Exp $
+// $Id: JetFillerBase.h,v 1.4 2011/02/23 19:34:29 stiegerb Exp $
 //
 //
 
@@ -85,6 +85,7 @@ protected:
   double* fTeta;
   double* fTphi;
   double* fTscale;
+  double* fTarea;
   // b-taggers
   double* fTjbTagProbTkCntHighEff ;
   double* fTjbTagProbTkCntHighPur ;

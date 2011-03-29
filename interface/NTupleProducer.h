@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.84 2011/03/25 14:12:58 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.85 2011/03/28 15:07:34 theofil Exp $
 //
 //
 
@@ -149,6 +149,7 @@ private:
 	edm::InputTag fL1TriggerTag;
 	edm::InputTag fHLTTrigEventTag;
 	edm::InputTag fHBHENoiseResultTag;
+	edm::InputTag fSrcRho;
 
 	float fMinmupt;
 	float fMaxmueta;
@@ -242,6 +243,7 @@ private:
 	float fTpuSumpT_highpT[gMaxnpileup];
 	float fTpuNtrks_lowpT[gMaxnpileup];
 	float fTpuNtrks_highpT[gMaxnpileup];
+	float fTrho; // rho from L1FastJetCorrection
 	// float fTpuInstLumi[gMaxnpileup];
 
 	// ECAL & HCAL Noise
@@ -690,6 +692,7 @@ private:
 	float fTjeta[gMaxnjets];
 	float fTjphi[gMaxnjets];
 	float fTjEcorr[gMaxnjets];
+	float fTjArea[gMaxnjets];
 
 	float fTJEtaRms[gMaxnjets];
 	float fTJPhiRms[gMaxnjets];

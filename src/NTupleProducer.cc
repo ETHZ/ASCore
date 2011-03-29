@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.106 2011/03/25 14:12:58 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.107 2011/03/28 15:07:34 theofil Exp $
 //
 //
 
@@ -131,7 +131,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fL1TriggerTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
 	fHLTTrigEventTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
 	fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
-
+	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
 
 	// Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -244,6 +244,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Jets and Jet Correctors
 	Handle<View<Jet> > jets;
 	iEvent.getByLabel(fJetTag,jets);
+
+	// rho for L1FastJet
+	edm::Handle<double> rho;
+	iEvent.getByLabel(fSrcRho,rho);
+	fTrho = *rho;
 
 	// collect information for b-tagging (4 tags)
 	Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
@@ -1320,6 +1325,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjEcorr [jqi] = scale;
 		fTJEtaRms[jqi] = sqrt(jet->etaetaMoment());
 		fTJPhiRms[jqi] = sqrt(jet->etaphiMoment());
+		fTjArea  [jqi] = jet->jetArea();
 
 		fTjNconstituents[jqi] = jet->nConstituents();
 		fTjChMult       [jqi] = jet->chargedMultiplicity(); // do it the pf way...
@@ -1824,6 +1830,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
 	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumInteractions]/F");
 	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumInteractions]/F");
+	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
 	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumInteractions]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
 	fEventTree->Branch("HLTResults"       ,&fTHLTres          ,"HLTResults[200]/I");
@@ -2232,6 +2239,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("JEta"           ,&fTjeta           ,"JEta[NJets]/F");
 	fEventTree->Branch("JPhi"           ,&fTjphi           ,"JPhi[NJets]/F");
 	fEventTree->Branch("JEcorr"         ,&fTjEcorr         ,"JEcorr[NJets]/F");
+	fEventTree->Branch("JArea"          ,&fTjArea          ,"JArea[NJets]/F");
 
 	fEventTree->Branch("JEtaRms"             ,&fTJEtaRms        ,"JEtaRms[NJets]/F");
 	fEventTree->Branch("JPhiRms"             ,&fTJPhiRms        ,"JPhiRms[NJets]/F");
@@ -2486,6 +2494,7 @@ void NTupleProducer::resetTree(){
 	fTbeamspotz         = -999.99;
 	fTNCaloTowers       = -999;
 	fTHBHENoiseFlag     = -999;
+	fTrho               = -999;
 
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
@@ -2812,6 +2821,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTJEtaRms,gMaxnjets );
 	resetFloat(fTJPhiRms,gMaxnjets );
 	resetFloat(fTjMass,   gMaxnjets);
+	resetFloat(fTjArea,   gMaxnjets);
+	resetFloat(fTjEcorr,   gMaxnjets);
 
 	resetInt  (fTjNconstituents, gMaxnjets);
 	resetInt  (fTjChMult, gMaxnjets);

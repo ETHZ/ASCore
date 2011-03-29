@@ -103,6 +103,7 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTet[ijet]    = Jit->et();
       fTphi[ijet]   = Jit->phi();
       fTeta[ijet]   = Jit->eta();
+      fTarea[ijet]  = Jit->jetArea();
       fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
 
       //      cout << "PFtoPAT jet " << Jit->p4() << " scale " << 1.0/Jit->jecFactor("Uncorrected") << endl;
