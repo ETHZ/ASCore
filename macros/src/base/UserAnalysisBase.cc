@@ -937,9 +937,9 @@ void UserAnalysisBase::EventPrint(){
   double fracEm, fracCh;
   GetEvtEmChFrac(fracEm, fracCh);
   cout << " Event fEM = " << fracEm << ", fCh = " << fracCh << endl;
-  cout << " caloMET  = " << MET    << ", METPhi = " << METPhi << ", METsignif = " << METsign << endl;
-  cout << " TCMET    = " << fTR->TCMET    << ", METPhi = " << fTR->TCMETphi << endl;
-  cout << " PFMET    = " << fTR->PFMET    << ", METPhi = " << fTR->PFMETphi << endl;
+  cout << " MucorrCaloMET  = " << fTR->MuCorrMET<< ", METPhi = " << fTR->MuCorrMETphi  << endl;
+  cout << " TCMET          = " << fTR->TCMET    << ", METPhi = " << fTR->TCMETphi << endl;
+  cout << " PFMET          = " << fTR->PFMET    << ", METPhi = " << fTR->PFMETphi << endl;
 		
   // print the jets info
   cout << " Number of jets in the ntuple = " << fTR->PFNJets
