@@ -1205,7 +1205,9 @@ bool UserAnalysisBase::CheckRunLumi(){
 		}
 	
 	}
-	if(good){cout <<  "accepted "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
-	else    {cout <<  "rejected "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
+	if(fVerbose > 3){
+		if(good){cout <<  "accepted "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
+		else    {cout <<  "rejected "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
+	}
 	return good;
 }
