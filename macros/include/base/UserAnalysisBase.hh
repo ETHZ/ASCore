@@ -38,6 +38,16 @@ public:
 	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 	vector<string>   fHLTLabels;   // Vector with current HLT names
+	
+	// stuff for JSON reading
+	virtual void ReadJSON(const char* JSONpath);
+	virtual bool CheckRunLumi();
+	struct RunLumi{
+		int run;
+		vector<int> lumi_min;
+		vector<int> lumi_max;
+	} fCurRunLumi; 
+	vector<RunLumi> fRunLumis;
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
