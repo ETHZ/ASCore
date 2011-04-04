@@ -22,14 +22,18 @@ FILENAME = sys.argv[1]
 CLASSNAME = 'TreeClassBase'
 HEADERNAME = CLASSNAME + '.h'
 SOURCENAME = CLASSNAME + '.C'
-MAXNMUS     = 30
-MAXNELES    = 20
-MAXNGENLEPT = 100
-MAXNJETS    = 100
-MAXNPHOS    = 50
-MAXNTRKS    = 500
-MAXHLTOBJ   = 10
-MAXNVTCS    = 25
+MAXNMUS       = 30
+MAXNELES      = 20
+MAXNTAUS      = 20
+MAXNGENLEPT   = 100
+MAXNJETS      = 100
+MAXNGENJETS   = 100
+MAXNPHOS      = 50
+MAXNTRKS      = 500
+MAXHLTOBJ     = 10
+MAXNVTCS      = 25
+MAXNPILEUP    = 50
+MAXNEBHITS    = 20
 
 #______________________________________________________________
 def makeClass(filename, classname, treename):
@@ -56,9 +60,21 @@ if __name__=='__main__':
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNMUS) + line[pos-5:len(line)]
 			line = newline
+		pos = line.find('//[NPfMus]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNMUS) + line[pos-5:len(line)]
+			line = newline
 		pos = line.find('//[NEles]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNELES) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[NPfEls]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNELES) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[NPfTaus]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNTAUS) + line[pos-5:len(line)]
 			line = newline
 		pos = line.find('//[NPhotons]')
 		if(pos != -1):
@@ -68,7 +84,11 @@ if __name__=='__main__':
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
 			line = newline
-		pos = line.find('//[PFNJets]')
+		pos = line.find('//[NGenJets]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNGENJETS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[PF2PATNJets]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
 			line = newline
@@ -91,6 +111,14 @@ if __name__=='__main__':
 		pos = line.find('//[NVrtx]')
 		if(pos != -1):
 			newline = line[0:line.find('[')+1] + str(MAXNVTCS) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[PUnumInteractions]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNPILEUP) + line[pos-5:len(line)]
+			line = newline
+		pos = line.find('//[NEBhits]')
+		if(pos != -1):
+			newline = line[0:line.find('[')+1] + str(MAXNEBHITS) + line[pos-5:len(line)]
 			line = newline
 		headerFile.write(line)
 	
