@@ -84,6 +84,8 @@ void UserAnalysisBase::GetHLTNames(Int_t& run){
 	for( int i=0; i < HLTNames->size(); i++ ){
 		fHLTLabelMap[(*HLTNames)[i]] = i; 
 		fHLTLabels.push_back((*HLTNames)[i]);
+                if ( fVerbose>3 )
+                  cout << "  " << i << " " << (*HLTNames)[i] << endl;
 	}
 }
 
@@ -105,7 +107,7 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	if( fHLTLabelMap.empty() ) return false;
 	else{
 		int bit = GetHLTBit(theHltName);
-		if(bit == -1){
+		if (bit < 0 ) {
 			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << theHltName << " not found!" << endl;
 			return false;
 		}
@@ -115,6 +117,9 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 
 void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 // Computes the event EM and Charged fractions
+
+        std::cerr << "NEED TO REVISE" << std::endl;
+        exit(-1);
 
 	int nMuGood = 0;
 	double pt_mu = 0.;
@@ -142,11 +147,11 @@ void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
-		double pt = fTR->JChfrac[i] * fTR->JPt[i];
+		double pt = 0.; //fTR->JChfrac[i] * fTR->JPt[i];
 		if (pt < 0.) pt = 0.;
-		double em = fTR->JEMfrac[i] * fTR->JEt[i];
+		double em = 0.; //fTR->JEMfrac[i] * fTR->JEt[i];
 		if (em < 0.) em = 0.;
-		double had = fTR->JEt[i] - em;
+		double had = 0.; //fTR->JEt[i] - em;
 		if (had < 0.) had = 0.;
 		pt_track += pt;
 		et_em    += em;
@@ -175,17 +180,17 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacu
 	// Basic PF jet cleaning and ID cuts
 	// cut at pt of ptcut (default = 30 GeV)
 	// cut at abs(eta) of absetacut (default = 2.5)
-	if(fTR->PFJPt[index] < ptcut           ) return false;
-	if(fabs(fTR->PFJEta[index]) > absetacut) return false;
+	if(fTR->JPt[index] < ptcut           ) return false;
+	if(fabs(fTR->JEta[index]) > absetacut) return false;
 	// Loose PF jet ID (WARNING: HF not included in our ntuple)
 	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
-	if ( !(fTR->PFJNConstituents[index] > 1) )    return false;
-	if ( !(fTR->PFJNeuEmfrac[index]     < 0.99) ) return false;
-	if ( !(fTR->PFJNeuHadfrac[index]    < 0.99) ) return false;
-	if (fabs(fTR->PFJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
-		if ( !(fTR->PFJChEmfrac[index]  < 0.99) )  return false;
-		if ( !(fTR->PFJChHadfrac[index] > 0.00) )  return false;
-		if ( !(fTR->PFJChMult[index]    > 0   ) )  return false;
+	if ( !(fTR->JNConstituents[index] > 1) )    return false;
+	if ( !(fTR->JNeutralEmFrac[index]     < 0.99) ) return false;
+	if ( !(fTR->JNeutralHadFrac[index]    < 0.99) ) return false;
+	if (fabs(fTR->JEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
+		if ( !(fTR->JChargedEmFrac[index]  < 0.99) )  return false;
+		if ( !(fTR->JChargedHadFrac[index] > 0.00) )  return false;
+		if ( !(fTR->JNAssoTracks[index]    > 0   ) )  return false;
 	}
 	return true;
 }
@@ -193,16 +198,16 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacu
 bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetacut) {
 	// Medium PF JID
 	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PFJNeuHadfrac[index] < 0.95)         ) return false;
-	if ( !(fTR->PFJNeuEmfrac[index]  < 0.95)         ) return false;
+	if ( !(fTR->JNeutralHadFrac[index] < 0.95)         ) return false;
+	if ( !(fTR->JNeutralEmFrac[index]  < 0.95)         ) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacut) {
 	// Tight PF JID
 	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PFJNeuHadfrac[index] < 0.90)         ) return false;
-	if ( !(fTR->PFJNeuEmfrac[index]  < 0.90)         ) return false;
+	if ( !(fTR->JNeutralHadFrac[index] < 0.90)         ) return false;
+	if ( !(fTR->JNeutralEmFrac[index]  < 0.90)         ) return false;
 	return true;
 }
 
@@ -211,20 +216,20 @@ bool UserAnalysisBase::IsGoodBasicJet(int index){
 	if(fTR->JPt[index] < 30) return false;
 	if(fabs(fTR->JEta[index]) > 3.0) return false;
 
-	if(fTR->JEt[index] - fTR->JPt[index] < -0.0001 ) return false;
-	if(fTR->JID_n90Hits[index] < 2 ) return false;
-	if(fTR->JID_HPD[index] > 0.98 ) return false;
-	if(fTR->JID_RBX[index] > 0.95 ) return false;
-	if(fTR->JEMfrac[index] > 1. ) return false;
-	if(fTR->JEMfrac[index] < 0.01 ) return false;
+	if(fTR->CAJEt[index] - fTR->JPt[index] < -0.0001 ) return false;
+	if(fTR->CAJID_n90Hits[index] < 2 ) return false;
+	if(fTR->CAJID_HPD[index] > 0.98 ) return false;
+	if(fTR->CAJID_RBX[index] > 0.95 ) return false;
+	if(fTR->CAJEMfrac[index] > 1. ) return false;
+	if(fTR->CAJEMfrac[index] < 0.01 ) return false;
 	// Have a linearly decreasing cut value in the transition region where
 	// the jet cones intersects with the tracker acceptance, i.e. between
 	// eta 1.9 and 2.9
 	const double chmin = 0.05;
 	double temp = chmin;
-	if(fabs(fTR->JEta[index]) > 1.9) temp = chmin * (1. - fabs(fTR->JEta[index]) + 1.9);
-	if(fabs(fTR->JEta[index]) > 2.9) temp = 0.;
-	if( fTR->JChfrac[index] < temp && fabs(fTR->JEta[index]) < 2.9) return false;
+	if(fabs(fTR->CAJEta[index]) > 1.9) temp = chmin * (1. - fabs(fTR->CAJEta[index]) + 1.9);
+	if(fabs(fTR->CAJEta[index]) > 2.9) temp = 0.;
+	if( fTR->CAJChfrac[index] < temp && fabs(fTR->CAJEta[index]) < 2.9) return false;
 	return true;
 }
 
@@ -317,9 +322,9 @@ bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, dou
 double UserAnalysisBase::hybRelElIso(int index){
 	// the value of hybrid relative electron isolation
 	if( fabs(fTR->ElEta[index]) < 1.479 ) // Barrel
-		return ( fTR->ElDR03TkSumPt[index] + std::max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (std::max(20.,fTR->ElEt[index]));	
+		return ( fTR->ElDR03TkSumPt[index] + TMath::Max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (TMath::Max(Float_t(20.),fTR->ElEt[index]));	
 	else // EndCap
-		return ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / std::max(20.,fTR->ElEt[index]);
+		return ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / TMath::Max(Float_t(20.),fTR->ElEt[index]);
 }
 
 bool UserAnalysisBase::IsTightEl(int index){
@@ -333,13 +338,15 @@ bool UserAnalysisBase::IsTightEl(int index){
 }
 
 bool UserAnalysisBase::IsLooseEl(int index){
+        std::cerr << "NEED TO REVISE" << std::endl;
+        exit(-1);
 	// Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
 	if(fTR->ElPt[index] < 10.) return false;
 	if(fabs(fTR->ElEta[index]) > 2.4) return false;
 
 	if(!fTR->ElEcalDriven[index]) return false;
 	if(fTR->ElCaloEnergy[index] < 10.) return false;
-	if(fTR->ElDuplicateEl[index] >= 0) return false;
+	//if(fTR->ElDuplicateEl[index] >= 0) return false;
 	
     // (El.Id cuts: WP90%; El.Convers.Reject.: WP80%; El.RelIso: Loose)	
 	if(!IsGoodElId_WP90(index)) return false;
@@ -647,17 +654,19 @@ vector<int> UserAnalysisBase::PFJetSelection(double ptcut, double absetacut, boo
 	vector<int>    selectedObjInd;
 	vector<double> selectedObjPt;
 	// form the vector of indices
-	for(int ind = 0; ind < fTR->PFNJets; ++ind){
+	for(int ind = 0; ind < fTR->NJets; ++ind){
 		// selection
 		if((*this.*pfjetSelector)(ind, ptcut, absetacut) == false) continue;
 
 		selectedObjInd.push_back(ind);
-		selectedObjPt.push_back(fTR->PFJPt[ind]);
+		selectedObjPt.push_back(fTR->JPt[ind]);
 	}
 	return Util::VSort(selectedObjInd, selectedObjPt);
 }
 
 vector<int> UserAnalysisBase::PhotonSelection(bool(UserAnalysisBase::*phoSelector)(int)){
+        std::cerr << "NEED TO REVISE" << std::endl;
+        exit(-1);
 	// Returns the vector of indices of
 	// good photons sorted by Pt
 	if(phoSelector == NULL) phoSelector = &UserAnalysisBase::IsGoodBasicPho;
@@ -667,7 +676,7 @@ vector<int> UserAnalysisBase::PhotonSelection(bool(UserAnalysisBase::*phoSelecto
 	for(int ind = 0; ind < fTR->NPhotons; ++ind){
 		// selection
 		if((*this.*phoSelector)(ind) == false) continue;
-		if(fTR->PhoIsElDupl[ind] >= 0) continue;
+		//if(fTR->PhoIsElDupl[ind] >= 0) continue;
 		selectedObjInd.push_back(ind);
 		selectedObjPt.push_back(fTR->PhoPt[ind]);
 	}
@@ -904,7 +913,9 @@ bool UserAnalysisBase::IsGoodEvt(vector<Cut> *cutVec){
 }
 
 void UserAnalysisBase::EventPrint(){ 
-
+        std::cerr << "NEED TO REVISE" << std::endl;
+        exit(-1);
+/*
   char ccharge[] = {'-', '0', '+'};
   TLorentzVector p1(0.,0.,0.,0.), p2(0.,0.,0.,0.), psum(0.,0.,0.,0.);
   double minv = -999.99;
@@ -955,9 +966,9 @@ void UserAnalysisBase::EventPrint(){
 	 << " Jet mass = " << jmass << endl;
     //		cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
     //		cout << "      " << " JetfEM = " << fTR->JEMfrac[i] << ", JetfCh = " << fTR->JChfrac[i] << endl;
-    cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->PFJChMult[i] << endl;
-    cout << "      " << " JetfEMch = " << fTR->PFJChEmfrac[i] << ", JetfEMneu = " << fTR->PFJNeuEmfrac[i]
-	 << " JetfHach = " << fTR->PFJChHadfrac[i] << ", JetfHaneu = " << fTR->PFJNeuHadfrac[i] << endl;
+    cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
+    cout << "      " << " JetfEMch = " << fTR->JChargedEmFrac[i] << ", JetfEMneu = " << fTR->PFJNeuEmfrac[i]
+	 << " JetfHach = " << fTR->JChargedHadFrac[i] << ", JetfHaneu = " << fTR->PFJNeuHadfrac[i] << endl;
     //    cout << "      " << " Jetn90 = " << fTR->JID_n90Hits[i] << ", JetHPD = " << fTR->JID_HPD[i] 
     //	 << ", JetRBX = " << fTR->JID_RBX[i] << endl;
     //    cout << "      " << " Jet Vtx Chisq/ndof = " << fTR->JVtxNChi2[i] << endl;
@@ -1109,6 +1120,7 @@ void UserAnalysisBase::EventPrint(){
       cout << " Inv. mass (phot" << i << ", phot" << j << ") = " << minv << endl;
     }
   }
+*/
 
 }
 

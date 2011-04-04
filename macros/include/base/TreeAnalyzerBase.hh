@@ -5,6 +5,7 @@
 #include <TString.h>
 #include "TreeReader.hh"
 #include "helper/Utilities.hh"
+#include <vector>
 
 class TreeAnalyzerBase {
 public:
@@ -27,6 +28,21 @@ public:
 	Long64_t fMaxEvents;
   
 	Int_t fCurRun;
+        Int_t fCurLumi;
+        bool skipLumi;
+        bool skipRun;
+
+	// stuff for JSON reading
+	virtual void ReadJSON(const char* JSONpath);
+	virtual const bool CheckRunLumi(void) const;
+        virtual const bool CheckRun(void) const;
+	struct RunLumi{
+          int run;
+          std::vector<int> lumi_min;
+          std::vector<int> lumi_max;
+	} fCurRunLumi; 
+        std::vector<RunLumi> fRunLumis;
+
 
 	TreeReader *fTR;
 
