@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-  cout << "Usage: RunJZBAnalyzer [-o filename] [-v verbose] [-n maxEvents] [-t type] [-c] [-l] file1 [... filen]" << endl;
+  cout << "Usage: RunJZBAnalyzer [-o filename] [-v verbose] [-n maxEvents] [-j JSON] [-t type] [-c] [-l] file1 [... filen]" << endl;
   cout << "  where:" << endl;
   cout << "     -c       runs full lepton cleaning             " << endl;
   cout << "     filename    is the output filename             " << endl;
@@ -24,6 +24,7 @@ void usage( int status = 0 ) {
   cout << "     verbose  sets the verbose level                " << endl;
   cout << "               default is 0 (quiet mode)            " << endl;
   cout << "     maxEvents number of events to process          " << endl;
+  cout << "     JSON     path of a JSON file to use            " << endl;
   cout << "     type     is 'el', 'mu' or 'mc' (default)       " << endl;
   cout << "     filen    are the input files (by default: ROOT files)" << endl;
   cout << "              with option -l, these are read as text files" << endl;
@@ -39,13 +40,14 @@ int main(int argc, char* argv[]) {
   bool fullCleaning = false;
   //	TString outputfile = "/tmp/delete.root";
   string outputFileName = "/tmp/delete.root";
+  string jsonFileName = "";
   int verbose = 0;
   int maxEvents=-1;
   string type = "data";
 
   // Parse options
   char ch;
-  while ((ch = getopt(argc, argv, "o:v:n:t:lh?c")) != -1 ) {
+  while ((ch = getopt(argc, argv, "o:v:n:j:t:lh?c")) != -1 ) {
     switch (ch) {
     case 'o': outputFileName = string(optarg); break;
     case 'v': verbose = atoi(optarg); break;
@@ -53,6 +55,7 @@ int main(int argc, char* argv[]) {
     case '?':
     case 'h': usage(0); break;
     case 'n': maxEvents = atoi(optarg); break;
+    case 'j': jsonFileName = string(optarg); break;
     case 't': type = string(optarg); break;
     case 'c': fullCleaning = true; break;
     default:
@@ -89,6 +92,7 @@ int main(int argc, char* argv[]) {
   cout << "outputFileName is:     " << outputFileName << endl;
   cout << "Verbose level is: " << verbose << endl;
   cout << "Number of events: " << theChain->GetEntries() << endl;
+  cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
   cout << "Type is: " << type << endl;
   cout << "Full cleaning is " << (fullCleaning?"ON":"OFF") << endl;
   cout << "--------------" << endl;
@@ -98,6 +102,7 @@ int main(int argc, char* argv[]) {
   tA->SetOutputFileName(outputFileName);
   tA->SetVerbose(verbose);
   tA->SetMaxEvents(maxEvents);
+  if ( jsonFileName.length() ) tA->ReadJSON(jsonFileName.c_str());
   tA->BeginJob();
   tA->Loop();
   tA->EndJob();

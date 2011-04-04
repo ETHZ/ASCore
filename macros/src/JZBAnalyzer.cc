@@ -31,14 +31,21 @@ void JZBAnalyzer::Loop(){
                 if ( fCurRun != fTR->Run ) {
                   fCurRun = fTR->Run;
                   fJZBAnalysis->BeginRun(fCurRun);
-                 }
-		fJZBAnalysis->Analyze();
+                  skipRun = false;
+                  if ( !CheckRun() ) skipRun = true;
+                }
+                // Check if new lumi is in JSON file
+                if ( !skipRun && fCurLumi != fTR->LumiSection ) {
+                  fCurLumi = fTR->LumiSection;
+                  skipLumi = false; // Re-initialise
+                  if ( !CheckRunLumi() ) skipLumi = true;
+                }
+		if ( !(skipRun || skipLumi) ) fJZBAnalysis->Analyze();
 	}
 }
 
 // Method called before starting the event loop
 void JZBAnalyzer::BeginJob(){
-	//fJZBAnalysis->SetOutputFile(fOutputFile);
 	fJZBAnalysis->outputFileName_ = outputFileName_;
 	fJZBAnalysis->fVerbose = fVerbose;
 
