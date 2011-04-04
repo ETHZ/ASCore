@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Apr  2 18:29:06 2011 by ROOT version 5.27/06b
+// Mon Apr  4 16:30:01 2011 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: /scratch/fronga/NTupleProducer_38X_data_74_1_015.root
+// found on file: /scratch/stiegerb/DoubleMu_Run2011A_V01-12-00_AOD_66_6_w9U.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -33,16 +33,16 @@ public :
    Float_t         ExtXSecLO;
    Float_t         IntXSec;
    Int_t           PUnumInteractions;
-   Float_t         PUzPositions[1];   //[PUnumInteractions]
-   Float_t         PUsumPtLowPt[1];   //[PUnumInteractions]
-   Float_t         PUsumPtHighPt[1];   //[PUnumInteractions]
-   Float_t         PUnTrksLowPt[1];   //[PUnumInteractions]
-   Float_t         PUnTrksHighPt[1];   //[PUnumInteractions]
+   Float_t         PUzPositions[50];   //[PUnumInteractions]
+   Float_t         PUsumPtLowPt[50];   //[PUnumInteractions]
+   Float_t         PUsumPtHighPt[50];   //[PUnumInteractions]
+   Float_t         PUnTrksLowPt[50];   //[PUnumInteractions]
+   Float_t         PUnTrksHighPt[50];   //[PUnumInteractions]
    Float_t         Weight;
-   Int_t           HLTResults[200];
+   Int_t           HLTResults[300];
    Int_t           L1PhysResults[128];
    Int_t           L1TechResults[64];
-   Int_t           HLTPrescale[200];
+   Int_t           HLTPrescale[300];
    Int_t           NHLTObjs;
    Int_t           HLTObjectID[7][10];
    Float_t         HLTObjectPt[7][10];
@@ -91,13 +91,13 @@ public :
    Float_t         GenLeptonGMEta[100];   //[NGenLeptons]
    Float_t         GenLeptonGMPhi[100];   //[NGenLeptons]
    Int_t           NGenJets;
-   Float_t         GenJetPt[1];   //[NGenJets]
-   Float_t         GenJetEta[1];   //[NGenJets]
-   Float_t         GenJetPhi[1];   //[NGenJets]
-   Float_t         GenJetE[1];   //[NGenJets]
-   Float_t         GenJetEmE[1];   //[NGenJets]
-   Float_t         GenJetHadE[1];   //[NGenJets]
-   Float_t         GenJetInvE[1];   //[NGenJets]
+   Float_t         GenJetPt[100];   //[NGenJets]
+   Float_t         GenJetEta[100];   //[NGenJets]
+   Float_t         GenJetPhi[100];   //[NGenJets]
+   Float_t         GenJetE[100];   //[NGenJets]
+   Float_t         GenJetEmE[100];   //[NGenJets]
+   Float_t         GenJetHadE[100];   //[NGenJets]
+   Float_t         GenJetInvE[100];   //[NGenJets]
    Int_t           NVrtx;
    Float_t         VrtxX[25];   //[NVrtx]
    Float_t         VrtxY[25];   //[NVrtx]
@@ -195,20 +195,20 @@ public :
    Float_t         MuGenGME[30];   //[NMus]
    Int_t           NPfMus;
    Int_t           NPfMusTot;
-   Float_t         PfMuPx[1];   //[NPfMus]
-   Float_t         PfMuPy[1];   //[NPfMus]
-   Float_t         PfMuPz[1];   //[NPfMus]
-   Float_t         PfMuPt[1];   //[NPfMus]
-   Float_t         PfMuPtE[1];   //[NPfMus]
-   Float_t         PfMuE[1];   //[NPfMus]
-   Float_t         PfMuEt[1];   //[NPfMus]
-   Float_t         PfMuEta[1];   //[NPfMus]
-   Float_t         PfMuPhi[1];   //[NPfMus]
-   Int_t           PfMuCharge[1];   //[NPfMus]
-   Float_t         PfMuParticleIso[1];   //[NPfMus]
-   Float_t         PfMuChargedHadronIso[1];   //[NPfMus]
-   Float_t         PfMuNeutralHadronIso[1];   //[NPfMus]
-   Float_t         PfMuPhotonIso[1];   //[NPfMus]
+   Float_t         PfMuPx[30];   //[NPfMus]
+   Float_t         PfMuPy[30];   //[NPfMus]
+   Float_t         PfMuPz[30];   //[NPfMus]
+   Float_t         PfMuPt[30];   //[NPfMus]
+   Float_t         PfMuPtE[30];   //[NPfMus]
+   Float_t         PfMuE[30];   //[NPfMus]
+   Float_t         PfMuEt[30];   //[NPfMus]
+   Float_t         PfMuEta[30];   //[NPfMus]
+   Float_t         PfMuPhi[30];   //[NPfMus]
+   Int_t           PfMuCharge[30];   //[NPfMus]
+   Float_t         PfMuParticleIso[30];   //[NPfMus]
+   Float_t         PfMuChargedHadronIso[30];   //[NPfMus]
+   Float_t         PfMuNeutralHadronIso[30];   //[NPfMus]
+   Float_t         PfMuPhotonIso[30];   //[NPfMus]
    Int_t           NEles;
    Int_t           NElesTot;
    Int_t           ElGood[20];   //[NEles]
@@ -313,36 +313,36 @@ public :
    Float_t         ElGenGME[20];   //[NEles]
    Int_t           NPfEls;
    Int_t           NPfElsTot;
-   Float_t         PfElPx[1];   //[NPfEls]
-   Float_t         PfElPy[1];   //[NPfEls]
-   Float_t         PfElPz[1];   //[NPfEls]
-   Float_t         PfElPt[1];   //[NPfEls]
-   Float_t         PfElPtE[1];   //[NPfEls]
-   Float_t         PfElE[1];   //[NPfEls]
-   Float_t         PfElEt[1];   //[NPfEls]
-   Float_t         PfElEta[1];   //[NPfEls]
-   Float_t         PfElPhi[1];   //[NPfEls]
-   Int_t           PfElCharge[1];   //[NPfEls]
-   Float_t         PfElParticleIso[1];   //[NPfEls]
-   Float_t         PfElChargedHadronIso[1];   //[NPfEls]
-   Float_t         PfElNeutralHadronIso[1];   //[NPfEls]
-   Float_t         PfElPhotonIso[1];   //[NPfEls]
+   Float_t         PfElPx[20];   //[NPfEls]
+   Float_t         PfElPy[20];   //[NPfEls]
+   Float_t         PfElPz[20];   //[NPfEls]
+   Float_t         PfElPt[20];   //[NPfEls]
+   Float_t         PfElPtE[20];   //[NPfEls]
+   Float_t         PfElE[20];   //[NPfEls]
+   Float_t         PfElEt[20];   //[NPfEls]
+   Float_t         PfElEta[20];   //[NPfEls]
+   Float_t         PfElPhi[20];   //[NPfEls]
+   Int_t           PfElCharge[20];   //[NPfEls]
+   Float_t         PfElParticleIso[20];   //[NPfEls]
+   Float_t         PfElChargedHadronIso[20];   //[NPfEls]
+   Float_t         PfElNeutralHadronIso[20];   //[NPfEls]
+   Float_t         PfElPhotonIso[20];   //[NPfEls]
    Int_t           NPfTaus;
    Int_t           NPfTausTot;
-   Float_t         PfTauPx[1];   //[NPfTaus]
-   Float_t         PfTauPy[1];   //[NPfTaus]
-   Float_t         PfTauPz[1];   //[NPfTaus]
-   Float_t         PfTauPt[1];   //[NPfTaus]
-   Float_t         PfTauPtE[1];   //[NPfTaus]
-   Float_t         PfTauE[1];   //[NPfTaus]
-   Float_t         PfTauEt[1];   //[NPfTaus]
-   Float_t         PfTauEta[1];   //[NPfTaus]
-   Float_t         PfTauPhi[1];   //[NPfTaus]
-   Int_t           PfTauCharge[1];   //[NPfTaus]
-   Float_t         PfTauParticleIso[1];   //[NPfTaus]
-   Float_t         PfTauChargedHadronIso[1];   //[NPfTaus]
-   Float_t         PfTauNeutralHadronIso[1];   //[NPfTaus]
-   Float_t         PfTauPhotonIso[1];   //[NPfTaus]
+   Float_t         PfTauPx[20];   //[NPfTaus]
+   Float_t         PfTauPy[20];   //[NPfTaus]
+   Float_t         PfTauPz[20];   //[NPfTaus]
+   Float_t         PfTauPt[20];   //[NPfTaus]
+   Float_t         PfTauPtE[20];   //[NPfTaus]
+   Float_t         PfTauE[20];   //[NPfTaus]
+   Float_t         PfTauEt[20];   //[NPfTaus]
+   Float_t         PfTauEta[20];   //[NPfTaus]
+   Float_t         PfTauPhi[20];   //[NPfTaus]
+   Int_t           PfTauCharge[20];   //[NPfTaus]
+   Float_t         PfTauParticleIso[20];   //[NPfTaus]
+   Float_t         PfTauChargedHadronIso[20];   //[NPfTaus]
+   Float_t         PfTauNeutralHadronIso[20];   //[NPfTaus]
+   Float_t         PfTauPhotonIso[20];   //[NPfTaus]
    Int_t           NPhotons;
    Int_t           NPhotonsTot;
    Int_t           PhoGood[50];   //[NPhotons]
@@ -457,26 +457,26 @@ public :
    Double_t        CAJChfrac[100];   //[CANJets]
    Int_t           CAJNConstituents[100];   //[CANJets]
    Int_t           PF2PATNJets;
-   Double_t        PF2PATJPx[7];   //[PF2PATNJets]
-   Double_t        PF2PATJPy[7];   //[PF2PATNJets]
-   Double_t        PF2PATJPz[7];   //[PF2PATNJets]
-   Double_t        PF2PATJPt[7];   //[PF2PATNJets]
-   Double_t        PF2PATJE[7];   //[PF2PATNJets]
-   Double_t        PF2PATJEt[7];   //[PF2PATNJets]
-   Double_t        PF2PATJEta[7];   //[PF2PATNJets]
-   Double_t        PF2PATJPhi[7];   //[PF2PATNJets]
-   Double_t        PF2PATJScale[7];   //[PF2PATNJets]
-   Double_t        PF2PATJbTagProbTkCntHighEff[7];   //[PF2PATNJets]
-   Double_t        PF2PATJbTagProbTkCntHighPur[7];   //[PF2PATNJets]
-   Double_t        PF2PATJbTagProbSimpSVHighEff[7];   //[PF2PATNJets]
-   Double_t        PF2PATJbTagProbSimpSVHighPur[7];   //[PF2PATNJets]
-   Int_t           PF2PATJChMult[7];   //[PF2PATNJets]
-   Int_t           PF2PATJNeuMult[7];   //[PF2PATNJets]
-   Double_t        PF2PATJChHadfrac[7];   //[PF2PATNJets]
-   Double_t        PF2PATJNeuHadfrac[7];   //[PF2PATNJets]
-   Double_t        PF2PATJChEmfrac[7];   //[PF2PATNJets]
-   Double_t        PF2PATJNeuEmfrac[7];   //[PF2PATNJets]
-   Int_t           PF2PATJNConstituents[7];   //[PF2PATNJets]
+   Double_t        PF2PATJPx[100];   //[PF2PATNJets]
+   Double_t        PF2PATJPy[100];   //[PF2PATNJets]
+   Double_t        PF2PATJPz[100];   //[PF2PATNJets]
+   Double_t        PF2PATJPt[100];   //[PF2PATNJets]
+   Double_t        PF2PATJE[100];   //[PF2PATNJets]
+   Double_t        PF2PATJEt[100];   //[PF2PATNJets]
+   Double_t        PF2PATJEta[100];   //[PF2PATNJets]
+   Double_t        PF2PATJPhi[100];   //[PF2PATNJets]
+   Double_t        PF2PATJScale[100];   //[PF2PATNJets]
+   Double_t        PF2PATJbTagProbTkCntHighEff[100];   //[PF2PATNJets]
+   Double_t        PF2PATJbTagProbTkCntHighPur[100];   //[PF2PATNJets]
+   Double_t        PF2PATJbTagProbSimpSVHighEff[100];   //[PF2PATNJets]
+   Double_t        PF2PATJbTagProbSimpSVHighPur[100];   //[PF2PATNJets]
+   Int_t           PF2PATJChMult[100];   //[PF2PATNJets]
+   Int_t           PF2PATJNeuMult[100];   //[PF2PATNJets]
+   Double_t        PF2PATJChHadfrac[100];   //[PF2PATNJets]
+   Double_t        PF2PATJNeuHadfrac[100];   //[PF2PATNJets]
+   Double_t        PF2PATJChEmfrac[100];   //[PF2PATNJets]
+   Double_t        PF2PATJNeuEmfrac[100];   //[PF2PATNJets]
+   Int_t           PF2PATJNConstituents[100];   //[PF2PATNJets]
    Int_t           NTracks;
    Int_t           NTracksTot;
    Int_t           TrkGood[500];   //[NTracks]
@@ -1078,9 +1078,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/fronga/NTupleProducer_38X_data_74_1_015.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/DoubleMu_Run2011A_V01-12-00_AOD_66_6_w9U.root");
       if (!f) {
-         f = new TFile("/scratch/fronga/NTupleProducer_38X_data_74_1_015.root");
+         f = new TFile("/scratch/stiegerb/DoubleMu_Run2011A_V01-12-00_AOD_66_6_w9U.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1308,20 +1308,20 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuGenGME", MuGenGME, &b_MuGenGME);
    fChain->SetBranchAddress("NPfMus", &NPfMus, &b_NPfMus);
    fChain->SetBranchAddress("NPfMusTot", &NPfMusTot, &b_NPfMusTot);
-   fChain->SetBranchAddress("PfMuPx", &PfMuPx, &b_PfMuPx);
-   fChain->SetBranchAddress("PfMuPy", &PfMuPy, &b_PfMuPy);
-   fChain->SetBranchAddress("PfMuPz", &PfMuPz, &b_PfMuPz);
-   fChain->SetBranchAddress("PfMuPt", &PfMuPt, &b_PfMuPt);
-   fChain->SetBranchAddress("PfMuPtE", &PfMuPtE, &b_PfMuPtE);
-   fChain->SetBranchAddress("PfMuE", &PfMuE, &b_PfMuE);
-   fChain->SetBranchAddress("PfMuEt", &PfMuEt, &b_PfMuEt);
-   fChain->SetBranchAddress("PfMuEta", &PfMuEta, &b_PfMuEta);
-   fChain->SetBranchAddress("PfMuPhi", &PfMuPhi, &b_PfMuPhi);
-   fChain->SetBranchAddress("PfMuCharge", &PfMuCharge, &b_PfMuCharge);
-   fChain->SetBranchAddress("PfMuParticleIso", &PfMuParticleIso, &b_PfMuParticleIso);
-   fChain->SetBranchAddress("PfMuChargedHadronIso", &PfMuChargedHadronIso, &b_PfMuChargedHadronIso);
-   fChain->SetBranchAddress("PfMuNeutralHadronIso", &PfMuNeutralHadronIso, &b_PfMuNeutralHadronIso);
-   fChain->SetBranchAddress("PfMuPhotonIso", &PfMuPhotonIso, &b_PfMuPhotonIso);
+   fChain->SetBranchAddress("PfMuPx", PfMuPx, &b_PfMuPx);
+   fChain->SetBranchAddress("PfMuPy", PfMuPy, &b_PfMuPy);
+   fChain->SetBranchAddress("PfMuPz", PfMuPz, &b_PfMuPz);
+   fChain->SetBranchAddress("PfMuPt", PfMuPt, &b_PfMuPt);
+   fChain->SetBranchAddress("PfMuPtE", PfMuPtE, &b_PfMuPtE);
+   fChain->SetBranchAddress("PfMuE", PfMuE, &b_PfMuE);
+   fChain->SetBranchAddress("PfMuEt", PfMuEt, &b_PfMuEt);
+   fChain->SetBranchAddress("PfMuEta", PfMuEta, &b_PfMuEta);
+   fChain->SetBranchAddress("PfMuPhi", PfMuPhi, &b_PfMuPhi);
+   fChain->SetBranchAddress("PfMuCharge", PfMuCharge, &b_PfMuCharge);
+   fChain->SetBranchAddress("PfMuParticleIso", PfMuParticleIso, &b_PfMuParticleIso);
+   fChain->SetBranchAddress("PfMuChargedHadronIso", PfMuChargedHadronIso, &b_PfMuChargedHadronIso);
+   fChain->SetBranchAddress("PfMuNeutralHadronIso", PfMuNeutralHadronIso, &b_PfMuNeutralHadronIso);
+   fChain->SetBranchAddress("PfMuPhotonIso", PfMuPhotonIso, &b_PfMuPhotonIso);
    fChain->SetBranchAddress("NEles", &NEles, &b_NEles);
    fChain->SetBranchAddress("NElesTot", &NElesTot, &b_NElesTot);
    fChain->SetBranchAddress("ElGood", ElGood, &b_ElGood);
@@ -1426,20 +1426,20 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenGME", ElGenGME, &b_ElGenGME);
    fChain->SetBranchAddress("NPfEls", &NPfEls, &b_NPfEls);
    fChain->SetBranchAddress("NPfElsTot", &NPfElsTot, &b_NPfElsTot);
-   fChain->SetBranchAddress("PfElPx", &PfElPx, &b_PfElPx);
-   fChain->SetBranchAddress("PfElPy", &PfElPy, &b_PfElPy);
-   fChain->SetBranchAddress("PfElPz", &PfElPz, &b_PfElPz);
-   fChain->SetBranchAddress("PfElPt", &PfElPt, &b_PfElPt);
-   fChain->SetBranchAddress("PfElPtE", &PfElPtE, &b_PfElPtE);
-   fChain->SetBranchAddress("PfElE", &PfElE, &b_PfElE);
-   fChain->SetBranchAddress("PfElEt", &PfElEt, &b_PfElEt);
-   fChain->SetBranchAddress("PfElEta", &PfElEta, &b_PfElEta);
-   fChain->SetBranchAddress("PfElPhi", &PfElPhi, &b_PfElPhi);
-   fChain->SetBranchAddress("PfElCharge", &PfElCharge, &b_PfElCharge);
-   fChain->SetBranchAddress("PfElParticleIso", &PfElParticleIso, &b_PfElParticleIso);
-   fChain->SetBranchAddress("PfElChargedHadronIso", &PfElChargedHadronIso, &b_PfElChargedHadronIso);
-   fChain->SetBranchAddress("PfElNeutralHadronIso", &PfElNeutralHadronIso, &b_PfElNeutralHadronIso);
-   fChain->SetBranchAddress("PfElPhotonIso", &PfElPhotonIso, &b_PfElPhotonIso);
+   fChain->SetBranchAddress("PfElPx", PfElPx, &b_PfElPx);
+   fChain->SetBranchAddress("PfElPy", PfElPy, &b_PfElPy);
+   fChain->SetBranchAddress("PfElPz", PfElPz, &b_PfElPz);
+   fChain->SetBranchAddress("PfElPt", PfElPt, &b_PfElPt);
+   fChain->SetBranchAddress("PfElPtE", PfElPtE, &b_PfElPtE);
+   fChain->SetBranchAddress("PfElE", PfElE, &b_PfElE);
+   fChain->SetBranchAddress("PfElEt", PfElEt, &b_PfElEt);
+   fChain->SetBranchAddress("PfElEta", PfElEta, &b_PfElEta);
+   fChain->SetBranchAddress("PfElPhi", PfElPhi, &b_PfElPhi);
+   fChain->SetBranchAddress("PfElCharge", PfElCharge, &b_PfElCharge);
+   fChain->SetBranchAddress("PfElParticleIso", PfElParticleIso, &b_PfElParticleIso);
+   fChain->SetBranchAddress("PfElChargedHadronIso", PfElChargedHadronIso, &b_PfElChargedHadronIso);
+   fChain->SetBranchAddress("PfElNeutralHadronIso", PfElNeutralHadronIso, &b_PfElNeutralHadronIso);
+   fChain->SetBranchAddress("PfElPhotonIso", PfElPhotonIso, &b_PfElPhotonIso);
    fChain->SetBranchAddress("NPfTaus", &NPfTaus, &b_NPfTaus);
    fChain->SetBranchAddress("NPfTausTot", &NPfTausTot, &b_NPfTausTot);
    fChain->SetBranchAddress("PfTauPx", PfTauPx, &b_PfTauPx);
