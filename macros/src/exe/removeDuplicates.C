@@ -1,10 +1,13 @@
 //
 // Script to remove duplicates based on run, lumi and event.
+// Result is a merged file, with duplicates removed.
 //
 // To compile: g++ -o removeDuplicates removeDuplicates.C `root-config --cflags --libs`
 //
 // Usage: removeDuplicates -o output <file to clean> <reference file>
-//    example: removeDuplicates -o EG_nodup.root EG.root Mu.root
+//    example: removeDuplicates -o All_nodup.root EG.root Mu.root
+//             this will merge EG.root and Mu.root into All_nodup.root, where
+//             events from EG.root that are also in Mu.root are removed.
 //
 #include <iostream>
 #include <iomanip>
@@ -27,7 +30,7 @@ bool duplicate( TTree* ref, Int_t& run, Int_t& lumi, Int_t& event ) {
 void usage( int status = 0 ) {
   std::cout << "Usage: removeDuplicates [-o filename] [-v verbose] [file to clean] [reference file]" << std::endl;
   std::cout << "  where:" << std::endl;
-  std::cout << "     filename    is the output filename             " << std::endl;
+  std::cout << "     filename is the merged output filename         " << std::endl;
   std::cout << "     verbose  sets the verbose level                " << std::endl;
   std::cout << "               default is 0 (quiet mode)            " << std::endl;
   std::cout << "     file to clean   is the file to clean up        " << std::endl;
@@ -72,7 +75,7 @@ int main(int argc, char** argv) {
     
     // Just copy the structure
     TFile* newFile = new TFile(outputFileName,"RECREATE");
-    TTree* newTree = t1->CloneTree(0);
+    TTree* newTree = t2->CloneTree();
     
     Int_t egRun, egLumi, egEvt;
     t1->SetBranchAddress("eventNum",&egEvt);
