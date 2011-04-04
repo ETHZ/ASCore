@@ -116,10 +116,6 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 
 void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 // Computes the event EM and Charged fractions
-
-        std::cerr << "NEED TO REVISE" << std::endl;
-        exit(-1);
-
 	int nMuGood = 0;
 	double pt_mu = 0.;
 	double pt_track = 0.;
@@ -146,11 +142,11 @@ void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 	}
 	for( int i = 0; i < fTR->NJets; ++i ){
 		if(fTR->JGood[i] != 0) continue;
-		double pt = 0.; //fTR->JChfrac[i] * fTR->JPt[i];
+		double pt = ( fTR->JChargedHadFrac[i] + fTR->JChargedEmFrac[i] ) * fTR->JPt[i];
 		if (pt < 0.) pt = 0.;
-		double em = 0.; //fTR->JEMfrac[i] * fTR->JEt[i];
+		double em = ( fTR->JNeutralEmFrac[i] + fTR->JNeutralEmFrac[i] ) * fTR->JEt[i];
 		if (em < 0.) em = 0.;
-		double had = 0.; //fTR->JEt[i] - em;
+		double had = ( fTR->JChargedHadFrac[i] + fTR->JNeutralHadFrac[i] ) * fTR->JEt[i];
 		if (had < 0.) had = 0.;
 		pt_track += pt;
 		et_em    += em;
@@ -372,15 +368,12 @@ bool UserAnalysisBase::IsTightEl(int index){
 }
 
 bool UserAnalysisBase::IsLooseEl(int index){
-        std::cerr << "NEED TO REVISE" << std::endl;
-        exit(-1);
 	// Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
 	if(fTR->ElPt[index] < 10.) return false;
 	if(fabs(fTR->ElEta[index]) > 2.4) return false;
 
 	if(!fTR->ElEcalDriven[index]) return false;
 	if(fTR->ElCaloEnergy[index] < 10.) return false;
-	//if(fTR->ElDuplicateEl[index] >= 0) return false;
 	
     // (El.Id cuts: WP90%; El.Convers.Reject.: WP80%; El.RelIso: Loose)	
 	if(!IsGoodElId_WP90(index)) return false;
