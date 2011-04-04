@@ -13,9 +13,9 @@ public:
 	virtual ~UserAnalysisBase();
   
 	virtual void Begin() {}
-    virtual void BeginRun(Int_t& run);
-    virtual void Analyze() {}
-    virtual void End() {}
+    	virtual void BeginRun(Int_t& run);
+    	virtual void Analyze() {}
+    	virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 
@@ -33,27 +33,21 @@ public:
 	TFile *fOutputFile;
 	TString fTag;
 	TLatex *fTlat;
-
+	
 	int fVerbose;
 	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 	vector<string>   fHLTLabels;   // Vector with current HLT names
 	
-	// stuff for JSON reading
-	virtual void ReadJSON(const char* JSONpath);
-	virtual bool CheckRunLumi();
-	struct RunLumi{
-		int run;
-		vector<int> lumi_min;
-		vector<int> lumi_max;
-	} fCurRunLumi; 
-	vector<RunLumi> fRunLumis;
 
 	// Jet Selectors
 	virtual bool IsGoodBasicJet(int);
-	virtual bool IsGoodBasicPFJet( int, double = 30., double = 2.5);
-	virtual bool IsGoodPFJetMedium(int, double = 30., double = 2.5);
-	virtual bool IsGoodPFJetTight( int, double = 30., double = 2.5);
+	virtual bool IsGoodBasicPFJet   ( int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetMedium  ( int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetTight   ( int, double = 30., double = 2.5);
+	virtual bool IsGoodBasicPFJetPAT( int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetMediumPAT(int, double = 30., double = 2.5);
+	virtual bool IsGoodPFJetTightPAT( int, double = 30., double = 2.5);
 
 	// Muon Selectors
 	virtual bool IsGoodBasicMu(int);

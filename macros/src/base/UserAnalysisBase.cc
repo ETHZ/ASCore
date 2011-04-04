@@ -84,8 +84,7 @@ void UserAnalysisBase::GetHLTNames(Int_t& run){
 	for( int i=0; i < HLTNames->size(); i++ ){
 		fHLTLabelMap[(*HLTNames)[i]] = i; 
 		fHLTLabels.push_back((*HLTNames)[i]);
-                if ( fVerbose>3 )
-                  cout << "  " << i << " " << (*HLTNames)[i] << endl;
+		if (fVerbose>3) cout << " " << i << " " << (*HLTNames)[i] << endl;
 	}
 }
 
@@ -195,6 +194,25 @@ bool UserAnalysisBase::IsGoodBasicPFJet(int index, double ptcut, double absetacu
 	return true;
 }
 
+bool UserAnalysisBase::IsGoodBasicPFJetPAT(int index, double ptcut, double absetacut){
+	// Basic PF jet cleaning and ID cuts
+	// cut at pt of ptcut (default = 30 GeV)
+	// cut at abs(eta) of absetacut (default = 2.5)
+	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
+	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
+	// Loose PF jet ID (WARNING: HF not included in our ntuple)
+	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
+	if ( !(fTR->PF2PATJNConstituents[index] > 1) )    return false;
+	if ( !(fTR->PF2PATJNeuEmfrac[index]     < 0.99) ) return false;
+	if ( !(fTR->PF2PATJNeuHadfrac[index]    < 0.99) ) return false;
+	if (fabs(fTR->PF2PATJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
+		if ( !(fTR->PF2PATJChEmfrac[index]  < 0.99) )  return false;
+		if ( !(fTR->PF2PATJChHadfrac[index] > 0.00) )  return false;
+		if ( !(fTR->PF2PATJChMult[index]    > 0   ) )  return false;
+	}
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetacut) {
 	// Medium PF JID
 	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
@@ -203,11 +221,27 @@ bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetac
 	return true;
 }
 
+bool UserAnalysisBase::IsGoodPFJetMediumPAT(int index, double ptcut, double absetacut) {
+	// Medium PF JID
+	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
+	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.95)         ) return false;
+	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.95)         ) return false;
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacut) {
 	// Tight PF JID
 	if ( ! IsGoodBasicPFJet(index, ptcut, absetacut) ) return false;
 	if ( !(fTR->JNeutralHadFrac[index] < 0.90)         ) return false;
 	if ( !(fTR->JNeutralEmFrac[index]  < 0.90)         ) return false;
+	return true;
+}
+
+bool UserAnalysisBase::IsGoodPFJetTightPAT(int index, double ptcut, double absetacut) {
+	// Tight PF JID
+	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
+	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.90)         ) return false;
+	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.90)         ) return false;
 	return true;
 }
 
@@ -1121,105 +1155,5 @@ void UserAnalysisBase::EventPrint(){
     }
   }
 */
-
 }
 
-// ---------------------------------
-// JSON stuff
-void UserAnalysisBase::ReadJSON(const char* JSONpath){
-	string line;	
-	ifstream JSON (JSONpath);
-	if (JSON.is_open()){
-		getline (JSON,line);
-	}
-	JSON.close();
-
-	line.erase(0,1);
-	line.erase(line.size()-1);
-	
-	// split JSON into runs with associated lumis
-	string c =", \"";
-	vector<string> splitted;
-	while(line.find(c) != string::npos){
-		int loc = line.find(c);
-		string tmp=line.substr(0, (loc));
-		splitted.push_back(tmp);	
-		line=line.erase(0, tmp.size()+2);
-	}	       
-	splitted.push_back(line); // for the last entry
-	
-	fCurRunLumi;
-	// loop over runs (with lumis)
-	for(int i=0; i<splitted.size(); ++i){
-		fCurRunLumi.run =0;
-		fCurRunLumi.lumi_min.clear();
-		fCurRunLumi.lumi_max.clear();
-
-		// first seperate runs and save them
-		if(splitted[i].find(":") != string::npos){
-			int loc = splitted[i].find(":");
-			string tmp = splitted[i].substr(1,loc-2);
-			stringstream ss ( tmp);
-			ss >> fCurRunLumi.run;
-			splitted[i].erase(0, loc+1);
-		}else {cout << "ERROR in ReadJSON: seperate runs" << endl; return;}
-
-		// now we're left with the lumis, remove the surrounding "[]"
-		if(splitted[i].find("[[") == string::npos || splitted[i].find("]]") == string::npos){ cout << "ERROR in ReadJSON: lumi parsing" << endl; return;}
-		else{
-			int loc  = splitted[i].find("[[");
-			int loc2 = splitted[i].find("]]");
-			splitted[i].erase(loc   , 1);
-			splitted[i].erase(loc2  , 1);
-		}
-		// left with lumis a la [a, b], [c, d], ...
-		while(splitted[i].find("[")!= string::npos){
-			int loc1 = splitted[i].find("[");
-			int loc2 = splitted[i].find("]");
-			int loc3 = splitted[i].find(",", loc1);
-			string lumi1= splitted[i].substr(loc1+1, loc3-1);
-			string lumi2= splitted[i].substr(loc3+1, loc2-1);
-			stringstream ss (lumi1); int lumimin;
-		        ss >> lumimin;	
-			fCurRunLumi.lumi_min.push_back(lumimin);
-			stringstream ss2 (lumi2); int lumimax;
-			ss2 >> lumimax;
-			fCurRunLumi.lumi_max.push_back(lumimax);
-			splitted[i].erase(loc1, loc2-loc1+3);
-		}
-	// push_back run and lumis
-	fRunLumis.push_back(fCurRunLumi);
-	}
-
-	if(fVerbose >1){
-		cout << "-----------------------------------------------" << endl;
-		cout << "Reading the following runs and lumi sections from JSON file:" << endl; 
-		for(int i=0; i<fRunLumis.size(); ++i){
-			cout << "  Run: " << fRunLumis[i].run << " Lumis: " ;
-			for(int k=0; k<fRunLumis[i].lumi_min.size(); ++k){
-				cout << " [" << fRunLumis[i].lumi_min[k] << ", " << fRunLumis[i].lumi_max[k] << "] ";
-			}
-			cout << endl;
-		}
-		cout << "-----------------------------------------------" << endl;
-	}
-}
-
-bool UserAnalysisBase::CheckRunLumi(){
-	bool good(false);
-	if(fRunLumis.size()==0) {cout << "ERROR CheckRunLumi: fRunLumis is empty." << endl; return good;}
-	for(int r=0; r<fRunLumis.size(); ++r){
-		if(fTR->Run != fRunLumis[r].run) continue;
-		for(int l=0; l<fRunLumis[r].lumi_min.size(); ++l){
-			if(fTR->LumiSection < fRunLumis[r].lumi_min[l]) continue;
-			if(fTR->LumiSection > fRunLumis[r].lumi_max[l]) continue;
-			good = true;
-		}
-	
-	}
-	if(fVerbose > 3){
-		if(good){cout <<  "accepted "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
-		else    {cout <<  "rejected "<<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;}
-	}
-	return good;
-}
