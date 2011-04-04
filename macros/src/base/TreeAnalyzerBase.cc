@@ -139,26 +139,22 @@ void TreeAnalyzerBase::ReadJSON(const char* JSONpath){
 const bool TreeAnalyzerBase::CheckRunLumi(void) const {
 	bool good(false);
 	if(fRunLumis.size()==0) {
-          if (fVerbose>1) 
-            cout << "CheckRunLumi: fRunLumis is empty. Assuming no JSON." << endl; 
-          return true;
+          	if (fVerbose>1) 
+            	cout << "CheckRunLumi: fRunLumis is empty. Assuming no JSON." << endl; 
+          	return true;
         }
-
 	for(int r=0; r<fRunLumis.size(); ++r){
-          if(fTR->Run != fRunLumis[r].run) {
-            if ( fVerbose>4 ) cout << "Run " << fTR->Run << " not in file" << endl;
-            continue;
-          }
-          for(int l=0; l<fRunLumis[r].lumi_min.size(); ++l){
-            if(fTR->LumiSection < fRunLumis[r].lumi_min[l]) continue;
-            if(fTR->LumiSection > fRunLumis[r].lumi_max[l]) continue;
-            good = true;
-          }
+          	if(fTR->Run != fRunLumis[r].run) continue;
+          	for(int l=0; l<fRunLumis[r].lumi_min.size(); ++l){
+            		if(fTR->LumiSection < fRunLumis[r].lumi_min[l]) continue;
+            		if(fTR->LumiSection > fRunLumis[r].lumi_max[l]) continue;
+            		good = true;
+          	}
 	}
 	if(fVerbose > 3){
-          if(good) cout <<  "JSON: accepted ";
-          else     cout <<  "JSON: rejected ";
-          cout <<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;
+          	if(good) cout <<  "JSON: accepted ";
+          	else     cout <<  "JSON: rejected ";
+          	cout <<  fTR->Run << ":" << fTR->LumiSection << ":" << fTR->Event << endl;
         }
 	return good;
 }
