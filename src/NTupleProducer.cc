@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.107 2011/03/28 15:07:34 theofil Exp $
+// $Id: NTupleProducer.cc,v 1.108 2011/03/29 15:49:10 pnef Exp $
 //
 //
 
@@ -54,6 +54,7 @@ Implementation:
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/GenMET.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
@@ -118,6 +119,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fRawCaloMETTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_rawcalomet");
 	fTCMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tcmet");
 	fPFMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmet");
+	fPFMETPATTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmetPAT");
 	fCorrCaloMETTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_corrcalomet");
 	fGenMETTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genmet");
 	fVertexTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
@@ -280,6 +282,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	Handle<View<PFMET> > pfmet;
 	iEvent.getByLabel(fPFMETTag, pfmet);
+	
+	Handle<View<pat::MET> > pfMETpat;
+	iEvent.getByLabel(fPFMETPATTag,pfMETpat);  //'pfMET PAT'
+
 
 	Handle<CaloMETCollection> corrmujesmet;
 	iEvent.getByLabel(fCorrCaloMETTag, corrmujesmet);
@@ -1106,6 +1112,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTpfelchargedhadroniso[pfeqi] = electron.chargedHadronIso();
 		fTpfelneutralhadroniso[pfeqi] = electron.neutralHadronIso();
 		fTpfelphotoniso[pfeqi]        = electron.photonIso();
+	
 	}
 
 	////////////////////////////////////////////////////////
@@ -1635,6 +1642,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
 	}
 
+	fTPFMETPAT     = (pfMETpat->front()).pt();
+	fTPFMETPATpx   = (pfMETpat->front()).px();
+	fTPFMETPATpy   = (pfMETpat->front()).py();
+	fTPFMETPATphi  = (pfMETpat->front()).phi();
+	fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
 
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -2306,54 +2318,59 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("TrkPtSumPhi"    ,&fTTrkPtSumphi    ,"TrkPtSumPhi/F");
 
 	// MET:
-	fEventTree->Branch("SumEt"              ,&fTSumEt               ,"SumEt/F");
-	fEventTree->Branch("ECALSumEt"          ,&fTECALSumEt           ,"ECALSumEt/F");
-	fEventTree->Branch("HCALSumEt"          ,&fTHCALSumEt           ,"HCALSumEt/F");
-	fEventTree->Branch("ECALEsumx"          ,&fTECALEsumx           ,"ECALEsumx/F");
-	fEventTree->Branch("ECALEsumy"          ,&fTECALEsumy           ,"ECALEsumy/F");
-	fEventTree->Branch("ECALEsumz"          ,&fTECALEsumz           ,"ECALEsumz/F");
-	fEventTree->Branch("ECALMET"            ,&fTECALMET             ,"ECALMET/F");
-	fEventTree->Branch("ECALMETPhi"         ,&fTECALMETphi          ,"ECALMETPhi/F");
-	fEventTree->Branch("ECALMETEta"         ,&fTECALMETeta          ,"ECALMETEta/F");
-	fEventTree->Branch("HCALEsumx"          ,&fTHCALEsumx           ,"HCALEsumx/F");
-	fEventTree->Branch("HCALEsumy"          ,&fTHCALEsumy           ,"HCALEsumy/F");
-	fEventTree->Branch("HCALEsumz"          ,&fTHCALEsumz           ,"HCALEsumz/F");
-	fEventTree->Branch("HCALMET"            ,&fTHCALMET             ,"HCALMET/F");
-	fEventTree->Branch("HCALMETPhi"         ,&fTHCALMETphi          ,"HCALMETPhi/F");
-	fEventTree->Branch("HCALMETeta"         ,&fTHCALMETeta          ,"HCALMETEta/F");
-	fEventTree->Branch("RawMET"             ,&fTRawMET              ,"RawMET/F");
-	fEventTree->Branch("RawMETpx"           ,&fTRawMETpx            ,"RawMETpx/F");
-	fEventTree->Branch("RawMETpy"           ,&fTRawMETpy            ,"RawMETpy/F");
-	fEventTree->Branch("RawMETphi"          ,&fTRawMETphi           ,"RawMETphi/F");
-	fEventTree->Branch("RawMETemEtFrac"     ,&fTRawMETemEtFrac      ,"RawMETemEtFrac/F");
-	fEventTree->Branch("RawMETemEtInEB"     ,&fTRawMETemEtInEB      ,"RawMETemEtInEB/F");
-	fEventTree->Branch("RawMETemEtInEE"     ,&fTRawMETemEtInEE      ,"RawMETemEtInEE/F");
-	fEventTree->Branch("RawMETemEtInHF"     ,&fTRawMETemEtInHF      ,"RawMETemEtInHF/F");
-	fEventTree->Branch("RawMEThadEtFrac"    ,&fTRawMEThadEtFrac     ,"RawMEThadEtFrac/F");
-	fEventTree->Branch("RawMEThadEtInHB"    ,&fTRawMEThadEtInHB     ,"RawMEThadEtInHB/F");
-	fEventTree->Branch("RawMEThadEtInHE"    ,&fTRawMEThadEtInHE     ,"RawMEThadEtInHE/F");
-	fEventTree->Branch("RawMEThadEtInHF"    ,&fTRawMEThadEtInHF     ,"RawMEThadEtInHF/F");
-	fEventTree->Branch("RawMETSignificance" ,&fTRawMETSignificance  ,"RawMETSignificance/F");
-	fEventTree->Branch("GenMET"             ,&fTGenMET              ,"GenMET/F");
-	fEventTree->Branch("GenMETpx"           ,&fTGenMETpx            ,"GenMETpx/F");
-	fEventTree->Branch("GenMETpy"           ,&fTGenMETpy            ,"GenMETpy/F");
-	fEventTree->Branch("GenMETphi"          ,&fTGenMETphi           ,"GenMETphi/F");
-	fEventTree->Branch("TCMET"              ,&fTTCMET               ,"TCMET/F");
-	fEventTree->Branch("TCMETpx"            ,&fTTCMETpx             ,"TCMETpx/F");
-	fEventTree->Branch("TCMETpy"            ,&fTTCMETpy             ,"TCMETpy/F");
-	fEventTree->Branch("TCMETphi"           ,&fTTCMETphi            ,"TCMETphi/F");
-	fEventTree->Branch("TCMETSignificance"  ,&fTTCMETSignificance   ,"TCMETSignificance/F");
-	fEventTree->Branch("MuJESCorrMET"       ,&fTMuJESCorrMET        ,"MuJESCorrMET/F");
-	fEventTree->Branch("MuJESCorrMETpx"     ,&fTMuJESCorrMETpx      ,"MuJESCorrMETpx/F");
-	fEventTree->Branch("MuJESCorrMETpy"     ,&fTMuJESCorrMETpy      ,"MuJESCorrMETpy/F");
-	fEventTree->Branch("MuJESCorrMETphi"    ,&fTMuJESCorrMETphi     ,"MuJESCorrMETphi/F");
-	fEventTree->Branch("PFMET"              ,&fTPFMET               ,"PFMET/F");
-	fEventTree->Branch("PFMETpx"            ,&fTPFMETpx             ,"PFMETpx/F");
-	fEventTree->Branch("PFMETpy"            ,&fTPFMETpy             ,"PFMETpy/F");
-	fEventTree->Branch("PFMETphi"           ,&fTPFMETphi            ,"PFMETphi/F");
-	fEventTree->Branch("PFMETSignificance"  ,&fTPFMETSignificance   ,"PFMETSignificance/F");
-	fEventTree->Branch("METR12"             ,&fTMETR12              ,"METR12/F");
-	fEventTree->Branch("METR21"             ,&fTMETR21              ,"METR21/F");
+	fEventTree->Branch("SumEt"                 ,&fTSumEt               ,"SumEt/F");
+	fEventTree->Branch("ECALSumEt"             ,&fTECALSumEt           ,"ECALSumEt/F");
+	fEventTree->Branch("HCALSumEt"             ,&fTHCALSumEt           ,"HCALSumEt/F");
+	fEventTree->Branch("ECALEsumx"             ,&fTECALEsumx           ,"ECALEsumx/F");
+	fEventTree->Branch("ECALEsumy"             ,&fTECALEsumy           ,"ECALEsumy/F");
+	fEventTree->Branch("ECALEsumz"             ,&fTECALEsumz           ,"ECALEsumz/F");
+	fEventTree->Branch("ECALMET"               ,&fTECALMET             ,"ECALMET/F");
+	fEventTree->Branch("ECALMETPhi"            ,&fTECALMETphi          ,"ECALMETPhi/F");
+	fEventTree->Branch("ECALMETEta"            ,&fTECALMETeta          ,"ECALMETEta/F");
+	fEventTree->Branch("HCALEsumx"             ,&fTHCALEsumx           ,"HCALEsumx/F");
+	fEventTree->Branch("HCALEsumy"             ,&fTHCALEsumy           ,"HCALEsumy/F");
+	fEventTree->Branch("HCALEsumz"             ,&fTHCALEsumz           ,"HCALEsumz/F");
+	fEventTree->Branch("HCALMET"               ,&fTHCALMET             ,"HCALMET/F");
+	fEventTree->Branch("HCALMETPhi"            ,&fTHCALMETphi          ,"HCALMETPhi/F");
+	fEventTree->Branch("HCALMETeta"            ,&fTHCALMETeta          ,"HCALMETEta/F");
+	fEventTree->Branch("RawMET"                ,&fTRawMET              ,"RawMET/F");
+	fEventTree->Branch("RawMETpx"              ,&fTRawMETpx            ,"RawMETpx/F");
+	fEventTree->Branch("RawMETpy"              ,&fTRawMETpy            ,"RawMETpy/F");
+	fEventTree->Branch("RawMETphi"             ,&fTRawMETphi           ,"RawMETphi/F");
+	fEventTree->Branch("RawMETemEtFrac"        ,&fTRawMETemEtFrac      ,"RawMETemEtFrac/F");
+	fEventTree->Branch("RawMETemEtInEB"        ,&fTRawMETemEtInEB      ,"RawMETemEtInEB/F");
+	fEventTree->Branch("RawMETemEtInEE"        ,&fTRawMETemEtInEE      ,"RawMETemEtInEE/F");
+	fEventTree->Branch("RawMETemEtInHF"        ,&fTRawMETemEtInHF      ,"RawMETemEtInHF/F");
+	fEventTree->Branch("RawMEThadEtFrac"       ,&fTRawMEThadEtFrac     ,"RawMEThadEtFrac/F");
+	fEventTree->Branch("RawMEThadEtInHB"       ,&fTRawMEThadEtInHB     ,"RawMEThadEtInHB/F");
+	fEventTree->Branch("RawMEThadEtInHE"       ,&fTRawMEThadEtInHE     ,"RawMEThadEtInHE/F");
+	fEventTree->Branch("RawMEThadEtInHF"       ,&fTRawMEThadEtInHF     ,"RawMEThadEtInHF/F");
+	fEventTree->Branch("RawMETSignificance"    ,&fTRawMETSignificance  ,"RawMETSignificance/F");
+	fEventTree->Branch("GenMET"                ,&fTGenMET              ,"GenMET/F");
+	fEventTree->Branch("GenMETpx"              ,&fTGenMETpx            ,"GenMETpx/F");
+	fEventTree->Branch("GenMETpy"              ,&fTGenMETpy            ,"GenMETpy/F");
+	fEventTree->Branch("GenMETphi"             ,&fTGenMETphi           ,"GenMETphi/F");
+	fEventTree->Branch("TCMET"                 ,&fTTCMET               ,"TCMET/F");
+	fEventTree->Branch("TCMETpx"               ,&fTTCMETpx             ,"TCMETpx/F");
+	fEventTree->Branch("TCMETpy"               ,&fTTCMETpy             ,"TCMETpy/F");
+	fEventTree->Branch("TCMETphi"              ,&fTTCMETphi            ,"TCMETphi/F");
+	fEventTree->Branch("TCMETSignificance"     ,&fTTCMETSignificance   ,"TCMETSignificance/F");
+	fEventTree->Branch("MuJESCorrMET"          ,&fTMuJESCorrMET        ,"MuJESCorrMET/F");
+	fEventTree->Branch("MuJESCorrMETpx"        ,&fTMuJESCorrMETpx      ,"MuJESCorrMETpx/F");
+	fEventTree->Branch("MuJESCorrMETpy"        ,&fTMuJESCorrMETpy      ,"MuJESCorrMETpy/F");
+	fEventTree->Branch("MuJESCorrMETphi"       ,&fTMuJESCorrMETphi     ,"MuJESCorrMETphi/F");
+	fEventTree->Branch("PFMET"                 ,&fTPFMET               ,"PFMET/F");
+	fEventTree->Branch("PFMETpx"               ,&fTPFMETpx             ,"PFMETpx/F");
+	fEventTree->Branch("PFMETpy"               ,&fTPFMETpy             ,"PFMETpy/F");
+	fEventTree->Branch("PFMETphi"              ,&fTPFMETphi            ,"PFMETphi/F");
+	fEventTree->Branch("PFMETSignificance"     ,&fTPFMETSignificance   ,"PFMETSignificance/F");
+	fEventTree->Branch("PFMETPAT"              ,&fTPFMETPAT            ,"PFMETPAT/F");
+	fEventTree->Branch("PFMETPATpx"            ,&fTPFMETPATpx          ,"PFMETPATpx/F");
+	fEventTree->Branch("PFMETPATpy"            ,&fTPFMETPATpy          ,"PFMETPATpy/F");
+	fEventTree->Branch("PFMETPATphi"           ,&fTPFMETPATphi         ,"PFMETPATphi/F");
+	fEventTree->Branch("PFMETPATSignificance"  ,&fTPFMETPATSignificance   ,"PFMETPATSignificance/F");
+	fEventTree->Branch("METR12"                ,&fTMETR12              ,"METR12/F");
+	fEventTree->Branch("METR21"                ,&fTMETR21              ,"METR21/F");
 }
 
 // Method called once before each run
@@ -2966,6 +2983,11 @@ void NTupleProducer::resetTree(){
 	fTPFMETpy            = -999.99;
 	fTPFMETphi           = -999.99;
 	fTPFMETSignificance  = -999.99;
+	fTPFMETPAT           = -999.99;
+	fTPFMETPATpx         = -999.99;
+	fTPFMETPATpy         = -999.99;
+	fTPFMETPATphi        = -999.99;
+	fTPFMETPATSignificance= -999.99;
 	fTMETR12             = -999.99;
 	fTMETR21             = -999.99;
 }
