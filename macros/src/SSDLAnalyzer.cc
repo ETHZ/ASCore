@@ -33,12 +33,19 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 		fTR->GetEntry(jentry);
 
 		// Upper Pt Hat cut
-		if( fPtHatCut > -1.0 )
-			if( fTR->PtHat > fPtHatCut ) continue;
+		if( (fPtHatCut > -1.0) && (fTR->PtHat > fPtHatCut) ) continue;
 
+		// Run processing
 		if( fCurRun != fTR->Run ) {
 			fCurRun = fTR->Run;
+			if ( CheckRun() == false ) continue;
 			fSSDLAnalysis->BeginRun(fCurRun);
+		}
+		
+		// Check if new lumi is in JSON file
+		if( fCurLumi != fTR->LumiSection ) {
+			fCurLumi = fTR->LumiSection;
+			if ( CheckRunLumi() == false ) continue;
 		}
 		fSSDLAnalysis->Analyze();
 	}

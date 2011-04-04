@@ -89,7 +89,7 @@ private:
 	int     fTnqels;
 	int   fTElcharge                   [fMaxNeles];
 	int   fTElChargeIsCons             [fMaxNeles];
-	int   fTElChargeIsGenCons          [fMaxNeles];
+	// int   fTElChargeIsGenCons          [fMaxNeles];
 	int   fTElEcalDriven               [fMaxNeles];
 	float fTElCaloEnergy               [fMaxNeles];
 	float fTElpt                       [fMaxNeles];
