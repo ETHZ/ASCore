@@ -30,17 +30,15 @@ void JZBAnalyzer::Loop(){
 		fTR->GetEntry(jentry);
                 if ( fCurRun != fTR->Run ) {
                   fCurRun = fTR->Run;
+                  if ( CheckRun() == false ) continue;
                   fJZBAnalysis->BeginRun(fCurRun);
-                  skipRun = false;
-                  if ( !CheckRun() ) skipRun = true;
                 }
                 // Check if new lumi is in JSON file
-                if ( !skipRun && fCurLumi != fTR->LumiSection ) {
+                if ( fCurLumi != fTR->LumiSection ) {
                   fCurLumi = fTR->LumiSection;
-                  skipLumi = false; // Re-initialise
-                  if ( !CheckRunLumi() ) skipLumi = true;
+                  if ( CheckRunLumi() == false ) continue;
                 }
-		if ( !(skipRun || skipLumi) ) fJZBAnalysis->Analyze();
+                fJZBAnalysis->Analyze();
 	}
 }
 
