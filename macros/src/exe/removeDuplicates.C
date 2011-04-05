@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TChain.h>
 
 bool duplicate( TTree* ref, Int_t& run, Int_t& lumi, Int_t& event ) {
     
@@ -67,15 +68,18 @@ int main(int argc, char** argv) {
     // Check arguments
     if( argc<2 || outputFileName.Length()==0 ) { usage(-1); }
 
-    TFile* f1 = new TFile(argv[0]);
-    TFile* f2 = new TFile(argv[1]);
+    TString inFile(argv[0]);
+    TString refFile(argv[1]);
+
+    TFile* f1 = new TFile(inFile);
+    TFile* f2 = new TFile(refFile);
     
     TTree* t1 = (TTree*)f1->Get("events");
     TTree* t2 = (TTree*)f2->Get("events");
     
     // Just copy the structure
-    TFile* newFile = new TFile(outputFileName,"RECREATE");
-    TTree* newTree = t2->CloneTree();
+    TFile* newFile = new TFile("tmp.root","RECREATE");
+    TTree* newTree = t1->CloneTree(0);
     
     Int_t egRun, egLumi, egEvt;
     t1->SetBranchAddress("eventNum",&egEvt);
@@ -99,14 +103,19 @@ int main(int argc, char** argv) {
     }
     std::cout << std::endl;
     newTree->AutoSave();
-    
+
     std::cout << "Found " << duplicates << " duplicate events in " << nentries;
     std::cout << " (" << duplicates/static_cast<float>(nentries)*100 << "%)" << std::endl;
     
     delete f1;
     delete f2;
     delete newFile;
-    
+
+    TString cmd("hadd "+outputFileName+" tmp.root "+refFile);
+
+    std::cout << "Merging files: " << cmd << std::endl;
+    gSystem->Exec(cmd);
+
     return 0;
     
 }
