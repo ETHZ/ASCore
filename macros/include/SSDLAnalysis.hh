@@ -41,7 +41,7 @@ private:
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;
 	
-	static const int gMaxhltbits = 200;
+	static const int gMaxhltbits = 300;
 	
 	TTree* fAnalysisTree;
 	
