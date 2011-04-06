@@ -9,15 +9,15 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerBase.h"
-#include <iostream>
 
 
 //________________________________________________________________________________________
-JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, const bool& isRealData )
-  : fTree(tree),fIsRealData(isRealData){
+JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, 
+                              const bool& isRealData )
+  : FillerBase(cfg,tree,isRealData)
+{
 	
   // Retrieve configuration parameters
-  fPrefix = cfg.getUntrackedParameter<std::string>("prefix");
   std::string jettype = cfg.getUntrackedParameter<edm::InputTag>("tag").label();
 
   // parse fTag label for jet-type
@@ -213,37 +213,4 @@ void JetFillerBase::reset(void) {
     resetDouble(fTNeuEmFrac,gMaxnobjs);
     resetInt(fTNConstituents,gMaxnobjs);
   }
-}
-
-//________________________________________________________________________________________
-void JetFillerBase::resetDouble(double* v, size_t size)
-{
-  for(size_t i = 0; i < size; ++i) v[i] = -999.9;
-}
-
-//________________________________________________________________________________________
-void JetFillerBase::resetInt(int* v, size_t size)
-{
-  for(size_t i = 0; i < size; ++i) v[i] = -999;
-}
-
-
-//________________________________________________________________________________________
-const bool JetFillerBase::addBranch(const char* name, const char* type, 
-                                void* address, const char* size )
-{
-  
-  // Form input
-  std::string fullname(fPrefix+name);
-  
-  std::string branchType(fullname);
-  if ( size ) // Size needs to be pre-fixed
-    branchType += "[" + std::string(fPrefix+size) + "]";
-  branchType += "/"+std::string(type);
-
-  // Declare branch
-  TBranch* b = fTree->Branch(fullname.c_str(),address,branchType.c_str());
-
-  return !(b==0); // return 1 if branch was successfully created, 0 otherwise
-
 }

@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.4 2011/02/23 19:34:29 stiegerb Exp $
+// $Id: JetFillerBase.h,v 1.5 2011/03/29 15:49:11 pnef Exp $
 //
 //
 
@@ -25,8 +25,9 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
+#include "DiLeptonAnalysis/NTupleProducer/interface/FillerBase.h"
 
-class JetFillerBase {
+class JetFillerBase : public FillerBase {
 public:
   // Enumerate jet types
   enum JetType {
@@ -48,13 +49,6 @@ public:
 
 protected:
 
-  /// Add a branch to the tree (takes care of prefixing branch names)
-  const bool addBranch(const char* name, const char* type, 
-                       void* address, const char* size = 0);
-  /// Resetting
-  void resetDouble(double* v, size_t size = 1);
-  void resetInt(int* v, size_t size = 1);
-
   /// Set and get jet type
   void setJetType( const JetType& type ) { fJetType = type; }
   const JetType jetType(void) const { return fJetType; }
@@ -68,9 +62,6 @@ protected:
   };
 
   JetType fJetType;	
-  std::string fPrefix;        /// Prefix for branches
-  TTree* fTree;               /// Pointer to tree to fill
-  bool   fIsRealData;         /// Global switch
 
   size_t gMaxnobjs;
 

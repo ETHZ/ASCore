@@ -267,13 +267,41 @@ process.analyze.jets = (
               btag_matchdeltaR = cms.double(0.25),
               ),
     )
-
 # Add residual correction for running on data
 if options.runon == 'data':
         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
         process.patJetCorrFactorsPF.levels.extend( ['L2L3Residual'] )
+
+# Add some PF lepton collections
+process.analyze.leptons = (
+    # PF Electrons
+    cms.PSet( type = cms.untracked.string('electron'),
+              prefix = cms.untracked.string('PFEl'),
+              tag = cms.untracked.InputTag('patElectronsPF'),
+              sel_minpt = process.analyze.sel_minelpt,
+              sel_maxeta = process.analyze.sel_maxeleta,
+              maxnobjs = cms.untracked.uint32(20)
+              ),
+    # PF Muons
+    cms.PSet( type = cms.untracked.string('muon'),
+              prefix = cms.untracked.string('PFMu'),
+              tag = cms.untracked.InputTag('patMuonsPF'),
+              sel_minpt = process.analyze.sel_minelpt,
+              sel_maxeta = process.analyze.sel_maxeleta,
+              maxnobjs = cms.untracked.uint32(20)
+              ),
+    # PF Taus
+    cms.PSet( type = cms.untracked.string('tau'),
+              prefix = cms.untracked.string('PFTau'),
+              tag = cms.untracked.InputTag('patTausPF'),
+              sel_minpt = process.analyze.sel_minelpt,
+              sel_maxeta = process.analyze.sel_maxeleta,
+              maxnobjs = cms.untracked.uint32(20)
+              ),
+    )
+              
 
 #### DEBUG #####################################################################
 # process.dump = cms.EDAnalyzer("EventContentAnalyzer")

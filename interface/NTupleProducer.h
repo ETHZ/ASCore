@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.86 2011/03/29 15:49:11 pnef Exp $
+// $Id: NTupleProducer.h,v 1.87 2011/04/04 16:25:36 pnef Exp $
 //
 //
 
@@ -53,6 +53,7 @@ Implementation:
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
+#include "DiLeptonAnalysis/NTupleProducer/interface/LeptonFillerPat.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
 using namespace reco;
@@ -100,7 +101,10 @@ private:
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
 
-	std::vector<JetFillerBase*> jetFillers;
+	std::vector<JetFillerBase*>     jetFillers;
+        std::vector<PatMuonFiller*>     muonFillers;
+        std::vector<PatElectronFiller*> electronFillers;
+        std::vector<PatTauFiller*>      tauFillers;
 
 	bool fIsRealData;
 	int fNTotEvents;

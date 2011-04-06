@@ -80,7 +80,8 @@ analyze = cms.EDAnalyzer('NTupleProducer',
         sel_fminebrechitE = cms.double(20.),
 
 	# Additional jet collections
-	jets = cms.VPSet()
+	jets = cms.VPSet(),
+        leptons = cms.VPSet()
 
 )
 

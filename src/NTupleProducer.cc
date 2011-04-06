@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.108 2011/03/29 15:49:10 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.109 2011/04/04 16:25:36 pnef Exp $
 //
 //
 
@@ -173,8 +173,21 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	// Create additional jet fillers
 	std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
 	for (size_t i=0; i<jConfigs.size(); ++i)
-		if ( jConfigs[i].getUntrackedParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fEventTree, fIsRealData) );
-		else jetFillers.push_back( new JetFillerReco(jConfigs[i], fEventTree, fIsRealData) );
+          if ( jConfigs[i].getUntrackedParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fEventTree, fIsRealData) );
+          else jetFillers.push_back( new JetFillerReco(jConfigs[i], fEventTree, fIsRealData) );
+
+	// Create additional lepton fillers
+	std::vector<edm::ParameterSet> lConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("leptons");
+	for (size_t i=0; i<lConfigs.size(); ++i) {
+          std::string type(lConfigs[i].getUntrackedParameter<std::string>("type"));
+          if ( type == "electron" ) 
+            electronFillers.push_back( new PatElectronFiller(lConfigs[i], fEventTree, fIsRealData) );
+          else if ( type == "muon" ) 
+            muonFillers.push_back( new PatMuonFiller(lConfigs[i], fEventTree, fIsRealData) );
+          else if ( type == "tau" ) 
+            tauFillers.push_back( new PatTauFiller(lConfigs[i], fEventTree, fIsRealData) );
+        }
+        
 
 	// Get list of trigger paths to store the triggering object info. of
 	fTHltLabels = iConfig.getUntrackedParameter<std::vector<std::string> >("hlt_labels");
@@ -223,7 +236,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Reset all the tree variables
 	resetTree();
-	for( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); it != jetFillers.end(); ++it ) (*it)->reset();
+	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
+              it != jetFillers.end(); ++it ) 
+          (*it)->reset();
+	for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+              it != muonFillers.end(); ++it ) 
+          (*it)->reset();
+	for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+              it != electronFillers.end(); ++it ) 
+          (*it)->reset();
+	for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+              it != tauFillers.end(); ++it ) 
+          (*it)->reset();
 
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -765,52 +789,42 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int pfmqi(0);  // Index of qualified muons
 	fTnpfmutot = 0; // Total number of tracker&&global muons
 
-	// Get muons, order them by pt and apply selection
-	std::vector<OrderPair> pfmuOrdered;
-	int pfmuIndex(0);
-	for ( View<pat::Muon>::const_iterator Mit = pfmuons->begin(); Mit != pfmuons->end();
-	++Mit,++pfmuIndex ) {
-		// Check if maximum number of muons is exceeded already:
-		if(pfmqi >= gMaxnmus){
-			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maximum number of PF muons exceeded";
-			fTflagmaxmuexc = 1;
-			fTgoodevent = 1;
-			break;
-		}
-		// PfMuon preselection:
-		fTnpfmutot++;
-		if(Mit->pt() < fMinmupt) continue;
-		if(fabs(Mit->eta()) > fMaxmueta) continue;
-		++pfmqi; // Count how many we'll eventually store
-		pfmuOrdered.push_back(make_pair(pfmuIndex,Mit->pt()));
+	for ( View<pat::Muon>::const_iterator Mit = pfmuons->begin(); 
+              Mit != pfmuons->end(); ++Mit ) {
+          // Check if maximum number of muons is exceeded already:
+          if(pfmqi >= gMaxnmus){
+            edm::LogWarning("NTP") << "@SUB=analyze()"
+                                   << "Maximum number of PF muons exceeded";
+            fTflagmaxmuexc = 1;
+            fTgoodevent = 1;
+            break;
+          }
+          fTnpfmutot++;
+
+          // PfMuon preselection:
+          if (Mit->pt() < fMinmupt) continue;
+          if (fabs(Mit->eta()) > fMaxmueta) continue;
+
+          const pat::Muon& muon = (*Mit);
+          fTpfmupx[pfmqi]     = muon.px();
+          fTpfmupy[pfmqi]     = muon.py();
+          fTpfmupz[pfmqi]     = muon.pz();
+          fTpfmupt[pfmqi]     = muon.pt();
+          fTpfmueta[pfmqi]    = muon.eta();
+          fTpfmuphi[pfmqi]    = muon.phi();
+          fTpfmue[pfmqi]      = muon.energy();
+          fTpfmuet[pfmqi]     = muon.et();
+          fTpfmucharge[pfmqi] = muon.charge();
+          
+          fTpfmuparticleiso[pfmqi]      = muon.particleIso();
+          fTpfmuchargedhadroniso[pfmqi] = muon.chargedHadronIso();
+          fTpfmuneutralhadroniso[pfmqi] = muon.neutralHadronIso();
+          fTpfmuphotoniso[pfmqi]        = muon.photonIso();
+          
+          ++pfmqi;
+
 	}
-	std::sort(pfmuOrdered.begin(),pfmuOrdered.end(),indexComparator);
-	fTnpfmu = pfmuOrdered.size();
-	pfmqi = 0;
-
-	// Dump muon properties in tree variables
-	for (std::vector<OrderPair>::const_iterator it = pfmuOrdered.begin();
-	it != pfmuOrdered.end(); ++it, ++pfmqi ) {
-		int index = it->first;
-		const pat::Muon& muon = (*pfmuons)[index];
-
-		fTpfmupx[pfmqi]     = muon.px();
-		fTpfmupy[pfmqi]     = muon.py();
-		fTpfmupz[pfmqi]     = muon.pz();
-		fTpfmupt[pfmqi]     = muon.pt();
-		fTpfmueta[pfmqi]    = muon.eta();
-		fTpfmuphi[pfmqi]    = muon.phi();
-		fTpfmue[pfmqi]      = muon.energy();
-		fTpfmuet[pfmqi]     = muon.et();
-		fTpfmucharge[pfmqi] = muon.charge();
-
-		fTpfmuparticleiso[pfmqi]      = muon.particleIso();
-		fTpfmuchargedhadroniso[pfmqi] = muon.chargedHadronIso();
-		fTpfmuneutralhadroniso[pfmqi] = muon.neutralHadronIso();
-		fTpfmuphotoniso[pfmqi]        = muon.photonIso();
-	}
-
+        fTnpfmu = pfmqi;
 
 	////////////////////////////////////////////////////////
 	// Electron variables:
@@ -1068,105 +1082,85 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int pfeqi(0);  // Index of qualified electrons
 	fTnpfeltot = 0; // Total number of electrons
 
-	// Get electrons, order them by pt and apply selection
-	std::vector<OrderPair> pfelOrdered;
-	int pfelIndex(0);
-	for ( View<pat::Electron>::const_iterator Eit = pfelectrons->begin(); Eit != pfelectrons->end();
-	++Eit,++pfelIndex ) {
-		// Check if maxielm number of electrons is exceeded already:
-		if(pfeqi >= gMaxneles){
-			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maximum number of PF electrons exceeded";
-			fTflagmaxelexc = 1;
-			fTgoodevent = 1;
-			break;
-		}
-		// PfElectron preselection:
-		fTnpfeltot++;
-		if(Eit->pt() < fMinelpt) continue;
-		if(fabs(Eit->eta()) > fMaxeleta) continue;
-		++pfeqi; // Count how many we'll eventually store
-		pfelOrdered.push_back(make_pair(pfelIndex,Eit->pt()));
+	for ( View<pat::Electron>::const_iterator Eit = pfelectrons->begin(); 
+              Eit != pfelectrons->end(); ++Eit ) {
+
+          // Check if maximum number of electrons is exceeded already:
+          if(pfeqi >= gMaxneles){
+            edm::LogWarning("NTP") << "@SUB=analyze()"
+                                   << "Maximum number of PF electrons exceeded";
+            fTflagmaxelexc = 1;
+            fTgoodevent = 1;
+            break;
+          }
+          fTnpfeltot++;
+		
+          // PfElectron preselection:
+          if(Eit->pt() < fMinelpt) continue;
+          if(fabs(Eit->eta()) > fMaxeleta) continue;
+
+          const pat::Electron& electron = (*Eit);
+          fTpfelpx[pfeqi]     = electron.px();
+          fTpfelpy[pfeqi]     = electron.py();
+          fTpfelpz[pfeqi]     = electron.pz();
+          fTpfelpt[pfeqi]     = electron.pt();
+          fTpfeleta[pfeqi]    = electron.eta();
+          fTpfelphi[pfeqi]    = electron.phi();
+          fTpfele[pfeqi]      = electron.energy();
+          fTpfelet[pfeqi]     = electron.et();
+          fTpfelcharge[pfeqi] = electron.charge();
+          
+          fTpfelparticleiso[pfeqi]      = electron.particleIso();
+          fTpfelchargedhadroniso[pfeqi] = electron.chargedHadronIso();
+          fTpfelneutralhadroniso[pfeqi] = electron.neutralHadronIso();
+          fTpfelphotoniso[pfeqi]        = electron.photonIso();
+
+          ++pfeqi;
 	}
-	std::sort(pfelOrdered.begin(),pfelOrdered.end(),indexComparator);
-	fTnpfel = pfelOrdered.size();
-	pfeqi = 0;
-
-	// Dump electron properties in tree variables
-	for (std::vector<OrderPair>::const_iterator it = pfelOrdered.begin();
-	it != pfelOrdered.end(); ++it, ++pfeqi ) {
-		int index = it->first;
-		const pat::Electron& electron = (*pfelectrons)[index];
-
-		fTpfelpx[pfeqi]     = electron.px();
-		fTpfelpy[pfeqi]     = electron.py();
-		fTpfelpz[pfeqi]     = electron.pz();
-		fTpfelpt[pfeqi]     = electron.pt();
-		fTpfeleta[pfeqi]    = electron.eta();
-		fTpfelphi[pfeqi]    = electron.phi();
-		fTpfele[pfeqi]      = electron.energy();
-		fTpfelet[pfeqi]     = electron.et();
-		fTpfelcharge[pfeqi] = electron.charge();
-
-		fTpfelparticleiso[pfeqi]      = electron.particleIso();
-		fTpfelchargedhadroniso[pfeqi] = electron.chargedHadronIso();
-		fTpfelneutralhadroniso[pfeqi] = electron.neutralHadronIso();
-		fTpfelphotoniso[pfeqi]        = electron.photonIso();
-	
-	}
+        fTnpfel = pfeqi;
 
 	////////////////////////////////////////////////////////
 	// PfTau Variables:
 	int pftqi(0);  // Index of qualified taus
 	fTnpftautot = 0; // Total number of taus
 
-	// Get taus, order them by pt and apply selection
-	std::vector<OrderPair> pftauOrdered;
-	int pftauIndex(0);
-	for ( View<pat::Tau>::const_iterator Tit = pftaus->begin(); Tit != pftaus->end();
-	++Tit,++pftauIndex ) {
-		// Check if maxielm number of taus is exceeded already:
-		if(pftqi >= gMaxntaus){
-			edm::LogWarning("NTP") << "@SUB=analyze()"
-				<< "Maximum number of PF taus exceeded";
-			fTflagmaxelexc = 1;
-			fTgoodevent = 1;
-			break;
-		}
-		// PfTau preselection:
-		fTnpftautot++;
-		if(Tit->pt() < fMinelpt) continue;
-		if(fabs(Tit->eta()) > fMaxeleta) continue;
-		++pftqi; // Count how many we'll eventually store
-		pftauOrdered.push_back(make_pair(pftauIndex,Tit->pt()));
+	for ( View<pat::Tau>::const_iterator Tit = pftaus->begin(); 
+              Tit != pftaus->end(); ++Tit ) {
+          // Check if maximum number of taus is exceeded already:
+          if(pftqi >= gMaxntaus){
+            edm::LogWarning("NTP") << "@SUB=analyze()"
+                                   << "Maximum number of PF taus exceeded";
+            fTflagmaxelexc = 1;
+            fTgoodevent = 1;
+            break;
+          }
+          fTnpftautot++;
+          
+          // PfTau preselection:
+          if(Tit->pt() < fMinelpt) continue;
+          if(fabs(Tit->eta()) > fMaxeleta) continue;
+
+          // Combined methods for Global and Tracker taus:
+          const pat::Tau& tau = (*Tit);
+          fTpftaupx[pftqi]     = tau.px();
+          fTpftaupy[pftqi]     = tau.py();
+          fTpftaupz[pftqi]     = tau.pz();
+          fTpftaupt[pftqi]     = tau.pt();
+          fTpftaueta[pftqi]    = tau.eta();
+          fTpftauphi[pftqi]    = tau.phi();
+          fTpftaue[pftqi]      = tau.energy();
+          fTpftauet[pftqi]     = tau.et();
+          fTpftaucharge[pftqi] = tau.charge();
+
+          fTpftauparticleiso[pftqi]      = tau.particleIso();
+          fTpftauchargedhadroniso[pftqi] = tau.chargedHadronIso();
+          fTpftauneutralhadroniso[pftqi] = tau.neutralHadronIso();
+          fTpftauphotoniso[pftqi]        = tau.photonIso();
+
+          ++pftqi; // Count how many we'll eventually store
 	}
-	std::sort(pftauOrdered.begin(),pftauOrdered.end(),indexComparator);
-	fTnpftau = pftauOrdered.size();
-	pftqi = 0;
-
-	// Dump tau properties in tree variables
-	for (std::vector<OrderPair>::const_iterator it = pftauOrdered.begin();
-	it != pftauOrdered.end(); ++it, ++pftqi ) {
-		int index = it->first;
-		const pat::Tau& tau = (*pftaus)[index];
-
-
-		// Combined methods for Global and Tracker taus:
-		fTpftaupx[pftqi]     = tau.px();
-		fTpftaupy[pftqi]     = tau.py();
-		fTpftaupz[pftqi]     = tau.pz();
-		fTpftaupt[pftqi]     = tau.pt();
-		fTpftaueta[pftqi]    = tau.eta();
-		fTpftauphi[pftqi]    = tau.phi();
-		fTpftaue[pftqi]      = tau.energy();
-		fTpftauet[pftqi]     = tau.et();
-		fTpftaucharge[pftqi] = tau.charge();
-
-		fTpftauparticleiso[pftqi]      = tau.particleIso();
-		fTpftauchargedhadroniso[pftqi] = tau.chargedHadronIso();
-		fTpftauneutralhadroniso[pftqi] = tau.neutralHadronIso();
-		fTpftauphotoniso[pftqi]        = tau.photonIso();
-	}
+        fTnpftau = pftqi;
+        
 
 	////////////////////////////////////////////////////////
 	// Photon Variables:
@@ -1317,8 +1311,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(jet->pt() < fMincorjpt) continue;
 		if(fabs(jet->eta()) > fMaxjeta) continue;
 		jqi++;
-
-                // cout << "PFJET p " << jet->p4() << " scale " << scale << endl; 
 
 		// Dump jet properties into tree variables
 		fTjpx    [jqi] = jet->px();
@@ -1525,8 +1517,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	////////////////////////////////////////////////////////
 	// Process other jet collections, as configured
 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-	it != jetFillers.end(); ++it )
-		(*it)->fillBranches(iEvent,iSetup);
+              it != jetFillers.end(); ++it )
+          (*it)->fillBranches(iEvent,iSetup);
+	for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+             it != muonFillers.end(); ++it ) 
+          (*it)->fillBranches(iEvent,iSetup);
+        for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+              it != electronFillers.end(); ++it ) 
+          (*it)->fillBranches(iEvent,iSetup);
+	for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+              it != tauFillers.end(); ++it ) 
+          (*it)->fillBranches(iEvent,iSetup);
 
 	////////////////////////////////////////////////////////
 	// Get and Dump (M)E(T) Variables:
@@ -2300,8 +2301,18 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 
 	// Additional Jet collections
 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-	it != jetFillers.end(); ++it )
-		(*it)->createBranches();
+              it != jetFillers.end(); ++it )
+          (*it)->createBranches();
+	for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+              it != muonFillers.end(); ++it ) 
+          (*it)->createBranches();
+	for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+              it != electronFillers.end(); ++it ) 
+          (*it)->createBranches();
+	for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+              it != tauFillers.end(); ++it ) 
+          (*it)->createBranches();
+
 
 	// Tracks:
 	fEventTree->Branch("NTracks"        ,&fTntracks      ,"NTracks/I");
