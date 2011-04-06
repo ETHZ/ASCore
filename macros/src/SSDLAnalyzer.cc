@@ -23,7 +23,7 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 	}
 
 	if( prescale>1 ) cout << " processing only every " << prescale << " events" << endl;
-	
+
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 
@@ -36,17 +36,20 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 		if( (fPtHatCut > -1.0) && (fTR->PtHat > fPtHatCut) ) continue;
 
 		// Run processing
-		if( fCurRun != fTR->Run ) {
+		if( fCurRun != fTR->Run ) { // new run
 			fCurRun = fTR->Run;
-			if ( CheckRun() == false ) continue;
-			fSSDLAnalysis->BeginRun(fCurRun);
+			skipRun = false;
+			if ( CheckRun() == false ) skipRun = true;
+			else fSSDLAnalysis->BeginRun(fCurRun);
 		}
 		
 		// Check if new lumi is in JSON file
-		if( fCurLumi != fTR->LumiSection ) {
+		if( fCurLumi != fTR->LumiSection ) { // new lumisection
 			fCurLumi = fTR->LumiSection;
-			if ( CheckRunLumi() == false ) continue;
+			skipLumi = false;
+			if ( CheckRunLumi() == false ) skipLumi = true;
 		}
+		if(skipRun || skipLumi) continue;
 		fSSDLAnalysis->Analyze();
 	}
 	cout << endl;
