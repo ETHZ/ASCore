@@ -22,11 +22,16 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
+		SingleMu = sample_begin, DoubleMu, MuEG, DoubleElectron,
+		gNSAMPLES
+	};
+	enum gOldSample {
+		oldsample_begin,
 		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
 		TTbar, WJets, ZJets, AstarJets, VVJets, QCD15, QCD30, QCD80, QCD170,
 		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
 		LM0, InclMu,
-		gNSAMPLES
+		gNOLDSAMPLES
 	};
 	enum gRegion {
 		region_begin,
@@ -214,6 +219,13 @@ public:
 	void bookRatioHistos();
 	void fixPRatios();
 
+	// Trigger stuff:
+	void getHLTNames(int, TTree*);
+	int  getHLTBit(string);
+	bool passesTrigger(string);
+	bool passesANDOfTriggers(vector<string>);
+	bool passesOROfTriggers(vector<string>);
+
 	// Event and Object selectors:
 	bool isGoodEvent();
 	bool isGoodMuEvent();
@@ -230,7 +242,7 @@ public:
 	bool isElTriggeredEvent();
 	bool isJetTriggeredEvent();
 	bool isHTTriggeredEvent();
-	bool isGoodRun(int sample);
+	bool isGoodRun(gSample);
 
 	bool isSigSupMuEvent();
 	bool isSigSupMuEventTRG();
@@ -306,7 +318,9 @@ private:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
+	int fCurrentRun;
 	ofstream fOUTSTREAM;
+	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
 	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
 	int fChargeSwitch;    // 0 for SS, 1 for OS

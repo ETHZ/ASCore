@@ -108,6 +108,8 @@ void MuonPlotter::init(TString filename){
 	fMinPt1 = 20.;
 	fMinPt2 = 10.;
 
+	fCurrentRun = -1;
+	
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
@@ -383,24 +385,28 @@ void MuonPlotter::sandBox(){
 
 //____________________________________________________________________________
 void MuonPlotter::doLoop(){
-	vector<int> samples = fAllSamples;
+	// vector<int> samples = fAllSamples;
 	int step = 5000;
 	fDoCounting = true;
 	TString eventfilename = fOutputDir + "InterestingEvents.txt";
 	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
 
 	// Sample loop
-	for(size_t i = 0; i < samples.size(); ++i){
-		int index = samples[i];
-		Sample *S = &fSamples[index];
-		fCurrentSample = gSample(index);
+	// for(size_t i = 0; i < samples.size(); ++i){
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		Sample *S = &fSamples[i];
+	
+		// int index = samples[i];
+		// Sample *S = &fSamples[index];
+		// fCurrentSample = gSample(index);
+
+		fCurrentSample = i;
 
 		TTree *tree = S->tree;
 		const bool isdata = S->isdata;
 
-
 		// Stuff to execute for each sample BEFORE looping on the events
-		initCounters(index);
+		initCounters();
 
 		// Event loop
 		tree->ResetBranchAddresses();
@@ -418,19 +424,23 @@ void MuonPlotter::doLoop(){
 			if (ientry < 0) break;
 			nb = fChain->GetEntry(jentry);   nbytes += nb;
 
+			if(fCurrentRun != Run){ // get trigger names for each new run
+				fCurrentRun = Run;
+				getHLTNames(Run, tree);
+			}
+
 			fCounters[fCurrentSample][Muon]    .fill("All events");
 			fCounters[fCurrentSample][EMu]     .fill("All events");
 			fCounters[fCurrentSample][Electron].fill("All events");
 		
 			// Select mutually exclusive runs for Jet and MultiJet datasets
-			if(!isGoodRun(index)) continue;
+			if(!isGoodRun(i)) continue;
 		
 			fCounters[fCurrentSample][Muon]    .fill(" ... is good run");
 			fCounters[fCurrentSample][EMu]     .fill(" ... is good run");
 			fCounters[fCurrentSample][Electron].fill(" ... is good run");
 		
 			fillYields(S);
-
 		}
 		cout << endl;
 		
@@ -1710,7 +1720,7 @@ void MuonPlotter::makeMuIsolationPlot(){
 				nb = fChain->GetEntry(jentry);   nbytes += nb;
 
 				// Select mutually exclusive runs for Jet and MultiJet datasets
-				if(!isGoodRun(i)) continue;
+				if(!isGoodRun(gSample(i))) continue;
 
 				////////////////////////////////////////////////////
 				// MOST LOOSE SELECTION
@@ -4809,6 +4819,58 @@ void MuonPlotter::fixPRatios(){
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Trigger stuff:
+//____________________________________________________________________________
+void MuonPlotter::getHLTNames(int run, TTree *tree){
+	// vector<string>* HLTNames;
+	if ( fVerbose>0 ) cout << "Retrieving HLTNames for run " << run << endl;
+	// tree->SetBranchAddress("HLTNames", &HLTNames);
+	// tree->GetEntryWithIndex(Run, Event);
+	for( int i = 0; i < HLTNames->size(); i++ ){
+		fHLTLabelMap[(*HLTNames)[i]] = i; 
+		if( fVerbose > 3 ) cout << " " << i << " " << (*HLTNames)[i] << endl;
+	}
+}
+int MuonPlotter::getHLTBit(string theHltName){
+	if( fHLTLabelMap.empty() ) return -1;
+	else{
+		map<string,int>::iterator it = fHLTLabelMap.find(theHltName);
+		if(it == fHLTLabelMap.end()){
+			if(fVerbose > 1) cout << "MuonPlotter::getHLTBit ==> Bit with name " << theHltName << " not found!" << endl;
+			return -1;
+		}
+		else{
+			return it->second;
+		}
+	}
+}
+
+//____________________________________________________________________________
+bool MuonPlotter::passesTrigger(string hltpath){
+	if( fHLTLabelMap.empty() ) return false;
+	else{
+		int bit = getHLTBit(hltpath);
+		if (bit < 0 ) {
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTResult ==> Bit with name " << hltpath << " not found!" << endl;
+			return false;
+		}
+		else return (bool)HLTResults[bit];
+	}
+}
+bool MuonPlotter::passesANDOfTriggers(vector<string> hltpaths){
+	for(size_t i = 0; i < hltpaths.size(); ++i){ // see if one of them WASN'T fired
+		if(passesTrigger(hltpaths[i]) == false) return false;
+	}
+	return true;
+}
+bool MuonPlotter::passesOROfTriggers(vector<string> hltpaths){
+	for(size_t i = 0; i < hltpaths.size(); ++i){ // see if one of them WAS fired
+		if(passesTrigger(hltpaths[i]) == true) return true;
+	}
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Event Selections:
 //____________________________________________________________________________
 bool MuonPlotter::isGoodEvent(){
@@ -5173,82 +5235,91 @@ bool MuonPlotter::passesMllEventVeto(float cut){
 
 //____________________________________________________________________________
 bool MuonPlotter::isMuTriggeredEvent(){
-	if(HLT_Mu9 == 0 &&
-	   HLT_Mu11 == 0 &&
-	   HLT_Mu13_v1 == 0 &&
-	   HLT_Mu15 == 0 &&
-	   HLT_Mu15_v1 == 0 &&
-	   HLT_DoubleMu0 == 0 &&
-	   HLT_DoubleMu3 == 0 &&
-	   HLT_DoubleMu3_v2 == 0 &&
-	   HLT_DoubleMu5_v2 == 0
-	   ) return false;
-	return true;
+	vector<string> mutriggers;
+	mutriggers.push_back("HLT_Mu12_v1");
+	// mutriggers.push_back("HLT_Mu9");
+	// mutriggers.push_back("HLT_Mu11");
+	// mutriggers.push_back("HLT_Mu13_v1");
+	// mutriggers.push_back("HLT_Mu15");
+	// mutriggers.push_back("HLT_Mu15_v1");
+	// mutriggers.push_back("HLT_DoubleMu0");
+	// mutriggers.push_back("HLT_DoubleMu3");
+	// mutriggers.push_back("HLT_DoubleMu3_v2");
+	// mutriggers.push_back("HLT_DoubleMu5_v2");
+	return passesOROfTriggers(mutriggers);
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isElTriggeredEvent(){
 	// Leptonic triggers from UCSD/UCSB/FNAL list
-	if(Run == 1)                       return  HLT_Ele10_LW_L1R;
-	if(Run >  1      && Run <  138000) return( HLT_Ele10_LW_L1R ||
-	                                           HLT_Ele10_SW_L1R ||
-	                                           HLT_Ele15_LW_L1R ||
-	                                           HLT_DoubleEle5_SW_L1R );
-	if(Run >= 138000 && Run <= 141900) return( HLT_Ele15_LW_L1R ||
-	                                           HLT_Ele15_SW_L1R ||
-	                                           HLT_Ele10_LW_EleId_L1R ||
-	                                           HLT_DoubleEle5_SW_L1R);
-	if(Run >  141900)                  return( HLT_Ele10_SW_EleId_L1R ||
-	                                           HLT_Ele15_SW_CaloEleId_L1R ||
-	                                           HLT_Ele15_SW_EleId_L1R ||
-	                                           HLT_Ele17_SW_LooseEleId_L1R ||
-	                                           HLT_Ele17_SW_CaloEleId_L1R ||
-	                                           HLT_Ele17_SW_EleId_L1R ||
-	                                           HLT_Ele17_SW_TightEleId_L1R ||
-	                                           HLT_Ele17_SW_TighterEleId_L1R_v1 ||
-	                                           HLT_Ele20_SW_L1R ||
-	                                           HLT_Ele22_SW_TighterEleId_L1R_v2 ||
-	                                           HLT_Ele22_SW_TighterEleId_L1R_v3 ||
-	                                           HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
-	                                           HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 ||
-	                                           HLT_Ele32_SW_TighterEleId_L1R_v2 ||
-	                                           HLT_DoubleEle10_SW_L1R ||
-	                                           HLT_DoubleEle15_SW_L1R_v1 ||
-	                                           HLT_DoubleEle17_SW_L1R_v1 );
-	return false;
+	// if(Run == 1)                       return  HLT_Ele10_LW_L1R;
+	// if(Run >  1      && Run <  138000) return( HLT_Ele10_LW_L1R ||
+	//                                            HLT_Ele10_SW_L1R ||
+	//                                            HLT_Ele15_LW_L1R ||
+	//                                            HLT_DoubleEle5_SW_L1R );
+	// if(Run >= 138000 && Run <= 141900) return( HLT_Ele15_LW_L1R ||
+	//                                            HLT_Ele15_SW_L1R ||
+	//                                            HLT_Ele10_LW_EleId_L1R ||
+	//                                            HLT_DoubleEle5_SW_L1R);
+	// if(Run >  141900)                  return( HLT_Ele10_SW_EleId_L1R ||
+	//                                            HLT_Ele15_SW_CaloEleId_L1R ||
+	//                                            HLT_Ele15_SW_EleId_L1R ||
+	//                                            HLT_Ele17_SW_LooseEleId_L1R ||
+	//                                            HLT_Ele17_SW_CaloEleId_L1R ||
+	//                                            HLT_Ele17_SW_EleId_L1R ||
+	//                                            HLT_Ele17_SW_TightEleId_L1R ||
+	//                                            HLT_Ele17_SW_TighterEleId_L1R_v1 ||
+	//                                            HLT_Ele20_SW_L1R ||
+	//                                            HLT_Ele22_SW_TighterEleId_L1R_v2 ||
+	//                                            HLT_Ele22_SW_TighterEleId_L1R_v3 ||
+	//                                            HLT_Ele27_SW_TightCaloEleIdTrack_L1R_v1 ||
+	//                                            HLT_Ele32_SW_TightCaloEleIdTrack_L1R_v1 ||
+	//                                            HLT_Ele32_SW_TighterEleId_L1R_v2 ||
+	//                                            HLT_DoubleEle10_SW_L1R ||
+	//                                            HLT_DoubleEle15_SW_L1R_v1 ||
+	//                                            HLT_DoubleEle17_SW_L1R_v1 );
+	vector<string> eltriggers; 
+	eltriggers.push_back("HLT_Ele8_v1");
+	return passesOROfTriggers(eltriggers);
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isJetTriggeredEvent(){
-	if(HLT_Jet15U == 0  && 
-	   HLT_Jet30U == 0  && 
-	   HLT_Jet50U == 0  &&
-	   HLT_Jet70U == 0  &&
-	   HLT_Jet100U == 0 &&
-	   HLT_Jet100U_v2 == 0 &&
-	   HLT_Jet100U_v3 == 0
-	) return false;
-	return true;
+	vector<string> jettriggers;
+	jettriggers.push_back("HLT_Jet150_v1");
+	// jettriggers.push_back("HLT_Jet15U");
+	// jettriggers.push_back("HLT_Jet30U");
+	// jettriggers.push_back("HLT_Jet50U");
+	// jettriggers.push_back("HLT_Jet70U");
+	// jettriggers.push_back("HLT_Jet100U");
+	// jettriggers.push_back("HLT_Jet100U_v2");
+	// jettriggers.push_back("HLT_Jet100U_v3");
+	return passesOROfTriggers(jettriggers);
 }
 
 //____________________________________________________________________________
 bool MuonPlotter::isHTTriggeredEvent(){
 	// Selects run ranges and HT triggers
-	if(Run == 1) if(HLT_HT100U == 1) return true;
-	if(Run >= 140160 && Run <= 147116 ) if(HLT_HT100U    == 1) return true; // RunA
-	if(Run >= 147196 && Run <= 148058 ) if(HLT_HT140U    == 1) return true; // Jet dataset
-	if(Run >= 148822 && Run <= 149294 ) if(HLT_HT150U_v3 == 1) return true; // Multijet dataset
+	// if(Run == 1) if(HLT_HT100U == 1) return true;
+	// if(Run >= 140160 && Run <= 147116 ) if(HLT_HT100U    == 1) return true; // RunA
+	// if(Run >= 147196 && Run <= 148058 ) if(HLT_HT140U    == 1) return true; // Jet dataset
+	// if(Run >= 148822 && Run <= 149294 ) if(HLT_HT150U_v3 == 1) return true; // Multijet dataset
 	if(!passesHTCut(300.)) return false;
-	return false;
+	vector<string> httriggers;
+	httriggers.push_back("HLT_HT160_v2");
+	// httriggers.push_back("HLT_HT100U");
+	// httriggers.push_back("HLT_HT140U");
+	// httriggers.push_back("HLT_HT150U");
+	return passesOROfTriggers(httriggers);
 }
 
 //____________________________________________________________________________
-bool MuonPlotter::isGoodRun(int sample){
+bool MuonPlotter::isGoodRun(gSample sample){
 	// Select runs such that JetB and MultiJet datasets are mutually exclusive
 	// if(gSample(sample) == JMB)      if(Run > 147195) return false;
 	// if(gSample(sample) == MultiJet) if(Run < 147196) return false;
-	if(gSample(sample) == JMB)      if(Run > 148058) return false;
-	if(gSample(sample) == MultiJet) if(Run < 148822) return false;
+	if(sample == JMB)      if(Run > 148058) return false;
+	if(sample == MultiJet) if(Run < 148822) return false;
 	return true;
 }
 
@@ -5256,7 +5327,7 @@ bool MuonPlotter::isGoodRun(int sample){
 bool MuonPlotter::isSigSupMuEvent(){
 	if(isGoodMuEvent() == false) return false;
 	if(fSelectionSwitch == 1) if(!passesHTCut(300.)) return false;
-	if(MuMT > 20.) return false;
+	if(MuMT[0] > 20.) return false;
 	if(pfMET > 20.) return false;
 	if(NMus > 1) return false;
 	return true;
