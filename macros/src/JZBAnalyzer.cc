@@ -18,28 +18,30 @@ JZBAnalyzer::~JZBAnalyzer(){
 
 // Method for looping over the tree
 void JZBAnalyzer::Loop(){
-	Long64_t nentries = fTR->GetEntries();
-	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
-	
-	// loop over all ntuple entries
-	if(fMaxEvents==-1)nentries=fTR->GetEntries();
-	if(fMaxEvents>0)nentries=fMaxEvents;
-	
-	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		PrintProgress(jentry);
-		fTR->GetEntry(jentry);
-                if ( fCurRun != fTR->Run ) {
-                  fCurRun = fTR->Run;
-                  if ( CheckRun() == false ) continue;
-                  fJZBAnalysis->BeginRun(fCurRun);
-                }
-                // Check if new lumi is in JSON file
-                if ( fCurLumi != fTR->LumiSection ) {
-                  fCurLumi = fTR->LumiSection;
-                  if ( CheckRunLumi() == false ) continue;
-                }
-                fJZBAnalysis->Analyze();
-	}
+  Long64_t nentries = fTR->GetEntries();
+  cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+  
+  // loop over all ntuple entries
+  if(fMaxEvents==-1)nentries=fTR->GetEntries();
+  if(fMaxEvents>0)nentries=fMaxEvents;
+  
+  for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
+    PrintProgress(jentry);
+    fTR->GetEntry(jentry);
+    if ( fCurRun != fTR->Run ) {
+      fCurRun = fTR->Run;
+      fJZBAnalysis->BeginRun(fCurRun);
+      skipRun = false;
+      if ( !CheckRun() ) skipRun = true;
+    }
+    // Check if new lumi is in JSON file
+    if ( !skipRun && fCurLumi != fTR->LumiSection ) {
+      fCurLumi = fTR->LumiSection;
+      skipLumi = false; // Re-initialise
+      if ( !CheckRunLumi() ) skipLumi = true;
+    }
+    if ( !(skipRun || skipLumi) ) fJZBAnalysis->Analyze();
+  }
 }
 
 // Method called before starting the event loop
