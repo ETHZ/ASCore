@@ -27,8 +27,6 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, const 
   fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
-  fJetCorrs        = config.getParameter<std::string>("corrections");
-  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");
   fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
   fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
@@ -56,9 +54,6 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
   // Jet tracks association (already done in PAT)
   Handle<reco::JetTracksAssociation::Container> jetTracksAssoc;
   iEvent.getByLabel(fJetTracksTag,jetTracksAssoc);
-
-  Handle<edm::ValueMap<reco::JetID> > jetsID;
-  iEvent.getByLabel(fJetID,jetsID);
 
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;

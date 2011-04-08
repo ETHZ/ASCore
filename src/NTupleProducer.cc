@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.110 2011/04/06 16:01:19 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.111 2011/04/08 15:21:04 stiegerb Exp $
 //
 //
 
@@ -102,10 +102,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
 	// InputTags
 	fMuonTag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_muons");
-	fPfMuonTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmuons");
 	fElectronTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_electrons");
-	fPfElectronTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfelectrons");
-	fPfTauTag  	    = iConfig.getUntrackedParameter<edm::InputTag>("tag_pftaus");
 	fEleIdWP            = iConfig.getUntrackedParameter<std::string>("tag_elidWP");
 	fMuIsoDepTkTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
 	fMuIsoDepECTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
@@ -255,17 +252,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<View<Muon> > muons;
 	iEvent.getByLabel(fMuonTag,muons); // 'muons'
 
-	Handle<View<pat::Muon> > pfmuons;
-	iEvent.getByLabel(fPfMuonTag,pfmuons);  //'patMuonsPF'
-
 	Handle<View<GsfElectron> > electrons;
 	iEvent.getByLabel(fElectronTag, electrons); // 'gsfElectrons'
-
-	Handle<View<pat::Electron> > pfelectrons;
-	iEvent.getByLabel(fPfElectronTag,pfelectrons);  //'patElectronsPF'
-
-	Handle<View<pat::Tau> > pftaus;
-	iEvent.getByLabel(fPfTauTag,pftaus);  //'patTausPF'
 
 	// Jets and Jet Correctors
 	Handle<View<Jet> > jets;
@@ -914,47 +902,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIsIso[mqi] = 1;
 	}
 
-	////////////////////////////////////////////////////////
-	// PfMuon Variables:
-	int pfmqi(0);  // Index of qualified muons
-	fTnpfmutot = 0; // Total number of tracker&&global muons
-
-	for ( View<pat::Muon>::const_iterator Mit = pfmuons->begin(); 
-              Mit != pfmuons->end(); ++Mit ) {
-          // Check if maximum number of muons is exceeded already:
-          if(pfmqi >= gMaxnmus){
-            edm::LogWarning("NTP") << "@SUB=analyze()"
-                                   << "Maximum number of PF muons exceeded";
-            fTflagmaxmuexc = 1;
-            fTgoodevent = 1;
-            break;
-          }
-          fTnpfmutot++;
-
-          // PfMuon preselection:
-          if (Mit->pt() < fMinmupt) continue;
-          if (fabs(Mit->eta()) > fMaxmueta) continue;
-
-          const pat::Muon& muon = (*Mit);
-          fTpfmupx[pfmqi]     = muon.px();
-          fTpfmupy[pfmqi]     = muon.py();
-          fTpfmupz[pfmqi]     = muon.pz();
-          fTpfmupt[pfmqi]     = muon.pt();
-          fTpfmueta[pfmqi]    = muon.eta();
-          fTpfmuphi[pfmqi]    = muon.phi();
-          fTpfmue[pfmqi]      = muon.energy();
-          fTpfmuet[pfmqi]     = muon.et();
-          fTpfmucharge[pfmqi] = muon.charge();
-          
-          fTpfmuparticleiso[pfmqi]      = muon.particleIso();
-          fTpfmuchargedhadroniso[pfmqi] = muon.chargedHadronIso();
-          fTpfmuneutralhadroniso[pfmqi] = muon.neutralHadronIso();
-          fTpfmuphotoniso[pfmqi]        = muon.photonIso();
-          
-          ++pfmqi;
-
-	}
-        fTnpfmu = pfmqi;
 
 	////////////////////////////////////////////////////////
 	// Electron variables:
@@ -1206,91 +1153,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		fTnEBhits++;
 	}
-
-	////////////////////////////////////////////////////////
-	// PfElectron Variables:
-	int pfeqi(0);  // Index of qualified electrons
-	fTnpfeltot = 0; // Total number of electrons
-
-	for ( View<pat::Electron>::const_iterator Eit = pfelectrons->begin(); 
-              Eit != pfelectrons->end(); ++Eit ) {
-
-          // Check if maximum number of electrons is exceeded already:
-          if(pfeqi >= gMaxneles){
-            edm::LogWarning("NTP") << "@SUB=analyze()"
-                                   << "Maximum number of PF electrons exceeded";
-            fTflagmaxelexc = 1;
-            fTgoodevent = 1;
-            break;
-          }
-          fTnpfeltot++;
-		
-          // PfElectron preselection:
-          if(Eit->pt() < fMinelpt) continue;
-          if(fabs(Eit->eta()) > fMaxeleta) continue;
-
-          const pat::Electron& electron = (*Eit);
-          fTpfelpx[pfeqi]     = electron.px();
-          fTpfelpy[pfeqi]     = electron.py();
-          fTpfelpz[pfeqi]     = electron.pz();
-          fTpfelpt[pfeqi]     = electron.pt();
-          fTpfeleta[pfeqi]    = electron.eta();
-          fTpfelphi[pfeqi]    = electron.phi();
-          fTpfele[pfeqi]      = electron.energy();
-          fTpfelet[pfeqi]     = electron.et();
-          fTpfelcharge[pfeqi] = electron.charge();
-          
-          fTpfelparticleiso[pfeqi]      = electron.particleIso();
-          fTpfelchargedhadroniso[pfeqi] = electron.chargedHadronIso();
-          fTpfelneutralhadroniso[pfeqi] = electron.neutralHadronIso();
-          fTpfelphotoniso[pfeqi]        = electron.photonIso();
-
-          ++pfeqi;
-	}
-        fTnpfel = pfeqi;
-
-	////////////////////////////////////////////////////////
-	// PfTau Variables:
-	int pftqi(0);  // Index of qualified taus
-	fTnpftautot = 0; // Total number of taus
-
-	for ( View<pat::Tau>::const_iterator Tit = pftaus->begin(); 
-              Tit != pftaus->end(); ++Tit ) {
-          // Check if maximum number of taus is exceeded already:
-          if(pftqi >= gMaxntaus){
-            edm::LogWarning("NTP") << "@SUB=analyze()"
-                                   << "Maximum number of PF taus exceeded";
-            fTflagmaxelexc = 1;
-            fTgoodevent = 1;
-            break;
-          }
-          fTnpftautot++;
-          
-          // PfTau preselection:
-          if(Tit->pt() < fMinelpt) continue;
-          if(fabs(Tit->eta()) > fMaxeleta) continue;
-
-          // Combined methods for Global and Tracker taus:
-          const pat::Tau& tau = (*Tit);
-          fTpftaupx[pftqi]     = tau.px();
-          fTpftaupy[pftqi]     = tau.py();
-          fTpftaupz[pftqi]     = tau.pz();
-          fTpftaupt[pftqi]     = tau.pt();
-          fTpftaueta[pftqi]    = tau.eta();
-          fTpftauphi[pftqi]    = tau.phi();
-          fTpftaue[pftqi]      = tau.energy();
-          fTpftauet[pftqi]     = tau.et();
-          fTpftaucharge[pftqi] = tau.charge();
-
-          fTpftauparticleiso[pftqi]      = tau.particleIso();
-          fTpftauchargedhadroniso[pftqi] = tau.chargedHadronIso();
-          fTpftauneutralhadroniso[pftqi] = tau.neutralHadronIso();
-          fTpftauphotoniso[pftqi]        = tau.photonIso();
-
-          ++pftqi; // Count how many we'll eventually store
-	}
-        fTnpftau = pftqi;
-        
 
 	////////////////////////////////////////////////////////
 	// Photon Variables:
@@ -2007,24 +1869,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MuGenGMPhi"       ,&fTGenMuGMPhi      ,"MuGenGMPhi[NMus]/F");
 	fEventTree->Branch("MuGenGME"         ,&fTGenMuGME        ,"MuGenGME[NMus]/F");
 
-	// pfMuons:
-	fEventTree->Branch("NPfMus"               ,&fTnpfmu                ,"NPfMus/I");
-	fEventTree->Branch("NPfMusTot"            ,&fTnpfmutot             ,"NPfMusTot/I");
-	fEventTree->Branch("PfMuPx"               ,&fTpfmupx               ,"PfMuPx[NPfMus]/F");
-	fEventTree->Branch("PfMuPy"               ,&fTpfmupy               ,"PfMuPy[NPfMus]/F");
-	fEventTree->Branch("PfMuPz"               ,&fTpfmupz               ,"PfMuPz[NPfMus]/F");
-	fEventTree->Branch("PfMuPt"               ,&fTpfmupt               ,"PfMuPt[NPfMus]/F");
-	fEventTree->Branch("PfMuPtE"              ,&fTpfmuptE              ,"PfMuPtE[NPfMus]/F");
-	fEventTree->Branch("PfMuE"                ,&fTpfmue                ,"PfMuE[NPfMus]/F");
-	fEventTree->Branch("PfMuEt"               ,&fTpfmuet               ,"PfMuEt[NPfMus]/F");
-	fEventTree->Branch("PfMuEta"              ,&fTpfmueta              ,"PfMuEta[NPfMus]/F");
-	fEventTree->Branch("PfMuPhi"              ,&fTpfmuphi              ,"PfMuPhi[NPfMus]/F");
-	fEventTree->Branch("PfMuCharge"           ,&fTpfmucharge           ,"PfMuCharge[NPfMus]/I");
-	fEventTree->Branch("PfMuParticleIso"      ,&fTpfmuparticleiso      ,"PfMuParticleIso[NPfMus]/F");
-	fEventTree->Branch("PfMuChargedHadronIso" ,&fTpfmuchargedhadroniso ,"PfMuChargedHadronIso[NPfMus]/F");
-	fEventTree->Branch("PfMuNeutralHadronIso" ,&fTpfmuneutralhadroniso ,"PfMuNeutralHadronIso[NPfMus]/F");
-	fEventTree->Branch("PfMuPhotonIso"        ,&fTpfmuphotoniso        ,"PfMuPhotonIso[NPfMus]/F");
-
 	fEventTree->Branch("NEBhits"              ,&fTnEBhits              ,"NEBhits/I");
 	fEventTree->Branch("EBrechitE"            ,&fTEBrechitE            ,"EBrechitE[NEBhits]/F");
 	fEventTree->Branch("EBrechitPt"           ,&fTEBrechitPt           ,"EBrechitPt[NEBhits]/F");
@@ -2146,42 +1990,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElGenGMEta"                  ,&fTGenElGMEta      ,"ElGenGMEta[NEles]/F");
 	fEventTree->Branch("ElGenGMPhi"                  ,&fTGenElGMPhi      ,"ElGenGMPhi[NEles]/F");
 	fEventTree->Branch("ElGenGME"                    ,&fTGenElGME        ,"ElGenGME[NEles]/F");
-
-	// pfElectrons:
-	fEventTree->Branch("NPfEls"               ,&fTnpfel                ,"NPfEls/I");
-	fEventTree->Branch("NPfElsTot"            ,&fTnpfeltot             ,"NPfElsTot/I");
-	fEventTree->Branch("PfElPx"               ,&fTpfelpx               ,"PfElPx[NPfEls]/F");
-	fEventTree->Branch("PfElPy"               ,&fTpfelpy               ,"PfElPy[NPfEls]/F");
-	fEventTree->Branch("PfElPz"               ,&fTpfelpz               ,"PfElPz[NPfEls]/F");
-	fEventTree->Branch("PfElPt"               ,&fTpfelpt               ,"PfElPt[NPfEls]/F");
-	fEventTree->Branch("PfElPtE"              ,&fTpfelptE              ,"PfElPtE[NPfEls]/F");
-	fEventTree->Branch("PfElE"                ,&fTpfele                ,"PfElE[NPfEls]/F");
-	fEventTree->Branch("PfElEt"               ,&fTpfelet               ,"PfElEt[NPfEls]/F");
-	fEventTree->Branch("PfElEta"              ,&fTpfeleta              ,"PfElEta[NPfEls]/F");
-	fEventTree->Branch("PfElPhi"              ,&fTpfelphi              ,"PfElPhi[NPfEls]/F");
-	fEventTree->Branch("PfElCharge"           ,&fTpfelcharge           ,"PfElCharge[NPfEls]/I");
-	fEventTree->Branch("PfElParticleIso"      ,&fTpfelparticleiso      ,"PfElParticleIso[NPfEls]/F");
-	fEventTree->Branch("PfElChargedHadronIso" ,&fTpfelchargedhadroniso ,"PfElChargedHadronIso[NPfEls]/F");
-	fEventTree->Branch("PfElNeutralHadronIso" ,&fTpfelneutralhadroniso ,"PfElNeutralHadronIso[NPfEls]/F");
-	fEventTree->Branch("PfElPhotonIso"        ,&fTpfelphotoniso        ,"PfElPhotonIso[NPfEls]/F");
-
-	// pfTaus:
-	fEventTree->Branch("NPfTaus"               ,&fTnpftau                ,"NPfTaus/I");
-	fEventTree->Branch("NPfTausTot"            ,&fTnpftautot             ,"NPfTausTot/I");
-	fEventTree->Branch("PfTauPx"               ,&fTpftaupx               ,"PfTauPx[NPfTaus]/F");
-	fEventTree->Branch("PfTauPy"               ,&fTpftaupy               ,"PfTauPy[NPfTaus]/F");
-	fEventTree->Branch("PfTauPz"               ,&fTpftaupz               ,"PfTauPz[NPfTaus]/F");
-	fEventTree->Branch("PfTauPt"               ,&fTpftaupt               ,"PfTauPt[NPfTaus]/F");
-	fEventTree->Branch("PfTauPtE"              ,&fTpftauptE              ,"PfTauPtE[NPfTaus]/F");
-	fEventTree->Branch("PfTauE"                ,&fTpftaue                ,"PfTauE[NPfTaus]/F");
-	fEventTree->Branch("PfTauEt"               ,&fTpftauet               ,"PfTauEt[NPfTaus]/F");
-	fEventTree->Branch("PfTauEta"              ,&fTpftaueta              ,"PfTauEta[NPfTaus]/F");
-	fEventTree->Branch("PfTauPhi"              ,&fTpftauphi              ,"PfTauPhi[NPfTaus]/F");
-	fEventTree->Branch("PfTauCharge"           ,&fTpftaucharge           ,"PfTauCharge[NPfTaus]/I");
-	fEventTree->Branch("PfTauParticleIso"      ,&fTpftauparticleiso      ,"PfTauParticleIso[NPfTaus]/F");
-	fEventTree->Branch("PfTauChargedHadronIso" ,&fTpftauchargedhadroniso ,"PfTauChargedHadronIso[NPfTaus]/F");
-	fEventTree->Branch("PfTauNeutralHadronIso" ,&fTpftauneutralhadroniso ,"PfTauNeutralHadronIso[NPfTaus]/F");
-	fEventTree->Branch("PfTauPhotonIso"        ,&fTpftauphotoniso        ,"PfTauPhotonIso[NPfTaus]/F");
 
 	// Photons:
 	fEventTree->Branch("NPhotons"         ,&fTnphotons          ,"NPhotons/I");
@@ -2665,21 +2473,6 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTGenMuGMPhi, gMaxnmus);
 	resetFloat(fTGenMuGME, gMaxnmus);
 
-	resetFloat(fTpfmupx, gMaxnmus);
-	resetFloat(fTpfmupy, gMaxnmus);
-	resetFloat(fTpfmupz, gMaxnmus);
-	resetFloat(fTpfmupt, gMaxnmus);
-	resetFloat(fTpfmuptE, gMaxnmus);
-	resetFloat(fTpfmue, gMaxnmus);
-	resetFloat(fTpfmuet, gMaxnmus);
-	resetFloat(fTpfmueta, gMaxnmus);
-	resetFloat(fTpfmuphi, gMaxnmus);
-	resetInt(fTpfmucharge, gMaxnmus);
-	resetFloat(fTpfmuparticleiso, gMaxnmus);
-	resetFloat(fTpfmuneutralhadroniso, gMaxnmus);
-	resetFloat(fTpfmuchargedhadroniso, gMaxnmus);
-	resetFloat(fTpfmuphotoniso, gMaxnmus);
-
 	resetInt(fTgoodel, gMaxneles);
 	resetInt(fTeIsIso, gMaxneles);
 	resetInt(fTeChargeMisIDProb, gMaxneles);
@@ -2789,36 +2582,6 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTGenElGMEta, gMaxneles);
 	resetFloat(fTGenElGMPhi, gMaxneles);
 	resetFloat(fTGenElGME, gMaxneles);
-
-	resetFloat(fTpfelpx, gMaxneles);
-	resetFloat(fTpfelpy, gMaxneles);
-	resetFloat(fTpfelpz, gMaxneles);
-	resetFloat(fTpfelpt, gMaxneles);
-	resetFloat(fTpfelptE, gMaxneles);
-	resetFloat(fTpfele, gMaxneles);
-	resetFloat(fTpfelet, gMaxneles);
-	resetFloat(fTpfeleta, gMaxneles);
-	resetFloat(fTpfelphi, gMaxneles);
-	resetInt(fTpfelcharge, gMaxneles);
-	resetFloat(fTpfelparticleiso, gMaxneles);
-	resetFloat(fTpfelneutralhadroniso, gMaxneles);
-	resetFloat(fTpfelchargedhadroniso, gMaxneles);
-	resetFloat(fTpfelphotoniso, gMaxneles);
-
-	resetFloat(fTpftaupx, gMaxntaus);
-	resetFloat(fTpftaupy, gMaxntaus);
-	resetFloat(fTpftaupz, gMaxntaus);
-	resetFloat(fTpftaupt, gMaxntaus);
-	resetFloat(fTpftauptE, gMaxntaus);
-	resetFloat(fTpftaue, gMaxntaus);
-	resetFloat(fTpftauet, gMaxntaus);
-	resetFloat(fTpftaueta, gMaxntaus);
-	resetFloat(fTpftauphi, gMaxntaus);
-	resetInt(fTpftaucharge, gMaxntaus);
-	resetFloat(fTpftauparticleiso, gMaxntaus);
-	resetFloat(fTpftauneutralhadroniso, gMaxntaus);
-	resetFloat(fTpftauchargedhadroniso, gMaxntaus);
-	resetFloat(fTpftauphotoniso, gMaxntaus);
 
 	resetInt(fTgoodjet, gMaxnjets);
 	resetFloat(fTjpx,  gMaxnjets);

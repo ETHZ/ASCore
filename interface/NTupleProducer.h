@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.88 2011/04/06 16:01:19 fronga Exp $
+// $Id: NTupleProducer.h,v 1.89 2011/04/08 15:21:05 stiegerb Exp $
 //
 //
 
@@ -123,10 +123,7 @@ private:
 	static const int gMaxnEBhits  = 20;
 
 	edm::InputTag fMuonTag;
-	edm::InputTag fPfMuonTag;
 	edm::InputTag fElectronTag;
-	edm::InputTag fPfElectronTag;
-	edm::InputTag fPfTauTag;
         std::string fEleIdWP;
 	edm::InputTag fMuIsoDepTkTag;
 	edm::InputTag fMuIsoDepECTag;
@@ -456,26 +453,6 @@ private:
 	float fTGenMuGMPhi   [gMaxnmus];
 	float fTGenMuGME     [gMaxnmus];
 
-// PfMuons:
-	int fTnpfmu;
-	int fTnpfmutot; // before preselection
-	float fTpfmupx  [gMaxnmus];
-	float fTpfmupy  [gMaxnmus];
-	float fTpfmupz  [gMaxnmus];
-	float fTpfmue   [gMaxnmus];
-	float fTpfmuet  [gMaxnmus];
-	float fTpfmupt  [gMaxnmus];
-	float fTpfmuptE [gMaxnmus];
-	float fTpfmueta [gMaxnmus];
-	float fTpfmuphi [gMaxnmus];
-	int fTpfmucharge[gMaxnmus];
-
-// - Isolation Variables
-	float fTpfmuparticleiso     [gMaxnmus];
-	float fTpfmuchargedhadroniso[gMaxnmus];
-	float fTpfmuneutralhadroniso[gMaxnmus];
-	float fTpfmuphotoniso       [gMaxnmus];
-
 
 // Electrons:
 	int fTneles;
@@ -595,47 +572,6 @@ private:
 	float fTGenElGMEta[gMaxneles];
 	float fTGenElGMPhi[gMaxneles];
 	float fTGenElGME[gMaxneles];
-
-// PfElectrons:
-	int fTnpfel;
-	int fTnpfeltot; // before preselection
-	float fTpfelpx[gMaxneles];
-	float fTpfelpy[gMaxneles];
-	float fTpfelpz[gMaxneles];
-	float fTpfele[gMaxneles];
-	float fTpfelet[gMaxneles];
-	float fTpfelpt[gMaxneles];
-	float fTpfelptE[gMaxneles];
-	float fTpfeleta[gMaxneles];
-	float fTpfelphi[gMaxneles];
-	int fTpfelcharge[gMaxneles];
-
-// - Isolation Variables
-	float fTpfelparticleiso[gMaxneles];
-	float fTpfelchargedhadroniso[gMaxneles];
-	float fTpfelneutralhadroniso[gMaxneles];
-	float fTpfelphotoniso[gMaxneles];
-
-
-// PfTaus:
-	int fTnpftau;
-	int fTnpftautot; // before prestauection
-	float fTpftaupx[gMaxntaus];
-	float fTpftaupy[gMaxntaus];
-	float fTpftaupz[gMaxntaus];
-	float fTpftaue[gMaxntaus];
-	float fTpftauet[gMaxntaus];
-	float fTpftaupt[gMaxntaus];
-	float fTpftauptE[gMaxntaus];
-	float fTpftaueta[gMaxntaus];
-	float fTpftauphi[gMaxntaus];
-	int fTpftaucharge[gMaxntaus];
-
-// - Isolation Variables
-	float fTpftauparticleiso[gMaxntaus];
-	float fTpftauchargedhadroniso[gMaxntaus];
-	float fTpftauneutralhadroniso[gMaxntaus];
-	float fTpftauphotoniso[gMaxntaus];
 
 // Photons:
 	int fTnphotons;
