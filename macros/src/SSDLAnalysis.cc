@@ -156,7 +156,6 @@ void SSDLAnalysis::Analyze(){
 	}
 	
 	int nqmus = selectedMuInd.size();
-	if( nqmus < 1 ) return;
 	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
 		int index = selectedMuInd[i];
 		fTmupt       [i] = fTR->MuPt[index];
