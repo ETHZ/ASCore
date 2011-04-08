@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.109 2011/04/04 16:25:36 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.110 2011/04/06 16:01:19 fronga Exp $
 //
 //
 
@@ -624,6 +624,136 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTbeamspotz = (beamSpot.position()).z();
 
 	IndexByPt indexComparator; // Need this to sort collections
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Get GenLeptons (+ Mother and GMother)
+	if(!fIsRealData){
+		edm::Handle<GenParticleCollection> gen;
+		iEvent.getByLabel(fGenPartTag, gen);
+		GenParticleCollection::const_iterator g_part;
+
+		std::vector<const GenParticle*> gen_lepts;
+		std::vector<const GenParticle*> gen_moms;
+		std::vector<const GenParticle*> gen_gmoms;
+
+
+		// loop over genparticles to get gen_els and gen_mus
+		for(g_part = gen->begin(); g_part != gen->end(); g_part++){
+			// select stable leptons
+			if( abs(g_part->pdgId()) !=  5  // b jets
+			 && abs(g_part->pdgId()) != 11
+			 && abs(g_part->pdgId()) != 12
+			 && abs(g_part->pdgId()) != 13
+			 && abs(g_part->pdgId()) != 14
+			 && abs(g_part->pdgId()) != 15
+			 && abs(g_part->pdgId()) != 16 ) continue;
+
+			if( g_part->status() != 1 ) continue;
+			if( g_part->pt()        < fMingenleptpt )  continue;
+			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
+
+			int gen_id= g_part->pdgId();
+			const GenParticle* gen_lept = &(*g_part);
+
+			// get mother of gen_lept
+			const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+			int m_id = gen_mom -> pdgId();
+
+			if(m_id != gen_id);
+			else{
+				int id= m_id;
+				while(id == gen_id){
+					gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
+					id=gen_mom->pdgId();
+				}
+			}
+			m_id = gen_mom->pdgId();
+
+			// get grand mother of gen_lept
+			const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+			int gm_id = gen_gmom->pdgId();
+			if (m_id != gm_id);
+			else{
+				int id=gm_id;
+				while(id == m_id){
+					gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
+					id = gen_gmom->pdgId();
+				}
+			}
+
+			gen_lepts.push_back(gen_lept);
+			gen_moms.push_back(gen_mom);
+			gen_gmoms.push_back(gen_gmom);
+		}
+
+		// set variables
+		if(gen_lepts.size()!=gen_moms.size() || gen_lepts.size()!=gen_gmoms.size()){
+			edm::LogWarning("NTP") << "@SUB=analyze"
+				<< "ERROR in filling of GenLeptons!! ";
+		}else{
+			fTngenleptons = gen_lepts.size();
+			for(int i=0; i<fTngenleptons; ++i){
+				if( i >= gMaxngenlept){
+					edm::LogWarning("NTP") << "@SUB=analyze"
+						<< "Maximum number of gen-leptons exceeded..";
+					fTflagmaxgenleptexc = 1;
+					fTgoodevent = 1;
+					break;
+				}
+
+				fTGenLeptonId[i]       =   gen_lepts[i]->pdgId();
+				fTGenLeptonPt[i]       =   gen_lepts[i]->pt();
+				fTGenLeptonEta[i]      =   gen_lepts[i]->eta();
+				fTGenLeptonPhi[i]      =   gen_lepts[i]->phi();
+
+				fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();
+				fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
+				fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
+				fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
+				fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
+
+				fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
+				fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
+				fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt();
+				fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
+				fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
+			}
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Get GenJets
+	if(!fIsRealData){
+		edm::Handle<GenJetCollection> genjets;
+		iEvent.getByLabel(fGenJetTag, genjets);
+		GenJetCollection::const_iterator gjet;
+		
+		int jqi=-1;
+		for(gjet = genjets->begin(); gjet != genjets->end(); gjet++){
+			// Preselection
+			if(gjet->pt() < fMingenjetpt) continue;
+			if(fabs(gjet->eta()) > fMaxgenjeteta) continue;
+			jqi++;
+			if( jqi >= gMaxngenjets){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+					<< "Maximum number of gen-jets exceeded..";
+				fTflagmaxgenjetexc = 1;
+				fTgoodevent = 1;
+				break;
+			}
+			
+			fTGenJetPt  [jqi] = gjet->pt();
+			fTGenJetEta [jqi] = gjet->eta();
+			fTGenJetPhi [jqi] = gjet->phi();
+			fTGenJetE   [jqi] = gjet->energy();
+			fTGenJetemE [jqi] = gjet->emEnergy();
+			fTGenJethadE[jqi] = gjet->hadEnergy();
+			fTGenJetinvE[jqi] = gjet->invisibleEnergy();
+		}
+		fTNGenJets = jqi+1;
+	}
+
 
 	////////////////////////////////////////////////////////
 	// Muon Variables:
@@ -1485,18 +1615,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		AssociatedTTracks.clear();
 	
 		// GenJet matching
-		if (!fIsRealData) {
-			const GenJet *matchedJet = matchJet(&(*jet), iEvent);
-			if( matchedJet != NULL ){
-				fTjetGenPt[jqi]   = matchedJet->pt();
-				fTjetGenEta[jqi]  = matchedJet->eta();
-				fTjetGenPhi[jqi]  = matchedJet->phi();
-				fTjetGenE[jqi]    = matchedJet->energy();
-				fTjetGenemE[jqi]  = matchedJet->emEnergy();
-				fTjetGenhadE[jqi] = matchedJet->hadEnergy();
-				fTjetGeninvE[jqi] = matchedJet->invisibleEnergy();
-			}
-		}
+		if (!fIsRealData) fTjetGenJetIndex[jqi] = matchJet(&(*jet));
 		fTgoodjet[jqi] = 0;
 	}
 	fTnjets = jqi+1;
@@ -1648,136 +1767,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETPATpy   = (pfMETpat->front()).py();
 	fTPFMETPATphi  = (pfMETpat->front()).phi();
 	fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
-
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Get GenLeptons (+ Mother and GMother)
-	if(!fIsRealData){
-		edm::Handle<GenParticleCollection> gen;
-		iEvent.getByLabel(fGenPartTag, gen);
-		GenParticleCollection::const_iterator g_part;
-
-		std::vector<const GenParticle*> gen_lepts;
-		std::vector<const GenParticle*> gen_moms;
-		std::vector<const GenParticle*> gen_gmoms;
-
-
-		// loop over genparticles to get gen_els and gen_mus
-		for(g_part = gen->begin(); g_part != gen->end(); g_part++){
-			// select stable leptons
-			if( abs(g_part->pdgId()) !=  5  // b jets
-			 && abs(g_part->pdgId()) != 11
-			 && abs(g_part->pdgId()) != 12
-			 && abs(g_part->pdgId()) != 13
-			 && abs(g_part->pdgId()) != 14
-			 && abs(g_part->pdgId()) != 15
-			 && abs(g_part->pdgId()) != 16 ) continue;
-
-			if( g_part->status() != 1 ) continue;
-			if( g_part->pt()        < fMingenleptpt )  continue;
-			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
-
-			int gen_id= g_part->pdgId();
-			const GenParticle* gen_lept = &(*g_part);
-
-			// get mother of gen_lept
-			const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
-			int m_id = gen_mom -> pdgId();
-
-			if(m_id != gen_id);
-			else{
-				int id= m_id;
-				while(id == gen_id){
-					gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
-					id=gen_mom->pdgId();
-				}
-			}
-			m_id = gen_mom->pdgId();
-
-			// get grand mother of gen_lept
-			const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
-			int gm_id = gen_gmom->pdgId();
-			if (m_id != gm_id);
-			else{
-				int id=gm_id;
-				while(id == m_id){
-					gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
-					id = gen_gmom->pdgId();
-				}
-			}
-
-			gen_lepts.push_back(gen_lept);
-			gen_moms.push_back(gen_mom);
-			gen_gmoms.push_back(gen_gmom);
-		}
-
-		// set variables
-		if(gen_lepts.size()!=gen_moms.size() || gen_lepts.size()!=gen_gmoms.size()){
-			edm::LogWarning("NTP") << "@SUB=analyze"
-				<< "ERROR in filling of GenLeptons!! ";
-		}else{
-			fTngenleptons = gen_lepts.size();
-			for(int i=0; i<fTngenleptons; ++i){
-				if( i >= gMaxngenlept){
-					edm::LogWarning("NTP") << "@SUB=analyze"
-						<< "Maximum number of gen-leptons exceeded..";
-					fTflagmaxgenleptexc = 1;
-					fTgoodevent = 1;
-					break;
-				}
-
-				fTGenLeptonId[i]       =   gen_lepts[i]->pdgId();
-				fTGenLeptonPt[i]       =   gen_lepts[i]->pt();
-				fTGenLeptonEta[i]      =   gen_lepts[i]->eta();
-				fTGenLeptonPhi[i]      =   gen_lepts[i]->phi();
-
-				fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();
-				fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
-				fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
-				fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
-				fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
-
-				fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
-				fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
-				fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt();
-				fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
-				fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
-			}
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Get GenJets
-	if(!fIsRealData){
-		edm::Handle<GenJetCollection> genjets;
-		iEvent.getByLabel(fGenJetTag, genjets);
-		GenJetCollection::const_iterator gjet;
-		
-		int jqi=-1;
-		for(gjet = genjets->begin(); gjet != genjets->end(); gjet++){
-			// Preselection
-			if(gjet->pt() < fMingenjetpt) continue;
-			if(fabs(gjet->eta()) > fMaxgenjeteta) continue;
-			jqi++;
-			if( jqi >= gMaxngenjets){
-				edm::LogWarning("NTP") << "@SUB=analyze"
-					<< "Maximum number of gen-jets exceeded..";
-				fTflagmaxgenjetexc = 1;
-				fTgoodevent = 1;
-				break;
-			}
-			
-			fTGenJetPt  [jqi] = gjet->pt();
-			fTGenJetEta [jqi] = gjet->eta();
-			fTGenJetPhi [jqi] = gjet->phi();
-			fTGenJetE   [jqi] = gjet->energy();
-			fTGenJetemE [jqi] = gjet->emEnergy();
-			fTGenJethadE[jqi] = gjet->hadEnergy();
-			fTGenJetinvE[jqi] = gjet->invisibleEnergy();
-		}
-		fTNGenJets = jqi+1;
-	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
@@ -2291,13 +2280,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("JVtxEzz"        ,&fTjetVtxEzz      ,"JVtxEzz[NJets]/F");
 	fEventTree->Branch("JVtxEzx"        ,&fTjetVtxEzx      ,"JVtxEzx[NJets]/F");
 	fEventTree->Branch("JVtxNChi2"      ,&fTjetVtxNChi2    ,"JVtxNChi2[NJets]/F");
-	fEventTree->Branch("JGenPt"         ,&fTjetGenPt       ,"JGenPt[NJets]/F");
-	fEventTree->Branch("JGenEta"        ,&fTjetGenEta      ,"JGenEta[NJets]/F");
-	fEventTree->Branch("JGenPhi"        ,&fTjetGenPhi      ,"JGenPhi[NJets]/F");
-	fEventTree->Branch("JGenE"          ,&fTjetGenE        ,"JGenE[NJets]/F");
-	fEventTree->Branch("JGenEmE"        ,&fTjetGenemE      ,"JGenEmE[NJets]/F");
-	fEventTree->Branch("JGenHadE"       ,&fTjetGenhadE     ,"JGenHadE[NJets]/F");
-	fEventTree->Branch("JGenInvE"       ,&fTjetGeninvE     ,"JGenInvE[NJets]/F");
+	fEventTree->Branch("JGenJetIndex"   ,&fTjetGenJetIndex ,"JGenJetIndex[NJets]/I");
 
 	// Additional Jet collections
 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
@@ -2886,13 +2869,7 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjetVtxEzx, gMaxnjets);
 	resetFloat(fTjetVtxNChi2, gMaxnjets);
 
-	resetFloat(fTjetGenPt, gMaxnjets);
-	resetFloat(fTjetGenEta, gMaxnjets);
-	resetFloat(fTjetGenPhi, gMaxnjets);
-	resetFloat(fTjetGenE, gMaxnjets);
-	resetFloat(fTjetGenemE, gMaxnjets);
-	resetFloat(fTjetGenhadE, gMaxnjets);
-	resetFloat(fTjetGeninvE, gMaxnjets);
+	resetInt(fTjetGenJetIndex, gMaxnjets);
 
 	resetInt(fTgoodtrk,  gMaxntrks);
 	resetFloat(fTtrkpt, gMaxntrks);
@@ -3100,39 +3077,34 @@ std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::
 }
 
 // Method for matching of jets
-const reco::GenJet* NTupleProducer::matchJet(const reco::Jet* jet, const edm::Event& iEvent){
-	const reco::GenJet *genjet = NULL;
-	if(fIsRealData){
+const int NTupleProducer::matchJet(const reco::Jet* jet){
+	// match to already filled genjets in ntuple:
+	// this can only be called AFTER the genjets have been stored!
+	if(fIsRealData || fTNGenJets < 1){
 		edm::LogWarning("NTP") << "@SUB=matchJet"
 			<< "Trying to access generator info on real data...";
-		return genjet;
+		return -1;
 	}
 
-	edm::Handle<GenJetCollection> genjets;
-	iEvent.getByLabel(fGenJetTag, genjets);
-	GenJetCollection::const_iterator gjet;
-	bool matched = false;
-
-	// Try to match the reco jet to a generator jet
+	// Try to match the reco jet to a stored generator jet
 	double mindr(999.99);
-	for(gjet = genjets->begin(); gjet != genjets->end(); gjet++){
+	int matchedindex = -1;
+	for(int i = 0; i < fTNGenJets; i++){
 
 		// Restrict to cone of 0.1 in DR around candidate
-		double dr = reco::deltaR(gjet->eta(), gjet->phi(), jet->eta(), jet->phi());
+		double dr = reco::deltaR(fTGenJetEta[i], fTGenJetPhi[i], jet->eta(), jet->phi());
 		if(dr > 0.3) continue;
 
 		// Restrict to pt match within a factor of 2
-		double ndpt = fabs(gjet->pt() - jet->pt())/gjet->pt();
+		double ndpt = fabs(fTGenJetPt[i] - jet->pt())/fTGenJetPt[i];
 		if(ndpt > 2.) continue;
 
 		// Minimize DeltaR
 		if(dr > mindr) continue;
 		mindr = dr;
-
-		matched = true;
-		genjet = &(*gjet);
+		matchedindex = i;
 	}
-	return genjet;
+	return matchedindex;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

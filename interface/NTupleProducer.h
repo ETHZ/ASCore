@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.87 2011/04/04 16:25:36 pnef Exp $
+// $Id: NTupleProducer.h,v 1.88 2011/04/06 16:01:19 fronga Exp $
 //
 //
 
@@ -69,7 +69,7 @@ public:
 	virtual void endJob();
 	virtual void endRun(const edm::Run&, const edm::EventSetup&);
 	std::vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
-	const reco::GenJet* matchJet(const reco::Jet *jet, const edm::Event& iEvent);
+	const int matchJet(const reco::Jet *jet);
 	void resetDouble(double *v, unsigned int size = 20);
 	void resetFloat(float *v, unsigned int size = 20);
 	void resetInt(int *v, unsigned int size = 20);
@@ -737,13 +737,7 @@ private:
 	float fTjetVtxEzx[gMaxnjets];
 	float fTjetVtxNChi2[gMaxnjets];
 	
-	float fTjetGenPt[gMaxnjets];
-	float fTjetGenEta[gMaxnjets];
-	float fTjetGenPhi[gMaxnjets];
-	float fTjetGenE[gMaxnjets];
-	float fTjetGenemE[gMaxnjets];
-	float fTjetGenhadE[gMaxnjets];
-	float fTjetGeninvE[gMaxnjets];
+	int   fTjetGenJetIndex[gMaxnjets];
 
 // Tracks:
 	int fTntracks;
