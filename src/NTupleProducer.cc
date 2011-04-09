@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.112 2011/04/08 16:39:06 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.113 2011/04/09 09:43:18 pnef Exp $
 //
 //
 
@@ -1481,7 +1481,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		AssociatedTTracks.clear();
 	
 		// GenJet matching
-		if (!fIsRealData) fTjetGenJetIndex[jqi] = matchJet(&(*jet));
+		if (!fIsRealData && fTNGenJets > 0) fTjetGenJetIndex[jqi] = matchJet(&(*jet));
 		fTgoodjet[jqi] = 0;
 	}
 	fTnjets = jqi+1;
