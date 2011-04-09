@@ -48,7 +48,7 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
   fTjbTagProbTkCntHighPur  = new double[gMaxnobjs];
   fTjbTagProbSimpSVHighEff = new double[gMaxnobjs];
   fTjbTagProbSimpSVHighPur = new double[gMaxnobjs];
-  
+  fTIDLoose               = new int[gMaxnobjs]; 
   if(fJetType==CALO) {
     fTID_HPD        = new double[gMaxnobjs];
     fTID_RBX        = new double[gMaxnobjs];
@@ -70,6 +70,7 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
     fTNeuHadFrac    = new double[gMaxnobjs];
     fTChEmFrac      = new double[gMaxnobjs];
     fTNeuEmFrac     = new double[gMaxnobjs];
+    fTChMuFrac      = new double[gMaxnobjs];
     fTNeuMult       = new int[gMaxnobjs];	
     fTNConstituents = new int[gMaxnobjs];
   }
@@ -94,7 +95,7 @@ JetFillerBase::~JetFillerBase(void) {
   delete [] fTjbTagProbTkCntHighPur ;
   delete [] fTjbTagProbSimpSVHighEff;
   delete [] fTjbTagProbSimpSVHighPur;
-  
+  delete [] fTIDLoose; 
   if (fJetType==CALO) {
     delete [] fTID_HPD;
     delete [] fTID_RBX; 
@@ -116,6 +117,7 @@ JetFillerBase::~JetFillerBase(void) {
     delete [] fTNeuHadFrac; 
     delete [] fTChEmFrac;   
     delete [] fTNeuEmFrac;  
+    delete [] fTChMuFrac;  
     delete [] fTNeuMult;    	
     delete [] fTNConstituents;		
   }
@@ -140,7 +142,7 @@ void JetFillerBase::createBranches(void) {
   addBranch("JbTagProbTkCntHighPur" , "D", fTjbTagProbTkCntHighPur , "NJets" );
   addBranch("JbTagProbSimpSVHighEff", "D", fTjbTagProbSimpSVHighEff, "NJets" );
   addBranch("JbTagProbSimpSVHighPur", "D", fTjbTagProbSimpSVHighPur, "NJets" );
-
+  addBranch("JIDLoose","I",fTIDLoose,"NJets" );
 
 	
   if(fJetType==CALO) {
@@ -165,6 +167,7 @@ void JetFillerBase::createBranches(void) {
     addBranch("JNeuHadfrac","D", fTNeuHadFrac,"NJets" );
     addBranch("JChEmfrac",  "D", fTChEmFrac,  "NJets" );
     addBranch("JNeuEmfrac", "D", fTNeuEmFrac, "NJets" );
+    addBranch("JChMufrac",  "D", fTChMuFrac,  "NJets" );
     addBranch("JNConstituents", "I", fTNConstituents,"NJets" );		
   }
 }
@@ -187,7 +190,7 @@ void JetFillerBase::reset(void) {
   resetDouble(fTjbTagProbTkCntHighPur ,gMaxnobjs);
   resetDouble(fTjbTagProbSimpSVHighEff,gMaxnobjs);
   resetDouble(fTjbTagProbSimpSVHighPur,gMaxnobjs);
-
+  resetInt (fTIDLoose, gMaxnobjs);
 	
   if (fJetType==CALO) {	
     resetDouble(fTID_RBX,gMaxnobjs);
@@ -211,6 +214,7 @@ void JetFillerBase::reset(void) {
     resetDouble(fTNeuHadFrac,gMaxnobjs);
     resetDouble(fTChEmFrac,gMaxnobjs);
     resetDouble(fTNeuEmFrac,gMaxnobjs);
+    resetDouble(fTChMuFrac,gMaxnobjs);
     resetInt(fTNConstituents,gMaxnobjs);
   }
 }

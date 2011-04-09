@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.5 2011/03/29 15:49:11 pnef Exp $
+// $Id: JetFillerBase.h,v 1.6 2011/04/06 16:01:19 fronga Exp $
 //
 //
 
@@ -97,6 +97,8 @@ protected:
   double* fTNeuHadFrac;
   double* fTChEmFrac;
   double* fTNeuEmFrac;
+  double* fTChMuFrac;
+  int*    fTIDLoose;
 
 };
 

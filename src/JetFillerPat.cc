@@ -4,13 +4,14 @@
 #include "DataFormats/JetReco/interface/JPTJetCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/JetReco/interface/JetID.h"
-//#include "DataFormats/JetReco/interface/Jet.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/JetReco/interface/JetTracksAssociation.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 
@@ -72,6 +73,10 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
   Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
   iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
 
+  // PFJetIDSelectionFunctor for LooseID.
+  PFJetIDSelectionFunctor PFjetIDLoose( PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::LOOSE );
+  JetIDSelectionFunctor   jetIDLoose( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::LOOSE );
+
   // PAT jets are already ordered by corrected pt: no need to re-order
   unsigned int ijet(0);
   for( View<pat::Jet>::const_iterator Jit = jets.begin();
@@ -88,7 +93,6 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
                                << ijet << " >= " << static_cast<int>(gMaxnobjs);
         break;
       }
-
       // Store the information (corrected)
       fTpx[ijet]    = Jit->px();
       fTpy[ijet]    = Jit->py();
@@ -99,6 +103,7 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTphi[ijet]   = Jit->phi();
       fTeta[ijet]   = Jit->eta();
       fTarea[ijet]  = Jit->jetArea();
+      
       fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
 
       // B-tagging probability (for 4 b-taggings)
@@ -107,34 +112,32 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTjbTagProbSimpSVHighEff[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
       fTjbTagProbSimpSVHighPur[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
 
-
+      if(Jit->isPFJet()){
+	fTIDLoose[ijet] = (int) PFjetIDLoose(*Jit);
+      } else {
+	fTIDLoose[ijet] = (int) jetIDLoose(*Jit);
+      } 
 
       // -------------------------------------------------
       // PF jet specific
       if (fJetType==PF) {
-        double CHF=Jit->chargedHadronEnergyFraction();
-        double NHF=Jit->neutralHadronEnergyFraction();
-        double CEF=Jit->chargedEmEnergyFraction();
-        double NEF=Jit->neutralEmEnergyFraction();
-        double CMF=Jit->chargedMuEnergyFraction();
-        
-        double sum=CHF+NHF+CEF+NEF+CMF;
-        if (sum >0) {
-          CHF=CHF/sum;
-          NHF=NHF/sum;
-          CEF=CEF/sum;
-          NEF=NEF/sum;
-          CMF=CMF/sum;
-        } else {
-          edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
-        }
-        fTChHadFrac[ijet]     = CHF;
-        fTNeuHadFrac[ijet]    = NHF;
-        fTChEmFrac[ijet]      = CEF;
-        fTNeuEmFrac[ijet]     = NEF;
-        fTChMult[ijet]        = Jit->chargedMultiplicity();
+       
+	// energy fractions for JetID have to be computed w.r.t. uncorrected Jet!
+	// all energy fractions (CHF, NHF, CEF, NEF) of pat::Jet apart from HFHadronEnergyFraction are anyway given w.r.t. uncorrected energy.
+	// PFJet IDs calculated from these definitions of energy fractions are consistent with the result of the PFJetIDSelectionFunctor
+	// moreover, the energy fractions add up to 1.
+	pat::Jet const & jetuncorr=Jit->correctedJet("Uncorrected");
+        fTChHadFrac[ijet]  =jetuncorr.chargedHadronEnergyFraction();
+        fTNeuHadFrac[ijet] =jetuncorr.neutralHadronEnergyFraction() + jetuncorr.HFHadronEnergyFraction();
+        fTChEmFrac[ijet]   =jetuncorr.chargedEmEnergyFraction();
+        fTNeuEmFrac[ijet]  =jetuncorr.neutralEmEnergyFraction();
+        fTChMuFrac[ijet]   =jetuncorr.chargedMuEnergyFraction();
+    
+	// multiplicities do not depend on energy
+	fTChMult[ijet]        = Jit->chargedMultiplicity();
         fTNeuMult[ijet]       = Jit->neutralMultiplicity();
-        fTNConstituents[ijet] = Jit->nConstituents();
+        fTNConstituents[ijet] = Jit->numberOfDaughters(); // same as nConstituents
+    
       }
 
       ijet++;

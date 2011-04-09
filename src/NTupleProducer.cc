@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.111 2011/04/08 15:21:04 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.112 2011/04/08 16:39:06 fronga Exp $
 //
 //
 
@@ -902,7 +902,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIsIso[mqi] = 1;
 	}
 
-
 	////////////////////////////////////////////////////////
 	// Electron variables:
 	// Keep pointers to electron superCluster in original collections
@@ -1321,11 +1320,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTjNconstituents[jqi] = jet->nConstituents();
 		fTjChMult       [jqi] = jet->chargedMultiplicity(); // do it the pf way...
 		fTjNeuMult      [jqi] = jet->neutralMultiplicity(); 
-		fTjChHadFrac    [jqi] = jet->chargedHadronEnergyFraction();
-		fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergyFraction();
-		fTjChEmFrac     [jqi] = jet->chargedEmEnergyFraction();
-		fTjNeuEmFrac    [jqi] = jet->neutralEmEnergyFraction();
-		fTjChMuEFrac    [jqi] = jet->chargedMuEnergyFraction();
+		
+		// energy fractions for JID need to be computed w.r.t. uncorrected jet energy!!
+		// see for instance https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+		// or http://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_1_3/doc/html/dc/dd5/classPFJetIDSelectionFunctor.html  
+		double uncorr_energy  = jet->energy()/scale;
+		fTjChHadFrac    [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
+		fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
+		fTjChEmFrac     [jqi] = jet->chargedEmEnergy()/uncorr_energy;
+		fTjNeuEmFrac    [jqi] = jet->neutralEmEnergy()/uncorr_energy;
+		fTjChMuEFrac    [jqi] = jet->chargedMuEnergy()/uncorr_energy;
 
 		// Calculate the DR wrt the closest electron
 		float ejDRmin = 10.; // Default when no electrons previously selected
