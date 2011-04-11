@@ -121,140 +121,6 @@ process.metMuonJESCorAK5.inputUncorJetsLabel = "ak5CaloJets"
 process.metMuonJESCorAK5.inputUncorMetLabel = "corMetGlobalMuons"
 process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
-############ PF2PAT ##########################################
-# load the standard PAT config
-process.load("PhysicsTools.PatAlgos.patSequences_cff")
-from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
-
-# Add a pro forma output module because PF2PAT complains otherwise...
-process.out = cms.OutputModule("PoolOutputModule",
-      # save only events passing the full path
-      SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-      # save PAT Layer 1 output; you need a '*' to
-      outputCommands = cms.untracked.vstring('drop *', *patEventContent )
-      )
-
-# Configure PAT to use PF2PAT instead of AOD sources
-from PhysicsTools.PatAlgos.tools.pfTools import *
-
-postfix = [ 'PF','PF2' ]
-for pf in postfix:
-    usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf)
-    # turn to false when running on data and MC (for the moment)
-    getattr(process, "patElectrons"+pf).embedGenMatch = False
-    getattr(process, "patMuons"+pf).embedGenMatch = False
-
-
-process.goodVertices = cms.EDFilter("VertexSelector",
-	src = cms.InputTag("offlinePrimaryVertices"),
-	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
-	filter = cms.bool(False),
-	)
-
-#### First PF collection
-# muon selection cuts
-process.pfMuonsFromVertexPF.vertices= cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
-process.pfMuonsFromVertexPF.d0Cut   = cms.double(0.02) # transverse IP w.r.t. PV
-process.pfMuonsFromVertexPF.dzCut   = cms.double(1.)  # longitudinal IP w.r.t. PV
-process.pfSelectedMuonsPF.cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 10" 
- 		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
-   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
-   		+" && muonRef().globalTrack().normalizedChi2() < 10"
-    		+" && muonRef().track().numberOfValidHits() > 10"
-    		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
-    		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
- 	)
-# electron selection cuts
-process.pfElectronsFromVertexPF.vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
-process.pfElectronsFromVertexPF.d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
-process.pfElectronsFromVertexPF.dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
-process.pfSelectedElectronsPF.cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 10" 
- 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"
- 		+"&& mva_e_pi > 0.6"
- 	)
-
-# PatElectronID
-process.patElectronsPF.addElectronID = cms.bool(True)
-process.patElectronsPF.electronIDSources = cms.PSet(
-	simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
-	simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
-	simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
-      	simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
-   	simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
-       	simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
-    	simpleEleId95cIso  = cms.InputTag("simpleEleId95cIso"),
-       	simpleEleId90cIso  = cms.InputTag("simpleEleId90cIso"),
-    	simpleEleId85cIso  = cms.InputTag("simpleEleId85cIso"),
-        simpleEleId80cIso  = cms.InputTag("simpleEleId80cIso"),
-    	simpleEleId70cIso  = cms.InputTag("simpleEleId70cIso"),
-        simpleEleId60cIso  = cms.InputTag("simpleEleId60cIso"),
-)
-
-# ele and mu isolation
-process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
-process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
-
-# Jet corrections 
-process.patJetCorrFactorsPF.levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-process.patJetCorrFactorsPF.rho    = cms.InputTag('kt6PFJets','rho')
-process.pfJetsPF.doAreaFastjet = True
-process.pfJetsPF.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
-
-#### Second PF collection
-# muon selection cuts
-process.pfMuonsFromVertexPF2.vertices= cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
-process.pfMuonsFromVertexPF2.d0Cut   = cms.double(0.02) # transverse IP w.r.t. PV
-process.pfMuonsFromVertexPF2.dzCut   = cms.double(1.)  # longitudinal IP w.r.t. PV
-process.pfSelectedMuonsPF2.cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 10" 
- 		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
-   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
-   		+" && muonRef().globalTrack().normalizedChi2() < 10"
-    		+" && muonRef().track().numberOfValidHits() > 10"
-    		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
-    		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
- 	)
-# electron selection cuts
-process.pfElectronsFromVertexPF2.vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
-process.pfElectronsFromVertexPF2.d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
-process.pfElectronsFromVertexPF2.dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
-process.pfSelectedElectronsPF2.cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 10" 
- 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"
- 		+"&& mva_e_pi > 0.6"
- 	)
-
-# PatElectronID
-process.patElectronsPF2.addElectronID = cms.bool(True)
-process.patElectronsPF2.electronIDSources = cms.PSet(
-	simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
-	simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
-	simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
-      	simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
-   	simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
-       	simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
-    	simpleEleId95cIso  = cms.InputTag("simpleEleId95cIso"),
-       	simpleEleId90cIso  = cms.InputTag("simpleEleId90cIso"),
-    	simpleEleId85cIso  = cms.InputTag("simpleEleId85cIso"),
-        simpleEleId80cIso  = cms.InputTag("simpleEleId80cIso"),
-    	simpleEleId70cIso  = cms.InputTag("simpleEleId70cIso"),
-        simpleEleId60cIso  = cms.InputTag("simpleEleId60cIso"),
-)
-
-# ele and mu isolation
-process.pfIsolatedMuonsPF2.combinedIsolationCut     = cms.double(1.0)
-process.pfIsolatedElectronsPF2.combinedIsolationCut = cms.double(1.0)
-
-# Jet corrections 
-process.patJetCorrFactorsPF2.levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-process.patJetCorrFactorsPF2.rho    = cms.InputTag('kt6PFJets','rho')
-process.pfJetsPF2.doAreaFastjet = True
-process.pfJetsPF2.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
-### End second PF collection
-
-
 ### Cleaning ###################################################################
 # flag HB/HE noise
 # info: https://twiki.cern.ch/twiki/bin/view/CMS/HcalNoiseInfoLibrary
@@ -282,6 +148,97 @@ process.scrapingVeto = cms.EDFilter("FilterOutScraping",
      numtrack = cms.untracked.uint32(10),
      thresh = cms.untracked.double(0.25)
      )
+
+process.goodVertices = cms.EDFilter("VertexSelector",
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
+	filter = cms.bool(False),
+	)
+
+############ PF2PAT ##########################################
+# load the standard PAT config
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+
+# Add a pro forma output module because PF2PAT complains otherwise...
+process.out = cms.OutputModule("PoolOutputModule",
+      # save only events passing the full path
+      SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+      # save PAT Layer 1 output; you need a '*' to
+      outputCommands = cms.untracked.vstring('drop *', *patEventContent )
+      )
+
+# Configure PAT to use PF2PAT instead of AOD sources
+from PhysicsTools.PatAlgos.tools.pfTools import *
+
+### Configuration in common to all collections
+pfPostfixes = [ 'PF','PF2' ]
+for pf in pfPostfixes:
+    usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf)
+    # turn to false when running on data and MC (for the moment)
+    getattr(process, 'patElectrons'+pf).embedGenMatch = False
+    getattr(process, 'patMuons'+pf).embedGenMatch = False
+
+    # muon selection cuts
+    getattr(process, 'pfMuonsFromVertex'+pf).vertices=cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
+    getattr(process, 'pfMuonsFromVertex'+pf).d0Cut   =cms.double(0.02) # transverse IP w.r.t. PV
+    getattr(process, 'pfMuonsFromVertex'+pf).dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
+    getattr(process, 'pfSelectedMuons'+pf).cut = cms.string(
+ 		"abs( eta ) < 2.4 && pt > 10" 
+ 		+" && muonRef().isNonnull && muonRef().isGlobalMuon()"
+   		+" && muonRef().isTrackerMuon() && muonRef().numberOfMatches > 1"
+   		+" && muonRef().globalTrack().normalizedChi2() < 10"
+    		+" && muonRef().track().numberOfValidHits() > 10"
+    		+" && muonRef().globalTrack().hitPattern().numberOfValidMuonHits() > 0"
+    		+" && muonRef().innerTrack().hitPattern().numberOfValidPixelHits() > 0"
+ 	)
+    # electron selection cuts
+    getattr(process, 'pfElectronsFromVertex'+pf).vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
+    getattr(process, 'pfElectronsFromVertex'+pf).d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
+    getattr(process, 'pfElectronsFromVertex'+pf).dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
+    getattr(process, 'pfSelectedElectrons'+pf).cut = cms.string(
+ 		"abs( eta ) < 2.4 && pt > 10" 
+ 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"
+ 		+"&& mva_e_pi > 0.6"
+ 	)
+
+    # Jet corrections 
+    getattr(process,'patJetCorrFactors'+pf).levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+    getattr(process,'patJetCorrFactors'+pf).rho    = cms.InputTag('kt6PFJets','rho')
+    getattr(process,'pfJets'+pf).doAreaFastjet     = True
+    getattr(process,'pfJets'+pf).Rho_EtaMax        = process.kt6PFJets.Rho_EtaMax
+
+    # Disable pileup removal on PF
+    getattr(process,'pfNoPileUp'+pf).enable = False
+
+
+### Specific to first PF collection
+# PatElectronID
+process.patElectronsPF.addElectronID = cms.bool(True)
+process.patElectronsPF.electronIDSources = cms.PSet(
+	simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
+	simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
+	simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
+      	simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
+   	simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
+       	simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
+    	simpleEleId95cIso  = cms.InputTag("simpleEleId95cIso"),
+       	simpleEleId90cIso  = cms.InputTag("simpleEleId90cIso"),
+    	simpleEleId85cIso  = cms.InputTag("simpleEleId85cIso"),
+        simpleEleId80cIso  = cms.InputTag("simpleEleId80cIso"),
+    	simpleEleId70cIso  = cms.InputTag("simpleEleId70cIso"),
+        simpleEleId60cIso  = cms.InputTag("simpleEleId60cIso"),
+)
+# ele and mu isolation
+process.pfIsolatedMuonsPF.combinedIsolationCut = cms.double(0.15)
+process.pfIsolatedElectronsPF.combinedIsolationCut = cms.double(0.15)
+
+
+### Specific to second PF collection
+# ele and mu isolation
+process.pfIsolatedMuonsPF2.combinedIsolationCut     = cms.double(1.0)
+process.pfIsolatedElectronsPF2.combinedIsolationCut = cms.double(1.0)
+
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
@@ -333,8 +290,8 @@ if options.runon == 'data':
         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
         for extJet in process.analyze.jets:
             extJet.corrections = extJet.corrections.value() + 'Residual'
-        process.patJetCorrFactorsPF.levels.extend( ['L2L3Residual'] )
-        process.patJetCorrFactorsPF2.levels.extend( ['L2L3Residual'] )
+        for pf in pfPostfixes:            
+            getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
 
 # Add some PF lepton collections
 process.analyze.leptons = (
@@ -399,10 +356,6 @@ process.analyze.leptons = (
 #                                      lastEvent = cms.untracked.int32(51),
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
-
-# To disable pileup on PF uncomment
-process.pfNoPileUpPF.enable = False
-process.pfNoPileUpPF2.enable = False
 
 # to enable pileUpsubtraction for MET
 # process.pfMETPF.src=cms.InputTag("pfNoPileUpPF")
