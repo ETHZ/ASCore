@@ -29,6 +29,7 @@ void SSDLAnalysis::BookTree(){
 	fOutputFile->cd();
 	fAnalysisTree = new TTree("Analysis", "AnalysisTree");
 
+
     // run/sample properties
 	fAnalysisTree->Branch("Run",                &fTRunNumber,         "Run/I");
 	fAnalysisTree->Branch("Event",              &fTEventNumber,       "Event/I");
@@ -65,7 +66,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("NEls",                   &fTnqels,               "NEls/I");
 	fAnalysisTree->Branch("ElCh",                   &fTElcharge,            "ElCh[NEls]/I");
 	fAnalysisTree->Branch("ElChIsCons",             &fTElChargeIsCons,      "ElChIsCons[NEls]/I");
-	// fAnalysisTree->Branch("ElChIsGenCons",          &fTElChargeIsGenCons,   "ElChIsGenCons[NEls]/I");
+	fAnalysisTree->Branch("ElChIsGenCons",          &fTElChargeIsGenCons,   "ElChIsGenCons[NEls]/I");
 	fAnalysisTree->Branch("ElEcalDriven",           &fTElEcalDriven,        "ElEcalDriven[NEls]/I");
 	fAnalysisTree->Branch("ElCaloEnergy",           &fTElCaloEnergy,        "ElCaloEnergy[NEls]/F");
 	fAnalysisTree->Branch("ElPt",                   &fTElpt,                "ElPt[NEls]/F");
@@ -106,8 +107,7 @@ void SSDLAnalysis::BookTree(){
 
 void SSDLAnalysis::Analyze(){
 	// initial event selection: good event trigger, good primary vertex...
-	// Trigger selection will be done later
-	// if( !IsGoodMuEvent() && !IsGoodElEvent() && !IsGoodElFakesEvent() && !IsGoodHadronicEvent()) return;
+	if( !IsGoodMuEvent() && !IsGoodElEvent() && !IsGoodElFakesEvent() && !IsGoodHadronicEvent()) return;
 	if( !IsGoodEvent() ) return;
 	ResetTree();
 	
@@ -123,9 +123,9 @@ void SSDLAnalysis::Analyze(){
 	if( (fTnqmus + fTnqels) < 1 ) return;
 	
 	// event and run info
-	fTRunNumber   = fTR->Run;
-	fTEventNumber = fTR->Event;
-	fTLumiSection = fTR->LumiSection;
+	fTRunNumber                  = fTR->Run;
+	fTEventNumber                = fTR->Event;
+	fTLumiSection                = fTR->LumiSection;
 		
 	// Get trigger results
 	fTHLTnames = fHLTLabels;
@@ -141,9 +141,9 @@ void SSDLAnalysis::Analyze(){
 	for(int ind=0; ind<std::min(nqjets,fMaxNjets); ind++){
 		jetindex = selectedJetInd[ind];
 		// dump properties
-		fTJetpt  [ind] = fTR->JPt [jetindex];
-		fTJeteta [ind] = fTR->JEta[jetindex];
-		fTJetphi [ind] = fTR->JPhi[jetindex];
+		fTJetpt  [ind] = fTR->PFJPt [jetindex];
+		fTJeteta [ind] = fTR->PFJEta[jetindex];
+		fTJetphi [ind] = fTR->PFJPhi[jetindex];
 	}
 	// get METs
 	fTtcMET     = fTR->TCMET;
@@ -156,6 +156,7 @@ void SSDLAnalysis::Analyze(){
 	}
 	
 	int nqmus = selectedMuInd.size();
+	if( nqmus < 1 ) return;
 	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
 		int index = selectedMuInd[i];
 		fTmupt       [i] = fTR->MuPt[index];
@@ -202,8 +203,7 @@ void SSDLAnalysis::Analyze(){
 		elindex = selectedElInd[ind];
 		fTElcharge                   [ind] = fTR->ElCharge                [elindex];
 		fTElChargeIsCons             [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
-		// fTElChargeIsGenCons          [ind] = (fTR->ElCharge[elindex])==(fTR->ElGenCharge[elindex]);
-		// Complicated to fix, was removed from NTuple since it's stored in the pdg id, do we use it?
+		fTElChargeIsGenCons          [ind] = (fTR->ElCharge[elindex])==(fTR->ElGenCharge[elindex]);
 		fTElEcalDriven               [ind] = fTR->ElEcalDriven           [elindex];
 		fTElCaloEnergy               [ind] = fTR->ElCaloEnergy           [elindex];
 		fTElpt                       [ind] = fTR->ElPt                   [elindex];
@@ -256,7 +256,7 @@ void SSDLAnalysis::ResetTree(){
 		fTHLTprescale[i] = -1;
 	}
 	fTHLTnames.clear();
-	fTHLTnames.resize(fHLTLabels.size());
+	fTHLTnames.resize(fHLTLabelMap.size());
 
 	// muon properties
 	fTnqmus = 0;
@@ -288,7 +288,7 @@ void SSDLAnalysis::ResetTree(){
 		fTElcharge          [i] = -999;
 		fTElChargeIsCons    [i] = -999;
 		fTElEcalDriven      [i] = -999;
-		// fTElChargeIsGenCons [i] = -999;
+		fTElChargeIsGenCons [i] = -999;
 		fTElCaloEnergy      [i] = -999.99;
 		fTElpt              [i] = -999.99;
 		fTEleta             [i] = -999.99;

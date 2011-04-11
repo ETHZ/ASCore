@@ -41,7 +41,7 @@ private:
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;
 	
-	static const int gMaxhltbits = 300;
+	static const int gMaxhltbits = 200;
 	
 	TTree* fAnalysisTree;
 	
@@ -89,7 +89,7 @@ private:
 	int     fTnqels;
 	int   fTElcharge                   [fMaxNeles];
 	int   fTElChargeIsCons             [fMaxNeles];
-	// int   fTElChargeIsGenCons          [fMaxNeles];
+	int   fTElChargeIsGenCons          [fMaxNeles];
 	int   fTElEcalDriven               [fMaxNeles];
 	float fTElCaloEnergy               [fMaxNeles];
 	float fTElpt                       [fMaxNeles];
