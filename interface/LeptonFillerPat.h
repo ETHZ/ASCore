@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.3 2011/02/23 19:34:29 stiegerb Exp $
+// $Id: LeptonFillerPat.h,v 1.1 2011/04/06 16:29:07 fronga Exp $
 //
 //
 
@@ -46,18 +46,28 @@ public:
   virtual void reset(void);
   /// Fill all branches
   virtual const int fillBranches(const edm::Event&, const edm::EventSetup& );
+  /// for specific leptons
+  virtual void getSpecific(LeptonType lepton, size_t index);
+
+  enum Type {
+    El, Mu, Tau, unknown
+  };
+  Type fType;
 
 private:
 
 
+  /// Set and get jet type
+  void setType( const Type& type ) { fType = type; }
+  const Type getType(void) const { return fType; }
+  
   //- Configuration parameters
   edm::InputTag fTag; 
-
+  
   // Pre-selection
   double fMinpt;
   double fMaxeta;
 
-  
   size_t gMaxnobjs;
   
   // Tree variables
@@ -73,6 +83,7 @@ private:
   double* fTe;
   double* fTet;
   int*    fTcharge;
+  int*    fTdecaymode;
 
   double* fTparticleIso;
   double* fTchargedHadronIso;
@@ -93,12 +104,12 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
 {
 
   // Retrieve configuration parameters
-  fMinpt   = config.getParameter<double>("sel_minpt");
-  fMaxeta  = config.getParameter<double>("sel_maxeta");
-  gMaxnobjs = config.getUntrackedParameter<uint>("maxnobjs");
+  std::string leptontype    = config.getUntrackedParameter<std::string>("type");
+  fMinpt                    = config.getParameter<double>("sel_minpt");
+  fMaxeta                   = config.getParameter<double>("sel_maxeta");
+  gMaxnobjs                 = config.getUntrackedParameter<uint>("maxnobjs");
   
-  fTag    = config.getUntrackedParameter<edm::InputTag>("tag");
-
+  fTag                      = config.getUntrackedParameter<edm::InputTag>("tag");
 
   edm::LogVerbatim("NTP") << " ==> LeptonFillerPat Constructor - " << fPrefix;
   edm::LogVerbatim("NTP") << "  Input Tag:      " << fTag.label();
@@ -107,6 +118,14 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
   edm::LogVerbatim("NTP") << "  Max eta:        " << fMaxeta;
   edm::LogVerbatim("NTP") << "---------------------------------";
 
+  if      (leptontype == "electron")   setType(El);
+  else if (leptontype == "muon")       setType(Mu);
+  else if (leptontype == "tau")        setType(Tau);  
+  else {
+    setType(unknown);
+    edm::LogWarning("NTP") << "!! Don't know Lepton Type !!" << leptontype;
+  }
+  
   // Define all arrays
   fTpx                = new double[gMaxnobjs];
   fTpy                = new double[gMaxnobjs];
@@ -122,6 +141,10 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
   fTchargedHadronIso  = new double[gMaxnobjs];
   fTneutralHadronIso  = new double[gMaxnobjs];
   fTphotonIso         = new double[gMaxnobjs];
+
+  if(fType == Tau){
+  	fTdecaymode    = new int[gMaxnobjs];
+  }
 
 }
 
@@ -166,6 +189,8 @@ const int LeptonFillerPat<LeptonType>::fillBranches(const edm::Event& iEvent,
     fTchargedHadronIso[pfqi] = lepton.chargedHadronIso();
     fTneutralHadronIso[pfqi] = lepton.neutralHadronIso();
     fTphotonIso[pfqi]        = lepton.photonIso();
+   
+    getSpecific(lepton, pfqi);
           
     ++pfqi;
 
@@ -196,6 +221,10 @@ LeptonFillerPat<LeptonType>::~LeptonFillerPat(void) {
   delete [] fTneutralHadronIso;
   delete [] fTphotonIso;
 
+  if(fType == Tau){
+  	delete [] fTdecaymode;
+  }
+
 }
 
 //________________________________________________________________________________________
@@ -219,6 +248,10 @@ void LeptonFillerPat<LeptonType>::createBranches(void) {
   addBranch("ChargedHadronIso", "D", fTchargedHadronIso,  "NObjs" );
   addBranch("NeutralHadronIso", "D", fTneutralHadronIso,  "NObjs" );
   addBranch("PhotonIso",        "D", fTphotonIso,  "NObjs" );
+  
+  if(fType == Tau){
+  	addBranch("DecayMode", "I", fTdecaymode,"NObjs" );
+  }
 
 }
 
@@ -244,6 +277,24 @@ void LeptonFillerPat<LeptonType>::reset(void) {
   resetDouble(fTneutralHadronIso,gMaxnobjs);
   resetDouble(fTphotonIso,gMaxnobjs);
 
+  if(fType==Tau){
+  	resetInt(fTdecaymode,gMaxnobjs);
+  }
+
+}
+
+//________________________________________________________________________________________
+template <class LeptonType>
+void LeptonFillerPat<LeptonType>::getSpecific(LeptonType lepton, size_t index){
+  	return;
+}
+
+//________________________________________________________________________________________
+template <>
+void LeptonFillerPat<pat::Tau>::getSpecific(pat::Tau lepton, size_t index){
+	// speficic for PFTaus
+	fTdecaymode[index]   = lepton.decayMode();	
+	return;
 }
 
 #endif
