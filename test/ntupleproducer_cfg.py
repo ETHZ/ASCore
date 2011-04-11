@@ -31,12 +31,13 @@ options.register ('runon', # register 'runon' option
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 
-options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
+#options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
+options.files= '/store/data/Run2011A/MuOnia/AOD/PromptReco-v1/000/161/311/E6B512D1-CD57-E011-BC63-001D09F2423B.root'
 #options.files= '/store/mc/Fall10/ZbbToLL_M-40_PtB1-15_TuneZ2_7TeV-madgraph-pythia6/GEN-SIM-RECO/START38_V12-v1/0001/14CCFBFC-DC0D-E011-AAE0-001A64789D70.root'
 #options.files= '/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0000/00309820-0FEA-DF11-AE59-E0CB4E1A118E.root'
 #options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
 #options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-# options.files= 'file:/data/stiegerb/tempfiles/MuData.root'
+#options.files= 'file:/scratch/stiegerb/MuData.root'
 # options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_RECO.root'
 # options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_AOD.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
@@ -170,7 +171,7 @@ process.pfElectronsFromVertexPF.d0Cut   =cms.double(0.04) # transverse IP w.r.t.
 process.pfElectronsFromVertexPF.dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
 process.pfSelectedElectronsPF.cut = cms.string(
  		"abs( eta ) < 2.4 && pt > 10" 
- 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() > 1"
+ 		+"&& gsfTrackRef().isNonnull() && gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"
  		+"&& mva_e_pi > 0.6"
  	)
 
@@ -286,9 +287,10 @@ if options.runon == 'data':
 #                                      )
 
 # To disable pileup on PF uncomment
-#process.pfNoPileUpPF.enable = False
+process.pfNoPileUpPF.enable = False
 
-
+# to enable pileUpsubtraction for MET
+# process.pfMETPF.src=cms.InputTag("pfNoPileUpPF")
 #### Path ######################################################################
 process.p = cms.Path(
     process.scrapingVeto * (
@@ -302,6 +304,7 @@ process.p = cms.Path(
         + process.simpleEleIdSequence
         + process.metCorSequence
         + process.patPF2PATSequencePF
+#	+ process.dump
         + process.analyze
         )
     )

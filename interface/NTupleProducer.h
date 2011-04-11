@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.85 2011/03/28 15:07:34 theofil Exp $
+// $Id: NTupleProducer.h,v 1.86 2011/03/29 15:49:11 pnef Exp $
 //
 //
 
@@ -136,6 +136,7 @@ private:
 	edm::InputTag fRawCaloMETTag;
 	edm::InputTag fTCMETTag;
 	edm::InputTag fPFMETTag;
+	edm::InputTag fPFMETPATTag;
 	edm::InputTag fCorrCaloMETTag;
 	edm::InputTag fGenMETTag;
 	edm::InputTag fVertexTag;
@@ -801,6 +802,11 @@ private:
 	float fTPFMETpy;
 	float fTPFMETphi;
 	float fTPFMETSignificance;
+	float fTPFMETPAT;
+	float fTPFMETPATpx;
+	float fTPFMETPATpy;
+	float fTPFMETPATphi;
+	float fTPFMETPATSignificance;
 	float fTMETR12;
 	float fTMETR21;
 ////////////////////////////////////////////////////////
