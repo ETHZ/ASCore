@@ -41,95 +41,53 @@ void MultiplicityAnalysisBase::InitializeEvent(){
 void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fElecs.clear();
 	fMuons.clear();
+	fTaus.clear();
 	fJets.clear();
-	fJetsLoose.clear();
-	fJetsMedium.clear();
-	fJetsTight.clear();
-	fBJets.clear();
+	fJetTaus.reset();
+	fNJetsAcc=0;
 
 	vector<double> mutight;
-	for(int i=0; i< fTR->NMus; ++i){
-		if(! IsGoodBasicMu(i)           ) continue;
-		if(! (fTR->MuPt[i] > 10)        ) continue;
-		if(! (fabs(fTR->MuEta[i]) < 2.4)) continue;
-		double iso    = fTR->MuRelIso03[i];
-		double pt     = fTR->MuPt[i];
-		double hybiso = iso*pt / std::max(20.,pt);
-		if(! (hybiso < 0.15)            ) continue;
+	for(int i=0; i< fTR->NPfMus; ++i){
 		fMuons.push_back(i);
-		mutight.push_back(fTR->MuPt[i]);
+		mutight.push_back(fTR->PfMuPt[i]);
 	}
 	fMuons      = Util::VSort(fMuons     , mutight);
 	
 	vector<double> eltight;
-	for(int i=0; i< fTR->NEles; ++i){
-		if(! IsLooseEl(i)               ) continue;
-		if(! (fTR->ElPt[i] > 10)        ) continue;
-		if(! (fabs(fTR->ElEta[i]) < 2.4)) continue;
-		if(! IsIsolatedEl(i, 0.15, 0.15)) continue; //hybiso 
+	for(int i=0; i< fTR->NPfEls; ++i){
 		fElecs.push_back(i);
-		eltight.push_back(fTR->ElPt[i]);
+		eltight.push_back(fTR->PfElPt[i]);
 	}
 	fElecs      = Util::VSort(fElecs     , eltight);
-
-	vector<double> pt1;
-	vector<double> pt2;
-	vector<double> pfloose;
-	vector<double> pfmedium;
-	vector<double> pftight;
-
-	fNJets_toremove_ele=0;
-	fNJets_toremove_muo=0;
-	for(int i=0; i<fElecs.size(); ++i){
-		if(fTR->ElPt[fElecs[i]] > 15) fNJets_toremove_ele ++;
-	}	
-	for(int i=0; i<fMuons.size(); ++i){
-		if(fTR->MuPt[fMuons[i]] > 15) fNJets_toremove_muo ++;
-	}	
-
-	bool doSel(true);
-	for(int ij=0; ij < fTR->PFNJets; ++ij){
-		if(fTR->PFJPt[ij] < 15) continue;  // note: ETH ntuple only stores PFJets > 15 GeV (defualt config)
-
-		bool JGood(true);
-		for(int i=0; i<fMuons.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->PFJEta[ij], fTR->MuEta[fMuons[i]], 
-					fTR->PFJPhi[ij], fTR->MuPhi[fMuons[i]]);
-			if(deltaR < 0.4)   {JGood=false; fNJets_toremove_muo--;}
-		}
-		for(int i=0; i<fElecs.size(); ++i){
-			double deltaR = Util::GetDeltaR(fTR->PFJEta[ij], fTR->ElEta[fElecs[i]], 
-					fTR->PFJPhi[ij], fTR->ElPhi[fElecs[i]]);
-			if(deltaR < 0.4)   {JGood=false; fNJets_toremove_ele--;}
-		}
-		if(JGood==false) continue;
-		
-		fJets.push_back(ij);                 // fJets has all jets except for duplicates with selected leptons
-		pt1.push_back(fTR->PFJPt[ij]);
-		if(! IsGoodBasicPFJet(ij,  20., 2.4) ) continue;
-		fJetsLoose.push_back(ij);
-		pfloose.push_back(fTR->PFJPt[ij]);
-		if( fTR->PFJbTagProbTkCntHighEff[ij] > 3.3){
-			fBJets.push_back(ij);
-			pt2.push_back(fTR->JPt[ij]);	
-		}
-		if(! IsGoodPFJetMedium(ij, 20., 2.4) ) continue;
-		fJetsMedium.push_back(ij);
-		pfmedium.push_back(fTR->PFJPt[ij]);
-		if(! IsGoodPFJetTight(ij,  20., 2.4) ) continue;
-		fJetsTight.push_back(ij);
-		pftight.push_back(fTR->PFJPt[ij]);
+	
+	vector<double> pt1; 
+	for(int ij=0; ij < fTR->PF2PATNJets; ++ij){
+		if(fTR->PF2PATJPt[ij] < 20) continue;  // note: ETH ntuple only stores PF2PATJets > 15 GeV (defualt config)
+		fJets.push_back(ij);                   // fJets has all jets except for duplicates with selected leptons
+		pt1.push_back(fTR->PF2PATJPt[ij]);
+		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(fTR->PF2PATJPt[ij]); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
+		if(fabs(fTR->PF2PATJEta[ij])>2.4) continue;
+		fNJetsAcc++;
 	}
 	fJets        = Util::VSort(fJets,       pt1);
-	fBJets       = Util::VSort(fBJets,      pt2);
-	fJetsLoose   = Util::VSort(fJetsLoose,  pfloose);
-	fJetsMedium  = Util::VSort(fJetsMedium, pfmedium);
-	fJetsTight   = Util::VSort(fJetsTight,  pftight);
-	pfloose.clear();
-	pfmedium.clear();
-	pftight.clear();
+	
+	vector<double> taus;
+	for(int i=0; i< fTR->NPfTaus; ++i){
+		if(fTR->PfTauPt[i]   < 20 ) continue;
+		fTaus.push_back(i);
+		taus.push_back(fTR->PfTauPt[i]);
+		fJetTaus.index.push_back(i); fJetTaus.pt.push_back(fTR->PfTauPt[i]); fJetTaus.isTau.push_back(1); fJetTaus.NObjs++;
+		if(fabs(fTR->PfTauEta[i])>2.4) continue;
+		fNJetsAcc++;
+	}
+	fTaus          = Util::VSort(fTaus     , taus);
 	pt1.clear();
-	pt2.clear();
+	//sort fJetTaus accorting to Pt
+	fJetTaus.index = Util::VSort(fJetTaus.index, fJetTaus.pt);
+	fJetTaus.isTau = Util::VSort(fJetTaus.isTau, fJetTaus.pt);
+	sort(fJetTaus.pt.begin(), fJetTaus.pt.end());
+	reverse(fJetTaus.pt.begin(), fJetTaus.pt.end());
+
 }
 
 void MultiplicityAnalysisBase::FindLeptonConfig(){
@@ -141,18 +99,18 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 	}else if(fElecs.size() + fMuons.size() ==2){
 		int charge1, charge2;
 		if(fElecs.size()==2){
-			charge1=fTR->ElCharge[fElecs[0]];
-			charge2=fTR->ElCharge[fElecs[1]];
+			charge1=fTR->PfElCharge[fElecs[0]];
+			charge2=fTR->PfElCharge[fElecs[1]];
 			if(charge1*charge2==1){fLeptConfig=SS_ee;}
 			else{fLeptConfig=OS_ee;}
 		} else if(fMuons.size()==2){
-			charge1=fTR->MuCharge[fMuons[0]];
-			charge2=fTR->MuCharge[fMuons[1]];
+			charge1=fTR->PfMuCharge[fMuons[0]];
+			charge2=fTR->PfMuCharge[fMuons[1]];
 			if(charge1*charge2==1){fLeptConfig=SS_mumu;}
 			else{fLeptConfig=OS_mumu;}
 		} else{
-			charge1=fTR->ElCharge[fElecs[0]];
-			charge2=fTR->MuCharge[fMuons[0]];			
+			charge1=fTR->PfElCharge[fElecs[0]];
+			charge2=fTR->PfMuCharge[fMuons[0]];			
 			if(charge1*charge2==1){fLeptConfig=SS_emu;}
 			else{fLeptConfig=OS_emu;}
 		}
@@ -201,37 +159,57 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 //		if(! IsGoodMuEvent()) return false;
 //	}
 
-	// HT
+	// HT from jets + taus
 	double HT=0;
-	for(int j=0; j<fJetsLoose.size(); ++j){
-		if(fTR->PFJPt[fJetsLoose[j]] > 50 && fabs(fTR->PFJEta[fJetsLoose[j]])<2.4){
-			HT += fTR->PFJPt[fJetsLoose[j]];
+	for(int j=0; j<fJetTaus.NObjs; ++j){
+		if(!fJetTaus.isTau[j]){
+			// ! Watch out: this is not what we want but the way is was done for 2010 data
+			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<2.4 && IsGoodBasicPFJetPAT(fJetTaus.index[j], 20., 2.4)){
+				HT += fTR->PF2PATJPt[fJetTaus.index[j]];
+			}
+		}else {
+			if(fTR->PfTauPt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTauEta[fJetTaus.index[j]]) < 2.4){
+//				HT +=fTR->PfTauPt[fJetTaus.index[j]];
+			}
 		}
 	}
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
 
 
-	// leading jets
+	// leading jets: FIXME: JID ignored
 	bool leadingjets(true);
 	if(fCut_JPt_hardest_min > 0){
-		if(fJets.size() <1) leadingjets=false;
-		else if(IsGoodBasicPFJet(fJets[0], fCut_JPt_hardest_min, 2.4) == false ){leadingjets=false;}
+		if(fJetTaus.NObjs <1) leadingjets=false;
+		else if(!fJetTaus.isTau[0]){
+			if(fTR->PF2PATJPt[fJetTaus.index[0]] < fCut_JPt_hardest_min || fabs(fTR->PF2PATJEta[fJetTaus.index[0]])>2.4 ) {leadingjets=false;}
+		}else {
+			if(fTR->PfTauPt[fJetTaus.index[0]]   < fCut_JPt_hardest_min || fabs(fTR->PfTauEta[fJetTaus.index[0]]) >2.4  ) {leadingjets=false;}
+		}
 	}
 	if(fCut_JPt_second_min > 0){
-		if(fJets.size() <2) leadingjets=false;
-		else if(IsGoodBasicPFJet(fJets[1], fCut_JPt_second_min,  2.4) == false ){leadingjets=false;}
+		if(fJetTaus.NObjs <2) leadingjets=false;
+		else if(!fJetTaus.isTau[1]){
+			if(fTR->PF2PATJPt[fJetTaus.index[1]] < fCut_JPt_second_min || fabs(fTR->PF2PATJEta[fJetTaus.index[1]])>2.4 ) {leadingjets=false;}
+		}else {
+			if(fTR->PfTauPt[fJetTaus.index[1]]   < fCut_JPt_second_min || fabs(fTR->PfTauEta[fJetTaus.index[1]]) >2.4  ) {leadingjets=false;}
+		}
 	}
 	if(leadingjets == false) return false;
 	
 	
-	// MHT
+	// MHT from jets plus taus
 	TVector3 MHTall(0., 0., 0.);
-        for(int i=0; i<fTR->PFNJets; ++i) {
+        for(int i=0; i<fTR->PF2PATNJets; ++i) {
 		TVector3 jet;
-		jet.SetPtEtaPhi(fTR->PFJPt[i], fTR->PFJEta[i], fTR->PFJPhi[i]);
+		jet.SetPtEtaPhi(fTR->PF2PATJPt[i], fTR->PF2PATJEta[i], fTR->PF2PATJPhi[i]);
 		MHTall += jet;
 	}	
+	for(int t=0; t<fTaus.size(); ++t){
+		TVector3 tau;
+		tau.SetPtEtaPhi(fTR->PfTauPt[fTaus[t]], fTR->PfTauEta[fTaus[t]], fTR->PfTauPhi[fTaus[t]]);
+		MHTall += tau;
+	}
 	fMHTall = MHTall.Pt();
 	if(fMHTall < fCut_MHT_min) {return false;}
 
@@ -253,25 +231,24 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		if( fCut_Zveto    ==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
 	} else if(fCut_Zselector ==1 ) {return false;}
 
-	// VectorSumPt of selected & identified objects(el, mu, jet) and MET
+	// VectorSumPt of selected & identified objects(tau, el, mu, jet) and MET
 	double px=0;
 	double py=0;
-	for(int i=0; i<fJetsLoose.size(); ++i){
-		px+=fTR->PFJPx[fJetsLoose[i]];
-		py+=fTR->PFJPy[fJetsLoose[i]];
+	for(int i=0; i<fJets.size(); ++i){
+		px+=fTR->PF2PATJPx[fJets[i]];
+		py+=fTR->PF2PATJPy[fJets[i]];
 	}
-	fMHT = sqrt(px*px + py*py); // MHT from all selected jets
-	TVector3 MHTvec(0.,0.,0.);
-	MHTvec.SetXYZ(px, py, 0.);
-	fMHTphi=MHTvec.Phi();
-
 	for(int i=0; i<fMuons.size(); ++i){
-		px+=fTR->MuPx[fMuons[i]];
-		py+=fTR->MuPy[fMuons[i]];
+		px+=fTR->PfMuPx[fMuons[i]];
+		py+=fTR->PfMuPy[fMuons[i]];
 	}
 	for(int i=0; i<fElecs.size(); ++i){
-		px+=fTR->ElPx[fElecs[i]];
-		py+=fTR->ElPy[fElecs[i]];
+		px+=fTR->PfElPx[fElecs[i]];
+		py+=fTR->PfElPy[fElecs[i]];
+	}
+	for(int i=0; i<fTaus.size(); ++i){
+		px+=fTR->PfTauPx[fTaus[i]];
+		py+=fTR->PfTauPy[fTaus[i]];
 	}
 	px+=fTR->PFMETpx;
 	py+=fTR->PFMETpy;
@@ -284,18 +261,17 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	return true;	
 }
 
-
 double MultiplicityAnalysisBase::GetDiLeptInvMass(){
 	TLorentzVector p1, p2;
 	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee){
-		p1.SetPtEtaPhiM(fTR->ElPt[fElecs[0]],fTR->ElEta[fElecs[0]],fTR->ElPhi[fElecs[0]], 0. );
-		p2.SetPtEtaPhiM(fTR->ElPt[fElecs[1]],fTR->ElEta[fElecs[1]],fTR->ElPhi[fElecs[1]], 0. );
+		p1.SetPtEtaPhiM(fTR->PfElPt[fElecs[0]],fTR->PfElEta[fElecs[0]],fTR->PfElPhi[fElecs[0]], 0. );
+		p2.SetPtEtaPhiM(fTR->PfElPt[fElecs[1]],fTR->PfElEta[fElecs[1]],fTR->PfElPhi[fElecs[1]], 0. );
 	} else if(fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ){
-		p1.SetPtEtaPhiM(fTR->MuPt[fMuons[0]],fTR->MuEta[fMuons[0]],fTR->MuPhi[fMuons[0]], 0.105 );
-		p2.SetPtEtaPhiM(fTR->MuPt[fMuons[1]],fTR->MuEta[fMuons[1]],fTR->MuPhi[fMuons[1]], 0.105 );
+		p1.SetPtEtaPhiM(fTR->PfMuPt[fMuons[0]],fTR->PfMuEta[fMuons[0]],fTR->PfMuPhi[fMuons[0]], 0.105 );
+		p2.SetPtEtaPhiM(fTR->PfMuPt[fMuons[1]],fTR->PfMuEta[fMuons[1]],fTR->PfMuPhi[fMuons[1]], 0.105 );
 	} else if(fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
-		p1.SetPtEtaPhiM(fTR->MuPt[fMuons[0]],fTR->MuEta[fMuons[0]],fTR->MuPhi[fMuons[0]], 0.105 );
-		p2.SetPtEtaPhiM(fTR->ElPt[fElecs[0]],fTR->ElEta[fElecs[0]],fTR->ElPhi[fElecs[0]], 0. );
+		p1.SetPtEtaPhiM(fTR->PfMuPt[fMuons[0]],fTR->PfMuEta[fMuons[0]],fTR->PfMuPhi[fMuons[0]], 0.105 );
+		p2.SetPtEtaPhiM(fTR->PfElPt[fElecs[0]],fTR->PfElEta[fElecs[0]],fTR->PfElPhi[fElecs[0]], 0. );
 	} else {
 		cout << "ERROR in MultiplicityAnalysisBase::GetDiLeptInvMass" << endl; 
 		return -999.99;

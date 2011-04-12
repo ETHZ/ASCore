@@ -20,7 +20,7 @@
 #include "helper/Hemisphere.hh"
 #include "MT2tree.hh"
 
-static const int gNHemispheres = 5;
+static const int gNHemispheres = 10;
 
 class MassAnalysis : public MultiplicityAnalysisBase{
 public:

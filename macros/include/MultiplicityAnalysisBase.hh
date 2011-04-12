@@ -23,13 +23,24 @@ public:
 	double GetDiLeptInvMass();
 	
 	vector<int> fElecs;
+	vector<int> fTaus;
 	vector<int> fMuons;
 	vector<int> fJets;
-	vector<int> fJetsLoose;
-	vector<int> fJetsMedium;
-	vector<int> fJetsTight;
-	vector<int> fBJets;
 	
+	
+	struct JetTau {
+		int NObjs;
+		vector<int> index; 
+		vector<double> pt; 
+		vector<int> isTau;
+		void reset(){
+			NObjs=0;
+			index.clear();
+			pt.clear();
+			isTau.clear();
+		}
+	} fJetTaus;
+
 	enum LeptConfig {
 	 	e, mu, OS_emu, OS_ee, OS_mumu, SS_emu, SS_ee, SS_mumu, multilept, null
   	};
@@ -58,16 +69,16 @@ public:
 
 	// members
 	float fVectorSumPt;
-	float fMHT;
 	float fMHTall;
 	float fHT;
-	float fMHTphi;	
+	int   fNJetsAcc;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 
 private:
 	void FindLeptonConfig();
 	void GetLeptonJetIndices();
+
 	
 	// ---- required and vetoed triggers ----
 	std::vector<std::string> fRequiredHLT; 

@@ -26,7 +26,6 @@ void MT2Misc::Reset() {
   LumiSection		  = -1;	  
   NVertices               = -1;
   LeptConfig		  = -1;	  
-  NJetsEta5Pt20           = -1;
   PassJetID               = -1;
   Jet0Pass                = -1;
   Jet1Pass                = -1;
@@ -48,6 +47,15 @@ void MT2Misc::Reset() {
     EcalGapClusterSize[i] = -1;
     EcalGapBE[i]          = -99999.99;    
   }
+  HLT_HT260_MHT60_v2      = false;
+  HLT_HT440_v2            = false;
+  HLT_QuadJet50_BTagIP_v1 = false;
+  HLT_QuadJet50_Jet40_v1  = false;
+  HLT_HT160_v2            = false;
+  HLT_DoubleMu3_HT160_v2  = false;
+  HLT_Mu8_Jet40_v2        = false;
+  HLT_DoubleMu3_v3        = false;
+
 }
 
 // MT2Znunu ------------------------------------
@@ -101,9 +109,11 @@ void MT2Jet::Reset() {
   bTagProbSSVHE = -99999.99;
   bTagProbSSVHP = -99999.99;
 
+  isPATPFIDLoose= 0; // PAT PFJetIDLoose regardless of eta and pt
   isPFIDLoose   = 0;
   isPFIDMedium  = 0;
   isPFIDTight   = 0;
+  isTau         = 0;
   ChHadFrac     = -99999.99; 
   NeuHadFrac    = -99999.99; 
   ChEmFrac      = -99999.99;
@@ -122,6 +132,7 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   double pt = lv.Pt();
   double eta = lv.Eta();
   if ( pt < minJPt || fabs(eta) > maxJEta )     return false;
+  if ( PFJID >0 && isTau )                      return false;
   
   switch (PFJID) {
   case 3:               // TIGHT
@@ -257,6 +268,7 @@ void MT2tree::Reset() {
   NJetsIDLoose     = 0;
   NJetsIDMedium    = 0;
   NJetsIDTight     = 0;
+  NJetsAcc         = 0;
   NEles            = 0;
   NMuons           = 0;
   NGenLepts        = 0;
@@ -289,6 +301,10 @@ void MT2tree::SetNJets(int n) {
   NJets = n;
 }
 
+void MT2tree::SetNJetsAcc(int n) {
+  NJetsAcc = n;
+}
+
 void MT2tree::SetNJetsIDLoose(int n) {
   NJetsIDLoose = n;
 }
@@ -307,6 +323,10 @@ void MT2tree::SetNEles(int n) {
 
 void MT2tree::SetNMuons(int n) {
   NMuons = n;
+}
+
+void MT2tree::SetNTaus(int n) {
+  NTaus = n;
 }
 
 Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met){
@@ -459,6 +479,12 @@ Int_t MT2tree::MaxMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
   return imax;
 }
 
+Bool_t MT2tree::PassMinMetJetDPhi03(){
+	if( NJetsAcc < 3)                              return true;
+	if( NJetsAcc >=3  && misc.MinMetJetDPhi > 0.3) return true;
+	return false;
+}
+
 Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
   int njets=0;
   for(int i=0; i<NJets; ++i){
@@ -558,48 +584,6 @@ Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta){
   return (mht-pfmet[0]).Pt();
 }
 
-
-Int_t MT2tree::JetIsInHemi(int jindex, int hemi_seed, int hemi_association, float MaxDR){
-  // returns 1 or 2 depending if jet is associated to hemi 1 or 2
-  // returns 0 if jet is not associated to either of the two hemispheres
-
-  // hemi_seed   = 2: max invariant mass, 4: two leading jet
-  // hemi_assoc  = 2: min invariant mass, 3: minial lund distance, 
-  // MaxDR: if >0 RejectISRDRmax(MaxDR) is called for hemi            
-
-  
-  vector<float> px, py, pz, E;
-  vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
-  for(int i=0; i<NJets; ++i){
-	if(jet[i].isPFIDLoose ==false) continue;
-  	px.push_back(jet[i].lv.Px());
-	py.push_back(jet[i].lv.Py());
-	pz.push_back(jet[i].lv.Pz());
-	 E.push_back(jet[i].lv.E());
-	jsel.push_back(i);
-  }
-		
-  if (px.size()<2) return -10;
-
-  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
-  Hemisphere* hemi = new Hemisphere(px, py, pz, E, hemi_seed, hemi_association);
-  hemi->SetDebug(0);
-  if(MaxDR > 0) hemi->RejectISRDRmax(MaxDR);
-  vector<int> grouping = hemi->getGrouping();
-  delete hemi;
-  
-  vector<int>    jused; // contains indices of jets used for pseudojets
-  for(int i=0; i<px.size(); ++i){
-	if(grouping[i]==1){
-		if(jsel[i]==jindex) return 1;
-	}else if(grouping[i] == 2){
-		if(jsel[i]==jindex) return 2;
-	}
-  }
-  return -1;
-
-}
-
 Double_t MT2tree::GetMT2Leading(double testmass, bool massive, int PFJID, int met){
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1)      MET = pfmet[0];
@@ -641,7 +625,7 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   vector<float> px, py, pz, E;
   vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
   for(int i=0; i<NJets; ++i){
-	if(jet[i].isPFIDLoose ==false) continue;
+	if(jet[i].IsGoodPFJet(20, 2.4, 0)) continue; // no ID imposed
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
@@ -842,7 +826,7 @@ Double_t MT2tree::SimpleMT2(bool pseudo){
     return sqrt(2*jet[0].lv.Pt()*jet[1].lv.Pt()*(1+TMath::Cos(jet[0].lv.DeltaPhi(jet[1].lv))));
   }
   else{
-    if(NJetsIDLoose < 2) return -999.99;
+    if(NJetsAcc < 2) return -999.99;
     return sqrt(2*hemi[0].lv1.Pt()*hemi[0].lv2.Pt()*(1+TMath::Cos(hemi[0].lv1.DeltaPhi(hemi[0].lv2))));
   }
 }
@@ -1195,6 +1179,38 @@ Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta){
 		good=true;
 	}
 	return good;	
+}
+
+Double_t MT2tree::GetLeptPt(int index){
+	if(NEles + NMuons ==0) return -999;
+	double pt_0 =0;
+	double pt_1 =0;
+	for(int i=0; i<NEles; ++i){
+		if(ele[i].lv.Pt() > pt_0)                          {pt_1 = pt_0; pt_0 = ele[i].lv.Pt();}
+		if(ele[i].lv.Pt() < pt_0 && ele[i].lv.Pt() > pt_1) {pt_1 = ele[i].lv.Pt();}
+	}
+	for(int i=0; i<NMuons; ++i){
+		if(muo[i].lv.Pt() > pt_0)                          {pt_1 = pt_0; pt_0 = muo[i].lv.Pt();}
+		if(muo[i].lv.Pt() < pt_0 && muo[i].lv.Pt() > pt_1) {pt_1 = muo[i].lv.Pt();}
+	}
+
+	if     (index==0) return pt_0;
+	else if(index==1) return pt_1;
+	else return -1;
+}
+
+Double_t MT2tree::TauClosestJet(){
+	if(NTaus <1) return -9.99;
+	double dR=1000;
+	for(int i=0; i<NJets; ++i){
+		if(! jet[i].isTau) continue;
+		for(int j=i+1; j<NJets; ++j){
+			if(! jet[j].isTau ){
+			       	if(jet[j].lv.DeltaR(jet[i].lv) < dR) {dR=jet[j].lv.DeltaR(jet[i].lv);}
+			}
+		}	
+	}
+	return dR;
 }
 
 ClassImp(MT2Misc)

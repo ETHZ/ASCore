@@ -22,7 +22,6 @@ public:
   Int_t    LumiSection;
   Int_t    NVertices;  
   Int_t    LeptConfig;
-  Int_t    NJetsEta5Pt20;
   Int_t    Jet0Pass;
   Int_t    Jet1Pass;
   Int_t    PassJetID;
@@ -42,8 +41,17 @@ public:
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
+  // Trigger bits: only a couple are implemented so far
+  Bool_t HLT_HT260_MHT60_v2;
+  Bool_t HLT_HT440_v2;
+  Bool_t HLT_QuadJet50_BTagIP_v1;
+  Bool_t HLT_QuadJet50_Jet40_v1;
+  Bool_t HLT_HT160_v2;
+  Bool_t HLT_DoubleMu3_HT160_v2;
+  Bool_t HLT_Mu8_Jet40_v2;
+  Bool_t HLT_DoubleMu3_v3;
 
-  ClassDef(MT2Misc, 10)
+  ClassDef(MT2Misc, 11)
 };
 
 
@@ -100,9 +108,11 @@ public:
   Double_t bTagProbSSVHE;
   Double_t bTagProbSSVHP;
 
+  Bool_t isPATPFIDLoose;
   Bool_t isPFIDLoose;
   Bool_t isPFIDMedium;
   Bool_t isPFIDTight;
+  Bool_t isTau;
 
   Double_t ChHadFrac;
   Double_t NeuHadFrac;
@@ -112,7 +122,7 @@ public:
   Int_t    NeuMult;
   Int_t    NConstituents;
 
-  ClassDef(MT2Jet, 5)
+  ClassDef(MT2Jet, 6)
 };
 
 // MT2Hemi ---------------------------
@@ -219,50 +229,50 @@ public:
   void SetNJetsIDLoose  (int n);
   void SetNJetsIDMedium (int n);
   void SetNJetsIDTight  (int n);
+  void SetNJetsAcc      (int n);
   void SetNEles         (int n);
   void SetNMuons        (int n);
+  void SetNTaus         (int n);
   
   // My functions here
   // NJets
-  Int_t    GetNjets (double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
-  Int_t    GetJetIndex(int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
-  Int_t    GetJetIndexByEta(int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
-  Int_t    GetNBtags (int algo=3, double value=2., double minJPt=20, double maxJEta=2.4, int PFJID=1);  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
-  Double_t JetPt      (int ijet=0, int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Int_t    GetNjets   (double minJPt=20, double maxJEta=5., int PFJID=0);  // PFJETID not depends on pt and eta
+  Int_t    GetJetIndex(int ijet=0, int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Int_t    GetJetIndexByEta(int ijet=0, int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Int_t    GetNBtags  (int algo=3, double value=2., double minJPt=20, double maxJEta=2.4, int PFJID=0);  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
+  Double_t JetPt      (int ijet=0, int PFJID=0, double minJPt=20, double maxJEta=2.4);
 
   // HT, MHT, ...
   Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
-  TLorentzVector GetMHTlv(int PFJID=1, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHT        (int PFJID=1, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTPhi     (int PFJID=1, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTminusMET(int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4);
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
-  Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=1);
+  Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=0);
   Double_t JetsInvMass(int j1=0, int j2=1);
-  Double_t MetJetDPhi(int ijet = 0, int PFJID=1, int met=1);
-  Double_t GetMinR12R21      (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
-  Double_t MinMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
-  Int_t    MinMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
-  Double_t MaxMetJetDPhi     (int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
-  Int_t    MaxMetJetDPhiIndex(int PFJID=1, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
-  Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, 
-		                   int PFJID=1, double minJPt=20, double maxJEta=2.4);
+  Double_t MetJetDPhi(int ijet = 0, int PFJID=0, int met=1);
+  Bool_t   PassMinMetJetDPhi03();
+  Double_t GetMinR12R21      (int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MinMetJetDPhi     (int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Int_t    MinMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MaxMetJetDPhi     (int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Int_t    MaxMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetMetDPhi(int hemi_index=0, int pj=1, int whichmet=1, double met=30);
 
   // MT2 & friends
-  Int_t    JetIsInHemi(int jindex=0, int hemi_seed=2, int hemi_association=3, float MaxDR=0);
-  Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=1, int met=1);
-  Double_t GetMT2Hemi(double testmass=0, bool massive=false, int PFJID=1, 
-		  double minJPt=20, double maxJEta=2.4, int hemi_association=3, int met=1);
+  Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=0, int met=1);
+  Double_t GetMT2Hemi(double testmass=0, bool massive=false, int PFJID=0, double minJPt=20, double maxJEta=2.4, int hemi_association=3, int met=1);
   Double_t GetMT2HemiMinDHT(double testmass=0, bool massive=false, int PFJID=0, double minJPt=20, double maxJEta=2.4, int met=1);
   Double_t GetMT2HemiNoISR(bool massive = false, int hemi_seed=4, int hemi_association=2, float MaxDR=0, int met=1);
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
   Double_t SimpleMT2(bool pseudo=true);
   Double_t GetMCT(bool massive=false, int met=1);
-  Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=1, double minJPt=20, double maxJEta=2.4,int met=1);
+  Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=0, double minJPt=20, double maxJEta=2.4,int met=1);
   Double_t GetMaxHemiMass(int hemi_index=0);
 
   // Leptons
@@ -279,15 +289,19 @@ public:
   Double_t GetGenLeptEta(int which, int pid, int mother, double pt, double eta);
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
   Bool_t   GenLeptFromW(int pid, double pt, double eta);
+  Double_t GetLeptPt(int index);
+
+  // Taus
+  Double_t TauClosestJet();
 
   Int_t     NJets;
   Int_t     NJetsIDLoose;
   Int_t     NJetsIDMedium;
   Int_t     NJetsIDTight;
+  Int_t     NJetsAcc;
   Int_t     NEles;
-  Int_t     NElesLoose;
   Int_t     NMuons;
-  Int_t     NMuonsLoose;
+  Int_t     NTaus;
   Int_t     NGenLepts;
 
   MT2Misc        misc;
@@ -304,7 +318,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 15)
+  ClassDef(MT2tree, 16)
 };
 
 #endif
