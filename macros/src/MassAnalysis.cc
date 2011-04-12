@@ -27,7 +27,6 @@ void MassAnalysis::Analyze(){
 	// ---------------------------------------------------
 	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
-	// --------------------------------------------------------------------
 
 	// check if event passes selection cuts and trigger requirements
 	if(! IsSelectedEvent()){return;}
@@ -167,7 +166,6 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.NVertices=nvertex;
 	// _________
 
-
 	// ---------------------------------------------------------------
 	// Set NJets, NElecs, NMuons
 	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
@@ -178,7 +176,6 @@ void MassAnalysis::FillTree(){
 	
 	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
-	// FIXME: jet no more PT sorted as taus included
 	for(int i=0; i<fJetTaus.NObjs; ++i) {
 		if(! fJetTaus.isTau[i]){
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PF2PATJPx[fJetTaus.index[i]], fTR->PF2PATJPy[fJetTaus.index[i]], 
@@ -193,7 +190,7 @@ void MassAnalysis::FillTree(){
 			if(IsGoodBasicPFJetPAT (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDLoose   =true;
 			if(IsGoodPFJetMediumPAT(fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDMedium  =true;
 			if(IsGoodPFJetTightPAT (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDTight   =true;
-//			if(fTR->PF2PATJIDLoose [fJetTaus.index[i]]==1       )  fMT2tree->jet[i].isPATPFIDLoose=true;;  // PF jetID regardless of eta and pt
+			if(fTR->PF2PATJIDLoose [fJetTaus.index[i]]==1       )  fMT2tree->jet[i].isPATPFIDLoose=true;;  // PF jetID regardless of eta and pt
 			fMT2tree->jet[i].ChHadFrac      = fTR->PF2PATJChHadfrac     [fJetTaus.index[i]];	
 			fMT2tree->jet[i].NeuHadFrac     = fTR->PF2PATJNeuHadfrac    [fJetTaus.index[i]];
 			fMT2tree->jet[i].ChEmFrac       = fTR->PF2PATJChEmfrac      [fJetTaus.index[i]];

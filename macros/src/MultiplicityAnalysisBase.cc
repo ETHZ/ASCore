@@ -47,14 +47,14 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fNJetsAcc=0;
 
 	vector<double> mutight;
-	for(int i=0; i< fTR->NPfMus; ++i){
+	for(int i=0; i< fTR->PfMuNObjs; ++i){
 		fMuons.push_back(i);
 		mutight.push_back(fTR->PfMuPt[i]);
 	}
 	fMuons      = Util::VSort(fMuons     , mutight);
 	
 	vector<double> eltight;
-	for(int i=0; i< fTR->NPfEls; ++i){
+	for(int i=0; i< fTR->PfElNObjs; ++i){
 		fElecs.push_back(i);
 		eltight.push_back(fTR->PfElPt[i]);
 	}
@@ -72,7 +72,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fJets        = Util::VSort(fJets,       pt1);
 	
 	vector<double> taus;
-	for(int i=0; i< fTR->NPfTaus; ++i){
+	for(int i=0; i< fTR->PfTauNObjs; ++i){
 		if(fTR->PfTauPt[i]   < 20 ) continue;
 		fTaus.push_back(i);
 		taus.push_back(fTR->PfTauPt[i]);
@@ -82,6 +82,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	}
 	fTaus          = Util::VSort(fTaus     , taus);
 	pt1.clear();
+	
 	//sort fJetTaus accorting to Pt
 	fJetTaus.index = Util::VSort(fJetTaus.index, fJetTaus.pt);
 	fJetTaus.isTau = Util::VSort(fJetTaus.isTau, fJetTaus.pt);
@@ -163,13 +164,12 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	double HT=0;
 	for(int j=0; j<fJetTaus.NObjs; ++j){
 		if(!fJetTaus.isTau[j]){
-			// ! Watch out: this is not what we want but the way is was done for 2010 data
-			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<2.4 && IsGoodBasicPFJetPAT(fJetTaus.index[j], 20., 2.4)){
+			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<2.4){
 				HT += fTR->PF2PATJPt[fJetTaus.index[j]];
 			}
 		}else {
 			if(fTR->PfTauPt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTauEta[fJetTaus.index[j]]) < 2.4){
-//				HT +=fTR->PfTauPt[fJetTaus.index[j]];
+				HT +=fTR->PfTauPt[fJetTaus.index[j]];
 			}
 		}
 	}
