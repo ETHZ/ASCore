@@ -116,6 +116,9 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 
 void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 // Computes the event EM and Charged fractions
+       std::cerr << "NEED TO REVISE" << std::endl;
+        exit(-1);
+
 	int nMuGood = 0;
 	double pt_mu = 0.;
 	double pt_track = 0.;
@@ -196,16 +199,7 @@ bool UserAnalysisBase::IsGoodBasicPFJetPAT(int index, double ptcut, double abset
 	// cut at abs(eta) of absetacut (default = 2.5)
 	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
 	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
-	// Loose PF jet ID (WARNING: HF not included in our ntuple)
-	// See PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h
-	if ( !(fTR->PF2PATJNConstituents[index] > 1) )    return false;
-	if ( !(fTR->PF2PATJNeuEmfrac[index]     < 0.99) ) return false;
-	if ( !(fTR->PF2PATJNeuHadfrac[index]    < 0.99) ) return false;
-	if (fabs(fTR->PF2PATJEta[index]) < 2.4 ) { // Cuts for |eta|<2.4
-		if ( !(fTR->PF2PATJChEmfrac[index]  < 0.99) )  return false;
-		if ( !(fTR->PF2PATJChHadfrac[index] > 0.00) )  return false;
-		if ( !(fTR->PF2PATJChMult[index]    > 0   ) )  return false;
-	}
+	if(fTR->PF2PATJIDLoose[index]    ==0       ) return false;
 	return true;
 }
 
@@ -940,9 +934,7 @@ bool UserAnalysisBase::IsGoodEvt(vector<Cut> *cutVec){
 }
 
 void UserAnalysisBase::EventPrint(){ 
-        std::cerr << "NEED TO REVISE" << std::endl;
-        exit(-1);
-/*
+  
   char ccharge[] = {'-', '0', '+'};
   TLorentzVector p1(0.,0.,0.,0.), p2(0.,0.,0.,0.), psum(0.,0.,0.,0.);
   double minv = -999.99;
@@ -973,50 +965,42 @@ void UserAnalysisBase::EventPrint(){
   cout << " PrimVtx, Ndof = " << fTR->PrimVtxNdof << ", chisq = " << fTR->PrimVtxNChi2 
        << ", TkPtSum = " << fTR->PrimVtxPtSum << endl;
   double fracEm, fracCh;
-  GetEvtEmChFrac(fracEm, fracCh);
-  cout << " Event fEM = " << fracEm << ", fCh = " << fracCh << endl;
-  cout << " MucorrCaloMET  = " << fTR->MuCorrMET<< ", METPhi = " << fTR->MuCorrMETphi  << endl;
+//  GetEvtEmChFrac(fracEm, fracCh);
+//  cout << " Event fEM = " << fracEm << ", fCh = " << fracCh << endl;
   cout << " TCMET          = " << fTR->TCMET    << ", METPhi = " << fTR->TCMETphi << endl;
   cout << " PFMET          = " << fTR->PFMET    << ", METPhi = " << fTR->PFMETphi << endl;
 		
   // print the jets info
-  cout << " Number of jets in the ntuple = " << fTR->PFNJets
+  cout << " Number of jets in the ntuple = " << fTR->NJets
     //       << ", total number of jets = " << fTR->NJetsTot
        << endl;
   int nJetsCand = 0;
-  for (int i = 0; i < fTR->PFNJets; ++i) {
-    double dPhiMJ = Util::DeltaPhi(fTR->PFJPhi[i], METPhi);
-    cout << " Jet" << i << " Pt = " << fTR->PFJPt[i] << ", Phi = " << fTR->PFJPhi[i]
-	 << ", Eta = " << fTR->PFJEta[i] << ", E = " << fTR->PFJE[i] << endl;
-    double jmass = sqrt(fTR->PFJE[i]*fTR->PFJE[i]-fTR->PFJPx[i]*fTR->PFJPx[i]-fTR->PFJPy[i]*fTR->PFJPy[i]-fTR->PFJPz[i]*fTR->PFJPz[i]);
-    cout << "      " << " Px = " << fTR->PFJPx[i] << " Py = " << fTR->PFJPy[i] << " Pz = " << fTR->PFJPz[i]
+  for (int i = 0; i < fTR->NJets; ++i) {
+    double dPhiMJ = Util::DeltaPhi(fTR->JPhi[i], METPhi);
+    cout << " Jet" << i << " Pt = " << fTR->JPt[i] << ", Phi = " << fTR->JPhi[i]
+	 << ", Eta = " << fTR->JEta[i] << ", E = " << fTR->JE[i] << endl;
+    double jmass = sqrt(fTR->JE[i]*fTR->JE[i]-fTR->JPx[i]*fTR->JPx[i]-fTR->JPy[i]*fTR->JPy[i]-fTR->JPz[i]*fTR->JPz[i]);
+    cout << "      " << " Px = " << fTR->JPx[i] << " Py = " << fTR->JPy[i] << " Pz = " << fTR->JPz[i]
 	 << " Jet mass = " << jmass << endl;
-    //		cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
-    //		cout << "      " << " JetfEM = " << fTR->JEMfrac[i] << ", JetfCh = " << fTR->JChfrac[i] << endl;
     cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
-    cout << "      " << " JetfEMch = " << fTR->JChargedEmFrac[i] << ", JetfEMneu = " << fTR->PFJNeuEmfrac[i]
-	 << " JetfHach = " << fTR->JChargedHadFrac[i] << ", JetfHaneu = " << fTR->PFJNeuHadfrac[i] << endl;
-    //    cout << "      " << " Jetn90 = " << fTR->JID_n90Hits[i] << ", JetHPD = " << fTR->JID_HPD[i] 
-    //	 << ", JetRBX = " << fTR->JID_RBX[i] << endl;
-    //    cout << "      " << " Jet Vtx Chisq/ndof = " << fTR->JVtxNChi2[i] << endl;
-    cout << "      " << " b-tag TCHE = " << fTR->PFJbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->PFJbTagProbTkCntHighPur[i] << endl;
-    cout << "      " << " b-tag SSVHE = " << fTR->PFJbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->PFJbTagProbSimpSVHighPur[i] << endl;
-    //    if (fTR->JGood[i] > 0) cout << "      -> bad jet, tag = " << fTR->JGood[i] << endl;
-    //    if (fTR->JGood[i] == 0)
+    cout << "      " << " JetfEMch = " << fTR->JChargedEmFrac[i] << ", JetfEMneu = " << fTR->JNeutralEmFrac[i]
+	 << " JetfHach = " << fTR->JChargedHadFrac[i] << ", JetfHaneu = " << fTR->JNeutralHadFrac[i] << ", JChargedMuEnergyFrac = " << fTR->JChargedMuEnergyFrac[i] << endl;
+    cout << "      " << " b-tag TCHE = " << fTR->JbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->JbTagProbTkCntHighPur[i] << endl;
+    cout << "      " << " b-tag SSVHE = " << fTR->JbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->JbTagProbSimpSVHighPur[i] << endl;
     nJetsCand++;
-    if (fTR->PFJPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
+    if (fTR->JPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
       cout << "      -> jet back-to-back with MET" << endl;
     }
   }
 
   // for multi-jet events
-  if (fTR->PFNJets >= 2) {
-    double dPhiMJ1 = Util::DeltaPhi(fTR->PFJPhi[0], METPhi);
-    double dPhiMJ2 = Util::DeltaPhi(fTR->PFJPhi[1], METPhi);
+  if (fTR->NJets >= 2) {
+    double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
+    double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
     double R12 = sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
     double R21 = sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
-    double dPhij12 = Util::DeltaPhi(fTR->PFJPhi[0], fTR->PFJPhi[1]);
-    double dRj12 = Util::GetDeltaR(fTR->PFJEta[0], fTR->PFJEta[1], fTR->PFJPhi[0], fTR->PFJPhi[1]);
+    double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
+    double dRj12 = Util::GetDeltaR(fTR->JEta[0], fTR->JEta[1], fTR->JPhi[0], fTR->JPhi[1]);
     cout << " R12    = " << R12 << ", R21    = " << R21 
 	 << ", dRj12  = " << dRj12 << ", dPhij12 = " << dPhij12 << endl;
   }
@@ -1032,12 +1016,11 @@ void UserAnalysisBase::EventPrint(){
     if (muQual != "") cout << "       " << muQual << endl;
     cout << "      " << " doPvx = " << fTR->MuD0PV[i] << " (signif. = " << fTR->MuD0PV[i]/fTR->MuD0E[i] << ")"
 	 << " dzPvx = " << fTR->MuDzPV[i] << " (signif. = " << fTR->MuDzPV[i]/fTR->MuDzE[i] << ")" << endl;
-    cout << "      " << " chisq = " << fTR->MuNChi2[i] << " #Trk hits = " << fTR->MuNTkHits[i] << endl;
+    cout << "      " << " chisq = " << fTR->MuNChi2[i] << " #Trk hits = " << fTR->MuNTkHits[i] << " NMatches " << fTR->MuNMatches[i] << endl;
+    cout << "      " << " NPixel hits " << fTR->MuNPxHits[i] << " global track Nhits " << fTR->MuNGlHits[i] << endl;
     cout << "      " << " IsoVal03 = " << fTR->MuRelIso03[i] << endl;
     cout << "      " << " IsoVal Trk = " << fTR->MuIso03SumPt[i] << " Em = " << fTR->MuIso03EmEt[i] << " Had = " << fTR->MuIso03HadEt[i] << endl;
     cout << "      " << " Energy assoc to the muon Em = " << fTR->MuEem[i] << " Had = " << fTR->MuEhad[i] << endl;
-    //		if (fTR->MuGood[i] > 0) cout << "      -> bad muon, tag = " << fTR->MuGood[i] << endl;
-    //		if (fTR->MuIsIso[i] == 1) cout << "      -> muon is isolated " << endl;
     if (fTR->MuRelIso03[i] <= muIsomax) cout << "      -> muon is isolated " << endl;
     else cout << "      -> muon NOT isolated " << endl;
   }
@@ -1061,13 +1044,9 @@ void UserAnalysisBase::EventPrint(){
 	 << " dist = " << fTR->ElConvPartnerTrkDist[i] << " cotTheta = " << fTR->ElConvPartnerTrkDCot[i]
 	 << " partner charge = " << ccharge[(int)fTR->ElConvPartnerTrkCharge[i]+1] << endl;
     cout << "      " << " GSF-CTF charge consistency = " << fTR->ElCInfoIsGsfCtfCons[i] << " Sc charge = " << fTR->ElScPixCharge[i] << endl;
-    //    if (fTR->ElIsInJet[i] >= 0) cout  << "      " << " Is in jet nber = " << fTR->ElIsInJet[i]
-    //				      << " sharedE = " << fTR->ElSharedEnergy[i] << endl;
     cout << "      " << " IsoVal03 = " << fTR->ElRelIso03[i] << endl;
     cout << "      " << " IsoVal Trk = " << fTR->ElDR03TkSumPt[i] << " Em = " << fTR->ElDR03EcalRecHitSumEt[i] 
 	 << " Had = " << fTR->ElDR03HcalTowerSumEt[i] << endl;
-    //		if (fTR->ElGood[i] > 0) cout << "      -> bad electron, tag = " << fTR->ElGood[i] << endl;
-    //		if (fTR->ElIsIso[i] == 1) cout << "      -> electron is isolated " << endl;
     if (fTR->ElRelIso03[i] <= elIsomax) cout << "      -> electron is isolated " << endl;
     else cout << "      -> electron NOT isolated " << endl;
   }
@@ -1078,24 +1057,16 @@ void UserAnalysisBase::EventPrint(){
 		                << ", Eta = " << fTR->PhoEta[i] << ", E = " << fTR->PhoEnergy[i] << endl;
     cout << "      " << " Px = " << fTR->PhoPx[i] << " Py = " << fTR->PhoPy[i] << " Pz = " << fTR->PhoPz[i] << endl;
     cout << "      " << " HoverE = " << fTR->PhoHoverE[i] << " sigmaEtaEta = " << fTR->PhoSigmaIetaIeta[i] << endl;
-    //    if (fTR->PhoIsInJet[i] >= 0) cout << "      "  << " Is in jet nber = " << fTR->PhoIsInJet[i]
-    //				      << " sharedE = " << fTR->PhoSharedEnergy[i] << endl;
-    cout << "      " << " IsoVal = " << fTR->PhoIso03[i] << endl;
     cout << "      " << " IsoVal Trk = " << fTR->PhoIso03TrkSolid[i] << " Em = " << fTR->PhoIso03Ecal[i] 
 	 << " Had = " << fTR->PhoIso03Hcal[i] << endl;
     cout << "      " << " Has conversion tracks = " << fTR->PhoHasConvTrks[i] << endl;
-    if (fTR->PhoIsElDupl[i] >= 0) cout << "      " << " Photon duplic with Elec" << fTR->PhoIsElDupl[i] << endl;
-    //		if (fTR->PhoGood[i] > 0) cout << "      -> bad photon, tag = " << fTR->PhoGood[i] << endl;
-    //		if (fTR->PhoIsIso[i] == 1) cout << "      -> photon is isolated " << endl;
     if (fTR->PhoIso03[i] <= phoIsomax) cout << "      -> photon is isolated " << endl;
     else cout << "      -> photon NOT isolated " << endl;
   }
 
   // jets/ lepton/ photon invariant masses
   for (int i = 0; i < fTR->NJets; ++i) {
-    if (fTR->JGood[i] != 0) continue;
     for (int j = i+1; j < fTR->NJets; ++j) {
-      if (fTR->JGood[j] != 0) continue;
       p1.SetPxPyPzE(fTR->JPx[i],fTR->JPy[i],fTR->JPz[i],fTR->JE[i]);
       p2.SetPxPyPzE(fTR->JPx[j],fTR->JPy[j],fTR->JPz[j],fTR->JE[j]);
       psum = p1 + p2;
@@ -1147,6 +1118,6 @@ void UserAnalysisBase::EventPrint(){
       cout << " Inv. mass (phot" << i << ", phot" << j << ") = " << minv << endl;
     }
   }
-*/
+
 }
 
