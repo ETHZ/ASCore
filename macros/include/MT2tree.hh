@@ -41,19 +41,55 @@ public:
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
-  // Trigger bits: only a couple are implemented so far
-  Bool_t HLT_HT260_MHT60_v2;
-  Bool_t HLT_HT440_v2;
-  Bool_t HLT_QuadJet50_BTagIP_v1;
-  Bool_t HLT_QuadJet50_Jet40_v1;
-  Bool_t HLT_HT160_v2;
-  Bool_t HLT_DoubleMu3_HT160_v2;
-  Bool_t HLT_Mu8_Jet40_v2;
-  Bool_t HLT_DoubleMu3_v3;
-
-  ClassDef(MT2Misc, 11)
+  
+  ClassDef(MT2Misc, 12)
 };
 
+// ----------------------------------------
+class MT2PileUp : public TObject {
+
+public:
+	MT2PileUp();
+	virtual ~MT2PileUp();
+	void Reset();
+
+	Int_t    PUnumInt;
+	Double_t PtHat;
+	Double_t Weight;
+
+	ClassDef(MT2PileUp, 1);
+};
+
+// --------------------------------
+class MT2Trigger : public TObject {
+
+public:
+	MT2Trigger();
+	virtual ~MT2Trigger();
+	void Reset();
+
+
+	// Trigger bits: only a couple are implemented so far
+	// HT
+	Bool_t HLT_HT160_v2;
+	Bool_t HLT_HT240_v2;
+	Bool_t HLT_HT260_v2;
+	Bool_t HLT_HT300_v2;
+	Bool_t HLT_HT360_v2;
+	Bool_t HLT_HT440_v2;
+	Bool_t HLT_HT450_v2;
+	// HT_MHT
+	Bool_t HLT_HT260_MHT60_v2;
+	// QuadJet
+	Bool_t HLT_QuadJet50_BTagIP_v1;
+	Bool_t HLT_QuadJet50_Jet40_v1;
+	// Muons
+	Bool_t HLT_DoubleMu3_HT160_v2;
+	Bool_t HLT_Mu8_Jet40_v2;
+	Bool_t HLT_DoubleMu3_v3;
+	
+	ClassDef(MT2Trigger, 1);
+};
 
 // MT2Znunu --------------------------------
 class MT2Znunu : public TObject {
@@ -306,6 +342,8 @@ public:
 
   MT2Misc        misc;
   MT2Znunu       Znunu;
+  MT2PileUp      pileUp;
+  MT2Trigger     trigger;
   MT2Jet         jet[m_jetSize];
   MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];
@@ -318,7 +356,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 16)
+  ClassDef(MT2tree, 17)
 };
 
 #endif

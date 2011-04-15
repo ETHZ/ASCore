@@ -19,7 +19,27 @@ void MassAnalysis::Begin(const char* filename){
 	// book tree
 	fMT2tree = new MT2tree();
 	BookTree();
-	
+
+	// define which triggers to fill
+	if(fisData){
+		// HT
+		fTriggerMap["HLT_HT160_v2"]            = &fMT2tree->trigger.HLT_HT160_v2;
+		fTriggerMap["HLT_HT240_v2"]            = &fMT2tree->trigger.HLT_HT240_v2;
+		fTriggerMap["HLT_HT260_v2"]            = &fMT2tree->trigger.HLT_HT260_v2;
+		fTriggerMap["HLT_HT300_v2"]            = &fMT2tree->trigger.HLT_HT300_v2;
+		fTriggerMap["HLT_HT360_v2"]            = &fMT2tree->trigger.HLT_HT360_v2;
+		fTriggerMap["HLT_HT440_v2"]            = &fMT2tree->trigger.HLT_HT440_v2;
+		fTriggerMap["HLT_HT450_v2"]            = &fMT2tree->trigger.HLT_HT450_v2;
+		// MHT_HT
+		fTriggerMap["HLT_HT260_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT260_MHT60_v2;
+		// QuadJet
+		fTriggerMap["HLT_QuadJet50_BTagIP_v1"] = &fMT2tree->trigger.HLT_QuadJet50_BTagIP_v1;
+		fTriggerMap["HLT_QuadJet50_Jet40_v1"]  = &fMT2tree->trigger.HLT_QuadJet50_Jet40_v1;
+		// Muons
+		fTriggerMap["HLT_DoubleMu3_HT160_v2"]  = &fMT2tree->trigger.HLT_DoubleMu3_HT160_v2;
+		fTriggerMap["HLT_DoubleMu3_v3"]        = &fMT2tree->trigger.HLT_DoubleMu3_v3;
+		fTriggerMap["HLT_Mu8_Jet40_v2"]        = &fMT2tree->trigger.HLT_Mu8_Jet40_v2;
+	}
 }
 
 void MassAnalysis::Analyze(){	
@@ -110,48 +130,16 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.MET                 = fTR->PFMET;
 	fMT2tree->misc.METPhi              = fTR->PFMETphi;
 
+	if(!fisData){
+		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
+		fMT2tree->pileUp.PtHat             = fTR->PtHat;
+	}
 
 	// _________
 	// HLT triggers
-	if( GetHLTResult("HLT_HT260_MHT60_v2") )  
-	  fMT2tree->misc.HLT_HT260_MHT60_v2 = true;
-	else 
-	  fMT2tree->misc.HLT_HT260_MHT60_v2 = false;
-	
-	if( GetHLTResult("HLT_HT440_v2") )  
-	  fMT2tree->misc.HLT_HT440_v2 = true;
-	else 
-	  fMT2tree->misc.HLT_HT440_v2 = false;
-	
-	if( GetHLTResult("HLT_QuadJet50_BTagIP_v1") )
-	  fMT2tree->misc.HLT_QuadJet50_BTagIP_v1 = true;
-	else 
-	  fMT2tree->misc.HLT_QuadJet50_BTagIP_v1 = false;
-
-	if( GetHLTResult("HLT_QuadJet50_Jet40_v1") )
-	  fMT2tree->misc.HLT_QuadJet50_Jet40_v1 = true;
-	else 
-	  fMT2tree->misc.HLT_QuadJet50_Jet40_v1 = false;
-	
-	if( GetHLTResult("HLT_HT160_v2"))
-	  fMT2tree->misc.HLT_HT160_v2= true;
-	else 
-	  fMT2tree->misc.HLT_HT160_v2 = false;
-	
-	if( GetHLTResult("HLT_DoubleMu3_HT160_v2") )
-	  fMT2tree->misc.HLT_DoubleMu3_HT160_v2 = true;
-	else 
-	  fMT2tree->misc.HLT_DoubleMu3_HT160_v2 = false;
-	
-	if( GetHLTResult("HLT_Mu8_Jet40_v2") )
-	  fMT2tree->misc.HLT_Mu8_Jet40_v2 = true;
-	else 
-	  fMT2tree->misc.HLT_Mu8_Jet40_v2 = false;
-	
-	if( GetHLTResult("HLT_DoubleMu3_v3") )
-	  fMT2tree->misc.HLT_DoubleMu3_v3 = true;
-	else 
-	  fMT2tree->misc.HLT_DoubleMu3_v3 = false;
+	for (StringBoolMap::iterator iter = fTriggerMap.begin(); iter != fTriggerMap.end(); ++iter){
+		if(GetHLTResult(iter->first)) *iter->second =1;
+	}
 	// _________
 
 	// _________
@@ -965,3 +953,4 @@ void MassAnalysis::End(){
 	fATree->Write();
 	fHistFile                ->Close();
 }
+

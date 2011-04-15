@@ -30,6 +30,9 @@ public:
 	void Begin(const char* filename = "Mass_histos.root");
 	void Analyze();
 	void End();
+	void SetType(bool isData=false){
+		fisData=isData;
+	};
 
 
 private:
@@ -60,7 +63,8 @@ private:
 		}
 	} fHemiObjects[gNHemispheres];
 	
-
+	typedef std::map <string, bool*> StringBoolMap;
+	StringBoolMap fTriggerMap;
 
 	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject);
 	void   GetMT2Variables(bool minimizeDHT, double minJPt, double maxJEta, HemiObjects& hemiobject);
@@ -85,8 +89,9 @@ private:
 
 
 	// data members
-	int fMT2_histos_step;
-  	int fMT2_histos_number;
+	int  fMT2_histos_step;
+  	int  fMT2_histos_number;
+	bool fisData;
 
 	vector<int> interesting_Run;
 	vector<int> interesting_Lumi;

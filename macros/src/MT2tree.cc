@@ -47,16 +47,53 @@ void MT2Misc::Reset() {
     EcalGapClusterSize[i] = -1;
     EcalGapBE[i]          = -99999.99;    
   }
-  HLT_HT260_MHT60_v2      = false;
-  HLT_HT440_v2            = false;
-  HLT_QuadJet50_BTagIP_v1 = false;
-  HLT_QuadJet50_Jet40_v1  = false;
-  HLT_HT160_v2            = false;
-  HLT_DoubleMu3_HT160_v2  = false;
-  HLT_Mu8_Jet40_v2        = false;
-  HLT_DoubleMu3_v3        = false;
 
 }
+
+// ------------------------------------------------------------
+// MT2PileUp
+MT2PileUp::MT2PileUp(){
+	Reset();
+}
+
+MT2PileUp::~MT2PileUp(){
+}
+
+void MT2PileUp::Reset(){
+	PUnumInt= -999;
+	PtHat   = -999.99;;
+	Weight  = -999.99;
+}
+
+// ------------------------------------------------------
+// MT2trigger
+MT2Trigger::MT2Trigger(){
+	Reset();
+}
+MT2Trigger::~MT2Trigger(){
+}
+
+void MT2Trigger::Reset(){
+	
+	// HT
+	HLT_HT160_v2            = false;
+	HLT_HT240_v2            = false; 
+	HLT_HT260_v2            = false;
+	HLT_HT300_v2            = false;
+	HLT_HT360_v2            = false;
+	HLT_HT440_v2            = false;
+	HLT_HT450_v2            = false;
+	// HT_MHT
+	HLT_HT260_MHT60_v2      = false;
+	// QuadJet
+	HLT_QuadJet50_BTagIP_v1 = false;
+	HLT_QuadJet50_Jet40_v1  = false;
+	// Muons
+	HLT_DoubleMu3_HT160_v2  = false;
+	HLT_Mu8_Jet40_v2        = false;
+	HLT_DoubleMu3_v3        = false;
+}
+
 
 // MT2Znunu ------------------------------------
 MT2Znunu::MT2Znunu(){
@@ -275,6 +312,9 @@ void MT2tree::Reset() {
 
   misc.Reset();
   Znunu.Reset();
+  pileUp.Reset();
+  trigger.Reset();
+
   for (int i = 0; i < m_jetSize; ++i) {
     jet[i].Reset();
   }
@@ -1214,6 +1254,9 @@ Double_t MT2tree::TauClosestJet(){
 }
 
 ClassImp(MT2Misc)
+ClassImp(MT2Znunu)
+ClassImp(MT2PileUp)
+ClassImp(MT2Trigger)
 ClassImp(MT2Jet)
 ClassImp(MT2Elec)
 ClassImp(MT2Muon)
