@@ -4,6 +4,7 @@
 #include "TreeReader.hh"
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
+#include "helper/PUWeight.h"
 #include <map>
 #include <string>
 
@@ -28,11 +29,16 @@ public:
 	virtual int GetHLTBit(string);
 	virtual bool GetHLTResult(string);
 
+	// PileUp reweighting;
+	virtual void  SetPileUpSrc(string, string);
+	virtual float GetPUWeight(int);
+
 	TreeReader *fTR;
 	TString fOutputDir;
 	TFile *fOutputFile;
 	TString fTag;
 	TLatex *fTlat;
+
 	
 	int fVerbose;
 	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
@@ -115,6 +121,11 @@ private:
 	std::vector<Cut> fElCuts;
 	std::vector<Cut> fJetCuts;
 	std::vector<Cut> fEvtSelCuts;
+	
+	// Pile UP reweighting
+	bool fDoPileUpReweight;
+	PUWeight  *fPUWeight;
+
 };
 
 #endif

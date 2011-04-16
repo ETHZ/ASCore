@@ -13,9 +13,11 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	fTR = tr;
 	fTlat = new TLatex();
 	fVerbose = false;
+	fDoPileUpReweight = false;
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
+	delete fPUWeight;
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
@@ -1120,4 +1122,25 @@ void UserAnalysisBase::EventPrint(){
   }
 
 }
+
+
+// ---------------------------------------------
+// Pile Up Reweighting
+void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
+	if(data_PileUp.size() == 0 ) return;
+	if(fDoPileUpReweight  == 1 ) {cout << "ERROR in SetPileUpSrc: fPUWeight already initialized" << endl; return; }
+	if(mc_PileUp.size() ==0){
+		fPUWeight = new PUWeight(data_PileUp.c_str());
+	}else {
+		fPUWeight = new PUWeight(data_PileUp.c_str(), mc_PileUp.c_str());
+	} 
+	fDoPileUpReweight = true;
+}
+
+float UserAnalysisBase::GetPUWeight(int nPUinteractions){
+	if(! fDoPileUpReweight) return -999.99;
+	else return fPUWeight->GetWeight(nPUinteractions); 
+}
+
+
 
