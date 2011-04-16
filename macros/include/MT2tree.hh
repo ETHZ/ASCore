@@ -20,7 +20,6 @@ public:
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
-  Int_t    NVertices;  
   Int_t    LeptConfig;
   Int_t    Jet0Pass;
   Int_t    Jet1Pass;
@@ -56,6 +55,7 @@ public:
 	Int_t    PUnumInt;
 	Double_t PtHat;
 	Double_t Weight;
+  	Int_t    NVertices;  // good reco vertices
 
 	ClassDef(MT2PileUp, 1);
 };

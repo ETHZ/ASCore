@@ -87,7 +87,6 @@ private:
 	TMctLib  *fMCT;
 	Hemisphere *fHemisphere;
 
-
 	// data members
 	int  fMT2_histos_step;
   	int  fMT2_histos_number;

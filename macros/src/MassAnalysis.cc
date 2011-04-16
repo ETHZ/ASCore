@@ -130,10 +130,26 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.MET                 = fTR->PFMET;
 	fMT2tree->misc.METPhi              = fTR->PFMETphi;
 
+	// ---------------------------------
+	// Pile UP info and reco vertices
 	if(!fisData){
 		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
 		fMT2tree->pileUp.PtHat             = fTR->PtHat;
+		fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
+		if(fVerbose > 3) {
+			cout << "fTR->PUnumInteractions " <<  fTR->PUnumInteractions << " weight "  
+		     	     << " GetPUWeight() " << GetPUWeight(fTR->PUnumInteractions) << endl; 
+		}
 	}
+	int nvertex=0;
+	for(int i=0; i<fTR->NVrtx; ++i){
+		if(fabs(fTR->VrtxZ[i]) > 24) continue;
+		if(sqrt( (fTR->VrtxX[i])*(fTR->VrtxX[i]) + (fTR->VrtxY[i])*(fTR->VrtxY[i])) > 2) continue;
+		if(fTR->VrtxNdof[i]<=4) continue;
+		nvertex++;
+	}
+	fMT2tree->pileUp.NVertices=nvertex;
+	// _________
 
 	// _________
 	// HLT triggers
@@ -142,17 +158,6 @@ void MassAnalysis::FillTree(){
 	}
 	// _________
 
-	// _________
-	// NVertices
-	int nvertex=0;
-	for(int i=0; i<fTR->NVrtx; ++i){
-		if(fabs(fTR->VrtxZ[i]) > 24) continue;
-		if(sqrt( (fTR->VrtxX[i])*(fTR->VrtxX[i]) + (fTR->VrtxY[i])*(fTR->VrtxY[i])) > 2) continue;
-		if(fTR->VrtxNdof[i]<=4) continue;
-		nvertex++;
-	}
-	fMT2tree->misc.NVertices=nvertex;
-	// _________
 
 	// ---------------------------------------------------------------
 	// Set NJets, NElecs, NMuons

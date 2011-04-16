@@ -24,7 +24,6 @@ void MT2Misc::Reset() {
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
-  NVertices               = -1;
   LeptConfig		  = -1;	  
   PassJetID               = -1;
   Jet0Pass                = -1;
@@ -60,9 +59,10 @@ MT2PileUp::~MT2PileUp(){
 }
 
 void MT2PileUp::Reset(){
-	PUnumInt= -999;
-	PtHat   = -999.99;;
-	Weight  = -999.99;
+	PUnumInt  = -999;
+	PtHat     = -999.99;;
+	Weight    = -999.99;
+  	NVertices = -1;
 }
 
 // ------------------------------------------------------
