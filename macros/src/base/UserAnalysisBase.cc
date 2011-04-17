@@ -17,7 +17,7 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
-	delete fPUWeight;
+	if(fDoPileUpReweight) delete fPUWeight;
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
