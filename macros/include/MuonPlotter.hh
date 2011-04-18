@@ -22,7 +22,7 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		SingleMu = sample_begin, DoubleMu, MuEG, DoubleElectron,
+		DoubleMu = sample_begin, MuEG, DoubleElectron,
 		gNSAMPLES
 	};
 	enum gOldSample {
@@ -108,7 +108,6 @@ public:
 	MuonPlotter(TString, TString);
 	virtual ~MuonPlotter();
 
-	inline void setSelection(int sel){ fSelectionSwitch = sel; };
 	inline void setCharge(int charge){ fChargeSwitch = charge; };
 
 	void init(TString filename = "samples.dat");
@@ -238,6 +237,7 @@ public:
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	bool passesMllEventVeto(float = 12.);
 
+	// Trigger selections:
 	bool isMuTriggeredEvent();
 	bool isElTriggeredEvent();
 	bool isJetTriggeredEvent();
@@ -322,7 +322,12 @@ private:
 	ofstream fOUTSTREAM;
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
-	int fSelectionSwitch; // 0 for UCSD, 1 for UFlorida
+	string fDoubleMuTrigger;
+	string fSingleMuTrigger;
+	string fDoubleElTrigger;
+	string fSingleElTrigger;
+	vector<string> fEMuTriggers;
+
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
 	vector<int> fAllSamples;
@@ -334,10 +339,6 @@ private:
 	vector<int> fEGData;  // EG data samples
 	vector<int> fJMData;  // JetMET data samples
 	
-	int fNJetsMin; // Cut on minimal number of jets
-	float fMinPt1; // Cut on pt of harder muon
-	float fMinPt2; // Cut on pt of softer muon
-
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
