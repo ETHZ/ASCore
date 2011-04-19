@@ -29,12 +29,17 @@ public:
 	SSDLAnalysis(TreeReader *tr = 0);
 	virtual ~SSDLAnalysis();
 	
-	void           Begin(const char* filename = "SSDLTree.root");
-	void           Analyze();
-	void           End();
+	void Begin(const char* filename = "SSDLTree.root");
+	void Analyze();
+	void End();
 	
-	void           BookTree();	
-	void           ResetTree();
+	void ReadTriggers(const char* = "HLTPaths_SSDL.dat");
+	void BookTriggers(vector<string>);
+	bool FillTriggers(vector<string>); // returns OR of list of triggers
+	void BookTree();
+	void ResetTree();
+	
+	const bool AddBranch(const char* name, const char* type, void* address, const char* size = 0);
 
 private:
 	static const int fMaxNjets = 30;
@@ -49,11 +54,12 @@ private:
 	int   fTRunNumber;
 	int   fTEventNumber;
 	int   fTLumiSection;
-	// trigger properties
-	int fTHLTNPaths;
-	int fTHLTres     [gMaxhltbits];
-	int fTHLTprescale[gMaxhltbits];
-	std::vector<std::string> fTHLTnames;
+
+	// triggers
+	int fNHLTPaths;
+	vector<string> fHLTPaths;
+	vector<int>    fHLTResults;
+	vector<int>    fHLTPrescales;	
 
 	// jet-MET properties
 	int   fTnqjets;

@@ -60,6 +60,7 @@ void SSDLAnalyzer::BeginJob(){
 	// fSSDLAnalysis->SetOutputDir(fOutputDir);
 	fSSDLAnalysis->SetOutputFile(fOutputFile);
 	fSSDLAnalysis->SetVerbose(fVerbose);
+	fSSDLAnalysis->SetData(fIsData);
 	fSSDLAnalysis->Begin();
 }
 

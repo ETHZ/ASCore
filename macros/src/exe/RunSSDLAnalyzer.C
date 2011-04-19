@@ -17,10 +17,12 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-v verbose] [-m maxevents] [-j JSON] [-p pthat] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-s] [-v verbose] [-m maxevents] [-j JSON] [-p pthat] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     outfile   is the output file                    " << endl;
 	cout << "                default is ssdlfile.root             " << endl;
+	cout << "     -s        toggles between data/mc               " << endl;
+	cout << "                default is data                      " << endl;
 	cout << "     verbose   sets the verbose level                " << endl;
 	cout << "                default is 0 (quiet mode)            " << endl;
 	cout << "     maxevents are the number of events to run over  " << endl;
@@ -39,6 +41,7 @@ void usage( int status = 0 ) {
 int main(int argc, char* argv[]) {
 // Default options
 	bool isList = false;
+	bool isdata = true;
 	// TString outputdir = "TempOutput/";
 	TString outputfile = "ssdlfile.root";
 	string jsonfile = "";
@@ -48,10 +51,11 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "o:v:p:m:j:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "o:sv:p:m:j:lh?")) != -1 ) {
 		switch (ch) {
 			case 'o': outputfile = TString(optarg); break;
 			case 'l': isList     = true; break;
+			case 's': isdata     = false; break;
 			case 'v': verbose    = atoi(optarg); break;
 			case 'p': pthatcut   = atof(optarg); break;
 			case 'm': maxevents  = atoi(optarg); break;
@@ -94,10 +98,12 @@ int main(int argc, char* argv[]) {
 	cout << "JSON file is:     " << (jsonfile.length()>0?jsonfile:"empty") << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 	if(pthatcut > -1.) cout << "Lower pthat cut: " << pthatcut << endl;
+	cout << "Running on " << (isdata?"data":"MC") << endl;
 	cout << "--------------" << endl;
 
 	SSDLAnalyzer *tA = new SSDLAnalyzer(theChain);
 	tA->SetOutputFile(outputfile);
+	tA->SetData(isdata);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxevents);
 	if ( jsonfile.length() ) tA->ReadJSON(jsonfile.c_str());

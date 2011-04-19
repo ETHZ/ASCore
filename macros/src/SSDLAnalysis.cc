@@ -9,12 +9,14 @@ const int SSDLAnalysis::gMaxhltbits;
 
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	//SetStyle();
+	fHLTPaths.clear();
 }
 
 SSDLAnalysis::~SSDLAnalysis(){
 }
 
 void SSDLAnalysis::Begin(const char* filename){
+	ReadTriggers();
 	ReadPDGTable();
 	BookTree();
 }
@@ -25,20 +27,98 @@ void SSDLAnalysis::End(){
 	fOutputFile->Close();
 }
 
+void SSDLAnalysis::ReadTriggers(const char* triggerfile){
+	// Read in a bunch of HLT paths to be stored in the mini tree
+	ifstream IN(triggerfile);
+	char buffer[200];
+	char ParName[100];
+	char StringValue[100];
+	bool ok(false);
+	
+	while( IN.getline(buffer, 200, '\n') ){
+		ok = false;
+		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
+
+		// strings
+		sscanf(buffer, "%s %s", ParName, StringValue);
+		if( !strcmp(ParName, "HLT") ){
+			fHLTPaths.push_back(StringValue); ok = true;
+		}
+
+		if(!ok) cout << "%% SSDLAnalysis::ReadTriggers ==> ERROR: Unknown variable " << ParName << endl;
+	}
+	if(fVerbose > 0){
+		cout << "Adding Trigger paths:" << endl;
+		for(size_t i = 0; i < fHLTPaths.size(); ++i){
+			cout << " " << fHLTPaths[i] << endl;
+		}
+		cout << "--------------" << endl;
+	}
+	fNHLTPaths = fHLTPaths.size();
+	fHLTResults.resize(fNHLTPaths);
+	fHLTPrescales.resize(fNHLTPaths);
+}
+
+void SSDLAnalysis::BookTriggers(vector<string> triggers){
+	for(size_t i = 0; i < triggers.size(); ++i){
+		string prescalename(triggers[i] + "_PS");
+		if(AddBranch(triggers[i].c_str(),  "I", &fHLTResults[i])   == false ) exit(-1);
+		if(AddBranch(prescalename.c_str(), "I", &fHLTPrescales[i]) == false ) exit(-1);
+	}
+}
+
+bool SSDLAnalysis::FillTriggers(vector<string> triggers){
+	// Returns OR of trigger results, i.e. true if ANY of them passed
+	bool accept = false;
+	if(triggers.size() == 0 ) return false;
+	for( int i = 0; i < triggers.size(); ++i ){
+		if(GetHLTBit(triggers[i]) == -1){
+			// Bit not found
+			fHLTResults[i]   = -1;
+			fHLTPrescales[i] = -1;
+			continue;
+		} else{
+			// Bit found
+			bool triggered   = GetHLTResult(triggers[i]);
+			fHLTResults[i]   = triggered ? 1:0;
+			fHLTPrescales[i] = GetHLTPrescale(triggers[i]);
+			accept = accept || triggered;
+		}
+	}
+	return accept;
+}
+
+const bool SSDLAnalysis::AddBranch( const char* name, const char* type, void* address, const char* size ){
+	// This is copied from FillerBase.cc
+  
+  // Form input
+  std::string fullname(name);
+  
+  std::string branchType(fullname);
+  if ( size ) // Size needs to be pre-fixed
+    branchType += "[" + std::string(size) + "]";
+  branchType += "/"+std::string(type);
+
+  // Declare branch
+  TBranch* b = fAnalysisTree->Branch(fullname.c_str(),address,branchType.c_str());
+
+  return !(b==0); // return 1 if branch was successfully created, 0 otherwise
+
+}
+
 void SSDLAnalysis::BookTree(){
 	fOutputFile->cd();
 	fAnalysisTree = new TTree("Analysis", "AnalysisTree");
 
     // run/sample properties
-	fAnalysisTree->Branch("Run",                &fTRunNumber,         "Run/I");
-	fAnalysisTree->Branch("Event",              &fTEventNumber,       "Event/I");
-	fAnalysisTree->Branch("LumiSec",            &fTLumiSection,       "LumiSec/I");
-	// HLT triggers
-	fAnalysisTree->Branch("NHLTPaths",          &fTHLTNPaths         ,"NHLTPaths/I");
-	fAnalysisTree->Branch("HLTResults",         &fTHLTres            ,"HLTResults[NHLTPaths]/I");
-	fAnalysisTree->Branch("HLTPrescales",       &fTHLTprescale       ,"HLTPrescale[NHLTPaths]/I");
-	fAnalysisTree->Branch("HLTNames",           &fTHLTnames);
+	fAnalysisTree->Branch("Run",              &fTRunNumber,         "Run/I");
+	fAnalysisTree->Branch("Event",            &fTEventNumber,       "Event/I");
+	fAnalysisTree->Branch("LumiSec",          &fTLumiSection,       "LumiSec/I");
 
+
+	// HLT triggers
+	BookTriggers(fHLTPaths);
+	
 	// single-muon properties
 	fAnalysisTree->Branch("NMus"          ,&fTnqmus,          "NMus/I");
 	fAnalysisTree->Branch("MuPt"          ,&fTmupt,           "MuPt[NMus]/F");
@@ -106,11 +186,12 @@ void SSDLAnalysis::BookTree(){
 
 void SSDLAnalysis::Analyze(){
 	// initial event selection: good event trigger, good primary vertex...
-	// Trigger selection will be done later
-	// if( !IsGoodMuEvent() && !IsGoodElEvent() && !IsGoodElFakesEvent() && !IsGoodHadronicEvent()) return;
 	if( !IsGoodEvent() ) return;
 	ResetTree();
 	
+	// Trigger selection
+	if(fIsData && FillTriggers(fHLTPaths) == false) return;
+
 	// Do object selections
 	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
 	vector<int> selectedElInd  = ElectronSelection(&UserAnalysisBase::IsLooseEl);
@@ -120,7 +201,7 @@ void SSDLAnalysis::Analyze(){
 	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
 	
 	// Require at least one loose lepton
-	if( (fTnqmus + fTnqels) < 1 ) return;
+	// if( (fTnqmus + fTnqels) < 1 ) return;
 	
 	// event and run info
 	fTRunNumber   = fTR->Run;
@@ -173,17 +254,26 @@ void SSDLAnalysis::Analyze(){
 		fTmudzbs     [i] = fTR->MuDzBS[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
 		
-		fTmuid     [i] = fTR->MuGenID  [index];
-		fTmumoid   [i] = fTR->MuGenMID [index];
-		fTmugmoid  [i] = fTR->MuGenGMID[index];
-		pdgparticle mu, mo, gmo;
-		GetPDGParticle(mu,  abs(fTR->MuGenID  [index]));
-		GetPDGParticle(mo,  abs(fTR->MuGenMID [index]));
-		GetPDGParticle(gmo, abs(fTR->MuGenGMID[index]));
-		fTmutype   [i] = mu.get_type();
-		fTmumotype [i] = mo.get_type();
-		fTmugmotype[i] = gmo.get_type();
-
+		if(fIsData == false){ // mc truth information
+			fTmuid     [i] = fTR->MuGenID  [index];
+			fTmumoid   [i] = fTR->MuGenMID [index];
+			fTmugmoid  [i] = fTR->MuGenGMID[index];
+			pdgparticle mu, mo, gmo;
+			GetPDGParticle(mu,  abs(fTR->MuGenID  [index]));
+			GetPDGParticle(mo,  abs(fTR->MuGenMID [index]));
+			GetPDGParticle(gmo, abs(fTR->MuGenGMID[index]));
+			fTmutype   [i] = mu.get_type();
+			fTmumotype [i] = mo.get_type();
+			fTmugmotype[i] = gmo.get_type();
+		} else{
+			fTmuid     [i] = -888;
+			fTmumoid   [i] = -888;
+			fTmugmoid  [i] = -888;
+			fTmutype   [i] = -888;
+			fTmumotype [i] = -888;
+			fTmugmotype[i] = -888;
+		}
+		
 		// Calculate mT:
 		TLorentzVector pmu;
 		pmu.SetXYZM(fTR->MuPx[index], fTR->MuPy[index], fTR->MuPz[index], 0.105);	
@@ -220,17 +310,26 @@ void SSDLAnalysis::Analyze(){
 		fTElDeltaEtaSuperClusterAtVtx[ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
 		fTElRelIso                   [ind] = fTR->ElRelIso03                 [elindex];
 		fTElS4OverS1                 [ind] = fTR->ElS4OverS1                 [elindex];
-		fTElGenID                    [ind] = fTR->ElGenID                    [elindex];
-		fTElGenMID                   [ind] = fTR->ElGenMID                   [elindex];
-		fTElGenGMID                  [ind] = fTR->ElGenGMID                  [elindex];
 		
-		pdgparticle el, emo, egmo;
-		GetPDGParticle(el,   abs(fTR->ElGenID  [elindex]));
-		GetPDGParticle(emo,  abs(fTR->ElGenMID [elindex]));
-		GetPDGParticle(egmo, abs(fTR->ElGenGMID[elindex]));
-		fTElGenType  [ind] = el.get_type();
-		fTElGenMType [ind] = emo.get_type();
-		fTElGenGMType[ind] = egmo.get_type();
+		if(fIsData == false){ // mc truth information		
+			fTElGenID  [ind] = fTR->ElGenID  [elindex];
+			fTElGenMID [ind] = fTR->ElGenMID [elindex];
+			fTElGenGMID[ind] = fTR->ElGenGMID[elindex];
+			pdgparticle el, emo, egmo;
+			GetPDGParticle(el,   abs(fTR->ElGenID  [elindex]));
+			GetPDGParticle(emo,  abs(fTR->ElGenMID [elindex]));
+			GetPDGParticle(egmo, abs(fTR->ElGenGMID[elindex]));
+			fTElGenType  [ind] = el.get_type();
+			fTElGenMType [ind] = emo.get_type();
+			fTElGenGMType[ind] = egmo.get_type();
+		} else{
+			fTElGenID    [ind] = -888;
+			fTElGenMID   [ind] = -888;
+			fTElGenGMID  [ind] = -888;
+			fTElGenType  [ind] = -888;
+			fTElGenMType [ind] = -888;
+			fTElGenGMType[ind] = -888;   
+		}
 		
 		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
 		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
@@ -250,6 +349,11 @@ void SSDLAnalysis::ResetTree(){
 	fTEventNumber                = 0;
 	fTLumiSection                = 0;
 
+	for(size_t i = 0; i < fNHLTPaths; ++i){
+		fHLTResults[i]   -2;
+		fHLTPrescales[i] -2;
+	}
+	
 	fTHLTNPaths	= 0;
 	for(size_t i = 0; i < gMaxhltbits; ++i){
 		fTHLTres     [i] = -1;
