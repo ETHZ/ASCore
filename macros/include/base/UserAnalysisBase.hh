@@ -19,6 +19,7 @@ public:
     	virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
+	inline virtual void SetData(bool isdata){fIsData = isdata;};
 
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	inline void SetOutputFile(TString file){ fOutputFile = Util::MakeOutputFile(fOutputDir + file); };
@@ -40,7 +41,8 @@ public:
 	TString fTag;
 	TLatex *fTlat;
 
-	
+	bool fIsData;
+
 	int fVerbose;
 	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names

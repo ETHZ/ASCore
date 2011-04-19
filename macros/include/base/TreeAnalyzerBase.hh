@@ -18,19 +18,23 @@ public:
 
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
 	inline virtual void SetMaxEvents(Long64_t maxevents){fMaxEvents = maxevents;};
+	inline virtual void SetData(bool isdata){fIsData = isdata;};
+
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	inline void SetOutputFile(TString file){ fOutputFile = file; };
 	
+	bool fIsData;
 	TString fOutputDir;
 	TString fOutputFile;
 	int fVerbose;
 	int fNEntries;
 	Long64_t fMaxEvents;
   
+
 	Int_t fCurRun;
-        Int_t fCurLumi;
-        bool skipLumi;
-        bool skipRun;
+	Int_t fCurLumi;
+	bool skipLumi;
+	bool skipRun;
 
 	// stuff for JSON reading
 	virtual void ReadJSON(const char* JSONpath);
