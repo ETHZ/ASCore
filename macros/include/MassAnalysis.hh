@@ -66,7 +66,7 @@ private:
 	typedef std::map <string, bool*> StringBoolMap;
 	StringBoolMap fTriggerMap;
 
-	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject);
+	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, int PFJID, HemiObjects& hemiobject);
 	void   GetMT2Variables(bool minimizeDHT, double minJPt, double maxJEta, HemiObjects& hemiobject);
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);

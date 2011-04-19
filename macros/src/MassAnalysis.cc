@@ -40,6 +40,7 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_DoubleMu3_v3"]        = &fMT2tree->trigger.HLT_DoubleMu3_v3;
 		fTriggerMap["HLT_Mu8_Jet40_v2"]        = &fMT2tree->trigger.HLT_Mu8_Jet40_v2;
 	}
+
 }
 
 void MassAnalysis::Analyze(){	
@@ -61,27 +62,31 @@ void MassAnalysis::Analyze(){
 	   // ************************************************* //
 	   // changes here affect misc.MT2 type variables !!!!  //
 	   // ************************************************  //
-	   // seed: max inv mass, assoc: minimal lund distance, no dR cut (i.e. third parameter is 0)
-	GetMT2Variables(2, 3, 0.0, 20, 2.4, fHemiObjects[0]); 
+
+	// seed: max inv mass, assoc: minimal lund distance, no dR cut (i.e. third parameter is 0)
+	GetMT2Variables(2, 3, 0.0, 20, 2.4, 0,  fHemiObjects[0]); 
+	
+	// seed: max inv mass, assoc: minimal lund distance, no dR cut (i.e. third parameter is 0), JETID enforced
+	GetMT2Variables(2, 3, 0.0, 20, 2.4, 1,  fHemiObjects[1]); 
 	
      	// MT2 for two leading jets, maxdR=0.1, i.e. smaller than jet cone size
-	GetMT2Variables(4, 3, 0.1, 20, 2.4, fHemiObjects[1]); 
+	GetMT2Variables(4, 3, 0.1, 20, 2.4, 0,  fHemiObjects[2]); 
 
 	// seed: leading jets, assoc: minimal lund distance, maxdR=1
-	GetMT2Variables(4, 3, 1.0, 20, 2.4, fHemiObjects[2]); 
+	GetMT2Variables(4, 3, 1.0, 20, 2.4, 0,  fHemiObjects[3]); 
 
 	// minimizing deltaHT
 	bool minimizeDHT(true);
-	GetMT2Variables(minimizeDHT, 20, 2.4, fHemiObjects[3]); 
+	GetMT2Variables(minimizeDHT, 20, 2.4,   fHemiObjects[4]); 
 	
 	// luc's code minimizing deltaHT
-	GetMT2Variables(0, 9, 0.0, 20, 2.4,   fHemiObjects[4]); 
+	GetMT2Variables(0, 9, 0.0, 20, 2.4, 0,  fHemiObjects[5]); 
 	
 	// seed: max inv mass, assoc: minimmal inv mass
-	GetMT2Variables(2, 2, 0.0, 20, 2.4,   fHemiObjects[5]); 
+	GetMT2Variables(2, 2, 0.0, 20, 2.4, 0,  fHemiObjects[6]); 
 	
 	// seed: leading jets, assoc: minimal lund distance, 
-	GetMT2Variables(4, 3, 0,  20,  2.4, fHemiObjects[6]); 
+	GetMT2Variables(4, 3, 0,  20,  2.4, 0,  fHemiObjects[7]); 
 	// -----------------------------------------------------------
 
 
@@ -113,6 +118,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
 	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
+	fMT2tree->misc.Vectorsumptloose	   = fVectorSumPtloose;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
 //	fMT2tree->misc.EcalDeadCellBEFlag  = fTR->EcalDeadCellBEFlag;
@@ -122,10 +128,11 @@ void MassAnalysis::FillTree(){
 //		fMT2tree->misc.EcalGapBE[i]          = fTR->EcalGapBE[i];
 //	}
 	fMT2tree->misc.MT2                 = fHemiObjects[0].MT2;    // note: this is a bit dangerous, 
+	fMT2tree->misc.MT2loose            = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
 	fMT2tree->misc.MCT                 = fHemiObjects[0].MCT;
-	fMT2tree->misc.MT2leading          = fHemiObjects[1].MT2;    //       as the definition of fHemiObjects1,2,3,4
-	fMT2tree->misc.MT2noISR            = fHemiObjects[2].MT2;    //       is interchangable
-	fMT2tree->misc.AlphaT              = fHemiObjects[3].alphaT; 
+	fMT2tree->misc.MT2leading          = fHemiObjects[2].MT2;    //       as the definition of fHemiObjects1,2,3,4
+	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
+	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
 
 	fMT2tree->misc.MET                 = fTR->PFMET;
 	fMT2tree->misc.METPhi              = fTR->PFMETphi;
@@ -160,14 +167,6 @@ void MassAnalysis::FillTree(){
 
 
 	// ---------------------------------------------------------------
-	// Set NJets, NElecs, NMuons
-	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
-	fMT2tree->SetNJetsAcc      ((Int_t)fNJetsAcc);
-	fMT2tree->SetNEles         ((Int_t)fElecs.size());
-	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
-	fMT2tree->SetNTaus         ((Int_t)fTaus.size());
-	
-	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
 	for(int i=0; i<fJetTaus.NObjs; ++i) {
 		if(! fJetTaus.isTau[i]){
@@ -197,6 +196,16 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].isTau = true;
 		}
 	}
+	
+	// ---------------------------------------------------------------
+	// Set NJets, NElecs, NMuons
+	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
+	fMT2tree->SetNJetsIDLoose  (fMT2tree->GetNjets(20, 2.4, 1));
+	fMT2tree->SetNJetsAcc      ((Int_t)fNJetsAcc);
+	fMT2tree->SetNEles         ((Int_t)fElecs.size());
+	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
+	fMT2tree->SetNTaus         ((Int_t)fTaus.size());
+	
 	
 	// -----------------------------------------------------------------
 	// Fill leptons 4-momenta & tight_flag & charge
@@ -306,12 +315,13 @@ void MassAnalysis::FillTree(){
 	// warning: these MT2tree methods are only to be called once all needed variables are filled!
 	// warning: hardcoded values!
 	fMT2tree->misc.MinMetJetDPhi = fMT2tree->MinMetJetDPhi(0,20,5.0,1);
-	fMT2tree->misc.PassJetID     = fMT2tree->PassJetID(50,5,1);
+	fMT2tree->misc.PassJetID     = fMT2tree->PassJetID(50,2.4,1);
+	fMT2tree->misc.PassJetID20   = fMT2tree->PassJetID(20,2.4,1);
 	if(fMT2tree->NJets > 0) {
 		fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,0);
 	} else  fMT2tree->misc.Jet0Pass      = 0; 
 	if(fMT2tree->NJets > 1) {
-		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet(100,2.4,0);
+		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet( 60,2.4,0);
 	} else  fMT2tree->misc.Jet1Pass      = 0;
 	
 	// MHT from jets and taus
@@ -514,7 +524,7 @@ void MassAnalysis::InterestingEvents(){
 }
 
 // ************************************************************************************************************************************* 
-void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject){
+void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, int PFJID, HemiObjects& hemiobject){
 
 	// clear hemiobject
 	hemiobject.objects .clear();
@@ -536,7 +546,8 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	vector<float> px, py, pz, E;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
-			if(fabs(fTR->PF2PATJEta[fJetTaus.index[i]])>2.4 || fTR->PF2PATJPt[fJetTaus.index[i]]< 20) continue;
+			if(PFJID==1 && !IsGoodBasicPFJetPAT(fJetTaus.index[i], 20, 2.4)                             )  continue;
+			else if(fabs(fTR->PF2PATJEta[fJetTaus.index[i]])>2.4 || fTR->PF2PATJPt[fJetTaus.index[i]]< 20) continue;
 			px.push_back(fTR->PF2PATJPx[fJetTaus.index[i]]);
 			py.push_back(fTR->PF2PATJPy[fJetTaus.index[i]]);
 			pz.push_back(fTR->PF2PATJPz[fJetTaus.index[i]]);

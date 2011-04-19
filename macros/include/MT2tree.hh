@@ -24,11 +24,13 @@ public:
   Int_t    Jet0Pass;
   Int_t    Jet1Pass;
   Int_t    PassJetID;
+  Int_t    PassJetID20;
   Int_t    EcalDeadCellBEFlag;
   Int_t    NECALGapClusters;
   Double_t EcalGapClusterSize[50];
   Double_t EcalGapBE[50];
   Double_t MT2;
+  Double_t MT2loose;
   Double_t MT2leading;
   Double_t MT2noISR;
   Double_t MCT;
@@ -36,12 +38,13 @@ public:
   Double_t MET;
   Double_t METPhi;
   Double_t Vectorsumpt;
+  Double_t Vectorsumptloose;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
   
-  ClassDef(MT2Misc, 12)
+  ClassDef(MT2Misc, 13)
 };
 
 // ----------------------------------------

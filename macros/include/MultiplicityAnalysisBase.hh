@@ -69,6 +69,7 @@ public:
 
 	// members
 	float fVectorSumPt;
+	float fVectorSumPtloose;
 	float fMHTall;
 	float fHT;
 	int   fNJetsAcc;

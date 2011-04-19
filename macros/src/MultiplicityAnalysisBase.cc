@@ -164,11 +164,11 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	double HT=0;
 	for(int j=0; j<fJetTaus.NObjs; ++j){
 		if(!fJetTaus.isTau[j]){
-			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<2.4){
+			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<3.0){
 				HT += fTR->PF2PATJPt[fJetTaus.index[j]];
 			}
 		}else {
-			if(fTR->PfTauPt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTauEta[fJetTaus.index[j]]) < 2.4){
+			if(fTR->PfTauPt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTauEta[fJetTaus.index[j]]) < 3.0){
 				HT +=fTR->PfTauPt[fJetTaus.index[j]];
 			}
 		}
@@ -232,28 +232,32 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	} else if(fCut_Zselector ==1 ) {return false;}
 
 	// VectorSumPt of selected & identified objects(tau, el, mu, jet) and MET
-	double px=0;
-	double py=0;
+	double px=0, pxloose=0;
+	double py=0, pyloose=0;
 	for(int i=0; i<fJets.size(); ++i){
 		px+=fTR->PF2PATJPx[fJets[i]];
 		py+=fTR->PF2PATJPy[fJets[i]];
+		if(!IsGoodBasicPFJetPAT(fJets[i], 20, 2.4)) continue;
+		pxloose+=fTR->PF2PATJPx[fJets[i]];
+		pyloose+=fTR->PF2PATJPy[fJets[i]];
 	}
 	for(int i=0; i<fMuons.size(); ++i){
-		px+=fTR->PfMuPx[fMuons[i]];
-		py+=fTR->PfMuPy[fMuons[i]];
+		px+=fTR->PfMuPx[fMuons[i]]; pxloose+=fTR->PfMuPx[fMuons[i]];
+		py+=fTR->PfMuPy[fMuons[i]]; pyloose+=fTR->PfMuPy[fMuons[i]];
 	}
 	for(int i=0; i<fElecs.size(); ++i){
-		px+=fTR->PfElPx[fElecs[i]];
-		py+=fTR->PfElPy[fElecs[i]];
+		px+=fTR->PfElPx[fElecs[i]]; pxloose+=fTR->PfElPx[fElecs[i]];
+		py+=fTR->PfElPy[fElecs[i]]; pyloose+=fTR->PfElPy[fElecs[i]];
 	}
 	for(int i=0; i<fTaus.size(); ++i){
-		px+=fTR->PfTauPx[fTaus[i]];
-		py+=fTR->PfTauPy[fTaus[i]];
+		px+=fTR->PfTauPx[fTaus[i]]; pxloose+=fTR->PfTauPx[fTaus[i]];
+		py+=fTR->PfTauPy[fTaus[i]]; pyloose+=fTR->PfTauPy[fTaus[i]];
 	}
-	px+=fTR->PFMETpx;
-	py+=fTR->PFMETpy;
+	px+=fTR->PFMETpx; pxloose+=fTR->PFMETpx;
+	py+=fTR->PFMETpy; pyloose+=fTR->PFMETpy;
 
-	fVectorSumPt = sqrt(px*px + py*py);
+	fVectorSumPt      = sqrt(px*px + py*py);
+	fVectorSumPtloose = sqrt(pxloose*pxloose + pyloose*pyloose);
 
 	if(fVectorSumPt > fCut_VSPT)    return false;
 

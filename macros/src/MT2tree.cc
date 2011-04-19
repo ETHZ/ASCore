@@ -26,9 +26,11 @@ void MT2Misc::Reset() {
   LumiSection		  = -1;	  
   LeptConfig		  = -1;	  
   PassJetID               = -1;
+  PassJetID20             = -1;
   Jet0Pass                = -1;
   Jet1Pass                = -1;
   MT2                     = -99999.99;
+  MT2loose                = -99999.99;
   MT2leading              = -99999.99;
   MT2noISR                = -99999.99;
   MCT                     = -99999.99;
@@ -36,6 +38,7 @@ void MT2Misc::Reset() {
   MET                     = -99999.99;
   METPhi                  = -99999.99;
   Vectorsumpt		  = -99999.99;
+  Vectorsumptloose	  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
   DPhiMhtMpt              = -99999.99;
@@ -394,7 +397,7 @@ Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
 	int njets=0;
 		for(int i=0; i<NJets; ++i){
 			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta &&
-				jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
+				jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false && jet[i].isTau==false)   return false;
 		}
 	return true;
 }
