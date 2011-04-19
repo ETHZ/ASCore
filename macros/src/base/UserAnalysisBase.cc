@@ -116,6 +116,18 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 	}
 }
 
+int UserAnalysisBase::GetHLTPrescale(string theHltName){
+	if( fHLTLabelMap.empty() ) return 0;
+	else{
+		int bit = GetHLTBit(theHltName);
+		if (bit < 0 ) {
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTPrescale ==> Bit with name " << theHltName << " not found!" << endl;
+			return 0;
+		}
+		else return fTR->HLTPrescale[bit];
+	}
+}
+
 void UserAnalysisBase::GetEvtEmChFrac(double & fracEm, double & fracCh){
 // Computes the event EM and Charged fractions
        std::cerr << "NEED TO REVISE" << std::endl;

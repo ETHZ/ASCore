@@ -28,6 +28,7 @@ public:
 	virtual void GetHLTNames(Int_t& run);
 	virtual int GetHLTBit(string);
 	virtual bool GetHLTResult(string);
+	virtual int GetHLTPrescale(string);
 
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string);
