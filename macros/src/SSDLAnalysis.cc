@@ -208,14 +208,6 @@ void SSDLAnalysis::Analyze(){
 	fTEventNumber = fTR->Event;
 	fTLumiSection = fTR->LumiSection;
 		
-	// Get trigger results
-	fTHLTnames = fHLTLabels;
-	fTHLTNPaths = fHLTLabels.size();
-	for(unsigned int i = 0; i < fHLTLabels.size(); i++ ){
-		fTHLTres[i]      = fTR->HLTResults[i];
-		fTHLTprescale[i] = fTR->HLTPrescale[i];
-	}
-		
 	// Dump basic jet and MET properties
 	int jetindex(-1);
 	int nqjets = selectedJetInd.size();
@@ -354,14 +346,6 @@ void SSDLAnalysis::ResetTree(){
 		fHLTPrescales[i] -2;
 	}
 	
-	fTHLTNPaths	= 0;
-	for(size_t i = 0; i < gMaxhltbits; ++i){
-		fTHLTres     [i] = -1;
-		fTHLTprescale[i] = -1;
-	}
-	fTHLTnames.clear();
-	fTHLTnames.resize(fHLTLabels.size());
-
 	// muon properties
 	fTnqmus = 0;
 	for(int i = 0; i < fMaxNmus; i++){
