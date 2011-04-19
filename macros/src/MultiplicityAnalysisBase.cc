@@ -235,6 +235,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	double px=0, pxloose=0;
 	double py=0, pyloose=0;
 	for(int i=0; i<fJets.size(); ++i){
+		if(fTR->PF2PATJPt[fJets[i]] < 20 || fabs(fTR->PF2PATJEta[fJets[i]])>2.4) continue;
 		px+=fTR->PF2PATJPx[fJets[i]];
 		py+=fTR->PF2PATJPy[fJets[i]];
 		if(!IsGoodBasicPFJetPAT(fJets[i], 20, 2.4)) continue;
@@ -250,6 +251,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		py+=fTR->PfElPy[fElecs[i]]; pyloose+=fTR->PfElPy[fElecs[i]];
 	}
 	for(int i=0; i<fTaus.size(); ++i){
+		if(fTR->PfTauPt[fTaus[i]] <20 || fabs(fTR->PfTauEta[fTaus[i]])>2.4) continue;
 		px+=fTR->PfTauPx[fTaus[i]]; pxloose+=fTR->PfTauPx[fTaus[i]];
 		py+=fTR->PfTauPy[fTaus[i]]; pyloose+=fTR->PfTauPy[fTaus[i]];
 	}
