@@ -110,62 +110,6 @@ void MassAnalysis::ResetTree(){
 }
 
 void MassAnalysis::FillTree(){
-	// ------------------------------------------------------------------
-	// fill misc 
-	fMT2tree->misc.Run                 = fTR->Run;
-	fMT2tree->misc.Event		   = fTR->Event;
-	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
-	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
-	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
-	fMT2tree->misc.Vectorsumpt	   = fVectorSumPt;
-	fMT2tree->misc.Vectorsumptloose	   = fVectorSumPtloose;
-	fMT2tree->misc.HT                  = fHT;
-	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
-//	fMT2tree->misc.EcalDeadCellBEFlag  = fTR->EcalDeadCellBEFlag;
-//	fMT2tree->misc.NECALGapClusters    = fTR->NECALGapClusters;
-//	for(int i=0; i<fMT2tree->misc.NECALGapClusters; ++i){
-//		fMT2tree->misc.EcalGapClusterSize[i] = fTR->EcalGapClusterSize[i];
-//		fMT2tree->misc.EcalGapBE[i]          = fTR->EcalGapBE[i];
-//	}
-	fMT2tree->misc.MT2                 = fHemiObjects[0].MT2;    // note: this is a bit dangerous, 
-	fMT2tree->misc.MT2loose            = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
-	fMT2tree->misc.MCT                 = fHemiObjects[0].MCT;
-	fMT2tree->misc.MT2leading          = fHemiObjects[2].MT2;    //       as the definition of fHemiObjects1,2,3,4
-	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
-	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
-
-	fMT2tree->misc.MET                 = fTR->PFMET;
-	fMT2tree->misc.METPhi              = fTR->PFMETphi;
-
-	// ---------------------------------
-	// Pile UP info and reco vertices
-	if(!fisData){
-		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
-		fMT2tree->pileUp.PtHat             = fTR->PtHat;
-		fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
-		if(fVerbose > 3) {
-			cout << "fTR->PUnumInteractions " <<  fTR->PUnumInteractions << " weight "  
-		     	     << " GetPUWeight() " << GetPUWeight(fTR->PUnumInteractions) << endl; 
-		}
-	}
-	int nvertex=0;
-	for(int i=0; i<fTR->NVrtx; ++i){
-		if(fabs(fTR->VrtxZ[i]) > 24) continue;
-		if(sqrt( (fTR->VrtxX[i])*(fTR->VrtxX[i]) + (fTR->VrtxY[i])*(fTR->VrtxY[i])) > 2) continue;
-		if(fTR->VrtxNdof[i]<=4) continue;
-		nvertex++;
-	}
-	fMT2tree->pileUp.NVertices=nvertex;
-	// _________
-
-	// _________
-	// HLT triggers
-	for (StringBoolMap::iterator iter = fTriggerMap.begin(); iter != fTriggerMap.end(); ++iter){
-		if(GetHLTResult(iter->first)) *iter->second =1;
-	}
-	// _________
-
-
 	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
 	for(int i=0; i<fJetTaus.NObjs; ++i) {
@@ -310,18 +254,68 @@ void MassAnalysis::FillTree(){
 	}	
 	fMT2tree->MPT[0].SetXYZM(-tracks.Px(), -tracks.Py(), 0, 0);
 
+	// Pile UP info and reco vertices
+	if(!fisData){
+		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
+		fMT2tree->pileUp.PtHat             = fTR->PtHat;
+		fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
+		if(fVerbose > 3) {
+			cout << "fTR->PUnumInteractions " <<  fTR->PUnumInteractions << " weight "  
+		     	     << " GetPUWeight() " << GetPUWeight(fTR->PUnumInteractions) << endl; 
+		}
+	}
+	int nvertex=0;
+	for(int i=0; i<fTR->NVrtx; ++i){
+		if(fabs(fTR->VrtxZ[i]) > 24) continue;
+		if(sqrt( (fTR->VrtxX[i])*(fTR->VrtxX[i]) + (fTR->VrtxY[i])*(fTR->VrtxY[i])) > 2) continue;
+		if(fTR->VrtxNdof[i]<=4) continue;
+		nvertex++;
+	}
+	fMT2tree->pileUp.NVertices=nvertex;
+	// _________
+
+	// _________
+	// HLT triggers
+	for (StringBoolMap::iterator iter = fTriggerMap.begin(); iter != fTriggerMap.end(); ++iter){
+		if(GetHLTResult(iter->first)) *iter->second =1;
+	}
+	// _________
+	
+	
+	// ------------------------------------------------------------------
+	// fill misc 
+	fMT2tree->misc.Run                 = fTR->Run;
+	fMT2tree->misc.Event		   = fTR->Event;
+	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
+	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
+	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
+	fMT2tree->misc.HT                  = fHT;
+	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
+	
+	fMT2tree->misc.MT2                 = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
+	fMT2tree->misc.MT2all              = fHemiObjects[0].MT2;    // note: this is a bit dangerous, 
+	fMT2tree->misc.MCT                 = fHemiObjects[1].MCT;
+	fMT2tree->misc.MT2leading          = fHemiObjects[2].MT2;    //       as the definition of fHemiObjects1,2,3,4
+	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
+	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
+
+	fMT2tree->misc.MET                 = fTR->PFMET;
+	fMT2tree->misc.METPhi              = fTR->PFMETphi;
+
 
 	// ----------------------------------------------------------------------------------
 	// warning: these MT2tree methods are only to be called once all needed variables are filled!
 	// warning: hardcoded values!
-	fMT2tree->misc.MinMetJetDPhi = fMT2tree->MinMetJetDPhi(0,20,5.0,1);
-	fMT2tree->misc.PassJetID     = fMT2tree->PassJetID(50,2.4,1);
-	fMT2tree->misc.PassJetID20   = fMT2tree->PassJetID(20,2.4,1);
+	fMT2tree->misc.Vectorsumpt	   = fMT2tree->GetMHTminusMET(1, 20, 2.4, true); // including leptons, ID jets only
+	fMT2tree->misc.VectorsumptAll	   = fMT2tree->GetMHTminusMET(0, 20, 2.4, true); // including leptons
+	fMT2tree->misc.MinMetJetDPhi       = fMT2tree->MinMetJetDPhi(0,20,5.0,1);
+	fMT2tree->misc.PassJetID           = fMT2tree->PassJetID(50,2.4,1);
+	fMT2tree->misc.PassJetID20         = fMT2tree->PassJetID(20,2.4,1);
 	if(fMT2tree->NJets > 0) {
-		fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,0);
+		fMT2tree->misc.Jet0Pass      = (Int_t) fMT2tree->jet[0].IsGoodPFJet(100,2.4,1);
 	} else  fMT2tree->misc.Jet0Pass      = 0; 
 	if(fMT2tree->NJets > 1) {
-		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet( 60,2.4,0);
+		fMT2tree->misc.Jet1Pass      = (Int_t) fMT2tree->jet[1].IsGoodPFJet( 60,2.4,1);
 	} else  fMT2tree->misc.Jet1Pass      = 0;
 	
 	// MHT from jets and taus
@@ -429,6 +423,8 @@ void MassAnalysis::FillTree(){
 
 	fMT2tree->Znunu.METplusLeptsPt             = fMT2tree->GetMETPlusGenLepts(0, 1, 1,  1113, 23, 0, 100, 0, 10000);
 	fMT2tree->Znunu.METplusLeptsPtReco         = fMT2tree->GetMETPlusLepts(1);
+	
+	
 	// ----------------------------------------------------------------------
 	// fill tree
 	fATree            ->Fill();

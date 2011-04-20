@@ -30,7 +30,7 @@ public:
   Double_t EcalGapClusterSize[50];
   Double_t EcalGapBE[50];
   Double_t MT2;
-  Double_t MT2loose;
+  Double_t MT2all;
   Double_t MT2leading;
   Double_t MT2noISR;
   Double_t MCT;
@@ -38,7 +38,7 @@ public:
   Double_t MET;
   Double_t METPhi;
   Double_t Vectorsumpt;
-  Double_t Vectorsumptloose;
+  Double_t VectorsumptAll;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
@@ -283,10 +283,10 @@ public:
 
   // HT, MHT, ...
   Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
-  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=0);

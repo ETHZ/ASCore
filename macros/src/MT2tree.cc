@@ -30,7 +30,7 @@ void MT2Misc::Reset() {
   Jet0Pass                = -1;
   Jet1Pass                = -1;
   MT2                     = -99999.99;
-  MT2loose                = -99999.99;
+  MT2all                  = -99999.99;
   MT2leading              = -99999.99;
   MT2noISR                = -99999.99;
   MCT                     = -99999.99;
@@ -38,7 +38,7 @@ void MT2Misc::Reset() {
   MET                     = -99999.99;
   METPhi                  = -99999.99;
   Vectorsumpt		  = -99999.99;
-  Vectorsumptloose	  = -99999.99;
+  VectorsumptAll 	  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
   DPhiMhtMpt              = -99999.99;
@@ -172,7 +172,7 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   double pt = lv.Pt();
   double eta = lv.Eta();
   if ( pt < minJPt || fabs(eta) > maxJEta )     return false;
-  if ( PFJID >0 && isTau )                      return false;
+  if ( isTau )                                  return true;  // for now every tau passes the "ID".
   
   switch (PFJID) {
   case 3:               // TIGHT
@@ -305,6 +305,7 @@ MT2tree::~MT2tree(){
 
 void MT2tree::Reset() {
   NJets            = 0;
+  NTaus            = 0;
   NJetsIDLoose     = 0;
   NJetsIDMedium    = 0;
   NJetsIDTight     = 0;
@@ -396,8 +397,8 @@ Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met
 Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
 	int njets=0;
 		for(int i=0; i<NJets; ++i){
-			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta &&
-				jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false && jet[i].isTau==false)   return false;
+			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta && 
+			   jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
 		}
 	return true;
 }
@@ -540,7 +541,7 @@ Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
 Int_t MT2tree::GetNBtags (int algo, double value, double minJPt, double maxJEta, int PFJID){  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
   int nbjets=0;
   for(int i=0; i<NJets; ++i){
-    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false || jet[i].isTau ) continue; // FIXME: taus don't have JID and BTAG info
     switch(algo){
     case 0: 
       if( jet[i].bTagProbTCHE < value ) continue;
@@ -601,7 +602,7 @@ Double_t MT2tree::GetHT(int PFJID, double minJPt, double maxJEta){
   return ht;
 }
 
-TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
+TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta, bool inclLepts){
   TLorentzVector mht(0,0,0,0);
   TLorentzVector j(0,0,0,0);
   for(int i = 0; i<NJets; ++i){
@@ -609,21 +610,31 @@ TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
     j.SetPtEtaPhiM(jet[i].lv.Pt(),0,jet[i].lv.Phi(),0);
     mht-=j;
   }
+  if(!inclLepts) return mht;
+  // add leptons
+  for(int i=0; i<NEles; ++i){
+    j.SetPtEtaPhiM(ele[i].lv.Pt(),0, ele[i].lv.Phi(), 0);
+    mht-=j;
+  }
+  for(int i=0; i<NMuons; ++i){
+    j.SetPtEtaPhiM(muo[i].lv.Pt(),0, muo[i].lv.Phi(), 0);
+    mht-=j;
+  }
   return mht;
 }
 
-Double_t MT2tree::GetMHT(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHT(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return mht.Pt();
 }
 
-Double_t MT2tree::GetMHTPhi(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHTPhi(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return mht.Phi();
 }
 
-Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return (mht-pfmet[0]).Pt();
 }
 
