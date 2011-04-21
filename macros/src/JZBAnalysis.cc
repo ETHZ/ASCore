@@ -1,6 +1,12 @@
 #include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
+<<<<<<< JZBAnalysis.cc
 #include "TF1.h"
+#include <time.h>
+#include <TRandom.h>
+=======
+#include "TF1.h"
+>>>>>>> 1.21
 //#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
@@ -10,7 +16,13 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
+string sjzbversion="1.22";
+string sjzbinfo="(write here any comments you have about this version/variation)";
 
+Double_t GausRandom(Double_t mu, Double_t sigma) { 
+  return gRandom->Gaus(mu,sigma);   //real deal
+  //return mu;//debugging : no smearing
+}
 
 class nanoEvent
 {
@@ -122,6 +134,8 @@ public:
   int pfJetGoodNum285;
   int pfJetGoodNum27;
   int pfJetGoodNum25;
+  int pfJetGoodNum20;
+
 
   float recoilpt[rMax];
   float dphiRecoilLep[rMax];
@@ -148,6 +162,7 @@ public:
   int badJet;
 
   float jzb[rMax];
+  float sjzb[rMax]; // smeared JZB
   float dphi_sumJetVSZ[rMax];
   float sumJetPt[rMax];
 
@@ -289,6 +304,7 @@ void nanoEvent::reset()
     pfJetGoodPhi[jCounter]=0;
   }
   pfJetGoodNum=0;
+  pfJetGoodNum20=0;
   pfJetGoodNum25=0;
   pfJetGoodNum27=0;
   pfJetGoodNum285=0;
@@ -307,6 +323,7 @@ void nanoEvent::reset()
 
   for(int rCounter=0;rCounter<rMax;rCounter++){
     jzb[rCounter]=0;
+    sjzb[rCounter]=0;
     dphi_sumJetVSZ[rCounter]=0;
     sumJetPt[rCounter]=0;
   }
@@ -316,6 +333,8 @@ void nanoEvent::reset()
 
 
 TTree *myTree;
+TTree *myInfo;
+
 nanoEvent nEvent;
 
 
@@ -346,6 +365,37 @@ void JZBAnalysis::Begin(){
   fHMDPhiPt  = new TH2F("fHMDPhiPt","fHMDPhiPt",350,0,3.5,300,0,100);
   fHMZPtJ1Pt = new TH2F("fHMZPtJ1Pt","fHMZPtJ1Pt",300,0,300,300,0,300);
   fHMZPtuJ1Pt = new TH2F("fHMZPtuJ1Pt","fHMZPtuJ1Pt",300,0,300,300,0,300);
+
+  myInfo = new TTree("info","info/S");
+  TString *user = new TString();
+  TString *timestamp = new TString();
+  TString *jzbversion = new TString();
+  TString *cmsdir = new TString();
+  TString *jzbinfo = new TString();
+  myInfo->Branch("user",&user,16000,0);
+  myInfo->Branch("timestamp",&timestamp,16000,0);
+  myInfo->Branch("version",&jzbversion,16000,0);
+  myInfo->Branch("cmsdir",&cmsdir,16000,0);
+  myInfo->Branch("jzbinfo",&jzbinfo,16000,0);
+  char usertext[255];
+  FILE *usernamefile;
+  usernamefile = popen("whoami", "r");
+  fgets(usertext, sizeof(usertext), usernamefile);
+  pclose(usernamefile);
+  *jzbversion=sjzbversion;
+  char scmsdir[1000];
+  getcwd(scmsdir,1000);
+  *cmsdir=scmsdir;
+  *jzbinfo=sjzbinfo;
+  *user=usertext;
+  time_t rawtime;
+  struct tm * timeinfo;
+  time (&rawtime );
+  *timestamp=ctime(&rawtime);
+  cout << *user << "\t" << *timestamp << "\t" << *cmsdir << "\t" << *jzbversion << endl;
+  
+  myInfo->Fill();
+  myInfo->Write();
 
   myTree = new TTree("events","events");
 
@@ -469,6 +519,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
 
+  myTree->Branch("pfJetGoodNum20",&nEvent.pfJetGoodNum20,"pfJetGoodNum20/I");
   myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
   myTree->Branch("pfJetGoodNum27",&nEvent.pfJetGoodNum27,"pfJetGoodNum27/I");
   myTree->Branch("pfJetGoodNum285",&nEvent.pfJetGoodNum285,"pfJetGoodNum285/I");
@@ -477,6 +528,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
 
   myTree->Branch("jzb",nEvent.jzb,"jzb[30]/F");
+  myTree->Branch("sjzb",nEvent.sjzb,"sjzb[30]/F");
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
   myTree->Branch("sumJetPt",nEvent.sumJetPt,"sumJetPt[30]/F");
   myTree->Branch("weight", &nEvent.weight,"weight/F");
@@ -779,6 +831,7 @@ void JZBAnalysis::Analyze() {
     TLorentzVector sumOfPFJets(0,0,0,0);
     nEvent.pfJetNum=0;
     nEvent.pfJetGoodNum=0;
+    nEvent.pfJetGoodNum20=0;
     nEvent.pfJetGoodNum25=0;
     nEvent.pfJetGoodNum27=0;
     nEvent.pfJetGoodNum285=0;
@@ -862,6 +915,7 @@ void JZBAnalysis::Analyze() {
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
           nEvent.pfJetGoodNum++;
         }
+        if ( jpt>20. ) nEvent.pfJetGoodNum20++;
         if ( jpt>25. ) nEvent.pfJetGoodNum25++;
         if ( jpt>27. ) nEvent.pfJetGoodNum27++;
         if ( jpt>28.5 ) nEvent.pfJetGoodNum285++;
@@ -920,7 +974,14 @@ void JZBAnalysis::Analyze() {
     nEvent.dphi_sumJetVSZ[1] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
     nEvent.sumJetPt[1] = pfNoCutsJetVector.Pt(); 
     nEvent.jzb[1] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
+<<<<<<< JZBAnalysis.cc
+    nEvent.jzb[1] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
+    nEvent.sjzb[1] = GausRandom(nEvent.jzb[1]+1.3,7); // to be used with pfMET
+
     
+=======
+    
+>>>>>>> 1.21
     nEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
     nEvent.sumJetPt[2] = recoil.Pt(); 
     nEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
