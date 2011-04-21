@@ -524,9 +524,9 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 
 	// clear hemiobject
 	hemiobject.objects .clear();
-	hemiobject.pjet1   .Clear();
-	hemiobject.pjet2   .Clear();
-	hemiobject.UTM     .Clear();
+	hemiobject.pjet1   .SetPxPyPzE(0.,0.,0.,0.);
+	hemiobject.pjet2   .SetPxPyPzE(0.,0.,0.,0.);
+	hemiobject.UTM     .SetPxPyPzE(0.,0.,0.,0.);
 	hemiobject.MT2     =-999.99;
 	hemiobject.MCT     =-999.99;
 
@@ -658,9 +658,9 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 
 	// clear hemiobject
 	hemiobject.objects .clear();
-	hemiobject.pjet1   .Clear();
-	hemiobject.pjet2   .Clear();
-	hemiobject.UTM     .Clear();
+	hemiobject.pjet1   .SetPxPyPzE(0.,0.,0.,0.);
+	hemiobject.pjet2   .SetPxPyPzE(0.,0.,0.,0.);
+	hemiobject.UTM     .SetPxPyPzE(0.,0.,0.,0.);
 	hemiobject.MT2     =-999.99;
 	hemiobject.MCT     =-999.99;
 	hemiobject.maxDR   =-999.99;

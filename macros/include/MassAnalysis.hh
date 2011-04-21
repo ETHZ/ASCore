@@ -59,7 +59,7 @@ private:
 		void Reset(){ MT2=-999.99; MCT = -999.99; alphaT = -999.99; minDHT = -999.99; maxDR=-999.99;
 	       	              dPhi = -999.99; seed = -1; assoc = -1; 
 		              objects.clear();
-		              pjet1.Clear(); pjet1.Clear(); UTM.Clear();
+		              pjet1.SetPxPyPzE(0.,0.,0.,0.); pjet1.SetPxPyPzE(0.,0.,0.,0.); UTM.SetPxPyPzE(0.,0.,0.,0.);
 		}
 	} fHemiObjects[gNHemispheres];
 	
