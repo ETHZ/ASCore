@@ -1,12 +1,9 @@
 #include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
-<<<<<<< JZBAnalysis.cc
 #include "TF1.h"
 #include <time.h>
 #include <TRandom.h>
-=======
 #include "TF1.h"
->>>>>>> 1.21
 //#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
@@ -16,7 +13,7 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="1.22";
+string sjzbversion="1.23";
 string sjzbinfo="(write here any comments you have about this version/variation)";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
@@ -974,14 +971,8 @@ void JZBAnalysis::Analyze() {
     nEvent.dphi_sumJetVSZ[1] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
     nEvent.sumJetPt[1] = pfNoCutsJetVector.Pt(); 
     nEvent.jzb[1] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
-<<<<<<< JZBAnalysis.cc
-    nEvent.jzb[1] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
     nEvent.sjzb[1] = GausRandom(nEvent.jzb[1]+1.3,7); // to be used with pfMET
 
-    
-=======
-    
->>>>>>> 1.21
     nEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
     nEvent.sumJetPt[2] = recoil.Pt(); 
     nEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
