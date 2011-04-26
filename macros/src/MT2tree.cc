@@ -21,6 +21,7 @@ MT2Misc::~MT2Misc(){
 
 void MT2Misc::Reset() {
   HBHENoiseFlag           =  0;
+  isData                  =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
@@ -83,10 +84,14 @@ void MT2Trigger::Reset(){
 	HLT_HT240_v2            = false; 
 	HLT_HT260_v2            = false;
 	HLT_HT300_v2            = false;
+	HLT_HT350_v2            = false;
 	HLT_HT360_v2            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
+	HLT_HT500_v2            = false;
+	HLT_HT550_v2            = false;
 	// HT_MHT
+	HLT_HT250_MHT60_v2      = false;
 	HLT_HT260_MHT60_v2      = false;
 	// QuadJet
 	HLT_QuadJet50_BTagIP_v1 = false;
@@ -524,8 +529,8 @@ Int_t MT2tree::MaxMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
 }
 
 Bool_t MT2tree::PassMinMetJetDPhi03(){
-	if( NJetsAcc < 3)                              return true;
-	if( NJetsAcc >=3  && misc.MinMetJetDPhi > 0.3) return true;
+	if( NJetsIDLoose < 3)                              return true;
+	if( NJetsIDLoose >=3  && misc.MinMetJetDPhi > 0.3) return true;
 	return false;
 }
 
@@ -672,7 +677,7 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1 || met==3)  MET = pfmet[0];
   else if(met==2)       MET = MHTloose[0];
-  else if(met==4)       MET.Clear();
+  else if(met==4)       MET.SetPxPyPzE(0,0,0,0);
   else return -999;
  
 
@@ -733,7 +738,7 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else if(met==3) MET = pfmet[0]; //plus OS dileptons
-  else if(met==4) MET.Clear();
+  else if(met==4) MET.SetPxPyPzE(0,0,0,0);
   else            return -999;
 
   if( met ==3 ){
@@ -793,7 +798,7 @@ Double_t MT2tree::GetMT2HemiMinDHT(double testmass, bool massive, int PFJID, dou
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else if(met==3) MET = pfmet[0]; //plus OS dileptons
-  else if(met==4) MET.Clear();
+  else if(met==4) MET.SetPxPyPzE(0,0,0,0);
   else            return -999;
 
   if( met ==3 ){

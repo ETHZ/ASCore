@@ -17,6 +17,7 @@ public:
   void Reset();
   
   Bool_t   HBHENoiseFlag;
+  Bool_t   isData;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
@@ -78,11 +79,15 @@ public:
 	Bool_t HLT_HT240_v2;
 	Bool_t HLT_HT260_v2;
 	Bool_t HLT_HT300_v2;
+	Bool_t HLT_HT350_v2;
 	Bool_t HLT_HT360_v2;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
+	Bool_t HLT_HT500_v2;
+	Bool_t HLT_HT550_v2;
 	// HT_MHT
 	Bool_t HLT_HT260_MHT60_v2;
+	Bool_t HLT_HT250_MHT60_v2;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -91,7 +96,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 1);
+	ClassDef(MT2Trigger, 2);
 };
 
 // MT2Znunu --------------------------------

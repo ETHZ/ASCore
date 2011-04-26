@@ -27,10 +27,14 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_HT240_v2"]            = &fMT2tree->trigger.HLT_HT240_v2;
 		fTriggerMap["HLT_HT260_v2"]            = &fMT2tree->trigger.HLT_HT260_v2;
 		fTriggerMap["HLT_HT300_v2"]            = &fMT2tree->trigger.HLT_HT300_v2;
+		fTriggerMap["HLT_HT350_v2"]            = &fMT2tree->trigger.HLT_HT350_v2;
 		fTriggerMap["HLT_HT360_v2"]            = &fMT2tree->trigger.HLT_HT360_v2;
 		fTriggerMap["HLT_HT440_v2"]            = &fMT2tree->trigger.HLT_HT440_v2;
 		fTriggerMap["HLT_HT450_v2"]            = &fMT2tree->trigger.HLT_HT450_v2;
+		fTriggerMap["HLT_HT500_v2"]            = &fMT2tree->trigger.HLT_HT500_v2;
+		fTriggerMap["HLT_HT550_v2"]            = &fMT2tree->trigger.HLT_HT550_v2;
 		// MHT_HT
+		fTriggerMap["HLT_HT250_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v2;
 		fTriggerMap["HLT_HT260_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT260_MHT60_v2;
 		// QuadJet
 		fTriggerMap["HLT_QuadJet50_BTagIP_v1"] = &fMT2tree->trigger.HLT_QuadJet50_BTagIP_v1;
@@ -94,7 +98,7 @@ void MassAnalysis::Analyze(){
 	MassAnalysis::FillTree();
 	
 	// print interesting events
-//	if(fTaus.size()>0 && fLeptConfig!=9)InterestingEvents();
+	InterestingEvents();
 }
 
 // ***********************************************************************************************
@@ -284,6 +288,7 @@ void MassAnalysis::FillTree(){
 	
 	// ------------------------------------------------------------------
 	// fill misc 
+	fMT2tree->misc.isData              = fisData;
 	fMT2tree->misc.Run                 = fTR->Run;
 	fMT2tree->misc.Event		   = fTR->Event;
 	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
@@ -431,7 +436,9 @@ void MassAnalysis::FillTree(){
 }
 
 void MassAnalysis::InterestingEvents(){
-	
+
+	if(fTR->Event != 20005424 ) return;
+	if(fTR->Run   != 160998   ) return;	
 // 	if(fMT2tree->hemi[0].MT2 < 200           ) return; 	
 //	if(fMT2tree->NJetsIDLoose < 2           ) return; 	
 //	if(fMT2tree->misc.MET < 30              ) return; 	
