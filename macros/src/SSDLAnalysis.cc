@@ -16,8 +16,8 @@ SSDLAnalysis::~SSDLAnalysis(){
 }
 
 void SSDLAnalysis::Begin(const char* filename){
-	ReadTriggers();
-	ReadPDGTable();
+	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
+	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
 	BookTree();
 }
 
@@ -201,7 +201,7 @@ void SSDLAnalysis::Analyze(){
 	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
 	
 	// Require at least one loose lepton
-	// if( (fTnqmus + fTnqels) < 1 ) return;
+	if(!fIsData && (fTnqmus + fTnqels) < 1 ) return;
 	
 	// event and run info
 	fTRunNumber   = fTR->Run;
