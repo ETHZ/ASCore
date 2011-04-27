@@ -22,15 +22,30 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu = sample_begin, MuEG, DoubleElectron,
+		DoubleMu = sample_begin, DoubleElectron, MuEG, MuHad, ElectronHad,
+		TTJets, WJets, DYJets, LM0,
+		QCD5to15,
+		QCD15to30,
+		QCD30to50,
+		QCD50to80,
+		QCD80to120,
+		QCD120to170,
+		QCD170to300,
+		QCD300to470,
+		QCD470to600,
+		QCD600to800,
+		QCD800to1000,
+		QCD1000to1400,
+		QCD1400to1800,
+		QCD1800, 
 		gNSAMPLES
 	};
-	enum gOldSample {
+	enum gOldSample { // temporary
 		oldsample_begin,
 		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
-		TTbar, WJets, ZJets, AstarJets, VVJets, QCD15, QCD30, QCD80, QCD170,
+		TTbar, ZJets, AstarJets, VVJets, QCD15, QCD30, QCD80, QCD170,
 		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
-		LM0, InclMu,
+		InclMu,
 		gNOLDSAMPLES
 	};
 	enum gRegion {
@@ -80,6 +95,15 @@ public:
 		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
+
+		TH2D *nt11_origin;
+		TH2D *nt10_origin;
+		TH2D *nt01_origin;
+		TH2D *nt00_origin;
+		TH1D *sst_origin;
+		TH1D *ssl_origin;
+		TH1D *zt_origin;
+		TH1D *zl_origin;
 	};
 	
 	struct Region{ // different binnings and or selections cuts, e.g. florida vs surfturf
@@ -103,6 +127,14 @@ public:
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
 	};
 	
+	// struct MetaSample{
+	// 	TString name;
+	// 	TString sname;
+	// 	int color;
+	// 	bool isdata;
+	// 	vector<int> samples;
+	// };
+	
 	MuonPlotter();
 	MuonPlotter(TString);
 	MuonPlotter(TString, TString);
@@ -111,7 +143,8 @@ public:
 	inline void setCharge(int charge){ fChargeSwitch = charge; };
 
 	void init(TString filename = "samples.dat");
-	void loadSamples(const char* filename = "samples.dat");
+	void readSamples(const char* filename = "samples.dat");
+	void loadSamples();
 	void setBinning();
 
 	void doAnalysis();
@@ -159,9 +192,6 @@ public:
 	TH2D* fillMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 	TH2D* fillMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 
-	void plotMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
-	void plotMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "");
-
 	// Calculate from pre stored numbers, with fixed selections:
 	void fillMuElRatios(vector<int>);
 
@@ -199,14 +229,11 @@ public:
 	
 	void fillYields(Sample*);
 	
-	void initCounters(int = -1);
+	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
 	void printCutFlows(TString);
 	
-	void printYields(gChannel = Muon);
-	void printYields(gChannel, float);
-	void printYields(gChannel, int, float = -1.0);
-	void printYields(gChannel, vector<int>, float = -1.0);
+	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
 
 	//////////////////////////////
@@ -217,45 +244,60 @@ public:
 	
 	void bookRatioHistos();
 	void fixPRatios();
-
-	// Trigger stuff:
-	void getHLTNames(int, TTree*);
-	int  getHLTBit(string);
-	bool passesTrigger(string);
-	bool passesANDOfTriggers(vector<string>);
-	bool passesOROfTriggers(vector<string>);
+	
+	// Geninfo stuff:
+	int muIndexToBin(int);
+	int elIndexToBin(int);
+	TString muBinToLabel(int);
+	TString elBinToLabel(int);
+	void labelMuOriginAxis(TAxis *);
+	void labelElOriginAxis(TAxis *);
+	
+	inline double getPercentage(int passed, int total){return 100.*(double)passed / (double)total;};
+	void printMuOriginTable();
+	void printMuOriginHeader(TString);
+	void printMuOriginFromSample(Sample*, int);
+	void print2MuOriginsFromSample(Sample*, int);
 
 	// Event and Object selectors:
 	bool isGoodEvent();
 	bool isGoodMuEvent();
-	bool isGoodElEvent();
-	bool isGoodElMuEvent();
+	int hasLooseMuons(int&, int&);
+	int hasLooseMuons();
+	int hasLooseElectrons(int&, int&);
+	int hasLooseElectrons();
 	bool passesNJetCut(int=2);
 	bool passesNJetCut_LooseLep(int=2);
+	bool passesJet50Cut();
+	
 	bool passesHTCut(float);
 	bool passesMETCut(float = -1.);
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	bool passesMllEventVeto(float = 12.);
 
 	// Trigger selections:
-	bool isMuTriggeredEvent();
-	bool isElTriggeredEvent();
-	bool isJetTriggeredEvent();
-	bool isHTTriggeredEvent();
+	bool singleMuTrigger();
+	bool singleElTrigger();
+
+	bool mumuSignalTrigger();
+	bool elelSignalTrigger();
+	bool elmuSignalTrigger();
+
+	bool doubleMuTrigger();
+	bool doubleElTrigger();
+	bool eMuTrigger();
+
+	bool doubleMuHTTrigger();
+	bool doubleElHTTrigger();
+	bool eMuHTTrigger();
+	
 	bool isGoodRun(gSample);
 
 	bool isSigSupMuEvent();
-	bool isSigSupMuEventTRG();
-	bool isSigSupOSMuMuEvent(int&, int&);
-	bool isSigSupSSMuMuEvent(int&, int&);
 	bool isZMuMuEvent();
-	bool isZMuMuEventTRG();
 
 	bool isSigSupElEvent();
-	bool isSigSupElEventTRG();
 	bool isZElElEvent(int&);
-	bool isZElElEventTRG();
-	bool isZElElEventTRG(int&);
 
 	bool isGenMatchedSUSYDiLepEvent();
 	bool isGenMatchedSUSYDiLepEvent(int&, int&);
@@ -267,46 +309,44 @@ public:
 	int isOSLLEvent(int&, int&);
 	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 
-	bool isSSLLMuEvent(   int&, int&);
-	bool isSSLLMuEventInvMETTRG(int&, int&);
-	bool isSSLLMuEventHTControlTRG(int&, int&);
-	bool isSSLLMuEventTRG(int&, int&);
-	bool isSSTTMuEvent(   int&, int&);
-	bool isSSTTMuEventTRG(int&, int&);
+	bool isSSLLMuEvent(int&, int&);
+	bool isSSTTMuEvent(int&, int&);
 
-	bool isSSLLElEvent(   int&, int&);
-	bool isSSLLElEventTRG(int&, int&);
-	bool isSSTTElEvent(   int&, int&);
-	bool isSSTTElEventTRG(int&, int&);
+	bool isSSLLElEvent(int&, int&);
+	bool isSSTTElEvent(int&, int&);
 
-	bool isSSLLElMuEvent(   int&, int&);
-	bool isSSLLElMuEventInvMETTRG(int&, int&);
-	bool isOSLLElMuEventTRG(int&, int&);
-	bool isSSLLElMuEventTRG(int&, int&);
-	bool isSSTTElMuEvent(   int&, int&);
-	bool isSSTTElMuEventTRG(int&, int&);
+	bool isSSLLElMuEvent(int&, int&);
+	bool isSSTTElMuEvent(int&, int&);
 
-	bool isGoodMuon(int);
+	bool isGoodMuon(int, float = -1.);
 	bool isLooseMuon(int);
 	bool isTightMuon(int);
 	bool isLooseNoTightMuon(int);
-	bool isGoodPrimMuon(int);
-	bool isGoodSecMuon(int);
+	bool isGoodPrimMuon(int, float = -1.);
+	bool isGoodSecMuon(int, float = -1.);
 	bool isFakeTTbarMuon(int);
 	bool isPromptTTbarMuon(int);
 	bool isPromptSUSYMuon(int);
 
-	bool isGoodElectron(int);
+	bool isGoodElectron(int, float = -1.);
 	bool isLooseElectron(int);
 	bool isTightElectron(int);
-	bool isGoodPrimElectron(int);
-	bool isGoodSecElectron(int);
+	bool isGoodPrimElectron(int, float = -1.);
+	bool isGoodSecElectron(int, float = -1.);
 	bool isPromptSUSYElectron(int);
 
-	bool isGoodJet(int);
+	bool isGoodJet(int, float = 30.);
 	bool isGoodJet_LooseLep(int);
 
 private:
+	float fC_minHT;
+	float fC_minMet;
+	int   fC_minNjets;
+	float fC_minMu1pt;
+	float fC_minMu2pt;
+	float fC_minEl1pt;
+	float fC_minEl2pt;
+	
 	const int     getNPtBins (gChannel);
 	const double *getPtBins  (gChannel);
 	const int     getNPt2Bins(gChannel);
@@ -322,15 +362,20 @@ private:
 	ofstream fOUTSTREAM;
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
-	string fDoubleMuTrigger;
-	string fSingleMuTrigger;
-	string fDoubleElTrigger;
-	string fSingleElTrigger;
-	vector<string> fEMuTriggers;
-
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
-	vector<int> fAllSamples;
+	// MetaSample fMS_MuControl;
+	// MetaSample fMS_ElControl;
+	// MetaSample fMS_MuSig;
+	// MetaSample fMS_ElSig;
+	// MetaSample fMS_EMuSig;
+	// MetaSample fMS_MuHTSig;
+	// MetaSample fMS_ElHTSig;
+	// MetaSample fMS_EMuHTSig;
+	// MetaSample fMS_QCD;
+	// MetaSample fMS_EWK;
+	// MetaSample fMS_Signal;
+
 	vector<int> fMCBG;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD

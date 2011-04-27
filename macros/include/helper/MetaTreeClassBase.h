@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Apr  5 12:44:54 2011 by ROOT version 5.27/06b
+// Tue Apr 26 11:27:56 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: /scratch/stiegerb/SSDLTrees/SingleMu_Run2011A_AOD.root
+// found on file: /scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -11,8 +11,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-
-using namespace std;
 
 class MetaTreeClassBase {
 public :
@@ -23,75 +21,103 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSec;
-   Int_t           NHLTPaths;
-   Int_t           HLTResults[214];   //[NHLTPaths]
-   Int_t           HLTPrescales[214];   //[NHLTPaths]
-   vector<string>  *HLTNames;
+   Int_t           HLT_Mu8_Jet40_v2;
+   Int_t           HLT_Mu8_Jet40_v2_PS;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;
+   Int_t           HLT_DoubleMu6_v1;
+   Int_t           HLT_DoubleMu6_v1_PS;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v1;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v1_PS;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v1;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v1_PS;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;
+   Int_t           HLT_DoubleMu3_HT160_v2;
+   Int_t           HLT_DoubleMu3_HT160_v2_PS;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;
    Int_t           NMus;
-   Float_t         MuPt[4];   //[NMus]
-   Float_t         MuEta[4];   //[NMus]
-   Float_t         MuPhi[4];   //[NMus]
-   Int_t           MuCharge[4];   //[NMus]
-   Int_t           MuTight[4];   //[NMus]
-   Float_t         MuIso[4];   //[NMus]
-   Float_t         MuIsoHybrid[4];   //[NMus]
-   Float_t         MuD0[4];   //[NMus]
-   Float_t         MuDz[4];   //[NMus]
-   Float_t         MuD0BS[4];   //[NMus]
-   Float_t         MuDzBS[4];   //[NMus]
-   Float_t         MuPtE[4];   //[NMus]
-   Int_t           MuGenID[4];   //[NMus]
-   Int_t           MuGenMoID[4];   //[NMus]
-   Int_t           MuGenGMoID[4];   //[NMus]
-   Int_t           MuGenType[4];   //[NMus]
-   Int_t           MuGenMoType[4];   //[NMus]
-   Int_t           MuGenGMoType[4];   //[NMus]
-   Float_t         MuMT[4];   //[NMus]
+   Float_t         MuPt[5];   //[NMus]
+   Float_t         MuEta[5];   //[NMus]
+   Float_t         MuPhi[5];   //[NMus]
+   Int_t           MuCharge[5];   //[NMus]
+   Int_t           MuTight[5];   //[NMus]
+   Float_t         MuIso[5];   //[NMus]
+   Float_t         MuIsoHybrid[5];   //[NMus]
+   Float_t         MuD0[5];   //[NMus]
+   Float_t         MuDz[5];   //[NMus]
+   Float_t         MuD0BS[5];   //[NMus]
+   Float_t         MuDzBS[5];   //[NMus]
+   Float_t         MuPtE[5];   //[NMus]
+   Int_t           MuGenID[5];   //[NMus]
+   Int_t           MuGenMoID[5];   //[NMus]
+   Int_t           MuGenGMoID[5];   //[NMus]
+   Int_t           MuGenType[5];   //[NMus]
+   Int_t           MuGenMoType[5];   //[NMus]
+   Int_t           MuGenGMoType[5];   //[NMus]
+   Float_t         MuMT[5];   //[NMus]
    Int_t           NEls;
-   Int_t           ElCh[2];   //[NEls]
-   Int_t           ElChIsCons[2];   //[NEls]
-   Int_t           ElEcalDriven[2];   //[NEls]
-   Float_t         ElCaloEnergy[2];   //[NEls]
-   Float_t         ElPt[2];   //[NEls]
-   Float_t         ElEta[2];   //[NEls]
-   Float_t         ElPhi[2];   //[NEls]
-   Float_t         ElD0[2];   //[NEls]
-   Float_t         ElD0Err[2];   //[NEls]
-   Float_t         ElDz[2];   //[NEls]
-   Float_t         ElDzErr[2];   //[NEls]
-   Float_t         ElEoverP[2];   //[NEls]
-   Float_t         ElHoverE[2];   //[NEls]
-   Float_t         ElSigmaIetaIeta[2];   //[NEls]
-   Float_t         ElDeltaPhiSuperClusterAtVtx[2];   //[NEls]
-   Float_t         ElDeltaEtaSuperClusterAtVtx[2];   //[NEls]
-   Float_t         ElRelIso[2];   //[NEls]
-   Int_t           ElIsGoodElId_WP80[2];   //[NEls]
-   Int_t           ElIsGoodElId_WP90[2];   //[NEls]
-   Int_t           ElIsGoodElId_WP95[2];   //[NEls]
-   Float_t         ElS4OverS1[2];   //[NEls]
-   Int_t           ElGenID[2];   //[NEls]
-   Int_t           ElGenMID[2];   //[NEls]
-   Int_t           ElGenGMID[2];   //[NEls]
-   Int_t           ElGenType[2];   //[NEls]
-   Int_t           ElGenMType[2];   //[NEls]
-   Int_t           ElGenGMType[2];   //[NEls]
-   Float_t         ElHybRelIso[2];   //[NEls]
-   Float_t         ElMT[2];   //[NEls]
+   Int_t           ElCh[5];   //[NEls]
+   Int_t           ElChIsCons[5];   //[NEls]
+   Int_t           ElEcalDriven[5];   //[NEls]
+   Float_t         ElCaloEnergy[5];   //[NEls]
+   Float_t         ElPt[5];   //[NEls]
+   Float_t         ElEta[5];   //[NEls]
+   Float_t         ElPhi[5];   //[NEls]
+   Float_t         ElD0[5];   //[NEls]
+   Float_t         ElD0Err[5];   //[NEls]
+   Float_t         ElDz[5];   //[NEls]
+   Float_t         ElDzErr[5];   //[NEls]
+   Float_t         ElEoverP[5];   //[NEls]
+   Float_t         ElHoverE[5];   //[NEls]
+   Float_t         ElSigmaIetaIeta[5];   //[NEls]
+   Float_t         ElDeltaPhiSuperClusterAtVtx[5];   //[NEls]
+   Float_t         ElDeltaEtaSuperClusterAtVtx[5];   //[NEls]
+   Float_t         ElRelIso[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP80[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP90[5];   //[NEls]
+   Int_t           ElIsGoodElId_WP95[5];   //[NEls]
+   Float_t         ElS4OverS1[5];   //[NEls]
+   Int_t           ElGenID[5];   //[NEls]
+   Int_t           ElGenMID[5];   //[NEls]
+   Int_t           ElGenGMID[5];   //[NEls]
+   Int_t           ElGenType[5];   //[NEls]
+   Int_t           ElGenMType[5];   //[NEls]
+   Int_t           ElGenGMType[5];   //[NEls]
+   Float_t         ElHybRelIso[5];   //[NEls]
+   Float_t         ElMT[5];   //[NEls]
    Float_t         tcMET;
    Float_t         pfMET;
    Int_t           NJets;
-   Float_t         JetPt[9];   //[NJets]
-   Float_t         JetEta[9];   //[NJets]
-   Float_t         JetPhi[9];   //[NJets]
+   Float_t         JetPt[10];   //[NJets]
+   Float_t         JetEta[10];   //[NJets]
+   Float_t         JetPhi[10];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSec;   //!
-   TBranch        *b_NHLTPaths;   //!
-   TBranch        *b_HLTResults;   //!
-   TBranch        *b_HLTPrescales;   //!
-   TBranch        *b_HLTNames;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v2;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v2_PS;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;   //!
+   TBranch        *b_HLT_DoubleMu6_v1;   //!
+   TBranch        *b_HLT_DoubleMu6_v1_PS;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1_PS;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1_PS;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
+   TBranch        *b_HLT_DoubleMu3_HT160_v2;   //!
+   TBranch        *b_HLT_DoubleMu3_HT160_v2_PS;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
@@ -168,9 +194,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/SingleMu_Run2011A_AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root");
       if (!f) {
-         f = new TFile("/scratch/stiegerb/SSDLTrees/SingleMu_Run2011A_AOD.root");
+         f = new TFile("/scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -215,8 +241,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    // Init() will be called many times when running on PROOF
    // (once per file to be processed).
 
-   // Set object pointer
-   HLTNames = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -226,10 +250,24 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
-   fChain->SetBranchAddress("NHLTPaths", &NHLTPaths, &b_NHLTPaths);
-   fChain->SetBranchAddress("HLTResults", HLTResults, &b_HLTResults);
-   fChain->SetBranchAddress("HLTPrescales", HLTPrescales, &b_HLTPrescales);
-   fChain->SetBranchAddress("HLTNames", &HLTNames, &b_HLTNames);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v2", &HLT_Mu8_Jet40_v2, &b_HLT_Mu8_Jet40_v2);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v2_PS", &HLT_Mu8_Jet40_v2_PS, &b_HLT_Mu8_Jet40_v2_PS);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu6_v1", &HLT_DoubleMu6_v1, &b_HLT_DoubleMu6_v1);
+   fChain->SetBranchAddress("HLT_DoubleMu6_v1_PS", &HLT_DoubleMu6_v1_PS, &b_HLT_DoubleMu6_v1_PS);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1", &HLT_Mu17_Ele8_CaloIdL_v1, &b_HLT_Mu17_Ele8_CaloIdL_v1);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1_PS", &HLT_Mu17_Ele8_CaloIdL_v1_PS, &b_HLT_Mu17_Ele8_CaloIdL_v1_PS);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1", &HLT_Mu8_Ele17_CaloIdL_v1, &b_HLT_Mu8_Ele17_CaloIdL_v1);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1_PS", &HLT_Mu8_Ele17_CaloIdL_v1_PS, &b_HLT_Mu8_Ele17_CaloIdL_v1_PS);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2", &HLT_DoubleMu3_HT160_v2, &b_HLT_DoubleMu3_HT160_v2);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2_PS", &HLT_DoubleMu3_HT160_v2_PS, &b_HLT_DoubleMu3_HT160_v2_PS);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);

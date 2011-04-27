@@ -2517,7 +2517,7 @@ void AnaClass::printProgress(int entry, const int nentries, TString header, int 
 	float progress_f = (float)(entry+1)/(float)(nentries)*100.;
 	char progress[10];
 	sprintf(progress, "%5.1f", progress_f);
-	cout << " Processing " << setw(40) << left << header << setw(6) << right << progress << " %      \r" << flush;
+	cout << " Processing " << setw(50) << left << header << setw(6) << right << progress << " %      \r" << flush;
 }
 
 //____________________________________________________________________________
