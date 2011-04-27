@@ -21,6 +21,8 @@
 #include "base/TreeReader.hh"
 #include "helper/Utilities.hh"
 #include "base/UserAnalysisBase.hh"
+#include "helper/Monitor.hh"
+
 
 using namespace std;
 
@@ -42,6 +44,9 @@ public:
 	const bool AddBranch(const char* name, const char* type, void* address, const char* size = 0);
 
 private:
+	Monitor fCounter;
+	string fCutnames[4];
+
 	static const int fMaxNjets = 30;
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;

@@ -1,4 +1,5 @@
 #include "SSDLAnalysis.hh"
+#include "helper/Monitor.hh"
 
 using namespace std;
 
@@ -10,6 +11,16 @@ const int SSDLAnalysis::gMaxhltbits;
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	//SetStyle();
 	fHLTPaths.clear();
+
+	fCutnames[0] = "All events";
+	fCutnames[1] = " ... passes primary Vertex cuts";
+	fCutnames[2] = " ... passes triggers (data only)";
+	fCutnames[3] = " ... has at least one loose lepton (mc only)";
+
+	fCounter.fill(fCutnames[0], 0.);
+	fCounter.fill(fCutnames[1], 0.);
+	fCounter.fill(fCutnames[2], 0.);
+	fCounter.fill(fCutnames[3], 0.);
 }
 
 SSDLAnalysis::~SSDLAnalysis(){
@@ -25,6 +36,7 @@ void SSDLAnalysis::End(){
 	fOutputFile->cd();
 	fAnalysisTree->Write();
 	fOutputFile->Close();
+	fCounter.print();
 }
 
 void SSDLAnalysis::ReadTriggers(const char* triggerfile){
@@ -185,12 +197,15 @@ void SSDLAnalysis::BookTree(){
 }
 
 void SSDLAnalysis::Analyze(){
+	fCounter.fill(fCutnames[0]);
 	// initial event selection: good event trigger, good primary vertex...
 	if( !IsGoodEvent() ) return;
+	fCounter.fill(fCutnames[1]);
 	ResetTree();
 	
 	// Trigger selection
 	if(fIsData && FillTriggers(fHLTPaths) == false) return;
+	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
 	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
@@ -202,7 +217,8 @@ void SSDLAnalysis::Analyze(){
 	
 	// Require at least one loose lepton
 	if(!fIsData && (fTnqmus + fTnqels) < 1 ) return;
-	
+	fCounter.fill(fCutnames[3]);
+
 	// event and run info
 	fTRunNumber   = fTR->Run;
 	fTEventNumber = fTR->Event;
