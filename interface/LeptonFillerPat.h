@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.1 2011/04/06 16:29:07 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.2 2011/04/11 11:07:51 pnef Exp $
 //
 //
 
@@ -78,12 +78,16 @@ private:
   double* fTpy;
   double* fTpz;
   double* fTpt;
+  double* fTpterr;
   double* fTeta;
   double* fTphi;
   double* fTe;
   double* fTet;
   int*    fTcharge;
   int*    fTdecaymode;
+  int*    fTelID90;
+  int*    fTelID95;
+  int*    fTmuNMatches;
 
   double* fTparticleIso;
   double* fTchargedHadronIso;
@@ -144,6 +148,12 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
 
   if(fType == Tau){
   	fTdecaymode    = new int[gMaxnobjs];
+  }else if(fType == El){
+  	fTelID95       = new int[gMaxnobjs];
+  	fTelID90       = new int[gMaxnobjs];
+  }else if(fType == Mu){
+  	fTmuNMatches   = new int[gMaxnobjs];
+	fTpterr        = new double[gMaxnobjs];
   }
 
 }
@@ -185,11 +195,11 @@ const int LeptonFillerPat<LeptonType>::fillBranches(const edm::Event& iEvent,
     fTet[pfqi]     = lepton.et();
     fTcharge[pfqi] = lepton.charge();
           
-    fTparticleIso[pfqi]      = lepton.particleIso();
+    fTparticleIso[pfqi]      = (lepton.chargedHadronIso()+lepton.neutralHadronIso()+lepton.photonIso())/lepton.pt();
     fTchargedHadronIso[pfqi] = lepton.chargedHadronIso();
     fTneutralHadronIso[pfqi] = lepton.neutralHadronIso();
     fTphotonIso[pfqi]        = lepton.photonIso();
-   
+  
     getSpecific(lepton, pfqi);
           
     ++pfqi;
@@ -223,6 +233,12 @@ LeptonFillerPat<LeptonType>::~LeptonFillerPat(void) {
 
   if(fType == Tau){
   	delete [] fTdecaymode;
+  }else if (fType == El){
+  	delete [] fTelID90;
+  	delete [] fTelID95;
+  }else if (fType == Mu){
+  	delete [] fTmuNMatches;
+	delete [] fTpterr;
   }
 
 }
@@ -251,6 +267,12 @@ void LeptonFillerPat<LeptonType>::createBranches(void) {
   
   if(fType == Tau){
   	addBranch("DecayMode", "I", fTdecaymode,"NObjs" );
+  }else if(fType == El){
+  	addBranch("ID90", "I", fTelID90, "NObjs");
+  	addBranch("ID95", "I", fTelID95, "NObjs");
+  }else if(fType == Mu){
+  	addBranch("PtErr"   , "D", fTpterr      , "NObjs");
+	addBranch("NMatches", "I", fTmuNMatches , "NObjs");
   }
 
 }
@@ -279,7 +301,14 @@ void LeptonFillerPat<LeptonType>::reset(void) {
 
   if(fType==Tau){
   	resetInt(fTdecaymode,gMaxnobjs);
+  }else if(fType ==El ){
+  	resetInt(fTelID95, gMaxnobjs);
+  	resetInt(fTelID90, gMaxnobjs);
+  }else if(fType == Mu){
+  	resetInt   (fTmuNMatches, gMaxnobjs);
+	resetDouble(fTpterr     , gMaxnobjs);
   }
+  
 
 }
 
@@ -294,6 +323,22 @@ template <>
 void LeptonFillerPat<pat::Tau>::getSpecific(pat::Tau lepton, size_t index){
 	// speficic for PFTaus
 	fTdecaymode[index]   = lepton.decayMode();	
+	return;
+}
+
+template <>
+void LeptonFillerPat<pat::Electron>::getSpecific(pat::Electron lepton, size_t index){
+	// speficic for PFElectrons
+	fTelID95[index]   = lepton.electronID("simpleEleId95cIso");
+	fTelID90[index]   = lepton.electronID("simpleEleId90cIso");
+	return;
+}
+
+template <>
+void LeptonFillerPat<pat::Muon>::getSpecific(pat::Muon lepton, size_t index){
+	// speficic for PFMuon
+	fTmuNMatches[index]   = lepton.numberOfMatches();
+	fTpterr     [index]   = lepton.globalTrack()->ptError();
 	return;
 }
 
