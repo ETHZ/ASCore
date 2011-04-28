@@ -29,36 +29,24 @@ static const double gStatBetaAlpha = 1.;
 static const double gStatBetaBeta  = 1.;
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-static const int gNMuPtbins_0  = 6;
-static const double gMuPtbins_0 [gNMuPtbins_0+1]  = {20., 30., 40., 50., 60., 70., 100.};
+static const int gNMuPtbins_0  = 4;
+static const double gMuPtbins_0 [gNMuPtbins_0+1]  = {10., 20., 30., 40., 50.};
 
-static const int gNMuPt2bins_0  = 7;
-static const double gMuPt2bins_0 [gNMuPt2bins_0+1]  = {10., 20., 30., 40., 50., 60., 70., 100.};
+static const int gNMuPt2bins_0  = 4;
+static const double gMuPt2bins_0 [gNMuPt2bins_0+1]  = {10., 20., 30., 40., 50.};
 
 static const int    gNMuEtabins = 1;
 static const double gMuEtabins[gNMuEtabins+1] = {-2.4, 2.4};
 
-static const int gNMuPtbins_1  = 7;
-static const double gMuPtbins_1 [gNMuPtbins_1+1]  = { 5., 10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
-
-static const int gNMuPt2bins_1 = 7;
-static const double gMuPt2bins_1[gNMuPt2bins_1+1] = { 5., 10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
-
 // Electron Binning //////////////////////////////////////////////////////////////
-static const int gNElPtbins_0  = 6;
-static const double gElPtbins_0 [gNElPtbins_0+1]  = {20., 30., 40., 50., 60., 70., 100.};
+static const int gNElPtbins_0  = 3;
+static const double gElPtbins_0 [gNElPtbins_0+1]  = {20., 30., 40., 50.};
 
-static const int gNElPt2bins_0 = 7;
-static const double gElPt2bins_0[gNElPt2bins_0+1] = {10., 20., 30., 40., 50., 60., 70., 100.};
+static const int gNElPt2bins_0 = 3;
+static const double gElPt2bins_0[gNElPt2bins_0+1] = {20., 30., 40., 50.};
 
 static const int    gNElEtabins = 1;
 static const double gElEtabins[gNElEtabins+1] = {-2.4, 2.4};
-
-static const int gNElPtbins_1  = 6;
-static const double gElPtbins_1 [gNElPtbins_1+1]  = {10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
-
-static const int gNElPt2bins_1 = 6;
-static const double gElPt2bins_1[gNElPt2bins_1+1] = {10., 20., 30., 40., 50., 60., 70.}; // ., 50., 65., 80.};
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -188,8 +176,8 @@ void MuonPlotter::readSamples(const char* filename){
 			s.lumi = ParValue;
 
 			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "IsData\t%f", &ParValue);
-			s.isdata = (bool)ParValue;
+			sscanf(buffer, "DataMC\t%f", &ParValue);
+			s.datamc = (int)ParValue;
 
 			IN.getline(buffer, 200, '\n');
 			sscanf(buffer, "Color\t%f", &ParValue);
@@ -204,7 +192,7 @@ void MuonPlotter::readSamples(const char* filename){
 				cout << "   Events:     " << s.tree->GetEntries() << endl;
 				cout << "   Lumi:       " << s.lumi << endl;
 				cout << "   Color:      " << s.color << endl;
-				cout << "   IsData:     " << s.isdata << endl;
+				cout << "   DataMC:     " << s.datamc << endl;
 			}
 
 			for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
@@ -279,6 +267,8 @@ const double *MuonPlotter::getEtaBins (gChannel chan){
 void MuonPlotter::doAnalysis(){
 	if(readHistos(fOutputFileName) != 0) return;
 
+	// printOrigins();
+
 	// sandBox();
 
 	// fLumiNorm = 35.;
@@ -293,17 +283,15 @@ void MuonPlotter::doAnalysis(){
 	// printYieldsShort();
 
 	// makeIntPrediction(fOutputDir + "Yields.txt");
-	// makeMuIsolationPlot();
+	makeMuIsolationPlot();
 
-	printMuOriginTable();
 
-	// makeMufRatioPlots(false);
-	// makeMupRatioPlots(false);
-	// makeElfRatioPlots(false);
-	// makeElpRatioPlots(false);
+	// makeMufRatioPlots(true);
+	// makeMupRatioPlots(true);
+	// makeElfRatioPlots(true);
+	// makeElpRatioPlots(true);
 	// makeMCClosurePlots(fMCBG);
 
-	// makeDataClosurePlots();
 	// makeNT012Plots(EMu, fJMData, &MuonPlotter::isOSLLElMuEvent, "JMData_OS_");
 	// makeNT012Plots(EMu, fMCBG,   &MuonPlotter::isOSLLElMuEvent, "MC_OS_");
 	// makeNT012Plots(Muon, fJMData,    &MuonPlotter::isSSLLMuEventHTControl, "JMData");
@@ -343,7 +331,7 @@ void MuonPlotter::doLoop(){
 		fCurrentSample = i;
 
 		TTree *tree = S->tree;
-		const bool isdata = S->isdata;
+		const bool isdata = (S->datamc)==0;
 
 		// Stuff to execute for each sample BEFORE looping on the events
 		initCounters(i);
@@ -554,7 +542,7 @@ void MuonPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(Muon
 			hnt01[i]->Sumw2();
 			hnt00[i]->Sumw2();
 			float scale = fLumiNorm / fSamples[index].lumi;
-			if(fSamples[index].isdata) scale = 1;
+			if(fSamples[index].datamc == 0) scale = 1;
 			tree->ResetBranchAddresses();
 			Init(tree);
 			if (fChain == 0) return;
@@ -1410,11 +1398,12 @@ void MuonPlotter::makeElpEffPlots(bool output){
 
 //____________________________________________________________________________
 void MuonPlotter::makeMuIsolationPlot(){
-	const bool read = true;
+	fOutputSubDir = "IsoPlots/";
+	const bool read = false;
 	TString filename = "IsoHistos.root";
 	const unsigned nselections = 2;
 	const unsigned nbins = 20.;
-	const float ptcut = 20.;
+	const float ptcut = 10.;
 
 	TString sel_name[nselections];
 	sel_name[0] = "Base";
@@ -1436,7 +1425,7 @@ void MuonPlotter::makeMuIsolationPlot(){
 
 	TFile *file;
 	if(!read){
-		file = new TFile(fOutputDir + filename, "RECREATE");
+		file = new TFile(fOutputDir + fOutputSubDir + filename, "RECREATE");
 		file->cd();
 		fDoCounting = false;
 		// Sample loop
@@ -1472,13 +1461,11 @@ void MuonPlotter::makeMuIsolationPlot(){
 				}
 				////////////////////////////////////////////////////
 				// SIGNAL SUPPRESSED SELECTION
-				if(isSigSupMuEvent()){
-					if(singleMuTrigger()){
-						if(isLooseMuon(0) == false) continue;
-						if(MuPt[0] < ptcut) continue;
-
-						hiso[1][i]->Fill(MuIso[0]);
-					}
+				int muind1(-1), muind2(-1);
+				if(isSigSupMuEvent() && singleMuTrigger() && hasLooseMuons(muind1, muind2)>0){
+					if(isLooseMuon(muind1) == false) continue;
+					if(MuPt[muind1] < ptcut) continue;
+					hiso[1][i]->Fill(MuIso[muind1]);
 				}
 				////////////////////////////////////////////////////
 			}
@@ -1494,7 +1481,7 @@ void MuonPlotter::makeMuIsolationPlot(){
 		file->Close();
 	}
 	else{
-		file = TFile::Open(fOutputDir + filename, "READ");
+		file = TFile::Open(fOutputDir + fOutputSubDir + filename, "READ");
 		if(file == NULL){
 			cout << "File " << filename << " does not exist!" << endl;
 			return;
@@ -1503,15 +1490,15 @@ void MuonPlotter::makeMuIsolationPlot(){
 
 		for(size_t i = 0; i < nselections; ++i){
 			for(gSample j = sample_begin; j < gNSAMPLES; j=gSample(j+1)){
-				TString getname = sel_name[i] + "/" + hiso[0][j]->GetName(); // had bug when storing file, change this after rerunning!
+				TString getname = sel_name[i] + "/" + hiso[i][j]->GetName(); // had bug when storing file, change this after rerunning!
 				hiso[i][j] = (TH1D*)file->Get(getname);
 				hiso[i][j]->SetFillColor(fSamples[j].color);
 			}
 		}
 	}
 
-	// vector<int> mcsamples = fMCBG;
-	vector<int> mcsamples = fMCBGMuEnr;
+	vector<int> mcsamples = fMCBG;
+	// vector<int> mcsamples = fMCBGMuEnr;
 	// vector<int> datasamples = fJMData;
 	vector<int> datasamples = fMuData;
 
@@ -1526,7 +1513,7 @@ void MuonPlotter::makeMuIsolationPlot(){
 		// Apply weights
 		for(size_t j = 0; j < gNSAMPLES; ++j){
 			float scale = fLumiNorm / fSamples[j].lumi;
-			if(fSamples[j].isdata) continue;
+			if(fSamples[j].datamc == 0) continue;
 			else hiso[i][j]->Scale(scale);
 		}
 
@@ -1558,7 +1545,7 @@ void MuonPlotter::makeMuIsolationPlot(){
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
 
-		Util::PrintNoEPS(c_temp, "Iso" + sel_name[i], fOutputDir, NULL);	
+		Util::PrintNoEPS(c_temp, "Iso" + sel_name[i], fOutputDir + fOutputSubDir, NULL);	
 	}	
 }
 
@@ -1924,7 +1911,7 @@ void MuonPlotter::makeMuIsoVsPtPlot(vector<int> samples1, int muon1, bool(MuonPl
 
 		tree = fSamples[index].tree;
 		float scale = fLumiNorm / fSamples[index].lumi;
-		if(fSamples[index].isdata) scale = 1.;
+		if(fSamples[index].datamc == 0) scale = 1.;
 		tree->ResetBranchAddresses();
 		Init(tree);
 		if (fChain == 0) return;
@@ -1946,7 +1933,7 @@ void MuonPlotter::makeMuIsoVsPtPlot(vector<int> samples1, int muon1, bool(MuonPl
 
 		tree = fSamples[index].tree;
 		float scale = fLumiNorm / fSamples[index].lumi;
-		if(fSamples[index].isdata) scale = 1.;
+		if(fSamples[index].datamc == 0) scale = 1.;
 		tree->ResetBranchAddresses();
 		Init(tree);
 		if (fChain == 0) return;
@@ -2224,7 +2211,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		Long64_t nentries = fChain->GetEntriesFast();
 
 		float scale = fLumiNorm / fSamples[sample].lumi;
-		if(fSamples[sample].isdata) scale = 1;
+		if(fSamples[sample].datamc == 0) scale = 1;
 
 		Long64_t nbytes = 0, nb = 0;
 		for (Long64_t jentry=0; jentry<nentries;jentry++) {
@@ -2438,7 +2425,7 @@ void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gRegion reg
 		v_name.push_back(S.sname);
 
 		float scale = fLumiNorm/S.lumi; // Normalize all
-		if(S.isdata) scale = 1;
+		if(S.datamc == 0) scale = 1;
 		if(reg == SigSup){
 			ntight += scale * S.numbers[chan].nsst;
 			nloose += scale * S.numbers[chan].nssl;
@@ -2496,7 +2483,7 @@ void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gRegion reg
 		v_name.push_back(S.sname);
 
 		float scale = fLumiNorm/S.lumi; // Normalize all
-		if(S.isdata) scale = 1;
+		if(S.datamc == 0) scale = 1;
 		// Channel *cha;
 		// if(chan == Muon)     cha = &S.region[reg].mm;
 		// if(chan == Electron) cha = &S.region[reg].ee;
@@ -2544,9 +2531,9 @@ void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gRegion reg
 
 //____________________________________________________________________________
 TGraphAsymmErrors* MuonPlotter::combineMCEfficiencies(vector<int> samples, gChannel chan, gRegion reg, bool output, TEfficiency::EStatOption statopt, double betaalpha, double betabeta){
-	bool data = fSamples[samples[0]].isdata;
+	bool datamc = fSamples[samples[0]].datamc;
 	for(size_t i = 0; i < samples.size(); ++i){ // check if samples contains only data or only MC
-		if(fSamples[samples[i]].isdata == data) continue;
+		if(fSamples[samples[i]].datamc == datamc) continue;
 		else{
 			TGraphAsymmErrors *null = NULL;
 			cout << "MuonPlotter::calculateEfficiency ==> sample is not pure data or pure MC, aborting..." << endl;
@@ -2603,9 +2590,9 @@ TGraphAsymmErrors* MuonPlotter::combineMCEfficiencies(vector<int> samples, gChan
 	return result;
 }
 TEfficiency* MuonPlotter::mergeDataEfficiencies(vector<int> samples, gChannel chan, gRegion reg, bool output, TEfficiency::EStatOption statopt, double betaalpha, double betabeta){
-	bool data = fSamples[samples[0]].isdata;
+	int datamc = fSamples[samples[0]].datamc;
 	for(size_t i = 0; i < samples.size(); ++i){ // check if samples contains only data or only MC
-		if(fSamples[samples[i]].isdata == data) continue;
+		if(fSamples[samples[i]].datamc == datamc) continue;
 		else{
 			TEfficiency *null = NULL;
 			cout << "MuonPlotter::calculateEfficiency ==> sample is not pure data or pure MC, aborting..." << endl;
@@ -2712,7 +2699,7 @@ void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gRegion reg
 		Sample *S = &fSamples[samples[i]];
 
 		float scale = fLumiNorm / S->lumi;
-		if(S->isdata) scale = 1;
+		if(S->datamc == 0) scale = 1;
 
 		Channel *C;
 		if(chan == Muon)     C = &S->region[Signal].mm;
@@ -3822,7 +3809,7 @@ void MuonPlotter::fillYields(Sample *S){
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
 	// Trigger selection
-	if( S->isdata == true && mumuSignalTrigger() == 1 || S->isdata == false ){
+	if( S->datamc == 0 && mumuSignalTrigger() == 1 || S->datamc > 0 ){
 		// Same-sign loose-loose di muon event
 		if(isSSLLMuEvent(mu1, mu2)){
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
@@ -3831,49 +3818,49 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Muon].fill(" ... both muons pass tight cut");
 				S->region[Signal].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2]);
 				S->region[Signal].mm.nt20_eta->Fill(MuEta[mu1], MuEta[mu2]);
-				if(!S->isdata) S->region[Signal].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
-				if( S->isdata) fOUTSTREAM << " Mu/Mu Tight-Tight event in run " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
+				if(S->datamc > 0 ) S->region[Signal].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
+				if(S->datamc == 0) fOUTSTREAM << " Mu/Mu Tight-Tight event in run " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
 				fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
 				S->region[Signal].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2]);
 				S->region[Signal].mm.nt10_eta->Fill(MuEta[mu1], MuEta[mu2]);
-				if(!S->isdata) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
 				S->region[Signal].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1]); // tight one always in x axis; fill same again
 				S->region[Signal].mm.nt10_eta->Fill(MuEta[mu2], MuEta[mu1]);
-				if(!S->isdata) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
 				S->region[Signal].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2]);
 				S->region[Signal].mm.nt00_eta->Fill(MuEta[mu1], MuEta[mu2]);
-				if(!S->isdata) S->region[Signal].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
 			}
 		}
 	}
-	if( (S->isdata == true && singleMuTrigger() ) || S->isdata == false ){
+	if( (S->datamc == 0 && singleMuTrigger() ) || S->datamc > 0 ){
 		if(isSigSupMuEvent()){ // f Ratio
 			if( isTightMuon(0) ){
 				S->region[Signal].mm.fntight->Fill(MuPt[0], MuEta[0]);
-				if(!S->isdata) S->region[Signal].mm.sst_origin->Fill(muIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.sst_origin->Fill(muIndexToBin(0)-0.5);
 			}
 			if( isLooseMuon(0) ){
 				S->region[Signal].mm.fnloose->Fill(MuPt[0], MuEta[0]);
-				if(!S->isdata) S->region[Signal].mm.ssl_origin->Fill(muIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.ssl_origin->Fill(muIndexToBin(0)-0.5);
 			}
 		}
 	}
-	if( (S->isdata == true && doubleMuTrigger() ) || S->isdata == false ){
+	if( (S->datamc == 0 && doubleMuTrigger() ) || S->datamc > 0 ){
 		if(isZMuMuEvent()){ // p Ratio
 			if( isTightMuon(0) ){
 				S->region[Signal].mm.pntight->Fill(MuPt[0], MuEta[0]);
-				if(!S->isdata) S->region[Signal].mm.zt_origin->Fill(muIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.zt_origin->Fill(muIndexToBin(0)-0.5);
 			}
 			if( isLooseMuon(0) ){
 				S->region[Signal].mm.pnloose->Fill(MuPt[0], MuEta[0]);
-				if(!S->isdata) S->region[Signal].mm.zl_origin->Fill(muIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].mm.zl_origin->Fill(muIndexToBin(0)-0.5);
 			}
 		}
 	}				
@@ -3881,7 +3868,7 @@ void MuonPlotter::fillYields(Sample *S){
 	// EE Channel
 	fCurrentChannel = Electron;
 	int el1(-1), el2(-1);
-	if( (S->isdata == true && elelSignalTrigger() == 1 ) || S->isdata == false ){
+	if( (S->datamc == 0 && elelSignalTrigger() == 1 ) || S->datamc > 0 ){
 		if( isSSLLElEvent(el1, el2) ){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
@@ -3889,50 +3876,50 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Electron].fill(" ... both electrons pass tight cut");
 				S->region[Signal].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2]);
 				S->region[Signal].ee.nt20_eta->Fill(ElEta[el1], ElEta[el2]);
-				if(!S->isdata) S->region[Signal].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
-				if( S->isdata) fOUTSTREAM << " E/E Tight-Tight event in run   " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
+				if(S->datamc > 0 ) S->region[Signal].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
+				if(S->datamc == 0) fOUTSTREAM << " E/E Tight-Tight event in run   " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
 				fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
 				S->region[Signal].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2]);
 				S->region[Signal].ee.nt10_eta->Fill(ElEta[el1], ElEta[el2]);
-				if(!S->isdata) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
 				S->region[Signal].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1]); // tight one always in x axis; fill same again
 				S->region[Signal].ee.nt10_eta->Fill(ElEta[el2], ElEta[el1]);
-				if(!S->isdata) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
 				S->region[Signal].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2]);
 				S->region[Signal].ee.nt00_eta->Fill(ElEta[el1], ElEta[el2]);
-				if(!S->isdata) S->region[Signal].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
 			}
 		}
 	}
-	if( (S->isdata == true && singleElTrigger() == 1 ) || S->isdata == false ){
+	if( (S->datamc == 0 && singleElTrigger() == 1 ) || S->datamc > 0 ){
 		if(isSigSupElEvent()){ // f Ratio
 			if( isTightElectron(0) ){
 				S->region[Signal].ee.fntight->Fill(ElPt[0], ElEta[0]);
-				if(!S->isdata) S->region[Signal].ee.sst_origin->Fill(elIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.sst_origin->Fill(elIndexToBin(0)-0.5);
 			}
 			if( isLooseElectron(0) ){
 				S->region[Signal].ee.fnloose->Fill(ElPt[0], ElEta[0]);
-				if(!S->isdata) S->region[Signal].ee.ssl_origin->Fill(elIndexToBin(0)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.ssl_origin->Fill(elIndexToBin(0)-0.5);
 			}
 		}
 	}
 	int elind;
-	if( (S->isdata == true && doubleElTrigger() == 1 ) || S->isdata == false ){
+	if( (S->datamc == 0 && doubleElTrigger() == 1 ) || S->datamc > 0 ){
 		if(isZElElEvent(elind)){ // p Ratio
 			if( isTightElectron(elind) ){
 				S->region[Signal].ee.pntight->Fill(ElPt[elind], ElEta[elind]);
-				if(!S->isdata) S->region[Signal].ee.zt_origin->Fill(elIndexToBin(elind)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.zt_origin->Fill(elIndexToBin(elind)-0.5);
 			}
 			if( isLooseElectron(elind) ){
 				S->region[Signal].ee.pnloose->Fill(ElPt[elind], ElEta[elind]);
-				if(!S->isdata) S->region[Signal].ee.zl_origin->Fill(elIndexToBin(elind)-0.5);
+				if(S->datamc > 0) S->region[Signal].ee.zl_origin->Fill(elIndexToBin(elind)-0.5);
 			}
 		}
 	}
@@ -3940,7 +3927,7 @@ void MuonPlotter::fillYields(Sample *S){
 	// EMu Channel
 	fCurrentChannel = EMu;
 	int mu(-1), el(-1);
-	if( (S->isdata == true && elmuSignalTrigger() ) || S->isdata == false ){
+	if( (S->datamc == 0 && elmuSignalTrigger() ) || S->datamc > 0 ){
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
@@ -3948,25 +3935,25 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][EMu].fill(" ... both e and mu pass tight cuts");
 				S->region[Signal].em.nt20_pt ->Fill(MuPt [mu], ElPt [el]);
 				S->region[Signal].em.nt20_eta->Fill(MuEta[mu], ElEta[el]);
-				if(!S->isdata) S->region[Signal].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
-				if( S->isdata) fOUTSTREAM << " E/Mu Tight-Tight event in run  " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
+				if(S->datamc > 0) S->region[Signal].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
+				if(S->datamc == 0) fOUTSTREAM << " E/Mu Tight-Tight event in run  " << setw(7) << Run << " event " << setw(13) << Event << " lumisection " << setw(5) << LumiSec << " in dataset " << setw(9) << S->sname << endl;
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
 				fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
 				S->region[Signal].em.nt10_pt ->Fill(MuPt [mu], ElPt [el]);
 				S->region[Signal].em.nt10_eta->Fill(MuEta[mu], ElEta[el]);
-				if(!S->isdata) S->region[Signal].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
+				if(S->datamc > 0) S->region[Signal].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
 				S->region[Signal].em.nt01_pt ->Fill(MuPt [mu], ElPt [el]); // muon always in x axis for e/mu
 				S->region[Signal].em.nt01_eta->Fill(MuEta[mu], ElEta[el]);
-				if(!S->isdata) S->region[Signal].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
+				if(S->datamc > 0) S->region[Signal].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
 			}
 			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
 				S->region[Signal].em.nt00_pt ->Fill(MuPt [mu], ElPt [el]);
 				S->region[Signal].em.nt00_eta->Fill(MuEta[mu], ElEta[el]);
-				if(!S->isdata) S->region[Signal].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
+				if(S->datamc > 0) S->region[Signal].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
 			}
 		}
 	}
@@ -4063,7 +4050,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 0) continue;
+		if(fSamples[i].datamc > 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4075,7 +4062,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 0) continue;
+			if(fSamples[i].datamc > 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][Muon].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4083,7 +4070,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 1) continue;
+		if(fSamples[i].datamc == 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4095,7 +4082,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 1) continue;
+			if(fSamples[i].datamc == 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][Muon].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4106,7 +4093,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 0) continue;
+		if(fSamples[i].datamc > 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4118,7 +4105,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 0) continue;
+			if(fSamples[i].datamc > 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][EMu].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4126,7 +4113,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 1) continue;
+		if(fSamples[i].datamc == 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4138,7 +4125,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 1) continue;
+			if(fSamples[i].datamc == 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][EMu].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4149,7 +4136,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 0) continue;
+		if(fSamples[i].datamc > 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4161,7 +4148,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 0) continue;
+			if(fSamples[i].datamc > 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][Electron].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4169,7 +4156,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	OUT << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << " Cutname                                 | ";
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-		if(fSamples[i].isdata == 1) continue;
+		if(fSamples[i].datamc == 0) continue;
 		OUT << setw(9) << fSamples[i].sname;
 		OUT << " | ";
 	}
@@ -4181,7 +4168,7 @@ void MuonPlotter::printCutFlows(TString filename){
 		OUT << " | ";
 
 		for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-			if(fSamples[i].isdata == 1) continue;
+			if(fSamples[i].datamc == 0) continue;
 			OUT << setw(9) << setprecision(3) << fCounters[i][Electron].counts(*countit) << " | ";
 		}
 		OUT << endl;
@@ -4205,7 +4192,7 @@ void MuonPlotter::printYields(gChannel chan, float lumiscale){
 		Sample S = fSamples[i];
 		NumberSet numbers = S.numbers[chan];
 		float scale = lumiscale / S.lumi;
-		if(S.isdata || scale < 0) scale = 1;
+		if(S.datamc == 0 || scale < 0) scale = 1;
 		cout << setw(15) << S.sname << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt2  << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt10 << " |";
@@ -4732,56 +4719,190 @@ void MuonPlotter::labelElOriginAxis(TAxis *axis){
 	}
 }
 
+void MuonPlotter::printOrigins(){
+	TString filename = fOutputDir + "Origins.txt";
+	fOUTSTREAM.open(filename.Data(), ios::trunc);
+	printMuOriginTable();
+	fOUTSTREAM << endl << endl;
+	printElOriginTable();
+	fOUTSTREAM << endl << endl;
+	printEMuOriginTable();
+	fOUTSTREAM << endl;
+	fOUTSTREAM.close();
+}
 void MuonPlotter::printMuOriginTable(){
-	cout << "-------------------------------------------" << endl;
-	cout << " Printing origins for Mu/Mu channel..." << endl;
+	fOUTSTREAM << "-------------------------------------------" << endl;
+	fOUTSTREAM << " Printing origins for Mu/Mu channel..." << endl;
 
 	printMuOriginHeader("NT20");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		print2MuOriginsFromSample(&fSamples[i], 2);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(2, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 	printMuOriginHeader("NT10");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		print2MuOriginsFromSample(&fSamples[i], 1);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(1, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 	printMuOriginHeader("NT00");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		print2MuOriginsFromSample(&fSamples[i], 0);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(0, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 
 	printMuOriginHeader("SSTi");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		printMuOriginFromSample(&fSamples[i], 1);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(1, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 	printMuOriginHeader("SSLo");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		printMuOriginFromSample(&fSamples[i], 2);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(2, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 	printMuOriginHeader("Z Ti");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		printMuOriginFromSample(&fSamples[i], 3);
 	}
-	cout << "=========================================================================================================================" << endl << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(3, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
 	printMuOriginHeader("Z Lo");
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		printMuOriginFromSample(&fSamples[i], 4);
 	}
-	cout << "=========================================================================================================================" << endl;
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(4, Muon);
+	fOUTSTREAM << "=========================================================================================================================" << endl << endl;
+}
+void MuonPlotter::printElOriginTable(){
+	fOUTSTREAM << "-------------------------------------------" << endl;
+	fOUTSTREAM << " Printing origins for E/E channel..." << endl;
+
+	printElOriginHeader("NT20");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		print2ElOriginsFromSample(&fSamples[i], 2);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(2, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printElOriginHeader("NT10");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		print2ElOriginsFromSample(&fSamples[i], 1);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(1, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printElOriginHeader("NT00");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		print2ElOriginsFromSample(&fSamples[i], 0);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(0, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+
+	printElOriginHeader("SSTi");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printElOriginFromSample(&fSamples[i], 1);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(1, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printElOriginHeader("SSLo");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printElOriginFromSample(&fSamples[i], 2);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(2, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printElOriginHeader("Z Ti");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printElOriginFromSample(&fSamples[i], 3);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(3, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printElOriginHeader("Z Lo");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printElOriginFromSample(&fSamples[i], 4);
+	}
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary(4, Electron);
+	fOUTSTREAM << "=============================================================================================================================================" << endl;
+}
+void MuonPlotter::printEMuOriginTable(){
+	fOUTSTREAM << "-------------------------------------------" << endl;
+	fOUTSTREAM << " Printing origins for E/Mu channel..." << endl;
+
+	printEMuOriginHeader("NT20");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printEMuOriginsFromSample(&fSamples[i], 2);
+	}
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(2, EMu);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printEMuOriginHeader("NT10");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printEMuOriginsFromSample(&fSamples[i], 1);
+	}
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(1, EMu);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printEMuOriginHeader("NT01");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printEMuOriginsFromSample(&fSamples[i], 10);
+	}
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(10, EMu);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
+	printEMuOriginHeader("NT00");
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		printEMuOriginsFromSample(&fSamples[i], 0);
+	}
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	printOriginSummary2L(0, EMu);
+	fOUTSTREAM << "=============================================================================================================================================" << endl << endl;
 }
 
 void MuonPlotter::printMuOriginHeader(TString name){
-	cout << "-------------------------------------------------------------------------------------------------------------------------" << endl;
-	cout << "    " << name;
-	cout << "            | Fakes   | W       | Z       | tau     | ud had. | s hadr. | c hadr. | b hadr. | strings | unid    |" << endl;
-	cout << "=========================================================================================================================" << endl;	
+	fOUTSTREAM << "-------------------------------------------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM << "    " << name;
+	fOUTSTREAM << "            | Fakes   | W       | Z       | tau     | ud had. | s hadr. | c hadr. | b hadr. | strings | unid    |" << endl;
+	fOUTSTREAM << "=========================================================================================================================" << endl;	
 }
+void MuonPlotter::printElOriginHeader(TString name){
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM << "    " << name;
+	fOUTSTREAM << "            |           Fakes             |                                  real electrons from...                                 |" << endl;
+	fOUTSTREAM << "                    | Mismatc | Gam/Con | Hadron. | W       | Z       | tau     | ud had. | s hadr. | c hadr. | b hadr. | strings | unid    |" << endl;
+	fOUTSTREAM << "=============================================================================================================================================" << endl;
+}
+void MuonPlotter::printEMuOriginHeader(TString name){
+	TString descr = "";
+	if(name == "NT20") descr = "both tight";
+	if(name == "NT10") descr = "muon tight";
+	if(name == "NT01") descr = "elec tight";
+	if(name == "NT00") descr = "none tight";
+	fOUTSTREAM << "---------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+	fOUTSTREAM << "    " << name;
+	fOUTSTREAM << "            |           Fakes             |                             real electrons/muons from...                                |" << endl;
+	fOUTSTREAM << "      " << descr;
+	fOUTSTREAM << "    | Mismatc | Gam/Con | Hadron. | W       | Z       | tau     | ud had. | s hadr. | c hadr. | b hadr. | strings | unid    |" << endl;
+	fOUTSTREAM << "=============================================================================================================================================" << endl;
+}
+
 void MuonPlotter::printMuOriginFromSample(Sample *S, int toggle){
-	if(S->isdata) return;
+	if(S->datamc == 0 || S->datamc == 2 ) return;
 	if(toggle != 1 && toggle != 2 && toggle != 3 && toggle != 4) return;
 	Channel *C = &S->region[Signal].mm;
 
@@ -4794,13 +4915,33 @@ void MuonPlotter::printMuOriginFromSample(Sample *S, int toggle){
 	if(histo->Integral() == 0.) return;
 	histo->Scale(100./histo->Integral());
 
-	cout << setw(15) << S->sname;
-	cout << "     |";
-	for(size_t i = 1; i <= 9; ++i)	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
+	fOUTSTREAM << setw(15) << S->sname;
+	fOUTSTREAM << "     |";
+	for(size_t i = 1; i <= 9; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
 }
+void MuonPlotter::printElOriginFromSample(Sample *S, int toggle){
+	if(S->datamc == 0 || S->datamc == 2 ) return;
+	if(toggle != 1 && toggle != 2 && toggle != 3 && toggle != 4) return;
+	Channel *C = &S->region[Signal].ee;
+
+	TH1D *histo;
+	if(toggle == 1) histo = (TH1D*)C->sst_origin->Clone();
+	if(toggle == 2) histo = (TH1D*)C->ssl_origin->Clone();
+	if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
+	if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
+
+	if(histo->Integral() == 0.) return;
+	histo->Scale(100./histo->Integral());
+
+	fOUTSTREAM << setw(15) << S->sname;
+	fOUTSTREAM << "     |";
+	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
+}
+
 void MuonPlotter::print2MuOriginsFromSample(Sample *S, int toggle){
-	if(S->isdata) return;
+	if(S->datamc == 0) return;
 	if(toggle != 0 && toggle != 1 && toggle != 2) return;
 	Channel *C = &S->region[Signal].mm;
 
@@ -4813,19 +4954,145 @@ void MuonPlotter::print2MuOriginsFromSample(Sample *S, int toggle){
 	if(histo->Integral() == 0.) return;
 	histo->Scale(100./histo->Integral());
 
-	cout << setw(15) << S->sname;
+	fOUTSTREAM << setw(15) << S->sname;
 
 	// first muon
-	cout << " mu1 |";
-	for(size_t i = 1; i <= 9; ++i)	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
+	fOUTSTREAM << " mu1 |";
+	for(size_t i = 1; i <= 9; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
 
 	// second muon
-	cout << "                mu2 |";
+	fOUTSTREAM << "                mu2 |";
 	histo = histo2d->ProjectionY();
 	histo->Scale(100./histo->Integral());
-	for(size_t i = 1; i <= 9; ++i)	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
-	cout << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+	for(size_t i = 1; i <= 9; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+}
+void MuonPlotter::print2ElOriginsFromSample(Sample *S, int toggle){
+	if(S->datamc == 0) return;
+	if(toggle != 0 && toggle != 1 && toggle != 2) return;
+	Channel *C = &S->region[Signal].ee;
+
+	TH2D *histo2d;
+	if(toggle == 0) histo2d = C->nt00_origin;
+	if(toggle == 1) histo2d = C->nt10_origin;
+	if(toggle == 2) histo2d = C->nt11_origin;
+
+	TH1D *histo = histo2d->ProjectionX();
+	if(histo->Integral() == 0.) return;
+	histo->Scale(100./histo->Integral());
+
+	fOUTSTREAM << setw(15) << S->sname;
+
+	// first electron
+	fOUTSTREAM << " el1 |";
+	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
+
+	// second electron
+	fOUTSTREAM << "                el2 |";
+	histo = histo2d->ProjectionY();
+	histo->Scale(100./histo->Integral());
+	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+}
+void MuonPlotter::printEMuOriginsFromSample(Sample *S, int toggle){
+	if(S->datamc == 0) return;
+	if(toggle != 0 && toggle != 1 && toggle != 2 && toggle != 10) return;
+	Channel *C = &S->region[Signal].em;
+
+	TH2D *histo2d;
+	if(toggle == 0)  histo2d = C->nt00_origin;
+	if(toggle == 1)  histo2d = C->nt10_origin;
+	if(toggle == 10) histo2d = C->nt01_origin;
+	if(toggle == 2)  histo2d = C->nt11_origin;
+
+	TH1D *histo = histo2d->ProjectionX();
+	if(histo->Integral() == 0.) return;
+	histo->Scale(100./histo->Integral());
+
+	// muon
+	fOUTSTREAM << setw(15) << S->sname;
+	fOUTSTREAM << " mu  |         |         |";
+	for(size_t i = 1; i <= 9; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;
+
+	// electron
+	fOUTSTREAM << "                el  |";
+	histo = histo2d->ProjectionY();
+	histo->Scale(100./histo->Integral());
+	for(size_t i = 1; i <= 11; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histo->GetBinContent(15)) << " |" << endl;			
+}
+
+void MuonPlotter::printOriginSummary(int toggle, gChannel chan){
+	if(toggle != 1 && toggle != 2 && toggle != 3 && toggle != 4) return;
+	TH1D *histosum = new TH1D("SST_Origin_Sum", "SSTOrigin",  15, 0, 15);
+	histosum->Sumw2();
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		Sample *S = &fSamples[i];
+		// if(S->sname == "QCD_5to15") continue;
+		if(S->datamc == 0 || S->datamc == 2) continue; // no data or signal
+		Channel *C;
+		if(chan == Muon)     C = &S->region[Signal].mm;
+		if(chan == Electron) C = &S->region[Signal].ee;
+
+		TH1D *histo;
+		if(toggle == 1) histo = (TH1D*)C->sst_origin->Clone();
+		if(toggle == 2) histo = (TH1D*)C->ssl_origin->Clone();
+		if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
+		if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
+
+		float scale = fLumiNorm / S->lumi;
+		histosum->Add(histo, scale);
+	}
+	histosum->Scale(100./histosum->Integral());
+	fOUTSTREAM << " Weighted Sum       |";
+	int ncols = 9;
+	if(chan == Electron) ncols = 11;
+	for(size_t i = 1; i <= ncols; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum->GetBinContent(15)) << " |" << endl;
+}
+void MuonPlotter::printOriginSummary2L(int toggle, gChannel chan){
+	if(toggle != 0 && toggle != 1 && toggle != 10 && toggle != 2) return;
+	TH1D *histosum1 = new TH1D("SST_Origin_Sum1", "SSTOrigin",  15, 0, 15);
+	TH1D *histosum2 = new TH1D("SST_Origin_Sum2", "SSTOrigin",  15, 0, 15);
+	histosum1->Sumw2();
+	histosum2->Sumw2();
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		Sample *S = &fSamples[i];
+		if(S->datamc == 0 || S->datamc == 2) continue; // no data or signal
+		Channel *C;
+		if(chan == Muon)     C = &S->region[Signal].mm;
+		if(chan == Electron) C = &S->region[Signal].ee;
+		if(chan == EMu)      C = &S->region[Signal].em;
+
+		TH2D *histo2d;
+		if(toggle == 0)  histo2d = C->nt00_origin;
+		if(toggle == 1)  histo2d = C->nt10_origin;
+		if(toggle == 10) histo2d = C->nt01_origin;
+		if(toggle == 2)  histo2d = C->nt11_origin;
+
+		float scale = fLumiNorm / S->lumi;
+		histosum1->Add(histo2d->ProjectionX(), scale);
+		histosum2->Add(histo2d->ProjectionY(), scale);
+	}
+	histosum1->Scale(100./histosum1->Integral());
+	histosum2->Scale(100./histosum2->Integral());
+	if(chan == Muon)     fOUTSTREAM << " Weighted Sum: mu1  |";
+	if(chan == EMu)      fOUTSTREAM << " Weighted Sum: muon |         |         |";
+	if(chan == Electron) fOUTSTREAM << " Weighted Sum: el1  |";
+	int ncols = 9;
+	if(chan == Electron) ncols = 11;
+	for(size_t i = 1; i <= ncols; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum1->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum1->GetBinContent(15)) << " |" << endl;
+
+	if(chan == Muon)     fOUTSTREAM << "               mu2  |";
+	if(chan == EMu)      fOUTSTREAM << "               ele  |";
+	if(chan == Electron) fOUTSTREAM << "               el2  |";
+	if(chan == EMu) ncols = 11;	
+	for(size_t i = 1; i <= ncols; ++i)	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum2->GetBinContent(i)) << " |";
+	fOUTSTREAM << setw(6)  << setprecision(3) << Form(" %6.2f%%", histosum2->GetBinContent(15)) << " |" << endl;	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -5246,11 +5513,11 @@ bool MuonPlotter::isGoodRun(gSample sample){
 //____________________________________________________________________________
 bool MuonPlotter::isSigSupMuEvent(){
 	int mu1(-1), mu2(-1);
-	if(hasLooseMuons(mu1, mu2) < 1)  return false;
-	if(!passesJet50Cut()) return false;
-	if(MuMT[0] > 20.) return false;
-	if(pfMET > 20.) return false;
-	if(NMus > 1) return false;
+	if(hasLooseMuons(mu1, mu2) < 1) return false;
+	if(!passesJet50Cut())           return false;
+	if(MuMT[0] > 20.)               return false;
+	if(pfMET > 20.)                 return false;
+	if(NMus > 1)                    return false;
 	return true;
 }
 bool MuonPlotter::isZMuMuEvent(){

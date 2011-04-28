@@ -121,7 +121,7 @@ public:
 		TTree *tree;
 		float lumi;
 		int color;
-		bool isdata;
+		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
 		bool isfilled; // check if this has been read in -- not implemented yet
 		Region region[gNREGIONS];
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
@@ -253,11 +253,23 @@ public:
 	void labelMuOriginAxis(TAxis *);
 	void labelElOriginAxis(TAxis *);
 	
-	inline double getPercentage(int passed, int total){return 100.*(double)passed / (double)total;};
+	void printOrigins();
 	void printMuOriginTable();
 	void printMuOriginHeader(TString);
 	void printMuOriginFromSample(Sample*, int);
 	void print2MuOriginsFromSample(Sample*, int);
+
+	void printElOriginTable();
+	void printElOriginHeader(TString);
+	void printElOriginFromSample(Sample*, int);
+	void print2ElOriginsFromSample(Sample*, int);
+
+	void printEMuOriginTable();
+	void printEMuOriginHeader(TString);
+	void printEMuOriginsFromSample(Sample*, int);
+
+	void printOriginSummary(int, gChannel);
+	void printOriginSummary2L(int, gChannel);
 
 	// Event and Object selectors:
 	bool isGoodEvent();
