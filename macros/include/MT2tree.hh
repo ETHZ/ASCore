@@ -75,8 +75,11 @@ public:
 
 	// Trigger bits: only a couple are implemented so far
 	// HT
+	Bool_t HLT_HT150_v2;
 	Bool_t HLT_HT160_v2;
+	Bool_t HLT_HT200_v2;
 	Bool_t HLT_HT240_v2;
+	Bool_t HLT_HT250_v2;
 	Bool_t HLT_HT260_v2;
 	Bool_t HLT_HT300_v2;
 	Bool_t HLT_HT350_v2;
@@ -156,7 +159,6 @@ public:
   Bool_t isPFIDLoose;
   Bool_t isPFIDMedium;
   Bool_t isPFIDTight;
-  Bool_t isTau;
 
   Double_t ChHadFrac;
   Double_t NeuHadFrac;
@@ -165,8 +167,14 @@ public:
   Int_t    ChMult;
   Int_t    NeuMult;
   Int_t    NConstituents;
+  
+  Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
+  Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
+  Double_t TauDR;
+  Double_t TauDPt;
+  Int_t    NTauMatch;
 
-  ClassDef(MT2Jet, 6)
+  ClassDef(MT2Jet, 7)
 };
 
 // MT2Hemi ---------------------------
@@ -215,8 +223,10 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    ID95;
+  Int_t    ID90;
 
-  ClassDef(MT2Elec, 5)
+  ClassDef(MT2Elec, 6)
 };
 
 // MT2Muon ----------------------------------
@@ -234,8 +244,10 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    NMatches;
+  Double_t PtErr;
 
-  ClassDef(MT2Muon, 5)
+  ClassDef(MT2Muon, 6)
 };
 
 
@@ -334,9 +346,8 @@ public:
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
   Bool_t   GenLeptFromW(int pid, double pt, double eta);
   Double_t GetLeptPt(int index);
+  Double_t ElClosestJet();
 
-  // Taus
-  Double_t TauClosestJet();
 
   Int_t     NJets;
   Int_t     NJetsIDLoose;

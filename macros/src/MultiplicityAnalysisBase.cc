@@ -36,7 +36,6 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fTaus.clear();
 	fJets.clear();
 	fJetTaus.reset();
-	fNJetsAcc=0;
 
 	vector<double> mutight;
 	for(int i=0; i< fTR->PfMuNObjs; ++i){
@@ -58,22 +57,20 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 		fJets.push_back(ij);                   // fJets has all jets except for duplicates with selected leptons
 		pt1.push_back(fTR->PF2PATJPt[ij]);
 		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(fTR->PF2PATJPt[ij]); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
-		if(fabs(fTR->PF2PATJEta[ij])>2.4) continue;
-		fNJetsAcc++;
 	}
 	fJets        = Util::VSort(fJets,       pt1);
-	
+	pt1.clear();
+
+	// !!!!!!!!!
+	// Don't add taus to jets starting from ntuple V02-01-01: jets include taus	
+	// !!!!!!!!!
 	vector<double> taus;
 	for(int i=0; i< fTR->PfTauNObjs; ++i){
-		if(fTR->PfTauPt[i]   < 20 ) continue;
+		if(fTR->PfTauPt[i]   < 20    ) continue; // note: taus go up to 2.5 in Eta
 		fTaus.push_back(i);
 		taus.push_back(fTR->PfTauPt[i]);
-		fJetTaus.index.push_back(i); fJetTaus.pt.push_back(fTR->PfTauPt[i]); fJetTaus.isTau.push_back(1); fJetTaus.NObjs++;
-		if(fabs(fTR->PfTauEta[i])>2.4) continue;
-		fNJetsAcc++;
 	}
 	fTaus          = Util::VSort(fTaus     , taus);
-	pt1.clear();
 	
 	//sort fJetTaus accorting to Pt
 	fJetTaus.index = Util::VSort(fJetTaus.index, fJetTaus.pt);
@@ -126,7 +123,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fTR->PtHat > fCut_PtHat_max ){return false;}
 	
 	// MET
-	if(fTR->PFMET < fCut_PFMET_min){return false;}
+	if(fTR->PFMETPAT < fCut_PFMET_min){return false;}
 	
 	// HLT triggers
 	if(fRequiredHLT.size() !=0 ){

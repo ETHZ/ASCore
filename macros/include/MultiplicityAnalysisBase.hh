@@ -61,7 +61,6 @@ public:
 
 	// members
 	float fHT;
-	int   fNJetsAcc;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 

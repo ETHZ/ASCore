@@ -23,8 +23,11 @@ void MassAnalysis::Begin(const char* filename){
 	// define which triggers to fill
 	if(fisData){
 		// HT
+		fTriggerMap["HLT_HT150_v2"]            = &fMT2tree->trigger.HLT_HT150_v2;
 		fTriggerMap["HLT_HT160_v2"]            = &fMT2tree->trigger.HLT_HT160_v2;
+		fTriggerMap["HLT_HT200_v2"]            = &fMT2tree->trigger.HLT_HT200_v2;
 		fTriggerMap["HLT_HT240_v2"]            = &fMT2tree->trigger.HLT_HT240_v2;
+		fTriggerMap["HLT_HT250_v2"]            = &fMT2tree->trigger.HLT_HT250_v2;
 		fTriggerMap["HLT_HT260_v2"]            = &fMT2tree->trigger.HLT_HT260_v2;
 		fTriggerMap["HLT_HT300_v2"]            = &fMT2tree->trigger.HLT_HT300_v2;
 		fTriggerMap["HLT_HT350_v2"]            = &fMT2tree->trigger.HLT_HT350_v2;
@@ -98,7 +101,7 @@ void MassAnalysis::Analyze(){
 	MassAnalysis::FillTree();
 	
 	// print interesting events
-	InterestingEvents();
+//	InterestingEvents();
 }
 
 // ***********************************************************************************************
@@ -139,17 +142,37 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].NeuMult        = fTR->PF2PATJNeuMult       [fJetTaus.index[i]];
 			fMT2tree->jet[i].NConstituents  = fTR->PF2PATJNConstituents [fJetTaus.index[i]];
 			fMT2tree->jet[i].isTau          = false;
-		}else {
+		}else { // this is obsolete starting from ntuple V02-01-01 as taus are included in jets
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PfTauPx[fJetTaus.index[i]],fTR->PfTauPy[fJetTaus.index[i]],fTR->PfTauPz[fJetTaus.index[i]],fTR->PfTauE[fJetTaus.index[i]]);
 			fMT2tree->jet[i].isTau = true;
+			cout << "ERROR: there is something wrong: jet should not be a tau: double counting?" << endl;
+			exit(1);
 		}
+	}
+
+	// --------------------------------------------------------------
+	// match taus to jets
+	for(int i=0; i<fTaus.size(); ++i){
+		TLorentzVector tau;
+		tau.SetPxPyPzE(fTR->PfTauPx[fTaus[i]],fTR->PfTauPy[fTaus[i]],fTR->PfTauPz[fTaus[i]],fTR->PfTauE[fTaus[i]]);
+		double mindR =10000; int jindex =-1;
+		for(int j=0; j<fJets.size(); ++j){
+			double dR = tau.DeltaR(fMT2tree->jet[j].lv);
+			if(dR < mindR && dR < 0.5) {mindR=dR; jindex = j;} 	
+		}
+		if(jindex ==-1) continue;
+		fMT2tree->jet[jindex].NTauMatch++;
+		if(fMT2tree->jet[jindex].isTauMatch && fMT2tree->jet[jindex].TauDR < mindR) continue;
+		fMT2tree->jet[jindex].isTauMatch = 1;
+		fMT2tree->jet[jindex].TauDR      = mindR;
+		fMT2tree->jet[jindex].TauDPt     = fMT2tree->jet[jindex].lv.Pt()-tau.Pt();
 	}
 	
 	// ---------------------------------------------------------------
 	// Set NJets, NElecs, NMuons
 	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
 	fMT2tree->SetNJetsIDLoose  (fMT2tree->GetNjets(20, 2.4, 1));
-	fMT2tree->SetNJetsAcc      ((Int_t)fNJetsAcc);
+	fMT2tree->SetNJetsAcc      (fMT2tree->GetNjets(20, 2.4, 0));
 	fMT2tree->SetNEles         ((Int_t)fElecs.size());
 	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
 	fMT2tree->SetNTaus         ((Int_t)fTaus.size());
@@ -158,21 +181,25 @@ void MassAnalysis::FillTree(){
 	// -----------------------------------------------------------------
 	// Fill leptons 4-momenta & tight_flag & charge
 	TLorentzVector METlv;
-	METlv.SetPtEtaPhiM(fTR->PFMET, 0., fTR->PFMETphi, 0.);
+	METlv.SetPtEtaPhiM(fTR->PFMETPAT, 0., fTR->PFMETPATphi, 0.);
 
 	for(int i=0; i<fElecs.size(); ++i) {
 	  	fMT2tree->ele[i].lv.SetPtEtaPhiE(fTR->PfElPt [fElecs[i]], fTR->PfElEta[fElecs[i]], 
 				          fTR->PfElPhi[fElecs[i]], fTR->PfElE  [fElecs[i]]); // = GetEle4Momenta(fElecs[i]);
 		fMT2tree->ele[i].MT     = GetMT(fMT2tree->ele[i].lv, 0., METlv, 0.); 
 		fMT2tree->ele[i].Charge = fTR->PfElCharge[fElecs[i]];
-		fMT2tree->ele[i].Iso    = fTR->PfElParticleIso[fElecs[i]];
+		fMT2tree->ele[i].Iso    = (fTR->PfElChargedHadronIso[fElecs[i]] + fTR->PfElNeutralHadronIso[fElecs[i]] + fTR->PfElPhotonIso[fElecs[i]])/fTR->PfElPt[fElecs[i]];
+		fMT2tree->ele[i].ID90   = fTR->PfElID90[fElecs[i]];
+		fMT2tree->ele[i].ID95   = fTR->PfElID95[fElecs[i]];
 	}
 	for(int i=0; i<fMuons.size(); ++i) {
 	  	fMT2tree->muo[i].lv.SetPtEtaPhiM(fTR->PfMuPt [fMuons[i]], fTR->PfMuEta[fMuons[i]], 
 				          fTR->PfMuPhi[fMuons[i]], 0.106);                     // = GetMuo4Momenta(fMuons[i]);
-		fMT2tree->muo[i].MT     = GetMT(fMT2tree->muo[i].lv, fMT2tree->muo[i].lv.M(), METlv, 0.); 
-		fMT2tree->muo[i].Charge = fTR->PfMuCharge[fMuons[i]];	
-		fMT2tree->muo[i].Iso    = fTR->PfMuParticleIso[fMuons[i]];
+		fMT2tree->muo[i].MT       = GetMT(fMT2tree->muo[i].lv, fMT2tree->muo[i].lv.M(), METlv, 0.); 
+		fMT2tree->muo[i].Charge   = fTR->PfMuCharge[fMuons[i]];	
+		fMT2tree->muo[i].Iso      = (fTR->PfMuChargedHadronIso[fMuons[i]] + fTR->PfMuNeutralHadronIso[fMuons[i]] + fTR->PfMuPhotonIso[fMuons[i]])/fTR->PfMuPt[fMuons[i]];
+		fMT2tree->muo[i].NMatches = fTR->PfMuNMatches[fMuons[i]];
+		fMT2tree->muo[i].PtErr    = fTR->PfMuPtErr[fMuons[i]];
 	}
 	
 	// ----------------------------------------------------------------
@@ -247,7 +274,7 @@ void MassAnalysis::FillTree(){
 
 	// --------------------------------------------------------------------
 	// MET and MPT
-	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMET,0,fTR->PFMETphi,0);
+	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMETPAT,0,fTR->PFMETPATphi,0);
 
 	// Fill vector sum of tracks
 	TVector3 tracks(0.,0.,0.);
@@ -295,17 +322,17 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
 	fMT2tree->misc.HT                  = fHT;
-	fMT2tree->misc.PFMETsign	   = (fTR->PFMET)/sqrt(fTR->SumEt);
+	fMT2tree->misc.PFMETsign	   = (fTR->PFMETPAT)/sqrt(fTR->SumEt);
 	
 	fMT2tree->misc.MT2                 = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
-	fMT2tree->misc.MT2all              = fHemiObjects[0].MT2;    // note: this is a bit dangerous, 
+	fMT2tree->misc.MT2all              = fHemiObjects[0].MT2;    
 	fMT2tree->misc.MCT                 = fHemiObjects[1].MCT;
 	fMT2tree->misc.MT2leading          = fHemiObjects[2].MT2;    //       as the definition of fHemiObjects1,2,3,4
 	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
 	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
 
-	fMT2tree->misc.MET                 = fTR->PFMET;
-	fMT2tree->misc.METPhi              = fTR->PFMETphi;
+	fMT2tree->misc.MET                 = fTR->PFMETPAT;
+	fMT2tree->misc.METPhi              = fTR->PFMETPATphi;
 
 
 	// ----------------------------------------------------------------------------------
@@ -324,16 +351,8 @@ void MassAnalysis::FillTree(){
 	} else  fMT2tree->misc.Jet1Pass      = 0;
 	
 	// MHT from jets and taus
-	TVector3 MHTidloose(0., 0., 0.);
-	TVector3 MHTall(0., 0., 0.);
-	for(int i=0; i<fMT2tree->NJets; ++i){
-		TVector3 jet = fMT2tree->jet[i].lv.Vect();
-		MHTall      += jet;
-		if(! fMT2tree->jet[i].IsGoodPFJet(20, 2.4, 1) ) continue;
-		MHTidloose  += jet;
-	}
-	fMT2tree->MHTloose[0].SetXYZM(-MHTidloose.Px(), -MHTidloose.Py(), 0, 0);
-	fMT2tree->MHT     [0].SetXYZM(-MHTall.Px()    , -MHTall.Py()    , 0, 0);
+	fMT2tree->MHTloose[0]=fMT2tree->GetMHTlv(1, 20, 2.4, true); // only jets satisfying the loose PF-ID and leptons
+	fMT2tree->MHT     [0]=fMT2tree->GetMHTlv(0, 20, 2.4, true); // jets and leptons
 	
 	// DPhiMhtMpt: should be replaced by method to calculate it on the fly. 
 	fMT2tree->misc.DPhiMhtMpt=Util::DeltaPhi(fMT2tree->MHT[0].Phi(), fMT2tree->MPT[0].Phi());	
@@ -403,7 +422,7 @@ void MassAnalysis::FillTree(){
 		fMT2tree->Znunu.Jet1Pass_matched   = (Int_t) IsGoodBasicPFJetPAT(jindi[1],  100., 2.4);
 	} else  fMT2tree->Znunu.Jet1Pass_matched   =0;
 	fMT2tree->Znunu.PassJetID_matched          = (Int_t) PassJetID_matched;
-	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETpy,2));
+	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETPATpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETPATpy,2));
 	
 	fMT2tree->Znunu.HTmatched                  = HTmatched;
 	fMT2tree->Znunu.NJetsIDLoose_matched       = NJetsIDLoose_matched;
@@ -437,8 +456,6 @@ void MassAnalysis::FillTree(){
 
 void MassAnalysis::InterestingEvents(){
 
-	if(fTR->Event != 20005424 ) return;
-	if(fTR->Run   != 160998   ) return;	
 // 	if(fMT2tree->hemi[0].MT2 < 200           ) return; 	
 //	if(fMT2tree->NJetsIDLoose < 2           ) return; 	
 //	if(fMT2tree->misc.MET < 30              ) return; 	
@@ -472,7 +489,7 @@ void MassAnalysis::InterestingEvents(){
 			     <<     " eta " << fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.Eta() 
 		             <<     " phi " << fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.Phi()
 		             <<     " Mass "<< fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].lv.M() ;  	     
-			if(fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].isTau) {cout << " jet is Tau ";} 
+			if(fMT2tree->jet[fMT2tree->hemi[0].jindices1[i]].isTauMatch) {cout << " jet is matched to Tau ";} 
 			cout << endl;	     
 	       	}
 	}
@@ -484,7 +501,7 @@ void MassAnalysis::InterestingEvents(){
 			     <<     " eta " << fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.Eta() 
 		             <<     " phi " << fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.Phi()
 		             <<     " Mass "<< fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].lv.M() ; 
-			if(fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].isTau) {cout << " jet is Tau ";}
+			if(fMT2tree->jet[fMT2tree->hemi[0].jindices2[i]].isTauMatch) {cout << " jet is matched to Tau ";}
 		        cout << endl;	     
 	       	}
 	}
@@ -627,8 +644,8 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	}
 
 	TLorentzVector pmiss;
-	pmiss.SetPx(fTR->PFMETpx);
-	pmiss.SetPy(fTR->PFMETpy);
+	pmiss.SetPx(fTR->PFMETPATpx);
+	pmiss.SetPy(fTR->PFMETPATpy);
 
 	// fill mindHT (minimized for assoc method 9)
 	hemiobject.minDHT = dHT;
@@ -641,7 +658,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	
 	// fill MCT
 	TVector2 pmiss_vector2;
-	pmiss_vector2.Set(fTR->PFMETpx, fTR->PFMETpy);
+	pmiss_vector2.Set(fTR->PFMETPATpx, fTR->PFMETPATpy);
 	TLorentzVector downstream(0.,0.,0.,0.); // no particles are downstream, i.e. not selected jets are upstream. 
 	hemiobject.MCT   =GetMCTcorr(pseudojet1, pseudojet2, downstream, pmiss_vector2);
 	
@@ -682,14 +699,14 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	vector<TLorentzVector> p4s;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
-			if(fabs(fTR->PF2PATJEta[fJetTaus.index[i]])>2.4) continue;
+			if(fabs(fTR->PF2PATJEta[fJetTaus.index[i]])>2.4 || fTR->PF2PATJPt[fJetTaus.index[i]] < minJPt) continue;
 			TLorentzVector v; 
 			v.SetPxPyPzE(fTR->PF2PATJPx[fJetTaus.index[i]], fTR->PF2PATJPy[fJetTaus.index[i]], fTR->PF2PATJPz[fJetTaus.index[i]], fTR->PF2PATJE[fJetTaus.index[i]]);
 			p4s.push_back(v);
 			fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=-1;
 			hemiobject.objects.push_back(fHemiObject);
 		}else {
-			if(fabs(fTR->PfTauEta[fJetTaus.index[i]])  >2.4) continue;
+			if(fabs(fTR->PfTauEta[fJetTaus.index[i]])  >2.4 || fTR->PfTauPt[fJetTaus.index[i]] < minJPt) continue;
 			TLorentzVector v; 
 			v.SetPxPyPzE(fTR->PfTauPx[fJetTaus.index[i]], fTR->PfTauPy[fJetTaus.index[i]], fTR->PfTauPz[fJetTaus.index[i]],fTR->PfTauE[fJetTaus.index[i]]);
 			fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=-1;
@@ -726,8 +743,8 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
     	hemiobject.alphaT  = 0.5 * ( sumPT - hemiobject.minDHT ) / sqrt( sumPT*sumPT - sumP4.Perp2() );
 		
 	TLorentzVector pmiss;
-	pmiss.SetPx(fTR->PFMETpx);
-	pmiss.SetPy(fTR->PFMETpy);
+	pmiss.SetPx(fTR->PFMETPATpx);
+	pmiss.SetPy(fTR->PFMETPATpy);
 	
 	// fill UTM
 	hemiobject.UTM          = - pmiss - pj1 - pj2;
@@ -737,7 +754,7 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	
 	// fill MCT
 	TVector2 pmiss_vector2;
-	pmiss_vector2.Set(fTR->PFMETpx, fTR->PFMETpy);
+	pmiss_vector2.Set(fTR->PFMETPATpx, fTR->PFMETPATpy);
 	TLorentzVector downstream(0.,0.,0.,0.); // no particles are downstream, i.e. not selected jets are upstream. 
 	hemiobject.MCT   =GetMCTcorr(pj1, pj2, downstream, pmiss_vector2);
 	

@@ -80,8 +80,11 @@ MT2Trigger::~MT2Trigger(){
 void MT2Trigger::Reset(){
 	
 	// HT
+	HLT_HT150_v2            = false;
 	HLT_HT160_v2            = false;
+	HLT_HT200_v2            = false; 
 	HLT_HT240_v2            = false; 
+	HLT_HT250_v2            = false; 
 	HLT_HT260_v2            = false;
 	HLT_HT300_v2            = false;
 	HLT_HT350_v2            = false;
@@ -158,7 +161,6 @@ void MT2Jet::Reset() {
   isPFIDLoose   = 0;
   isPFIDMedium  = 0;
   isPFIDTight   = 0;
-  isTau         = 0;
   ChHadFrac     = -99999.99; 
   NeuHadFrac    = -99999.99; 
   ChEmFrac      = -99999.99;
@@ -166,6 +168,12 @@ void MT2Jet::Reset() {
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1;
+  
+  isTau         = 0;  // starting from ntuple V02-01-01: this has to be 0! 
+  isTauMatch    = 0;  // tell you if the jet is matched to a tau.
+  TauDR         = -99999.99;
+  TauDPt        = -99999.99;
+  NTauMatch     = 0;
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
@@ -275,6 +283,8 @@ void MT2Muon::Reset() {
   MT            = -9999.99;
   Iso           = -9999.99;
   Charge        = -999;
+  NMatches      = -999;
+  PtErr         = -999.99;
 }
 
 void MT2Muon::SetLV(const TLorentzVector v) {
@@ -294,6 +304,8 @@ void MT2Elec::Reset() {
   MT            = -9999.99;
   Iso           = -9999.99;
   Charge        = -999;
+  ID95          = -999;
+  ID90          = -999;
 }
 
 void MT2Elec::SetLV(const TLorentzVector v) {
@@ -684,7 +696,7 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   vector<float> px, py, pz, E;
   vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
   for(int i=0; i<NJets; ++i){
-	if(jet[i].IsGoodPFJet(20, 2.4, 0)) continue; // no ID imposed
+	if(jet[i].IsGoodPFJet(20, 2.4, 1)) continue;
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
@@ -1258,15 +1270,11 @@ Double_t MT2tree::GetLeptPt(int index){
 	else return -1;
 }
 
-Double_t MT2tree::TauClosestJet(){
-	if(NTaus <1) return -9.99;
+Double_t MT2tree::ElClosestJet(){
 	double dR=1000;
-	for(int i=0; i<NJets; ++i){
-		if(! jet[i].isTau) continue;
-		for(int j=i+1; j<NJets; ++j){
-			if(! jet[j].isTau ){
-			       	if(jet[j].lv.DeltaR(jet[i].lv) < dR) {dR=jet[j].lv.DeltaR(jet[i].lv);}
-			}
+	for(int i=0; i<NEles; ++i){
+		for(int j=0; j<NJets; ++j){
+			if(ele[i].lv.DeltaR(jet[j].lv) < dR) {dR=ele[i].lv.DeltaR(jet[j].lv);}
 		}	
 	}
 	return dR;
