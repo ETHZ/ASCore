@@ -44,6 +44,12 @@ public:
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
+  Double_t caloHT30;
+  Double_t caloHT40;
+  Double_t caloHT50;
+  Double_t caloMHT20;
+  Double_t caloMHT30;
+  Double_t caloMHT40;
   
   ClassDef(MT2Misc, 13)
 };
@@ -76,21 +82,34 @@ public:
 	// Trigger bits: only a couple are implemented so far
 	// HT
 	Bool_t HLT_HT150_v2;
+	Bool_t HLT_HT150_v3;
 	Bool_t HLT_HT160_v2;
 	Bool_t HLT_HT200_v2;
+	Bool_t HLT_HT200_v3;
 	Bool_t HLT_HT240_v2;
 	Bool_t HLT_HT250_v2;
+	Bool_t HLT_HT250_v3;
 	Bool_t HLT_HT260_v2;
 	Bool_t HLT_HT300_v2;
+	Bool_t HLT_HT300_v3;
+	Bool_t HLT_HT300_v4;
 	Bool_t HLT_HT350_v2;
+	Bool_t HLT_HT350_v3;
 	Bool_t HLT_HT360_v2;
+	Bool_t HLT_HT400_v2;
+	Bool_t HLT_HT400_v3;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
+	Bool_t HLT_HT450_v3;
 	Bool_t HLT_HT500_v2;
+	Bool_t HLT_HT500_v3;
 	Bool_t HLT_HT550_v2;
+	Bool_t HLT_HT550_v3;
 	// HT_MHT
-	Bool_t HLT_HT260_MHT60_v2;
 	Bool_t HLT_HT250_MHT60_v2;
+	Bool_t HLT_HT250_MHT60_v3;
+	Bool_t HLT_HT260_MHT60_v2;
+	Bool_t HLT_HT300_MHT75_v4;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -99,7 +118,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 2);
+	ClassDef(MT2Trigger, 4);
 };
 
 // MT2Znunu --------------------------------

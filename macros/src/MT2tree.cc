@@ -42,6 +42,12 @@ void MT2Misc::Reset() {
   VectorsumptAll 	  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
+  caloHT30       	  = -99999.99;
+  caloHT40       	  = -99999.99;
+  caloHT50       	  = -99999.99;
+  caloMHT20       	  = -99999.99;
+  caloMHT30       	  = -99999.99;
+  caloMHT40       	  = -99999.99;
   DPhiMhtMpt              = -99999.99;
   MinMetJetDPhi           = -99999.99;
   EcalDeadCellBEFlag      = -1;
@@ -81,21 +87,34 @@ void MT2Trigger::Reset(){
 	
 	// HT
 	HLT_HT150_v2            = false;
+	HLT_HT150_v3            = false;
 	HLT_HT160_v2            = false;
-	HLT_HT200_v2            = false; 
-	HLT_HT240_v2            = false; 
-	HLT_HT250_v2            = false; 
+	HLT_HT200_v2            = false;
+	HLT_HT200_v3            = false;
+	HLT_HT240_v2            = false;
+	HLT_HT250_v2            = false;
+	HLT_HT250_v3            = false;
 	HLT_HT260_v2            = false;
 	HLT_HT300_v2            = false;
+	HLT_HT300_v3            = false;
+	HLT_HT300_v4            = false;
 	HLT_HT350_v2            = false;
+	HLT_HT350_v3            = false;
 	HLT_HT360_v2            = false;
+	HLT_HT400_v2            = false;
+	HLT_HT400_v3            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
+	HLT_HT450_v3            = false;
 	HLT_HT500_v2            = false;
+	HLT_HT500_v3            = false;
 	HLT_HT550_v2            = false;
+	HLT_HT550_v3            = false;
 	// HT_MHT
 	HLT_HT250_MHT60_v2      = false;
+	HLT_HT250_MHT60_v3      = false;
 	HLT_HT260_MHT60_v2      = false;
+	HLT_HT300_MHT75_v4      = false;
 	// QuadJet
 	HLT_QuadJet50_BTagIP_v1 = false;
 	HLT_QuadJet50_Jet40_v1  = false;
