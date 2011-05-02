@@ -141,18 +141,18 @@ public:
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
         void makePlot(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0., const double max=1., 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void MakePlot(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="",//njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void plotSig(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", TString xtitle="MT2 [GeV]", 
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
-	void PrintCutFlow(int njets=-2, int nleps=0);
+	void PrintCutFlow(int njets=-2, int nleps=0, TString trigger="");
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
 	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
 	void PrintWEfficiency(int sample_index , std::string lept, Long64_t nevents);
@@ -182,12 +182,12 @@ private:
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
         void PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0, const double max=1, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
