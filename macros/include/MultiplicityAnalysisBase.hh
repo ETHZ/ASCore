@@ -26,7 +26,11 @@ public:
 	vector<int> fTaus;
 	vector<int> fMuons;
 	vector<int> fJets;
-	
+
+	//pfJetID
+	bool IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut);
+	bool IsGoodPFJetMediumPAT3(int index, double ptcut, double absetacut);
+	bool IsGoodPFJetTightPAT3(int index, double ptcut, double absetacut);
 	
 	struct JetTau {
 		int NObjs;
@@ -51,6 +55,7 @@ public:
 	TString fSetName;
 	float fCut_PFMET_min;
 	float fCut_HT_min;
+	float fCut_caloHT50_min;
 	float fCut_JPt_hardest_min;
 	float fCut_JPt_second_min;
 	float fCut_DiLeptInvMass_min;
@@ -61,6 +66,7 @@ public:
 
 	// members
 	float fHT;
+	float fCaloHT50;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 

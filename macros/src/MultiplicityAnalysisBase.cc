@@ -8,6 +8,7 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	Util::SetStyle();	
 	fCut_PFMET_min                      = 0;
 	fCut_HT_min                         = 0;
+	fCut_caloHT50_min                   = 0;
 	fCut_JPt_hardest_min                = 0;
 	fCut_JPt_second_min                 = 0;
 	fCut_DiLeptInvMass_min              = 0;
@@ -158,6 +159,15 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	}
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
+	
+	//caloHT
+	fCaloHT50 =0.0;	
+	for(int j=0; j<fTR->CANJets; ++j){
+		float jetpt = fTR->CAJPt[j];
+		if( jetpt<50 || abs(fTR->CAJEta[j]>3.0) ) continue;
+		fCaloHT50  += jetpt;
+	}
+	if(fCaloHT50 < fCut_caloHT50_min) return false;
 
 
 	// leading jets including JID for jets
@@ -165,7 +175,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fCut_JPt_hardest_min > 0){
 		if(fJetTaus.NObjs <1) leadingjets=false;
 		else if(!fJetTaus.isTau[0]){
-			if(! IsGoodBasicPFJetPAT(fJetTaus.index[0], fCut_JPt_hardest_min, 2.4)) {leadingjets=false;}
+			if(! IsGoodBasicPFJetPAT3(fJetTaus.index[0], fCut_JPt_hardest_min, 2.4)) {leadingjets=false;}
 		}else {
 			if(fTR->PfTau3Pt[fJetTaus.index[0]]   < fCut_JPt_hardest_min || fabs(fTR->PfTau3Eta[fJetTaus.index[0]]) >2.4  ) {leadingjets=false;}
 		}
@@ -173,7 +183,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fCut_JPt_second_min > 0){
 		if(fJetTaus.NObjs <2) leadingjets=false;
 		else if(!fJetTaus.isTau[1]){
-			if(! IsGoodBasicPFJetPAT(fJetTaus.index[1], fCut_JPt_second_min, 2.4)) {leadingjets=false;}
+			if(! IsGoodBasicPFJetPAT3(fJetTaus.index[1], fCut_JPt_second_min, 2.4)) {leadingjets=false;}
 		}else {
 			if(fTR->PfTau3Pt[fJetTaus.index[1]]   < fCut_JPt_second_min || fabs(fTR->PfTau3Eta[fJetTaus.index[1]]) >2.4  ) {leadingjets=false;}
 		}
@@ -257,6 +267,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_PFMET_min            = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "HT_min") ){
 			fCut_HT_min               = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "caloHT50_min") ){
+			fCut_caloHT50_min         = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "JPt_hardest_min") ){
 			fCut_JPt_hardest_min      = float(ParValue); ok = true;			
 		} else if( !strcmp(ParName, "JPt_second_min") ){
@@ -275,6 +287,7 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "setting cuts to: " << endl;
 		cout << "  PFMET_min                   " << fCut_PFMET_min                  <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
+		cout << "  caloHT50_min                " << fCut_caloHT50_min               <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
 		cout << "  JPt_second_min              " << fCut_JPt_second_min             <<endl;
 		cout << "  DiLeptInvMass_min           " << fCut_DiLeptInvMass_min          <<endl;
@@ -291,4 +304,33 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		}
 		cout << "--------------"    << endl;	
 	}			
+}
+
+
+// ****************************************************************************************************
+
+bool MultiplicityAnalysisBase::IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut){
+	// Basic PF jet cleaning and ID cuts
+	// cut at pt of ptcut (default = 30 GeV)
+	// cut at abs(eta) of absetacut (default = 2.5)
+	if(fTR->PF2PAT3JPt[index] < ptcut           ) return false;
+	if(fabs(fTR->PF2PAT3JEta[index]) > absetacut) return false;
+	if(fTR->PF2PAT3JIDLoose[index]    ==0       ) return false;
+	return true;
+}
+
+bool MultiplicityAnalysisBase::IsGoodPFJetMediumPAT3(int index, double ptcut, double absetacut) {
+	// Medium PF JID
+	if ( ! IsGoodBasicPFJetPAT3(index, ptcut, absetacut)  ) return false;
+	if ( !(fTR->PF2PAT3JNeuHadfrac[index] < 0.95)         ) return false;
+	if ( !(fTR->PF2PAT3JNeuEmfrac[index]  < 0.95)         ) return false;
+	return true;
+}
+
+bool MultiplicityAnalysisBase::IsGoodPFJetTightPAT3(int index, double ptcut, double absetacut) {
+	// Tight PF JID
+	if ( ! IsGoodBasicPFJetPAT3(index, ptcut, absetacut)  ) return false;
+	if ( !(fTR->PF2PAT3JNeuHadfrac[index] < 0.90)         ) return false;
+	if ( !(fTR->PF2PAT3JNeuEmfrac[index]  < 0.90)         ) return false;
+	return true;
 }

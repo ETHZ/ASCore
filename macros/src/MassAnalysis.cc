@@ -143,9 +143,9 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].bTagProbSSVHP =  fTR->PF2PAT3JbTagProbSimpSVHighPur[fJetTaus.index[i]];
 		  
 			// Jet id variables
-			if(IsGoodBasicPFJetPAT (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDLoose   =true;
-			if(IsGoodPFJetMediumPAT(fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDMedium  =true;
-			if(IsGoodPFJetTightPAT (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDTight   =true;
+			if(IsGoodBasicPFJetPAT3 (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDLoose   =true;
+			if(IsGoodPFJetMediumPAT3(fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDMedium  =true;
+			if(IsGoodPFJetTightPAT3 (fJetTaus.index[i], 20., 2.4))  fMT2tree->jet[i].isPFIDTight   =true;
 			if(fTR->PF2PAT3JIDLoose [fJetTaus.index[i]]==1       )  fMT2tree->jet[i].isPATPFIDLoose=true;;  // PF jetID regardless of eta and pt
 			fMT2tree->jet[i].ChHadFrac      = fTR->PF2PAT3JChHadfrac     [fJetTaus.index[i]];	
 			fMT2tree->jet[i].NeuHadFrac     = fTR->PF2PAT3JNeuHadfrac    [fJetTaus.index[i]];
@@ -373,7 +373,7 @@ void MassAnalysis::FillTree(){
 
 	// ---------------------------	
 	// calo HT and MHT
-	float caHT30=0, caHT40=0, caHT50=0;
+	float caHT30=0, caHT40=0;
 	float caMHT20, caMHT30, caMHT40;
 	TLorentzVector mht20(0,0,0,0), mht30(0,0,0,0), mht40(0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
@@ -394,13 +394,10 @@ void MassAnalysis::FillTree(){
 	    mht40 -= jetT;
 	    caHT40  += jetpt;
 	  }
-	  if(jetpt>50) {
-	    caHT50  += jetpt;
-	  }
 	}
 	fMT2tree->misc.caloHT30  = caHT30;
 	fMT2tree->misc.caloHT40  = caHT40;
-	fMT2tree->misc.caloHT50  = caHT50;
+	fMT2tree->misc.caloHT50  = fCaloHT50;
 	fMT2tree->misc.caloMHT20 = mht20.Pt();
 	fMT2tree->misc.caloMHT30 = mht30.Pt();
 	fMT2tree->misc.caloMHT40 = mht40.Pt();
@@ -423,15 +420,15 @@ void MassAnalysis::FillTree(){
 			}
 		}
 		if(  jet == false) continue;	
-		if(fTR->PF2PAT3JPt[i] > 50 && fabs(fTR->PF2PAT3JEta[i])<5 && IsGoodBasicPFJetPAT(i,  50., 5)==false ){
+		if(fTR->PF2PAT3JPt[i] > 50 && fabs(fTR->PF2PAT3JEta[i])<5 && IsGoodBasicPFJetPAT3(i,  50., 5)==false ){
 			PassJetID_matched  = false;
 		}
 		jindi.push_back(i); jpt.push_back(fTR->PF2PAT3JPt[i]);
-		if(! IsGoodBasicPFJetPAT(i,  20., 2.4) ) continue;
+		if(! IsGoodBasicPFJetPAT3(i,  20., 2.4) ) continue;
 		vectorsumpt_matched_px+=fTR->PF2PAT3JPx[i];
 		vectorsumpt_matched_py+=fTR->PF2PAT3JPy[i];
 		NJetsIDLoose_matched++;
-		if(! IsGoodBasicPFJetPAT(i,  50., 2.4) ) continue;
+		if(! IsGoodBasicPFJetPAT3(i,  50., 2.4) ) continue;
 		HTmatched += fTR->PF2PAT3JPt[i];
 	}
 	TLorentzVector MET = fMT2tree->pfmet[0];
@@ -462,10 +459,10 @@ void MassAnalysis::FillTree(){
 
 	jindi   = Util::VSort(jindi, jpt);
 	if(jindi.size() >0){
-		fMT2tree->Znunu.Jet0Pass_matched   = (Int_t) IsGoodBasicPFJetPAT(jindi[0],  100., 2.4);
+		fMT2tree->Znunu.Jet0Pass_matched   = (Int_t) IsGoodBasicPFJetPAT3(jindi[0],  100., 2.4);
 	} else  fMT2tree->Znunu.Jet0Pass_matched   =0; 
 	if(jindi.size() >1){
-		fMT2tree->Znunu.Jet1Pass_matched   = (Int_t) IsGoodBasicPFJetPAT(jindi[1],  100., 2.4);
+		fMT2tree->Znunu.Jet1Pass_matched   = (Int_t) IsGoodBasicPFJetPAT3(jindi[1],  100., 2.4);
 	} else  fMT2tree->Znunu.Jet1Pass_matched   =0;
 	fMT2tree->Znunu.PassJetID_matched          = (Int_t) PassJetID_matched;
 	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETPATpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETPATpy,2));
@@ -612,7 +609,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	vector<float> px, py, pz, E;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
-			if(PFJID==1 && !IsGoodBasicPFJetPAT(fJetTaus.index[i], 20, 2.4)                             )  continue;
+			if(PFJID==1 && !IsGoodBasicPFJetPAT3(fJetTaus.index[i], 20, 2.4)                             )  continue;
 			else if(fabs(fTR->PF2PAT3JEta[fJetTaus.index[i]])>2.4 || fTR->PF2PAT3JPt[fJetTaus.index[i]]< 20) continue;
 			px.push_back(fTR->PF2PAT3JPx[fJetTaus.index[i]]);
 			py.push_back(fTR->PF2PAT3JPy[fJetTaus.index[i]]);
