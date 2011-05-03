@@ -186,14 +186,17 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElHybRelIso",            &fTElHybRelIso,         "ElHybRelIso[NEls]/F");
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
-	// event properties
-	fAnalysisTree->Branch("tcMET",           &fTtcMET,       "tcMET/F");
-	fAnalysisTree->Branch("pfMET",           &fTpfMET,       "pfMET/F");
+	// PU correction
+	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
+
 	// jet-MET properties
-	fAnalysisTree->Branch("NJets",           &fTnqjets,      "NJets/I");
-	fAnalysisTree->Branch("JetPt",           &fTJetpt,       "JetPt[NJets]/F");
-	fAnalysisTree->Branch("JetEta",          &fTJeteta,      "JetEta[NJets]/F");
-	fAnalysisTree->Branch("JetPhi",          &fTJetphi,      "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("tcMET",         &fTtcMET,    "tcMET/F");
+	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
+	fAnalysisTree->Branch("NJets",         &fTnqjets,   "NJets/I");
+	fAnalysisTree->Branch("JetPt",         &fTJetpt,    "JetPt[NJets]/F");
+	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
+	fAnalysisTree->Branch("JetPhi",        &fTJetphi,   "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag,  "JetSSVHPBTag[NJets]/F"); // tight WP: > 2.
 }
 
 void SSDLAnalysis::Analyze(){
@@ -223,7 +226,7 @@ void SSDLAnalysis::Analyze(){
 	fTRunNumber   = fTR->Run;
 	fTEventNumber = fTR->Event;
 	fTLumiSection = fTR->LumiSection;
-		
+
 	// Dump basic jet and MET properties
 	int jetindex(-1);
 	int nqjets = selectedJetInd.size();
@@ -233,16 +236,14 @@ void SSDLAnalysis::Analyze(){
 		fTJetpt  [ind] = fTR->JPt [jetindex];
 		fTJeteta [ind] = fTR->JEta[jetindex];
 		fTJetphi [ind] = fTR->JPhi[jetindex];
+		fTJetbtag[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
 	}
 	// get METs
 	fTtcMET     = fTR->TCMET;
 	fTpfMET     = fTR->PFMET;
-	// get dPhi and R12, R21 variables for J1, J2 and MET
-	if( nqjets >= 2 ){
-		float METBadJetmin = 20.;
-		float METPhi = fTR->PFMETphi;
-		float MET = fTR->PFMET;
-	}
+
+	// PU correction
+	fTrho = fTR->Rho;
 	
 	int nqmus = selectedMuInd.size();
 	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
@@ -362,6 +363,8 @@ void SSDLAnalysis::ResetTree(){
 		fHLTPrescales[i] -2;
 	}
 	
+	fTrho = -999.99;
+	
 	// muon properties
 	fTnqmus = 0;
 	for(int i = 0; i < fMaxNmus; i++){
@@ -424,9 +427,10 @@ void SSDLAnalysis::ResetTree(){
 	// jet-MET properties
 	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt [i] = -999.99;
-		fTJeteta[i] = -999.99;
-		fTJetphi[i] = -999.99;
+		fTJetpt [i]  = -999.99;
+		fTJeteta[i]  = -999.99;
+		fTJetphi[i]  = -999.99;
+		fTJetbtag[i] = -999.99;
 	}
 	fTtcMET      = -999.99;
 	fTpfMET      = -999.99;

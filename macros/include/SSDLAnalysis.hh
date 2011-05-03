@@ -71,8 +71,12 @@ private:
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
+	float fTJetbtag[fMaxNjets]; // tight WP: > 2.
 	float fTtcMET;
 	float fTpfMET;
+	
+	// PU correction
+	float fTrho;
 	
 	//muon properties
 	int   fTnqmus;
