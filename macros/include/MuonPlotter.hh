@@ -22,7 +22,8 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu = sample_begin, DoubleElectron, MuEG, MuHad, ElectronHad,
+		// DoubleMu = sample_begin, DoubleEle, MuEG, MuHad, ElectronHad,
+		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
 		TTJets, WJets, DYJets, LM0,
 		QCD5to15,
 		QCD15to30,
@@ -143,6 +144,7 @@ public:
 	inline void setCharge(int charge){ fChargeSwitch = charge; };
 
 	void init(TString filename = "samples.dat");
+	void InitMC(TTree*); // remove a few branches
 	void readSamples(const char* filename = "samples.dat");
 	void loadSamples();
 	void setBinning();
@@ -164,9 +166,12 @@ public:
 	void makeMupEffPlots(bool = false);
 	void makeElpEffPlots(bool = false);
 
-	void makeMuIsolationPlots();
-	void makeMuIsolationPlot();
+	void makeMuIsolationPlots(bool = false);
+	void makeElIsolationPlots(bool = false);
+	void makeMuIsolationPlotsOld();
 	void makeMuPtPlots();
+	
+	void makeNT2KinPlots(bool read);
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -272,6 +277,9 @@ public:
 	void printOriginSummary2L(int, gChannel);
 
 	// Event and Object selectors:
+	int getNJets();
+	float getHT();
+	
 	bool isGoodEvent();
 	bool isGoodMuEvent();
 	int hasLooseMuons(int&, int&);
@@ -394,6 +402,7 @@ private:
 	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
+	vector<int> fMuEGData;  // MuEG dataset
 	vector<int> fJMData;  // JetMET data samples
 	
 	float fLumiNorm;      // Normalize everything to this luminosity

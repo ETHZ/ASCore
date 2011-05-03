@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Apr 26 11:27:56 2011 by ROOT version 5.27/06b
+// Tue May  3 14:38:09 2011 by ROOT version 5.28/00
 // from TTree Analysis/AnalysisTree
-// found on file: /scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root
+// found on file: SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -23,22 +23,36 @@ public :
    Int_t           LumiSec;
    Int_t           HLT_Mu8_Jet40_v2;
    Int_t           HLT_Mu8_Jet40_v2_PS;
+   Int_t           HLT_Mu8_Jet40_v3;
+   Int_t           HLT_Mu8_Jet40_v3_PS;
    Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;
    Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;
    Int_t           HLT_DoubleMu6_v1;
    Int_t           HLT_DoubleMu6_v1_PS;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v1;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v1_PS;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v2;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v2_PS;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v1;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v1_PS;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v2;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v2_PS;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS;
    Int_t           HLT_DoubleMu3_HT160_v2;
    Int_t           HLT_DoubleMu3_HT160_v2_PS;
+   Int_t           HLT_DoubleMu3_HT160_v3;
+   Int_t           HLT_DoubleMu3_HT160_v3_PS;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS;
    Int_t           NMus;
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
@@ -89,12 +103,14 @@ public :
    Int_t           ElGenGMType[5];   //[NEls]
    Float_t         ElHybRelIso[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
+   Float_t         Rho;
    Float_t         tcMET;
    Float_t         pfMET;
    Int_t           NJets;
-   Float_t         JetPt[10];   //[NJets]
-   Float_t         JetEta[10];   //[NJets]
-   Float_t         JetPhi[10];   //[NJets]
+   Float_t         JetPt[30];   //[NJets]
+   Float_t         JetEta[30];   //[NJets]
+   Float_t         JetPhi[30];   //[NJets]
+   Float_t         JetSSVHPBTag[30];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -102,22 +118,36 @@ public :
    TBranch        *b_LumiSec;   //!
    TBranch        *b_HLT_Mu8_Jet40_v2;   //!
    TBranch        *b_HLT_Mu8_Jet40_v2_PS;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v3;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v3_PS;   //!
    TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;   //!
    TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;   //!
    TBranch        *b_HLT_DoubleMu6_v1;   //!
    TBranch        *b_HLT_DoubleMu6_v1_PS;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1_PS;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v2;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v2_PS;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1_PS;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v2;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v2_PS;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v2;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v2_PS;   //!
+   TBranch        *b_HLT_DoubleMu3_HT160_v3;   //!
+   TBranch        *b_HLT_DoubleMu3_HT160_v3_PS;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
@@ -168,12 +198,14 @@ public :
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElHybRelIso;   //!
    TBranch        *b_ElMT;   //!
+   TBranch        *b_Rho;   //!
    TBranch        *b_tcMET;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
+   TBranch        *b_JetSSVHPBTag;   //!
 
    MetaTreeClassBase(TTree *tree=0);
    virtual ~MetaTreeClassBase();
@@ -194,9 +226,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
       if (!f) {
-         f = new TFile("/scratch/stiegerb/SSDLTrees/Apr20/MuEG_Run2011A_AOD.root");
+         f = new TFile("SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -252,22 +284,36 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v2", &HLT_Mu8_Jet40_v2, &b_HLT_Mu8_Jet40_v2);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v2_PS", &HLT_Mu8_Jet40_v2_PS, &b_HLT_Mu8_Jet40_v2_PS);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v3", &HLT_Mu8_Jet40_v3, &b_HLT_Mu8_Jet40_v3);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v3_PS", &HLT_Mu8_Jet40_v3_PS, &b_HLT_Mu8_Jet40_v3_PS);
    fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1);
    fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS);
    fChain->SetBranchAddress("HLT_DoubleMu6_v1", &HLT_DoubleMu6_v1, &b_HLT_DoubleMu6_v1);
    fChain->SetBranchAddress("HLT_DoubleMu6_v1_PS", &HLT_DoubleMu6_v1_PS, &b_HLT_DoubleMu6_v1_PS);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1", &HLT_Mu17_Ele8_CaloIdL_v1, &b_HLT_Mu17_Ele8_CaloIdL_v1);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1_PS", &HLT_Mu17_Ele8_CaloIdL_v1_PS, &b_HLT_Mu17_Ele8_CaloIdL_v1_PS);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v2", &HLT_Mu17_Ele8_CaloIdL_v2, &b_HLT_Mu17_Ele8_CaloIdL_v2);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v2_PS", &HLT_Mu17_Ele8_CaloIdL_v2_PS, &b_HLT_Mu17_Ele8_CaloIdL_v2_PS);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1", &HLT_Mu8_Ele17_CaloIdL_v1, &b_HLT_Mu8_Ele17_CaloIdL_v1);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1_PS", &HLT_Mu8_Ele17_CaloIdL_v1_PS, &b_HLT_Mu8_Ele17_CaloIdL_v1_PS);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v2", &HLT_Mu8_Ele17_CaloIdL_v2, &b_HLT_Mu8_Ele17_CaloIdL_v2);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v2_PS", &HLT_Mu8_Ele17_CaloIdL_v2_PS, &b_HLT_Mu8_Ele17_CaloIdL_v2_PS);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2", &HLT_DoubleMu3_HT160_v2, &b_HLT_DoubleMu3_HT160_v2);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2_PS", &HLT_DoubleMu3_HT160_v2_PS, &b_HLT_DoubleMu3_HT160_v2_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v3", &HLT_DoubleMu3_HT160_v3, &b_HLT_DoubleMu3_HT160_v3);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v3_PS", &HLT_DoubleMu3_HT160_v3_PS, &b_HLT_DoubleMu3_HT160_v3_PS);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
@@ -318,12 +364,14 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElHybRelIso", ElHybRelIso, &b_ElHybRelIso);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
+   fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+   fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
    Notify();
 }
 
