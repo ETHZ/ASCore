@@ -38,6 +38,8 @@ public:
   Double_t AlphaT;
   Double_t MET;
   Double_t METPhi;
+  Double_t LeadingJPt;
+  Double_t SecondJPt;
   Double_t Vectorsumpt;
   Double_t VectorsumptAll;
   Double_t PFMETsign;
@@ -51,7 +53,7 @@ public:
   Double_t caloMHT30;
   Double_t caloMHT40;
   
-  ClassDef(MT2Misc, 13)
+  ClassDef(MT2Misc, 14)
 };
 
 // ----------------------------------------

@@ -56,6 +56,7 @@ public:
 	float fCut_PFMET_min;
 	float fCut_HT_min;
 	float fCut_caloHT50_min;
+	float fCut_caloMHT30_min;
 	float fCut_JPt_hardest_min;
 	float fCut_JPt_second_min;
 	float fCut_DiLeptInvMass_min;

@@ -38,6 +38,8 @@ void MT2Misc::Reset() {
   AlphaT                  = -99999.99;
   MET                     = -99999.99;
   METPhi                  = -99999.99;
+  LeadingJPt              = -99999.99;
+  SecondJPt               = -99999.99;
   Vectorsumpt		  = -99999.99;
   VectorsumptAll 	  = -99999.99;
   PFMETsign		  = -99999.99;
