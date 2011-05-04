@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.89 2011/04/08 15:21:05 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.90 2011/04/08 16:39:06 fronga Exp $
 //
 //
 
@@ -45,6 +45,7 @@ Implementation:
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
 
 // Helpers
@@ -100,6 +101,8 @@ private:
 
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
+        AdaptiveVertexFitter avFitter;
+
 
 	std::vector<JetFillerBase*>     jetFillers;
         std::vector<PatMuonFiller*>     muonFillers;

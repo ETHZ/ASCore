@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.113 2011/04/09 09:43:18 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.114 2011/04/09 10:48:21 stiegerb Exp $
 //
 //
 
@@ -33,7 +33,6 @@ Implementation:
 
 // Utilities
 #include "CommonTools/Utils/interface/PtComparator.h"
-#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
@@ -205,6 +204,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 		fTHLTObjectEta[i] = fTHLTObjectEta[i-1]+gMaxhltnobjs;
 		fTHLTObjectPhi[i] = fTHLTObjectPhi[i-1]+gMaxhltnobjs;
 	}
+
 }
 
 //________________________________________________________________________________________
@@ -1292,14 +1292,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		}
 		int index = it->first;
 		const PFJet* cojet = static_cast<const PFJet*>( &((*jets)[index]) ); // look away...
-		PFJet* jet = new PFJet(*cojet);
+                std::auto_ptr<PFJet> jet(new PFJet(*cojet));
 
 		// The correction was calculated above: use it
 		double scale = it->second/jet->pt();
 		jet->scaleEnergy(scale);
 	
 		// Jet preselection
-		if(jet->pt() < fMincorjpt) continue;
+		if(jet->pt() < fMincorjpt) continue; 
 		if(fabs(jet->eta()) > fMaxjeta) continue;
 		jqi++;
 
@@ -1440,8 +1440,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		// Do a vertex fitting with the tracks
 		if(AssociatedTTracks.size() > 1) {
-			AdaptiveVertexFitter *fitter = new AdaptiveVertexFitter();
-			TransientVertex jetVtx = fitter->vertex(AssociatedTTracks);
+			TransientVertex jetVtx = avFitter.vertex(AssociatedTTracks);
 			if(jetVtx.isValid()){
 				fTjetVtxx    [jqi] = jetVtx.position().x();
 				fTjetVtxy    [jqi] = jetVtx.position().y();
