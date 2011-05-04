@@ -127,9 +127,13 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("Event",            &fTEventNumber,       "Event/I");
 	fAnalysisTree->Branch("LumiSec",          &fTLumiSection,       "LumiSec/I");
 
-
 	// HLT triggers
 	BookTriggers(fHLTPaths);
+	
+	// event properties
+	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
+	fAnalysisTree->Branch("NVrtx",         &fTnvrtx,     "NVrtx/I");
+
 	
 	// single-muon properties
 	fAnalysisTree->Branch("NMus"          ,&fTnqmus,          "NMus/I");
@@ -186,9 +190,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElHybRelIso",            &fTElHybRelIso,         "ElHybRelIso[NEls]/F");
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
-	// PU correction
-	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
-
 	// jet-MET properties
 	fAnalysisTree->Branch("tcMET",         &fTtcMET,    "tcMET/F");
 	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
@@ -243,7 +244,8 @@ void SSDLAnalysis::Analyze(){
 	fTpfMET     = fTR->PFMET;
 
 	// PU correction
-	fTrho = fTR->Rho;
+	fTrho   = fTR->Rho;
+	fTnvrtx = fTR->NVrtx;
 	
 	int nqmus = selectedMuInd.size();
 	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
@@ -363,7 +365,8 @@ void SSDLAnalysis::ResetTree(){
 		fHLTPrescales[i] -2;
 	}
 	
-	fTrho = -999.99;
+	fTrho   = -999.99;
+	fTnvrtx = -999;
 	
 	// muon properties
 	fTnqmus = 0;

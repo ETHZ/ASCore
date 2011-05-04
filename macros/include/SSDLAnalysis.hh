@@ -75,8 +75,9 @@ private:
 	float fTtcMET;
 	float fTpfMET;
 	
-	// PU correction
+	// event properties
 	float fTrho;
+	int fTnvrtx;
 	
 	//muon properties
 	int   fTnqmus;
