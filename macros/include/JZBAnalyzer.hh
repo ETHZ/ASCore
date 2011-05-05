@@ -13,7 +13,7 @@ class JZBAnalyzer : public TreeAnalyzerBase {
 public:
   JZBAnalyzer(TTree *tree = 0, std::string dataType="mc", bool fullCleaning=false );
   virtual ~JZBAnalyzer();
-  void BeginJob();
+  void BeginJob(string data_PileUp, string mc_PileUp);
   void EndJob();
   void Loop();
   void SetMaxEvents(int a){fMaxEvents=a;}

@@ -45,10 +45,10 @@ void JZBAnalyzer::Loop(){
 }
 
 // Method called before starting the event loop
-void JZBAnalyzer::BeginJob(){
+void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fJZBAnalysis->outputFileName_ = outputFileName_;
 	fJZBAnalysis->fVerbose = fVerbose;
-
+	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fJZBAnalysis->Begin();
 
 }
