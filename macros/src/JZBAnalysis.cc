@@ -1,4 +1,4 @@
-#include "helper/Utilities.hh"
+	#include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
 #include "TF1.h"
 #include <time.h>
@@ -13,8 +13,8 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="1.23";
-string sjzbinfo="(write here any comments you have about this version/variation)";
+string sjzbversion="1.24";
+string sjzbinfo="Introduced PU RW Handling for JZB";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
   return gRandom->Gaus(mu,sigma);   //real deal
@@ -164,6 +164,7 @@ public:
   float sumJetPt[rMax];
 
   float weight;
+  float PUweight;
   bool passed_triggers;
 
 };
@@ -326,6 +327,7 @@ void nanoEvent::reset()
   }
 
   weight = 1.0;
+  PUweight = 1.0;
 }
 
 
@@ -389,7 +391,6 @@ void JZBAnalysis::Begin(){
   struct tm * timeinfo;
   time (&rawtime );
   *timestamp=ctime(&rawtime);
-  cout << *user << "\t" << *timestamp << "\t" << *cmsdir << "\t" << *jzbversion << endl;
   
   myInfo->Fill();
   myInfo->Write();
@@ -529,6 +530,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
   myTree->Branch("sumJetPt",nEvent.sumJetPt,"sumJetPt[30]/F");
   myTree->Branch("weight", &nEvent.weight,"weight/F");
+  myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/B");
 
 
@@ -598,10 +600,12 @@ void JZBAnalysis::Analyze() {
   counters[EV].fill("All events");
   nEvent.reset();
   // Fill generic information
-  nEvent.eventNum = fTR->Event;
-  nEvent.runNum   = fTR->Run;
-  nEvent.lumi     = fTR->LumiSection;
+  nEvent.eventNum  = fTR->Event;
+  nEvent.runNum    = fTR->Run;
+  nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();    
+  nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
+  nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
 
   // Trigger information
   nEvent.passed_triggers=0;
