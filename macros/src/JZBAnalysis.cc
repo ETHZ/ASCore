@@ -1,4 +1,4 @@
-	#include "helper/Utilities.hh"
+#include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
 #include "TF1.h"
 #include <time.h>
@@ -13,8 +13,8 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="1.24";
-string sjzbinfo="Introduced PU RW Handling for JZB";
+string sjzbversion="$Revision$";
+string sjzbinfo="";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
   return gRandom->Gaus(mu,sigma);   //real deal
@@ -569,22 +569,30 @@ vector<lepton> JZBAnalysis::sortLeptonsByPt(vector<lepton>& leptons) {
 
 //------------------------------------------------------------------------------
 const bool JZBAnalysis::passElTriggers() {
-  if ( GetHLTResult("HLT_DoubleEle10_CaloIdL_TrkIdVL_Ele10_v1") )      return true;
-  //  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )      return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
   return false;
 
 }
 
 //------------------------------------------------------------------------------
 const bool JZBAnalysis::passMuTriggers() {
-  if ( GetHLTResult("HLT_DoubleMu6_v1") ) return true;
- 
+  if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
   return false;
 } 
 
 //______________________________________________________________________________
 const bool JZBAnalysis::passEMuTriggers() {
-  if ( GetHLTResult("HLT_Mu10_Ele10_CaloIdL_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
  
   return false;
     
@@ -603,9 +611,12 @@ void JZBAnalysis::Analyze() {
   nEvent.eventNum  = fTR->Event;
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
-  nEvent.totEvents = fTR->GetEntries();    
-  nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
-  nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
+  nEvent.totEvents = fTR->GetEntries();
+  if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
+    {
+      nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
+      nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
+    }
 
   // Trigger information
   nEvent.passed_triggers=0;
