@@ -37,7 +37,6 @@
 //       for ( counters_t iCount=count_begin; iCount<count_end; 
 ///            iCount = counters_t(iCount+1) ) {
 //         counters[iCount].print();
-//         std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
 //       }
 //     ...
 //    }
@@ -64,7 +63,9 @@ class Monitor {
   typedef std::map<const std::string, float, eqstr> Cmap;
 
 public:
-  Monitor() : maxLength(50) {}
+  Monitor() : maxLength(50),name("") {}
+
+  void setName( const std::string& s ) { name = s; }
 
   void fill( const std::string& counter, const float& weight=1. ) {
     Cmap::iterator it;
@@ -89,6 +90,7 @@ public:
     float prev = maxc;
     ostringstream maxclen; maxclen << maxc;
     size_t maxwidth = maxclen.str().length();
+    cout << left << "COUNTER> " << name << endl;
     for ( vector<string>::const_iterator it = countNames.begin(); 
           it != countNames.end(); ++it ) {
       float count = counters[*it];
@@ -101,12 +103,15 @@ public:
                 << endl;
       prev = count;
     }
+    cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
+    
   }
 
 public:
   std::vector<std::string> countNames;
   Cmap counters;
   int maxLength;
+  std::string name;
 
 };
 #endif
