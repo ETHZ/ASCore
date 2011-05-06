@@ -316,7 +316,6 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 }
 
 // ELECTRONS
-
 bool UserAnalysisBase::IsGoodBasicEl(int index){
 	// Electrons with WP95 ID and conv. rej.
 	// No isolation cut
@@ -390,7 +389,9 @@ bool UserAnalysisBase::IsLooseEl(int index){
 	// rejection if matched to any muon which passes basic quility cuts
 	for( int im = 0; im < fTR->NMus; ++im ){
 		if( (fTR->MuIsGlobalMuon[im] == 1 && fTR->MuIsTrackerMuon[im] == 1) &&
-		    (fTR->MuNTkHits[im] > 10) && (fTR->MuNChi2[im] < 11) && (fTR->MuNMuHits[im] > 0)) {
+		    (fTR->MuNTkHits[im] > 10) &&
+		    (fTR->MuNChi2[im] < 10) &&
+		    (fTR->MuNMuHits[im] > 0)) {
 			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
 			if(deltaR <= 0.1) return false;
 		}
