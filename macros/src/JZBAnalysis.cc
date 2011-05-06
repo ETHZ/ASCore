@@ -13,7 +13,7 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision$";
+string sjzbversion="$Revision: 1.25 $";
 string sjzbinfo="";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
@@ -534,11 +534,19 @@ void JZBAnalysis::Begin(){
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/B");
 
 
-  // Define event counters (so we have them in the right order)
+  // Define counters (so we have them in the right order)
+  counters[EV].setName("Events");
+  counters[TR].setName("Triggers");
+  counters[MU].setName("Muons");
+  counters[EL].setName("Electrons");
+  counters[JE].setName("Jets");
+  counters[PJ].setName("PFJets");
+
   counters[EV].fill("All events",0.);
   if ( fDataType_ != "mc" ) {
     counters[EV].fill("... pass electron triggers",0.);
     counters[EV].fill("... pass muon triggers",0.);
+    counters[EV].fill("... pass EM triggers",0.);
     counters[EV].fill("... pass all trigger requirements",0.);
   }
   std::string types[3] = { "ee","mm","em" };
@@ -593,10 +601,9 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
- 
   return false;
-    
-} 
+  
+}
 
 
 //______________________________________________________________________________
@@ -1029,6 +1036,18 @@ void JZBAnalysis::Analyze() {
         if ( nEvent.jzb[1]>50 ) {
           counters[EV].fill("... "+type+" + 2 jets + require Z + JZB>50");
         }
+      }
+    }
+    // Trigger information
+    map<string,int>::iterator itend = fHLTLabelMap.end();
+    char buf[256];
+    counters[TR].fill("All selected events");
+    for ( map<string,int>::iterator it = fHLTLabelMap.begin(); it != itend; ++it ) {
+      int bit = it->second;
+      bool passed = fTR->HLTResults[bit];
+      if ( passed ) {
+        //sprintf(buf,"... %s (%02d)",(it->first).c_str(),fTR->HLTPrescale[bit]);
+        counters[TR].fill( (it->first), fTR->HLTResults[bit] );
       }
     }
     ////////////////////////////////////////////////////

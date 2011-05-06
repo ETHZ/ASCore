@@ -101,6 +101,7 @@ int main(int argc, char* argv[]) {
   cout << "outputFileName is:     " << outputFileName << endl;
   cout << "Verbose level is: " << verbose << endl;
   cout << "Number of events: " << theChain->GetEntries() << endl;
+  cout << "Events to process: " << maxEvents << endl;
   cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
   cout << "Type is: " << type << endl;
   cout << "Full cleaning is " << (fullCleaning?"ON":"OFF") << endl;

@@ -50,7 +50,7 @@ public:
 
 private:
 
-  enum counters_t { count_begin, EV=count_begin, MU, EL, JE, PJ, count_end };
+  enum counters_t { count_begin, EV=count_begin, TR, MU, EL, JE, PJ, count_end };
   Monitor counters[count_end];
 
   vector<lepton> sortLeptonsByPt(vector<lepton>&);
