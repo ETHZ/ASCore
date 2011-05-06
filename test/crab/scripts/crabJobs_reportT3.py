@@ -32,6 +32,8 @@ elif (USERNAME == "thea"):
 	userNickName = "Alessandro"
 elif (USERNAME == "predragm"):
 	userNickName = "Pedja"
+elif (USERNAME == "buchmann"):
+	userNickName = "Marco-Andrea"
 else:
 	userNickName = "Great guy!"
 jobDir="ntuples/"+datamc+"/"+ntupleVersion+"/"+jobName
@@ -103,7 +105,7 @@ if (datamc=="data"):
 	if return_value != 0:
 		print 'Problem with moving/creating json report of the job '+jobName+'. Exiting...'
 		sys.exit()
-	format_Twiki = "| [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumiSummary.json.txt][...-...]] | "+datasetName+" | "+datasetSize+" GB | ...M | [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumi.txt][... /pb]] | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 3_8_6 | "+ntupleVersion+" | "+userNickName+" | |"
+	format_Twiki = "| [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumiSummary.json.txt][...-...]] | "+datasetName+" | "+datasetSize+" GB | ...M | [[%ATTACHURL%/"+jobName+"-"+ntupleVersion+"_lumi.txt][... /pb]] | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 4_1_3 | "+ntupleVersion+" | "+userNickName+" | |"
 else:
 	format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" GB | "+datasetEvents+" | ... pb | %TWISTY{showlink=\"Show...\" hidelink=\"Hide\"}%<br>/store/user/susy/"+jobDir+"/ <br>%ENDTWISTY% | 3_8_6 | "+ntupleVersion+" | "+userNickName+" | |"
 
