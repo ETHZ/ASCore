@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
   // Parse options
   char ch;
-  while ((ch = getopt(argc, argv, "o:v:n:j:t:lh?c:p:P")) != -1 ) {
+  while ((ch = getopt(argc, argv, "o:v:n:j:t:lh?cp:P")) != -1 ) {
     switch (ch) {
     case 'o': outputFileName = string(optarg); break;
     case 'v': verbose = atoi(optarg); break;
