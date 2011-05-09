@@ -47,42 +47,46 @@ def refreshFileList( srmPath, tmpFile ):
 #     print 'Done'
 
 
-def performDelete( filesToDelete, srmSite, logFile ):
+def performDelete( files, srmSite, logFile ):
+
+
+    toDelete = sorted(files, key = lambda file: file[2])
     print 'The following files will be deleted:'
-    for file in filesToDelete:
-        print file[1],'\t',file[0]
+    print 'Id \t Retry \t Size \t Path #'
+    for file in toDelete:
+        print file[2],'\t',file[3],'\t',file[1],'\t',file[0]
     
     if query_yes_no('Do you want to proceed?','no'):
         log = open(logFile,'w')
-        for file in filesToDelete:
+        for file in toDelete:
             lcgdel = subprocess.Popen(['lcg-del','-l','-v',srmSite+file[0]], stdout=log,stderr=log)
             lcgdel.wait()
         log.close()
         print 'Log saved to',logFile
     else:
-        print 'No file was deleted'
+        print 'No file deleted'
 
-def main():
+def findDuplicates():
     usage = 'usage: %prog [options] path'
     parser = optparse.OptionParser(usage)
 
-    parser.add_option('--site', dest='site', help='Site where files are located. Can be [T2_CH_CSCS,T3_CH_PSI]')
+    parser.add_option('--site', dest='site', help='Site where files are located. Can be [t2cscs,t3psi]')
     parser.add_option('--moveTo', dest='moveTo', help='Destination for the duplicates')
     parser.add_option('--refresh', dest='refresh', help='Refresh the list of files', action='store_true')
-    parser.add_option('--tryDelete', dest='tryDelete', help='Attempts to delete the duplicates with the same size', action='store_true')
+    parser.add_option('--tryDelete', dest='tryDelete', help='Attempts to delete the duplicates: Keeps the bigger file for each job', action='store_true')
     parser.add_option('--deleteAll', dest='deleteAll', help='Delete all the duplicates', action='store_true')
     parser.add_option('--dcap', dest='dcap', help='Print the list of files in dcap format', action='store_true')
-    parser.add_option('--tag', dest='tag', default='RECO', help='tag to match the files [RECO]')
+#     parser.add_option('--tag', dest='tag', default='MC', help='tag to match the files [MC,data]')
 
     (opt, args) = parser.parse_args()
 
     if not opt.site:
         parser.error('No site selected')
-    if opt.site == 'T3_CH_PSI':
+    if opt.site == 't3psi' || opt.site == 'T3_CH_PSI':
         srmSite = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN="
         rootpath = srmSite+'/pnfs/psi.ch/cms/trivcat'
         dcapPrefix= 'dcap://t3se01.psi.ch:22125'
-    elif opt.site == 'T2_CH_CSCS':
+    elif opt.site == 't2cscs' || opt.site == 'T2_CH_CSCS':
         srmSite = "srm://storage01.lcg.cscs.ch:8443/srm/managerv2?SFN="
         rootpath = srmSite+"/pnfs/lcg.cscs.ch/cms/trivcat"
         dcapPrefix= ''
@@ -96,7 +100,7 @@ def main():
     if path[0] is not '/':
         parser.error('Requires an absolute path: It must start with \'/\'')
 
-    fileTag=opt.tag
+#     fileTag=opt.tag
 
     if path[-1] == '/':
         path = path[:-1]
@@ -115,10 +119,6 @@ def main():
         sys.stdout.flush()
 
         refreshFileList(rootpath+path,tmpFile)
-#         dump = open(tmpFile,'w')
-#         srmls = subprocess.Popen(['srmls',rootpath+path],stdout=dump)
-#         srmls.wait()
-#         dump.close()
         print 'Done'
     else:
         print 'Using',tmpFile,'as source'
@@ -131,7 +131,7 @@ def main():
         print 'done'
         out = open(tmpFile).read()
  
-    print 'Processing file list using file tag',fileTag
+#     print 'Processing file list using file tag',fileTag
     lines = out.splitlines()
     # remove the directory name 
     lines.pop(0)
@@ -150,15 +150,18 @@ def main():
         if len(line) is 0:
             continue
         tokens=line.split()
-        res = re.search(fileTag+'_([0-9]*)_([0-9]*)_',tokens[1])
+        res = re.search('_([0-9]{1,})_([0-9]{1,})_([0-9a-zA-Z]{3}\.root)',tokens[1])
         if res is None:
             continue
 
+        
+        path = tokens[1]
         id = int(res.group(1))
         retry = int(res.group(2))
         size = int(tokens[0])
 
-        fileTuple=(tokens[1],int(tokens[0]),id,retry)
+        # make a tuple, path, size, id, retry
+        fileTuple=(path,size,id,retry)
         # count the total size
         sizeOnDisk += size
         # fill the map, where the key is the job id
@@ -193,13 +196,13 @@ def main():
     print 'Total file size: %.2fGb' % sizeGb
 
     if len(duplicatesMap) is not 0:
-        print 'Size \t Path \t Retry #'
+        print 'Id \t Retry \t Size \t Path #'
         for id in sorted(duplicatesMap.iterkeys()):
             fileArray = duplicatesMap[id]
             print '---',id,'-',len(fileArray),'duplicates'
             for fileTuple in fileArray:
                 # size, path, retry
-                print fileTuple[1],'\t',fileTuple[0],'\t',fileTuple[3]
+                print fileTuple[2],'\t',fileTuple[3],'\t',fileTuple[1],'\t',fileTuple[0]
     
 
     if len(missingFiles) == 0:
@@ -218,20 +221,20 @@ def main():
         nUnsafeDuplicates = 0
         for files in duplicatesMap.itervalues():
             canDelete = True
-            # take the size of the first file as a reference
-            refSize = files[0][1]
-            for file in files:
-                # check if all the sizes are the same
-                canDelete &= file[1] == refSize
+#             # take the size of the first file as a reference
+#             refSize = files[0][1]
+#             for file in files:
+#                 # check if all the sizes are the same
+#                 canDelete &= file[1] == refSize
 
-            if not canDelete:
-                print '--- ',file[2],'The following files have mismatching size: no action taken'
-                for file in files:
-                    print file[1],'\t',file[0],'\t',file[3]
-                    nUnsafeDuplicates += 1
+#             if not canDelete:
+#                 print '--- ',file[2],'The following files have mismatching size: no action taken'
+#                 for file in files:
+#                     print file[1],'\t',file[0],'\t',file[3]
+#                     nUnsafeDuplicates += 1
             
             #if we are happy with the filesize
-            dups = sorted(files, key = lambda file: file[3])
+            dups = sorted(files, key = lambda file: file[1])
             # don't the one with the highest retry
             dups.pop(-1)
             filesToDelete.extend(dups)
@@ -278,4 +281,4 @@ def main():
         log.close()
 
 if __name__ == '__main__':
-        main()
+        findDuplicates()
