@@ -7,6 +7,7 @@ using namespace std;
 
 MassAnalysis::MassAnalysis(TreeReader *tr) : MultiplicityAnalysisBase(tr){
 	Util::SetStyle();	
+	fCounter=0;
 }
 
 MassAnalysis::~MassAnalysis(){
@@ -119,7 +120,7 @@ void MassAnalysis::Analyze(){
 
 // ***********************************************************************************************
 void MassAnalysis::BookTree(){
-	           
+	          
 	fATree = new TTree("MassTree", "MassTree");
 	fATree->Branch("MT2tree" , "MT2tree" , &fMT2tree);
 
@@ -130,6 +131,12 @@ void MassAnalysis::ResetTree(){
 }
 
 void MassAnalysis::FillTree(){
+	// check size of jets electrons muons and genleptons
+	if(fJetTaus.NObjs > 40) {cout << "ERROR: fJetTaus.NObjs > 40: skip event" << endl; return;}
+	if(fElecs.size()  > 10) {cout << "ERROR: fElecs.size()  > 10: skip event" << endl; return;}
+	if(fMuons.size()  > 10) {cout << "ERROR: fMuons.size()  > 10: skip event" << endl; return;}
+
+
 	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
 	for(int i=0; i<fJetTaus.NObjs; ++i) {
@@ -284,6 +291,7 @@ void MassAnalysis::FillTree(){
 		}
 	}
 	fMT2tree->NGenLepts = NGenLepts;
+	if(NGenLepts >30 ) {cout << "ERROR: NGenLepts >30: skip event" << endl; return;}
 
 	// --------------------------------------------------------------------
 	// MET and MPT
@@ -346,6 +354,9 @@ void MassAnalysis::FillTree(){
 
 	fMT2tree->misc.MET                 = fTR->PFMETPAT;
 	fMT2tree->misc.METPhi              = fTR->PFMETPATphi;
+
+	fMT2tree->misc.LeadingJPt          = (fMT2tree->NJets > 0) ? fMT2tree->jet[0].lv.Pt() : 0;
+	fMT2tree->misc.SecondJPt           = (fMT2tree->NJets > 1) ? fMT2tree->jet[1].lv.Pt() : 0;
 
 
 	// ----------------------------------------------------------------------------------
@@ -681,7 +692,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	}
 	delete hemi;
 	if(pseudojet1.Pt()==0 || pseudojet2.Pt()==0 ){
-		cout << "++ ERROR : hemi seed " <<  hemi_seed  << " hemi assoc " << hemi_assoc << " n input " << grouping.size() << " n objets in hemi " << counter 
+		cout << "++ WARNING : hemi seed " <<  hemi_seed  << " hemi assoc " << hemi_assoc << " n input " << grouping.size() << " n objets in hemi " << counter 
 		     << " pseudojet1 pt " << pseudojet1.Pt() << " pseudojet2 pt " << pseudojet2.Pt() << endl;
 		return;
 	}
