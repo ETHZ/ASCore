@@ -164,33 +164,33 @@ void MassPlotter::MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], d
 
 	TString cuts = cutStream.str().c_str();
 	
-	//                 variable                            cuts njets  nlepts title     bins               flip_order  log  composite    ratio  stacked overlay 
-	MakePlot(fSamples,"misc.MT2" ,                         cuts, -3,   0,      "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
-//	MakePlot(fSamples,"hemi[0].lv1.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
-//	MakePlot(fSamples,"hemi[0].lv2.M()" ,                  cuts, -3,   0,      "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
+	//                 variable                            cuts njets  nlepts HLT title     bins               flip_order  log  composite    ratio  stacked overlay 
+	MakePlot(fSamples,"misc.MT2" ,                         cuts, -3,   0,    "",  "MT2" , gNMT2bins, gMT2bins , false,  true ,  true,      true,  true,  false);
+//	MakePlot(fSamples,"hemi[0].lv1.M()" ,                  cuts, -3,   0,    "",  "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
+//	MakePlot(fSamples,"hemi[0].lv2.M()" ,                  cuts, -3,   0,    "",  "h1.M", 30,       0, 1000  , false,  true ,  true,      true,  true,  false);
 
 }
 
 //________________________________________________________________________
 
-void MassPlotter::makePlot(TString var, TString cuts, int njets, int nleps, TString xtitle,
+void MassPlotter::makePlot(TString var, TString cuts, int njets, int nleps, TString HLT,  TString xtitle,
 			   const int nbins, const double min, const double max,
 			   bool flip_order, bool logflag, bool composited, bool ratio, bool stacked, 
 			   bool overlaySUSY, float overlayScale){
 
-  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, min, max, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(fSamples, var, cuts, njets, nleps, HLT, xtitle, nbins, min, max, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
   
 
 }
 
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TString xtitle, 
+void MassPlotter::MakePlot(TString var, TString cuts, int njets, int nleps, TString HLT, TString xtitle, 
 			   const int nbins,  const double *bins,
 			   bool flip_order, bool logflag, bool composited, bool ratio, bool stacked, 
 			   bool overlaySUSY, float overlayScale){
 
-  MakePlot(fSamples, var, cuts, njets, nleps, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(fSamples, var, cuts, njets, nleps, HLT, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 
 }
@@ -232,62 +232,68 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 		if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && fMT2tree->GenLeptFromW(11, 0, 100)==true) leptfound =true;
 		if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && fMT2tree->GenLeptFromW(13, 0, 100)==true) leptfound =true;
 
+		Double_t weight = fMT2tree->pileUp.Weight;
+
 		// all events
-		if(eventgood)   counters[all].fill("all events");
-		if(acceptance)  counters[all].fill("acceptance");
-		if(leptfound)   counters[all].fill(to_measure);
+		if(eventgood)   counters[all].fill("all events", weight);
+		if(acceptance)  counters[all].fill("acceptance", weight);
+		if(leptfound)   counters[all].fill(to_measure, weight);
 		
 		// MET
 		if(fMT2tree->misc.MET                     < 30    )  continue;
-		if(eventgood)   counters[MET].fill("MET");
-		if(acceptance)  counters[MET].fill("acceptance");
-		if(leptfound)   counters[MET].fill(to_measure);
+		if(eventgood)   counters[MET].fill("MET", weight);
+		if(acceptance)  counters[MET].fill("acceptance", weight);
+		if(leptfound)   counters[MET].fill(to_measure, weight);
 		
 		// presel
 		if(fMT2tree->misc.HT                      <300    )  continue;
-		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
-		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
-		if(eventgood)   counters[presel].fill("presel");
-		if(acceptance)  counters[presel].fill("acceptance");
-		if(leptfound)   counters[presel].fill(to_measure);
+//		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
+//		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
+		if(fMT2tree->NJets < 2                                      )  continue;
+		if(fMT2tree->jet[0].IsGoodPFJet(100,2.4,2)          ==0     )  continue; // to be in sync with old macros. 
+		if(fMT2tree->jet[1].IsGoodPFJet(100,2.4,2)          ==0     )  continue;
+		if(eventgood)   counters[presel].fill("presel", weight);
+		if(acceptance)  counters[presel].fill("acceptance", weight);
+		if(leptfound)   counters[presel].fill(to_measure, weight);
 		
 		// NJetsIDLoose
-		if(fMT2tree->NJetsIDLoose                 <2     ) continue;  
-		if(eventgood)   counters[NJetsIDLoose].fill("NJetsIDLoose");
-		if(acceptance)  counters[NJetsIDLoose].fill("acceptance");
-		if(leptfound)   counters[NJetsIDLoose].fill(to_measure);
+		if(fMT2tree->NJetsIDLoose                 <3     ) continue;  
+		if(eventgood)   counters[NJetsIDLoose].fill("NJetsIDLoose", weight);
+		if(acceptance)  counters[NJetsIDLoose].fill("acceptance", weight);
+		if(leptfound)   counters[NJetsIDLoose].fill(to_measure, weight);
 
 		
 		// ECAL HCAL Noise
-		if(fMT2tree->misc.EcalDeadCellBEFlag              ==0     )  continue;
+//		if(fMT2tree->misc.EcalDeadCellBEFlag              ==0     )  continue;
 		if(fMT2tree->misc.HBHENoiseFlag                   ==0     )  continue;
-		if(eventgood)   counters[HCAL_ECAL_noise].fill("Cal_Noise");
-		if(acceptance)  counters[HCAL_ECAL_noise].fill("acceptance");
-		if(leptfound)   counters[HCAL_ECAL_noise].fill(to_measure);
+		if(eventgood)   counters[HCAL_ECAL_noise].fill("Cal_Noise", weight);
+		if(acceptance)  counters[HCAL_ECAL_noise].fill("acceptance", weight);
+		if(leptfound)   counters[HCAL_ECAL_noise].fill(to_measure, weight);
 		
 		// PassJetID
-		if(fMT2tree->misc.PassJetID               ==0     ) continue;
-		if(eventgood)   counters[PassJetID].fill("PassJetID");
-		if(acceptance)  counters[PassJetID].fill("acceptance");
-		if(leptfound)   counters[PassJetID].fill(to_measure);
+		if(fMT2tree->PassJetID(50,2.4,1)          ==0     ) continue;
+//		if(fMT2tree->misc.PassJetID               ==0     ) continue;
+		if(eventgood)   counters[PassJetID].fill("PassJetID", weight);
+		if(acceptance)  counters[PassJetID].fill("acceptance", weight);
+		if(leptfound)   counters[PassJetID].fill(to_measure, weight);
 		
 		// MinMetJetDPhi
-		if(fMT2tree->misc.MinMetJetDPhi           <0.3    )  continue;
-		if(eventgood)   counters[MinMetJetDPhi].fill("MinMetJetDPhi");
-		if(acceptance)  counters[MinMetJetDPhi].fill("acceptance");
-		if(leptfound)   counters[MinMetJetDPhi].fill(to_measure);
+		if(fMT2tree->PassMinMetJetDPhi03() ==0)      continue;
+		if(eventgood)   counters[MinMetJetDPhi].fill("MinMetJetDPhi", weight);
+		if(acceptance)  counters[MinMetJetDPhi].fill("acceptance", weight);
+		if(leptfound)   counters[MinMetJetDPhi].fill(to_measure, weight);
 		
 		// VectorSumPt
 		if(fMT2tree->misc.Vectorsumpt             >70     )  continue;
-		if(eventgood)   counters[VectorSumPt].fill("VectorSumPt");
-		if(acceptance)  counters[VectorSumPt].fill("acceptance");
-		if(leptfound)   counters[VectorSumPt].fill(to_measure);
+		if(eventgood)   counters[VectorSumPt].fill("VectorSumPt", weight);
+		if(acceptance)  counters[VectorSumPt].fill("acceptance", weight);
+		if(leptfound)   counters[VectorSumPt].fill(to_measure, weight);
 		
 		// MT2
 		if(fMT2tree->misc.MT2             <100     )  continue;
-		if(eventgood)   counters[MT2].fill("MT2");
-		if(acceptance)  counters[MT2].fill("acceptance");
-		if(leptfound)   counters[MT2].fill(to_measure);
+		if(eventgood)   counters[MT2].fill("MT2", weight);
+		if(acceptance)  counters[MT2].fill("acceptance", weight);
+		if(leptfound)   counters[MT2].fill(to_measure, weight);
 		
       	}
 
@@ -326,12 +332,14 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 	h_1    ->Draw();
 	string name  ="Wevents_"+lept+"_acceptance_"+(string) Sample.name; 
 	Util::PrintEPS(col, name, fOutputDir);
+	Util::PrintPNG(col, name, fOutputDir);
 	h_2    ->SetLineColor(kBlue);
 	h_2    ->SetMarkerStyle(20);
 	h_2    ->SetDrawOption("E");
 	h_2    ->Draw();
 	name  ="Wevents_"+lept+"_reco_"+(string) Sample.name; 
 	Util::PrintEPS(col, name, fOutputDir);
+	Util::PrintPNG(col, name, fOutputDir);
 	
 	//__________________________________
 	if(lept=="ele") {
@@ -522,18 +530,18 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 
 //________________________________________________________________________
 
-void MassPlotter::PrintCutFlow(int njets, int nleps){
+void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
   
   Monitor counters[fSamples.size()];
   
-  TString  cnames[12] = {"QCD", "W+jets", "Z+jets", "Top","Other", "Total Bkg.", "data", "LM0", "LM1", "LM4", "LM9", "LM13"};
-  Monitor  ccount[12], ccount_100[12];
+  TString  cnames[14] = {"QCD", "W+jets", "Z+jets", "Top","Other", "Total Bkg.", "data", "LM1", "LM3", "LM4", "LM9", "LM11", "LM12", "LM13"};
+  Monitor  ccount[14], ccount_100[14];
 
   for(size_t i = 0; i < fSamples.size(); ++i){
 
-    Double_t weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
+    Double_t sample_weight = fSamples[i].xsection * fSamples[i].kfact * fSamples[i].lumi / (fSamples[i].nevents);
     if(fVerbose>2) cout << "PrintCutFlow: looping over " << fSamples[i].name << endl;
-    if(fVerbose>2) cout << "              sample has weight " << weight << " and " << fSamples[i].tree->GetEntries() << " entries" << endl; 
+    if(fVerbose>2) cout << "              sample has weight " << sample_weight << " and " << fSamples[i].tree->GetEntries() << " entries" << endl; 
 
     fMT2tree = new MT2tree();
     fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
@@ -545,7 +553,9 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
       
       if ( fVerbose>2 && jentry % 50000 == 0 )  cout << "+++ Proccessing event " << jentry << endl;
-
+      
+      Double_t weight = sample_weight;
+      if (!fMT2tree->misc.isData ) weight = weight * fMT2tree->pileUp.Weight; // pile-up reweighting for MC 
 
        bool isMT2gt100 = fMT2tree->misc.MT2 > 100.;
 
@@ -553,6 +563,15 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       //if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->jet[1].IsGoodPFJet(100, 2.4, 1) )  continue;
       if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->misc.Jet0Pass )  continue;
       if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->misc.Jet1Pass )  continue;
+      if(trigger=="HT"){
+	      if( fMT2tree->misc.isData ==1 && fMT2tree->trigger.HLT_HT440_v2 ==0 && fMT2tree->trigger.HLT_HT450_v2 ==0 ) continue;
+              if( fMT2tree->misc.HT      < 480) continue;
+              if( fMT2tree->misc.MET     < 30)  continue;
+      }else if(trigger=="MHT_HT"){
+      	      if( fMT2tree->misc.isData ==1 && fMT2tree->trigger.HLT_HT260_MHT60_v2 ==0 && fMT2tree->trigger.HLT_HT250_MHT60_v2 ==0 ) continue;
+              if( fMT2tree->misc.HT      < 300) continue;
+              if( fMT2tree->misc.MET     < 130) continue;
+      }
 
       if     (njets>1) {
 	if(fMT2tree->NJetsIDLoose != njets) continue;
@@ -569,7 +588,7 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
 	if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, text, weight);
       }
 
-      if( fMT2tree->misc.MinMetJetDPhi < 0.3 )  continue;
+      if(fMT2tree->PassMinMetJetDPhi03() ==0)      continue;      
       counters[i].fill("Minimum DPhi(MET,jet) > 0.3",weight);
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
@@ -579,17 +598,16 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
 
-      if( fMT2tree->misc.EcalDeadCellBEFlag != 1 )  continue;
-      counters[i].fill("Boundary energy veto (dead ecal)",weight);
-      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
-      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
+//      if( fMT2tree->misc.EcalDeadCellBEFlag != 1 )  continue;
+//      counters[i].fill("Boundary energy veto (dead ecal)",weight);
+//      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
+//      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Boundary energy veto (dead ecal)", weight);
 
       if( fMT2tree->misc.Vectorsumpt > 70. )  continue;
       counters[i].fill("VectorSumPt < 70",weight);
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "VectorSumPt < 70", weight);
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "VectorSumPt < 70", weight);
 
-      //if( !fMT2tree->PassJetID(50, 6. ,1) )  continue;
       if( !fMT2tree->misc.PassJetID )  continue;
       counters[i].fill("jets > 50GeV failing PFID event veto",weight);
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "jets > 50GeV failing PFID event veto", weight);
@@ -620,6 +638,12 @@ void MassPlotter::PrintCutFlow(int njets, int nleps){
 		if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, cut_name, weight);
 	      }
       }
+      
+//      if( !(fMT2tree->GetNBtags(2,1.74) >= 1) ) continue;
+//      TString text = "b-tags >=1";
+//      counters[i].fill(text.Data(),weight);
+//      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, text, weight);
+//      if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, text, weight);
       
       if( fMT2tree->misc.MT2 < 80. )  continue;
       counters[i].fill("MT2 > 80 GeV" ,weight);
@@ -705,11 +729,13 @@ void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TStri
                                 count[ 4].fill(cut.Data(),weight);
   if     (type  == "mc"     )   count[ 5].fill(cut.Data(),weight);
   else if(type  == "data"   )	count[ 6].fill(cut.Data(),weight);
-  else if(sname == "LM0"    )	count[ 7].fill(cut.Data(),weight);
-  else if(sname == "LM1"    )	count[ 8].fill(cut.Data(),weight);
+  else if(sname == "LM1"    )	count[ 7].fill(cut.Data(),weight);
+  else if(sname == "LM3"    )	count[ 8].fill(cut.Data(),weight);
   else if(sname == "LM4"    )	count[ 9].fill(cut.Data(),weight);
   else if(sname == "LM9"    )	count[10].fill(cut.Data(),weight);
-  else if(sname == "LM13"    )	count[11].fill(cut.Data(),weight);
+  else if(sname == "LM11"    )	count[11].fill(cut.Data(),weight);
+  else if(sname == "LM12"    )	count[12].fill(cut.Data(),weight);
+  else if(sname == "LM13"    )	count[13].fill(cut.Data(),weight);
 }
 
 //________________________________________________________________________
@@ -846,9 +872,11 @@ void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString 
 		}
 		if(optcut!="_" && Samples[i].sname == "DYToLL"){
 			TString newcuts = cuts + "&&" + optcut;  
-			selection      = TString::Format("(%f) * (%s)",weight,newcuts.Data());
+			if(Samples[i].type!="data") selection      = TString::Format("(%.15f*pileUp.Weight) * (%s)",weight,newcuts.Data());
+			else                        selection      = TString::Format("(%.15f) * (%s)"              ,weight,newcuts.Data()); 
 		} else {
-			selection      = TString::Format("(%f) * (%s)",weight,cuts.Data());
+			if(Samples[i].type!="data") selection      = TString::Format("(%.15f*pileUp.Weight) * (%s)",weight,cuts.Data());
+			else                        selection      = TString::Format("(%.15f) * (%s)"              ,weight,cuts.Data()); 
 		}
 
 		variable          = TString::Format("%s>>%s",variable.Data(),histos[i]->GetName());
@@ -891,7 +919,7 @@ void MassPlotter::CompSamples(std::vector<sample> Samples, TString var, TString 
 
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps, TString HLT,
 			   TString xtitle, const int nbins, const double min, const double max,
 			   bool flip_order, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
@@ -900,13 +928,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
   bins[0] = min;
   for(int i=1; i<=nbins; i++)
     bins[i] = min+i*(max-min)/nbins;
-  MakePlot(Samples, var, cuts, njets, nleps, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
+  MakePlot(Samples, var, cuts, njets, nleps, HLT, xtitle, nbins, bins, flip_order, logflag, composited, ratio, stacked, overlaySUSY, overlayScale);
 
 }
 
 //________________________________________________________________________
 
-void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps,
+void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cuts, int njets, int nleps, TString HLT,
 			   TString xtitle, const int nbins, const double *bins, 
 			   bool flip_order, bool logflag, bool composited, bool ratio, 
 			   bool stacked, bool overlaySUSY, float overlayScale){
@@ -992,7 +1020,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	
 		TString variable  = TString::Format("%s>>%s",var.Data(),h_samples[i]->GetName());
 		TString theCuts = nJets + nLeps + "&&" + cuts;
-		TString selection = TString::Format("(%f) * (%s)",weight,theCuts.Data());
+		if(Samples[i].type=="data" && HLT!="") theCuts += " &&("+HLT+")"; // triggers for data
+
+		TString selection;
+		if(Samples[i].type!="data") selection      = TString::Format("(%.15f*pileUp.Weight) * (%s)",weight,theCuts.Data());
+		else                        selection      = TString::Format("(%.15f) * (%s)"              ,weight,theCuts.Data()); 
+//		if(Samples[i].type!="data") selection      = TString::Format("(%.15f) * (%s)",              weight,theCuts.Data());
+//		else                        selection      = TString::Format("(%.15f) * (%s)"              ,weight,theCuts.Data()); 
 		  
 		if(fVerbose>2) cout << "+++++ Drawing " << variable  << endl
 				    << "\twith cuts: "  << selection << endl;
@@ -1162,7 +1196,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	oname.ReplaceAll("Vectorsumpt","VSPT");
 	oname.ReplaceAll("EcalDeadCellBEFlag","BEFlg");
 	oname.ReplaceAll("HBHENoiseFlag","HBHEFlg");
-	oname.ReplaceAll("NJetsIDLoose","NJLoose");
+	oname.ReplaceAll("NJetsIDLoose","NJIDLoose");
 	oname.ReplaceAll("isPFIDLoose","isJLoose");
 	oname.ReplaceAll("IsGoodPFJet","IsGoodPFJ");
 	oname.ReplaceAll("MinMetJetDPhi","MinDPhi");
