@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=10};
+enum {m_jetSize = 40, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=10};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
