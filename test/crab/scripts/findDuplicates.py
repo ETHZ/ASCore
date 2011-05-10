@@ -82,11 +82,11 @@ def findDuplicates():
 
     if not opt.site:
         parser.error('No site selected')
-    if opt.site == 't3psi' || opt.site == 'T3_CH_PSI':
+    if opt.site == 't3psi' or opt.site == 'T3_CH_PSI':
         srmSite = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN="
         rootpath = srmSite+'/pnfs/psi.ch/cms/trivcat'
         dcapPrefix= 'dcap://t3se01.psi.ch:22125'
-    elif opt.site == 't2cscs' || opt.site == 'T2_CH_CSCS':
+    elif opt.site == 't2cscs' or opt.site == 'T2_CH_CSCS':
         srmSite = "srm://storage01.lcg.cscs.ch:8443/srm/managerv2?SFN="
         rootpath = srmSite+"/pnfs/lcg.cscs.ch/cms/trivcat"
         dcapPrefix= ''
