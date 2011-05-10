@@ -422,7 +422,7 @@ void MassAnalysis::FillTree(){
 	double HTmatched=0, vectorsumpt_matched_px=0, vectorsumpt_matched_py=0;
 	int    NJetsIDLoose_matched=0;
 	for(int i=0; i<fTR->PF2PAT3NJets; ++i){
-		if(fTR->PF2PAT3JPt[i] < 15) continue;  
+		if(fTR->PF2PAT3JPt[i] < 20) continue;  
 		bool jet(true);
 		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
