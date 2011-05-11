@@ -18,13 +18,32 @@
 class MuonPlotter : public AnaClass{
 
 public:
+	// Binning
+	static const int gNMuPtbins  = 5;
+	static const int gNMuPt2bins = 5;
+	static const int gNMuEtabins = 1;
+	static const int gNElPtbins  = 5;
+	static const int gNElPt2bins = 5;
+	static const int gNElEtabins = 1;
 	
+	static double gMuPtbins [gNMuPtbins+1];
+	static double gMuPt2bins[gNMuPt2bins+1];
+	static double gMuEtabins[gNMuEtabins+1];
+
+	static double gElPtbins [gNElPtbins+1];
+	static double gElPt2bins[gNElPt2bins+1];
+	static double gElEtabins[gNElEtabins+1];
+
+
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
 		// DoubleMu = sample_begin, DoubleEle, MuEG, MuHad, ElectronHad,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
-		TTJets, WJets, DYJets, LM0,
+		TTJets, WJets, DYJets, WW, WZ, ZZ,
+		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
+		// LM0, LM9, LM11,
+		QCDMuEnr10,
 		QCD5to15,
 		QCD15to30,
 		QCD30to50,
@@ -38,7 +57,12 @@ public:
 		QCD800to1000,
 		QCD1000to1400,
 		QCD1400to1800,
-		QCD1800, 
+		QCD1800,
+		// QCD50to100MG,
+		// QCD100to250MG,
+		// QCD250to500MG,
+		// QCD500to1000MG,
+		// QCD1000MG,
 		gNSAMPLES
 	};
 	enum gOldSample { // temporary
@@ -115,6 +139,23 @@ public:
 		Channel ee;
 	};
 	
+	static const int gNKinVars = 9;
+	struct KinPlots{
+		static TString var_name[gNKinVars];
+		static int nbins[gNKinVars];
+		static float xmin[gNKinVars];
+		static float xmax[gNKinVars];
+		TH1D *hvar[gNKinVars];
+	};
+	
+	static const int gNSels = 2;
+	struct IsoPlots{
+		static TString sel_name[gNSels];
+		static int nbins[gNSels];
+		TH1D *hiso[gNSels];
+		TH1D *hiso_pt[gNSels][gNMuPt2bins];
+	};
+	
 	struct Sample{
 		TString name;
 		TString sname;
@@ -123,18 +164,11 @@ public:
 		float lumi;
 		int color;
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
-		bool isfilled; // check if this has been read in -- not implemented yet
 		Region region[gNREGIONS];
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
+		KinPlots kinplots[3]; // tt and ll and signal
+		IsoPlots isoplots[2]; // e and mu
 	};
-	
-	// struct MetaSample{
-	// 	TString name;
-	// 	TString sname;
-	// 	int color;
-	// 	bool isdata;
-	// 	vector<int> samples;
-	// };
 	
 	MuonPlotter();
 	MuonPlotter(TString);
@@ -166,12 +200,16 @@ public:
 	void makeMupEffPlots(bool = false);
 	void makeElpEffPlots(bool = false);
 
-	void makeMuIsolationPlots(bool = false);
-	void makeElIsolationPlots(bool = false);
 	void makeMuIsolationPlotsOld();
 	void makeMuPtPlots();
 	
-	void makeNT2KinPlots(bool read);
+	void makeMuIsolationPlots();
+	void makeElIsolationPlots();
+	void fillMuIsoHistos(gSample);
+	void fillElIsoHistos(gSample);
+	
+	void makeNT2KinPlots();
+	void fillKinematicHistos(gSample);
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -296,8 +334,10 @@ public:
 	bool passesMllEventVeto(float = 12.);
 
 	// Trigger selections:
-	bool singleMuTrigger();
-	bool singleElTrigger();
+	bool  singleMuTrigger();
+	float singleMuPrescale();
+	bool  singleElTrigger();
+	float singleElPrescale();
 
 	bool mumuSignalTrigger();
 	bool elelSignalTrigger();

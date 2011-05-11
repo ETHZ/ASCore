@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue May  3 14:38:09 2011 by ROOT version 5.28/00
+// Fri May  6 15:50:31 2011 by ROOT version 5.28/00
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root
+// found on file: SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -21,38 +21,70 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSec;
+   Int_t           HLT_Mu8_Jet40_v1;
+   Int_t           HLT_Mu8_Jet40_v1_PS;
    Int_t           HLT_Mu8_Jet40_v2;
    Int_t           HLT_Mu8_Jet40_v2_PS;
    Int_t           HLT_Mu8_Jet40_v3;
    Int_t           HLT_Mu8_Jet40_v3_PS;
+   Int_t           HLT_Mu8_Jet40_v4;
+   Int_t           HLT_Mu8_Jet40_v4_PS;
    Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;
    Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3;
+   Int_t           HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS;
    Int_t           HLT_DoubleMu6_v1;
    Int_t           HLT_DoubleMu6_v1_PS;
+   Int_t           HLT_DoubleMu6_v2;
+   Int_t           HLT_DoubleMu6_v2_PS;
+   Int_t           HLT_DoubleMu7_v1;
+   Int_t           HLT_DoubleMu7_v1_PS;
+   Int_t           HLT_DoubleMu7_v2;
+   Int_t           HLT_DoubleMu7_v2_PS;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2;
    Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3;
+   Int_t           HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3_PS;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v1;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v1_PS;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v2;
    Int_t           HLT_Mu17_Ele8_CaloIdL_v2_PS;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v3;
+   Int_t           HLT_Mu17_Ele8_CaloIdL_v3_PS;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v1;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v1_PS;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v2;
    Int_t           HLT_Mu8_Ele17_CaloIdL_v2_PS;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v3;
+   Int_t           HLT_Mu8_Ele17_CaloIdL_v3_PS;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1_PS;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3;
    Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1;
+   Int_t           HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1_PS;
    Int_t           HLT_DoubleMu3_HT160_v2;
    Int_t           HLT_DoubleMu3_HT160_v2_PS;
    Int_t           HLT_DoubleMu3_HT160_v3;
    Int_t           HLT_DoubleMu3_HT160_v3_PS;
+   Int_t           HLT_DoubleMu3_HT150_v1;
+   Int_t           HLT_DoubleMu3_HT150_v1_PS;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1_PS;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3;
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1;
+   Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS;
+   Float_t         Rho;
+   Int_t           NVrtx;
    Int_t           NMus;
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
@@ -103,7 +135,6 @@ public :
    Int_t           ElGenGMType[5];   //[NEls]
    Float_t         ElHybRelIso[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
-   Float_t         Rho;
    Float_t         tcMET;
    Float_t         pfMET;
    Int_t           NJets;
@@ -116,38 +147,70 @@ public :
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSec;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v1;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v1_PS;   //!
    TBranch        *b_HLT_Mu8_Jet40_v2;   //!
    TBranch        *b_HLT_Mu8_Jet40_v2_PS;   //!
    TBranch        *b_HLT_Mu8_Jet40_v3;   //!
    TBranch        *b_HLT_Mu8_Jet40_v3_PS;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v4;   //!
+   TBranch        *b_HLT_Mu8_Jet40_v4_PS;   //!
    TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1;   //!
    TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3;   //!
+   TBranch        *b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS;   //!
    TBranch        *b_HLT_DoubleMu6_v1;   //!
    TBranch        *b_HLT_DoubleMu6_v1_PS;   //!
+   TBranch        *b_HLT_DoubleMu6_v2;   //!
+   TBranch        *b_HLT_DoubleMu6_v2_PS;   //!
+   TBranch        *b_HLT_DoubleMu7_v1;   //!
+   TBranch        *b_HLT_DoubleMu7_v1_PS;   //!
+   TBranch        *b_HLT_DoubleMu7_v2;   //!
+   TBranch        *b_HLT_DoubleMu7_v2_PS;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2;   //!
    TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3;   //!
+   TBranch        *b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3_PS;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v1_PS;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v2;   //!
    TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v2_PS;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v3;   //!
+   TBranch        *b_HLT_Mu17_Ele8_CaloIdL_v3_PS;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v1_PS;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v2;   //!
    TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v2_PS;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v3;   //!
+   TBranch        *b_HLT_Mu8_Ele17_CaloIdL_v3_PS;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1_PS;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3;   //!
    TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1;   //!
+   TBranch        *b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1_PS;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v2;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v2_PS;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v3;   //!
    TBranch        *b_HLT_DoubleMu3_HT160_v3_PS;   //!
+   TBranch        *b_HLT_DoubleMu3_HT150_v1;   //!
+   TBranch        *b_HLT_DoubleMu3_HT150_v1_PS;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1_PS;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3;   //!
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1;   //!
+   TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS;   //!
+   TBranch        *b_Rho;   //!
+   TBranch        *b_NVrtx;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
@@ -198,7 +261,6 @@ public :
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElHybRelIso;   //!
    TBranch        *b_ElMT;   //!
-   TBranch        *b_Rho;   //!
    TBranch        *b_tcMET;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_NJets;   //!
@@ -226,9 +288,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
       if (!f) {
-         f = new TFile("SSDLTrees/2011/May3/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
+         f = new TFile("SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -282,38 +344,70 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v1", &HLT_Mu8_Jet40_v1, &b_HLT_Mu8_Jet40_v1);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v1_PS", &HLT_Mu8_Jet40_v1_PS, &b_HLT_Mu8_Jet40_v1_PS);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v2", &HLT_Mu8_Jet40_v2, &b_HLT_Mu8_Jet40_v2);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v2_PS", &HLT_Mu8_Jet40_v2_PS, &b_HLT_Mu8_Jet40_v2_PS);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v3", &HLT_Mu8_Jet40_v3, &b_HLT_Mu8_Jet40_v3);
    fChain->SetBranchAddress("HLT_Mu8_Jet40_v3_PS", &HLT_Mu8_Jet40_v3_PS, &b_HLT_Mu8_Jet40_v3_PS);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v4", &HLT_Mu8_Jet40_v4, &b_HLT_Mu8_Jet40_v4);
+   fChain->SetBranchAddress("HLT_Mu8_Jet40_v4_PS", &HLT_Mu8_Jet40_v4_PS, &b_HLT_Mu8_Jet40_v4_PS);
    fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1);
    fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3);
+   fChain->SetBranchAddress("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS", &HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS, &b_HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS);
    fChain->SetBranchAddress("HLT_DoubleMu6_v1", &HLT_DoubleMu6_v1, &b_HLT_DoubleMu6_v1);
    fChain->SetBranchAddress("HLT_DoubleMu6_v1_PS", &HLT_DoubleMu6_v1_PS, &b_HLT_DoubleMu6_v1_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu6_v2", &HLT_DoubleMu6_v2, &b_HLT_DoubleMu6_v2);
+   fChain->SetBranchAddress("HLT_DoubleMu6_v2_PS", &HLT_DoubleMu6_v2_PS, &b_HLT_DoubleMu6_v2_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu7_v1", &HLT_DoubleMu7_v1, &b_HLT_DoubleMu7_v1);
+   fChain->SetBranchAddress("HLT_DoubleMu7_v1_PS", &HLT_DoubleMu7_v1_PS, &b_HLT_DoubleMu7_v1_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu7_v2", &HLT_DoubleMu7_v2, &b_HLT_DoubleMu7_v2);
+   fChain->SetBranchAddress("HLT_DoubleMu7_v2_PS", &HLT_DoubleMu7_v2_PS, &b_HLT_DoubleMu7_v2_PS);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1_PS);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2);
    fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2_PS);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3);
+   fChain->SetBranchAddress("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3_PS", &HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3_PS, &b_HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3_PS);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1", &HLT_Mu17_Ele8_CaloIdL_v1, &b_HLT_Mu17_Ele8_CaloIdL_v1);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v1_PS", &HLT_Mu17_Ele8_CaloIdL_v1_PS, &b_HLT_Mu17_Ele8_CaloIdL_v1_PS);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v2", &HLT_Mu17_Ele8_CaloIdL_v2, &b_HLT_Mu17_Ele8_CaloIdL_v2);
    fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v2_PS", &HLT_Mu17_Ele8_CaloIdL_v2_PS, &b_HLT_Mu17_Ele8_CaloIdL_v2_PS);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v3", &HLT_Mu17_Ele8_CaloIdL_v3, &b_HLT_Mu17_Ele8_CaloIdL_v3);
+   fChain->SetBranchAddress("HLT_Mu17_Ele8_CaloIdL_v3_PS", &HLT_Mu17_Ele8_CaloIdL_v3_PS, &b_HLT_Mu17_Ele8_CaloIdL_v3_PS);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1", &HLT_Mu8_Ele17_CaloIdL_v1, &b_HLT_Mu8_Ele17_CaloIdL_v1);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v1_PS", &HLT_Mu8_Ele17_CaloIdL_v1_PS, &b_HLT_Mu8_Ele17_CaloIdL_v1_PS);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v2", &HLT_Mu8_Ele17_CaloIdL_v2, &b_HLT_Mu8_Ele17_CaloIdL_v2);
    fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v2_PS", &HLT_Mu8_Ele17_CaloIdL_v2_PS, &b_HLT_Mu8_Ele17_CaloIdL_v2_PS);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v3", &HLT_Mu8_Ele17_CaloIdL_v3, &b_HLT_Mu8_Ele17_CaloIdL_v3);
+   fChain->SetBranchAddress("HLT_Mu8_Ele17_CaloIdL_v3_PS", &HLT_Mu8_Ele17_CaloIdL_v3_PS, &b_HLT_Mu8_Ele17_CaloIdL_v3_PS);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1_PS);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2_PS);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3);
    fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3_PS);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1);
+   fChain->SetBranchAddress("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1_PS", &HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1_PS, &b_HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1_PS);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2", &HLT_DoubleMu3_HT160_v2, &b_HLT_DoubleMu3_HT160_v2);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v2_PS", &HLT_DoubleMu3_HT160_v2_PS, &b_HLT_DoubleMu3_HT160_v2_PS);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v3", &HLT_DoubleMu3_HT160_v3, &b_HLT_DoubleMu3_HT160_v3);
    fChain->SetBranchAddress("HLT_DoubleMu3_HT160_v3_PS", &HLT_DoubleMu3_HT160_v3_PS, &b_HLT_DoubleMu3_HT160_v3_PS);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT150_v1", &HLT_DoubleMu3_HT150_v1, &b_HLT_DoubleMu3_HT150_v1);
+   fChain->SetBranchAddress("HLT_DoubleMu3_HT150_v1_PS", &HLT_DoubleMu3_HT150_v1_PS, &b_HLT_DoubleMu3_HT150_v1_PS);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1_PS);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2_PS);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3);
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3_PS);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1);
+   fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS);
+   fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
+   fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
@@ -364,7 +458,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElHybRelIso", ElHybRelIso, &b_ElHybRelIso);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
