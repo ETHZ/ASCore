@@ -204,9 +204,9 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 	     << Sample.name << endl;	
       	std::cout << setfill('-') << std::setw(70) << "" << std::endl;
 
-        enum counters_t { count_begin, all=count_begin, MET, presel, NJetsIDLoose, HCAL_ECAL_noise, PassJetID, MinMetJetDPhi, VectorSumPt, MT2,  count_end };
+        enum counters_t { count_begin, all=count_begin, presel, NJetsIDLoose , PassJetID, MinMetJetDPhi, VectorSumPt, MT2,  count_end };
  	Monitor counters[count_end];
-	TString lablx[count_end] = {"all events","MET", "presel", "NJetsIDLoose" ,"Cal_Noise", "PassJetID", "MinMetJetDPhi", "VectorSumPt", "MT2"};
+	TString lablx[count_end] = {"all events", "presel", "NJetsIDLoose" , "PassJetID", "MinMetJetDPhi", "VectorSumPt", "MT2"};
 
 	string to_measure;
 	if(lept == "ele" )            {to_measure = "W->enu  recoed";} 
@@ -227,8 +227,8 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 		bool acceptance(false);
 		if(lept=="ele" && fMT2tree->GenLeptFromW(11, 0 , 100)==true)                                              eventgood =true;
 		if(lept=="muo" && fMT2tree->GenLeptFromW(13, 0 , 100)==true)                                              eventgood =true;
-		if(lept=="ele" && fMT2tree->GenLeptFromW(11,10,  2.4)==true)                                              acceptance=true;
-		if(lept=="muo" && fMT2tree->GenLeptFromW(13,10,  2.4)==true)                                              acceptance=true;
+		if(lept=="ele" && fMT2tree->GenLeptFromW(11, 5,  2.4)==true)                                              acceptance=true;
+		if(lept=="muo" && fMT2tree->GenLeptFromW(13, 5,  2.4)==true)                                              acceptance=true;
 		if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && fMT2tree->GenLeptFromW(11, 0, 100)==true) leptfound =true;
 		if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && fMT2tree->GenLeptFromW(13, 0, 100)==true) leptfound =true;
 
@@ -239,22 +239,18 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 		if(acceptance)  counters[all].fill("acceptance", weight);
 		if(leptfound)   counters[all].fill(to_measure, weight);
 		
-		// MET
-		if(fMT2tree->misc.MET                     < 30    )  continue;
-		if(eventgood)   counters[MET].fill("MET", weight);
-		if(acceptance)  counters[MET].fill("acceptance", weight);
-		if(leptfound)   counters[MET].fill(to_measure, weight);
-		
 		// presel
-		if(fMT2tree->misc.HT                      <300    )  continue;
-//		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
-//		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
-		if(fMT2tree->NJets < 2                                      )  continue;
-		if(fMT2tree->jet[0].IsGoodPFJet(100,2.4,2)          ==0     )  continue; // to be in sync with old macros. 
-		if(fMT2tree->jet[1].IsGoodPFJet(100,2.4,2)          ==0     )  continue;
+		if(fMT2tree->misc.MET                     < 30    )  continue;
+//		if(fMT2tree->misc.caloHT50                < 550   )  continue;
+		if(fMT2tree->misc.caloHT50                < 320   )  continue;
+		if(fMT2tree->misc.caloMHT30               < 130   )  continue;
+		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
+		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
+		if(fMT2tree->misc.HBHENoiseFlag           ==0     )  continue;
 		if(eventgood)   counters[presel].fill("presel", weight);
 		if(acceptance)  counters[presel].fill("acceptance", weight);
 		if(leptfound)   counters[presel].fill(to_measure, weight);
+		
 		
 		// NJetsIDLoose
 		if(fMT2tree->NJetsIDLoose                 <3     ) continue;  
@@ -262,17 +258,8 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 		if(acceptance)  counters[NJetsIDLoose].fill("acceptance", weight);
 		if(leptfound)   counters[NJetsIDLoose].fill(to_measure, weight);
 
-		
-		// ECAL HCAL Noise
-//		if(fMT2tree->misc.EcalDeadCellBEFlag              ==0     )  continue;
-		if(fMT2tree->misc.HBHENoiseFlag                   ==0     )  continue;
-		if(eventgood)   counters[HCAL_ECAL_noise].fill("Cal_Noise", weight);
-		if(acceptance)  counters[HCAL_ECAL_noise].fill("acceptance", weight);
-		if(leptfound)   counters[HCAL_ECAL_noise].fill(to_measure, weight);
-		
 		// PassJetID
-		if(fMT2tree->PassJetID(50,2.4,1)          ==0     ) continue;
-//		if(fMT2tree->misc.PassJetID               ==0     ) continue;
+		if(fMT2tree->misc.PassJetID               ==0     ) continue;
 		if(eventgood)   counters[PassJetID].fill("PassJetID", weight);
 		if(acceptance)  counters[PassJetID].fill("acceptance", weight);
 		if(leptfound)   counters[PassJetID].fill(to_measure, weight);
@@ -290,7 +277,7 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 		if(leptfound)   counters[VectorSumPt].fill(to_measure, weight);
 		
 		// MT2
-		if(fMT2tree->misc.MT2             <100     )  continue;
+		if(fMT2tree->misc.MT2             <0     )  continue;
 		if(eventgood)   counters[MT2].fill("MT2", weight);
 		if(acceptance)  counters[MT2].fill("acceptance", weight);
 		if(leptfound)   counters[MT2].fill(to_measure, weight);
@@ -328,12 +315,16 @@ void MassPlotter::PrintWEfficiency(int sample_index , std::string lept, Long64_t
 	col -> cd();
 	h_1    ->SetLineColor(kBlue);
 	h_1    ->SetMarkerStyle(20);
+	h_1    ->SetMinimum(0);
+	h_1    ->SetMaximum(1);
 	h_1    ->SetDrawOption("E");
 	h_1    ->Draw();
 	string name  ="Wevents_"+lept+"_acceptance_"+(string) Sample.name; 
 	Util::PrintEPS(col, name, fOutputDir);
 	Util::PrintPNG(col, name, fOutputDir);
 	h_2    ->SetLineColor(kBlue);
+	h_2    ->SetMinimum(0);
+	h_2    ->SetMaximum(1);
 	h_2    ->SetMarkerStyle(20);
 	h_2    ->SetDrawOption("E");
 	h_2    ->Draw();
@@ -533,9 +524,10 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
   
   Monitor counters[fSamples.size()];
-  
-  TString  cnames[14] = {"QCD", "W+jets", "Z+jets", "Top","Other", "Total Bkg.", "data", "LM1", "LM3", "LM4", "LM9", "LM11", "LM12", "LM13"};
-  Monitor  ccount[14], ccount_100[14];
+
+  const int   nProc      = 17;  
+  TString  cnames[nProc] = {"QCD", "W+jets", "Z+jets", "Top","Other", "Total Bkg.", "data", "LM1", "LM2", "LM3", "LM4", "LM5", "LM8", "LM9", "LM11", "LM12", "LM13"};
+  Monitor  ccount[nProc], ccount_100[nProc];
 
   for(size_t i = 0; i < fSamples.size(); ++i){
 
@@ -559,18 +551,23 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
 
        bool isMT2gt100 = fMT2tree->misc.MT2 > 100.;
 
-      //if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->jet[0].IsGoodPFJet(100, 2.4, 1) )  continue;
-      //if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->jet[1].IsGoodPFJet(100, 2.4, 1) )  continue;
       if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->misc.Jet0Pass )  continue;
       if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->misc.Jet1Pass )  continue;
       if(trigger=="HT"){
-	      if( fMT2tree->misc.isData ==1 && fMT2tree->trigger.HLT_HT440_v2 ==0 && fMT2tree->trigger.HLT_HT450_v2 ==0 ) continue;
-              if( fMT2tree->misc.HT      < 480) continue;
+	      if( fMT2tree->misc.isData ==1 
+		  && fMT2tree->trigger.HLT_HT440_v2 ==0 
+		  && fMT2tree->trigger.HLT_HT450_v2 ==0 
+		  && fMT2tree->trigger.HLT_HT500_v3 ==0 ) continue;
+              if( fMT2tree->misc.caloHT50< 550) continue;
               if( fMT2tree->misc.MET     < 30)  continue;
       }else if(trigger=="MHT_HT"){
-      	      if( fMT2tree->misc.isData ==1 && fMT2tree->trigger.HLT_HT260_MHT60_v2 ==0 && fMT2tree->trigger.HLT_HT250_MHT60_v2 ==0 ) continue;
-              if( fMT2tree->misc.HT      < 300) continue;
-              if( fMT2tree->misc.MET     < 130) continue;
+      	      if( fMT2tree->misc.isData ==1 
+		  && fMT2tree->trigger.HLT_HT260_MHT60_v2 ==0 
+		  && fMT2tree->trigger.HLT_HT250_MHT60_v2 ==0 
+		  && fMT2tree->trigger.HLT_HT250_MHT60_v3 ==0 ) continue;
+              if( fMT2tree->misc.caloHT50  <= 320) continue;
+              if( fMT2tree->misc.caloMHT30 <  130) continue;
+              if( fMT2tree->misc.MET       <   30) continue;
       }
 
       if     (njets>1) {
@@ -681,6 +678,30 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
       if( fMT2tree->misc.MT2 < 300. )  continue;
       counters[i].fill("MT2 > 300 GeV",weight);
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 300 GeV", weight);
+      if( fMT2tree->misc.MT2 < 325. )  continue;
+      counters[i].fill("MT2 > 325 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 325 GeV", weight);
+      if( fMT2tree->misc.MT2 < 350. )  continue;
+      counters[i].fill("MT2 > 350 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 350 GeV", weight);
+      if( fMT2tree->misc.MT2 < 375. )  continue;
+      counters[i].fill("MT2 > 375 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 375 GeV", weight);
+      if( fMT2tree->misc.MT2 < 400. )  continue;
+      counters[i].fill("MT2 > 400 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 400 GeV", weight);
+      if( fMT2tree->misc.MT2 < 425. )  continue;
+      counters[i].fill("MT2 > 425 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 425 GeV", weight);
+      if( fMT2tree->misc.MT2 < 450. )  continue;
+      counters[i].fill("MT2 > 450 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 450 GeV", weight);
+      if( fMT2tree->misc.MT2 < 475. )  continue;
+      counters[i].fill("MT2 > 475 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 475 GeV", weight);
+      if( fMT2tree->misc.MT2 < 500. )  continue;
+      counters[i].fill("MT2 > 500 GeV",weight);
+      FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "MT2 > 500 GeV", weight);
       
     }
     delete fMT2tree;
@@ -699,7 +720,7 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
   std::cout << setfill('=') << std::setw(70) << "" << std::endl;
   std::cout << "Statistics - by process" << std::endl;
   std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;
-  for ( size_t i = 0; i < 12; ++i){
+  for ( size_t i = 0; i < nProc; ++i){
     std::cout << "++++  " << cnames[i] << std::endl;  
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
     ccount[i].print();
@@ -709,7 +730,7 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
   std::cout << setfill('=') << std::setw(70) << "" << std::endl;
   std::cout << "Statistics - by process (MT2 > 100GeV)" << std::endl;
   std::cout << setfill('_') << std::setw(70) << "" << setfill(' ') << std::endl;
-  for ( size_t i = 0; i < 12; ++i){
+  for ( size_t i = 0; i < nProc; ++i){
     std::cout << "++++  " << cnames[i] << std::endl;  
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
     ccount_100[i].print();
@@ -730,12 +751,15 @@ void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TStri
   if     (type  == "mc"     )   count[ 5].fill(cut.Data(),weight);
   else if(type  == "data"   )	count[ 6].fill(cut.Data(),weight);
   else if(sname == "LM1"    )	count[ 7].fill(cut.Data(),weight);
-  else if(sname == "LM3"    )	count[ 8].fill(cut.Data(),weight);
-  else if(sname == "LM4"    )	count[ 9].fill(cut.Data(),weight);
-  else if(sname == "LM9"    )	count[10].fill(cut.Data(),weight);
-  else if(sname == "LM11"    )	count[11].fill(cut.Data(),weight);
-  else if(sname == "LM12"    )	count[12].fill(cut.Data(),weight);
-  else if(sname == "LM13"    )	count[13].fill(cut.Data(),weight);
+  else if(sname == "LM2"    )	count[ 8].fill(cut.Data(),weight);
+  else if(sname == "LM3"    )	count[ 9].fill(cut.Data(),weight);
+  else if(sname == "LM4"    )	count[10].fill(cut.Data(),weight);
+  else if(sname == "LM5"    )	count[11].fill(cut.Data(),weight);
+  else if(sname == "LM8"    )	count[12].fill(cut.Data(),weight);
+  else if(sname == "LM9"    )	count[13].fill(cut.Data(),weight);
+  else if(sname == "LM11"    )	count[14].fill(cut.Data(),weight);
+  else if(sname == "LM12"    )	count[15].fill(cut.Data(),weight);
+  else if(sname == "LM13"    )	count[16].fill(cut.Data(),weight);
 }
 
 //________________________________________________________________________
@@ -960,9 +984,9 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 
 	// h_data
 	h_data -> Sumw2();
-	h_data -> SetMarkerStyle(1);
-	h_data -> SetMarkerColor(kRed);
-	h_data -> SetLineColor(kRed);
+	h_data -> SetMarkerStyle(20);
+	h_data -> SetMarkerColor(kBlack);
+	h_data -> SetLineColor(kBlack);
 	h_data -> SetStats(false);
 
 	h_mc_sum -> SetFillStyle(3004);
@@ -1599,7 +1623,7 @@ void MassPlotter::plotRatioStack(THStack* hstack, TH1* h1_orig, TH1* h2_orig, bo
 
 	hstack->SetMinimum(0.02);
 	hstack ->Draw("hist");
-	h2     ->Draw("same");
+	h2     ->Draw("sameEX0");
 
 	// title
 	TLatex lat;
@@ -1736,7 +1760,7 @@ void MassPlotter::plotRatioStack(THStack* hstack, TH1* h1_orig, TH1* h2_orig, TH
 
 	hstack->SetMinimum(0.02);
 	hstack->Draw("hist");
-	h2    ->Draw("same");
+	h2    ->Draw("sameEX0");
 	h3->Scale(overlayScale ? overlayScale : h2->Integral() / h3->Integral());
 	h3->SetFillColor(0);
 	h3->SetLineStyle(kDotted);
@@ -2098,7 +2122,7 @@ void MassPlotter::printHisto(THStack* h, TH1* h_data, TH1* h_mc_sum, TH1* h_susy
 	h->Draw(drawopt);
 	//h_mc_sum -> Draw("same, E2");
 	if(h_data->Integral()>0) {
-		h_data       ->Draw("same");
+		h_data       ->Draw("sameEX0");
 	}
 	h_susy->Scale(overlayScale ? overlayScale : h_data->Integral() / h_susy->Integral());
 	h_susy->SetLineStyle(kDotted);
