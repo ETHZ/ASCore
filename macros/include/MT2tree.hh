@@ -5,7 +5,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=10};
+enum {m_jetSize = 40, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=10};
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -17,6 +17,7 @@ public:
   void Reset();
   
   Bool_t   HBHENoiseFlag;
+  Bool_t   isData;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
@@ -24,24 +25,35 @@ public:
   Int_t    Jet0Pass;
   Int_t    Jet1Pass;
   Int_t    PassJetID;
+  Int_t    PassJetID20;
   Int_t    EcalDeadCellBEFlag;
   Int_t    NECALGapClusters;
   Double_t EcalGapClusterSize[50];
   Double_t EcalGapBE[50];
   Double_t MT2;
+  Double_t MT2all;
   Double_t MT2leading;
   Double_t MT2noISR;
   Double_t MCT;
   Double_t AlphaT;
   Double_t MET;
   Double_t METPhi;
+  Double_t LeadingJPt;
+  Double_t SecondJPt;
   Double_t Vectorsumpt;
+  Double_t VectorsumptAll;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
+  Double_t caloHT30;
+  Double_t caloHT40;
+  Double_t caloHT50;
+  Double_t caloMHT20;
+  Double_t caloMHT30;
+  Double_t caloMHT40;
   
-  ClassDef(MT2Misc, 12)
+  ClassDef(MT2Misc, 14)
 };
 
 // ----------------------------------------
@@ -71,15 +83,35 @@ public:
 
 	// Trigger bits: only a couple are implemented so far
 	// HT
+	Bool_t HLT_HT150_v2;
+	Bool_t HLT_HT150_v3;
 	Bool_t HLT_HT160_v2;
+	Bool_t HLT_HT200_v2;
+	Bool_t HLT_HT200_v3;
 	Bool_t HLT_HT240_v2;
+	Bool_t HLT_HT250_v2;
+	Bool_t HLT_HT250_v3;
 	Bool_t HLT_HT260_v2;
 	Bool_t HLT_HT300_v2;
+	Bool_t HLT_HT300_v3;
+	Bool_t HLT_HT300_v4;
+	Bool_t HLT_HT350_v2;
+	Bool_t HLT_HT350_v3;
 	Bool_t HLT_HT360_v2;
+	Bool_t HLT_HT400_v2;
+	Bool_t HLT_HT400_v3;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
+	Bool_t HLT_HT450_v3;
+	Bool_t HLT_HT500_v2;
+	Bool_t HLT_HT500_v3;
+	Bool_t HLT_HT550_v2;
+	Bool_t HLT_HT550_v3;
 	// HT_MHT
+	Bool_t HLT_HT250_MHT60_v2;
+	Bool_t HLT_HT250_MHT60_v3;
 	Bool_t HLT_HT260_MHT60_v2;
+	Bool_t HLT_HT300_MHT75_v4;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -88,7 +120,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 1);
+	ClassDef(MT2Trigger, 4);
 };
 
 // MT2Znunu --------------------------------
@@ -148,7 +180,6 @@ public:
   Bool_t isPFIDLoose;
   Bool_t isPFIDMedium;
   Bool_t isPFIDTight;
-  Bool_t isTau;
 
   Double_t ChHadFrac;
   Double_t NeuHadFrac;
@@ -157,8 +188,14 @@ public:
   Int_t    ChMult;
   Int_t    NeuMult;
   Int_t    NConstituents;
+  
+  Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
+  Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
+  Double_t TauDR;
+  Double_t TauDPt;
+  Int_t    NTauMatch;
 
-  ClassDef(MT2Jet, 6)
+  ClassDef(MT2Jet, 7)
 };
 
 // MT2Hemi ---------------------------
@@ -207,8 +244,10 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    ID95;
+  Int_t    ID90;
 
-  ClassDef(MT2Elec, 5)
+  ClassDef(MT2Elec, 6)
 };
 
 // MT2Muon ----------------------------------
@@ -226,8 +265,10 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    NMatches;
+  Double_t PtErr;
 
-  ClassDef(MT2Muon, 5)
+  ClassDef(MT2Muon, 6)
 };
 
 
@@ -280,10 +321,10 @@ public:
 
   // HT, MHT, ...
   Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
-  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=0);
@@ -326,9 +367,8 @@ public:
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
   Bool_t   GenLeptFromW(int pid, double pt, double eta);
   Double_t GetLeptPt(int index);
+  Double_t ElClosestJet();
 
-  // Taus
-  Double_t TauClosestJet();
 
   Int_t     NJets;
   Int_t     NJetsIDLoose;
