@@ -456,7 +456,7 @@ void MassAnalysis::FillTree(){
 	TLorentzVector mht30_matched(0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
 	  	TLorentzVector jetT(0,0,0,0);
-	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j]>3.0) ) continue;
+	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
 		bool jet(true);
 		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
@@ -471,6 +471,7 @@ void MassAnalysis::FillTree(){
 			caHT50_matched  += fTR->CAJPt[j]; //HT50
 		}
 	}
+
 	fMT2tree->Znunu.caloMHT30_matched=mht30_matched.Pt();
 	fMT2tree->Znunu.caloHT50_matched =caHT50_matched;
 
