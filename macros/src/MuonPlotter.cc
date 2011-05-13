@@ -444,6 +444,7 @@ void MuonPlotter::doLoop(){
 			if(fCurrentRun != Run){ // get trigger names for each new run
 				fCurrentRun = Run;
 			}
+			
 
 			fCounters[fCurrentSample][Muon]    .fill("All events");
 			fCounters[fCurrentSample][EMu]     .fill("All events");
@@ -4452,11 +4453,8 @@ void MuonPlotter::fillYields(Sample *S){
 	fDoCounting = true;
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
-	// Trigger selection
-	// if( S->datamc == 0 && mumuSignalTrigger() == 1 || S->datamc > 0 ){
-	if(mumuSignalTrigger() && isSSLLMuEvent(mu1, mu2)){
-		// Same-sign loose-loose di muon event
-		// if(isSSLLMuEvent(mu1, mu2)){
+	if(mumuSignalTrigger()){ // Trigger selection
+		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
 				fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
 				fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
@@ -4483,43 +4481,34 @@ void MuonPlotter::fillYields(Sample *S){
 				S->region[Signal].mm.nt00_eta->Fill(MuEta[mu1], MuEta[mu2]);
 				if(S->datamc > 0) S->region[Signal].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5);
 			}
-		// }
+		}
 	}
-	// if( (S->datamc == 0 && singleMuTrigger() ) || S->datamc > 0 ){
 	if(singleMuTrigger() && isSigSupMuEvent()){
-		float prescale = 1.;
-		if(S->datamc == 0) prescale = singleMuPrescale();
-		// if(isSigSupMuEvent()){ // f Ratio
-			if( isTightMuon(0) ){
-				S->region[Signal].mm.fntight->Fill(MuPt[0], MuEta[0], prescale);
-				if(S->datamc > 0) S->region[Signal].mm.sst_origin->Fill(muIndexToBin(0)-0.5);
-			}
-			if( isLooseMuon(0) ){
-				S->region[Signal].mm.fnloose->Fill(MuPt[0], MuEta[0], prescale);
-				if(S->datamc > 0) S->region[Signal].mm.ssl_origin->Fill(muIndexToBin(0)-0.5);
-			}
-		// }
+		if( isTightMuon(0) ){
+			S->region[Signal].mm.fntight->Fill(MuPt[0], MuEta[0], singleMuPrescale());
+			if(S->datamc > 0) S->region[Signal].mm.sst_origin->Fill(muIndexToBin(0)-0.5);
+		}
+		if( isLooseMuon(0) ){
+			S->region[Signal].mm.fnloose->Fill(MuPt[0], MuEta[0], singleMuPrescale());
+			if(S->datamc > 0) S->region[Signal].mm.ssl_origin->Fill(muIndexToBin(0)-0.5);
+		}
 	}
-	// if( (S->datamc == 0 && doubleMuTrigger() ) || S->datamc > 0 ){
 	if(doubleMuTrigger() && isZMuMuEvent()){
-		// if(isZMuMuEvent()){ // p Ratio
-			if( isTightMuon(0) ){
-				S->region[Signal].mm.pntight->Fill(MuPt[0], MuEta[0]);
-				if(S->datamc > 0) S->region[Signal].mm.zt_origin->Fill(muIndexToBin(0)-0.5);
-			}
-			if( isLooseMuon(0) ){
-				S->region[Signal].mm.pnloose->Fill(MuPt[0], MuEta[0]);
-				if(S->datamc > 0) S->region[Signal].mm.zl_origin->Fill(muIndexToBin(0)-0.5);
-			}
-		// }
+		if( isTightMuon(0) ){
+			S->region[Signal].mm.pntight->Fill(MuPt[0], MuEta[0]);
+			if(S->datamc > 0) S->region[Signal].mm.zt_origin->Fill(muIndexToBin(0)-0.5);
+		}
+		if( isLooseMuon(0) ){
+			S->region[Signal].mm.pnloose->Fill(MuPt[0], MuEta[0]);
+			if(S->datamc > 0) S->region[Signal].mm.zl_origin->Fill(muIndexToBin(0)-0.5);
+		}
 	}				
 
 	// EE Channel
 	fCurrentChannel = Electron;
 	int el1(-1), el2(-1);
-	// if( (S->datamc == 0 && elelSignalTrigger() == 1 ) || S->datamc > 0 ){
-	if(elelSignalTrigger() && isSSLLElEvent(el1, el2)){
-		// if( isSSLLElEvent(el1, el2) ){
+	if(elelSignalTrigger()){
+		if( isSSLLElEvent(el1, el2) ){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
 				fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
@@ -4546,44 +4535,35 @@ void MuonPlotter::fillYields(Sample *S){
 				S->region[Signal].ee.nt00_eta->Fill(ElEta[el1], ElEta[el2]);
 				if(S->datamc > 0) S->region[Signal].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5);
 			}
-		// }
+		}
 	}
-	// if( (S->datamc == 0 && singleElTrigger() == 1 ) || S->datamc > 0 ){
 	if(singleElTrigger() && isSigSupElEvent()){
-		float prescale = 1.;
-		if(S->datamc == 0) prescale = singleElPrescale();
-		// if(isSigSupElEvent()){ // f Ratio
-			if( isTightElectron(0) ){
-				S->region[Signal].ee.fntight->Fill(ElPt[0], ElEta[0], prescale);
-				if(S->datamc > 0) S->region[Signal].ee.sst_origin->Fill(elIndexToBin(0)-0.5);
-			}
-			if( isLooseElectron(0) ){
-				S->region[Signal].ee.fnloose->Fill(ElPt[0], ElEta[0], prescale);
-				if(S->datamc > 0) S->region[Signal].ee.ssl_origin->Fill(elIndexToBin(0)-0.5);
-			}
-		// }
+		if( isTightElectron(0) ){
+			S->region[Signal].ee.fntight->Fill(ElPt[0], ElEta[0], singleElPrescale());
+			if(S->datamc > 0) S->region[Signal].ee.sst_origin->Fill(elIndexToBin(0)-0.5);
+		}
+		if( isLooseElectron(0) ){
+			S->region[Signal].ee.fnloose->Fill(ElPt[0], ElEta[0], singleElPrescale());
+			if(S->datamc > 0) S->region[Signal].ee.ssl_origin->Fill(elIndexToBin(0)-0.5);
+		}
 	}
 	int elind;
-	// if( (S->datamc == 0 && doubleElTrigger() == 1 ) || S->datamc > 0 ){
 	if(doubleElTrigger() && isZElElEvent(elind)){
-		// if(isZElElEvent(elind)){ // p Ratio
-			if( isTightElectron(elind) ){
-				S->region[Signal].ee.pntight->Fill(ElPt[elind], ElEta[elind]);
-				if(S->datamc > 0) S->region[Signal].ee.zt_origin->Fill(elIndexToBin(elind)-0.5);
-			}
-			if( isLooseElectron(elind) ){
-				S->region[Signal].ee.pnloose->Fill(ElPt[elind], ElEta[elind]);
-				if(S->datamc > 0) S->region[Signal].ee.zl_origin->Fill(elIndexToBin(elind)-0.5);
-			}
-		// }
+		if( isTightElectron(elind) ){
+			S->region[Signal].ee.pntight->Fill(ElPt[elind], ElEta[elind]);
+			if(S->datamc > 0) S->region[Signal].ee.zt_origin->Fill(elIndexToBin(elind)-0.5);
+		}
+		if( isLooseElectron(elind) ){
+			S->region[Signal].ee.pnloose->Fill(ElPt[elind], ElEta[elind]);
+			if(S->datamc > 0) S->region[Signal].ee.zl_origin->Fill(elIndexToBin(elind)-0.5);
+		}
 	}
 
 	// EMu Channel
 	fCurrentChannel = EMu;
 	int mu(-1), el(-1);
-	// if( (S->datamc == 0 && elmuSignalTrigger() ) || S->datamc > 0 ){
-	if(elmuSignalTrigger() && isSSLLElMuEvent(mu, el)){
-		// if( isSSLLElMuEvent(mu, el) ){
+	if(elmuSignalTrigger()){
+		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
 				fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
@@ -4610,7 +4590,7 @@ void MuonPlotter::fillYields(Sample *S){
 				S->region[Signal].em.nt00_eta->Fill(MuEta[mu], ElEta[el]);
 				if(S->datamc > 0) S->region[Signal].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5);
 			}
-		// }
+		}
 	}
 }
 
@@ -5960,7 +5940,6 @@ bool MuonPlotter::eMuTrigger(){
 	if(fSamples[fCurrentSample].datamc > 0) return true;
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != MuEG1 && fCurrentSample != MuEG2) return false;
-
 	return ( (HLT_Mu17_Ele8_CaloIdL_v1 > 0) || 
 	         (HLT_Mu17_Ele8_CaloIdL_v2 > 0) ||
 	         (HLT_Mu17_Ele8_CaloIdL_v3 > 0) ||
@@ -6683,7 +6662,7 @@ bool MuonPlotter::isGoodPrimElectron(int ele, float ptcut){
 	return true;
 }
 bool MuonPlotter::isGoodSecElectron(int ele, float ptcut){
-	if(ptcut < 0.) ptcut = fC_minEl1pt;
+	if(ptcut < 0.) ptcut = fC_minEl2pt;
 	if(isLooseElectron(ele) == false) return false;
 	if(ElPt[ele] < ptcut) return false;
 	return true;
