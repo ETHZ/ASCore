@@ -144,6 +144,8 @@ void MT2Znunu::Reset(){
 	Jet1Pass_matched          = -999;
 	Jet0Pass_matched          = -999;
 	HTmatched                 = -99999.99;
+	caloMHT30_matched         = -99999.99;
+	caloHT50_matched          = -99999.99;
 	GenZmumu_mll              = -99999.99;
 	GenZmumu_mll_acc          = -99999.99;
 	GenZee_mll                = -99999.99;

@@ -392,7 +392,7 @@ void MassAnalysis::FillTree(){
 	  float jetpt = fTR->CAJPt[j];
 	  TLorentzVector jetT(0,0,0,0);
 
-	  if( jetpt<20 || abs(fTR->CAJEta[j]>3.0) ) continue;
+	  if( jetpt<20 || fabs(fTR->CAJEta[j])>3.0 ) continue;
 
 	  jetT.SetPtEtaPhiM(jetpt, 0, fTR->CAJPhi[j], 0);
 
@@ -443,7 +443,7 @@ void MassAnalysis::FillTree(){
 		if(fTR->PF2PAT3JPt[i]<50 || fabs(fTR->PF2PAT3JEta[i])>3 ) continue;
 		HTmatched += fTR->PF2PAT3JPt[i];
 	}
-	TLorentzVector MET = fMT2tree->pfmet[0];
+	TLorentzVector MET     = fMT2tree->pfmet[0];
 	for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 		if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
 			vectorsumpt_matched_px+=fMT2tree->genlept[gen].lv.Px();
@@ -451,6 +451,29 @@ void MassAnalysis::FillTree(){
 			MET +=fMT2tree->genlept[gen].lv;
 		}
 	}
+	
+	float caHT50_matched=0.0;
+	TLorentzVector mht30_matched(0,0,0,0);
+	for(int j=0; j<fTR->CANJets; ++j){
+	  	TLorentzVector jetT(0,0,0,0);
+	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j]>3.0) ) continue;
+		bool jet(true);
+		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
+			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
+				double deltaR = Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->genlept[gen].lv.Eta(), fTR->CAJPhi[j], fMT2tree->genlept[gen].lv.Phi());
+				if(deltaR < 0.4) jet=false;
+			}
+		}
+		if(  jet == false) continue;	
+	  	jetT.SetPtEtaPhiM(fTR->CAJPt[j], 0, fTR->CAJPhi[j], 0);
+	  	mht30_matched -= jetT;  // MHT30
+	  	if(fTR->CAJPt[j]>50) {
+			caHT50_matched  += fTR->CAJPt[j]; //HT50
+		}
+	}
+	fMT2tree->Znunu.caloMHT30_matched=mht30_matched.Pt();
+	fMT2tree->Znunu.caloHT50_matched =caHT50_matched;
+
 	double mindPhi=10;
 	if(jindi.size()<1){mindPhi = -999.99;}
 	else{

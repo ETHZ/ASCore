@@ -162,18 +162,17 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(HT<fCut_HT_min){return false;}
 	
 	//caloHT and calo MHT
-	
 	TLorentzVector mht30(0,0,0,0);
 	fCaloHT50 =0.0;	
 	for(int j=0; j<fTR->CANJets; ++j){
 		float jetpt = fTR->CAJPt[j];
 	  	TLorentzVector jetT(0,0,0,0);
-		if( jetpt<30 || abs(fTR->CAJEta[j]>3.0) ) continue;
+		if( jetpt<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
 	  	// MHT
 		jetT.SetPtEtaPhiM(jetpt, 0, fTR->CAJPhi[j], 0);
 		mht30 -= jetT;
 		
-		if( jetpt<50 || abs(fTR->CAJEta[j]>3.0) ) continue;
+		if( jetpt<50 || fabs(fTR->CAJEta[j])>3.0 ) continue;
 		// HT
 		fCaloHT50  += jetpt;
 	}
