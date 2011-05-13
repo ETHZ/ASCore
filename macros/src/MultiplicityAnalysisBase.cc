@@ -210,7 +210,16 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		if(invmass > fCut_DiLeptInvMass_max) {return false;}		 
 				 
 	}
-	
+
+	// flag crazy events (dedicated to filter HCAL "laser" events)
+	if(fTR->HCALSumEt > 10000 && fTR->PF2PAT3NJets > 25 ){
+		fCrazyHCAL =1;
+		cout << "WARNING: crazy HCAL event: Run " << fTR->Run << " LS " << fTR->LumiSection  << " Event " << fTR->Event 
+		     << " has HCALSumET " << fTR->HCALSumEt << " njets " << fTR->PF2PAT3NJets << endl;
+	}
+	else    fCrazyHCAL =0;	
+
+
 	// ------------------------------------------------------------------------------------------	
 	return true;	
 }

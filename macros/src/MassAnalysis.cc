@@ -76,7 +76,7 @@ void MassAnalysis::Analyze(){
 
 	// reset tree variables
 	ResetTree();
-	
+
 	// -----------------------------------------------------------
 	// fill fHemiObjects1,2,3
 	for(int i=0; i<gNHemispheres; ++i){ fHemiObjects[i].Reset();}
@@ -342,6 +342,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.LumiSection	   = fTR->LumiSection;
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
+	fMT2tree->misc.CrazyHCAL           = fCrazyHCAL;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (fTR->PFMETPAT)/sqrt(fTR->SumEt);
 	
@@ -616,6 +617,9 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	hemiobject.alphaT  =-999.99;
 	hemiobject.dPhi    =-999.99;
 
+	// protection against crazy HCAL events
+	if(fCrazyHCAL) return;
+
 	// make pseudojets with hemispheres
 	vector<float> px, py, pz, E;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
@@ -748,6 +752,8 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	hemiobject.assoc   = -1;
 	hemiobject.seed    = -1;
 
+	// protection against crazy HCAL events
+	if(fCrazyHCAL) return;
 
 	// make pseudojets with hemispheres
 	vector<TLorentzVector> p4s;

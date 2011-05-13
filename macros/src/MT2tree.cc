@@ -21,6 +21,7 @@ MT2Misc::~MT2Misc(){
 
 void MT2Misc::Reset() {
   HBHENoiseFlag           =  0;
+  CrazyHCAL               =  0;
   isData                  =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
@@ -482,7 +483,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int me
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else if(met==3) {
-	  double mass = GetDiLeptonInvMass(0,1,0,10,1);
+	  double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 	  if(mass > 71 && mass <111) MET = GetMETPlusLeptsLV(1) + pfmet[0] ;
 	  else return -888.;
   }
@@ -501,7 +502,7 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else if(met==3) {
-	  double mass = GetDiLeptonInvMass(0,1,0,10,1);
+	  double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 	  if(mass > 71 && mass <111) MET = GetMETPlusLeptsLV(1) + pfmet[0] ;
 	  else return -888.;
   }
@@ -776,7 +777,7 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
 
   if( met ==3 ){
   // adding OS dilepton LV to MET
-	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,5.0,true);
 	if(dilept_invmass < 111 && dilept_invmass > 71){
 		for(int i=0; i<NEles; ++i){
 			MET = MET + ele[i].lv;
@@ -836,7 +837,7 @@ Double_t MT2tree::GetMT2HemiMinDHT(double testmass, bool massive, int PFJID, dou
 
   if( met ==3 ){
   // adding OS dilepton LV to MET
-	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,5.0,true);
 	if(dilept_invmass < 111 && dilept_invmass > 71){
 		for(int i=0; i<NEles; ++i){
 			MET = MET + ele[i].lv;
@@ -1155,7 +1156,7 @@ Bool_t MT2tree::IsDiLeptonMll(int same_sign, int same_flavour, int flavour, doub
 TLorentzVector MT2tree::GetMETPlusLeptsLV(int OSDiLeptFromZ){
 	TLorentzVector lv = pfmet[0];
 	if(OSDiLeptFromZ ==1) {
-		double mass = GetDiLeptonInvMass(0,1,0,10,1);
+		double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 		if(mass < 0 )               return lv;
 		if(mass < 71 || mass > 111) return lv; 
 	}
@@ -1170,7 +1171,7 @@ TLorentzVector MT2tree::GetMETPlusLeptsLV(int OSDiLeptFromZ){
 
 Double_t MT2tree::GetMETPlusLepts(int OSDiLeptFromZ){
 	if(OSDiLeptFromZ ==1) {
-		double mass = GetDiLeptonInvMass(0,1,0,10,1);
+		double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 		if(mass < 0 )               return -2000;
 		if(mass < 71 || mass > 111) return -1000; 
 	}

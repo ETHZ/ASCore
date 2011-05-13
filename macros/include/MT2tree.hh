@@ -6,6 +6,7 @@
 #include "TVector3.h"
 
 enum {m_jetSize = 40, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=10};
+// ele and muo are 15 previous to MT2_V00-02-03
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -17,6 +18,7 @@ public:
   void Reset();
   
   Bool_t   HBHENoiseFlag;
+  Bool_t   CrazyHCAL;
   Bool_t   isData;
   Int_t    Run;
   Int_t    Event;
@@ -53,7 +55,7 @@ public:
   Double_t caloMHT30;
   Double_t caloMHT40;
   
-  ClassDef(MT2Misc, 14)
+  ClassDef(MT2Misc, 15)
 };
 
 // ----------------------------------------

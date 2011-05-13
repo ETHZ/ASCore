@@ -68,6 +68,8 @@ public:
 	// members
 	float fHT;
 	float fCaloHT50;
+	
+	bool  fCrazyHCAL;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 
