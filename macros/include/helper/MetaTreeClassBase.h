@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri May  6 15:50:31 2011 by ROOT version 5.28/00
+// Sat May 14 20:31:33 2011 by ROOT version 5.28/00
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root
+// found on file: SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -85,6 +85,7 @@ public :
    Int_t           HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS;
    Float_t         Rho;
    Int_t           NVrtx;
+   Float_t         PUWeight;
    Int_t           NMus;
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
@@ -211,6 +212,7 @@ public :
    TBranch        *b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS;   //!
    TBranch        *b_Rho;   //!
    TBranch        *b_NVrtx;   //!
+   TBranch        *b_PUWeight;   //!
    TBranch        *b_NMus;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
@@ -288,9 +290,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
       if (!f) {
-         f = new TFile("SSDLTrees/2011/May6a/DoubleMu-Run2011A-PromptReco-v2-AOD.root");
+         f = new TFile("SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -408,6 +410,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS", &HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS, &b_HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1_PS);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
+   fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
