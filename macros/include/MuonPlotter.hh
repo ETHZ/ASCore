@@ -157,6 +157,7 @@ public:
 	};
 	
 	struct Sample{
+		Sample(){};
 		TString name;
 		TString sname;
 		TFile *file;
@@ -201,7 +202,6 @@ public:
 	void makeElpEffPlots(bool = false);
 
 	void makeMuIsolationPlotsOld();
-	void makeMuPtPlots();
 	
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
@@ -448,7 +448,7 @@ private:
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
-	vector<Sample> fSamples;
+	vector<Sample*> fSamples;
 	map<TString, int> fSampleMap;	// Mapping of sample number to name
 	
 	TFile *fStorageFile;
