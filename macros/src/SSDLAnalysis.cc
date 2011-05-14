@@ -1,5 +1,7 @@
 #include "SSDLAnalysis.hh"
 #include "helper/Monitor.hh"
+#include "helper/PUWeight.h"
+
 
 using namespace std;
 
@@ -7,6 +9,8 @@ const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 const int SSDLAnalysis::gMaxhltbits;
+
+TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	//SetStyle();
@@ -16,6 +20,7 @@ SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	fCutnames[1] = " ... passes primary Vertex cuts";
 	fCutnames[2] = " ... passes triggers (data only)";
 	fCutnames[3] = " ... has at least one loose lepton (mc only)";
+
 
 	fCounter.fill(fCutnames[0], 0.);
 	fCounter.fill(fCutnames[1], 0.);
@@ -27,8 +32,10 @@ SSDLAnalysis::~SSDLAnalysis(){
 }
 
 void SSDLAnalysis::Begin(const char* filename){
-	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
-	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
+	string pileupsrc = string(gBaseDir + "data_pileup.root");
+	SetPileUpSrc(pileupsrc);
+	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
+	ReadPDGTable(gBaseDir + "pdgtable.txt");
 	BookTree();
 }
 
@@ -133,6 +140,7 @@ void SSDLAnalysis::BookTree(){
 	// event properties
 	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
 	fAnalysisTree->Branch("NVrtx",         &fTnvrtx,     "NVrtx/I");
+	fAnalysisTree->Branch("PUWeight",      &fTpuweight,  "PUWeight/F");
 
 	
 	// single-muon properties
@@ -208,7 +216,8 @@ void SSDLAnalysis::Analyze(){
 	ResetTree();
 	
 	// Trigger selection
-	if(fIsData && FillTriggers(fHLTPaths) == false) return;
+	// if(fIsData && FillTriggers(fHLTPaths) == false) return;
+	FillTriggers(fHLTPaths);
 	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
@@ -220,7 +229,8 @@ void SSDLAnalysis::Analyze(){
 	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
 	
 	// Require at least one loose lepton
-	if(!fIsData && (fTnqmus + fTnqels) < 1 ) return;
+	// if(!fIsData && (fTnqmus + fTnqels) < 1 ) return;
+	if( (fTnqmus + fTnqels) < 1 ) return;
 	fCounter.fill(fCutnames[3]);
 
 	// event and run info
@@ -246,7 +256,9 @@ void SSDLAnalysis::Analyze(){
 	// PU correction
 	fTrho   = fTR->Rho;
 	fTnvrtx = fTR->NVrtx;
-	
+	if(!fIsData) fTpuweight = GetPUWeight(fTR->PUnumInteractions);
+	else fTpuweight = 1.;
+
 	int nqmus = selectedMuInd.size();
 	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
 		int index = selectedMuInd[i];
@@ -365,8 +377,9 @@ void SSDLAnalysis::ResetTree(){
 		fHLTPrescales[i] -2;
 	}
 	
-	fTrho   = -999.99;
-	fTnvrtx = -999;
+	fTrho      = -999.99;
+	fTnvrtx    = -999;
+	fTpuweight = -999.99;
 	
 	// muon properties
 	fTnqmus = 0;

@@ -22,7 +22,7 @@
 #include "helper/Utilities.hh"
 #include "base/UserAnalysisBase.hh"
 #include "helper/Monitor.hh"
-
+#include "helper/PUWeight.h"
 
 using namespace std;
 
@@ -53,6 +53,8 @@ private:
 	
 	static const int gMaxhltbits = 300;
 	
+	static TString gBaseDir;
+	
 	TTree* fAnalysisTree;
 	
 	// run/sample properties
@@ -78,6 +80,7 @@ private:
 	// event properties
 	float fTrho;
 	int fTnvrtx;
+	float fTpuweight;
 	
 	//muon properties
 	int   fTnqmus;
