@@ -32,7 +32,7 @@ public:
 	virtual int GetHLTPrescale(string);
 
 	// PileUp reweighting;
-	virtual void  SetPileUpSrc(string, string);
+	virtual void  SetPileUpSrc(string, string = "");
 	virtual float GetPUWeight(int);
 
 	TreeReader *fTR;
