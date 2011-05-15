@@ -200,7 +200,9 @@ void SSDLAnalysis::BookTree(){
 
 	// jet-MET properties
 	fAnalysisTree->Branch("tcMET",         &fTtcMET,    "tcMET/F");
+	fAnalysisTree->Branch("tcMETPhi",      &fTtcMETphi, "tcMETPhi/F");
 	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
+	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi, "pfMETPhi/F");
 	fAnalysisTree->Branch("NJets",         &fTnqjets,   "NJets/I");
 	fAnalysisTree->Branch("JetPt",         &fTJetpt,    "JetPt[NJets]/F");
 	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
@@ -251,7 +253,9 @@ void SSDLAnalysis::Analyze(){
 	}
 	// get METs
 	fTtcMET     = fTR->TCMET;
+	fTtcMETphi  = fTR->TCMETphi;
 	fTpfMET     = fTR->PFMET;
+	fTpfMETphi  = fTR->PFMETphi;
 
 	// PU correction
 	fTrho   = fTR->Rho;
@@ -449,5 +453,7 @@ void SSDLAnalysis::ResetTree(){
 		fTJetbtag[i] = -999.99;
 	}
 	fTtcMET      = -999.99;
+	fTtcMETphi   = -999.99;
 	fTpfMET      = -999.99;
+	fTpfMETphi   = -999.99;
 }

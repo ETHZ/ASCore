@@ -75,7 +75,9 @@ private:
 	float fTJetphi[fMaxNjets];
 	float fTJetbtag[fMaxNjets]; // tight WP: > 2.
 	float fTtcMET;
+	float fTtcMETphi;
 	float fTpfMET;
+	float fTpfMETphi;
 	
 	// event properties
 	float fTrho;
