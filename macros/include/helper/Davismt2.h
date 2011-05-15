@@ -29,12 +29,14 @@ public:
 	void   mt2_massless();
 	void   set_momenta(double *pa0, double *pb0, double* pmiss0);
 	void   set_mn(double mn);
+	inline void set_verbose(int vlevel){verbose = vlevel;};
 	double get_mt2();
 	void   print();
 	int    nevt;
 
 private:
 
+	int verbose;
 	bool   solved;
 	bool   momenta_set;
 	double mt2_b;
