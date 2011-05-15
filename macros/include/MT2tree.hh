@@ -149,7 +149,9 @@ public:
 	Double_t RecoOSee_mll;
 	Double_t RecoOSmumu_mll;
 	Double_t caloMHT30_matched;
+	Double_t caloMHT30_matchedReco;
 	Double_t caloHT50_matched;
+	Double_t caloHT50_matchedReco;
 	Double_t HTmatched;
 	Double_t METplusLeptsPt;
 	Double_t METplusLeptsPtReco;
@@ -160,7 +162,7 @@ public:
 	Double_t Jet0Pass_matched;
 	Double_t Vectorsumpt_matched;
 
-	ClassDef(MT2Znunu, 3);
+	ClassDef(MT2Znunu, 4);
 };
 
 // MT2Jet ----------------------------------

@@ -65,7 +65,6 @@ void MassAnalysis::Begin(const char* filename){
 }
 
 void MassAnalysis::Analyze(){	
-
 	// ---------------------------------------------------
 	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
@@ -135,7 +134,6 @@ void MassAnalysis::FillTree(){
 	if(fJetTaus.NObjs > 40) {cout << "ERROR: fJetTaus.NObjs > 40: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
 	if(fElecs.size()  > 10) {cout << "ERROR: fElecs.size()  > 10: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
 	if(fMuons.size()  > 10) {cout << "ERROR: fMuons.size()  > 10: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
-
 
 	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
@@ -280,7 +278,7 @@ void MassAnalysis::FillTree(){
 			abs(fTR->GenLeptonID[i]) == 16)   mass=0.;    // nu 
 		else   continue;
 		NGenLepts++;
-		if(i >= 40 ) {cout << "ERROR: NGenLepts >=40:" << endl; continue;}
+		if(i >= 30 ) {cout << "ERROR: NGenLepts >=30: skipping remaining genlepts for event " << fTR->Event << endl; continue;}
 		fMT2tree->genlept[i].lv.SetPtEtaPhiM(fTR->GenLeptonPt[i], fTR->GenLeptonEta[i], fTR->GenLeptonPhi[i], mass);
 		fMT2tree->genlept[i].ID       = fTR->GenLeptonID[i];
 		fMT2tree->genlept[i].MID      = fTR->GenLeptonMID[i];
@@ -452,8 +450,10 @@ void MassAnalysis::FillTree(){
 		}
 	}
 	
-	float caHT50_matched=0.0;
-	TLorentzVector mht30_matched(0,0,0,0);
+	float           caHT50_matched    =0.0; 
+	float           caHT50_matchedReco=0.0;
+	TLorentzVector  mht30_matched     (0,0,0,0); 
+	TLorentzVector  mht30_matchedReco (0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
 	  	TLorentzVector jetT(0,0,0,0);
 	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
@@ -471,9 +471,32 @@ void MassAnalysis::FillTree(){
 			caHT50_matched  += fTR->CAJPt[j]; //HT50
 		}
 	}
+	for(int j=0; j<fTR->CANJets; ++j){
+	  	TLorentzVector jetT(0,0,0,0);
+	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+		bool jet(true);
+		// remove overlap from reco electrons and muons
+		for(int e=0; e<fMT2tree->NEles; ++e){
+			double dR=Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->ele[e].lv.Eta(), fTR->CAJPhi[j], fMT2tree->ele[e].lv.Phi());
+			if(dR < 0.4) jet=false;
+		}
+		for(int m=0; m<fMT2tree->NMuons; ++m){
+			double dR=Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->muo[m].lv.Eta(), fTR->CAJPhi[j], fMT2tree->muo[m].lv.Phi());
+			if(dR < 0.4) jet=false;
+		}
+		if(jet==false) continue;
+	  	jetT.SetPtEtaPhiM(fTR->CAJPt[j], 0, fTR->CAJPhi[j], 0);
+	  	mht30_matchedReco -= jetT;  // MHT30
+	  	if(fTR->CAJPt[j]>50) {
+			caHT50_matchedReco  += fTR->CAJPt[j]; //HT50
+		}
+	}
 
-	fMT2tree->Znunu.caloMHT30_matched=mht30_matched.Pt();
-	fMT2tree->Znunu.caloHT50_matched =caHT50_matched;
+
+	fMT2tree->Znunu.caloMHT30_matched    =mht30_matched.Pt();
+	fMT2tree->Znunu.caloMHT30_matchedReco=mht30_matchedReco.Pt();
+	fMT2tree->Znunu.caloHT50_matched     =caHT50_matched;
+	fMT2tree->Znunu.caloHT50_matchedReco =caHT50_matchedReco;
 
 	double mindPhi=10;
 	if(jindi.size()<1){mindPhi = -999.99;}
@@ -531,6 +554,7 @@ void MassAnalysis::FillTree(){
 	// ----------------------------------------------------------------------
 	// fill tree
 	fATree            ->Fill();
+
 }
 
 void MassAnalysis::InterestingEvents(){
