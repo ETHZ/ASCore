@@ -7,22 +7,16 @@ using namespace std;
 MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysisBase(tr){
 	Util::SetStyle();	
 	fCut_PFMET_min                      = 0;
-	fCut_MHT_min                        = 0;
 	fCut_HT_min                         = 0;
+	fCut_caloHT50_min                   = 0;
+	fCut_caloMHT30_min                  = 0;
 	fCut_JPt_hardest_min                = 0;
 	fCut_JPt_second_min                 = 0;
-	fCut_VSPT                           = 9999.99;
 	fCut_DiLeptInvMass_min              = 0;
 	fCut_DiLeptInvMass_max              = 9999.99;
-	fCut_Zselector                      = 0;
-	fCut_Zveto                          = 0;
-	fCut_DiLeptOSSFInvMass_lowercut     = 9999.99;
-	fCut_DiLeptOSSFInvMass_uppercut     =-9999.99;
 	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
-	fCut_ElectronTrigger                = 0;
-	fCut_MuonTrigger                    = 0;
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
@@ -44,44 +38,41 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	fTaus.clear();
 	fJets.clear();
 	fJetTaus.reset();
-	fNJetsAcc=0;
 
 	vector<double> mutight;
-	for(int i=0; i< fTR->PfMuNObjs; ++i){
+	for(int i=0; i< fTR->PfMu3NObjs; ++i){
 		fMuons.push_back(i);
-		mutight.push_back(fTR->PfMuPt[i]);
+		mutight.push_back(fTR->PfMu3Pt[i]);
 	}
 	fMuons      = Util::VSort(fMuons     , mutight);
 	
 	vector<double> eltight;
-	for(int i=0; i< fTR->PfElNObjs; ++i){
+	for(int i=0; i< fTR->PfEl3NObjs; ++i){
 		fElecs.push_back(i);
-		eltight.push_back(fTR->PfElPt[i]);
+		eltight.push_back(fTR->PfEl3Pt[i]);
 	}
 	fElecs      = Util::VSort(fElecs     , eltight);
 	
 	vector<double> pt1; 
-	for(int ij=0; ij < fTR->PF2PATNJets; ++ij){
-		if(fTR->PF2PATJPt[ij] < 20) continue;  // note: ETH ntuple only stores PF2PATJets > 15 GeV (defualt config)
+	for(int ij=0; ij < fTR->PF2PAT3NJets; ++ij){
+		if(fTR->PF2PAT3JPt[ij] < 20) continue;  // note: ETH ntuple only stores PF2PAT3Jets > 15 GeV (defualt config)
 		fJets.push_back(ij);                   // fJets has all jets except for duplicates with selected leptons
-		pt1.push_back(fTR->PF2PATJPt[ij]);
-		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(fTR->PF2PATJPt[ij]); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
-		if(fabs(fTR->PF2PATJEta[ij])>2.4) continue;
-		fNJetsAcc++;
+		pt1.push_back(fTR->PF2PAT3JPt[ij]);
+		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(fTR->PF2PAT3JPt[ij]); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
 	}
 	fJets        = Util::VSort(fJets,       pt1);
-	
+	pt1.clear();
+
+	// !!!!!!!!!
+	// Don't add taus to jets starting from ntuple V02-01-01: jets include taus	
+	// !!!!!!!!!
 	vector<double> taus;
-	for(int i=0; i< fTR->PfTauNObjs; ++i){
-		if(fTR->PfTauPt[i]   < 20 ) continue;
+	for(int i=0; i< fTR->PfTau3NObjs; ++i){
+		if(fTR->PfTau3Pt[i]   < 20    ) continue; // note: taus go up to 2.5 in Eta
 		fTaus.push_back(i);
-		taus.push_back(fTR->PfTauPt[i]);
-		fJetTaus.index.push_back(i); fJetTaus.pt.push_back(fTR->PfTauPt[i]); fJetTaus.isTau.push_back(1); fJetTaus.NObjs++;
-		if(fabs(fTR->PfTauEta[i])>2.4) continue;
-		fNJetsAcc++;
+		taus.push_back(fTR->PfTau3Pt[i]);
 	}
 	fTaus          = Util::VSort(fTaus     , taus);
-	pt1.clear();
 	
 	//sort fJetTaus accorting to Pt
 	fJetTaus.index = Util::VSort(fJetTaus.index, fJetTaus.pt);
@@ -100,18 +91,18 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 	}else if(fElecs.size() + fMuons.size() ==2){
 		int charge1, charge2;
 		if(fElecs.size()==2){
-			charge1=fTR->PfElCharge[fElecs[0]];
-			charge2=fTR->PfElCharge[fElecs[1]];
+			charge1=fTR->PfEl3Charge[fElecs[0]];
+			charge2=fTR->PfEl3Charge[fElecs[1]];
 			if(charge1*charge2==1){fLeptConfig=SS_ee;}
 			else{fLeptConfig=OS_ee;}
 		} else if(fMuons.size()==2){
-			charge1=fTR->PfMuCharge[fMuons[0]];
-			charge2=fTR->PfMuCharge[fMuons[1]];
+			charge1=fTR->PfMu3Charge[fMuons[0]];
+			charge2=fTR->PfMu3Charge[fMuons[1]];
 			if(charge1*charge2==1){fLeptConfig=SS_mumu;}
 			else{fLeptConfig=OS_mumu;}
 		} else{
-			charge1=fTR->PfElCharge[fElecs[0]];
-			charge2=fTR->PfMuCharge[fMuons[0]];			
+			charge1=fTR->PfEl3Charge[fElecs[0]];
+			charge2=fTR->PfMu3Charge[fMuons[0]];			
 			if(charge1*charge2==1){fLeptConfig=SS_emu;}
 			else{fLeptConfig=OS_emu;}
 		}
@@ -134,7 +125,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fTR->PtHat > fCut_PtHat_max ){return false;}
 	
 	// MET
-	if(fTR->PFMET < fCut_PFMET_min){return false;}
+	if(fTR->PFMETPAT < fCut_PFMET_min){return false;}
 	
 	// HLT triggers
 	if(fRequiredHLT.size() !=0 ){
@@ -153,66 +144,61 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 			} 
 		}
 	}
-//	if(fCut_ElectronTrigger == 1){
-//		if(! IsGoodElEvent_RA5()) return false;
-//	}
-//	if(fCut_MuonTrigger ==1 ){
-//		if(! IsGoodMuEvent()) return false;
-//	}
 
 	// HT from jets + taus
 	double HT=0;
 	for(int j=0; j<fJetTaus.NObjs; ++j){
 		if(!fJetTaus.isTau[j]){
-			if(fTR->PF2PATJPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PATJEta[fJetTaus.index[j]])<2.4){
-				HT += fTR->PF2PATJPt[fJetTaus.index[j]];
+			if(fTR->PF2PAT3JPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PAT3JEta[fJetTaus.index[j]])<3.0){
+				HT += fTR->PF2PAT3JPt[fJetTaus.index[j]];
 			}
 		}else {
-			if(fTR->PfTauPt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTauEta[fJetTaus.index[j]]) < 2.4){
-				HT +=fTR->PfTauPt[fJetTaus.index[j]];
+			if(fTR->PfTau3Pt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTau3Eta[fJetTaus.index[j]]) < 3.0){
+				HT +=fTR->PfTau3Pt[fJetTaus.index[j]];
 			}
 		}
 	}
 	fHT = HT;
 	if(HT<fCut_HT_min){return false;}
+	
+	//caloHT and calo MHT
+	TLorentzVector mht30(0,0,0,0);
+	fCaloHT50 =0.0;	
+	for(int j=0; j<fTR->CANJets; ++j){
+		float jetpt = fTR->CAJPt[j];
+	  	TLorentzVector jetT(0,0,0,0);
+		if( jetpt<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+	  	// MHT
+		jetT.SetPtEtaPhiM(jetpt, 0, fTR->CAJPhi[j], 0);
+		mht30 -= jetT;
+		
+		if( jetpt<50 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+		// HT
+		fCaloHT50  += jetpt;
+	}
+	if(fCaloHT50  < fCut_caloHT50_min ) return false;
+	if(mht30.Pt() < fCut_caloMHT30_min) return false;
 
-
-	// leading jets: FIXME: JID ignored
+	// leading jets including JID for jets
 	bool leadingjets(true);
 	if(fCut_JPt_hardest_min > 0){
 		if(fJetTaus.NObjs <1) leadingjets=false;
 		else if(!fJetTaus.isTau[0]){
-			if(fTR->PF2PATJPt[fJetTaus.index[0]] < fCut_JPt_hardest_min || fabs(fTR->PF2PATJEta[fJetTaus.index[0]])>2.4 ) {leadingjets=false;}
+			if(! IsGoodBasicPFJetPAT3(fJetTaus.index[0], fCut_JPt_hardest_min, 2.4)) {leadingjets=false;}
 		}else {
-			if(fTR->PfTauPt[fJetTaus.index[0]]   < fCut_JPt_hardest_min || fabs(fTR->PfTauEta[fJetTaus.index[0]]) >2.4  ) {leadingjets=false;}
+			if(fTR->PfTau3Pt[fJetTaus.index[0]]   < fCut_JPt_hardest_min || fabs(fTR->PfTau3Eta[fJetTaus.index[0]]) >2.4  ) {leadingjets=false;}
 		}
 	}
 	if(fCut_JPt_second_min > 0){
 		if(fJetTaus.NObjs <2) leadingjets=false;
 		else if(!fJetTaus.isTau[1]){
-			if(fTR->PF2PATJPt[fJetTaus.index[1]] < fCut_JPt_second_min || fabs(fTR->PF2PATJEta[fJetTaus.index[1]])>2.4 ) {leadingjets=false;}
+			if(! IsGoodBasicPFJetPAT3(fJetTaus.index[1], fCut_JPt_second_min, 2.4)) {leadingjets=false;}
 		}else {
-			if(fTR->PfTauPt[fJetTaus.index[1]]   < fCut_JPt_second_min || fabs(fTR->PfTauEta[fJetTaus.index[1]]) >2.4  ) {leadingjets=false;}
+			if(fTR->PfTau3Pt[fJetTaus.index[1]]   < fCut_JPt_second_min || fabs(fTR->PfTau3Eta[fJetTaus.index[1]]) >2.4  ) {leadingjets=false;}
 		}
 	}
 	if(leadingjets == false) return false;
 	
-	
-	// MHT from jets plus taus
-	TVector3 MHTall(0., 0., 0.);
-        for(int i=0; i<fTR->PF2PATNJets; ++i) {
-		TVector3 jet;
-		jet.SetPtEtaPhi(fTR->PF2PATJPt[i], fTR->PF2PATJEta[i], fTR->PF2PATJPhi[i]);
-		MHTall += jet;
-	}	
-	for(int t=0; t<fTaus.size(); ++t){
-		TVector3 tau;
-		tau.SetPtEtaPhi(fTR->PfTauPt[fTaus[t]], fTR->PfTauEta[fTaus[t]], fTR->PfTauPhi[fTaus[t]]);
-		MHTall += tau;
-	}
-	fMHTall = MHTall.Pt();
-	if(fMHTall < fCut_MHT_min) {return false;}
-
 	
 	// DiLeptonInvMass_min DiLeptonInvMass_max
 	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee || fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ||
@@ -223,39 +209,15 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		if(invmass > fCut_DiLeptInvMass_max) {return false;}		 
 				 
 	}
-	
-	// Z-bosoon selector or veto
-	if( fLeptConfig==OS_ee ||fLeptConfig==OS_mumu ){
-		double invmass = GetDiLeptInvMass();
-		if( fCut_Zselector==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return true; }	
-		if( fCut_Zveto    ==1 && (invmass > fCut_DiLeptOSSFInvMass_lowercut) && (invmass < fCut_DiLeptOSSFInvMass_uppercut) ) {return false;}	
-	} else if(fCut_Zselector ==1 ) {return false;}
 
-	// VectorSumPt of selected & identified objects(tau, el, mu, jet) and MET
-	double px=0;
-	double py=0;
-	for(int i=0; i<fJets.size(); ++i){
-		px+=fTR->PF2PATJPx[fJets[i]];
-		py+=fTR->PF2PATJPy[fJets[i]];
+	// flag crazy events (dedicated to filter HCAL "laser" events)
+	if(fTR->HCALSumEt > 10000 && fTR->PF2PAT3NJets > 25 ){
+		fCrazyHCAL =1;
+		cout << "WARNING: crazy HCAL event: Run " << fTR->Run << " LS " << fTR->LumiSection  << " Event " << fTR->Event 
+		     << " has HCALSumET " << fTR->HCALSumEt << " njets " << fTR->PF2PAT3NJets << endl;
 	}
-	for(int i=0; i<fMuons.size(); ++i){
-		px+=fTR->PfMuPx[fMuons[i]];
-		py+=fTR->PfMuPy[fMuons[i]];
-	}
-	for(int i=0; i<fElecs.size(); ++i){
-		px+=fTR->PfElPx[fElecs[i]];
-		py+=fTR->PfElPy[fElecs[i]];
-	}
-	for(int i=0; i<fTaus.size(); ++i){
-		px+=fTR->PfTauPx[fTaus[i]];
-		py+=fTR->PfTauPy[fTaus[i]];
-	}
-	px+=fTR->PFMETpx;
-	py+=fTR->PFMETpy;
+	else    fCrazyHCAL =0;	
 
-	fVectorSumPt = sqrt(px*px + py*py);
-
-	if(fVectorSumPt > fCut_VSPT)    return false;
 
 	// ------------------------------------------------------------------------------------------	
 	return true;	
@@ -264,14 +226,14 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 double MultiplicityAnalysisBase::GetDiLeptInvMass(){
 	TLorentzVector p1, p2;
 	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee){
-		p1.SetPtEtaPhiM(fTR->PfElPt[fElecs[0]],fTR->PfElEta[fElecs[0]],fTR->PfElPhi[fElecs[0]], 0. );
-		p2.SetPtEtaPhiM(fTR->PfElPt[fElecs[1]],fTR->PfElEta[fElecs[1]],fTR->PfElPhi[fElecs[1]], 0. );
+		p1.SetPtEtaPhiM(fTR->PfEl3Pt[fElecs[0]],fTR->PfEl3Eta[fElecs[0]],fTR->PfEl3Phi[fElecs[0]], 0. );
+		p2.SetPtEtaPhiM(fTR->PfEl3Pt[fElecs[1]],fTR->PfEl3Eta[fElecs[1]],fTR->PfEl3Phi[fElecs[1]], 0. );
 	} else if(fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ){
-		p1.SetPtEtaPhiM(fTR->PfMuPt[fMuons[0]],fTR->PfMuEta[fMuons[0]],fTR->PfMuPhi[fMuons[0]], 0.105 );
-		p2.SetPtEtaPhiM(fTR->PfMuPt[fMuons[1]],fTR->PfMuEta[fMuons[1]],fTR->PfMuPhi[fMuons[1]], 0.105 );
+		p1.SetPtEtaPhiM(fTR->PfMu3Pt[fMuons[0]],fTR->PfMu3Eta[fMuons[0]],fTR->PfMu3Phi[fMuons[0]], 0.105 );
+		p2.SetPtEtaPhiM(fTR->PfMu3Pt[fMuons[1]],fTR->PfMu3Eta[fMuons[1]],fTR->PfMu3Phi[fMuons[1]], 0.105 );
 	} else if(fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
-		p1.SetPtEtaPhiM(fTR->PfMuPt[fMuons[0]],fTR->PfMuEta[fMuons[0]],fTR->PfMuPhi[fMuons[0]], 0.105 );
-		p2.SetPtEtaPhiM(fTR->PfElPt[fElecs[0]],fTR->PfElEta[fElecs[0]],fTR->PfElPhi[fElecs[0]], 0. );
+		p1.SetPtEtaPhiM(fTR->PfMu3Pt[fMuons[0]],fTR->PfMu3Eta[fMuons[0]],fTR->PfMu3Phi[fMuons[0]], 0.105 );
+		p2.SetPtEtaPhiM(fTR->PfEl3Pt[fElecs[0]],fTR->PfEl3Eta[fElecs[0]],fTR->PfEl3Phi[fElecs[0]], 0. );
 	} else {
 		cout << "ERROR in MultiplicityAnalysisBase::GetDiLeptInvMass" << endl; 
 		return -999.99;
@@ -315,24 +277,18 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_Run_min = int(IntValue); ok = true;
 		} else if( !strcmp(ParName, "Run_max") ){
 			fCut_Run_max = int(IntValue); ok = true;
-		} else if( !strcmp(ParName, "Zselector") ){
-			fCut_Zselector = int(IntValue); ok = true;
-		} else if( !strcmp(ParName, "Zveto") ){
-			fCut_Zveto   = int(IntValue); ok = true;
-		} else if( !strcmp(ParName, "ElectronTrigger") ){
-			fCut_ElectronTrigger   = int(IntValue); ok = true;
-		} else if( !strcmp(ParName, "MuonTrigger") ){
-			fCut_MuonTrigger   = int(IntValue); ok = true;
 		}
 
 		// floats 
 		sscanf(buffer, "%s %f", ParName, &ParValue);
 		if( !strcmp(ParName, "PFMET_min") ){
 			fCut_PFMET_min            = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "MHT_min") ){
-			fCut_MHT_min              = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "HT_min") ){
 			fCut_HT_min               = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "caloHT50_min") ){
+			fCut_caloHT50_min         = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "caloMHT30_min") ){
+			fCut_caloMHT30_min        = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "JPt_hardest_min") ){
 			fCut_JPt_hardest_min      = float(ParValue); ok = true;			
 		} else if( !strcmp(ParName, "JPt_second_min") ){
@@ -341,14 +297,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_DiLeptInvMass_min    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "DiLeptInvMass_max") ){
 			fCut_DiLeptInvMass_max    = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "DiLeptOSSFInvMass_lowercut") ){
-			fCut_DiLeptOSSFInvMass_lowercut    = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "DiLeptOSSFInvMass_uppercut") ){
-			fCut_DiLeptOSSFInvMass_uppercut    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "PtHat_max")){
-			fCut_PtHat_max                     = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "VSPT_max")){
-			fCut_VSPT                          = float(ParValue); ok = true;
+			fCut_PtHat_max            = float(ParValue); ok = true;
 		}  		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
@@ -356,22 +306,16 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 	if(verbose){
 		cout << "setting cuts to: " << endl;
 		cout << "  PFMET_min                   " << fCut_PFMET_min                  <<endl;
-		cout << "  MHT_min                     " << fCut_MHT_min                    <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
+		cout << "  caloHT50_min                " << fCut_caloHT50_min               <<endl;
+		cout << "  caloMHT30_min               " << fCut_caloMHT30_min              <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
 		cout << "  JPt_second_min              " << fCut_JPt_second_min             <<endl;
-		cout << "  VSPT_max                    " << fCut_VSPT                       <<endl;
 		cout << "  DiLeptInvMass_min           " << fCut_DiLeptInvMass_min          <<endl;
 		cout << "  DiLeptInvMass_max           " << fCut_DiLeptInvMass_max          <<endl;		
-		cout << "  Zveto                       " << fCut_Zveto                      <<endl;
-		cout << "  Zselector                   " << fCut_Zselector                  <<endl;
-		cout << "  DiLeptOSSFInvMass_lowercut  " << fCut_DiLeptOSSFInvMass_lowercut <<endl;
-		cout << "  DiLeptOSSFInvMass_uppercut  " << fCut_DiLeptOSSFInvMass_uppercut <<endl;
 		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
-		cout << "  ElectronTrigger             " << fCut_ElectronTrigger            <<endl;
-		cout << "  MuonTrigger                 " << fCut_MuonTrigger                <<endl;
 
 		for(int i=0; i<fRequiredHLT.size(); ++i){
 			cout << "  HLTRequired (logic OR)      " << fRequiredHLT[i]                  <<endl;
@@ -381,4 +325,33 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		}
 		cout << "--------------"    << endl;	
 	}			
+}
+
+
+// ****************************************************************************************************
+
+bool MultiplicityAnalysisBase::IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut){
+	// Basic PF jet cleaning and ID cuts
+	// cut at pt of ptcut (default = 30 GeV)
+	// cut at abs(eta) of absetacut (default = 2.5)
+	if(fTR->PF2PAT3JPt[index] < ptcut           ) return false;
+	if(fabs(fTR->PF2PAT3JEta[index]) > absetacut) return false;
+	if(fTR->PF2PAT3JIDLoose[index]    ==0       ) return false;
+	return true;
+}
+
+bool MultiplicityAnalysisBase::IsGoodPFJetMediumPAT3(int index, double ptcut, double absetacut) {
+	// Medium PF JID
+	if ( ! IsGoodBasicPFJetPAT3(index, ptcut, absetacut)  ) return false;
+	if ( !(fTR->PF2PAT3JNeuHadfrac[index] < 0.95)         ) return false;
+	if ( !(fTR->PF2PAT3JNeuEmfrac[index]  < 0.95)         ) return false;
+	return true;
+}
+
+bool MultiplicityAnalysisBase::IsGoodPFJetTightPAT3(int index, double ptcut, double absetacut) {
+	// Tight PF JID
+	if ( ! IsGoodBasicPFJetPAT3(index, ptcut, absetacut)  ) return false;
+	if ( !(fTR->PF2PAT3JNeuHadfrac[index] < 0.90)         ) return false;
+	if ( !(fTR->PF2PAT3JNeuEmfrac[index]  < 0.90)         ) return false;
+	return true;
 }
