@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat May 14 20:31:33 2011 by ROOT version 5.28/00
+// Sun May 15 19:54:33 2011 by ROOT version 5.28/00
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root
+// found on file: SSDLTrees/2011/May15/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -137,7 +137,9 @@ public :
    Float_t         ElHybRelIso[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
    Float_t         tcMET;
+   Float_t         tcMETPhi;
    Float_t         pfMET;
+   Float_t         pfMETPhi;
    Int_t           NJets;
    Float_t         JetPt[30];   //[NJets]
    Float_t         JetEta[30];   //[NJets]
@@ -264,7 +266,9 @@ public :
    TBranch        *b_ElHybRelIso;   //!
    TBranch        *b_ElMT;   //!
    TBranch        *b_tcMET;   //!
+   TBranch        *b_tcMETPhi;   //!
    TBranch        *b_pfMET;   //!
+   TBranch        *b_pfMETPhi;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
@@ -290,9 +294,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/2011/May15/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
       if (!f) {
-         f = new TFile("SSDLTrees/2011/May14/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
+         f = new TFile("SSDLTrees/2011/May15/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -462,7 +466,9 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElHybRelIso", ElHybRelIso, &b_ElHybRelIso);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
    fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
+   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
+   fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);

@@ -9,8 +9,9 @@
 #include "helper/AnaClass.hh"
 #include "helper/FPRatios.hh"
 #include "helper/Monitor.hh"
-#include "TLorentzVector.h"
+#include "helper/Davismt2.h"
 
+#include "TLorentzVector.h"
 #include "TEfficiency.h"
 #include "TGraphAsymmErrors.h"
 
@@ -25,6 +26,9 @@ public:
 	static const int gNElPtbins  = 5;
 	static const int gNElPt2bins = 5;
 	static const int gNElEtabins = 1;
+	
+	static const int gNNVrtxBins = 10;
+	static int gNVrtxBins[gNNVrtxBins+1];
 	
 	static double gMuPtbins [gNMuPtbins+1];
 	static double gMuPt2bins[gNMuPt2bins+1];
@@ -139,7 +143,7 @@ public:
 		Channel ee;
 	};
 	
-	static const int gNKinVars = 9;
+	static const int gNKinVars = 10;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
 		static int nbins[gNKinVars];
@@ -154,6 +158,7 @@ public:
 		static int nbins[gNSels];
 		TH1D *hiso[gNSels];
 		TH1D *hiso_pt[gNSels][gNMuPt2bins];
+		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
 	struct Sample{
@@ -317,6 +322,7 @@ public:
 	// Event and Object selectors:
 	int getNJets();
 	float getHT();
+	float getMT2(int, int, int);
 	
 	bool isGoodEvent();
 	bool isGoodMuEvent();
@@ -423,18 +429,6 @@ private:
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
-
-	// MetaSample fMS_MuControl;
-	// MetaSample fMS_ElControl;
-	// MetaSample fMS_MuSig;
-	// MetaSample fMS_ElSig;
-	// MetaSample fMS_EMuSig;
-	// MetaSample fMS_MuHTSig;
-	// MetaSample fMS_ElHTSig;
-	// MetaSample fMS_EMuHTSig;
-	// MetaSample fMS_QCD;
-	// MetaSample fMS_EWK;
-	// MetaSample fMS_Signal;
 
 	vector<int> fMCBG;    // SM background MC samples
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
