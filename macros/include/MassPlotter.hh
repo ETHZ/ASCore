@@ -82,25 +82,6 @@ public:
 	};
 	std::vector<sample>  fSamples;
 	
-	struct efficiency{
-		double ele_reco;
-		double ele_reco_err;
-		double muo_reco;
-		double muo_reco_err;
-		double nu_acc;
-		double nu_acc_err;
-		double R(std::string lept){
-			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
-			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
-			else return -1;
-		}
-		double R_err(std::string lept){
-			// error propagation
-			if     (lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			else if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			else return -1;
-		}
-	} fZtonunu_efficiency;
 
 	// probability for W->lnu event to be reconstructed and identified. 
 	struct Wprediction{
@@ -121,7 +102,7 @@ public:
 			if     (lept == "ele" && W_prob("ele")>0){return sqrt(pow(Wenu_acc *Wenu_rec_err ,2) + pow(Wenu_rec *Wenu_acc_err ,2));}
 			else if(lept == "muo" && W_prob("muo")>0){return sqrt(pow(Wmunu_acc*Wmunu_rec_err,2) + pow(Wmunu_rec*Wmunu_acc_err,2));}
 			else return -1;
-		};
+		}
 		double QCD_bg_e;
 		double QCD_bg_mu;
 		double Top_bg_e;
@@ -131,6 +112,34 @@ public:
 		double Other_bg_e;
 		double Other_bg_mu;
 	} fWpred;
+
+	struct Zprediction{
+		double ele_reco;
+		double ele_reco_err;
+		double muo_reco;
+		double muo_reco_err;
+		double nu_acc;
+		double nu_acc_err;
+		double R(std::string lept){
+			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
+			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
+			else return -1;
+		}
+		double R_err(std::string lept){
+			// error propagation
+			if     (lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else return -1;
+		}
+		double QCD_bg_e;
+		double QCD_bg_mu;
+		double Top_bg_e;
+		double Top_bg_mu;
+		double W_bg_e;
+		double W_bg_mu;
+		double Other_bg_e;
+		double Other_bg_mu;
+	} fZpred;
 	// -----------------
 	
 
