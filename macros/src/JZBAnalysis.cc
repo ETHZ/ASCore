@@ -13,7 +13,7 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.25 $";
+string sjzbversion="$Revision: 1.26 $";
 string sjzbinfo="";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
@@ -30,7 +30,7 @@ public:
   float mll; // di-lepton system
   float pt;
   float phi;
-
+  bool is_data;
 
   float pt1; // leading leptons
   float pt2;
@@ -176,6 +176,8 @@ void nanoEvent::reset()
   mll=0; // di-lepton system
   pt=0;
   phi=0;
+
+  is_data=false;
 
   pt1=0;
   pt2=0;
@@ -397,6 +399,7 @@ void JZBAnalysis::Begin(){
 
   myTree = new TTree("events","events");
 
+  myTree->Branch("is_data",&nEvent.is_data,"is_data/B");
   myTree->Branch("mll",&nEvent.mll,"mll/F");
   myTree->Branch("pt",&nEvent.pt,"pt/F");
   myTree->Branch("phi",&nEvent.phi,"phi/F");
@@ -629,6 +632,7 @@ void JZBAnalysis::Analyze() {
   nEvent.passed_triggers=0;
   if ( fDataType_ == "mu" || fDataType_ == "el"  || fDataType_ == "em") 
     {
+      nEvent.is_data=true;
       if( (fDataType_=="mu") && passMuTriggers() ) 
         {
           counters[EV].fill("... pass muon triggers");
