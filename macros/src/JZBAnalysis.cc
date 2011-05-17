@@ -13,7 +13,7 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.26 $";
+string sjzbversion="$Revision: 1.27 $";
 string sjzbinfo="";
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
@@ -55,6 +55,8 @@ public:
   float genMll;
   float genRecoil;
   float genJZB;
+  int   genNjets;
+  int   genNleptons;
   float genRecoilSel;
   float genPt1Sel; // Selected leptons
   float genPt2Sel;
@@ -103,6 +105,13 @@ public:
   int leptonId[jMax];
   int leptonCharge[jMax];
 
+  int pfLeptonNum; // store all leptons (reduntant for the 2 leptons that form the Z)
+  float pfLeptonPt[jMax]; 
+  float pfLeptonEta[jMax];
+  float pfLeptonPhi[jMax];
+  int pfLeptonId[jMax];
+  int pfLeptonCharge[jMax];
+
   int leptonPairNum;
   int leptonPairId[jMax];
   float leptonPairMass[jMax];
@@ -113,7 +122,7 @@ public:
   float pfJetPt[jMax];
   float pfJetEta[jMax];
   float pfJetPhi[jMax];
-  float pfJetID[jMax];
+  bool  pfJetID[jMax];
   float pfJetScale[jMax];
   float pfJetDphiMet[jMax];
   float pfHT;
@@ -124,6 +133,7 @@ public:
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
+  bool   pfJetGoodID[jMax];
 
   int pfJetGoodNum35;
   int pfJetGoodNum33;
@@ -166,6 +176,7 @@ public:
   float weight;
   float PUweight;
   bool passed_triggers;
+  int trigger_bit;
 
 };
 
@@ -201,6 +212,8 @@ void nanoEvent::reset()
   genMll=0;
   genRecoil=0;
   genJZB = 0;
+  genNjets = 0;
+  genNleptons = 0;
   genPt1Sel=0;
   genPt2Sel=0;
   genEta1Sel=0;
@@ -212,6 +225,7 @@ void nanoEvent::reset()
   genRecoilSel=0;
   genJZBSel = 0;
   passed_triggers=0;
+  trigger_bit = 0;
   
   eta1=0; // leading leptons
   eta2=0;
@@ -254,6 +268,15 @@ void nanoEvent::reset()
     leptonCharge[jCounter]=0;
   }
   leptonNum=0;
+
+  for(int jCounter=0;jCounter<jMax;jCounter++){
+    pfLeptonPt[jCounter]=0; 
+    pfLeptonEta[jCounter]=0;
+    pfLeptonPhi[jCounter]=0;
+    pfLeptonId[jCounter]=0;
+    pfLeptonCharge[jCounter]=0;
+  }
+  pfLeptonNum=0;
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
     leptonPairMass[jCounter]=0;
@@ -302,6 +325,7 @@ void nanoEvent::reset()
     pfJetGoodPt[jCounter]=0;
     pfJetGoodEta[jCounter]=0;
     pfJetGoodPhi[jCounter]=0;
+    pfJetGoodID[jCounter]=0;
   }
   pfJetGoodNum=0;
   pfJetGoodNum20=0;
@@ -425,6 +449,8 @@ void JZBAnalysis::Begin(){
   myTree->Branch("genMll",&nEvent.genMll,"genMll/F");
   myTree->Branch("genRecoil",&nEvent.genRecoil,"genRecoil/F");
   myTree->Branch("genJZB",&nEvent.genJZB,"genJZB/F");
+  myTree->Branch("genNjets",&nEvent.genNjets,"genNjets/I");
+  myTree->Branch("genNleptons",&nEvent.genNleptons,"genNleptons/I");
   myTree->Branch("genPt1Sel",&nEvent.genPt1Sel,"genPt1Sel/F");
   myTree->Branch("genPt2Sel",&nEvent.genPt2Sel,"genPt2Sel/F");
   myTree->Branch("genEta1Sel",&nEvent.genEta1Sel,"genEta1Sel/F");
@@ -472,6 +498,13 @@ void JZBAnalysis::Begin(){
   myTree->Branch("leptonId",nEvent.leptonId,"leptonId[leptonNum]/I");
   myTree->Branch("leptonCharge",nEvent.leptonCharge,"leptonCharge[leptonNum]/I");
 
+  myTree->Branch("pfLeptonNum",&nEvent.pfLeptonNum,"pfLeptonNum/I");
+  myTree->Branch("pfLeptonPt",nEvent.pfLeptonPt,"pfLeptonPt[pfLeptonNum]/F");
+  myTree->Branch("pfLeptonEta",nEvent.pfLeptonEta,"pfLeptonEta[pfLeptonNum]/F");
+  myTree->Branch("pfLeptonPhi",nEvent.pfLeptonPhi,"pfLeptonPhi[pfLeptonNum]/F");
+  myTree->Branch("pfLeptonId",nEvent.pfLeptonId,"pfLeptonId[pfLeptonNum]/I");
+  myTree->Branch("pfLeptonCharge",nEvent.pfLeptonCharge,"pfLeptonCharge[pfLeptonNum]/I");
+
   myTree->Branch("leptonPairNum",&nEvent.leptonPairNum,"leptonPairNum/I");
   myTree->Branch("leptonPairMass",nEvent.leptonPairMass,"leptonPairMass[leptonPairNum]/F");
   myTree->Branch("leptonPairDphi",nEvent.leptonPairDphi,"leptonPairDphi[leptonPairNum]/F");
@@ -508,7 +541,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfJetPt",nEvent.pfJetPt,"pfJetPt[pfJetNum]/F");
   myTree->Branch("pfJetEta",nEvent.pfJetEta,"pfJetEta[pfJetNum]/F");
   myTree->Branch("pfJetPhi",nEvent.pfJetPhi,"pfJetPhi[pfJetNum]/F");
-  myTree->Branch("pfJetID",nEvent.pfJetID,"pfJetID[pfJetNum]/F");
+  myTree->Branch("pfJetID",nEvent.pfJetID,"pfJetID[pfJetNum]/B");
   myTree->Branch("pfJetScale",nEvent.pfJetScale,"pfJetScale[pfJetNum]/F");
   myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
@@ -516,9 +549,10 @@ void JZBAnalysis::Begin(){
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
 
   myTree->Branch("pfJetGoodNum",&nEvent.pfJetGoodNum,"pfJetGoodNum/I");
-  myTree->Branch("pfJetGoodPt",nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/B");
 
   myTree->Branch("pfJetGoodNum20",&nEvent.pfJetGoodNum20,"pfJetGoodNum20/I");
   myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
@@ -535,6 +569,7 @@ void JZBAnalysis::Begin(){
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/B");
+  myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
 
 
   // Define counters (so we have them in the right order)
@@ -630,23 +665,26 @@ void JZBAnalysis::Analyze() {
 
   // Trigger information
   nEvent.passed_triggers=0;
-  if ( fDataType_ == "mu" || fDataType_ == "el"  || fDataType_ == "em") 
+  if ( fDataType_ != "mc" ) 
     {
       nEvent.is_data=true;
-      if( (fDataType_=="mu") && passMuTriggers() ) 
-        {
-          counters[EV].fill("... pass muon triggers");
-          nEvent.passed_triggers=1;
-        } 
-      else if ( (fDataType_=="el") && passElTriggers() ) 
+      if ( passElTriggers() ) 
         {
           counters[EV].fill("... pass electron triggers");
           nEvent.passed_triggers=1;
+          nEvent.trigger_bit |= 1;
         } 
-      else if ( (fDataType_=="em") && passEMuTriggers() ) 
+      if ( passMuTriggers() )
+        {
+          counters[EV].fill("... pass muon triggers");
+          nEvent.passed_triggers=1;
+          nEvent.trigger_bit |= (1<<1);
+        } 
+      if ( passEMuTriggers() )
         {
           counters[EV].fill("... pass EM triggers");
           nEvent.passed_triggers=1;
+          nEvent.trigger_bit |= (1<<2);
         }
     }
 
@@ -722,6 +760,29 @@ void JZBAnalysis::Analyze() {
 	}
     }
   
+  // #-- PF muon loop
+  for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
+    {
+      if ( nEvent.pfLeptonNum>=jMax ) break;
+      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfMu3Pt[muIndex];
+      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfMu3Eta[muIndex];
+      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfMu3Phi[muIndex];
+      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 13*fTR->PfMu3Charge[muIndex];
+      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu3Charge[muIndex];
+      nEvent.pfLeptonNum++;
+    }
+
+  // #-- PF electron loop
+  for(int elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++)
+    {
+      if ( nEvent.pfLeptonNum>=jMax ) break;
+      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfEl3Pt[elIndex];
+      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfEl3Eta[elIndex];
+      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfEl3Phi[elIndex];
+      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 11*fTR->PfEl3Charge[elIndex];
+      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfEl3Charge[elIndex];
+      nEvent.pfLeptonNum++;
+    }
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   
@@ -901,14 +962,14 @@ void JZBAnalysis::Analyze() {
         if ( !(jpt>20) ) continue;  
         counters[PJ].fill("... pt>20.");
 
-	nEvent.pfJetPt[nEvent.pfJetNum] = jpt;
-	nEvent.pfJetEta[nEvent.pfJetNum] = jeta;
-	nEvent.pfJetPhi[nEvent.pfJetNum] = jphi;
+	nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
+	nEvent.pfJetEta[nEvent.pfJetNum]   = jeta;
+	nEvent.pfJetPhi[nEvent.pfJetNum]   = jphi;
         nEvent.pfJetScale[nEvent.pfJetNum] = jesC;
-        nEvent.pfJetID[nEvent.pfJetNum]  = static_cast<int>(isJetID);
+        nEvent.pfJetID[nEvent.pfJetNum]    = isJetID;
 	nEvent.pfJetDphiMet[nEvent.pfJetNum] = aJet.DeltaPhi(pfMETvector);
 	nEvent.pfJetNum = nEvent.pfJetNum +1;
-	nEvent.pfHT += jpt;
+	nEvent.pfHT    += jpt;
 
         // Keep central jets
         if ( !(fabs(jeta)<2.6 ) ) continue;
@@ -936,15 +997,16 @@ void JZBAnalysis::Analyze() {
           nEvent.pfJetGoodPt[nEvent.pfJetGoodNum]  = jpt;
           nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
+          nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
           nEvent.pfJetGoodNum++;
         }
-        if ( jpt>20. ) nEvent.pfJetGoodNum20++;
-        if ( jpt>25. ) nEvent.pfJetGoodNum25++;
-        if ( jpt>27. ) nEvent.pfJetGoodNum27++;
+        if ( jpt>20. )  nEvent.pfJetGoodNum20++;
+        if ( jpt>25. )  nEvent.pfJetGoodNum25++;
+        if ( jpt>27. )  nEvent.pfJetGoodNum27++;
         if ( jpt>28.5 ) nEvent.pfJetGoodNum285++;
         if ( jpt>31.5 ) nEvent.pfJetGoodNum315++;
-        if ( jpt>33. ) nEvent.pfJetGoodNum33++;
-        if ( jpt>35. ) nEvent.pfJetGoodNum35++;
+        if ( jpt>33. )  nEvent.pfJetGoodNum33++;
+        if ( jpt>35. )  nEvent.pfJetGoodNum35++;
       }
     
     
@@ -1160,24 +1222,6 @@ void JZBAnalysis::Analyze() {
       nEvent.genId2Sel    = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenID[i2]:fTR->ElGenID[i2]);
       nEvent.genJZBSel    = nEvent.genRecoilSel - (genLep1 + genLep2).Pt();
 	
-
-
-      TLorentzVector tmpVector;
-      tmpVector.SetPtEtaPhiM(fTR->GenLeptonPt[i1],fTR->GenLeptonEta[i1],fTR->GenLeptonPhi[i1],0.);
-      TLorentzVector l1=tmpVector;
-      tmpVector.SetPtEtaPhiM(fTR->GenLeptonPt[i2],fTR->GenLeptonEta[i2],fTR->GenLeptonPhi[i2],0.);
-      TLorentzVector l2=tmpVector;
-      TLorentzVector genZvector = l1 + l2;
-      nEvent.genRecoil  = (-GenMETvector - genZvector).Pt();
-      nEvent.genZPt     = genZvector.Pt();
-      nEvent.genMll     = genZvector.M();
-      nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
-      nEvent.genPt1     = l1.Pt();
-      nEvent.genPt2     = l2.Pt();
-      nEvent.genId1     = fTR->GenLeptonID[i1];
-      nEvent.genId2     = fTR->GenLeptonID[i2];
-      nEvent.genEta1    = fTR->GenLeptonEta[i1];
-      nEvent.genEta2    = fTR->GenLeptonEta[i2];
     }
     myTree->Fill();
   }
@@ -1197,7 +1241,6 @@ void JZBAnalysis::End(){
     for ( counters_t iCount=count_begin; iCount<count_end; 
           iCount = counters_t(iCount+1) ) {
       counters[iCount].print();
-      std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
     }
   }
 
@@ -1262,8 +1305,8 @@ const bool JZBAnalysis::IsCustomEl(const int index){
   // kinematic acceptance
   if(!(fTR->ElPt[index]>10) )return false;
   counters[EL].fill(" ... pt > 10");
-  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
-  counters[EL].fill(" ... |eta| < 2.5");
+  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
+  counters[EL].fill(" ... |eta| < 2.4");
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
   counters[EL].fill(" ... missing inner hits <= 1");
   if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
@@ -1320,15 +1363,17 @@ void JZBAnalysis::GeneratorInfo(void) {
   // Try to find an Z->ll pair inside the acceptance
   double minPt = 20.;
   double mllCut = 20.;
-  double maxEtaEl = 2.5, maxEtaMu = 2.4;
-  // First, look for leptons in acceptance and coming from Z
+  double maxEta = 2.4;
+  double minJPt = 30;
+  double maxJEta = 3.0;
+  // First, look for leptons in acceptance
   vector<lepton> gLeptons;
   for ( int gIndex=0;gIndex<fTR->NGenLeptons; ++gIndex ) {
     if ( fTR->GenLeptonPt[gIndex]>minPt && 
-         (( abs(fTR->GenLeptonID[gIndex])==11 
-            && fabs(fTR->GenLeptonEta[gIndex])<maxEtaEl) 
-          || ( abs(fTR->GenLeptonID[gIndex])==13 
-               && fabs(fTR->GenLeptonEta[gIndex])<maxEtaMu) ) )
+         fabs(fTR->GenLeptonEta[gIndex])<maxEta &&
+         ( abs(fTR->GenLeptonID[gIndex])==11 ||
+           abs(fTR->GenLeptonID[gIndex])==13 ) 
+         )
       {
         TLorentzVector tmpVector;
         tmpVector.SetPtEtaPhiM(fTR->GenLeptonPt[gIndex],fTR->GenLeptonEta[gIndex], 
@@ -1339,40 +1384,58 @@ void JZBAnalysis::GeneratorInfo(void) {
         tmpLepton.index  = gIndex;
         tmpLepton.type   = fTR->GenLeptonID[gIndex];
         tmpLepton.genPt  = tmpVector.Pt();
+        gLeptons.push_back(tmpLepton); 
         //if ( fTR->GenLeptonMID[gIndex] ==23 ) gLeptons.push_back(tmpLepton); // WW study
       }         
   }
-  // Stop here if not even two leptons from Z
-  //  if ( gLeptons.size()<2 ) return;
-  // Problem: we have too many leptons from Z... Will take two first
-  if ( gLeptons.size()>2 ) 
-    std::cerr << "*** WARNING: more than one Z found: " 
-              << gLeptons.size() << std::endl;
+  // Gen leptons are not sorted by Pt...
+  vector<lepton> sortedGLeptons = sortLeptonsByPt(gLeptons);
 
-  // Check for Z in the mll window
-
-  //if ( fabs(genZvector.M()-91.2)>mllCut ) return; // WW study
-
+  // Store actual number of leptons passing selection
+  nEvent.genNleptons = gLeptons.size();
 
   // Now fill information
   TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
-  
   nEvent.genMET     = fTR->GenMET;
+
+  // Number of good jets
+  nEvent.genNjets = 0;
+  for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
+    if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
+    if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
+    ++nEvent.genNjets;
+  }
+
+
+  // Select the two highest-pt leptons compatible with a Z
+  size_t i1 = 0, i2 = 0;
+  if ( sortedGLeptons.size()>1 ) {
+    for ( size_t i=0; i<sortedGLeptons.size()-1; ++i ) {
+      i1 = i;
+      TLorentzVector lp1(sortedGLeptons[i].p);
+      for ( size_t j=i+1; j<sortedGLeptons.size(); ++j ) {
+        i2 = j;
+        TLorentzVector lp2(sortedGLeptons[j].p);
+        if ( fabs( (lp1+lp2).M() - 91.2 ) < mllCut ) break;
+      }
+    }
+  }
   
-  if(gLeptons.size()>0)
+
+  if(sortedGLeptons.size()>0)
     {
-      nEvent.genPt1     = gLeptons[0].p.Pt();
-      nEvent.genId1     = gLeptons[0].type;
-      nEvent.genEta1    = gLeptons[0].p.Eta();
-      nEvent.genMID     = fTR->GenLeptonMID[gLeptons[0].index];
-      nEvent.genGMID    = fTR->GenLeptonGMID[gLeptons[0].index];
-      if(gLeptons.size()>1)
+      nEvent.genPt1     = sortedGLeptons[i1].p.Pt();
+      nEvent.genId1     = sortedGLeptons[i1].type;
+      nEvent.genEta1    = sortedGLeptons[i1].p.Eta();
+      nEvent.genMID     = fTR->GenLeptonMID[sortedGLeptons[i1].index];
+      nEvent.genGMID    = fTR->GenLeptonGMID[sortedGLeptons[i1].index];
+      if(sortedGLeptons.size()>1)
         {
-          TLorentzVector genZvector = gLeptons[0].p + gLeptons[1].p;
+          TLorentzVector genZvector = sortedGLeptons[i1].p + sortedGLeptons[i2].p;
           nEvent.genRecoil  = (-GenMETvector - genZvector).Pt();
-          nEvent.genPt2     = gLeptons[1].p.Pt();
-          nEvent.genId2     = gLeptons[1].type;
-          nEvent.genEta2    = gLeptons[1].p.Eta();
+          nEvent.genPt2     = sortedGLeptons[i2].p.Pt();
+          nEvent.genId2     = sortedGLeptons[i2].type;
+          nEvent.genEta2    = sortedGLeptons[i2].p.Eta();
           nEvent.genZPt     = genZvector.Pt();
           nEvent.genMll     = genZvector.M();
           nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
