@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.114 2011/04/09 10:48:21 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.115 2011/05/04 09:26:50 fronga Exp $
 //
 //
 
@@ -158,6 +158,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
 	fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
 	fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
+        fHpileupstat = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
 	fRunTree     = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
 	fEventTree   = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 
@@ -295,8 +296,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Handle<View<PFMET> > pfmet;
 	iEvent.getByLabel(fPFMETTag, pfmet);
 	
-	Handle<View<pat::MET> > pfMETpat;
-	iEvent.getByLabel(fPFMETPATTag,pfMETpat);  //'pfMET PAT'
+ 	Handle<View<pat::MET> > pfMETpat;
+ 	iEvent.getByLabel(fPFMETPATTag,pfMETpat);  //'pfMET PAT'
 
 
 	Handle<CaloMETCollection> corrmujesmet;
@@ -428,6 +429,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			if( PVI->getBunchCrossing() != 0 ) continue; // only look at in-time pileup
 
 			fTpuNumInteractions  = PVI->getPU_NumInteractions();
+                        fHpileupstat->Fill( fTpuNumInteractions );
 			if(fTpuNumInteractions > gMaxnpileup){
 				edm::LogWarning("NTP") << "@SUB=analyze()"
 					<< "More than " << static_cast<int>(gMaxnpileup)
@@ -444,7 +446,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
 			}		
 		}
-	}
+	} else {
+          // Just store the number of primary vertices
+          fHpileupstat->Fill(vertices->size());
+        }
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Trigger information
@@ -504,12 +509,21 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	fFirstevent = false;
 
-	// Get trigger results
+	// Get trigger results and prescale
 	for(unsigned int i = 0; i < tr.size(); i++ ){
-		bool fired = tr[i].accept();
-		if(fired) fHhltstat->Fill(i);
-		fTHLTres[i] = fired ? 1:0;
-		fTHLTprescale[i] = fHltConfig.prescaleValue(iEvent, iSetup, fTHLTmenu[i]);
+          bool fired = tr[i].accept();
+          if(fired) fHhltstat->Fill(i);
+          fTHLTres[i] = fired ? 1:0;
+          fTHLTprescale[i] = fHltConfig.prescaleValue(iEvent, iSetup, fTHLTmenu[i]);
+//FIXME: TOO MANY ERRORS FOR THE MOMENT.
+//           // Check that there is only 1 L1 seed (otherwise we can't get the combined prescale)
+//           if ( fHltConfig.hltL1GTSeeds(fTHLTmenu[i]).size() == 1 ) {
+//             const std::string l1tname(fHltConfig.hltL1GTSeeds(fTHLTmenu[i]).at(0).second);
+//             if ( l1tname.find(" OR ") == string::npos ) { // Poor man's check...
+//               std::pair<int,int> ps = fHltConfig.prescaleValues(iEvent, iSetup, fTHLTmenu[i]);
+//               fTHLTprescale[i] = ps.first*ps.second; // Multiply L1 and HLT prescales
+//             }
+//           }
 	}
 	for( unsigned int i = 0; i < gMaxl1physbits; ++i ){
 		bool fired = l1GtReadoutRecord->decisionWord()[i];
@@ -981,7 +995,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTegsfphi[eqi]                 = electron.gsfTrack()->phi();
 			fTetrkmomerror[eqi]            = electron.trackMomentumError();
 			fTeecalergerror[eqi]           = electron.ecalEnergyError();
-			fTeelemomerror[eqi]            = electron.electronMomentumError();
+                        // 4_2: take the error on the default momentum
+			fTeelemomerror[eqi]            = electron.p4Error( electron.candidateP4Kind() );
 			fTenbrems[eqi]                 = electron.numberOfBrems();
 			fTee[eqi]                      = electron.energy();
 			fTeet[eqi]                     = electron.et();
@@ -1123,7 +1138,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(energy<fMinebrechitE)continue; 
 		if(fTnEBhits>gMaxnEBhits)
 		{
-			edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of EB rechits exceeded"; fTgoodevent = 1; break;
+                  edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of EB rechits exceeded"; 
+                  fTgoodevent = 1; 
+                  break;
 		}
 
 		double time = ecalrechit->time();
@@ -1134,8 +1151,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		TVector3 hitPos(p.x(),p.y(),p.z());
 		hitPos *= 1.0/hitPos.Mag();
 		hitPos *= energy;	
-		float e4oe1 = EcalSeverityLevelAlgo::swissCross( ebDetId , *ebRecHits );
-		float e2oe9 =EcalSeverityLevelAlgo::E2overE9(ebDetId , *ebRecHits );
+//4_2 		float e4oe1 = EcalSeverityLevelAlgo::swissCross( ebDetId , *ebRecHits );
+//4_2 		float e2oe9 =EcalSeverityLevelAlgo::E2overE9(ebDetId , *ebRecHits );
 
 		fTEBrechitE[fTnEBhits] =  hitPos.Mag();
 		fTEBrechitPt[fTnEBhits] =  hitPos.Pt();
@@ -1143,8 +1160,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTEBrechitPhi[fTnEBhits] = hitPos.Phi() ;
 		fTEBrechitTime[fTnEBhits] = time;
 		fTEBrechitChi2[fTnEBhits] = chi2;
-		fTEBrechitE4oE1[fTnEBhits] =e4oe1 ;
-		fTEBrechitE2oE9[fTnEBhits] = e2oe9;
+//4_2 		fTEBrechitE4oE1[fTnEBhits] =e4oe1 ;
+//4_2 		fTEBrechitE2oE9[fTnEBhits] = e2oe9;
 
 	//	cout << "ebrechit P =" << fTEBrechitE[fTnEBhits] << " Pt = " << fTEBrechitPt[fTnEBhits] ;
 	//	cout << " eta = " << fTEBrechitEta[fTnEBhits] << "phi = " << fTEBrechitPhi[fTnEBhits] << " time = "<< fTEBrechitTime[fTnEBhits] ;
