@@ -284,7 +284,7 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuNTkHits[index] < 11) return false;
 	if(fTR->MuNMuHits[index] < 1)  return false;
 
-	if(fabs(fTR->MuD0BS[index]) > 0.02)    return false;
+	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
 	if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
 
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
@@ -406,7 +406,7 @@ bool UserAnalysisBase::IsLooseNoTightEl(int index){
 
 bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
 	// Returns true if the electron is compatible with the primary vertex (false otherwise)
-	if(fabs(fTR->ElD0BS[ind]) > 0.02) return false;
+	if(fabs(fTR->ElD0PV[ind]) > 0.04) return false;
 	if(fabs(fTR->ElDzPV[ind]) > 1.0) return false;
 	return true;
 }
