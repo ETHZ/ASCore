@@ -34,14 +34,6 @@ options.register ('runon', # register 'runon' option
 options.files= 'file:/scratch/pnef/mc/Fall11/AOD/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_007E0957-964E-E011-BA72-485B39800BBB.root'
 #options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
 #options.files= '/store/data/Run2011A/MuOnia/AOD/PromptReco-v1/000/161/311/E6B512D1-CD57-E011-BC63-001D09F2423B.root'
-#options.files= '/store/mc/Fall10/ZbbToLL_M-40_PtB1-15_TuneZ2_7TeV-madgraph-pythia6/GEN-SIM-RECO/START38_V12-v1/0001/14CCFBFC-DC0D-E011-AAE0-001A64789D70.root'
-#options.files= '/store/mc/Winter10/WtoENu_TuneDW_7TeV-pythia6/GEN-SIM-RECO/E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/0000//32F092B8-2625-E011-A80D-003048D45FD2.root'
-#options.files= '/store/data/Run2010B/Mu/AOD/Nov4ReReco_v1/0000/00309820-0FEA-DF11-AE59-E0CB4E1A118E.root'
-#options.files= '/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/135/735/FAB17A5D-4465-DF11-8DBF-00E08178C031.root'
-#options.files= '/store/mc/Spring10/TTbarJets-madgraph/GEN-SIM-RECO/START3X_V26_S09-v1/0011/A4121AB4-0747-DF11-8984-0030487F171B.root'
-#options.files= 'file:/scratch/stiegerb/MuData.root'
-# options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_RECO.root'
-# options.files= 'file:/data/stiegerb/tempfiles/TTbar_Winter10_AOD.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -55,16 +47,14 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
+    # CMSSW_4_2
+    process.GlobalTag.globaltag = "GR_R_42_V12::All"
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "GR_R_311_V2::All"
-#     process.GlobalTag.globaltag = "GR10_P_V11::All"
+#    process.GlobalTag.globaltag = "GR_R_311_V2::All"
 else:
     # CMSSW_3_8_X:
     process.GlobalTag.globaltag = "START311_V2::All"
 
-
-### b-tagging ##################################################################
-# NOW: Take from AOD, and do matching
 
 ### Input/Output ###############################################################
 # Input
@@ -84,14 +74,8 @@ process.TFileService = cms.Service("TFileService",
 ### Electron ID ##############################################################
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
-### Jet ID ###################################################################
-#process.load('RecoJets.Configuration.JetIDProducers_cff')
-#process.recoJetIdSequence = cms.Sequence( process.ak5JetID )
-
 ### Jet Corrections ##########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookJetEnergyCorrections
-# and http://indico.cern.ch/getFile.py/access?contribId=38&sessionId=4&resId=0&materialId=slides&confId=110072 slide 13
-# to check what cff to use
 # note: this runs the L1Fast-Jet corrections for PF jets. not applied on Calo
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
@@ -102,18 +86,6 @@ process.kt6PFJets.Ghost_EtaMax = cms.double(5.0)
 # Turn-on the FastJet jet area calculation 
 process.ak5PFJets.doAreaFastjet = True
 process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
-
-# Disable DB acccess for the ones that are not in Global Tag yet
-process.ak5PFL1Fastjet.useCondDB    = False
-
-if options.runon=='data':
-	process.jecCorSequence = cms.Sequence(
-		process.ak5CaloJetsL2L3Residual*process.ak5PFJetsL1FastL2L3Residual
-	)
-else:
-	process.jecCorSequence = cms.Sequence(
-		process.ak5CaloJetsL2L3*process.ak5PFJetsL1FastL2L3
-	)
 
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
@@ -176,7 +148,7 @@ from PhysicsTools.PatAlgos.tools.pfTools import *
 ### Configuration in common to all collections
 pfPostfixes = [ 'PF','PF2','PF3' ]
 for pf in pfPostfixes:
-    usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf)
+    usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
     # turn to false when running on data and MC (for the moment)
     getattr(process, 'patElectrons'+pf).embedGenMatch = False
     getattr(process, 'patMuons'+pf).embedGenMatch = False
@@ -316,16 +288,16 @@ process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
 # Add some jet collections
 process.analyze.jets = (
    # Calo jets
-    cms.PSet( prefix = cms.untracked.string('CA'),
-              tag = cms.untracked.InputTag('ak5CaloJets'),
-              isPat = cms.untracked.bool(False),
-              tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-              jet_id = cms.untracked.InputTag('ak5JetID'),
-              sel_minpt  = process.analyze.sel_mincorjpt,
-              sel_maxeta = process.analyze.sel_maxjeta,
-              corrections = cms.string('ak5CaloL2L3'),
-              btag_matchdeltaR = cms.double(0.25),
-              ),
+     cms.PSet( prefix = cms.untracked.string('CA'),
+               tag = cms.untracked.InputTag('ak5CaloJets'),
+               isPat = cms.untracked.bool(False),
+               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+               jet_id = cms.untracked.InputTag('ak5JetID'),
+               sel_minpt  = process.analyze.sel_mincorjpt,
+               sel_maxeta = process.analyze.sel_maxjeta,
+               corrections = cms.string('ak5CaloL2L3'),
+               btag_matchdeltaR = cms.double(0.25),
+               ),
     # PF jets from PF2PAT
     cms.PSet( prefix = cms.untracked.string('PF2PAT'),
               tag = cms.untracked.InputTag('patJetsPF'),
@@ -358,13 +330,14 @@ process.analyze.jets = (
               btag_matchdeltaR = cms.double(0.25),
               ),
     )
-# Add residual correction for running on data
-if options.runon == 'data':
-        process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
-        for extJet in process.analyze.jets:
-            extJet.corrections = extJet.corrections.value() + 'Residual'
-        for pf in pfPostfixes:            
-            getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
+# # Add residual correction for running on data
+# FIXME: NOT EVALUTED YET => NOT PRESENT IN 4_2 GLOBAL TAG FOR NOW
+# if options.runon == 'data':
+#         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
+#         for extJet in process.analyze.jets:
+#             extJet.corrections = extJet.corrections.value() + 'Residual'
+#         for pf in pfPostfixes:            
+#             getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
 
 # Add some PF lepton collections
 process.analyze.leptons = (
@@ -453,6 +426,7 @@ process.analyze.leptons = (
 #                                      lastEvent = cms.untracked.int32(51),
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
+# process.Tracer = cms.Service("Tracer")
 
 # to enable pileUpsubtraction for MET
 # process.pfMETPF.src=cms.InputTag("pfNoPileUpPF")
@@ -466,7 +440,6 @@ process.p = cms.Path(
 	+ process.kt6PFJets
 	+ process.ak5PFJets
         + process.mygenjets
-        + process.jecCorSequence
         + process.simpleEleIdSequence
         + process.metCorSequence
         + process.patPF2PATSequencePF

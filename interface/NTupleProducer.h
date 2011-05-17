@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.90 2011/04/08 16:39:06 fronga Exp $
+// $Id: NTupleProducer.h,v 1.91 2011/05/04 09:26:50 fronga Exp $
 //
 //
 
@@ -250,6 +250,7 @@ private:
 	float fTpuNtrks_highpT[gMaxnpileup];
 	float fTrho; // rho from L1FastJetCorrection
 	// float fTpuInstLumi[gMaxnpileup];
+        TH1I* fHpileupstat;
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;
