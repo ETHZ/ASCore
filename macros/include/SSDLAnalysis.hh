@@ -95,8 +95,6 @@ private:
 	int   fTmutight       [fMaxNmus]; // 0 for loose (but not tight), 1 for tight
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
-	float fTmud0bs        [fMaxNmus];
-	float fTmudzbs        [fMaxNmus];
 	float fTmuptE         [fMaxNmus];
 	int   fTmuid          [fMaxNmus];
 	int   fTmumoid        [fMaxNmus];

@@ -154,8 +154,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuIsoHybrid"   ,&fTmuisohyb,       "MuIsoHybrid[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
-	fAnalysisTree->Branch("MuD0BS"        ,&fTmud0bs,         "MuD0BS[NMus]/F");
-	fAnalysisTree->Branch("MuDzBS"        ,&fTmudzbs,         "MuDzBS[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
 	fAnalysisTree->Branch("MuGenID"       ,&fTmuid,           "MuGenID[NMus]/I");
 	fAnalysisTree->Branch("MuGenMoID"     ,&fTmumoid,         "MuGenMoID[NMus]/I");
@@ -277,8 +275,6 @@ void SSDLAnalysis::Analyze(){
 		else fTmuisohyb[i] = fTmuiso[i]*fTmupt[i] / 20.;
 		fTmud0       [i] = fTR->MuD0PV[index];
 		fTmudz       [i] = fTR->MuDzPV[index];
-		fTmud0bs     [i] = fTR->MuD0BS[index];
-		fTmudzbs     [i] = fTR->MuDzBS[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
 		
 		if(fIsData == false){ // mc truth information
@@ -397,8 +393,6 @@ void SSDLAnalysis::ResetTree(){
 		fTmuisohyb      [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
-		fTmud0bs        [i] = -999.99;
-		fTmudzbs        [i] = -999.99;
 		fTmuptE         [i] = -999.99;
 		fTmuid          [i] = -999;
 		fTmumoid        [i] = -999;

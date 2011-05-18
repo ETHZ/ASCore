@@ -382,6 +382,10 @@ bool UserAnalysisBase::IsLooseEl(int index){
 	if(!fTR->ElEcalDriven[index]) return false;
 	if(fTR->ElCaloEnergy[index] < 10.) return false;
 	
+	// Make CaloIsoVL triggers fully efficient:
+	if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElEt[index] > 0.2) return false;
+	if(fTR->ElDR03HcalTowerSumEt[index] /fTR->ElEt[index] > 0.2) return false;
+	
     // (El.Id cuts: WP90%; El.Convers.Reject.: WP80%; El.RelIso: Loose)	
 	if(!IsGoodElId_WP90(index)) return false;
 	if(fTR->ElNumberOfMissingInnerHits[index] > 0) return false; // Ask for tighter WP80 conversion rejection
