@@ -96,8 +96,6 @@ public :
    Float_t         MuIsoHybrid[5];   //[NMus]
    Float_t         MuD0[5];   //[NMus]
    Float_t         MuDz[5];   //[NMus]
-   Float_t         MuD0BS[5];   //[NMus]
-   Float_t         MuDzBS[5];   //[NMus]
    Float_t         MuPtE[5];   //[NMus]
    Int_t           MuGenID[5];   //[NMus]
    Int_t           MuGenMoID[5];   //[NMus]
@@ -225,8 +223,6 @@ public :
    TBranch        *b_MuIsoHybrid;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
-   TBranch        *b_MuD0BS;   //!
-   TBranch        *b_MuDzBS;   //!
    TBranch        *b_MuPtE;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenMoID;   //!
@@ -425,8 +421,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuIsoHybrid", MuIsoHybrid, &b_MuIsoHybrid);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
-   fChain->SetBranchAddress("MuD0BS", MuD0BS, &b_MuD0BS);
-   fChain->SetBranchAddress("MuDzBS", MuDzBS, &b_MuDzBS);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenMoID", MuGenMoID, &b_MuGenMoID);

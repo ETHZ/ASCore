@@ -22,13 +22,16 @@ public:
 	// Binning
 	static const int gNMuPtbins  = 5;
 	static const int gNMuPt2bins = 5;
-	static const int gNMuEtabins = 1;
+	static const int gNMuEtabins = 8;
 	static const int gNElPtbins  = 5;
 	static const int gNElPt2bins = 5;
-	static const int gNElEtabins = 1;
+	static const int gNElEtabins = 6;
 	
-	static const int gNNVrtxBins = 10;
-	static int gNVrtxBins[gNNVrtxBins+1];
+	static const int gNNVrtxBins = 9;
+	static double gNVrtxBins[gNNVrtxBins+1];
+
+	static const int gNJetPtBins = 10;
+	static double gJetPtBins[gNJetPtBins+1];
 	
 	static double gMuPtbins [gNMuPtbins+1];
 	static double gMuPt2bins[gNMuPt2bins+1];
@@ -42,46 +45,40 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		// DoubleMu = sample_begin, DoubleEle, MuEG, MuHad, ElectronHad,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
-		TTJets, WJets, DYJets, WW, WZ, ZZ,
+		MuHad1, MuHad2, EleHad1, EleHad2,
+		TTJets, WJets, DYJets, WW, WZ, ZZ, GJets40, GJets100, GJets200,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
-		// LM0, LM9, LM11,
 		QCDMuEnr10,
-		QCD5to15,
-		QCD15to30,
-		QCD30to50,
-		QCD50to80,
-		QCD80to120,
-		QCD120to170,
-		QCD170to300,
-		QCD300to470,
-		QCD470to600,
-		QCD600to800,
-		QCD800to1000,
-		QCD1000to1400,
-		QCD1400to1800,
+		QCD5,
+		QCD15,
+		QCD30,
+		QCD50,
+		QCD80,
+		QCD120,
+		QCD170,
+		QCD300,
+		QCD470,
+		QCD600,
+		QCD800,
+		QCD1000,
+		QCD1400,
 		QCD1800,
-		// QCD50to100MG,
-		// QCD100to250MG,
-		// QCD250to500MG,
-		// QCD500to1000MG,
-		// QCD1000MG,
+		QCD50MG,
+		QCD100MG,
+		QCD250MG,
+		QCD500MG,
+		QCD1000MG,
 		gNSAMPLES
 	};
-	enum gOldSample { // temporary
-		oldsample_begin,
-		MuA = sample_begin, MuB, EGA, EGB, JMA, JMB, MultiJet,
-		TTbar, ZJets, AstarJets, VVJets, QCD15, QCD30, QCD80, QCD170,
-		SSWWDPS, SSWWSPSPos, SSWWSPSNeg,
-		InclMu,
-		gNOLDSAMPLES
+	enum gFPSwitch{
+		SigSup,
+		ZDecay
 	};
 	enum gRegion {
 		region_begin,
 		Signal = region_begin,
-		SigSup,
-		ZDecay,
+		// Control,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -125,6 +122,34 @@ public:
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
 
+		TH2D *fntight_nv; // pt vs nvrtx
+		TH2D *fnloose_nv;
+		TH2D *pntight_nv; // pt vs nvrtx
+		TH2D *pnloose_nv;
+
+		// Binning in closest jet pt
+		TH2D *nt20_jpt; // pt of jet closest to 1 vs 2
+		TH2D *nt10_jpt;
+		TH2D *nt01_jpt;
+		TH2D *nt00_jpt;
+		TH2D *fntight_jpt; // pt vs closest jet pt
+		TH2D *fnloose_jpt; 
+		TH2D *pntight_jpt; // pt vs closest jet pt
+		TH2D *pnloose_jpt;
+
+		// Gen matched yields: t = tight, p = prompt, etc.
+		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
+		TH2D *npp_cm_pt; // charge misid
+		TH2D *nfp_pt;
+		TH2D *npf_pt; // only filled for e/mu
+		TH2D *nff_pt;
+		TH2D *nt2pp_pt; // pp/fp/.. in tt window, binned in pt1 vs pt2
+		TH2D *nt2pp_cm_pt; // charge misid
+		TH2D *nt2fp_pt;
+		TH2D *nt2pf_pt; // only filled for e/mu
+		TH2D *nt2ff_pt;
+
+		// Origin histos
 		TH2D *nt11_origin;
 		TH2D *nt10_origin;
 		TH2D *nt01_origin;
@@ -205,8 +230,6 @@ public:
 	void makeElfEffPlots(bool = false);
 	void makeMupEffPlots(bool = false);
 	void makeElpEffPlots(bool = false);
-
-	void makeMuIsolationPlotsOld();
 	
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
@@ -216,17 +239,16 @@ public:
 	void makeNT2KinPlots();
 	void fillKinematicHistos(gSample);
 	
+	void makeFRvsNVrtxPlots(gChannel);
+	void makeFRvsEtaPlots(gChannel);
+	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
 	void makeNT012Plots(vector<int>, gChannel, gRegion = Signal);
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
 	void makeIntPrediction(TString);
-	
-	void makeMuIsoVsPtPlot(int, int, TCut, int, int, TCut, TString = "IsovsPt", bool = false);
-	void makeMuIsoVsPtPlot(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
-	void makeMuIsoVsPtPlot(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TString = "IsovsPt", bool = false);
-	void makeMuIsoVsNJetsPlot(int, int, TCut, int, int, TCut, TString = "IsovsNJets", bool = false);
+	void makeIntMCClosure(TString);
 	
 	//////////////////////////////
 	// Fake ratios
@@ -243,21 +265,22 @@ public:
 	// Calculate from pre stored numbers, with fixed selections:
 	void fillMuElRatios(vector<int>);
 
-	TH1D* fillMuRatioPt(int, gRegion, bool = false);
-	TH1D* fillMuRatioPt(vector<int>, gRegion, bool = false);
-	TH1D* fillElRatioPt(int, gRegion, bool = false);
-	TH1D* fillElRatioPt(vector<int>, gRegion, bool = false);
+	TH1D* fillMuRatioPt(int, gFPSwitch, bool = false);
+	TH1D* fillMuRatioPt(vector<int>, gFPSwitch, bool = false);
+	TH1D* fillElRatioPt(int, gFPSwitch, bool = false);
+	TH1D* fillElRatioPt(vector<int>, gFPSwitch, bool = false);
 
-	void calculateRatio(vector<int>, gChannel, gRegion, TH2D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gRegion, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&);
-	void calculateRatio(vector<int>, gChannel, gRegion, float&, float&, float&);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatioNV(vector<int>, gChannel, gFPSwitch, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
-	TEfficiency *mergeDataEfficiencies(vector<int>, gChannel, gRegion, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
-	TEfficiency *getEfficiency(Sample*, gChannel, gRegion, int = 0, bool = false);
-	TGraphAsymmErrors *combineMCEfficiencies(vector<int>, gChannel, gRegion, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
+	TEfficiency *mergeDataEfficiencies(vector<int>, gChannel, gFPSwitch, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
+	TEfficiency *getEfficiency(Sample*, gChannel, gFPSwitch, int = 0, bool = false);
+	TGraphAsymmErrors *combineMCEfficiencies(vector<int>, gChannel, gFPSwitch, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
 
-	void getPassedTotal(vector<int>, gChannel, gRegion, TH2D*&, TH2D*&, bool = false);
+	void getPassedTotal(vector<int>, gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -280,6 +303,8 @@ public:
 	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
 	void printCutFlows(TString);
+	void printCutFlow(gChannel, int, int);
+	void printCutFlowsOld(TString);
 	
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
@@ -323,6 +348,7 @@ public:
 	int getNJets();
 	float getHT();
 	float getMT2(int, int, int);
+	float getClosestJetPt(int, gChannel);
 	
 	bool isGoodEvent();
 	bool isGoodMuEvent();
@@ -336,6 +362,7 @@ public:
 	
 	bool passesHTCut(float);
 	bool passesMETCut(float = -1.);
+	bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	bool passesMllEventVeto(float = 12.);
 
@@ -390,16 +417,20 @@ public:
 	bool isLooseNoTightMuon(int);
 	bool isGoodPrimMuon(int, float = -1.);
 	bool isGoodSecMuon(int, float = -1.);
-	bool isFakeTTbarMuon(int);
-	bool isPromptTTbarMuon(int);
-	bool isPromptSUSYMuon(int);
+
+	bool isFakeMuon(int);
+	bool isPromptMuon(int);
+	bool isChargeMatchedMuon(int);
 
 	bool isGoodElectron(int, float = -1.);
 	bool isLooseElectron(int);
 	bool isTightElectron(int);
 	bool isGoodPrimElectron(int, float = -1.);
 	bool isGoodSecElectron(int, float = -1.);
-	bool isPromptSUSYElectron(int);
+
+	bool isFakeElectron(int);
+	bool isPromptElectron(int);
+	bool isChargeMatchedElectron(int);
 
 	bool isGoodJet(int, float = 30.);
 	bool isGoodJet_LooseLep(int);

@@ -2465,7 +2465,7 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 }
 
 //____________________________________________________________________________
-void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt){
+void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt, bool logy){
 	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
 	col->SetFillStyle(0);
 	col->SetFrameFillStyle(0);
@@ -2473,6 +2473,7 @@ void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Opti
 	gPad->SetFillStyle(0);
 	o->Draw(drawopt);
 	gPad->RedrawAxis();
+	if(logy) gPad->SetLogy(1);
 	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
