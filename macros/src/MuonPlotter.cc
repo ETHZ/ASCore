@@ -5624,7 +5624,7 @@ void MuonPlotter::fillYields(Sample *S){
 					fOUTSTREAM << " in dataset " << setw(12) << S->sname;
 					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
 					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
-					fOUTSTREAM << " MT2 = " << setw(5) << Form("%6.2f", getMT2(el1, el2, 2)) << endl;
+					fOUTSTREAM << " MT2 = " << setw(5) << Form("%6.2f", getMT2(mu, el, 2)) << endl;
 				}
 				if(S->datamc > 0){
 					S->region[Signal].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
