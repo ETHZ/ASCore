@@ -55,9 +55,9 @@ int     MuonPlotter::IsoPlots::nbins[MuonPlotter::gNSels]    = {20, 20};
 
 // Charge misid probability (from Hamed)
 double MuonPlotter::gEChMisIDB   = 0.0002; // preliminary number
-double MuonPlotter::gEChMisIDB_E = 0.00004; // error (prelim, assume 10% for now)
+double MuonPlotter::gEChMisIDB_E = 0.0001; // error (prelim, assume 10% for now)
 double MuonPlotter::gEChMisIDE   = 0.0028; // preliminary number
-double MuonPlotter::gEChMisIDE_E = 0.00056; // error (prelim, assume 10% for now)
+double MuonPlotter::gEChMisIDE_E = 0.0004; // error (prelim, assume 10% for now)
 
 //____________________________________________________________________________
 MuonPlotter::MuonPlotter(){
@@ -392,7 +392,7 @@ void MuonPlotter::doAnalysis(){
 	makeMuIsolationPlots();
 	makeElIsolationPlots();
 	makeNT2KinPlots();
-
+	
 	makeFRvsPtPlots(Muon,     SigSup);
 	makeFRvsPtPlots(Electron, SigSup);
 	makeFRvsPtPlots(Muon,     ZDecay);
@@ -403,7 +403,7 @@ void MuonPlotter::doAnalysis(){
 	makeFRvsNVrtxPlots(Electron);
 	makeFRvsClJPtPlots(Muon);
 	makeFRvsClJPtPlots(Electron);
-
+	
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
 	// makeElfRatioPlots(false);
@@ -430,18 +430,16 @@ void MuonPlotter::doAnalysis(){
 
 //____________________________________________________________________________
 void MuonPlotter::sandBox(){
-	fOutputSubDir = "sandbox";
+	fOutputSubDir = "sandbox/";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
 
-	TH1D *cljetpt_mu     = new TH1D("clJetPt_mu", "Closest Jet Pt for muons",             30, 0., 150.);
-	TH1D *cljetpt_el     = new TH1D("clJetPt_el", "Closest Jet Pt for electrons",         30, 0., 150.);
-	TH1D *cljetptdiff_mu = new TH1D("clJetPtDiff_mu", "Closest Jet Pt minus muon Pt",     30, -50., 150.);
-	TH1D *cljetptdiff_el = new TH1D("clJetPtDiff_el", "Closest Jet Pt minus electron Pt", 30, -50., 150.);
-	TH2D *cljetptvsmupt  = new TH2D("clJetPtVsMuPt", "Closest Jet Pt for muons",          30, 0., 150., 30., 0., 150.);
-	TH2D *cljetptvselpt  = new TH2D("clJetPtVsElPt", "Closest Jet Pt for electrons",      30, 0., 150., 30., 0., 150.);
+	TH1D *h_iso_fake   = new TH1D("h_iso_fake",   "Isolation for fake muons in ttbar", 100, 0., 1.);
+	TH1D *h_iso_prompt = new TH1D("h_iso_prompt", "Isolation for prompt muons ttbar",  100, 0., 1.);
 	Sample *S = fSamples[TTJets];
 
 	TTree *tree = S->tree;
-	const bool isdata = (S->datamc)==0;
 
 	// Event loop
 	tree->ResetBranchAddresses();
@@ -459,31 +457,84 @@ void MuonPlotter::sandBox(){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-		if(fCurrentRun != Run){ // get trigger names for each new run
-			fCurrentRun = Run;
-		}
-		
 		int ind1(-1), ind2(-1);
-		if(hasLooseMuons(ind1, ind2) > 0){
-			cljetpt_mu->Fill(getClosestJetPt(ind1, Muon), PUWeight);
-			cljetptvsmupt->Fill(getClosestJetPt(ind1, Muon), MuPt[ind1], PUWeight);
-			cljetptdiff_mu->Fill(getClosestJetPt(ind1, Muon) - MuPt[ind1], PUWeight);
-		}
-		if(hasLooseElectrons(ind1, ind2) > 0){
-			cljetpt_el->Fill(getClosestJetPt(ind1, Electron), PUWeight);
-			cljetptvselpt->Fill(getClosestJetPt(ind1, Electron), ElPt[ind1], PUWeight);
-			cljetptdiff_el->Fill(getClosestJetPt(ind1, Electron) - ElPt[ind1], PUWeight);
+		
+		for(size_t i = 0; i < NMus; ++i){
+			if(MuIso[i] > 1.0) continue;
+			if(isFakeMuon(i))   h_iso_fake->Fill(MuIso[i]);
+			if(isPromptMuon(i)) h_iso_prompt->Fill(MuIso[i]);
 		}
 	}
 	cout << endl;
 
-	printObject(cljetpt_mu,     "ClJetPt_Mu", "ClJetPt_Mu", "PE1", true	);
-	printObject(cljetpt_el,     "ClJetPt_El", "ClJetPt_El", "PE1", true	);
-	printObject(cljetptdiff_mu, "ClJetPtDiff_Mu", "ClJetPtDiff_Mu", "PE1", true);
-	printObject(cljetptdiff_el, "ClJetPtDiff_El", "ClJetPtDiff_El", "PE1", true);
-	printObject(cljetptvsmupt,  "ClJetPtVsMuPt", "ClJetPtVsMuPt", "colz");
-	printObject(cljetptvselpt,  "ClJetPtVsElPt", "ClJetPtVsElPt", "colz");
+	h_iso_prompt->Scale(1./h_iso_prompt->Integral());
+	h_iso_fake  ->Scale(7./h_iso_fake->Integral());
 
+	TH1D *hstack = new TH1D("stacked", "stacked", 100, 0., 1.);
+	hstack->Add(h_iso_prompt);
+	hstack->Add(h_iso_fake);
+	hstack->SetFillStyle(0);
+	hstack->SetLineWidth(3);
+	hstack->SetLineColor(kBlack);
+
+	// h_iso_prompt->SetMaximum(20.);
+	h_iso_fake  ->SetMaximum(h_iso_prompt->GetMaximum());
+	h_iso_prompt->SetMinimum(0.0);
+	h_iso_fake  ->SetMinimum(0.0);
+	hstack      ->SetMinimum(0.0);
+
+	h_iso_prompt->SetXTitle(convertVarName("MuIso[0]"));
+	h_iso_fake->SetXTitle(convertVarName("MuIso[0]"));
+	hstack->SetXTitle(convertVarName("MuIso[0]"));
+
+	h_iso_prompt->SetLineWidth(2);
+	h_iso_prompt->SetLineColor(kBlue);
+	h_iso_prompt->SetFillColor(kBlue);
+	h_iso_prompt->SetFillStyle(3004);
+
+	h_iso_fake->SetLineWidth(2);
+	h_iso_fake->SetLineColor(kRed);
+	h_iso_fake->SetFillColor(kRed);
+	h_iso_fake->SetFillStyle(3005);
+
+	// TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	// lat->SetTextColor(kBlack);
+	// lat->SetTextSize(0.04);
+	
+	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
+	leg->AddEntry(h_iso_prompt, "prompt","f");
+	leg->AddEntry(h_iso_fake,   "fake",  "f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	TCanvas *c_temp = new TCanvas("IsoMockup", "Isolation", 0, 0, 800, 600);
+	c_temp->cd();
+
+	// gPad->SetLogy();
+	h_iso_fake->Draw("hist");
+	h_iso_prompt->DrawCopy("hist same");
+	hstack->Draw("hist same");
+	leg->Draw();
+	gPad->RedrawAxis();
+	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+	// lat->DrawLatex(0.11,0.92, name);
+	
+	double miny = 0.;
+	double maxy = h_iso_prompt->GetMaximum();
+
+	TLine *l1;
+	l1 = new TLine(0.15,miny,0.15,0.3805);
+	l1->SetLineColor(kBlack);
+	l1->SetLineWidth(2);
+	l1->Draw();
+	
+	
+	Util::PrintNoEPS(c_temp, "IsoMockup", fOutputDir + fOutputSubDir, NULL);
+	delete h_iso_prompt, h_iso_fake, hstack;
+	delete c_temp, leg;
+	// delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
 
@@ -2684,7 +2735,7 @@ void MuonPlotter::fillKinematicHistos(gSample i){
 			p2.SetPtEtaPhiM(ElPt[el], ElEta[el], ElPhi[el], gMEL);
 			float mass = (p1+p2).M();
 			KP0->hvar[8]->Fill(mass,                  puweight); // EM
-			KP0->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+			KP0->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
 			if(isTightMuon(mu) && isTightElectron(el)){ // tight-tight
 				KP1->hvar[0]->Fill(getHT(),               puweight);
 				KP1->hvar[1]->Fill(pfMET,                 puweight);
@@ -2692,7 +2743,7 @@ void MuonPlotter::fillKinematicHistos(gSample i){
 				KP1->hvar[3]->Fill(ptmax,                 puweight);
 				KP1->hvar[4]->Fill(ptmin,                 puweight);
 				KP1->hvar[8]->Fill(mass,                  puweight); // EM
-				KP1->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+				KP1->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
 				if( isSSLLElMuEvent(mu, el) ){
 					KP2->hvar[0]->Fill(getHT(),               puweight);
 					KP2->hvar[1]->Fill(pfMET,                 puweight);
@@ -2700,7 +2751,7 @@ void MuonPlotter::fillKinematicHistos(gSample i){
 					KP2->hvar[3]->Fill(ptmax,                 puweight);
 					KP2->hvar[4]->Fill(ptmin,                 puweight);
 					KP2->hvar[8]->Fill(mass,                  puweight); // EM						
-					KP2->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+					KP2->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
 				}
 			}
 		}
