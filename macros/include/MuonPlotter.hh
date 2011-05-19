@@ -41,6 +41,10 @@ public:
 	static double gElPt2bins[gNElPt2bins+1];
 	static double gElEtabins[gNElEtabins+1];
 
+	static double gEChMisIDB;
+	static double gEChMisIDB_E;
+	static double gEChMisIDE;
+	static double gEChMisIDE_E;
 
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
@@ -158,6 +162,13 @@ public:
 		TH1D *ssl_origin;
 		TH1D *zt_origin;
 		TH1D *zl_origin;
+
+		// OS Yields
+		// Only filled for electrons
+		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
+		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
+		TH2D *nt20_OS_EE_pt; // BB = barrel/barrel, EE = endcap/endcap
+		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
 	};
 	
 	struct Region{ // different binnings and or selections cuts, e.g. florida vs surfturf
@@ -239,8 +250,10 @@ public:
 	void makeNT2KinPlots();
 	void fillKinematicHistos(gSample);
 	
-	void makeFRvsNVrtxPlots(gChannel);
+	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
+	void makeFRvsNVrtxPlots(gChannel);
+	void makeFRvsClJPtPlots(gChannel);
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -273,6 +286,7 @@ public:
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatioNV(vector<int>, gChannel, gFPSwitch, TH1D*&, bool = false);
+	void calculateRatioCJPt(vector<int>, gChannel, gFPSwitch, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
@@ -280,7 +294,7 @@ public:
 	TEfficiency *getEfficiency(Sample*, gChannel, gFPSwitch, int = 0, bool = false);
 	TGraphAsymmErrors *combineMCEfficiencies(vector<int>, gChannel, gFPSwitch, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
 
-	void getPassedTotal(vector<int>, gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, bool = false);
+	void getPassedTotal(vector<int>, gChannel, gFPSwitch, TH2D*&, TH2D*&, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -299,6 +313,7 @@ public:
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
 	void fillYields(Sample*);
+	void fillOSYields(Sample*);
 	
 	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
@@ -431,6 +446,8 @@ public:
 	bool isFakeElectron(int);
 	bool isPromptElectron(int);
 	bool isChargeMatchedElectron(int);
+
+	bool isBarrelElectron(int);
 
 	bool isGoodJet(int, float = 30.);
 	bool isGoodJet_LooseLep(int);
