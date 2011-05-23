@@ -85,6 +85,7 @@ public:
 
 	// probability for W->lnu event to be reconstructed and identified. 
 	struct Wprediction{
+		// efficiencies for W->lnu
 		double Wenu_acc;
 		double Wenu_acc_err;
 		double Wenu_rec;
@@ -101,6 +102,25 @@ public:
 		double W_prob_err(std::string lept){
 			if     (lept == "ele" && W_prob("ele")>0){return sqrt(pow(Wenu_acc *Wenu_rec_err ,2) + pow(Wenu_rec *Wenu_acc_err ,2));}
 			else if(lept == "muo" && W_prob("muo")>0){return sqrt(pow(Wmunu_acc*Wmunu_rec_err,2) + pow(Wmunu_rec*Wmunu_acc_err,2));}
+			else return -1;
+		}
+		// efficiencies for Top W->lnu
+		double TopWenu_acc;
+		double TopWenu_acc_err;
+		double TopWenu_rec;
+		double TopWenu_rec_err;
+		double TopWmunu_acc;
+		double TopWmunu_acc_err;
+		double TopWmunu_rec;
+		double TopWmunu_rec_err;
+		double TopW_prob(std::string lept){
+			if     (lept == "ele" && TopWenu_acc  >0 && TopWenu_rec  >0){return TopWenu_acc *TopWenu_rec;}
+			else if(lept == "muo" && TopWmunu_acc >0 && TopWmunu_rec >0){return TopWmunu_acc*TopWmunu_rec;}
+			else return -1;
+		}
+		double TopW_prob_err(std::string lept){
+			if     (lept == "ele" && TopW_prob("ele")>0){return sqrt(pow(TopWenu_acc *TopWenu_rec_err ,2) + pow(TopWenu_rec *TopWenu_acc_err ,2));}
+			else if(lept == "muo" && TopW_prob("muo")>0){return sqrt(pow(TopWmunu_acc*TopWmunu_rec_err,2) + pow(TopWmunu_rec*TopWmunu_acc_err,2));}
 			else return -1;
 		}
 		double QCD_bg_e;
@@ -164,7 +184,7 @@ public:
 	void PrintCutFlow(int njets=-2, int nleps=0, TString trigger="");
         void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
 	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
-	void PrintWEfficiency(int sample_index , std::string lept, Long64_t nevents);
+	void PrintWEfficiency(int sample_index ,TString process, std::string lept, Long64_t nevents, bool includeTaus);
         void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
 		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
 		      const int nbins=100, const double min=0., const double max=380., double fit_min=40., double fit_max=100.);
