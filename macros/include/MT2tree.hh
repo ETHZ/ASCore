@@ -371,10 +371,14 @@ public:
   Double_t GetGenLeptPt(int which, int pid, int mother, double pt, double eta);
   Double_t GetGenLeptEta(int which, int pid, int mother, double pt, double eta);
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
-  Bool_t   GenLeptFromW(int pid, double pt, double eta);
+  Bool_t   GenLeptFromW(int pid, double pt, double eta, bool includeTaus);
   Double_t GetLeptPt(int index);
   Double_t ElClosestJet();
-
+  Int_t    WDecayMode();
+  Int_t    TopDecayMode();
+  Bool_t   TopDecayModeResult(Int_t nlepts);
+  Bool_t   SLTopAccept(double pt, double eta);
+  Double_t SLTopEta(double pt);
 
   Int_t     NJets;
   Int_t     NJetsIDLoose;

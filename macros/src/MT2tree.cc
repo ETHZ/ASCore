@@ -1266,13 +1266,14 @@ Double_t MT2tree::GetGenLeptPt(int which, int pid, int mother, double pt, double
 	else           return genlept[index].lv.Pt();	
 }
 
-Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta){
+Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta, bool includeTau){
 	bool good(false);
 	for(int i=0; i<NGenLepts; ++i){
-		if(abs(genlept[i].ID)       !=pid) continue;
-		if(abs(genlept[i].MID)      !=24 ) continue;
-		if(genlept[i].lv.Pt()       < pt ) continue;
-		if(fabs(genlept[i].lv.Eta())>eta ) continue;
+		if(abs(genlept[i].ID) !=pid                         ) continue;
+		if( (!includeTau) && abs(genlept[i].MID) !=24       ) continue;
+		if(   includeTau  && !((abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) || abs(genlept[i].MID)==24)) continue;
+		if(genlept[i].lv.Pt()       < pt                    ) continue;
+		if(fabs(genlept[i].lv.Eta())>eta                    ) continue;
 		good=true;
 	}
 	return good;	
@@ -1306,6 +1307,132 @@ Double_t MT2tree::ElClosestJet(){
 	return dR;
 }
 
+Int_t MT2tree::TopDecayMode(){
+	// bit map: 
+	// 1 = electron 1
+	// 2 = electron 2
+	// 4 = muon 1
+	// 8 = muon 2
+	// 16 = tau 1
+	// 32 = tau 2
+	// 64 = leptonic tau1
+	// 128= leptonic tau2
+	Int_t bit=0;
+	Bool_t acceptance(true);
+	for(int i=0; i<NGenLepts; ++i){
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ) {
+			if( (bit & 1)==0) bit = bit | 1;
+			else              bit = bit | 2;
+		} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ) {
+			if( (bit & 4)==0) bit = bit | 4;
+			else              bit = bit | 8;
+		} 
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) {
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+			if     ( (bit & 1 )==0) bit = bit |  1;
+			else                    bit = bit |  2;
+			if     ( (bit & 64)==0) bit = bit | 64;
+			else                    bit = bit |128;
+		} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) {
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+			if     ( (bit & 4 )==0) bit = bit |  4;
+			else                    bit = bit |  8;
+			if     ( (bit & 64)==0) bit = bit | 64;
+			else                    bit = bit |128;
+		}
+		if( abs(genlept[i].ID)==16 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ){
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+		}
+	}
+	return bit;
+}
+
+
+Bool_t MT2tree::TopDecayModeResult(Int_t nlepts){
+	Int_t bit =TopDecayMode();
+	if(nlepts == 1){ // semileptonic without leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return false; // more than one e/mu
+		if     ( (bit & 64)==64)                return false; // at least one leptonic tau
+		if     ( (bit & 1 )==1 && (bit & 4)==0) return true;
+		else if( (bit & 1 )==0 && (bit & 4)==4) return true;
+		else                                    return false;
+	}else if(nlepts == 115){ // semileptonic with leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return false; // more than one e/mu
+		if     ( (bit & 1 )==1 && (bit & 4)==0) return true;
+		else if( (bit & 1 )==0 && (bit & 4)==4) return true;
+		else                                    return false;
+	}else if(nlepts == 215){ // fully leptonic with leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return true; // two eles or two muons
+		if     ( (bit & 1 )==1 && (bit & 4)==4) return true; // one ele and one muo
+		else                                    return false;
+	}else if(nlepts == 2){ // fully leptonic without leptonic tau
+		if     ( (bit & 64)==64               ) return false; // leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return true; // two eles or two muons
+		if     ( (bit & 1 )==1 && (bit & 4)==4) return true; // one ele and one muo
+		else                                    return false;
+	}else if(nlepts == 0){ // fully hadronic without hadronic tau
+		if     ( (bit & 1 )==1 || (bit & 4)==4) return false; // ele or muo
+		if     ( (bit & 16)==16               ) return false; // tau
+		else                                    return true;
+	}else if(nlepts == 15){ // fully hadronic with hadronic tau
+		if     ( (bit & 1 )==1 || (bit & 4)==4) return false; // ele or muo
+		else                                    return true;
+	}else if(nlepts ==11){
+		if     ( (bit & 4 )==4 ) return false; // muon
+		if     ( (bit & 2 )==2 ) return false; // two electron
+		if     ( (bit & 1 )==1 ) return true;  // electron
+		else                     return false;
+	}else if(nlepts ==13){
+		if     ( (bit & 1 )==1 ) return false; // ele
+		if     ( (bit & 8 )==8 ) return false; // two muons
+		if     ( (bit & 4 )==4 ) return true;  // muon
+		else                     return false;
+	}
+	else                                           return false;
+}
+
+Bool_t MT2tree::SLTopAccept(double pt, double eta){
+	for(int i=0; i<NGenLepts; ++i){
+		if(    abs(genlept[i].ID)  !=11 && abs(genlept[i].ID) !=13                               ) continue;
+		if( ! (abs(genlept[i].MID) ==15 && abs(genlept[i].GMID)==24 || abs(genlept[i].MID) ==24 )) continue;
+		if(genlept[i].lv.Pt()>pt && fabs(genlept[i].lv.Eta()) < eta)                              return true;	
+	}
+	return false;
+}
+
+Double_t MT2tree::SLTopEta(double pt){
+	for(int i=0; i<NGenLepts; ++i){
+		if(    abs(genlept[i].ID)  !=11 && abs(genlept[i].ID) !=13                               ) continue;
+		if( ! (abs(genlept[i].MID) ==15 && abs(genlept[i].GMID)==24 || abs(genlept[i].MID) ==24 )) continue;
+		if(genlept[i].lv.Pt()>pt)      return genlept[i].lv.Eta();	
+	}
+	return -999.99;
+}
+
+
+Int_t MT2tree::WDecayMode(){
+	// bit map:
+	// 0 not recognized
+	// 1= ele
+	// 2= muo
+	// 4= tau
+	// 8= tau stable (i.e. problem in MC sample)
+	Int_t result =0;
+	for(int i=0; i<NGenLepts; ++i){
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==24 )                               {result = result | 1;} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==24 )                               {result = result | 2;} 
+		if( abs(genlept[i].ID)==16 && abs(genlept[i].MID)==24 )                               {result = result | 4;}  // tau neutrino
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 5;} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 6;} 
+		if( abs(genlept[i].ID)==15 && abs(genlept[i].MID)==24 )                               {result = result | 12;} // stable tau
+	}
+	return result;
+}
 
 ClassImp(MT2Misc)
 ClassImp(MT2Znunu)
