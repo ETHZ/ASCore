@@ -65,19 +65,11 @@ public:
 	virtual bool IsLooseNoTightMu(int);
 
 	// Electron Selectors
-	virtual bool IsGoodBasicEl		(int);
-	virtual bool IsElInGap(int);
-	virtual bool IsElFromPrimaryVx	(int);
-
-	virtual bool IsGoodElId_WP80	(int);
-	virtual bool IsGoodElId_WP90	(int);
-
-	virtual bool IsTightEl			(int);
-	virtual bool IsLooseEl			(int);
-	virtual bool IsLooseNoTightEl	(int);
-	
-	virtual double hybRelElIso		(int);
-	virtual bool IsIsolatedEl		(int, double, double);
+	virtual bool IsGoodBasicEl(int);
+	virtual bool IsGoodElId_WP80(int);
+	virtual bool IsGoodElId_WP90(int);
+	virtual bool IsLooseEl(int);
+	virtual float relElIso(int);
 
 	// Photon Selectors
 	virtual bool IsGoodBasicPho(int);
