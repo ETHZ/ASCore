@@ -46,9 +46,24 @@ double MuonPlotter::gJetPtBins[gNJetPtBins+1]  = {30., 40., 50., 60., 70., 80., 
 //////////////////////////////////////////////////////////////////////////////////
 
 TString MuonPlotter::KinPlots::var_name[MuonPlotter::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2"};
-int     MuonPlotter::KinPlots::nbins[MuonPlotter::gNKinVars]    = { 20 ,   20 ,      6 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20 };
+int     MuonPlotter::KinPlots::nbins[MuonPlotter::gNKinVars]    = { 20 ,   20 ,      8 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20 };
 float   MuonPlotter::KinPlots::xmin[MuonPlotter::gNKinVars]     = {100.,    0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.};
-float   MuonPlotter::KinPlots::xmax[MuonPlotter::gNKinVars]     = {800.,  210.,      6.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.};
+float   MuonPlotter::KinPlots::xmax[MuonPlotter::gNKinVars]     = {800.,  210.,      8.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.};
+TString MuonPlotter::KinPlots::axis_label[MuonPlotter::gNKinVars] = {"H_{T} [GeV]",
+                                                                     "ME_{T} [GeV]",
+                                                                     "N_{Jets}",
+                                                                     "P_{T} (l_{1}) [GeV]",
+                                                                     "P_{T} (l_{2}) [GeV]",
+                                                                     "m_{ll} (SF) [GeV]",
+                                                                     "m_{#mu#mu} [GeV]",
+                                                                     "m_{ee} [GeV]",
+                                                                     "m_{ll} (OF) [GeV]",
+                                                                     "M_{T2} [GeV]"};
+
+TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt"};
+int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  };
+float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. };
+float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. };
 
 TString MuonPlotter::IsoPlots::sel_name[MuonPlotter::gNSels] = {"Base", "SigSup"};
 int     MuonPlotter::IsoPlots::nbins[MuonPlotter::gNSels]    = {20, 20};
@@ -111,6 +126,9 @@ void MuonPlotter::init(TString filename){
 	TH1::AddDirectory(kFALSE);
 
 	fMCBG.push_back(TTJets);
+	fMCBG.push_back(TJets_t);
+	fMCBG.push_back(TJets_tW);
+	fMCBG.push_back(TJets_s);
 	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
 	fMCBG.push_back(GJets40);
@@ -148,6 +166,9 @@ void MuonPlotter::init(TString filename){
 	fMCBGSig.push_back(LM0);
 
 	fMCBGMuEnr.push_back(TTJets);
+	fMCBGMuEnr.push_back(TJets_t);
+	fMCBGMuEnr.push_back(TJets_tW);
+	fMCBGMuEnr.push_back(TJets_s);
 	fMCBGMuEnr.push_back(WJets);
 	fMCBGMuEnr.push_back(DYJets);
 	fMCBGMuEnr.push_back(GJets40);
@@ -393,16 +414,15 @@ void MuonPlotter::doAnalysis(){
 	makeElIsolationPlots();
 	makeNT2KinPlots();
 	
+	makeRatioPlots(Muon);
+	makeRatioPlots(Electron);
+	
 	makeFRvsPtPlots(Muon,     SigSup);
 	makeFRvsPtPlots(Electron, SigSup);
 	makeFRvsPtPlots(Muon,     ZDecay);
 	makeFRvsPtPlots(Electron, ZDecay);
 	makeFRvsEtaPlots(Muon);
 	makeFRvsEtaPlots(Electron);
-	makeFRvsNVrtxPlots(Muon);
-	makeFRvsNVrtxPlots(Electron);
-	makeFRvsClJPtPlots(Muon);
-	makeFRvsClJPtPlots(Electron);
 	
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
@@ -430,15 +450,19 @@ void MuonPlotter::doAnalysis(){
 
 //____________________________________________________________________________
 void MuonPlotter::sandBox(){
-	fOutputSubDir = "sandbox/";
+	fOutputSubDir = "DoubleMu/";
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 
-	TH1D *h_iso_fake   = new TH1D("h_iso_fake",   "Isolation for fake muons in ttbar", 100, 0., 1.);
-	TH1D *h_iso_prompt = new TH1D("h_iso_prompt", "Isolation for prompt muons ttbar",  100, 0., 1.);
-	Sample *S = fSamples[TTJets];
+	TH1D *h_njets_dr04_loose = new TH1D("h_njets_dr04_loose", "Number of jets within DR<0.4 of loose leptons", 4, 0., 4);
+	TH1D *h_mindr_loose      = new TH1D("h_mindr_loose",      "DR to closest jet for loose leptons",           100, 0., 1.);
+	TH1D *h_min2dr_loose     = new TH1D("h_min2dr_loose",     "DR to second closest jet for loose leptons",    100, 0., 1.);
 
+	float ptcut = 10.;
+	TString appendix = "_pt10";
+
+	Sample *S = fSamples[DoubleMu2];
 	TTree *tree = S->tree;
 
 	// Event loop
@@ -460,81 +484,91 @@ void MuonPlotter::sandBox(){
 		int ind1(-1), ind2(-1);
 		
 		for(size_t i = 0; i < NMus; ++i){
-			if(MuIso[i] > 1.0) continue;
-			if(isFakeMuon(i))   h_iso_fake->Fill(MuIso[i]);
-			if(isPromptMuon(i)) h_iso_prompt->Fill(MuIso[i]);
+			if(!isLooseMuon(i)) continue;
+
+			if(MuPt[i] < ptcut) continue;
+
+			int njets = 0;
+			for(size_t j = 0; j < NJets; ++j){
+				if(Util::GetDeltaR(MuEta[i], JetEta[j], MuPhi[i], JetPhi[j]) > 0.4) continue;
+				njets++;
+			}
+			h_njets_dr04_loose->Fill(njets);
+			h_mindr_loose ->Fill(getClosestJetDR(i, Muon));
+			h_min2dr_loose->Fill(getSecondClosestJetDR(i, Muon));
+		}
+		for(size_t i = 0; i < NEls; ++i){
+			if(!isLooseElectron(i)) continue;
+
+			if(ElPt[i] < ptcut) continue;
+
+			int njets = 0;
+			for(size_t j = 0; j < NJets; ++j){
+				if(Util::GetDeltaR(ElEta[i], JetEta[j], ElPhi[i], JetPhi[j]) > 0.4) continue;
+				njets++;
+			}
+			h_njets_dr04_loose->Fill(njets);
+			h_mindr_loose->Fill(getClosestJetDR(i, Electron));
+			h_min2dr_loose->Fill(getSecondClosestJetDR(i, Electron));
 		}
 	}
 	cout << endl;
 
-	h_iso_prompt->Scale(1./h_iso_prompt->Integral());
-	h_iso_fake  ->Scale(7./h_iso_fake->Integral());
+	// h_iso_prompt->SetMinimum(0.0);
+	// h_iso_fake  ->SetMinimum(0.0);
 
-	TH1D *hstack = new TH1D("stacked", "stacked", 100, 0., 1.);
-	hstack->Add(h_iso_prompt);
-	hstack->Add(h_iso_fake);
-	hstack->SetFillStyle(0);
-	hstack->SetLineWidth(3);
-	hstack->SetLineColor(kBlack);
+	h_njets_dr04_loose->SetXTitle("NJets");
+	h_mindr_loose     ->SetXTitle("DR(closest Jet)");
+	h_min2dr_loose    ->SetXTitle("DR(second closest Jet)");
 
-	// h_iso_prompt->SetMaximum(20.);
-	h_iso_fake  ->SetMaximum(h_iso_prompt->GetMaximum());
-	h_iso_prompt->SetMinimum(0.0);
-	h_iso_fake  ->SetMinimum(0.0);
-	hstack      ->SetMinimum(0.0);
-
-	h_iso_prompt->SetXTitle(convertVarName("MuIso[0]"));
-	h_iso_fake->SetXTitle(convertVarName("MuIso[0]"));
-	hstack->SetXTitle(convertVarName("MuIso[0]"));
-
-	h_iso_prompt->SetLineWidth(2);
-	h_iso_prompt->SetLineColor(kBlue);
-	h_iso_prompt->SetFillColor(kBlue);
-	h_iso_prompt->SetFillStyle(3004);
-
-	h_iso_fake->SetLineWidth(2);
-	h_iso_fake->SetLineColor(kRed);
-	h_iso_fake->SetFillColor(kRed);
-	h_iso_fake->SetFillStyle(3005);
+	// h_iso_prompt->SetLineWidth(2);
+	// h_iso_prompt->SetLineColor(kBlue);
+	// h_iso_prompt->SetFillColor(kBlue);
+	// h_iso_prompt->SetFillStyle(3004);
+	// 
+	// h_iso_fake->SetLineWidth(2);
+	// h_iso_fake->SetLineColor(kRed);
+	// h_iso_fake->SetFillColor(kRed);
+	// h_iso_fake->SetFillStyle(3005);
 
 	// TLatex *lat = new TLatex();
 	// lat->SetNDC(kTRUE);
 	// lat->SetTextColor(kBlack);
 	// lat->SetTextSize(0.04);
 	
-	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	leg->AddEntry(h_iso_prompt, "prompt","f");
-	leg->AddEntry(h_iso_fake,   "fake",  "f");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
+	// TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
+	// leg->AddEntry(h_iso_prompt, "prompt","f");
+	// leg->AddEntry(h_iso_fake,   "fake",  "f");
+	// leg->SetFillStyle(0);
+	// leg->SetTextFont(42);
+	// leg->SetBorderSize(0);
 
-	TCanvas *c_temp = new TCanvas("IsoMockup", "Isolation", 0, 0, 800, 600);
-	c_temp->cd();
-
-	// gPad->SetLogy();
-	h_iso_fake->Draw("hist");
-	h_iso_prompt->DrawCopy("hist same");
-	hstack->Draw("hist same");
-	leg->Draw();
+	TCanvas *c1 = new TCanvas("NJets", "NJets", 0, 0, 800, 600);
+	c1->cd();
+	gPad->SetLogy();
+	h_njets_dr04_loose->DrawCopy("hist");
 	gPad->RedrawAxis();
+
+	TCanvas *c2 = new TCanvas("MinDR", "MinDR", 0, 0, 800, 600);
+	c2->cd();
+	gPad->SetLogy();
+	h_mindr_loose->DrawCopy("hist");
+	gPad->RedrawAxis();
+
+	TCanvas *c3 = new TCanvas("Min2DR", "Min2DR", 0, 0, 800, 600);
+	c3->cd();
+	gPad->SetLogy();
+	h_min2dr_loose->DrawCopy("hist");
+	gPad->RedrawAxis();
+
 	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
 	// lat->DrawLatex(0.11,0.92, name);
 	
-	double miny = 0.;
-	double maxy = h_iso_prompt->GetMaximum();
-
-	TLine *l1;
-	l1 = new TLine(0.15,miny,0.15,0.3805);
-	l1->SetLineColor(kBlack);
-	l1->SetLineWidth(2);
-	l1->Draw();
-	
-	
-	Util::PrintNoEPS(c_temp, "IsoMockup", fOutputDir + fOutputSubDir, NULL);
-	delete h_iso_prompt, h_iso_fake, hstack;
-	delete c_temp, leg;
-	// delete c_temp, lat, leg;
+	Util::PrintNoEPS(c1, "NJets_DR04_Loose" + appendix, fOutputDir + fOutputSubDir, NULL);
+	Util::PrintNoEPS(c2, "MinDR_Loose" + appendix,      fOutputDir + fOutputSubDir, NULL);
+	Util::PrintNoEPS(c3, "Min2DR_Loose" + appendix,     fOutputDir + fOutputSubDir, NULL);
+	delete h_njets_dr04_loose, h_mindr_loose, h_min2dr_loose;
+	delete c1, c2, c3;
 	fOutputSubDir = "";
 }
 
@@ -588,6 +622,7 @@ void MuonPlotter::doLoop(){
 
 			fillYields(S);
 			fillOSYields(S);
+			fillRatioPlots(S);
 			fillKinematicHistos(i);
 			fillMuIsoHistos(i);
 			fillElIsoHistos(i);
@@ -1249,369 +1284,6 @@ void MuonPlotter::makeElpRatioPlots(bool output){
 
 	Util::PrintNoEPS(c_tight, "ElpRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
 	Util::PrintNoEPS(c_loose, "ElpRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	fOutputSubDir = "";
-}
-
-//____________________________________________________________________________
-void MuonPlotter::makeMufEffPlots(bool output){
-	fOutputSubDir = "Ratios/Muon/";
-	bool stacks = true;
-	// vector<int> mcsamples = fMCBGMuEnr;
-	vector<int> mcsamples = fMCBG;
-	TEfficiency       *e_fdata1 = mergeDataEfficiencies(fJMData,   Muon, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TEfficiency       *e_fdata2 = mergeDataEfficiencies(fMuData,   Muon, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TGraphAsymmErrors *g_fallmc = combineMCEfficiencies(mcsamples, Muon, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	e_fdata1->SetName("MufEffData");
-	e_fdata2->SetName("MufEffDataMu");
-	g_fallmc->SetName("MufEffAllMC");
-
-	e_fdata1->SetMarkerColor(kBlack);
-	e_fdata2->SetMarkerColor(kBlue);
-	g_fallmc->SetMarkerColor(kRed);
-
-	e_fdata1->SetMarkerStyle(20);
-	e_fdata2->SetMarkerStyle(20);
-	g_fallmc->SetMarkerStyle(20);
-
-	e_fdata1->SetLineWidth(2);
-	e_fdata2->SetLineWidth(2);
-	g_fallmc->SetLineWidth(2);
-
-	e_fdata1->SetLineColor(kBlack);
-	e_fdata2->SetLineColor(kBlue);
-	g_fallmc->SetLineColor(kRed);
-
-	e_fdata1->SetFillColor(kBlack);
-	e_fdata2->SetFillColor(kBlue);
-	g_fallmc->SetFillColor(kRed);
-
-	plotEffOverlayEG(e_fdata1, "Data (Jet, L = 21.7 pb^{-1})", g_fallmc, "QCD, t#bar{t}+jets, V+jets");
-	plotEffOverlayEE(e_fdata1, "Data (Jet, L = 21.7 pb^{-1})", e_fdata2, "Data (Muon, L = 21.3 pb^{-1})");
-	// plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	////// STACKS ///////////////////////////////////////////////////////////////////////////////////////////////////
-	if(stacks){
-		THStack *hntight_stack = new THStack("MufTightStack", "Stack of tight muons in sig. supp. selection");
-		THStack *hnloose_stack = new THStack("MufLooseStack", "Stack of loose muons in sig. supp. selection");
-		const unsigned int nmcsamples = mcsamples.size();
-		TH1D *hntight[nmcsamples];
-		TH1D *hnloose[nmcsamples];
-
-		for(size_t i = 0; i < mcsamples.size(); ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			Channel *cha = &S->region[Signal].mm;
-			hntight[i] = cha->fntight->ProjectionX();
-			hnloose[i] = cha->fnloose->ProjectionX();
-			hntight[i]->SetFillColor(S->color);
-			hnloose[i]->SetFillColor(S->color);
-			float scale = fLumiNorm / S->lumi;
-			hntight[i]->Scale(scale);
-			hnloose[i]->Scale(scale);
-			hntight_stack->Add(hntight[i]);
-			hnloose_stack->Add(hnloose[i]);
-		}
-		hntight_stack->Draw();
-		hntight_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-		hnloose_stack->Draw();
-		hnloose_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-
-		TCanvas *c_tight = new TCanvas("MufStackTight", "Tight Stack", 0, 0, 800, 600);
-		TCanvas *c_loose = new TCanvas("MufStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		for(size_t i = 0; i < nmcsamples; ++i){
-			int index = mcsamples[i];
-			leg->AddEntry(hntight[i], fSamples[index]->sname.Data(), "f");
-		}
-		leg->SetFillStyle(0);
-		leg->SetTextFont(42);
-		leg->SetBorderSize(0);
-
-		c_tight->cd();
-		gPad->SetLogy();
-		hntight_stack->Draw("hist");
-		leg->Draw();
-
-		c_loose->cd();
-		gPad->SetLogy();
-		hnloose_stack->Draw("hist");
-		leg->Draw();
-
-		Util::PrintNoEPS(c_tight, "MufRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-		Util::PrintNoEPS(c_loose, "MufRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);		
-	}
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeElfEffPlots(bool output){
-	fOutputSubDir = "Ratios/Electron/";
-	bool stacks = true;
-	// vector<int> mcsamples = fMCBGMuEnr;
-	vector<int> mcsamples = fMCBG;
-	TEfficiency       *e_fdata1 = mergeDataEfficiencies(fJMData,   Electron, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TEfficiency       *e_fdata2 = mergeDataEfficiencies(fEGData,   Electron, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TGraphAsymmErrors *g_fallmc = combineMCEfficiencies(mcsamples, Electron, SigSup, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	e_fdata1->SetName("ElfEffData");
-	e_fdata2->SetName("ElfEffDataMu");
-	g_fallmc->SetName("ElfEffAllMC");
-
-	e_fdata1->SetMarkerColor(kBlack);
-	e_fdata2->SetMarkerColor(kBlue);
-	g_fallmc->SetMarkerColor(kRed);
-
-	e_fdata1->SetMarkerStyle(20);
-	e_fdata2->SetMarkerStyle(20);
-	g_fallmc->SetMarkerStyle(20);
-
-	e_fdata1->SetLineWidth(2);
-	e_fdata2->SetLineWidth(2);
-	g_fallmc->SetLineWidth(2);
-
-	e_fdata1->SetLineColor(kBlack);
-	e_fdata2->SetLineColor(kBlue);
-	g_fallmc->SetLineColor(kRed);
-
-	e_fdata1->SetFillColor(kBlack);
-	e_fdata2->SetFillColor(kBlue);
-	g_fallmc->SetFillColor(kRed);
-
-	plotEffOverlayEG(e_fdata1, "Data (Jet, L = 21.7 pb^{-1})", g_fallmc, "QCD, t#bar{t}+jets, V+jets");
-	plotEffOverlayEE(e_fdata1, "Data (Jet, L = 21.7 pb^{-1})", e_fdata2, "Data (EG, L = 21.3 pb^{-1})");
-	// plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	////// STACKS ///////////////////////////////////////////////////////////////////////////////////////////////////
-	if(stacks){
-		THStack *hntight_stack = new THStack("ElfTightStack", "Stack of tight electrons in sig. supp. selection");
-		THStack *hnloose_stack = new THStack("ElfLooseStack", "Stack of loose electrons in sig. supp. selection");
-		const unsigned int nmcsamples = mcsamples.size();
-		TH1D *hntight[nmcsamples];
-		TH1D *hnloose[nmcsamples];
-
-		for(size_t i = 0; i < mcsamples.size(); ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			Channel *cha = &S->region[Signal].ee;
-			hntight[i] = cha->fntight->ProjectionX();
-			hnloose[i] = cha->fnloose->ProjectionX();
-			hntight[i]->SetFillColor(S->color);
-			hnloose[i]->SetFillColor(S->color);
-			float scale = fLumiNorm / S->lumi;
-			hntight[i]->Scale(scale);
-			hnloose[i]->Scale(scale);
-			hntight_stack->Add(hntight[i]);
-			hnloose_stack->Add(hnloose[i]);
-		}
-		hntight_stack->Draw();
-		hntight_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-		hnloose_stack->Draw();
-		hnloose_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-
-		TCanvas *c_tight = new TCanvas("ElfStackTight", "Tight Stack", 0, 0, 800, 600);
-		TCanvas *c_loose = new TCanvas("ElfStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		for(size_t i = 0; i < nmcsamples; ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			leg->AddEntry(hntight[i], S->sname.Data(), "f");
-		}
-		leg->SetFillStyle(0);
-		leg->SetTextFont(42);
-		leg->SetBorderSize(0);
-
-		c_tight->cd();
-		gPad->SetLogy();
-		hntight_stack->Draw("hist");
-		leg->Draw();
-
-		c_loose->cd();
-		gPad->SetLogy();
-		hnloose_stack->Draw("hist");
-		leg->Draw();
-
-		Util::PrintNoEPS(c_tight, "ElfRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-		Util::PrintNoEPS(c_loose, "ElfRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);		
-	}
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeMupEffPlots(bool output){
-	fOutputSubDir = "Ratios/Muon/";
-	bool stacks = true;
-	// vector<int> mcsamples = fMCBGMuEnr;
-	vector<int> mcsamples = fMCBG;
-	TEfficiency       *e_pdata1 = mergeDataEfficiencies(fJMData,   Muon, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TEfficiency       *e_pdata2 = mergeDataEfficiencies(fMuData,   Muon, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TGraphAsymmErrors *g_pallmc = combineMCEfficiencies(mcsamples, Muon, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	e_pdata1->SetName("MupEffData");
-	e_pdata2->SetName("MupEffDataMu");
-	g_pallmc->SetName("MupEffAllMC");
-
-	e_pdata1->SetMarkerColor(kBlack);
-	e_pdata2->SetMarkerColor(kBlue);
-	g_pallmc->SetMarkerColor(kRed);
-
-	e_pdata1->SetMarkerStyle(20);
-	e_pdata2->SetMarkerStyle(20);
-	g_pallmc->SetMarkerStyle(20);
-
-	e_pdata1->SetLineWidth(2);
-	e_pdata2->SetLineWidth(2);
-	g_pallmc->SetLineWidth(2);
-
-	e_pdata1->SetLineColor(kBlack);
-	e_pdata2->SetLineColor(kBlue);
-	g_pallmc->SetLineColor(kRed);
-
-	e_pdata1->SetFillColor(kBlack);
-	e_pdata2->SetFillColor(kBlue);
-	g_pallmc->SetFillColor(kRed);
-
-	plotEffOverlayEG(e_pdata1, "Data (Jet, L = 21.7 pb^{-1})", g_pallmc, "QCD, t#bar{t}+jets, V+jets");
-	plotEffOverlayEE(e_pdata1, "Data (Jet, L = 21.7 pb^{-1})", e_pdata2, "Data (Muon, L = 21.3 pb^{-1})");
-	// plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	if(stacks){
-		vector<int> mcsamples = fMCBGSig;
-		THStack *hntight_stack = new THStack("MupTightStack", "Stack of tight muons in Z decay selection");
-		THStack *hnloose_stack = new THStack("MupLooseStack", "Stack of loose muons in Z decay selection");
-		const unsigned int nmcsamples = mcsamples.size();
-		TH1D *hntight[nmcsamples];
-		TH1D *hnloose[nmcsamples];
-
-		for(size_t i = 0; i < mcsamples.size(); ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			Channel *cha = &S->region[Signal].mm;
-			hntight[i] = cha->pntight->ProjectionX();
-			hnloose[i] = cha->pnloose->ProjectionX();
-			hntight[i]->SetFillColor(S->color);
-			hnloose[i]->SetFillColor(S->color);
-			float scale = fLumiNorm / S->lumi;
-			hntight[i]->Scale(scale);
-			hnloose[i]->Scale(scale);
-			hntight_stack->Add(hntight[i]);
-			hnloose_stack->Add(hnloose[i]);
-		}
-		hntight_stack->Draw();
-		hntight_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-		hnloose_stack->Draw();
-		hnloose_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-
-		TCanvas *c_tight = new TCanvas("MupStackTight", "Tight Stack", 0, 0, 800, 600);
-		TCanvas *c_loose = new TCanvas("MupStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		for(size_t i = 0; i < nmcsamples; ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			leg->AddEntry(hntight[i], S->sname.Data(), "f");
-		}
-		leg->SetFillStyle(0);
-		leg->SetTextFont(42);
-		leg->SetBorderSize(0);
-
-		c_tight->cd();
-		// gPad->SetLogy();
-		hntight_stack->Draw("hist");
-		leg->Draw();
-
-		c_loose->cd();
-		// gPad->SetLogy();
-		hnloose_stack->Draw("hist");
-		leg->Draw();
-
-		Util::PrintNoEPS(c_tight, "MupRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-		Util::PrintNoEPS(c_loose, "MupRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-
-	}
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeElpEffPlots(bool output){
-	fOutputSubDir = "Ratios/Electron/";
-	bool stacks = true;
-	// vector<int> mcsamples = fMCBGMuEnr;
-	vector<int> mcsamples = fMCBG;
-	TEfficiency       *e_pdata1 = mergeDataEfficiencies(fJMData,   Electron, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TEfficiency       *e_pdata2 = mergeDataEfficiencies(fEGData,   Electron, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	TGraphAsymmErrors *g_pallmc = combineMCEfficiencies(mcsamples, Electron, ZDecay, output, gStatOpt, gStatBetaAlpha, gStatBetaBeta);
-	e_pdata1->SetName("ElpEffData");
-	e_pdata2->SetName("ElpEffDataMu");
-	g_pallmc->SetName("ElpEffAllMC");
-
-	e_pdata1->SetMarkerColor(kBlack);
-	e_pdata2->SetMarkerColor(kBlue);
-	g_pallmc->SetMarkerColor(kRed);
-
-	e_pdata1->SetMarkerStyle(20);
-	e_pdata2->SetMarkerStyle(20);
-	g_pallmc->SetMarkerStyle(20);
-
-	e_pdata1->SetLineWidth(2);
-	e_pdata2->SetLineWidth(2);
-	g_pallmc->SetLineWidth(2);
-
-	e_pdata1->SetLineColor(kBlack);
-	e_pdata2->SetLineColor(kBlue);
-	g_pallmc->SetLineColor(kRed);
-
-	e_pdata1->SetFillColor(kBlack);
-	e_pdata2->SetFillColor(kBlue);
-	g_pallmc->SetFillColor(kRed);
-
-	plotEffOverlayEG(e_pdata1, "Data (Jet, L = 21.7 pb^{-1})", g_pallmc, "QCD, t#bar{t}+jets, V+jets");
-	plotEffOverlayEE(e_pdata1, "Data (Jet, L = 21.7 pb^{-1})", e_pdata2, "Data (EG, L = 21.3 pb^{-1})");
-	// plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	////// STACKS ///////////////////////////////////////////////////////////////////////////////////////////////////
-	if(stacks){
-		THStack *hntight_stack = new THStack("ElpTightStack", "Stack of tight electrons in Z decay selection");
-		THStack *hnloose_stack = new THStack("ElpLooseStack", "Stack of loose electrons in Z decay selection");
-		const unsigned int nmcsamples = mcsamples.size();
-		TH1D *hntight[nmcsamples];
-		TH1D *hnloose[nmcsamples];
-
-		for(size_t i = 0; i < mcsamples.size(); ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			Channel *cha = &S->region[Signal].ee;
-			hntight[i] = cha->pntight->ProjectionX();
-			hnloose[i] = cha->pnloose->ProjectionX();
-			hntight[i]->SetFillColor(S->color);
-			hnloose[i]->SetFillColor(S->color);
-			float scale = fLumiNorm / S->lumi;
-			hntight[i]->Scale(scale);
-			hnloose[i]->Scale(scale);
-			hntight_stack->Add(hntight[i]);
-			hnloose_stack->Add(hnloose[i]);
-		}
-		hntight_stack->Draw();
-		hntight_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-		hnloose_stack->Draw();
-		hnloose_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-
-		TCanvas *c_tight = new TCanvas("ElpStackTight", "Tight Stack", 0, 0, 800, 600);
-		TCanvas *c_loose = new TCanvas("ElpStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		for(size_t i = 0; i < nmcsamples; ++i){
-			Sample *S = fSamples[mcsamples[i]];
-			leg->AddEntry(hntight[i], S->sname.Data(), "f");
-		}
-		leg->SetFillStyle(0);
-		leg->SetTextFont(42);
-		leg->SetBorderSize(0);
-
-		c_tight->cd();
-		// gPad->SetLogy();
-		hntight_stack->Draw("hist");
-		leg->Draw();
-
-		c_loose->cd();
-		// gPad->SetLogy();
-		hnloose_stack->Draw("hist");
-		leg->Draw();
-
-		Util::PrintNoEPS(c_tight, "ElpRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-		Util::PrintNoEPS(c_loose, "ElpRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	}
 	fOutputSubDir = "";
 }
 
@@ -2527,7 +2199,7 @@ void MuonPlotter::makeNT2KinPlots(){
 			datasamples.push_back(MuEG1);
 			datasamples.push_back(MuEG2);
 
-			hvar_data[i]->SetXTitle(KinPlots::var_name[i]);
+			hvar_data[i]->SetXTitle(KinPlots::axis_label[i]);
 			hvar_data[i]->SetLineWidth(3);
 			hvar_data[i]->SetLineColor(kBlack);
 			hvar_data[i]->SetMarkerStyle(8);
@@ -2545,7 +2217,7 @@ void MuonPlotter::makeNT2KinPlots(){
 			for(size_t j = 0; j < datasamples.size(); ++j){
 				Sample *S = fSamples[datasamples[j]];
 				hvar_data[i]->Add(S->kinplots[s].hvar[i]);
-				hvar_data[i]->SetXTitle(KinPlots::var_name[i]);
+				hvar_data[i]->SetXTitle(KinPlots::axis_label[i]);
 			}
 
 			// // Scale to get equal integrals
@@ -2565,7 +2237,7 @@ void MuonPlotter::makeNT2KinPlots(){
 				hvar_mc  [i]->Add(S->kinplots[s].hvar[i]);
 				hvar_mc_s[i]->Add(S->kinplots[s].hvar[i]);
 				hvar_mc_s[i]->Draw("goff");
-				hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::var_name[i]);
+				hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
 			}
 
 			double max1 = hvar_mc_s[i]->GetMaximum();
@@ -2934,7 +2606,7 @@ void MuonPlotter::makeFRvsEtaPlots(gChannel chan){
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
-void MuonPlotter::makeFRvsNVrtxPlots(gChannel chan){
+void MuonPlotter::makeRatioPlots(gChannel chan){
 	fOutputSubDir = "Ratios/";
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
@@ -2943,11 +2615,6 @@ void MuonPlotter::makeFRvsNVrtxPlots(gChannel chan){
 	TString name;
 	if(chan == Muon)     name = "Muons";
 	if(chan == Electron) name = "Electrons";
-
-	TH1D *h_nvratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", gNNVrtxBins, gNVrtxBins);
-	TH1D *h_nvratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC", gNNVrtxBins, gNVrtxBins);
-	h_nvratio_data->Sumw2();
-    h_nvratio_mc  ->Sumw2();
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
@@ -2961,143 +2628,67 @@ void MuonPlotter::makeFRvsNVrtxPlots(gChannel chan){
 		mcsamples   = fMCBG;
 	}
 
-	calculateRatioNV(datasamples, chan, SigSup, h_nvratio_data);
-	calculateRatioNV(mcsamples,   chan, SigSup, h_nvratio_mc);
+	// Customizationg
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} [GeV]", "P_{T}(Hardest Jet) [GeV]", "N_{Vertices}", "P_{T}(Closest Jet) [GeV]"};
 
-	h_nvratio_data->SetMaximum(0.3);
-	h_nvratio_mc  ->SetMaximum(0.3);
-	h_nvratio_data->SetMinimum(0.0);
-	h_nvratio_mc  ->SetMinimum(0.0);
+	for(size_t i = 0; i < gNRatioVars; ++i){
+		TH1D *h_ratio_data = getFRatio(datasamples, chan, i);
+		TH1D *h_ratio_mc   = getFRatio(mcsamples,   chan, i);
+		h_ratio_data->SetName(Form("FRatio_%s_data", FRatioPlots::var_name[i].Data()));
+		h_ratio_mc  ->SetName(Form("FRatio_%s_mc",   FRatioPlots::var_name[i].Data()));
 
-	h_nvratio_data->SetXTitle("N_{Vertices}");
-    h_nvratio_mc  ->SetXTitle("N_{Vertices}");
-	h_nvratio_data->GetYaxis()->SetTitleOffset(1.2);
-    h_nvratio_mc  ->GetYaxis()->SetTitleOffset(1.2);
-	h_nvratio_data->SetYTitle("N_{Tight}/N_{Loose}");
-    h_nvratio_mc  ->SetYTitle("N_{Tight}/N_{Loose}");
+		h_ratio_data->SetMaximum(0.3);
+		h_ratio_mc  ->SetMaximum(0.3);
+		h_ratio_data->SetMinimum(0.0);
+		h_ratio_mc  ->SetMinimum(0.0);
 
-	h_nvratio_data->SetMarkerColor(kBlack);
-	h_nvratio_data->SetMarkerStyle(20);
-	h_nvratio_data->SetMarkerSize(1.3);
-	h_nvratio_data->SetLineWidth(2);
-	h_nvratio_data->SetLineColor(kBlack);
-	h_nvratio_data->SetFillColor(kBlack);
+		h_ratio_data->SetXTitle(axis_name[i]);
+	    h_ratio_mc  ->SetXTitle(axis_name[i]);
+		h_ratio_data->GetYaxis()->SetTitleOffset(1.2);
+	    h_ratio_mc  ->GetYaxis()->SetTitleOffset(1.2);
+		h_ratio_data->SetYTitle("N_{Tight}/N_{Loose}");
+	    h_ratio_mc  ->SetYTitle("N_{Tight}/N_{Loose}");
 
-	h_nvratio_mc  ->SetMarkerColor(kRed);
-	h_nvratio_mc  ->SetMarkerStyle(20);
-	h_nvratio_mc  ->SetMarkerSize(1.3);
-	h_nvratio_mc  ->SetLineWidth(2);
-	h_nvratio_mc  ->SetLineColor(kRed);
-	h_nvratio_mc  ->SetFillColor(kRed);
+		h_ratio_data->SetMarkerColor(kBlack);
+		h_ratio_data->SetMarkerStyle(20);
+		h_ratio_data->SetMarkerSize(1.3);
+		h_ratio_data->SetLineWidth(2);
+		h_ratio_data->SetLineColor(kBlack);
+		h_ratio_data->SetFillColor(kBlack);
 
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
+		h_ratio_mc  ->SetMarkerColor(kRed);
+		h_ratio_mc  ->SetMarkerStyle(20);
+		h_ratio_mc  ->SetMarkerSize(1.3);
+		h_ratio_mc  ->SetLineWidth(2);
+		h_ratio_mc  ->SetLineColor(kRed);
+		h_ratio_mc  ->SetFillColor(kRed);
+
+		TLatex *lat = new TLatex();
+		lat->SetNDC(kTRUE);
+		lat->SetTextColor(kBlack);
+		lat->SetTextSize(0.04);
 	
-	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	leg->AddEntry(h_nvratio_data, "Data","f");
-	leg->AddEntry(h_nvratio_mc,   "MC",  "f");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
+		TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
+		leg->AddEntry(h_ratio_data, "Data","f");
+		leg->AddEntry(h_ratio_mc,   "MC",  "f");
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetBorderSize(0);
 
-	TCanvas *c_temp = new TCanvas("C_NVRatioPlot", "fRatio vs NVrtx in Data vs MC", 0, 0, 800, 600);
-	c_temp->cd();
+		TCanvas *c_temp = new TCanvas("C_Temp", "fRatio", 0, 0, 800, 600);
+		c_temp->cd();
 
-	// gPad->SetLogy();
-	h_nvratio_mc->DrawCopy("PE X0");
-	h_nvratio_data->Draw("PE X0 same");
-	leg->Draw();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
-	lat->DrawLatex(0.11,0.92, name);
+		// gPad->SetLogy();
+		h_ratio_mc  ->DrawCopy("PE X0");
+		h_ratio_data->DrawCopy("PE X0 same");
+		leg->Draw();
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+		lat->DrawLatex(0.11,0.92, name);
 	
-	Util::PrintNoEPS(c_temp, "NVRatio_" + name, fOutputDir + fOutputSubDir, NULL);
-	delete h_nvratio_mc, h_nvratio_data;
-	delete c_temp, lat, leg;
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeFRvsClJPtPlots(gChannel chan){
-	fOutputSubDir = "Ratios/";
-	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
-
-	TString name;
-	if(chan == Muon)     name = "Muons";
-	if(chan == Electron) name = "Electrons";
-
-	TH1D *h_jptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", gNJetPtBins, gJetPtBins);
-	TH1D *h_jptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   gNJetPtBins, gJetPtBins);
-	h_jptratio_data->Sumw2();
-    h_jptratio_mc  ->Sumw2();
-
-	vector<int> datasamples;
-	vector<int> mcsamples;
-
-	if(chan == Muon){
-		datasamples = fMuData;
-		mcsamples   = fMCBGMuEnr;
+		Util::PrintNoEPS(c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+		delete c_temp, leg, lat;
+		delete h_ratio_data, h_ratio_mc;
 	}
-	if(chan == Electron){
-		datasamples = fEGData;
-		mcsamples   = fMCBG;
-	}
-
-	calculateRatioCJPt(datasamples, chan, SigSup, h_jptratio_data);
-	calculateRatioCJPt(mcsamples,   chan, SigSup, h_jptratio_mc);
-
-	h_jptratio_data->SetMaximum(1.0);
-	h_jptratio_mc  ->SetMaximum(1.0);
-	h_jptratio_data->SetMinimum(0.0);
-	h_jptratio_mc  ->SetMinimum(0.0);
-
-	h_jptratio_data->SetXTitle("p_{T}(Closest Jet) [GeV]");
-    h_jptratio_mc  ->SetXTitle("p_{T}(Closest Jet) [GeV]");
-	h_jptratio_data->GetYaxis()->SetTitleOffset(1.2);
-    h_jptratio_mc  ->GetYaxis()->SetTitleOffset(1.2);
-	h_jptratio_data->SetYTitle("N_{Tight}/N_{Loose}");
-    h_jptratio_mc  ->SetYTitle("N_{Tight}/N_{Loose}");
-
-	h_jptratio_data->SetMarkerColor(kBlack);
-	h_jptratio_data->SetMarkerStyle(20);
-	h_jptratio_data->SetMarkerSize(1.3);
-	h_jptratio_data->SetLineWidth(2);
-	h_jptratio_data->SetLineColor(kBlack);
-	h_jptratio_data->SetFillColor(kBlack);
-
-	h_jptratio_mc  ->SetMarkerColor(kRed);
-	h_jptratio_mc  ->SetMarkerStyle(20);
-	h_jptratio_mc  ->SetMarkerSize(1.3);
-	h_jptratio_mc  ->SetLineWidth(2);
-	h_jptratio_mc  ->SetLineColor(kRed);
-	h_jptratio_mc  ->SetFillColor(kRed);
-
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
-	
-	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	leg->AddEntry(h_jptratio_data, "Data","f");
-	leg->AddEntry(h_jptratio_mc,   "MC",  "f");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-
-	TCanvas *c_temp = new TCanvas("C_JPtRatioPlot", "fRatio vs CJetPt in Data vs MC", 0, 0, 800, 600);
-	c_temp->cd();
-
-	// gPad->SetLogy();
-	h_jptratio_mc->DrawCopy("PE X0");
-	h_jptratio_data->Draw("PE X0 same");
-	leg->Draw();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
-	lat->DrawLatex(0.11,0.92, name);
-	
-	Util::PrintNoEPS(c_temp, "CJPtRatio_" + name, fOutputDir + fOutputSubDir, NULL);
-	delete h_jptratio_mc, h_jptratio_data;
-	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
 
@@ -3229,24 +2820,6 @@ TH1D* MuonPlotter::fillMuRatioPt(vector<int> samples, int muon, bool(MuonPlotter
 }
 
 //____________________________________________________________________________
-TH2D* MuonPlotter::fillMuRatio(int sample, int muon, bool(MuonPlotter::*eventSelector)(), bool(MuonPlotter::*muonSelector)(int), const int nptbins, const double* ptbins, const int netabins, const double* etabins){
-	vector<int> samples; samples.push_back(sample);
-	return fillMuRatio(samples, muon, eventSelector, muonSelector, nptbins, ptbins, netabins, etabins);
-}
-TH2D* MuonPlotter::fillMuRatio(vector<int> samples, int muon, bool(MuonPlotter::*eventSelector)(), bool(MuonPlotter::*muonSelector)(int), const int nptbins, const double* ptbins, const int netabins, const double* etabins){
-	gStyle->SetOptStat(0);
-	TH2D *h_2d  = new TH2D("MuRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", nptbins, ptbins, netabins, etabins);
-	TH1D *h_pt  = new TH1D("MuRatioPt",  "Ratio of tight to loose Muons vs Pt",        nptbins, ptbins);
-	TH1D *h_eta = new TH1D("MuRatioEta", "Ratio of tight to loose Muons vs Eta",       netabins, etabins);
-
-	h_2d->SetXTitle(convertVarName("MuPt[0]"));
-	h_2d->SetYTitle(convertVarName("MuEta[0]"));
-
-	produceRatio(Muon, samples, muon, eventSelector, muonSelector, h_2d, h_pt, h_eta, false);
-	return h_2d;
-}
-
-//____________________________________________________________________________
 void MuonPlotter::fillMuElRatios(vector<int> samples){
 	calculateRatio(samples, Muon,     SigSup, fH2D_MufRatio, fH1D_MufRatioPt, fH1D_MufRatioEta);
 	calculateRatio(samples, Muon,     ZDecay, fH2D_MupRatio, fH1D_MupRatioPt, fH1D_MupRatioEta);
@@ -3314,7 +2887,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	H_ntight->Sumw2();
 	H_nloose->Sumw2();
 
-	getPassedTotal(samples, chan, fp, H_ntight, H_nloose, 0, output);
+	getPassedTotal(samples, chan, fp, H_ntight, H_nloose, output);
 	h_2d->Divide(H_ntight, H_nloose, 1., 1., "B");
 
 	TH1D *hmuloosept  = H_nloose->ProjectionX();
@@ -3336,62 +2909,6 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		printObject(h_2d,  TString("Ratio")    + name, "Fake Ratio vs pt/eta", "colz");
 		printObject(h_pt,  TString("RatioPt")  + name, "Fake Ratio vs pt",     "PE1");
 		printObject(h_eta, TString("RatioEta") + name, "Fake Ratio vs eta",    "PE1");
-	}
-}
-void MuonPlotter::calculateRatioNV(vector<int> samples, gChannel chan, gFPSwitch fp, TH1D*&h_nv, bool output){
-	gStyle->SetOptStat(0);
-	TH2D *H_ntight = new TH2D("NTight", "NTight Muons",      getNPt2Bins(chan), getPt2Bins(chan), gNNVrtxBins, gNVrtxBins);
-	TH2D *H_nloose = new TH2D("NLoose", "NLoose Muons",      getNPt2Bins(chan), getPt2Bins(chan), gNNVrtxBins, gNVrtxBins);
-	TH2D *H_ratio  = new TH2D("Ratio",  "Tight/Loose Ratio", getNPt2Bins(chan), getPt2Bins(chan), gNNVrtxBins, gNVrtxBins);
-	H_ntight->Sumw2();
-	H_nloose->Sumw2();
-	H_ratio->Sumw2();
-
-	getPassedTotal(samples, chan, fp, H_ntight, H_nloose, 1, output);
-	H_ratio->Divide(H_ntight, H_nloose, 1., 1., "B");
-
-	TH1D *hmuloosenv = H_nloose->ProjectionY();
-	TH1D *hmutightnv = H_ntight->ProjectionY();
-
-	h_nv->Divide(hmutightnv, hmuloosenv, 1., 1., "B"); // weights are ignored
-	delete H_ntight, H_nloose, H_ratio, hmuloosenv, hmutightnv;
-	TString name = "";
-	for(size_t i = 0; i < samples.size(); ++i){
-		int sample = samples[i];
-		name += h_nv->GetName();
-		name += "_";
-		name += fSamples[sample]->sname;
-	}
-	if(output){
-		printObject(h_nv,  TString("RatioNV")  + name, "Fake Ratio vs nv", "PE1");
-	}
-}
-void MuonPlotter::calculateRatioCJPt(vector<int> samples, gChannel chan, gFPSwitch fp, TH1D*&h_jpt, bool output){
-	gStyle->SetOptStat(0);
-	TH2D *H_ntight = new TH2D("NTight", "NTight Muons",      gNJetPtBins, gJetPtBins, getNPt2Bins(chan), getPt2Bins(chan));
-	TH2D *H_nloose = new TH2D("NLoose", "NLoose Muons",      gNJetPtBins, gJetPtBins, getNPt2Bins(chan), getPt2Bins(chan));
-	TH2D *H_ratio  = new TH2D("Ratio",  "Tight/Loose Ratio", gNJetPtBins, gJetPtBins, getNPt2Bins(chan), getPt2Bins(chan));
-	H_ntight->Sumw2();
-	H_nloose->Sumw2();
-	H_ratio->Sumw2();
-
-	getPassedTotal(samples, chan, fp, H_ntight, H_nloose, 2, output);
-	H_ratio->Divide(H_ntight, H_nloose, 1., 1., "B");
-
-	TH1D *hmuloosejpt = H_nloose->ProjectionX();
-	TH1D *hmutightjpt = H_ntight->ProjectionX();
-
-	h_jpt->Divide(hmutightjpt, hmuloosejpt, 1., 1., "B"); // weights are ignored
-	delete H_ntight, H_nloose, H_ratio, hmuloosejpt, hmutightjpt;
-	TString name = "";
-	for(size_t i = 0; i < samples.size(); ++i){
-		int sample = samples[i];
-		name += h_jpt->GetName();
-		name += "_";
-		name += fSamples[sample]->sname;
-	}
-	if(output){
-		printObject(h_jpt,  TString("RatioNV")  + name, "Fake Ratio vs nv", "PE1");
 	}
 }
 void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, float &ratio, float &ratioe){
@@ -3510,170 +3027,7 @@ void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 }
 
 //____________________________________________________________________________
-TGraphAsymmErrors* MuonPlotter::combineMCEfficiencies(vector<int> samples, gChannel chan, gFPSwitch fp, bool output, TEfficiency::EStatOption statopt, double betaalpha, double betabeta){
-	bool datamc = fSamples[samples[0]]->datamc;
-	for(size_t i = 0; i < samples.size(); ++i){ // check if samples contains only data or only MC
-		if(fSamples[samples[i]]->datamc == datamc) continue;
-		else{
-			TGraphAsymmErrors *null = NULL;
-			cout << "MuonPlotter::calculateEfficiency ==> sample is not pure data or pure MC, aborting..." << endl;
-			return null;
-		}
-	}
-
-	TString regchan = "";
-	if(chan == Muon)     regchan += "Mu_";
-	if(chan == Electron) regchan += "El_";
-	if(fp == SigSup) regchan += "f_";
-	if(fp == ZDecay) regchan += "p_";
-	TString name1 = regchan + "TLEff";
-	TString name2 = regchan + "TLGraph";
-	for(size_t i = 0; i < samples.size(); ++i){
-		name1 += "_";
-		name2 += "_";
-		name1 += fSamples[samples[i]]->sname;
-		name2 += fSamples[samples[i]]->sname;
-	}
-
-	TEfficiency *total_eff = new TEfficiency(name1, "TotalEfficiency", getNPt2Bins(chan), getPt2Bins(chan));
-	total_eff->SetName(name1);
-	total_eff->SetStatisticOption(statopt); // Needs to be bayesian in order to combine different effs
-	total_eff->SetBetaAlpha(betaalpha);
-	total_eff->SetBetaBeta(betabeta);
-	total_eff->SetConfidenceLevel(0.683); // 1-sigma = default
-	TList *pList = new TList();
-	for(size_t i = 0; i < samples.size(); ++i){ // get the individual efficiencies
-		Sample *S = fSamples[samples[i]];
-		TEfficiency *eff = getEfficiency(S, chan, fp, 1, output);
-		eff->SetStatisticOption(total_eff->GetStatisticOption());
-		eff->SetBetaAlpha(total_eff->GetBetaAlpha());
-		eff->SetBetaBeta(total_eff->GetBetaBeta());
-
-		// Weighting
-		eff->SetWeight(fLumiNorm / S->lumi);
-		// if(eff->GetTotalHistogram()->GetEntries() == 0) eff->SetWeight(0.);
-		// else eff->SetWeight(fLumiNorm / S->lumi);
-		pList->Add(eff);
-		// if(eff->GetTotalHistogram()->GetEntries() > 0) pList->Add(eff);
-		if(output){
-			if(!fOutputSubDir.EndsWith("/")) fOutputSubDir += "/";
-			TString temp = fOutputSubDir;
-			fOutputSubDir = temp + "Effs/";
-			printObject(eff, regchan + "Eff_" + S->sname, "Test", "");
-			fOutputSubDir = temp;
-		}
-	}
-
-	TGraphAsymmErrors *result = new TGraphAsymmErrors();
-	result = total_eff->Combine(pList, "mode central");
-	result->SetName(name2);
-	return result;
-}
-TEfficiency* MuonPlotter::mergeDataEfficiencies(vector<int> samples, gChannel chan, gFPSwitch fp, bool output, TEfficiency::EStatOption statopt, double betaalpha, double betabeta){
-	int datamc = fSamples[samples[0]]->datamc;
-	for(size_t i = 0; i < samples.size(); ++i){ // check if samples contains only data or only MC
-		if(fSamples[samples[i]]->datamc == datamc) continue;
-		else{
-			TEfficiency *null = NULL;
-			cout << "MuonPlotter::calculateEfficiency ==> sample is not pure data or pure MC, aborting..." << endl;
-			return null;
-		}
-	}
-
-	TString regchan = "";
-	if(chan == Muon)     regchan += "Mu_";
-	if(chan == Electron) regchan += "El_";
-	if(fp == SigSup) regchan += "f_";
-	if(fp == ZDecay) regchan += "p_";
-	TString name1 = regchan + "TLEff";
-	TString name2 = regchan + "TLGraph";
-	for(size_t i = 0; i < samples.size(); ++i){
-		name1 += "_";
-		name2 += "_";
-		name1 += fSamples[samples[i]]->sname;
-		name2 += fSamples[samples[i]]->sname;
-	}
-
-	TEfficiency *total_eff = new TEfficiency(name1, "TotalEfficiency", getNPt2Bins(chan), getPt2Bins(chan));
-	total_eff->SetName(name1);
-	total_eff->SetStatisticOption(statopt);
-	total_eff->SetBetaAlpha(betaalpha);
-	total_eff->SetBetaBeta(betabeta);
-	total_eff->SetConfidenceLevel(0.683); // 1-sigma = default
-	TList *pList = new TList();
-	for(size_t i = 0; i < samples.size(); ++i){ // get the individual efficiencies
-		Sample *S = fSamples[samples[i]];
-		double scale = fLumiNorm / S->lumi;
-		TEfficiency *eff = getEfficiency(S, chan, fp, 1, output);
-		pList->Add(eff);
-		if(output){
-			if(!fOutputSubDir.EndsWith("/")) fOutputSubDir += "/";
-			TString temp = fOutputSubDir;
-			fOutputSubDir = temp + "Effs/";
-			printObject(eff, regchan + "Eff_" + S->sname, "Test", "");
-			fOutputSubDir = temp;
-		}
-	}
-	total_eff->Merge(pList);
-	return total_eff;
-}
-
-//____________________________________________________________________________
-TEfficiency* MuonPlotter::getEfficiency(Sample *S, gChannel chan, gFPSwitch fp, int pteta2d, bool output){
-// Basic method for retrieving efficiency of a sample, used for both data and mc
-// pteta2d switches between different binnings: 0 = 2d (pt vs eta), 1 = pt, 2 = eta
-	Region *R = &S->region[Signal];
-	Channel *C;
-	if(chan == Muon)     C = &R->mm;
-	if(chan == Electron) C = &R->ee;
-
-	TH2D *ntight, *nloose;
-	if(fp == SigSup){
-		ntight = C->fntight;
-		nloose = C->fnloose;
-	} else if(fp == ZDecay){
-		ntight = C->pntight;
-		nloose = C->pnloose;		
-	}
-
-
-	if(output){
-		if(!fOutputSubDir.EndsWith("/")) fOutputSubDir += "/";
-		TString temp = fOutputSubDir;
-		fOutputSubDir = temp + "NTight/";
-		printObject(ntight->ProjectionX(), S->region[Signal].sname + "_" + C->sname + "_Tight_" + S->name, "Number of loose leptons vs pt", "PE1");
-		fOutputSubDir = temp + "NLoose/";
-		printObject(nloose->ProjectionX(), S->region[Signal].sname + "_" + C->sname + "_Loose_" + S->name, "Number of tight leptons vs pt", "PE1");
-		TH1D *rat = new TH1D(S->region[Signal].sname + "_" + C->sname + "_Ratio_" + S->sname, "Title", getNPt2Bins(chan), getPt2Bins(chan));
-		rat->Divide(ntight->ProjectionX(), nloose->ProjectionX(), 1., 1., "B"); // binomial
-		fOutputSubDir = temp + "Ratio/";
-		printObject(rat, rat->GetName(), "Title", "PE1");
-		fOutputSubDir = temp;
-	}
-
-	TEfficiency *eff;
-	if(pteta2d == 0){
-		eff = new TEfficiency(*ntight, *nloose);
-		eff->SetName(S->sname + "_TLEff_2d");
-		eff->SetTitle("Tight/Loose Efficiency for " + S->sname + " vs pt vs eta");
-	}
-	if(pteta2d == 1){
-		TH1D *h_passed = ntight->ProjectionX();
-		TH1D *h_total  = nloose->ProjectionX();
-		eff = new TEfficiency(*h_passed, *h_total);	
-		eff->SetName(S->sname + "_TLEff_pt");
-		eff->SetTitle("Tight/Loose Efficiency for " + S->sname + " vs pt");
-	} 
-	if(pteta2d == 2){
-		TH1D *h_passed = ntight->ProjectionY();
-		TH1D *h_total  = nloose->ProjectionY();
-		eff = new TEfficiency(*h_passed, *h_total);	
-		eff->SetName(S->sname + "_TLEff_eta");
-		eff->SetTitle("Tight/Loose Efficiency for " + S->sname + " vs eta");
-	}
-	return eff;
-}
-void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, int toggle, bool output){
+void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output){
 	// toggle: choose binning: 0: pt, default, 1: nvrtx, 2: closest jet pt
 	if(fVerbose>2) cout << "---------------" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
@@ -3686,32 +3040,12 @@ void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		if(chan == Muon)     C = &S->region[Signal].mm;
 		if(chan == Electron) C = &S->region[Signal].ee;
 		TH2D *ntight, *nloose;
-		if(toggle == 0){
-			if(fp == SigSup){
-				ntight = C->fntight;
-				nloose = C->fnloose;
-			} else if(fp == ZDecay){
-				ntight = C->pntight;
-				nloose = C->pnloose;
-			}
-		}
-		if(toggle == 1){
-			if(fp == SigSup){
-				ntight = C->fntight_nv;
-				nloose = C->fnloose_nv;
-			} else if(fp == ZDecay){
-				ntight = C->pntight_nv;
-				nloose = C->pnloose_nv;
-			}			
-		}
-		if(toggle == 2){
-			if(fp == SigSup){
-				ntight = C->fntight_jpt;
-				nloose = C->fnloose_jpt;
-			} else if(fp == ZDecay){
-				ntight = C->pntight_jpt;
-				nloose = C->pnloose_jpt;
-			}			
+		if(fp == SigSup){
+			ntight = C->fntight;
+			nloose = C->fnloose;
+		} else if(fp == ZDecay){
+			ntight = C->pntight;
+			nloose = C->pnloose;
 		}
 		h_passed->Add(ntight, scale);
 		h_total ->Add(nloose, scale);
@@ -3726,6 +3060,33 @@ void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		printObject(h_passed, TString("Passed") + name, "Passed vs pt vs eta", "colz");
 		printObject(h_total,  TString("Total")  + name, "Total vs pt vs eta",  "colz");
 	}	
+}
+
+TH1D* MuonPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, bool output){
+	gStyle->SetOptStat(0);
+
+	TH1D *ntight = new TH1D("h_NTight",  "NTight",  FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
+	TH1D *nloose = new TH1D("h_NLoose",  "NLoose",  FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
+	TH1D *ratio  = new TH1D("h_TLRatio", "TLRatio", FRatioPlots::nbins[ratiovar], FRatioPlots::xmin[ratiovar], FRatioPlots::xmax[ratiovar]);
+	ntight->Sumw2(); nloose->Sumw2(); ratio->Sumw2();
+
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
+
+		float scale = fLumiNorm / S->lumi;
+		if(S->datamc == 0) scale = 1;
+
+		FRatioPlots *RP;
+		if(chan == Muon)     RP = &S->ratioplots[0];
+		if(chan == Electron) RP = &S->ratioplots[1];
+		ntight->Add(RP->ntight[ratiovar], scale);
+		nloose->Add(RP->nloose[ratiovar], scale);
+	}
+	
+	ratio->Divide(ntight, nloose, 1., 1., "B");
+
+	delete ntight, nloose;
+	return ratio;
 }
 
 //____________________________________________________________________________
@@ -5430,7 +4791,6 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Muon].fill(" ... both muons pass tight cut");
 				S->region[Signal].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
 				S->region[Signal].mm.nt20_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
-				S->region[Signal].mm.nt20_jpt->Fill(getClosestJetPt(mu1, Muon), getClosestJetPt(mu2, Muon), puweight);
 				if(S->datamc == 0){
 					fOUTSTREAM << " Mu/Mu Tight-Tight event in run ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5453,20 +4813,17 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
 				S->region[Signal].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
 				S->region[Signal].mm.nt10_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
-				S->region[Signal].mm.nt10_jpt->Fill(getClosestJetPt(mu1, Muon), getClosestJetPt(mu2, Muon), puweight);
 				if(S->datamc > 0) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
 				S->region[Signal].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], puweight); // tight one always in x axis; fill same again
 				S->region[Signal].mm.nt10_eta->Fill(MuEta[mu2], MuEta[mu1], puweight);
-				S->region[Signal].mm.nt10_jpt->Fill(getClosestJetPt(mu2, Muon), getClosestJetPt(mu1, Muon), puweight);
 				if(S->datamc > 0) S->region[Signal].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, puweight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
 				S->region[Signal].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
 				S->region[Signal].mm.nt00_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
-				S->region[Signal].mm.nt00_jpt->Fill(getClosestJetPt(mu1, Muon), getClosestJetPt(mu2, Muon), puweight);
 				if(S->datamc > 0) S->region[Signal].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
 			}
 			if(S->datamc > 0){
@@ -5480,28 +4837,20 @@ void MuonPlotter::fillYields(Sample *S){
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
 			S->region[Signal].mm.fntight->Fill(MuPt[0], MuEta[0], singleMuPrescale() * puweight);
-			S->region[Signal].mm.fntight_nv->Fill(MuPt[0], NVrtx, puweight);
-			S->region[Signal].mm.fntight_jpt->Fill(MuPt[0], getClosestJetPt(0, Muon), puweight);
 			if(S->datamc > 0) S->region[Signal].mm.sst_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseMuon(0) ){
 			S->region[Signal].mm.fnloose->Fill(MuPt[0], MuEta[0], singleMuPrescale() * puweight);
-			S->region[Signal].mm.fnloose_nv->Fill(MuPt[0], NVrtx, puweight);
-			S->region[Signal].mm.fnloose_jpt->Fill(MuPt[0], getClosestJetPt(0, Muon), puweight);
 			if(S->datamc > 0) S->region[Signal].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 	}
 	if(doubleMuTrigger() && isZMuMuEvent()){
 		if( isTightMuon(0) ){
 			S->region[Signal].mm.pntight->Fill(MuPt[0], MuEta[0], puweight);
-			S->region[Signal].mm.pntight_nv->Fill(MuPt[0], NVrtx, puweight);
-			S->region[Signal].mm.pntight_jpt->Fill(MuPt[0], getClosestJetPt(0, Muon), puweight);
 			if(S->datamc > 0) S->region[Signal].mm.zt_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseMuon(0) ){
 			S->region[Signal].mm.pnloose->Fill(MuPt[0], MuEta[0], puweight);
-			S->region[Signal].mm.pnloose_nv->Fill(MuPt[0], NVrtx, puweight);
-			S->region[Signal].mm.pnloose_jpt->Fill(MuPt[0], getClosestJetPt(0, Muon), puweight);
 			if(S->datamc > 0) S->region[Signal].mm.zl_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 	}				
@@ -5517,7 +4866,6 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Electron].fill(" ... both electrons pass tight cut");
 				S->region[Signal].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
 				S->region[Signal].ee.nt20_eta->Fill(ElEta[el1], ElEta[el2], puweight);
-				S->region[Signal].ee.nt20_jpt->Fill(getClosestJetPt(el1, Electron), getClosestJetPt(el2, Electron), puweight);
 				if(S->datamc == 0){
 					fOUTSTREAM << " E/E Tight-Tight event in run   ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5545,20 +4893,17 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
 				S->region[Signal].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
 				S->region[Signal].ee.nt10_eta->Fill(ElEta[el1], ElEta[el2], puweight);
-				S->region[Signal].ee.nt10_jpt->Fill(getClosestJetPt(el1, Electron), getClosestJetPt(el2, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
 				S->region[Signal].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], puweight); // tight one always in x axis; fill same again
 				S->region[Signal].ee.nt10_eta->Fill(ElEta[el2], ElEta[el1], puweight);
-				S->region[Signal].ee.nt10_jpt->Fill(getClosestJetPt(el2, Electron), getClosestJetPt(el1, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, puweight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
 				S->region[Signal].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
 				S->region[Signal].ee.nt00_eta->Fill(ElEta[el1], ElEta[el2], puweight);
-				S->region[Signal].ee.nt00_jpt->Fill(getClosestJetPt(el1, Electron), getClosestJetPt(el2, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
 			}
 			if(S->datamc > 0 ){
@@ -5577,14 +4922,10 @@ void MuonPlotter::fillYields(Sample *S){
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
 			S->region[Signal].ee.fntight->Fill(ElPt[0], ElEta[0], singleElPrescale() * puweight);
-			S->region[Signal].ee.fntight_nv->Fill(ElPt[0], NVrtx, puweight);
-			S->region[Signal].ee.fntight_jpt->Fill(ElPt[0], getClosestJetPt(0, Electron), puweight);
 			if(S->datamc > 0) S->region[Signal].ee.sst_origin->Fill(elIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseElectron(0) ){
 			S->region[Signal].ee.fnloose->Fill(ElPt[0], ElEta[0], singleElPrescale() * puweight);
-			S->region[Signal].ee.fnloose_nv->Fill(ElPt[0], NVrtx, puweight);
-			S->region[Signal].ee.fnloose_jpt->Fill(ElPt[0], getClosestJetPt(0, Electron), puweight);
 			if(S->datamc > 0) S->region[Signal].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, puweight);
 		}
 	}
@@ -5592,14 +4933,10 @@ void MuonPlotter::fillYields(Sample *S){
 	if(doubleElTrigger() && isZElElEvent(elind)){
 		if( isTightElectron(elind) ){
 			S->region[Signal].ee.pntight->Fill(ElPt[elind], ElEta[elind], puweight);
-			S->region[Signal].ee.pntight_nv->Fill(ElPt[elind], NVrtx, puweight);
-			S->region[Signal].ee.pntight_jpt->Fill(ElPt[elind], getClosestJetPt(elind, Electron), puweight);
 			if(S->datamc > 0) S->region[Signal].ee.zt_origin->Fill(elIndexToBin(elind)-0.5, puweight);
 		}
 		if( isLooseElectron(elind) ){
 			S->region[Signal].ee.pnloose->Fill(ElPt[elind], ElEta[elind], puweight);
-			S->region[Signal].ee.pnloose_nv->Fill(ElPt[elind], NVrtx, puweight);
-			S->region[Signal].ee.pnloose_jpt->Fill(ElPt[elind], getClosestJetPt(elind, Electron), puweight);
 			if(S->datamc > 0) S->region[Signal].ee.zl_origin->Fill(elIndexToBin(elind)-0.5, puweight);
 		}
 	}
@@ -5615,7 +4952,6 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][EMu].fill(" ... both e and mu pass tight cuts");
 				S->region[Signal].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[Signal].em.nt20_eta->Fill(MuEta[mu], ElEta[el], puweight);
-				S->region[Signal].em.nt20_jpt->Fill(getClosestJetPt(mu, Muon), getClosestJetPt(el, Electron), puweight);
 				if(S->datamc == 0){
 					fOUTSTREAM << " E/Mu Tight-Tight event in run  ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5638,20 +4974,17 @@ void MuonPlotter::fillYields(Sample *S){
 				fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
 				S->region[Signal].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[Signal].em.nt10_eta->Fill(MuEta[mu], ElEta[el], puweight);
-				S->region[Signal].em.nt10_jpt->Fill(getClosestJetPt(mu, Muon), getClosestJetPt(el, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
 				S->region[Signal].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], puweight); // muon always in x axis for e/mu
 				S->region[Signal].em.nt01_eta->Fill(MuEta[mu], ElEta[el], puweight);
-				S->region[Signal].em.nt01_jpt->Fill(getClosestJetPt(mu, Muon), getClosestJetPt(el, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
 				S->region[Signal].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[Signal].em.nt00_eta->Fill(MuEta[mu], ElEta[el], puweight);
-				S->region[Signal].em.nt00_jpt->Fill(getClosestJetPt(mu, Muon), getClosestJetPt(el, Electron), puweight);
 				if(S->datamc > 0) S->region[Signal].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if(S->datamc > 0){
@@ -5694,6 +5027,49 @@ void MuonPlotter::fillOSYields(Sample *S){
 		}
 	}
 	fChargeSwitch = 0;
+}
+void MuonPlotter::fillRatioPlots(Sample *S){
+	fDoCounting = false;
+	fChargeSwitch = 0;
+	float puweight = PUWeight;
+
+	FRatioPlots *RP0 = &S->ratioplots[0];
+	FRatioPlots *RP1 = &S->ratioplots[1];
+
+	fCurrentChannel = Muon;
+	if(singleMuTrigger() && isSigSupMuEvent()){
+		if( isTightMuon(0) ){
+			RP0->ntight[0]->Fill(getNJets(),               puweight);
+			RP0->ntight[1]->Fill(getHT(),                  puweight);
+			RP0->ntight[2]->Fill(getMaxJPt(),              puweight);
+			RP0->ntight[3]->Fill(NVrtx,                    puweight);
+			RP0->ntight[4]->Fill(getClosestJetPt(0, Muon), puweight);
+		}
+		if( isLooseMuon(0) ){
+			RP0->nloose[0]->Fill(getNJets(),               puweight);
+			RP0->nloose[1]->Fill(getHT(),                  puweight);
+			RP0->nloose[2]->Fill(getMaxJPt(),              puweight);
+			RP0->nloose[3]->Fill(NVrtx,                    puweight);
+			RP0->nloose[4]->Fill(getClosestJetPt(0, Muon), puweight);
+		}
+	}
+	if(singleElTrigger() && isSigSupElEvent()){
+		if( isTightElectron(0) ){
+			RP1->ntight[0]->Fill(getNJets(),                   puweight);
+			RP1->ntight[1]->Fill(getHT(),                      puweight);
+			RP1->ntight[2]->Fill(getMaxJPt(),                  puweight);
+			RP1->ntight[3]->Fill(NVrtx,                        puweight);
+			RP1->ntight[4]->Fill(getClosestJetPt(0, Electron), puweight);
+		}
+		if( isLooseElectron(0) ){
+			RP1->nloose[0]->Fill(getNJets(),                   puweight);
+			RP1->nloose[1]->Fill(getHT(),                      puweight);
+			RP1->nloose[2]->Fill(getMaxJPt(),                  puweight);
+			RP1->nloose[3]->Fill(NVrtx,                        puweight);
+			RP1->nloose[4]->Fill(getClosestJetPt(0, Electron), puweight);
+		}
+	}
+	
 }
 
 //____________________________________________________________________________
@@ -6221,6 +5597,28 @@ void MuonPlotter::bookHistos(){
 			}
 		}
 
+		// Ratio histos
+		FRatioPlots *rpmu = &S->ratioplots[0];
+		FRatioPlots *rpel = &S->ratioplots[1];
+		for(size_t j = 0; j < gNRatioVars; ++j){
+			rpmu->ntight[j] = new TH1D(Form("h_%s_NTight_mu_%s", S->sname.Data(), FRatioPlots::var_name[j].Data()), S->sname.Data(), FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			rpmu->ntight[j]->SetFillColor(S->color);
+			rpmu->ntight[j]->SetXTitle(FRatioPlots::var_name[j]);
+			rpmu->ntight[j]->Sumw2();
+			rpmu->nloose[j] = new TH1D(Form("h_%s_NLoose_mu_%s", S->sname.Data(), FRatioPlots::var_name[j].Data()), S->sname.Data(), FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			rpmu->nloose[j]->SetFillColor(S->color);
+			rpmu->nloose[j]->SetXTitle(FRatioPlots::var_name[j]);
+			rpmu->nloose[j]->Sumw2();
+			rpel->ntight[j] = new TH1D(Form("h_%s_NTight_el_%s", S->sname.Data(), FRatioPlots::var_name[j].Data()), S->sname.Data(), FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			rpel->ntight[j]->SetFillColor(S->color);
+			rpel->ntight[j]->SetXTitle(FRatioPlots::var_name[j]);
+			rpel->ntight[j]->Sumw2();
+			rpel->nloose[j] = new TH1D(Form("h_%s_NLoose_el_%s", S->sname.Data(), FRatioPlots::var_name[j].Data()), S->sname.Data(), FRatioPlots::nbins[j], FRatioPlots::xmin[j], FRatioPlots::xmax[j]);
+			rpel->nloose[j]->SetFillColor(S->color);
+			rpel->nloose[j]->SetXTitle(FRatioPlots::var_name[j]);
+			rpel->nloose[j]->Sumw2();
+		}
+
 		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
 			Region *R = &S->region[r];
 			for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
@@ -6240,19 +5638,6 @@ void MuonPlotter::bookHistos(){
 					C->fnloose  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_fNLoose",  "fNLoose",  getNPt2Bins(c), getPt2Bins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose  ->Sumw2();
 					C->pntight  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNTight",  "pNTight",  getNPt2Bins(c), getPt2Bins(c), getNEtaBins(c), getEtaBins(c)); C->pntight  ->Sumw2();
 					C->pnloose  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNLoose",  "pNLoose",  getNPt2Bins(c), getPt2Bins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose  ->Sumw2();
-					C->fntight_nv  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_fNTight_nv",  "fNTight_nv",  getNPt2Bins(c), getPt2Bins(c), gNNVrtxBins, gNVrtxBins); C->fntight_nv->Sumw2();
-					C->fnloose_nv  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_fNLoose_nv",  "fNLoose_nv",  getNPt2Bins(c), getPt2Bins(c), gNNVrtxBins, gNVrtxBins); C->fnloose_nv->Sumw2();
-					C->pntight_nv  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNTight_nv",  "pNTight_nv",  getNPt2Bins(c), getPt2Bins(c), gNNVrtxBins, gNVrtxBins); C->pntight_nv->Sumw2();
-					C->pnloose_nv  = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNLoose_nv",  "pNLoose_nv",  getNPt2Bins(c), getPt2Bins(c), gNNVrtxBins, gNVrtxBins); C->pnloose_nv->Sumw2();
-
-					C->nt20_jpt    = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT20_jpt",    "NT20_jpt",    gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins);       C->nt20_jpt->Sumw2();
-					C->nt10_jpt    = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT10_jpt",    "NT10_jpt",    gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins);       C->nt10_jpt->Sumw2();
-					C->nt01_jpt    = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT01_jpt",    "NT01_jpt",    gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins);       C->nt01_jpt->Sumw2();
-					C->nt00_jpt    = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT00_jpt",    "NT00_jpt",    gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins);       C->nt00_jpt->Sumw2();
-					C->fntight_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_fNTight_jpt", "fNTight_jpt", gNJetPtBins, gJetPtBins, getNPt2Bins(c), getPt2Bins(c)); C->fntight_jpt->Sumw2();
-					C->fnloose_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_fNLoose_jpt", "fNLoose_jpt", gNJetPtBins, gJetPtBins, getNPt2Bins(c), getPt2Bins(c)); C->fnloose_jpt->Sumw2();
-					C->pntight_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNTight_jpt", "pNTight_jpt", gNJetPtBins, gJetPtBins, getNPt2Bins(c), getPt2Bins(c)); C->pntight_jpt->Sumw2();
-					C->pnloose_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_pNLoose_jpt", "pNLoose_jpt", gNJetPtBins, gJetPtBins, getNPt2Bins(c), getPt2Bins(c)); C->pnloose_jpt->Sumw2();
 
 					if(c == Electron){ // OS Yields
 						C->nt20_OS_BB_pt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNPt2Bins(c), getPt2Bins(c), getNPt2Bins(c), getPt2Bins(c)); C->nt20_OS_BB_pt ->Sumw2();
@@ -6311,10 +5696,6 @@ void MuonPlotter::bookHistos(){
 					C->nt10_eta = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT10_eta", "NT10_eta", getNEtaBins(Muon), getEtaBins(Muon), getNEtaBins(Electron), getEtaBins(Electron)); C->nt10_eta->Sumw2();
 					C->nt01_eta = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT01_eta", "NT01_eta", getNEtaBins(Muon), getEtaBins(Muon), getNEtaBins(Electron), getEtaBins(Electron)); C->nt01_eta->Sumw2();
 					C->nt00_eta = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT00_eta", "NT00_eta", getNEtaBins(Muon), getEtaBins(Muon), getNEtaBins(Electron), getEtaBins(Electron)); C->nt00_eta->Sumw2();
-					C->nt20_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT20_jpt", "NT20_jpt", gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins); C->nt20_jpt->Sumw2();
-					C->nt10_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT10_jpt", "NT10_jpt", gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins); C->nt10_jpt->Sumw2();
-					C->nt01_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT01_jpt", "NT01_jpt", gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins); C->nt01_jpt->Sumw2();
-					C->nt00_jpt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT00_jpt", "NT00_jpt", gNJetPtBins, gJetPtBins, gNJetPtBins, gJetPtBins); C->nt00_jpt->Sumw2();
 
 					C->nt20_OS_BB_pt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNPt2Bins(Muon), getPt2Bins(Muon), getNPt2Bins(Electron), getPt2Bins(Electron)); C->nt20_OS_BB_pt ->Sumw2();
                     C->nt20_OS_EE_pt = new TH2D(S->sname + "_" + R->sname + "_" + C->sname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNPt2Bins(Muon), getPt2Bins(Muon), getNPt2Bins(Electron), getPt2Bins(Electron)); C->nt20_OS_EE_pt ->Sumw2();
@@ -6386,6 +5767,18 @@ void MuonPlotter::writeHistos(){
 			}
 		}
 
+		// Ratio histos
+		temp = S->sname + "/FRatioPlots/";
+		rdir = Util::FindOrCreate(temp, pFile);
+		rdir->cd();
+		FRatioPlots *rpmu = &S->ratioplots[0];
+		FRatioPlots *rpel = &S->ratioplots[1];
+		for(size_t j = 0; j < gNRatioVars; ++j){
+			rpmu->ntight[j]->Write(rpmu->ntight[j]->GetName(), TObject::kWriteDelete);
+			rpmu->nloose[j]->Write(rpmu->nloose[j]->GetName(), TObject::kWriteDelete);
+			rpel->ntight[j]->Write(rpel->ntight[j]->GetName(), TObject::kWriteDelete);
+			rpel->nloose[j]->Write(rpel->nloose[j]->GetName(), TObject::kWriteDelete);
+		}
 
 		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
 			Region *R = &S->region[r];
@@ -6406,10 +5799,6 @@ void MuonPlotter::writeHistos(){
 				C->nt10_eta   ->Write(C->nt10_eta   ->GetName(), TObject::kWriteDelete);
 				C->nt01_eta   ->Write(C->nt01_eta   ->GetName(), TObject::kWriteDelete);
 				C->nt00_eta   ->Write(C->nt00_eta   ->GetName(), TObject::kWriteDelete);
-				C->nt20_jpt   ->Write(C->nt20_jpt   ->GetName(), TObject::kWriteDelete);
-				C->nt10_jpt   ->Write(C->nt10_jpt   ->GetName(), TObject::kWriteDelete);
-				C->nt01_jpt   ->Write(C->nt01_jpt   ->GetName(), TObject::kWriteDelete);
-				C->nt00_jpt   ->Write(C->nt00_jpt   ->GetName(), TObject::kWriteDelete);
 				
 				if(ch == Electron){
 					C->nt20_OS_BB_pt->Write(C->nt20_OS_BB_pt->GetName(), TObject::kWriteDelete);
@@ -6442,14 +5831,6 @@ void MuonPlotter::writeHistos(){
 					C->fnloose    ->Write(C->fnloose    ->GetName(), TObject::kWriteDelete);
 					C->pntight    ->Write(C->pntight    ->GetName(), TObject::kWriteDelete);
 					C->pnloose    ->Write(C->pnloose    ->GetName(), TObject::kWriteDelete);
-					C->fntight_nv ->Write(C->fntight_nv ->GetName(), TObject::kWriteDelete);
-					C->fnloose_nv ->Write(C->fnloose_nv ->GetName(), TObject::kWriteDelete);
-					C->pntight_nv ->Write(C->pntight_nv ->GetName(), TObject::kWriteDelete);
-					C->pnloose_nv ->Write(C->pnloose_nv ->GetName(), TObject::kWriteDelete);
-					C->fntight_jpt->Write(C->fntight_jpt->GetName(), TObject::kWriteDelete);
-					C->fnloose_jpt->Write(C->fnloose_jpt->GetName(), TObject::kWriteDelete);
-					C->pntight_jpt->Write(C->pntight_jpt->GetName(), TObject::kWriteDelete);
-					C->pnloose_jpt->Write(C->pnloose_jpt->GetName(), TObject::kWriteDelete);
 					if(S->datamc > 0){
 						C->sst_origin ->Write(C->sst_origin ->GetName(), TObject::kWriteDelete);
 						C->ssl_origin ->Write(C->ssl_origin ->GetName(), TObject::kWriteDelete);
@@ -6523,6 +5904,20 @@ int  MuonPlotter::readHistos(TString filename){
 			}
 		}
 
+		// Ratio histos
+		FRatioPlots *rpmu = &S->ratioplots[0];
+		FRatioPlots *rpel = &S->ratioplots[1];
+		for(size_t j = 0; j < gNRatioVars; ++j){
+			TString getname = rpmu->ntight[j]->GetName();
+			rpmu->ntight[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+			getname = rpmu->nloose[j]->GetName();
+			rpmu->nloose[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+			getname = rpel->ntight[j]->GetName();
+			rpel->ntight[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+			getname = rpel->nloose[j]->GetName();
+			rpel->nloose[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+		}
+
 		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){ // Loop over regions
 			Region *R = &S->region[r];
 			for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
@@ -6539,10 +5934,6 @@ int  MuonPlotter::readHistos(TString filename){
 				C->nt10_eta    = (TH2D*)pFile->Get(rootdir + C->nt10_eta   ->GetName() );
 				C->nt01_eta    = (TH2D*)pFile->Get(rootdir + C->nt01_eta   ->GetName() );
 				C->nt00_eta    = (TH2D*)pFile->Get(rootdir + C->nt00_eta   ->GetName() );
-				C->nt20_jpt    = (TH2D*)pFile->Get(rootdir + C->nt20_jpt   ->GetName() );
-				C->nt10_jpt    = (TH2D*)pFile->Get(rootdir + C->nt10_jpt   ->GetName() );
-				C->nt01_jpt    = (TH2D*)pFile->Get(rootdir + C->nt01_jpt   ->GetName() );
-				C->nt00_jpt    = (TH2D*)pFile->Get(rootdir + C->nt00_jpt   ->GetName() );
 
 				if(ch == Electron){
 					C->nt20_OS_BB_pt = (TH2D*)pFile->Get(rootdir + C->nt20_OS_BB_pt->GetName() );
@@ -6575,14 +5966,6 @@ int  MuonPlotter::readHistos(TString filename){
 					C->fnloose     = (TH2D*)pFile->Get(rootdir + C->fnloose->GetName() );
 					C->pntight     = (TH2D*)pFile->Get(rootdir + C->pntight->GetName() );
 					C->pnloose     = (TH2D*)pFile->Get(rootdir + C->pnloose->GetName() );
-					C->fntight_nv  = (TH2D*)pFile->Get(rootdir + C->fntight_nv->GetName() );
-					C->fnloose_nv  = (TH2D*)pFile->Get(rootdir + C->fnloose_nv->GetName() );
-					C->pntight_nv  = (TH2D*)pFile->Get(rootdir + C->pntight_nv->GetName() );
-					C->pnloose_nv  = (TH2D*)pFile->Get(rootdir + C->pnloose_nv->GetName() );
-					C->fntight_jpt = (TH2D*)pFile->Get(rootdir + C->fntight_jpt->GetName() );
-					C->fnloose_jpt = (TH2D*)pFile->Get(rootdir + C->fnloose_jpt->GetName() );
-					C->pntight_jpt = (TH2D*)pFile->Get(rootdir + C->pntight_jpt->GetName() );
-					C->pnloose_jpt = (TH2D*)pFile->Get(rootdir + C->pnloose_jpt->GetName() );
 					if(S->datamc > 0){
 						C->sst_origin  = (TH1D*)pFile->Get(rootdir + C->sst_origin->GetName() );
 						C->ssl_origin  = (TH1D*)pFile->Get(rootdir + C->ssl_origin->GetName() );
@@ -7348,12 +6731,56 @@ float MuonPlotter::getClosestJetPt(int ind, gChannel chan){
 	float cljetpt = 0.;
 	for(size_t i = 0; i < NJets; ++i){
 		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
-		if(dr < 0.05) continue;
+		// if(dr < 0.05) continue;
 		if(dr > mindr) continue;
 		mindr = dr;
 		cljetpt = JetPt[i];
 	}
 	return cljetpt;
+}
+float MuonPlotter::getClosestJetDR(int ind, gChannel chan){
+// Get the pt of the closest jet
+	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
+	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
+	
+	float mindr = 999.;
+	for(size_t i = 0; i < NJets; ++i){
+		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
+		if(dr > mindr) continue;
+		mindr = dr;
+	}
+	return mindr;
+}
+float MuonPlotter::getSecondClosestJetDR(int ind, gChannel chan){
+// Get the pt of the closest jet
+	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
+	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
+	
+	if(NJets < 2) return 10.;
+	
+	float mindr  = 888.;
+	float mindr2 = 999.;
+	for(size_t i = 0; i < NJets; ++i){
+		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
+		if(dr < mindr){
+			mindr2 = mindr;
+			mindr = dr;			
+		}
+		else if(dr < mindr2){
+			mindr2 = dr;
+		}
+	}
+	return mindr2;
+}
+
+float MuonPlotter::getMaxJPt(){
+	float maxpt(0.);
+	for(size_t i = 0; i < NJets; ++i){
+		if(!isGoodJet(i)) continue;
+		if(JetPt[i] < maxpt) continue;
+		maxpt = JetPt[i];
+	}
+	return maxpt;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -7745,7 +7172,7 @@ bool MuonPlotter::passesMllEventVeto(float cut){
 					}
 				}
 			}
-		}		
+		}
 	}
 
 	if(NEls > 1){ 
@@ -7896,7 +7323,7 @@ bool MuonPlotter::isSSLLMuEvent(int& mu1, int& mu2){
 		if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){
@@ -7943,7 +7370,7 @@ bool MuonPlotter::isSSLLElEvent(int& el1, int& el2){
 		if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){
@@ -7991,7 +7418,7 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(12.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){

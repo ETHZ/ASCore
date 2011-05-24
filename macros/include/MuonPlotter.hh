@@ -51,7 +51,7 @@ public:
 		sample_begin,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
 		MuHad1, MuHad2, EleHad1, EleHad2,
-		TTJets, WJets, DYJets, WW, WZ, ZZ, GJets40, GJets100, GJets200,
+		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, WW, WZ, ZZ, GJets40, GJets100, GJets200,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD5,
@@ -121,25 +121,11 @@ public:
 		TH2D *nt10_eta;
 		TH2D *nt01_eta;
 		TH2D *nt00_eta;
+
 		TH2D *fntight; // pt vs eta
 		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
-
-		TH2D *fntight_nv; // pt vs nvrtx
-		TH2D *fnloose_nv;
-		TH2D *pntight_nv; // pt vs nvrtx
-		TH2D *pnloose_nv;
-
-		// Binning in closest jet pt
-		TH2D *nt20_jpt; // pt of jet closest to 1 vs 2
-		TH2D *nt10_jpt;
-		TH2D *nt01_jpt;
-		TH2D *nt00_jpt;
-		TH2D *fntight_jpt; // pt vs closest jet pt
-		TH2D *fnloose_jpt; 
-		TH2D *pntight_jpt; // pt vs closest jet pt
-		TH2D *pnloose_jpt;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -179,9 +165,20 @@ public:
 		Channel ee;
 	};
 	
+	static const int gNRatioVars = 5;
+	struct FRatioPlots{
+		static TString var_name[gNRatioVars];
+		static int nbins[gNRatioVars];
+		static float xmin[gNRatioVars];
+		static float xmax[gNRatioVars];
+		TH1D *ntight[gNRatioVars];
+		TH1D *nloose[gNRatioVars]; 
+	};
+	
 	static const int gNKinVars = 10;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
+		static TString axis_label[gNKinVars];
 		static int nbins[gNKinVars];
 		static float xmin[gNKinVars];
 		static float xmax[gNKinVars];
@@ -208,8 +205,9 @@ public:
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
 		Region region[gNREGIONS];
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
-		KinPlots kinplots[3]; // tt and ll and signal
-		IsoPlots isoplots[2]; // e and mu
+		KinPlots    kinplots[3]; // tt and ll and signal
+		IsoPlots    isoplots[2]; // e and mu
+		FRatioPlots ratioplots[2]; // e and mu
 	};
 	
 	MuonPlotter();
@@ -237,11 +235,6 @@ public:
 	void makeElfRatioPlots(bool = false);
 	void makeElpRatioPlots(bool = false);
 
-	void makeMufEffPlots(bool = false);
-	void makeElfEffPlots(bool = false);
-	void makeMupEffPlots(bool = false);
-	void makeElpEffPlots(bool = false);
-	
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
 	void fillMuIsoHistos(gSample);
@@ -252,8 +245,7 @@ public:
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
-	void makeFRvsNVrtxPlots(gChannel);
-	void makeFRvsClJPtPlots(gChannel);
+	void makeRatioPlots(gChannel);
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -272,8 +264,6 @@ public:
 	TH1D* fillMuRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
 	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
 	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-	TH2D* fillMuRatio(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
-	TH2D* fillMuRatio(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*);
 
 	// Calculate from pre stored numbers, with fixed selections:
 	void fillMuElRatios(vector<int>);
@@ -285,16 +275,11 @@ public:
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatioNV(vector<int>, gChannel, gFPSwitch, TH1D*&, bool = false);
-	void calculateRatioCJPt(vector<int>, gChannel, gFPSwitch, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
-	TEfficiency *mergeDataEfficiencies(vector<int>, gChannel, gFPSwitch, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
-	TEfficiency *getEfficiency(Sample*, gChannel, gFPSwitch, int = 0, bool = false);
-	TGraphAsymmErrors *combineMCEfficiencies(vector<int>, gChannel, gFPSwitch, bool = false, TEfficiency::EStatOption = TEfficiency::kBUniform, double beta = 1., double alpha = 1.);
-
-	void getPassedTotal(vector<int>, gChannel, gFPSwitch, TH2D*&, TH2D*&, int = 0, bool = false);
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
+	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
@@ -314,6 +299,7 @@ public:
 	
 	void fillYields(Sample*);
 	void fillOSYields(Sample*);
+	void fillRatioPlots(Sample*);
 	
 	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
@@ -364,6 +350,9 @@ public:
 	float getHT();
 	float getMT2(int, int, int);
 	float getClosestJetPt(int, gChannel);
+	float getClosestJetDR(int, gChannel);
+	float getSecondClosestJetDR(int, gChannel);
+	float getMaxJPt();
 	
 	bool isGoodEvent();
 	bool isGoodMuEvent();
