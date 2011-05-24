@@ -321,7 +321,7 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
 	
 	// ECAL gap veto
-	if ( fabs(fTR->ElEta[index]) > 1.442 && fabs(fTR->ElEta[index]) < 1.567 )  return false;
+	if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
 
 	if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
 	if(fabs(fTR->ElDzPV[index]) > 1.00) return false;
@@ -392,9 +392,8 @@ bool UserAnalysisBase::IsLooseEl(int index){
 
 	if(!fTR->ElEcalDriven[index]) return false;
 	
-	// Loose identification criteria
+	// Loose identification criteria: WP90
 	if(!IsGoodElId_WP90(index)) return false;
-	if(fTR->ElNumberOfMissingInnerHits[index] > 0) return false; // Ask for tighter WP80 conversion rejection
 
 	// Loose isolation criteria
 	if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
