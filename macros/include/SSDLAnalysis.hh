@@ -74,6 +74,8 @@ private:
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
 	float fTJetbtag[fMaxNjets]; // tight WP: > 2.
+	float fTJetArea[fMaxNjets];
+
 	float fTtcMET;
 	float fTtcMETphi;
 	float fTpfMET;
@@ -90,9 +92,7 @@ private:
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
 	float fTmuiso         [fMaxNmus];
-	float fTmuisohyb      [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
-	int   fTmutight       [fMaxNmus]; // 0 for loose (but not tight), 1 for tight
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
 	float fTmuptE         [fMaxNmus];
@@ -106,37 +106,25 @@ private:
 	
 	// electron properties
 	int     fTnqels;
-	int   fTElcharge                   [fMaxNeles];
-	int   fTElChargeIsCons             [fMaxNeles];
-	// int   fTElChargeIsGenCons          [fMaxNeles];
-	int   fTElEcalDriven               [fMaxNeles];
-	float fTElCaloEnergy               [fMaxNeles];
-	float fTElpt                       [fMaxNeles];
-	float fTEleta                      [fMaxNeles];
-	float fTElphi                      [fMaxNeles];
-	float fTEld0                       [fMaxNeles];
-	float fTElD0Err                    [fMaxNeles];
-	float fTEldz                       [fMaxNeles];
-	float fTElDzErr                    [fMaxNeles];
-	float fTElEoverP                   [fMaxNeles];
-	float fTElHoverE                   [fMaxNeles];
-	float fTElSigmaIetaIeta            [fMaxNeles];
-	float fTElDeltaPhiSuperClusterAtVtx[fMaxNeles];
-	float fTElDeltaEtaSuperClusterAtVtx[fMaxNeles];
-	float fTElRelIso                   [fMaxNeles];
-	int   fTElIsGoodElId_WP80          [fMaxNeles];
-	int   fTElIsGoodElId_WP90          [fMaxNeles];
-	int   fTElIsGoodElId_WP95          [fMaxNeles];
-	float fTElS4OverS1                 [fMaxNeles];
-	float fTElConvPartnerTrkDist       [fMaxNeles];
-	float fTElConvPartnerTrkDCot       [fMaxNeles];
-	float fTElMT                       [fMaxNeles];
-	int   fTElGenID                    [fMaxNeles];
-	int   fTElGenMID                   [fMaxNeles];
-	int   fTElGenGMID                  [fMaxNeles];
-	int   fTElGenType                  [fMaxNeles];
-	int   fTElGenMType                 [fMaxNeles];
-	int   fTElGenGMType                [fMaxNeles];
-	float fTElHybRelIso                [fMaxNeles];
+	int   fTElcharge         [fMaxNeles];
+	int   fTElChargeIsCons   [fMaxNeles];
+	float fTElpt             [fMaxNeles];
+	float fTEleta            [fMaxNeles];
+	float fTElphi            [fMaxNeles];
+	float fTEld0             [fMaxNeles];
+	float fTElD0Err          [fMaxNeles];
+	float fTEldz             [fMaxNeles];
+	float fTElDzErr          [fMaxNeles];
+	float fTElRelIso         [fMaxNeles];
+	float fTElEcalRecHitSumEt[fMaxNeles];
+	int   fTElIsGoodElId_WP80[fMaxNeles];
+	int   fTElIsGoodElId_WP90[fMaxNeles];
+	float fTElMT             [fMaxNeles];
+	int   fTElGenID          [fMaxNeles];
+	int   fTElGenMID         [fMaxNeles];
+	int   fTElGenGMID        [fMaxNeles];
+	int   fTElGenType        [fMaxNeles];
+	int   fTElGenMType       [fMaxNeles];
+	int   fTElGenGMType      [fMaxNeles];
 };
 #endif

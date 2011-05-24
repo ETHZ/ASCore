@@ -149,27 +149,22 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuEta"         ,&fTmueta,          "MuEta[NMus]/F");
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
-	fAnalysisTree->Branch("MuTight"       ,&fTmutight,        "MuTight[NMus]/I");
 	fAnalysisTree->Branch("MuIso"         ,&fTmuiso,          "MuIso[NMus]/F");
-	fAnalysisTree->Branch("MuIsoHybrid"   ,&fTmuisohyb,       "MuIsoHybrid[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
 	fAnalysisTree->Branch("MuGenID"       ,&fTmuid,           "MuGenID[NMus]/I");
-	fAnalysisTree->Branch("MuGenMoID"     ,&fTmumoid,         "MuGenMoID[NMus]/I");
-	fAnalysisTree->Branch("MuGenGMoID"    ,&fTmugmoid,        "MuGenGMoID[NMus]/I");
+	fAnalysisTree->Branch("MuGenMID"      ,&fTmumoid,         "MuGenMID[NMus]/I");
+	fAnalysisTree->Branch("MuGenGMID"     ,&fTmugmoid,        "MuGenGMID[NMus]/I");
 	fAnalysisTree->Branch("MuGenType"     ,&fTmutype,         "MuGenType[NMus]/I");
-	fAnalysisTree->Branch("MuGenMoType"   ,&fTmumotype,       "MuGenMoType[NMus]/I");
-	fAnalysisTree->Branch("MuGenGMoType"  ,&fTmugmotype,      "MuGenGMoType[NMus]/I");
+	fAnalysisTree->Branch("MuGenMType"    ,&fTmumotype,       "MuGenMType[NMus]/I");
+	fAnalysisTree->Branch("MuGenGMType"   ,&fTmugmotype,      "MuGenGMType[NMus]/I");
 	fAnalysisTree->Branch("MuMT"          ,&fTmuMT,           "MuMT[NMus]/F");
 
 	// single-electron properties
 	fAnalysisTree->Branch("NEls",                   &fTnqels,               "NEls/I");
-	fAnalysisTree->Branch("ElCh",                   &fTElcharge,            "ElCh[NEls]/I");
+	fAnalysisTree->Branch("ElCharge",               &fTElcharge,            "ElCh[NEls]/I");
 	fAnalysisTree->Branch("ElChIsCons",             &fTElChargeIsCons,      "ElChIsCons[NEls]/I");
-	// fAnalysisTree->Branch("ElChIsGenCons",          &fTElChargeIsGenCons,   "ElChIsGenCons[NEls]/I");
-	fAnalysisTree->Branch("ElEcalDriven",           &fTElEcalDriven,        "ElEcalDriven[NEls]/I");
-	fAnalysisTree->Branch("ElCaloEnergy",           &fTElCaloEnergy,        "ElCaloEnergy[NEls]/F");
 	fAnalysisTree->Branch("ElPt",                   &fTElpt,                "ElPt[NEls]/F");
 	fAnalysisTree->Branch("ElEta",                  &fTEleta,               "ElEta[NEls]/F");
 	fAnalysisTree->Branch("ElPhi",                  &fTElphi,               "ElPhi[NEls]/F");
@@ -177,23 +172,16 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElD0Err",                &fTElD0Err,             "ElD0Err[NEls]/F");
 	fAnalysisTree->Branch("ElDz",                   &fTEldz,                "ElDz[NEls]/F");
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
-	fAnalysisTree->Branch("ElEoverP",               &fTElEoverP,            "ElEoverP[NEls]/F");
-	fAnalysisTree->Branch("ElHoverE",               &fTElHoverE,            "ElHoverE[NEls]/F");
-	fAnalysisTree->Branch("ElSigmaIetaIeta",        &fTElSigmaIetaIeta,     "ElSigmaIetaIeta[NEls]/F");
-	fAnalysisTree->Branch("ElDeltaPhiSuperClusterAtVtx", &fTElDeltaPhiSuperClusterAtVtx, "ElDeltaPhiSuperClusterAtVtx[NEls]/F");
-	fAnalysisTree->Branch("ElDeltaEtaSuperClusterAtVtx", &fTElDeltaEtaSuperClusterAtVtx, "ElDeltaEtaSuperClusterAtVtx[NEls]/F");
 	fAnalysisTree->Branch("ElRelIso",               &fTElRelIso,            "ElRelIso[NEls]/F");
+	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
-	fAnalysisTree->Branch("ElIsGoodElId_WP95",      &fTElIsGoodElId_WP95,   "ElIsGoodElId_WP95[NEls]/I");
-	fAnalysisTree->Branch("ElS4OverS1",             &fTElS4OverS1,          "ElS4OverS1[NEls]/F");
 	fAnalysisTree->Branch("ElGenID",                &fTElGenID,             "ElGenID[NEls]/I");
 	fAnalysisTree->Branch("ElGenMID",               &fTElGenMID,            "ElGenMID[NEls]/I");
 	fAnalysisTree->Branch("ElGenGMID",              &fTElGenGMID,           "ElGenGMID[NEls]/I");
 	fAnalysisTree->Branch("ElGenType",              &fTElGenType,           "ElGenType[NEls]/I");
 	fAnalysisTree->Branch("ElGenMType",             &fTElGenMType,          "ElGenMType[NEls]/I");
 	fAnalysisTree->Branch("ElGenGMType",            &fTElGenGMType,         "ElGenGMType[NEls]/I");
-	fAnalysisTree->Branch("ElHybRelIso",            &fTElHybRelIso,         "ElHybRelIso[NEls]/F");
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
 	// jet-MET properties
@@ -206,6 +194,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
 	fAnalysisTree->Branch("JetPhi",        &fTJetphi,   "JetPhi[NJets]/F");
 	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag,  "JetSSVHPBTag[NJets]/F"); // tight WP: > 2.
+	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
 }
 
 void SSDLAnalysis::Analyze(){
@@ -223,7 +212,7 @@ void SSDLAnalysis::Analyze(){
 	// Do object selections
 	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
 	vector<int> selectedElInd  = ElectronSelection(&UserAnalysisBase::IsLooseEl);
-	vector<int> selectedJetInd = PFJetSelection(30., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
+	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min((int) selectedMuInd .size(), fMaxNmus);
 	fTnqels  = std::min((int) selectedElInd .size(), fMaxNeles);
 	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
@@ -248,6 +237,7 @@ void SSDLAnalysis::Analyze(){
 		fTJeteta [ind] = fTR->JEta[jetindex];
 		fTJetphi [ind] = fTR->JPhi[jetindex];
 		fTJetbtag[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
+		fTJetArea[ind] = fTR->JArea[jetindex];
 	}
 	// get METs
 	fTtcMET     = fTR->TCMET;
@@ -268,11 +258,7 @@ void SSDLAnalysis::Analyze(){
 		fTmueta      [i] = fTR->MuEta[index];
 		fTmuphi      [i] = fTR->MuPhi[index];
 		fTmucharge   [i] = fTR->MuCharge[index];
-		if(IsTightMu(index))        fTmutight[i] = 1;
-		if(IsLooseNoTightMu(index)) fTmutight[i] = 0;
 		fTmuiso      [i] = fTR->MuRelIso03[index];
-		if(fTmupt[i] > 20.) fTmuisohyb[i] = fTmuiso[i];
-		else fTmuisohyb[i] = fTmuiso[i]*fTmupt[i] / 20.;
 		fTmud0       [i] = fTR->MuD0PV[index];
 		fTmudz       [i] = fTR->MuDzPV[index];
 		fTmuptE      [i] = fTR->MuPtE[index];
@@ -313,26 +299,17 @@ void SSDLAnalysis::Analyze(){
 	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
 	for(int ind=0; ind<std::min(nqels,fMaxNeles); ind++){
 		elindex = selectedElInd[ind];
-		fTElcharge                   [ind] = fTR->ElCharge                [elindex];
-		fTElChargeIsCons             [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
-		// fTElChargeIsGenCons          [ind] = (fTR->ElCharge[elindex])==(fTR->ElGenCharge[elindex]);
-		// Complicated to fix, was removed from NTuple since it's stored in the pdg id, do we use it?
-		fTElEcalDriven               [ind] = fTR->ElEcalDriven           [elindex];
-		fTElCaloEnergy               [ind] = fTR->ElCaloEnergy           [elindex];
-		fTElpt                       [ind] = fTR->ElPt                   [elindex];
-		fTEleta                      [ind] = fTR->ElEta                  [elindex];
-		fTElphi                      [ind] = fTR->ElPhi                  [elindex];
-		fTEld0                       [ind] = fTR->ElD0PV                 [elindex];
-		fTElD0Err                    [ind] = fTR->ElD0E                  [elindex];
-		fTEldz                       [ind] = fTR->ElDzPV                 [elindex];
-		fTElDzErr                    [ind] = fTR->ElDzE                  [elindex];
-		fTElEoverP                   [ind] = fTR->ElESuperClusterOverP   [elindex];
-		fTElHoverE                   [ind] = fTR->ElHcalOverEcal         [elindex];
-		fTElSigmaIetaIeta            [ind] = fTR->ElSigmaIetaIeta        [elindex];
-		fTElDeltaPhiSuperClusterAtVtx[ind] = fTR->ElDeltaPhiSuperClusterAtVtx[elindex];
-		fTElDeltaEtaSuperClusterAtVtx[ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
-		fTElRelIso                   [ind] = fTR->ElRelIso03                 [elindex];
-		fTElS4OverS1                 [ind] = fTR->ElS4OverS1                 [elindex];
+		fTElcharge           [ind] = fTR->ElCharge                [elindex];
+		fTElChargeIsCons     [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
+		fTElpt               [ind] = fTR->ElPt                   [elindex];
+		fTEleta              [ind] = fTR->ElEta                  [elindex];
+		fTElphi              [ind] = fTR->ElPhi                  [elindex];
+		fTEld0               [ind] = fTR->ElD0PV                 [elindex];
+		fTElD0Err            [ind] = fTR->ElD0E                  [elindex];
+		fTEldz               [ind] = fTR->ElDzPV                 [elindex];
+		fTElDzErr            [ind] = fTR->ElDzE                  [elindex];
+		fTElRelIso           [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
+		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt  [elindex];
 		
 		if(fIsData == false){ // mc truth information		
 			fTElGenID  [ind] = fTR->ElGenID  [elindex];
@@ -357,10 +334,8 @@ void SSDLAnalysis::Analyze(){
 		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
 		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
 		fTElMT             [ind] = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
-		fTElHybRelIso      [ind] = hybRelElIso(elindex);
 		fTElIsGoodElId_WP80[ind] = IsGoodElId_WP80(elindex);
 		fTElIsGoodElId_WP90[ind] = IsGoodElId_WP90(elindex);
-		fTElIsGoodElId_WP95[ind] = IsGoodBasicEl(elindex);
 	}
 
 	fAnalysisTree->Fill();
@@ -388,9 +363,7 @@ void SSDLAnalysis::ResetTree(){
 		fTmueta         [i] = -999.99;
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
-		fTmutight       [i] = -999;
 		fTmuiso         [i] = -999.99;
-		fTmuisohyb      [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
 		fTmuptE         [i] = -999.99;
@@ -408,9 +381,6 @@ void SSDLAnalysis::ResetTree(){
 	for(int i = 0; i < fMaxNeles; i++){
 		fTElcharge          [i] = -999;
 		fTElChargeIsCons    [i] = -999;
-		fTElEcalDriven      [i] = -999;
-		// fTElChargeIsGenCons [i] = -999;
-		fTElCaloEnergy      [i] = -999.99;
 		fTElpt              [i] = -999.99;
 		fTEleta             [i] = -999.99;
 		fTElphi             [i] = -999.99;
@@ -418,24 +388,17 @@ void SSDLAnalysis::ResetTree(){
 		fTElD0Err           [i] = -999.99;
 		fTEldz              [i] = -999.99;
 		fTElDzErr           [i] = -999.99;
-		fTElEoverP          [i] = -999.99;
-		fTElHoverE          [i] = -999.99;
-		fTElSigmaIetaIeta   [i] = -999.99;
-		fTElDeltaPhiSuperClusterAtVtx[i] = -999.99;
-		fTElDeltaPhiSuperClusterAtVtx[i] = -999.99;
-		fTElRelIso                   [i] = -999.99;
-		fTElIsGoodElId_WP80          [i] = -999;
-		fTElIsGoodElId_WP90          [i] = -999;
-		fTElIsGoodElId_WP95          [i] = -999;
-		fTElS4OverS1                 [i] = -999.99;
-		fTElMT                       [i] = -999.99;
-		fTElGenID                    [i] = -999;
-		fTElGenMID                   [i] = -999;
-		fTElGenGMID                  [i] = -999;
-		fTElGenType                  [i] = -999;
-		fTElGenMType                 [i] = -999;
-		fTElGenGMType                [i] = -999;
-		fTElHybRelIso                [i] = -999.99;
+		fTElRelIso          [i] = -999.99;
+		fTElEcalRecHitSumEt [i] = -999.99;
+		fTElIsGoodElId_WP80 [i] = -999;
+		fTElIsGoodElId_WP90 [i] = -999;
+		fTElMT              [i] = -999.99;
+		fTElGenID           [i] = -999;
+		fTElGenMID          [i] = -999;
+		fTElGenGMID         [i] = -999;
+		fTElGenType         [i] = -999;
+		fTElGenMType        [i] = -999;
+		fTElGenGMType       [i] = -999;
 	}
 
 	// jet-MET properties
@@ -445,6 +408,7 @@ void SSDLAnalysis::ResetTree(){
 		fTJeteta[i]  = -999.99;
 		fTJetphi[i]  = -999.99;
 		fTJetbtag[i] = -999.99;
+		fTJetArea[i] = -999.99;
 	}
 	fTtcMET      = -999.99;
 	fTtcMETphi   = -999.99;
