@@ -51,6 +51,7 @@ public:
 		sample_begin,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
 		MuHad1, MuHad2, EleHad1, EleHad2,
+		TTJetsSync,
 		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, WW, WZ, ZZ, GJets40, GJets100, GJets200,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
@@ -165,7 +166,7 @@ public:
 		Channel ee;
 	};
 	
-	static const int gNRatioVars = 5;
+	static const int gNRatioVars = 6;
 	struct FRatioPlots{
 		static TString var_name[gNRatioVars];
 		static int nbins[gNRatioVars];
@@ -254,6 +255,8 @@ public:
 
 	void makeIntPrediction(TString);
 	void makeIntMCClosure(TString);
+	
+	void printSyncExercise();
 	
 	//////////////////////////////
 	// Fake ratios
@@ -352,6 +355,7 @@ public:
 	float getClosestJetPt(int, gChannel);
 	float getClosestJetDR(int, gChannel);
 	float getSecondClosestJetDR(int, gChannel);
+	float getAwayJetPt(int, gChannel);
 	float getMaxJPt();
 	
 	bool isGoodEvent();
@@ -368,7 +372,7 @@ public:
 	bool passesMETCut(float = -1.);
 	bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
-	bool passesMllEventVeto(float = 12.);
+	bool passesMllEventVeto(float = 5.);
 
 	// Trigger selections:
 	bool  singleMuTrigger();

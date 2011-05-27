@@ -60,10 +60,10 @@ TString MuonPlotter::KinPlots::axis_label[MuonPlotter::gNKinVars] = {"H_{T} [GeV
                                                                      "m_{ll} (OF) [GeV]",
                                                                      "M_{T2} [GeV]"};
 
-TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt"};
-int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  };
-float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. };
-float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. };
+TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt"};
+int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  };
+float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. };
+float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. };
 
 TString MuonPlotter::IsoPlots::sel_name[MuonPlotter::gNSels] = {"Base", "SigSup"};
 int     MuonPlotter::IsoPlots::nbins[MuonPlotter::gNSels]    = {20, 20};
@@ -222,24 +222,20 @@ void MuonPlotter::InitMC(TTree *tree){
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
    fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
    fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
-   fChain->SetBranchAddress("MuTight", MuTight, &b_MuTight);
    fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
-   fChain->SetBranchAddress("MuIsoHybrid", MuIsoHybrid, &b_MuIsoHybrid);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
-   fChain->SetBranchAddress("MuGenMoID", MuGenMoID, &b_MuGenMoID);
-   fChain->SetBranchAddress("MuGenGMoID", MuGenGMoID, &b_MuGenGMoID);
+   fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
+   fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
    fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
-   fChain->SetBranchAddress("MuGenMoType", MuGenMoType, &b_MuGenMoType);
-   fChain->SetBranchAddress("MuGenGMoType", MuGenGMoType, &b_MuGenGMoType);
+   fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
+   fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
    fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
    fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
-   fChain->SetBranchAddress("ElCh", ElCh, &b_ElCh);
+   fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
    fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
-   fChain->SetBranchAddress("ElEcalDriven", ElEcalDriven, &b_ElEcalDriven);
-   fChain->SetBranchAddress("ElCaloEnergy", ElCaloEnergy, &b_ElCaloEnergy);
    fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
    fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
    fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
@@ -247,23 +243,15 @@ void MuonPlotter::InitMC(TTree *tree){
    fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
    fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
-   fChain->SetBranchAddress("ElEoverP", ElEoverP, &b_ElEoverP);
-   fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
-   fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
-   fChain->SetBranchAddress("ElDeltaPhiSuperClusterAtVtx", ElDeltaPhiSuperClusterAtVtx, &b_ElDeltaPhiSuperClusterAtVtx);
-   fChain->SetBranchAddress("ElDeltaEtaSuperClusterAtVtx", ElDeltaEtaSuperClusterAtVtx, &b_ElDeltaEtaSuperClusterAtVtx);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
-   fChain->SetBranchAddress("ElIsGoodElId_WP95", ElIsGoodElId_WP95, &b_ElIsGoodElId_WP95);
-   fChain->SetBranchAddress("ElS4OverS1", ElS4OverS1, &b_ElS4OverS1);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
    fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
    fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
    fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
-   fChain->SetBranchAddress("ElHybRelIso", ElHybRelIso, &b_ElHybRelIso);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
    fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
@@ -402,35 +390,36 @@ const double *MuonPlotter::getEtaBins (gChannel chan){
 //____________________________________________________________________________
 void MuonPlotter::doAnalysis(){
 	// sandBox();
+	printSyncExercise();
 
-	if(readHistos(fOutputFileName) != 0) return;
-	// fLumiNorm = 43.5;
-	// fLumiNorm = 152.9;
-	fLumiNorm = 191.1;
-	// fLumiNorm = 1000.;
-	
-	printOrigins();
-	makeMuIsolationPlots();
-	makeElIsolationPlots();
-	makeNT2KinPlots();
-	
-	makeRatioPlots(Muon);
-	makeRatioPlots(Electron);
-	
-	makeFRvsPtPlots(Muon,     SigSup);
-	makeFRvsPtPlots(Electron, SigSup);
-	makeFRvsPtPlots(Muon,     ZDecay);
-	makeFRvsPtPlots(Electron, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Electron);
+	// if(readHistos(fOutputFileName) != 0) return;
+	// // fLumiNorm = 43.5;
+	// // fLumiNorm = 152.9;
+	// fLumiNorm = 191.1;
+	// // fLumiNorm = 1000.;
+	// 
+	// printOrigins();
+	// // makeMuIsolationPlots();
+	// // makeElIsolationPlots();
+	// makeNT2KinPlots();
+	// 
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Electron);
+	// 
+	// makeFRvsPtPlots(Muon,     SigSup);
+	// makeFRvsPtPlots(Electron, SigSup);
+	// makeFRvsPtPlots(Muon,     ZDecay);
+	// makeFRvsPtPlots(Electron, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Electron);
 	
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
 	// makeElfRatioPlots(false);
 	// makeElpRatioPlots(false);
 	
-	makeIntPrediction(fOutputDir + "DataPrediction.txt");
-	makeIntMCClosure( fOutputDir + "MCClosure.txt");
+	// makeIntPrediction(fOutputDir + "DataPrediction.txt");
+	// makeIntMCClosure( fOutputDir + "MCClosure.txt");
 	
 	// makeMCClosurePlots(fMCBG);
 
@@ -450,125 +439,147 @@ void MuonPlotter::doAnalysis(){
 
 //____________________________________________________________________________
 void MuonPlotter::sandBox(){
-	fOutputSubDir = "DoubleMu/";
-	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
-
-	TH1D *h_njets_dr04_loose = new TH1D("h_njets_dr04_loose", "Number of jets within DR<0.4 of loose leptons", 4, 0., 4);
-	TH1D *h_mindr_loose      = new TH1D("h_mindr_loose",      "DR to closest jet for loose leptons",           100, 0., 1.);
-	TH1D *h_min2dr_loose     = new TH1D("h_min2dr_loose",     "DR to second closest jet for loose leptons",    100, 0., 1.);
-
-	float ptcut = 10.;
-	TString appendix = "_pt10";
-
-	Sample *S = fSamples[DoubleMu2];
-	TTree *tree = S->tree;
-
-	// Event loop
-	tree->ResetBranchAddresses();
-	// Init(tree);
-	if(S->datamc == 0) Init(tree);
-	else InitMC(tree);
-
-	if (fChain == 0) return;
-	Long64_t nentries = fChain->GetEntriesFast();
-	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-		printProgress(jentry, nentries, S->name);
-
-		Long64_t ientry = LoadTree(jentry);
-		if (ientry < 0) break;
-		nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-		int ind1(-1), ind2(-1);
-		
-		for(size_t i = 0; i < NMus; ++i){
-			if(!isLooseMuon(i)) continue;
-
-			if(MuPt[i] < ptcut) continue;
-
-			int njets = 0;
-			for(size_t j = 0; j < NJets; ++j){
-				if(Util::GetDeltaR(MuEta[i], JetEta[j], MuPhi[i], JetPhi[j]) > 0.4) continue;
-				njets++;
-			}
-			h_njets_dr04_loose->Fill(njets);
-			h_mindr_loose ->Fill(getClosestJetDR(i, Muon));
-			h_min2dr_loose->Fill(getSecondClosestJetDR(i, Muon));
-		}
-		for(size_t i = 0; i < NEls; ++i){
-			if(!isLooseElectron(i)) continue;
-
-			if(ElPt[i] < ptcut) continue;
-
-			int njets = 0;
-			for(size_t j = 0; j < NJets; ++j){
-				if(Util::GetDeltaR(ElEta[i], JetEta[j], ElPhi[i], JetPhi[j]) > 0.4) continue;
-				njets++;
-			}
-			h_njets_dr04_loose->Fill(njets);
-			h_mindr_loose->Fill(getClosestJetDR(i, Electron));
-			h_min2dr_loose->Fill(getSecondClosestJetDR(i, Electron));
-		}
-	}
-	cout << endl;
-
-	// h_iso_prompt->SetMinimum(0.0);
-	// h_iso_fake  ->SetMinimum(0.0);
-
-	h_njets_dr04_loose->SetXTitle("NJets");
-	h_mindr_loose     ->SetXTitle("DR(closest Jet)");
-	h_min2dr_loose    ->SetXTitle("DR(second closest Jet)");
-
-	// h_iso_prompt->SetLineWidth(2);
-	// h_iso_prompt->SetLineColor(kBlue);
-	// h_iso_prompt->SetFillColor(kBlue);
-	// h_iso_prompt->SetFillStyle(3004);
-	// 
-	// h_iso_fake->SetLineWidth(2);
-	// h_iso_fake->SetLineColor(kRed);
-	// h_iso_fake->SetFillColor(kRed);
-	// h_iso_fake->SetFillStyle(3005);
-
-	// TLatex *lat = new TLatex();
-	// lat->SetNDC(kTRUE);
-	// lat->SetTextColor(kBlack);
-	// lat->SetTextSize(0.04);
+	TFile *pFile = TFile::Open(fOutputDir + "InvMass.root", "RECREATE");
+	fLumiNorm = 191.1;
 	
-	// TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	// leg->AddEntry(h_iso_prompt, "prompt","f");
-	// leg->AddEntry(h_iso_fake,   "fake",  "f");
-	// leg->SetFillStyle(0);
-	// leg->SetTextFont(42);
-	// leg->SetBorderSize(0);
+	TH1D *h_minv_sf = new TH1D("h_minv_sf", "Inv. Mass of same flavor dileptons",     1000, 0., 700.);
+	TH1D *h_minv_of = new TH1D("h_minv_sf", "Inv. Mass of opposite flavor dileptons", 1000, 0., 700.);
+	TH1D *h_minv_ee = new TH1D("h_minv_ee", "Inv. Mass of ee pairs",                  1000, 0., 700.);
+	TH1D *h_minv_mm = new TH1D("h_minv_mm", "Inv. Mass of mumu pairs",                1000, 0., 700.);
 
-	TCanvas *c1 = new TCanvas("NJets", "NJets", 0, 0, 800, 600);
+	vector<int> samples;
+	samples.push_back(DoubleMu1);
+	samples.push_back(DoubleMu2);
+	samples.push_back(DoubleEle1);
+	samples.push_back(DoubleEle2);
+	samples.push_back(MuEG1);
+	samples.push_back(MuEG2);
+
+	for(size_t samp = 0; samp < samples.size(); ++samp){
+		Sample *S = fSamples[samp];
+		fCurrentSample = gSample(samp);
+		TTree *tree = S->tree;
+
+		// Event loop
+		tree->ResetBranchAddresses();
+		// Init(tree);
+		if(S->datamc == 0) Init(tree);
+		else InitMC(tree);
+
+		if (fChain == 0) return;
+		Long64_t nentries = fChain->GetEntriesFast();
+		Long64_t nbytes = 0, nb = 0;
+		for (Long64_t jentry=0; jentry<nentries;jentry++) {
+			printProgress(jentry, nentries, S->name);
+
+			Long64_t ientry = LoadTree(jentry);
+			if (ientry < 0) break;
+			nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+			int ind1(-1), ind2(-1);
+			int type(0);
+			TLorentzVector pl1, pl2;
+			type = abs(isOSLLEvent(ind1, ind2));
+			if(type == 0) continue; //nothing found
+			if(type == 1){ // mumu
+				if(!mumuSignalTrigger()) continue;
+				pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+				pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);
+				float mass = (pl1 + pl2).M();
+				h_minv_sf->Fill(mass);
+				h_minv_mm->Fill(mass);
+			}
+			if(type == 2){ // ee
+				if(!elelSignalTrigger()) continue;
+				pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
+				pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
+				float mass = (pl1 + pl2).M();
+				h_minv_sf->Fill(mass);
+				h_minv_ee->Fill(mass);
+			}
+			if(type == 3){ // emu
+				if(!elmuSignalTrigger()) continue;
+				pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+				pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
+				float mass = (pl1 + pl2).M();
+				h_minv_of->Fill(mass);
+			}
+		}
+		cout << endl;
+	}
+
+	h_minv_of->SetXTitle("m_{ll} [GeV]");
+	h_minv_sf->SetXTitle("m_{ll} [GeV]");
+	h_minv_mm->SetXTitle("m_{ll} [GeV]");
+	h_minv_ee->SetXTitle("m_{ll} [GeV]");
+
+	h_minv_sf->SetMarkerColor(kBlack);
+	h_minv_sf->SetMarkerStyle(20);
+	h_minv_sf->SetMarkerSize(1.0);
+	h_minv_sf->SetLineWidth(2);
+	h_minv_sf->SetLineColor(kBlack);
+	h_minv_sf->SetFillColor(kBlack);
+
+	h_minv_of->SetMarkerColor(kRed);
+	h_minv_of->SetMarkerStyle(20);
+	h_minv_of->SetMarkerSize(0.7);
+	h_minv_of->SetLineWidth(2);
+	h_minv_of->SetLineColor(kRed);
+	h_minv_of->SetFillColor(kRed);
+
+	h_minv_mm->SetLineWidth(1);
+	h_minv_mm->SetLineColor(kBlue);
+	h_minv_mm->SetFillColor(kBlue);
+	h_minv_mm->SetFillStyle(3004);
+
+	h_minv_ee->SetLineWidth(1);
+	h_minv_ee->SetLineColor(kGreen);
+	h_minv_ee->SetFillColor(kGreen);
+	h_minv_ee->SetFillStyle(3005);
+
+	printObject(h_minv_of, "Minv_OF", "Inv Mass OF Pairs", "PE X0", true);
+	printObject(h_minv_sf, "Minv_SF", "Inv Mass SF Pairs", "PE X0", true);
+	printObject(h_minv_mm, "Minv_MM", "Inv Mass MM Pairs", "hist",  true);
+	printObject(h_minv_ee, "Minv_EE", "Inv Mass EE Pairs", "hist",  true);
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	TLegend *leg = new TLegend(0.70,0.70,0.89,0.88);
+	leg->AddEntry(h_minv_sf, "SF Pairs", "p");
+	leg->AddEntry(h_minv_mm, "MM Pairs", "f");
+	leg->AddEntry(h_minv_ee, "EE Pairs", "f");
+	leg->AddEntry(h_minv_of, "OF Pairs", "p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	THStack *stack = new THStack("hstack", "Stack");
+	stack->Add(h_minv_mm);
+	stack->Add(h_minv_ee);
+
+	TCanvas *c1 = new TCanvas("Minv", "Minv", 0, 0, 800, 600);
 	c1->cd();
 	gPad->SetLogy();
-	h_njets_dr04_loose->DrawCopy("hist");
+	h_minv_sf->DrawCopy("PE X0");
+	h_minv_of->DrawCopy("PE X0 same");
+	stack->Draw("hist same");
+	// h_minv_mm->DrawCopy("hist same");
+	// h_minv_ee->DrawCopy("hist same");
+	leg->Draw();
 	gPad->RedrawAxis();
 
-	TCanvas *c2 = new TCanvas("MinDR", "MinDR", 0, 0, 800, 600);
-	c2->cd();
-	gPad->SetLogy();
-	h_mindr_loose->DrawCopy("hist");
-	gPad->RedrawAxis();
-
-	TCanvas *c3 = new TCanvas("Min2DR", "Min2DR", 0, 0, 800, 600);
-	c3->cd();
-	gPad->SetLogy();
-	h_min2dr_loose->DrawCopy("hist");
-	gPad->RedrawAxis();
-
-	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
 	// lat->DrawLatex(0.11,0.92, name);
 	
-	Util::PrintNoEPS(c1, "NJets_DR04_Loose" + appendix, fOutputDir + fOutputSubDir, NULL);
-	Util::PrintNoEPS(c2, "MinDR_Loose" + appendix,      fOutputDir + fOutputSubDir, NULL);
-	Util::PrintNoEPS(c3, "Min2DR_Loose" + appendix,     fOutputDir + fOutputSubDir, NULL);
-	delete h_njets_dr04_loose, h_mindr_loose, h_min2dr_loose;
-	delete c1, c2, c3;
+	Util::PrintNoEPS(c1, "MinvCombined", fOutputDir + fOutputSubDir, pFile);
+	
+	delete h_minv_of, h_minv_sf, h_minv_mm, h_minv_ee;
+	delete c1;
+	delete lat, lat;
+	pFile->Close();
 	fOutputSubDir = "";
 }
 
@@ -1375,7 +1386,7 @@ void MuonPlotter::makeMuIsolationPlots(){
 		if(MuPt[muind1] > gMuPt2bins[gNMuPt2bins]) continue;
 
 		// Select genmatched fake muons
-		if(MuGenMoType[muind1] == 2 || MuGenMoType[muind1] == 4) continue;
+		if(MuGenMType[muind1] == 2 || MuGenMType[muind1] == 4) continue;
 
 		////////////////////////////////////////////////////
 		// MOST LOOSE SELECTION
@@ -2628,8 +2639,8 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 		mcsamples   = fMCBG;
 	}
 
-	// Customizationg
-	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} [GeV]", "P_{T}(Hardest Jet) [GeV]", "N_{Vertices}", "P_{T}(Closest Jet) [GeV]"};
+	// Customization
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} [GeV]", "P_{T}(Hardest Jet) [GeV]", "N_{Vertices}", "P_{T}(Closest Jet) [GeV]", "P_{T}(Away Jet) [GeV]"};
 
 	for(size_t i = 0; i < gNRatioVars; ++i){
 		TH1D *h_ratio_data = getFRatio(datasamples, chan, i);
@@ -3996,8 +4007,6 @@ void MuonPlotter::makeIntPrediction(TString filename){
 	delete fEMuFPRatios;
 	delete fEEFPRatios;
 }
-
-//____________________________________________________________________________
 void MuonPlotter::makeIntMCClosure(TString filename){
 	ofstream OUT(filename.Data(), ios::trunc);
 
@@ -4448,6 +4457,139 @@ void MuonPlotter::makeIntMCClosure(TString filename){
 	delete fMuMuFPRatios;
 	delete fEMuFPRatios;
 	delete fEEFPRatios;
+}
+
+void MuonPlotter::printSyncExercise(){
+	fLumiNorm = 1000.;
+	fDoCounting = false;
+
+	fC_minMu1pt = 5.;
+	fC_minMu2pt = 5.;
+	fC_minEl1pt = 10.;
+	fC_minEl2pt = 10.;
+	fC_minHT    = 200.;
+	fC_minMet   = 30.;
+	fC_minNjets = 0;
+
+	TString eventfilename = fOutputDir + "pass3_eth.txt";
+	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
+
+	Sample *S = fSamples[TTJetsSync];
+	TTree *tree = S->tree;
+	fCurrentSample = TTJetsSync;
+
+	// Counters
+	int N_mumu(0), N_elel(0), N_elmu(0);
+
+	// Event loop
+	tree->ResetBranchAddresses();
+	// Init(tree);
+	if(S->datamc == 0) Init(tree);
+	else InitMC(tree);
+
+	if (fChain == 0) return;
+	Long64_t nentries = fChain->GetEntriesFast();
+	Long64_t nbytes = 0, nb = 0;
+	for (Long64_t jentry=0; jentry<nentries;jentry++) {
+		printProgress(jentry, nentries, S->name);
+
+		Long64_t ientry = LoadTree(jentry);
+		if (ientry < 0) break;
+		nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+		// MuMu
+		fCurrentChannel = Muon;
+		int mu1(-1), mu2(-1);
+		if(mumuSignalTrigger()){
+			if(isSSLLMuEvent(mu1, mu2)){
+				if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){
+					N_mumu++;
+					fOUTSTREAM << " Mu/Mu in event ";
+					fOUTSTREAM << setw(11) << Event;
+					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
+					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu1]);
+					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", MuPt[mu2]);
+					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
+					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
+					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
+				}
+			}
+		}
+		
+		
+		// EE
+		fCurrentChannel = Electron;
+		int el1(-1), el2(-1);
+		if(elelSignalTrigger()){
+			if( isSSLLElEvent(el1, el2) ){
+				if(  isTightElectron(el1) &&  isTightElectron(el2) ){
+					N_elel++;
+					fOUTSTREAM << " El/El in event ";
+					fOUTSTREAM << setw(11) << Event;
+					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
+					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", ElPt[el1]);
+					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el2]);
+					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
+					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
+					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
+				}
+			}
+		}
+		
+		// EMu
+		fCurrentChannel = EMu;
+		int mu(-1), el(-1);
+		if(elmuSignalTrigger()){
+			if( isSSLLElMuEvent(mu, el) ){
+				if(  isTightElectron(el) &&  isTightMuon(mu) ){
+					N_elmu++;
+					fOUTSTREAM << " El/Mu in event ";
+					fOUTSTREAM << setw(11) << Event;
+					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
+					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu]);
+					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el]);
+					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
+					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
+					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
+				}
+			}
+		}
+	}
+	cout << endl;
+
+	float scale = fLumiNorm/S->lumi;
+
+	// OUTPUT
+	cout << endl;
+	cout << "====================================================================" << endl;
+	cout << " Event Yields " << endl;
+	cout << "--------------------------------------------------------------------" << endl;
+	cout << "        elel    |       mumu     |        elmu    |          tot" << endl;
+	cout << setw(14) << left << " " << N_elel << " |";
+	cout << setw(14) << left << " " << N_mumu << " |";
+	cout << setw(14) << left << " " << N_elmu << " |";
+	cout << setw(14) << left << " " << N_elel+N_mumu+N_elmu << endl;
+	cout << "--------------------------------------------------------------------" << endl;
+	cout << " Event Yields scaled to 1/fb " << endl;
+	cout << "--------------------------------------------------------------------" << endl;
+	cout << setw(6) << Form("%5.2f", scale * N_elel) << " +-";
+	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel)) << " |";
+	cout << setw(6) << Form("%5.2f", scale * N_mumu) << " +-";
+	cout << setw(6) << Form("%5.2f", scale * sqrt(N_mumu)) << " |";
+	cout << setw(6) << Form("%5.2f", scale * N_elmu) << " +-";
+	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elmu)) << " |";
+	cout << setw(6) << Form("%5.2f", scale * (N_elel+N_mumu+N_elmu)) << " +-";
+	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel+N_mumu+N_elmu)) << endl;
+	cout << "====================================================================" << endl;
+	cout << endl;
+	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | Ran on 1084783 total events, [[%%ATTACHURL%%/pass3_eth.txt][yield.txt]] |"
+		, scale*N_elel, N_elel
+		, scale*N_mumu, N_mumu
+		, scale*N_elmu, N_elmu
+		, scale*(N_elel+N_mumu+N_elmu), N_elel+N_mumu+N_elmu) << endl;
+
+	fOUTSTREAM.close();
+	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
@@ -5044,6 +5186,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP0->ntight[2]->Fill(getMaxJPt(),              puweight);
 			RP0->ntight[3]->Fill(NVrtx,                    puweight);
 			RP0->ntight[4]->Fill(getClosestJetPt(0, Muon), puweight);
+			RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    puweight);
 		}
 		if( isLooseMuon(0) ){
 			RP0->nloose[0]->Fill(getNJets(),               puweight);
@@ -5051,6 +5194,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP0->nloose[2]->Fill(getMaxJPt(),              puweight);
 			RP0->nloose[3]->Fill(NVrtx,                    puweight);
 			RP0->nloose[4]->Fill(getClosestJetPt(0, Muon), puweight);
+			RP0->nloose[5]->Fill(getAwayJetPt(0, Muon),    puweight);
 		}
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
@@ -5060,6 +5204,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP1->ntight[2]->Fill(getMaxJPt(),                  puweight);
 			RP1->ntight[3]->Fill(NVrtx,                        puweight);
 			RP1->ntight[4]->Fill(getClosestJetPt(0, Electron), puweight);
+			RP1->ntight[5]->Fill(getAwayJetPt(0, Electron),    puweight);
 		}
 		if( isLooseElectron(0) ){
 			RP1->nloose[0]->Fill(getNJets(),                   puweight);
@@ -5067,6 +5212,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP1->nloose[2]->Fill(getMaxJPt(),                  puweight);
 			RP1->nloose[3]->Fill(NVrtx,                        puweight);
 			RP1->nloose[4]->Fill(getClosestJetPt(0, Electron), puweight);
+			RP1->nloose[5]->Fill(getAwayJetPt(0, Electron),    puweight);
 		}
 	}
 	
@@ -6061,8 +6207,8 @@ int MuonPlotter::muIndexToBin(int ind){
 	// For the origin histograms
 	// return the bin to fill for each id/type
 	int id    = abs(MuGenID[ind]);
-	int mid   = abs(MuGenMoID[ind]);
-	int mtype = abs(MuGenMoType[ind]);
+	int mid   = abs(MuGenMID[ind]);
+	int mtype = abs(MuGenMType[ind]);
 	if(id  != 13)                                 return 1; // mis id
 	if(mid == 24)                                 return 2; // W
 	if(mid == 23)                                 return 3; // Z
@@ -6772,6 +6918,22 @@ float MuonPlotter::getSecondClosestJetDR(int ind, gChannel chan){
 	}
 	return mindr2;
 }
+float MuonPlotter::getAwayJetPt(int ind, gChannel chan){
+// Get the pt of away jet
+// DR > 0.1, choose hardest
+	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
+	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
+	
+	if(NJets < 1) return 0.;
+	
+	float mindr  = 888.;
+	for(size_t i = 0; i < NJets; ++i){
+		if(Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]) < 1.0) continue;
+		if(!isGoodJet(i)) continue;
+		return JetPt[i]; // assume sorted by pt, so this will return the hardest one
+	}
+	return 0.;
+}
 
 float MuonPlotter::getMaxJPt(){
 	float maxpt(0.);
@@ -6873,7 +7035,7 @@ int MuonPlotter::isSSLLEvent(int &ind1, int &ind2){
 	}
 	for(size_t i = 0; i < NEls; ++i){
 		if(!isLooseElectron(i)) continue;
-		if(ElCh[i] == 1 ){
+		if(ElCharge[i] == 1 ){
 			lepton tmpLepton;
 			TLorentzVector p;
 			p.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
@@ -6883,7 +7045,7 @@ int MuonPlotter::isSSLLEvent(int &ind1, int &ind2){
 			tmpLepton.index  = i;
 			tmp_looseLeps_p.push_back(tmpLepton);
 		}
-		if(ElCh[i] == -1){
+		if(ElCharge[i] == -1){
 			lepton tmpLepton;
 			TLorentzVector p;
 			p.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
@@ -6980,7 +7142,7 @@ int MuonPlotter::isOSLLEvent(int &ind1, int &ind2){
 		TLorentzVector p;
 		p.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
 		tmpLepton.p      = p;
-		tmpLepton.charge = ElCh[i];
+		tmpLepton.charge = ElCharge[i];
 		tmpLepton.type   = 1;
 		tmpLepton.index  = i;
 		tmp_looseLeps.push_back(tmpLepton);
@@ -7097,7 +7259,7 @@ bool MuonPlotter::passesZVeto(int ind1, int ind2, gChannel chan, float dm){
 				// Second electron
 				for(size_t j = i+1; j < NEls; ++j){
 					if(chan == Electron && j == ind2) continue;
-					if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
+					if(isTightElectron(j) && (ElCharge[i] != ElCharge[j]) ){
 						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
 						if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
 					}
@@ -7143,7 +7305,7 @@ bool MuonPlotter::passesZVeto(float dm){
 
 				// Second electron
 				for(size_t j = i+1; j < NEls; ++j){
-					if(isTightElectron(j) && (ElCh[i] != ElCh[j]) ){
+					if(isTightElectron(j) && (ElCharge[i] != ElCharge[j]) ){
 						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
 						if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
 					}
@@ -7251,7 +7413,7 @@ bool MuonPlotter::isZElElEvent(int &elind){
 	if(hasLooseElectrons(el1, el2) < 2)  return false;
 	if(!isTightElectron(el1) && !isTightElectron(el2)) return false; // at least one tight
 
-	if(ElCh[el1] == ElCh[el2]) return false; // os
+	if(ElCharge[el1] == ElCharge[el2]) return false; // os
 
 	// Z mass window cut
 	TLorentzVector p1, p2;
@@ -7483,16 +7645,16 @@ bool MuonPlotter::isGoodSecMuon(int muon, float ptcut){
 //____________________________________________________________________________
 bool MuonPlotter::isFakeMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
-	if(MuGenMoType[muon] == 2)  return false;
-	if(MuGenMoType[muon] == 4)  return false;
+	if(MuGenMType[muon] == 2)  return false;
+	if(MuGenMType[muon] == 4)  return false;
 	return true;
 }
 bool MuonPlotter::isPromptMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
 	if(abs(MuGenID[muon]) != 13) return false; // not matched to mu
-	if(MuGenMoType[muon] == 4) return true; // W/Z -> mu
-	if(abs(MuGenMoID[muon]) == 15 && MuGenGMoType[muon] == 4) return true; // W/Z -> tau -> mu
-	if(MuGenMoType[muon] == 9) return true; // susy particle
+	if(MuGenMType[muon] == 4) return true; // W/Z -> mu
+	if(abs(MuGenMID[muon]) == 15 && MuGenGMType[muon] == 4) return true; // W/Z -> tau -> mu
+	if(MuGenMType[muon] == 9) return true; // susy particle
 	return false;
 }
 bool MuonPlotter::isChargeMatchedMuon(int mu){
@@ -7505,9 +7667,21 @@ bool MuonPlotter::isChargeMatchedMuon(int mu){
 // Electrons
 //____________________________________________________________________________
 bool MuonPlotter::isGoodElectron(int ele, float ptcut){
+// Some common electron ID cuts
 	if(ele >= NEls) return false; // Sanity check
 	if(ptcut < 0.) ptcut = fC_minEl2pt;
 	if(ElPt[ele] < ptcut) return false;
+
+	// if(ElEcalRecHitSumEt[ele] > 0.2) return false; // when using "CaloIsoVL" triggers
+
+	// Reject electrons closer than 0.1 in DR to tight muons
+	for(size_t i = 0; i < NMus; ++i){
+		if(!isTightMuon(i)) continue;
+		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
+		return false;
+	}
+	
+	
 	return true;
 }
 bool MuonPlotter::isLooseElectron(int ele){
@@ -7555,8 +7729,8 @@ bool MuonPlotter::isPromptElectron(int ele){
 	return false;
 }
 bool MuonPlotter::isChargeMatchedElectron(int ele){
-	if(ElGenID[ele] ==  11) return ElCh[ele] < 0; // electron
-	if(ElGenID[ele] == -11) return ElCh[ele] > 0; // positron
+	if(ElGenID[ele] ==  11) return ElCharge[ele] < 0; // electron
+	if(ElGenID[ele] == -11) return ElCharge[ele] > 0; // positron
 	return true;
 }
 
@@ -7574,12 +7748,14 @@ bool MuonPlotter::isGoodJet(int jet, float pt){
 	float minDR = 0.4;
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isTightMuon(imu)) continue;
+		// if(!isLooseMuon(imu)) continue;
 		if(!isGoodSecMuon(imu)) continue; // pt > 10
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
 	for(size_t iel = 0; iel < NEls; ++iel){
 		if(!isTightElectron(iel)) continue;
+		// if(!isLooseElectron(iel)) continue;
 		if(!isGoodSecElectron(iel)) continue;
 		if(Util::GetDeltaR(ElEta[iel], JetEta[jet], ElPhi[iel], JetPhi[jet]) > minDR ) continue;
 		return false;
