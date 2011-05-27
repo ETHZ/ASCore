@@ -54,6 +54,8 @@ if options.runon=='data':
 else:
     # CMSSW_3_8_X:
     process.GlobalTag.globaltag = "START311_V2::All"
+    # CMSSW_4_2_X:
+    # process.GlobalTag.globaltag = "START42_V12::All"
 
 
 ### Input/Output ###############################################################
@@ -81,8 +83,8 @@ process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
 # Turn-on the FastJet density calculation -----------------------
 process.kt6PFJets.doRhoFastjet = True
-process.kt6PFJets.Rho_EtaMax = cms.double(4.4)
-process.kt6PFJets.Ghost_EtaMax = cms.double(5.0)
+# process.kt6PFJets.Rho_EtaMax   = cms.double(4.4) # this is the default value in 4_2
+# process.kt6PFJets.Ghost_EtaMax = cms.double(5.0) # this is the default value in 4_2
 # Turn-on the FastJet jet area calculation 
 process.ak5PFJets.doAreaFastjet = True
 process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
