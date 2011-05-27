@@ -53,9 +53,9 @@ if options.runon=='data':
 #    process.GlobalTag.globaltag = "GR_R_311_V2::All"
 else:
     # CMSSW_3_8_X:
-    process.GlobalTag.globaltag = "START311_V2::All"
+    # process.GlobalTag.globaltag = "START311_V2::All"
     # CMSSW_4_2_X:
-    # process.GlobalTag.globaltag = "START42_V12::All"
+    process.GlobalTag.globaltag = "START42_V12::All"
 
 
 ### Input/Output ###############################################################
