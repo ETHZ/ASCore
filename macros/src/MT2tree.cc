@@ -143,6 +143,8 @@ void MT2Znunu::Reset(){
 	PassJetID_matched         = -999;
 	Jet1Pass_matched          = -999;
 	Jet0Pass_matched          = -999;
+	LeadingJPt_matched        = -99999.99;
+	SecondJPt_matched         = -99999.99;
 	HTmatched                 = -99999.99;
 	caloMHT30_matched         = -99999.99;
 	caloMHT30_matchedReco     = -99999.99;

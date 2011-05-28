@@ -114,7 +114,7 @@ void MassAnalysis::Analyze(){
 	MassAnalysis::FillTree();
 	
 	// print interesting events
-//	InterestingEvents();
+	InterestingEvents();
 }
 
 // ***********************************************************************************************
@@ -519,9 +519,11 @@ void MassAnalysis::FillTree(){
 	jindi   = Util::VSort(jindi, jpt);
 	if(jindi.size() >0){
 		fMT2tree->Znunu.Jet0Pass_matched   = (Int_t) IsGoodBasicPFJetPAT3(jindi[0],  100., 2.4);
+		fMT2tree->Znunu.LeadingJPt_matched = jpt[0];
 	} else  fMT2tree->Znunu.Jet0Pass_matched   =0; 
 	if(jindi.size() >1){
 		fMT2tree->Znunu.Jet1Pass_matched   = (Int_t) IsGoodBasicPFJetPAT3(jindi[1],   60., 2.4);
+		fMT2tree->Znunu.SecondJPt_matched  = jpt[1];
 	} else  fMT2tree->Znunu.Jet1Pass_matched   =0;
 	fMT2tree->Znunu.PassJetID_matched          = (Int_t) PassJetID_matched;
 	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETPATpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETPATpy,2));
@@ -559,23 +561,25 @@ void MassAnalysis::FillTree(){
 
 void MassAnalysis::InterestingEvents(){
 
-// 	if(fMT2tree->hemi[0].MT2 < 200           ) return; 	
-//	if(fMT2tree->NJetsIDLoose < 2           ) return; 	
-//	if(fMT2tree->misc.MET < 30              ) return; 	
-//	if(fMT2tree->misc.HT < 300              ) return; 	
-//	if(fMT2tree->misc.Jet0Pass == 0         ) return; 	
-//	if(fMT2tree->misc.Jet1Pass == 0         ) return; 	
-//	if(fMT2tree->misc.PassJetID == 0        ) return; 	
-//	if(fMT2tree->misc.Vectorsumpt>70        ) return; 	
-//	if(fMT2tree->misc.MinMetJetDPhi<0.3     ) return; 	
-//	if(fMT2tree->misc.EcalDeadCellBEFlag==0 ) return; 	
-//	if(fMT2tree->misc.HBHENoiseFlag == 0    ) return; 	
-//	if(fMT2tree->misc.LeptConfig != 9       ) return; 	
-//	if(fMT2tree->NEles + fMT2tree->NMuons==0) return;
+ 	if(fMT2tree->misc.MT2 < 300             ) return; 	
+	if(fMT2tree->NJetsIDLoose < 2           ) return; 	
+	if(fMT2tree->misc.MET < 30              ) return; 	
+	if(fMT2tree->misc.HT < 300              ) return; 	
+	if(fMT2tree->misc.Jet0Pass == 0         ) return; 	
+	if(fMT2tree->misc.Jet1Pass == 0         ) return; 	
+	if(fMT2tree->misc.PassJetID == 0        ) return; 	
+	if(fMT2tree->misc.Vectorsumpt>70        ) return; 	
+	if(fMT2tree->misc.MinMetJetDPhi<0.3     ) return; 	
+	if(fMT2tree->misc.HBHENoiseFlag == 0    ) return; 	
+	if(fMT2tree->NEles + fMT2tree->NMuons!=0) return;
 
 	cout << "-------------------------------------------------------------------------------" << endl;	
 	EventPrint();
 	cout << "++++ MT2 Prtinouts: ++++ " << endl;
+	cout << "NEles " << fMT2tree->NEles << endl;
+	for(int i=0; i<fMT2tree->NEles; ++i){
+		cout << " pt " << fMT2tree->ele[i].lv.Pt()  << " eta " << fMT2tree->ele[i].lv.Eta() << " phi " << fMT2tree->ele[i].lv.Phi() << endl;
+	}
 	cout << "  MT2 "                  << fMT2tree->hemi[0].MT2     << endl;
 	cout << "   association method: " << fMT2tree->hemi[0].assoc_method << " seed method " << fMT2tree->hemi[0].seed_method << endl;
 	cout << "   pseudojet 1: pt "     << fMT2tree->hemi[0].lv1.Pt()     << " eta "         << fMT2tree->hemi[0].lv1.Eta()   << " phi " << fMT2tree->hemi[0].lv1.Phi() << endl;
@@ -1082,13 +1086,8 @@ vector<TLorentzVector> MassAnalysis::GetLepton4Momenta(){
 
 // ****************************************************************************************************
 void MassAnalysis::End(){
-	// cout interesting events
 	cout << " *************************************************************** " << endl;
-	cout << " interesting events                                              " << endl;
-	for(int i=0; i< interesting_Event.size(); ++i){
-		cout << interesting_Type[i] << "Run:Lumi:Evt" << " " << interesting_Run[i] << ":" << interesting_Lumi[i]
-		     << ":" << interesting_Event[i] << " value " << interesting_value[i] << endl;	     
-	}
+	cout << " MassAnalysis::End()                                             " << endl;
 	cout << " *************************************************************** " << endl;
 	
 	fHistFile->cd();	

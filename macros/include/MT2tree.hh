@@ -160,9 +160,11 @@ public:
 	Double_t PassJetID_matched;
 	Double_t Jet1Pass_matched;
 	Double_t Jet0Pass_matched;
+	Double_t LeadingJPt_matched;
+	Double_t SecondJPt_matched;
 	Double_t Vectorsumpt_matched;
 
-	ClassDef(MT2Znunu, 4);
+	ClassDef(MT2Znunu, 5);
 };
 
 // MT2Jet ----------------------------------
