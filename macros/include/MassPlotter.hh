@@ -127,6 +127,8 @@ public:
 		double QCD_bg_mu;
 		double Top_bg_e;
 		double Top_bg_mu;
+		double W_bg_e;
+		double W_bg_mu;
 		double Z_bg_e;
 		double Z_bg_mu;
 		double Other_bg_e;

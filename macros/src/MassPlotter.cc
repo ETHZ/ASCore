@@ -253,12 +253,13 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		// presel
 		if(fMT2tree->misc.MET                     < 30    )  continue;
 //		if(fMT2tree->misc.caloMHT30               < 130   )  continue;
-		if(fMT2tree->misc.HT                      < 550   )  continue;
+//		if(fMT2tree->misc.HT                      < 300   )  continue;
+		if(fMT2tree->misc.caloHT50                < 550   )  continue;
 		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
 		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
-		if(fMT2tree->misc.LeadingJPt              < 150   )  continue;
-		if(fMT2tree->misc.SecondJPt               < 100   )  continue;
-//		if(fMT2tree->GetNBtags (2,1.74,20,2.4,1)  ==0     )  continue;
+//		if(fMT2tree->misc.LeadingJPt              < 150   )  continue;
+//		if(fMT2tree->misc.SecondJPt               < 100   )  continue;
+		if(fMT2tree->GetNBtags(3,2.0,20,2.4,1)    ==0     )  continue;
 		if(fMT2tree->misc.HBHENoiseFlag           ==0     )  continue;
 		if(fMT2tree->misc.CrazyHCAL               ==1     )  continue;
 		if(eventgood)   counters[presel].fill("presel", weight);
@@ -292,7 +293,7 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		if(leptfound)   counters[VectorSumPt].fill(to_measure, weight);
 		
 		// MT2
-//		if(fMT2tree->misc.MT2             <0     )  continue;
+//		if(fMT2tree->misc.MT2             <100     )  continue;
 		if(eventgood)   counters[MT2].fill("MT2", weight);
 		if(acceptance)  counters[MT2].fill("acceptance", weight);
 		if(leptfound)   counters[MT2].fill(to_measure, weight);
@@ -440,19 +441,19 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 		
 		// presel
 		if(pid == 11 || pid == 13){
-			if(fMT2tree->Znunu.HTmatched              <300    )  continue;
+//			if(fMT2tree->Znunu.HTmatched              <350    )  continue;
 			if(fMT2tree->Znunu.caloHT50_matched       <320    )  continue;
-//			if(fMT2tree->Znunu.caloMHT30_matched      <130    )  continue;
+			if(fMT2tree->Znunu.caloMHT30_matched      <130    )  continue;
 //			if(fMT2tree->Znunu.Jet0Pass_matched       ==0     )  continue;
 //			if(fMT2tree->Znunu.Jet1Pass_matched       ==0     )  continue;
-//			if(fMT2tree->Znunu.NJetsIDLoose_matched   <2      )  continue;
+			if(fMT2tree->Znunu.NJetsIDLoose_matched   <2      )  continue;
 		} else if(lept == "neutrinos"){
-			if(fMT2tree->misc.HT                      <300    )  continue;
+//			if(fMT2tree->misc.HT                      <350    )  continue;
 			if(fMT2tree->misc.caloHT50                <320    )  continue;
-//			if(fMT2tree->misc.caloMHT30               <130    )  continue;
+			if(fMT2tree->misc.caloMHT30               <130    )  continue;
 //			if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
 //			if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
-//			if(fMT2tree->NJetsIDLoose                  <2     )  continue;
+			if(fMT2tree->NJetsIDLoose                  <2     )  continue;
 		}
 		if(ZllSelect)   counters[presel].fill("presel"  , weight);
 		if(ZllGood    ) counters[presel].fill(to_measure, weight);
@@ -1193,11 +1194,13 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 			  // save nevents for W background prediction
 			  if(nleps==-11){
 			  	fWpred.QCD_bg_e   = h_composited[0]->Integral();	
+				fWpred.W_bg_e     = h_composited[1]->Integral();
 				fWpred.Z_bg_e     = h_composited[2]->Integral();
 				fWpred.Top_bg_e   = h_composited[3]->Integral();
 				fWpred.Other_bg_e = h_composited[4]->Integral();
 			  }else if(nleps==-13){
 			  	fWpred.QCD_bg_mu   = h_composited[0]->Integral();	
+				fWpred.W_bg_mu     = h_composited[1]->Integral();
 				fWpred.Z_bg_mu     = h_composited[2]->Integral();
 				fWpred.Top_bg_mu   = h_composited[3]->Integral();
 				fWpred.Other_bg_mu = h_composited[4]->Integral();
