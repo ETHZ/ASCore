@@ -68,6 +68,7 @@ public:
 	virtual bool IsGoodBasicEl(int);
 	virtual bool IsGoodElId_WP80(int);
 	virtual bool IsGoodElId_WP90(int);
+	virtual bool ElPassesWP80_ConvRej(int);
 	virtual bool IsLooseEl(int);
 	virtual float relElIso(int);
 

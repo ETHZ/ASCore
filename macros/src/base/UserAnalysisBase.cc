@@ -290,11 +290,9 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
-	double iso = fTR->MuRelIso03[index];
-	double pt = fTR->MuPt[index];
-	double hybiso = iso*pt / std::max(20.,pt);
-	if(hybiso > 1.0) return false;
+	if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
 
+	if(fTR->MuRelIso03[index] > 1.0) return false;
 	return true;
 }
 
@@ -329,6 +327,13 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	return true;
 }
 
+bool UserAnalysisBase::ElPassesWP80_ConvRej(int index){
+	// if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
+	// if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
+	if(fTR->ElIDsimpleWP80relIso[index] < 4) return false;
+	return true;
+}
+
 bool UserAnalysisBase::IsGoodElId_WP90(int index){
 	// Electrons with WP90 ID and WP80 conv. rej.
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
@@ -341,13 +346,11 @@ bool UserAnalysisBase::IsGoodElId_WP90(int index){
 		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
 		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.70 ) return false;
 		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.009) return false;
-		if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
 
-	if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
-	if(fTR->ElConvPartnerTrkDist      [index] > 0.02) return false;
-	if(fTR->ElConvPartnerTrkDCot      [index] > 0.02) return false;
-
+	// WP80 conv. rejection
+	if(ElPassesWP80_ConvRej(index) == false) return false;
 	return true;
 }
 
@@ -363,16 +366,16 @@ bool UserAnalysisBase::IsGoodElId_WP80(int index){
 		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
 		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.03 ) return false;
 		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.007) return false;
-		if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
 	if(fTR->ElPt[index] < 20.){
-		if(( fTR->Elfbrem[index] > 0.15 || (fTR->ElSCEta[index] < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 )) == false ) return false;
+		if(fTR->Elfbrem[index] > 0.15) return true;
+		if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
+		return false;
 	}
 
-	if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
-	if(fTR->ElConvPartnerTrkDist      [index] > 0.02) return false;
-	if(fTR->ElConvPartnerTrkDCot      [index] > 0.02) return false;
-
+	// WP80 conv. rejection
+	if(ElPassesWP80_ConvRej(index) == false) return false;
 	return true;
 }
 
