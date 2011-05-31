@@ -31,14 +31,15 @@ options.register ('runon', # register 'runon' option
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 
-options.files= 'file:/scratch/pnef/mc/Fall11/AOD/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_007E0957-964E-E011-BA72-485B39800BBB.root'
+#options.files= 'file:/scratch/pnef/mc/Fall11/AOD/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_007E0957-964E-E011-BA72-485B39800BBB.root'
 #options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
 #options.files= '/store/data/Run2011A/MuOnia/AOD/PromptReco-v1/000/161/311/E6B512D1-CD57-E011-BC63-001D09F2423B.root'
+options.files= '/store/data/Run2010A/EG/AOD/Apr21ReReco-v1/0003/D6055361-7770-E011-BE49-00266CF32F90.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
-options.output='NTupleProducer_41X_'+options.runon+'.root'
+options.output='NTupleProducer_42X_'+options.runon+'.root'
 
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
