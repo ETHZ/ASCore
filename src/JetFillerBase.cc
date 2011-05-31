@@ -58,6 +58,7 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
     fTjChfrac       = new double[gMaxnobjs];
     fTjnAssoTracks  = new int[gMaxnobjs];
     fTNConstituents = new int[gMaxnobjs];		
+    fTn90           = new int[gMaxnobjs];
   } else if (fJetType==JPT) {
     fTChMult        = new int[gMaxnobjs];
     fTID_HPD        = new double[gMaxnobjs];
@@ -104,6 +105,7 @@ JetFillerBase::~JetFillerBase(void) {
     delete [] fTEMfrac;
     delete [] fTjnAssoTracks;
     delete [] fTjChfrac;
+    delete [] fTn90;		
     delete [] fTNConstituents;		
   } else if (fJetType==JPT) {
     delete [] fTChMult;     
@@ -154,6 +156,7 @@ void JetFillerBase::createBranches(void) {
     addBranch("JNAssoTracks",   "I", fTjnAssoTracks, "NJets" );
     addBranch("JChfrac",        "D", fTjChfrac,      "NJets" );
     addBranch("JNConstituents", "I", fTNConstituents,"NJets" );				
+    addBranch("Jn90"          , "I", fTn90,          "NJets" );				
   } else if (fJetType==JPT) {
     addBranch("JChMult",    "I", fTChMult,    "NJets");
     addBranch("JID_HPD",    "D",fTID_HPD     ,"NJets" );

@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.6 2011/04/06 16:01:19 fronga Exp $
+// $Id: JetFillerBase.h,v 1.7 2011/04/09 09:43:18 pnef Exp $
 //
 //
 
@@ -88,6 +88,7 @@ protected:
   double* fTEMfrac;
   int*    fTNeuMult;
   int*    fTChMult;
+  int*    fTn90;
   double* fTID_HPD; 
   double* fTID_RBX;    
   double* fTID_n90Hits;

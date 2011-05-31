@@ -234,6 +234,8 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
 
       fTEMfrac[ijet]        = cjet->emEnergyFraction();
       fTNConstituents[ijet] = cjet->nConstituents();
+      fTn90[ijet]           = cjet->n90();
+
 
 
       /////////////////////////////////////////////////////
