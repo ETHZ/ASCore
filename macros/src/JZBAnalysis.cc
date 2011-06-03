@@ -15,8 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.28 $";
+string sjzbversion="$Revision: 1.29 $";
 string sjzbinfo="";
+
+/*
+
+$LOG: 
+
+*/
+
 
 Double_t GausRandom(Double_t mu, Double_t sigma) { 
   return gRandom->Gaus(mu,sigma);   //real deal
@@ -34,6 +41,7 @@ public:
   float pfpt[particleflowtypes];
   float phi;
   float pfphi[particleflowtypes];
+  float pfeta[particleflowtypes];
   bool is_data;
 
   float pt1; // leading leptons
@@ -272,6 +280,9 @@ void nanoEvent::reset()
     pfphi[ipf]=0;
     pfphi1[ipf]=0;
     pfphi2[ipf]=0;
+    pfeta[ipf]=0;
+    pfeta1[ipf]=0;
+    pfeta2[ipf]=0;
   }
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
@@ -601,10 +612,14 @@ cout << endl << endl;
   myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
 
   myTree->Branch("pfpt",&nEvent.pfpt,"pfpt[30]/F");
+  myTree->Branch("pfphi",&nEvent.pfphi,"pfphi[30]/F");
+  myTree->Branch("pfeta",&nEvent.pfeta,"pfeta[30]/F");
   myTree->Branch("pfpt1",&nEvent.pfpt1,"pfpt1[30]/F");
   myTree->Branch("pfpt2",&nEvent.pfpt2,"pfpt2[30]/F");
   myTree->Branch("pfphi1",&nEvent.pfphi1,"pfphi1[30]/F");
   myTree->Branch("pfphi2",&nEvent.pfphi2,"pfphi2[30]/F");
+  myTree->Branch("pfeta1",&nEvent.pfeta1,"pfeta1[30]/F");
+  myTree->Branch("pfeta2",&nEvent.pfeta2,"pfeta2[30]/F");
   myTree->Branch("pfmll",&nEvent.pfmll,"pfmll[30]/F");
   myTree->Branch("pfjzb",&nEvent.pfjzb,"pfjzb[30]/F");
 
@@ -707,7 +722,6 @@ void JZBAnalysis::Analyze() {
       nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
       nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
     }
-cout << "Starting out" << endl;
   // Trigger information
   nEvent.passed_triggers=0;
   if ( fDataType_ != "mc" ) 
@@ -754,6 +768,8 @@ cout << "Starting out" << endl;
 
   vector<lepton> leptons;
   vector<vector<lepton> > pfLeptons;
+  vector<lepton> combPfleptons;
+
   for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	vector<lepton> pfLepton;
 	pfLeptons.push_back(pfLepton);
@@ -781,7 +797,7 @@ cout << "Starting out" << endl;
 	  tmpLepton.index = muIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
-	  leptons.push_back(tmpLepton);//blublu
+	  leptons.push_back(tmpLepton);
 	}
     }
   
@@ -831,6 +847,13 @@ cout << "Starting out" << endl;
   for(int muIndex=0;muIndex<fTR->PfMu2NObjs;muIndex++)
     {
       if ( nEvent.pfLeptonNum>=jMax ) break;
+      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfMu3Pt[muIndex];
+      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfMu3Eta[muIndex];
+      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfMu3Phi[muIndex];
+      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 13*fTR->PfMu2Charge[muIndex];
+      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu2Charge[muIndex];
+      nEvent.pfLeptonNum++;
+      if ( nEvent.pfLeptonNum>=jMax ) break;
       if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMu2Px[muIndex],fTR->PfMu2Py[muIndex],fTR->PfMu2Pz[muIndex],fTR->PfMu2E[muIndex]);
 	  int tmpCharge = fTR->PfMu2Charge[muIndex];
@@ -841,19 +864,14 @@ cout << "Starting out" << endl;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[2].push_back(tmpLepton);
+	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
+	  combPfleptons.push_back(tmpLepton);
       }
     }
 
   // #-- PF muon loop -- type 3
   for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
     {
-      if ( nEvent.pfLeptonNum>=jMax ) break;
-      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfMu3Pt[muIndex];
-      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfMu3Eta[muIndex];
-      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfMu3Phi[muIndex];
-      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 13*fTR->PfMu3Charge[muIndex];
-      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu3Charge[muIndex];
-      nEvent.pfLeptonNum++;
       if(IsCustomPfMu(muIndex)) {
           counters[MU].fill("... pass pf mu selection");
 	  TLorentzVector tmpVector(fTR->PfMu3Px[muIndex],fTR->PfMu3Py[muIndex],fTR->PfMu3Pz[muIndex],fTR->PfMu3E[muIndex]);
@@ -865,6 +883,7 @@ cout << "Starting out" << endl;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[3].push_back(tmpLepton);
+	  combPfleptons.push_back(tmpLepton);
       }
     }
 
@@ -872,6 +891,13 @@ cout << "Starting out" << endl;
   for(int elIndex=0;elIndex<fTR->PfElNObjs;elIndex++)
     {
       if(IsCustomPfEl(elIndex)) {
+      if ( nEvent.pfLeptonNum>=jMax ) break;
+      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfElPt[elIndex];
+      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfElEta[elIndex];
+      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfElPhi[elIndex];
+      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 11*fTR->PfElCharge[elIndex];
+      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfElCharge[elIndex];
+      nEvent.pfLeptonNum++;
 	  TLorentzVector tmpVector(fTR->PfElPx[elIndex],fTR->PfElPy[elIndex],fTR->PfElPz[elIndex],fTR->PfElE[elIndex]);
 	  int tmpCharge = fTR->PfElCharge[elIndex];
 	  lepton tmpLepton;
@@ -881,6 +907,7 @@ cout << "Starting out" << endl;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[1].push_back(tmpLepton);
+	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
       }
     }
   
@@ -903,13 +930,6 @@ cout << "Starting out" << endl;
   // #-- PF electron loop -- type 3
   for(int elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++)
     {
-      if ( nEvent.pfLeptonNum>=jMax ) break;
-      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfEl3Pt[elIndex];
-      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfEl3Eta[elIndex];
-      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfEl3Phi[elIndex];
-      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 11*fTR->PfEl3Charge[elIndex];
-      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfEl3Charge[elIndex];
-      nEvent.pfLeptonNum++;
       if(IsCustomPfEl(elIndex)) {
           counters[EL].fill("... pass pf e selection");
 	  TLorentzVector tmpVector(fTR->PfEl3Px[elIndex],fTR->PfEl3Py[elIndex],fTR->PfEl3Pz[elIndex],fTR->PfEl3E[elIndex]);
@@ -923,18 +943,23 @@ cout << "Starting out" << endl;
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
-  
+
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
 
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
   vector<vector<lepton> > sortedGoodPFLeptons;
   bool dopf[particleflowtypes];
   for(int ipf=0;ipf<particleflowtypes;ipf++) {
-	vector<lepton> sortedGoodPfLeptonOfSpecificPFtype =sortLeptonsByPt(pfLeptons[ipf]);
+	vector<lepton> leptonsel = pfLeptons[ipf];
+	vector<lepton> sortedGoodPfLeptonOfSpecificPFtype;
+	if(leptonsel.size()>0) sortedGoodPfLeptonOfSpecificPFtype =sortLeptonsByPt(leptonsel);
         sortedGoodPFLeptons.push_back(sortedGoodPfLeptonOfSpecificPFtype);
-        if(sortedGoodPFLeptons[ipf].size() > 1) dopf[ipf]=true; else dopf[ipf]=false;
+        if(sortedGoodPFLeptons[ipf].size() > 1) {
+		dopf[ipf]=true; 
+	} else {
+	dopf[ipf]=false;
+	}
   }
-
   
 
   if(sortedGoodLeptons.size() > 1) {
@@ -1010,8 +1035,11 @@ cout << "Starting out" << endl;
 	nEvent.pfpt2[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Pt();
 	nEvent.pfphi1[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Phi();
 	nEvent.pfphi2[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Phi();
+	nEvent.pfeta1[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Eta();
+	nEvent.pfeta2[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Eta();
 	nEvent.pfmll[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).M();
 	nEvent.pfphi[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Phi();
+	nEvent.pfphi[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Eta();
 	nEvent.pfpt[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Pt();
        }
     }
@@ -1274,11 +1302,11 @@ cout << "Starting out" << endl;
     if(dopf[3]) nEvent.jzb[7] = AllpfNoCutsJetVector[3].Pt() - (PFs1[3]+PFs2[3]).Pt();
     else nEvent.jzb[7] = -99999.9;
 
-    for(int ipf=1;ipf<particleflowtypes;ipf++) {
+    for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	if(dopf[ipf]) nEvent.pfjzb[ipf]=AllpfNoCutsJetVector[ipf].Pt() - (PFs1[ipf]+PFs2[ipf]).Pt();
 	else nEvent.pfjzb[ipf]=-99999.9;
+//	cout << nEvent.pfjzb[0] << ": \t" << nEvent.pfjzb[1]-nEvent.pfjzb[0] << "\t" << nEvent.pfjzb[2]-nEvent.pfjzb[0] << "\t" << nEvent.pfjzb[3]-nEvent.pfjzb[0] << endl; 
     }
-    nEvent.pfjzb[0]=-999.9;
     
     // ----------------------------------------
     recoil+=s1+s2;   // now add also the leptons to the recoil! to form the complete recoil model
@@ -1509,6 +1537,7 @@ const bool JZBAnalysis::IsCustomPfEl(const int index){
   counters[EL].fill(" ... PF pt > 10");
   if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[EL].fill(" ... PF |eta| < 2.4");
+  if(!(fTR->PfElID95[index])) return false;
 /*
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
   counters[EL].fill(" ... missing inner hits <= 1");
