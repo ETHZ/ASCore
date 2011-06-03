@@ -186,6 +186,16 @@ public:
 		TH1D *hvar[gNKinVars];
 	};
 	
+	static const int gNHWWVars = 10;
+	struct HWWPlots{
+		static TString var_name[gNHWWVars];
+		static TString axis_label[gNHWWVars];
+		static int nbins[gNHWWVars];
+		static float xmin[gNHWWVars];
+		static float xmax[gNHWWVars];
+		TH1D *hvar[gNHWWVars];
+	};
+	
 	static const int gNSels = 2;
 	struct IsoPlots{
 		static TString sel_name[gNSels];
@@ -207,6 +217,7 @@ public:
 		Region region[gNREGIONS];
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
 		KinPlots    kinplots[3]; // tt and ll and signal
+		HWWPlots    hwwplots[3]; // 0: no event sel, 1: N-1 sel
 		IsoPlots    isoplots[2]; // e and mu
 		FRatioPlots ratioplots[2]; // e and mu
 	};
@@ -247,6 +258,8 @@ public:
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
 	void makeRatioPlots(gChannel);
+	
+	void makeHWWPlots();
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -303,6 +316,7 @@ public:
 	void fillYields(Sample*);
 	void fillOSYields(Sample*);
 	void fillRatioPlots(Sample*);
+	void fillHWWHistos(Sample*);
 	
 	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
@@ -373,6 +387,11 @@ public:
 	bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	bool passesMllEventVeto(float = 5.);
+	bool passesMllEventVeto(int, int, int, float = 5.);
+
+	// HWW Stuff
+	bool passesAddLepVeto(int, int, int);
+
 
 	// Trigger selections:
 	bool  singleMuTrigger();
@@ -466,7 +485,7 @@ private:
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
 	int fCurrentRun;
-	ofstream fOUTSTREAM;
+	ofstream fOUTSTREAM, fOUTSTREAM2;
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS

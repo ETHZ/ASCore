@@ -45,6 +45,7 @@ double MuonPlotter::gNVrtxBins[gNNVrtxBins+1]  = {0, 2, 4, 6, 8, 10, 12, 14, 16,
 double MuonPlotter::gJetPtBins[gNJetPtBins+1]  = {30., 40., 50., 60., 70., 80., 80., 90., 100., 120., 150.};
 //////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::KinPlots::var_name[MuonPlotter::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2"};
 int     MuonPlotter::KinPlots::nbins[MuonPlotter::gNKinVars]    = { 20 ,   20 ,      8 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20 };
 float   MuonPlotter::KinPlots::xmin[MuonPlotter::gNKinVars]     = {100.,    0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.};
@@ -60,11 +61,29 @@ TString MuonPlotter::KinPlots::axis_label[MuonPlotter::gNKinVars] = {"H_{T} [GeV
                                                                      "m_{ll} (OF) [GeV]",
                                                                      "M_{T2} [GeV]"};
 
+//////////////////////////////////////////////////////////////////////////////////
+TString MuonPlotter::HWWPlots::var_name[MuonPlotter::gNHWWVars] = {"MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "DPhi", "MT2"};
+int     MuonPlotter::HWWPlots::nbins[MuonPlotter::gNHWWVars]    = {  20 ,      4 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20  ,   20 };
+float   MuonPlotter::HWWPlots::xmin[MuonPlotter::gNHWWVars]     = {   0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0. ,    0.};
+float   MuonPlotter::HWWPlots::xmax[MuonPlotter::gNHWWVars]     = { 200.,      4.,  200.,  100.,       100. ,       100. ,       100. ,       100. ,  3.15 ,  100.};
+TString MuonPlotter::HWWPlots::axis_label[MuonPlotter::gNHWWVars] = {"ME_{T} [GeV]",
+                                                                     "N_{Jets}",
+                                                                     "P_{T} (l_{1}) [GeV]",
+                                                                     "P_{T} (l_{2}) [GeV]",
+                                                                     "m_{ll} (SF) [GeV]",
+                                                                     "m_{#mu#mu} [GeV]",
+                                                                     "m_{ee} [GeV]",
+                                                                     "m_{ll} (OF) [GeV]",
+                                                                     "#Delta#Phi_{ll}",
+                                                                     "M_{T2} [GeV]"};
+
+//////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt"};
 int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  };
 float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. };
 float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. };
 
+//////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::IsoPlots::sel_name[MuonPlotter::gNSels] = {"Base", "SigSup"};
 int     MuonPlotter::IsoPlots::nbins[MuonPlotter::gNSels]    = {20, 20};
 
@@ -244,6 +263,7 @@ void MuonPlotter::InitMC(TTree *tree){
    fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
+   fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
@@ -254,12 +274,15 @@ void MuonPlotter::InitMC(TTree *tree){
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
    fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
+   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
+   fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
    fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
+   fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
    Notify();
 }
 
@@ -393,14 +416,16 @@ void MuonPlotter::doAnalysis(){
 	printSyncExercise();
 
 	// if(readHistos(fOutputFileName) != 0) return;
-	// // fLumiNorm = 43.5;
-	// // fLumiNorm = 152.9;
+	// fLumiNorm = 43.5;
+	// fLumiNorm = 152.9;
 	// fLumiNorm = 191.1;
-	// // fLumiNorm = 1000.;
-	// 
+	// fLumiNorm = 1000.;
+	
+	// makeHWWPlots();
+	
 	// printOrigins();
-	// // makeMuIsolationPlots();
-	// // makeElIsolationPlots();
+	// makeMuIsolationPlots();
+	// makeElIsolationPlots();
 	// makeNT2KinPlots();
 	// 
 	// makeRatioPlots(Muon);
@@ -412,12 +437,12 @@ void MuonPlotter::doAnalysis(){
 	// makeFRvsPtPlots(Electron, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Electron);
-	
+	// 
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
 	// makeElfRatioPlots(false);
 	// makeElpRatioPlots(false);
-	
+	// 
 	// makeIntPrediction(fOutputDir + "DataPrediction.txt");
 	// makeIntMCClosure( fOutputDir + "MCClosure.txt");
 	
@@ -586,13 +611,17 @@ void MuonPlotter::sandBox(){
 //____________________________________________________________________________
 void MuonPlotter::doLoop(){
 	fDoCounting = true;
-	TString eventfilename = fOutputDir + "InterestingEvents.txt";
+	TString eventfilename  = fOutputDir + "SSDLSignalEvents.txt";
+	TString eventfilename2 = fOutputDir + "HWWSignalEvents.txt";
 	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
+	fOUTSTREAM2.open(eventfilename2.Data(), ios::trunc);
 
 	// Sample loop
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
 		fCurrentSample = i;
+		
+		if(i != TTJetsSync) continue;
 
 		TTree *tree = S->tree;
 		const bool isdata = (S->datamc)==0;
@@ -634,6 +663,7 @@ void MuonPlotter::doLoop(){
 			fillYields(S);
 			fillOSYields(S);
 			fillRatioPlots(S);
+			fillHWWHistos(S);
 			fillKinematicHistos(i);
 			fillMuIsoHistos(i);
 			fillElIsoHistos(i);
@@ -647,6 +677,7 @@ void MuonPlotter::doLoop(){
 
 	}
 	fOUTSTREAM.close();
+	fOUTSTREAM2.close();
 	writeHistos();
 	printCutFlows(fOutputDir + "CutFlow.txt");
 	fDoCounting = false;
@@ -2703,6 +2734,137 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 	fOutputSubDir = "";
 }
 
+void MuonPlotter::makeHWWPlots(){
+	TString selname[3] = {"NoCuts", "N1Cuts", "N1CutsBarrel"};
+
+	for(size_t s = 0; s < 3; ++s){ // loop on selections
+		fOutputSubDir = "HWWPlots/" + selname[s];
+		char cmd[100];
+	    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	    system(cmd);
+		
+		TH1D    *hvar_data[gNHWWVars];
+		TH1D    *hvar_mc  [gNHWWVars];
+		THStack *hvar_mc_s[gNHWWVars];
+
+		TLatex *lat = new TLatex();
+		lat->SetNDC(kTRUE);
+		lat->SetTextColor(kBlack);
+		lat->SetTextSize(0.04);
+
+		// Create histograms
+		for(size_t i = 0; i < gNHWWVars; ++i){
+			hvar_data[i] = new TH1D("Data_"          + HWWPlots::var_name[i], HWWPlots::var_name[i] + " in Data", HWWPlots::nbins[i], HWWPlots::xmin[i], HWWPlots::xmax[i]);
+			hvar_mc[i]   = new TH1D("MC_"            + HWWPlots::var_name[i], HWWPlots::var_name[i] + " in MC"  , HWWPlots::nbins[i], HWWPlots::xmin[i], HWWPlots::xmax[i]);
+			hvar_mc_s[i] = new THStack("MC_stacked_" + HWWPlots::var_name[i], HWWPlots::var_name[i] + " in MC");
+		}
+
+		// Adjust overflow bins:
+		for(size_t i = 0; i < gNHWWVars; ++i){
+			for(gSample j = sample_begin; j < gNSAMPLES; j=gSample(j+1)){
+				Int_t nbins     = fSamples[j]->hwwplots[s].hvar[i]->GetNbinsX();
+				Double_t binc   = fSamples[j]->hwwplots[s].hvar[i]->GetBinContent(nbins);
+				Double_t overfl = fSamples[j]->hwwplots[s].hvar[i]->GetBinContent(nbins+1);
+				fSamples[j]->hwwplots[s].hvar[i]->SetBinContent(nbins, binc + overfl);
+			}
+		}
+
+		for(size_t i = 0; i < gNHWWVars; ++i){
+			// Create plots
+			vector<int> mcsamples = fMCBGMuEnr;
+			if(i != 6) mcsamples = fMCBG;
+			vector<int> datasamples;
+			datasamples.push_back(DoubleMu1);
+			datasamples.push_back(DoubleMu2);
+			datasamples.push_back(DoubleEle1);
+			datasamples.push_back(DoubleEle2);
+			datasamples.push_back(MuEG1);
+			datasamples.push_back(MuEG2);
+
+			hvar_data[i]->SetXTitle(HWWPlots::axis_label[i]);
+			hvar_data[i]->SetLineWidth(3);
+			hvar_data[i]->SetLineColor(kBlack);
+			hvar_data[i]->SetMarkerStyle(8);
+			hvar_data[i]->SetMarkerColor(kBlack);
+			hvar_data[i]->SetMarkerSize(1.2);
+
+			// Scale by luminosity
+			for(size_t j = 0; j < gNSAMPLES; ++j){
+				float lumiscale = fLumiNorm / fSamples[j]->lumi;
+				if(fSamples[j]->datamc == 0) continue;
+				fSamples[j]->hwwplots[s].hvar[i]->Scale(lumiscale);
+			}
+
+			// Fill data histo
+			for(size_t j = 0; j < datasamples.size(); ++j){
+				Sample *S = fSamples[datasamples[j]];
+				hvar_data[i]->Add(S->hwwplots[s].hvar[i]);
+				hvar_data[i]->SetXTitle(HWWPlots::axis_label[i]);
+			}
+
+			// Scale to get equal integrals
+			float intscale(0.);
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				intscale += fSamples[mcsamples[j]]->hwwplots[s].hvar[i]->Integral();
+			}
+			intscale = hvar_data[i]->Integral() / intscale;
+			
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				fSamples[mcsamples[j]]->hwwplots[s].hvar[i]->Scale(intscale);
+			}
+
+			// Fill MC stacks
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				Sample *S = fSamples[mcsamples[j]];
+				hvar_mc  [i]->Add(S->hwwplots[s].hvar[i]);
+				hvar_mc_s[i]->Add(S->hwwplots[s].hvar[i]);
+				hvar_mc_s[i]->Draw("goff");
+				hvar_mc_s[i]->GetXaxis()->SetTitle(HWWPlots::axis_label[i]);
+			}
+
+			double max1 = hvar_mc_s[i]->GetMaximum();
+			double max2 = hvar_data[i]->GetMaximum();
+			double max = max1>max2?max1:max2;
+			hvar_mc_s[i]->SetMaximum(5.*max);
+			hvar_data[i]->SetMaximum(5.*max);
+			// hvar_mc_s[i]->SetMaximum(1.5*max);
+			// hvar_data[i]->SetMaximum(1.5*max);
+			hvar_mc_s[i]->SetMinimum(0.5);
+			hvar_data[i]->SetMinimum(0.5);
+
+			TCanvas *c_temp = new TCanvas("C_" + HWWPlots::var_name[i], HWWPlots::var_name[i] + " in Data vs MC", 0, 0, 800, 600);
+			c_temp->cd();
+
+			// TLegend *leg = new TLegend(0.15,0.50,0.40,0.88);
+			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
+			TLegend *leg = new TLegend(0.75,0.50,0.89,0.88);
+			leg->AddEntry(hvar_data[i], "Data","p");
+			for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->hwwplots[s].hvar[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg->SetFillStyle(0);
+			leg->SetTextFont(42);
+			leg->SetBorderSize(0);
+
+			gPad->SetLogy();
+			hvar_mc_s[i]->Draw("hist");
+			hvar_data[i]->DrawCopy("PE X0 same");
+			leg->Draw();
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+			lat->DrawLatex(0.11,0.92, selname[s]);
+
+			if(i < 4)  lat->DrawLatex(0.31,0.92, "ee/e#mu/#mu#mu");
+			if(i == 4) lat->DrawLatex(0.31,0.92, "ee/#mu#mu");
+			if(i == 5) lat->DrawLatex(0.31,0.92, "#mu#mu");
+			if(i == 6) lat->DrawLatex(0.31,0.92, "ee");
+			if(i == 7) lat->DrawLatex(0.31,0.92, "e#mu");
+			if(i > 7)  lat->DrawLatex(0.31,0.92, "ee/e#mu/#mu#mu");
+
+			Util::PrintNoEPS(c_temp, HWWPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+			delete c_temp;
+			delete leg;
+		}
+	}
+}
+
 //____________________________________________________________________________
 void MuonPlotter::produceRatio(gChannel chan, int sample, int index, bool(MuonPlotter::*eventSelector)(), bool(MuonPlotter::*objSelector)(int), TH2D *&h_2d, TH1D *&h_pt, TH1D *&h_eta, bool output){
 	vector<int> samples; samples.push_back(sample);
@@ -4471,7 +4633,7 @@ void MuonPlotter::printSyncExercise(){
 	fC_minMet   = 30.;
 	fC_minNjets = 0;
 
-	TString eventfilename = fOutputDir + "pass3_eth.txt";
+	TString eventfilename = fOutputDir + "pass7_eth.txt";
 	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
 
 	Sample *S = fSamples[TTJetsSync];
@@ -4508,7 +4670,11 @@ void MuonPlotter::printSyncExercise(){
 					fOUTSTREAM << setw(11) << Event;
 					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
 					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu1]);
+					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", MuD0[mu1]);
+					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", MuDz[mu1]);
 					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", MuPt[mu2]);
+					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", MuD0[mu2]);
+					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", MuDz[mu2]);
 					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
 					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
 					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
@@ -4528,7 +4694,11 @@ void MuonPlotter::printSyncExercise(){
 					fOUTSTREAM << setw(11) << Event;
 					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
 					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", ElPt[el1]);
+					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", ElD0[el1]);
+					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", ElDz[el1]);
 					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el2]);
+					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", MuD0[el2]);
+					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", MuDz[el2]);
 					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
 					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
 					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
@@ -4547,7 +4717,11 @@ void MuonPlotter::printSyncExercise(){
 					fOUTSTREAM << setw(11) << Event;
 					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
 					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu]);
+					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", MuD0[mu]);
+					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", MuDz[mu]);
 					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el]);
+					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", ElD0[el]);
+					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", ElDz[el]);
 					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
 					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
 					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
@@ -4564,7 +4738,7 @@ void MuonPlotter::printSyncExercise(){
 	cout << "====================================================================" << endl;
 	cout << " Event Yields " << endl;
 	cout << "--------------------------------------------------------------------" << endl;
-	cout << "        elel    |       mumu     |        elmu    |          tot" << endl;
+	cout << "        elel     |       mumu      |        elmu     |          tot" << endl;
 	cout << setw(14) << left << " " << N_elel << " |";
 	cout << setw(14) << left << " " << N_mumu << " |";
 	cout << setw(14) << left << " " << N_elmu << " |";
@@ -4582,7 +4756,7 @@ void MuonPlotter::printSyncExercise(){
 	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel+N_mumu+N_elmu)) << endl;
 	cout << "====================================================================" << endl;
 	cout << endl;
-	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | Ran on 1084783 total events, [[%%ATTACHURL%%/pass3_eth.txt][yield.txt]] |"
+	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | Ran on 1084783 total events, [[%%ATTACHURL%%/pass7_eth.txt][yield.txt]] |"
 		, scale*N_elel, N_elel
 		, scale*N_mumu, N_mumu
 		, scale*N_elmu, N_elmu
@@ -5217,6 +5391,190 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 	}
 	
 }
+void MuonPlotter::fillHWWHistos(Sample *S){
+	fDoCounting = false;
+	fChargeSwitch = 0;
+	float puweight = PUWeight;
+
+	HWWPlots *HWW0 = &S->hwwplots[0]; // all
+	HWWPlots *HWW1 = &S->hwwplots[1]; // N-1
+	HWWPlots *HWW2 = &S->hwwplots[2]; // N-1 barrel only
+	int ind1(-1), ind2(-1);
+
+	// Cuts
+	const float dphimax = 0.785398;
+	const float pt1min  = 30.;
+	const float pt2min  = 25.;
+	const float metmin  = 20.;
+	const float mllmin  = 20.;
+	const float mllmax  = 60.;
+
+	TLorentzVector pl1, pl2;
+	int type = abs(isOSLLEvent(ind1, ind2));
+	if(type == 0) return; //nothing found
+	if(type == 1){ // mumu
+		if(!mumuSignalTrigger()) return;
+		if(!passesAddLepVeto(ind1, ind2, 1)) return;
+		if(!isTightMuon(ind1) || !isTightMuon(ind2)) return;
+		
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);
+		float mass = (pl1+pl2).M();
+		float dphi = Util::DeltaPhi(MuPhi[ind1], MuPhi[ind2]);
+		
+		HWW0->hvar[0]->Fill(pfMET,      puweight);
+		HWW0->hvar[1]->Fill(getNJets(), puweight);
+		HWW0->hvar[2]->Fill(MuPt[ind1], puweight);
+		HWW0->hvar[3]->Fill(MuPt[ind2], puweight);
+		HWW0->hvar[4]->Fill(mass,       puweight);
+		HWW0->hvar[5]->Fill(mass,       puweight);
+		HWW0->hvar[8]->Fill(dphi,       puweight);
+		HWW0->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+
+		if(                  getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[2]->Fill(MuPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[3]->Fill(MuPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min &&                                   dphi < dphimax) HWW1->hvar[4]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min &&                                   dphi < dphimax) HWW1->hvar[5]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW1->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax){
+			if(S->datamc == 0){
+				fOUTSTREAM2 << " Mu/Mu event in run ";
+				fOUTSTREAM2 << setw(7) << Run;
+				fOUTSTREAM2 << " event " << setw(11) << Event;
+				fOUTSTREAM2 << " lumisection " << setw(4) << LumiSec;
+				fOUTSTREAM2 << " in dataset " << setw(12) << S->sname;
+				fOUTSTREAM2 << " DPhi = " << setw(5) << Form("%6.2f", dphi);
+				fOUTSTREAM2 << " MET  = " << setw(5) << Form("%6.2f", pfMET);
+				fOUTSTREAM2 << " Mass = " << setw(5) << Form("%6.2f", mass);
+				fOUTSTREAM2 << " Pt1  = " << setw(5) << Form("%6.2f", MuPt[ind1]);
+				fOUTSTREAM2 << " Pt2  = " << setw(5) << Form("%6.2f", MuPt[ind2]);
+				fOUTSTREAM2 << " MT2  = " << setw(5) << Form("%6.2f", getMT2(ind1, ind2, 1)) << endl;
+			}
+		}
+		
+		if(fabs(MuEta[ind1]) > 1.5 || fabs(MuEta[ind2]) > 1.5) return;
+
+		if(                  getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[2]->Fill(MuPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[3]->Fill(MuPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min &&                                   dphi < dphimax) HWW2->hvar[4]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min &&                                   dphi < dphimax) HWW2->hvar[5]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW2->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && MuPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+	}
+	if(type == 2){ // ee
+		if(!elelSignalTrigger()) return;
+		if(!passesAddLepVeto(ind1, ind2, 2)) return;
+		if(!isTightElectron(ind1) || !isTightElectron(ind2)) return;
+
+		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
+		float mass = (pl1+pl2).M();
+		float dphi = Util::DeltaPhi(ElPhi[ind1], ElPhi[ind2]);
+
+		HWW0->hvar[0]->Fill(pfMET,      puweight);
+		HWW0->hvar[1]->Fill(getNJets(), puweight);
+		HWW0->hvar[2]->Fill(ElPt[ind1], puweight);
+		HWW0->hvar[3]->Fill(ElPt[ind2], puweight);
+		HWW0->hvar[4]->Fill(mass,       puweight);
+		HWW0->hvar[6]->Fill(mass,       puweight);
+		HWW0->hvar[8]->Fill(dphi,       puweight);
+		HWW0->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+
+		if(                  getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[2]->Fill(ElPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[3]->Fill(ElPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW1->hvar[4]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW1->hvar[6]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW1->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax){
+			if(S->datamc == 0){
+				fOUTSTREAM2 << " El/El event in run ";
+				fOUTSTREAM2 << setw(7) << Run;
+				fOUTSTREAM2 << " event " << setw(11) << Event;
+				fOUTSTREAM2 << " lumisection " << setw(4) << LumiSec;
+				fOUTSTREAM2 << " in dataset " << setw(12) << S->sname;
+				fOUTSTREAM2 << " DPhi = " << setw(5) << Form("%6.2f", dphi);
+				fOUTSTREAM2 << " MET  = " << setw(5) << Form("%6.2f", pfMET);
+				fOUTSTREAM2 << " Mass = " << setw(5) << Form("%6.2f", mass);
+				fOUTSTREAM2 << " Pt1  = " << setw(5) << Form("%6.2f", ElPt[ind1]);
+				fOUTSTREAM2 << " Pt2  = " << setw(5) << Form("%6.2f", ElPt[ind2]);
+				fOUTSTREAM2 << " MT2  = " << setw(5) << Form("%6.2f", getMT2(ind1, ind2, 2)) << endl;
+			}
+		}
+		
+		if(fabs(ElEta[ind1]) > 1.5 || fabs(ElEta[ind2]) > 1.5) return;
+
+		if(                  getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[2]->Fill(ElPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[3]->Fill(ElPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW2->hvar[4]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW2->hvar[6]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW2->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && ElPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+	}
+	if(type == 3){ // emu
+		if(!elmuSignalTrigger()) return;
+		if(!passesAddLepVeto(ind1, ind2, 3)) return;
+		if(!isTightMuon(ind1) || !isTightElectron(ind2)) return;
+
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
+		float mass = (pl1+pl2).M();
+		float dphi = Util::DeltaPhi(MuPhi[ind1], ElPhi[ind2]);
+
+		HWW0->hvar[0]->Fill(pfMET,      puweight);
+		HWW0->hvar[1]->Fill(getNJets(), puweight);
+		HWW0->hvar[2]->Fill(MuPt[ind1], puweight);
+		HWW0->hvar[3]->Fill(ElPt[ind2], puweight);
+		HWW0->hvar[7]->Fill(mass,       puweight);
+		HWW0->hvar[8]->Fill(dphi,       puweight);
+		HWW0->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+
+		if(                  getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[2]->Fill(MuPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[3]->Fill(ElPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW1->hvar[7]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW1->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW1->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax){
+			if(S->datamc == 0){
+				fOUTSTREAM2 << " El/Mu event in run ";
+				fOUTSTREAM2 << setw(7) << Run;
+				fOUTSTREAM2 << " event " << setw(11) << Event;
+				fOUTSTREAM2 << " lumisection " << setw(4) << LumiSec;
+				fOUTSTREAM2 << " in dataset " << setw(12) << S->sname;
+				fOUTSTREAM2 << " DPhi = " << setw(5) << Form("%6.2f", dphi);
+				fOUTSTREAM2 << " MET  = " << setw(5) << Form("%6.2f", pfMET);
+				fOUTSTREAM2 << " Mass = " << setw(5) << Form("%6.2f", mass);
+				fOUTSTREAM2 << " Pt1  = " << setw(5) << Form("%6.2f", MuPt[ind1]);
+				fOUTSTREAM2 << " Pt2  = " << setw(5) << Form("%6.2f", ElPt[ind2]);
+				fOUTSTREAM2 << " MT2  = " << setw(5) << Form("%6.2f", getMT2(ind1, ind2, 3)) << endl;
+			}
+		}
+		
+		if(fabs(MuEta[ind1]) > 1.5 || fabs(ElEta[ind2]) > 1.5) return;
+
+		if(                  getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[0]->Fill(pfMET,      puweight);
+		if(pfMET > metmin &&                    MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[1]->Fill(getNJets(), puweight);
+		if(pfMET > metmin && getNJets() == 0 &&                        ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[2]->Fill(MuPt[ind1], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min &&                        mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[3]->Fill(ElPt[ind2], puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min &&                                   dphi < dphimax) HWW2->hvar[7]->Fill(mass,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax                  ) HWW2->hvar[8]->Fill(dphi,       puweight);
+		if(pfMET > metmin && getNJets() == 0 && MuPt[ind1] > pt1min && ElPt[ind2] > pt2min && mass > mllmin && mass < mllmax && dphi < dphimax) HWW2->hvar[9]->Fill(getMT2(ind1, ind2, 3), puweight);
+	}
+}
 
 //____________________________________________________________________________
 void MuonPlotter::storeNumbers(Sample *S, gChannel chan){
@@ -5701,16 +6059,35 @@ void MuonPlotter::bookHistos(){
 		for(size_t j = 0; j < gNKinVars; ++j){
 			kp0->hvar[j] = new TH1D(Form("h_%s_%s_LL", KinPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
 			kp0->hvar[j]->SetFillColor(S->color);
-			kp0->hvar[j]->SetXTitle(KinPlots::var_name[j]);
+			kp0->hvar[j]->SetXTitle(KinPlots::axis_label[j]);
 			kp0->hvar[j]->Sumw2();
 			kp1->hvar[j] = new TH1D(Form("h_%s_%s_TT", KinPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
 			kp1->hvar[j]->SetFillColor(S->color);
-			kp1->hvar[j]->SetXTitle(KinPlots::var_name[j]);
+			kp1->hvar[j]->SetXTitle(KinPlots::axis_label[j]);
 			kp1->hvar[j]->Sumw2();
 			kp2->hvar[j] = new TH1D(Form("h_%s_%s_Sig", KinPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
 			kp2->hvar[j]->SetFillColor(S->color);
-			kp2->hvar[j]->SetXTitle(KinPlots::var_name[j]);
+			kp2->hvar[j]->SetXTitle(KinPlots::axis_label[j]);
 			kp2->hvar[j]->Sumw2();
+		}
+
+		// HWW histos
+		HWWPlots *hww0 = &S->hwwplots[0]; // all
+		HWWPlots *hww1 = &S->hwwplots[1]; // N-1
+		HWWPlots *hww2 = &S->hwwplots[2]; // N-1 barrel only
+		for(size_t j = 0; j < gNHWWVars; ++j){
+			hww0->hvar[j] = new TH1D(Form("h_%s_%s", HWWPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), HWWPlots::nbins[j], HWWPlots::xmin[j], HWWPlots::xmax[j]);
+			hww0->hvar[j]->SetFillColor(S->color);
+			hww0->hvar[j]->SetXTitle(HWWPlots::axis_label[j]);
+			hww0->hvar[j]->Sumw2();
+			hww1->hvar[j] = new TH1D(Form("h_%s_%s_AllCuts", HWWPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), HWWPlots::nbins[j], HWWPlots::xmin[j], HWWPlots::xmax[j]);
+			hww1->hvar[j]->SetFillColor(S->color);
+			hww1->hvar[j]->SetXTitle(HWWPlots::axis_label[j]);
+			hww1->hvar[j]->Sumw2();
+			hww2->hvar[j] = new TH1D(Form("h_%s_%s_AllCuts_barrel", HWWPlots::var_name[j].Data(), S->sname.Data()), S->sname.Data(), HWWPlots::nbins[j], HWWPlots::xmin[j], HWWPlots::xmax[j]);
+			hww2->hvar[j]->SetFillColor(S->color);
+			hww2->hvar[j]->SetXTitle(HWWPlots::axis_label[j]);
+			hww2->hvar[j]->Sumw2();
 		}
 
 		// Isolation histos
@@ -5894,6 +6271,20 @@ void MuonPlotter::writeHistos(){
 			kp1->hvar[j]->Write(kp1->hvar[j]->GetName(), TObject::kWriteDelete);
 			kp2->hvar[j]->Write(kp2->hvar[j]->GetName(), TObject::kWriteDelete);
 		}
+
+		// HWW histos
+		HWWPlots *hww0 = &S->hwwplots[0];
+		HWWPlots *hww1 = &S->hwwplots[1];
+		HWWPlots *hww2 = &S->hwwplots[2];
+		temp = S->sname + "/HWWPlots/";
+		rdir = Util::FindOrCreate(temp, pFile);
+		rdir->cd();
+		for(size_t j = 0; j < gNHWWVars; ++j){
+			hww0->hvar[j]->Write(hww0->hvar[j]->GetName(), TObject::kWriteDelete);
+			hww1->hvar[j]->Write(hww1->hvar[j]->GetName(), TObject::kWriteDelete);
+			hww2->hvar[j]->Write(hww2->hvar[j]->GetName(), TObject::kWriteDelete);
+		}
+
 		// Isolation histos
 		temp = S->sname + "/IsoPlots/";
 		rdir = Util::FindOrCreate(temp, pFile);
@@ -6020,6 +6411,22 @@ int  MuonPlotter::readHistos(TString filename){
 			getname = kp2->hvar[j]->GetName();
 			kp2->hvar[j] = (TH1D*)pFile->Get(S->sname + "/KinPlots/" + getname);
 			kp2->hvar[j]->SetFillColor(S->color);
+		}
+
+		// HWW histos
+		HWWPlots *hwwp_a = &S->hwwplots[0];
+		HWWPlots *hwwp_n = &S->hwwplots[1];
+		HWWPlots *hwwp_b = &S->hwwplots[2];
+		for(size_t j = 0; j < gNHWWVars; ++j){
+			TString getname = hwwp_a->hvar[j]->GetName();
+			hwwp_a->hvar[j] = (TH1D*)pFile->Get(S->sname + "/HWWPlots/" + getname);
+			hwwp_a->hvar[j]->SetFillColor(S->color);
+			getname = hwwp_n->hvar[j]->GetName();
+			hwwp_n->hvar[j] = (TH1D*)pFile->Get(S->sname + "/HWWPlots/" + getname);
+			hwwp_n->hvar[j]->SetFillColor(S->color);
+			getname = hwwp_b->hvar[j]->GetName();
+			hwwp_b->hvar[j] = (TH1D*)pFile->Get(S->sname + "/HWWPlots/" + getname);
+			hwwp_b->hvar[j]->SetFillColor(S->color);
 		}
 
 		// Isolation histos
@@ -6835,16 +7242,16 @@ float MuonPlotter::getMT2(int ind1, int ind2, int toggle){
 	TLorentzVector pmet, pl1, pl2;
 
 	if(toggle == 1){ // mumu
-		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], 0.);
-		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], 0.);			
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);			
 	}
 	if(toggle == 2){ // ee
-		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], 0.);
-		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], 0.);			
+		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
 	}
 	if(toggle == 3){ // emu
-		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], 0.);
-		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], 0.);			
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
 	}
 	
 	pmet.SetPtEtaPhiM(pfMET, 0., pfMETPhi, 0.);
@@ -7076,8 +7483,8 @@ int MuonPlotter::isSSLLEvent(int &ind1, int &ind2){
 			ptmax = ptsum;
 			select = -1;
 		}
-		// if(looseLeps_p.size() > 1) cout << " Event with TWO SS pairs: r" << setw(7) << Run << "/e" << setw(13) << Event << "/l" << setw(5) << LumiSec << " in dataset " << setw(9) << fSamples[fCurrentSample]->sname << endl;		
 	}
+
 	if(select == 0) return 0; // this ensures we have at least one pair
 
 	vector<lepton> selectedPair;
@@ -7182,6 +7589,24 @@ int MuonPlotter::isOSLLEvent(int &ind1, int &ind2){
 	ind1 = selectedPair[0].index;
 	ind2 = selectedPair[1].index;
 	return result;
+}
+
+// HWW Event selections:
+//____________________________________________________________________________
+bool MuonPlotter::passesAddLepVeto(int ind1, int ind2, int toggle){
+	if(toggle == 1){ // muons
+		for(size_t i = 0; i < NMus; ++i) if(i != ind1 && i != ind2 && isTightMuon(i)) return false;
+		for(size_t i = 0; i < NEls; ++i) if(isTightElectron(i)) return false;
+	}
+	if(toggle == 2){ // electrons
+		for(size_t i = 0; i < NMus; ++i) if(isTightMuon(i)) return false;
+		for(size_t i = 0; i < NEls; ++i) if(i != ind1 && i != ind2 && isTightElectron(i)) return false;
+	}
+	if(toggle == 3){ // emu
+		for(size_t i = 0; i < NMus; ++i) if(i != ind1 && isTightMuon(i))     return false;
+		for(size_t i = 0; i < NEls; ++i) if(i != ind2 && isTightElectron(i)) return false;
+	}
+	return true;
 }
 
 //____________________________________________________________________________
@@ -7318,7 +7743,6 @@ bool MuonPlotter::passesZVeto(float dm){
 bool MuonPlotter::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
 // has invariant mass smaller than cut, returns true if none found
-
 	if(NMus > 1){
 		// First muon
 		for(size_t i = 0; i < NMus-1; ++i){
@@ -7354,6 +7778,25 @@ bool MuonPlotter::passesMllEventVeto(float cut){
 			}
 		}
 	}
+	return true;
+}
+bool MuonPlotter::passesMllEventVeto(int ind1, int ind2, int toggle, float cut){
+	// Calculate invariant mass of pair, return false if it's smaller than cut
+	TLorentzVector pmet, pl1, pl2;
+
+	if(toggle == 1){ // mumu
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);			
+	}
+	if(toggle == 2){ // ee
+		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
+	}
+	if(toggle == 3){ // emu
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
+	}
+	if( (pl1+pl2).M() < cut ) return false;
 	return true;
 }
 
@@ -7485,7 +7928,7 @@ bool MuonPlotter::isSSLLMuEvent(int& mu1, int& mu2){
 		if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(mu1, mu2, 1, 5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){
@@ -7532,7 +7975,7 @@ bool MuonPlotter::isSSLLElEvent(int& el1, int& el2){
 		if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
+	if(!passesMllEventVeto(el1, el2, 2, 5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){
@@ -7580,7 +8023,7 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Z veto");
 	}
 
-	if(!passesMllEventVeto(5.)) return false; // no low mass OSSF pairs
+	// if(!passesMllEventVeto(mu, el, 3, 5.)) return false; // no low mass OSSF pairs
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Minv veto");
 
 	if(fChargeSwitch == 0){
@@ -7616,6 +8059,7 @@ bool MuonPlotter::isGoodMuon(int muon, float ptcut){
 	if(muon >= NMus) return false; // Sanity check
 	if(ptcut < 0.) ptcut = fC_minMu2pt;
 	if(MuPt[muon] < ptcut) return false;
+	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
 	return true;
 }
 bool MuonPlotter::isLooseMuon(int muon){
@@ -7672,7 +8116,7 @@ bool MuonPlotter::isGoodElectron(int ele, float ptcut){
 	if(ptcut < 0.) ptcut = fC_minEl2pt;
 	if(ElPt[ele] < ptcut) return false;
 
-	// if(ElEcalRecHitSumEt[ele] > 0.2) return false; // when using "CaloIsoVL" triggers
+	// if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // when using "CaloIsoVL" triggers
 
 	// Reject electrons closer than 0.1 in DR to tight muons
 	for(size_t i = 0; i < NMus; ++i){
