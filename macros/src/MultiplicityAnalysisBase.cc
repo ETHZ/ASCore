@@ -17,6 +17,8 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_PtHat_max                      = 999999.;
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
+	fDoJESUncertainty                   = false;
+	fJESScale                           = 1.0;
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
@@ -55,10 +57,10 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	
 	vector<double> pt1; 
 	for(int ij=0; ij < fTR->PF2PAT3NJets; ++ij){
-		if(fTR->PF2PAT3JPt[ij] < 20) continue;  // note: ETH ntuple only stores PF2PAT3Jets > 15 GeV (defualt config)
+		if(Jet(ij).Pt() < 20)       continue;  // note: ETH ntuple only stores PF2PAT3Jets > 15 GeV (defualt config)
 		fJets.push_back(ij);                   // fJets has all jets except for duplicates with selected leptons
-		pt1.push_back(fTR->PF2PAT3JPt[ij]);
-		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(fTR->PF2PAT3JPt[ij]); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
+		pt1.push_back(Jet(ij).Pt());
+		fJetTaus.index.push_back(ij); fJetTaus.pt.push_back(Jet(ij).Pt()); fJetTaus.isTau.push_back(0); fJetTaus.NObjs++;
 	}
 	fJets        = Util::VSort(fJets,       pt1);
 	pt1.clear();
@@ -116,7 +118,6 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	// goodevt from UserAnalysisBase
 	if(!IsGoodEvent()) {return false;}
-
 	// Run
 	if(fTR->Run < fCut_Run_min ) {return false;}
 	if(fTR->Run > fCut_Run_max ) {return false;}
@@ -125,7 +126,7 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fTR->PtHat > fCut_PtHat_max ){return false;}
 	
 	// MET
-	if(fTR->PFMETPAT < fCut_PFMET_min){return false;}
+	if(MET().Pt() < fCut_PFMET_min){return false;}
 	
 	// HLT triggers
 	if(fRequiredHLT.size() !=0 ){
@@ -149,8 +150,8 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	double HT=0;
 	for(int j=0; j<fJetTaus.NObjs; ++j){
 		if(!fJetTaus.isTau[j]){
-			if(fTR->PF2PAT3JPt[fJetTaus.index[j]] > 50 && fabs(fTR->PF2PAT3JEta[fJetTaus.index[j]])<3.0){
-				HT += fTR->PF2PAT3JPt[fJetTaus.index[j]];
+			if(Jet(fJetTaus.index[j]).Pt() > 50 && fabs(Jet(fJetTaus.index[j]).Eta())<3.0){
+				HT += Jet(fJetTaus.index[j]).Pt();
 			}
 		}else {
 			if(fTR->PfTau3Pt[fJetTaus.index[j]] > 50 && fabs(fTR->PfTau3Eta[fJetTaus.index[j]]) < 3.0){
@@ -165,14 +166,14 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	TLorentzVector mht30(0,0,0,0);
 	fCaloHT50 =0.0;	
 	for(int j=0; j<fTR->CANJets; ++j){
-		float jetpt = fTR->CAJPt[j];
+		float jetpt = CAJet(j).Pt();
 	  	TLorentzVector jetT(0,0,0,0);
-		if( jetpt<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+		if( jetpt<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 	  	// MHT
-		jetT.SetPtEtaPhiM(jetpt, 0, fTR->CAJPhi[j], 0);
+		jetT.SetPtEtaPhiM(jetpt, 0, CAJet(j).Phi(), 0);
 		mht30 -= jetT;
 		
-		if( jetpt<50 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+		if( jetpt<50 || fabs(CAJet(j).Eta())>3.0 ) continue;
 		// HT
 		fCaloHT50  += jetpt;
 	}
@@ -299,6 +300,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_DiLeptInvMass_max    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "PtHat_max")){
 			fCut_PtHat_max            = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "JESScale")){
+			fJESScale                 = float(ParValue); ok = true;
 		}  		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
@@ -316,6 +319,11 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
+		cout << "  JESScale                    " << fJESScale                       <<endl;
+		if(fJESScale !=1.0){
+		cout << "  Do rescaling of Jets and MET with scale " << fJESScale           <<endl;
+		fDoJESUncertainty = true;
+		}
 
 		for(int i=0; i<fRequiredHLT.size(); ++i){
 			cout << "  HLTRequired (logic OR)      " << fRequiredHLT[i]                  <<endl;
@@ -334,7 +342,7 @@ bool MultiplicityAnalysisBase::IsGoodBasicPFJetPAT3(int index, double ptcut, dou
 	// Basic PF jet cleaning and ID cuts
 	// cut at pt of ptcut (default = 30 GeV)
 	// cut at abs(eta) of absetacut (default = 2.5)
-	if(fTR->PF2PAT3JPt[index] < ptcut           ) return false;
+	if(Jet(index).Pt() < ptcut                  ) return false;
 	if(fabs(fTR->PF2PAT3JEta[index]) > absetacut) return false;
 	if(fTR->PF2PAT3JIDLoose[index]    ==0       ) return false;
 	return true;
@@ -354,4 +362,58 @@ bool MultiplicityAnalysisBase::IsGoodPFJetTightPAT3(int index, double ptcut, dou
 	if ( !(fTR->PF2PAT3JNeuHadfrac[index] < 0.90)         ) return false;
 	if ( !(fTR->PF2PAT3JNeuEmfrac[index]  < 0.90)         ) return false;
 	return true;
+}
+
+// Jets and JES uncertainty
+TLorentzVector MultiplicityAnalysisBase::Jet(int index){
+	TLorentzVector j(0,0,0,0);
+	j.SetPtEtaPhiE(fTR->PF2PAT3JPt[index], fTR->PF2PAT3JEta[index], fTR->PF2PAT3JPhi[index], fTR->PF2PAT3JE[index]);
+	if  (! fDoJESUncertainty) return j;
+	else                      return MultiplicityAnalysisBase::JetJESScaled(j);
+}
+
+TLorentzVector MultiplicityAnalysisBase::CAJet(int index){
+	TLorentzVector j(0,0,0,0);
+	j.SetPtEtaPhiE(fTR->CAJPt[index], fTR->CAJEta[index], fTR->CAJPhi[index], fTR->CAJE[index]);
+	if  (! fDoJESUncertainty) return j;
+	else                      return MultiplicityAnalysisBase::JetJESScaled(j);
+}
+
+TLorentzVector MultiplicityAnalysisBase::JetJESScaled(TLorentzVector j){
+	TLorentzVector j_scaled(0.,0.,0.,0);
+	j_scaled.SetPtEtaPhiM(j.Perp()*fJESScale, j.Eta(), j.Phi(), j.M());	
+	return j_scaled;
+}
+
+// MET w/ and w/0 JES uncertainty
+TLorentzVector MultiplicityAnalysisBase::MET(){
+	double JESunclusteredScale =1.2; // scale for unclustered energy fraction
+	TLorentzVector MET(0,0,0,0);
+	MET.SetPtEtaPhiM(fTR->PFMETPAT, 0., fTR->PFMETPATphi, 0);
+	if(!fDoJESUncertainty) return MET;
+	else{
+		TLorentzVector MHT(0,0,0,0),clustered(0,0,0,0);
+		// calculate correction due to clustered jets;
+		for(int i=0; i<fTR->PF2PAT3NJets; ++i){
+			clustered.SetPtEtaPhiE(fTR->PF2PAT3JPt[i], fTR->PF2PAT3JEta[i], fTR->PF2PAT3JPhi[i], fTR->PF2PAT3JE[i]);
+			MHT      -=clustered;
+		}
+		for(int i=0; i<fTR->PfEl3NObjs; ++i){
+			clustered.SetPtEtaPhiM(fTR->PfEl3Pt[i], fTR->PfEl3Eta[i], fTR->PfEl3Phi[i], 0);
+			MHT      -=clustered;
+		}
+		for(int i=0; i<fTR->PfMu3NObjs; ++i){
+			clustered.SetPtEtaPhiM(fTR->PfMu3Pt[i], fTR->PfMu3Eta[i], fTR->PfMu3Phi[i], 0.106);
+			MHT      -=clustered;
+		}
+		double unclustered_frac=fabs(MHT.Pt()-MET.Pt())/MET.Pt();
+		double clustered_frac  =MHT.Pt()/MET.Pt();
+		// normalize fractions
+		unclustered_frac=unclustered_frac/(clustered_frac+unclustered_frac);
+		clustered_frac  =clustered_frac  /(clustered_frac+unclustered_frac);
+		// rescale met pt
+		double met_pt = MET.Pt()*(fJESScale*clustered_frac + JESunclusteredScale*unclustered_frac);
+		MET.SetPerp(met_pt);
+		return MET;
+	}
 }

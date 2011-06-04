@@ -31,6 +31,12 @@ public:
 	bool IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut);
 	bool IsGoodPFJetMediumPAT3(int index, double ptcut, double absetacut);
 	bool IsGoodPFJetTightPAT3(int index, double ptcut, double absetacut);
+
+	// jets
+	TLorentzVector Jet(int index);
+	TLorentzVector CAJet(int index);
+	TLorentzVector JetJESScaled(TLorentzVector j);
+	TLorentzVector MET();
 	
 	struct JetTau {
 		int NObjs;
@@ -64,6 +70,8 @@ public:
 	float fCut_PtHat_max;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
+	bool  fDoJESUncertainty;
+	float fJESScale;
 
 	// members
 	float fHT;

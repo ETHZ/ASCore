@@ -114,7 +114,7 @@ void MassAnalysis::Analyze(){
 	MassAnalysis::FillTree();
 	
 	// print interesting events
-	InterestingEvents();
+//	InterestingEvents();
 }
 
 // ***********************************************************************************************
@@ -139,8 +139,8 @@ void MassAnalysis::FillTree(){
 	// Fill jets 4-momenta & ID's 
 	for(int i=0; i<fJetTaus.NObjs; ++i) {
 		if(! fJetTaus.isTau[i]){
-			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PF2PAT3JPx[fJetTaus.index[i]], fTR->PF2PAT3JPy[fJetTaus.index[i]], 
-						fTR->PF2PAT3JPz[fJetTaus.index[i]], fTR->PF2PAT3JE [fJetTaus.index[i]]); //SetLV(GetJet4Momenta(fJets[i]));
+			fMT2tree->jet[i].lv.SetPtEtaPhiE( Jet(fJetTaus.index[i]).Pt(),  Jet(fJetTaus.index[i]).Eta(), 
+						          Jet(fJetTaus.index[i]).Phi(), Jet(fJetTaus.index[i]).E()  ); //SetLV(GetJet4Momenta(fJets[i]));
 			// b-tag info now should be available
 			fMT2tree->jet[i].bTagProbTCHE  =  fTR->PF2PAT3JbTagProbTkCntHighEff [fJetTaus.index[i]];
 			fMT2tree->jet[i].bTagProbTCHP  =  fTR->PF2PAT3JbTagProbTkCntHighPur [fJetTaus.index[i]];
@@ -199,7 +199,7 @@ void MassAnalysis::FillTree(){
 	// -----------------------------------------------------------------
 	// Fill leptons 4-momenta & tight_flag & charge
 	TLorentzVector METlv;
-	METlv.SetPtEtaPhiM(fTR->PFMETPAT, 0., fTR->PFMETPATphi, 0.);
+	METlv.SetPtEtaPhiM(MET().Pt(), 0., MET().Phi(), 0.);
 
 	for(int i=0; i<fElecs.size(); ++i) {
 	  	fMT2tree->ele[i].lv.SetPtEtaPhiE(fTR->PfEl3Pt [fElecs[i]], fTR->PfEl3Eta[fElecs[i]], 
@@ -293,7 +293,7 @@ void MassAnalysis::FillTree(){
 
 	// --------------------------------------------------------------------
 	// MET and MPT
-	fMT2tree->pfmet[0].SetPtEtaPhiM(fTR->PFMETPAT,0,fTR->PFMETPATphi,0);
+	fMT2tree->pfmet[0]=MET();
 
 	// Fill vector sum of tracks
 	TVector3 tracks(0.,0.,0.);
@@ -342,7 +342,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
 	fMT2tree->misc.CrazyHCAL           = fCrazyHCAL;
 	fMT2tree->misc.HT                  = fHT;
-	fMT2tree->misc.PFMETsign	   = (fTR->PFMETPAT)/sqrt(fTR->SumEt);
+	fMT2tree->misc.PFMETsign	   = (MET().Pt())/sqrt(fTR->SumEt);
 	
 	fMT2tree->misc.MT2                 = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
 	fMT2tree->misc.MT2all              = fHemiObjects[0].MT2;    
@@ -351,8 +351,8 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
 	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
 
-	fMT2tree->misc.MET                 = fTR->PFMETPAT;
-	fMT2tree->misc.METPhi              = fTR->PFMETPATphi;
+	fMT2tree->misc.MET                 = MET().Pt();
+	fMT2tree->misc.METPhi              = MET().Phi();
 
 	fMT2tree->misc.LeadingJPt          = (fMT2tree->NJets > 0) ? fMT2tree->jet[0].lv.Pt() : 0;
 	fMT2tree->misc.SecondJPt           = (fMT2tree->NJets > 1) ? fMT2tree->jet[1].lv.Pt() : 0;
@@ -387,12 +387,12 @@ void MassAnalysis::FillTree(){
 	float caMHT20, caMHT30, caMHT40;
 	TLorentzVector mht20(0,0,0,0), mht30(0,0,0,0), mht40(0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
-	  float jetpt = fTR->CAJPt[j];
+	  float jetpt = CAJet(j).Pt();
 	  TLorentzVector jetT(0,0,0,0);
 
-	  if( jetpt<20 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+	  if( jetpt<20 || fabs(CAJet(j).Eta())>3.0 ) continue;
 
-	  jetT.SetPtEtaPhiM(jetpt, 0, fTR->CAJPhi[j], 0);
+	  jetT.SetPtEtaPhiM(jetpt, 0, CAJet(j).Phi(), 0);
 
 	  if(jetpt>20)
 	    mht20 -= jetT;
@@ -414,39 +414,38 @@ void MassAnalysis::FillTree(){
 	
 	// _________
 	// stuff for Z->nunu (close your eyes...)	
-	// FIXME: full section on Znunu
 	vector<int>    jindi;
 	vector<double> jpt;
 	bool PassJetID_matched(true);
 	double HTmatched=0, vectorsumpt_matched_px=0, vectorsumpt_matched_py=0;
 	int    NJetsIDLoose_matched=0;
 	for(int i=0; i<fTR->PF2PAT3NJets; ++i){
-		if(fTR->PF2PAT3JPt[i] < 20) continue;  
+		if(Jet(i).Pt() < 20) continue;  
 		bool jet(true);
 		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
-				double deltaR = Util::GetDeltaR(fTR->PF2PAT3JEta[i], fMT2tree->genlept[gen].lv.Eta(), fTR->PF2PAT3JPhi[i], fMT2tree->genlept[gen].lv.Phi());
+				double deltaR = Util::GetDeltaR(Jet(i).Eta(), fMT2tree->genlept[gen].lv.Eta(), Jet(i).Phi(), fMT2tree->genlept[gen].lv.Phi());
 				if(deltaR < 0.4) jet=false;
 			}
 		}
 		if(  jet == false) continue;	
-		if(fTR->PF2PAT3JPt[i] > 50 && fabs(fTR->PF2PAT3JEta[i])<2.4 && IsGoodBasicPFJetPAT3(i,  50., 2.4)==false ){
+		if(Jet(i).Pt() > 50 && fabs(Jet(i).Eta())<2.4 && IsGoodBasicPFJetPAT3(i,  50., 2.4)==false ){
 			PassJetID_matched  = false;
 		}
-		jindi.push_back(i); jpt.push_back(fTR->PF2PAT3JPt[i]);
+		jindi.push_back(i); jpt.push_back(Jet(i).Pt());
 		if(! IsGoodBasicPFJetPAT3(i,  20., 2.4) ) continue;
-		vectorsumpt_matched_px+=fTR->PF2PAT3JPx[i];
-		vectorsumpt_matched_py+=fTR->PF2PAT3JPy[i];
+		vectorsumpt_matched_px+=Jet(i).Px();
+		vectorsumpt_matched_py+=Jet(i).Py();
 		NJetsIDLoose_matched++;
-		if(fTR->PF2PAT3JPt[i]<50 || fabs(fTR->PF2PAT3JEta[i])>3 ) continue;
-		HTmatched += fTR->PF2PAT3JPt[i];
+		if(Jet(i).Pt()<50 || fabs(Jet(i).Eta())>3 ) continue;
+		HTmatched += Jet(i).Pt();
 	}
-	TLorentzVector MET     = fMT2tree->pfmet[0];
+	TLorentzVector met     = fMT2tree->pfmet[0];
 	for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 		if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
 			vectorsumpt_matched_px+=fMT2tree->genlept[gen].lv.Px();
 			vectorsumpt_matched_py+=fMT2tree->genlept[gen].lv.Py();
-			MET +=fMT2tree->genlept[gen].lv;
+			met +=fMT2tree->genlept[gen].lv;
 		}
 	}
 	
@@ -456,39 +455,39 @@ void MassAnalysis::FillTree(){
 	TLorentzVector  mht30_matchedReco (0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
 	  	TLorentzVector jetT(0,0,0,0);
-	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+	  	if( CAJet(j).Pt()<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 		bool jet(true);
 		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
 			if( ((abs(fMT2tree->genlept[gen].ID) == 11 || abs(fMT2tree->genlept[gen].ID)==13) && fMT2tree->genlept[gen].MID ==23) ) {
-				double deltaR = Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->genlept[gen].lv.Eta(), fTR->CAJPhi[j], fMT2tree->genlept[gen].lv.Phi());
+				double deltaR = Util::GetDeltaR(CAJet(j).Eta(), fMT2tree->genlept[gen].lv.Eta(), CAJet(j).Phi(), fMT2tree->genlept[gen].lv.Phi());
 				if(deltaR < 0.4) jet=false;
 			}
 		}
 		if(  jet == false) continue;	
-	  	jetT.SetPtEtaPhiM(fTR->CAJPt[j], 0, fTR->CAJPhi[j], 0);
+	  	jetT.SetPtEtaPhiM(CAJet(j).Pt(), 0, CAJet(j).Phi(), 0);
 	  	mht30_matched -= jetT;  // MHT30
-	  	if(fTR->CAJPt[j]>50) {
-			caHT50_matched  += fTR->CAJPt[j]; //HT50
+	  	if(CAJet(j).Pt()>50) {
+			caHT50_matched  += CAJet(j).Pt(); //HT50
 		}
 	}
 	for(int j=0; j<fTR->CANJets; ++j){
 	  	TLorentzVector jetT(0,0,0,0);
-	  	if( fTR->CAJPt[j]<30 || fabs(fTR->CAJEta[j])>3.0 ) continue;
+	  	if( CAJet(j).Pt()<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 		bool jet(true);
 		// remove overlap from reco electrons and muons
 		for(int e=0; e<fMT2tree->NEles; ++e){
-			double dR=Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->ele[e].lv.Eta(), fTR->CAJPhi[j], fMT2tree->ele[e].lv.Phi());
+			double dR=Util::GetDeltaR(CAJet(j).Eta(), fMT2tree->ele[e].lv.Eta(), CAJet(j).Phi(), fMT2tree->ele[e].lv.Phi());
 			if(dR < 0.4) jet=false;
 		}
 		for(int m=0; m<fMT2tree->NMuons; ++m){
-			double dR=Util::GetDeltaR(fTR->CAJEta[j], fMT2tree->muo[m].lv.Eta(), fTR->CAJPhi[j], fMT2tree->muo[m].lv.Phi());
+			double dR=Util::GetDeltaR(CAJet(j).Eta(), fMT2tree->muo[m].lv.Eta(), CAJet(j).Phi(), fMT2tree->muo[m].lv.Phi());
 			if(dR < 0.4) jet=false;
 		}
 		if(jet==false) continue;
-	  	jetT.SetPtEtaPhiM(fTR->CAJPt[j], 0, fTR->CAJPhi[j], 0);
+	  	jetT.SetPtEtaPhiM(CAJet(j).Pt(), 0, CAJet(j).Phi(), 0);
 	  	mht30_matchedReco -= jetT;  // MHT30
-	  	if(fTR->CAJPt[j]>50) {
-			caHT50_matchedReco  += fTR->CAJPt[j]; //HT50
+	  	if(CAJet(j).Pt()>50) {
+			caHT50_matchedReco  += CAJet(j).Pt(); //HT50
 		}
 	}
 
@@ -502,10 +501,9 @@ void MassAnalysis::FillTree(){
 	if(jindi.size()<1){mindPhi = -999.99;}
 	else{
 		for(int i=0; i<jindi.size(); ++i){
-			if(fTR->PF2PAT3JPt[jindi[i]]       < 20 ) continue;
-			if(fabs(fTR->PF2PAT3JEta[jindi[i]])> 5.0) continue;
-			TLorentzVector lv(fTR->PF2PAT3JPx[jindi[i]],fTR->PF2PAT3JPy[jindi[i]],fTR->PF2PAT3JPz[jindi[i]],fTR->PF2PAT3JE[jindi[i]]);
-			double dphi = TMath::Abs(lv.DeltaPhi(MET));
+			if(Jet(jindi[i]).Pt()       < 20 ) continue;
+			if(fabs(Jet(jindi[i]).Eta())> 5.0) continue;
+			double dphi = TMath::Abs(Jet(jindi[i]).DeltaPhi(met));
 			if(dphi < mindPhi){ 
 				mindPhi = dphi;
 			}
@@ -526,7 +524,7 @@ void MassAnalysis::FillTree(){
 		fMT2tree->Znunu.SecondJPt_matched  = jpt[1];
 	} else  fMT2tree->Znunu.Jet1Pass_matched   =0;
 	fMT2tree->Znunu.PassJetID_matched          = (Int_t) PassJetID_matched;
-	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+fTR->PFMETPATpx,2) + pow(vectorsumpt_matched_py+fTR->PFMETPATpy,2));
+	fMT2tree->Znunu.Vectorsumpt_matched        = sqrt( pow(vectorsumpt_matched_px+MET().Px(),2) + pow(vectorsumpt_matched_py+MET().Py(),2));
 	
 	fMT2tree->Znunu.HTmatched                  = HTmatched;
 	fMT2tree->Znunu.NJetsIDLoose_matched       = NJetsIDLoose_matched;
@@ -677,11 +675,11 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
 			if(PFJID==1 && !IsGoodBasicPFJetPAT3(fJetTaus.index[i], 20, 2.4)                             )  continue;
-			else if(fabs(fTR->PF2PAT3JEta[fJetTaus.index[i]])>2.4 || fTR->PF2PAT3JPt[fJetTaus.index[i]]< 20) continue;
-			px.push_back(fTR->PF2PAT3JPx[fJetTaus.index[i]]);
-			py.push_back(fTR->PF2PAT3JPy[fJetTaus.index[i]]);
-			pz.push_back(fTR->PF2PAT3JPz[fJetTaus.index[i]]);
-			 E.push_back(fTR->PF2PAT3JE [fJetTaus.index[i]]);
+			else if(fabs(Jet(fJetTaus.index[i]).Eta())>2.4 || Jet(fJetTaus.index[i]).Pt()< 20            ) continue;
+			px.push_back(Jet(fJetTaus.index[i]).Px());
+			py.push_back(Jet(fJetTaus.index[i]).Py());
+			pz.push_back(Jet(fJetTaus.index[i]).Pz());
+			 E.push_back(Jet(fJetTaus.index[i]).E() );
 			 fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=0;
 			 hemiobject.objects.push_back(fHemiObject);
 		}else {
@@ -754,8 +752,8 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	}
 
 	TLorentzVector pmiss;
-	pmiss.SetPx(fTR->PFMETPATpx);
-	pmiss.SetPy(fTR->PFMETPATpy);
+	pmiss.SetPx(MET().Px());
+	pmiss.SetPy(MET().Py());
 
 	// fill mindHT (minimized for assoc method 9)
 	hemiobject.minDHT = dHT;
@@ -768,7 +766,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	
 	// fill MCT
 	TVector2 pmiss_vector2;
-	pmiss_vector2.Set(fTR->PFMETPATpx, fTR->PFMETPATpy);
+	pmiss_vector2.Set(MET().Px(), MET().Py());
 	TLorentzVector downstream(0.,0.,0.,0.); // no particles are downstream, i.e. not selected jets are upstream. 
 	hemiobject.MCT   =GetMCTcorr(pseudojet1, pseudojet2, downstream, pmiss_vector2);
 	
@@ -811,10 +809,8 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	vector<TLorentzVector> p4s;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
-			if(fabs(fTR->PF2PAT3JEta[fJetTaus.index[i]])>2.4 || fTR->PF2PAT3JPt[fJetTaus.index[i]] < minJPt) continue;
-			TLorentzVector v; 
-			v.SetPxPyPzE(fTR->PF2PAT3JPx[fJetTaus.index[i]], fTR->PF2PAT3JPy[fJetTaus.index[i]], fTR->PF2PAT3JPz[fJetTaus.index[i]], fTR->PF2PAT3JE[fJetTaus.index[i]]);
-			p4s.push_back(v);
+			if(fabs(Jet(fJetTaus.index[i]).Eta())>2.4 || Jet(fJetTaus.index[i]).Pt() < minJPt) continue;
+			p4s.push_back(Jet(fJetTaus.index[i]));
 			fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=-1;
 			hemiobject.objects.push_back(fHemiObject);
 		}else {
@@ -855,8 +851,8 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
     	hemiobject.alphaT  = 0.5 * ( sumPT - hemiobject.minDHT ) / sqrt( sumPT*sumPT - sumP4.Perp2() );
 		
 	TLorentzVector pmiss;
-	pmiss.SetPx(fTR->PFMETPATpx);
-	pmiss.SetPy(fTR->PFMETPATpy);
+	pmiss.SetPx(MET().Px());
+	pmiss.SetPy(MET().Py());
 	
 	// fill UTM
 	hemiobject.UTM          = - pmiss - pj1 - pj2;
@@ -866,7 +862,7 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	
 	// fill MCT
 	TVector2 pmiss_vector2;
-	pmiss_vector2.Set(fTR->PFMETPATpx, fTR->PFMETPATpy);
+	pmiss_vector2.Set(MET().Px(), MET().Py());
 	TLorentzVector downstream(0.,0.,0.,0.); // no particles are downstream, i.e. not selected jets are upstream. 
 	hemiobject.MCT   =GetMCTcorr(pj1, pj2, downstream, pmiss_vector2);
 	
