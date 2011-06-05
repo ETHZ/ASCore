@@ -62,7 +62,9 @@ public:
 	float fCut_PFMET_min;
 	float fCut_HT_min;
 	float fCut_caloHT50_min;
+	float fCut_caloHT50ID_min;
 	float fCut_caloMHT30_min;
+	float fCut_caloMHT30ID_min;
 	float fCut_JPt_hardest_min;
 	float fCut_JPt_second_min;
 	float fCut_DiLeptInvMass_min;
@@ -76,6 +78,9 @@ public:
 	// members
 	float fHT;
 	float fCaloHT50;
+	float fCaloHT50_ID;
+	float fCaloMHT30;
+	float fCaloMHT30_ID;
 	
 	bool  fCrazyHCAL;
 	int   fNJets_toremove_ele;

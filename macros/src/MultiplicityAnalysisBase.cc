@@ -9,7 +9,9 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_PFMET_min                      = 0;
 	fCut_HT_min                         = 0;
 	fCut_caloHT50_min                   = 0;
+	fCut_caloHT50ID_min                 = 0;
 	fCut_caloMHT30_min                  = 0;
+	fCut_caloMHT30ID_min                = 0;
 	fCut_JPt_hardest_min                = 0;
 	fCut_JPt_second_min                 = 0;
 	fCut_DiLeptInvMass_min              = 0;
@@ -163,22 +165,27 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(HT<fCut_HT_min){return false;}
 	
 	//caloHT and calo MHT
-	TLorentzVector mht30(0,0,0,0);
-	fCaloHT50 =0.0;	
+	TLorentzVector mht30(0,0,0,0), mht30_ID(0,0,0,0);
+	fCaloHT50 =0.0, fCaloHT50_ID =0.0;
 	for(int j=0; j<fTR->CANJets; ++j){
-		float jetpt = CAJet(j).Pt();
-	  	TLorentzVector jetT(0,0,0,0);
-		if( jetpt<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
+		if( CAJet(j).Pt()<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 	  	// MHT
-		jetT.SetPtEtaPhiM(jetpt, 0, CAJet(j).Phi(), 0);
-		mht30 -= jetT;
-		
-		if( jetpt<50 || fabs(CAJet(j).Eta())>3.0 ) continue;
+		mht30 -= CAJet(j);
+		// MHT_ID
+		if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001) mht30_ID -= CAJet(j);	
 		// HT
-		fCaloHT50  += jetpt;
+		if( CAJet(j).Pt()<50 ) continue;
+		fCaloHT50  += CAJet(j).Pt();
+		// HT_ID
+		if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001) fCaloHT50_ID += CAJet(j).Pt();
 	}
-	if(fCaloHT50  < fCut_caloHT50_min ) return false;
-	if(mht30.Pt() < fCut_caloMHT30_min) return false;
+	fCaloMHT30   =mht30.Pt();
+	fCaloMHT30_ID=mht30_ID.Pt();
+	if(fCaloHT50      < fCut_caloHT50_min   ) return false;
+	if(fCaloHT50_ID   < fCut_caloHT50ID_min ) return false;
+	if(fCaloMHT30     < fCut_caloMHT30_min  ) return false;
+	if(fCaloMHT30_ID  < fCut_caloMHT30ID_min) return false;
+
 
 	// leading jets including JID for jets
 	bool leadingjets(true);
@@ -288,8 +295,12 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_HT_min               = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "caloHT50_min") ){
 			fCut_caloHT50_min         = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "caloHT50ID_min") ){
+			fCut_caloHT50ID_min       = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "caloMHT30_min") ){
 			fCut_caloMHT30_min        = float(ParValue); ok = true;
+		} else if( !strcmp(ParName, "caloMHT30ID_min") ){
+			fCut_caloMHT30ID_min      = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "JPt_hardest_min") ){
 			fCut_JPt_hardest_min      = float(ParValue); ok = true;			
 		} else if( !strcmp(ParName, "JPt_second_min") ){
@@ -311,7 +322,9 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  PFMET_min                   " << fCut_PFMET_min                  <<endl;
 		cout << "  HT_min                      " << fCut_HT_min                     <<endl;
 		cout << "  caloHT50_min                " << fCut_caloHT50_min               <<endl;
+		cout << "  caloHT50ID_min              " << fCut_caloHT50ID_min             <<endl;
 		cout << "  caloMHT30_min               " << fCut_caloMHT30_min              <<endl;
+		cout << "  caloMHT30ID_min             " << fCut_caloMHT30ID_min            <<endl;
 		cout << "  JPt_hardest_min             " << fCut_JPt_hardest_min            <<endl;
 		cout << "  JPt_second_min              " << fCut_JPt_second_min             <<endl;
 		cout << "  DiLeptInvMass_min           " << fCut_DiLeptInvMass_min          <<endl;

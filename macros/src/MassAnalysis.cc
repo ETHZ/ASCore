@@ -191,6 +191,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
 	fMT2tree->SetNJetsIDLoose  (fMT2tree->GetNjets(20, 2.4, 1));
 	fMT2tree->SetNJetsAcc      (fMT2tree->GetNjets(20, 2.4, 0));
+	fMT2tree->SetNBJets        (fMT2tree->GetNBtags(3,2.0,20,2.4,1));
 	fMT2tree->SetNEles         ((Int_t)fElecs.size());
 	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
 	fMT2tree->SetNTaus         ((Int_t)fTaus.size());
@@ -209,6 +210,14 @@ void MassAnalysis::FillTree(){
 		fMT2tree->ele[i].Iso    = (fTR->PfEl3ChargedHadronIso[fElecs[i]] + fTR->PfEl3NeutralHadronIso[fElecs[i]] + fTR->PfEl3PhotonIso[fElecs[i]])/fTR->PfEl3Pt[fElecs[i]];
 		fMT2tree->ele[i].ID90   = fTR->PfEl3ID90[fElecs[i]];
 		fMT2tree->ele[i].ID95   = fTR->PfEl3ID95[fElecs[i]];
+		
+		// match to caloJets
+		for(int j=0; j<fTR->CANJets; ++j){
+			if(fMT2tree->ele[i].lv.DeltaR(CAJet(j)) <0.4) {
+				fMT2tree->ele[i].CAJ_n90     = fTR->CAJn90[j];
+				fMT2tree->ele[i].CAJ_n90Hits = fTR->CAJID_n90Hits[j];
+			}
+		}
 	}
 	for(int i=0; i<fMuons.size(); ++i) {
 	  	fMT2tree->muo[i].lv.SetPtEtaPhiM(fTR->PfMu3Pt [fMuons[i]], fTR->PfMu3Eta[fMuons[i]], 
@@ -287,6 +296,14 @@ void MassAnalysis::FillTree(){
 		fMT2tree->genlept[i].GMStatus = fTR->GenLeptonGMStatus[i];
 		if(abs(fMT2tree->genlept[i].ID) == 11 || abs(fMT2tree->genlept[i].ID) == 13 || abs(fMT2tree->genlept[i].ID) == 15   ){
 			fMT2tree->genlept[i].MT = GetMT(fMT2tree->genlept[i].lv, fMT2tree->genlept[i].lv.M(), fMT2tree->genmet[0], 0.);
+		}
+		if(abs(fTR->GenLeptonID[i]) == 11){// match to caloJets
+			for(int j=0; j<fTR->CANJets; ++j){
+				if(fMT2tree->genlept[i].lv.DeltaR(CAJet(j)) <0.4) {
+					fMT2tree->genlept[i].CAJ_n90     = fTR->CAJn90[j];
+					fMT2tree->genlept[i].CAJ_n90Hits = fTR->CAJID_n90Hits[j];
+				}
+			}
 		}
 	}
 	fMT2tree->NGenLepts = NGenLepts;
@@ -383,34 +400,26 @@ void MassAnalysis::FillTree(){
 
 	// ---------------------------	
 	// calo HT and MHT
-	float caHT30=0, caHT40=0;
-	float caMHT20, caMHT30, caMHT40;
-	TLorentzVector mht20(0,0,0,0), mht30(0,0,0,0), mht40(0,0,0,0);
+	float caHT40=0, caHT40_ID=0;
+	TLorentzVector mht40(0,0,0,0), mht40_ID(0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
-	  float jetpt = CAJet(j).Pt();
-	  TLorentzVector jetT(0,0,0,0);
+	  	if( CAJet(j).Pt()<40 || fabs(CAJet(j).Eta())>3.0 ) continue;
 
-	  if( jetpt<20 || fabs(CAJet(j).Eta())>3.0 ) continue;
-
-	  jetT.SetPtEtaPhiM(jetpt, 0, CAJet(j).Phi(), 0);
-
-	  if(jetpt>20)
-	    mht20 -= jetT;
-	  if(jetpt>30) {
-	    mht30 -= jetT;
-	    caHT30  += jetpt;
-	  }
-	  if(jetpt>40) {
-	    mht40 -= jetT;
-	    caHT40  += jetpt;
-	  }
+	    	caHT40   += CAJet(j).Pt();
+	    	mht40    -= CAJet(j);
+	  	
+	  	if(! (fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001)) continue;
+		caHT40_ID += CAJet(j).Pt();
+		mht40_ID  -= CAJet(j);
 	}
-	fMT2tree->misc.caloHT30  = caHT30;
-	fMT2tree->misc.caloHT40  = caHT40;
-	fMT2tree->misc.caloHT50  = fCaloHT50;
-	fMT2tree->misc.caloMHT20 = mht20.Pt();
-	fMT2tree->misc.caloMHT30 = mht30.Pt();
-	fMT2tree->misc.caloMHT40 = mht40.Pt();
+	fMT2tree->misc.caloHT40     = caHT40;
+	fMT2tree->misc.caloHT40_ID  = caHT40_ID;
+	fMT2tree->misc.caloMHT40    = mht40.Pt();
+	fMT2tree->misc.caloMHT40_ID = mht40_ID.Pt();
+	fMT2tree->misc.caloHT50     = fCaloHT50;
+	fMT2tree->misc.caloHT50_ID  = fCaloHT50_ID;
+	fMT2tree->misc.caloMHT30    = fCaloMHT30;
+	fMT2tree->misc.caloMHT30_ID = fCaloMHT30_ID;
 	
 	// _________
 	// stuff for Z->nunu (close your eyes...)	
@@ -449,12 +458,15 @@ void MassAnalysis::FillTree(){
 		}
 	}
 	
-	float           caHT50_matched    =0.0; 
-	float           caHT50_matchedReco=0.0;
-	TLorentzVector  mht30_matched     (0,0,0,0); 
-	TLorentzVector  mht30_matchedReco (0,0,0,0);
+	float           caHT50_matched      =0.0; 
+	float           caHT50ID_matched    =0.0; 
+	float           caHT50_matchedReco  =0.0;
+	float           caHT50ID_matchedReco=0.0;
+	TLorentzVector  mht30_matched       (0,0,0,0); 
+	TLorentzVector  mht30ID_matched     (0,0,0,0); 
+	TLorentzVector  mht30_matchedReco   (0,0,0,0);
+	TLorentzVector  mht30ID_matchedReco (0,0,0,0);
 	for(int j=0; j<fTR->CANJets; ++j){
-	  	TLorentzVector jetT(0,0,0,0);
 	  	if( CAJet(j).Pt()<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 		bool jet(true);
 		for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
@@ -464,14 +476,18 @@ void MassAnalysis::FillTree(){
 			}
 		}
 		if(  jet == false) continue;	
-	  	jetT.SetPtEtaPhiM(CAJet(j).Pt(), 0, CAJet(j).Phi(), 0);
-	  	mht30_matched -= jetT;  // MHT30
+	  	mht30_matched    -= CAJet(j);  // MHT30
+		if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001){
+		mht30ID_matched  -= CAJet(j); // MHT30_ID
+		} 
 	  	if(CAJet(j).Pt()>50) {
-			caHT50_matched  += CAJet(j).Pt(); //HT50
+			caHT50_matched    += CAJet(j).Pt(); //HT50
+			if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001) {
+			caHT50ID_matched  += CAJet(j).Pt(); //HT50
+			}
 		}
 	}
 	for(int j=0; j<fTR->CANJets; ++j){
-	  	TLorentzVector jetT(0,0,0,0);
 	  	if( CAJet(j).Pt()<30 || fabs(CAJet(j).Eta())>3.0 ) continue;
 		bool jet(true);
 		// remove overlap from reco electrons and muons
@@ -484,18 +500,27 @@ void MassAnalysis::FillTree(){
 			if(dR < 0.4) jet=false;
 		}
 		if(jet==false) continue;
-	  	jetT.SetPtEtaPhiM(CAJet(j).Pt(), 0, CAJet(j).Phi(), 0);
-	  	mht30_matchedReco -= jetT;  // MHT30
+	  	mht30_matchedReco   -= CAJet(j);  // MHT30
+		if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001){
+		mht30ID_matchedReco -= CAJet(j);  // MHT30_ID
+		}
 	  	if(CAJet(j).Pt()>50) {
-			caHT50_matchedReco  += CAJet(j).Pt(); //HT50
+			caHT50_matchedReco    += CAJet(j).Pt(); //HT50
+			if(fTR->CAJn90[j]>=2 && fTR->CAJEMfrac[j]>=0.000001){
+			caHT50ID_matchedReco  += CAJet(j).Pt(); //HT50ID
+			}
 		}
 	}
 
 
-	fMT2tree->Znunu.caloMHT30_matched    =mht30_matched.Pt();
-	fMT2tree->Znunu.caloMHT30_matchedReco=mht30_matchedReco.Pt();
-	fMT2tree->Znunu.caloHT50_matched     =caHT50_matched;
-	fMT2tree->Znunu.caloHT50_matchedReco =caHT50_matchedReco;
+	fMT2tree->Znunu.caloMHT30_matched      =mht30_matched.Pt();
+	fMT2tree->Znunu.caloMHT30ID_matched    =mht30ID_matched.Pt();
+	fMT2tree->Znunu.caloMHT30_matchedReco  =mht30_matchedReco.Pt();
+	fMT2tree->Znunu.caloMHT30ID_matchedReco=mht30ID_matchedReco.Pt();
+	fMT2tree->Znunu.caloHT50_matched       =caHT50_matched;
+	fMT2tree->Znunu.caloHT50ID_matched     =caHT50ID_matched;
+	fMT2tree->Znunu.caloHT50_matchedReco   =caHT50_matchedReco;
+	fMT2tree->Znunu.caloHT50ID_matchedReco =caHT50ID_matchedReco;
 
 	double mindPhi=10;
 	if(jindi.size()<1){mindPhi = -999.99;}

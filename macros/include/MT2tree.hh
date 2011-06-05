@@ -28,10 +28,6 @@ public:
   Int_t    Jet1Pass;
   Int_t    PassJetID;
   Int_t    PassJetID20;
-  Int_t    EcalDeadCellBEFlag;
-  Int_t    NECALGapClusters;
-  Double_t EcalGapClusterSize[50];
-  Double_t EcalGapBE[50];
   Double_t MT2;
   Double_t MT2all;
   Double_t MT2leading;
@@ -48,14 +44,16 @@ public:
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
-  Double_t caloHT30;
-  Double_t caloHT40;
-  Double_t caloHT50;
-  Double_t caloMHT20;
-  Double_t caloMHT30;
-  Double_t caloMHT40;
+  Double_t caloHT40;    
+  Double_t caloHT40_ID;
+  Double_t caloHT50;  
+  Double_t caloHT50_ID;
+  Double_t caloMHT30;  
+  Double_t caloMHT30_ID;
+  Double_t caloMHT40;  
+  Double_t caloMHT40_ID;
   
-  ClassDef(MT2Misc, 15)
+  ClassDef(MT2Misc, 18)
 };
 
 // ----------------------------------------
@@ -149,9 +147,13 @@ public:
 	Double_t RecoOSee_mll;
 	Double_t RecoOSmumu_mll;
 	Double_t caloMHT30_matched;
+	Double_t caloMHT30ID_matched;
 	Double_t caloMHT30_matchedReco;
+	Double_t caloMHT30ID_matchedReco;
 	Double_t caloHT50_matched;
+	Double_t caloHT50ID_matched;
 	Double_t caloHT50_matchedReco;
+	Double_t caloHT50ID_matchedReco;
 	Double_t HTmatched;
 	Double_t METplusLeptsPt;
 	Double_t METplusLeptsPtReco;
@@ -164,7 +166,7 @@ public:
 	Double_t SecondJPt_matched;
 	Double_t Vectorsumpt_matched;
 
-	ClassDef(MT2Znunu, 5);
+	ClassDef(MT2Znunu, 6);
 };
 
 // MT2Jet ----------------------------------
@@ -254,8 +256,10 @@ public:
   Int_t    Charge;
   Int_t    ID95;
   Int_t    ID90;
+  Int_t    CAJ_n90;
+  Int_t    CAJ_n90Hits;
 
-  ClassDef(MT2Elec, 6)
+  ClassDef(MT2Elec, 7)
 };
 
 // MT2Muon ----------------------------------
@@ -296,6 +300,8 @@ public:
   Int_t          GMID;
   Int_t          GMStatus;
   Double_t       MT;
+  Double_t       CAJ_n90;
+  Double_t       CAJ_n90Hits;
 
 
   ClassDef(MT2GenLept, 3)
@@ -315,6 +321,7 @@ public:
   void SetNJetsIDMedium (int n);
   void SetNJetsIDTight  (int n);
   void SetNJetsAcc      (int n);
+  void SetNBJets        (int n);
   void SetNEles         (int n);
   void SetNMuons        (int n);
   void SetNTaus         (int n);
@@ -387,6 +394,7 @@ public:
   Int_t     NJetsIDMedium;
   Int_t     NJetsIDTight;
   Int_t     NJetsAcc;
+  Int_t     NBJets;
   Int_t     NEles;
   Int_t     NMuons;
   Int_t     NTaus;

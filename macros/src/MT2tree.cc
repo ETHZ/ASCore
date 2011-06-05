@@ -45,20 +45,16 @@ void MT2Misc::Reset() {
   VectorsumptAll 	  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
-  caloHT30       	  = -99999.99;
   caloHT40       	  = -99999.99;
+  caloHT40_ID       	  = -99999.99;
   caloHT50       	  = -99999.99;
-  caloMHT20       	  = -99999.99;
+  caloHT50_ID             = -99999.99;
   caloMHT30       	  = -99999.99;
+  caloMHT30_ID      	  = -99999.99;
   caloMHT40       	  = -99999.99;
+  caloMHT40_ID      	  = -99999.99;
   DPhiMhtMpt              = -99999.99;
   MinMetJetDPhi           = -99999.99;
-  EcalDeadCellBEFlag      = -1;
-  NECALGapClusters        = -1;
-  for(int i=0; i<50; ++i){
-    EcalGapClusterSize[i] = -1;
-    EcalGapBE[i]          = -99999.99;    
-  }
 
 }
 
@@ -147,9 +143,13 @@ void MT2Znunu::Reset(){
 	SecondJPt_matched         = -99999.99;
 	HTmatched                 = -99999.99;
 	caloMHT30_matched         = -99999.99;
+	caloMHT30ID_matched       = -99999.99;
 	caloMHT30_matchedReco     = -99999.99;
+	caloMHT30ID_matchedReco   = -99999.99;
 	caloHT50_matched          = -99999.99;
+	caloHT50ID_matched        = -99999.99;
 	caloHT50_matchedReco      = -99999.99;
+	caloHT50ID_matchedReco    = -99999.99;
 	GenZmumu_mll              = -99999.99;
 	GenZmumu_mll_acc          = -99999.99;
 	GenZee_mll                = -99999.99;
@@ -290,12 +290,14 @@ MT2GenLept::~MT2GenLept(){
 void MT2GenLept::Reset(){
   lv.  SetPxPyPzE(0, 0, 0, 0);
 
-  ID       = -999;
-  MID      = -999;
-  MStatus  = -999;
-  GMID     = -999;
-  GMStatus = -999;
-  MT       = -9999.99;
+  ID          = -999;
+  MID         = -999;
+  MStatus     = -999;
+  GMID        = -999;
+  GMStatus    = -999;
+  MT          = -9999.99;
+  CAJ_n90     = -9999.99;
+  CAJ_n90Hits = -9999.99;
 }
 
 // MT2Muon -----------------------------------
@@ -334,6 +336,8 @@ void MT2Elec::Reset() {
   Charge        = -999;
   ID95          = -999;
   ID90          = -999;
+  CAJ_n90       = -999;
+  CAJ_n90Hits   = -999;
 }
 
 void MT2Elec::SetLV(const TLorentzVector v) {
@@ -396,6 +400,10 @@ void MT2tree::SetNJetsAcc(int n) {
 
 void MT2tree::SetNJetsIDLoose(int n) {
   NJetsIDLoose = n;
+}
+
+void MT2tree::SetNBJets(int n) {
+  NBJets = n;
 }
 
 void MT2tree::SetNJetsIDMedium(int n) {
