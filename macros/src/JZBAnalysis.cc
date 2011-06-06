@@ -15,12 +15,12 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.29 $";
+string sjzbversion="$Revision: 1.30 $";
 string sjzbinfo="";
 
 /*
 
-$LOG: 
+$LOG: $
 
 */
 
@@ -679,6 +679,8 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
   return false;
 
 }
@@ -687,8 +689,10 @@ const bool JZBAnalysis::passElTriggers() {
 const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
   return false;
 } 
 
@@ -697,11 +701,14 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
   return false;
-  
 }
 
 
@@ -768,7 +775,6 @@ void JZBAnalysis::Analyze() {
 
   vector<lepton> leptons;
   vector<vector<lepton> > pfLeptons;
-  vector<lepton> combPfleptons;
 
   for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	vector<lepton> pfLepton;
@@ -865,7 +871,6 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[2].push_back(tmpLepton);
 	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
-	  combPfleptons.push_back(tmpLepton);
       }
     }
 
@@ -883,7 +888,6 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[3].push_back(tmpLepton);
-	  combPfleptons.push_back(tmpLepton);
       }
     }
 
@@ -954,11 +958,7 @@ void JZBAnalysis::Analyze() {
 	vector<lepton> sortedGoodPfLeptonOfSpecificPFtype;
 	if(leptonsel.size()>0) sortedGoodPfLeptonOfSpecificPFtype =sortLeptonsByPt(leptonsel);
         sortedGoodPFLeptons.push_back(sortedGoodPfLeptonOfSpecificPFtype);
-        if(sortedGoodPFLeptons[ipf].size() > 1) {
-		dopf[ipf]=true; 
-	} else {
-	dopf[ipf]=false;
-	}
+        if(sortedGoodPFLeptons[ipf].size() > 1) {dopf[ipf]=true;} else {dopf[ipf]=false;}
   }
   
 
@@ -1538,6 +1538,7 @@ const bool JZBAnalysis::IsCustomPfEl(const int index){
   if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[EL].fill(" ... PF |eta| < 2.4");
   if(!(fTR->PfElID95[index])) return false;
+  //if(!(fTR->PfElID80[index])) return false;
 /*
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
   counters[EL].fill(" ... missing inner hits <= 1");
