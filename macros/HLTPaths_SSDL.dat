@@ -4,35 +4,53 @@ HLT  HLT_Mu8_Jet40_v1
 HLT  HLT_Mu8_Jet40_v2
 HLT  HLT_Mu8_Jet40_v3
 HLT  HLT_Mu8_Jet40_v4
+HLT  HLT_Mu8_Jet40_v5
+HLT  HLT_Mu8_Jet40_v6
 HLT  HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1
 HLT  HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2
 HLT  HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3
+HLT  HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4
+HLT  HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5
 ##################################################
 # Signal regions:
 # high pT
 HLT  HLT_DoubleMu6_v1
 HLT  HLT_DoubleMu6_v2
+HLT  HLT_DoubleMu6_v3
 HLT  HLT_DoubleMu7_v1
 HLT  HLT_DoubleMu7_v2
+HLT  HLT_DoubleMu7_v3
 HLT  HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1
 HLT  HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2
 HLT  HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3
+HLT  HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4
+HLT  HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5
 HLT  HLT_Mu17_Ele8_CaloIdL_v1
 HLT  HLT_Mu17_Ele8_CaloIdL_v2
 HLT  HLT_Mu17_Ele8_CaloIdL_v3
+HLT  HLT_Mu17_Ele8_CaloIdL_v4
+HLT  HLT_Mu17_Ele8_CaloIdL_v5
 HLT  HLT_Mu8_Ele17_CaloIdL_v1
 HLT  HLT_Mu8_Ele17_CaloIdL_v2
 HLT  HLT_Mu8_Ele17_CaloIdL_v3
+HLT  HLT_Mu8_Ele17_CaloIdL_v4
+HLT  HLT_Mu8_Ele17_CaloIdL_v5
 # high HT
 HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1
 HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2
 HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3
 HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1
+HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v2
+HLT  HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v3
 HLT  HLT_DoubleMu3_HT160_v2
 HLT  HLT_DoubleMu3_HT160_v3
 HLT  HLT_DoubleMu3_HT150_v1
+HLT  HLT_DoubleMu3_HT150_v2
+HLT  HLT_DoubleMu3_HT150_v3
 HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1
 HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2
 HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3
 HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1
+HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v2
+HLT  HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v3
 ##################################################
