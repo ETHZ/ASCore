@@ -319,14 +319,14 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
 	// if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
 		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.80 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.007) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.80 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
 		if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
 	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
 		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.70 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.01) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.70 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.01) return false;
 		// if(fTR->ElHcalOverEcal             [index] > 0.07 ) return false;	
 	}
 	
@@ -350,14 +350,14 @@ bool UserAnalysisBase::IsGoodElId_WP90(int index){
 	// Electrons with WP90 ID and WP80 conv. rej.
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
 		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.80 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.007) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.80 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
 		if(fTR->ElHcalOverEcal             [index] > 0.12 ) return false;	
 	}
 	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
 		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.70 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.009) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.70 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.009) return false;
 		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
 
@@ -370,14 +370,14 @@ bool UserAnalysisBase::IsGoodElId_WP80(int index){
 	// Electrons with WP80 ID and conv. rej. cuts
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
 		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.06 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.004) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.06 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.004) return false;
 		if(fTR->ElHcalOverEcal             [index] > 0.04 ) return false;	
 	}
 	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
 		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
-		if(fTR->ElDeltaPhiSuperClusterAtVtx[index] > 0.03 ) return false;
-		if(fTR->ElDeltaEtaSuperClusterAtVtx[index] > 0.007) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.03 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
 		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
 	if(fTR->ElPt[index] < 20.){
