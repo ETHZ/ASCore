@@ -43,9 +43,9 @@ public:
 
   string outputFileName_; // public name of the output file name
 
-  void Begin();
+  void Begin(TFile *f);
   void Analyze();
-  void End();
+  void End(TFile *f);
 
   // Fill generator information
   void GeneratorInfo();

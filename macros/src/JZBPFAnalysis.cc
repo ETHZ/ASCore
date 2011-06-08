@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.31 $";
+string sjzbPFversion="$Revision: 1.1 $";
 string sjzbPFinfo="";
 
 /*
 
-$Log: $
+$Log: JZBPFAnalysis.cc,v $
+Revision 1.1  2011/06/08 15:20:49  buchmann
+First commit of the JZB PF analysis scripts. ATM they are practically identical to the main ones but that will change really soon.
+
 
 */
 
@@ -413,13 +416,13 @@ JZBPFAnalysis::JZBPFAnalysis(TreeReader *tr, std::string dataType, bool fullClea
 JZBPFAnalysis::~JZBPFAnalysis(){
 }
 
-void JZBPFAnalysis::Begin(){
+void JZBPFAnalysis::Begin(TFile *f){
 cout << endl << endl;
-cout << "For PF: We need to decide on what a Custom PF El/Mu is (cuts); We need to define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). We also need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
+cout << "This is JZBPFAnalysis --- For PF: We need to decide on what a Custom PF El/Mu is (cuts); We need to define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). We also need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
 cout << endl << endl;
   // Define the output file of histograms
-  fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
-	
+  //fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
+  fHistFile=f;	
   rand_ = new TRandom();
 
   TH1::AddDirectory(kFALSE);
@@ -435,7 +438,7 @@ cout << endl << endl;
   fHMZPtJ1Pt = new TH2F("fHMZPtJ1Pt","fHMZPtJ1Pt",300,0,300,300,0,300);
   fHMZPtuJ1Pt = new TH2F("fHMZPtuJ1Pt","fHMZPtuJ1Pt",300,0,300,300,0,300);
 
-  InfoTree = new TTree("info","info/S");
+  InfoTree = new TTree("PFinfo","PFinfo/S");
   TString *user = new TString();
   TString *timestamp = new TString();
   TString *jzbversion = new TString();
@@ -465,7 +468,7 @@ cout << endl << endl;
   InfoTree->Fill();
   InfoTree->Write();
 
-  mypfTree = new TTree("events","events");
+  mypfTree = new TTree("PFevents","PFevents");
 
   mypfTree->Branch("is_data",&npfEvent.is_data,"is_data/B");
   mypfTree->Branch("mll",&npfEvent.mll,"mll/F");
@@ -1461,8 +1464,8 @@ void JZBPFAnalysis::Analyze() {
   }
 }
 
-void JZBPFAnalysis::End(){
-  fHistFile->cd();	
+void JZBPFAnalysis::End(TFile *f){
+  f->cd();	
 
   mypfTree->Write();
 
@@ -1477,7 +1480,7 @@ void JZBPFAnalysis::End(){
     }
   }
 
-  fHistFile->Close();
+//  fHistFile->Close();
 }
 
 template<class T>

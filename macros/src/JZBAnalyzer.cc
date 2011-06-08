@@ -9,6 +9,7 @@ using namespace std;
 JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning) 
   : TreeAnalyzerBase(tree) {
   fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning);
+  fJZBPFAnalysis = new JZBPFAnalysis(fTR,dataType,fullCleaning);
 }
 
 JZBAnalyzer::~JZBAnalyzer(){
@@ -49,19 +50,31 @@ void JZBAnalyzer::Loop(){
   }
 }
 
+TFile *fHistFile;
+
 // Method called before starting the event loop
 void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
-	fJZBAnalysis->outputFileName_ = outputFileName_;
-	fJZBPFAnalysis->outputFileName_ = outputFileName_;
+	fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
+//	fJZBAnalysis->outputFileName_ = outputFileName_;
+//	fJZBPFAnalysis->outputFileName_ = outputFileName_;
 	fJZBAnalysis->fVerbose = fVerbose;
 	fJZBPFAnalysis->fVerbose = fVerbose;
 	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-	fJZBAnalysis->Begin();
-	fJZBPFAnalysis->Begin();
+cout << "Starting the regular analysis " << endl;
+	fJZBAnalysis->Begin(fHistFile);
+cout << "Starting the new analysis " << endl;
+	fJZBPFAnalysis->Begin(fHistFile);
+cout << "Done with beginning ... " << endl;
 }
 
 // Method called after finishing the event loop
 void JZBAnalyzer::EndJob(){
-	fJZBAnalysis->End();
+	cout << "Ok gotten here ... " << endl;
+	fJZBAnalysis->End(fHistFile);
+	cout << "Survived the first gracefully ... " << endl;
+	fJZBPFAnalysis->End(fHistFile);
+	cout << "Survived the second gracefully ... " << endl;
+
+fHistFile->Close();
 }

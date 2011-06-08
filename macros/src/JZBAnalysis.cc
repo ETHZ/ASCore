@@ -15,12 +15,12 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.30 $";
+string sjzbversion="$Revision: 1.31 $";
 string sjzbinfo="";
 
 /*
 
-$LOG: $
+$Log: $
 
 */
 
@@ -412,12 +412,13 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
 JZBAnalysis::~JZBAnalysis(){
 }
 
-void JZBAnalysis::Begin(){
+void JZBAnalysis::Begin(TFile *f){
 cout << endl << endl;
-cout << "For PF: We need to decide on what a Custom PF El/Mu is (cuts); We need to define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). We also need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
+cout << "This is JZBAnalysis --- For PF: We need to decide on what a Custom PF El/Mu is (cuts); We need to define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). We also need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
 cout << endl << endl;
   // Define the output file of histograms
-  fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
+//  fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
+  fHistFile=f;
 	
   rand_ = new TRandom();
 
@@ -1460,8 +1461,9 @@ void JZBAnalysis::Analyze() {
   }
 }
 
-void JZBAnalysis::End(){
-  fHistFile->cd();	
+void JZBAnalysis::End(TFile *f){
+  //fHistFile->cd();
+  f->cd();	
 
   myTree->Write();
 
@@ -1476,7 +1478,7 @@ void JZBAnalysis::End(){
     }
   }
 
-  fHistFile->Close();
+//  fHistFile->Close();
 }
 
 template<class T>
