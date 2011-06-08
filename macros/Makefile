@@ -25,7 +25,7 @@ SRCS           = src/helper/PUWeight.C src/base/TreeClassBase.C src/base/TreeRea
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc \
                  src/MuonPlotter.cc src/MassPlotter.cc src/helper/MetaTreeClassBase.C \
                  src/JZBAnalyzer.cc src/JZBAnalysis.cc \
-                 src/JZBPFAnalyzer.cc src/JZBPFAnalysis.cc \
+                 src/JZBPFAnalysis.cc \
                  src/SSDLAnalyzer.cc src/SSDLAnalysis.cc
 
 # We want dictionaries only for classes that have _linkdef.h files                                                               
@@ -44,7 +44,7 @@ SHARED=shlib/libDiLeptonAnalysis.so
 .PHONY : clean purge all depend PhysQC
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer MakeMuonPlots RunJZBAnalyzer RunJZBPFAnalyzer RunSSDLAnalyzer MakeMassPlots 
+all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer MakeMuonPlots RunJZBAnalyzer RunSSDLAnalyzer MakeMassPlots 
 # all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer MakeMuonPlots RunJZBAnalyzer RunSSDLAnalyzer MakeMassPlots shared
 
 # shared: $(SHARED)
@@ -77,9 +77,6 @@ MakeMassPlots: src/exe/MakeMassPlots.C $(OBJS)
 RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
-RunJZBPFAnalyzer: src/exe/RunJZBPFAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
 RunSSDLAnalyzer: src/exe/RunSSDLAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
@@ -98,7 +95,6 @@ clean:
 	$(RM) MakeMuonPlots
 	$(RM) MakeMassPlots
 	$(RM) RunJZBAnalyzer
-	$(RM) RunJZBPFAnalyzer
 	$(RM) RunSSDLAnalyzer
 
 purge:

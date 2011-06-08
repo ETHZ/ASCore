@@ -7,6 +7,7 @@
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 #include "JZBAnalysis.hh"
+#include "JZBPFAnalysis.hh"
 #include <string>
 
 class JZBAnalyzer : public TreeAnalyzerBase {
@@ -22,6 +23,7 @@ public:
 
 private:
   JZBAnalysis *fJZBAnalysis;
+  JZBPFAnalysis *fJZBPFAnalysis;
   int fMaxEvents;
   TString fOutputFile;
   string outputFileName_;

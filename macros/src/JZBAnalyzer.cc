@@ -13,6 +13,7 @@ JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning)
 
 JZBAnalyzer::~JZBAnalyzer(){
 	delete fJZBAnalysis;
+	delete fJZBPFAnalysis;
 	if(!fTR->fChain) cout << "JZBAnalyzer ==> No chain!" << endl;
 }
 
@@ -31,6 +32,7 @@ void JZBAnalyzer::Loop(){
     if ( fCurRun != fTR->Run ) {
       fCurRun = fTR->Run;
       fJZBAnalysis->BeginRun(fCurRun);
+      fJZBPFAnalysis->BeginRun(fCurRun);
       skipRun = false;
       if ( !CheckRun() ) skipRun = true;
     }
@@ -40,17 +42,23 @@ void JZBAnalyzer::Loop(){
       skipLumi = false; // Re-initialise
       if ( !CheckRunLumi() ) skipLumi = true;
     }
-    if ( !(skipRun || skipLumi) ) fJZBAnalysis->Analyze();
+    if ( !(skipRun || skipLumi) ) {
+	fJZBAnalysis->Analyze();
+	fJZBPFAnalysis->Analyze();
+    }
   }
 }
 
 // Method called before starting the event loop
 void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fJZBAnalysis->outputFileName_ = outputFileName_;
+	fJZBPFAnalysis->outputFileName_ = outputFileName_;
 	fJZBAnalysis->fVerbose = fVerbose;
+	fJZBPFAnalysis->fVerbose = fVerbose;
 	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fJZBAnalysis->Begin();
-
+	fJZBPFAnalysis->Begin();
 }
 
 // Method called after finishing the event loop
