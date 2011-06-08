@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.2 2011/04/11 11:07:51 pnef Exp $
+// $Id: LeptonFillerPat.h,v 1.3 2011/04/28 13:40:37 pnef Exp $
 //
 //
 
@@ -85,6 +85,8 @@ private:
   double* fTet;
   int*    fTcharge;
   int*    fTdecaymode;
+  int*    fTelID80;
+  int*    fTelID85;
   int*    fTelID90;
   int*    fTelID95;
   int*    fTmuNMatches;
@@ -151,6 +153,8 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
   }else if(fType == El){
   	fTelID95       = new int[gMaxnobjs];
   	fTelID90       = new int[gMaxnobjs];
+  	fTelID85       = new int[gMaxnobjs];
+  	fTelID80       = new int[gMaxnobjs];
   }else if(fType == Mu){
   	fTmuNMatches   = new int[gMaxnobjs];
 	fTpterr        = new double[gMaxnobjs];
@@ -234,8 +238,10 @@ LeptonFillerPat<LeptonType>::~LeptonFillerPat(void) {
   if(fType == Tau){
   	delete [] fTdecaymode;
   }else if (fType == El){
-  	delete [] fTelID90;
   	delete [] fTelID95;
+  	delete [] fTelID90;
+  	delete [] fTelID85;
+  	delete [] fTelID80;
   }else if (fType == Mu){
   	delete [] fTmuNMatches;
 	delete [] fTpterr;
@@ -268,8 +274,10 @@ void LeptonFillerPat<LeptonType>::createBranches(void) {
   if(fType == Tau){
   	addBranch("DecayMode", "I", fTdecaymode,"NObjs" );
   }else if(fType == El){
-  	addBranch("ID90", "I", fTelID90, "NObjs");
   	addBranch("ID95", "I", fTelID95, "NObjs");
+  	addBranch("ID90", "I", fTelID90, "NObjs");
+  	addBranch("ID85", "I", fTelID85, "NObjs");
+  	addBranch("ID80", "I", fTelID80, "NObjs");
   }else if(fType == Mu){
   	addBranch("PtErr"   , "D", fTpterr      , "NObjs");
 	addBranch("NMatches", "I", fTmuNMatches , "NObjs");
@@ -304,6 +312,8 @@ void LeptonFillerPat<LeptonType>::reset(void) {
   }else if(fType ==El ){
   	resetInt(fTelID95, gMaxnobjs);
   	resetInt(fTelID90, gMaxnobjs);
+  	resetInt(fTelID85, gMaxnobjs);
+  	resetInt(fTelID80, gMaxnobjs);
   }else if(fType == Mu){
   	resetInt   (fTmuNMatches, gMaxnobjs);
 	resetDouble(fTpterr     , gMaxnobjs);
@@ -331,6 +341,8 @@ void LeptonFillerPat<pat::Electron>::getSpecific(pat::Electron lepton, size_t in
 	// speficic for PFElectrons
 	fTelID95[index]   = lepton.electronID("simpleEleId95cIso");
 	fTelID90[index]   = lepton.electronID("simpleEleId90cIso");
+	fTelID85[index]   = lepton.electronID("simpleEleId85cIso");
+	fTelID80[index]   = lepton.electronID("simpleEleId80cIso");
 	return;
 }
 
