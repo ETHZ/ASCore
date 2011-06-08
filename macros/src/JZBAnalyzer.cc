@@ -55,26 +55,20 @@ TFile *fHistFile;
 // Method called before starting the event loop
 void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
+//	Note: the next two lines are commented out because we are now saving in the analysis routine anymore but at the "analyzer level"
 //	fJZBAnalysis->outputFileName_ = outputFileName_;
 //	fJZBPFAnalysis->outputFileName_ = outputFileName_;
 	fJZBAnalysis->fVerbose = fVerbose;
 	fJZBPFAnalysis->fVerbose = fVerbose;
 	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-cout << "Starting the regular analysis " << endl;
 	fJZBAnalysis->Begin(fHistFile);
-cout << "Starting the new analysis " << endl;
 	fJZBPFAnalysis->Begin(fHistFile);
-cout << "Done with beginning ... " << endl;
 }
 
 // Method called after finishing the event loop
 void JZBAnalyzer::EndJob(){
-	cout << "Ok gotten here ... " << endl;
 	fJZBAnalysis->End(fHistFile);
-	cout << "Survived the first gracefully ... " << endl;
 	fJZBPFAnalysis->End(fHistFile);
-	cout << "Survived the second gracefully ... " << endl;
-
-fHistFile->Close();
+	fHistFile->Close();
 }
