@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.115 2011/05/04 09:26:50 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.116 2011/05/17 14:04:04 fronga Exp $
 //
 //
 
@@ -1717,17 +1717,15 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
 	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumInteractions]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
-	fEventTree->Branch("HLTResults"       ,&fTHLTres          ,"HLTResults[200]/I");
-	fEventTree->Branch("L1PhysResults"    ,&fTL1physres       ,"L1PhysResults[128]/I");
-	fEventTree->Branch("L1TechResults"    ,&fTL1techres       ,"L1TechResults[64]/I");
-	fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     ,"HLTPrescale[200]/I");
+	fEventTree->Branch("HLTResults"       ,&fTHLTres          , Form("HLTResults[%d]/I", gMaxhltbits));
+	fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     , Form("HLTPrescale[%d]/I", gMaxhltbits));
+	fEventTree->Branch("L1PhysResults"    ,&fTL1physres       , Form("L1PhysResults[%d]/I", gMaxl1physbits));
+	fEventTree->Branch("L1TechResults"    ,&fTL1techres       , Form("L1TechResults[%d]/I", gMaxl1techbits));
 	fEventTree->Branch("NHLTObjs"         ,&fTNHLTobjects     ,"NHLTObjs/I");
-	// First dimension of these arrays is fixed at run time
-	TString dimensions = TString::Format("[%d][%d]",fTNpaths,gMaxhltnobjs);
-	fEventTree->Branch("HLTObjectID" ,fTHLTObjectID[0]  ,TString("HLTObjectID"+dimensions+"/I"));
-	fEventTree->Branch("HLTObjectPt" ,fTHLTObjectPt[0]  ,TString("HLTObjectPt"+dimensions+"/F"));
-	fEventTree->Branch("HLTObjectEta",fTHLTObjectEta[0] ,TString("HLTObjectEta"+dimensions+"/F"));
-	fEventTree->Branch("HLTObjectPhi",fTHLTObjectPhi[0] ,TString("HLTObjectPhi"+dimensions+"/F"));
+	fEventTree->Branch("HLTObjectID"      ,fTHLTObjectID[0]   , Form("HLTObjectID[%d][%d]/I",  fTNpaths, gMaxhltnobjs));
+	fEventTree->Branch("HLTObjectPt"      ,fTHLTObjectPt[0]   , Form("HLTObjectPt[%d][%d]/F",  fTNpaths, gMaxhltnobjs));
+	fEventTree->Branch("HLTObjectEta"     ,fTHLTObjectEta[0]  , Form("HLTObjectEta[%d][%d]/F", fTNpaths, gMaxhltnobjs));
+	fEventTree->Branch("HLTObjectPhi"     ,fTHLTObjectPhi[0]  , Form("HLTObjectPhi[%d][%d]/F", fTNpaths, gMaxhltnobjs));
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
 	fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/F");
