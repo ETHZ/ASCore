@@ -81,8 +81,12 @@ public:
 	float fCaloHT50_ID;
 	float fCaloMHT30;
 	float fCaloMHT30_ID;
+
+	int   fCounter;
 	
 	bool  fCrazyHCAL;
+	bool  fIsNANObj;
+	bool  fNegativeJEC;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 

@@ -19,6 +19,7 @@ public:
   
   Bool_t   HBHENoiseFlag;
   Bool_t   CrazyHCAL;
+  Bool_t   NegativeJEC;
   Bool_t   isData;
   Int_t    Run;
   Int_t    Event;
@@ -53,7 +54,7 @@ public:
   Double_t caloMHT40;  
   Double_t caloMHT40_ID;
   
-  ClassDef(MT2Misc, 18)
+  ClassDef(MT2Misc, 19)
 };
 
 // ----------------------------------------
@@ -95,23 +96,33 @@ public:
 	Bool_t HLT_HT300_v2;
 	Bool_t HLT_HT300_v3;
 	Bool_t HLT_HT300_v4;
+	Bool_t HLT_HT300_v5;
 	Bool_t HLT_HT350_v2;
 	Bool_t HLT_HT350_v3;
+	Bool_t HLT_HT350_v4;
 	Bool_t HLT_HT360_v2;
 	Bool_t HLT_HT400_v2;
 	Bool_t HLT_HT400_v3;
+	Bool_t HLT_HT400_v4;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
 	Bool_t HLT_HT450_v3;
+	Bool_t HLT_HT450_v4;
 	Bool_t HLT_HT500_v2;
 	Bool_t HLT_HT500_v3;
+	Bool_t HLT_HT500_v4;
 	Bool_t HLT_HT550_v2;
 	Bool_t HLT_HT550_v3;
+	Bool_t HLT_HT550_v4;
+	Bool_t HLT_HT550_v5;
 	// HT_MHT
 	Bool_t HLT_HT250_MHT60_v2;
 	Bool_t HLT_HT250_MHT60_v3;
+	Bool_t HLT_HT250_MHT60_v4;
+	Bool_t HLT_HT250_MHT70_v1;
 	Bool_t HLT_HT260_MHT60_v2;
 	Bool_t HLT_HT300_MHT75_v4;
+	Bool_t HLT_HT300_MHT75_v5;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -120,7 +131,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 4);
+	ClassDef(MT2Trigger, 6);
 };
 
 // MT2Znunu --------------------------------
@@ -198,6 +209,8 @@ public:
   Int_t    ChMult;
   Int_t    NeuMult;
   Int_t    NConstituents;
+
+  Double_t Scale;      // scale factor from JE correction
   
   Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
   Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
@@ -205,7 +218,7 @@ public:
   Double_t TauDPt;
   Int_t    NTauMatch;
 
-  ClassDef(MT2Jet, 7)
+  ClassDef(MT2Jet, 8)
 };
 
 // MT2Hemi ---------------------------
@@ -366,6 +379,7 @@ public:
   Double_t GetMCT(bool massive=false, int met=1);
   Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=0, double minJPt=20, double maxJEta=2.4,int met=1);
   Double_t GetMaxHemiMass(int hemi_index=0);
+  Double_t PseudoJetPtRatio();
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);

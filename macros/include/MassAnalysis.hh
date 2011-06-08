@@ -105,6 +105,5 @@ private:
         MT2tree* fMT2tree;
         TTree* fATree;
 	
-	int fCounter;
 };
 #endif

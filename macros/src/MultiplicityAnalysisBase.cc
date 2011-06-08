@@ -37,6 +37,8 @@ void MultiplicityAnalysisBase::InitializeEvent(){
 }
 
 void MultiplicityAnalysisBase::GetLeptonJetIndices(){
+	fIsNANObj = false; 
+
 	fElecs.clear();
 	fMuons.clear();
 	fTaus.clear();
@@ -45,6 +47,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 
 	vector<double> mutight;
 	for(int i=0; i< fTR->PfMu3NObjs; ++i){
+		if(std::isnan(fTR->PfMu3Pt[i]))  {fIsNANObj = true; continue;} //protection against objects with NAN-Pt
 		fMuons.push_back(i);
 		mutight.push_back(fTR->PfMu3Pt[i]);
 	}
@@ -52,6 +55,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	
 	vector<double> eltight;
 	for(int i=0; i< fTR->PfEl3NObjs; ++i){
+		if(std::isnan(fTR->PfEl3Pt[i]))  {fIsNANObj = true; continue;} //protection against objects with NAN-Pt
 		fElecs.push_back(i);
 		eltight.push_back(fTR->PfEl3Pt[i]);
 	}
@@ -59,6 +63,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	
 	vector<double> pt1; 
 	for(int ij=0; ij < fTR->PF2PAT3NJets; ++ij){
+		if(std::isnan(fTR->PF2PAT3JPt[ij])){ fIsNANObj = true; continue; } //protection against objects with NAN-Pt
 		if(Jet(ij).Pt() < 20)       continue;  // note: ETH ntuple only stores PF2PAT3Jets > 15 GeV (defualt config)
 		fJets.push_back(ij);                   // fJets has all jets except for duplicates with selected leptons
 		pt1.push_back(Jet(ij).Pt());
@@ -72,6 +77,7 @@ void MultiplicityAnalysisBase::GetLeptonJetIndices(){
 	// !!!!!!!!!
 	vector<double> taus;
 	for(int i=0; i< fTR->PfTau3NObjs; ++i){
+		if(std::isnan(fTR->PfTau3Pt[i])) { fIsNANObj = true; continue;} //protection against objects with NAN-Pt
 		if(fTR->PfTau3Pt[i]   < 20    ) continue; // note: taus go up to 2.5 in Eta
 		fTaus.push_back(i);
 		taus.push_back(fTR->PfTau3Pt[i]);
@@ -118,11 +124,19 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 
 
 bool MultiplicityAnalysisBase::IsSelectedEvent(){
+
 	// goodevt from UserAnalysisBase
 	if(!IsGoodEvent()) {return false;}
+
 	// Run
 	if(fTR->Run < fCut_Run_min ) {return false;}
 	if(fTR->Run > fCut_Run_max ) {return false;}
+
+	// Protection against events with NAN-Pt objects
+	if(fIsNANObj) {
+		cout << "WARNING: Event " << fTR->Event << " Lumi " << fTR->LumiSection << " Run " << fTR->Run << " has NAN-Pt Objects!! Skipping Event" << endl;
+		return false;
+	}
 	
 	//PtHat
 	if(fTR->PtHat > fCut_PtHat_max ){return false;}
@@ -186,7 +200,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	if(fCaloMHT30     < fCut_caloMHT30_min  ) return false;
 	if(fCaloMHT30_ID  < fCut_caloMHT30ID_min) return false;
 
-
 	// leading jets including JID for jets
 	bool leadingjets(true);
 	if(fCut_JPt_hardest_min > 0){
@@ -207,7 +220,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 	}
 	if(leadingjets == false) return false;
 	
-	
 	// DiLeptonInvMass_min DiLeptonInvMass_max
 	if(fLeptConfig==SS_ee || fLeptConfig==OS_ee || fLeptConfig==SS_mumu || fLeptConfig==OS_mumu ||
 	   fLeptConfig==SS_emu || fLeptConfig==OS_emu ){
@@ -225,6 +237,17 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		     << " has HCALSumET " << fTR->HCALSumEt << " njets " << fTR->PF2PAT3NJets << endl;
 	}
 	else    fCrazyHCAL =0;	
+
+	// flag events with Jets with correction factor from JE correction 
+	fNegativeJEC =0; 
+	for( int i=0; i<fTR->PF2PAT3NJets; ++i){
+		if(fTR->PF2PAT3JScale[i]>=0) continue;
+		fNegativeJEC =1;
+	}
+	if(fNegativeJEC) {
+		cout << "WARNING: Event with Jets with negative JEC: Run " << fTR->Run << " LS " << fTR->LumiSection << " Event " << fTR->Event
+		     << " N PFJets " << fTR->PF2PAT3NJets << " NCaloJets " << fTR->CANJets << endl; 
+	}
 
 
 	// ------------------------------------------------------------------------------------------	
@@ -358,6 +381,7 @@ bool MultiplicityAnalysisBase::IsGoodBasicPFJetPAT3(int index, double ptcut, dou
 	if(Jet(index).Pt() < ptcut                  ) return false;
 	if(fabs(fTR->PF2PAT3JEta[index]) > absetacut) return false;
 	if(fTR->PF2PAT3JIDLoose[index]    ==0       ) return false;
+	if(fTR->PF2PAT3JScale[index]     < 0        ) return false;
 	return true;
 }
 

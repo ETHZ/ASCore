@@ -7,7 +7,6 @@ using namespace std;
 
 MassAnalysis::MassAnalysis(TreeReader *tr) : MultiplicityAnalysisBase(tr){
 	Util::SetStyle();	
-	fCounter=0;
 }
 
 MassAnalysis::~MassAnalysis(){
@@ -36,23 +35,33 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_HT300_v2"]            = &fMT2tree->trigger.HLT_HT300_v2;
 		fTriggerMap["HLT_HT300_v3"]            = &fMT2tree->trigger.HLT_HT300_v3;
 		fTriggerMap["HLT_HT300_v4"]            = &fMT2tree->trigger.HLT_HT300_v4;
+		fTriggerMap["HLT_HT300_v5"]            = &fMT2tree->trigger.HLT_HT300_v5;
 		fTriggerMap["HLT_HT350_v2"]            = &fMT2tree->trigger.HLT_HT350_v2;
 		fTriggerMap["HLT_HT350_v3"]            = &fMT2tree->trigger.HLT_HT350_v3;
+		fTriggerMap["HLT_HT350_v4"]            = &fMT2tree->trigger.HLT_HT350_v4;
 		fTriggerMap["HLT_HT360_v2"]            = &fMT2tree->trigger.HLT_HT360_v2;
 		fTriggerMap["HLT_HT400_v2"]            = &fMT2tree->trigger.HLT_HT400_v2;
 		fTriggerMap["HLT_HT400_v3"]            = &fMT2tree->trigger.HLT_HT400_v3;
+		fTriggerMap["HLT_HT400_v4"]            = &fMT2tree->trigger.HLT_HT400_v4;
 		fTriggerMap["HLT_HT440_v2"]            = &fMT2tree->trigger.HLT_HT440_v2;
 		fTriggerMap["HLT_HT450_v2"]            = &fMT2tree->trigger.HLT_HT450_v2;
 		fTriggerMap["HLT_HT450_v3"]            = &fMT2tree->trigger.HLT_HT450_v3;
+		fTriggerMap["HLT_HT450_v4"]            = &fMT2tree->trigger.HLT_HT450_v4;
 		fTriggerMap["HLT_HT500_v2"]            = &fMT2tree->trigger.HLT_HT500_v2;
 		fTriggerMap["HLT_HT500_v3"]            = &fMT2tree->trigger.HLT_HT500_v3;
+		fTriggerMap["HLT_HT500_v4"]            = &fMT2tree->trigger.HLT_HT500_v4;
 		fTriggerMap["HLT_HT550_v2"]            = &fMT2tree->trigger.HLT_HT550_v2;
 		fTriggerMap["HLT_HT550_v3"]            = &fMT2tree->trigger.HLT_HT550_v3;
+		fTriggerMap["HLT_HT550_v4"]            = &fMT2tree->trigger.HLT_HT550_v4;
+		fTriggerMap["HLT_HT550_v5"]            = &fMT2tree->trigger.HLT_HT550_v5;
 		// MHT_HT
 		fTriggerMap["HLT_HT250_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v2;
 		fTriggerMap["HLT_HT250_MHT60_v3"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v3;
+		fTriggerMap["HLT_HT250_MHT60_v4"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v4;
+		fTriggerMap["HLT_HT250_MHT70_v1"]      = &fMT2tree->trigger.HLT_HT250_MHT70_v1;
 		fTriggerMap["HLT_HT260_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT260_MHT60_v2;
 		fTriggerMap["HLT_HT300_MHT75_v4"]      = &fMT2tree->trigger.HLT_HT300_MHT75_v4;
+		fTriggerMap["HLT_HT300_MHT75_v5"]      = &fMT2tree->trigger.HLT_HT300_MHT75_v5;
 		// QuadJet
 		fTriggerMap["HLT_QuadJet50_BTagIP_v1"] = &fMT2tree->trigger.HLT_QuadJet50_BTagIP_v1;
 		fTriggerMap["HLT_QuadJet50_Jet40_v1"]  = &fMT2tree->trigger.HLT_QuadJet50_Jet40_v1;
@@ -65,6 +74,7 @@ void MassAnalysis::Begin(const char* filename){
 }
 
 void MassAnalysis::Analyze(){	
+
 	// ---------------------------------------------------
 	// Initialize fElecs, fJetsLoose, fBJets, fMuons, fLeptConfig 
 	InitializeEvent();
@@ -159,6 +169,7 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].ChMult         = fTR->PF2PAT3JChMult        [fJetTaus.index[i]];
 			fMT2tree->jet[i].NeuMult        = fTR->PF2PAT3JNeuMult       [fJetTaus.index[i]];
 			fMT2tree->jet[i].NConstituents  = fTR->PF2PAT3JNConstituents [fJetTaus.index[i]];
+			fMT2tree->jet[i].Scale          = fTR->PF2PAT3JScale         [fJetTaus.index[i]];
 			fMT2tree->jet[i].isTau          = false;
 		}else { // this is obsolete starting from ntuple V02-01-01 as taus are included in jets
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PfTau3Px[fJetTaus.index[i]],fTR->PfTau3Py[fJetTaus.index[i]],fTR->PfTau3Pz[fJetTaus.index[i]],fTR->PfTau3E[fJetTaus.index[i]]);
@@ -358,6 +369,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.LeptConfig          = (int) fLeptConfig;
 	fMT2tree->misc.HBHENoiseFlag	   = fTR->HBHENoiseFlag;
 	fMT2tree->misc.CrazyHCAL           = fCrazyHCAL;
+	fMT2tree->misc.NegativeJEC         = fNegativeJEC;
 	fMT2tree->misc.HT                  = fHT;
 	fMT2tree->misc.PFMETsign	   = (MET().Pt())/sqrt(fTR->SumEt);
 	
@@ -692,15 +704,20 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	hemiobject.alphaT  =-999.99;
 	hemiobject.dPhi    =-999.99;
 
-	// protection against crazy HCAL events
-	if(fCrazyHCAL) return;
+	// protection against crazy HCAL events 
+	if(fCrazyHCAL ) return;
 
 	// make pseudojets with hemispheres
 	vector<float> px, py, pz, E;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
 			if(PFJID==1 && !IsGoodBasicPFJetPAT3(fJetTaus.index[i], 20, 2.4)                             )  continue;
-			else if(fabs(Jet(fJetTaus.index[i]).Eta())>2.4 || Jet(fJetTaus.index[i]).Pt()< 20            ) continue;
+			else if(fabs(Jet(fJetTaus.index[i]).Eta())>2.4 || Jet(fJetTaus.index[i]).Pt()< 20            )  continue;
+			if(fTR->PF2PAT3JScale[fJetTaus.index[i]] <0){
+				cout << "WARNING: MT2 calculation failed: selected Jet with negative JEC: Run " << fTR->Run<< " Lumi: " << fTR->LumiSection << " Event " << fTR->Event 
+			 	     <<": accoc: " << hemi_assoc << " seed " << hemi_seed << " PFJID " << PFJID << endl;
+				return;
+			}
 			px.push_back(Jet(fJetTaus.index[i]).Px());
 			py.push_back(Jet(fJetTaus.index[i]).Py());
 			pz.push_back(Jet(fJetTaus.index[i]).Pz());
@@ -772,7 +789,7 @@ void MassAnalysis::GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, 
 	delete hemi;
 	if(pseudojet1.Pt()==0 || pseudojet2.Pt()==0 ){
 		cout << "++ WARNING : hemi seed " <<  hemi_seed  << " hemi assoc " << hemi_assoc << " n input " << grouping.size() << " n objets in hemi " << counter 
-		     << " pseudojet1 pt " << pseudojet1.Pt() << " pseudojet2 pt " << pseudojet2.Pt() << endl;
+		     << " pseudojet1 pt " << pseudojet1.Pt() << " pseudojet2 pt " << pseudojet2.Pt() << " Event " << fTR->Event  << " Run " << fTR->Run << endl;
 		return;
 	}
 
@@ -827,14 +844,18 @@ void MassAnalysis::GetMT2Variables(bool minimizeDHT,  double minJPt, double maxJ
 	hemiobject.assoc   = -1;
 	hemiobject.seed    = -1;
 
-	// protection against crazy HCAL events
-	if(fCrazyHCAL) return;
+	// protection against crazy HCAL events 
+	if(fCrazyHCAL ) return;
 
 	// make pseudojets with hemispheres
 	vector<TLorentzVector> p4s;
 	for(int i=0; i<fJetTaus.NObjs; ++i){
 		if(!fJetTaus.isTau[i]){
 			if(fabs(Jet(fJetTaus.index[i]).Eta())>2.4 || Jet(fJetTaus.index[i]).Pt() < minJPt) continue;
+			if(fTR->PF2PAT3JScale[fJetTaus.index[i]] <0){
+				cout << "WARNING: MT2 minimizeDHT calculation failed: selected Jet with negative JEC: Run " << fTR->Run<< " Lumi: " << fTR->LumiSection << " Event " << fTR->Event <<endl;
+				return;
+			}
 			p4s.push_back(Jet(fJetTaus.index[i]));
 			fHemiObject.type="jet"; fHemiObject.index=i; fHemiObject.hemi=-1;
 			hemiobject.objects.push_back(fHemiObject);

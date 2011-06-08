@@ -22,6 +22,7 @@ MT2Misc::~MT2Misc(){
 void MT2Misc::Reset() {
   HBHENoiseFlag           =  0;
   CrazyHCAL               =  0;
+  NegativeJEC             =  0;
   isData                  =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
@@ -97,23 +98,33 @@ void MT2Trigger::Reset(){
 	HLT_HT300_v2            = false;
 	HLT_HT300_v3            = false;
 	HLT_HT300_v4            = false;
+	HLT_HT300_v5            = false;
 	HLT_HT350_v2            = false;
 	HLT_HT350_v3            = false;
+	HLT_HT350_v4            = false;
 	HLT_HT360_v2            = false;
 	HLT_HT400_v2            = false;
 	HLT_HT400_v3            = false;
+	HLT_HT400_v4            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
 	HLT_HT450_v3            = false;
+	HLT_HT450_v4            = false;
 	HLT_HT500_v2            = false;
 	HLT_HT500_v3            = false;
+	HLT_HT500_v4            = false;
 	HLT_HT550_v2            = false;
 	HLT_HT550_v3            = false;
+	HLT_HT550_v4            = false;
+	HLT_HT550_v5            = false;
 	// HT_MHT
 	HLT_HT250_MHT60_v2      = false;
 	HLT_HT250_MHT60_v3      = false;
+	HLT_HT250_MHT60_v4      = false;
+	HLT_HT250_MHT70_v1      = false;
 	HLT_HT260_MHT60_v2      = false;
 	HLT_HT300_MHT75_v4      = false;
+	HLT_HT300_MHT75_v5      = false;
 	// QuadJet
 	HLT_QuadJet50_BTagIP_v1 = false;
 	HLT_QuadJet50_Jet40_v1  = false;
@@ -196,6 +207,8 @@ void MT2Jet::Reset() {
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1;
+
+  Scale         = -99999.99; // correction factor
   
   isTau         = 0;  // starting from ntuple V02-01-01: this has to be 0! 
   isTauMatch    = 0;  // tell you if the jet is matched to a tau.
@@ -214,6 +227,7 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   double eta = lv.Eta();
   if ( pt < minJPt || fabs(eta) > maxJEta )     return false;
   if ( isTau )                                  return true;  // for now every tau passes the "ID".
+  if (Scale <0 )                                return false; // jet has negative Scale from JE correction
   
   switch (PFJID) {
   case 3:               // TIGHT
@@ -449,10 +463,10 @@ Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met
 
 Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
 	int njets=0;
-		for(int i=0; i<NJets; ++i){
-			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta && 
-			   jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
-		}
+	for(int i=0; i<NJets; ++i){
+		if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta && 
+		   jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
+	}
 	return true;
 }
 
@@ -1442,6 +1456,11 @@ Int_t MT2tree::WDecayMode(){
 		if( abs(genlept[i].ID)==15 && abs(genlept[i].MID)==24 )                               {result = result | 12;} // stable tau
 	}
 	return result;
+}
+
+Double_t MT2tree::PseudoJetPtRatio(){
+	if(hemi[1].lv1.Pt() > hemi[1].lv2.Pt()) return hemi[1].lv2.Pt()/hemi[1].lv1.Pt();
+	else return hemi[1].lv1.Pt()/hemi[1].lv2.Pt();
 }
 
 ClassImp(MT2Misc)
