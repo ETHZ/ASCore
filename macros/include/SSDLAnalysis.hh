@@ -36,12 +36,17 @@ public:
 	void End();
 	
 	void ReadTriggers(const char* = "HLTPaths_SSDL.dat");
-	void BookTriggers(vector<string>);
-	bool FillTriggers(vector<string>); // returns OR of list of triggers
+	void BookTriggers();
+	bool FillTriggers(); // returns OR of list of triggers
 	void BookTree();
 	void ResetTree();
 	
 	const bool AddBranch(const char* name, const char* type, void* address, const char* size = 0);
+
+	struct HLTPathSet{
+		TString name;
+		vector<string> paths;
+	};
 
 private:
 	Monitor fCounter;
@@ -63,7 +68,7 @@ private:
 	int   fTLumiSection;
 
 	// triggers
-	int fNHLTPaths;
+	vector<HLTPathSet> fHLTPathSets;
 	vector<string> fHLTPaths;
 	vector<int>    fHLTResults;
 	vector<int>    fHLTPrescales;	

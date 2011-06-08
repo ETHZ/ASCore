@@ -50,58 +50,74 @@ void SSDLAnalysis::ReadTriggers(const char* triggerfile){
 	// Read in a bunch of HLT paths to be stored in the mini tree
 	ifstream IN(triggerfile);
 	char buffer[200];
-	char ParName[100];
 	char StringValue[100];
 	bool ok(false);
 	
+	
 	while( IN.getline(buffer, 200, '\n') ){
-		ok = false;
-		if (buffer[0] == '#') {continue;} // Skip lines commented with '#'
+		// ok = false;
+		if (buffer[0] == '#') continue; // Skip lines commented with '#'
+		if( !strcmp(buffer, "PATHSET")){
+			HLTPathSet ps;
 
-		// strings
-		sscanf(buffer, "%s %s", ParName, StringValue);
-		if( !strcmp(ParName, "HLT") ){
-			fHLTPaths.push_back(StringValue); ok = true;
+			IN.getline(buffer, 200, '\n');
+			sscanf(buffer, "Name\t%s", StringValue);
+			ps.name = TString(StringValue);
+			while( IN.getline(buffer, 200, '\n') && IN.gcount() > 1 && buffer[0] != '#' ){
+				// End declaration of paths of a set with either an empty line or a comment
+				sscanf(buffer, "Path\t%s", StringValue);
+				ps.paths.push_back(string(StringValue));
+			}
+			fHLTPathSets.push_back(ps);
+			ok = true;
 		}
 
-		if(!ok) cout << "%% SSDLAnalysis::ReadTriggers ==> ERROR: Unknown variable " << ParName << endl;
+		if(!ok) cout << "%% SSDLAnalysis::ReadTriggers ==> ERROR: Reading failed!" << endl;
 	}
 	if(fVerbose > 0){
-		cout << "Adding Trigger paths:" << endl;
-		for(size_t i = 0; i < fHLTPaths.size(); ++i){
-			cout << " " << fHLTPaths[i] << endl;
+		cout << "Adding Trigger path sets:" << endl;
+		for(size_t i = 0; i < fHLTPathSets.size(); ++i){
+			HLTPathSet ps = fHLTPathSets[i];
+			cout << " " << ps.name << endl;
+			for(size_t j = 0; j < ps.paths.size(); ++j){
+				cout << "   > " << ps.paths[j] << endl;
+			}
 		}
 		cout << "--------------" << endl;
 	}
-	fNHLTPaths = fHLTPaths.size();
-	fHLTResults.resize(fNHLTPaths);
-	fHLTPrescales.resize(fNHLTPaths);
+
+	fHLTResults.resize(fHLTPathSets.size());
+	fHLTPrescales.resize(fHLTPathSets.size());
 }
 
-void SSDLAnalysis::BookTriggers(vector<string> triggers){
-	for(size_t i = 0; i < triggers.size(); ++i){
-		string prescalename(triggers[i] + "_PS");
-		if(AddBranch(triggers[i].c_str(),  "I", &fHLTResults[i])   == false ) exit(-1);
-		if(AddBranch(prescalename.c_str(), "I", &fHLTPrescales[i]) == false ) exit(-1);
+void SSDLAnalysis::BookTriggers(){
+	for(int i = 0; i < fHLTPathSets.size(); i++){
+		HLTPathSet ps = fHLTPathSets[i];
+		TString prescalename = ps.name + "_PS";
+		if(AddBranch(ps.name.Data(),      "I", &fHLTResults[i])   == false ) exit(-1);
+		if(AddBranch(prescalename.Data(), "I", &fHLTPrescales[i]) == false ) exit(-1);
 	}
 }
 
-bool SSDLAnalysis::FillTriggers(vector<string> triggers){
+bool SSDLAnalysis::FillTriggers(){
 	// Returns OR of trigger results, i.e. true if ANY of them passed
 	bool accept = false;
-	if(triggers.size() == 0 ) return false;
-	for( int i = 0; i < triggers.size(); ++i ){
-		if(GetHLTBit(triggers[i]) == -1){
-			// Bit not found
+	if(fHLTPathSets.size() == 0 ) return false;
+
+	for(int i = 0; i < fHLTPathSets.size(); i++){ // loop over path sets
+		HLTPathSet ps = fHLTPathSets[i];
+
+		for(size_t j = 0; j < ps.paths.size(); ++j){ // loop over paths
 			fHLTResults[i]   = -1;
 			fHLTPrescales[i] = -1;
-			continue;
-		} else{
-			// Bit found
-			bool triggered   = GetHLTResult(triggers[i]);
+			string path = ps.paths[j];
+
+			if(GetHLTBit(path) == -1) continue; // Bit not found
+			bool triggered   = GetHLTResult(path);
 			fHLTResults[i]   = triggered ? 1:0;
-			fHLTPrescales[i] = GetHLTPrescale(triggers[i]);
+			fHLTPrescales[i] = GetHLTPrescale(path);
 			accept = accept || triggered;
+			break; // break loop after the bit is found
 		}
 	}
 	return accept;
@@ -135,7 +151,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("LumiSec",          &fTLumiSection,       "LumiSec/I");
 
 	// HLT triggers
-	BookTriggers(fHLTPaths);
+	BookTriggers();
 	
 	// event properties
 	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
@@ -206,7 +222,7 @@ void SSDLAnalysis::Analyze(){
 	
 	// Trigger selection
 	// if(fIsData && FillTriggers(fHLTPaths) == false) return;
-	FillTriggers(fHLTPaths);
+	FillTriggers();
 	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
@@ -347,7 +363,7 @@ void SSDLAnalysis::ResetTree(){
 	fTEventNumber                = 0;
 	fTLumiSection                = 0;
 
-	for(size_t i = 0; i < fNHLTPaths; ++i){
+	for(size_t i = 0; i < fHLTPathSets.size(); ++i){
 		fHLTResults[i]   -2;
 		fHLTPrescales[i] -2;
 	}
