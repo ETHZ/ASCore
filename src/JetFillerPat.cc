@@ -105,6 +105,7 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTarea[ijet]  = Jit->jetArea();
       
       fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
+      fTL1FastJetScale[ijet] = Jit->jecFactor("L1FastJet")/Jit->jecFactor("Uncorrected"); 
 
       // B-tagging probability (for 4 b-taggings)
       fTjbTagProbTkCntHighEff [ijet] = Jit->bDiscriminator("trackCountingHighEffBJetTags"        );

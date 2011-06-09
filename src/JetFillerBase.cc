@@ -43,6 +43,7 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
   fTeta                    = new double[gMaxnobjs];
   fTphi                    = new double[gMaxnobjs];
   fTscale                  = new double[gMaxnobjs];
+  fTL1FastJetScale         = new double[gMaxnobjs];
   fTarea                   = new double[gMaxnobjs];
   fTjbTagProbTkCntHighEff  = new double[gMaxnobjs];
   fTjbTagProbTkCntHighPur  = new double[gMaxnobjs];
@@ -92,6 +93,7 @@ JetFillerBase::~JetFillerBase(void) {
   delete [] fTarea;
   delete [] fTphi;
   delete [] fTscale;
+  delete [] fTL1FastJetScale;
   delete [] fTjbTagProbTkCntHighEff ;
   delete [] fTjbTagProbTkCntHighPur ;
   delete [] fTjbTagProbSimpSVHighEff;
@@ -139,6 +141,7 @@ void JetFillerBase::createBranches(void) {
   addBranch("JEta",   "D", fTeta,  "NJets" );
   addBranch("JPhi",   "D", fTphi,  "NJets" );
   addBranch("JScale", "D", fTscale,"NJets" );
+  addBranch("JL1FastJetScale", "D", fTL1FastJetScale,"NJets" );
   addBranch("JArea",  "D", fTarea, "NJets" );
   addBranch("JbTagProbTkCntHighEff" , "D", fTjbTagProbTkCntHighEff , "NJets" );
   addBranch("JbTagProbTkCntHighPur" , "D", fTjbTagProbTkCntHighPur , "NJets" );
