@@ -184,7 +184,7 @@ public:
         void plotSig(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", TString xtitle="MT2 [GeV]", 
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
 	void PrintCutFlow(int njets=-2, int nleps=0, TString trigger="");
-        void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
+        void FillMonitor(Monitor *count, TString sname, TString type, TString cut, double weight);
 	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
 	void PrintWEfficiency(int sample_index ,TString process, std::string lept, Long64_t nevents, bool includeTaus);
         void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 

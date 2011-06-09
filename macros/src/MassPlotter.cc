@@ -778,7 +778,7 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
 
 //________________________________________________________________________
 
-void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight){
+void MassPlotter::FillMonitor(Monitor *count, TString sname, TString type, TString cut, double weight){
   if     (sname == "QCD"    ) 	count[ 0].fill(cut.Data(),weight);
   else if(sname == "Wtolnu" ) 	count[ 1].fill(cut.Data(),weight);
   else if(sname == "DY"     ) 	count[ 2].fill(cut.Data(),weight);
