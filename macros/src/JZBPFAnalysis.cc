@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.8 $";
+string sjzbPFversion="$Revision: 1.9 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.9  2011/06/09 15:49:41  buchmann
+Fixed a bug causing Full Cleaning to lead to a segfault
+
 Revision 1.8  2011/06/09 12:45:35  buchmann
 Now also handling events that contain PF leptons but no RECO leptons
 
@@ -446,7 +449,6 @@ cout << endl << endl;
   //fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
   fHistFile=f;	
   rand_ = new TRandom();
-cout << "This is point 0 " << endl;
   TH1::AddDirectory(kFALSE);
 
   // Define the histograms
@@ -1167,7 +1169,6 @@ void JZBPFAnalysis::Analyze() {
     TLorentzVector recoil(0,0,0,0); // different constructions of recoil model (under dev, need cleaning)    
     npfEvent.jetNum=0;        // total jet counting
     npfEvent.goodJetNum=0;    // Jets passing tighter pt cut
-cout << "Point A" << endl;
     for(int i =0 ; i<fTR->NJets;i++) // CALO jet loop
       {
         counters[JE].fill("All Calo jets");
@@ -1188,7 +1189,7 @@ cout << "Point A" << endl;
         counters[JE].fill("... pass jet ID");
 	
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
-/*
+
         // lepton-jet cleaning
         if ( fFullCleaning_ ) { 
           // Remove jet close to any lepton
@@ -1204,11 +1205,10 @@ cout << "Point A" << endl;
           if(aJet.DeltaR(sortedGoodPFLeptons[0][PfPosLepton1[0]].p)<DRmax)continue;
           counters[JE].fill("... pass lepton 2 veto");
         }
-	*/
+	
         // Acceptance cuts before we use this jet
         if ( !(fabs(jeta)<2.6 && jpt>20.) ) continue;
         counters[JE].fill("... |eta|<2.6 && pt>20.");
-	cout << "Point B" << endl;
         recoil+=aJet;
 	
 	npfEvent.jetpt[npfEvent.jetNum]  = aJet.Pt();
@@ -1223,11 +1223,9 @@ cout << "Point A" << endl;
           counters[JE].fill("... pt>30");
           npfEvent.goodJetNum++;
         }
-	cout << "Point C" << endl;
 	
       }
     
-    	cout << "Point D" << endl;
 
     // --- construct met vectors here
     float caloMETpx = fTR->RawMETpx;
