@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.2 $";
+string sjzbPFversion="$Revision: 1.3 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.3  2011/06/09 07:46:47  buchmann
+Adapted cuts and added counters for PF
+
 Revision 1.2  2011/06/08 16:18:13  buchmann
 Merged the two JZBs such that only one file is produced
 
@@ -1296,6 +1299,7 @@ void JZBPFAnalysis::Analyze() {
     for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	if(dopf[ipf]) npfEvent.pfjzb[ipf]=AllpfNoCutsJetVector[ipf].Pt() - (PFs1[ipf]+PFs2[ipf]).Pt();
 	else npfEvent.pfjzb[ipf]=-99999.9;
+    }
     
     //these do require RECO
     if(doreco) {
@@ -1475,7 +1479,6 @@ void JZBPFAnalysis::Analyze() {
     }
     mypfTree->Fill();
     }
-  }
 }
 
 void JZBPFAnalysis::End(TFile *f){
