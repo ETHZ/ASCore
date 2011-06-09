@@ -60,14 +60,27 @@ struct eqstr
 
 class Monitor {
 
-  typedef std::map<const std::string, float, eqstr> Cmap;
+  //typedef std::map<const std::string, float, eqstr> Cmap;
+  typedef std::map<const std::string, double, eqstr> Cmap;
 
 public:
   Monitor() : maxLength(50),name("") {}
 
   void setName( const std::string& s ) { name = s; }
 
+  /*
   void fill( const std::string& counter, const float& weight=1. ) {
+    Cmap::iterator it;
+    if ( ( it = counters.find(counter)) == counters.end() ) {
+      countNames.push_back( counter ); // Store name in ordered list
+      if ( counter.length()>maxLength ) maxLength = counter.length();
+      counters.insert( make_pair(counter,weight) ); // Increment counter
+    } else {
+      (*it).second += weight;
+    }
+  }
+  */
+  void fill( const std::string& counter, const double& weight=1. ) {
     Cmap::iterator it;
     if ( ( it = counters.find(counter)) == counters.end() ) {
       countNames.push_back( counter ); // Store name in ordered list
