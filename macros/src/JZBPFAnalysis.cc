@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.6 $";
+string sjzbPFversion="$Revision: 1.7 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.7  2011/06/09 12:17:36  buchmann
+Adapted the getRecoElIndex and getRecoMuIndex methods to return the best candidate (it previously returned -1 if no candidate was found within 0.05, leading to a possible problem)
+
 Revision 1.6  2011/06/09 10:44:58  pablom
 
 Only the information of reco leptons matched to pf leptons is stored.
@@ -865,9 +868,13 @@ void JZBPFAnalysis::Analyze() {
       if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMuPx[muIndex],fTR->PfMuPy[muIndex],fTR->PfMuPz[muIndex],fTR->PfMuE[muIndex]);
 	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
-          TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
-          int tmpCharge = fTR->PfMuCharge[muIndex];
-          int recotmpCharge = fTR->MuCharge[recoIndex];
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
+		recotmpCharge = fTR->MuCharge[recoIndex];
+	  }
+	  int tmpCharge = fTR->PfMu3Charge[muIndex];
 	
           PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
@@ -898,10 +905,14 @@ void JZBPFAnalysis::Analyze() {
       if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMu2Px[muIndex],fTR->PfMu2Py[muIndex],fTR->PfMu2Pz[muIndex],fTR->PfMu2E[muIndex]);
 	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
-	  TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
-	  int tmpCharge = fTR->PfMu2Charge[muIndex];
-	  int recotmpCharge = fTR->MuCharge[recoIndex];
-	  
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
+		recotmpCharge = fTR->MuCharge[recoIndex];
+	  }
+	  int tmpCharge = fTR->PfMu3Charge[muIndex];
+
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
 	  tmpLepton.recop = recotmpVector;
@@ -923,9 +934,13 @@ void JZBPFAnalysis::Analyze() {
           counters[MU].fill("... pass pf mu selection");
 	  TLorentzVector tmpVector(fTR->PfMu3Px[muIndex],fTR->PfMu3Py[muIndex],fTR->PfMu3Pz[muIndex],fTR->PfMu3E[muIndex]);
 	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
-	  TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
+		recotmpCharge = fTR->MuCharge[recoIndex];
+	  }
 	  int tmpCharge = fTR->PfMu3Charge[muIndex];
-	  int recotmpCharge = fTR->MuCharge[recoIndex];
 
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
@@ -939,6 +954,7 @@ void JZBPFAnalysis::Analyze() {
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
+
 
   // #-- PF electron loop -- type 1
   for(int elIndex=0;elIndex<fTR->PfElNObjs;elIndex++)
@@ -954,9 +970,13 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.pfLeptonNum++;
 	  TLorentzVector tmpVector(fTR->PfElPx[elIndex],fTR->PfElPy[elIndex],fTR->PfElPz[elIndex],fTR->PfElE[elIndex]);
 	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
-	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+		recotmpCharge = fTR->ElCharge[recoIndex];
+	  }
 	  int tmpCharge = fTR->PfMu3Charge[elIndex];
-	  int recotmpCharge = fTR->MuCharge[recoIndex];
 
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
@@ -978,9 +998,13 @@ void JZBPFAnalysis::Analyze() {
       if(IsCustomPfEl(elIndex)) {
 	  TLorentzVector tmpVector(fTR->PfEl2Px[elIndex],fTR->PfEl2Py[elIndex],fTR->PfEl2Pz[elIndex],fTR->PfEl2E[elIndex]);
 	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
-	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
-	  int tmpCharge = fTR->PfMu3Charge[elIndex];
-	  int recotmpCharge = fTR->MuCharge[recoIndex];
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+		recotmpCharge = fTR->ElCharge[recoIndex];
+	  }
+	  int tmpCharge = fTR->PfEl3Charge[elIndex];
 	 
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
@@ -1002,10 +1026,15 @@ void JZBPFAnalysis::Analyze() {
           counters[EL].fill("... pass pf e selection");
 	  TLorentzVector tmpVector(fTR->PfEl3Px[elIndex],fTR->PfEl3Py[elIndex],fTR->PfEl3Pz[elIndex],fTR->PfEl3E[elIndex]);
 	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
-	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
-	  int tmpCharge = fTR->PfMu3Charge[elIndex];
-	  int recotmpCharge = fTR->MuCharge[recoIndex];
 	
+	  TLorentzVector recotmpVector(0,0,0,0);
+	  int recotmpCharge = 0;
+	  if(recoIndex>-1) {
+		recotmpVector = (fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+		recotmpCharge = fTR->ElCharge[recoIndex];
+	  }
+	  int tmpCharge = fTR->PfEl3Charge[elIndex];
+
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
 	  tmpLepton.recop = recotmpVector;
@@ -1713,7 +1742,7 @@ const bool JZBPFAnalysis::IsCustomPfEl(const int index){
 
 //Get the index of the reco muon in the reco collection
 int JZBPFAnalysis::getRecoMuIndex(TLorentzVector tmpPfVector) {
-  int retval = 0;
+  int retval = -1;
   int muIndex = 0;
   float lastDeltaR=150.0;
   for(muIndex=0;muIndex<fTR->NMus;muIndex++) {
@@ -1733,7 +1762,7 @@ int JZBPFAnalysis::getRecoMuIndex(TLorentzVector tmpPfVector) {
 
 //Get the index of the reco electron in the reco collection
 int JZBPFAnalysis::getRecoElIndex(TLorentzVector tmpPfVector) {
-  int retval = 0;
+  int retval = -1;
   int elIndex = 0;
   float lastDeltaR=150.0;
   for(elIndex=0;elIndex<fTR->NEles;elIndex++) {
