@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.7 $";
+string sjzbPFversion="$Revision: 1.8 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.8  2011/06/09 12:45:35  buchmann
+Now also handling events that contain PF leptons but no RECO leptons
+
 Revision 1.7  2011/06/09 12:17:36  buchmann
 Adapted the getRecoElIndex and getRecoMuIndex methods to return the best candidate (it previously returned -1 if no candidate was found within 0.05, leading to a possible problem)
 
@@ -443,7 +446,7 @@ cout << endl << endl;
   //fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
   fHistFile=f;	
   rand_ = new TRandom();
-
+cout << "This is point 0 " << endl;
   TH1::AddDirectory(kFALSE);
 
   // Define the histograms
@@ -739,6 +742,7 @@ const bool JZBPFAnalysis::passEMuTriggers() {
 
 //______________________________________________________________________________
 void JZBPFAnalysis::Analyze() {
+
   // #--- analysis global parameters
   double DRmax=0.4; // veto jets in a cone of DRmax close to the lepton
 
@@ -1163,6 +1167,7 @@ void JZBPFAnalysis::Analyze() {
     TLorentzVector recoil(0,0,0,0); // different constructions of recoil model (under dev, need cleaning)    
     npfEvent.jetNum=0;        // total jet counting
     npfEvent.goodJetNum=0;    // Jets passing tighter pt cut
+cout << "Point A" << endl;
     for(int i =0 ; i<fTR->NJets;i++) // CALO jet loop
       {
         counters[JE].fill("All Calo jets");
@@ -1183,7 +1188,7 @@ void JZBPFAnalysis::Analyze() {
         counters[JE].fill("... pass jet ID");
 	
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
-
+/*
         // lepton-jet cleaning
         if ( fFullCleaning_ ) { 
           // Remove jet close to any lepton
@@ -1199,11 +1204,11 @@ void JZBPFAnalysis::Analyze() {
           if(aJet.DeltaR(sortedGoodPFLeptons[0][PfPosLepton1[0]].p)<DRmax)continue;
           counters[JE].fill("... pass lepton 2 veto");
         }
-	
+	*/
         // Acceptance cuts before we use this jet
         if ( !(fabs(jeta)<2.6 && jpt>20.) ) continue;
         counters[JE].fill("... |eta|<2.6 && pt>20.");
-	
+	cout << "Point B" << endl;
         recoil+=aJet;
 	
 	npfEvent.jetpt[npfEvent.jetNum]  = aJet.Pt();
@@ -1218,10 +1223,12 @@ void JZBPFAnalysis::Analyze() {
           counters[JE].fill("... pt>30");
           npfEvent.goodJetNum++;
         }
+	cout << "Point C" << endl;
 	
       }
     
-    
+    	cout << "Point D" << endl;
+
     // --- construct met vectors here
     float caloMETpx = fTR->RawMETpx;
     float caloMETpy = fTR->RawMETpy;
@@ -1259,7 +1266,7 @@ void JZBPFAnalysis::Analyze() {
         if ( fFullCleaning_ ) { 
           // Remove jet close to any lepton
           bool isClean(true);
-          for ( size_t ilep = 0; ilep<sortedGoodPFLeptons.size(); ++ilep )
+          for ( size_t ilep = 0; ilep<sortedGoodPFLeptons[0].size(); ++ilep )
             if ( aJet.DeltaR(sortedGoodPFLeptons[0][ilep].p)<DRmax) isClean=false;
           if ( !isClean ) continue;
           counters[PJ].fill("... pass full lepton cleaning");
