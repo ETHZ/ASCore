@@ -50,9 +50,10 @@ public:
 	enum gSample {
 		sample_begin,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
-		MuHad1, MuHad2, EleHad1, EleHad2,
+		// MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJetsSync,
-		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, WW, WZ, ZZ, GJets40, GJets100, GJets200,
+		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50,
+		GJets40, GJets100, GJets200, GVJets, WW, WZ, ZZ, VVTo4L,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD5,
@@ -205,8 +206,16 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
-	struct Sample{
+	static const int gNHWWSels = 3;
+	static TString gHWWSelNames[gNHWWSels];
+	static const int gNKinSels = 3;
+	static TString gKinSelNames[gNKinSels];
+	static TString gEMULabel[2];
+
+	class Sample{
+	public:
 		Sample(){};
+		
 		TString name;
 		TString sname;
 		TFile *file;
@@ -216,8 +225,8 @@ public:
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
 		Region region[gNREGIONS];
 		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
-		KinPlots    kinplots[3]; // tt and ll and signal
-		HWWPlots    hwwplots[3]; // 0: no event sel, 1: N-1 sel
+		KinPlots    kinplots[gNKinSels]; // tt and ll and signal
+		HWWPlots    hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
 		IsoPlots    isoplots[2]; // e and mu
 		FRatioPlots ratioplots[2]; // e and mu
 	};
@@ -249,11 +258,8 @@ public:
 
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
-	void fillMuIsoHistos(gSample);
-	void fillElIsoHistos(gSample);
 	
 	void makeNT2KinPlots();
-	void fillKinematicHistos(gSample);
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
@@ -313,11 +319,6 @@ public:
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
-	void fillYields(Sample*);
-	void fillOSYields(Sample*);
-	void fillRatioPlots(Sample*);
-	void fillHWWHistos(Sample*);
-	
 	void initCounters(gSample);
 	void storeNumbers(Sample*, gChannel);
 	void printCutFlows(TString);
@@ -328,9 +329,21 @@ public:
 	void printYieldsShort(float = -1);
 
 	//////////////////////////////
+	// Fillers
+	void fillYields(Sample*);
+	void fillOSYields(Sample*);
+	void fillRatioPlots(Sample*);
+	void fillHWWPlots(Sample*);
+
+	void fillMuIsoPlots(gSample);
+	void fillElIsoPlots(gSample);
+	void fillKinPlots(gSample);
+	
+	//////////////////////////////
 	// I/O
-	void bookHistos();
-	void writeHistos();
+	void bookHistos(Sample*);
+	void deleteHistos(Sample*);
+	void writeHistos(Sample*, TFile*);
 	int readHistos(TString);
 	
 	void bookRatioHistos();
@@ -341,8 +354,8 @@ public:
 	int elIndexToBin(int);
 	TString muBinToLabel(int);
 	TString elBinToLabel(int);
-	void labelMuOriginAxis(TAxis *);
-	void labelElOriginAxis(TAxis *);
+	void labelOriginAxis(TAxis*, gChannel);
+	void label2OriginAxes(TAxis*, TAxis*, gChannel);
 	
 	void printOrigins();
 	void printMuOriginTable();
@@ -502,8 +515,10 @@ private:
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 
+	vector<Sample*>::iterator fS;
 	vector<Sample*> fSamples;
-	map<TString, int> fSampleMap;	// Mapping of sample number to name
+	vector<Sample*> fMCSamples;
+	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
 	
 	TFile *fStorageFile;
 	TString fOutputFileName;
