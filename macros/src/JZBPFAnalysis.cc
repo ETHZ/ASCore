@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.4 $";
+string sjzbPFversion="$Revision: 1.5 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.5  2011/06/09 08:54:26  buchmann
+Translated more abstract variables to PF as well
+
 Revision 1.4  2011/06/09 07:52:40  buchmann
 paranthesis fixed
 
@@ -783,7 +786,7 @@ void JZBPFAnalysis::Analyze() {
   
   // Good event requirement: essentially vertex requirements
   if ( !IsGoodEvent() ) {
-    mypfTree->Fill();
+    if( isMC ) mypfTree->Fill();
     return;
   }
   counters[EV].fill("... pass good event requirements");
@@ -801,7 +804,7 @@ void JZBPFAnalysis::Analyze() {
 //--------------------------   STEP 1 : RECO LEPTONS
 
   // #--- muon loop
-  for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
+  /*  for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
     {
       counters[MU].fill("All mus");
       if(IsCustomMu(muIndex))
@@ -848,6 +851,7 @@ void JZBPFAnalysis::Analyze() {
 	  leptons.push_back(tmpLepton);
 	}
     }
+   */
 
 //--------------------------   STEP 2 : PF LEPTONS
 
@@ -856,11 +860,18 @@ void JZBPFAnalysis::Analyze() {
     {
       if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMuPx[muIndex],fTR->PfMuPy[muIndex],fTR->PfMuPz[muIndex],fTR->PfMuE[muIndex]);
-	  int tmpCharge = fTR->PfMuCharge[muIndex];
-	  PFlepton tmpLepton;
+	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
+          TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
+          int tmpCharge = fTR->PfMuCharge[muIndex];
+          int recotmpCharge = fTR->MuCharge[recoIndex];
+	
+          PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+          tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = muIndex;
+	  tmpLepton.recoindex = recoIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[1].push_back(tmpLepton);
@@ -882,11 +893,18 @@ void JZBPFAnalysis::Analyze() {
       if ( npfEvent.pfLeptonNum>=jMax ) break;
       if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMu2Px[muIndex],fTR->PfMu2Py[muIndex],fTR->PfMu2Pz[muIndex],fTR->PfMu2E[muIndex]);
+	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
+	  TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
 	  int tmpCharge = fTR->PfMu2Charge[muIndex];
+	  int recotmpCharge = fTR->MuCharge[recoIndex];
+	  
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+	  tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = muIndex;
+	  tmpLepton.recoindex = recoIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[2].push_back(tmpLepton);
@@ -900,11 +918,18 @@ void JZBPFAnalysis::Analyze() {
       if(IsCustomPfMu(muIndex)) {
           counters[MU].fill("... pass pf mu selection");
 	  TLorentzVector tmpVector(fTR->PfMu3Px[muIndex],fTR->PfMu3Py[muIndex],fTR->PfMu3Pz[muIndex],fTR->PfMu3E[muIndex]);
+	  int recoIndex = getRecoMuIndex(tmpVector); //Get the index of a matched reco muon
+	  TLorentzVector recotmpVector(fTR->MuPx[recoIndex],fTR->MuPy[recoIndex],fTR->MuPz[recoIndex],fTR->MuE[recoIndex]);
 	  int tmpCharge = fTR->PfMu3Charge[muIndex];
+	  int recotmpCharge = fTR->MuCharge[recoIndex];
+
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+	  tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = muIndex;
+	  tmpLepton.recoindex = recoIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[3].push_back(tmpLepton);
@@ -924,12 +949,19 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.pfLeptonCharge[npfEvent.pfLeptonNum] = fTR->PfElCharge[elIndex];
       npfEvent.pfLeptonNum++;
 	  TLorentzVector tmpVector(fTR->PfElPx[elIndex],fTR->PfElPy[elIndex],fTR->PfElPz[elIndex],fTR->PfElE[elIndex]);
-	  int tmpCharge = fTR->PfElCharge[elIndex];
+	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
+	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+	  int tmpCharge = fTR->PfMu3Charge[elIndex];
+	  int recotmpCharge = fTR->MuCharge[recoIndex];
+
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+	  tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = elIndex;
-	  tmpLepton.type = 1;
+	  tmpLepton.recoindex = recoIndex;
+	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[1].push_back(tmpLepton);
 	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
@@ -941,12 +973,19 @@ void JZBPFAnalysis::Analyze() {
     {
       if(IsCustomPfEl(elIndex)) {
 	  TLorentzVector tmpVector(fTR->PfEl2Px[elIndex],fTR->PfEl2Py[elIndex],fTR->PfEl2Pz[elIndex],fTR->PfEl2E[elIndex]);
-	  int tmpCharge = fTR->PfEl2Charge[elIndex];
+	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
+	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+	  int tmpCharge = fTR->PfMu3Charge[elIndex];
+	  int recotmpCharge = fTR->MuCharge[recoIndex];
+	 
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+	  tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = elIndex;
-	  tmpLepton.type = 1;
+	  tmpLepton.recoindex = recoIndex;
+	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[2].push_back(tmpLepton);
       }
@@ -958,12 +997,19 @@ void JZBPFAnalysis::Analyze() {
       if(IsCustomPfEl(elIndex)) {
           counters[EL].fill("... pass pf e selection");
 	  TLorentzVector tmpVector(fTR->PfEl3Px[elIndex],fTR->PfEl3Py[elIndex],fTR->PfEl3Pz[elIndex],fTR->PfEl3E[elIndex]);
-	  int tmpCharge = fTR->PfEl3Charge[elIndex];
+	  int recoIndex = getRecoElIndex(tmpVector); //Get the index of a matched reco electron
+	  TLorentzVector recotmpVector(fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
+	  int tmpCharge = fTR->PfMu3Charge[elIndex];
+	  int recotmpCharge = fTR->MuCharge[recoIndex];
+	
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
+	  tmpLepton.recop = recotmpVector;
 	  tmpLepton.charge = tmpCharge;
+	  tmpLepton.recocharge = recotmpCharge;
 	  tmpLepton.index = elIndex;
-	  tmpLepton.type = 1;
+	  tmpLepton.recoindex = recoIndex;
+	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
 	  pfLeptons[3].push_back(tmpLepton);
       }
@@ -971,23 +1017,28 @@ void JZBPFAnalysis::Analyze() {
 
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
 
-  vector<PFlepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
+  //vector<PFlepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
+ 
   vector<vector<PFlepton> > sortedGoodPFLeptons;
   bool dopf[particleflowtypes];
-  bool doreco;
+  
+  //bool doreco;
+  
   for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	vector<PFlepton> leptonsel = pfLeptons[ipf];
 	vector<PFlepton> sortedGoodPfLeptonOfSpecificPFtype;
 	if(leptonsel.size()>0) sortedGoodPfLeptonOfSpecificPFtype =sortLeptonsByPt(leptonsel);
         sortedGoodPFLeptons.push_back(sortedGoodPfLeptonOfSpecificPFtype);
-        if(sortedGoodPFLeptons[ipf].size() > 1) {dopf[ipf]=true;} else {dopf[ipf]=false;}
+        //if(sortedGoodPFLeptons[ipf].size() > 1) {dopf[ipf]=true;} else {dopf[ipf]=false;}
   }
-  if(sortedGoodLeptons.size() > 1) {doreco=true;} else {doreco=false;}
+  
+  
+  //if(sortedGoodLeptons.size() > 1) {doreco=true;} else {doreco=false;}
 
   if(sortedGoodPFLeptons[0].size() > 1) { // note that the "0" entry corresponds to the one we actually want to use.
     counters[EV].fill("... has at least 2 leptons");
-    int PosLepton1 = 0;
-    int PosLepton2 = 1;
+    //int PosLepton1 = 0;
+    //int PosLepton2 = 1;
     int PfPosLepton1[particleflowtypes];
     int PfPosLepton2[particleflowtypes];
     for(int ipf=0;ipf<particleflowtypes;ipf++) {
@@ -996,13 +1047,13 @@ void JZBPFAnalysis::Analyze() {
     }
 
     // Check for OS combination
-    for(; PosLepton2 < sortedGoodLeptons.size(); PosLepton2++) {
-      if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
-    }
-   for(int ipf=0;ipf<particleflowtypes;ipf++) {
-       for(; PfPosLepton2[ipf] < sortedGoodPFLeptons[ipf].size(); PfPosLepton2[ipf]++) {
-         if(sortedGoodPFLeptons[ipf][0].charge*sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].charge<0) break;
-       }
+    //for(; PosLepton2 < sortedGoodLeptons.size(); PosLepton2++) {
+    //  if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
+    //}
+    for(int ipf=0;ipf<particleflowtypes;ipf++) {
+      for(; PfPosLepton2[ipf] < sortedGoodPFLeptons[ipf].size(); PfPosLepton2[ipf]++) {
+	if(sortedGoodPFLeptons[ipf][0].charge*sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].charge<0) break;
+      }
     }
 	
     if(PfPosLepton2[0] == sortedGoodPFLeptons[0].size()) {//not enough leptons...
@@ -1010,10 +1061,10 @@ void JZBPFAnalysis::Analyze() {
       return;
     }
     counters[EV].fill("... has at least 2 OS leptons");
-// is this a smart way of doing it?
-
+    // is this a smart way of doing it?
+    
     // Preselection
-    if(sortedGoodLeptons.size()>1 && PosLepton2!=sortedGoodLeptons.size() && sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
+    /*if(sortedGoodLeptons.size()>1 && PosLepton2!=sortedGoodLeptons.size() && sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
 
       npfEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
       npfEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
@@ -1033,8 +1084,7 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
       npfEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
       npfEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
-    }
-    /*else {
+    } else {
       
       //If there are less than two leptons the data is not saved.
       mypfTree->Fill();
@@ -1049,8 +1099,19 @@ void JZBPFAnalysis::Analyze() {
     }
     counters[EV].fill("... pass dilepton pt selection");
     
-   for(int ipf=0;ipf<particleflowtypes;ipf++) {
-       if(dopf[ipf]&&sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Pt()>20&&sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Pt()>20) {
+    //Fill the reco information
+    npfEvent.pt1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Pt();
+    npfEvent.pt2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Pt();
+    npfEvent.phi1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Phi();
+    npfEvent.phi2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Phi();
+    npfEvent.eta1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Eta();
+    npfEvent.eta2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Eta();
+    npfEvent.mll=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).M();
+    npfEvent.phi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Phi();
+    npfEvent.phi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Eta();
+    npfEvent.pt=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Pt();
+    for(int ipf=0;ipf<particleflowtypes;ipf++) {
+      if(dopf[ipf]&&sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Pt()>20&&sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Pt()>20) {
 	npfEvent.pfpt1[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Pt();
 	npfEvent.pfpt2[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Pt();
 	npfEvent.pfphi1[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Phi();
@@ -1061,10 +1122,10 @@ void JZBPFAnalysis::Analyze() {
 	npfEvent.pfphi[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Phi();
 	npfEvent.pfphi[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Eta();
 	npfEvent.pfpt[ipf]=(sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p+sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p).Pt();
-       }
+      }
     }
     
-
+    
     // #--- construct different recoil models, initial the recoil vector will hold only the sum over the hard jets, only in the end we will add-up the lepton system
     TLorentzVector recoil(0,0,0,0); // different constructions of recoil model (under dev, need cleaning)    
     npfEvent.jetNum=0;        // total jet counting
@@ -1105,7 +1166,7 @@ void JZBPFAnalysis::Analyze() {
           if(aJet.DeltaR(sortedGoodPFLeptons[0][PfPosLepton1[0]].p)<DRmax)continue;
           counters[JE].fill("... pass lepton 2 veto");
         }
-
+	
         // Acceptance cuts before we use this jet
         if ( !(fabs(jeta)<2.6 && jpt>20.) ) continue;
         counters[JE].fill("... |eta|<2.6 && pt>20.");
@@ -1124,10 +1185,10 @@ void JZBPFAnalysis::Analyze() {
           counters[JE].fill("... pt>30");
           npfEvent.goodJetNum++;
         }
-		
+	
       }
     
-
+    
     // --- construct met vectors here
     float caloMETpx = fTR->RawMETpx;
     float caloMETpy = fTR->RawMETpy;
@@ -1646,6 +1707,35 @@ const bool JZBPFAnalysis::IsCustomPfEl(const int index){
 	
 }
 
+//Get the index of the reco muon in the reco collection
+int JZBPFAnalysis::getRecoMuIndex(TLorentzVector tmpPfVector) {
+
+  int muIndex = 0;
+  for(muIndex=0;muIndex<fTR->NMus;muIndex++) {
+    float px= fTR->MuPx[muIndex];
+    float py= fTR->MuPy[muIndex];
+    float pz= fTR->MuPz[muIndex];
+    float energy =  fTR->MuE[muIndex];
+    TLorentzVector tmpVector(px,py,pz,energy);
+    if(tmpPfVector.DeltaR(tmpVector)<0.05) return muIndex; //maybe to tight
+  }
+  return -1;
+} 
+
+//Get the index of the reco electron in the reco collection
+int JZBPFAnalysis::getRecoElIndex(TLorentzVector tmpPfVector) {
+
+  int elIndex = 0;
+  for(elIndex=0;elIndex<fTR->NEles;elIndex++) {
+    float px= fTR->ElPx[elIndex];
+    float py= fTR->ElPy[elIndex];
+    float pz= fTR->ElPz[elIndex];
+    float energy =  fTR->ElE[elIndex];
+    TLorentzVector tmpVector(px,py,pz,energy);
+    if(tmpPfVector.DeltaR(tmpVector)<0.05) return elIndex; //maybe to tight
+  }
+  return -1;
+} 
 
 
 

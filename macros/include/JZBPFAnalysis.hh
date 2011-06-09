@@ -21,9 +21,12 @@
 
 struct PFlepton {
   TLorentzVector p;
-  int charge;
+  TLorentzVector recop;
+  int charge; 
+  int recocharge;
   int type; //0==electron 1==muon 2==tau 
   int index;
+  int recoindex;
   float genPt;
 };
 
@@ -40,7 +43,8 @@ public:
   const bool passElTriggers(void);
   const bool passEMuTriggers(void);
   const bool passMuTriggers(void);
-
+  int getRecoMuIndex(TLorentzVector);
+  int getRecoElIndex(TLorentzVector);
   string outputFileName_; // public name of the output file name
 
   void Begin(TFile *f);
