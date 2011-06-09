@@ -16,12 +16,16 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.5 $";
+string sjzbPFversion="$Revision: 1.6 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.6  2011/06/09 10:44:58  pablom
+
+Only the information of reco leptons matched to pf leptons is stored.
+
 Revision 1.5  2011/06/09 08:54:26  buchmann
 Translated more abstract variables to PF as well
 
@@ -1709,33 +1713,45 @@ const bool JZBPFAnalysis::IsCustomPfEl(const int index){
 
 //Get the index of the reco muon in the reco collection
 int JZBPFAnalysis::getRecoMuIndex(TLorentzVector tmpPfVector) {
-
+  int retval = 0;
   int muIndex = 0;
+  float lastDeltaR=150.0;
   for(muIndex=0;muIndex<fTR->NMus;muIndex++) {
     float px= fTR->MuPx[muIndex];
     float py= fTR->MuPy[muIndex];
     float pz= fTR->MuPz[muIndex];
     float energy =  fTR->MuE[muIndex];
     TLorentzVector tmpVector(px,py,pz,energy);
-    if(tmpPfVector.DeltaR(tmpVector)<0.05) return muIndex; //maybe to tight
+    float currdeltaR = tmpPfVector.DeltaR(tmpVector);
+    if(currdeltaR<lastDeltaR) {
+	retval=muIndex;
+	lastDeltaR=currdeltaR;
+    }
   }
-  return -1;
+  return retval;
 } 
 
 //Get the index of the reco electron in the reco collection
 int JZBPFAnalysis::getRecoElIndex(TLorentzVector tmpPfVector) {
-
+  int retval = 0;
   int elIndex = 0;
+  float lastDeltaR=150.0;
   for(elIndex=0;elIndex<fTR->NEles;elIndex++) {
     float px= fTR->ElPx[elIndex];
     float py= fTR->ElPy[elIndex];
     float pz= fTR->ElPz[elIndex];
     float energy =  fTR->ElE[elIndex];
     TLorentzVector tmpVector(px,py,pz,energy);
-    if(tmpPfVector.DeltaR(tmpVector)<0.05) return elIndex; //maybe to tight
+    float currdeltaR = tmpPfVector.DeltaR(tmpVector);
+    if(currdeltaR<lastDeltaR) {
+	retval=elIndex;
+	lastDeltaR=currdeltaR;
+    }
   }
-  return -1;
+  return retval;
 } 
+
+
 
 
 
