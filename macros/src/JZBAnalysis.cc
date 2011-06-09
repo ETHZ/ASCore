@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.31 $";
+string sjzbversion="$Revision: 1.32 $";
 string sjzbinfo="";
 
 /*
 
-$Log: $
+$Log: JZBAnalysis.cc,v $
+Revision 1.32  2011/06/08 16:18:13  buchmann
+Merged the two JZBs such that only one file is produced
+
 
 */
 
@@ -635,10 +638,20 @@ cout << endl << endl;
 
 
   // Define counters (so we have them in the right order)
+/*
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
   counters[MU].setName("Muons");
   counters[EL].setName("Electrons");
+  counters[JE].setName("Jets");
+  counters[PJ].setName("PFJets");
+*/
+  counters[EV].setName("Events");
+  counters[TR].setName("Triggers");
+  counters[MU].setName("Muons");
+  counters[PFMU].setName("PFMuons");
+  counters[EL].setName("Electrons");
+  counters[PFEL].setName("PFElectrons");
   counters[JE].setName("Jets");
   counters[PJ].setName("PFJets");
 

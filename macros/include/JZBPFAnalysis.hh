@@ -52,7 +52,7 @@ public:
 
 private:
 
-  enum counters_t { count_begin, EV=count_begin, TR, MU, EL, JE, PJ, count_end };
+  enum counters_t { count_begin, EV=count_begin, TR, MU, PFMU, EL, PFEL, JE, PJ, count_end };
   Monitor counters[count_end];
 
   vector<PFlepton> sortLeptonsByPt(vector<PFlepton>&);
