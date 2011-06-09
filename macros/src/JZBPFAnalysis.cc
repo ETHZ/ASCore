@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.3 $";
+string sjzbPFversion="$Revision: 1.4 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.4  2011/06/09 07:52:40  buchmann
+paranthesis fixed
+
 Revision 1.3  2011/06/09 07:46:47  buchmann
 Adapted cuts and added counters for PF
 
@@ -1003,7 +1006,7 @@ void JZBPFAnalysis::Analyze() {
     }
 	
     if(PfPosLepton2[0] == sortedGoodPFLeptons[0].size()) {//not enough leptons...
-      mypfTree->Fill();
+      if(isMC) mypfTree->Fill(); //only fill it if we're dealing with MC
       return;
     }
     counters[EV].fill("... has at least 2 OS leptons");
@@ -1041,7 +1044,7 @@ void JZBPFAnalysis::Analyze() {
     */
 
     if(!(sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Pt() > 20 && sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Pt() > 20)) {
-      mypfTree->Fill();
+      if(isMC) mypfTree->Fill();
       return;
     }
     counters[EV].fill("... pass dilepton pt selection");
@@ -1240,12 +1243,14 @@ void JZBPFAnalysis::Analyze() {
 	npfEvent.vjetphi[index]=recoil.Phi();
       }
     
-    
+    /*
+    deliberately commented out at the moment to make sure these two are not used anymore
+
     TLorentzVector s1;
     if(doreco) s1 = sortedGoodLeptons[PosLepton1].p;
     TLorentzVector s2;
     if(doreco) s2 = sortedGoodLeptons[PosLepton2].p;
-
+*/
     TLorentzVector PFs1[particleflowtypes];
     TLorentzVector PFs2[particleflowtypes];
 
@@ -1260,10 +1265,12 @@ void JZBPFAnalysis::Analyze() {
     npfEvent.met[3]=fTR->MuJESCorrMET;
     npfEvent.met[4]=fTR->PFMET;
     npfEvent.met[5]=fTR->SumEt;
+//    npfEvent.met[6]=fTR->METPAT; ??
 
     TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
     TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
     TLorentzVector pfrecoNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
+    TLorentzVector purepfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
     TLorentzVector AllpfNoCutsJetVector[particleflowtypes]; // for constructing SumJPt from pfmet (unclustered), as Kostas
     TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
     npfEvent.metPhi[0]=caloMETvector.Phi();
@@ -1276,12 +1283,16 @@ void JZBPFAnalysis::Analyze() {
     
     // Remove electrons from MET
     caloVector = -caloMETvector;
-    if ( doreco && sortedGoodLeptons[PosLepton1].type == 0 ) caloVector -= s1;
-    if ( doreco && sortedGoodLeptons[PosLepton2].type == 0 ) caloVector -= s2;
+//    if ( doreco && sortedGoodLeptons[PosLepton1].type == 0 ) caloVector -= s1;
+//    if ( doreco && sortedGoodLeptons[PosLepton2].type == 0 ) caloVector -= s2;
+    if ( sortedGoodPFLeptons[0][PfPosLepton1[0]].type == 0 ) caloVector -= PFs1[0];
+    if ( sortedGoodPFLeptons[0][PfPosLepton2[0]].type == 0 ) caloVector -= PFs2[0];
 
     // remove the leptons from PFMET and tcMET
-    if(doreco) pfrecoNoCutsJetVector = -pfMETvector - s1 - s2;
-    if(doreco) tcNoCutsJetVector = -tcMETvector - s1 - s2;
+//    if(doreco) pfrecoNoCutsJetVector = -pfMETvector - s1 - s2;
+//    if(doreco) tcNoCutsJetVector = -tcMETvector - s1 - s2;
+    purepfNoCutsJetVector  = -pfMETvector - PFs1[0] - PFs2[0];
+    tcNoCutsJetVector = -tcMETvector - PFs1[0] - PFs2[0];
 
     for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	if(dopf[ipf]) AllpfNoCutsJetVector[ipf] = -pfMETvector - PFs1[ipf] - PFs2[ipf];
@@ -1289,43 +1300,56 @@ void JZBPFAnalysis::Analyze() {
     // #--- different versions of JZB
     
     //these do not require RECO
-    npfEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
+//    npfEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
+    npfEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(PFs1[0]+PFs2[0]);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
     npfEvent.sumJetPt[2] = recoil.Pt(); 
     npfEvent.sumJetPt[3] = sumOfPFJets.Pt();
     
-    if(dopf[3]) npfEvent.jzb[7] = AllpfNoCutsJetVector[3].Pt() - (PFs1[3]+PFs2[3]).Pt();
-    else npfEvent.jzb[7] = -99999.9;
-
     for(int ipf=0;ipf<particleflowtypes;ipf++) {
 	if(dopf[ipf]) npfEvent.pfjzb[ipf]=AllpfNoCutsJetVector[ipf].Pt() - (PFs1[ipf]+PFs2[ipf]).Pt();
 	else npfEvent.pfjzb[ipf]=-99999.9;
     }
     
     //these do require RECO
-    if(doreco) {
-      npfEvent.dphi_sumJetVSZ[0]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
+//    if(doreco) {
+//      npfEvent.dphi_sumJetVSZ[0]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
+//      npfEvent.sumJetPt[0]=caloVector.Pt();
+//      npfEvent.jzb[0] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
+      npfEvent.dphi_sumJetVSZ[0]=caloVector.DeltaPhi(PFs1[0]+PFs2[0]); // DPhi between Z and SumJpt
       npfEvent.sumJetPt[0]=caloVector.Pt();
-      npfEvent.jzb[0] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
+      npfEvent.jzb[0] = caloVector.Pt() - (PFs1[0]+PFs2[0]).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
       
-      npfEvent.dphi_sumJetVSZ[1] = pfrecoNoCutsJetVector.DeltaPhi(s1+s2); 
-      npfEvent.sumJetPt[1] = pfrecoNoCutsJetVector.Pt(); 
-      npfEvent.jzb[1] = pfrecoNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
+//      npfEvent.dphi_sumJetVSZ[1] = pfrecoNoCutsJetVector.DeltaPhi(s1+s2); 
+//      npfEvent.sumJetPt[1] = pfrecoNoCutsJetVector.Pt(); 
+//      npfEvent.jzb[1] = pfrecoNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
+      npfEvent.dphi_sumJetVSZ[1] = purepfNoCutsJetVector.DeltaPhi(PFs1[0]+PFs2[0]); 
+      npfEvent.sumJetPt[1] = purepfNoCutsJetVector.Pt(); 
+      npfEvent.jzb[1] = purepfNoCutsJetVector.Pt() - (PFs1[0]+PFs2[0]).Pt(); // to be used with pfMET
+
       npfEvent.sjzb[1] = GaussRandom(npfEvent.jzb[1]+1.3,7);
       
       
-      npfEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
-      npfEvent.jzb[3] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
+//      npfEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
+//      npfEvent.jzb[3] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
+      npfEvent.jzb[2] = recoil.Pt() - (PFs1[0]+PFs2[0]).Pt(); // to be used recoil met (recoilpt[0])    
+      npfEvent.jzb[3] = sumOfPFJets.Pt() - (PFs1[0]+PFs2[0]).Pt(); // to be used recoil met (recoilpt[0])
       
-      npfEvent.dphi_sumJetVSZ[4] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
+//      npfEvent.dphi_sumJetVSZ[4] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
+//      npfEvent.sumJetPt[4] = tcNoCutsJetVector.Pt(); 
+//      npfEvent.jzb[4] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
+      npfEvent.dphi_sumJetVSZ[4] = tcNoCutsJetVector.DeltaPhi(PFs1[0]+PFs2[0]); // tcJZB
       npfEvent.sumJetPt[4] = tcNoCutsJetVector.Pt(); 
-      npfEvent.jzb[4] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
+      npfEvent.jzb[4] = tcNoCutsJetVector.Pt() - (PFs1[0]+PFs2[0]).Pt(); // to be used with tcMET
       
       // --- recoil met and pf recoil met
-      npfEvent.met[6] = (sumOfPFJets + s1 + s2).Pt(); 
-      npfEvent.met[7] = (recoil + s1 + s2).Pt();
+//      npfEvent.met[6] = (sumOfPFJets + s1 + s2).Pt(); 
+//      npfEvent.met[7] = (recoil + s1 + s2).Pt();
+      npfEvent.met[6] = (sumOfPFJets + PFs1[0]+PFs2[0]).Pt(); 
+      npfEvent.met[7] = (recoil + PFs1[0]+PFs2[0]).Pt();
       
-      recoil+=s1+s2;   // now add also the leptons to the recoil! to form the complete recoil model
-      
+//      recoil+=s1+s2;   // now add also the leptons to the recoil! to form the complete recoil model
+      recoil+=PFs1[0]+PFs2[0];   // now add also the leptons to the recoil! to form the complete recoil model
+
       if(recoil.Pt()!=0)
       {
 	index=0;
@@ -1333,7 +1357,7 @@ void JZBPFAnalysis::Analyze() {
 	npfEvent.recoileta[index]=recoil.Eta();
 	npfEvent.recoilphi[index]=recoil.Phi();
       }
-    }//end of if(doreco)
+//    }//end of if(doreco)
     
     // ----------------------------------------
     
@@ -1372,22 +1396,22 @@ void JZBPFAnalysis::Analyze() {
 
 
     // --- store number of good leptons in the event 
-    npfEvent.leptonNum = int(sortedGoodLeptons.size());
-    for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
-      TLorentzVector lp(sortedGoodLeptons[i].p);
+    npfEvent.leptonNum = int(sortedGoodPFLeptons[0].size());
+    for ( size_t i=0; i<sortedGoodPFLeptons[0].size(); ++i ) {
+      TLorentzVector lp(sortedGoodPFLeptons[0][i].p);
       npfEvent.leptonPt[i] = lp.Pt();
       npfEvent.leptonEta[i] = lp.Eta();
       npfEvent.leptonPhi[i] = lp.Phi();
-      npfEvent.leptonCharge[i] = sortedGoodLeptons[i].charge;
-      npfEvent.leptonId[i] = sortedGoodLeptons[i].type ;
+      npfEvent.leptonCharge[i] = sortedGoodPFLeptons[0][i].charge;
+      npfEvent.leptonId[i] = sortedGoodPFLeptons[0][i].type ;
 
 
-      for(size_t j=i+1; j<sortedGoodLeptons.size();j++) // store lepton pair masses
+      for(size_t j=i+1; j<sortedGoodPFLeptons[0].size();j++) // store lepton pair masses
 	{
-          TLorentzVector lp1(sortedGoodLeptons[i].p);
-          TLorentzVector lp2(sortedGoodLeptons[j].p);
-          int old_id1 = (sortedGoodLeptons[i].type+1)*sortedGoodLeptons[i].charge;
-          int old_id2 = (sortedGoodLeptons[j].type+1)*sortedGoodLeptons[j].charge;
+          TLorentzVector lp1(sortedGoodPFLeptons[0][i].p);
+          TLorentzVector lp2(sortedGoodPFLeptons[0][j].p);
+          int old_id1 = (sortedGoodPFLeptons[0][i].type+1)*sortedGoodPFLeptons[0][i].charge;
+          int old_id2 = (sortedGoodPFLeptons[0][j].type+1)*sortedGoodPFLeptons[0][j].charge;
           if(npfEvent.leptonPairNum<jMax)
 	    {
               npfEvent.leptonPairMass[npfEvent.leptonPairNum] = (lp1+lp2).M();
@@ -1397,7 +1421,7 @@ void JZBPFAnalysis::Analyze() {
 	    }
 	}
     }
-    
+    /*
     if(doreco) {
       npfEvent.dphiZpfMet = (s1+s2).DeltaPhi(pfMETvector);
       npfEvent.dphiZs1 = (s1+s2).DeltaPhi(s1);
@@ -1409,8 +1433,20 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.dphipfRecoilMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
       npfEvent.dphipfRecoilMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
     }
-    
+    */
+
+      npfEvent.dphiZpfMet = (PFs1[0]+PFs2[0]).DeltaPhi(pfMETvector);
+      npfEvent.dphiZs1 = (PFs1[0]+PFs2[0]).DeltaPhi(PFs1[0]);
+      npfEvent.dphiZs2 = (PFs1[0]+PFs2[0]).DeltaPhi(PFs2[0]);
+      npfEvent.dphiMet1 = sortedGoodPFLeptons[0][PfPosLepton1[0]].p.DeltaPhi(pfMETvector);
+      npfEvent.dphiMet2 = sortedGoodPFLeptons[0][PfPosLepton2[0]].p.DeltaPhi(pfMETvector);
+      npfEvent.dphitcMet1 = sortedGoodPFLeptons[0][PfPosLepton1[0]].p.DeltaPhi(tcMETvector);
+      npfEvent.dphitcMet2 = sortedGoodPFLeptons[0][PfPosLepton2[0]].p.DeltaPhi(tcMETvector);
+      npfEvent.dphipfRecoilMet1 = sortedGoodPFLeptons[0][PfPosLepton1[0]].p.DeltaPhi(-sumOfPFJets - PFs1[0]-PFs2[0]); // pf recoil met
+      npfEvent.dphipfRecoilMet2 = sortedGoodPFLeptons[0][PfPosLepton2[0]].p.DeltaPhi(-sumOfPFJets - PFs1[0]-PFs2[0]); // pf recoil met
+
     // Store minimum dphi between some mets and any kind of lepton
+/*
     for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
       TLorentzVector lp(sortedGoodLeptons[i].p);
       if ( fabs(recoil.DeltaPhi(lp))>npfEvent.dphiRecoilLep[0] )
@@ -1422,6 +1458,18 @@ void JZBPFAnalysis::Analyze() {
       if ( fabs((recoil + s1 + s2).DeltaPhi(lp)) > npfEvent.dphiMetLep[7] )
         npfEvent.dphiMetLep[7] = (recoil + s1 + s2).DeltaPhi(lp);
     }
+*/
+    for ( size_t i=0; i<sortedGoodPFLeptons[0].size(); ++i ) {
+      TLorentzVector lp(sortedGoodPFLeptons[0][i].p);
+      if ( fabs(recoil.DeltaPhi(lp))>npfEvent.dphiRecoilLep[0] )
+        npfEvent.dphiRecoilLep[0] = recoil.DeltaPhi(lp);
+      if ( fabs(pfMETvector.DeltaPhi(lp))>npfEvent.dphiMetLep[4] )
+        npfEvent.dphiMetLep[4] = pfMETvector.DeltaPhi(lp);
+      if ( fabs((sumOfPFJets + PFs1[0]+PFs2[0]).DeltaPhi(lp))> npfEvent.dphiMetLep[6] )
+        npfEvent.dphiMetLep[6] = (sumOfPFJets + PFs1[0]+PFs2[0]).DeltaPhi(lp);
+      if ( fabs((recoil + PFs1[0]+PFs2[0]).DeltaPhi(lp)) > npfEvent.dphiMetLep[7] )
+        npfEvent.dphiMetLep[7] = (recoil + PFs1[0]+PFs2[0]).DeltaPhi(lp);
+    }
 
     // Store minimum dphi between some mets and any good jet
     for ( size_t i=0; i<pfGoodJets.size(); ++i ) {
@@ -1429,27 +1477,34 @@ void JZBPFAnalysis::Analyze() {
       if ( fabs(pfMETvector.DeltaPhi(jp))>npfEvent.dphiMetJet[4] )
         npfEvent.dphiMetJet[4] = pfMETvector.DeltaPhi(jp);
     }
+/*
     if(doreco) {
       // Store some additional MET information
       npfEvent.dphiMetSumJetPt[4] = pfrecoNoCutsJetVector.DeltaPhi(pfMETvector);
       npfEvent.metPar[4]  = pfMETvector.Dot(s1+s2);
       npfEvent.metPerp[4] = pfMETvector.Perp((s1+s2).Vect());
-    }
+    }*/
+      // Store some additional MET information
+      npfEvent.dphiMetSumJetPt[4] = pfrecoNoCutsJetVector.DeltaPhi(pfMETvector);
+      npfEvent.metPar[4]  = pfMETvector.Dot(PFs1[0]+PFs2[0]);
+      npfEvent.metPerp[4] = pfMETvector.Perp((PFs1[0]+PFs2[0]).Vect());
     
     // Store some generator information on selected leptons
-    if ( isMC && doreco ) {
+    if ( isMC ) {
       TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
-      int i1 = sortedGoodLeptons[PosLepton1].index;
-      int i2 = sortedGoodLeptons[PosLepton2].index;
+      int i1 = sortedGoodPFLeptons[0][PfPosLepton1[0]].index;
+      int i2 = sortedGoodPFLeptons[0][PfPosLepton2[0]].index;
       int i3,i4,i5;
 
+      /// REALLY NOT SURE HERE!
+
       TLorentzVector genLep1; 
-      if ( sortedGoodLeptons[PosLepton1].type )
+      if ( sortedGoodPFLeptons[0][PfPosLepton1[0]].type )
         genLep1.SetPtEtaPhiE(fTR->MuGenPt[i1],fTR->MuGenEta[i1],fTR->MuGenPhi[i1],fTR->MuGenE[i1]);
       else
         genLep1.SetPtEtaPhiE(fTR->ElGenPt[i1],fTR->ElGenEta[i1],fTR->ElGenPhi[i1],fTR->ElGenE[i1]);
       TLorentzVector genLep2;
-      if ( sortedGoodLeptons[PosLepton2].type )
+      if ( sortedGoodPFLeptons[0][PfPosLepton2[0]].type )
         genLep2.SetPtEtaPhiE(fTR->MuGenPt[i2],fTR->MuGenEta[i2],fTR->MuGenPhi[i2],fTR->MuGenE[i2]);
       else
         genLep2.SetPtEtaPhiE(fTR->ElGenPt[i2],fTR->ElGenEta[i2],fTR->ElGenPhi[i2],fTR->ElGenE[i2]);
@@ -1461,9 +1516,9 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.genMID1     = fTR->GenLeptonMID[i1]; // WW study
       npfEvent.genMID2     = fTR->GenLeptonMID[i2]; // WW study
 
-      if(sortedGoodLeptons.size()>=3) {i3=sortedGoodLeptons[2].index;npfEvent.genMID3 = fTR->GenLeptonMID[i3];} else npfEvent.genMID3=-999; // WW study
-      if(sortedGoodLeptons.size()>=4) {i4=sortedGoodLeptons[3].index;npfEvent.genMID4 = fTR->GenLeptonMID[i4];} else npfEvent.genMID4=-999; // WW study
-      if(sortedGoodLeptons.size()>=5) {i5=sortedGoodLeptons[4].index;npfEvent.genMID5 = fTR->GenLeptonMID[i5];} else npfEvent.genMID5=-999; // WW study
+      if(sortedGoodPFLeptons[0].size()>=3) {i3=sortedGoodPFLeptons[0][2].index;npfEvent.genMID3 = fTR->GenLeptonMID[i3];} else npfEvent.genMID3=-999; // WW study
+      if(sortedGoodPFLeptons[0].size()>=4) {i4=sortedGoodPFLeptons[0][3].index;npfEvent.genMID4 = fTR->GenLeptonMID[i4];} else npfEvent.genMID4=-999; // WW study
+      if(sortedGoodPFLeptons[0].size()>=5) {i5=sortedGoodPFLeptons[0][4].index;npfEvent.genMID5 = fTR->GenLeptonMID[i5];} else npfEvent.genMID5=-999; // WW study
 
       npfEvent.genGMID1    = fTR->GenLeptonGMID[i1]; // WW study
       npfEvent.genGMID2    = fTR->GenLeptonGMID[i2]; // WW study
@@ -1472,8 +1527,8 @@ void JZBPFAnalysis::Analyze() {
       npfEvent.genPt2Sel    = genLep2.Pt();
       npfEvent.genEta1Sel   = genLep1.Eta();
       npfEvent.genEta2Sel   = genLep2.Eta();
-      npfEvent.genId1Sel    = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenID[i1]:fTR->ElGenID[i1]);
-      npfEvent.genId2Sel    = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenID[i2]:fTR->ElGenID[i2]);
+      npfEvent.genId1Sel    = (sortedGoodPFLeptons[0][PfPosLepton1[0]].type?fTR->MuGenID[i1]:fTR->ElGenID[i1]);
+      npfEvent.genId2Sel    = (sortedGoodPFLeptons[0][PfPosLepton2[0]].type?fTR->MuGenID[i2]:fTR->ElGenID[i2]);
       npfEvent.genJZBSel    = npfEvent.genRecoilSel - (genLep1 + genLep2).Pt();
 	
     }
