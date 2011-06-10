@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.12 $";
+string sjzbPFversion="$Revision: 1.13 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.13  2011/06/10 13:46:20  buchmann
+Reduced the complexity by kicking out PF1 (medium) & PF2 (tight) and only using PF3 (loose)
+
 Revision 1.12  2011/06/10 09:03:00  buchmann
 Updated several variables to PF
 
@@ -1003,8 +1006,8 @@ void JZBPFAnalysis::Analyze() {
 	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
       }
     }
-
 /*
+
   // #-- PF electron loop -- type 1
   for(int elIndex=0;elIndex<fTR->PfElNObjs;elIndex++)
     {
@@ -1024,7 +1027,7 @@ void JZBPFAnalysis::Analyze() {
 		recotmpVector = (fTR->ElPx[recoIndex],fTR->ElPy[recoIndex],fTR->ElPz[recoIndex],fTR->ElE[recoIndex]);
 		recotmpCharge = fTR->ElCharge[recoIndex];
 	  }
-	  int tmpCharge = fTR->PfMuCharge[elIndex];
+	  int tmpCharge = fTR->PfElCharge[elIndex];
 
 	  PFlepton tmpLepton;
 	  tmpLepton.p = tmpVector;
