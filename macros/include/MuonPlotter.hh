@@ -83,8 +83,12 @@ public:
 	};
 	enum gRegion {
 		region_begin,
-		Signal = region_begin,
-		// Control,
+		Baseline = region_begin,
+		HT200MET30,
+		HT400MET50,
+		HT400MET120,
+		HT200MET120,
+		HT80MET100,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -95,6 +99,13 @@ public:
 		gNCHANNELS
 	};
 	struct lepton{
+		lepton(){};
+		lepton(TLorentzVector vec, int ch, int ty, int ind){
+			p = vec;
+			charge = ch;
+			type = ty;
+			index = ind;
+		};
 		TLorentzVector p;
 		int charge;
 		int type; // -1(unknown), 0(mu), 1(ele)
@@ -159,9 +170,17 @@ public:
 		TH2D *nt20_OS_EB_pt; // EB = barrel/endcap
 	};
 	
-	struct Region{ // different binnings and or selections cuts, e.g. florida vs surfturf
-		TString name;
-		TString sname;
+	struct Region{
+		static TString sname[gNREGIONS];
+		// Custom selections for every region
+		static float minMu1pt[gNREGIONS];
+		static float minMu2pt[gNREGIONS];
+		static float minEl1pt[gNREGIONS];
+		static float minEl2pt[gNREGIONS];
+		static float minHT   [gNREGIONS];
+		static float minMet  [gNREGIONS];
+		static int   minNjets[gNREGIONS];
+		
 		Channel mm;
 		Channel em;
 		Channel ee;
@@ -224,7 +243,7 @@ public:
 		int color;
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
 		Region region[gNREGIONS];
-		NumberSet numbers[gNCHANNELS]; // summary of integrated numbers
+		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots    kinplots[gNKinSels]; // tt and ll and signal
 		HWWPlots    hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
 		IsoPlots    isoplots[2]; // e and mu
@@ -269,10 +288,10 @@ public:
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
-	void makeNT012Plots(vector<int>, gChannel, gRegion = Signal);
+	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline);
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
-	void makeIntPrediction(TString);
+	void makeIntPrediction(TString, gRegion);
 	void makeIntMCClosure(TString);
 	
 	void printSyncExercise();
@@ -313,14 +332,14 @@ public:
 	void makeSSElElPredictionPlots(vector<int>, bool = false);
 	void makeSSElMuPredictionPlots(vector<int>, bool = false);
 	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Signal);
-	void NObs(gChannel, THStack *&, vector<int>, gRegion = Signal);
+	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Baseline);
+	void NObs(gChannel, THStack *&, vector<int>, gRegion = Baseline);
 	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
 	
 	void initCounters(gSample);
-	void storeNumbers(Sample*, gChannel);
+	void storeNumbers(Sample*, gChannel, gRegion);
 	void printCutFlows(TString);
 	void printCutFlow(gChannel, int, int);
 	void printCutFlowsOld(TString);
@@ -330,8 +349,7 @@ public:
 
 	//////////////////////////////
 	// Fillers
-	void fillYields(Sample*);
-	void fillOSYields(Sample*);
+	void fillYields(Sample*, gRegion);
 	void fillRatioPlots(Sample*);
 	void fillHWWPlots(Sample*);
 
@@ -375,6 +393,26 @@ public:
 	void printOriginSummary(int, gChannel);
 	void printOriginSummary2L(int, gChannel);
 
+	// Trigger selections:
+	bool  singleMuTrigger();
+	float singleMuPrescale();
+	bool  singleElTrigger();
+	float singleElPrescale();
+
+	bool mumuSignalTrigger();
+	bool elelSignalTrigger();
+	bool elmuSignalTrigger();
+
+	bool doubleMuTrigger();
+	bool doubleElTrigger();
+	bool eMuTrigger();
+
+	bool doubleMuHTTrigger();
+	bool doubleElHTTrigger();
+	bool eMuHTTrigger();
+	
+	bool isGoodRun(gSample);
+
 	// Event and Object selectors:
 	int getNJets();
 	float getHT();
@@ -385,6 +423,13 @@ public:
 	float getAwayJetPt(int, gChannel);
 	float getMaxJPt();
 	
+	int isSSLLEvent(int&, int&);
+	int isOSLLEvent(int&, int&);
+	int isSSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
+	int isOSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
+	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
+	vector<lepton> sortLeptonsByTypeAndPt(vector<lepton> &leptons);
+
 	bool isGoodEvent();
 	bool isGoodMuEvent();
 	int hasLooseMuons(int&, int&);
@@ -406,26 +451,6 @@ public:
 	bool passesAddLepVeto(int, int, int);
 
 
-	// Trigger selections:
-	bool  singleMuTrigger();
-	float singleMuPrescale();
-	bool  singleElTrigger();
-	float singleElPrescale();
-
-	bool mumuSignalTrigger();
-	bool elelSignalTrigger();
-	bool elmuSignalTrigger();
-
-	bool doubleMuTrigger();
-	bool doubleElTrigger();
-	bool eMuTrigger();
-
-	bool doubleMuHTTrigger();
-	bool doubleElHTTrigger();
-	bool eMuHTTrigger();
-	
-	bool isGoodRun(gSample);
-
 	bool isSigSupMuEvent();
 	bool isZMuMuEvent();
 
@@ -437,10 +462,6 @@ public:
 
 	bool isGenMatchedSUSYEEEvent();
 	bool isGenMatchedSUSYEMuEvent();
-
-	int isSSLLEvent(int&, int&);
-	int isOSLLEvent(int&, int&);
-	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 
 	bool isSSLLMuEvent(int&, int&);
 	bool isSSTTMuEvent(int&, int&);
