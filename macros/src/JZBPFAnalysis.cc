@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.10 $";
+string sjzbPFversion="$Revision: 1.11 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.11  2011/06/09 16:28:31  buchmann
+Removed jet-lepton cleaning for PF
+
 Revision 1.10  2011/06/09 15:55:07  buchmann
 Checked second occurrence. All fine
 
@@ -68,10 +71,15 @@ public:
   void reset();
 
   float mll; // di-lepton system
+  float recomll;
   float pfmll[particleflowtypes];
   float pt;
+  float recopt;
   float pfpt[particleflowtypes];
   float phi;
+  float recophi;
+  float eta;
+  float recoeta;
   float pfphi[particleflowtypes];
   float pfeta[particleflowtypes];
   bool is_data;
@@ -80,6 +88,9 @@ public:
   float pt2;
   float pfpt1[particleflowtypes]; // leading leptons
   float pfpt2[particleflowtypes];
+
+  float recopt1; // leading leptons
+  float recopt2;
 
   float genPt1; // leading legenPtons
   float genPt2;
@@ -114,12 +125,16 @@ public:
   float genMllSel;
   float genJZBSel;
   float eta1; // leading leptons
+  float recoeta1;
   float pfeta1[particleflowtypes];
   float eta2;
+  float recoeta2;
   float pfeta2[particleflowtypes];
   float phi1;
+  float recophi1;
   float pfphi1[particleflowtypes];
   float phi2;
+  float recophi2;
   float pfphi2[particleflowtypes];
   float dphi;
   float dphiZpfMet;
@@ -137,7 +152,6 @@ public:
   int ch2;
   int chid1; // old id (kostas convention)
   int chid2;
-
 
   int jetNum;
   int goodJetNum;
@@ -241,13 +255,19 @@ void nanoPFEvent::reset()
 {
 
   mll=0; // di-lepton system
+  recomll=0; // di-lepton system
   pt=0;
+  recopt=0;
   phi=0;
+  eta=0;
+  recophi=0;
 
   is_data=false;
 
   pt1=0;
+  recopt1=0;
   pt2=0;
+  recopt2=0;
   genPt1=0;
   genPt2=0;
   genEta1=0;
@@ -284,9 +304,13 @@ void nanoPFEvent::reset()
   trigger_bit = 0;
   
   eta1=0; // leading leptons
+  recoeta1=0; // leading leptons
   eta2=0;
+  recoeta2=0;
   phi1=0;
+  recophi1=0;
   phi2=0;
+  recophi2=0;
   dphiZpfMet=0;
   dphiZs1=0;
   dphiZs2=0;
@@ -499,10 +523,15 @@ cout << endl << endl;
 
   mypfTree->Branch("is_data",&npfEvent.is_data,"is_data/B");
   mypfTree->Branch("mll",&npfEvent.mll,"mll/F");
+  mypfTree->Branch("recomll",&npfEvent.recomll,"recomll/F");
   mypfTree->Branch("pt",&npfEvent.pt,"pt/F");
+  mypfTree->Branch("recopt",&npfEvent.recopt,"recopt/F");
   mypfTree->Branch("phi",&npfEvent.phi,"phi/F");
+  mypfTree->Branch("recophi",&npfEvent.recophi,"recophi/F");
   mypfTree->Branch("pt1",&npfEvent.pt1,"pt1/F");
+  mypfTree->Branch("recopt1",&npfEvent.recopt1,"recopt1/F");
   mypfTree->Branch("pt2",&npfEvent.pt2,"pt2/F");
+  mypfTree->Branch("recopt2",&npfEvent.recopt2,"recopt2/F");
   mypfTree->Branch("genPt1",&npfEvent.genPt1,"genPt1/F");
   mypfTree->Branch("genPt2",&npfEvent.genPt2,"genPt2/F");
   mypfTree->Branch("genEta1",&npfEvent.genEta1,"genEta1/F");
@@ -536,9 +565,13 @@ cout << endl << endl;
   mypfTree->Branch("genRecoilSel",&npfEvent.genRecoilSel,"genRecoilSel/F");
   mypfTree->Branch("genJZBSel",&npfEvent.genJZBSel,"genJZBSel/F");
   mypfTree->Branch("eta1",&npfEvent.eta1,"eta1/F");
+  mypfTree->Branch("recoeta1",&npfEvent.recoeta1,"recoeta1/F");
   mypfTree->Branch("eta2",&npfEvent.eta2,"eta2/F");
+  mypfTree->Branch("recoeta2",&npfEvent.recoeta2,"recoeta2/F");
   mypfTree->Branch("phi1",&npfEvent.phi1,"phi1/F");
+  mypfTree->Branch("recophi1",&npfEvent.recophi1,"recophi1/F");
   mypfTree->Branch("phi2",&npfEvent.phi2,"phi2/F");
+  mypfTree->Branch("recophi2",&npfEvent.recophi2,"recophi2/F");
   mypfTree->Branch("dphiZpfMet",&npfEvent.dphiZpfMet,"dphiZpfMet/F");
   mypfTree->Branch("dphiZs1",&npfEvent.dphiZs1,"dphiZs1/F");
   mypfTree->Branch("dphiZs2",&npfEvent.dphiZs2,"dphiZs2/F");
@@ -645,6 +678,9 @@ cout << endl << endl;
   mypfTree->Branch("pfpt",&npfEvent.pfpt,"pfpt[30]/F");
   mypfTree->Branch("pfphi",&npfEvent.pfphi,"pfphi[30]/F");
   mypfTree->Branch("pfeta",&npfEvent.pfeta,"pfeta[30]/F");
+  mypfTree->Branch("eta",&npfEvent.eta,"eta/F");
+  mypfTree->Branch("recoeta",&npfEvent.recoeta,"recoeta/F");
+  mypfTree->Branch("recoeta",&npfEvent.recoeta,"recoeta/F");
   mypfTree->Branch("pfpt1",&npfEvent.pfpt1,"pfpt1[30]/F");
   mypfTree->Branch("pfpt2",&npfEvent.pfpt2,"pfpt2[30]/F");
   mypfTree->Branch("pfphi1",&npfEvent.pfphi1,"pfphi1[30]/F");
@@ -1141,17 +1177,30 @@ void JZBPFAnalysis::Analyze() {
     }
     counters[EV].fill("... pass dilepton pt selection");
     
+    //Fil in PF information
+    npfEvent.pt1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Pt();
+    npfEvent.pt2=sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Pt();
+    npfEvent.phi1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Phi();
+    npfEvent.phi2=sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Phi();
+    npfEvent.eta1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Eta();
+    npfEvent.eta2=sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Eta();
+    npfEvent.mll=(sortedGoodPFLeptons[0][PfPosLepton1[0]].p+sortedGoodPFLeptons[0][PfPosLepton2[0]].p).M();
+    npfEvent.phi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].p+sortedGoodPFLeptons[0][PfPosLepton2[0]].p).Phi();
+    npfEvent.eta=(sortedGoodPFLeptons[0][PfPosLepton1[0]].p+sortedGoodPFLeptons[0][PfPosLepton2[0]].p).Eta();
+    npfEvent.pt=(sortedGoodPFLeptons[0][PfPosLepton1[0]].p+sortedGoodPFLeptons[0][PfPosLepton2[0]].p).Pt();
+
     //Fill the reco information
-    npfEvent.pt1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Pt();
-    npfEvent.pt2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Pt();
-    npfEvent.phi1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Phi();
-    npfEvent.phi2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Phi();
-    npfEvent.eta1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Eta();
-    npfEvent.eta2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Eta();
-    npfEvent.mll=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).M();
-    npfEvent.phi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Phi();
-    npfEvent.phi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Eta();
-    npfEvent.pt=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Pt();
+    npfEvent.recopt1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Pt();
+    npfEvent.recopt2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Pt();
+    npfEvent.recophi1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Phi();
+    npfEvent.recophi2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Phi();
+    npfEvent.recoeta1=sortedGoodPFLeptons[0][PfPosLepton1[0]].recop.Eta();
+    npfEvent.recoeta2=sortedGoodPFLeptons[0][PfPosLepton2[0]].recop.Eta();
+    npfEvent.recomll=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).M();
+    npfEvent.recophi=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Phi();
+    npfEvent.recoeta=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Eta();
+    npfEvent.recopt=(sortedGoodPFLeptons[0][PfPosLepton1[0]].recop+sortedGoodPFLeptons[0][PfPosLepton2[0]].recop).Pt();
+
     for(int ipf=0;ipf<particleflowtypes;ipf++) {
       if(dopf[ipf]&&sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Pt()>20&&sortedGoodPFLeptons[ipf][PfPosLepton2[ipf]].p.Pt()>20) {
 	npfEvent.pfpt1[ipf]=sortedGoodPFLeptons[ipf][PfPosLepton1[ipf]].p.Pt();
