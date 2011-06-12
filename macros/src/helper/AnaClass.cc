@@ -2187,8 +2187,6 @@ TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, 
 	if(draw) h1->Draw(drawopt);
 	return h1;
 }
-
-//____________________________________________________________________________
 TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* tree, bool draw, const char* drawopt){
 	int nbins_auto = nbins;
 	if(nbins == 0)	nbins_auto = OptNBins(tree->Draw(arg, reqs, "goff"));
@@ -2198,8 +2196,6 @@ TH1D* AnaClass::drawTree1D(const char* arg, const TCut reqs, const char* histn, 
 	if(draw) h1->Draw(drawopt);
 	return h1;
 }
-
-//____________________________________________________________________________
 TH2D* AnaClass::drawTree2D(const char* arg1, const char* arg2, const TCut reqs, const char* histn, const int nbinsx, const double xmin, const double xmax, const int nbinsy, const double ymin, const double ymax, TTree* tree, bool draw, const char* drawopt){
 	char out[1000];
 	int nbinsx_auto(nbinsx), nbinsy_auto(nbinsy);
@@ -2225,8 +2221,6 @@ TString AnaClass::convertVarName(const char* var){
 	}
 	else return outp;
 }
-
-//____________________________________________________________________________
 TString AnaClass::convertVarName2(const char* var){
 /*  - Removes bracket signs from filenames to enable saving as .eps files  */
 	TString out_str = TString(var);
@@ -2260,8 +2254,6 @@ for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
 }
 return ohist;
 }
-
-//____________________________________________________________________________
 TH2D* AnaClass::normHist(const TH2D *ihist){
 /*		-	Normalizes a histogram (incl. errors) to unit integral
 I.e. divides each entry by the integral									*/
@@ -2275,8 +2267,6 @@ for( int i = 0; i < ihist->GetNbinsX()+2; i++ ){
 }
 return ohist;
 }
-
-//____________________________________________________________________________
 TH1D* AnaClass::normHistBW(const TH1D *ihist, float scale){
 /*		-	Normalizes a histogram (incl. errors) with variable binwidth.
 			I.e. divides each entry by the binwidth									*/
@@ -2318,8 +2308,6 @@ void AnaClass::setPlottingRange(TH1D *&h1, float margin, bool logy){
 	h1->SetMinimum(min);
 	h1->SetMaximum(max);
 }
-
-//____________________________________________________________________________
 void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, float margin, bool logy){
 	// Determine plotting range
 	// Default margin is 0.05	
@@ -2354,8 +2342,6 @@ void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, float margin, bool logy){
 	h2->SetMinimum(min);
 	h2->SetMaximum(max);
 }
-
-//____________________________________________________________________________
 void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, TH1D *&h3, float margin, bool logy){
 	// Determine plotting range
 	// Default margin is 0.05
@@ -2397,8 +2383,6 @@ void AnaClass::setPlottingRange(TH1D *&h1, TH1D *&h2, TH1D *&h3, float margin, b
 	h3->SetMinimum(min);
 	h3->SetMaximum(max);
 }
-
-//____________________________________________________________________________
 void AnaClass::setPlottingRange(std::vector<TH1D*> &hists, float margin, bool logy){
 	// Determine plotting range
 	// Default margin is 0.05
@@ -2444,8 +2428,6 @@ float AnaClass::getMaxYExtension(TH1 *h){
 	}
 	return max;
 }
-
-//____________________________________________________________________________
 float AnaClass::getMinYExtension(TH1 *h){
 	float min = h->GetMinimum();
 	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
@@ -2548,6 +2530,20 @@ void AnaClass::refValues(const char* var, TH1D* h){
 }
 
 //____________________________________________________________________________
+void AnaClass::getWeightedYMeanRMS(TH1D *h, double &mean, double &rms){
+	vector<double> values;
+	vector<double> weights;
+	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
+		if(h->GetBinError(i) == 0.) continue;
+		values.push_back(h->GetBinContent(i));
+		weights.push_back(1./h->GetBinError(i));
+	}
+	mean = TMath::Mean(values.begin(), values.end(), weights.begin());
+	rms = TMath::RMS(values.begin(), values.end());
+	return;
+}
+
+//____________________________________________________________________________
 double AnaClass::tailFraction(TH1D* h, double frac){
 	double binValue = -999.;
 	int nbins = h->GetNbinsX();
@@ -2582,8 +2578,6 @@ double AnaClass::tailFraction(TH1D* h, double frac){
 
 	return binValue;
 }
-
-//____________________________________________________________________________
 void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
 // Prints the CheckList to file filename
 	ofstream file;
@@ -2636,8 +2630,6 @@ void AnaClass::printCheckList(const char* var, TH1D* h, const char* filename){
 		file << printRatio(var, h, 0., isoLow, 0., isoHigh) << endl;
 	}
 }
-
-//____________________________________________________________________________
 TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 // Prints the value of the variable for which frac remains in the tail
 
@@ -2679,8 +2671,6 @@ TString AnaClass::printTailFraction(const char* var, TH1D* h, double frac){
 	TString result = Form("  For %f of tail %s = %f +- %f", frac, var, binValue, dbinValue);
 	return result;
 }
-
-//____________________________________________________________________________
 TString AnaClass::printAverage(const char* var, TH1D* h) {
 // Prints the average of the histogram
 
@@ -2697,8 +2687,6 @@ TString AnaClass::printAverage(const char* var, TH1D* h) {
 	TString result = Form("  Mean value of %s = %f +- %f", var, aver, daver);
 	return result;
 }
-
-//____________________________________________________________________________
 TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2){
 // Prints the ratio of entries for which (x1<var<x2) / (y1<var<y2)
 

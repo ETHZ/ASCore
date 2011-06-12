@@ -294,6 +294,8 @@ public:
 	void makeIntPrediction(TString, gRegion);
 	void makeIntMCClosure(TString);
 	
+	void makeTTbarClosure();
+	
 	void printSyncExercise();
 	
 	//////////////////////////////
@@ -375,23 +377,23 @@ public:
 	void labelOriginAxis(TAxis*, gChannel);
 	void label2OriginAxes(TAxis*, TAxis*, gChannel);
 	
-	void printOrigins();
-	void printMuOriginTable();
+	void printOrigins(gRegion = Baseline);
+	void printMuOriginTable(gRegion = Baseline);
 	void printMuOriginHeader(TString);
-	void printMuOriginFromSample(Sample*, int);
-	void print2MuOriginsFromSample(Sample*, int);
+	void printMuOriginFromSample(Sample*, int, gRegion = Baseline);
+	void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline);
 
-	void printElOriginTable();
+	void printElOriginTable(gRegion = Baseline);
 	void printElOriginHeader(TString);
-	void printElOriginFromSample(Sample*, int);
-	void print2ElOriginsFromSample(Sample*, int);
+	void printElOriginFromSample(Sample*, int, gRegion = Baseline);
+	void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline);
 
-	void printEMuOriginTable();
+	void printEMuOriginTable(gRegion = Baseline);
 	void printEMuOriginHeader(TString);
-	void printEMuOriginsFromSample(Sample*, int);
+	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline);
 
-	void printOriginSummary(int, gChannel);
-	void printOriginSummary2L(int, gChannel);
+	void printOriginSummary(int, gChannel, gRegion = Baseline);
+	void printOriginSummary2L(int, gChannel, gRegion = Baseline);
 
 	// Trigger selections:
 	bool  singleMuTrigger();

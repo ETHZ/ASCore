@@ -131,8 +131,10 @@ public:
 	virtual void printProgress(int, const int, TString, const int = -1);
 	virtual TString numbForm(double);
 	virtual int getExp(double e);
-	
 	virtual void refValues(const char* var, TH1D* h);
+
+	virtual void getWeightedYMeanRMS(TH1D*, double&, double&);
+
 	virtual double tailFraction(TH1D* h, double frac);
 	virtual void printCheckList(const char* var, TH1D* h, const char* filename);
 	virtual TString printTailFraction(const char* var, TH1D* h, double frac);
