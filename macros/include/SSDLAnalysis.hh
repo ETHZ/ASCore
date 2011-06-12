@@ -52,11 +52,9 @@ private:
 	Monitor fCounter;
 	string fCutnames[4];
 
-	static const int fMaxNjets = 30;
+	static const int fMaxNjets = 40;
 	static const int fMaxNmus  = 5;
 	static const int fMaxNeles = 5;
-	
-	static const int gMaxhltbits = 300;
 	
 	static TString gBaseDir;
 	

@@ -8,7 +8,6 @@ using namespace std;
 const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
-const int SSDLAnalysis::gMaxhltbits;
 
 TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
