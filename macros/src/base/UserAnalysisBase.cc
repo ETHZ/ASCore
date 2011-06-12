@@ -466,7 +466,7 @@ bool UserAnalysisBase::IsGoodEvent(){
 	if (fTR->PrimVtxIsFake) return false;
 	if (fabs(pvz) > 24.) return false;
 	if (sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
-	if (fTR->PrimVtxNdof < 5) return false;
+	if (fTR->PrimVtxNdof < 4.0) return false; // this is a float, cut value at 4.0
 	return true;
 }
 
