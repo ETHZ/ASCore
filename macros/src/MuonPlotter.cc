@@ -4389,8 +4389,8 @@ void MuonPlotter::makeIntMCClosure(TString filename){
 }
 
 void MuonPlotter::makeTTbarClosure(){
-	// TString filename = "TTbarClosure.txt";
-	// ofstream OUT(fOutputDir + filename.Data(), ios::trunc);
+	TString filename = "TTbarClosure.txt";
+	ofstream OUT(fOutputDir + filename.Data(), ios::trunc);
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// RATIOS /////////////////////////////////////////////////////////////////////////
@@ -4573,58 +4573,58 @@ void MuonPlotter::makeTTbarClosure(){
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	cout << "---------------------------------------------------------------------------------------------------------" << endl;
-	cout << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
-	cout << "---------------------------------------------------------------------------------------------------------" << endl;
-	cout << setw(16) << "        allMC    ||";
-	cout << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
-	cout << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
-	cout << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
-	cout << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
-	cout << endl;
-	cout << "---------------------------------------------------------------------------------------------------------" << endl << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
-	cout << "                 ||       Mu/Mu       ||        E/Mu       ||       Mu/E        ||        E/E        ||" << endl;
-	cout << "                 ||    Nt   |    Nl   ||    Nt   |   Nl    ||    Nt   |   Nl    ||    Nt   |   Nl    ||" << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
-	cout << setw(16) << "Observed" << " || ";
-	cout << setw(7)  << numbForm(nt_mm) << " | ";
-	cout << setw(7)  << numbForm(nl_mm) << " || ";
-	cout << setw(7)  << numbForm(nt_em) << " | ";
-	cout << setw(7)  << numbForm(nl_em) << " || ";
-	cout << setw(7)  << numbForm(nt_me) << " | ";
-	cout << setw(7)  << numbForm(nl_me) << " || ";
-	cout << setw(7)  << numbForm(nt_ee) << " | ";
-	cout << setw(7)  << numbForm(nl_ee) << " || ";
-	cout << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
-	cout << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
-	cout << "                 ||    Np   |    Nf   ||    Np   |    Nf   ||    Np   |    Nf   ||    Np   |    Nf   ||" << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
-	cout << setw(16) << "MC Truth" << " || ";
-	cout << setw(7)  << numbForm(np_mm) << " | ";
-	cout << setw(7)  << numbForm(nf_mm) << " || ";
-	cout << setw(7)  << numbForm(np_em) << " | ";
-	cout << setw(7)  << numbForm(nf_em) << " || ";
-	cout << setw(7)  << numbForm(np_me) << " | ";
-	cout << setw(7)  << numbForm(nf_me) << " || ";
-	cout << setw(7)  << numbForm(np_ee) << " | ";
-	cout << setw(7)  << numbForm(nf_ee) << " || ";
-	cout << endl;
-	cout << setw(16) << "Predicted" << " || ";
-	cout << setw(7)  << numbForm(MM_Nev[0]) << " | ";
-	cout << setw(7)  << numbForm(MM_Nev[1]) << " || ";
-	cout << setw(7)  << numbForm(EM_Nev[0]) << " | ";
-	cout << setw(7)  << numbForm(EM_Nev[1]) << " || ";
-	cout << setw(7)  << numbForm(ME_Nev[0]) << " | ";
-	cout << setw(7)  << numbForm(ME_Nev[1]) << " || ";
-	cout << setw(7)  << numbForm(EE_Nev[0]) << " | ";
-	cout << setw(7)  << numbForm(EE_Nev[1]) << " || ";
-	cout << endl;
-	cout << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "        allMC    ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
+	OUT << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 ||       Mu/Mu       ||        E/Mu       ||       Mu/E        ||        E/E        ||" << endl;
+	OUT << "                 ||    Nt   |    Nl   ||    Nt   |   Nl    ||    Nt   |   Nl    ||    Nt   |   Nl    ||" << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "Observed" << " || ";
+	OUT << setw(7)  << numbForm(nt_mm) << " | ";
+	OUT << setw(7)  << numbForm(nl_mm) << " || ";
+	OUT << setw(7)  << numbForm(nt_em) << " | ";
+	OUT << setw(7)  << numbForm(nl_em) << " || ";
+	OUT << setw(7)  << numbForm(nt_me) << " | ";
+	OUT << setw(7)  << numbForm(nl_me) << " || ";
+	OUT << setw(7)  << numbForm(nt_ee) << " | ";
+	OUT << setw(7)  << numbForm(nl_ee) << " || ";
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 ||    Np   |    Nf   ||    Np   |    Nf   ||    Np   |    Nf   ||    Np   |    Nf   ||" << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "MC Truth" << " || ";
+	OUT << setw(7)  << numbForm(np_mm) << " | ";
+	OUT << setw(7)  << numbForm(nf_mm) << " || ";
+	OUT << setw(7)  << numbForm(np_em) << " | ";
+	OUT << setw(7)  << numbForm(nf_em) << " || ";
+	OUT << setw(7)  << numbForm(np_me) << " | ";
+	OUT << setw(7)  << numbForm(nf_me) << " || ";
+	OUT << setw(7)  << numbForm(np_ee) << " | ";
+	OUT << setw(7)  << numbForm(nf_ee) << " || ";
+	OUT << endl;
+	OUT << setw(16) << "Predicted" << " || ";
+	OUT << setw(7)  << numbForm(MM_Nev[0]) << " | ";
+	OUT << setw(7)  << numbForm(MM_Nev[1]) << " || ";
+	OUT << setw(7)  << numbForm(EM_Nev[0]) << " | ";
+	OUT << setw(7)  << numbForm(EM_Nev[1]) << " || ";
+	OUT << setw(7)  << numbForm(ME_Nev[0]) << " | ";
+	OUT << setw(7)  << numbForm(ME_Nev[1]) << " || ";
+	OUT << setw(7)  << numbForm(EE_Nev[0]) << " | ";
+	OUT << setw(7)  << numbForm(EE_Nev[1]) << " || ";
+	OUT << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------" << endl;
 	
-	// OUT.close();
+	OUT.close();
 	delete fMMFPRatios;
 	delete fEMFPRatios;
 	delete fMEFPRatios;
@@ -7382,45 +7382,27 @@ bool MuonPlotter::elmuSignalTrigger(){
 bool MuonPlotter::singleMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
-	return ( (HLT_Mu8_Jet40_v1 > 0) || 
-	         (HLT_Mu8_Jet40_v2 > 0) ||
-	         (HLT_Mu8_Jet40_v3 > 0) ||
-	         (HLT_Mu8_Jet40_v4 > 0) ||
-	         (HLT_Mu8_Jet40_v5 > 0) ||
-	         (HLT_Mu8_Jet40_v6 > 0) );
+	return (HLT_MU8_JET40 > 0);
 }
 float MuonPlotter::singleMuPrescale(){
 	// Pretend MC samples have prescale 1.
 	if(fSamples[fCurrentSample]->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	if( HLT_Mu8_Jet40_v1 > 0 ) return HLT_Mu8_Jet40_v1_PS;
-	if( HLT_Mu8_Jet40_v2 > 0 ) return HLT_Mu8_Jet40_v2_PS;
-	if( HLT_Mu8_Jet40_v3 > 0 ) return HLT_Mu8_Jet40_v3_PS;
-	if( HLT_Mu8_Jet40_v4 > 0 ) return HLT_Mu8_Jet40_v4_PS;
-	if( HLT_Mu8_Jet40_v5 > 0 ) return HLT_Mu8_Jet40_v5_PS;
-	if( HLT_Mu8_Jet40_v6 > 0 ) return HLT_Mu8_Jet40_v6_PS;
-	return 1.;
+	if(HLT_MU8_JET40_PS > 0) return HLT_MU8_JET40_PS;
+	return 1;
 }
 bool MuonPlotter::singleElTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
-	return ( (HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1 > 0) || 
-	         (HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2 > 0) ||
-	         (HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3 > 0) ||
-	         (HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4 > 0) ||
-	         (HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5 > 0) );
+	return (HLT_ELE8_JET40 > 0);
 }
 float MuonPlotter::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
 	if(fSamples[fCurrentSample]->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
-	if( HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1 > 0 ) return HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1_PS;
-	if( HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2 > 0 ) return HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2_PS;
-	if( HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3 > 0 ) return HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3_PS;
-	if( HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4 > 0 ) return HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4_PS;
-	if( HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5 > 0 ) return HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5_PS;
+	if( HLT_ELE8_JET40_PS > 0 ) return HLT_ELE8_JET40_PS;
 	return 1.;
 }
 
@@ -7430,12 +7412,7 @@ bool MuonPlotter::doubleMuTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleMu1 && fCurrentSample != DoubleMu2) return false;
 
-	return ( (HLT_DoubleMu6_v1 > 0) || 
-	         (HLT_DoubleMu6_v2 > 0) ||
-	         (HLT_DoubleMu6_v3 > 0) ||
-	         (HLT_DoubleMu7_v1 > 0) ||
-	         (HLT_DoubleMu7_v2 > 0) ||
-	         (HLT_DoubleMu7_v3 > 0) );
+	return (HLT_MU13_MU8 > 0);
 }
 bool MuonPlotter::doubleElTrigger(){
 	// Pretend MC samples always fire trigger
@@ -7443,11 +7420,7 @@ bool MuonPlotter::doubleElTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleEle1 && fCurrentSample != DoubleEle2) return false;
 
-	return ( (HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1 > 0) || 
-	         (HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2 > 0) ||
-	         (HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3 > 0) ||
-	         (HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4 > 0) ||
-	         (HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5 > 0) );
+	return (HLT_ELE17_ELE8 > 0);
 }
 bool MuonPlotter::doubleMuHTTrigger(){
 	// Pretend MC samples always fire trigger
@@ -7455,11 +7428,7 @@ bool MuonPlotter::doubleMuHTTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleMu1 && fCurrentSample != DoubleMu2) return false;
 
-	return ( (HLT_DoubleMu3_HT160_v2 > 0) || 
-	         (HLT_DoubleMu3_HT160_v3 > 0) ||
-	         (HLT_DoubleMu3_HT150_v1 > 0) ||
-	         (HLT_DoubleMu3_HT150_v2 > 0) ||
-	         (HLT_DoubleMu3_HT150_v3 > 0) );
+	return (HLT_DOUBLEMU3_HT160 > 0);
 }
 bool MuonPlotter::doubleElHTTrigger(){
 	// Pretend MC samples always fire trigger
@@ -7467,28 +7436,15 @@ bool MuonPlotter::doubleElHTTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleEle1 && fCurrentSample != DoubleEle2) return false;
 
-	return ( (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1 > 0) || 
-	         (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2 > 0) ||
-	         (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3 > 0) ||
-	         (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1 > 0) ||
-	         (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v2 > 0) ||
-	         (HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v3 > 0) );
+	return (HLT_DOUBLEELE8_HT160 > 0);
 }
 bool MuonPlotter::eMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != MuEG1 && fCurrentSample != MuEG2) return false;
-	return ( (HLT_Mu17_Ele8_CaloIdL_v1 > 0) || 
-	         (HLT_Mu17_Ele8_CaloIdL_v2 > 0) ||
-	         (HLT_Mu17_Ele8_CaloIdL_v3 > 0) ||
-	         (HLT_Mu17_Ele8_CaloIdL_v4 > 0) ||
-	         (HLT_Mu17_Ele8_CaloIdL_v5 > 0) ||
-	         (HLT_Mu8_Ele17_CaloIdL_v1 > 0) ||
-	         (HLT_Mu8_Ele17_CaloIdL_v2 > 0) ||
-	         (HLT_Mu8_Ele17_CaloIdL_v3 > 0) ||
-	         (HLT_Mu8_Ele17_CaloIdL_v4 > 0) ||
-	         (HLT_Mu8_Ele17_CaloIdL_v5 > 0) );
+	return ( (HLT_MU17_ELE8 > 0) || 
+	         (HLT_MU8_ELE17 > 0) );
 }
 bool MuonPlotter::eMuHTTrigger(){
 	// Pretend MC samples always fire trigger
@@ -7496,12 +7452,7 @@ bool MuonPlotter::eMuHTTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != MuEG1 && fCurrentSample != MuEG2) return false;
 
-	return ( (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1 > 0) || 
-	         (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2 > 0) ||
-	         (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3 > 0) ||
-	         (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1 > 0) ||
-	         (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v2 > 0) ||
-	         (HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v3 > 0) );
+	return (HLT_MU3_ELE8_HT160 > 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
