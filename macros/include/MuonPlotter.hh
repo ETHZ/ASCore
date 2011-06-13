@@ -392,8 +392,8 @@ public:
 	void printEMuOriginHeader(TString);
 	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline);
 
-	void printOriginSummary(int, gChannel, gRegion = Baseline);
-	void printOriginSummary2L(int, gChannel, gRegion = Baseline);
+	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline);
+	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline);
 
 	// Trigger selections:
 	bool  singleMuTrigger();
