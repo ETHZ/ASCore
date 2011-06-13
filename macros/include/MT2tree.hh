@@ -69,8 +69,9 @@ public:
 	Double_t PtHat;
 	Double_t Weight;
   	Int_t    NVertices;  // good reco vertices
+	Double_t Rho;
 
-	ClassDef(MT2PileUp, 1);
+	ClassDef(MT2PileUp, 2);
 };
 
 // --------------------------------
@@ -210,7 +211,9 @@ public:
   Int_t    NeuMult;
   Int_t    NConstituents;
 
-  Double_t Scale;      // scale factor from JE correction
+  Double_t Scale;          // scale factor from JE correction
+  Double_t L1FastJetScale; // correction factor from raw to L1FastJetcorrected
+  Double_t Area;
   
   Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
   Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
@@ -218,7 +221,7 @@ public:
   Double_t TauDPt;
   Int_t    NTauMatch;
 
-  ClassDef(MT2Jet, 8)
+  ClassDef(MT2Jet, 9)
 };
 
 // MT2Hemi ---------------------------
@@ -380,6 +383,7 @@ public:
   Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=0, double minJPt=20, double maxJEta=2.4,int met=1);
   Double_t GetMaxHemiMass(int hemi_index=0);
   Double_t PseudoJetPtRatio();
+  Double_t HemiMassTop();
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);

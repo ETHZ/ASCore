@@ -70,8 +70,9 @@ MT2PileUp::~MT2PileUp(){
 
 void MT2PileUp::Reset(){
 	PUnumInt  = -999;
-	PtHat     = -999.99;;
+	PtHat     = -999.99;
 	Weight    = -999.99;
+	Rho       = -999.99;
   	NVertices = -1;
 }
 
@@ -209,6 +210,8 @@ void MT2Jet::Reset() {
   NConstituents = -1;
 
   Scale         = -99999.99; // correction factor
+  L1FastJetScale= -99999.99; // correction factor from raw to L1FastJetcorrected
+  Area          = -99999.99;
   
   isTau         = 0;  // starting from ntuple V02-01-01: this has to be 0! 
   isTauMatch    = 0;  // tell you if the jet is matched to a tau.
@@ -1461,6 +1464,13 @@ Int_t MT2tree::WDecayMode(){
 Double_t MT2tree::PseudoJetPtRatio(){
 	if(hemi[1].lv1.Pt() > hemi[1].lv2.Pt()) return hemi[1].lv2.Pt()/hemi[1].lv1.Pt();
 	else return hemi[1].lv1.Pt()/hemi[1].lv2.Pt();
+}
+
+Double_t MT2tree::HemiMassTop(){
+	Double_t M1    =hemi[1].lv1.M();
+	Double_t M2    =hemi[1].lv2.M();
+	if(fabs(M1-172)<fabs(M2-172)) return M1;
+	else                          return M2;
 }
 
 ClassImp(MT2Misc)
