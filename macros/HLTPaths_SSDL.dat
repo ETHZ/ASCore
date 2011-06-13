@@ -20,13 +20,16 @@ Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5
 # Signal regions:
 # high pT
 PATHSET
-Name	HLT_MU13_MU8
+Name	HLT_DOUBLEMU7
 Path	HLT_DoubleMu6_v1
 Path	HLT_DoubleMu6_v2
 Path	HLT_DoubleMu6_v3
 Path	HLT_DoubleMu7_v1
 Path	HLT_DoubleMu7_v2
 Path	HLT_DoubleMu7_v3
+
+PATHSET
+Name	HLT_MU13_MU8
 Path	HLT_Mu13_Mu8_v1
 Path	HLT_Mu13_Mu8_v2
 
