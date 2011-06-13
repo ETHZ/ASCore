@@ -430,36 +430,37 @@ void MuonPlotter::doAnalysis(){
 	// // fLumiNorm = 43.5;
 	// // fLumiNorm = 152.9;
 	// // fLumiNorm = 191.1;
+	fLumiNorm = 349.;
 	// fLumiNorm = 410.;
-	fLumiNorm = 1000.;
-	// 
+	// fLumiNorm = 1000.;
+
 	makeTTbarClosure();
-	// makeHWWPlots();
-	// 
-	// printOrigins();
-	// makeMuIsolationPlots();
-	// makeElIsolationPlots();
-	// makeNT2KinPlots();
-	// 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Electron);
-	// 
-	// makeFRvsPtPlots(Muon,     SigSup);
-	// makeFRvsPtPlots(Electron, SigSup);
-	// makeFRvsPtPlots(Muon,     ZDecay);
-	// makeFRvsPtPlots(Electron, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Electron);
-	// 
-	// makeMufRatioPlots(false);
-	// makeMupRatioPlots(false);
-	// makeElfRatioPlots(false);
-	// makeElpRatioPlots(false);
-	// 
-	// for(size_t i = 0; i < gNREGIONS; ++i){
-	// 	TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
-	// 	makeIntPrediction(outputname, gRegion(i));
-	// }
+	makeHWWPlots();
+	
+	printOrigins();
+	makeMuIsolationPlots();
+	makeElIsolationPlots();
+	makeNT2KinPlots();
+	
+	makeRatioPlots(Muon);
+	makeRatioPlots(Electron);
+	
+	makeFRvsPtPlots(Muon,     SigSup);
+	makeFRvsPtPlots(Electron, SigSup);
+	makeFRvsPtPlots(Muon,     ZDecay);
+	makeFRvsPtPlots(Electron, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Electron);
+	
+	makeMufRatioPlots(false);
+	makeMupRatioPlots(false);
+	makeElfRatioPlots(false);
+	makeElpRatioPlots(false);
+	
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
+		makeIntPrediction(outputname, gRegion(i));
+	}
 
 	// makeIntMCClosure( fOutputDir + "MCClosure.txt");	
 	// makeMCClosurePlots(fMCBG);
@@ -668,9 +669,7 @@ void MuonPlotter::doLoop(){
 			fCounters[fCurrentSample][EMu]     .fill(" ... is good run");
 			fCounters[fCurrentSample][Electron].fill(" ... is good run");
 
-			for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r);
-
-			// Revert event selections to baseline:
+			// Set event selections to baseline:
 			fC_minMu1pt = Region::minMu1pt[Baseline];
 			fC_minMu2pt = Region::minMu2pt[Baseline];
 			fC_minEl1pt = Region::minEl1pt[Baseline];
@@ -684,6 +683,8 @@ void MuonPlotter::doLoop(){
 			fillKinPlots(i);
 			fillMuIsoPlots(i);
 			fillElIsoPlots(i);
+
+			for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r);
 		}
 		cout << endl;
 
@@ -5117,7 +5118,8 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg){
 	///////////////////////////////////////////////////
 	// SS YIELDS
 	// MuMu Channel
-	fDoCounting = true;
+	if(reg == Baseline) fDoCounting = true;
+	else fDoCounting = false;
 	fCurrentChannel = Muon;
 	float puweight = PUWeight;
 	int mu1(-1), mu2(-1);
@@ -7412,7 +7414,8 @@ bool MuonPlotter::doubleMuTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleMu1 && fCurrentSample != DoubleMu2) return false;
 
-	return (HLT_MU13_MU8 > 0);
+	return ( (HLT_DOUBLEMU7 > 0) || 
+	         (HLT_MU13_MU8  > 0) );
 }
 bool MuonPlotter::doubleElTrigger(){
 	// Pretend MC samples always fire trigger
@@ -7420,7 +7423,8 @@ bool MuonPlotter::doubleElTrigger(){
 	// Only apply this on the DoubleMu dataset!
 	if(fCurrentSample != DoubleEle1 && fCurrentSample != DoubleEle2) return false;
 
-	return (HLT_ELE17_ELE8 > 0);
+	return ( (HLT_ELE17_ELE8       > 0) ||
+	         (HLT_ELE17_ELE8_TIGHT > 0) );
 }
 bool MuonPlotter::doubleMuHTTrigger(){
 	// Pretend MC samples always fire trigger

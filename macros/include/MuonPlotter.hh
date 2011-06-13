@@ -522,7 +522,6 @@ private:
 	gChannel fCurrentChannel;
 	int fCurrentRun;
 	ofstream fOUTSTREAM, fOUTSTREAM2;
-	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
