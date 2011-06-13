@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Jun 13 09:52:18 2011 by ROOT version 5.27/06b
+// Mon Jun 13 14:12:43 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/Jun13/DoubleMu-Run2011A-PromptReco-v4-AOD.root
+// found on file: /scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -25,6 +25,8 @@ public :
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
    Int_t           HLT_ELE8_JET40_PS;
+   Int_t           HLT_DOUBLEMU7;
+   Int_t           HLT_DOUBLEMU7_PS;
    Int_t           HLT_MU13_MU8;
    Int_t           HLT_MU13_MU8_PS;
    Int_t           HLT_ELE17_ELE8;
@@ -98,6 +100,8 @@ public :
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
    TBranch        *b_HLT_ELE8_JET40_PS;   //!
+   TBranch        *b_HLT_DOUBLEMU7;   //!
+   TBranch        *b_HLT_DOUBLEMU7_PS;   //!
    TBranch        *b_HLT_MU13_MU8;   //!
    TBranch        *b_HLT_MU13_MU8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8;   //!
@@ -182,9 +186,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/Jun13/DoubleMu-Run2011A-PromptReco-v4-AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root");
       if (!f) {
-         f = new TFile("SSDLTrees/Jun13/DoubleMu-Run2011A-PromptReco-v4-AOD.root");
+         f = new TFile("/scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -242,6 +246,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
    fChain->SetBranchAddress("HLT_ELE8_JET40_PS", &HLT_ELE8_JET40_PS, &b_HLT_ELE8_JET40_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEMU7", &HLT_DOUBLEMU7, &b_HLT_DOUBLEMU7);
+   fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
    fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
    fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
