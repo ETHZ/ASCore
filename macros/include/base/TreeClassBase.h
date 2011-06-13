@@ -40,10 +40,10 @@ public :
    Float_t         PUnTrksHighPt[50];   //[PUnumInteractions]
    Float_t         Rho;
    Float_t         Weight;
-   Int_t           HLTResults[200];
+   Int_t           HLTResults[400];
    Int_t           L1PhysResults[128];
    Int_t           L1TechResults[64];
-   Int_t           HLTPrescale[200];
+   Int_t           HLTPrescale[400];
    Int_t           NHLTObjs;
    Int_t           HLTObjectID[7][10];
    Float_t         HLTObjectPt[7][10];
