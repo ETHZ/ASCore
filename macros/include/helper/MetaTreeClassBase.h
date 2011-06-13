@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Jun 13 14:12:43 2011 by ROOT version 5.27/06b
+// Mon Jun 13 14:53:10 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: /scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -31,6 +31,8 @@ public :
    Int_t           HLT_MU13_MU8_PS;
    Int_t           HLT_ELE17_ELE8;
    Int_t           HLT_ELE17_ELE8_PS;
+   Int_t           HLT_ELE17_ELE8_TIGHT;
+   Int_t           HLT_ELE17_ELE8_TIGHT_PS;
    Int_t           HLT_MU17_ELE8;
    Int_t           HLT_MU17_ELE8_PS;
    Int_t           HLT_MU8_ELE17;
@@ -106,6 +108,8 @@ public :
    TBranch        *b_HLT_MU13_MU8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8;   //!
    TBranch        *b_HLT_ELE17_ELE8_PS;   //!
+   TBranch        *b_HLT_ELE17_ELE8_TIGHT;   //!
+   TBranch        *b_HLT_ELE17_ELE8_TIGHT_PS;   //!
    TBranch        *b_HLT_MU17_ELE8;   //!
    TBranch        *b_HLT_MU17_ELE8_PS;   //!
    TBranch        *b_HLT_MU8_ELE17;   //!
@@ -186,9 +190,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root");
       if (!f) {
-         f = new TFile("/scratch/stiegerb/SSDLTrees/Jun13a/DoubleMu-Run2011A-PromptReco-v4-AOD_2.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -252,6 +256,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
+   fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
+   fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT_PS", &HLT_ELE17_ELE8_TIGHT_PS, &b_HLT_ELE17_ELE8_TIGHT_PS);
    fChain->SetBranchAddress("HLT_MU17_ELE8", &HLT_MU17_ELE8, &b_HLT_MU17_ELE8);
    fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
    fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
