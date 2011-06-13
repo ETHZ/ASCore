@@ -26,7 +26,17 @@ public:
 	vector<int> fTaus;
 	vector<int> fMuons;
 	vector<int> fJets;
-	
+
+	//pfJetID
+	bool IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut);
+	bool IsGoodPFJetMediumPAT3(int index, double ptcut, double absetacut);
+	bool IsGoodPFJetTightPAT3(int index, double ptcut, double absetacut);
+
+	// jets
+	TLorentzVector Jet(int index);
+	TLorentzVector CAJet(int index);
+	TLorentzVector JetJESScaled(TLorentzVector j);
+	TLorentzVector MET();
 	
 	struct JetTau {
 		int NObjs;
@@ -50,28 +60,33 @@ public:
 	//  ---- set of cuts ---
 	TString fSetName;
 	float fCut_PFMET_min;
-	float fCut_MHT_min;
 	float fCut_HT_min;
+	float fCut_caloHT50_min;
+	float fCut_caloHT50ID_min;
+	float fCut_caloMHT30_min;
+	float fCut_caloMHT30ID_min;
 	float fCut_JPt_hardest_min;
 	float fCut_JPt_second_min;
-	float fCut_VSPT;
 	float fCut_DiLeptInvMass_min;
 	float fCut_DiLeptInvMass_max;
-	float fCut_DiLeptOSSFInvMass_lowercut;
-	float fCut_DiLeptOSSFInvMass_uppercut;
 	float fCut_PtHat_max;
-	int   fCut_Zselector;
-	int   fCut_Zveto;
 	int   fCut_Run_min;
 	int   fCut_Run_max;
-	int   fCut_ElectronTrigger;
-	int   fCut_MuonTrigger;
+	bool  fDoJESUncertainty;
+	float fJESScale;
 
 	// members
-	float fVectorSumPt;
-	float fMHTall;
 	float fHT;
-	int   fNJetsAcc;
+	float fCaloHT50;
+	float fCaloHT50_ID;
+	float fCaloMHT30;
+	float fCaloMHT30_ID;
+
+	int   fCounter;
+	
+	bool  fCrazyHCAL;
+	bool  fIsNANObj;
+	bool  fNegativeJEC;
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 
