@@ -4,6 +4,7 @@
 #include "TreeReader.hh"
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
+#include "helper/PUWeight.h"
 #include <map>
 #include <string>
 
@@ -18,6 +19,7 @@ public:
     	virtual void End() {}
 	inline virtual void SetTag(TString tag){fTag = tag;};
 	inline virtual void SetVerbose(int verbose){fVerbose = verbose;};
+	inline virtual void SetData(bool isdata){fIsData = isdata;};
 
 	inline void SetOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	inline void SetOutputFile(TString file){ fOutputFile = Util::MakeOutputFile(fOutputDir + file); };
@@ -27,13 +29,20 @@ public:
 	virtual void GetHLTNames(Int_t& run);
 	virtual int GetHLTBit(string);
 	virtual bool GetHLTResult(string);
+	virtual int GetHLTPrescale(string);
+
+	// PileUp reweighting;
+	virtual void  SetPileUpSrc(string, string = "");
+	virtual float GetPUWeight(int);
 
 	TreeReader *fTR;
 	TString fOutputDir;
 	TFile *fOutputFile;
 	TString fTag;
 	TLatex *fTlat;
-	
+
+	bool fIsData;
+
 	int fVerbose;
 	map<int, pdgparticle> fPDGMap; // Mapping of PDG ID names
 	map<string, int> fHLTLabelMap; // Mapping of HLT trigger bit names
@@ -56,19 +65,12 @@ public:
 	virtual bool IsLooseNoTightMu(int);
 
 	// Electron Selectors
-	virtual bool IsGoodBasicEl		(int);
-	virtual bool IsElInGap(int);
-	virtual bool IsElFromPrimaryVx	(int);
-
-	virtual bool IsGoodElId_WP80	(int);
-	virtual bool IsGoodElId_WP90	(int);
-
-	virtual bool IsTightEl			(int);
-	virtual bool IsLooseEl			(int);
-	virtual bool IsLooseNoTightEl	(int);
-	
-	virtual double hybRelElIso		(int);
-	virtual bool IsIsolatedEl		(int, double, double);
+	virtual bool IsGoodBasicEl(int);
+	virtual bool IsGoodElId_WP80(int);
+	virtual bool IsGoodElId_WP90(int);
+	virtual bool ElPassesWP80_ConvRej(int);
+	virtual bool IsLooseEl(int);
+	virtual float relElIso(int);
 
 	// Photon Selectors
 	virtual bool IsGoodBasicPho(int);
@@ -115,6 +117,11 @@ private:
 	std::vector<Cut> fElCuts;
 	std::vector<Cut> fJetCuts;
 	std::vector<Cut> fEvtSelCuts;
+	
+	// Pile UP reweighting
+	bool fDoPileUpReweight;
+	PUWeight  *fPUWeight;
+
 };
 
 #endif
