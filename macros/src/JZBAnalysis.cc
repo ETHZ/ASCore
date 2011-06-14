@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.33 $";
+string sjzbversion="$Revision: 1.34 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.34  2011/06/14 15:02:08  buchmann
+Updated Electron Paths
+
 Revision 1.33  2011/06/09 07:46:47  buchmann
 Adapted cuts and added counters for PF
 
@@ -720,6 +723,8 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
   return false;
 } 
 
