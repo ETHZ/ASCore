@@ -5,8 +5,9 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=10};
+enum {m_jetSize = 40, m_genjetSize = 20, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=4};
 // ele and muo are 15 previous to MT2_V00-02-03
+// hemi size was 10 previos to MT2_V00-05-00
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -224,6 +225,23 @@ public:
   ClassDef(MT2Jet, 9)
 };
 
+// MT2GenJet -------------------------
+class MT2GenJet : public TObject {
+
+public:
+  MT2GenJet();
+  virtual ~MT2GenJet();
+
+  void Reset();
+  TLorentzVector lv;
+  
+  Int_t    JetMatchIndex;
+  Double_t DeltaR;
+
+  ClassDef(MT2GenJet, 1)
+};
+
+
 // MT2Hemi ---------------------------
 class MT2Hemi : public TObject {
 
@@ -333,6 +351,7 @@ public:
   void Reset();
 
   void SetNJets         (int n);
+  void SetNGenJets      (int n);
   void SetNJetsIDLoose  (int n);
   void SetNJetsIDMedium (int n);
   void SetNJetsIDTight  (int n);
@@ -408,6 +427,7 @@ public:
   Double_t SLTopEta(double pt);
 
   Int_t     NJets;
+  Int_t     NGenJets;
   Int_t     NJetsIDLoose;
   Int_t     NJetsIDMedium;
   Int_t     NJetsIDTight;
@@ -423,6 +443,7 @@ public:
   MT2PileUp      pileUp;
   MT2Trigger     trigger;
   MT2Jet         jet[m_jetSize];
+  MT2GenJet      genjet[m_genjetSize];
   MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];
   MT2Muon        muo[m_muoSize];
@@ -434,7 +455,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 17)
+  ClassDef(MT2tree, 18)
 };
 
 #endif

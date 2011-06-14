@@ -87,7 +87,7 @@ void MassAnalysis::Analyze(){
 	ResetTree();
 
 	// -----------------------------------------------------------
-	// fill fHemiObjects1,2,3
+	// fill fHemiObjects
 	for(int i=0; i<gNHemispheres; ++i){ fHemiObjects[i].Reset();}
 	   // ************************************************* //
 	   // changes here affect misc.MT2 type variables !!!!  //
@@ -99,24 +99,13 @@ void MassAnalysis::Analyze(){
 	// seed: max inv mass, assoc: minimal lund distance, no dR cut (i.e. third parameter is 0), JETID enforced
 	GetMT2Variables(2, 3, 0.0, 20, 2.4, 1,  fHemiObjects[1]); 
 	
-     	// MT2 for two leading jets, maxdR=0.1, i.e. smaller than jet cone size
-	GetMT2Variables(4, 3, 0.1, 20, 2.4, 0,  fHemiObjects[2]); 
-
-	// seed: leading jets, assoc: minimal lund distance, maxdR=1
-	GetMT2Variables(4, 3, 1.0, 20, 2.4, 0,  fHemiObjects[3]); 
-
 	// minimizing deltaHT
 	bool minimizeDHT(true);
-	GetMT2Variables(minimizeDHT, 20, 2.4,   fHemiObjects[4]); 
+	GetMT2Variables(minimizeDHT, 20, 2.4,   fHemiObjects[2]); 
 	
-	// luc's code minimizing deltaHT
-	GetMT2Variables(0, 9, 0.0, 20, 2.4, 0,  fHemiObjects[5]); 
+	// seed: max inv mass, assoc: minimmal inv mass, JET ID required
+	GetMT2Variables(2, 2, 0.0, 20, 2.4, 1,  fHemiObjects[3]); 
 	
-	// seed: max inv mass, assoc: minimmal inv mass
-	GetMT2Variables(2, 2, 0.0, 20, 2.4, 0,  fHemiObjects[6]); 
-	
-	// seed: leading jets, assoc: minimal lund distance, 
-	GetMT2Variables(4, 3, 0,  20,  2.4, 0,  fHemiObjects[7]); 
 	// -----------------------------------------------------------
 
 
@@ -198,16 +187,39 @@ void MassAnalysis::FillTree(){
 		fMT2tree->jet[jindex].TauDR      = mindR;
 		fMT2tree->jet[jindex].TauDPt     = fMT2tree->jet[jindex].lv.Pt()-tau.Pt();
 	}
+
 	
 	// ---------------------------------------------------------------
 	// Set NJets, NElecs, NMuons
 	fMT2tree->SetNJets         ((Int_t)fJetTaus.NObjs);
+	fMT2tree->SetNGenJets      (fTR->NGenJets > gNGenJets ? gNGenJets: fTR->NGenJets);
 	fMT2tree->SetNJetsIDLoose  (fMT2tree->GetNjets(20, 2.4, 1));
 	fMT2tree->SetNJetsAcc      (fMT2tree->GetNjets(20, 2.4, 0));
 	fMT2tree->SetNBJets        (fMT2tree->GetNBtags(3,2.0,20,2.4,1));
 	fMT2tree->SetNEles         ((Int_t)fElecs.size());
 	fMT2tree->SetNMuons        ((Int_t)fMuons.size());
 	fMT2tree->SetNTaus         ((Int_t)fTaus.size());
+	
+	// --------------------------------------------------------------
+	// Fill GenJets
+	for(int i=0; i<fTR->NGenJets; ++i){
+		if(i >= gNGenJets) {
+			cout << "WARNING: Event " << fTR->Event << " Run " << fTR->Run << " has more than " << gNGenJets << " GenJets " << endl;
+			continue;
+	       	}
+		fMT2tree->genjet[i].lv.SetPtEtaPhiE(fTR->GenJetPt[i], fTR->GenJetEta[i], fTR->GenJetPhi[i], fTR->GenJetE[i]);
+		double mindR=999.99;
+		int    index=-1;
+		for(int j=0; j<fMT2tree->NJets; ++j){
+			double dR=fMT2tree->jet[j].lv.DeltaR(fMT2tree->genjet[i].lv);
+			if(dR < mindR) {
+				mindR = dR;
+				index = j;
+			}
+		}
+		fMT2tree->genjet[i].DeltaR        = mindR;
+		fMT2tree->genjet[i].JetMatchIndex = index;
+	}
 	
 	
 	// -----------------------------------------------------------------
@@ -379,9 +391,7 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.MT2                 = fHemiObjects[1].MT2;    // note: this is a bit dangerous, 
 	fMT2tree->misc.MT2all              = fHemiObjects[0].MT2;    
 	fMT2tree->misc.MCT                 = fHemiObjects[1].MCT;
-	fMT2tree->misc.MT2leading          = fHemiObjects[2].MT2;    //       as the definition of fHemiObjects1,2,3,4
-	fMT2tree->misc.MT2noISR            = fHemiObjects[3].MT2;    //       is interchangable
-	fMT2tree->misc.AlphaT              = fHemiObjects[4].alphaT; 
+	fMT2tree->misc.AlphaT              = fHemiObjects[2].alphaT; // minimizing deltaHT 
 
 	fMT2tree->misc.MET                 = MET().Pt();
 	fMT2tree->misc.METPhi              = MET().Phi();

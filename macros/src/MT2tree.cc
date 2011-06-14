@@ -259,6 +259,20 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   return true;
 }
 
+// MT2GenJet --------------------------------------
+MT2GenJet::MT2GenJet(){
+  Reset();
+}
+
+MT2GenJet::~MT2GenJet(){
+}
+
+void MT2GenJet::Reset(){
+  DeltaR             = -9999.99;
+  JetMatchIndex      = -1;
+  
+  lv.SetPxPyPzE(0, 0, 0, 0);
+}
 
 // MT2Hemisphere -----------------------------------
 MT2Hemi::MT2Hemi(){
@@ -379,6 +393,7 @@ void MT2tree::Reset() {
   NEles            = 0;
   NMuons           = 0;
   NGenLepts        = 0;
+  NGenJets         = 0;
 
   misc.Reset();
   Znunu.Reset();
@@ -387,6 +402,9 @@ void MT2tree::Reset() {
 
   for (int i = 0; i < m_jetSize; ++i) {
     jet[i].Reset();
+  }
+  for (int i = 0; i< m_genjetSize; ++i){
+    genjet[i].Reset();
   }
   for (int i = 0; i < m_eleSize; ++i) {
     ele[i].Reset();
@@ -409,6 +427,10 @@ void MT2tree::Reset() {
 
 void MT2tree::SetNJets(int n) {
   NJets = n;
+}
+
+void MT2tree::SetNGenJets(int n) {
+  NGenJets = n;
 }
 
 void MT2tree::SetNJetsAcc(int n) {
