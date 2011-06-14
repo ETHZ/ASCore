@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.34 $";
+string sjzbversion="$Revision: 1.35 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.35  2011/06/14 15:16:05  buchmann
+Added additional Mu path
+
 Revision 1.34  2011/06/14 15:02:08  buchmann
 Updated Electron Paths
 
@@ -1022,15 +1025,13 @@ void JZBAnalysis::Analyze() {
       return;
     }
     counters[EV].fill("... has at least 2 OS leptons");
-// is this a smart way of doing it?
+
    for(int ipf=0;ipf<particleflowtypes;ipf++) {
        if(PfPosLepton2[ipf] == sortedGoodPFLeptons[ipf].size()) {
-         myTree->Fill();
-         return;
+         dopf[ipf]=false;
        }
     }
-    counters[EV].fill("... has at least 2 OS PF leptons");
-    
+
     // Preselection
     if(sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
 
