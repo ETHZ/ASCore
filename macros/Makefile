@@ -17,8 +17,16 @@ LIBS           = $(ROOTLIBS)
 NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
-SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/JZBAnalyzer.cc src/JZBAnalysis.cc src/JZBPFAnalysis.cc src/helper/PUWeight.C
+SRCS           = src/helper/PUWeight.C src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
+                 src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc src/MT2tree.cc src/MassAnalysis.cc \
+                 src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysisBase.cc \
+                 src/MultiplicityAnalysis.cc  src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc src/RatioAnalysis.cc \
+                 src/helper/TMctLib.cc src/helper/mctlib.cc src/helper/FPRatios.cc \
+                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc \
+                 src/MuonPlotter.cc src/MassPlotter.cc src/helper/MetaTreeClassBase.C \
+                 src/JZBAnalyzer.cc src/JZBAnalysis.cc \
+                 src/JZBPFAnalysis.cc \
+                 src/SSDLAnalyzer.cc src/SSDLAnalysis.cc
 
 # We want dictionaries only for classes that have _linkdef.h files                                                               
 DICTOBS =  $(patsubst %_linkdef.hh, %.o, \
@@ -26,6 +34,8 @@ DICTOBS =  $(patsubst %_linkdef.hh, %.o, \
                           $(wildcard dict/*_linkdef.hh) ) )
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
+
+OBJS += $(DICTOBS)
 
 SHARED=shlib/libDiLeptonAnalysis.so
 
@@ -42,9 +52,6 @@ all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJet
 #	@echo "Creating library $(SHARED)"
 #	$(LD) $(LDFLAGS) $(SOFLAGS) $(OBJS) -o $(SHARED)
 #	@echo "$(SHARED) successfully compiled!"
-
-RunTriggerAnalyzer: src/exe/RunTriggerAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
