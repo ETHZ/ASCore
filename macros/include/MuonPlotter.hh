@@ -50,7 +50,7 @@ public:
 	enum gSample {
 		sample_begin,
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
-		// MuHad1, MuHad2, EleHad1, EleHad2,
+		MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJetsSync,
 		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50,
 		GJets40, GJets100, GJets200, GVJets, WW, WZ, ZZ, VVTo4L,
@@ -81,14 +81,18 @@ public:
 		SigSup,
 		ZDecay
 	};
+	enum gHiLoSwitch{
+		HighPt,
+		LowPt
+	};
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
+		HT80MET100,
 		HT200MET30,
+		HT200MET120,
 		HT400MET50,
 		HT400MET120,
-		HT200MET120,
-		HT80MET100,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -172,11 +176,12 @@ public:
 	
 	struct Region{
 		static TString sname[gNREGIONS];
+		// Two different pt cuts
+		static float minMu1pt[2];
+		static float minMu2pt[2];
+		static float minEl1pt[2];
+		static float minEl2pt[2];
 		// Custom selections for every region
-		static float minMu1pt[gNREGIONS];
-		static float minMu2pt[gNREGIONS];
-		static float minEl1pt[gNREGIONS];
-		static float minEl2pt[gNREGIONS];
 		static float minHT   [gNREGIONS];
 		static float minMet  [gNREGIONS];
 		static int   minNjets[gNREGIONS];
@@ -204,6 +209,13 @@ public:
 		static float xmin[gNKinVars];
 		static float xmax[gNKinVars];
 		TH1D *hvar[gNKinVars];
+		TH2D *hmetvsht;
+		static const int nMETBins = 100;
+		static const int nHTBins = 200;
+		static const float METmin = 0.;
+		static const float METmax = 400.;
+		static const float HTmin = 0.;
+		static const float HTmax = 1000.;
 	};
 	
 	static const int gNHWWVars = 10;
@@ -230,6 +242,7 @@ public:
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
+	static TString gHiLoLabel[2];
 
 	class Sample{
 	public:
@@ -242,12 +255,13 @@ public:
 		float lumi;
 		int color;
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
-		Region region[gNREGIONS];
+		Region region[gNREGIONS][2];
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
-		KinPlots    kinplots[gNKinSels]; // tt and ll and signal
+		KinPlots    kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 		HWWPlots    hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
 		IsoPlots    isoplots[2]; // e and mu
 		FRatioPlots ratioplots[2]; // e and mu
+		TGraph *sigevents[gNCHANNELS][2];
 	};
 	
 	MuonPlotter();
@@ -270,15 +284,16 @@ public:
 	
 	//////////////////////////////
 	// Plots
-	void makeMufRatioPlots(bool = false);
-	void makeMupRatioPlots(bool = false);
-	void makeElfRatioPlots(bool = false);
-	void makeElpRatioPlots(bool = false);
+	void makeMufRatioPlots(bool = false, gHiLoSwitch = HighPt);
+	void makeMupRatioPlots(bool = false, gHiLoSwitch = HighPt);
+	void makeElfRatioPlots(bool = false, gHiLoSwitch = HighPt);
+	void makeElpRatioPlots(bool = false, gHiLoSwitch = HighPt);
 
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
 	
-	void makeNT2KinPlots();
+	void makeNT2KinPlots(gHiLoSwitch = HighPt);
+	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
@@ -288,11 +303,11 @@ public:
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
-	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline);
+	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
-	void makeIntPrediction(TString, gRegion);
-	void makeIntMCClosure(TString);
+	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
+	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);
 	
 	void makeTTbarClosure();
 	
@@ -321,7 +336,7 @@ public:
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
-	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, gHiLoSwitch = HighPt);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
@@ -330,12 +345,12 @@ public:
 
 	//////////////////////////////
 	// Predictions
-	void makeSSMuMuPredictionPlots(vector<int>, bool = false);
-	void makeSSElElPredictionPlots(vector<int>, bool = false);
-	void makeSSElMuPredictionPlots(vector<int>, bool = false);
+	void makeSSMuMuPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
+	void makeSSElElPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
+	void makeSSElMuPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
 	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Baseline);
-	void NObs(gChannel, THStack *&, vector<int>, gRegion = Baseline);
+	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void NObs(gChannel, THStack *&, vector<int>, gRegion = Baseline, gHiLoSwitch = HighPt);
 	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
@@ -351,20 +366,22 @@ public:
 
 	//////////////////////////////
 	// Fillers
-	void fillYields(Sample*, gRegion);
+	void fillYields(Sample*, gRegion, gHiLoSwitch);
 	void fillRatioPlots(Sample*);
 	void fillHWWPlots(Sample*);
 
 	void fillMuIsoPlots(gSample);
 	void fillElIsoPlots(gSample);
-	void fillKinPlots(gSample);
+	void fillKinPlots(gSample, gHiLoSwitch);
 	
 	//////////////////////////////
 	// I/O
 	void bookHistos(Sample*);
 	void deleteHistos(Sample*);
 	void writeHistos(Sample*, TFile*);
+	void writeSigGraphs(Sample*, gChannel, gHiLoSwitch, TFile*);
 	int readHistos(TString);
+	int readSigGraphs(TString);
 	
 	void bookRatioHistos();
 	void fixPRatios();
@@ -380,20 +397,20 @@ public:
 	void printOrigins(gRegion = Baseline);
 	void printMuOriginTable(gRegion = Baseline);
 	void printMuOriginHeader(TString);
-	void printMuOriginFromSample(Sample*, int, gRegion = Baseline);
-	void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline);
+	void printMuOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
 	void printElOriginTable(gRegion = Baseline);
 	void printElOriginHeader(TString);
-	void printElOriginFromSample(Sample*, int, gRegion = Baseline);
-	void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline);
+	void printElOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
 	void printEMuOriginTable(gRegion = Baseline);
 	void printEMuOriginHeader(TString);
-	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline);
+	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
 
-	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline);
-	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline);
+	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 
 	// Trigger selections:
 	bool  singleMuTrigger();
@@ -532,7 +549,10 @@ private:
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
 	vector<int> fMuEGData;  // MuEG dataset
-	vector<int> fJMData;  // JetMET data samples
+	vector<int> fMuHadData;  // Muon data samples
+	vector<int> fEleHadData;  // EG data samples
+	vector<int> fHighPtData;  // All high pt triggered data
+	vector<int> fLowPtData;   // All lepton cross HT triggered data
 	
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
@@ -541,6 +561,20 @@ private:
 	vector<Sample*> fSamples;
 	vector<Sample*> fMCSamples;
 	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
+	
+	vector<float> fSigEv_HI_MM_HT;
+	vector<float> fSigEv_HI_MM_MET;
+	vector<float> fSigEv_LO_MM_HT;
+	vector<float> fSigEv_LO_MM_MET;
+	vector<float> fSigEv_HI_EE_HT;
+	vector<float> fSigEv_HI_EE_MET;
+	vector<float> fSigEv_LO_EE_HT;
+	vector<float> fSigEv_LO_EE_MET;
+	vector<float> fSigEv_HI_EM_HT;
+	vector<float> fSigEv_HI_EM_MET;
+	vector<float> fSigEv_LO_EM_HT;
+	vector<float> fSigEv_LO_EM_MET;
+	
 	
 	TFile *fStorageFile;
 	TString fOutputFileName;
