@@ -27,6 +27,7 @@
 #include "THStack.h"
 #include "TCanvas.h"
 #include "TTree.h"
+#include "TEventList.h"
 #include "TCut.h"
 #include "TTreeFormula.h"
 #include "TStyle.h"
@@ -556,7 +557,7 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 
 //________________________________________________________________________
 
-void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
+void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger, TString cuts){
   
   Monitor counters[fSamples.size()];
 
@@ -575,7 +576,27 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger){
     Long64_t nentries =  fSamples[i].tree->GetEntries();
     Long64_t nbytes = 0, nb = 0;
     int nev =0;
-    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+    //leo tweak - filtering out the TTree
+    TString myCuts = cuts;
+
+    if( fSamples[i].type=="data") myCuts += " && " + trigger; //cuts to be aplied only on data
+    cout << "Cuts for Flow: " << myCuts << endl;
+    fSamples[i].tree->Draw(">>selList", myCuts);
+
+
+    TEventList *myEvtList = (TEventList*)gDirectory->Get("selList");
+    fSamples[i].tree->SetEventList(myEvtList);
+    int counter=0;
+    cout << "Filtering done, size=" <<myEvtList->GetN()  << endl;
+    
+    if(myEvtList->GetSize()==0) continue;
+    
+    while(myEvtList->GetEntry(counter++) !=-1){
+      
+      int jentry = myEvtList->GetEntry(counter-1);
+      
+      //for (Long64_t jentry=0; jentry<nentries;jentry++) {
       nb =  fSamples[i].tree->GetEntry(jentry);   nbytes += nb;
       fSamples[i].tree->SetBranchAddress("MT2tree", &fMT2tree);
       
@@ -1114,6 +1135,11 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 		
 		if(fVerbose>2) cout << "\tevents found : "  <<  nev << endl
 				    << "\t->Integral() : "  <<  h_samples[i]->Integral() << endl;
+
+		/// event count with errors
+		TH1F * clone = (TH1F*)h_samples[i]->Clone();
+		clone->Rebin(clone->GetNbinsX());
+		if(fVerbose>2) cout << "\tEvents: " << clone->GetBinContent(1) << " +- " << clone->GetBinError(1) << endl;
 		
 		if (Samples[i].sname.Contains("QCD")) {
 		  h_composited[0]->Add(h_samples[i]);
@@ -1191,6 +1217,26 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 				<< "TOTAL BG:          " << h_composited[0]->Integral()+h_composited[1]->Integral()+h_composited[2]->Integral()+h_composited[3]->Integral()+h_composited[4]->Integral() <<endl
 			        << "SUSY:              " << h_composited[5]->Integral()  << endl
 			        << "Data:              " << h_composited[6]->Integral()  << endl;
+
+			   //Same, but with errors
+			   string OverallSamples[7] = {"QCD","W+jets","Z+Jets","Other","TOTAL BG","SUSY","Data"};
+			   for(int os=0; os<7; os++){
+			     string tSample = OverallSamples[os];
+			     if(tSample!="TOTAL BG"){
+			       TH1F* clone = (TH1F*) h_composited[os]->Clone();
+			       clone->Rebin(clone->GetNbinsX());
+			       if(fVerbose>2) cout << tSample << ": " << clone->GetBinContent(1) << " +- " << clone->GetBinError(1) << endl;
+			     }
+			     else{
+			       TH1F* clone = (TH1F*) h_composited[0]->Clone();
+			       clone->Add(h_composited[1]);
+			       clone->Add(h_composited[2]);
+                               clone->Add(h_composited[3]);
+			       clone->Add(h_composited[4]);
+			       clone->Rebin(clone->GetNbinsX());
+                               if(fVerbose>2) cout << tSample << ": " << clone->GetBinContent(1) << " +- " << clone->GetBinError(1) << endl;
+			     }
+			   }
 			  // save nevents for W background prediction
 			  if(nleps==-11){
 			  	fWpred.QCD_bg_e   = h_composited[0]->Integral();	
