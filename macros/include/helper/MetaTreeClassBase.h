@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Jun 13 14:53:10 2011 by ROOT version 5.27/06b
+// Wed Jun 15 16:29:20 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -39,10 +39,14 @@ public :
    Int_t           HLT_MU8_ELE17_PS;
    Int_t           HLT_DOUBLEELE8_HT160;
    Int_t           HLT_DOUBLEELE8_HT160_PS;
+   Int_t           HLT_DOUBLEELE8_HT160_TIGHT;
+   Int_t           HLT_DOUBLEELE8_HT160_TIGHT_PS;
    Int_t           HLT_DOUBLEMU3_HT160;
    Int_t           HLT_DOUBLEMU3_HT160_PS;
    Int_t           HLT_MU3_ELE8_HT160;
    Int_t           HLT_MU3_ELE8_HT160_PS;
+   Int_t           HLT_MU3_ELE8_HT160_TIGHT;
+   Int_t           HLT_MU3_ELE8_HT160_TIGHT_PS;
    Float_t         Rho;
    Int_t           NVrtx;
    Float_t         PUWeight;
@@ -116,10 +120,14 @@ public :
    TBranch        *b_HLT_MU8_ELE17_PS;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160_PS;   //!
+   TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT;   //!
+   TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT_PS;   //!
    TBranch        *b_HLT_DOUBLEMU3_HT160;   //!
    TBranch        *b_HLT_DOUBLEMU3_HT160_PS;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160_PS;   //!
+   TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT;   //!
+   TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT_PS;   //!
    TBranch        *b_Rho;   //!
    TBranch        *b_NVrtx;   //!
    TBranch        *b_PUWeight;   //!
@@ -190,9 +198,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun13b/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_28.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -264,10 +272,14 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT_PS", &HLT_DOUBLEELE8_HT160_TIGHT_PS, &b_HLT_DOUBLEELE8_HT160_TIGHT_PS);
    fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160", &HLT_DOUBLEMU3_HT160, &b_HLT_DOUBLEMU3_HT160);
    fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160_PS", &HLT_DOUBLEMU3_HT160_PS, &b_HLT_DOUBLEMU3_HT160_PS);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160", &HLT_MU3_ELE8_HT160, &b_HLT_MU3_ELE8_HT160);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
+   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
+   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
