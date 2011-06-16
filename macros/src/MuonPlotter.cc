@@ -60,7 +60,7 @@ double MuonPlotter::gJetPtBins[gNJetPtBins+1]  = {30., 40., 50., 60., 70., 80., 
 //////////////////////////////////////////////////////////////////////////////////
 
 TString MuonPlotter::gEMULabel[2] = {"mu", "el"};
-TString MuonPlotter::gHiLoLabel[2] = {"HighPt", "LowPt"};
+TString MuonPlotter::gHiLoLabel[3] = {"HighPt", "LowPt", "TauChan"};
 //////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
 TString MuonPlotter::KinPlots::var_name[MuonPlotter::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2"};
@@ -465,8 +465,9 @@ void MuonPlotter::doAnalysis(){
 	// makeMuIsolationPlots();
 	// makeElIsolationPlots();
 	// makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	makeMETvsHTPlotTau();
 	
 	// makeRatioPlots(Muon);
 	// makeRatioPlots(Electron);
@@ -483,10 +484,16 @@ void MuonPlotter::doAnalysis(){
 	// makeElfRatioPlots(false);
 	// makeElpRatioPlots(false);
 	
-	// for(size_t i = 0; i < gNREGIONS; ++i){
-	// 	TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
-	// 	makeIntPrediction(outputname, gRegion(i));
-	// }
+	TString tablefilename  = fOutputDir + "Table2.tex";
+	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
+	fOUTSTREAM << "==========================================================================================================" << endl;
+	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
+	fOUTSTREAM << endl;
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
+		makeIntPrediction(outputname, gRegion(i));
+	}
+	fOUTSTREAM.close();
 
 	// makeIntMCClosure( fOutputDir + "MCClosure.txt");	
 	// makeMCClosurePlots(fMCBG);
@@ -1457,7 +1464,7 @@ void MuonPlotter::makeMuIsolationPlots(){
 		if(MuPt[muind1] > gMuPt2bins[gNMuPt2bins]) continue;
 
 		// Select genmatched fake muons
-		if(MuGenMType[muind1] == 2 || MuGenMType[muind1] == 4) continue;
+		if(isPromptMuon(muind1)) continue;
 
 		////////////////////////////////////////////////////
 		// MOST LOOSE SELECTION
@@ -1488,6 +1495,25 @@ void MuonPlotter::makeMuIsolationPlots(){
 				hiso_ttbar_nv[1][k]->Fill(MuIso[muind1]);
 			}
 		}
+		// ////////////////////////////////////////////////////
+		// // SIGNAL SELECTION
+		// if(isSSLLMuEvent(muind1, muind2)){
+		// 	int fakemu = muind1;
+		// 	if(isPromptMuon(muind1) &&  isPromptMuon(muind2)) continue;
+		// 	if(isPromptMuon(muind1) && !isPromptMuon(muind2)) fakemu = muind2;
+		// 	
+		// 	hiso_ttbar[1]->Fill(MuIso[fakemu]);
+		// 	for(size_t k = 0; k < gNMuPt2bins; ++k){
+		// 		if(MuPt[fakemu] < gMuPt2bins[k]) continue;
+		// 		if(MuPt[fakemu] > gMuPt2bins[k+1]) continue;
+		// 		hiso_ttbar_pt[1][k]->Fill(MuIso[fakemu]);
+		// 	}
+		// 	for(size_t k = 0; k < gNNVrtxBins; ++k){
+		// 		if(NVrtx < gNVrtxBins[k]) continue;
+		// 		if(NVrtx > gNVrtxBins[k+1]) continue;
+		// 		hiso_ttbar_nv[1][k]->Fill(MuIso[fakemu]);
+		// 	}
+		// }
 		////////////////////////////////////////////////////
 	}
 	cout << endl;
@@ -2252,189 +2278,322 @@ void MuonPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 }
 void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, vector<int> emsamples, gHiLoSwitch hilo){
 	if(readSigGraphs(fOutputFileName) != 0) return;
-	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
 	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/10 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
 
-	for(size_t s = 0; s < 3; ++s){ // loop on selections
-		fOutputSubDir = "KinematicPlots/" + gHiLoLabel[hilo] + "/" + selname[s];
-		char cmd[100];
-	    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-	    system(cmd);
-		
-		TLatex *lat = new TLatex();
-		lat->SetNDC(kTRUE);
-		lat->SetTextColor(kBlack);
-		lat->SetTextSize(0.04);
+	fOutputSubDir = "KinematicPlots/HTvsMET/";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+	
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
 
-		// Create histograms
-		TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-		TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-		TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
+	const float htmax = 750.;
 
-		// vector<int> mcsamples   = fMCBGMuEnr;
-		// const gSample sig = LM1;
+	// Create histograms
+	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, 0., 400.);
+	// TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
+	// TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
+	// TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
 
-		//////////////////////////////////////////////////////////
-		// Make MET vs HT plot:
-		hmetvsht_da_mm->SetMarkerStyle(8);
-		hmetvsht_da_mm->SetMarkerColor(kBlack);
-		hmetvsht_da_mm->SetMarkerSize(1.5);
-		hmetvsht_da_mm->GetYaxis()->SetTitleOffset(1.2);
+	// vector<int> mcsamples   = fMCBGMuEnr;
+	// const gSample sig = LM1;
 
-		hmetvsht_da_ee->SetMarkerStyle(21);
-		hmetvsht_da_ee->SetMarkerColor(kRed);
-		hmetvsht_da_ee->SetMarkerSize(1.4);
-		hmetvsht_da_ee->GetYaxis()->SetTitleOffset(1.2);
+	//////////////////////////////////////////////////////////
+	// Make MET vs HT plot:
+	hmetvsht_da_mm->SetMarkerStyle(8);
+	hmetvsht_da_mm->SetMarkerColor(kBlack);
+	hmetvsht_da_mm->SetMarkerSize(1.5);
+	hmetvsht_da_mm->GetYaxis()->SetTitleOffset(1.4);
 
-		hmetvsht_da_em->SetMarkerStyle(23);
-		hmetvsht_da_em->SetMarkerColor(kBlue);
-		hmetvsht_da_em->SetMarkerSize(1.7  );
-		hmetvsht_da_em->GetYaxis()->SetTitleOffset(1.2);
+	hmetvsht_da_ee->SetMarkerStyle(21);
+	hmetvsht_da_ee->SetMarkerColor(kRed);
+	hmetvsht_da_ee->SetMarkerSize(1.4);
+	hmetvsht_da_ee->GetYaxis()->SetTitleOffset(1.4);
 
-		// TGraphs:
-		TMultiGraph *gmetvsht_da_mm = new TMultiGraph("HTvsMET_mm", "HTvsMET_mm");
-		TMultiGraph *gmetvsht_da_ee = new TMultiGraph("HTvsMET_ee", "HTvsMET_ee");
-		TMultiGraph *gmetvsht_da_em = new TMultiGraph("HTvsMET_em", "HTvsMET_em");
-		
-		
-		// Fill data histo
-		for(size_t i = 0; i < mmsamples.size(); ++i) hmetvsht_da_mm->Add(fSamples[mmsamples[i]]->kinplots[s][hilo].hmetvsht);
-		for(size_t i = 0; i < eesamples.size(); ++i) hmetvsht_da_ee->Add(fSamples[eesamples[i]]->kinplots[s][hilo].hmetvsht);
-		for(size_t i = 0; i < emsamples.size(); ++i) hmetvsht_da_em->Add(fSamples[emsamples[i]]->kinplots[s][hilo].hmetvsht);
+	hmetvsht_da_em->SetMarkerStyle(23);
+	hmetvsht_da_em->SetMarkerColor(kBlue);
+	hmetvsht_da_em->SetMarkerSize(1.7  );
+	hmetvsht_da_em->GetYaxis()->SetTitleOffset(1.4);
 
-		for(size_t i = 0; i < mmsamples.size(); ++i) gmetvsht_da_mm->Add(fSamples[mmsamples[i]]->sigevents[Muon][hilo]);
-		for(size_t i = 0; i < eesamples.size(); ++i) gmetvsht_da_ee->Add(fSamples[eesamples[i]]->sigevents[Electron][hilo]);
-		for(size_t i = 0; i < emsamples.size(); ++i) gmetvsht_da_em->Add(fSamples[emsamples[i]]->sigevents[EMu][hilo]);
+	// TGraphs:
+	TMultiGraph *gmetvsht_da_mm = new TMultiGraph("HTvsMET_mm", "HTvsMET_mm");
+	TMultiGraph *gmetvsht_da_ee = new TMultiGraph("HTvsMET_ee", "HTvsMET_ee");
+	TMultiGraph *gmetvsht_da_em = new TMultiGraph("HTvsMET_em", "HTvsMET_em");
 
-		hmetvsht_da_mm->SetXTitle(KinPlots::axis_label[0]);
-		hmetvsht_da_mm->SetYTitle(KinPlots::axis_label[1]);
-		hmetvsht_da_ee->SetXTitle(KinPlots::axis_label[0]);
-		hmetvsht_da_ee->SetYTitle(KinPlots::axis_label[1]);
-		hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
-		hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
+	// Fill data histo
+	// for(size_t i = 0; i < mmsamples.size(); ++i) hmetvsht_da_mm->Add(fSamples[mmsamples[i]]->kinplots[s][hilo].hmetvsht);
+	// for(size_t i = 0; i < eesamples.size(); ++i) hmetvsht_da_ee->Add(fSamples[eesamples[i]]->kinplots[s][hilo].hmetvsht);
+	// for(size_t i = 0; i < emsamples.size(); ++i) hmetvsht_da_em->Add(fSamples[emsamples[i]]->kinplots[s][hilo].hmetvsht);
 
-		TLegend *leg = new TLegend(0.75,0.70,0.89,0.88);
-		leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
-		leg->AddEntry(hmetvsht_da_ee, "ee","p");
-		leg->AddEntry(hmetvsht_da_em, "e#mu","p");
-		leg->SetFillStyle(0);
-		leg->SetTextFont(42);
-		leg->SetBorderSize(0);
+	for(size_t i = 0; i < mmsamples.size(); ++i) gmetvsht_da_mm->Add(fSamples[mmsamples[i]]->sigevents[Muon][hilo]);
+	for(size_t i = 0; i < eesamples.size(); ++i) gmetvsht_da_ee->Add(fSamples[eesamples[i]]->sigevents[Electron][hilo]);
+	for(size_t i = 0; i < emsamples.size(); ++i) gmetvsht_da_em->Add(fSamples[emsamples[i]]->sigevents[EMu][hilo]);		
 
-		// Special effects:
-		const float lowerht = hilo==HighPt? 80.:200.;
-		TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
-		TWbox *lowmetbox = new TWbox(0., 0., 1000.,    30., kBlack, 0, 0);
-		lowhtbox ->SetFillColor(14);
-		lowmetbox->SetFillColor(14);
-		lowhtbox ->SetFillStyle(3004);
-		lowmetbox->SetFillStyle(3004);
-		TLine *boxborder1 = new TLine(lowerht,30.,lowerht,400.);
-		TLine *boxborder2 = new TLine(lowerht,30.,1000.,30.);
-		boxborder1->SetLineWidth(1);
-		boxborder2->SetLineWidth(1);
-		boxborder1->SetLineColor(14);
-		boxborder2->SetLineColor(14);
+	hmetvsht_da_mm->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsht_da_ee->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-		// TWbox *sigreg1 = new TWbox(80. , 100., 1000., 400., kBlack, 0, 0);
-		// TWbox *sigreg2 = new TWbox(200., 120., 1000., 400., kBlack, 0, 0);
-		// TWbox *sigreg3 = new TWbox(400.,  50., 1000., 400., kBlack, 0, 0);
-		// TWbox *sigreg4 = new TWbox(400., 120., 1000., 400., kBlack, 0, 0);
-		// 
-		// sigreg1->SetFillColor(52);
-		// sigreg2->SetFillColor(62);
-		// sigreg3->SetFillColor(82);
-		// sigreg4->SetFillColor(92);
-		// sigreg1->SetFillStyle(3305);
-		// sigreg2->SetFillStyle(3395);
-		// sigreg3->SetFillStyle(3345);
-		// sigreg4->SetFillStyle(3354);		
+	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
+	leg->AddEntry(hmetvsht_da_ee, "ee","p");
+	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
 
-		TLine *sig1x = new TLine(lowerht, 100., lowerht, 400.);
-		TLine *sig1y = new TLine(lowerht, 100., 1000.,   100.);
-		TLine *sig2x = new TLine(lowerht, 120., lowerht, 400.);
-		TLine *sig2y = new TLine(lowerht, 120., 1000.,   120.);
-		TLine *sig3x = new TLine(400.,  50., 400.,  400.);
-		TLine *sig3y = new TLine(400.,  50., 1000.,  50.);
-		TLine *sig4x = new TLine(400., 120., 400.,  400.);
-		TLine *sig4y = new TLine(400., 120., 1000., 120.);
+	// Special effects:
+	const float lowerht = hilo==HighPt? 80.:200.;
 
-		sig1x->SetLineWidth(2);
-        sig1y->SetLineWidth(2);
-        sig2x->SetLineWidth(2);
-        sig2y->SetLineWidth(2);
-        sig3x->SetLineWidth(2);
-        sig3y->SetLineWidth(2);
-        sig4x->SetLineWidth(3);
-        sig4y->SetLineWidth(3);
+	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
+	lowhtbox ->SetFillColor(12);
+	lowmetbox->SetFillColor(12);
+	lowhtbox ->SetFillStyle(3005);
+	lowmetbox->SetFillStyle(3005);
+	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,400.);
+	TLine *boxborder2 = new TLine(lowerht,30.,htmax,30.);
+	boxborder1->SetLineWidth(1);
+	boxborder2->SetLineWidth(1);
+	boxborder1->SetLineColor(14);
+	boxborder2->SetLineColor(14);
 
-		// sig1x->SetLineColor(kBlack);
-		// sig1y->SetLineColor(kBlack);
-		// sig2x->SetLineColor(kBlack);
-		// sig2y->SetLineColor(kBlack);
-		// sig3x->SetLineColor(kBlack);
-		// sig3y->SetLineColor(kBlack);
-		// sig4x->SetLineColor(kBlack);
-		// sig4y->SetLineColor(kBlack);
+	TLine *sig1x = new TLine(lowerht, 100., lowerht, 400.); // met 100 ht 80
+	TLine *sig1y = new TLine(lowerht, 100., htmax,   100.); 
+	TLine *sig2x = new TLine(200., 120., 200.,  400.);      // met 120 ht 200
+	TLine *sig2y = new TLine(200., 120., htmax, 120.);
+	TLine *sig3x = new TLine(400.,  50., 400.,  400.);      // met 50  ht 400
+	TLine *sig3y = new TLine(400.,  50., htmax,  50.);
+	TLine *sig4x = new TLine(400., 120., 400.,  400.);      // met 120 ht 400
+	TLine *sig4y = new TLine(400., 120., htmax, 120.);
 
-		sig1x->SetLineStyle(2);
-        sig1y->SetLineStyle(2);
-        sig2x->SetLineStyle(2);
-        sig2y->SetLineStyle(2);
-        sig3x->SetLineStyle(2);
-        sig3y->SetLineStyle(2);
-        // sig4x->SetLineStyle(2);
-        // sig4y->SetLineStyle(2);
+	sig1x->SetLineWidth(2);
+	sig1y->SetLineWidth(2);
+	sig2x->SetLineWidth(2);
+	sig2y->SetLineWidth(2);
+	sig3x->SetLineWidth(1);
+	sig3y->SetLineWidth(1);
+	sig4x->SetLineWidth(3);
+	sig4y->SetLineWidth(3);
 
-		TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 800, 600);
-		c_temp->cd();
+	sig1x->SetLineStyle(3);
+	sig1y->SetLineStyle(3);
+	sig2x->SetLineStyle(2);
+	sig2y->SetLineStyle(2);
+	sig3x->SetLineStyle(1);
+	sig3y->SetLineStyle(1);
+	// sig4x->SetLineStyle(1);
+	// sig4y->SetLineStyle(1);
 
-		hmetvsht_da_mm->DrawCopy("axis");
+	float legymax = hilo==HighPt?0.54:0.50;
+	TLegend *regleg = new TLegend(0.65,0.37,0.88,legymax);
+	regleg->AddEntry(sig4x, "Search Region 1","l");
+	regleg->AddEntry(sig2x, "Search Region 2","l");
+	regleg->AddEntry(sig3x, "Search Region 3","l");
+	if(hilo != LowPt) regleg->AddEntry(sig1x, "Search Region 4","l");
+	regleg->SetFillStyle(0);
+	regleg->SetTextFont(42);
+	regleg->SetTextSize(0.03);
+	regleg->SetBorderSize(0);
+	
 
-		lowhtbox ->Draw();
-		lowmetbox->Draw();
-		boxborder1->Draw();
-		boxborder2->Draw();
+	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp->cd();
+	c_temp->SetRightMargin(0.03);
+	c_temp->SetLeftMargin(0.13);
 
-		if(hilo != LowPt) sig1x->Draw();
-        if(hilo != LowPt) sig1y->Draw();
-        sig2x->Draw();
-        sig2y->Draw();
-        sig3x->Draw();
-        sig3y->Draw();
-        sig4x->Draw();
-        sig4y->Draw();
+	hmetvsht_da_mm->DrawCopy("axis");
 
-		// if(hilo != LowPt) sigreg1->Draw();
-		// sigreg2->Draw();
-		// sigreg3->Draw();
-		// sigreg4->Draw();
+	lowhtbox ->Draw();
+	lowmetbox->Draw();
+	boxborder1->Draw();
+	boxborder2->Draw();
 
-		// Histos
-		// hmetvsht_da_mm->DrawCopy("scat same");
-		// hmetvsht_da_ee->DrawCopy("scat same");
-		// hmetvsht_da_em->DrawCopy("scat same");
-		
-		// Graphs
-		gmetvsht_da_em->Draw("P");
-		gmetvsht_da_ee->Draw("P");
-		gmetvsht_da_mm->Draw("P");
-		
-		leg->Draw();
-		// gPad->SetGridx();
-		// gPad->SetGridy();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
-		// lat->DrawLatex(0.11,0.92, selname[s]);
-		// lat->DrawLatex(0.31,0.92, "#mu#mu/e#mu/ee");
-		// lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
-		lat->DrawLatex(0.11,0.92, hiloname[hilo]);
-		gPad->RedrawAxis();
+	if(hilo != LowPt) sig1x->Draw();
+	if(hilo != LowPt) sig1y->Draw();
+	sig2x->Draw();
+	sig2y->Draw();
+	sig3x->Draw();
+	sig3y->Draw();
+	sig4x->Draw();
+	sig4y->Draw();
 
-		Util::PrintNoEPS(c_temp, "HTvsMET", fOutputDir + fOutputSubDir, NULL);
-		delete c_temp;
-		delete leg;
-		delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
-	}
+	// Graphs
+	gmetvsht_da_em->Draw("P");
+	gmetvsht_da_ee->Draw("P");
+	gmetvsht_da_mm->Draw("P");
+	
+	leg->Draw();
+	regleg->Draw();
+	// gPad->SetGridx();
+	// gPad->SetGridy();
+	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
+	// lat->DrawLatex(0.31,0.92, "#mu#mu/e#mu/ee");
+	// lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
+	lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	gPad->RedrawAxis();
+
+	Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+	delete c_temp;
+	delete leg, regleg;
+	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
+	delete gmetvsht_da_mm, gmetvsht_da_ee, gmetvsht_da_em;//, hmetvsht_mc;
+}
+void MuonPlotter::makeMETvsHTPlotTau(){
+	fOutputSubDir = "KinematicPlots/HTvsMET/";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+	
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	const float htmax = 750.;
+
+	// Create histograms
+	TH2D *hmetvsht_da_mt = new TH2D("Data_HTvsMET_mt", "Data_HTvsMET_mt", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_et = new TH2D("Data_HTvsMET_et", "Data_HTvsMET_et", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_tt = new TH2D("Data_HTvsMET_tt", "Data_HTvsMET_tt", 100, 0., htmax, 100, 0., 400.);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs HT plot:
+	hmetvsht_da_mt->SetMarkerStyle(22);
+	hmetvsht_da_mt->SetMarkerSize(1.8);
+	hmetvsht_da_mt->SetMarkerColor(51);
+	hmetvsht_da_mt->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_et->SetMarkerStyle(33);
+	hmetvsht_da_et->SetMarkerSize(2.3);
+	hmetvsht_da_et->SetMarkerColor(46);
+
+	hmetvsht_da_tt->SetMarkerStyle(34);
+	hmetvsht_da_tt->SetMarkerSize(1.8);
+	hmetvsht_da_tt->SetMarkerColor(38);
+
+
+	 // these are the 5 SS tau-mu events with HT>350 and MET>80
+	const int ntauev = 5;
+	float a_ht [ntauev] = {372.561, 368.64,  467.394, 605.398, 424.883};
+	float a_met[ntauev] = {99.2257, 109.763, 144.284, 143.927, 91.4893};
+
+	TGraph *gmetvsht_da_mt = new TGraph(ntauev, a_ht, a_met);
+	gmetvsht_da_mt->SetName("Data_HTvsMET_mt_graph");
+	gmetvsht_da_mt->SetMarkerStyle(22);
+	gmetvsht_da_mt->SetMarkerSize(1.8);
+	gmetvsht_da_mt->SetMarkerColor(51);
+
+	hmetvsht_da_mt->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_mt->SetYTitle(KinPlots::axis_label[1]);
+
+	// TLegend *leg = new TLegend(0.80,0.82,0.95,0.88);
+	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	leg->AddEntry(hmetvsht_da_mt, "#mu#tau","p");
+	leg->AddEntry(hmetvsht_da_et, "e#tau","p");
+	leg->AddEntry(hmetvsht_da_tt, "#tau#tau","p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
+
+	// Special effects:
+	const float lowerht = 350.;
+	// HT350met80 and HT400met120).
+	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    80., kBlack, 0, 0);
+	lowhtbox ->SetFillColor(12);
+	lowmetbox->SetFillColor(12);
+	lowhtbox ->SetFillStyle(3005);
+	lowmetbox->SetFillStyle(3005);
+	TLine *boxborder1 = new TLine(lowerht, 80., lowerht, 400.);
+	TLine *boxborder2 = new TLine(lowerht, 80., htmax,   80.);
+	boxborder1->SetLineWidth(1);
+	boxborder2->SetLineWidth(1);
+	boxborder1->SetLineColor(14);
+	boxborder2->SetLineColor(14);
+
+	// TLine *sig1x = new TLine(lowerht, 100., lowerht, 400.);
+	// TLine *sig1y = new TLine(lowerht, 100., htmax,   100.);
+	// TLine *sig2x = new TLine(lowerht, 120., lowerht, 400.);
+	// TLine *sig2y = new TLine(lowerht, 120., htmax,   120.);
+	// TLine *sig3x = new TLine(400.,  50., 400.,  400.);
+	// TLine *sig3y = new TLine(400.,  50., htmax,  50.);
+	TLine *sig4x = new TLine(400., 120., 400.,  400.);
+	TLine *sig4y = new TLine(400., 120., htmax, 120.);
+
+	// sig1x->SetLineWidth(2);
+	// sig1y->SetLineWidth(2);
+	// sig2x->SetLineWidth(2);
+	// sig2y->SetLineWidth(2);
+	// sig3x->SetLineWidth(2);
+	// sig3y->SetLineWidth(2);
+	sig4x->SetLineWidth(3);
+	sig4y->SetLineWidth(3);
+
+	// sig1x->SetLineStyle(2);
+	// sig1y->SetLineStyle(2);
+	// sig2x->SetLineStyle(2);
+	// sig2y->SetLineStyle(2);
+	// sig3x->SetLineStyle(2);
+	// sig3y->SetLineStyle(2);
+	// sig4x->SetLineStyle(2);
+	// sig4y->SetLineStyle(2);
+
+	TLegend *regleg = new TLegend(0.65,0.45,0.88,0.50);
+	regleg->AddEntry(sig4x, "Search Region 1","l");
+	regleg->SetFillStyle(0);
+	regleg->SetTextFont(42);
+	regleg->SetTextSize(0.03);
+	regleg->SetBorderSize(0);
+
+	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp->cd();
+	c_temp->SetRightMargin(0.03);
+	c_temp->SetLeftMargin(0.13);
+
+	hmetvsht_da_mt->Draw("axis");
+
+	lowhtbox ->Draw();
+	lowmetbox->Draw();
+	boxborder1->Draw();
+	boxborder2->Draw();
+
+	// if(hilo != LowPt) sig1x->Draw();
+	// if(hilo != LowPt) sig1y->Draw();
+	// sig2x->Draw();
+	// sig2y->Draw();
+	// sig3x->Draw();
+	// sig3y->Draw();
+	sig4x->Draw();
+	sig4y->Draw();
+
+	// Graphs
+	gmetvsht_da_mt->Draw("P");
+	
+	leg->Draw();
+	regleg->Draw();
+	// gPad->SetGridx();
+	// gPad->SetGridy();
+	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
+	lat->DrawLatex(0.13,0.92, "p_{T}(#mu/e/#tau) > 5/10/15 GeV");
+	gPad->RedrawAxis();
+
+	Util::PrintNoEPS(c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp, "HTvsMET_TauChan",   fOutputDir + fOutputSubDir);
+	delete c_temp;
+	delete leg, regleg;
+	delete hmetvsht_da_mt;
+	delete gmetvsht_da_mt;
 }
 void MuonPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	fOutputSubDir = "Ratios/";
@@ -3653,14 +3812,17 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////////////////////////////////////////////
 	float olderror(0.), newerror(0.);
 	// add here relative errors on the ratios
-	float syst_m_p           = 0.10 * mupratio_data;
-	float syst_e_p           = 0.10 * elpratio_data;
+	float syst_m_p           = 0.50 * mupratio_data;
+
+	float syst_e_p           = 0.50 * elpratio_data;
+
 	float syst_eta_m_f       = 0.10 * mufratio_data;
+	float syst_nv_m_f        = 0.10 * mufratio_data;
+	float syst_intrinsic_m_f = 0.50 * mufratio_data;
+
 	float syst_eta_e_f       = 0.10 * elfratio_data;
-	float syst_nv_m_f        = 0.08 * mufratio_data;
-	float syst_nv_e_f        = 0.15 * elfratio_data;
-	float syst_intrinsic_m_f = 0.10 * mufratio_data;
-	float syst_intrinsic_e_f = 0.10 * elfratio_data;
+	float syst_nv_e_f        = 0.10 * elfratio_data;
+	float syst_intrinsic_e_f = 0.50 * elfratio_data;
 
 	// // add here absolute errors on the ratios
 	// float syst_m_p           = 0.05;
@@ -3704,10 +3866,10 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////////////////////////////////////////////
 	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	float nt2_mumu(0.),    nt10_mumu(0.),    nt0_mumu(0.);
-	float nt2_mumu_e2(0.), nt10_mumu_e2(0.), nt0_mumu_e2(0.);
-	float nt2_emu(0.),     nt10_emu(0.),     nt01_emu(0.),    nt0_emu(0.);
-	float nt2_emu_e2(0.),  nt10_emu_e2(0.),  nt01_emu_e2(0.), nt0_emu_e2(0.);	
+	float nt2_mm(0.),    nt10_mm(0.),    nt0_mm(0.);
+	float nt2_mm_e2(0.), nt10_mm_e2(0.), nt0_mm_e2(0.);
+	float nt2_em(0.),     nt10_em(0.),     nt01_em(0.),    nt0_em(0.);
+	float nt2_em_e2(0.),  nt10_em_e2(0.),  nt01_em_e2(0.), nt0_em_e2(0.);	
 	float nt2_ee(0.),      nt10_ee(0.),      nt0_ee(0.);
 	float nt2_ee_e2(0.),   nt10_ee_e2(0.),   nt0_ee_e2(0.);
 
@@ -3717,23 +3879,23 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	for(size_t i = 0; i < musamples.size(); ++i){
 		Sample *S = fSamples[musamples[i]];
-		nt2_mumu     += S->numbers[reg][Muon].nt2;
-		nt10_mumu    += S->numbers[reg][Muon].nt10;
-		nt0_mumu     += S->numbers[reg][Muon].nt0;
-		nt2_mumu_e2  += S->numbers[reg][Muon].nt2;
-		nt10_mumu_e2 += S->numbers[reg][Muon].nt10;
-		nt0_mumu_e2  += S->numbers[reg][Muon].nt0;
+		nt2_mm     += S->numbers[reg][Muon].nt2;
+		nt10_mm    += S->numbers[reg][Muon].nt10;
+		nt0_mm     += S->numbers[reg][Muon].nt0;
+		nt2_mm_e2  += S->numbers[reg][Muon].nt2;
+		nt10_mm_e2 += S->numbers[reg][Muon].nt10;
+		nt0_mm_e2  += S->numbers[reg][Muon].nt0;
 	}		
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
-		nt2_emu     += S->numbers[reg][EMu].nt2;
-		nt10_emu    += S->numbers[reg][EMu].nt10;
-		nt01_emu    += S->numbers[reg][EMu].nt01;
-		nt0_emu     += S->numbers[reg][EMu].nt0;
-		nt2_emu_e2  += S->numbers[reg][EMu].nt2;
-		nt10_emu_e2 += S->numbers[reg][EMu].nt10;
-		nt01_emu_e2 += S->numbers[reg][EMu].nt01;
-		nt0_emu_e2  += S->numbers[reg][EMu].nt0;
+		nt2_em     += S->numbers[reg][EMu].nt2;
+		nt10_em    += S->numbers[reg][EMu].nt10;
+		nt01_em    += S->numbers[reg][EMu].nt01;
+		nt0_em     += S->numbers[reg][EMu].nt0;
+		nt2_em_e2  += S->numbers[reg][EMu].nt2;
+		nt10_em_e2 += S->numbers[reg][EMu].nt10;
+		nt01_em_e2 += S->numbers[reg][EMu].nt01;
+		nt0_em_e2  += S->numbers[reg][EMu].nt0;
 
 		nt2_em_BB_os    += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
 		nt2_em_EE_os    += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
@@ -3774,12 +3936,12 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 
 	// MuMu Channel
-	vector<double> nt_mumu;
-	nt_mumu.push_back(nt0_mumu);
-	nt_mumu.push_back(nt10_mumu); // mu passes
-	nt_mumu.push_back(nt2_mumu);
+	vector<double> nt_mm;
+	nt_mm.push_back(nt0_mm);
+	nt_mm.push_back(nt10_mm); // mu passes
+	nt_mm.push_back(nt2_mm);
 
-	fMMFPRatios->NevtTopol(0, 2, nt_mumu);
+	fMMFPRatios->NevtTopol(0, 2, nt_mm);
 
 	vector<double> vpt, veta;
 	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas (first electron then muon)
@@ -3790,15 +3952,15 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	vector<double> MuMu_Esyst = fMMFPRatios->NevtPassErrSyst();
 
 	// EMu Channel
-	vector<double> nt_emu;
-	nt_emu.push_back(nt0_emu);
-	nt_emu.push_back(nt01_emu); // e passes
-	nt_emu.push_back(nt10_emu); // mu passes
-	nt_emu.push_back(nt2_emu);
+	vector<double> nt_em;
+	nt_em.push_back(nt0_em);
+	nt_em.push_back(nt01_em); // e passes
+	nt_em.push_back(nt10_em); // mu passes
+	nt_em.push_back(nt2_em);
 
-	fEMFPRatios->NevtTopol(1, 1, nt_emu);
+	fEMFPRatios->NevtTopol(1, 1, nt_em);
 
-	vector<double> EMu_Nev      = fEMFPRatios->NevtPass(vpt, veta);
+	vector<double> EMu_Nev   = fEMFPRatios->NevtPass(vpt, veta);
 	vector<double> EMu_Estat = fEMFPRatios->NevtPassErrStat();
 	vector<double> EMu_Esyst = fEMFPRatios->NevtPassErrSyst();
 
@@ -3854,19 +4016,19 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << "         YIELDS  ||   Nt2   |   Nt1   |   Nt0   ||   Nt2   |   Nt10  |   Nt01  |   Nt0   ||   Nt2   |   Nt1   |   Nt0   ||" << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 
-	float nt2sum_mumu(0.), nt10sum_mumu(0.), nt0sum_mumu(0.);
-	float nt2sum_emu(0.), nt10sum_emu(0.), nt01sum_emu(0.), nt0sum_emu(0.);
+	float nt2sum_mm(0.), nt10sum_mm(0.), nt0sum_mm(0.);
+	float nt2sum_em(0.), nt10sum_em(0.), nt01sum_em(0.), nt0sum_em(0.);
 	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->lumi;
-		nt2sum_mumu  += scale*S->numbers[reg][Muon]    .nt2;
-		nt10sum_mumu += scale*S->numbers[reg][Muon]    .nt10;
-		nt0sum_mumu  += scale*S->numbers[reg][Muon]    .nt0;
-		nt2sum_emu   += scale*S->numbers[reg][EMu]     .nt2;
-		nt10sum_emu  += scale*S->numbers[reg][EMu]     .nt10;
-		nt01sum_emu  += scale*S->numbers[reg][EMu]     .nt01;
-		nt0sum_emu   += scale*S->numbers[reg][EMu]     .nt0;
+		nt2sum_mm  += scale*S->numbers[reg][Muon]    .nt2;
+		nt10sum_mm += scale*S->numbers[reg][Muon]    .nt10;
+		nt0sum_mm  += scale*S->numbers[reg][Muon]    .nt0;
+		nt2sum_em   += scale*S->numbers[reg][EMu]     .nt2;
+		nt10sum_em  += scale*S->numbers[reg][EMu]     .nt10;
+		nt01sum_em  += scale*S->numbers[reg][EMu]     .nt01;
+		nt0sum_em   += scale*S->numbers[reg][EMu]     .nt0;
 		nt2sum_ee    += scale*S->numbers[reg][Electron].nt2;
 		nt10sum_ee   += scale*S->numbers[reg][Electron].nt10;
 		nt0sum_ee    += scale*S->numbers[reg][Electron].nt0;
@@ -3886,13 +4048,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	}	
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "MC sum" << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_mumu  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_mumu ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_mumu  ) << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_emu   ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_emu  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt01sum_emu  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_emu   ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_mm  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_mm ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_mm  ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_em   ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_em  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt01sum_em  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_em   ) << " || ";
 	OUT << setw(7) << Form("%5.1f", nt2sum_ee    ) << " | ";
 	OUT << setw(7) << Form("%5.1f", nt10sum_ee   ) << " | ";
 	OUT << setw(7) << Form("%5.1f", nt0sum_ee    ) << " || ";
@@ -3917,13 +4079,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	}	
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "data"  << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_mumu ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_mumu) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_mumu ) << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_emu  ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_emu ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt01_emu ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_emu  ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_mm ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_mm) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_mm ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_em  ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_em ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt01_em ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_em  ) << " || ";
 	OUT << setw(7) << Form("%4.0f", nt2_ee   ) << " | ";
 	OUT << setw(7) << Form("%4.0f", nt10_ee  ) << " | ";
 	OUT << setw(7) << Form("%4.0f", nt0_ee   ) << " || ";
@@ -4125,12 +4287,12 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr2)) << " || " << endl;
 	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "observed"  << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_mumu ) << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_emu  ) << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_mm ) << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_em  ) << " || ";
 	OUT << setw(25) << left << Form("%2.0f", nt2_ee   ) << " || " << endl;
 	OUT << "==========================================================================================================" << endl;
 	OUT << setw(20) << "combined observed: ";
-	OUT << setw(5) << left << Form("%2.0f", nt2_mumu+nt2_emu+nt2_ee ) << endl;
+	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << setw(20) << "        predicted: ";
 	OUT << setw(5) << left << Form("%5.2f", mm_tot_fakes +  em_tot_fakes + nt2_em_chmid + ee_tot_fakes + nt2_ee_chmid ) << " +/- ";
 	float comb_tot_sqerr1 = mm_tot_fakes_e1*mm_tot_fakes_e1 + em_tot_sqerr1 + ee_tot_sqerr1;
@@ -4138,8 +4300,32 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
 	OUT << "==========================================================================================================" << endl;
-
 	OUT.close();
+	
+	float totfakes = mm_tot_fakes +  em_tot_fakes + ee_tot_fakes;
+	float totpred = totfakes + nt2_em_chmid + nt2_ee_chmid;
+
+	float mm_tot_fakes_new = mm_tot_fakes>0 ? mm_tot_fakes : 0.5;
+	float ee_tot_fakes_new = ee_tot_fakes>0 ? ee_tot_fakes : 0.5;
+	float em_tot_fakes_new = em_tot_fakes>0 ? em_tot_fakes : 0.5;
+	float totfakes_new = mm_tot_fakes_new + ee_tot_fakes_new + em_tot_fakes_new;
+
+	float mm_pred_sqerr = mm_tot_fakes_e1*mm_tot_fakes_e1 + mm_tot_fakes_new*mm_tot_fakes_new*0.25;
+	float ee_pred_sqerr = ee_tot_sqerr1                   + ee_tot_fakes_new*ee_tot_fakes_new*0.25 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
+	float em_pred_sqerr = em_tot_sqerr1                   + em_tot_fakes_new*em_tot_fakes_new*0.25 + nt2_em_chmid_e2*nt2_em_chmid_e2;
+	float toterror = sqrt(0.25 * totfakes_new*totfakes_new
+	                    + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2
+	                    + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+	
+	// ee & mm & em & total & limit
+	fOUTSTREAM << Region::sname[reg] << endl;
+	fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
+	ee_tot_fakes + nt2_ee_chmid, sqrt(ee_pred_sqerr),
+	mm_tot_fakes,                sqrt(mm_pred_sqerr),
+	em_tot_fakes + nt2_em_chmid, sqrt(em_pred_sqerr),
+	totpred, toterror);
+	fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
+	
 	delete fMMFPRatios;
 	delete fEMFPRatios;
 	delete fEEFPRatios;
@@ -7153,7 +7339,7 @@ int  MuonPlotter::readSigGraphs(TString filename){
 	
 	TString channame, getname;
 	Color_t color[3] = {kBlack, kRed, kBlue};
-	// Size_t  size [3] = {1.2, 1.2, 1.2};
+	// Size_t  size [3] = {1.6, 1.5, 1.8};
 	Size_t size = 1.5;
 	Style_t style[3] = {8, 21, 23};
 	

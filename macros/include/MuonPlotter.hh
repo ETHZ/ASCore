@@ -83,7 +83,8 @@ public:
 	};
 	enum gHiLoSwitch{
 		HighPt,
-		LowPt
+		LowPt,
+		TauChan
 	};
 	enum gRegion {
 		region_begin,
@@ -242,7 +243,7 @@ public:
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
-	static TString gHiLoLabel[2];
+	static TString gHiLoLabel[3];
 
 	class Sample{
 	public:
@@ -294,6 +295,7 @@ public:
 	
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
+	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
