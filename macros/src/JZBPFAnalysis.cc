@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.15 $";
+string sjzbPFversion="$Revision: 1.16 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.16  2011/06/14 15:16:05  buchmann
+Added additional Mu path
+
 Revision 1.15  2011/06/14 15:02:08  buchmann
 Updated Electron Paths
 
@@ -482,11 +485,12 @@ JZBPFAnalysis::~JZBPFAnalysis(){
 
 void JZBPFAnalysis::Begin(TFile *f){
 cout << endl << endl;
-cout << "This is JZBPFAnalysis --- For PF: We need to decide on what a Custom PF El/Mu is (cuts); We need to define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). We also need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
+cout << "This is JZBPFAnalysis --- For PF: We need to decide on what a Custom PF El/Mu is (cuts); " << endl << "We've already solved the following questions: " << endl << endl << "Define whether we want to reject events with less than 2 pf leptons or just drop back to the current way of doing things in that case (inconsistent!). Need to look at how we want to mix the current and the new situation as with reco we may reject events that would pass pf and the other way around ... " << endl;
 cout << endl << endl;
   // Define the output file of histograms
   //fHistFile = new TFile(outputFileName_.c_str(), "RECREATE");
-  fHistFile=f;	
+  fHistFile=f;
+  f->cd();
   rand_ = new TRandom();
   TH1::AddDirectory(kFALSE);
 
@@ -1206,6 +1210,10 @@ void JZBPFAnalysis::Analyze() {
     //Fil in PF information
     npfEvent.pt1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Pt();
     npfEvent.pt2=sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Pt();
+    npfEvent.ch1=sortedGoodPFLeptons[0][PfPosLepton1[0]].charge;
+    npfEvent.ch2=sortedGoodPFLeptons[0][PfPosLepton2[0]].charge;
+    npfEvent.id1=sortedGoodPFLeptons[0][PfPosLepton1[0]].type;
+    npfEvent.id2=sortedGoodPFLeptons[0][PfPosLepton2[0]].type;
     npfEvent.phi1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Phi();
     npfEvent.phi2=sortedGoodPFLeptons[0][PfPosLepton2[0]].p.Phi();
     npfEvent.eta1=sortedGoodPFLeptons[0][PfPosLepton1[0]].p.Eta();
