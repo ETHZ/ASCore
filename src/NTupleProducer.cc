@@ -216,6 +216,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 			LumiWeights_      = edm::LumiReWeighting(fTPileUpHistoMC[0], fTPileUpHistoData[0], fTPileUpHistoMC[1], fTPileUpHistoData[1]);
 		}
 	}
+
 }
 
 //________________________________________________________________________________________
@@ -235,6 +236,7 @@ NTupleProducer::~NTupleProducer(){
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	++fNTotEvents;
+
 
 	using namespace edm;
 	using namespace std;
@@ -677,6 +679,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			 && abs(g_part->pdgId()) != 16 ) continue;
 
 			if(!( g_part->status() ==1 || (g_part->status() ==2 && abs(g_part->pdgId())==5))) continue;
+
+			bool GenMomExists  (true);
+			bool GenGrMomExists(true);
+
 			if( g_part->pt()        < fMingenleptpt )  continue;
 			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
@@ -685,27 +691,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			// get mother of gen_lept
 			const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
-			int m_id = gen_mom -> pdgId();
+			if(gen_mom==NULL){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+				<< " WARNING: GenParticle does not have a mother ";
+				GenMomExists=false;
+			}
+			int m_id=-999;
+			if(GenMomExists) m_id = gen_mom -> pdgId();
 
-			if(m_id != gen_id);
+			if(m_id != gen_id || !GenMomExists);
 			else{
 				int id= m_id;
-				while(id == gen_id){
+				while(id == gen_id && GenMomExists){
 					gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
-					id=gen_mom->pdgId();
+					if(gen_mom==NULL){
+						edm::LogWarning("NTP") << "@SUB=analyze"
+						<< " WARNING: GenParticle does not have a mother ";
+						GenMomExists=false;
+					}
+					if(GenMomExists) id=gen_mom->pdgId();
 				}
 			}
-			m_id = gen_mom->pdgId();
+			if(GenMomExists) m_id = gen_mom->pdgId();
 
 			// get grand mother of gen_lept
-			const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
-			int gm_id = gen_gmom->pdgId();
-			if (m_id != gm_id);
+			const GenParticle* gen_gmom=NULL;
+			if(GenMomExists) gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+			if(gen_gmom==NULL){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+				<< " WARNING: GenParticle does not have a GrandMother ";
+				GenGrMomExists=false;
+			}
+			int gm_id=-999;
+			if(GenGrMomExists) gm_id = gen_gmom->pdgId();
+			if (m_id != gm_id || !GenGrMomExists);
 			else{
 				int id=gm_id;
-				while(id == m_id){
+				while(id == m_id && GenGrMomExists){
 					gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
-					id = gen_gmom->pdgId();
+					if(gen_gmom==NULL){
+						edm::LogWarning("NTP") << "@SUB=analyze"
+						<< " WARNING: GenParticle does not have a GrandMother ";
+						GenGrMomExists=false;
+					}
+					if(GenGrMomExists) id = gen_gmom->pdgId();
 				}
 			}
 
@@ -734,17 +763,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTGenLeptonEta[i]      =   gen_lepts[i]->eta();
 				fTGenLeptonPhi[i]      =   gen_lepts[i]->phi();
 
-				fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();
-				fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
-				fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
-				fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
-				fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
+				fTGenLeptonMId[i]      =   (gen_moms[i]!=NULL )  ? gen_moms[i]->pdgId()  : -999;
+				fTGenLeptonMStatus[i]  =   (gen_moms[i]!=NULL )  ? gen_moms[i]->status() : -999;
+				fTGenLeptonMPt[i]      =   (gen_moms[i]!=NULL )  ? gen_moms[i]->pt()     : -999;
+				fTGenLeptonMEta[i]     =   (gen_moms[i]!=NULL )  ? gen_moms[i]->eta()    : -999;
+				fTGenLeptonMPhi[i]     =   (gen_moms[i]!=NULL )  ? gen_moms[i]->phi()    : -999;
 
-				fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
-				fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
-				fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt();
-				fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
-				fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
+				fTGenLeptonGMId[i]     =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->pdgId() : -999;
+				fTGenLeptonGMStatus[i] =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->status(): -999;
+				fTGenLeptonGMPt[i]     =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->pt()    : -999;
+				fTGenLeptonGMEta[i]    =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->eta()   : -999;
+				fTGenLeptonGMPhi[i]    =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->phi()   : -999;
 			}
 		}
 	}
