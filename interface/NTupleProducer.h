@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.92 2011/05/17 14:04:04 fronga Exp $
+// $Id: NTupleProducer.h,v 1.93 2011/05/29 08:25:01 pnef Exp $
 //
 //
 
@@ -102,6 +102,9 @@ private:
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
         AdaptiveVertexFitter avFitter;
+
+  //for OOT reweighting in Summer11_S3 samples
+  edm::LumiReWeighting LumiWeights_;
 
 
 	std::vector<JetFillerBase*>     jetFillers;
@@ -243,6 +246,7 @@ private:
 
 	// Pile-up
 	int fTpuNumInteractions;
+	int fTpuOOTNumInteractions;
 	float fTpuZpositions[gMaxnpileup];
 	float fTpuSumpT_lowpT[gMaxnpileup];
 	float fTpuSumpT_highpT[gMaxnpileup];
@@ -251,6 +255,10 @@ private:
 	float fTrho; // rho from L1FastJetCorrection
 	// float fTpuInstLumi[gMaxnpileup];
         TH1I* fHpileupstat;
+  	float fTpuWeightTotal;
+  	float fTpuWeightInTime;
+	std::vector<std::string> fTPileUpHistoData;
+	std::vector<std::string> fTPileUpHistoMC;
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;

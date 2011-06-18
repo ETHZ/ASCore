@@ -78,7 +78,11 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 
 	# Additional jet collections
 	jets = cms.VPSet(),
-        leptons = cms.VPSet()
+        leptons = cms.VPSet(),
+
+	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
+	pu_data = cms.untracked.vstring('', ''), # replace this by cms.untracked.vstring('data_pileup.root', 'name_of_histo')
+	pu_mc   = cms.untracked.vstring('', '')  # replace this by cms.untracked.vstring('mc_pileup.root'  , 'name_of_histo')
 
 )
 

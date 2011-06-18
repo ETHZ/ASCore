@@ -73,6 +73,7 @@ Implementation:
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+ #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -205,7 +206,16 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 		fTHLTObjectEta[i] = fTHLTObjectEta[i-1]+gMaxhltnobjs;
 		fTHLTObjectPhi[i] = fTHLTObjectPhi[i-1]+gMaxhltnobjs;
 	}
-
+	
+	
+	//OOT pu reweighting
+        if(!fIsRealData){
+		fTPileUpHistoData = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_data");
+		fTPileUpHistoMC   = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_mc");
+	 	if(! fTPileUpHistoData[0].empty() && !fTPileUpHistoMC[0].empty() ){
+			LumiWeights_      = edm::LumiReWeighting(fTPileUpHistoMC[0], fTPileUpHistoData[0], fTPileUpHistoMC[1], fTPileUpHistoData[1]);
+		}
+	}
 }
 
 //________________________________________________________________________________________
@@ -409,6 +419,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// Get GenEventInfoProduct
 	edm::Handle<GenEventInfoProduct> genEvtInfo;
 	edm::Handle<std::vector<PileupSummaryInfo> > pileupInfo;
+
+	
+	double MyWeightTotal   =-999;
+	double MyWeightInTime  =-999;
 	// If need to run on MC prior to Spring11 (CMSSW_3_9_X series) change code accordingly here:
 	// edm::Handle<PileupSummaryInfo> pileupInfo; 
 	if(!fIsRealData){
@@ -426,30 +440,42 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
 		std::vector<PileupSummaryInfo>::const_iterator PVI;
 		for (PVI = pileupInfo->begin(); PVI !=pileupInfo->end(); ++PVI){
-			if( PVI->getBunchCrossing() != 0 ) continue; // only look at in-time pileup
-
-			fTpuNumInteractions  = PVI->getPU_NumInteractions();
-                        fHpileupstat->Fill( fTpuNumInteractions );
-			if(fTpuNumInteractions > gMaxnpileup){
-				edm::LogWarning("NTP") << "@SUB=analyze()"
-					<< "More than " << static_cast<int>(gMaxnpileup)
-					<< " generated Pileup events found, increase size!";
-				fTgoodevent = 1;
+			if( PVI->getBunchCrossing() == 0 ){ // in-time PU
+				fTpuNumInteractions  = PVI->getPU_NumInteractions();
+				fHpileupstat->Fill( fTpuNumInteractions );
+				if(fTpuNumInteractions > gMaxnpileup){
+				  edm::LogWarning("NTP") << "@SUB=analyze()"
+							 << "More than " << static_cast<int>(gMaxnpileup)
+							 << " generated Pileup events found, increase size!";
+				  fTgoodevent = 1;
+				}
+				for(int i = 0; i < PVI->getPU_NumInteractions(); i++){
+					if(i >= gMaxnpileup) break; // hard protection
+					fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
+					fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
+					fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
+					fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
+					fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
+					// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
+				}		
+			}else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
+				fTpuOOTNumInteractions = PVI->getPU_NumInteractions();
 			}
-			for(int i = 0; i < PVI->getPU_NumInteractions(); i++){
-				if(i >= gMaxnpileup) break; // hard protection
-				fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
-				fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
-				fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
-				fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
-				fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
-				// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
-			}		
+		}
+		//see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
+		// as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
+		if(!fTPileUpHistoData[0].empty() && !fTPileUpHistoMC[0].empty() ){
+			const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
+			MyWeightTotal  = LumiWeights_.weightOOT( (*iEventB) ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
+			MyWeightInTime = LumiWeights_.weight   ( (*iEventB) ); // this is the inTimeWeight only
 		}
 	} else {
           // Just store the number of primary vertices
           fHpileupstat->Fill(vertices->size());
         }
+	fTpuWeightTotal  = MyWeightTotal;
+	fTpuWeightInTime = MyWeightInTime;
+	
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Trigger information
@@ -650,7 +676,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			 && abs(g_part->pdgId()) != 15
 			 && abs(g_part->pdgId()) != 16 ) continue;
 
-			if(!( g_part->status() ==1 || (g_part->status() ==2 && abs(g_part->pdgId())==5))) continue;
+			if( g_part->status() != 1 ) continue;
 			if( g_part->pt()        < fMingenleptpt )  continue;
 			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
@@ -1691,6 +1717,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fRunTree->Branch("HLTLabels"      ,&fTHltLabels );
 	fRunTree->Branch("HLTNames"       ,&fTHLTmenu );
 	fRunTree->Branch("L1PhysMenu"     ,&fTL1physmenu );
+	
+	fRunTree->Branch("PileUpData"     ,&fTPileUpHistoData);
+	fRunTree->Branch("PileUpMC"       ,&fTPileUpHistoMC);
 
 	// Event information:
 	fEventTree->Branch("Run"              ,&fTrunnumber       ,"Run/I");
@@ -1708,7 +1737,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/F");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	// Pile-Up information:
-	fEventTree->Branch("PUnumInteractions",&fTpuNumInteractions,"PUnumInteractions/I");
+	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
+	fEventTree->Branch("PUOOTnumInteractions",&fTpuOOTNumInteractions,"PUOOTnumInteractions/I");
 	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumInteractions]/F");
 	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumInteractions]/F");
 	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
@@ -1726,6 +1756,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("HLTObjectPt"      ,fTHLTObjectPt[0]   , Form("HLTObjectPt[%d][%d]/F",  fTNpaths, gMaxhltnobjs));
 	fEventTree->Branch("HLTObjectEta"     ,fTHLTObjectEta[0]  , Form("HLTObjectEta[%d][%d]/F", fTNpaths, gMaxhltnobjs));
 	fEventTree->Branch("HLTObjectPhi"     ,fTHLTObjectPhi[0]  , Form("HLTObjectPhi[%d][%d]/F", fTNpaths, gMaxhltnobjs));
+	fEventTree->Branch("PUWeightTotal"    ,&fTpuWeightTotal   , "PUWeightTotal/F");
+	fEventTree->Branch("PUWeightInTime"   ,&fTpuWeightInTime  , "PUWeightInTime/F");
+
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
 	fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/F");
@@ -2314,6 +2347,9 @@ void NTupleProducer::resetTree(){
 	fTpdfxPDF2          = -999.99;
 
 	fTweight            = -999.99;
+        fTpuWeightTotal     = -999.99;
+        fTpuWeightInTime    = -999.99;
+
 	fTgoodvtx           = -999;
 	fTprimvtxx          = -999.99;
 	fTprimvtxy          = -999.99;
@@ -2352,6 +2388,7 @@ void NTupleProducer::resetTree(){
 
 	// Pile-up
 	fTpuNumInteractions = 0;
+	fTpuOOTNumInteractions = 0;
 	resetFloat(fTpuZpositions   ,gMaxnpileup);
 	resetFloat(fTpuSumpT_lowpT  ,gMaxnpileup);
 	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);

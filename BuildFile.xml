@@ -29,4 +29,8 @@
 <use   name="RecoJets/JetAlgorithms"/>
 <use   name="RecoLocalCalo/EcalRecAlgos"/>
 <use   name="RecoEcal/EgammaCoreTools"/>
+<use name="PhysicsTools/Utilities"/>
+<use name="SimDataFormats/PileupSummaryInfo"/>
+<use   name="boost"/>
+
 <flags   EDM_PLUGIN="1"/>
