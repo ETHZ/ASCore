@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.117 2011/06/08 13:10:51 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.119 2011/06/18 09:50:02 pnef Exp $
 //
 //
 
@@ -676,7 +676,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			 && abs(g_part->pdgId()) != 15
 			 && abs(g_part->pdgId()) != 16 ) continue;
 
-			if( g_part->status() != 1 ) continue;
+			if(!( g_part->status() ==1 || (g_part->status() ==2 && abs(g_part->pdgId())==5))) continue;
 			if( g_part->pt()        < fMingenleptpt )  continue;
 			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
@@ -2387,8 +2387,8 @@ void NTupleProducer::resetTree(){
 	resetInt(fTvrtxisfake,   gMaxnvrtx);
 
 	// Pile-up
-	fTpuNumInteractions = 0;
-	fTpuOOTNumInteractions = 0;
+	fTpuNumInteractions    = -999;
+	fTpuOOTNumInteractions = -999;
 	resetFloat(fTpuZpositions   ,gMaxnpileup);
 	resetFloat(fTpuSumpT_lowpT  ,gMaxnpileup);
 	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);
