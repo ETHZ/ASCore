@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+### WATCH OUT: NEEDS TO BE LAUNCHED AS python runManager.py configuration.cfg and NOT ./runManager configuration.cfg
+
 ###############################################################
 #                       runManager.py                         #
 ###############################################################
@@ -22,8 +24,9 @@ from os import popen
 import commands
 import time
 ##the following two are for threading
-import Queue
-import threading
+#import Queue
+#import threading
+from multiprocessing import Pool
 
 jobnumbers=[]
 totaljobnumber=0
@@ -144,10 +147,7 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   
   outputName = "output_" + str(step) + ".root"
   #Send to the queue
-#  print "qsub -e /tmp/ -o /tmp/ -N " + taskName + " " + nameOfDirectory + nameOfConf2 + " " + str(step)
-#  result = os.system("qsub -e /tmp/ -o /tmp/ " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
-#  pipe=popen('echo "Your job 861717 ("example_job") has been submitted"')
-  pipe=popen("aqsub -e /tmp/ -o /tmp/ -N" + taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
+  pipe=popen("qsub -e /tmp/ -o /tmp/ -N " + taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
   for l in pipe.readlines():
 	  if l.find("Your job")>-1:
 		  thisjobnumber=int(l[l.index('job ')+4:l.index(' (')])
@@ -338,31 +338,13 @@ def process(task, conf):
     for step in range(0, NumberOfJobs):
       createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, conf, correctList, task) 
 
-##################################################################################
-#               SPEEDING UP THINGS WITH QUEUES AND THREADS                       #
-##################################################################################
-
-queue = Queue.Queue()
-numoftasksdone=[]
-numoftasksstarted=0
-
-allprocessed=[]
-class ProcessThread(threading.Thread):
-  def __init__(self, queue):
-    threading.Thread.__init__(self)
-    self.queue = queue
-
-  def run(self):
-    while True:
-      args = self.queue.get()
-      
-      output = process(l, result)
-      time.sleep(5)
-      numoftasksdone.append(2)
 
 ##################################################################################
 #                              POST PROCESSING                                   #
 ##################################################################################
+
+def cb(r): #optional: callback function
+    pass
 
 def ensure_dir(f) :
 	if not os.path.exists(f):
@@ -407,9 +389,7 @@ def check_directory(path,username) :
 ##################################################################################
 #                                  MAIN                                          #
 ##################################################################################
-t = ProcessThread(queue)
-t.setDaemon(True)
-t.start()
+po = Pool()
 
 fusepath=""
 uname=""
@@ -425,19 +405,12 @@ else:
     fusepath=result[4]
     uname=result[6]
     for l in listOfTasks:
-      numoftasksstarted+=1
       if(l[0].find("/data/")>-1) :
 	isdata=1
       showMessage("Processing " + l[0])
-      queue.put((l,result))
-  #Queue.join()
-  ##not working in python 2.4 so let's implement a workaround!
-  waitcounter=0
-  try:
-    while len(numoftasksdone)<numoftasksstarted:
-        time.sleep(0.5)
-  except len(numoftasksdone)==numoftasksstarted:
-    pass
+      po.apply_async(process,(l, result),callback=cb)
+  po.close()
+  po.join()
 
   totaljobnumber=len(jobnumbers)
   counter=0
