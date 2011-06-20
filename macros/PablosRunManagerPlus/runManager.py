@@ -425,6 +425,6 @@ else:
   check_directory(fusepath,uname)
   if isdata==1:
     print "We're dealing with data - we still need to merge data files and check for duplicates!"
-    pipe=popen("/shome/"+uname+"/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
+    pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
     for l in pipe.readlines():
 	  print l
