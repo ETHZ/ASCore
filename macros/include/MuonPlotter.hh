@@ -89,6 +89,7 @@ public:
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
+		Control,
 		HT80MET100,
 		HT200MET30,
 		HT200MET120,
@@ -184,7 +185,9 @@ public:
 		static float minEl2pt[2];
 		// Custom selections for every region
 		static float minHT   [gNREGIONS];
+		static float maxHT   [gNREGIONS];
 		static float minMet  [gNREGIONS];
+		static float maxMet  [gNREGIONS];
 		static int   minNjets[gNREGIONS];
 		
 		Channel mm;
@@ -461,8 +464,8 @@ public:
 	bool passesNJetCut_LooseLep(int=2);
 	bool passesJet50Cut();
 	
-	bool passesHTCut(float);
-	bool passesMETCut(float = -1.);
+	bool passesHTCut(float, float = 7000.);
+	bool passesMETCut(float = -1., float = 7000.);
 	bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
 	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	bool passesMllEventVeto(float = 5.);
@@ -522,6 +525,8 @@ public:
 private:
 	float fC_minHT;
 	float fC_minMet;
+	float fC_maxHT;
+	float fC_maxMet;
 	int   fC_minNjets;
 	float fC_minMu1pt;
 	float fC_minMu2pt;
