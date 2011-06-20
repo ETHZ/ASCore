@@ -6,9 +6,10 @@
 # + Python script which allows to manage multiple jobs in the #
 # context of a lsfbatch system.                               #
 #                                                             #
-# + type runManager -h to see a description of the usage          #   
+# + type runManager -h to see a description of the usage      #   
 #                                                             #
 # + Feedback to: pablom@cern.ch                               #
+# + Feedback about this version: contact marco-andrea         #
 #                                                             #
 ############################################################### 
    
@@ -367,24 +368,24 @@ def ensure_dir(f) :
 	if not os.path.exists(f):
 		os.makedirs(f)
 
-def join_directory(path,filelist) :
-	localpath="/scratch/buchmann/"+path
+def join_directory(path,filelist,username) :
+	localpath="/scratch/"+username+"/"+path
 	ensure_dir(localpath)
 	cleanpath=path;
 	if (cleanpath[len(cleanpath)-1]=="/") : # remove trailing slash
 		cleanpath=cleanpath[0:len(cleanpath)-2]
-	fusecommand="hadd -f /scratch/buchmann/"+cleanpath+".root "
+	fusecommand="hadd -f /scratch/"+username+"/"+cleanpath+".root "
 	for item in filelist:
-		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/buchmann/"+item+" /scratch/buchmann/"+item
+		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/"+item
 		commands.getstatusoutput(copycommand)
-		fusecommand=fusecommand+" /scratch/buchmann/"+item
+		fusecommand=fusecommand+" /scratch/"+username+"/"+item
 	print commands.getoutput(fusecommand)
-	deletecommand="rm -r /scratch/buchmann/"+path+"/" 
+	deletecommand="rm -r /scratch/"+username+"/"+path+"/" 
 	print commands.getoutput(deletecommand)
 		
 
-def check_directory(path) :
-	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/buchmann/"+path
+def check_directory(path,username) :
+	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+path
 	print "\033[1;34m Going to checkout the subdirectory "+complete_path+" \033[0m "
 	listoffiles=[]
 	supposedtobejoined=False;
@@ -399,7 +400,7 @@ def check_directory(path) :
 				supposedtobejoined=True
 				listoffiles.append(currentline[currentline.find(path):])
 	if supposedtobejoined==True:
-		join_directory(path,listoffiles)
+		join_directory(path,listoffiles,username)
 
 
 
@@ -411,7 +412,8 @@ t.setDaemon(True)
 t.start()
 
 fusepath=""
-
+uname=""
+isdata=0
 if(len(sys.argv) != 2 or sys.argv[1] == "-h"):
   printUsage()
 else:
@@ -421,8 +423,11 @@ else:
   else:
     listOfTasks = getListOfTasks(result[0])
     fusepath=result[4]
+    uname=result[6]
     for l in listOfTasks:
       numoftasksstarted+=1
+      if(l[0].find("/data/")>-1) :
+	isdata=1
       showMessage("Processing " + l[0])
       queue.put((l,result))
   #Queue.join()
@@ -445,5 +450,9 @@ else:
 	  checklist(jobnumbers,currlist)
 	  time.sleep(60)
   print "All jobs have finished - merging everything to your scratch directory now!"
-  check_directory(fusepath)
-
+  check_directory(fusepath,uname)
+  if isdata==1:
+    print "We're dealing with data - we still need to merge data files and check for duplicates!"
+    pipe=popen("/shome/"+uname+"/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
+    for l in pipe.readlines():
+	  print l
