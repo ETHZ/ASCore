@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <TLorentzVector.h>
+#include "JetCorrectionUncertainty.h"
 
 #include "base/TreeReader.hh"
 #include "base/UserAnalysisBase.hh"
@@ -35,8 +36,14 @@ public:
 	// jets
 	TLorentzVector Jet(int index);
 	TLorentzVector CAJet(int index);
-	TLorentzVector JetJESScaled(TLorentzVector j);
+	TLorentzVector PFJetJESScaled(TLorentzVector j);
+	TLorentzVector CAJetJESScaled(TLorentzVector j);
 	TLorentzVector MET();
+	double GetJECUncertPF(double pt, double eta);
+	double GetJECUncertCalo(double pt, double eta);
+	void Initialize_JetCorrectionUncertainty();
+	JetCorrectionUncertainty *fJecUncPF;
+	JetCorrectionUncertainty *fJecUncCalo;
 	
 	struct JetTau {
 		int NObjs;
@@ -73,7 +80,7 @@ public:
 	int   fCut_Run_min;
 	int   fCut_Run_max;
 	bool  fDoJESUncertainty;
-	float fJESScale;
+	int   fJESUpDown;
 
 	// members
 	float fHT;

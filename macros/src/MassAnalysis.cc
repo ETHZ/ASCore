@@ -159,9 +159,9 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].NeuMult        = fTR->PF2PAT3JNeuMult       [fJetTaus.index[i]];
 			fMT2tree->jet[i].NConstituents  = fTR->PF2PAT3JNConstituents [fJetTaus.index[i]];
 			fMT2tree->jet[i].Scale          = fTR->PF2PAT3JScale         [fJetTaus.index[i]];
-			fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
 			fMT2tree->jet[i].Area           = fTR->PF2PAT3JArea          [fJetTaus.index[i]];
 			fMT2tree->jet[i].isTau          = false;
+			if(fisData)fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
 		}else { // this is obsolete starting from ntuple V02-01-01 as taus are included in jets
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PfTau3Px[fJetTaus.index[i]],fTR->PfTau3Py[fJetTaus.index[i]],fTR->PfTau3Pz[fJetTaus.index[i]],fTR->PfTau3E[fJetTaus.index[i]]);
 			fMT2tree->jet[i].isTau = true;

@@ -1,6 +1,7 @@
 #include "helper/Utilities.hh"
 #include "MultiplicityAnalysisBase.hh"
-
+#include "TSystem.h"
+#include "JetCorrectionUncertainty.h"
 
 using namespace std;
 
@@ -20,13 +21,15 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 	fCut_Run_min                        = 0;
 	fCut_Run_max                        = 9999999;
 	fDoJESUncertainty                   = false;
-	fJESScale                           = 1.0;
+	fJESUpDown                          = 0;
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
 }
 
 MultiplicityAnalysisBase::~MultiplicityAnalysisBase(){
+	delete fJecUncPF;
+	delete fJecUncCalo;
 }
 
 
@@ -308,6 +311,8 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_Run_min = int(IntValue); ok = true;
 		} else if( !strcmp(ParName, "Run_max") ){
 			fCut_Run_max = int(IntValue); ok = true;
+		} else if( !strcmp(ParName, "JESUpDown")){
+			fJESUpDown   = int(IntValue); ok = true;
 		}
 
 		// floats 
@@ -334,8 +339,6 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fCut_DiLeptInvMass_max    = float(ParValue); ok = true;
 		} else if( !strcmp(ParName, "PtHat_max")){
 			fCut_PtHat_max            = float(ParValue); ok = true;
-		} else if( !strcmp(ParName, "JESScale")){
-			fJESScale                 = float(ParValue); ok = true;
 		}  		
 
 		if(!ok) cout << "%% MultiplicityAnalysis::ReadCuts ==> ERROR: Unknown variable " << ParName << endl;
@@ -355,9 +358,10 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		cout << "  PtHat_max                   " << fCut_PtHat_max                  <<endl;
 		cout << "  Run_min                     " << fCut_Run_min                    <<endl;
 		cout << "  Run_max                     " << fCut_Run_max                    <<endl;
-		cout << "  JESScale                    " << fJESScale                       <<endl;
-		if(fJESScale !=1.0){
-		cout << "  Do rescaling of Jets and MET with scale " << fJESScale           <<endl;
+		cout << "  JESUpDown                   " << fJESUpDown                      <<endl;
+		if(fJESUpDown ==-1 || fJESUpDown==1){
+		if(fJESUpDown ==1) cout << "  Do up  -scaling of Jets and MET "             <<endl;
+		else               cout << "  Do down-scaling of Jets and MET "             <<endl;
 		fDoJESUncertainty = true;
 		}
 
@@ -369,6 +373,15 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		}
 		cout << "--------------"    << endl;	
 	}			
+	if(fDoJESUncertainty){
+		cout << "--------------------- " << endl;
+		cout << " -> initialize JetCorrectionUncertainty " << endl;
+		Initialize_JetCorrectionUncertainty();
+		cout << "--------------------- " << endl;
+	}else{
+		fJecUncPF   =NULL;
+		fJecUncCalo =NULL;
+	}
 }
 
 
@@ -402,55 +415,78 @@ bool MultiplicityAnalysisBase::IsGoodPFJetTightPAT3(int index, double ptcut, dou
 }
 
 // Jets and JES uncertainty
+void MultiplicityAnalysisBase::Initialize_JetCorrectionUncertainty(){
+	fJecUncCalo = new JetCorrectionUncertainty("Fall10_AK5Calo_Uncertainty.txt");
+	fJecUncPF   = new JetCorrectionUncertainty("Fall10_AK5PF_Uncertainty.txt");
+}
+// pf
 TLorentzVector MultiplicityAnalysisBase::Jet(int index){
 	TLorentzVector j(0,0,0,0);
 	j.SetPtEtaPhiE(fTR->PF2PAT3JPt[index], fTR->PF2PAT3JEta[index], fTR->PF2PAT3JPhi[index], fTR->PF2PAT3JE[index]);
 	if  (! fDoJESUncertainty) return j;
-	else                      return MultiplicityAnalysisBase::JetJESScaled(j);
+	else                      return MultiplicityAnalysisBase::PFJetJESScaled(j);
 }
 
+TLorentzVector MultiplicityAnalysisBase::PFJetJESScaled(TLorentzVector j){
+	TLorentzVector j_scaled(0.,0.,0.,0);
+	if(fJESUpDown== 1) j_scaled.SetPtEtaPhiM(j.Perp()*(1+GetJECUncertPF(j.Pt(),j.Eta())), j.Eta(), j.Phi(), j.M());
+	if(fJESUpDown==-1) j_scaled.SetPtEtaPhiM(j.Perp()*(1-GetJECUncertPF(j.Pt(),j.Eta())), j.Eta(), j.Phi(), j.M());
+	return j_scaled;
+}
+
+double MultiplicityAnalysisBase::GetJECUncertPF(double pt, double eta){
+	// pt must be corrected! not raw  	
+	fJecUncPF->setJetPt(pt);
+	fJecUncPF->setJetEta(eta);
+	double uncert= fJecUncPF->getUncertainty(true);
+	if     (fabs(eta) <1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
+	else if(fabs(eta) <3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
+	else if(fabs(eta) <5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
+	return uncert; 
+}
+
+// Calo
 TLorentzVector MultiplicityAnalysisBase::CAJet(int index){
 	TLorentzVector j(0,0,0,0);
 	j.SetPtEtaPhiE(fTR->CAJPt[index], fTR->CAJEta[index], fTR->CAJPhi[index], fTR->CAJE[index]);
 	if  (! fDoJESUncertainty) return j;
-	else                      return MultiplicityAnalysisBase::JetJESScaled(j);
+	else                      return MultiplicityAnalysisBase::CAJetJESScaled(j);
 }
 
-TLorentzVector MultiplicityAnalysisBase::JetJESScaled(TLorentzVector j){
+
+TLorentzVector MultiplicityAnalysisBase::CAJetJESScaled(TLorentzVector j){
 	TLorentzVector j_scaled(0.,0.,0.,0);
-	j_scaled.SetPtEtaPhiM(j.Perp()*fJESScale, j.Eta(), j.Phi(), j.M());	
+	if(fJESUpDown== 1) j_scaled.SetPtEtaPhiM(j.Perp()*(1+GetJECUncertCalo(j.Pt(),j.Eta())), j.Eta(), j.Phi(), j.M());
+	if(fJESUpDown==-1) j_scaled.SetPtEtaPhiM(j.Perp()*(1-GetJECUncertCalo(j.Pt(),j.Eta())), j.Eta(), j.Phi(), j.M());
 	return j_scaled;
 }
 
-// MET w/ and w/0 JES uncertainty
+double MultiplicityAnalysisBase::GetJECUncertCalo(double pt, double eta){
+	// pt must be corrected! not raw  	
+	fJecUncCalo->setJetPt(pt);
+	fJecUncCalo->setJetEta(eta);
+	double uncert= fJecUncCalo->getUncertainty(true);
+	if     (fabs(eta) <1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
+	else if(fabs(eta) <3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
+	else if(fabs(eta) <5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
+	return uncert; 
+}
+
+// pfMET 
 TLorentzVector MultiplicityAnalysisBase::MET(){
-	double JESunclusteredScale =1.2; // scale for unclustered energy fraction
 	TLorentzVector MET(0,0,0,0);
-	MET.SetPtEtaPhiM(fTR->PFMETPAT, 0., fTR->PFMETPATphi, 0);
-	if(!fDoJESUncertainty) return MET;
-	else{
-		TLorentzVector MHT(0,0,0,0),clustered(0,0,0,0);
-		// calculate correction due to clustered jets;
-		for(int i=0; i<fTR->PF2PAT3NJets; ++i){
-			clustered.SetPtEtaPhiE(fTR->PF2PAT3JPt[i], fTR->PF2PAT3JEta[i], fTR->PF2PAT3JPhi[i], fTR->PF2PAT3JE[i]);
-			MHT      -=clustered;
-		}
-		for(int i=0; i<fTR->PfEl3NObjs; ++i){
-			clustered.SetPtEtaPhiM(fTR->PfEl3Pt[i], fTR->PfEl3Eta[i], fTR->PfEl3Phi[i], 0);
-			MHT      -=clustered;
-		}
-		for(int i=0; i<fTR->PfMu3NObjs; ++i){
-			clustered.SetPtEtaPhiM(fTR->PfMu3Pt[i], fTR->PfMu3Eta[i], fTR->PfMu3Phi[i], 0.106);
-			MHT      -=clustered;
-		}
-		double unclustered_frac=fabs(MHT.Pt()-MET.Pt())/MET.Pt();
-		double clustered_frac  =MHT.Pt()/MET.Pt();
-		// normalize fractions
-		unclustered_frac=unclustered_frac/(clustered_frac+unclustered_frac);
-		clustered_frac  =clustered_frac  /(clustered_frac+unclustered_frac);
-		// rescale met pt
-		double met_pt = MET.Pt()*(fJESScale*clustered_frac + JESunclusteredScale*unclustered_frac);
-		MET.SetPerp(met_pt);
+	if(!fDoJESUncertainty){
+		MET.SetPtEtaPhiM(fTR->PFMETPAT, 0., fTR->PFMETPATphi, 0);
+		return MET;
+	} else{
+		if      (fJESUpDown==1){
+			MET.SetPtEtaPhiM(fTR->PFMETPAT*1.05, 0., fTR->PFMETPATphi, 0);
+		}else if(fJESUpDown==-1){
+			MET.SetPtEtaPhiM(fTR->PFMETPAT*0.95, 0., fTR->PFMETPATphi, 0);
+		}else{
+			cout << " something wrong in met scaling" << endl; exit(1);
+		}		
 		return MET;
 	}
 }
+
