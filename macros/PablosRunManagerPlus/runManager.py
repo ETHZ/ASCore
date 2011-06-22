@@ -410,7 +410,6 @@ else:
       po.apply_async(process,(l, result),callback=cb)
   po.close()
   po.join()
-
   totaljobnumber=len(jobnumbers)
   counter=0
   while(len(jobnumbers)>0 and counter<300) :
@@ -423,7 +422,7 @@ else:
 	  time.sleep(60)
   print "All jobs have finished - need to merge everything and place it in your scratch directory!"
   check_directory(fusepath,uname)
-  if isdata==1:
+  if isdata==1 and result[2].contains("RunJZBAnalyzer"):
     print "We're dealing with data - we still need to merge data files and check for duplicates!"
     pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
     for l in pipe.readlines():
