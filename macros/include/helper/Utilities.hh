@@ -105,6 +105,19 @@ namespace Util {
   }
 
   //__________________________________________________________________________
+  inline void SaveAsMacro(TCanvas *cin, TString name, TString dir){
+    // Prints a ROOT TCanvas Object to a .eps file
+    //  name is the bare output filename, e.g. "fit_4_8",
+    //  dir is the output directory (inside the overall output dir.)
+    // Create sub directories if needed
+	dir = MakeOutputDir(dir);
+
+    dir += name;
+    dir += ".C";
+    cin->SaveAs(dir);
+  }
+
+  //__________________________________________________________________________
   inline TDirectory* FindOrCreate( TString& dir, TFile* file ) {
     // Look for a directory and create it if it does not exist
 
