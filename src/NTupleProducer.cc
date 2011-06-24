@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.119 2011/06/18 09:50:02 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.121 2011/06/18 12:20:34 pnef Exp $
 //
 //
 
@@ -467,9 +467,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		//see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
 		// as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
 		if(!fTPileUpHistoData[0].empty() && !fTPileUpHistoMC[0].empty() ){
-			const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
-			MyWeightTotal  = LumiWeights_.weightOOT( (*iEventB) ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
-			MyWeightInTime = LumiWeights_.weight   ( (*iEventB) ); // this is the inTimeWeight only
+		  //const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
+			MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
+			MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
 		}
 	} else {
           // Just store the number of primary vertices
