@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.121 2011/06/18 12:20:34 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.122 2011/06/24 13:23:29 leo Exp $
 //
 //
 
@@ -461,8 +461,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 					// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
 				}		
 			}else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
-				fTpuOOTNumInteractions = PVI->getPU_NumInteractions();
+				fTpuOOTNumInteractionsLate = PVI->getPU_NumInteractions();
 			}
+			else if( PVI->getBunchCrossing() == -1 ){ // OOT pile-Up: this is the 50ns early Bunch
+			  fTpuOOTNumInteractionsEarly = PVI->getPU_NumInteractions();
+                        }
+
 		}
 		//see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
 		// as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
@@ -1767,7 +1771,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
-	fEventTree->Branch("PUOOTnumInteractions",&fTpuOOTNumInteractions,"PUOOTnumInteractions/I");
+	fEventTree->Branch("PUOOTnumInteractionsEarly",&fTpuOOTNumInteractionsEarly,"PUOOTnumInteractionsEarly/I");
+	fEventTree->Branch("PUOOTnumInteractionsLate",&fTpuOOTNumInteractionsLate,"PUOOTnumInteractionsLate/I");
 	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumInteractions]/F");
 	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumInteractions]/F");
 	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
@@ -2417,7 +2422,9 @@ void NTupleProducer::resetTree(){
 
 	// Pile-up
 	fTpuNumInteractions    = -999;
-	fTpuOOTNumInteractions = -999;
+	fTpuOOTNumInteractionsEarly = -999;
+	fTpuOOTNumInteractionsLate = -999;
+
 	resetFloat(fTpuZpositions   ,gMaxnpileup);
 	resetFloat(fTpuSumpT_lowpT  ,gMaxnpileup);
 	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);
