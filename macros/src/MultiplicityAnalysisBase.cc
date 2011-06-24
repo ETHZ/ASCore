@@ -2,6 +2,9 @@
 #include "MultiplicityAnalysisBase.hh"
 #include "TSystem.h"
 #include "JetCorrectionUncertainty.h"
+#include <iostream>
+#include <fstream>
+
 
 using namespace std;
 
@@ -127,9 +130,9 @@ void MultiplicityAnalysisBase::FindLeptonConfig(){
 
 
 bool MultiplicityAnalysisBase::IsSelectedEvent(){
-
 	// goodevt from UserAnalysisBase
 	if(!IsGoodEvent()) {return false;}
+
 
 	// Run
 	if(fTR->Run < fCut_Run_min ) {return false;}
@@ -251,7 +254,6 @@ bool MultiplicityAnalysisBase::IsSelectedEvent(){
 		cout << "WARNING: Event with Jets with negative JEC: Run " << fTR->Run << " LS " << fTR->LumiSection << " Event " << fTR->Event
 		     << " N PFJets " << fTR->PF2PAT3NJets << " NCaloJets " << fTR->CANJets << endl; 
 	}
-
 
 	// ------------------------------------------------------------------------------------------	
 	return true;	
@@ -416,8 +418,18 @@ bool MultiplicityAnalysisBase::IsGoodPFJetTightPAT3(int index, double ptcut, dou
 
 // Jets and JES uncertainty
 void MultiplicityAnalysisBase::Initialize_JetCorrectionUncertainty(){
-	fJecUncCalo = new JetCorrectionUncertainty("Fall10_AK5Calo_Uncertainty.txt");
-	fJecUncPF   = new JetCorrectionUncertainty("Fall10_AK5PF_Uncertainty.txt");
+	string Calo="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/JESuncertainty/Fall10_AK5Calo_Uncertainty.txt";
+	string PF  ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/JESuncertainty/Fall10_AK5PF_Uncertainty.txt";
+
+	ifstream fileCalo(Calo.c_str());
+	ifstream filePF  (PF.c_str());
+	if(! filePF   ) {cout << "ERROR: cannot open file " << PF     << endl; exit(1); }
+	else            {cout << "  using file "            << PF     << endl;          }
+	if(! fileCalo ) {cout << "ERROR: cannot open file " << Calo   << endl; exit(1); }
+	else            {cout << "  using file "            << Calo   << endl;          } 
+
+	fJecUncCalo = new JetCorrectionUncertainty(Calo);
+	fJecUncPF   = new JetCorrectionUncertainty(PF);
 }
 // pf
 TLorentzVector MultiplicityAnalysisBase::Jet(int index){
