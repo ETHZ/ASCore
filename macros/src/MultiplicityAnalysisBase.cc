@@ -448,12 +448,17 @@ TLorentzVector MultiplicityAnalysisBase::PFJetJESScaled(TLorentzVector j){
 
 double MultiplicityAnalysisBase::GetJECUncertPF(double pt, double eta){
 	// pt must be corrected! not raw  	
+
+	// eta cannot be greater than 5! 
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
+
 	fJecUncPF->setJetPt(pt);
 	fJecUncPF->setJetEta(eta);
 	double uncert= fJecUncPF->getUncertainty(true);
-	if     (fabs(eta) <1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
-	else if(fabs(eta) <3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
-	else if(fabs(eta) <5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
+	if     (fabs(eta) <=1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
+	else if(fabs(eta) <=3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
+	else if(fabs(eta) <=5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
 	return uncert; 
 }
 
@@ -475,12 +480,16 @@ TLorentzVector MultiplicityAnalysisBase::CAJetJESScaled(TLorentzVector j){
 
 double MultiplicityAnalysisBase::GetJECUncertCalo(double pt, double eta){
 	// pt must be corrected! not raw  	
+	
+	// eta cannot be greater than 5! 
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
 	fJecUncCalo->setJetPt(pt);
 	fJecUncCalo->setJetEta(eta);
 	double uncert= fJecUncCalo->getUncertainty(true);
-	if     (fabs(eta) <1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
-	else if(fabs(eta) <3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
-	else if(fabs(eta) <5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
+	if     (fabs(eta) <=1.5)  uncert = sqrt(uncert*uncert + 0.02*0.02);
+	else if(fabs(eta) <=3.0)  uncert = sqrt(uncert*uncert + 0.06*0.06);
+	else if(fabs(eta) <=5.0)  uncert = sqrt(uncert*uncert + 0.20*0.20);
 	return uncert; 
 }
 
