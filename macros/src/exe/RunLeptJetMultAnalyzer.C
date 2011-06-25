@@ -101,8 +101,11 @@ int main(int argc, char* argv[]) {
 		cout << "ERROR: you are running on data, no reweighting needed... " << endl; exit(-1);
 	}
 
-	// setofcuts="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/20101129_macros/multiplicity_cuts/"+setofcuts+".dat";
-	setofcuts="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
+	setofcuts   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
+	if(data_PileUp.length()!=0){data_PileUp ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_data/"+data_PileUp;}
+	if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_mc/"  +mc_PileUp;}
+	if(jsonFileName.length() !=0){jsonFileName="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/"           +jsonFileName;}
+
 	
 
 	TChain *theChain = new TChain("analyze/Analysis");
