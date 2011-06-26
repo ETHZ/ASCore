@@ -7,6 +7,7 @@
 #include "helper/AnaClass.hh"
 #include "helper/Utilities.hh"
 #include "helper/FPRatios.hh"
+#include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
 
 #include "TLorentzVector.h"
@@ -47,12 +48,14 @@ int   MuonPlotter::Region::minNjets[MuonPlotter::gNREGIONS] = {        2  ,     
 // Muon Binning //////////////////////////////////////////////////////////////////
 double MuonPlotter::gMuPtbins [gNMuPtbins+1]  = {10., 20., 30., 40., 50., 60.};
 double MuonPlotter::gMuPt2bins[gNMuPt2bins+1] = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {-2.4, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.4};
+double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.5, 2.4};
+// double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {-2.4, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.4};
 
 // Electron Binning //////////////////////////////////////////////////////////////
 double MuonPlotter::gElPtbins [gNElPtbins+1]  = {10., 20., 30., 40., 50., 60.};
 double MuonPlotter::gElPt2bins[gNElPt2bins+1] = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gElEtabins[gNElEtabins+1] = {-2.4, -1.5, -0.85, 0., 0.85, 1.5, 2.4};
+double MuonPlotter::gElEtabins[gNElEtabins+1] = {0., 0.85, 1.5, 2.4};
+// double MuonPlotter::gElEtabins[gNElEtabins+1] = {-2.4, -1.5, -0.85, 0., 0.85, 1.5, 2.4};
 //////////////////////////////////////////////////////////////////////////////////
 
 // NVrtx Binning //////////////////////////////////////////////////////////////
@@ -69,16 +72,16 @@ TString MuonPlotter::KinPlots::var_name[MuonPlotter::gNKinVars] = {"HT", "MET", 
 int     MuonPlotter::KinPlots::nbins[MuonPlotter::gNKinVars]    = { 20 ,   20 ,      8 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20 };
 float   MuonPlotter::KinPlots::xmin[MuonPlotter::gNKinVars]     = {100.,    0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.};
 float   MuonPlotter::KinPlots::xmax[MuonPlotter::gNKinVars]     = {800.,  210.,      8.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.};
-TString MuonPlotter::KinPlots::axis_label[MuonPlotter::gNKinVars] = {"H_{T} [GeV]",
-                                                                     "E_{T}^{miss} [GeV]",
+TString MuonPlotter::KinPlots::axis_label[MuonPlotter::gNKinVars] = {"H_{T} (GeV)",
+                                                                     "E_{T}^{miss} (GeV)",
                                                                      "N_{Jets}",
-                                                                     "P_{T} (l_{1}) [GeV]",
-                                                                     "P_{T} (l_{2}) [GeV]",
-                                                                     "m_{ll} (SF) [GeV]",
-                                                                     "m_{#mu#mu} [GeV]",
-                                                                     "m_{ee} [GeV]",
-                                                                     "m_{ll} (OF) [GeV]",
-                                                                     "M_{T2} [GeV]"};
+                                                                     "P_{T} (l_{1}) (GeV)",
+                                                                     "P_{T} (l_{2}) (GeV)",
+                                                                     "m_{ll} (SF) (GeV)",
+                                                                     "m_{#mu#mu} (GeV)",
+                                                                     "m_{ee} (GeV)",
+                                                                     "m_{ll} (OF) (GeV)",
+                                                                     "M_{T2} (GeV)"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::gHWWSelNames[gNHWWSels] = {"", "AllCuts", "Barrel"};
@@ -86,22 +89,22 @@ TString MuonPlotter::HWWPlots::var_name[MuonPlotter::gNHWWVars] = {"MET", "NJets
 int     MuonPlotter::HWWPlots::nbins[MuonPlotter::gNHWWVars]    = {  20 ,      4 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20  ,   20 };
 float   MuonPlotter::HWWPlots::xmin[MuonPlotter::gNHWWVars]     = {   0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0. ,    0.};
 float   MuonPlotter::HWWPlots::xmax[MuonPlotter::gNHWWVars]     = { 200.,      4.,  200.,  100.,       100. ,       100. ,       100. ,       100. ,  3.15 ,  100.};
-TString MuonPlotter::HWWPlots::axis_label[MuonPlotter::gNHWWVars] = {"E_{T}^{miss} [GeV]",
+TString MuonPlotter::HWWPlots::axis_label[MuonPlotter::gNHWWVars] = {"E_{T}^{miss} (GeV)",
                                                                      "N_{Jets}",
-                                                                     "P_{T} (l_{1}) [GeV]",
-                                                                     "P_{T} (l_{2}) [GeV]",
-                                                                     "m_{ll} (SF) [GeV]",
-                                                                     "m_{#mu#mu} [GeV]",
-                                                                     "m_{ee} [GeV]",
-                                                                     "m_{ll} (OF) [GeV]",
+                                                                     "P_{T} (l_{1}) (GeV)",
+                                                                     "P_{T} (l_{2}) (GeV)",
+                                                                     "m_{ll} (SF) (GeV)",
+                                                                     "m_{#mu#mu} (GeV)",
+                                                                     "m_{ee} (GeV)",
+                                                                     "m_{ll} (OF) (GeV)",
                                                                      "#Delta#Phi_{ll}",
-                                                                     "M_{T2} [GeV]"};
+                                                                     "M_{T2} (GeV)"};
 
 //////////////////////////////////////////////////////////////////////////////////
-TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt"};
-int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  };
-float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. };
-float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. };
+TString MuonPlotter::FRatioPlots::var_name[MuonPlotter::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets"};
+int     MuonPlotter::FRatioPlots::nbins[MuonPlotter::gNRatioVars]    = {     7 ,   20 ,      20 ,         9  ,        20  ,        20  ,       3 };
+float   MuonPlotter::FRatioPlots::xmin[MuonPlotter::gNRatioVars]     = {     1.,   50.,      30.,         0. ,        30. ,        30. ,       0.};
+float   MuonPlotter::FRatioPlots::xmax[MuonPlotter::gNRatioVars]     = {     8.,  500.,     300.,        18. ,       150. ,       300. ,       3.};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString MuonPlotter::IsoPlots::sel_name[MuonPlotter::gNSels] = {"Base", "SigSup"};
@@ -143,6 +146,7 @@ void MuonPlotter::init(TString filename){
 	if(fVerbose > 0) if(fChargeSwitch == 1) cout << " ... using opposite-sign charge selection" << endl;
 
 	Util::SetStyle();
+	// Util::SetTDRStyle();
 	readSamples(filename);
 	readVarNames("anavarnames.dat");
 	fOutputFileName = fOutputDir + "Yields.root";
@@ -159,6 +163,8 @@ void MuonPlotter::init(TString filename){
 	fC_minEl2pt = 10.;
 	fC_minHT    = 80.;
 	fC_minMet   = 30.;
+	fC_maxHT    = 7000.;
+	fC_maxMet   = 7000.;
 	fC_minNjets = 2;
 
 	fMCSamples.push_back(fSampleMap["TTJets"]);
@@ -457,12 +463,12 @@ void MuonPlotter::doAnalysis(){
 	// // fLumiNorm = 152.9;
 	// // fLumiNorm = 191.1;
 	fLumiNorm = 349.;
-	// fLumiNorm = 410.;
-	// fLumiNorm = 1000.;
-
+	// // fLumiNorm = 410.;
+	// // fLumiNorm = 1000.;
+	// 
 	// makeTTbarClosure();
 	// makeHWWPlots();
-	
+	// 
 	// printOrigins();
 	// makeMuIsolationPlots();
 	// makeElIsolationPlots();
@@ -470,182 +476,69 @@ void MuonPlotter::doAnalysis(){
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotTau();
-	
+
 	// makeRatioPlots(Muon);
 	// makeRatioPlots(Electron);
-	
+
 	// makeFRvsPtPlots(Muon,     SigSup);
 	// makeFRvsPtPlots(Electron, SigSup);
 	// makeFRvsPtPlots(Muon,     ZDecay);
 	// makeFRvsPtPlots(Electron, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Electron);
-	
+
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
 	// makeElfRatioPlots(false);
 	// makeElpRatioPlots(false);
-	
-	// TString tablefilename  = fOutputDir + "Table2.tex";
-	// fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
-	// fOUTSTREAM << "==========================================================================================================" << endl;
-	// fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
-	// fOUTSTREAM << endl;
-	// for(size_t i = 0; i < gNREGIONS; ++i){
-	// 	TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
-	// 	makeIntPrediction(outputname, gRegion(i));
-	// }
-	// fOUTSTREAM.close();
-	// 
+
+	TString tablefilename  = fOutputDir + "Table2.tex";
+	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
+	fOUTSTREAM << "==========================================================================================================" << endl;
+	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
+	fOUTSTREAM << endl;
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
+		makeIntPrediction(outputname, gRegion(i));
+	}
+	fOUTSTREAM.close();
+
 	// // makeIntMCClosure( fOutputDir + "MCClosure.txt");	
 	// // makeMCClosurePlots(fMCBG);
-	// cout << endl;
+	cout << endl;
 }
 
 //____________________________________________________________________________
 void MuonPlotter::sandBox(){
-	// TFile *pFile = TFile::Open(fOutputDir + "InvMass.root", "RECREATE");
-	// fLumiNorm = 191.1;
-	// 
-	// TH1D *h_minv_sf = new TH1D("h_minv_sf", "Inv. Mass of same flavor dileptons",     1000, 0., 700.);
-	// TH1D *h_minv_of = new TH1D("h_minv_sf", "Inv. Mass of opposite flavor dileptons", 1000, 0., 700.);
-	// TH1D *h_minv_ee = new TH1D("h_minv_ee", "Inv. Mass of ee pairs",                  1000, 0., 700.);
-	// TH1D *h_minv_mm = new TH1D("h_minv_mm", "Inv. Mass of mumu pairs",                1000, 0., 700.);
-	// 
-	// vector<int> samples;
-	// samples.push_back(DoubleMu1);
-	// samples.push_back(DoubleMu2);
-	// samples.push_back(DoubleEle1);
-	// samples.push_back(DoubleEle2);
-	// samples.push_back(MuEG1);
-	// samples.push_back(MuEG2);
-	// 
-	// for(size_t samp = 0; samp < samples.size(); ++samp){
-	// 	Sample *S = fSamples[samp];
-	// 	fCurrentSample = gSample(samp);
-	// 	TTree *tree = S->tree;
-	// 
-	// 	// Event loop
-	// 	tree->ResetBranchAddresses();
-	// 	// Init(tree);
-	// 	if(S->datamc == 0) Init(tree);
-	// 	else InitMC(tree);
-	// 
-	// 	if (fChain == 0) return;
-	// 	Long64_t nentries = fChain->GetEntriesFast();
-	// 	Long64_t nbytes = 0, nb = 0;
-	// 	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-	// 		printProgress(jentry, nentries, S->name);
-	// 
-	// 		Long64_t ientry = LoadTree(jentry);
-	// 		if (ientry < 0) break;
-	// 		nb = fChain->GetEntry(jentry);   nbytes += nb;
-	// 
-	// 		int ind1(-1), ind2(-1);
-	// 		int type(0);
-	// 		TLorentzVector pl1, pl2;
-	// 		type = abs(isOSLLEvent(ind1, ind2));
-	// 		if(type == 0) continue; //nothing found
-	// 		if(type == 1){ // mumu
-	// 			if(!mumuSignalTrigger()) continue;
-	// 			pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
-	// 			pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);
-	// 			float mass = (pl1 + pl2).M();
-	// 			h_minv_sf->Fill(mass);
-	// 			h_minv_mm->Fill(mass);
-	// 		}
-	// 		if(type == 2){ // ee
-	// 			if(!elelSignalTrigger()) continue;
-	// 			pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
-	// 			pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
-	// 			float mass = (pl1 + pl2).M();
-	// 			h_minv_sf->Fill(mass);
-	// 			h_minv_ee->Fill(mass);
-	// 		}
-	// 		if(type == 3){ // emu
-	// 			if(!elmuSignalTrigger()) continue;
-	// 			pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
-	// 			pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
-	// 			float mass = (pl1 + pl2).M();
-	// 			h_minv_of->Fill(mass);
-	// 		}
-	// 	}
-	// 	cout << endl;
-	// }
-	// 
-	// h_minv_of->SetXTitle("m_{ll} [GeV]");
-	// h_minv_sf->SetXTitle("m_{ll} [GeV]");
-	// h_minv_mm->SetXTitle("m_{ll} [GeV]");
-	// h_minv_ee->SetXTitle("m_{ll} [GeV]");
-	// 
-	// h_minv_sf->SetMarkerColor(kBlack);
-	// h_minv_sf->SetMarkerStyle(20);
-	// h_minv_sf->SetMarkerSize(1.0);
-	// h_minv_sf->SetLineWidth(2);
-	// h_minv_sf->SetLineColor(kBlack);
-	// h_minv_sf->SetFillColor(kBlack);
-	// 
-	// h_minv_of->SetMarkerColor(kRed);
-	// h_minv_of->SetMarkerStyle(20);
-	// h_minv_of->SetMarkerSize(0.7);
-	// h_minv_of->SetLineWidth(2);
-	// h_minv_of->SetLineColor(kRed);
-	// h_minv_of->SetFillColor(kRed);
-	// 
-	// h_minv_mm->SetLineWidth(1);
-	// h_minv_mm->SetLineColor(kBlue);
-	// h_minv_mm->SetFillColor(kBlue);
-	// h_minv_mm->SetFillStyle(3004);
-	// 
-	// h_minv_ee->SetLineWidth(1);
-	// h_minv_ee->SetLineColor(kGreen);
-	// h_minv_ee->SetFillColor(kGreen);
-	// h_minv_ee->SetFillStyle(3005);
-	// 
-	// printObject(h_minv_of, "Minv_OF", "Inv Mass OF Pairs", "PE X0", true);
-	// printObject(h_minv_sf, "Minv_SF", "Inv Mass SF Pairs", "PE X0", true);
-	// printObject(h_minv_mm, "Minv_MM", "Inv Mass MM Pairs", "hist",  true);
-	// printObject(h_minv_ee, "Minv_EE", "Inv Mass EE Pairs", "hist",  true);
-	// 
-	// TLatex *lat = new TLatex();
-	// lat->SetNDC(kTRUE);
-	// lat->SetTextColor(kBlack);
-	// lat->SetTextSize(0.04);
-	// 
-	// TLegend *leg = new TLegend(0.70,0.70,0.89,0.88);
-	// leg->AddEntry(h_minv_sf, "SF Pairs", "p");
-	// leg->AddEntry(h_minv_mm, "MM Pairs", "f");
-	// leg->AddEntry(h_minv_ee, "EE Pairs", "f");
-	// leg->AddEntry(h_minv_of, "OF Pairs", "p");
-	// leg->SetFillStyle(0);
-	// leg->SetTextFont(42);
-	// leg->SetBorderSize(0);
-	// 
-	// THStack *stack = new THStack("hstack", "Stack");
-	// stack->Add(h_minv_mm);
-	// stack->Add(h_minv_ee);
-	// 
-	// TCanvas *c1 = new TCanvas("Minv", "Minv", 0, 0, 800, 600);
-	// c1->cd();
-	// gPad->SetLogy();
-	// h_minv_sf->DrawCopy("PE X0");
-	// h_minv_of->DrawCopy("PE X0 same");
-	// stack->Draw("hist same");
-	// // h_minv_mm->DrawCopy("hist same");
-	// // h_minv_ee->DrawCopy("hist same");
-	// leg->Draw();
-	// gPad->RedrawAxis();
-	// 
-	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
-	// // lat->DrawLatex(0.11,0.92, name);
-	// 
-	// Util::PrintNoEPS(c1, "MinvCombined", fOutputDir + fOutputSubDir, pFile);
-	// 
-	// delete h_minv_of, h_minv_sf, h_minv_mm, h_minv_ee;
-	// delete c1;
-	// delete lat, lat;
-	// pFile->Close();
-	// fOutputSubDir = "";
+	TH1D *h_btag = new TH1D("h_btag", "NBtags", 5, 0., 5.);
+	
+	Sample *S = fSamples[DoubleMu1];
+	fCurrentSample = gSample(DoubleMu1);
+	TTree *tree = S->tree;
+
+	// Event loop
+	tree->ResetBranchAddresses();
+	// Init(tree);
+	if(S->datamc == 0) Init(tree);
+	else InitMC(tree);
+
+	if (fChain == 0) return;
+	Long64_t nentries = fChain->GetEntriesFast();
+	Long64_t nbytes = 0, nb = 0;
+	for (Long64_t jentry=0; jentry<nentries;jentry++) {
+		printProgress(jentry, nentries, S->name);
+
+		Long64_t ientry = LoadTree(jentry);
+		if (ientry < 0) break;
+		nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+		h_btag->Fill(getNBTags());
+	}
+	cout << endl;
+	
+	printObject(h_btag, "NBtags", "NBtags", "PE X0", true);
+	delete h_btag;
+	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
@@ -662,7 +555,7 @@ void MuonPlotter::doLoop(){
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
 		fCurrentSample = i;
-				
+		
 		bookHistos(S);
 		
 		TTree *tree = S->tree;
@@ -2334,7 +2227,7 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 
 	for(size_t i = 0; i < mmsamples.size(); ++i) gmetvsht_da_mm->Add(fSamples[mmsamples[i]]->sigevents[Muon][hilo]);
 	for(size_t i = 0; i < eesamples.size(); ++i) gmetvsht_da_ee->Add(fSamples[eesamples[i]]->sigevents[Electron][hilo]);
-	for(size_t i = 0; i < emsamples.size(); ++i) gmetvsht_da_em->Add(fSamples[emsamples[i]]->sigevents[EMu][hilo]);		
+	for(size_t i = 0; i < emsamples.size(); ++i) gmetvsht_da_em->Add(fSamples[emsamples[i]]->sigevents[EMu][hilo]);
 
 	hmetvsht_da_mm->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_mm->SetYTitle(KinPlots::axis_label[1]);
@@ -2429,8 +2322,8 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	sig4y->Draw();
 
 	// Graphs
-	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_ee->Draw("P");
+	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
 	leg->Draw();
@@ -2439,12 +2332,13 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	// gPad->SetGridy();
 	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	// lat->DrawLatex(0.31,0.92, "#mu#mu/e#mu/ee");
-	lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
-	// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	// lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
+	lat->DrawLatex(0.13,0.92, hiloname[hilo]);
 	gPad->RedrawAxis();
 
-	Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
 	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
@@ -2590,8 +2484,9 @@ void MuonPlotter::makeMETvsHTPlotTau(){
 	lat->DrawLatex(0.13,0.92, "p_{T}(#mu/e/#tau) > 5/10/15 GeV");
 	gPad->RedrawAxis();
 
-	Util::PrintNoEPS(c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp, "HTvsMET_TauChan",   fOutputDir + fOutputSubDir);
+	Util::PrintNoEPS( c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
 	delete hmetvsht_da_mt;
@@ -2630,36 +2525,46 @@ void MuonPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
 
-	float maximum = 0.4;
-	if(fp == ZDecay) maximum = 1.1;
-	h_ptratio_data->SetMaximum(maximum);
-	h_ptratio_mc  ->SetMaximum(maximum);
-	h_ptratio_data->SetMinimum(0.0);
-	h_ptratio_mc  ->SetMinimum(0.0);
+	// float maximum = 0.4;
+	// if(fp == ZDecay) maximum = 1.1;
+	// h_ptratio_data->SetMaximum(maximum);
+	// h_ptratio_mc  ->SetMaximum(maximum);
+	// h_ptratio_data->SetMinimum(0.0);
+	// h_ptratio_mc  ->SetMinimum(0.0);
 
-	if(chan == Muon)     h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
-	if(chan == Electron) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
-	h_ptratio_mc->GetYaxis()->SetTitleOffset(1.2);
-	h_ptratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
+	// if(chan == Muon)     h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
+	// if(chan == Electron) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
+	// h_ptratio_mc->GetYaxis()->SetTitleOffset(1.2);
+	// h_ptratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
 
+	// h_ptratio_data->SetMarkerColor(kBlack);
+	// h_ptratio_data->SetMarkerStyle(20);
+	// h_ptratio_data->SetMarkerSize(1.3);
+	// h_ptratio_data->SetLineWidth(2);
+	// h_ptratio_data->SetLineColor(kBlack);
+	// h_ptratio_data->SetFillColor(kBlack);
+	// 
+	// h_ptratio_mc  ->SetMarkerColor(kRed);
+	// h_ptratio_mc  ->SetMarkerStyle(20);
+	// h_ptratio_mc  ->SetMarkerSize(1.3);
+	// h_ptratio_mc  ->SetLineWidth(2);
+	// h_ptratio_mc  ->SetLineColor(kRed);
+	// h_ptratio_mc  ->SetFillColor(kRed);
+
+	h_ptratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
+	// h_ptratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
+	h_ptratio_data->GetYaxis()->SetTitle("TL Ratio");
+	h_ptratio_data->SetMarkerStyle(22);
+	h_ptratio_data->SetMarkerSize(1.4);
 	h_ptratio_data->SetMarkerColor(kBlack);
-	h_ptratio_data->SetMarkerStyle(20);
-	h_ptratio_data->SetMarkerSize(1.3);
-	h_ptratio_data->SetLineWidth(2);
 	h_ptratio_data->SetLineColor(kBlack);
-	h_ptratio_data->SetFillColor(kBlack);
+	h_ptratio_data->GetYaxis()->SetRangeUser(0., 0.5);
 
-	h_ptratio_mc  ->SetMarkerColor(kRed);
-	h_ptratio_mc  ->SetMarkerStyle(20);
-	h_ptratio_mc  ->SetMarkerSize(1.3);
-	h_ptratio_mc  ->SetLineWidth(2);
-	h_ptratio_mc  ->SetLineColor(kRed);
-	h_ptratio_mc  ->SetFillColor(kRed);
 
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
+	// TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	// lat->SetTextColor(kBlack);
+	// lat->SetTextSize(0.04);
 	
 	TLegend *leg;
 	if(fp == SigSup) leg = new TLegend(0.70,0.75,0.89,0.88);
@@ -2670,24 +2575,34 @@ void MuonPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	leg->SetTextFont(42);
 	leg->SetBorderSize(0);
 
-	TCanvas *c_temp = new TCanvas("C_PtRatioPlot", "fRatio vs Pt in Data vs MC", 0, 0, 800, 600);
+	// TCanvas *c_temp = new TCanvas("C_PtRatioPlot", "fRatio vs Pt in Data vs MC", 0, 0, 800, 600);
+	TCanvas *c_temp = new TCanvas();
 	c_temp->cd();
 
 	// gPad->SetLogy();
-	h_ptratio_mc->DrawCopy("PE X0");
-	h_ptratio_data->Draw("PE X0 same");
-	leg->Draw();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
-	lat->DrawLatex(0.11,0.92, name);
-	double ymean(0.), yrms(0.);
-	getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
-	lat->SetTextSize(0.03);
-	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	h_ptratio_data->Draw("PE");
+	// h_ptratio_mc->DrawCopy("PE X0");
+	// h_ptratio_data->Draw("PE X0 same");
+	// leg->Draw();
+	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+	// lat->DrawLatex(0.11,0.92, name);
+	TLatex lat;
+	lat.SetNDC(kTRUE);
+    lat.SetTextSize(0.028);
+    lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
+    lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 7 TeV");
+    lat.DrawLatex(0.83, 0.88, name);
+	// double ymean(0.), yrms(0.);
+	// getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
+	// lat->SetTextSize(0.03);
+	// lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 
-	TString fpname = "f";
-	if(fp == ZDecay) fpname = "p";
+	TString fpname = "F";
+	if(fp == ZDecay) fpname = "P";
 	
-	Util::PrintNoEPS(c_temp, fpname + "PtRatio_" + name, fOutputDir + fOutputSubDir, NULL);
+	Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
 	delete h_ptratio_mc, h_ptratio_data;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
@@ -2725,59 +2640,80 @@ void MuonPlotter::makeFRvsEtaPlots(gChannel chan){
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
 	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
 
-	h_etaratio_data->SetMaximum(0.4);
-	h_etaratio_mc  ->SetMaximum(0.4);
-	h_etaratio_data->SetMinimum(0.0);
-	h_etaratio_mc  ->SetMinimum(0.0);
+	// h_etaratio_data->SetMaximum(0.4);
+	// h_etaratio_mc  ->SetMaximum(0.4);
+	// h_etaratio_data->SetMinimum(0.0);
+	// h_etaratio_mc  ->SetMinimum(0.0);
 
-	if(chan == Muon)     h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
-	if(chan == Electron) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
-	h_etaratio_mc->GetYaxis()->SetTitleOffset(1.2);
-	h_etaratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
+	// if(chan == Muon)     h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
+	// if(chan == Electron) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
+	// h_etaratio_mc->GetYaxis()->SetTitleOffset(1.2);
+	// h_etaratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
+	// 
+	// h_etaratio_data->SetMarkerColor(kBlack);
+	// h_etaratio_data->SetMarkerStyle(20);
+	// h_etaratio_data->SetMarkerSize(1.3);
+	// h_etaratio_data->SetLineWidth(2);
+	// h_etaratio_data->SetLineColor(kBlack);
+	// h_etaratio_data->SetFillColor(kBlack);
+	// 
+	// h_etaratio_mc  ->SetMarkerColor(kRed);
+	// h_etaratio_mc  ->SetMarkerStyle(20);
+	// h_etaratio_mc  ->SetMarkerSize(1.3);
+	// h_etaratio_mc  ->SetLineWidth(2);
+	// h_etaratio_mc  ->SetLineColor(kRed);
+	// h_etaratio_mc  ->SetFillColor(kRed);
 
+	// h_etaratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
+	h_etaratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
+	h_etaratio_data->GetYaxis()->SetTitle("TL Ratio");
+	h_etaratio_data->SetMarkerStyle(22);
+	h_etaratio_data->SetMarkerSize(1.4);
 	h_etaratio_data->SetMarkerColor(kBlack);
-	h_etaratio_data->SetMarkerStyle(20);
-	h_etaratio_data->SetMarkerSize(1.3);
-	h_etaratio_data->SetLineWidth(2);
 	h_etaratio_data->SetLineColor(kBlack);
-	h_etaratio_data->SetFillColor(kBlack);
+	h_etaratio_data->GetYaxis()->SetRangeUser(0., 0.5);
 
-	h_etaratio_mc  ->SetMarkerColor(kRed);
-	h_etaratio_mc  ->SetMarkerStyle(20);
-	h_etaratio_mc  ->SetMarkerSize(1.3);
-	h_etaratio_mc  ->SetLineWidth(2);
-	h_etaratio_mc  ->SetLineColor(kRed);
-	h_etaratio_mc  ->SetFillColor(kRed);
-
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
+	// TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	// lat->SetTextColor(kBlack);
+	// lat->SetTextSize(0.04);
 	
-	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	leg->AddEntry(h_etaratio_data, "Data","f");
-	leg->AddEntry(h_etaratio_mc,   "MC",  "f");
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
+	// TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
+	// leg->AddEntry(h_etaratio_data, "Data","f");
+	// leg->AddEntry(h_etaratio_mc,   "MC",  "f");
+	// leg->SetFillStyle(0);
+	// leg->SetTextFont(42);
+	// leg->SetBorderSize(0);
 
-	TCanvas *c_temp = new TCanvas("C_EtaRatioPlot", "fRatio vs Eta in Data vs MC", 0, 0, 800, 600);
+	// TCanvas *c_temp = new TCanvas("C_EtaRatioPlot", "fRatio vs Eta in Data vs MC", 0, 0, 800, 600);
+	TCanvas *c_temp = new TCanvas();
 	c_temp->cd();
 
 	// gPad->SetLogy();
-	h_etaratio_mc->DrawCopy("PE X0");
-	h_etaratio_data->Draw("PE X0 same");
-	leg->Draw();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
-	lat->DrawLatex(0.11,0.92, name);
-	double ymean(0.), yrms(0.);
-	getWeightedYMeanRMS(h_etaratio_data, ymean, yrms);
-	lat->SetTextSize(0.03);
-	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	h_etaratio_data->Draw("PE");
+	TLatex lat;
+	lat.SetNDC(kTRUE);
+    lat.SetTextSize(0.028);
+    lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
+    lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 7 TeV");
+    lat.DrawLatex(0.83, 0.88, name);
 	
-	Util::PrintNoEPS(c_temp, "EtaRatio_" + name, fOutputDir + fOutputSubDir, NULL);
+	// h_etaratio_mc->DrawCopy("PE X0");
+	// h_etaratio_data->Draw("PE X0 same");
+	// leg->Draw();
+	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+	// lat->DrawLatex(0.11,0.92, name);
+	// double ymean(0.), yrms(0.);
+	// getWeightedYMeanRMS(h_etaratio_data, ymean, yrms);
+	// lat->SetTextSize(0.03);
+	// lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	
+	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
 	delete h_etaratio_mc, h_etaratio_data;
-	delete c_temp, lat, leg;
+	delete c_temp;
+	// delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
 void MuonPlotter::makeRatioPlots(gChannel chan){
@@ -2803,7 +2739,7 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 	}
 
 	// Customization
-	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} [GeV]", "P_{T}(Hardest Jet) [GeV]", "N_{Vertices}", "P_{T}(Closest Jet) [GeV]", "P_{T}(Away Jet) [GeV]"};
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "P_{T}(Closest Jet) (GeV)", "P_{T}(Away Jet) (GeV)", "N_{BJets}"};
 
 	for(size_t i = 0; i < gNRatioVars; ++i){
 		TH1D *h_ratio_data = getFRatio(datasamples, chan, i);
@@ -2864,6 +2800,7 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 		lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 	
 		Util::PrintNoEPS(c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(  c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir);
 		delete c_temp, leg, lat;
 		delete h_ratio_data, h_ratio_mc;
 	}
@@ -3773,6 +3710,573 @@ void MuonPlotter::NObs(gChannel chan, THStack *&stack, vector<int> samples, gReg
 void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	vector<int> musamples;
+	vector<int> elsamples;
+	vector<int> emusamples;
+
+	// TODO: Check these samples!
+	musamples = fMuData;
+	elsamples = fEGData;
+	emusamples = fMuEGData;
+
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
+	OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// RATIOS /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float mufratio_data(0.),  mufratio_data_e(0.), mufratio_data_eup(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.), mupratio_data_eup(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.), elfratio_data_eup(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.), elpratio_data_eup(0.);
+	float mufratio_allmc(0.), mufratio_allmc_e(0.);
+	float mupratio_allmc(0.), mupratio_allmc_e(0.);
+	float elfratio_allmc(0.), elfratio_allmc_e(0.);
+	float elpratio_allmc(0.), elpratio_allmc_e(0.);
+
+	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
+	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
+
+	calculateRatio(fEGData, Electron, SigSup, elfratio_data, elfratio_data_e);
+	calculateRatio(fEGData, Electron, ZDecay, elpratio_data, elpratio_data_e);
+
+	calculateRatio(fMCBGMuEnr, Muon,     SigSup, mufratio_allmc, mufratio_allmc_e);
+	calculateRatio(fMCBGMuEnr, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
+	calculateRatio(fMCBG,      Electron, SigSup, elfratio_allmc, elfratio_allmc_e);
+	calculateRatio(fMCBG,      Electron, ZDecay, elpratio_allmc, elpratio_allmc_e);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float nt2_mm(0.),    nt10_mm(0.),    nt0_mm(0.);
+	float nt2_em(0.),    nt10_em(0.),    nt01_em(0.),    nt0_em(0.);
+	float nt2_ee(0.),    nt10_ee(0.),    nt0_ee(0.);
+
+	// OS yields
+	float nt2_ee_BB_os(0.),    nt2_ee_EE_os(0.),    nt2_ee_EB_os(0.);
+	float nt2_em_BB_os(0.),    nt2_em_EE_os(0.);
+
+	for(size_t i = 0; i < musamples.size(); ++i){
+		Sample *S = fSamples[musamples[i]];
+		nt2_mm     += S->numbers[reg][Muon].nt2;
+		nt10_mm    += S->numbers[reg][Muon].nt10;
+		nt0_mm     += S->numbers[reg][Muon].nt0;
+	}		
+	for(size_t i = 0; i < emusamples.size(); ++i){
+		Sample *S = fSamples[emusamples[i]];
+		nt2_em     += S->numbers[reg][EMu].nt2;
+		nt10_em    += S->numbers[reg][EMu].nt10;
+		nt01_em    += S->numbers[reg][EMu].nt01;
+		nt0_em     += S->numbers[reg][EMu].nt0;
+
+		nt2_em_BB_os    += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
+		nt2_em_EE_os    += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
+	}		
+	for(size_t i = 0; i < elsamples.size(); ++i){
+		Sample *S = fSamples[elsamples[i]];
+		nt2_ee     += S->numbers[reg][Electron].nt2;
+		nt10_ee    += S->numbers[reg][Electron].nt10;
+		nt0_ee     += S->numbers[reg][Electron].nt0;
+
+		nt2_ee_BB_os += S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
+		nt2_ee_EE_os += S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
+		nt2_ee_EB_os += S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
+	}		
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// PREDICTIONS ////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	FakeRatios *FR = new FakeRatios();
+	
+	FR->setMFRatio(mufratio_data, 0.08);
+	FR->setEFRatio(elfratio_data, 0.08);
+	FR->setMPRatio(mupratio_data, 0.05);
+	FR->setEPRatio(elpratio_data, 0.05);
+
+	FR->setMMNtl(nt2_mm, nt10_mm, nt0_mm);
+	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
+	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
+	
+	// FR->printOutput();
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// PRINTOUT ///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "        allMC    ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
+	OUT << endl;
+	OUT << setw(16) << "    data stat only ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_data  << " +/- " << setw(7) << setprecision(2) << mufratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_data  << " +/- " << setw(7) << setprecision(2) << mupratio_data_e  << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_data  << " +/- " << setw(7) << setprecision(2) << elfratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_data  << " +/- " << setw(7) << setprecision(2) << elpratio_data_e  << " ||";
+	OUT << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+	OUT << "         YIELDS  ||   Nt2   |   Nt1   |   Nt0   ||   Nt2   |   Nt10  |   Nt01  |   Nt0   ||   Nt2   |   Nt1   |   Nt0   ||" << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+
+	float nt2sum_mm(0.), nt10sum_mm(0.), nt0sum_mm(0.);
+	float nt2sum_em(0.), nt10sum_em(0.), nt01sum_em(0.), nt0sum_em(0.);
+	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
+	for(size_t i = 0; i < fMCBG.size(); ++i){
+		Sample *S = fSamples[fMCBG[i]];
+		float scale = fLumiNorm / S->lumi;
+		nt2sum_mm  += scale*S->numbers[reg][Muon]    .nt2;
+		nt10sum_mm += scale*S->numbers[reg][Muon]    .nt10;
+		nt0sum_mm  += scale*S->numbers[reg][Muon]    .nt0;
+		nt2sum_em  += scale*S->numbers[reg][EMu]     .nt2;
+		nt10sum_em += scale*S->numbers[reg][EMu]     .nt10;
+		nt01sum_em += scale*S->numbers[reg][EMu]     .nt01;
+		nt0sum_em  += scale*S->numbers[reg][EMu]     .nt0;
+		nt2sum_ee  += scale*S->numbers[reg][Electron].nt2;
+		nt10sum_ee += scale*S->numbers[reg][Electron].nt10;
+		nt0sum_ee  += scale*S->numbers[reg][Electron].nt0;
+
+		OUT << setw(16) << S->sname << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt0  << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][EMu]     .nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][EMu]     .nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][EMu]     .nt01 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][EMu]     .nt0  << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Electron].nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Electron].nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Electron].nt0  << " || ";
+		OUT << endl;
+	}	
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "MC sum" << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_mm  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_mm ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_mm  ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_em   ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_em  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt01sum_em  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_em   ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_ee    ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_ee   ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_ee    ) << " || ";
+	OUT << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		Sample *S = fSamples[i];
+		if(S->datamc < 2) continue;
+		float scale = fLumiNorm / S->lumi;
+		OUT << setw(16) << S->sname << " || ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt2  ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt10 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt0  ) << " || ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][EMu]     .nt2  ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][EMu]     .nt10 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][EMu]     .nt01 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][EMu]     .nt0  ) << " || ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Electron].nt2  ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Electron].nt10 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Electron].nt0  ) << " || ";
+		OUT << endl;
+	}	
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "data"  << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_mm ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_mm) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_mm ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_em  ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_em ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt01_em ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_em  ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_ee   ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_ee  ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_ee   ) << " || ";
+	OUT << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	// // OUT << setw(16) << "tot. pred. fakes"  << " || ";
+	// // OUT << setw(7) << Form("%5.2f", FR->getMMTotFakes() ) << " | ";
+	// // OUT << setw(7) << "        |";
+	// // OUT << setw(7) << "         || ";
+	// // OUT << setw(7) << Form("%5.2f", FR->getEMTotFakes() ) << " | ";
+	// // OUT << setw(7) << "        | ";
+	// // OUT << setw(7) << "        | ";
+	// // OUT << setw(7) << "        || ";
+	// // OUT << setw(7) << Form("%5.2f", FR->getEETotFakes() ) << " | ";
+	// // OUT << setw(7) << "        | ";
+	// // OUT << setw(7) << "        || ";
+	// // OUT << endl;
+	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << endl;
+	OUT << "  PREDICTIONS" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " Mu/Mu Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getMMNpp();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNppEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNppESyst() << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getMMNpf();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNpfEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNpfESyst() << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getMMNff();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNffEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNffESyst() << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getMMTotFakes();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMTotEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMTotESyst() << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/Mu Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getEMNpp();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNppEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNppESyst() << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getEMNpf();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNpfEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNpfESyst() << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << FR->getEMNfp();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNfpEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNfpESyst() << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getEMNff();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNffEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNffESyst() << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getEMTotFakes();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMTotEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMTotESyst() << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/E Channel:" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getEENpp();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENppEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENppESyst() << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getEENpf();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENpfEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENpfESyst() << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getEENff();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENffEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENffESyst() << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getEETotFakes();
+	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEETotEStat();
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEETotESyst() << " (syst)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float nt2_ee_chmid(0.), nt2_ee_chmid_e1(0.), nt2_ee_chmid_e2(0.);
+	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
+	
+	// Abbreviations
+	float fb  = gEChMisIDB;
+	float fbE = gEChMisIDB_E;
+	float fe  = gEChMisIDE;
+	float feE = gEChMisIDE_E;
+
+	// Simple error propagation assuming error on number of events is sqrt(N)
+	nt2_ee_chmid    = 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os;
+	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*nt2_ee_BB_os) + (4*fe*fe*nt2_ee_EE_os) + (fb+fe)*(fb+fe)*nt2_ee_EB_os ); // stat only
+	nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+	nt2_em_chmid    = fb*nt2_em_BB_os + fe*nt2_em_EE_os;
+	nt2_em_chmid_e1 = sqrt( fb*fb*nt2_em_BB_os + fe*fe*nt2_em_EE_os );
+	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// PRINTOUT ///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << "       E-ChMisID  ||       Barrel       |       Endcap      ||" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << "                  ||";
+	OUT << setw(7)  << setprecision(2) << fb  << " +/- " << setw(7) << setprecision(3) << fbE  << " |";
+	OUT << setw(7)  << setprecision(2) << fe  << " +/- " << setw(7) << setprecision(3) << feE  << " ||";
+	OUT << endl;
+	OUT << "--------------------------------------------------------------" << endl << endl;
+
+	OUT << "-----------------------------------------------------------------------" << endl;
+	OUT << "                 ||       E/Mu        ||             E/E             ||" << endl;
+	OUT << "      OS-YIELDS  ||   N_B   |   N_E   ||   N_BB  |   N_EB  |   N_EE  ||" << endl;
+	OUT << "-----------------------------------------------------------------------" << endl;
+
+	float mc_os_em_bb_sum(0.), mc_os_em_ee_sum(0.);
+	float mc_os_ee_bb_sum(0.), mc_os_ee_eb_sum(0.), mc_os_ee_ee_sum(0.);
+
+	for(size_t i = 0; i < fMCBG.size(); ++i){
+		Sample *S = fSamples[fMCBG[i]];
+		float scale = fLumiNorm / S->lumi;
+		
+		mc_os_em_bb_sum += scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
+		mc_os_em_ee_sum += scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
+		mc_os_ee_bb_sum += scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries();
+		mc_os_ee_eb_sum += scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries();
+		mc_os_ee_ee_sum += scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries();
+
+		OUT << setw(16) << S->sname << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << endl;
+	}	
+	OUT << "-----------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "MC sum" << " || ";
+	OUT << setw(7) << Form("%5.1f", mc_os_em_bb_sum ) << " | ";
+	OUT << setw(7) << Form("%5.1f", mc_os_em_ee_sum ) << " || ";
+	OUT << setw(7) << Form("%5.1f", mc_os_ee_bb_sum ) << " | ";
+	OUT << setw(7) << Form("%5.1f", mc_os_ee_eb_sum ) << " | ";
+	OUT << setw(7) << Form("%5.1f", mc_os_ee_ee_sum ) << " || ";
+	OUT << endl;
+	OUT << "-----------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "data"  << " || ";
+	OUT << setw(7) << Form("%5.0f", nt2_em_BB_os ) << " | ";
+	OUT << setw(7) << Form("%5.0f", nt2_em_EE_os ) << " || ";
+	OUT << setw(7) << Form("%5.0f", nt2_ee_BB_os ) << " | ";
+	OUT << setw(7) << Form("%5.0f", nt2_ee_EB_os ) << " | ";
+	OUT << setw(7) << Form("%5.0f", nt2_ee_EE_os ) << " || ";
+	OUT << endl;
+	OUT << "-----------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "pred. SS contr."  << " || ";
+	OUT << setw(7) << Form("%6.4f",   fb   * nt2_em_BB_os ) << " | ";
+	OUT << setw(7) << Form("%6.4f",   fe   * nt2_em_EE_os ) << " || ";
+	OUT << setw(7) << Form("%6.4f", 2*fb   * nt2_ee_BB_os ) << " | ";
+	OUT << setw(7) << Form("%6.4f", (fb+fe)* nt2_ee_EB_os ) << " | ";
+	OUT << setw(7) << Form("%6.4f", 2*fe   * nt2_ee_EE_os ) << " || ";
+	OUT << endl;
+	OUT << "-----------------------------------------------------------------------" << endl << endl;
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+
+
+	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "       SUMMARY   ||           Mu/Mu           ||           E/Mu            ||           E/E             ||" << endl;
+	OUT << "==========================================================================================================" << endl;
+	OUT << setw(16) << "pred. fakes"  << " || ";
+	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getMMTotEStat()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getMMTotESyst()) << " || ";
+	OUT << setw(5) << Form("%5.2f", FR->getEMTotFakes()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getEMTotEStat()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getEMTotESyst()) << " || ";
+	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getEETotEStat()) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getEETotESyst()) << " || " << endl;
+	OUT << setw(16) << "pred. chmisid "  << " || ";
+	OUT << "                          || ";
+	OUT << setw(5) << Form("%5.2f", nt2_em_chmid   ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", nt2_em_chmid_e1) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", nt2_em_chmid_e2) << " || ";
+	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid   ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid_e1) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid_e2) << " || " << endl;
+	OUT << setw(16) << "WW/WZ/ZZ (MC)"  << " || ";
+	float dibos_mc_mm(0.), dibos_mc_em(0.), dibos_mc_ee(0.);
+	dibos_mc_mm += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][Muon].nt2;
+	dibos_mc_mm += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][Muon].nt2;
+	dibos_mc_mm += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][Muon].nt2;
+	dibos_mc_em += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][EMu].nt2;
+	dibos_mc_em += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][EMu].nt2;
+	dibos_mc_em += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][EMu].nt2;
+	dibos_mc_ee += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][Electron].nt2;
+	dibos_mc_ee += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][Electron].nt2;
+	dibos_mc_ee += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][Electron].nt2;
+	OUT << setw(5) << Form("%5.2f", dibos_mc_mm   ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_mm);
+	OUT << "           || ";
+	OUT << setw(5) << Form("%5.2f", dibos_mc_em   ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_em);
+	OUT << "           || ";
+	OUT << setw(5) << Form("%5.2f", dibos_mc_ee   ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_ee);
+	OUT << "           || " << endl;
+	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "tot. backgr. "  << " || ";
+	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat();
+	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + 0.25*dibos_mc_mm*dibos_mc_mm;
+	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1;
+	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + 0.25*dibos_mc_em*dibos_mc_em;
+	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1;
+	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + 0.25*dibos_mc_ee*dibos_mc_ee;
+	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes() + dibos_mc_mm) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr2)) << " || ";
+	OUT << setw(5) << Form("%5.2f", FR->getEMTotFakes() + nt2_em_chmid + dibos_mc_em) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr2)) << " || ";
+	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_em) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr2)) << " || " << endl;
+	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
+	OUT << setw(16) << "observed"  << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_mm ) << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_em  ) << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_ee   ) << " || " << endl;
+	OUT << "==========================================================================================================" << endl;
+	OUT << setw(20) << "combined observed: ";
+	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
+	OUT << setw(20) << "        predicted: ";
+	float tot_pred = FR->getMMTotFakes() + dibos_mc_mm +  FR->getEMTotFakes() + nt2_em_chmid + dibos_mc_em + FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_ee;
+	float comb_tot_sqerr1 = mm_tot_sqerr1 + em_tot_sqerr1 + ee_tot_sqerr1;
+	float comb_tot_sqerr2 = mm_tot_sqerr2 + em_tot_sqerr2 + ee_tot_sqerr2;
+	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
+	OUT << "==========================================================================================================" << endl;
+	OUT.close();
+	
+	// float totfakes = FR->getTotFakes();
+	// 
+	// // Here be dragons...
+	// float mm_pred_sqerr = FR->getMMTotEStat()*FR->getMMTotEStat() + mm_tot_fakes_new*mm_tot_fakes_new*0.25 + 0.25*dibos_mc_mm*dibos_mc_mm;
+	// float ee_pred_sqerr = ee_tot_sqerr1                   + ee_tot_fakes_new*ee_tot_fakes_new*0.25 + 0.25*dibos_mc_em*dibos_mc_ee + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
+	// float em_pred_sqerr = em_tot_sqerr1                   + em_tot_fakes_new*em_tot_fakes_new*0.25 + 0.25*dibos_mc_em*dibos_mc_em + nt2_em_chmid_e2*nt2_em_chmid_e2;
+	// float toterror = sqrt(0.25 * totfakes_new*totfakes_new
+	//                     + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2
+	//                     + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
+	// 
+	// // ee & mm & em & total & limit
+	// fOUTSTREAM << Region::sname[reg] << endl;
+	// fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
+	// ee_tot_fakes + nt2_ee_chmid + dibos_mc_ee, sqrt(ee_pred_sqerr),
+	// mm_tot_fakes + dibos_mc_mm,                sqrt(mm_pred_sqerr),
+	// em_tot_fakes + nt2_em_chmid + dibos_mc_em, sqrt(em_pred_sqerr),
+	// tot_pred, toterror);
+	// fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// OUTPUT AS PLOT /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
+	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
+	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 3, 0., 3.);
+	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
+	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted WW/WZ/ZZ", 3, 0., 3.);
+	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
+	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
+	
+	h_obs->SetMarkerColor(kBlack);
+	h_obs->SetMarkerStyle(20);
+	h_obs->SetMarkerSize(2.5);
+	h_obs->SetLineWidth(2);
+	h_obs->SetLineColor(kBlack);
+	h_obs->SetFillColor(kBlack);
+	
+	h_pred_sfake->SetLineWidth(1);
+	h_pred_dfake->SetLineWidth(1);
+	h_pred_chmid->SetLineWidth(1);
+	h_pred_mc   ->SetLineWidth(1);
+	h_pred_tot  ->SetLineWidth(3);
+	h_pred_sfake->SetLineColor(50);
+	h_pred_sfake->SetFillColor(50);
+	h_pred_dfake->SetLineColor(38);
+	h_pred_dfake->SetFillColor(38);
+	h_pred_chmid->SetLineColor(42);
+	h_pred_chmid->SetFillColor(42);
+	h_pred_mc   ->SetLineColor(31);
+	h_pred_mc   ->SetFillColor(31);
+	
+	// Add numbers:
+	h_obs->SetBinContent(1, nt2_ee);
+	h_obs->SetBinContent(2, nt2_mm);
+	h_obs->SetBinContent(3, nt2_em);
+	h_obs->SetBinError(1, 0); // FIXME
+	h_obs->SetBinError(2, 0); // FIXME
+	h_obs->SetBinError(3, 0); // FIXME
+	
+	h_pred_sfake->SetBinContent(1, FR->getEENpf());
+	h_pred_sfake->SetBinContent(2, FR->getMMNpf());
+	h_pred_sfake->SetBinContent(3, FR->getEMNpf()+FR->getEMNfp());
+	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
+	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
+	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
+	
+	h_pred_dfake->SetBinContent(1, FR->getEENff());
+	h_pred_dfake->SetBinContent(2, FR->getMMNff());
+	h_pred_dfake->SetBinContent(3, FR->getEMNff());
+	
+	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
+	h_pred_chmid->SetBinContent(2, 0.);
+	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
+	
+	h_pred_mc->SetBinContent(1, dibos_mc_ee);
+	h_pred_mc->SetBinContent(2, dibos_mc_mm);
+	h_pred_mc->SetBinContent(3, dibos_mc_em);
+	
+	h_pred_tot->Add(h_pred_sfake);
+	h_pred_tot->Add(h_pred_dfake);
+	h_pred_tot->Add(h_pred_chmid);
+	h_pred_tot->Add(h_pred_mc);
+	// h_pred_tot->SetBinError(1, sqrt(ee_pred_sqerr));
+	// h_pred_tot->SetBinError(2, sqrt(mm_pred_sqerr));
+	// h_pred_tot->SetBinError(3, sqrt(em_pred_sqerr));
+	
+	hs_pred->Add(h_pred_sfake);
+	hs_pred->Add(h_pred_dfake);
+	hs_pred->Add(h_pred_chmid);
+	hs_pred->Add(h_pred_mc);
+	
+	double max = h_obs->Integral();
+	h_obs       ->SetMaximum(max>1?max+1:1.);
+	h_pred_sfake->SetMaximum(max>1?max+1:1.);
+	h_pred_dfake->SetMaximum(max>1?max+1:1.);
+	h_pred_chmid->SetMaximum(max>1?max+1:1.);
+	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
+	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
+	hs_pred     ->SetMaximum(max>1?max+1:1.);
+	
+	hs_pred->Draw("goff");
+	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
+	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
+	hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
+	hs_pred->GetXaxis()->SetLabelOffset(0.01);
+	hs_pred->GetXaxis()->SetLabelFont(42);
+	hs_pred->GetXaxis()->SetLabelSize(0.1);
+	
+	TLegend *leg = new TLegend(0.15,0.70,0.50,0.88);
+	leg->AddEntry(h_obs,        "Observed","p");
+	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
+	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
+	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
+	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	// leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 800, 600);
+	c_temp->cd();
+	
+	hs_pred->Draw("hist");
+	h_pred_tot->DrawCopy("X0 E1 same");
+	h_obs->DrawCopy("P0 same");
+	leg->Draw();
+	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
+	// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	gPad->RedrawAxis();
+	fOutputSubDir = "ObsPredPlots/";
+	Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
+	delete c_temp;	
+	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
+	delete FR;
+	fOutputSubDir = "";
+}
+void MuonPlotter::makeIntPredictionOLD(TString filename, gRegion reg, gHiLoSwitch hilo){
+	ofstream OUT(filename.Data(), ios::trunc);
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
 	vector<int> musamples;
 	vector<int> elsamples;
 	vector<int> emusamples;
@@ -3924,18 +4428,17 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FPRatios *fEEFPRatios   = new FPRatios();
 
 	fMMFPRatios->SetVerbose(fVerbose);
-	fEMFPRatios ->SetVerbose(fVerbose);
-	fEEFPRatios  ->SetVerbose(fVerbose);
+	fEMFPRatios->SetVerbose(fVerbose);
+	fEEFPRatios->SetVerbose(fVerbose);
 
 	fMMFPRatios->SetMuFratios(mufratio_data, mufratio_data_e_new);
 	fMMFPRatios->SetMuPratios(mupratio_data, mupratio_data_e_new);
 
-	fEEFPRatios  ->SetElFratios(elfratio_data, elfratio_data_e_new);
-	fEEFPRatios  ->SetElPratios(elpratio_data, elpratio_data_e_new);
+	fEEFPRatios->SetElFratios(elfratio_data, elfratio_data_e_new);
+	fEEFPRatios->SetElPratios(elpratio_data, elpratio_data_e_new);
 
-	fEMFPRatios ->SetFratios(elfratio_data, elfratio_data_e_new, mufratio_data, mufratio_data_e_new);
-	fEMFPRatios ->SetPratios(elpratio_data, elpratio_data_e_new, mupratio_data, mupratio_data_e_new);
-
+	fEMFPRatios->SetFratios(elfratio_data, elfratio_data_e_new, mufratio_data, mufratio_data_e_new);
+	fEMFPRatios->SetPratios(elpratio_data, elpratio_data_e_new, mupratio_data, mupratio_data_e_new);
 
 	// MuMu Channel
 	vector<double> nt_mm;
@@ -3949,9 +4452,9 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas (first electron then muon)
 	veta.push_back(0.); veta.push_back(0.);
 
-	vector<double> MuMu_Nev   = fMMFPRatios->NevtPass(vpt, veta);
-	vector<double> MuMu_Estat = fMMFPRatios->NevtPassErrStat();
-	vector<double> MuMu_Esyst = fMMFPRatios->NevtPassErrSyst();
+	vector<double> MM_Nev   = fMMFPRatios->NevtPass(vpt, veta);
+	vector<double> MM_Estat = fMMFPRatios->NevtPassErrStat();
+	vector<double> MM_Esyst = fMMFPRatios->NevtPassErrSyst();
 
 	// EMu Channel
 	vector<double> nt_em;
@@ -3962,9 +4465,9 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	fEMFPRatios->NevtTopol(1, 1, nt_em);
 
-	vector<double> EMu_Nev   = fEMFPRatios->NevtPass(vpt, veta);
-	vector<double> EMu_Estat = fEMFPRatios->NevtPassErrStat();
-	vector<double> EMu_Esyst = fEMFPRatios->NevtPassErrSyst();
+	vector<double> EM_Nev   = fEMFPRatios->NevtPass(vpt, veta);
+	vector<double> EM_Estat = fEMFPRatios->NevtPassErrStat();
+	vector<double> EM_Esyst = fEMFPRatios->NevtPassErrSyst();
 
 	// EE Channel
 	vector<double> nt_ee;
@@ -3978,15 +4481,47 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	vector<double> EE_Estat = fEEFPRatios->NevtPassErrStat();
 	vector<double> EE_Esyst = fEEFPRatios->NevtPassErrSyst();
 
-	float mm_tot_fakes    = MuMu_Nev[1]+MuMu_Nev[2];
-	float mm_tot_fakes_e1 = TMath::Sqrt(MuMu_Estat[1]*MuMu_Estat[1] + MuMu_Estat[2]*MuMu_Estat[2]);
-	float mm_tot_fakes_e2 = TMath::Sqrt(MuMu_Esyst[1]*MuMu_Esyst[1] + MuMu_Esyst[2]*MuMu_Esyst[2]);
-	float em_tot_fakes    = EMu_Nev[1]+EMu_Nev[2]+EMu_Nev[3];
-	float em_tot_fakes_e1 = TMath::Sqrt(EMu_Estat[1]*EMu_Estat[1] + EMu_Estat[2]*EMu_Estat[2] + EMu_Estat[3]*EMu_Estat[3]);
-	float em_tot_fakes_e2 = TMath::Sqrt(EMu_Esyst[1]*EMu_Esyst[1] + EMu_Esyst[2]*EMu_Esyst[2] + EMu_Esyst[3]*EMu_Esyst[3]);
+	float mm_tot_fakes    = MM_Nev[1]+MM_Nev[2];
+	float mm_tot_fakes_e1 = TMath::Sqrt(MM_Estat[1]*MM_Estat[1] + MM_Estat[2]*MM_Estat[2]);
+	float mm_tot_fakes_e2 = TMath::Sqrt(MM_Esyst[1]*MM_Esyst[1] + MM_Esyst[2]*MM_Esyst[2]);
+	float em_tot_fakes    = EM_Nev[1]+EM_Nev[2]+EM_Nev[3];
+	float em_tot_fakes_e1 = TMath::Sqrt(EM_Estat[1]*EM_Estat[1] + EM_Estat[2]*EM_Estat[2] + EM_Estat[3]*EM_Estat[3]);
+	float em_tot_fakes_e2 = TMath::Sqrt(EM_Esyst[1]*EM_Esyst[1] + EM_Esyst[2]*EM_Esyst[2] + EM_Esyst[3]*EM_Esyst[3]);
 	float ee_tot_fakes    = EE_Nev[1]+EE_Nev[2];
 	float ee_tot_fakes_e1 = TMath::Sqrt(EE_Estat[1]*EE_Estat[1] + EE_Estat[2]*EE_Estat[2]);
 	float ee_tot_fakes_e2 = TMath::Sqrt(EE_Esyst[1]*EE_Esyst[1] + EE_Esyst[2]*EE_Esyst[2]);
+
+	// TEST OF FAKERATIOS CLASS:
+	cout << "-----------------" << endl;
+	cout << "Input: Ntt " << nt2_ee << " Ntl " << nt10_ee << " Nll " << nt0_ee << endl;
+	// cout << "Input: Ntt " << nt2_em << " Ntl " << nt10_em << " Nlt " << nt01_em << " Nll " << nt0_em << endl;
+	FakeRatios *fr = new FakeRatios();
+	// fr->setNToyMCs(10);
+	// fr->setVerbose(3);
+	float test_npp   = fr->getNpp(           nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_nppe1 = fr->getNppEStat(      nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_nppe2 = fr->getESystFromToys2(nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data, 0.05, 0.05, 0.05, 0.05, &FakeRatios::getNpp);
+
+	float test_npf   = 2*fr->getNpf(           nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_npfe1 = 2*fr->getNpfEStat(      nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_npfe2 = 2*fr->getESystFromToys2(nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data, 0.05, 0.05, 0.05, 0.05, &FakeRatios::getNpf);
+
+	// float test_nfp   = fr->getNfp(           nt2_em, nt10_em, nt01_em, nt0_em, mufratio_data, mufratio_data, elpratio_data, elpratio_data);
+	// float test_nfpe1 = fr->getNfpEStat(      nt2_em, nt10_em, nt01_em, nt0_em, mufratio_data, mufratio_data, elpratio_data, elpratio_data);
+	// float test_nfpe2 = fr->getESystFromToys2(nt2_em, nt10_em, nt01_em, nt0_em, mufratio_data, mufratio_data, elpratio_data, elpratio_data, 0.05, 0.05, 0.05, 0.05, &FakeRatios::getNfp);
+
+	float test_nff   = fr->getNff(           nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_nffe1 = fr->getNffEStat(      nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data);
+	float test_nffe2 = fr->getESystFromToys2(nt2_ee, 0.5*nt10_ee, 0.5*nt10_ee, nt0_ee, elfratio_data, elfratio_data, elpratio_data, elpratio_data, 0.05, 0.05, 0.05, 0.05, &FakeRatios::getNff);
+	cout << test_npp    << " ± " << test_nppe1    << " ± " << sqrt(test_nppe2) << endl;
+	cout << test_npf    << " ± " << test_npfe1    << " ± " << sqrt(test_npfe2) << endl;
+	// cout << test_nfp    << " ± " << test_nfpe1    << " ± " << sqrt(test_nfpe2) << endl;
+	cout << test_nff    << " ± " << test_nffe1    << " ± " << sqrt(test_nffe2) << endl;
+	cout << endl;
+	cout << EE_Nev[0] << " ± " << EE_Estat[0] << " ± " << EE_Esyst[0] << endl;
+	cout << EE_Nev[1] << " ± " << EE_Estat[1] << " ± " << EE_Esyst[1] << endl;
+	cout << EE_Nev[2] << " ± " << EE_Estat[2] << " ± " << EE_Esyst[2] << endl;
+	// cout << EM_Nev[3] << " ± " << EM_Estat[3] << " ± " << EM_Esyst[3] << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
@@ -4110,32 +4645,32 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << "  PREDICTIONS" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " Mu/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << MuMu_Nev[0];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[0];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[0] << " (syst)" << endl;
-	OUT << "  Nfp:           " << setw(7) << setprecision(3) << MuMu_Nev[1];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[1];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[1] << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << MuMu_Nev[2];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[2];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[2] << " (syst)" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << MM_Nev[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[0] << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << MM_Nev[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[1] << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << MM_Nev[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[2] << " (syst)" << endl;
 	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << mm_tot_fakes;
 	OUT << " +/- "             << setw(7) << setprecision(3) << mm_tot_fakes_e1;
 	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << mm_tot_fakes_e2 << " (syst)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " E/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << EMu_Nev[0];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[0];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[0] << " (syst)" << endl;
-	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EMu_Nev[1];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[1];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[1] << " (syst)" << endl;
-	OUT << "  Npf:           " << setw(7) << setprecision(3) << EMu_Nev[2];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[2];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[2] << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << EMu_Nev[3];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[3];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[3] << " (syst)" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << EM_Nev[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[0] << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EM_Nev[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[1] << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << EM_Nev[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[2] << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << EM_Nev[3];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[3];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[3] << " (syst)" << endl;
 	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << em_tot_fakes;
 	OUT << " +/- "             << setw(7) << setprecision(3) << em_tot_fakes_e1;
 	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << em_tot_fakes_e2 << " (syst)" << endl;
@@ -4344,15 +4879,130 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	// ee & mm & em & total & limit
 	fOUTSTREAM << Region::sname[reg] << endl;
 	fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
-	ee_tot_fakes + nt2_ee_chmid, sqrt(ee_pred_sqerr),
-	mm_tot_fakes,                sqrt(mm_pred_sqerr),
-	em_tot_fakes + nt2_em_chmid, sqrt(em_pred_sqerr),
+	ee_tot_fakes + nt2_ee_chmid + dibos_mc_ee, sqrt(ee_pred_sqerr),
+	mm_tot_fakes + dibos_mc_mm,                sqrt(mm_pred_sqerr),
+	em_tot_fakes + nt2_em_chmid + dibos_mc_em, sqrt(em_pred_sqerr),
 	tot_pred, toterror);
 	fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
 	
-	delete fMMFPRatios;
-	delete fEMFPRatios;
-	delete fEEFPRatios;
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// OUTPUT AS PLOT /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	// TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
+	// TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
+	// TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 3, 0., 3.);
+	// TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
+	// TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted WW/WZ/ZZ", 3, 0., 3.);
+	// TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
+	// THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
+	// 
+	// h_obs->SetMarkerColor(kBlack);
+	// h_obs->SetMarkerStyle(20);
+	// h_obs->SetMarkerSize(2.5);
+	// h_obs->SetLineWidth(2);
+	// h_obs->SetLineColor(kBlack);
+	// h_obs->SetFillColor(kBlack);
+	// 
+	// h_pred_sfake->SetLineWidth(1);
+	// h_pred_dfake->SetLineWidth(1);
+	// h_pred_chmid->SetLineWidth(1);
+	// h_pred_mc   ->SetLineWidth(1);
+	// h_pred_tot  ->SetLineWidth(3);
+	// h_pred_sfake->SetLineColor(50);
+	// h_pred_sfake->SetFillColor(50);
+	// h_pred_dfake->SetLineColor(38);
+	// h_pred_dfake->SetFillColor(38);
+	// h_pred_chmid->SetLineColor(42);
+	// h_pred_chmid->SetFillColor(42);
+	// h_pred_mc   ->SetLineColor(31);
+	// h_pred_mc   ->SetFillColor(31);
+	// 
+	// // Add numbers:
+	// h_obs->SetBinContent(1, nt2_ee);
+	// h_obs->SetBinContent(2, nt2_mm);
+	// h_obs->SetBinContent(3, nt2_em);
+	// h_obs->SetBinError(1, 0); // FIXME
+	// h_obs->SetBinError(2, 0); // FIXME
+	// h_obs->SetBinError(3, 0); // FIXME
+	// 
+	// h_pred_sfake->SetBinContent(1, EE_Nev[1]);
+	// h_pred_sfake->SetBinContent(2, MM_Nev[1]);
+	// h_pred_sfake->SetBinContent(3, EM_Nev[1]+EM_Nev[2]);
+	// h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
+	// h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
+	// h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
+	// 
+	// h_pred_dfake->SetBinContent(1, EE_Nev[2]);
+	// h_pred_dfake->SetBinContent(2, MM_Nev[2]);
+	// h_pred_dfake->SetBinContent(3, EM_Nev[3]);
+	// 
+	// h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
+	// h_pred_chmid->SetBinContent(2, 0.);
+	// h_pred_chmid->SetBinContent(3, nt2_em_chmid);
+	// 
+	// h_pred_mc->SetBinContent(1, dibos_mc_ee);
+	// h_pred_mc->SetBinContent(2, dibos_mc_mm);
+	// h_pred_mc->SetBinContent(3, dibos_mc_em);
+	// 
+	// h_pred_tot->Add(h_pred_sfake);
+	// h_pred_tot->Add(h_pred_dfake);
+	// h_pred_tot->Add(h_pred_chmid);
+	// h_pred_tot->Add(h_pred_mc);
+	// h_pred_tot->SetBinError(1, sqrt(ee_pred_sqerr));
+	// h_pred_tot->SetBinError(2, sqrt(mm_pred_sqerr));
+	// h_pred_tot->SetBinError(3, sqrt(em_pred_sqerr));
+	// 
+	// hs_pred->Add(h_pred_sfake);
+	// hs_pred->Add(h_pred_dfake);
+	// hs_pred->Add(h_pred_chmid);
+	// hs_pred->Add(h_pred_mc);
+	// 
+	// double max = h_obs->Integral();
+	// h_obs       ->SetMaximum(max>1?max+1:1.);
+	// h_pred_sfake->SetMaximum(max>1?max+1:1.);
+	// h_pred_dfake->SetMaximum(max>1?max+1:1.);
+	// h_pred_chmid->SetMaximum(max>1?max+1:1.);
+	// h_pred_mc   ->SetMaximum(max>1?max+1:1.);
+	// h_pred_tot  ->SetMaximum(max>1?max+1:1.);
+	// hs_pred     ->SetMaximum(max>1?max+1:1.);
+	// 
+	// hs_pred->Draw("goff");
+	// hs_pred->GetXaxis()->SetBinLabel(1, "ee");
+	// hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
+	// hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
+	// hs_pred->GetXaxis()->SetLabelOffset(0.01);
+	// hs_pred->GetXaxis()->SetLabelFont(42);
+	// hs_pred->GetXaxis()->SetLabelSize(0.1);
+	// 
+	// TLegend *leg = new TLegend(0.15,0.70,0.50,0.88);
+	// leg->AddEntry(h_obs,        "Observed","p");
+	// leg->AddEntry(h_pred_sfake, "Single Fakes","f");
+	// leg->AddEntry(h_pred_dfake, "Double Fakes","f");
+	// leg->AddEntry(h_pred_chmid, "Charge MisID","f");
+	// leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
+	// leg->SetFillStyle(0);
+	// leg->SetTextFont(42);
+	// // leg->SetTextSize(0.05);
+	// leg->SetBorderSize(0);
+	// 
+	// TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 800, 600);
+	// c_temp->cd();
+	// 
+	// hs_pred->Draw("hist");
+	// h_pred_tot->DrawCopy("X0 E1 same");
+	// h_obs->DrawCopy("P0 same");
+	// leg->Draw();
+	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
+	// // lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	// gPad->RedrawAxis();
+	// fOutputSubDir = "ObsPredPlots/";
+	// Util::PrintNoEPS(c_temp, "C_ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintPDF(c_temp,   "C_ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
+	// delete c_temp;	
+	// delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
+	delete fMMFPRatios, fEMFPRatios, fEEFPRatios;
+	fOutputSubDir = "";
 }
 void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
@@ -4547,9 +5197,9 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	vpt.push_back(30.); vpt.push_back(30.); // Fake pts and etas (first electron then muon)
 	veta.push_back(0.); veta.push_back(0.);
 
-	vector<double> MuMu_Nev   = fMMFPRatios->NevtPass(vpt, veta);
-	vector<double> MuMu_Estat = fMMFPRatios->NevtPassErrStat();
-	vector<double> MuMu_Esyst = fMMFPRatios->NevtPassErrSyst();
+	vector<double> MM_Nev   = fMMFPRatios->NevtPass(vpt, veta);
+	vector<double> MM_Estat = fMMFPRatios->NevtPassErrStat();
+	vector<double> MM_Esyst = fMMFPRatios->NevtPassErrSyst();
 
 	// EMu Channel
 	vector<double> nt_emu;
@@ -4560,9 +5210,9 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 
 	fEMFPRatios->NevtTopol(1, 1, nt_emu);
 
-	vector<double> EMu_Nev   = fEMFPRatios->NevtPass(vpt, veta);
-	vector<double> EMu_Estat = fEMFPRatios->NevtPassErrStat();
-	vector<double> EMu_Esyst = fEMFPRatios->NevtPassErrSyst();
+	vector<double> EM_Nev   = fEMFPRatios->NevtPass(vpt, veta);
+	vector<double> EM_Estat = fEMFPRatios->NevtPassErrStat();
+	vector<double> EM_Esyst = fEMFPRatios->NevtPassErrSyst();
 
 	// EE Channel
 	vector<double> nt_ee;
@@ -4639,10 +5289,10 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "tot. pred. fakes"  << " || ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[1]+MuMu_Nev[2] ) << " | ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[1]+MM_Nev[2] ) << " | ";
 	OUT << setw(7) << "        |";
 	OUT << setw(7) << "         || ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[1]+EMu_Nev[2]+EMu_Nev[3] ) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[1]+EM_Nev[2]+EM_Nev[3] ) << " | ";
 	OUT << setw(7) << "        | ";
 	OUT << setw(7) << "        | ";
 	OUT << setw(7) << "        || ";
@@ -4671,13 +5321,13 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << " ee charge misid ||         |         |         ||         |         |         |         || ";
 	OUT << setw(7) << Form("%5.2f", npp_cm_ee) << " |         |         ||" << endl;
 	OUT << setw(16) << "Predicted"  << " || ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[0] / (mupratio_allmc*mupratio_allmc)) << " | ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[1] / (mupratio_allmc*mufratio_allmc)) << " | ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[2] / (mufratio_allmc*mufratio_allmc)) << " || ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[0]  / (mupratio_allmc*elpratio_allmc)) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[1]  / (mufratio_allmc*elpratio_allmc)) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[2]  / (mupratio_allmc*elfratio_allmc)) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[3]  / (mufratio_allmc*elfratio_allmc)) << " || ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[0] / (mupratio_allmc*mupratio_allmc)) << " | ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[1] / (mupratio_allmc*mufratio_allmc)) << " | ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[2] / (mufratio_allmc*mufratio_allmc)) << " || ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[0]  / (mupratio_allmc*elpratio_allmc)) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[1]  / (mufratio_allmc*elpratio_allmc)) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[2]  / (mupratio_allmc*elfratio_allmc)) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[3]  / (mufratio_allmc*elfratio_allmc)) << " || ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[0]   / (elpratio_allmc*elpratio_allmc)) << " | ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[1]   / (elpratio_allmc*elfratio_allmc)) << " | ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[2]   / (elfratio_allmc*elfratio_allmc)) << " || ";
@@ -4698,13 +5348,13 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << " ee charge misid ||         |         |         ||         |         |         |         || ";
 	OUT << setw(7) << Form("%5.2f", nt2pp_cm_ee) << " |         |         ||" << endl;
 	OUT << setw(16) << "Predicted in TT"  << " || ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[0] ) << " | ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[1] ) << " | ";
-	OUT << setw(7) << Form("%5.2f", MuMu_Nev[2] ) << " || ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[0]  ) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[1]  ) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[2]  ) << " | ";
-	OUT << setw(7) << Form("%5.2f", EMu_Nev[3]  ) << " || ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[0] ) << " | ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[1] ) << " | ";
+	OUT << setw(7) << Form("%5.2f", MM_Nev[2] ) << " || ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[0]  ) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[1]  ) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[2]  ) << " | ";
+	OUT << setw(7) << Form("%5.2f", EM_Nev[3]  ) << " || ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[0]   ) << " | ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[1]   ) << " | ";
 	OUT << setw(7) << Form("%5.2f", EE_Nev[2]   ) << " || ";
@@ -4716,35 +5366,35 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << "  PREDICTIONS (in tt window)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " Mu/Mu Channel:" << endl;
-	OUT << "  Npp*pp:        " << setw(7) << setprecision(3) << MuMu_Nev[0];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[0];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[0] << " (syst)" << endl;
-	OUT << "  Nfp*fp:        " << setw(7) << setprecision(3) << MuMu_Nev[1];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[1];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[1] << " (syst)" << endl;
-	OUT << "  Nff*ff:        " << setw(7) << setprecision(3) << MuMu_Nev[2];
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[2];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[2] << " (syst)" << endl;
-	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << MuMu_Nev[1]+MuMu_Nev[2];
-	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(MuMu_Estat[1]*MuMu_Estat[1] + MuMu_Estat[2]*MuMu_Estat[2]);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(MuMu_Esyst[1]*MuMu_Esyst[1] + MuMu_Esyst[2]*MuMu_Esyst[2]) << " (syst)" << endl;
+	OUT << "  Npp*pp:        " << setw(7) << setprecision(3) << MM_Nev[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[0] << " (syst)" << endl;
+	OUT << "  Nfp*fp:        " << setw(7) << setprecision(3) << MM_Nev[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[1] << " (syst)" << endl;
+	OUT << "  Nff*ff:        " << setw(7) << setprecision(3) << MM_Nev[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[2] << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << MM_Nev[1]+MM_Nev[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(MM_Estat[1]*MM_Estat[1] + MM_Estat[2]*MM_Estat[2]);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(MM_Esyst[1]*MM_Esyst[1] + MM_Esyst[2]*MM_Esyst[2]) << " (syst)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " E/Mu Channel:" << endl;
-	OUT << "  Npp*pp:        " << setw(7) << setprecision(3) << EMu_Nev[0];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[0];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[0] << " (syst)" << endl;
-	OUT << "  Nfp*fp:        " << setw(7) << setprecision(3) << EMu_Nev[1];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[1];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[1] << " (syst)" << endl;
-	OUT << "  Npf*pf:        " << setw(7) << setprecision(3) << EMu_Nev[2];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[2];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[2] << " (syst)" << endl;
-	OUT << "  Nff*ff:        " << setw(7) << setprecision(3) << EMu_Nev[3];
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[3];
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[3] << " (syst)" << endl;
-	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << EMu_Nev[1]+EMu_Nev[2]+EMu_Nev[3];
-	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(EMu_Estat[1]*EMu_Estat[1] + EMu_Estat[2]*EMu_Estat[2] + EMu_Estat[3]*EMu_Estat[3]);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(EMu_Esyst[1]*EMu_Esyst[1] + EMu_Esyst[2]*EMu_Esyst[2] + EMu_Esyst[3]*EMu_Esyst[3]) << " (syst)" << endl;
+	OUT << "  Npp*pp:        " << setw(7) << setprecision(3) << EM_Nev[0];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[0];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[0] << " (syst)" << endl;
+	OUT << "  Nfp*fp:        " << setw(7) << setprecision(3) << EM_Nev[1];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[1];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[1] << " (syst)" << endl;
+	OUT << "  Npf*pf:        " << setw(7) << setprecision(3) << EM_Nev[2];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[2];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[2] << " (syst)" << endl;
+	OUT << "  Nff*ff:        " << setw(7) << setprecision(3) << EM_Nev[3];
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[3];
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[3] << " (syst)" << endl;
+	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << EM_Nev[1]+EM_Nev[2]+EM_Nev[3];
+	OUT << " +/- "             << setw(7) << setprecision(3) << TMath::Sqrt(EM_Estat[1]*EM_Estat[1] + EM_Estat[2]*EM_Estat[2] + EM_Estat[3]*EM_Estat[3]);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << TMath::Sqrt(EM_Esyst[1]*EM_Esyst[1] + EM_Esyst[2]*EM_Esyst[2] + EM_Esyst[3]*EM_Esyst[3]) << " (syst)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " E/E Channel:" << endl;
 	OUT << "  Npp*pp:        " << setw(7) << setprecision(3) << EE_Nev[0];
@@ -4763,29 +5413,29 @@ void MuonPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << "  PREDICTIONS (in entire window)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " Mu/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << MuMu_Nev[0]   / (mupratio_allmc*mupratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[0] / (mupratio_allmc*mupratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[0] / (mupratio_allmc*mupratio_allmc) << " (syst)" << endl;
-	OUT << "  Nfp:           " << setw(7) << setprecision(3) << MuMu_Nev[1]   / (mupratio_allmc*mufratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[1] / (mupratio_allmc*mufratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[1] / (mupratio_allmc*mufratio_allmc) << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << MuMu_Nev[2]   / (mufratio_allmc*mufratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << MuMu_Estat[2] / (mufratio_allmc*mufratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MuMu_Esyst[2] / (mufratio_allmc*mufratio_allmc) << " (syst)" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << MM_Nev[0]   / (mupratio_allmc*mupratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[0] / (mupratio_allmc*mupratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[0] / (mupratio_allmc*mupratio_allmc) << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << MM_Nev[1]   / (mupratio_allmc*mufratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[1] / (mupratio_allmc*mufratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[1] / (mupratio_allmc*mufratio_allmc) << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << MM_Nev[2]   / (mufratio_allmc*mufratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << MM_Estat[2] / (mufratio_allmc*mufratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << MM_Esyst[2] / (mufratio_allmc*mufratio_allmc) << " (syst)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " E/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << EMu_Nev[0]   / (mupratio_allmc*elpratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[0] / (mupratio_allmc*elpratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[0] / (mupratio_allmc*elpratio_allmc) << " (syst)" << endl;
-	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EMu_Nev[1]   / (mufratio_allmc*elpratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[1] / (mufratio_allmc*elpratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[1] / (mufratio_allmc*elpratio_allmc) << " (syst)" << endl;
-	OUT << "  Npf:           " << setw(7) << setprecision(3) << EMu_Nev[2]   / (mupratio_allmc*elfratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[2] / (mupratio_allmc*elfratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[2] / (mupratio_allmc*elfratio_allmc) << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << EMu_Nev[3]   / (mufratio_allmc*elfratio_allmc);
-	OUT << " +/- "             << setw(7) << setprecision(3) << EMu_Estat[3] / (mufratio_allmc*elfratio_allmc);
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EMu_Esyst[3] / (mufratio_allmc*elfratio_allmc) << " (syst)" << endl;
+	OUT << "  Npp:           " << setw(7) << setprecision(3) << EM_Nev[0]   / (mupratio_allmc*elpratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[0] / (mupratio_allmc*elpratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[0] / (mupratio_allmc*elpratio_allmc) << " (syst)" << endl;
+	OUT << "  Nfp:           " << setw(7) << setprecision(3) << EM_Nev[1]   / (mufratio_allmc*elpratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[1] / (mufratio_allmc*elpratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[1] / (mufratio_allmc*elpratio_allmc) << " (syst)" << endl;
+	OUT << "  Npf:           " << setw(7) << setprecision(3) << EM_Nev[2]   / (mupratio_allmc*elfratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[2] / (mupratio_allmc*elfratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[2] / (mupratio_allmc*elfratio_allmc) << " (syst)" << endl;
+	OUT << "  Nff:           " << setw(7) << setprecision(3) << EM_Nev[3]   / (mufratio_allmc*elfratio_allmc);
+	OUT << " +/- "             << setw(7) << setprecision(3) << EM_Estat[3] / (mufratio_allmc*elfratio_allmc);
+	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << EM_Esyst[3] / (mufratio_allmc*elfratio_allmc) << " (syst)" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << " E/E Channel:" << endl;
 	OUT << "  Npp:           " << setw(7) << setprecision(3) << EE_Nev[0]   / (elpratio_allmc*elpratio_allmc);
@@ -5078,7 +5728,7 @@ void MuonPlotter::printSyncExercise(){
 	fC_minMet   = 30.;
 	fC_minNjets = 0;
 
-	TString eventfilename = fOutputDir + "pass8_eth.txt";
+	TString eventfilename = fOutputDir + "pass2_eth.txt";
 	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
 
 	Sample *S = fSamples[TTJetsSync];
@@ -5201,7 +5851,7 @@ void MuonPlotter::printSyncExercise(){
 	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel+N_mumu+N_elmu)) << endl;
 	cout << "====================================================================" << endl;
 	cout << endl;
-	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | Ran on 1084783 total events, [[%%ATTACHURL%%/pass8_eth.txt][yield.txt]] |"
+	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | [[%%ATTACHURL%%/pass2_eth.txt][yield.txt]] |"
 		, scale*N_elel, N_elel
 		, scale*N_mumu, N_mumu
 		, scale*N_elmu, N_elmu
@@ -5566,7 +6216,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
 				fCounters[fCurrentSample][Muon].fill(" ... both muons pass tight cut");
 				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt20_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
+				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt && (fCurrentSample != MuHad1 || fCurrentSample != MuHad2)){
 					fOUTSTREAM << " Mu/Mu Tight-Tight event in run ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5588,18 +6238,18 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
 				fCounters[fCurrentSample][Muon].fill(" ... first muon passes tight cut");
 				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt10_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
+				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				fCounters[fCurrentSample][Muon].fill(" ... second muon passes tight cut");
 				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], puweight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].mm.nt10_eta->Fill(MuEta[mu2], MuEta[mu1], puweight);
+				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu2]), fabs(MuEta[mu1]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, puweight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
 				S->region[reg][hilo].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt00_eta->Fill(MuEta[mu1], MuEta[mu2], puweight);
+				S->region[reg][hilo].mm.nt00_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
 			}
 			if(S->datamc > 0){
@@ -5612,21 +6262,21 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	}
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
-			S->region[reg][hilo].mm.fntight->Fill(MuPt[0], MuEta[0], singleMuPrescale() * puweight);
+			S->region[reg][hilo].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * puweight);
 			if(S->datamc > 0) S->region[reg][hilo].mm.sst_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseMuon(0) ){
-			S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], MuEta[0], singleMuPrescale() * puweight);
+			S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * puweight);
 			if(S->datamc > 0) S->region[reg][hilo].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 	}
 	if(doubleMuTrigger() && isZMuMuEvent()){
 		if( isTightMuon(0) ){
-			S->region[reg][hilo].mm.pntight->Fill(MuPt[0], MuEta[0], puweight);
+			S->region[reg][hilo].mm.pntight->Fill(MuPt[0], fabs(MuEta[0]), puweight);
 			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseMuon(0) ){
-			S->region[reg][hilo].mm.pnloose->Fill(MuPt[0], MuEta[0], puweight);
+			S->region[reg][hilo].mm.pnloose->Fill(MuPt[0], fabs(MuEta[0]), puweight);
 			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 	}				
@@ -5641,7 +6291,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
 				fCounters[fCurrentSample][Electron].fill(" ... both electrons pass tight cut");
 				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt20_eta->Fill(ElEta[el1], ElEta[el2], puweight);
+				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt && (fCurrentSample != EleHad1 || fCurrentSample != EleHad2)){
 					fOUTSTREAM << " E/E Tight-Tight event in run   ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5668,18 +6318,18 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
 				fCounters[fCurrentSample][Electron].fill(" ... first electron passes tight cut");
 				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt10_eta->Fill(ElEta[el1], ElEta[el2], puweight);
+				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				fCounters[fCurrentSample][Electron].fill(" ... second electron passes tight cut");
 				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], puweight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].ee.nt10_eta->Fill(ElEta[el2], ElEta[el1], puweight);
+				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el2]), fabs(ElEta[el2]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, puweight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
 				S->region[reg][hilo].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt00_eta->Fill(ElEta[el1], ElEta[el2], puweight);
+				S->region[reg][hilo].ee.nt00_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
 			}
 			if(S->datamc > 0 ){
@@ -5697,22 +6347,22 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
-			S->region[reg][hilo].ee.fntight->Fill(ElPt[0], ElEta[0], singleElPrescale() * puweight);
+			S->region[reg][hilo].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * puweight);
 			if(S->datamc > 0) S->region[reg][hilo].ee.sst_origin->Fill(elIndexToBin(0)-0.5, puweight);
 		}
 		if( isLooseElectron(0) ){
-			S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], ElEta[0], singleElPrescale() * puweight);
+			S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * puweight);
 			if(S->datamc > 0) S->region[reg][hilo].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, puweight);
 		}
 	}
 	int elind;
 	if(doubleElTrigger() && isZElElEvent(elind)){
 		if( isTightElectron(elind) ){
-			S->region[reg][hilo].ee.pntight->Fill(ElPt[elind], ElEta[elind], puweight);
+			S->region[reg][hilo].ee.pntight->Fill(ElPt[elind], fabs(ElEta[elind]), puweight);
 			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(elind)-0.5, puweight);
 		}
 		if( isLooseElectron(elind) ){
-			S->region[reg][hilo].ee.pnloose->Fill(ElPt[elind], ElEta[elind], puweight);
+			S->region[reg][hilo].ee.pnloose->Fill(ElPt[elind], fabs(ElEta[elind]), puweight);
 			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(elind)-0.5, puweight);
 		}
 	}
@@ -5727,7 +6377,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
 				fCounters[fCurrentSample][EMu].fill(" ... both e and mu pass tight cuts");
 				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt20_eta->Fill(MuEta[mu], ElEta[el], puweight);
+				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
 					fOUTSTREAM << " E/Mu Tight-Tight event in run  ";
 					fOUTSTREAM << setw(7) << Run;
@@ -5750,18 +6400,18 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
 				fCounters[fCurrentSample][EMu].fill(" ... muon passes tight cut");
 				S->region[reg][hilo].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt10_eta->Fill(MuEta[mu], ElEta[el], puweight);
+				S->region[reg][hilo].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fCounters[fCurrentSample][EMu].fill(" ... electron passes tight cut");
 				S->region[reg][hilo].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], puweight); // muon always in x axis for e/mu
-				S->region[reg][hilo].em.nt01_eta->Fill(MuEta[mu], ElEta[el], puweight);
+				S->region[reg][hilo].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
 				S->region[reg][hilo].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt00_eta->Fill(MuEta[mu], ElEta[el], puweight);
+				S->region[reg][hilo].em.nt00_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if(S->datamc > 0){
@@ -5832,6 +6482,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP0->ntight[3]->Fill(NVrtx,                    puweight);
 			RP0->ntight[4]->Fill(getClosestJetPt(0, Muon), puweight);
 			RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    puweight);
+			RP0->ntight[6]->Fill(getNBTags(),              puweight);
 		}
 		if( isLooseMuon(0) ){
 			RP0->nloose[0]->Fill(getNJets(),               puweight);
@@ -5840,6 +6491,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP0->nloose[3]->Fill(NVrtx,                    puweight);
 			RP0->nloose[4]->Fill(getClosestJetPt(0, Muon), puweight);
 			RP0->nloose[5]->Fill(getAwayJetPt(0, Muon),    puweight);
+			RP0->nloose[6]->Fill(getNBTags(),              puweight);
 		}
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
@@ -5850,6 +6502,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP1->ntight[3]->Fill(NVrtx,                        puweight);
 			RP1->ntight[4]->Fill(getClosestJetPt(0, Electron), puweight);
 			RP1->ntight[5]->Fill(getAwayJetPt(0, Electron),    puweight);
+			RP1->ntight[6]->Fill(getNBTags(),                  puweight);
 		}
 		if( isLooseElectron(0) ){
 			RP1->nloose[0]->Fill(getNJets(),                   puweight);
@@ -5858,6 +6511,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 			RP1->nloose[3]->Fill(NVrtx,                        puweight);
 			RP1->nloose[4]->Fill(getClosestJetPt(0, Electron), puweight);
 			RP1->nloose[5]->Fill(getAwayJetPt(0, Electron),    puweight);
+			RP1->nloose[6]->Fill(getNBTags(),                  puweight);
 		}
 	}
 	
@@ -7393,10 +8047,10 @@ int  MuonPlotter::readSigGraphs(TString filename){
 	}
 	
 	TString channame, getname;
-	Color_t color[3] = {kBlack, kRed, kBlue};
-	// Size_t  size [3] = {1.6, 1.5, 1.8};
+	Color_t color[3] = {kBlack, kBlue, kRed};
+	// Size_t  size [3] = {1.6, 1.8, 1.5};
 	Size_t size = 1.5;
-	Style_t style[3] = {8, 21, 23};
+	Style_t style[3] = {8, 23, 21};
 	
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
@@ -8090,6 +8744,11 @@ int MuonPlotter::getNJets(){
 	int njets(0);
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) njets++;
 	return njets;
+}
+int MuonPlotter::getNBTags(){
+	int ntags(0);
+	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i) && JetSSVHPBTag[i] > 2.0) ntags++;
+	return ntags;
 }
 float MuonPlotter::getHT(){
 	float ht(0.);
@@ -8815,6 +9474,9 @@ bool MuonPlotter::isSSLLElEvent(int& el1, int& el2){
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has 2 loose electrons");
 
 	if(fChargeSwitch == 0){
+		// Need to remove the Z veto in OS case, since these OS events are exactly what 
+		// contributes to the SS yield. They would NOT fire the Z veto, since they are
+		// misidd as SS events
 		if(!passesZVeto()) return false; // no Zs in event
 		if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes Z veto");
 	}

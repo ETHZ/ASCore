@@ -22,10 +22,12 @@ public:
 	// Binning
 	static const int gNMuPtbins  = 5;
 	static const int gNMuPt2bins = 5;
-	static const int gNMuEtabins = 8;
+	static const int gNMuEtabins = 4;
+	// static const int gNMuEtabins = 8;
 	static const int gNElPtbins  = 5;
 	static const int gNElPt2bins = 5;
-	static const int gNElEtabins = 6;
+	static const int gNElEtabins = 3;
+	// static const int gNElEtabins = 6;
 	
 	static const int gNNVrtxBins = 9;
 	static double gNVrtxBins[gNNVrtxBins+1];
@@ -195,7 +197,8 @@ public:
 		Channel ee;
 	};
 	
-	static const int gNRatioVars = 6;
+	// static const int gNRatioVars = 6;
+	static const int gNRatioVars = 7;
 	struct FRatioPlots{
 		static TString var_name[gNRatioVars];
 		static int nbins[gNRatioVars];
@@ -312,6 +315,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
+	void makeIntPredictionOLD(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);
 	
 	void makeTTbarClosure();
@@ -439,6 +443,7 @@ public:
 
 	// Event and Object selectors:
 	int getNJets();
+	int getNBTags();
 	float getHT();
 	float getMT2(int, int, int);
 	float getClosestJetPt(int, gChannel);
@@ -473,7 +478,6 @@ public:
 
 	// HWW Stuff
 	bool passesAddLepVeto(int, int, int);
-
 
 	bool isSigSupMuEvent();
 	bool isZMuMuEvent();
