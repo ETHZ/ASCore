@@ -493,15 +493,23 @@ void MuonPlotter::doAnalysis(){
 	// makeElpRatioPlots(false);
 
 	TString tablefilename  = fOutputDir + "Table2.tex";
+	TString didarfilename  = fOutputDir + "forDidar.txt";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
 	fOUTSTREAM << endl;
+	fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
+	fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
+	fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
+	fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
+	fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
+	fOUTSTREAM2 << endl;
 	for(size_t i = 0; i < gNREGIONS; ++i){
 		TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
 		makeIntPrediction(outputname, gRegion(i));
 	}
 	fOUTSTREAM.close();
+	fOUTSTREAM2.close();
 
 	// // makeIntMCClosure( fOutputDir + "MCClosure.txt");	
 	// // makeMCClosurePlots(fMCBG);
@@ -3793,11 +3801,19 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	FakeRatios *FR = new FakeRatios();
-	
-	FR->setMFRatio(mufratio_data, 0.08);
-	FR->setEFRatio(elfratio_data, 0.08);
-	FR->setMPRatio(mupratio_data, 0.05);
-	FR->setEPRatio(elpratio_data, 0.05);
+	FR->setNToyMCs(100); // speedup
+	FR->setAddESyst(0.5);
+	// FR->setNToyMCs(100);
+	// FR->setAddESyst(0.0);
+
+	// FR->setMFRatio(mufratio_data, 0.10);
+	// FR->setEFRatio(elfratio_data, 0.10);
+	// FR->setMPRatio(mupratio_data, 0.05);
+	// FR->setEPRatio(elpratio_data, 0.05);
+	FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+	FR->setEFRatio(elfratio_data, elfratio_data_e);
+	FR->setMPRatio(mupratio_data, mupratio_data_e);
+	FR->setEPRatio(elpratio_data, elpratio_data_e);
 
 	FR->setMMNtl(nt2_mm, nt10_mm, nt0_mm);
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
@@ -3982,11 +3998,11 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	// Simple error propagation assuming error on number of events is sqrt(N)
 	nt2_ee_chmid    = 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os;
-	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*nt2_ee_BB_os) + (4*fe*fe*nt2_ee_EE_os) + (fb+fe)*(fb+fe)*nt2_ee_EB_os ); // stat only
+	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
 	nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
 
 	nt2_em_chmid    = fb*nt2_em_BB_os + fe*nt2_em_EE_os;
-	nt2_em_chmid_e1 = sqrt( fb*fb*nt2_em_BB_os + fe*fe*nt2_em_EE_os );
+	nt2_em_chmid_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
 	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -4078,31 +4094,46 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid_e2) << " || " << endl;
 	OUT << setw(16) << "WW/WZ/ZZ (MC)"  << " || ";
 	float dibos_mc_mm(0.), dibos_mc_em(0.), dibos_mc_ee(0.);
-	dibos_mc_mm += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][Muon].nt2;
-	dibos_mc_mm += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][Muon].nt2;
-	dibos_mc_mm += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][Muon].nt2;
-	dibos_mc_em += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][EMu].nt2;
-	dibos_mc_em += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][EMu].nt2;
-	dibos_mc_em += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][EMu].nt2;
-	dibos_mc_ee += fLumiNorm/fSamples[WW]->lumi * fSamples[WW]->numbers[reg][Electron].nt2;
-	dibos_mc_ee += fLumiNorm/fSamples[WZ]->lumi * fSamples[WZ]->numbers[reg][Electron].nt2;
-	dibos_mc_ee += fLumiNorm/fSamples[ZZ]->lumi * fSamples[ZZ]->numbers[reg][Electron].nt2;
+	float dibos_mc_mm_e1(0.), dibos_mc_em_e1(0.), dibos_mc_ee_e1(0.);
+	float wwscale = fLumiNorm/fSamples[WW]->lumi;
+	float wzscale = fLumiNorm/fSamples[WZ]->lumi;
+	float zzscale = fLumiNorm/fSamples[ZZ]->lumi;
+	dibos_mc_mm += wwscale * fSamples[WW]->numbers[reg][Muon].nt2;
+	dibos_mc_mm += wzscale * fSamples[WZ]->numbers[reg][Muon].nt2;
+	dibos_mc_mm += zzscale * fSamples[ZZ]->numbers[reg][Muon].nt2;
+	dibos_mc_mm_e1 = sqrt(wwscale*wwscale*FR->getEStat2(fSamples[WW]->numbers[reg][Muon].nt2)
+	                    + wzscale*wzscale*FR->getEStat2(fSamples[WZ]->numbers[reg][Muon].nt2)
+	                    + zzscale*zzscale*FR->getEStat2(fSamples[ZZ]->numbers[reg][Muon].nt2));
+	dibos_mc_em += wwscale * fSamples[WW]->numbers[reg][EMu].nt2;
+	dibos_mc_em += wzscale * fSamples[WZ]->numbers[reg][EMu].nt2;
+	dibos_mc_em += zzscale * fSamples[ZZ]->numbers[reg][EMu].nt2;
+	dibos_mc_em_e1 = sqrt(wwscale*wwscale*FR->getEStat2(fSamples[WW]->numbers[reg][EMu].nt2)
+	                    + wzscale*wzscale*FR->getEStat2(fSamples[WZ]->numbers[reg][EMu].nt2)
+	                    + zzscale*zzscale*FR->getEStat2(fSamples[ZZ]->numbers[reg][EMu].nt2));
+	dibos_mc_ee += wwscale * fSamples[WW]->numbers[reg][Electron].nt2;
+	dibos_mc_ee += wzscale * fSamples[WZ]->numbers[reg][Electron].nt2;
+	dibos_mc_ee += zzscale * fSamples[ZZ]->numbers[reg][Electron].nt2;
+	dibos_mc_ee_e1 = sqrt(wwscale*wwscale*FR->getEStat2(fSamples[WW]->numbers[reg][Electron].nt2)
+	                    + wzscale*wzscale*FR->getEStat2(fSamples[WZ]->numbers[reg][Electron].nt2)
+	                    + zzscale*zzscale*FR->getEStat2(fSamples[ZZ]->numbers[reg][Electron].nt2));
+
 	OUT << setw(5) << Form("%5.2f", dibos_mc_mm   ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_mm);
-	OUT << "           || ";
+	OUT << setw(5) << Form("%5.2f", dibos_mc_mm_e1) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_mm) << " || ";
 	OUT << setw(5) << Form("%5.2f", dibos_mc_em   ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_em);
-	OUT << "           || ";
+	OUT << setw(5) << Form("%5.2f", dibos_mc_em_e1) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_em) << " || ";
 	OUT << setw(5) << Form("%5.2f", dibos_mc_ee   ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_ee);
-	OUT << "           || " << endl;
+	OUT << setw(5) << Form("%5.2f", dibos_mc_ee_e1) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", 0.5*dibos_mc_ee) << " || " << endl;
 	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "tot. backgr. "  << " || ";
-	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat();
+	// Just add different errors in quadrature (they are independent)
+	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat() + dibos_mc_mm_e1*dibos_mc_mm_e1;
+	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + dibos_mc_em_e1*dibos_mc_em_e1;
+	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + dibos_mc_ee_e1*dibos_mc_ee_e1;
 	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + 0.25*dibos_mc_mm*dibos_mc_mm;
-	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1;
 	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + 0.25*dibos_mc_em*dibos_mc_em;
-	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1;
 	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + 0.25*dibos_mc_ee*dibos_mc_ee;
 	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes() + dibos_mc_mm) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr1)) << " +/- ";
@@ -4110,7 +4141,7 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << Form("%5.2f", FR->getEMTotFakes() + nt2_em_chmid + dibos_mc_em) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr2)) << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_em) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_ee) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr2)) << " || " << endl;
 	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
@@ -4122,37 +4153,39 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(20) << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << setw(20) << "        predicted: ";
-	float tot_pred = FR->getMMTotFakes() + dibos_mc_mm +  FR->getEMTotFakes() + nt2_em_chmid + dibos_mc_em + FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_ee;
-	float comb_tot_sqerr1 = mm_tot_sqerr1 + em_tot_sqerr1 + ee_tot_sqerr1;
-	float comb_tot_sqerr2 = mm_tot_sqerr2 + em_tot_sqerr2 + ee_tot_sqerr2;
+	float tot_pred        = FR->getTotFakes() + dibos_mc_mm + nt2_em_chmid + dibos_mc_em + nt2_ee_chmid + dibos_mc_ee;
+	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + dibos_mc_mm_e1*dibos_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + dibos_mc_em_e1*dibos_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + dibos_mc_ee_e1*dibos_mc_ee_e1;
+	float comb_tot_sqerr2 = FR->getTotESyst()*FR->getTotESyst() + 0.25*dibos_mc_mm*dibos_mc_mm + 0.25*dibos_mc_em*dibos_mc_em + 0.25*dibos_mc_ee*dibos_mc_ee + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
 	OUT << "==========================================================================================================" << endl;
 	OUT.close();
 	
-	// float totfakes = FR->getTotFakes();
-	// 
-	// // Here be dragons...
-	// float mm_pred_sqerr = FR->getMMTotEStat()*FR->getMMTotEStat() + mm_tot_fakes_new*mm_tot_fakes_new*0.25 + 0.25*dibos_mc_mm*dibos_mc_mm;
-	// float ee_pred_sqerr = ee_tot_sqerr1                   + ee_tot_fakes_new*ee_tot_fakes_new*0.25 + 0.25*dibos_mc_em*dibos_mc_ee + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
-	// float em_pred_sqerr = em_tot_sqerr1                   + em_tot_fakes_new*em_tot_fakes_new*0.25 + 0.25*dibos_mc_em*dibos_mc_em + nt2_em_chmid_e2*nt2_em_chmid_e2;
-	// float toterror = sqrt(0.25 * totfakes_new*totfakes_new
-	//                     + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2
-	//                     + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2);
-	// 
-	// // ee & mm & em & total & limit
-	// fOUTSTREAM << Region::sname[reg] << endl;
-	// fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
-	// ee_tot_fakes + nt2_ee_chmid + dibos_mc_ee, sqrt(ee_pred_sqerr),
-	// mm_tot_fakes + dibos_mc_mm,                sqrt(mm_pred_sqerr),
-	// em_tot_fakes + nt2_em_chmid + dibos_mc_em, sqrt(em_pred_sqerr),
-	// tot_pred, toterror);
-	// fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
-	
+	///////////////////////////////////////////////////////////////////////////////////
+	//  OUTPUT FOR PAS TABLE  /////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	fOUTSTREAM << Region::sname[reg] << endl;
+	fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
+	FR->getEETotFakes() + nt2_ee_chmid + dibos_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	FR->getMMTotFakes() + dibos_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	FR->getEMTotFakes() + nt2_em_chmid + dibos_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+	fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
 	
 	///////////////////////////////////////////////////////////////////////////////////
-	// OUTPUT AS PLOT /////////////////////////////////////////////////////////////////
+	//  OUTPUT FOR DIDARS PLOT  ///////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	fOUTSTREAM2 << "// " + Region::sname[reg] << endl;
+	fOUTSTREAM2 << Form("float %s_SS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), dibos_mc_ee,  dibos_mc_mm, dibos_mc_em,  dibos_mc_ee + dibos_mc_mm + dibos_mc_em);
+	fOUTSTREAM2 << Form("float %s_OS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), nt2_ee_chmid, 0.00,        nt2_em_chmid, nt2_ee_chmid + nt2_em_chmid);
+	fOUTSTREAM2 << Form("float %s_PF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENpf(), FR->getMMNpf(), FR->getEMNpf()+FR->getEMNfp(), FR->getEENpf() + FR->getMMNpf() + FR->getEMNpf() + FR->getEMNfp());
+	fOUTSTREAM2 << Form("float %s_FF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENff(), FR->getMMNff(), FR->getEMNff(), FR->getEENff()+FR->getMMNff()+FR->getEMNff());
+	fOUTSTREAM2 << Form("float %s_Error_ETH[4] = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), sqrt(ee_tot_sqerr1 + ee_tot_sqerr2), sqrt(mm_tot_sqerr1 + mm_tot_sqerr2), sqrt(em_tot_sqerr1 + em_tot_sqerr2), sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+	fOUTSTREAM2 << endl;
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
 	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
@@ -4187,9 +4220,9 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
-	h_obs->SetBinError(1, 0); // FIXME
-	h_obs->SetBinError(2, 0); // FIXME
-	h_obs->SetBinError(3, 0); // FIXME
+	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
+	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
+	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
 	
 	h_pred_sfake->SetBinContent(1, FR->getEENpf());
 	h_pred_sfake->SetBinContent(2, FR->getMMNpf());
@@ -4214,9 +4247,9 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_pred_tot->Add(h_pred_dfake);
 	h_pred_tot->Add(h_pred_chmid);
 	h_pred_tot->Add(h_pred_mc);
-	// h_pred_tot->SetBinError(1, sqrt(ee_pred_sqerr));
-	// h_pred_tot->SetBinError(2, sqrt(mm_pred_sqerr));
-	// h_pred_tot->SetBinError(3, sqrt(em_pred_sqerr));
+	h_pred_tot->SetBinError(1, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
+	h_pred_tot->SetBinError(2, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2));
+	h_pred_tot->SetBinError(3, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
 	
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_dfake);
@@ -4256,7 +4289,7 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("X0 E1 same");
-	h_obs->DrawCopy("P0 same");
+	h_obs->DrawCopy("PE X0 same");
 	leg->Draw();
 	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
