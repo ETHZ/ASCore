@@ -537,6 +537,12 @@ private:
 	float fC_minEl1pt;
 	float fC_minEl2pt;
 	
+	void resetHypLeptons();
+	void setHypLepton1(int, gChannel);
+	void setHypLepton2(int, gChannel);
+	lepton fHypLepton1;
+	lepton fHypLepton2;
+	
 	const int     getNPtBins (gChannel);
 	const double *getPtBins  (gChannel);
 	const int     getNPt2Bins(gChannel);
