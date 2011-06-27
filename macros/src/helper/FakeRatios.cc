@@ -16,7 +16,7 @@
 
 using namespace std;
 
-FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100) {
+FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100), fAddESyst(0.0) {
 	// Initialize arrays to avoid segfaults
 	fMMNtl[0] = -1.; fMMNtl[1] = -1.; fMMNtl[2] = -1.; 
 	fEENtl[0] = -1.; fEENtl[1] = -1.; fEENtl[2] = -1.; 
@@ -75,7 +75,9 @@ float FakeRatios::getMMNppEStat(){
 	return getNppEStat(      fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
 float FakeRatios::getMMNppESyst(){
-	return getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNpp);
+	float fromtoys = getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNpp);
+	float addsyst = fAddESyst * getMMNpp();
+	return sqrt(fromtoys + addsyst*addsyst);
 }
 float FakeRatios::getMMNpf(){
 	return 2.*getNpf(           fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
@@ -84,7 +86,9 @@ float FakeRatios::getMMNpfEStat(){
 	return 2.*getNpfEStat(      fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
 float FakeRatios::getMMNpfESyst(){
-	return 2.*getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNpf);
+	float fromtoys = 2.*getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNpf);
+	float addsyst = fAddESyst * getMMNpf();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getMMNff(){
 	return getNff(           fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
@@ -93,7 +97,9 @@ float FakeRatios::getMMNffEStat(){
 	return getNffEStat(      fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
 float FakeRatios::getMMNffESyst(){
-	return getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNff);
+	float fromtoys = getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNff);
+	float addsyst = fAddESyst * getMMNff();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 //____________________________________________________________________________________
 float FakeRatios::getEENpp(){
@@ -103,7 +109,9 @@ float FakeRatios::getEENppEStat(){
 	return getNppEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENppESyst(){
-	return getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNpp);
+	float fromtoys = getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNpp);
+	float addsyst = fAddESyst * getEENpp();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEENpf(){
 	return 2.*getNfp(           fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -112,7 +120,9 @@ float FakeRatios::getEENpfEStat(){
 	return 2.*getNfpEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENpfESyst(){
-	return 2.*getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfp);
+	float fromtoys =  2.*getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfp);
+	float addsyst = fAddESyst * getEENpf();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEENff(){
 	return getNff(           fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -121,7 +131,9 @@ float FakeRatios::getEENffEStat(){
 	return getNffEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENffESyst(){
-	return getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNff);
+	float fromtoys = getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNff);
+	float addsyst = fAddESyst * getEENff();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 //____________________________________________________________________________________
 float FakeRatios::getEMNpp(){
@@ -131,7 +143,9 @@ float FakeRatios::getEMNppEStat(){
 	return getNppEStat(      fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMNppESyst(){
-	return getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNpp);	
+	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNpp);	
+	float addsyst = fAddESyst * getEMNpp();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEMNpf(){
 	return getNpf(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
@@ -140,7 +154,9 @@ float FakeRatios::getEMNpfEStat(){
 	return getNpfEStat(      fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMNpfESyst(){
-	return getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNpf);
+	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNpf);
+	float addsyst = fAddESyst * getEMNpf();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEMNfp(){
 	return getNfp(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
@@ -149,7 +165,9 @@ float FakeRatios::getEMNfpEStat(){
 	return getNfpEStat(      fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMNfpESyst(){
-	return getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNfp);
+	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNfp);
+	float addsyst = fAddESyst * getEMNfp();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEMNff(){
 	return getNff(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
@@ -158,7 +176,9 @@ float FakeRatios::getEMNffEStat(){
 	return getNffEStat(      fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMNffESyst(){
-	return getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNff);
+	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNff);
+	float addsyst = fAddESyst * getEMNff();
+	return sqrt(fromtoys + addsyst*addsyst);	
 }
 
 //____________________________________________________________________________________
@@ -170,7 +190,9 @@ float FakeRatios::getMMTotEStat(){
 	return getNfpNpfNffSumEStat(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
 float FakeRatios::getMMTotESyst(){
-	return sqrt(getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float fromtoys = sqrt(getESystFromToys2(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0], fMFRatio[1], fMFRatio[1], fMPRatio[1], fMPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float addsyst = fAddESyst * getMMTotFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
 }
 float FakeRatios::getEETotFakes(){
 	return getNfpNpfNffSum(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -179,7 +201,9 @@ float FakeRatios::getEETotEStat(){
 	return getNfpNpfNffSumEStat(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEETotESyst(){
-	return sqrt(getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float fromtoys = sqrt(getESystFromToys2(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float addsyst = fAddESyst * getEETotFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
 }
 float FakeRatios::getEMTotFakes(){
 	return getNfpNpfNffSum(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -188,7 +212,9 @@ float FakeRatios::getEMTotEStat(){
 	return getNfpNpfNffSumEStat(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMTotESyst(){
-	return sqrt(getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float fromtoys = sqrt(getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float addsyst = fAddESyst * getEMTotFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
 }
 
 //____________________________________________________________________________________
@@ -250,7 +276,9 @@ float FakeRatios::getTotESyst(){
 	float rms_p = TMath::RMS(p_results.begin(), p_results.end());
 	if(fVerbose > 2) cout << " RMS = " << rms_p << endl;
 	
-	return rms_f*rms_f + rms_p*rms_p;	
+	float fromtoys = rms_f*rms_f + rms_p*rms_p;
+	float addsyst = fAddESyst * getTotFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
 }
 float FakeRatios::getTotFakes(float f1, float f2, float p1, float p2){
 	float mm = getNfpNpfNffSum(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], f1, f2, p1, p2);	

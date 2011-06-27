@@ -16,6 +16,7 @@ public:
 
 	inline void setNToyMCs(int n){fNToyMCs = n;};
 	inline void setVerbose(int n){fVerbose = n;};
+	inline void setAddESyst(float e){fAddESyst = e;};
 
 	//_____________________________________________________________________________
 	// Input
@@ -106,6 +107,8 @@ public:
 private:
 	int fVerbose; // default 0
 	int fNToyMCs; // default 100
+	// Additional relative systematic error on predictions (added in quadrature), default 0.
+	float fAddESyst;
 	
 	float fMMNtl[3]; // tt, tl, ll
 	float fEENtl[3]; // tt, tl, ll
