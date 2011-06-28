@@ -34,7 +34,8 @@ options.register ('runon', # register 'runon' option
 #options.files= 'file:/scratch/pnef/mc/Fall11/AOD/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_007E0957-964E-E011-BA72-485B39800BBB.root'
 #options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
 #options.files= '/store/data/Run2011A/MuOnia/AOD/PromptReco-v1/000/161/311/E6B512D1-CD57-E011-BC63-001D09F2423B.root'
-options.files= '/store/data/Run2010A/EG/AOD/Apr21ReReco-v1/0003/D6055361-7770-E011-BE49-00266CF32F90.root'
+#options.files= '/store/data/Run2010A/EG/AOD/Apr21ReReco-v1/0003/D6055361-7770-E011-BE49-00266CF32F90.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11-QCD_Pt-300to470_TuneZ2_7TeV_pythia6-AODSIM-PU_S3_START42_V11-v2-0000-4E79FBE4-F37C-E011-B178-003048D4607A.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
 # Now parse arguments from command line (might overwrite defaults)
@@ -149,7 +150,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
 ### Configuration in common to all collections
-pfPostfixes = [ 'PF','PF2','PF3' ]
+pfPostfixes = [ 'PFAntiIso','PF2','PF3' ]
 for pf in pfPostfixes:
     usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
     # turn to false when running on data and MC (for the moment)
@@ -204,10 +205,10 @@ for pf in pfPostfixes:
     # set to false to disable jet to be cleaned from Taus
     getattr(process,"pfNoTau"+pf).enable      = False
 
-### Specific to first PF collection: MEDIUM
+### Specific to first PF collection: AntiIsolated electrons and muons: Isolation cuts is set to 2
 # ID Cuts
-process.pfMuonsIDPF = cms.EDFilter("MuonIDPFCandidateSelector", 
-		src = cms.InputTag("pfMuonsFromVertexPF"), 
+process.pfMuonsIDPFAntiIso = cms.EDFilter("MuonIDPFCandidateSelector", 
+		src = cms.InputTag("pfMuonsFromVertexPFAntiIso"), 
 		cut = cms.string( 
 			"muonID('GlobalMuonPromptTight') && " + 
 			"isTrackerMuon &&" + 
@@ -215,22 +216,13 @@ process.pfMuonsIDPF = cms.EDFilter("MuonIDPFCandidateSelector",
 			"track.hitPattern.numberOfValidPixelHits > 0" 
 			), 
 		) 
-process.pfSelectedMuonsPF.src = 'pfMuonsIDPF' 
-process.pfMuonSequencePF.replace( process.pfSelectedMuonsPF, 
-		process.pfMuonsIDPF * 
-		process.pfSelectedMuonsPF 
+process.pfSelectedMuonsPFAntiIso.src = 'pfMuonsIDPFAntiIso' 
+process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso, 
+		process.pfMuonsIDPFAntiIso * 
+		process.pfSelectedMuonsPFAntiIso 
 		) 
-process.pfElectronsIDPF = cms.EDFilter("ElectronIDPFCandidateSelector", 
-		src = cms.InputTag("pfElectronsFromVertexPF"), 
-		recoGsfElectrons = cms.InputTag('gsfElectrons'), 
-		electronIdMap = cms.InputTag('simpleEleId95relIso'), 
-		bitsToCheck = cms.vstring('id'), 
-		) 
-process.pfSelectedElectronsPF.src = 'pfElectronsIDPF' 
-process.pfElectronSequencePF.replace( process.pfSelectedElectronsPF, 
-		process.pfElectronsIDPF * 
-		process.pfSelectedElectronsPF 
-		) 
+process.pfIsolatedMuonsPFAntiIso.combinedIsolationCut     = cms.double(2.0) # set min isolation to 2
+process.pfIsolatedElectronsPFAntiIso.combinedIsolationCut = cms.double(2.0) # set min isolation to 2
 
 ### Specific to second PF collection: TIGHT
 # ID cuts
@@ -302,8 +294,8 @@ process.analyze.jets = (
                btag_matchdeltaR = cms.double(0.25),
                ),
     # PF jets from PF2PAT
-    cms.PSet( prefix = cms.untracked.string('PF2PAT'),
-              tag = cms.untracked.InputTag('patJetsPF'),
+    cms.PSet( prefix = cms.untracked.string('PF2PATAntiIso'),
+              tag = cms.untracked.InputTag('patJetsPFAntiIso'),
               isPat = cms.untracked.bool(True),
               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
               sel_minpt  = cms.double(15.0),
@@ -346,24 +338,24 @@ process.analyze.jets = (
 process.analyze.leptons = (
     # PF Electrons
     cms.PSet( type = cms.untracked.string('electron'),
-              prefix = cms.untracked.string('PfEl'),
-              tag = cms.untracked.InputTag('patElectronsPF'),
+              prefix = cms.untracked.string('PfElAntiIso'),
+              tag = cms.untracked.InputTag('patElectronsPFAntiIso'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
               ),
     # PF Muons
     cms.PSet( type = cms.untracked.string('muon'),
-              prefix = cms.untracked.string('PfMu'),
-              tag = cms.untracked.InputTag('patMuonsPF'),
+              prefix = cms.untracked.string('PfMuAntiIso'),
+              tag = cms.untracked.InputTag('patMuonsPFAntiIso'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
               ),
     # PF Taus
     cms.PSet( type = cms.untracked.string('tau'),
-              prefix = cms.untracked.string('PfTau'),
-              tag = cms.untracked.InputTag('patTausPF'),
+              prefix = cms.untracked.string('PfTauAntiIso'),
+              tag = cms.untracked.InputTag('patTausPFAntiIso'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
@@ -445,7 +437,7 @@ process.p = cms.Path(
         + process.mygenjets
         + process.simpleEleIdSequence
         + process.metCorSequence
-        + process.patPF2PATSequencePF
+        + process.patPF2PATSequencePFAntiIso
         + process.patPF2PATSequencePF2
         + process.patPF2PATSequencePF3
 #	+ process.dump
