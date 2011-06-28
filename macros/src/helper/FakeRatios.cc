@@ -103,7 +103,7 @@ float FakeRatios::getMMNffESyst(){
 }
 //____________________________________________________________________________________
 float FakeRatios::getEENpp(){
-	return getNpp(           fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
+	return getNpp(   fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENppEStat(){
 	return getNppEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -114,7 +114,7 @@ float FakeRatios::getEENppESyst(){
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEENpf(){
-	return 2.*getNfp(           fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
+	return 2.*getNfp(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENpfEStat(){
 	return 2.*getNfpEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -125,7 +125,7 @@ float FakeRatios::getEENpfESyst(){
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
 float FakeRatios::getEENff(){
-	return getNff(           fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
+	return getNff(   fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEENffEStat(){
 	return getNffEStat(      fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -206,13 +206,13 @@ float FakeRatios::getEETotESyst(){
 	return sqrt(fromtoys + addsyst*addsyst);
 }
 float FakeRatios::getEMTotFakes(){
-	return getNfpNpfNffSum(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
+	return getNfpNpfNffSum(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMTotEStat(){
-	return getNfpNpfNffSumEStat(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
+	return getNfpNpfNffSumEStat(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
 float FakeRatios::getEMTotESyst(){
-	float fromtoys = sqrt(getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0], fEFRatio[1], fEFRatio[1], fEPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
+	float fromtoys = sqrt(getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfNffSum));
 	float addsyst = fAddESyst * getEMTotFakes();
 	return sqrt(fromtoys + addsyst*addsyst);
 }
@@ -363,10 +363,10 @@ float FakeRatios::getNff(float Ntt, float Ntl, float Nlt, float Nll, float f1, f
 }
 float FakeRatios::getNfpNpfNffSum(float Ntt, float Ntl, float Nlt, float Nll, float f1, float f2, float p1, float p2){
 	// This is equivalent to p1*f2*Npf + f1*p2*Nfp + f1*f2*Nff
-	return 1./((f1-p1)*(f2-p2)) * ( (    p1*f2*(f1-1)*(1-p2) + f1*p2*(1-p1)*(f2-1) + f1*f2*(1-p1)*(1-p2))*Ntt
-	                             +  (-1.*p1*f2*(f1-1)*   p2  + f1*p2*(1-p1)* f2    - f1*f2*(1-p1)*   p2 )*Ntl
-	                             +  (    p1*f2* f1   *(1-p2) - f1*p2*   p1 *(f2-1) - f1*f2*   p1 *(1-p2))*Nlt
-	                             +  (-1.*p1*f2* f1   *   p2  - f1*p2*   p1 * f2    + f1*f2*   p1 *   p2 )*Nll ); 
+	return 1./((f1-p1)*(f2-p2)) * ( (    p1*f2*(f1-1.)*(1.-p2) + f1*p2*(1.-p1)*(f2-1.) + f1*f2*(1.-p1)*(1.-p2))*Ntt
+	                             +  (-1.*p1*f2*(f1-1.)*   p2   + f1*p2*(1.-p1)* f2     - f1*f2*(1.-p1)*    p2 )*Ntl
+	                             +  (    p1*f2* f1    *(1.-p2) - f1*p2*    p1 *(f2-1.) - f1*f2*    p1 *(1.-p2))*Nlt
+	                             +  (-1.*p1*f2* f1    *   p2   - f1*p2*    p1 * f2     + f1*f2*    p1 *    p2 )*Nll ); 
 }
 
 //____________________________________________________________________________________
