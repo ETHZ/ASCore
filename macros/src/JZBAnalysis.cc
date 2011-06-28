@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.35 $";
+string sjzbversion="$Revision: 1.36 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.36  2011/06/14 17:35:01  buchmann
+Removing a veto for events that don't have enough PF leptons (this version is purely reco now)
+
 Revision 1.35  2011/06/14 15:16:05  buchmann
 Added additional Mu path
 
@@ -170,6 +173,11 @@ public:
   float pfJetGoodPhi[jMax];
   bool   pfJetGoodID[jMax];
 
+  int pfJetGoodNum60;
+  int pfJetGoodNum55;
+  int pfJetGoodNum50;
+  int pfJetGoodNum45;
+  int pfJetGoodNum40;
   int pfJetGoodNum35;
   int pfJetGoodNum33;
   int pfJetGoodNum315;
@@ -388,6 +396,11 @@ void nanoEvent::reset()
   pfJetGoodNum315=0;
   pfJetGoodNum33=0;
   pfJetGoodNum35=0;
+  pfJetGoodNum40=0;
+  pfJetGoodNum45=0;
+  pfJetGoodNum50=0;
+  pfJetGoodNum55=0;
+  pfJetGoodNum60=0;
 
   eventNum=0;
   runNum=0;
@@ -623,6 +636,11 @@ cout << endl << endl;
   myTree->Branch("pfJetGoodNum315",&nEvent.pfJetGoodNum315,"pfJetGoodNum315/I");
   myTree->Branch("pfJetGoodNum33",&nEvent.pfJetGoodNum33,"pfJetGoodNum33/I");
   myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
+  myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
+  myTree->Branch("pfJetGoodNum45",&nEvent.pfJetGoodNum45,"pfJetGoodNum45/I");
+  myTree->Branch("pfJetGoodNum50",&nEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
+  myTree->Branch("pfJetGoodNum55",&nEvent.pfJetGoodNum55,"pfJetGoodNum55/I");
+  myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
   myTree->Branch("pfpt",&nEvent.pfpt,"pfpt[30]/F");
   myTree->Branch("pfphi",&nEvent.pfphi,"pfphi[30]/F");
@@ -1251,6 +1269,11 @@ void JZBAnalysis::Analyze() {
         if ( jpt>31.5 ) nEvent.pfJetGoodNum315++;
         if ( jpt>33. )  nEvent.pfJetGoodNum33++;
         if ( jpt>35. )  nEvent.pfJetGoodNum35++;
+        if ( jpt>40. )  nEvent.pfJetGoodNum40++;
+        if ( jpt>45. )  nEvent.pfJetGoodNum45++;
+        if ( jpt>50. )  nEvent.pfJetGoodNum50++;
+        if ( jpt>55. )  nEvent.pfJetGoodNum55++;
+        if ( jpt>60. )  nEvent.pfJetGoodNum60++;
       }
     
     
