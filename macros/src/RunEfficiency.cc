@@ -338,7 +338,7 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("chn",&t_nEvent.chn,"chn/I");
   t_myTree->Branch("drl", &t_nEvent.drl,"drl/F");
   t_myTree->Branch("pfdrl", &t_nEvent.pfdrl,"pfdrl/F");
-  t_myTree->Branch("pfMET",&t_nEvent.pfMET,"pfMET/F");
+  t_myTree->Branch("pfMET",&t_nEvent.pfMET,"pfMET[3]/F");
   t_myTree->Branch("pfHT",t_nEvent.pfHT,"pfHT[3]/F");
   t_myTree->Branch("pfGoodHT", t_nEvent.pfGoodHT,"pfGoodHT[3]/F");
   t_myTree->Branch("pfTightHT", t_nEvent.pfTightHT,"pfTightHT[3]/F");
@@ -362,9 +362,9 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("pfeta2",&t_nEvent.pfeta2,"pfeta2/F");
   t_myTree->Branch("pfetan",&t_nEvent.pfetan,"pfetan/F");
   t_myTree->Branch("pfmll",&t_nEvent.pfmll,"pfmll/F");
-  t_myTree->Branch("passedee_triggers", &t_nEvent.passedee_triggers,"passedee_triggers/I");
-  t_myTree->Branch("passedmm_triggers", &t_nEvent.passedmm_triggers,"passedmm_triggers/I");
-  t_myTree->Branch("passedem_triggers", &t_nEvent.passedem_triggers,"passedem_triggers/I");
+  t_myTree->Branch("passedee_triggers", &t_nEvent.passedee_triggers,"passedee_triggers[3]/I");
+  t_myTree->Branch("passedmm_triggers", &t_nEvent.passedmm_triggers,"passedmm_triggers[3]/I");
+  t_myTree->Branch("passedem_triggers", &t_nEvent.passedem_triggers,"passedem_triggers[3]/I");
   t_myTree->Branch("tag1", t_nEvent.tag1,"tag1[3]/I");
   t_myTree->Branch("probe1", t_nEvent.probe1,"probe1[3]/I");
   t_myTree->Branch("pprobe1", t_nEvent.pprobe1,"pprobe1[3]/I");
