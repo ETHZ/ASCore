@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.122 2011/06/24 13:23:29 leo Exp $
+// $Id: NTupleProducer.cc,v 1.123 2011/06/24 15:55:52 leo Exp $
 //
 //
 
@@ -1690,6 +1690,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETpy  = (pfmet->front()).py();
 	fTPFMETphi = (pfmet->front()).phi();
 	fTPFMETSignificance = (pfmet->at(0)).significance();
+        fTPFSumEt  = (pfmet->front()).sumEt();
 
 	fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
 	fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
@@ -2251,6 +2252,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PFMETpy"               ,&fTPFMETpy             ,"PFMETpy/F");
 	fEventTree->Branch("PFMETphi"              ,&fTPFMETphi            ,"PFMETphi/F");
 	fEventTree->Branch("PFMETSignificance"     ,&fTPFMETSignificance   ,"PFMETSignificance/F");
+        fEventTree->Branch("PFSumEt"               ,&fTPFSumEt             ,"PFSumEt/F");
 	fEventTree->Branch("PFMETPAT"              ,&fTPFMETPAT            ,"PFMETPAT/F");
 	fEventTree->Branch("PFMETPATpx"            ,&fTPFMETPATpx          ,"PFMETPATpx/F");
 	fEventTree->Branch("PFMETPATpy"            ,&fTPFMETPATpy          ,"PFMETPATpy/F");
@@ -2825,6 +2827,7 @@ void NTupleProducer::resetTree(){
 	fTPFMETpy            = -999.99;
 	fTPFMETphi           = -999.99;
 	fTPFMETSignificance  = -999.99;
+        fTPFSumEt            = -999.99;
 	fTPFMETPAT           = -999.99;
 	fTPFMETPATpx         = -999.99;
 	fTPFMETPATpy         = -999.99;

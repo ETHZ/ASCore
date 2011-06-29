@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.94 2011/06/18 09:50:02 pnef Exp $
+// $Id: NTupleProducer.h,v 1.95 2011/06/24 15:56:06 leo Exp $
 //
 //
 
@@ -750,6 +750,7 @@ private:
 	float fTPFMETpy;
 	float fTPFMETphi;
 	float fTPFMETSignificance;
+        float fTPFSumEt;
 	float fTPFMETPAT;
 	float fTPFMETPATpx;
 	float fTPFMETPATpy;
