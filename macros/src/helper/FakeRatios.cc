@@ -456,6 +456,6 @@ float FakeRatios::getEStat2(float N){
 	// float lo = 0.5 * TMath::ChisquareQuantile(1.-0.6827, 2*N);
 	
 	// Always just return the upper one (will always be larger)
-	return up*up;
+	return ((up-N)*(up-N));
 }
 
