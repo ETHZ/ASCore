@@ -21,7 +21,7 @@ using namespace std;
 #define jMax 30  // do not touch this
 #define metMax 30
 #define rMax 30
-
+#define nAnalysis 3
 
 
 //_______________________t_nanoEvent class____________________________________________________
@@ -75,9 +75,9 @@ public:
   float dzbsn;
   float d0pvn;
   float dzpvn;
-  float dr1;
-  float dr2;
-  float drn;
+  float dr1[3];
+  float dr2[3];
+  float drn[3];
   int ch1;
   int ch2;
   int chn;
@@ -87,12 +87,35 @@ public:
   int id1;
   int id2;
   int idn;
-  int tag1;
-  int probe1;
-  int pprobe1;
-  int tag2;
-  int probe2;
-  int pprobe2;
+  
+  int tagReco1[3];
+  int probeReco1[3];
+  int pprobeReco1[3];
+  int tagReco2[3];
+  int probeReco2[3];
+  int pprobeReco2[3];
+  
+  int tagIso1[3];
+  int probeIso1[3];
+  int pprobeIso1[3];
+  int tagIso2[3];
+  int probeIso2[3];
+  int pprobeIso2[3];
+  
+  int tagID1[3];
+  int probeID1[3];
+  int pprobeID1[3];
+  int tagID2[3];
+  int probeID2[3];
+  int pprobeID2[3];
+
+  int tag1[3];
+  int probe1[3];
+  int pprobe1[3];
+  int tag2[3];
+  int probe2[3];
+  int pprobe2[3];
+
   float drl;
   float pfdrl;
 
@@ -120,16 +143,12 @@ public:
   float genDRN;
  
   //Jets 
-  int pfJetGoodNum;
-  int pfJetGoodNumID;
-  float pfJetGoodPt[jMax];
-  float pfJetGoodEta[jMax];
-  float pfJetGoodPhi[jMax];
-  bool pfJetGoodID[jMax];
-  float pfMET;
-  float pfHT;
-  float pfGoodHT;
-  float pfTightHT;
+  int pfJetGoodNum[3];
+  int pfJetGoodNumID[3];
+  float pfMET[3];
+  float pfHT[3];
+  float pfGoodHT[3];
+  float pfTightHT[3];
   
   int eventNum;
   int runNum;
@@ -137,9 +156,9 @@ public:
   int goodVtx;
   int numVtx;
   
-  int passedee_triggers;
-  int passedmm_triggers;
-  int passedem_triggers;
+  int passedee_triggers[3];
+  int passedmm_triggers[3];
+  int passedem_triggers[3];
  
   
 };
@@ -156,27 +175,40 @@ void t_nanoEvent::reset() {
   d0bs1 = 0; dzbs1 = 0; d0pv1 = 0; dzpv1 = 0; d0bs2 = 0; dzbs2 = 0; d0pv2 = 0; dzpv2 = 0; 
   d0bsn = 0; dzbsn = 0; d0pvn = 0; dzpvn = 0;
   ch1 = 0; ch2 = 0; chn = 0; id1 = -1; id2 = -1; idn = -1;
-  tag1 = 0; probe1 = 0; pprobe1 = 0;
-  tag2 = 0; probe2 = 0; pprobe2 = 0;
-  dr1 = 0; dr2 = 0; drn = 0; drl = 0; pfdrl = 0;
+  for(int n = 0; n < nAnalysis; n++) {
+    tag1[n] = 0; probe1[n] = 0; pprobe1[n] = 0;
+    tag2[n] = 0; probe2[n] = 0; pprobe2[n] = 0;
+  
+    tagReco1[n] = 0; probeReco1[n] = 0; pprobeReco1[n] = 0;
+    tagReco2[n] = 0; probeReco2[n] = 0; pprobeReco2[n] = 0;
+  
+    tagIso1[n] = 0; probeIso1[n] = 0; pprobeIso1[n] = 0;
+    tagIso2[n] = 0; probeIso2[n] = 0; pprobeIso2[n] = 0;
+    
+    tagID1[n] = 0; probeID1[n] = 0; pprobeID1[n] = 0;
+    tagID2[n] = 0; probeID2[n] = 0; pprobeID2[n] = 0;
+
+    dr1[n] = 0; dr2[n] = 0; drn[n] = 0; 
+  
+    pfJetGoodNum[n] = 0; pfJetGoodNumID[n] = 0;
+    pfHT[n] = 0; pfGoodHT[n] = 0; pfTightHT[n] = 0;
+
+    passedee_triggers[n] = 0; passedmm_triggers[n] = 0; passedem_triggers[n] = 0;
+
+    pfMET[n]=0;
+  }
+
+  drl = 0; pfdrl = 0;
+
   genPt1 = 0; genId1 = 0; genMID1 = 0; genEta1 = 0; genPhi1 = 0; genCh1 = 0;
   genPt2 = 0; genId2 = 0; genMID2 = 0; genEta2 = 0; genPhi2 = 0; genCh2 = 0;
   genPtN = 0; genEtaN = 0;
   genMET = 0; genZPt = 0; genMll = 0; genNjets = 0; genNleptons = 0;
   genDRN = 0;
-  pfJetGoodNum = 0; pfJetGoodNumID = 0;
-  pfMET = 0; pfHT = 0; pfGoodHT = 0; pfTightHT = 0;
-  
 
-  for(int jCounter=0;jCounter<jMax;jCounter++){
-    pfJetGoodPt[jCounter]=0;
-    pfJetGoodEta[jCounter]=0;
-    pfJetGoodPhi[jCounter]=0;
-    pfJetGoodID[jCounter]=0;
-  }
- 
   eventNum=0; runNum=0; lumi=0; goodVtx=0; numVtx=0;
-  passedee_triggers = 0; passedmm_triggers = 0; passedem_triggers = 0;
+
+
   
 
 }
@@ -257,9 +289,9 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("pt1",&t_nEvent.pt1,"pt1/F");
   t_myTree->Branch("pt2",&t_nEvent.pt2,"pt2/F");
   t_myTree->Branch("ptn",&t_nEvent.ptn,"ptn/F");
-  t_myTree->Branch("dr1",&t_nEvent.dr1,"dr1/F");
-  t_myTree->Branch("dr2",&t_nEvent.dr2,"dr2/F");
-  t_myTree->Branch("drn",&t_nEvent.drn,"drn/F");
+  t_myTree->Branch("dr1",t_nEvent.dr1,"dr1[3]/F");
+  t_myTree->Branch("dr2",t_nEvent.dr2,"dr2[3]/F");
+  t_myTree->Branch("drn",t_nEvent.drn,"drn[3]/F");
   t_myTree->Branch("d0bs1",&t_nEvent.d0bs1,"d0bs1/F");
   t_myTree->Branch("dzbs1",&t_nEvent.dzbs1,"dzbs1/F");
   t_myTree->Branch("d0pv1",&t_nEvent.d0pv1,"d0pv1/F");
@@ -304,23 +336,19 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("ch1",&t_nEvent.ch1,"ch1/I");
   t_myTree->Branch("ch2",&t_nEvent.ch2,"ch2/I");
   t_myTree->Branch("chn",&t_nEvent.chn,"chn/I");
-  t_myTree->Branch("drl",&t_nEvent.drl,"drl/F");
-  t_myTree->Branch("pfdrl",&t_nEvent.pfdrl,"pfdrl/F");
+  t_myTree->Branch("drl", &t_nEvent.drl,"drl/F");
+  t_myTree->Branch("pfdrl", &t_nEvent.pfdrl,"pfdrl/F");
   t_myTree->Branch("pfMET",&t_nEvent.pfMET,"pfMET/F");
-  t_myTree->Branch("pfHT",&t_nEvent.pfHT,"pfHT/F");
-  t_myTree->Branch("pfGoodHT",&t_nEvent.pfGoodHT,"pfGoodHT/F");
-  t_myTree->Branch("pfTightHT",&t_nEvent.pfTightHT,"pfTightHT/F");
+  t_myTree->Branch("pfHT",t_nEvent.pfHT,"pfHT[3]/F");
+  t_myTree->Branch("pfGoodHT", t_nEvent.pfGoodHT,"pfGoodHT[3]/F");
+  t_myTree->Branch("pfTightHT", t_nEvent.pfTightHT,"pfTightHT[3]/F");
   t_myTree->Branch("eventNum",&t_nEvent.eventNum,"eventNum/I");
   t_myTree->Branch("runNum",&t_nEvent.runNum,"runNum/I");
   t_myTree->Branch("lumi",&t_nEvent.lumi,"lumi/I");
   t_myTree->Branch("goodVtx",&t_nEvent.goodVtx,"goodVtx/I");
   t_myTree->Branch("numVtx",&t_nEvent.numVtx,"numVtx/I");
-  t_myTree->Branch("pfJetGoodNum",&t_nEvent.pfJetGoodNum,"pfJetGoodNum/I");
-  t_myTree->Branch("pfJetGoodNumID",&t_nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
-  t_myTree->Branch("pfJetGoodPt", t_nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
-  t_myTree->Branch("pfJetGoodEta",t_nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
-  t_myTree->Branch("pfJetGoodPhi",t_nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
-  t_myTree->Branch("pfJetGoodID", t_nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/B");
+  t_myTree->Branch("pfJetGoodNum",t_nEvent.pfJetGoodNum,"pfJetGoodNum[3]/I");
+  t_myTree->Branch("pfJetGoodNumID",t_nEvent.pfJetGoodNumID,"pfJetGoodNumID[3]/I");
   t_myTree->Branch("pfpt",&t_nEvent.pfpt,"pfpt/F");
   t_myTree->Branch("pfphi",&t_nEvent.pfphi,"pfphi/F");
   t_myTree->Branch("pfeta",&t_nEvent.pfeta,"pfeta/F");
@@ -337,12 +365,30 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("passedee_triggers", &t_nEvent.passedee_triggers,"passedee_triggers/I");
   t_myTree->Branch("passedmm_triggers", &t_nEvent.passedmm_triggers,"passedmm_triggers/I");
   t_myTree->Branch("passedem_triggers", &t_nEvent.passedem_triggers,"passedem_triggers/I");
-  t_myTree->Branch("tag1", &t_nEvent.tag1,"tag1/I");
-  t_myTree->Branch("probe1", &t_nEvent.probe1,"probe1/I");
-  t_myTree->Branch("pprobe1", &t_nEvent.pprobe1,"pprobe1/I");
-  t_myTree->Branch("tag2", &t_nEvent.tag2,"tag2/I");
-  t_myTree->Branch("probe2", &t_nEvent.probe2,"probe2/I");
-  t_myTree->Branch("pprobe2", &t_nEvent.pprobe2,"pprobe2/I");
+  t_myTree->Branch("tag1", t_nEvent.tag1,"tag1[3]/I");
+  t_myTree->Branch("probe1", t_nEvent.probe1,"probe1[3]/I");
+  t_myTree->Branch("pprobe1", t_nEvent.pprobe1,"pprobe1[3]/I");
+  t_myTree->Branch("tag2", t_nEvent.tag2,"tag2[3]/I");
+  t_myTree->Branch("probe2", t_nEvent.probe2,"probe2[3]/I");
+  t_myTree->Branch("pprobe2", t_nEvent.pprobe2,"pprobe2[3]/I");
+  t_myTree->Branch("tagReco1", t_nEvent.tagReco1,"tagReco1[3]/I");
+  t_myTree->Branch("probeReco1", t_nEvent.probeReco1,"probeReco1[3]/I");
+  t_myTree->Branch("pprobeReco1", t_nEvent.pprobeReco1,"pprobeReco1[3]/I");
+  t_myTree->Branch("tagReco2", t_nEvent.tagReco2,"tagReco2[3]/I");
+  t_myTree->Branch("probeReco2", t_nEvent.probeReco2,"probeReco2[3]/I");
+  t_myTree->Branch("pprobeReco2", t_nEvent.pprobeReco2,"pprobeReco2[3]/I");
+  t_myTree->Branch("tagIso1", t_nEvent.tagIso1,"tagIso1[3]/I");
+  t_myTree->Branch("probeIso1", t_nEvent.probeIso1,"probeIso1[3]/I");
+  t_myTree->Branch("pprobeIso1", t_nEvent.pprobeIso1,"pprobeIso1[3]/I");
+  t_myTree->Branch("tagIso2", t_nEvent.tagIso2,"tagIso2[3]/I");
+  t_myTree->Branch("probeIso2", t_nEvent.probeIso2,"probeIso2[3]/I");
+  t_myTree->Branch("pprobeIso2", t_nEvent.pprobeIso2,"pprobeIso2[3]/I");
+  t_myTree->Branch("tagID1", t_nEvent.tagID1,"tagID1[3]/I");
+  t_myTree->Branch("probeID1", t_nEvent.probeID1,"probeID1[3]/I");
+  t_myTree->Branch("pprobeID1", t_nEvent.pprobeID1,"pprobeID1[3]/I");
+  t_myTree->Branch("tagID2", t_nEvent.tagID2,"tagID2[3]/I");
+  t_myTree->Branch("probeID2", t_nEvent.probeID2,"probeID2[3]/I");
+  t_myTree->Branch("pprobeID2", t_nEvent.pprobeID2,"pprobeID2[3]/I");
   
 }
 
@@ -359,39 +405,45 @@ vector<t_lepton> RunEfficiency::sortLeptonsByPt(vector<t_lepton>& leptons) {
 
 
 //________________________________________________________________________________
-const bool RunEfficiency::passElTriggers() {
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+const bool RunEfficiency::passElTriggers(int iAnalysis) {
+  if(iAnalysis==1) {
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+   }
   return false;
 
 }
 
 //________________________________________________________________________________
-const bool RunEfficiency::passMuTriggers() {
-  if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
+const bool RunEfficiency::passMuTriggers(int iAnalysis) {
+  if(iAnalysis==1) {
+	if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
+  }
   return false;
 } 
 
 //______________________________________________________________________________
-const bool RunEfficiency::passEMuTriggers() {
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+const bool RunEfficiency::passEMuTriggers(int iAnalysis) {
+  if(iAnalysis==1) {
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+  }
   return false;
 }
 
@@ -410,9 +462,11 @@ void RunEfficiency::Analyze() {
 
   //Triggers
   if ( !isMC ) {
-    if(passElTriggers()) t_nEvent.passedee_triggers = 1;
-    if(passMuTriggers()) t_nEvent.passedmm_triggers = 1;
-    if(passEMuTriggers()) t_nEvent.passedem_triggers = 1;
+    for(int n = 0; n < nAnalysis; n++) {
+	if(passElTriggers(n)) t_nEvent.passedee_triggers[n] = 1;
+	if(passMuTriggers(n)) t_nEvent.passedmm_triggers[n] = 1;
+	if(passEMuTriggers(n)) t_nEvent.passedem_triggers[n] = 1;
+    }
   } else {
     isZ = GeneratorInfo();
     if(!isZ ) return;
@@ -477,14 +531,29 @@ void RunEfficiency::Analyze() {
     tmpLepton.d0PV = fTR->MuD0PV[muIndex];
     tmpLepton.dzPV = fTR->MuD0PV[muIndex];
     tmpLepton.pfindex = indexOfAssociatedPFMuon;
-    tmpLepton.tag = 0;
-    tmpLepton.probe = 0;
-    tmpLepton.pprobe = 0;
-    if(MuPassingTag(muIndex)) tmpLepton.tag = 1;
-    if(MuPassingProbe(muIndex)) tmpLepton.probe = 1;
-    if(MuPassingPProbe(muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobe = 1;
-    //if(IsCustomMu(muIndex)) tmpLepton.pprobe = 1;
-    
+    for(int n = 0; n < nAnalysis; n++) { 
+      tmpLepton.tagReco[n] = 0;
+      tmpLepton.probeReco[n] = 0;
+      tmpLepton.pprobeReco[n] = 0;
+      tmpLepton.tagIso[n] = 0;
+      tmpLepton.probeIso[n] = 0;
+      tmpLepton.pprobeIso[n] = 0;
+      tmpLepton.tagID[n] = 0;
+      tmpLepton.probeID[n] = 0;
+      tmpLepton.pprobeID[n] = 0;
+
+      if(MuPassingRecoTag(n, muIndex)) tmpLepton.tagReco[n] = 1;
+      if(MuPassingRecoProbe(n, muIndex)) tmpLepton.probeReco[n] = 1;
+      if(MuPassingRecoPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeReco[n] = 1;
+      
+      if(MuPassingIsoTag(n, muIndex)) tmpLepton.tagIso[n] = 1;
+      if(MuPassingIsoProbe(n, muIndex)) tmpLepton.probeIso[n] = 1;
+      if(MuPassingIsoPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIso[n] = 1;
+      
+      if(MuPassingIDTag(n, muIndex)) tmpLepton.tagID[n] = 1;
+      if(MuPassingIDProbe(n, muIndex)) tmpLepton.probeID[n] = 1;
+      if(MuPassingIDPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeID[n] = 1;
+    }
     leptons.push_back(tmpLepton);
     
   }
@@ -526,13 +595,30 @@ void RunEfficiency::Analyze() {
     tmpLepton.dzPV = fTR->ElD0PV[elIndex];
     tmpLepton.type = 0;
     tmpLepton.genPt = 0.;
-    tmpLepton.tag = 0;
-    tmpLepton.probe = 0;
-    tmpLepton.pprobe = 0;
-    if(ElPassingTag(elIndex)) tmpLepton.tag = 1;
-    if(ElPassingProbe(elIndex)) tmpLepton.probe = 1;
-    if(ElPassingPProbe(elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobe = 1;
-    //if(IsCustomEl(elIndex)) tmpLepton.pprobe = 1;
+
+    for(int n = 0; n < nAnalysis; n++) {
+      tmpLepton.tagReco[n] = 0;
+      tmpLepton.probeReco[n] = 0;
+      tmpLepton.pprobeReco[n] = 0;
+      tmpLepton.tagIso[n] = 0;
+      tmpLepton.probeIso[n] = 0;
+      tmpLepton.pprobeIso[n] = 0;
+      tmpLepton.tagID[n] = 0;
+      tmpLepton.probeID[n] = 0;
+      tmpLepton.pprobeID[n] = 0;
+
+      if(ElPassingRecoTag(n, elIndex)) tmpLepton.tagReco[n] = 1;
+      if(ElPassingRecoProbe(n, elIndex)) tmpLepton.probeReco[n] = 1;
+      if(ElPassingRecoPProbe(n, elIndex)) tmpLepton.pprobeReco[n] = 1;
+
+      if(ElPassingIsoTag(n, elIndex)) tmpLepton.tagIso[n] = 1;
+      if(ElPassingIsoProbe(n, elIndex)) tmpLepton.probeIso[n] = 1;
+      if(ElPassingIsoPProbe(n, elIndex)) tmpLepton.pprobeIso[n] = 1;
+
+      if(ElPassingIDTag(n, elIndex)) tmpLepton.tagID[n] = 1;
+      if(ElPassingIDProbe(n, elIndex)) tmpLepton.probeID[n] = 1;
+      if(ElPassingIDPProbe(n, elIndex,indexOfAssociatedPFEl)) tmpLepton.pprobeID[n] = 1;
+    }
     leptons.push_back(tmpLepton);
   
   }
@@ -564,9 +650,20 @@ void RunEfficiency::Analyze() {
       t_nEvent.phi1 = sortedGoodLeptons[PosLepton1].p.Phi();
       t_nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
       t_nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
-      t_nEvent.tag1 = sortedGoodLeptons[PosLepton1].tag; //??????
-      t_nEvent.probe1 = sortedGoodLeptons[PosLepton1].probe; //??????
-      t_nEvent.pprobe1 = sortedGoodLeptons[PosLepton1].pprobe; //??????
+      for(int n = 0; n < nAnalysis; ++n) {
+        t_nEvent.tagReco1[n] = sortedGoodLeptons[PosLepton1].tagReco[n]; //??????
+        t_nEvent.probeReco1[n] = sortedGoodLeptons[PosLepton1].probeReco[n]; //??????
+        t_nEvent.pprobeReco1[n] = sortedGoodLeptons[PosLepton1].pprobeReco[n]; //??????
+        t_nEvent.tagIso1[n] = sortedGoodLeptons[PosLepton1].tagIso[n]; //??????
+        t_nEvent.probeIso1[n] = sortedGoodLeptons[PosLepton1].probeIso[n]; //??????
+        t_nEvent.pprobeIso1[n] = sortedGoodLeptons[PosLepton1].pprobeIso[n]; //??????
+        t_nEvent.tagID1[n] = sortedGoodLeptons[PosLepton1].tagID[n]; //??????
+        t_nEvent.probeID1[n] = sortedGoodLeptons[PosLepton1].probeID[n]; //??????
+        t_nEvent.pprobeID1[n] = sortedGoodLeptons[PosLepton1].pprobeID[n]; //??????
+        t_nEvent.tag1[n] = t_nEvent.tagReco1[n]*t_nEvent.tagIso1[n]*t_nEvent.tagID1[n]; 
+        t_nEvent.probe1[n] = t_nEvent.probeReco1[n]*t_nEvent.probeIso1[n]*t_nEvent.probeID1[n];
+        t_nEvent.pprobe1[n] = t_nEvent.pprobeReco1[n]*t_nEvent.pprobeIso1[n]*t_nEvent.pprobeID1[n];
+      }
       t_nEvent.d0bs1 = sortedGoodLeptons[PosLepton1].d0BS;
       t_nEvent.dzbs1 = sortedGoodLeptons[PosLepton1].dzBS;
       t_nEvent.d0pv1 = sortedGoodLeptons[PosLepton1].d0PV;
@@ -581,9 +678,20 @@ void RunEfficiency::Analyze() {
       t_nEvent.phi2 = sortedGoodLeptons[PosLepton2].p.Phi();
       t_nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
       t_nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
-      t_nEvent.tag2 = sortedGoodLeptons[PosLepton2].tag; //??????
-      t_nEvent.probe2 = sortedGoodLeptons[PosLepton2].probe; //??????
-      t_nEvent.pprobe2 = sortedGoodLeptons[PosLepton2].pprobe; //??????
+      for(int n = 0; n < nAnalysis; ++n) {
+        t_nEvent.tagReco2[n] = sortedGoodLeptons[PosLepton2].tagReco[n]; //??????
+        t_nEvent.probeReco2[n] = sortedGoodLeptons[PosLepton2].probeReco[n]; //??????
+        t_nEvent.pprobeReco2[n] = sortedGoodLeptons[PosLepton2].pprobeReco[n]; //??????
+        t_nEvent.tagIso2[n] = sortedGoodLeptons[PosLepton2].tagIso[n]; //??????
+        t_nEvent.probeIso2[n] = sortedGoodLeptons[PosLepton2].probeIso[n]; //??????
+        t_nEvent.pprobeIso2[n] = sortedGoodLeptons[PosLepton2].pprobeIso[n]; //??????
+        t_nEvent.tagID2[n] = sortedGoodLeptons[PosLepton2].tagID[n]; //??????
+        t_nEvent.probeID2[n] = sortedGoodLeptons[PosLepton2].probeID[n]; //??????
+        t_nEvent.pprobeID2[n] = sortedGoodLeptons[PosLepton2].pprobeID[n]; //??????
+        t_nEvent.tag2[n] = t_nEvent.tagReco2[n]*t_nEvent.tagIso2[n]*t_nEvent.tagID2[n]; 
+        t_nEvent.probe2[n] = t_nEvent.probeReco2[n]*t_nEvent.probeIso2[n]*t_nEvent.probeID2[n];
+        t_nEvent.pprobe2[n] = t_nEvent.pprobeReco2[n]*t_nEvent.pprobeIso2[n]*t_nEvent.pprobeID2[n];
+      }    
       t_nEvent.d0bs2 = sortedGoodLeptons[PosLepton2].d0BS;
       t_nEvent.dzbs2 = sortedGoodLeptons[PosLepton2].dzBS;
       t_nEvent.d0pv2 = sortedGoodLeptons[PosLepton2].d0PV;
@@ -628,89 +736,89 @@ void RunEfficiency::Analyze() {
 
     } else {
       
-      if( isMC) t_myTree->Fill();
+      if( isMC ) t_myTree->Fill();
       return;
       
     }
 
     
-    t_nEvent.pfJetGoodNum=0;
-    vector<t_lepton> pfGoodJets;
-    float closest1=1000, closest2=1000, closestn=1000; //the dr distance between the leptons and jets
-    for(int i =0 ; i<fTR->PF2PAT3NJets;i++) { // PF jet loop//killPF
-      
-      if(i==jMax){cout<<"max Num was reached"<<endl; return;}
-      
-      float jpt = fTR->PF2PAT3JPt[i];//killPF
-      float jeta = fTR->PF2PAT3JEta[i];//killPF
-      float jphi = fTR->PF2PAT3JPhi[i];//killPF
-      float jpx = fTR->PF2PAT3JPx[i];//killPF
-      float jpy = fTR->PF2PAT3JPy[i];//killPF
-      float jpz = fTR->PF2PAT3JPz[i];//killPF
-      float jenergy = fTR->PF2PAT3JE[i];//killPF
-      //float jesC = fTR->PF2PAT3JEcorr[i];//killPF
-      
-      //bool  isJetID = IsGoodBasicPFJet(i,false);
-      bool  isJetID = IsGoodBasicPFJetPAT3(i, 20.0, 3.0);
-      
-      TLorentzVector aJet(jpx,jpy,jpz,jenergy);
-      TLorentzVector sumOfPFJets(0,0,0,0);
-      // lepton-jet cleaning
-      if ( fFullCleaning_ ) { 
-	// Remove jet close to any lepton
-	bool isClean(true);
-	for ( size_t ilep = 0; ilep<sortedGoodLeptons.size(); ++ilep )
-	  if ( aJet.DeltaR(sortedGoodLeptons[ilep].p)<DRmax) isClean=false;
-	if ( !isClean ) continue;
-      } else {
-	// Remove jet close to leptons from Z candidate
-	if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax)continue; 
-	if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax)continue;
+    float jetThreshold[nAnalysis] = {30, 40, 20};
+    for(int n = 0; n < nAnalysis; n++) { 
+      t_nEvent.pfJetGoodNum[n]=0;
+      vector<t_lepton> pfGoodJets;
+      float closest1=1000, closest2=1000, closestn=1000; //the dr distance between the leptons and jets
+      for(int i =0 ; i<fTR->PF2PAT3NJets;i++) { // PF jet loop//killPF
+	
+        if(i==jMax){cout<<"max Num was reached"<<endl; return;}
+	
+	float jpt = fTR->PF2PAT3JPt[i];//killPF
+	float jeta = fTR->PF2PAT3JEta[i];//killPF
+	float jphi = fTR->PF2PAT3JPhi[i];//killPF
+	float jpx = fTR->PF2PAT3JPx[i];//killPF
+	float jpy = fTR->PF2PAT3JPy[i];//killPF
+	float jpz = fTR->PF2PAT3JPz[i];//killPF
+	float jenergy = fTR->PF2PAT3JE[i];//killPF
+	//float jesC = fTR->PF2PAT3JEcorr[i];//killPF
+	
+	bool  isJetID = IsGoodBasicPFJet(i,false);
+        if(n == 0) isJetID = IsGoodBasicPFJet(i, false); //JZB
+	if(n == 1) isJetID = IsGoodBasicPFJet(i, false); //SS
+	if(n == 2) isJetID = IsGoodBasicPFJetPAT3(i, 20.0, 3.0); //MT2
+	
+	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
+	TLorentzVector sumOfPFJets(0,0,0,0);
+	// lepton-jet cleaning
+	if ( fFullCleaning_ ) { 
+	  // Remove jet close to any lepton
+	  bool isClean(true);
+	  for ( size_t ilep = 0; ilep<sortedGoodLeptons.size(); ++ilep )
+	    if ( aJet.DeltaR(sortedGoodLeptons[ilep].p)<DRmax) isClean=false;
+	  if ( !isClean ) continue;
+	} else {
+	  // Remove jet close to leptons from Z candidate
+	  if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax)continue; 
+	  if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax)continue;
+	}
+	
+	// Keep jets over min. pt threshold
+	if ( !(jpt>20) ) continue;  
+	
+	t_nEvent.pfHT[n]    += jpt;
+	
+	// Keep central jets
+	if ( !(fabs(jeta)<2.6 ) ) continue;
+	
+	
+	t_nEvent.pfGoodHT[n] += jpt;
+	sumOfPFJets += aJet;
+	
+	t_lepton tmpLepton;
+	tmpLepton.p = aJet;
+	tmpLepton.charge = 0;
+	tmpLepton.index = i;
+	tmpLepton.type = -1;
+	pfGoodJets.push_back(tmpLepton);
+	
+	if ( jpt > jetThreshold[n] ) {
+	  t_nEvent.pfTightHT[n] += jpt;
+	  if(isJetID>0) t_nEvent.pfJetGoodNumID[n]++;
+	  t_nEvent.pfJetGoodNum[n]++;
+	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
+	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
+	  float drn = aJet.DeltaR(sortedGoodLeptons[negativePosition].p);
+	  if(dr1<closest1) closest1 = dr1;
+	  if(dr2<closest2) closest2 = dr2;
+	  if(drn<closestn) closestn = drn;
+	}
+	
       }
       
-      // Keep jets over min. pt threshold
-      if ( !(jpt>20) ) continue;  
-      
-      t_nEvent.pfHT    += jpt;
-      
-      // Keep central jets
-      if ( !(fabs(jeta)<2.6 ) ) continue;
-      
-     
-      t_nEvent.pfGoodHT += jpt;
-      sumOfPFJets += aJet;
-      
-      t_lepton tmpLepton;
-      tmpLepton.p = aJet;
-      tmpLepton.charge = 0;
-      tmpLepton.index = i;
-      tmpLepton.type = -1;
-      pfGoodJets.push_back(tmpLepton);
-      
-      if ( jpt>30 ) {
-	t_nEvent.pfTightHT += jpt;
-	t_nEvent.pfJetGoodPt[t_nEvent.pfJetGoodNum]  = jpt;
-	t_nEvent.pfJetGoodEta[t_nEvent.pfJetGoodNum] = jeta;
-	t_nEvent.pfJetGoodPhi[t_nEvent.pfJetGoodNum] = jphi;
-	t_nEvent.pfJetGoodID[t_nEvent.pfJetGoodNum]  = isJetID;
-	if(isJetID>0) t_nEvent.pfJetGoodNumID++;
-	t_nEvent.pfJetGoodNum++;
-	float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
-	float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
-	float drn = aJet.DeltaR(sortedGoodLeptons[negativePosition].p);
-	if(dr1<closest1) closest1 = dr1;
-	if(dr2<closest2) closest2 = dr2;
-	if(drn<closestn) closestn = drn;
-      }
-      
+      t_nEvent.pfMET[n] = fTR->PFMET;
+      t_nEvent.dr1[n] = closest1;
+      t_nEvent.dr2[n] = closest2;
+      t_nEvent.drn[n] = closestn;
     }
-    
-    t_nEvent.pfMET = fTR->PFMET;
-    t_nEvent.dr1 = closest1;
-    t_nEvent.dr2 = closest2;
-    t_nEvent.drn = closestn;
-    
-    t_myTree->Fill();	
+      t_myTree->Fill();	
   } else {
   
     if( isMC ) t_myTree->Fill();
@@ -967,76 +1075,317 @@ const bool RunEfficiency::IsCustomJet(const int index){
 }
 
 
-//__________________________________________________________________
-const bool RunEfficiency::MuPassingTag(const int index){
 
-
-  // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 5) )       return false;
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-
-  // Quality cuts
-  if ( !fTR->MuIsGMPT[index] )        return false;
-  if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
-
-
-  return true;
-
-
-}
-
-
-//_________________________________________________________________
-const bool RunEfficiency::MuPassingProbe(const int index) {
-
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
-  if ( !(fTR->MuPt[index] > 5) )       return false;
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-  
-  return true;
-
-}
-
-
-
-//__________________________________________________________________
-const bool RunEfficiency::MuPassingPProbe(const int index, const int indexpf){
-  
-  // Basic muon cleaning and ID
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingTag(int n, int index){
 
   // Acceptance cuts
   if ( !(fTR->MuPt[index] > 5) )       return false;
   if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-
-  if(indexpf == -1) return false;
-  /* 
-  // Quality cuts
-  if ( !fTR->MuIsGMPT[index] )        return false;
-  if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
   
-  // Hits
-  if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-  if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-  if ( !(fTR->MuNMatches[index] > 1) )      return false;
+  if(n == 0) {
+    // Quality cuts
+    if ( !fTR->MuIsGMPT[index] )        return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 1) {
+    if ( !fTR->MuIsGMPT[index] )        return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 2) {
+    if ( !fTR->MuIsGMPT[index] )        return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  }
+  
+  return true;
+}
 
-  // Vertex compatibility
-  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingRecoProbe(int n, int index){
 
-  // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-  double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-
-  if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-  */
-  if (! IsCustomPfMu(indexpf) ) return false;
-
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 1) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 2) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  }
   return true;
 }
 
 
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIDProbe(int n, int index){
+
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
+    if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
+    if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
+    if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
+  } else if(n == 1) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
+    if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
+    if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
+    if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
+  } else if(n == 2) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
+    if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
+    if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
+    if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
+  }
+  return true;
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIsoProbe(const int n, const int index){
+
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+ 
+  if(n == 0) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 1) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n == 2) {
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+    if ( !fTR->MuIsGlobalMuon[index] )  return false;
+    if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  }
+  return true;
+
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingRecoPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+
+  if(n == 0) {
+    return MuPassingIDProbe(n, index);
+  } else if(n==1) {
+    return MuPassingIDProbe(n, index);
+  } else if(n == 2){
+    return true;
+  }
+  return true;
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIDPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    return MuPassingIsoProbe(n, index);
+  } else if(n==1) {
+    return MuPassingIsoProbe(n, index);
+  } else if(n==2) {
+    return true;
+  }
+  return true;
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIsoPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
+    if ( !(hybridIso < 0.15) ) return false;  
+  } else if(n == 1) {
+    double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
+    if ( !(hybridIso < 0.15) ) return false;  
+  } else if(n == 2) {
+    return IsCustomPfMu(pfindex);
+  }
+  return true;
+}
+
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::ElPassingTag(const int n, const int index){
+  
+  // kinematic acceptance
+  if(!(fTR->ElPt[index]>5) )return false;
+  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
+  // Electron ID
+  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
+  if (elIDWP95!=7) return false;
+
+  //   // Other choices for electron ID
+  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
+  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
+  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
+  return true;
+
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::ElPassingRecoProbe(int n, int index){
+
+   // kinematic acceptance
+  if(!(fTR->ElPt[index]>5) )return false;
+  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false; // Acceptance cuts
+  
+  if(n == 0) {
+    if(!fTR->ElEcalDriven[index]) return false;
+    if(fTR->ElCaloEnergy[index] < 10.) return false;
+  } else if(n == 1) {
+    if(!fTR->ElEcalDriven[index]) return false;
+    if(fTR->ElCaloEnergy[index] < 10.) return false;
+  } else if(n == 2) {
+    if(!fTR->ElEcalDriven[index]) return false;
+    if(fTR->ElCaloEnergy[index] < 10.) return false;
+  }
+  
+  return true;
+
+}
+/*
+
+// OLDER VERSION? 
+// modified
+const bool RunEfficiency::ElPassingRecoProbe(const int n, const int index) {
+  
+  // Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
+  if(fTR->ElPt[index] < 5.) return false;
+  if(fabs(fTR->ElEta[index]) > 2.4) return false;
+
+  if(n == 0) {
+    if(!fTR->ElEcalDriven[index]) return false;
+    if(fTR->ElCaloEnergy[index] < 10.) return false;
+  } else if(n == 1) {
+
+  } else if(n ==2) {
+
+  }
+  return true;
+
+
+
+  // Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
+  if(fTR->ElPt[index] < 5.) return false;
+  if(fabs(fTR->ElEta[index]) > 2.4) return false;
+  if(!fTR->ElEcalDriven[index]) return false;
+  if(fTR->ElCaloEnergy[index] < 10.) return false;
+
+  return true;
+
+
+}
+*/
+//__________________________________________________________________________
+const bool RunEfficiency::ElPassingIDProbe(int n, int index){
+
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+   
+  } else if(n == 1) {
+ 
+  } else if(n == 2) {
+    
+  }
+
+  return true;
+}
+
+//__________________________________________________________________________
+/*
+const bool RunEfficiency::MuPassingRecoPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+
+  if(n == 0) {
+    return MuPassingIDProbe(n, index);
+  } else if(n==1) {
+    return MuPassingIDProbe(n, index);
+  } else if(n == 2){
+    return true;
+  }
+  return true;
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIDPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    return MuPassingIsoProbe(n, index);
+  } else if(n==1) {
+    return MuPassingIsoProbe(n, index);
+  } else if(n==2) {
+    return true;
+  }
+  return true;
+}
+
+
+//__________________________________________________________________________
+const bool RunEfficiency::MuPassingIsoPProbe(const int n, const int index, const int pfindex){
+  
+  // Acceptance cuts
+  if ( !(fTR->MuPt[index] > 5) )       return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  
+  if(n == 0) {
+    double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
+    if ( !(hybridIso < 0.15) ) return false;  
+  } else if(n == 1) {
+    double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
+    if ( !(hybridIso < 0.15) ) return false;  
+  } else if(n == 2) {
+    return IsCustomPfMu(pfindex);
+  }
+  return true;
+}
+
+
+*/
 
 //_________________________________________________________________________
 const bool RunEfficiency::ElPassingTag(const int index) {
@@ -1058,7 +1407,24 @@ const bool RunEfficiency::ElPassingTag(const int index) {
 
 
 //_____________________________________________________________________________
-const bool RunEfficiency::ElPassingProbe(const int index) {
+/*
+const bool RunEfficiency::ElPassingRecoProbe(const int n, const int index) {
+  
+  // Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
+  if(fTR->ElPt[index] < 5.) return false;
+  if(fabs(fTR->ElEta[index]) > 2.4) return false;
+
+  if(n == 0) {
+    if(!fTR->ElEcalDriven[index]) return false;
+    if(fTR->ElCaloEnergy[index] < 10.) return false;
+  } else if(n == 1) {
+
+  } else if(n ==2) {
+
+  }
+  return true;
+
+
 
   // Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
   if(fTR->ElPt[index] < 5.) return false;
@@ -1070,7 +1436,7 @@ const bool RunEfficiency::ElPassingProbe(const int index) {
 
 
 }
-
+*/
 
 //____________________________________________________________________________
 const bool RunEfficiency::ElPassingPProbe(const int index, int indexpf) {
@@ -1148,6 +1514,15 @@ bool RunEfficiency::GeneratorInfo(void) {
   TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
   t_nEvent.genMET     = fTR->GenMET;
   
+  // Number of good jets
+  t_nEvent.genNjets = 0;
+  for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
+    if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
+    if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
+    ++t_nEvent.genNjets;
+  }
+  
+  
 
   // Select the two highest-pt leptons compatible with a Z
   size_t i1 = 0, i2 = 0;
@@ -1163,27 +1538,12 @@ bool RunEfficiency::GeneratorInfo(void) {
     }
     //if(i1 == sortedGLeptons.size()-1) return saveMC;
   }
+ 
 
-  float closest1 = 1000, closest2 = 1000, dr1, dr2;
-  if(sortedGLeptons.size()>1) { 
-    // Number of good jets
-    t_nEvent.genNjets = 0;
-    for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
-      if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
-      if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
-      ++t_nEvent.genNjets;
-      TLorentzVector tmpVector;
-      tmpVector.SetPtEtaPhiE(fTR->GenJetPt[jIndex],fTR->GenJetEta[jIndex], fTR->GenJetPhi[jIndex], fTR->GenJetE[jIndex]);
-      float dr1 = tmpVector.DeltaR(sortedGLeptons[i1].p);
-      float dr2 = tmpVector.DeltaR(sortedGLeptons[i2].p);
-      if(dr1<closest1) closest1 = dr1;
-      if(dr2<closest2) closest2 = dr2;
-    }
-    dr1 = closest1;
-    dr2 = closest2;
-  }
   
-
+ 
+  
+  float dr1 = 1000, dr2 = 1000, drN = 1000;
   
   if(sortedGLeptons.size()>0) {
     t_nEvent.genPt1     = sortedGLeptons[i1].p.Pt();
@@ -1224,4 +1584,45 @@ bool RunEfficiency::GeneratorInfo(void) {
   }
   
   return saveMC;
+}
+
+
+//********************************* FUNCTIONS THAT ARE STILL MISSING !!!!
+
+const bool RunEfficiency::ElPassingIsoTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::ElPassingIsoProbe(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::ElPassingIDTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::ElPassingIDPProbe(int a,int b,int c) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::MuPassingRecoTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::MuPassingIsoTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::MuPassingIDTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+
+const bool RunEfficiency::ElPassingRecoTag(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+const bool RunEfficiency::ElPassingRecoPProbe(int a, int b) {
+cout << "NOT DEFINED!" << endl;
+}
+const bool RunEfficiency::ElPassingIsoPProbe(int a, int b) {
+cout << "NOT DEFINED!" << endl;
 }
