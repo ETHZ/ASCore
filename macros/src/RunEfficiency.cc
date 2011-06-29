@@ -1360,13 +1360,21 @@ Isolation	-	4	5
 
 const bool RunEfficiency::MuPassingTag(int n, int index){
 
-  // Acceptance cuts
-  if(n!=2) {
-	if ( !(fTR->MuPt[index] > 5) )       return false;
-	if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-  } else {
+
+  if(n==0) // JZB
+  {
+	if ( !fTR->MuIsGMPT[index] )        return false;
+	if ( !fTR->MuIsGlobalMuon[index] )  return false;
+	if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  } else if(n==1) // same sign
+  {
+	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
+	if(fTR->MuIsTrackerMuon[index] == 0) return false;
+  } else if(n==1) // mt2
+  {
 	if(getPFMuIndex(index)==-1) return false;
   }
+
   /*
   if(n == 0) {
     // Quality cuts
@@ -1404,10 +1412,12 @@ const bool RunEfficiency::MuPassingIsoTag(int n, int index) {
 ///
 
 const bool RunEfficiency::MuPassingRecoProbe(int n, int index){
-
-  // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 5) )       return false;
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  if(n!=2) {
+	if ( !(fTR->MuPt[index] > 5) )       return false;
+	if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  } else {
+	if(getPFMuIndex(index)==-1) return false;
+  } 
   
 
   return true;
@@ -1420,9 +1430,10 @@ const bool RunEfficiency::MuPassingRecoProbe(int n, int index){
 
 const bool RunEfficiency::MuPassingRecoPProbe(const int n, const int index, const int pfindex){
   
-  // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 5) )       return false;
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  if(n!=2) {//jzb&same sign
+	if ( !(fTR->MuPt[index] > 5) )       return false;
+	if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  } 
 
   if(n == 0) {//JZB
 	if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
@@ -1472,7 +1483,7 @@ const bool RunEfficiency::MuPassingIDPProbe(int n, int index, int pfindex){
   {
 	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
 	if(fTR->MuIsTrackerMuon[index] == 0) return false;
-  } else if(n==1) // mt2
+  } else if(n==2) // mt2
   {
 	if(indexpf == -1) return false;
 	cout << "don't know exactly what to do for mt2!" << endl;
@@ -1503,7 +1514,7 @@ const bool RunEfficiency::MuPassingIsoPProbe(int n, int index, int pfindex){
   } else if(n==1) // same sign
   {
 	if(fTR->MuRelIso03[index] > 0.15) return false;
-  } else if(n==1) // same sign
+  } else if(n==2) // same sign
   {
 	if(indexpf == -1) return false;
 	cout << "don't know exactly what to do for mt2!" << endl;
