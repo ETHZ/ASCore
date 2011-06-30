@@ -780,7 +780,12 @@ void RunEfficiency::Analyze() {
 
   vector<t_lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
 
-  if(sortedGoodLeptons.size() > 1) {
+  if(sortedGoodLeptons.size() < 2) {
+    if( isMC ) t_myTree->Fill();
+    return;
+  }
+
+//  if(sortedGoodLeptons.size() > 1) {
     
     int PosLepton1 = 0;
     int PosLepton2 = 1;
@@ -796,8 +801,11 @@ void RunEfficiency::Analyze() {
     }
     
     // Acceptance
-    if(sortedGoodLeptons[PosLepton1].p.Pt() > 5 && sortedGoodLeptons[PosLepton2].p.Pt() > 5 && 
-       fabs(sortedGoodLeptons[PosLepton1].p.Eta())< 2.4 && fabs(sortedGoodLeptons[PosLepton2].p.Eta())< 2.4) {
+    if(!(sortedGoodLeptons[PosLepton1].p.Pt() > 5 && sortedGoodLeptons[PosLepton2].p.Pt() > 5 && 
+       fabs(sortedGoodLeptons[PosLepton1].p.Eta())< 2.4 && fabs(sortedGoodLeptons[PosLepton2].p.Eta())< 2.4)) {
+      	if( isMC ) t_myTree->Fill();
+      	return;
+    }
 
       t_nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
       t_nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
@@ -887,13 +895,13 @@ void RunEfficiency::Analyze() {
       //t_nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
       
       //t_nEvent.pfdphi=sortedGoodLeptons[PosLepton2].pfp.DeltaPhi(sortedGoodLeptons[PosLepton1].pfp);
-
+/*
     } else {
       
       if( isMC ) t_myTree->Fill();
       return;
       
-    }
+    }*/
 
     
     float jetThreshold[nAnalysis] = {30, 40, 20};
@@ -973,12 +981,12 @@ void RunEfficiency::Analyze() {
       t_nEvent.drn[n] = closestn;
     }
       t_myTree->Fill();	
-  } else {
+//  } else {
   
-    if( isMC ) t_myTree->Fill();
+//    if( isMC ) t_myTree->Fill();
    
 
-  }
+//  }
 
 }
 
