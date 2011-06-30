@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.95 2011/06/24 15:56:06 leo Exp $
+// $Id: NTupleProducer.h,v 1.96 2011/06/29 16:21:02 fronga Exp $
 //
 //
 
@@ -246,7 +246,8 @@ private:
 
 	// Pile-up
 	int fTpuNumInteractions;
-	int fTpuOOTNumInteractionsLate;
+        int fTpuNumFilled;
+        int fTpuOOTNumInteractionsLate;
         int fTpuOOTNumInteractionsEarly;
 
 	float fTpuZpositions[gMaxnpileup];

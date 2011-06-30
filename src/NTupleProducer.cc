@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.123 2011/06/24 15:55:52 leo Exp $
+// $Id: NTupleProducer.cc,v 1.124 2011/06/29 16:21:03 fronga Exp $
 //
 //
 
@@ -441,39 +441,47 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
 		std::vector<PileupSummaryInfo>::const_iterator PVI;
-		for (PVI = pileupInfo->begin(); PVI !=pileupInfo->end(); ++PVI){
-			if( PVI->getBunchCrossing() == 0 ){ // in-time PU
-				fTpuNumInteractions  = PVI->getPU_NumInteractions();
-				fHpileupstat->Fill( fTpuNumInteractions );
-				if(fTpuNumInteractions > gMaxnpileup){
-				  edm::LogWarning("NTP") << "@SUB=analyze()"
-							 << "More than " << static_cast<int>(gMaxnpileup)
-							 << " generated Pileup events found, increase size!";
-				  fTgoodevent = 1;
-				}
-				for(int i = 0; i < PVI->getPU_NumInteractions(); i++){
-					if(i >= gMaxnpileup) break; // hard protection
-					fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
-					fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
-					fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
-					fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
-					fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
-					// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
-				}		
-			}else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
-				fTpuOOTNumInteractionsLate = PVI->getPU_NumInteractions();
-			}
-			else if( PVI->getBunchCrossing() == -1 ){ // OOT pile-Up: this is the 50ns early Bunch
-			  fTpuOOTNumInteractionsEarly = PVI->getPU_NumInteractions();
-                        }
 
+		for (PVI = pileupInfo->begin(); PVI !=pileupInfo->end(); ++PVI){
+		  if( PVI->getBunchCrossing() == 0 ){ // in-time PU
+		    fTpuNumInteractions  = PVI->getPU_NumInteractions();
+		    fHpileupstat->Fill( fTpuNumInteractions );
+		    
+		    if(fTpuNumInteractions > gMaxnpileup){
+		      edm::LogWarning("NTP") << "@SUB=analyze()"
+					     << "More than " << static_cast<int>(gMaxnpileup)
+					     << " generated Pileup events found, increase size!";
+		      fTgoodevent = 1;
+		    }
+		    
+		    fTpuNumFilled = (int)PVI->getPU_zpositions().size();
+		    for( int i = 0; i < fTpuNumFilled; i++){
+		      if(i >= gMaxnpileup) break; // hard protection
+		      fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
+		      fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
+		      fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
+		      fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
+		      fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
+		      
+		      // fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
+		    }
+		    
+		  }
+		  else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
+		    fTpuOOTNumInteractionsLate = PVI->getPU_NumInteractions();
+		  }
+		  else if( PVI->getBunchCrossing() == -1 ){ // OOT pile-Up: this is the 50ns early Bunch
+		    fTpuOOTNumInteractionsEarly = PVI->getPU_NumInteractions();
+		  }
+		  
+		  
 		}
 		//see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
 		// as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
 		if(!fTPileUpHistoData[0].empty() && !fTPileUpHistoMC[0].empty() ){
 		  //const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
-			MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
-			MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
+		  MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
+		  MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
 		}
 	} else {
           // Just store the number of primary vertices
@@ -1772,15 +1780,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
+	fEventTree->Branch("PUnumFilled",&fTpuNumFilled,"PUnumFilled/I");
 	fEventTree->Branch("PUOOTnumInteractionsEarly",&fTpuOOTNumInteractionsEarly,"PUOOTnumInteractionsEarly/I");
 	fEventTree->Branch("PUOOTnumInteractionsLate",&fTpuOOTNumInteractionsLate,"PUOOTnumInteractionsLate/I");
-	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumInteractions]/F");
-	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumInteractions]/F");
+	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumFilled]/F");
+	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumFilled]/F");
+	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumFilled]/F");
+	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumFilled]/F");
+	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumFilled]/F");
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
-	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumInteractions]/F");
+	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumFilled]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
 	fEventTree->Branch("HLTResults"       ,&fTHLTres          , Form("HLTResults[%d]/I", gMaxhltbits));
 	fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     , Form("HLTPrescale[%d]/I", gMaxhltbits));
@@ -2424,6 +2433,7 @@ void NTupleProducer::resetTree(){
 
 	// Pile-up
 	fTpuNumInteractions    = -999;
+	fTpuNumFilled = -999;
 	fTpuOOTNumInteractionsEarly = -999;
 	fTpuOOTNumInteractionsLate = -999;
 
