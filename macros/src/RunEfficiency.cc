@@ -403,23 +403,114 @@ vector<t_lepton> RunEfficiency::sortLeptonsByPt(vector<t_lepton>& leptons) {
   
 }
 
+const bool RunEfficiency::passAnyMT2Trigger() {
+// HT
+if ( GetHLTResult("HLT_HT150_v3") )        return true;
+if ( GetHLTResult("HLT_HT160_v2") )        return true;
+if ( GetHLTResult("HLT_HT200_v2") )        return true;
+if ( GetHLTResult("HLT_HT200_v3") )        return true;
+if ( GetHLTResult("HLT_HT240_v2") )        return true;
+if ( GetHLTResult("HLT_HT250_v2") )        return true;
+if ( GetHLTResult("HLT_HT250_v3") )        return true;
+if ( GetHLTResult("HLT_HT260_v2") )        return true;
+if ( GetHLTResult("HLT_HT300_v2") )        return true;
+if ( GetHLTResult("HLT_HT300_v3") )        return true;
+if ( GetHLTResult("HLT_HT300_v4") )        return true;
+if ( GetHLTResult("HLT_HT300_v5") )        return true;
+if ( GetHLTResult("HLT_HT350_v2") )        return true;
+if ( GetHLTResult("HLT_HT350_v3") )        return true;
+if ( GetHLTResult("HLT_HT350_v4") )        return true;
+if ( GetHLTResult("HLT_HT360_v2") )        return true;
+if ( GetHLTResult("HLT_HT400_v2") )        return true;
+if ( GetHLTResult("HLT_HT400_v3") )        return true;
+if ( GetHLTResult("HLT_HT400_v4") )        return true;
+if ( GetHLTResult("HLT_HT440_v2") )        return true;
+if ( GetHLTResult("HLT_HT450_v2") )        return true;
+if ( GetHLTResult("HLT_HT450_v3") )        return true;
+if ( GetHLTResult("HLT_HT450_v4") )        return true;
+if ( GetHLTResult("HLT_HT500_v2") )        return true;
+if ( GetHLTResult("HLT_HT500_v3") )        return true;
+if ( GetHLTResult("HLT_HT500_v4") )        return true;
+if ( GetHLTResult("HLT_HT550_v2") )        return true;
+if ( GetHLTResult("HLT_HT550_v3") )        return true;
+if ( GetHLTResult("HLT_HT550_v4") )        return true;
+if ( GetHLTResult("HLT_HT550_v5") )        return true;
+// MHT_HT
+if ( GetHLTResult("HLT_HT250_MHT60_v2") )        return true;
+if ( GetHLTResult("HLT_HT250_MHT60_v3") )        return true;
+if ( GetHLTResult("HLT_HT250_MHT60_v4") )        return true;
+if ( GetHLTResult("HLT_HT250_MHT70_v1") )        return true;
+if ( GetHLTResult("HLT_HT260_MHT60_v2") )        return true;
+if ( GetHLTResult("HLT_HT300_MHT75_v4") )        return true;
+if ( GetHLTResult("HLT_HT300_MHT75_v5") )        return true;
+// QuadJet
+if ( GetHLTResult("HLT_QuadJet50_BTagIP_v1") )        return true;
+if ( GetHLTResult("HLT_QuadJet50_Jet40_v1") )        return true;
+// Muons
+if ( GetHLTResult("HLT_DoubleMu3_HT160_v2") )        return true;
+if ( GetHLTResult("HLT_DoubleMu3_v3") )        return true;
+if ( GetHLTResult("HLT_Mu8_Jet40_v2") )        return true;
+return false;
+}
+
+
 
 //________________________________________________________________________________
 const bool RunEfficiency::passElTriggers(int iAnalysis) {
-  if(iAnalysis==1) {
+  if(iAnalysis==0) {//JZB
 	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
 	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
 	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
 	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
 	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
-   }
+  }
+  if(iAnalysis==1) {//same sign
+	if ( GetHLTResult("HLT_ELE8_JET40") )        				return true;
+	if ( GetHLTResult("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v1") )        	return true;
+	if ( GetHLTResult("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2") )        	return true;
+	if ( GetHLTResult("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3") )        	return true;
+	if ( GetHLTResult("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4") )        	return true;
+	if ( GetHLTResult("HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5") )        	return true;
+	if ( GetHLTResult("HLT_ELE17_ELE8") )        				return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+	if ( GetHLTResult("HLT_ELE17_ELE8_TIGHT") )        			return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
+	if ( GetHLTResult("HLT_DOUBLEELE8_HT160") )        			return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v1") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v2") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT160_v3") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v1") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v2") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdL_TrkIdVL_HT150_v3") )        	return true;
+	if ( GetHLTResult("HLT_DOUBLEELE8_HT160_TIGHT") )        		return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT160_v1") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT160_v2") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT160_v3") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v1") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v2") )        	return true;
+	if ( GetHLTResult("HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v3") )        	return true;
+  }
+  if(iAnalysis==2) {//mt2
+	return passAnyMT2Trigger();
+  }
   return false;
 
 }
 
 //________________________________________________________________________________
 const bool RunEfficiency::passMuTriggers(int iAnalysis) {
-  if(iAnalysis==1) {
+  if(iAnalysis==0) {//JZB
 	if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
 	if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
 	if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
@@ -427,12 +518,52 @@ const bool RunEfficiency::passMuTriggers(int iAnalysis) {
 	if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
 	if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
   }
+  if(iAnalysis==1) {//same sign
+	if ( GetHLTResult("HLT_MU8_JET40") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v2") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v3") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v4") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v5") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Jet40_v6") )        return true;
+	if ( GetHLTResult("HLT_DOUBLEMU7") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
+	if ( GetHLTResult("HLT_MU13_MU8") )        return true;
+	if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
+	if ( GetHLTResult("HLT_MU17_ELE8") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
+	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
+	if ( GetHLTResult("HLT_MU8_ELE17") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
+	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+	if ( GetHLTResult("HLT_DOUBLEMU3_HT160") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu3_HT160_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu3_HT160_v3") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu3_HT150_v1") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu3_HT150_v2") )        return true;
+	if ( GetHLTResult("HLT_DoubleMu3_HT150_v3") )        return true;
+  }
+  if(iAnalysis==2) {//mt2
+	return passAnyMT2Trigger();
+  }
   return false;
 } 
 
 //______________________________________________________________________________
 const bool RunEfficiency::passEMuTriggers(int iAnalysis) {
-  if(iAnalysis==1) {
+  if(iAnalysis==0) {//JZB
 	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
 	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
 	if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
@@ -444,6 +575,27 @@ const bool RunEfficiency::passEMuTriggers(int iAnalysis) {
 	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
 	if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
   }
+  if(iAnalysis==1) {//same sign
+	if ( GetHLTResult("HLT_MU3_ELE8_HT160") )        			return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v1") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v2") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT160_v3") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v1") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v2") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdL_TrkIdVL_HT150_v3") )        	return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
+	if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
+	if ( GetHLTResult("HLT_MU3_ELE8_HT160_TIGHT") )        			return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT160_v1") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT160_v2") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT160_v3") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v1") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v2") )        	return true;
+	if ( GetHLTResult("HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v3") )        	return true;
+  }
+  if(iAnalysis==2) {//mt2
+	return passAnyMT2Trigger();
+   }
   return false;
 }
 
@@ -1452,7 +1604,7 @@ const bool RunEfficiency::MuPassingRecoPProbe(const int n, const int index, cons
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
   } else if(n == 2) {//MT2
 //	if ( !fTR->MuIsTrackerMuon[index] ) return false;
-	if(indexpf == -1) return false;
+	if(pfindex == -1) return false;
 	cout << "don't know exactly what to do for mt2!" << endl;
   }
   return true;
@@ -1485,7 +1637,7 @@ const bool RunEfficiency::MuPassingIDPProbe(int n, int index, int pfindex){
 	if(fTR->MuIsTrackerMuon[index] == 0) return false;
   } else if(n==2) // mt2
   {
-	if(indexpf == -1) return false;
+	if(pfindex == -1) return false;
 	cout << "don't know exactly what to do for mt2!" << endl;
   }
   return true;
@@ -1514,9 +1666,9 @@ const bool RunEfficiency::MuPassingIsoPProbe(int n, int index, int pfindex){
   } else if(n==1) // same sign
   {
 	if(fTR->MuRelIso03[index] > 0.15) return false;
-  } else if(n==2) // same sign
+  } else if(n==2) // mt2
   {
-	if(indexpf == -1) return false;
+	if(pfindex == -1) return false;
 	cout << "don't know exactly what to do for mt2!" << endl;
   }
   return true;

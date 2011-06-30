@@ -78,6 +78,7 @@ public:
   const bool passElTriggers(int);
   const bool passEMuTriggers(int);
   const bool passMuTriggers(int);
+  const bool passAnyMT2Trigger();
   const bool MuPassingRecoProbe(int,int);
   const bool MuPassingIDPProbe(int, int,int);
   const bool IsGoodBasicPFJetPAT3(int, double, double);
