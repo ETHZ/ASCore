@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.36 $";
+string sjzbversion="$Revision: 1.37 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.37  2011/06/28 13:30:25  buchmann
+Added additional jet counts for higher pt thresholds
+
 Revision 1.36  2011/06/14 17:35:01  buchmann
 Removing a veto for events that don't have enough PF leptons (this version is purely reco now)
 
@@ -722,9 +725,12 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
@@ -742,10 +748,14 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v4") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
   return false;
 } 
 
@@ -756,11 +766,13 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
   return false;
 }
 
