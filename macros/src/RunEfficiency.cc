@@ -77,9 +77,9 @@ public:
   float dzbsn;
   float d0pvn;
   float dzpvn;
-  float dr1[3];
-  float dr2[3];
-  float drn[3];
+  float dr1jzb,dr1ss,dr1mt2;
+  float dr2jzb,dr2ss,dr2mt2;
+  float drnjzb,drnss,drnmt2;
   int ch1;
   int ch2;
   int chn;
@@ -90,27 +90,27 @@ public:
   int id2;
   int idn;
   
-  int probeReco1[3];
-  int pprobeReco1[3];
-  int probeReco2[3];
-  int pprobeReco2[3];
+  int probeReco1jzb,probeReco1ss,probeReco1mt2;
+  int pprobeReco1jzb,pprobeReco1ss,pprobeReco1mt2;
+  int probeReco2jzb,probeReco2ss,probeReco2mt2;
+  int pprobeReco2jzb,pprobeReco2ss,pprobeReco2mt2;
   
-  int probeIso1[3];
-  int pprobeIso1[3];
-  int probeIso2[3];
-  int pprobeIso2[3];
+  int probeIso1jzb,probeIso1ss,probeIso1mt2;
+  int pprobeIso1jzb,pprobeIso1ss,pprobeIso1mt2;
+  int probeIso2jzb,probeIso2ss,probeIso2mt2;
+  int pprobeIso2jzb,pprobeIso2ss,pprobeIso2mt2;
   
-  int probeID1[3];
-  int pprobeID1[3];
-  int probeID2[3];
-  int pprobeID2[3];
+  int probeID1jzb,probeID1ss,probeID1mt2;
+  int pprobeID1jzb,pprobeID1ss,pprobeID1mt2;
+  int probeID2jzb,probeID2ss,probeID2mt2;
+  int pprobeID2jzb,pprobeID2ss,pprobeID2mt2;
 
-  int tag1[3];
-  int probe1[3];
-  int pprobe1[3];
-  int tag2[3];
-  int probe2[3];
-  int pprobe2[3];
+  int tag1jzb,tag1ss,tag1mt2;
+  int probe1jzb,probe1ss,probe1mt2;
+  int pprobe1jzb,pprobe1ss,pprobe1mt2;
+  int tag2jzb,tag2ss,tag2mt2;
+  int probe2jzb,probe2ss,probe2mt2;
+  int pprobe2jzb,pprobe2ss,pprobe2mt2;
 
   float drl;
   float pfdrl;
@@ -139,12 +139,12 @@ public:
   float genDRN;
  
   //Jets 
-  int pfJetGoodNum[3];
-  int pfJetGoodNumID[3];
-  float pfMET[3];
-  float pfHT[3];
-  float pfGoodHT[3];
-  float pfTightHT[3];
+  int pfJetGoodNumjzb,pfJetGoodNumss,pfJetGoodNummt2;
+  int pfJetGoodNumIDjzb,pfJetGoodNumIDss,pfJetGoodNumIDmt2;
+  float pfMETjzb,pfMETss,pfMETmt2;
+  float pfHTjzb,pfHTss,pfHTmt2;
+  float pfGoodHTjzb,pfGoodHTss,pfGoodHTmt2;
+  float pfTightHTjzb,pfTightHTss,pfTightHTmt2;
   
   int eventNum;
   int runNum;
@@ -152,9 +152,9 @@ public:
   int goodVtx;
   int numVtx;
   
-  int passedee_triggers[3];
-  int passedmm_triggers[3];
-  int passedem_triggers[3];
+  int passedee_triggersjzb,passedee_triggersss,passedee_triggersmt2;
+  int passedmm_triggersjzb,passedmm_triggersss,passedmm_triggersmt2;
+  int passedem_triggersjzb,passedem_triggersss,passedem_triggersmt2;
  
   
 };
@@ -171,28 +171,44 @@ void t_nanoEvent::reset() {
   d0bs1 = 0; dzbs1 = 0; d0pv1 = 0; dzpv1 = 0; d0bs2 = 0; dzbs2 = 0; d0pv2 = 0; dzpv2 = 0; 
   d0bsn = 0; dzbsn = 0; d0pvn = 0; dzpvn = 0;
   ch1 = 0; ch2 = 0; chn = 0; id1 = -1; id2 = -1; idn = -1;
-  for(int n = 0; n < nAnalysis; n++) {
-    tag1[n] = 0; probe1[n] = 0; pprobe1[n] = 0;
-    tag2[n] = 0; probe2[n] = 0; pprobe2[n] = 0;
+
+    tag1jzb = 0;tag1ss = 0;tag1mt2 = 0; 
+    probe1jzb = 0;probe1ss = 0;probe1mt2 = 0; 
+    pprobe1jzb = 0;pprobe1ss = 0;pprobe1mt2 = 0;
+    tag2jzb = 0; tag2ss = 0; tag2mt2 = 0; 
+    probe2jzb = 0; probe2ss = 0; probe2mt2 = 0; 
+    pprobe2jzb = 0;pprobe2ss = 0;pprobe2mt2 = 0;
   
-    probeReco1[n] = 0; pprobeReco1[n] = 0;
-    probeReco2[n] = 0; pprobeReco2[n] = 0;
+    probeReco1jzb = 0; probeReco1ss = 0; probeReco1mt2 = 0; 
+    pprobeReco1jzb = 0;pprobeReco1ss = 0;pprobeReco1mt2 = 0;
+    probeReco2jzb = 0; probeReco2ss = 0; probeReco2mt2 = 0; 
+    pprobeReco2jzb = 0;pprobeReco2ss = 0;pprobeReco2mt2 = 0;
   
-    probeIso1[n] = 0; pprobeIso1[n] = 0;
-    probeIso2[n] = 0; pprobeIso2[n] = 0;
+    probeIso1jzb = 0; probeIso1ss = 0; probeIso1mt2 = 0; 
+    pprobeIso1jzb = 0;pprobeIso1ss = 0;pprobeIso1mt2 = 0;
+    probeIso2jzb = 0; probeIso2ss = 0; probeIso2mt2 = 0; 
+    pprobeIso2jzb = 0;pprobeIso2ss = 0;pprobeIso2mt2 = 0;
     
-    probeID1[n] = 0; pprobeID1[n] = 0;
-    probeID2[n] = 0; pprobeID2[n] = 0;
+    probeID1jzb = 0; probeID1ss = 0; probeID1mt2 = 0; 
+    pprobeID1jzb = 0;pprobeID1ss = 0;pprobeID1mt2 = 0;
+    probeID2jzb = 0; probeID2ss = 0; probeID2mt2 = 0; 
+    pprobeID2jzb = 0;pprobeID2ss = 0;pprobeID2mt2 = 0;
 
-    dr1[n] = 0; dr2[n] = 0; drn[n] = 0; 
+    dr1jzb = 0; dr1ss = 0; dr1mt2 = 0; 
+    dr2jzb = 0; dr2ss = 0; dr2mt2 = 0; 
+    drnjzb = 0; drnss = 0; drnmt2 = 0; 
   
-    pfJetGoodNum[n] = 0; pfJetGoodNumID[n] = 0;
-    pfHT[n] = 0; pfGoodHT[n] = 0; pfTightHT[n] = 0;
+    pfJetGoodNumjzb = 0; pfJetGoodNumss = 0; pfJetGoodNummt2 = 0; 
+    pfJetGoodNumIDjzb = 0;pfJetGoodNumIDss = 0;pfJetGoodNumIDmt2 = 0;
+    pfHTjzb = 0; pfHTss = 0; pfHTmt2 = 0; 
+    pfGoodHTjzb = 0; pfGoodHTss = 0; pfGoodHTmt2 = 0; 
+    pfTightHTjzb = 0;pfTightHTss = 0;pfTightHTmt2 = 0;
 
-    passedee_triggers[n] = 0; passedmm_triggers[n] = 0; passedem_triggers[n] = 0;
+    passedee_triggersjzb = 0; passedee_triggersss = 0; passedee_triggersmt2 = 0; 
+    passedmm_triggersjzb = 0; passedmm_triggersss = 0;passedmm_triggersmt2 = 0;  
+    passedem_triggersjzb = 0;passedem_triggersss = 0;passedem_triggersmt2 = 0;
 
-    pfMET[n]=0;
-  }
+    pfMETjzb=0;pfMETss=0;pfMETmt2=0;
 
   drl = 0; pfdrl = 0;
 
@@ -285,9 +301,15 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("pt1",&t_nEvent.pt1,"pt1/F");
   t_myTree->Branch("pt2",&t_nEvent.pt2,"pt2/F");
   t_myTree->Branch("ptn",&t_nEvent.ptn,"ptn/F");
-  t_myTree->Branch("dr1",t_nEvent.dr1,"dr1[3]/F");
-  t_myTree->Branch("dr2",t_nEvent.dr2,"dr2[3]/F");
-  t_myTree->Branch("drn",t_nEvent.drn,"drn[3]/F");
+  t_myTree->Branch("dr1jzb",&t_nEvent.dr1jzb,"dr1jzb/F");
+  t_myTree->Branch("dr1ss",&t_nEvent.dr1ss,"dr1ss/F");
+  t_myTree->Branch("dr1mt2",&t_nEvent.dr1mt2,"dr1mt2/F");
+  t_myTree->Branch("dr2jzb",&t_nEvent.dr2jzb,"dr2jzb/F");
+  t_myTree->Branch("dr2ss",&t_nEvent.dr2ss,"dr2ss/F");
+  t_myTree->Branch("dr2mt2",&t_nEvent.dr2mt2,"dr2mt2/F");
+  t_myTree->Branch("drnjzb",&t_nEvent.drnjzb,"drnjzb/F");
+  t_myTree->Branch("drnss",&t_nEvent.drnss,"drnss/F");
+  t_myTree->Branch("drnmt2",&t_nEvent.drnmt2,"drnmt2/F");
   t_myTree->Branch("d0bs1",&t_nEvent.d0bs1,"d0bs1/F");
   t_myTree->Branch("dzbs1",&t_nEvent.dzbs1,"dzbs1/F");
   t_myTree->Branch("d0pv1",&t_nEvent.d0pv1,"d0pv1/F");
@@ -334,17 +356,29 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("chn",&t_nEvent.chn,"chn/I");
   t_myTree->Branch("drl", &t_nEvent.drl,"drl/F");
   t_myTree->Branch("pfdrl", &t_nEvent.pfdrl,"pfdrl/F");
-  t_myTree->Branch("pfMET",&t_nEvent.pfMET,"pfMET[3]/F");
-  t_myTree->Branch("pfHT",t_nEvent.pfHT,"pfHT[3]/F");
-  t_myTree->Branch("pfGoodHT", t_nEvent.pfGoodHT,"pfGoodHT[3]/F");
-  t_myTree->Branch("pfTightHT", t_nEvent.pfTightHT,"pfTightHT[3]/F");
+  t_myTree->Branch("pfMETjzb",&t_nEvent.pfMETjzb,"pfMETjzb/F");
+  t_myTree->Branch("pfMETss",&t_nEvent.pfMETss,"pfMETss/F");
+  t_myTree->Branch("pfMETmt2",&t_nEvent.pfMETmt2,"pfMETmt2/F");
+  t_myTree->Branch("pfHTjzb",&t_nEvent.pfHTjzb,"pfHTjzb/F");
+  t_myTree->Branch("pfHTss",&t_nEvent.pfHTss,"pfHTss/F");
+  t_myTree->Branch("pfHTmt2",&t_nEvent.pfHTmt2,"pfHTmt2/F");
+  t_myTree->Branch("pfGoodHTjzb", &t_nEvent.pfGoodHTjzb,"pfGoodHTjzb/F");
+  t_myTree->Branch("pfGoodHTss", &t_nEvent.pfGoodHTss,"pfGoodHTss/F");
+  t_myTree->Branch("pfGoodHTmt2", &t_nEvent.pfGoodHTmt2,"pfGoodHTmt2/F");
+  t_myTree->Branch("pfTightHTjzb", &t_nEvent.pfTightHTjzb,"pfTightHTjzb/F");
+  t_myTree->Branch("pfTightHTss", &t_nEvent.pfTightHTss,"pfTightHTss/F");
+  t_myTree->Branch("pfTightHTmt2", &t_nEvent.pfTightHTmt2,"pfTightHTmt2/F");
   t_myTree->Branch("eventNum",&t_nEvent.eventNum,"eventNum/I");
   t_myTree->Branch("runNum",&t_nEvent.runNum,"runNum/I");
   t_myTree->Branch("lumi",&t_nEvent.lumi,"lumi/I");
   t_myTree->Branch("goodVtx",&t_nEvent.goodVtx,"goodVtx/I");
   t_myTree->Branch("numVtx",&t_nEvent.numVtx,"numVtx/I");
-  t_myTree->Branch("pfJetGoodNum",t_nEvent.pfJetGoodNum,"pfJetGoodNum[3]/I");
-  t_myTree->Branch("pfJetGoodNumID",t_nEvent.pfJetGoodNumID,"pfJetGoodNumID[3]/I");
+  t_myTree->Branch("pfJetGoodNumjzb",&t_nEvent.pfJetGoodNumjzb,"pfJetGoodNumjzb/I");
+  t_myTree->Branch("pfJetGoodNumss",&t_nEvent.pfJetGoodNumss,"pfJetGoodNumss/I");
+  t_myTree->Branch("pfJetGoodNummt2",&t_nEvent.pfJetGoodNummt2,"pfJetGoodNummt2/I");
+  t_myTree->Branch("pfJetGoodNumIDjzb",&t_nEvent.pfJetGoodNumIDjzb,"pfJetGoodNumIDjzb/I");
+  t_myTree->Branch("pfJetGoodNumIDss",&t_nEvent.pfJetGoodNumIDss,"pfJetGoodNumIDss/I");
+  t_myTree->Branch("pfJetGoodNumIDmt2",&t_nEvent.pfJetGoodNumIDmt2,"pfJetGoodNumIDmt2/I");
   t_myTree->Branch("pfpt",&t_nEvent.pfpt,"pfpt/F");
   t_myTree->Branch("pfphi",&t_nEvent.pfphi,"pfphi/F");
   t_myTree->Branch("pfeta",&t_nEvent.pfeta,"pfeta/F");
@@ -358,27 +392,66 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("pfeta2",&t_nEvent.pfeta2,"pfeta2/F");
   t_myTree->Branch("pfetan",&t_nEvent.pfetan,"pfetan/F");
   t_myTree->Branch("pfmll",&t_nEvent.pfmll,"pfmll/F");
-  t_myTree->Branch("passedee_triggers", &t_nEvent.passedee_triggers,"passedee_triggers[3]/I");
-  t_myTree->Branch("passedmm_triggers", &t_nEvent.passedmm_triggers,"passedmm_triggers[3]/I");
-  t_myTree->Branch("passedem_triggers", &t_nEvent.passedem_triggers,"passedem_triggers[3]/I");
-  t_myTree->Branch("tag1", t_nEvent.tag1,"tag1[3]/I");
-  t_myTree->Branch("probe1", t_nEvent.probe1,"probe1[3]/I");
-  t_myTree->Branch("pprobe1", t_nEvent.pprobe1,"pprobe1[3]/I");
-  t_myTree->Branch("tag2", t_nEvent.tag2,"tag2[3]/I");
-  t_myTree->Branch("probe2", t_nEvent.probe2,"probe2[3]/I");
-  t_myTree->Branch("pprobe2", t_nEvent.pprobe2,"pprobe2[3]/I");
-  t_myTree->Branch("probeReco1", t_nEvent.probeReco1,"probeReco1[3]/I");
-  t_myTree->Branch("pprobeReco1", t_nEvent.pprobeReco1,"pprobeReco1[3]/I");
-  t_myTree->Branch("probeReco2", t_nEvent.probeReco2,"probeReco2[3]/I");
-  t_myTree->Branch("pprobeReco2", t_nEvent.pprobeReco2,"pprobeReco2[3]/I");
-  t_myTree->Branch("probeIso1", t_nEvent.probeIso1,"probeIso1[3]/I");
-  t_myTree->Branch("pprobeIso1", t_nEvent.pprobeIso1,"pprobeIso1[3]/I");
-  t_myTree->Branch("probeIso2", t_nEvent.probeIso2,"probeIso2[3]/I");
-  t_myTree->Branch("pprobeIso2", t_nEvent.pprobeIso2,"pprobeIso2[3]/I");
-  t_myTree->Branch("probeID1", t_nEvent.probeID1,"probeID1[3]/I");
-  t_myTree->Branch("pprobeID1", t_nEvent.pprobeID1,"pprobeID1[3]/I");
-  t_myTree->Branch("probeID2", t_nEvent.probeID2,"probeID2[3]/I");
-  t_myTree->Branch("pprobeID2", t_nEvent.pprobeID2,"pprobeID2[3]/I");
+  t_myTree->Branch("passedee_triggersjzb", &t_nEvent.passedee_triggersjzb,"passedee_triggersjzb/I");
+  t_myTree->Branch("passedee_triggersss",  &t_nEvent.passedee_triggersss,"passedee_triggersss/I");
+  t_myTree->Branch("passedee_triggersmt2", &t_nEvent.passedee_triggersmt2,"passedee_triggersmt2/I");
+  t_myTree->Branch("passedmm_triggersjzb", &t_nEvent.passedmm_triggersjzb,"passedmm_triggersjzb/I");
+  t_myTree->Branch("passedmm_triggersss",  &t_nEvent.passedmm_triggersss,"passedmm_triggersss/I");
+  t_myTree->Branch("passedmm_triggersmt2", &t_nEvent.passedmm_triggersmt2,"passedmm_triggersmt2/I");
+  t_myTree->Branch("passedem_triggersjzb", &t_nEvent.passedem_triggersjzb,"passedem_triggersjzb/I");
+  t_myTree->Branch("passedem_triggersss",  &t_nEvent.passedem_triggersss,"passedem_triggersss/I");
+  t_myTree->Branch("passedem_triggersmt2", &t_nEvent.passedem_triggersmt2,"passedem_triggersmt2/I");
+  t_myTree->Branch("tag1jzb", &t_nEvent.tag1jzb,"tag1jzb/I");
+  t_myTree->Branch("tag1ss", &t_nEvent.tag1ss,"tag1ss/I");
+  t_myTree->Branch("tag1mt2", &t_nEvent.tag1mt2,"tag1mt2/I");
+  t_myTree->Branch("probe1jzb", &t_nEvent.probe1jzb,"probe1jzb/I");
+  t_myTree->Branch("probe1ss", &t_nEvent.probe1ss,"probe1ss/I");
+  t_myTree->Branch("probe1mt2", &t_nEvent.probe1mt2,"probe1mt2/I");
+  t_myTree->Branch("pprobe1jzb", &t_nEvent.pprobe1jzb,"pprobe1jzb/I");
+  t_myTree->Branch("pprobe1ss", &t_nEvent.pprobe1ss,"pprobe1ss/I");
+  t_myTree->Branch("pprobe1mt2", &t_nEvent.pprobe1mt2,"pprobe1mt2/I");
+  t_myTree->Branch("tag2jzb", &t_nEvent.tag2jzb,"tag2jzb/I");
+  t_myTree->Branch("tag2ss", &t_nEvent.tag2ss,"tag2ss/I");
+  t_myTree->Branch("tag2mt2", &t_nEvent.tag2mt2,"tag2mt2/I");
+  t_myTree->Branch("probe2jzb", &t_nEvent.probe2jzb,"probe2jzb/I");
+  t_myTree->Branch("probe2ss", &t_nEvent.probe2ss,"probe2ss/I");
+  t_myTree->Branch("probe2mt2", &t_nEvent.probe2mt2,"probe2mt2/I");
+  t_myTree->Branch("pprobe2jzb", &t_nEvent.pprobe2jzb,"pprobe2jzb/I");
+  t_myTree->Branch("pprobe2ss", &t_nEvent.pprobe2ss,"pprobe2ss/I");
+  t_myTree->Branch("pprobe2mt2", &t_nEvent.pprobe2mt2,"pprobe2mt2/I");
+  t_myTree->Branch("probeReco1jzb", &t_nEvent.probeReco1jzb,"probeReco1jzb/I");
+  t_myTree->Branch("probeReco1ss", &t_nEvent.probeReco1ss,"probeReco1ss/I");
+  t_myTree->Branch("probeReco1mt2", &t_nEvent.probeReco1mt2,"probeReco1mt2/I");
+  t_myTree->Branch("probeReco2jzb", &t_nEvent.probeReco2jzb,"probeReco2jzb/I");
+  t_myTree->Branch("probeReco2ss", &t_nEvent.probeReco2ss,"probeReco2ss/I");
+  t_myTree->Branch("probeReco2mt2", &t_nEvent.probeReco2mt2,"probeReco2mt2/I");
+  t_myTree->Branch("pprobeReco2jzb", &t_nEvent.pprobeReco2jzb,"pprobeReco2jzb/I");
+  t_myTree->Branch("pprobeReco2ss", &t_nEvent.pprobeReco2ss,"pprobeReco2ss/I");
+  t_myTree->Branch("pprobeReco2mt2", &t_nEvent.pprobeReco2mt2,"pprobeReco2mt2/I");
+  t_myTree->Branch("probeIso1jzb", &t_nEvent.probeIso1jzb,"probeIso1jzb/I");
+  t_myTree->Branch("probeIso1ss", &t_nEvent.probeIso1ss,"probeIso1ss/I");
+  t_myTree->Branch("probeIso1mt2", &t_nEvent.probeIso1mt2,"probeIso1mt2/I");
+  t_myTree->Branch("pprobeIso1jzb", &t_nEvent.pprobeIso1jzb,"pprobeIso1jzb/I");
+  t_myTree->Branch("pprobeIso1ss", &t_nEvent.pprobeIso1ss,"pprobeIso1ss/I");
+  t_myTree->Branch("pprobeIso1mt2", &t_nEvent.pprobeIso1mt2,"pprobeIso1mt2/I");
+  t_myTree->Branch("probeIso2jzb", &t_nEvent.probeIso2jzb,"probeIso2jzb/I");
+  t_myTree->Branch("probeIso2ss", &t_nEvent.probeIso2ss,"probeIso2ss/I");
+  t_myTree->Branch("probeIso2mt2", &t_nEvent.probeIso2mt2,"probeIso2mt2/I");
+  t_myTree->Branch("pprobeIso2jzb", &t_nEvent.pprobeIso2jzb,"pprobeIso2jzb/I");
+  t_myTree->Branch("pprobeIso2ss", &t_nEvent.pprobeIso2ss,"pprobeIso2ss/I");
+  t_myTree->Branch("pprobeIso2mt2", &t_nEvent.pprobeIso2mt2,"pprobeIso2mt2/I");
+  t_myTree->Branch("probeID1jzb", &t_nEvent.probeID1jzb,"probeID1jzb/I");
+  t_myTree->Branch("probeID1ss", &t_nEvent.probeID1ss,"probeID1ss/I");
+  t_myTree->Branch("probeID1mt2", &t_nEvent.probeID1mt2,"probeID1mt2/I");
+  t_myTree->Branch("pprobeID1jzb", &t_nEvent.pprobeID1jzb,"pprobeID1jzb/I");
+  t_myTree->Branch("pprobeID1ss", &t_nEvent.pprobeID1ss,"pprobeID1ss/I");
+  t_myTree->Branch("pprobeID1mt2", &t_nEvent.pprobeID1mt2,"pprobeID1mt2/I");
+  t_myTree->Branch("probeID2jzb", &t_nEvent.probeID2jzb,"probeID2jzb/I");
+  t_myTree->Branch("probeID2ss", &t_nEvent.probeID2ss,"probeID2ss/I");
+  t_myTree->Branch("probeID2mt2", &t_nEvent.probeID2mt2,"probeID2mt2/I");
+  t_myTree->Branch("pprobeID2jzb", &t_nEvent.pprobeID2jzb,"pprobeID2jzb/I");
+  t_myTree->Branch("pprobeID2ss", &t_nEvent.pprobeID2ss,"pprobeID2ss/I");
+  t_myTree->Branch("pprobeID2mt2", &t_nEvent.pprobeID2mt2,"pprobeID2mt2/I");
   
 }
 
@@ -604,11 +677,17 @@ void RunEfficiency::Analyze() {
 
   //Triggers
   if ( !isMC ) {
-    for(int n = 0; n < nAnalysis; n++) {
-	if(passElTriggers(n)) t_nEvent.passedee_triggers[n] = 1;
-	if(passMuTriggers(n)) t_nEvent.passedmm_triggers[n] = 1;
-	if(passEMuTriggers(n)) t_nEvent.passedem_triggers[n] = 1;
-    }
+	if(passElTriggers(0)) t_nEvent.passedee_triggersjzb = 1;
+	if(passMuTriggers(0)) t_nEvent.passedmm_triggersjzb = 1;
+	if(passEMuTriggers(0)) t_nEvent.passedem_triggersjzb = 1;
+
+	if(passElTriggers(1)) t_nEvent.passedee_triggersss = 1;
+	if(passMuTriggers(1)) t_nEvent.passedmm_triggersss = 1;
+	if(passEMuTriggers(1)) t_nEvent.passedem_triggersss = 1;
+
+	if(passElTriggers(2)) t_nEvent.passedee_triggersmt2 = 1;
+	if(passMuTriggers(2)) t_nEvent.passedmm_triggersmt2 = 1;
+	if(passEMuTriggers(2)) t_nEvent.passedem_triggersmt2 = 1;
   } else {
     isZ = GeneratorInfo();
     if(!isZ ) return;
@@ -673,26 +752,43 @@ void RunEfficiency::Analyze() {
     tmpLepton.d0PV = fTR->MuD0PV[muIndex];
     tmpLepton.dzPV = fTR->MuD0PV[muIndex];
     tmpLepton.pfindex = indexOfAssociatedPFMuon;
-    for(int n = 0; n < nAnalysis; n++) { 
-      tmpLepton.tag[n] = 0;
-      tmpLepton.probeReco[n] = 0;
-      tmpLepton.pprobeReco[n] = 0;
-      tmpLepton.probeIso[n] = 0;
-      tmpLepton.pprobeIso[n] = 0;
-      tmpLepton.probeID[n] = 0;
-      tmpLepton.pprobeID[n] = 0;
 
-      if(MuPassingTag(n, muIndex)) tmpLepton.tag[n] = 1;
+      tmpLepton.tagjzb = 0;		tmpLepton.tagss = 0;		tmpLepton.tagmt2 = 0;
+      tmpLepton.probeRecojzb = 0;	tmpLepton.probeRecoss = 0;	tmpLepton.probeRecomt2 = 0;
+      tmpLepton.pprobeRecojzb = 0;	tmpLepton.pprobeRecoss = 0;	tmpLepton.pprobeRecomt2 = 0;
+      tmpLepton.probeIsojzb = 0;	tmpLepton.probeIsoss = 0;	tmpLepton.probeIsomt2 = 0;
+      tmpLepton.pprobeIsojzb = 0;	tmpLepton.pprobeIsoss = 0;	tmpLepton.pprobeIsomt2 = 0;
+      tmpLepton.probeIDjzb = 0;		tmpLepton.probeIDss = 0;	tmpLepton.probeIDmt2 = 0;
+      tmpLepton.pprobeIDjzb = 0;	tmpLepton.pprobeIDss = 0;	tmpLepton.pprobeIDmt2 = 0;
+
+      if(MuPassingTag(0, muIndex)) tmpLepton.tagjzb = 1;
+      if(MuPassingTag(1, muIndex)) tmpLepton.tagss = 1;
+      if(MuPassingTag(2, muIndex)) tmpLepton.tagmt2 = 1;
       
-      if(MuPassingRecoProbe(n, muIndex)) tmpLepton.probeReco[n] = 1;
-      if(MuPassingRecoPProbe(n, muIndex)) tmpLepton.pprobeReco[n] = 1;
-      if(MuPassingIDProbe(n, muIndex)) tmpLepton.probeID[n] = 1;
-      if(MuPassingIDPProbe(n, muIndex)) tmpLepton.pprobeID[n] = 1;
+      if(MuPassingRecoProbe(0, muIndex)) tmpLepton.probeRecojzb = 1;
+      if(MuPassingRecoProbe(1, muIndex)) tmpLepton.probeRecoss = 1;
+      if(MuPassingRecoProbe(2, muIndex)) tmpLepton.probeRecomt2 = 1;
+
+      if(MuPassingRecoPProbe(0, muIndex)) tmpLepton.pprobeRecojzb = 1;
+      if(MuPassingRecoPProbe(1, muIndex)) tmpLepton.pprobeRecoss = 1;
+      if(MuPassingRecoPProbe(2, muIndex)) tmpLepton.pprobeRecomt2 = 1;
+
+      if(MuPassingIDProbe(0, muIndex)) tmpLepton.probeIDjzb = 1;
+      if(MuPassingIDProbe(1, muIndex)) tmpLepton.probeIDss = 1;
+      if(MuPassingIDProbe(2, muIndex)) tmpLepton.probeIDmt2 = 1;
+
+      if(MuPassingIDPProbe(0, muIndex)) tmpLepton.pprobeIDjzb = 1;
+      if(MuPassingIDPProbe(1, muIndex)) tmpLepton.pprobeIDss = 1;
+      if(MuPassingIDPProbe(2, muIndex)) tmpLepton.pprobeIDmt2 = 1;
       
-      if(MuPassingIsoProbe(n, muIndex)) tmpLepton.probeIso[n] = 1;
-      if(MuPassingIsoPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIso[n] = 1;
-      
-    }
+      if(MuPassingIsoProbe(0, muIndex)) tmpLepton.probeIsojzb = 1;
+      if(MuPassingIsoProbe(1, muIndex)) tmpLepton.probeIsoss = 1;
+      if(MuPassingIsoProbe(2, muIndex)) tmpLepton.probeIsomt2 = 1;
+
+      if(MuPassingIsoPProbe(0, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIsojzb = 1;
+      if(MuPassingIsoPProbe(1, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIsoss = 1;
+      if(MuPassingIsoPProbe(2, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIsomt2 = 1;
+
     leptons.push_back(tmpLepton);
     
   }
@@ -735,23 +831,42 @@ void RunEfficiency::Analyze() {
     tmpLepton.type = 0;
     tmpLepton.genPt = 0.;
 
-    for(int n = 0; n < nAnalysis; n++) {
-      tmpLepton.tag[n] = 0;
-      tmpLepton.probeReco[n] = 0;
-      tmpLepton.pprobeReco[n] = 0;
-      tmpLepton.probeIso[n] = 0;
-      tmpLepton.pprobeIso[n] = 0;
-      tmpLepton.probeID[n] = 0;
-      tmpLepton.pprobeID[n] = 0;
+      tmpLepton.tagjzb = 0;		tmpLepton.tagss = 0;		tmpLepton.tagmt2 = 0;
+      tmpLepton.probeRecojzb = 0;	tmpLepton.probeRecoss = 0;	tmpLepton.probeRecomt2 = 0;
+      tmpLepton.pprobeRecojzb = 0;	tmpLepton.pprobeRecoss = 0;	tmpLepton.pprobeRecomt2 = 0;
+      tmpLepton.probeIsojzb = 0;	tmpLepton.probeIsoss = 0;	tmpLepton.probeIsomt2 = 0;
+      tmpLepton.pprobeIsojzb = 0;	tmpLepton.pprobeIsoss = 0;	tmpLepton.pprobeIsomt2 = 0;
+      tmpLepton.probeIDjzb = 0;		tmpLepton.probeIDss = 0;	tmpLepton.probeIDmt2 = 0;
+      tmpLepton.pprobeIDjzb = 0;	tmpLepton.pprobeIDss = 0;	tmpLepton.pprobeIDmt2 = 0;
 
-      if(ElPassingTag(n, elIndex)) tmpLepton.tag[n] = 1;
-      if(ElPassingRecoProbe(n, elIndex)) tmpLepton.probeReco[n] = 1;
-      if(ElPassingRecoPProbe(n, elIndex)) tmpLepton.pprobeReco[n] = 1;
-      if(ElPassingIDProbe(n, elIndex)) tmpLepton.probeID[n] = 1;
-      if(ElPassingIDPProbe(n, elIndex)) tmpLepton.pprobeID[n] = 1;
-      if(ElPassingIsoProbe(n, elIndex)) tmpLepton.probeIso[n] = 1;
-      if(ElPassingIsoPProbe(n, elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobeIso[n] = 1;
-    }
+      if(ElPassingTag(0, elIndex)) tmpLepton.tagjzb = 1;
+      if(ElPassingTag(1, elIndex)) tmpLepton.tagss = 1;
+      if(ElPassingTag(2, elIndex)) tmpLepton.tagmt2 = 1;
+
+      if(ElPassingRecoProbe(0, elIndex)) tmpLepton.probeRecojzb = 1;
+      if(ElPassingRecoProbe(1, elIndex)) tmpLepton.probeRecoss = 1;
+      if(ElPassingRecoProbe(2, elIndex)) tmpLepton.probeRecomt2 = 1;
+
+      if(ElPassingRecoPProbe(0, elIndex)) tmpLepton.pprobeRecojzb = 1;
+      if(ElPassingRecoPProbe(1, elIndex)) tmpLepton.pprobeRecoss = 1;
+      if(ElPassingRecoPProbe(2, elIndex)) tmpLepton.pprobeRecomt2 = 1;
+
+      if(ElPassingIDProbe(0, elIndex)) tmpLepton.probeIDjzb = 1;
+      if(ElPassingIDProbe(1, elIndex)) tmpLepton.probeIDss = 1;
+      if(ElPassingIDProbe(2, elIndex)) tmpLepton.probeIDmt2 = 1;
+
+      if(ElPassingIDPProbe(0, elIndex)) tmpLepton.pprobeIDjzb = 1;
+      if(ElPassingIDPProbe(1, elIndex)) tmpLepton.pprobeIDss = 1;
+      if(ElPassingIDPProbe(2, elIndex)) tmpLepton.pprobeIDmt2 = 1;
+
+      if(ElPassingIsoProbe(0, elIndex)) tmpLepton.probeIsojzb = 1;
+      if(ElPassingIsoProbe(1, elIndex)) tmpLepton.probeIsoss = 1;
+      if(ElPassingIsoProbe(2, elIndex)) tmpLepton.probeIsomt2 = 1;
+
+      if(ElPassingIsoPProbe(0, elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobeIsojzb = 1;
+      if(ElPassingIsoPProbe(1, elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobeIsoss = 1;
+      if(ElPassingIsoPProbe(2, elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobeIsomt2 = 1;
+
     leptons.push_back(tmpLepton);
   
   }
@@ -791,17 +906,34 @@ void RunEfficiency::Analyze() {
       t_nEvent.phi1 = sortedGoodLeptons[PosLepton1].p.Phi();
       t_nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
       t_nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
-      for(int n = 0; n < nAnalysis; ++n) {
-        t_nEvent.tag1[n] = sortedGoodLeptons[PosLepton1].tag[n]; //??????
-        t_nEvent.probeReco1[n] = sortedGoodLeptons[PosLepton1].probeReco[n]; //??????
-        t_nEvent.pprobeReco1[n] = sortedGoodLeptons[PosLepton1].pprobeReco[n]; //??????
-        t_nEvent.probeIso1[n] = sortedGoodLeptons[PosLepton1].probeIso[n]; //??????
-        t_nEvent.pprobeIso1[n] = sortedGoodLeptons[PosLepton1].pprobeIso[n]; //??????
-        t_nEvent.probeID1[n] = sortedGoodLeptons[PosLepton1].probeID[n]; //??????
-        t_nEvent.pprobeID1[n] = sortedGoodLeptons[PosLepton1].pprobeID[n]; //??????
-        t_nEvent.probe1[n] = t_nEvent.probeReco1[n]*t_nEvent.probeIso1[n]*t_nEvent.probeID1[n];
-        t_nEvent.pprobe1[n] = t_nEvent.pprobeReco1[n]*t_nEvent.pprobeIso1[n]*t_nEvent.pprobeID1[n];
-      }
+        t_nEvent.tag1jzb = sortedGoodLeptons[PosLepton1].tagjzb; //??????
+        t_nEvent.tag1ss = sortedGoodLeptons[PosLepton1].tagss; //??????
+        t_nEvent.tag1mt2 = sortedGoodLeptons[PosLepton1].tagmt2; //??????
+        t_nEvent.probeReco1jzb = sortedGoodLeptons[PosLepton1].probeRecojzb; //??????
+        t_nEvent.probeReco1ss = sortedGoodLeptons[PosLepton1].probeRecoss; //??????
+        t_nEvent.probeReco1mt2 = sortedGoodLeptons[PosLepton1].probeRecomt2; //??????
+        t_nEvent.pprobeReco1jzb = sortedGoodLeptons[PosLepton1].pprobeRecojzb; //??????
+        t_nEvent.pprobeReco1ss = sortedGoodLeptons[PosLepton1].pprobeRecoss; //??????
+        t_nEvent.pprobeReco1mt2 = sortedGoodLeptons[PosLepton1].pprobeRecomt2; //??????
+        t_nEvent.probeIso1jzb = sortedGoodLeptons[PosLepton1].probeIsojzb; //??????
+        t_nEvent.probeIso1ss = sortedGoodLeptons[PosLepton1].probeIsoss; //??????
+        t_nEvent.probeIso1mt2 = sortedGoodLeptons[PosLepton1].probeIsomt2; //??????
+        t_nEvent.pprobeIso1jzb = sortedGoodLeptons[PosLepton1].pprobeIsojzb; //??????
+        t_nEvent.pprobeIso1ss = sortedGoodLeptons[PosLepton1].pprobeIsoss; //??????
+        t_nEvent.pprobeIso1mt2 = sortedGoodLeptons[PosLepton1].pprobeIsomt2; //??????
+        t_nEvent.probeID1jzb = sortedGoodLeptons[PosLepton1].probeIDjzb; //??????
+        t_nEvent.probeID1ss = sortedGoodLeptons[PosLepton1].probeIDss; //??????
+        t_nEvent.probeID1mt2 = sortedGoodLeptons[PosLepton1].probeIDmt2; //??????
+        t_nEvent.pprobeID1jzb = sortedGoodLeptons[PosLepton1].pprobeIDjzb; //??????
+        t_nEvent.pprobeID1ss = sortedGoodLeptons[PosLepton1].pprobeIDss; //??????
+        t_nEvent.pprobeID1mt2 = sortedGoodLeptons[PosLepton1].pprobeIDmt2; //??????
+        t_nEvent.probe1jzb = t_nEvent.probeReco1jzb*t_nEvent.probeIso1jzb*t_nEvent.probeID1jzb;
+        t_nEvent.probe1ss = t_nEvent.probeReco1ss*t_nEvent.probeIso1ss*t_nEvent.probeID1ss;
+        t_nEvent.probe1mt2 = t_nEvent.probeReco1mt2*t_nEvent.probeIso1mt2*t_nEvent.probeID1mt2;
+        t_nEvent.pprobe1jzb = t_nEvent.pprobeReco1jzb*t_nEvent.pprobeIso1jzb*t_nEvent.pprobeID1jzb;
+        t_nEvent.pprobe1ss = t_nEvent.pprobeReco1ss*t_nEvent.pprobeIso1ss*t_nEvent.pprobeID1ss;
+        t_nEvent.pprobe1mt2 = t_nEvent.pprobeReco1mt2*t_nEvent.pprobeIso1mt2*t_nEvent.pprobeID1mt2;
+
       t_nEvent.d0bs1 = sortedGoodLeptons[PosLepton1].d0BS;
       t_nEvent.dzbs1 = sortedGoodLeptons[PosLepton1].dzBS;
       t_nEvent.d0pv1 = sortedGoodLeptons[PosLepton1].d0PV;
@@ -816,17 +948,35 @@ void RunEfficiency::Analyze() {
       t_nEvent.phi2 = sortedGoodLeptons[PosLepton2].p.Phi();
       t_nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
       t_nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
-      for(int n = 0; n < nAnalysis; ++n) {
-        t_nEvent.tag2[n] = sortedGoodLeptons[PosLepton2].tag[n]; //??????
-        t_nEvent.probeReco2[n] = sortedGoodLeptons[PosLepton2].probeReco[n]; //??????
-        t_nEvent.pprobeReco2[n] = sortedGoodLeptons[PosLepton2].pprobeReco[n]; //??????
-        t_nEvent.probeIso2[n] = sortedGoodLeptons[PosLepton2].probeIso[n]; //??????
-        t_nEvent.pprobeIso2[n] = sortedGoodLeptons[PosLepton2].pprobeIso[n]; //??????
-        t_nEvent.probeID2[n] = sortedGoodLeptons[PosLepton2].probeID[n]; //??????
-        t_nEvent.pprobeID2[n] = sortedGoodLeptons[PosLepton2].pprobeID[n]; //??????
-        t_nEvent.probe2[n] = t_nEvent.probeReco2[n]*t_nEvent.probeIso2[n]*t_nEvent.probeID2[n];
-        t_nEvent.pprobe2[n] = t_nEvent.pprobeReco2[n]*t_nEvent.pprobeIso2[n]*t_nEvent.pprobeID2[n];
-      }    
+//      for(int n = 0; n < nAnalysis; ++n) {
+        t_nEvent.tag2jzb = sortedGoodLeptons[PosLepton2].tagjzb; //??????
+        t_nEvent.tag2ss = sortedGoodLeptons[PosLepton2].tagss; //??????
+        t_nEvent.tag2mt2 = sortedGoodLeptons[PosLepton2].tagmt2; //??????
+        t_nEvent.probeReco2jzb = sortedGoodLeptons[PosLepton2].probeRecojzb; //??????
+        t_nEvent.probeReco2ss = sortedGoodLeptons[PosLepton2].probeRecoss; //??????
+        t_nEvent.probeReco2mt2 = sortedGoodLeptons[PosLepton2].probeRecomt2; //??????
+        t_nEvent.pprobeReco2jzb = sortedGoodLeptons[PosLepton2].pprobeRecojzb; //??????
+        t_nEvent.pprobeReco2ss = sortedGoodLeptons[PosLepton2].pprobeRecoss; //??????
+        t_nEvent.pprobeReco2mt2 = sortedGoodLeptons[PosLepton2].pprobeRecomt2; //??????
+        t_nEvent.probeIso2jzb = sortedGoodLeptons[PosLepton2].probeIsojzb; //??????
+        t_nEvent.probeIso2ss = sortedGoodLeptons[PosLepton2].probeIsoss; //??????
+        t_nEvent.probeIso2mt2 = sortedGoodLeptons[PosLepton2].probeIsomt2; //??????
+        t_nEvent.pprobeIso2jzb = sortedGoodLeptons[PosLepton2].pprobeIsojzb; //??????
+        t_nEvent.pprobeIso2ss = sortedGoodLeptons[PosLepton2].pprobeIsoss; //??????
+        t_nEvent.pprobeIso2mt2 = sortedGoodLeptons[PosLepton2].pprobeIsomt2; //??????
+        t_nEvent.probeID2jzb = sortedGoodLeptons[PosLepton2].probeIDjzb; //??????
+        t_nEvent.probeID2ss = sortedGoodLeptons[PosLepton2].probeIDss; //??????
+        t_nEvent.probeID2mt2 = sortedGoodLeptons[PosLepton2].probeIDmt2; //??????
+        t_nEvent.pprobeID2jzb = sortedGoodLeptons[PosLepton2].pprobeIDjzb; //??????
+        t_nEvent.pprobeID2ss = sortedGoodLeptons[PosLepton2].pprobeIDss; //??????
+        t_nEvent.pprobeID2mt2 = sortedGoodLeptons[PosLepton2].pprobeIDmt2; //??????
+        t_nEvent.probe2jzb = t_nEvent.probeReco2jzb*t_nEvent.probeIso2jzb*t_nEvent.probeID2jzb;
+        t_nEvent.probe2ss = t_nEvent.probeReco2ss*t_nEvent.probeIso2ss*t_nEvent.probeID2ss;
+        t_nEvent.probe2mt2 = t_nEvent.probeReco2mt2*t_nEvent.probeIso2mt2*t_nEvent.probeID2mt2;
+        t_nEvent.pprobe2jzb = t_nEvent.pprobeReco2jzb*t_nEvent.pprobeIso2jzb*t_nEvent.pprobeID2jzb;
+        t_nEvent.pprobe2ss = t_nEvent.pprobeReco2ss*t_nEvent.pprobeIso2ss*t_nEvent.pprobeID2ss;
+        t_nEvent.pprobe2mt2 = t_nEvent.pprobeReco2mt2*t_nEvent.pprobeIso2mt2*t_nEvent.pprobeID2mt2;
+//      }    
       t_nEvent.d0bs2 = sortedGoodLeptons[PosLepton2].d0BS;
       t_nEvent.dzbs2 = sortedGoodLeptons[PosLepton2].dzBS;
       t_nEvent.d0pv2 = sortedGoodLeptons[PosLepton2].d0PV;
@@ -878,10 +1028,14 @@ void RunEfficiency::Analyze() {
 
     
     float jetThreshold[nAnalysis] = {30, 40, 20};
-    for(int n = 0; n < nAnalysis; n++) { 
-      t_nEvent.pfJetGoodNum[n]=0;
-      vector<t_lepton> pfGoodJets;
-      float closest1=1000, closest2=1000, closestn=1000; //the dr distance between the leptons and jets
+//    for(int n = 0; n < nAnalysis; n++) { 
+      t_nEvent.pfJetGoodNumjzb=0;
+      t_nEvent.pfJetGoodNumss=0;
+      t_nEvent.pfJetGoodNummt2=0;
+//      vector<t_lepton> pfGoodJets;
+      float closest1jzb=1000, closest2jzb=1000, closestnjzb=1000; //the dr distance between the leptons and jets
+      float closest1ss=1000,  closest2ss=1000,  closestnss=1000; //the dr distance between the leptons and jets
+      float closest1mt2=1000, closest2mt2=1000, closestnmt2=1000; //the dr distance between the leptons and jets
       for(int i =0 ; i<fTR->PF2PAT3NJets;i++) { // PF jet loop//killPF
 	
         if(i==jMax){cout<<"max Num was reached"<<endl; return;}
@@ -896,9 +1050,9 @@ void RunEfficiency::Analyze() {
 	//float jesC = fTR->PF2PAT3JEcorr[i];//killPF
 	
 	bool  isJetID = IsGoodBasicPFJet(i,false);
-        if(n == 0) isJetID = IsGoodBasicPFJet(i, false); //JZB
-	if(n == 1) isJetID = IsGoodBasicPFJet(i, false); //SS
-	if(n == 2) isJetID = IsGoodBasicPFJetPAT3(i, 20.0, 3.0); //MT2
+	bool isJetIdjzb = IsGoodBasicPFJet(i, false); //JZB
+	bool isJetIdss  = IsGoodBasicPFJet(i, false); //SS
+	bool isJetIdmt2 = IsGoodBasicPFJetPAT3(i, 20.0, 3.0); //MT2
 	
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
 	TLorentzVector sumOfPFJets(0,0,0,0);
@@ -918,41 +1072,81 @@ void RunEfficiency::Analyze() {
 	// Keep jets over min. pt threshold
 	if ( !(jpt>20) ) continue;  
 	
-	t_nEvent.pfHT[n]    += jpt;
+	t_nEvent.pfHTjzb    += jpt;
+	t_nEvent.pfHTss    += jpt;
+	t_nEvent.pfHTmt2    += jpt;
 	
 	// Keep central jets
 	if ( !(fabs(jeta)<2.6 ) ) continue;
 	
 	
-	t_nEvent.pfGoodHT[n] += jpt;
+	t_nEvent.pfGoodHTjzb += jpt;
+	t_nEvent.pfGoodHTss += jpt;
+	t_nEvent.pfGoodHTmt2 += jpt;
+
 	sumOfPFJets += aJet;
 	
-	t_lepton tmpLepton;
+/*	t_lepton tmpLepton;
 	tmpLepton.p = aJet;
 	tmpLepton.charge = 0;
 	tmpLepton.index = i;
-	tmpLepton.type = -1;
-	pfGoodJets.push_back(tmpLepton);
+	tmpLepton.type = -1;*/
+//	pfGoodJets.push_back(tmpLepton);
 	
-	if ( jpt > jetThreshold[n] ) {
-	  t_nEvent.pfTightHT[n] += jpt;
-	  if(isJetID>0) t_nEvent.pfJetGoodNumID[n]++;
-	  t_nEvent.pfJetGoodNum[n]++;
+	if ( jpt > jetThreshold[0] ) {//JZB
+	  t_nEvent.pfTightHTjzb += jpt;
+	  if(isJetID>0&&isJetIdjzb>0) t_nEvent.pfJetGoodNumIDjzb++;
+	  t_nEvent.pfJetGoodNumjzb++;
 	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
 	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
 	  float drn = aJet.DeltaR(sortedGoodLeptons[negativePosition].p);
-	  if(dr1<closest1) closest1 = dr1;
-	  if(dr2<closest2) closest2 = dr2;
-	  if(drn<closestn) closestn = drn;
+	  if(dr1<closest1jzb) closest1jzb = dr1;
+	  if(dr2<closest2jzb) closest2jzb = dr2;
+	  if(drn<closestnjzb) closestnjzb = drn;
+	}
+	if ( jpt > jetThreshold[1] ) {//SS
+	  t_nEvent.pfTightHTss += jpt;
+	  if(isJetID>0) t_nEvent.pfJetGoodNumIDss++;
+	  t_nEvent.pfJetGoodNumss++;
+	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
+	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
+	  float drn = aJet.DeltaR(sortedGoodLeptons[negativePosition].p);
+	  if(dr1<closest1ss) closest1ss = dr1;
+	  if(dr2<closest2ss) closest2ss = dr2;
+	  if(drn<closestnss) closestnss = drn;
+	}
+	if ( jpt > jetThreshold[2] ) {//MT2
+	  t_nEvent.pfTightHTmt2 += jpt;
+	  if(isJetID>0) t_nEvent.pfJetGoodNumIDmt2++;
+	  t_nEvent.pfJetGoodNummt2++;
+	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
+	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
+	  float drn = aJet.DeltaR(sortedGoodLeptons[negativePosition].p);
+	  if(dr1<closest1mt2) closest1mt2 = dr1;
+	  if(dr2<closest2mt2) closest2mt2 = dr2;
+	  if(drn<closestnmt2) closestnmt2 = drn;
 	}
 	
       }
       
-      t_nEvent.pfMET[n] = fTR->PFMET;
-      t_nEvent.dr1[n] = closest1;
-      t_nEvent.dr2[n] = closest2;
-      t_nEvent.drn[n] = closestn;
-    }
+      t_nEvent.pfMETjzb = fTR->PFMET;
+      t_nEvent.pfMETss = fTR->PFMET;
+      t_nEvent.pfMETmt2 = fTR->PFMET;
+
+      t_nEvent.dr1jzb = closest1jzb;
+      t_nEvent.dr1ss = closest1ss;
+      t_nEvent.dr1mt2 = closest1mt2;
+      t_nEvent.dr2jzb = closest2jzb;
+      t_nEvent.dr2ss = closest2ss;
+      t_nEvent.dr2mt2 = closest2mt2;
+      t_nEvent.drnjzb = closestnjzb;
+      t_nEvent.drnss = closestnss;
+      t_nEvent.drnmt2 = closestnmt2;
+//    }
+
+
+
+
       t_myTree->Fill();	
 //  } else {
   

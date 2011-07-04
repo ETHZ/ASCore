@@ -27,10 +27,10 @@ struct t_lepton {
   int type; //0==electron 1==muon 2==tau 
   int index, pfindex;
   float genPt;
-  int tag[5], probe[5], pprobe[5];
-  int tagReco[5], probeReco[5], pprobeReco[5];
-  int tagIso[5], probeIso[5], pprobeIso[5];
-  int tagID[5], probeID[5], pprobeID[5];
+  int tagjzb,tagss,tagmt2, probejzb,probess,probemt2, pprobejzb,pprobess,pprobemt2 ;
+  int tagRecojzb,tagRecoss,tagRecomt2,probeRecojzb,probeRecoss,probeRecomt2,pprobeRecojzb,pprobeRecoss,pprobeRecomt2;
+  int tagIsojzb,tagIsoss,tagIsomt2, probeIsojzb,probeIsoss,probeIsomt2, pprobeIsojzb,pprobeIsoss,pprobeIsomt2; 
+  int tagIDjzb,tagIDss,tagIDmt2, probeIDjzb,probeIDss,probeIDmt2,pprobeIDjzb,pprobeIDss,pprobeIDmt2;
 };
 
 
