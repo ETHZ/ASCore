@@ -8,6 +8,7 @@ Path	HLT_Mu8_Jet40_v3
 Path	HLT_Mu8_Jet40_v4
 Path	HLT_Mu8_Jet40_v5
 Path	HLT_Mu8_Jet40_v6
+Path	HLT_Mu8_Jet40_v7
 
 PATHSET
 Name	HLT_ELE8_JET40
@@ -16,6 +17,7 @@ Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v2
 Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v3
 Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v4
 Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v5
+Path	HLT_Ele8_CaloIdL_CaloIsoVL_Jet40_v6
 ##################################################
 # Signal regions:
 # high pT
@@ -27,11 +29,15 @@ Path	HLT_DoubleMu6_v3
 Path	HLT_DoubleMu7_v1
 Path	HLT_DoubleMu7_v2
 Path	HLT_DoubleMu7_v3
+Path	HLT_DoubleMu7_v4
+Path	HLT_DoubleMu7_v5
 
 PATHSET
 Name	HLT_MU13_MU8
 Path	HLT_Mu13_Mu8_v1
 Path	HLT_Mu13_Mu8_v2
+Path	HLT_Mu13_Mu8_v3
+Path	HLT_Mu13_Mu8_v4
 
 PATHSET
 Name	HLT_ELE17_ELE8
@@ -40,12 +46,15 @@ Path	HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2
 Path	HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3
 Path	HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4
 Path	HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5
+Path	HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6
 
 PATHSET
 Name	HLT_ELE17_ELE8_TIGHT
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3
+Path  HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4
+Path  HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5
 Path	HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1
 Path	HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2
 Path	HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3
@@ -59,6 +68,7 @@ Path	HLT_Mu17_Ele8_CaloIdL_v2
 Path	HLT_Mu17_Ele8_CaloIdL_v3
 Path	HLT_Mu17_Ele8_CaloIdL_v4
 Path	HLT_Mu17_Ele8_CaloIdL_v5
+Path	HLT_Mu17_Ele8_CaloIdL_v6
 
 PATHSET
 Name	HLT_MU8_ELE17
@@ -67,6 +77,7 @@ Path	HLT_Mu8_Ele17_CaloIdL_v2
 Path	HLT_Mu8_Ele17_CaloIdL_v3
 Path	HLT_Mu8_Ele17_CaloIdL_v4
 Path	HLT_Mu8_Ele17_CaloIdL_v5
+Path	HLT_Mu8_Ele17_CaloIdL_v6
 
 # high HT
 PATHSET
@@ -86,6 +97,7 @@ Path	HLT_DoubleEle8_CaloIdT_TrkIdVL_HT160_v3
 Path	HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v1
 Path	HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v2
 Path	HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v3
+Path	HLT_DoubleEle8_CaloIdT_TrkIdVL_HT150_v4
 
 PATHSET
 Name	HLT_DOUBLEMU3_HT160
@@ -94,6 +106,8 @@ Path	HLT_DoubleMu3_HT160_v3
 Path	HLT_DoubleMu3_HT150_v1
 Path	HLT_DoubleMu3_HT150_v2
 Path	HLT_DoubleMu3_HT150_v3
+Path	HLT_DoubleMu3_HT150_v4
+Path	HLT_DoubleMu3_HT150_v5
 
 PATHSET
 Name	HLT_MU3_ELE8_HT160
@@ -112,4 +126,5 @@ Path	HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT160_v3
 Path	HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v1
 Path	HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v2
 Path	HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v3
+Path	HLT_Mu3_Ele8_CaloIdT_TrkIdVL_HT150_v4
 ##################################################
