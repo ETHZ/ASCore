@@ -45,42 +45,32 @@ public:
   const bool IsCustomPfEl(const int);
   const int getPFMuIndex(const int);
   const int getPFElIndex(const int);
+
+  const bool MuAcceptance(int);
   const bool MuPassingTag(int, int);
-  const bool MuPassingIsoTag(int, int);
+  const bool MuPassingRecoProbe(int, int);
+  const bool MuPassingRecoPProbe(int, int);
+  const bool MuPassingIDProbe(int, int);
+  const bool MuPassingIDPProbe(int, int);
   const bool MuPassingIsoProbe(int, int);
   const bool MuPassingIsoPProbe(int, int, int);
-  const bool MuPassingIDTag(int, int);
-  const bool MuPassingIDProbe(int, int);
-  const bool MuPassingRecoTag(int, int);
-  const bool MuPassingRecoProbe(int, int, int);
-  const bool MuPassingRecoPProbe(int, int, int);
-  const bool MuPassingProbe(int,int);
-  const bool MuPassingPProbe(const int, const int);
-  const bool ElPassingTag(const int);
+
+  const bool ElAcceptance(int);
   const bool ElPassingTag(const int, const int);
-  const bool ElPassingProbe(const int);
-  const bool ElPassingPProbe(const int, const int);
-
-  const bool ElPassingRecoTag(int,int);
-  const bool ElPassingRecoProbe(int);
-  const bool ElPassingRecoProbe(int,int);
+  const bool ElPassingRecoProbe(const int, const int);
   const bool ElPassingRecoPProbe(const int, const int);
-
-  const bool ElPassingIsoTag(int,int);
-  const bool ElPassingIsoProbe(int,int);
-  const bool ElPassingIsoPProbe(const int, const int);
-
-  const bool ElPassingIDTag(int,int);
   const bool ElPassingIDProbe(int,int);
-  const bool ElPassingIDPProbe(int, int, int);
+  const bool ElPassingIDPProbe(int, int);
+  const bool ElPassingIsoProbe(int,int);
+  const bool ElPassingIsoPProbe(const int, const int, const int);
+
+
 
   const bool IsCustomJet(const int index);
   const bool passElTriggers(int);
   const bool passEMuTriggers(int);
   const bool passMuTriggers(int);
   const bool passAnyMT2Trigger();
-  const bool MuPassingRecoProbe(int,int);
-  const bool MuPassingIDPProbe(int, int,int);
   const bool IsGoodBasicPFJetPAT3(int, double, double);
   void setInfo();
   string outputFileName_; // public name of the output file name

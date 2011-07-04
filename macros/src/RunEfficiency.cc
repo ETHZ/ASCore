@@ -90,24 +90,18 @@ public:
   int id2;
   int idn;
   
-  int tagReco1[3];
   int probeReco1[3];
   int pprobeReco1[3];
-  int tagReco2[3];
   int probeReco2[3];
   int pprobeReco2[3];
   
-  int tagIso1[3];
   int probeIso1[3];
   int pprobeIso1[3];
-  int tagIso2[3];
   int probeIso2[3];
   int pprobeIso2[3];
   
-  int tagID1[3];
   int probeID1[3];
   int pprobeID1[3];
-  int tagID2[3];
   int probeID2[3];
   int pprobeID2[3];
 
@@ -181,14 +175,14 @@ void t_nanoEvent::reset() {
     tag1[n] = 0; probe1[n] = 0; pprobe1[n] = 0;
     tag2[n] = 0; probe2[n] = 0; pprobe2[n] = 0;
   
-    tagReco1[n] = 0; probeReco1[n] = 0; pprobeReco1[n] = 0;
-    tagReco2[n] = 0; probeReco2[n] = 0; pprobeReco2[n] = 0;
+    probeReco1[n] = 0; pprobeReco1[n] = 0;
+    probeReco2[n] = 0; pprobeReco2[n] = 0;
   
-    tagIso1[n] = 0; probeIso1[n] = 0; pprobeIso1[n] = 0;
-    tagIso2[n] = 0; probeIso2[n] = 0; pprobeIso2[n] = 0;
+    probeIso1[n] = 0; pprobeIso1[n] = 0;
+    probeIso2[n] = 0; pprobeIso2[n] = 0;
     
-    tagID1[n] = 0; probeID1[n] = 0; pprobeID1[n] = 0;
-    tagID2[n] = 0; probeID2[n] = 0; pprobeID2[n] = 0;
+    probeID1[n] = 0; pprobeID1[n] = 0;
+    probeID2[n] = 0; pprobeID2[n] = 0;
 
     dr1[n] = 0; dr2[n] = 0; drn[n] = 0; 
   
@@ -373,22 +367,16 @@ void RunEfficiency::Begin(){
   t_myTree->Branch("tag2", t_nEvent.tag2,"tag2[3]/I");
   t_myTree->Branch("probe2", t_nEvent.probe2,"probe2[3]/I");
   t_myTree->Branch("pprobe2", t_nEvent.pprobe2,"pprobe2[3]/I");
-  t_myTree->Branch("tagReco1", t_nEvent.tagReco1,"tagReco1[3]/I");
   t_myTree->Branch("probeReco1", t_nEvent.probeReco1,"probeReco1[3]/I");
   t_myTree->Branch("pprobeReco1", t_nEvent.pprobeReco1,"pprobeReco1[3]/I");
-  t_myTree->Branch("tagReco2", t_nEvent.tagReco2,"tagReco2[3]/I");
   t_myTree->Branch("probeReco2", t_nEvent.probeReco2,"probeReco2[3]/I");
   t_myTree->Branch("pprobeReco2", t_nEvent.pprobeReco2,"pprobeReco2[3]/I");
-  t_myTree->Branch("tagIso1", t_nEvent.tagIso1,"tagIso1[3]/I");
   t_myTree->Branch("probeIso1", t_nEvent.probeIso1,"probeIso1[3]/I");
   t_myTree->Branch("pprobeIso1", t_nEvent.pprobeIso1,"pprobeIso1[3]/I");
-  t_myTree->Branch("tagIso2", t_nEvent.tagIso2,"tagIso2[3]/I");
   t_myTree->Branch("probeIso2", t_nEvent.probeIso2,"probeIso2[3]/I");
   t_myTree->Branch("pprobeIso2", t_nEvent.pprobeIso2,"pprobeIso2[3]/I");
-  t_myTree->Branch("tagID1", t_nEvent.tagID1,"tagID1[3]/I");
   t_myTree->Branch("probeID1", t_nEvent.probeID1,"probeID1[3]/I");
   t_myTree->Branch("pprobeID1", t_nEvent.pprobeID1,"pprobeID1[3]/I");
-  t_myTree->Branch("tagID2", t_nEvent.tagID2,"tagID2[3]/I");
   t_myTree->Branch("probeID2", t_nEvent.probeID2,"probeID2[3]/I");
   t_myTree->Branch("pprobeID2", t_nEvent.pprobeID2,"pprobeID2[3]/I");
   
@@ -686,27 +674,24 @@ void RunEfficiency::Analyze() {
     tmpLepton.dzPV = fTR->MuD0PV[muIndex];
     tmpLepton.pfindex = indexOfAssociatedPFMuon;
     for(int n = 0; n < nAnalysis; n++) { 
-      tmpLepton.tagReco[n] = 0;
+      tmpLepton.tag[n] = 0;
       tmpLepton.probeReco[n] = 0;
       tmpLepton.pprobeReco[n] = 0;
-      tmpLepton.tagIso[n] = 0;
       tmpLepton.probeIso[n] = 0;
       tmpLepton.pprobeIso[n] = 0;
-      tmpLepton.tagID[n] = 0;
       tmpLepton.probeID[n] = 0;
       tmpLepton.pprobeID[n] = 0;
 
-      if(MuPassingRecoTag(n, muIndex)) tmpLepton.tagReco[n] = 1;
-      if(MuPassingRecoProbe(n, muIndex)) tmpLepton.probeReco[n] = 1;
-      if(MuPassingRecoPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeReco[n] = 1;
+      if(MuPassingTag(n, muIndex)) tmpLepton.tag[n] = 1;
       
-      if(MuPassingIsoTag(n, muIndex)) tmpLepton.tagIso[n] = 1;
+      if(MuPassingRecoProbe(n, muIndex)) tmpLepton.probeReco[n] = 1;
+      if(MuPassingRecoPProbe(n, muIndex)) tmpLepton.pprobeReco[n] = 1;
+      if(MuPassingIDProbe(n, muIndex)) tmpLepton.probeID[n] = 1;
+      if(MuPassingIDPProbe(n, muIndex)) tmpLepton.pprobeID[n] = 1;
+      
       if(MuPassingIsoProbe(n, muIndex)) tmpLepton.probeIso[n] = 1;
       if(MuPassingIsoPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeIso[n] = 1;
       
-      if(MuPassingIDTag(n, muIndex)) tmpLepton.tagID[n] = 1;
-      if(MuPassingIDProbe(n, muIndex)) tmpLepton.probeID[n] = 1;
-      if(MuPassingIDPProbe(n, muIndex, indexOfAssociatedPFMuon)) tmpLepton.pprobeID[n] = 1;
     }
     leptons.push_back(tmpLepton);
     
@@ -751,27 +736,21 @@ void RunEfficiency::Analyze() {
     tmpLepton.genPt = 0.;
 
     for(int n = 0; n < nAnalysis; n++) {
-      tmpLepton.tagReco[n] = 0;
+      tmpLepton.tag[n] = 0;
       tmpLepton.probeReco[n] = 0;
       tmpLepton.pprobeReco[n] = 0;
-      tmpLepton.tagIso[n] = 0;
       tmpLepton.probeIso[n] = 0;
       tmpLepton.pprobeIso[n] = 0;
-      tmpLepton.tagID[n] = 0;
       tmpLepton.probeID[n] = 0;
       tmpLepton.pprobeID[n] = 0;
 
-      if(ElPassingRecoTag(n, elIndex)) tmpLepton.tagReco[n] = 1;
+      if(ElPassingTag(n, elIndex)) tmpLepton.tag[n] = 1;
       if(ElPassingRecoProbe(n, elIndex)) tmpLepton.probeReco[n] = 1;
       if(ElPassingRecoPProbe(n, elIndex)) tmpLepton.pprobeReco[n] = 1;
-
-      if(ElPassingIsoTag(n, elIndex)) tmpLepton.tagIso[n] = 1;
-      if(ElPassingIsoProbe(n, elIndex)) tmpLepton.probeIso[n] = 1;
-      if(ElPassingIsoPProbe(n, elIndex)) tmpLepton.pprobeIso[n] = 1;
-
-      if(ElPassingIDTag(n, elIndex)) tmpLepton.tagID[n] = 1;
       if(ElPassingIDProbe(n, elIndex)) tmpLepton.probeID[n] = 1;
-      if(ElPassingIDPProbe(n, elIndex,indexOfAssociatedPFEl)) tmpLepton.pprobeID[n] = 1;
+      if(ElPassingIDPProbe(n, elIndex)) tmpLepton.pprobeID[n] = 1;
+      if(ElPassingIsoProbe(n, elIndex)) tmpLepton.probeIso[n] = 1;
+      if(ElPassingIsoPProbe(n, elIndex, indexOfAssociatedPFEl)) tmpLepton.pprobeIso[n] = 1;
     }
     leptons.push_back(tmpLepton);
   
@@ -813,16 +792,13 @@ void RunEfficiency::Analyze() {
       t_nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
       t_nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
       for(int n = 0; n < nAnalysis; ++n) {
-        t_nEvent.tagReco1[n] = sortedGoodLeptons[PosLepton1].tagReco[n]; //??????
+        t_nEvent.tag1[n] = sortedGoodLeptons[PosLepton1].tag[n]; //??????
         t_nEvent.probeReco1[n] = sortedGoodLeptons[PosLepton1].probeReco[n]; //??????
         t_nEvent.pprobeReco1[n] = sortedGoodLeptons[PosLepton1].pprobeReco[n]; //??????
-        t_nEvent.tagIso1[n] = sortedGoodLeptons[PosLepton1].tagIso[n]; //??????
         t_nEvent.probeIso1[n] = sortedGoodLeptons[PosLepton1].probeIso[n]; //??????
         t_nEvent.pprobeIso1[n] = sortedGoodLeptons[PosLepton1].pprobeIso[n]; //??????
-        t_nEvent.tagID1[n] = sortedGoodLeptons[PosLepton1].tagID[n]; //??????
         t_nEvent.probeID1[n] = sortedGoodLeptons[PosLepton1].probeID[n]; //??????
         t_nEvent.pprobeID1[n] = sortedGoodLeptons[PosLepton1].pprobeID[n]; //??????
-        t_nEvent.tag1[n] = t_nEvent.tagReco1[n]*t_nEvent.tagIso1[n]*t_nEvent.tagID1[n]; 
         t_nEvent.probe1[n] = t_nEvent.probeReco1[n]*t_nEvent.probeIso1[n]*t_nEvent.probeID1[n];
         t_nEvent.pprobe1[n] = t_nEvent.pprobeReco1[n]*t_nEvent.pprobeIso1[n]*t_nEvent.pprobeID1[n];
       }
@@ -841,16 +817,13 @@ void RunEfficiency::Analyze() {
       t_nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
       t_nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
       for(int n = 0; n < nAnalysis; ++n) {
-        t_nEvent.tagReco2[n] = sortedGoodLeptons[PosLepton2].tagReco[n]; //??????
+        t_nEvent.tag2[n] = sortedGoodLeptons[PosLepton2].tag[n]; //??????
         t_nEvent.probeReco2[n] = sortedGoodLeptons[PosLepton2].probeReco[n]; //??????
         t_nEvent.pprobeReco2[n] = sortedGoodLeptons[PosLepton2].pprobeReco[n]; //??????
-        t_nEvent.tagIso2[n] = sortedGoodLeptons[PosLepton2].tagIso[n]; //??????
         t_nEvent.probeIso2[n] = sortedGoodLeptons[PosLepton2].probeIso[n]; //??????
         t_nEvent.pprobeIso2[n] = sortedGoodLeptons[PosLepton2].pprobeIso[n]; //??????
-        t_nEvent.tagID2[n] = sortedGoodLeptons[PosLepton2].tagID[n]; //??????
         t_nEvent.probeID2[n] = sortedGoodLeptons[PosLepton2].probeID[n]; //??????
         t_nEvent.pprobeID2[n] = sortedGoodLeptons[PosLepton2].pprobeID[n]; //??????
-        t_nEvent.tag2[n] = t_nEvent.tagReco2[n]*t_nEvent.tagIso2[n]*t_nEvent.tagID2[n]; 
         t_nEvent.probe2[n] = t_nEvent.probeReco2[n]*t_nEvent.probeIso2[n]*t_nEvent.probeID2[n];
         t_nEvent.pprobe2[n] = t_nEvent.pprobeReco2[n]*t_nEvent.pprobeIso2[n]*t_nEvent.pprobeID2[n];
       }    
@@ -1011,201 +984,7 @@ std::string RunEfficiency::any2string(T i)
 }
 
 
-
-//__________________________________________________________________________
-const bool RunEfficiency::IsCustomPfMu(const int index){
-//VERY TEMPORARY !!!!
-  // Basic muon cleaning and ID
-  // Acceptance cuts
-  if ( !(fTR->PfMu3Pt[index] > 5) )       return false;
-  if ( !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
-  
-/*  // Quality cuts
-  if ( !fTR->fTR->PfMu3IsGMPT[index])        return false;
-  if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
-  
-  // Hits
-  if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-  if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-  if ( !(fTR->MuNMatches[index] > 1) )      return false;
-  
-  // Vertex compatibility
-  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-  
-  // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-  double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-  
-  if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-*/
-  return true;
-}
-
-const bool RunEfficiency::IsCustomMu(const int index){
-
-  // Basic muon cleaning and ID
-
-  // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 10) )       return false;
-  counters[MU].fill(" ... pt > 10");
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-  counters[MU].fill(" ... |eta| < 2.4");
-
-  // Quality cuts
-  if ( !fTR->MuIsGMPT[index] )        return false;
-  counters[MU].fill(" ... is global muon prompt tight");
-  if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  counters[MU].fill(" ... is global muon");
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
-  counters[MU].fill(" ... is tracker muon");
-
-  // Hits
-  if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-  counters[MU].fill(" ... nTkHits >= 11");
-  if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-  counters[MU].fill(" ... nPxHits > 0");
-  if ( !(fTR->MuNMatches[index] > 1) )      return false;
-  counters[MU].fill(" ... nMatches > 1");
-
-  // Vertex compatibility
-  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-  counters[MU].fill(" ... D0(pv) < 0.02");
-  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-  counters[MU].fill(" ... DZ(pv) < 1.0");
-
-  // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-  double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-  counters[MU].fill(" ... hybridIso < 0.15");
-
-  if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-  counters[MU].fill(" ... dpt/pt < 0.1");
-
-  return true;
-}
-
-
-const bool RunEfficiency::IsCustomEl(const int index){
-
-  // kinematic acceptance
-  if(!(fTR->ElPt[index]>10) )return false;
-  counters[EL].fill(" ... pt > 10");
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  counters[EL].fill(" ... |eta| < 2.4");
-  if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-  counters[EL].fill(" ... missing inner hits <= 1");
-  if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-  counters[EL].fill(" ... D0(pv) < 0.04");
-  if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-  counters[EL].fill(" ... DZ(pv) < 1.0");
-
-  // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-  counters[EL].fill(" ... passes WP95 ID");
-
-  // Flat isolation below 20 GeV (only for synch.)
-  double hybridIso = fTR->ElRelIso03[index]
-    *fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-  counters[EL].fill(" ... hybridIso < 0.15");
-
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP90 ID");
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP80 ID");
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-  //   counters[EL].fill("... MVA>0.4");
-
-  return true;
-
-
-}
-
-
-//__________________________________________________________________________
-const bool RunEfficiency::IsCustomPfEl(const int index){
-
-  // kinematic acceptance
-  if(!(fTR->PfEl3Pt[index]>5) )return false;
-  if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
-  if(!(fTR->PfElID95[index])) return false;
-  //if(!(fTR->PfElID80[index])) return false;
-/*
-  if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-  if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-  if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-  
-  // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-  
-  // Flat isolation below 20 GeV (only for synch.)
-  double hybridIso = fTR->ElRelIso03[index]
-    *fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;  
-  
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-*/
-  return true;
-  
-}
-
-
-//_______________________________________________________________________
-const int RunEfficiency::getPFMuIndex(const int recoIndex) {
-
-  int muIndex = 0;
-  float px= fTR->MuPx[recoIndex];
-  float py= fTR->MuPy[recoIndex];
-  float pz= fTR->MuPz[recoIndex];
-  float energy =  fTR->MuE[recoIndex];
-  TLorentzVector tmpVector(px,py,pz,energy);
-  
-  for(muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++) {
-    float pfpx= fTR->PfMu3Px[muIndex];
-    float pfpy= fTR->PfMu3Py[muIndex];
-    float pfpz= fTR->PfMu3Pz[muIndex];
-    float pfenergy =  fTR->PfMu3E[muIndex];
-    //if(pfpx == 0 && pfpy == 0 && pfpz == 0) break;
-    TLorentzVector tmpPfVector(pfpx,pfpy,pfpz,pfenergy);
-    if(tmpPfVector.DeltaR(tmpVector)<0.05) return muIndex; //maybe to tight
-  }
-  return -1;
-  
-} 
-
-//_______________________________________________________________________
-const int RunEfficiency::getPFElIndex(const int recoIndex) {
-
-  int elIndex = 0;
-  float px= fTR->ElPx[recoIndex];
-  float py= fTR->ElPy[recoIndex];
-  float pz= fTR->ElPz[recoIndex];
-  float energy =  fTR->ElE[recoIndex];
-  TLorentzVector tmpVector(px,py,pz,energy);
-  
-  for(elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++) {
-    float pfpx= fTR->PfEl3Px[elIndex];
-    float pfpy= fTR->PfEl3Py[elIndex];
-    float pfpz= fTR->PfEl3Pz[elIndex];
-    float pfenergy =  fTR->PfEl3E[elIndex];
-    //if(pfpx == 0 && pfpy == 0 && pfpz == 0) break;
-    TLorentzVector tmpPfVector(pfpx,pfpy,pfpz,pfenergy);
-    if(tmpPfVector.DeltaR(tmpVector)<0.05) return elIndex; //maybe to tight
-  }
-  return -1;
-
-} 
-
-
-
+//_____________________________________________________________________________
 const bool RunEfficiency::IsGoodBasicPFJetPAT3(int index, double ptcut, double absetacut){
         // Basic PF jet cleaning and ID cuts
         // cut at pt of ptcut (default = 30 GeV)
@@ -1237,119 +1016,6 @@ const bool RunEfficiency::IsCustomJet(const int index){
 }
 
 
-
-
-//__________________________________________________________________________
-const bool RunEfficiency::ElPassingTag(const int n, const int index){
-  
-  // kinematic acceptance
-  if(!(fTR->ElPt[index]>5) )return false;
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-  return true;
-
-}
-
-
-//__________________________________________________________________________
-const bool RunEfficiency::ElPassingRecoProbe(int n, int index){
-
-   // kinematic acceptance
-  if(!(fTR->ElPt[index]>5) )return false;
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false; // Acceptance cuts
-  
-  if(n == 0) {
-    if(!fTR->ElEcalDriven[index]) return false;
-    if(fTR->ElCaloEnergy[index] < 10.) return false;
-  } else if(n == 1) {
-    if(!fTR->ElEcalDriven[index]) return false;
-    if(fTR->ElCaloEnergy[index] < 10.) return false;
-  } else if(n == 2) {
-    if(!fTR->ElEcalDriven[index]) return false;
-    if(fTR->ElCaloEnergy[index] < 10.) return false;
-  }
-  
-  return true;
-
-}
-
-//__________________________________________________________________________
-const bool RunEfficiency::ElPassingIDProbe(int n, int index){
-
-  // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 5) )       return false;
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
-  
-  if(n == 0) {
-   
-  } else if(n == 1) {
- 
-  } else if(n == 2) {
-    
-  }
-
-  return true;
-}
-
-
-
-//_________________________________________________________________________
-const bool RunEfficiency::ElPassingTag(const int index) {
-
-  // kinematic acceptance
-  if(!(fTR->ElPt[index]>5) )return false;
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-  return true;
-}
-
-//____________________________________________________________________________
-const bool RunEfficiency::ElPassingPProbe(const int index, int indexpf) {
-  
-  // kinematic acceptance
-  if(!(fTR->ElPt[index]>5) )return false;
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  //if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-  //if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-  //if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-  if ( indexpf == -1) return false;
-  /*
-  // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-
-  // Flat isolation below 20 GeV (only for synch.)
-  double hybridIso = fTR->ElRelIso03[index]
-    *fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP90 ID");
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP80 ID");
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-  //   counters[EL].fill("... MVA>0.4");
-  */
-  if( ! IsCustomPfEl(indexpf) ) return false;
-  
-
-  return true;
-}
 
 //__________________________________________________________________________
 bool RunEfficiency::GeneratorInfo(void) {
@@ -1393,15 +1059,6 @@ bool RunEfficiency::GeneratorInfo(void) {
   TLorentzVector GenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
   t_nEvent.genMET     = fTR->GenMET;
   
-  // Number of good jets
-  t_nEvent.genNjets = 0;
-  for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
-    if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
-    if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
-    ++t_nEvent.genNjets;
-  }
-  
-  
 
   // Select the two highest-pt leptons compatible with a Z
   size_t i1 = 0, i2 = 0;
@@ -1417,12 +1074,27 @@ bool RunEfficiency::GeneratorInfo(void) {
     }
     //if(i1 == sortedGLeptons.size()-1) return saveMC;
   }
- 
 
+  float closest1 = 1000, closest2 = 1000, dr1, dr2;
+  if(sortedGLeptons.size()>1) { 
+    // Number of good jets
+    t_nEvent.genNjets = 0;
+    for ( int jIndex=0; jIndex<fTR->NGenJets; ++jIndex) {
+      if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
+      if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
+      ++t_nEvent.genNjets;
+      TLorentzVector tmpVector;
+      tmpVector.SetPtEtaPhiE(fTR->GenJetPt[jIndex],fTR->GenJetEta[jIndex], fTR->GenJetPhi[jIndex], fTR->GenJetE[jIndex]);
+      dr1 = tmpVector.DeltaR(sortedGLeptons[i1].p);
+      dr2 = tmpVector.DeltaR(sortedGLeptons[i2].p);
+      if(dr1<closest1) closest1 = dr1;
+      if(dr2<closest2) closest2 = dr2;
+    }
+    dr1 = closest1;
+    dr2 = closest2;
+  }
   
- 
-  
-  float dr1 = 1000, dr2 = 1000, drN = 1000;
+
   
   if(sortedGLeptons.size()>0) {
     t_nEvent.genPt1     = sortedGLeptons[i1].p.Pt();
