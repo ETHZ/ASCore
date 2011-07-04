@@ -107,13 +107,16 @@ void MT2Trigger::Reset(){
 	HLT_HT400_v2            = false;
 	HLT_HT400_v3            = false;
 	HLT_HT400_v4            = false;
+	HLT_HT400_v5            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
 	HLT_HT450_v3            = false;
 	HLT_HT450_v4            = false;
+	HLT_HT450_v5            = false;
 	HLT_HT500_v2            = false;
 	HLT_HT500_v3            = false;
 	HLT_HT500_v4            = false;
+	HLT_HT500_v5            = false;
 	HLT_HT550_v2            = false;
 	HLT_HT550_v3            = false;
 	HLT_HT550_v4            = false;
@@ -1478,7 +1481,7 @@ Int_t MT2tree::WDecayMode(){
 		if( abs(genlept[i].ID)==16 && abs(genlept[i].MID)==24 )                               {result = result | 4;}  // tau neutrino
 		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 5;} 
 		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 6;} 
-		if( abs(genlept[i].ID)==15 && abs(genlept[i].MID)==24 )                               {result = result | 12;} // stable tau
+		if( abs(genlept[i].ID)==15 && abs(genlept[i].MID)==24 )                               {result = result | 8;} // stable tau
 	}
 	return result;
 }
@@ -1494,6 +1497,30 @@ Double_t MT2tree::HemiMassTop(){
 	if(fabs(M1-172)<fabs(M2-172)) return M1;
 	else                          return M2;
 }
+
+Double_t MT2tree::LeptJetDR( int pid, int index, bool bjet, int ID){
+        if(pid==11 && NEles  < index+1) return -1;
+	if(pid==13 && NMuons < index+1) return -1;
+	Double_t dRmin=999.99;
+	for(int i=0; i<NJets; ++i){
+		if(! jet[i].IsGoodPFJet(20,2.8,ID))         continue;
+		if(bjet && jet[i].bTagProbSSVHP < 2.0)      continue;
+		Double_t dR=999.99;
+		if(pid==13) dR = jet[i].lv.DeltaR(muo[index].lv);
+		if(pid==11) dR = jet[i].lv.DeltaR(ele[index].lv);
+		if(dR < dRmin) dRmin=dR;
+	}
+	return dRmin;
+}
+
+Double_t MT2tree::PseudoJetMetDPhi(){
+	if(hemi[1].MT2 <0) return -999;
+	double dPhi1 = hemi[1].lv1.DeltaPhi(pfmet[0]);
+	double dPhi2 = hemi[1].lv2.DeltaPhi(pfmet[0]);
+	return (fabs(dPhi1) < fabs(dPhi2)) ? fabs(dPhi1) : fabs(dPhi2);
+}
+
+
 
 ClassImp(MT2Misc)
 ClassImp(MT2Znunu)

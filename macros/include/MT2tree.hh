@@ -106,13 +106,16 @@ public:
 	Bool_t HLT_HT400_v2;
 	Bool_t HLT_HT400_v3;
 	Bool_t HLT_HT400_v4;
+	Bool_t HLT_HT400_v5;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
 	Bool_t HLT_HT450_v3;
 	Bool_t HLT_HT450_v4;
+	Bool_t HLT_HT450_v5;
 	Bool_t HLT_HT500_v2;
 	Bool_t HLT_HT500_v3;
 	Bool_t HLT_HT500_v4;
+	Bool_t HLT_HT500_v5;
 	Bool_t HLT_HT550_v2;
 	Bool_t HLT_HT550_v3;
 	Bool_t HLT_HT550_v4;
@@ -133,7 +136,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 6);
+	ClassDef(MT2Trigger, 7);
 };
 
 // MT2Znunu --------------------------------
@@ -389,6 +392,7 @@ public:
   Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetMetDPhi(int hemi_index=0, int pj=1, int whichmet=1, double met=30);
+  Double_t PseudoJetMetDPhi();
 
   // MT2 & friends
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=0, int met=1);
@@ -425,6 +429,7 @@ public:
   Bool_t   TopDecayModeResult(Int_t nlepts);
   Bool_t   SLTopAccept(double pt, double eta);
   Double_t SLTopEta(double pt);
+  Double_t LeptJetDR(int pid, int index, bool bjet, int ID);
 
   Int_t     NJets;
   Int_t     NGenJets;
