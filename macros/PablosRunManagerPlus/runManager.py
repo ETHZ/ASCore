@@ -16,6 +16,7 @@
 ############################################################### 
    
 
+domultiprocessing=True
 
 # System libraries to interact with the shell
 import sys
@@ -23,10 +24,11 @@ import os
 from os import popen
 import commands
 import time
-##the following two are for threading
-#import Queue
-#import threading
-from multiprocessing import Pool
+try:
+	from multiprocessing import Pool
+except ImportError:
+	print "Importing multiprocessing failed. Please use the script like this: python runManager.py template.cfg and not ./runManager.py template.cfg"
+	domultiprocessing=False
 
 jobnumbers=[]
 totaljobnumber=0
@@ -209,12 +211,12 @@ def parseInputFile(name):
     if(stringInfo[i] == []):
       return "Error"   
   showMessage("Configuration Parameters:")
-  showMessage("ReleasePath = " + stringInfo[1])
-  showMessage("Executable = " + stringInfo[2])
-  showMessage("NameOfConf = " + stringInfo[3])
-  showMessage("NameOfSource = " + stringInfo[0])
+  showMessage("ReleasePath = " + stringInfo[1] + sanitycheck("ReleasePath",stringInfo[1]))
+  showMessage("Executable = " + stringInfo[2] + sanitycheck("Executable",stringInfo[2]))
+  showMessage("NameOfConf = " + stringInfo[3] + sanitycheck("NameOfConf",stringInfo[3]))
+  showMessage("NameOfSource = " + stringInfo[0] + sanitycheck("NameOfSource",stringInfo[0]))
   showMessage("SrmPath = " + stringInfo[4])
-  showMessage("WorkPath = " + stringInfo[5])
+  showMessage("WorkPath = " + stringInfo[5] + sanitycheck("WorkPath",stringInfo[5]))
   showMessage("HPName = " + stringInfo[6])
   return stringInfo
 
@@ -384,11 +386,22 @@ def check_directory(path,username) :
 		join_directory(path,listoffiles,username)
 
 
+##################################################################################
+#                              POST PROCESSING                                   #
+##################################################################################
+
+def sanitycheck(name,path):
+	if os.path.exists(path) == False:
+		showMessage("Problem detected with "+name+" which is set to "+path+" -- please fix this. Aborting.")
+		sys.exit(-1)
+	else :
+		return " ... ok !"
 
 ##################################################################################
 #                                  MAIN                                          #
 ##################################################################################
-po = Pool()
+if domultiprocessing==True:
+	po = Pool()
 
 fusepath=""
 uname=""
@@ -407,9 +420,15 @@ else:
       if(l[0].find("/data/")>-1) :
 	isdata=1
       showMessage("Processing " + l[0])
-      po.apply_async(process,(l, result),callback=cb)
-  po.close()
-  po.join()
+      if domultiprocessing==True:
+	      print "At this point you could be saving a lot of time with multiprocessing ... "
+	      po.apply_async(process,(l, result),callback=cb)
+      else :
+	      process(l, result)
+      		
+  if domultiprocessing==True :
+	  po.close()
+	  po.join()
   totaljobnumber=len(jobnumbers)
   counter=0
   while(len(jobnumbers)>0 and counter<300) :
