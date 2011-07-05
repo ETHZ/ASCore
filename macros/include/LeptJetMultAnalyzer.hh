@@ -7,7 +7,6 @@
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 #include "MassAnalysis.hh"
-#include "helper/LumiReweightingStandAlone.h"
 
 
 class LeptJetMultAnalyzer : public TreeAnalyzerBase {
