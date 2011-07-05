@@ -35,7 +35,8 @@ public:
 		fisData=isData;
 	};
 
-
+  //  reweight::LumiReWeighting *LumiReW;
+  bool isS3;
 private:
 
 	void BookTree();

@@ -353,8 +353,15 @@ void MassAnalysis::FillTree(){
 	if(!fisData){
 		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
 		fMT2tree->pileUp.PtHat             = fTR->PtHat;
-		fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
+		//////////// S3 vs S4
+
+		if(isS3)
+		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions, fTR->PUnumInteractionsLate);
+		else
+		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
+
 		fMT2tree->pileUp.Rho               = fTR->Rho;
+		
 		if(fVerbose > 3) {
 			cout << "fTR->PUnumInteractions " <<  fTR->PUnumInteractions << " weight "  
 		     	     << " GetPUWeight() " << GetPUWeight(fTR->PUnumInteractions) << endl; 
@@ -1153,5 +1160,8 @@ void MassAnalysis::End(){
 	// write tree
 	fATree->Write();
 	fHistFile                ->Close();
+
+	cout << " MassAnalysis::RealEnd()                                             " << endl;
+
 }
 
