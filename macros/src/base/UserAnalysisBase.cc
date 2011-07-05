@@ -1156,5 +1156,9 @@ float UserAnalysisBase::GetPUWeight(int nPUinteractions){
 	else return fPUWeight->GetWeight(nPUinteractions); 
 }
 
+float UserAnalysisBase::GetPUWeight(int nPUinteractions, int nPUinteractionsLate){
+  if(! fDoPileUpReweight) return -999.99;
+  else return fPUWeight->weightOOT(nPUinteractions, nPUinteractionsLate);
+}
 
 

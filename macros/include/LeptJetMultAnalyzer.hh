@@ -7,7 +7,7 @@
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 #include "MassAnalysis.hh"
-
+#include "helper/LumiReweightingStandAlone.h"
 
 
 class LeptJetMultAnalyzer : public TreeAnalyzerBase {
@@ -19,7 +19,8 @@ public:
 	void EndJob();
 	void Loop();
 	void SetMaxEvents(int a){fMaxEvents=a;}
-
+  bool isS3;
+  
 private:
 	MassAnalysis             *fMassAnalysis;
   	int fMaxEvents;

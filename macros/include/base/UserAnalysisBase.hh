@@ -34,6 +34,8 @@ public:
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string = "");
 	virtual float GetPUWeight(int);
+  virtual float GetPUWeight(int, int);
+
 
 	TreeReader *fTR;
 	TString fOutputDir;
