@@ -20,7 +20,8 @@
 #include "helper/Hemisphere.hh"
 #include "MT2tree.hh"
 
-static const int gNHemispheres = 10;
+static const int gNHemispheres = 4;
+static const int gNGenJets     = 20;
 
 class MassAnalysis : public MultiplicityAnalysisBase{
 public:
@@ -34,7 +35,8 @@ public:
 		fisData=isData;
 	};
 
-
+  //  reweight::LumiReWeighting *LumiReW;
+  bool isS3;
 private:
 
 	void BookTree();
@@ -59,14 +61,14 @@ private:
 		void Reset(){ MT2=-999.99; MCT = -999.99; alphaT = -999.99; minDHT = -999.99; maxDR=-999.99;
 	       	              dPhi = -999.99; seed = -1; assoc = -1; 
 		              objects.clear();
-		              pjet1.Clear(); pjet1.Clear(); UTM.Clear();
+		              pjet1.SetPxPyPzE(0.,0.,0.,0.); pjet1.SetPxPyPzE(0.,0.,0.,0.); UTM.SetPxPyPzE(0.,0.,0.,0.);
 		}
 	} fHemiObjects[gNHemispheres];
 	
 	typedef std::map <string, bool*> StringBoolMap;
 	StringBoolMap fTriggerMap;
 
-	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, HemiObjects& hemiobject);
+	void   GetMT2Variables(int hemi_seed, int hemi_assoc, double maxDR, double minJPt, double maxJEta, int PFJID, HemiObjects& hemiobject);
 	void   GetMT2Variables(bool minimizeDHT, double minJPt, double maxJEta, HemiObjects& hemiobject);
 	double GetMT2(TLorentzVector v1, double mv1, TLorentzVector v2, double mv2, TLorentzVector p_unobs, int m_invisible); 
 	double GetAlphaT(std::vector<TLorentzVector>& p4s);
@@ -86,7 +88,6 @@ private:
 	Davismt2 *fMT2;
 	TMctLib  *fMCT;
 	Hemisphere *fHemisphere;
-
 
 	// data members
 	int  fMT2_histos_step;
