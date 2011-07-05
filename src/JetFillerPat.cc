@@ -103,7 +103,13 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
       fTphi[ijet]   = Jit->phi();
       fTeta[ijet]   = Jit->eta();
       fTarea[ijet]  = Jit->jetArea();
-      
+
+      if(Jit->genJet()){
+	fTflavour[ijet] = Jit->partonFlavour();
+      }
+      else
+	fTflavour[ijet] = 0 ;
+
       fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
       fTL1FastJetScale[ijet] = Jit->jecFactor("L1FastJet")/Jit->jecFactor("Uncorrected"); 
 
