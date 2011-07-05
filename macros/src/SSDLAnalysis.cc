@@ -346,9 +346,14 @@ void SSDLAnalysis::Analyze(){
 			fTElGenGMType[ind] = -888;   
 		}
 		
-		p[ind] = TLorentzVector(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], fTR->ElE[elindex]);
-		float mtsquare = (p[ind]+p_MET).Et()*(p[ind]+p_MET).Et() - (p[ind]+p_MET).Pt()*(p[ind]+p_MET).Pt();
-		fTElMT             [ind] = mtsquare < 0.0 ? -TMath::Sqrt(-mtsquare) : TMath::Sqrt(mtsquare);
+		// Calculate mT:
+		TLorentzVector pel;
+		pel.SetXYZM(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], 0.0005);
+		double ETlept = sqrt(pel.M2() + pel.Perp2());
+		double METpx  = fTR->PFMETpx;
+		double METpy  = fTR->PFMETpy;
+		fTElMT[ind]   = sqrt( 2*fTR->PFMET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
+		
 		fTElIsGoodElId_WP80[ind] = IsGoodElId_WP80(elindex);
 		fTElIsGoodElId_WP90[ind] = IsGoodElId_WP90(elindex);
 	}
