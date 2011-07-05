@@ -1095,7 +1095,7 @@ void RunEfficiency::Analyze() {
 	
 	if ( jpt > jetThreshold[0] ) {//JZB
 	  t_nEvent.pfTightHTjzb += jpt;
-	  if(isJetID>0&&isJetIdjzb>0) t_nEvent.pfJetGoodNumIDjzb++;
+	  if(isJetIdjzb>0) t_nEvent.pfJetGoodNumIDjzb++;
 	  t_nEvent.pfJetGoodNumjzb++;
 	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
 	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
@@ -1106,7 +1106,7 @@ void RunEfficiency::Analyze() {
 	}
 	if ( jpt > jetThreshold[1] ) {//SS
 	  t_nEvent.pfTightHTss += jpt;
-	  if(isJetID>0) t_nEvent.pfJetGoodNumIDss++;
+	  if(isJetIDss>0) t_nEvent.pfJetGoodNumIDss++;
 	  t_nEvent.pfJetGoodNumss++;
 	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
 	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
@@ -1117,7 +1117,7 @@ void RunEfficiency::Analyze() {
 	}
 	if ( jpt > jetThreshold[2] ) {//MT2
 	  t_nEvent.pfTightHTmt2 += jpt;
-	  if(isJetID>0) t_nEvent.pfJetGoodNumIDmt2++;
+	  if(isJetIDmt2>0) t_nEvent.pfJetGoodNumIDmt2++;
 	  t_nEvent.pfJetGoodNummt2++;
 	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
 	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
