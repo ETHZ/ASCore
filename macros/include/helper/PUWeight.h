@@ -51,6 +51,9 @@ class PUWeight {
   // Get the histogram with the profile for MC
   TH1F* GetMCHisto() const {return (TH1F*)fMC->Clone();}
 
+  double weightOOT( int npv_in_time, int npv_m50nsBX );
+void weightOOT_init();
+
  protected:
   // Build the PU ideal profile for MC
   TH1F* IdealMCHistogram();
@@ -68,6 +71,7 @@ class PUWeight {
   TH1F* fMC;     //PU profile for MC
   TH1F* fWeight; //Histogram with the weight content
 
+  double WeightOOTPU_[25][25];
 };
 
 
