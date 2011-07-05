@@ -212,10 +212,10 @@ bool UserAnalysisBase::IsGoodBasicPFJetPAT(int index, double ptcut, double abset
 	// Basic PF jet cleaning and ID cuts
 	// cut at pt of ptcut (default = 30 GeV)
 	// cut at abs(eta) of absetacut (default = 2.5)
-	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
-	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
-	if(fTR->PF2PATJIDLoose[index]    ==0       ) return false;
-	return true;
+//	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
+//	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
+//	if(fTR->PF2PATJIDLoose[index]    ==0       ) return false;
+	return false;
 }
 
 bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetacut) {
@@ -229,8 +229,8 @@ bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetac
 bool UserAnalysisBase::IsGoodPFJetMediumPAT(int index, double ptcut, double absetacut) {
 	// Medium PF JID
 	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.95)         ) return false;
-	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.95)         ) return false;
+//	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.95)         ) return false;
+//	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.95)         ) return false;
 	return true;
 }
 
@@ -245,8 +245,8 @@ bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacu
 bool UserAnalysisBase::IsGoodPFJetTightPAT(int index, double ptcut, double absetacut) {
 	// Tight PF JID
 	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.90)         ) return false;
-	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.90)         ) return false;
+//	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.90)         ) return false;
+//	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.90)         ) return false;
 	return true;
 }
 
@@ -968,8 +968,8 @@ void UserAnalysisBase::EventPrint(){
 
   // print the event and primary vertex info
   TString tag = "";
-  if (fTR->NJets == 1 && fabs(fTR->JEta[0]) < etaBar) tag = "***";
-  if (fTR->NJets >= 2 && (fabs(fTR->JEta[0]) < etaBar || fabs(fTR->JEta[1] < etaBar))) tag = "***";
+  if (fTR->PF2PAT3NJets == 1 && fabs(fTR->PF2PAT3JEta[0]) < etaBar) tag = "***";
+  if (fTR->PF2PAT3NJets >= 2 && (fabs(fTR->PF2PAT3JEta[0]) < etaBar || fabs(fTR->PF2PAT3JEta[1] < etaBar))) tag = "***";
   cout << endl;
   cout << " Run = " << fTR->Run << ", Lumi sect = " << fTR->LumiSection
        << ", Event = " << fTR->Event << "  " << tag << endl;
@@ -987,38 +987,47 @@ void UserAnalysisBase::EventPrint(){
   cout << " PFMET          = " << fTR->PFMET    << ", METPhi = " << fTR->PFMETphi << endl;
 		
   // print the jets info
-  cout << " Number of jets in the ntuple = " << fTR->NJets
-    //       << ", total number of jets = " << fTR->NJetsTot
-       << endl;
+  cout << " Number of jets in the ntuple = " << fTR->PF2PAT3NJets << endl;
   int nJetsCand = 0;
-  for (int i = 0; i < fTR->NJets; ++i) {
-    double dPhiMJ = Util::DeltaPhi(fTR->JPhi[i], METPhi);
-    cout << " Jet" << i << " Pt = " << fTR->JPt[i] << ", Phi = " << fTR->JPhi[i]
-	 << ", Eta = " << fTR->JEta[i] << ", E = " << fTR->JE[i] << endl;
-    double jmass = sqrt(fTR->JE[i]*fTR->JE[i]-fTR->JPx[i]*fTR->JPx[i]-fTR->JPy[i]*fTR->JPy[i]-fTR->JPz[i]*fTR->JPz[i]);
-    cout << "      " << " Px = " << fTR->JPx[i] << " Py = " << fTR->JPy[i] << " Pz = " << fTR->JPz[i]
+  for (int i = 0; i < fTR->PF2PAT3NJets; ++i) {
+    double dPhiMJ = Util::DeltaPhi(fTR->PF2PAT3JPhi[i], METPhi);
+    cout << " Jet" << i << " Pt = " << fTR->PF2PAT3JPt[i] << ", Phi = " << fTR->PF2PAT3JPhi[i]
+	 << ", Eta = " << fTR->PF2PAT3JEta[i] << ", E = " << fTR->PF2PAT3JE[i] << endl;
+    double jmass = sqrt(fTR->PF2PAT3JE[i]*fTR->PF2PAT3JE[i]-fTR->PF2PAT3JPx[i]*fTR->PF2PAT3JPx[i]-fTR->PF2PAT3JPy[i]*fTR->PF2PAT3JPy[i]-fTR->PF2PAT3JPz[i]*fTR->PF2PAT3JPz[i]);
+    cout << "      " << " Px = " << fTR->PF2PAT3JPx[i] << " Py = " << fTR->PF2PAT3JPy[i] << " Pz = " << fTR->PF2PAT3JPz[i]
 	 << " Jet mass = " << jmass << endl;
-    cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
-    cout << "      " << " JetfEMch = " << fTR->JChargedEmFrac[i] << ", JetfEMneu = " << fTR->JNeutralEmFrac[i]
-	 << " JetfHach = " << fTR->JChargedHadFrac[i] << ", JetfHaneu = " << fTR->JNeutralHadFrac[i] << ", JChargedMuEnergyFrac = " << fTR->JChargedMuEnergyFrac[i] << endl;
-    cout << "      " << " b-tag TCHE = " << fTR->JbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->JbTagProbTkCntHighPur[i] << endl;
-    cout << "      " << " b-tag SSVHE = " << fTR->JbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->JbTagProbSimpSVHighPur[i] << endl;
+    cout << "      " << " dPhiJM = " << dPhiMJ <<  endl;
+    
+    cout << "      " << " pf-JID    (1=true, 0=false)= " << fTR->PF2PAT3JIDLoose[i] << endl;  
+    cout << "      " <<" JetfEMch  = " << fTR->PF2PAT3JChEmfrac[i]  << ", JetfEMneu = "  << fTR->PF2PAT3JNeuEmfrac[i] << endl;
+    cout << "      " <<" JetfHach  = " << fTR->PF2PAT3JChHadfrac[i] << ", JetfHaneu = "  << fTR->PF2PAT3JNeuHadfrac[i] <<  endl;
+    cout << "      " <<" JetCHMult = " << fTR->PF2PAT3JChMult[i]    << ", JetNeuMult = " << fTR->PF2PAT3JNeuMult[i]    << endl; 
+    cout << "      " << " b-tag TCHE = " << fTR->PF2PAT3JbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->PF2PAT3JbTagProbTkCntHighPur[i] << endl;
+    cout << "      " << " b-tag SSVHE = " << fTR->PF2PAT3JbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->PF2PAT3JbTagProbSimpSVHighPur[i] << endl;
     nJetsCand++;
-    if (fTR->JPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
+    if (fTR->PF2PAT3JPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
       cout << "      -> jet back-to-back with MET" << endl;
     }
   }
-
+	
   // for multi-jet events
-  if (fTR->NJets >= 2) {
-    double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
-    double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
+  if (fTR->PF2PAT3NJets >= 2) {
+    double dPhiMJ1 = Util::DeltaPhi(fTR->PF2PAT3JPhi[0], METPhi);
+    double dPhiMJ2 = Util::DeltaPhi(fTR->PF2PAT3JPhi[1], METPhi);
     double R12 = sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
     double R21 = sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
-    double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
-    double dRj12 = Util::GetDeltaR(fTR->JEta[0], fTR->JEta[1], fTR->JPhi[0], fTR->JPhi[1]);
+    double dPhij12 = Util::DeltaPhi(fTR->PF2PAT3JPhi[0], fTR->PF2PAT3JPhi[1]);
+    double dRj12 = Util::GetDeltaR(fTR->PF2PAT3JEta[0], fTR->PF2PAT3JEta[1], fTR->PF2PAT3JPhi[0], fTR->PF2PAT3JPhi[1]);
     cout << " R12    = " << R12 << ", R21    = " << R21 
 	 << ", dRj12  = " << dRj12 << ", dPhij12 = " << dPhij12 << endl;
+  }
+
+  if(fTR->PfTau3NObjs>0) cout << "PF2PAT Taus: these hadronic taus are contained in above jet collection! " << endl;
+  for(int i=0; i<fTR->PfTau3NObjs; ++i){
+	TLorentzVector tau(fTR->PfTau3Px[i],fTR->PfTau3Py[i],fTR->PfTau3Pz[i],fTR->PfTau3E[i]);
+	  cout << " Tau " << i <<  " has mass " << tau.M() << " pt " << tau.Pt() << " Eta " << tau.Eta() << " Phi " << tau.Phi()<< endl;
+	  cout << "       px " << tau.Px() << ", py " << tau.Py() << ", pz " << tau.Pz() << ", E " << tau.E() << endl; 
+	  cout << "       reconstruced tau decay mode (5*(number of charged hadrons-1) + number of pi0s.) " << fTR->PfTau3DecayMode[i] << endl;
   }
 		
   // print muon info
@@ -1081,10 +1090,10 @@ void UserAnalysisBase::EventPrint(){
   }
 
   // jets/ lepton/ photon invariant masses
-  for (int i = 0; i < fTR->NJets; ++i) {
-    for (int j = i+1; j < fTR->NJets; ++j) {
-      p1.SetPxPyPzE(fTR->JPx[i],fTR->JPy[i],fTR->JPz[i],fTR->JE[i]);
-      p2.SetPxPyPzE(fTR->JPx[j],fTR->JPy[j],fTR->JPz[j],fTR->JE[j]);
+  for (int i = 0; i < fTR->PF2PAT3NJets; ++i) {
+    for (int j = i+1; j < fTR->PF2PAT3NJets; ++j) {
+      p1.SetPxPyPzE(fTR->PF2PAT3JPx[i],fTR->PF2PAT3JPy[i],fTR->PF2PAT3JPz[i],fTR->PF2PAT3JE[i]);
+      p2.SetPxPyPzE(fTR->PF2PAT3JPx[j],fTR->PF2PAT3JPy[j],fTR->PF2PAT3JPz[j],fTR->PF2PAT3JE[j]);
       psum = p1 + p2;
       minv = psum.M();
       cout << " Inv. mass (jet" << i << ", jet" << j << ") = " << minv << endl;
