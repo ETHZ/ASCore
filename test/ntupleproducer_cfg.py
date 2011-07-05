@@ -30,11 +30,6 @@ options.register ('runon', # register 'runon' option
                   "Type of sample to run on: data (default), MC")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-
-#options.files= 'file:/scratch/pnef/mc/Fall11/AOD/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_007E0957-964E-E011-BA72-485B39800BBB.root'
-#options.files= '/store/data/Run2011A/SingleElectron/AOD/PromptReco-v1/000/161/311/12418487-D557-E011-BCFA-001D09F24E39.root'
-#options.files= '/store/data/Run2011A/MuOnia/AOD/PromptReco-v1/000/161/311/E6B512D1-CD57-E011-BC63-001D09F2423B.root'
-#options.files= '/store/data/Run2010A/EG/AOD/Apr21ReReco-v1/0003/D6055361-7770-E011-BE49-00266CF32F90.root'
 options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11-QCD_Pt-300to470_TuneZ2_7TeV_pythia6-AODSIM-PU_S3_START42_V11-v2-0000-4E79FBE4-F37C-E011-B178-003048D4607A.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
 
@@ -83,6 +78,30 @@ process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 # note: this runs the L1Fast-Jet corrections for PF jets. not applied on Calo
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.jec = cms.ESSource("PoolDBESSource",
+	DBParameters = cms.PSet(
+	messageLevel = cms.untracked.int32(0)
+	),
+	timetype = cms.string('runnumber'),
+	toGet = cms.VPSet(
+		cms.PSet(
+			record = cms.string('JetCorrectionsRecord'),
+			tag    = cms.string('JetCorrectorParametersCollection_Jec11V2_AK5PF'),
+			label  = cms.untracked.string('AK5PF')
+		),
+		cms.PSet(
+			record = cms.string('JetCorrectionsRecord'),
+			tag    = cms.string('JetCorrectorParametersCollection_Jec11V2_AK5Calo'),
+			label  = cms.untracked.string('AK5Calo')
+		)
+	),
+	## here you add as many jet types as you need (AK5Calo, AK5JPT, AK7PF, AK7Calo, KT4PF, KT4Calo)
+	connect = cms.string('sqlite:Jec11V2.db')
+)
+# Add an es_prefer statement to get your new JEC constants from the sqlite file, rather than from the global tag
+process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+
 # Turn-on the FastJet density calculation -----------------------
 process.kt6PFJets.doRhoFastjet = True
 # process.kt6PFJets.Rho_EtaMax   = cms.double(4.4) # this is the default value in 4_2
@@ -109,14 +128,17 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
+# beam halo ############3
+process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
+
 # ECAL dead cells: this is not a filter. Only a flag is stored.
-# Ecal gap boundary energy: specify minimal gap BE here.
-### NOTE: THIS PART WAS REDUCED TO ENSURE COMPATIBILITY WITH CMSSW 3_9_7. THIS IS TEMPORARY!
-#process.load("PhysicsTools/EcalAnomalousEventFilter/ecalanomalouseventfilter_cfi")
-#process.EcalAnomalousEventFilter.FilterAlgo = cms.untracked.string("TuningMode")
-#process.EcalAnomalousEventFilter.cutBoundEnergyGapEE = cms.untracked.double(5)
-#process.EcalAnomalousEventFilter.cutBoundEnergyGapEB = cms.untracked.double(5)
-#process.EcalAnomalousEventFilter.enableGap           = cms.untracked.bool(True)
+from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
+process.ecalDeadCellTPfilter                           = EcalDeadCellEventFilter.clone()
+process.ecalDeadCellTPfilter.tpDigiCollection          = cms.InputTag("ecalTPSkim")
+process.ecalDeadCellTPfilter.etValToBeFlagged          = cms.double(63.75)
+process.ecalDeadCellTPfilter.ebReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEB")
+process.ecalDeadCellTPfilter.eeReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEE")
+process.ecalDeadCellTPfilter.taggingMode               = cms.bool( True )
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 # require scraping filter
@@ -326,13 +348,13 @@ process.analyze.jets = (
               ),
     )
 # # Add residual correction for running on data
-# FIXME: NOT EVALUTED YET => NOT PRESENT IN 4_2 GLOBAL TAG FOR NOW
-# if options.runon == 'data':
-#         process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
-#         for extJet in process.analyze.jets:
-#             extJet.corrections = extJet.corrections.value() + 'Residual'
-#         for pf in pfPostfixes:            
-#             getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
+# # taken from local sqlite file. see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011V2 
+if options.runon == 'data':
+	process.analyze.jetCorrs = process.analyze.jetCorrs.value() + 'Residual'
+        for extJet in process.analyze.jets:
+        	extJet.corrections = extJet.corrections.value() + 'Residual'
+	for pf in pfPostfixes:            
+		getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
 
 # Add some PF lepton collections
 process.analyze.leptons = (
@@ -422,15 +444,21 @@ process.analyze.leptons = (
 #                                      paths = cms.untracked.vstring(['p'])
 #                                      )
 # process.Tracer = cms.Service("Tracer")
+# process.options = cms.untracked.PSet(
+# 	wantSummary = cms.untracked.bool(True)
+# )
 
 # to enable pileUpsubtraction for MET
 # process.pfMETPF.src=cms.InputTag("pfNoPileUpPF")
 # process.pfMETPF2.src=cms.InputTag("pfNoPileUpPF2")
 #### Path ######################################################################
+
 process.p = cms.Path(
     process.scrapingVeto * (
 	process.goodVertices
         + process.HBHENoiseFilterResultProducer
+	+ process.CSCTightHaloFilter
+	+ process.ecalDeadCellTPfilter
         # + process.EcalAnomalousEventFilter
 	+ process.kt6PFJets
 	+ process.ak5PFJets

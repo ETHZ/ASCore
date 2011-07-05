@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.124 2011/06/29 16:21:03 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.125 2011/06/30 09:45:05 leo Exp $
 //
 //
 
@@ -84,6 +84,7 @@ Implementation:
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 
+#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 /*
 #include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
@@ -277,6 +278,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel(fSrcRho,rho);
 	fTrho = *rho;
 
+	// beam halo
+	edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
+	iEvent.getByLabel("BeamHaloSummary",TheBeamHaloSummary);
+	const BeamHaloSummary TheSummary = (*TheBeamHaloSummary.product());
+	fTcscTightHaloID = static_cast<int>  (TheSummary.CSCTightHaloId());
+
 	// collect information for b-tagging (4 tags)
 	Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
 	iEvent.getByLabel(fBtag1Tag,jetsAndProbsTkCntHighEff);
@@ -352,7 +359,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::ESHandle<CaloGeometry> geometry ;
 	iSetup.get<CaloGeometryRecord>().get(geometry);
 
-
+	// ECAL dead cell Trigger Primitive filter
+	edm::Handle<bool> EcalDeadTPFilterFlag;
+	iEvent.getByLabel("ecalDeadCellTPfilter",EcalDeadTPFilterFlag);
+	fTecalDeadTPFilterFlag = (int) *EcalDeadTPFilterFlag;
+	
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -1624,6 +1635,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTtrkphi[nqtrk]   = it->phi();
 		fTtrknchi2[nqtrk] = it->normalizedChi2();
 		fTtrknhits[nqtrk] = it->numberOfValidHits();
+		fTtrkVtxDz[nqtrk] = it->dz(primVtx->position());
+		fTtrkVtxDxy[nqtrk]= it->dxy(primVtx->position());	
 		fTgoodtrk[nqtrk]  = 0;
 	}
 	fTntracks = nqtrk+1;
@@ -1831,6 +1844,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
+	fEventTree->Branch("CSCTightHaloID"   ,&fTcscTightHaloID    ,"CSCTightHaloID/I");
+	fEventTree->Branch("EcalDeadTPFilterFlag",&fTecalDeadTPFilterFlag,"EcalDeadTPFilterFlag/I");
 	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
 	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
@@ -2209,6 +2224,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("TrkPhi"         ,&fTtrkphi       ,"TrkPhi[NTracks]/F");
 	fEventTree->Branch("TrkNChi2"       ,&fTtrknchi2     ,"TrkNChi2[NTracks]/F");
 	fEventTree->Branch("TrkNHits"       ,&fTtrknhits     ,"TrkNHits[NTracks]/F");
+	fEventTree->Branch("TrkVtxDz"       ,&fTtrkVtxDz     ,"TrkVtxDz[NTracks]/F");
+	fEventTree->Branch("TrkVtxDxy"      ,&fTtrkVtxDxy    ,"TrkVtxDxy[NTracks]/F");
 	fEventTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/F");
 	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/F");
 	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/F");
@@ -2412,8 +2429,10 @@ void NTupleProducer::resetTree(){
 	fTbeamspotz         = -999.99;
 	fTNCaloTowers       = -999;
 	fTHBHENoiseFlag     = -999;
+	fTcscTightHaloID    = -999;
 	fTrho               = -999;
 
+	fTecalDeadTPFilterFlag = -999;
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
 	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);
@@ -2743,6 +2762,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTtrkphi, gMaxntrks);
 	resetFloat(fTtrknchi2, gMaxntrks);
 	resetFloat(fTtrknhits, gMaxntrks);
+	resetFloat(fTtrkVtxDxy, gMaxntrks);
+	resetFloat(fTtrkVtxDz, gMaxntrks);
 
 	resetFloat(fTPhotPt,gMaxnphos);
 	resetFloat(fTPhotPx,gMaxnphos);
