@@ -18,7 +18,8 @@ using namespace std;
 void usage( int status = 0 ) {
 	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-o filename] [-v verbose] [-j json] " << endl;
 	cout << "                              [-m set_of_cuts] [-n maxEvents] [-t type] [-x lumi] " << endl;
-	cout << "                              [-p data_PileUp] [-P mc_PileUP]                " << endl;   
+	cout << "                              [-p data_PileUp] [-P mc_PileUP]                " << endl; 
+        cout << "                              [-s S3]                                       " << endl;
 	cout << "                              [-l] file1 [... filen]"                          << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
 	TString outputdir = "TempOutput/";
 	TString filename  = "MassTree.root";
 	TString setofcuts = "default";
+	string puScenario = "";
   	string  jsonFileName = "";
 	string  data_PileUp = "";
 	string  mc_PileUp = "";
@@ -59,11 +61,11 @@ int main(int argc, char* argv[]) {
 	int verbose  = 0;
 	int maxEvents=-1;
 	float lumi   = -999.99;
-	
+	bool isS3 = false;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:o:v:j:m:n:p:P:t:x:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "s:d:o:v:j:m:n:p:P:t:x:lh?")) != -1 ) {
 		switch (ch) {
 			case 'd': outputdir       = TString(optarg); break;
 			case 'o': filename        = TString(optarg); break;
@@ -75,6 +77,8 @@ int main(int argc, char* argv[]) {
 			case 'P': mc_PileUp       = string(optarg); break;
 			case 't': type            = string(optarg); break;
 			case 'x': lumi     	  = atof(optarg); break;
+		case 's': puScenario            = string(optarg); break;
+
 			case 'l': isList          = true; break;
 			case '?':
 			case 'h': usage(0); break;
@@ -95,18 +99,21 @@ int main(int argc, char* argv[]) {
 	else if (type=="mc"  ) isData =false;
 	else    usage(-1);
 	if      (!isData && data_PileUp.length()==0  ) {
-		cout << "ERROR: need data_PileUp to run on MC " << endl; exit(-1);
+		cout << "WARNING: need data_PileUp to run on MC " << endl;
 	}
 	if      ( isData && (data_PileUp.length() >0 || mc_PileUp.length() >0)  ) {
 		cout << "ERROR: you are running on data, no reweighting needed... " << endl; exit(-1);
 	}
 
-	setofcuts   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
-	if(data_PileUp.length()!=0){data_PileUp ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_data/"+data_PileUp;}
-	if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_mc/"  +mc_PileUp;}
+	setofcuts   ="/shome/leo/Analysis/cuts/"+setofcuts+".dat";
+	//if(data_PileUp.length()!=0){data_PileUp ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_data/"+data_PileUp;}
+	//if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_mc/"  +mc_PileUp;}
+	if(data_PileUp.length()!=0){data_PileUp ="/shome/leo/Analysis/runManagerT3_MT2Trees/"+data_PileUp;}
+	if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/leo/Analysis/runManagerT3_MT2Trees/"  +mc_PileUp;}
+
 	if(jsonFileName.length() !=0){jsonFileName="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/"           +jsonFileName;}
 
-	
+	if(puScenario=="S3") isS3=true;
 
 	TChain *theChain = new TChain("analyze/Analysis");
 	for(int i = 0; i < argc; i++){
@@ -145,10 +152,12 @@ int main(int argc, char* argv[]) {
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxEvents);
+	tA->isS3 = isS3;
   	if (jsonFileName!="") tA->ReadJSON(jsonFileName.c_str());
 	tA->BeginJob(filename, setofcuts, lumi, isData, data_PileUp, mc_PileUp);
 	tA->Loop();
 	tA->EndJob();
+
 	delete tA;
 	return 0;
 }
