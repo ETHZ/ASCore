@@ -19,7 +19,7 @@ void usage( int status = 0 ) {
 	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-o filename] [-v verbose] [-j json] " << endl;
 	cout << "                              [-m set_of_cuts] [-n maxEvents] [-t type] [-x lumi] " << endl;
 	cout << "                              [-p data_PileUp] [-P mc_PileUP]                " << endl; 
-        cout << "                              [-s S3]                                       " << endl;
+        cout << "                              [-s S3]                                        " << endl;
 	cout << "                              [-l] file1 [... filen]"                          << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 			case 'P': mc_PileUp       = string(optarg); break;
 			case 't': type            = string(optarg); break;
 			case 'x': lumi     	  = atof(optarg); break;
-		case 's': puScenario            = string(optarg); break;
+			case 's': puScenario      = string(optarg); break;
 
 			case 'l': isList          = true; break;
 			case '?':
@@ -105,11 +105,12 @@ int main(int argc, char* argv[]) {
 		cout << "ERROR: you are running on data, no reweighting needed... " << endl; exit(-1);
 	}
 
-	setofcuts   ="/shome/leo/Analysis/cuts/"+setofcuts+".dat";
+//	setofcuts   ="/shome/leo/Analysis/cuts/"+setofcuts+".dat";
+	setofcuts   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
 	//if(data_PileUp.length()!=0){data_PileUp ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_data/"+data_PileUp;}
 	//if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_mc/"  +mc_PileUp;}
-	if(data_PileUp.length()!=0){data_PileUp ="/shome/leo/Analysis/runManagerT3_MT2Trees/"+data_PileUp;}
-	if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/leo/Analysis/runManagerT3_MT2Trees/"  +mc_PileUp;}
+	if(data_PileUp.length()!=0){data_PileUp ="/shome/leo/Analysis/runManagerT3_MT2Trees/"            + data_PileUp;}
+	if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/leo/Analysis/runManagerT3_MT2Trees/pileup_mc/"  + mc_PileUp;}
 
 	if(jsonFileName.length() !=0){jsonFileName="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/"           +jsonFileName;}
 

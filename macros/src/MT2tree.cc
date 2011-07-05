@@ -56,6 +56,8 @@ void MT2Misc::Reset() {
   caloMHT40_ID      	  = -99999.99;
   DPhiMhtMpt              = -99999.99;
   MinMetJetDPhi           = -99999.99;
+  TrackingFailure         = -99999.99;
+  TrackingFailurePVtx     = -99999.99;
 
 }
 
@@ -69,11 +71,14 @@ MT2PileUp::~MT2PileUp(){
 }
 
 void MT2PileUp::Reset(){
-	PUnumInt  = -999;
-	PtHat     = -999.99;
-	Weight    = -999.99;
-	Rho       = -999.99;
-  	NVertices = -1;
+	PUnumInt       = -999;
+	PUnumIntEarly  = -999;
+	PUnumIntLate   = -999;
+	isS3           = -1;
+	PtHat          = -999.99;
+	Weight         = -999.99;
+	Rho            = -999.99;
+  	NVertices      = -1;
 }
 
 // ------------------------------------------------------

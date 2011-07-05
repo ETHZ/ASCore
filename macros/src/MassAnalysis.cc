@@ -134,8 +134,8 @@ void MassAnalysis::ResetTree(){
 void MassAnalysis::FillTree(){
 	// check size of jets electrons muons and genleptons
 	if(fJetTaus.NObjs > 40) {cout << "ERROR: fJetTaus.NObjs > 40: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
-	if(fElecs.size()  > 10) {cout << "ERROR: fElecs.size()  > 10: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
-	if(fMuons.size()  > 10) {cout << "ERROR: fMuons.size()  > 10: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
+	if(fElecs.size()  > 5 ) {cout << "ERROR: fElecs.size()  >  5: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
+	if(fMuons.size()  > 5 ) {cout << "ERROR: fMuons.size()  >  5: " << "run " << fTR->Run << " Event " << fTR->Event << " skip event" << endl; return;}
 
 	// ---------------------------------------------------------------
 	// Fill jets 4-momenta & ID's 
@@ -352,11 +352,13 @@ void MassAnalysis::FillTree(){
 	// Pile UP info and reco vertices
 	if(!fisData){
 		fMT2tree->pileUp.PUnumInt          = fTR->PUnumInteractions;
+		fMT2tree->pileUp.PUnumIntLate      = fTR->PUOOTnumInteractionsLate;
+		fMT2tree->pileUp.PUnumIntEarly     = fTR->PUOOTnumInteractionsEarly;
 		fMT2tree->pileUp.PtHat             = fTR->PtHat;
+		fMT2tree->pileUp.isS3              = (int) isS3;
 		//////////// S3 vs S4
-
 		if(isS3)
-		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions, fTR->PUnumInteractionsLate);
+		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions, fTR->PUOOTnumInteractionsLate);
 		else
 		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
 
@@ -455,7 +457,11 @@ void MassAnalysis::FillTree(){
 	fMT2tree->misc.caloHT50_ID  = fCaloHT50_ID;
 	fMT2tree->misc.caloMHT30    = fCaloMHT30;
 	fMT2tree->misc.caloMHT30_ID = fCaloMHT30_ID;
-	
+
+	// RA2 tracking failure
+	fMT2tree->misc.TrackingFailure     = fTR->TrkPtSum/fHT;
+	fMT2tree->misc.TrackingFailurePVtx = fTR->PrimVtxPtSum/fHT;
+
 	// _________
 	// stuff for Z->nunu (close your eyes...)	
 	vector<int>    jindi;

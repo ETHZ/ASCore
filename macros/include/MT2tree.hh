@@ -5,8 +5,8 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_genjetSize = 20, m_eleSize = 10, m_muoSize = 10, m_genleptSize=30, m_hemiSize=4};
-// ele and muo are 15 previous to MT2_V00-02-03
+enum {m_jetSize = 40, m_genjetSize = 20, m_eleSize = 5, m_muoSize = 5, m_genleptSize=30, m_hemiSize=4};
+// ele and muo are 10 previous to MT2_V00-06-00
 // hemi size was 10 previos to MT2_V00-05-00
 
 // MT2Misc ----------------------------------
@@ -54,8 +54,10 @@ public:
   Double_t caloMHT30_ID;
   Double_t caloMHT40;  
   Double_t caloMHT40_ID;
+  Double_t TrackingFailure;
+  Double_t TrackingFailurePVtx;
   
-  ClassDef(MT2Misc, 19)
+  ClassDef(MT2Misc, 20)
 };
 
 // ----------------------------------------
@@ -67,12 +69,15 @@ public:
 	void Reset();
 
 	Int_t    PUnumInt;
+	Int_t    PUnumIntEarly;
+	Int_t    PUnumIntLate;
+	Int_t    isS3;
 	Double_t PtHat;
 	Double_t Weight;
   	Int_t    NVertices;  // good reco vertices
 	Double_t Rho;
 
-	ClassDef(MT2PileUp, 2);
+	ClassDef(MT2PileUp, 3);
 };
 
 // --------------------------------
