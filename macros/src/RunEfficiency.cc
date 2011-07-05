@@ -1050,9 +1050,9 @@ void RunEfficiency::Analyze() {
 	//float jesC = fTR->PF2PAT3JEcorr[i];//killPF
 	
 	bool  isJetID = IsGoodBasicPFJet(i,false);
-	bool isJetIdjzb = IsGoodBasicPFJet(i, false); //JZB
-	bool isJetIdss  = IsGoodBasicPFJet(i, false); //SS
-	bool isJetIdmt2 = IsGoodBasicPFJetPAT3(i, 20.0, 3.0); //MT2
+	bool isJetIDjzb = IsGoodBasicPFJet(i, false); //JZB
+	bool isJetIDss  = IsGoodBasicPFJet(i, false); //SS
+	bool isJetIDmt2 = IsGoodBasicPFJetPAT3(i, 20.0, 3.0); //MT2
 	
 	TLorentzVector aJet(jpx,jpy,jpz,jenergy);
 	TLorentzVector sumOfPFJets(0,0,0,0);
@@ -1095,7 +1095,7 @@ void RunEfficiency::Analyze() {
 	
 	if ( jpt > jetThreshold[0] ) {//JZB
 	  t_nEvent.pfTightHTjzb += jpt;
-	  if(isJetIdjzb>0) t_nEvent.pfJetGoodNumIDjzb++;
+	  if(isJetIDjzb>0) t_nEvent.pfJetGoodNumIDjzb++;
 	  t_nEvent.pfJetGoodNumjzb++;
 	  float dr1 = aJet.DeltaR(sortedGoodLeptons[PosLepton1].p);
 	  float dr2 = aJet.DeltaR(sortedGoodLeptons[PosLepton2].p);
