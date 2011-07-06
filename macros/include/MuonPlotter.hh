@@ -197,15 +197,15 @@ public:
 		Channel ee;
 	};
 	
-	// static const int gNRatioVars = 6;
-	static const int gNRatioVars = 7;
+	// static const int gNRatioVars = 8;
+	static const int gNRatioVars = 9;
 	struct FRatioPlots{
 		static TString var_name[gNRatioVars];
 		static int nbins[gNRatioVars];
 		static float xmin[gNRatioVars];
 		static float xmax[gNRatioVars];
 		TH1D *ntight[gNRatioVars];
-		TH1D *nloose[gNRatioVars]; 
+		TH1D *nloose[gNRatioVars];
 	};
 	
 	static const int gNKinVars = 10;
@@ -301,13 +301,18 @@ public:
 	
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
+	void makeMETvsHTPlotCustom();
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
+	void makeFRvsPtPlotsForPAS(gChannel, gFPSwitch);
+	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
 	
 	void makeHWWPlots();
+	
+	void makeIsoVsMETPlot(gSample);
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -536,6 +541,8 @@ private:
 	float fC_minMu2pt;
 	float fC_minEl1pt;
 	float fC_minEl2pt;
+	float fC_maxMet_Control;
+	float fC_maxMt_Control;
 	
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
@@ -595,6 +602,8 @@ private:
 	
 	TFile *fStorageFile;
 	TString fOutputFileName;
+	TLatex *fLatex;
+	
 	
 	TH2D *fH2D_MufRatio;
 	TH1D *fH1D_MufRatioPt;
