@@ -22,23 +22,49 @@ FILENAME = sys.argv[1]
 CLASSNAME = 'TreeClassBase'
 HEADERNAME = CLASSNAME + '.h'
 SOURCENAME = CLASSNAME + '.C'
-MAXNMUS       = 30
-MAXNELES      = 20
-MAXNTAUS      = 20
 MAXPFLEPT     = 20
-MAXNGENLEPT   = 100
 MAXNJETS      = 100
-MAXNGENJETS   = 100
-MAXNPHOS      = 50
-MAXNTRKS      = 500
-MAXHLTOBJ     = 10
-MAXNVTCS      = 25
-MAXNPILEUP    = 50
-MAXNEBHITS    = 20
+rules = { # Reco
+          'NMus'    : 30,
+          'NEles'   : 20,
+          'NPhotons': 50,
+          'NJets'   : MAXNJETS,
+          # PF
+          'PfMuNObjs'  : MAXPFLEPT,
+          'PfMu2NObjs' : MAXPFLEPT,
+          'PfMu3NObjs' : MAXPFLEPT,
+          'PfElNObjs'  : MAXPFLEPT,
+          'PfEl2NObjs' : MAXPFLEPT,
+          'PfEl3NObjs' : MAXPFLEPT,
+          'PfTauNObjs' : MAXPFLEPT,
+          'PfTau2NObjs': MAXPFLEPT,
+          'PfTau3NObjs': MAXPFLEPT,
+          'PF2PATNJets' : MAXNJETS,
+          'PF2PAT2NJets': MAXNJETS,
+          'PF2PAT3NJets': MAXNJETS,
+          # Anti-iso
+          'PfMuAntiIsoNObjs'  : MAXPFLEPT,
+          'PfElAntiIsoNObjs'  : MAXPFLEPT,
+          'PfTauAntiIsoNObjs' : MAXPFLEPT,
+          'PF2PATAntiIsoNJets': MAXNJETS,
+          # Other jets
+          'CANJets' : MAXNJETS,
+          'JPTNJets': MAXNJETS,
+          # Generator
+          'NGenLeptons': 100,
+          'NGenJets'   : 100,
+          # Others
+          'NTracks' : 500,
+          'NPaths'  : 10,
+          'NVrtx'   : 25,
+          'NEBhits' : 20,
+          'PUnumInteractions': 50,
+          'PUnumFilled'      : 50
+          }
 
 #______________________________________________________________
 def makeClass(filename, classname, treename):
-	f = TFile(filename)
+	f = TFile.Open(filename)
 	tree = gDirectory.Get(treename)
 	tree.MakeClass(classname)
 	f.Close()
@@ -53,90 +79,10 @@ if __name__=='__main__':
 	headerFile = open(HEADERNAME, 'w')
 	
 	for line in headerLines:
-		pos = line.find('//[NGenLeptons]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNGENLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NMus]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNMUS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfMuNObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfMu2NObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NEles]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNELES) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfElNObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfEl2NObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfTauNObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PfTau2NObjs]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXPFLEPT) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NPhotons]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNPHOS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NGenJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNGENJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PF2PATNJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PF2PAT2NJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[CANJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[JPTNJets]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNJETS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NTracks]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNTRKS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NPaths]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXHLTOBJ) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NVrtx]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNVTCS) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[PUnumInteractions]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNPILEUP) + line[pos-5:len(line)]
-			line = newline
-		pos = line.find('//[NEBhits]')
-		if(pos != -1):
-			newline = line[0:line.find('[')+1] + str(MAXNEBHITS) + line[pos-5:len(line)]
-			line = newline
+                for key,val in rules.iteritems():
+                    pos = line.find('//['+key+']')
+                    if ( pos != -1):
+                       line = line[0:line.find('[')+1] + str(val) + line[pos-5:len(line)]
 		headerFile.write(line)
 	
 	headerFile.close()
