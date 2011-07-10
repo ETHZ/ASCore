@@ -5,7 +5,9 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-enum {m_jetSize = 40, m_eleSize = 15, m_muoSize = 15, m_genleptSize=30, m_hemiSize=10};
+enum {m_jetSize = 40, m_genjetSize = 20, m_eleSize = 5, m_muoSize = 5, m_genleptSize=30, m_hemiSize=4};
+// ele and muo are 10 previous to MT2_V00-06-00
+// hemi size was 10 previos to MT2_V00-05-00
 
 // MT2Misc ----------------------------------
 class MT2Misc : public TObject {
@@ -17,32 +19,47 @@ public:
   void Reset();
   
   Bool_t   HBHENoiseFlag;
+  Bool_t   CrazyHCAL;
+  Bool_t   NegativeJEC;
+  Bool_t   isData;
+  Bool_t   BadEcalTP;
+  Bool_t   BadEcalBE;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
-  Int_t    NVertices;  
   Int_t    LeptConfig;
   Int_t    Jet0Pass;
   Int_t    Jet1Pass;
   Int_t    PassJetID;
-  Int_t    EcalDeadCellBEFlag;
-  Int_t    NECALGapClusters;
-  Double_t EcalGapClusterSize[50];
-  Double_t EcalGapBE[50];
+  Int_t    PassJetID20;
   Double_t MT2;
+  Double_t MT2all;
   Double_t MT2leading;
   Double_t MT2noISR;
   Double_t MCT;
   Double_t AlphaT;
   Double_t MET;
   Double_t METPhi;
+  Double_t LeadingJPt;
+  Double_t SecondJPt;
   Double_t Vectorsumpt;
+  Double_t VectorsumptAll;
   Double_t PFMETsign;
   Double_t DPhiMhtMpt;
   Double_t MinMetJetDPhi;
   Double_t HT;
+  Double_t caloHT40;    
+  Double_t caloHT40_ID;
+  Double_t caloHT50;  
+  Double_t caloHT50_ID;
+  Double_t caloMHT30;  
+  Double_t caloMHT30_ID;
+  Double_t caloMHT40;  
+  Double_t caloMHT40_ID;
+  Double_t TrackingFailure;
+  Double_t TrackingFailurePVtx;
   
-  ClassDef(MT2Misc, 12)
+  ClassDef(MT2Misc, 21)
 };
 
 // ----------------------------------------
@@ -54,10 +71,15 @@ public:
 	void Reset();
 
 	Int_t    PUnumInt;
+	Int_t    PUnumIntEarly;
+	Int_t    PUnumIntLate;
+	Int_t    isS3;
 	Double_t PtHat;
 	Double_t Weight;
+  	Int_t    NVertices;  // good reco vertices
+	Double_t Rho;
 
-	ClassDef(MT2PileUp, 1);
+	ClassDef(MT2PileUp, 3);
 };
 
 // --------------------------------
@@ -71,15 +93,48 @@ public:
 
 	// Trigger bits: only a couple are implemented so far
 	// HT
+	Bool_t HLT_HT150_v2;
+	Bool_t HLT_HT150_v3;
 	Bool_t HLT_HT160_v2;
+	Bool_t HLT_HT200_v2;
+	Bool_t HLT_HT200_v3;
 	Bool_t HLT_HT240_v2;
+	Bool_t HLT_HT250_v2;
+	Bool_t HLT_HT250_v3;
 	Bool_t HLT_HT260_v2;
 	Bool_t HLT_HT300_v2;
+	Bool_t HLT_HT300_v3;
+	Bool_t HLT_HT300_v4;
+	Bool_t HLT_HT300_v5;
+	Bool_t HLT_HT350_v2;
+	Bool_t HLT_HT350_v3;
+	Bool_t HLT_HT350_v4;
 	Bool_t HLT_HT360_v2;
+	Bool_t HLT_HT400_v2;
+	Bool_t HLT_HT400_v3;
+	Bool_t HLT_HT400_v4;
+	Bool_t HLT_HT400_v5;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
+	Bool_t HLT_HT450_v3;
+	Bool_t HLT_HT450_v4;
+	Bool_t HLT_HT450_v5;
+	Bool_t HLT_HT500_v2;
+	Bool_t HLT_HT500_v3;
+	Bool_t HLT_HT500_v4;
+	Bool_t HLT_HT500_v5;
+	Bool_t HLT_HT550_v2;
+	Bool_t HLT_HT550_v3;
+	Bool_t HLT_HT550_v4;
+	Bool_t HLT_HT550_v5;
 	// HT_MHT
+	Bool_t HLT_HT250_MHT60_v2;
+	Bool_t HLT_HT250_MHT60_v3;
+	Bool_t HLT_HT250_MHT60_v4;
+	Bool_t HLT_HT250_MHT70_v1;
 	Bool_t HLT_HT260_MHT60_v2;
+	Bool_t HLT_HT300_MHT75_v4;
+	Bool_t HLT_HT300_MHT75_v5;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -88,7 +143,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 1);
+	ClassDef(MT2Trigger, 7);
 };
 
 // MT2Znunu --------------------------------
@@ -114,6 +169,14 @@ public:
 	Double_t GenZnunu_tau_mll_acc;
 	Double_t RecoOSee_mll;
 	Double_t RecoOSmumu_mll;
+	Double_t caloMHT30_matched;
+	Double_t caloMHT30ID_matched;
+	Double_t caloMHT30_matchedReco;
+	Double_t caloMHT30ID_matchedReco;
+	Double_t caloHT50_matched;
+	Double_t caloHT50ID_matched;
+	Double_t caloHT50_matchedReco;
+	Double_t caloHT50ID_matchedReco;
 	Double_t HTmatched;
 	Double_t METplusLeptsPt;
 	Double_t METplusLeptsPtReco;
@@ -122,9 +185,11 @@ public:
 	Double_t PassJetID_matched;
 	Double_t Jet1Pass_matched;
 	Double_t Jet0Pass_matched;
+	Double_t LeadingJPt_matched;
+	Double_t SecondJPt_matched;
 	Double_t Vectorsumpt_matched;
 
-	ClassDef(MT2Znunu, 2);
+	ClassDef(MT2Znunu, 6);
 };
 
 // MT2Jet ----------------------------------
@@ -148,7 +213,6 @@ public:
   Bool_t isPFIDLoose;
   Bool_t isPFIDMedium;
   Bool_t isPFIDTight;
-  Bool_t isTau;
 
   Double_t ChHadFrac;
   Double_t NeuHadFrac;
@@ -158,8 +222,35 @@ public:
   Int_t    NeuMult;
   Int_t    NConstituents;
 
-  ClassDef(MT2Jet, 6)
+  Double_t Scale;          // scale factor from JE correction
+  Double_t L1FastJetScale; // correction factor from raw to L1FastJetcorrected
+  Double_t Area;
+  
+  Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
+  Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
+  Double_t TauDR;
+  Double_t TauDPt;
+  Int_t    NTauMatch;
+
+  ClassDef(MT2Jet, 9)
 };
+
+// MT2GenJet -------------------------
+class MT2GenJet : public TObject {
+
+public:
+  MT2GenJet();
+  virtual ~MT2GenJet();
+
+  void Reset();
+  TLorentzVector lv;
+  
+  Int_t    JetMatchIndex;
+  Double_t DeltaR;
+
+  ClassDef(MT2GenJet, 1)
+};
+
 
 // MT2Hemi ---------------------------
 class MT2Hemi : public TObject {
@@ -207,8 +298,12 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    ID95;
+  Int_t    ID90;
+  Int_t    CAJ_n90;
+  Int_t    CAJ_n90Hits;
 
-  ClassDef(MT2Elec, 5)
+  ClassDef(MT2Elec, 7)
 };
 
 // MT2Muon ----------------------------------
@@ -226,8 +321,10 @@ public:
   Double_t MT;
   Double_t Iso;
   Int_t    Charge;
+  Int_t    NMatches;
+  Double_t PtErr;
 
-  ClassDef(MT2Muon, 5)
+  ClassDef(MT2Muon, 6)
 };
 
 
@@ -247,6 +344,8 @@ public:
   Int_t          GMID;
   Int_t          GMStatus;
   Double_t       MT;
+  Double_t       CAJ_n90;
+  Double_t       CAJ_n90Hits;
 
 
   ClassDef(MT2GenLept, 3)
@@ -262,10 +361,12 @@ public:
   void Reset();
 
   void SetNJets         (int n);
+  void SetNGenJets      (int n);
   void SetNJetsIDLoose  (int n);
   void SetNJetsIDMedium (int n);
   void SetNJetsIDTight  (int n);
   void SetNJetsAcc      (int n);
+  void SetNBJets        (int n);
   void SetNEles         (int n);
   void SetNMuons        (int n);
   void SetNTaus         (int n);
@@ -280,10 +381,10 @@ public:
 
   // HT, MHT, ...
   Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
-  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4);
-  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4);
+  TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHT        (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTPhi     (int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
+  Double_t GetMHTminusMET(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
   // dPhi and friends
   Bool_t   PassJetID(double minJPt=50, double maxJEta=5.0, int PFJID=1);
   Double_t JetsDPhi(int j1=1, int j2=0, int PFJID=0);
@@ -295,9 +396,11 @@ public:
   Int_t    MinMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Double_t MaxMetJetDPhi     (int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Int_t    MaxMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MinMetJetDPhiL2L3 ();
   Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetMetDPhi(int hemi_index=0, int pj=1, int whichmet=1, double met=30);
+  Double_t PseudoJetMetDPhi();
 
   // MT2 & friends
   Double_t GetMT2Leading(double testmass=0, bool massive=true, int PFJID=0, int met=1);
@@ -310,6 +413,8 @@ public:
   Double_t GetMCT(bool massive=false, int met=1);
   Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=0, double minJPt=20, double maxJEta=2.4,int met=1);
   Double_t GetMaxHemiMass(int hemi_index=0);
+  Double_t PseudoJetPtRatio();
+  Double_t HemiMassTop();
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);
@@ -324,17 +429,23 @@ public:
   Double_t GetGenLeptPt(int which, int pid, int mother, double pt, double eta);
   Double_t GetGenLeptEta(int which, int pid, int mother, double pt, double eta);
   Int_t    GetGenLeptIndex(int which, int pid, int mother, double pt, double eta);
-  Bool_t   GenLeptFromW(int pid, double pt, double eta);
+  Bool_t   GenLeptFromW(int pid, double pt, double eta, bool includeTaus);
   Double_t GetLeptPt(int index);
-
-  // Taus
-  Double_t TauClosestJet();
+  Double_t ElClosestJet();
+  Int_t    WDecayMode();
+  Int_t    TopDecayMode();
+  Bool_t   TopDecayModeResult(Int_t nlepts);
+  Bool_t   SLTopAccept(double pt, double eta);
+  Double_t SLTopEta(double pt);
+  Double_t LeptJetDR(int pid, int index, bool bjet, int ID);
 
   Int_t     NJets;
+  Int_t     NGenJets;
   Int_t     NJetsIDLoose;
   Int_t     NJetsIDMedium;
   Int_t     NJetsIDTight;
   Int_t     NJetsAcc;
+  Int_t     NBJets;
   Int_t     NEles;
   Int_t     NMuons;
   Int_t     NTaus;
@@ -345,6 +456,7 @@ public:
   MT2PileUp      pileUp;
   MT2Trigger     trigger;
   MT2Jet         jet[m_jetSize];
+  MT2GenJet      genjet[m_genjetSize];
   MT2Hemi        hemi[m_hemiSize];
   MT2Elec        ele[m_eleSize];
   MT2Muon        muo[m_muoSize];
@@ -356,7 +468,7 @@ public:
   TLorentzVector MHTloose[2];
 
   
-  ClassDef(MT2tree, 17)
+  ClassDef(MT2tree, 18)
 };
 
 #endif
