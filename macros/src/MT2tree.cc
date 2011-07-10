@@ -24,6 +24,8 @@ void MT2Misc::Reset() {
   CrazyHCAL               =  0;
   NegativeJEC             =  0;
   isData                  =  0;
+  BadEcalTP               =  0;
+  BadEcalBE               =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
@@ -585,6 +587,23 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
     }
   }
   return imin;
+}
+
+Double_t MT2tree::MinMetJetDPhiL2L3(){
+	vector<TLorentzVector> jets;
+	for (int i=0; i<NJets; ++i){
+		TLorentzVector j(0,0,0,0);
+		if(jet[i].lv.Pt()/jet[i].L1FastJetScale < 20) continue;
+		if(fabs(jet[i].lv.Eta())                > 5 ) continue;
+		j.SetPtEtaPhiM(jet[i].lv.Pt()/jet[i].L1FastJetScale, jet[i].lv.Eta(), jet[i].lv.Phi(), jet[i].lv.M());
+		jets.push_back(j);
+	}
+	Double_t minDPhi=10;
+	for(int i=0; i<jets.size(); ++i){
+		Double_t dphi = TMath::Abs(jets[i].DeltaPhi(pfmet[0]));
+		if(dphi<minDPhi) minDPhi=dphi;
+	}
+	return minDPhi;
 }
 
 Double_t MT2tree::MaxMetJetDPhi(int PFJID, double minJPt, double maxJEta, int met) {

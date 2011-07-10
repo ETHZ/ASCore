@@ -22,6 +22,8 @@ public:
   Bool_t   CrazyHCAL;
   Bool_t   NegativeJEC;
   Bool_t   isData;
+  Bool_t   BadEcalTP;
+  Bool_t   BadEcalBE;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
@@ -57,7 +59,7 @@ public:
   Double_t TrackingFailure;
   Double_t TrackingFailurePVtx;
   
-  ClassDef(MT2Misc, 20)
+  ClassDef(MT2Misc, 21)
 };
 
 // ----------------------------------------
@@ -394,6 +396,7 @@ public:
   Int_t    MinMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Double_t MaxMetJetDPhi     (int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
   Int_t    MaxMetJetDPhiIndex(int PFJID=0, double minJPt=20, double maxJEta=6., int met=1); // electrons and muons not considered for minDPhi
+  Double_t MinMetJetDPhiL2L3 ();
   Double_t GetPseudoJetsdPhi(int hemi_seed=2, int hemi_association=3, int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetsdPhiMinDHT(int PFJID=0, double minJPt=20, double maxJEta=2.4);
   Double_t GetPseudoJetMetDPhi(int hemi_index=0, int pj=1, int whichmet=1, double met=30);

@@ -74,6 +74,18 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_Mu8_Jet40_v2"]        = &fMT2tree->trigger.HLT_Mu8_Jet40_v2;
 	}
 
+
+	// initialize fDeadCellFilterBE and fDeadCellFilterTP
+	fDeadCellFilterBE.Reset();
+	fDeadCellFilterTP.Reset();
+	for(int i=0; i<fTPfiles.size(); ++i){
+		MassAnalysis::DeadCellParser(fDeadCellFilterTP, fTPfiles[i]);
+	}
+	for(int i=0; i<fBEfiles.size(); ++i){
+		MassAnalysis::DeadCellParser(fDeadCellFilterBE, fBEfiles[i]);
+	}
+
+
 }
 
 void MassAnalysis::Analyze(){	
@@ -164,7 +176,7 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].Scale          = fTR->PF2PAT3JScale         [fJetTaus.index[i]];
 			fMT2tree->jet[i].Area           = fTR->PF2PAT3JArea          [fJetTaus.index[i]];
 			fMT2tree->jet[i].isTau          = false;
-			if(fisData)fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
+			fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
 		}else { // this is obsolete starting from ntuple V02-01-01 as taus are included in jets
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PfTau3Px[fJetTaus.index[i]],fTR->PfTau3Py[fJetTaus.index[i]],fTR->PfTau3Pz[fJetTaus.index[i]],fTR->PfTau3E[fJetTaus.index[i]]);
 			fMT2tree->jet[i].isTau = true;
@@ -386,6 +398,20 @@ void MassAnalysis::FillTree(){
 	}
 	// _________
 	
+	//__________
+	// ECAL Dead Cell
+	for(int i=0;i<fDeadCellFilterBE.event.size(); ++i){
+		if(fTR->Run         !=fDeadCellFilterBE.run[i] )  continue;
+		if(fTR->LumiSection !=fDeadCellFilterBE.lumi[i])  continue;
+		if(fTR->Event       !=fDeadCellFilterBE.event[i]) continue;
+		fMT2tree->misc.BadEcalBE = 1;
+	}
+	for(int i=0;i<fDeadCellFilterTP.event.size(); ++i){
+		if(fTR->Run         !=fDeadCellFilterTP.run[i] )  continue;
+		if(fTR->LumiSection !=fDeadCellFilterTP.lumi[i])  continue;
+		if(fTR->Event       !=fDeadCellFilterTP.event[i]) continue;
+		fMT2tree->misc.BadEcalTP = 1;
+	}
 	
 	// ------------------------------------------------------------------
 	// fill misc 
@@ -1154,6 +1180,37 @@ vector<TLorentzVector> MassAnalysis::GetLepton4Momenta(){
 	return momenta;
 }
 
+// ********************************************************************************
+// BE file parser
+void MassAnalysis::DeadCellParser(DeadCellFilter &DeadCellFilter_, string file_){
+	string line;	
+	string path="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/ECALDeadCell/";
+	string file=path+file_;
+	ifstream IN(file.c_str());
+	if (!IN.is_open()) {cout << "ERROR: cannot open dead cell file " << file << endl; exit(1);}
+	else{
+		if(fVerbose>0) cout << "--------------------------"          << endl;
+		if(fVerbose>0) cout << "DeadCellParser: read file " << file  << endl;
+		while ( ! IN.eof() ){
+			getline (IN, line);
+			TString Line=  line.c_str();
+			if(Line.EndsWith("\",") && Line.BeginsWith("\"")){
+				Line.ReplaceAll("\"", "");
+				Line.ReplaceAll(",", "");
+				TObjArray *p= (TObjArray*) Line.Tokenize(":");
+				TString run  =((TObjString*)p->At(0))->GetString();
+				TString lumi =((TObjString*)p->At(1))->GetString();
+				TString event=((TObjString*)p->At(2))->GetString();
+				DeadCellFilter_.run.  push_back(run.Atoi());
+				DeadCellFilter_.lumi. push_back(lumi.Atoi());
+				DeadCellFilter_.event.push_back(event.Atoi());
+			}
+		}
+		if(fVerbose >0) cout << "DeadCellParser: read " <<  DeadCellFilter_.run.size() << " events to be filtered. " << endl; 
+		if(fVerbose >0) cout << "--------------------------"          << endl;
+	}
+}
+// *************************************
 
 // ****************************************************************************************************
 void MassAnalysis::End(){

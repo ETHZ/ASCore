@@ -97,6 +97,10 @@ public:
 	int   fNJets_toremove_ele;
 	int   fNJets_toremove_muo;
 
+	// ---- file for EcalDeadCell veto
+	std::vector<std::string> fTPfiles;
+	std::vector<std::string> fBEfiles;
+
 private:
 	void FindLeptonConfig();
 	void GetLeptonJetIndices();
@@ -105,6 +109,7 @@ private:
 	// ---- required and vetoed triggers ----
 	std::vector<std::string> fRequiredHLT; 
 	std::vector<std::string> fVetoedHLT;
+
 
 };
 #endif

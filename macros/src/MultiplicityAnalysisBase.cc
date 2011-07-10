@@ -28,6 +28,9 @@ MultiplicityAnalysisBase::MultiplicityAnalysisBase(TreeReader *tr) : UserAnalysi
 
 	fRequiredHLT.clear();
 	fVetoedHLT.clear();
+	
+	fBEfiles.clear();
+	fTPfiles.clear();
 }
 
 MultiplicityAnalysisBase::~MultiplicityAnalysisBase(){
@@ -305,6 +308,10 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 			fRequiredHLT.push_back(StringValue); ok = true;
 		} else if( !strcmp(ParName, "HLT_vetoed") ){
 			fVetoedHLT.push_back(StringValue); ok = true;
+		} else if( !strcmp(ParName, "ECALBEfile") ){
+			fBEfiles.push_back(StringValue); ok = true;
+		} else if( !strcmp(ParName, "ECALTPfile") ){
+			fTPfiles.push_back(StringValue); ok = true;
 		}	
 
 		// ints
@@ -372,6 +379,12 @@ void MultiplicityAnalysisBase::ReadCuts(const char* SetofCuts="multiplicity_cuts
 		}
 		for(int i=0; i<fVetoedHLT.size(); ++i){
 			cout << "  HLTVetoed                   " << fVetoedHLT[i]                    <<endl;
+		}
+		for(int i=0; i<fBEfiles.size(); ++i){
+			cout << "  ECALBEfile                  " << fBEfiles[i]                      << endl;
+		}
+		for(int i=0; i<fTPfiles.size(); ++i){
+			cout << "  ECALTPfile                  " << fTPfiles[i]                      << endl;
 		}
 		cout << "--------------"    << endl;	
 	}			
