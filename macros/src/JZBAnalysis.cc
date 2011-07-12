@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.37 $";
+string sjzbversion="$Revision: 1.38 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.38  2011/07/04 11:25:45  buchmann
+Updated trigger versions
+
 Revision 1.37  2011/06/28 13:30:25  buchmann
 Added additional jet counts for higher pt thresholds
 
@@ -47,6 +50,7 @@ Double_t GausRandom(Double_t mu, Double_t sigma) {
   return gRandom->Gaus(mu,sigma);   //real deal
   //return mu;//debugging : no smearing
 }
+
 class nanoEvent
 {
 public:
@@ -174,7 +178,11 @@ public:
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
-  bool   pfJetGoodID[jMax];
+  bool  pfJetGoodID[jMax];
+  float bTagProbTHighEff[jMax];
+  float bTagProbTHighPur[jMax];
+  float bTagProbSHighEff[jMax];
+  float bTagProbSHighPur[jMax];
 
   int pfJetGoodNum60;
   int pfJetGoodNum55;
@@ -384,7 +392,12 @@ void nanoEvent::reset()
     pfJetGoodEta[jCounter]=0;
     pfJetGoodPhi[jCounter]=0;
     pfJetGoodID[jCounter]=0;
+    bTagProbTHighEff[jCounter]=0;
+    bTagProbTHighPur[jCounter]=0;
+    bTagProbSHighEff[jCounter]=0;
+    bTagProbSHighPur[jCounter]=0;
   }
+
   pfJetGoodNum=0;
   pfJetGoodNumID=0;
   pfJetGoodNumEta2p4=0;
@@ -631,6 +644,11 @@ cout << endl << endl;
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/B");
+
+  myTree->Branch("bTagProbTHighEff", nEvent.bTagProbTHighEff,"bTagProbTHighEff[pfJetGoodNum]/F");
+  myTree->Branch("bTagProbTHighPur", nEvent.bTagProbTHighPur,"bTagProbTHighPur[pfJetGoodNum]/F");
+  myTree->Branch("bTagProbSHighEff", nEvent.bTagProbSHighEff,"bTagProbSHighEff[pfJetGoodNum]/F");
+  myTree->Branch("bTagProbSHighPur", nEvent.bTagProbSHighPur,"bTagProbSHighPur[pfJetGoodNum]/F");
 
   myTree->Branch("pfJetGoodNum20",&nEvent.pfJetGoodNum20,"pfJetGoodNum20/I");
   myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
@@ -1267,6 +1285,11 @@ void JZBAnalysis::Analyze() {
           nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
           nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
+          nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
+          nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
+          nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
+          nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
+
           if(isJetID>0) nEvent.pfJetGoodNumID++;
           nEvent.pfJetGoodNum++;
           if (abs(jeta)<2.4) nEvent.pfJetGoodNumEta2p4++;
@@ -1287,7 +1310,6 @@ void JZBAnalysis::Analyze() {
         if ( jpt>55. )  nEvent.pfJetGoodNum55++;
         if ( jpt>60. )  nEvent.pfJetGoodNum60++;
       }
-    
     
     int index;
     if(recoil.Pt()!=0) // so far we had not added the lepton system in the recoil, so our recoil represents the sumJPt (ugly but it should work)
