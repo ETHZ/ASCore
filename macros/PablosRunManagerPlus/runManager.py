@@ -149,7 +149,7 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   
   outputName = "output_" + str(step) + ".root"
   thisjobnumber=0
-  pipe=popen("qsub -e /tmp/ -o /tmp/ -N " + taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
+  pipe=popen("qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
   for l in pipe.readlines():
 	  if l.find("Your job")>-1:
 		  thisjobnumber=int(l[l.index('job ')+4:l.index(' (')])
@@ -352,18 +352,18 @@ def ensure_dir(f) :
 		os.makedirs(f)
 
 def join_directory(path,filelist,username) :
-	localpath="/scratch/"+username+"/"+path
+	localpath="/scratch/"+username+"/ntuples/"+path
 	ensure_dir(localpath)
 	cleanpath=path;
 	if (cleanpath[len(cleanpath)-1]=="/") : # remove trailing slash
 		cleanpath=cleanpath[0:len(cleanpath)-2]
-	fusecommand="hadd -f /scratch/"+username+"/"+cleanpath+".root > /dev/null "
+	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root > /dev/null "
 	for item in filelist:
-		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/"+item
+		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/ntuples/"+item
 		commands.getstatusoutput(copycommand)
-		fusecommand=fusecommand+" /scratch/"+username+"/"+item
+		fusecommand=fusecommand+" /scratch/"+username+"/ntuples/"+item
 	print commands.getoutput(fusecommand)
-	deletecommand="rm -r /scratch/"+username+"/"+path+"/" 
+	deletecommand="rm -r /scratch/"+username+"/ntuples/"+path+"/" 
 	print commands.getoutput(deletecommand)
 		
 
@@ -421,9 +421,9 @@ else:
 	isdata=1
       showMessage("Processing " + l[0])
       if domultiprocessing==True:
-	      print "At this point you could be saving a lot of time with multiprocessing ... "
 	      po.apply_async(process,(l, result),callback=cb)
       else :
+	      print "At this point you could be saving a lot of time with multiprocessing ... "
 	      process(l, result)
       		
   if domultiprocessing==True :
@@ -443,6 +443,6 @@ else:
   check_directory(fusepath,uname)
   if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
     print "We're dealing with data - we still need to merge data files and check for duplicates!"
-    pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
+    pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/ntuples/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
     for l in pipe.readlines():
 	  print l
