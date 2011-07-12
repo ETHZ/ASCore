@@ -32,8 +32,8 @@ void JZBAnalyzer::Loop(){
     fTR->GetEntry(jentry);
     if ( fCurRun != fTR->Run ) {
       fCurRun = fTR->Run;
-      fJZBAnalysis->BeginRun(fCurRun);
-      fJZBPFAnalysis->BeginRun(fCurRun);
+      if(whichanalysis!=2) fJZBAnalysis->BeginRun(fCurRun);
+      if(whichanalysis!=1) fJZBPFAnalysis->BeginRun(fCurRun);
       skipRun = false;
       if ( !CheckRun() ) skipRun = true;
     }
@@ -44,8 +44,8 @@ void JZBAnalyzer::Loop(){
       if ( !CheckRunLumi() ) skipLumi = true;
     }
     if ( !(skipRun || skipLumi) ) {
-	fJZBAnalysis->Analyze();
-	fJZBPFAnalysis->Analyze();
+	if(whichanalysis!=2) fJZBAnalysis->Analyze();
+	if(whichanalysis!=1) fJZBPFAnalysis->Analyze();
     }
   }
 }
@@ -62,13 +62,13 @@ void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fJZBPFAnalysis->fVerbose = fVerbose;
 	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-	fJZBAnalysis->Begin(fHistFile);
-	fJZBPFAnalysis->Begin(fHistFile);
+	if(whichanalysis!=2) fJZBAnalysis->Begin(fHistFile);
+	if(whichanalysis!=1) fJZBPFAnalysis->Begin(fHistFile);
 }
 
 // Method called after finishing the event loop
 void JZBAnalyzer::EndJob(){
-	fJZBAnalysis->End(fHistFile);
-	fJZBPFAnalysis->End(fHistFile);
+	if(whichanalysis!=2) fJZBAnalysis->End(fHistFile);
+	if(whichanalysis!=1) fJZBPFAnalysis->End(fHistFile);
 	fHistFile->Close();
 }
