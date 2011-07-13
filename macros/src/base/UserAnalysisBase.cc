@@ -13,9 +13,11 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	fTR = tr;
 	fTlat = new TLatex();
 	fVerbose = false;
+	fDoPileUpReweight = false;
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
+	if(fDoPileUpReweight) delete fPUWeight;
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
@@ -79,6 +81,7 @@ void UserAnalysisBase::GetHLTNames(Int_t& run){
 	runTree->SetBranchAddress("HLTNames",&HLTNames);
 	runTree->GetEntryWithIndex(run);
 
+	fHLTLabelMap.clear();
 	fHLTLabels.clear();
 	fHLTLabels.reserve(HLTNames->size());
 	for( int i=0; i < HLTNames->size(); i++ ){
@@ -111,6 +114,18 @@ bool UserAnalysisBase::GetHLTResult(string theHltName){
 			return false;
 		}
 		else return (bool)fTR->HLTResults[bit];
+	}
+}
+
+int UserAnalysisBase::GetHLTPrescale(string theHltName){
+	if( fHLTLabelMap.empty() ) return 0;
+	else{
+		int bit = GetHLTBit(theHltName);
+		if (bit < 0 ) {
+			if(fVerbose > 1) cout << "UserAnalysisBase::GetHLTPrescale ==> Bit with name " << theHltName << " not found!" << endl;
+			return 0;
+		}
+		else return fTR->HLTPrescale[bit];
 	}
 }
 
@@ -197,10 +212,10 @@ bool UserAnalysisBase::IsGoodBasicPFJetPAT(int index, double ptcut, double abset
 	// Basic PF jet cleaning and ID cuts
 	// cut at pt of ptcut (default = 30 GeV)
 	// cut at abs(eta) of absetacut (default = 2.5)
-	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
-	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
-	if(fTR->PF2PATJIDLoose[index]    ==0       ) return false;
-	return true;
+//	if(fTR->PF2PATJPt[index] < ptcut           ) return false;
+//	if(fabs(fTR->PF2PATJEta[index]) > absetacut) return false;
+//	if(fTR->PF2PATJIDLoose[index]    ==0       ) return false;
+	return false;
 }
 
 bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetacut) {
@@ -214,8 +229,8 @@ bool UserAnalysisBase::IsGoodPFJetMedium(int index, double ptcut, double absetac
 bool UserAnalysisBase::IsGoodPFJetMediumPAT(int index, double ptcut, double absetacut) {
 	// Medium PF JID
 	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.95)         ) return false;
-	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.95)         ) return false;
+//	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.95)         ) return false;
+//	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.95)         ) return false;
 	return true;
 }
 
@@ -230,8 +245,8 @@ bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacu
 bool UserAnalysisBase::IsGoodPFJetTightPAT(int index, double ptcut, double absetacut) {
 	// Tight PF JID
 	if ( ! IsGoodBasicPFJetPAT(index, ptcut, absetacut) ) return false;
-	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.90)         ) return false;
-	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.90)         ) return false;
+//	if ( !(fTR->PF2PATJNeuHadfrac[index] < 0.90)         ) return false;
+//	if ( !(fTR->PF2PATJNeuEmfrac[index]  < 0.90)         ) return false;
 	return true;
 }
 
@@ -270,17 +285,15 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 	if(fTR->MuNTkHits[index] < 11) return false;
 	if(fTR->MuNMuHits[index] < 1)  return false;
 
-	if(fabs(fTR->MuD0BS[index]) > 0.02)    return false;
+	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
 	if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
 
 	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
 	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
-	double iso = fTR->MuRelIso03[index];
-	double pt = fTR->MuPt[index];
-	double hybiso = iso*pt / std::max(20.,pt);
-	if(hybiso > 1.0) return false;
+	if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
 
+	if(fTR->MuRelIso03[index] > 1.0) return false;
 	return true;
 }
 
@@ -302,104 +315,107 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 }
 
 // ELECTRONS
-
 bool UserAnalysisBase::IsGoodBasicEl(int index){
-	// Electrons with WP95 ID and conv. rej.
-	// No isolation cut
-	// ECAL gap veto
-	if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false; // Ele ID WP 80
-	if(IsElInGap(index)) return false;
-	if(!IsElFromPrimaryVx(index)) return false;
+	// Electrons with WP95 ID
+	// if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
+	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.80 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
+		if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+	}
+	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
+		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.70 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.01) return false;
+		// if(fTR->ElHcalOverEcal             [index] > 0.07 ) return false;	
+	}
 	
+	// ECAL gap veto
+	if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
+
+	if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
+	if(fabs(fTR->ElDzPV[index]) > 1.00) return false;
+
+	return true;
+}
+
+bool UserAnalysisBase::ElPassesWP80_ConvRej(int index){
+	// if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
+	// if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
+	if(fTR->ElIDsimpleWP80relIso[index] < 4) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodElId_WP90(int index){
-	// Electrons with WP90 ID and conv. rej.
-	// No isolation cut
-	// ECAL gap veto
-	if(!IsGoodBasicEl(index)) return false;
-	if(fTR->ElIDsimpleWPrelIso[index] != 5 && fTR->ElIDsimpleWPrelIso[index] != 7) return false;
+	// Electrons with WP90 ID and WP80 conv. rej.
+	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.80 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
+		if(fTR->ElHcalOverEcal             [index] > 0.12 ) return false;	
+	}
+	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
+		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.70 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.009) return false;
+		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+	}
+
+	// WP80 conv. rejection
+	if(ElPassesWP80_ConvRej(index) == false) return false;
 	return true;
 }
 
 bool UserAnalysisBase::IsGoodElId_WP80(int index){
 	// Electrons with WP80 ID and conv. rej. cuts
-	// No isolation cut
-	// ECAL gap veto	
-	if(!IsGoodBasicEl(index)) return false;
-	if(fTR->ElIDsimpleWP80relIso[index] != 5 && fTR->ElIDsimpleWP80relIso[index] != 7) return false; // Ele ID WP 80
-	return true;
-}
-
-bool UserAnalysisBase::IsIsolatedEl(int index, double ElecCombRelIsoEBarmax, double ElecCombRelIsoEEndmax){
-	// hybrid relative electron isolation for given cut values
 	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
-		if( hybRelElIso(index) > ElecCombRelIsoEBarmax ) return false;
+		if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.06 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.004) return false;
+		if(fTR->ElHcalOverEcal             [index] > 0.04 ) return false;	
 	}
-	else{ // EndCap
-		if( hybRelElIso(index) > ElecCombRelIsoEEndmax ) return false;
+	if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
+		if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
+		if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.03 ) return false;
+		if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
+		// if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
 	}
+	if(fTR->ElPt[index] < 20.){
+		if(fTR->Elfbrem[index] > 0.15) return true;
+		if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
+		return false;
+	}
+
+	// WP80 conv. rejection
+	if(ElPassesWP80_ConvRej(index) == false) return false;
 	return true;
 }
 
-double UserAnalysisBase::hybRelElIso(int index){
-	// the value of hybrid relative electron isolation
-	if( fabs(fTR->ElEta[index]) < 1.479 ) // Barrel
-		return ( fTR->ElDR03TkSumPt[index] + TMath::Max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / (TMath::Max(Float_t(20.),fTR->ElEt[index]));	
-	else // EndCap
-		return ( fTR->ElDR03TkSumPt[index] + fTR->ElDR03EcalRecHitSumEt[index] + fTR->ElDR03HcalTowerSumEt[index] ) / TMath::Max(Float_t(20.),fTR->ElEt[index]);
-}
-
-bool UserAnalysisBase::IsTightEl(int index){
-	// Definition of "Tight electron" (El.Id cuts: WP80%; El.Convers.Reject.: WP80%; El.RelIso: WP95%)
-	if(!IsLooseEl(index)) return false;			// corresponding to the defintion of the "Loose Electron"
-
-	if(!IsGoodElId_WP80(index)) return false;
-	if(!IsIsolatedEl(index, 0.15, 0.15)) return false; // corresponds to WP 95 isolation
-
-	return true;
+float UserAnalysisBase::relElIso(int index){
+	// Apply 1 GeV subtraction in ECAL Barrel isolation
+	if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
+		double iso = ( fTR->ElDR03TkSumPt[index] + TMath::Max(0., fTR->ElDR03EcalRecHitSumEt[index] - 1.) + fTR->ElDR03HcalTowerSumEt[index] ) / fTR->ElPt[index];
+		return iso;
+	}
+	return fTR->ElRelIso03[index]; // EndCap
 }
 
 bool UserAnalysisBase::IsLooseEl(int index){
-	// Definition of "Loose electron" (reco cuts, El.Id, El.Convers.Reject., El.RelIso)
-	if(fTR->ElPt[index] < 10.) return false;
+	if(!IsGoodBasicEl(index))         return false;
+	if(fTR->ElPt[index] < 10.)        return false;
 	if(fabs(fTR->ElEta[index]) > 2.4) return false;
 
 	if(!fTR->ElEcalDriven[index]) return false;
-	if(fTR->ElCaloEnergy[index] < 10.) return false;
 	
-    // (El.Id cuts: WP90%; El.Convers.Reject.: WP80%; El.RelIso: Loose)	
+	// Loose identification criteria: WP90
 	if(!IsGoodElId_WP90(index)) return false;
-	if(fTR->ElNumberOfMissingInnerHits[index] > 0) return false; // Ask for tighter WP80 conversion rejection
-	if(!IsIsolatedEl(index, 1.0, 0.6)) return false;
-	// rejection if matched to any muon which passes basic quility cuts
-	for( int im = 0; im < fTR->NMus; ++im ){
-		if( (fTR->MuIsGlobalMuon[im] == 1 && fTR->MuIsTrackerMuon[im] == 1) &&
-		    (fTR->MuNTkHits[im] > 10) && (fTR->MuNChi2[im] < 11) && (fTR->MuNMuHits[im] > 0)) {
-			double deltaR = Util::GetDeltaR(fTR->ElEta[index], fTR->MuEta[im], fTR->ElPhi[index], fTR->MuPhi[im]);
-			if(deltaR <= 0.1) return false;
-		}
-	}
+
+	// Loose isolation criteria
+	if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
+	if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
+
 	return true;
-}
-
-bool UserAnalysisBase::IsLooseNoTightEl(int index){
-	if(IsLooseEl(index) && !IsTightEl(index)) return true;
-	else return false;
-}
-
-bool UserAnalysisBase::IsElFromPrimaryVx(int ind){
-	// Returns true if the electron is compatible with the primary vertex (false otherwise)
-	if(fabs(fTR->ElD0BS[ind]) > 0.02) return false;
-	if(fabs(fTR->ElDzPV[ind]) > 1.0) return false;
-	return true;
-}
-
-bool UserAnalysisBase::IsElInGap(int ind){
-	// ECAL gap veto
-	if ( fabs(fTR->ElEta[ind]) > 1.442 && fabs(fTR->ElEta[ind]) < 1.560 )  return true;
-	return false;
 }
 
 // PHOTONS
@@ -451,7 +467,7 @@ bool UserAnalysisBase::IsGoodEvent(){
 	if (fTR->PrimVtxIsFake) return false;
 	if (fabs(pvz) > 24.) return false;
 	if (sqrt(pvx*pvx + pvy*pvy) > 2.0) return false; // Wrt 0,0
-	if (fTR->PrimVtxNdof < 5) return false;
+	if (fTR->PrimVtxNdof < 4.0) return false; // this is a float, cut value at 4.0
 	return true;
 }
 
@@ -952,8 +968,8 @@ void UserAnalysisBase::EventPrint(){
 
   // print the event and primary vertex info
   TString tag = "";
-  if (fTR->NJets == 1 && fabs(fTR->JEta[0]) < etaBar) tag = "***";
-  if (fTR->NJets >= 2 && (fabs(fTR->JEta[0]) < etaBar || fabs(fTR->JEta[1] < etaBar))) tag = "***";
+  if (fTR->PF2PAT3NJets == 1 && fabs(fTR->PF2PAT3JEta[0]) < etaBar) tag = "***";
+  if (fTR->PF2PAT3NJets >= 2 && (fabs(fTR->PF2PAT3JEta[0]) < etaBar || fabs(fTR->PF2PAT3JEta[1] < etaBar))) tag = "***";
   cout << endl;
   cout << " Run = " << fTR->Run << ", Lumi sect = " << fTR->LumiSection
        << ", Event = " << fTR->Event << "  " << tag << endl;
@@ -971,38 +987,47 @@ void UserAnalysisBase::EventPrint(){
   cout << " PFMET          = " << fTR->PFMET    << ", METPhi = " << fTR->PFMETphi << endl;
 		
   // print the jets info
-  cout << " Number of jets in the ntuple = " << fTR->NJets
-    //       << ", total number of jets = " << fTR->NJetsTot
-       << endl;
+  cout << " Number of jets in the ntuple = " << fTR->PF2PAT3NJets << endl;
   int nJetsCand = 0;
-  for (int i = 0; i < fTR->NJets; ++i) {
-    double dPhiMJ = Util::DeltaPhi(fTR->JPhi[i], METPhi);
-    cout << " Jet" << i << " Pt = " << fTR->JPt[i] << ", Phi = " << fTR->JPhi[i]
-	 << ", Eta = " << fTR->JEta[i] << ", E = " << fTR->JE[i] << endl;
-    double jmass = sqrt(fTR->JE[i]*fTR->JE[i]-fTR->JPx[i]*fTR->JPx[i]-fTR->JPy[i]*fTR->JPy[i]-fTR->JPz[i]*fTR->JPz[i]);
-    cout << "      " << " Px = " << fTR->JPx[i] << " Py = " << fTR->JPy[i] << " Pz = " << fTR->JPz[i]
+  for (int i = 0; i < fTR->PF2PAT3NJets; ++i) {
+    double dPhiMJ = Util::DeltaPhi(fTR->PF2PAT3JPhi[i], METPhi);
+    cout << " Jet" << i << " Pt = " << fTR->PF2PAT3JPt[i] << ", Phi = " << fTR->PF2PAT3JPhi[i]
+	 << ", Eta = " << fTR->PF2PAT3JEta[i] << ", E = " << fTR->PF2PAT3JE[i] << endl;
+    double jmass = sqrt(fTR->PF2PAT3JE[i]*fTR->PF2PAT3JE[i]-fTR->PF2PAT3JPx[i]*fTR->PF2PAT3JPx[i]-fTR->PF2PAT3JPy[i]*fTR->PF2PAT3JPy[i]-fTR->PF2PAT3JPz[i]*fTR->PF2PAT3JPz[i]);
+    cout << "      " << " Px = " << fTR->PF2PAT3JPx[i] << " Py = " << fTR->PF2PAT3JPy[i] << " Pz = " << fTR->PF2PAT3JPz[i]
 	 << " Jet mass = " << jmass << endl;
-    cout << "      " << " dPhiJM = " << dPhiMJ << ", JetNtrk = " << fTR->JNAssoTracks[i] << endl;
-    cout << "      " << " JetfEMch = " << fTR->JChargedEmFrac[i] << ", JetfEMneu = " << fTR->JNeutralEmFrac[i]
-	 << " JetfHach = " << fTR->JChargedHadFrac[i] << ", JetfHaneu = " << fTR->JNeutralHadFrac[i] << ", JChargedMuEnergyFrac = " << fTR->JChargedMuEnergyFrac[i] << endl;
-    cout << "      " << " b-tag TCHE = " << fTR->JbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->JbTagProbTkCntHighPur[i] << endl;
-    cout << "      " << " b-tag SSVHE = " << fTR->JbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->JbTagProbSimpSVHighPur[i] << endl;
+    cout << "      " << " dPhiJM = " << dPhiMJ <<  endl;
+    
+    cout << "      " << " pf-JID    (1=true, 0=false)= " << fTR->PF2PAT3JIDLoose[i] << endl;  
+    cout << "      " <<" JetfEMch  = " << fTR->PF2PAT3JChEmfrac[i]  << ", JetfEMneu = "  << fTR->PF2PAT3JNeuEmfrac[i] << endl;
+    cout << "      " <<" JetfHach  = " << fTR->PF2PAT3JChHadfrac[i] << ", JetfHaneu = "  << fTR->PF2PAT3JNeuHadfrac[i] <<  endl;
+    cout << "      " <<" JetCHMult = " << fTR->PF2PAT3JChMult[i]    << ", JetNeuMult = " << fTR->PF2PAT3JNeuMult[i]    << endl; 
+    cout << "      " << " b-tag TCHE = " << fTR->PF2PAT3JbTagProbTkCntHighEff[i]<< ", TCHP = " << fTR->PF2PAT3JbTagProbTkCntHighPur[i] << endl;
+    cout << "      " << " b-tag SSVHE = " << fTR->PF2PAT3JbTagProbSimpSVHighEff[i]<< ", SSVHP = " << fTR->PF2PAT3JbTagProbSimpSVHighPur[i] << endl;
     nJetsCand++;
-    if (fTR->JPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
+    if (fTR->PF2PAT3JPt[i] > 20. && fabs(dPhiMJ-3.141592654) < 0.05) {
       cout << "      -> jet back-to-back with MET" << endl;
     }
   }
-
+	
   // for multi-jet events
-  if (fTR->NJets >= 2) {
-    double dPhiMJ1 = Util::DeltaPhi(fTR->JPhi[0], METPhi);
-    double dPhiMJ2 = Util::DeltaPhi(fTR->JPhi[1], METPhi);
+  if (fTR->PF2PAT3NJets >= 2) {
+    double dPhiMJ1 = Util::DeltaPhi(fTR->PF2PAT3JPhi[0], METPhi);
+    double dPhiMJ2 = Util::DeltaPhi(fTR->PF2PAT3JPhi[1], METPhi);
     double R12 = sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
     double R21 = sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
-    double dPhij12 = Util::DeltaPhi(fTR->JPhi[0], fTR->JPhi[1]);
-    double dRj12 = Util::GetDeltaR(fTR->JEta[0], fTR->JEta[1], fTR->JPhi[0], fTR->JPhi[1]);
+    double dPhij12 = Util::DeltaPhi(fTR->PF2PAT3JPhi[0], fTR->PF2PAT3JPhi[1]);
+    double dRj12 = Util::GetDeltaR(fTR->PF2PAT3JEta[0], fTR->PF2PAT3JEta[1], fTR->PF2PAT3JPhi[0], fTR->PF2PAT3JPhi[1]);
     cout << " R12    = " << R12 << ", R21    = " << R21 
 	 << ", dRj12  = " << dRj12 << ", dPhij12 = " << dPhij12 << endl;
+  }
+
+  if(fTR->PfTau3NObjs>0) cout << "PF2PAT Taus: these hadronic taus are contained in above jet collection! " << endl;
+  for(int i=0; i<fTR->PfTau3NObjs; ++i){
+	TLorentzVector tau(fTR->PfTau3Px[i],fTR->PfTau3Py[i],fTR->PfTau3Pz[i],fTR->PfTau3E[i]);
+	  cout << " Tau " << i <<  " has mass " << tau.M() << " pt " << tau.Pt() << " Eta " << tau.Eta() << " Phi " << tau.Phi()<< endl;
+	  cout << "       px " << tau.Px() << ", py " << tau.Py() << ", pz " << tau.Pz() << ", E " << tau.E() << endl; 
+	  cout << "       reconstruced tau decay mode (5*(number of charged hadrons-1) + number of pi0s.) " << fTR->PfTau3DecayMode[i] << endl;
   }
 		
   // print muon info
@@ -1065,10 +1090,10 @@ void UserAnalysisBase::EventPrint(){
   }
 
   // jets/ lepton/ photon invariant masses
-  for (int i = 0; i < fTR->NJets; ++i) {
-    for (int j = i+1; j < fTR->NJets; ++j) {
-      p1.SetPxPyPzE(fTR->JPx[i],fTR->JPy[i],fTR->JPz[i],fTR->JE[i]);
-      p2.SetPxPyPzE(fTR->JPx[j],fTR->JPy[j],fTR->JPz[j],fTR->JE[j]);
+  for (int i = 0; i < fTR->PF2PAT3NJets; ++i) {
+    for (int j = i+1; j < fTR->PF2PAT3NJets; ++j) {
+      p1.SetPxPyPzE(fTR->PF2PAT3JPx[i],fTR->PF2PAT3JPy[i],fTR->PF2PAT3JPz[i],fTR->PF2PAT3JE[i]);
+      p2.SetPxPyPzE(fTR->PF2PAT3JPx[j],fTR->PF2PAT3JPy[j],fTR->PF2PAT3JPz[j],fTR->PF2PAT3JE[j]);
       psum = p1 + p2;
       minv = psum.M();
       cout << " Inv. mass (jet" << i << ", jet" << j << ") = " << minv << endl;
@@ -1120,4 +1145,29 @@ void UserAnalysisBase::EventPrint(){
   }
 
 }
+
+
+// ---------------------------------------------
+// Pile Up Reweighting
+void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
+	if(data_PileUp.size() == 0 ) return;
+	if(fDoPileUpReweight  == 1 ) {cout << "ERROR in SetPileUpSrc: fPUWeight already initialized" << endl; return; }
+	if(mc_PileUp.size() ==0){
+		fPUWeight = new PUWeight(data_PileUp.c_str());
+	}else {
+		fPUWeight = new PUWeight(data_PileUp.c_str(), mc_PileUp.c_str());
+	} 
+	fDoPileUpReweight = true;
+}
+
+float UserAnalysisBase::GetPUWeight(int nPUinteractions){
+	if(! fDoPileUpReweight) return -999.99;
+	else return fPUWeight->GetWeight(nPUinteractions); 
+}
+
+float UserAnalysisBase::GetPUWeight(int nPUinteractions, int nPUinteractionsLate){
+  if(! fDoPileUpReweight) return -999.99;
+  else return fPUWeight->weightOOT(nPUinteractions, nPUinteractionsLate);
+}
+
 
