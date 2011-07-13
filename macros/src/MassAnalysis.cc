@@ -44,19 +44,27 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_HT400_v3"]            = &fMT2tree->trigger.HLT_HT400_v3;
 		fTriggerMap["HLT_HT400_v4"]            = &fMT2tree->trigger.HLT_HT400_v4;
 		fTriggerMap["HLT_HT400_v5"]            = &fMT2tree->trigger.HLT_HT400_v5;
+		fTriggerMap["HLT_HT400_v6"]            = &fMT2tree->trigger.HLT_HT400_v6;
+		fTriggerMap["HLT_HT400_v7"]            = &fMT2tree->trigger.HLT_HT400_v7;
 		fTriggerMap["HLT_HT440_v2"]            = &fMT2tree->trigger.HLT_HT440_v2;
 		fTriggerMap["HLT_HT450_v2"]            = &fMT2tree->trigger.HLT_HT450_v2;
 		fTriggerMap["HLT_HT450_v3"]            = &fMT2tree->trigger.HLT_HT450_v3;
 		fTriggerMap["HLT_HT450_v4"]            = &fMT2tree->trigger.HLT_HT450_v4;
 		fTriggerMap["HLT_HT450_v5"]            = &fMT2tree->trigger.HLT_HT450_v5;
+		fTriggerMap["HLT_HT450_v6"]            = &fMT2tree->trigger.HLT_HT450_v6;
+		fTriggerMap["HLT_HT450_v7"]            = &fMT2tree->trigger.HLT_HT450_v7;
 		fTriggerMap["HLT_HT500_v2"]            = &fMT2tree->trigger.HLT_HT500_v2;
 		fTriggerMap["HLT_HT500_v3"]            = &fMT2tree->trigger.HLT_HT500_v3;
 		fTriggerMap["HLT_HT500_v4"]            = &fMT2tree->trigger.HLT_HT500_v4;
 		fTriggerMap["HLT_HT500_v5"]            = &fMT2tree->trigger.HLT_HT500_v5;
+		fTriggerMap["HLT_HT500_v6"]            = &fMT2tree->trigger.HLT_HT500_v6;
+		fTriggerMap["HLT_HT500_v7"]            = &fMT2tree->trigger.HLT_HT500_v7;
 		fTriggerMap["HLT_HT550_v2"]            = &fMT2tree->trigger.HLT_HT550_v2;
 		fTriggerMap["HLT_HT550_v3"]            = &fMT2tree->trigger.HLT_HT550_v3;
 		fTriggerMap["HLT_HT550_v4"]            = &fMT2tree->trigger.HLT_HT550_v4;
 		fTriggerMap["HLT_HT550_v5"]            = &fMT2tree->trigger.HLT_HT550_v5;
+		fTriggerMap["HLT_HT550_v6"]            = &fMT2tree->trigger.HLT_HT550_v6;
+		fTriggerMap["HLT_HT550_v7"]            = &fMT2tree->trigger.HLT_HT550_v7;
 		// MHT_HT
 		fTriggerMap["HLT_HT250_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v2;
 		fTriggerMap["HLT_HT250_MHT60_v3"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v3;
@@ -174,9 +182,12 @@ void MassAnalysis::FillTree(){
 			fMT2tree->jet[i].NeuMult        = fTR->PF2PAT3JNeuMult       [fJetTaus.index[i]];
 			fMT2tree->jet[i].NConstituents  = fTR->PF2PAT3JNConstituents [fJetTaus.index[i]];
 			fMT2tree->jet[i].Scale          = fTR->PF2PAT3JScale         [fJetTaus.index[i]];
+			fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
 			fMT2tree->jet[i].Area           = fTR->PF2PAT3JArea          [fJetTaus.index[i]];
 			fMT2tree->jet[i].isTau          = false;
-			fMT2tree->jet[i].L1FastJetScale = fTR->PF2PAT3JL1FastJetScale[fJetTaus.index[i]];
+			if(!fisData){
+			fMT2tree->jet[i].Flavour        = fTR->PF2PAT3JFlavour       [fJetTaus.index[i]];
+			}
 		}else { // this is obsolete starting from ntuple V02-01-01 as taus are included in jets
 			fMT2tree->jet[i].lv.SetPxPyPzE( fTR->PfTau3Px[fJetTaus.index[i]],fTR->PfTau3Py[fJetTaus.index[i]],fTR->PfTau3Pz[fJetTaus.index[i]],fTR->PfTau3E[fJetTaus.index[i]]);
 			fMT2tree->jet[i].isTau = true;

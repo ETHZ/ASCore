@@ -114,19 +114,27 @@ public:
 	Bool_t HLT_HT400_v3;
 	Bool_t HLT_HT400_v4;
 	Bool_t HLT_HT400_v5;
+	Bool_t HLT_HT400_v6;
+	Bool_t HLT_HT400_v7;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
 	Bool_t HLT_HT450_v3;
 	Bool_t HLT_HT450_v4;
 	Bool_t HLT_HT450_v5;
+	Bool_t HLT_HT450_v6;
+	Bool_t HLT_HT450_v7;
 	Bool_t HLT_HT500_v2;
 	Bool_t HLT_HT500_v3;
 	Bool_t HLT_HT500_v4;
 	Bool_t HLT_HT500_v5;
+	Bool_t HLT_HT500_v6;
+	Bool_t HLT_HT500_v7;
 	Bool_t HLT_HT550_v2;
 	Bool_t HLT_HT550_v3;
 	Bool_t HLT_HT550_v4;
 	Bool_t HLT_HT550_v5;
+	Bool_t HLT_HT550_v6;
+	Bool_t HLT_HT550_v7;
 	// HT_MHT
 	Bool_t HLT_HT250_MHT60_v2;
 	Bool_t HLT_HT250_MHT60_v3;
@@ -143,7 +151,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 7);
+	ClassDef(MT2Trigger, 8);
 };
 
 // MT2Znunu --------------------------------
@@ -225,6 +233,8 @@ public:
   Double_t Scale;          // scale factor from JE correction
   Double_t L1FastJetScale; // correction factor from raw to L1FastJetcorrected
   Double_t Area;
+
+  Int_t    Flavour;   // JetFlavour for MC
   
   Bool_t   isTau;      // has to be *ALWAYS FALSE* starting from V02-01-01
   Bool_t   isTauMatch; // tells you if pf-jet is matched to a tau
@@ -232,7 +242,7 @@ public:
   Double_t TauDPt;
   Int_t    NTauMatch;
 
-  ClassDef(MT2Jet, 9)
+  ClassDef(MT2Jet, 10)
 };
 
 // MT2GenJet -------------------------

@@ -115,19 +115,27 @@ void MT2Trigger::Reset(){
 	HLT_HT400_v3            = false;
 	HLT_HT400_v4            = false;
 	HLT_HT400_v5            = false;
+	HLT_HT400_v6            = false;
+	HLT_HT400_v7            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
 	HLT_HT450_v3            = false;
 	HLT_HT450_v4            = false;
 	HLT_HT450_v5            = false;
+	HLT_HT450_v6            = false;
+	HLT_HT450_v7            = false;
 	HLT_HT500_v2            = false;
 	HLT_HT500_v3            = false;
 	HLT_HT500_v4            = false;
 	HLT_HT500_v5            = false;
+	HLT_HT500_v6            = false;
+	HLT_HT500_v7            = false;
 	HLT_HT550_v2            = false;
 	HLT_HT550_v3            = false;
 	HLT_HT550_v4            = false;
 	HLT_HT550_v5            = false;
+	HLT_HT550_v6            = false;
+	HLT_HT550_v7            = false;
 	// HT_MHT
 	HLT_HT250_MHT60_v2      = false;
 	HLT_HT250_MHT60_v3      = false;
@@ -222,6 +230,8 @@ void MT2Jet::Reset() {
   Scale         = -99999.99; // correction factor
   L1FastJetScale= -99999.99; // correction factor from raw to L1FastJetcorrected
   Area          = -99999.99;
+
+  Flavour       = -9999;
   
   isTau         = 0;  // starting from ntuple V02-01-01: this has to be 0! 
   isTauMatch    = 0;  // tell you if the jet is matched to a tau.
