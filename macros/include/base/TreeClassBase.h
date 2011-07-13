@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Jul  5 12:05:16 2011 by ROOT version 5.27/06b
+// Wed Jul 13 15:31:35 2011 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: NTupleProducer_42X_MC_18_3_Is8.root
+// found on file: /shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -36,11 +36,11 @@ public :
    Int_t           PUnumFilled;
    Int_t           PUOOTnumInteractionsEarly;
    Int_t           PUOOTnumInteractionsLate;
-   Float_t         PUzPositions[32];   //[PUnumFilled]
-   Float_t         PUsumPtLowPt[32];   //[PUnumFilled]
-   Float_t         PUsumPtHighPt[32];   //[PUnumFilled]
-   Float_t         PUnTrksLowPt[32];   //[PUnumFilled]
-   Float_t         PUnTrksHighPt[32];   //[PUnumFilled]
+   Float_t         PUzPositions[50];   //[PUnumFilled]
+   Float_t         PUsumPtLowPt[50];   //[PUnumFilled]
+   Float_t         PUsumPtHighPt[50];   //[PUnumFilled]
+   Float_t         PUnTrksLowPt[50];   //[PUnumFilled]
+   Float_t         PUnTrksHighPt[50];   //[PUnumFilled]
    Float_t         Rho;
    Float_t         Weight;
    Int_t           HLTResults[400];
@@ -81,6 +81,8 @@ public :
    Int_t           MaxGenJetExceed;
    Int_t           MaxVerticesExceed;
    Int_t           HBHENoiseFlag;
+   Int_t           CSCTightHaloID;
+   Int_t           EcalDeadTPFilterFlag;
    Int_t           NGenLeptons;
    Int_t           GenLeptonID[100];   //[NGenLeptons]
    Float_t         GenLeptonPt[100];   //[NGenLeptons]
@@ -405,6 +407,7 @@ public :
    Double_t        CAJEt[100];   //[CANJets]
    Double_t        CAJEta[100];   //[CANJets]
    Double_t        CAJPhi[100];   //[CANJets]
+   Int_t           CAJFlavour[100];   //[CANJets]
    Double_t        CAJScale[100];   //[CANJets]
    Double_t        CAJL1FastJetScale[100];   //[CANJets]
    Double_t        CAJArea[100];   //[CANJets]
@@ -431,6 +434,7 @@ public :
    Double_t        PF2PATAntiIsoJEt[100];   //[PF2PATAntiIsoNJets]
    Double_t        PF2PATAntiIsoJEta[100];   //[PF2PATAntiIsoNJets]
    Double_t        PF2PATAntiIsoJPhi[100];   //[PF2PATAntiIsoNJets]
+   Int_t           PF2PATAntiIsoJFlavour[100];   //[PF2PATAntiIsoNJets]
    Double_t        PF2PATAntiIsoJScale[100];   //[PF2PATAntiIsoNJets]
    Double_t        PF2PATAntiIsoJL1FastJetScale[100];   //[PF2PATAntiIsoNJets]
    Double_t        PF2PATAntiIsoJArea[100];   //[PF2PATAntiIsoNJets]
@@ -456,6 +460,7 @@ public :
    Double_t        PF2PAT2JEt[100];   //[PF2PAT2NJets]
    Double_t        PF2PAT2JEta[100];   //[PF2PAT2NJets]
    Double_t        PF2PAT2JPhi[100];   //[PF2PAT2NJets]
+   Int_t           PF2PAT2JFlavour[100];   //[PF2PAT2NJets]
    Double_t        PF2PAT2JScale[100];   //[PF2PAT2NJets]
    Double_t        PF2PAT2JL1FastJetScale[100];   //[PF2PAT2NJets]
    Double_t        PF2PAT2JArea[100];   //[PF2PAT2NJets]
@@ -481,6 +486,7 @@ public :
    Double_t        PF2PAT3JEt[100];   //[PF2PAT3NJets]
    Double_t        PF2PAT3JEta[100];   //[PF2PAT3NJets]
    Double_t        PF2PAT3JPhi[100];   //[PF2PAT3NJets]
+   Int_t           PF2PAT3JFlavour[100];   //[PF2PAT3NJets]
    Double_t        PF2PAT3JScale[100];   //[PF2PAT3NJets]
    Double_t        PF2PAT3JL1FastJetScale[100];   //[PF2PAT3NJets]
    Double_t        PF2PAT3JArea[100];   //[PF2PAT3NJets]
@@ -670,6 +676,8 @@ public :
    Float_t         TrkPhi[500];   //[NTracks]
    Float_t         TrkNChi2[500];   //[NTracks]
    Float_t         TrkNHits[500];   //[NTracks]
+   Float_t         TrkVtxDz[500];   //[NTracks]
+   Float_t         TrkVtxDxy[500];   //[NTracks]
    Float_t         TrkPtSumx;
    Float_t         TrkPtSumy;
    Float_t         TrkPtSum;
@@ -793,6 +801,8 @@ public :
    TBranch        *b_MaxGenJetExceed;   //!
    TBranch        *b_MaxVerticesExceed;   //!
    TBranch        *b_HBHENoiseFlag;   //!
+   TBranch        *b_CSCTightHaloID;   //!
+   TBranch        *b_EcalDeadTPFilterFlag;   //!
    TBranch        *b_NGenLeptons;   //!
    TBranch        *b_GenLeptonID;   //!
    TBranch        *b_GenLeptonPt;   //!
@@ -1117,6 +1127,7 @@ public :
    TBranch        *b_CAJEt;   //!
    TBranch        *b_CAJEta;   //!
    TBranch        *b_CAJPhi;   //!
+   TBranch        *b_CAJFlavour;   //!
    TBranch        *b_CAJScale;   //!
    TBranch        *b_CAJL1FastJetScale;   //!
    TBranch        *b_CAJArea;   //!
@@ -1143,6 +1154,7 @@ public :
    TBranch        *b_PF2PATAntiIsoJEt;   //!
    TBranch        *b_PF2PATAntiIsoJEta;   //!
    TBranch        *b_PF2PATAntiIsoJPhi;   //!
+   TBranch        *b_PF2PATAntiIsoJFlavour;   //!
    TBranch        *b_PF2PATAntiIsoJScale;   //!
    TBranch        *b_PF2PATAntiIsoJL1FastJetScale;   //!
    TBranch        *b_PF2PATAntiIsoJArea;   //!
@@ -1168,6 +1180,7 @@ public :
    TBranch        *b_PF2PAT2JEt;   //!
    TBranch        *b_PF2PAT2JEta;   //!
    TBranch        *b_PF2PAT2JPhi;   //!
+   TBranch        *b_PF2PAT2JFlavour;   //!
    TBranch        *b_PF2PAT2JScale;   //!
    TBranch        *b_PF2PAT2JL1FastJetScale;   //!
    TBranch        *b_PF2PAT2JArea;   //!
@@ -1193,6 +1206,7 @@ public :
    TBranch        *b_PF2PAT3JEt;   //!
    TBranch        *b_PF2PAT3JEta;   //!
    TBranch        *b_PF2PAT3JPhi;   //!
+   TBranch        *b_PF2PAT3JFlavour;   //!
    TBranch        *b_PF2PAT3JScale;   //!
    TBranch        *b_PF2PAT3JL1FastJetScale;   //!
    TBranch        *b_PF2PAT3JArea;   //!
@@ -1382,6 +1396,8 @@ public :
    TBranch        *b_TrkPhi;   //!
    TBranch        *b_TrkNChi2;   //!
    TBranch        *b_TrkNHits;   //!
+   TBranch        *b_TrkVtxDz;   //!
+   TBranch        *b_TrkVtxDxy;   //!
    TBranch        *b_TrkPtSumx;   //!
    TBranch        *b_TrkPtSumy;   //!
    TBranch        *b_TrkPtSum;   //!
@@ -1460,9 +1476,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NTupleProducer_42X_MC_18_3_Is8.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
       if (!f) {
-         f = new TFile("NTupleProducer_42X_MC_18_3_Is8.root");
+         f = new TFile("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1576,6 +1592,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MaxGenJetExceed", &MaxGenJetExceed, &b_MaxGenJetExceed);
    fChain->SetBranchAddress("MaxVerticesExceed", &MaxVerticesExceed, &b_MaxVerticesExceed);
    fChain->SetBranchAddress("HBHENoiseFlag", &HBHENoiseFlag, &b_HBHENoiseFlag);
+   fChain->SetBranchAddress("CSCTightHaloID", &CSCTightHaloID, &b_CSCTightHaloID);
+   fChain->SetBranchAddress("EcalDeadTPFilterFlag", &EcalDeadTPFilterFlag, &b_EcalDeadTPFilterFlag);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
    fChain->SetBranchAddress("GenLeptonID", GenLeptonID, &b_GenLeptonID);
    fChain->SetBranchAddress("GenLeptonPt", GenLeptonPt, &b_GenLeptonPt);
@@ -1900,6 +1918,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("CAJEt", CAJEt, &b_CAJEt);
    fChain->SetBranchAddress("CAJEta", CAJEta, &b_CAJEta);
    fChain->SetBranchAddress("CAJPhi", CAJPhi, &b_CAJPhi);
+   fChain->SetBranchAddress("CAJFlavour", CAJFlavour, &b_CAJFlavour);
    fChain->SetBranchAddress("CAJScale", CAJScale, &b_CAJScale);
    fChain->SetBranchAddress("CAJL1FastJetScale", CAJL1FastJetScale, &b_CAJL1FastJetScale);
    fChain->SetBranchAddress("CAJArea", CAJArea, &b_CAJArea);
@@ -1926,6 +1945,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PF2PATAntiIsoJEt", PF2PATAntiIsoJEt, &b_PF2PATAntiIsoJEt);
    fChain->SetBranchAddress("PF2PATAntiIsoJEta", PF2PATAntiIsoJEta, &b_PF2PATAntiIsoJEta);
    fChain->SetBranchAddress("PF2PATAntiIsoJPhi", PF2PATAntiIsoJPhi, &b_PF2PATAntiIsoJPhi);
+   fChain->SetBranchAddress("PF2PATAntiIsoJFlavour", PF2PATAntiIsoJFlavour, &b_PF2PATAntiIsoJFlavour);
    fChain->SetBranchAddress("PF2PATAntiIsoJScale", PF2PATAntiIsoJScale, &b_PF2PATAntiIsoJScale);
    fChain->SetBranchAddress("PF2PATAntiIsoJL1FastJetScale", PF2PATAntiIsoJL1FastJetScale, &b_PF2PATAntiIsoJL1FastJetScale);
    fChain->SetBranchAddress("PF2PATAntiIsoJArea", PF2PATAntiIsoJArea, &b_PF2PATAntiIsoJArea);
@@ -1951,6 +1971,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PF2PAT2JEt", PF2PAT2JEt, &b_PF2PAT2JEt);
    fChain->SetBranchAddress("PF2PAT2JEta", PF2PAT2JEta, &b_PF2PAT2JEta);
    fChain->SetBranchAddress("PF2PAT2JPhi", PF2PAT2JPhi, &b_PF2PAT2JPhi);
+   fChain->SetBranchAddress("PF2PAT2JFlavour", PF2PAT2JFlavour, &b_PF2PAT2JFlavour);
    fChain->SetBranchAddress("PF2PAT2JScale", PF2PAT2JScale, &b_PF2PAT2JScale);
    fChain->SetBranchAddress("PF2PAT2JL1FastJetScale", PF2PAT2JL1FastJetScale, &b_PF2PAT2JL1FastJetScale);
    fChain->SetBranchAddress("PF2PAT2JArea", PF2PAT2JArea, &b_PF2PAT2JArea);
@@ -1976,6 +1997,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PF2PAT3JEt", PF2PAT3JEt, &b_PF2PAT3JEt);
    fChain->SetBranchAddress("PF2PAT3JEta", PF2PAT3JEta, &b_PF2PAT3JEta);
    fChain->SetBranchAddress("PF2PAT3JPhi", PF2PAT3JPhi, &b_PF2PAT3JPhi);
+   fChain->SetBranchAddress("PF2PAT3JFlavour", PF2PAT3JFlavour, &b_PF2PAT3JFlavour);
    fChain->SetBranchAddress("PF2PAT3JScale", PF2PAT3JScale, &b_PF2PAT3JScale);
    fChain->SetBranchAddress("PF2PAT3JL1FastJetScale", PF2PAT3JL1FastJetScale, &b_PF2PAT3JL1FastJetScale);
    fChain->SetBranchAddress("PF2PAT3JArea", PF2PAT3JArea, &b_PF2PAT3JArea);
@@ -2165,6 +2187,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("TrkPhi", TrkPhi, &b_TrkPhi);
    fChain->SetBranchAddress("TrkNChi2", TrkNChi2, &b_TrkNChi2);
    fChain->SetBranchAddress("TrkNHits", TrkNHits, &b_TrkNHits);
+   fChain->SetBranchAddress("TrkVtxDz", TrkVtxDz, &b_TrkVtxDz);
+   fChain->SetBranchAddress("TrkVtxDxy", TrkVtxDxy, &b_TrkVtxDxy);
    fChain->SetBranchAddress("TrkPtSumx", &TrkPtSumx, &b_TrkPtSumx);
    fChain->SetBranchAddress("TrkPtSumy", &TrkPtSumy, &b_TrkPtSumy);
    fChain->SetBranchAddress("TrkPtSum", &TrkPtSum, &b_TrkPtSum);
