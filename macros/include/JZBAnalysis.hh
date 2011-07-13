@@ -34,8 +34,8 @@ public:
   virtual ~JZBAnalysis();
   const bool IsCustomMu(const int);
   const bool IsCustomEl(const int);
-  const bool IsCustomPfMu(const int);
-  const bool IsCustomPfEl(const int);
+  const bool IsCustomPfMu(const int, const int);
+  const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int index);
   const bool passElTriggers(void);
   const bool passEMuTriggers(void);

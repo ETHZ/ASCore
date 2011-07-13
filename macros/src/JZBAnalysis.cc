@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.39 $";
+string sjzbversion="$Revision: 1.40 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.40  2011/07/12 15:58:39  buchmann
+Fixed bug with branches being an 8 bit signed integer (/B) instead of a boolean (/O)
+
 Revision 1.39  2011/07/12 13:51:09  buchmann
 Added some b info to JZB (for testing purposes)
 
@@ -919,9 +922,9 @@ void JZBAnalysis::Analyze() {
     }
   
   // #-- PF muon loop -- type 1
-  for(int muIndex=0;muIndex<fTR->PfMuNObjs;muIndex++)
+/*  for(int muIndex=0;muIndex<fTR->PfMuNObjs;muIndex++)
     {
-      if(IsCustomPfMu(muIndex)) {
+      if(IsCustomPfMu(muIndex,1)) {
 	  TLorentzVector tmpVector(fTR->PfMuPx[muIndex],fTR->PfMuPy[muIndex],fTR->PfMuPz[muIndex],fTR->PfMuE[muIndex]);
 	  int tmpCharge = fTR->PfMuCharge[muIndex];
 	  lepton tmpLepton;
@@ -933,7 +936,7 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[1].push_back(tmpLepton);
       }
     }
-
+*/
 
   // #-- PF muon loop -- type 2
   for(int muIndex=0;muIndex<fTR->PfMu2NObjs;muIndex++)
@@ -946,7 +949,7 @@ void JZBAnalysis::Analyze() {
       nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu2Charge[muIndex];
       nEvent.pfLeptonNum++;
       if ( nEvent.pfLeptonNum>=jMax ) break;
-      if(IsCustomPfMu(muIndex)) {
+      if(IsCustomPfMu(muIndex,2)) {
 	  TLorentzVector tmpVector(fTR->PfMu2Px[muIndex],fTR->PfMu2Py[muIndex],fTR->PfMu2Pz[muIndex],fTR->PfMu2E[muIndex]);
 	  int tmpCharge = fTR->PfMu2Charge[muIndex];
 	  lepton tmpLepton;
@@ -960,10 +963,10 @@ void JZBAnalysis::Analyze() {
       }
     }
 
-  // #-- PF muon loop -- type 3
+/*  // #-- PF muon loop -- type 3
   for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
     {
-      if(IsCustomPfMu(muIndex)) {
+      if(IsCustomPfMu(muIndex,3)) {
           counters[MU].fill("... pass pf mu selection");
 	  TLorentzVector tmpVector(fTR->PfMu3Px[muIndex],fTR->PfMu3Py[muIndex],fTR->PfMu3Pz[muIndex],fTR->PfMu3E[muIndex]);
 	  int tmpCharge = fTR->PfMu3Charge[muIndex];
@@ -976,11 +979,11 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
-
+*/
   // #-- PF electron loop -- type 1
   for(int elIndex=0;elIndex<fTR->PfElNObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex)) {
+      if(IsCustomPfEl(elIndex,1)) {
       if ( nEvent.pfLeptonNum>=jMax ) break;
       nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfElPt[elIndex];
       nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfElEta[elIndex];
@@ -1000,11 +1003,11 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
       }
     }
-  
+/*  
   // #-- PF electron loop -- type 2
   for(int elIndex=0;elIndex<fTR->PfEl2NObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex)) {
+      if(IsCustomPfEl(elIndex,2)) {
 	  TLorentzVector tmpVector(fTR->PfEl2Px[elIndex],fTR->PfEl2Py[elIndex],fTR->PfEl2Pz[elIndex],fTR->PfEl2E[elIndex]);
 	  int tmpCharge = fTR->PfEl2Charge[elIndex];
 	  lepton tmpLepton;
@@ -1020,7 +1023,7 @@ void JZBAnalysis::Analyze() {
   // #-- PF electron loop -- type 3
   for(int elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex)) {
+      if(IsCustomPfEl(elIndex,3)) {
           counters[EL].fill("... pass pf e selection");
 	  TLorentzVector tmpVector(fTR->PfEl3Px[elIndex],fTR->PfEl3Py[elIndex],fTR->PfEl3Pz[elIndex],fTR->PfEl3E[elIndex]);
 	  int tmpCharge = fTR->PfEl3Charge[elIndex];
@@ -1033,7 +1036,7 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
-
+*/
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
 
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
@@ -1581,13 +1584,17 @@ std::string JZBAnalysis::any2string(T i)
   return buffer.str();
 }
 
-const bool JZBAnalysis::IsCustomPfMu(const int index){
+const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
 //VERY TEMPORARY !!!!
   // Basic muon cleaning and ID
   // Acceptance cuts
-  if ( !(fTR->PfMu3Pt[index] > 10) )       return false;
+  if (pftype==1 && !(fTR->PfMuPt[index] > 10) )       return false;
+  if (pftype==2 && !(fTR->PfMu2Pt[index] > 10) )       return false;
+  if (pftype==3 && !(fTR->PfMu3Pt[index] > 10) )       return false;
   counters[MU].fill(" ... PF pt > 10");
-  if ( !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
+  if (pftype==1 && !(fabs(fTR->PfMuEta[index])<2.4) ) return false;
+  if (pftype==2 && !(fabs(fTR->PfMu2Eta[index])<2.4) ) return false;
+  if (pftype==3 && !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
   counters[MU].fill(" ... PF |eta| < 2.4");
 
 /*  // Quality cuts
@@ -1624,14 +1631,20 @@ const bool JZBAnalysis::IsCustomPfMu(const int index){
 }
 
 
-const bool JZBAnalysis::IsCustomPfEl(const int index){
+const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
 
   // kinematic acceptance
-  if(!(fTR->PfEl3Pt[index]>10) )return false;
+  if(pftype==1&&!(fTR->PfElPt[index]>10) )return false;
+  if(pftype==2&&!(fTR->PfEl2Pt[index]>10) )return false;
+  if(pftype==3&&!(fTR->PfEl3Pt[index]>10) )return false;
   counters[EL].fill(" ... PF pt > 10");
-  if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
+  if(pftype==1&&!(fabs(fTR->PfElEta[index]) < 2.4) ) return false;
+  if(pftype==2&&!(fabs(fTR->PfEl2Eta[index]) < 2.4) ) return false;
+  if(pftype==3&&!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[EL].fill(" ... PF |eta| < 2.4");
-  if(!(fTR->PfElID95[index])) return false;
+  if(pftype==1&&!((fTR->PfElID95[index]))) return false;
+  if(pftype==2&&!((fTR->PfElID95[index]))) return false;
+  if(pftype==3&&!((fTR->PfElID95[index]))) return false;
   //if(!(fTR->PfElID80[index])) return false;
 /*
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
@@ -1673,9 +1686,9 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   // Basic muon cleaning and ID
 
   // Acceptance cuts
-  if ( !(fTR->MuPt[index] > 10) )       return false;
+  if (!(fTR->MuPt[index] > 10) )       return false;
   counters[MU].fill(" ... pt > 10");
-  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
+  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
   counters[MU].fill(" ... |eta| < 2.4");
 
   // Quality cuts
