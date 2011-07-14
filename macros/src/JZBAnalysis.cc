@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.40 $";
+string sjzbversion="$Revision: 1.41 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.41  2011/07/13 08:32:09  buchmann
+Deactivating superfluous pf leptons, keeping only the collections we use; Adapted isCustomPfEl and isCustomPfMu with additional option for type in case we want to bring the other ones back. This fixes a problem observed with Summer 11 MC.
+
 Revision 1.40  2011/07/12 15:58:39  buchmann
 Fixed bug with branches being an 8 bit signed integer (/B) instead of a boolean (/O)
 
@@ -127,6 +130,11 @@ public:
   float dphitcMet2;
   float dphipfRecoilMet1;
   float dphipfRecoilMet2;
+
+  bool ElCInfoIsGsfCtfCons;
+  bool ElCInfoIsGsfCtfScPixCons;
+  bool ElCInfoIsGsfScPixCons;
+
   int id1;
   int id2;
   int ch1;
@@ -302,6 +310,9 @@ void nanoEvent::reset()
   dphipfRecoilMet1=0;
   dphipfRecoilMet2=0;
   dphi=0;
+  ElCInfoIsGsfCtfCons=false;
+  ElCInfoIsGsfCtfScPixCons=false;
+  ElCInfoIsGsfScPixCons=false;
   id1=0;
   id2=0;
   ch1=0;
@@ -566,6 +577,9 @@ cout << endl << endl;
   myTree->Branch("dphipfRecoilMet1",&nEvent.dphipfRecoilMet1,"dphipfRecoilMet1/F");
   myTree->Branch("dphipfRecoilMet2",&nEvent.dphipfRecoilMet2,"dphipfRecoilMet2/F");
   myTree->Branch("dphi",&nEvent.dphi,"dphi/F");
+  myTree->Branch("ElCInfoIsGsfCtfCons",&nEvent.ElCInfoIsGsfCtfCons,"ElCInfoIsGsfCtfCons/O");
+  myTree->Branch("ElCInfoIsGsfScPixCons",&nEvent.ElCInfoIsGsfScPixCons,"ElCInfoIsGsfScPixCons/O");
+  myTree->Branch("ElCInfoIsGsfCtfScPixCons",&nEvent.ElCInfoIsGsfCtfScPixCons,"ElCInfoIsGsfCtfScPixCons/O");
 
   myTree->Branch("id1",&nEvent.id1,"id1/I");
   myTree->Branch("id2",&nEvent.id2,"id2/I");
@@ -892,6 +906,9 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.index = muIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
+          tmpLepton.ElCInfoIsGsfCtfCons=true;
+          tmpLepton.ElCInfoIsGsfCtfScPixCons=true;
+          tmpLepton.ElCInfoIsGsfScPixCons=true;
 	  leptons.push_back(tmpLepton);
 	}
     }
@@ -917,6 +934,9 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.index = elIndex;
 	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
+          tmpLepton.ElCInfoIsGsfCtfCons=fTR->ElCInfoIsGsfCtfCons[elIndex];
+          tmpLepton.ElCInfoIsGsfCtfScPixCons=fTR->ElCInfoIsGsfCtfScPixCons[elIndex];
+          tmpLepton.ElCInfoIsGsfScPixCons=fTR->ElCInfoIsGsfScPixCons[elIndex];
 	  leptons.push_back(tmpLepton);
 	}
     }
@@ -1107,6 +1127,10 @@ void JZBAnalysis::Analyze() {
       nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
       nEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
       nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
+
+      nEvent.ElCInfoIsGsfCtfCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfCons;
+      nEvent.ElCInfoIsGsfCtfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfScPixCons;
+      nEvent.ElCInfoIsGsfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfScPixCons;
     } else {
       
       //If there are less than two leptons the event is not considered
