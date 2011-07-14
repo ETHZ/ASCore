@@ -423,6 +423,7 @@ void MassAnalysis::FillTree(){
 		if(fTR->Event       !=fDeadCellFilterTP.event[i]) continue;
 		fMT2tree->misc.BadEcalTP = 1;
 	}
+	if(fTR->EcalDeadTPFilterFlag==0) fMT2tree->misc.BadEcalTP=1;
 	
 	// ------------------------------------------------------------------
 	// fill misc 
