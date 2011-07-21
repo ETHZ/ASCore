@@ -25,20 +25,17 @@ struct lepton {
   int type; //0==electron 1==muon 2==tau 
   int index;
   float genPt;
-  bool ElCInfoIsGsfCtfCons;
-  bool ElCInfoIsGsfCtfScPixCons;
-  bool ElCInfoIsGsfScPixCons;
 };
 
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
-  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false);
+  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false);
   virtual ~JZBAnalysis();
   const bool IsCustomMu(const int);
   const bool IsCustomEl(const int);
-  const bool IsCustomPfMu(const int, const int);
-  const bool IsCustomPfEl(const int, const int);
+  const bool IsCustomPfMu(const int);
+  const bool IsCustomPfEl(const int);
   const bool IsCustomJet(const int index);
   const bool passElTriggers(void);
   const bool passEMuTriggers(void);
@@ -80,7 +77,7 @@ private:
 
   std::string fDataType_;
   bool fFullCleaning_;
-
+  bool fisModelScan;
   TRandom* rand_;
 
 };

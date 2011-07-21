@@ -15,27 +15,12 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.41 $";
+string sjzbversion="$Revision: 1.36 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
-Revision 1.41  2011/07/13 08:32:09  buchmann
-Deactivating superfluous pf leptons, keeping only the collections we use; Adapted isCustomPfEl and isCustomPfMu with additional option for type in case we want to bring the other ones back. This fixes a problem observed with Summer 11 MC.
-
-Revision 1.40  2011/07/12 15:58:39  buchmann
-Fixed bug with branches being an 8 bit signed integer (/B) instead of a boolean (/O)
-
-Revision 1.39  2011/07/12 13:51:09  buchmann
-Added some b info to JZB (for testing purposes)
-
-Revision 1.38  2011/07/04 11:25:45  buchmann
-Updated trigger versions
-
-Revision 1.37  2011/06/28 13:30:25  buchmann
-Added additional jet counts for higher pt thresholds
-
 Revision 1.36  2011/06/14 17:35:01  buchmann
 Removing a veto for events that don't have enough PF leptons (this version is purely reco now)
 
@@ -59,7 +44,6 @@ Double_t GausRandom(Double_t mu, Double_t sigma) {
   return gRandom->Gaus(mu,sigma);   //real deal
   //return mu;//debugging : no smearing
 }
-
 class nanoEvent
 {
 public:
@@ -130,11 +114,6 @@ public:
   float dphitcMet2;
   float dphipfRecoilMet1;
   float dphipfRecoilMet2;
-
-  bool ElCInfoIsGsfCtfCons;
-  bool ElCInfoIsGsfCtfScPixCons;
-  bool ElCInfoIsGsfScPixCons;
-
   int id1;
   int id2;
   int ch1;
@@ -192,17 +171,8 @@ public:
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
-  bool  pfJetGoodID[jMax];
-  float bTagProbTHighEff[jMax];
-  float bTagProbTHighPur[jMax];
-  float bTagProbSHighEff[jMax];
-  float bTagProbSHighPur[jMax];
+  bool   pfJetGoodID[jMax];
 
-  int pfJetGoodNum60;
-  int pfJetGoodNum55;
-  int pfJetGoodNum50;
-  int pfJetGoodNum45;
-  int pfJetGoodNum40;
   int pfJetGoodNum35;
   int pfJetGoodNum33;
   int pfJetGoodNum315;
@@ -247,6 +217,9 @@ public:
   bool passed_triggers;
   int trigger_bit;
 
+  float mGlu;
+  float mChi;
+  float mLSP;
 };
 
 nanoEvent::nanoEvent(){};
@@ -310,9 +283,6 @@ void nanoEvent::reset()
   dphipfRecoilMet1=0;
   dphipfRecoilMet2=0;
   dphi=0;
-  ElCInfoIsGsfCtfCons=false;
-  ElCInfoIsGsfCtfScPixCons=false;
-  ElCInfoIsGsfScPixCons=false;
   id1=0;
   id2=0;
   ch1=0;
@@ -409,12 +379,7 @@ void nanoEvent::reset()
     pfJetGoodEta[jCounter]=0;
     pfJetGoodPhi[jCounter]=0;
     pfJetGoodID[jCounter]=0;
-    bTagProbTHighEff[jCounter]=0;
-    bTagProbTHighPur[jCounter]=0;
-    bTagProbSHighEff[jCounter]=0;
-    bTagProbSHighPur[jCounter]=0;
   }
-
   pfJetGoodNum=0;
   pfJetGoodNumID=0;
   pfJetGoodNumEta2p4=0;
@@ -429,11 +394,6 @@ void nanoEvent::reset()
   pfJetGoodNum315=0;
   pfJetGoodNum33=0;
   pfJetGoodNum35=0;
-  pfJetGoodNum40=0;
-  pfJetGoodNum45=0;
-  pfJetGoodNum50=0;
-  pfJetGoodNum55=0;
-  pfJetGoodNum60=0;
 
   eventNum=0;
   runNum=0;
@@ -452,8 +412,11 @@ void nanoEvent::reset()
 
   weight = 1.0;
   PUweight = 1.0;
-}
 
+  mGlu=0;
+  mChi=0;
+  mLSP=0;
+}
 
 TTree *myTree;
 TTree *myInfo;
@@ -461,8 +424,8 @@ TTree *myInfo;
 nanoEvent nEvent;
 
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning) : 
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) {
+JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan) : 
+  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan){
   //	Util::SetStyle();	
   //	setTDRStyle();	
 }
@@ -525,7 +488,7 @@ cout << endl << endl;
 
   myTree = new TTree("events","events");
 
-  myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
+  myTree->Branch("is_data",&nEvent.is_data,"is_data/B");
   myTree->Branch("mll",&nEvent.mll,"mll/F");
   myTree->Branch("pt",&nEvent.pt,"pt/F");
   myTree->Branch("phi",&nEvent.phi,"phi/F");
@@ -577,9 +540,6 @@ cout << endl << endl;
   myTree->Branch("dphipfRecoilMet1",&nEvent.dphipfRecoilMet1,"dphipfRecoilMet1/F");
   myTree->Branch("dphipfRecoilMet2",&nEvent.dphipfRecoilMet2,"dphipfRecoilMet2/F");
   myTree->Branch("dphi",&nEvent.dphi,"dphi/F");
-  myTree->Branch("ElCInfoIsGsfCtfCons",&nEvent.ElCInfoIsGsfCtfCons,"ElCInfoIsGsfCtfCons/O");
-  myTree->Branch("ElCInfoIsGsfScPixCons",&nEvent.ElCInfoIsGsfScPixCons,"ElCInfoIsGsfScPixCons/O");
-  myTree->Branch("ElCInfoIsGsfCtfScPixCons",&nEvent.ElCInfoIsGsfCtfScPixCons,"ElCInfoIsGsfCtfScPixCons/O");
 
   myTree->Branch("id1",&nEvent.id1,"id1/I");
   myTree->Branch("id2",&nEvent.id2,"id2/I");
@@ -646,7 +606,7 @@ cout << endl << endl;
   myTree->Branch("pfJetPt",nEvent.pfJetPt,"pfJetPt[pfJetNum]/F");
   myTree->Branch("pfJetEta",nEvent.pfJetEta,"pfJetEta[pfJetNum]/F");
   myTree->Branch("pfJetPhi",nEvent.pfJetPhi,"pfJetPhi[pfJetNum]/F");
-  myTree->Branch("pfJetID",nEvent.pfJetID,"pfJetID[pfJetNum]/O");
+  myTree->Branch("pfJetID",nEvent.pfJetID,"pfJetID[pfJetNum]/B");
   myTree->Branch("pfJetScale",nEvent.pfJetScale,"pfJetScale[pfJetNum]/F");
   myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
@@ -663,12 +623,7 @@ cout << endl << endl;
   myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
-  myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/O");
-
-  myTree->Branch("bTagProbTHighEff", nEvent.bTagProbTHighEff,"bTagProbTHighEff[pfJetGoodNum]/F");
-  myTree->Branch("bTagProbTHighPur", nEvent.bTagProbTHighPur,"bTagProbTHighPur[pfJetGoodNum]/F");
-  myTree->Branch("bTagProbSHighEff", nEvent.bTagProbSHighEff,"bTagProbSHighEff[pfJetGoodNum]/F");
-  myTree->Branch("bTagProbSHighPur", nEvent.bTagProbSHighPur,"bTagProbSHighPur[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/B");
 
   myTree->Branch("pfJetGoodNum20",&nEvent.pfJetGoodNum20,"pfJetGoodNum20/I");
   myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
@@ -677,11 +632,6 @@ cout << endl << endl;
   myTree->Branch("pfJetGoodNum315",&nEvent.pfJetGoodNum315,"pfJetGoodNum315/I");
   myTree->Branch("pfJetGoodNum33",&nEvent.pfJetGoodNum33,"pfJetGoodNum33/I");
   myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
-  myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
-  myTree->Branch("pfJetGoodNum45",&nEvent.pfJetGoodNum45,"pfJetGoodNum45/I");
-  myTree->Branch("pfJetGoodNum50",&nEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
-  myTree->Branch("pfJetGoodNum55",&nEvent.pfJetGoodNum55,"pfJetGoodNum55/I");
-  myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
   myTree->Branch("pfpt",&nEvent.pfpt,"pfpt[30]/F");
   myTree->Branch("pfphi",&nEvent.pfphi,"pfphi[30]/F");
@@ -701,8 +651,13 @@ cout << endl << endl;
   myTree->Branch("sumJetPt",nEvent.sumJetPt,"sumJetPt[30]/F");
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
-  myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
+  myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/B");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
+
+  myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
+  myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
+  myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+
 
 
   // Define counters (so we have them in the right order)
@@ -763,12 +718,9 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
@@ -786,14 +738,10 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v4") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
   return false;
 } 
 
@@ -804,13 +752,11 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
   return false;
 }
 
@@ -827,10 +773,16 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
+
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
       nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
       nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
+      if(fisModelScan) {
+	nEvent.mGlu=fTR->MassGlu;
+	nEvent.mChi=fTR->MassChi;
+	nEvent.mLSP=fTR->MassLSP;
+      }
     }
   // Trigger information
   nEvent.passed_triggers=0;
@@ -906,9 +858,6 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.index = muIndex;
 	  tmpLepton.type = 1;
 	  tmpLepton.genPt = 0.;
-          tmpLepton.ElCInfoIsGsfCtfCons=true;
-          tmpLepton.ElCInfoIsGsfCtfScPixCons=true;
-          tmpLepton.ElCInfoIsGsfScPixCons=true;
 	  leptons.push_back(tmpLepton);
 	}
     }
@@ -934,17 +883,14 @@ void JZBAnalysis::Analyze() {
 	  tmpLepton.index = elIndex;
 	  tmpLepton.type = 0;
 	  tmpLepton.genPt = 0.;
-          tmpLepton.ElCInfoIsGsfCtfCons=fTR->ElCInfoIsGsfCtfCons[elIndex];
-          tmpLepton.ElCInfoIsGsfCtfScPixCons=fTR->ElCInfoIsGsfCtfScPixCons[elIndex];
-          tmpLepton.ElCInfoIsGsfScPixCons=fTR->ElCInfoIsGsfScPixCons[elIndex];
 	  leptons.push_back(tmpLepton);
 	}
     }
   
   // #-- PF muon loop -- type 1
-/*  for(int muIndex=0;muIndex<fTR->PfMuNObjs;muIndex++)
+  for(int muIndex=0;muIndex<fTR->PfMuNObjs;muIndex++)
     {
-      if(IsCustomPfMu(muIndex,1)) {
+      if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMuPx[muIndex],fTR->PfMuPy[muIndex],fTR->PfMuPz[muIndex],fTR->PfMuE[muIndex]);
 	  int tmpCharge = fTR->PfMuCharge[muIndex];
 	  lepton tmpLepton;
@@ -956,7 +902,7 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[1].push_back(tmpLepton);
       }
     }
-*/
+
 
   // #-- PF muon loop -- type 2
   for(int muIndex=0;muIndex<fTR->PfMu2NObjs;muIndex++)
@@ -969,7 +915,7 @@ void JZBAnalysis::Analyze() {
       nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu2Charge[muIndex];
       nEvent.pfLeptonNum++;
       if ( nEvent.pfLeptonNum>=jMax ) break;
-      if(IsCustomPfMu(muIndex,2)) {
+      if(IsCustomPfMu(muIndex)) {
 	  TLorentzVector tmpVector(fTR->PfMu2Px[muIndex],fTR->PfMu2Py[muIndex],fTR->PfMu2Pz[muIndex],fTR->PfMu2E[muIndex]);
 	  int tmpCharge = fTR->PfMu2Charge[muIndex];
 	  lepton tmpLepton;
@@ -983,10 +929,10 @@ void JZBAnalysis::Analyze() {
       }
     }
 
-/*  // #-- PF muon loop -- type 3
+  // #-- PF muon loop -- type 3
   for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
     {
-      if(IsCustomPfMu(muIndex,3)) {
+      if(IsCustomPfMu(muIndex)) {
           counters[MU].fill("... pass pf mu selection");
 	  TLorentzVector tmpVector(fTR->PfMu3Px[muIndex],fTR->PfMu3Py[muIndex],fTR->PfMu3Pz[muIndex],fTR->PfMu3E[muIndex]);
 	  int tmpCharge = fTR->PfMu3Charge[muIndex];
@@ -999,11 +945,11 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
-*/
+
   // #-- PF electron loop -- type 1
   for(int elIndex=0;elIndex<fTR->PfElNObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex,1)) {
+      if(IsCustomPfEl(elIndex)) {
       if ( nEvent.pfLeptonNum>=jMax ) break;
       nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfElPt[elIndex];
       nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfElEta[elIndex];
@@ -1023,11 +969,11 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[0].push_back(tmpLepton); // THIS IS THE REAL DEAL (the one we will probably want to use)
       }
     }
-/*  
+  
   // #-- PF electron loop -- type 2
   for(int elIndex=0;elIndex<fTR->PfEl2NObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex,2)) {
+      if(IsCustomPfEl(elIndex)) {
 	  TLorentzVector tmpVector(fTR->PfEl2Px[elIndex],fTR->PfEl2Py[elIndex],fTR->PfEl2Pz[elIndex],fTR->PfEl2E[elIndex]);
 	  int tmpCharge = fTR->PfEl2Charge[elIndex];
 	  lepton tmpLepton;
@@ -1043,7 +989,7 @@ void JZBAnalysis::Analyze() {
   // #-- PF electron loop -- type 3
   for(int elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++)
     {
-      if(IsCustomPfEl(elIndex,3)) {
+      if(IsCustomPfEl(elIndex)) {
           counters[EL].fill("... pass pf e selection");
 	  TLorentzVector tmpVector(fTR->PfEl3Px[elIndex],fTR->PfEl3Py[elIndex],fTR->PfEl3Pz[elIndex],fTR->PfEl3E[elIndex]);
 	  int tmpCharge = fTR->PfEl3Charge[elIndex];
@@ -1056,7 +1002,7 @@ void JZBAnalysis::Analyze() {
 	  pfLeptons[3].push_back(tmpLepton);
       }
     }
-*/
+
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
 
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
@@ -1127,10 +1073,6 @@ void JZBAnalysis::Analyze() {
       nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
       nEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
       nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
-
-      nEvent.ElCInfoIsGsfCtfCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfCons;
-      nEvent.ElCInfoIsGsfCtfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfScPixCons;
-      nEvent.ElCInfoIsGsfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfScPixCons;
     } else {
       
       //If there are less than two leptons the event is not considered
@@ -1315,11 +1257,6 @@ void JZBAnalysis::Analyze() {
           nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
           nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
           nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-          nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
-          nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
-          nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
-          nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
-
           if(isJetID>0) nEvent.pfJetGoodNumID++;
           nEvent.pfJetGoodNum++;
           if (abs(jeta)<2.4) nEvent.pfJetGoodNumEta2p4++;
@@ -1334,12 +1271,8 @@ void JZBAnalysis::Analyze() {
         if ( jpt>31.5 ) nEvent.pfJetGoodNum315++;
         if ( jpt>33. )  nEvent.pfJetGoodNum33++;
         if ( jpt>35. )  nEvent.pfJetGoodNum35++;
-        if ( jpt>40. )  nEvent.pfJetGoodNum40++;
-        if ( jpt>45. )  nEvent.pfJetGoodNum45++;
-        if ( jpt>50. )  nEvent.pfJetGoodNum50++;
-        if ( jpt>55. )  nEvent.pfJetGoodNum55++;
-        if ( jpt>60. )  nEvent.pfJetGoodNum60++;
       }
+    
     
     int index;
     if(recoil.Pt()!=0) // so far we had not added the lepton system in the recoil, so our recoil represents the sumJPt (ugly but it should work)
@@ -1587,7 +1520,7 @@ void JZBAnalysis::End(TFile *f){
   myTree->Write();
 
   // Dump statistics
-  if (1) { // Put that to 0 if you are annoyed
+  if (0) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
@@ -1608,17 +1541,13 @@ std::string JZBAnalysis::any2string(T i)
   return buffer.str();
 }
 
-const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
+const bool JZBAnalysis::IsCustomPfMu(const int index){
 //VERY TEMPORARY !!!!
   // Basic muon cleaning and ID
   // Acceptance cuts
-  if (pftype==1 && !(fTR->PfMuPt[index] > 10) )       return false;
-  if (pftype==2 && !(fTR->PfMu2Pt[index] > 10) )       return false;
-  if (pftype==3 && !(fTR->PfMu3Pt[index] > 10) )       return false;
+  if ( !(fTR->PfMu3Pt[index] > 10) )       return false;
   counters[MU].fill(" ... PF pt > 10");
-  if (pftype==1 && !(fabs(fTR->PfMuEta[index])<2.4) ) return false;
-  if (pftype==2 && !(fabs(fTR->PfMu2Eta[index])<2.4) ) return false;
-  if (pftype==3 && !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
+  if ( !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
   counters[MU].fill(" ... PF |eta| < 2.4");
 
 /*  // Quality cuts
@@ -1655,20 +1584,14 @@ const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
 }
 
 
-const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
+const bool JZBAnalysis::IsCustomPfEl(const int index){
 
   // kinematic acceptance
-  if(pftype==1&&!(fTR->PfElPt[index]>10) )return false;
-  if(pftype==2&&!(fTR->PfEl2Pt[index]>10) )return false;
-  if(pftype==3&&!(fTR->PfEl3Pt[index]>10) )return false;
+  if(!(fTR->PfEl3Pt[index]>10) )return false;
   counters[EL].fill(" ... PF pt > 10");
-  if(pftype==1&&!(fabs(fTR->PfElEta[index]) < 2.4) ) return false;
-  if(pftype==2&&!(fabs(fTR->PfEl2Eta[index]) < 2.4) ) return false;
-  if(pftype==3&&!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
+  if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[EL].fill(" ... PF |eta| < 2.4");
-  if(pftype==1&&!((fTR->PfElID95[index]))) return false;
-  if(pftype==2&&!((fTR->PfElID95[index]))) return false;
-  if(pftype==3&&!((fTR->PfElID95[index]))) return false;
+  if(!(fTR->PfElID95[index])) return false;
   //if(!(fTR->PfElID80[index])) return false;
 /*
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
@@ -1710,9 +1633,9 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   // Basic muon cleaning and ID
 
   // Acceptance cuts
-  if (!(fTR->MuPt[index] > 10) )       return false;
+  if ( !(fTR->MuPt[index] > 10) )       return false;
   counters[MU].fill(" ... pt > 10");
-  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
+  if ( !(fabs(fTR->MuEta[index])<2.4) ) return false;
   counters[MU].fill(" ... |eta| < 2.4");
 
   // Quality cuts
