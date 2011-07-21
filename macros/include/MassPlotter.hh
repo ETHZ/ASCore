@@ -211,7 +211,8 @@ private:
 
 
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
-        void PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub);
+        void PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub, TF1* func_qcd_model);
+        void printEstimation(TH1D* h_pred, TH1D* h_pred_c, int nbins, float min, float max);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
 		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0, const double max=1, 
