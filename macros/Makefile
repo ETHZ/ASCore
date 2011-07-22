@@ -17,85 +17,28 @@ LIBS           = $(ROOTLIBS)
 NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS))
 
-SRCS           = src/helper/PUWeight.C src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/UserAnalyzer.cc src/TreeAnalyzer.cc src/PhysQCAnalyzer.cc src/TreeSkimmer.cc src/MT2tree.cc src/MassAnalysis.cc \
-                 src/UserAnalysis.cc src/DiLeptonAnalysis.cc src/TreeCleaner.cc src/MultiplicityAnalysisBase.cc \
-                 src/MultiplicityAnalysis.cc  src/SignificanceAnalysis.cc src/PhysQCAnalysis.cc src/RatioAnalysis.cc \
-                 src/helper/TMctLib.cc src/helper/mctlib.cc src/helper/FPRatios.cc \
-                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc  src/LeptJetMultAnalyzer.cc \
-                 src/MuonPlotter.cc src/MassPlotter.cc src/helper/MetaTreeClassBase.C \
-                 src/JZBAnalyzer.cc src/JZBAnalysis.cc \
-                 src/JZBPFAnalysis.cc \
-                 src/SSDLAnalyzer.cc src/SSDLAnalysis.cc
-
-# We want dictionaries only for classes that have _linkdef.h files                                                               
-DICTOBS =  $(patsubst %_linkdef.hh, %.o, \
-                      $(patsubst dict/%, obj/dict_%, \
-                          $(wildcard dict/*_linkdef.hh) ) )
+SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
+                 src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc \
+                 src/helper/PUWeight.C src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc src/helper/MetaTreeClassBase.C
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
-OBJS += $(DICTOBS)
-
-SHARED=shlib/libDiLeptonAnalysis.so
-
-
 .SUFFIXES: .cc,.C,.hh,.h
-.PHONY : clean purge all depend PhysQC
+.PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer MakeMuonPlots RunJZBAnalyzer RunSSDLAnalyzer MakeMassPlots 
-# all: RunUserAnalyzer RunTreeAnalyzer RunPhysQCAnalyzer RunTreeSkimmer RunLeptJetMultAnalyzer MakeMuonPlots RunJZBAnalyzer RunSSDLAnalyzer MakeMassPlots shared
-
-# shared: $(SHARED)
-# $(SHARED): $(OBJS)
-#	@echo "Creating library $(SHARED)"
-#	$(LD) $(LDFLAGS) $(SOFLAGS) $(OBJS) -o $(SHARED)
-#	@echo "$(SHARED) successfully compiled!"
+all: RunUserAnalyzer RunTreeSkimmer 
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunTreeAnalyzer: src/exe/RunTreeAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunPhysQCAnalyzer: src/exe/RunPhysQCAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 RunTreeSkimmer: src/exe/RunTreeSkimmer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
-RunLeptJetMultAnalyzer: src/exe/RunLeptJetMultAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^	
-
-MakeMuonPlots: src/exe/MakeMuonPlots.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-MakeMassPlots: src/exe/MakeMassPlots.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunSSDLAnalyzer: src/exe/RunSSDLAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-obj/dict_%.o: include/%.hh dict/%_linkdef.hh
-	@echo "Generating dictionary for $<"
-	$(ROOTSYS)/bin/rootcint -f $(patsubst %.o, %.C, $@) -c -Idict $(INCLUDES) $(notdir $^)
-	$(CXX) -c $(CXXFLAGS) -o $@ $(patsubst %.o, %.C, $@)
-
 clean:
 	$(RM) $(OBJS)	
 	$(RM) RunUserAnalyzer
-	$(RM) RunTreeAnalyzer
-	$(RM) RunPhysQCAnalyzer
 	$(RM) RunTreeSkimmer
-	$(RM) RunLeptJetMultAnalyzer
-	$(RM) MakeMuonPlots
-	$(RM) MakeMassPlots
-	$(RM) RunJZBAnalyzer
-	$(RM) RunSSDLAnalyzer
 
 purge:
 	$(RM) $(OBJS)
@@ -105,3 +48,177 @@ deps: $(SRCS)
 
 # DO NOT DELETE THIS LINE -- make depend needs it
 
+src/base/TreeClassBase.o: ./include/base/TreeClassBase.h
+src/base/TreeReader.o: ./include/base/TreeReader.hh
+src/base/TreeReader.o: ./include/base/TreeClassBase.h
+src/base/TreeAnalyzerBase.o: /usr/include/stdlib.h /usr/include/features.h
+src/base/TreeAnalyzerBase.o: /usr/include/sys/cdefs.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/wordsize.h
+src/base/TreeAnalyzerBase.o: /usr/include/gnu/stubs.h
+src/base/TreeAnalyzerBase.o: /usr/include/gnu/stubs-64.h
+src/base/TreeAnalyzerBase.o: /usr/include/sys/types.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/types.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/typesizes.h
+src/base/TreeAnalyzerBase.o: /usr/include/time.h /usr/include/endian.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/endian.h
+src/base/TreeAnalyzerBase.o: /usr/include/sys/select.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/select.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/sigset.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/time.h
+src/base/TreeAnalyzerBase.o: /usr/include/sys/sysmacros.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/pthreadtypes.h
+src/base/TreeAnalyzerBase.o: /usr/include/alloca.h
+src/base/TreeAnalyzerBase.o: ./include/base/TreeAnalyzerBase.hh
+src/base/TreeAnalyzerBase.o: ./include/base/TreeReader.hh
+src/base/TreeAnalyzerBase.o: ./include/base/TreeClassBase.h
+src/base/TreeAnalyzerBase.o: ./include/helper/Utilities.hh
+src/base/TreeAnalyzerBase.o: /usr/include/stdio.h /usr/include/libio.h
+src/base/TreeAnalyzerBase.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/stdio_lim.h
+src/base/TreeAnalyzerBase.o: /usr/include/bits/sys_errlist.h
+src/base/UserAnalysisBase.o: ./include/base/TreeReader.hh
+src/base/UserAnalysisBase.o: ./include/base/TreeClassBase.h
+src/base/UserAnalysisBase.o: /usr/include/stdlib.h /usr/include/features.h
+src/base/UserAnalysisBase.o: /usr/include/sys/cdefs.h
+src/base/UserAnalysisBase.o: /usr/include/bits/wordsize.h
+src/base/UserAnalysisBase.o: /usr/include/gnu/stubs.h
+src/base/UserAnalysisBase.o: /usr/include/gnu/stubs-64.h
+src/base/UserAnalysisBase.o: /usr/include/sys/types.h
+src/base/UserAnalysisBase.o: /usr/include/bits/types.h
+src/base/UserAnalysisBase.o: /usr/include/bits/typesizes.h
+src/base/UserAnalysisBase.o: /usr/include/time.h /usr/include/endian.h
+src/base/UserAnalysisBase.o: /usr/include/bits/endian.h
+src/base/UserAnalysisBase.o: /usr/include/sys/select.h
+src/base/UserAnalysisBase.o: /usr/include/bits/select.h
+src/base/UserAnalysisBase.o: /usr/include/bits/sigset.h
+src/base/UserAnalysisBase.o: /usr/include/bits/time.h
+src/base/UserAnalysisBase.o: /usr/include/sys/sysmacros.h
+src/base/UserAnalysisBase.o: /usr/include/bits/pthreadtypes.h
+src/base/UserAnalysisBase.o: /usr/include/alloca.h
+src/base/UserAnalysisBase.o: ./include/helper/pdgparticle.hh
+src/base/UserAnalysisBase.o: ./include/helper/Monitor.hh
+src/base/UserAnalysisBase.o: ./include/base/UserAnalysisBase.hh
+src/base/UserAnalysisBase.o: ./include/base/TreeReader.hh
+src/base/UserAnalysisBase.o: ./include/helper/Utilities.hh
+src/base/UserAnalysisBase.o: /usr/include/stdio.h /usr/include/libio.h
+src/base/UserAnalysisBase.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/base/UserAnalysisBase.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/base/UserAnalysisBase.o: /usr/include/bits/stdio_lim.h
+src/base/UserAnalysisBase.o: /usr/include/bits/sys_errlist.h
+src/base/UserAnalysisBase.o: ./include/helper/PUWeight.h
+src/UserAnalyzer.o: ./include/UserAnalyzer.hh
+src/UserAnalyzer.o: ./include/base/TreeAnalyzerBase.hh
+src/UserAnalyzer.o: ./include/base/TreeReader.hh
+src/UserAnalyzer.o: ./include/base/TreeClassBase.h
+src/UserAnalyzer.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/UserAnalyzer.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/UserAnalyzer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/UserAnalyzer.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
+src/UserAnalyzer.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/UserAnalyzer.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/UserAnalyzer.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/UserAnalyzer.o: /usr/include/bits/stdio_lim.h
+src/UserAnalyzer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/UserAnalyzer.o: /usr/include/sys/types.h /usr/include/time.h
+src/UserAnalyzer.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/UserAnalyzer.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/UserAnalyzer.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/UserAnalyzer.o: /usr/include/sys/sysmacros.h
+src/UserAnalyzer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+src/UserAnalyzer.o: ./include/base/TreeReader.hh ./include/UserAnalysis.hh
+src/UserAnalyzer.o: ./include/base/UserAnalysisBase.hh
+src/UserAnalyzer.o: ./include/helper/pdgparticle.hh
+src/UserAnalyzer.o: ./include/helper/PUWeight.h
+src/TreeSkimmer.o: ./include/TreeSkimmer.hh
+src/TreeSkimmer.o: ./include/base/TreeAnalyzerBase.hh
+src/TreeSkimmer.o: ./include/base/TreeReader.hh
+src/TreeSkimmer.o: ./include/base/TreeClassBase.h
+src/TreeSkimmer.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/TreeSkimmer.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/TreeSkimmer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/TreeSkimmer.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
+src/TreeSkimmer.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/TreeSkimmer.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/TreeSkimmer.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/TreeSkimmer.o: /usr/include/bits/stdio_lim.h
+src/TreeSkimmer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/TreeSkimmer.o: /usr/include/sys/types.h /usr/include/time.h
+src/TreeSkimmer.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/TreeSkimmer.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/TreeSkimmer.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/TreeSkimmer.o: /usr/include/sys/sysmacros.h
+src/TreeSkimmer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+src/TreeSkimmer.o: ./include/base/TreeReader.hh
+src/UserAnalysis.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/UserAnalysis.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/UserAnalysis.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/UserAnalysis.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
+src/UserAnalysis.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/UserAnalysis.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/UserAnalysis.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/UserAnalysis.o: /usr/include/bits/stdio_lim.h
+src/UserAnalysis.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/UserAnalysis.o: /usr/include/sys/types.h /usr/include/time.h
+src/UserAnalysis.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/UserAnalysis.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/UserAnalysis.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/UserAnalysis.o: /usr/include/sys/sysmacros.h
+src/UserAnalysis.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+src/UserAnalysis.o: ./include/UserAnalysis.hh ./include/base/TreeReader.hh
+src/UserAnalysis.o: ./include/base/TreeClassBase.h
+src/UserAnalysis.o: ./include/base/UserAnalysisBase.hh
+src/UserAnalysis.o: ./include/base/TreeReader.hh
+src/UserAnalysis.o: ./include/helper/pdgparticle.hh
+src/UserAnalysis.o: ./include/helper/PUWeight.h
+src/helper/PUWeight.o: ./include/helper/PUWeight.h
+src/helper/AnaClass.o: ./include/helper/AnaClass.hh /usr/include/math.h
+src/helper/AnaClass.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/helper/AnaClass.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/helper/AnaClass.o: /usr/include/gnu/stubs-64.h
+src/helper/AnaClass.o: /usr/include/bits/huge_val.h
+src/helper/AnaClass.o: /usr/include/bits/mathdef.h
+src/helper/AnaClass.o: /usr/include/bits/mathcalls.h /usr/include/stdlib.h
+src/helper/AnaClass.o: /usr/include/sys/types.h /usr/include/bits/types.h
+src/helper/AnaClass.o: /usr/include/bits/typesizes.h /usr/include/time.h
+src/helper/AnaClass.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/helper/AnaClass.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/helper/AnaClass.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/helper/AnaClass.o: /usr/include/sys/sysmacros.h
+src/helper/AnaClass.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+src/helper/AnaClass.o: /usr/include/stdio.h /usr/include/libio.h
+src/helper/AnaClass.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/helper/AnaClass.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/helper/AnaClass.o: /usr/include/bits/stdio_lim.h
+src/helper/AnaClass.o: /usr/include/bits/sys_errlist.h
+src/helper/AnaClass.o: ./include/helper/Utilities.hh
+src/helper/AnaClass.o: ./include/helper/MetaTreeClassBase.h
+src/helper/AnaClass.o: ./include/helper/Utilities.hh
+src/helper/Davismt2.o: ./include/helper/Davismt2.h /usr/include/math.h
+src/helper/Davismt2.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/helper/Davismt2.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/helper/Davismt2.o: /usr/include/gnu/stubs-64.h
+src/helper/Davismt2.o: /usr/include/bits/huge_val.h
+src/helper/Davismt2.o: /usr/include/bits/mathdef.h
+src/helper/Davismt2.o: /usr/include/bits/mathcalls.h
+src/helper/LeptJetStat.o: ./include/helper/LeptJetStat.h
+src/helper/Hemisphere.o: ./include/helper/Hemisphere.hh
+src/helper/Hemisphere.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/helper/Hemisphere.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/helper/Hemisphere.o: /usr/include/bits/wordsize.h
+src/helper/Hemisphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+src/helper/Hemisphere.o: /usr/include/bits/types.h
+src/helper/Hemisphere.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/helper/Hemisphere.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/helper/Hemisphere.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/helper/Hemisphere.o: /usr/include/bits/stdio_lim.h
+src/helper/Hemisphere.o: /usr/include/bits/sys_errlist.h
+src/helper/Hemisphere.o: /usr/include/stdlib.h /usr/include/sys/types.h
+src/helper/Hemisphere.o: /usr/include/time.h /usr/include/endian.h
+src/helper/Hemisphere.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+src/helper/Hemisphere.o: /usr/include/bits/select.h
+src/helper/Hemisphere.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/helper/Hemisphere.o: /usr/include/sys/sysmacros.h
+src/helper/Hemisphere.o: /usr/include/bits/pthreadtypes.h
+src/helper/Hemisphere.o: /usr/include/alloca.h
+src/helper/MetaTreeClassBase.o: ./include/helper/MetaTreeClassBase.h
