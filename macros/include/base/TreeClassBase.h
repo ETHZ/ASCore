@@ -722,9 +722,9 @@ public :
    Float_t         PFMETPATSignificance;
    Float_t         METR12;
    Float_t         METR21;
-   float         MassGlu;
-   float         MassChi;
-   float         MassLSP;
+   Float_t         MassGlu;
+   Float_t         MassChi;
+   Float_t         MassLSP;
 
 
    // List of branches

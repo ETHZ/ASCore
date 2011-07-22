@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.42 $";
+string sjzbversion="$Revision: 1.44 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.44  2011/07/22 06:25:37  buchmann
+Updated implementation of SUSY scan for JZB
+
 Revision 1.42  2011/07/14 07:43:22  buchmann
 Added info to check charge flips
 
@@ -1603,7 +1606,7 @@ void JZBAnalysis::End(TFile *f){
   myTree->Write();
 
   // Dump statistics
-  if (1) { // Put that to 0 if you are annoyed
+  if (0) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
