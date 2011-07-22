@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-  cout << "Usage: RunJZBAnalyzer [-o filename] [-v verbose] [-n maxEvents] [-j JSON] [-t type] [-c] [-l] [-M] [-p data_PileUp] [-P mc_PileUP] file1 [... filen]" << endl;
+  cout << "Usage: RunJZBAnalyzer [-o filename] [-a analysis] [-v verbose] [-n maxEvents] [-j JSON] [-t type] [-c] [-l] [-M] [-p data_PileUp] [-P mc_PileUP] file1 [... filen]" << endl;
   cout << "  where:" << endl;
   cout << "     -c       runs full lepton cleaning                                       " << endl;
   cout << "     -M       is for Model scans (also loads masses)                          " << endl;
@@ -30,6 +30,7 @@ void usage( int status = 0 ) {
   cout << "                   interactions is read                                       " << endl;
   cout << "     mc_PileUP     root file from which the generated # pile up               " << endl;
   cout << "     type     is 'el', 'mu' or 'mc' (default)                                 " << endl;
+  cout << "     analisys is 0 (both), 1(only reco [default]) or 2 (only pf)              " << endl;
   cout << "     filen    are the input files (by default: ROOT files)                    " << endl;
   cout << "              with option -l, these are read as text files                    " << endl;
   cout << "              with one ROOT file name per line                                " << endl;
@@ -51,14 +52,16 @@ int main(int argc, char* argv[]) {
 
   int verbose = 0;
   int maxEvents=-1;
+  int whichanalysis=1;
   string type = "data";
 
   // Parse options
   char ch;
-  while ((ch = getopt(argc, argv, "o:v:n:j:t:lMh?cp:P")) != -1 ) {
+  while ((ch = getopt(argc, argv, "o:v:n:j:t:lMh?cp:P:a:")) != -1 ) {
     switch (ch) {
     case 'o': outputFileName = string(optarg); break;
     case 'v': verbose = atoi(optarg); break;
+    case 'a': whichanalysis = atoi(optarg); break;
     case 'l': isList = true; break;
     case 'M': isModelScan = true; break;
     case '?':
@@ -108,9 +111,10 @@ int main(int argc, char* argv[]) {
   cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
   cout << "Type is: " << type << endl;
   cout << "Full cleaning is " << (fullCleaning?"ON":"OFF") << endl;
-  cout << "Model scan is " << (isModelScan?"activated":"deactivated") << endl;
   cout << "MC_PileUp file:                 " << (mc_PileUp.length()>0?mc_PileUp:"empty") << endl;
   cout << "Data_PileUp file:               " << (data_PileUp.length()>0?data_PileUp:"empty") << endl;
+  cout << "Analysis chosen: " << whichanalysis << " (0=both, 1=reco [default], 2=pf)"<< endl;
+  cout << "Model scan is " << (isModelScan?"activated":"deactivated") << endl;
 
   cout << "--------------" << endl;
 
@@ -118,6 +122,7 @@ int main(int argc, char* argv[]) {
   //	tA->SetOutputFile(outputfile);
   tA->SetOutputFileName(outputFileName);
   tA->SetVerbose(verbose);
+  tA->SetAnalysis(whichanalysis);
   tA->SetMaxEvents(maxEvents);
   if ( jsonFileName.length() ) tA->ReadJSON(jsonFileName.c_str());
   tA->BeginJob(data_PileUp, mc_PileUp);

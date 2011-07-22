@@ -16,12 +16,18 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.17 $";
+string sjzbPFversion="$Revision: 1.19 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.19  2011/07/04 11:25:45  buchmann
+Updated trigger versions
+
+Revision 1.18  2011/06/28 13:30:25  buchmann
+Added additional jet counts for higher pt thresholds
+
 Revision 1.17  2011/06/17 10:30:57  buchmann
 Charge and lepton type added
 
@@ -222,6 +228,11 @@ public:
   float pfJetGoodPhi[jMax];
   bool   pfJetGoodID[jMax];
 
+  int pfJetGoodNum60;
+  int pfJetGoodNum55;
+  int pfJetGoodNum50;
+  int pfJetGoodNum45;
+  int pfJetGoodNum40;
   int pfJetGoodNum35;
   int pfJetGoodNum33;
   int pfJetGoodNum315;
@@ -450,6 +461,11 @@ void nanoPFEvent::reset()
   pfJetGoodNum315=0;
   pfJetGoodNum33=0;
   pfJetGoodNum35=0;
+  pfJetGoodNum40=0;
+  pfJetGoodNum45=0;
+  pfJetGoodNum50=0;
+  pfJetGoodNum55=0;
+  pfJetGoodNum60=0;
 
   eventNum=0;
   runNum=0;
@@ -477,7 +493,7 @@ TTree *InfoTree;
 nanoPFEvent npfEvent;
 
 
-JZBPFAnalysis::JZBPFAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan) : 
+JZBPFAnalysis::JZBPFAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan) :
   UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning), fisModelScan(isModelScan) {
   //	Util::SetStyle();	
   //	setTDRStyle();	
@@ -693,6 +709,11 @@ cout << endl << endl;
   mypfTree->Branch("pfJetGoodNum315",&npfEvent.pfJetGoodNum315,"pfJetGoodNum315/I");
   mypfTree->Branch("pfJetGoodNum33",&npfEvent.pfJetGoodNum33,"pfJetGoodNum33/I");
   mypfTree->Branch("pfJetGoodNum35",&npfEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
+  mypfTree->Branch("pfJetGoodNum40",&npfEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
+  mypfTree->Branch("pfJetGoodNum45",&npfEvent.pfJetGoodNum45,"pfJetGoodNum45/I");
+  mypfTree->Branch("pfJetGoodNum50",&npfEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
+  mypfTree->Branch("pfJetGoodNum55",&npfEvent.pfJetGoodNum55,"pfJetGoodNum55/I");
+  mypfTree->Branch("pfJetGoodNum60",&npfEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
   mypfTree->Branch("pfpt",&npfEvent.pfpt,"pfpt[30]/F");
   mypfTree->Branch("pfphi",&npfEvent.pfphi,"pfphi[30]/F");
@@ -769,16 +790,18 @@ const bool JZBPFAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
   return false;
-
 }
 
 //------------------------------------------------------------------------------
@@ -789,10 +812,14 @@ const bool JZBPFAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v4") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
   return false;
 }
 
@@ -803,11 +830,13 @@ const bool JZBPFAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
   return false;
 }
 
@@ -1424,6 +1453,11 @@ void JZBPFAnalysis::Analyze() {
         if ( jpt>31.5 ) npfEvent.pfJetGoodNum315++;
         if ( jpt>33. )  npfEvent.pfJetGoodNum33++;
         if ( jpt>35. )  npfEvent.pfJetGoodNum35++;
+        if ( jpt>40. )  npfEvent.pfJetGoodNum40++;
+        if ( jpt>45. )  npfEvent.pfJetGoodNum45++;
+        if ( jpt>50. )  npfEvent.pfJetGoodNum50++;
+        if ( jpt>55. )  npfEvent.pfJetGoodNum55++;
+        if ( jpt>60. )  npfEvent.pfJetGoodNum60++;
       }
     
     

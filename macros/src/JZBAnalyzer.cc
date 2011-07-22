@@ -6,15 +6,16 @@
 
 using namespace std;
 
-JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning) 
+JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning, bool isModelScan) 
   : TreeAnalyzerBase(tree) {
-  fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning);
-  fJZBPFAnalysis = new JZBPFAnalysis(fTR,dataType,fullCleaning);
+f_isModelScan=isModelScan;
+if(whichanalysis!=2)   fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning);
+if(whichanalysis!=1)   fJZBPFAnalysis = new JZBPFAnalysis(fTR,dataType,fullCleaning);
 }
 
 JZBAnalyzer::~JZBAnalyzer(){
-	delete fJZBAnalysis;
-	delete fJZBPFAnalysis;
+if(whichanalysis!=2) 	delete fJZBAnalysis;
+if(whichanalysis!=1) 	delete fJZBPFAnalysis;
 	if(!fTR->fChain) cout << "JZBAnalyzer ==> No chain!" << endl;
 }
 
@@ -58,10 +59,10 @@ void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 //	Note: the next two lines are commented out because we are now saving in the analysis routine anymore but at the "analyzer level"
 //	fJZBAnalysis->outputFileName_ = outputFileName_;
 //	fJZBPFAnalysis->outputFileName_ = outputFileName_;
-	fJZBAnalysis->fVerbose = fVerbose;
-	fJZBPFAnalysis->fVerbose = fVerbose;
-	fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-	fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	if(whichanalysis!=2) fJZBAnalysis->fVerbose = fVerbose;
+	if(whichanalysis!=1) fJZBPFAnalysis->fVerbose = fVerbose;
+	if(whichanalysis!=2) fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	if(whichanalysis!=1) fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	if(whichanalysis!=2) fJZBAnalysis->Begin(fHistFile);
 	if(whichanalysis!=1) fJZBPFAnalysis->Begin(fHistFile);
 }
