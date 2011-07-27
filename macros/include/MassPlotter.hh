@@ -82,28 +82,10 @@ public:
 	};
 	std::vector<sample>  fSamples;
 	
-	struct efficiency{
-		double ele_reco;
-		double ele_reco_err;
-		double muo_reco;
-		double muo_reco_err;
-		double nu_acc;
-		double nu_acc_err;
-		double R(std::string lept){
-			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
-			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
-			else return -1;
-		}
-		double R_err(std::string lept){
-			// error propagation
-			if     (lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			else if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
-			else return -1;
-		}
-	} fZtonunu_efficiency;
 
 	// probability for W->lnu event to be reconstructed and identified. 
 	struct Wprediction{
+		// efficiencies for W->lnu
 		double Wenu_acc;
 		double Wenu_acc_err;
 		double Wenu_rec;
@@ -121,16 +103,65 @@ public:
 			if     (lept == "ele" && W_prob("ele")>0){return sqrt(pow(Wenu_acc *Wenu_rec_err ,2) + pow(Wenu_rec *Wenu_acc_err ,2));}
 			else if(lept == "muo" && W_prob("muo")>0){return sqrt(pow(Wmunu_acc*Wmunu_rec_err,2) + pow(Wmunu_rec*Wmunu_acc_err,2));}
 			else return -1;
-		};
+		}
+		// efficiencies for Top W->lnu
+		double TopWenu_acc;
+		double TopWenu_acc_err;
+		double TopWenu_rec;
+		double TopWenu_rec_err;
+		double TopWmunu_acc;
+		double TopWmunu_acc_err;
+		double TopWmunu_rec;
+		double TopWmunu_rec_err;
+		double TopW_prob(std::string lept){
+			if     (lept == "ele" && TopWenu_acc  >0 && TopWenu_rec  >0){return TopWenu_acc *TopWenu_rec;}
+			else if(lept == "muo" && TopWmunu_acc >0 && TopWmunu_rec >0){return TopWmunu_acc*TopWmunu_rec;}
+			else return -1;
+		}
+		double TopW_prob_err(std::string lept){
+			if     (lept == "ele" && TopW_prob("ele")>0){return sqrt(pow(TopWenu_acc *TopWenu_rec_err ,2) + pow(TopWenu_rec *TopWenu_acc_err ,2));}
+			else if(lept == "muo" && TopW_prob("muo")>0){return sqrt(pow(TopWmunu_acc*TopWmunu_rec_err,2) + pow(TopWmunu_rec*TopWmunu_acc_err,2));}
+			else return -1;
+		}
 		double QCD_bg_e;
 		double QCD_bg_mu;
 		double Top_bg_e;
 		double Top_bg_mu;
+		double W_bg_e;
+		double W_bg_mu;
 		double Z_bg_e;
 		double Z_bg_mu;
 		double Other_bg_e;
 		double Other_bg_mu;
 	} fWpred;
+
+	struct Zprediction{
+		double ele_reco;
+		double ele_reco_err;
+		double muo_reco;
+		double muo_reco_err;
+		double nu_acc;
+		double nu_acc_err;
+		double R(std::string lept){
+			if     (lept=="ele" && ele_reco>0 && nu_acc > 0){return 1./(ele_reco*nu_acc);}
+			else if(lept=="muo" && muo_reco>0 && nu_acc > 0){return 1./(muo_reco*nu_acc);}
+			else return -1;
+		}
+		double R_err(std::string lept){
+			// error propagation
+			if     (lept=="ele" && R("ele")!=-1){return R("ele")*sqrt(pow(ele_reco_err/ele_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else if(lept=="muo" && R("muo")!=-1){return R("muo")*sqrt(pow(muo_reco_err/muo_reco,2)+pow(nu_acc_err/nu_acc,2));}
+			else return -1;
+		}
+		double QCD_bg_e;
+		double QCD_bg_mu;
+		double Top_bg_e;
+		double Top_bg_mu;
+		double W_bg_e;
+		double W_bg_mu;
+		double Other_bg_e;
+		double Other_bg_mu;
+	} fZpred;
 	// -----------------
 	
 
@@ -141,21 +172,21 @@ public:
 	void setOutputDir(TString dir){ fOutputDir = Util::MakeOutputDir(dir); };
 	void setOutputFile(TString filename){ fOutputFile = Util::MakeOutputFile(fOutputDir + filename); };
         void makePlot(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0., const double max=1., 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void MakePlot(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="",//njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void plotSig(TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", TString xtitle="MT2 [GeV]", 
 		     int nbins=50, double min=0., double max=1., bool cleaned=false, int type=0 ); // 0: s/sqrt(b), 1: s/sqrt(s+b), 3:s/b
-	void PrintCutFlow(int njets=-2, int nleps=0);
-        void FillMonitor(Monitor *count, TString sname, TString type, TString cut, float weight);
+  void PrintCutFlow(int njets=-2, int nleps=0, TString trigger="", TString cuts="");
+        void FillMonitor(Monitor *count, TString sname, TString type, TString cut, double weight);
 	void PrintZllEfficiency(int sample_index, bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass);
-	void PrintWEfficiency(int sample_index , std::string lept, Long64_t nevents);
+	void PrintWEfficiency(int sample_index ,TString process, std::string lept, Long64_t nevents, bool includeTaus);
         void abcd_MT2(TString var="misc.MinMetJetDPhi", TString basecut="misc.HBHENoiseFlag == 1", 
 		      TString upper_cut="misc.MinMetJetDPhi<0.2", TString lower_cut="misc.MinMetJetDPhi>0.3", 
 		      const int nbins=100, const double min=0., const double max=380., double fit_min=40., double fit_max=100.);
@@ -182,12 +213,12 @@ private:
         void MakeMT2PredictionAndPlots(bool cleaned , double dPhisplit[], double fudgefactor);
         void PrintABCDPredictions(TString var, TString basecut, TString upper_cut, TString lower_cut, TF1* func_qcd, TF1* func_sub);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=50, const double min=0, const double max=1, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
         void MakePlot(std::vector<sample> Samples, TString var="misc.PseudoJetMT2", TString cuts="misc.HBHENoiseFlag == 1", 
-		      int njets=-2, int nleps=0, //njets: 2 -> njets==2, -2 -> njets>=2
+		      int njets=-2, int nleps=0, TString HLT="", //njets: 2 -> njets==2, -2 -> njets>=2
 		      TString xtitle="MT2 [GeV]", const int nbins=gNMT2bins, const double *bins=gMT2bins, 
 		      bool cleaned=false, bool logflag=true, bool composited=false, bool ratio=false, 
 		      bool stacked=true, bool overlaySUSY=false, float overlayScale = 0);
