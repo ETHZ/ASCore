@@ -37,6 +37,7 @@ public:
 
   //  reweight::LumiReWeighting *LumiReW;
   bool isS3;
+  bool noPU;
 private:
 
 	void BookTree();

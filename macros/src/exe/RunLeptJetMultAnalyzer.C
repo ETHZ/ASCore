@@ -19,7 +19,8 @@ void usage( int status = 0 ) {
 	cout << "Usage: RunLeptJetMultAnalyzer [-d dir] [-o filename] [-v verbose] [-j json] " << endl;
 	cout << "                              [-m set_of_cuts] [-n maxEvents] [-t type] [-x lumi] " << endl;
 	cout << "                              [-p data_PileUp] [-P mc_PileUP]                " << endl; 
-        cout << "                              [-s S3]                                        " << endl;
+        cout << "                              [-s S3,noPU]                                        " << endl;
+	//cout << "                              [-noPU]                                        " << endl;
 	cout << "                              [-l] file1 [... filen]"                          << endl;
 	cout << "  where:" << endl;
 	cout << "     dir           is the output directory                                   " << endl;
@@ -62,30 +63,31 @@ int main(int argc, char* argv[]) {
 	int maxEvents=-1;
 	float lumi   = -999.99;
 	bool isS3 = false;
+	bool noPU = false;
 
 // Parse options
 	char ch;
 	while ((ch = getopt(argc, argv, "s:d:o:v:j:m:n:p:P:t:x:lh?")) != -1 ) {
-		switch (ch) {
-			case 'd': outputdir       = TString(optarg); break;
-			case 'o': filename        = TString(optarg); break;
-			case 'v': verbose         = atoi(optarg); break;
-			case 'j': jsonFileName    = string(optarg); break;
-			case 'm': setofcuts       = TString(optarg); break;
-			case 'n': maxEvents       = atoi(optarg); break;
-			case 'p': data_PileUp     = string(optarg); break;
-			case 'P': mc_PileUp       = string(optarg); break;
-			case 't': type            = string(optarg); break;
-			case 'x': lumi     	  = atof(optarg); break;
-			case 's': puScenario      = string(optarg); break;
-
-			case 'l': isList          = true; break;
-			case '?':
-			case 'h': usage(0); break;
-			default:
-			cerr << "*** Error: unknown option " << optarg << std::endl;
-			usage(-1);
-		}
+	  switch (ch) {
+	  case 'd': outputdir       = TString(optarg); break;
+	  case 'o': filename        = TString(optarg); break;
+	  case 'v': verbose         = atoi(optarg); break;
+	  case 'j': jsonFileName    = string(optarg); break;
+	  case 'm': setofcuts       = TString(optarg); break;
+	  case 'n': maxEvents       = atoi(optarg); break;
+	  case 'p': data_PileUp     = string(optarg); break;
+	  case 'P': mc_PileUp       = string(optarg); break;
+	  case 't': type            = string(optarg); break;
+	  case 'x': lumi     	  = atof(optarg); break;
+	  case 's': puScenario      = string(optarg); break;
+	  case 'l': isList          = true; break;
+	    //case 'noPU': noPU = true; break;  
+	  case '?':
+	  case 'h': usage(0); break;
+	  default:
+	    cerr << "*** Error: unknown option " << optarg << std::endl;
+	    usage(-1);
+	  }
 	}
 
 	argc -= optind;
@@ -106,7 +108,7 @@ int main(int argc, char* argv[]) {
 	}
 
 //	setofcuts   ="/shome/leo/Analysis/cuts/"+setofcuts+".dat";
-	setofcuts   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/multiplicity_cuts/"+setofcuts+".dat";
+	setofcuts   ="/shome/leo/Analysis/runManagerT3_MT2Trees/cuts/"+setofcuts+".dat";
 	//if(data_PileUp.length()!=0){data_PileUp ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_data/"+data_PileUp;}
 	//if(mc_PileUp.length()  !=0){mc_PileUp   ="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/pileUp_mc/"  +mc_PileUp;}
 	if(data_PileUp.length()!=0){data_PileUp ="/shome/leo/Analysis/runManagerT3_MT2Trees/"            + data_PileUp;}
@@ -115,6 +117,7 @@ int main(int argc, char* argv[]) {
 	if(jsonFileName.length() !=0){jsonFileName="/shome/pnef/SUSY/SUSY_macros/LeptJetMult/certification/"           +jsonFileName;}
 
 	if(puScenario=="S3") isS3=true;
+	else if(puScenario=="noPU") noPU=true;
 
 	TChain *theChain = new TChain("analyze/Analysis");
 	for(int i = 0; i < argc; i++){
@@ -140,6 +143,7 @@ int main(int argc, char* argv[]) {
   	cout << "JSON file is:                   " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
   	cout << "MC_PileUp file:                 " << (mc_PileUp.length()>0?mc_PileUp:"empty") << endl;
   	cout << "Data_PileUp file:               " << (data_PileUp.length()>0?data_PileUp:"empty") << endl;
+	if(noPU) cout << "WARNING: NoPU option set, all the PU weights will be set to 1" << endl;
 	if(setofcuts!="multiplicity_cuts/default"){
 		cout << "Set of Cuts is:                 " << setofcuts << endl;
 	}
@@ -154,6 +158,7 @@ int main(int argc, char* argv[]) {
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxEvents);
 	tA->isS3 = isS3;
+	tA->noPU = noPU;
   	if (jsonFileName!="") tA->ReadJSON(jsonFileName.c_str());
 	tA->BeginJob(filename, setofcuts, lumi, isData, data_PileUp, mc_PileUp);
 	tA->Loop();

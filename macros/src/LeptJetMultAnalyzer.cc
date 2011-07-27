@@ -58,7 +58,7 @@ void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lu
 	fMassAnalysis             ->Begin(filename);
 
         fMassAnalysis             ->isS3        = isS3;
-	
+	fMassAnalysis             ->noPU        = noPU;
 	//if(is)
 }
 

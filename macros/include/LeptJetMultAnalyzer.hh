@@ -18,8 +18,8 @@ public:
 	void EndJob();
 	void Loop();
 	void SetMaxEvents(int a){fMaxEvents=a;}
-  bool isS3;
-  
+  	bool isS3;
+  bool noPU;  
 private:
 	MassAnalysis             *fMassAnalysis;
   	int fMaxEvents;

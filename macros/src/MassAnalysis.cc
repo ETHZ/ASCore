@@ -69,10 +69,17 @@ void MassAnalysis::Begin(const char* filename){
 		fTriggerMap["HLT_HT250_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v2;
 		fTriggerMap["HLT_HT250_MHT60_v3"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v3;
 		fTriggerMap["HLT_HT250_MHT60_v4"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v4;
+		fTriggerMap["HLT_HT250_MHT60_v5"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v5;
+		fTriggerMap["HLT_HT250_MHT60_v6"]      = &fMT2tree->trigger.HLT_HT250_MHT60_v6;
 		fTriggerMap["HLT_HT250_MHT70_v1"]      = &fMT2tree->trigger.HLT_HT250_MHT70_v1;
+		fTriggerMap["HLT_HT250_MHT70_v2"]      = &fMT2tree->trigger.HLT_HT250_MHT70_v2;
+		fTriggerMap["HLT_HT250_MHT70_v3"]      = &fMT2tree->trigger.HLT_HT250_MHT70_v3;
+		fTriggerMap["HLT_HT250_MHT90_v1"]      = &fMT2tree->trigger.HLT_HT250_MHT90_v1;
 		fTriggerMap["HLT_HT260_MHT60_v2"]      = &fMT2tree->trigger.HLT_HT260_MHT60_v2;
 		fTriggerMap["HLT_HT300_MHT75_v4"]      = &fMT2tree->trigger.HLT_HT300_MHT75_v4;
 		fTriggerMap["HLT_HT300_MHT75_v5"]      = &fMT2tree->trigger.HLT_HT300_MHT75_v5;
+		fTriggerMap["HLT_HT300_MHT80_v1"]      = &fMT2tree->trigger.HLT_HT300_MHT80_v1;
+		fTriggerMap["HLT_HT350_MHT70_v1"]      = &fMT2tree->trigger.HLT_HT350_MHT70_v1;
 		// QuadJet
 		fTriggerMap["HLT_QuadJet50_BTagIP_v1"] = &fMT2tree->trigger.HLT_QuadJet50_BTagIP_v1;
 		fTriggerMap["HLT_QuadJet50_Jet40_v1"]  = &fMT2tree->trigger.HLT_QuadJet50_Jet40_v1;
@@ -381,12 +388,16 @@ void MassAnalysis::FillTree(){
 		fMT2tree->pileUp.PtHat             = fTR->PtHat;
 		fMT2tree->pileUp.isS3              = (int) isS3;
 		//////////// S3 vs S4
-		if(isS3)
+		if(noPU)
+		  fMT2tree->pileUp.Weight            = 1;
+	        else if(isS3)
 		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions, fTR->PUOOTnumInteractionsLate);
 		else
 		  fMT2tree->pileUp.Weight            = GetPUWeight(fTR->PUnumInteractions);
-
+		
 		fMT2tree->pileUp.Rho               = fTR->Rho;
+		
+		//cout << fMT2tree->pileUp.Weight            << endl;
 		
 		if(fVerbose > 3) {
 			cout << "fTR->PUnumInteractions " <<  fTR->PUnumInteractions << " weight "  
