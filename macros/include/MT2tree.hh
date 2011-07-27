@@ -158,7 +158,7 @@ public:
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 8);
+	ClassDef(MT2Trigger, 9);
 };
 
 // MT2Znunu --------------------------------
