@@ -344,6 +344,9 @@ void MassAnalysis::FillTree(){
 			abs(fTR->GenLeptonID[i]) == 14 || 
 			abs(fTR->GenLeptonID[i]) == 16)   mass=0.;    // nu 
 		else if(abs(fTR->GenLeptonID[i]) == 5 )   mass=4.2;   // bottom-quark
+		else if(abs(fTR->GenLeptonID[i]) == 22 )  mass=0;     // photon
+		else if(abs(fTR->GenLeptonID[i]) == 23 )  mass=91.2;   //  Z
+		else if(abs(fTR->GenLeptonID[i]) == 24 )  mass=80.4;   //  W
 		else   continue;
 		NGenLepts++;
 		if(NGenLepts >= 30 ) {cout << "ERROR: NGenLepts >=30: skipping remaining genlepts for event " << fTR->Event << endl; continue;}
