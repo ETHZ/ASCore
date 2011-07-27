@@ -49,16 +49,22 @@ void LeptJetMultAnalyzer::Loop(){
 }
 
 // Method called before starting the event loop
-void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi, bool isData){
-
+void LeptJetMultAnalyzer::BeginJob(TString filename, TString setofcuts, float lumi, bool isData, string data_PileUp, string mc_PileUp){
 	fMassAnalysis             ->ReadCuts(setofcuts);
 	fMassAnalysis             ->SetType(isData);
+	fMassAnalysis             ->SetPileUpSrc(data_PileUp, mc_PileUp);
 	fMassAnalysis             ->SetOutputDir(fOutputDir);
 	fMassAnalysis             ->fVerbose        = fVerbose;
 	fMassAnalysis             ->Begin(filename);
+
+        fMassAnalysis             ->isS3        = isS3;
+	
+	//if(is)
 }
 
 // Method called after finishing the event loop
 void LeptJetMultAnalyzer::EndJob(){
-	fMassAnalysis         ->End();
+  fMassAnalysis         ->End();
+  cout << " LeptJetMultAnalyzer::End()                                             " << endl;
+  
 }
