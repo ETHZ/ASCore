@@ -139,10 +139,17 @@ public:
 	Bool_t HLT_HT250_MHT60_v2;
 	Bool_t HLT_HT250_MHT60_v3;
 	Bool_t HLT_HT250_MHT60_v4;
+	Bool_t HLT_HT250_MHT60_v5;
+	Bool_t HLT_HT250_MHT60_v6;
 	Bool_t HLT_HT250_MHT70_v1;
+	Bool_t HLT_HT250_MHT70_v2;
+	Bool_t HLT_HT250_MHT70_v3;
+	Bool_t HLT_HT250_MHT90_v1;
 	Bool_t HLT_HT260_MHT60_v2;
 	Bool_t HLT_HT300_MHT75_v4;
 	Bool_t HLT_HT300_MHT75_v5;
+	Bool_t HLT_HT300_MHT80_v1;
+	Bool_t HLT_HT350_MHT70_v1;
 	// QuadJet
 	Bool_t HLT_QuadJet50_BTagIP_v1;
 	Bool_t HLT_QuadJet50_Jet40_v1;
@@ -448,6 +455,9 @@ public:
   Bool_t   SLTopAccept(double pt, double eta);
   Double_t SLTopEta(double pt);
   Double_t LeptJetDR(int pid, int index, bool bjet, int ID);
+
+  //Bosons
+  Double_t GetGenVPt(int pid);
 
   Int_t     NJets;
   Int_t     NGenJets;

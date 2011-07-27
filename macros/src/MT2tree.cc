@@ -140,10 +140,17 @@ void MT2Trigger::Reset(){
 	HLT_HT250_MHT60_v2      = false;
 	HLT_HT250_MHT60_v3      = false;
 	HLT_HT250_MHT60_v4      = false;
+	HLT_HT250_MHT60_v5      = false;
+	HLT_HT250_MHT60_v6      = false;
 	HLT_HT250_MHT70_v1      = false;
+	HLT_HT250_MHT70_v2      = false;
+	HLT_HT250_MHT70_v3      = false;
+	HLT_HT250_MHT90_v1      = false;
 	HLT_HT260_MHT60_v2      = false;
 	HLT_HT300_MHT75_v4      = false;
 	HLT_HT300_MHT75_v5      = false;
+	HLT_HT300_MHT80_v1      = false;
+	HLT_HT350_MHT70_v1      = false;
 	// QuadJet
 	HLT_QuadJet50_BTagIP_v1 = false;
 	HLT_QuadJet50_Jet40_v1  = false;
@@ -1552,6 +1559,18 @@ Double_t MT2tree::PseudoJetMetDPhi(){
 	double dPhi1 = hemi[1].lv1.DeltaPhi(pfmet[0]);
 	double dPhi2 = hemi[1].lv2.DeltaPhi(pfmet[0]);
 	return (fabs(dPhi1) < fabs(dPhi2)) ? fabs(dPhi1) : fabs(dPhi2);
+}
+
+Double_t MT2tree::GetGenVPt(int pid){
+  TLorentzVector V_p;
+  int countNLepts=0;
+  for(int i=0; i<NGenLepts; ++i){
+    if( abs(genlept[i].MID) != pid       ) continue;
+    V_p += genlept[i].lv;
+    countNLepts++;
+  }
+  //if(countNLepts!=2)cout << "[WARNING]: " << countNLepts << " leptons for this boson" << endl;
+  return V_p.Pt();
 }
 
 
