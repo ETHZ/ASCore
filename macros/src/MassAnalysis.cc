@@ -339,21 +339,21 @@ void MassAnalysis::FillTree(){
 		else if(abs(fTR->GenLeptonID[i]) == 5 )   mass=4.2;   // bottom-quark
 		else   continue;
 		NGenLepts++;
-		if(i >= 30 ) {cout << "ERROR: NGenLepts >=30: skipping remaining genlepts for event " << fTR->Event << endl; continue;}
-		fMT2tree->genlept[i].lv.SetPtEtaPhiM(fTR->GenLeptonPt[i], fTR->GenLeptonEta[i], fTR->GenLeptonPhi[i], mass);
-		fMT2tree->genlept[i].ID       = fTR->GenLeptonID[i];
-		fMT2tree->genlept[i].MID      = fTR->GenLeptonMID[i];
-		fMT2tree->genlept[i].MStatus  = fTR->GenLeptonMStatus[i];
-		fMT2tree->genlept[i].GMID     = fTR->GenLeptonGMID[i];
-		fMT2tree->genlept[i].GMStatus = fTR->GenLeptonGMStatus[i];
-		if(abs(fMT2tree->genlept[i].ID) == 11 || abs(fMT2tree->genlept[i].ID) == 13 || abs(fMT2tree->genlept[i].ID) == 15   ){
-			fMT2tree->genlept[i].MT = GetMT(fMT2tree->genlept[i].lv, fMT2tree->genlept[i].lv.M(), fMT2tree->genmet[0], 0.);
+		if(NGenLepts >= 30 ) {cout << "ERROR: NGenLepts >=30: skipping remaining genlepts for event " << fTR->Event << endl; continue;}
+		fMT2tree->genlept[NGenLepts-1].lv.SetPtEtaPhiM(fTR->GenLeptonPt[i], fTR->GenLeptonEta[i], fTR->GenLeptonPhi[i], mass);
+		fMT2tree->genlept[NGenLepts-1].ID       = fTR->GenLeptonID[i];
+		fMT2tree->genlept[NGenLepts-1].MID      = fTR->GenLeptonMID[i];
+		fMT2tree->genlept[NGenLepts-1].MStatus  = fTR->GenLeptonMStatus[i];
+		fMT2tree->genlept[NGenLepts-1].GMID     = fTR->GenLeptonGMID[i];
+		fMT2tree->genlept[NGenLepts-1].GMStatus = fTR->GenLeptonGMStatus[i];
+		if(abs(fMT2tree->genlept[NGenLepts-1].ID) == 11 || abs(fMT2tree->genlept[NGenLepts-1].ID) == 13 || abs(fMT2tree->genlept[NGenLepts-1].ID) == 15   ){
+			fMT2tree->genlept[NGenLepts-1].MT = GetMT(fMT2tree->genlept[NGenLepts-1].lv, fMT2tree->genlept[NGenLepts-1].lv.M(), fMT2tree->genmet[0], 0.);
 		}
-		if(abs(fTR->GenLeptonID[i]) == 11){// match to caloJets
+		if(abs(fTR->GenLeptonID[NGenLepts-1]) == 11){// match to caloJets
 			for(int j=0; j<fTR->CANJets; ++j){
-				if(fMT2tree->genlept[i].lv.DeltaR(CAJet(j)) <0.4) {
-					fMT2tree->genlept[i].CAJ_n90     = fTR->CAJn90[j];
-					fMT2tree->genlept[i].CAJ_n90Hits = fTR->CAJID_n90Hits[j];
+				if(fMT2tree->genlept[NGenLepts-1].lv.DeltaR(CAJet(j)) <0.4) {
+					fMT2tree->genlept[NGenLepts-1].CAJ_n90     = fTR->CAJn90[j];
+					fMT2tree->genlept[NGenLepts-1].CAJ_n90Hits = fTR->CAJID_n90Hits[j];
 				}
 			}
 		}
