@@ -15,12 +15,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbversion="$Revision: 1.44 $";
+string sjzbversion="$Revision: 1.45 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.45  2011/07/22 06:41:35  buchmann
+Final update for SUSY scan implementation (for JZB)
+
 Revision 1.44  2011/07/22 06:25:37  buchmann
 Updated implementation of SUSY scan for JZB
 
@@ -107,6 +110,7 @@ public:
   float genRecoil;
   float genJZB;
   int   genNjets;
+  int   genNjetsTwoSix;
   int   genNleptons;
   float genRecoilSel;
   float genPt1Sel; // Selected leptons
@@ -291,6 +295,7 @@ void nanoEvent::reset()
   genRecoil=0;
   genJZB = 0;
   genNjets = 0;
+  genNjetsTwoSix = 0;
   genNleptons = 0;
   genPt1Sel=0;
   genPt2Sel=0;
@@ -322,10 +327,10 @@ void nanoEvent::reset()
   ElCInfoIsGsfCtfCons=false;
   ElCInfoIsGsfCtfScPixCons=false;
   ElCInfoIsGsfScPixCons=false;
-  id1=0;
-  id2=0;
-  ch1=0;
-  ch2=0;
+  id1=-9;
+  id2=-9;
+  ch1=-9;
+  ch2=-9;
   chid1=0;
   chid2=0;
 
@@ -564,6 +569,7 @@ cout << endl << endl;
   myTree->Branch("genRecoil",&nEvent.genRecoil,"genRecoil/F");
   myTree->Branch("genJZB",&nEvent.genJZB,"genJZB/F");
   myTree->Branch("genNjets",&nEvent.genNjets,"genNjets/I");
+  myTree->Branch("genNjetsTwoSix",&nEvent.genNjetsTwoSix,"genNjetsTwoSix/I");
   myTree->Branch("genNleptons",&nEvent.genNleptons,"genNleptons/I");
   myTree->Branch("genPt1Sel",&nEvent.genPt1Sel,"genPt1Sel/F");
   myTree->Branch("genPt2Sel",&nEvent.genPt2Sel,"genPt2Sel/F");
@@ -841,6 +847,7 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
+
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
       nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
@@ -931,7 +938,6 @@ void JZBAnalysis::Analyze() {
 	  leptons.push_back(tmpLepton);
 	}
     }
-  
   
   // #--- electron loop
   for(int elIndex=0;elIndex<fTR->NEles;elIndex++)
@@ -1090,7 +1096,10 @@ void JZBAnalysis::Analyze() {
   }
   
 
-  if(sortedGoodLeptons.size() > 1) {
+  if(sortedGoodLeptons.size() < 2) {
+	    myTree->Fill();
+	    return;
+  }
     
     counters[EV].fill("... has at least 2 leptons");
     int PosLepton1 = 0;
@@ -1118,7 +1127,6 @@ void JZBAnalysis::Analyze() {
       return;
     }
     counters[EV].fill("... has at least 2 OS leptons");
-
    for(int ipf=0;ipf<particleflowtypes;ipf++) {
        if(PfPosLepton2[ipf] == sortedGoodPFLeptons[ipf].size()) {
          dopf[ipf]=false;
@@ -1209,9 +1217,9 @@ void JZBAnalysis::Analyze() {
           counters[JE].fill("... pass full lepton cleaning");
         } else {
           // Remove jet close to leptons from Z candidate
-          if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax)continue; 
+          if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax) continue; 
           counters[JE].fill("... pass lepton 1 veto");
-          if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax)continue;
+          if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax) continue;
           counters[JE].fill("... pass lepton 2 veto");
         }
 
@@ -1288,14 +1296,14 @@ void JZBAnalysis::Analyze() {
           counters[PJ].fill("... pass full lepton cleaning");
         } else {
           // Remove jet close to leptons from Z candidate
-          if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax)continue; 
+          if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax) continue;
           counters[PJ].fill("... pass lepton 1 veto");
-          if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax)continue;
+          if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax) continue;
           counters[PJ].fill("... pass lepton 2 veto");
         }
 	
         // Keep jets over min. pt threshold
-        if ( !(jpt>20) ) continue;  
+        if ( !(jpt>20) ) continue;
         counters[PJ].fill("... pt>20.");
 
 	nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
@@ -1596,7 +1604,6 @@ void JZBAnalysis::Analyze() {
 	
     }
     myTree->Fill();
-  }
 }
 
 void JZBAnalysis::End(TFile *f){
@@ -1872,8 +1879,9 @@ void JZBAnalysis::GeneratorInfo(void) {
     if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
     if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
     ++nEvent.genNjets;
+    if ( fabs(fTR->GenJetEta[jIndex])>2.6 ) continue;
+    ++nEvent.genNjetsTwoSix;
   }
-
 
   // Select the two highest-pt leptons compatible with a Z
   size_t i1 = 0, i2 = 0;
