@@ -459,6 +459,9 @@ public:
   //Bosons
   Double_t GetGenVPt(int pid);
 
+  // LostLepton estimate
+  Bool_t   LostLeptonChanges(); 
+
   Int_t     NJets;
   Int_t     NGenJets;
   Int_t     NJetsIDLoose;

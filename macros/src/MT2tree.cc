@@ -1574,6 +1574,57 @@ Double_t MT2tree::GetGenVPt(int pid){
 }
 
 
+Bool_t MT2tree::LostLeptonChanges(){
+
+	// add electron and muons to jets
+	if ( (NEles==0 || ele[0].lv.Pt()<10) && (NMuons==0 || muo[0].lv.Pt()<10) ){
+//		return true;
+	}
+
+	// make easy changes
+	for(int i=0; i<NEles; ++i){
+		if(ele[i].lv.Pt()>20)  NJetsIDLoose ++;
+		if(ele[i].lv.Pt()>50)  misc.HT +=ele[i].lv.Pt();
+		if(ele[i].lv.Pt()>100) misc.Jet0Pass=true;
+		if(ele[i].lv.Pt()>60 ) misc.Jet1Pass=true;
+	}
+	for(int i=0; i<NMuons; ++i){
+		if(muo[i].lv.Pt()>20)  NJetsIDLoose ++;
+		if(muo[i].lv.Pt()>50)  misc.HT +=muo[i].lv.Pt();
+		if(muo[i].lv.Pt()>100) misc.Jet0Pass=true;
+		if(muo[i].lv.Pt()>60 ) misc.Jet1Pass=true;
+	}
+	if(NMuons>0 && muo[0].lv.Pt() > misc.LeadingJPt) misc.LeadingJPt = muo[0].lv.Pt();
+	if(NEles >0 && ele[0].lv.Pt() > misc.LeadingJPt) misc.LeadingJPt = ele[0].lv.Pt();
+
+	if(NMuons>0 && muo[0].lv.Pt() > misc.SecondJPt && muo[0].lv.Pt()< misc.LeadingJPt)  misc.SecondJPt	= muo[0].lv.Pt();
+	if(NEles >0 && ele[0].lv.Pt() > misc.SecondJPt && ele[0].lv.Pt()< misc.LeadingJPt)  misc.SecondJPt	= ele[0].lv.Pt();
+	if(NMuons>1 && muo[1].lv.Pt() > misc.SecondJPt)  misc.SecondJPt	= muo[1].lv.Pt();
+	if(NEles >1 && ele[1].lv.Pt() > misc.SecondJPt)  misc.SecondJPt	= ele[1].lv.Pt();
+
+	// MinMetJetsDPhi
+	double minDPhi=10;
+	for(int i=0; i<NJets; ++i){
+		if(jet[i].lv.Pt()<20)               continue;
+		if(TMath::Abs(jet[i].lv.Eta())>5.0) continue;
+		double dPhi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	for(int i=0; i<NEles; ++i){
+		if(ele[i].lv.Pt()<20) continue;
+		double dPhi = TMath::Abs(ele[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	for(int i=0; i<NMuons; ++i){
+		if(muo[i].lv.Pt()<20) continue;
+		double dPhi = TMath::Abs(muo[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	if(minDPhi<10) misc.MinMetJetDPhi=minDPhi;
+
+	return true;
+}
+
 
 ClassImp(MT2Misc)
 ClassImp(MT2Znunu)

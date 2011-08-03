@@ -231,17 +231,17 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		if(process=="W"){
 			if(lept=="ele" && fMT2tree->GenLeptFromW(11, 0 , 1000,includeTaus)==true)                                              eventgood =true;
 			if(lept=="muo" && fMT2tree->GenLeptFromW(13, 0 , 1000,includeTaus)==true)                                              eventgood =true;
-			if(lept=="ele" && fMT2tree->GenLeptFromW(11, 5,  2.4 ,includeTaus)==true)                                              acceptance=true;
-			if(lept=="muo" && fMT2tree->GenLeptFromW(13, 5,  2.4 ,includeTaus)==true)                                              acceptance=true;
-			if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && fMT2tree->GenLeptFromW(11, 0, 1000,includeTaus)==true)  leptfound =true;
-			if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && fMT2tree->GenLeptFromW(13, 0, 1000,includeTaus)==true)  leptfound =true;
+			if(lept=="ele" && fMT2tree->GenLeptFromW(11,10,  2.4 ,includeTaus)==true)                                              acceptance=true;
+			if(lept=="muo" && fMT2tree->GenLeptFromW(13,10,  2.4 ,includeTaus)==true)                                              acceptance=true;
+			if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && fMT2tree->GenLeptFromW(11, 0, 1000,includeTaus)==true && fMT2tree->ele[0].lv.Pt()>10)  leptfound =true;
+			if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && fMT2tree->GenLeptFromW(13, 0, 1000,includeTaus)==true && fMT2tree->muo[0].lv.Pt()>10)  leptfound =true;
 		}else if(process=="Top"){ 
 			if(lept=="ele" && fMT2tree->TopDecayModeResult(11)==true)                                                 eventgood =true;
 			if(lept=="muo" && fMT2tree->TopDecayModeResult(13)==true)                                                 eventgood =true;
-			if(lept=="ele" && fMT2tree->TopDecayModeResult(11)==true && fMT2tree->SLTopAccept(5, 2.4)==true )         acceptance =true;
-			if(lept=="muo" && fMT2tree->TopDecayModeResult(13)==true && fMT2tree->SLTopAccept(5, 2.4)==true )         acceptance =true;
-			if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && eventgood)                                 leptfound =true;
-			if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && eventgood)                                 leptfound =true;
+			if(lept=="ele" && fMT2tree->TopDecayModeResult(11)==true && fMT2tree->SLTopAccept(10, 2.4)==true )        acceptance =true;
+			if(lept=="muo" && fMT2tree->TopDecayModeResult(13)==true && fMT2tree->SLTopAccept(10, 2.4)==true )        acceptance =true;
+			if(lept=="ele" && fMT2tree->NEles==1 && fMT2tree->NMuons==0 && eventgood &&fMT2tree->ele[0].lv.Pt()>10)             leptfound =true;
+			if(lept=="muo" && fMT2tree->NMuons==1&& fMT2tree->NEles== 0 && eventgood &&fMT2tree->muo[0].lv.Pt()>10)             leptfound =true;
 		}
 
 		Double_t weight = fMT2tree->pileUp.Weight;
@@ -253,14 +253,13 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		
 		// presel
 		if(fMT2tree->misc.MET                     < 30    )  continue;
-//		if(fMT2tree->misc.caloMHT30               < 130   )  continue;
-//		if(fMT2tree->misc.HT                      < 300   )  continue;
-		if(fMT2tree->misc.caloHT50                < 550   )  continue;
+		if(fMT2tree->misc.HT                      < 300   )  continue;
+		if(fMT2tree->misc.caloHT50_ID             < 600   )  continue;
 		if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
 		if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
 //		if(fMT2tree->misc.LeadingJPt              < 150   )  continue;
-//		if(fMT2tree->misc.SecondJPt               < 100   )  continue;
-		if(fMT2tree->GetNBtags(3,2.0,20,2.4,1)    ==0     )  continue;
+		if(fMT2tree->misc.SecondJPt               < 100   )  continue;
+//		if(fMT2tree->NBJets                       < 1     )  continue;
 		if(fMT2tree->misc.HBHENoiseFlag           ==0     )  continue;
 		if(fMT2tree->misc.CrazyHCAL               ==1     )  continue;
 		if(eventgood)   counters[presel].fill("presel", weight);
@@ -281,7 +280,6 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		if(leptfound)   counters[PassJetID].fill(to_measure, weight);
 		
 		// MinMetJetDPhi
-//		if(fMT2tree->PassMinMetJetDPhi03() ==0)      continue;
 		if(fMT2tree->misc.MinMetJetDPhi <0.3 )       continue;
 		if(eventgood)   counters[MinMetJetDPhi].fill("MinMetJetDPhi", weight);
 		if(acceptance)  counters[MinMetJetDPhi].fill("acceptance", weight);
@@ -294,7 +292,11 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		if(leptfound)   counters[VectorSumPt].fill(to_measure, weight);
 		
 		// MT2
-//		if(fMT2tree->misc.MT2             <100     )  continue;
+//		if(fMT2tree->misc.MT2             <400     )  continue;
+//		if(fMT2tree->misc.MT2             <150     )  continue;
+		if(fMT2tree->misc.MT2 <200 || fMT2tree->misc.MT2>400 )  continue;
+//		if(fMT2tree->misc.MT2 <150 || fMT2tree->misc.MT2>300 )  continue;
+//		if(fMT2tree->misc.MT2 <100 || fMT2tree->misc.MT2>150  )  continue;
 		if(eventgood)   counters[MT2].fill("MT2", weight);
 		if(acceptance)  counters[MT2].fill("acceptance", weight);
 		if(leptfound)   counters[MT2].fill(to_measure, weight);
@@ -317,17 +319,21 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 	TH1D* h_rec = new TH1D("h_rec", "", count_end, 0., (double) count_end );
 	TH1D* h_1   = new TH1D("h_1"  , "", count_end, 0., (double) count_end );
 	TH1D* h_2   = new TH1D("h_2"  , "", count_end, 0., (double) count_end );
+	TH1D* h_3   = new TH1D("h_3"  , "", count_end, 0., (double) count_end );
 	for(int i=0; i<count_end; ++i){
 		h_1    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		h_2    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
+		h_3    ->GetXaxis()->SetBinLabel(i+1, lablx[i]);
 		h_all->SetBinContent(i+1,counters[i].counts((string) lablx[i]));
 		h_acc->SetBinContent(i+1,counters[i].counts("acceptance"));
 		h_rec->SetBinContent(i+1,counters[i].counts(to_measure));
 	}
 	h_1    ->Sumw2();
 	h_2    ->Sumw2();
+	h_3    ->Sumw2();
 	h_1    ->Divide(h_acc,h_all);	
 	h_2    ->Divide(h_rec,h_acc);	
+	h_3    ->Divide(h_rec,h_all);	
 	TCanvas *col  = new TCanvas("Wevents", "", 0, 0, 900, 700);
 	col -> cd();
 	h_1    ->SetLineColor(kBlue);
@@ -337,8 +343,6 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 	h_1    ->SetDrawOption("E");
 	h_1    ->Draw();
 	string name  ="Wevents_"+lept+"_acceptance_"+(string) Sample.name; 
-	Util::PrintEPS(col, name, fOutputDir);
-	Util::PrintPNG(col, name, fOutputDir);
 	h_2    ->SetLineColor(kBlue);
 	h_2    ->SetMinimum(0);
 	h_2    ->SetMaximum(1);
@@ -346,8 +350,13 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 	h_2    ->SetDrawOption("E");
 	h_2    ->Draw();
 	name  ="Wevents_"+lept+"_reco_"+(string) Sample.name; 
-	Util::PrintEPS(col, name, fOutputDir);
-	Util::PrintPNG(col, name, fOutputDir);
+	h_3    ->SetLineColor(kBlue);
+	h_3    ->SetMinimum(0);
+	h_3    ->SetMaximum(1);
+	h_3    ->SetMarkerStyle(20);
+	h_3    ->SetDrawOption("E");
+	h_3    ->Draw();
+	name  ="Wevents_"+lept+"_prob_"+(string) Sample.name; 
 
 	cout << "lept " << lept << " process " << process << endl;	
 	//__________________________________
@@ -356,33 +365,44 @@ void MassPlotter::PrintWEfficiency(int sample_index ,TString process,  std::stri
 		fWpred.Wenu_acc_err    =h_1->GetBinError(count_end); 
 		fWpred.Wenu_rec        =h_2->GetBinContent(count_end);
 		fWpred.Wenu_rec_err    =h_2->GetBinError(count_end);  
+		fWpred.Wenu_prob       =h_3->GetBinContent(count_end);
+		fWpred.Wenu_prob_err   =h_3->GetBinError(count_end);  
 	}else if  (lept=="ele" && process=="Top"){
 		fWpred.TopWenu_acc     =h_1->GetBinContent(count_end);
 		fWpred.TopWenu_acc_err =h_1->GetBinError(count_end); 
 		fWpred.TopWenu_rec     =h_2->GetBinContent(count_end);
 		fWpred.TopWenu_rec_err =h_2->GetBinError(count_end);  
+		fWpred.TopWenu_prob    =h_3->GetBinContent(count_end);
+		fWpred.TopWenu_prob_err=h_3->GetBinError(count_end);  
 	}else if  (lept=="muo" && process=="W") {
 		fWpred.Wmunu_acc       =h_1->GetBinContent(count_end);
 		fWpred.Wmunu_acc_err   =h_1->GetBinError(count_end); 
 		fWpred.Wmunu_rec       =h_2->GetBinContent(count_end);
 		fWpred.Wmunu_rec_err   =h_2->GetBinError(count_end); 
+		fWpred.Wmunu_prob      =h_3->GetBinContent(count_end);
+		fWpred.Wmunu_prob_err  =h_3->GetBinError(count_end);  
 	}else if  (lept=="muo" && process=="Top") {
 		fWpred.TopWmunu_acc    =h_1->GetBinContent(count_end);
 		fWpred.TopWmunu_acc_err=h_1->GetBinError(count_end); 
 		fWpred.TopWmunu_rec    =h_2->GetBinContent(count_end);
 		fWpred.TopWmunu_rec_err=h_2->GetBinError(count_end); 
+		fWpred.TopWmunu_prob    =h_3->GetBinContent(count_end);
+		fWpred.TopWmunu_prob_err=h_3->GetBinError(count_end);  
 	}
 
 	//_________________________________
 	delete h_1;
 	delete h_2;
+	delete h_3;
 	delete h_all;
 	delete h_acc;
 	delete h_rec;
 	delete col;
 }
+
 // ________________________________________________________________________
-void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass){
+void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass, bool pileUp_reweight){
+//void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string lept, Long64_t nevents, double lower_mass, double upper_mass){
 	sample Sample = fSamples[sample_index];
 
       	std::cout << setfill('=') << std::setw(70) << "" << std::endl;
@@ -434,7 +454,7 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 
 		}
 
-		Double_t weight = fMT2tree->pileUp.Weight;
+		Double_t weight =(pileUp_reweight)? fMT2tree->pileUp.Weight:1;
 			
 		// all events
 		if(ZllSelect)   counters[all].fill("all events", weight);
@@ -442,19 +462,19 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 		
 		// presel
 		if(pid == 11 || pid == 13){
-//			if(fMT2tree->Znunu.HTmatched              <350    )  continue;
-			if(fMT2tree->Znunu.caloHT50_matched       <320    )  continue;
-			if(fMT2tree->Znunu.caloMHT30_matched      <130    )  continue;
-//			if(fMT2tree->Znunu.Jet0Pass_matched       ==0     )  continue;
-//			if(fMT2tree->Znunu.Jet1Pass_matched       ==0     )  continue;
-			if(fMT2tree->Znunu.NJetsIDLoose_matched   <2      )  continue;
+			if(fMT2tree->Znunu.HTmatched              <300    )  continue;
+			if(fMT2tree->Znunu.caloHT50ID_matched     <600    )  continue;
+			if(fMT2tree->Znunu.Jet0Pass_matched       ==0     )  continue;
+			if(fMT2tree->Znunu.Jet1Pass_matched       ==0     )  continue;
+			if(fMT2tree->Znunu.SecondJPt_matched      <100     )  continue;
+			if(fMT2tree->Znunu.NJetsIDLoose_matched   <3      )  continue;
 		} else if(lept == "neutrinos"){
-//			if(fMT2tree->misc.HT                      <350    )  continue;
-			if(fMT2tree->misc.caloHT50                <320    )  continue;
-			if(fMT2tree->misc.caloMHT30               <130    )  continue;
-//			if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
-//			if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
-			if(fMT2tree->NJetsIDLoose                  <2     )  continue;
+			if(fMT2tree->misc.HT                      <300    )  continue;
+			if(fMT2tree->misc.caloHT50_ID             <600    )  continue;
+			if(fMT2tree->misc.Jet0Pass                ==0     )  continue;
+			if(fMT2tree->misc.Jet1Pass                ==0     )  continue;
+			if(fMT2tree->misc.SecondJPt               <100     )  continue;
+			if(fMT2tree->NJetsIDLoose                  <3     )  continue;
 		}
 		if(ZllSelect)   counters[presel].fill("presel"  , weight);
 		if(ZllGood    ) counters[presel].fill(to_measure, weight);
@@ -467,36 +487,36 @@ void MassPlotter::PrintZllEfficiency(int sample_index , bool data, std::string l
 		
 		// VectorSumPt
 		if(pid == 11 || pid == 13){
-//			if(fMT2tree->Znunu.Vectorsumpt_matched    >70     )  continue;
+			if(fMT2tree->Znunu.Vectorsumpt_matched    >70     )  continue;
 		} else if(lept == "neutrinos"){
-//			if(fMT2tree->misc.Vectorsumpt             >70     )  continue;
+			if(fMT2tree->misc.Vectorsumpt             >70     )  continue;
 		}
 		if(ZllSelect)   counters[VectorSumPt].fill("VectorSumPt", weight);
 		if(ZllGood    ) counters[VectorSumPt].fill(to_measure,    weight);
 		
 		// PassJetID
 		if(pid ==11 || pid == 13){
-//			if(fMT2tree->Znunu.PassJetID_matched      ==0     ) continue;
+			if(fMT2tree->Znunu.PassJetID_matched      ==0     ) continue;
 		}else if (lept == "neutrinos"){
-//			if(fMT2tree->misc.PassJetID               ==0     ) continue;
+			if(fMT2tree->misc.PassJetID               ==0     ) continue;
 		}
 		if(ZllSelect)   counters[PassJetID].fill("PassJetID"   ,weight);
 		if(ZllGood    ) counters[PassJetID].fill(to_measure    ,weight);
 		
 		// MinMetJetDPhi
 		if(pid ==11 || pid == 13){
-//			if(fMT2tree->Znunu.MinMetplusLeptJetDPhi  <0.3    )  continue;
+			if(fMT2tree->Znunu.MinMetplusLeptJetDPhi  <0.3    )  continue;
 		}else if (lept == "neutrinos"){
-//			if(fMT2tree->misc.MinMetJetDPhi           <0.3    )  continue;
+			if(fMT2tree->misc.MinMetJetDPhi           <0.3    )  continue;
 		}
 		if(ZllSelect)   counters[MinMetJetDPhi].fill("MinMetJetDPhi",weight);
 		if(ZllGood    ) counters[MinMetJetDPhi].fill(to_measure     ,weight);
 		
 		// MET
 		if(pid ==11 || pid == 13){
-//			if(fMT2tree->Znunu.METplusLeptsPt         < 30    ) continue;
+			if(fMT2tree->Znunu.METplusLeptsPt         < 30    ) continue;
 		}else if (lept == "neutrinos"){
-//			if(fMT2tree->misc.MET                     < 30    )  continue;
+			if(fMT2tree->misc.MET                     < 30    )  continue;
 		}
 		if(ZllSelect)   counters[MET].fill("MET"       ,weight);
 		if(ZllGood    ) counters[MET].fill(to_measure  ,weight);
@@ -607,15 +627,15 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger, TString cu
 
        bool isMT2gt100 = fMT2tree->misc.MT2 > 100.;
 
-      if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->misc.Jet0Pass )  continue;
-//      if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->misc.Jet1Pass )  continue;
-      if( fMT2tree->NJetsIDLoose < 2 || ! fMT2tree->jet[1].IsGoodPFJet(100,2.4,1) )  continue;
+      if( fMT2tree->NJetsIDLoose < 1 || !fMT2tree->misc.Jet0Pass                                      )  continue;
+      if( fMT2tree->NJetsIDLoose < 2 || !fMT2tree->misc.Jet1Pass    || fMT2tree->misc.SecondJPt < 100 )  continue;
+      if( !(!fMT2tree->misc.isData   || (fMT2tree->misc.Run <162803 || fMT2tree->misc.Run >162909  )) )  continue;
       if(trigger=="HT"){
 	      if( fMT2tree->misc.isData ==1 
 		  && fMT2tree->trigger.HLT_HT440_v2 ==0 
 		  && fMT2tree->trigger.HLT_HT450_v2 ==0 
 		  && fMT2tree->trigger.HLT_HT500_v3 ==0 ) continue;
-              if( fMT2tree->misc.caloHT50< 550) continue;
+              if( fMT2tree->misc.caloHT50_ID< 550)        continue;
               if( fMT2tree->misc.MET     < 30)  continue;
       }else if(trigger=="MHT_HT"){
       	      if( fMT2tree->misc.isData ==1 
@@ -649,6 +669,7 @@ void MassPlotter::PrintCutFlow(int njets, int nleps, TString trigger, TString cu
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "Minimum DPhi(MET,jet) > 0.3", weight);
 
       if( fMT2tree->misc.HBHENoiseFlag != 1 )  continue;
+      if( fMT2tree->misc.CrazyHCAL     != 0 )  continue;
       counters[i].fill("HBHE noise veto",weight);
       FillMonitor(ccount, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
       if(isMT2gt100)     FillMonitor(ccount_100, fSamples[i].sname, fSamples[i].type, "HBHE noise veto", weight);
@@ -1063,7 +1084,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	//TString  cnames[5] = {"QCD", "W/Z/#gamma production", "Top production", "susy", "data"};
 	//int      ccolor[5] = {401, 418, 602, 0, 632};
 	TString  cnames[7] = {"QCD", "W+jets", "Z+jets", "Top", "Other", "susy", "data"};
-	int      ccolor[7] = {401, 417, 419, 600, 603, 0, 632};
+	int      ccolor[7] = { 401,   417,       419,      600,    603,     0,     632};
 	for (int i=0; i<7; i++){
 	  h_composited[i] = new TH1D(varname+"_"+cnames[i], "", nbins, bins);
 	  h_composited[i] -> Sumw2();

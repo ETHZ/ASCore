@@ -536,12 +536,13 @@ void MassAnalysis::FillTree(){
 			PassJetID_matched  = false;
 		}
 		jindi.push_back(i); jpt.push_back(Jet(i).Pt());
+		if(Jet(i).Pt() >50 && fabs(Jet(i).Eta())<3 ){
+			HTmatched += Jet(i).Pt();
+		}
 		if(! IsGoodBasicPFJetPAT3(i,  20., 2.4) ) continue;
 		vectorsumpt_matched_px+=Jet(i).Px();
 		vectorsumpt_matched_py+=Jet(i).Py();
 		NJetsIDLoose_matched++;
-		if(Jet(i).Pt()<50 || fabs(Jet(i).Eta())>3 ) continue;
-		HTmatched += Jet(i).Pt();
 	}
 	TLorentzVector met     = fMT2tree->pfmet[0];
 	for(int gen=0; gen<fMT2tree->NGenLepts; ++gen){
@@ -651,20 +652,20 @@ void MassAnalysis::FillTree(){
 	fMT2tree->Znunu.NJetsToRemoveEle           = fNJets_toremove_ele;
 	fMT2tree->Znunu.NJetsToRemoveMuo           = fNJets_toremove_muo;
 
-	fMT2tree->Znunu.RecoOSee_mll               = fMT2tree->GetDiLeptonInvMass(0, 1, 1, 5.0, 1); 
-	fMT2tree->Znunu.RecoOSmumu_mll             = fMT2tree->GetDiLeptonInvMass(0, 1, 2, 5.0, 1); 
+	fMT2tree->Znunu.RecoOSee_mll               = fMT2tree->GetDiLeptonInvMass(0, 1, 1, 20, 1); 
+	fMT2tree->Znunu.RecoOSmumu_mll             = fMT2tree->GetDiLeptonInvMass(0, 1, 2, 20, 1); 
 
 	fMT2tree->Znunu.GenZee_mll                 = fMT2tree->GenOSDiLeptonInvMass(11,23,0,100);
-	fMT2tree->Znunu.GenZee_mll_acc             = fMT2tree->GenOSDiLeptonInvMass(11,23,5.0,2.4);
+	fMT2tree->Znunu.GenZee_mll_acc             = fMT2tree->GenOSDiLeptonInvMass(11,23,20,2.4);
 	fMT2tree->Znunu.GenZmumu_mll               = fMT2tree->GenOSDiLeptonInvMass(13,23,0,100);
-	fMT2tree->Znunu.GenZmumu_mll_acc           = fMT2tree->GenOSDiLeptonInvMass(13,23,5.0,2.4);
+	fMT2tree->Znunu.GenZmumu_mll_acc           = fMT2tree->GenOSDiLeptonInvMass(13,23,20,2.4);
 
 	fMT2tree->Znunu.GenZnunu_e_mll             = fMT2tree->GenOSDiLeptonInvMass(12,23,0,100);
-	fMT2tree->Znunu.GenZnunu_e_mll_acc         = fMT2tree->GenOSDiLeptonInvMass(12,23,5.0,2.4);
+	fMT2tree->Znunu.GenZnunu_e_mll_acc         = fMT2tree->GenOSDiLeptonInvMass(12,23,20,2.4);
 	fMT2tree->Znunu.GenZnunu_mu_mll            = fMT2tree->GenOSDiLeptonInvMass(14,23,0,100);
-	fMT2tree->Znunu.GenZnunu_mu_mll_acc        = fMT2tree->GenOSDiLeptonInvMass(14,23,5.0,2.4);
+	fMT2tree->Znunu.GenZnunu_mu_mll_acc        = fMT2tree->GenOSDiLeptonInvMass(14,23,20,2.4);
 	fMT2tree->Znunu.GenZnunu_tau_mll           = fMT2tree->GenOSDiLeptonInvMass(16,23,0,100);
-	fMT2tree->Znunu.GenZnunu_tau_mll_acc       = fMT2tree->GenOSDiLeptonInvMass(16,23,5.0,2.4);
+	fMT2tree->Znunu.GenZnunu_tau_mll_acc       = fMT2tree->GenOSDiLeptonInvMass(16,23,20,2.4);
 
 	fMT2tree->Znunu.METplusLeptsPt             = fMT2tree->GetMETPlusGenLepts(0, 1, 1,  1113, 23, 0, 100, 0, 10000);
 	fMT2tree->Znunu.METplusLeptsPtReco         = fMT2tree->GetMETPlusLepts(1);
