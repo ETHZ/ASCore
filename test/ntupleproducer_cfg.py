@@ -45,7 +45,7 @@ process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
     # CMSSW_4_2
-    process.GlobalTag.globaltag = "GR_R_42_V12::All"
+    process.GlobalTag.globaltag = "GR_R_42_V19::All"
     # CMSSW_3_8_X:
 #    process.GlobalTag.globaltag = "GR_R_311_V2::All"
 else:
@@ -78,30 +78,6 @@ process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 # note: this runs the L1Fast-Jet corrections for PF jets. not applied on Calo
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-process.jec = cms.ESSource("PoolDBESSource",
-	DBParameters = cms.PSet(
-	messageLevel = cms.untracked.int32(0)
-	),
-	timetype = cms.string('runnumber'),
-	toGet = cms.VPSet(
-		cms.PSet(
-			record = cms.string('JetCorrectionsRecord'),
-			tag    = cms.string('JetCorrectorParametersCollection_Jec11V2_AK5PF'),
-			label  = cms.untracked.string('AK5PF')
-		),
-		cms.PSet(
-			record = cms.string('JetCorrectionsRecord'),
-			tag    = cms.string('JetCorrectorParametersCollection_Jec11V2_AK5Calo'),
-			label  = cms.untracked.string('AK5Calo')
-		)
-	),
-	## here you add as many jet types as you need (AK5Calo, AK5JPT, AK7PF, AK7Calo, KT4PF, KT4Calo)
-	connect = cms.string('sqlite:Jec11V2.db')
-)
-# Add an es_prefer statement to get your new JEC constants from the sqlite file, rather than from the global tag
-process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
-
 # Turn-on the FastJet density calculation -----------------------
 process.kt6PFJets.doRhoFastjet = True
 # process.kt6PFJets.Rho_EtaMax   = cms.double(4.4) # this is the default value in 4_2
