@@ -21,32 +21,45 @@ MT2Misc::~MT2Misc(){
 
 void MT2Misc::Reset() {
   HBHENoiseFlag           =  0;
+  CrazyHCAL               =  0;
+  NegativeJEC             =  0;
+  isData                  =  0;
+  BadEcalTP               =  0;
+  BadEcalBE               =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
-  NVertices               = -1;
   LeptConfig		  = -1;	  
   PassJetID               = -1;
+  PassJetID20             = -1;
   Jet0Pass                = -1;
   Jet1Pass                = -1;
   MT2                     = -99999.99;
+  MT2all                  = -99999.99;
   MT2leading              = -99999.99;
   MT2noISR                = -99999.99;
   MCT                     = -99999.99;
   AlphaT                  = -99999.99;
   MET                     = -99999.99;
   METPhi                  = -99999.99;
+  LeadingJPt              = -99999.99;
+  SecondJPt               = -99999.99;
   Vectorsumpt		  = -99999.99;
+  VectorsumptAll 	  = -99999.99;
   PFMETsign		  = -99999.99;
   HT			  = -99999.99;
+  caloHT40       	  = -99999.99;
+  caloHT40_ID       	  = -99999.99;
+  caloHT50       	  = -99999.99;
+  caloHT50_ID             = -99999.99;
+  caloMHT30       	  = -99999.99;
+  caloMHT30_ID      	  = -99999.99;
+  caloMHT40       	  = -99999.99;
+  caloMHT40_ID      	  = -99999.99;
   DPhiMhtMpt              = -99999.99;
   MinMetJetDPhi           = -99999.99;
-  EcalDeadCellBEFlag      = -1;
-  NECALGapClusters        = -1;
-  for(int i=0; i<50; ++i){
-    EcalGapClusterSize[i] = -1;
-    EcalGapBE[i]          = -99999.99;    
-  }
+  TrackingFailure         = -99999.99;
+  TrackingFailurePVtx     = -99999.99;
 
 }
 
@@ -60,9 +73,14 @@ MT2PileUp::~MT2PileUp(){
 }
 
 void MT2PileUp::Reset(){
-	PUnumInt= -999;
-	PtHat   = -999.99;;
-	Weight  = -999.99;
+	PUnumInt       = -999;
+	PUnumIntEarly  = -999;
+	PUnumIntLate   = -999;
+	isS3           = -1;
+	PtHat          = -999.99;
+	Weight         = -999.99;
+	Rho            = -999.99;
+  	NVertices      = -1;
 }
 
 // ------------------------------------------------------
@@ -76,15 +94,63 @@ MT2Trigger::~MT2Trigger(){
 void MT2Trigger::Reset(){
 	
 	// HT
+	HLT_HT150_v2            = false;
+	HLT_HT150_v3            = false;
 	HLT_HT160_v2            = false;
-	HLT_HT240_v2            = false; 
+	HLT_HT200_v2            = false;
+	HLT_HT200_v3            = false;
+	HLT_HT240_v2            = false;
+	HLT_HT250_v2            = false;
+	HLT_HT250_v3            = false;
 	HLT_HT260_v2            = false;
 	HLT_HT300_v2            = false;
+	HLT_HT300_v3            = false;
+	HLT_HT300_v4            = false;
+	HLT_HT300_v5            = false;
+	HLT_HT350_v2            = false;
+	HLT_HT350_v3            = false;
+	HLT_HT350_v4            = false;
 	HLT_HT360_v2            = false;
+	HLT_HT400_v2            = false;
+	HLT_HT400_v3            = false;
+	HLT_HT400_v4            = false;
+	HLT_HT400_v5            = false;
+	HLT_HT400_v6            = false;
+	HLT_HT400_v7            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
+	HLT_HT450_v3            = false;
+	HLT_HT450_v4            = false;
+	HLT_HT450_v5            = false;
+	HLT_HT450_v6            = false;
+	HLT_HT450_v7            = false;
+	HLT_HT500_v2            = false;
+	HLT_HT500_v3            = false;
+	HLT_HT500_v4            = false;
+	HLT_HT500_v5            = false;
+	HLT_HT500_v6            = false;
+	HLT_HT500_v7            = false;
+	HLT_HT550_v2            = false;
+	HLT_HT550_v3            = false;
+	HLT_HT550_v4            = false;
+	HLT_HT550_v5            = false;
+	HLT_HT550_v6            = false;
+	HLT_HT550_v7            = false;
 	// HT_MHT
+	HLT_HT250_MHT60_v2      = false;
+	HLT_HT250_MHT60_v3      = false;
+	HLT_HT250_MHT60_v4      = false;
+	HLT_HT250_MHT60_v5      = false;
+	HLT_HT250_MHT60_v6      = false;
+	HLT_HT250_MHT70_v1      = false;
+	HLT_HT250_MHT70_v2      = false;
+	HLT_HT250_MHT70_v3      = false;
+	HLT_HT250_MHT90_v1      = false;
 	HLT_HT260_MHT60_v2      = false;
+	HLT_HT300_MHT75_v4      = false;
+	HLT_HT300_MHT75_v5      = false;
+	HLT_HT300_MHT80_v1      = false;
+	HLT_HT350_MHT70_v1      = false;
 	// QuadJet
 	HLT_QuadJet50_BTagIP_v1 = false;
 	HLT_QuadJet50_Jet40_v1  = false;
@@ -110,7 +176,17 @@ void MT2Znunu::Reset(){
 	PassJetID_matched         = -999;
 	Jet1Pass_matched          = -999;
 	Jet0Pass_matched          = -999;
+	LeadingJPt_matched        = -99999.99;
+	SecondJPt_matched         = -99999.99;
 	HTmatched                 = -99999.99;
+	caloMHT30_matched         = -99999.99;
+	caloMHT30ID_matched       = -99999.99;
+	caloMHT30_matchedReco     = -99999.99;
+	caloMHT30ID_matchedReco   = -99999.99;
+	caloHT50_matched          = -99999.99;
+	caloHT50ID_matched        = -99999.99;
+	caloHT50_matchedReco      = -99999.99;
+	caloHT50ID_matchedReco    = -99999.99;
 	GenZmumu_mll              = -99999.99;
 	GenZmumu_mll_acc          = -99999.99;
 	GenZee_mll                = -99999.99;
@@ -150,7 +226,6 @@ void MT2Jet::Reset() {
   isPFIDLoose   = 0;
   isPFIDMedium  = 0;
   isPFIDTight   = 0;
-  isTau         = 0;
   ChHadFrac     = -99999.99; 
   NeuHadFrac    = -99999.99; 
   ChEmFrac      = -99999.99;
@@ -158,6 +233,18 @@ void MT2Jet::Reset() {
   ChMult        = -1; 
   NeuMult       = -1; 
   NConstituents = -1;
+
+  Scale         = -99999.99; // correction factor
+  L1FastJetScale= -99999.99; // correction factor from raw to L1FastJetcorrected
+  Area          = -99999.99;
+
+  Flavour       = -9999;
+  
+  isTau         = 0;  // starting from ntuple V02-01-01: this has to be 0! 
+  isTauMatch    = 0;  // tell you if the jet is matched to a tau.
+  TauDR         = -99999.99;
+  TauDPt        = -99999.99;
+  NTauMatch     = 0;
 }
 
 void MT2Jet::SetLV(const TLorentzVector v) {
@@ -169,7 +256,8 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   double pt = lv.Pt();
   double eta = lv.Eta();
   if ( pt < minJPt || fabs(eta) > maxJEta )     return false;
-  if ( PFJID >0 && isTau )                      return false;
+  if ( isTau )                                  return true;  // for now every tau passes the "ID".
+  if (Scale <0 )                                return false; // jet has negative Scale from JE correction
   
   switch (PFJID) {
   case 3:               // TIGHT
@@ -198,6 +286,20 @@ Bool_t MT2Jet::IsGoodPFJet(double minJPt, double maxJEta, int PFJID) {
   return true;
 }
 
+// MT2GenJet --------------------------------------
+MT2GenJet::MT2GenJet(){
+  Reset();
+}
+
+MT2GenJet::~MT2GenJet(){
+}
+
+void MT2GenJet::Reset(){
+  DeltaR             = -9999.99;
+  JetMatchIndex      = -1;
+  
+  lv.SetPxPyPzE(0, 0, 0, 0);
+}
 
 // MT2Hemisphere -----------------------------------
 MT2Hemi::MT2Hemi(){
@@ -246,12 +348,14 @@ MT2GenLept::~MT2GenLept(){
 void MT2GenLept::Reset(){
   lv.  SetPxPyPzE(0, 0, 0, 0);
 
-  ID       = -999;
-  MID      = -999;
-  MStatus  = -999;
-  GMID     = -999;
-  GMStatus = -999;
-  MT       = -9999.99;
+  ID          = -999;
+  MID         = -999;
+  MStatus     = -999;
+  GMID        = -999;
+  GMStatus    = -999;
+  MT          = -9999.99;
+  CAJ_n90     = -9999.99;
+  CAJ_n90Hits = -9999.99;
 }
 
 // MT2Muon -----------------------------------
@@ -267,6 +371,8 @@ void MT2Muon::Reset() {
   MT            = -9999.99;
   Iso           = -9999.99;
   Charge        = -999;
+  NMatches      = -999;
+  PtErr         = -999.99;
 }
 
 void MT2Muon::SetLV(const TLorentzVector v) {
@@ -286,6 +392,10 @@ void MT2Elec::Reset() {
   MT            = -9999.99;
   Iso           = -9999.99;
   Charge        = -999;
+  ID95          = -999;
+  ID90          = -999;
+  CAJ_n90       = -999;
+  CAJ_n90Hits   = -999;
 }
 
 void MT2Elec::SetLV(const TLorentzVector v) {
@@ -302,6 +412,7 @@ MT2tree::~MT2tree(){
 
 void MT2tree::Reset() {
   NJets            = 0;
+  NTaus            = 0;
   NJetsIDLoose     = 0;
   NJetsIDMedium    = 0;
   NJetsIDTight     = 0;
@@ -309,6 +420,7 @@ void MT2tree::Reset() {
   NEles            = 0;
   NMuons           = 0;
   NGenLepts        = 0;
+  NGenJets         = 0;
 
   misc.Reset();
   Znunu.Reset();
@@ -317,6 +429,9 @@ void MT2tree::Reset() {
 
   for (int i = 0; i < m_jetSize; ++i) {
     jet[i].Reset();
+  }
+  for (int i = 0; i< m_genjetSize; ++i){
+    genjet[i].Reset();
   }
   for (int i = 0; i < m_eleSize; ++i) {
     ele[i].Reset();
@@ -341,12 +456,20 @@ void MT2tree::SetNJets(int n) {
   NJets = n;
 }
 
+void MT2tree::SetNGenJets(int n) {
+  NGenJets = n;
+}
+
 void MT2tree::SetNJetsAcc(int n) {
   NJetsAcc = n;
 }
 
 void MT2tree::SetNJetsIDLoose(int n) {
   NJetsIDLoose = n;
+}
+
+void MT2tree::SetNBJets(int n) {
+  NBJets = n;
 }
 
 void MT2tree::SetNJetsIDMedium(int n) {
@@ -392,10 +515,10 @@ Double_t MT2tree::GetMinR12R21(int PFJID, double minJPt, double maxJEta, int met
 
 Bool_t MT2tree::PassJetID(double minJPt, double maxJEta, int PFJID) {
 	int njets=0;
-		for(int i=0; i<NJets; ++i){
-			if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta &&
-				jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
-		}
+	for(int i=0; i<NJets; ++i){
+		if(jet[i].lv.Pt() >= minJPt && fabs(jet[i].lv.Eta()) <= maxJEta && 
+		   jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false)   return false;
+	}
 	return true;
 }
 
@@ -440,7 +563,7 @@ Double_t MT2tree::MinMetJetDPhi(int PFJID, double minJPt, double maxJEta, int me
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else if(met==3) {
-	  double mass = GetDiLeptonInvMass(0,1,0,10,1);
+	  double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 	  if(mass > 71 && mass <111) MET = GetMETPlusLeptsLV(1) + pfmet[0] ;
 	  else return -888.;
   }
@@ -459,7 +582,7 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = GetMHTlv(PFJID, minJPt, maxJEta);
   else if(met==3) {
-	  double mass = GetDiLeptonInvMass(0,1,0,10,1);
+	  double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 	  if(mass > 71 && mass <111) MET = GetMETPlusLeptsLV(1) + pfmet[0] ;
 	  else return -888.;
   }
@@ -481,6 +604,23 @@ Int_t MT2tree::MinMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
     }
   }
   return imin;
+}
+
+Double_t MT2tree::MinMetJetDPhiL2L3(){
+	vector<TLorentzVector> jets;
+	for (int i=0; i<NJets; ++i){
+		TLorentzVector j(0,0,0,0);
+		if(jet[i].lv.Pt()/jet[i].L1FastJetScale < 20) continue;
+		if(fabs(jet[i].lv.Eta())                > 5 ) continue;
+		j.SetPtEtaPhiM(jet[i].lv.Pt()/jet[i].L1FastJetScale, jet[i].lv.Eta(), jet[i].lv.Phi(), jet[i].lv.M());
+		jets.push_back(j);
+	}
+	Double_t minDPhi=10;
+	for(int i=0; i<jets.size(); ++i){
+		Double_t dphi = TMath::Abs(jets[i].DeltaPhi(pfmet[0]));
+		if(dphi<minDPhi) minDPhi=dphi;
+	}
+	return minDPhi;
 }
 
 Double_t MT2tree::MaxMetJetDPhi(int PFJID, double minJPt, double maxJEta, int met) {
@@ -520,8 +660,8 @@ Int_t MT2tree::MaxMetJetDPhiIndex(int PFJID, double minJPt, double maxJEta, int 
 }
 
 Bool_t MT2tree::PassMinMetJetDPhi03(){
-	if( NJetsAcc < 3)                              return true;
-	if( NJetsAcc >=3  && misc.MinMetJetDPhi > 0.3) return true;
+	if( NJetsIDLoose < 3)                              return true;
+	if( NJetsIDLoose >=3  && misc.MinMetJetDPhi > 0.3) return true;
 	return false;
 }
 
@@ -537,7 +677,7 @@ Int_t MT2tree::GetNjets(double minJPt, double maxJEta, int PFJID){
 Int_t MT2tree::GetNBtags (int algo, double value, double minJPt, double maxJEta, int PFJID){  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
   int nbjets=0;
   for(int i=0; i<NJets; ++i){
-    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false) continue;
+    if(jet[i].IsGoodPFJet(minJPt,maxJEta,PFJID)==false || jet[i].isTau ) continue; // FIXME: taus don't have JID and BTAG info
     switch(algo){
     case 0: 
       if( jet[i].bTagProbTCHE < value ) continue;
@@ -598,7 +738,7 @@ Double_t MT2tree::GetHT(int PFJID, double minJPt, double maxJEta){
   return ht;
 }
 
-TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
+TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta, bool inclLepts){
   TLorentzVector mht(0,0,0,0);
   TLorentzVector j(0,0,0,0);
   for(int i = 0; i<NJets; ++i){
@@ -606,21 +746,31 @@ TLorentzVector MT2tree::GetMHTlv(int PFJID, double minJPt, double maxJEta){
     j.SetPtEtaPhiM(jet[i].lv.Pt(),0,jet[i].lv.Phi(),0);
     mht-=j;
   }
+  if(!inclLepts) return mht;
+  // add leptons
+  for(int i=0; i<NEles; ++i){
+    j.SetPtEtaPhiM(ele[i].lv.Pt(),0, ele[i].lv.Phi(), 0);
+    mht-=j;
+  }
+  for(int i=0; i<NMuons; ++i){
+    j.SetPtEtaPhiM(muo[i].lv.Pt(),0, muo[i].lv.Phi(), 0);
+    mht-=j;
+  }
   return mht;
 }
 
-Double_t MT2tree::GetMHT(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHT(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return mht.Pt();
 }
 
-Double_t MT2tree::GetMHTPhi(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHTPhi(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return mht.Phi();
 }
 
-Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta){
-  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta);
+Double_t MT2tree::GetMHTminusMET(int PFJID, double minJPt, double maxJEta, bool inclLepts){
+  TLorentzVector mht = GetMHTlv(PFJID,minJPt,maxJEta, inclLepts);
   return (mht-pfmet[0]).Pt();
 }
 
@@ -658,14 +808,14 @@ Double_t MT2tree::GetMT2HemiNoISR(bool massive, int hemi_seed, int hemi_associat
   TLorentzVector MET(0., 0., 0., 0.);
   if(met==1 || met==3)  MET = pfmet[0];
   else if(met==2)       MET = MHTloose[0];
-  else if(met==4)       MET.Clear();
+  else if(met==4)       MET.SetPxPyPzE(0,0,0,0);
   else return -999;
  
 
   vector<float> px, py, pz, E;
   vector<int>   jsel; // contains indices of all jets fed into hemisphere algo
   for(int i=0; i<NJets; ++i){
-	if(jet[i].IsGoodPFJet(20, 2.4, 0)) continue; // no ID imposed
+	if(jet[i].IsGoodPFJet(20, 2.4, 1)) continue;
   	px.push_back(jet[i].lv.Px());
 	py.push_back(jet[i].lv.Py());
 	pz.push_back(jet[i].lv.Pz());
@@ -719,12 +869,12 @@ Double_t MT2tree::GetMT2Hemi(double testmass, bool massive, int PFJID, double mi
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else if(met==3) MET = pfmet[0]; //plus OS dileptons
-  else if(met==4) MET.Clear();
+  else if(met==4) MET.SetPxPyPzE(0,0,0,0);
   else            return -999;
 
   if( met ==3 ){
   // adding OS dilepton LV to MET
-	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,5.0,true);
 	if(dilept_invmass < 111 && dilept_invmass > 71){
 		for(int i=0; i<NEles; ++i){
 			MET = MET + ele[i].lv;
@@ -779,12 +929,12 @@ Double_t MT2tree::GetMT2HemiMinDHT(double testmass, bool massive, int PFJID, dou
   if(met==1)      MET = pfmet[0];
   else if(met==2) MET = MHTloose[0];
   else if(met==3) MET = pfmet[0]; //plus OS dileptons
-  else if(met==4) MET.Clear();
+  else if(met==4) MET.SetPxPyPzE(0,0,0,0);
   else            return -999;
 
   if( met ==3 ){
   // adding OS dilepton LV to MET
-	double dilept_invmass= GetDiLeptonInvMass(0,1,0,10,true);
+	double dilept_invmass= GetDiLeptonInvMass(0,1,0,5.0,true);
 	if(dilept_invmass < 111 && dilept_invmass > 71){
 		for(int i=0; i<NEles; ++i){
 			MET = MET + ele[i].lv;
@@ -1103,7 +1253,7 @@ Bool_t MT2tree::IsDiLeptonMll(int same_sign, int same_flavour, int flavour, doub
 TLorentzVector MT2tree::GetMETPlusLeptsLV(int OSDiLeptFromZ){
 	TLorentzVector lv = pfmet[0];
 	if(OSDiLeptFromZ ==1) {
-		double mass = GetDiLeptonInvMass(0,1,0,10,1);
+		double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 		if(mass < 0 )               return lv;
 		if(mass < 71 || mass > 111) return lv; 
 	}
@@ -1118,7 +1268,7 @@ TLorentzVector MT2tree::GetMETPlusLeptsLV(int OSDiLeptFromZ){
 
 Double_t MT2tree::GetMETPlusLepts(int OSDiLeptFromZ){
 	if(OSDiLeptFromZ ==1) {
-		double mass = GetDiLeptonInvMass(0,1,0,10,1);
+		double mass = GetDiLeptonInvMass(0,1,0,5.0,1);
 		if(mass < 0 )               return -2000;
 		if(mass < 71 || mass > 111) return -1000; 
 	}
@@ -1209,13 +1359,14 @@ Double_t MT2tree::GetGenLeptPt(int which, int pid, int mother, double pt, double
 	else           return genlept[index].lv.Pt();	
 }
 
-Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta){
+Bool_t MT2tree::GenLeptFromW(int pid, double pt, double eta, bool includeTau){
 	bool good(false);
 	for(int i=0; i<NGenLepts; ++i){
-		if(abs(genlept[i].ID)       !=pid) continue;
-		if(abs(genlept[i].MID)      !=24 ) continue;
-		if(genlept[i].lv.Pt()       < pt ) continue;
-		if(fabs(genlept[i].lv.Eta())>eta ) continue;
+		if(abs(genlept[i].ID) !=pid                         ) continue;
+		if( (!includeTau) && abs(genlept[i].MID) !=24       ) continue;
+		if(   includeTau  && !((abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) || abs(genlept[i].MID)==24)) continue;
+		if(genlept[i].lv.Pt()       < pt                    ) continue;
+		if(fabs(genlept[i].lv.Eta())>eta                    ) continue;
 		good=true;
 	}
 	return good;	
@@ -1239,19 +1390,241 @@ Double_t MT2tree::GetLeptPt(int index){
 	else return -1;
 }
 
-Double_t MT2tree::TauClosestJet(){
-	if(NTaus <1) return -9.99;
+Double_t MT2tree::ElClosestJet(){
 	double dR=1000;
-	for(int i=0; i<NJets; ++i){
-		if(! jet[i].isTau) continue;
-		for(int j=i+1; j<NJets; ++j){
-			if(! jet[j].isTau ){
-			       	if(jet[j].lv.DeltaR(jet[i].lv) < dR) {dR=jet[j].lv.DeltaR(jet[i].lv);}
-			}
+	for(int i=0; i<NEles; ++i){
+		for(int j=0; j<NJets; ++j){
+			if(ele[i].lv.DeltaR(jet[j].lv) < dR) {dR=ele[i].lv.DeltaR(jet[j].lv);}
 		}	
 	}
 	return dR;
 }
+
+Int_t MT2tree::TopDecayMode(){
+	// bit map: 
+	// 1 = electron 1
+	// 2 = electron 2
+	// 4 = muon 1
+	// 8 = muon 2
+	// 16 = tau 1
+	// 32 = tau 2
+	// 64 = leptonic tau1
+	// 128= leptonic tau2
+	Int_t bit=0;
+	Bool_t acceptance(true);
+	for(int i=0; i<NGenLepts; ++i){
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ) {
+			if( (bit & 1)==0) bit = bit | 1;
+			else              bit = bit | 2;
+		} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ) {
+			if( (bit & 4)==0) bit = bit | 4;
+			else              bit = bit | 8;
+		} 
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) {
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+			if     ( (bit & 1 )==0) bit = bit |  1;
+			else                    bit = bit |  2;
+			if     ( (bit & 64)==0) bit = bit | 64;
+			else                    bit = bit |128;
+		} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 ) {
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+			if     ( (bit & 4 )==0) bit = bit |  4;
+			else                    bit = bit |  8;
+			if     ( (bit & 64)==0) bit = bit | 64;
+			else                    bit = bit |128;
+		}
+		if( abs(genlept[i].ID)==16 && abs(genlept[i].MID)==24 && abs(genlept[i].GMID)==6 ){
+			if     ( (bit & 16)==0) bit = bit | 16;
+			else                    bit = bit | 32;
+		}
+	}
+	return bit;
+}
+
+
+Bool_t MT2tree::TopDecayModeResult(Int_t nlepts){
+	Int_t bit =TopDecayMode();
+	if(nlepts == 1){ // semileptonic without leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return false; // more than one e/mu
+		if     ( (bit & 64)==64)                return false; // at least one leptonic tau
+		if     ( (bit & 1 )==1 && (bit & 4)==0) return true;
+		else if( (bit & 1 )==0 && (bit & 4)==4) return true;
+		else                                    return false;
+	}else if(nlepts == 115){ // semileptonic with leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return false; // more than one e/mu
+		if     ( (bit & 1 )==1 && (bit & 4)==0) return true;
+		else if( (bit & 1 )==0 && (bit & 4)==4) return true;
+		else                                    return false;
+	}else if(nlepts == 215){ // fully leptonic with leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return true; // two eles or two muons
+		if     ( (bit & 1 )==1 && (bit & 4)==4) return true; // one ele and one muo
+		else                                    return false;
+	}else if(nlepts == 2){ // fully leptonic without leptonic tau
+		if     ( (bit & 64)==64               ) return false; // leptonic tau
+		if     ( (bit & 2 )==2 || (bit & 8)==8) return true; // two eles or two muons
+		if     ( (bit & 1 )==1 && (bit & 4)==4) return true; // one ele and one muo
+		else                                    return false;
+	}else if(nlepts == 0){ // fully hadronic without hadronic tau
+		if     ( (bit & 1 )==1 || (bit & 4)==4) return false; // ele or muo
+		if     ( (bit & 16)==16               ) return false; // tau
+		else                                    return true;
+	}else if(nlepts == 15){ // fully hadronic with hadronic tau
+		if     ( (bit & 1 )==1 || (bit & 4)==4) return false; // ele or muo
+		else                                    return true;
+	}else if(nlepts ==11){
+		if     ( (bit & 4 )==4 ) return false; // muon
+		if     ( (bit & 2 )==2 ) return false; // two electron
+		if     ( (bit & 1 )==1 ) return true;  // electron
+		else                     return false;
+	}else if(nlepts ==13){
+		if     ( (bit & 1 )==1 ) return false; // ele
+		if     ( (bit & 8 )==8 ) return false; // two muons
+		if     ( (bit & 4 )==4 ) return true;  // muon
+		else                     return false;
+	}
+	else                                           return false;
+}
+
+Bool_t MT2tree::SLTopAccept(double pt, double eta){
+	for(int i=0; i<NGenLepts; ++i){
+		if(    abs(genlept[i].ID)  !=11 && abs(genlept[i].ID) !=13                               ) continue;
+		if( ! (abs(genlept[i].MID) ==15 && abs(genlept[i].GMID)==24 || abs(genlept[i].MID) ==24 )) continue;
+		if(genlept[i].lv.Pt()>pt && fabs(genlept[i].lv.Eta()) < eta)                              return true;	
+	}
+	return false;
+}
+
+Double_t MT2tree::SLTopEta(double pt){
+	for(int i=0; i<NGenLepts; ++i){
+		if(    abs(genlept[i].ID)  !=11 && abs(genlept[i].ID) !=13                               ) continue;
+		if( ! (abs(genlept[i].MID) ==15 && abs(genlept[i].GMID)==24 || abs(genlept[i].MID) ==24 )) continue;
+		if(genlept[i].lv.Pt()>pt)      return genlept[i].lv.Eta();	
+	}
+	return -999.99;
+}
+
+
+Int_t MT2tree::WDecayMode(){
+	// bit map:
+	// 0 not recognized
+	// 1= ele
+	// 2= muo
+	// 4= tau
+	// 8= tau stable (i.e. problem in MC sample)
+	Int_t result =0;
+	for(int i=0; i<NGenLepts; ++i){
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==24 )                               {result = result | 1;} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==24 )                               {result = result | 2;} 
+		if( abs(genlept[i].ID)==16 && abs(genlept[i].MID)==24 )                               {result = result | 4;}  // tau neutrino
+		if( abs(genlept[i].ID)==11 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 5;} 
+		if( abs(genlept[i].ID)==13 && abs(genlept[i].MID)==15 && abs(genlept[i].GMID)==24 )   {result = result | 6;} 
+		if( abs(genlept[i].ID)==15 && abs(genlept[i].MID)==24 )                               {result = result | 8;} // stable tau
+	}
+	return result;
+}
+
+Double_t MT2tree::PseudoJetPtRatio(){
+	if(hemi[1].lv1.Pt() > hemi[1].lv2.Pt()) return hemi[1].lv2.Pt()/hemi[1].lv1.Pt();
+	else return hemi[1].lv1.Pt()/hemi[1].lv2.Pt();
+}
+
+Double_t MT2tree::HemiMassTop(){
+	Double_t M1    =hemi[1].lv1.M();
+	Double_t M2    =hemi[1].lv2.M();
+	if(fabs(M1-172)<fabs(M2-172)) return M1;
+	else                          return M2;
+}
+
+Double_t MT2tree::LeptJetDR( int pid, int index, bool bjet, int ID){
+        if(pid==11 && NEles  < index+1) return -1;
+	if(pid==13 && NMuons < index+1) return -1;
+	Double_t dRmin=999.99;
+	for(int i=0; i<NJets; ++i){
+		if(! jet[i].IsGoodPFJet(20,2.8,ID))         continue;
+		if(bjet && jet[i].bTagProbSSVHP < 2.0)      continue;
+		Double_t dR=999.99;
+		if(pid==13) dR = jet[i].lv.DeltaR(muo[index].lv);
+		if(pid==11) dR = jet[i].lv.DeltaR(ele[index].lv);
+		if(dR < dRmin) dRmin=dR;
+	}
+	return dRmin;
+}
+
+Double_t MT2tree::PseudoJetMetDPhi(){
+	if(hemi[1].MT2 <0) return -999;
+	double dPhi1 = hemi[1].lv1.DeltaPhi(pfmet[0]);
+	double dPhi2 = hemi[1].lv2.DeltaPhi(pfmet[0]);
+	return (fabs(dPhi1) < fabs(dPhi2)) ? fabs(dPhi1) : fabs(dPhi2);
+}
+
+Double_t MT2tree::GetGenVPt(int pid){
+  TLorentzVector V_p;
+  int countNLepts=0;
+  for(int i=0; i<NGenLepts; ++i){
+    if( abs(genlept[i].MID) != pid       ) continue;
+    V_p += genlept[i].lv;
+    countNLepts++;
+  }
+  //if(countNLepts!=2)cout << "[WARNING]: " << countNLepts << " leptons for this boson" << endl;
+  return V_p.Pt();
+}
+
+
+Bool_t MT2tree::LostLeptonChanges(){
+
+	// add electron and muons to jets
+	if ( (NEles==0 || ele[0].lv.Pt()<10) && (NMuons==0 || muo[0].lv.Pt()<10) ){
+//		return true;
+	}
+
+	// make easy changes
+	for(int i=0; i<NEles; ++i){
+		if(ele[i].lv.Pt()>20)  NJetsIDLoose ++;
+		if(ele[i].lv.Pt()>50)  misc.HT +=ele[i].lv.Pt();
+		if(ele[i].lv.Pt()>100) misc.Jet0Pass=true;
+		if(ele[i].lv.Pt()>60 ) misc.Jet1Pass=true;
+	}
+	for(int i=0; i<NMuons; ++i){
+		if(muo[i].lv.Pt()>20)  NJetsIDLoose ++;
+		if(muo[i].lv.Pt()>50)  misc.HT +=muo[i].lv.Pt();
+		if(muo[i].lv.Pt()>100) misc.Jet0Pass=true;
+		if(muo[i].lv.Pt()>60 ) misc.Jet1Pass=true;
+	}
+	if(NMuons>0 && muo[0].lv.Pt() > misc.LeadingJPt) misc.LeadingJPt = muo[0].lv.Pt();
+	if(NEles >0 && ele[0].lv.Pt() > misc.LeadingJPt) misc.LeadingJPt = ele[0].lv.Pt();
+
+	if(NMuons>0 && muo[0].lv.Pt() > misc.SecondJPt && muo[0].lv.Pt()< misc.LeadingJPt)  misc.SecondJPt	= muo[0].lv.Pt();
+	if(NEles >0 && ele[0].lv.Pt() > misc.SecondJPt && ele[0].lv.Pt()< misc.LeadingJPt)  misc.SecondJPt	= ele[0].lv.Pt();
+	if(NMuons>1 && muo[1].lv.Pt() > misc.SecondJPt)  misc.SecondJPt	= muo[1].lv.Pt();
+	if(NEles >1 && ele[1].lv.Pt() > misc.SecondJPt)  misc.SecondJPt	= ele[1].lv.Pt();
+
+	// MinMetJetsDPhi
+	double minDPhi=10;
+	for(int i=0; i<NJets; ++i){
+		if(jet[i].lv.Pt()<20)               continue;
+		if(TMath::Abs(jet[i].lv.Eta())>5.0) continue;
+		double dPhi = TMath::Abs(jet[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	for(int i=0; i<NEles; ++i){
+		if(ele[i].lv.Pt()<20) continue;
+		double dPhi = TMath::Abs(ele[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	for(int i=0; i<NMuons; ++i){
+		if(muo[i].lv.Pt()<20) continue;
+		double dPhi = TMath::Abs(muo[i].lv.DeltaPhi(pfmet[0]));
+		if(dPhi<minDPhi) minDPhi=dPhi;
+	}
+	if(minDPhi<10) misc.MinMetJetDPhi=minDPhi;
+
+	return true;
+}
+
 
 ClassImp(MT2Misc)
 ClassImp(MT2Znunu)
