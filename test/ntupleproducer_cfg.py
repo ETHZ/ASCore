@@ -104,9 +104,6 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
-# beam halo ############3
-process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
-
 # ECAL dead cells: this is not a filter. Only a flag is stored.
 from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
 process.ecalDeadCellTPfilter                           = EcalDeadCellEventFilter.clone()
@@ -433,7 +430,6 @@ process.p = cms.Path(
     process.scrapingVeto * (
 	process.goodVertices
         + process.HBHENoiseFilterResultProducer
-	+ process.CSCTightHaloFilter
 	+ process.ecalDeadCellTPfilter
         # + process.EcalAnomalousEventFilter
 	+ process.kt6PFJets
