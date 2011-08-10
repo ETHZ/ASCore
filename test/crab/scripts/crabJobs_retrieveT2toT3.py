@@ -60,7 +60,7 @@ while (all_ok):
 
    
    # run data_replica
-   command='/swshare/psit3/bin/data_replica.py --delete --debug '+filelistName+' --from-site '+T2NAME+' --to-site T3_CH_PSI /store/user/susy/'+jobDir
+   command='/swshare/psit3/bin/data_replica.py --copy-tool=srmcp --delete --debug '+filelistName+' --from-site '+T2NAME+' --to-site T3_CH_PSI /store/user/susy/'+jobDir
    print "Running",command
    return_value = os.system(command)
    if return_value != 0:
