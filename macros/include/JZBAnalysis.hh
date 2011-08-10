@@ -25,6 +25,7 @@ struct lepton {
   int type; //0==electron 1==muon 2==tau 
   int index;
   float genPt;
+  float iso;
   bool ElCInfoIsGsfCtfCons;
   bool ElCInfoIsGsfCtfScPixCons;
   bool ElCInfoIsGsfScPixCons;
