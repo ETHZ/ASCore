@@ -26,6 +26,7 @@ void MT2Misc::Reset() {
   isData                  =  0;
   BadEcalTP               =  0;
   BadEcalBE               =  0;
+  CSCTightHaloID          =  0;
   Run                     = -1;	  
   Event		  	  = -1;	  
   LumiSection		  = -1;	  
@@ -93,6 +94,10 @@ MT2Trigger::~MT2Trigger(){
 
 void MT2Trigger::Reset(){
 	
+	// HT with DPhi
+	HLT_HT500_JetPt60_DPhi2p94_v1 = false;
+	HLT_HT550_JetPt60_DPhi2p94_v1 = false;
+	
 	// HT
 	HLT_HT150_v2            = false;
 	HLT_HT150_v3            = false;
@@ -117,6 +122,7 @@ void MT2Trigger::Reset(){
 	HLT_HT400_v5            = false;
 	HLT_HT400_v6            = false;
 	HLT_HT400_v7            = false;
+	HLT_HT400_v8            = false;
 	HLT_HT440_v2            = false;
 	HLT_HT450_v2            = false;
 	HLT_HT450_v3            = false;
@@ -124,18 +130,22 @@ void MT2Trigger::Reset(){
 	HLT_HT450_v5            = false;
 	HLT_HT450_v6            = false;
 	HLT_HT450_v7            = false;
+	HLT_HT450_v8            = false;
 	HLT_HT500_v2            = false;
 	HLT_HT500_v3            = false;
 	HLT_HT500_v4            = false;
 	HLT_HT500_v5            = false;
 	HLT_HT500_v6            = false;
 	HLT_HT500_v7            = false;
+	HLT_HT500_v8            = false;
 	HLT_HT550_v2            = false;
 	HLT_HT550_v3            = false;
 	HLT_HT550_v4            = false;
 	HLT_HT550_v5            = false;
 	HLT_HT550_v6            = false;
 	HLT_HT550_v7            = false;
+	HLT_HT550_v8            = false;
+	HLT_HT600_v1            = false;
 	// HT_MHT
 	HLT_HT250_MHT60_v2      = false;
 	HLT_HT250_MHT60_v3      = false;
@@ -145,15 +155,22 @@ void MT2Trigger::Reset(){
 	HLT_HT250_MHT70_v1      = false;
 	HLT_HT250_MHT70_v2      = false;
 	HLT_HT250_MHT70_v3      = false;
+	HLT_HT250_MHT70_v4      = false;
 	HLT_HT250_MHT90_v1      = false;
+	HLT_HT250_MHT90_v2      = false;
 	HLT_HT260_MHT60_v2      = false;
 	HLT_HT300_MHT75_v4      = false;
 	HLT_HT300_MHT75_v5      = false;
+	HLT_HT300_MHT75_v7      = false;
+	HLT_HT300_MHT75_v8      = false;
 	HLT_HT300_MHT80_v1      = false;
+	HLT_HT300_MHT80_v2      = false;
+	HLT_HT300_MHT90_v1      = false;
+	HLT_HT300_MHT90_v2      = false;
 	HLT_HT350_MHT70_v1      = false;
-	// QuadJet
-	HLT_QuadJet50_BTagIP_v1 = false;
-	HLT_QuadJet50_Jet40_v1  = false;
+	HLT_HT350_MHT70_v2      = false;
+	HLT_HT350_MHT80_v1      = false;
+	HLT_HT350_MHT80_v2      = false;
 	// Muons
 	HLT_DoubleMu3_HT160_v2  = false;
 	HLT_Mu8_Jet40_v2        = false;

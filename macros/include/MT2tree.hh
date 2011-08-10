@@ -24,6 +24,7 @@ public:
   Bool_t   isData;
   Bool_t   BadEcalTP;
   Bool_t   BadEcalBE;
+  Bool_t   CSCTightHaloID;
   Int_t    Run;
   Int_t    Event;
   Int_t    LumiSection;
@@ -59,7 +60,7 @@ public:
   Double_t TrackingFailure;
   Double_t TrackingFailurePVtx;
   
-  ClassDef(MT2Misc, 21)
+  ClassDef(MT2Misc, 22)
 };
 
 // ----------------------------------------
@@ -90,8 +91,10 @@ public:
 	virtual ~MT2Trigger();
 	void Reset();
 
+	// HT with DPhi
+	Bool_t HLT_HT500_JetPt60_DPhi2p94_v1;
+	Bool_t HLT_HT550_JetPt60_DPhi2p94_v1;
 
-	// Trigger bits: only a couple are implemented so far
 	// HT
 	Bool_t HLT_HT150_v2;
 	Bool_t HLT_HT150_v3;
@@ -116,6 +119,7 @@ public:
 	Bool_t HLT_HT400_v5;
 	Bool_t HLT_HT400_v6;
 	Bool_t HLT_HT400_v7;
+	Bool_t HLT_HT400_v8;
 	Bool_t HLT_HT440_v2;
 	Bool_t HLT_HT450_v2;
 	Bool_t HLT_HT450_v3;
@@ -123,18 +127,22 @@ public:
 	Bool_t HLT_HT450_v5;
 	Bool_t HLT_HT450_v6;
 	Bool_t HLT_HT450_v7;
+	Bool_t HLT_HT450_v8;
 	Bool_t HLT_HT500_v2;
 	Bool_t HLT_HT500_v3;
 	Bool_t HLT_HT500_v4;
 	Bool_t HLT_HT500_v5;
 	Bool_t HLT_HT500_v6;
 	Bool_t HLT_HT500_v7;
+	Bool_t HLT_HT500_v8;
 	Bool_t HLT_HT550_v2;
 	Bool_t HLT_HT550_v3;
 	Bool_t HLT_HT550_v4;
 	Bool_t HLT_HT550_v5;
 	Bool_t HLT_HT550_v6;
 	Bool_t HLT_HT550_v7;
+	Bool_t HLT_HT550_v8;
+	Bool_t HLT_HT600_v1;
 	// HT_MHT
 	Bool_t HLT_HT250_MHT60_v2;
 	Bool_t HLT_HT250_MHT60_v3;
@@ -144,21 +152,28 @@ public:
 	Bool_t HLT_HT250_MHT70_v1;
 	Bool_t HLT_HT250_MHT70_v2;
 	Bool_t HLT_HT250_MHT70_v3;
+	Bool_t HLT_HT250_MHT70_v4;
 	Bool_t HLT_HT250_MHT90_v1;
+	Bool_t HLT_HT250_MHT90_v2;
 	Bool_t HLT_HT260_MHT60_v2;
 	Bool_t HLT_HT300_MHT75_v4;
 	Bool_t HLT_HT300_MHT75_v5;
+	Bool_t HLT_HT300_MHT75_v7;
+	Bool_t HLT_HT300_MHT75_v8;
 	Bool_t HLT_HT300_MHT80_v1;
+	Bool_t HLT_HT300_MHT80_v2;
+	Bool_t HLT_HT300_MHT90_v1;
+	Bool_t HLT_HT300_MHT90_v2;
 	Bool_t HLT_HT350_MHT70_v1;
-	// QuadJet
-	Bool_t HLT_QuadJet50_BTagIP_v1;
-	Bool_t HLT_QuadJet50_Jet40_v1;
+	Bool_t HLT_HT350_MHT70_v2;
+	Bool_t HLT_HT350_MHT80_v1;
+	Bool_t HLT_HT350_MHT80_v2;
 	// Muons
 	Bool_t HLT_DoubleMu3_HT160_v2;
 	Bool_t HLT_Mu8_Jet40_v2;
 	Bool_t HLT_DoubleMu3_v3;
 	
-	ClassDef(MT2Trigger, 9);
+	ClassDef(MT2Trigger, 10);
 };
 
 // MT2Znunu --------------------------------
