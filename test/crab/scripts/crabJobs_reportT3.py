@@ -142,7 +142,10 @@ if status != 0:
    print 'Problem with getting number of events for the job '+jobName+'. Exiting...'
    print output
    datasetEvents = "XX.X"
-datasetEvents = "%3.1fM" % (float(output)/1e6)
+if datamc=="data":
+   datasetEvents = "%3.1fM" % (float(output)/1e6)
+else: 
+   datasetEvents = output
 print 'datasetEvents =',datasetEvents
 
 
