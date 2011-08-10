@@ -107,44 +107,47 @@ else:
          break
 
 
-# # get the dataset size on SE
-print '--> Getting size of dataset...\n   ',command_getSize
-status, datasetSize = commands.getstatusoutput(command_getSize)
-if status != 0:
-   print 'Problem with getting size of the job '+jobName+'. Exiting...'
-   datasetSize = "XX.X"
-datasetSize =  "%3.1fGB" % (float(datasetSize)/1024)
-print 'datasetSize =',datasetSize
-
-# get number of events ib the dataset
-print '--> Getting number of events in dataset...\n   ',command_getEvents
-status, datasetEvents = commands.getstatusoutput(command_getEvents)
-if status != 0:
-   print 'Problem with getting number of events for the job '+jobName+'. Exiting...'
-   datasetEvents = "XX.X"
-datasetEvents = "%3.1fM" % (float(datasetEvents)/1e6)
-print 'datasetEvents =',datasetEvents
-
 # Get CMSSW version
 cmsswVersion = os.getenv('CMSSW_VERSION')[6:] # Remove leading "CMSSW_"
 print 'cmsswVersion =',cmsswVersion
 
+print '--> Getting status of all jobs\n   ',command_status
+return_value,output = commands.getstatusoutput(command_status)
+if return_value != 0:
+   print 'Problem with crab -status of the job '+jobName+'. Exiting...'
+   print output
+   sys.exit()
+
+print '--> Getting output of all jobs...\n   ',command_getoutput
+return_value,output = commands.getstatusoutput(command_getoutput)
+if return_value != 0:
+   print 'Problem with crab -getoutput of the job '+jobName+'. Continuing anyway...'
+   print output
+   #sys.exit()
+
+# # get the dataset size on SE
+print '--> Getting size of dataset...\n   ',command_getSize
+status, output = commands.getstatusoutput(command_getSize)
+if status != 0:
+   print 'Problem with getting size of the job '+jobName+'. Exiting...'
+   print output
+   datasetSize = "XX.X"
+datasetSize =  "%3.1fGB" % (float(output)/1024)
+print 'datasetSize =',datasetSize
+
+# get number of events ib the dataset
+print '--> Getting number of events in dataset...\n   ',command_getEvents
+status, output = commands.getstatusoutput(command_getEvents)
+if status != 0:
+   print 'Problem with getting number of events for the job '+jobName+'. Exiting...'
+   print output
+   datasetEvents = "XX.X"
+datasetEvents = "%3.1fM" % (float(output)/1e6)
+print 'datasetEvents =',datasetEvents
+
+
 # perform crab tasks for data jobs
 if (datamc=="data"):
-   print '--> Getting status of all jobs\n   ',command_status
-   return_value,output = commands.getstatusoutput(command_status)
-   if return_value != 0:
-      print 'Problem with crab -status of the job '+jobName+'. Exiting...'
-      print output
-      sys.exit()
-
-   print '--> Getting output of all jobs...\n   ',command_getoutput
-   return_value,output = commands.getstatusoutput(command_getoutput)
-   if return_value != 0:
-      print 'Problem with crab -getoutput of the job '+jobName+'. Continuing anyway...'
-      print output
-      #sys.exit()
-
    print '--> Getting crab report...\n   ',command_report
    return_value,output = commands.getstatusoutput(command_report)
    if return_value != 0:
