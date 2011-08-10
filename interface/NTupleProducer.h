@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.93 2011/05/29 08:25:01 pnef Exp $
+// $Id: NTupleProducer.h,v 1.97 2011/06/30 09:45:05 leo Exp $
 //
 //
 
@@ -246,7 +246,10 @@ private:
 
 	// Pile-up
 	int fTpuNumInteractions;
-	int fTpuOOTNumInteractions;
+        int fTpuNumFilled;
+        int fTpuOOTNumInteractionsLate;
+        int fTpuOOTNumInteractionsEarly;
+
 	float fTpuZpositions[gMaxnpileup];
 	float fTpuSumpT_lowpT[gMaxnpileup];
 	float fTpuSumpT_highpT[gMaxnpileup];
@@ -273,11 +276,16 @@ private:
 	float fTEBrechitE4oE1[gMaxnEBhits];
 	float fTEBrechitE2oE9[gMaxnEBhits];
 	
+	int fTecalDeadTPFilterFlag;
 	// int fTEcalDeadCellBEFlag;
 	// static const unsigned int gMaxnECALGapClusters = 50;
 	// unsigned int fTnECALGapClusters;
 	// float fTEcalGapBE[gMaxnECALGapClusters];
 	// int fTEcalGapClusterSize[gMaxnECALGapClusters];
+	//
+	
+	// CSCBeamHalo
+	int fTcscTightHaloID;
 
 	int fTgoodvtx;
 	float fTprimvtxx;
@@ -696,6 +704,8 @@ private:
 	float fTtrkphi[gMaxntrks];
 	float fTtrknchi2[gMaxntrks];
 	float fTtrknhits[gMaxntrks];
+	float fTtrkVtxDz[gMaxntrks];
+	float fTtrkVtxDxy[gMaxntrks];
 
 // (M)E(T):
 	float fTTrkPtSumx;
@@ -748,6 +758,7 @@ private:
 	float fTPFMETpy;
 	float fTPFMETphi;
 	float fTPFMETSignificance;
+        float fTPFSumEt;
 	float fTPFMETPAT;
 	float fTPFMETPATpx;
 	float fTPFMETPATpy;

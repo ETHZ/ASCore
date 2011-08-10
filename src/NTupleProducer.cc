@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.117 2011/06/08 13:10:51 stiegerb Exp $
+// $Id: NTupleProducer.cc,v 1.125 2011/06/30 09:45:05 leo Exp $
 //
 //
 
@@ -84,6 +84,7 @@ Implementation:
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 
+#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 /*
 #include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
@@ -216,6 +217,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 			LumiWeights_      = edm::LumiReWeighting(fTPileUpHistoMC[0], fTPileUpHistoData[0], fTPileUpHistoMC[1], fTPileUpHistoData[1]);
 		}
 	}
+
 }
 
 //________________________________________________________________________________________
@@ -235,6 +237,7 @@ NTupleProducer::~NTupleProducer(){
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	++fNTotEvents;
+
 
 	using namespace edm;
 	using namespace std;
@@ -274,6 +277,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<double> rho;
 	iEvent.getByLabel(fSrcRho,rho);
 	fTrho = *rho;
+
+	// beam halo
+	edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
+	iEvent.getByLabel("BeamHaloSummary",TheBeamHaloSummary);
+	const BeamHaloSummary TheSummary = (*TheBeamHaloSummary.product());
+	fTcscTightHaloID = static_cast<int>  (TheSummary.CSCTightHaloId());
 
 	// collect information for b-tagging (4 tags)
 	Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
@@ -350,7 +359,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::ESHandle<CaloGeometry> geometry ;
 	iSetup.get<CaloGeometryRecord>().get(geometry);
 
-
+	// ECAL dead cell Trigger Primitive filter
+	edm::Handle<bool> EcalDeadTPFilterFlag;
+	iEvent.getByLabel("ecalDeadCellTPfilter",EcalDeadTPFilterFlag);
+	fTecalDeadTPFilterFlag = (int) *EcalDeadTPFilterFlag;
+	
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -439,35 +452,47 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
 		std::vector<PileupSummaryInfo>::const_iterator PVI;
+
 		for (PVI = pileupInfo->begin(); PVI !=pileupInfo->end(); ++PVI){
-			if( PVI->getBunchCrossing() == 0 ){ // in-time PU
-				fTpuNumInteractions  = PVI->getPU_NumInteractions();
-				fHpileupstat->Fill( fTpuNumInteractions );
-				if(fTpuNumInteractions > gMaxnpileup){
-				  edm::LogWarning("NTP") << "@SUB=analyze()"
-							 << "More than " << static_cast<int>(gMaxnpileup)
-							 << " generated Pileup events found, increase size!";
-				  fTgoodevent = 1;
-				}
-				for(int i = 0; i < PVI->getPU_NumInteractions(); i++){
-					if(i >= gMaxnpileup) break; // hard protection
-					fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
-					fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
-					fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
-					fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
-					fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
-					// fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
-				}		
-			}else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
-				fTpuOOTNumInteractions = PVI->getPU_NumInteractions();
-			}
+		  if( PVI->getBunchCrossing() == 0 ){ // in-time PU
+		    fTpuNumInteractions  = PVI->getPU_NumInteractions();
+		    fHpileupstat->Fill( fTpuNumInteractions );
+		    
+		    if(fTpuNumInteractions > gMaxnpileup){
+		      edm::LogWarning("NTP") << "@SUB=analyze()"
+					     << "More than " << static_cast<int>(gMaxnpileup)
+					     << " generated Pileup events found, increase size!";
+		      fTgoodevent = 1;
+		    }
+		    
+		    fTpuNumFilled = (int)PVI->getPU_zpositions().size();
+		    for( int i = 0; i < fTpuNumFilled; i++){
+		      if(i >= gMaxnpileup) break; // hard protection
+		      fTpuZpositions[i]   = PVI->getPU_zpositions()[i];
+		      fTpuSumpT_lowpT[i]  = PVI->getPU_sumpT_lowpT()[i];
+		      fTpuSumpT_highpT[i] = PVI->getPU_sumpT_highpT()[i];
+		      fTpuNtrks_lowpT[i]  = PVI->getPU_ntrks_lowpT()[i];
+		      fTpuNtrks_highpT[i] = PVI->getPU_ntrks_highpT()[i];
+		      
+		      // fTpuInstLumi[i]     = PVI->getPU_instLumi()[i];
+		    }
+		    
+		  }
+		  else if( PVI->getBunchCrossing() == 1 ){ // OOT pile-Up: this is the 50ns late Bunch
+		    fTpuOOTNumInteractionsLate = PVI->getPU_NumInteractions();
+		  }
+		  else if( PVI->getBunchCrossing() == -1 ){ // OOT pile-Up: this is the 50ns early Bunch
+		    fTpuOOTNumInteractionsEarly = PVI->getPU_NumInteractions();
+		  }
+		  
+		  
 		}
 		//see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
 		// as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
 		if(!fTPileUpHistoData[0].empty() && !fTPileUpHistoMC[0].empty() ){
-			const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
-			MyWeightTotal  = LumiWeights_.weightOOT( (*iEventB) ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
-			MyWeightInTime = LumiWeights_.weight   ( (*iEventB) ); // this is the inTimeWeight only
+		  //const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
+		  MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
+		  MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
 		}
 	} else {
           // Just store the number of primary vertices
@@ -676,7 +701,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			 && abs(g_part->pdgId()) != 15
 			 && abs(g_part->pdgId()) != 16 ) continue;
 
-			if( g_part->status() != 1 ) continue;
+			if(!( g_part->status() ==1 || (g_part->status() ==2 && abs(g_part->pdgId())==5))) continue;
+
+			bool GenMomExists  (true);
+			bool GenGrMomExists(true);
+
 			if( g_part->pt()        < fMingenleptpt )  continue;
 			if( fabs(g_part->eta()) > fMaxgenlepteta ) continue;
 
@@ -685,27 +714,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			// get mother of gen_lept
 			const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
-			int m_id = gen_mom -> pdgId();
+			if(gen_mom==NULL){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+				<< " WARNING: GenParticle does not have a mother ";
+				GenMomExists=false;
+			}
+			int m_id=-999;
+			if(GenMomExists) m_id = gen_mom -> pdgId();
 
-			if(m_id != gen_id);
+			if(m_id != gen_id || !GenMomExists);
 			else{
 				int id= m_id;
-				while(id == gen_id){
+				while(id == gen_id && GenMomExists){
 					gen_mom = static_cast<const GenParticle*> (gen_mom->mother());
-					id=gen_mom->pdgId();
+					if(gen_mom==NULL){
+						edm::LogWarning("NTP") << "@SUB=analyze"
+						<< " WARNING: GenParticle does not have a mother ";
+						GenMomExists=false;
+					}
+					if(GenMomExists) id=gen_mom->pdgId();
 				}
 			}
-			m_id = gen_mom->pdgId();
+			if(GenMomExists) m_id = gen_mom->pdgId();
 
 			// get grand mother of gen_lept
-			const GenParticle* gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
-			int gm_id = gen_gmom->pdgId();
-			if (m_id != gm_id);
+			const GenParticle* gen_gmom=NULL;
+			if(GenMomExists) gen_gmom  = static_cast<const GenParticle*>(gen_mom->mother());
+			if(gen_gmom==NULL){
+				edm::LogWarning("NTP") << "@SUB=analyze"
+				<< " WARNING: GenParticle does not have a GrandMother ";
+				GenGrMomExists=false;
+			}
+			int gm_id=-999;
+			if(GenGrMomExists) gm_id = gen_gmom->pdgId();
+			if (m_id != gm_id || !GenGrMomExists);
 			else{
 				int id=gm_id;
-				while(id == m_id){
+				while(id == m_id && GenGrMomExists){
 					gen_gmom  = static_cast<const GenParticle*>(gen_gmom->mother());
-					id = gen_gmom->pdgId();
+					if(gen_gmom==NULL){
+						edm::LogWarning("NTP") << "@SUB=analyze"
+						<< " WARNING: GenParticle does not have a GrandMother ";
+						GenGrMomExists=false;
+					}
+					if(GenGrMomExists) id = gen_gmom->pdgId();
 				}
 			}
 
@@ -734,17 +786,17 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTGenLeptonEta[i]      =   gen_lepts[i]->eta();
 				fTGenLeptonPhi[i]      =   gen_lepts[i]->phi();
 
-				fTGenLeptonMId[i]      =   gen_moms[i]->pdgId();
-				fTGenLeptonMStatus[i]  =   gen_moms[i]->status();
-				fTGenLeptonMPt[i]      =   gen_moms[i]->pt();
-				fTGenLeptonMEta[i]     =   gen_moms[i]->eta();
-				fTGenLeptonMPhi[i]     =   gen_moms[i]->phi();
+				fTGenLeptonMId[i]      =   (gen_moms[i]!=NULL )  ? gen_moms[i]->pdgId()  : -999;
+				fTGenLeptonMStatus[i]  =   (gen_moms[i]!=NULL )  ? gen_moms[i]->status() : -999;
+				fTGenLeptonMPt[i]      =   (gen_moms[i]!=NULL )  ? gen_moms[i]->pt()     : -999;
+				fTGenLeptonMEta[i]     =   (gen_moms[i]!=NULL )  ? gen_moms[i]->eta()    : -999;
+				fTGenLeptonMPhi[i]     =   (gen_moms[i]!=NULL )  ? gen_moms[i]->phi()    : -999;
 
-				fTGenLeptonGMId[i]     =   gen_gmoms[i]->pdgId();
-				fTGenLeptonGMStatus[i] =   gen_gmoms[i]->status();
-				fTGenLeptonGMPt[i]     =   gen_gmoms[i]->pt();
-				fTGenLeptonGMEta[i]    =   gen_gmoms[i]->eta();
-				fTGenLeptonGMPhi[i]    =   gen_gmoms[i]->phi();
+				fTGenLeptonGMId[i]     =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->pdgId() : -999;
+				fTGenLeptonGMStatus[i] =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->status(): -999;
+				fTGenLeptonGMPt[i]     =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->pt()    : -999;
+				fTGenLeptonGMEta[i]    =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->eta()   : -999;
+				fTGenLeptonGMPhi[i]    =   (gen_gmoms[i]!=NULL ) ? gen_gmoms[i]->phi()   : -999;
 			}
 		}
 	}
@@ -1583,6 +1635,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTtrkphi[nqtrk]   = it->phi();
 		fTtrknchi2[nqtrk] = it->normalizedChi2();
 		fTtrknhits[nqtrk] = it->numberOfValidHits();
+		fTtrkVtxDz[nqtrk] = it->dz(primVtx->position());
+		fTtrkVtxDxy[nqtrk]= it->dxy(primVtx->position());	
 		fTgoodtrk[nqtrk]  = 0;
 	}
 	fTntracks = nqtrk+1;
@@ -1657,6 +1711,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETpy  = (pfmet->front()).py();
 	fTPFMETphi = (pfmet->front()).phi();
 	fTPFMETSignificance = (pfmet->at(0)).significance();
+        fTPFSumEt  = (pfmet->front()).sumEt();
 
 	fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
 	fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
@@ -1738,14 +1793,16 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
-	fEventTree->Branch("PUOOTnumInteractions",&fTpuOOTNumInteractions,"PUOOTnumInteractions/I");
-	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumInteractions]/F");
-	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumInteractions]/F");
-	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumInteractions]/F");
+	fEventTree->Branch("PUnumFilled",&fTpuNumFilled,"PUnumFilled/I");
+	fEventTree->Branch("PUOOTnumInteractionsEarly",&fTpuOOTNumInteractionsEarly,"PUOOTnumInteractionsEarly/I");
+	fEventTree->Branch("PUOOTnumInteractionsLate",&fTpuOOTNumInteractionsLate,"PUOOTnumInteractionsLate/I");
+	fEventTree->Branch("PUzPositions"     ,&fTpuZpositions     ,"PUzPositions[PUnumFilled]/F");
+	fEventTree->Branch("PUsumPtLowPt"     ,&fTpuSumpT_lowpT    ,"PUsumPtLowPt[PUnumFilled]/F");
+	fEventTree->Branch("PUsumPtHighPt"    ,&fTpuSumpT_highpT   ,"PUsumPtHighPt[PUnumFilled]/F");
+	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumFilled]/F");
+	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumFilled]/F");
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
-	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumInteractions]/F");
+	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumFilled]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
 	fEventTree->Branch("HLTResults"       ,&fTHLTres          , Form("HLTResults[%d]/I", gMaxhltbits));
 	fEventTree->Branch("HLTPrescale"      ,&fTHLTprescale     , Form("HLTPrescale[%d]/I", gMaxhltbits));
@@ -1787,6 +1844,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
+	fEventTree->Branch("CSCTightHaloID"   ,&fTcscTightHaloID    ,"CSCTightHaloID/I");
+	fEventTree->Branch("EcalDeadTPFilterFlag",&fTecalDeadTPFilterFlag,"EcalDeadTPFilterFlag/I");
 	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
 	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
@@ -2165,6 +2224,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("TrkPhi"         ,&fTtrkphi       ,"TrkPhi[NTracks]/F");
 	fEventTree->Branch("TrkNChi2"       ,&fTtrknchi2     ,"TrkNChi2[NTracks]/F");
 	fEventTree->Branch("TrkNHits"       ,&fTtrknhits     ,"TrkNHits[NTracks]/F");
+	fEventTree->Branch("TrkVtxDz"       ,&fTtrkVtxDz     ,"TrkVtxDz[NTracks]/F");
+	fEventTree->Branch("TrkVtxDxy"      ,&fTtrkVtxDxy    ,"TrkVtxDxy[NTracks]/F");
 	fEventTree->Branch("TrkPtSumx"      ,&fTTrkPtSumx      ,"TrkPtSumx/F");
 	fEventTree->Branch("TrkPtSumy"      ,&fTTrkPtSumy      ,"TrkPtSumy/F");
 	fEventTree->Branch("TrkPtSum"       ,&fTTrkPtSum       ,"TrkPtSum/F");
@@ -2217,6 +2278,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PFMETpy"               ,&fTPFMETpy             ,"PFMETpy/F");
 	fEventTree->Branch("PFMETphi"              ,&fTPFMETphi            ,"PFMETphi/F");
 	fEventTree->Branch("PFMETSignificance"     ,&fTPFMETSignificance   ,"PFMETSignificance/F");
+        fEventTree->Branch("PFSumEt"               ,&fTPFSumEt             ,"PFSumEt/F");
 	fEventTree->Branch("PFMETPAT"              ,&fTPFMETPAT            ,"PFMETPAT/F");
 	fEventTree->Branch("PFMETPATpx"            ,&fTPFMETPATpx          ,"PFMETPATpx/F");
 	fEventTree->Branch("PFMETPATpy"            ,&fTPFMETPATpy          ,"PFMETPATpy/F");
@@ -2367,8 +2429,10 @@ void NTupleProducer::resetTree(){
 	fTbeamspotz         = -999.99;
 	fTNCaloTowers       = -999;
 	fTHBHENoiseFlag     = -999;
+	fTcscTightHaloID    = -999;
 	fTrho               = -999;
 
+	fTecalDeadTPFilterFlag = -999;
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
 	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);
@@ -2387,8 +2451,11 @@ void NTupleProducer::resetTree(){
 	resetInt(fTvrtxisfake,   gMaxnvrtx);
 
 	// Pile-up
-	fTpuNumInteractions = 0;
-	fTpuOOTNumInteractions = 0;
+	fTpuNumInteractions    = -999;
+	fTpuNumFilled = -999;
+	fTpuOOTNumInteractionsEarly = -999;
+	fTpuOOTNumInteractionsLate = -999;
+
 	resetFloat(fTpuZpositions   ,gMaxnpileup);
 	resetFloat(fTpuSumpT_lowpT  ,gMaxnpileup);
 	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);
@@ -2695,6 +2762,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTtrkphi, gMaxntrks);
 	resetFloat(fTtrknchi2, gMaxntrks);
 	resetFloat(fTtrknhits, gMaxntrks);
+	resetFloat(fTtrkVtxDxy, gMaxntrks);
+	resetFloat(fTtrkVtxDz, gMaxntrks);
 
 	resetFloat(fTPhotPt,gMaxnphos);
 	resetFloat(fTPhotPx,gMaxnphos);
@@ -2789,6 +2858,7 @@ void NTupleProducer::resetTree(){
 	fTPFMETpy            = -999.99;
 	fTPFMETphi           = -999.99;
 	fTPFMETSignificance  = -999.99;
+        fTPFSumEt            = -999.99;
 	fTPFMETPAT           = -999.99;
 	fTPFMETPATpx         = -999.99;
 	fTPFMETPATpy         = -999.99;
