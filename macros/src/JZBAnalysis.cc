@@ -14,12 +14,16 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.46 $";
+string sjzbversion="$Revision: 1.47 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.47  2011/08/10 15:28:33  fronga
+Remove full-blown PF leptons and just store some PF lepton info.
+Add isolation information.
+
 Revision 1.46  2011/07/28 12:34:33  buchmann
 Bugfixes: Added variable for jet counting at generator level using the same eta cut (2.6), called genNjetsTwoSix (because the standard one, genNjets, uses a cut on |eta| at 3.0); the second bugfix concerns the way events with less than two reconstructed leptons are stored ... in that they actually ARE stored now whereas before, if the 'sortedGoodLeptons' vector didn't contain enough entries, the event could be lost.
 
@@ -1412,7 +1416,7 @@ void JZBAnalysis::End(TFile *f){
   myTree->Write();
 
   // Dump statistics
-  if (0) { // Put that to 0 if you are annoyed
+  if (1) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
