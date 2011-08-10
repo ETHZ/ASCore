@@ -1,6 +1,16 @@
 #!/usr/bin/python
 import sys, os, pwd, commands, shlex, glob
 
+def updateFileList(filelistName,srmDir):
+   """Update list of files to process"""
+   command='lcg-ls '+srmDir+' | perl -an -F"/" -e \'print "/".join("/",@F[5 .. $#F])\' > ' + filelistName
+   print "command: " + command
+   return_value = os.system(command)
+   if return_value != 0:
+      print 'Problem to determine which jobs need to be retrieved. Exiting...'
+      sys.exit()
+
+
 print sys.argv[1:]
 # check the command line arguments
 if (len(sys.argv[1:]) < 3) or (len(sys.argv[1:]) > 4):      # if no argument is specified,
@@ -40,48 +50,24 @@ else:
 
 # create the list of files that need to be retrieved from T2 to T3
 filelistName = "filelists_"+datamc+"_"+ntupleVersion+"/filelist_"+jobName+".txt"
-command="srmls "+T2SRMDIR+" | awk '{split($2,nameParts,\""+nameSplitString+"\"); if (NR>3) print nameParts[2]}' > " + filelistName
-print "command: " + command
-return_value = os.system(command)
-if return_value != 0:
-	print 'Problem to determine which jobs need to be retrieved. Exiting...'
-	sys.exit()
 
-# run data_replica
-command="data_replica.py --debug "+filelistName+" --from-site "+T2NAME+" --to-site T3_CH_PSI /store/user/susy/"+jobDir
-#print "command: " + command
-return_value = os.system(command)
-if return_value == 0:
-	print 'Data replicated succesfully. Exiting...'
-	sys.exit()
-else:
-	print 'Problem in replicating data with "data_replica". Trying directly with "lcg-cp"...'
+# Now run a loop
+all_ok = True
+logfilename = jobName+'_replica'
+doneFiles = []
+while (all_ok):
+   updateFileList(filelistName,T2SRMDIR)
 
-# try to do simple lcg-cp from T2 to T3 in case there was problem with data_replica
-numJobs=0
-command_copy = 'lcg-cp -v -n 1 -T srmv2 -U srmv2'           # for copying from remote T2 site
-while ((numJobs == 0) or (numJobs == 1000) or (numJobs == 2000)): 
-	command="srmls -offset="+str(numJobs)+" "+SRMOPTIONS+" "+T2SRMDIR
-	print 'Getting the list of '+jobName+' jobs at SE (from job '+str(numJobs+1)+' to max.'+str(numJobs+1000)+')...'
-	status, output = commands.getstatusoutput(command)
-	filenames = shlex.split(output)                         # get list of files in the jobName directory at the SE path (and their sizes)
-	print 'There are ' + str((len(filenames)-2)/2) + ' jobs to be retrieved.'
-	if len(filenames) == 2:                                 # get out of the loop if there are no more jobs
-		break
-	for filename in filenames:
-		if (jobName in filename ) and ('.root' in filename) and not ((jobName+'.root') == filename):
-			nameParts=filename.split(jobName+'/')
-			command = command_copy + ' ' + T2SRMDIR+'/'+nameParts[1] + ' ' + T3SRMDIR+'/'+nameParts[1]
-#			print 'with command: ' + command
-			print 'copying from SE job ' + str(numJobs+1) + ':'
-			return_value = os.system(command)
-			numJobs = numJobs + 1
-	print "numJobs: " + str(numJobs)
-	if numJobs == 0:										# get out of the loop if there are no more jobs
-		break
+   
+   # run data_replica
+   command='/swshare/psit3/bin/data_replica.py --delete --debug '+filelistName+' --from-site '+T2NAME+' --to-site T3_CH_PSI /store/user/susy/'+jobDir
+   print "Running",command
+   return_value = os.system(command)
+   if return_value != 0:
+      print 'Problem in replicating data with "data_replica".'
+      all_ok = False
+      sys.exit()
 
-if numJobs > 0:												# print info on num of retrieved jobs
-	print str(numJobs) + ' jobs have been processed.'
-else:
-	print '0 jobs have been retrieved. Exiting...'
-	sys.exit()
+   # In principle one could loop here...
+   all_ok = False
+   
