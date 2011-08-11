@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.47 $";
+string sjzbversion="$Revision: 1.48 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.48  2011/08/10 16:02:45  fronga
+Switch stats back on (you better have a very good reason to turn it off :) )
+
 Revision 1.47  2011/08/10 15:28:33  fronga
 Remove full-blown PF leptons and just store some PF lepton info.
 Add isolation information.
@@ -707,7 +710,6 @@ void JZBAnalysis::Begin(TFile *f){
     counters[EV].fill("... pass electron triggers",0.);
     counters[EV].fill("... pass muon triggers",0.);
     counters[EV].fill("... pass EM triggers",0.);
-    counters[EV].fill("... pass all trigger requirements",0.);
   }
   std::string types[3] = { "ee","mm","em" };
   for ( size_t itype=0; itype<3; ++itype ) {
@@ -856,7 +858,7 @@ void JZBAnalysis::Analyze() {
   
   // Good event requirement: essentially vertex requirements
   if ( !IsGoodEvent() ) {
-    myTree->Fill();
+    if (isMC) myTree->Fill();
     return;
   }
   counters[EV].fill("... pass good event requirements");
@@ -951,7 +953,7 @@ void JZBAnalysis::Analyze() {
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
   if(sortedGoodLeptons.size() < 2) {
-    myTree->Fill();
+    if (isMC) myTree->Fill();
     return;
   }
     
@@ -964,7 +966,7 @@ void JZBAnalysis::Analyze() {
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
   }
   if(PosLepton2 == sortedGoodLeptons.size()) {
-    myTree->Fill();
+    if (isMC) myTree->Fill();
     return;
   }
   counters[EV].fill("... has at least 2 OS leptons");
@@ -999,7 +1001,7 @@ void JZBAnalysis::Analyze() {
   } else {
       
     //If there are less than two leptons the event is not considered
-    myTree->Fill();
+    if (isMC) myTree->Fill();
     return;
     
   }
@@ -1036,7 +1038,7 @@ void JZBAnalysis::Analyze() {
   for(int i =0 ; i<fTR->NJets;i++) // PF jet loop
     {
       counters[PJ].fill("All PF jets");
-      if(i==jMax){cout<<"max Num was reached"<<endl; return;}
+      if(i==jMax){cout<<"max Num was reached"<<endl; break;}
 	
       float jpt = fTR->JPt[i];
       float jeta = fTR->JEta[i];
@@ -1140,7 +1142,7 @@ void JZBAnalysis::Analyze() {
   for(int i =0 ; i<fTR->NJets;i++) // CALO jet loop
     {
       counters[JE].fill("All Calo jets");
-      if(i==jMax) { cout<<"max Num was reached"<<endl; return; }
+      if(i==jMax) { cout<<"max Num was reached"<<endl; break; }
 	
       float jpt  = fTR->CAJPt[i];
       float jeta = fTR->CAJEta[i];
