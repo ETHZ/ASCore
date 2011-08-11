@@ -4,10 +4,14 @@
 #include "helper/TMctLib.h"
 
 #include <vector>
+#include <iostream>
+#include <string>
+#include <sstream>
 #include "helper/Hemisphere.hh"
 #include "helper/Utilities.hh"
 #include "TLorentzVector.h"
 #include "TMath.h"
+#include "TRandom.h"
 
 using std::vector;
 
@@ -746,6 +750,175 @@ Int_t MT2tree::GetJetIndexByEta(int ijet, int PFJID, double minJPt, double maxJE
   return indx[ijet];
 }
 
+Int_t MT2tree::GetQcdType(bool matchOnPhi, int PFID){
+  // matchOnPhi=true -> match to met phi, otherwise largest pt contribution
+  // 1: undermeasured jet (ending up as one of the 3 leading jets)
+  // 2: undermeasured jet (ending up as other than the 3 leading jets)
+  // 3: overmeasured jet
+  // 4: lost jet
+  // 5: jet appearing magicaly
+  // 6: real met
+  // 7: other
+
+  int njets = PFID == 0 ? NJets : NJetsIDLoose;
+  int   matchedGIndex  [20]; // [jetindex]
+  float matchedJetsDr  [20]; // [jetindex]
+  float otherGenjetsPt [20]; // [genjetindex]
+  float otherGenjetsPhi[20]; // [genjetindex]
+  int   otherJets  = 0;
+  int   nMatched   = 0;
+  for (int i = 0; i<20;i++){
+    matchedGIndex [i] = -1;
+    matchedJetsDr [i] = 0.5;
+    otherGenjetsPt[i] = 0.;
+  }
+  for (int j = 0; j<NGenJets; j++){
+    int index = genjet[j].JetMatchIndex;
+    if (genjet[j].DeltaR < matchedJetsDr[index]) {
+      if ( matchedGIndex[index] != -1) {
+	int otherIndex = matchedGIndex[index];
+	otherGenjetsPt[otherIndex] = genjet[otherIndex].lv.Pt();
+	otherJets++;
+	nMatched--;
+      }
+      matchedGIndex[index] = j;
+      matchedJetsDr[index] = genjet[j].DeltaR;
+      nMatched++;
+    }
+    else {
+      otherGenjetsPt [j] = genjet[j].lv.Pt ();
+      otherGenjetsPhi[j] = genjet[j].lv.Phi();
+      otherJets++;
+    }
+  }
+
+  float magicJetPt=0., lostJetPt=0., underJet3Pt=0, underJetPt=0, overJetPt=0.;
+  float genMetPt = genmet[0].Pt();
+  float magicJetPhi=0., lostJetPhi=0., underJet3Phi=0, underJetPhi=0, overJetPhi=0.;
+  float genMetPhi = genmet[0].Phi();
+
+
+  if (nMatched>njets) cout << "more matched jets than jets... something wrong? " << endl;
+  if (nMatched<njets){ // possible case 5
+    for (int j = 0 ; j < njets; j++){
+      if (matchedGIndex[j] == -1 && jet[j].lv.Pt()>magicJetPt) {
+	magicJetPt  = jet[j].lv.Pt (); // if jet j didn't match a gen jet, store it's pt
+	magicJetPhi = jet[j].lv.Phi();
+      }
+    }
+  }
+  if (otherJets !=0){ 
+    for (int i = 0; i<NGenJets; i++){ // check possible case 4
+      if (otherGenjetsPt[i] > lostJetPt ) {
+	lostJetPt  = otherGenjetsPt [i];
+	lostJetPhi = otherGenjetsPhi[i];
+      }
+    }
+  }
+  for (int j = 0 ; j < njets; j++){
+    if (matchedGIndex[j] != -1){
+      float jpt  = jet[j].lv.Pt();
+      float gjpt = genjet[matchedGIndex[j]].lv.Pt();
+      if      (gjpt<jpt) {
+	if ( jpt - gjpt > overJetPt ) {
+	  overJetPt   =  jpt - gjpt;
+	  overJetPhi  =  genjet[matchedGIndex[j]].lv.Phi();
+	}
+      }
+      else if ( j  < 3 )   {
+	if ( gjpt - jpt > underJet3Pt ){
+	  underJet3Pt  = gjpt - jpt;
+	  underJet3Phi = genjet[matchedGIndex[j]].lv.Phi();
+	}
+      }
+      else if ( gjpt - jpt > underJetPt ) {
+	underJetPt   = gjpt - jpt;
+	underJetPhi  = genjet[matchedGIndex[j]].lv.Phi();
+      }
+
+//       cout << j << ", " << matchedGIndex[j] << ": jpt = " << jpt << ", gjpt = " << gjpt 
+// 	   << ", overJetPt = " << overJetPt << ", underJet3Pt = " << underJet3Pt << ", underJetPt = " << underJetPt << endl;
+    }
+  }
+
+  int type = 7;
+  if(!matchOnPhi){
+    float thePt = 50.;
+    if (genMetPt   > thePt ) {
+      type = 6;
+      thePt = genMetPt;
+    }
+    if (lostJetPt  > thePt ) {
+      type = 4;
+      thePt = lostJetPt;
+    }
+    if (magicJetPt > thePt ) {
+      type = 5;
+      thePt = magicJetPt;
+    }
+    if (underJet3Pt> thePt ) {
+      type = 1;
+      thePt = underJet3Pt;
+    }
+    if (underJetPt > thePt ) {
+      type = 2;
+      thePt = underJetPt;
+    }
+    if (overJetPt  > thePt ) {
+      type = 3;
+      thePt = overJetPt;
+    }
+  }
+  else{
+    float deltaPhi = 5., dPhi;
+    float metPhi = pfmet[0].Phi();
+    //dPhi = TMath::Min((Float_t)(TMath::Abs(genMetPhi-metPhi)),(Float_t)(2.*TMath::Pi()-TMath::Abs(genMetPhi-metPhi)));
+    dPhi = TVector2::Phi_mpi_pi(genMetPhi-metPhi);
+    if (genMetPt   > 30. && dPhi<deltaPhi ) {
+      type = 6;
+      deltaPhi = dPhi;
+    }
+    //    dPhi = TMath::Min((Float_t)(TMath::Abs(lostJetPhi-metPhi)),(Float_t)(2.*TMath::Pi()-TMath::Abs(lostJetPhi-metPhi)));
+    dPhi = TVector2::Phi_mpi_pi(lostJetPhi-metPhi);
+    if (lostJetPt  > 30. && dPhi<deltaPhi ) {
+      type = 4;
+      deltaPhi = dPhi;
+    }
+    dPhi = TMath::Min((Float_t)(TMath::Abs(magicJetPhi-metPhi-TMath::Pi())),(Float_t)(2.*TMath::Pi()-TMath::Abs(magicJetPhi-metPhi-TMath::Pi())));
+    if (magicJetPt > 30. && dPhi<deltaPhi ) {
+      type = 5;
+      deltaPhi = dPhi;
+    }
+    dPhi = TMath::Min((Float_t)(TMath::Abs(underJet3Phi-metPhi)),(Float_t)(2.*TMath::Pi()-TMath::Abs(underJet3Phi-metPhi)));
+    if (underJet3Pt> 30. && dPhi<deltaPhi ) {
+      type = 1;
+      deltaPhi = dPhi;
+    }
+    dPhi = TMath::Min((Float_t)(TMath::Abs(underJetPhi-metPhi)),(Float_t)(2.*TMath::Pi()-TMath::Abs(underJetPhi-metPhi)));
+    if (underJetPt > 30. && dPhi<deltaPhi ) {
+      type = 2;
+      deltaPhi = dPhi;
+    }
+    dPhi = TMath::Min((Float_t)(TMath::Abs(overJetPhi-metPhi-TMath::Pi())),(Float_t)(2.*TMath::Pi()-TMath::Abs(overJetPhi-metPhi-TMath::Pi())));
+    if (overJetPt  > 30. && dPhi<deltaPhi ) {
+      type = 3;
+      deltaPhi = dPhi;
+    }
+  }
+
+//   cout << "---------------------- " << endl
+//        << "nmatched jets = " << nMatched << ", otherJets = " << otherJets << endl
+//        << "type = " << type << endl
+//        << "magicJetPt = " << magicJetPt 
+//        << ", lostJetPt = " <<  lostJetPt
+//        << ", underJet3Pt = " <<  underJet3Pt
+//        << ", underJetPt = " <<  underJetPt
+//        << ", overJetPt = " <<  overJetPt << endl;
+
+
+  return type;
+}
+
 Double_t MT2tree::GetHT(int PFJID, double minJPt, double maxJEta){
   Double_t ht=0;
   for(int i = 0; i<NJets; ++i){
@@ -1025,6 +1198,75 @@ Double_t MT2tree::CalcMT2(double testmass, bool massive, TLorentzVector visible1
   delete mt2;
   return MT2;
 
+}
+
+Double_t MT2tree::TopDileptonMT2(bool massive, bool moreJets){
+
+  if (NJets<2 || (NEles+NMuons)<2) return -999;
+
+  TLorentzVector j1, j2, l1, l2, v11, v22, v12, v21, met;
+  if (NMuons == 2){
+    l1=muo[0].lv;
+    l2=muo[1].lv;
+  } else if (NEles ==2) {
+    l1=ele[0].lv;
+    l2=ele[1].lv;
+  }
+  else{
+    l1=muo[0].lv;
+    l2=ele[0].lv;
+  }
+  j1= jet[0].lv;
+  j2= jet[1].lv;
+
+  v11=j1+l1;
+  v22=j2+l2;
+  v12=j1+l2;
+  v21=j2+l1;
+  met = pfmet[0];
+
+  double mt2_1 = CalcMT2(0., massive, v11, v22, met);
+  double mt2_2 = CalcMT2(0., massive, v12, v21, met);
+
+  double mt2 = TMath::Min(mt2_1, mt2_2);
+
+  if (moreJets){
+    for (int i = 3; i<NJets; i++){
+      for (int j =0; j<i; j++){
+	j1= jet[j].lv;
+	j2= jet[i].lv;
+	v11=j1+l1;
+	v22=j2+l2;
+	double mt2_1 = CalcMT2(0., massive, v11, v22, met);
+	double mt2_2 = CalcMT2(0., massive, v12, v21, met);
+	mt2 = TMath::Min(mt2,TMath::Min(mt2_1, mt2_2));
+      }
+    }
+  }
+
+  return mt2;
+
+}
+
+Double_t MT2tree::WDileptonMT2(bool massive){
+
+  if (NJets<2 || (NEles+NMuons)<2) return -999;
+
+  TLorentzVector l1, l2, met;
+  if (NMuons == 2){
+    l1=muo[0].lv;
+    l2=muo[1].lv;
+  } else if (NEles ==2) {
+    l1=ele[0].lv;
+    l2=ele[1].lv;
+  }
+  else{
+    l1=muo[0].lv;
+    l2=ele[0].lv;
+  }
+  met = pfmet[0];
+
+  return CalcMT2(0., massive, l1, l2,  met);
 }
 
 Double_t MT2tree::SimpleMT2(bool pseudo){
@@ -1640,6 +1882,169 @@ Bool_t MT2tree::LostLeptonChanges(){
 	if(minDPhi<10) misc.MinMetJetDPhi=minDPhi;
 
 	return true;
+}
+
+Double_t MT2tree::RemoveAndRecalcMT2(int option, float prob, bool hiDphi, float dphi, bool selection){
+  // Remove jets, option -> 0: everywhere, 1: near cracks (|eta|<.12 || 1.44<|eta|<1.56)
+  // returns recalculated mt2
+  // negative value if fails selection with recalculated values (HT, MET, 2nd jet pt, NJets)
+  // negative value if not in minDphi region of interest
+  // if called with a Draw() function, must be called before any other cut so the changes are effective
+
+  gRandom->SetSeed((int)(misc.HT*100)); // making sure that every call returns the same thing
+
+
+  std::ostringstream change;
+  std::ostringstream initialQuantities;
+  initialQuantities << "Initial quantities: " << endl
+		    << "MET = " << misc.MET << ", njets = " << NJetsIDLoose << ", caloHT = " << misc.caloHT50_ID
+		    << ", 2nd jet pt = " << misc.SecondJPt << ", minMetJetDPhi = " << misc.MinMetJetDPhi << endl;
+
+  
+  TLorentzVector MET = pfmet[0];
+  TLorentzVector JETS[20];
+  int njets = 0;
+  float ptremoved = 0;
+
+  bool lost = false;  
+
+  for(int i=0; i<NJets; ++i){
+    if(jet[i].IsGoodPFJet(20, 2.4, 1) ==false) continue;
+    switch(option) {
+    case 0:
+      if(prob > gRandom->Uniform(1)){
+	TLorentzVector jetmet;
+	jetmet.SetPtEtaPhiM(jet[i].lv.Pt(),0.,jet[i].lv.Phi(),0.);
+	MET += jetmet;
+	ptremoved += jet[i].lv.Pt();
+	lost = true;
+ 	change << "Jet lost -- Lumi:Event " << misc.LumiSection << ":" << misc.Event << endl
+	       << "index = " << i               << ", pt = "  << jet[i].lv.Pt() 
+	       << ", eta = " << jet[i].lv.Eta() << ", phi = " << jet[i].lv.Phi() << endl;
+	jet[i].lv.SetPtEtaPhiM(0.1,10.,0.,0.);
+      }
+      else {
+	JETS[njets] = jet[i].lv;
+	njets++;
+      }
+      break;
+    case 1:
+      if(prob > gRandom->Uniform(1) && 
+	 ( fabs(jet[i].lv.Eta()) < .12 || (fabs(jet[i].lv.Eta()) < 1.56 && fabs(jet[i].lv.Eta()) > 1.44))){
+	TLorentzVector jetmet;
+	jetmet.SetPtEtaPhiM(jet[i].lv.Pt(),0.,jet[i].lv.Phi(),0.);
+	MET += jetmet;
+	ptremoved += jet[i].lv.Pt();
+	lost = true;
+ 	change << "Jet lost -- Lumi:Event " << misc.LumiSection << ":" << misc.Event << endl
+	       << "index = " << i               << ", pt = "  << jet[i].lv.Pt() 
+	       << ", eta = " << jet[i].lv.Eta() << ", phi = " << jet[i].lv.Phi() << endl;
+	jet[i].lv.SetPtEtaPhiM(0.1,10.,0.,0.);
+      }
+      else {
+	JETS[njets] = jet[i].lv;
+	njets++;
+      }
+      break;
+    }
+  }
+
+  if (!lost){
+    // return negative if not in dphi region of interest
+    if ( hiDphi && misc.MinMetJetDPhi < dphi) return -9.;
+    if (!hiDphi && misc.MinMetJetDPhi > dphi) return -9.;
+    return misc.MT2;
+  }
+
+
+
+  // recalculate variables used in selection
+  NJetsIDLoose = njets;
+  misc.caloHT50_ID -= ptremoved;
+  misc.MET = MET.Pt();
+  misc.METPhi = MET.Phi();
+  pfmet[0] = MET;
+  misc.SecondJPt = JETS[1].Pt();
+
+  // return negative if doesn't pass selection
+  // MET-MHT does not change when losing a jet
+  if(selection && (njets < 3 || misc.caloHT50_ID < 600 || misc.MET < 30 || misc.SecondJPt < 100) ) {
+//      cout << "--- fails selection " << ", njets = " << njets << ", misc.caloHT50_ID = " << misc.caloHT50_ID << ", misc.MET = " << misc.MET << ", misc.SecondJPt = " << misc.SecondJPt << endl;
+    return -9.;
+  }
+
+  // recalc MinMetJetDPhi
+  float oldDphi = misc.MinMetJetDPhi;
+  misc.MinMetJetDPhi = MinMetJetDPhi(0,20.,5.0,1);
+
+  // return negative if not in dphi region of interest
+  if ( hiDphi && misc.MinMetJetDPhi < dphi) return -9.;
+  if (!hiDphi && misc.MinMetJetDPhi > dphi) return -9.;
+
+  // protection against crazy HCAL events 
+  if(misc.CrazyHCAL ) return -9.;
+
+  // make pseudojets with hemispheres
+  vector<float> px, py, pz, E;
+  for(int i=0; i<njets; ++i){
+  	px.push_back(JETS[i].Px());
+	py.push_back(JETS[i].Py());
+	pz.push_back(JETS[i].Pz());
+	E .push_back(JETS[i].E ());
+  }
+		
+  if (px.size()<2) { // protection against events with only one jet
+    misc.MT2 = 0;
+    return -9.;
+  }
+
+  // get hemispheres (seed 2: max inv mass, association method: default 3 = minimal lund distance)
+  Hemisphere* hemi = new Hemisphere(px, py, pz, E, 2, 3);
+  vector<int> grouping = hemi->getGrouping();
+
+  TLorentzVector pseudojet1(0.,0.,0.,0.);
+  TLorentzVector pseudojet2(0.,0.,0.,0.);
+	
+  for(int i=0; i<px.size(); ++i){
+	if(grouping[i]==1){
+		pseudojet1.SetPx(pseudojet1.Px() + px[i]);
+		pseudojet1.SetPy(pseudojet1.Py() + py[i]);
+		pseudojet1.SetPz(pseudojet1.Pz() + pz[i]);
+		pseudojet1.SetE( pseudojet1.E()  + E[i]);	
+	}else if(grouping[i] == 2){
+		pseudojet2.SetPx(pseudojet2.Px() + px[i]);
+		pseudojet2.SetPy(pseudojet2.Py() + py[i]);
+		pseudojet2.SetPz(pseudojet2.Pz() + pz[i]);
+		pseudojet2.SetE( pseudojet2.E()  + E[i]);
+	}
+  }
+  delete hemi;
+
+  if(MET.Pt()<30) {return -9.;}
+  float mt2 = CalcMT2(0, 0, pseudojet1, pseudojet2, MET); 
+
+//   if (lost) {
+//     cout << "*** MT2 change from " << misc.MT2 << " to " << mt2 << " due to lost jet" << endl;
+//     cout << "MinMetJetDPhi from " << oldDphi << " to " << misc.MinMetJetDPhi << endl;
+//   }
+
+  if (mt2>300 && njets >= 3 && misc.caloHT50_ID > 600 && misc.MET > 30 && misc.SecondJPt > 100 && misc.MinMetJetDPhi > 0.3) {
+    cout << "===================================" << endl
+	 << "Event:Lumi " << misc.Event << ":" << misc.LumiSection << " pass event selection and MT2>300" << endl
+	 << "old MT2 = " << misc.MT2 << ", new MT2 = " << mt2 << endl
+	 << "recalculated quantities: " << endl
+	 << "MET = " << misc.MET << ", njets = " << njets << ", caloHT = " << misc.caloHT50_ID
+	 << ", 2nd jet pt = " << misc.SecondJPt << ", minMetJetDPhi = " << misc.MinMetJetDPhi << endl;
+    cout << "-------------------" 
+	 << initialQuantities.str() << endl;
+    cout << "-------------------" 
+	 << change.str() << endl;
+  }
+
+  misc.MT2 = mt2;
+
+  return mt2;
+
 }
 
 

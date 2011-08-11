@@ -411,6 +411,8 @@ public:
   Int_t    GetNBtags  (int algo=3, double value=2., double minJPt=20, double maxJEta=2.4, int PFJID=0);  // algo - 0:TCHE, 1:TCHP, 2:SSVHE, 3:SSVHP
   Double_t JetPt      (int ijet=0, int PFJID=0, double minJPt=20, double maxJEta=2.4);
 
+  Int_t GetQcdType(bool matchOnPhi=true, int PFID=0);
+
   // HT, MHT, ...
   Double_t GetHT         (int PFJID=0, double minJPt=50, double maxJEta=2.4);
   TLorentzVector GetMHTlv(int PFJID=0, double minJPt=20, double maxJEta=2.4, bool inclLepts=false);
@@ -441,12 +443,15 @@ public:
   Double_t GetMT2HemiNoISR(bool massive = false, int hemi_seed=4, int hemi_association=2, float MaxDR=0, int met=1);
   Double_t CalcMT2(double testmass, bool massive, 
 		  TLorentzVector visible1, TLorentzVector visible2, TLorentzVector MET );
+  Double_t TopDileptonMT2(bool massive=true, bool moreJets=false);
+  Double_t WDileptonMT2(bool massive=true);
   Double_t SimpleMT2(bool pseudo=true);
   Double_t GetMCT(bool massive=false, int met=1);
   Double_t GetSqrtS(double testmass=0, bool massive=true,int PFJID=0, double minJPt=20, double maxJEta=2.4,int met=1);
   Double_t GetMaxHemiMass(int hemi_index=0);
   Double_t PseudoJetPtRatio();
   Double_t HemiMassTop();
+  Double_t RemoveAndRecalcMT2(int option=0, float prob=0.01, bool hiDphi=true, float dphi=0.0, bool selection=false);
 
   // Leptons
   Double_t GenOSDiLeptonInvMass(unsigned int pid=11, unsigned int mother=23, double pt=10, double eta=2.4);
