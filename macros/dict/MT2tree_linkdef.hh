@@ -13,5 +13,6 @@
 #pragma link C++ class MT2Muon;
 #pragma link C++ class MT2Hemi;
 #pragma link C++ class MT2GenLept;
+#pragma link C++ class MT2GenJet;
 #endif
 
