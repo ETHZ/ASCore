@@ -1336,6 +1336,8 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	oname.ReplaceAll("||","_");
 	oname.ReplaceAll("misc.","");
 	oname.ReplaceAll("LeptConfig","LepCfg");
+	oname.ReplaceAll("LeadingJPt","J1Pt");
+	oname.ReplaceAll("SecondJPt","J2Pt");
 	oname.ReplaceAll("Vectorsumpt","VSPT");
 	oname.ReplaceAll("EcalDeadCellBEFlag","BEFlg");
 	oname.ReplaceAll("HBHENoiseFlag","HBHEFlg");
@@ -1357,6 +1359,7 @@ void MassPlotter::MakePlot(std::vector<sample> Samples, TString var, TString cut
 	oname.ReplaceAll("trigger.HLT_HT500_v3","HLT_HT500_v3");
 	oname.ReplaceAll(",","-");
         TString outname = Util::removeFunnyChar(oname.Data());
+	outname.ReplaceAll("NMuons.eq0_muo0.lv.Pt.lt10_NEles.eq0_ele0.lv.Pt.lt10","noLepPt10");
 
 	if(!stacked) {
 	  outname = outname + (flip_order ? "_flipped" : "") + (logflag ? "_log" : "") + "_shape";
@@ -1624,10 +1627,10 @@ void MassPlotter::ABCD_MT2(TString var, TString basecut, TString upper_cut, TStr
   f_sub2->Draw("same");
   TLine *l_sub_min = new TLine(fit_min,f_sub1->GetYaxis()->GetXmin(),fit_min,f_sub1->GetMaximum()); l_sub_min->SetLineStyle(2); l_sub_min->Draw("same");
   TLine *l_sub_max = new TLine(fit_max,f_sub1->GetYaxis()->GetXmin(),fit_max,f_sub1->GetMaximum()); l_sub_max->SetLineStyle(2); l_sub_max->Draw("same");
-  TLegend *leg = new TLegend(.55,.5,.85,.75);
+  TLegend *leg = new TLegend(.52,.5,.85,.75);
   leg->SetFillColor(0);
   leg->AddEntry(ratio_data,"data","le");
-  leg->AddEntry(ratio_sub ,"data (EWK subtracted)","le");
+  leg->AddEntry(ratio_sub ,"data (non-QCD subtracted)","le");
   leg->Draw("same");
 
   PrintABCDPredictions(var, basecut, upper_cut, lower_cut, f_qcd1,f_sub1,f_qcd3);
@@ -1812,7 +1815,7 @@ void MassPlotter::PrintABCDPredictions(TString var, TString basecut, TString upp
 
 void MassPlotter::printEstimation(TH1D* h_pred, TH1D* h_pred_c, int nbins, float min, float max){
   float delta = (max-min)/((float)nbins);
-  double yield[5][2], error[5][2];
+  double yield[11][2], error[11][2];
   yield[0][0] = Util::IntegralAndError(h_pred,  (int)((100.-min)/delta)+1, nbins+1, error[0][0]);
   cout << "\tMT2>100 = " << yield[0][0]  << " +/- " << error[0][0];
   yield[0][1] = Util::IntegralAndError(h_pred_c,(int)((100.-min)/delta)+1, nbins+1, error[0][1]);
@@ -1833,14 +1836,38 @@ void MassPlotter::printEstimation(TH1D* h_pred, TH1D* h_pred_c, int nbins, float
   cout << "\tMT2>300 = " << yield[4][0]  << " +/- " << error[4][0];
   yield[4][1] = Util::IntegralAndError(h_pred_c,(int)((300.-min)/delta)+1, nbins+1, error[4][1]);
   cout << "\tMT2>300 = " << yield[4][1]  << " +/- " << error[4][1] << endl;
+  yield[5][0] = Util::IntegralAndError(h_pred,  (int)((350.-min)/delta)+1, nbins+1, error[5][0]);
+  cout << "\tMT2>350 = " << yield[5][0]  << " +/- " << error[5][0];
+  yield[5][1] = Util::IntegralAndError(h_pred_c,(int)((350.-min)/delta)+1, nbins+1, error[5][1]);
+  cout << "\tMT2>350 = " << yield[5][1]  << " +/- " << error[5][1] << endl;
+  yield[6][0] = Util::IntegralAndError(h_pred,  (int)((400.-min)/delta)+1, nbins+1, error[6][0]);
+  cout << "\tMT2>400 = " << yield[6][0]  << " +/- " << error[6][0];
+  yield[6][1] = Util::IntegralAndError(h_pred_c,(int)((400.-min)/delta)+1, nbins+1, error[6][1]);
+  cout << "\tMT2>400 = " << yield[6][1]  << " +/- " << error[6][1] << endl;
+  yield[7][0] = Util::IntegralAndError(h_pred,  (int)((450.-min)/delta)+1, nbins+1, error[7][0]);
+  cout << "\tMT2>450 = " << yield[7][0]  << " +/- " << error[7][0];
+  yield[7][1] = Util::IntegralAndError(h_pred_c,(int)((450.-min)/delta)+1, nbins+1, error[7][1]);
+  cout << "\tMT2>450 = " << yield[7][1]  << " +/- " << error[7][1] << endl;
+  yield[8][0] = Util::IntegralAndError(h_pred,  (int)((500.-min)/delta)+1, nbins+1, error[8][0]);
+  cout << "\tMT2>500 = " << yield[8][0]  << " +/- " << error[8][0];
+  yield[8][1] = Util::IntegralAndError(h_pred_c,(int)((500.-min)/delta)+1, nbins+1, error[8][1]);
+  cout << "\tMT2>500 = " << yield[8][1]  << " +/- " << error[8][1] << endl;
+  yield[9][0] = Util::IntegralAndError(h_pred,  (int)((550.-min)/delta)+1, nbins+1, error[9][0]);
+  cout << "\tMT2>550 = " << yield[9][0]  << " +/- " << error[9][0];
+  yield[9][1] = Util::IntegralAndError(h_pred_c,(int)((550.-min)/delta)+1, nbins+1, error[9][1]);
+  cout << "\tMT2>550 = " << yield[9][1]  << " +/- " << error[9][1] << endl;
+  yield[10][0] = Util::IntegralAndError(h_pred,  (int)((600.-min)/delta)+1, nbins+1, error[10][0]);
+  cout << "\tMT2>600 = " << yield[10][0]  << " +/- " << error[10][0];
+  yield[10][1] = Util::IntegralAndError(h_pred_c,(int)((600.-min)/delta)+1, nbins+1, error[10][1]);
+  cout << "\tMT2>600 = " << yield[10][1]  << " +/- " << error[10][1] << endl;
 
   for (int i=0; i<2; i++){
     cout << "yield_" << (i==0 ? "opt" : "pes") << " = {" << endl;
-    for (int j=0; j<5; j++){
+    for (int j=0; j<11; j++){
       cout << yield[j][i] << (j<4 ? ", " : "\n}\n");
     }
     cout << "error_" << (i==0 ? "opt" : "pes") << " = {" << endl;
-    for (int j=0; j<5; j++){
+    for (int j=0; j<11; j++){
       cout << error[j][i] << (j<4 ? ", " : "\n}\n");
     }
   }
