@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.48 $";
+string sjzbversion="$Revision: 1.49 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.49  2011/08/11 17:03:19  fronga
+Only keep "empty" events for MC.
+
 Revision 1.48  2011/08/10 16:02:45  fronga
 Switch stats back on (you better have a very good reason to turn it off :) )
 
@@ -738,6 +741,8 @@ vector<lepton> JZBAnalysis::sortLeptonsByPt(vector<lepton>& leptons) {
 
 
 //------------------------------------------------------------------------------
+//for triggers, check out
+// http://fwyzard.web.cern.ch/fwyzard/hlt/summary
 const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
@@ -745,11 +750,15 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v7") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v8") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
@@ -764,17 +773,28 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
   if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v4") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v5") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v6") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v7") )        return true;
+
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v4") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v6") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v7") )        return true;
+
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
+
   if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v5") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v6") )        return true;
   return false;
 } 
 
@@ -786,12 +806,17 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
+
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
   return false;
 }
 
