@@ -1,18 +1,22 @@
 #!/usr/bin/python
 
+### WATCH OUT: NEEDS TO BE LAUNCHED AS python runManager.py configuration.cfg and NOT ./runManager configuration.cfg
+
 ###############################################################
 #                       runManager.py                         #
 ###############################################################
 # + Python script which allows to manage multiple jobs in the #
 # context of a lsfbatch system.                               #
 #                                                             #
-# + type runManager -h to see a description of the usage          #   
+# + type runManager -h to see a description of the usage      #   
 #                                                             #
 # + Feedback to: pablom@cern.ch                               #
+# + Feedback about this version: contact marco-andrea         #
 #                                                             #
 ############################################################### 
    
 
+domultiprocessing=True
 
 # System libraries to interact with the shell
 import sys
@@ -20,9 +24,11 @@ import os
 from os import popen
 import commands
 import time
-##the following two are for threading
-import Queue
-import threading
+try:
+	from multiprocessing import Pool
+except ImportError:
+	print "Importing multiprocessing failed. Please use the script like this: python runManager.py template.cfg and not ./runManager.py template.cfg"
+	domultiprocessing=False
 
 jobnumbers=[]
 totaljobnumber=0
@@ -142,17 +148,13 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   outputCFGFile.close()
   
   outputName = "output_" + str(step) + ".root"
-  #Send to the queue
-#  print "qsub -e /tmp/ -o /tmp/ -N " + taskName + " " + nameOfDirectory + nameOfConf2 + " " + str(step)
-#  result = os.system("qsub -e /tmp/ -o /tmp/ " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
-#  pipe=popen('echo "Your job 861717 ("example_job") has been submitted"')
-  pipe=popen("aqsub -e /tmp/ -o /tmp/ -N" + taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
+  thisjobnumber=0
+  pipe=popen("qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
   for l in pipe.readlines():
 	  if l.find("Your job")>-1:
 		  thisjobnumber=int(l[l.index('job ')+4:l.index(' (')])
 		  print str(taskName)+": Submitted job "+str(step)+" with job number: "+str(thisjobnumber)
-		  jobnumbers.append(thisjobnumber)
-
+  return thisjobnumber
 ###############################################################
 # createJob method: Prepares everything for a single job      #
 #                                                             #
@@ -175,10 +177,7 @@ def createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, stringInfo, listO
 
   result = createCMSConf(step, nameOfCurrentDirectory, releasePath, 
            nameOfConfigurationFile, inputFilesForCMS, executablePath, nameOfSRMPath, hpname, task)
-
-  if(result != 0):
-    return "Error creating Python-Configuration file"
-  return "OK"
+  return result
 
 ###############################################################
 # parseInputFile method: Parses the input file                #
@@ -212,12 +211,12 @@ def parseInputFile(name):
     if(stringInfo[i] == []):
       return "Error"   
   showMessage("Configuration Parameters:")
-  showMessage("ReleasePath = " + stringInfo[1])
-  showMessage("Executable = " + stringInfo[2])
-  showMessage("NameOfConf = " + stringInfo[3])
-  showMessage("NameOfSource = " + stringInfo[0])
+  showMessage("ReleasePath = " + stringInfo[1] + sanitycheck("ReleasePath",stringInfo[1]))
+  showMessage("Executable = " + stringInfo[2] + sanitycheck("Executable",stringInfo[2]))
+  showMessage("NameOfConf = " + stringInfo[3] + sanitycheck("NameOfConf",stringInfo[3]))
+  showMessage("NameOfSource = " + stringInfo[0] + sanitycheck("NameOfSource",stringInfo[0]))
   showMessage("SrmPath = " + stringInfo[4])
-  showMessage("WorkPath = " + stringInfo[5])
+  showMessage("WorkPath = " + stringInfo[5] + sanitycheck("WorkPath",stringInfo[5]))
   showMessage("HPName = " + stringInfo[6])
   return stringInfo
 
@@ -289,7 +288,7 @@ def process(task, conf):
   dcapPath = "dcap://t3se01.psi.ch:22125/"
   srmPath = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"
   folderToList = srmPath + task[0]
-  print "Going to fetch list pertaining to "+str(task[0])
+  showMessage("Going to fetch list of files pertaining to "+str(task[0]))
   theList = os.popen("lcg-ls " + folderToList)
   list = theList.readlines()
   for li in theList:
@@ -332,59 +331,44 @@ def process(task, conf):
   os.system("mkdir -p ../" + taskName)
 
   showMessage(str(NumberOfJobs) + " with " + str(FilesPerJob) + " each will be created")
-
+  jobnumbercollection=[]
   if(FilesPerJob > 0):
     for step in range(0, NumberOfJobs):
-      createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, conf, correctList, task) 
-
-##################################################################################
-#               SPEEDING UP THINGS WITH QUEUES AND THREADS                       #
-##################################################################################
-
-queue = Queue.Queue()
-numoftasksdone=[]
-numoftasksstarted=0
-
-allprocessed=[]
-class ProcessThread(threading.Thread):
-  def __init__(self, queue):
-    threading.Thread.__init__(self)
-    self.queue = queue
-
-  def run(self):
-    while True:
-      args = self.queue.get()
-      
-      output = process(l, result)
-      time.sleep(5)
-      numoftasksdone.append(2)
+      result=createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, conf, correctList, task)
+      jobnumbercollection.append(result)
+  return jobnumbercollection
 
 ##################################################################################
 #                              POST PROCESSING                                   #
 ##################################################################################
 
+def cb(r): #optional: callback function
+    for listentry in r:
+      jobnumbers.append(listentry)
+    pass
+
 def ensure_dir(f) :
 	if not os.path.exists(f):
 		os.makedirs(f)
 
-def join_directory(path,filelist) :
-	localpath="/scratch/buchmann/"+path
+def join_directory(path,filelist,username) :
+	localpath="/scratch/"+username+"/ntuples/"+path
 	ensure_dir(localpath)
 	cleanpath=path;
 	if (cleanpath[len(cleanpath)-1]=="/") : # remove trailing slash
 		cleanpath=cleanpath[0:len(cleanpath)-2]
-	fusecommand="hadd -f /scratch/buchmann/"+cleanpath+".root "
+	fusecommand="hadd -f /scratch/"+username+"/ntuples/"+cleanpath+".root > /dev/null "
 	for item in filelist:
-		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/buchmann/"+item+" /scratch/buchmann/"+item
+		copycommand="dccp dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+item+" /scratch/"+username+"/ntuples/"+item
 		commands.getstatusoutput(copycommand)
-		fusecommand=fusecommand+" /scratch/buchmann/"+item
+		fusecommand=fusecommand+" /scratch/"+username+"/ntuples/"+item
 	print commands.getoutput(fusecommand)
-	deletecommand="rm -r /scratch/buchmann/"+path+"/" 
+	deletecommand="rm -r /scratch/"+username+"/ntuples/"+path+"/" 
 	print commands.getoutput(deletecommand)
 		
 
-def check_directory(path) :
-	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/buchmann/"+path
+def check_directory(path,username) :
+	complete_path="/pnfs/psi.ch/cms/trivcat/store/user/"+username+"/"+path
 	print "\033[1;34m Going to checkout the subdirectory "+complete_path+" \033[0m "
 	listoffiles=[]
 	supposedtobejoined=False;
@@ -393,25 +377,35 @@ def check_directory(path) :
 	for l in pipe.readlines():
 		currentline=l.strip("\n")
 		if(currentline[0]=="d") :
-			check_directory(currentline[currentline.find(path):])
+			check_directory(currentline[currentline.find(path):],username)
 		else :
 			if(currentline.count(path) > 0) :
 				supposedtobejoined=True
 				listoffiles.append(currentline[currentline.find(path):])
 	if supposedtobejoined==True:
-		join_directory(path,listoffiles)
+		join_directory(path,listoffiles,username)
 
 
+##################################################################################
+#                              POST PROCESSING                                   #
+##################################################################################
+
+def sanitycheck(name,path):
+	if os.path.exists(path) == False:
+		showMessage("Problem detected with "+name+" which is set to "+path+" -- please fix this. Aborting.")
+		sys.exit(-1)
+	else :
+		return " ... ok !"
 
 ##################################################################################
 #                                  MAIN                                          #
 ##################################################################################
-t = ProcessThread(queue)
-t.setDaemon(True)
-t.start()
+if domultiprocessing==True:
+	po = Pool()
 
 fusepath=""
-
+uname=""
+isdata=0
 if(len(sys.argv) != 2 or sys.argv[1] == "-h"):
   printUsage()
 else:
@@ -421,19 +415,20 @@ else:
   else:
     listOfTasks = getListOfTasks(result[0])
     fusepath=result[4]
+    uname=result[6]
     for l in listOfTasks:
-      numoftasksstarted+=1
+      if(l[0].find("/data/")>-1) :
+	isdata=1
       showMessage("Processing " + l[0])
-      queue.put((l,result))
-  #Queue.join()
-  ##not working in python 2.4 so let's implement a workaround!
-  waitcounter=0
-  try:
-    while len(numoftasksdone)<numoftasksstarted:
-        time.sleep(0.5)
-  except len(numoftasksdone)==numoftasksstarted:
-    pass
-
+      if domultiprocessing==True:
+	      po.apply_async(process,(l, result),callback=cb)
+      else :
+	      print "At this point you could be saving a lot of time with multiprocessing ... "
+	      process(l, result)
+      		
+  if domultiprocessing==True :
+	  po.close()
+	  po.join()
   totaljobnumber=len(jobnumbers)
   counter=0
   while(len(jobnumbers)>0 and counter<300) :
@@ -444,6 +439,10 @@ else:
 		currlist.append(int(line))
 	  checklist(jobnumbers,currlist)
 	  time.sleep(60)
-  print "All jobs have finished - merging everything to your scratch directory now!"
-  check_directory(fusepath)
-
+  print "All jobs have finished - need to merge everything and place it in your scratch directory!"
+  check_directory(fusepath,uname)
+  if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
+    print "We're dealing with data - we still need to merge data files and check for duplicates!"
+    pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/ntuples/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
+    for l in pipe.readlines():
+	  print l

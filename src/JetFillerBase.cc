@@ -42,6 +42,8 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
   fTet                     = new double[gMaxnobjs];
   fTeta                    = new double[gMaxnobjs];
   fTphi                    = new double[gMaxnobjs];
+  fTflavour                    = new int[gMaxnobjs];
+
   fTscale                  = new double[gMaxnobjs];
   fTL1FastJetScale         = new double[gMaxnobjs];
   fTarea                   = new double[gMaxnobjs];
@@ -92,6 +94,8 @@ JetFillerBase::~JetFillerBase(void) {
   delete [] fTeta;
   delete [] fTarea;
   delete [] fTphi;
+  delete [] fTflavour;
+
   delete [] fTscale;
   delete [] fTL1FastJetScale;
   delete [] fTjbTagProbTkCntHighEff ;
@@ -140,6 +144,8 @@ void JetFillerBase::createBranches(void) {
   addBranch("JEt",    "D", fTet,   "NJets" );
   addBranch("JEta",   "D", fTeta,  "NJets" );
   addBranch("JPhi",   "D", fTphi,  "NJets" );
+  addBranch("JFlavour",   "I", fTflavour,  "NJets" );
+
   addBranch("JScale", "D", fTscale,"NJets" );
   addBranch("JL1FastJetScale", "D", fTL1FastJetScale,"NJets" );
   addBranch("JArea",  "D", fTarea, "NJets" );
@@ -191,6 +197,8 @@ void JetFillerBase::reset(void) {
   resetDouble(fTet  ,gMaxnobjs);
   resetDouble(fTeta ,gMaxnobjs);
   resetDouble(fTphi ,gMaxnobjs);
+  resetInt(fTflavour ,gMaxnobjs);
+
   resetDouble(fTarea,gMaxnobjs);
   resetDouble(fTjbTagProbTkCntHighEff ,gMaxnobjs);
   resetDouble(fTjbTagProbTkCntHighPur ,gMaxnobjs);
