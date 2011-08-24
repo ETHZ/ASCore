@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.97 2011/06/30 09:45:05 leo Exp $
+// $Id: NTupleProducer.h,v 1.98 2011/07/05 09:02:05 pnef Exp $
 //
 //
 
@@ -113,6 +113,7 @@ private:
         std::vector<PatTauFiller*>      tauFillers;
 
 	bool fIsRealData;
+	bool fIsModelScan;
 	int fNTotEvents;
 	int fNFillTree;
 
@@ -243,6 +244,10 @@ private:
 	float fTextxslo;
 	float fTintxs;
 	float fTweight;
+        float fTMassGlu;
+        float fTMassChi;
+        float fTMassLSP;
+
 
 	// Pile-up
 	int fTpuNumInteractions;

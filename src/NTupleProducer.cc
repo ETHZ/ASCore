@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.125 2011/06/30 09:45:05 leo Exp $
+// $Id: NTupleProducer.cc,v 1.126 2011/07/05 09:02:05 pnef Exp $
 //
 //
 
@@ -86,6 +86,8 @@ Implementation:
 
 #include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+
 /*
 #include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
 #include "PhysicsTools/EcalAnomalousEventFilter/interface/EcalBoundaryInfoCalculator.h"
@@ -96,10 +98,11 @@ Implementation:
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
 
-
 NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	// Main settings
 	fIsRealData = iConfig.getUntrackedParameter<bool>("isRealData");
+	fIsModelScan = iConfig.getUntrackedParameter<bool>("isModelScan");
+        if(fIsRealData&&fIsModelScan) fIsModelScan=false; // avoiding possible mistakes
 
 	// InputTags
 	fMuonTag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_muons");
@@ -1731,6 +1734,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETPATphi  = (pfMETpat->front()).phi();
 	fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
 
+        ////////////////////////////////////////////////////////////////////////////////
+	// Special stuff for Model Scans ///////////////////////////////////////////////
+
+	if(!fIsRealData&&fIsModelScan) {
+		Handle<LHEEventProduct> product;
+		iEvent.getByLabel("source", product);
+
+		LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
+		LHEEventProduct::comments_const_iterator c_end = product->comments_end();
+
+		float mGL;
+		float mLSP;
+	        float xCHI;
+
+	        for(LHEEventProduct::comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+	          size_t found = (*cit).find("model");
+
+	          //# model T5zz_0.5_925.0_400.0to1000.0_450.0.lhe
+	          if( found != std::string::npos)   {
+	            size_t foundLength = (*cit).size();
+	            found = (*cit).find("T5zz");
+	            std::string smaller = (*cit).substr(found+1,foundLength);
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            std::istringstream iss(smaller);
+	            iss >> xCHI;
+	            iss.clear();
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> mGL;
+	            iss.clear();
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> mLSP;
+	            iss.clear();
+	          }
+	        }
+	        fTMassGlu = mGL;
+	        fTMassChi = xCHI;
+	        fTMassLSP = mLSP;
+	}
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
 	fEventTree->Fill();
@@ -1815,6 +1862,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("HLTObjectPhi"     ,fTHLTObjectPhi[0]  , Form("HLTObjectPhi[%d][%d]/F", fTNpaths, gMaxhltnobjs));
 	fEventTree->Branch("PUWeightTotal"    ,&fTpuWeightTotal   , "PUWeightTotal/F");
 	fEventTree->Branch("PUWeightInTime"   ,&fTpuWeightInTime  , "PUWeightInTime/F");
+        fEventTree->Branch("MassGlu"            ,&fTMassGlu,      "MassGlu/F");
+        fEventTree->Branch("MassChi"            ,&fTMassChi,      "MassChi/F");
+        fEventTree->Branch("MassLSP"            ,&fTMassLSP,      "MassLSP/F");
 
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");

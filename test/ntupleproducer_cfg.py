@@ -28,11 +28,16 @@ options.register ('runon', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
+options.register ('ModelScan', # register 'runon' option
+                  False,  # the default value
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you are dealing with a model scan, set this to True, otherwise to False (default)")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11-QCD_Pt-300to470_TuneZ2_7TeV_pythia6-AODSIM-PU_S3_START42_V11-v2-0000-4E79FBE4-F37C-E011-B178-003048D4607A.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
-
+options.ModelScan = False
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_42X_'+options.runon+'.root'
@@ -63,6 +68,7 @@ process.source = cms.Source("PoolSource",
       # duplicateCheckMode = cms.untracked.string("noDuplicateCheck")
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
+process.ModelScan = cms.untracked.PSet( input = cms.untracked.bool(options.ModelScan) )
 # Output
 process.TFileService = cms.Service("TFileService",
 # Keep track of the type of data source and reco type in the ntuple file name
@@ -274,6 +280,7 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
+process.analyze.isModelScan = cms.untracked.bool(options.ModelScan)
 
 # Add some jet collections
 process.analyze.jets = (
