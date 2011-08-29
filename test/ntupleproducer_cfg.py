@@ -35,9 +35,8 @@ options.register ('ModelScan', # register 'runon' option
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11-QCD_Pt-300to470_TuneZ2_7TeV_pythia6-AODSIM-PU_S3_START42_V11-v2-0000-4E79FBE4-F37C-E011-B178-003048D4607A.root'
+options.files= 'file:/scratch/buchmann/mSUGRA_m0-20to2000_m12-20to760_tanb-10andA0-0_7TeV-Pythia6Z/AODSIM/PU_S4_START42_V11_FastSim-v1/0021/22AEB6CF-C8A3-E011-81E7-002354EF3BDC.root'
 options.maxEvents = -1 # If it is different from -1, string "_numEventXX" will be added to the output file name
-options.ModelScan = False
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_42X_'+options.runon+'.root'
@@ -107,8 +106,9 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 # process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
 # process.HBHENoiseFilter.maxRBXEMF = cms.double(0.01)
 # the next two lines produce the HCAL noise summary flag with an additional cut on RBX
-process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
-process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
+if not options.ModelScan==True: 
+	process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
+	process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
 
 # ECAL dead cells: this is not a filter. Only a flag is stored.
 from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
@@ -336,6 +336,25 @@ if options.runon == 'data':
 	for pf in pfPostfixes:            
 		getattr(process,'patJetCorrFactors'+pf).levels.extend( ['L2L3Residual'] )
 
+#if options.ModelScan == True:
+#https://twiki.cern.ch/twiki/bin/viewauth/CMSPublic/SWGuideEWKUtilities#Summary	
+# Produce PDF weights (maximum is 3)
+      # Produce PDF weights (maximum is 3)
+#process.pdfWeights = cms.EDProducer("PdfWeightProducer",
+#            # Fix POWHEG if buggy (this PDF set will also appear on output,
+#            # so only two more PDF sets can be added in PdfSetNames if not "")
+#            #FixPOWHEG = cms.untracked.string("cteq66.LHgrid"),
+#            #GenTag = cms.untracked.InputTag("genParticles"),
+#            PdfInfoTag = cms.untracked.InputTag("generator"),
+#            PdfSetNames = cms.untracked.vstring(
+#                    "cteq66.LHgrid"
+#                  , "MRST2006nnlo.LHgrid"
+#                  , "NNPDF10_100.LHgrid"
+#            )
+#)
+
+
+	
 # Add some PF lepton collections
 process.analyze.leptons = (
     # PF Electrons
@@ -433,23 +452,44 @@ process.analyze.leptons = (
 # process.pfMETPF2.src=cms.InputTag("pfNoPileUpPF2")
 #### Path ######################################################################
 
-process.p = cms.Path(
-    process.scrapingVeto * (
-	process.goodVertices
-        + process.HBHENoiseFilterResultProducer
-	+ process.ecalDeadCellTPfilter
-        # + process.EcalAnomalousEventFilter
-	+ process.kt6PFJets
-	+ process.ak5PFJets
-        + process.mygenjets
-        + process.simpleEleIdSequence
-        + process.metCorSequence
-        + process.patPF2PATSequencePFAntiIso
-        + process.patPF2PATSequencePF2
-        + process.patPF2PATSequencePF3
-#	+ process.dump
-        + process.analyze
-        )
+if options.ModelScan == False:
+	process.p = cms.Path(
+		process.scrapingVeto * (
+		process.goodVertices
+        	+ process.HBHENoiseFilterResultProducer
+		+ process.ecalDeadCellTPfilter
+        	# + process.EcalAnomalousEventFilter
+		+ process.kt6PFJets
+		+ process.ak5PFJets
+        	+ process.mygenjets
+        	+ process.simpleEleIdSequence
+        	+ process.metCorSequence
+        	+ process.patPF2PATSequencePFAntiIso
+        	+ process.patPF2PATSequencePF2
+        	+ process.patPF2PATSequencePF3
+#		+ process.pdfWeights
+	#	+ process.dump
+        	+ process.analyze
+        	)
+    )
+else:
+	process.p = cms.Path(
+		process.scrapingVeto * (
+		process.goodVertices
+		+ process.ecalDeadCellTPfilter
+        	# + process.EcalAnomalousEventFilter
+		+ process.kt6PFJets
+		+ process.ak5PFJets
+        	+ process.mygenjets
+        	+ process.simpleEleIdSequence
+        	+ process.metCorSequence
+        	+ process.patPF2PATSequencePFAntiIso
+        	+ process.patPF2PATSequencePF2
+        	+ process.patPF2PATSequencePF3
+#		+ process.pdfWeights
+	#	+ process.dump
+        	+ process.analyze
+        	)
     )
 
 # remove ak5GenJets from the path if it will run on data

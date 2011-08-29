@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.98 2011/07/05 09:02:05 pnef Exp $
+// $Id: NTupleProducer.h,v 1.99 2011/08/24 10:35:24 buchmann Exp $
 //
 //
 
@@ -159,6 +159,10 @@ private:
 	edm::InputTag fHLTTrigEventTag;
 	edm::InputTag fHBHENoiseResultTag;
 	edm::InputTag fSrcRho;
+	edm::InputTag fpdfWeightTag;
+
+	int NPdfs;
+	float fTpdfW[100];
 
 	float fMinmupt;
 	float fMaxmueta;
@@ -247,6 +251,13 @@ private:
         float fTMassGlu;
         float fTMassChi;
         float fTMassLSP;
+        float fTSUSYScanM0;
+        float fTSUSYScanM12;
+        float fTSUSYScanA0;
+        float fTSUSYScanMu;
+        float fTSUSYScanCrossSection;
+        float fTSUSYScanTanBeta;
+
 
 
 	// Pile-up

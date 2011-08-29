@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.126 2011/07/05 09:02:05 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.127 2011/08/24 10:35:24 buchmann Exp $
 //
 //
 
@@ -133,7 +133,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fGenJetTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
 	fL1TriggerTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
 	fHLTTrigEventTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
-	fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
+	if(!fIsModelScan) fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
 
 	// Event Selection
@@ -425,8 +425,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Retrieve HB/HE noise flag
 	edm::Handle<bool> hbHeNoiseFlag;
-	iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
-	fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
+	if(!fIsModelScan) {
+	   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
+	   fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
+	}
 
 	// Get Transient Track Builder
 	ESHandle<TransientTrackBuilder> theB;
@@ -452,7 +454,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTpdfx2       = genEvtInfo->pdf()->x.second;
 		fTpdfxPDF1    = genEvtInfo->pdf()->xPDF.first;
 		fTpdfxPDF2    = genEvtInfo->pdf()->xPDF.second;
-		
+     
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
 		std::vector<PileupSummaryInfo>::const_iterator PVI;
 
@@ -1747,12 +1749,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		float mGL;
 		float mLSP;
 	        float xCHI;
-
 	        for(LHEEventProduct::comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
 	          size_t found = (*cit).find("model");
-
 	          //# model T5zz_0.5_925.0_400.0to1000.0_450.0.lhe
 	          if( found != std::string::npos)   {
+		    // Simplified models
 	            size_t foundLength = (*cit).size();
 	            found = (*cit).find("T5zz");
 	            std::string smaller = (*cit).substr(found+1,foundLength);
@@ -1767,11 +1768,56 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	            iss >> mGL;
 	            iss.clear();
 	            found = smaller.find("_");
+
 	            smaller = smaller.substr(found+1,smaller.size());
 	            iss.str(smaller);
 	            iss >> mLSP;
 	            iss.clear();
-	          }
+
+	            //model msugra_1900_100_10_0_1
+	            float m0,m12,tanb,A0,signMu;
+	            foundLength = (*cit).size();
+	            found = (*cit).find("=");
+	            smaller = (*cit).substr(found+1,foundLength);
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            //
+		    iss.clear();
+	            iss.str(smaller);
+	            iss >> m0;
+	            iss.clear();
+	            //
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> m12;
+	            iss.clear();
+	            //
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> tanb;
+	            iss.clear();
+	            //
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> A0;
+	            iss.clear();
+	            //
+	            found = smaller.find("_");
+	            smaller = smaller.substr(found+1,smaller.size());
+	            iss.str(smaller);
+	            iss >> signMu;
+	            iss.clear();
+
+//std::cout << "m0=" << m0 << " m12=" << m12 << " signMu=" << signMu << " and A0=" << A0 << std::endl;
+		    // mSUGRA scan
+	            fTSUSYScanM0=m0;
+	            fTSUSYScanM12=m12;
+		    fTSUSYScanMu=signMu;
+		    fTSUSYScanA0=A0;
+		  }
 	        }
 	        fTMassGlu = mGL;
 	        fTMassChi = xCHI;
@@ -1862,10 +1908,13 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("HLTObjectPhi"     ,fTHLTObjectPhi[0]  , Form("HLTObjectPhi[%d][%d]/F", fTNpaths, gMaxhltnobjs));
 	fEventTree->Branch("PUWeightTotal"    ,&fTpuWeightTotal   , "PUWeightTotal/F");
 	fEventTree->Branch("PUWeightInTime"   ,&fTpuWeightInTime  , "PUWeightInTime/F");
-        fEventTree->Branch("MassGlu"            ,&fTMassGlu,      "MassGlu/F");
-        fEventTree->Branch("MassChi"            ,&fTMassChi,      "MassChi/F");
-        fEventTree->Branch("MassLSP"            ,&fTMassLSP,      "MassLSP/F");
-
+        fEventTree->Branch("MassGlu"          ,&fTMassGlu         ,"MassGlu/F");
+        fEventTree->Branch("MassChi"          ,&fTMassChi         ,"MassChi/F");
+        fEventTree->Branch("MassLSP"          ,&fTMassLSP         ,"MassLSP/F");
+        fEventTree->Branch("M0"               ,&fTSUSYScanM0      ,"M0/F");
+        fEventTree->Branch("M12"              ,&fTSUSYScanM12     ,"M12/F");
+        fEventTree->Branch("signMu"           ,&fTSUSYScanMu      ,"signMu/F");
+        fEventTree->Branch("A0"               ,&fTSUSYScanA0      ,"A0/F");
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
 	fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/F");
