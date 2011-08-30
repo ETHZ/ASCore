@@ -1,7 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Aug 30 15:43:55 2011 by ROOT version 5.27/06b
-// found on file: ../test/NTupleProducer_42X_MC_numEvent100__SAVE.root
+// Tue Aug 30 19:27:28 2011 by ROOT version 5.27/06b
+// from TTree Analysis/ETHZAnalysisTree
+// found on file: ../test/NTupleProducer_42X_MC.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -32,6 +33,7 @@ public :
    Float_t         ExtXSecLO;
    Float_t         IntXSec;
    Float_t         pdfW[100];
+   Float_t         pdfWsum;
    Int_t           NPdfs;
    Int_t           PUnumInteractions;
    Int_t           PUnumFilled;
@@ -761,6 +763,7 @@ public :
    TBranch        *b_ExtXSecLO;   //!
    TBranch        *b_IntXSec;   //!
    TBranch        *b_pdfW;   //!
+   TBranch        *b_pdfWsum;   //!
    TBranch        *b_NPdfs;   //!
    TBranch        *b_PUnumInteractions;   //!
    TBranch        *b_PUnumFilled;   //!
@@ -1493,9 +1496,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC_numEvent100__SAVE.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC.root");
       if (!f) {
-         f = new TFile("../test/NTupleProducer_42X_MC_numEvent100__SAVE.root");
+         f = new TFile("../test/NTupleProducer_42X_MC.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1561,6 +1564,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ExtXSecLO", &ExtXSecLO, &b_ExtXSecLO);
    fChain->SetBranchAddress("IntXSec", &IntXSec, &b_IntXSec);
    fChain->SetBranchAddress("pdfW", pdfW, &b_pdfW);
+   fChain->SetBranchAddress("pdfWsum", &pdfWsum, &b_pdfWsum);
    fChain->SetBranchAddress("NPdfs", &NPdfs, &b_NPdfs);
    fChain->SetBranchAddress("PUnumInteractions", &PUnumInteractions, &b_PUnumInteractions);
    fChain->SetBranchAddress("PUnumFilled", &PUnumFilled, &b_PUnumFilled);

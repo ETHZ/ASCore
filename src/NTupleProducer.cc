@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.128 2011/08/29 13:43:37 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.129 2011/08/30 08:36:04 buchmann Exp $
 //
 //
 
@@ -543,14 +543,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			double newpdf1_0 = LHAPDF::xfx(x1, Q, id1)/x1;
 			double newpdf2_0 = LHAPDF::xfx(x2, Q, id2)/x2;
-
+			
+			float pdfWsum=0;
 			for(int pdf=1; pdf<= NPdfs; pdf++){
 				LHAPDF::initPDF(pdf);
 				double newpdf1 = LHAPDF::xfx(x1, Q, id1)/x1;
 				double newpdf2 = LHAPDF::xfx(x2, Q, id2)/x2;
 				fTpdfW[pdf] = newpdf1/newpdf1_0*newpdf2/newpdf2_0;
+				pdfWsum+=fTpdfW[pdf];
 			}
-
+			fTpdfWsum=pdfWsum;
 		}
 	} else {
           // Just store the number of primary vertices
@@ -1938,6 +1940,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/F");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	fEventTree->Branch("pdfW"             ,&fTpdfW             ,"pdfW[100]/F");
+	fEventTree->Branch("pdfWsum"          ,&fTpdfWsum          ,"pdfWsum/F");
 	fEventTree->Branch("NPdfs"            ,&NPdfs              ,"NPdfs/I");
 
 	// Pile-Up information:
