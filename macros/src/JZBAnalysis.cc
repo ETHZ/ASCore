@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.50 $";
+string sjzbversion="$Revision: 1.51 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.51  2011/08/30 14:06:38  buchmann
+Bringing mSUGRA scans to JZB: Parameters introduced, PDF weights implemented for PDF systematics; also had to deactivate some PF variables as they are no longer in the NTuple
+
 Revision 1.50  2011/08/16 12:33:19  buchmann
 Updated trigger paths
 
@@ -262,6 +265,7 @@ public:
   float weight;
   int NPdfs;
   float pdfW[100];
+  float pdfWsum;
   float PUweight;
   bool passed_triggers;
   int trigger_bit;
@@ -284,6 +288,7 @@ void nanoEvent::reset()
 
   is_data=false;
   NPdfs=0;
+  pdfWsum=0;
 
   pt1=0;
   pt2=0;
@@ -719,6 +724,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("M12",&nEvent.M12,"M12/F");
   myTree->Branch("signMu",&nEvent.signMu,"signMu/F");
   myTree->Branch("pdfW",nEvent.pdfW,"pdfW[100]/F");
+  myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
 
   counters[EV].setName("Events");
@@ -868,7 +874,8 @@ void JZBAnalysis::Analyze() {
         nEvent.signMu=fTR->signMu;
         nEvent.M12=fTR->M12;
         nEvent.NPdfs=fTR->NPdfs;
-        for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i]; 
+        for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i];
+	nEvent.pdfWsum=fTR->pdfWsum; 
       }
     }
   // Trigger information
