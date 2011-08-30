@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.127 2011/08/24 10:35:24 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.128 2011/08/29 13:43:37 buchmann Exp $
 //
 //
 
@@ -73,7 +73,7 @@ Implementation:
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
- #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -97,6 +97,24 @@ Implementation:
 
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
+
+#include <map>
+//#include <pair>
+#include <sstream>
+
+namespace LHAPDF {
+  void initPDFSet(const std::string& filename, int member=0);
+  void initPDF(int member=0);
+  int numberPDF(int nset);
+  int numberPDF();
+  void usePDFMember(int nset, int member);
+  double xfx( double x, double Q, int fl);
+  double getXmin(int nset, int member);
+  double getXmax(int nset, int member);
+  double getQ2min(int nset, int member);
+  double getQ2max(int nset, int member);
+  void extrapolate(bool extrapolate=true);
+}
 
 NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	// Main settings
@@ -156,6 +174,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
 	fMaxgenjeteta   = iConfig.getParameter<double>("sel_maxgenjeteta");
 	fMinebrechitE   = iConfig.getParameter<double>("sel_fminebrechitE");
+
+	
+	if(fIsModelScan) {
+		LHAPDF::initPDFSet("cteq66.LHgrid",1);
+		NPdfs = LHAPDF::numberPDF();
+	}
 
 	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
@@ -498,6 +522,35 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		  //const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
 		  MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
 		  MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
+		}
+		if(fIsModelScan) {
+			edm::Handle<GenEventInfoProduct> pdfstuff;
+			if (!iEvent.getByLabel("generator", pdfstuff)) {
+				edm::LogError("PDFWeightProducer") << ">>> PdfInfo not found !!!";
+				return;
+			}
+		
+			float Q = pdfstuff->pdf()->scalePDF;
+			int id1 = pdfstuff->pdf()->id.first;
+			double x1 = pdfstuff->pdf()->x.first;
+			double pdf1 = pdfstuff->pdf()->xPDF.first;
+			int id2 = pdfstuff->pdf()->id.second;
+			double x2 = pdfstuff->pdf()->x.second;
+			double pdf2 = pdfstuff->pdf()->xPDF.second;
+
+			fTpdfW[0]=1;
+			LHAPDF::initPDF(0);
+
+			double newpdf1_0 = LHAPDF::xfx(x1, Q, id1)/x1;
+			double newpdf2_0 = LHAPDF::xfx(x2, Q, id2)/x2;
+
+			for(int pdf=1; pdf<= NPdfs; pdf++){
+				LHAPDF::initPDF(pdf);
+				double newpdf1 = LHAPDF::xfx(x1, Q, id1)/x1;
+				double newpdf2 = LHAPDF::xfx(x2, Q, id2)/x2;
+				fTpdfW[pdf] = newpdf1/newpdf1_0*newpdf2/newpdf2_0;
+			}
+
 		}
 	} else {
           // Just store the number of primary vertices
@@ -1884,6 +1937,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PDFxPDF2"         ,&fTpdfxPDF2        ,"PDFxPDF2/F");
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/F");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
+	fEventTree->Branch("pdfW"             ,&fTpdfW             ,"pdfW[100]/F");
+	fEventTree->Branch("NPdfs"            ,&NPdfs              ,"NPdfs/I");
+
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
 	fEventTree->Branch("PUnumFilled",&fTpuNumFilled,"PUnumFilled/I");

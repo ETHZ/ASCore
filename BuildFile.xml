@@ -1,3 +1,4 @@
+<use   name="lhapdf"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
 <use   name="FWCore/ServiceRegistry"/>
@@ -31,6 +32,7 @@
 <use   name="RecoEcal/EgammaCoreTools"/>
 <use name="PhysicsTools/Utilities"/>
 <use name="SimDataFormats/PileupSummaryInfo"/>
+<use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="boost"/>
 
 <flags   EDM_PLUGIN="1"/>
