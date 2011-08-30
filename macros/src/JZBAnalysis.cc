@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.49 $";
+string sjzbversion="$Revision: 1.50 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.50  2011/08/16 12:33:19  buchmann
+Updated trigger paths
+
 Revision 1.49  2011/08/11 17:03:19  fronga
 Only keep "empty" events for MC.
 
@@ -257,13 +260,18 @@ public:
   float sumJetPt[rMax];
 
   float weight;
+  int NPdfs;
+  float pdfW[100];
   float PUweight;
   bool passed_triggers;
   int trigger_bit;
   float mGlu;
   float mChi;
   float mLSP;
-
+  float M0;
+  float A0;
+  float M12;
+  float signMu;
 };
 
 nanoEvent::nanoEvent(){};
@@ -275,6 +283,7 @@ void nanoEvent::reset()
   phi=0;
 
   is_data=false;
+  NPdfs=0;
 
   pt1=0;
   pt2=0;
@@ -339,6 +348,8 @@ void nanoEvent::reset()
   ch2=-9;
   chid1=0;
   chid2=0;
+
+  for(int i=0;i<100;i++) pdfW[i]=1.0;
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
     jetpt[jCounter]=0; // jets in barrel + endcaps
@@ -462,6 +473,10 @@ void nanoEvent::reset()
   mGlu=0;
   mChi=0;
   mLSP=0;
+  A0=0;
+  M0=0;
+  M12=0;
+  signMu=0;
 }
 
 
@@ -699,6 +714,12 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
   myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
   myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+  myTree->Branch("M0",&nEvent.M0,"M0/F");
+  myTree->Branch("A0",&nEvent.A0,"A0/F");
+  myTree->Branch("M12",&nEvent.M12,"M12/F");
+  myTree->Branch("signMu",&nEvent.signMu,"signMu/F");
+  myTree->Branch("pdfW",nEvent.pdfW,"pdfW[100]/F");
+  myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -842,6 +863,12 @@ void JZBAnalysis::Analyze() {
         nEvent.mGlu=fTR->MassGlu;
         nEvent.mChi=fTR->MassChi;
         nEvent.mLSP=fTR->MassLSP;
+        nEvent.A0=fTR->A0;
+        nEvent.M0=fTR->M0;
+        nEvent.signMu=fTR->signMu;
+        nEvent.M12=fTR->M12;
+        nEvent.NPdfs=fTR->NPdfs;
+        for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i]; 
       }
     }
   // Trigger information
@@ -1468,11 +1495,11 @@ const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
   //VERY TEMPORARY !!!!
   // Basic muon cleaning and ID
   // Acceptance cuts
-  if (pftype==1 && !(fTR->PfMuPt[index] > 10) )       return false;
+//  if (pftype==1 && !(fTR->PfMuPt[index] > 10) )       return false;
   if (pftype==2 && !(fTR->PfMu2Pt[index] > 10) )       return false;
   if (pftype==3 && !(fTR->PfMu3Pt[index] > 10) )       return false;
   counters[MU].fill(" ... PF pt > 10");
-  if (pftype==1 && !(fabs(fTR->PfMuEta[index])<2.4) ) return false;
+//  if (pftype==1 && !(fabs(fTR->PfMuEta[index])<2.4) ) return false;
   if (pftype==2 && !(fabs(fTR->PfMu2Eta[index])<2.4) ) return false;
   if (pftype==3 && !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
   counters[MU].fill(" ... PF |eta| < 2.4");
@@ -1512,19 +1539,19 @@ const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
 
 
 const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
-
+  std::cout << "IF YOU USE THIS FUNCTION YOU NEED TO REVISE IT - PfElPt and other branches are no longer available" << std::endl;
   // kinematic acceptance
-  if(pftype==1&&!(fTR->PfElPt[index]>10) )return false;
+//  if(pftype==1&&!(fTR->PfElPt[index]>10) )return false;
   if(pftype==2&&!(fTR->PfEl2Pt[index]>10) )return false;
   if(pftype==3&&!(fTR->PfEl3Pt[index]>10) )return false;
   counters[EL].fill(" ... PF pt > 10");
-  if(pftype==1&&!(fabs(fTR->PfElEta[index]) < 2.4) ) return false;
+//  if(pftype==1&&!(fabs(fTR->PfElEta[index]) < 2.4) ) return false;
   if(pftype==2&&!(fabs(fTR->PfEl2Eta[index]) < 2.4) ) return false;
   if(pftype==3&&!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[EL].fill(" ... PF |eta| < 2.4");
-  if(pftype==1&&!((fTR->PfElID95[index]))) return false;
-  if(pftype==2&&!((fTR->PfElID95[index]))) return false;
-  if(pftype==3&&!((fTR->PfElID95[index]))) return false;
+//  if(pftype==1&&!((fTR->PfElID95[index]))) return false;
+//  if(pftype==2&&!((fTR->PfElID95[index]))) return false;
+//  if(pftype==3&&!((fTR->PfElID95[index]))) return false;
   //if(!(fTR->PfElID80[index])) return false;
   /*
     if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;

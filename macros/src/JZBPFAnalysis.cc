@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.19 $";
+string sjzbPFversion="$Revision: 1.21 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.21  2011/07/22 06:25:37  buchmann
+Updated implementation of SUSY scan for JZB
+
 Revision 1.19  2011/07/04 11:25:45  buchmann
 Updated trigger versions
 
@@ -1833,13 +1836,13 @@ const bool JZBPFAnalysis::IsCustomPfMu(const int index){
 
 
 const bool JZBPFAnalysis::IsCustomPfEl(const int index){
-
+std::cout << "IF YOU USE THIS FUNCTION YOU SHOULD UPDATE IT!" << std::endl;
   // kinematic acceptance
   if(!(fTR->PfEl3Pt[index]>10) )return false;
   counters[PFEL].fill(" ... PF pt > 10");
   if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
   counters[PFEL].fill(" ... PF |eta| < 2.4");
-  if(!(fTR->PfElID95[index])) return false;
+//  if(!(fTR->PfElID95[index])) return false;
   //if(!(fTR->PfElID80[index])) return false;
 /*
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
