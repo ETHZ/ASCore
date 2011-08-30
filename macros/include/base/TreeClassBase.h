@@ -1,8 +1,16 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
+<<<<<<< TreeClassBase.h
+// Tue Aug 30 15:43:55 2011 by ROOT version 5.27/06b
+=======
 // Wed Jul 13 15:31:35 2011 by ROOT version 5.27/06b
+>>>>>>> 1.33
 // from TTree Analysis/ETHZAnalysisTree
+<<<<<<< TreeClassBase.h
+// found on file: ../test/NTupleProducer_42X_MC_numEvent100__SAVE.root
+=======
 // found on file: /shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root
+>>>>>>> 1.33
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -32,6 +40,8 @@ public :
    Float_t         PDFxPDF2;
    Float_t         ExtXSecLO;
    Float_t         IntXSec;
+   Float_t         pdfW[100];
+   Int_t           NPdfs;
    Int_t           PUnumInteractions;
    Int_t           PUnumFilled;
    Int_t           PUOOTnumInteractionsEarly;
@@ -52,8 +62,20 @@ public :
    Float_t         HLTObjectPt[7][10];
    Float_t         HLTObjectEta[7][10];
    Float_t         HLTObjectPhi[7][10];
+<<<<<<< TreeClassBase.h
    Float_t         PUWeightTotal;
    Float_t         PUWeightInTime;
+   Float_t         MassGlu;
+   Float_t         MassChi;
+   Float_t         MassLSP;
+   Float_t         M0;
+   Float_t         M12;
+   Float_t         signMu;
+   Float_t         A0;
+=======
+   Float_t         PUWeightTotal;
+   Float_t         PUWeightInTime;
+>>>>>>> 1.33
    Int_t           PrimVtxGood;
    Float_t         PrimVtxx;
    Float_t         PrimVtxy;
@@ -752,6 +774,8 @@ public :
    TBranch        *b_PDFxPDF2;   //!
    TBranch        *b_ExtXSecLO;   //!
    TBranch        *b_IntXSec;   //!
+   TBranch        *b_pdfW;   //!
+   TBranch        *b_NPdfs;   //!
    TBranch        *b_PUnumInteractions;   //!
    TBranch        *b_PUnumFilled;   //!
    TBranch        *b_PUOOTnumInteractionsEarly;   //!
@@ -772,8 +796,20 @@ public :
    TBranch        *b_HLTObjectPt;   //!
    TBranch        *b_HLTObjectEta;   //!
    TBranch        *b_HLTObjectPhi;   //!
+<<<<<<< TreeClassBase.h
    TBranch        *b_PUWeightTotal;   //!
    TBranch        *b_PUWeightInTime;   //!
+   TBranch        *b_MassGlu;   //!
+   TBranch        *b_MassChi;   //!
+   TBranch        *b_MassLSP;   //!
+   TBranch        *b_M0;   //!
+   TBranch        *b_M12;   //!
+   TBranch        *b_signMu;   //!
+   TBranch        *b_A0;   //!
+=======
+   TBranch        *b_PUWeightTotal;   //!
+   TBranch        *b_PUWeightInTime;   //!
+>>>>>>> 1.33
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -1476,9 +1512,17 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
+<<<<<<< TreeClassBase.h
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC_numEvent100__SAVE.root");
+=======
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
+>>>>>>> 1.33
       if (!f) {
+<<<<<<< TreeClassBase.h
+         f = new TFile("../test/NTupleProducer_42X_MC_numEvent100__SAVE.root");
+=======
          f = new TFile("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
+>>>>>>> 1.33
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1543,6 +1587,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PDFxPDF2", &PDFxPDF2, &b_PDFxPDF2);
    fChain->SetBranchAddress("ExtXSecLO", &ExtXSecLO, &b_ExtXSecLO);
    fChain->SetBranchAddress("IntXSec", &IntXSec, &b_IntXSec);
+   fChain->SetBranchAddress("pdfW", pdfW, &b_pdfW);
+   fChain->SetBranchAddress("NPdfs", &NPdfs, &b_NPdfs);
    fChain->SetBranchAddress("PUnumInteractions", &PUnumInteractions, &b_PUnumInteractions);
    fChain->SetBranchAddress("PUnumFilled", &PUnumFilled, &b_PUnumFilled);
    fChain->SetBranchAddress("PUOOTnumInteractionsEarly", &PUOOTnumInteractionsEarly, &b_PUOOTnumInteractionsEarly);
@@ -1563,8 +1609,20 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLTObjectPt", HLTObjectPt, &b_HLTObjectPt);
    fChain->SetBranchAddress("HLTObjectEta", HLTObjectEta, &b_HLTObjectEta);
    fChain->SetBranchAddress("HLTObjectPhi", HLTObjectPhi, &b_HLTObjectPhi);
+<<<<<<< TreeClassBase.h
    fChain->SetBranchAddress("PUWeightTotal", &PUWeightTotal, &b_PUWeightTotal);
    fChain->SetBranchAddress("PUWeightInTime", &PUWeightInTime, &b_PUWeightInTime);
+   fChain->SetBranchAddress("MassGlu", &MassGlu, &b_MassGlu);
+   fChain->SetBranchAddress("MassChi", &MassChi, &b_MassChi);
+   fChain->SetBranchAddress("MassLSP", &MassLSP, &b_MassLSP);
+   fChain->SetBranchAddress("M0", &M0, &b_M0);
+   fChain->SetBranchAddress("M12", &M12, &b_M12);
+   fChain->SetBranchAddress("signMu", &signMu, &b_signMu);
+   fChain->SetBranchAddress("A0", &A0, &b_A0);
+=======
+   fChain->SetBranchAddress("PUWeightTotal", &PUWeightTotal, &b_PUWeightTotal);
+   fChain->SetBranchAddress("PUWeightInTime", &PUWeightInTime, &b_PUWeightInTime);
+>>>>>>> 1.33
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
