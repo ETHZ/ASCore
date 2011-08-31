@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   int maxEvents=-1;
   int whichanalysis=1;
   string type = "data";
-
+  bool type_is_set=false;
   // Parse options
   char ch;
   while ((ch = getopt(argc, argv, "o:v:n:j:t:lMh?cp:P:a:")) != -1 ) {
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     case 'h': usage(0); break;
     case 'n': maxEvents = atoi(optarg); break;
     case 'j': jsonFileName = string(optarg); break;
-    case 't': type = string(optarg); break;
+    case 't': type = string(optarg); type_is_set=true; break;
     case 'c': fullCleaning = true; break;
     case 'p': data_PileUp     = string(optarg); break;
     case 'P': mc_PileUp       = string(optarg); break;
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
       usage(-1);
     }
   }
-
+  if(isModelScan&&!type_is_set) type="mc";
   argc -= optind;
   argv += optind;
 
