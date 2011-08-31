@@ -3,8 +3,6 @@
 #include <TTree.h>
 #include <TString.h>
 #include <sstream>
-#include <stdio.h>
-#include <assert.h>
 
 using namespace std;
 
@@ -59,12 +57,9 @@ void TreeAnalyzerBase::PrintProgress(Long64_t entry){
 
 // ---------------------------------
 // JSON stuff
-
 void TreeAnalyzerBase::ReadJSON(const char* JSONpath){
 	string line;	
 	ifstream JSON (JSONpath);
-	if(!JSON) cout << "ERROR : JSON FILE DOES NOT EXIST" << endl;
-	assert(JSON);
 	if (JSON.is_open()){
 		getline (JSON,line);
 	}
