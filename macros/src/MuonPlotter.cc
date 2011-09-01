@@ -16,6 +16,7 @@
 
 #include "TWbox.h"
 #include "TMultiGraph.h"
+#include "TGaxis.h"
 
 #include <iomanip>
 #include <time.h> // access to date/time
@@ -29,7 +30,6 @@ static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
-static const TEfficiency::EStatOption gStatOpt = TEfficiency::kBBayesian; // kBBayesian (alpha, beta), kBUniform (1,1), kBJeffrey (0.5, 0.5)
 static const double gStatBetaAlpha = 1.;
 static const double gStatBetaBeta  = 1.;
 
@@ -47,15 +47,21 @@ float MuonPlotter::Region::maxMet  [MuonPlotter::gNREGIONS] = {      7000.,     
 int   MuonPlotter::Region::minNjets[MuonPlotter::gNREGIONS] = {        2  ,             2  ,          2  ,          2  ,           2  ,          2  ,           2  };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-double MuonPlotter::gMuPtbins [gNMuPtbins+1]  = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gMuPt2bins[gNMuPt2bins+1] = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.5, 2.4};
+double MuonPlotter::gMuPtbins [gNMuPtbins+1]  = {5., 10., 15., 20., 25., 35., 45, 60.};
+double MuonPlotter::gMuPt2bins[gNMuPt2bins+1] = {5., 10., 15., 20., 25., 35., 45, 60.};
+// double MuonPlotter::gMuPtbins [gNMuPtbins+1]  = {10., 20., 30., 40., 50., 60.};
+// double MuonPlotter::gMuPt2bins[gNMuPt2bins+1] = {10., 20., 30., 40., 50., 60.};
+double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {0., 1.0, 1.479, 2.0, 2.5};
+// double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.5, 2.4};
 // double MuonPlotter::gMuEtabins[gNMuEtabins+1] = {-2.4, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.4};
 
 // Electron Binning //////////////////////////////////////////////////////////////
-double MuonPlotter::gElPtbins [gNElPtbins+1]  = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gElPt2bins[gNElPt2bins+1] = {10., 20., 30., 40., 50., 60.};
-double MuonPlotter::gElEtabins[gNElEtabins+1] = {0., 0.85, 1.5, 2.4};
+double MuonPlotter::gElPtbins [gNElPtbins+1]  = {10., 15., 20., 25., 35., 55.};
+double MuonPlotter::gElPt2bins[gNElPt2bins+1] = {10., 15., 20., 25., 35., 55.};
+// double MuonPlotter::gElPtbins [gNElPtbins+1]  = {10., 20., 30., 40., 50., 60.};
+// double MuonPlotter::gElPt2bins[gNElPt2bins+1] = {10., 20., 30., 40., 50., 60.};
+double MuonPlotter::gElEtabins[gNElEtabins+1] = {0., 1.0, 1.479, 2.0, 2.5};
+// double MuonPlotter::gElEtabins[gNElEtabins+1] = {0., 0.85, 1.5, 2.4};
 // double MuonPlotter::gElEtabins[gNElEtabins+1] = {-2.4, -1.5, -0.85, 0., 0.85, 1.5, 2.4};
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -147,6 +153,7 @@ void MuonPlotter::init(TString filename){
 	if(fVerbose > 0) if(fChargeSwitch == 1) cout << " ... using opposite-sign charge selection" << endl;
 
 	Util::SetStyle();
+	// gROOT->SetStyle("Plain");
 	readSamples(filename);
 	readVarNames("anavarnames.dat");
 	fOutputFileName = fOutputDir + "Yields.root";
@@ -179,21 +186,21 @@ void MuonPlotter::init(TString filename){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
-	fMCBG.push_back(TTJets);
-	fMCBG.push_back(TJets_t);
-	fMCBG.push_back(TJets_tW);
-	fMCBG.push_back(TJets_s);
-	fMCBG.push_back(WJets);
-	fMCBG.push_back(DYJets10to50);
-	fMCBG.push_back(DYJets50);
-	fMCBG.push_back(GJets40);
-	fMCBG.push_back(GJets100);
-	fMCBG.push_back(GJets200);
-	fMCBG.push_back(WW);
-	fMCBG.push_back(WZ);
-	fMCBG.push_back(ZZ);
-	// fMCBG.push_back(VVTo4L);
-	fMCBG.push_back(GVJets);
+	// fMCBG.push_back(TTJets);
+	// fMCBG.push_back(TJets_t);
+	// fMCBG.push_back(TJets_tW);
+	// fMCBG.push_back(TJets_s);
+	// fMCBG.push_back(WJets);
+	// fMCBG.push_back(DYJets10to50);
+	// fMCBG.push_back(DYJets50);
+	// fMCBG.push_back(GJets40);
+	// fMCBG.push_back(GJets100);
+	// fMCBG.push_back(GJets200);
+	// fMCBG.push_back(WW);
+	// fMCBG.push_back(WZ);
+	// fMCBG.push_back(ZZ);
+	// // fMCBG.push_back(VVTo4L);
+	// fMCBG.push_back(GVJets);
 
 	// fMCBG.push_back(QCD5);
 	// fMCBG.push_back(QCD15);
@@ -210,7 +217,7 @@ void MuonPlotter::init(TString filename){
 	// fMCBG.push_back(QCD1400);
 	// fMCBG.push_back(QCD1800);
 
-	// fMCBG.push_back(QCD50MG);
+	fMCBG.push_back(QCD50MG);
 	fMCBG.push_back(QCD100MG);
 	fMCBG.push_back(QCD250MG);
 	fMCBG.push_back(QCD500MG);
@@ -222,21 +229,21 @@ void MuonPlotter::init(TString filename){
 	fMCBGSig = fMCBG;
 	fMCBGSig.push_back(LM6);
 
-	fMCBGMuEnr.push_back(TTJets);
-	fMCBGMuEnr.push_back(TJets_t);
-	fMCBGMuEnr.push_back(TJets_tW);
-	fMCBGMuEnr.push_back(TJets_s);
-	fMCBGMuEnr.push_back(WJets);
-	fMCBGMuEnr.push_back(DYJets10to50);
-	fMCBGMuEnr.push_back(DYJets50);
-	fMCBGMuEnr.push_back(GJets40);
-	fMCBGMuEnr.push_back(GJets100);
-	fMCBGMuEnr.push_back(GJets200);
-	fMCBGMuEnr.push_back(WW);
-	fMCBGMuEnr.push_back(WZ);
-	fMCBGMuEnr.push_back(ZZ);
-	// fMCBGMuEnr.push_back(VVTo4L);
-	fMCBGMuEnr.push_back(GVJets);
+	// fMCBGMuEnr.push_back(TTJets);
+	// fMCBGMuEnr.push_back(TJets_t);
+	// fMCBGMuEnr.push_back(TJets_tW);
+	// fMCBGMuEnr.push_back(TJets_s);
+	// fMCBGMuEnr.push_back(WJets);
+	// fMCBGMuEnr.push_back(DYJets10to50);
+	// fMCBGMuEnr.push_back(DYJets50);
+	// fMCBGMuEnr.push_back(GJets40);
+	// fMCBGMuEnr.push_back(GJets100);
+	// fMCBGMuEnr.push_back(GJets200);
+	// fMCBGMuEnr.push_back(WW);
+	// fMCBGMuEnr.push_back(WZ);
+	// fMCBGMuEnr.push_back(ZZ);
+	// // fMCBGMuEnr.push_back(VVTo4L);
+	// fMCBGMuEnr.push_back(GVJets);
 	fMCBGMuEnr.push_back(QCDMuEnr10);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
@@ -457,17 +464,18 @@ const double *MuonPlotter::getEtaBins (gChannel chan){
 
 //____________________________________________________________________________
 void MuonPlotter::doAnalysis(){
+	sandBox();
+	return;
+	
+	if(readHistos(fOutputFileName) != 0) return;
+	fLumiNorm = 976.;
+
 	// sandBox();
+	// makePileUpPlots();
 	// printSyncExercise();
 	// makeIsoVsMETPlot(QCDMuEnr10);
 	// makeIsoVsMETPlot(DoubleMu2);
 	
-	if(readHistos(fOutputFileName) != 0) return;
-	// fLumiNorm = 349.;
-	// fLumiNorm = 869.;
-	fLumiNorm = 976.;
-	// fLumiNorm = 1000.;
-
 	// makeHWWPlots();
 
 	// printOrigins();
@@ -479,19 +487,22 @@ void MuonPlotter::doAnalysis(){
 	// makeMETvsHTPlotCustom();
 	// makeMETvsHTPlotTau();
 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Electron);
-
+	makeRatioPlots(Muon);
+	makeRatioPlots(Electron);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Electron);
+	
 	// makeFRvsPtPlots(Muon,     SigSup);
 	// makeFRvsPtPlots(Electron, SigSup);
 	// makeFRvsPtPlots(Muon,     ZDecay);
 	// makeFRvsPtPlots(Electron, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Electron);
-	makeFRvsPtPlotsForPAS(Muon,     SigSup);
-	makeFRvsPtPlotsForPAS(Electron, SigSup);
-	makeFRvsEtaPlotsForPAS(Muon);
-	makeFRvsEtaPlotsForPAS(Electron);
+
+	// makeFRvsPtPlotsForPAS(Muon);
+	// makeFRvsPtPlotsForPAS(Electron);
+	// makeFRvsEtaPlotsForPAS(Muon);
+	// makeFRvsEtaPlotsForPAS(Electron);
 
 	// makeMufRatioPlots(false);
 	// makeMupRatioPlots(false);
@@ -525,27 +536,327 @@ void MuonPlotter::doAnalysis(){
 	// }
 	// fOUTSTREAM.close();
 	// fOUTSTREAM2.close();
-
+	// 
 	// makeIntMCClosure( fOutputDir + "MCClosure.txt");	
 	// makeTTbarClosure();
-	cout << endl;
+	// cout << endl;
 }
 
 //____________________________________________________________________________
 void MuonPlotter::sandBox(){
-	FakeRatios *FR = new FakeRatios();
-	FR->setMFRatio(0.08, 0.008);
-	FR->setEFRatio(0.12, 0.012);
-	FR->setMPRatio(0.95, 0.095);
-	FR->setEPRatio(0.80, 0.080);
+	fOutputSubDir = "sandbox/";
+	vector<int> samples;
+	// samples.push_back(DoubleMu1);
+	samples.push_back(DoubleMu2);
+	// samples.push_back(QCDMuEnr10);
 
-	FR->setMMNtl(6., 54., 23.);
-	FR->setEENtl(5., 45., 43.);
-	FR->setEMNtl(6., 46., 64., 53.);
+	TH1D *hdphi1_da = new TH1D("hdphi1_da", "hdphi1_da", 20, 0., 3.1416);
+	TH1D *hdphi2_da = new TH1D("hdphi2_da", "hdphi2_da", 20, 0., 3.1416);
+	TH1D *hdphi1_mc = new TH1D("hdphi1_mc", "hdphi1_mc", 20, 0., 3.1416);
+	TH1D *hdphi2_mc = new TH1D("hdphi2_mc", "hdphi2_mc", 20, 0., 3.1416);
 	
-	cout << "MM " << FR->getMMNpf() << " " << FR->getMMNff() << " - Total: " << FR->getMMTotFakes() << " vs " << FR->getMMNpf() + FR->getMMNff() << endl;
-	cout << "EM " << FR->getEMNfp() << " " << FR->getEMNfp() << " " << FR->getEMNff() << " - Total: " << FR->getEMTotFakes() << " vs " << FR->getEMNpf() + FR->getEMNfp() + FR->getEMNff() << endl;
+	hdphi1_da->Sumw2();
+	hdphi2_da->Sumw2();
+	hdphi1_mc->Sumw2();
+	hdphi2_mc->Sumw2();
 	
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
+		
+		TTree *tree = S->tree;		
+		tree->ResetBranchAddresses();
+		if(S->datamc < 1) Init(tree);
+		if(S->datamc > 0) InitMC(tree);
+		for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
+			tree->GetEntry(jentry);
+			printProgress(jentry, tree->GetEntriesFast(), S->name);
+
+			if(singleMuTrigger() && isSigSupMuEvent()){
+				setHypLepton1(0, Muon);
+				int jind = getClosestJet(0, Muon);
+				float dphi = Util::GetDeltaR(MuEta[0], JetEta[jind], MuPhi[0], JetPhi[jind]);
+				if(getNJets() == 1){
+					if(S->datamc == 0) hdphi1_da->Fill(dphi, singleMuPrescale());
+					if(S->datamc > 0 ) hdphi1_mc->Fill(dphi);
+				}
+				if(getNJets() > 1){
+					if(S->datamc == 0) hdphi2_da->Fill(dphi, singleMuPrescale());
+					if(S->datamc > 0 ) hdphi2_mc->Fill(dphi);					
+				}
+			}
+		}
+	}
+	
+	printObject(hdphi1_da, "DR_1Jet_Data", "PEX");
+	printObject(hdphi2_da, "DR_2Jet_Data", "PEX");
+	// printObject(hdphi1_mc, "DPhi_1Jet_MC", "PEX");
+	// printObject(hdphi2_mc, "DPhi_2Jet_MC", "PEX");
+}
+
+//____________________________________________________________________________
+void MuonPlotter::makePileUpPlots(){
+	fOutputSubDir = "PileUp/";
+	bool write = false;
+
+	TH1D *smu_nvertices, *dmu_nvertices, *sel_nvertices, *del_nvertices, *mue_nvertices;
+	TH1D *mu_ntight, *mu_nloose, *mu_ratio, *el_ntight, *el_nloose, *el_ratio;
+
+	if(!write){
+		TFile *file = TFile::Open(fOutputDir + fOutputSubDir + "histos.root");
+		smu_nvertices = (TH1D*)file->Get("smu_nvertices");
+		dmu_nvertices = (TH1D*)file->Get("dmu_nvertices");
+		sel_nvertices = (TH1D*)file->Get("sel_nvertices");
+		del_nvertices = (TH1D*)file->Get("del_nvertices");
+		mue_nvertices = (TH1D*)file->Get("mue_nvertices");
+		mu_ratio      = (TH1D*)file->Get("mu_ratio");
+		el_ratio      = (TH1D*)file->Get("el_ratio");
+	}
+	else{
+		vector<gSample> samples;
+		samples.push_back(DoubleMu1);
+		samples.push_back(DoubleMu2);
+		samples.push_back(MuEG1);
+		samples.push_back(MuEG2);
+		samples.push_back(DoubleEle1);
+		samples.push_back(DoubleEle2);
+
+		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		sel_nvertices = new TH1D("sel_nvertices", "sel_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		del_nvertices = new TH1D("del_nvertices", "del_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		mue_nvertices = new TH1D("mue_nvertices", "mue_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+
+		mu_ntight = new TH1D("mu_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		mu_nloose = new TH1D("mu_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		mu_ratio  = new TH1D("mu_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		el_ntight = new TH1D("el_ntight", "ntight", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		el_nloose = new TH1D("el_nloose", "nloose", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+		el_ratio  = new TH1D("el_ratio",  "ratio",  FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
+
+		mu_ntight    ->Sumw2();
+		mu_nloose    ->Sumw2();
+		mu_ratio     ->Sumw2();
+		el_ntight    ->Sumw2();
+		el_nloose    ->Sumw2();
+		el_ratio     ->Sumw2();
+		smu_nvertices->Sumw2();
+		dmu_nvertices->Sumw2();
+		sel_nvertices->Sumw2();
+		del_nvertices->Sumw2();
+		mue_nvertices->Sumw2();
+		mu_ntight    ->SetXTitle("N_{Vertices}");
+		mu_nloose    ->SetXTitle("N_{Vertices}");
+		mu_ratio     ->SetXTitle("N_{Vertices}");
+		el_ntight    ->SetXTitle("N_{Vertices}");
+		el_nloose    ->SetXTitle("N_{Vertices}");
+		el_ratio     ->SetXTitle("N_{Vertices}");
+		smu_nvertices->SetXTitle("N_{Vertices}");
+		dmu_nvertices->SetXTitle("N_{Vertices}");
+		sel_nvertices->SetXTitle("N_{Vertices}");
+		del_nvertices->SetXTitle("N_{Vertices}");
+		mue_nvertices->SetXTitle("N_{Vertices}");
+		mu_ntight    ->SetYTitle("N_{Events}");
+		mu_nloose    ->SetYTitle("N_{Events}");
+		mu_ratio     ->SetYTitle("N_{Events}");
+		el_ntight    ->SetYTitle("N_{Events}");
+		el_nloose    ->SetYTitle("N_{Events}");
+		el_ratio     ->SetYTitle("N_{Events}");
+		smu_nvertices->SetYTitle("N_{Events}");
+		dmu_nvertices->SetYTitle("N_{Events}");
+		sel_nvertices->SetYTitle("N_{Events}");
+		del_nvertices->SetYTitle("N_{Events}");
+		mue_nvertices->SetYTitle("N_{Events}");
+		mu_ntight    ->GetYaxis()->SetTitleOffset(1.2);
+		mu_nloose    ->GetYaxis()->SetTitleOffset(1.2);
+		mu_ratio     ->GetYaxis()->SetTitleOffset(1.2);
+		el_ntight    ->GetYaxis()->SetTitleOffset(1.2);
+		el_nloose    ->GetYaxis()->SetTitleOffset(1.2);
+		el_ratio     ->GetYaxis()->SetTitleOffset(1.2);
+		smu_nvertices->GetYaxis()->SetTitleOffset(1.2);
+		dmu_nvertices->GetYaxis()->SetTitleOffset(1.2);
+		sel_nvertices->GetYaxis()->SetTitleOffset(1.2);
+		del_nvertices->GetYaxis()->SetTitleOffset(1.2);
+		mue_nvertices->GetYaxis()->SetTitleOffset(1.2);
+
+		for(size_t i = 0; i < samples.size(); ++i){
+			Sample *S = fSamples[samples[i]];
+			fCurrentSample = samples[i];
+			resetHypLeptons();
+			fDoCounting = false;
+		
+			TTree *tree = S->tree;
+			tree->ResetBranchAddresses();
+			if(S->datamc < 1) Init(tree);
+			if(S->datamc > 0) InitMC(tree);
+			for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
+				tree->GetEntry(jentry);
+				printProgress(jentry, tree->GetEntriesFast(), S->name);
+
+				if(mumuSignalTrigger()) dmu_nvertices->Fill(NVrtx);
+				if(elelSignalTrigger()) del_nvertices->Fill(NVrtx);
+				if(elmuSignalTrigger()) mue_nvertices->Fill(NVrtx);
+				if(singleMuTrigger()){
+					smu_nvertices->Fill(NVrtx);
+					if(isSigSupMuEvent()){
+						if(isTightMuon(0)) mu_ntight->Fill(NVrtx);
+						if(isLooseMuon(0)) mu_nloose->Fill(NVrtx);					
+					}
+				}
+				resetHypLeptons();
+				if(singleElTrigger()){
+					sel_nvertices->Fill(NVrtx);
+				 	if(isSigSupElEvent()){
+						if(isTightElectron(0)) el_ntight->Fill(NVrtx);
+						if(isLooseElectron(0)) el_nloose->Fill(NVrtx);
+					}
+				}
+			}
+		}
+	
+		mu_ratio->Divide(mu_ntight, mu_nloose, 1., 1., "B");
+		mu_ratio->GetYaxis()->SetRangeUser(0., 0.4);
+		el_ratio->Divide(el_ntight, el_nloose, 1., 1., "B");
+		el_ratio->GetYaxis()->SetRangeUser(0., 0.4);
+
+		dmu_nvertices->Scale(1./dmu_nvertices->Integral());
+		smu_nvertices->Scale(1./smu_nvertices->Integral());
+		del_nvertices->Scale(1./del_nvertices->Integral());
+		sel_nvertices->Scale(1./sel_nvertices->Integral());
+		mue_nvertices->Scale(1./mue_nvertices->Integral());
+
+	}
+
+	mu_ratio     ->SetYTitle("N_{Events} (Normalized)");
+	el_ratio     ->SetYTitle("N_{Events} (Normalized)");
+	smu_nvertices->SetYTitle("N_{Events} (Normalized)");
+	dmu_nvertices->SetYTitle("N_{Events} (Normalized)");
+	sel_nvertices->SetYTitle("N_{Events} (Normalized)");
+	del_nvertices->SetYTitle("N_{Events} (Normalized)");
+	mue_nvertices->SetYTitle("N_{Events} (Normalized)");
+
+	mu_ratio     ->GetYaxis()->SetTitleOffset(1.3);
+	el_ratio     ->GetYaxis()->SetTitleOffset(1.3);
+	smu_nvertices->GetYaxis()->SetTitleOffset(1.3);
+	dmu_nvertices->GetYaxis()->SetTitleOffset(1.3);
+	sel_nvertices->GetYaxis()->SetTitleOffset(1.3);
+	del_nvertices->GetYaxis()->SetTitleOffset(1.3);
+	mue_nvertices->GetYaxis()->SetTitleOffset(1.3);
+
+	// Color_t colors[6] = {1, 1, 1, 1, 1, 1};
+	Color_t colors[5] = {31, 41, 51, 61, 81};
+	// Color_t colors[6] = {1, 12, 39, 38, 32, 30};//, 29};
+	Style_t styles[6] = {24, 25, 26, 27, 32, 30};//, 29};
+
+	// dmu_nvertices->SetMarkerStyle(styles[0]);
+	// smu_nvertices->SetMarkerStyle(styles[1]);
+	// del_nvertices->SetMarkerStyle(styles[2]);
+	// sel_nvertices->SetMarkerStyle(styles[3]);
+	// mue_nvertices->SetMarkerStyle(styles[4]);
+	// dmu_nvertices->SetMarkerColor(colors[0]);
+	// smu_nvertices->SetMarkerColor(colors[1]);
+	// del_nvertices->SetMarkerColor(colors[2]);
+	// sel_nvertices->SetMarkerColor(colors[3]);
+	// mue_nvertices->SetMarkerColor(colors[4]);
+	dmu_nvertices->SetLineColor(colors[0]);
+	smu_nvertices->SetLineColor(colors[1]);
+	del_nvertices->SetLineColor(colors[2]);
+	sel_nvertices->SetLineColor(colors[3]);
+	mue_nvertices->SetLineColor(colors[4]);
+	// dmu_nvertices->SetMarkerSize(1.5);
+	// smu_nvertices->SetMarkerSize(1.5);
+	// del_nvertices->SetMarkerSize(1.5);
+	// sel_nvertices->SetMarkerSize(1.5);
+	// mue_nvertices->SetMarkerSize(1.5);
+	dmu_nvertices->SetLineWidth(2);
+	smu_nvertices->SetLineWidth(2);
+	del_nvertices->SetLineWidth(2);
+	sel_nvertices->SetLineWidth(2);
+	mue_nvertices->SetLineWidth(2);
+	dmu_nvertices->SetFillStyle(0);
+	smu_nvertices->SetFillStyle(0);
+	del_nvertices->SetFillStyle(0);
+	sel_nvertices->SetFillStyle(0);
+	mue_nvertices->SetFillStyle(0);
+
+	dmu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+	smu_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+	del_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+	sel_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+	mue_nvertices->GetYaxis()->SetRangeUser(0., 0.4);
+
+	mu_ratio->SetMarkerStyle(20);
+	mu_ratio->SetMarkerColor(kBlue);
+	mu_ratio->SetLineColor(kBlue);
+	mu_ratio->SetMarkerSize(1.8);
+	mu_ratio->SetLineWidth(2);
+	el_ratio->SetMarkerStyle(21);
+	el_ratio->SetMarkerColor(kRed);
+	el_ratio->SetLineColor(kRed);
+	el_ratio->SetMarkerSize(1.8);
+	el_ratio->SetLineWidth(2);
+
+	// printObject(mu_ratio, "MuRatio", "PEX");
+	// printObject(el_ratio, "ElRatio", "PEX");
+	// printObject(dmu_nvertices, "NVertices_DMu", "L");
+	// printObject(smu_nvertices, "NVertices_SMu", "L");
+	// printObject(del_nvertices, "NVertices_DEl", "L");
+	// printObject(sel_nvertices, "NVertices_SEl", "L");
+	// printObject(mue_nvertices, "NVertices_MuE", "L");
+
+	// TLegend *leg = new TLegend(0.35,0.15,0.70,0.40);
+	TLegend *leg = new TLegend(0.50,0.60,0.88,0.88);
+	leg->AddEntry(dmu_nvertices, Form("DoubleMu Trig., Mean = %4.2f", dmu_nvertices->GetMean()),  "l");
+	leg->AddEntry(smu_nvertices, Form("SingleMu Trig., Mean = %4.2f", smu_nvertices->GetMean()),  "l");
+	leg->AddEntry(del_nvertices, Form("DoubleEle Trig., Mean = %4.2f", del_nvertices->GetMean()), "l");
+	leg->AddEntry(sel_nvertices, Form("SingleEle Trig., Mean = %4.2f", sel_nvertices->GetMean()), "l");
+	leg->AddEntry(mue_nvertices, Form("MuEle Trig., Mean = %4.2f", mue_nvertices->GetMean()),   "l");
+	leg->AddEntry(mu_ratio, Form("TL Ratio (Muons)"), "p");
+	leg->AddEntry(el_ratio, Form("TL Ratio (Electrons)"),  "p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	// leg->SetTextSize(0.03);
+	leg->SetBorderSize(0);
+
+	TCanvas *c_temp = new TCanvas("C_temp", "HT vs MET in Data vs MC", 0, 0, 800, 600);
+	c_temp->cd();
+	dmu_nvertices->Draw("axis");
+	dmu_nvertices->DrawCopy("hist L same");
+	smu_nvertices->DrawCopy("hist L same");
+	del_nvertices->DrawCopy("hist L same");
+	sel_nvertices->DrawCopy("hist L same");
+	mue_nvertices->DrawCopy("hist L same");
+	mu_ratio->DrawCopy("PE X0 same");
+	el_ratio->DrawCopy("PE X0 same");
+	TGaxis *axis = new TGaxis(18, 0, 18, 0.4, 0, 0.4, 510, "+L");
+	axis->SetLabelFont(42);
+	axis->SetTitleFont(42);
+	axis->SetTitleOffset(1.2);
+	axis->SetTitle("TL Ratio");
+	axis->Draw();
+	leg->Draw();
+	drawTopLine();
+	// fLatex->DrawLatex(0.10,0.92, fSamples[sample]->name);
+	Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, "PileUp", fOutputDir + fOutputSubDir);
+
+	if(write){
+		TFile *file = new TFile(fOutputDir + fOutputSubDir + "histos.root", "RECREATE");
+		mu_ratio->Write(mu_ratio->GetName(), TObject::kWriteDelete);
+		el_ratio->Write(el_ratio->GetName(), TObject::kWriteDelete);
+		dmu_nvertices->Write(dmu_nvertices->GetName(), TObject::kWriteDelete);
+		smu_nvertices->Write(smu_nvertices->GetName(), TObject::kWriteDelete);
+		del_nvertices->Write(del_nvertices->GetName(), TObject::kWriteDelete);
+		sel_nvertices->Write(sel_nvertices->GetName(), TObject::kWriteDelete);
+		mue_nvertices->Write(mue_nvertices->GetName(), TObject::kWriteDelete);
+		file->Close();
+	}
+
+	// Cleanup
+	delete leg, c_temp;
+	if(write) delete mu_ntight, mu_nloose, el_ntight, el_nloose, mu_ratio, el_ratio;
+	else delete mu_ratio, el_ratio;
+	delete dmu_nvertices, smu_nvertices, del_nvertices, sel_nvertices, mue_nvertices;
+	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
@@ -2189,11 +2500,6 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
-
 	const float htmax = 750.;
 
 	// Create histograms
@@ -2298,7 +2604,7 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	// sig4y->SetLineStyle(1);
 
 	float legymax = hilo==HighPt?0.54:0.50;
-	TLegend *regleg = new TLegend(0.65,0.37,0.88,legymax);
+	TLegend *regleg = new TLegend(0.70,0.37,0.88,legymax);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
@@ -2337,12 +2643,17 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	
 	leg->Draw();
 	regleg->Draw();
-	// gPad->SetGridx();
-	// gPad->SetGridy();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
-	// lat->DrawLatex(0.31,0.92, "#mu#mu/e#mu/ee");
-	// lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
-	lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	drawTopLine();
+	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	pave->SetFillColor(0);
+	pave->SetFillStyle(1001);
+	pave->SetBorderSize(0);
+	pave->SetMargin(0.05);
+	pave->SetTextFont(42);
+	pave->SetTextSize(0.04);
+	pave->SetTextAlign(12);
+	pave->AddText(hiloname[hilo]);
+	pave->Draw();
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
@@ -2361,11 +2672,6 @@ void MuonPlotter::makeMETvsHTPlotCustom(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
-
 	const float htmax = 750.;
 
 	// Create histograms
@@ -2484,7 +2790,7 @@ void MuonPlotter::makeMETvsHTPlotCustom(){
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
 
-	TLegend *regleg = new TLegend(0.65,0.47,0.88,0.6);
+	TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
@@ -2523,12 +2829,18 @@ void MuonPlotter::makeMETvsHTPlotCustom(){
 	
 	leg->Draw();
 	regleg->Draw();
-	// gPad->SetGridx();
-	// gPad->SetGridy();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
-	// lat->DrawLatex(0.31,0.92, "#mu#mu/e#mu/ee");
-	// lat->DrawLatex(0.11,0.92, "#mu#mu/e#mu/ee");
-	lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+
+	drawTopLine();
+	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	pave->SetFillColor(0);
+	pave->SetFillStyle(1001);
+	pave->SetBorderSize(0);
+	pave->SetMargin(0.05);
+	pave->SetTextFont(42);
+	pave->SetTextSize(0.04);
+	pave->SetTextAlign(12);
+	pave->AddText(hiloname[hilo]);
+	pave->Draw();
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
@@ -2545,11 +2857,6 @@ void MuonPlotter::makeMETvsHTPlotTau(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
-
 	const float htmax = 750.;
 
 	// Create histograms
@@ -2688,10 +2995,17 @@ void MuonPlotter::makeMETvsHTPlotTau(){
 	
 	leg->Draw();
 	regleg->Draw();
-	// gPad->SetGridx();
-	// gPad->SetGridy();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
-	lat->DrawLatex(0.13,0.92, "p_{T}(#mu/e/#tau) > 5/10/15 GeV");
+	drawTopLine();
+	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	pave->SetFillColor(0);
+	pave->SetFillStyle(1001);
+	pave->SetBorderSize(0);
+	pave->SetMargin(0.05);
+	pave->SetTextFont(42);
+	pave->SetTextSize(0.04);
+	pave->SetTextAlign(12);
+	pave->AddText("p_{T}(#mu/e/#tau) > 5/10/15 GeV");
+	pave->Draw();
 	gPad->RedrawAxis();
 
 	Util::PrintNoEPS( c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
@@ -2792,12 +3106,11 @@ void MuonPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	
 	Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
 	delete h_ptratio_mc, h_ptratio_data;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
-void MuonPlotter::makeFRvsPtPlotsForPAS(gChannel chan, gFPSwitch fp){
+void MuonPlotter::makeFRvsPtPlotsForPAS(gChannel chan){
 	Util::SetTDRStyle();
 	fOutputSubDir = "Ratios/forPAS/";
 	char cmd[100];
@@ -2811,64 +3124,76 @@ void MuonPlotter::makeFRvsPtPlotsForPAS(gChannel chan, gFPSwitch fp){
 	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
 	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
 
-	TH1D *h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPt2Bins(chan), getPt2Bins(chan));
-	TH1D *h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPt2Bins(chan), getPt2Bins(chan));
+	TH1D *h_ratio_A2 = new TH1D("Ratio_data2", "Tight/Loose Ratio in data for A2", getNPt2Bins(chan), getPt2Bins(chan));
+	TH1D *h_ratio_A1 = new TH1D("Ratio_data1", "Tight/Loose Ratio in data for A1", getNPt2Bins(chan), getPt2Bins(chan));
 
 	vector<int> datasamples;
-	vector<int> mcsamples;
 
-	if(chan == Muon){
-		datasamples = fMuData;
-		mcsamples   = fMCBGMuEnr;
+	if(chan == Muon)     datasamples = fMuData;
+	if(chan == Electron) datasamples = fEGData;
+
+	float A1MBins [5] = {0.31, 0.25, 0.21, 0.18, 0.20};
+	float A1MBinsE[5] = {0.002, 0.002, 0.002, 0.003, 0.001};
+
+	float A1EBins [5] = {0.22, 0.21, 0.14, 0.22, 0.35};
+	float A1EBinsE[5] = {0.02, 0.02, 0.02, 0.02, 0.04};
+
+	for(size_t i = 0; i < 5; ++i){
+		if(chan == Muon){
+			h_ratio_A1->SetBinContent(i+1, A1MBins[i]);
+			h_ratio_A1->SetBinError(i+1,   A1MBinsE[i]);
+		}
+		if(chan == Electron){
+			h_ratio_A1->SetBinContent(i+1, A1EBins[i]);
+			h_ratio_A1->SetBinError(i+1,   A1EBinsE[i]);
+		}
 	}
-	if(chan == Electron){
-		datasamples = fEGData;
-		mcsamples   = fMCBG;
-	}
 
-	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
-	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
+	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_ratio_A2, h_dummy1);
 
-	float maximum = 0.8;
-	if(fp == ZDecay) maximum = 1.1;
-	h_ptratio_data->SetMaximum(maximum);
-	h_ptratio_mc  ->SetMaximum(maximum);
-	h_ptratio_data->SetMinimum(0.0);
-	h_ptratio_mc  ->SetMinimum(0.0);
+	h_ratio_A2->GetXaxis()->SetTitle("p_{T} (GeV)");
+	h_ratio_A2->GetYaxis()->SetTitle("TL Ratio");
+	h_ratio_A2->SetMarkerStyle(20);
+	h_ratio_A2->SetMarkerSize(1.6);
+	h_ratio_A2->SetMarkerColor(kBlue);
+	h_ratio_A2->SetLineColor(kBlue);
 
-	if(chan == Muon)     h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
-	if(chan == Electron) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
-	h_ptratio_mc->GetYaxis()->SetTitleOffset(1.2);
-	h_ptratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
+	h_ratio_A1->GetXaxis()->SetTitle("p_{T} (GeV)");
+	h_ratio_A1->GetYaxis()->SetTitle("TL Ratio");
+	h_ratio_A1->SetMarkerStyle(23);
+	h_ratio_A1->SetMarkerSize(1.8);
+	h_ratio_A1->SetMarkerColor(kBlack);
+	h_ratio_A1->SetLineColor(kBlack);
 
-	h_ptratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
-	// h_ptratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
-	h_ptratio_data->GetYaxis()->SetTitle("TL Ratio");
-	h_ptratio_data->SetMarkerStyle(22);
-	h_ptratio_data->SetMarkerSize(1.4);
-	h_ptratio_data->SetMarkerColor(kBlack);
-	h_ptratio_data->SetLineColor(kBlack);
-	h_ptratio_data->GetYaxis()->SetRangeUser(0., 0.75);
+	h_ratio_A2->GetYaxis()->SetRangeUser(0., 0.7);
+	h_ratio_A1->GetYaxis()->SetRangeUser(0., 0.7);
 
+	TLegend *leg = new TLegend(0.21,0.58,0.47,0.78);
+	leg->AddEntry(h_ratio_A1, "Method A1","p");
+	leg->AddEntry(h_ratio_A2, "Method A2","p");
+	leg->SetTextSize(0.05);
+	// leg->SetTextFont(42);
+	leg->SetFillStyle(0);
+	leg->SetBorderSize(0);	
 
 	TCanvas *c_temp = new TCanvas();
 	c_temp->cd();
+	c_temp->SetRightMargin(0.05);
 
-	h_ptratio_data->Draw("PE");
+	h_ratio_A2->Draw("PE");
+	h_ratio_A1->Draw("PE same");
+	leg->Draw();
 	TLatex lat;
 	lat.SetNDC(kTRUE);
-	lat.SetTextSize(0.028);
+	lat.SetTextSize(0.05);
 	lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
-	lat.DrawLatex(0.23, 0.79, "#int L dt = 976 pb^{-1},   #sqrt{s} = 7 TeV");
-	lat.DrawLatex(0.83, 0.88, name);
+	lat.DrawLatex(0.70, 0.88, name);
+	lat.DrawLatex(0.23, 0.81, "L_{int.} = 0.98 fb^{-1},   #sqrt{s} = 7 TeV");
 
-	TString fpname = "F";
-	if(fp == ZDecay) fpname = "P";
-	
-	Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
-	delete h_ptratio_mc, h_ptratio_data;
+	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir);
+	delete h_ratio_A1, h_ratio_A2;
 	delete c_temp;
 	fOutputSubDir = "";
 }
@@ -2975,7 +3300,6 @@ void MuonPlotter::makeFRvsEtaPlots(gChannel chan){
 	
 	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
 	delete h_etaratio_mc, h_etaratio_data;
 	// delete c_temp;
 	delete c_temp, lat, leg;
@@ -2995,68 +3319,94 @@ void MuonPlotter::makeFRvsEtaPlotsForPAS(gChannel chan){
 	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNPt2Bins(chan), getPt2Bins(chan));
 	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
 
-	TH1D *h_etaratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_etaratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_ratio_A2 = new TH1D("Ratio_data2", "Tight/Loose Ratio in data for A2", getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_ratio_A1 = new TH1D("Ratio_data1", "Tight/Loose Ratio in data for A1", getNEtaBins(chan), getEtaBins(chan));
 
 	vector<int> datasamples;
-	vector<int> mcsamples;
 
-	if(chan == Muon){
-		datasamples = fMuData;
-		mcsamples   = fMCBGMuEnr;
+	if(chan == Muon)     datasamples = fMuData;
+	if(chan == Electron) datasamples = fEGData;
+
+	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_ratio_A2);
+
+	float A1MBins [4] = {0.2, 0.23, 0.25, 0.26};
+	float A1MBinsE[4] = {0.001, 0.002, 0.002, 0.002};
+
+	float A1EBins [4] = {0.2, 0.22, 0.23, 0.28};
+	float A1EBinsE[4] = {0.01, 0.02, 0.02, 0.03};
+
+	for(size_t i = 0; i < 4; ++i){
+		if(chan == Muon){
+			h_ratio_A1->SetBinContent(i+1, A1MBins[i]);
+			h_ratio_A1->SetBinError(i+1,   A1MBinsE[i]);
+		}
+		if(chan == Electron){
+			h_ratio_A1->SetBinContent(i+1, A1EBins[i]);
+			h_ratio_A1->SetBinError(i+1,   A1EBinsE[i]);
+		}
 	}
-	if(chan == Electron){
-		datasamples = fEGData;
-		mcsamples   = fMCBG;
-	}
 
-	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
-	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
+	h_ratio_A2->SetMaximum(0.4);
+	h_ratio_A2->SetMinimum(0.0);
+	h_ratio_A1->SetMaximum(0.4);
+	h_ratio_A1->SetMinimum(0.0);
 
-	h_etaratio_data->SetMaximum(0.4);
-	h_etaratio_mc  ->SetMaximum(0.4);
-	h_etaratio_data->SetMinimum(0.0);
-	h_etaratio_mc  ->SetMinimum(0.0);
+	// h_ratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
+	h_ratio_A2->GetXaxis()->SetTitle("#left|#eta#right|");
+	h_ratio_A2->GetYaxis()->SetTitle("TL Ratio");
+	h_ratio_A2->SetMarkerStyle(20);
+	h_ratio_A2->SetMarkerSize(1.6);
+	h_ratio_A2->SetMarkerColor(kBlue);
+	h_ratio_A2->SetLineColor(kBlue);
 
-	if(chan == Muon)     h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
-	if(chan == Electron) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
-	
-	// h_etaratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
-	h_etaratio_data->GetXaxis()->SetTitle("#left|#eta#right|");
-	h_etaratio_data->GetYaxis()->SetTitle("TL Ratio");
-	h_etaratio_data->SetMarkerStyle(22);
-	h_etaratio_data->SetMarkerSize(1.4);
-	h_etaratio_data->SetMarkerColor(kBlack);
-	h_etaratio_data->SetLineColor(kBlack);
-	h_etaratio_data->GetYaxis()->SetRangeUser(0., 0.5);
+	h_ratio_A1->GetXaxis()->SetTitle("#left|#eta#right|");
+	h_ratio_A1->GetYaxis()->SetTitle("TL Ratio");
+	h_ratio_A1->SetMarkerStyle(23);
+	h_ratio_A1->SetMarkerSize(1.8);
+	h_ratio_A1->SetMarkerColor(kBlack);
+	h_ratio_A1->SetLineColor(kBlack);
+
+	h_ratio_A2->GetYaxis()->SetRangeUser(0., 0.5);
+	h_ratio_A1->GetYaxis()->SetRangeUser(0., 0.5);
+
+	TLegend *leg = new TLegend(0.21,0.58,0.47,0.78);
+	leg->AddEntry(h_ratio_A1, "Method A1","p");
+	leg->AddEntry(h_ratio_A2, "Method A2","p");
+	leg->SetTextSize(0.05);
+	// leg->SetTextFont(42);
+	leg->SetFillStyle(0);
+	leg->SetBorderSize(0);	
 
 	TCanvas *c_temp = new TCanvas();
 	c_temp->cd();
+	c_temp->SetRightMargin(0.05);
 
-	h_etaratio_data->Draw("PE");
+	h_ratio_A2->Draw("PE");
+	h_ratio_A1->Draw("PE same");
+	leg->Draw();
 	TLatex lat;
 	lat.SetNDC(kTRUE);
-	lat.SetTextSize(0.028);
+	lat.SetTextSize(0.05);
 	lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
-	lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 7 TeV");
-	lat.DrawLatex(0.83, 0.88, name);
+	lat.DrawLatex(0.70, 0.88, name);
+	lat.DrawLatex(0.23, 0.81, "L_{int.} = 0.98 fb^{-1},   #sqrt{s} = 7 TeV");
 	
-	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
-	delete h_etaratio_mc, h_etaratio_data;
+	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir);
+	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir);
+	delete h_ratio_A1, h_ratio_A2;
 	delete c_temp;
 	fOutputSubDir = "";
 }
 void MuonPlotter::makeRatioPlots(gChannel chan){
-	fOutputSubDir = "Ratios/";
-	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
-
 	TString name;
 	if(chan == Muon)     name = "Muons";
 	if(chan == Electron) name = "Electrons";
+
+	fOutputSubDir = "Ratios/" + name + "/";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
@@ -3071,7 +3421,7 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 	}
 
 	// Customization
-	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "P_{T}(Closest Jet) (GeV)", "P_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "p_{T}(Closest Jet) (GeV)", "p_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
 
 	for(size_t i = 0; i < gNRatioVars; ++i){
 		TH1D *h_ratio_data = getFRatio(datasamples, chan, i);
@@ -3137,6 +3487,82 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 		Util::PrintPDF(  c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir);
 		delete c_temp, leg, lat;
 		delete h_ratio_data, h_ratio_mc;
+	}
+	fOutputSubDir = "";
+}
+void MuonPlotter::makeNTightLoosePlots(gChannel chan){
+	TString name;
+	if(chan == Muon)     name = "Muons";
+	if(chan == Electron) name = "Electrons";
+
+	fOutputSubDir = "Ratios/" + name + "/NTightLoose/";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+
+	vector<int> datasamples;
+	vector<int> mcsamples;
+
+	if(chan == Muon){
+		datasamples = fMuData;
+		mcsamples   = fMCBGMuEnr;
+	}
+	if(chan == Electron){
+		datasamples = fEGData;
+		mcsamples   = fMCBG;
+	}
+
+	// Customization
+	TString axis_name[gNRatioVars] = {"N_{Jets}",  "H_{T} (GeV)", "P_{T}(Hardest Jet) (GeV)", "N_{Vertices}", "p_{T}(Closest Jet) (GeV)", "p_{T}(Away Jet) (GeV)", "N_{BJets}", "E_{T}^{miss} (GeV)", "m_{T} (GeV)"};
+
+	for(size_t i = 0; i < gNRatioVars; ++i){
+		THStack *hsntight = new THStack(Form("NTight_%s", FRatioPlots::var_name[i].Data()), "Stack of tight");
+		THStack *hsnloose = new THStack(Form("NLoose_%s", FRatioPlots::var_name[i].Data()), "Stack of loose");
+		const unsigned int nmcsamples = mcsamples.size();
+
+		// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
+		TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		for(size_t j = 0; j < mcsamples.size(); ++j){
+			Sample *S = fSamples[mcsamples[j]];
+			FRatioPlots *rat;
+			if(chan == Muon)     rat = &S->ratioplots[0];
+			if(chan == Electron) rat = &S->ratioplots[1];
+			rat->ntight[i]->SetFillColor(S->color);
+			rat->nloose[i]->SetFillColor(S->color);
+			float scale = fLumiNorm / S->lumi;
+			rat->ntight[i]->Scale(scale);
+			rat->nloose[i]->Scale(scale);
+			hsntight->Add(rat->ntight[i]);
+			hsnloose->Add(rat->nloose[i]);
+
+			if(rat->nloose[i]->Integral() < 1 ) continue;
+			leg->AddEntry(rat->ntight[i], S->sname.Data(), "f");
+		}
+		hsntight->Draw();
+		hsntight->GetXaxis()->SetTitle(axis_name[i]);
+		hsnloose->Draw();
+		hsnloose->GetXaxis()->SetTitle(axis_name[i]);
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetBorderSize(0);
+
+		TCanvas *c_tight = new TCanvas(Form("NTight_%s", FRatioPlots::var_name[i].Data()), "Tight Stack", 0, 0, 800, 600);
+		TCanvas *c_loose = new TCanvas(Form("NLoose_%s", FRatioPlots::var_name[i].Data()), "Loose Stack", 0, 0, 800, 600);
+
+
+		c_tight->cd();
+		gPad->SetLogy();
+		hsntight->Draw("hist");
+		leg->Draw();
+
+		c_loose->cd();
+		gPad->SetLogy();
+		hsnloose->Draw("hist");
+		leg->Draw();
+
+		Util::PrintNoEPS(c_tight, Form("NTight_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir, fOutputFile);
+		Util::PrintNoEPS(c_loose, Form("NLoose_%s", FRatioPlots::var_name[i].Data()), fOutputDir + fOutputSubDir, fOutputFile);	
+		delete hsntight, hsnloose, c_tight, c_loose, leg;
 	}
 	fOutputSubDir = "";
 }
@@ -3438,9 +3864,9 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		name += fSamples[sample]->sname;
 	}
 	if(output){
-		printObject(h_2d,  sname + "Ratio"    + name, "Muon Fake Ratio vs pt/eta", "colz");
-		printObject(h_pt,  sname + "RatioPt"  + name, "Muon Fake Ratio vs pt",     "PE1");
-		printObject(h_eta, sname + "RatioEta" + name, "Muon Fake Ratio vs eta",    "PE1");
+		printObject(h_2d,  sname + "Ratio"    + name, "colz");
+		printObject(h_pt,  sname + "RatioPt"  + name, "PE1");
+		printObject(h_eta, sname + "RatioEta" + name, "PE1");
 	}
 	delete H_ntight, H_nloose, hloosept, hlooseeta, htightpt, htighteta;
 }
@@ -3564,9 +3990,9 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 		name += fSamples[sample]->sname;
 	}
 	if(output){
-		printObject(h_2d,  TString("Ratio")    + name, "Fake Ratio vs pt/eta", "colz");
-		printObject(h_pt,  TString("RatioPt")  + name, "Fake Ratio vs pt",     "PE1");
-		printObject(h_eta, TString("RatioEta") + name, "Fake Ratio vs eta",    "PE1");
+		printObject(h_2d,  TString("Ratio")    + name, "colz");
+		printObject(h_pt,  TString("RatioPt")  + name, "PE1");
+		printObject(h_eta, TString("RatioEta") + name, "PE1");
 	}
 }
 void MuonPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, float &ratio, float &ratioe){
@@ -3715,8 +4141,8 @@ void MuonPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		name += fSamples[sample]->sname;
 	}
 	if(output){
-		printObject(h_passed, TString("Passed") + name, "Passed vs pt vs eta", "colz");
-		printObject(h_total,  TString("Total")  + name, "Total vs pt vs eta",  "colz");
+		printObject(h_passed, TString("Passed") + name, "colz");
+		printObject(h_total,  TString("Total")  + name, "colz");
 	}	
 }
 
@@ -6583,10 +7009,10 @@ vector<TH1D*> MuonPlotter::MuMuFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 		H_nt0mes->SetYTitle(convertVarName("MuPt[0]"));
 		// if(H_nsigpred->GetMinimum() < 0) H_nsigpred->SetMaximum(0);
 		// if(H_nsigpred->GetMinimum() > 0) H_nsigpred->SetMinimum(0);
-		printObject(H_nsigpred, H_nsigpred->GetName(), H_nsigpred->GetTitle());
-		printObject(H_nt2mes, H_nt2mes->GetName(), H_nt2mes->GetTitle(), "colz");
-		printObject(H_nt1mes, H_nt1mes->GetName(), H_nt1mes->GetTitle(), "colz");
-		printObject(H_nt0mes, H_nt0mes->GetName(), H_nt0mes->GetTitle(), "colz");
+		printObject(H_nsigpred, H_nsigpred->GetName());
+		printObject(H_nt2mes, H_nt2mes->GetName(), "colz");
+		printObject(H_nt1mes, H_nt1mes->GetName(), "colz");
+		printObject(H_nt0mes, H_nt0mes->GetName(), "colz");
 	}
 	res.push_back(H_nsigpred);
 	res.push_back(H_nfppred);
@@ -6685,10 +7111,10 @@ vector<TH1D*> MuonPlotter::ElElFPPrediction(TH2D* H_fratio, TH2D* H_pratio, TH2D
 		H_nt0mes->SetYTitle(convertVarName("ElPt[0]"));
 		// if(H_nsigpred->GetMinimum() < 0) H_nsigpred->SetMaximum(0);
 		// if(H_nsigpred->GetMinimum() > 0) H_nsigpred->SetMinimum(0);
-		printObject(H_nsigpred, H_nsigpred->GetName(), H_nsigpred->GetTitle());
-		printObject(H_nt2mes, H_nt2mes->GetName(), H_nt2mes->GetTitle(), "colz");
-		printObject(H_nt1mes, H_nt1mes->GetName(), H_nt1mes->GetTitle(), "colz");
-		printObject(H_nt0mes, H_nt0mes->GetName(), H_nt0mes->GetTitle(), "colz");
+		printObject(H_nsigpred, H_nsigpred->GetName());
+		printObject(H_nt2mes, H_nt2mes->GetName(), "colz");
+		printObject(H_nt1mes, H_nt1mes->GetName(), "colz");
+		printObject(H_nt0mes, H_nt0mes->GetName(), "colz");
 	}
 	res.push_back(H_nsigpred);
 	res.push_back(H_nfppred);
@@ -6801,11 +7227,11 @@ vector<TH1D*> MuonPlotter::ElMuFPPrediction(TH2D* H_mufratio, TH2D* H_mupratio, 
 		H_nt01mes->SetYTitle(convertVarName("MuPt[0]"));
 		H_nt0mes->SetXTitle(convertVarName("MuPt[0]"));
 		H_nt0mes->SetYTitle(convertVarName("MuPt[0]"));
-		printObject(H_npppred, H_npppred->GetName(), H_npppred->GetTitle());
-		printObject(H_nt2mes,  H_nt2mes->GetName(),  H_nt2mes->GetTitle(),  "colz");
-		printObject(H_nt10mes, H_nt10mes->GetName(), H_nt10mes->GetTitle(), "colz");
-		printObject(H_nt01mes, H_nt01mes->GetName(), H_nt01mes->GetTitle(), "colz");
-		printObject(H_nt0mes,  H_nt0mes->GetName(),  H_nt0mes->GetTitle(),  "colz");
+		printObject(H_npppred, H_npppred->GetName());
+		printObject(H_nt2mes,  H_nt2mes->GetName(),  "colz");
+		printObject(H_nt10mes, H_nt10mes->GetName(), "colz");
+		printObject(H_nt01mes, H_nt01mes->GetName(), "colz");
+		printObject(H_nt0mes,  H_nt0mes->GetName(),  "colz");
 	}
 	res.push_back(H_npppred);
 	res.push_back(H_nfppred);
@@ -9486,34 +9912,35 @@ float MuonPlotter::getMT2(int ind1, int ind2, int toggle){
 	delete DavisMT2;
 	return MT2;
 }
+int   MuonPlotter::getClosestJet(int ind, gChannel chan){
+// Get index of the closest jet
+	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
+	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
+	
+	float mindr = 999.;
+	int cljetindex = -1;
+	for(size_t i = 0; i < NJets; ++i){
+		if(isGoodJet(i) == false) continue;
+		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
+		if(dr > mindr) continue;
+		mindr = dr;
+		cljetindex = i;
+	}
+	return cljetindex;
+}
 float MuonPlotter::getClosestJetPt(int ind, gChannel chan){
 // Get the pt of the closest jet
-	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
-	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
-	
-	float mindr = 999.;
-	float cljetpt = 0.;
-	for(size_t i = 0; i < NJets; ++i){
-		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
-		// if(dr < 0.05) continue;
-		if(dr > mindr) continue;
-		mindr = dr;
-		cljetpt = JetPt[i];
-	}
-	return cljetpt;
+	int jind = getClosestJet(ind, chan);
+	if(jind > -1) return JetPt[jind];
+	return -1;
 }
 float MuonPlotter::getClosestJetDR(int ind, gChannel chan){
-// Get the pt of the closest jet
+// Get delta R to the closest jet
 	float lepeta = (chan==Muon)?MuEta[ind]:ElEta[ind];
 	float lepphi = (chan==Muon)?MuPhi[ind]:ElPhi[ind];
-	
-	float mindr = 999.;
-	for(size_t i = 0; i < NJets; ++i){
-		float dr = Util::GetDeltaR(lepeta, JetEta[i], lepphi, JetPhi[i]);
-		if(dr > mindr) continue;
-		mindr = dr;
-	}
-	return mindr;
+	int jind = getClosestJet(ind, chan);
+	if(jind > -1) return Util::GetDeltaR(lepeta, JetEta[jind], lepphi, JetPhi[jind]);
+	return -1;
 }
 float MuonPlotter::getSecondClosestJetDR(int ind, gChannel chan){
 // Get the pt of the closest jet
@@ -10447,4 +10874,15 @@ bool MuonPlotter::isGoodJet(int jet, float pt){
 	}
 	if(JetPt[jet] < pt) return false;
 	return true;
+}
+
+
+void MuonPlotter::drawTopLine(){
+	fLatex->SetTextFont(62);
+	fLatex->SetTextSize(0.05);
+	fLatex->DrawLatex(0.13,0.92, "CMS Preliminary");	
+	fLatex->SetTextFont(42);
+	fLatex->SetTextSize(0.04);
+	fLatex->DrawLatex(0.70,0.92, "L_{int.} = 0.98 fb^{-1}");
+	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 }

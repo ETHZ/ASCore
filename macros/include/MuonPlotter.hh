@@ -20,13 +20,13 @@ class MuonPlotter : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuPtbins  = 5;
-	static const int gNMuPt2bins = 5;
+	static const int gNMuPtbins  = 7;
+	static const int gNMuPt2bins = 7;
 	static const int gNMuEtabins = 4;
 	// static const int gNMuEtabins = 8;
 	static const int gNElPtbins  = 5;
 	static const int gNElPt2bins = 5;
-	static const int gNElEtabins = 3;
+	static const int gNElEtabins = 4;
 	// static const int gNElEtabins = 6;
 	
 	static const int gNNVrtxBins = 9;
@@ -278,16 +278,14 @@ public:
 
 	inline void setCharge(int charge){ fChargeSwitch = charge; };
 
-	void init(TString filename = "samples.dat");
-	void InitMC(TTree*); // remove a few branches
-	void readSamples(const char* filename = "samples.dat");
-	void loadSamples();
-	void setBinning();
+	virtual void init(TString filename = "samples.dat");
+	virtual void InitMC(TTree*); // remove a few branches
+	virtual void readSamples(const char* filename = "samples.dat");
 
-	void doAnalysis();
-	void doLoop();
+	virtual void doAnalysis();
+	virtual void doLoop();
 	
-	void sandBox();
+	virtual void sandBox();
 	
 	//////////////////////////////
 	// Plots
@@ -306,13 +304,15 @@ public:
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
-	void makeFRvsPtPlotsForPAS(gChannel, gFPSwitch);
+	void makeFRvsPtPlotsForPAS(gChannel);
 	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
+	void makeNTightLoosePlots(gChannel);
 	
 	void makeHWWPlots();
 	
 	void makeIsoVsMETPlot(gSample);
+	void makePileUpPlots();
 	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
@@ -427,111 +427,105 @@ public:
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 
 	// Trigger selections:
-	bool  singleMuTrigger();
-	float singleMuPrescale();
-	bool  singleElTrigger();
-	float singleElPrescale();
+	virtual bool  singleMuTrigger();
+	virtual float singleMuPrescale();
+	virtual bool  singleElTrigger();
+	virtual float singleElPrescale();
 
-	bool mumuSignalTrigger();
-	bool elelSignalTrigger();
-	bool elmuSignalTrigger();
+	virtual bool mumuSignalTrigger();
+	virtual bool elelSignalTrigger();
+	virtual bool elmuSignalTrigger();
 
-	bool doubleMuTrigger();
-	bool doubleElTrigger();
-	bool eMuTrigger();
+	virtual bool doubleMuTrigger();
+	virtual bool doubleElTrigger();
+	virtual bool eMuTrigger();
 
-	bool doubleMuHTTrigger();
-	bool doubleElHTTrigger();
-	bool eMuHTTrigger();
+	virtual bool doubleMuHTTrigger();
+	virtual bool doubleElHTTrigger();
+	virtual bool eMuHTTrigger();
 	
-	bool isGoodRun(gSample);
+	virtual bool isGoodRun(gSample);
 
 	// Event and Object selectors:
-	int getNJets();
-	int getNBTags();
-	float getHT();
-	float getMT2(int, int, int);
-	float getClosestJetPt(int, gChannel);
-	float getClosestJetDR(int, gChannel);
-	float getSecondClosestJetDR(int, gChannel);
-	float getAwayJetPt(int, gChannel);
-	float getMaxJPt();
+	virtual int getNJets();
+	virtual int getNBTags();
+	virtual float getHT();
+	virtual float getMT2(int, int, int);
+	virtual int   getClosestJet(int, gChannel);
+	virtual float getClosestJetPt(int, gChannel);
+	virtual float getClosestJetDR(int, gChannel);
+	virtual float getSecondClosestJetDR(int, gChannel);
+	virtual float getAwayJetPt(int, gChannel);
+	virtual float getMaxJPt();
 	
-	int isSSLLEvent(int&, int&);
-	int isOSLLEvent(int&, int&);
-	int isSSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
-	int isOSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
+	virtual int isSSLLEvent(int&, int&);
+	virtual int isOSLLEvent(int&, int&);
+	virtual int isSSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
+	virtual int isOSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
 	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
 	vector<lepton> sortLeptonsByTypeAndPt(vector<lepton> &leptons);
 
-	bool isGoodEvent();
-	bool isGoodMuEvent();
-	int hasLooseMuons(int&, int&);
-	int hasLooseMuons();
-	int hasLooseElectrons(int&, int&);
-	int hasLooseElectrons();
-	bool passesNJetCut(int=2);
-	bool passesNJetCut_LooseLep(int=2);
-	bool passesJet50Cut();
+	virtual bool isGoodEvent();
+	virtual bool isGoodMuEvent();
+	virtual int hasLooseMuons(int&, int&);
+	virtual int hasLooseMuons();
+	virtual int hasLooseElectrons(int&, int&);
+	virtual int hasLooseElectrons();
+	virtual bool passesNJetCut(int=2);
+	virtual bool passesJet50Cut();
 	
-	bool passesHTCut(float, float = 7000.);
-	bool passesMETCut(float = -1., float = 7000.);
-	bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
-	bool passesZVeto(float = 15.); // cut with mZ +/- cut value
-	bool passesMllEventVeto(float = 5.);
-	bool passesMllEventVeto(int, int, int, float = 5.);
+	virtual bool passesHTCut(float, float = 7000.);
+	virtual bool passesMETCut(float = -1., float = 7000.);
+	virtual bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
+	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
+	virtual bool passesMllEventVeto(float = 5.);
+	virtual bool passesMllEventVeto(int, int, int, float = 5.);
 
 	// HWW Stuff
-	bool passesAddLepVeto(int, int, int);
+	virtual bool passesAddLepVeto(int, int, int);
 
-	bool isSigSupMuEvent();
-	bool isZMuMuEvent();
+	virtual bool isSigSupMuEvent();
+	virtual bool isZMuMuEvent();
 
-	bool isSigSupElEvent();
-	bool isZElElEvent(int&);
+	virtual bool isSigSupElEvent();
+	virtual bool isZElElEvent(int&);
 
-	bool isGenMatchedSUSYDiLepEvent();
-	bool isGenMatchedSUSYDiLepEvent(int&, int&);
+	virtual bool isGenMatchedSUSYDiLepEvent();
+	virtual bool isGenMatchedSUSYDiLepEvent(int&, int&);
 
-	bool isGenMatchedSUSYEEEvent();
-	bool isGenMatchedSUSYEMuEvent();
+	virtual bool isGenMatchedSUSYEEEvent();
+	virtual bool isGenMatchedSUSYEMuEvent();
 
-	bool isSSLLMuEvent(int&, int&);
-	bool isSSTTMuEvent(int&, int&);
+	virtual bool isSSLLMuEvent(int&, int&);
+	virtual bool isSSLLElEvent(int&, int&);
+	virtual bool isSSLLElMuEvent(int&, int&);
 
-	bool isSSLLElEvent(int&, int&);
-	bool isSSTTElEvent(int&, int&);
+	virtual bool isGoodMuon(int, float = -1.);
+	virtual bool isLooseMuon(int);
+	virtual bool isTightMuon(int);
+	virtual bool isGoodPrimMuon(int, float = -1.);
+	virtual bool isGoodSecMuon(int, float = -1.);
 
-	bool isSSLLElMuEvent(int&, int&);
-	bool isSSTTElMuEvent(int&, int&);
+	virtual bool isFakeMuon(int);
+	virtual bool isPromptMuon(int);
+	virtual bool isChargeMatchedMuon(int);
 
-	bool isGoodMuon(int, float = -1.);
-	bool isLooseMuon(int);
-	bool isTightMuon(int);
-	bool isLooseNoTightMuon(int);
-	bool isGoodPrimMuon(int, float = -1.);
-	bool isGoodSecMuon(int, float = -1.);
+	virtual bool isGoodElectron(int, float = -1.);
+	virtual bool isLooseElectron(int);
+	virtual bool isTightElectron(int);
+	virtual bool isGoodPrimElectron(int, float = -1.);
+	virtual bool isGoodSecElectron(int, float = -1.);
 
-	bool isFakeMuon(int);
-	bool isPromptMuon(int);
-	bool isChargeMatchedMuon(int);
+	virtual bool isFakeElectron(int);
+	virtual bool isPromptElectron(int);
+	virtual bool isChargeMatchedElectron(int);
 
-	bool isGoodElectron(int, float = -1.);
-	bool isLooseElectron(int);
-	bool isTightElectron(int);
-	bool isGoodPrimElectron(int, float = -1.);
-	bool isGoodSecElectron(int, float = -1.);
+	virtual bool isBarrelElectron(int);
 
-	bool isFakeElectron(int);
-	bool isPromptElectron(int);
-	bool isChargeMatchedElectron(int);
+	virtual bool isGoodJet(int, float = 30.);
+	
+	virtual void drawTopLine();
 
-	bool isBarrelElectron(int);
-
-	bool isGoodJet(int, float = 30.);
-	bool isGoodJet_LooseLep(int);
-
-private:
 	float fC_minHT;
 	float fC_minMet;
 	float fC_maxHT;
@@ -618,6 +612,9 @@ private:
 	TH2D *fH2D_ElpRatio;
 	TH1D *fH1D_ElpRatioPt;
 	TH1D *fH1D_ElpRatioEta;
+	
+	private:
+	
 };
 
 #endif
