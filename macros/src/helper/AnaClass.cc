@@ -2447,8 +2447,8 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 }
 
 //____________________________________________________________________________
-void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt, bool logy){
-	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+void AnaClass::printObject(TObject* o, TString name, Option_t *drawopt, bool logy){
+	TCanvas *col = new TCanvas(o->GetName(), o->GetTitle(), 0, 0, 900, 700);
 	col->SetFillStyle(0);
 	col->SetFrameFillStyle(0);
 	col->cd();
@@ -2456,7 +2456,7 @@ void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Opti
 	o->Draw(drawopt);
 	gPad->RedrawAxis();
 	if(logy) gPad->SetLogy(1);
-	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
+	Util::PrintNoEPS(col, name, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
@@ -2501,6 +2501,7 @@ void AnaClass::printProgress(int entry, const int nentries, TString header, int 
 	char progress[10];
 	sprintf(progress, "%5.1f", progress_f);
 	cout << " Processing " << setw(50) << left << header << setw(6) << right << progress << " %      \r" << flush;
+	if(entry+1 == nentries) cout << endl;
 }
 
 //____________________________________________________________________________
