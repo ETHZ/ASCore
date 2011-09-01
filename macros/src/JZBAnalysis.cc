@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.51 $";
+string sjzbversion="$Revision: 1.52 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.52  2011/08/30 18:56:21  buchmann
+Added pdfWsum to JZB analysis
+
 Revision 1.51  2011/08/30 14:06:38  buchmann
 Bringing mSUGRA scans to JZB: Parameters introduced, PDF weights implemented for PDF systematics; also had to deactivate some PF variables as they are no longer in the NTuple
 
@@ -786,6 +789,7 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
@@ -822,6 +826,7 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v5") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v6") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v7") )        return true;
   return false;
 } 
 
@@ -835,6 +840,7 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v9") )        return true;
 
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
@@ -844,6 +850,7 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v9") )        return true;
   return false;
 }
 
