@@ -211,7 +211,8 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 MetaTreeClassBase::~MetaTreeClassBase()
 {
    if (!fChain) return;
-   delete fChain->GetCurrentFile();
+   if(fChain->GetCurrentFile()) delete fChain->GetCurrentFile();
+   return;
 }
 
 Int_t MetaTreeClassBase::GetEntry(Long64_t entry)
