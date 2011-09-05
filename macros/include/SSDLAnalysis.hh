@@ -36,8 +36,8 @@ public:
 	void End();
 	
 	void ReadTriggers(const char* = "HLTPaths_SSDL.dat");
-	void BookTriggers();
-	bool FillTriggers(); // returns OR of list of triggers
+	void AddTriggerBranches();
+	bool FillTriggers(); // Returns OR of list of triggers
 	void BookTree();
 	void ResetTree();
 	
@@ -60,18 +60,24 @@ private:
 	
 	TTree* fAnalysisTree;
 	
-	// run/sample properties
+	/////////////////////////////////////
+	// Tree branches
 	int   fTRunNumber;
 	int   fTEventNumber;
 	int   fTLumiSection;
 
-	// triggers
+	// PileUP info
+	float fTrho;
+	int   fTnvrtx;
+	float fTpuweight;
+	
+	// Triggers
 	vector<HLTPathSet> fHLTPathSets;
 	vector<string> fHLTPaths;
 	vector<int>    fHLTResults;
 	vector<int>    fHLTPrescales;	
 
-	// jet-MET properties
+	// JetMET properties
 	int   fTnqjets;
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
@@ -84,12 +90,7 @@ private:
 	float fTpfMET;
 	float fTpfMETphi;
 	
-	// event properties
-	float fTrho;
-	int fTnvrtx;
-	float fTpuweight;
-	
-	//muon properties
+	// Muon properties
 	int   fTnqmus;
 	float fTmupt          [fMaxNmus];
 	float fTmueta         [fMaxNmus];
@@ -107,7 +108,7 @@ private:
 	int   fTmugmotype     [fMaxNmus];
 	float fTmuMT          [fMaxNmus];
 	
-	// electron properties
+	// Electron properties
 	int     fTnqels;
 	int   fTElcharge         [fMaxNeles];
 	int   fTElChargeIsCons   [fMaxNeles];

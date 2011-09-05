@@ -11,8 +11,8 @@ const int SSDLAnalysis::fMaxNeles;
 
 TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
+//____________________________________________________________________________
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
-	//SetStyle();
 	fHLTPaths.clear();
 
 	fCutnames[0] = "All events";
@@ -26,10 +26,10 @@ SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
 	fCounter.fill(fCutnames[2], 0.);
 	fCounter.fill(fCutnames[3], 0.);
 }
-
 SSDLAnalysis::~SSDLAnalysis(){
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::Begin(const char* filename){
 	string pileupsrc = string(gBaseDir + "data_pileup.root");
 	SetPileUpSrc(pileupsrc);
@@ -38,6 +38,7 @@ void SSDLAnalysis::Begin(const char* filename){
 	BookTree();
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::End(){
 	fOutputFile->cd();
 	fAnalysisTree->Write();
@@ -45,6 +46,7 @@ void SSDLAnalysis::End(){
 	fCounter.print();
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::ReadTriggers(const char* triggerfile){
 	// Read in a bunch of HLT paths to be stored in the mini tree
 	ifstream IN(triggerfile);
@@ -88,8 +90,7 @@ void SSDLAnalysis::ReadTriggers(const char* triggerfile){
 	fHLTResults.resize(fHLTPathSets.size());
 	fHLTPrescales.resize(fHLTPathSets.size());
 }
-
-void SSDLAnalysis::BookTriggers(){
+void SSDLAnalysis::AddTriggerBranches(){
 	for(int i = 0; i < fHLTPathSets.size(); i++){
 		HLTPathSet ps = fHLTPathSets[i];
 		TString prescalename = ps.name + "_PS";
@@ -97,7 +98,6 @@ void SSDLAnalysis::BookTriggers(){
 		if(AddBranch(prescalename.Data(), "I", &fHLTPrescales[i]) == false ) exit(-1);
 	}
 }
-
 bool SSDLAnalysis::FillTriggers(){
 	// Returns OR of trigger results, i.e. true if ANY of them passed
 	bool accept = false;
@@ -121,25 +121,23 @@ bool SSDLAnalysis::FillTriggers(){
 	}
 	return accept;
 }
-
 const bool SSDLAnalysis::AddBranch( const char* name, const char* type, void* address, const char* size ){
 	// This is copied from FillerBase.cc
-  
-  // Form input
-  std::string fullname(name);
-  
-  std::string branchType(fullname);
-  if ( size ) // Size needs to be pre-fixed
-    branchType += "[" + std::string(size) + "]";
-  branchType += "/"+std::string(type);
+	// Form input
+	std::string fullname(name);
 
-  // Declare branch
-  TBranch* b = fAnalysisTree->Branch(fullname.c_str(),address,branchType.c_str());
+	std::string branchType(fullname);
+	if ( size ) // Size needs to be pre-fixed
+	branchType += "[" + std::string(size) + "]";
+	branchType += "/"+std::string(type);
 
-  return !(b==0); // return 1 if branch was successfully created, 0 otherwise
+	// Declare branch
+	TBranch* b = fAnalysisTree->Branch(fullname.c_str(),address,branchType.c_str());
 
+	return !(b==0); // return 1 if branch was successfully created, 0 otherwise
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::BookTree(){
 	fOutputFile->cd();
 	fAnalysisTree = new TTree("Analysis", "AnalysisTree");
@@ -150,7 +148,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("LumiSec",          &fTLumiSection,       "LumiSec/I");
 
 	// HLT triggers
-	BookTriggers();
+	AddTriggerBranches();
 	
 	// event properties
 	fAnalysisTree->Branch("Rho",           &fTrho,       "Rho/F");
@@ -212,6 +210,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::Analyze(){
 	fCounter.fill(fCutnames[0]);
 	// initial event selection: good event trigger, good primary vertex...
@@ -228,33 +227,30 @@ void SSDLAnalysis::Analyze(){
 	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
 	vector<int> selectedElInd  = ElectronSelection(&UserAnalysisBase::IsLooseEl);
 	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
-	fTnqmus  = std::min((int) selectedMuInd .size(), fMaxNmus);
-	fTnqels  = std::min((int) selectedElInd .size(), fMaxNeles);
-	fTnqjets = std::min((int) selectedJetInd.size(), fMaxNjets);
+	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus  );
+	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles );
+	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets );
 	
 	// Require at least one loose lepton
-	// if(!fIsData && (fTnqmus + fTnqels) < 1 ) return;
 	if( (fTnqmus + fTnqels) < 1 ) return;
 	fCounter.fill(fCutnames[3]);
 
-	// event and run info
+	// Event and run info
 	fTRunNumber   = fTR->Run;
 	fTEventNumber = fTR->Event;
 	fTLumiSection = fTR->LumiSection;
 
 	// Dump basic jet and MET properties
-	int jetindex(-1);
-	int nqjets = selectedJetInd.size();
-	for(int ind=0; ind<std::min(nqjets,fMaxNjets); ind++){
-		jetindex = selectedJetInd[ind];
-		// dump properties
+	for(int ind = 0; ind < fTnqjets; ind++){
+		int jetindex = selectedJetInd[ind];
 		fTJetpt  [ind] = fTR->JPt [jetindex];
 		fTJeteta [ind] = fTR->JEta[jetindex];
 		fTJetphi [ind] = fTR->JPhi[jetindex];
 		fTJetbtag[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
 		fTJetArea[ind] = fTR->JArea[jetindex];
 	}
-	// get METs
+
+	// Get METs
 	fTtcMET     = fTR->TCMET;
 	fTtcMETphi  = fTR->TCMETphi;
 	fTpfMET     = fTR->PFMET;
@@ -266,17 +262,17 @@ void SSDLAnalysis::Analyze(){
 	if(!fIsData) fTpuweight = GetPUWeight(fTR->PUnumInteractions);
 	else fTpuweight = 1.;
 
-	int nqmus = selectedMuInd.size();
-	for(int i = 0; i < std::min(nqmus, fMaxNmus); ++i){
+	// Dump muon properties
+	for(int i = 0; i < fTnqmus; ++i){
 		int index = selectedMuInd[i];
-		fTmupt       [i] = fTR->MuPt[index];
-		fTmueta      [i] = fTR->MuEta[index];
-		fTmuphi      [i] = fTR->MuPhi[index];
-		fTmucharge   [i] = fTR->MuCharge[index];
-		fTmuiso      [i] = fTR->MuRelIso03[index];
-		fTmud0       [i] = fTR->MuD0PV[index];
-		fTmudz       [i] = fTR->MuDzPV[index];
-		fTmuptE      [i] = fTR->MuPtE[index];
+		fTmupt    [i] = fTR->MuPt      [index];
+		fTmueta   [i] = fTR->MuEta     [index];
+		fTmuphi   [i] = fTR->MuPhi     [index];
+		fTmucharge[i] = fTR->MuCharge  [index];
+		fTmuiso   [i] = fTR->MuRelIso03[index];
+		fTmud0    [i] = fTR->MuD0PV    [index];
+		fTmudz    [i] = fTR->MuDzPV    [index];
+		fTmuptE   [i] = fTR->MuPtE     [index];
 		
 		if(fIsData == false){ // mc truth information
 			fTmuid     [i] = fTR->MuGenID  [index];
@@ -307,24 +303,20 @@ void SSDLAnalysis::Analyze(){
 		fTmuMT[i]     = sqrt( 2*fTR->PFMET*ETlept - pmu.Px()*METpx - pmu.Py()*METpy );
 	}
 
-	// Dump basic electron properties
-	int elindex(-1);
-	int nqels = selectedElInd.size();
-	TLorentzVector p[nqels];
-	TLorentzVector p_MET(fTR->PFMETpx, fTR->PFMETpy, 0, fTR->PFMET);
-	for(int ind=0; ind<std::min(nqels,fMaxNeles); ind++){
-		elindex = selectedElInd[ind];
+	// Dump electron properties
+	for(int ind = 0; ind < fTnqels; ind++){
+		int elindex = selectedElInd[ind];
 		fTElcharge           [ind] = fTR->ElCharge                [elindex];
 		fTElChargeIsCons     [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
-		fTElpt               [ind] = fTR->ElPt                   [elindex];
-		fTEleta              [ind] = fTR->ElEta                  [elindex];
-		fTElphi              [ind] = fTR->ElPhi                  [elindex];
-		fTEld0               [ind] = fTR->ElD0PV                 [elindex];
-		fTElD0Err            [ind] = fTR->ElD0E                  [elindex];
-		fTEldz               [ind] = fTR->ElDzPV                 [elindex];
-		fTElDzErr            [ind] = fTR->ElDzE                  [elindex];
+		fTElpt               [ind] = fTR->ElPt                    [elindex];
+		fTEleta              [ind] = fTR->ElEta                   [elindex];
+		fTElphi              [ind] = fTR->ElPhi                   [elindex];
+		fTEld0               [ind] = fTR->ElD0PV                  [elindex];
+		fTElD0Err            [ind] = fTR->ElD0E                   [elindex];
+		fTEldz               [ind] = fTR->ElDzPV                  [elindex];
+		fTElDzErr            [ind] = fTR->ElDzE                   [elindex];
 		fTElRelIso           [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
-		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt  [elindex];
+		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt   [elindex];
 		
 		if(fIsData == false){ // mc truth information		
 			fTElGenID  [ind] = fTR->ElGenID  [elindex];
@@ -361,6 +353,7 @@ void SSDLAnalysis::Analyze(){
 	fAnalysisTree->Fill();
 }
 
+//____________________________________________________________________________
 void SSDLAnalysis::ResetTree(){
 	// sample/run
 	fTRunNumber                  = 0;
