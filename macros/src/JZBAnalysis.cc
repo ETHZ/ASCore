@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.52 $";
+string sjzbversion="$Revision: 1.53 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.53  2011/09/01 07:20:20  buchmann
+Updated trigger paths
+
 Revision 1.52  2011/08/30 18:56:21  buchmann
 Added pdfWsum to JZB analysis
 
@@ -808,6 +811,7 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu6_v5") )        return true;
   if ( GetHLTResult("HLT_DoubleMu6_v6") )        return true;
   if ( GetHLTResult("HLT_DoubleMu6_v7") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu6_v8") )        return true;
 
   if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
@@ -816,6 +820,7 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v6") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v7") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v8") )        return true;
 
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
@@ -827,6 +832,7 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_Mu13_Mu8_v5") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v6") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v7") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v8") )        return true;
   return false;
 } 
 
