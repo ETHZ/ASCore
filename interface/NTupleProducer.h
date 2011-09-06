@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.101 2011/08/30 17:27:05 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.102 2011/09/06 16:22:08 stiegerb Exp $
 //
 //
 
@@ -164,6 +164,7 @@ private:
 	int NPdfs;
 	float fTpdfW[100];
 	float fTpdfWsum;
+	int fTprocess;
 
 	float fMinmupt;
 	float fMaxmueta;

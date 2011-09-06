@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.129 2011/08/30 08:36:04 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.130 2011/08/30 17:27:05 buchmann Exp $
 //
 //
 
@@ -23,6 +23,10 @@ Implementation:
 #include <memory>
 #include <iostream>
 #include <cmath>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sstream>
 
 // ROOT includes
 #include "TLorentzVector.h"
@@ -448,8 +452,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 */
 
 	// Retrieve HB/HE noise flag
-	edm::Handle<bool> hbHeNoiseFlag;
+	
 	if(!fIsModelScan) {
+	   edm::Handle<bool> hbHeNoiseFlag;
 	   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
 	   fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
 	}
@@ -553,6 +558,19 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				pdfWsum+=fTpdfW[pdf];
 			}
 			fTpdfWsum=pdfWsum;
+
+			int process = 0;
+			if(fTsigprocid>=237 && fTsigprocid<=242) process=1;//"ng";
+			else if(fTsigprocid>=246 && fTsigprocid<=256) process=2;//"ns";
+			else if(fTsigprocid>=216 && fTsigprocid<=236) process=3;//"nn";
+			else if(fTsigprocid>=201 && fTsigprocid<=214) process=4;//"ll";
+			else if( (fTsigprocid>=274 && fTsigprocid<=280) || (fTsigprocid>=284 && fTsigprocid<=286)) process=5;//"sb";
+			else if( (fTsigprocid>=271 && fTsigprocid<=273) || (fTsigprocid>=281 && fTsigprocid<=283) || (fTsigprocid>=291 && fTsigprocid<=293)) process=6;//"ss";
+			else if(fTsigprocid>=261 && fTsigprocid<=265) process=7;//"tb";
+			else if( (fTsigprocid>=287 && fTsigprocid<=290) || fTsigprocid==296) process=8;//"bb";
+			else if(fTsigprocid>=243 && fTsigprocid<=244) process=9;//"gg";
+			else if( (fTsigprocid>=258 && fTsigprocid<=259) || (fTsigprocid>=294 && fTsigprocid<=295) ) process=10;//"sg";
+			fTprocess=process;
 		}
 	} else {
           // Just store the number of primary vertices
@@ -1974,6 +1992,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("M12"              ,&fTSUSYScanM12     ,"M12/F");
         fEventTree->Branch("signMu"           ,&fTSUSYScanMu      ,"signMu/F");
         fEventTree->Branch("A0"               ,&fTSUSYScanA0      ,"A0/F");
+        fEventTree->Branch("process"          ,&fTprocess         ,"process/I");
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
 	fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/F");
@@ -2528,7 +2547,6 @@ void NTupleProducer::endJob(){
 
 	// Build index in tree for fast retrieval by run
 	fRunTree->BuildIndex("Run","0");
-
 	edm::LogVerbatim("NTP") << " ---------------------------------------------------";
 	edm::LogVerbatim("NTP") << " ==> NTupleProducer::endJob() ...";
 	edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
