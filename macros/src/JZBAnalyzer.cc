@@ -6,11 +6,11 @@
 
 using namespace std;
 
-JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning, bool isModelScan) 
+JZBAnalyzer::JZBAnalyzer(TTree *tree, std::string dataType, bool fullCleaning, bool isModelScan,bool makeSmall) 
   : TreeAnalyzerBase(tree) {
 f_isModelScan=isModelScan;
-if(whichanalysis!=2)   fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning,isModelScan);
-if(whichanalysis!=1)   fJZBPFAnalysis = new JZBPFAnalysis(fTR,dataType,fullCleaning,isModelScan);
+if(whichanalysis!=2)   fJZBAnalysis = new JZBAnalysis(fTR,dataType,fullCleaning,isModelScan,makeSmall);
+if(whichanalysis!=1)   fJZBPFAnalysis = new JZBPFAnalysis(fTR,dataType,fullCleaning,isModelScan,makeSmall);
 }
 
 JZBAnalyzer::~JZBAnalyzer(){

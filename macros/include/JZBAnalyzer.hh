@@ -12,7 +12,7 @@
 
 class JZBAnalyzer : public TreeAnalyzerBase {
 public:
-  JZBAnalyzer(TTree *tree = 0, std::string dataType="mc", bool fullCleaning=false , bool isModelScan=false);
+  JZBAnalyzer(TTree *tree = 0, std::string dataType="mc", bool fullCleaning=false , bool isModelScan=false, bool makeSmall=false);
   virtual ~JZBAnalyzer();
   void BeginJob(string data_PileUp, string mc_PileUp);
   void EndJob();
@@ -30,6 +30,7 @@ private:
   TString fOutputFile;
   string outputFileName_;
   bool f_isModelScan;
+  bool f_makeSmall;
 
 };
 #endif

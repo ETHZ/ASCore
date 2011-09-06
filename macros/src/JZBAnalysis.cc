@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.53 $";
+string sjzbversion="$Revision: 1.54 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.54  2011/09/05 16:25:47  buchmann
+Included v8 for dimuon triggers
+
 Revision 1.53  2011/09/01 07:20:20  buchmann
 Updated trigger paths
 
@@ -497,8 +500,8 @@ TTree *myInfo;
 nanoEvent nEvent;
 
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan) :
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan){
+JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall) :
+  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall){
   //	Util::SetStyle();	
   //	setTDRStyle();	
 }
@@ -930,7 +933,7 @@ void JZBAnalysis::Analyze() {
   
   // Good event requirement: essentially vertex requirements
   if ( !IsGoodEvent() ) {
-    if (isMC) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
   counters[EV].fill("... pass good event requirements");
@@ -1025,7 +1028,7 @@ void JZBAnalysis::Analyze() {
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
   if(sortedGoodLeptons.size() < 2) {
-    if (isMC) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
     
@@ -1038,7 +1041,7 @@ void JZBAnalysis::Analyze() {
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
   }
   if(PosLepton2 == sortedGoodLeptons.size()) {
-    if (isMC) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
   counters[EV].fill("... has at least 2 OS leptons");
@@ -1073,7 +1076,7 @@ void JZBAnalysis::Analyze() {
   } else {
       
     //If there are less than two leptons the event is not considered
-    if (isMC) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
     
   }

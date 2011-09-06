@@ -33,7 +33,7 @@ struct PFlepton {
 
 class JZBPFAnalysis : public UserAnalysisBase{
 public:
-  JZBPFAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false);
+  JZBPFAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false);
   virtual ~JZBPFAnalysis();
   const bool IsCustomMu(const int);
   const bool IsCustomEl(const int);
@@ -80,6 +80,7 @@ private:
   std::string fDataType_;
   bool fFullCleaning_;
   bool fisModelScan;
+  bool fmakeSmall;
 
   TRandom* rand_;
 

@@ -16,12 +16,15 @@ using namespace std;
 
 const int particleflowtypes=3+1;//  this is pf1,pf2,pf3 -- all of them get saved.  (the +1 is so that we can access pf1 with pfX[1] instead of [0] 
 
-string sjzbPFversion="$Revision: 1.21 $";
+string sjzbPFversion="$Revision: 1.22 $";
 string sjzbPFinfo="";
 
 /*
 
 $Log: JZBPFAnalysis.cc,v $
+Revision 1.22  2011/08/30 14:06:38  buchmann
+Bringing mSUGRA scans to JZB: Parameters introduced, PDF weights implemented for PDF systematics; also had to deactivate some PF variables as they are no longer in the NTuple
+
 Revision 1.21  2011/07/22 06:25:37  buchmann
 Updated implementation of SUSY scan for JZB
 
@@ -496,8 +499,8 @@ TTree *InfoTree;
 nanoPFEvent npfEvent;
 
 
-JZBPFAnalysis::JZBPFAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan) :
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning), fisModelScan(isModelScan) {
+JZBPFAnalysis::JZBPFAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall) :
+  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning), fisModelScan(isModelScan), fmakeSmall(makeSmall) {
   //	Util::SetStyle();	
   //	setTDRStyle();	
 }
