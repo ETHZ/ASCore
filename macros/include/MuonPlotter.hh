@@ -79,14 +79,14 @@ public:
 		QCD1000MG,
 		gNSAMPLES
 	};
-	enum gFPSwitch{
-		SigSup,
-		ZDecay
-	};
 	enum gHiLoSwitch{
 		HighPt,
 		LowPt,
 		TauChan
+	};
+	enum gFPSwitch{
+		SigSup,
+		ZDecay
 	};
 	enum gRegion {
 		region_begin,
@@ -254,9 +254,11 @@ public:
 	class Sample{
 	public:
 		Sample(){};
+		~Sample(){};
 		
 		TString name;
 		TString sname;
+		TString location;
 		TFile *file;
 		TTree *tree;
 		float lumi;
@@ -264,11 +266,22 @@ public:
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
 		Region region[gNREGIONS][2];
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
-		KinPlots    kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
-		HWWPlots    hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
-		IsoPlots    isoplots[2]; // e and mu
+		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
+		HWWPlots hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
+		IsoPlots isoplots[2]; // e and mu
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
+
+		TTree* getTree(){
+			file = TFile::Open(location);
+			tree = (TTree*)file->Get("Analysis");
+			return tree;
+		}
+		
+		void cleanUp(){
+			tree = NULL;
+			file->Close();
+		}
 	};
 	
 	MuonPlotter();
@@ -289,11 +302,6 @@ public:
 	
 	//////////////////////////////
 	// Plots
-	void makeMufRatioPlots(bool = false, gHiLoSwitch = HighPt);
-	void makeMupRatioPlots(bool = false, gHiLoSwitch = HighPt);
-	void makeElfRatioPlots(bool = false, gHiLoSwitch = HighPt);
-	void makeElpRatioPlots(bool = false, gHiLoSwitch = HighPt);
-
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
 	

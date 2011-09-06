@@ -186,21 +186,21 @@ void MuonPlotter::init(TString filename){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
-	// fMCBG.push_back(TTJets);
-	// fMCBG.push_back(TJets_t);
-	// fMCBG.push_back(TJets_tW);
-	// fMCBG.push_back(TJets_s);
-	// fMCBG.push_back(WJets);
-	// fMCBG.push_back(DYJets10to50);
-	// fMCBG.push_back(DYJets50);
-	// fMCBG.push_back(GJets40);
-	// fMCBG.push_back(GJets100);
-	// fMCBG.push_back(GJets200);
-	// fMCBG.push_back(WW);
-	// fMCBG.push_back(WZ);
-	// fMCBG.push_back(ZZ);
-	// // fMCBG.push_back(VVTo4L);
-	// fMCBG.push_back(GVJets);
+	fMCBG.push_back(TTJets);
+	fMCBG.push_back(TJets_t);
+	fMCBG.push_back(TJets_tW);
+	fMCBG.push_back(TJets_s);
+	fMCBG.push_back(WJets);
+	fMCBG.push_back(DYJets10to50);
+	fMCBG.push_back(DYJets50);
+	fMCBG.push_back(GJets40);
+	fMCBG.push_back(GJets100);
+	fMCBG.push_back(GJets200);
+	fMCBG.push_back(WW);
+	fMCBG.push_back(WZ);
+	fMCBG.push_back(ZZ);
+	// fMCBG.push_back(VVTo4L);
+	fMCBG.push_back(GVJets);
 
 	// fMCBG.push_back(QCD5);
 	// fMCBG.push_back(QCD15);
@@ -229,25 +229,25 @@ void MuonPlotter::init(TString filename){
 	fMCBGSig = fMCBG;
 	fMCBGSig.push_back(LM6);
 
-	// fMCBGMuEnr.push_back(TTJets);
-	// fMCBGMuEnr.push_back(TJets_t);
-	// fMCBGMuEnr.push_back(TJets_tW);
-	// fMCBGMuEnr.push_back(TJets_s);
-	// fMCBGMuEnr.push_back(WJets);
-	// fMCBGMuEnr.push_back(DYJets10to50);
-	// fMCBGMuEnr.push_back(DYJets50);
-	// fMCBGMuEnr.push_back(GJets40);
-	// fMCBGMuEnr.push_back(GJets100);
-	// fMCBGMuEnr.push_back(GJets200);
-	// fMCBGMuEnr.push_back(WW);
-	// fMCBGMuEnr.push_back(WZ);
-	// fMCBGMuEnr.push_back(ZZ);
-	// // fMCBGMuEnr.push_back(VVTo4L);
-	// fMCBGMuEnr.push_back(GVJets);
+	fMCBGMuEnr.push_back(TTJets);
+	fMCBGMuEnr.push_back(TJets_t);
+	fMCBGMuEnr.push_back(TJets_tW);
+	fMCBGMuEnr.push_back(TJets_s);
+	fMCBGMuEnr.push_back(WJets);
+	fMCBGMuEnr.push_back(DYJets10to50);
+	fMCBGMuEnr.push_back(DYJets50);
+	fMCBGMuEnr.push_back(GJets40);
+	fMCBGMuEnr.push_back(GJets100);
+	fMCBGMuEnr.push_back(GJets200);
+	fMCBGMuEnr.push_back(WW);
+	fMCBGMuEnr.push_back(WZ);
+	fMCBGMuEnr.push_back(ZZ);
+	// fMCBGMuEnr.push_back(VVTo4L);
+	fMCBGMuEnr.push_back(GVJets);
 	fMCBGMuEnr.push_back(QCDMuEnr10);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
-	fMCBGMuEnrSig.push_back(LM0);
+	fMCBGMuEnrSig.push_back(LM6);
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
@@ -375,10 +375,7 @@ void MuonPlotter::readSamples(const char* filename){
 
 			IN.getline(buffer, 200, '\n');
 			sscanf(buffer, "File\t%s", StringValue);
-			TFile *f = TFile::Open(StringValue);
-			s->file = f;
-			s->tree = (TTree*)f->Get("Analysis");
-			if(s->tree == NULL){ cout << " Tree not found in file!" << endl; break; }
+			s->location = TString(StringValue);
 
 			IN.getline(buffer, 200, '\n');
 			sscanf(buffer, "Lumi\t%f", &ParValue);
@@ -397,8 +394,6 @@ void MuonPlotter::readSamples(const char* filename){
 				cout << "  New sample added: " << s->name << endl;
 				cout << "   Sample no.  " << counter << endl;
 				cout << "   Short name: " << s->sname << endl;
-				cout << "   File:       " << (s->file)->GetName() << endl;
-				cout << "   Events:     " << s->tree->GetEntries() << endl;
 				cout << "   Lumi:       " << s->lumi << endl;
 				cout << "   Color:      " << s->color << endl;
 				cout << "   DataMC:     " << s->datamc << endl;
@@ -464,13 +459,12 @@ const double *MuonPlotter::getEtaBins (gChannel chan){
 
 //____________________________________________________________________________
 void MuonPlotter::doAnalysis(){
-	sandBox();
-	return;
+	// sandBox();
+	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fLumiNorm = 976.;
 
-	// sandBox();
 	// makePileUpPlots();
 	// printSyncExercise();
 	// makeIsoVsMETPlot(QCDMuEnr10);
@@ -478,11 +472,11 @@ void MuonPlotter::doAnalysis(){
 	
 	// makeHWWPlots();
 
-	// printOrigins();
-	// makeMuIsolationPlots();
-	// makeElIsolationPlots();
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	printOrigins();
+	makeMuIsolationPlots();
+	makeElIsolationPlots();
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotCustom();
 	// makeMETvsHTPlotTau();
@@ -503,11 +497,6 @@ void MuonPlotter::doAnalysis(){
 	// makeFRvsPtPlotsForPAS(Electron);
 	// makeFRvsEtaPlotsForPAS(Muon);
 	// makeFRvsEtaPlotsForPAS(Electron);
-
-	// makeMufRatioPlots(false);
-	// makeMupRatioPlots(false);
-	// makeElfRatioPlots(false);
-	// makeElpRatioPlots(false);
 
 	// time_t rawtime;
 	// struct tm* timeinfo;
@@ -537,9 +526,9 @@ void MuonPlotter::doAnalysis(){
 	// fOUTSTREAM.close();
 	// fOUTSTREAM2.close();
 	// 
-	// makeIntMCClosure( fOutputDir + "MCClosure.txt");	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
 	// makeTTbarClosure();
-	// cout << endl;
+	cout << endl;
 }
 
 //____________________________________________________________________________
@@ -563,7 +552,7 @@ void MuonPlotter::sandBox(){
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 		
-		TTree *tree = S->tree;		
+		TTree *tree = S->getTree();
 		tree->ResetBranchAddresses();
 		if(S->datamc < 1) Init(tree);
 		if(S->datamc > 0) InitMC(tree);
@@ -585,6 +574,7 @@ void MuonPlotter::sandBox(){
 				}
 			}
 		}
+		S->cleanUp();
 	}
 	
 	printObject(hdphi1_da, "DR_1Jet_Data", "PEX");
@@ -684,7 +674,7 @@ void MuonPlotter::makePileUpPlots(){
 			resetHypLeptons();
 			fDoCounting = false;
 		
-			TTree *tree = S->tree;
+			TTree *tree = S->getTree();
 			tree->ResetBranchAddresses();
 			if(S->datamc < 1) Init(tree);
 			if(S->datamc > 0) InitMC(tree);
@@ -711,6 +701,7 @@ void MuonPlotter::makePileUpPlots(){
 					}
 				}
 			}
+			S->cleanUp();
 		}
 	
 		mu_ratio->Divide(mu_ntight, mu_nloose, 1., 1., "B");
@@ -878,7 +869,7 @@ void MuonPlotter::doLoop(){
 		
 		bookHistos(S);
 		
-		TTree *tree = S->tree;
+		TTree *tree = S->getTree();
 		const bool isdata = (S->datamc)==0;
 
 		// Stuff to execute for each sample BEFORE looping on the events
@@ -938,6 +929,7 @@ void MuonPlotter::doLoop(){
 		writeSigGraphs(S, EMu,      LowPt,  pFile);
 
 		deleteHistos(S);
+		S->cleanUp();
 	}
 
 	pFile->Write();
@@ -1090,7 +1082,7 @@ void MuonPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(Muon
 		TTree *tree = NULL;
 		for(size_t i = 0; i < mcsamples.size(); ++i){
 			int index = mcsamples[i];
-			tree = fSamples[index]->tree;
+			tree = fSamples[index]->getTree();
 			hnt20[i] = new TH1D(Form("nt20_%s", fSamples[index]->sname.Data()), "Observed Nt20", getNPt2Bins(Muon), getPt2Bins(Muon));
 			hnt10[i] = new TH1D(Form("nt10_%s", fSamples[index]->sname.Data()), "Observed Nt10", getNPt2Bins(Muon), getPt2Bins(Muon));
 			hnt01[i] = new TH1D(Form("nt01_%s", fSamples[index]->sname.Data()), "Observed Nt01", getNPt2Bins(Muon), getPt2Bins(Muon));
@@ -1143,6 +1135,7 @@ void MuonPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(Muon
 			hnt01_stack->Add(hnt01[i]);
 			hnt00_stack->Add(hnt00[i]);
 			if(fVerbose > 1) cout << endl;
+			fSamples[index]->cleanUp();
 		}
 	}
 
@@ -1190,405 +1183,6 @@ void MuonPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(Muon
 	Util::PrintNoEPS(c10, tag + "ObservedNt10", fOutputDir + fOutputSubDir, fOutputFile);
 	Util::PrintNoEPS(c01, tag + "ObservedNt01", fOutputDir + fOutputSubDir, fOutputFile);
 	Util::PrintNoEPS(c00, tag + "ObservedNt00", fOutputDir + fOutputSubDir, fOutputFile);
-}
-
-//____________________________________________________________________________
-void MuonPlotter::makeMufRatioPlots(bool output, gHiLoSwitch hilo){
-	if(fVerbose>1) cout << "MuonPlotter::makeMufRatioPlots() ..." << endl;
-	fOutputSubDir = "Ratios/Muon";
-	TH1D *h_fdata1 = fillMuRatioPt(fMuData,    SigSup, output); // DoubleMu dataset
-	// TH1D *h_fdata2 = fillMuRatioPt(DoubleMu1, SigSup, output); // temp, for compilation
-	TH1D *h_fallmc = fillMuRatioPt(fMCBGMuEnr, SigSup, output);      // QCD MC
-	TH1D *h_fttbar = fillMuRatioPt(TTJets,   0, &MuonPlotter::isSigSupMuEvent, &MuonPlotter::isFakeMuon); // TTbarJets MC
-	h_fdata1->SetName("MufRatioData");
-	// h_fdata2->SetName("MufRatioDataMu");
-	h_fttbar->SetName("MufRatioTTbar");
-	h_fallmc->SetName("MufRatioAllMC");
-
-	setPlottingRange(h_fdata1, h_fttbar, h_fallmc);
-
-	// h_fdata1->SetMinimum(0.);
-	// h_fdata2->SetMinimum(0.);
-	// h_fttbar->SetMinimum(0.);
-	// h_fallmc->SetMinimum(0.);
-
-	h_fdata1->SetMarkerColor(kBlack);
-	// h_fdata2->SetMarkerColor(kBlue);
-	h_fttbar->SetMarkerColor(kBlue);
-	h_fallmc->SetMarkerColor(kRed);
-
-	h_fdata1->SetMarkerStyle(20);
-	// h_fdata2->SetMarkerStyle(20);
-	h_fttbar->SetMarkerStyle(20);
-	h_fallmc->SetMarkerStyle(20);
-
-	// h_fdata1->SetMarkerSize(2);
-	// h_fdata2->SetMarkerSize(2);
-	// h_fttbar->SetMarkerSize(2);
-	// h_fallmc->SetMarkerSize(2);
-
-	h_fdata1->SetLineWidth(2);
-	// h_fdata2->SetLineWidth(2);
-	h_fttbar->SetLineWidth(2);
-	h_fallmc->SetLineWidth(2);
-
-	h_fdata1->SetLineColor(kBlack);
-	// h_fdata2->SetLineColor(kBlue);
-	h_fttbar->SetLineColor(kBlue);
-	h_fallmc->SetLineColor(kRed);
-
-	h_fdata1->SetFillColor(kBlack);
-	// h_fdata2->SetFillColor(kBlue);
-	h_fttbar->SetFillColor(kBlue);
-	h_fallmc->SetFillColor(kRed);
-
-	plotRatioOverlay3H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-	// setPlottingRange(h_fdata1, h_fdata2);
-	// plotRatioOverlay2H(h_fdata1, "Data (Jet, L = 21.7 pb^{-1})", h_fdata2, "Data (Muon, L = 21.3 pb^{-1})");
-	// plotRatioOverlay3H(h_fdata2, "Data (Mu, L = 21.3 pb^{-1})", h_fttbar, "t#bar{t} Fake GenMatch", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	vector<int> mcsamples = fMCBGSig;
-	THStack *hntight_stack = new THStack("MufTightStack", "Stack of tight muons in sig. supp. selection");
-	THStack *hnloose_stack = new THStack("MufLooseStack", "Stack of loose muons in sig. supp. selection");
-	const unsigned int nmcsamples = mcsamples.size();
-	TH1D *hntight[nmcsamples];
-	TH1D *hnloose[nmcsamples];
-
-	for(size_t i = 0; i < mcsamples.size(); ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		Channel *cha = &S->region[Baseline][hilo].mm;
-		hntight[i] = cha->fntight->ProjectionX();
-		hnloose[i] = cha->fnloose->ProjectionX();
-		hntight[i]->SetFillColor(S->color);
-		hnloose[i]->SetFillColor(S->color);
-		float scale = fLumiNorm / S->lumi;
-		hntight[i]->Scale(scale);
-		hnloose[i]->Scale(scale);
-		hntight_stack->Add(hntight[i]);
-		hnloose_stack->Add(hnloose[i]);
-	}
-	hntight_stack->Draw();
-	hntight_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-	hnloose_stack->Draw();
-	hnloose_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-
-	TCanvas *c_tight = new TCanvas("MufStackTight", "Tight Stack", 0, 0, 800, 600);
-	TCanvas *c_loose = new TCanvas("MufStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-	// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-	TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-	for(size_t i = 0; i < nmcsamples; ++i){
-		int index = mcsamples[i];
-		leg->AddEntry(hntight[i], fSamples[index]->sname.Data(), "f");
-	}
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-
-	c_tight->cd();
-	gPad->SetLogy();
-	hntight_stack->Draw("hist");
-	leg->Draw();
-
-	c_loose->cd();
-	gPad->SetLogy();
-	hnloose_stack->Draw("hist");
-	leg->Draw();
-
-	Util::PrintNoEPS(c_tight, "MufRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-	Util::PrintNoEPS(c_loose, "MufRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeElfRatioPlots(bool output, gHiLoSwitch hilo){
-	if(fVerbose>1) cout << "MuonPlotter::makeElfRatioPlots() ..." << endl;
-	fOutputSubDir = "Ratios/Electron";
-	TH1D *h_fdata1 = fillElRatioPt(fEGData, SigSup, output);      // JetMET Dataset (Single Electron Selection)
-	// TH1D *h_fdata2 = fillElRatioPt(DoubleEle1, SigSup, output); // temp for compilation
-	TH1D *h_fallmc = fillElRatioPt(fMCBG,   SigSup, output);      // QCD MC
-	h_fdata1->SetName("ElfRatioData");
-	// h_fdata2->SetName("ElfRatioDataEl");
-	h_fallmc->SetName("ElfRatioAllMC");
-
-	setPlottingRange(h_fdata1, h_fallmc);
-	// setPlottingRange(h_fdata1, h_fdata2, h_fallmc);
-
-	// h_fdata1->SetMinimum(0.);
-	// h_fdata2->SetMinimum(0.);
-	// h_fallmc->SetMinimum(0.);
-
-	h_fdata1->SetMarkerColor(kBlack);
-	// h_fdata2->SetMarkerColor(kBlue);
-	h_fallmc->SetMarkerColor(kRed);
-
-	h_fdata1->SetMarkerStyle(20);
-	// h_fdata2->SetMarkerStyle(20);
-	h_fallmc->SetMarkerStyle(20);
-
-	// h_fdata1->SetMarkerSize(2);
-	// h_fdata2->SetMarkerSize(2);
-	// h_fallmc->SetMarkerSize(2);
-
-	h_fdata1->SetLineWidth(2);
-	// h_fdata2->SetLineWidth(2);
-	h_fallmc->SetLineWidth(2);
-
-	h_fdata1->SetLineColor(kBlack);
-	// h_fdata2->SetLineColor(kBlue);
-	h_fallmc->SetLineColor(kRed);
-
-	h_fdata1->SetFillColor(kBlack);
-	// h_fdata2->SetFillColor(kBlue);
-	h_fallmc->SetFillColor(kRed);
-
-	plotRatioOverlay2H(h_fdata1, "Data (Jet, L = 35 pb^{-1})", h_fallmc, "QCD, t#bar{t}+jets, V+jets");
-	// setPlottingRange(h_fdata1, h_fdata2);
-	// plotRatioOverlay2H(h_fdata1, "Data (Jet, L = 35 pb^{-1})", h_fdata2, "Data (EGamma, L = 35 pb^{-1})");
-
-	vector<int> mcsamples = fMCBGSig;
-	THStack *hntight_stack = new THStack("ElfTightStack", "Stack of tight electrons in sig. supp. selection");
-	THStack *hnloose_stack = new THStack("ElfLooseStack", "Stack of loose electrons in sig. supp. selection");
-	const unsigned int nmcsamples = mcsamples.size();
-	TH1D *hntight[nmcsamples];
-	TH1D *hnloose[nmcsamples];
-
-	for(size_t i = 0; i < mcsamples.size(); ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		Channel *cha = &S->region[Baseline][hilo].ee;
-		hntight[i] = cha->fntight->ProjectionX();
-		hnloose[i] = cha->fnloose->ProjectionX();
-		hntight[i]->SetFillColor(S->color);
-		hnloose[i]->SetFillColor(S->color);
-		float scale = fLumiNorm / S->lumi;
-		hntight[i]->Scale(scale);
-		hnloose[i]->Scale(scale);
-		hntight_stack->Add(hntight[i]);
-		hnloose_stack->Add(hnloose[i]);
-	}
-	hntight_stack->Draw();
-	hntight_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-	hnloose_stack->Draw();
-	hnloose_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-
-	TCanvas *c_tight = new TCanvas("ElfStackTight", "Tight Stack", 0, 0, 800, 600);
-	TCanvas *c_loose = new TCanvas("ElfStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-	// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-	TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-	for(size_t i = 0; i < nmcsamples; ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		leg->AddEntry(hntight[i], S->sname.Data(), "f");
-	}
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-
-	c_tight->cd();
-	// gPad->SetLogy();
-	hntight_stack->Draw("hist");
-	leg->Draw();
-
-	c_loose->cd();
-	// gPad->SetLogy();
-	hnloose_stack->Draw("hist");
-	leg->Draw();
-
-	Util::PrintNoEPS(c_tight, "ElfRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-	Util::PrintNoEPS(c_loose, "ElfRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeMupRatioPlots(bool output, gHiLoSwitch hilo){
-	if(fVerbose>1) cout << "MuonPlotter::makeMupRatioPlots() ..." << endl;
-	fOutputSubDir = "Ratios/Muon";
-	TH1D *h_pdata  = fillMuRatioPt(fMuData,    ZDecay, output);
-	TH1D *h_pallmc = fillMuRatioPt(fMCBGMuEnr, ZDecay, output);
-	TH1D *h_pttbar = fillMuRatioPt(TTJets, 0, &MuonPlotter::isGoodMuEvent, &MuonPlotter::isPromptMuon); // TTbar
-	h_pdata ->SetName("MupRatioData");
-	h_pttbar->SetName("MupRatioTTbar");
-	h_pallmc->SetName("MupRatioAllMC");
-
-	setPlottingRange(h_pdata, h_pttbar, h_pallmc);
-
-	h_pdata ->Draw("goff");
-	h_pttbar->Draw("goff");
-	h_pallmc->Draw("goff");
-
-	// h_pdata ->SetMinimum(0.);
-	// h_pttbar->SetMinimum(0.);
-	// h_pallmc->SetMinimum(0.);
-	// h_pttbar->SetMaximum(1.3);
-	// h_pallmc->SetMaximum(1.3);
-
-	h_pdata ->SetLineWidth(2);
-	h_pttbar->SetLineWidth(2);
-	h_pallmc->SetLineWidth(2);
-
-	h_pdata ->SetMarkerColor(kBlack);
-	h_pttbar->SetMarkerColor(kBlue);
-	h_pallmc->SetMarkerColor(kRed);
-
-	h_pdata ->SetMarkerStyle(20);
-	h_pttbar->SetMarkerStyle(20);
-	h_pallmc->SetMarkerStyle(20);
-
-	// h_pdata ->SetMarkerSize(2);
-	// h_pttbar->SetMarkerSize(2);
-	// h_pallmc->SetMarkerSize(2);
-
-	h_pdata ->SetLineColor(kBlack);
-	h_pttbar->SetLineColor(kBlue);
-	h_pallmc->SetLineColor(kRed);
-
-	h_pdata ->SetFillColor(kBlack);
-	h_pttbar->SetFillColor(kBlue);
-	h_pallmc->SetFillColor(kRed);
-
-	h_pdata ->SetDrawOption("E1");
-	h_pttbar->SetDrawOption("E1");
-	h_pallmc->SetDrawOption("E1");
-
-	// plotRatioOverlay3H(h_pdata, "Data (Jet, L = 21.7 pb^{-1})", h_pttbar, "t#bar{t} Prompt GenMatch", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
-	plotRatioOverlay3H(h_pdata, "Data (Mu, L = 21.3 pb^{-1})", h_pttbar, "t#bar{t} Prompt GenMatch", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	vector<int> mcsamples = fMCBGSig;
-	THStack *hntight_stack = new THStack("MupTightStack", "Stack of tight muons in Z decay selection");
-	THStack *hnloose_stack = new THStack("MupLooseStack", "Stack of loose muons in Z decay selection");
-	const unsigned int nmcsamples = mcsamples.size();
-	TH1D *hntight[nmcsamples];
-	TH1D *hnloose[nmcsamples];
-
-	for(size_t i = 0; i < mcsamples.size(); ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		Channel *cha = &S->region[Baseline][hilo].mm;
-		hntight[i] = cha->pntight->ProjectionX();
-		hnloose[i] = cha->pnloose->ProjectionX();
-		hntight[i]->SetFillColor(S->color);
-		hnloose[i]->SetFillColor(S->color);
-		float scale = fLumiNorm / S->lumi;
-		hntight[i]->Scale(scale);
-		hnloose[i]->Scale(scale);
-		hntight_stack->Add(hntight[i]);
-		hnloose_stack->Add(hnloose[i]);
-	}
-	hntight_stack->Draw();
-	hntight_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-	hnloose_stack->Draw();
-	hnloose_stack->GetXaxis()->SetTitle(convertVarName("MuPt[0]"));
-
-	TCanvas *c_tight = new TCanvas("MupStackTight", "Tight Stack", 0, 0, 800, 600);
-	TCanvas *c_loose = new TCanvas("MupStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-	TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-	// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-	for(size_t i = 0; i < nmcsamples; ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		leg->AddEntry(hntight[i], S->sname.Data(), "f");
-	}
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-
-	c_tight->cd();
-	// gPad->SetLogy();
-	hntight_stack->Draw("hist");
-	leg->Draw();
-
-	c_loose->cd();
-	// gPad->SetLogy();
-	hnloose_stack->Draw("hist");
-	leg->Draw();
-
-	Util::PrintNoEPS(c_tight, "MupRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-	Util::PrintNoEPS(c_loose, "MupRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	fOutputSubDir = "";
-}
-void MuonPlotter::makeElpRatioPlots(bool output, gHiLoSwitch hilo){
-	if(fVerbose>1) cout << "MuonPlotter::makeElpRatioPlots() ..." << endl;
-	fOutputSubDir = "Ratios/Electron";
-	TH1D *h_pdata  = fillElRatioPt(fEGData, ZDecay, output);
-	TH1D *h_pallmc = fillElRatioPt(fMCBG,   ZDecay, output);
-	h_pdata ->SetName("ElpRatioData");
-	h_pallmc->SetName("ElpRatioAllMC");
-
-	setPlottingRange(h_pdata, h_pallmc);
-
-	h_pdata ->Draw("goff");
-	h_pallmc->Draw("goff");
-
-	// h_pdata ->SetMinimum(0.);
-	// h_pallmc->SetMinimum(0.);
-
-	h_pdata ->SetLineWidth(2);
-	h_pallmc->SetLineWidth(2);
-
-	h_pdata ->SetMarkerColor(kBlack);
-	h_pallmc->SetMarkerColor(kRed);
-
-	h_pdata ->SetMarkerStyle(20);
-	h_pallmc->SetMarkerStyle(20);
-
-	h_pdata ->SetLineColor(kBlack);
-	h_pallmc->SetLineColor(kRed);
-
-	h_pdata ->SetFillColor(kBlack);
-	h_pallmc->SetFillColor(kRed);
-
-	h_pdata ->SetDrawOption("E1");
-	h_pallmc->SetDrawOption("E1");
-
-	setPlottingRange(h_pdata, h_pallmc);
-	plotRatioOverlay2H(h_pdata, "Data (EG, L = 35 pb^{-1})", h_pallmc, "QCD, t#bar{t}+jets, V+jets");
-
-	vector<int> mcsamples = fMCBGSig;
-	THStack *hntight_stack = new THStack("ElpTightStack", "Stack of tight electrons in Z decay selection");
-	THStack *hnloose_stack = new THStack("ElpLooseStack", "Stack of loose electrons in Z decay selection");
-	const unsigned int nmcsamples = mcsamples.size();
-	TH1D *hntight[nmcsamples];
-	TH1D *hnloose[nmcsamples];
-
-	for(size_t i = 0; i < mcsamples.size(); ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		Channel *cha = &S->region[Baseline][hilo].ee;
-		hntight[i] = cha->pntight->ProjectionX();
-		hnloose[i] = cha->pnloose->ProjectionX();
-		hntight[i]->SetFillColor(S->color);
-		hnloose[i]->SetFillColor(S->color);
-		float scale = fLumiNorm / S->lumi;
-		hntight[i]->Scale(scale);
-		hnloose[i]->Scale(scale);
-		hntight_stack->Add(hntight[i]);
-		hnloose_stack->Add(hnloose[i]);
-	}
-	hntight_stack->Draw();
-	hntight_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-	hnloose_stack->Draw();
-	hnloose_stack->GetXaxis()->SetTitle(convertVarName("ElPt[0]"));
-
-	TCanvas *c_tight = new TCanvas("ElpStackTight", "Tight Stack", 0, 0, 800, 600);
-	TCanvas *c_loose = new TCanvas("ElpStackLoose", "Loose Stack", 0, 0, 800, 600);
-
-	// TLegend *leg = new TLegend(0.13,0.60,0.38,0.88);
-	TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-	for(size_t i = 0; i < nmcsamples; ++i){
-		Sample *S = fSamples[mcsamples[i]];
-		leg->AddEntry(hntight[i], S->sname.Data(), "f");
-	}
-	leg->SetFillStyle(0);
-	leg->SetTextFont(42);
-	leg->SetBorderSize(0);
-
-	c_tight->cd();
-	// gPad->SetLogy();
-	hntight_stack->Draw("hist");
-	leg->Draw();
-
-	c_loose->cd();
-	// gPad->SetLogy();
-	hnloose_stack->Draw("hist");
-	leg->Draw();
-
-	Util::PrintNoEPS(c_tight, "ElpRatioTightStack", fOutputDir + fOutputSubDir, fOutputFile);
-	Util::PrintNoEPS(c_loose, "ElpRatioLooseStack", fOutputDir + fOutputSubDir, fOutputFile);	
-	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
@@ -1651,7 +1245,7 @@ void MuonPlotter::makeMuIsolationPlots(){
 	////////////////////////////////////////////////////
 	// Fill ttbar histos
 	// Sample loop
-	TTree *tree = fSamples[TTJets]->tree;
+	TTree *tree = fSamples[TTJets]->getTree();
 
 	// Event loop
 	tree->ResetBranchAddresses();
@@ -1731,6 +1325,7 @@ void MuonPlotter::makeMuIsolationPlots(){
 		// }
 		////////////////////////////////////////////////////
 	}
+	fSamples[TTJets]->cleanUp();
 	cout << endl;
 	////////////////////////////////////////////////////
 	
@@ -2042,7 +1637,7 @@ void MuonPlotter::makeElIsolationPlots(){
 	////////////////////////////////////////////////////
 	// Fill ttbar histos
 	// Sample loop
-	TTree *tree = fSamples[TTJets]->tree;
+	TTree *tree = fSamples[TTJets]->getTree();
 
 	// Event loop
 	tree->ResetBranchAddresses();
@@ -2108,6 +1703,7 @@ void MuonPlotter::makeElIsolationPlots(){
 		////////////////////////////////////////////////////
 	}
 	cout << endl;
+	fSamples[TTJets]->cleanUp();
 	////////////////////////////////////////////////////
 
 	// Create plots
@@ -3712,7 +3308,7 @@ void MuonPlotter::makeIsoVsMETPlot(gSample sample){
 	Style_t styles[nmetbins] = {20, 21, 22, 23, 34, 33, 29};
 	TH1F* hiso[nmetbins];
 	
-	TTree *tree = fSamples[sample]->tree;
+	TTree *tree = fSamples[sample]->getTree();
 	for(int i = 0; i < nmetbins; ++i){
 		TString name = Form("h%d",i+1);
 		hiso[i] = new TH1F(name, Form("MET%.0fto%.0f", metbins[i], metbins[i+1]), nisobins, 0., 1.);
@@ -3774,6 +3370,7 @@ void MuonPlotter::makeIsoVsMETPlot(gSample sample){
 	delete leg, c_temp;
 	for(int i = 0; i < nmetbins; ++i) hiso[i]->Delete();
 	fOutputSubDir = "";
+	fSamples[sample]->cleanUp();
 }
 
 //____________________________________________________________________________
@@ -3804,7 +3401,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 	if(fVerbose>2) cout << "---------------" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
 		int sample = samples[i];
-		TTree *tree = fSamples[sample]->tree;
+		TTree *tree = fSamples[sample]->getTree();
 		if(fVerbose>2) cout << "Producing ratios for " << fSamples[sample]->sname << endl;
 		tree->ResetBranchAddresses();
 		if(fSamples[sample]->datamc < 1) Init(tree);
@@ -3836,6 +3433,7 @@ TODO Fix treatment of statistical errors and luminosity scaling here!
 
 		}
 		cout << endl;
+		fSamples[sample]->cleanUp();
 
 		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << " / " << H_ntight->Integral() << endl;
 		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << " / " << H_nloose->Integral() << endl;
@@ -4494,7 +4092,7 @@ void MuonPlotter::NObs(gChannel chan, TH1D *&hist, vector<int> samples, bool(Muo
 		Sample *S = fSamples[samples[i]];
 		float scale = fLumiNorm / S->lumi;
 
-		TTree *tree = S->tree;
+		TTree *tree = S->getTree();
 		tree->ResetBranchAddresses();
 		Init(tree);
 		if (fChain == 0) return;
@@ -4511,6 +4109,7 @@ void MuonPlotter::NObs(gChannel chan, TH1D *&hist, vector<int> samples, bool(Muo
 			if((chan == Muon || chan == EMu) && NMus > 0) hist->Fill(MuPt[0], scale);
 			if( chan == Electron             && NEls > 0) hist->Fill(ElPt[0], scale);
 		}
+		S->cleanUp();
 	}	
 }
 void MuonPlotter::NObs(gChannel chan, TH1D *&hist, vector<int> samples, gRegion reg, gHiLoSwitch hilo){
@@ -6538,7 +6137,7 @@ void MuonPlotter::makeTTbarClosure(){
 	float nt_ee(0.), nl_ee(0.),  np_ee(0.), nf_ee(0.);
 
 	Sample *S = fSamples[TTJets];
-	TTree *tree = S->tree;
+	TTree *tree = S->getTree();
 	fCurrentSample = TTJets;
 
 	// Event loop
@@ -6624,6 +6223,7 @@ void MuonPlotter::makeTTbarClosure(){
 		}
 	}
 	cout << endl;
+	S->cleanUp();
 	// Scale by luminosity:
 	float scale = fLumiNorm / fSamples[TTJets]->lumi;
 	nt_mm*=scale; nl_mm*=scale; np_mm*=scale; nf_mm*=scale;
@@ -6783,7 +6383,7 @@ void MuonPlotter::printSyncExercise(){
 	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
 
 	Sample *S = fSamples[TTJetsSync];
-	TTree *tree = S->tree;
+	TTree *tree = S->getTree();
 	fCurrentSample = TTJetsSync;
 
 	// Counters
@@ -6911,6 +6511,7 @@ void MuonPlotter::printSyncExercise(){
 		, scale*(N_elel+N_mumu+N_elmu), N_elel+N_mumu+N_elmu) << endl;
 
 	fOUTSTREAM.close();
+	S->cleanUp();
 	fOutputSubDir = "";
 }
 
@@ -10070,13 +9671,15 @@ int MuonPlotter::hasLooseElectrons(){
 //____________________________________________________________________________
 int MuonPlotter::isSSLLEvent(int &ind1, int &ind2){
 	// Check first if there is a tight-tight pair in the event
-	if(int res = isSSEvent(ind1, &MuonPlotter::isTightMuon, ind2, &MuonPlotter::isTightElectron)) return res;
+	int res = isSSEvent(ind1, &MuonPlotter::isTightMuon, ind2, &MuonPlotter::isTightElectron);
+	if(res > 0) return res;
 	return isSSEvent(ind1, &MuonPlotter::isLooseMuon, ind2, &MuonPlotter::isLooseElectron);
 }
 int MuonPlotter::isOSLLEvent(int &ind1, int &ind2){
 	// Check first if there is a tight-tight pair in the event
-	if(int res = isOSEvent(ind1, &MuonPlotter::isTightMuon, ind2, &MuonPlotter::isTightElectron)) return res;
-	return isOSEvent(ind1, &MuonPlotter::isLooseMuon, ind2, &MuonPlotter::isLooseElectron);
+	int res = isOSEvent(ind1, &MuonPlotter::isTightMuon, ind2, &MuonPlotter::isTightElectron);
+	if(res > 0) return res;
+	else return isOSEvent(ind1, &MuonPlotter::isLooseMuon, ind2, &MuonPlotter::isLooseElectron);
 }
 int MuonPlotter::isSSEvent(int &ind1, bool(MuonPlotter::*muonSelector)(int), int &ind2, bool(MuonPlotter::*eleSelector)(int)){
 	// Looks for a SS pair of leptons with given object selectors
