@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <iostream>
 
 class MetaTreeClassBase {
 public :
@@ -197,15 +198,15 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
-      if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
-      }
-      tree = (TTree*)gDirectory->Get("Analysis");
-
-   }
-   Init(tree);
+   // if (tree == 0) {
+   //    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
+   //    if (!f) {
+   //       f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
+   //    }
+   //    tree = (TTree*)gDirectory->Get("Analysis");
+   // 
+   // }
+   // Init(tree);
 }
 
 MetaTreeClassBase::~MetaTreeClassBase()
