@@ -18,6 +18,7 @@
 #include "TMultiGraph.h"
 #include "TGaxis.h"
 
+#include <iostream>
 #include <iomanip>
 #include <time.h> // access to date/time
 
@@ -144,6 +145,7 @@ MuonPlotter::MuonPlotter(TString outputdir, TString outputfile){
 //____________________________________________________________________________
 MuonPlotter::~MuonPlotter(){
 	if(fOutputFile->IsOpen()) fOutputFile->Close();
+	fChain = 0;
 }
 
 //____________________________________________________________________________
@@ -251,21 +253,33 @@ void MuonPlotter::init(TString filename){
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
+	fMuData    .push_back(DoubleMu3);
+	fMuData    .push_back(DoubleMu4);
 	fMuHadData .push_back(MuHad1);
 	fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
 	fEGData    .push_back(DoubleEle2);
+	fEGData    .push_back(DoubleEle3);
+	fEGData    .push_back(DoubleEle4);
 	fEleHadData.push_back(EleHad1);
 	fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
 	fMuEGData  .push_back(MuEG2);
+	fMuEGData  .push_back(MuEG3);
+	fMuEGData  .push_back(MuEG4);
 
 	fHighPtData.push_back(DoubleMu1);
 	fHighPtData.push_back(DoubleMu2);
+	fHighPtData.push_back(DoubleMu3);
+	fHighPtData.push_back(DoubleMu4);
 	fHighPtData.push_back(DoubleEle1);
 	fHighPtData.push_back(DoubleEle2);
+	fHighPtData.push_back(DoubleEle3);
+	fHighPtData.push_back(DoubleEle4);
 	fHighPtData.push_back(MuEG1);
 	fHighPtData.push_back(MuEG2);
+	fHighPtData.push_back(MuEG3);
+	fHighPtData.push_back(MuEG4);
 
 	fLowPtData.push_back(MuHad1);
 	fLowPtData.push_back(MuHad2);
@@ -273,6 +287,8 @@ void MuonPlotter::init(TString filename){
 	fLowPtData.push_back(EleHad2);
 	fLowPtData.push_back(MuEG1);
 	fLowPtData.push_back(MuEG2);
+	fLowPtData.push_back(MuEG3);
+	fLowPtData.push_back(MuEG4);
 
 	bookRatioHistos();
 }
@@ -463,12 +479,12 @@ void MuonPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	fLumiNorm = 976.;
+	fLumiNorm = 2096.;
 
 	// makePileUpPlots();
 	// printSyncExercise();
-	// makeIsoVsMETPlot(QCDMuEnr10);
-	// makeIsoVsMETPlot(DoubleMu2);
+	makeIsoVsMETPlot(QCDMuEnr10);
+	makeIsoVsMETPlot(DoubleMu2);
 	
 	// makeHWWPlots();
 
@@ -485,49 +501,49 @@ void MuonPlotter::doAnalysis(){
 	makeRatioPlots(Electron);
 	makeNTightLoosePlots(Muon);
 	makeNTightLoosePlots(Electron);
-	
-	// makeFRvsPtPlots(Muon,     SigSup);
-	// makeFRvsPtPlots(Electron, SigSup);
-	// makeFRvsPtPlots(Muon,     ZDecay);
-	// makeFRvsPtPlots(Electron, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Electron);
+	// 
+	makeFRvsPtPlots(Muon,     SigSup);
+	makeFRvsPtPlots(Electron, SigSup);
+	makeFRvsPtPlots(Muon,     ZDecay);
+	makeFRvsPtPlots(Electron, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Electron);
 
 	// makeFRvsPtPlotsForPAS(Muon);
 	// makeFRvsPtPlotsForPAS(Electron);
 	// makeFRvsEtaPlotsForPAS(Muon);
 	// makeFRvsEtaPlotsForPAS(Electron);
 
-	// time_t rawtime;
-	// struct tm* timeinfo;
-	// time(&rawtime);
-	// timeinfo = localtime(&rawtime);
-	// // access a chararray containing the date with asctime(timeinfo)
-	// 
-	// TString tablefilename = fOutputDir + "Table2.tex";
-	// TString didarfilename = fOutputDir + "forDidar.txt";
-	// fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
-	// fOUTSTREAM << "==========================================================================================================" << endl;
-	// fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
-	// fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
-	// fOUTSTREAM << endl;
-	// 
-	// fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
-	// fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
-	// fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
-	// fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
-	// fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
-	// fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
-	// fOUTSTREAM2 << endl;
-	// for(size_t i = 0; i < gNREGIONS; ++i){
-	// 	TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
-	// 	makeIntPrediction(outputname, gRegion(i));
-	// }
-	// fOUTSTREAM.close();
-	// fOUTSTREAM2.close();
-	// 
-	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// makeTTbarClosure();
+	time_t rawtime;
+	struct tm* timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	// access a chararray containing the date with asctime(timeinfo)
+	
+	TString tablefilename = fOutputDir + "Table2.tex";
+	TString didarfilename = fOutputDir + "forDidar.txt";
+	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
+	fOUTSTREAM << "==========================================================================================================" << endl;
+	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
+	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM << endl;
+	
+	fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
+	fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
+	fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
+	fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
+	fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
+	fOUTSTREAM2 << endl;
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
+		makeIntPrediction(outputname, gRegion(i));
+	}
+	fOUTSTREAM.close();
+	fOUTSTREAM2.close();
+	
+	makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	makeTTbarClosure();
 	cout << endl;
 }
 
@@ -586,7 +602,7 @@ void MuonPlotter::sandBox(){
 //____________________________________________________________________________
 void MuonPlotter::makePileUpPlots(){
 	fOutputSubDir = "PileUp/";
-	bool write = false;
+	bool write = true;
 
 	TH1D *smu_nvertices, *dmu_nvertices, *sel_nvertices, *del_nvertices, *mue_nvertices;
 	TH1D *mu_ntight, *mu_nloose, *mu_ratio, *el_ntight, *el_nloose, *el_ratio;
@@ -605,10 +621,16 @@ void MuonPlotter::makePileUpPlots(){
 		vector<gSample> samples;
 		samples.push_back(DoubleMu1);
 		samples.push_back(DoubleMu2);
+		samples.push_back(DoubleMu3);
+		samples.push_back(DoubleMu4);
 		samples.push_back(MuEG1);
 		samples.push_back(MuEG2);
+		samples.push_back(MuEG3);
+		samples.push_back(MuEG4);
 		samples.push_back(DoubleEle1);
 		samples.push_back(DoubleEle2);
+		samples.push_back(DoubleEle3);
+		samples.push_back(DoubleEle4);
 
 		smu_nvertices = new TH1D("smu_nvertices", "smu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
 		dmu_nvertices = new TH1D("dmu_nvertices", "dmu_nvertices", FRatioPlots::nbins[3], FRatioPlots::xmin[3], FRatioPlots::xmax[3]);
@@ -917,7 +939,6 @@ void MuonPlotter::doLoop(){
 			fillElIsoPlots(i);
 
 		}
-		cout << endl;
 
 		// Stuff to execute for each sample AFTER looping on the events
 		writeHistos(S, pFile);
@@ -10496,6 +10517,6 @@ void MuonPlotter::drawTopLine(){
 	fLatex->DrawLatex(0.13,0.92, "CMS Preliminary");	
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(0.04);
-	fLatex->DrawLatex(0.70,0.92, "L_{int.} = 0.98 fb^{-1}");
+	fLatex->DrawLatex(0.70,0.92, "L_{int.} = 2.1 fb^{-1}");
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 }
