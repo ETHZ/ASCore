@@ -11,15 +11,20 @@ using namespace std;
 
 
 #define jMax 30  // do not touch this
-#define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.55 $";
+enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
+enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
+
+string sjzbversion="$Revision: 1.56 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.56  2011/09/06 09:27:15  buchmann
+changed jet eta cut from 2.6 to 3.0
+
 Revision 1.55  2011/09/06 09:09:40  buchmann
 Added a 'small' option, which leads to uninteresting events not being stored
 
@@ -244,22 +249,22 @@ public:
   int pfJetGoodNum20;
 
 
-  float recoilpt[rMax];
-  float dphiRecoilLep[rMax];
-  float vjetpt[rMax];
-  float vjeteta[rMax];
-  float vjetphi[rMax];
-  float recoilenergy[rMax];
-  float recoilphi[rMax];
-  float recoileta[rMax];
+  float recoilpt;
+  float dphiRecoilLep;
+  float vjetpt;
+  float vjeteta;
+  float vjetphi;
+  float recoilenergy;
+  float recoilphi;
+  float recoileta;
 
-  float met[metMax];
-  float metPhi[metMax];
-  float dphiMetLep[metMax];
-  float dphiMetJet[metMax];
-  float dphiMetSumJetPt[metMax];
-  float metPerp[metMax];
-  float metPar[metMax];
+  float met[mettype_max];
+  float metPhi[mettype_max];
+  float dphiMetLep[mettype_max];
+  float dphiMetJet[mettype_max];
+  float dphiMetSumJetPt[mettype_max];
+  float metPerp[mettype_max];
+  float metPar[mettype_max];
   int eventNum;
   int runNum;
   int lumi;
@@ -268,11 +273,10 @@ public:
   float totEvents; // tot events processed by the ntuple producer (job submission efficiency), no need to keep this as int, better as float
   int badJet;
 
-  float jzb[rMax];
-  float pfjzb[rMax];
-  float sjzb[rMax]; // smeared JZB
-  float dphi_sumJetVSZ[rMax];
-  float sumJetPt[rMax];
+  float jzb[jzbtype_max];
+  float sjzb[jzbtype_max]; // smeared JZB
+  float dphi_sumJetVSZ[jzbtype_max];
+  float sumJetPt[jzbtype_max];
 
   float weight;
   int NPdfs;
@@ -403,19 +407,17 @@ void nanoEvent::reset()
   } 
   leptonPairNum=0;
  
-  for(int rCounter=0;rCounter<rMax;rCounter++){
-    recoilpt[rCounter]=0;
-    dphiRecoilLep[rCounter]=0;
-    vjetpt[rCounter]=0;
-    vjeteta[rCounter]=0;
-    vjetphi[rCounter]=0;
-    recoilenergy[rCounter]=0;
-    recoilphi[rCounter]=0;
-    recoileta[rCounter]=0;
-  }
+  recoilpt=0;
+  dphiRecoilLep=0;
+  vjetpt=0;
+  vjeteta=0;
+  vjetphi=0;
+  recoilenergy=0;
+  recoilphi=0;
+  recoileta=0;
 
     
-  for(int metCounter=0;metCounter<metMax;metCounter++){
+  for(int metCounter=int(mettype_min);metCounter<int(mettype_max);metCounter++){
     met[metCounter]=0;
     metPhi[metCounter]=0;
     dphiMetLep[metCounter]=0;
@@ -478,7 +480,7 @@ void nanoEvent::reset()
   badJet=0;
   totEvents=0;
 
-  for(int rCounter=0;rCounter<rMax;rCounter++){
+  for(int rCounter=int(jzbtype_min);rCounter<int(jzbtype_max);rCounter++){
     jzb[rCounter]=0;
     sjzb[rCounter]=0;
     dphi_sumJetVSZ[rCounter]=0;
@@ -514,22 +516,10 @@ JZBAnalysis::~JZBAnalysis(){
 
 void JZBAnalysis::Begin(TFile *f){
 
-  fHistFile=f;
-	
+  f->cd();
   rand_ = new TRandom();
 
   TH1::AddDirectory(kFALSE);
-
-  // Define the histograms
-  fHElectronPtEta = new TH2F("fHElectronPtEta","fHElectronPtEta",300,0,300,300,-3.0,3.0);
-  fHElectronIDPtEta  = new TH2F("fHElectronIDPtEta","fHElectronIDPtEta",300,0,300,300,-3.0,3.0);
-  fHElectronIDIsoPtEta  = new TH2F("fHElectronIDIsoPtEta","fHElectronIDIsoPtEta",300,0,300,300,-3.0,3.0);
-  for(int i =0;i<20;i++){string title = "fHMee"+any2string(i);fHMee[i] = new TH1F(title.c_str(),title.c_str(),200,0,200);}
-  fHMeeDPhi  = new TH2F("fHMeeDPhi","fHMeeDPhi",300,0,300,350,0,3.5);
-  fHMeePt    = new TH2F("fHMeePt","fHMeePt",300,0,300,300,0,100);;
-  fHMDPhiPt  = new TH2F("fHMDPhiPt","fHMDPhiPt",350,0,3.5,300,0,100);
-  fHMZPtJ1Pt = new TH2F("fHMZPtJ1Pt","fHMZPtJ1Pt",300,0,300,300,0,300);
-  fHMZPtuJ1Pt = new TH2F("fHMZPtuJ1Pt","fHMZPtuJ1Pt",300,0,300,300,0,300);
 
   myInfo = new TTree("info","info/S");
   TString *user = new TString();
@@ -652,23 +642,23 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("leptonPairDphi",nEvent.leptonPairDphi,"leptonPairDphi[leptonPairNum]/F");
   myTree->Branch("leptonPairId",nEvent.leptonPairId,"leptonPairId[leptonPairNum]/I");
 
-  myTree->Branch("recoilpt",nEvent.recoilpt,"recoilpt[30]/F");
-  myTree->Branch("dphiRecoilLep",nEvent.dphiRecoilLep,"dphiRecoilLep[30]/F");
-  myTree->Branch("recoilphi",nEvent.recoilphi,"recoilphi[30]/F");
-  myTree->Branch("recoileta",nEvent.recoileta,"recoileta[30]/F");
-  myTree->Branch("recoilenergy",nEvent.recoilenergy,"recoilenergy[30]/F");
+  myTree->Branch("recoilpt",&nEvent.recoilpt,"recoilpt/F");
+  myTree->Branch("dphiRecoilLep",&nEvent.dphiRecoilLep,"dphiRecoilLep/F");
+  myTree->Branch("recoilphi",&nEvent.recoilphi,"recoilphi/F");
+  myTree->Branch("recoileta",&nEvent.recoileta,"recoileta/F");
+  myTree->Branch("recoilenergy",&nEvent.recoilenergy,"recoilenergy/F");
 
-  myTree->Branch("vjetpt",nEvent.vjetpt,"vjetpt[30]/F");
-  myTree->Branch("vjeteta",nEvent.vjeteta,"vjeteta[30]/F");
-  myTree->Branch("vjetphi",nEvent.vjetphi,"vjetphi[30]/F");
+  myTree->Branch("vjetpt",&nEvent.vjetpt,"vjetpt/F");
+  myTree->Branch("vjeteta",&nEvent.vjeteta,"vjeteta/F");
+  myTree->Branch("vjetphi",&nEvent.vjetphi,"vjetphi/F");
 
-  myTree->Branch("met",nEvent.met,"met[30]/F");
-  myTree->Branch("metPhi",nEvent.metPhi,"metPhi[30]/F");
-  myTree->Branch("dphiMetLep",nEvent.dphiMetLep,"dphiMetLep[30]/F");
-  myTree->Branch("dphiMetJet",nEvent.dphiMetJet,"dphiMetJet[30]/F");
-  myTree->Branch("dphiMetSumJetPt",nEvent.dphiMetSumJetPt,"dphiMetSumJetPt[30]/F");
-  myTree->Branch("metPerp",nEvent.metPerp,"metPerp[30]/F");
-  myTree->Branch("metPar",nEvent.metPar,"metPar[30]/F");
+  myTree->Branch("met",nEvent.met,Form("met[%d]/F",int(mettype_max)));
+  myTree->Branch("metPhi",nEvent.metPhi,Form("metPhi[%d]/F",int(mettype_max)));
+  myTree->Branch("dphiMetLep",nEvent.dphiMetLep,Form("dphiMetLep[%d]/F",int(mettype_max)));
+  myTree->Branch("dphiMetJet",nEvent.dphiMetJet,Form("dphiMetJet[%d]/F",int(mettype_max)));
+  myTree->Branch("dphiMetSumJetPt",nEvent.dphiMetSumJetPt,Form("dphiMetSumJetPt[%d]/F",int(mettype_max)));
+  myTree->Branch("metPerp",nEvent.metPerp,Form("metPerp[%d]/F",int(mettype_max)));
+  myTree->Branch("metPar",nEvent.metPar,Form("metPar[%d]/F",int(mettype_max)));
 
 
   myTree->Branch("eventNum",&nEvent.eventNum,"eventNum/I");
@@ -720,10 +710,11 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNum55",&nEvent.pfJetGoodNum55,"pfJetGoodNum55/I");
   myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
-  myTree->Branch("jzb",nEvent.jzb,"jzb[30]/F");
-  myTree->Branch("sjzb",nEvent.sjzb,"sjzb[30]/F");
-  myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,"dphi_sumJetVSZ[30]/F");
-  myTree->Branch("sumJetPt",nEvent.sumJetPt,"sumJetPt[30]/F");
+  myTree->Branch("jzb",nEvent.jzb,Form("jzb[%d]/F",int(jzbtype_max)));
+  myTree->Branch("sjzb",nEvent.sjzb,Form("sjzb[%d]/F",int(jzbtype_max)));
+  myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,Form("dphi_sumJetVSZ[%d]/F",int(jzbtype_max)));
+  myTree->Branch("sumJetPt",nEvent.sumJetPt,Form("sumJetPt[%d]/F",int(jzbtype_max)));
+
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
@@ -735,9 +726,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("A0",&nEvent.A0,"A0/F");
   myTree->Branch("M12",&nEvent.M12,"M12/F");
   myTree->Branch("signMu",&nEvent.signMu,"signMu/F");
-  myTree->Branch("pdfW",nEvent.pdfW,"pdfW[100]/F");
-  myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
+  myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
+  myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -1278,32 +1269,31 @@ void JZBAnalysis::Analyze() {
   int index;
   if(recoil.Pt()!=0) // so far we had not added the lepton system in the recoil, so our recoil represents the sumJPt (ugly but it should work)
     {
-      index=0;
-      nEvent.vjetpt[index]=recoil.Pt();  // vjet = vector sum of jets, vjetpt = sumJPt
-      nEvent.vjeteta[index]=recoil.Eta();
-      nEvent.vjetphi[index]=recoil.Phi();
+      nEvent.vjetpt=recoil.Pt();  // vjet = vector sum of jets, vjetpt = sumJPt
+      nEvent.vjeteta=recoil.Eta();
+      nEvent.vjetphi=recoil.Phi();
     }
     
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
   TLorentzVector s2 = sortedGoodLeptons[PosLepton2].p;
 
-  nEvent.met[0]=fTR->RawMET;
-  nEvent.met[1]=0.; // Not there anymore: fTR->MuJESCorrMET;
-  nEvent.met[2]=fTR->TCMET;
-  nEvent.met[3]=fTR->MuJESCorrMET;
-  nEvent.met[4]=fTR->PFMET;
-  nEvent.met[5]=fTR->SumEt;
+  nEvent.met[RAW]=fTR->RawMET;
+  nEvent.met[DUM]=0.; // Not there anymore: fTR->MuJESCorrMET;
+  nEvent.met[TCMET]=fTR->TCMET;
+  nEvent.met[MUJESCORRMET]=fTR->MuJESCorrMET;
+  nEvent.met[PFMET]=fTR->PFMET;
+  nEvent.met[SUMET]=fTR->SumEt;
 
   TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
   TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
-  nEvent.metPhi[0]=caloMETvector.Phi();
-  nEvent.metPhi[1]=0.;
-  nEvent.metPhi[2]=tcMETvector.Phi();
-  nEvent.metPhi[3]=0.;
-  nEvent.metPhi[4]=pfMETvector.Phi();
-  nEvent.metPhi[5]=0.;
+  nEvent.metPhi[RAW]=caloMETvector.Phi();
+  nEvent.metPhi[DUM]=0.;
+  nEvent.metPhi[TCMET]=tcMETvector.Phi();
+  nEvent.metPhi[MUJESCORRMET]=0.;
+  nEvent.metPhi[PFMET]=pfMETvector.Phi();
+  nEvent.metPhi[SUMET]=0.;
     
   // Remove electrons from MET
   caloVector = -caloMETvector;
@@ -1315,38 +1305,37 @@ void JZBAnalysis::Analyze() {
   tcNoCutsJetVector = -tcMETvector - s1 - s2;
 
   // #--- different versions of JZB
-  nEvent.dphi_sumJetVSZ[0]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
-  nEvent.sumJetPt[0]=caloVector.Pt();
-  nEvent.jzb[0] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
+  nEvent.dphi_sumJetVSZ[CALOJZB]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
+  nEvent.sumJetPt[CALOJZB]=caloVector.Pt();
+  nEvent.jzb[CALOJZB] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
     
-  nEvent.dphi_sumJetVSZ[1] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
-  nEvent.sumJetPt[1] = pfNoCutsJetVector.Pt(); 
-  nEvent.jzb[1] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
-  nEvent.sjzb[1] = GausRandom(nEvent.jzb[1]+1.3,7); // to be used with pfMET
+  nEvent.dphi_sumJetVSZ[PFJZB] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
+  nEvent.sumJetPt[PFJZB] = pfNoCutsJetVector.Pt(); 
+  nEvent.jzb[PFJZB] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
+  nEvent.sjzb[PFJZB] = GausRandom(nEvent.jzb[1]+1.3,7); // to be used with pfMET
 
-  nEvent.dphi_sumJetVSZ[2] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
-  nEvent.sumJetPt[2] = recoil.Pt(); 
-  nEvent.jzb[2] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
-  nEvent.jzb[3] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
-  nEvent.sumJetPt[3] = sumOfPFJets.Pt();
+  nEvent.dphi_sumJetVSZ[RECOILJZB] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
+  nEvent.sumJetPt[RECOILJZB] = recoil.Pt(); 
+  nEvent.jzb[RECOILJZB] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
+  nEvent.jzb[PFRECOILJZB] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
+  nEvent.sumJetPt[PFRECOILJZB] = sumOfPFJets.Pt();
 
-  nEvent.dphi_sumJetVSZ[4] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
-  nEvent.sumJetPt[4] = tcNoCutsJetVector.Pt(); 
-  nEvent.jzb[4] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
+  nEvent.dphi_sumJetVSZ[TCJZB] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
+  nEvent.sumJetPt[TCJZB] = tcNoCutsJetVector.Pt(); 
+  nEvent.jzb[TCJZB] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
 
   // --- recoil met and pf recoil met
-  nEvent.met[6] = (sumOfPFJets + s1 + s2).Pt(); 
-  nEvent.met[7] = (recoil + s1 + s2).Pt();
+  nEvent.met[PFRECOILMET] = (sumOfPFJets + s1 + s2).Pt(); 
+  nEvent.met[RECOILMET] = (recoil + s1 + s2).Pt();
     
   // ----------------------------------------
   recoil+=s1+s2;   // now add also the leptons to the recoil! to form the complete recoil model
 
   if(recoil.Pt()!=0)
     {
-      index=0;
-      nEvent.recoilpt[index]=recoil.Pt();
-      nEvent.recoileta[index]=recoil.Eta();
-      nEvent.recoilphi[index]=recoil.Phi();
+      nEvent.recoilpt=recoil.Pt();
+      nEvent.recoileta=recoil.Eta();
+      nEvent.recoilphi=recoil.Phi();
     }
     
   // Statistics ///////////////////////////////////////
@@ -1423,27 +1412,23 @@ void JZBAnalysis::Analyze() {
   // Store minimum dphi between some mets and any kind of lepton
   for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
     TLorentzVector lp(sortedGoodLeptons[i].p);
-    if ( fabs(recoil.DeltaPhi(lp))>nEvent.dphiRecoilLep[0] )
-      nEvent.dphiRecoilLep[0] = recoil.DeltaPhi(lp);
-    if ( fabs(pfMETvector.DeltaPhi(lp))>nEvent.dphiMetLep[4] )
-      nEvent.dphiMetLep[4] = pfMETvector.DeltaPhi(lp);
-    if ( fabs((sumOfPFJets + s1 + s2).DeltaPhi(lp))> nEvent.dphiMetLep[6] )
-      nEvent.dphiMetLep[6] = (sumOfPFJets + s1 + s2).DeltaPhi(lp);
-    if ( fabs((recoil + s1 + s2).DeltaPhi(lp)) > nEvent.dphiMetLep[7] )
-      nEvent.dphiMetLep[7] = (recoil + s1 + s2).DeltaPhi(lp);
+    if ( fabs(recoil.DeltaPhi(lp))<fabs(nEvent.dphiRecoilLep) ) nEvent.dphiRecoilLep = recoil.DeltaPhi(lp);
+    if ( fabs(pfMETvector.DeltaPhi(lp))<fabs(nEvent.dphiMetLep[PFMET]) ) nEvent.dphiMetLep[PFMET] = pfMETvector.DeltaPhi(lp);
+    if ( fabs((sumOfPFJets + s1 + s2).DeltaPhi(lp))< fabs(nEvent.dphiMetLep[PFRECOILMET]) ) nEvent.dphiMetLep[PFRECOILMET] = (sumOfPFJets + s1 + s2).DeltaPhi(lp);
+    if ( fabs((recoil + s1 + s2).DeltaPhi(lp)) < fabs(nEvent.dphiMetLep[RECOILMET]) ) nEvent.dphiMetLep[RECOILMET] = (recoil + s1 + s2).DeltaPhi(lp);
   }
 
   // Store minimum dphi between some mets and any good jet
   for ( size_t i=0; i<pfGoodJets.size(); ++i ) {
     TLorentzVector jp(pfGoodJets[i].p);
-    if ( fabs(pfMETvector.DeltaPhi(jp))>nEvent.dphiMetJet[4] )
-      nEvent.dphiMetJet[4] = pfMETvector.DeltaPhi(jp);
+    if ( fabs(pfMETvector.DeltaPhi(jp))<fabs(nEvent.dphiMetJet[PFMET]) )
+      nEvent.dphiMetJet[PFMET] = pfMETvector.DeltaPhi(jp);
   }
-  nEvent.dphiMetSumJetPt[4] = pfNoCutsJetVector.DeltaPhi(pfMETvector);
+  nEvent.dphiMetSumJetPt[PFMET] = pfNoCutsJetVector.DeltaPhi(pfMETvector);
 
   // Store some additional MET information
-  nEvent.metPar[4]  = pfMETvector.Dot(s1+s2);
-  nEvent.metPerp[4] = pfMETvector.Perp((s1+s2).Vect());
+  nEvent.metPar[PFMET]  = pfMETvector.Dot(s1+s2);
+  nEvent.metPerp[PFMET] = pfMETvector.Perp((s1+s2).Vect());
     
   // Store some generator information on selected leptons
   if ( isMC ) {
@@ -1490,7 +1475,6 @@ void JZBAnalysis::Analyze() {
 }
 
 void JZBAnalysis::End(TFile *f){
-  //fHistFile->cd();
   f->cd();	
 
   myTree->Write();
@@ -1506,7 +1490,6 @@ void JZBAnalysis::End(TFile *f){
     }
   }
 
-  //  fHistFile->Close();
 }
 
 template<class T>
