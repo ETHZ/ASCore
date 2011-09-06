@@ -16,12 +16,17 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.56 $";
+string sjzbversion="$Revision: 1.57 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.57  2011/09/06 13:44:46  fronga
+cd() to output file before opening trees.
+Removed histograms.
+Cleaned up fHistFile.
+
 Revision 1.56  2011/09/06 09:27:15  buchmann
 changed jet eta cut from 2.6 to 3.0
 
@@ -179,6 +184,7 @@ public:
   int chid1; // old id (kostas convention)
   int chid2;
 
+  int process;
 
   int jetNum;
   int goodJetNum;
@@ -305,6 +311,8 @@ void nanoEvent::reset()
   is_data=false;
   NPdfs=0;
   pdfWsum=0;
+
+  process=0;
 
   pt1=0;
   pt2=0;
@@ -614,6 +622,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("ch2",&nEvent.ch2,"ch2/I");
   myTree->Branch("chid1",&nEvent.chid1,"chid1/I");
   myTree->Branch("chid2",&nEvent.chid2,"chid2/I");
+  myTree->Branch("process",&nEvent.process,"process/I");
 
   myTree->Branch("jetNum",&nEvent.jetNum,"jetNum/I");
   myTree->Branch("goodJetNum",&nEvent.goodJetNum,"goodJetNum/I");
@@ -876,6 +885,7 @@ void JZBAnalysis::Analyze() {
       nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
       nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
       if(fisModelScan) {
+        nEvent.process=fTR->process;
         nEvent.mGlu=fTR->MassGlu;
         nEvent.mChi=fTR->MassChi;
         nEvent.mLSP=fTR->MassLSP;
