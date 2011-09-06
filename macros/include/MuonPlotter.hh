@@ -51,7 +51,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2, DoubleEle1, DoubleEle2, MuEG1, MuEG2,
+		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, DoubleMu4,
+		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4,
+		MuEG1, MuEG2, MuEG3, MuEG4,
 		MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJetsSync,
 		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50,

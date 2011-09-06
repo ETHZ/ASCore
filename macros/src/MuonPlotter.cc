@@ -7820,7 +7820,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	fOUTSTREAM.open(filename.Data(), ios::trunc);
 	fOUTSTREAM << " Printing Cutflow for Mu/Mu channel..." << endl;
 	// printCutFlow(Muon, DoubleMu1, EleHad2);
-	printCutFlow(Muon, DoubleMu1, MuEG2);
+	printCutFlow(Muon, DoubleMu1, DoubleMu4);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	printCutFlow(Muon, TTJets, DYJets10to50);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -7835,8 +7835,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
-	// printCutFlow(EMu, DoubleMu1, EleHad2);
-	printCutFlow(EMu, DoubleMu1, MuEG2);
+	printCutFlow(EMu, MuEG1, MuEG4);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	printCutFlow(EMu, TTJets, DYJets10to50);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -7851,8 +7850,7 @@ void MuonPlotter::printCutFlows(TString filename){
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
-	// printCutFlow(Electron, DoubleMu1, EleHad2);
-	printCutFlow(Electron, DoubleMu1, MuEG2);
+	printCutFlow(Electron, DoubleEle1, DoubleEle4);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	printCutFlow(Electron, TTJets, DYJets10to50);
 	fOUTSTREAM << "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
@@ -9402,7 +9400,10 @@ bool MuonPlotter::doubleMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
 	// Only apply this on the DoubleMu dataset!
-	if(fCurrentSample != DoubleMu1 && fCurrentSample != DoubleMu2) return false;
+	if(fCurrentSample != DoubleMu1 &&
+	   fCurrentSample != DoubleMu2 &&
+	   fCurrentSample != DoubleMu3 &&
+	   fCurrentSample != DoubleMu4) return false;
 
 	return ( (HLT_DOUBLEMU7 > 0) || 
 	         (HLT_MU13_MU8  > 0) );
@@ -9410,8 +9411,11 @@ bool MuonPlotter::doubleMuTrigger(){
 bool MuonPlotter::doubleElTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
-	// Only apply this on the DoubleMu dataset!
-	if(fCurrentSample != DoubleEle1 && fCurrentSample != DoubleEle2) return false;
+	// Only apply this on the DoubleEle dataset!
+	if(fCurrentSample != DoubleEle1 &&
+	   fCurrentSample != DoubleEle2 &&
+	   fCurrentSample != DoubleEle3 &&
+	   fCurrentSample != DoubleEle4) return false;
 
 	return ( (HLT_ELE17_ELE8       > 0) ||
 	         (HLT_ELE17_ELE8_TIGHT > 0) );
@@ -9436,16 +9440,22 @@ bool MuonPlotter::doubleElHTTrigger(){
 bool MuonPlotter::eMuTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
-	// Only apply this on the DoubleMu dataset!
-	if(fCurrentSample != MuEG1 && fCurrentSample != MuEG2) return false;
+	// Only apply this on the MuEG dataset!
+	if(fCurrentSample != MuEG1 &&
+	   fCurrentSample != MuEG2 &&
+	   fCurrentSample != MuEG3 &&
+	   fCurrentSample != MuEG4) return false;
 	return ( (HLT_MU17_ELE8 > 0) || 
 	         (HLT_MU8_ELE17 > 0) );
 }
 bool MuonPlotter::eMuHTTrigger(){
 	// Pretend MC samples always fire trigger
 	if(fSamples[fCurrentSample]->datamc > 0) return true;
-	// Only apply this on the DoubleMu dataset!
-	if(fCurrentSample != MuEG1 && fCurrentSample != MuEG2) return false;
+	// Only apply this on the MuEG dataset!
+	if(fCurrentSample != MuEG1 &&
+	   fCurrentSample != MuEG2 &&
+	   fCurrentSample != MuEG3 &&
+	   fCurrentSample != MuEG4) return false;
 
 	return ( (HLT_MU3_ELE8_HT160 > 0) ||
 	         (HLT_MU3_ELE8_HT160_TIGHT > 0) );
