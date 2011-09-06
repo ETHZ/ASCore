@@ -14,12 +14,15 @@ using namespace std;
 #define metMax 30
 #define rMax 30
 
-string sjzbversion="$Revision: 1.54 $";
+string sjzbversion="$Revision: 1.55 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.55  2011/09/06 09:09:40  buchmann
+Added a 'small' option, which leads to uninteresting events not being stored
+
 Revision 1.54  2011/09/05 16:25:47  buchmann
 Included v8 for dimuon triggers
 
@@ -1157,8 +1160,8 @@ void JZBAnalysis::Analyze() {
       nEvent.pfHT    += jpt;
       
       // Keep central jets
-      if ( !(fabs(jeta)<2.6 ) ) continue;
-      counters[PJ].fill("... |eta|<2.6");
+      if ( !(fabs(jeta)<3.0 ) ) continue;
+      counters[PJ].fill("... |eta|<3.0");
       
       // Flag good jets failing ID
       if (!isJetID) { 
@@ -1252,8 +1255,8 @@ void JZBAnalysis::Analyze() {
       }
 
       // Acceptance cuts before we use this jet
-      if ( !(fabs(jeta)<2.6 && jpt>20.) ) continue;
-      counters[JE].fill("... |eta|<2.6 && pt>20.");
+      if ( !(fabs(jeta)<3.0 && jpt>20.) ) continue;
+      counters[JE].fill("... |eta|<3.0 && pt>20.");
 	
       recoil+=aJet;
       
@@ -1702,7 +1705,7 @@ const bool JZBAnalysis::IsCustomJet(const int index){
   if ( !(fTR->CAJID_HPD[index] < 0.98)  ) return false;
   counters[JE].fill(" ... HPD < 0.98");
 
-  if ( fabs(fTR->CAJEta[index])<2.6 ) {
+  if ( fabs(fTR->CAJEta[index])<3.0 ) {
     if ( !(fTR->CAJEMfrac[index] > 0.01)  ) return false;
   } else {
     if ( !(fTR->CAJEMfrac[index] > -0.9)  ) return false;
@@ -1759,7 +1762,7 @@ void JZBAnalysis::GeneratorInfo(void) {
     if ( fTR->GenJetPt[jIndex]<minJPt ) continue;
     if ( fabs(fTR->GenJetEta[jIndex])>maxJEta ) continue;
     ++nEvent.genNjets;
-    if ( fabs(fTR->GenJetEta[jIndex])>2.6 ) continue;
+    if ( fabs(fTR->GenJetEta[jIndex])>3.0 ) continue;
     ++nEvent.genNjetsTwoSix;
   }
 
