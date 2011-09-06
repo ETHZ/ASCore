@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Aug 30 19:27:28 2011 by ROOT version 5.27/06b
+// Tue Sep  6 23:09:35 2011 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: ../test/NTupleProducer_42X_MC.root
+// found on file: ../test/NTupleProducer_42X_MC_numEvent1200.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -64,6 +64,7 @@ public :
    Float_t         M12;
    Float_t         signMu;
    Float_t         A0;
+   Int_t           process;
    Int_t           PrimVtxGood;
    Float_t         PrimVtxx;
    Float_t         PrimVtxy;
@@ -794,6 +795,7 @@ public :
    TBranch        *b_M12;   //!
    TBranch        *b_signMu;   //!
    TBranch        *b_A0;   //!
+   TBranch        *b_process;   //!
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -1496,9 +1498,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC_numEvent1200.root");
       if (!f) {
-         f = new TFile("../test/NTupleProducer_42X_MC.root");
+         f = new TFile("../test/NTupleProducer_42X_MC_numEvent1200.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1595,6 +1597,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("M12", &M12, &b_M12);
    fChain->SetBranchAddress("signMu", &signMu, &b_signMu);
    fChain->SetBranchAddress("A0", &A0, &b_A0);
+   fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
