@@ -543,7 +543,7 @@ void MuonPlotter::doAnalysis(){
 	fOUTSTREAM2.close();
 	
 	makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	makeTTbarClosure();
+	// makeTTbarClosure();
 	cout << endl;
 }
 
@@ -4276,6 +4276,35 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float nt2_spwwm_em_e1[gNREGIONS] = {0.0103, 0.000, 0.0058, 0.000, 0.0042, 0.0043, 0.0028};
 	float nt2_dpww_em_e1 [gNREGIONS] = {0.0050, 0.000, 0.0019, 0.000, 0.0019, 0.0019, 0.0019};
 	float nt2_ttw_em_e1  [gNREGIONS] = {0.0297, 0.000, 0.0177, 0.000, 0.0128, 0.0110, 0.0075};
+	
+	// apply scale factor for increased luminosity to these (poor mans solution before running myself)
+	for(size_t i = 0; i < 7; ++i){
+		float scale = fLumiNorm/976.;
+		nt2_spwwp_ee   [i] *= scale;
+		nt2_spwwm_ee   [i] *= scale;
+		nt2_dpww_ee    [i] *= scale;
+		nt2_ttw_ee     [i] *= scale;
+		nt2_spwwp_mm   [i] *= scale;
+		nt2_spwwm_mm   [i] *= scale;
+		nt2_dpww_mm    [i] *= scale;
+		nt2_ttw_mm     [i] *= scale;
+		nt2_spwwp_em   [i] *= scale;
+		nt2_spwwm_em   [i] *= scale;
+		nt2_dpww_em    [i] *= scale;
+		nt2_ttw_em     [i] *= scale;
+		nt2_spwwp_ee_e1[i] *= sqrt(scale);
+		nt2_spwwm_ee_e1[i] *= sqrt(scale);
+		nt2_dpww_ee_e1 [i] *= sqrt(scale);
+		nt2_ttw_ee_e1  [i] *= sqrt(scale);
+		nt2_spwwp_mm_e1[i] *= sqrt(scale);
+		nt2_spwwm_mm_e1[i] *= sqrt(scale);
+		nt2_dpww_mm_e1 [i] *= sqrt(scale);
+		nt2_ttw_mm_e1  [i] *= sqrt(scale);	
+		nt2_spwwp_em_e1[i] *= sqrt(scale);
+		nt2_spwwm_em_e1[i] *= sqrt(scale);
+		nt2_dpww_em_e1 [i] *= sqrt(scale);
+		nt2_ttw_em_e1  [i] *= sqrt(scale);		
+	}
 	
 	float nt2_rare_sum_ee[gNREGIONS]; for(size_t i = 0; i < gNREGIONS; ++i){nt2_rare_sum_ee[i] = (nt2_spwwp_ee[i] + nt2_spwwm_ee[i] + nt2_dpww_ee[i] + nt2_ttw_ee[i]);}
 	float nt2_rare_sum_mm[gNREGIONS]; for(size_t i = 0; i < gNREGIONS; ++i){nt2_rare_sum_mm[i] = (nt2_spwwp_mm[i] + nt2_spwwm_mm[i] + nt2_dpww_mm[i] + nt2_ttw_mm[i]);}
@@ -9914,76 +9943,19 @@ bool MuonPlotter::passesHTCut(float min, float max){
 bool MuonPlotter::passesMETCut(float min, float max){
 	return (pfMET >= min && pfMET < max);
 }
-bool MuonPlotter::passesZVeto(int ind1, int ind2, gChannel chan, float dm){
-// Checks if there is any combination of opposite sign, same flavor tight leptons
-// with invariant mass closer than dm to the Z mass, returns true if none found
-// Default for dm is 15 GeV
-// Ignores the pair given by ind1 and ind2
-
-	// In EMu case, the given pair is irrelevant
-	if(chan == EMu) return passesZVeto(dm);
-
-	if(NMus > 1){
-		unsigned start = 0;
-		// First muon
-		for(size_t i = start; i < NMus-1; ++i){
-			if(chan == Muon && i == ind1) continue;
-			if(isTightMuon(i)){
-				TLorentzVector pmu1, pmu2;
-				pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
-
-				// Second muon
-				for(size_t j = i+1; j < NMus; ++j){ 
-					if(chan == Muon && j == ind2) continue;
-					if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
-						pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], gMMU);
-						if(fabs((pmu1+pmu2).M() - gMZ) < dm) return false;
-					}
-				}
-			}
-		}
-	}
-
-	if(NEls > 1){
-		unsigned start = 0;
-		// if(fCurrentChannel == Electron) start = 1; // For ee, ignore first e
-		// First electron
-		for(size_t i = start; i < NEls-1; ++i){
-			if(chan == Electron && i == ind1) continue;
-			if(isTightElectron(i)){
-				TLorentzVector pel1, pel2;
-				pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-
-				// Second electron
-				for(size_t j = i+1; j < NEls; ++j){
-					if(chan == Electron && j == ind2) continue;
-					if(isTightElectron(j) && (ElCharge[i] != ElCharge[j]) ){
-						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
-						if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
-					}
-				}
-			}
-		}		
-	}
-	return true;	
-}
-bool MuonPlotter::passesZVeto(float dm){
-// Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
+bool MuonPlotter::passesZVeto(bool(MuonPlotter::*muonSelector)(int), bool(MuonPlotter::*eleSelector)(int), float dm){
+// Checks if any combination of opposite sign, same flavor leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
 // Default for dm is 15 GeV
-
 	if(NMus > 1){
-		unsigned start = 0;
-		// if(fCurrentChannel == Muon) start = 1; // For mumu, ignore first mu
-		// First muon
-		for(size_t i = start; i < NMus-1; ++i){
-			if(isTightMuon(i)){
+		for(size_t i = 0; i < NMus-1; ++i){
+			if((*this.*muonSelector)(i)){
 				TLorentzVector pmu1, pmu2;
 				pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
 
 				// Second muon
 				for(size_t j = i+1; j < NMus; ++j){ 
-					if(isTightMuon(j) && (MuCharge[i] != MuCharge[j]) ){
+					if((*this.*muonSelector)(j) && (MuCharge[i] != MuCharge[j]) ){
 						pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], gMMU);
 						if(fabs((pmu1+pmu2).M() - gMZ) < dm) return false;
 					}
@@ -9993,17 +9965,14 @@ bool MuonPlotter::passesZVeto(float dm){
 	}
 
 	if(NEls > 1){
-		unsigned start = 0;
-		// if(fCurrentChannel == Electron) start = 1; // For ee, ignore first e
-		// First electron
-		for(size_t i = start; i < NEls-1; ++i){
-			if(isTightElectron(i)){
+		for(size_t i = 0; i < NEls-1; ++i){
+			if((*this.*eleSelector)(i)){
 				TLorentzVector pel1, pel2;
 				pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
 
 				// Second electron
 				for(size_t j = i+1; j < NEls; ++j){
-					if(isTightElectron(j) && (ElCharge[i] != ElCharge[j]) ){
+					if((*this.*eleSelector)(j) && (ElCharge[i] != ElCharge[j]) ){
 						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
 						if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
 					}
@@ -10012,6 +9981,10 @@ bool MuonPlotter::passesZVeto(float dm){
 		}		
 	}
 	return true;
+}
+bool MuonPlotter::passesZVeto(float dm){
+	return passesZVeto(&MuonPlotter::isTightMuon, &MuonPlotter::isTightElectron, dm);
+	// return passesZVeto(&MuonPlotter::isLooseMuon, &MuonPlotter::isLooseElectron, dm);
 }
 bool MuonPlotter::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
@@ -10311,7 +10284,7 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 		// Need to remove the Z veto in OS case, since these OS events are exactly what 
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
 		// misidd as SS events
-		if(!passesZVeto())       return false;
+		if(!passesZVeto()) return false;
 		if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes Z veto");
 	}
 

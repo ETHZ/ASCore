@@ -486,7 +486,7 @@ public:
 	
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
-	virtual bool passesZVeto(int, int, gChannel, float = 15.); // cut with mZ +/- cut value
+	virtual bool passesZVeto(bool(MuonPlotter::*)(int), bool(MuonPlotter::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
