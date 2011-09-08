@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.57 $";
+string sjzbversion="$Revision: 1.58 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.58  2011/09/06 21:12:44  buchmann
+Added process variable to JZB tree (important for mSUGRA scans)
+
 Revision 1.57  2011/09/06 13:44:46  fronga
 cd() to output file before opening trees.
 Removed histograms.
@@ -1127,7 +1130,7 @@ void JZBAnalysis::Analyze() {
       float jpz = fTR->JPz[i];
       float jenergy = fTR->JE[i];
       float jesC = fTR->JEcorr[i];
-      bool  isJetID = IsGoodBasicPFJet(i,false);
+      bool  isJetID = IsGoodBasicPFJet(i,false,3.0);
       
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
