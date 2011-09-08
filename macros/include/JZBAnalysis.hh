@@ -64,20 +64,6 @@ private:
   vector<lepton> sortLeptonsByPt(vector<lepton>&);
 
   template<class T> std::string any2string(T i);
-  // file for histograms:
-  TFile *fHistFile;
-	
-
-  TH1F *fHMee[20];
-
-  TH2F *fHElectronPtEta;
-  TH2F *fHElectronIDPtEta;
-  TH2F *fHElectronIDIsoPtEta;
-  TH2F *fHMeeDPhi;
-  TH2F *fHMeePt;
-  TH2F *fHMDPhiPt;
-  TH2F *fHMZPtJ1Pt;
-  TH2F *fHMZPtuJ1Pt;
 
   std::string fDataType_;
   bool fFullCleaning_;
