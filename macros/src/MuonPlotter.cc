@@ -203,6 +203,10 @@ void MuonPlotter::init(TString filename){
 	fMCBG.push_back(ZZ);
 	// fMCBG.push_back(VVTo4L);
 	fMCBG.push_back(GVJets);
+	fMCBG.push_back(DPSWW);
+	fMCBG.push_back(WpWp);
+	fMCBG.push_back(WmWm);
+	fMCBG.push_back(ttbarW);
 
 	// fMCBG.push_back(QCD5);
 	// fMCBG.push_back(QCD15);
@@ -483,31 +487,31 @@ void MuonPlotter::doAnalysis(){
 
 	// makePileUpPlots();
 	// printSyncExercise();
-	makeIsoVsMETPlot(QCDMuEnr10);
-	makeIsoVsMETPlot(DoubleMu2);
+	// makeIsoVsMETPlot(QCDMuEnr10);
+	// makeIsoVsMETPlot(DoubleMu2);
 	
 	// makeHWWPlots();
 
-	printOrigins();
-	makeMuIsolationPlots();
-	makeElIsolationPlots();
-	makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// printOrigins();
+	// makeMuIsolationPlots();
+	// makeElIsolationPlots();
+	// makeNT2KinPlots();
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotCustom();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Electron);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Electron);
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Electron);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Electron);
 	// 
-	makeFRvsPtPlots(Muon,     SigSup);
-	makeFRvsPtPlots(Electron, SigSup);
-	makeFRvsPtPlots(Muon,     ZDecay);
-	makeFRvsPtPlots(Electron, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Electron);
+	// makeFRvsPtPlots(Muon,     SigSup);
+	// makeFRvsPtPlots(Electron, SigSup);
+	// makeFRvsPtPlots(Muon,     ZDecay);
+	// makeFRvsPtPlots(Electron, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Electron);
 
 	// makeFRvsPtPlotsForPAS(Muon);
 	// makeFRvsPtPlotsForPAS(Electron);
@@ -542,7 +546,7 @@ void MuonPlotter::doAnalysis(){
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
 	
-	makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
 	// makeTTbarClosure();
 	cout << endl;
 }
@@ -2178,7 +2182,8 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	leg->SetBorderSize(0);
 
 	// Special effects:
-	const float lowerht = hilo==HighPt? 80.:200.;
+	// const float lowerht = hilo==HighPt? 80.:200.;
+	const float lowerht = hilo==HighPt? 0.:200.;
 
 	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
 	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
@@ -2259,7 +2264,7 @@ void MuonPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	gmetvsht_da_mm->Draw("P");
 	
 	leg->Draw();
-	regleg->Draw();
+	// regleg->Draw();
 	drawTopLine();
 	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
 	pave->SetFillColor(0);
@@ -7460,6 +7465,11 @@ void MuonPlotter::fillKinPlots(gSample i, gHiLoSwitch hilo){
 	fC_minMu2pt = Region::minMu2pt[hilo];
 	fC_minEl1pt = Region::minEl1pt[hilo];
 	fC_minEl2pt = Region::minEl2pt[hilo];
+	fC_minHT    = Region::minHT   [Baseline];
+	fC_maxHT    = Region::maxHT   [Baseline];
+	fC_minMet   = Region::minMet  [Baseline];
+	fC_maxMet   = Region::maxMet  [Baseline];
+	fC_minNjets = Region::minNjets[Baseline];
 	if(hilo == LowPt) fC_minHT = 200.;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8689,6 +8699,7 @@ int  MuonPlotter::readHistos(TString filename){
 				for(size_t j = 0; j < gNKinVars; ++j){
 					getname = Form("%s_%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data(), KinPlots::var_name[j].Data());
 					kp->hvar[j] = (TH1D*)pFile->Get(S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname);
+					cout << S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname << endl;
 					kp->hvar[j]->SetFillColor(S->color);
 				}
 			}
@@ -9983,8 +9994,8 @@ bool MuonPlotter::passesZVeto(bool(MuonPlotter::*muonSelector)(int), bool(MuonPl
 	return true;
 }
 bool MuonPlotter::passesZVeto(float dm){
-	return passesZVeto(&MuonPlotter::isTightMuon, &MuonPlotter::isTightElectron, dm);
-	// return passesZVeto(&MuonPlotter::isLooseMuon, &MuonPlotter::isLooseElectron, dm);
+	// return passesZVeto(&MuonPlotter::isTightMuon, &MuonPlotter::isTightElectron, dm);
+	return passesZVeto(&MuonPlotter::isLooseMuon, &MuonPlotter::isLooseElectron, dm);
 }
 bool MuonPlotter::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
@@ -10190,8 +10201,8 @@ bool MuonPlotter::isSSLLMuEvent(int& mu1, int& mu2){
 	setHypLepton1(mu1, Muon);
 	setHypLepton1(mu2, Muon);
 
-	if(!passesJet50Cut()) return false; // one jet with pt > 50
-	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has one jet > 50 GeV");
+	// if(!passesJet50Cut()) return false; // one jet with pt > 50
+	// if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... has one jet > 50 GeV");
 
 	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
 	if(fDoCounting) fCounters[fCurrentSample][Muon].fill(" ... passes NJets cut");
@@ -10242,8 +10253,8 @@ bool MuonPlotter::isSSLLElEvent(int& el1, int& el2){
 	setHypLepton1(el1, Electron);
 	setHypLepton1(el2, Electron);
 
-	if(!passesJet50Cut()) return false;
-	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has one jet > 50 GeV");
+	// if(!passesJet50Cut()) return false;
+	// if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... has one jet > 50 GeV");
 
 	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
 	if(fDoCounting) fCounters[fCurrentSample][Electron].fill(" ... passes NJets cut");
@@ -10294,8 +10305,8 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 	setHypLepton1(mu, Muon);
 	setHypLepton1(el, Electron);
 
-	if(!passesJet50Cut()) return false;
-	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has one jet > 50 GeV");
+	// if(!passesJet50Cut()) return false;
+	// if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... has one jet > 50 GeV");
 
 	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
 	if(fDoCounting) fCounters[fCurrentSample][EMu].fill(" ... passes NJets cut");
@@ -10490,6 +10501,6 @@ void MuonPlotter::drawTopLine(){
 	fLatex->DrawLatex(0.13,0.92, "CMS Preliminary");	
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(0.04);
-	fLatex->DrawLatex(0.70,0.92, "L_{int.} = 2.1 fb^{-1}");
+	fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 }

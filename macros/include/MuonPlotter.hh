@@ -58,6 +58,7 @@ public:
 		TTJetsSync,
 		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50,
 		GJets40, GJets100, GJets200, GVJets, WW, WZ, ZZ, VVTo4L,
+		DPSWW, WpWp, WmWm, ttbarW,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD5,
