@@ -266,7 +266,7 @@ public:
 		TTree *tree;
 		float lumi;
 		int color;
-		int datamc; // 0: Data, 1: SM MC, 2: Signal MC
+		int datamc; // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC
 		Region region[gNREGIONS][2];
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
@@ -575,6 +575,7 @@ public:
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
 	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
+	vector<int> fMCRareSM; // Rare SM backgrounds
 	vector<int> fMuData;  // Muon data samples
 	vector<int> fEGData;  // EG data samples
 	vector<int> fMuEGData;  // MuEG dataset
