@@ -32,9 +32,6 @@ public:
 	static const int gNNVrtxBins = 9;
 	static double gNVrtxBins[gNNVrtxBins+1];
 
-	static const int gNJetPtBins = 10;
-	static double gJetPtBins[gNJetPtBins+1];
-	
 	static double gMuPtbins [gNMuPtbins+1];
 	static double gMuPt2bins[gNMuPt2bins+1];
 	static double gMuEtabins[gNMuEtabins+1];
@@ -228,16 +225,6 @@ public:
 		static const float HTmax = 1000.;
 	};
 	
-	static const int gNHWWVars = 10;
-	struct HWWPlots{
-		static TString var_name[gNHWWVars];
-		static TString axis_label[gNHWWVars];
-		static int nbins[gNHWWVars];
-		static float xmin[gNHWWVars];
-		static float xmax[gNHWWVars];
-		TH1D *hvar[gNHWWVars];
-	};
-	
 	static const int gNSels = 2;
 	struct IsoPlots{
 		static TString sel_name[gNSels];
@@ -247,8 +234,6 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNHWWSels = 3;
-	static TString gHWWSelNames[gNHWWSels];
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
@@ -270,7 +255,6 @@ public:
 		Region region[gNREGIONS][2];
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
-		HWWPlots hwwplots[gNHWWSels]; // 0: no event sel, 1: N-1 sel
 		IsoPlots isoplots[2]; // e and mu
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
@@ -320,8 +304,6 @@ public:
 	void makeRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
 	
-	void makeHWWPlots();
-	
 	void makeIsoVsMETPlot(gSample);
 	void makePileUpPlots();
 	
@@ -331,9 +313,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
-	void makeIntPredictionOLD(TString, gRegion, gHiLoSwitch = HighPt);
-	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);
-	
+	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
 	void makeTTbarClosure();
 	
 	void printSyncExercise();
@@ -393,8 +373,7 @@ public:
 	// Fillers
 	void fillYields(Sample*, gRegion, gHiLoSwitch);
 	void fillRatioPlots(Sample*);
-	void fillHWWPlots(Sample*);
-
+	
 	void fillMuIsoPlots(gSample);
 	void fillElIsoPlots(gSample);
 	void fillKinPlots(gSample, gHiLoSwitch);
@@ -491,9 +470,6 @@ public:
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
-
-	// HWW Stuff
-	virtual bool passesAddLepVeto(int, int, int);
 
 	virtual bool isSigSupMuEvent();
 	virtual bool isZMuMuEvent();
