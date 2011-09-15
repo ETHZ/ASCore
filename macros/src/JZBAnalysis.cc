@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.58 $";
+string sjzbversion="$Revision: 1.59 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.59  2011/09/08 15:50:10  fronga
+Fix bug in Jet ID (was removing jets above 3.0...).
+
 Revision 1.58  2011/09/06 21:12:44  buchmann
 Added process variable to JZB tree (important for mSUGRA scans)
 
@@ -1465,15 +1468,16 @@ void JZBAnalysis::Analyze() {
     nEvent.genZPtSel    = (genLep1 + genLep2).Pt();
     nEvent.genMllSel    = (genLep1 + genLep2).M();
 
-    nEvent.genMID1     = fTR->GenLeptonMID[i1]; // WW study
-    nEvent.genMID2     = fTR->GenLeptonMID[i2]; // WW study
+    nEvent.genMID1     = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]); // WW study
+    nEvent.genMID2     = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]); // WW study
 
-    if(sortedGoodLeptons.size()>=3) {i3=sortedGoodLeptons[2].index;nEvent.genMID3 = fTR->GenLeptonMID[i3];} else nEvent.genMID3=-999; // WW study
-    if(sortedGoodLeptons.size()>=4) {i4=sortedGoodLeptons[3].index;nEvent.genMID4 = fTR->GenLeptonMID[i4];} else nEvent.genMID4=-999; // WW study
-    if(sortedGoodLeptons.size()>=5) {i5=sortedGoodLeptons[4].index;nEvent.genMID5 = fTR->GenLeptonMID[i5];} else nEvent.genMID5=-999; // WW study
+    //// This won't work: the index is not correct!
+    //if(sortedGoodLeptons.size()>=3) {i3=sortedGoodLeptons[2].index;nEvent.genMID3 = fTR->GenLeptonMID[i3];} else nEvent.genMID3=-999; // WW study
+    //if(sortedGoodLeptons.size()>=4) {i4=sortedGoodLeptons[3].index;nEvent.genMID4 = fTR->GenLeptonMID[i4];} else nEvent.genMID4=-999; // WW study
+    //if(sortedGoodLeptons.size()>=5) {i5=sortedGoodLeptons[4].index;nEvent.genMID5 = fTR->GenLeptonMID[i5];} else nEvent.genMID5=-999; // WW study
 
-    nEvent.genGMID1    = fTR->GenLeptonGMID[i1]; // WW study
-    nEvent.genGMID2    = fTR->GenLeptonGMID[i2]; // WW study
+    nEvent.genGMID1    = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]); // WW study
+    nEvent.genGMID2    = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i2]); // WW study
 
     nEvent.genPt1Sel    = genLep1.Pt();
     nEvent.genPt2Sel    = genLep2.Pt();
