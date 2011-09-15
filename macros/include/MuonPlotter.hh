@@ -23,13 +23,12 @@ public:
 	static const int gNMuPtbins  = 7;
 	static const int gNMuPt2bins = 7;
 	static const int gNMuEtabins = 4;
-	// static const int gNMuEtabins = 8;
 	static const int gNElPtbins  = 5;
 	static const int gNElPt2bins = 5;
 	static const int gNElEtabins = 4;
-	// static const int gNElEtabins = 6;
 	
 	static const int gNNVrtxBins = 9;
+
 	static double gNVrtxBins[gNNVrtxBins+1];
 
 	static double gMuPtbins [gNMuPtbins+1];
@@ -39,6 +38,16 @@ public:
 	static double gElPtbins [gNElPtbins+1];
 	static double gElPt2bins[gNElPt2bins+1];
 	static double gElEtabins[gNElEtabins+1];
+
+	static const int gNDiffHTBins  = 5;
+	static const int gNDiffMETBins = 3;
+	static const int gNDiffNJBins  = 5;
+	static const int gNDiffMT2Bins = 3;
+
+	static double gDiffHTBins [gNDiffHTBins+1];
+	static double gDiffMETBins[gNDiffMETBins+1];
+	static double gDiffNJBins [gNDiffNJBins+1];
+	static double gDiffMT2Bins[gNDiffMT2Bins+1];
 
 	static double gEChMisIDB;
 	static double gEChMisIDB_E;
@@ -53,9 +62,8 @@ public:
 		MuEG1, MuEG2, MuEG3, MuEG4,
 		MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJetsSync,
-		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50,
-		GJets40, GJets100, GJets200, GVJets, WW, WZ, ZZ, VVTo4L,
-		DPSWW, WpWp, WmWm, ttbarW,
+		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50, GJets40, GJets100, GJets200,
+		GVJets, WW, WZ, ZZ, VVTo4L, DPSWW, WpWp, WmWm, ttbarW,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD5,
@@ -102,8 +110,8 @@ public:
 	enum gChannel {
 		channels_begin,
 		Muon = channels_begin,
-		EMu,
-		Electron,
+		ElMu,
+		Elec,
 		gNCHANNELS
 	};
 	struct lepton{
@@ -234,9 +242,27 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
+	static const int gNDiffVars = 4;
+	struct DiffPredYields{
+		static TString var_name[gNDiffVars];
+		static TString axis_label[gNDiffVars];
+		static int nbins[gNDiffVars];
+		static double* bins[gNDiffVars];
+
+		TH1D *hnt11[gNDiffVars]; // SS yields
+		TH1D *hnt10[gNDiffVars];
+		TH1D *hnt01[gNDiffVars];
+		TH1D *hnt00[gNDiffVars];
+
+		TH1D *hnt2_os_BB[gNDiffVars]; // OS yields
+		TH1D *hnt2_os_EB[gNDiffVars];
+		TH1D *hnt2_os_EE[gNDiffVars];
+	};
+	
 	static const int gNKinSels = 3;
 	static TString gKinSelNames[gNKinSels];
 	static TString gEMULabel[2];
+	static TString gChanLabel[gNCHANNELS];
 	static TString gHiLoLabel[3];
 
 	class Sample{
@@ -252,7 +278,9 @@ public:
 		float lumi;
 		int color;
 		int datamc; // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC
+		TH1D *cutFlowHisto[gNCHANNELS];
 		Region region[gNREGIONS][2];
+		DiffPredYields diffyields[gNCHANNELS];
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 		IsoPlots isoplots[2]; // e and mu
@@ -313,6 +341,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
+	void makeDiffPrediction();
 	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
 	void makeTTbarClosure();
 	
@@ -359,12 +388,15 @@ public:
 	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
 	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
-	
-	void initCounters(gSample);
+
 	void storeNumbers(Sample*, gChannel, gRegion);
+	
+	// Cutflow
+	void initCutNames();
+	void initCounters(gSample);
+	void fillCutFlowHistos(gSample);
+	void printCutFlow(gChannel, gSample, gSample);
 	void printCutFlows(TString);
-	void printCutFlow(gChannel, int, int);
-	void printCutFlowsOld(TString);
 	
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
@@ -372,6 +404,7 @@ public:
 	//////////////////////////////
 	// Fillers
 	void fillYields(Sample*, gRegion, gHiLoSwitch);
+	void fillDiffYields(Sample*);
 	void fillRatioPlots(Sample*);
 	
 	void fillMuIsoPlots(gSample);
@@ -538,7 +571,12 @@ public:
 	const int     getNEtaBins(gChannel);
 	const double *getEtaBins (gChannel);
 	
+	const double *getDiffPredBins(int);
+	
 	Monitor fCounters[gNSAMPLES][3];
+	vector<string> fMMCutNames;
+	vector<string> fEMCutNames;
+	vector<string> fEECutNames;
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
