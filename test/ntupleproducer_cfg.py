@@ -421,7 +421,7 @@ process.analyze.leptons = (
               
 
 #### DEBUG #####################################################################
-process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+# process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
 # )
@@ -451,7 +451,7 @@ process.p = cms.Path(
        	+ process.patPF2PATSequencePFAntiIso
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
-	+ process.dump
+#	+ process.dump
        	+ process.analyze
        	)
    )
