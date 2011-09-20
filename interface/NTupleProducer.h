@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.103 2011/09/06 17:47:16 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.104 2011/09/20 13:22:58 pnef Exp $
 //
 //
 
@@ -158,6 +158,7 @@ private:
 	edm::InputTag fL1TriggerTag;
 	edm::InputTag fHLTTrigEventTag;
 	edm::InputTag fHBHENoiseResultTag;
+	edm::InputTag fHBHENoiseResultTagIso;
 	edm::InputTag fSrcRho;
 	edm::InputTag fpdfWeightTag;
 
@@ -283,6 +284,7 @@ private:
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;
+	int fTHBHENoiseFlagIso;
 	int fRecovRecHitFilterFlag;
 
 	int fTnEBhits;

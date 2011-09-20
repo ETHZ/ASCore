@@ -32,7 +32,8 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_genjets      = cms.untracked.InputTag('ak5GenJets'),
 	tag_l1trig       = cms.untracked.InputTag("gtDigis"),
 	tag_hlttrigevent = cms.untracked.InputTag("hltTriggerSummaryAOD"),
-	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducerStd','HBHENoiseFilterResult'),
+	tag_hcalnoiseIso = cms.untracked.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
 	tag_srcRho       = cms.untracked.InputTag('kt6PFJets','rho'),
 
 	# Trigger paths to store the triggering object information of

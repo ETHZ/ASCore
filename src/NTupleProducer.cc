@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.131 2011/09/06 17:47:15 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.132 2011/09/20 13:22:58 pnef Exp $
 //
 //
 
@@ -155,7 +155,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fGenJetTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
 	fL1TriggerTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
 	fHLTTrigEventTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
-	if(!fIsModelScan) fHBHENoiseResultTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
+	if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
+	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
 
 	// Event Selection
@@ -462,7 +463,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	if(!fIsModelScan) {
 	   edm::Handle<bool> hbHeNoiseFlag;
 	   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
-	   fTHBHENoiseFlag = static_cast<int>(*hbHeNoiseFlag);
+	   fTHBHENoiseFlag    = static_cast<int>(*hbHeNoiseFlag);
+	   
+	   edm::Handle<bool> hbHeNoiseFlagIso;
+	   iEvent.getByLabel(fHBHENoiseResultTagIso,hbHeNoiseFlagIso);
+	   fTHBHENoiseFlagIso = static_cast<int>(*hbHeNoiseFlagIso);
 	}
 
 	// Get Transient Track Builder
@@ -2027,6 +2032,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
+	fEventTree->Branch("HBHENoiseFlagIso" ,&fTHBHENoiseFlagIso  ,"HBHENoiseFlagIso/I");
 	fEventTree->Branch("CSCTightHaloID"   ,&fTcscTightHaloID    ,"CSCTightHaloID/I");
 	fEventTree->Branch("EcalDeadTPFilterFlag",&fTecalDeadTPFilterFlag,"EcalDeadTPFilterFlag/I");
 	fEventTree->Branch("RecovRecHitFilterFlag",&fRecovRecHitFilterFlag,"RecovRecHitFilterFlag/I");
@@ -2612,6 +2618,7 @@ void NTupleProducer::resetTree(){
 	fTbeamspotz         = -999.99;
 	fTNCaloTowers       = -999;
 	fTHBHENoiseFlag     = -999;
+	fTHBHENoiseFlagIso  = -999;
 	fTcscTightHaloID    = -999;
 	fTrho               = -999;
 

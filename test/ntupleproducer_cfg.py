@@ -98,15 +98,22 @@ process.metCorSequence = cms.Sequence(process.metMuonJESCorAK5)
 
 ### Cleaning ###################################################################
 # flag HB/HE noise
-# info: https://twiki.cern.ch/twiki/bin/view/CMS/HcalNoiseInfoLibrary
-# uncomment following two lines to filer HCAL noise rather than to flag it!
-# process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-# process.HBHENoiseFilter.maxRBXEMF = cms.double(0.01)
-# the next two lines produce the HCAL noise summary flag with an additional cut on RBX
-process.load('CommonTools/RecoAlgos/HBHENoiseFilterResultProducer_cfi')
-process.HBHENoiseFilterResultProducer.maxRBXEMF = cms.double(0.01)
+# https://twiki.cern.ch/twiki/bin/view/CMS/HcalNoiseInfoLibrary
+# https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
+# the next two lines produce the HCAL noise summary flag
+from CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi import *
+# std config with cut on iso:
+process.HBHENoiseFilterResultProducerIso = HBHENoiseFilterResultProducer.clone() 
+# HCAL DPG recomended config:
+process.HBHENoiseFilterResultProducerStd = HBHENoiseFilterResultProducer.clone()
+process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumE        = cms.double(999999.)
+process.HBHENoiseFilterResultProducerStd.minNumIsolatedNoiseChannels = cms.int32(999999)
+process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumEt       = cms.double(999999.)
+
+
 
 # RA2 RecHitFilter: tagging mode
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
 process.load('SandBox.RecovRecHitFilter.recovRecHitFilter_cfi')
 process.recovRecHitFilter.TaggingMode           = cms.bool(True)
 
@@ -414,7 +421,7 @@ process.analyze.leptons = (
               
 
 #### DEBUG #####################################################################
-# process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
 # )
@@ -432,7 +439,8 @@ process.analyze.leptons = (
 process.p = cms.Path(
 	process.scrapingVeto * (
 	process.goodVertices
-       	+ process.HBHENoiseFilterResultProducer
+       	+ process.HBHENoiseFilterResultProducerIso
+       	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
@@ -443,7 +451,7 @@ process.p = cms.Path(
        	+ process.patPF2PATSequencePFAntiIso
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
-#	+ process.dump
+	+ process.dump
        	+ process.analyze
        	)
    )
@@ -454,4 +462,5 @@ if options.runon=='data':
 if options.runon!='data':
     process.p.remove(process.scrapingVeto)
 if options.ModelScan==True:
-    process.p.remove(process.HBHENoiseFilterResultProducer)
+    process.p.remove(process.HBHENoiseFilterResultProducerIso)
+    process.p.remove(process.HBHENoiseFilterResultProducerStd)
