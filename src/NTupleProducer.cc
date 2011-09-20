@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.130 2011/08/30 17:27:05 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.131 2011/09/06 17:47:15 buchmann Exp $
 //
 //
 
@@ -395,6 +395,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel("ecalDeadCellTPfilter",EcalDeadTPFilterFlag);
 	fTecalDeadTPFilterFlag = (int) *EcalDeadTPFilterFlag;
 	
+	// Stevens recovRecHitFilter
+	// http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/lowette/SandBox/Skims/python/recovRecHitFilter_cfi.py?sortby=date&view=log
+	// https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
+	edm::Handle<bool> RecovRecHitFilterFlag;
+	iEvent.getByLabel("recovRecHitFilter","Result",RecovRecHitFilterFlag);
+	fRecovRecHitFilterFlag =(int) *RecovRecHitFilterFlag;
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -2023,6 +2029,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
 	fEventTree->Branch("CSCTightHaloID"   ,&fTcscTightHaloID    ,"CSCTightHaloID/I");
 	fEventTree->Branch("EcalDeadTPFilterFlag",&fTecalDeadTPFilterFlag,"EcalDeadTPFilterFlag/I");
+	fEventTree->Branch("RecovRecHitFilterFlag",&fRecovRecHitFilterFlag,"RecovRecHitFilterFlag/I");
 	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
 	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
@@ -2609,6 +2616,7 @@ void NTupleProducer::resetTree(){
 	fTrho               = -999;
 
 	fTecalDeadTPFilterFlag = -999;
+	fRecovRecHitFilterFlag = -999;
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
 	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);

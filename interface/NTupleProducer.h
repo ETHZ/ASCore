@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.102 2011/09/06 16:22:08 stiegerb Exp $
+// $Id: NTupleProducer.h,v 1.103 2011/09/06 17:47:16 buchmann Exp $
 //
 //
 
@@ -283,6 +283,7 @@ private:
 
 	// ECAL & HCAL Noise
 	int fTHBHENoiseFlag;
+	int fRecovRecHitFilterFlag;
 
 	int fTnEBhits;
 	float fTEBrechitE[gMaxnEBhits];
