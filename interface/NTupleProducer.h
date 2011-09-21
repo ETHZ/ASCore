@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.104 2011/09/20 13:22:58 pnef Exp $
+// $Id: NTupleProducer.h,v 1.105 2011/09/20 15:52:35 pnef Exp $
 //
 //
 
@@ -240,6 +240,7 @@ private:
 	unsigned int fTeventnumber;
 	int fTlumisection;
 	float fTpthat;
+	float fTqcdPartonicHT;
 	int fTsigprocid;
 	float fTpdfscalePDF;
 	int fTpdfid1;

@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.132 2011/09/20 13:22:58 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.133 2011/09/20 15:52:35 pnef Exp $
 //
 //
 
@@ -484,6 +484,21 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	// If need to run on MC prior to Spring11 (CMSSW_3_9_X series) change code accordingly here:
 	// edm::Handle<PileupSummaryInfo> pileupInfo; 
 	if(!fIsRealData){
+		// Get LHEEventProduct with partonic momenta. 	
+		Handle<LHEEventProduct> evt;
+		iEvent.getByType( evt );
+		const lhef::HEPEUP hepeup_ = evt->hepeup();
+		const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
+		float partonicHT=0;
+		for(unsigned int i=0; i<pup_.size(); ++i){
+			if(hepeup_.ISTUP[i]!=1) continue; // quarks and gluons come out of MG/ME as stable
+			int idabs=abs(hepeup_.IDUP[i]); 
+			if( idabs != 21 && (idabs<1 || idabs>6) ) continue;  // gluons and quarks
+			float ptPart = sqrt( pow(hepeup_.PUP[i][0],2) + pow(hepeup_.PUP[i][1],2) ); // first entry is px, second py
+			partonicHT +=ptPart; // sum QCD partonic HT
+		}
+		fTqcdPartonicHT=partonicHT;
+
 		iEvent.getByLabel("generator", genEvtInfo);
 		fTpthat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
 		fTsigprocid   = genEvtInfo->signalProcessID();
@@ -1958,6 +1973,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("Event"            ,&fTeventnumber     ,"Event/I");
 	fEventTree->Branch("LumiSection"      ,&fTlumisection     ,"LumiSection/I");
 	fEventTree->Branch("PtHat"            ,&fTpthat           ,"PtHat/F");
+	fEventTree->Branch("QCDPartonicHT"    ,&fTqcdPartonicHT   ,"QCDPartonicHT/F");
 	fEventTree->Branch("SigProcID"        ,&fTsigprocid       ,"SigProcID/I");
 	fEventTree->Branch("PDFScalePDF"      ,&fTpdfscalePDF     ,"PDFScalePDF/F");
 	fEventTree->Branch("PDFID1"           ,&fTpdfid1          ,"PDFID1/I");
@@ -2588,6 +2604,7 @@ void NTupleProducer::resetTree(){
 	fTeventnumber       = -999;
 	fTlumisection       = -999;
 	fTpthat             = -999.99;
+	fTqcdPartonicHT     = -999.99;
 	fTsigprocid         = -999;
 	fTpdfscalePDF       = -999.99;
 	fTpdfid1            = -999;
