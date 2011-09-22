@@ -40,12 +40,12 @@ float MuonPlotter::Region::minMu2pt[2] = {10.,   5.};
 float MuonPlotter::Region::minEl1pt[2] = {20.,  10.};
 float MuonPlotter::Region::minEl2pt[2] = {10.,  10.};
 
-TString MuonPlotter::Region::sname [MuonPlotter::gNREGIONS] = {"HT80MET30", "HT80MET20to50", "HT80MET100", "HT200MET30", "HT200MET120", "HT400MET50", "HT400MET120"};
-float MuonPlotter::Region::minHT   [MuonPlotter::gNREGIONS] = {        80.,             80.,          80.,         200.,          200.,         400.,          400.};
-float MuonPlotter::Region::maxHT   [MuonPlotter::gNREGIONS] = {      7000.,           7000.,        7000.,        7000.,         7000.,        7000.,         7000.};
-float MuonPlotter::Region::minMet  [MuonPlotter::gNREGIONS] = {        30.,             20.,         100.,          30.,          120.,          50.,          120.};
-float MuonPlotter::Region::maxMet  [MuonPlotter::gNREGIONS] = {      7000.,             50.,        7000.,        7000.,         7000.,        7000.,         7000.};
-int   MuonPlotter::Region::minNjets[MuonPlotter::gNREGIONS] = {        2  ,             2  ,          2  ,          2  ,           2  ,          2  ,           2  };
+TString MuonPlotter::Region::sname [MuonPlotter::gNREGIONS] = {"HT80MET30", "HT80MET20to50", "HT80MET100", "HT200MET30", "HT200MET120", "HT400MET50", "HT400MET120", "HT400MET0",  "HT80METInv30", "HT0MET120"};
+float MuonPlotter::Region::minHT   [MuonPlotter::gNREGIONS] = {        80.,             80.,          80.,         200.,          200.,         400.,          400.,         400.,            80.,          0.};
+float MuonPlotter::Region::maxHT   [MuonPlotter::gNREGIONS] = {      7000.,           7000.,        7000.,        7000.,         7000.,        7000.,         7000.,        7000.,          7000.,       7000.};
+float MuonPlotter::Region::minMet  [MuonPlotter::gNREGIONS] = {        30.,             20.,         100.,          30.,          120.,          50.,          120.,           0.,             0.,        120.};
+float MuonPlotter::Region::maxMet  [MuonPlotter::gNREGIONS] = {      7000.,             50.,        7000.,        7000.,         7000.,        7000.,         7000.,        7000.,            30.,       7000.};
+int   MuonPlotter::Region::minNjets[MuonPlotter::gNREGIONS] = {         2 ,              2 ,           2 ,           2 ,            2 ,           2 ,            2 ,           2 ,             2 ,          0 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double MuonPlotter::gMuPtbins [gNMuPtbins+1]  = {5., 10., 15., 20., 25., 35., 45, 60.};
@@ -488,14 +488,14 @@ void MuonPlotter::doAnalysis(){
 	fLumiNorm = 2096.;
 	printCutFlows(fOutputDir + "CutFlow.txt");
 
-	// makePileUpPlots();
+	// makePileUpPlots(); // loops on all data!
 	// printSyncExercise();
 	// makeIsoVsMETPlot(QCDMuEnr10);
 	// makeIsoVsMETPlot(DoubleMu2);
 	
 	// printOrigins();
-	// makeMuIsolationPlots();
-	// makeElIsolationPlots();
+	// makeMuIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
@@ -506,10 +506,10 @@ void MuonPlotter::doAnalysis(){
 	// makeRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
-	// 
-	// makeFRvsPtPlots(Muon,     SigSup);
+
+	// makeFRvsPtPlots(Muon, SigSup);
 	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon,     ZDecay);
+	// makeFRvsPtPlots(Muon, ZDecay);
 	// makeFRvsPtPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
@@ -518,38 +518,11 @@ void MuonPlotter::doAnalysis(){
 	// makeFRvsPtPlotsForPAS(Elec);
 	// makeFRvsEtaPlotsForPAS(Muon);
 	// makeFRvsEtaPlotsForPAS(Elec);
-
-	// time_t rawtime;
-	// struct tm* timeinfo;
-	// time(&rawtime);
-	// timeinfo = localtime(&rawtime);
-	// // access a chararray containing the date with asctime(timeinfo)
-	// 
-	// TString tablefilename = fOutputDir + "Table2.tex";
-	// TString didarfilename = fOutputDir + "forDidar.txt";
-	// fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
-	// fOUTSTREAM << "==========================================================================================================" << endl;
-	// fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
-	// fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
-	// fOUTSTREAM << endl;
-	// 
-	// fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
-	// fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
-	// fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
-	// fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
-	// fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
-	// fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
-	// fOUTSTREAM2 << endl;
-	// for(size_t i = 0; i < gNREGIONS; ++i){
-	// 	TString outputname = fOutputDir + "DataPred_" + Region::sname[i] + ".txt";
-	// 	makeIntPrediction(outputname, gRegion(i));
-	// }
-	// fOUTSTREAM.close();
-	// fOUTSTREAM2.close();
-	// 
-	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// // makeTTbarClosure();
 	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeTTbarClosure();
+	
+	makeAllIntPredictions();
 	makeDiffPrediction();
 	
 	// cout << endl;
@@ -857,7 +830,7 @@ void MuonPlotter::makePileUpPlots(){
 	leg->Draw();
 	drawTopLine();
 	// fLatex->DrawLatex(0.10,0.92, fSamples[sample]->name);
-	Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintNoEPS( c_temp, "PileUp", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "PileUp", fOutputDir + fOutputSubDir);
 
 	if(write){
@@ -1525,7 +1498,8 @@ void MuonPlotter::makeMuIsolationPlots(){
 		lat->SetTextColor(kBlack);
 		
 
-		Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
+		// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
 		for(int k = 0; k < gNMuPt2bins; ++k){
 			ratio_data  = hiso_data_pt[i][k] ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin1);
@@ -1563,7 +1537,8 @@ void MuonPlotter::makeMuIsolationPlots(){
 			lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 			lat->SetTextColor(kBlack);
 
-			Util::PrintNoEPS(c_temp, Form("MuIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);				
+			// Util::PrintNoEPS(c_temp, Form("MuIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);
+			Util::PrintPDF(c_temp, Form("MuIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
 			ratio_data  = hiso_data_nv[i][k] ->Integral(bin0, bin015) / hiso_data_nv[i][k] ->Integral(bin0, bin1);
@@ -1601,7 +1576,8 @@ void MuonPlotter::makeMuIsolationPlots(){
 			lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 			lat->SetTextColor(kBlack);
 
-			Util::PrintNoEPS(c_temp, Form("MuIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);				
+			// Util::PrintNoEPS(c_temp, Form("MuIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);
+			Util::PrintPDF(c_temp, Form("MuIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 	}
 }
@@ -1904,7 +1880,8 @@ void MuonPlotter::makeElIsolationPlots(){
 		lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 		lat->SetTextColor(kBlack);
 
-		Util::PrintNoEPS(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);	
+		// Util::PrintNoEPS(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
 		for(int k = 0; k < gNElPt2bins; ++k){
 			double max1 = hiso_mc_pt_s[i][k]->GetMaximum();
@@ -1943,7 +1920,8 @@ void MuonPlotter::makeElIsolationPlots(){
 			lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 			lat->SetTextColor(kBlack);
 
-			Util::PrintNoEPS(c_temp, Form("ElIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);				
+			// Util::PrintNoEPS(c_temp, Form("ElIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);
+			Util::PrintPDF(c_temp, Form("ElIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
 			double max1 = hiso_mc_nv_s[i][k]->GetMaximum();
@@ -1982,7 +1960,8 @@ void MuonPlotter::makeElIsolationPlots(){
 			lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
 			lat->SetTextColor(kBlack);
 
-			Util::PrintNoEPS(c_temp, Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);				
+			// Util::PrintNoEPS(c_temp, Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);
+			Util::PrintPDF(c_temp, Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 	}
 }
@@ -2108,7 +2087,8 @@ void MuonPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			if(i == 8) lat->DrawLatex(0.31,0.92, "e#mu");
 			if(i > 8)  lat->DrawLatex(0.31,0.92, "ee/e#mu/#mu#mu");
 
-			Util::PrintNoEPS(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+			// Util::PrintNoEPS(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+			Util::PrintPDF(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
 			delete c_temp;
 			delete leg;
 		}
@@ -2728,7 +2708,7 @@ void MuonPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	TString fpname = "F";
 	if(fp == ZDecay) fpname = "P";
 	
-	Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
 	delete h_ptratio_mc, h_ptratio_data;
 	delete c_temp, lat, leg;
@@ -2922,7 +2902,7 @@ void MuonPlotter::makeFRvsEtaPlots(gChannel chan){
 	lat->SetTextSize(0.03);
 	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 	
-	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
 	delete h_etaratio_mc, h_etaratio_data;
 	// delete c_temp;
@@ -3107,7 +3087,7 @@ void MuonPlotter::makeRatioPlots(gChannel chan){
 		lat->SetTextSize(0.03);
 		lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 	
-		Util::PrintNoEPS(c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
+		// Util::PrintNoEPS(c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
 		Util::PrintPDF(  c_temp, "FRatio_" + name + "_" + FRatioPlots::var_name[i], fOutputDir + fOutputSubDir);
 		delete c_temp, leg, lat;
 		delete h_ratio_data, h_ratio_mc;
@@ -4041,6 +4021,37 @@ void MuonPlotter::NObs(gChannel chan, THStack *&stack, vector<int> samples, gReg
 }
 
 //____________________________________________________________________________
+void MuonPlotter::makeAllIntPredictions(){
+	fOutputSubDir = Util::MakeOutputDir("IntPredictions");
+	time_t rawtime;
+	struct tm* timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	// access a chararray containing the date with asctime(timeinfo)
+	
+	TString tablefilename = fOutputDir + fOutputSubDir + "Table2.tex";
+	TString didarfilename = fOutputDir + fOutputSubDir + "forDidar.txt";
+	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
+	fOUTSTREAM << "==========================================================================================================" << endl;
+	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
+	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM << endl;
+	
+	fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
+	fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
+	fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
+	fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
+	fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
+	fOUTSTREAM2 << endl;
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = fOutputDir + fOutputSubDir + "DataPred_" + Region::sname[i] + ".txt";
+		makeIntPrediction(outputname, gRegion(i));
+	}
+	fOUTSTREAM.close();
+	fOUTSTREAM2.close();
+	fOutputSubDir = "";
+}
 void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 
@@ -4153,25 +4164,25 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->lumi;
-		nt2sum_mm  += scale*S->numbers[reg][Muon]    .nt2;
-		nt10sum_mm += scale*S->numbers[reg][Muon]    .nt10;
-		nt0sum_mm  += scale*S->numbers[reg][Muon]    .nt0;
-		nt2sum_em  += scale*S->numbers[reg][ElMu]     .nt2;
-		nt10sum_em += scale*S->numbers[reg][ElMu]     .nt10;
-		nt01sum_em += scale*S->numbers[reg][ElMu]     .nt01;
-		nt0sum_em  += scale*S->numbers[reg][ElMu]     .nt0;
+		nt2sum_mm  += scale*S->numbers[reg][Muon].nt2;
+		nt10sum_mm += scale*S->numbers[reg][Muon].nt10;
+		nt0sum_mm  += scale*S->numbers[reg][Muon].nt0;
+		nt2sum_em  += scale*S->numbers[reg][ElMu].nt2;
+		nt10sum_em += scale*S->numbers[reg][ElMu].nt10;
+		nt01sum_em += scale*S->numbers[reg][ElMu].nt01;
+		nt0sum_em  += scale*S->numbers[reg][ElMu].nt0;
 		nt2sum_ee  += scale*S->numbers[reg][Elec].nt2;
 		nt10sum_ee += scale*S->numbers[reg][Elec].nt10;
 		nt0sum_ee  += scale*S->numbers[reg][Elec].nt0;
 
 		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt2  << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt10 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon]    .nt0  << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu]     .nt2  << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu]     .nt10 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu]     .nt01 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu]     .nt0  << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt0  << " || ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt2  << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt10 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt01 << " | ";
+		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt0  << " || ";
 		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt2  << " | ";
 		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt10 << " | ";
 		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt0  << " || ";
@@ -4182,13 +4193,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(7) << Form("%5.1f", nt2sum_mm  ) << " | ";
 	OUT << setw(7) << Form("%5.1f", nt10sum_mm ) << " | ";
 	OUT << setw(7) << Form("%5.1f", nt0sum_mm  ) << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_em   ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_em  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt01sum_em  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_em   ) << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_ee    ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_ee   ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_ee    ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_em  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_em ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt01sum_em ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_em  ) << " || ";
+	OUT << setw(7) << Form("%5.1f", nt2sum_ee  ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt10sum_ee ) << " | ";
+	OUT << setw(7) << Form("%5.1f", nt0sum_ee  ) << " || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
@@ -4196,13 +4207,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->lumi;
 		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt2  ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt10 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon]    .nt0  ) << " || ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu]     .nt2  ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu]     .nt10 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu]     .nt01 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu]     .nt0  ) << " || ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt2  ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt10 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt0  ) << " || ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt2  ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt10 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt01 ) << " | ";
+		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt0  ) << " || ";
 		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt2  ) << " | ";
 		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt10 ) << " | ";
 		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt0  ) << " || ";
@@ -4213,13 +4224,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(7) << Form("%4.0f", nt2_mm ) << " | ";
 	OUT << setw(7) << Form("%4.0f", nt10_mm) << " | ";
 	OUT << setw(7) << Form("%4.0f", nt0_mm ) << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_em  ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_em ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt01_em ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_em  ) << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_ee   ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_ee  ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_ee   ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_em ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_em) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt01_em) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_em ) << " || ";
+	OUT << setw(7) << Form("%4.0f", nt2_ee ) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt10_ee) << " | ";
+	OUT << setw(7) << Form("%4.0f", nt0_ee ) << " || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << endl;
@@ -4450,8 +4461,8 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "observed"  << " || ";
 	OUT << setw(25) << left << Form("%2.0f", nt2_mm ) << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_em  ) << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_ee   ) << " || " << endl;
+	OUT << setw(25) << left << Form("%2.0f", nt2_em ) << " || ";
+	OUT << setw(25) << left << Form("%2.0f", nt2_ee ) << " || " << endl;
 	OUT << "==========================================================================================================" << endl;
 	OUT << setw(20) << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
@@ -4509,7 +4520,6 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_pred_dfake->SetLineWidth(1);
 	h_pred_chmid->SetLineWidth(1);
 	h_pred_mc   ->SetLineWidth(1);
-	h_pred_tot  ->SetLineWidth(3);
 	h_pred_sfake->SetLineColor(50);
 	h_pred_sfake->SetFillColor(50);
 	h_pred_dfake->SetLineColor(38);
@@ -4518,6 +4528,9 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_pred_chmid->SetFillColor(42);
 	h_pred_mc   ->SetLineColor(31);
 	h_pred_mc   ->SetFillColor(31);
+	h_pred_tot  ->SetLineWidth(1);
+	h_pred_tot  ->SetFillColor(kBlack);
+	h_pred_tot  ->SetFillStyle(3013);
 	
 	// Add numbers:
 	h_obs->SetBinContent(1, nt2_ee);
@@ -4576,12 +4589,13 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	hs_pred->GetXaxis()->SetLabelFont(42);
 	hs_pred->GetXaxis()->SetLabelSize(0.1);
 	
-	TLegend *leg = new TLegend(0.15,0.70,0.50,0.88);
+	TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
 	leg->AddEntry(h_obs,        "Observed","p");
 	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
 	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
 	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
+	leg->AddEntry(h_pred_tot,    "Total Uncertainty","f");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	// leg->SetTextSize(0.05);
@@ -4591,21 +4605,22 @@ void MuonPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	c_temp->cd();
 	
 	hs_pred->Draw("hist");
-	h_pred_tot->DrawCopy("X0 E1 same");
+	h_pred_tot->DrawCopy("0 E2 same");
 	h_obs->DrawCopy("PE X0 same");
 	leg->Draw();
-	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-	// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+	
+	lat->SetTextSize(0.03);
+	lat->DrawLatex(0.16,0.60, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
+	if(reg != Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV", Region::minMet[reg]));
+	if(reg == Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV, < %.0f GeV", Region::minMet[reg], Region::maxMet[reg]));
 	drawTopLine();
 	
 	gPad->RedrawAxis();
-	fOutputSubDir = "ObsPredPlots/";
-	Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
-	// Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
+	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
 	delete FR;
-	fOutputSubDir = "";
 }
 
 void MuonPlotter::makeDiffPrediction(){
@@ -4638,6 +4653,7 @@ void MuonPlotter::makeDiffPrediction(){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
+	// Loop on the different variables
 	for(size_t j = 0; j < gNDiffVars; ++j){
 		TString varname    = DiffPredYields::var_name[j];
 		const int nbins    = DiffPredYields::nbins[j];
@@ -4646,6 +4662,8 @@ void MuonPlotter::makeDiffPrediction(){
 		///////////////////////////////////////////////////////////////////////////////////
 		// OBSERVATIONS ///////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11 = new TH1D(Form("NT11_%s", varname.Data()), varname, nbins, bins); nt11->Sumw2();
+
 		TH1D *nt11_mm = new TH1D(Form("NT11_MM_%s", varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
 		TH1D *nt10_mm = new TH1D(Form("NT10_MM_%s", varname.Data()), varname, nbins, bins); nt10_mm->Sumw2();
 		TH1D *nt01_mm = new TH1D(Form("NT01_MM_%s", varname.Data()), varname, nbins, bins); nt01_mm->Sumw2();
@@ -4694,41 +4712,102 @@ void MuonPlotter::makeDiffPrediction(){
 			nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[j]);
 			nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[j]);
 		}
+		
+		nt11->Add(nt11_mm);
+		nt11->Add(nt11_ee);
+		nt11->Add(nt11_em);
+
+		
+		///////////////////////////////////////////////////////////////////////////////////
+		// Errors /////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////
+		// Save the squared sum of total error in the bin errors of these histos,
+		// then apply square root before plotting
+		TH1D *totbg    = new TH1D(Form("TotBG_%s",    varname.Data()), varname, nbins, bins); totbg   ->Sumw2();
+		TH1D *totbg_mm = new TH1D(Form("TotBG_mm_%s", varname.Data()), varname, nbins, bins); totbg_mm->Sumw2();
+		TH1D *totbg_em = new TH1D(Form("TotBG_em_%s", varname.Data()), varname, nbins, bins); totbg_em->Sumw2();
+		TH1D *totbg_ee = new TH1D(Form("TotBG_ee_%s", varname.Data()), varname, nbins, bins); totbg_ee->Sumw2();
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// MC Predictions /////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
-		TH1D *nt11_mm_mc = new TH1D(Form("NT11_MM_MC_%s", varname.Data()), varname, nbins, bins); nt11_mm_mc->Sumw2();
-		TH1D *nt11_ee_mc = new TH1D(Form("NT11_EE_MC_%s", varname.Data()), varname, nbins, bins); nt11_ee_mc->Sumw2();
-		TH1D *nt11_em_mc = new TH1D(Form("NT11_EM_MC_%s", varname.Data()), varname, nbins, bins); nt11_em_mc->Sumw2();
-
-		for(size_t i = 0; i < fMCBG.size(); ++i){
-			Sample *S = fSamples[fMCBG[i]];
-			float scale = fLumiNorm / S->lumi;
-			nt11_mm_mc->Add(S->diffyields[Muon].hnt11[j], scale);
-			nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
-			nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
-		}
+		// TH1D *nt11_mc = new TH1D(Form("NT11_MC_%s", varname.Data()), varname, nbins, bins); nt11_mc->Sumw2();
+		// 
+		// TH1D *nt11_mm_mc = new TH1D(Form("NT11_MM_MC_%s", varname.Data()), varname, nbins, bins); nt11_mm_mc->Sumw2();
+		// TH1D *nt11_ee_mc = new TH1D(Form("NT11_EE_MC_%s", varname.Data()), varname, nbins, bins); nt11_ee_mc->Sumw2();
+		// TH1D *nt11_em_mc = new TH1D(Form("NT11_EM_MC_%s", varname.Data()), varname, nbins, bins); nt11_em_mc->Sumw2();
+		// 
+		// for(size_t i = 0; i < fMCBG.size(); ++i){
+		// 	Sample *S = fSamples[fMCBG[i]];
+		// 	float scale = fLumiNorm / S->lumi;
+		// 	nt11_mm_mc->Add(S->diffyields[Muon].hnt11[j], scale);
+		// 	nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
+		// 	nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
+		// }
+		// 
+		// nt11_mc->Add(nt11_mm_mc);
+		// nt11_mc->Add(nt11_ee_mc);
+		// nt11_mc->Add(nt11_em_mc);
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// RARE SM MC /////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_ss = new TH1D(Form("NT11_SS_%s", varname.Data()), varname, nbins, bins); nt11_ss->Sumw2();
+
 		TH1D *nt11_mm_ss = new TH1D(Form("NT11_MM_SS_%s", varname.Data()), varname, nbins, bins); nt11_mm_ss->Sumw2();
 		TH1D *nt11_ee_ss = new TH1D(Form("NT11_EE_SS_%s", varname.Data()), varname, nbins, bins); nt11_ee_ss->Sumw2();
 		TH1D *nt11_em_ss = new TH1D(Form("NT11_EM_SS_%s", varname.Data()), varname, nbins, bins); nt11_em_ss->Sumw2();
 
 		for(size_t i = 0; i < fMCRareSM.size(); ++i){
+			FakeRatios *FR = new FakeRatios();
 			Sample *S = fSamples[fMCRareSM[i]];
 			float scale = fLumiNorm / S->lumi;
 			nt11_mm_ss->Add(S->diffyields[Muon].hnt11[j], scale);
 			nt11_ee_ss->Add(S->diffyields[Elec].hnt11[j], scale);
 			nt11_em_ss->Add(S->diffyields[ElMu].hnt11[j], scale);
+
+			// Errors
+			for(size_t b = 0; b < nbins; ++b){
+				float ss_mm = S->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
+				float ss_ee = S->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
+				float ss_em = S->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
+
+				float esyst2_mm = 0.25 * ss_mm*ss_mm*scale*scale;
+				float esyst2_ee = 0.25 * ss_ee*ss_ee*scale*scale;
+				float esyst2_em = 0.25 * ss_em*ss_em*scale*scale;
+
+				float estat2_mm = scale*scale*FR->getEStat2(ss_mm);
+				float estat2_ee = scale*scale*FR->getEStat2(ss_ee);
+				float estat2_em = scale*scale*FR->getEStat2(ss_em);
+
+				float prev    = totbg   ->GetBinError(b+1);
+				float prev_mm = totbg_mm->GetBinError(b+1);
+				float prev_em = totbg_em->GetBinError(b+1);
+				float prev_ee = totbg_ee->GetBinError(b+1);
+
+				totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+				totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+				totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+				totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+			}
+			delete FR;
 		}
 
+		nt11_ss->Add(nt11_mm_ss);
+		nt11_ss->Add(nt11_ee_ss);
+		nt11_ss->Add(nt11_em_ss);
+
+		totbg   ->Add(nt11_ss);
+		totbg_mm->Add(nt11_mm_ss);
+		totbg_em->Add(nt11_em_ss);
+		totbg_ee->Add(nt11_ee_ss);
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// FAKE PREDICTIONS ///////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_sf = new TH1D(Form("NT11_SF_%s", varname.Data()), varname, nbins, bins); nt11_sf->Sumw2();
+		TH1D *nt11_df = new TH1D(Form("NT11_DF_%s", varname.Data()), varname, nbins, bins); nt11_df->Sumw2();
+
 		TH1D *nt11_mm_sf = new TH1D(Form("NT11_MM_SF_%s", varname.Data()), varname, nbins, bins); nt11_mm_sf->Sumw2();
 		TH1D *nt11_ee_sf = new TH1D(Form("NT11_EE_SF_%s", varname.Data()), varname, nbins, bins); nt11_ee_sf->Sumw2();
 		TH1D *nt11_em_sf = new TH1D(Form("NT11_EM_SF_%s", varname.Data()), varname, nbins, bins); nt11_em_sf->Sumw2();
@@ -4739,7 +4818,7 @@ void MuonPlotter::makeDiffPrediction(){
 		for(size_t i = 0; i < nbins; ++i){
 			FakeRatios *FR = new FakeRatios();
 			FR->setNToyMCs(100); // speedup
-			FR->setAddESyst(0.5);
+			FR->setAddESyst(0.5); // additional systematics
 
 			FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
 			FR->setEFRatio(elfratio_data, elfratio_data_e);
@@ -4757,12 +4836,51 @@ void MuonPlotter::makeDiffPrediction(){
 			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
 			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
 			
+			// Errors
+			float esyst2_mm  = FR->getMMTotESyst()*FR->getMMTotESyst();
+			float esyst2_ee  = FR->getEETotESyst()*FR->getEETotESyst();
+			float esyst2_em  = FR->getEMTotESyst()*FR->getEMTotESyst();
+			float esyst2_tot = FR->getTotESyst()  *FR->getTotESyst();
+			float estat2_mm  = FR->getMMTotEStat()*FR->getMMTotEStat();
+			float estat2_ee  = FR->getEETotEStat()*FR->getEETotEStat();
+			float estat2_em  = FR->getEMTotEStat()*FR->getEMTotEStat();
+			float estat2_tot = FR->getTotEStat()  *FR->getTotEStat();
+
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_mm = totbg_mm->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+			totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+			totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+			
 			delete FR;
 		}
+		
+		nt11_sf->Add(nt11_mm_sf);
+		nt11_sf->Add(nt11_ee_sf);
+		nt11_sf->Add(nt11_em_sf);
+
+		nt11_df->Add(nt11_mm_df);
+		nt11_df->Add(nt11_ee_df);
+		nt11_df->Add(nt11_em_df);
+
+		totbg   ->Add(nt11_sf);
+		totbg   ->Add(nt11_df);
+		totbg_mm->Add(nt11_mm_sf);
+		totbg_mm->Add(nt11_mm_df);
+		totbg_em->Add(nt11_em_sf);
+		totbg_em->Add(nt11_em_df);
+		totbg_ee->Add(nt11_ee_sf);
+		totbg_ee->Add(nt11_ee_df);
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// E-CHARGE MISID /////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
+		TH1D *nt11_cm = new TH1D(Form("NT11_CM_%s", varname.Data()), varname, nbins, bins); nt11_cm->Sumw2();
+
 		TH1D *nt11_ee_cm = new TH1D(Form("NT11_EE_CM_%s", varname.Data()), varname, nbins, bins); nt11_ee_cm->Sumw2();
 		TH1D *nt11_em_cm = new TH1D(Form("NT11_EM_CM_%s", varname.Data()), varname, nbins, bins); nt11_em_cm->Sumw2();
 
@@ -4773,38 +4891,87 @@ void MuonPlotter::makeDiffPrediction(){
 		float feE = gEChMisIDE_E;
 
 		for(size_t i = 0; i < nbins; ++i){
-			// Simple error propagation assuming error on number of events is sqrt(N)
-			nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_os_ee_bb->GetBinContent(i+1) + 2*fe*nt2_os_ee_ee->GetBinContent(i+1) + (fb+fe)*nt2_os_ee_eb->GetBinContent(i+1));
-			// nt2_ee_chmid_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-			// nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+			float nt2_ee_BB_os = nt2_os_ee_bb->GetBinContent(i+1);
+			float nt2_ee_EB_os = nt2_os_ee_eb->GetBinContent(i+1);
+			float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
+			float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
+			float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
+			
+			// Errors
+			FakeRatios *FR = new FakeRatios();
 
-			nt11_em_cm->SetBinContent(i+i, fb*nt2_os_em_bb->GetBinContent(i+1) + fe*nt2_os_em_ee->GetBinContent(i+1));
-			// nt2_em_chmid_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
-			// nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+			// Simple error propagation assuming error on number of events is FR->getEStat2()
+			nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os);
+			float nt11_ee_cm_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+			float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+			nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
+			float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
+			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+			
+			float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+			float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+			float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+			float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+			float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+			float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+			totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+			totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+			delete FR;
 		}
 
+		nt11_cm->Add(nt11_ee_cm);
+		nt11_cm->Add(nt11_em_cm);
+
+		totbg   ->Add(nt11_cm);
+		totbg_em->Add(nt11_em_cm);
+		totbg_ee->Add(nt11_ee_cm);
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// OUTPUT /////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////
+		nt11->SetMarkerColor(kBlack);
+		nt11->SetMarkerStyle(20);
+		nt11->SetMarkerSize(2.0);
+		nt11->SetLineWidth(2);
+		nt11->SetLineColor(kBlack);
+		nt11->SetFillColor(kBlack);
 		nt11_mm->SetMarkerColor(kBlack);
 		nt11_mm->SetMarkerStyle(20);
-		nt11_mm->SetMarkerSize(2.5);
+		nt11_mm->SetMarkerSize(2.0);
 		nt11_mm->SetLineWidth(2);
 		nt11_mm->SetLineColor(kBlack);
 		nt11_mm->SetFillColor(kBlack);
 		nt11_ee->SetMarkerColor(kBlack);
 		nt11_ee->SetMarkerStyle(20);
-		nt11_ee->SetMarkerSize(2.5);
+		nt11_ee->SetMarkerSize(2.0);
 		nt11_ee->SetLineWidth(2);
 		nt11_ee->SetLineColor(kBlack);
 		nt11_ee->SetFillColor(kBlack);
 		nt11_em->SetMarkerColor(kBlack);
 		nt11_em->SetMarkerStyle(20);
-		nt11_em->SetMarkerSize(2.5);
+		nt11_em->SetMarkerSize(2.0);
 		nt11_em->SetLineWidth(2);
 		nt11_em->SetLineColor(kBlack);
 		nt11_em->SetFillColor(kBlack);
+
+		nt11_sf->SetLineWidth(1);
+		nt11_df->SetLineWidth(1);
+		nt11_ss->SetLineWidth(1);
+		nt11_sf->SetLineColor(50);
+		nt11_sf->SetFillColor(50);
+		nt11_df->SetLineColor(38);
+		nt11_df->SetFillColor(38);
+		nt11_cm->SetLineColor(42);
+		nt11_cm->SetFillColor(42);
+		nt11_ss->SetLineColor(31);
+		nt11_ss->SetFillColor(31);
 
 		nt11_mm_sf->SetLineWidth(1);
 		nt11_mm_df->SetLineWidth(1);
@@ -4839,10 +5006,35 @@ void MuonPlotter::makeDiffPrediction(){
 		nt11_em_cm->SetFillColor(42);
 		nt11_em_ss->SetLineColor(31);
 		nt11_em_ss->SetFillColor(31);
+		
+		totbg   ->SetLineWidth(1);
+		totbg_mm->SetLineWidth(1);
+		totbg_em->SetLineWidth(1);
+		totbg_ee->SetLineWidth(1);
 
+		totbg   ->SetFillColor(kBlack);
+		totbg_mm->SetFillColor(kBlack);
+		totbg_em->SetFillColor(kBlack);
+		totbg_ee->SetFillColor(kBlack);
+		totbg   ->SetFillStyle(3013);
+		totbg_mm->SetFillStyle(3013);
+		totbg_em->SetFillStyle(3013);
+		totbg_ee->SetFillStyle(3013);
+
+		TH1D *nt11_pred_tot    = new TH1D(Form("NT11_PRED_%s",    varname.Data()), varname, nbins, bins); nt11_pred_tot->Sumw2();
+		TH1D *nt11_mm_pred_tot = new TH1D(Form("NT11_MM_PRED_%s", varname.Data()), varname, nbins, bins); nt11_mm_pred_tot->Sumw2();
+		TH1D *nt11_ee_pred_tot = new TH1D(Form("NT11_EE_PRED_%s", varname.Data()), varname, nbins, bins); nt11_ee_pred_tot->Sumw2();
+		TH1D *nt11_em_pred_tot = new TH1D(Form("NT11_EM_PRED_%s", varname.Data()), varname, nbins, bins); nt11_em_pred_tot->Sumw2();
+		
+		THStack *nt11_tot    = new THStack("NT11_TotalBG", "NT11_TotalBG");
 		THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
 		THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
 		THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
+		
+		nt11_tot->Add(nt11_sf);
+		nt11_tot->Add(nt11_df);
+		nt11_tot->Add(nt11_ss);
+		nt11_tot->Add(nt11_cm);
 
 		nt11_mm_tot->Add(nt11_mm_sf);
 		nt11_mm_tot->Add(nt11_mm_df);
@@ -4857,6 +5049,28 @@ void MuonPlotter::makeDiffPrediction(){
 		nt11_em_tot->Add(nt11_em_df);
 		nt11_em_tot->Add(nt11_em_ss);
 		nt11_em_tot->Add(nt11_em_cm);
+
+		nt11_tot->Draw("goff");
+		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_mm_tot->Draw("goff");
+		nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_ee_tot->Draw("goff");
+		nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_em_tot->Draw("goff");
+		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+
+		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
+		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
+		nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum());
+		nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum());
+
+		double max = nt11->Integral();
+		nt11    ->SetMaximum(max>1?max+1:1.);
+		nt11_sf ->SetMaximum(max>1?max+1:1.);
+		nt11_df ->SetMaximum(max>1?max+1:1.);
+		nt11_cm ->SetMaximum(max>1?max+1:1.);
+		nt11_ss ->SetMaximum(max>1?max+1:1.);
+		nt11_tot->SetMaximum(max>1?max+1:1.);
 
 		double max_mm = nt11_mm->Integral();
 		nt11_mm    ->SetMaximum(max_mm>1?max_mm+1:1.);
@@ -4881,37 +5095,93 @@ void MuonPlotter::makeDiffPrediction(){
 		nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
 		nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
 
-		TLegend *leg_mm = new TLegend(0.60,0.70,0.90,0.88);
+		// Take square root of sum of squared errors:
+		for(size_t i = 0; i < nbins; ++i){
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_mm = totbg_mm->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
+
+			totbg   ->SetBinError(i+1, sqrt(prev)   );
+			totbg_mm->SetBinError(i+1, sqrt(prev_mm));
+			totbg_em->SetBinError(i+1, sqrt(prev_em));
+			totbg_ee->SetBinError(i+1, sqrt(prev_ee));
+		}
+		
+
+		fOutputSubDir = "DiffPredictionPlots/";
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg = new TLegend(0.60,0.67,0.90,0.88);
+		leg->AddEntry(nt11,    "Observed","p");
+		leg->AddEntry(nt11_sf, "Single Fakes","f");
+		leg->AddEntry(nt11_df, "Double Fakes","f");
+		leg->AddEntry(nt11_ss, "Irreducible (MC)","f");
+		leg->AddEntry(nt11_cm, "Charge MisID","f");
+		leg->AddEntry(totbg,   "Total Uncertainty","f");
+		leg->SetFillStyle(0);
+		leg->SetTextFont(42);
+		leg->SetBorderSize(0);
+		
+		TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp->cd();
+		gPad->SetLogy();
+		
+		nt11_tot->Draw("hist");
+		// nt11_error->DrawCopy("X0 E1 same");
+		nt11->DrawCopy("PE X0 same");
+		totbg->DrawCopy("0 E2 same");
+		leg->Draw();
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
+		lat->SetTextSize(0.03);
+		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
+		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
+		if(j==3)       lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+		drawTopLine();
+		
+		gPad->RedrawAxis();
+		Util::PrintPDF(c_temp, varname + "_ObsPred", fOutputDir + fOutputSubDir);
+
+		fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_mm = new TLegend(0.60,0.67,0.90,0.88);
 		leg_mm->AddEntry(nt11_mm,    "Observed","p");
 		leg_mm->AddEntry(nt11_mm_sf, "Single Fakes","f");
 		leg_mm->AddEntry(nt11_mm_df, "Double Fakes","f");
 		leg_mm->AddEntry(nt11_mm_ss, "Irreducible (MC)","f");
+		leg_mm->AddEntry(totbg_mm,   "Total Uncertainty","f");
 		leg_mm->SetFillStyle(0);
 		leg_mm->SetTextFont(42);
-		// leg_mm->SetTextSize(0.05);
 		leg_mm->SetBorderSize(0);
 		
-		TCanvas *c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+		c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
 		c_temp->cd();
 		gPad->SetLogy();
 		
 		nt11_mm_tot->Draw("hist");
 		// nt11_error->DrawCopy("X0 E1 same");
 		nt11_mm->DrawCopy("PE X0 same");
+		totbg_mm->DrawCopy("0 E2 same");
 		leg_mm->Draw();
-		// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "#mu#mu");
+		lat->SetTextSize(0.03);
+		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
+		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
+		if(j==3)       lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
 		drawTopLine();
 		
 		gPad->RedrawAxis();
-		Util::PrintNoEPS(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
 
-		TLegend *leg_ee = new TLegend(0.60,0.70,0.90,0.88);
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_ee = new TLegend(0.60,0.67,0.90,0.88);
 		leg_ee->AddEntry(nt11_ee,    "Observed","p");
 		leg_ee->AddEntry(nt11_ee_sf, "Single Fakes","f");
 		leg_ee->AddEntry(nt11_ee_df, "Double Fakes","f");
 		leg_ee->AddEntry(nt11_ee_ss, "Irreducible (MC)","f");
 		leg_ee->AddEntry(nt11_ee_cm, "Charge MisID","f");
+		leg_ee->AddEntry(totbg_ee,   "Total Uncertainty","f");
 		leg_ee->SetFillStyle(0);
 		leg_ee->SetTextFont(42);
 		leg_ee->SetBorderSize(0);
@@ -4923,20 +5193,27 @@ void MuonPlotter::makeDiffPrediction(){
 		nt11_ee_tot->Draw("hist");
 		// nt11_error->DrawCopy("X0 E1 same");
 		nt11_ee->DrawCopy("PE X0 same");
+		totbg_ee->DrawCopy("0 E2 same");
 		leg_ee->Draw();
-		// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "ee");
+		lat->SetTextSize(0.03);
+		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
+		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
+		if(j==3)       lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
 		drawTopLine();
 		
 		gPad->RedrawAxis();
-		Util::PrintNoEPS(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
 
-		TLegend *leg_em = new TLegend(0.60,0.70,0.90,0.88);
+		/////////////////////////////////////////////////////////////////
+		TLegend *leg_em = new TLegend(0.60,0.67,0.90,0.88);
 		leg_em->AddEntry(nt11_em,    "Observed","p");
 		leg_em->AddEntry(nt11_em_sf, "Single Fakes","f");
 		leg_em->AddEntry(nt11_em_df, "Double Fakes","f");
 		leg_em->AddEntry(nt11_em_ss, "Irreducible (MC)","f");
 		leg_em->AddEntry(nt11_em_cm, "Charge MisID","f");
+		leg_em->AddEntry(totbg_em,   "Total Uncertainty","f");
 		leg_em->SetFillStyle(0);
 		leg_em->SetTextFont(42);
 		leg_em->SetBorderSize(0);
@@ -4946,17 +5223,32 @@ void MuonPlotter::makeDiffPrediction(){
 		gPad->SetLogy();
 		
 		nt11_em_tot->Draw("hist");
-		// nt11_error->DrawCopy("X0 E1 same");
+		totbg_em->DrawCopy("0 E2 same");
 		nt11_em->DrawCopy("PE X0 same");
 		leg_em->Draw();
-		// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		// lat->DrawLatex(0.13,0.92, hiloname[hilo]);
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.65,0.92, "e#mu");
+		lat->SetTextSize(0.03);
+		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
+		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
+		if(j==3)       lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
 		drawTopLine();
 		
 		gPad->RedrawAxis();
-		Util::PrintNoEPS(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir, NULL);
+		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
 
-		delete c_temp;
+		// Cleanup
+		delete c_temp, leg, leg_mm, leg_em, leg_ee;
+		delete nt11, nt11_mm, nt11_ee, nt11_em;
+		delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
+		delete nt2_os_ee_bb, nt2_os_ee_eb, nt2_os_ee_ee, nt2_os_em_bb, nt2_os_em_ee;
+		delete nt11_ss, nt11_mm_ss, nt11_em_ss, nt11_ee_ss;
+		delete nt11_sf, nt11_mm_sf, nt11_em_sf, nt11_ee_sf;
+		delete nt11_df, nt11_mm_df, nt11_em_df, nt11_ee_df;
+		delete nt11_cm, nt11_em_cm, nt11_ee_cm;
+		// delete nt11_mc, nt11_mm_mc, nt11_ee_mc, nt11_em_mc;
+		delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
+		delete totbg, totbg_mm, totbg_em, totbg_ee;
 	}
 	fOutputSubDir = "";
 }
@@ -6274,7 +6566,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
 				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt && (fCurrentSample != MuHad1 || fCurrentSample != MuHad2)){
-					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT %6.2f MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), pfMET, getMT2(mu1,mu2,1), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu1,mu2,1), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][hilo].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
@@ -6344,7 +6636,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
 				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt && (fCurrentSample != EleHad1 || fCurrentSample != EleHad2)){
-					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT %6.2f MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), pfMET, getMT2(el1,el2,2), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(el1,el2,2), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][hilo].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
@@ -6419,13 +6711,13 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[2]);
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[14]);
 				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[15]);
 				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[16]);
-				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[17]);
 				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
-					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT %6.2f MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), pfMET, getMT2(mu,el,3), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu,el,3), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
 				if(S->datamc > 0){
@@ -6437,13 +6729,13 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				}
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[15]);
+				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[14]);
 				S->region[reg][hilo].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[reg][hilo].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[16]);
+				if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[15]);
 				S->region[reg][hilo].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], puweight); // muon always in x axis for e/mu
 				S->region[reg][hilo].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc > 0) S->region[reg][hilo].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
@@ -7273,16 +7565,15 @@ void MuonPlotter::initCutNames(){
 	fEMCutNames.push_back(" ... has both"); //                         = 5
 	fEMCutNames.push_back(" ... has same-sign electron muon pair"); // = 6
 	fEMCutNames.push_back(" ... passes Z veto"); //                    = 7
-	fEMCutNames.push_back(" ... passes Minv veto"); //                 = 8
-	fEMCutNames.push_back(" ... has one jet > 50 GeV"); //             = 9
-	fEMCutNames.push_back(" ... passes NJets cut"); //                 = 10
-	fEMCutNames.push_back(" ... passes HT cut"); //                    = 11
-	fEMCutNames.push_back(" ... passes MET cut"); //                   = 12
-	fEMCutNames.push_back(" ... muon passes pt cut"); //               = 13
-	fEMCutNames.push_back(" ... electron passes pt cut"); //           = 14
-	fEMCutNames.push_back(" ... muon passes tight cut"); //            = 15
-	fEMCutNames.push_back(" ... electron passes tight cut"); //        = 16
-	fEMCutNames.push_back(" ... both e and mu pass tight cuts"); //    = 17
+	fEMCutNames.push_back(" ... has one jet > 50 GeV"); //             = 8
+	fEMCutNames.push_back(" ... passes NJets cut"); //                 = 9
+	fEMCutNames.push_back(" ... passes HT cut"); //                    = 10
+	fEMCutNames.push_back(" ... passes MET cut"); //                   = 11
+	fEMCutNames.push_back(" ... muon passes pt cut"); //               = 12
+	fEMCutNames.push_back(" ... electron passes pt cut"); //           = 13
+	fEMCutNames.push_back(" ... muon passes tight cut"); //            = 14
+	fEMCutNames.push_back(" ... electron passes tight cut"); //        = 15
+	fEMCutNames.push_back(" ... both e and mu pass tight cuts"); //    = 16
 }
 void MuonPlotter::initCounters(gSample sample){
 	fCounters[sample][Muon].fill(fMMCutNames[0],  0.);
@@ -7303,25 +7594,6 @@ void MuonPlotter::initCounters(gSample sample){
 	fCounters[sample][Muon].fill(fMMCutNames[15], 0.);
 	fCounters[sample][Muon].fill(fMMCutNames[16], 0.);
 
-	fCounters[sample][ElMu].fill(fEMCutNames[0],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[1],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[2],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[3],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[4],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[5],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[6],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[7],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[8],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[9],  0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[10], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[11], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[12], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[13], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[14], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[15], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[16], 0.);
-	fCounters[sample][ElMu].fill(fEMCutNames[17], 0.);
-
 	fCounters[sample][Elec].fill(fEECutNames[0],  0.);
 	fCounters[sample][Elec].fill(fEECutNames[1],  0.);
 	fCounters[sample][Elec].fill(fEECutNames[2],  0.);
@@ -7339,6 +7611,24 @@ void MuonPlotter::initCounters(gSample sample){
 	fCounters[sample][Elec].fill(fEECutNames[14], 0.);
 	fCounters[sample][Elec].fill(fEECutNames[15], 0.);
 	fCounters[sample][Elec].fill(fEECutNames[16], 0.);
+
+	fCounters[sample][ElMu].fill(fEMCutNames[0],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[1],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[2],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[3],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[4],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[5],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[6],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[7],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[8],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[9],  0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[10], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[11], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[12], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[13], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[14], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[15], 0.);
+	fCounters[sample][ElMu].fill(fEMCutNames[16], 0.);
 }
 void MuonPlotter::fillCutFlowHistos(gSample sample){
 	Sample *S = fSamples[sample];
@@ -8349,7 +8639,7 @@ void MuonPlotter::fixPRatios(){
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Geninfo stuff:
+// Geninfo stuff
 //____________________________________________________________________________
 int MuonPlotter::muIndexToBin(int ind){
 	// For the origin histograms
@@ -9701,7 +9991,7 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 	}
 	if(fChargeSwitch == 1){
 		if(abs(isOSLLEvent(mu, el)) != 3) return false;
-		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[7]);
+		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[6]);
 	}
 
 	if(fChargeSwitch == 0){
@@ -9709,38 +9999,36 @@ bool MuonPlotter::isSSLLElMuEvent(int& mu, int& el){
 		// contributes to the SS yield. They would NOT fire the Z veto, since they are
 		// misidd as SS events
 		if(!passesZVeto()) return false;
-		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[8]);
+		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[7]);
 	}
-
-	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[8]);
 
 	// Define hypothesis leptons
 	setHypLepton1(mu, Muon);
 	setHypLepton1(el, Elec);
 
 	// if(!passesJet50Cut()) return false;
-	// if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[9]);
+	// if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[8]);
 
 	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
-	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[10]);
+	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[9]);
 
 	if(!passesHTCut(fC_minHT, fC_maxHT) )  return false;    // ht cut
-	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[11]);
+	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[10]);
 
 	if(!passesMETCut(fC_minMet, fC_maxMet) ) return false;    // met cut
-	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[12]);
+	if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[11]);
 
 	if(MuPt[mu] > ElPt[el]){
 		if(!isGoodPrimMuon(mu))    return false;
-		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[13]);
+		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[12]);
 		if(!isGoodSecElectron(el)) return false;
-		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[14]);
+		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[13]);
 	}
 	else if(MuPt[mu] < ElPt[el]){
 		if(!isGoodPrimElectron(el)) return false;
-		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[14]);
-		if(!isGoodSecMuon(mu))      return false;
 		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[13]);
+		if(!isGoodSecMuon(mu))      return false;
+		if(fDoCounting) fCounters[fCurrentSample][ElMu].fill(fEMCutNames[12]);
 	}
 	return true;
 }
@@ -9766,6 +10054,7 @@ bool MuonPlotter::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(isLooseMuon(muon) == false) return false;
 	if(MuIso[muon] > 0.15) return false;
+	// if(MuIso[muon] > 0.1) return false;
 	return true;
 }
 bool MuonPlotter::isGoodPrimMuon(int muon, float ptcut){
@@ -9836,6 +10125,7 @@ bool MuonPlotter::isTightElectron(int ele){
 	if(ElIsGoodElId_WP80[ele] != 1) return false;
 
 	if(ElRelIso[ele]    > 0.15) return false;
+	// if(ElRelIso[ele]    > 0.1) return false;
 
 	return true;
 }

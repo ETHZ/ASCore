@@ -105,6 +105,9 @@ public:
 		HT200MET120,
 		HT400MET50,
 		HT400MET120,
+		HT400MET0,
+		HT80METInv30,
+		HT0MET120,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -340,6 +343,7 @@ public:
 	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
 
+	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeDiffPrediction();
 	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
