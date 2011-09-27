@@ -30,7 +30,8 @@ def get_info(lumiFile,jsonFile):
             lumiTot = lumiTot.strip('| ')
             break
 
-   return [range,lumiTot]
+   lumiString =  "%3.1f/pb" % float(lumiTot)
+   return [range,lumiString]
 
   
 
@@ -173,7 +174,7 @@ if (datamc=="data"):
    # get misc. information to be put on the twiki
    [range,lumi] = get_info(fLumiSummary,fJsonSummary)
 
-   format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']] |'+datasetName+' |'+datasetSize+' |'+datasetEvents+' |[[%ATTACHURL%/'+fLumiSummary+']['+lumi+'/pb]] | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% |'+cmsswVersion+' |'+ntupleVersion+' |'+userNickName+' | |'
+   format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']] |'+datasetName+' |'+datasetSize+' |'+datasetEvents+' |[[%ATTACHURL%/'+fLumiSummary+']['+lumi+']] | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% |'+cmsswVersion+' |'+ntupleVersion+' |'+userNickName+' | |'
 else:
    format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" GB | "+datasetEvents+' | ... pb | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% | '+cmsswVersion+' | '+ntupleVersion+" | "+userNickName+" | |"
 
