@@ -3,18 +3,14 @@
 # PSI Tier-3 example batch Job  #
 #################################
 
-# 64bit & all queue version!
-
 ##### CONFIGURATION ##############################################
 # Output files to be copied back to the User Interface
 # (the file path must be given relative to the working directory)
-OUTFILES="myout_job_$1.txt myerr_job_$1.txt"
+OUTFILES=
 
 # Output files to be copied to the SE
 # (as above the file path must be given relative to the working directory)
 SEOUTFILES="output_$1.root"
-
-#SOURCEFILES="dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/susy/ntuples/mc/V01-03-01/ZJets-madgraph-V01-03-01.root"
 
 SOURCEFILES=sourcefile
 
@@ -46,7 +42,6 @@ JOBDIR=jobdir
 
 SEUSERSUBDIR=srmdir
 
-#exe=/shome/pablom/CMSSW_3_8_4_patch2/src/DiLeptonAnalysis/NTupleProducer/macros/RunJZBAnalyzer
 exe=exefile
 ##################################################################
 
@@ -64,8 +59,6 @@ RELEASE=therelease
 #$ -N example_job
 
 # Run time soft and hard limits hh:mm:ss
-# soft=CPU time; hard=Wallclock time
-#$ -l s_rt=12:00:00,h_rt=14:00:00
 
 ### Specify the queue on which to run
 #$ -q all.q
@@ -119,8 +112,8 @@ else
    SERESULTDIR=$USER_SRM_HOME/$HN_NAME/$SEUSERSUBDIR
 fi
 if test -e "$WORKDIR"; then
-   echo "ERROR: WORKDIR ($WORKDIR) already exists! Aborting..." >&2
-   exit 1
+   echo "WARNING: WORKDIR ($WORKDIR) already exists! Removing it..." >&2
+   rm -rf $WOKDIR
 fi
 mkdir -p $WORKDIR
 if test ! -d "$WORKDIR"; then
@@ -141,7 +134,9 @@ EOF
 ###########################################################################
 ## YOUR FUNCTIONALITY CODE GOES HERE
 # set up CMS environment
+
 export SCRAM_ARCH=slc5_amd64_gcc434
+
 source $VO_CMS_SW_DIR/cmsset_default.sh
 
 cd $RELEASE
@@ -151,21 +146,19 @@ eval `scramv1 runtime -sh`
 cd $WORKDIR
 
 export LD_LIBRARY_PATH=/swshare/glite/d-cache/dcap/lib/:$LD_LIBRARY_PATH
-
-# Output goes to myout, errors to myerr
-$exe -o $SEOUTFILES $ARGUMENTS $SOURCEFILES > myout_job_$1.txt 2>myerr_job_$1.txt
-
-# Here we produce some additional output for the files that are copied back to
-#  our shared home
-scramv1 list >> myout_job_$1.txt 2>>myerr_job_$1.txt
-srmls srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/ >> myout_job_$1.txt 2>>myerr_job_$1.txt
-
-# create a dummy file for copying back to the SE
-dd if=/dev/urandom of=mybigfile count=100 &>/dev/null
-
-
-
-
+rootoutfiles=""
+counter=0
+for f in $SOURCEFILES; do
+  output=${SEOUTFILES%.*}"_"$counter.root
+  echo Running $exe $ARGUMENTS -o $output $f ...
+  $exe $ARGUMENTS -o $output $f 
+  if test -e $output; then rootoutfiles=$rootoutfiles" "$output; fi
+  let counter++
+done
+if test x"$rootoutfiles" != x; then
+  echo Running hadd $SEOUTFILES $rootoutfiles
+  hadd $SEOUTFILES $rootoutfiles
+fi
 
 #### RETRIEVAL OF OUTPUT FILES AND CLEANING UP ############################
 cd $WORKDIR
@@ -197,7 +190,7 @@ if test x"$OUTFILES" != x; then
    done
 fi
 
-if test x"$SEOUTFILES" != x; then
+if test -e $SEOUTFILES; then
    if test 0"$DBG" -ge 2; then
       srmdebug="-debug"
    fi
