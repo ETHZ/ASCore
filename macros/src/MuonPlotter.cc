@@ -197,9 +197,19 @@ void MuonPlotter::init(TString filename){
 	// fMCBG.push_back(VVTo4L);
 	fMCBG.push_back(GVJets);
 	fMCBG.push_back(DPSWW);
-	fMCBG.push_back(WpWp);
-	fMCBG.push_back(WmWm);
-	fMCBG.push_back(ttbarW);
+	fMCBG.push_back(WWplus);
+	fMCBG.push_back(WWminus);
+	fMCBG.push_back(TTWplus);
+	fMCBG.push_back(TTWminus);
+	fMCBG.push_back(TTZplus);
+	fMCBG.push_back(TTZminus);
+	fMCBG.push_back(TTWWplus);
+	fMCBG.push_back(TTWWminus);
+	fMCBG.push_back(WWWplus);
+	fMCBG.push_back(WWWminus);
+	// fMCBG.push_back(WpWp);
+	// fMCBG.push_back(WmWm);
+	// fMCBG.push_back(ttbarW);
 
 	// fMCBG.push_back(QCD5);
 	// fMCBG.push_back(QCD15);
@@ -253,9 +263,19 @@ void MuonPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZ);
 	fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
-	fMCRareSM.push_back(WpWp);
-	fMCRareSM.push_back(WmWm);
-	fMCRareSM.push_back(ttbarW);
+	fMCRareSM.push_back(WWplus);
+	fMCRareSM.push_back(WWminus);
+	fMCRareSM.push_back(TTWplus);
+	fMCRareSM.push_back(TTWminus);
+	fMCRareSM.push_back(TTZplus);
+	fMCRareSM.push_back(TTZminus);
+	fMCRareSM.push_back(TTWWplus);
+	fMCRareSM.push_back(TTWWminus);
+	fMCRareSM.push_back(WWWplus);
+	fMCRareSM.push_back(WWWminus);
+	// fMCRareSM.push_back(WpWp);
+	// fMCRareSM.push_back(WmWm);
+	// fMCRareSM.push_back(ttbarW);
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
@@ -496,8 +516,8 @@ void MuonPlotter::doAnalysis(){
 	// printOrigins();
 	// makeMuIsolationPlots(); // loops on TTbar sample
 	// makeElIsolationPlots(); // loops on TTbar sample
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotCustom();
 	// makeMETvsHTPlotTau();
@@ -6554,7 +6574,7 @@ void MuonPlotter::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	if(reg == Baseline && hilo == HighPt) fDoCounting = true;
 	fCurrentChannel = Muon;
 	float puweight = PUWeight;
-	if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
 		if(fDoCounting) fCounters[fCurrentSample][Muon].fill(fMMCutNames[2]);
@@ -6806,7 +6826,7 @@ void MuonPlotter::fillDiffYields(Sample *S){
 	fDoCounting = false;
 	fCurrentChannel = Muon;
 	float puweight = PUWeight;
-	if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
 		fC_minHT  = 0.;
@@ -7063,7 +7083,7 @@ void MuonPlotter::fillRatioPlots(Sample *S){
 	fDoCounting = false;
 	fChargeSwitch = 0;
 	float puweight = PUWeight;
-	if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	// Reset event selections to baseline:
 	fC_minMu1pt = Region::minMu1pt[HighPt];
@@ -7179,7 +7199,7 @@ void MuonPlotter::fillKinPlots(gSample i, gHiLoSwitch hilo){
 	int mu(-1), el(-1); // for e/mu channel, easier readability
 
 	float puweight = PUWeight;
-	if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
@@ -7380,7 +7400,7 @@ void MuonPlotter::fillMuIsoPlots(gSample i){
 		if(!singleMuTrigger()) return;
 		float prescale = singleMuPrescale();
 		float puweight = PUWeight;
-		if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 		float scale = prescale * puweight;
 
 		// Common event selections
@@ -7450,7 +7470,7 @@ void MuonPlotter::fillElIsoPlots(gSample i){
 		if(!singleElTrigger()) return;
 		float prescale = singleElPrescale();
 		float puweight = PUWeight;
-		if(S->datamc == 3) puweight = 1; // fix for samples with no pileup
+		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 		float scale = prescale * puweight;
 
 		// Common event selections
