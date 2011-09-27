@@ -226,7 +226,7 @@ def findDuplicates():
             missStr += str(i)+','
         missStr = missStr[:-1]+']'
 
-    print 'Missing files:',missStr
+    print 'Missing files','('+str(len(missingFiles))+'):',missStr
     print hline
         
     if opt.tryDelete:
@@ -253,7 +253,7 @@ def findDuplicates():
             filesToDelete.extend(dups)
 
         print 'N of duplicates safe to delete:',len(filesToDelete),' N of duplicates with mismatching size:',nUnsafeDuplicates
-        performDelete( filesToDelete, srmSite, logFile )
+        if len(filesToDelete)>0: performDelete( filesToDelete, srmSite, logFile )
 
     elif opt.deleteAll:
         # make one list of duplicates
@@ -262,7 +262,7 @@ def findDuplicates():
             filesToDelete.extend(files)
 
         print 'Duplicate files to delete: ',len(filesToDelete)
-        performDelete( filesToDelete, srmSite, logFile )
+        if len(filesToDelete)>0: performDelete( filesToDelete, srmSite, logFile )
 
     return
 
