@@ -25,10 +25,33 @@ from os import popen
 import commands
 import time
 try:
-	from multiprocessing import Pool
+        from multiprocessing import Pool
 except ImportError:
 	print "Importing multiprocessing failed. Please use the script like this: python runManager.py template.cfg and not ./runManager.py template.cfg"
 	domultiprocessing=False
+
+# Command-line options -----------------------------------
+from optparse import OptionParser
+usage = """%prog <configuration>
+where configuration should look like this:
+---------------------------------------
+ReleasePath path
+Executable name
+NameOfConf path
+NameOfSource path
+SrmPath path
+WorkPath path
+HPName path
+---------------------------------------"""
+parser = OptionParser(usage=usage)
+parser.add_option("-n","--dry-run",dest="dryrun",action="store_true",default=False,
+                  help="Do not actually submit the jobs: just creates file to submit")
+parser.add_option("-v","--verbose",dest="verbose",action="store_true",default=False,
+                  help="Turn verbosity on")
+parser.add_option("-r","--renew",dest="renew",action="store_true",default=False,
+                  help="Renew cached files")
+(options, args) = parser.parse_args(args=None, values=None)
+#---------------------------------------------------------
 
 jobnumbers=[]
 totaljobnumber=0
@@ -146,10 +169,18 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   outputCFGFile.write(newcfgText7)
   CFGFile.close()
   outputCFGFile.close()
-  
+
+
   outputName = "output_" + str(step) + ".root"
+  stderr = nameOfDirectory + taskName + '/job_' + str(step) + '.err'
+  stdout = nameOfDirectory + taskName + '/job_' + str(step) + '.out'
   thisjobnumber=0
-  pipe=popen("qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
+
+  cmd = " ".join(['qsub','-q all.q','-N',"RMG"+str(step)+taskName,'-o',stdout,'-e',stderr,nameOfDirectory+taskName+'/'+nameOfConf2+' '+str(step)])
+  print cmd
+  if options.dryrun: return thisjobnumber
+
+  pipe=popen(cmd)#"qsub -e /tmp/ -o /tmp/ -N " + "RMJ"+str(step)+taskName + " " + nameOfDirectory + taskName + "/" + nameOfConf2 + " " + str(step))
   for l in pipe.readlines():
 	  if l.find("Your job")>-1:
 		  thisjobnumber=int(l[l.index('job ')+4:l.index(' (')])
@@ -174,7 +205,6 @@ def createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, stringInfo, listO
   if(inputFilesForCMS == ""):
     return "Error: No input files available"
   
-
   result = createCMSConf(step, nameOfCurrentDirectory, releasePath, 
            nameOfConfigurationFile, inputFilesForCMS, executablePath, nameOfSRMPath, hpname, task)
   return result
@@ -230,23 +260,6 @@ def showMessage(message):
 
 
 ###############################################################
-# printUsage method: Prints how to use the program            #
-#                                                             #
-###############################################################
-def printUsage():
-  print "./runMan configuration.txt"
-  print "configuration.txt should look like this:"
-  print "---------------------------------------"
-  print "ReleasePath path"
-  print "Executable name"
-  print "NameOfConf path"
-  print "NameOfSource path"
-  print "SrmPath path"
-  print "WorkPath path"
-  print "HPName path"
-  print "---------------------------------------"
- 
-###############################################################
 # List of tasks: from the source file                         #
 #                                                             #
 ###############################################################
@@ -288,13 +301,26 @@ def process(task, conf):
   dcapPath = "dcap://t3se01.psi.ch:22125/"
   srmPath = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"
   folderToList = srmPath + task[0]
-  showMessage("Going to fetch list of files pertaining to "+str(task[0]))
-  theList = os.popen("lcg-ls " + folderToList)
-  list = theList.readlines()
-  for li in theList:
-    if(li.find("not found") != -1):
-      showMessage("Folder not found")
-      return "Error"
+  list = [] # Initialize file list
+
+  # Check if cache file exists and if we should use it
+  cacheFile = '.'+folderToList.replace('/','_').replace('?','_')
+  if not options.renew and os.path.isfile(cacheFile):
+      f = open(cacheFile)
+      showMessage('Reading files pertaining to '+str(task[0])+'from cache file '+cacheFile)
+      list = f.readlines()
+      f.close()
+  else:
+      # If not: rebuild the list
+      showMessage("Going to fetch list of files pertaining to "+str(task[0]))
+      theList = os.popen('lcg-ls --vo cms --srm-timeout=6000 --connect-timeout=6000 -T srmv2 --nobdii ' + folderToList + ' 2>&1')
+      list = theList.readlines()
+      for li in list:
+          if(li.find("root") == -1):
+              showMessage("Problem with folder",li)
+              return "Error"
+      f = open(cacheFile,'w')
+      f.write(''.join(list))
   
   numberOfFiles = len(list)
   if(numberOfFiles == 0):
@@ -330,7 +356,7 @@ def process(task, conf):
   os.system("mkdir -p " + taskName)
   os.system("mkdir -p ../" + taskName)
 
-  showMessage(str(NumberOfJobs) + " with " + str(FilesPerJob) + " each will be created")
+  showMessage(str(NumberOfJobs) + " jobs with " + str(FilesPerJob) + " files each will be created")
   jobnumbercollection=[]
   if(FilesPerJob > 0):
     for step in range(0, NumberOfJobs):
@@ -400,49 +426,57 @@ def sanitycheck(name,path):
 ##################################################################################
 #                                  MAIN                                          #
 ##################################################################################
-if domultiprocessing==True:
-	po = Pool()
+if __name__ == '__main__' :
 
-fusepath=""
-uname=""
-isdata=0
-if(len(sys.argv) != 2 or sys.argv[1] == "-h"):
-  printUsage()
-else:
-  result = parseInputFile(sys.argv[1])
-  if(result == "Error"):
-    showMessage("Error parsing input file")
-  else:
-    listOfTasks = getListOfTasks(result[0])
-    fusepath=result[4]
-    uname=result[6]
-    for l in listOfTasks:
-      if(l[0].find("/data/")>-1) :
-	isdata=1
-      showMessage("Processing " + l[0])
-      if domultiprocessing==True:
-	      po.apply_async(process,(l, result),callback=cb)
-      else :
-	      print "At this point you could be saving a lot of time with multiprocessing ... "
-	      process(l, result)
+        if domultiprocessing==True:
+                po = Pool()
+        fusepath=""
+        uname=""
+        isdata=0
+        if len(args) != 1:
+                parser.print_usage()
+                sys.exit(-1)
+        
+        result = parseInputFile(args[0])
+        if(result == "Error"):
+                showMessage("Error parsing input file")
+                sys.exit(-1)
+
+        listOfTasks = getListOfTasks(result[0])
+        fusepath=result[4]
+        uname=result[6]
+        for l in listOfTasks:
+                if(l[0].find("/data/")>-1) :
+                        isdata=1
+                showMessage("Processing " + l[0])
+                if domultiprocessing==True:
+                        po.apply_async(process,(l, result),callback=cb)
+                else :
+                        print "At this point you could be saving a lot of time with multiprocessing ... "
+                        jobnumber = process(l, result)
+                        jobnumbers.extend(jobnumber)
       		
-  if domultiprocessing==True :
-	  po.close()
-	  po.join()
-  totaljobnumber=len(jobnumbers)
-  counter=0
-  while(len(jobnumbers)>0 and counter<300) :
-	  counter+=1
-	  currlist=[]
-	  pipe=popen("qstat | grep `whoami` | awk '{print $1}'")
-	  for line in pipe.readlines():
-		currlist.append(int(line))
-	  checklist(jobnumbers,currlist)
-	  time.sleep(60)
-  print "All jobs have finished - need to merge everything and place it in your scratch directory!"
-  check_directory(fusepath,uname)
-  if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
-    print "We're dealing with data - we still need to merge data files and check for duplicates!"
-    pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/ntuples/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
-    for l in pipe.readlines():
-	  print l
+        if domultiprocessing==True :
+                po.close()
+                po.join()
+
+        if options.dryrun: sys.exit(0) # We're done for the dry run
+
+        totaljobnumber=len(jobnumbers)
+        counter=0
+        print 'Total job numbers:',totaljobnumber
+        while(len(jobnumbers)>0 and counter<300) :
+                counter+=1
+                currlist=[]
+                pipe=popen("qstat | grep `whoami` | awk '{print $1}'")
+                for line in pipe.readlines():
+                        currlist.append(int(line))
+                checklist(jobnumbers,currlist)
+                time.sleep(60)
+        print "All jobs have finished - need to merge everything and place it in your scratch directory!"
+        check_directory(fusepath,uname)
+        if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
+                print "We're dealing with data - we still need to merge data files and check for duplicates!"
+                pipe=popen("/shome/buchmann/material/flash_remove_duplicates.exec -d /scratch/"+uname+"/ntuples/"+str(fusepath)+"/ -o /scratch/"+uname+"/"+fusepath+".root")
+                for l in pipe.readlines():
+                        print l
