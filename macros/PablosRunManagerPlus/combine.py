@@ -92,8 +92,8 @@ def parseFile( file, counters, indices ):
 if __name__ == '__main__':
     
     parser = OptionParser(usage=usage())
-    parser.add_option('-i','--include',dest='toInclude',type='string', help='List of counters to include')
-    parser.add_option('-e','--exclude',dest='toExclude',type='string', help='List of counters to exclude')
+    parser.add_option('-i','--include',dest='toInclude',type='string', metavar='LIST', help='Comma-separated list of counters to include')
+    parser.add_option('-e','--exclude',dest='toExclude',type='string', metavar='LIST', help='Comma-separated list of counters to exclude')
     (options, args) = parser.parse_args()
 
     if len(args)<1: parser.error('Need at least one argument')
