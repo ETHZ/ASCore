@@ -354,7 +354,7 @@ def process(task, conf):
   value = nameOfFolder.rfind("/")
   taskName = nameOfFolder[value+1:len(nameOfFolder)] 
   os.system("mkdir -p " + taskName)
-  os.system("mkdir -p ../" + taskName)
+#  os.system("mkdir -p ../" + taskName)
 
   showMessage(str(NumberOfJobs) + " jobs with " + str(FilesPerJob) + " files each will be created")
   jobnumbercollection=[]
@@ -466,13 +466,13 @@ if __name__ == '__main__' :
         counter=0
         print 'Total job numbers:',totaljobnumber
         while(len(jobnumbers)>0 and counter<300) :
+                time.sleep(60)
                 counter+=1
                 currlist=[]
                 pipe=popen("qstat | grep `whoami` | awk '{print $1}'")
                 for line in pipe.readlines():
                         currlist.append(int(line))
                 checklist(jobnumbers,currlist)
-                time.sleep(60)
         print "All jobs have finished - need to merge everything and place it in your scratch directory!"
         check_directory(fusepath,uname)
         if isdata==1 and result[2].find("RunJZBAnalyzer")>-1:
