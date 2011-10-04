@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Sep  6 23:09:35 2011 by ROOT version 5.27/06b
+// Wed Jul 13 15:31:35 2011 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: ../test/NTupleProducer_42X_MC_numEvent1200.root
+// found on file: /shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -22,6 +22,7 @@ public :
    Int_t           Event;
    Int_t           LumiSection;
    Float_t         PtHat;
+   Float_t         QCDPartonicHT;
    Int_t           SigProcID;
    Float_t         PDFScalePDF;
    Int_t           PDFID1;
@@ -32,9 +33,6 @@ public :
    Float_t         PDFxPDF2;
    Float_t         ExtXSecLO;
    Float_t         IntXSec;
-   Float_t         pdfW[100];
-   Float_t         pdfWsum;
-   Int_t           NPdfs;
    Int_t           PUnumInteractions;
    Int_t           PUnumFilled;
    Int_t           PUOOTnumInteractionsEarly;
@@ -57,14 +55,6 @@ public :
    Float_t         HLTObjectPhi[7][10];
    Float_t         PUWeightTotal;
    Float_t         PUWeightInTime;
-   Float_t         MassGlu;
-   Float_t         MassChi;
-   Float_t         MassLSP;
-   Float_t         M0;
-   Float_t         M12;
-   Float_t         signMu;
-   Float_t         A0;
-   Int_t           process;
    Int_t           PrimVtxGood;
    Float_t         PrimVtxx;
    Float_t         PrimVtxy;
@@ -92,8 +82,10 @@ public :
    Int_t           MaxGenJetExceed;
    Int_t           MaxVerticesExceed;
    Int_t           HBHENoiseFlag;
+   Int_t           HBHENoiseFlagIso;
    Int_t           CSCTightHaloID;
    Int_t           EcalDeadTPFilterFlag;
+   Int_t           RecovRecHitFilterFlag;
    Int_t           NGenLeptons;
    Int_t           GenLeptonID[100];   //[NGenLeptons]
    Float_t         GenLeptonPt[100];   //[NGenLeptons]
@@ -753,6 +745,7 @@ public :
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSection;   //!
    TBranch        *b_PtHat;   //!
+   TBranch        *b_QCDPartonicHT;   //!
    TBranch        *b_SigProcID;   //!
    TBranch        *b_PDFScalePDF;   //!
    TBranch        *b_PDFID1;   //!
@@ -763,9 +756,6 @@ public :
    TBranch        *b_PDFxPDF2;   //!
    TBranch        *b_ExtXSecLO;   //!
    TBranch        *b_IntXSec;   //!
-   TBranch        *b_pdfW;   //!
-   TBranch        *b_pdfWsum;   //!
-   TBranch        *b_NPdfs;   //!
    TBranch        *b_PUnumInteractions;   //!
    TBranch        *b_PUnumFilled;   //!
    TBranch        *b_PUOOTnumInteractionsEarly;   //!
@@ -788,14 +778,6 @@ public :
    TBranch        *b_HLTObjectPhi;   //!
    TBranch        *b_PUWeightTotal;   //!
    TBranch        *b_PUWeightInTime;   //!
-   TBranch        *b_MassGlu;   //!
-   TBranch        *b_MassChi;   //!
-   TBranch        *b_MassLSP;   //!
-   TBranch        *b_M0;   //!
-   TBranch        *b_M12;   //!
-   TBranch        *b_signMu;   //!
-   TBranch        *b_A0;   //!
-   TBranch        *b_process;   //!
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -823,6 +805,8 @@ public :
    TBranch        *b_MaxGenJetExceed;   //!
    TBranch        *b_MaxVerticesExceed;   //!
    TBranch        *b_HBHENoiseFlag;   //!
+   TBranch        *b_HBHENoiseFlagIso;   //!
+   TBranch        *b_RecovRecHitFilterFlag;   //!
    TBranch        *b_CSCTightHaloID;   //!
    TBranch        *b_EcalDeadTPFilterFlag;   //!
    TBranch        *b_NGenLeptons;   //!
@@ -1498,9 +1482,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../test/NTupleProducer_42X_MC_numEvent1200.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
       if (!f) {
-         f = new TFile("../test/NTupleProducer_42X_MC_numEvent1200.root");
+         f = new TFile("/shome/pnef/SUSY/CMSSW_4_2_3/src/DiLeptonAnalysis/NTupleProducer/test/NTupleProducer_42X_MC_111_0_AtW.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1555,6 +1539,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSection", &LumiSection, &b_LumiSection);
    fChain->SetBranchAddress("PtHat", &PtHat, &b_PtHat);
+   fChain->SetBranchAddress("QCDPartonicHT", &QCDPartonicHT, &b_QCDPartonicHT);
    fChain->SetBranchAddress("SigProcID", &SigProcID, &b_SigProcID);
    fChain->SetBranchAddress("PDFScalePDF", &PDFScalePDF, &b_PDFScalePDF);
    fChain->SetBranchAddress("PDFID1", &PDFID1, &b_PDFID1);
@@ -1565,9 +1550,6 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PDFxPDF2", &PDFxPDF2, &b_PDFxPDF2);
    fChain->SetBranchAddress("ExtXSecLO", &ExtXSecLO, &b_ExtXSecLO);
    fChain->SetBranchAddress("IntXSec", &IntXSec, &b_IntXSec);
-   fChain->SetBranchAddress("pdfW", pdfW, &b_pdfW);
-   fChain->SetBranchAddress("pdfWsum", &pdfWsum, &b_pdfWsum);
-   fChain->SetBranchAddress("NPdfs", &NPdfs, &b_NPdfs);
    fChain->SetBranchAddress("PUnumInteractions", &PUnumInteractions, &b_PUnumInteractions);
    fChain->SetBranchAddress("PUnumFilled", &PUnumFilled, &b_PUnumFilled);
    fChain->SetBranchAddress("PUOOTnumInteractionsEarly", &PUOOTnumInteractionsEarly, &b_PUOOTnumInteractionsEarly);
@@ -1590,14 +1572,6 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLTObjectPhi", HLTObjectPhi, &b_HLTObjectPhi);
    fChain->SetBranchAddress("PUWeightTotal", &PUWeightTotal, &b_PUWeightTotal);
    fChain->SetBranchAddress("PUWeightInTime", &PUWeightInTime, &b_PUWeightInTime);
-   fChain->SetBranchAddress("MassGlu", &MassGlu, &b_MassGlu);
-   fChain->SetBranchAddress("MassChi", &MassChi, &b_MassChi);
-   fChain->SetBranchAddress("MassLSP", &MassLSP, &b_MassLSP);
-   fChain->SetBranchAddress("M0", &M0, &b_M0);
-   fChain->SetBranchAddress("M12", &M12, &b_M12);
-   fChain->SetBranchAddress("signMu", &signMu, &b_signMu);
-   fChain->SetBranchAddress("A0", &A0, &b_A0);
-   fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
@@ -1625,6 +1599,8 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MaxGenJetExceed", &MaxGenJetExceed, &b_MaxGenJetExceed);
    fChain->SetBranchAddress("MaxVerticesExceed", &MaxVerticesExceed, &b_MaxVerticesExceed);
    fChain->SetBranchAddress("HBHENoiseFlag", &HBHENoiseFlag, &b_HBHENoiseFlag);
+   fChain->SetBranchAddress("HBHENoiseFlagIso", &HBHENoiseFlagIso, &b_HBHENoiseFlagIso);
+   fChain->SetBranchAddress("RecovRecHitFilterFlag", &RecovRecHitFilterFlag, &b_RecovRecHitFilterFlag);
    fChain->SetBranchAddress("CSCTightHaloID", &CSCTightHaloID, &b_CSCTightHaloID);
    fChain->SetBranchAddress("EcalDeadTPFilterFlag", &EcalDeadTPFilterFlag, &b_EcalDeadTPFilterFlag);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
