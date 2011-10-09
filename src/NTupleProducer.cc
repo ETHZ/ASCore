@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.133 2011/09/20 15:52:35 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.134 2011/09/21 17:32:21 pnef Exp $
 //
 //
 
@@ -486,18 +486,20 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	if(!fIsRealData){
 		// Get LHEEventProduct with partonic momenta. 	
 		Handle<LHEEventProduct> evt;
-		iEvent.getByType( evt );
-		const lhef::HEPEUP hepeup_ = evt->hepeup();
-		const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
-		float partonicHT=0;
-		for(unsigned int i=0; i<pup_.size(); ++i){
-			if(hepeup_.ISTUP[i]!=1) continue; // quarks and gluons come out of MG/ME as stable
-			int idabs=abs(hepeup_.IDUP[i]); 
-			if( idabs != 21 && (idabs<1 || idabs>6) ) continue;  // gluons and quarks
-			float ptPart = sqrt( pow(hepeup_.PUP[i][0],2) + pow(hepeup_.PUP[i][1],2) ); // first entry is px, second py
-			partonicHT +=ptPart; // sum QCD partonic HT
+		bool LHEEventProduct_found= iEvent.getByType( evt );
+		if(LHEEventProduct_found){ 
+			const lhef::HEPEUP hepeup_ = evt->hepeup();
+			const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
+			float partonicHT=0;
+			for(unsigned int i=0; i<pup_.size(); ++i){
+				if(hepeup_.ISTUP[i]!=1) continue; // quarks and gluons come out of MG/ME as stable
+				int idabs=abs(hepeup_.IDUP[i]); 
+				if( idabs != 21 && (idabs<1 || idabs>6) ) continue;  // gluons and quarks
+				float ptPart = sqrt( pow(hepeup_.PUP[i][0],2) + pow(hepeup_.PUP[i][1],2) ); // first entry is px, second py
+				partonicHT +=ptPart; // sum QCD partonic HT
+			}
+			fTqcdPartonicHT=partonicHT;
 		}
-		fTqcdPartonicHT=partonicHT;
 
 		iEvent.getByLabel("generator", genEvtInfo);
 		fTpthat       = genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
@@ -1840,8 +1842,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	if(!fIsRealData&&fIsModelScan) {
 		Handle<LHEEventProduct> product;
-		iEvent.getByLabel("source", product);
-
+		bool LHEEventProduct_found=iEvent.getByLabel("source", product);
 		LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
 		LHEEventProduct::comments_const_iterator c_end = product->comments_end();
 
