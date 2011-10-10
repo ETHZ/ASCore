@@ -25,7 +25,7 @@ JOBDIR=sgejob-$JOB_ID-$DIR
 
 # Run time soft and hard limits hh:mm:ss
 # soft=CPU time; hard=Wallclock time
-#$ -l s_rt=40:00:00,h_rt=42:00:00
+# #$ -l s_rt=40:00:00,h_rt=42:00:00
 
 ### Specify the queue on which to run
 #$ -q all.q
