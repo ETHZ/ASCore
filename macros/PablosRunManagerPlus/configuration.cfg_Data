@@ -1,0 +1,35 @@
+#####
+# PromptReco: 2011B
+#####
+/susy/ntuples/data/V02-04-07c/DoubleElectron-Run2011B-PromptReco-v1-AOD/ '-t el -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-07c/MuEG-Run2011B-PromptReco-v1-AOD/ '-t em -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-07c/DoubleMu-Run2011B-PromptReco-v1-AOD/ '-t mu -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+
+####
+# PromptReco mess starting in August
+#####
+/susy/ntuples/data/V02-04-03/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry  '-t el -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-03/DoubleMu_Run2011A-PromptReco-v6_AOD__retry/ '-t mu -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1 
+/susy/ntuples/data/V02-04-03/MuEG_Run2011A-PromptReco-v6_AOD__retry/ '-t em -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+
+#####
+# August ReReco
+#####
+/susy/ntuples/data/V02-04-03/DoubleElectron-Run2011A-05Aug2011-v1-AOD/ '-t el -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+/susy/ntuples/data/V02-04-03/MuEG-Run2011A-05Aug2011-v1-AOD/ '-t em -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+/susy/ntuples/data/V02-04-03/DoubleMu-Run2011A-05Aug2011-v1-AOD/ '-t mu -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+
+#####
+# May ReReco
+#####
+/susy/ntuples/data/V02-02-08/DoubleElectron-Run2011A-May10ReReco-v1-AOD/  '-t el -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
+/susy/ntuples/data/V02-02-08/MuEG-Run2011A-May10ReReco-v1-AOD/  '-t em -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
+/susy/ntuples/data/V02-02-08/DoubleMu-Run2011A-May10ReReco-v1-AOD/ / '-t mu -j /shome/buchmann/development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
+
+#####
+# PromptReco 
+##### 
+/susy/ntuples/data/V02-02-09a/DoubleMu-Run2011A-PromptReco-v4-AOD/ '-t mu -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-02-09a/DoubleElectron-Run2011A-PromptReco-v4-AOD/  '-t el -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-02-09a/MuEG-Run2011A-PromptReco-v4-AOD/ '-t em -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+
