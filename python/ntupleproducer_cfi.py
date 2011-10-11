@@ -35,6 +35,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducerStd','HBHENoiseFilterResult'),
 	tag_hcalnoiseIso = cms.untracked.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
 	tag_srcRho       = cms.untracked.InputTag('kt6PFJets','rho'),
+	tag_srcRhoPFnoPU = cms.untracked.InputTag('kt6PFJetsPF3','rho'),
 
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',

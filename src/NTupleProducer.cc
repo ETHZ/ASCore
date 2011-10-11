@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.134 2011/09/21 17:32:21 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.135 2011/10/09 08:35:22 pnef Exp $
 //
 //
 
@@ -158,6 +158,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
+	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
 
 	// Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -309,6 +310,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<double> rho;
 	iEvent.getByLabel(fSrcRho,rho);
 	fTrho = *rho;
+	
+	// rho for L1FastJet running PFnoPU
+	edm::Handle<double> rhoNoPU;
+	iEvent.getByLabel(fSrcRhoPFnoPU,rhoNoPU);
+	fTrhoPFnoPU = *rhoNoPU;
 
 	// beam halo
 	edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
@@ -2000,6 +2006,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumFilled]/F");
 	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumFilled]/F");
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
+	fEventTree->Branch("RhoPFnoPU"        ,&fTrhoPFnoPU        ,"RhoPFnoPU/F");
 	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumFilled]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
 	fEventTree->Branch("HLTResults"       ,&fTHLTres          , Form("HLTResults[%d]/I", gMaxhltbits));
@@ -2639,6 +2646,7 @@ void NTupleProducer::resetTree(){
 	fTHBHENoiseFlagIso  = -999;
 	fTcscTightHaloID    = -999;
 	fTrho               = -999;
+	fTrhoPFnoPU         = -999;
 
 	fTecalDeadTPFilterFlag = -999;
 	fRecovRecHitFilterFlag = -999;

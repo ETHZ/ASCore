@@ -36,7 +36,8 @@ options.register ('ModelScan', # register 'runon' option
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:/scratch/buchmann/mSUGRA_m0-20to2000_m12-20to760_tanb-10andA0-0_7TeV-Pythia6Z/AODSIM/PU_S4_START42_V11_FastSim-v1/0021/22AEB6CF-C8A3-E011-81E7-002354EF3BDC.root'
-options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
+#options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -53,7 +54,7 @@ if options.runon=='data':
     process.GlobalTag.globaltag = "GR_R_42_V19::All"
 else:
     # CMSSW_4_2_X:
-    process.GlobalTag.globaltag = "START42_V12::All"
+    process.GlobalTag.globaltag = "START42_V13::All"
 
 
 ### Input/Output ###############################################################
@@ -135,11 +136,12 @@ process.scrapingVeto = cms.EDFilter("FilterOutScraping",
      thresh = cms.untracked.double(0.25)
      )
 
+# Get a list of good primary vertices, in 42x, these are DAF vertices
 process.goodVertices = cms.EDFilter("VertexSelector",
 	src = cms.InputTag("offlinePrimaryVertices"),
 	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
-	filter = cms.bool(False),
-	)
+	filter = cms.bool(False)
+)
 
 ############ PF2PAT ##########################################
 # load the standard PAT config
@@ -157,10 +159,54 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Configure PAT to use PF2PAT instead of AOD sources
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
+# Compute the mean pt per unit area (rho) from the
+# various PFchs inputs
+# -> note: when using PFnoPileUp, rho must be computed from the kt6-pfjets
+#          with charged pf-candidates not coming from the PV already subtracted!
+#          since the kt6-pfjets come from the pfNoElectron collection (which
+#          is different for each pf2pat branch) we run it three times...
+from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
+process.kt6PFJetsPF2 = kt4PFJets.clone(
+		rParam = cms.double(0.6),
+		src = cms.InputTag('pfNoElectronPF2'),
+		doAreaFastjet = cms.bool(True),
+		doRhoFastjet = cms.bool(True)
+	)
+process.kt6PFJetsPF3 = kt4PFJets.clone(
+		rParam = cms.double(0.6),
+		src = cms.InputTag('pfNoElectronPF3'),
+		doAreaFastjet = cms.bool(True),
+		doRhoFastjet = cms.bool(True)
+	)
+process.kt6PFJetsPFAntiIso = kt4PFJets.clone(
+		rParam = cms.double(0.6),
+		src = cms.InputTag('pfNoElectronPFAntiIso'),
+		doAreaFastjet = cms.bool(True),
+		doRhoFastjet = cms.bool(True)
+	)
+
 ### Configuration in common to all collections
 pfPostfixes = [ 'PFAntiIso','PF2','PF3' ]
 for pf in pfPostfixes:
     usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
+    # configure PFnoPU
+    getattr(process,'pfPileUp'+pf).Enable              = True
+    getattr(process,'pfPileUp'+pf).checkClosestZVertex = cms.bool(False)
+    getattr(process,'pfPileUp'+pf).Vertices            = cms.InputTag('goodVertices')
+    getattr(process,'pfJets'+pf).doAreaFastjet         = True
+    getattr(process,'pfJets'+pf).doRhoFastjet          = False
+    # Add the KT6 producer to the sequence (see below)
+    getattr(process,"patPF2PATSequence"+pf).replace(
+	getattr(process,"pfNoElectron"+pf),
+	getattr(process,"pfNoElectron"+pf)*getattr(process,'kt6PFJets'+pf)) # pfNoElectron is src of kt6PFJets
+    # Jet corrections 
+    getattr(process,'patJetCorrFactors'+pf).levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+    getattr(process,'patJetCorrFactors'+pf).rho    = cms.InputTag('kt6PFJets'+pf,'rho')
+    getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PFchs') 
+
+    # set to false to disable jet to be cleaned from Taus
+    getattr(process,"pfNoTau"+pf).enable      = False
+    
     # turn to false when running on data and MC (for the moment)
     getattr(process, 'patElectrons'+pf).embedGenMatch = False
     getattr(process, 'patMuons'+pf).embedGenMatch = False
@@ -201,17 +247,7 @@ for pf in pfPostfixes:
     getattr(process, 'pfIsolatedMuons'+pf)    .combinedIsolationCut = cms.double(0.20)
     getattr(process, 'pfIsolatedElectrons'+pf).combinedIsolationCut = cms.double(0.20)
 
-    # Jet corrections 
-    getattr(process,'patJetCorrFactors'+pf).levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-    getattr(process,'patJetCorrFactors'+pf).rho    = cms.InputTag('kt6PFJets','rho')
-    getattr(process,'pfJets'+pf).doAreaFastjet     = True
-    getattr(process,'pfJets'+pf).Rho_EtaMax        = process.kt6PFJets.Rho_EtaMax
 
-    # Disable pileup removal on PF
-    getattr(process,'pfNoPileUp'+pf).enable   = False
-
-    # set to false to disable jet to be cleaned from Taus
-    getattr(process,"pfNoTau"+pf).enable      = False
 
 ### Specific to first PF collection: AntiIsolated electrons and muons: Isolation cuts is set to 2
 # ID Cuts

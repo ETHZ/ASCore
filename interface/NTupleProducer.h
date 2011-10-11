@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.105 2011/09/20 15:52:35 pnef Exp $
+// $Id: NTupleProducer.h,v 1.106 2011/09/21 17:32:22 pnef Exp $
 //
 //
 
@@ -160,6 +160,7 @@ private:
 	edm::InputTag fHBHENoiseResultTag;
 	edm::InputTag fHBHENoiseResultTagIso;
 	edm::InputTag fSrcRho;
+	edm::InputTag fSrcRhoPFnoPU;
 	edm::InputTag fpdfWeightTag;
 
 	int NPdfs;
@@ -276,6 +277,7 @@ private:
 	float fTpuNtrks_lowpT[gMaxnpileup];
 	float fTpuNtrks_highpT[gMaxnpileup];
 	float fTrho; // rho from L1FastJetCorrection
+	float fTrhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
 	// float fTpuInstLumi[gMaxnpileup];
         TH1I* fHpileupstat;
   	float fTpuWeightTotal;
