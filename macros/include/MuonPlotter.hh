@@ -43,11 +43,15 @@ public:
 	static const int gNDiffMETBins = 3;
 	static const int gNDiffNJBins  = 5;
 	static const int gNDiffMT2Bins = 3;
+	static const int gNDiffPT1Bins = 5;
+	static const int gNDiffPT2Bins = 5;
 
 	static double gDiffHTBins [gNDiffHTBins+1];
 	static double gDiffMETBins[gNDiffMETBins+1];
 	static double gDiffNJBins [gNDiffNJBins+1];
 	static double gDiffMT2Bins[gNDiffMT2Bins+1];
+	static double gDiffPT1Bins[gNDiffPT1Bins+1];
+	static double gDiffPT2Bins[gNDiffPT2Bins+1];
 
 	static double gEChMisIDB;
 	static double gEChMisIDB_E;
@@ -247,7 +251,7 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 4;
+	static const int gNDiffVars = 6;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
