@@ -300,11 +300,11 @@ def process(task, conf):
  
   dcapPath = "dcap://t3se01.psi.ch:22125/"
   srmPath = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"
-  folderToList = srmPath + task[0]
+  newfolderToList = "/pnfs/psi.ch/cms/trivcat/store/user/" + task[0]
   list = [] # Initialize file list
 
   # Check if cache file exists and if we should use it
-  cacheFile = '.'+folderToList.replace('/','_').replace('?','_')
+  cacheFile = '.'+newfolderToList.replace('/','_').replace('?','_')
   if not options.renew and os.path.isfile(cacheFile):
       f = open(cacheFile)
       showMessage('Reading files pertaining to '+str(task[0])+'from cache file '+cacheFile)
@@ -313,7 +313,7 @@ def process(task, conf):
   else:
       # If not: rebuild the list
       showMessage("Going to fetch list of files pertaining to "+str(task[0]))
-      theList = os.popen('lcg-ls --vo cms --srm-timeout=6000 --connect-timeout=6000 -T srmv2 --nobdii ' + folderToList + ' 2>&1')
+      theList = os.popen("uberftp t3se01.psi.ch 'ls "+newfolderToList+"'  | grep root | awk '{ print $9 }'");
       list = theList.readlines()
       for li in list:
           if(li.find("root") == -1):
@@ -322,7 +322,9 @@ def process(task, conf):
       f = open(cacheFile,'w')
       f.write(''.join(list))
   
+  
   numberOfFiles = len(list)
+  
   if(numberOfFiles == 0):
     showMessage("No files found")
     return "Error"
@@ -330,7 +332,7 @@ def process(task, conf):
 
   correctList = [];
   for fileName in list:
-    auxiliar = dcapPath + fileName
+    auxiliar = dcapPath + newfolderToList + fileName
     auxiliar = auxiliar[0:len(auxiliar)-1]
     correctList.append(auxiliar)
 
