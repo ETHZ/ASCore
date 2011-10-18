@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.59 $";
+string sjzbversion="$Revision: 1.60 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.60  2011/09/15 16:59:03  fronga
+Fixed bug (I think) in storage of mother and grand-mother IDs of selected leptons.
+
 Revision 1.59  2011/09/08 15:50:10  fronga
 Fix bug in Jet ID (was removing jets above 3.0...).
 
@@ -277,7 +280,7 @@ public:
   float dphiMetSumJetPt[mettype_max];
   float metPerp[mettype_max];
   float metPar[mettype_max];
-  int eventNum;
+  ULong64_t eventNum;
   int runNum;
   int lumi;
   int goodVtx;
@@ -676,7 +679,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("metPar",nEvent.metPar,Form("metPar[%d]/F",int(mettype_max)));
 
 
-  myTree->Branch("eventNum",&nEvent.eventNum,"eventNum/I");
+  myTree->Branch("eventNum",&nEvent.eventNum,"eventNum/l");
   myTree->Branch("runNum",&nEvent.runNum,"runNum/I");
   myTree->Branch("lumi",&nEvent.lumi,"lumi/I");
   myTree->Branch("goodVtx",&nEvent.goodVtx,"goodVtx/I");
