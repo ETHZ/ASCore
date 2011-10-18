@@ -106,6 +106,20 @@ Path	HLT_Mu8_Ele17_CaloIdL_v7
 Path	HLT_Mu8_Ele17_CaloIdL_v8
 Path	HLT_Mu8_Ele17_CaloIdL_v9
 
+PATHSET
+Name	HLT_MU8_ELE17_TIGHT
+Path	HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v1
+Path	HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v3
+Path	HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v4
+Path	HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v7
+
+PATHSET
+Name	HLT_MU17_ELE8_TIGHT
+Path	HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v1
+Path	HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v3
+Path	HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v4
+Path	HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v7
+
 # high HT
 PATHSET
 Name	HLT_DOUBLEELE8_HT160
