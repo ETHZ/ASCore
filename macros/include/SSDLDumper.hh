@@ -1,22 +1,19 @@
 /*****************************************************************************
-*   Collection of tools for producing plots for Muon Fake Rate Analysis      *
+*   Collection of tools for producing plots for same-sign dilepton analysis  *
 *                                                                            *
 *                                                  (c) 2010 Benjamin Stieger *
 *****************************************************************************/
-#ifndef MuonPlotter_HH
-#define MuonPlotter_HH
+#ifndef SSDLDumper_HH
+#define SSDLDumper_HH
 
 #include "helper/AnaClass.hh"
-#include "helper/FPRatios.hh"
 #include "helper/Monitor.hh"
-#include "helper/Davismt2.h"
 
 #include "TLorentzVector.h"
-#include "TEfficiency.h"
-#include "TGraphAsymmErrors.h"
 
+using namespace std;
 
-class MuonPlotter : public AnaClass{
+class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
@@ -53,17 +50,12 @@ public:
 	static double gDiffPT1Bins[gNDiffPT1Bins+1];
 	static double gDiffPT2Bins[gNDiffPT2Bins+1];
 
-	static double gEChMisIDB;
-	static double gEChMisIDB_E;
-	static double gEChMisIDE;
-	static double gEChMisIDE_E;
-
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, DoubleMu4,
-		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4,
-		MuEG1, MuEG2, MuEG3, MuEG4,
+		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, DoubleMu4, DoubleMu5,
+		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
+		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
 		MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJetsSync,
 		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50, GJets40, GJets100, GJets200,
@@ -148,9 +140,7 @@ public:
 		long nzt;
 	};
 
-	struct Channel{ // like mumu, emu, ee
-		TString name;
-		TString sname;
+	struct Channel{ // MM/EE/EM
 		TH2D *nt20_pt; // pt1 vs pt2
 		TH2D *nt10_pt;
 		TH2D *nt01_pt; // only filled for e/mu
@@ -277,6 +267,14 @@ public:
 	class Sample{
 	public:
 		Sample(){};
+		Sample(TString loc, TString tag, int dm, int cs = -1, float lum = 1.0, int col = 1){
+			location = loc;
+			sname    = tag;
+			datamc   = dm;
+			chansel  = cs;
+			lumi     = lum;
+			color    = col;
+		};
 		~Sample(){};
 		
 		TString name;
@@ -286,7 +284,8 @@ public:
 		TTree *tree;
 		float lumi;
 		int color;
-		int datamc; // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC
+		int datamc;  // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC, 4: rare MC (no pileup)
+		int chansel; // -1: Ignore, 0: mumu, 1: elel, 2: elmu
 		TH1D *cutFlowHisto[gNCHANNELS];
 		Region region[gNREGIONS][2];
 		DiffPredYields diffyields[gNCHANNELS];
@@ -297,7 +296,11 @@ public:
 		TGraph *sigevents[gNCHANNELS][2];
 
 		TTree* getTree(){
-			file = TFile::Open(location);
+			file = new TFile(location);
+			if(file->IsZombie()){
+				cout << "SSDLDumper::Sample::getTree ==> Error opening file " << location << endl;
+				exit(1);
+			}
 			tree = (TTree*)file->Get("Analysis");
 			return tree;
 		}
@@ -308,118 +311,36 @@ public:
 		}
 	};
 	
-	MuonPlotter();
-	MuonPlotter(TString);
-	MuonPlotter(TString, TString);
-	virtual ~MuonPlotter();
+	SSDLDumper();
+	virtual ~SSDLDumper();
 
-	inline void setCharge(int charge){ fChargeSwitch = charge; };
+	virtual void init();
+	virtual void init(TString); // samples read from a datacard
+	virtual void init(TString, TString, int, int = -1); // running on single sample
+	virtual void InitMC(TTree*); // removed a few branches (triggers)
 
-	virtual void init(TString filename = "samples.dat");
-	virtual void InitMC(TTree*); // remove a few branches
-	virtual void readSamples(const char* filename = "samples.dat");
+	virtual void readDatacard(TString); // read in a datacard
 
-	virtual void doAnalysis();
-	virtual void doLoop();
+	virtual void loop();              // loop on all samples if several
+	virtual void loopEvents(Sample*); // perform loop on single sample
 	
-	virtual void sandBox();
-	
-	//////////////////////////////
-	// Plots
-	void makeMuIsolationPlots();
-	void makeElIsolationPlots();
-	
-	void makeNT2KinPlots(gHiLoSwitch = HighPt);
-	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
-	void makeMETvsHTPlotCustom();
-	void makeMETvsHTPlotTau();
-	
-	void makeFRvsPtPlots(gChannel, gFPSwitch);
-	void makeFRvsEtaPlots(gChannel);
-	void makeFRvsPtPlotsForPAS(gChannel);
-	void makeFRvsEtaPlotsForPAS(gChannel);
-	void makeRatioPlots(gChannel);
-	void makeNTightLoosePlots(gChannel);
-	
-	void makeIsoVsMETPlot(gSample);
-	void makePileUpPlots();
-	
-	void makeMCClosurePlots(vector<int>);
-	void makeDataClosurePlots();
-	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void makeNT012Plots(gChannel, vector<int>, bool(MuonPlotter::*)(int&, int&), TString = "");
-
-	void makeAllIntPredictions();
-	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
-	void makeDiffPrediction();
-	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
-	void makeTTbarClosure();
-	
-	void printSyncExercise();
-	
-	//////////////////////////////
-	// Fake ratios
-	// Produce from tree, with given selections:
-	void produceRatio(gChannel, int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceRatio(gChannel, vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-
-	TH1D* fillMuRatioPt(int, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(MuonPlotter::*)(), bool(MuonPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-
-	// Calculate from pre stored numbers, with fixed selections:
-	void fillMuElRatios(vector<int>);
-
-	TH1D* fillMuRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillMuRatioPt(vector<int>, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(vector<int>, gFPSwitch, bool = false);
-
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
-	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
-	
-	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, gHiLoSwitch = HighPt);
-	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
-
-	void ratioWithBinomErrors(float, float, float&, float&);
-	void ratioWithPoissErrors(float, float, float&, float&);
-	void ratioWithAsymmCPErrors(int, int, float&, float&, float&);
-
-	//////////////////////////////
-	// Predictions
-	void makeSSMuMuPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
-	void makeSSElElPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
-	void makeSSElMuPredictionPlots(vector<int>, bool = false, gHiLoSwitch = HighPt);
-	void NObs(gChannel, TH1D *&, vector<int>, bool(MuonPlotter::*)());
-	void NObs(gChannel, TH1D *&, vector<int>, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void NObs(gChannel, THStack *&, vector<int>, gRegion = Baseline, gHiLoSwitch = HighPt);
-	vector<TH1D*> MuMuFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
-	vector<TH1D*> ElElFPPrediction(TH2D* fratio, TH2D* pratio, TH2D* nt2, TH2D* nt1, TH2D* nt0, bool output = false);
-	vector<TH1D*> ElMuFPPrediction(TH2D* mufratio, TH2D* mupratio, TH2D* elfratio, TH2D* elpratio,  TH2D* nt2, TH2D* nt10, TH2D* nt01, TH2D* nt0, bool output = false);
-
 	void storeNumbers(Sample*, gChannel, gRegion);
 	
 	// Cutflow
 	void initCutNames();
-	void initCounters(gSample);
-	void fillCutFlowHistos(gSample);
+	void initCounters();
+	void fillCutFlowHistos(Sample*);
 	void printCutFlow(gChannel, gSample, gSample);
 	void printCutFlows(TString);
 	
-	void printYields(gChannel, float = -1.0);
-	void printYieldsShort(float = -1);
-
 	//////////////////////////////
 	// Fillers
 	void fillYields(Sample*, gRegion, gHiLoSwitch);
 	void fillDiffYields(Sample*);
 	void fillRatioPlots(Sample*);
-	
-	void fillMuIsoPlots(gSample);
-	void fillElIsoPlots(gSample);
-	void fillKinPlots(gSample, gHiLoSwitch);
+	void fillMuIsoPlots(Sample*);
+	void fillElIsoPlots(Sample*);
+	void fillKinPlots(Sample*, gHiLoSwitch);
 	
 	//////////////////////////////
 	// I/O
@@ -431,8 +352,7 @@ public:
 	int readSigGraphs(TString);
 	
 	void bookRatioHistos();
-	void fixPRatios();
-	
+
 	// Geninfo stuff:
 	int muIndexToBin(int);
 	int elIndexToBin(int);
@@ -441,24 +361,6 @@ public:
 	void labelOriginAxis(TAxis*, gChannel);
 	void label2OriginAxes(TAxis*, TAxis*, gChannel);
 	
-	void printOrigins(gRegion = Baseline);
-	void printMuOriginTable(gRegion = Baseline);
-	void printMuOriginHeader(TString);
-	void printMuOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void print2MuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-
-	void printElOriginTable(gRegion = Baseline);
-	void printElOriginHeader(TString);
-	void printElOriginFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void print2ElOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-
-	void printEMuOriginTable(gRegion = Baseline);
-	void printEMuOriginHeader(TString);
-	void printEMuOriginsFromSample(Sample*, int, gRegion = Baseline, gHiLoSwitch = HighPt);
-
-	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
-	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
-
 	// Trigger selections:
 	virtual bool  singleMuTrigger();
 	virtual float singleMuPrescale();
@@ -477,7 +379,7 @@ public:
 	virtual bool doubleElHTTrigger();
 	virtual bool eMuHTTrigger();
 	
-	virtual bool isGoodRun(gSample);
+	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
 	virtual int getNJets();
@@ -493,9 +395,9 @@ public:
 	
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
-	virtual int isSSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
-	virtual int isOSEvent(int&, bool(MuonPlotter::*)(int), int&, bool(MuonPlotter::*)(int));
-	vector<lepton> sortLeptonsByPt(vector<lepton> &leptons);
+	virtual int isSSEvent(int&, bool(SSDLDumper::*)(int), int&, bool(SSDLDumper::*)(int));
+	virtual int isOSEvent(int&, bool(SSDLDumper::*)(int), int&, bool(SSDLDumper::*)(int));
+	std::vector<lepton> sortLeptonsByPt(std::vector<lepton> &leptons);
 	vector<lepton> sortLeptonsByTypeAndPt(vector<lepton> &leptons);
 
 	virtual bool isGoodEvent();
@@ -509,7 +411,7 @@ public:
 	
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
-	virtual bool passesZVeto(bool(MuonPlotter::*)(int), bool(MuonPlotter::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
+	virtual bool passesZVeto(bool(SSDLDumper::*)(int), bool(SSDLDumper::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
@@ -553,8 +455,6 @@ public:
 	virtual bool isBarrelElectron(int);
 
 	virtual bool isGoodJet(int, float = 30.);
-	
-	virtual void drawTopLine();
 
 	float fC_minHT;
 	float fC_minMet;
@@ -590,26 +490,11 @@ public:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
-	int fCurrentRun;
 	ofstream fOUTSTREAM, fOUTSTREAM2;
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 
-	vector<int> fMCBG;    // SM background MC samples
-	vector<int> fMCBGSig; // SM background + LM0 signal samples
-	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
-	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
-	vector<int> fMCRareSM; // Rare SM backgrounds
-	vector<int> fMuData;  // Muon data samples
-	vector<int> fEGData;  // EG data samples
-	vector<int> fMuEGData;  // MuEG dataset
-	vector<int> fMuHadData;  // Muon data samples
-	vector<int> fEleHadData;  // EG data samples
-	vector<int> fHighPtData;  // All high pt triggered data
-	vector<int> fLowPtData;   // All lepton cross HT triggered data
-	
 	float fLumiNorm;      // Normalize everything to this luminosity
-	float fBinWidthScale; // Normalize bin contents to this width
 
 	vector<Sample*>::iterator fS;
 	vector<Sample*> fSamples;
@@ -631,9 +516,6 @@ public:
 	
 	
 	TFile *fStorageFile;
-	TString fOutputFileName;
-	TLatex *fLatex;
-	
 	
 	TH2D *fH2D_MufRatio;
 	TH1D *fH1D_MufRatioPt;
@@ -649,8 +531,13 @@ public:
 	TH1D *fH1D_ElpRatioPt;
 	TH1D *fH1D_ElpRatioEta;
 	
+	TString fOutputFileName;
+
+	Sample *fSample;
+
 	private:
 	
+	Monitor fCounter[3];	
 };
 
 #endif
