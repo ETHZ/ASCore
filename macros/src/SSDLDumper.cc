@@ -1409,9 +1409,9 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 //____________________________________________________________________________
 void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
 	Channel *C;
-	if(chan == Muon)     C = &S->region[reg][HighPt].mm;
+	if(chan == Muon) C = &S->region[reg][HighPt].mm;
 	if(chan == Elec) C = &S->region[reg][HighPt].ee;
-	if(chan == ElMu)      C = &S->region[reg][HighPt].em;
+	if(chan == ElMu) C = &S->region[reg][HighPt].em;
 	S->numbers[reg][chan].nt2  = C->nt20_pt->GetEntries();
 	S->numbers[reg][chan].nt10 = C->nt10_pt->GetEntries();
 	S->numbers[reg][chan].nt01 = C->nt01_pt->GetEntries();
@@ -2247,9 +2247,9 @@ int  SSDLDumper::readHistos(TString filename){
 					}
 				}
 				if(hilo == HighPt){
-					storeNumbers(S, Muon,     r);
+					storeNumbers(S, Muon, r);
 					storeNumbers(S, Elec, r);
-					storeNumbers(S, ElMu,      r);					
+					storeNumbers(S, ElMu, r);					
 				}
 			}
 		}
@@ -2485,8 +2485,10 @@ bool SSDLDumper::eMuTrigger(){
 	if(fSample->datamc > 0) return true;
 	// Only look for emu events
 	if(fSample->chansel != -1 && fSample->chansel != 2) return false;
-	return ( (HLT_MU17_ELE8 > 0) || 
-	         (HLT_MU8_ELE17 > 0) );
+	return ( (HLT_MU17_ELE8       > 0) || 
+	         (HLT_MU8_ELE17       > 0) ||
+	         (HLT_MU17_ELE8_TIGHT > 0) ||
+	         (HLT_MU8_ELE17_TIGHT > 0) );
 }
 bool SSDLDumper::eMuHTTrigger(){
 	// Pretend MC samples always fire trigger

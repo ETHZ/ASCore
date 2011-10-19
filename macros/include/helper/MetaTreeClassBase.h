@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Jun 15 16:29:20 2011 by ROOT version 5.27/06b
+// Wed Oct 19 18:15:01 2011 by ROOT version 5.30/01
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root
+// found on file: SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -11,7 +11,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <iostream>
 
 class MetaTreeClassBase {
 public :
@@ -38,6 +37,10 @@ public :
    Int_t           HLT_MU17_ELE8_PS;
    Int_t           HLT_MU8_ELE17;
    Int_t           HLT_MU8_ELE17_PS;
+   Int_t           HLT_MU8_ELE17_TIGHT;
+   Int_t           HLT_MU8_ELE17_TIGHT_PS;
+   Int_t           HLT_MU17_ELE8_TIGHT;
+   Int_t           HLT_MU17_ELE8_TIGHT_PS;
    Int_t           HLT_DOUBLEELE8_HT160;
    Int_t           HLT_DOUBLEELE8_HT160_PS;
    Int_t           HLT_DOUBLEELE8_HT160_TIGHT;
@@ -48,6 +51,12 @@ public :
    Int_t           HLT_MU3_ELE8_HT160_PS;
    Int_t           HLT_MU3_ELE8_HT160_TIGHT;
    Int_t           HLT_MU3_ELE8_HT160_TIGHT_PS;
+   Int_t           HLT_DOUBLEMU3_MASS4_HT150;
+   Int_t           HLT_DOUBLEMU3_MASS4_HT150_PS;
+   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;
+   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
+   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;
+   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
    Float_t         Rho;
    Int_t           NVrtx;
    Float_t         PUWeight;
@@ -93,11 +102,11 @@ public :
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[40];   //[NJets]
-   Float_t         JetEta[40];   //[NJets]
-   Float_t         JetPhi[40];   //[NJets]
-   Float_t         JetSSVHPBTag[40];   //[NJets]
-   Float_t         JetArea[40];   //[NJets]
+   Float_t         JetPt[10];   //[NJets]
+   Float_t         JetEta[10];   //[NJets]
+   Float_t         JetPhi[10];   //[NJets]
+   Float_t         JetSSVHPBTag[10];   //[NJets]
+   Float_t         JetArea[10];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -119,6 +128,10 @@ public :
    TBranch        *b_HLT_MU17_ELE8_PS;   //!
    TBranch        *b_HLT_MU8_ELE17;   //!
    TBranch        *b_HLT_MU8_ELE17_PS;   //!
+   TBranch        *b_HLT_MU8_ELE17_TIGHT;   //!
+   TBranch        *b_HLT_MU8_ELE17_TIGHT_PS;   //!
+   TBranch        *b_HLT_MU17_ELE8_TIGHT;   //!
+   TBranch        *b_HLT_MU17_ELE8_TIGHT_PS;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160_PS;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT;   //!
@@ -129,6 +142,12 @@ public :
    TBranch        *b_HLT_MU3_ELE8_HT160_PS;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT_PS;   //!
+   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150;   //!
+   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150_PS;   //!
+   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
+   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
+   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
+   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
    TBranch        *b_Rho;   //!
    TBranch        *b_NVrtx;   //!
    TBranch        *b_PUWeight;   //!
@@ -198,22 +217,21 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   // if (tree == 0) {
-   //    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
-   //    if (!f) {
-   //       f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
-   //    }
-   //    tree = (TTree*)gDirectory->Get("Analysis");
-   // 
-   // }
-   // Init(tree);
+   if (tree == 0) {
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root");
+      if (!f || !f->IsOpen()) {
+         f = new TFile("SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root");
+      }
+      f->GetObject("Analysis",tree);
+
+   }
+   Init(tree);
 }
 
 MetaTreeClassBase::~MetaTreeClassBase()
 {
    if (!fChain) return;
-   if(fChain->GetCurrentFile()) delete fChain->GetCurrentFile();
-   return;
+   delete fChain->GetCurrentFile();
 }
 
 Int_t MetaTreeClassBase::GetEntry(Long64_t entry)
@@ -228,10 +246,8 @@ Long64_t MetaTreeClassBase::LoadTree(Long64_t entry)
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
-   if (!fChain->InheritsFrom(TChain::Class()))  return centry;
-   TChain *chain = (TChain*)fChain;
-   if (chain->GetTreeNumber() != fCurrent) {
-      fCurrent = chain->GetTreeNumber();
+   if (fChain->GetTreeNumber() != fCurrent) {
+      fCurrent = fChain->GetTreeNumber();
       Notify();
    }
    return centry;
@@ -272,6 +288,10 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
    fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
    fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
+   fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT", &HLT_MU8_ELE17_TIGHT, &b_HLT_MU8_ELE17_TIGHT);
+   fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT_PS", &HLT_MU8_ELE17_TIGHT_PS, &b_HLT_MU8_ELE17_TIGHT_PS);
+   fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT", &HLT_MU17_ELE8_TIGHT, &b_HLT_MU17_ELE8_TIGHT);
+   fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT_PS", &HLT_MU17_ELE8_TIGHT_PS, &b_HLT_MU17_ELE8_TIGHT_PS);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
@@ -282,6 +302,12 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150", &HLT_DOUBLEMU3_MASS4_HT150, &b_HLT_DOUBLEMU3_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150_PS", &HLT_DOUBLEMU3_MASS4_HT150_PS, &b_HLT_DOUBLEMU3_MASS4_HT150_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
+   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
