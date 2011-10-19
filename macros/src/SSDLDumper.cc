@@ -2952,8 +2952,8 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 	return true;
 }
 bool SSDLDumper::passesZVeto(float dm){
-	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
-	return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
+	return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
+	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
 }
 bool SSDLDumper::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
