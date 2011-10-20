@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.60 $";
+string sjzbversion="$Revision: 1.61 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.61  2011/10/18 12:19:33  buchmann
+Changed the event number to ULong64_t (to accomodate even very large event numbers)
+
 Revision 1.60  2011/09/15 16:59:03  fronga
 Fixed bug (I think) in storage of mother and grand-mother IDs of selected leptons.
 
@@ -997,8 +1000,10 @@ void JZBAnalysis::Analyze() {
           float energy =  fTR->ElE[elIndex];
           TLorentzVector tmpVector(px,py,pz,energy);
           int tmpCharge=fTR->ElCharge[elIndex];
-          float hybridIso = fTR->ElRelIso03[elIndex]*fTR->ElPt[elIndex]/std::max((float)20.,fTR->ElPt[elIndex]);
-
+          double pedestal=0.;
+          if ( fabs(fTR->ElEta[elIndex]) < 1.479 ) pedestal = 1.0;
+          double iso = fTR->ElDR03TkSumPt[elIndex]+std::max(fTR->ElDR03EcalRecHitSumEt[elIndex]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[elIndex];
+          double hybridIso = iso/std::max((float)20.,fTR->ElPt[elIndex]);
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
@@ -1676,24 +1681,41 @@ const bool JZBAnalysis::IsCustomEl(const int index){
   counters[EL].fill(" ... DZ(pv) < 1.0");
 
   // Electron ID
-  int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  if (elIDWP95!=7) return false;
-  counters[EL].fill(" ... passes WP95 ID");
+  // int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
+  // if (elIDWP95!=7) return false;
+  // counters[EL].fill(" ... passes WP95 ID");
+
+  //  Electron ID (exclusively)
+  int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+  if (!(elIDWP90&1)) return false;
+  counters[EL].fill(" ... passes WP90 ID");
+
+  //  Conversion rejection
+//  if ( elIDWP90 < 4 ) return false;
+//  counters[EL].fill(" ... passes conversion rejection");
+
+  //  Additional requirements for trigger consistency
+  if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+     if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;
+     if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false;
+     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false;
+     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false;
+  } else { // Endcap
+     if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;
+     if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false;
+     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;
+     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false;
+  }
+  counters[EL].fill(" ... passes additional electron ID cuts");
 
   // Flat isolation below 20 GeV (only for synch.)
-  double hybridIso = fTR->ElRelIso03[index]
-    *fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;  
+  // double hybridIso = fTR->ElRelIso03[index]*fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
+  double pedestal = 0.;
+  if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
+  double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
+  double hybridIso = iso/std::max((float)20.,fTR->ElPt[index]);
+  if ( !(hybridIso < 0.15) ) return false;
   counters[EL].fill(" ... hybridIso < 0.15");
-
-  //   // Other choices for electron ID
-  //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP90 ID");
-  //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-  //   counters[EL].fill("... passes WP80 ID");
-  //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-  //   counters[EL].fill("... MVA>0.4");
-
   return true;
 
 	
