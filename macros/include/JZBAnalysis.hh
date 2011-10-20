@@ -40,7 +40,8 @@ public:
   const bool IsCustomEl(const int);
   const bool IsCustomPfMu(const int, const int);
   const bool IsCustomPfEl(const int, const int);
-  const bool IsCustomJet(const int index);
+  const bool IsCustomJet(const int);
+  const bool IsConvertedPhoton( const int eIndex );
   const bool passElTriggers(void);
   const bool passEMuTriggers(void);
   const bool passMuTriggers(void);

@@ -31,7 +31,7 @@ void usage( int status = 0 ) {
   cout << "                   interactions is read                                       " << endl;
   cout << "     mc_PileUP     root file from which the generated # pile up               " << endl;
   cout << "     type     is 'el', 'mu' or 'mc' (default)                                 " << endl;
-  cout << "     analisys is 0 (both), 1(only reco [default]) or 2 (only pf)              " << endl;
+  cout << "     analysis is 0 (both), 1(only reco [default]) or 2 (only pf)              " << endl;
   cout << "     filen    are the input files (by default: ROOT files)                    " << endl;
   cout << "              with option -l, these are read as text files                    " << endl;
   cout << "              with one ROOT file name per line                                " << endl;

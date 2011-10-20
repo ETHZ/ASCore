@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.61 $";
+string sjzbversion="$Revision: 1.62 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.62  2011/10/20 14:26:15  buchmann
+Adapted custom electron function (basically from WP95 to WP90)
+
 Revision 1.61  2011/10/18 12:19:33  buchmann
 Changed the event number to ULong64_t (to accomodate even very large event numbers)
 
@@ -136,6 +139,8 @@ public:
   float pt2;
   float iso1;
   float iso2;
+  bool  isConv1; // Photon conversion flag
+  bool  isConv2;
 
   float genPt1; // leading legenPtons
   float genPt2;
@@ -330,6 +335,8 @@ void nanoEvent::reset()
   pt2=0;
   iso1=0;
   iso2=0;
+  isConv1 = false;
+  isConv2 = false;
   genPt1=0;
   genPt2=0;
   genEta1=0;
@@ -577,6 +584,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pt2",&nEvent.pt2,"pt2/F");
   myTree->Branch("iso1",&nEvent.iso1,"iso1/F");
   myTree->Branch("iso2",&nEvent.iso2,"iso2/F");
+  myTree->Branch("isConv1",&nEvent.isConv1,"isConv1/O");
+  myTree->Branch("isConv2",&nEvent.isConv2,"isConv2/O");
   myTree->Branch("genPt1",&nEvent.genPt1,"genPt1/F");
   myTree->Branch("genPt2",&nEvent.genPt2,"genPt2/F");
   myTree->Branch("genEta1",&nEvent.genEta1,"genEta1/F");
@@ -803,6 +812,13 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v7") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v8") )        return true;
+
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
+
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
@@ -811,11 +827,6 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
   return false;
 
 }
@@ -1074,6 +1085,7 @@ void JZBAnalysis::Analyze() {
     nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
     nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
     nEvent.chid1 = (sortedGoodLeptons[PosLepton1].type+1)*sortedGoodLeptons[PosLepton1].charge;
+    nEvent.isConv1 = IsConvertedPhoton(sortedGoodLeptons[PosLepton1].index);
       
     nEvent.eta2 = sortedGoodLeptons[PosLepton2].p.Eta();
     nEvent.pt2 = sortedGoodLeptons[PosLepton2].p.Pt();
@@ -1082,6 +1094,7 @@ void JZBAnalysis::Analyze() {
     nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
     nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
     nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
+    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
     
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
     nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
@@ -1671,8 +1684,10 @@ const bool JZBAnalysis::IsCustomEl(const int index){
   // kinematic acceptance
   if(!(fTR->ElPt[index]>10) )return false;
   counters[EL].fill(" ... pt > 10");
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  counters[EL].fill(" ... |eta| < 2.4");
+  if ( !(fTR->ElESuperClusterOverP[index]*fTR->ElTrkMomAtVtx[index]>10) ) return false;
+  counters[EL].fill(" ... SC pt > 10");
+  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+  counters[EL].fill(" ... |eta| < 2.5");
   if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
   counters[EL].fill(" ... missing inner hits <= 1");
   if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
@@ -1690,35 +1705,47 @@ const bool JZBAnalysis::IsCustomEl(const int index){
   if (!(elIDWP90&1)) return false;
   counters[EL].fill(" ... passes WP90 ID");
 
-  //  Conversion rejection
-//  if ( elIDWP90 < 4 ) return false;
-//  counters[EL].fill(" ... passes conversion rejection");
-
-  //  Additional requirements for trigger consistency
+  // Additional requirements for trigger consistency
+  // See https://twiki.cern.ch/twiki/bin/view/CMS/EgammaWorkingPointsv3
+  // WP90 cuts are in comments
   if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
-     if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;
-     if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false;
-     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false;
-     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false;
+     if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+     if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
   } else { // Endcap
-     if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;
-     if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false;
-     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;
-     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false;
+     if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+     if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
   }
   counters[EL].fill(" ... passes additional electron ID cuts");
 
-  // Flat isolation below 20 GeV (only for synch.)
-  // double hybridIso = fTR->ElRelIso03[index]*fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
+  // Compute isolation separately (corresponds to WP95 iso)
   double pedestal = 0.;
   if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
   double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
-  double hybridIso = iso/std::max((float)20.,fTR->ElPt[index]);
+  double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
   if ( !(hybridIso < 0.15) ) return false;
   counters[EL].fill(" ... hybridIso < 0.15");
+
+  //  Conversion rejection (NOT FOR NOW)
+//  if ( IsConvertedPhoton(index) ) return false;
+//  counters[EL].fill(" ... passes conversion rejection");
+
   return true;
 
 	
+}
+
+// Check if electron is from photon conversion
+const bool JZBAnalysis::IsConvertedPhoton( const int eIndex ) {
+ 
+  int elIDWP90 = fTR->ElIDsimpleWP90relIso[eIndex];
+  if ( elIDWP90 < 4 ) return true;
+  counters[EL].fill(" ... passes conversion rejection");
+  return false;
+ 
 }
 
 const bool JZBAnalysis::IsCustomJet(const int index){
