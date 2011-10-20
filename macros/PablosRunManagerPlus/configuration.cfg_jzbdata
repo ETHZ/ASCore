@@ -8,7 +8,7 @@
 ####
 # PromptReco mess starting in August
 #####
-/susy/ntuples/data/V02-04-03/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry  '-t el -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-178078_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-03/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry/  '-t el -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-178078_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
 /susy/ntuples/data/V02-04-03/DoubleMu_Run2011A-PromptReco-v6_AOD__retry/ '-t mu -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-178078_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1 
 /susy/ntuples/data/V02-04-03/MuEG_Run2011A-PromptReco-v6_AOD__retry/ '-t em -j /shome/buchmann/new_development/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Cert_160404-178078_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
 
