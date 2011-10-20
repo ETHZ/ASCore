@@ -2154,7 +2154,6 @@ void AnaClass::plotEffOverlayEE(TEfficiency *h1in, TString tag1, TEfficiency *h2
 /*****************************************************************************
 ###################| Utilities |##############################################
 *****************************************************************************/
-
 //____________________________________________________________________________
 TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
 	TFile *file = NULL;
@@ -2435,6 +2434,12 @@ float AnaClass::getMinYExtension(TH1 *h){
 		if(temp < min) min = temp;
 	}
 	return min;
+}
+
+//____________________________________________________________________________
+void AnaClass::setZeroBinError(TH1D *ihist){
+//    - Sets all bin errors to zero
+	for( int i = 0; i < ihist->GetNbinsX()+2; i++ ) ihist->SetBinError(i,0.);
 }
 
 //____________________________________________________________________________

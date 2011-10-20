@@ -2116,32 +2116,33 @@ int  SSDLDumper::readHistos(TString filename){
 	
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
+		if(fVerbose > 1) cout << "Reading histos for " << S->sname << endl;
 
 		// Cut flow histos
-		S->cutFlowHisto[Muon] = (TH1D*)pFile->Get(S->sname + "/MMCutFlow");
-		S->cutFlowHisto[Elec] = (TH1D*)pFile->Get(S->sname + "/EECutFlow");
-		S->cutFlowHisto[ElMu] = (TH1D*)pFile->Get(S->sname + "/EMCutFlow");
+		getObjectSafe(pFile, S->sname + "/MMCutFlow", S->cutFlowHisto[Muon]);
+		getObjectSafe(pFile, S->sname + "/EECutFlow", S->cutFlowHisto[Elec]);
+		getObjectSafe(pFile, S->sname + "/EMCutFlow", S->cutFlowHisto[ElMu]);
 
 		// Histos for differential yields
 		for(size_t k = 0; k < gNCHANNELS; ++k){
 			TString name;
 			for(size_t j = 0; j < gNDiffVars; ++j){
 				getname = Form("%s_%s_NT11_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt11[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt11[j]);
 				getname = Form("%s_%s_NT10_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt10[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt10[j]);
 				getname = Form("%s_%s_NT01_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt01[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt01[j]);
 				getname = Form("%s_%s_NT00_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt00[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt00[j]);
 				if(k == Muon) continue;
 				getname = Form("%s_%s_NT11_OS_BB_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt2_os_BB[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt2_os_BB[j]);
 				getname = Form("%s_%s_NT11_OS_EE_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt2_os_EE[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt2_os_EE[j]);
 				if(k == ElMu) continue;
 				getname = Form("%s_%s_NT11_OS_EB_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				S->diffyields[k].hnt2_os_EB[j] = (TH1D*)pFile->Get(S->sname + "/DiffYields/" + getname);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt2_os_EB[j]);
 			}
 		}	
 
@@ -2151,10 +2152,10 @@ int  SSDLDumper::readHistos(TString filename){
 			for(size_t k = 0; k < gNKinSels; ++k){
 				KinPlots *kp = &S->kinplots[k][hilo];
 				getname = Form("%s_%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data());
-				kp->hmetvsht = (TH2D*)pFile->Get(S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname);
+				getObjectSafe(pFile, S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname, kp->hmetvsht);
 				for(size_t j = 0; j < gNKinVars; ++j){
 					getname = Form("%s_%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data(), KinPlots::var_name[j].Data());
-					kp->hvar[j] = (TH1D*)pFile->Get(S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname);
+					getObjectSafe(pFile, S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname, kp->hvar[j]);
 					kp->hvar[j]->SetFillColor(S->color);
 				}
 			}
@@ -2165,16 +2166,16 @@ int  SSDLDumper::readHistos(TString filename){
 			IsoPlots *ip = &S->isoplots[lep];
 			for(size_t j = 0; j < gNSels; ++j){
 				getname = Form("%s_%s_%siso", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[lep].Data());
-				ip->hiso[j] = (TH1D*)pFile->Get(S->sname + "/IsoPlots/" + getname);
+				getObjectSafe(pFile, S->sname + "/IsoPlots/" + getname, ip->hiso[j]);
 				ip->hiso[j]->SetFillColor(S->color);
 				for(int k = 0; k < gNMuPt2bins; ++k){
 					getname = Form("%s_%s_%siso_pt%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[lep].Data(), k);
-					ip->hiso_pt[j][k] = (TH1D*)pFile->Get(S->sname + "/IsoPlots/" + getname);
+					getObjectSafe(pFile, S->sname + "/IsoPlots/" + getname, ip->hiso_pt[j][k]);
 					ip->hiso_pt[j][k]->SetFillColor(S->color);
 				}
 				for(int k = 0; k < gNNVrtxBins; ++k){
 					getname = Form("%s_%s_%siso_nv%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[lep].Data(), k);
-					ip->hiso_nv[j][k] = (TH1D*)pFile->Get(S->sname + "/IsoPlots/" + getname);
+					getObjectSafe(pFile, S->sname + "/IsoPlots/" + getname, ip->hiso_nv[j][k]);
 					ip->hiso_nv[j][k]->SetFillColor(S->color);
 				}
 			}
@@ -2183,9 +2184,9 @@ int  SSDLDumper::readHistos(TString filename){
 			FRatioPlots *rp = &S->ratioplots[lep];
 			for(size_t j = 0; j < gNRatioVars; ++j){
 				getname = Form("%s_%s_ntight_%s", S->sname.Data(), gEMULabel[lep].Data(), FRatioPlots::var_name[j].Data());
-				rp->ntight[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+				getObjectSafe(pFile, S->sname + "/FRatioPlots/" + getname, rp->ntight[j]);
 				getname = Form("%s_%s_nloose_%s", S->sname.Data(), gEMULabel[lep].Data(), FRatioPlots::var_name[j].Data());
-				rp->nloose[j] = (TH1D*)pFile->Get(S->sname + "/FRatioPlots/" + getname);
+				getObjectSafe(pFile, S->sname + "/FRatioPlots/" + getname, rp->nloose[j]);
 			}
 		}
 
@@ -2195,54 +2196,53 @@ int  SSDLDumper::readHistos(TString filename){
 				Region *R = &S->region[r][hilo];
 				for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
 					Channel *C;
-					if(ch == Muon)     C = &R->mm;
+					if(ch == Muon) C = &R->mm;
 					if(ch == Elec) C = &R->ee;
-					if(ch == ElMu)      C = &R->em;
+					if(ch == ElMu) C = &R->em;
 					TString root = S->sname +"/"+ Region::sname[r] +"/"+ gHiLoLabel[hilo] +"/"+ S->sname +"_"+ Region::sname[r] +"_"+ gChanLabel[ch] +"_"+ gHiLoLabel[hilo];
-					C->nt20_pt  = (TH2D*)pFile->Get(root + "_NT20_pt");
-					C->nt10_pt  = (TH2D*)pFile->Get(root + "_NT10_pt");
-					C->nt01_pt  = (TH2D*)pFile->Get(root + "_NT01_pt");
-					C->nt00_pt  = (TH2D*)pFile->Get(root + "_NT00_pt");
-					C->nt20_eta = (TH2D*)pFile->Get(root + "_NT20_eta");
-					C->nt10_eta = (TH2D*)pFile->Get(root + "_NT10_eta");
-					C->nt01_eta = (TH2D*)pFile->Get(root + "_NT01_eta");
-					C->nt00_eta = (TH2D*)pFile->Get(root + "_NT00_eta");
-
+					getObjectSafe(pFile, root + "_NT20_pt",  C->nt20_pt );
+					getObjectSafe(pFile, root + "_NT10_pt" , C->nt10_pt );
+					getObjectSafe(pFile, root + "_NT01_pt" , C->nt01_pt );
+					getObjectSafe(pFile, root + "_NT00_pt" , C->nt00_pt );
+					getObjectSafe(pFile, root + "_NT20_eta", C->nt20_eta);
+					getObjectSafe(pFile, root + "_NT10_eta", C->nt10_eta);
+					getObjectSafe(pFile, root + "_NT01_eta", C->nt01_eta);
+					getObjectSafe(pFile, root + "_NT00_eta", C->nt00_eta);
 					if(S->datamc > 0){
-						C->npp_pt      = (TH2D*)pFile->Get(root + "_NPP_pt");
-						C->nfp_pt      = (TH2D*)pFile->Get(root + "_NFP_pt");
-						C->npf_pt      = (TH2D*)pFile->Get(root + "_NPF_pt");
-						C->nff_pt      = (TH2D*)pFile->Get(root + "_NFF_pt");
-						C->nt2pp_pt    = (TH2D*)pFile->Get(root + "_NT2PP_pt");
-						C->nt2fp_pt    = (TH2D*)pFile->Get(root + "_NT2FP_pt");
-						C->nt2pf_pt    = (TH2D*)pFile->Get(root + "_NT2PF_pt");
-						C->nt2ff_pt    = (TH2D*)pFile->Get(root + "_NT2FF_pt");
-						C->nt11_origin = (TH2D*)pFile->Get(root + "_NT20_Origin");
-						C->nt10_origin = (TH2D*)pFile->Get(root + "_NT10_Origin");
-						C->nt01_origin = (TH2D*)pFile->Get(root + "_NT01_Origin");
-						C->nt00_origin = (TH2D*)pFile->Get(root + "_NT00_Origin");
-
+						getObjectSafe(pFile, root + "_NPP_pt"     , C->npp_pt     );
+						getObjectSafe(pFile, root + "_NFP_pt"     , C->nfp_pt     );
+						getObjectSafe(pFile, root + "_NPF_pt"     , C->npf_pt     );
+						getObjectSafe(pFile, root + "_NFF_pt"     , C->nff_pt     );
+						getObjectSafe(pFile, root + "_NT2PP_pt"   , C->nt2pp_pt   );
+						getObjectSafe(pFile, root + "_NT2FP_pt"   , C->nt2fp_pt   );
+						getObjectSafe(pFile, root + "_NT2PF_pt"   , C->nt2pf_pt   );
+						getObjectSafe(pFile, root + "_NT2FF_pt"   , C->nt2ff_pt   );
+						getObjectSafe(pFile, root + "_NT20_Origin", C->nt11_origin);
+						getObjectSafe(pFile, root + "_NT10_Origin", C->nt10_origin);
+						getObjectSafe(pFile, root + "_NT01_Origin", C->nt01_origin);
+						getObjectSafe(pFile, root + "_NT00_Origin", C->nt00_origin);
+						
 						if(ch != Muon){
-							C->npp_cm_pt   = (TH2D*)pFile->Get(root + "_NPP_CM_pt");
-							C->nt2pp_cm_pt = (TH2D*)pFile->Get(root + "_NT2PP_CM_pt");						
+							getObjectSafe(pFile, root + "_NPP_CM_pt"  , C->npp_cm_pt  );
+							getObjectSafe(pFile, root + "_NT2PP_CM_pt", C->nt2pp_cm_pt);
 						}
 					}
 					if(ch == Elec || ch == ElMu){
-						C->nt20_OS_BB_pt = (TH2D*)pFile->Get(root + "_NT20_OS_BB_pt");
-						C->nt20_OS_EE_pt = (TH2D*)pFile->Get(root + "_NT20_OS_EE_pt");
-						if(ch == Elec) C->nt20_OS_EB_pt = (TH2D*)pFile->Get(root + "_NT20_OS_EB_pt");
+						getObjectSafe(pFile, root + "_NT20_OS_BB_pt", C->nt20_OS_BB_pt);
+						getObjectSafe(pFile, root + "_NT20_OS_EE_pt", C->nt20_OS_EE_pt);
+						if(ch == Elec) getObjectSafe(pFile, root + "_NT20_OS_EB_pt", C->nt20_OS_EB_pt);
 					}
 
 					if(ch != ElMu){
-						C->fntight     = (TH2D*)pFile->Get(root + "_fNTight");
-						C->fnloose     = (TH2D*)pFile->Get(root + "_fNLoose");
-						C->pntight     = (TH2D*)pFile->Get(root + "_pNTight");
-						C->pnloose     = (TH2D*)pFile->Get(root + "_pNLoose");
+						getObjectSafe(pFile, root + "_fNTight", C->fntight);
+						getObjectSafe(pFile, root + "_fNLoose", C->fnloose);
+						getObjectSafe(pFile, root + "_pNTight", C->pntight);
+						getObjectSafe(pFile, root + "_pNLoose", C->pnloose);
 						if(S->datamc > 0){
-							C->sst_origin  = (TH1D*)pFile->Get(root + "_fTOrigin");
-							C->ssl_origin  = (TH1D*)pFile->Get(root + "_fLOrigin");
-							C->zt_origin   = (TH1D*)pFile->Get(root + "_pTOrigin");
-							C->zl_origin   = (TH1D*)pFile->Get(root + "_pLOrigin");
+							getObjectSafe(pFile, root + "_fTOrigin", C->sst_origin);
+							getObjectSafe(pFile, root + "_fLOrigin", C->ssl_origin);
+							getObjectSafe(pFile, root + "_pTOrigin", C->zt_origin );
+							getObjectSafe(pFile, root + "_pLOrigin", C->zl_origin );
 						}
 					}
 				}
@@ -2277,7 +2277,7 @@ int  SSDLDumper::readSigGraphs(TString filename){
 				if(ch == Elec) channame = "EE";
 				if(ch == ElMu)      channame = "EM";
 				getname = Form("%s/SigGraphs/%s_%s_%s_SigEvents", S->sname.Data(), S->sname.Data(), channame.Data(), gHiLoLabel[hilo].Data());
-				S->sigevents[ch][hilo] = (TGraph*)pFile->Get(getname);
+				getObjectSafe(pFile, getname, S->sigevents[ch][hilo]);
 				S->sigevents[ch][hilo]->SetMarkerColor(color[ch]);
 				S->sigevents[ch][hilo]->SetMarkerStyle(style[ch]);
 				S->sigevents[ch][hilo]->SetMarkerSize(size);
