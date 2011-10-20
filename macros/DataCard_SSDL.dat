@@ -6,21 +6,21 @@
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Data
-DoubleMu1	SSDLTrees/Sep6/DoubleMu-Run2011A-PromptReco-v4-AOD.root				0	0
-DoubleMu2	SSDLTrees/Sep6/DoubleMu-Run2011A-May10ReReco-v1-AOD.root			0	0
-DoubleMu3	SSDLTrees/Sep6/DoubleMu-Run2011A-05Aug2011-v1-AOD.root				0	0
-DoubleMu4	SSDLTrees/Sep6/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root			0	0
-DoubleMu5	SSDLTrees/Oct12/DoubleMu-Run2011B-PromptReco-v1-AOD.root			0	0
-DoubleEle1	SSDLTrees/Sep6/DoubleElectron-Run2011A-PromptReco-v4-AOD.root			0	1
-DoubleEle2	SSDLTrees/Sep6/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root			0	1
-DoubleEle3	SSDLTrees/Sep6/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root			0	1
-DoubleEle4	SSDLTrees/Sep6/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root		0	1
-DoubleEle5	SSDLTrees/Oct12/DoubleElectron-Run2011B-PromptReco-v1-AOD.root			0	1
-MuEG1		SSDLTrees/Sep6/MuEG-Run2011A-PromptReco-v4-AOD.root				0	2
-MuEG2		SSDLTrees/Sep6/MuEG-Run2011A-May10ReReco-v1-AOD.root				0	2
-MuEG3		SSDLTrees/Sep6/MuEG-Run2011A-05Aug2011-v1-AOD.root				0	2
-MuEG4		SSDLTrees/Sep6/MuEG_Run2011A-PromptReco-v6_AOD__retry.root			0	2
-MuEG5		SSDLTrees/Oct12/MuEG-Run2011B-PromptReco-v1-AOD.root				0	2
+DoubleMu1	SSDLTrees/Oct18/DoubleMu-Run2011A-PromptReco-v4-AOD.root			0	0
+DoubleMu2	SSDLTrees/Oct18/DoubleMu-Run2011A-May10ReReco-v1-AOD.root			0	0
+DoubleMu3	SSDLTrees/Oct18/DoubleMu-Run2011A-05Aug2011-v1-AOD.root				0	0
+DoubleMu4	SSDLTrees/Oct18/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root			0	0
+DoubleMu5	SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root			0	0
+DoubleEle1	SSDLTrees/Oct18/DoubleElectron-Run2011A-PromptReco-v4-AOD.root			0	1
+DoubleEle2	SSDLTrees/Oct18/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root			0	1
+DoubleEle3	SSDLTrees/Oct18/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root			0	1
+DoubleEle4	SSDLTrees/Oct18/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root		0	1
+DoubleEle5	SSDLTrees/Oct18/DoubleElectron-Run2011B-PromptReco-v1-AOD.root			0	1
+MuEG1		SSDLTrees/Oct18/MuEG-Run2011A-PromptReco-v4-AOD.root				0	2
+MuEG2		SSDLTrees/Oct18/MuEG-Run2011A-May10ReReco-v1-AOD.root				0	2
+MuEG3		SSDLTrees/Oct18/MuEG-Run2011A-05Aug2011-v1-AOD.root				0	2
+MuEG4		SSDLTrees/Oct18/MuEG_Run2011A-PromptReco-v6_AOD__retry.root			0	2
+MuEG5		SSDLTrees/Oct18/MuEG-Run2011B-PromptReco-v1-AOD.root				0	2
 MuHad1		SSDLTrees/Jul6/MuHad-Run2011A-May10ReReco-v1-AOD.root				0	0
 MuHad2		SSDLTrees/Jul6/MuHad-Run2011A-PromptReco-v4-AOD.root				0	0
 EleHad1		SSDLTrees/Jul6/ElectronHad-Run2011A-May10ReReco-v1-AOD.root			0	1
