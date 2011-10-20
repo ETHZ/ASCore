@@ -297,42 +297,48 @@ def getListOfTasks(nameOfFile):
 #                                                             #
 ###############################################################
 def process(task, conf):
- 
   dcapPath = "dcap://t3se01.psi.ch:22125/"
   srmPath = "srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"
-  newfolderToList = "/pnfs/psi.ch/cms/trivcat/store/user/" + task[0]
+  folderToList = srmPath + task[0]
   list = [] # Initialize file list
 
   # Check if cache file exists and if we should use it
-  cacheFile = '.'+newfolderToList.replace('/','_').replace('?','_')
+  cacheFile = '.'+folderToList.replace('/','_').replace('?','_')
+  allmyfiles=[]
   if not options.renew and os.path.isfile(cacheFile):
+      print "Reading from cached file"
       f = open(cacheFile)
       showMessage('Reading files pertaining to '+str(task[0])+'from cache file '+cacheFile)
-      list = f.readlines()
+      allmyfiles = f.readlines()
       f.close()
   else:
       # If not: rebuild the list
       showMessage("Going to fetch list of files pertaining to "+str(task[0]))
-      theList = os.popen("uberftp t3se01.psi.ch 'ls "+newfolderToList+"'  | grep root | awk '{ print $9 }'");
-      list = theList.readlines()
-      for li in list:
-          if(li.find("root") == -1):
-              showMessage("Problem with folder",li)
-              return "Error"
+      doloop=True
+      offset=0
+      while(doloop) :
+	      command = 'srmls --offset '+str(offset)+ ' --count 1000 ' + folderToList + " 2>&1 | grep root | awk '{print $2}'"
+	      theList = os.popen(command)
+	      list = theList.readlines()
+	      for li in list:
+		      allmyfiles.append(li)
+	      if(len(list)==1000):
+		      doloop=True;
+		      offset=offset+1000
+		      print "Need to fetch more files ... hold on (currently have a list of "+str(len(allmyfiles))+" files)"
+	      else:
+		      doloop=False;
       f = open(cacheFile,'w')
-      f.write(''.join(list))
+      f.write(''.join(allmyfiles))
   
-  
-  numberOfFiles = len(list)
-  
+  numberOfFiles = len(allmyfiles)
   if(numberOfFiles == 0):
     showMessage("No files found")
     return "Error"
 
-
   correctList = [];
-  for fileName in list:
-    auxiliar = dcapPath + newfolderToList + fileName
+  for fileName in allmyfiles:
+    auxiliar = dcapPath + fileName
     auxiliar = auxiliar[0:len(auxiliar)-1]
     correctList.append(auxiliar)
 
