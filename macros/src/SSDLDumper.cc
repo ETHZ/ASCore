@@ -92,17 +92,19 @@ double SSDLDumper::gDiffNJBins[gNDiffNJBins+1]   = { 0.,   1.,   2.,    3.,   4.
 double SSDLDumper::gDiffMT2Bins[gNDiffMT2Bins+1] = { 0.,  25.,  50., 150.};
 double SSDLDumper::gDiffPT1Bins[gNDiffPT1Bins+1] = { 20., 40., 60., 80., 100., 200.};
 double SSDLDumper::gDiffPT2Bins[gNDiffPT2Bins+1] = { 10., 20., 30., 40.,  50., 100.};
+double SSDLDumper::gDiffNBJBins[gNDiffNBJBins+1] = { 0., 1., 2., 3.};
 
 //////////////////////////////////////////////////////////////////////////////////
-TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2"};
-int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins};
-double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins};
+TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets"};
+int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins};
+double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} (GeV)",
                                                                            "E_{T}^{miss} (GeV)",
                                                                            "N_{Jets}",
                                                                            "M_{T2} (GeV)",
                                                                            "P_{T} (l_{1}) (GeV)",
-                                                                           "P_{T} (l_{2}) (GeV)"};
+                                                                           "P_{T} (l_{2}) (GeV)",
+                                                                           "N_{Btag}"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
@@ -705,24 +707,28 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				S->diffyields[Muon].hnt11[3]->Fill(MT2,   puweight);
 				S->diffyields[Muon].hnt11[4]->Fill(MuPt[mu1], puweight);
 				S->diffyields[Muon].hnt11[5]->Fill(MuPt[mu2], puweight);
+				S->diffyields[Muon].hnt11[6]->Fill(getNBTags(), puweight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
 				S->diffyields[Muon].hnt10[1]->Fill(pfMET, puweight);
 				S->diffyields[Muon].hnt10[3]->Fill(MT2,   puweight);
 				S->diffyields[Muon].hnt10[4]->Fill(MuPt[mu1], puweight);
 				S->diffyields[Muon].hnt10[5]->Fill(MuPt[mu2], puweight);
+				S->diffyields[Muon].hnt10[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				S->diffyields[Muon].hnt01[1]->Fill(pfMET, puweight);
 				S->diffyields[Muon].hnt01[3]->Fill(MT2,   puweight);
 				S->diffyields[Muon].hnt01[4]->Fill(MuPt[mu1], puweight);
 				S->diffyields[Muon].hnt01[5]->Fill(MuPt[mu2], puweight);
+				S->diffyields[Muon].hnt01[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
 				S->diffyields[Muon].hnt00[1]->Fill(pfMET, puweight);
 				S->diffyields[Muon].hnt00[3]->Fill(MT2,   puweight);
 				S->diffyields[Muon].hnt00[4]->Fill(MuPt[mu1], puweight);
 				S->diffyields[Muon].hnt00[5]->Fill(MuPt[mu2], puweight);
+				S->diffyields[Muon].hnt00[6]->Fill(getNBTags(), puweight);
 			}
 		}
 		resetHypLeptons();
@@ -765,24 +771,28 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				S->diffyields[Elec].hnt11[3]->Fill(MT2,   puweight);
 				S->diffyields[Elec].hnt11[4]->Fill(ElPt[el1], puweight);
 				S->diffyields[Elec].hnt11[5]->Fill(ElPt[el2], puweight);
+				S->diffyields[Elec].hnt11[6]->Fill(getNBTags(), puweight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
 				S->diffyields[Elec].hnt10[1]->Fill(pfMET, puweight);
 				S->diffyields[Elec].hnt10[3]->Fill(MT2,   puweight);
 				S->diffyields[Elec].hnt10[4]->Fill(ElPt[el1], puweight);
 				S->diffyields[Elec].hnt10[5]->Fill(ElPt[el2], puweight);
+				S->diffyields[Elec].hnt10[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				S->diffyields[Elec].hnt01[1]->Fill(pfMET, puweight);
 				S->diffyields[Elec].hnt01[3]->Fill(MT2,   puweight);
 				S->diffyields[Elec].hnt01[4]->Fill(ElPt[el1], puweight);
 				S->diffyields[Elec].hnt01[5]->Fill(ElPt[el2], puweight);
+				S->diffyields[Elec].hnt01[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
 				S->diffyields[Elec].hnt00[1]->Fill(pfMET, puweight);
 				S->diffyields[Elec].hnt00[3]->Fill(MT2,   puweight);
 				S->diffyields[Elec].hnt00[4]->Fill(ElPt[el1], puweight);
 				S->diffyields[Elec].hnt00[5]->Fill(ElPt[el2], puweight);
+				S->diffyields[Elec].hnt00[6]->Fill(getNBTags(), puweight);
 			}
 		}
 		resetHypLeptons();
@@ -830,24 +840,28 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				S->diffyields[ElMu].hnt11[3]->Fill(MT2,   puweight);
 				S->diffyields[ElMu].hnt11[4]->Fill(ptmax, puweight);
 				S->diffyields[ElMu].hnt11[5]->Fill(ptmin, puweight);
+				S->diffyields[ElMu].hnt11[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
 				S->diffyields[ElMu].hnt10[1]->Fill(pfMET, puweight);
 				S->diffyields[ElMu].hnt10[3]->Fill(MT2,   puweight);
 				S->diffyields[ElMu].hnt10[4]->Fill(ptmax, puweight);
 				S->diffyields[ElMu].hnt10[5]->Fill(ptmin, puweight);
+				S->diffyields[ElMu].hnt10[6]->Fill(getNBTags(), puweight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				S->diffyields[ElMu].hnt01[1]->Fill(pfMET, puweight);
 				S->diffyields[ElMu].hnt01[3]->Fill(MT2,   puweight);
 				S->diffyields[ElMu].hnt01[4]->Fill(ptmax, puweight);
 				S->diffyields[ElMu].hnt01[5]->Fill(ptmin, puweight);
+				S->diffyields[ElMu].hnt01[6]->Fill(getNBTags(), puweight);
 			}
 			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
 				S->diffyields[ElMu].hnt00[1]->Fill(pfMET, puweight);
 				S->diffyields[ElMu].hnt00[3]->Fill(MT2,   puweight);
 				S->diffyields[ElMu].hnt00[4]->Fill(ptmax, puweight);
 				S->diffyields[ElMu].hnt00[5]->Fill(ptmin, puweight);
+				S->diffyields[ElMu].hnt00[6]->Fill(getNBTags(), puweight);
 			}
 		}
 		resetHypLeptons();
@@ -895,24 +909,28 @@ void SSDLDumper::fillDiffYields(Sample *S){
 					S->diffyields[Elec].hnt2_os_BB[3]->Fill(MT2  , puweight);
 					S->diffyields[Elec].hnt2_os_BB[4]->Fill(ElPt[el1], puweight);
 					S->diffyields[Elec].hnt2_os_BB[5]->Fill(ElPt[el2], puweight);
+					S->diffyields[Elec].hnt2_os_BB[6]->Fill(getNBTags(), puweight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
 					S->diffyields[Elec].hnt2_os_EE[1]->Fill(pfMET, puweight);
 					S->diffyields[Elec].hnt2_os_EE[3]->Fill(MT2  , puweight);
 					S->diffyields[Elec].hnt2_os_EE[4]->Fill(ElPt[el1], puweight);
 					S->diffyields[Elec].hnt2_os_EE[5]->Fill(ElPt[el2], puweight);
+					S->diffyields[Elec].hnt2_os_EE[6]->Fill(getNBTags(), puweight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
 					S->diffyields[Elec].hnt2_os_EB[1]->Fill(pfMET, puweight);
 					S->diffyields[Elec].hnt2_os_EB[3]->Fill(MT2  , puweight);
 					S->diffyields[Elec].hnt2_os_EB[4]->Fill(ElPt[el1], puweight);
 					S->diffyields[Elec].hnt2_os_EB[5]->Fill(ElPt[el2], puweight);
+					S->diffyields[Elec].hnt2_os_EB[6]->Fill(getNBTags(), puweight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
 					S->diffyields[Elec].hnt2_os_EB[1]->Fill(pfMET, puweight);
 					S->diffyields[Elec].hnt2_os_EB[3]->Fill(MT2  , puweight);
 					S->diffyields[Elec].hnt2_os_EB[4]->Fill(ElPt[el1], puweight);
 					S->diffyields[Elec].hnt2_os_EB[5]->Fill(ElPt[el2], puweight);
+					S->diffyields[Elec].hnt2_os_EB[6]->Fill(getNBTags(), puweight);
 				}
 			}
 		}
@@ -955,12 +973,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 					S->diffyields[ElMu].hnt2_os_BB[3]->Fill(MT2  , puweight);
 					S->diffyields[ElMu].hnt2_os_BB[4]->Fill(ptmax, puweight);
 					S->diffyields[ElMu].hnt2_os_BB[5]->Fill(ptmin, puweight);
+					S->diffyields[ElMu].hnt2_os_BB[6]->Fill(getNBTags(), puweight);
 				}
 				if(!isBarrelElectron(el)){
 					S->diffyields[ElMu].hnt2_os_EE[1]->Fill(pfMET, puweight);
 					S->diffyields[ElMu].hnt2_os_EE[3]->Fill(MT2  , puweight);
 					S->diffyields[ElMu].hnt2_os_EE[4]->Fill(ptmax, puweight);
 					S->diffyields[ElMu].hnt2_os_EE[5]->Fill(ptmin, puweight);
+					S->diffyields[ElMu].hnt2_os_EE[6]->Fill(getNBTags(), puweight);
 				}
 			}
 		}

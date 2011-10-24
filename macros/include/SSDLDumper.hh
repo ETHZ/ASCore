@@ -42,6 +42,7 @@ public:
 	static const int gNDiffMT2Bins = 3;
 	static const int gNDiffPT1Bins = 5;
 	static const int gNDiffPT2Bins = 5;
+	static const int gNDiffNBJBins = 3;
 
 	static double gDiffHTBins [gNDiffHTBins+1];
 	static double gDiffMETBins[gNDiffMETBins+1];
@@ -49,6 +50,7 @@ public:
 	static double gDiffMT2Bins[gNDiffMT2Bins+1];
 	static double gDiffPT1Bins[gNDiffPT1Bins+1];
 	static double gDiffPT2Bins[gNDiffPT2Bins+1];
+	static double gDiffNBJBins[gNDiffNBJBins+1];
 
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
@@ -241,7 +243,7 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 6;
+	static const int gNDiffVars = 7;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -296,7 +298,7 @@ public:
 		TGraph *sigevents[gNCHANNELS][2];
 
 		TTree* getTree(){
-			file = new TFile(location);
+			file = TFile::Open(location);
 			if(file->IsZombie()){
 				cout << "SSDLDumper::Sample::getTree ==> Error opening file " << location << endl;
 				exit(1);
