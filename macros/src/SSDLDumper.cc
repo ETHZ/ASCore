@@ -253,7 +253,7 @@ void SSDLDumper::readDatacard(TString cardfile){
 	char buffer[1000];
 	ifstream IN(cardfile);
 
-	char inputfile[100], sname[100];
+	char inputfile[500], sname[100];
 	int datamc, chan, color;
 	float lumi;
 
@@ -261,7 +261,7 @@ void SSDLDumper::readDatacard(TString cardfile){
 	if(fVerbose > 2) cout << "Reading datacard  " << cardfile << endl;
 	int counter(0);
 
-	while( IN.getline(buffer, 200, '\n') ){
+	while( IN.getline(buffer, 600, '\n') ){
 		lumi = 1.0;
 		color = 1;
 		if (buffer[0] == '#') continue; // Skip lines commented with '#'
