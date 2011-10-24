@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.106 2011/09/21 17:32:22 pnef Exp $
+// $Id: NTupleProducer.h,v 1.107 2011/10/11 17:03:42 pnef Exp $
 //
 //
 
@@ -47,6 +47,21 @@ Implementation:
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
+// PF stuff
+#include "DataFormats/ParticleFlowReco/interface/PFBlock.h"
+#include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlockElement.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
+#include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
+#include "CommonTools/ParticleFlow/plugins/PFPileUp.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidateFwd.h"
+#include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
 
 // Helpers
 #include "Math/VectorUtil.h"
@@ -98,6 +113,18 @@ private:
 		}
 	};
 
+  double DeltaR(double phi1, double phi2, double eta1, double eta2);
+  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
+  reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;
+  int FindPFCandType(int id);
+  bool isInPhiCracks(double phi, double eta);
+  bool isInEtaCracks(double eta);
+  bool CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i);
+  double DeltaPhi(double phi1, double phi2);
+
+  EcalClusterFunctionBaseClass *CrackCorrFunc;
+  EcalClusterFunctionBaseClass *LocalCorrFunc;
+
 
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
@@ -124,6 +151,7 @@ private:
 	static const int gMaxntrks    = 500;
 	static const int gMaxnphos    = 50;
 	static const int gMaxngenlept = 100;
+	static const int gMaxngenphot = 100;
 	static const int gMaxngenjets = 100;
 	static const int gMaxnvrtx    = 25;
 	static const int gMaxnpileup  = 50;
@@ -162,6 +190,8 @@ private:
 	edm::InputTag fSrcRho;
 	edm::InputTag fSrcRhoPFnoPU;
 	edm::InputTag fpdfWeightTag;
+        edm::InputTag pfphotonsProducerTag;
+        edm::InputTag pfProducerTag;
 
 	int NPdfs;
 	float fTpdfW[100];
@@ -185,6 +215,8 @@ private:
 
 	float fMingenleptpt; 
 	float fMaxgenlepteta;
+	float fMingenphotpt; 
+	float fMaxgenphoteta;
 	float fMingenjetpt;
 	float fMaxgenjeteta;
 	
@@ -372,6 +404,7 @@ private:
 	int fTflagmaxtrkexc;     // Found more than 500 tracks in event
 	int fTflagmaxphoexc;     // Found more than 500 photons in event
 	int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
+	int fTflagmaxgenphotexc; // Found more than 100 genphotons in event
 	int fTflagmaxgenjetexc;  // Found more than 100 genjets in event
 	int fTflagmaxvrtxexc;    // Found more than 25 vertices in event
 
@@ -391,6 +424,14 @@ private:
 	float fTGenLeptonGMPt[gMaxngenlept];    
 	float fTGenLeptonGMEta[gMaxngenlept];   
 	float fTGenLeptonGMPhi[gMaxngenlept]; 
+
+  // GenPhotons
+  int fTngenphotons;
+  float fTGenPhotonPt[gMaxngenphot];      
+  float fTGenPhotonEta[gMaxngenphot];     
+  float fTGenPhotonPhi[gMaxngenphot];    
+  int fTGenPhotonMotherID[gMaxngenphot];
+  int fTGenPhotonMotherStatus[gMaxngenphot];
 
 // GenJets
 	int   fTNGenJets;
@@ -662,6 +703,61 @@ private:
 	int   fTPhotScSeedSeverity[gMaxnphos];
 	float fTPhotE1OverE9[gMaxnphos];
 	float fTPhotS4OverS1[gMaxnphos];
+  float fTPhotSigmaEtaEta[gMaxnphos];
+  float fTPhote1x5[gMaxnphos];
+  float fTPhote2x5[gMaxnphos];
+  float fTPhote3x3[gMaxnphos];
+  float fTPhote5x5[gMaxnphos];
+  float fTPhotmaxEnergyXtal[gMaxnphos];
+  float fTPhotIso03HcalDepth1[gMaxnphos];
+  float fTPhotIso03HcalDepth2[gMaxnphos];
+  float fTPhotIso04HcalDepth1[gMaxnphos];
+  float fTPhotIso04HcalDepth2[gMaxnphos];
+  int fTPhotIso03nTrksSolid[gMaxnphos];
+  int fTPhotIso03nTrksHollow[gMaxnphos];
+  int fTPhotIso04nTrksSolid[gMaxnphos];
+  int fTPhotIso04nTrksHollow[gMaxnphos];
+  int fTPhotisEB[gMaxnphos];
+  int fTPhotisEE[gMaxnphos];
+  int fTPhotisEBEtaGap[gMaxnphos];
+  int fTPhotisEBPhiGap[gMaxnphos];
+  int fTPhotisEERingGap[gMaxnphos];
+  int fTPhotisEEDeeGap[gMaxnphos];
+  int fTPhotisEBEEGap[gMaxnphos];
+  int fTPhotisPFlowPhoton[gMaxnphos];
+  int fTPhotisStandardPhoton[gMaxnphos];
+  int fTPhotMCmatchindex[gMaxnphos];
+  int fTPhotMCmatchexitcode[gMaxnphos];
+  float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];
+  float fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[gMaxnphos];
+  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
+  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1[gMaxnphos];
+  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1[gMaxnphos];
+  float fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1[gMaxnphos];
+  float fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1[gMaxnphos];
+  float fT_pho_ChargedHadronIso[gMaxnphos];
+  float fT_pho_NeutralHadronIso[gMaxnphos];
+  float fT_pho_PhotonIso[gMaxnphos];
+  int fT_pho_isPFPhoton[gMaxnphos];
+  int fT_pho_isPFElectron[gMaxnphos];
+  float fTSCraw[gMaxnphos];
+  float fTSCpre[gMaxnphos];
+  float fTSCenergy[gMaxnphos];
+  float fTSCeta[gMaxnphos];
+  float fTSCphi[gMaxnphos];
+  float fTSCsigmaPhi[gMaxnphos];
+  float fTSCsigmaEta[gMaxnphos];
+  float fTSCbrem[gMaxnphos];
+  float fTPhocrackcorrseed[gMaxnphos];
+  float fTPhocrackcorr[gMaxnphos];
+  float fTPholocalcorrseed[gMaxnphos];
+  float fTPholocalcorr[gMaxnphos];
 
 
 // Jets:

@@ -34,5 +34,6 @@
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="boost"/>
+<use name="RecoParticleFlow/PFClusterTools"/>
 
 <flags   EDM_PLUGIN="1"/>

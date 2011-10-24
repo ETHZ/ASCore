@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.135 2011/10/09 08:35:22 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.136 2011/10/11 17:03:41 pnef Exp $
 //
 //
 
@@ -99,6 +99,10 @@ Implementation:
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 
+#include "Geometry/Records/interface/CaloTopologyRecord.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "RecoParticleFlow/PFClusterTools/interface/ClusterClusterMapping.h"
+
 // Interface
 #include "DiLeptonAnalysis/NTupleProducer/interface/NTupleProducer.h"
 
@@ -159,6 +163,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
 	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
+	pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
+	pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
+
+
 
 	// Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -180,12 +188,17 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
 	fMaxgenjeteta   = iConfig.getParameter<double>("sel_maxgenjeteta");
 	fMinebrechitE   = iConfig.getParameter<double>("sel_fminebrechitE");
+	fMingenphotpt   = iConfig.getParameter<double>("sel_mingenphotpt");
+	fMaxgenphoteta  = iConfig.getParameter<double>("sel_maxgenphoteta");
 
 	
 	if(fIsModelScan) {
 		LHAPDF::initPDFSet("cteq66.LHgrid",1);
 		NPdfs = LHAPDF::numberPDF();
 	}
+
+	CrackCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
+	LocalCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
 	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
@@ -342,7 +355,22 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	//Get Photon collection
 	Handle<View<Photon> > photons;
 	iEvent.getByLabel(fPhotonTag, photons);
-
+	
+	//PFcandidates
+	edm::Handle<reco::PFCandidateCollection> pfCandidates;
+	iEvent.getByLabel(pfProducerTag, pfCandidates);
+	
+	//Electron collection
+	edm::Handle<reco::GsfElectronCollection> electronHandle;
+	iEvent.getByLabel(fElectronTag, electronHandle);
+	
+	//PF Photon collection
+	edm::Handle<reco::PhotonCollection> pfPhotonHandle;
+	iEvent.getByLabel(pfphotonsProducerTag,pfPhotonHandle);
+	
+	edm::Handle<reco::VertexCollection> alternativeVertexHandle;
+	iEvent.getByLabel(fVertexTag, alternativeVertexHandle);
+	
 	// MET
 	Handle<CaloMETCollection> calomet;
 	iEvent.getByLabel(fRawCaloMETTag, calomet);
@@ -396,6 +424,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	edm::ESHandle<CaloGeometry> geometry ;
 	iSetup.get<CaloGeometryRecord>().get(geometry);
+
+	edm::ESHandle<CaloTopology> theCaloTopo;
+	iSetup.get<CaloTopologyRecord>().get(theCaloTopo);
+	const CaloTopology *topology = theCaloTopo.product();
+
+	CrackCorrFunc->init(iSetup);
+	LocalCorrFunc->init(iSetup);
 
 	// ECAL dead cell Trigger Primitive filter
 	edm::Handle<bool> EcalDeadTPFilterFlag;
@@ -913,6 +948,56 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		}
 	}
 
+        ////////////////////////////////////////////////////////////////////////////////
+       // Gen GenPhotons
+
+       if(!fIsRealData){
+         edm::Handle<GenParticleCollection> gen;
+         iEvent.getByLabel(fGenPartTag, gen);
+         GenParticleCollection::const_iterator g_part;
+
+         std::vector<const GenParticle*> gen_photons;
+         std::vector<const GenParticle*> gen_photons_mothers;
+
+         for(g_part = gen->begin(); g_part != gen->end(); g_part++){
+
+           if( g_part->pdgId() != 22 ) continue;
+           if( g_part->status()!=1 ) continue;
+           if( g_part->pt() < fMingenphotpt )  continue;
+           if( fabs(g_part->eta()) > fMaxgenphoteta ) continue;
+
+           const GenParticle* gen_phot = &(*g_part);
+           const GenParticle* gen_phot_mom = static_cast<const GenParticle*> (g_part->mother());
+
+           if(gen_phot_mom==NULL){
+             edm::LogWarning("NTP") << "@SUB=analyze" << " WARNING: GenPhoton does not have a mother ";
+           }
+
+           gen_photons.push_back(gen_phot);
+           gen_photons_mothers.push_back(gen_phot_mom);
+
+         }
+
+         fTngenphotons = gen_photons.size();
+
+         for(int i=0; i<fTngenphotons; ++i){
+           if( i >= gMaxngenphot){
+             edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of gen-photons exceeded..";
+             fTflagmaxgenphotexc = 1;
+             fTgoodevent = 1;
+             break;
+           }
+
+           fTGenPhotonPt[i]       =   gen_photons[i]->pt();
+           fTGenPhotonEta[i]      =   gen_photons[i]->eta();
+           fTGenPhotonPhi[i]      =   gen_photons[i]->phi();
+           fTGenPhotonMotherID[i] =   gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->pdgId() : -999;
+           fTGenPhotonMotherStatus[i] = gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->status() : -999;
+
+         }
+
+       }
+
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Get GenJets
@@ -1425,7 +1510,22 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPhotH1overE[phoqi]        = photon.hadronicDepth1OverEm();
 	fTPhotH2overE[phoqi]        = photon.hadronicDepth2OverEm();
 	fTPhotSigmaIetaIeta[phoqi]  = photon.sigmaIetaIeta();
-	
+
+       fTPhotSigmaEtaEta[phoqi] = photon.sigmaEtaEta();
+       fTPhote1x5[phoqi]= photon.e1x5();
+       fTPhote2x5[phoqi]= photon.e2x5();
+       fTPhote3x3[phoqi]= photon.e3x3();
+       fTPhote5x5[phoqi]= photon.e5x5();
+       fTPhotmaxEnergyXtal[phoqi]= photon.maxEnergyXtal();
+       fTPhotIso03HcalDepth1[phoqi]= photon.hcalDepth1TowerSumEtConeDR03();
+       fTPhotIso03HcalDepth2[phoqi]= photon.hcalDepth2TowerSumEtConeDR03();
+       fTPhotIso04HcalDepth1[phoqi]= photon.hcalDepth1TowerSumEtConeDR04();
+       fTPhotIso04HcalDepth2[phoqi]= photon.hcalDepth2TowerSumEtConeDR04();
+       fTPhotIso03nTrksSolid[phoqi]= photon.nTrkSolidConeDR03();
+       fTPhotIso03nTrksHollow[phoqi]= photon.nTrkHollowConeDR03();
+       fTPhotIso04nTrksSolid[phoqi]= photon.nTrkSolidConeDR04();
+       fTPhotIso04nTrksHollow[phoqi]= photon.nTrkHollowConeDR04();
+
 	// EcalClusterLazyTools *lazyTools = new EcalClusterLazyTools(iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"), edm::InputTag("reducedEcalRecHitsEE"));
 
 	fTPhotSCEnergy[phoqi]       = photon.superCluster()->rawEnergy();
@@ -1444,6 +1544,297 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTgoodphoton[phoqi]       = 0;
 	fTPhotIsIso[phoqi]        = 1;
 
+       fTPhotisEB[phoqi]= photon.isEB();
+       fTPhotisEE[phoqi]= photon.isEE();
+       fTPhotisEBEtaGap[phoqi]= photon.isEBEtaGap();
+       fTPhotisEBPhiGap[phoqi]= photon.isEBPhiGap();
+       fTPhotisEERingGap[phoqi]= photon.isEERingGap();
+       fTPhotisEEDeeGap[phoqi]= photon.isEEDeeGap();
+       fTPhotisEBEEGap[phoqi]= photon.isEBEEGap();
+       fTPhotisPFlowPhoton[phoqi]= photon.isPFlowPhoton();
+       fTPhotisStandardPhoton[phoqi]= photon.isStandardPhoton();
+
+       if (!fIsRealData){
+
+         edm::Handle<GenParticleCollection> gen;
+         iEvent.getByLabel(fGenPartTag, gen);
+         GenParticleCollection::const_iterator g_part;
+
+         std::vector<const reco::GenParticle*> matched = matchRecoCand(&photon,iEvent);
+
+         if (matched[0]==NULL) fTPhotMCmatchexitcode[phoqi]=-2;
+         else if (matched[0]->pdgId()!=22) fTPhotMCmatchexitcode[phoqi]=-1;
+         else {
+           fTPhotMCmatchexitcode[phoqi]=-999;
+     
+           fTPhotMCmatchindex[phoqi]=-999;
+           for(int i=0; i<fTngenphotons; ++i){
+             if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.001*matched[0]->pt()) \
+                  && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.001*fabs(matched[0]->eta()) ) \
+                  && ( fabs(fTGenPhotonPhi[i]-matched[0]->phi())<0.001*fabs(matched[0]->phi()) ) ) {
+               fTPhotMCmatchindex[phoqi]=i;
+             }
+           }
+
+           if (fTPhotMCmatchindex[phoqi]!=-999){
+             fTPhotMCmatchexitcode[phoqi]=0;
+             if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]==22 && fTGenPhotonMotherStatus[fTPhotMCmatchindex[phoqi]]==3) fTPhotMCmatchexitcode[phoqi]=1;
+             if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]!=22 && fTGenPhotonMotherStatus[fTPhotMCmatchindex[phoqi]]==3) fTPhotMCmatchexitcode[phoqi]=2;
+           }
+
+         }
+
+       }
+
+       const SuperCluster *sc = &(*photon.superCluster());  
+       
+       fTSCraw[phoqi] = sc->rawEnergy();
+       fTSCpre[phoqi] = sc->preshowerEnergy();
+       fTSCenergy[phoqi] = sc->energy();
+       fTSCeta[phoqi] = sc->eta();
+       fTSCphi[phoqi] = sc->phi();
+       fTSCsigmaPhi[phoqi] = sc->phiWidth();
+       fTSCsigmaEta[phoqi] = sc->etaWidth();
+       fTSCbrem[phoqi] = (sc->etaWidth()!=0) ? sc->phiWidth()/sc->etaWidth() : -1;
+       {
+	 float crackcorrseedenergy = sc->rawEnergy();
+	 float localcorrseedenergy = sc->rawEnergy();
+	 float crackcorrenergy = sc->rawEnergy();
+	 float localcorrenergy = sc->rawEnergy();
+	 int index=0;
+	 for(reco::CaloCluster_iterator itClus = sc->clustersBegin(); itClus != sc->clustersEnd(); ++itClus) {
+	   const reco::CaloClusterPtr cc = *itClus;
+	   if (&(**itClus)==&(*sc->seed())){
+	     crackcorrseedenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+	     localcorrseedenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+	   }
+	   crackcorrenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+	   localcorrenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+	   index++;
+	 }
+	 fTPhocrackcorrseed[phoqi] = crackcorrseedenergy/sc->rawEnergy();
+	 fTPhocrackcorr[phoqi] = crackcorrenergy/sc->rawEnergy();
+	 fTPholocalcorrseed[phoqi] = localcorrseedenergy/sc->rawEnergy();
+	 fTPholocalcorr[phoqi] = localcorrenergy/sc->rawEnergy();
+       }
+		
+
+       { // start PF stuff from Nicholas
+
+	 reco::PhotonCollection::const_iterator gamIterSl;
+
+	 const Photon* gamIter = &photon;
+
+	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[phoqi] = 0;
+	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1[phoqi] = 0;
+
+	 //Look for associated PF objects
+	 bool FoundPFPhoton=false;
+	 bool FoundPFElectron=false;
+
+	 int iPFduplicata=-1;
+
+	 //Find PFPhoton
+	 int iphot=-1;
+	 int ncand=pfCandidates->size();
+	 for( int i=0; i<ncand; ++i ) {
+	   if ((*pfCandidates)[i].particleId()==reco::PFCandidate::gamma){
+	     if ((*pfCandidates)[i].mva_nothing_gamma()>0){
+	       if( (*pfCandidates)[i].superClusterRef()==gamIter->superCluster()) {
+		 iphot = i;
+	       }
+	     }
+	   }
+	 }    
+
+	 if (iphot!=-1) FoundPFPhoton=true;
+
+	 //Find PFElectron
+	 bool foundEgSC = false;
+	 int iel = -1;
+	 reco::GsfElectronCollection::const_iterator elIterSl;
+	 for (reco::GsfElectronCollection::const_iterator elIter = electronHandle->begin(); elIter != electronHandle->end(); ++elIter){
+	   if (gamIter->superCluster()==elIter->superCluster()) {
+	     elIterSl = elIter;
+	     foundEgSC = true;
+	   }
+
+	   if (foundEgSC){
+	     int iid = 0;
+	     double MVACut_ = -0.1; //42X
+	     //double MVACut_ = -1.; //44X
+	     int ncand=pfCandidates->size();
+	     for( int i=0; i<ncand; ++i ) {
+	       if ((*pfCandidates)[i].particleId()==reco::PFCandidate::e && (*pfCandidates)[i].gsfTrackRef().isNull()==false && (*pfCandidates)[i].mva_e_pi()>MVACut_ && (*pfCandidates)[i].gsfTrackRef()==elIterSl->gsfTrack()){
+		 iel = i;
+		 iid++;
+	       }
+	     }
+	   }
+     
+	 }
+
+
+	 if (iel!=-1) FoundPFElectron=true;
+   
+	 double photonPhi;
+	 double photonEta;
+	 double photonVz;
+
+	 double phoSC_GeomEta = gamIter->superCluster()->eta();
+	 double phoSC_GeomPhi = gamIter->superCluster()->phi();
+
+	 if (FoundPFPhoton){ //use PFPhoton
+
+	   fT_pho_isPFPhoton[phoqi] = 1;
+	   fT_pho_isPFElectron[phoqi] = 0;
+
+	   if (pfPhotonHandle->size()>0){
+	     double Emin=4000;
+	     reco::PhotonCollection::const_iterator pfgamIterSl;
+	     for (reco::PhotonCollection::const_iterator pfgamIter = pfPhotonHandle->begin(); pfgamIter != pfPhotonHandle->end(); ++pfgamIter){
+	       if (fabs((*pfCandidates)[iphot].energy()-pfgamIter->energy())<Emin) {
+		 Emin = fabs((*pfCandidates)[iphot].energy()-pfgamIter->energy());
+		 pfgamIterSl=pfgamIter;       
+	       }
+	     }
+	     if (Emin<4000){
+	       fT_pho_ChargedHadronIso[phoqi] = pfgamIterSl->chargedHadronIso();
+	       fT_pho_NeutralHadronIso[phoqi] = pfgamIterSl->neutralHadronIso();
+	       fT_pho_PhotonIso[phoqi] = pfgamIterSl->photonIso();
+	     }
+	   }
+
+	   iPFduplicata = iphot;
+	   photonPhi = (*pfCandidates)[iphot].phi();
+	   photonEta = (*pfCandidates)[iphot].eta();
+	   photonVz = (*pfCandidates)[iphot].vz();
+	 }
+
+	 else if (!FoundPFPhoton && FoundPFElectron){ //use PFElectron
+
+
+	   fT_pho_isPFPhoton[phoqi] = 0;
+	   fT_pho_isPFElectron[phoqi] = 1;
+
+	   fT_pho_ChargedHadronIso[phoqi] = elIterSl->pfIsolationVariables().chargedHadronIso;
+	   fT_pho_NeutralHadronIso[phoqi] = elIterSl->pfIsolationVariables().neutralHadronIso;
+	   fT_pho_PhotonIso[phoqi] = elIterSl->pfIsolationVariables().photonIso;
+
+	   iPFduplicata = iel;
+	   photonPhi = (*pfCandidates)[iel].phi();
+	   photonEta = (*pfCandidates)[iel].eta();
+	   photonVz = (*pfCandidates)[iel].vz();
+
+	 }
+
+	 else if (!FoundPFPhoton && !FoundPFElectron){ //e/g only => use cones
+
+	   fT_pho_isPFPhoton[phoqi] = 0;
+	   fT_pho_isPFElectron[phoqi] = 0;
+
+
+	   photonPhi = phoSC_GeomPhi;
+	   photonEta = phoSC_GeomEta;
+	   photonVz = gamIter->vz();
+
+	 }
+
+
+
+	 if (FoundPFPhoton && FoundPFElectron){ //both => we have used PFPhoton
+
+	   fT_pho_isPFPhoton[phoqi] = 1;
+	   fT_pho_isPFElectron[phoqi] = 1;
+
+	 }
+
+ 
+	 int pho_Cone06NbPfCand;
+	 int pho_Cone06PfCandType[500];
+	 int pho_Cone06PfCandOverlap[500];
+	 float pho_Cone06PfCandEta[500];
+	 float pho_Cone06PfCandPhi[500];
+	 float pho_Cone06PfCandDeltaR[500];
+	 float pho_Cone06PfCandDeltaEta[500];
+	 float pho_Cone06PfCandDeltaPhi[500];
+	 float pho_Cone06PfCandPt[500];
+	 float pho_Cone06PfCandDz[500]; 
+	 int pho_Cone06PfCandIsFromPU[500]; 
+
+
+
+	 //Recompute pflow isolation keeping all the pfcandidates in a 0.6 cone
+	 pho_Cone06NbPfCand = 0;
+	 int ipf=0;
+
+	 double dR;
+	 int type = -1;
+
+	 for( int i=0; i<ncand; ++i ) {
+
+	   if (FoundPFPhoton && i==iphot) continue;
+	   if (FoundPFElectron && i==iel) continue;
+
+	   dR = DeltaR(photonPhi, (*pfCandidates)[i].phi(), photonEta, (*pfCandidates)[i].eta());
+
+	   if (dR<0.6 && dR>1e-05){
+        
+	     type = FindPFCandType((*pfCandidates)[i].pdgId());
+        
+	     if (type==0 || type==1 || type==2){
+        
+	       if (dR<0.6){
+            
+		 bool isOverlapping = false;
+            
+		 pho_Cone06PfCandType[ipf] = type;
+		 pho_Cone06PfCandOverlap[ipf] = isOverlapping;
+            
+		 pho_Cone06PfCandEta[ipf] = (*pfCandidates)[i].eta();
+		 pho_Cone06PfCandPhi[ipf] = (*pfCandidates)[i].phi();
+		 pho_Cone06PfCandDeltaR[ipf] = DeltaR( photonPhi, (*pfCandidates)[i].phi(),photonEta,(*pfCandidates)[i].eta());
+		 pho_Cone06PfCandDeltaEta[ipf] = (*pfCandidates)[i].eta()-photonEta;
+		 pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
+		 pho_Cone06PfCandPt[ipf] = (*pfCandidates)[i].pt();
+		 pho_Cone06PfCandDz[ipf] = fabs((*pfCandidates)[i].vz()-photonVz); 
+
+		 pho_Cone06PfCandIsFromPU[ipf] = -1;
+		 if (type==1){
+		   //cout << "A" << endl;
+		   reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
+		   //cout << "B"<<endl;
+		   if (chvtx.isNull() || chvtx.key()==0) pho_Cone06PfCandIsFromPU[ipf] = 0;
+		   else pho_Cone06PfCandIsFromPU[ipf] = 1;
+		   //cout << "C"<<endl;
+		 }
+		 ipf++;
+            
+		 if (dR<0.4 && isOverlapping==false) FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pfCandidates, i, phoqi);
+            
+	       }
+	     }
+        
+	   }
+
+	 }
+	 pho_Cone06NbPfCand = ipf;
+
+       }     // end PF stuff from Nicholas
+
+
+
 // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
 // 	// Spike removal information
 // 	if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
@@ -1456,7 +1847,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 // 		fTPhotS4OverS1[phoqi] = 1.0-EcalSeverityLevelAlgo::swissCross( photon.superCluster()->seed()->seed(), *eeRecHits );
 //      } else
 // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
- 	}
+ 	} // end photons
 
 	////////////////////////////////////////////////////////
 	// Jet Variables:
@@ -2053,6 +2444,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MaxTrkExceed"     ,&fTflagmaxtrkexc     ,"MaxTrkExceed/I");
 	fEventTree->Branch("MaxPhotonsExceed" ,&fTflagmaxphoexc     ,"MaxPhotonsExceed/I");
 	fEventTree->Branch("MaxGenLepExceed"  ,&fTflagmaxgenleptexc ,"MaxGenLepExceed/I");
+	fEventTree->Branch("MaxGenPhoExceed"  ,&fTflagmaxgenphotexc ,"MaxGenPhoExceed/I");
 	fEventTree->Branch("MaxGenJetExceed"  ,&fTflagmaxgenjetexc  ,"MaxGenJetExceed/I");
 	fEventTree->Branch("MaxVerticesExceed",&fTflagmaxvrtxexc    ,"MaxVerticesExceed/I");
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
@@ -2081,6 +2473,14 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("GenLeptonGMPt"    ,&fTGenLeptonGMPt       ,"GenLeptonGMPt[NGenLeptons]/F");
 	fEventTree->Branch("GenLeptonGMEta"   ,&fTGenLeptonGMEta      ,"GenLeptonGMEta[NGenLeptons]/F");
 	fEventTree->Branch("GenLeptonGMPhi"   ,&fTGenLeptonGMPhi      ,"GenLeptonGMPhi[NGenLeptons]/F");
+
+	// Gen-Photons
+	fEventTree->Branch("NGenPhotons"      ,&fTngenphotons         ,"NGenPhotons/I");
+	fEventTree->Branch("GenPhotonPt"      ,&fTGenPhotonPt         ,"GenPhotonPt[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonEta"     ,&fTGenPhotonEta        ,"GenPhotonEta[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonPhi"     ,&fTGenPhotonPhi        ,"GenPhotonPhi[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonMotherID"     ,&fTGenPhotonMotherID        ,"GenPhotonMotherID[NGenPhotons]/I");
+	fEventTree->Branch("GenPhotonMotherStatus"     ,&fTGenPhotonMotherStatus        ,"GenPhotonMotherStatus[NGenPhotons]/I");
 
 	// Gen-Jets
 	fEventTree->Branch("NGenJets"    ,&fTNGenJets   ,"NGenJets/I");
@@ -2359,6 +2759,66 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
 	fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/F");
 	fEventTree->Branch("PhoS4OverS1"      ,&fTPhotS4OverS1      ,"PhoS4OverS1[NPhotons]/F");
+       fEventTree->Branch("PhoSigmaEtaEta"   ,&fTPhotSigmaEtaEta   ,"PhoSigmaEtaEta[NPhotons]/F");
+       fEventTree->Branch("PhoE1x5"   ,&fTPhote1x5   ,"PhoE1x5[NPhotons]/F");
+       fEventTree->Branch("PhoE2x5"   ,&fTPhote2x5   ,"PhoE2x5[NPhotons]/F");
+       fEventTree->Branch("PhoE3x3"   ,&fTPhote3x3   ,"PhoE3x3[NPhotons]/F");
+       fEventTree->Branch("PhoE5x5"   ,&fTPhote5x5   ,"PhoE5x5[NPhotons]/F");
+       fEventTree->Branch("PhomaxEnergyXtal"   ,&fTPhotmaxEnergyXtal   ,"PhomaxEnergyXtal[NPhotons]/F");
+       fEventTree->Branch("PhoIso03HcalDepth1"   ,&fTPhotIso03HcalDepth1   ,"PhoIso03HcalDepth1[NPhotons]/F");
+       fEventTree->Branch("PhoIso03HcalDepth2"   ,&fTPhotIso03HcalDepth2   ,"PhoIso03HcalDepth2[NPhotons]/F");
+       fEventTree->Branch("PhoIso04HcalDepth1"   ,&fTPhotIso04HcalDepth1   ,"PhoIso04HcalDepth1[NPhotons]/F");
+       fEventTree->Branch("PhoIso04HcalDepth2"   ,&fTPhotIso04HcalDepth2   ,"PhoIso04HcalDepth2[NPhotons]/F");
+       fEventTree->Branch("PhoIso03nTrksSolid"   ,&fTPhotIso03nTrksSolid   ,"PhoIso03nTrksSolid[NPhotons]/I");
+       fEventTree->Branch("PhoIso03nTrksHollow"   ,&fTPhotIso03nTrksHollow   ,"PhoIso03nTrksHollow[NPhotons]/I");
+       fEventTree->Branch("PhoIso04nTrksSolid"   ,&fTPhotIso04nTrksSolid   ,"PhoIso04nTrksSolid[NPhotons]/I");
+       fEventTree->Branch("PhoIso04nTrksHollow"   ,&fTPhotIso04nTrksHollow   ,"PhoIso04nTrksHollow[NPhotons]/I");
+       fEventTree->Branch("PhoisEB"   ,&fTPhotisEB   ,"PhoisEB[NPhotons]/I");
+       fEventTree->Branch("PhoisEE"   ,&fTPhotisEE   ,"PhoisEE[NPhotons]/I");
+       fEventTree->Branch("PhoisEBEtaGap"   ,&fTPhotisEBEtaGap   ,"PhoisEBEtaGap[NPhotons]/I");
+       fEventTree->Branch("PhoisEBPhiGap"   ,&fTPhotisEBPhiGap   ,"PhoisEBPhiGap[NPhotons]/I");
+       fEventTree->Branch("PhoisEERingGap"   ,&fTPhotisEERingGap   ,"PhoisEERingGap[NPhotons]/I");
+       fEventTree->Branch("PhoisEEDeeGap"   ,&fTPhotisEEDeeGap   ,"PhoisEEDeeGap[NPhotons]/I");
+       fEventTree->Branch("PhoisEBEEGap"   ,&fTPhotisEBEEGap   ,"PhoisEBEEGap[NPhotons]/I");
+       fEventTree->Branch("PhoisPFlowPhoton"   ,&fTPhotisPFlowPhoton   ,"PhoisPFlowPhoton[NPhotons]/I");
+       fEventTree->Branch("PhoisStandardPhoton"   ,&fTPhotisStandardPhoton   ,"PhoisStandardPhoton[NPhotons]/I");
+       fEventTree->Branch("PhoMCmatchindex"   ,&fTPhotMCmatchindex   ,"PhoMCmatchindex[NPhotons]/I");
+       fEventTree->Branch("PhoMCmatchexitcode"   ,&fTPhotMCmatchexitcode   ,"PhoMCmatchexitcode[NPhotons]/I");
+       fEventTree->Branch("Pho_Cone04PhotonIso_dR0_dEta0_pt0",&fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,"Pho_Cone04PhotonIso_dR0_dEta0_pt0[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04PhotonIso_dR0_dEta0_pt5",&fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,"Pho_Cone04PhotonIso_dR0_dEta0_pt5[NPhotons]/F");
+
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks",&fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks,"Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[NPhotons]/F");
+
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0",&fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0,"Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5",&fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5,"Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[NPhotons]/F");
+
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks",&fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks,"Pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0",&fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0,"Pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5",&fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5,"Pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[NPhotons]/F");
+
+       fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0",&fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0,"Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1",&fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1,"Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1",&fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1,"Pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1",&fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1,"Pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1[NPhotons]/F");
+       fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1",&fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1,"Pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1[NPhotons]/F");
+       fEventTree->Branch("Pho_ChargedHadronIso",&fT_pho_ChargedHadronIso,"Pho_ChargedHadronIso[NPhotons]/F");
+       fEventTree->Branch("Pho_NeutralHadronIso",&fT_pho_NeutralHadronIso,"Pho_NeutralHadronIso[NPhotons]/F");
+       fEventTree->Branch("Pho_PhotonIso",&fT_pho_PhotonIso,"Pho_PhotonIso[NPhotons]/F");
+       fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
+       fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
+	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NPhotons]/F");
+	fEventTree->Branch("SCPre",&fTSCpre ,"SCPre[NPhotons]/F");
+	fEventTree->Branch("SCEnergy",&fTSCenergy ,"SCEnergy[NPhotons]/F");
+	fEventTree->Branch("SCEta",&fTSCeta ,"SCEta[NPhotons]/F");
+	fEventTree->Branch("SCPhi",&fTSCphi ,"SCPhi[NPhotons]/F");
+	fEventTree->Branch("SCPhiWidth",&fTSCsigmaPhi ,"SCPhiWidth[NPhotons]/F");
+	fEventTree->Branch("SCEtaWidth",&fTSCsigmaEta ,"SCEtaWidth[NPhotons]/F");
+	fEventTree->Branch("SCBrem",&fTSCbrem ,"SCBrem[NPhotons]/F");
+	fEventTree->Branch("Phocrackcorrseed",&fTPhocrackcorrseed ,"Phocrackcorrseed[NPhotons]/F");
+	fEventTree->Branch("Phocrackcorr",&fTPhocrackcorr ,"Phocrackcorr[NPhotons]/F");
+	fEventTree->Branch("Pholocalcorrseed",&fTPholocalcorrseed ,"Pholocalcorrseed[NPhotons]/F");
+	fEventTree->Branch("Pholocalcorr",&fTPholocalcorr ,"Pholocalcorr[NPhotons]/F");
+
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -2688,6 +3148,7 @@ void NTupleProducer::resetTree(){
 	fTflagmaxtrkexc     = 0;
 	fTflagmaxphoexc     = 0;
 	fTflagmaxgenleptexc = 0;
+	fTflagmaxgenphotexc = 0;
 	fTflagmaxgenjetexc = 0;
 	fTflagmaxvrtxexc    = 0;
 
@@ -2704,6 +3165,7 @@ void NTupleProducer::resetTree(){
 	fTnphotons    = 0;
 	fTnphotonstot = 0;
 	fTngenleptons = 0;
+	fTngenphotons = 0;
 	fTNGenJets    = 0;
 	fTnvrtx       = 0;
 
@@ -2721,6 +3183,12 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTGenLeptonGMPt  ,gMaxngenlept);
 	resetFloat(fTGenLeptonGMEta ,gMaxngenlept);
 	resetFloat(fTGenLeptonGMPhi ,gMaxngenlept);
+
+       resetFloat(fTGenPhotonPt    ,gMaxngenphot);
+       resetFloat(fTGenPhotonEta   ,gMaxngenphot);
+       resetFloat(fTGenPhotonPhi   ,gMaxngenphot);
+       resetInt(fTGenPhotonMotherID   ,gMaxngenphot);
+       resetInt(fTGenPhotonMotherStatus ,gMaxngenphot);
 
 	resetFloat(fTGenJetPt   ,gMaxngenjets);
 	resetFloat(fTGenJetEta  ,gMaxngenjets);
@@ -3024,6 +3492,64 @@ void NTupleProducer::resetTree(){
 	resetInt(fTPhotScSeedSeverity, gMaxnphos);
 	resetFloat(fTPhotS4OverS1, gMaxnphos);
 	resetFloat(fTPhotE1OverE9, gMaxnphos);
+
+       resetFloat(fTPhotSigmaEtaEta,gMaxnphos);
+       resetFloat(fTPhote1x5,gMaxnphos);
+       resetFloat(fTPhote2x5,gMaxnphos);
+       resetFloat(fTPhote3x3,gMaxnphos);
+       resetFloat(fTPhote5x5,gMaxnphos);
+       resetFloat(fTPhotmaxEnergyXtal,gMaxnphos);
+       resetFloat(fTPhotIso03HcalDepth1,gMaxnphos);
+       resetFloat(fTPhotIso03HcalDepth2,gMaxnphos);
+       resetFloat(fTPhotIso04HcalDepth1,gMaxnphos);
+       resetFloat(fTPhotIso04HcalDepth2,gMaxnphos);
+       resetInt(fTPhotIso03nTrksSolid,gMaxnphos);
+       resetInt(fTPhotIso03nTrksHollow,gMaxnphos);
+       resetInt(fTPhotIso04nTrksSolid,gMaxnphos);
+       resetInt(fTPhotIso04nTrksHollow,gMaxnphos);
+       resetInt(fTPhotisEB,gMaxnphos);
+       resetInt(fTPhotisEE,gMaxnphos);
+       resetInt(fTPhotisEBEtaGap,gMaxnphos);
+       resetInt(fTPhotisEBPhiGap,gMaxnphos);
+       resetInt(fTPhotisEERingGap,gMaxnphos);
+       resetInt(fTPhotisEEDeeGap,gMaxnphos);
+       resetInt(fTPhotisEBEEGap,gMaxnphos);
+       resetInt(fTPhotisPFlowPhoton,gMaxnphos);
+       resetInt(fTPhotisStandardPhoton,gMaxnphos);
+       resetInt(fTPhotMCmatchindex,gMaxnphos);
+       resetInt(fTPhotMCmatchexitcode,gMaxnphos);
+       resetFloat( fT_pho_Cone04PhotonIso_dR0_dEta0_pt0, gMaxnphos);
+       resetFloat( fT_pho_Cone04PhotonIso_dR0_dEta0_pt5, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0, gMaxnphos);
+       resetFloat( fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5, gMaxnphos);
+       resetFloat( fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0, gMaxnphos);
+       resetFloat( fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1, gMaxnphos);
+       resetFloat( fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1, gMaxnphos);
+       resetFloat( fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1, gMaxnphos);
+       resetFloat( fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1, gMaxnphos);
+       resetFloat( fT_pho_ChargedHadronIso, gMaxnphos);
+       resetFloat( fT_pho_NeutralHadronIso, gMaxnphos);
+       resetFloat( fT_pho_PhotonIso, gMaxnphos);
+       resetInt( fT_pho_isPFPhoton, gMaxnphos);
+       resetInt( fT_pho_isPFElectron, gMaxnphos);
+
+	resetFloat(fTSCraw,gMaxnphos);
+	resetFloat(fTSCpre,gMaxnphos);
+	resetFloat(fTSCenergy,gMaxnphos);
+	resetFloat(fTSCeta,gMaxnphos);
+	resetFloat(fTSCphi,gMaxnphos);
+	resetFloat(fTSCsigmaPhi,gMaxnphos);
+	resetFloat(fTSCsigmaEta,gMaxnphos);
+	resetFloat(fTSCbrem,gMaxnphos);
+	resetFloat(fTPhocrackcorrseed,gMaxnphos);
+	resetFloat(fTPhocrackcorr,gMaxnphos);
+	resetFloat(fTPholocalcorrseed,gMaxnphos);
+	resetFloat(fTPholocalcorr,gMaxnphos);
+
 
 	fTTrkPtSumx          = -999.99;
 	fTTrkPtSumy          = -999.99;
@@ -3548,6 +4074,262 @@ void NTupleProducer::resetInt(int *v, unsigned int size){
 		v[i] = -999;
 	}
 }
+
+double NTupleProducer::DeltaR(double phi1, double phi2, double eta1, double eta2){
+
+  double dphi=phi2-phi1;
+  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
+  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+  double dR=sqrt(dphi*dphi+(eta2-eta1)*(eta2-eta1));
+
+  return dR;
+}
+
+void NTupleProducer::FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi){
+
+  double pt = (*pfCandidates)[ipf].pt();
+  double dEta = fabs(photonEta - (*pfCandidates)[ipf].eta());
+  double dPhi = DeltaPhi(photonPhi,(*pfCandidates)[ipf].phi());
+  double dR = sqrt(dEta*dEta+dPhi*dPhi);
+  double dz = fabs(photonVz - (*pfCandidates)[ipf].vz());
+
+
+  //cout << "FillPhotonIsoVariables pt="<<pt<<endl;
+  if (type==0){
+
+    fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[phoqi] += pt;
+    if (pt>0.5) fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[phoqi] += pt;
+  
+    if (dR>0.07) {
+      fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[phoqi] += pt;
+      if (pt>0.5) fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[phoqi] += pt;
+    }
+    if (isInEtaCracks((*pfCandidates)[ipf].eta())==false && isInPhiCracks((*pfCandidates)[ipf].phi(),(*pfCandidates)[ipf].eta())==false){
+      fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[phoqi] += pt;
+      if (pt>0.5) fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[phoqi] += pt;
+    }
+  }
+
+  if (type==1) { //Charged hadron
+    fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
+    if (dz<0.1) fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1[phoqi] += pt;
+    if (dz<0.1 && pt>0.5) fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1[phoqi] += pt;
+    if (dz<0.1 && pt>0.5 && dEta>0.01) fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1[phoqi] += pt;
+    if (dz<0.1 && pt>0.5 && dR>0.04) fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1[phoqi] += pt;
+  }
+
+  if (type==2) { //Photon
+    fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[phoqi] += pt;
+    if (pt>0.5) fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[phoqi] += pt;
+  }
+  
+  return;
+}
+
+reco::VertexRef NTupleProducer::chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const {
+
+  //PfPileUp candidates!
+
+  //  cout << "chargedHadronVertex finding" << endl;
+
+  reco::TrackBaseRef trackBaseRef( pfcand.trackRef() );
+  
+  size_t  iVertex = 0;
+  unsigned index=0;
+  unsigned nFoundVertex = 0;
+  typedef reco::VertexCollection::const_iterator IV;
+  float bestweight=0;
+  for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
+
+    const reco::Vertex& vtx = *iv;
+    
+    typedef reco::Vertex::trackRef_iterator IT;
+    
+    // loop on tracks in vertices
+    for(IT iTrack=vtx.tracks_begin(); 
+	iTrack!=vtx.tracks_end(); ++iTrack) {
+	 
+      const reco::TrackBaseRef& baseRef = *iTrack;
+
+      // one of the tracks in the vertex is the same as 
+      // the track considered in the function
+      float w = vtx.trackWeight(baseRef);
+      if(baseRef == trackBaseRef ) {
+	//select the vertex for which the track has the highest weight
+	if (w > bestweight){
+	  bestweight=w;
+	  iVertex=index;
+	  nFoundVertex++;
+	}	 	
+      }
+    }
+  }
+
+  if (nFoundVertex>0){
+    if (nFoundVertex!=1)
+      edm::LogWarning("TrackOnTwoVertex")<<"a track is shared by at least two verteces. Used to be an assert";
+    return reco::VertexRef( vertices, iVertex);
+  }
+  // no vertex found with this track. 
+
+  bool checkClosestZVertex_ = true;
+
+  // optional: as a secondary solution, associate the closest vertex in z
+  if ( checkClosestZVertex_ ) {
+
+    double dzmin = 10000;
+    double ztrack = pfcand.vertex().z();
+    bool foundVertex = false;
+    index = 0;
+    for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
+
+      double dz = fabs(ztrack - iv->z());
+      if(dz<dzmin) {
+	dzmin = dz; 
+	iVertex = index;
+	foundVertex = true;
+      }
+    }
+
+    if( foundVertex ) 
+      return reco::VertexRef( vertices, iVertex);  
+
+  }
+
+
+  return reco::VertexRef();
+}
+
+int NTupleProducer::FindPFCandType(int id){
+
+  int type = -1;
+
+  if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
+  if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
+  if (id==22) type=2; //photons
+  if (fabs(id)==11) type=3; //electrons
+  if (fabs(id)==13) type=4; //muons
+
+  return type;
+}
+
+bool NTupleProducer::isInPhiCracks(double phi, double eta){
+
+
+  // tranform radiants [-pi,pi] in degrees [0,360]
+  phi = (phi+TMath::Pi()) *180/TMath::Pi();
+
+  // each supermodule is 20 degrees wide
+  Double_t moduleWidth = 20;
+
+  // the first module is centered at phi=0, so the first cracks are +10 and -10
+  Double_t phi0 = 10.;
+
+  // set a fiducial cut around the crack of +2-2 degrees
+  Double_t fiducialCut = 2.;
+
+  bool OK = false;
+  if (fabs(eta)<1.44){
+  for (Int_t i = 0 ; i < 18; ++i){
+    if ((phi0 + moduleWidth*i -fiducialCut) <= phi && phi <= (phi0 + moduleWidth*i + fiducialCut)) OK = true;
+    //        cout << " PHI " << (phi0 + moduleWidth*i -fiducialCut) << " " << phi << " " <<  (phi0 + moduleWidth*i + fiducialCut)  << " " << OK << endl ;
+  }
+  }
+
+  //  cout << "is in phi crack ? " << OK << endl;
+  return OK;
+}
+
+bool NTupleProducer::isInEtaCracks(double eta){
+
+     /*
+       Yuri Maravin eta cracks def :
+     double emAbsEta = fabs(phoSC_GeomEta);
+     pho_isInCrack = 0;
+     if ( emAbsEta < 0.018 ||
+	 (emAbsEta > 0.423 && emAbsEta < 0.461) || 
+	 (emAbsEta > 0.770 && emAbsEta < 0.806) || 
+	 (emAbsEta > 1.127 && emAbsEta < 1.163) || 
+	 (emAbsEta > 1.460 && emAbsEta < 1.558) )
+       pho_isInCrack = 1;
+     */
+
+  const Int_t nBinsEta = 5;
+  Double_t leftEta [nBinsEta]       = {0.00, 0.42, 0.77, 1.13, 1.46};
+  Double_t rightEta[nBinsEta]       = {0.02, 0.46, 0.81, 1.16, 9999.};
+
+  bool OK = false;
+  if (TMath::Abs(eta)<1.44) {
+          for (Int_t i = 0; i< nBinsEta; ++i){
+                  if (leftEta[i] < TMath::Abs(eta) && TMath::Abs(eta) < rightEta[i] ) OK = true;
+          }
+  }
+  else if (TMath::Abs(eta)>1.44 && TMath::Abs(eta)<1.56) OK = true;
+  else if (TMath::Abs(eta)>1.56) OK = false;
+    //    cout << leftEta[i] << " " << TMath::Abs(eta) << " " << rightEta[i] <<  " " << OK << endl;
+
+  //  cout << "IS IN CRACK ? " << OK << endl;
+  return OK;
+}
+
+bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i){
+
+  //This tool can be used in RECO only
+
+  bool isOverlapping = false;
+  
+  const reco::SuperCluster* supercluster = new reco::SuperCluster(*(scRef));
+  //const reco::SuperCluster* supercluster = (const reco::SuperCluster *)gamIter->superCluster());
+  std::vector<const reco::SuperCluster*> sc;
+  sc.push_back(supercluster);
+		 
+  for(unsigned iele=0; iele<(*pfCandidates)[i].elementsInBlocks().size(); ++iele) {
+    // first get the block 
+    reco::PFBlockRef blockRef = (*pfCandidates)[i].elementsInBlocks()[iele].first;
+    //
+    unsigned elementIndex = (*pfCandidates)[i].elementsInBlocks()[iele].second;
+    // check it actually exists 
+    if(!blockRef.isNull()){
+		 
+      // then get the elements of the block
+      const edm::OwnVector< reco::PFBlockElement >&  elements = (*blockRef).elements();
+		 
+      const reco::PFBlockElement & pfbe (elements[elementIndex]); 
+      // The first ECAL element should be the cluster associated to the GSF; defined as the seed
+      //if(pfbe.type()==reco::PFBlockElement::ECAL || pfbe.type()==reco::PFBlockElement::PS1 || pfbe.type()==reco::PFBlockElement::PS2 || pfbe.type()==reco::PFBlockElement::HCAL)
+      //{	  
+		 
+      reco::PFClusterRef myPFClusterRef = pfbe.clusterRef();
+      if(!myPFClusterRef.isNull()){  
+		 
+	const reco::PFCluster & myPFCluster (*myPFClusterRef);
+	//reco::PFCluster & myPFCluster (*myPFClusterRef);
+	
+	//	cout << "PFcand has a ClusterRef"<<endl;
+	int hasOverlap = ClusterClusterMapping::checkOverlap(myPFCluster,sc);
+	//	if (hasOverlap==-1) cout << "NO Overlap with E/gamma SC"<<endl;
+	//	else cout << "Overlap with E/gamma SC"<<endl;
+	if (hasOverlap!=-1) isOverlapping = true;
+
+      }
+    }
+  }
+
+  return isOverlapping;
+	
+}
+
+double NTupleProducer::DeltaPhi(double phi1, double phi2){
+
+  double dphi=phi1-phi2;
+  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
+  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+
+  return dphi;
+}
+
+
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(NTupleProducer);

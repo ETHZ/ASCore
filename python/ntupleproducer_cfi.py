@@ -36,6 +36,8 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_hcalnoiseIso = cms.untracked.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
 	tag_srcRho       = cms.untracked.InputTag('kt6PFJets','rho'),
 	tag_srcRhoPFnoPU = cms.untracked.InputTag('kt6PFJetsPF3','rho'),
+	tag_pfphotonsProducer  = cms.untracked.InputTag("pfPhotonTranslator:pfphot"),
+	tag_pfProducer = cms.untracked.InputTag("particleFlow"),
 
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',
@@ -69,6 +71,9 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(0.0),
 	sel_maxgenlepteta = cms.double(100),
+	# GenPhotons
+	sel_mingenphotpt = cms.double(5.0),
+	sel_maxgenphoteta = cms.double(2.5),
 	# GenJets
 	sel_mingenjetpt  = cms.double(10.0),
 	sel_maxgenjeteta = cms.double(6.0),
