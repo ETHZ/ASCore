@@ -3390,8 +3390,9 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 bool SSDLDumper::isLooseElectron(int ele){
 	// All electrons are already loose in the high-pt selection (hybiso)
 	if(isGoodElectron(ele) == false) return false;
+	// CAREFUL: THIS IS A BUG: IT WILL ALWAYS CUT ON 0.60!
 	if( fabs(ElEta[ele]) < 1.479 ) if(ElRelIso[ele] > 1.00) return false;
-	else                           if(ElRelIso[ele] > 0.60) return false;		
+	else                           if(ElRelIso[ele] > 0.60) return false;
 	if(ElChIsCons[ele] != 1) return false;
 	return true;
 }
