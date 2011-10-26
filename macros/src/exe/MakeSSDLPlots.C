@@ -32,7 +32,7 @@ void usage( int status = 0 ) {
 int main(int argc, char* argv[]) {
 // Default options
 	TString outputdir = "SSDLPlots/";
-	TString datacard  = "datacard.dat";
+	TString datacard  = "DataCard_SSDL.dat";
 	int verbose = 0;
 
 // Parse options
