@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.137 2011/10/24 14:43:54 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.138 2011/10/26 14:57:03 peruzzi Exp $
 //
 //
 
@@ -1697,25 +1697,33 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
          std::vector<const reco::GenParticle*> matched = matchRecoCand(&photon,iEvent);
 
-         if (matched[0]==NULL) fTPhotMCmatchexitcode[phoqi]=-2;
-         else if (matched[0]->pdgId()!=22) fTPhotMCmatchexitcode[phoqi]=-1;
+         if (matched[0]==NULL) {
+	   fTPhotMCmatchexitcode[phoqi]=-1;
+	   fTPhotMCmatchindex[phoqi]=-999;
+	 }
+         else if (matched[0]->pdgId()!=22) {
+	   fTPhotMCmatchexitcode[phoqi]=0;
+	   fTPhotMCmatchindex[phoqi]=-999;
+	 }
          else {
-           fTPhotMCmatchexitcode[phoqi]=-999;
-     
+
            fTPhotMCmatchindex[phoqi]=-999;
+
            for(int i=0; i<fTngenphotons; ++i){
-             if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.001*matched[0]->pt()) \
-                  && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.001*fabs(matched[0]->eta()) ) \
-                  && ( fabs(fTGenPhotonPhi[i]-matched[0]->phi())<0.001*fabs(matched[0]->phi()) ) ) {
+             if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.01*matched[0]->pt()) \
+                  && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.01*fabs(matched[0]->eta()) ) \
+                  && ( DeltaPhi(fTGenPhotonPhi[i],matched[0]->phi())<0.01 ) ) {
                fTPhotMCmatchindex[phoqi]=i;
              }
            }
 
            if (fTPhotMCmatchindex[phoqi]!=-999){
-             fTPhotMCmatchexitcode[phoqi]=0;
-             if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]==22 && fTGenPhotonMotherStatus[fTPhotMCmatchindex[phoqi]]==3) fTPhotMCmatchexitcode[phoqi]=1;
-             if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]!=22 && fTGenPhotonMotherStatus[fTPhotMCmatchindex[phoqi]]==3) fTPhotMCmatchexitcode[phoqi]=2;
+	     if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]>=-6 && fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]<=6) fTPhotMCmatchexitcode[phoqi]=1;
+	     else if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]==21) fTPhotMCmatchexitcode[phoqi]=1;
+             else if (fTGenPhotonMotherID[fTPhotMCmatchindex[phoqi]]==22 && fTGenPhotonMotherStatus[fTPhotMCmatchindex[phoqi]]==3) fTPhotMCmatchexitcode[phoqi]=2;
+             else fTPhotMCmatchexitcode[phoqi]=3;
            }
+	   else fTPhotMCmatchexitcode[phoqi]=-2;
 
          }
 
