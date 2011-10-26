@@ -38,8 +38,19 @@ public:
 	void ReadTriggers(const char* = "HLTPaths_SSDL.dat");
 	void AddTriggerBranches();
 	bool FillTriggers(); // Returns OR of list of triggers
+	void FillAnalysisTree();
 	void BookTree();
 	void ResetTree();
+	
+	void FillEffTree();
+	void BookEffTree();
+	void ResetEffTree();
+
+	bool IsSignalMuon(int);
+	bool IsSignalElectron(int);
+	bool IsTightMuon(int, int);
+	bool IsTightEle(int, int);
+	
 	
 	const bool AddBranch(const char* name, const char* type, void* address, const char* size = 0);
 
@@ -109,7 +120,7 @@ private:
 	float fTmuMT          [fMaxNmus];
 	
 	// Electron properties
-	int     fTnqels;
+	int   fTnqels;
 	int   fTElcharge         [fMaxNeles];
 	int   fTElChargeIsCons   [fMaxNeles];
 	float fTElpt             [fMaxNeles];
@@ -130,5 +141,21 @@ private:
 	int   fTElGenType        [fMaxNeles];
 	int   fTElGenMType       [fMaxNeles];
 	int   fTElGenGMType      [fMaxNeles];
+	
+	TTree *fLepEffTree; // lepton efficiency tree, filled once per lepton
+	int   fLETrun;
+	int   fLETevent;
+	int   fLETlumi;
+	float fLETrho;
+	int   fLETnvrtx;
+	float fLETpuweight;
+	int   fLETtype; // mu(0), el(1)
+	float fLETpt;
+	float fLETeta;
+	float fLETphi;
+	float fLETiso;
+	int   fLETpassed1;
+	int   fLETpassed2;
+	
 };
 #endif

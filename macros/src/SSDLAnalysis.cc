@@ -10,6 +10,7 @@ const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 
 TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
+// TString SSDLAnalysis::gBaseDir = "/home/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
@@ -36,12 +37,14 @@ void SSDLAnalysis::Begin(const char* filename){
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
 	BookTree();
+	if(!fIsData) BookEffTree();
 }
 
 //____________________________________________________________________________
 void SSDLAnalysis::End(){
 	fOutputFile->cd();
 	fAnalysisTree->Write();
+	if(!fIsData) fLepEffTree->Write();
 	fOutputFile->Close();
 	fCounter.print();
 }
@@ -210,8 +213,32 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
 }
 
+void SSDLAnalysis::BookEffTree(){
+	fOutputFile->cd();
+	fLepEffTree = new TTree("LeptonEfficiency", "LeptonEfficiencyTree");
+
+    // run/sample properties
+	fLepEffTree->Branch("Run",              &fLETrun      ,       "Run/I");
+	fLepEffTree->Branch("Event",            &fLETevent    ,       "Event/I");
+	fLepEffTree->Branch("LumiSec",          &fLETlumi     ,       "LumiSec/I");
+	fLepEffTree->Branch("Rho",              &fLETrho      ,       "Rho/F");
+	fLepEffTree->Branch("NVrtx",            &fLETnvrtx    ,       "NVrtx/I");
+	fLepEffTree->Branch("PUWeight",         &fLETpuweight ,       "PUWeight/F");
+	fLepEffTree->Branch("Type",             &fLETtype     ,       "Type/I");
+	fLepEffTree->Branch("Pt",               &fLETpt       ,       "Pt/F");
+	fLepEffTree->Branch("Eta",              &fLETeta      ,       "Eta/F");
+	fLepEffTree->Branch("Phi",              &fLETphi      ,       "Phi/F");
+	fLepEffTree->Branch("Iso",              &fLETiso      ,       "Iso/F");
+	fLepEffTree->Branch("Pass1",            &fLETpassed1  ,       "Pass1/I");
+	fLepEffTree->Branch("Pass2",            &fLETpassed2  ,       "Pass2/I");
+}
+
 //____________________________________________________________________________
 void SSDLAnalysis::Analyze(){
+	FillAnalysisTree();
+	if(!fIsData) FillEffTree();
+}
+void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[0]);
 	// initial event selection: good event trigger, good primary vertex...
 	if( !IsGoodEvent() ) return;
@@ -352,6 +379,50 @@ void SSDLAnalysis::Analyze(){
 
 	fAnalysisTree->Fill();
 }
+void SSDLAnalysis::FillEffTree(){
+	if(fIsData){
+		if(fVerbose > 0) cout << "Trying to fill MC lepton efficiencies on data, Stupid..." << endl;
+		return;
+	}
+	ResetEffTree();
+
+	fLETevent    = fTR->Run;
+	fLETrun      = fTR->Event;
+	fLETlumi     = fTR->LumiSection;
+	fLETrho      = fTR->Rho;
+	fLETnvrtx    = fTR->NVrtx;
+	fLETpuweight = GetPUWeight(fTR->PUnumInteractions);
+
+	// Muon loop
+	for(int i = 0; i < fTR->NMus; ++i){
+		if(IsSignalMuon(i) == false) continue; // match to signal mu
+		if(fTR->MuPt[i] < 10.) continue; // pt cut
+		fLETtype   = 0; // mu
+		fLETpt     = fTR->MuPt      [i];
+		fLETeta    = fTR->MuEta     [i];
+		fLETphi    = fTR->MuPhi     [i];
+		fLETiso    = fTR->MuRelIso03[i];
+		
+		fLETpassed1 = IsTightMuon(1,i)?1:0;
+		fLETpassed2 = IsTightMuon(2,i)?1:0;
+		fLepEffTree->Fill();
+	}
+
+	// Electron loop
+	for(int i = 0; i < fTR->NEles; ++i){
+		if(IsSignalElectron(i) == false) continue; // match to signal el
+		if(fTR->ElPt[i] < 10.) continue; // pt cut
+		fLETtype   = 1; // mu
+		fLETpt     = fTR->ElPt      [i];
+		fLETeta    = fTR->ElEta     [i];
+		fLETphi    = fTR->ElPhi     [i];
+		fLETiso    = relElIso(i);
+		
+		fLETpassed1 = IsTightEle(1,i)?1:0;
+		fLETpassed2 = IsTightEle(2,i)?1:0;
+		fLepEffTree->Fill();
+	}
+}
 
 //____________________________________________________________________________
 void SSDLAnalysis::ResetTree(){
@@ -427,4 +498,112 @@ void SSDLAnalysis::ResetTree(){
 	fTtcMETphi   = -999.99;
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
+}
+void SSDLAnalysis::ResetEffTree(){
+	fLETevent      = -999;
+	fLETrun        = -999;
+	fLETlumi       = -999;
+	fLETrho        = -999.99;
+	fLETnvrtx      = -999;
+	fLETpuweight   = -999.99;
+	fLETtype       = -999;
+	fLETpt         = -999.99;
+	fLETeta        = -999.99;
+	fLETphi        = -999.99;
+	fLETiso        = -999.99;
+	fLETpassed1    = -999;
+	fLETpassed2    = -999;
+}
+
+//____________________________________________________________________________
+// Some same-sign specific object selections
+bool SSDLAnalysis::IsSignalMuon(int index){
+	int matched = -1;
+	// Match to a gen muon
+	float mindr(100.);
+	for(size_t i = 0; i < fTR->NGenLeptons; ++i){
+		if(abs(fTR->GenLeptonID[i]) != 13) continue; // muons
+		float eta = fTR->GenLeptonEta[i];
+		float phi = fTR->GenLeptonPhi[i];
+		float DR = Util::GetDeltaR(eta, fTR->MuEta[index], phi, fTR->MuPhi[index]);
+
+		if(DR > mindr) continue; // minimize DR
+		mindr = DR;
+		matched = i;
+	}
+
+	if(matched < 0) return false; // match unsuccessful
+
+	pdgparticle mo, gmo;
+	GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
+	GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
+	
+	if(mo.get_type() > 10  || gmo.get_type() > 10)  return false; // mother is SM hadron
+	if(mo.get_type() == 9  || gmo.get_type() == 9)  return true; // matched to susy
+	if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) return true; // mother is gauge or higgs, but not gamma or gluon
+	return false; // default
+}
+bool SSDLAnalysis::IsSignalElectron(int index){
+	int matched = -1;
+	// Match to a gen electron
+	float mindr(100.);
+	for(size_t i = 0; i < fTR->NGenLeptons; ++i){
+		if(abs(fTR->GenLeptonID[i]) != 11) continue; // electrons
+		float eta = fTR->GenLeptonEta[i];
+		float phi = fTR->GenLeptonPhi[i];
+		float DR = Util::GetDeltaR(eta, fTR->ElEta[index], phi, fTR->ElPhi[index]);
+
+		if(DR > mindr) continue; // minimize DR
+		mindr = DR;
+		matched = i;
+	}
+
+	if(matched < 0) return false; // match unsuccessful
+
+	pdgparticle mo, gmo;
+	GetPDGParticle(mo,  abs(fTR->GenLeptonMID [matched]));
+	GetPDGParticle(gmo, abs(fTR->GenLeptonGMID[matched]));
+	
+	if(mo.get_type() > 10  || gmo.get_type() > 10)  return false; // mother is SM hadron
+	if(mo.get_type() == 9  || gmo.get_type() == 9)  return true; // matched to susy
+	if(mo.get_type() == 4 && abs(mo.get_pdgid()) != 21 && abs(mo.get_pdgid()) != 22) return true; // mother is gauge or higgs, but not gamma or gluon
+	return false; // default
+}
+bool SSDLAnalysis::IsTightMuon(int toggle, int index){
+	if(toggle == 1){
+		if(IsGoodBasicMu(index) == false) return false;
+		if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+		if(fTR->MuRelIso03[index] > 0.15) return false;
+		return true;
+	}
+	if(toggle == 2){
+		if(IsGoodBasicMu(index) == false) return false;
+		if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+		float newiso = fTR->MuRelIso03[index] - TMath::Log(fTR->MuPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->MuPt[index]);
+		if(newiso > 0.15) return false;
+		return true;
+	}
+	cout << "Choose your toggle!" << endl;
+	return false;
+}
+bool SSDLAnalysis::IsTightEle(int toggle, int index){
+	if(toggle == 1){
+		if(IsLooseEl(index) == false) return false;
+		if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElPt[index] > 0.2) return false;
+		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
+		if(IsGoodElId_WP80(index) == false) return false;
+		if(relElIso(index) > 0.15) return false;
+		return true;		
+	}
+	if(toggle == 2){
+		if(IsLooseEl(index) == false) return false;
+		if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElPt[index] > 0.2) return false;
+		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
+		if(IsGoodElId_WP80(index) == false) return false;
+		float newiso = relElIso(index) - TMath::Log(fTR->ElPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->ElPt[index]);
+		if(newiso > 0.15) return false;
+		return true;
+	}
+	cout << "Choose your toggle!" << endl;
+	return false;
 }
