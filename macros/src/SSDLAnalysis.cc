@@ -37,14 +37,14 @@ void SSDLAnalysis::Begin(const char* filename){
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
 	BookTree();
-	if(!fIsData) BookEffTree();
+	if(!fIsData && fDoFillEffTree) BookEffTree();
 }
 
 //____________________________________________________________________________
 void SSDLAnalysis::End(){
 	fOutputFile->cd();
 	fAnalysisTree->Write();
-	if(!fIsData) fLepEffTree->Write();
+	if(fDoFillEffTree && !fIsData) fLepEffTree->Write();
 	fOutputFile->Close();
 	fCounter.print();
 }
@@ -236,7 +236,7 @@ void SSDLAnalysis::BookEffTree(){
 //____________________________________________________________________________
 void SSDLAnalysis::Analyze(){
 	FillAnalysisTree();
-	if(!fIsData) FillEffTree();
+	if(fDoFillEffTree && !fIsData) FillEffTree();
 }
 void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[0]);

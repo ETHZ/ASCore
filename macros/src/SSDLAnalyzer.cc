@@ -5,6 +5,7 @@ using namespace std;
 
 SSDLAnalyzer::SSDLAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
 	fSSDLAnalysis = new SSDLAnalysis(fTR);
+	fDoFillEffTree = false;
 }
 
 SSDLAnalyzer::~SSDLAnalyzer(){
@@ -61,6 +62,7 @@ void SSDLAnalyzer::BeginJob(){
 	fSSDLAnalysis->SetOutputFile(fOutputFile);
 	fSSDLAnalysis->SetVerbose(fVerbose);
 	fSSDLAnalysis->SetData(fIsData);
+	fSSDLAnalysis->DoFillEffTree(fDoFillEffTree);
 	fSSDLAnalysis->Begin();
 }
 

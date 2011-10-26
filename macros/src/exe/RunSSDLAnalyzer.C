@@ -17,7 +17,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-s] [-v verbose] [-m maxevents] [-j JSON] [-p pthat] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-s] [-v verbose] [-m maxevents] [-e filleff] [-j JSON] [-p pthat] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     outfile   is the output file                    " << endl;
 	cout << "                default is ssdlfile.root             " << endl;
@@ -27,6 +27,8 @@ void usage( int status = 0 ) {
 	cout << "                default is 0 (quiet mode)            " << endl;
 	cout << "     maxevents are the number of events to run over  " << endl;
 	cout << "               default is -1 (all)                   " << endl;
+	cout << "     filleff   switches on the efficiency tree       " << endl;
+	cout << "               default is 0 (all)                   " << endl;
 	cout << "     JSON      path of a JSON file to use            " << endl;
 	cout << "     pthat     sets the upper cut on PtHat           " << endl;
 	cout << "                default is -1.0 (no cut)                " << endl;
@@ -47,11 +49,12 @@ int main(int argc, char* argv[]) {
 	string jsonfile = "";
 	int verbose = 0;
 	Long64_t maxevents = -1;
+	bool doeff = 0;
 	float pthatcut = -1.0;
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "o:sv:p:m:j:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "o:sv:p:m:j:e:lh?")) != -1 ) {
 		switch (ch) {
 			case 'o': outputfile = TString(optarg); break;
 			case 'l': isList     = true; break;
@@ -60,6 +63,7 @@ int main(int argc, char* argv[]) {
 			case 'p': pthatcut   = atof(optarg); break;
 			case 'm': maxevents  = atoi(optarg); break;
 			case 'j': jsonfile   = string(optarg); break;
+			case 'e': doeff      = atoi(optarg); break;
 			case '?':
 			case 'h': usage(0); break;
 			default:
@@ -108,6 +112,7 @@ int main(int argc, char* argv[]) {
 	tA->SetMaxEvents(maxevents);
 	if ( jsonfile.length() ) tA->ReadJSON(jsonfile.c_str());
 	tA->SetPtHatCut(pthatcut);
+	tA->DoFillEffTree(doeff);
 	tA->BeginJob();
 	tA->Loop();
 	tA->EndJob();

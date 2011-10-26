@@ -35,6 +35,8 @@ public:
 	void Analyze();
 	void End();
 	
+	inline void DoFillEffTree(bool fill){fDoFillEffTree = fill;};
+	
 	void ReadTriggers(const char* = "HLTPaths_SSDL.dat");
 	void AddTriggerBranches();
 	bool FillTriggers(); // Returns OR of list of triggers
@@ -60,6 +62,8 @@ public:
 	};
 
 private:
+	bool fDoFillEffTree;
+	
 	Monitor fCounter;
 	string fCutnames[4];
 

@@ -15,9 +15,11 @@ public:
 	void EndJob		();
 	void Loop		(Int_t prescale=1);
 	inline void SetPtHatCut(float cut){fPtHatCut = cut;};
+	inline void DoFillEffTree(bool fill){fDoFillEffTree = fill;};
 
 private:
 	SSDLAnalysis	*fSSDLAnalysis;
 	float fPtHatCut;
+	bool fDoFillEffTree;
 };
 #endif
