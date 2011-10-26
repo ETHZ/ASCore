@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.138 2011/10/26 14:57:03 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.139 2011/10/26 16:08:51 peruzzi Exp $
 //
 //
 
@@ -1711,7 +1711,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
            for(int i=0; i<fTngenphotons; ++i){
              if ( (fabs(fTGenPhotonPt[i]-matched[0]->pt())<0.01*matched[0]->pt()) \
-                  && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.01*fabs(matched[0]->eta()) ) \
+                  && (fabs(fTGenPhotonEta[i]-matched[0]->eta())<0.01) \
                   && ( DeltaPhi(fTGenPhotonPhi[i],matched[0]->phi())<0.01 ) ) {
                fTPhotMCmatchindex[phoqi]=i;
              }
