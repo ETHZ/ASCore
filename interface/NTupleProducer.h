@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.107 2011/10/11 17:03:42 pnef Exp $
+// $Id: NTupleProducer.h,v 1.108 2011/10/24 14:43:53 peruzzi Exp $
 //
 //
 
@@ -150,6 +150,7 @@ private:
 	static const int gMaxnjets    = 100;
 	static const int gMaxntrks    = 500;
 	static const int gMaxnphos    = 50;
+        static const int gMaxnSC      = 100;
 	static const int gMaxngenlept = 100;
 	static const int gMaxngenphot = 100;
 	static const int gMaxngenjets = 100;
@@ -192,6 +193,8 @@ private:
 	edm::InputTag fpdfWeightTag;
         edm::InputTag pfphotonsProducerTag;
         edm::InputTag pfProducerTag;
+        edm::InputTag fSCTagBarrel;
+        edm::InputTag fSCTagEndcap;
 
 	int NPdfs;
 	float fTpdfW[100];
@@ -212,6 +215,7 @@ private:
 	int	fMintrknhits;
 	float fMinphopt;
 	float fMaxphoeta;
+        float fMinSCraw;
 
 	float fMingenleptpt; 
 	float fMaxgenlepteta;
@@ -256,6 +260,7 @@ private:
 
 	float fRTMinphopt;
 	float fRTMaxphoeta;
+        float fRTMinSCraw;
 
 
 	int fRTmaxnmu;
@@ -626,6 +631,7 @@ private:
 	// float fTeSharedPz[gMaxneles];
 	// float fTeSharedEnergy[gMaxneles];
 	// int fTeDupEl[gMaxneles];
+        int fTElSCindex[gMaxneles];
 	float fTeConvPartTrackDist[gMaxneles];
 	float fTeConvPartTrackDCot[gMaxneles];
 	float fTeConvPartTrackPt[gMaxneles];
@@ -746,18 +752,25 @@ private:
   float fT_pho_PhotonIso[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
-  float fTSCraw[gMaxnphos];
-  float fTSCpre[gMaxnphos];
-  float fTSCenergy[gMaxnphos];
-  float fTSCeta[gMaxnphos];
-  float fTSCphi[gMaxnphos];
-  float fTSCsigmaPhi[gMaxnphos];
-  float fTSCsigmaEta[gMaxnphos];
-  float fTSCbrem[gMaxnphos];
-  float fTPhocrackcorrseed[gMaxnphos];
-  float fTPhocrackcorr[gMaxnphos];
-  float fTPholocalcorrseed[gMaxnphos];
-  float fTPholocalcorr[gMaxnphos];
+  int fTPhotSCindex[gMaxnphos];
+
+  // SC
+  int fTnSC;
+  float fTSCraw[gMaxnSC];
+  float fTSCpre[gMaxnSC];
+  float fTSCenergy[gMaxnSC];
+  float fTSCeta[gMaxnSC];
+  float fTSCphi[gMaxnSC];
+  float fTSCsigmaPhi[gMaxnSC];
+  float fTSCsigmaEta[gMaxnSC];
+  float fTSCbrem[gMaxnSC];
+  float fTSCR9[gMaxnSC];
+  float fTSCcrackcorrseed[gMaxnSC];
+  float fTSCcrackcorr[gMaxnSC];
+  float fTSClocalcorrseed[gMaxnSC];
+  float fTSClocalcorr[gMaxnSC];
+  float fTSCcrackcorrseedfactor[gMaxnSC];
+  float fTSClocalcorrseedfactor[gMaxnSC];
 
 
 // Jets:

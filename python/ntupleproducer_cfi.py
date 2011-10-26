@@ -38,7 +38,9 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_srcRhoPFnoPU = cms.untracked.InputTag('kt6PFJetsPF3','rho'),
 	tag_pfphotonsProducer  = cms.untracked.InputTag("pfPhotonTranslator:pfphot"),
 	tag_pfProducer = cms.untracked.InputTag("particleFlow"),
-
+        tag_SC_barrel    = cms.untracked.InputTag("correctedHybridSuperClusters"),
+        tag_SC_endcap    = cms.untracked.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
+                         
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',
 	                              'hltSingleMu5L3Filtered5',
@@ -68,6 +70,8 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	# Photons
 	sel_minphopt      = cms.double(5.0),
 	sel_maxphoeta     = cms.double(2.5),
+        # SC
+        sel_minSCraw      = cms.double(5.0),
 	# GenLeptons
 	sel_mingenleptpt  = cms.double(0.0),
 	sel_maxgenlepteta = cms.double(100),

@@ -316,6 +316,7 @@ public :
    Int_t           ElScSeedSeverity[20];   //[NEles]
    Float_t         ElE1OverE9[20];   //[NEles]
    Float_t         ElS4OverS1[20];   //[NEles]
+   Int_t           ElSCindex[20];   //[NEles]
    Int_t           ElGenID[20];   //[NEles]
    Int_t           ElGenStatus[20];   //[NEles]
    Float_t         ElGenPt[20];   //[NEles]
@@ -396,6 +397,7 @@ public :
    Int_t           PhoisStandardPhoton[50];   //[NPhotons]
    Int_t           PhoMCmatchindex[50];   //[NPhotons]
    Int_t           PhoMCmatchexitcode[50];   //[NPhotons]
+   Int_t           PhotSCindex[50];   //[NPhotons]
    Float_t         Pho_Cone04PhotonIso_dR0_dEta0_pt0[50];   //[NPhotons]
    Float_t         Pho_Cone04PhotonIso_dR0_dEta0_pt5[50];   //[NPhotons]
    Float_t         Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[50];   //[NPhotons]
@@ -414,18 +416,22 @@ public :
    Float_t         Pho_PhotonIso[50];   //[NPhotons]
    Int_t           Pho_isPFPhoton[50];   //[NPhotons]
    Int_t           Pho_isPFElectron[50];   //[NPhotons]
-   Float_t         SCRaw[50];   //[NPhotons]
-   Float_t         SCPre[50];   //[NPhotons]
-   Float_t         SCEnergy[50];   //[NPhotons]
-   Float_t         SCEta[50];   //[NPhotons]
-   Float_t         SCPhi[50];   //[NPhotons]
-   Float_t         SCPhiWidth[50];   //[NPhotons]
-   Float_t         SCEtaWidth[50];   //[NPhotons]
-   Float_t         SCBrem[50];   //[NPhotons]
-   Float_t         Phocrackcorrseed[50];   //[NPhotons]
-   Float_t         Phocrackcorr[50];   //[NPhotons]
-   Float_t         Pholocalcorrseed[50];   //[NPhotons]
-   Float_t         Pholocalcorr[50];   //[NPhotons]
+   Int_t           NSuperClusters;
+   Float_t         SCRaw[100];   //[NSuperClusters]
+   Float_t         SCPre[100];   //[NSuperClusters]
+   Float_t         SCEnergy[100];   //[NSuperClusters]
+   Float_t         SCEta[100];   //[NSuperClusters]
+   Float_t         SCPhi[100];   //[NSuperClusters]
+   Float_t         SCPhiWidth[100];   //[NSuperClusters]
+   Float_t         SCEtaWidth[100];   //[NSuperClusters]
+   Float_t         SCBrem[100];   //[NSuperClusters]
+   Float_t         SCR9[100];   //[NSuperClusters]
+   Float_t         SCcrackcorrseed[100];   //[NSuperClusters]
+   Float_t         SCcrackcorr[100];   //[NSuperClusters]
+   Float_t         SClocalcorrseed[100];   //[NSuperClusters]
+   Float_t         SClocalcorr[100];   //[NSuperClusters]
+   Float_t         SCcrackcorrseedfactor[100];   //[NSuperClusters]
+   Float_t         SClocalcorrseedfactor[100];   //[NSuperClusters]
    Int_t           NJets;
    Int_t           NJetsTot;
    Int_t           JGood[100];   //[NJets]
@@ -1113,6 +1119,7 @@ public :
    TBranch        *b_ElScSeedSeverity;   //!
    TBranch        *b_ElE1OverE9;   //!
    TBranch        *b_ElS4OverS1;   //!
+   TBranch        *b_ElSCindex;   //!
    TBranch        *b_ElGenID;   //!
    TBranch        *b_ElGenStatus;   //!
    TBranch        *b_ElGenPt;   //!
@@ -1193,6 +1200,7 @@ public :
    TBranch        *b_PhoisStandardPhoton;   //!
    TBranch        *b_PhoMCmatchindex;   //!
    TBranch        *b_PhoMCmatchexitcode;   //!
+   TBranch        *b_PhotSCindex;   //!
    TBranch        *b_Pho_Cone04PhotonIso_dR0_dEta0_pt0;   //!
    TBranch        *b_Pho_Cone04PhotonIso_dR0_dEta0_pt5;   //!
    TBranch        *b_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks;   //!
@@ -1211,6 +1219,7 @@ public :
    TBranch        *b_Pho_PhotonIso;   //!
    TBranch        *b_Pho_isPFPhoton;   //!
    TBranch        *b_Pho_isPFElectron;   //!
+   TBranch        *b_NSuperClusters;   //!
    TBranch        *b_SCRaw;   //!
    TBranch        *b_SCPre;   //!
    TBranch        *b_SCEnergy;   //!
@@ -1219,10 +1228,13 @@ public :
    TBranch        *b_SCPhiWidth;   //!
    TBranch        *b_SCEtaWidth;   //!
    TBranch        *b_SCBrem;   //!
-   TBranch        *b_Phocrackcorrseed;   //!
-   TBranch        *b_Phocrackcorr;   //!
-   TBranch        *b_Pholocalcorrseed;   //!
-   TBranch        *b_Pholocalcorr;   //!
+   TBranch        *b_SCR9;   //!
+   TBranch        *b_SCcrackcorrseed;   //!
+   TBranch        *b_SCcrackcorr;   //!
+   TBranch        *b_SClocalcorrseed;   //!
+   TBranch        *b_SClocalcorr;   //!
+   TBranch        *b_SCcrackcorrseedfactor;   //!
+   TBranch        *b_SClocalcorrseedfactor;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_NJetsTot;   //!
    TBranch        *b_JGood;   //!
@@ -1982,6 +1994,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElScSeedSeverity", ElScSeedSeverity, &b_ElScSeedSeverity);
    fChain->SetBranchAddress("ElE1OverE9", ElE1OverE9, &b_ElE1OverE9);
    fChain->SetBranchAddress("ElS4OverS1", ElS4OverS1, &b_ElS4OverS1);
+   fChain->SetBranchAddress("ElSCindex", ElSCindex, &b_ElSCindex);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
    fChain->SetBranchAddress("ElGenStatus", ElGenStatus, &b_ElGenStatus);
    fChain->SetBranchAddress("ElGenPt", ElGenPt, &b_ElGenPt);
@@ -2062,6 +2075,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("PhoisStandardPhoton", PhoisStandardPhoton, &b_PhoisStandardPhoton);
    fChain->SetBranchAddress("PhoMCmatchindex", PhoMCmatchindex, &b_PhoMCmatchindex);
    fChain->SetBranchAddress("PhoMCmatchexitcode", PhoMCmatchexitcode, &b_PhoMCmatchexitcode);
+   fChain->SetBranchAddress("PhotSCindex", PhotSCindex, &b_PhotSCindex);
    fChain->SetBranchAddress("Pho_Cone04PhotonIso_dR0_dEta0_pt0", Pho_Cone04PhotonIso_dR0_dEta0_pt0, &b_Pho_Cone04PhotonIso_dR0_dEta0_pt0);
    fChain->SetBranchAddress("Pho_Cone04PhotonIso_dR0_dEta0_pt5", Pho_Cone04PhotonIso_dR0_dEta0_pt5, &b_Pho_Cone04PhotonIso_dR0_dEta0_pt5);
    fChain->SetBranchAddress("Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks", Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks, &b_Pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks);
@@ -2080,6 +2094,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Pho_PhotonIso", Pho_PhotonIso, &b_Pho_PhotonIso);
    fChain->SetBranchAddress("Pho_isPFPhoton", Pho_isPFPhoton, &b_Pho_isPFPhoton);
    fChain->SetBranchAddress("Pho_isPFElectron", Pho_isPFElectron, &b_Pho_isPFElectron);
+   fChain->SetBranchAddress("NSuperClusters", &NSuperClusters, &b_NSuperClusters);
    fChain->SetBranchAddress("SCRaw", SCRaw, &b_SCRaw);
    fChain->SetBranchAddress("SCPre", SCPre, &b_SCPre);
    fChain->SetBranchAddress("SCEnergy", SCEnergy, &b_SCEnergy);
@@ -2088,10 +2103,13 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("SCPhiWidth", SCPhiWidth, &b_SCPhiWidth);
    fChain->SetBranchAddress("SCEtaWidth", SCEtaWidth, &b_SCEtaWidth);
    fChain->SetBranchAddress("SCBrem", SCBrem, &b_SCBrem);
-   fChain->SetBranchAddress("Phocrackcorrseed", Phocrackcorrseed, &b_Phocrackcorrseed);
-   fChain->SetBranchAddress("Phocrackcorr", Phocrackcorr, &b_Phocrackcorr);
-   fChain->SetBranchAddress("Pholocalcorrseed", Pholocalcorrseed, &b_Pholocalcorrseed);
-   fChain->SetBranchAddress("Pholocalcorr", Pholocalcorr, &b_Pholocalcorr);
+   fChain->SetBranchAddress("SCR9", SCR9, &b_SCR9);
+   fChain->SetBranchAddress("SCcrackcorrseed", SCcrackcorrseed, &b_SCcrackcorrseed);
+   fChain->SetBranchAddress("SCcrackcorr", SCcrackcorr, &b_SCcrackcorr);
+   fChain->SetBranchAddress("SClocalcorrseed", SClocalcorrseed, &b_SClocalcorrseed);
+   fChain->SetBranchAddress("SClocalcorr", SClocalcorr, &b_SClocalcorr);
+   fChain->SetBranchAddress("SCcrackcorrseedfactor", SCcrackcorrseedfactor, &b_SCcrackcorrseedfactor);
+   fChain->SetBranchAddress("SClocalcorrseedfactor", SClocalcorrseedfactor, &b_SClocalcorrseedfactor);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("NJetsTot", &NJetsTot, &b_NJetsTot);
    fChain->SetBranchAddress("JGood", JGood, &b_JGood);

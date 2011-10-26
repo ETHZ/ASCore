@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.136 2011/10/11 17:03:41 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.137 2011/10/24 14:43:54 peruzzi Exp $
 //
 //
 
@@ -165,7 +165,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
 	pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
 	pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
-
+	fSCTagBarrel = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_barrel");
+        fSCTagEndcap = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_endcap");
 
 
 	// Event Selection
@@ -183,6 +184,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fMintrknhits    = iConfig.getParameter<int>("sel_mintrknhits");
 	fMinphopt       = iConfig.getParameter<double>("sel_minphopt");
 	fMaxphoeta      = iConfig.getParameter<double>("sel_maxphoeta");
+	fMinSCraw       = iConfig.getParameter<double>("sel_minSCraw");
 	fMingenleptpt   = iConfig.getParameter<double>("sel_mingenleptpt");
 	fMaxgenlepteta  = iConfig.getParameter<double>("sel_maxgenlepteta");
 	fMingenjetpt    = iConfig.getParameter<double>("sel_mingenjetpt");
@@ -355,6 +357,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	//Get Photon collection
 	Handle<View<Photon> > photons;
 	iEvent.getByLabel(fPhotonTag, photons);
+
+	//Get SC collections
+        Handle<SuperClusterCollection> BarrelSuperClusters;
+        Handle<SuperClusterCollection> EndcapSuperClusters;
+        iEvent.getByLabel(fSCTagBarrel,BarrelSuperClusters);
+        iEvent.getByLabel(fSCTagEndcap,EndcapSuperClusters);
 	
 	//PFcandidates
 	edm::Handle<reco::PFCandidateCollection> pfCandidates;
@@ -1191,6 +1199,102 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIsIso[mqi] = 1;
 	}
 
+
+	// SC variables
+	fTnSC=0;
+	for (SuperClusterCollection::const_iterator sc = BarrelSuperClusters->begin(); sc!=BarrelSuperClusters->end(); ++sc){
+
+	  if (sc->rawEnergy()<fRTMinSCraw) continue;
+
+	  if (fTnSC>gMaxnSC) {
+	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
+	    fTgoodevent = 1; 
+	    break;
+          }
+
+	  fTSCraw[fTnSC] = sc->rawEnergy();
+	  fTSCpre[fTnSC] = sc->preshowerEnergy();
+	  fTSCenergy[fTnSC] = sc->energy();
+	  fTSCeta[fTnSC] = sc->eta();
+	  fTSCphi[fTnSC] = sc->phi();
+	  fTSCsigmaPhi[fTnSC] = sc->phiWidth();
+	  fTSCsigmaEta[fTnSC] = sc->etaWidth();
+	  fTSCbrem[fTnSC] = (sc->etaWidth()!=0) ? sc->phiWidth()/sc->etaWidth() : -1;
+	  fTSCR9[fTnSC] = sc->rawEnergy()!=0 ? EcalClusterTools::e3x3(  *(sc->seed()), ebRecHits.product(), &(*topology)) / sc->rawEnergy() : -1;
+	  {
+	    float crackcorrseedenergy = sc->rawEnergy();
+	    float localcorrseedenergy = sc->rawEnergy();
+	    float crackcorrenergy = sc->rawEnergy();
+	    float localcorrenergy = sc->rawEnergy();
+	    int index=0;
+	    for(reco::CaloCluster_iterator itClus = sc->clustersBegin(); itClus != sc->clustersEnd(); ++itClus) {
+	      const reco::CaloClusterPtr cc = *itClus;
+	      if (&(**itClus)==&(*sc->seed())){
+		crackcorrseedenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+		localcorrseedenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+		fTSCcrackcorrseedfactor[fTnSC] = CrackCorrFunc->getValue(*cc);
+		fTSClocalcorrseedfactor[fTnSC] = LocalCorrFunc->getValue(*cc);		
+	      }
+	      crackcorrenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+	      localcorrenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+	      index++;
+	    }
+	    fTSCcrackcorrseed[fTnSC] = crackcorrseedenergy/sc->rawEnergy();
+	    fTSCcrackcorr[fTnSC] = crackcorrenergy/sc->rawEnergy();
+	    fTSClocalcorrseed[fTnSC] = localcorrseedenergy/sc->rawEnergy();
+	    fTSClocalcorr[fTnSC] = localcorrenergy/sc->rawEnergy();
+	  }
+	  fTnSC++;
+	}
+
+	for (SuperClusterCollection::const_iterator sc = EndcapSuperClusters->begin(); sc!=EndcapSuperClusters->end(); ++sc){
+
+	  if (sc->rawEnergy()<fRTMinSCraw) continue;
+
+	  if (fTnSC>gMaxnSC) {
+	    edm::LogWarning("NTP") << "@SUB=analyze" << "Maximum number of Super Clusters exceeded"; 
+	    fTgoodevent = 1; 
+	    break;
+          }
+
+	  fTSCraw[fTnSC] = sc->rawEnergy();
+	  fTSCpre[fTnSC] = sc->preshowerEnergy();
+	  fTSCenergy[fTnSC] = sc->energy();
+	  fTSCeta[fTnSC] = sc->eta();
+	  fTSCphi[fTnSC] = sc->phi();
+	  fTSCsigmaPhi[fTnSC] = sc->phiWidth();
+	  fTSCsigmaEta[fTnSC] = sc->etaWidth();
+	  fTSCbrem[fTnSC] = (sc->etaWidth()!=0) ? sc->phiWidth()/sc->etaWidth() : -1;
+	  fTSCR9[fTnSC] = sc->rawEnergy()!=0 ? EcalClusterTools::e3x3(  *(sc->seed()), eeRecHits.product(), &(*topology)) / sc->rawEnergy() : -1;
+	  {
+	    float crackcorrseedenergy = sc->rawEnergy();
+	    float localcorrseedenergy = sc->rawEnergy();
+	    float crackcorrenergy = sc->rawEnergy();
+	    float localcorrenergy = sc->rawEnergy();
+	    int index=0;
+	    for(reco::CaloCluster_iterator itClus = sc->clustersBegin(); itClus != sc->clustersEnd(); ++itClus) {
+	      const reco::CaloClusterPtr cc = *itClus;
+	      if (&(**itClus)==&(*sc->seed())){
+		crackcorrseedenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+		localcorrseedenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+		fTSCcrackcorrseedfactor[fTnSC] = CrackCorrFunc->getValue(*cc);
+		fTSClocalcorrseedfactor[fTnSC] = LocalCorrFunc->getValue(*cc);		
+	      }
+	      crackcorrenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
+	      localcorrenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+	      index++;
+	    }
+	    fTSCcrackcorrseed[fTnSC] = crackcorrseedenergy/sc->rawEnergy();
+	    fTSCcrackcorr[fTnSC] = crackcorrenergy/sc->rawEnergy();
+	    fTSClocalcorrseed[fTnSC] = localcorrseedenergy/sc->rawEnergy();
+	    fTSClocalcorr[fTnSC] = localcorrenergy/sc->rawEnergy();
+	  }
+	  fTnSC++;
+	}
+
+
+
+
 	////////////////////////////////////////////////////////
 	// Electron variables:
 	// Keep pointers to electron superCluster in original collections
@@ -1351,6 +1455,33 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTeIDsimpleWP85relIso[eqi] = eIDmapsimpleWP85[electronRef];
 			fTeIDsimpleWP80relIso[eqi] = eIDmapsimpleWP80[electronRef];
 
+			{
+			  fTElSCindex[eqi] = -1;
+			  float diff=1e+4;
+			  for (int scind=0; scind<fTnSC; scind++){
+			        if (fabs(fTSCraw[scind]-electron.superCluster()->rawEnergy())<diff) {
+				  fTElSCindex[eqi]=scind;
+				  diff=fabs(fTSCraw[scind]-electron.superCluster()->rawEnergy());
+				}
+			    }
+
+			  if (fTElSCindex[eqi]!=-1)
+			  if (fabs(fTSCeta[fTElSCindex[eqi]]-electron.superCluster()->eta())>0.1 || \
+			      DeltaPhi(fTSCphi[fTElSCindex[eqi]],electron.superCluster()->phi())>0.1){
+			    //			    std::cout << fTSCraw[fTElSCindex[eqi]] << " " << electron.superCluster()->rawEnergy() << std::endl;
+			    //			    std::cout << fTSCeta[fTElSCindex[eqi]] << " " << electron.superCluster()->eta() << std::endl;
+			    //			    std::cout << fTSCphi[fTElSCindex[eqi]] << " " << electron.superCluster()->phi() << std::endl;
+			    fTElSCindex[eqi] = -1;			    
+			  }
+
+			  if (fTElSCindex[eqi]==-1) {
+			    edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for electron"; 
+			    //			    fTgoodevent = 1; 
+			    //			    break;
+			  }
+			}
+
+
 			// MC Matching
 			if(!fIsRealData){
 				std::vector<const GenParticle*> ElMatch = matchRecoCand(&electron, iEvent);
@@ -1444,6 +1575,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 		fTnEBhits++;
 	}
+
+
+
+
 
 	////////////////////////////////////////////////////////
 	// Photon Variables:
@@ -1586,38 +1721,32 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
        }
 
-       const SuperCluster *sc = &(*photon.superCluster());  
-       
-       fTSCraw[phoqi] = sc->rawEnergy();
-       fTSCpre[phoqi] = sc->preshowerEnergy();
-       fTSCenergy[phoqi] = sc->energy();
-       fTSCeta[phoqi] = sc->eta();
-       fTSCphi[phoqi] = sc->phi();
-       fTSCsigmaPhi[phoqi] = sc->phiWidth();
-       fTSCsigmaEta[phoqi] = sc->etaWidth();
-       fTSCbrem[phoqi] = (sc->etaWidth()!=0) ? sc->phiWidth()/sc->etaWidth() : -1;
        {
-	 float crackcorrseedenergy = sc->rawEnergy();
-	 float localcorrseedenergy = sc->rawEnergy();
-	 float crackcorrenergy = sc->rawEnergy();
-	 float localcorrenergy = sc->rawEnergy();
-	 int index=0;
-	 for(reco::CaloCluster_iterator itClus = sc->clustersBegin(); itClus != sc->clustersEnd(); ++itClus) {
-	   const reco::CaloClusterPtr cc = *itClus;
-	   if (&(**itClus)==&(*sc->seed())){
-	     crackcorrseedenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
-	     localcorrseedenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
+	 fTPhotSCindex[phoqi] = -1;
+	 float diff=1e+4;
+	 for (int scind=0; scind<fTnSC; scind++){
+	   if (fabs(fTSCraw[scind]-photon.superCluster()->rawEnergy())<diff) {
+	     fTPhotSCindex[phoqi]=scind;
+	     diff=fabs(fTSCraw[scind]-photon.superCluster()->rawEnergy());
 	   }
-	   crackcorrenergy += (*itClus)->energy()*(CrackCorrFunc->getValue(*cc)-1);
-	   localcorrenergy += (*itClus)->energy()*(LocalCorrFunc->getValue(*cc)-1);
-	   index++;
 	 }
-	 fTPhocrackcorrseed[phoqi] = crackcorrseedenergy/sc->rawEnergy();
-	 fTPhocrackcorr[phoqi] = crackcorrenergy/sc->rawEnergy();
-	 fTPholocalcorrseed[phoqi] = localcorrseedenergy/sc->rawEnergy();
-	 fTPholocalcorr[phoqi] = localcorrenergy/sc->rawEnergy();
+
+	 if (fTPhotSCindex[phoqi]!=-1)
+	   if (fabs(fTSCeta[fTPhotSCindex[phoqi]]-photon.superCluster()->eta())>0.1 || \
+	       DeltaPhi(fTSCphi[fTPhotSCindex[phoqi]],photon.superCluster()->phi())>0.1){
+	     //			    std::cout << fTSCraw[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->rawEnergy() << std::endl;
+	     //			    std::cout << fTSCeta[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->eta() << std::endl;
+	     //			    std::cout << fTSCphi[fTPhotSCindex[phoqi]] << " " << photon.superCluster()->phi() << std::endl;
+	     fTPhotSCindex[phoqi] = -1;			    
+	   }
+
+	 if (fTPhotSCindex[phoqi]==-1) {
+	   edm::LogWarning("NTP") << "@SUB=analyze" << "No matching SC found for electron"; 
+	   //			    fTgoodevent = 1; 
+	   //			    break;
+	 }
        }
-		
+
 
        { // start PF stuff from Nicholas
 
@@ -2679,6 +2808,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElTrkMomAtVtx"               ,&fTetrkmomatvtx        ,"ElTrkMomAtVtx[NEles]/F");
 	fEventTree->Branch("ElESuperClusterOverP"        ,&fTeESuperClusterOverP        ,"ElESuperClusterOverP[NEles]/F");
 	fEventTree->Branch("ElNumberOfMissingInnerHits"  ,&fTeNumberOfMissingInnerHits  ,"ElNumberOfMissingInnerHits[NEles]/I");
+	fEventTree->Branch("ElSCindex",&fTElSCindex,"ElSCindex[NEles]/I");
 
 	// fEventTree->Branch("ElIsInJet"                   ,&fTeIsInJet           ,"ElIsInJet[NEles]/I");
 	// fEventTree->Branch("ElSharedPx"                  ,&fTeSharedPx          ,"ElSharedPx[NEles]/F");
@@ -2806,19 +2936,24 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("Pho_PhotonIso",&fT_pho_PhotonIso,"Pho_PhotonIso[NPhotons]/F");
        fEventTree->Branch("Pho_isPFPhoton",&fT_pho_isPFPhoton,"Pho_isPFPhoton[NPhotons]/I");
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
-	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NPhotons]/F");
-	fEventTree->Branch("SCPre",&fTSCpre ,"SCPre[NPhotons]/F");
-	fEventTree->Branch("SCEnergy",&fTSCenergy ,"SCEnergy[NPhotons]/F");
-	fEventTree->Branch("SCEta",&fTSCeta ,"SCEta[NPhotons]/F");
-	fEventTree->Branch("SCPhi",&fTSCphi ,"SCPhi[NPhotons]/F");
-	fEventTree->Branch("SCPhiWidth",&fTSCsigmaPhi ,"SCPhiWidth[NPhotons]/F");
-	fEventTree->Branch("SCEtaWidth",&fTSCsigmaEta ,"SCEtaWidth[NPhotons]/F");
-	fEventTree->Branch("SCBrem",&fTSCbrem ,"SCBrem[NPhotons]/F");
-	fEventTree->Branch("Phocrackcorrseed",&fTPhocrackcorrseed ,"Phocrackcorrseed[NPhotons]/F");
-	fEventTree->Branch("Phocrackcorr",&fTPhocrackcorr ,"Phocrackcorr[NPhotons]/F");
-	fEventTree->Branch("Pholocalcorrseed",&fTPholocalcorrseed ,"Pholocalcorrseed[NPhotons]/F");
-	fEventTree->Branch("Pholocalcorr",&fTPholocalcorr ,"Pholocalcorr[NPhotons]/F");
+       fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
 
+	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
+	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
+	fEventTree->Branch("SCPre",&fTSCpre ,"SCPre[NSuperClusters]/F");
+	fEventTree->Branch("SCEnergy",&fTSCenergy ,"SCEnergy[NSuperClusters]/F");
+	fEventTree->Branch("SCEta",&fTSCeta ,"SCEta[NSuperClusters]/F");
+	fEventTree->Branch("SCPhi",&fTSCphi ,"SCPhi[NSuperClusters]/F");
+	fEventTree->Branch("SCPhiWidth",&fTSCsigmaPhi ,"SCPhiWidth[NSuperClusters]/F");
+	fEventTree->Branch("SCEtaWidth",&fTSCsigmaEta ,"SCEtaWidth[NSuperClusters]/F");
+	fEventTree->Branch("SCBrem",&fTSCbrem ,"SCBrem[NSuperClusters]/F");
+	fEventTree->Branch("SCR9",&fTSCR9 ,"SCR9[NSuperClusters]/F");
+	fEventTree->Branch("SCcrackcorrseed",&fTSCcrackcorrseed ,"SCcrackcorrseed[NSuperClusters]/F");
+	fEventTree->Branch("SCcrackcorr",&fTSCcrackcorr ,"SCcrackcorr[NSuperClusters]/F");
+	fEventTree->Branch("SClocalcorrseed",&fTSClocalcorrseed ,"SClocalcorrseed[NSuperClusters]/F");
+	fEventTree->Branch("SClocalcorr",&fTSClocalcorr ,"SClocalcorr[NSuperClusters]/F");
+	fEventTree->Branch("SCcrackcorrseedfactor",&fTSCcrackcorrseedfactor ,"SCcrackcorrseedfactor[NSuperClusters]/F");
+	fEventTree->Branch("SClocalcorrseedfactor",&fTSClocalcorrseedfactor ,"SClocalcorrseedfactor[NSuperClusters]/F");
 
 	// Jets:
 	fEventTree->Branch("NJets"          ,&fTnjets          ,"NJets/I");
@@ -2997,6 +3132,7 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 	fRTMintrknhits   = -999;
 	fRTMinphopt      = -999.99;
 	fRTMaxphoeta     = -999.99;
+	fRTMinSCraw      = -999.99;
 
 	fRTmaxnmu   = -999;
 	fRTmaxnel   = -999;
@@ -3029,6 +3165,8 @@ void NTupleProducer::endRun(const edm::Run& r, const edm::EventSetup&){
 
 	fRTMinphopt      = fMinphopt;
 	fRTMaxphoeta     = fMaxphoeta;
+
+	fRTMinSCraw      = fMinSCraw;
 
 	fRTmaxnmu   = gMaxnmus;
 	fRTmaxnel   = gMaxneles;
@@ -3168,6 +3306,7 @@ void NTupleProducer::resetTree(){
 	fTngenphotons = 0;
 	fTNGenJets    = 0;
 	fTnvrtx       = 0;
+	fTnSC         = 0;
 
 	resetInt(fTGenLeptonId       ,gMaxngenlept);
 	resetFloat(fTGenLeptonPt    ,gMaxngenlept);
@@ -3349,6 +3488,7 @@ void NTupleProducer::resetTree(){
 	// resetFloat(fTeSharedPz, gMaxneles);
 	// resetFloat(fTeSharedEnergy, gMaxneles);
 	// resetInt(fTeDupEl, gMaxneles);
+	resetInt (fTElSCindex, gMaxnphos);
 
 	resetFloat(fTeConvPartTrackDist, gMaxneles);
 	resetFloat(fTeConvPartTrackDCot, gMaxneles);
@@ -3536,20 +3676,23 @@ void NTupleProducer::resetTree(){
        resetFloat( fT_pho_PhotonIso, gMaxnphos);
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
        resetInt( fT_pho_isPFElectron, gMaxnphos);
+       resetInt (fTPhotSCindex, gMaxnphos);
 
-	resetFloat(fTSCraw,gMaxnphos);
-	resetFloat(fTSCpre,gMaxnphos);
-	resetFloat(fTSCenergy,gMaxnphos);
-	resetFloat(fTSCeta,gMaxnphos);
-	resetFloat(fTSCphi,gMaxnphos);
-	resetFloat(fTSCsigmaPhi,gMaxnphos);
-	resetFloat(fTSCsigmaEta,gMaxnphos);
-	resetFloat(fTSCbrem,gMaxnphos);
-	resetFloat(fTPhocrackcorrseed,gMaxnphos);
-	resetFloat(fTPhocrackcorr,gMaxnphos);
-	resetFloat(fTPholocalcorrseed,gMaxnphos);
-	resetFloat(fTPholocalcorr,gMaxnphos);
-
+	resetFloat(fTSCraw,gMaxnSC);
+	resetFloat(fTSCpre,gMaxnSC);
+	resetFloat(fTSCenergy,gMaxnSC);
+	resetFloat(fTSCeta,gMaxnSC);
+	resetFloat(fTSCphi,gMaxnSC);
+	resetFloat(fTSCsigmaPhi,gMaxnSC);
+	resetFloat(fTSCsigmaEta,gMaxnSC);
+	resetFloat(fTSCbrem,gMaxnSC);
+	resetFloat(fTSCR9,gMaxnSC);
+	resetFloat(fTSCcrackcorrseed,gMaxnSC);
+	resetFloat(fTSCcrackcorr,gMaxnSC);
+	resetFloat(fTSClocalcorrseed,gMaxnSC);
+	resetFloat(fTSClocalcorr,gMaxnSC);
+	resetFloat(fTSCcrackcorrseedfactor,gMaxnSC);
+	resetFloat(fTSClocalcorrseedfactor,gMaxnSC);
 
 	fTTrkPtSumx          = -999.99;
 	fTTrkPtSumy          = -999.99;
