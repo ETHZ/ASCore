@@ -396,7 +396,7 @@ void SSDLAnalysis::FillEffTree(){
 	// Muon loop
 	for(int i = 0; i < fTR->NMus; ++i){
 		if(IsSignalMuon(i) == false) continue; // match to signal mu
-		if(fTR->MuPt[i] < 10.) continue; // pt cut
+		if(fTR->MuPt[i] < 5.) continue; // pt cut
 		fLETtype   = 0; // mu
 		fLETpt     = fTR->MuPt      [i];
 		fLETeta    = fTR->MuEta     [i];
@@ -411,7 +411,7 @@ void SSDLAnalysis::FillEffTree(){
 	// Electron loop
 	for(int i = 0; i < fTR->NEles; ++i){
 		if(IsSignalElectron(i) == false) continue; // match to signal el
-		if(fTR->ElPt[i] < 10.) continue; // pt cut
+		if(fTR->ElPt[i] < 5.) continue; // pt cut
 		fLETtype   = 1; // mu
 		fLETpt     = fTR->ElPt      [i];
 		fLETeta    = fTR->ElEta     [i];
@@ -532,6 +532,7 @@ bool SSDLAnalysis::IsSignalMuon(int index){
 		matched = i;
 	}
 
+	if(mindr > 0.2) return false; // max distance
 	if(matched < 0) return false; // match unsuccessful
 
 	pdgparticle mo, gmo;
@@ -558,6 +559,7 @@ bool SSDLAnalysis::IsSignalElectron(int index){
 		matched = i;
 	}
 
+	if(mindr > 0.2) return false; // max distance
 	if(matched < 0) return false; // match unsuccessful
 
 	pdgparticle mo, gmo;
