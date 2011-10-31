@@ -20,17 +20,25 @@ def get_info(lumiFile,jsonFile):
    # Luminosity from lumi summary
    tbegin = 0 # tag beginning of totals
    pat = re.compile('(\|\s*[\d\.]+\s*)+\|')
+   patU = re.compile('.*Recorded\((.*)\).*')
    lumiTot = 0
+   units = ''
    for line in open(lumiFile):
+      # Scroll down to totals
       if line.find('Total') != -1: tbegin = 1
       elif tbegin:
+         m = re.match(patU,line)
+         if m: 
+            units = m.group(1)
+            continue
          m = re.match(pat,line) 
          if m:
             lumiTot = m.group(1)  # Strangely only stores last match...
             lumiTot = lumiTot.strip('| ')
             break
 
-   lumiString =  "%3.1f/pb" % float(lumiTot)
+   lumiString =  "%3.1f%s" % (float(lumiTot), units)
+   print 'lumiString:',lumiString,lumiFile
    return [range,lumiString]
 
   
@@ -124,9 +132,8 @@ return_value,output = commands.getstatusoutput(command_getoutput)
 if return_value != 0:
    print 'Problem with crab -getoutput of the job '+jobName+'. Continuing anyway...'
    print output
-   #sys.exit()
 
-# # get the dataset size on SE
+# get the dataset size on SE
 print '--> Getting size of dataset...\n   ',command_getSize
 status, output = commands.getstatusoutput(command_getSize)
 if status != 0:
