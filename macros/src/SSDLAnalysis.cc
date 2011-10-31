@@ -32,10 +32,13 @@ SSDLAnalysis::~SSDLAnalysis(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Begin(const char* filename){
-	string pileupsrc = string(gBaseDir + "data_pileup.root");
-	SetPileUpSrc(pileupsrc);
-	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
-	ReadPDGTable(gBaseDir + "pdgtable.txt");
+	// string pileupsrc = string(gBaseDir + "data_pileup.root");
+	// SetPileUpSrc(pileupsrc);
+	// ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
+	// ReadPDGTable(gBaseDir + "pdgtable.txt");
+	SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
+	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
+	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
 	BookTree();
 	if(!fIsData && fDoFillEffTree) BookEffTree();
 }
@@ -166,6 +169,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
 	fAnalysisTree->Branch("MuIso"         ,&fTmuiso,          "MuIso[NMus]/F");
+	fAnalysisTree->Branch("MuCorrIso"     ,&fTmuciso,         "MuCorrIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
@@ -189,6 +193,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElDz",                   &fTEldz,                "ElDz[NEls]/F");
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
 	fAnalysisTree->Branch("ElRelIso",               &fTElRelIso,            "ElRelIso[NEls]/F");
+	fAnalysisTree->Branch("ElCorrIso",              &fTElCorrIso,           "ElCorrIso[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
 	fAnalysisTree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
@@ -251,13 +256,13 @@ void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
-	vector<int> selectedMuInd  = MuonSelection(&UserAnalysisBase::IsGoodBasicMu);
-	vector<int> selectedElInd  = ElectronSelection(&UserAnalysisBase::IsLooseEl);
+	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsVeryLooseMu);
+	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsVeryLooseEl);
 	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
-	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus  );
-	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles );
-	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets );
-	
+	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
+	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
+	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets);
+
 	// Require at least one loose lepton
 	if( (fTnqmus + fTnqels) < 1 ) return;
 	fCounter.fill(fCutnames[3]);
@@ -297,6 +302,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuphi   [i] = fTR->MuPhi     [index];
 		fTmucharge[i] = fTR->MuCharge  [index];
 		fTmuiso   [i] = fTR->MuRelIso03[index];
+		fTmuciso  [i] = corrMuIso(index);
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
 		fTmuptE   [i] = fTR->MuPtE     [index];
@@ -343,6 +349,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTEldz               [ind] = fTR->ElDzPV                  [elindex];
 		fTElDzErr            [ind] = fTR->ElDzE                   [elindex];
 		fTElRelIso           [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
+		fTElCorrIso          [ind] = corrElIso(elindex);
 		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt   [elindex];
 		
 		if(fIsData == false){ // mc truth information		
@@ -356,7 +363,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTElGenType  [ind] = el.get_type();
 			fTElGenMType [ind] = emo.get_type();
 			fTElGenGMType[ind] = egmo.get_type();
-		} else{
+		}
+		else{
 			fTElGenID    [ind] = -888;
 			fTElGenMID   [ind] = -888;
 			fTElGenGMID  [ind] = -888;
@@ -448,6 +456,7 @@ void SSDLAnalysis::ResetTree(){
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
 		fTmuiso         [i] = -999.99;
+		fTmuciso        [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
 		fTmuptE         [i] = -999.99;
@@ -473,6 +482,7 @@ void SSDLAnalysis::ResetTree(){
 		fTEldz              [i] = -999.99;
 		fTElDzErr           [i] = -999.99;
 		fTElRelIso          [i] = -999.99;
+		fTElCorrIso         [i] = -999.99;
 		fTElEcalRecHitSumEt [i] = -999.99;
 		fTElIsGoodElId_WP80 [i] = -999;
 		fTElIsGoodElId_WP90 [i] = -999;
@@ -581,8 +591,7 @@ bool SSDLAnalysis::IsTightMuon(int toggle, int index){
 	if(toggle == 2){
 		if(IsGoodBasicMu(index) == false) return false;
 		if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
-		float newiso = fTR->MuRelIso03[index] - TMath::Log(fTR->MuPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->MuPt[index]);
-		if(newiso > 0.15) return false;
+		if(corrMuIso(index) > 0.15) return false;
 		return true;
 	}
 	cout << "Choose your toggle!" << endl;
@@ -602,10 +611,22 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 		if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElPt[index] > 0.2) return false;
 		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
 		if(IsGoodElId_WP80(index) == false) return false;
-		float newiso = relElIso(index) - TMath::Log(fTR->ElPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->ElPt[index]);
-		if(newiso > 0.15) return false;
+		if(corrElIso(index) > 0.15) return false;
 		return true;
 	}
 	cout << "Choose your toggle!" << endl;
 	return false;
+}
+
+//____________________________________________________________________________
+// Same-sign specific isolation
+double SSDLAnalysis::corrMuIso(int index){
+	double newiso = fTR->MuRelIso03[index] - TMath::Log(fTR->MuPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->MuPt[index]);
+	if(newiso < 0.) newiso = 0.; // cut off at 0
+	return newiso;
+}
+double SSDLAnalysis::corrElIso(int index){
+	double newiso = relElIso(index) - TMath::Log(fTR->ElPt[index]) * (fTR->NVrtx - 1) / (30. * fTR->ElPt[index]);
+	if(newiso < 0.) newiso = 0.; // cut off at 0
+	return newiso;
 }

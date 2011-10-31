@@ -53,6 +53,8 @@ public:
 	bool IsTightMuon(int, int);
 	bool IsTightEle(int, int);
 	
+	double corrMuIso(int);
+	double corrElIso(int);
 	
 	const bool AddBranch(const char* name, const char* type, void* address, const char* size = 0);
 
@@ -111,6 +113,7 @@ private:
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
 	float fTmuiso         [fMaxNmus];
+	float fTmuciso        [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
@@ -135,6 +138,7 @@ private:
 	float fTEldz             [fMaxNeles];
 	float fTElDzErr          [fMaxNeles];
 	float fTElRelIso         [fMaxNeles];
+	float fTElCorrIso        [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
 	int   fTElIsGoodElId_WP80[fMaxNeles];
 	int   fTElIsGoodElId_WP90[fMaxNeles];
