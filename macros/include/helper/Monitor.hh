@@ -95,20 +95,20 @@ public:
      return counters[counter];
   }
 
-  void print() {
+  friend ostream& operator<<( ostream& os, Monitor m ) {
     using namespace std;
-    if ( !(countNames.size()>0) ) return;
+    if ( !(m.countNames.size()>0) ) return os;
     // This needs to be improved
-    float maxc = counters[countNames[0]];
+    float maxc = m.counters[m.countNames[0]];
     float prev = maxc;
     ostringstream maxclen; maxclen << maxc;
     size_t maxwidth = maxclen.str().length();
-    cout << left << "COUNTER> " << name << endl;
-    for ( vector<string>::const_iterator it = countNames.begin(); 
-          it != countNames.end(); ++it ) {
-      float count = counters[*it];
-      cout << setw(maxLength+5) << left << (*it) 
-                << setw(maxwidth) << right << count << " " 
+    os << left << "COUNTER> " << m.name << endl;
+    for ( vector<string>::const_iterator it = m.countNames.begin();
+          it != m.countNames.end(); ++it ) {
+      float count = m.counters[*it];
+      os << setw(m.maxLength+5) << left << (*it)
+                << setw(maxwidth) << right << count << " "
                 << setw(3) << right
                 << static_cast<int>(maxc>0.?count/maxc*100.:0.) << "% "
                 << setw(3) << right
@@ -116,9 +116,12 @@ public:
                 << endl;
       prev = count;
     }
-    cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;    
-    
+    os << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
+
+    return os;
   }
+
+  void print() { std::cout << *this; }
 
 public:
   std::vector<std::string> countNames;
