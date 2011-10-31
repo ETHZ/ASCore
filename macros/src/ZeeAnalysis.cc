@@ -57,14 +57,6 @@ void ZeeAnalysis::Analyze(){
 
   fHInvMass0->Fill((elec[0]+elec[1]).M());
 
-  TLorentzVector correlec[2];
-
-  for (int i=0; i<2; i++){
-    correlec[i]=elec[i];
-    correlec[i].SetE(elecorr->get_correctedenergy(fTR,i,15));
-    correlec[i].SetRho(elecorr->get_correctedenergy(fTR,i,15));
-  }
-
   fHInvMass15 ->Fill((CorrElectron(0,15)+CorrElectron(1,15)).M());
   fHInvMass16 ->Fill((CorrElectron(0,16)+CorrElectron(1,16)).M());
   fHInvMass20 ->Fill((CorrElectron(0,20)+CorrElectron(1,20)).M());
@@ -86,7 +78,7 @@ void ZeeAnalysis::End(){
 }
 
 TLorentzVector ZeeAnalysis::CorrElectron(int i, int mode){
-  TLorentzVector corr=elec[i];
+  TLorentzVector corr(1,0,0,1);
   corr.SetE(elecorr->get_correctedenergy(fTR,i,mode));
   corr.SetRho(elecorr->get_correctedenergy(fTR,i,mode));
   return corr;
