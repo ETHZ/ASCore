@@ -28,7 +28,7 @@ public:
 private:
 
   EnergyCorrection *elecorr;
-  TLorentzVector CorrElectron(int i, int mode);
+  TLorentzVector CorrElectron(TreeReader *fTR, int i, int mode);
 	
 	// file for histograms:
 	TFile *fHistFile;

@@ -57,9 +57,9 @@ void ZeeAnalysis::Analyze(){
 
   fHInvMass0->Fill((elec[0]+elec[1]).M());
 
-  fHInvMass15 ->Fill((CorrElectron(0,15)+CorrElectron(1,15)).M());
-  fHInvMass16 ->Fill((CorrElectron(0,16)+CorrElectron(1,16)).M());
-  fHInvMass20 ->Fill((CorrElectron(0,20)+CorrElectron(1,20)).M());
+  fHInvMass15 ->Fill((CorrElectron(fTR,0,15)+CorrElectron(fTR,1,15)).M());
+  fHInvMass16 ->Fill((CorrElectron(fTR,0,16)+CorrElectron(fTR,1,16)).M());
+  fHInvMass20 ->Fill((CorrElectron(fTR,0,20)+CorrElectron(fTR,1,20)).M());
 
 }
 
@@ -77,8 +77,9 @@ void ZeeAnalysis::End(){
 	fHistFile->Close();
 }
 
-TLorentzVector ZeeAnalysis::CorrElectron(int i, int mode){
-  TLorentzVector corr(1,0,0,1);
+TLorentzVector ZeeAnalysis::CorrElectron(TreeReader *fTR, int i, int mode){
+  TLorentzVector corr;
+  corr.SetPtEtaPhiE(fTR->ElPt[i],fTR->ElEta[i],fTR->ElPhi[i],fTR->ElE[i]);
   corr.SetE(elecorr->get_correctedenergy(fTR,i,mode));
   corr.SetRho(elecorr->get_correctedenergy(fTR,i,mode));
   return corr;
