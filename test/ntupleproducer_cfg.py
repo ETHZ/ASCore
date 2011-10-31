@@ -195,6 +195,7 @@ for pf in pfPostfixes:
     getattr(process,'pfPileUp'+pf).Vertices            = cms.InputTag('goodVertices')
     getattr(process,'pfJets'+pf).doAreaFastjet         = True
     getattr(process,'pfJets'+pf).doRhoFastjet          = False
+    getattr(process,'pfNoPileUp'+pf).enable            = False  # !!! this is a switch to turn on and off the pile-up removal !!!!
     # Add the KT6 producer to the sequence (see below)
     getattr(process,"patPF2PATSequence"+pf).replace(
 	getattr(process,"pfNoElectron"+pf),
@@ -202,7 +203,8 @@ for pf in pfPostfixes:
     # Jet corrections 
     getattr(process,'patJetCorrFactors'+pf).levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
     getattr(process,'patJetCorrFactors'+pf).rho    = cms.InputTag('kt6PFJets'+pf,'rho')
-    getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PFchs') 
+#   getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PFchs')  # !!! if pfnoPU is turned ON use these JEC!!!
+    getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PF')     # !!! if pfnoPU is turned OFF use these JEC!!!
 
     # set to false to disable jet to be cleaned from Taus
     getattr(process,"pfNoTau"+pf).enable      = False
