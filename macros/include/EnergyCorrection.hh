@@ -17,8 +17,6 @@
 
 // CORR MODES PHOTONS
 // 0: nothing
-// 1: SC corr + crack + local - NOT IMPLEMENTED
-// 2: SC corr + crack (no local) - NOT IMPLEMENTED
 // 5: SC corr FIT + crack + local
 // 6: SC corr FIT + crack (no local)
 
@@ -40,56 +38,51 @@
 class EnergyCorrection
 {
 public:
-	// ! C-TOR 
-	EnergyCorrection(TString tuning);
+  // ! C-TOR 
+  EnergyCorrection(TString tuning);
 	
-	// ! D-TOR
-	virtual ~EnergyCorrection();
+  // ! D-TOR
+  virtual ~EnergyCorrection();
 	
-	double get_correctedenergy(TreeReader *fTR, int photon_index, int mode);
+  double get_correctedenergy(TreeReader *fTR, int photon_index, int mode);
 
 private:
 
   bool forphotons;
   
-	double f5x5( double iEta );
-	float getEtaCorrectionBarrel(float eta);
-	bool isInPhiCracks(double phi, double eta);
-	
-	static const Int_t    nBinsEta = 14;                    
-	Double_t       leftEta  [nBinsEta];                   
-	Double_t       rightEta [nBinsEta];                   
-	static const Int_t    nBinsBr = 18;                     
-	Double_t       leftBr  [nBinsBr];                      
-	Double_t       rightBr [nBinsBr];                      
-	Double_t brbins  [2*nBinsBr];    
-	TH1F *h_corr[nBinsEta];   
-	static const Int_t    nBinsET = 14;             
-	Double_t       leftET  [nBinsET];                    
-	Double_t       rightET [nBinsET];                    
-	Double_t       ETBins  [nBinsET*2];     
-	TH1F *h_CBET_EB;
-	TH1F *h_CBET_EE;
+  double f5x5( double iEta );
+  float getEtaCorrectionBarrel(float eta);
+  bool isInPhiCracks(double phi, double eta);
 
-	double getPho_correctedenergy(TreeReader *fTR, int photon_index, int mode);
-	double getEl_correctedenergy(TreeReader *fTR, int photon_index, int mode);
+  static const Double_t etaCrackMin = 1.44; 
+  static const Double_t etaCrackMax = 1.56;
+  static const Int_t    nBinsEta              = 14; 
+  Double_t       leftEta  [nBinsEta];
+  Double_t       rightEta [nBinsEta];
 
-  /*
-  // binned corrections
-	Double_t applyScCorrectionsBrEta(Double_t eta, Double_t sigmaPhiSigmaEta);
-	Double_t applyScCorrectionsET_EB(Double_t ET);
-	Double_t applyScCorrectionsET_EE(Double_t ET);
-  */
 
-  // fitted corrections
-	Double_t xcorr[nBinsEta];
-	TF1 *fcorr[nBinsEta]; 
-	Double_t applyScCorrectionsBrEta_FIT(Double_t eta, Double_t sigmaPhiSigmaEta);
-	Double_t applyScCorrectionsET_EB_FIT(Double_t ET);
-	Double_t applyScCorrectionsET_EE_FIT(Double_t ET);
 
-	Double_t applyScCorrectionsET_EB_FIT_electrons(Double_t ET);
-	Double_t applyScCorrectionsET_EE_FIT_electrons(Double_t ET);
+  double getPho_correctedenergy(TreeReader *fTR, int photon_index, int mode);
+  double getEl_correctedenergy(TreeReader *fTR, int photon_index, int mode);
+
+
+  Double_t xcorr[nBinsEta];
+  Double_t par0[nBinsEta];
+  Double_t par1[nBinsEta];
+  Double_t par2[nBinsEta];
+  Double_t par3[nBinsEta];
+  Double_t par4[nBinsEta];
+
+  Double_t applyScCorrectionsBrEta_photons(Double_t eta, Double_t sigmaPhiSigmaEta);
+  Double_t applyScCorrectionsET_EB_photons(Double_t ET);
+  Double_t applyScCorrectionsET_EE_photons(Double_t ET);
+  Double_t applyScCorrectionsE_EE_photons(Double_t E);
+
+  Double_t applyScCorrectionsBrEta_electrons(Double_t eta, Double_t sigmaPhiSigmaEta);
+  Double_t applyScCorrectionsET_EB_electrons(Double_t ET);
+  Double_t applyScCorrectionsET_EE_electrons(Double_t ET);
+  Double_t applyScCorrectionsE_EE_electrons(Double_t E);
+
 
 };
 
