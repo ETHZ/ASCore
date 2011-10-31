@@ -1,0 +1,20 @@
+# Run2011B
+/susy/ntuples/data/V02-04-07c/DoubleElectron-Run2011B-PromptReco-v1-AOD/       '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-07c/MuEG-Run2011B-PromptReco-v1-AOD/                 '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1 
+/susy/ntuples/data/V02-04-07c/DoubleMu-Run2011B-PromptReco-v1-AOD/             '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+# PromptReco v6
+/susy/ntuples/data/V02-04-03/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry  '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-04-03/DoubleMu_Run2011A-PromptReco-v6_AOD__retry/       '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1 
+/susy/ntuples/data/V02-04-03/MuEG_Run2011A-PromptReco-v6_AOD__retry/           '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+# PromptReco v4
+/susy/ntuples/data/V02-02-09a/DoubleMu-Run2011A-PromptReco-v4-AOD/             '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-02-09a/DoubleElectron-Run2011A-PromptReco-v4-AOD/       '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+/susy/ntuples/data/V02-02-09a/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER/      '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-177515_7TeV_PromptReco_Collisions11_JSON.txt' 20 -1
+# Aug5 ReReco (170249-172619)
+/susy/ntuples/data/V02-04-03/DoubleElectron-Run2011A-05Aug2011-v1-AOD/         '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+/susy/ntuples/data/V02-04-03/MuEG-Run2011A-05Aug2011-v1-AOD__new/              '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+/susy/ntuples/data/V02-04-03/DoubleMu-Run2011A-05Aug2011-v1-AOD/               '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.txt' 20 -1
+# May10 ReReco
+/susy/ntuples/data/V02-02-08/DoubleElectron-Run2011A-May10ReReco-v1-AOD/       '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
+/susy/ntuples/data/V02-02-08/MuEG-Run2011A-May10ReReco-v1-AOD/                 '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
+/susy/ntuples/data/V02-02-08/DoubleMu-Run2011A-May10ReReco-v1-AOD/             '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.txt' 20 -1
