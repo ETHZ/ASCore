@@ -21,8 +21,10 @@ void ZeeAnalysis::Begin(){
 
 	fHElPt   = new TH1D("ElPt", "Pt of electrons", 100, 0., 500.);
 	fHElPtCorr   = new TH1D("ElPtCorr", "Corrected Pt of electrons", 100, 0., 500.);
-	fHInvMass = new TH1D("eeInvMass","Invariant ee mass", 100, 80,100);
-	fHInvMassCorr = new TH1D("eeInvMassCorr","Invariant ee mass corr", 100, 80,100);
+	fHInvMass0 = new TH1D("eeInvMass0","Invariant ee mass", 100, 80,100);
+	fHInvMass15 = new TH1D("eeInvMass15","Invariant ee mass corr15", 100, 80,100);
+	fHInvMass16 = new TH1D("eeInvMassCorr16","Invariant ee mass corr16", 100, 80,100);
+	fHInvMass20 = new TH1D("eeInvMassCorr20","Invariant ee mass corr20", 100, 80,100);
 }
 
 void ZeeAnalysis::Analyze(){
@@ -35,13 +37,12 @@ void ZeeAnalysis::Analyze(){
  
   }
 
-
   if (fTR->NEles<2) return;
   if (fTR->ElPt[1]<20) return;
 
   bool id=true;
   for (int i=0; i<2; i++){
-    if (fTR->ElIDsimpleWP90relIso[i]<7) id=false;
+    if (fTR->ElIDsimpleWP80relIso[i]<7) id=false;
   }
   if (!id) return;
 
@@ -54,24 +55,39 @@ void ZeeAnalysis::Analyze(){
   if (fabs((elec[0]+elec[1]).M()-91.2)<10) masswindow=true;
   if (!masswindow) return;
 
+  fHInvMass0->Fill((elec[0]+elec[1]).M());
+
   TLorentzVector correlec[2];
+
   for (int i=0; i<2; i++){
     correlec[i]=elec[i];
     correlec[i].SetE(elecorr->get_correctedenergy(fTR,i,15));
     correlec[i].SetRho(elecorr->get_correctedenergy(fTR,i,15));
   }
 
-  fHInvMass->Fill((elec[0]+elec[1]).M());
-  fHInvMassCorr ->Fill((correlec[0]+correlec[1]).M());
-
+  fHInvMass15 ->Fill((CorrElectron(0,15)+CorrElectron(1,15)).M());
+  fHInvMass16 ->Fill((CorrElectron(0,16)+CorrElectron(1,16)).M());
+  fHInvMass20 ->Fill((CorrElectron(0,20)+CorrElectron(1,20)).M());
 
 }
 
 void ZeeAnalysis::End(){
 	fHistFile->cd();	
+
 	fHElPt   ->Write();
 	fHElPtCorr -> Write();
-	fHInvMass -> Write();
-	fHInvMassCorr -> Write();
+
+	fHInvMass0 -> Write();
+	fHInvMass15 -> Write();
+	fHInvMass16 -> Write();
+	fHInvMass20 -> Write();
+
 	fHistFile->Close();
+}
+
+TLorentzVector ZeeAnalysis::CorrElectron(int i, int mode){
+  TLorentzVector corr=elec[i];
+  corr.SetE(elecorr->get_correctedenergy(fTR,i,mode));
+  corr.SetRho(elecorr->get_correctedenergy(fTR,i,mode));
+  return corr;
 }

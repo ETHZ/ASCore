@@ -33,10 +33,14 @@ private:
 	TFile *fHistFile;
 	
 
-	TH1D *fHElPt;
-	TH1D *fHElPtCorr;
-  TH1D *fHInvMass;
-  TH1D *fHInvMassCorr;
+  TH1D *fHElPt;
+  TH1D *fHElPtCorr;
+
+  TH1D *fHInvMass0;
+  TH1D *fHInvMass15;
+  TH1D *fHInvMass16;
+  TH1D *fHInvMass20;
+
 
 };
 #endif
