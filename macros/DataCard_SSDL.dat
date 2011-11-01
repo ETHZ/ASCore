@@ -27,7 +27,6 @@ EleHad1		SSDLTrees/2011/Jul6/ElectronHad-Run2011A-May10ReReco-v1-AOD.root		0	1
 EleHad2		SSDLTrees/2011/Jul6/ElectronHad-Run2011A-PromptReco-v4-AOD.root			0	1
 ####################################################################################################################
 # Top and EWK
-TTJetsSync	SSDLTrees/2011B/Oct31/MC/TT_TuneZ2_7TeV-pythia6-tauola.root				1	-1	6.8875e+03	51
 TTJets		SSDLTrees/2011B/Oct31/MC/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11_2.root		1	-1	23503.95	51
 # TTJetsOld	SSDLTrees/2011/Jul5/MC/TTJets_TuneZ2_7TeV-madgraph-tauola.root				1	-1	7014.0		51
 SingleT_t	SSDLTrees/2011B/Oct31/MC/TToBLNu_TuneZ2_t-channel_7TeV-madgraph.root			1	-1	2.32e+04	53
@@ -61,10 +60,10 @@ WWWplus		SSDLTrees/2011B/Oct31/MC/WWWTo2Lplus2Nu_NTP.root				3	-1	8.794e+06	51
 WWWminus	SSDLTrees/2011B/Oct31/MC/WWWTo2Lminus2Nu_NTP.root				3	-1	7.195e+06	51
 ###################################################################################################################
 # Rare SM with no pileup, correct all by 1/puweight = 1/0.2674456 = 3.739078
-DPSWW		SSDLTrees/2011B/Oct31/MC/DoublePartonWWFastSim_SSDLTree.root			4	-1	5.298e+05	51
-W+W+		SSDLTrees/2011B/Oct31/MC/WplusWplus_SSDLTree.root				4	-1	8.106e+05	51
-W-W-		SSDLTrees/2011B/Oct31/MC/WminusWminus_SSDLTree.root				4	-1	3.126e+06	51
-ttbarW		SSDLTrees/2011B/Oct31/MC/ttbarW_SSDLTree.root					4	-1	2.532e+06	51
+DPSWW		SSDLTrees/2011B/Oct31/MC/DoublePartonWWFastSim.root				4	-1	5.298e+05	51
+W+W+		SSDLTrees/2011B/Oct31/MC/WplusWplus.root					4	-1	8.106e+05	51
+W-W-		SSDLTrees/2011B/Oct31/MC/WminusWminus.root					4	-1	3.126e+06	51
+ttbarW		SSDLTrees/2011B/Oct31/MC/ttbarW.root						4	-1	2.532e+06	51
 ####################################################################################################################
 ## SUSY Signal
 LM0		SSDLTrees/2011B/Oct31/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.978e+03	18
