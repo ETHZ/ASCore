@@ -148,7 +148,7 @@ def clean():
 		elif os.path.isdir(output_location+obj):
 			os.system('cd '+output_location+' ; mv '+output_location+obj+'/* '+obj+'.root' )
 			os.system('rm -r '+output_location+obj+'/' )
-	#os.system('rm -r tmp/ ; rm job_* ; rm -r sgejob*')
+	os.system('rm -r tmp/ ; rm job_* ; rm -r sgejob*')
 	
 		
 def merge_and_clean():
@@ -171,7 +171,7 @@ def merge_and_clean():
 			continue
 		else:
 			os.system('rm '+output_location+obj)
-	#os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
+	os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
 		
 
 def do_stuff(config_name):
