@@ -39,18 +39,18 @@
 
 # SUSY Signal
 /susy/ntuples/mc/V02-01-01/LM0_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM1_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM2_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM3_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM4_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM5_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM6_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM7_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM8_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM9_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM11_SUSY_sftsht_7TeV-pythia6/                          '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM12_SUSY_sftsht_7TeV-pythia6/                          '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/LM13_SUSY_sftsht_7TeV-pythia6/                          '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM1_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM2_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM3_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM4_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM5_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM6_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM7_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM8_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM9_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM11_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM12_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1' -1 20
+/susy/ntuples/mc/V02-01-02_test/LM13_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1' -1 20
 
 # QCD
 /susy/ntuples/mc/V02-01-02/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6/          '-s -v 1' -1 20
