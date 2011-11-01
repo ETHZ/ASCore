@@ -2,10 +2,9 @@
 /susy/ntuples/mc/V02-04-01/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11_2/          '-s -v 1' -1 20
 /susy/ntuples/mc/V02-04-01/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11/   '-s -v 1' -1 20
 /susy/ntuples/mc/V02-04-01/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2/      '-s -v 1' -1 20
-
 /susy/ntuples/mc/V02-01-01/TTJets_TuneZ2_7TeV-madgraph-tauola/                     '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/            '-s -v 1' -1 20
-/susy/ntuples/mc/V02-01-01/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/                 '-s -v 1' -1 20
+# /susy/ntuples/mc/V02-01-01/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/            '-s -v 1' -1 20 # Old 
+# /susy/ntuples/mc/V02-01-01/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/                 '-s -v 1' -1 20 # Old 
 /susy/ntuples/mc/V02-01-01/TToBLNu_TuneZ2_s-channel_7TeV-madgraph_2/               '-s -v 1' -1 20
 /susy/ntuples/mc/V02-01-01/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/                 '-s -v 1' -1 20
 /susy/ntuples/mc/V02-01-01/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/                '-s -v 1' -1 20
@@ -25,7 +24,6 @@
 /susy/ntuples/mc/V02-04-03/ttbarW/                                                 '-s -v 1' 1 -1
 /susy/ntuples/mc/V02-04-03/WplusWplus/                                             '-s -v 1' 1 -1
 /susy/ntuples/mc/V02-04-03/WminusWminus/                                           '-s -v 1' 1 -1
-
 /stiegerb/ntuples/mc/V02-04-07/TTWTo2Lplus2Nu_NTP/                                 '-s -v 1' 1 -1
 /stiegerb/ntuples/mc/V02-04-07/TTWTo2Lminus2Nu_NTP/                                '-s -v 1' 1 -1
 /stiegerb/ntuples/mc/V02-04-07/TTZTo2Lplus2Nu_NTP/                                 '-s -v 1' 1 -1
