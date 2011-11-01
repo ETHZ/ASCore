@@ -22,7 +22,7 @@
 
 // CORR MODES ELECTRONS
 // 0: default el energy from CMSSW
-// 20: SC energy + Ceta + preshower
+// 20: SC energy (with el corrections from CMSSW)
 // 15: SC corr FIT + crack + local
 // 16: SC corr FIT + crack (no local)
 
@@ -46,12 +46,13 @@ public:
 	
   double get_correctedenergy(TreeReader *fTR, int photon_index, int mode);
 
+  float getEtaCorrectionBarrel(float eta);
+
 private:
 
   bool forphotons;
   
   double f5x5( double iEta );
-  float getEtaCorrectionBarrel(float eta);
   bool isInPhiCracks(double phi, double eta);
 
   static const Double_t etaCrackMin = 1.44; 

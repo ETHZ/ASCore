@@ -462,7 +462,8 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
     float et = energy/cosh(sc_eta);
     if (mode==5 || mode==6){
       et /= applyScCorrectionsBrEta_photons(sc_eta,sc_brem);
-      et /= applyScCorrectionsET_EE_photons(et);
+      //      et /= applyScCorrectionsET_EE_photons(et);
+      et /= applyScCorrectionsE_EE_photons(et*cosh(sc_eta));
     }
     energy = et*cosh(sc_eta);
   }
@@ -482,14 +483,14 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
 
 double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode){
 
-  if (mode!=0 && mode!=15 && mode!=16 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
+  if (mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
 
   if (mode==0) return fTR->ElE[ei];
 
   int si=fTR->ElSCindex[ei];
 
   if (si<0) {
-    //    std::cout << "Calling electron energy correction without SC matching! Returning default electron energy." << std::endl;
+    std::cout << "Calling electron energy correction without SC matching! Returning default electron energy." << std::endl;
     return fTR->ElE[ei];
   }
 
@@ -497,7 +498,7 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   float sc_phi = fTR->SCPhi[si];
   float sc_brem = fTR->SCBrem[si];
 
-  bool isbarrel = (fabs(sc_eta)<1.44);
+  bool isbarrel = (fabs(sc_eta)<1.4442);
   bool isendcap = !isbarrel;
 
   float energy=0;
@@ -505,31 +506,32 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   if (isbarrel) energy = fTR->SCRaw[si]*getEtaCorrectionBarrel(sc_eta);
   if (isendcap) energy = fTR->SCRaw[si]+fTR->SCPre[si];
 
-  if (mode==20) return energy;
+  if (mode==20) return fTR->SCEnergy[si];
 
-  if (( TMath::Abs(sc_eta) < 1.44 ) && (energy/cosh(sc_eta)>5)){
+  if (( TMath::Abs(sc_eta) < 1.4442 ) && (energy/cosh(sc_eta)>5)){
     float et = energy/cosh(sc_eta);
-    if (mode==15 || mode==16){
+
       et /= applyScCorrectionsBrEta_electrons(sc_eta,sc_brem);
       et /= applyScCorrectionsET_EB_electrons(et);
-    }
+
     energy = et*cosh(sc_eta);
   }
 
   if ( ( TMath::Abs(sc_eta) < 2.5) && ( TMath::Abs(sc_eta) > 1.56 ) && (energy/cosh(sc_eta)>5)){
     float et = energy/cosh(sc_eta);
-    if (mode==15 || mode==16){
+
       et /= applyScCorrectionsBrEta_electrons(sc_eta,sc_brem);
       // et /= applyScCorrectionsET_EE_electrons(et);
       et /= applyScCorrectionsE_EE_electrons(et*cosh(sc_eta));
-    }
+
     energy = et*cosh(sc_eta);
   }
   
-  if (mode==15 || mode==16) if (isbarrel) energy *= fTR->SCcrackcorr[si];
 
-  if (mode==15) if (isbarrel) energy *= fTR->SClocalcorr[si];
 
+  if (mode==15) if (isbarrel) energy *= fTR->SCcrackcorr[si];
+  if (mode==16) if (isbarrel) energy *= fTR->SCcrackcorr[si]*fTR->SClocalcorr[si];
+  if (mode==17) if (isbarrel) energy *= fTR->SCcrackcorrseed[si];
 
   return energy;
 };

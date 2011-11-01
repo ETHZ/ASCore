@@ -32,6 +32,7 @@ private:
 	
 	// file for histograms:
 	TFile *fHistFile;
+  ofstream *myfile[10][10];
 	
 
   TH1D *fHElPt;
@@ -40,6 +41,7 @@ private:
   TH1D *fHInvMass0;
   TH1D *fHInvMass15;
   TH1D *fHInvMass16;
+  TH1D *fHInvMass17;
   TH1D *fHInvMass20;
 
 
