@@ -65,8 +65,6 @@ public:
 	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
 	void makeTTbarClosure();
 	
-	void printSyncExercise();
-	
 	//////////////////////////////
 	// Fake ratios
 	// Produce from tree, with given selections:

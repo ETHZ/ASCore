@@ -125,19 +125,19 @@ void SSDLPlotter::init(TString filename){
 	// fMCBG.push_back(VVTo4L);
 	fMCBG.push_back(GVJets);
 	fMCBG.push_back(DPSWW);
-	fMCBG.push_back(WWplus);
-	fMCBG.push_back(WWminus);
-	fMCBG.push_back(TTWplus);
-	fMCBG.push_back(TTWminus);
+	// fMCBG.push_back(WWplus);
+	// fMCBG.push_back(WWminus);
+	// fMCBG.push_back(TTWplus);
+	// fMCBG.push_back(TTWminus);
 	fMCBG.push_back(TTZplus);
 	fMCBG.push_back(TTZminus);
 	fMCBG.push_back(TTWWplus);
 	fMCBG.push_back(TTWWminus);
 	fMCBG.push_back(WWWplus);
 	fMCBG.push_back(WWWminus);
-	// fMCBG.push_back(WpWp);
-	// fMCBG.push_back(WmWm);
-	// fMCBG.push_back(ttbarW);
+	fMCBG.push_back(WpWp);
+	fMCBG.push_back(WmWm);
+	fMCBG.push_back(ttbarW);
 
 	// fMCBG.push_back(QCD5);
 	// fMCBG.push_back(QCD15);
@@ -191,19 +191,19 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZ);
 	fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
-	fMCRareSM.push_back(WWplus);
-	fMCRareSM.push_back(WWminus);
-	fMCRareSM.push_back(TTWplus);
-	fMCRareSM.push_back(TTWminus);
+	// fMCRareSM.push_back(WWplus);
+	// fMCRareSM.push_back(WWminus);
+	// fMCRareSM.push_back(TTWplus);
+	// fMCRareSM.push_back(TTWminus);
 	fMCRareSM.push_back(TTZplus);
 	fMCRareSM.push_back(TTZminus);
 	fMCRareSM.push_back(TTWWplus);
 	fMCRareSM.push_back(TTWWminus);
 	fMCRareSM.push_back(WWWplus);
 	fMCRareSM.push_back(WWWminus);
-	// fMCRareSM.push_back(WpWp);
-	// fMCRareSM.push_back(WmWm);
-	// fMCRareSM.push_back(ttbarW);
+	fMCRareSM.push_back(WpWp);
+	fMCRareSM.push_back(WmWm);
+	fMCRareSM.push_back(ttbarW);
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
@@ -438,12 +438,11 @@ void SSDLPlotter::doAnalysis(){
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	// fLumiNorm = 2096.; // Pre 2011B
-	// fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
-	fLumiNorm = 1014.; // Only 2011B
+	fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
+	// fLumiNorm = 1014.; // Only 2011B
 
 	// makePileUpPlots(true); // loops on all data!
 
-	// printSyncExercise();
 	// makeIsoVsMETPlot(QCDMuEnr10);
 	// makeIsoVsMETPlot(DoubleMu2);
 	
@@ -5598,154 +5597,6 @@ void SSDLPlotter::makeTTbarClosure(){
 	delete fEMFPRatios;
 	delete fMEFPRatios;
 	delete fEEFPRatios;
-}
-
-void SSDLPlotter::printSyncExercise(){
-	fLumiNorm = 1000.;
-	fDoCounting = false;
-
-	fC_minMu1pt = 5.;
-	fC_minMu2pt = 5.;
-	fC_minEl1pt = 10.;
-	fC_minEl2pt = 10.;
-	fC_minHT    = 200.;
-	fC_minMet   = 30.;
-	fC_minNjets = 0;
-
-	TString eventfilename = fOutputDir + "pass3_eth.txt";
-	fOUTSTREAM.open(eventfilename.Data(), ios::trunc);
-
-	Sample *S = fSamples[TTJetsSync];
-	TTree *tree = S->getTree();
-	fCurrentSample = TTJetsSync;
-
-	// Counters
-	int N_mumu(0), N_elel(0), N_elmu(0);
-
-	// Event loop
-	tree->ResetBranchAddresses();
-	// Init(tree);
-	if(S->datamc == 0) Init(tree);
-	else InitMC(tree);
-
-	if (fChain == 0) return;
-	Long64_t nentries = fChain->GetEntriesFast();
-	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<nentries;jentry++) {
-		printProgress(jentry, nentries, S->name);
-
-		Long64_t ientry = LoadTree(jentry);
-		if (ientry < 0) break;
-		nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-		// MuMu
-		fCurrentChannel = Muon;
-		int mu1(-1), mu2(-1);
-		if(mumuSignalTrigger()){
-			if(isSSLLMuEvent(mu1, mu2)){
-				if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){
-					N_mumu++;
-					fOUTSTREAM << " Mu/Mu in event ";
-					fOUTSTREAM << setw(11) << Event;
-					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
-					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu1]);
-					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", MuD0[mu1]);
-					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", MuDz[mu1]);
-					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", MuPt[mu2]);
-					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", MuD0[mu2]);
-					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", MuDz[mu2]);
-					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
-					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
-					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
-				}
-			}
-		}
-		resetHypLeptons();
-		
-		// EE
-		fCurrentChannel = Elec;
-		int el1(-1), el2(-1);
-		if(elelSignalTrigger()){
-			if( isSSLLElEvent(el1, el2) ){
-				if(  isTightElectron(el1) &&  isTightElectron(el2) ){
-					N_elel++;
-					fOUTSTREAM << " El/El in event ";
-					fOUTSTREAM << setw(11) << Event;
-					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
-					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", ElPt[el1]);
-					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", ElD0[el1]);
-					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", ElDz[el1]);
-					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el2]);
-					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", MuD0[el2]);
-					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", MuDz[el2]);
-					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
-					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
-					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
-				}
-			}
-		}
-		resetHypLeptons();
-
-		// EMu
-		fCurrentChannel = ElMu;
-		int mu(-1), el(-1);
-		if(elmuSignalTrigger()){
-			if( isSSLLElMuEvent(mu, el) ){
-				if(  isTightElectron(el) &&  isTightMuon(mu) ){
-					N_elmu++;
-					fOUTSTREAM << " El/Mu in event ";
-					fOUTSTREAM << setw(11) << Event;
-					fOUTSTREAM << " lumisection " << setw(4) << LumiSec;
-					fOUTSTREAM << " Pt1 = " << setw(5) << Form("%6.2f", MuPt[mu]);
-					fOUTSTREAM << " D01 = " << setw(5) << Form("%6.3f", MuD0[mu]);
-					fOUTSTREAM << " Dz1 = " << setw(5) << Form("%6.3f", MuDz[mu]);
-					fOUTSTREAM << " Pt2 = " << setw(5) << Form("%6.2f", ElPt[el]);
-					fOUTSTREAM << " D02 = " << setw(5) << Form("%6.3f", ElD0[el]);
-					fOUTSTREAM << " Dz2 = " << setw(5) << Form("%6.3f", ElDz[el]);
-					fOUTSTREAM << " HT  = " << setw(5) << Form("%6.2f", getHT());
-					fOUTSTREAM << " MET = " << setw(5) << Form("%6.2f", pfMET);
-					fOUTSTREAM << " NJET = " << setw(1) << Form("%1d", getNJets()) << endl;
-				}
-			}
-		}
-		resetHypLeptons();
-	}
-	cout << endl;
-
-	float scale = fLumiNorm/S->lumi;
-
-	// OUTPUT
-	cout << endl;
-	cout << "====================================================================" << endl;
-	cout << " Event Yields " << endl;
-	cout << "--------------------------------------------------------------------" << endl;
-	cout << "        elel     |       mumu      |        elmu     |          tot" << endl;
-	cout << setw(14) << left << " " << N_elel << " |";
-	cout << setw(14) << left << " " << N_mumu << " |";
-	cout << setw(14) << left << " " << N_elmu << " |";
-	cout << setw(14) << left << " " << N_elel+N_mumu+N_elmu << endl;
-	cout << "--------------------------------------------------------------------" << endl;
-	cout << " Event Yields scaled to 1/fb " << endl;
-	cout << "--------------------------------------------------------------------" << endl;
-	cout << setw(6) << Form("%5.2f", scale * N_elel) << " +-";
-	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel)) << " |";
-	cout << setw(6) << Form("%5.2f", scale * N_mumu) << " +-";
-	cout << setw(6) << Form("%5.2f", scale * sqrt(N_mumu)) << " |";
-	cout << setw(6) << Form("%5.2f", scale * N_elmu) << " +-";
-	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elmu)) << " |";
-	cout << setw(6) << Form("%5.2f", scale * (N_elel+N_mumu+N_elmu)) << " +-";
-	cout << setw(6) << Form("%5.2f", scale * sqrt(N_elel+N_mumu+N_elmu)) << endl;
-	cout << "====================================================================" << endl;
-	cout << endl;
-	cout << Form("| ETH/IFCA/Oviedo | %5.2f (%1d)  | %5.2f (%2d)   | %5.2f (%2d)   | %5.2f (%3d)   | [[%%ATTACHURL%%/pass3_eth.txt][yield.txt]] |"
-		, scale*N_elel, N_elel
-		, scale*N_mumu, N_mumu
-		, scale*N_elmu, N_elmu
-		, scale*(N_elel+N_mumu+N_elmu), N_elel+N_mumu+N_elmu) << endl;
-
-	fOUTSTREAM.close();
-	S->cleanUp();
-	fOutputSubDir = "";
 }
 
 //____________________________________________________________________________
