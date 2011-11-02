@@ -164,6 +164,8 @@ private:
 	float fLETiso;
 	int   fLETpassed1;
 	int   fLETpassed2;
+	int   fLETpassed3;
+	int   fLETpassed4;
 	
 };
 #endif

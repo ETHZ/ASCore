@@ -236,6 +236,8 @@ void SSDLAnalysis::BookEffTree(){
 	fLepEffTree->Branch("Iso",              &fLETiso      ,       "Iso/F");
 	fLepEffTree->Branch("Pass1",            &fLETpassed1  ,       "Pass1/I");
 	fLepEffTree->Branch("Pass2",            &fLETpassed2  ,       "Pass2/I");
+	fLepEffTree->Branch("Pass3",            &fLETpassed3  ,       "Pass3/I");
+	fLepEffTree->Branch("Pass4",            &fLETpassed4  ,       "Pass4/I");
 }
 
 //____________________________________________________________________________
@@ -413,6 +415,8 @@ void SSDLAnalysis::FillEffTree(){
 		
 		fLETpassed1 = IsTightMuon(1,i)?1:0;
 		fLETpassed2 = IsTightMuon(2,i)?1:0;
+		fLETpassed3 = IsTightMuon(3,i)?1:0;
+		fLETpassed4 = IsTightMuon(4,i)?1:0;
 		fLepEffTree->Fill();
 	}
 
@@ -428,6 +432,8 @@ void SSDLAnalysis::FillEffTree(){
 		
 		fLETpassed1 = IsTightEle(1,i)?1:0;
 		fLETpassed2 = IsTightEle(2,i)?1:0;
+		fLETpassed3 = IsTightEle(3,i)?1:0;
+		fLETpassed4 = IsTightEle(4,i)?1:0;
 		fLepEffTree->Fill();
 	}
 }
@@ -523,6 +529,8 @@ void SSDLAnalysis::ResetEffTree(){
 	fLETiso        = -999.99;
 	fLETpassed1    = -999;
 	fLETpassed2    = -999;
+	fLETpassed3    = -999;
+	fLETpassed4    = -999;
 }
 
 //____________________________________________________________________________
@@ -594,6 +602,18 @@ bool SSDLAnalysis::IsTightMuon(int toggle, int index){
 		if(corrMuIso(index) > 0.15) return false;
 		return true;
 	}
+	if(toggle == 3){
+		if(IsGoodBasicMu(index) == false) return false;
+		if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+		if(fTR->MuRelIso03[index] > 0.1) return false;
+		return true;
+	}
+	if(toggle == 4){
+		if(IsGoodBasicMu(index) == false) return false;
+		if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+		if(corrMuIso(index) > 0.1) return false;
+		return true;
+	}
 	cout << "Choose your toggle!" << endl;
 	return false;
 }
@@ -612,6 +632,22 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
 		if(IsGoodElId_WP80(index) == false) return false;
 		if(corrElIso(index) > 0.15) return false;
+		return true;
+	}
+	if(toggle == 3){
+		if(IsLooseEl(index) == false) return false;
+		if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElPt[index] > 0.2) return false;
+		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
+		if(IsGoodElId_WP80(index) == false) return false;
+		if(relElIso(index) > 0.1) return false;
+		return true;		
+	}
+	if(toggle == 4){
+		if(IsLooseEl(index) == false) return false;
+		if(fTR->ElDR03EcalRecHitSumEt[index]/fTR->ElPt[index] > 0.2) return false;
+		if(fTR->ElCInfoIsGsfCtfScPixCons[index] != 1) return false;
+		if(IsGoodElId_WP80(index) == false) return false;
+		if(corrElIso(index) > 0.1) return false;
 		return true;
 	}
 	cout << "Choose your toggle!" << endl;
