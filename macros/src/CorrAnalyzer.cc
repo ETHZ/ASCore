@@ -22,6 +22,9 @@ CorrAnalyzer::~CorrAnalyzer(){
 void CorrAnalyzer::Loop(){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << fTR->GetEntries() << endl;
+
+	if(fMaxEvents==-1)nentries=fTR->GetEntries();
+	if(fMaxEvents>0)nentries=fMaxEvents;
 	
 	// loop over all ntuple entries
 	// nentries = 200;
@@ -32,23 +35,33 @@ void CorrAnalyzer::Loop(){
                   fCurRun = fTR->Run;
                   fZeeAnalysis->BeginRun(fCurRun);
                   fHggAnalysis->BeginRun(fCurRun);
+		  skipRun = false;
+		  if ( !CheckRun() ) skipRun = true;
                  }
+		// Check if new lumi is in JSON file
+		if ( !skipRun && fCurLumi != fTR->LumiSection ) {
+		  fCurLumi = fTR->LumiSection;
+		  skipLumi = false; // Re-initialise
+		  if ( !CheckRunLumi() ) skipLumi = true;
+		}
+		if ( !(skipRun || skipLumi) ) {
+		  fZeeAnalysis->Analyze();
+		  fHggAnalysis->Analyze();
+		}
 
-		fZeeAnalysis->Analyze();
-		fHggAnalysis->Analyze();
 	}
 }
 
 // Method called before starting the event loop
-void CorrAnalyzer::BeginJob(){
+void CorrAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fZeeAnalysis->SetOutputDir(fOutputDir);
 	fZeeAnalysis->fVerbose = fVerbose;
-
+	fZeeAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fZeeAnalysis->Begin();
 
 	fHggAnalysis->SetOutputDir(fOutputDir);
 	fHggAnalysis->fVerbose = fVerbose;
-
+	fHggAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fHggAnalysis->Begin();
 
 }

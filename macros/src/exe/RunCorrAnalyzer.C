@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunCorrAnalyzer [-d dir] [-v verbose] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunCorrAnalyzer [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
 	cout << "               default is TempOutput/               " << endl;
@@ -35,22 +35,31 @@ int main(int argc, char* argv[]) {
 	bool isList = false;
 	TString outputdir = "TempOutput/";
 	int verbose = 0;
-
-// Parse options
+	
+	int maxEvents=-1;
+	string jsonFileName = "";
+	string  data_PileUp = "";
+	string  mc_PileUp = "";
+	
+	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:lh?")) != -1 ) {
-		switch (ch) {
-			case 'd': outputdir = TString(optarg); break;
-			case 'v': verbose = atoi(optarg); break;
-			case 'l': isList = true; break;
-			case '?':
-			case 'h': usage(0); break;
-			default:
-			cerr << "*** Error: unknown option " << optarg << std::endl;
-			usage(-1);
-		}
+	while ((ch = getopt(argc, argv, "d:v:j:p:P:n:lh?")) != -1 ) {
+	  switch (ch) {
+	  case 'd': outputdir = TString(optarg); break;
+	  case 'v': verbose = atoi(optarg); break;
+	  case 'l': isList = true; break;
+	  case '?':
+	  case 'h': usage(0); break;
+	  case 'p': data_PileUp     = string(optarg); break;
+	  case 'P': mc_PileUp       = string(optarg); break;
+	  case 'n': maxEvents = atoi(optarg); break;
+	  case 'j': jsonFileName = string(optarg); break;
+	  default:
+	    cerr << "*** Error: unknown option " << optarg << std::endl;
+	    usage(-1);
+	  }
 	}
-
+	
 	argc -= optind;
 	argv += optind;
 
@@ -79,12 +88,18 @@ int main(int argc, char* argv[]) {
 	cout << "OutputDir is:     " << outputdir << endl;
 	cout << "Verbose level is: " << verbose << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
+	cout << "Events to process: " << maxEvents << endl;
+	cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
+	cout << "MC_PileUp file:                 " << (mc_PileUp.length()>0?mc_PileUp:"empty") << endl;
+	cout << "Data_PileUp file:               " << (data_PileUp.length()>0?data_PileUp:"empty") << endl;
 	cout << "--------------" << endl;
 
 	CorrAnalyzer *tA = new CorrAnalyzer(theChain);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
-	tA->BeginJob();
+	tA->SetMaxEvents(maxEvents);
+	if ( jsonFileName.length() ) tA->ReadJSON(jsonFileName.c_str());
+	tA->BeginJob(data_PileUp, mc_PileUp);
 	tA->Loop();
 	tA->EndJob();
 	delete tA;
