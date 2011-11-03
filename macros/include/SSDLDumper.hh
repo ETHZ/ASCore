@@ -226,7 +226,7 @@ public:
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 7;
+	static const int gNDiffVars = 9;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -439,7 +439,7 @@ public:
 
 	virtual bool isBarrelElectron(int);
 
-	virtual bool isGoodJet(int, float = 30.);
+	virtual bool isGoodJet(int, float = 40.);
 
 	float fC_minHT;
 	float fC_minMet;
