@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunCorrAnalyzer [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunCorrAnalyzer [-f datamc] [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
 	cout << "               default is TempOutput/               " << endl;
@@ -40,12 +40,14 @@ int main(int argc, char* argv[]) {
 	string jsonFileName = "";
 	string  data_PileUp = "";
 	string  mc_PileUp = "";
+	string dataType = "";
 	
 	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "d:v:j:p:P:n:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "f:d:v:j:p:P:n:lh?")) != -1 ) {
 	  switch (ch) {
 	  case 'd': outputdir = TString(optarg); break;
+	  case 'f': dataType = TString(optarg); break;
 	  case 'v': verbose = atoi(optarg); break;
 	  case 'l': isList = true; break;
 	  case '?':
@@ -90,11 +92,12 @@ int main(int argc, char* argv[]) {
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 	cout << "Events to process: " << maxEvents << endl;
 	cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
+	cout << "Data/MC flag: " << dataType << endl;
 	cout << "MC_PileUp file:                 " << (mc_PileUp.length()>0?mc_PileUp:"empty") << endl;
 	cout << "Data_PileUp file:               " << (data_PileUp.length()>0?data_PileUp:"empty") << endl;
 	cout << "--------------" << endl;
 
-	CorrAnalyzer *tA = new CorrAnalyzer(theChain);
+	CorrAnalyzer *tA = new CorrAnalyzer(theChain,dataType);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxEvents);

@@ -483,9 +483,11 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
 
 double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode){
 
-  if (mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
+  if (mode != 999 && mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
 
   if (mode==0) return fTR->ElE[ei];
+
+  if (mode==999) return fTR->ElGenE[ei];
 
   int si=fTR->ElSCindex[ei];
 

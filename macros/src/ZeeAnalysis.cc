@@ -3,18 +3,25 @@
 
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 using namespace std;
 
-ZeeAnalysis::ZeeAnalysis(TreeReader *tr) : UserAnalysisBase(tr){
+ZeeAnalysis::ZeeAnalysis(TreeReader *tr, std::string dataType) : UserAnalysisBase(tr), fDataType_(dataType){
 	Util::SetStyle();	
+	if (fDataType_ == "mc") isdata=false;
+	else if (fDataType_ == "data") isdata=true; 
+	else {
+	  std::cout << "wrong data type" << std::endl;
+	  assert(1==0);
+	}
         elecorr = new EnergyCorrection("electrons");
-	for (int i=0; i<5; i++) for (int j=0; j<4; j++) myfile[i][j] = new ofstream();
+	for (int i=0; i<6; i++) for (int j=0; j<4; j++) myfile[i][j] = new ofstream();
 }
 
 ZeeAnalysis::~ZeeAnalysis(){
   delete elecorr;
-  for (int i=0; i<5; i++) for (int j=0; j<4; j++) delete myfile[i][j];
+  for (int i=0; i<6; i++) for (int j=0; j<4; j++) delete myfile[i][j];
 }
 
 void ZeeAnalysis::Begin(){
@@ -24,8 +31,8 @@ void ZeeAnalysis::Begin(){
 
 	
 	const char* masspointsfile = "masspoints_ee_";
-	int codes[5]={0,15,16,17,20};
-	for (int i=0; i<5; i++)	for (int j=0; j<4; j++){
+	int codes[6]={0,15,16,17,20,999};
+	for (int i=0; i<6; i++)	for (int j=0; j<4; j++){
 	TString path=fOutputDir;
 	path.Append(masspointsfile);
 	path+=codes[i];
@@ -44,6 +51,12 @@ void ZeeAnalysis::Begin(){
 	fHInvMass16 = new TH1D("eeInvMass16","Invariant ee mass corr16", 100, 70,110);
 	fHInvMass17 = new TH1D("eeInvMass17","Invariant ee mass corr17", 100, 70,110);
 	fHInvMass20 = new TH1D("eeInvMass20","Invariant ee mass corr20", 100, 70,110);
+	fHInvMassEgen = new TH1D("eeInvMassEgen","Invariant ee mass corrEgen", 100, 70,110);
+
+	fHErecEGen17  = new TH1D("ErecEgen17","ErecEgen17",100,0.5,1.5);
+	fHErecEGen20  = new TH1D("ErecEgen20","ErecEgen20",100,0.5,1.5);
+	fHErecEGen999  = new TH1D("ErecEgen999","ErecEgen999",100,0.5,1.5);
+
 }
 
 void ZeeAnalysis::Analyze(){
@@ -56,15 +69,20 @@ void ZeeAnalysis::Analyze(){
    }
   */
 
+  float weight;
+  if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
+  else weight=1;
+
+
   vector<int> passing;
    for (int i=0; i<fTR->NEles; i++){
       passing.push_back(i);
   }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-     if (fTR->ElIDsimpleWP80relIso[*it]<7) it=passing.erase(it); else it++;
+     if (IsGoodElId_WP80(*it)) it=passing.erase(it); else it++;
    }
-   
+
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      if (fTR->ElSCindex[*it]==-1) it=passing.erase(it); else it++;
    }
@@ -79,15 +97,18 @@ void ZeeAnalysis::Analyze(){
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
-     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5)) it=passing.erase(it); else it++;
+     float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
+     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) it=passing.erase(it); else it++;
    }
 
    if (passing.size()<2) return;
+   
+   if (fTR->ElSCindex[passing.at(0)]==-1 || fTR->ElSCindex[passing.at(1)]==-1) return;
 
-  TLorentzVector elec[2];
-  for (int i=0; i<2; i++){
-    elec[i].SetPtEtaPhiE(fTR->ElPt[passing.at(i)],fTR->ElEta[passing.at(i)],fTR->ElPhi[passing.at(i)],fTR->ElE[passing.at(i)]);
-  }
+   TLorentzVector elec[2];
+   for (int i=0; i<2; i++){
+     elec[i].SetPtEtaPhiE(fTR->ElPt[passing.at(i)],fTR->ElEta[passing.at(i)],fTR->ElPhi[passing.at(i)],fTR->ElE[passing.at(i)]);
+   }
 
   /*
   bool masswindow=false;
@@ -95,45 +116,62 @@ void ZeeAnalysis::Analyze(){
   if (!masswindow) return;
   */
 
+
   float invmass0=(elec[0]+elec[1]).M();
   float invmass15=(CorrElectron(fTR,passing.at(0),15)+CorrElectron(fTR,passing.at(1),15)).M();
   float invmass16=(CorrElectron(fTR,passing.at(0),16)+CorrElectron(fTR,passing.at(1),16)).M();
   float invmass17=(CorrElectron(fTR,passing.at(0),17)+CorrElectron(fTR,passing.at(1),17)).M();
   float invmass20=(CorrElectron(fTR,passing.at(0),20)+CorrElectron(fTR,passing.at(1),20)).M();
+  float invmassEgen=(CorrElectron(fTR,passing.at(0),999)+CorrElectron(fTR,passing.at(1),999)).M();
 
-  fHInvMass0->Fill(invmass0);
-  fHInvMass15 ->Fill(invmass15);
-  fHInvMass16 ->Fill(invmass16);
-  fHInvMass17 ->Fill(invmass17);
-  fHInvMass20 ->Fill(invmass20);
+  fHInvMass0->Fill(invmass0,weight);
+  fHInvMass15 ->Fill(invmass15,weight);
+  fHInvMass16 ->Fill(invmass16,weight);
+  fHInvMass17 ->Fill(invmass17,weight);
+  fHInvMass20 ->Fill(invmass20,weight);
+  fHInvMassEgen->Fill(invmassEgen,weight);
 
- if (fTR->ElSCindex[passing.at(0)]!=-1 && fTR->ElSCindex[passing.at(1)]!=-1){
+
 
    int cat;
    
-   if (fTR->ElEta[passing.at(0)]<1.4442 && fTR->ElEta[passing.at(1)]<1.4442) cat=1;
-   else if (fTR->ElEta[passing.at(0)]>1.56 && fTR->ElEta[passing.at(1)]>1.56) cat=3;
-   else if (fTR->ElEta[passing.at(0)]<1.4442 && fTR->ElEta[passing.at(1)]>1.56) cat=2;
-   else if (fTR->ElEta[passing.at(0)]>1.4442 && fTR->ElEta[passing.at(1)]<1.56) cat=2;
+   float abseta0 = fabs(fTR->ElEta[passing.at(0)]);
+   float abseta1 = fabs(fTR->ElEta[passing.at(1)]);
+   if (abseta0<1.4442 && abseta1<1.4442) cat=1;
+   else if (abseta0>1.56 && abseta1>1.56) cat=3;
+   else if (abseta0<1.4442 && abseta1>1.56) cat=2;
+   else if (abseta0>1.4442 && abseta1<1.56) cat=2;
    else cat=-1;
    
    
    if (cat!=-1){
-     *(myfile[0][0]) << invmass0 << std::endl;
-     *(myfile[1][0]) << invmass15 << std::endl;
-     *(myfile[2][0]) << invmass16 << std::endl;
-     *(myfile[3][0]) << invmass17 << std::endl;
-     *(myfile[4][0]) << invmass20 << std::endl;
+     *(myfile[0][0]) << invmass0 << " " << weight << std::endl;
+     *(myfile[1][0]) << invmass15 << " " << weight << std::endl;
+     *(myfile[2][0]) << invmass16 << " " << weight << std::endl;
+     *(myfile[3][0]) << invmass17 << " " << weight << std::endl;
+     *(myfile[4][0]) << invmass20 << " " << weight << std::endl;
+     *(myfile[5][0]) << invmassEgen << " " << weight << std::endl;
      
-     *(myfile[0][cat]) << invmass0 << std::endl;
-     *(myfile[1][cat]) << invmass15 << std::endl;
-     *(myfile[2][cat]) << invmass16 << std::endl;
-     *(myfile[3][cat]) << invmass17 << std::endl;
-     *(myfile[4][cat]) << invmass20 << std::endl;
+     *(myfile[0][cat]) << invmass0 << " " << weight << std::endl;
+     *(myfile[1][cat]) << invmass15 << " " << weight << std::endl;
+     *(myfile[2][cat]) << invmass16 << " " << weight << std::endl;
+     *(myfile[3][cat]) << invmass17 << " " << weight << std::endl;
+     *(myfile[4][cat]) << invmass20 << " " << weight << std::endl;
+     *(myfile[5][cat]) << invmassEgen << " " << weight << std::endl;
+   }
+ 
+
+   if (cat==1) for (int i=0; i<2; i++) {
+     if (fTR->ElGenE[passing.at(i)]<0) continue;
+     TLorentzVector correl17 = CorrElectron(fTR,passing.at(i),17);
+     TLorentzVector correl20 = CorrElectron(fTR,passing.at(i),20);
+     TLorentzVector correlGen = CorrElectron(fTR,passing.at(i),999);
+     fHErecEGen17->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
+     fHErecEGen20->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
+     fHErecEGen999->Fill(correlGen.E()/fTR->ElGenE[passing.at(i)]);
    }
    
-   
- }
+ 
  
  
 
@@ -150,6 +188,11 @@ void ZeeAnalysis::End(){
 	fHInvMass16 -> Write();
 	fHInvMass17 -> Write();
 	fHInvMass20 -> Write();
+	fHInvMassEgen -> Write();
+
+	fHErecEGen17->Write();
+	fHErecEGen20->Write();
+	fHErecEGen999->Write();
 
 	fHistFile->Close();
 	for (int i=0; i<5; i++) for (int j=0; j<4; j++)  myfile[i][j]->close();

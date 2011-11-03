@@ -48,12 +48,14 @@ public:
 
   float getEtaCorrectionBarrel(float eta);
 
+  bool isInPhiCracks(double phi, double eta);
+
 private:
 
   bool forphotons;
   
   double f5x5( double iEta );
-  bool isInPhiCracks(double phi, double eta);
+
 
   static const Double_t etaCrackMin = 1.44; 
   static const Double_t etaCrackMax = 1.56;

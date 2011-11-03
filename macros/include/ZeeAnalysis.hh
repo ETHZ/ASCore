@@ -18,7 +18,7 @@
 
 class ZeeAnalysis : public UserAnalysisBase{
 public:
-	ZeeAnalysis(TreeReader *tr = NULL);
+  ZeeAnalysis(TreeReader *tr = NULL, std::string dataType="data");
 	virtual ~ZeeAnalysis();
 
 	void Begin();
@@ -33,7 +33,9 @@ private:
 	// file for histograms:
 	TFile *fHistFile;
   ofstream *myfile[10][10];
-	
+
+  std::string fDataType_;
+  bool isdata;
 
   TH1D *fHElPt;
   TH1D *fHElPtCorr;
@@ -43,7 +45,11 @@ private:
   TH1D *fHInvMass16;
   TH1D *fHInvMass17;
   TH1D *fHInvMass20;
+  TH1D *fHInvMassEgen;
 
+  TH1D *fHErecEGen17;
+  TH1D *fHErecEGen20;
+  TH1D *fHErecEGen999;
 
 };
 #endif
