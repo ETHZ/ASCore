@@ -55,7 +55,7 @@ void ZeeAnalysis::Begin(){
 
 	fHErecEGen17  = new TH1D("ErecEgen17","ErecEgen17",100,0.5,1.5);
 	fHErecEGen20  = new TH1D("ErecEgen20","ErecEgen20",100,0.5,1.5);
-	fHErecEGen999  = new TH1D("ErecEgen999","ErecEgen999",100,0.5,1.5);
+
 
 }
 
@@ -98,7 +98,9 @@ void ZeeAnalysis::Analyze(){
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
-     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) it=passing.erase(it); else it++;
+     if ( (fabs(eta)>2.5) ) it=passing.erase(it); else it++;
+     //     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) it=passing.erase(it); else it++;
+     //     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) it=passing.erase(it); else it++;
    }
 
    if (passing.size()<2) return;
@@ -110,11 +112,11 @@ void ZeeAnalysis::Analyze(){
      elec[i].SetPtEtaPhiE(fTR->ElPt[passing.at(i)],fTR->ElEta[passing.at(i)],fTR->ElPhi[passing.at(i)],fTR->ElE[passing.at(i)]);
    }
 
-  /*
+
   bool masswindow=false;
-  if (fabs((elec[0]+elec[1]).M()-91.2)<20) masswindow=true;
+  if (fabs((elec[0]+elec[1]).M()-91.2)<30) masswindow=true;
   if (!masswindow) return;
-  */
+
 
 
   float invmass0=(elec[0]+elec[1]).M();
@@ -122,7 +124,11 @@ void ZeeAnalysis::Analyze(){
   float invmass16=(CorrElectron(fTR,passing.at(0),16)+CorrElectron(fTR,passing.at(1),16)).M();
   float invmass17=(CorrElectron(fTR,passing.at(0),17)+CorrElectron(fTR,passing.at(1),17)).M();
   float invmass20=(CorrElectron(fTR,passing.at(0),20)+CorrElectron(fTR,passing.at(1),20)).M();
-  float invmassEgen=(CorrElectron(fTR,passing.at(0),999)+CorrElectron(fTR,passing.at(1),999)).M();
+  
+  TLorentzVector genelec[2];
+  for (int i=0; i<2; i++) genelec[i].SetPtEtaPhiE(fTR->ElGenPt[passing.at(i)],fTR->ElGenEta[passing.at(i)],fTR->ElGenPhi[passing.at(i)],fTR->ElGenE[passing.at(i)]);
+  
+  float invmassEgen=(genelec[0]+genelec[1]).M();
 
   fHInvMass0->Fill(invmass0,weight);
   fHInvMass15 ->Fill(invmass15,weight);
@@ -135,12 +141,12 @@ void ZeeAnalysis::Analyze(){
 
    int cat;
    
-   float abseta0 = fabs(fTR->ElEta[passing.at(0)]);
-   float abseta1 = fabs(fTR->ElEta[passing.at(1)]);
+   float abseta0 = fTR->SCEta[fTR->ElSCindex[passing.at(0)]];
+   float abseta1 = fTR->SCEta[fTR->ElSCindex[passing.at(1)]];
    if (abseta0<1.4442 && abseta1<1.4442) cat=1;
    else if (abseta0>1.56 && abseta1>1.56) cat=3;
    else if (abseta0<1.4442 && abseta1>1.56) cat=2;
-   else if (abseta0>1.4442 && abseta1<1.56) cat=2;
+   else if (abseta0>1.56 && abseta1<1.4442) cat=2;
    else cat=-1;
    
    
@@ -165,10 +171,8 @@ void ZeeAnalysis::Analyze(){
      if (fTR->ElGenE[passing.at(i)]<0) continue;
      TLorentzVector correl17 = CorrElectron(fTR,passing.at(i),17);
      TLorentzVector correl20 = CorrElectron(fTR,passing.at(i),20);
-     TLorentzVector correlGen = CorrElectron(fTR,passing.at(i),999);
      fHErecEGen17->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
      fHErecEGen20->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
-     fHErecEGen999->Fill(correlGen.E()/fTR->ElGenE[passing.at(i)]);
    }
    
  
@@ -192,7 +196,7 @@ void ZeeAnalysis::End(){
 
 	fHErecEGen17->Write();
 	fHErecEGen20->Write();
-	fHErecEGen999->Write();
+
 
 	fHistFile->Close();
 	for (int i=0; i<5; i++) for (int j=0; j<4; j++)  myfile[i][j]->close();

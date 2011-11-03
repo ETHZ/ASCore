@@ -49,7 +49,7 @@ private:
 
   TH1D *fHErecEGen17;
   TH1D *fHErecEGen20;
-  TH1D *fHErecEGen999;
+
 
 };
 #endif

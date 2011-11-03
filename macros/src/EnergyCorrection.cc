@@ -403,6 +403,7 @@ bool EnergyCorrection::isInPhiCracks(double phi, double eta){
   if (fabs(eta)<1.44){
     for (Int_t i = 0 ; i < 18; ++i){
       if ((phi0 + moduleWidth*i -fiducialCut) <= phi && phi <= (phi0 + moduleWidth*i + fiducialCut)) OK = true;
+      //	std::cout << (int)OK << std::endl;
       //        cout << " PHI " << (phi0 + moduleWidth*i -fiducialCut) << " " << phi << " " <<  (phi0 + moduleWidth*i + fiducialCut)  << " " << OK << endl ;
     }
   }
