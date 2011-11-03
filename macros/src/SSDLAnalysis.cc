@@ -276,7 +276,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt  [ind] = fTR->JPt [jetindex];
+		fTJetpt  [ind] = GetJetPtNoResidual(jetindex);
 		fTJeteta [ind] = fTR->JEta[jetindex];
 		fTJetphi [ind] = fTR->JPhi[jetindex];
 		fTJetbtag[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
