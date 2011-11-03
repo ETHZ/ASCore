@@ -113,7 +113,6 @@ private:
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
 	float fTmuiso         [fMaxNmus];
-	float fTmuciso        [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
@@ -138,8 +137,8 @@ private:
 	float fTEldz             [fMaxNeles];
 	float fTElDzErr          [fMaxNeles];
 	float fTElRelIso         [fMaxNeles];
-	float fTElCorrIso        [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
+	float fTElHoverE         [fMaxNeles];
 	int   fTElIsGoodElId_WP80[fMaxNeles];
 	int   fTElIsGoodElId_WP90[fMaxNeles];
 	float fTElMT             [fMaxNeles];

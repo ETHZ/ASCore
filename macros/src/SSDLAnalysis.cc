@@ -169,7 +169,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
 	fAnalysisTree->Branch("MuCharge"      ,&fTmucharge,       "MuCharge[NMus]/I");
 	fAnalysisTree->Branch("MuIso"         ,&fTmuiso,          "MuIso[NMus]/F");
-	fAnalysisTree->Branch("MuCorrIso"     ,&fTmuciso,         "MuCorrIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
@@ -193,8 +192,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElDz",                   &fTEldz,                "ElDz[NEls]/F");
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
 	fAnalysisTree->Branch("ElRelIso",               &fTElRelIso,            "ElRelIso[NEls]/F");
-	fAnalysisTree->Branch("ElCorrIso",              &fTElCorrIso,           "ElCorrIso[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
+	fAnalysisTree->Branch("ElHoverE",               &fTElHoverE,            "ElHoverE[NEls]/F");
 	fAnalysisTree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
 	fAnalysisTree->Branch("ElGenID",                &fTElGenID,             "ElGenID[NEls]/I");
@@ -258,8 +257,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
-	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsVeryLooseMu);
-	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsVeryLooseEl);
+	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsLooseMu);
+	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsLooseEl);
 	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
 	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
@@ -304,7 +303,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuphi   [i] = fTR->MuPhi     [index];
 		fTmucharge[i] = fTR->MuCharge  [index];
 		fTmuiso   [i] = fTR->MuRelIso03[index];
-		fTmuciso  [i] = corrMuIso(index);
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
 		fTmuptE   [i] = fTR->MuPtE     [index];
@@ -351,7 +349,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTEldz               [ind] = fTR->ElDzPV                  [elindex];
 		fTElDzErr            [ind] = fTR->ElDzE                   [elindex];
 		fTElRelIso           [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
-		fTElCorrIso          [ind] = corrElIso(elindex);
 		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt   [elindex];
 		
 		if(fIsData == false){ // mc truth information		
@@ -383,6 +380,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		double METpy  = fTR->PFMETpy;
 		fTElMT[ind]   = sqrt( 2*fTR->PFMET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
 		
+		fTElHoverE         [ind] = fTR->ElHcalOverEcal[elindex];
 		fTElIsGoodElId_WP80[ind] = IsGoodElId_WP80(elindex);
 		fTElIsGoodElId_WP90[ind] = IsGoodElId_WP90(elindex);
 	}
@@ -462,7 +460,6 @@ void SSDLAnalysis::ResetTree(){
 		fTmuphi         [i] = -999.99;
 		fTmucharge      [i] = -999;
 		fTmuiso         [i] = -999.99;
-		fTmuciso        [i] = -999.99;
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
 		fTmuptE         [i] = -999.99;
@@ -488,8 +485,8 @@ void SSDLAnalysis::ResetTree(){
 		fTEldz              [i] = -999.99;
 		fTElDzErr           [i] = -999.99;
 		fTElRelIso          [i] = -999.99;
-		fTElCorrIso         [i] = -999.99;
 		fTElEcalRecHitSumEt [i] = -999.99;
+		fTElHoverE          [i] = -999.99;
 		fTElIsGoodElId_WP80 [i] = -999;
 		fTElIsGoodElId_WP90 [i] = -999;
 		fTElMT              [i] = -999.99;

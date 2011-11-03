@@ -65,7 +65,6 @@ public:
 	virtual bool IsTightMu(int);
 	virtual bool IsLooseMu(int);
 	virtual bool IsLooseNoTightMu(int);
-	virtual bool IsVeryLooseMu(int);
 
 	// Electron Selectors
 	virtual bool IsGoodBasicEl(int);
@@ -73,7 +72,6 @@ public:
 	virtual bool IsGoodElId_WP90(int);
 	virtual bool ElPassesWP80_ConvRej(int);
 	virtual bool IsLooseEl(int);
-	virtual bool IsVeryLooseEl(int);
 	virtual float relElIso(int);
 
 	// Photon Selectors

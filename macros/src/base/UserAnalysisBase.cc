@@ -314,30 +314,6 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 	else return false;
 }
 
-bool UserAnalysisBase::IsVeryLooseMu(int index){
-	// Basic muon cleaning and ID
-	if(fTR->MuIsGlobalMuon[index] == 0)  return false;
-	if(fTR->MuIsTrackerMuon[index] == 0) return false;
-
-	if(fTR->MuPt[index] < 5)          return false;
-	if(fabs(fTR->MuEta[index]) > 2.4) return false;
-
-	if(fTR->MuNChi2[index] > 10)   return false;
-	if(fTR->MuNTkHits[index] < 11) return false;
-	if(fTR->MuNMuHits[index] < 1)  return false;
-
-	if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
-	if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
-
-	if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
-	if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
-
-	if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
-
-	if(fTR->MuRelIso03[index] > 2.0) return false;
-	return true;
-}
-
 // ELECTRONS
 bool UserAnalysisBase::IsGoodBasicEl(int index){
 	// Electrons with WP95 ID
@@ -439,21 +415,6 @@ bool UserAnalysisBase::IsLooseEl(int index){
 	if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
 	if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
 
-	return true;
-}
-
-bool UserAnalysisBase::IsVeryLooseEl(int index){
-	if(!IsGoodBasicEl(index))         return false;
-	if(fTR->ElPt[index] < 10.)        return false;
-	if(fabs(fTR->ElEta[index]) > 2.4) return false;
-
-	if(!fTR->ElEcalDriven[index]) return false;
-	
-	// Loose identification criteria: WP90
-	if(!IsGoodElId_WP90(index)) return false;
-
-	// Loose isolation criteria
-	if(relElIso(index) > 2.0) return false;
 	return true;
 }
 
