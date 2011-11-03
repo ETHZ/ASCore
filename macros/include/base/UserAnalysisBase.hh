@@ -8,6 +8,8 @@
 #include <map>
 #include <string>
 
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+
 class UserAnalysisBase{
 public:
 	UserAnalysisBase(TreeReader *tr = 0);
@@ -34,7 +36,7 @@ public:
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string = "");
 	virtual float GetPUWeight(int);
-  virtual float GetPUWeight(int, int);
+	virtual float GetPUWeight(int, int);
 
 
 	TreeReader *fTR;
@@ -42,6 +44,8 @@ public:
 	TFile *fOutputFile;
 	TString fTag;
 	TLatex *fTlat;
+
+	FactorizedJetCorrector *fJetCorrector;
 
 	bool fIsData;
 
@@ -95,6 +99,7 @@ public:
 	virtual bool DiElectronSelection(int&, int&, int = 0, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	virtual bool SSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	virtual bool OSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+
 	// TDL & RA5
 	virtual bool IsGoodElEvent_TDL();
 	virtual bool IsGoodElEvent_RA5();
@@ -102,6 +107,8 @@ public:
 	// Print interesting event
 	virtual void EventPrint();
 	virtual void GetEvtEmChFrac(double & fracEm, double & fracCh);
+
+	virtual float GetJetPtNoResidual(int);
 
 private:
 

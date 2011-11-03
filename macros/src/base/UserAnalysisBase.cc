@@ -6,6 +6,10 @@
 #include "base/UserAnalysisBase.hh"
 #include "TH1I.h"
 #include "TLorentzVector.h"
+#include "TSystem.h"
+
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 using namespace std;
 
@@ -14,10 +18,24 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	fTlat = new TLatex();
 	fVerbose = false;
 	fDoPileUpReweight = false;
+	
+	//----------- Correction Object ------------------------------
+	vector<JetCorrectorParameters> JetCorPar;
+	JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2L3Residual.txt");
+	JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L3Absolute.txt");
+	JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2Relative.txt");
+	JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L1FastJet.txt");
+	JetCorPar.push_back(*L1JetPar);
+	JetCorPar.push_back(*L2JetPar);
+	JetCorPar.push_back(*L3JetPar);
+	JetCorPar.push_back(*ResJetPar);
+	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
+	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar;
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
 	if(fDoPileUpReweight) delete fPUWeight;
+	delete fJetCorrector;
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
@@ -826,6 +844,29 @@ bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
 	// of the hardest two in the argument
 	// charge is the relative charge, 0 = no cut on charge, 1 = SS, -1 = OS
 	return DiMuonSelection(prim, sec, 1);
+}
+
+///////////////////////////////////////////////////////////////
+// JEC
+float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
+	if(!fIsData) return fTR->JPt[jetindex]; // do nothing for MC (no res corr here)
+
+	float rawpt = fTR->JPt[jetindex]/fTR->JEcorr[jetindex];
+	fJetCorrector->setJetEta(fTR->JEta[jetindex]);
+	fJetCorrector->setRho(fTR->Rho);
+	fJetCorrector->setJetA(fTR->JArea[jetindex]);
+	fJetCorrector->setJetPt(rawpt); // IMPORTANT: the correction is a function of the RAW pt
+
+	// The getSubCorrections member function returns the vector of the subcorrections UP to
+	// the given level. For example in the example above, factors[0] is the L1 correction
+	// and factors[3] is the L1+L2+L3+Residual correction.
+	vector<float> factors = fJetCorrector->getSubCorrections();
+
+	// Sanity check: JEcorr should be the full set of corrections applied
+	if(fabs(factors[3] - fTR->JEcorr[jetindex]) > 0.000001 && fVerbose > 2) cout << "" << endl;
+
+	double l1l2l3scale = factors[2];
+	return rawpt*l1l2l3scale;
 }
 
 ///////////////////////////////////////////////////////////////
