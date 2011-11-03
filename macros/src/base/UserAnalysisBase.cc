@@ -863,7 +863,7 @@ float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 	vector<float> factors = fJetCorrector->getSubCorrections();
 
 	// Sanity check: JEcorr should be the full set of corrections applied
-	if(fabs(factors[3] - fTR->JEcorr[jetindex]) > 0.000001 && fVerbose > 2) cout << "" << endl;
+	if(fabs(factors[3] - fTR->JEcorr[jetindex]) > 0.000001 && fVerbose > 2) cout << "UserAnalysisBase::GetJetPtNoResidual ==> WARNING: Your JECs don't seem to be consistent!" << endl;
 
 	double l1l2l3scale = factors[2];
 	return rawpt*l1l2l3scale;
