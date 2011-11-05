@@ -17,8 +17,9 @@ LIBS           = $(ROOTLIBS)
 NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lCondFormatsJetMETObjects
 
+
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc \
+                 src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc src/JZBAnalyzer.cc src/JZBAnalysis.cc src/JZBPFAnalysis.cc \
                  src/helper/PUWeight.C src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc src/helper/MetaTreeClassBase.C
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
@@ -27,7 +28,7 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeSkimmer 
+all: RunUserAnalyzer RunTreeSkimmer RunJZBAnalyzer 
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
@@ -35,10 +36,16 @@ RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 RunTreeSkimmer: src/exe/RunTreeSkimmer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
+RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
+
+
+
 clean:
 	$(RM) $(OBJS)	
 	$(RM) RunUserAnalyzer
 	$(RM) RunTreeSkimmer
+	$(RM) RunJZBAnalyzer
 
 purge:
 	$(RM) $(OBJS)

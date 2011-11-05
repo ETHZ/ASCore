@@ -16,12 +16,18 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.62 $";
+string sjzbversion="$Revision: 1.63 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.63  2011/10/20 16:05:10  fronga
+Flag electrons from photon conversion.
+Open eta to 2.5 (can cut offline).
+Some additional comments in electron ID.
+Added cut on SuperCluster ET.
+
 Revision 1.62  2011/10/20 14:26:15  buchmann
 Adapted custom electron function (basically from WP95 to WP90)
 
@@ -245,6 +251,8 @@ public:
 
   int pfJetGoodNum;
   int pfJetGoodNumID;
+  int pfJetGoodNump1sigma;
+  int pfJetGoodNumn1sigma;
   int pfJetGoodNumEta2p4;
   int pfJetGoodNumEta2p0;
   int pfJetGoodNumEta1p4;
@@ -481,6 +489,8 @@ void nanoEvent::reset()
 
   pfJetGoodNum=0;
   pfJetGoodNumID=0;
+  pfJetGoodNump1sigma=0;
+  pfJetGoodNumn1sigma=0;
   pfJetGoodNumEta2p4=0;
   pfJetGoodNumEta2p0=0;
   pfJetGoodNumEta1p4=0;
@@ -712,6 +722,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("pfJetGoodNum",&nEvent.pfJetGoodNum,"pfJetGoodNum/I");
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
+  myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
+  myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
   myTree->Branch("pfJetGoodNumEta2p4",&nEvent.pfJetGoodNumEta2p4,"pfJetGoodNumEta2p4/I");
   myTree->Branch("pfJetGoodNumEta2p0",&nEvent.pfJetGoodNumEta2p0,"pfJetGoodNumEta2p0/I");
   myTree->Branch("pfJetGoodNumEta1p4",&nEvent.pfJetGoodNumEta1p4,"pfJetGoodNumEta1p4/I");
@@ -1177,7 +1189,13 @@ void JZBAnalysis::Analyze() {
       // Keep jets over min. pt threshold
       if ( !(jpt>20) ) continue;
       counters[PJ].fill("... pt>20.");
-      
+      //Get Uncertainty
+      fJetCorrector->setJetEta(jeta);
+      fJetCorrector->setJetPt(jpt); // IMPORTANT: the correction is a function of the RAW pt
+      float jec = fJetCorrector->getCorrection();     
+      jecUnc->setJetEta(jeta);
+      jecUnc->setJetPt(jec*jpt); // IMPORTANT: the uncertainty is a function of the CORRECTED pt
+      float unc = jecUnc->getUncertainty(true); 
       nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
       nEvent.pfJetEta[nEvent.pfJetNum]   = jeta;
       nEvent.pfJetPhi[nEvent.pfJetNum]   = jphi;
@@ -1226,6 +1244,8 @@ void JZBAnalysis::Analyze() {
         if (abs(jeta)<1.4) nEvent.pfJetGoodNumEta1p4++;
         if (abs(jeta)<1.2) nEvent.pfJetGoodNumEta1p2++;
       }
+      if ( jpt>30+unc )  nEvent.pfJetGoodNump1sigma++;
+      if ( jpt>30-unc )  nEvent.pfJetGoodNumn1sigma++;
       if ( jpt>20. )  nEvent.pfJetGoodNum20++;
       if ( jpt>25. )  nEvent.pfJetGoodNum25++;
       if ( jpt>27. )  nEvent.pfJetGoodNum27++;

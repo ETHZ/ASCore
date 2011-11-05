@@ -9,6 +9,7 @@
 #include "TSystem.h"
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 using namespace std;
@@ -30,7 +31,8 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	JetCorPar.push_back(*L3JetPar);
 	JetCorPar.push_back(*ResJetPar);
 	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar;
+        jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/Fall10_AK5PF_Uncertainty.txt");
+	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
 }
 
 UserAnalysisBase::~UserAnalysisBase(){

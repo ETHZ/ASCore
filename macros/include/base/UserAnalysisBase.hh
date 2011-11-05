@@ -9,6 +9,7 @@
 #include <string>
 
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 class UserAnalysisBase{
 public:
@@ -46,6 +47,7 @@ public:
 	TLatex *fTlat;
 
 	FactorizedJetCorrector *fJetCorrector;
+        JetCorrectionUncertainty *jecUnc;
 
 	bool fIsData;
 
