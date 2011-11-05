@@ -475,7 +475,7 @@ public:
 	bool fDoCounting;
 	gSample fCurrentSample;
 	gChannel fCurrentChannel;
-	ofstream fOUTSTREAM, fOUTSTREAM2;
+	ofstream fOUTSTREAM, fOUTSTREAM2, fOUTSTREAM3;
 
 	int fChargeSwitch;    // 0 for SS, 1 for OS
 

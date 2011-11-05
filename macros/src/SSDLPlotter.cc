@@ -441,36 +441,36 @@ void SSDLPlotter::doAnalysis(){
 	fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
 	// fLumiNorm = 1014.; // Only 2011B
 
-	// makePileUpPlots(true); // loops on all data!
-
-	// makeIsoVsMETPlot(QCDMuEnr10);
-	// makeIsoVsMETPlot(DoubleMu2);
-	
-	printCutFlows(fOutputDir + "CutFlow.txt");
-	printOrigins();
-	
-	// makeMuIsolationPlots(); // loops on TTbar sample
-	// makeElIsolationPlots(); // loops on TTbar sample
-	makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	// makeMETvsHTPlotCustom();
-	// makeMETvsHTPlotTau();
-	
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Elec);
-	
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
-	
-	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// makeTTbarClosure();
+	// // makePileUpPlots(true); // loops on all data!
+	// 
+	// // makeIsoVsMETPlot(QCDMuEnr10);
+	// // makeIsoVsMETPlot(DoubleMu2);
+	// 
+	// printCutFlows(fOutputDir + "CutFlow.txt");
+	// printOrigins();
+	// 
+	// // makeMuIsolationPlots(); // loops on TTbar sample
+	// // makeElIsolationPlots(); // loops on TTbar sample
+	// makeNT2KinPlots();
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// // makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	// // makeMETvsHTPlotCustom();
+	// // makeMETvsHTPlotTau();
+	// 
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
+	// 
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
+	// 
+	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// // makeTTbarClosure();
 	
 	makeAllIntPredictions();
 	makeDiffPrediction();
@@ -3527,24 +3527,34 @@ void SSDLPlotter::makeAllIntPredictions(){
 	// access a chararray containing the date with asctime(timeinfo)
 	
 	TString tablefilename = fOutputDir + fOutputSubDir + "Table2.tex";
-	TString didarfilename = fOutputDir + fOutputSubDir + "forDidar.txt";
+	// TString didarfilename = fOutputDir + fOutputSubDir + "forDidar.txt";
+	TString notetable     = fOutputDir + fOutputSubDir + "NoteTable.tex";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
 	fOUTSTREAM << Form(" Generated on: %s ", asctime(timeinfo)) << endl;
 	fOUTSTREAM << endl;
 	
-	fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
-	fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
-	fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
-	fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
-	fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
-	fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
-	fOUTSTREAM2 << endl;
+	// fOUTSTREAM2.open(didarfilename.Data(), ios::trunc);
+	// fOUTSTREAM2 << "////////////////////////////////////////////////////////////////////" << endl;
+	// fOUTSTREAM2 << "// Plot inputs from ETH Analysis" << endl;
+	// fOUTSTREAM2 << Form("// Generated on: %s ", asctime(timeinfo)) << endl;
+	// fOUTSTREAM2 << "// Format is {ee, mm, em, total}" << endl;
+	// fOUTSTREAM2 << "// Errors are on sum of backgrounds" << endl;
+	// fOUTSTREAM2 << endl;
+
+	fOUTSTREAM3.open(notetable.Data(), ios::trunc);
+	fOUTSTREAM3 << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+	fOUTSTREAM3 << Form("%%%% Generated on: %s ", asctime(timeinfo)) << endl;
+	fOUTSTREAM3 << "%% Format is tot, (ee, mm, em)" << endl;
+	fOUTSTREAM3 << endl;
+
 	for(size_t i = 0; i < gNREGIONS; ++i){
 		TString outputname = fOutputDir + fOutputSubDir + "DataPred_" + Region::sname[i] + ".txt";
 		makeIntPrediction(outputname, gRegion(i));
 	}
+
+
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
 	fOutputSubDir = "";
@@ -3560,6 +3570,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	vector<int> musamples;
 	vector<int> elsamples;
 	vector<int> emusamples;
+	
+	const float RareESyst = 0.5;
+	const float RareESyst2 = RareESyst*RareESyst;
 
 	// TODO: Check these samples!
 	musamples = fMuData;
@@ -3588,8 +3601,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
-	calculateRatio(fMCBGMuEnr, Muon,     SigSup, mufratio_allmc, mufratio_allmc_e);
-	calculateRatio(fMCBGMuEnr, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
+	calculateRatio(fMCBGMuEnr, Muon, SigSup, mufratio_allmc, mufratio_allmc_e);
+	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mupratio_allmc, mupratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, ZDecay, elpratio_allmc, elpratio_allmc_e);
 
@@ -3929,23 +3942,23 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	}
 
 	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_mm) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_mm_e1) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*nt2_rare_mc_mm) << " || ";
+	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_mm_e1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_mm) << " || ";
 	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_em) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_em_e1) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*nt2_rare_mc_em) << " || ";
+	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_em_e1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_em) << " || ";
 	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_ee) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_ee_e1) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", 0.5*nt2_rare_mc_ee) << " || " << endl;
+	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_ee_e1)) << " +/- ";
+	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_ee) << " || " << endl;
 	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "tot. backgr. "  << " || ";
 	// Just add different errors in quadrature (they are independent)
 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat() + nt2_rare_mc_mm_e1;
 	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1;
 	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
-	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + 0.25*nt2_rare_mc_mm*nt2_rare_mc_mm;
-	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + 0.25*nt2_rare_mc_em*nt2_rare_mc_em;
-	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + 0.25*nt2_rare_mc_ee*nt2_rare_mc_ee;
+	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm;
+	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em;
+	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee;
 	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes() + nt2_rare_mc_mm) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr2)) << " || ";
@@ -3966,7 +3979,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(20) << "        predicted: ";
 	float tot_pred        = FR->getTotFakes() + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee;
 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
-	float comb_tot_sqerr2 = FR->getTotESyst()*FR->getTotESyst() + 0.25*nt2_rare_mc_mm*nt2_rare_mc_mm + 0.25*nt2_rare_mc_em*nt2_rare_mc_em + 0.25*nt2_rare_mc_ee*nt2_rare_mc_ee + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
+	float comb_tot_sqerr2 = FR->getTotESyst()*FR->getTotESyst() + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
@@ -3987,13 +4000,43 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR DIDARS PLOT  ///////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	fOUTSTREAM2 << "// " + Region::sname[reg] << endl;
-	fOUTSTREAM2 << Form("float %s_SS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), nt2_rare_mc_ee, nt2_rare_mc_mm, nt2_rare_mc_em, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em);
-	fOUTSTREAM2 << Form("float %s_OS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), nt2_ee_chmid, 0.00, nt2_em_chmid, nt2_ee_chmid + nt2_em_chmid);
-	fOUTSTREAM2 << Form("float %s_PF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENpf(), FR->getMMNpf(), FR->getEMNpf()+FR->getEMNfp(), FR->getEENpf() + FR->getMMNpf() + FR->getEMNpf() + FR->getEMNfp());
-	fOUTSTREAM2 << Form("float %s_FF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENff(), FR->getMMNff(), FR->getEMNff(), FR->getEENff()+FR->getMMNff()+FR->getEMNff());
-	fOUTSTREAM2 << Form("float %s_Error_ETH[4] = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), sqrt(ee_tot_sqerr1 + ee_tot_sqerr2), sqrt(mm_tot_sqerr1 + mm_tot_sqerr2), sqrt(em_tot_sqerr1 + em_tot_sqerr2), sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	fOUTSTREAM2 << endl;
+	// fOUTSTREAM2 << "// " + Region::sname[reg] << endl;
+	// fOUTSTREAM2 << Form("float %s_SS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), nt2_rare_mc_ee, nt2_rare_mc_mm, nt2_rare_mc_em, nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em);
+	// fOUTSTREAM2 << Form("float %s_OS_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), nt2_ee_chmid, 0.00, nt2_em_chmid, nt2_ee_chmid + nt2_em_chmid);
+	// fOUTSTREAM2 << Form("float %s_PF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENpf(), FR->getMMNpf(), FR->getEMNpf()+FR->getEMNfp(), FR->getEENpf() + FR->getMMNpf() + FR->getEMNpf() + FR->getEMNfp());
+	// fOUTSTREAM2 << Form("float %s_FF_ETH[4]    = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), FR->getEENff(), FR->getMMNff(), FR->getEMNff(), FR->getEENff()+FR->getMMNff()+FR->getEMNff());
+	// fOUTSTREAM2 << Form("float %s_Error_ETH[4] = {%6.3f, %6.3f, %6.3f, %6.3f }; \n", Region::sname[reg].Data(), sqrt(ee_tot_sqerr1 + ee_tot_sqerr2), sqrt(mm_tot_sqerr1 + mm_tot_sqerr2), sqrt(em_tot_sqerr1 + em_tot_sqerr2), sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+	// fOUTSTREAM2 << endl;
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	//  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
+	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+	fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+	FR->getEENff() + FR->getMMNff() + FR->getEMNff(), FR->getTotDoubleETot(),
+	FR->getEENff(), FR->getEENffETot(), FR->getMMNff(), FR->getMMNffETot(), FR->getEMNff(), FR->getEMNffETot());
+	fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+	FR->getEENpf() + FR->getMMNpf() + FR->getEMNpf() + FR->getEMNfp(), FR->getTotSingleETot(),
+	FR->getEENpf(), FR->getEENpfETot(), FR->getMMNpf(), FR->getMMNpfETot(), FR->getEMSingleFakes(), FR->getEMSingleETot());
+	fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
+	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
+	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
+	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
+	fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + 0.25*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
+	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
+	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
+	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
+	// fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+	fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
+	FR->getEETotFakes() + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	FR->getEMTotFakes() + nt2_rare_mc_em + nt2_em_chmid, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
+	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
+	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+	fOUTSTREAM3 << endl;
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////

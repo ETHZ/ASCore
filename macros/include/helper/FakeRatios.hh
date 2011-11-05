@@ -36,35 +36,49 @@ public:
 	float getMMNpp();
 	float getMMNppEStat();
 	float getMMNppESyst();
+	float getMMNppETot();
 	float getMMNpf();
 	float getMMNpfEStat();
 	float getMMNpfESyst();
+	float getMMNpfETot();
 	float getMMNff();
 	float getMMNffEStat();
 	float getMMNffESyst();
+	float getMMNffETot();
 
 	float getEENpp();
 	float getEENppEStat();
 	float getEENppESyst();
+	float getEENppETot();
 	float getEENpf();
 	float getEENpfEStat();
 	float getEENpfESyst();
+	float getEENpfETot();
 	float getEENff();
 	float getEENffEStat();
 	float getEENffESyst();
+	float getEENffETot();
 	
 	float getEMNpp();
 	float getEMNppEStat();
 	float getEMNppESyst();
+	float getEMNppETot();
 	float getEMNpf();
 	float getEMNpfEStat();
 	float getEMNpfESyst();
+	float getEMNpfETot();
 	float getEMNfp();
 	float getEMNfpEStat();
 	float getEMNfpESyst();
+	float getEMNfpETot();
+	float getEMSingleFakes();
+	float getEMSingleEStat();
+	float getEMSingleESyst();
+	float getEMSingleETot();
 	float getEMNff();
 	float getEMNffEStat();
 	float getEMNffESyst();
+	float getEMNffETot();
 	
 	float getMMTotFakes();
 	float getMMTotEStat();
@@ -77,9 +91,21 @@ public:
 	float getEMTotESyst();
 
 	float getTotFakes();
+	float getTotSingleFakes();
+	float getTotDoubleFakes();
 	float getTotEStat();
+	float getTotSingleEStat();
+	float getTotDoubleEStat();
 	float getTotESyst();
+	float getTotSingleESyst();
+	float getTotDoubleESyst();
+	float getTotETot();
+	float getTotSingleETot();
+	float getTotDoubleETot();
+
 	float getTotFakes(float, float, float, float);
+	float getTotSingleFakes(float, float, float, float);
+	float getTotDoubleFakes(float, float, float, float);
 
 	void printOutput();
 
@@ -92,11 +118,13 @@ public:
 	float getNfp(float, float, float, float, float, float, float, float);
 	float getNff(float, float, float, float, float, float, float, float);
 	float getNfpNpfNffSum(float, float, float, float, float, float, float, float);
+	float getNfpNpfSum(float, float, float, float, float, float, float, float);
 	float getNppEStat(float, float, float, float, float, float, float, float);
 	float getNpfEStat(float, float, float, float, float, float, float, float);
 	float getNfpEStat(float, float, float, float, float, float, float, float);
 	float getNffEStat(float, float, float, float, float, float, float, float);
 	float getNfpNpfNffSumEStat(float, float, float, float, float, float, float, float);
+	float getNfpNpfSumEStat(float, float, float, float, float, float, float, float);
 
 	float getESystFromToys2(float, float, float, float, float, float, float, float, float, float, float, float, float(FakeRatios::*)(float, float, float, float, float, float, float, float));
 
@@ -109,11 +137,11 @@ private:
 	int fNToyMCs; // default 100
 	// Additional relative systematic error on predictions (added in quadrature), default 0.
 	float fAddESyst;
-	
+
 	float fMMNtl[3]; // tt, tl, ll
 	float fEENtl[3]; // tt, tl, ll
 	float fEMNtl[4]; // tt, tl, lt, ll
-	
+
 	float fMFRatio[2]; // ratio, error
 	float fMPRatio[2]; // ratio, error
 	float fEFRatio[2]; // ratio, error
