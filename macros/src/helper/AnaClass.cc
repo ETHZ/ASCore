@@ -2443,6 +2443,15 @@ void AnaClass::setZeroBinError(TH1D *ihist){
 }
 
 //____________________________________________________________________________
+void AnaClass::fillWithoutOF(TH1D *&ihist, double x, double w){
+	double xmax = ihist->GetBinLowEdge(ihist->GetNbinsX());
+	// double xmax = ihist->GetBinLowEdge(ihist->GetMaximumBin());
+	double bw = ihist->GetBinWidth(ihist->GetMaximumBin());
+	if(x > xmax) ihist->Fill(xmax + bw*0.5, w); // always increment last bin (i.e. never the overflow)
+	else ihist->Fill(x, w);
+}
+
+//____________________________________________________________________________
 TCanvas* AnaClass::makeCanvas(const char* name){
 /*		-	Creates a TCanvas at a somewhat random position							 */
 	int x = (int)gRandom->Uniform(10,200);

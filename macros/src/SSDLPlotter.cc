@@ -1999,12 +1999,13 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	const float htmax = 750.;
+	const float htmax = 900.;
+	const float metmax = 300.;
 
 	// Create histograms
-	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, 0., metmax);
 	// TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
 	// TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
 	// TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
@@ -2060,30 +2061,30 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	leg->SetBorderSize(0);
 
 	// Special effects:
-	// const float lowerht = hilo==HighPt? 80.:200.;
-	const float lowerht = hilo==HighPt? 0.:200.;
+	const float lowerht = hilo==HighPt? 80.:200.;
+	// const float lowerht = hilo==HighPt? 0.:200.;
 
-	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
+	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
 	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
-	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,400.);
+	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,metmax);
 	TLine *boxborder2 = new TLine(lowerht,30.,htmax,30.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
 	boxborder1->SetLineColor(14);
 	boxborder2->SetLineColor(14);
 
-	TLine *sig1x = new TLine(lowerht, 100., lowerht, 400.); // met 100 ht 80
-	TLine *sig1y = new TLine(lowerht, 100., htmax,   100.); 
-	TLine *sig2x = new TLine(200., 120., 200.,  400.);      // met 120 ht 200
+	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
+	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
+	TLine *sig2x = new TLine(200., 120., 200.,  metmax);      // met 120 ht 200
 	TLine *sig2y = new TLine(200., 120., htmax, 120.);
-	TLine *sig3x = new TLine(400.,  50., 400.,  400.);      // met 50  ht 400
-	TLine *sig3y = new TLine(400.,  50., htmax,  50.);
-	TLine *sig4x = new TLine(400., 120., 400.,  400.);      // met 120 ht 400
-	TLine *sig4y = new TLine(400., 120., htmax, 120.);
+	TLine *sig3x = new TLine(450.,  50., 450.,  metmax);      // met 50  ht 450
+	TLine *sig3y = new TLine(450.,  50., htmax,  50.);
+	TLine *sig4x = new TLine(450., 120., 450.,  metmax);      // met 120 ht 450
+	TLine *sig4y = new TLine(450., 120., htmax, 120.);
 
 	sig1x->SetLineWidth(2);
 	sig1y->SetLineWidth(2);
@@ -2103,8 +2104,9 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
 
-	float legymax = hilo==HighPt?0.54:0.50;
-	TLegend *regleg = new TLegend(0.70,0.37,0.88,legymax);
+	// float legymax = hilo==HighPt?0.54:0.50;
+	// TLegend *regleg = new TLegend(0.70,0.37,0.88,0.54);
+	TLegend *regleg = new TLegend(0.70,0.45,0.88,0.62);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
@@ -2142,9 +2144,9 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	gmetvsht_da_mm->Draw("P");
 	
 	leg->Draw();
-	// regleg->Draw();
+	regleg->Draw();
 	drawTopLine();
-	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	TPaveText *pave = new TPaveText(0.16, 0.83, 0.53, 0.88, "NDC");
 	pave->SetFillColor(0);
 	pave->SetFillStyle(1001);
 	pave->SetBorderSize(0);

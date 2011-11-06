@@ -37,7 +37,7 @@ public:
 	static double gElEtabins[gNElEtabins+1];
 
 	static const int gNDiffHTBins  = 5;
-	static const int gNDiffMETBins = 3;
+	static const int gNDiffMETBins = 4;
 	static const int gNDiffNJBins  = 5;
 	static const int gNDiffMT2Bins = 3;
 	static const int gNDiffPT1Bins = 5;

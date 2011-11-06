@@ -134,6 +134,8 @@ public:
 	virtual float getMaxYExtension(TH1*);
 	virtual float getMinYExtension(TH1*);
 	virtual void setZeroBinError(TH1D*);
+	virtual void fillWithoutOF(TH1D *&, double, double=1.);
+	
 	virtual TCanvas* makeCanvas(const char*);
 	virtual void printObject(TObject* o, TString name, Option_t *drawopt = "", bool logy = false);
 	virtual TH1D* bookTH1D(const char*, const char*, int, double, double);
