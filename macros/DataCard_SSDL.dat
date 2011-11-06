@@ -6,21 +6,21 @@
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Data
-DoubleMu1	SSDLTrees/2011B/Oct31/DoubleMu-Run2011A-PromptReco-v4-AOD.root			0	0
-DoubleMu2	SSDLTrees/2011B/Oct31/DoubleMu-Run2011A-May10ReReco-v1-AOD.root			0	0
-DoubleMu3	SSDLTrees/2011B/Oct31/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
-DoubleMu4	SSDLTrees/2011B/Oct31/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
-DoubleMu5	SSDLTrees/2011B/Oct31/DoubleMu-Run2011B-PromptReco-v1-AOD.root			0	0
-DoubleEle1	SSDLTrees/2011B/Oct31/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
-DoubleEle2	SSDLTrees/2011B/Oct31/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
-DoubleEle3	SSDLTrees/2011B/Oct31/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
-DoubleEle4	SSDLTrees/2011B/Oct31/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
-DoubleEle5	SSDLTrees/2011B/Oct31/DoubleElectron-Run2011B-PromptReco-v1-AOD.root		0	1
-MuEG1		SSDLTrees/2011B/Oct31/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER.root		0	2
-MuEG2		SSDLTrees/2011B/Oct31/MuEG-Run2011A-May10ReReco-v1-AOD.root			0	2
-MuEG3		SSDLTrees/2011B/Oct31/MuEG-Run2011A-05Aug2011-v1-AOD__new.root			0	2
-MuEG4		SSDLTrees/2011B/Oct31/MuEG_Run2011A-PromptReco-v6_AOD__retry.root		0	2
-MuEG5		SSDLTrees/2011B/Oct31/MuEG-Run2011B-PromptReco-v1-AOD.root			0	2
+DoubleMu1	SSDLTrees/2011B/Nov3/DoubleMu-Run2011A-PromptReco-v4-AOD.root			0	0
+DoubleMu2	SSDLTrees/2011B/Nov3/DoubleMu-Run2011A-May10ReReco-v1-AOD.root			0	0
+DoubleMu3	SSDLTrees/2011B/Nov3/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
+DoubleMu4	SSDLTrees/2011B/Nov3/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
+DoubleMu5	SSDLTrees/2011B/Nov3/DoubleMu-Run2011B-PromptReco-v1-AOD.root			0	0
+DoubleEle1	SSDLTrees/2011B/Nov3/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
+DoubleEle2	SSDLTrees/2011B/Nov3/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
+DoubleEle3	SSDLTrees/2011B/Nov3/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
+DoubleEle4	SSDLTrees/2011B/Nov3/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
+DoubleEle5	SSDLTrees/2011B/Nov3/DoubleElectron-Run2011B-PromptReco-v1-AOD.root		0	1
+MuEG1		SSDLTrees/2011B/Nov3/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER.root		0	2
+MuEG2		SSDLTrees/2011B/Nov3/MuEG-Run2011A-May10ReReco-v1-AOD.root			0	2
+MuEG3		SSDLTrees/2011B/Nov3/MuEG-Run2011A-05Aug2011-v1-AOD__new.root			0	2
+MuEG4		SSDLTrees/2011B/Nov3/MuEG_Run2011A-PromptReco-v6_AOD__retry.root		0	2
+MuEG5		SSDLTrees/2011B/Nov3/MuEG-Run2011B-PromptReco-v1-AOD.root			0	2
 MuHad1		SSDLTrees/2011/Jul6/MuHad-Run2011A-May10ReReco-v1-AOD.root			0	0
 MuHad2		SSDLTrees/2011/Jul6/MuHad-Run2011A-PromptReco-v4-AOD.root			0	0
 EleHad1		SSDLTrees/2011/Jul6/ElectronHad-Run2011A-May10ReReco-v1-AOD.root		0	1
@@ -66,19 +66,19 @@ W-W-		SSDLTrees/2011B/Oct31/MC/WminusWminus.root					4	-1	3.126e+06	51
 ttbarW		SSDLTrees/2011B/Oct31/MC/ttbarW.root						4	-1	2.532e+06	51
 ####################################################################################################################
 ## SUSY Signal
-LM0		SSDLTrees/2011B/Oct31/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.978e+03	18
-LM1		SSDLTrees/2011B/Nov1/MC/LM1_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.331e+04	18
-LM2		SSDLTrees/2011B/Nov1/MC/LM2_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.574e+05	18
-LM3		SSDLTrees/2011B/Nov1/MC/LM3_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.469e+04	18
-LM4		SSDLTrees/2011B/Nov1/MC/LM4_SUSY_sftsht_7TeV-pythia6.root			2	-1	8.609e+04	18
-LM5		SSDLTrees/2011B/Nov1/MC/LM5_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.534e+05	18
-LM6		SSDLTrees/2011B/Nov1/MC/LM6_SUSY_sftsht_7TeV-pythia6.root			2	-1	5.452e+05	18
-LM7		SSDLTrees/2011B/Nov1/MC/LM7_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.000e+03	18
-LM8		SSDLTrees/2011B/Nov1/MC/LM8_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.758e+05	18
-LM9		SSDLTrees/2011B/Nov1/MC/LM9_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.158e+04	18
-LM11		SSDLTrees/2011B/Nov1/MC/LM11_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.967e+05	18
-LM12		SSDLTrees/2011B/Nov1/MC/LM12_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.779e+04	18
-LM13		SSDLTrees/2011B/Nov1/MC/LM13_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.768e+04	18
+LM0		SSDLTrees/2011B/Nov1b/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.978e+03	18
+LM1		SSDLTrees/2011B/Nov1b/MC/LM1_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.331e+04	18
+LM2		SSDLTrees/2011B/Nov1b/MC/LM2_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.574e+05	18
+LM3		SSDLTrees/2011B/Nov1b/MC/LM3_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.469e+04	18
+LM4		SSDLTrees/2011B/Nov1b/MC/LM4_SUSY_sftsht_7TeV-pythia6.root			2	-1	8.609e+04	18
+LM5		SSDLTrees/2011B/Nov1b/MC/LM5_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.534e+05	18
+LM6		SSDLTrees/2011B/Nov1b/MC/LM6_SUSY_sftsht_7TeV-pythia6.root			2	-1	5.452e+05	18
+LM7		SSDLTrees/2011B/Nov1b/MC/LM7_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.000e+03	18
+LM8		SSDLTrees/2011B/Nov1b/MC/LM8_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.758e+05	18
+LM9		SSDLTrees/2011B/Nov1b/MC/LM9_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.158e+04	18
+LM11		SSDLTrees/2011B/Nov1b/MC/LM11_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.967e+05	18
+LM12		SSDLTrees/2011B/Nov1b/MC/LM12_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.779e+04	18
+LM13		SSDLTrees/2011B/Nov1b/MC/LM13_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.768e+04	18
 ###################################################################################################################
 # QCD
 MuEnr10		SSDLTrees/2011B/Oct31/MC/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6.root	1	-1	2.2886e+01	94
