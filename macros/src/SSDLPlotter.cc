@@ -441,36 +441,33 @@ void SSDLPlotter::doAnalysis(){
 	fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
 	// fLumiNorm = 1014.; // Only 2011B
 
-	// // makePileUpPlots(true); // loops on all data!
-	// 
-	// // makeIsoVsMETPlot(QCDMuEnr10);
-	// // makeIsoVsMETPlot(DoubleMu2);
-	// 
-	// printCutFlows(fOutputDir + "CutFlow.txt");
-	// printOrigins();
-	// 
-	// // makeMuIsolationPlots(); // loops on TTbar sample
-	// // makeElIsolationPlots(); // loops on TTbar sample
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	// // makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	// // makeMETvsHTPlotCustom();
-	// // makeMETvsHTPlotTau();
-	// 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
-	// 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
-	// 
-	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// // makeTTbarClosure();
+	// makePileUpPlots(true); // loops on all data!
+	
+	printCutFlows(fOutputDir + "CutFlow.txt");
+	printOrigins();
+	
+	// makeMuIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	// makeMETvsHTPlotCustom();
+	// makeMETvsHTPlotTau();
+	
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Elec);
+	
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
+	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeTTbarClosure();
 	
 	makeAllIntPredictions();
 	makeDiffPrediction();
@@ -3053,6 +3050,7 @@ void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 	tree->ResetBranchAddresses();
 	if(fSamples[sample]->datamc < 1) Init(tree);
 	if(fSamples[sample]->datamc > 0) InitMC(tree);
+	fSample = fSamples[sample];
 	for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
 		tree->GetEntry(jentry);
 		printProgress(jentry, tree->GetEntriesFast(), fSamples[sample]->name);
@@ -3247,7 +3245,7 @@ TH1D* SSDLPlotter::fillMuRatioPt(vector<int> samples, gFPSwitch fp, bool output)
 	calculateRatio(samples, Muon, fp, h_2d, h_pt, h_eta, output);
 	delete h_2d, h_eta;
 	return h_pt;
-};
+}
 
 //____________________________________________________________________________
 TH1D* SSDLPlotter::fillElRatioPt(int sample, gFPSwitch fp, bool output){
@@ -3280,6 +3278,7 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 TODO Fix treatment of statistical errors and luminosity scaling here!
 */
 	gStyle->SetOptStat(0);
+
 	h_2d->Sumw2();
 	h_pt->Sumw2();
 	h_eta->Sumw2();
@@ -3463,7 +3462,6 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		printObject(h_total,  TString("Total")  + name, "colz");
 	}	
 }
-
 TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, bool output){
 	gStyle->SetOptStat(0);
 
@@ -4710,14 +4708,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg->Draw();
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
-		lat->SetTextSize(0.03);
-		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
-		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
-		if(j>2)        lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+		drawDiffCuts(j);
 		drawTopLine();
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, "ObsPred_" + varname + "_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
 		/////////////////////////////////////////////////////////////////
@@ -4744,14 +4741,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_mm->Draw();
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.65,0.92, "#mu#mu");
-		lat->SetTextSize(0.03);
-		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
-		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
-		if(j>2)        lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+		drawDiffCuts(j);
 		drawTopLine();
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		/////////////////////////////////////////////////////////////////
 		TLegend *leg_ee = new TLegend(0.60,0.67,0.90,0.88);
@@ -4778,14 +4774,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_ee->Draw();
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.65,0.92, "ee");
-		lat->SetTextSize(0.03);
-		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
-		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
-		if(j>2)        lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+		drawDiffCuts(j);
 		drawTopLine();
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		/////////////////////////////////////////////////////////////////
 		TLegend *leg_em = new TLegend(0.60,0.67,0.90,0.88);
@@ -4811,14 +4806,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		leg_em->Draw();
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.65,0.92, "e#mu");
-		lat->SetTextSize(0.03);
-		if(j==0||j==2) lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV");
-		if(j==1)       lat->DrawLatex(0.13,0.85, "H_{T} > 80 GeV, N_{Jets} > 1");
-		if(j>2)        lat->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+		drawDiffCuts(j);
 		drawTopLine();
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
+		gPad->SetLogy(0);
+		Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		// Cleanup
 		delete c_temp, leg, leg_mm, leg_em, leg_ee;
@@ -6222,4 +6216,15 @@ void SSDLPlotter::drawTopLine(){
 	fLatex->SetTextSize(0.04);
 	fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
+	return;
+}
+void SSDLPlotter::drawDiffCuts(int j){
+	fLatex->SetTextFont(42);
+	fLatex->SetTextSize(0.03);
+	if(j>4)        fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+	if(j==0||j==4) fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 50 GeV");
+	if(j==1)       fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 120 GeV");
+	if(j==2)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 200 GeV, N_{Jets} #geq 2");
+	if(j==3)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 400 GeV, N_{Jets} #geq 2");
+	return;
 }
