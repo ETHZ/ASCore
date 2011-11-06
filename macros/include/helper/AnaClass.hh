@@ -131,6 +131,8 @@ public:
 	virtual void setPlottingRange(TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(std::vector<TH1D*>&, float = 0.05, bool = false);
+	virtual void getPlottingRange(float&, float&, std::vector<TH1D*> , float = 0.05, bool = false);
+
 	virtual float getMaxYExtension(TH1*);
 	virtual float getMinYExtension(TH1*);
 	virtual void setZeroBinError(TH1D*);

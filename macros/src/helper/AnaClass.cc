@@ -2417,10 +2417,45 @@ void AnaClass::setPlottingRange(std::vector<TH1D*> &hists, float margin, bool lo
 		hists[i]->SetMaximum(max);
 	}
 }
+void AnaClass::getPlottingRange(float &minopt, float &maxopt, std::vector<TH1D*> hists, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05
+	float max = hists[0]->GetBinContent(1);
+	float min = hists[0]->GetBinContent(1);
+	for(size_t i = 0; i < hists.size(); ++i){
+		float tempmax = getMaxYExtension(hists[i]);
+		float tempmin = getMinYExtension(hists[i]);
+		if(tempmax > max) max = tempmax;
+		if(tempmin < min) min = tempmin;
+	}
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval = hists[0]->GetBinContent(hists[0]->GetMinimumBin());
+			for(size_t i = 0; i < hists.size(); ++i){
+				float tempval = hists[i]->GetBinContent(hists[i]->GetMinimumBin());
+				if(tempval < minval) minval = tempval;
+			}
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	minopt = min;
+	maxopt = max;
+	return;
+}
 
 //____________________________________________________________________________
 float AnaClass::getMaxYExtension(TH1 *h){
-	float max = h->GetMaximum();
+	float max = h->GetBinContent(1);
+	// float max = h->GetMaximum();
 	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
 		float temp = h->GetBinContent(i) + h->GetBinError(i);
 		if(temp > max) max = temp;
@@ -2428,7 +2463,8 @@ float AnaClass::getMaxYExtension(TH1 *h){
 	return max;
 }
 float AnaClass::getMinYExtension(TH1 *h){
-	float min = h->GetMinimum();
+	float min = h->GetBinContent(1);
+	// float min = h->GetMinimum();
 	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
 		float temp = h->GetBinContent(i) - h->GetBinError(i);
 		if(temp < min) min = temp;

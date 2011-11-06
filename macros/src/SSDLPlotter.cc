@@ -446,8 +446,8 @@ void SSDLPlotter::doAnalysis(){
 	printCutFlows(fOutputDir + "CutFlow.txt");
 	printOrigins();
 	
-	// makeMuIsolationPlots(); // loops on TTbar sample
-	// makeElIsolationPlots(); // loops on TTbar sample
+	makeMuIsolationPlots(); // loops on TTbar sample
+	makeElIsolationPlots(); // loops on TTbar sample
 	makeNT2KinPlots();
 	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
@@ -1814,13 +1814,10 @@ void SSDLPlotter::makeElIsolationPlots(){
 	}
 }
 
-
 bool sampleIsRare( TString  s_name){
 	if ( (s_name) =="WWplus" or (s_name) == "WWminus" or (s_name) =="TTWplus" or (s_name) =="TTWminus" or (s_name) =="TTZplus"or (s_name) =="TTZminus" or (s_name) =="TTWWplus" or (s_name) =="TTWWminus" or (s_name) =="WWWplus" or (s_name) =="WWWminus" or (s_name) =="DPSWW" or (s_name) =="WpWp" or (s_name) =="WmWm" or (s_name) =="ttbarW" ) return true;
 	else return false;
 }
-
-
 void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
 
@@ -4764,6 +4761,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
 		gPad->SetLogy(0);
+		float minopt, maxopt;
+		vector<TH1D*> histvec;
+		histvec.push_back(nt11);
+		histvec.push_back(totbg);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_tot->SetMinimum(0);
+		nt11_tot->SetMaximum(maxopt);
 		Util::PrintPDF(c_temp, "ObsPred_" + varname + "_lin", fOutputDir + fOutputSubDir + "lin/");
 
 		fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
@@ -4796,6 +4800,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_mm);
+		histvec.push_back(totbg_mm);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_mm_tot->SetMinimum(0);
+		nt11_mm_tot->SetMaximum(maxopt);
 		gPad->SetLogy(0);
 		Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
@@ -4829,6 +4840,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_ee);
+		histvec.push_back(totbg_ee);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_ee_tot->SetMinimum(0);
+		nt11_ee_tot->SetMaximum(maxopt);
 		gPad->SetLogy(0);
 		Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
@@ -4861,6 +4879,13 @@ void SSDLPlotter::makeDiffPrediction(){
 		
 		gPad->RedrawAxis();
 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
+
+		histvec.clear();
+		histvec.push_back(nt11_em);
+		histvec.push_back(totbg_em);
+		getPlottingRange(minopt, maxopt, histvec, 0.1);
+		nt11_em_tot->SetMinimum(0);
+		nt11_em_tot->SetMaximum(maxopt);
 		gPad->SetLogy(0);
 		Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
 
@@ -6275,6 +6300,6 @@ void SSDLPlotter::drawDiffCuts(int j){
 	if(j==0||j==4) fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 50 GeV");
 	if(j==1)       fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 120 GeV");
 	if(j==2)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 200 GeV, N_{Jets} #geq 2");
-	if(j==3)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 400 GeV, N_{Jets} #geq 2");
+	if(j==3)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 450 GeV, N_{Jets} #geq 2");
 	return;
 }

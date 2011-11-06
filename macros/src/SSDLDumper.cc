@@ -775,9 +775,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 400
+		// MET BINNING, HT > 450
 		fC_minMet = 30.;
-		fC_minHT =  400.;
+		fC_minHT =  450.;
 		fC_minNjets = 2;
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
@@ -901,22 +901,22 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 400
+		// MET BINNING, HT > 450
 		fC_minMet = 30.;
-		fC_minHT =  400.;
+		fC_minHT =  450.;
 		fC_minNjets = 2;
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di elon event
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				fillWithoutOF(S->diffyields[Elec].hnt11[3], pfMET, puweight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[2], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[3], pfMET, puweight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[2], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[3], pfMET, puweight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[2], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[3], pfMET, puweight);
 			}
 		}
 		resetHypLeptons();
@@ -1031,9 +1031,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
-		// MET BINNING, HT > 400
+		// MET BINNING, HT > 450
 		fC_minMet = 30.;
-		fC_minHT  = 400.;
+		fC_minHT  = 450.;
 		fC_minNjets = 2;
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
@@ -1168,9 +1168,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 400
+		// MET BINNING, HT > 450
 		fC_minMet = 30.;
-		fC_minHT =  400.;
+		fC_minHT =  450.;
 		fC_minNjets = 2;
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
@@ -1280,9 +1280,9 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 400
+		// MET BINNING, HT > 450
 		fC_minMet = 30.;
-		fC_minHT  = 400.;
+		fC_minHT  = 450.;
 		fC_minNjets = 2;
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
