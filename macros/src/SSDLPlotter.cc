@@ -1813,6 +1813,14 @@ void SSDLPlotter::makeElIsolationPlots(){
 		}
 	}
 }
+
+
+bool sampleIsRare( TString  s_name){
+	if ( (s_name) =="WWplus" or (s_name) == "WWminus" or (s_name) =="TTWplus" or (s_name) =="TTWminus" or (s_name) =="TTZplus"or (s_name) =="TTZminus" or (s_name) =="TTWWplus" or (s_name) =="TTWWminus" or (s_name) =="WWWplus" or (s_name) =="WWWminus" or (s_name) =="DPSWW" or (s_name) =="WpWp" or (s_name) =="WmWm" or (s_name) =="ttbarW" ) return true;
+	else return false;
+}
+
+
 void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
 
@@ -1823,7 +1831,13 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 	    system(cmd);
 		
 		TH1D    *hvar_data[gNKinVars];
-		TH1D    *hvar_mc  [gNKinVars];
+
+		TH1D    *hvar_qcd  [gNKinVars];
+		TH1D    *hvar_ttj  [gNKinVars];
+		TH1D    *hvar_ewk  [gNKinVars];
+		TH1D    *hvar_rare [gNKinVars];
+		TH1D    *hvar_db   [gNKinVars];
+
 		THStack *hvar_mc_s[gNKinVars];
 
 		TLatex *lat = new TLatex();
@@ -1834,7 +1848,13 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 		// Create histograms
 		for(size_t i = 0; i < gNKinVars; ++i){
 			hvar_data[i] = new TH1D("Data_"          + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-			hvar_mc[i]   = new TH1D("MC_"            + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC"  , KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+
+			hvar_qcd [i] = new TH1D("QCD_"           + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_ttj [i] = new TH1D("TTjets_"        + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_ewk [i] = new TH1D("EWK_"           + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_rare[i] = new TH1D("Rare_"          + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_db[i]   = new TH1D("DB_"            + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+
 			hvar_mc_s[i] = new THStack("MC_stacked_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC");
 		}
 
@@ -1890,14 +1910,34 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				S->kinplots[s][hilo].hvar[i]->Scale(intscale);
 			}
 
+			hvar_qcd [i]->SetFillColor(38);
+			hvar_ttj [i]->SetFillColor(kRed+2);
+			hvar_ewk [i]->SetFillColor(kBlue+2);
+			hvar_rare[i]->SetFillColor(kGreen-2);
+			hvar_db[i]->SetFillColor(kYellow-4);
+
 			// Fill MC stacks
 			for(size_t j = 0; j < mcsamples.size();   ++j){
 				Sample *S = fSamples[mcsamples[j]];
-				hvar_mc  [i]->Add(S->kinplots[s][hilo].hvar[i]);
-				hvar_mc_s[i]->Add(S->kinplots[s][hilo].hvar[i]);
-				hvar_mc_s[i]->Draw("goff");
-				hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
+				TString s_name = S->sname;
+				if ( s_name == "TTJets" )         hvar_ttj[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("SingleT") ) hvar_ttj[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name == "WJets" )          hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("DYJets") )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("GJets")  )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("QCD") )     hvar_qcd[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleIsRare(s_name) )       hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("Photon") )  hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( s_name == "WW" or s_name =="WZ"   or s_name =="ZZ" ) hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
 			}
+			hvar_mc_s[i]->Add(hvar_qcd[i]);
+			hvar_mc_s[i]->Add(hvar_db[i]);
+			hvar_mc_s[i]->Add(hvar_ewk[i]);
+			hvar_mc_s[i]->Add(hvar_ttj[i]);
+			hvar_mc_s[i]->Add(hvar_rare[i]);
+			hvar_mc_s[i]->Draw("goff");
+			hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
+			 
 
 			double max1 = hvar_mc_s[i]->GetMaximum();
 			double max2 = hvar_data[i]->GetMaximum();
@@ -1916,7 +1956,15 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
 			TLegend *leg = new TLegend(0.75,0.50,0.89,0.88);
 			leg->AddEntry(hvar_data[i], "Data","p");
-			for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->kinplots[s][hilo].hvar[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg->AddEntry(hvar_qcd[i], "QCD","f");
+			leg->AddEntry(hvar_ewk[i], "EWK","f");
+			leg->AddEntry(hvar_ttj[i], "Top","f");
+			leg->AddEntry(hvar_rare[i], "Rare","f");
+			leg->AddEntry(hvar_db[i], "double Boson","f");
+	
+			// for(size_t j = 0; j < mcsamples.size(); ++j){ 
+			// 	leg->AddEntry(fSamples[mcsamples[j]]->kinplots[s][hilo].hvar[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+			// }
 			leg->SetFillStyle(0);
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
