@@ -1907,11 +1907,14 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				S->kinplots[s][hilo].hvar[i]->Scale(intscale);
 			}
 
-			hvar_qcd [i]->SetFillColor(38);
-			hvar_ttj [i]->SetFillColor(kRed+2);
-			hvar_ewk [i]->SetFillColor(kBlue+2);
-			hvar_rare[i]->SetFillColor(kGreen-2);
-			hvar_db[i]->SetFillColor(kYellow-4);
+			hvar_qcd [i]->SetFillColor(kYellow-4);
+			hvar_db  [i]->SetFillColor(kSpring-9);
+			hvar_ewk [i]->SetFillColor(kGreen +1);
+			hvar_ttj [i]->SetFillColor(kAzure-5);
+			hvar_rare[i]->SetFillColor(kAzure+8);
+			// hvar_ttj [i]->SetFillColor(kAzure +1);
+			// hvar_rare[i]->SetFillColor(kViolet+5);
+
 
 			// Fill MC stacks
 			for(size_t j = 0; j < mcsamples.size();   ++j){
@@ -1930,8 +1933,8 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
 			hvar_mc_s[i]->Add(hvar_db[i]);
 			hvar_mc_s[i]->Add(hvar_ewk[i]);
-			hvar_mc_s[i]->Add(hvar_ttj[i]);
 			hvar_mc_s[i]->Add(hvar_rare[i]);
+			hvar_mc_s[i]->Add(hvar_ttj[i]);
 			hvar_mc_s[i]->Draw("goff");
 			hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
 			 
@@ -1951,13 +1954,13 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 
 			// TLegend *leg = new TLegend(0.15,0.50,0.40,0.88);
 			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
-			TLegend *leg = new TLegend(0.75,0.50,0.89,0.88);
+			TLegend *leg = new TLegend(0.75,0.65,0.89,0.88);
 			leg->AddEntry(hvar_data[i], "Data","p");
-			leg->AddEntry(hvar_qcd[i], "QCD","f");
-			leg->AddEntry(hvar_ewk[i], "EWK","f");
-			leg->AddEntry(hvar_ttj[i], "Top","f");
-			leg->AddEntry(hvar_rare[i], "Rare","f");
-			leg->AddEntry(hvar_db[i], "double Boson","f");
+			leg->AddEntry(hvar_ttj[i],  "Top","f");
+			leg->AddEntry(hvar_rare[i], "Rare SM","f");
+			leg->AddEntry(hvar_ewk[i],  "EWK","f");
+			leg->AddEntry(hvar_db[i],   "DiBoson","f");
+			leg->AddEntry(hvar_qcd[i],  "QCD","f");
 	
 			// for(size_t j = 0; j < mcsamples.size(); ++j){ 
 			// 	leg->AddEntry(fSamples[mcsamples[j]]->kinplots[s][hilo].hvar[i], fSamples[mcsamples[j]]->sname.Data(), "f");
@@ -2790,7 +2793,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	h_etaratio_mc->DrawCopy("PE X0");
 	h_etaratio_data->Draw("PE X0 same");
 	leg->Draw();
-	lat->DrawLatex(0.70,0.92, Form("L_{int.} = ~%4.1f pb^{-1}", fLumiNorm));
+	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	lat->DrawLatex(0.11,0.92, name);
 	double ymean(0.), yrms(0.);
 	getWeightedYMeanRMS(h_etaratio_data, ymean, yrms);
@@ -3812,55 +3815,33 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
 	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
 	
-	
-	OUT << "  PREDICTIONS (Data yields and ratios)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " Mu/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getMMNpp();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNppEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNppESyst() << " (syst)" << endl;
-	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getMMNpf();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNpfEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNpfESyst() << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getMMNff();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMNffEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMNffESyst() << " (syst)" << endl;
-	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getMMTotFakes();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getMMTotEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getMMTotESyst() << " (syst)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " E/Mu Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getEMNpp();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNppEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNppESyst() << " (syst)" << endl;
-	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getEMNpf();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNpfEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNpfESyst() << " (syst)" << endl;
-	OUT << "  Nfp:           " << setw(7) << setprecision(3) << FR->getEMNfp();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNfpEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNfpESyst() << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getEMNff();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMNffEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMNffESyst() << " (syst)" << endl;
-	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getEMTotFakes();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEMTotEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEMTotESyst() << " (syst)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " E/E Channel:" << endl;
-	OUT << "  Npp:           " << setw(7) << setprecision(3) << FR->getEENpp();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENppEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENppESyst() << " (syst)" << endl;
-	OUT << "  Npf:           " << setw(7) << setprecision(3) << FR->getEENpf();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENpfEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENpfESyst() << " (syst)" << endl;
-	OUT << "  Nff:           " << setw(7) << setprecision(3) << FR->getEENff();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEENffEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEENffESyst() << " (syst)" << endl;
-	OUT << "  Total fakes:   " << setw(7) << setprecision(3) << FR->getEETotFakes();
-	OUT << " +/- "             << setw(7) << setprecision(3) << FR->getEETotEStat();
-	OUT << " (stat) +/- "      << setw(7) << setprecision(3) << FR->getEETotESyst() << " (syst)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << "  Fake Predictions:" << endl;
+	OUT << "------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 |          Mu/Mu        |         El/El         |          El/Mu        |" << endl;
+	OUT << "------------------------------------------------------------------------------------------" << endl;
+	OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+	FR->getMMNpp(), FR->getMMNppEStat(), FR->getMMNppESyst(),
+	FR->getEENpp(), FR->getEENppEStat(), FR->getEENppESyst(), 
+	FR->getEMNpp(), FR->getEMNppEStat(), FR->getEMNppESyst()) << endl;
+	OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+	FR->getMMNpf(), FR->getMMNpfEStat(), FR->getMMNpfESyst(),
+	FR->getEENpf(), FR->getEENpfEStat(), FR->getEENpfESyst(), 
+	FR->getEMNpf(), FR->getEMNpfEStat(), FR->getEMNpfESyst()) << endl;
+	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
+	FR->getEMNfp(), FR->getEMNfpEStat(), FR->getEMNfpESyst()) << endl;
+	OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+	FR->getMMNff(), FR->getMMNffEStat(), FR->getMMNffESyst(),
+	FR->getEENff(), FR->getEENffEStat(), FR->getEENffESyst(), 
+	FR->getEMNff(), FR->getEMNffEStat(), FR->getEMNffESyst()) << endl;
+	OUT << "------------------------------------------------------------------------------------------" << endl;
+	OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
+	FR->getMMTotFakes(), FR->getMMTotEStat(), FR->getMMTotESyst(),
+	FR->getEETotFakes(), FR->getEETotEStat(), FR->getEETotESyst(), 
+	FR->getEMTotFakes(), FR->getEMTotEStat(), FR->getEMTotESyst()) << endl;
+	OUT << "------------------------------------------------------------------------------------------" << endl;
+	OUT << " (Value ± E_stat ± E_syst) " << endl;
+	OUT << "//////////////////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
