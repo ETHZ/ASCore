@@ -536,6 +536,16 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   if (mode==16) if (isbarrel) energy *= fTR->SCcrackcorr[si]*fTR->SClocalcorr[si];
   if (mode==17) if (isbarrel) energy *= fTR->SCcrackcorrseed[si];
 
+
+  if (mode==17){
+    std::cout << "eta " << sc_eta << std::endl;
+    std::cout << "gen " << fTR->ElGenE[ei] << std::endl;
+    std::cout << "17 " << energy << std::endl;
+    std::cout << "20 " << fTR->SCEnergy[si]  << std::endl;
+
+  }
+
+
   return energy;
 };
 

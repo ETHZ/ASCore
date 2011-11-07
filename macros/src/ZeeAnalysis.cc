@@ -98,9 +98,9 @@ void ZeeAnalysis::Analyze(){
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
-     if ( (fabs(eta)>2.5) ) it=passing.erase(it); else it++;
+     //if ( (fabs(eta)>2.5) ) it=passing.erase(it); else it++;
      //     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) it=passing.erase(it); else it++;
-     //     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) it=passing.erase(it); else it++;
+          if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) it=passing.erase(it); else it++;
    }
 
    if (passing.size()<2) return;
@@ -124,6 +124,8 @@ void ZeeAnalysis::Analyze(){
   float invmass16=(CorrElectron(fTR,passing.at(0),16)+CorrElectron(fTR,passing.at(1),16)).M();
   float invmass17=(CorrElectron(fTR,passing.at(0),17)+CorrElectron(fTR,passing.at(1),17)).M();
   float invmass20=(CorrElectron(fTR,passing.at(0),20)+CorrElectron(fTR,passing.at(1),20)).M();
+
+  //  std::cout << "bla" << std::endl;
   
   TLorentzVector genelec[2];
   for (int i=0; i<2; i++) genelec[i].SetPtEtaPhiE(fTR->ElGenPt[passing.at(i)],fTR->ElGenEta[passing.at(i)],fTR->ElGenPhi[passing.at(i)],fTR->ElGenE[passing.at(i)]);
@@ -141,14 +143,18 @@ void ZeeAnalysis::Analyze(){
 
    int cat;
    
-   float abseta0 = fTR->SCEta[fTR->ElSCindex[passing.at(0)]];
-   float abseta1 = fTR->SCEta[fTR->ElSCindex[passing.at(1)]];
+   float abseta0 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(0)]]);
+   float abseta1 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(1)]]);
    if (abseta0<1.4442 && abseta1<1.4442) cat=1;
-   else if (abseta0>1.56 && abseta1>1.56) cat=3;
-   else if (abseta0<1.4442 && abseta1>1.56) cat=2;
-   else if (abseta0>1.56 && abseta1<1.4442) cat=2;
+   else if (abseta0>1.653 && abseta1>1.653) cat=3;
+   else if (abseta0<1.4442 && abseta1>1.653) cat=2;
+   else if (abseta0>1.653 && abseta1<1.4442) cat=2;
    else cat=-1;
    
+
+   std::cout << "cat " << cat << std::endl;
+   std::cout << "mass17 " << invmass17 << " mass20 " << invmass20 << std::endl;
+   //   std::cout << fTR->SCEta[fTR->ElSCindex[passing.at(0)]] << " " << fTR->SCEta[fTR->ElSCindex[passing.at(1)]] << " " << cat << std::endl;
    
    if (cat!=-1){
      *(myfile[0][0]) << invmass0 << " " << weight << std::endl;
@@ -167,12 +173,14 @@ void ZeeAnalysis::Analyze(){
    }
  
 
-   if (cat==1) for (int i=0; i<2; i++) {
+   if (cat==2) for (int i=0; i<2; i++) {
      if (fTR->ElGenE[passing.at(i)]<0) continue;
+     /*
      TLorentzVector correl17 = CorrElectron(fTR,passing.at(i),17);
      TLorentzVector correl20 = CorrElectron(fTR,passing.at(i),20);
      fHErecEGen17->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
      fHErecEGen20->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
+     */
    }
    
  
@@ -205,7 +213,8 @@ void ZeeAnalysis::End(){
 TLorentzVector ZeeAnalysis::CorrElectron(TreeReader *fTR, int i, int mode){
   TLorentzVector corr;
   corr.SetPtEtaPhiE(fTR->ElPt[i],fTR->ElEta[i],fTR->ElPhi[i],fTR->ElE[i]);
-  corr.SetE(elecorr->get_correctedenergy(fTR,i,mode));
-  corr.SetRho(elecorr->get_correctedenergy(fTR,i,mode));
+  float corrE=elecorr->get_correctedenergy(fTR,i,mode);
+  corr.SetE(corrE);
+  corr.SetRho(corrE);
   return corr;
 }
