@@ -24,6 +24,9 @@ HEADERNAME = CLASSNAME + '.h'
 SOURCENAME = CLASSNAME + '.C'
 MAXPFLEPT     = 20
 MAXNJETS      = 100
+MAXNPHOS      = 50
+MAXNGENPHOS   = 100
+MAXNSC        = 100
 rules = { # Reco
           'NMus'    : 30,
           'NEles'   : 20,
@@ -53,6 +56,10 @@ rules = { # Reco
           # Generator
           'NGenLeptons': 100,
           'NGenJets'   : 100,
+          'NGenPhotons': 100,
+	  # Photons
+	  'MaxNPhotons':MAXNGENPHOS,
+	  'NSuperClusters':MAXNSC,
           # Others
           'NTracks' : 500,
           'NPaths'  : 10,
