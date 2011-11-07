@@ -31,7 +31,7 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	JetCorPar.push_back(*L3JetPar);
 	JetCorPar.push_back(*ResJetPar);
 	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-        jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/Fall10_AK5PF_Uncertainty.txt");
+        jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
 	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
 }
 
