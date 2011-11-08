@@ -86,7 +86,7 @@ void ZeeAnalysis::Analyze(){
   }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-     if (IsGoodElId_WP80(*it)) it=passing.erase(it); else it++;
+     if (!IsGoodElId_WP80(*it)) it=passing.erase(it); else it++;
    }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
@@ -94,7 +94,7 @@ void ZeeAnalysis::Analyze(){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      if (fabs(eta)<1.4442) energy*=elecorr->getEtaCorrectionBarrel(eta);
      if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->ElSCindex[*it]];
-     if (energy/cosh(eta)<40) it=passing.erase(it); else it++;
+     if (energy/cosh(eta)<30) it=passing.erase(it); else it++;
    }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
