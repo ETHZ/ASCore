@@ -502,12 +502,12 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   float sc_brem = fTR->SCBrem[si];
 
   bool isbarrel = (fabs(sc_eta)<1.4442);
-  bool isendcap = !isbarrel;
+
 
   float energy=0;
 
   if (isbarrel) energy = fTR->SCRaw[si]*getEtaCorrectionBarrel(sc_eta);
-  if (isendcap) energy = fTR->SCRaw[si]+fTR->SCPre[si];
+  if (fabs(sc_eta)>1.56) energy = fTR->SCRaw[si]+fTR->SCPre[si];
 
   if (mode==20) return fTR->SCEnergy[si];
 
@@ -536,7 +536,7 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   if (mode==16) if (isbarrel) energy *= fTR->SCcrackcorr[si]*fTR->SClocalcorr[si];
   if (mode==17) if (isbarrel) energy *= fTR->SCcrackcorrseed[si];
 
-
+  /*
   if (mode==17){
     std::cout << "eta " << sc_eta << std::endl;
     std::cout << "gen " << fTR->ElGenE[ei] << std::endl;
@@ -544,7 +544,7 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
     std::cout << "20 " << fTR->SCEnergy[si]  << std::endl;
 
   }
-
+  */
 
   return energy;
 };

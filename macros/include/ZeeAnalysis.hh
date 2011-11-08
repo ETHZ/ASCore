@@ -47,8 +47,12 @@ private:
   TH1D *fHInvMass20;
   TH1D *fHInvMassEgen;
 
-  TH1D *fHErecEGen17;
-  TH1D *fHErecEGen20;
+  TH1D *fHErecEGen17cat1;
+  TH1D *fHErecEGen20cat1;
+  TH1D *fHErecEGen17cat2;
+  TH1D *fHErecEGen20cat2;
+  TH1D *fHErecEGen17cat3;
+  TH1D *fHErecEGen20cat3;
 
 
 };
