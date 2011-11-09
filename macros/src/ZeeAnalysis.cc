@@ -60,7 +60,8 @@ void ZeeAnalysis::Begin(){
 	fHErecEGen17cat3  = new TH1D("ErecEgen17cat3","ErecEgen17cat3",100,0.5,1.5);
 	fHErecEGen20cat3  = new TH1D("ErecEgen20cat3","ErecEgen20cat3",100,0.5,1.5);
 
-	fHNumPU = new TH1I("NumPU","NumPU",40,0,40);
+	fHNumPU = new TH1F("NumPU","NumPU",40,0,40);
+	fHNumVtx = new TH1F("NumVtx","NumVtx",40,0,40);
 
 }
 
@@ -78,7 +79,8 @@ void ZeeAnalysis::Analyze(){
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
 
-  fHNumPU->Fill(fTR->NVrtx,weight);
+  if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
+  fHNumVtx->Fill(fTR->NVrtx,weight);
 
 
   bool evtisok = true;
@@ -223,6 +225,7 @@ void ZeeAnalysis::End(){
 	fHErecEGen20cat3->Write();
 
 	fHNumPU->Write();
+	fHNumVtx->Write();
 	
 	fHistFile->Close();
 	for (int i=0; i<5; i++) for (int j=0; j<4; j++)  myfile[i][j]->close();
