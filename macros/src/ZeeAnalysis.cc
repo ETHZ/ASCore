@@ -60,6 +60,7 @@ void ZeeAnalysis::Begin(){
 	fHErecEGen17cat3  = new TH1D("ErecEgen17cat3","ErecEgen17cat3",100,0.5,1.5);
 	fHErecEGen20cat3  = new TH1D("ErecEgen20cat3","ErecEgen20cat3",100,0.5,1.5);
 
+	fHNumPU = new TH1I("NumPU","NumPU",40,0,40);
 
 }
 
@@ -76,6 +77,8 @@ void ZeeAnalysis::Analyze(){
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
+
+  fHNumPU->Fill(fTR->NVrtx,weight);
 
 
   bool evtisok = true;
@@ -132,16 +135,19 @@ void ZeeAnalysis::Analyze(){
   //  std::cout << "bla" << std::endl;
   
   TLorentzVector genelec[2];
-  for (int i=0; i<2; i++) genelec[i].SetPtEtaPhiE(fTR->ElGenPt[passing.at(i)],fTR->ElGenEta[passing.at(i)],fTR->ElGenPhi[passing.at(i)],fTR->ElGenE[passing.at(i)]);
-  
-  float invmassEgen=(genelec[0]+genelec[1]).M();
+  float invmassEgen=0;
+  if (!isdata){
+    for (int i=0; i<2; i++) genelec[i].SetPtEtaPhiE(fTR->ElGenPt[passing.at(i)],fTR->ElGenEta[passing.at(i)],fTR->ElGenPhi[passing.at(i)],fTR->ElGenE[passing.at(i)]);
+    invmassEgen=(genelec[0]+genelec[1]).M();
+    fHInvMassEgen->Fill(invmassEgen,weight);
+  }
 
   fHInvMass0->Fill(invmass0,weight);
   fHInvMass15 ->Fill(invmass15,weight);
   fHInvMass16 ->Fill(invmass16,weight);
   fHInvMass17 ->Fill(invmass17,weight);
   fHInvMass20 ->Fill(invmass20,weight);
-  fHInvMassEgen->Fill(invmassEgen,weight);
+
 
 
 
@@ -216,7 +222,8 @@ void ZeeAnalysis::End(){
 	fHErecEGen17cat3->Write();
 	fHErecEGen20cat3->Write();
 
-
+	fHNumPU->Write();
+	
 	fHistFile->Close();
 	for (int i=0; i<5; i++) for (int j=0; j<4; j++)  myfile[i][j]->close();
 }

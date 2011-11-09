@@ -12,7 +12,7 @@
 
 class CorrAnalyzer : public TreeAnalyzerBase {
 public:
-	CorrAnalyzer(TTree *tree = 0);
+  CorrAnalyzer(TTree *tree = 0, std::string dataType="data");
 	virtual ~CorrAnalyzer();
 	void BeginJob(string data_PileUp, string mc_PileUp);
 	void EndJob();

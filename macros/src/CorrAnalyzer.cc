@@ -7,14 +7,14 @@
 
 using namespace std;
 
-CorrAnalyzer::CorrAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
-	fZeeAnalysis = new ZeeAnalysis(fTR);
-	fHggAnalysis = new HggAnalysis(fTR);
+CorrAnalyzer::CorrAnalyzer(TTree *tree, std::string dataType) : TreeAnalyzerBase(tree) {
+  fZeeAnalysis = new ZeeAnalysis(fTR,dataType);
+  //  fHggAnalysis = new HggAnalysis(fTR,dataType);
 }
 
 CorrAnalyzer::~CorrAnalyzer(){
 	delete fZeeAnalysis;
-	delete fHggAnalysis;
+	//	delete fHggAnalysis;
 	if(!fTR->fChain) cout << "CorrAnalyzer ==> No chain!" << endl;
 }
 
@@ -31,13 +31,12 @@ void CorrAnalyzer::Loop(){
 	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 		PrintProgress(jentry);
 		fTR->GetEntry(jentry);
-                if ( fCurRun != fTR->Run ) {
-                  fCurRun = fTR->Run;
-                  fZeeAnalysis->BeginRun(fCurRun);
-                  fHggAnalysis->BeginRun(fCurRun);
+		if ( fCurRun != fTR->Run ) {
+		  fCurRun = fTR->Run;
+		  fZeeAnalysis->BeginRun(fCurRun);
 		  skipRun = false;
 		  if ( !CheckRun() ) skipRun = true;
-                 }
+		}
 		// Check if new lumi is in JSON file
 		if ( !skipRun && fCurLumi != fTR->LumiSection ) {
 		  fCurLumi = fTR->LumiSection;
@@ -46,9 +45,8 @@ void CorrAnalyzer::Loop(){
 		}
 		if ( !(skipRun || skipLumi) ) {
 		  fZeeAnalysis->Analyze();
-		  fHggAnalysis->Analyze();
+		  //		  fHggAnalysis->Analyze();
 		}
-
 	}
 }
 
@@ -58,16 +56,16 @@ void CorrAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fZeeAnalysis->fVerbose = fVerbose;
 	fZeeAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fZeeAnalysis->Begin();
-
+	/*
 	fHggAnalysis->SetOutputDir(fOutputDir);
 	fHggAnalysis->fVerbose = fVerbose;
 	fHggAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fHggAnalysis->Begin();
-
+	*/
 }
 
 // Method called after finishing the event loop
 void CorrAnalyzer::EndJob(){
 	fZeeAnalysis->End();
-	fHggAnalysis->End();
+	//	fHggAnalysis->End();
 }

@@ -54,6 +54,7 @@ private:
   TH1D *fHErecEGen17cat3;
   TH1D *fHErecEGen20cat3;
 
+  TH1I *fHNumPU;
 
 };
 #endif
