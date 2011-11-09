@@ -16,12 +16,16 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.64 $";
+string sjzbversion="$Revision: 1.65 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.65  2011/11/07 11:00:25  fronga
+Fixed use of jec uncertainties.
+FIXME: move these txt files to the repository...
+
 Revision 1.64  2011/11/05 14:11:41  pablom
 
 Added JET Energy Scale uncertainty
@@ -75,56 +79,6 @@ Updated trigger paths
 
 Revision 1.49  2011/08/11 17:03:19  fronga
 Only keep "empty" events for MC.
-
-Revision 1.48  2011/08/10 16:02:45  fronga
-Switch stats back on (you better have a very good reason to turn it off :) )
-
-Revision 1.47  2011/08/10 15:28:33  fronga
-Remove full-blown PF leptons and just store some PF lepton info.
-Add isolation information.
-
-Revision 1.46  2011/07/28 12:34:33  buchmann
-Bugfixes: Added variable for jet counting at generator level using the same eta cut (2.6), called genNjetsTwoSix (because the standard one, genNjets, uses a cut on |eta| at 3.0); the second bugfix concerns the way events with less than two reconstructed leptons are stored ... in that they actually ARE stored now whereas before, if the 'sortedGoodLeptons' vector didn't contain enough entries, the event could be lost.
-
-Revision 1.45  2011/07/22 06:41:35  buchmann
-Final update for SUSY scan implementation (for JZB)
-
-Revision 1.44  2011/07/22 06:25:37  buchmann
-Updated implementation of SUSY scan for JZB
-
-Revision 1.42  2011/07/14 07:43:22  buchmann
-Added info to check charge flips
-
-Revision 1.41  2011/07/13 08:32:09  buchmann
-Deactivating superfluous pf leptons, keeping only the collections we use; Adapted isCustomPfEl and isCustomPfMu with additional option for type in case we want to bring the other ones back. This fixes a problem observed with Summer 11 MC.
-
-Revision 1.40  2011/07/12 15:58:39  buchmann
-Fixed bug with branches being an 8 bit signed integer (/B) instead of a boolean (/O)
-
-Revision 1.39  2011/07/12 13:51:09  buchmann
-Added some b info to JZB (for testing purposes)
-
-Revision 1.38  2011/07/04 11:25:45  buchmann
-Updated trigger versions
-
-Revision 1.37  2011/06/28 13:30:25  buchmann
-Added additional jet counts for higher pt thresholds
-
-Revision 1.36  2011/06/14 17:35:01  buchmann
-Removing a veto for events that don't have enough PF leptons (this version is purely reco now)
-
-Revision 1.35  2011/06/14 15:16:05  buchmann
-Added additional Mu path
-
-Revision 1.34  2011/06/14 15:02:08  buchmann
-Updated Electron Paths
-
-Revision 1.33  2011/06/09 07:46:47  buchmann
-Adapted cuts and added counters for PF
-
-Revision 1.32  2011/06/08 16:18:13  buchmann
-Merged the two JZBs such that only one file is produced
-
 
 */
 
@@ -315,6 +269,7 @@ public:
   float sumJetPt[jzbtype_max];
 
   float weight;
+  float Efficiencyweightonly;
   int NPdfs;
   float pdfW[100];
   float pdfWsum;
@@ -532,6 +487,8 @@ void nanoEvent::reset()
 
   weight = 1.0;
   PUweight = 1.0;
+  Efficiencyweightonly = 1.0;
+
   mGlu=0;
   mChi=0;
   mLSP=0;
@@ -766,6 +723,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
+  myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
+
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
@@ -1123,6 +1082,15 @@ void JZBAnalysis::Analyze() {
     nEvent.ElCInfoIsGsfCtfCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfCons;
     nEvent.ElCInfoIsGsfCtfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfScPixCons;
     nEvent.ElCInfoIsGsfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfScPixCons;
+
+    float lepweight=1.0;
+    if(nEvent.id1==nEvent.id2&&nEvent.id1==0) lepweight=0.99;
+    if(nEvent.id1==nEvent.id2&&nEvent.id1==1) lepweight=0.95;
+    if(nEvent.id1!=nEvent.id2) lepweight=0.98;
+
+    nEvent.weight=nEvent.weight*lepweight;
+    nEvent.Efficiencyweightonly=lepweight;
+
   } else {
       
     //If there are less than two leptons the event is not considered
