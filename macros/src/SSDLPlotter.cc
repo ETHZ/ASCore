@@ -114,8 +114,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(TJets_tW);
 	fMCBG.push_back(TJets_s);
 	fMCBG.push_back(WJets);
-	fMCBG.push_back(DYJets10to50);
-	fMCBG.push_back(DYJets50);
+	fMCBG.push_back(DYJets);
 	fMCBG.push_back(GJets40);
 	fMCBG.push_back(GJets100);
 	fMCBG.push_back(GJets200);
@@ -436,41 +435,42 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// return;
 	
-	if(readHistos(fOutputFileName) != 0) return;
+	// if(readHistos(fOutputFileName) != 0) return;
 	// fLumiNorm = 2096.; // Pre 2011B
 	fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
 	// fLumiNorm = 1014.; // Only 2011B
 
 	// makePileUpPlots(true); // loops on all data!
 	
-	printCutFlows(fOutputDir + "CutFlow.txt");
-	printOrigins();
+	// printCutFlows(fOutputDir + "CutFlow.txt");
+	// printOrigins();
 	
-	makeMuIsolationPlots(); // loops on TTbar sample
-	makeElIsolationPlots(); // loops on TTbar sample
-	makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMuIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
+	// makeNT2KinPlots();
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	// makeMETvsHTPlotCustom();
+	makeMETvsHTPlotCustom();
 	// makeMETvsHTPlotTau();
+	makePRLPlot1();
 	
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Elec);
-	
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
-	
-	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// makeTTbarClosure();
-	
-	makeAllIntPredictions();
-	makeDiffPrediction();
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
+	// 
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
+	// 
+	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// // makeTTbarClosure();
+	// 
+	// makeAllIntPredictions();
+	// makeDiffPrediction();
 }
 
 //____________________________________________________________________________
@@ -1954,12 +1954,12 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 
 			// TLegend *leg = new TLegend(0.15,0.50,0.40,0.88);
 			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
-			TLegend *leg = new TLegend(0.75,0.65,0.89,0.88);
+			TLegend *leg = new TLegend(0.70,0.65,0.89,0.88);
 			leg->AddEntry(hvar_data[i], "Data","p");
 			leg->AddEntry(hvar_ttj[i],  "Top","f");
 			leg->AddEntry(hvar_rare[i], "Rare SM","f");
-			leg->AddEntry(hvar_ewk[i],  "EWK","f");
-			leg->AddEntry(hvar_db[i],   "DiBoson","f");
+			leg->AddEntry(hvar_ewk[i],  "Single Boson","f");
+			leg->AddEntry(hvar_db[i],   "Di-Boson","f");
 			leg->AddEntry(hvar_qcd[i],  "QCD","f");
 	
 			// for(size_t j = 0; j < mcsamples.size(); ++j){ 
@@ -2167,61 +2167,97 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	delete gmetvsht_da_mm, gmetvsht_da_ee, gmetvsht_da_em;//, hmetvsht_mc;
 }
 void SSDLPlotter::makeMETvsHTPlotCustom(){
-	gHiLoSwitch hilo = LowPt;
+	if(readSigGraphs(fOutputFileName) != 0) return;
+	gHiLoSwitch hilo = HighPt;
 	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/10 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
-	fOutputSubDir = "KinematicPlots/HTvsMET/";
+	fOutputSubDir = "PRL";
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	const float htmax = 750.;
+	const float htmax = 1100.;
+	const float metmax = 250.;
+	
+	Color_t col_mm = kBlack;
+	Color_t col_ee = kRed;
+	Color_t col_em = kBlue;
+	// Color_t col_mt = kMagenta;
+	// Color_t col_et = kGreen;
+	// Color_t col_tt = kCyan;
+	// Color_t col_mm = kAzure   +2;
+	// Color_t col_ee = kPink    +2;
+	// Color_t col_em = kOrange  +2;
+	Color_t col_mt = kSpring  +2;
+	Color_t col_et = kViolet  +2;
+	Color_t col_tt = kTeal    +2;
 
 	// Create histograms
-	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, 0., 400.);
-	// TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-	// TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-	// TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-
-	// vector<int> mcsamples   = fMCBGMuEnr;
-	// const gSample sig = LM1;
+	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, 0., metmax);
 
 	//////////////////////////////////////////////////////////
 	// Make MET vs HT plot:
 	hmetvsht_da_mm->SetMarkerStyle(8);
-	hmetvsht_da_mm->SetMarkerColor(kBlack);
+	hmetvsht_da_mm->SetMarkerColor(col_mm);
 	hmetvsht_da_mm->SetMarkerSize(1.5);
 	hmetvsht_da_mm->GetYaxis()->SetTitleOffset(1.4);
 
 	hmetvsht_da_ee->SetMarkerStyle(21);
-	hmetvsht_da_ee->SetMarkerColor(kRed);
+	hmetvsht_da_ee->SetMarkerColor(col_ee);
 	hmetvsht_da_ee->SetMarkerSize(1.4);
 	hmetvsht_da_ee->GetYaxis()->SetTitleOffset(1.4);
 
 	hmetvsht_da_em->SetMarkerStyle(23);
-	hmetvsht_da_em->SetMarkerColor(kBlue);
+	hmetvsht_da_em->SetMarkerColor(col_em);
 	hmetvsht_da_em->SetMarkerSize(1.7  );
 	hmetvsht_da_em->GetYaxis()->SetTitleOffset(1.4);
 
-	// Define signa events here:
-	const int nmmev = 23;
-	const int nemev = 19;
-	const int neeev = 7;
-	float ht_mm [nmmev] = {319.601, 249.944, 585.687, 218.65 , 280.798, 209.26 , 228.398, 229.865, 264.248, 284.968, 219.79 , 210.096, 372.221, 257.237, 435.9  , 455.478, 224.574, 267.277, 646.496, 253.169, 220.158, 354.292, 592.905};
-	float met_mm[nmmev] = {53.6233, 205.792, 35.0852, 39.8026, 73.8093, 58.0265, 48.3581, 30.1828, 120.754, 31.0167, 63.0605, 46.5073, 51.0459, 34.209 , 62.904 , 62.8467, 76.8364, 107.896, 143.069, 122.463, 78.2578, 42.3864, 58.09};
-	float ht_em [nemev] = {318.618, 253.246, 320.556, 259.813, 324.42 , 377.818, 421.674, 290.427, 687.421, 296.215, 280.877, 247.511, 279.396, 347.603, 323.792, 428.888, 247.792, 261.28 , 255.075};
-	float met_em[nemev] = {61.8755, 70.9379, 38.5762, 109.035, 56.9286, 121.968, 33.6699, 53.6195, 92.6551, 150.137, 100.28 , 64.1492, 78.0987, 77.7492, 67.6595, 55.3003, 53.2864, 72.1098, 30.7443};
-	float ht_ee [neeev] = {294.182, 257.603, 561.344, 246.617, 264.046, 563.705, 253.773};
-	float met_ee[neeev] = {56.5751, 64.2966, 30.083 , 108.323, 59.5336, 83.8312, 46.3871};
+///////////// HARDCODED
+
+	// // Define signal events here:
+	// const int nmmev = 23;
+	// const int nemev = 19;
+	// const int neeev = 7;
+	// float ht_mm [nmmev] = {319.601, 249.944, 585.687, 218.65 , 280.798, 209.26 , 228.398, 229.865, 264.248, 284.968, 219.79 , 210.096, 372.221, 257.237, 435.9  , 455.478, 224.574, 267.277, 646.496, 253.169, 220.158, 354.292, 592.905};
+	// float met_mm[nmmev] = {53.6233, 205.792, 35.0852, 39.8026, 73.8093, 58.0265, 48.3581, 30.1828, 120.754, 31.0167, 63.0605, 46.5073, 51.0459, 34.209 , 62.904 , 62.8467, 76.8364, 107.896, 143.069, 122.463, 78.2578, 42.3864, 58.09};
+	// float ht_em [nemev] = {318.618, 253.246, 320.556, 259.813, 324.42 , 377.818, 421.674, 290.427, 687.421, 296.215, 280.877, 247.511, 279.396, 347.603, 323.792, 428.888, 247.792, 261.28 , 255.075};
+	// float met_em[nemev] = {61.8755, 70.9379, 38.5762, 109.035, 56.9286, 121.968, 33.6699, 53.6195, 92.6551, 150.137, 100.28 , 64.1492, 78.0987, 77.7492, 67.6595, 55.3003, 53.2864, 72.1098, 30.7443};
+	// float ht_ee [neeev] = {294.182, 257.603, 561.344, 246.617, 264.046, 563.705, 253.773};
+	// float met_ee[neeev] = {56.5751, 64.2966, 30.083 , 108.323, 59.5336, 83.8312, 46.3871};
+	// 
+	// // TGraphs:
+	// TGraph *gmetvsht_da_mm = new TGraph(nmmev, ht_mm, met_mm);
+	// TGraph *gmetvsht_da_em = new TGraph(nemev, ht_em, met_em);
+	// TGraph *gmetvsht_da_ee = new TGraph(neeev, ht_ee, met_ee);
+	// gmetvsht_da_mm->SetName("HTvsMET_mm");
+	//     gmetvsht_da_em->SetName("HTvsMET_em");
+	//     gmetvsht_da_ee->SetName("HTvsMET_ee");
+	// gmetvsht_da_mm->SetMarkerColor(kBlack);
+	// gmetvsht_da_mm->SetMarkerStyle(8);
+	// gmetvsht_da_mm->SetMarkerSize(1.5);
+	// gmetvsht_da_em->SetMarkerColor(kBlue);
+	// gmetvsht_da_em->SetMarkerStyle(23);
+	// gmetvsht_da_em->SetMarkerSize(1.5);
+	// gmetvsht_da_ee->SetMarkerColor(kRed);
+	// gmetvsht_da_ee->SetMarkerStyle(21);
+	// gmetvsht_da_ee->SetMarkerSize(1.5);
+
+///////////// FROM FILE
 
 	// TGraphs:
-	TGraph *gmetvsht_da_mm = new TGraph(nmmev, ht_mm, met_mm);
-	TGraph *gmetvsht_da_em = new TGraph(nemev, ht_em, met_em);
-	TGraph *gmetvsht_da_ee = new TGraph(neeev, ht_ee, met_ee);
-	gmetvsht_da_mm->SetName("HTvsMET_mm");
-    gmetvsht_da_em->SetName("HTvsMET_em");
-    gmetvsht_da_ee->SetName("HTvsMET_ee");
+	TMultiGraph *gmetvsht_da_mm = new TMultiGraph("HTvsMET_mm", "HTvsMET_mm");
+	TMultiGraph *gmetvsht_da_ee = new TMultiGraph("HTvsMET_ee", "HTvsMET_ee");
+	TMultiGraph *gmetvsht_da_em = new TMultiGraph("HTvsMET_em", "HTvsMET_em");
+
+	vector<int> mmsamples = fMuData;
+	vector<int> eesamples = fEGData;
+	vector<int> emsamples = fMuEGData;
+	for(size_t i = 0; i < mmsamples.size(); ++i) gmetvsht_da_mm->Add(fSamples[mmsamples[i]]->sigevents[Muon][HighPt]);
+	for(size_t i = 0; i < eesamples.size(); ++i) gmetvsht_da_ee->Add(fSamples[eesamples[i]]->sigevents[Elec][HighPt]);
+	for(size_t i = 0; i < emsamples.size(); ++i) gmetvsht_da_em->Add(fSamples[emsamples[i]]->sigevents[ElMu][HighPt]);
+
+///////////////////////
 
 	hmetvsht_da_mm->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_mm->SetYTitle(KinPlots::axis_label[1]);
@@ -2230,17 +2266,8 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	gmetvsht_da_mm->SetMarkerColor(kBlack);
-	gmetvsht_da_mm->SetMarkerStyle(8);
-	gmetvsht_da_mm->SetMarkerSize(1.5);
-	gmetvsht_da_em->SetMarkerColor(kBlue);
-	gmetvsht_da_em->SetMarkerStyle(23);
-	gmetvsht_da_em->SetMarkerSize(1.5);
-	gmetvsht_da_ee->SetMarkerColor(kRed);
-	gmetvsht_da_ee->SetMarkerStyle(21);
-	gmetvsht_da_ee->SetMarkerSize(1.5);
-
-	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	// TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
 	leg->AddEntry(hmetvsht_da_ee, "ee","p");
 	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
@@ -2249,30 +2276,92 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	leg->SetTextSize(0.05);
 	leg->SetBorderSize(0);
 
+
+	//////////////////////////////////////////////////////////
+	// TAUS //////////////////////////////////////////////////
+	// Create histograms
+	TH2D *hmetvsht_da_mt = new TH2D("Data_HTvsMET_mt", "Data_HTvsMET_mt", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_et = new TH2D("Data_HTvsMET_et", "Data_HTvsMET_et", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_tt = new TH2D("Data_HTvsMET_tt", "Data_HTvsMET_tt", 100, 0., htmax, 100, 0., metmax);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs HT plot:
+	hmetvsht_da_mt->SetMarkerStyle(22);
+	hmetvsht_da_mt->SetMarkerSize(1.8);
+	hmetvsht_da_mt->SetMarkerColor(col_mt);
+	hmetvsht_da_mt->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_et->SetMarkerStyle(33);
+	hmetvsht_da_et->SetMarkerSize(2.3);
+	hmetvsht_da_et->SetMarkerColor(col_et);
+	// hmetvsht_da_et->SetMarkerColor(46);
+
+	hmetvsht_da_tt->SetMarkerStyle(34);
+	hmetvsht_da_tt->SetMarkerSize(1.8);
+	hmetvsht_da_tt->SetMarkerColor(col_tt);
+	// hmetvsht_da_tt->SetMarkerColor(38);
+
+
+	// Updated numbers with 3.2/fb from Nov 9
+	const int nmtev = 16;
+	float a_mt_ht [nmtev] = {454.149, 380.437, 363.305, 549.702, 361.937, 355.314, 363.292, 440.719, 640.22, 487.826, 481.437, 357.928, 464.144, 532.001, 1022.7, 378.033};
+	float a_mt_met[nmtev] = {144.284,  91.627, 217.503, 143.927, 81.9502, 109.763,  89.345, 111.706, 82.201, 161.936, 120.827, 113.490,  85.155, 107.131,  82.53, 118.257};
+	const int netev = 10;
+	float a_et_ht [netev] = {421.656, 421.634, 537.589, 444.368, 388.334, 393.389, 418.707, 399.363, 393.997, 555.166};
+	float a_et_met[netev] = {103.668, 93.5886, 83.3471, 194.835, 80.4797, 88.2911, 117.529, 165.110, 83.4841,  88.946};
+
+	TGraph *gmetvsht_da_mt = new TGraph(nmtev, a_mt_ht, a_mt_met);
+	gmetvsht_da_mt->SetName("Data_HTvsMET_mt_graph");
+	gmetvsht_da_mt->SetMarkerStyle(hmetvsht_da_mt->GetMarkerStyle());
+	gmetvsht_da_mt->SetMarkerSize( hmetvsht_da_mt->GetMarkerSize());
+	gmetvsht_da_mt->SetMarkerColor(hmetvsht_da_mt->GetMarkerColor());
+
+	TGraph *gmetvsht_da_et = new TGraph(netev, a_et_ht, a_et_met);
+	gmetvsht_da_et->SetName("Data_HTvsMET_et_graph");
+	gmetvsht_da_et->SetMarkerStyle(hmetvsht_da_et->GetMarkerStyle());
+	gmetvsht_da_et->SetMarkerSize( hmetvsht_da_et->GetMarkerSize());
+	gmetvsht_da_et->SetMarkerColor(hmetvsht_da_et->GetMarkerColor());
+
+	hmetvsht_da_mt->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_mt->SetYTitle(KinPlots::axis_label[1]);
+
+	// TLegend *leg = new TLegend(0.80,0.82,0.95,0.88);
+	TLegend *leg2 = new TLegend(0.80,0.70,0.95,0.88);
+	leg2->AddEntry(hmetvsht_da_mt, "#mu#tau","p");
+	leg2->AddEntry(hmetvsht_da_et, "e#tau","p");
+	leg2->AddEntry(hmetvsht_da_tt, "#tau#tau","p");
+	leg2->SetFillStyle(0);
+	leg2->SetTextFont(42);
+	leg2->SetTextSize(0.05);
+	leg2->SetBorderSize(0);
+
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+
 	// Special effects:
 	const float lowerht = hilo==HighPt? 80.:200.;
 
-	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
+	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
 	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
-	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,400.);
+	TLine *boxborder1 = new TLine(lowerht,30.,lowerht, metmax);
 	TLine *boxborder2 = new TLine(lowerht,30.,htmax,30.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
 	boxborder1->SetLineColor(14);
 	boxborder2->SetLineColor(14);
 
-	TLine *sig1x = new TLine(lowerht, 100., lowerht, 400.); // met 100 ht 80
-	TLine *sig1y = new TLine(lowerht, 100., htmax,   100.); 
-	TLine *sig2x = new TLine(200., 120., 200.,  400.);      // met 120 ht 200
+	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
+	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
+	TLine *sig2x = new TLine(200., 120., 200.,  metmax);      // met 120 ht 200
 	TLine *sig2y = new TLine(200., 120., htmax, 120.);
-	TLine *sig3x = new TLine(400.,  50., 400.,  400.);      // met 50  ht 400
-	TLine *sig3y = new TLine(400.,  50., htmax,  50.);
-	TLine *sig4x = new TLine(400., 120., 400.,  400.);      // met 120 ht 400
-	TLine *sig4y = new TLine(400., 120., htmax, 120.);
+	TLine *sig3x = new TLine(450.,  50., 450.,  metmax);      // met 50  ht 450
+	TLine *sig3y = new TLine(450.,  50., htmax,  50.);
+	TLine *sig4x = new TLine(450., 120., 450.,  metmax);      // met 120 ht 450
+	TLine *sig4y = new TLine(450., 120., htmax, 120.);
 
 	sig1x->SetLineWidth(2);
 	sig1y->SetLineWidth(2);
@@ -2292,7 +2381,8 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
 
-	TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
+	// TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
+	TLegend *regleg = new TLegend(0.70,0.45,0.88,0.62);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
@@ -2329,25 +2419,29 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
+	gmetvsht_da_mt->Draw("P");
+	gmetvsht_da_et->Draw("P");
+	
 	leg->Draw();
+	leg2->Draw();
 	regleg->Draw();
 
 	drawTopLine();
-	TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
-	pave->SetFillColor(0);
-	pave->SetFillStyle(1001);
-	pave->SetBorderSize(0);
-	pave->SetMargin(0.05);
-	pave->SetTextFont(42);
-	pave->SetTextSize(0.04);
-	pave->SetTextAlign(12);
-	pave->AddText(hiloname[hilo]);
-	pave->Draw();
+	// TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	// pave->SetFillColor(0);
+	// pave->SetFillStyle(1001);
+	// pave->SetBorderSize(0);
+	// pave->SetMargin(0.05);
+	// pave->SetTextFont(42);
+	// pave->SetTextSize(0.04);
+	// pave->SetTextAlign(12);
+	// pave->AddText(hiloname[hilo]);
+	// pave->Draw();
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, "HTvsMET_" + gHiLoLabel[hilo] + "_Custom", fOutputDir + fOutputSubDir);
+	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
 	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
@@ -2359,12 +2453,13 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	const float htmax = 750.;
+	const float htmax = 1100.;
+	const float metmax = 300.;
 
 	// Create histograms
-	TH2D *hmetvsht_da_mt = new TH2D("Data_HTvsMET_mt", "Data_HTvsMET_mt", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_et = new TH2D("Data_HTvsMET_et", "Data_HTvsMET_et", 100, 0., htmax, 100, 0., 400.);
-	TH2D *hmetvsht_da_tt = new TH2D("Data_HTvsMET_tt", "Data_HTvsMET_tt", 100, 0., htmax, 100, 0., 400.);
+	TH2D *hmetvsht_da_mt = new TH2D("Data_HTvsMET_mt", "Data_HTvsMET_mt", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_et = new TH2D("Data_HTvsMET_et", "Data_HTvsMET_et", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_tt = new TH2D("Data_HTvsMET_tt", "Data_HTvsMET_tt", 100, 0., htmax, 100, 0., metmax);
 
 	//////////////////////////////////////////////////////////
 	// Make MET vs HT plot:
@@ -2382,18 +2477,13 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	hmetvsht_da_tt->SetMarkerColor(38);
 
 
-	// these are the 5 SS tau-mu events with HT>350 and MET>80
-	// const int nmtev = 5;
-	// float a_mt_ht [nmtev] = {372.561, 368.64,  467.394, 605.398, 424.883};
-	// float a_mt_met[nmtev] = {99.2257, 109.763, 144.284, 143.927, 91.4893};
-
-	// updated numbers with 967/pb from Jul 6
-	const int nmtev = 7;
-	float a_mt_ht [nmtev] = {454.149, 380.437, 363.305, 549.702, 361.937, 355.314, 363.292};
-	float a_mt_met[nmtev] = {144.284, 91.6271, 217.503, 143.927, 81.9502, 109.763, 89.3453};
-	const int netev = 4;
-	float a_et_ht [netev] = {421.656, 421.634, 537.589, 444.368};
-	float a_et_met[netev] = {103.668, 93.5886, 83.3471, 194.835};
+	// Updated numbers with 3.2/fb from Nov 9
+	const int nmtev = 16;
+	float a_mt_ht [nmtev] = {454.149, 380.437, 363.305, 549.702, 361.937, 355.314, 363.292, 440.719, 640.22, 487.826, 481.437, 357.928, 464.144, 532.001, 1022.7, 378.033};
+	float a_mt_met[nmtev] = {144.284,  91.627, 217.503, 143.927, 81.9502, 109.763,  89.345, 111.706, 82.201, 161.936, 120.827, 113.490,  85.155, 107.131,  82.53, 118.257};
+	const int netev = 10;
+	float a_et_ht [netev] = {421.656, 421.634, 537.589, 444.368, 388.334, 393.389, 418.707, 399.363, 393.997, 555.166};
+	float a_et_met[netev] = {103.668, 93.5886, 83.3471, 194.835, 80.4797, 88.2911, 117.529, 165.110, 83.4841,  88.946};
 
 	TGraph *gmetvsht_da_mt = new TGraph(nmtev, a_mt_ht, a_mt_met);
 	gmetvsht_da_mt->SetName("Data_HTvsMET_mt_graph");
@@ -2423,13 +2513,13 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	// Special effects:
 	const float lowerht = 350.;
 	// HT350met80 and HT400met120).
-	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, 400., kBlack, 0, 0);
+	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
 	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    80., kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
-	TLine *boxborder1 = new TLine(lowerht, 80., lowerht, 400.);
+	TLine *boxborder1 = new TLine(lowerht, 80., lowerht, metmax);
 	TLine *boxborder2 = new TLine(lowerht, 80., htmax,   80.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
@@ -2442,8 +2532,8 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	// TLine *sig2y = new TLine(lowerht, 120., htmax,   120.);
 	// TLine *sig3x = new TLine(400.,  50., 400.,  400.);
 	// TLine *sig3y = new TLine(400.,  50., htmax,  50.);
-	TLine *sig4x = new TLine(400., 120., 400.,  400.);
-	TLine *sig4y = new TLine(400., 120., htmax, 120.);
+	TLine *sig4x = new TLine(450., 120., 450.,  metmax);
+	TLine *sig4y = new TLine(450., 120., htmax, 120.);
 
 	// sig1x->SetLineWidth(2);
 	// sig1y->SetLineWidth(2);
@@ -2510,9 +2600,9 @@ void SSDLPlotter::makeMETvsHTPlotTau(){
 	pave->Draw();
 	gPad->RedrawAxis();
 
-	Util::PrintNoEPS( c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
+	// Util::PrintNoEPS( c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir);
+	// Util::SaveAsMacro(c_temp, "HTvsMET_TauChan", fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
 	delete hmetvsht_da_mt;
@@ -3067,6 +3157,212 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 		delete hsntight, hsnloose, c_tight, c_loose, leg;
 	}
 	fOutputSubDir = "";
+}
+
+void SSDLPlotter::makePRLPlot1(){
+	FakeRatios *FR = new FakeRatios();
+	const int nchans = 8;
+	TString axis_labels_1[nchans] = {
+		"H_{T} >  80",
+		"H_{T} > 200",
+		"",
+		"H_{T} > 450",
+		"",
+		"H_{T} > 450",
+		"",
+		""
+	};
+	TString axis_labels_2[nchans] = {
+		"E_{T}^{miss} > 120",
+		"E_{T}^{miss} > 120",
+		"",
+		"E_{T}^{miss} > 50",
+		"",
+		"E_{T}^{miss} > 120",
+		"",
+		""
+	};
+	TH1D    *h_obs      = new TH1D("h_observed",   "Observed number of events", nchans, 0., (double)nchans);
+	TH1D    *h_pred_sf  = new TH1D("h_pred_sfake", "Predicted single fakes",    nchans, 0., (double)nchans);
+	TH1D    *h_pred_df  = new TH1D("h_pred_dfake", "Predicted double fakes",    nchans, 0., (double)nchans);
+	TH1D    *h_pred_cm  = new TH1D("h_pred_chmid", "Predicted charge mis id",   nchans, 0., (double)nchans);
+	TH1D    *h_pred_mc  = new TH1D("h_pred_mc",    "Predicted WW/WZ/ZZ",        nchans, 0., (double)nchans);
+	TH1D    *h_pred_tot = new TH1D("h_pred_tot",   "Total Prediction",          nchans, 0., (double)nchans);
+	THStack *hs_pred    = new THStack("hs_predicted", "Predicted number of events");
+	
+	const double p_df [nchans] = { 0.1, 0.5, 0.1, 0.8, 0.2, 0.1, 0.0, 0.0};
+	const double p_sf [nchans] = {14.4, 15., 8.4, 7.7, 4.4, 2.2, 1.1, 4.0};
+	const double p_cm [nchans] = { 0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0.0, 0.3};
+	const double p_mc [nchans] = { 5.8, 5.1, 4.8, 3.0, 2.9, 1.5, 1.4, 4.0};
+	const double p_E  [nchans] = { 9.0, 10., 6.4, 6.0, 4.6, 2.7, 2.3, 0.6};
+	const double n_obs[nchans] = {19. , 20., 17., 11., 8. , 3. , 2. , 5. };
+	
+	h_obs->SetMarkerColor(kBlack);
+	h_obs->SetMarkerStyle(20);
+	h_obs->SetMarkerSize(2.5);
+	h_obs->SetLineWidth(2);
+	h_obs->SetLineColor(kBlack);
+	h_obs->SetFillColor(kBlack);
+	
+	h_pred_sf->SetLineWidth(1);
+	h_pred_df->SetLineWidth(1);
+	h_pred_cm->SetLineWidth(1);
+	h_pred_mc->SetLineWidth(1);
+
+	Color_t col_sf = 50;
+	Color_t col_df = 38;
+	Color_t col_cm = 42;
+	Color_t col_mc = 31;
+	h_pred_sf->SetLineColor(col_sf);
+	h_pred_sf->SetFillColor(col_sf);
+	h_pred_df->SetLineColor(col_df);
+	h_pred_df->SetFillColor(col_df);
+	h_pred_cm->SetLineColor(col_cm);
+	h_pred_cm->SetFillColor(col_cm);
+	h_pred_mc->SetLineColor(col_mc);
+	h_pred_mc->SetFillColor(col_mc);
+
+	h_pred_tot  ->SetLineWidth(1);
+	h_pred_tot  ->SetFillColor(12);
+	h_pred_tot  ->SetFillStyle(3005);
+	
+	// Add numbers:
+	for(size_t i = 0; i < nchans; ++i){
+		h_obs     ->SetBinContent(i+1, n_obs[i]);
+		h_pred_sf ->SetBinContent(i+1, p_sf [i]);
+		h_pred_df ->SetBinContent(i+1, p_df [i]);
+		h_pred_cm ->SetBinContent(i+1, p_cm [i]);
+		h_pred_mc ->SetBinContent(i+1, p_mc [i]);
+		h_pred_sf ->GetXaxis()->SetBinLabel(i+1, "");
+		h_pred_tot->SetBinError(i+1, p_E[i]);
+		h_obs     ->SetBinError(i+1, FR->getEStat(n_obs[i]));
+	}
+	
+	h_pred_tot->Add(h_pred_sf);
+	h_pred_tot->Add(h_pred_df);
+	h_pred_tot->Add(h_pred_cm);
+	h_pred_tot->Add(h_pred_mc);
+
+	hs_pred->Add(h_pred_sf);
+	hs_pred->Add(h_pred_df);
+	hs_pred->Add(h_pred_cm);
+	hs_pred->Add(h_pred_mc);
+
+	// double max = h_obs->Integral()*0.5;
+	double max = 43.;
+	h_obs     ->SetMaximum(max);
+	h_pred_sf ->SetMaximum(max);
+	h_pred_df ->SetMaximum(max);
+	h_pred_cm ->SetMaximum(max);
+	h_pred_mc ->SetMaximum(max);
+	h_pred_tot->SetMaximum(max);
+	hs_pred   ->SetMaximum(max);
+	
+	hs_pred->Draw("goff");
+	hs_pred->GetYaxis()->SetTitle("Events");
+	hs_pred->GetYaxis()->SetTitleOffset(1.1);
+	hs_pred->GetYaxis()->SetTitleSize(0.05);
+	hs_pred->GetYaxis()->SetTickLength(0.02);
+	// hs_pred->GetXaxis()->SetLabelOffset(0.01);
+	// hs_pred->GetXaxis()->SetLabelFont(42);
+	// hs_pred->GetXaxis()->SetLabelSize(0.05);
+	// hs_pred->GetXaxis()->LabelsOption("v");
+	for(size_t i = 0; i < nchans; ++i) hs_pred->GetXaxis()->SetBinLabel(i+1, "");
+	
+	TLegend *leg = new TLegend(0.58,0.66,0.93,0.89);
+	// TLegend *leg = new TLegend(0.27,0.65,0.62,0.88);
+	// TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
+	leg->AddEntry(h_obs,      "Observed",         "p");
+	leg->AddEntry(h_pred_mc,  "Irreducible (MC)", "f");
+	leg->AddEntry(h_pred_cm,  "Charge MisID",     "f");
+	leg->AddEntry(h_pred_df,  "Double Fakes",     "f");
+	leg->AddEntry(h_pred_sf,  "Single Fakes",     "f");
+	leg->AddEntry(h_pred_tot, "Total Uncertainty","f");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	// leg->SetFillColor(kWhite);
+	// leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
+	c_temp->cd();
+	c_temp->SetBottomMargin(0.2);
+	c_temp->SetLeftMargin(0.12);
+	c_temp->SetRightMargin(0.05);
+	hs_pred->Draw("hist");
+	h_pred_tot->DrawCopy("0 E2 same");
+	h_obs->DrawCopy("PE X0 same");
+	leg->Draw();
+
+	for(size_t i = 0; i < nchans; ++i){
+		float bincenter = hs_pred->GetXaxis()->GetBinCenter(i+1);
+		// float shift = 0.01;
+		// float split = 0.03;
+		// float x1 = bincenter - split + shift;
+		// float x2 = bincenter + split + shift;
+		float shift = 0.08;
+		float split = 0.22;
+		float x1 = bincenter - split + shift;
+		float x2 = bincenter + split + shift;
+		TLatex *label = new TLatex();
+		// label->SetNDC(0);
+		label->SetTextColor(kBlack);
+		label->SetTextSize(0.035);
+		// label->SetTextAlign();
+		label->SetTextAngle(90);
+		// label->DrawLatex(x1, -9., axis_labels_1[i]);
+		// label->DrawLatex(x2, -9., axis_labels_2[i]);
+		label->DrawLatex(x1, -11., axis_labels_1[i]);
+		label->DrawLatex(x2, -11., axis_labels_2[i]);
+	}
+	TLine *l1 = new TLine(1.0, max*1.05, 1.0, -11.);
+	TLine *l2 = new TLine(3.0, max*1.05, 3.0, -11.);
+	TLine *l3 = new TLine(5.0, max*0.65, 5.0, -11.);
+	l1->Draw();
+	l2->Draw();
+	l3->Draw();
+
+	TLatex *lat = new TLatex();
+	// lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.03);
+	
+	float shift = 0.38;
+	float split = 0.17;
+	lat->SetTextAngle(90);
+	lat->DrawLatex(1.0 - shift - split, 32.0, "High p_{T}");
+	lat->DrawLatex(1.0 - shift + split, 32.0, "(ee/#mu#mu/e#mu)");
+	lat->DrawLatex(2.0 - shift - split, 33.0, "Low p_{T}" );
+	lat->DrawLatex(2.0 - shift + split, 33.0, "(ee/#mu#mu/e#mu)" );
+	lat->DrawLatex(3.0 - shift - split, 22.0, "High p_{T}");
+	lat->DrawLatex(3.0 - shift + split, 22.0, "(ee/#mu#mu/e#mu)");
+	lat->DrawLatex(4.0 - shift - split, 19.5, "Low p_{T}" );
+	lat->DrawLatex(4.0 - shift + split, 19.5, "(ee/#mu#mu/e#mu)" );
+	lat->DrawLatex(5.0 - shift - split, 14.0, "High p_{T}");
+	lat->DrawLatex(5.0 - shift + split, 14.0, "(ee/#mu#mu/e#mu)");
+	lat->DrawLatex(6.0 - shift - split,  8.0, "Low p_{T}" );
+	lat->DrawLatex(6.0 - shift + split,  8.0, "(ee/#mu#mu/e#mu)" );
+	lat->DrawLatex(7.0 - shift - split,  6.0, "High p_{T}");
+	lat->DrawLatex(7.0 - shift + split,  6.0, "(ee/#mu#mu/e#mu)");
+	lat->DrawLatex(8.0 - shift - split, 12.0, "Tau channels");
+	lat->DrawLatex(8.0 - shift + split, 12.0, "(e#tau/#mu#tau/#tau#tau)");
+	// float shift = 0.4;
+	// lat->DrawLatex(1.0 - shift, 32.0, "High p_{T} (e/#mu)");
+	// lat->DrawLatex(2.0 - shift, 33.0, "Low p_{T} (e/#mu)" );
+	// lat->DrawLatex(3.0 - shift, 22.0, "High p_{T} (e/#mu)");
+	// lat->DrawLatex(4.0 - shift, 19.5, "Low p_{T} (e/#mu)" );
+	// lat->DrawLatex(5.0 - shift, 14.0, "High p_{T} (e/#mu)");
+	// lat->DrawLatex(6.0 - shift,  8.0, "Low p_{T} (e/#mu)" );
+	// lat->DrawLatex(7.0 - shift,  6.0, "High p_{T} (e/#mu)");
+	// lat->DrawLatex(8.0 - shift, 12.0, "e#tau/#mu#tau/#tau#tau");
+	drawTopLine();
+	
+	gPad->RedrawAxis();
+	fOutputSubDir = "PRL";
+	Util::PrintPDF(c_temp, "ObsPred_MultiChan", fOutputDir + fOutputSubDir);
+	delete c_temp;	
+	delete h_obs, h_pred_sf, h_pred_df, h_pred_cm, h_pred_mc, h_pred_tot, hs_pred;
+	delete FR;	
 }
 
 void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
@@ -3711,11 +4007,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(7)  << setprecision(2) << elpratio_data  << " +/- " << setw(7) << setprecision(2) << elpratio_data_e  << " ||";
 	OUT << endl;
 	OUT << "---------------------------------------------------------------------------------------------------------" << endl << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-	OUT << "         YIELDS  ||   Nt2   |   Nt1   |   Nt0   ||   Nt2   |   Nt10  |   Nt01  |   Nt0   ||   Nt2   |   Nt1   |   Nt0   ||" << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-
+	OUT << "-------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 |           Mu/Mu          |                E/Mu               |           E/E            ||" << endl;
+	OUT << "         YIELDS  |   Ntt  |   Nt1  |   Nll  |   Ntt  |   Ntl  |   Nlt  |   Nll  |   Ntt  |   Nt1  |   Nll  ||" << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------" << endl;
 	float nt2sum_mm(0.), nt10sum_mm(0.), nt0sum_mm(0.);
 	float nt2sum_em(0.), nt10sum_em(0.), nt01sum_em(0.), nt0sum_em(0.);
 	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
@@ -3732,67 +4027,36 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt2sum_ee  += scale*S->numbers[reg][Elec].nt2;
 		nt10sum_ee += scale*S->numbers[reg][Elec].nt10;
 		nt0sum_ee  += scale*S->numbers[reg][Elec].nt0;
-
-		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt2  << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt10 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Muon].nt0  << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt2  << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt10 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt01 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][ElMu].nt0  << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt2  << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt10 << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->numbers[reg][Elec].nt0  << " || ";
-		OUT << endl;
+		TString tempname = S->sname;
+		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
+		scale*S->numbers[reg][Muon].nt2 , scale*S->numbers[reg][Muon].nt10, scale*S->numbers[reg][Muon].nt0 ,
+		scale*S->numbers[reg][ElMu].nt2 , scale*S->numbers[reg][ElMu].nt10, scale*S->numbers[reg][ElMu].nt01, scale*S->numbers[reg][ElMu].nt0 ,
+		scale*S->numbers[reg][Elec].nt2 , scale*S->numbers[reg][Elec].nt10, scale*S->numbers[reg][Elec].nt0 );
 	}	
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "MC sum" << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_mm  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_mm ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_mm  ) << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_em  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_em ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt01sum_em ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_em  ) << " || ";
-	OUT << setw(7) << Form("%5.1f", nt2sum_ee  ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt10sum_ee ) << " | ";
-	OUT << setw(7) << Form("%5.1f", nt0sum_ee  ) << " || ";
-	OUT << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "\\hline" << endl;
+	OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", "MC sum",
+	nt2sum_mm ,	nt10sum_mm,	nt0sum_mm ,
+	nt2sum_em ,	nt10sum_em,	nt01sum_em,	nt0sum_em ,
+	nt2sum_ee ,	nt10sum_ee,	nt0sum_ee);
+	OUT << "\\hline" << endl;
+
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->lumi;
-		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt2  ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt10 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Muon].nt0  ) << " || ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt2  ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt10 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt01 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][ElMu].nt0  ) << " || ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt2  ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt10 ) << " | ";
-		OUT << setw(7)  << Form("%5.2f", scale * S->numbers[reg][Elec].nt0  ) << " || ";
-		OUT << endl;
+
+		TString tempname = S->sname;
+		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
+		scale*S->numbers[reg][Muon].nt2 , scale*S->numbers[reg][Muon].nt10, scale*S->numbers[reg][Muon].nt0 ,
+		scale*S->numbers[reg][ElMu].nt2 , scale*S->numbers[reg][ElMu].nt10, scale*S->numbers[reg][ElMu].nt01, scale*S->numbers[reg][ElMu].nt0 ,
+		scale*S->numbers[reg][Elec].nt2 , scale*S->numbers[reg][Elec].nt10, scale*S->numbers[reg][Elec].nt0 );
 	}	
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "data"  << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_mm ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_mm) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_mm ) << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_em ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_em) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt01_em) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_em ) << " || ";
-	OUT << setw(7) << Form("%4.0f", nt2_ee ) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt10_ee) << " | ";
-	OUT << setw(7) << Form("%4.0f", nt0_ee ) << " || ";
+	OUT << "\\hline" << endl;
+	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
+	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
+	OUT << "\\hline" << endl;	
 	OUT << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << endl;
-	
+
 	///////////////////////////////////////////////////////////////////////////////////
 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -4095,8 +4359,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_pred_mc   ->SetLineColor(31);
 	h_pred_mc   ->SetFillColor(31);
 	h_pred_tot  ->SetLineWidth(1);
-	h_pred_tot  ->SetFillColor(kBlack);
-	h_pred_tot  ->SetFillStyle(3013);
+	// h_pred_tot  ->SetFillColor(kBlack);
+	// h_pred_tot  ->SetFillStyle(3013);
+	h_pred_tot  ->SetFillColor(12);
+	h_pred_tot  ->SetFillStyle(3005);
 	
 	// Add numbers:
 	h_obs->SetBinContent(1, nt2_ee);
@@ -4167,7 +4433,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	// leg->SetTextSize(0.05);
 	leg->SetBorderSize(0);
 	
-	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 800, 600);
+	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->cd();
 	
 	hs_pred->Draw("hist");
@@ -4607,14 +4873,24 @@ void SSDLPlotter::makeDiffPrediction(){
 		totbg_em->SetLineWidth(1);
 		totbg_ee->SetLineWidth(1);
 
-		totbg   ->SetFillColor(kBlack);
-		totbg_mm->SetFillColor(kBlack);
-		totbg_em->SetFillColor(kBlack);
-		totbg_ee->SetFillColor(kBlack);
-		totbg   ->SetFillStyle(3013);
-		totbg_mm->SetFillStyle(3013);
-		totbg_em->SetFillStyle(3013);
-		totbg_ee->SetFillStyle(3013);
+
+		totbg   ->SetFillColor(12);
+		totbg_mm->SetFillColor(12);
+		totbg_em->SetFillColor(12);
+		totbg_ee->SetFillColor(12);
+		totbg   ->SetFillStyle(3005);
+		totbg_mm->SetFillStyle(3005);
+		totbg_em->SetFillStyle(3005);
+		totbg_ee->SetFillStyle(3005);
+
+		// totbg   ->SetFillColor(kBlack);
+		// totbg_mm->SetFillColor(kBlack);
+		// totbg_em->SetFillColor(kBlack);
+		// totbg_ee->SetFillColor(kBlack);
+		// totbg   ->SetFillStyle(3013);
+		// totbg_mm->SetFillStyle(3013);
+		// totbg_em->SetFillStyle(3013);
+		// totbg_ee->SetFillStyle(3013);
 
 		TH1D *nt11_pred_tot    = new TH1D(Form("NT11_PRED_%s",    varname.Data()), varname, nbins, bins); nt11_pred_tot->Sumw2();
 		TH1D *nt11_mm_pred_tot = new TH1D(Form("NT11_MM_PRED_%s", varname.Data()), varname, nbins, bins); nt11_mm_pred_tot->Sumw2();

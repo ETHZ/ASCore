@@ -54,6 +54,8 @@ public:
 	void makeIsoVsMETPlot(gSample);
 	void makePileUpPlots(bool write = true);
 	
+	void makePRLPlot1();
+	
 	void makeMCClosurePlots(vector<int>);
 	void makeDataClosurePlots();
 	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
