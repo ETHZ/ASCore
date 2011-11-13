@@ -31,6 +31,7 @@ struct t_lepton {
   int tagRecojzb,tagRecoss,tagRecomt2,probeRecojzb,probeRecoss,probeRecomt2,pprobeRecojzb,pprobeRecoss,pprobeRecomt2;
   int tagIsojzb,tagIsoss,tagIsomt2, probeIsojzb,probeIsoss,probeIsomt2, pprobeIsojzb,pprobeIsoss,pprobeIsomt2; 
   int tagIDjzb,tagIDss,tagIDmt2, probeIDjzb,probeIDss,probeIDmt2,pprobeIDjzb,pprobeIDss,pprobeIDmt2;
+  int tagmatchedtohlt;
 };
 
 
@@ -54,6 +55,7 @@ public:
   const bool MuPassingIDPProbe(int, int);
   const bool MuPassingIsoProbe(int, int);
   const bool MuPassingIsoPProbe(int, int, int);
+  const bool MuPassingTriggerTagRequirement(int);
 
   const bool ElAcceptance(int);
   const bool ElPassingTag(const int, const int);
@@ -63,7 +65,7 @@ public:
   const bool ElPassingIDPProbe(int, int);
   const bool ElPassingIsoProbe(int,int);
   const bool ElPassingIsoPProbe(const int, const int, const int);
-
+  const bool ElPassingTriggerTagRequirement(int);
 
 
   const bool IsCustomJet(const int index);
@@ -87,8 +89,9 @@ private:
   enum counters_t { count_begin, EV=count_begin, TR, MU, EL, JE, PJ, count_end };
   Monitor counters[count_end];
 
-  vector<t_lepton> sortLeptonsByPt(vector<t_lepton>&);
-
+  vector<t_lepton> selectLeptons(vector<t_lepton>&); 
+  vector<t_lepton> sortLeptonsByPt(vector<t_lepton>& ); 
+  
   template<class T> std::string any2string(T i);
   // file for histograms:
   TFile *fHistFile;
