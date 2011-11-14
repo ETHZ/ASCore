@@ -372,8 +372,148 @@ Double_t EnergyCorrection::applyScCorrectionsE_EE_electrons(Double_t E){
  						  
 }         
 
+Double_t EnergyCorrection::applyScCorrectionsETETA_EB_electrons(Double_t ET, Double_t eta){        
+  if (0.02< TMath::Abs(eta) && TMath::Abs(eta) < 0.25){ 
+    if (5< ET && ET < 10) return 0.977764;
+    if (10< ET && ET < 20) return 0.994264;
+    if (20< ET && ET < 30) return 0.997246;
+    if (30< ET && ET < 40) return 1.00025;
+    if (40< ET && ET < 50) return 0.999151;
+    if (50< ET && ET < 60) return 1.00043;
+    if (60< ET && ET < 80) return 1.0001;
+    if (80< ET && ET < 100) return 1.0005;
+    if (100< ET && ET < 120) return 1.00015;
+    if (120< ET && ET < 140) return 1.00006;
+    if (140< ET && ET < 160) return 1.00005;
+    if (160< ET && ET < 180) return 1.00001;
+    if (180< ET && ET < 200) return 0.999564;
+  }
+  if (0.25< TMath::Abs(eta) && TMath::Abs(eta) < 0.42){ 
+    if (5< ET && ET < 10) return 0.971133;
+    if (10< ET && ET < 20) return 0.993328;
+    if (20< ET && ET < 30) return 0.996237;
+    if (30< ET && ET < 40) return 0.997145;
+    if (40< ET && ET < 50) return 0.999389;
+    if (50< ET && ET < 60) return 0.999637;
+    if (60< ET && ET < 80) return 0.999618;
+    if (80< ET && ET < 100) return 1.00007;
+    if (100< ET && ET < 120) return 1.00042;
+    if (120< ET && ET < 140) return 1.00002;
+    if (140< ET && ET < 160) return 1.00033;
+    if (160< ET && ET < 180) return 1.00019;
+    if (180< ET && ET < 200) return 1.00019;
+  }
+  if (0.46< TMath::Abs(eta) && TMath::Abs(eta) < 0.77){ 
+    if (5< ET && ET < 10) return 0.975339;
+    if (10< ET && ET < 20) return 0.995132;
+    if (20< ET && ET < 30) return 0.996809;
+    if (30< ET && ET < 40) return 0.998916;
+    if (40< ET && ET < 50) return 0.999224;
+    if (50< ET && ET < 60) return 0.999411;
+    if (60< ET && ET < 80) return 1.00007;
+    if (80< ET && ET < 100) return 1.00008;
+    if (100< ET && ET < 120) return 1.0001;
+    if (120< ET && ET < 140) return 1.00034;
+    if (140< ET && ET < 160) return 1.00024;
+    if (160< ET && ET < 180) return 1.00002;
+    if (180< ET && ET < 200) return 1.00021;
+  }
+  if (0.81< TMath::Abs(eta) && TMath::Abs(eta) < 0.91){ 
+    if (5< ET && ET < 10) return 0.958131;
+    if (10< ET && ET < 20) return 0.983402;
+    if (20< ET && ET < 30) return 0.995181;
+    if (30< ET && ET < 40) return 0.995896;
+    if (40< ET && ET < 50) return 0.998876;
+    if (50< ET && ET < 60) return 0.998252;
+    if (60< ET && ET < 80) return 0.99977;
+    if (80< ET && ET < 100) return 0.99968;
+    if (100< ET && ET < 120) return 0.99965;
+    if (120< ET && ET < 140) return 1.00033;
+    if (140< ET && ET < 160) return 1.00016;
+    if (160< ET && ET < 180) return 1.00063;
+    if (180< ET && ET < 200) return 1.00043;
+  }
+  if (0.91< TMath::Abs(eta) && TMath::Abs(eta) < 1.01){ 
+    if (5< ET && ET < 10) return 0.961929;
+    if (10< ET && ET < 20) return 0.984915;
+    if (20< ET && ET < 30) return 0.989539;
+    if (30< ET && ET < 40) return 0.993018;
+    if (40< ET && ET < 50) return 0.996772;
+    if (50< ET && ET < 60) return 0.996256;
+    if (60< ET && ET < 80) return 0.998337;
+    if (80< ET && ET < 100) return 0.998792;
+    if (100< ET && ET < 120) return 0.99941;
+    if (120< ET && ET < 140) return 1.00002;
+    if (140< ET && ET < 160) return 1.00065;
+    if (160< ET && ET < 180) return 1.00134;
+    if (180< ET && ET < 200) return 1.00159;
+  }
+  if (1.01< TMath::Abs(eta) && TMath::Abs(eta) < 1.13){ 
+    if (5< ET && ET < 10) return 0.917478;
+    if (10< ET && ET < 20) return 0.959749;
+    if (20< ET && ET < 30) return 0.983153;
+    if (30< ET && ET < 40) return 0.986145;
+    if (40< ET && ET < 50) return 0.99099;
+    if (50< ET && ET < 60) return 0.994393;
+    if (60< ET && ET < 80) return 0.996233;
+    if (80< ET && ET < 100) return 0.997332;
+    if (100< ET && ET < 120) return 0.999427;
+    if (120< ET && ET < 140) return 0.999626;
+    if (140< ET && ET < 160) return 1.00141;
+    if (160< ET && ET < 180) return 1.00128;
+    if (180< ET && ET < 200) return 1.00155;
+  }
+  if (1.16< TMath::Abs(eta) && TMath::Abs(eta) < 1.22){ 
+    if (5< ET && ET < 10) return 0.912609;
+    if (10< ET && ET < 20) return 0.949897;
+    if (20< ET && ET < 30) return 0.962474;
+    if (30< ET && ET < 40) return 0.980088;
+    if (40< ET && ET < 50) return 0.983248;
+    if (50< ET && ET < 60) return 0.987987;
+    if (60< ET && ET < 80) return 0.992508;
+    if (80< ET && ET < 100) return 0.995594;
+    if (100< ET && ET < 120) return 0.99812;
+    if (120< ET && ET < 140) return 1.00038;
+    if (140< ET && ET < 160) return 1.00082;
+    if (160< ET && ET < 180) return 1.00217;
+    if (180< ET && ET < 200) return 1.00287;
+  }
+  if (1.22< TMath::Abs(eta) && TMath::Abs(eta) < 1.33){ 
+    if (5< ET && ET < 10) return 0.864972;
+    if (10< ET && ET < 20) return 0.935465;
+    if (20< ET && ET < 30) return 0.963805;
+    if (30< ET && ET < 40) return 0.972135;
+    if (40< ET && ET < 50) return 0.983485;
+    if (50< ET && ET < 60) return 0.986927;
+    if (60< ET && ET < 80) return 0.994452;
+    if (80< ET && ET < 100) return 0.996924;
+    if (100< ET && ET < 120) return 0.99832;
+    if (120< ET && ET < 140) return 1.00008;
+    if (140< ET && ET < 160) return 1.00137;
+    if (160< ET && ET < 180) return 1.00205;
+    if (180< ET && ET < 200) return 1.00273;
+  }
+  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.44){ 
+    if (5< ET && ET < 10) return 0.864351;
+    if (10< ET && ET < 20) return 0.920213;
+    if (20< ET && ET < 30) return 0.961388;
+    if (30< ET && ET < 40) return 0.972928;
+    if (40< ET && ET < 50) return 0.982903;
+    if (50< ET && ET < 60) return 0.990699;
+    if (60< ET && ET < 80) return 0.99128;
+    if (80< ET && ET < 100) return 0.995919;
+    if (100< ET && ET < 120) return 0.998793;
+    if (120< ET && ET < 140) return 1.00008;
+    if (140< ET && ET < 160) return 1.00162;
+    if (160< ET && ET < 180) return 1.0023;
+    if (180< ET && ET < 200) return 1.00317;
+  }
 
-
+  std::cout << "WARNING YOU'RE ASKING FOR CORRECTIONS OUTSIDE BOUNDARIES " << std::endl;
+  std::cout << "input eta: " << eta << std::endl;
+  std::cout << "input ET: " << ET << std::endl;
+  return 1;
+};                                
 
 double EnergyCorrection::f5x5( double iEta ) {
   if ( iEta < 40.2198 ) return 1;
@@ -382,6 +522,24 @@ double EnergyCorrection::f5x5( double iEta ) {
 
 float EnergyCorrection::getEtaCorrectionBarrel(float eta){
   return 1.0/f5x5((int)(TMath::Abs(eta)*(5/0.087)));
+};
+
+bool EnergyCorrection::isInEBEtaCracks(double eta){
+
+  if (TMath::Abs(eta)>1.44) return false;
+
+  if (0.02< TMath::Abs(eta) && TMath::Abs(eta) < 0.25) return false;
+  if (0.25< TMath::Abs(eta) && TMath::Abs(eta) < 0.42) return false; 
+  if (0.46< TMath::Abs(eta) && TMath::Abs(eta) < 0.77) return false; 
+  if (0.81< TMath::Abs(eta) && TMath::Abs(eta) < 0.91) return false; 
+  if (0.91< TMath::Abs(eta) && TMath::Abs(eta) < 1.01) return false; 
+  if (1.01< TMath::Abs(eta) && TMath::Abs(eta) < 1.13) return false; 
+  if (1.16< TMath::Abs(eta) && TMath::Abs(eta) < 1.22) return false; 
+  if (1.22< TMath::Abs(eta) && TMath::Abs(eta) < 1.33) return false; 
+  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.44) return false; 
+
+  return true;
+
 };
 
 bool EnergyCorrection::isInPhiCracks(double phi, double eta){
@@ -515,7 +673,8 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
     float et = energy/cosh(sc_eta);
 
       et /= applyScCorrectionsBrEta_electrons(sc_eta,sc_brem);
-      et /= applyScCorrectionsET_EB_electrons(et);
+      //  et /= applyScCorrectionsET_EB_electrons(et);
+      et /= applyScCorrectionsETETA_EB_electrons(et,sc_eta);
 
     energy = et*cosh(sc_eta);
   }

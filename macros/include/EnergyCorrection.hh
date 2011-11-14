@@ -49,6 +49,7 @@ public:
   float getEtaCorrectionBarrel(float eta);
 
   bool isInPhiCracks(double phi, double eta);
+  bool isInEBEtaCracks(double eta);
 
 private:
 
@@ -85,7 +86,7 @@ private:
   Double_t applyScCorrectionsET_EB_electrons(Double_t ET);
   Double_t applyScCorrectionsET_EE_electrons(Double_t ET);
   Double_t applyScCorrectionsE_EE_electrons(Double_t E);
-
+  Double_t applyScCorrectionsETETA_EB_electrons(Double_t ET, Double_t eta);
 
 };
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include <vector>
 
 using namespace std;
 
@@ -16,12 +17,12 @@ ZeeAnalysis::ZeeAnalysis(TreeReader *tr, std::string dataType) : UserAnalysisBas
 	  assert(1==0);
 	}
         elecorr = new EnergyCorrection("electrons");
-	for (int i=0; i<6; i++) for (int j=0; j<4; j++) myfile[i][j] = new ofstream();
+	for (int i=0; i<6; i++) for (int j=0; j<7; j++) myfile[i][j] = new ofstream();
 }
 
 ZeeAnalysis::~ZeeAnalysis(){
   delete elecorr;
-  for (int i=0; i<6; i++) for (int j=0; j<4; j++) delete myfile[i][j];
+  for (int i=0; i<6; i++) for (int j=0; j<7; j++) delete myfile[i][j];
 }
 
 void ZeeAnalysis::Begin(){
@@ -32,7 +33,7 @@ void ZeeAnalysis::Begin(){
 	
 	const char* masspointsfile = "masspoints_ee_";
 	int codes[6]={0,15,16,17,20,999};
-	for (int i=0; i<6; i++)	for (int j=0; j<4; j++){
+	for (int i=0; i<6; i++)	for (int j=0; j<7; j++){
 	TString path=fOutputDir;
 	path.Append(masspointsfile);
 	path+=codes[i];
@@ -97,15 +98,17 @@ void ZeeAnalysis::Analyze(){
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float energy=fTR->SCRaw[fTR->ElSCindex[*it]];
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
-     if (fabs(eta)<1.4442) energy*=elecorr->getEtaCorrectionBarrel(eta);
+     if (fabs(eta)<1.44) energy*=elecorr->getEtaCorrectionBarrel(eta);
      if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->ElSCindex[*it]];
-     if (energy/cosh(eta)<30) it=passing.erase(it); else it++;
+     if (energy/cosh(eta)<30 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
    }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
-     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
+     // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) evtisok=false;    
+     // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
+     if ( (fabs(eta)>1.44 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
    }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
@@ -150,53 +153,61 @@ void ZeeAnalysis::Analyze(){
   fHInvMass17 ->Fill(invmass17,weight);
   fHInvMass20 ->Fill(invmass20,weight);
 
-
-
-
-   int cat;
    
    float abseta0 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(0)]]);
    float abseta1 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(1)]]);
-   if (abseta0<1.4442 && abseta1<1.4442) cat=1;
-   else if (abseta0>1.56 && abseta1>1.56) cat=3;
-   else if (abseta0<1.4442 && abseta1>1.56) cat=2;
-   else if (abseta0>1.56 && abseta1<1.4442) cat=2;
-   else cat=-1;
-   
+    vector<int> cat;
+    if (abseta0<1.44 && abseta1<1.44) cat.push_back(1);
+    else if (abseta0>1.56 && abseta1>1.56) cat.push_back(3);
+   else if ((abseta0<1.44 && abseta1>1.56) || (abseta0>1.56 && abseta1<1.44)) cat.push_back(2);
+   else return;
+    
+    if (cat[0]==1){
+        if (abseta0<1 && abseta1<1) cat.push_back(4);
+        else if (abseta0>1 && abseta1>1) cat.push_back(6);
+        else cat.push_back(5);
+    }
+             
+             
+             
+             
    /*
    std::cout << "cat " << cat << std::endl;
    std::cout << "mass17 " << invmass17 << " mass20 " << invmass20 << std::endl;
    //   std::cout << fTR->SCEta[fTR->ElSCindex[passing.at(0)]] << " " << fTR->SCEta[fTR->ElSCindex[passing.at(1)]] << " " << cat << std::endl;
    */
-
-   if (cat!=-1){
-     *(myfile[0][0]) << invmass0 << " " << weight << std::endl;
+    for (vector<int>::const_iterator it=cat.begin(); it!=cat.end(); it++){
+        int j=*it;
+        *(myfile[0][j]) << invmass0 << " " << weight << std::endl;
+        *(myfile[1][j]) << invmass15 << " " << weight << std::endl;
+        *(myfile[2][j]) << invmass16 << " " << weight << std::endl;
+        *(myfile[3][j]) << invmass17 << " " << weight << std::endl;
+        *(myfile[4][j]) << invmass20 << " " << weight << std::endl;
+        *(myfile[5][j]) << invmassEgen << " " << weight << std::endl;
+    }
+    
+    *(myfile[0][0]) << invmass0 << " " << weight << std::endl;
      *(myfile[1][0]) << invmass15 << " " << weight << std::endl;
      *(myfile[2][0]) << invmass16 << " " << weight << std::endl;
      *(myfile[3][0]) << invmass17 << " " << weight << std::endl;
      *(myfile[4][0]) << invmass20 << " " << weight << std::endl;
      *(myfile[5][0]) << invmassEgen << " " << weight << std::endl;
      
-     *(myfile[0][cat]) << invmass0 << " " << weight << std::endl;
-     *(myfile[1][cat]) << invmass15 << " " << weight << std::endl;
-     *(myfile[2][cat]) << invmass16 << " " << weight << std::endl;
-     *(myfile[3][cat]) << invmass17 << " " << weight << std::endl;
-     *(myfile[4][cat]) << invmass20 << " " << weight << std::endl;
-     *(myfile[5][cat]) << invmassEgen << " " << weight << std::endl;
+     
  
-    for (int i=0; i<2; i++) {
-     if (fTR->ElGenE[passing.at(i)]<0) continue;
-     TLorentzVector correl17 = CorrElectron(fTR,passing.at(i),17);
-     TLorentzVector correl20 = CorrElectron(fTR,passing.at(i),20);
-     if (cat==1) fHErecEGen17cat1->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
-     if (cat==1) fHErecEGen20cat1->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
-     if (cat==2) fHErecEGen17cat2->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
-     if (cat==2) fHErecEGen20cat2->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
-     if (cat==3) fHErecEGen17cat3->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
-     if (cat==3) fHErecEGen20cat3->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
-    }
+//    for (int i=0; i<2; i++) {
+//     if (fTR->ElGenE[passing.at(i)]<0) continue;
+//     TLorentzVector correl17 = CorrElectron(fTR,passing.at(i),17);
+//     TLorentzVector correl20 = CorrElectron(fTR,passing.at(i),20);
+//     if (cat==1) fHErecEGen17cat1->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
+//     if (cat==1) fHErecEGen20cat1->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
+//     if (cat==2) fHErecEGen17cat2->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
+//     if (cat==2) fHErecEGen20cat2->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
+//     if (cat==3) fHErecEGen17cat3->Fill(correl17.E()/fTR->ElGenE[passing.at(i)]);
+//     if (cat==3) fHErecEGen20cat3->Fill(correl20.E()/fTR->ElGenE[passing.at(i)]);
+//    }
 
-   }
+   
    
  
  
@@ -228,7 +239,7 @@ void ZeeAnalysis::End(){
 	fHNumVtx->Write();
 	
 	fHistFile->Close();
-	for (int i=0; i<5; i++) for (int j=0; j<4; j++)  myfile[i][j]->close();
+	for (int i=0; i<6; i++) for (int j=0; j<7; j++)  myfile[i][j]->close();
 }
 
 TLorentzVector ZeeAnalysis::CorrElectron(TreeReader *fTR, int i, int mode){
