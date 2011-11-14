@@ -183,6 +183,6 @@ if (datamc=="data"):
 
    format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']] |'+datasetName+' |'+datasetSize+' |'+datasetEvents+' |[[%ATTACHURL%/'+fLumiSummary+']['+lumi+']] | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% |'+cmsswVersion+' |'+ntupleVersion+' |'+userNickName+' | |'
 else:
-   format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" GB | "+datasetEvents+' | ... pb | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% | '+cmsswVersion+' | '+ntupleVersion+" | "+userNickName+" | |"
+   format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" | "+datasetEvents+' | ... pb | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% | '+cmsswVersion+' | '+ntupleVersion+" | "+userNickName+" | |"
 
 print '---------------------------------------\nAdd the following line to the Twiki:\n\n',format_Twiki
