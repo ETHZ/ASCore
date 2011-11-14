@@ -19,10 +19,11 @@ using namespace std;
 const bool RunEfficiency::ElAcceptance(int index) {
   
   if(!(fTR->ElPt[index]>5) )return false;
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
+  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
   return true;
 
 }
+
 
 //_____________________________________________________________
 const bool RunEfficiency::ElPassingTag(int n, int index) {
@@ -30,19 +31,52 @@ const bool RunEfficiency::ElPassingTag(int n, int index) {
   //The tag has to have a more constrained acceptance
   if(n == 0) {
     if(!(fTR->ElPt[index]>20) )return false;
-    if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if (elIDWP95!=7) return false;
+    if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+    int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+    if(!(elIDWP90&1)) return false;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+      if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
+    } else { // Endcap
+      if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
+    }
   } else if(n == 1) {
     if(!(fTR->ElPt[index]>20) )return false;
-    if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if (elIDWP95!=7) return false;
+    if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+    int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+    if(!(elIDWP90&1)) return false;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+      if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
+    } else { // Endcap
+      if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
+    }
   } else if(n == 2) {  
     if(!(fTR->ElPt[index]>20) )return false;
-    if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if (elIDWP95!=7) return false;
+    if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+    int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+    if(!(elIDWP90&1)) return false;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+      if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
+    } else { // Endcap
+      if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
+    }
   }
 
   return true;
@@ -89,10 +123,12 @@ const bool RunEfficiency::ElPassingRecoPProbe(int n, int index) {
 
   if(n == 0) {
     if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
+    if ( !(fTR->ElESuperClusterOverP[index]*fTR->ElTrkMomAtVtx[index]>10) ) return false;
     if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
     if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
   } else if(n == 1) {
     if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
+    if ( !(fTR->ElESuperClusterOverP[index]*fTR->ElTrkMomAtVtx[index]>10) ) return false;
     if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
     if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
   } else if(n == 2) {
@@ -108,11 +144,33 @@ const bool RunEfficiency::ElPassingIDPProbe(int n, int index) {
   if(!ElAcceptance(index)) return false;
 
   if(n == 0) {
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if(elIDWP95!=7) return false;
+    int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+    if(!(elIDWP90&1)) return false;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+      if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
+    } else { // Endcap
+      if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
+    }
   } else if(n == 1) {
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if(elIDWP95!=7) return false;
+    int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
+    if(!(elIDWP90&1)) return false;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+      if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
+    } else { // Endcap
+      if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
+      if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
+      if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
+      if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
+    }
   } else if(n == 2) {
     return true;
   }
@@ -125,12 +183,18 @@ const bool RunEfficiency::ElPassingIsoPProbe(int n, int index,int pfindex) {
   if(!ElAcceptance(index)) return false;
 
   if(n == 0) {
-    double hybridIso = fTR->ElRelIso03[index]*fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
+    double pedestal = 0.;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
+    double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
+    double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
     if ( !(hybridIso < 0.15) ) return false;
   } else if(n == 1) {
-    double hybridIso = fTR->ElRelIso03[index]*fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
+    double pedestal = 0.;
+    if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
+    double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
+    double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
     if ( !(hybridIso < 0.15) ) return false;
-  } else if(n == 2) {
+} else if(n == 2) {
     if(pfindex == -1) return false;
     if( ! IsCustomPfEl(pfindex) ) return false;
   }
@@ -166,7 +230,7 @@ const int RunEfficiency::getPFElIndex(const int recoIndex) {
 const bool RunEfficiency::IsCustomPfEl(const int index){
 
   if(!(fTR->PfEl3Pt[index]>5) )return false;
-  if(!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
+  if(!(fabs(fTR->PfEl3Eta[index]) < 2.5) ) return false;
   if(!(fTR->PfElID95[index])) return false;
   
   return true;

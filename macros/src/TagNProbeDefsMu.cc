@@ -36,14 +36,23 @@ const bool RunEfficiency::MuPassingTag(int n, int index){
     if ( !fTR->MuIsGMPT[index]) return false;
     if ( !fTR->MuIsGlobalMuon[index]) return false;
     if ( !fTR->MuIsTrackerMuon[index]) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
   } else if(n==1) {
     if ( !fTR->MuIsGMPT[index]) return false;
     if ( !fTR->MuIsGlobalMuon[index]) return false;
     if ( !fTR->MuIsTrackerMuon[index]) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
   } else if(n==1) {
     if ( !fTR->MuIsGMPT[index]) return false;
     if ( !fTR->MuIsGlobalMuon[index]) return false;
     if ( !fTR->MuIsTrackerMuon[index]) return false;
+    if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
+    if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+    if ( !(fTR->MuNMatches[index] > 1) )      return false;
   }
   return true;
 }
@@ -140,7 +149,6 @@ const bool RunEfficiency::MuPassingIsoPProbe(int n, int index, int pfindex){
   if(n==0) {
     double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
     if ( !(hybridIso < 0.15) ) return false;
-    if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
   } else if(n==1) {
     if(fTR->MuRelIso03[index] > 0.15) return false;
   } else if(n==2) {
