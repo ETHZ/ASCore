@@ -445,14 +445,14 @@ void SSDLPlotter::doAnalysis(){
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// printOrigins();
 	
-	// makeMuIsolationPlots(); // loops on TTbar sample
-	// makeElIsolationPlots(); // loops on TTbar sample
+	makeMuIsolationPlots(); // loops on TTbar sample
+	makeElIsolationPlots(); // loops on TTbar sample
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	makeMETvsHTPlotPRL();
+	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
-	makePRLPlot1();
+	// makePRLPlot1();
 	
 	// makeRatioPlots(Muon);
 	// makeRatioPlots(Elec);
@@ -465,12 +465,12 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsPtPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
-	// 
-	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// // makeTTbarClosure();
-	// 
+	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeTTbarClosure();
+	
 	makeAllIntPredictions();
-	// makeDiffPrediction();
+	makeDiffPrediction();
 }
 
 //____________________________________________________________________________
@@ -1035,7 +1035,6 @@ void SSDLPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(SSDL
 
 //____________________________________________________________________________
 void SSDLPlotter::makeMuIsolationPlots(){
-	fOutputSubDir = "MuIsoPlots/";
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
@@ -1184,6 +1183,7 @@ void SSDLPlotter::makeMuIsolationPlots(){
 	vector<int> datasamples = fMuData;
 
 	for(size_t i = 0; i < gNSels; ++i){
+		fOutputSubDir = "Isolation/Muons/";
 		hiso_data[i]->SetXTitle(convertVarName("MuIso[0]"));
 		hiso_data[i]->SetLineWidth(3);
 		hiso_data[i]->SetLineColor(kBlack);
@@ -1350,6 +1350,7 @@ void SSDLPlotter::makeMuIsolationPlots(){
 		Util::PrintPDF(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
 		for(int k = 0; k < gNMuPt2bins; ++k){
+			fOutputSubDir = "Isolation/Muons/PtBinned/";
 			ratio_data  = hiso_data_pt[i][k] ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin1);
 			ratio_mc    = hiso_mc_pt[i][k]   ->Integral(bin0, bin015) / hiso_mc_pt[i][k]   ->Integral(bin0, bin1);
 			ratio_ttbar = hiso_ttbar_pt[i][k]->Integral(bin0, bin015) / hiso_ttbar_pt[i][k]->Integral(bin0, bin1);
@@ -1389,6 +1390,7 @@ void SSDLPlotter::makeMuIsolationPlots(){
 			Util::PrintPDF(c_temp, Form("MuIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
+			fOutputSubDir = "Isolation/Muons/NVrtxBinned/";
 			ratio_data  = hiso_data_nv[i][k] ->Integral(bin0, bin015) / hiso_data_nv[i][k] ->Integral(bin0, bin1);
 			ratio_mc    = hiso_mc_nv[i][k]   ->Integral(bin0, bin015) / hiso_mc_nv[i][k]   ->Integral(bin0, bin1);
 			ratio_ttbar = hiso_ttbar_nv[i][k]->Integral(bin0, bin015) / hiso_ttbar_nv[i][k]->Integral(bin0, bin1);
@@ -1430,7 +1432,6 @@ void SSDLPlotter::makeMuIsolationPlots(){
 	}
 }
 void SSDLPlotter::makeElIsolationPlots(){
-	fOutputSubDir = "ElIsoPlots/";
 	char cmd[100];
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
@@ -1562,6 +1563,7 @@ void SSDLPlotter::makeElIsolationPlots(){
 	vector<int> datasamples = fEGData;
 
 	for(size_t i = 0; i < gNSels; ++i){
+		fOutputSubDir = "Isolation/Electrons/";
 		hiso_data[i]->SetXTitle(convertVarName("ElRelIso[0]"));
 		hiso_data[i]->SetLineWidth(3);
 		hiso_data[i]->SetLineColor(kBlack);
@@ -1729,9 +1731,10 @@ void SSDLPlotter::makeElIsolationPlots(){
 		lat->SetTextColor(kBlack);
 
 		// Util::PrintNoEPS(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
-		Util::PrintPDF(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
+		Util::PrintPDF(c_temp, "ElIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
 		for(int k = 0; k < gNElPt2bins; ++k){
+			fOutputSubDir = "Isolation/Electrons/PtBinned/";
 			double max1 = hiso_mc_pt_s[i][k]->GetMaximum();
 			double max2 = hiso_data_pt[i][k]->GetMaximum();
 			double max = max1>max2?max1:max2;
@@ -1772,6 +1775,7 @@ void SSDLPlotter::makeElIsolationPlots(){
 			Util::PrintPDF(c_temp, Form("ElIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
+			fOutputSubDir = "Isolation/Electrons/NVrtxBinned/";
 			double max1 = hiso_mc_nv_s[i][k]->GetMaximum();
 			double max2 = hiso_data_nv[i][k]->GetMaximum();
 			double max = max1>max2?max1:max2;
@@ -4465,6 +4469,9 @@ void SSDLPlotter::makeDiffPrediction(){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
+	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets"};
+	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1.};
+
 	// Loop on the different variables
 	for(size_t j = 0; j < gNDiffVars; ++j){
 		TString varname    = DiffPredYields::var_name[j];
@@ -4864,20 +4871,51 @@ void SSDLPlotter::makeDiffPrediction(){
 		totbg_em->SetFillStyle(3005);
 		totbg_ee->SetFillStyle(3005);
 
-		// totbg   ->SetFillColor(kBlack);
-		// totbg_mm->SetFillColor(kBlack);
-		// totbg_em->SetFillColor(kBlack);
-		// totbg_ee->SetFillColor(kBlack);
-		// totbg   ->SetFillStyle(3013);
-		// totbg_mm->SetFillStyle(3013);
-		// totbg_em->SetFillStyle(3013);
-		// totbg_ee->SetFillStyle(3013);
+		// Take square root of sum of squared errors:
+		// (stored the SQUARED errors before)
+		for(size_t i = 0; i < nbins; ++i){
+			float prev    = totbg   ->GetBinError(i+1);
+			float prev_mm = totbg_mm->GetBinError(i+1);
+			float prev_em = totbg_em->GetBinError(i+1);
+			float prev_ee = totbg_ee->GetBinError(i+1);
 
-		TH1D *nt11_pred_tot    = new TH1D(Form("NT11_PRED_%s",    varname.Data()), varname, nbins, bins); nt11_pred_tot->Sumw2();
-		TH1D *nt11_mm_pred_tot = new TH1D(Form("NT11_MM_PRED_%s", varname.Data()), varname, nbins, bins); nt11_mm_pred_tot->Sumw2();
-		TH1D *nt11_ee_pred_tot = new TH1D(Form("NT11_EE_PRED_%s", varname.Data()), varname, nbins, bins); nt11_ee_pred_tot->Sumw2();
-		TH1D *nt11_em_pred_tot = new TH1D(Form("NT11_EM_PRED_%s", varname.Data()), varname, nbins, bins); nt11_em_pred_tot->Sumw2();
+			totbg   ->SetBinError(i+1, sqrt(prev)   );
+			totbg_mm->SetBinError(i+1, sqrt(prev_mm));
+			totbg_em->SetBinError(i+1, sqrt(prev_em));
+			totbg_ee->SetBinError(i+1, sqrt(prev_ee));
+		}
+
+		// Normalize everything to binwidth
+		nt11_sf    = normHistBW(nt11_sf, binwidthscale[j]);
+		nt11_df    = normHistBW(nt11_df, binwidthscale[j]);
+		nt11_ss    = normHistBW(nt11_ss, binwidthscale[j]);
+		nt11_cm    = normHistBW(nt11_cm, binwidthscale[j]);
+
+		nt11_mm_sf = normHistBW(nt11_mm_sf, binwidthscale[j]);
+		nt11_mm_df = normHistBW(nt11_mm_df, binwidthscale[j]);
+		nt11_mm_ss = normHistBW(nt11_mm_ss, binwidthscale[j]);
+
+		nt11_ee_sf = normHistBW(nt11_ee_sf, binwidthscale[j]);
+		nt11_ee_df = normHistBW(nt11_ee_df, binwidthscale[j]);
+		nt11_ee_ss = normHistBW(nt11_ee_ss, binwidthscale[j]);
+		nt11_ee_cm = normHistBW(nt11_ee_cm, binwidthscale[j]);
 		
+		nt11_em_sf = normHistBW(nt11_em_sf, binwidthscale[j]);
+		nt11_em_df = normHistBW(nt11_em_df, binwidthscale[j]);
+		nt11_em_ss = normHistBW(nt11_em_ss, binwidthscale[j]);
+		nt11_em_cm = normHistBW(nt11_em_cm, binwidthscale[j]);
+		
+		totbg      = normHistBW(totbg,    binwidthscale[j]);
+		totbg_mm   = normHistBW(totbg_mm, binwidthscale[j]);
+		totbg_em   = normHistBW(totbg_em, binwidthscale[j]);
+		totbg_ee   = normHistBW(totbg_ee, binwidthscale[j]);
+
+		nt11       = normHistBW(nt11,    binwidthscale[j]);
+		nt11_mm    = normHistBW(nt11_mm, binwidthscale[j]);
+		nt11_em    = normHistBW(nt11_em, binwidthscale[j]);
+		nt11_ee    = normHistBW(nt11_ee, binwidthscale[j]);
+
+		// Fill stacks
 		THStack *nt11_tot    = new THStack("NT11_TotalBG", "NT11_TotalBG");
 		THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
 		THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
@@ -4908,14 +4946,20 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_ee_tot->Add(nt11_ee_sig);
 		// nt11_em_tot->Add(nt11_em_sig);
 
+		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
+		if(j==4 || j==8) ytitle = "Events";
 		nt11_tot->Draw("goff");
 		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_mm_tot->Draw("goff");
 		nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_ee_tot->Draw("goff");
 		nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
 		nt11_em_tot->Draw("goff");
 		nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
+		nt11_em_tot->GetYaxis()->SetTitle(ytitle);
 
 		nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
 		nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
@@ -4952,21 +4996,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		nt11_em_cm ->SetMaximum(max_em>1?max_em+1:1.);
 		nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
 		nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
-
-		// Take square root of sum of squared errors:
-		for(size_t i = 0; i < nbins; ++i){
-			float prev    = totbg   ->GetBinError(i+1);
-			float prev_mm = totbg_mm->GetBinError(i+1);
-			float prev_em = totbg_em->GetBinError(i+1);
-			float prev_ee = totbg_ee->GetBinError(i+1);
-
-			totbg   ->SetBinError(i+1, sqrt(prev)   );
-			totbg_mm->SetBinError(i+1, sqrt(prev_mm));
-			totbg_em->SetBinError(i+1, sqrt(prev_em));
-			totbg_ee->SetBinError(i+1, sqrt(prev_ee));
-		}
 		
-
 		fOutputSubDir = "DiffPredictionPlots/";
 		/////////////////////////////////////////////////////////////////
 		TLegend *leg = new TLegend(0.60,0.67,0.90,0.88);
