@@ -23,8 +23,10 @@
 // CORR MODES ELECTRONS
 // 0: default el energy from CMSSW
 // 20: SC energy (with el corrections from CMSSW)
-// 15: SC corr FIT + crack + local
-// 16: SC corr FIT + crack (no local)
+// 15: SC corr + crack + local
+// 16: SC corr + crack (no local)
+// 17: SC corr + crack + local (on seed cl only)
+// 18: SC corr (no crack, no local)
 
 // ------------------------------------------------------------------------------------
 /**
@@ -58,7 +60,7 @@ private:
   double f5x5( double iEta );
 
 
-  static const Double_t etaCrackMin = 1.44; 
+  static const Double_t etaCrackMin = 1.4442; 
   static const Double_t etaCrackMax = 1.56;
   static const Int_t    nBinsEta              = 14; 
   Double_t       leftEta  [nBinsEta];

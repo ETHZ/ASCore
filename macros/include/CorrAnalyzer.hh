@@ -7,6 +7,7 @@
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 #include "ZeeAnalysis.hh"
+#include "ZeeMiniTree.hh"
 #include "HggAnalysis.hh"
 #include <string>
 
@@ -21,6 +22,7 @@ public:
 
 private:
   ZeeAnalysis *fZeeAnalysis;
+  ZeeMiniTree *fZeeMiniTree;
   HggAnalysis *fHggAnalysis;
   int fMaxEvents;
 

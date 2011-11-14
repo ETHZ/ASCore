@@ -493,7 +493,7 @@ Double_t EnergyCorrection::applyScCorrectionsETETA_EB_electrons(Double_t ET, Dou
     if (160< ET && ET < 180) return 1.00205;
     if (180< ET && ET < 200) return 1.00273;
   }
-  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.44){ 
+  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.4442){ 
     if (5< ET && ET < 10) return 0.864351;
     if (10< ET && ET < 20) return 0.920213;
     if (20< ET && ET < 30) return 0.961388;
@@ -526,7 +526,7 @@ float EnergyCorrection::getEtaCorrectionBarrel(float eta){
 
 bool EnergyCorrection::isInEBEtaCracks(double eta){
 
-  if (TMath::Abs(eta)>1.44) return false;
+  if (TMath::Abs(eta)>1.4442) return false;
 
   if (0.02< TMath::Abs(eta) && TMath::Abs(eta) < 0.25) return false;
   if (0.25< TMath::Abs(eta) && TMath::Abs(eta) < 0.42) return false; 
@@ -536,7 +536,7 @@ bool EnergyCorrection::isInEBEtaCracks(double eta){
   if (1.01< TMath::Abs(eta) && TMath::Abs(eta) < 1.13) return false; 
   if (1.16< TMath::Abs(eta) && TMath::Abs(eta) < 1.22) return false; 
   if (1.22< TMath::Abs(eta) && TMath::Abs(eta) < 1.33) return false; 
-  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.44) return false; 
+  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.4442) return false; 
 
   return true;
 
@@ -558,7 +558,7 @@ bool EnergyCorrection::isInPhiCracks(double phi, double eta){
   Double_t fiducialCut = 2.;
 
   bool OK = false;
-  if (fabs(eta)<1.44){
+  if (fabs(eta)<1.4442){
     for (Int_t i = 0 ; i < 18; ++i){
       if ((phi0 + moduleWidth*i -fiducialCut) <= phi && phi <= (phi0 + moduleWidth*i + fiducialCut)) OK = true;
       //	std::cout << (int)OK << std::endl;
@@ -608,7 +608,7 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
   if (highr9 && isbarrel) energy = fTR->PhoE5x5[pi]; // e5x5 is already ceta corrected
   if (highr9 && isendcap) energy = fTR->PhoE5x5[pi]+fTR->SCPre[si];
 
-  if (( TMath::Abs(sc_eta) < 1.44 ) && lowr9 && (energy/cosh(sc_eta)>10)){
+  if (( TMath::Abs(sc_eta) < 1.4442 ) && lowr9 && (energy/cosh(sc_eta)>10)){
     float et = energy/cosh(sc_eta);
     if (mode==5 || mode==6){
       et /= applyScCorrectionsBrEta_photons(sc_eta,sc_brem);
@@ -642,7 +642,7 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
 
 double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode){
 
-  if (mode != 999 && mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
+  if (mode != 999 && mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=18 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
 
   if (mode==0) return fTR->ElE[ei];
 
@@ -691,9 +691,11 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   
 
 
+
   if (mode==15) if (isbarrel) energy *= fTR->SCcrackcorr[si];
   if (mode==16) if (isbarrel) energy *= fTR->SCcrackcorr[si]*fTR->SClocalcorr[si];
   if (mode==17) if (isbarrel) energy *= fTR->SCcrackcorrseed[si];
+  if (mode==18) ;
 
   /*
   if (mode==17){

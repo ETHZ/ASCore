@@ -1,5 +1,6 @@
 #include "CorrAnalyzer.hh"
 #include "ZeeAnalysis.hh"
+#include "ZeeMiniTree.hh"
 #include "HggAnalysis.hh"
 
 #include "base/TreeAnalyzerBase.hh"
@@ -9,11 +10,13 @@ using namespace std;
 
 CorrAnalyzer::CorrAnalyzer(TTree *tree, std::string dataType) : TreeAnalyzerBase(tree) {
   fZeeAnalysis = new ZeeAnalysis(fTR,dataType);
+  fZeeMiniTree = new ZeeMiniTree(fTR,dataType);
   //  fHggAnalysis = new HggAnalysis(fTR,dataType);
 }
 
 CorrAnalyzer::~CorrAnalyzer(){
 	delete fZeeAnalysis;
+	delete fZeeMiniTree;
 	//	delete fHggAnalysis;
 	if(!fTR->fChain) cout << "CorrAnalyzer ==> No chain!" << endl;
 }
@@ -34,6 +37,7 @@ void CorrAnalyzer::Loop(){
 		if ( fCurRun != fTR->Run ) {
 		  fCurRun = fTR->Run;
 		  fZeeAnalysis->BeginRun(fCurRun);
+		  fZeeMiniTree->BeginRun(fCurRun);
 		  skipRun = false;
 		  if ( !CheckRun() ) skipRun = true;
 		}
@@ -45,6 +49,7 @@ void CorrAnalyzer::Loop(){
 		}
 		if ( !(skipRun || skipLumi) ) {
 		  fZeeAnalysis->Analyze();
+		  fZeeMiniTree->Analyze();
 		  //		  fHggAnalysis->Analyze();
 		}
 	}
@@ -56,6 +61,12 @@ void CorrAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fZeeAnalysis->fVerbose = fVerbose;
 	fZeeAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fZeeAnalysis->Begin();
+
+	fZeeMiniTree->SetOutputDir(fOutputDir);
+	fZeeMiniTree->fVerbose = fVerbose;
+	fZeeMiniTree->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	fZeeMiniTree->Begin();
+	
 	/*
 	fHggAnalysis->SetOutputDir(fOutputDir);
 	fHggAnalysis->fVerbose = fVerbose;
@@ -67,5 +78,6 @@ void CorrAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 // Method called after finishing the event loop
 void CorrAnalyzer::EndJob(){
 	fZeeAnalysis->End();
+	fZeeMiniTree->End();
 	//	fHggAnalysis->End();
 }
