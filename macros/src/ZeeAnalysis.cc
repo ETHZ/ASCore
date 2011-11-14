@@ -101,7 +101,7 @@ void ZeeAnalysis::Analyze(){
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float energy=fTR->SCRaw[fTR->ElSCindex[*it]];
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
-     if (fabs(eta)<1.44) energy*=elecorr->getEtaCorrectionBarrel(eta);
+     if (fabs(eta)<1.4442) energy*=elecorr->getEtaCorrectionBarrel(eta);
      if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->ElSCindex[*it]];
      if (energy/cosh(eta)<30 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
    }
@@ -111,7 +111,7 @@ void ZeeAnalysis::Analyze(){
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
      // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) evtisok=false;    
      // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
-     if ( (fabs(eta)>1.44 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
+     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
    }
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
@@ -162,9 +162,9 @@ void ZeeAnalysis::Analyze(){
    float abseta0 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(0)]]);
    float abseta1 = fabs(fTR->SCEta[fTR->ElSCindex[passing.at(1)]]);
     vector<int> cat;
-    if (abseta0<1.44 && abseta1<1.44) cat.push_back(1);
+    if (abseta0<1.4442 && abseta1<1.4442) cat.push_back(1);
     else if (abseta0>1.56 && abseta1>1.56) cat.push_back(3);
-   else if ((abseta0<1.44 && abseta1>1.56) || (abseta0>1.56 && abseta1<1.44)) cat.push_back(2);
+   else if ((abseta0<1.4442 && abseta1>1.56) || (abseta0>1.56 && abseta1<1.4442)) cat.push_back(2);
    else return;
     
     if (cat[0]==1){
