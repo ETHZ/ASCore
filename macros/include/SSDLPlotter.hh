@@ -41,7 +41,7 @@ public:
 	
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
-	void makeMETvsHTPlotCustom();
+	void makeMETvsHTPlotPRL();
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);

@@ -435,9 +435,9 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// return;
 	
-	// if(readHistos(fOutputFileName) != 0) return;
+	if(readHistos(fOutputFileName) != 0) return;
 	// fLumiNorm = 2096.; // Pre 2011B
-	fLumiNorm = 3110.; // Including 2011B (1.014 /fb)
+	fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
 	// fLumiNorm = 1014.; // Only 2011B
 
 	// makePileUpPlots(true); // loops on all data!
@@ -450,7 +450,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	makeMETvsHTPlotCustom();
+	makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
 	makePRLPlot1();
 	
@@ -458,7 +458,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
-	// 
+
 	// makeFRvsPtPlots(Muon, SigSup);
 	// makeFRvsPtPlots(Elec, SigSup);
 	// makeFRvsPtPlots(Muon, ZDecay);
@@ -469,7 +469,7 @@ void SSDLPlotter::doAnalysis(){
 	// // makeIntMCClosure(fOutputDir + "MCClosure.txt");	
 	// // makeTTbarClosure();
 	// 
-	// makeAllIntPredictions();
+	makeAllIntPredictions();
 	// makeDiffPrediction();
 }
 
@@ -2166,7 +2166,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
 	delete gmetvsht_da_mm, gmetvsht_da_ee, gmetvsht_da_em;//, hmetvsht_mc;
 }
-void SSDLPlotter::makeMETvsHTPlotCustom(){
+void SSDLPlotter::makeMETvsHTPlotPRL(){
 	if(readSigGraphs(fOutputFileName) != 0) return;
 	gHiLoSwitch hilo = HighPt;
 	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/10 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
@@ -2175,7 +2175,7 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 	
-	const float htmax = 1100.;
+	const float htmax = 1200.;
 	const float metmax = 250.;
 	
 	Color_t col_mm = kBlack;
@@ -2187,9 +2187,9 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	// Color_t col_mm = kAzure   +2;
 	// Color_t col_ee = kPink    +2;
 	// Color_t col_em = kOrange  +2;
-	Color_t col_mt = kSpring  +2;
-	Color_t col_et = kViolet  +2;
-	Color_t col_tt = kTeal    +2;
+	Color_t col_mt = kGreen;
+	Color_t col_et = kMagenta;
+	Color_t col_tt = kCyan;
 
 	// Create histograms
 	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., metmax);
@@ -2215,33 +2215,35 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 
 ///////////// HARDCODED
 
-	// // Define signal events here:
-	// const int nmmev = 23;
-	// const int nemev = 19;
-	// const int neeev = 7;
-	// float ht_mm [nmmev] = {319.601, 249.944, 585.687, 218.65 , 280.798, 209.26 , 228.398, 229.865, 264.248, 284.968, 219.79 , 210.096, 372.221, 257.237, 435.9  , 455.478, 224.574, 267.277, 646.496, 253.169, 220.158, 354.292, 592.905};
-	// float met_mm[nmmev] = {53.6233, 205.792, 35.0852, 39.8026, 73.8093, 58.0265, 48.3581, 30.1828, 120.754, 31.0167, 63.0605, 46.5073, 51.0459, 34.209 , 62.904 , 62.8467, 76.8364, 107.896, 143.069, 122.463, 78.2578, 42.3864, 58.09};
-	// float ht_em [nemev] = {318.618, 253.246, 320.556, 259.813, 324.42 , 377.818, 421.674, 290.427, 687.421, 296.215, 280.877, 247.511, 279.396, 347.603, 323.792, 428.888, 247.792, 261.28 , 255.075};
-	// float met_em[nemev] = {61.8755, 70.9379, 38.5762, 109.035, 56.9286, 121.968, 33.6699, 53.6195, 92.6551, 150.137, 100.28 , 64.1492, 78.0987, 77.7492, 67.6595, 55.3003, 53.2864, 72.1098, 30.7443};
-	// float ht_ee [neeev] = {294.182, 257.603, 561.344, 246.617, 264.046, 563.705, 253.773};
-	// float met_ee[neeev] = {56.5751, 64.2966, 30.083 , 108.323, 59.5336, 83.8312, 46.3871};
-	// 
-	// // TGraphs:
-	// TGraph *gmetvsht_da_mm = new TGraph(nmmev, ht_mm, met_mm);
-	// TGraph *gmetvsht_da_em = new TGraph(nemev, ht_em, met_em);
-	// TGraph *gmetvsht_da_ee = new TGraph(neeev, ht_ee, met_ee);
-	// gmetvsht_da_mm->SetName("HTvsMET_mm");
-	//     gmetvsht_da_em->SetName("HTvsMET_em");
-	//     gmetvsht_da_ee->SetName("HTvsMET_ee");
-	// gmetvsht_da_mm->SetMarkerColor(kBlack);
-	// gmetvsht_da_mm->SetMarkerStyle(8);
-	// gmetvsht_da_mm->SetMarkerSize(1.5);
-	// gmetvsht_da_em->SetMarkerColor(kBlue);
-	// gmetvsht_da_em->SetMarkerStyle(23);
-	// gmetvsht_da_em->SetMarkerSize(1.5);
-	// gmetvsht_da_ee->SetMarkerColor(kRed);
-	// gmetvsht_da_ee->SetMarkerStyle(21);
-	// gmetvsht_da_ee->SetMarkerSize(1.5);
+	// Updated numbers from Ronny with 3.2/fb from Nov 12
+	const int nmmev = 64;
+	const int nemev = 65;
+	const int neeev = 23;
+	float ht_mm [nmmev] = {435.900, 204.860, 209.260, 218.650, 219.790, 222.290, 259.240, 270.020, 489.070, 1070.04, 200.766, 204.392, 204.452, 204.452, 208.623, 208.657, 210.096, 211.624, 212.403, 212.403, 214.341, 217.729, 220.158, 224.574, 224.574, 226.762, 228.398, 229.865, 245.168, 249.944, 249.944, 253.169, 254.717, 257.237, 258.778, 264.248, 267.277, 276.444, 279.782, 280.798, 284.485, 284.968, 291.472, 293.045, 299.879, 314.186, 315.412, 318.984, 319.601, 320.678, 331.128, 334.864, 334.864, 354.292, 358.104, 372.221, 375.212, 400.209, 432.051, 455.478, 585.687, 587.099, 592.905, 646.496};
+	float met_mm[nmmev] = {62.9040, 78.2570, 58.0265, 39.8026, 63.0605, 66.7972, 40.6448, 70.0999, 57.5302, 62.9920, 74.0824, 70.9175, 44.4644, 44.4644, 30.0451, 51.7086, 46.5073, 53.1209, 30.4686, 30.4686, 39.8278, 45.5598, 78.2578, 76.8364, 76.8364, 30.5832, 48.3581, 30.1828, 58.5595, 205.792, 205.792, 122.463, 72.3296, 34.2090, 53.2947, 120.754, 107.896, 35.0554, 35.0923, 73.8093, 38.8426, 31.0167, 40.1132, 143.384, 62.2534, 59.5283, 64.3967, 31.1259, 53.6233, 41.3591, 33.9659, 157.391, 157.391, 42.3864, 75.1158, 51.0459, 30.7741, 73.8847, 69.9304, 62.8467, 35.0852, 44.8593, 58.0900, 143.069};
+
+	float ht_em [nemev] = {200.856, 203.856, 217.713, 224.065, 230.359, 230.402, 231.013, 231.549, 232.082, 235.257, 235.387, 239.412, 247.511, 247.792, 253.246, 253.919, 255.472, 257.601, 258.430, 259.813, 260.531, 261.280, 264.287, 271.378, 273.446, 274.043, 275.092, 279.396, 280.382, 280.877, 284.782, 290.427, 290.471, 291.739, 296.215, 299.392, 300.756, 304.033, 318.618, 320.556, 321.842, 323.792, 324.420, 325.135, 331.484, 346.067, 347.603, 356.005, 358.059, 360.080, 377.818, 377.982, 379.805, 392.301, 397.064, 405.976, 411.237, 420.223, 421.674, 426.820, 428.888, 433.076, 482.122, 573.502, 687.421};
+	float met_em[nemev] = {49.1676, 43.4862, 83.6971, 138.175, 46.4088, 100.221, 45.8226, 188.366, 86.1323,  52.378, 69.2557, 64.9008, 64.1492, 53.2864, 70.9379, 62.5218, 109.433, 57.4553, 53.0968, 109.035, 105.571, 72.1098, 60.1917, 42.4493, 34.1574, 36.9665, 65.4461, 78.0987, 84.8157, 100.280, 38.5000, 53.6195, 64.6249, 53.5031, 150.137, 83.4427, 36.4459, 177.228, 61.8755, 38.5762, 80.1506, 67.6595, 56.9286, 124.552, 42.7002, 33.9257, 77.7492, 40.6771, 171.337, 57.1148, 121.968, 35.6684, 77.5705, 101.652, 134.948, 133.954, 50.0136, 123.933, 33.6699, 52.7702, 55.3003, 38.1614, 120.909, 172.382, 92.6551};
+
+	float ht_ee [neeev] = {506.070, 204.731, 215.716, 229.599, 246.617, 250.143, 253.773, 255.403, 257.603, 264.046, 268.365, 268.365, 279.091, 279.595, 294.182, 294.927, 356.908, 444.026, 481.184, 481.184, 561.344, 563.705, 794.961};
+	float met_ee[neeev] = {53.5072, 39.2809, 39.2347, 203.315, 108.323, 60.6616, 46.3871, 41.7713, 64.2966, 59.5336, 196.744, 196.744, 30.4783, 36.8805, 56.5751, 34.1080, 93.1700, 111.901, 61.2708, 61.2708, 30.0830, 83.8312, 42.2462};
+
+	// TGraphs:
+	TGraph *gmetvsht_da_mm_lowpt = new TGraph(nmmev, ht_mm, met_mm);
+	TGraph *gmetvsht_da_em_lowpt = new TGraph(nemev, ht_em, met_em);
+	TGraph *gmetvsht_da_ee_lowpt = new TGraph(neeev, ht_ee, met_ee);
+	gmetvsht_da_mm_lowpt->SetName("HTvsMET_mm_lowpt");
+	gmetvsht_da_em_lowpt->SetName("HTvsMET_em_lowpt");
+	gmetvsht_da_ee_lowpt->SetName("HTvsMET_ee_lowpt");
+	gmetvsht_da_mm_lowpt->SetMarkerColor(col_mm);
+	gmetvsht_da_mm_lowpt->SetMarkerStyle(8);
+	gmetvsht_da_mm_lowpt->SetMarkerSize(1.5);
+	gmetvsht_da_em_lowpt->SetMarkerColor(col_em);
+	gmetvsht_da_em_lowpt->SetMarkerStyle(23);
+	gmetvsht_da_em_lowpt->SetMarkerSize(1.5);
+	gmetvsht_da_ee_lowpt->SetMarkerColor(col_ee);
+	gmetvsht_da_ee_lowpt->SetMarkerStyle(21);
+	gmetvsht_da_ee_lowpt->SetMarkerSize(1.5);
 
 ///////////// FROM FILE
 
@@ -2275,7 +2277,6 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.05);
 	leg->SetBorderSize(0);
-
 
 	//////////////////////////////////////////////////////////
 	// TAUS //////////////////////////////////////////////////
@@ -2382,11 +2383,11 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	// sig4y->SetLineStyle(1);
 
 	// TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
-	TLegend *regleg = new TLegend(0.70,0.45,0.88,0.62);
+	TLegend *regleg = new TLegend(0.67,0.51,0.87,0.68);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
-	if(hilo != LowPt) regleg->AddEntry(sig1x, "Search Region 4","l");
+	regleg->AddEntry(sig1x, "Search Region 4","l");
 	regleg->SetFillStyle(0);
 	regleg->SetTextFont(42);
 	regleg->SetTextSize(0.03);
@@ -2395,7 +2396,7 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 
 	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
 	c_temp->cd();
-	c_temp->SetRightMargin(0.03);
+	c_temp->SetRightMargin(0.05);
 	c_temp->SetLeftMargin(0.13);
 
 	hmetvsht_da_mm->DrawCopy("axis");
@@ -2419,6 +2420,10 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
+	gmetvsht_da_ee_lowpt->Draw("P");
+	gmetvsht_da_em_lowpt->Draw("P");
+	gmetvsht_da_mm_lowpt->Draw("P");
+	
 	gmetvsht_da_mt->Draw("P");
 	gmetvsht_da_et->Draw("P");
 	
@@ -2440,7 +2445,7 @@ void SSDLPlotter::makeMETvsHTPlotCustom(){
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp, "HTvsMET_" + gHiLoLabel[hilo] + "_Custom", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, "HTvsMET_PRL", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
@@ -4194,29 +4199,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 
 
-	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
-	OUT << "       SUMMARY   ||           Mu/Mu           ||           E/Mu            ||           E/E             ||" << endl;
-	OUT << "==========================================================================================================" << endl;
-	OUT << setw(16) << "pred. fakes"  << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getMMTotEStat()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getMMTotESyst()) << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getEMTotFakes()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getEMTotEStat()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getEMTotESyst()) << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getEETotEStat()) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", FR->getEETotESyst()) << " || " << endl;
-	OUT << setw(16) << "pred. chmisid "  << " || ";
-	OUT << "                          || ";
-	OUT << setw(5) << Form("%5.2f", nt2_em_chmid   ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_em_chmid_e1) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_em_chmid_e2) << " || ";
-	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid   ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid_e1) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", nt2_ee_chmid_e2) << " || " << endl;
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
+	OUT << "==============================================================================================" << endl;
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. fakes",
+	FR->getMMTotFakes(), FR->getMMTotEStat(), FR->getMMTotESyst(),
+	FR->getEMTotFakes(), FR->getEMTotEStat(), FR->getEMTotESyst(),
+	FR->getEETotFakes(), FR->getEETotEStat(), FR->getEETotESyst());
+	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. chmisid",
+	nt2_em_chmid, nt2_em_chmid_e1, nt2_em_chmid_e2, nt2_ee_chmid, nt2_ee_chmid_e1, nt2_ee_chmid_e2);
 
-	OUT << setw(16) << "Rare SM (MC)"  << " || ";
 	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
 	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
@@ -4230,18 +4222,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt2_rare_mc_em_e1 += scale*scale * FR->getEStat2(S->numbers[reg][ElMu].nt2);
 		nt2_rare_mc_ee_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Elec].nt2);
 	}
-
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_mm) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_mm_e1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_mm) << " || ";
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_em) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_em_e1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_em) << " || ";
-	OUT << setw(5) << Form("%5.2f", nt2_rare_mc_ee) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(nt2_rare_mc_ee_e1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", RareESyst*nt2_rare_mc_ee) << " || " << endl;
-	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "tot. backgr. "  << " || ";
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (MC)",
+	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1), RareESyst*nt2_rare_mc_mm,
+	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
+	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	// Just add different errors in quadrature (they are independent)
 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat() + nt2_rare_mc_mm_e1;
 	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1;
@@ -4249,21 +4234,17 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm;
 	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em;
 	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee;
-	OUT << setw(5) << Form("%5.2f", FR->getMMTotFakes() + nt2_rare_mc_mm) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(mm_tot_sqerr2)) << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(em_tot_sqerr2)) << " || ";
-	OUT << setw(5) << Form("%5.2f", FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr1)) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(ee_tot_sqerr2)) << " || " << endl;
-	OUT << "----------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "observed"  << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_mm ) << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_em ) << " || ";
-	OUT << setw(25) << left << Form("%2.0f", nt2_ee ) << " || " << endl;
-	OUT << "==========================================================================================================" << endl;
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "tot. backgr.",
+	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
+	FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
+	FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
+	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "",
+	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	OUT << Form("%16s || %5.0f                 || %5.0f                 || %5.0f                 ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
+	OUT << "==============================================================================================" << endl;
 	OUT << setw(20) << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << setw(20) << "        predicted: ";
@@ -4273,7 +4254,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
-	OUT << "==========================================================================================================" << endl;
+	OUT << "==============================================================================================" << endl;
 	OUT.close();
 	
 	///////////////////////////////////////////////////////////////////////////////////
