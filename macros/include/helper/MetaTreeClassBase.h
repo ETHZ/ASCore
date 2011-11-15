@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Oct 19 18:15:01 2011 by ROOT version 5.30/01
+// Tue Nov 15 17:07:04 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root
+// found on file: /scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -88,6 +88,12 @@ public :
    Float_t         ElDzErr[5];   //[NEls]
    Float_t         ElRelIso[5];   //[NEls]
    Float_t         ElEcalRecHitSumEt[5];   //[NEls]
+   Float_t         ElHcalTowerSumEt[5];   //[NEls]
+   Float_t         ElTkSumPt[5];   //[NEls]
+   Float_t         ElDPhi[5];   //[NEls]
+   Float_t         ElDEta[5];   //[NEls]
+   Float_t         ElSigmaIetaIeta[5];   //[NEls]
+   Float_t         ElHoverE[5];   //[NEls]
    Int_t           ElIsGoodElId_WP80[5];   //[NEls]
    Int_t           ElIsGoodElId_WP90[5];   //[NEls]
    Int_t           ElGenID[5];   //[NEls]
@@ -102,11 +108,11 @@ public :
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[10];   //[NJets]
-   Float_t         JetEta[10];   //[NJets]
-   Float_t         JetPhi[10];   //[NJets]
-   Float_t         JetSSVHPBTag[10];   //[NJets]
-   Float_t         JetArea[10];   //[NJets]
+   Float_t         JetPt[20];   //[NJets]
+   Float_t         JetEta[20];   //[NJets]
+   Float_t         JetPhi[20];   //[NJets]
+   Float_t         JetSSVHPBTag[20];   //[NJets]
+   Float_t         JetArea[20];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -179,6 +185,12 @@ public :
    TBranch        *b_ElDzErr;   //!
    TBranch        *b_ElRelIso;   //!
    TBranch        *b_ElEcalRecHitSumEt;   //!
+   TBranch        *b_ElHcalTowerSumEt;   //!
+   TBranch        *b_ElTkSumPt;   //!
+   TBranch        *b_ElDPhi;   //!
+   TBranch        *b_ElDEta;   //!
+   TBranch        *b_ElSigmaIetaIeta;   //!
+   TBranch        *b_ElHoverE;   //!
    TBranch        *b_ElIsGoodElId_WP80;   //!
    TBranch        *b_ElIsGoodElId_WP90;   //!
    TBranch        *b_ElGenID;   //!
@@ -218,11 +230,11 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("SSDLTrees/Oct18/DoubleMu-Run2011B-PromptReco-v1-AOD.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
+      if (!f) {
+         f = new TFile("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
       }
-      f->GetObject("Analysis",tree);
+      tree = (TTree*)gDirectory->Get("Analysis");
 
    }
    Init(tree);
@@ -246,8 +258,10 @@ Long64_t MetaTreeClassBase::LoadTree(Long64_t entry)
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
-   if (fChain->GetTreeNumber() != fCurrent) {
-      fCurrent = fChain->GetTreeNumber();
+   if (!fChain->InheritsFrom(TChain::Class()))  return centry;
+   TChain *chain = (TChain*)fChain;
+   if (chain->GetTreeNumber() != fCurrent) {
+      fCurrent = chain->GetTreeNumber();
       Notify();
    }
    return centry;
@@ -339,6 +353,12 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
+   fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
+   fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
+   fChain->SetBranchAddress("ElDPhi", ElDPhi, &b_ElDPhi);
+   fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
+   fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
+   fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
