@@ -227,6 +227,12 @@ void SSDLDumper::InitMC(TTree *tree){
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
+   fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
+   fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
+   fChain->SetBranchAddress("ElDPhi", ElDPhi, &b_ElDPhi);
+   fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
+   fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
+   fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
@@ -3714,17 +3720,16 @@ bool SSDLDumper::isLooseElectron(int ele){
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
 		if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
-		if(ElSigmaIetaIeta[ele] > 0.011) return false; // CaloIdT
-		if(ElDPhi         [ele] > 0.15)  return false; // TrkIdVL
-		if(ElDEta         [ele] > 0.01)  return false; // TrkIdVL
+		if(ElSigmaIetaIeta[ele]  > 0.011) return false; // CaloIdT
+		if(fabs(ElDPhi    [ele]) > 0.15)  return false; // TrkIdVL
+		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL
 	}
 	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
 		if(ElHoverE[ele] > 0.075)        return false; // CaloIdT, what about tight??
-		if(ElSigmaIetaIeta[ele] > 0.031) return false; // CaloIdT
-		if(ElDPhi         [ele] > 0.10)  return false; // TrkIdVL
-		if(ElDEta         [ele] > 0.01)  return false; // TrkIdVL
+		if(ElSigmaIetaIeta[ele]  > 0.031) return false; // CaloIdT
+		if(fabs(ElDPhi    [ele]) > 0.10)  return false; // TrkIdVL
+		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL
 	}
-	
 	return true;
 }
 bool SSDLDumper::isTightElectron(int ele){
