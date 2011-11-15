@@ -193,6 +193,11 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElDzErr",                &fTElDzErr,             "ElDzErr[NEls]/F");
 	fAnalysisTree->Branch("ElRelIso",               &fTElRelIso,            "ElRelIso[NEls]/F");
 	fAnalysisTree->Branch("ElEcalRecHitSumEt",      &fTElEcalRecHitSumEt,   "ElEcalRecHitSumEt[NEls]/F");
+	fAnalysisTree->Branch("ElHcalTowerSumEt",       &fTElHcalTowerSumEt,    "ElHcalTowerSumEt[NEls]/F");
+	fAnalysisTree->Branch("ElTkSumPt",              &fTElTkSumPt,           "ElTkSumPt[NEls]/F");
+	fAnalysisTree->Branch("ElDPhi",                 &fTElDPhi,              "ElDPhi[NEls]/F");
+	fAnalysisTree->Branch("ElDEta",                 &fTElDEta,              "ElDEta[NEls]/F");
+	fAnalysisTree->Branch("ElSigmaIetaIeta",        &fTElSigmaIetaIeta,     "ElSigmaIetaIeta[NEls]/F");
 	fAnalysisTree->Branch("ElHoverE",               &fTElHoverE,            "ElHoverE[NEls]/F");
 	fAnalysisTree->Branch("ElIsGoodElId_WP80",      &fTElIsGoodElId_WP80,   "ElIsGoodElId_WP80[NEls]/I");
 	fAnalysisTree->Branch("ElIsGoodElId_WP90",      &fTElIsGoodElId_WP90,   "ElIsGoodElId_WP90[NEls]/I");
@@ -339,17 +344,16 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump electron properties
 	for(int ind = 0; ind < fTnqels; ind++){
 		int elindex = selectedElInd[ind];
-		fTElcharge           [ind] = fTR->ElCharge                [elindex];
-		fTElChargeIsCons     [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
-		fTElpt               [ind] = fTR->ElPt                    [elindex];
-		fTEleta              [ind] = fTR->ElEta                   [elindex];
-		fTElphi              [ind] = fTR->ElPhi                   [elindex];
-		fTEld0               [ind] = fTR->ElD0PV                  [elindex];
-		fTElD0Err            [ind] = fTR->ElD0E                   [elindex];
-		fTEldz               [ind] = fTR->ElDzPV                  [elindex];
-		fTElDzErr            [ind] = fTR->ElDzE                   [elindex];
-		fTElRelIso           [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
-		fTElEcalRecHitSumEt  [ind] = fTR->ElDR03EcalRecHitSumEt   [elindex];
+		fTElcharge          [ind] = fTR->ElCharge                [elindex];
+		fTElChargeIsCons    [ind] = fTR->ElCInfoIsGsfCtfScPixCons[elindex];
+		fTElpt              [ind] = fTR->ElPt                    [elindex];
+		fTEleta             [ind] = fTR->ElEta                   [elindex];
+		fTElphi             [ind] = fTR->ElPhi                   [elindex];
+		fTEld0              [ind] = fTR->ElD0PV                  [elindex];
+		fTElD0Err           [ind] = fTR->ElD0E                   [elindex];
+		fTEldz              [ind] = fTR->ElDzPV                  [elindex];
+		fTElDzErr           [ind] = fTR->ElDzE                   [elindex];
+		fTElRelIso          [ind] = relElIso(elindex); // correct by 1 GeV in ecal for barrel
 		
 		if(fIsData == false){ // mc truth information		
 			fTElGenID  [ind] = fTR->ElGenID  [elindex];
@@ -379,8 +383,16 @@ void SSDLAnalysis::FillAnalysisTree(){
 		double METpx  = fTR->PFMETpx;
 		double METpy  = fTR->PFMETpy;
 		fTElMT[ind]   = sqrt( 2*fTR->PFMET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
+
+		// Electron ID
+		fTElEcalRecHitSumEt[ind] = fTR->ElDR03EcalRecHitSumEt      [elindex];
+		fTElHcalTowerSumEt [ind] = fTR->ElDR03HcalTowerSumEt       [elindex];
+		fTElTkSumPt        [ind] = fTR->ElDR03TkSumPt              [elindex];
+		fTElDPhi           [ind] = fTR->ElDeltaPhiSuperClusterAtVtx[elindex];
+		fTElDEta           [ind] = fTR->ElDeltaEtaSuperClusterAtVtx[elindex];
+		fTElSigmaIetaIeta  [ind] = fTR->ElSigmaIetaIeta            [elindex];
+		fTElHoverE         [ind] = fTR->ElHcalOverEcal             [elindex];
 		
-		fTElHoverE         [ind] = fTR->ElHcalOverEcal[elindex];
 		fTElIsGoodElId_WP80[ind] = IsGoodElId_WP80(elindex);
 		fTElIsGoodElId_WP90[ind] = IsGoodElId_WP90(elindex);
 	}
@@ -486,6 +498,11 @@ void SSDLAnalysis::ResetTree(){
 		fTElDzErr           [i] = -999.99;
 		fTElRelIso          [i] = -999.99;
 		fTElEcalRecHitSumEt [i] = -999.99;
+		fTElHcalTowerSumEt  [i] = -999.99;
+		fTElTkSumPt         [i] = -999.99;
+		fTElDPhi            [i] = -999.99;
+		fTElDEta            [i] = -999.99;
+		fTElSigmaIetaIeta   [i] = -999.99;
 		fTElHoverE          [i] = -999.99;
 		fTElIsGoodElId_WP80 [i] = -999;
 		fTElIsGoodElId_WP90 [i] = -999;

@@ -138,26 +138,25 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WmWm);
 	fMCBG.push_back(ttbarW);
 
-	// fMCBG.push_back(QCD5);
-	// fMCBG.push_back(QCD15);
-	// fMCBG.push_back(QCD30);
-	// fMCBG.push_back(QCD50);
-	// fMCBG.push_back(QCD80);
-	// fMCBG.push_back(QCD120);
-	// fMCBG.push_back(QCD170);
-	// fMCBG.push_back(QCD300);
-	// fMCBG.push_back(QCD470);
-	// fMCBG.push_back(QCD600);
-	// fMCBG.push_back(QCD800);
-	// fMCBG.push_back(QCD1000);
-	// fMCBG.push_back(QCD1400);
-	// fMCBG.push_back(QCD1800);
+	fMCBG.push_back(QCD15);
+	fMCBG.push_back(QCD30);
+	fMCBG.push_back(QCD50);
+	fMCBG.push_back(QCD80);
+	fMCBG.push_back(QCD120);
+	fMCBG.push_back(QCD170);
+	fMCBG.push_back(QCD300);
+	fMCBG.push_back(QCD470);
+	fMCBG.push_back(QCD600);
+	fMCBG.push_back(QCD800);
+	fMCBG.push_back(QCD1000);
+	fMCBG.push_back(QCD1400);
+	fMCBG.push_back(QCD1800);
 
-	fMCBG.push_back(QCD50MG);
-	fMCBG.push_back(QCD100MG);
-	fMCBG.push_back(QCD250MG);
-	fMCBG.push_back(QCD500MG);
-	fMCBG.push_back(QCD1000MG);
+	// fMCBG.push_back(QCD50MG);
+	// fMCBG.push_back(QCD100MG);
+	// fMCBG.push_back(QCD250MG);
+	// fMCBG.push_back(QCD500MG);
+	// fMCBG.push_back(QCD1000MG);
 
 	fMCBGSig = fMCBG;
 	fMCBGSig.push_back(LM6);
@@ -167,8 +166,7 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(TJets_tW);
 	fMCBGMuEnr.push_back(TJets_s);
 	fMCBGMuEnr.push_back(WJets);
-	fMCBGMuEnr.push_back(DYJets10to50);
-	fMCBGMuEnr.push_back(DYJets50);
+	fMCBGMuEnr.push_back(DYJets);
 	fMCBGMuEnr.push_back(GJets40);
 	fMCBGMuEnr.push_back(GJets100);
 	fMCBGMuEnr.push_back(GJets200);
@@ -442,29 +440,29 @@ void SSDLPlotter::doAnalysis(){
 
 	// makePileUpPlots(true); // loops on all data!
 	
-	// printCutFlows(fOutputDir + "CutFlow.txt");
-	// printOrigins();
+	printCutFlows(fOutputDir + "CutFlow.txt");
+	printOrigins();
 	
 	makeMuIsolationPlots(); // loops on TTbar sample
 	makeElIsolationPlots(); // loops on TTbar sample
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 	
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Elec);
 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 	
 	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
 	// makeTTbarClosure();
@@ -1930,9 +1928,9 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				if ( s_name.Contains("DYJets") )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
 				if ( s_name.Contains("GJets")  )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
 				if ( s_name.Contains("QCD") )     hvar_qcd[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleIsRare(s_name) )       hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("Photon") )  hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name == "WW" or s_name =="WZ"   or s_name =="ZZ" ) hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleIsRare(s_name) )       hvar_rare[i]->Add(S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("GVJets") )  hvar_db[i]->Add(  S->kinplots[s][hilo].hvar[i] );
+				if ( s_name.Contains("WWTo2L2Nu") or s_name.Contains("WZTo3LNu")   or s_name.Contains("ZZTo4L") ) hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
 			}
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
 			hvar_mc_s[i]->Add(hvar_db[i]);

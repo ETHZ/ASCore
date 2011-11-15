@@ -3701,15 +3701,30 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 	return true;
 }
 bool SSDLDumper::isLooseElectron(int ele){
-	// All electrons are already loose in the high-pt selection (hybiso)
 	if(isGoodElectron(ele) == false) return false;
-	// // CAREFUL: THIS IS A BUG: It will cut on 0.6 only for barrel electrons, NO CUT on endcap electrons
-	// if( fabs(ElEta[ele]) < 1.479 ) if(ElRelIso[ele] > 1.00) return false;
-	// else                           if(ElRelIso[ele] > 0.60) return false;
-	// Fixed: ?
-	if( fabs(ElEta[ele])  < 1.479){ if(ElRelIso[ele] > 1.00) return false;}
-	if( fabs(ElEta[ele]) >= 1.479){ if(ElRelIso[ele] > 0.60) return false;}
+	if(fabs(ElEta[ele])  < 1.479){ if(ElRelIso[ele] > 1.00) return false;}
+	if(fabs(ElEta[ele]) >= 1.479){ if(ElRelIso[ele] > 0.60) return false;}
 	if(ElChIsCons[ele] != 1) return false;
+	
+	// Additional cuts for CaloIsoVL and TrkIsoVL
+	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
+	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+
+	// Additional cuts for CaloIdVL and TrkIdVL:
+	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
+		if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
+		if(ElSigmaIetaIeta[ele] > 0.011) return false; // CaloIdT
+		if(ElDPhi         [ele] > 0.15)  return false; // TrkIdVL
+		if(ElDEta         [ele] > 0.01)  return false; // TrkIdVL
+	}
+	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
+		if(ElHoverE[ele] > 0.075)        return false; // CaloIdT, what about tight??
+		if(ElSigmaIetaIeta[ele] > 0.031) return false; // CaloIdT
+		if(ElDPhi         [ele] > 0.10)  return false; // TrkIdVL
+		if(ElDEta         [ele] > 0.01)  return false; // TrkIdVL
+	}
+	
 	return true;
 }
 bool SSDLDumper::isTightElectron(int ele){

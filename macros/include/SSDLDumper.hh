@@ -59,15 +59,15 @@ public:
 		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
 		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
 		MuHad1, MuHad2, EleHad1, EleHad2,
-		TTJets, TJets_t, TJets_tW, TJets_s, WJets, DYJets, DYJets50, DYJets10to50, GJets40, GJets100, GJets200,
-		GVJets, WW, WZ, ZZ, VVTo4L,
+		TTJets, TJets_t, TbarJet_t, TJets_tW, TbarJet_tW, TJets_s, TbarJet_s, WJets, DYJets,
+		GJets40, GJets100, GJets200,
+		GVJets, WW, WZ, ZZ, 
 		WWplus, WWminus, TTWplus, TTWminus, TTZplus, TTZminus, TTWWplus, TTWWminus, WWWplus, WWWminus,
 		DPSWW, WpWp, WmWm, ttbarW,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
-		QCD5, QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
-		QCD1000, QCD1400, QCD1800,
-		QCD50MG, QCD100MG, QCD250MG, QCD500MG, QCD1000MG,
+		QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
+		QCD1000, QCD1400, QCD1800, QCD50MG, QCD100MG, QCD250MG, QCD500MG, QCD1000MG,
 		gNSAMPLES
 	};
 	enum gHiLoSwitch{

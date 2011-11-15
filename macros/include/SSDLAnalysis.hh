@@ -138,6 +138,11 @@ private:
 	float fTElDzErr          [fMaxNeles];
 	float fTElRelIso         [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
+	float fTElHcalTowerSumEt [fMaxNeles];
+	float fTElTkSumPt        [fMaxNeles];
+	float fTElDPhi           [fMaxNeles];
+	float fTElDEta           [fMaxNeles];
+	float fTElSigmaIetaIeta  [fMaxNeles];
 	float fTElHoverE         [fMaxNeles];
 	int   fTElIsGoodElId_WP80[fMaxNeles];
 	int   fTElIsGoodElId_WP90[fMaxNeles];
