@@ -57,6 +57,8 @@ void ZeeMiniTree::Begin(){
 	OutputTree->Branch("eltrail_pz",&eltrail_pz,"eltrail_pz/F");
 	OutputTree->Branch("ellead_energy",&ellead_energy,"ellead_energy/F");
 	OutputTree->Branch("eltrail_energy",&eltrail_energy,"eltrail_energy/F");
+	OutputTree->Branch("ellead_SCenergyCetaCorr",&ellead_SCenergyCetaCorr,"ellead_SCenergyCetaCorr/F");
+	OutputTree->Branch("eltrail_SCenergyCetaCorr",&eltrail_SCenergyCetaCorr,"eltrail_SCenergyCetaCorr/F");
 	OutputTree->Branch("ellead_energySCdefault",&ellead_energySCdefault,"ellead_energySCdefault/F");
 	OutputTree->Branch("eltrail_energySCdefault",&eltrail_energySCdefault,"eltrail_energySCdefault/F");
 	OutputTree->Branch("ellead_energyNewCorrNoCrack",&ellead_energyNewCorrNoCrack,"ellead_energyNewCorrNoCrack/F");
@@ -69,6 +71,8 @@ void ZeeMiniTree::Begin(){
 	OutputTree->Branch("eltrail_SCeta",&eltrail_SCeta,"eltrail_SCeta/F");
 	OutputTree->Branch("ellead_fbrem",&ellead_fbrem,"ellead_fbrem/F");
 	OutputTree->Branch("eltrail_fbrem",&eltrail_fbrem,"eltrail_fbrem/F");
+	OutputTree->Branch("ellead_Pin",&ellead_Pin,"ellead_Pin/F");
+	OutputTree->Branch("eltrail_Pin",&eltrail_Pin,"eltrail_Pin/F");
 
 	OutputTree->Branch("ellead_r9",&ellead_r9,"ellead_r9/F");
 	OutputTree->Branch("eltrail_r9",&eltrail_r9,"eltrail_r9/F");
@@ -129,7 +133,7 @@ void ZeeMiniTree::Analyze(){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      if (fabs(eta)<1.4442) energy*=elecorr->getEtaCorrectionBarrel(eta);
      if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->ElSCindex[*it]];
-     if (energy/cosh(eta)<30) it=passing.erase(it); else it++;
+     if (energy/cosh(eta)<30 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
    }
 
    //cout << "E" << endl;
@@ -137,7 +141,7 @@ void ZeeMiniTree::Analyze(){
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
-     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
+     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
    }
 
    //cout << "F" << endl;
@@ -196,6 +200,12 @@ void ZeeMiniTree::Analyze(){
    else if (abseta0<1.4442 && abseta1>1.56) cat=2;
    else if (abseta0>1.56 && abseta1<1.4442) cat=2;
    else cat=-1;
+
+ if (cat==1){
+        if (abseta0<1 && abseta1<1) cat=4;
+        else if (abseta0>1 && abseta1>1) cat=6;
+        else cat=5;
+    }
  
 
 
@@ -232,8 +242,12 @@ void ZeeMiniTree::Analyze(){
   eltrail_SCeta = fTR->SCEta[fTR->ElSCindex[passing.at(1)]];
   ellead_fbrem = fTR->Elfbrem[passing.at(0)];
   eltrail_fbrem = fTR->Elfbrem[passing.at(1)];
+  ellead_Pin = fTR->ElTrkMomAtVtx[passing.at(0)];
+  eltrail_Pin = fTR->ElTrkMomAtVtx[passing.at(1)];
 
 
+  ellead_SCenergyCetaCorr = CorrElectron(fTR,passing.at(0),21).E();
+  eltrail_SCenergyCetaCorr = CorrElectron(fTR,passing.at(1),21).E();
   ellead_energySCdefault = CorrElectron(fTR,passing.at(0),20).E();
   eltrail_energySCdefault = CorrElectron(fTR,passing.at(1),20).E();
   ellead_energyNewCorrNoCrack = CorrElectron(fTR,passing.at(0),18).E();

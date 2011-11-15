@@ -56,7 +56,9 @@ private:
   Float_t ellead_energy, eltrail_energy;
   Float_t ellead_SCeta, eltrail_SCeta;
   Float_t ellead_fbrem, eltrail_fbrem;
+  Float_t ellead_Pin, eltrail_Pin;
 
+  Float_t ellead_SCenergyCetaCorr, eltrail_SCenergyCetaCorr;
   Float_t ellead_energySCdefault, eltrail_energySCdefault;
   Float_t ellead_energyNewCorrNoCrack, eltrail_energyNewCorrNoCrack;
   Float_t ellead_energyNewCorr, eltrail_energyNewCorr;
