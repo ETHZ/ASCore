@@ -443,25 +443,25 @@ void SSDLPlotter::doAnalysis(){
 	printCutFlows(fOutputDir + "CutFlow.txt");
 	printOrigins();
 	
-	makeMuIsolationPlots(); // loops on TTbar sample
-	makeElIsolationPlots(); // loops on TTbar sample
-	makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMuIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
+	// makeNT2KinPlots();
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 	
-	makeRatioPlots(Muon);
+	// makeRatioPlots(Muon);
 	makeRatioPlots(Elec);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
 
-	makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Muon, SigSup);
 	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Muon, ZDecay);
 	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Muon);
 	makeFRvsEtaPlots(Elec);
 	
 	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
@@ -2829,8 +2829,10 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
 	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
 
-	h_etaratio_data->SetMaximum(0.4);
-	h_etaratio_mc  ->SetMaximum(0.4);
+	float max = 0.4;
+	if(chan==Elec) max = 0.8;
+	h_etaratio_data->SetMaximum(max);
+	h_etaratio_mc  ->SetMaximum(max);
 	h_etaratio_data->SetMinimum(0.0);
 	h_etaratio_mc  ->SetMinimum(0.0);
 
@@ -3030,6 +3032,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 
 		float max = 0.4;
 		if(i==8) max = 1.0;
+		if(chan==Elec) max = 0.8;
 		h_ratio_data->SetMaximum(max);
 		h_ratio_mc  ->SetMaximum(max);
 		h_ratio_data->SetMinimum(0.0);
