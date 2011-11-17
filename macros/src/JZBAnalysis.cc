@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.65 $";
+string sjzbversion="$Revision: 1.66 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.66  2011/11/09 15:18:13  buchmann
+Adapted weight (used to be PU only) to also have an efficiency related weight (which is saved separately to Efficiencyweightonly)
+
 Revision 1.65  2011/11/07 11:00:25  fronga
 Fixed use of jec uncertainties.
 FIXME: move these txt files to the repository...
@@ -805,6 +808,8 @@ const bool JZBAnalysis::passElTriggers() {
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
   if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v9") )        return true;
+  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v10") )        return true;
   return false;
 
 }
@@ -828,6 +833,10 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v6") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v7") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v8") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v9") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v10") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v11") )        return true;
+  if ( GetHLTResult("HLT_DoubleMu7_v12") )        return true;
 
   if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
   if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
@@ -839,7 +848,10 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_Mu13_Mu8_v5") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v6") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v7") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v8") )        return true;
+//  if ( GetHLTResult("HLT_Mu13_Mu8_v8") )        return true;
+//  if ( GetHLTResult("HLT_Mu13_Mu8_v9") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v10") )        return true;
+  if ( GetHLTResult("HLT_Mu13_Mu8_v11") )        return true;
   return false;
 } 
 
@@ -854,6 +866,8 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
   if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v9") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v13") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v12") )        return true;
 
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
@@ -864,6 +878,8 @@ const bool JZBAnalysis::passEMuTriggers() {
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
   if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v9") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v12") )        return true;
+  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v13") )        return true;
   return false;
 }
 
