@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.109 2011/10/26 14:57:02 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.110 2011/10/31 13:33:38 fronga Exp $
 //
 //
 
@@ -114,7 +114,9 @@ private:
 	};
 
   double DeltaR(double phi1, double phi2, double eta1, double eta2);
-  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
+  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
+//   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
+//   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
   reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;
   int FindPFCandType(int id);
   bool isInPhiCracks(double phi, double eta);
@@ -734,25 +736,61 @@ private:
   int fTPhotisStandardPhoton[gMaxnphos];
   int fTPhotMCmatchindex[gMaxnphos];
   int fTPhotMCmatchexitcode[gMaxnphos];
-  float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];
-  float fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[gMaxnphos];
-  float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[gMaxnphos];
-  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
-  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1[gMaxnphos];
-  float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt5_dz1[gMaxnphos];
-  float fT_pho_Cone04ChargedHadronIso_dR0_dEta1_pt5_dz1[gMaxnphos];
-  float fT_pho_Cone04ChargedHadronIso_dR4_dEta0_pt5_dz1[gMaxnphos];
+ 
   float fT_pho_ChargedHadronIso[gMaxnphos];
   float fT_pho_NeutralHadronIso[gMaxnphos];
   float fT_pho_PhotonIso[gMaxnphos];
   int fT_pho_isPFPhoton[gMaxnphos];
   int fT_pho_isPFElectron[gMaxnphos];
   int fTPhotSCindex[gMaxnphos];
+
+float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];
+float fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[gMaxnphos];
+float fT_pho_Cone04PhotonIso_dR8_dEta0_pt0[gMaxnphos];
+float fT_pho_Cone04PhotonIso_dR8_dEta0_pt5[gMaxnphos];
+float fT_pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
+float fT_pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
+float fT_pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
+float fT_pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[gMaxnphos];
+float fT_pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
+float fT_pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
+float fT_pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
+float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
+float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
+
 
   // SC
   int fTnSC;
