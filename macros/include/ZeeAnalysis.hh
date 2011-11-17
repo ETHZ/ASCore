@@ -46,6 +46,7 @@ private:
   TH1D *fHInvMass17;
   TH1D *fHInvMass18;
   TH1D *fHInvMass20;
+  TH1D *fHInvMass21;
   TH1D *fHInvMassEgen;
 
   /*

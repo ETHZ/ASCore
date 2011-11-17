@@ -27,6 +27,7 @@
 // 16: SC corr + crack (no local)
 // 17: SC corr + crack + local (on seed cl only)
 // 18: SC corr (no crack, no local)
+// 21: SC Ceta corrected energy
 
 // ------------------------------------------------------------------------------------
 /**
@@ -62,7 +63,7 @@ private:
 
   static const Double_t etaCrackMin = 1.4442; 
   static const Double_t etaCrackMax = 1.56;
-  static const Int_t    nBinsEta              = 14; 
+  static const Int_t    nBinsEta              = 16; 
   Double_t       leftEta  [nBinsEta];
   Double_t       rightEta [nBinsEta];
 
@@ -79,16 +80,27 @@ private:
   Double_t par3[nBinsEta];
   Double_t par4[nBinsEta];
 
+ 
   Double_t applyScCorrectionsBrEta_photons(Double_t eta, Double_t sigmaPhiSigmaEta);
+
   Double_t applyScCorrectionsET_EB_photons(Double_t ET);
   Double_t applyScCorrectionsET_EE_photons(Double_t ET);
   Double_t applyScCorrectionsE_EE_photons(Double_t E);
 
+  Double_t applyScCorrectionsETETA_photons(Double_t ET, Double_t eta);
+  Double_t applyScCorrectionsETETA_working_photons(Double_t ET, Double_t eta);
+  
+
   Double_t applyScCorrectionsBrEta_electrons(Double_t eta, Double_t sigmaPhiSigmaEta);
+  
   Double_t applyScCorrectionsET_EB_electrons(Double_t ET);
   Double_t applyScCorrectionsET_EE_electrons(Double_t ET);
   Double_t applyScCorrectionsE_EE_electrons(Double_t E);
-  Double_t applyScCorrectionsETETA_EB_electrons(Double_t ET, Double_t eta);
+  
+
+  Double_t applyScCorrectionsETETA_electrons(Double_t ET, Double_t eta);
+  Double_t applyScCorrectionsETETA_working_electrons(Double_t ET, Double_t eta);
+
 
 };
 

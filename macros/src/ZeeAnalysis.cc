@@ -71,6 +71,7 @@ void ZeeAnalysis::Begin(){
 
 void ZeeAnalysis::Analyze(){
 
+
   /*
   for (int i=0; i<fTR->NEles; i++){
     fHElPt -> Fill(fTR->ElPt[i]);
@@ -98,6 +99,12 @@ void ZeeAnalysis::Analyze(){
      if (!IsGoodElId_WP80(*it)) it=passing.erase(it); else it++;
    }
 
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+     if (fTR->ElSCindex[*it]==-1) it=passing.erase(it); else it++;
+   }
+
+
+
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
      float energy=fTR->SCRaw[fTR->ElSCindex[*it]];
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
@@ -106,16 +113,14 @@ void ZeeAnalysis::Analyze(){
      if (energy/cosh(eta)<30 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
    }
 
+
+
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
      float eta=fTR->SCEta[fTR->ElSCindex[*it]];
      float phi=fTR->SCPhi[fTR->ElSCindex[*it]];
-     // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) evtisok=false;    
-     // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
-     if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
-   }
-
-   for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
-     if (fTR->ElSCindex[*it]==-1) evtisok=false;
+      if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) ) evtisok=false;    
+     //if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta))) evtisok=false;
+     // if ( (fabs(eta)>1.4442 && fabs(eta)<1.56) || (fabs(eta)>2.5) || (elecorr->isInPhiCracks(phi,eta)) || (elecorr->isInEBEtaCracks(eta)) ) evtisok=false;
    }
 
    if (!evtisok) return;
@@ -127,11 +132,9 @@ void ZeeAnalysis::Analyze(){
      elec[i].SetPtEtaPhiE(fTR->ElPt[passing.at(i)],fTR->ElEta[passing.at(i)],fTR->ElPhi[passing.at(i)],fTR->ElE[passing.at(i)]);
    }
 
-
   bool masswindow=false;
   if (fabs((elec[0]+elec[1]).M()-91.2)<30) masswindow=true;
   if (!masswindow) return;
-
 
 
   float invmass0=(elec[0]+elec[1]).M();

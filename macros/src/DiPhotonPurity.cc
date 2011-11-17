@@ -30,7 +30,9 @@ void DiPhotonPurity::Begin(){
 	const char* filename = "diphoton_purity.root";
 	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 
-	fHsieie = new TH1F("sieie","sieie",100,0,0.05);
+	fHsieie_all = new TH1F("sieie_all","sieie_all",100,0,0.05);
+	fHsieie_signal = new TH1F("sieie_signal","sieie_signal",100,0,0.05);
+	fHsieie_background = new TH1F("sieie_background","sieie_background",100,0,0.05);
 
 	fHNumPU = new TH1F("NumPU","NumPU",40,0,40);
 	fHNumVtx = new TH1F("NumVtx","NumVtx",40,0,40);
@@ -45,37 +47,13 @@ void DiPhotonPurity::Analyze(){
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
 
+  if (!isdata && weight<0) weight=1; // TO ALLOW NOT USING PU REW IN MC
+
   if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
   fHNumVtx->Fill(fTR->NVrtx,weight);
 
 
-
-  vector<int> passing;
-   for (int i=0; i<fTR->NPhotons; i++){
-      passing.push_back(i);
-  }
-
-   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-     if (fTR->PhotSCindex[*it]==-1) it=passing.erase(it); else it++;
-   }
-
-
-
-   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-     float energy=fTR->SCRaw[fTR->PhotSCindex[*it]];
-     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
-     if (fabs(eta)<1.4442) energy*=phocorr->getEtaCorrectionBarrel(eta);
-     if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->PhotSCindex[*it]];
-     if (energy/cosh(eta)<10 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
-   }
-
-
-
-     for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-       if (!PhotonID_EGM_10_006_Loose(fTR,*it)) it=passing.erase(it); else it++;
-     }
-
-
+  std::vector<int> passing = PhotonSelection(fTR);
 
    bool evtisok=true;
 
@@ -88,11 +66,20 @@ void DiPhotonPurity::Analyze(){
    if (!evtisok) return;
 
 
+   if (!isdata){
+     for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+       if (fTR->PhoMCmatchexitcode[*it]<0)  it=passing.erase(it); else it++;
+     }
+   }
+
 
    for (vector<int>::iterator it = passing.begin(); it != passing.end(); it++){
-     fHsieie->Fill(fTR->PhoSigmaIetaIeta[*it],weight);
+     fHsieie_all->Fill(fTR->PhoSigmaIetaIeta[*it],weight);
+     if (!isdata){
+       if (fTR->PhoMCmatchexitcode[*it]>0) fHsieie_signal->Fill(fTR->PhoSigmaIetaIeta[*it],weight);
+       else fHsieie_background->Fill(fTR->PhoSigmaIetaIeta[*it],weight);
+     }
    }
- 
  
 
 }
@@ -103,7 +90,9 @@ void DiPhotonPurity::End(){
 
 	fHistFile->cd();	
 
-	fHsieie->Write();
+	fHsieie_all->Write();
+	fHsieie_signal->Write();
+	fHsieie_background->Write();
 
 	fHNumPU->Write();
 	fHNumVtx->Write();
@@ -125,14 +114,44 @@ TLorentzVector DiPhotonPurity::CorrPhoton(TreeReader *fTR, int i, int mode){
   return corr;
 };
 
+
+std::vector<int> DiPhotonPurity::PhotonSelection(TreeReader *fTR){
+
+ vector<int> passing;
+   for (int i=0; i<fTR->NPhotons; i++){
+      passing.push_back(i);
+  }
+
+   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+     if (fTR->PhotSCindex[*it]==-1) it=passing.erase(it); else it++;
+   }
+
+   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+     float energy=fTR->SCRaw[fTR->PhotSCindex[*it]];
+     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
+     if (fabs(eta)<1.4442) energy*=phocorr->getEtaCorrectionBarrel(eta);
+     if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->PhotSCindex[*it]];
+     if (energy/cosh(eta)<10 || energy/cosh(eta)>200) it=passing.erase(it); else it++;
+   }
+
+     for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+       if (!PhotonID_EGM_10_006_Loose_SigmaIetaIeta_Relaxed(fTR,*it)) it=passing.erase(it); else it++;
+     }
+
+     return passing;
+
+};
+
+
+
+
 bool DiPhotonPurity::PhotonID_EGM_10_006_Loose(TreeReader *fTR, int i){
-
-
 
   if (fTR->PhoIso04Ecal[i]>4.2) return false;
   if (fTR->PhoIso04Hcal[i]>2.2) return false;
   if (fTR->PhoIso04TrkHollow[i]>2.0) return false;
   if (fTR->PhoHoverE[i]>0.05) return false;
+
 
   if (fabs(fTR->PhoEta[i])<1.4442) {
     if (fTR->PhoSigmaIetaIeta[i]>0.01) return false;
@@ -140,6 +159,27 @@ bool DiPhotonPurity::PhotonID_EGM_10_006_Loose(TreeReader *fTR, int i){
   else {
     if (fTR->PhoSigmaIetaIeta[i]>0.03) return false;
   }
+
+
+  return true;
+
+};
+
+bool DiPhotonPurity::PhotonID_EGM_10_006_Loose_SigmaIetaIeta_Relaxed(TreeReader *fTR, int i){
+
+  if (fTR->PhoIso04Ecal[i]>4.2) return false;
+  if (fTR->PhoIso04Hcal[i]>2.2) return false;
+  if (fTR->PhoIso04TrkHollow[i]>2.0) return false;
+  if (fTR->PhoHoverE[i]>0.05) return false;
+
+  /*
+  if (fabs(fTR->PhoEta[i])<1.4442) {
+    if (fTR->PhoSigmaIetaIeta[i]>0.01) return false;
+  }
+  else {
+    if (fTR->PhoSigmaIetaIeta[i]>0.03) return false;
+  }
+  */
 
   return true;
 

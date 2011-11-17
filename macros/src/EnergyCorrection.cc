@@ -1,12 +1,13 @@
 #include "EnergyCorrection.hh"
 #include "base/TreeReader.hh"
+#include <assert.h>
 
 EnergyCorrection::EnergyCorrection(TString tuning)
 {
   
   {
-    Double_t       leftEtatemp  [nBinsEta]   = { 0.02, 0.25, 0.46, 0.81, 0.91, 1.01, 1.16,           etaCrackMax,  1.653,  1.8, 2.0, 2.2, 2.3, 2.4 };
-    Double_t       rightEtatemp [nBinsEta]   = { 0.25, 0.42, 0.77, 0.91, 1.01, 1.13, etaCrackMin,    1.653,        1.8  ,  2.0, 2.2, 2.3, 2.4, 2.5 };
+    Double_t       leftEtatemp  [nBinsEta]   = { 0.02, 0.25, 0.46, 0.81, 0.91, 1.01, 1.16, 1.22, 1.33,           etaCrackMax,  1.653,  1.8, 2.0, 2.2, 2.3, 2.4 };
+    Double_t       rightEtatemp [nBinsEta]   = { 0.25, 0.42, 0.77, 0.91, 1.01, 1.13, 1.22, 1.33, etaCrackMin,    1.653,        1.8  ,  2.0, 2.2, 2.3, 2.4, 2.5 };
     
     for (int i=0; i<nBinsEta; i++) leftEta[i]=leftEtatemp[i];
     for (int i=0; i<nBinsEta; i++) rightEta[i]=rightEtatemp[i];
@@ -20,180 +21,207 @@ EnergyCorrection::EnergyCorrection(TString tuning)
 
   if (forphotons){
 
+ xcorr[0]=1.00506;
+  xcorr[1]=1.00697;
+  xcorr[2]=1.00595;
+  xcorr[3]=1.00595;
+  xcorr[4]=1.00595;
+  xcorr[5]=1.00595;
+  xcorr[6]=1.00595;
+  xcorr[7]=1.00595;
+  xcorr[8]=1.00595;
+  xcorr[9]=0.966651;
+  xcorr[10]=0.97381;
+  xcorr[11]=0.976516;
+  xcorr[12]=0.983254;
+  xcorr[13]=0.98502;
+  xcorr[14]=0.98502;
+  xcorr[15]=0.978472;
 
-    xcorr[0]=1.00506;
-    xcorr[1]=1.00697;
-    xcorr[2]=1.00595;
-    xcorr[3]=1.00595;
-    xcorr[4]=1.00595;
-    xcorr[5]=1.00595;
-    xcorr[6]=1.00595;
-    xcorr[7]=0.966651;
-    xcorr[8]=0.97381;
-    xcorr[9]=0.976516;
-    xcorr[10]=0.983254;
-    xcorr[11]=0.98502;
-    xcorr[12]=0.98502;
-    xcorr[13]=0.978472;
+  par0[0] = 0.00132382 ;
+  par1[0] = 2.17664 ;
+  par2[0] = -0.00467206 ;
+  par3[0] = 0.988994 ;
+  par4[0] = 17.5858 ;
 
-    par0[0] = 0.00132382 ;
-    par1[0] = 2.17664 ;
-    par2[0] = -0.00467206 ;
-    par3[0] = 0.988994 ;
-    par4[0] = 17.5858 ;
+  par0[1] = -0.00590257 ;
+  par1[1] = 1.90733 ;
+  par2[1] = 0.000684327 ;
+  par3[1] = 0.986431 ;
+  par4[1] = 16.6698 ;
 
-    par0[1] = -0.00590257 ;
-    par1[1] = 1.90733 ;
-    par2[1] = 0.000684327 ;
-    par3[1] = 0.986431 ;
-    par4[1] = 16.6698 ;
+  par0[2] = 0.00265109 ;
+  par1[2] = 1.73272 ;
+  par2[2] = -0.00107022 ;
+  par3[2] = 0.989322 ;
+  par4[2] = 15.4911 ;
 
-    par0[2] = 0.00265109 ;
-    par1[2] = 1.73272 ;
-    par2[2] = -0.00107022 ;
-    par3[2] = 0.989322 ;
-    par4[2] = 15.4911 ;
+  par0[3] = 0.00231631 ;
+  par1[3] = 1.3463 ;
+  par2[3] = -0.00369555 ;
+  par3[3] = 0.987133 ;
+  par4[3] = 10.9233 ;
 
-    par0[3] = 0.00231631 ;
-    par1[3] = 1.3463 ;
-    par2[3] = -0.00369555 ;
-    par3[3] = 0.987133 ;
-    par4[3] = 10.9233 ;
+  par0[4] = 0.00984253 ;
+  par1[4] = 1.33889 ;
+  par2[4] = -0.00392593 ;
+  par3[4] = 0.979191 ;
+  par4[4] = 9.35276 ;
 
-    par0[4] = 0.00984253 ;
-    par1[4] = 1.33889 ;
-    par2[4] = -0.00392593 ;
-    par3[4] = 0.979191 ;
-    par4[4] = 9.35276 ;
+  par0[5] = 0.023683 ;
+  par1[5] = 1.31198 ;
+  par2[5] = -0.00947317 ;
+  par3[5] = 0.963352 ;
+  par4[5] = 7.5597 ;
 
-    par0[5] = 0.023683 ;
-    par1[5] = 1.31198 ;
-    par2[5] = -0.00947317 ;
-    par3[5] = 0.963352 ;
-    par4[5] = 7.5597 ;
+  par0[6] = 0.134234 ;
+  par1[6] = 1.78462 ;
+  par2[6] = -0.0536956 ;
+  par3[6] = 0.987307 ;
+  par4[6] = 2.54916 ;
 
-    par0[6] = 0.0851133 ;
-    par1[6] = 1.38097 ;
-    par2[6] = -0.0340201 ;
-    par3[6] = 0.969502 ;
-    par4[6] = 4.17983 ;
+  par0[7] = 0.111337 ;
+  par1[7] = 1.33644 ;
+  par2[7] = -0.0445354 ;
+  par3[7] = 0.98227 ;
+  par4[7] = 2.86281 ;
 
-    par0[7] = 6.71705 ;
-    par1[7] = 5034.26 ;
-    par2[7] = -2.68669 ;
-    par3[7] = 0.970174 ;
-    par4[7] = 1.00288 ;
+  par0[8] = 0.0265652 ;
+  par1[8] = 1.48372 ;
+  par2[8] = -0.0921363 ;
+  par3[8] = 0.963707 ;
+  par4[8] = 4.81597 ;
 
-    par0[8] = 1306.82 ;
-    par1[8] = 472004 ;
-    par2[8] = -1.86145 ;
-    par3[8] = 0.981714 ;
-    par4[8] = -0.25644 ;
+  par0[9] = 6.596 ;
+  par1[9] = 4851.13 ;
+  par2[9] = -2.63843 ;
+  par3[9] = 0.970162 ;
+  par4[9] = 1.00567 ;
 
-    par0[9] = 0.317121 ;
-    par1[9] = 3.22717 ;
-    par2[9] = -0.126848 ;
-    par3[9] = 0.957792 ;
-    par4[9] = 2.01028 ;
+  par0[10] = 2406.05 ;
+  par1[10] = 855573 ;
+  par2[10] = -1.91938 ;
+  par3[10] = 0.980931 ;
+  par4[10] = -0.0740673 ;
 
-    par0[10] = 0.275225 ;
-    par1[10] = 2.20686 ;
-    par2[10] = -0.11009 ;
-    par3[10] = 0.93922 ;
-    par4[10] = 2.69958 ;
+  par0[11] = 0.829199 ;
+  par1[11] = 3.22717 ;
+  par2[11] = -0.0485123 ;
+  par3[11] = 0.957792 ;
+  par4[11] = 2.01028 ;
 
-    par0[11] = 0.0639875 ;
-    par1[11] = 1.40045 ;
-    par2[11] = -0.0255853 ;
-    par3[11] = 0.821566 ;
-    par4[11] = 7.3297 ;
+  par0[12] = 0.275226 ;
+  par1[12] = 2.20687 ;
+  par2[12] = -0.110091 ;
+  par3[12] = 0.93922 ;
+  par4[12] = 2.69956 ;
 
-    par0[12] = 0.030488 ;
-    par1[12] = 1.37842 ;
-    par2[12] = -0.0121879 ;
-    par3[12] = 0.8173 ;
-    par4[12] = 9.29944 ;
+  par0[13] = 0.169408 ;
+  par1[13] = 1.53546 ;
+  par2[13] = -0.0677257 ;
+  par3[13] = 0.860703 ;
+  par4[13] = 4.63723 ;
 
-    par0[13] = 0.213906 ;
-    par1[13] = 1.67471 ;
-    par2[13] = -0.0860589 ;
-    par3[13] = 0.893636 ;
-    par4[13] = 3.78218 ;
+  par0[14] = 0.0780066 ;
+  par1[14] = 1.39628 ;
+  par2[14] = -0.0312043 ;
+  par3[14] = 0.826576 ;
+  par4[14] = 6.71971 ;
 
+  par0[15] = 0.214497 ;
+  par1[15] = 1.6747 ;
+  par2[15] = -0.0858208 ;
+  par3[15] = 0.893635 ;
+  par4[15] = 3.7822 ;
+
+
+  
   } // end for photons
 
   else { // for electrons
 
-    xcorr[0]=1.00227;
-    xcorr[1]=1.00252;
-    xcorr[2]=1.00225;
-    xcorr[3]=1.00159;
-    xcorr[4]=0.999475;
-    xcorr[5]=0.997203;
-    xcorr[6]=0.993886;
-    xcorr[7]=0.971262;
-    xcorr[8]=0.975922;
-    xcorr[9]=0.979087;
-    xcorr[10]=0.98495;
-    xcorr[11]=0.98781;
-    xcorr[12]=0.989546;
-    xcorr[13]=0.989638;
+  xcorr[0]=1.00227;
+  xcorr[1]=1.00252;
+  xcorr[2]=1.00225;
+  xcorr[3]=1.00159;
+  xcorr[4]=0.999475;
+  xcorr[5]=0.997203;
+  xcorr[6]=0.99628;
+  xcorr[7]=0.993651;
+  xcorr[8]=0.993058;
+  xcorr[9]=0.971262;
+  xcorr[10]=0.975922;
+  xcorr[11]=0.979087;
+  xcorr[12]=0.98495;
+  xcorr[13]=0.98781;
+  xcorr[14]=0.989546;
+  xcorr[15]=0.989638;
 
-    par0[0] = 1.00718;
-    par1[0] = -0.00187886;
-    par2[0] = 0 ;
 
-    par0[1] = 1.00713;
-    par1[1] = -0.00227574;
-    par2[1] = 0 ;
+ par0[0] = 1.00718;
+  par1[0] = -0.00187886;
+  par2[0] = 0 ;
 
-    par0[2] = 1.00641;
-    par1[2] = -0.00259935;
-    par2[2] = 0 ;
+  par0[1] = 1.00713;
+  par1[1] = -0.00227574;
+  par2[1] = 0 ;
 
-    par0[3] = 1.00761;
-    par1[3] = -0.00433692;
-    par2[3] = 0 ;
+  par0[2] = 1.00641;
+  par1[2] = -0.00259935;
+  par2[2] = 0 ;
 
-    par0[4] = 1.00682;
-    par1[4] = -0.00551324;
-    par2[4] = 0 ;
+  par0[3] = 1.00761;
+  par1[3] = -0.00433692;
+  par2[3] = 0 ;
 
-    par0[5] = 1.0073;
-    par1[5] = -0.00799669;
-    par2[5] = 0 ;
+  par0[4] = 1.00682;
+  par1[4] = -0.00551324;
+  par2[4] = 0 ;
 
-    par0[6] = 1.00462;
-    par1[6] = -0.00870057;
-    par2[6] = 0 ;
+  par0[5] = 1.0073;
+  par1[5] = -0.00799669;
+  par2[5] = 0 ;
 
-    par0[7] = 0.972798;
-    par1[7] = -0.000771577;
-    par2[7] = -0.00276696;
+  par0[6] = 1.00565;
+  par1[6] = -0.00856895;
+  par2[6] = 0 ;
 
-    par0[8] = 0.981672;
-    par1[8] = -0.00202028;
-    par2[8] = -0.00471028;
+  par0[7] = 1.0052;
+  par1[7] = -0.00886579;
+  par2[7] = 0 ;
 
-    par0[9] = 0.98251;
-    par1[9] = 0.00441308;
-    par2[9] = -0.00809139;
+  par0[8] = 1.00325;
+  par1[8] = -0.00849542;
+  par2[8] = 0 ;
 
-    par0[10] = 0.986123;
-    par1[10] = 0.00832913;
-    par2[10] = -0.00944584;
+  par0[9] = 0.972798;
+  par1[9] = -0.000771577;
+  par2[9] = -0.00276696;
 
-    par0[11] = 0.990124;
-    par1[11] = 0.00742879;
-    par2[11] = -0.00960462;
+  par0[10] = 0.981672;
+  par1[10] = -0.00202028;
+  par2[10] = -0.00471028;
 
-    par0[12] = 0.990187;
-    par1[12] = 0.0094608;
-    par2[12] = -0.010172;
+  par0[11] = 0.98251;
+  par1[11] = 0.00441308;
+  par2[11] = -0.00809139;
 
-    par0[13] = 0.99372;
-    par1[13] = 0.00560406;
-    par2[13] = -0.00943169;
+  par0[12] = 0.986123;
+  par1[12] = 0.00832913;
+  par2[12] = -0.00944584;
+
+  par0[13] = 0.990124;
+  par1[13] = 0.00742879;
+  par2[13] = -0.00960462;
+
+  par0[14] = 0.990187;
+  par1[14] = 0.0094608;
+  par2[14] = -0.010172;
+
+  par0[15] = 0.99372;
+  par1[15] = 0.00560406;
+  par2[15] = -0.00943169;
+
 
   }
 
@@ -204,6 +232,7 @@ EnergyCorrection::EnergyCorrection(TString tuning)
 EnergyCorrection::~EnergyCorrection() 
 {
 };
+
 
 Double_t EnergyCorrection::applyScCorrectionsBrEta_photons(Double_t eta, Double_t sigmaPhiSigmaEta){  
 
@@ -290,6 +319,72 @@ Double_t EnergyCorrection::applyScCorrectionsE_EE_photons(Double_t E){
 						   
 };  
 
+Double_t EnergyCorrection::applyScCorrectionsETETA_working_photons(Double_t ET, Double_t eta){  
+    							   
+  // protect against high ET				   
+								   
+  if (ET > 200 ) ET =200;    				   
+  if (fabs(eta) <1.33  || ET < 10 ) return 1;              
+
+  else if (1.33 <= fabs(eta) && fabs(eta) < 1.44 ) { 
+    if ( 10 <= ET && ET <  50 ) return     0.984352 + 0.000316509 *ET ;
+    if ( 50 <= ET             ) return         1; 
+  }                                               
+  else if (1.56 <= fabs(eta) && fabs(eta) < 1.653 )        return     0.992191 + 5.85881e-05 *ET ;
+  else if (1.653 <= fabs(eta) && fabs(eta) < 1.8 )        return     0.993616 + 4.58595e-05 *ET ;
+  else if (1.8 <= fabs(eta) && fabs(eta) < 2 )        return     0.995683 + 3.29924e-05 *ET ;
+  else if (2 <= fabs(eta) && fabs(eta) < 2.2 )        return     0.993543 + 5.77925e-05 *ET ;
+  else if (2.2 <= fabs(eta) && fabs(eta) < 2.3 )        return     0.995799 + 2.5475e-05 *ET ;
+  else if (2.3 <= fabs(eta) && fabs(eta) < 2.4 ) return 1;
+  else if (2.4 <= fabs(eta) && fabs(eta) < 2.5 ) return 1;
+  return 1;
+}                                           
+
+Double_t EnergyCorrection::applyScCorrectionsETETA_photons(Double_t ET, Double_t eta){ 
+
+  // std::cout << "true eta: " << eta << std::endl;
+
+  // eta = 0																						   
+  if (TMath::Abs(eta)  <  leftEta[0]            ) { eta = 0.02 ; }	
+
+  // outside acceptance
+
+  if (TMath::Abs(eta)  >=  rightEta[nBinsEta-1] ) { eta = 2.49; if (DBG) std::cout << " WARNING [applyScCorrections]: TMath::Abs(eta)  >=  rightEta[nBinsEta-1] " << std::endl;}  
+  																								   
+ 
+  bool needinterpolation=true;
+                               
+  for (Int_t iEta = 0; iEta < nBinsEta; ++iEta){
+    if ( leftEta[iEta] <= TMath::Abs(eta) && TMath::Abs(eta) <rightEta[iEta] ){
+       needinterpolation=false;
+    }	
+  }													       										
+  if (isInEBEtaCracks(eta) && !needinterpolation) {
+    std::cout << "ERROR: not interpolating in EB eta crack" << std::endl;
+    std::cout << eta << std::endl;
+  };
+
+  if (!needinterpolation) { // no need to interpolate
+    // std::cout << "calling not interpolated with " << tmpEta << std::endl;
+    return applyScCorrectionsETETA_working_photons(ET,eta);
+  } 
+  else { // need to interpolate    
+   
+    // std::cout << "calling interpolation" << std::endl;
+
+    Double_t tmpLeftEta, tmpRightEta;
+    
+    for (Int_t iEta = 0; iEta < nBinsEta-1; ++iEta){								       								         if (rightEta[iEta] <= TMath::Abs(eta) && TMath::Abs(eta) <leftEta[iEta+1]) {							      
+	tmpLeftEta=leftEta[iEta];         
+	tmpRightEta=leftEta[iEta+1];
+      }																						      }																						         
+    // std::cout << "calling interpolation with "<< eta << " " << tmpLeftEta << " " << tmpRightEta << std::endl;
+    return (applyScCorrectionsETETA_working_photons(ET,tmpLeftEta)+applyScCorrectionsETETA_working_photons(ET,tmpRightEta))/2;
+      
+  }
+};
+
+
 Double_t EnergyCorrection::applyScCorrectionsBrEta_electrons(Double_t eta, Double_t sigmaPhiSigmaEta){
 
   // extra protections																					   
@@ -326,6 +421,7 @@ Double_t EnergyCorrection::applyScCorrectionsBrEta_electrons(Double_t eta, Doubl
   else return xcorr[tmpEta]; 
 
 };
+
 
 Double_t EnergyCorrection::applyScCorrectionsET_EB_electrons(Double_t ET){      
   
@@ -372,148 +468,239 @@ Double_t EnergyCorrection::applyScCorrectionsE_EE_electrons(Double_t E){
  						  
 }         
 
-Double_t EnergyCorrection::applyScCorrectionsETETA_EB_electrons(Double_t ET, Double_t eta){        
-  if (0.02< TMath::Abs(eta) && TMath::Abs(eta) < 0.25){ 
-    if (5< ET && ET < 10) return 0.977764;
-    if (10< ET && ET < 20) return 0.994264;
-    if (20< ET && ET < 30) return 0.997246;
-    if (30< ET && ET < 40) return 1.00025;
-    if (40< ET && ET < 50) return 0.999151;
-    if (50< ET && ET < 60) return 1.00043;
-    if (60< ET && ET < 80) return 1.0001;
-    if (80< ET && ET < 100) return 1.0005;
-    if (100< ET && ET < 120) return 1.00015;
-    if (120< ET && ET < 140) return 1.00006;
-    if (140< ET && ET < 160) return 1.00005;
-    if (160< ET && ET < 180) return 1.00001;
-    if (180< ET && ET < 200) return 0.999564;
-  }
-  if (0.25< TMath::Abs(eta) && TMath::Abs(eta) < 0.42){ 
-    if (5< ET && ET < 10) return 0.971133;
-    if (10< ET && ET < 20) return 0.993328;
-    if (20< ET && ET < 30) return 0.996237;
-    if (30< ET && ET < 40) return 0.997145;
-    if (40< ET && ET < 50) return 0.999389;
-    if (50< ET && ET < 60) return 0.999637;
-    if (60< ET && ET < 80) return 0.999618;
-    if (80< ET && ET < 100) return 1.00007;
-    if (100< ET && ET < 120) return 1.00042;
-    if (120< ET && ET < 140) return 1.00002;
-    if (140< ET && ET < 160) return 1.00033;
-    if (160< ET && ET < 180) return 1.00019;
-    if (180< ET && ET < 200) return 1.00019;
-  }
-  if (0.46< TMath::Abs(eta) && TMath::Abs(eta) < 0.77){ 
-    if (5< ET && ET < 10) return 0.975339;
-    if (10< ET && ET < 20) return 0.995132;
-    if (20< ET && ET < 30) return 0.996809;
-    if (30< ET && ET < 40) return 0.998916;
-    if (40< ET && ET < 50) return 0.999224;
-    if (50< ET && ET < 60) return 0.999411;
-    if (60< ET && ET < 80) return 1.00007;
-    if (80< ET && ET < 100) return 1.00008;
-    if (100< ET && ET < 120) return 1.0001;
-    if (120< ET && ET < 140) return 1.00034;
-    if (140< ET && ET < 160) return 1.00024;
-    if (160< ET && ET < 180) return 1.00002;
-    if (180< ET && ET < 200) return 1.00021;
-  }
-  if (0.81< TMath::Abs(eta) && TMath::Abs(eta) < 0.91){ 
-    if (5< ET && ET < 10) return 0.958131;
-    if (10< ET && ET < 20) return 0.983402;
-    if (20< ET && ET < 30) return 0.995181;
-    if (30< ET && ET < 40) return 0.995896;
-    if (40< ET && ET < 50) return 0.998876;
-    if (50< ET && ET < 60) return 0.998252;
-    if (60< ET && ET < 80) return 0.99977;
-    if (80< ET && ET < 100) return 0.99968;
-    if (100< ET && ET < 120) return 0.99965;
-    if (120< ET && ET < 140) return 1.00033;
-    if (140< ET && ET < 160) return 1.00016;
-    if (160< ET && ET < 180) return 1.00063;
-    if (180< ET && ET < 200) return 1.00043;
-  }
-  if (0.91< TMath::Abs(eta) && TMath::Abs(eta) < 1.01){ 
-    if (5< ET && ET < 10) return 0.961929;
-    if (10< ET && ET < 20) return 0.984915;
-    if (20< ET && ET < 30) return 0.989539;
-    if (30< ET && ET < 40) return 0.993018;
-    if (40< ET && ET < 50) return 0.996772;
-    if (50< ET && ET < 60) return 0.996256;
-    if (60< ET && ET < 80) return 0.998337;
-    if (80< ET && ET < 100) return 0.998792;
-    if (100< ET && ET < 120) return 0.99941;
-    if (120< ET && ET < 140) return 1.00002;
-    if (140< ET && ET < 160) return 1.00065;
-    if (160< ET && ET < 180) return 1.00134;
-    if (180< ET && ET < 200) return 1.00159;
-  }
-  if (1.01< TMath::Abs(eta) && TMath::Abs(eta) < 1.13){ 
-    if (5< ET && ET < 10) return 0.917478;
-    if (10< ET && ET < 20) return 0.959749;
-    if (20< ET && ET < 30) return 0.983153;
-    if (30< ET && ET < 40) return 0.986145;
-    if (40< ET && ET < 50) return 0.99099;
-    if (50< ET && ET < 60) return 0.994393;
-    if (60< ET && ET < 80) return 0.996233;
-    if (80< ET && ET < 100) return 0.997332;
-    if (100< ET && ET < 120) return 0.999427;
-    if (120< ET && ET < 140) return 0.999626;
-    if (140< ET && ET < 160) return 1.00141;
-    if (160< ET && ET < 180) return 1.00128;
-    if (180< ET && ET < 200) return 1.00155;
-  }
-  if (1.16< TMath::Abs(eta) && TMath::Abs(eta) < 1.22){ 
-    if (5< ET && ET < 10) return 0.912609;
-    if (10< ET && ET < 20) return 0.949897;
-    if (20< ET && ET < 30) return 0.962474;
-    if (30< ET && ET < 40) return 0.980088;
-    if (40< ET && ET < 50) return 0.983248;
-    if (50< ET && ET < 60) return 0.987987;
-    if (60< ET && ET < 80) return 0.992508;
-    if (80< ET && ET < 100) return 0.995594;
-    if (100< ET && ET < 120) return 0.99812;
-    if (120< ET && ET < 140) return 1.00038;
-    if (140< ET && ET < 160) return 1.00082;
-    if (160< ET && ET < 180) return 1.00217;
-    if (180< ET && ET < 200) return 1.00287;
-  }
-  if (1.22< TMath::Abs(eta) && TMath::Abs(eta) < 1.33){ 
-    if (5< ET && ET < 10) return 0.864972;
-    if (10< ET && ET < 20) return 0.935465;
-    if (20< ET && ET < 30) return 0.963805;
-    if (30< ET && ET < 40) return 0.972135;
-    if (40< ET && ET < 50) return 0.983485;
-    if (50< ET && ET < 60) return 0.986927;
-    if (60< ET && ET < 80) return 0.994452;
-    if (80< ET && ET < 100) return 0.996924;
-    if (100< ET && ET < 120) return 0.99832;
-    if (120< ET && ET < 140) return 1.00008;
-    if (140< ET && ET < 160) return 1.00137;
-    if (160< ET && ET < 180) return 1.00205;
-    if (180< ET && ET < 200) return 1.00273;
-  }
-  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.4442){ 
-    if (5< ET && ET < 10) return 0.864351;
-    if (10< ET && ET < 20) return 0.920213;
-    if (20< ET && ET < 30) return 0.961388;
-    if (30< ET && ET < 40) return 0.972928;
-    if (40< ET && ET < 50) return 0.982903;
-    if (50< ET && ET < 60) return 0.990699;
-    if (60< ET && ET < 80) return 0.99128;
-    if (80< ET && ET < 100) return 0.995919;
-    if (100< ET && ET < 120) return 0.998793;
-    if (120< ET && ET < 140) return 1.00008;
-    if (140< ET && ET < 160) return 1.00162;
-    if (160< ET && ET < 180) return 1.0023;
-    if (180< ET && ET < 200) return 1.00317;
-  }
 
-  std::cout << "WARNING YOU'RE ASKING FOR CORRECTIONS OUTSIDE BOUNDARIES " << std::endl;
-  std::cout << "input eta: " << eta << std::endl;
-  std::cout << "input ET: " << ET << std::endl;
-  return 1;
-};                                
+
+ 
+
+double EnergyCorrection::applyScCorrectionsETETA_working_electrons(Double_t ET, Double_t eta){ 
+
+  Double_t par0 = 0;
+  Double_t par1 = 0;
+  Double_t par2 = 0;
+  Double_t par3 = 0;
+  Double_t par4 = 0;
+  
+  // std::cout << ET << std::endl;
+  // std::cout << eta << std::endl;
+
+  
+
+  if (0.02 <= fabs(eta) && fabs(eta) <0.25) {
+    par0 = 0.977764; 
+    par1 = 1.00082; 
+    par2 = -5.57895e-06; 
+    par3 = 0.0189922; 
+    par4 = -13.7688; 
+  } 
+
+  if (0.25 <= fabs(eta) && fabs(eta) <0.42) {
+    par0 = 0.971133; 
+    par1 = 1.00034; 
+    par2 = -7.22258e-07; 
+    par3 = 0.0149721; 
+    par4 = -19.9583; 
+  }                                             
+
+  if (0.46 <= fabs(eta) && fabs(eta) <0.77) {
+    par0 = 0.975339; 
+    par1 = 1.0003; 
+    par2 = -8.28272e-07; 
+    par3 = 0.0112622; 
+    par4 = -19.8705; 
+  }                                           
+   				 	  
+  if (0.81 <= fabs(eta) && fabs(eta) <0.91) {
+    par0 = 0.958131; 
+    par1 = 0.999076; 
+    par2 = 7.84516e-06; 
+    par3 = 0.0549452; 
+    par4 = -11.6424; 
+  }                                           
+
+   				 	  
+  if (0.91 <= fabs(eta) && fabs(eta) <1.01) {
+    par0 = 0.961929; 
+    par1 = 0.996587; 
+    par2 = 2.68649e-05; 
+    par3 = 0.033021; 
+    par4 = -16.3223; 
+  }                                           
+
+   				 	  
+  if (1.01 <= fabs(eta) && fabs(eta) <1.13) {
+    par0 = 0.917478; 
+    par1 = 0.995432; 
+    par2 = 3.42621e-05; 
+    par3 = 0.0794779; 
+    par4 = -16.9804; 
+  }                                           
+
+   				 	  
+  if (1.16 <= fabs(eta) && fabs(eta) <1.22) {
+    par0 = 0.912609; 
+    par1 = 0.993364; 
+    par2 = 5.12739e-05; 
+    par3 = 0.0819801; 
+    par4 = -23.3512; 
+  }                                           
+
+   				 	  
+  if (1.22 <= fabs(eta) && fabs(eta) <1.33) {
+    par0 = 0.864972; 
+    par1 = 0.994976; 
+    par2 = 4.13714e-05; 
+    par3 = 0.122349; 
+    par4 = -20.8449; 
+  }                                           
+
+   				 	  
+  if (1.33 <= fabs(eta) && fabs(eta) <etaCrackMin) {
+    par0 = 0.864351; 
+    par1 = 0.991656; 
+    par2 = 6.2759e-05; 
+    par3 = 0.172499; 
+    par4 = -16.6057; 
+  }                                           
+
+   				 	  
+  if (etaCrackMax <= fabs(eta) && fabs(eta) <1.653) {
+    par0 = 0.857992; 
+    par1 = 0.98803; 
+    par2 = 9.8499e-05; 
+    par3 = 0.142157; 
+    par4 = -17.6396; 
+
+  }                                           
+                					        
+   				 	  
+  if (1.653 <= fabs(eta) && fabs(eta) <1.8) {
+    par0 = 0.877181; 
+    par1 = 0.9858; 
+    par2 = 0.000107183; 
+    par3 = 0.182178; 
+    par4 = -13.1828; 
+
+  }                                           
+                					        
+   				 	  
+  if (1.8 <= fabs(eta) && fabs(eta) <2) {
+    par0 = 0.902391; 
+    par1 = 0.993132; 
+    par2 = 6.34629e-05; 
+    par3 = 0.0868843; 
+    par4 = -22.0789; 
+
+  }                                           
+                					        
+   				 	  
+  if (2 <= fabs(eta) && fabs(eta) <2.2) {
+    par0 = 0.926399; 
+    par1 = 0.996113; 
+    par2 = 3.72639e-05; 
+    par3 = 0.0512621; 
+    par4 = -21.0456; 
+
+  }                                           
+                					        
+   				 	  
+  if (2.2 <= fabs(eta) && fabs(eta) <2.3) {
+    par0 = 0.9419; 
+    par1 = 0.997974; 
+    par2 = 2.11951e-05; 
+    par3 = 0.0436488; 
+    par4 = -16.9869; 
+
+  }                                           
+                					        
+   				 	  
+  if (2.3 <= fabs(eta) && fabs(eta) <2.4) {
+    par0 = 0.973133; 
+    par1 = 1.00242; 
+    par2 = -7.26518e-06; 
+    par3 = 0.0241854; 
+    par4 = -29.3233; 
+
+  }                                           
+                					        
+   				 	  
+  if (2.4 <= fabs(eta) && fabs(eta) <2.5) {
+    par0 = 0.984542; 
+    par1 = 1.00329; 
+    par2 = -8.84497e-06; 
+    par3 = 0.019583; 
+    par4 = -38.8689; 
+
+  }                                           
+
+
+  if (par4 == 0) {
+    std::cout << "WARNING YOU'RE ASKING FOR CORRECTIONS OUTSIDE ETA BOUNDARIES " << std::endl;
+    std::cout << "input eta: " << eta << std::endl;
+    std::cout << "input ET: " << ET << std::endl;
+    return -999;
+  }     
+           					        
+  if (ET > 200) ET =200;   		  
+  if (             ET <    5 ) {
+    std::cout << "WARNING YOU'RE ASKING FOR CORRECTIONS OUTSIDE ET LOW BOUNDARY " << std::endl;
+    std::cout << "input eta: " << eta << std::endl;
+    std::cout << "input ET: " << ET << std::endl;
+    return         -999;  
+  }
+  if (  5 <= ET && ET <   10 ) return         par0 ;  
+  if ( 10 <= ET && ET <= 200 ) return         (par1  + ET*par2)*(1- par3*exp(ET/ par4));
+
+
+
+  return -999;
+
+};
+
+
+double EnergyCorrection::applyScCorrectionsETETA_electrons(Double_t ET, Double_t eta){ 
+
+  // std::cout << "true eta: " << eta << std::endl;
+
+  // eta = 0																						   
+  if (TMath::Abs(eta)  <  leftEta[0]            ) { eta = 0.02 ; }	
+
+  // outside acceptance
+
+  if (TMath::Abs(eta)  >=  rightEta[nBinsEta-1] ) { eta = 2.49; if (DBG) std::cout << " WARNING [applyScCorrections]: TMath::Abs(eta)  >=  rightEta[nBinsEta-1] " << std::endl;}  
+  																								   
+ 
+  bool needinterpolation=true;
+                               
+  for (Int_t iEta = 0; iEta < nBinsEta; ++iEta){
+    if ( leftEta[iEta] <= TMath::Abs(eta) && TMath::Abs(eta) <rightEta[iEta] ){
+       needinterpolation=false;
+    }	
+  }													       										
+  if (isInEBEtaCracks(eta) && !needinterpolation) {
+    std::cout << "ERROR: not interpolating in EB eta crack" << std::endl;
+    std::cout << eta << std::endl;
+  };
+
+  if (!needinterpolation) { // no need to interpolate
+    // std::cout << "calling not interpolated with " << tmpEta << std::endl;
+    return applyScCorrectionsETETA_working_electrons(ET,eta);
+  } 
+  else { // need to interpolate    
+   
+    // std::cout << "calling interpolation" << std::endl;
+
+    Double_t tmpLeftEta, tmpRightEta;
+    
+    for (Int_t iEta = 0; iEta < nBinsEta-1; ++iEta){								       								         if (rightEta[iEta] <= TMath::Abs(eta) && TMath::Abs(eta) <leftEta[iEta+1]) {							      
+	tmpLeftEta=leftEta[iEta];         
+	tmpRightEta=leftEta[iEta+1];
+      }																						      }																						         
+    // std::cout << "calling interpolation with "<< eta << " " << tmpLeftEta << " " << tmpRightEta << std::endl;
+    return (applyScCorrectionsETETA_working_electrons(ET,tmpLeftEta)+applyScCorrectionsETETA_working_electrons(ET,tmpRightEta))/2;
+      
+  }
+};
+
 
 double EnergyCorrection::f5x5( double iEta ) {
   if ( iEta < 40.2198 ) return 1;
@@ -526,17 +713,17 @@ float EnergyCorrection::getEtaCorrectionBarrel(float eta){
 
 bool EnergyCorrection::isInEBEtaCracks(double eta){
 
-  if (TMath::Abs(eta)>1.4442) return false;
+  if (TMath::Abs(eta)>=1.4442) return false;
 
-  if (0.02< TMath::Abs(eta) && TMath::Abs(eta) < 0.25) return false;
-  if (0.25< TMath::Abs(eta) && TMath::Abs(eta) < 0.42) return false; 
-  if (0.46< TMath::Abs(eta) && TMath::Abs(eta) < 0.77) return false; 
-  if (0.81< TMath::Abs(eta) && TMath::Abs(eta) < 0.91) return false; 
-  if (0.91< TMath::Abs(eta) && TMath::Abs(eta) < 1.01) return false; 
-  if (1.01< TMath::Abs(eta) && TMath::Abs(eta) < 1.13) return false; 
-  if (1.16< TMath::Abs(eta) && TMath::Abs(eta) < 1.22) return false; 
-  if (1.22< TMath::Abs(eta) && TMath::Abs(eta) < 1.33) return false; 
-  if (1.33< TMath::Abs(eta) && TMath::Abs(eta) < 1.4442) return false; 
+  if (0.02<= TMath::Abs(eta) && TMath::Abs(eta) < 0.25) return false;
+  if (0.25<= TMath::Abs(eta) && TMath::Abs(eta) < 0.42) return false; 
+  if (0.46<= TMath::Abs(eta) && TMath::Abs(eta) < 0.77) return false; 
+  if (0.81<= TMath::Abs(eta) && TMath::Abs(eta) < 0.91) return false; 
+  if (0.91<= TMath::Abs(eta) && TMath::Abs(eta) < 1.01) return false; 
+  if (1.01<= TMath::Abs(eta) && TMath::Abs(eta) < 1.13) return false; 
+  if (1.16<= TMath::Abs(eta) && TMath::Abs(eta) < 1.22) return false; 
+  if (1.22<= TMath::Abs(eta) && TMath::Abs(eta) < 1.33) return false; 
+  if (1.33<= TMath::Abs(eta) && TMath::Abs(eta) < 1.4442) return false; 
 
   return true;
 
@@ -571,11 +758,15 @@ bool EnergyCorrection::isInPhiCracks(double phi, double eta){
 };
 
 double EnergyCorrection::get_correctedenergy(TreeReader *fTR, int ind,  int mode){
+
   if (forphotons) return getPho_correctedenergy(fTR, ind, mode);
   else return getEl_correctedenergy(fTR, ind, mode);
+
 };
 
+
 double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mode){
+
 
   if (mode!=0 && mode!=5 && mode!=6) {std::cout << "wrong call mode" << std::endl; return -999;}
 
@@ -612,7 +803,8 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
     float et = energy/cosh(sc_eta);
     if (mode==5 || mode==6){
       et /= applyScCorrectionsBrEta_photons(sc_eta,sc_brem);
-      et /= applyScCorrectionsET_EB_photons(et);
+      //et /= applyScCorrectionsET_EB_photons(et);
+      et /= applyScCorrectionsETETA_photons(et,sc_eta);
     }
     energy = et*cosh(sc_eta);
   }
@@ -622,7 +814,8 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
     if (mode==5 || mode==6){
       et /= applyScCorrectionsBrEta_photons(sc_eta,sc_brem);
       //      et /= applyScCorrectionsET_EE_photons(et);
-      et /= applyScCorrectionsE_EE_photons(et*cosh(sc_eta));
+      // et /= applyScCorrectionsE_EE_photons(et*cosh(sc_eta));
+      et /= applyScCorrectionsETETA_photons(et,sc_eta);
     }
     energy = et*cosh(sc_eta);
   }
@@ -638,11 +831,14 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
   }
 
   return energy;
+
+
 };
+
 
 double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode){
 
-  if (mode != 999 && mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=18 && mode!=20) {std::cout << "wrong call mode" << std::endl; return -999;}
+  if (mode != 999 && mode!=0 && mode!=15 && mode!=16 && mode!=17 && mode!=18 && mode!=20 && mode!=21) {std::cout << "wrong call mode" << std::endl; return -999;}
 
   if (mode==0) return fTR->ElE[ei];
 
@@ -667,6 +863,8 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
   if (isbarrel) energy = fTR->SCRaw[si]*getEtaCorrectionBarrel(sc_eta);
   if (fabs(sc_eta)>1.56) energy = fTR->SCRaw[si]+fTR->SCPre[si];
 
+  if (mode==21) return energy;
+
   if (mode==20) return fTR->SCEnergy[si];
 
   if (( TMath::Abs(sc_eta) < 1.4442 ) && (energy/cosh(sc_eta)>5)){
@@ -674,7 +872,7 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
 
       et /= applyScCorrectionsBrEta_electrons(sc_eta,sc_brem);
       //  et /= applyScCorrectionsET_EB_electrons(et);
-      et /= applyScCorrectionsETETA_EB_electrons(et,sc_eta);
+      et /= applyScCorrectionsETETA_electrons(et,sc_eta);
 
     energy = et*cosh(sc_eta);
   }
@@ -684,7 +882,8 @@ double EnergyCorrection::getEl_correctedenergy(TreeReader *fTR, int ei, int mode
 
       et /= applyScCorrectionsBrEta_electrons(sc_eta,sc_brem);
       // et /= applyScCorrectionsET_EE_electrons(et);
-      et /= applyScCorrectionsE_EE_electrons(et*cosh(sc_eta));
+      // et /= applyScCorrectionsE_EE_electrons(et*cosh(sc_eta));
+      et /= applyScCorrectionsETETA_electrons(et,sc_eta);
 
     energy = et*cosh(sc_eta);
   }

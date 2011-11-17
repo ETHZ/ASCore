@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include <TH1D.h>
 
@@ -35,7 +36,9 @@ private:
 	// file for histograms:
 	TFile *fHistFile;
 
+  std::vector<int> PhotonSelection(TreeReader *fTR);
   bool PhotonID_EGM_10_006_Loose(TreeReader *fTR, int i);
+  bool PhotonID_EGM_10_006_Loose_SigmaIetaIeta_Relaxed(TreeReader *fTR, int i);
 
   std::string fDataType_;
   bool isdata;
@@ -43,7 +46,9 @@ private:
   TH1F *fHNumPU;
   TH1F *fHNumVtx;
 
-  TH1F *fHsieie;
+  TH1F *fHsieie_all;
+  TH1F *fHsieie_signal;
+  TH1F *fHsieie_background;
 
 };
 #endif
