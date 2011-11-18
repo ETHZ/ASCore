@@ -134,6 +134,8 @@ export LD_LIBRARY_PATH=/swshare/glite/d-cache/dcap/lib/:$LD_LIBRARY_PATH
 
 EXECLINE
 
+COPYLINE
+
 #### RETRIEVAL OF OUTPUT FILES AND CLEANING UP ############################
 cd $WORKDIR
 if test 0"$DBG" -gt 0; then

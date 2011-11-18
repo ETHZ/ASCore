@@ -19,6 +19,8 @@ def usage():
 	print 'The config file must look as follows:'
 	print '        DumperLocation     <path to the RunSSDLDumper executable>'
 	print '        OutputLocation     <the desired output location. make sure the folder exists and that there is NO allYields.root in it!>'
+	print '        OutdirNode         <temporary folder on the workernodes /scratch/ directory'
+	print '                           this dir will be created and stuff will be moved out of it, so it doesn\'t really matter what it\'s called>'
 	print '        DataCard           <datacard as usual, but you must include the entire path after stiegerb/ (i.e. don\'t forget the 2011(B)-part'
 	print '                           omit the \'.root\' in the filename if you want to split up the job, the resulting directory MUST exist on the SE'
 	print '                           it is crucial that this datacard has only existing paths!>'
@@ -39,10 +41,12 @@ def usage():
 	print '(which is needed in the script) does not work'
 
 def mk_dir_string(line):
+	# concatenating the strings for input directories
 	files = []
 	path = line.split()[1]
 	if not path[-1] == '/':
 		path += '/'
+	print '[status] searching for all files for split up jobs, at', line.split()[0]
 	raw_files = commands.getoutput('srmls '+srm_path+path)
 	raw_file_list = raw_files.split('\n')
 	for file in raw_file_list:
@@ -53,6 +57,7 @@ def mk_dir_string(line):
 	for file in files:
 		indiv_dir = line.split()[0]+'_'+file.split('/')[-1].replace('.root','')
 		strings.append(mk_single_string(line, file, indiv_dir))
+	print '[status] found', len(strings), 'files for directory', line.split()[0]
 	return strings
 		#ind = files.index(file)
 		#if not ind%nof:
@@ -72,9 +77,9 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 	string+= ' -m '+line.split()[2]
 	string+= ' -c '+line.split()[3]
 	if not indiv_dir:
-		string+= ' -o '+output_location
+		string+= ' -o '+output_node
 	else:
-		string+= ' -o '+output_location+'/'+indiv_dir
+		string+= ' -o '+output_node+'/'+indiv_dir
 	return string
 
 def mk_card_line(line):
@@ -96,6 +101,10 @@ def read_config(config_name):
 		arg = line.split()[1]
 		if opt == 'DumperLocation':
 			info['dumper_location'] = arg
+		elif opt == 'OutdirNode':
+			if not arg[-1]== '/':
+				arg+='/'
+			info['output_node'] = arg
 		elif opt == 'OutputLocation':
 			if not arg[-1]== '/':
 				arg+='/'
@@ -177,7 +186,7 @@ def merge_and_clean():
 def do_stuff(config_name):
 	print '[status] starting script...'
 
-	global srm_path, dcap_path, dumper_location, output_location, user, noj, release_dir
+	global srm_path, dcap_path, dumper_location, output_location, user, noj, release_dir, output_node
 	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'
 	dcap_path = 'dcap://t3se01.psi.ch:22125/'
 	
@@ -187,6 +196,7 @@ def do_stuff(config_name):
 	cardFile        =  open(info_dict['cardfile_name'], 'r')
 	dumper_location = info_dict['dumper_location']
 	output_location = info_dict['output_location']
+	output_node     = info_dict['output_node']
 	batch_script    = info_dict['batch_script']
 	user            = info_dict['user']
 	release_dir     = info_dict['release_dir']
@@ -197,18 +207,24 @@ def do_stuff(config_name):
 	
 	# checking if output location exists, otherwise create it
 	if not os.path.isdir(output_location):
+		print '[status] creating output directory:', output_location
 		os.system('mkdir '+output_location)
+	else:
+		print '[WARNING] output directory', output_location, 'already exists, this might lead to problems.'
 
 	# checking if a tmp/ subdir exists in the working dir, if so remove it and create an empty one
 	if os.path.isdir('tmp'):
 		os.system('rm -r tmp')
 	os.mkdir('tmp')
 	
-	lm_cardFile  = open('tmp/tmp_datacard_lm.dat', 'w')
-	qcd_cardFile = open('tmp/tmp_datacard_qcd.dat', 'w')
-	ww_cardFile  = open('tmp/tmp_datacard_ww.dat', 'w')
+	lm_cardFile  = open('tmp/tmp_datacard_lm.dat'  , 'w')
+	qcd_cardFile = open('tmp/tmp_datacard_qcd.dat' , 'w')
+	ww_cardFile  = open('tmp/tmp_datacard_ww.dat'  , 'w')
+
+	special_dirs = []
 	
 	print '[status] reading info and creating cards...'
+	print '[status] searching for all the files on the SE'
 	for line in cardFile.readlines():
 		if '#' in line or len(line) == 0:
 			continue
@@ -222,8 +238,9 @@ def do_stuff(config_name):
 			else:
 				commit_strings.append(mk_single_string(line))
 		else:
+			print '[status] looking up single files for', line.split()[0]
+			special_dirs.append(line.split()[0])
 			commit_strings.extend(mk_dir_string(line))
-			#mk_tmp_cards(line)
 		
 	lm_cardFile.close()
 	qcd_cardFile.close()
@@ -236,13 +253,26 @@ def do_stuff(config_name):
 			continue
 		if os.path.getsize(os.path.abspath('.')+'/tmp/'+card) == 0:
 			continue
-		commit_strings.append(dumper_location + ' -v 1 -l ' + os.path.abspath('.')+'/tmp/'+card+' -o '+output_location)
+		commit_strings.append(dumper_location + ' -v 1 -l ' + os.path.abspath('.')+'/tmp/'+card+' -o '+output_node)
 	
 	print '[status] starting to submit jobs...'
 
 	for commit in commit_strings:
 		ind = commit_strings.index(commit)
-		print 'At job number:', ind
+		my_line = commit.split()
+		name = 'xkcd'
+		if '-n' in my_line:
+			name = my_line[my_line.index('-n')+1]
+		#print 'At job number:', ind
+		# if not ind == 1: continue # to test with only the first job
+		# this is not to copy everything back directly to the /shome
+		# instead it creates a directory /jobnumber/ on the workernode /scratch/ and afterwards moves everything from there to /shome
+		commit+=str(ind)+'/'
+		if name in special_dirs:
+			copyline = 'mv ' + commit.split()[-1]+' '+output_location
+		else:
+			copyline = 'mv ' + commit.split()[-1]+'* ' +output_location
+
 		shellScript = open(batch_script, 'r')
 		tmpScript_name = 'tmp/tmp_script_'+str(ind)+'.sh'
 		tmpScript = open(tmpScript_name, 'w')
@@ -253,10 +283,13 @@ def do_stuff(config_name):
 				tmpScript.writelines('cd '+release_dir+'\n')
 			elif 'EXECLINE' in line:
 				tmpScript.writelines(commit+'\n')
+			elif 'COPYLINE' in line:
+				tmpScript.writelines(copyline+'\n')
 			else:
 				tmpScript.writelines(line)
 		tmpScript.close()
 		os.system('qsub -q short.q  -N job_'+str(ind)+' '+tmpScript_name)
+	print '[status] submitted', len(commit_strings), 'jobs'
 		#os.system('sleep 1')
 		#os.system('rm '+tmpScript_name)
 
@@ -269,7 +302,7 @@ def do_stuff(config_name):
 		if not time_elapsed%60:
 			print_status(time_elapsed)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
-	os.system('sleep 2')
+	
 	if check_commands():
 		merge_and_clean()
 	else:
@@ -279,6 +312,7 @@ def main(args):
 	if len(args)==1:
 		print 'You must specify at least something... Let me help you:\n'
 		usage()
+		sys.exit()
 	if ('--help' in args) or ('-h' in args):
 		usage()
 		sys.exit()
