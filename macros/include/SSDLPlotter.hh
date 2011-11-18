@@ -38,6 +38,7 @@ public:
 	// Plots
 	void makeMuIsolationPlots();
 	void makeElIsolationPlots();
+	void makeElIdPlots();
 	
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);

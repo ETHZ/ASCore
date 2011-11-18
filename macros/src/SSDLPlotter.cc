@@ -443,10 +443,12 @@ void SSDLPlotter::doAnalysis(){
 	printCutFlows(fOutputDir + "CutFlow.txt");
 	printOrigins();
 	
-	// makeMuIsolationPlots(); // loops on TTbar sample
-	// makeElIsolationPlots(); // loops on TTbar sample
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	//makeMuIsolationPlots(); // loops on TTbar sample
+	//makeElIsolationPlots(); // loops on TTbar sample
+	makeElIdPlots();
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
@@ -1813,6 +1815,403 @@ void SSDLPlotter::makeElIsolationPlots(){
 			// Util::PrintNoEPS(c_temp, Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir, NULL);
 			Util::PrintPDF(c_temp, Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), fOutputDir + fOutputSubDir);
 		}
+	}
+}
+
+void SSDLPlotter::makeElIdPlots(){
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+
+	TH1D    *hhoe_data [gNSels];
+	TH1D    *hhoe_mc   [gNSels];
+	TH1D	*hhoe_ttbar[gNSels];
+	THStack *hhoe_mc_s [gNSels];
+
+	TH1D    *hsiesie_data [gNSels];
+	TH1D    *hsiesie_mc   [gNSels];
+	TH1D	*hsiesie_ttbar[gNSels];
+	THStack *hsiesie_mc_s [gNSels];
+
+	TH1D    *hdeta_data [gNSels];
+	TH1D    *hdeta_mc   [gNSels];
+	TH1D	*hdeta_ttbar[gNSels];
+	THStack *hdeta_mc_s [gNSels];
+
+	TH1D    *hdphi_data [gNSels];
+	TH1D    *hdphi_mc   [gNSels];
+	TH1D	*hdphi_ttbar[gNSels];
+	THStack *hdphi_mc_s [gNSels];
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	// Create histograms
+	for(size_t i = 0; i < gNSels; ++i){
+		hhoe_data[i]  = new TH1D("ElhoeData_"          + IdPlots::sel_name[i], "Electron hoe in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.15);
+		hhoe_mc[i]    = new TH1D("ElhoeMC_"            + IdPlots::sel_name[i], "Electron hoe in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.15);
+		//hhoe_ttbar[i] = new TH1D("ElhoeTTbar_"         + IdPlots::sel_name[i], "Electron hoe in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.015);
+		hhoe_mc_s[i]  = new THStack("ElhoeMC_stacked_" + IdPlots::sel_name[i], "Electron hoe in MC for "    + IdPlots::sel_name[i]);
+		hhoe_data[i]  ->Sumw2();
+		hhoe_mc[i]    ->Sumw2();
+		//hhoe_ttbar[i] ->Sumw2();
+		hsiesie_data[i]  = new TH1D("ElsiesieData_"          + IdPlots::sel_name[i], "Electron siesiein Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
+		hsiesie_mc[i]    = new TH1D("ElsiesieMC_"            + IdPlots::sel_name[i], "Electron siesiein MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
+		//hsiesie_ttbar[i] = new TH1D("ElsiesieTTbar_"         + IdPlots::sel_name[i], "Electron siesiein TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
+		hsiesie_mc_s[i]  = new THStack("ElsiesieMC_stacked_" + IdPlots::sel_name[i], "Electron siesiein MC for "    + IdPlots::sel_name[i]);
+		hsiesie_data[i]  ->Sumw2();
+		hsiesie_mc[i]    ->Sumw2();
+		//hsiesie_ttbar[i] ->Sumw2();
+		hdeta_data[i]  = new TH1D("EldetaData_"          + IdPlots::sel_name[i], "Electron deta in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
+		hdeta_mc[i]    = new TH1D("EldetaMC_"            + IdPlots::sel_name[i], "Electron deta in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
+		//hdeta_ttbar[i] = new TH1D("EldetaTTbar_"         + IdPlots::sel_name[i], "Electron deta in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
+		hdeta_mc_s[i]  = new THStack("EldetaMC_stacked_" + IdPlots::sel_name[i], "Electron deta in MC for "    + IdPlots::sel_name[i]);
+		hdeta_data[i]  ->Sumw2();
+		hdeta_mc[i]    ->Sumw2();
+		//hdeta_ttbar[i] ->Sumw2();
+		hdphi_data[i]  = new TH1D("EldphiData_"          + IdPlots::sel_name[i], "Electron dphi in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
+		hdphi_mc[i]    = new TH1D("EldphiMC_"            + IdPlots::sel_name[i], "Electron dphi in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
+		//hdphi_ttbar[i] = new TH1D("EldphiTTbar_"         + IdPlots::sel_name[i], "Electron dphi in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
+		hdphi_mc_s[i]  = new THStack("EldphiMC_stacked_" + IdPlots::sel_name[i], "Electron dphi in MC for "    + IdPlots::sel_name[i]);
+		hdphi_data[i]  ->Sumw2();
+		hdphi_mc[i]    ->Sumw2();
+		//hdphi_ttbar[i] ->Sumw2();
+	}
+
+	////////////////////////////////////////////////////
+	// Fill ttbar histos
+	// Sample loop
+	// // // TTree *tree = fSamples[TTJets]->getTree();
+
+	// // // // Event loop
+	// // // tree->ResetBranchAddresses();
+	// // // InitMC(tree);
+
+	// // // if (fChain == 0) return;
+	// // // Long64_t nentries = fChain->GetEntriesFast();
+	// // // Long64_t nbytes = 0, nb = 0;
+	// // // for (Long64_t jentry=0; jentry<nentries;jentry++) {
+	// // // 	printProgress(jentry, nentries, fSamples[TTJets]->name);
+
+	// // // 	Long64_t ientry = LoadTree(jentry);
+	// // // 	if (ientry < 0) break;
+	// // // 	nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+	// // // 	int elind1(-1), elind2(-1);
+	// // // 	if(hasLooseElectrons(elind1, elind2) < 1) continue;
+
+	// // // 	// Common event selections
+	// // // 	if(!passesJet50Cut()) continue; // make trigger 100% efficient
+
+	// // // 	// Common object selections
+	// // // 	if(!isLooseElectron(elind1)) continue;
+	// // // 	// if(ElIsGoodElId_WP80[elind1] != 1) return false; // apply tight ID for the iso plots?
+
+	// // // 	// Select genmatched fake muons
+	// // // 	if(ElGenMType[elind1] == 2 || ElGenMType[elind1] == 4) continue;
+	// // // 	// Exclude also conversions here?
+
+	// // // 	if(ElPt[elind1] < fC_minEl2pt) continue;
+	// // // 	if(ElPt[elind1] > gElPt2bins[gNElPt2bins]) continue;
+
+
+	// // // 	////////////////////////////////////////////////////
+	// // // 	// MOST LOOSE SELECTION
+	// // // 	hhoe_ttbar[0]->Fill(ElHoverE[elind1]);
+	// // // 	hsiesie_ttbar[0]->Fill(ElSigmaIetaIeta[elind1]);
+	// // // 	hdeta_ttbar[0]->Fill(ElDEta[elind1]);
+	// // // 	hdphi_ttbar[0]->Fill(ElDPhi[elind1]);
+
+	// // // 	////////////////////////////////////////////////////
+	// // // 	// SIGNAL SUPPRESSED SELECTION
+	// // // 	if(isSigSupElEvent()){
+	// // // 		hhoe_ttbar   [1]->Fill(ElRelIso        [elind1]);
+	// // // 		hsiesie_ttbar[1]->Fill(ElSigmaIetaIeta [elind1]);
+	// // // 		hdphi_ttbar  [1]->Fill(ElDEta          [elind1]);
+	// // // 		hdeta_ttbar  [1]->Fill(ElDPhi          [elind1]);
+	// // // 	}
+	// // // 	////////////////////////////////////////////////////
+	// // // }
+	// // // cout << endl;
+	// // // fSamples[TTJets]->cleanUp();
+	////////////////////////////////////////////////////
+
+	// Create plots
+	vector<int> mcsamples = fMCBG;
+	vector<int> datasamples = fEGData;
+
+	for(size_t i = 0; i < gNSels; ++i){
+		fOutputSubDir = "Id/Electrons/";
+		hhoe_data[i]->SetXTitle(convertVarName("ElHoverE"));
+		hhoe_data[i]->SetLineWidth(3);
+		hhoe_data[i]->SetLineColor(kBlack);
+		hhoe_data[i]->SetMarkerStyle(8);
+		hhoe_data[i]->SetMarkerColor(kBlack);
+		hhoe_data[i]->SetMarkerSize(1.2);
+
+		// // //hhoe_ttbar[i]->SetXTitle(convertVarName("ElHoverE"));
+		// // //hhoe_ttbar[i]->SetLineWidth(3);
+		// // //hhoe_ttbar[i]->SetLineColor(kRed);
+		// // //hhoe_ttbar[i]->SetMarkerStyle(23);
+		// // //hhoe_ttbar[i]->SetMarkerColor(kRed);
+		// // //hhoe_ttbar[i]->SetMarkerSize(1.3);
+		
+		hsiesie_data[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
+		hsiesie_data[i]->SetLineWidth(3);
+		hsiesie_data[i]->SetLineColor(kBlack);
+		hsiesie_data[i]->SetMarkerStyle(8);
+		hsiesie_data[i]->SetMarkerColor(kBlack);
+		hsiesie_data[i]->SetMarkerSize(1.2);
+
+		// // // hsiesie_ttbar[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
+		// // // hsiesie_ttbar[i]->SetLineWidth(3);
+		// // // hsiesie_ttbar[i]->SetLineColor(kRed);
+		// // // hsiesie_ttbar[i]->SetMarkerStyle(23);
+		// // // hsiesie_ttbar[i]->SetMarkerColor(kRed);
+		// // // hsiesie_ttbar[i]->SetMarkerSize(1.3);
+		
+		hdeta_data[i]->SetXTitle(convertVarName("ElDEta"));
+		hdeta_data[i]->SetLineWidth(3);
+		hdeta_data[i]->SetLineColor(kBlack);
+		hdeta_data[i]->SetMarkerStyle(8);
+		hdeta_data[i]->SetMarkerColor(kBlack);
+		hdeta_data[i]->SetMarkerSize(1.2);
+
+		// // // hdeta_ttbar[i]->SetXTitle(convertVarName("ElDEta"));
+		// // // hdeta_ttbar[i]->SetLineWidth(3);
+		// // // hdeta_ttbar[i]->SetLineColor(kRed);
+		// // // hdeta_ttbar[i]->SetMarkerStyle(23);
+		// // // hdeta_ttbar[i]->SetMarkerColor(kRed);
+		// // // hdeta_ttbar[i]->SetMarkerSize(1.3);
+		
+		hdphi_data[i]->SetXTitle(convertVarName("ElDPhi"));
+		hdphi_data[i]->SetLineWidth(3);
+		hdphi_data[i]->SetLineColor(kBlack);
+		hdphi_data[i]->SetMarkerStyle(8);
+		hdphi_data[i]->SetMarkerColor(kBlack);
+		hdphi_data[i]->SetMarkerSize(1.2);
+
+		// // //hdphi_ttbar[i]->SetXTitle(convertVarName("ElDPhi"));
+		// // //hdphi_ttbar[i]->SetLineWidth(3);
+		// // //hdphi_ttbar[i]->SetLineColor(kRed);
+		// // //hdphi_ttbar[i]->SetMarkerStyle(23);
+		// // //hdphi_ttbar[i]->SetMarkerColor(kRed);
+		// // //hdphi_ttbar[i]->SetMarkerSize(1.3);
+
+		// Apply weights to MC histos
+		for(size_t j = 0; j < gNSAMPLES; ++j){
+			Sample *S = fSamples[j];
+			float lumiscale = fLumiNorm / S->lumi;
+			if(S->datamc == 0) continue;
+			S->idplots.hhoe[i]->Scale(lumiscale);
+			S->idplots.hsiesie[i]->Scale(lumiscale);
+			S->idplots.hdeta[i]->Scale(lumiscale);
+			S->idplots.hdphi[i]->Scale(lumiscale);
+		}
+
+		// Fill data histo
+		for(size_t j = 0; j < datasamples.size(); ++j){
+			Sample *S = fSamples[datasamples[j]];
+			hhoe_data[i]->Add(S->idplots.hhoe[i]);
+			hhoe_data[i]->SetXTitle(convertVarName("ElHoverE"));
+			hsiesie_data[i]->Add(S->idplots.hsiesie[i]);
+			hsiesie_data[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
+			hdeta_data[i]->Add(S->idplots.hdeta[i]);
+			hdeta_data[i]->SetXTitle(convertVarName("ElDEta"));
+			hdphi_data[i]->Add(S->idplots.hdphi[i]);
+			hdphi_data[i]->SetXTitle(convertVarName("ElDPhi"));
+		}
+
+		// Scale to get equal integrals
+		float hoe_intscale(0.);
+		float siesie_intscale(0.);
+		float deta_intscale(0.);
+		float dphi_intscale(0.);
+		for(size_t j = 0; j < mcsamples.size();   ++j){
+			Sample *S = fSamples[mcsamples[j]];
+			hoe_intscale    += S->idplots.hhoe[i]->Integral();
+			siesie_intscale += S->idplots.hsiesie[i]->Integral();
+			deta_intscale   += S->idplots.hdeta[i]->Integral();
+			dphi_intscale   += S->idplots.hdphi[i]->Integral();
+		}
+		hoe_intscale    = hhoe_data[i]->Integral() / hoe_intscale;
+		siesie_intscale = hsiesie_data[i]->Integral() / siesie_intscale;
+		deta_intscale   = hdeta_data[i]->Integral() / deta_intscale;
+		dphi_intscale   = hdphi_data[i]->Integral() / dphi_intscale;
+		
+		for(size_t j = 0; j < mcsamples.size();   ++j){
+			Sample *S = fSamples[mcsamples[j]];			
+			S->idplots.hhoe[i]->Scale(hoe_intscale);
+			S->idplots.hsiesie[i]->Scale(siesie_intscale);
+			S->idplots.hdeta[i]->Scale(deta_intscale);
+			S->idplots.hdphi[i]->Scale(dphi_intscale);
+		}
+		// // //hhoe_ttbar[i]    -> Scale(hhoe_data[i]    -> Integral() / hhoe_ttbar[i]    -> Integral());
+		// // //hsiesie_ttbar[i] -> Scale(hsiesie_data[i] -> Integral() / hsiesie_ttbar[i] -> Integral());
+		// // //hdeta_ttbar[i]   -> Scale(hdeta_data[i]   -> Integral() / hdeta_ttbar[i]   -> Integral());
+		// // //hdphi_ttbar[i]   -> Scale(hdphi_data[i]   -> Integral() / hdphi_ttbar[i]   -> Integral());
+
+		// Fill MC stacks
+		for(size_t j = 0; j < mcsamples.size();   ++j){
+			Sample *S = fSamples[mcsamples[j]];			
+			hhoe_mc  [i]->Add(S->idplots.hhoe[i]);
+			hhoe_mc_s[i]->Add(S->idplots.hhoe[i]);
+			hhoe_mc_s[i]->Draw("goff");
+			hhoe_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElHoverE"));
+			hsiesie_mc  [i]->Add(S->idplots.hsiesie[i]);
+			hsiesie_mc_s[i]->Add(S->idplots.hsiesie[i]);
+			hsiesie_mc_s[i]->Draw("goff");
+			hsiesie_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElSigmaIetaIeta"));
+			hdeta_mc  [i]->Add(S->idplots.hdeta[i]);
+			hdeta_mc_s[i]->Add(S->idplots.hdeta[i]);
+			hdeta_mc_s[i]->Draw("goff");
+			hdeta_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElDEta"));
+			hdphi_mc  [i]->Add(S->idplots.hdphi[i]);
+			hdphi_mc_s[i]->Add(S->idplots.hdphi[i]);
+			hdphi_mc_s[i]->Draw("goff");
+			hdphi_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElDPhi"));
+		}
+
+
+		double hoe_max1 = hhoe_mc_s[i]->GetMaximum();
+		double hoe_max2 = hhoe_data[i]->GetMaximum();
+		double hoe_max = hoe_max1>hoe_max2?hoe_max1:hoe_max2;
+		double siesie_max1 = hsiesie_mc_s[i]->GetMaximum();
+		double siesie_max2 = hsiesie_data[i]->GetMaximum();
+		double siesie_max = siesie_max1>siesie_max2?siesie_max1:siesie_max2;
+		double deta_max1 = hdeta_mc_s[i]->GetMaximum();
+		double deta_max2 = hdeta_data[i]->GetMaximum();
+		double deta_max = deta_max1>deta_max2?deta_max1:deta_max2;
+		double dphi_max1 = hdphi_mc_s[i]->GetMaximum();
+		double dphi_max2 = hdphi_data[i]->GetMaximum();
+		double dphi_max = dphi_max1>dphi_max2?dphi_max1:dphi_max2;
+
+		hhoe_mc_s[i]->SetMaximum(1.2*hoe_max);
+		hhoe_data[i]->SetMaximum(1.2*hoe_max);
+		hsiesie_mc_s[i]->SetMaximum(1.2*siesie_max);
+		hsiesie_data[i]->SetMaximum(1.2*siesie_max);
+		hdeta_mc_s[i]->SetMaximum(1.2*deta_max);
+		hdeta_data[i]->SetMaximum(1.2*deta_max);
+		hdphi_mc_s[i]->SetMaximum(1.2*dphi_max);
+		hdphi_data[i]->SetMaximum(1.2*dphi_max);
+
+		//int bin0   = hiso_data[i]->FindBin(0.0);
+		//int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
+		//int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
+		//float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
+		//float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
+		//float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
+
+		// H over E
+		TCanvas *hoe_temp = new TCanvas("ElHoE" + IdPlots::sel_name[i], "Electron H/E in Data vs MC", 0, 0, 800, 600);
+		hoe_temp->cd();
+
+		TLegend *hoe_leg = new TLegend(0.70,0.30,0.90,0.68);
+		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		hoe_leg->AddEntry(hhoe_data[i], "Data","p");
+		// // //hoe_leg->AddEntry(hhoe_ttbar[i], "TTbar fake","p");
+		for(size_t j = 0; j < mcsamples.size(); ++j) hoe_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hhoe[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		hoe_leg->SetFillStyle(0);
+		hoe_leg->SetTextFont(42);
+		hoe_leg->SetBorderSize(0);
+
+		// gPad->SetLogy();
+		hhoe_mc_s[i]->Draw("hist");
+		// // //hhoe_ttbar[i]->DrawCopy("PE X0 same");
+		hhoe_data[i]->DrawCopy("PE X0 same");
+		hoe_leg->Draw();
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
+		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
+		lat->SetTextColor(kRed);
+		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+		lat->SetTextColor(kBlack);
+
+		Util::PrintPDF(hoe_temp, "ElHoE" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
+
+		// Sigma I eta I eta
+		TCanvas *siesie_temp = new TCanvas("ElSieSie" + IdPlots::sel_name[i], "Electron #sigma_{i#eta i#eta} in Data vs MC", 0, 0, 800, 600);
+		siesie_temp->cd();
+
+		TLegend *siesie_leg = new TLegend(0.70,0.30,0.90,0.68);
+		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		siesie_leg->AddEntry(hsiesie_data[i], "Data","p");
+		// // // siesie_leg->AddEntry(hsiesie_ttbar[i], "TTbar fake","p");
+		for(size_t j = 0; j < mcsamples.size(); ++j) siesie_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hsiesie[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		siesie_leg->SetFillStyle(0);
+		siesie_leg->SetTextFont(42);
+		siesie_leg->SetBorderSize(0);
+
+		// gPad->SetLogy();
+		hsiesie_mc_s[i]->Draw("hist");
+		// // // hsiesie_ttbar[i]->DrawCopy("PE X0 same");
+		hsiesie_data[i]->DrawCopy("PE X0 same");
+		siesie_leg->Draw();
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
+		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
+		lat->SetTextColor(kRed);
+		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+		lat->SetTextColor(kBlack);
+
+		Util::PrintPDF(siesie_temp, "ElSieSie" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
+
+		// Delta eta
+		TCanvas *deta_temp = new TCanvas("ElDeta" + IdPlots::sel_name[i], "Electron #Delta #eta in Data vs MC", 0, 0, 800, 600);
+		deta_temp->cd();
+
+		TLegend *deta_leg = new TLegend(0.70,0.30,0.90,0.68);
+		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		deta_leg->AddEntry(hdeta_data[i], "Data","p");
+		// // // deta_leg->AddEntry(hdeta_ttbar[i], "TTbar fake","p");
+		for(size_t j = 0; j < mcsamples.size(); ++j) deta_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hdeta[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		deta_leg->SetFillStyle(0);
+		deta_leg->SetTextFont(42);
+		deta_leg->SetBorderSize(0);
+
+		// gPad->SetLogy();
+		hdeta_mc_s[i]->Draw("hist");
+		// // // hdeta_ttbar[i]->DrawCopy("PE X0 same");
+		hdeta_data[i]->DrawCopy("PE X0 same");
+		deta_leg->Draw();
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
+		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
+		lat->SetTextColor(kRed);
+		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+		lat->SetTextColor(kBlack);
+
+		Util::PrintPDF(deta_temp, "ElDeta" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
+
+		// Delta phi
+		TCanvas *dphi_temp = new TCanvas("ElDphi" + IdPlots::sel_name[i], "Electron #Delta #phi in Data vs MC", 0, 0, 800, 600);
+		dphi_temp->cd();
+
+		TLegend *dphi_leg = new TLegend(0.70,0.30,0.90,0.68);
+		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+		dphi_leg->AddEntry(hdphi_data[i], "Data","p");
+		// // // dphi_leg->AddEntry(hdphi_ttbar[i], "TTbar fake","p");
+		for(size_t j = 0; j < mcsamples.size(); ++j) dphi_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hdphi[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		dphi_leg->SetFillStyle(0);
+		dphi_leg->SetTextFont(42);
+		dphi_leg->SetBorderSize(0);
+
+		// gPad->SetLogy();
+		hdphi_mc_s[i]->Draw("hist");
+		// // // hdphi_ttbar[i]->DrawCopy("PE X0 same");
+		hdphi_data[i]->DrawCopy("PE X0 same");
+		dphi_leg->Draw();
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
+		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
+		lat->SetTextColor(kRed);
+		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+		lat->SetTextColor(kBlack);
+
+		Util::PrintPDF(dphi_temp, "ElDphi" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
+
 	}
 }
 

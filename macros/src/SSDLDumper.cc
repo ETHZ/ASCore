@@ -115,6 +115,8 @@ float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::IsoPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
 int     SSDLDumper::IsoPlots::nbins[SSDLDumper::gNSels]    = {20, 20};
+TString SSDLDumper::IdPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
+int     SSDLDumper::IdPlots::nbins[SSDLDumper::gNSels]    = {20, 20};
 
 
 TString SSDLDumper::gEMULabel[2] = {"mu", "el"};
@@ -379,6 +381,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillRatioPlots(S);
 		fillMuIsoPlots(S);
 		fillElIsoPlots(S);
+		fillElIdPlots(S);
 
 	}
 
@@ -1674,10 +1677,89 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 	}
 	return;
 }
+void SSDLDumper::fillElIdPlots(Sample *S){
+	resetHypLeptons();
+	fDoCounting = false;
+	IdPlots *IdP = &S->idplots;
+
+	// Reset event selections to baseline:
+	fC_minMu1pt = Region::minMu1pt[HighPt];
+	fC_minMu2pt = Region::minMu2pt[HighPt];
+	fC_minEl1pt = Region::minEl1pt[HighPt];
+	fC_minEl2pt = Region::minEl2pt[HighPt];
+
+	fC_minHT    = Region::minHT   [Baseline];
+	fC_maxHT    = Region::maxHT   [Baseline];
+	fC_minMet   = Region::minMet  [Baseline];
+	fC_maxMet   = Region::maxMet  [Baseline];
+	fC_minNjets = Region::minNjets[Baseline];
+
+	int elind1(-1), elind2(-1);
+	if(hasLooseElectrons(elind1, elind2) > 0){
+		setHypLepton1(elind1, Elec);
+		// Common trigger selection
+		if(!singleElTrigger()) return;
+		float prescale = singleElPrescale();
+		float puweight = PUWeight;
+		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
+		float scale = prescale * puweight;
+
+		// Common event selections
+		if(!passesJet50Cut()) return; // make trigger 100% efficient
+
+		// Common object selections
+		if(!isLooseElectron(elind1)) return;
+		// if(ElIsGoodElId_WP80[elind1] != 1) return false; // apply tight ID for the iso plots?
+
+		if(ElPt[elind1] < fC_minEl2pt) return;
+		if(ElPt[elind1] > gElPt2bins[gNElPt2bins]) return;
+
+		////////////////////////////////////////////////////
+		// MOST LOOSE SELECTION
+		IdP->hhoe   [0]->Fill(ElHoverE[elind1], scale);
+		IdP->hsiesie[0]->Fill(ElSigmaIetaIeta[elind1], scale);
+		IdP->hdeta  [0]->Fill(ElDEta[elind1], scale);
+		IdP->hdphi  [0]->Fill(ElDPhi[elind1], scale);
+		//for(size_t k = 0; k < gNElPt2bins; ++k){
+		//	if(ElPt[elind1] < gElPt2bins[k]) continue;
+		//	if(ElPt[elind1] > gElPt2bins[k+1]) continue;
+		//	IdP->hiso_pt[0][k]->Fill(ElHoverE[elind1], scale);
+		//}
+		//for(size_t k = 0; k < gNNVrtxBins; ++k){
+		//	if(NVrtx <  gNVrtxBins[k]) continue;
+		//	if(NVrtx >= gNVrtxBins[k+1]) continue;
+		//	IdP->hiso_nv[0][k]->Fill(ElHoverE[elind1], scale);
+		//}
+
+		////////////////////////////////////////////////////
+		// SIGNAL SUPPRESSED SELECTION
+		if(isSigSupElEvent()){
+			IdP->hhoe   [1]->Fill(ElHoverE[elind1], scale);
+			IdP->hsiesie[1]->Fill(ElSigmaIetaIeta[elind1], scale);
+			IdP->hdeta  [1]->Fill(ElDEta[elind1], scale);
+			IdP->hdphi  [1]->Fill(ElDPhi[elind1], scale);
+			//IP->hiso[1]->Fill(ElRelIso[elind1], scale);
+			//for(size_t k = 0; k < gNElPt2bins; ++k){
+			//	if(ElPt[elind1] < gElPt2bins[k]) continue;
+			//	if(ElPt[elind1] > gElPt2bins[k+1]) continue;
+			//	IP->hiso_pt[1][k]->Fill(ElRelIso[elind1], scale);
+			//}
+			//for(size_t k = 0; k < gNNVrtxBins; ++k){
+			//	if(NVrtx <  gNVrtxBins[k]) continue;
+			//	if(NVrtx >= gNVrtxBins[k+1]) continue;
+			//	IP->hiso_nv[1][k]->Fill(ElRelIso[elind1], scale);
+			//}
+		}
+		//////////////////////////////////////////////////
+		resetHypLeptons();
+	}
+	return;
+}
+
 void SSDLDumper::fillElIsoPlots(Sample *S){
 	resetHypLeptons();
 	fDoCounting = false;
-	IsoPlots *IP = &S->isoplots[1]; // mu
+	IsoPlots *IP = &S->isoplots[1]; // el
 
 	// Reset event selections to baseline:
 	fC_minMu1pt = Region::minMu1pt[HighPt];
@@ -2018,6 +2100,30 @@ void SSDLDumper::bookHistos(Sample *S){
 			}
 		}
 	}
+	// id histos for electrons
+	for(size_t j = 0; j < gNSels; ++j){
+		TString hoename    = Form("%s_%s_%shoe"   , S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+		TString siesiename = Form("%s_%s_%ssiesie", S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+		TString detaname   = Form("%s_%s_%sdeta"  , S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+		TString dphiname   = Form("%s_%s_%sdphi"  , S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+		S->idplots.hhoe[j] = new TH1D(hoename, Form("%shoe", gEMULabel[1].Data()), IdPlots::nbins[j], 0., 0.15);
+		S->idplots.hhoe[j]->SetFillColor(S->color);
+		S->idplots.hhoe[j]->SetXTitle("HoE");
+		S->idplots.hhoe[j]->Sumw2();
+		S->idplots.hsiesie[j] = new TH1D(siesiename, Form("%ssiesie", gEMULabel[1].Data()), IdPlots::nbins[j], 0., 0.035);
+		S->idplots.hsiesie[j]->SetFillColor(S->color);
+		S->idplots.hsiesie[j]->SetXTitle("#sigma_{i#eta , i#eta}");
+		S->idplots.hsiesie[j]->Sumw2();
+		S->idplots.hdeta[j] = new TH1D(detaname, Form("%sdeta", gEMULabel[1].Data()), IdPlots::nbins[j], -0.01, 0.01);
+		S->idplots.hdeta[j]->SetFillColor(S->color);
+		S->idplots.hdeta[j]->SetXTitle("#Delta#eta");
+		S->idplots.hdeta[j]->Sumw2();
+		S->idplots.hdphi[j] = new TH1D(dphiname, Form("%sdphi", gEMULabel[1].Data()), IdPlots::nbins[j], -0.15, 0.15);
+		S->idplots.hdphi[j]->SetFillColor(S->color);
+		S->idplots.hdphi[j]->SetXTitle("#Delta#phi");
+		S->idplots.hdphi[j]->Sumw2();
+	}
+
 
 	for(size_t l = 0; l < 2; ++l){
 		// Isolation histos
@@ -2165,6 +2271,14 @@ void SSDLDumper::deleteHistos(Sample *S){
 		}
 	}
 
+	// id histos for electrons
+	for(size_t j = 0; j < gNSels; ++j){
+		delete S->idplots.hhoe   [j];
+		delete S->idplots.hsiesie[j];
+		delete S->idplots.hdeta  [j];
+		delete S->idplots.hdphi  [j];
+	}
+
 	for(size_t l = 0; l < 2; ++l){
 		// Isolation histos
 		for(size_t j = 0; j < gNSels; ++j){
@@ -2295,6 +2409,19 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 			kp->hmetvsht->Write(kp->hmetvsht->GetName(), TObject::kWriteDelete);
 			for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
 		}
+	}
+
+
+	// Id histos for electrons
+	temp = S->sname + "/IdPlots/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	IdPlots *idp = &S->idplots;
+	for(size_t j = 0; j < gNSels; ++j){
+		idp->hhoe   [j]->Write(idp->hhoe   [j]->GetName(), TObject::kWriteDelete);
+		idp->hsiesie[j]->Write(idp->hsiesie[j]->GetName(), TObject::kWriteDelete);
+		idp->hdeta  [j]->Write(idp->hdeta  [j]->GetName(), TObject::kWriteDelete);
+		idp->hdphi  [j]->Write(idp->hdphi  [j]->GetName(), TObject::kWriteDelete);
 	}
 
 	// Isolation histos
@@ -2499,6 +2626,27 @@ int  SSDLDumper::readHistos(TString filename){
 					kp->hvar[j]->SetFillColor(S->color);
 				}
 			}
+		}
+
+		// Id histos for electrons only
+		IdPlots *idp = &S->idplots;
+		for(size_t j = 0; j < gNSels; ++j){
+			// hoe
+			getname = Form("%s_%s_%shoe", S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+			getObjectSafe(pFile, S->sname + "/IdPlots/" + getname, idp->hhoe[j]);
+			idp->hhoe[j]->SetFillColor(S->color);
+			// sigma ieta ieta
+			getname = Form("%s_%s_%ssiesie", S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+			getObjectSafe(pFile, S->sname + "/IdPlots/" + getname, idp->hsiesie[j]);
+			idp->hsiesie[j]->SetFillColor(S->color);
+			// delta eta
+			getname = Form("%s_%s_%sdeta", S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+			getObjectSafe(pFile, S->sname + "/IdPlots/" + getname, idp->hdeta[j]);
+			idp->hdeta[j]->SetFillColor(S->color);
+			// delta phi
+			getname = Form("%s_%s_%sdphi", S->sname.Data(), IdPlots::sel_name[j].Data(), gEMULabel[1].Data());
+			getObjectSafe(pFile, S->sname + "/IdPlots/" + getname, idp->hdphi[j]);
+			idp->hdphi[j]->SetFillColor(S->color);
 		}
 
 		for(size_t lep = 0; lep < 2; ++lep){ // e-mu loop

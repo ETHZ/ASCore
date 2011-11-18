@@ -225,6 +225,17 @@ public:
 		TH1D *hiso_pt[gNSels][gNMuPt2bins];
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
+
+	struct IdPlots{
+		static TString sel_name[gNSels];
+		static int nbins[gNSels];
+		TH1D *hhoe[gNSels];
+		TH1D *hsiesie[gNSels];
+		TH1D *hdphi[gNSels];
+		TH1D *hdeta[gNSels];
+		//TH1D *hid_pt[gNSels][gNMuPt2bins];
+		//TH1D *hid_nv[gNSels][gNNVrtxBins];
+	};
 	
 	static const int gNDiffVars = 9;
 	struct DiffPredYields{
@@ -277,6 +288,7 @@ public:
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 		IsoPlots isoplots[2]; // e and mu
+		IdPlots  idplots; //only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
 
@@ -325,6 +337,7 @@ public:
 	void fillRatioPlots(Sample*);
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
+	void fillElIdPlots (Sample*);
 	void fillKinPlots(Sample*, gHiLoSwitch);
 	
 	//////////////////////////////
