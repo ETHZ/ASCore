@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.110 2011/10/31 13:33:38 fronga Exp $
+// $Id: NTupleProducer.h,v 1.111 2011/11/17 19:37:18 peruzzi Exp $
 //
 //
 
@@ -289,6 +289,7 @@ private:
 	float fTpdfx2;
 	float fTpdfxPDF1;
 	float fTpdfxPDF2;
+	float fTgenweight;
 	float fTextxslo;
 	float fTintxs;
 	float fTweight;

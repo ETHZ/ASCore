@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.140 2011/10/26 16:51:07 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.141 2011/11/17 19:37:19 peruzzi Exp $
 //
 //
 
@@ -560,6 +560,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTpdfx2       = genEvtInfo->pdf()->x.second;
 		fTpdfxPDF1    = genEvtInfo->pdf()->xPDF.first;
 		fTpdfxPDF2    = genEvtInfo->pdf()->xPDF.second;
+		fTgenweight   = genEvtInfo->weight();
      
 		iEvent.getByLabel("addPileupInfo", pileupInfo);
 		std::vector<PileupSummaryInfo>::const_iterator PVI;
@@ -2695,6 +2696,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PDFx2"            ,&fTpdfx2           ,"PDFx2/F");
 	fEventTree->Branch("PDFxPDF1"         ,&fTpdfxPDF1        ,"PDFxPDF1/F");
 	fEventTree->Branch("PDFxPDF2"         ,&fTpdfxPDF2        ,"PDFxPDF2/F");
+	fEventTree->Branch("GenWeight"        ,&fTgenweight       ,"GenWeight/F");
 	fEventTree->Branch("ExtXSecLO"        ,&fTextxslo         ,"ExtXSecLO/F");
 	fEventTree->Branch("IntXSec"          ,&fTintxs           ,"IntXSec/F");
 	fEventTree->Branch("pdfW"             ,&fTpdfW             ,"pdfW[100]/F");
@@ -3437,6 +3439,7 @@ void NTupleProducer::resetTree(){
 	fTpdfx2             = -999.99;
 	fTpdfxPDF1          = -999.99;
 	fTpdfxPDF2          = -999.99;
+	fTgenweight         = -999.99;
 
 	fTweight            = -999.99;
         fTpuWeightTotal     = -999.99;
