@@ -19,10 +19,11 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	fTlat = new TLatex();
 	fVerbose = false;
 	fDoPileUpReweight = false;
-	
+
+        // Put all JES-related stuff between pre-compiler flags
+#ifdef DOJES	
 	//----------- Correction Object ------------------------------
 	vector<JetCorrectorParameters> JetCorPar;
-#ifdef DOJES
 	JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2L3Residual.txt");
 	JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L3Absolute.txt");
 	JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2Relative.txt");
@@ -31,17 +32,22 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	JetCorPar.push_back(*L2JetPar);
 	JetCorPar.push_back(*L3JetPar);
 	JetCorPar.push_back(*ResJetPar);
-#endif
+
 	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-#ifdef DOJES
         jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
 	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
 #endif
+
 }
 
 UserAnalysisBase::~UserAnalysisBase(){
 	if(fDoPileUpReweight) delete fPUWeight;
+
+#ifdef DOJES       
 	delete fJetCorrector;
+        delete jecUnc;
+#endif
+
 }
 
 void UserAnalysisBase::BeginRun(Int_t& run) {
@@ -854,6 +860,7 @@ bool UserAnalysisBase::SSDiMuonSelection(int &prim, int &sec){
 
 ///////////////////////////////////////////////////////////////
 // JEC
+#ifdef DOJES
 float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 	if(!fIsData) return fTR->JPt[jetindex]; // do nothing for MC (no res corr here)
 
@@ -874,6 +881,7 @@ float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 	double l1l2l3scale = factors[2];
 	return rawpt*l1l2l3scale;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////
 // Cut Stuff

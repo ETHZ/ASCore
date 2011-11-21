@@ -34,7 +34,7 @@ endif
 
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc src/JZBAnalyzer.cc src/JZBAnalysis.cc src/JZBPFAnalysis.cc \
+                 src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc \
                  src/helper/PUWeight.C src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc src/helper/MetaTreeClassBase.C
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))

@@ -46,9 +46,6 @@ public:
 	TString fTag;
 	TLatex *fTlat;
 
-	FactorizedJetCorrector *fJetCorrector;
-        JetCorrectionUncertainty *jecUnc;
-
 	bool fIsData;
 
 	int fVerbose;
@@ -110,7 +107,12 @@ public:
 	virtual void EventPrint();
 	virtual void GetEvtEmChFrac(double & fracEm, double & fracCh);
 
+        // Put all JES-related stuff between precompiler flags
+#ifdef DOJES 
+        FactorizedJetCorrector *fJetCorrector;
+        JetCorrectionUncertainty *jecUnc;
 	virtual float GetJetPtNoResidual(int);
+#endif
 
 private:
 
