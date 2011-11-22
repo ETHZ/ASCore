@@ -1,5 +1,6 @@
 #include "DiPhotonJetsAnalyzer.hh"
 #include "DiPhotonPurity.hh"
+#include "DiPhotonMiniTree.hh"
 
 
 #include "base/TreeAnalyzerBase.hh"
@@ -9,10 +10,12 @@ using namespace std;
 
 DiPhotonJetsAnalyzer::DiPhotonJetsAnalyzer(TTree *tree, std::string dataType) : TreeAnalyzerBase(tree) {
   fDiPhotonPurity = new DiPhotonPurity(fTR,dataType);
+  fDiPhotonMiniTree = new DiPhotonMiniTree(fTR,dataType);
 }
 
 DiPhotonJetsAnalyzer::~DiPhotonJetsAnalyzer(){
 	delete fDiPhotonPurity;
+	delete fDiPhotonMiniTree;
 	if(!fTR->fChain) cout << "DiPhotonJetsAnalyzer ==> No chain!" << endl;
 }
 
@@ -32,6 +35,7 @@ void DiPhotonJetsAnalyzer::Loop(){
 		if ( fCurRun != fTR->Run ) {
 		  fCurRun = fTR->Run;
 		  fDiPhotonPurity->BeginRun(fCurRun);
+		  fDiPhotonMiniTree->BeginRun(fCurRun);
 		  skipRun = false;
 		  if ( !CheckRun() ) skipRun = true;
 		}
@@ -43,6 +47,7 @@ void DiPhotonJetsAnalyzer::Loop(){
 		}
 		if ( !(skipRun || skipLumi) ) {
 		  fDiPhotonPurity->Analyze();
+		  fDiPhotonMiniTree->Analyze();
 		}
 	}
 }
@@ -54,9 +59,15 @@ void DiPhotonJetsAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 	fDiPhotonPurity->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fDiPhotonPurity->Begin();
 
+	fDiPhotonMiniTree->SetOutputDir(fOutputDir);
+	fDiPhotonMiniTree->fVerbose = fVerbose;
+	fDiPhotonMiniTree->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+	fDiPhotonMiniTree->Begin();
+
 }
 
 // Method called after finishing the event loop
 void DiPhotonJetsAnalyzer::EndJob(){
 	fDiPhotonPurity->End();
+	fDiPhotonMiniTree->End();
 }

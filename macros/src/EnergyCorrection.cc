@@ -825,7 +825,7 @@ double EnergyCorrection::getPho_correctedenergy(TreeReader *fTR, int pi, int mod
     if (highr9 && isbarrel) energy *= fTR->SCcrackcorrseedfactor[si];
   }
 
-  if (mode==5){
+  if (mode==6){
     if (lowr9 && isbarrel) energy *= fTR->SClocalcorr[si];
     if (highr9 && isbarrel) energy *= fTR->SClocalcorrseedfactor[si];
   }

@@ -7,6 +7,7 @@
 #include "base/TreeAnalyzerBase.hh"
 #include "base/TreeReader.hh"
 #include "DiPhotonPurity.hh"
+#include "DiPhotonMiniTree.hh"
 #include <string>
 
 class DiPhotonJetsAnalyzer : public TreeAnalyzerBase {
@@ -20,6 +21,7 @@ public:
 
 private:
   DiPhotonPurity *fDiPhotonPurity;
+  DiPhotonMiniTree *fDiPhotonMiniTree;
   int fMaxEvents;
 
 };

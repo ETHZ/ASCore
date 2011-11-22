@@ -40,6 +40,8 @@ private:
   bool PhotonID_EGM_10_006_Loose(TreeReader *fTR, int i);
   bool PhotonID_EGM_10_006_Loose_SigmaIetaIeta_Relaxed(TreeReader *fTR, int i);
 
+  bool TriggerSelection();
+
   std::string fDataType_;
   bool isdata;
 
@@ -49,6 +51,8 @@ private:
   TH1F *fHsieie_all;
   TH1F *fHsieie_signal;
   TH1F *fHsieie_background;
+
+  TH1F *fHgginvmass;
 
 };
 #endif
