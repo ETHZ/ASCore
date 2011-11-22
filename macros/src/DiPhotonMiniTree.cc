@@ -9,7 +9,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType) : UserAnalysisBase(tr), fDataType_(dataType){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, double aw) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw){
 	Util::SetStyle();	
 	if (fDataType_ == "mc") isdata=false;
 	else if (fDataType_ == "data") isdata=true; 
@@ -98,6 +98,7 @@ void DiPhotonMiniTree::Analyze(){
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
+  weight*=AddWeight;
 
   if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
   fHNumVtx->Fill(fTR->NVrtx,weight);

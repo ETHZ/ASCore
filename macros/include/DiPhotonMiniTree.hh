@@ -18,7 +18,7 @@
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data");
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", double aw=-999);
 	virtual ~DiPhotonMiniTree();
 
 	void Begin();
@@ -38,6 +38,8 @@ private:
 	
   std::string fDataType_;
   bool isdata;
+
+  double AddWeight;
 
   TFile* fMiniTree;
   TTree* OutputTree;

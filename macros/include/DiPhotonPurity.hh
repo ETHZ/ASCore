@@ -21,7 +21,7 @@
 
 class DiPhotonPurity : public UserAnalysisBase{
 public:
-  DiPhotonPurity(TreeReader *tr = NULL, std::string dataType="data");
+  DiPhotonPurity(TreeReader *tr = NULL, std::string dataType="data", double aw=-999);
 	virtual ~DiPhotonPurity();
 
 	void Begin();
@@ -44,6 +44,7 @@ private:
 
   std::string fDataType_;
   bool isdata;
+  double AddWeight;
 
   TH1F *fHNumPU;
   TH1F *fHNumVtx;

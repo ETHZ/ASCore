@@ -8,7 +8,7 @@
 
 using namespace std;
 
-DiPhotonPurity::DiPhotonPurity(TreeReader *tr, std::string dataType) : UserAnalysisBase(tr), fDataType_(dataType){
+DiPhotonPurity::DiPhotonPurity(TreeReader *tr, std::string dataType, double aw) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw){
 	Util::SetStyle();
 	
 	if (fDataType_ == "mc") isdata=false;
@@ -48,6 +48,7 @@ void DiPhotonPurity::Analyze(){
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
+  weight*=AddWeight;
 
   if (!isdata && weight<0) weight=1; // TO ALLOW NOT USING PU REW IN MC
 
