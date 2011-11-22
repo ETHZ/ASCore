@@ -36,6 +36,12 @@ void SSDLAnalysis::Begin(const char* filename){
 	// SetPileUpSrc(pileupsrc);
 	// ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	// ReadPDGTable(gBaseDir + "pdgtable.txt");
+	if ( !fIsData) {
+		fMsugraCount = new TH2D("msugra_count", "msugra_count", 100, 10, 2010, 38, 10, 770);
+		for (int i=0; i<10; i++) {
+			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), 100, 10, 2010, 38, 10, 770);
+		}
+	}
 	SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
 	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
 	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
@@ -45,6 +51,12 @@ void SSDLAnalysis::Begin(const char* filename){
 
 //____________________________________________________________________________
 void SSDLAnalysis::End(){
+	if (!fIsData) {
+		fMsugraCount->Write();
+		for (int i=0; i<10; i++) {
+			fProcessCount[i]->Write();
+		}
+	}
 	fOutputFile->cd();
 	fAnalysisTree->Write();
 	if(fDoFillEffTree && !fIsData) fLepEffTree->Write();
@@ -153,6 +165,10 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("Event",            &fTEventNumber,       "Event/I");
 	fAnalysisTree->Branch("LumiSec",          &fTLumiSection,       "LumiSec/I");
 
+	fAnalysisTree->Branch("m0",            &fTm0,         "m0/F");
+	fAnalysisTree->Branch("m12",           &fTm12,        "m12/F");
+	fAnalysisTree->Branch("process",       &fTprocess,    "process/I");
+
 	// HLT triggers
 	AddTriggerBranches();
 	
@@ -164,6 +180,7 @@ void SSDLAnalysis::BookTree(){
 	
 	// single-muon properties
 	fAnalysisTree->Branch("NMus"          ,&fTnqmus,          "NMus/I");
+	fAnalysisTree->Branch("IsSignalMuon"  ,&fTIsSignalMuon,   "IsSignalMuon[NMus]/I");
 	fAnalysisTree->Branch("MuPt"          ,&fTmupt,           "MuPt[NMus]/F");
 	fAnalysisTree->Branch("MuEta"         ,&fTmueta,          "MuEta[NMus]/F");
 	fAnalysisTree->Branch("MuPhi"         ,&fTmuphi,          "MuPhi[NMus]/F");
@@ -182,6 +199,7 @@ void SSDLAnalysis::BookTree(){
 
 	// single-electron properties
 	fAnalysisTree->Branch("NEls",                   &fTnqels,               "NEls/I");
+	fAnalysisTree->Branch("IsSignalElectron" ,      &fTIsSignalElectron,    "IsSignalElectron[NEls]/I");
 	fAnalysisTree->Branch("ElCharge",               &fTElcharge,            "ElCh[NEls]/I");
 	fAnalysisTree->Branch("ElChIsCons",             &fTElChargeIsCons,      "ElChIsCons[NEls]/I");
 	fAnalysisTree->Branch("ElPt",                   &fTElpt,                "ElPt[NEls]/F");
@@ -251,6 +269,10 @@ void SSDLAnalysis::Analyze(){
 }
 void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[0]);
+	if (!fIsData){
+		fMsugraCount->Fill(fTR->M0, fTR->M12);
+		if (fTR->process > 0 && fTR->process < 11) fProcessCount[(fTR->process)-1]->Fill(fTR->M0, fTR->M12);
+	}
 	// initial event selection: good event trigger, good primary vertex...
 	if( !IsGoodEvent() ) return;
 	fCounter.fill(fCutnames[1]);
@@ -278,6 +300,17 @@ void SSDLAnalysis::FillAnalysisTree(){
 	fTEventNumber = fTR->Event;
 	fTLumiSection = fTR->LumiSection;
 
+	if(!fIsData) {
+		fTm0   = fTR->M0;
+		fTm12  = fTR->M12;
+		fTprocess = fTR->process;
+	}
+	else {
+		fTm0   = -1;
+		fTm12  = -1;
+		fTprocess = -1;
+
+	}
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
@@ -323,6 +356,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTmutype   [i] = mu.get_type();
 			fTmumotype [i] = mo.get_type();
 			fTmugmotype[i] = gmo.get_type();
+			fTIsSignalMuon[i] = IsSignalMuon(index)? 1:0;
 		} else{
 			fTmuid     [i] = -888;
 			fTmumoid   [i] = -888;
@@ -330,6 +364,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTmutype   [i] = -888;
 			fTmumotype [i] = -888;
 			fTmugmotype[i] = -888;
+			fTIsSignalMuon[i] = -999;
 		}
 		
 		// Calculate mT:
@@ -366,6 +401,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTElGenType  [ind] = el.get_type();
 			fTElGenMType [ind] = emo.get_type();
 			fTElGenGMType[ind] = egmo.get_type();
+			fTIsSignalElectron[ind] = IsSignalElectron(elindex)? 1:0;
 		}
 		else{
 			fTElGenID    [ind] = -888;
@@ -374,6 +410,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 			fTElGenType  [ind] = -888;
 			fTElGenMType [ind] = -888;
 			fTElGenGMType[ind] = -888;   
+			fTIsSignalElectron[ind] = -999;
 		}
 		
 		// Calculate mT:
@@ -455,6 +492,10 @@ void SSDLAnalysis::ResetTree(){
 	fTEventNumber                = 0;
 	fTLumiSection                = 0;
 
+	fTm0                         = -999.99;
+	fTm12                        = -999.99;
+	fTprocess                    = -999;
+
 	for(size_t i = 0; i < fHLTPathSets.size(); ++i){
 		fHLTResults[i]   -2;
 		fHLTPrescales[i] -2;
@@ -467,6 +508,7 @@ void SSDLAnalysis::ResetTree(){
 	// muon properties
 	fTnqmus = 0;
 	for(int i = 0; i < fMaxNmus; i++){
+		fTIsSignalMuon  [i] = -999;
 		fTmupt          [i] = -999.99;
 		fTmueta         [i] = -999.99;
 		fTmuphi         [i] = -999.99;
@@ -487,6 +529,7 @@ void SSDLAnalysis::ResetTree(){
 	// electron properties
 	fTnqels = 0;
 	for(int i = 0; i < fMaxNeles; i++){
+		fTIsSignalElectron  [i] = -999;
 		fTElcharge          [i] = -999;
 		fTElChargeIsCons    [i] = -999;
 		fTElpt              [i] = -999.99;

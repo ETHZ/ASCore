@@ -76,12 +76,18 @@ private:
 	static TString gBaseDir;
 	
 	TTree* fAnalysisTree;
+	TH2D* fMsugraCount;
+	TH2D* fProcessCount[10];
 	
 	/////////////////////////////////////
 	// Tree branches
 	int   fTRunNumber;
 	int   fTEventNumber;
 	int   fTLumiSection;
+
+	float  fTm0;
+	float  fTm12;
+	int    fTprocess;
 
 	// PileUP info
 	float fTrho;
@@ -109,6 +115,7 @@ private:
 	
 	// Muon properties
 	int   fTnqmus;
+	int   fTIsSignalMuon  [fMaxNmus];
 	float fTmupt          [fMaxNmus];
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
@@ -127,6 +134,7 @@ private:
 	
 	// Electron properties
 	int   fTnqels;
+	int   fTIsSignalElectron [fMaxNeles];
 	int   fTElcharge         [fMaxNeles];
 	int   fTElChargeIsCons   [fMaxNeles];
 	float fTElpt             [fMaxNeles];
