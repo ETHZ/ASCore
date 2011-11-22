@@ -264,59 +264,159 @@ void SSDLPlotter::InitMC(TTree *tree){
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("Run", &Run, &b_Run);
-   fChain->SetBranchAddress("Event", &Event, &b_Event);
-   fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
-   fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
-   fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
-   fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
-   fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
-   fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
-   fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
-   fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
-   fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
-   fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
-   fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
-   fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
-   fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
-   fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
-   fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
-   fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
-   fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
-   fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
-   fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
-   fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
-   fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
-   fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
-   fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
-   fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
-   fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
-   fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
-   fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
-   fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
-   fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
-   fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
-   fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
-   fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
-   fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
-   fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
-   fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
-   fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
-   fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
-   fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
-   fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
-   fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
-   fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
-   fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
-   fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
-   fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
-   fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
-   fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
-   fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
-   fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
-   fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
+	fChain->SetBranchAddress("Run", &Run, &b_Run);
+	fChain->SetBranchAddress("Event", &Event, &b_Event);
+	fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
+	fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
+	fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
+	fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
+	fChain->SetBranchAddress("HLT_ELE8_JET40_PS", &HLT_ELE8_JET40_PS, &b_HLT_ELE8_JET40_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEMU7", &HLT_DOUBLEMU7, &b_HLT_DOUBLEMU7);
+	fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
+	fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
+	fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
+	fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
+	fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
+	fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
+	fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT_PS", &HLT_ELE17_ELE8_TIGHT_PS, &b_HLT_ELE17_ELE8_TIGHT_PS);
+	fChain->SetBranchAddress("HLT_MU17_ELE8", &HLT_MU17_ELE8, &b_HLT_MU17_ELE8);
+	fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
+	fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
+	fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
+	fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT", &HLT_MU8_ELE17_TIGHT, &b_HLT_MU8_ELE17_TIGHT);
+	fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT_PS", &HLT_MU8_ELE17_TIGHT_PS, &b_HLT_MU8_ELE17_TIGHT_PS);
+	fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT", &HLT_MU17_ELE8_TIGHT, &b_HLT_MU17_ELE8_TIGHT);
+	fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT_PS", &HLT_MU17_ELE8_TIGHT_PS, &b_HLT_MU17_ELE8_TIGHT_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT_PS", &HLT_DOUBLEELE8_HT160_TIGHT_PS, &b_HLT_DOUBLEELE8_HT160_TIGHT_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160", &HLT_DOUBLEMU3_HT160, &b_HLT_DOUBLEMU3_HT160);
+	fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160_PS", &HLT_DOUBLEMU3_HT160_PS, &b_HLT_DOUBLEMU3_HT160_PS);
+	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160", &HLT_MU3_ELE8_HT160, &b_HLT_MU3_ELE8_HT160);
+	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
+	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
+	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150", &HLT_DOUBLEMU3_MASS4_HT150, &b_HLT_DOUBLEMU3_MASS4_HT150);
+	fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150_PS", &HLT_DOUBLEMU3_MASS4_HT150_PS, &b_HLT_DOUBLEMU3_MASS4_HT150_PS);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+	fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
+	fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+	fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
+	fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
+	fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
+	fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
+	fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
+	fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
+	fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
+	fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
+	fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
+	fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
+	fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
+	fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+	fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
+	fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
+	fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
+	fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
+	fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
+	fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
+	fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
+	fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
+	fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
+	fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
+	fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
+	fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
+	fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
+	fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
+	fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
+	fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
+	fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
+	fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
+	fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
+	fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
+	fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
+	fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
+	fChain->SetBranchAddress("ElDPhi", ElDPhi, &b_ElDPhi);
+	fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
+	fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
+	fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
+	fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
+	fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
+	fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
+	fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
+	fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
+	fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
+	fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
+	fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
+	fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
+	fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
+	fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
+	fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
+	fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
+	fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
+	fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
+	fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
+	fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+	fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
+	fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
+
+
+   //fChain->SetBranchAddress("Run", &Run, &b_Run);
+   //fChain->SetBranchAddress("Event", &Event, &b_Event);
+   //fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
+   //fChain->SetBranchAddress("m0", &m0, &b_m0);
+   //fChain->SetBranchAddress("m12", &m12, &b_m12);
+   //fChain->SetBranchAddress("process", &process, &b_process);
+   //fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
+   //fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
+   //fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
+   //fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
+   //fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
+   //fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
+   //fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
+   //fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
+   //fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
+   //fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
+   //fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+   //fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
+   //fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
+   //fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
+   //fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
+   //fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
+   //fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
+   //fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
+   //fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
+   //fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
+   //fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
+   //fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
+   //fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
+   //fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
+   //fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
+   //fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
+   //fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
+   //fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
+   //fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
+   //fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
+   //fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
+   //fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
+   //fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
+   //fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
+   //fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
+   //fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
+   //fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
+   //fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
+   //fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
+   //fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
+   //fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
+   //fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
+   //fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
+   //fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
+   //fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
+   //fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
+   //fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
+   //fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
+   //fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
+   //fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
    Notify();
 }
 void SSDLPlotter::readSamples(const char* filename){
@@ -440,37 +540,82 @@ void SSDLPlotter::doAnalysis(){
 
 	// makePileUpPlots(true); // loops on all data!
 	
-	printCutFlows(fOutputDir + "CutFlow.txt");
-	printOrigins();
-	
-	//makeMuIsolationPlots(); // loops on TTbar sample
-	//makeElIsolationPlots(); // loops on TTbar sample
-	makeElIdPlots();
-	makeNT2KinPlots();
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	//printCutFlows(fOutputDir + "CutFlow.txt");
+	//printOrigins();
+	//
+	////makeMuIsolationPlots(); // loops on TTbar sample
+	////makeElIsolationPlots(); // loops on TTbar sample
+	//makeElIdPlots();
+	//makeNT2KinPlots();
+	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 
-	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	// makeMETvsHTPlotPRL();
-	// makeMETvsHTPlotTau();
-	// makePRLPlot1();
-	
-	// makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	//// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	//// makeMETvsHTPlotPRL();
+	//// makeMETvsHTPlotTau();
+	//// makePRLPlot1();
+	//
+	//// makeRatioPlots(Muon);
+	//makeRatioPlots(Elec);
+	//// makeNTightLoosePlots(Muon);
+	//// makeNTightLoosePlots(Elec);
 
-	// makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
+	//// makeFRvsPtPlots(Muon, SigSup);
+	//makeFRvsPtPlots(Elec, SigSup);
+	//// makeFRvsPtPlots(Muon, ZDecay);
+	//makeFRvsPtPlots(Elec, ZDecay);
+	//// makeFRvsEtaPlots(Muon);
+	//makeFRvsEtaPlots(Elec);
+	//
+	//// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	//// makeTTbarClosure();
+	//
+	//makeAllIntPredictions();
+	//makeDiffPrediction();
+	makeRelIsoTTSigPlots();
+	//load_msugraInfo("/scratch/mdunser/111111_msugra/msugra_tan10.root");
+}
+
+void SSDLPlotter::load_kfacs(TFile * results) {
+    ifstream IN("msugraSSDL/nlo_kfactors.txt");
+
+    TH2D *kfac_[10];
+    char buffer[1000];
+    for (int i = 0 ; i< 10; i++){
+      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 100 , 10 , 2010 , 38 , 10 , 770);
+    }
+
+    while( IN.getline(buffer, 1000, '\n') ){
+      if (buffer[0] == '#') continue; // Skip lines commented with '#'
+      float p[10];
+      float m0_(-1), m12_(-1);
+      sscanf(buffer, "%f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f", &m0_, &m12_, &p[0], &p[1], &p[2], &p[3], &p[4], &p[5], &p[6], &p[7], &p[8], &p[9]);
+      if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f (1) %1.5f (2) %1.5f (3) %1.5f (4) %1.5f (5) %1.5f (6) %1.5f (7) %1.5f (8) %1.5f (9) %1.5f (10) %1.5f", m0_, m12_, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) << endl;
+      for (int i = 0 ; i< 10; i++){
+          kfac_[i]->Fill(m0_, m12_, p[i]);
+      }
+    }
+	results->cd();
+    for (int i = 0 ; i< 10; i++){
+      kfac_[i]->Write();
+    }
+}
+
+void SSDLPlotter::load_loxsecs(TFile * results) {
+	ifstream IN("msugraSSDL/xsec_lo.txt");
+	results->cd();
+	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 100 , 10 , 2010 , 38 , 10 , 770);
 	
-	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	// makeTTbarClosure();
-	
-	makeAllIntPredictions();
-	makeDiffPrediction();
+	char buffer[1000];
+	while( IN.getline(buffer, 1000, '\n') ){
+	  if (buffer[0] == '#') continue; // Skip lines commented with '#'
+	  float xsec;
+	  float m0_(-1), m12_(-1);
+	  sscanf(buffer, "%f | %f | %f", &m0_, &m12_, &xsec);
+	  if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f xsec: %10.5", m0_, m12_, xsec) << endl;
+	  lo_xsec->Fill(m0_, m12_, xsec);
+	}
+	results->cd();
+	lo_xsec->Write();
 }
 
 //____________________________________________________________________________
@@ -1031,6 +1176,265 @@ void SSDLPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(SSDL
 	Util::PrintNoEPS(c10, tag + "ObservedNt10", fOutputDir + fOutputSubDir, fOutputFile);
 	Util::PrintNoEPS(c01, tag + "ObservedNt01", fOutputDir + fOutputSubDir, fOutputFile);
 	Util::PrintNoEPS(c00, tag + "ObservedNt00", fOutputDir + fOutputSubDir, fOutputFile);
+}
+//____________________________________________________________________________
+void SSDLPlotter::makeRelIsoTTSigPlots(){
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	TLatex *el_lat = new TLatex();
+	el_lat->SetNDC(kTRUE);
+	el_lat->SetTextColor(kBlack);
+	el_lat->SetTextSize(0.04);
+
+	// Create histograms
+	TH1D * hiso_ttbar  = new TH1D("MuIsoTTbar_"   , "Muon Isolation in TTbar for " , IsoPlots::nbins[0], 0., 1.);
+	TH1D * hiso_signal = new TH1D("MuIsoSignal_"  , "Muon Isolation in Signal for ", IsoPlots::nbins[0], 0., 1.);
+	hiso_ttbar ->Sumw2();
+	hiso_signal->Sumw2();
+	TH1D * el_hiso_ttbar  = new TH1D("ElIsoTTbar_"   , "Electron Isolation in TTbar for " , IsoPlots::nbins[0], 0., 0.6);
+	TH1D * el_hiso_signal = new TH1D("ElIsoSignal_"  , "Electron Isolation in Signal for ", IsoPlots::nbins[0], 0., 0.6);
+	el_hiso_ttbar ->Sumw2();
+	el_hiso_signal->Sumw2();
+
+	////////////////////////////////////////////////////
+	// Fill ttbar histos
+	TTree *ttbar_tree = fSamples[TTJets]->getTree();
+	ttbar_tree->ResetBranchAddresses();
+	InitMC(ttbar_tree);
+
+	// Event loop muons and electrons
+	if (fChain == 0) return;
+	Long64_t tt_nentries = fChain->GetEntriesFast();
+	for (Long64_t jentry=0; jentry<tt_nentries;jentry++) {
+		printProgress(jentry, tt_nentries, fSamples[TTJets]->name);
+
+		ttbar_tree->GetEntry(jentry);
+		//Long64_t ientry = LoadTree(jentry);
+		//if (ientry < 0) break;
+		
+		int muind1(-1), muind2(-1);
+		if(hasLooseMuons(muind1, muind2) > 0) {
+			// Common event selections
+			if(passesJet50Cut()) { // make trigger 100% efficient
+				// Common object selections
+				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
+					if(MuPt[muind1] > fC_minMu2pt) {
+					// match muons to susy or vector boson
+						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
+							hiso_ttbar->Fill(MuIso[muind1]);
+						}
+						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
+						//	hiso_ttbar->Fill(MuIso[muind2]);
+						//}
+					}
+				}
+			}
+		}
+		int elind1(-1), elind2(-1);
+		if(hasLooseElectrons(elind1, elind2) > 0) {
+			// Common event selections
+			if(passesJet50Cut()) { // make trigger 100% efficient
+				// Common object selections
+				if(isLooseElectron(elind1) ) { //&& isLooseElectron(elind2)) {
+					if(ElPt[elind1] > fC_minEl2pt) {
+						// match electrons to susy particle or vector boson
+						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
+							el_hiso_ttbar->Fill(ElRelIso[elind1]);
+						}
+						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
+						//	el_hiso_ttbar->Fill(ElRelIso[elind2]);
+						//}
+					}
+				}
+			}
+		}
+	} // end loop over all events
+	fSamples[TTJets]->cleanUp();
+	cout << endl;
+	////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////
+	// Fill signal histos
+	TTree *signal_tree = fSamples[LM6]->getTree();
+	signal_tree->ResetBranchAddresses();
+	InitMC(signal_tree);
+	// Event loop
+
+	// Event loop muons and electrons
+	if (fChain == 0) return;
+	Long64_t sig_nentries = fChain->GetEntriesFast();
+	for (Long64_t jentry=0; jentry<sig_nentries;jentry++) {
+		printProgress(jentry, sig_nentries, fSamples[LM6]->name);
+
+		signal_tree->GetEntry(jentry);
+		//Long64_t ientry = LoadTree(jentry);
+		//if (ientry < 0) break;
+		
+		int muind1(-1), muind2(-1);
+		if(hasLooseMuons(muind1, muind2) > 0) {
+			// Common event selections
+			if(passesJet50Cut()) { // make trigger 100% efficient
+				// Common object selections
+				if( isLooseMuon(muind1) ) { //&& isLooseMuon(muind2)){
+					if(MuPt[muind1] > fC_minMu2pt) {
+					// match muons to susy or vector boson
+						if( (MuGenMType[muind1] == 9  || MuGenGMType[muind1] == 9 ) || (MuGenMType[muind1]  == 4 && abs(MuGenMID[muind1]) != 21 && abs(MuGenMID[muind1]) != 22) ) {
+							hiso_signal->Fill(MuIso[muind1]);
+						}
+						//if( (MuGenMType[muind2] == 9  || MuGenGMType[muind2] == 9 ) || (MuGenMType[muind2]  == 4 && abs(MuGenMID[muind2]) != 21 && abs(MuGenMID[muind2]) != 22) ) {
+						//	hiso_signal->Fill(MuIso[muind2]);
+						//}
+					}
+				}
+			}
+		}
+		int elind1(-1), elind2(-1);
+		if(hasLooseElectrons(elind1, elind2) > 0) {
+			// Common event selections
+			if(passesJet50Cut()) { // make trigger 100% efficient
+				// Common object selections
+				if(isLooseElectron(elind1) ){ //&& isLooseElectron(elind2)) {
+					if(ElPt[elind1] > fC_minEl2pt) {
+						// match electrons to susy particle or vector boson
+						if( (ElGenMType[elind1] == 9  || ElGenGMType[elind1] == 9 ) || (ElGenMType[elind1]  == 4 && abs(ElGenMID[elind1]) != 21 && abs(ElGenMID[elind1]) != 22) ) {
+							el_hiso_signal->Fill(ElRelIso[elind1]);
+						}
+						//if( (ElGenMType[elind2] == 9  || ElGenGMType[elind2] == 9 ) || (ElGenMType[elind2]  == 4 && abs(ElGenMID[elind2]) != 21 && abs(ElGenMID[elind2]) != 22) ) {
+						//	el_hiso_signal->Fill(ElRelIso[elind2]);
+						//}
+					}
+				}
+			}
+		}
+	} // end loop over all events
+	fSamples[LM6]->cleanUp();
+	cout << endl;
+	////////////////////////////////////////////////////
+	
+	//--------------------------------------------------------------------------------------
+	// Format and calculate muon histos
+	hiso_ttbar->SetXTitle("rel Iso muons");
+	hiso_ttbar->SetLineWidth(2);
+	//hiso_ttbar->SetFillColor(kWhite);
+	//hiso_ttbar->SetLineColor(kRed);
+	hiso_ttbar->SetMarkerStyle(20);
+	hiso_ttbar->SetMarkerColor(kBlue-3);
+	hiso_ttbar->SetMarkerSize(1.15);
+		
+	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
+	hiso_signal->SetLineWidth(2);
+	//hiso_signal->SetLineColor(kBlue);
+	hiso_signal->SetMarkerStyle(21);
+	hiso_signal->SetMarkerColor(kRed+1);
+	hiso_signal->SetMarkerSize(1.15);
+		
+	//double max1 = hiso_mc_s[i]->GetMaximum();
+	//double max2 = hiso_data[i]->GetMaximum();
+	//double max = max1>max2?max1:max2;
+	//hiso_mc_s[i]->SetMaximum(1.5*max);
+	//hiso_data[i]->SetMaximum(1.5*max);
+
+	int bin0   = hiso_ttbar->FindBin(0.0);
+	int bin015 = hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
+	int bin1   = hiso_ttbar->FindBin(1.0)  - 1;
+	float ratio_signal = hiso_signal ->Integral(bin0, bin015) / hiso_signal ->Integral(bin0, bin1);
+	float ratio_ttbar  = hiso_ttbar  ->Integral(bin0, bin015) / hiso_ttbar  ->Integral(bin0, bin1);
+
+	
+	hiso_signal ->Scale(1/hiso_signal->Integral());
+	hiso_ttbar  ->Scale(1/hiso_ttbar ->Integral());
+	
+
+	TCanvas *c_temp = new TCanvas("MuIso" , "Muon Isolation in TTJets and Signal", 0, 0, 800, 600);
+	c_temp->cd();
+
+	TLegend *leg = new TLegend(0.30,0.65,0.55,0.88);
+	// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
+	leg->AddEntry(hiso_signal, "Signal","p");
+	leg->AddEntry(hiso_ttbar , "TTbar","p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+
+	gPad->SetLogy();
+	hiso_ttbar->Draw("pe");
+	hiso_signal->Draw("same");
+	leg->Draw();
+	lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+	lat->SetTextColor(kRed+1);
+	lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", ratio_signal));
+	lat->SetTextColor(kBlue-3);
+	lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+	
+
+	Util::PrintPDF(c_temp, "MuIso" , fOutputDir + fOutputSubDir);
+
+	//--------------------------------------------------------------------------------------
+	// Format and calculate electron histos
+	el_hiso_ttbar->SetXTitle("rel Iso electrons");
+	el_hiso_ttbar->SetLineWidth(2);
+	//hiso_ttbar->SetFillColor(kWhite);
+	//hiso_ttbar->SetLineColor(kRed);
+	el_hiso_ttbar->SetMarkerStyle(20);
+	el_hiso_ttbar->SetMarkerColor(kBlue-3);
+	el_hiso_ttbar->SetMarkerSize(1.15);
+
+	//hiso_signal[i]->SetXTitle(convertVarName("MuIso[0]"));
+	el_hiso_signal->SetLineWidth(2);
+	//hiso_signal->SetLineColor(kBlue);
+	el_hiso_signal->SetMarkerStyle(21);
+	el_hiso_signal->SetMarkerColor(kRed+1);
+	el_hiso_signal->SetMarkerSize(1.15);
+		
+	//double max1 = el_hiso_mc_s[i]->GetMaximum();
+	//double max2 = el_hiso_data[i]->GetMaximum();
+	//double max = max1>max2?max1:max2;
+	//el_hiso_mc_s[i]->SetMaximum(1.5*max);
+	//el_hiso_data[i]->SetMaximum(1.5*max);
+
+	int el_bin0   = el_hiso_ttbar->FindBin(0.0);
+	int el_bin015 = el_hiso_ttbar->FindBin(0.15) - 1; // bins start at lower edge...
+	//int el_bin1   = el_hiso_ttbar->FindBin(1.0)  - 1;
+	int el_bin1   = el_hiso_ttbar->FindBin(0.6)  - 1;
+	float el_ratio_signal = el_hiso_signal ->Integral(el_bin0, el_bin015) / el_hiso_signal ->Integral(el_bin0, el_bin1);
+	float el_ratio_ttbar  = el_hiso_ttbar  ->Integral(el_bin0, el_bin015) / el_hiso_ttbar  ->Integral(el_bin0, el_bin1);
+
+	
+	el_hiso_signal ->Scale(1/el_hiso_signal->Integral());
+	el_hiso_ttbar  ->Scale(1/el_hiso_ttbar ->Integral());
+	
+
+	TCanvas *el_temp = new TCanvas("ElIso" , "Electron Isolation in TTJets and Signal", 0, 0, 800, 600);
+	el_temp->cd();
+
+	TLegend *el_leg = new TLegend(0.30,0.65,0.55,0.88);
+	el_leg->AddEntry(el_hiso_signal, "Signal","p");
+	el_leg->AddEntry(el_hiso_ttbar , "TTbar","p");
+	el_leg->SetFillStyle(0);
+	el_leg->SetTextFont(42);
+	el_leg->SetBorderSize(0);
+
+	gPad->SetLogy();
+	el_hiso_ttbar->Draw("");
+	el_hiso_signal->Draw("same");
+	el_leg->Draw();
+	el_lat->DrawLatex(0.75,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+	el_lat->SetTextColor(kRed+1);
+	el_lat->DrawLatex(0.70,0.70, Form("R^{T/L}_{Signal} = %4.2f", el_ratio_signal));
+	el_lat->SetTextColor(kBlue-3);
+	el_lat->DrawLatex(0.70,0.60, Form("R^{T/L}_{TTbar} = %4.2f", el_ratio_ttbar));
+	
+
+	// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(el_temp, "ElIso" , fOutputDir + fOutputSubDir);
+
 }
 
 //____________________________________________________________________________
@@ -6971,3 +7375,99 @@ void SSDLPlotter::drawDiffCuts(int j){
 	if(j==3)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 450 GeV, N_{Jets} #geq 2");
 	return;
 }
+void SSDLPlotter::load_msugraInfo( const char * filestring) {
+	// ATTENTION: it is important that m0, m12 and process are known by the InitMC function!!
+
+	fOUTSTREAM.open("msugraSSDL/output.txt", ios::trunc);
+	TFile * res_ = new TFile("msugraSSDL/res.root", "RECREATE", "res_");
+
+	// comment the next two lines in case you already have the necessary files at hand.
+	// you can also just let them in, it doesn't really affect the performance much
+	SSDLPlotter::load_kfacs(res_);
+	SSDLPlotter::load_loxsecs(res_);
+
+	TH2D  * pass_  = new TH2D("msugra_pass"   , "msugra_pass"   , 100 , 10 , 2010 , 38 , 10 , 770);
+
+	//TFile * kfacs_ = new TFile("msugraSSDL/kfac_hs.root", "READ", "kfacs_");
+	//if ( kfacs_->IsOpen() ) cout << "kfac file is open " << endl;
+	TH2D * kfacs[10];
+	for (int i = 0; i < 10; i++) {
+		kfacs[i] = (TH2D *) res_->Get(Form("kfac_%i", i));
+	}
+
+	TFile * file_ = new TFile(filestring, "READ", "file_"); // example file: "/scratch/mdunser/111111_msugra/msugra_tan10.root"
+	if ( file_->IsOpen() ) cout << "File is open " << endl;
+	
+	TTree * tree_= (TTree *) file_->Get("Analysis");
+	tree_->ResetBranchAddresses();
+
+	InitMC(tree_);
+	double tot_events = tree_->GetEntriesFast();
+	cout << "Total Number of entries: " << tot_events << endl;
+	int n_tot = 0;
+	float tightTot(0);
+	float signalTot(0);
+	
+	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
+		tree_->GetEntry(jentry);
+		if ( !(getHT() > 450 && pfMET > 120) ) continue;
+    	int mu1(-1), mu2(-1);
+		if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
+			if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+			tightTot++;
+			if ( !(tree_->GetLeaf("IsSignalMuon")->GetValue(mu1) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu2) == 1) ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("MuMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+				n_tot++;
+				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				fOUTSTREAM << " m0: " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
+				pass_->Fill(m0, m12, weight);
+				continue;
+			}
+		}
+		resetHypLeptons();
+		int el1(-1), el2(-1);
+		if( isSSLLElEvent(el1, el2) ){
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+			tightTot++;
+			if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el1) == 1 && tree_->GetLeaf("IsSignalElectron")->GetValue(el2) == 1) ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("ElEl - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+				n_tot++;
+				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
+				pass_->Fill(m0, m12, weight);
+				continue;
+			}
+		}
+
+		resetHypLeptons();
+		int mu(-1), el(-1);
+		if( isSSLLElMuEvent(mu, el) ){
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+			tightTot++;
+			if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu) == 1) ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("ElMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu]) << endl ;
+				n_tot++;
+				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
+				pass_->Fill(m0, m12, weight);
+			}
+			resetHypLeptons();
+		}
+	}
+	cout << "Total Number of SS events (with MET > 120 GeV and HT > 450 GeV): " << n_tot << endl;
+	fOUTSTREAM << "Total number of tight pairs: " << tightTot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/tightTot << endl;
+
+	TH2D * count_ = (TH2D *) file_->Get("msugra_count");
+	TH2D *eff_   = new TH2D("msugra_eff"   , "msugra_eff"   , 100 , 10 , 2010 , 38 , 10 , 770);
+	eff_->Divide(pass_, count_, 1., 1.);
+
+	res_->cd();
+	pass_->Write();
+	count_->Write();
+	eff_->Write();
+
+}
+

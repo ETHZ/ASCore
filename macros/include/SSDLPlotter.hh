@@ -33,6 +33,9 @@ public:
 
 	virtual void doAnalysis();
 	virtual void sandBox();
+	virtual void load_kfacs(TFile *);
+	virtual void load_loxsecs(TFile *);
+	virtual void load_msugraInfo(const char * filestring);
 
 	//////////////////////////////
 	// Plots
@@ -67,6 +70,7 @@ public:
 	void makeDiffPrediction();
 	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
 	void makeTTbarClosure();
+	void makeRelIsoTTSigPlots();
 	
 	//////////////////////////////
 	// Fake ratios
