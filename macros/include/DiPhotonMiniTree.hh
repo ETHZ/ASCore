@@ -41,6 +41,7 @@ private:
   TFile* fMiniTree;
   TTree* OutputTree;
 
+  Float_t event_luminormfactor;
   Float_t event_weight;
 
   Float_t event_rho;

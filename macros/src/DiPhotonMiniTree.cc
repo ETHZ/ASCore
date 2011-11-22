@@ -3,6 +3,7 @@
 
 #include "DiPhotonPurity.hh"
 
+
 #include <iostream>
 #include <fstream>
 #include <assert.h>
@@ -34,6 +35,8 @@ void DiPhotonMiniTree::Begin(){
 
   fMiniTree->cd();
   OutputTree = new TTree("Tree","Tree");
+
+ OutputTree->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
 
   OutputTree->Branch("event_weight",&event_weight,"event_weight/F");
   OutputTree->Branch("event_rho",&event_rho,"event_rho/F");
@@ -253,7 +256,7 @@ void DiPhotonMiniTree::Begin(){
 	
   cout << "Tree and histos created" << endl;
 
-  for (int i=0;i<10;i++)  cout << "No trigger selection!!!" << endl;	
+  // for (int i=0;i<10;i++)  cout << "No trigger selection!!!" << endl;	
 
 }
 
@@ -267,12 +270,13 @@ void DiPhotonMiniTree::Analyze(){
   float weight;
   if (!isdata) weight = GetPUWeight(fTR->PUnumInteractions);
   else weight=1;
-  weight*=AddWeight;
+  
+  event_luminormfactor=AddWeight;
 
   if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
   fHNumVtx->Fill(fTR->NVrtx,weight);
 
-  //  if (!TriggerSelection()) return;
+    if (!TriggerSelection()) return;
 
 
   std::vector<int> passing = PhotonSelection(fTR);
@@ -554,41 +558,17 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR){
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
     if (fabs(eta)<1.4442) energy*=phocorr->getEtaCorrectionBarrel(eta);
     if (fabs(eta)>1.56) energy+=fTR->SCPre[fTR->PhotSCindex[*it]];
-    if (energy/cosh(eta)<20) it=passing.erase(it); else it++;
+    if (energy/cosh(eta)<20 || fabs(eta)>2.5) it=passing.erase(it); else it++;
   }
 
   return passing;
 
 };
 
-
-
-
-
-
 bool DiPhotonMiniTree::TriggerSelection(){
-
-  vector<string> triggers;
-
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v2");
-  triggers.push_back("HLT_Photon26_Photon18_v2");
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_IsoVL_v2");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v1");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
-  triggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v1");
-  triggers.push_back("HLT_Photon32_CaloIdL_Photon26_CaloIdL_v2");
-  triggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v1");
-
-  for (vector<string>::const_iterator it=triggers.begin(); it!=triggers.end(); it++){
-    if ( GetHLTPrescale(*it)!=0) {
-      cout << "warning: using prescaled trigger!!! " << *it << " " << GetHLTPrescale(*it) << endl;
-    }
-    if ( GetHLTResult(*it) )        return true;
-  }
-
-  return false;
-
+#include "DiPhotonTriggerSelection.cc"
 };
+
+
+
+

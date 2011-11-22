@@ -71,3 +71,4 @@ void DiPhotonJetsAnalyzer::EndJob(){
 	fDiPhotonPurity->End();
 	fDiPhotonMiniTree->End();
 }
+

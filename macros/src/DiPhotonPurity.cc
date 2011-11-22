@@ -1,6 +1,7 @@
 #include "helper/Utilities.hh"
 #include "DiPhotonPurity.hh"
 
+
 #include <iostream>
 #include <fstream>
 #include <assert.h>
@@ -30,10 +31,11 @@ void DiPhotonPurity::Begin(){
 	const char* filename = "diphoton_purity.root";
 	fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 
+	/*
 	fHsieie_all = new TH1F("sieie_all","sieie_all",100,0,0.05);
 	fHsieie_signal = new TH1F("sieie_signal","sieie_signal",100,0,0.05);
 	fHsieie_background = new TH1F("sieie_background","sieie_background",100,0,0.05);
-
+	*/
 	fHgginvmass = new TH1F("gginvmass","gginvmass",110,80,300);
 
 	fHNumPU = new TH1F("NumPU","NumPU",40,0,40);
@@ -104,11 +106,11 @@ void DiPhotonPurity::End(){
 
 
 	fHistFile->cd();	
-
+	/*
 	fHsieie_all->Write();
 	fHsieie_signal->Write();
 	fHsieie_background->Write();
-
+	*/
 	fHNumPU->Write();
 	fHNumVtx->Write();
 
@@ -204,28 +206,5 @@ bool DiPhotonPurity::PhotonID_EGM_10_006_Loose_SigmaIetaIeta_Relaxed(TreeReader 
 };
 
 bool DiPhotonPurity::TriggerSelection(){
-
-  vector<string> triggers;
-
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon20_R9Id_Photon18_R9Id_v2");
-  triggers.push_back("HLT_Photon26_Photon18_v2");
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon26_IsoVL_Photon18_IsoVL_v2");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_v2");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_R9Id_v1");
-  triggers.push_back("HLT_Photon26_CaloIdL_IsoVL_Photon18_CaloIdL_IsoVL_v2");
-  triggers.push_back("HLT_Photon26_R9Id_Photon18_CaloIdL_IsoVL_v1");
-  triggers.push_back("HLT_Photon32_CaloIdL_Photon26_CaloIdL_v2");
-  triggers.push_back("HLT_Photon36_CaloIdL_Photon22_CaloIdL_v1");
-
-  for (vector<string>::const_iterator it=triggers.begin(); it!=triggers.end(); it++){
-    if ( GetHLTPrescale(*it)!=0) {
-      cout << "warning: using prescaled trigger!!! " << *it << " " << GetHLTPrescale(*it) << endl;
-    }
-    if ( GetHLTResult(*it) )        return true;
-  }
-
- return false;
-
+#include "DiPhotonTriggerSelection.cc"
 };
