@@ -19,6 +19,7 @@ rejectISRDR(0), rejectISRDRmax(100.), dbg(0)  {
 		Object_Noseed.push_back(0);
 		Object_Noassoc.push_back(0);
 	}
+	numLoop =0;
 }
 
 // constructor without specification of the seed and association methods
@@ -34,6 +35,7 @@ rejectISRDR(0), rejectISRDRmax(100.), dbg(0)  {
 		Object_Noseed.push_back(0);
 		Object_Noassoc.push_back(0);
 	}
+	numLoop =0;
 }
 
 vector<float> Hemisphere::getAxis1(){
@@ -83,6 +85,7 @@ int Hemisphere::Reconstruct(){
 // NewAxis1_xxx, NewAxis1_xxx : temporary axes for calculation in association methods 2 and 3
 
 
+	numLoop=0; // initialize numLoop for Zero
 	int vsize = (int) Object_Px.size();
 	if((int) Object_Py.size() != vsize || (int) Object_Pz.size() != vsize){
 		cout << "WARNING!!!!! Input vectors have different size! Fix it!" << endl;
@@ -327,7 +330,6 @@ int Hemisphere::Reconstruct(){
 		cout << " Association method = " << hemi_meth << endl;
 	}
 
-	int numLoop = 0;
 	bool I_Move = true;
 
 	// iterate to associate all objects to hemispheres (methods 1 to 3 only)
@@ -339,6 +341,9 @@ int Hemisphere::Reconstruct(){
 		numLoop++;
 		if (dbg > 0) {
 			cout << " Iteration = " << numLoop << endl;
+		}
+		if(numLoop == nItermax-1){
+			cout << " Hemishpere: warning - reaching max number of iterations " << endl;
 		}
 
 	// initialize the current sums of Px, Py, Pz, E for the two hemispheres
