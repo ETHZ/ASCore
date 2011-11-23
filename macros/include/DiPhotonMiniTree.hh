@@ -38,7 +38,6 @@ private:
 
   double AddWeight;
 
-  TFile* fMiniTree;
   TTree* OutputTree;
 
   Float_t event_luminormfactor;

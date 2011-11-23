@@ -16,10 +16,10 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunDiPhotonJetsAnalyzer [-f datamc] [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-x xsec(pb)] [-L nlumi(/fb)] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunDiPhotonJetsAnalyzer [-o outfile] [-f datamc] [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-x xsec(pb)] [-L nlumi(/fb)] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
-	cout << "               default is TempOutput/               " << endl;
+	cout << "               default is current directory               " << endl;
 	cout << "     verbose  sets the verbose level                " << endl;
 	cout << "               default is 0 (quiet mode)            " << endl;
 	cout << "     filen    are the input files (by default: ROOT files)" << endl;
@@ -33,7 +33,8 @@ void usage( int status = 0 ) {
 int main(int argc, char* argv[]) {
 // Default options
 	bool isList = false;
-	TString outputdir = "TempOutput/";
+	TString outputdir = "./";
+	TString outputfile = "outfile.root";
 	int verbose = 0;
 	
 	int maxEvents=-1;
@@ -46,9 +47,10 @@ int main(int argc, char* argv[]) {
 	
 	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "f:d:v:j:p:P:n:x:L:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "o:f:d:v:j:p:P:n:x:L:lh?")) != -1 ) {
 	  switch (ch) {
 	  case 'd': outputdir = TString(optarg); break;
+	  case 'o': outputfile = TString(optarg); break;
 	  case 'f': dataType = TString(optarg); break;
 	  case 'v': verbose = atoi(optarg); break;
 	  case 'l': isList = true; break;
@@ -92,6 +94,7 @@ int main(int argc, char* argv[]) {
 
 	cout << "--------------" << endl;
 	cout << "OutputDir is:     " << outputdir << endl;
+	cout << "OutputFile is:    " << outputfile << endl;
 	cout << "Verbose level is: " << verbose << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 	cout << "Events to process: " << maxEvents << endl;
@@ -115,6 +118,7 @@ int main(int argc, char* argv[]) {
 
 	DiPhotonJetsAnalyzer *tA = new DiPhotonJetsAnalyzer(theChain,dataType,AddWeight);
 	tA->SetOutputDir(outputdir);
+	tA->SetOutputFile(outputfile);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxEvents);
 	if ( jsonFileName.length() ) tA->ReadJSON(jsonFileName.c_str());

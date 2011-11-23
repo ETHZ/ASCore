@@ -30,10 +30,10 @@ void DiPhotonMiniTree::Begin(){
   cout << "Begin" << endl;
 
   // Define the output file of histograms
-  const char* filename = "MiniTree_Diphoton.root";
-  fMiniTree = new TFile(fOutputDir + TString(filename), "RECREATE");
+  //  const char* filename = "MiniTree_Diphoton.root";
 
-  fMiniTree->cd();
+
+  fOutputFile->cd();
   OutputTree = new TTree("Tree","Tree");
 
  OutputTree->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
@@ -540,12 +540,12 @@ void DiPhotonMiniTree::Analyze(){
 }
 
 void DiPhotonMiniTree::End(){
-  fMiniTree->cd();
+  fOutputFile->cd();
   OutputTree->Write();	
   fHNumPU->Write();
   fHNumVtx->Write();
 	
-  fMiniTree->Close();
+  fOutputFile->Close();
 
 }
 

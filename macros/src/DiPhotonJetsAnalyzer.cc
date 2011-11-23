@@ -9,12 +9,12 @@
 using namespace std;
 
 DiPhotonJetsAnalyzer::DiPhotonJetsAnalyzer(TTree *tree, std::string dataType, double aw) : TreeAnalyzerBase(tree), AddWeight(aw) {
-  fDiPhotonPurity = new DiPhotonPurity(fTR,dataType,AddWeight);
+  //  fDiPhotonPurity = new DiPhotonPurity(fTR,dataType,AddWeight);
   fDiPhotonMiniTree = new DiPhotonMiniTree(fTR,dataType,AddWeight);
 }
 
 DiPhotonJetsAnalyzer::~DiPhotonJetsAnalyzer(){
-	delete fDiPhotonPurity;
+  //	delete fDiPhotonPurity;
 	delete fDiPhotonMiniTree;
 	if(!fTR->fChain) cout << "DiPhotonJetsAnalyzer ==> No chain!" << endl;
 }
@@ -34,7 +34,7 @@ void DiPhotonJetsAnalyzer::Loop(){
 		fTR->GetEntry(jentry);
 		if ( fCurRun != fTR->Run ) {
 		  fCurRun = fTR->Run;
-		  fDiPhotonPurity->BeginRun(fCurRun);
+		  //		  fDiPhotonPurity->BeginRun(fCurRun);
 		  fDiPhotonMiniTree->BeginRun(fCurRun);
 		  skipRun = false;
 		  if ( !CheckRun() ) skipRun = true;
@@ -46,7 +46,7 @@ void DiPhotonJetsAnalyzer::Loop(){
 		  if ( !CheckRunLumi() ) skipLumi = true;
 		}
 		if ( !(skipRun || skipLumi) ) {
-		  fDiPhotonPurity->Analyze();
+		  //		  fDiPhotonPurity->Analyze();
 		  fDiPhotonMiniTree->Analyze();
 		}
 	}
@@ -54,12 +54,14 @@ void DiPhotonJetsAnalyzer::Loop(){
 
 // Method called before starting the event loop
 void DiPhotonJetsAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
-	fDiPhotonPurity->SetOutputDir(fOutputDir);
-	fDiPhotonPurity->fVerbose = fVerbose;
-	fDiPhotonPurity->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-	fDiPhotonPurity->Begin();
+// 	fDiPhotonPurity->SetOutputDir(fOutputDir);
+// 	fDiPhotonPurity->SetOutputFile(fOutputFile);
+// 	fDiPhotonPurity->fVerbose = fVerbose;
+// 	fDiPhotonPurity->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
+// 	fDiPhotonPurity->Begin();
 
 	fDiPhotonMiniTree->SetOutputDir(fOutputDir);
+	fDiPhotonMiniTree->SetOutputFile(fOutputFile);
 	fDiPhotonMiniTree->fVerbose = fVerbose;
 	fDiPhotonMiniTree->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 	fDiPhotonMiniTree->Begin();
@@ -68,7 +70,7 @@ void DiPhotonJetsAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
 
 // Method called after finishing the event loop
 void DiPhotonJetsAnalyzer::EndJob(){
-	fDiPhotonPurity->End();
+  //	fDiPhotonPurity->End();
 	fDiPhotonMiniTree->End();
 }
 
