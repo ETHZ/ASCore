@@ -65,8 +65,19 @@ void DiPhotonMiniTree::Begin(){
   OutputTree->Branch("photrail_energyNewCorr",&photrail_energyNewCorr,"photrail_energyNewCorr/F");
   OutputTree->Branch("pholead_energyNewCorrLocal",&pholead_energyNewCorrLocal,"pholead_energyNewCorrLocal/F");
   OutputTree->Branch("photrail_energyNewCorrLocal",&photrail_energyNewCorrLocal,"photrail_energyNewCorrLocal/F");
+ 
   OutputTree->Branch("pholead_SCeta",&pholead_SCeta,"pholead_SCeta/F");
   OutputTree->Branch("photrail_SCeta",&photrail_SCeta,"photrail_SCeta/F");
+  OutputTree->Branch("pholead_SCphi",&pholead_SCphi,"pholead_SCphi/F");
+  OutputTree->Branch("photrail_SCphi",&photrail_SCphi,"photrail_SCphi/F");
+  
+  OutputTree->Branch("pholead_PhoHasPixSeed",&pholead_PhoHasPixSeed,"pholead_PhoHasPixSeed/I");
+  OutputTree->Branch("pholead_PhoHasConvTrks",&pholead_PhoHasConvTrks,"pholead_PhoHasConvTrks/I");
+  OutputTree->Branch("pholead_PhoScSeedSeverity",&pholead_PhoScSeedSeverity,"pholead_PhoScSeedSeverity/I");
+  
+  OutputTree->Branch("photrail_PhoHasPixSeed",&photrail_PhoHasPixSeed,"photrail_PhoHasPixSeed/I");
+  OutputTree->Branch("photrail_PhoHasConvTrks",&photrail_PhoHasConvTrks,"photrail_PhoHasConvTrks/I");
+  OutputTree->Branch("photrail_PhoScSeedSeverity",&photrail_PhoScSeedSeverity,"photrail_PhoScSeedSeverity/I");
 
   OutputTree->Branch("pholead_r9",&pholead_r9,"pholead_r9/F");
   OutputTree->Branch("photrail_r9",&photrail_r9,"photrail_r9/F");
@@ -313,7 +324,17 @@ void DiPhotonMiniTree::Analyze(){
 
   pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
   photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
+  pholead_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
+  photrail_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
  
+  pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(0)];
+  pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(0)];
+  pholead_PhoScSeedSeverity=fTR->PhoScSeedSeverity[passing.at(0)];
+  
+  photrail_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(1)];
+  photrail_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(1)];
+  photrail_PhoScSeedSeverity=fTR->PhoScSeedSeverity[passing.at(1)];
+
   pholead_energySCdefault = CorrPhoton(fTR,passing.at(0),0).E();
   photrail_energySCdefault = CorrPhoton(fTR,passing.at(1),0).E();
   pholead_energyNewCorr = CorrPhoton(fTR,passing.at(0),5).E();

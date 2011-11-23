@@ -60,8 +60,14 @@ private:
   Float_t pholead_pt, photrail_pt;
   Float_t pholead_pz, photrail_pz;
   Float_t pholead_energy, photrail_energy;
+
   Float_t pholead_SCeta, photrail_SCeta;
-  
+  Float_t pholead_SCphi, photrail_SCphi;
+ 
+  Int_t pholead_PhoHasPixSeed, photrail_PhoHasPixSeed;
+  Int_t pholead_PhoHasConvTrks, photrail_PhoHasConvTrks;
+  Int_t pholead_PhoScSeedSeverity, photrail_PhoScSeedSeverity;
+ 
   Float_t pholead_energySCdefault, photrail_energySCdefault;
   Float_t pholead_energyNewCorr, photrail_energyNewCorr;
   Float_t pholead_energyNewCorrLocal, photrail_energyNewCorrLocal;
