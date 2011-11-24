@@ -12,7 +12,7 @@
 
 class DiPhotonJetsAnalyzer : public TreeAnalyzerBase {
 public:
-  DiPhotonJetsAnalyzer(TTree *tree = 0, std::string dataType="data", double aw=-999);
+  DiPhotonJetsAnalyzer(TTree *tree = 0, std::string dataType="data", double aw=-999, double* _kfac=NULL);
 	virtual ~DiPhotonJetsAnalyzer();
 	void BeginJob(string data_PileUp, string mc_PileUp);
 	void EndJob();
@@ -24,6 +24,7 @@ private:
   DiPhotonMiniTree *fDiPhotonMiniTree;
   int fMaxEvents;
   double AddWeight;
+  double* kfactors;
 
 };
 #endif

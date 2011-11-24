@@ -10,7 +10,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, double aw) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, double aw, double* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac){
   Util::SetStyle();	
   if (fDataType_ == "mc") isdata=false;
   else if (fDataType_ == "data") isdata=true; 
@@ -37,6 +37,8 @@ void DiPhotonMiniTree::Begin(){
   OutputTree = new TTree("Tree","Tree");
 
  OutputTree->Branch("event_luminormfactor",&event_luminormfactor,"event_luminormfactor/F");
+ OutputTree->Branch("event_Kfactor",&event_Kfactor,"event_Kfactor/F");
+
 
   OutputTree->Branch("event_weight",&event_weight,"event_weight/F");
   OutputTree->Branch("event_rho",&event_rho,"event_rho/F");
@@ -287,7 +289,7 @@ void DiPhotonMiniTree::Analyze(){
   if (!isdata) fHNumPU->Fill(fTR->PUnumInteractions,weight);
   fHNumVtx->Fill(fTR->NVrtx,weight);
 
-    if (!TriggerSelection()) return;
+  if (!TriggerSelection()) return;
 
 
   std::vector<int> passing = PhotonSelection(fTR);
@@ -303,6 +305,15 @@ void DiPhotonMiniTree::Analyze(){
   if (!isdata) event_nPU = fTR->PUnumInteractions;
   event_nRecVtx = fTR->NVrtx;
   
+  if (!isdata) {
+    int nmatched_part_isrfsr_gamma=0;
+    for (int i=0; i<2; i++){
+      int code = fTR->PhoMCmatchexitcode[passing.at(i)];
+      if (code==1 || code==2) nmatched_part_isrfsr_gamma++;
+    }
+    event_Kfactor = kfactors[2-nmatched_part_isrfsr_gamma];
+  }
+  else event_Kfactor=1;
 
   dipho_mgg_photon = invmass0;
   dipho_mgg_newCorr = invmass5;
@@ -572,6 +583,10 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR){
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
     float eta=fTR->SCEta[fTR->PhotSCindex[*it]];
     if (fabs(eta)>1.4442 && fabs(eta)<1.56) it=passing.erase(it); else it++;
+  }
+
+  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+    if (fTR->PhoHasPixSeed[*it]!=0) it=passing.erase(it); else it++;
   }
 
   for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
