@@ -79,19 +79,20 @@ def process(dir,opt):
          print "--> Removed remote files"
   
    # 2. Remove remote directory
-   answ = 'y'
-   cmd = ['srmrmdir',sedir]
-   if opt.verb>1: print "CMD =",' '.join(cmd)
-   if not opt.force: 
-      answ = raw_input('Remove remote directory? [y/n] ')
-      while answ != 'y' and answ != 'n':  
-         answ = raw_input('Please answer y or n: ').rstrip()
-   if answ == 'y':
-      err = subprocess.call(cmd)
-      if err:
-         print '*** Error:',err
-         sys.exit(-1)
-      print "--> Removed remote directory"
+   if len(list)>0:
+      answ = 'y'
+      cmd = ['srmrmdir',sedir]
+      if opt.verb>1: print "CMD =",' '.join(cmd)
+      if not opt.force: 
+         answ = raw_input('Remove remote directory? [y/n] ')
+         while answ != 'y' and answ != 'n':  
+            answ = raw_input('Please answer y or n: ').rstrip()
+      if answ == 'y':
+         err = subprocess.call(cmd)
+         if err:
+            print '*** Error:',err
+            sys.exit(-1)
+         print "--> Removed remote directory"
 
    # 3. Remove local directory
    answ = 'y'
