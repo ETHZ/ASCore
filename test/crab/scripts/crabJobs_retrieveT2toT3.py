@@ -3,12 +3,21 @@ import sys, os, pwd, commands, shlex, glob
 
 def updateFileList(filelistName,srmDir):
    """Update list of files to process"""
-   command='lcg-ls '+srmDir+' | perl -an -F"/" -e \'print "/".join("/",@F[5 .. $#F])\' > ' + filelistName
-   print "command: " + command
+   command='srmls -count=1000 -offset=0 '+srmDir+' | grep .root | perl -an -F"/" -e \'print "/".join("/",@F[5 .. $#F])\' > ' + filelistName
    return_value = os.system(command)
    if return_value != 0:
       print 'Problem to determine which jobs need to be retrieved. Exiting...'
-      sys.exit()
+      sys.exit()   
+   attempts = 1
+   while ( (sum(1 for line in open(filelistName)))==1000*attempts ):
+      off = 1000*attempts
+      command='srmls -count=1000 -offset=%s'%off+' '+srmDir+' | grep .root | perl -an -F"/" -e \'print "/".join("/",@F[5 .. $#F])\' >> '+filelistName
+      return_value = os.system(command)
+      if return_value != 0:
+         print 'Problem to determine which jobs need to be retrieved. Exiting...'
+         sys.exit()   
+      attempts+=1
+
 
 
 print sys.argv[1:]
