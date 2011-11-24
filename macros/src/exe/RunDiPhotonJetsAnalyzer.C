@@ -16,7 +16,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunDiPhotonJetsAnalyzer [-o outfile] [-f datamc] [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-x xsec(pb)] [-L nlumi(/fb)] [-G gg k factor] [-g gj k factor] [-J jj k factor] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunDiPhotonJetsAnalyzer [-o outfile] [-f datamc] [-d dir] [-v verbose] [-p datapileup] [-P MCpileup] [-n MaxEvents] [-j jsonfile] [-x xsec(pb)] [-L nlumi(/fb)] [-N events_in_dset] [-G gg k factor] [-g gj k factor] [-J jj k factor] [-l] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     dir      is the output directory               " << endl;
 	cout << "               default is current directory               " << endl;
@@ -44,13 +44,15 @@ int main(int argc, char* argv[]) {
 	string dataType = "";
 	Float_t xsec=-1;
 	Float_t nlumi=-1;
+	Int_t nevtsindset=-1;
 
 	Float_t kfactors[3]={1,1,1};
 	
 	// Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "G:g:J:o:f:d:v:j:p:P:n:x:L:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "N:G:g:J:o:f:d:v:j:p:P:n:x:L:lh?")) != -1 ) {
 	  switch (ch) {
+	  case 'N': nevtsindset = atoi(optarg); break;
 	  case 'G': kfactors[0] = atof(optarg); break;
 	  case 'g': kfactors[1] = atof(optarg); break;
 	  case 'J': kfactors[2] = atof(optarg); break;
@@ -105,6 +107,7 @@ int main(int argc, char* argv[]) {
 	cout << "Events to process: " << maxEvents << endl;
 	cout << "Input cross section: " << xsec << " pb" << endl;
 	cout << "Lumi to normalize to: " << nlumi << " /fb" << endl;
+	cout << "Number of events in dset for normalization: " << nevtsindset << endl;
 	cout << "JSON file is: " << (jsonFileName.length()>0?jsonFileName:"empty") << endl;
 	cout << "Data/MC flag: " << dataType << endl;
 	cout << "MC_PileUp file:                 " << (mc_PileUp.length()>0?mc_PileUp:"empty") << endl;
@@ -113,12 +116,9 @@ int main(int argc, char* argv[]) {
 	cout << "--------------" << endl;
 
 	Float_t AddWeight;
-	if (nlumi==-1 || xsec==-1) AddWeight=1;
-	else {
-	  Float_t effentries;
-	  effentries = maxEvents==-1 ? theChain->GetEntries() : maxEvents;
-	  AddWeight=nlumi/(effentries/(1000*xsec));
-	}
+	if (nlumi==-1 || xsec==-1 || nevtsindset==-1) AddWeight=1;
+	else AddWeight=nlumi*xsec*1000.0/nevtsindset;
+	
 
 	if (verbose) cout << "Reweighting factor for luminosity rescaling: " << AddWeight << endl;
 
