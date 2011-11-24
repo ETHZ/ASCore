@@ -10,7 +10,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, double aw, double* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t aw, Float_t* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac){
   Util::SetStyle();	
   if (fDataType_ == "mc") isdata=false;
   else if (fDataType_ == "data") isdata=true; 
@@ -335,8 +335,8 @@ void DiPhotonMiniTree::Analyze(){
 
   pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
   photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
-  pholead_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(0)]];
-  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(1)]];
+  pholead_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
+  photrail_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
  
   pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(0)];
   pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(0)];

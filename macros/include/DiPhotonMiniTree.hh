@@ -18,7 +18,7 @@
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", double aw=-999, double* _kfac=NULL);
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
   virtual ~DiPhotonMiniTree();
 
   void Begin();
@@ -27,7 +27,7 @@ public:
 
 private:
 
-  double* kfactors;
+  Float_t* kfactors;
 
   std::vector<int> PhotonSelection(TreeReader *fTR);
   bool TriggerSelection();
@@ -38,7 +38,7 @@ private:
   std::string fDataType_;
   bool isdata;
 
-  double AddWeight;
+  Float_t AddWeight;
 
   TTree* OutputTree;
 

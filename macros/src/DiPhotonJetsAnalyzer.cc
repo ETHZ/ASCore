@@ -8,7 +8,7 @@
 
 using namespace std;
 
-DiPhotonJetsAnalyzer::DiPhotonJetsAnalyzer(TTree *tree, std::string dataType, double aw, double* _kfac) : TreeAnalyzerBase(tree), AddWeight(aw), kfactors(_kfac) {
+DiPhotonJetsAnalyzer::DiPhotonJetsAnalyzer(TTree *tree, std::string dataType, Float_t aw, Float_t* _kfac) : TreeAnalyzerBase(tree), AddWeight(aw), kfactors(_kfac) {
   //  fDiPhotonPurity = new DiPhotonPurity(fTR,dataType,AddWeight);
   fDiPhotonMiniTree = new DiPhotonMiniTree(fTR,dataType,AddWeight,kfactors);
 }

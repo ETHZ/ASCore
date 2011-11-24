@@ -42,10 +42,10 @@ int main(int argc, char* argv[]) {
 	string  data_PileUp = "";
 	string  mc_PileUp = "";
 	string dataType = "";
-	double xsec=-1;
-	double nlumi=-1;
+	Float_t xsec=-1;
+	Float_t nlumi=-1;
 
-	double kfactors[3]={1,1,1};
+	Float_t kfactors[3]={1,1,1};
 	
 	// Parse options
 	char ch;
@@ -112,10 +112,10 @@ int main(int argc, char* argv[]) {
 	cout << "gg,gj,jj k-factors:  " << kfactors[0] << " " << kfactors[1] << " " << kfactors[2] << endl;
 	cout << "--------------" << endl;
 
-	double AddWeight;
+	Float_t AddWeight;
 	if (nlumi==-1 || xsec==-1) AddWeight=1;
 	else {
-	  double effentries;
+	  Float_t effentries;
 	  effentries = maxEvents==-1 ? theChain->GetEntries() : maxEvents;
 	  AddWeight=nlumi/(effentries/(1000*xsec));
 	}
