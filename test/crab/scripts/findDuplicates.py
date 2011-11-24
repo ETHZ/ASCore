@@ -40,10 +40,14 @@ def refreshFileList( srmPath, tmpFile ):
 #     print 'Reloading list of files in '+tmpFile+'...',
 #     sys.stdout.flush()
 
-    dump = open(tmpFile,'w')
-    srmls = subprocess.Popen(['srmls',srmPath],stdout=dump)
+    srmls = subprocess.Popen('srmls -count=1000 '+srmPath+' | grep .root > '+tmpFile, shell=True)
     srmls.wait()
-    dump.close()
+    attempts = 1
+    while ( (sum(1 for line in open(tmpFile)))==1000*attempts ):
+        off = 1000*attempts
+        srmls = subprocess.Popen('srmls -count=1000 -offset=%s'%off+' '+srmPath+' | grep .root >> '+tmpFile, shell=True)
+        srmls.wait()
+        attempts+=1
 #     print 'Done'
 
 
@@ -147,7 +151,7 @@ def findDuplicates():
 #     print 'Processing file list using file tag',fileTag
     lines = out.splitlines()
     # remove the directory name 
-    lines.pop(0)
+    #lines.pop(0)    # not needed with new list method
 
     #initialize some variables
     sizeOnDisk = 0.
