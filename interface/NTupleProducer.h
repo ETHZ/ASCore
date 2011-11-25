@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.111 2011/11/17 19:37:18 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.112 2011/11/18 16:09:49 pnef Exp $
 //
 //
 
@@ -307,6 +307,7 @@ private:
 
 	// Pile-up
 	int fTpuNumInteractions;
+	int fTpuNumTrueInteractions;
         int fTpuNumFilled;
         int fTpuOOTNumInteractionsLate;
         int fTpuOOTNumInteractionsEarly;
@@ -320,6 +321,7 @@ private:
 	float fTrhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
 	// float fTpuInstLumi[gMaxnpileup];
         TH1I* fHpileupstat;
+        TH1I* fHtruepileupstat;
   	float fTpuWeightTotal;
   	float fTpuWeightInTime;
 	std::vector<std::string> fTPileUpHistoData;

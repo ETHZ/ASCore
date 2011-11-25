@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.141 2011/11/17 19:37:19 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.142 2011/11/18 16:09:48 pnef Exp $
 //
 //
 
@@ -199,18 +199,20 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 		NPdfs = LHAPDF::numberPDF();
 	}
 
-	CrackCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
-	LocalCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
+	CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
+	LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
 	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
 	// Create histograms and trees
-	fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
-	fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
-	fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
-        fHpileupstat = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
-	fRunTree     = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
-	fEventTree   = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
+	fHhltstat        = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
+	fHl1physstat     = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
+	fHl1techstat     = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
+        fHpileupstat     = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
+        fHtruepileupstat = fTFileService->make<TH1I>("TruePileUpStats", "TruePileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
+
+	fRunTree         = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
+	fEventTree       = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 
 	// Dump the full configuration
 	edm::LogVerbatim("NTP") << "---------------------------------";
@@ -569,6 +571,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		  if( PVI->getBunchCrossing() == 0 ){ // in-time PU
 		    fTpuNumInteractions  = PVI->getPU_NumInteractions();
 		    fHpileupstat->Fill( fTpuNumInteractions );
+		    fTpuNumTrueInteractions  = PVI->getTrueNumInteractions();
+		    fHtruepileupstat->Fill( fTpuNumTrueInteractions );
 		    
 		    if(fTpuNumInteractions > gMaxnpileup){
 		      edm::LogWarning("NTP") << "@SUB=analyze()"
@@ -2705,6 +2709,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
+	fEventTree->Branch("PUnumTrueInteractions",   &fTpuNumTrueInteractions   ,"PUnumTrueInteractions/I");
 	fEventTree->Branch("PUnumFilled",&fTpuNumFilled,"PUnumFilled/I");
 	fEventTree->Branch("PUOOTnumInteractionsEarly",&fTpuOOTNumInteractionsEarly,"PUOOTnumInteractionsEarly/I");
 	fEventTree->Branch("PUOOTnumInteractionsLate",&fTpuOOTNumInteractionsLate,"PUOOTnumInteractionsLate/I");
