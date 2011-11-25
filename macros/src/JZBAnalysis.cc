@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.66 $";
+string sjzbversion="$Revision: 1.67 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.67  2011/11/17 13:36:07  buchmann
+Updated triggers
+
 Revision 1.66  2011/11/09 15:18:13  buchmann
 Adapted weight (used to be PU only) to also have an efficiency related weight (which is saved separately to Efficiencyweightonly)
 
@@ -282,6 +285,9 @@ public:
   float mGlu;
   float mChi;
   float mLSP;
+  float mGMSBGlu;
+  float mGMSBChi;
+  float mGMSBLSP;
   float M0;
   float A0;
   float M12;
@@ -495,6 +501,9 @@ void nanoEvent::reset()
   mGlu=0;
   mChi=0;
   mLSP=0;
+  mGMSBGlu=0;
+  mGMSBChi=0;
+  mGMSBLSP=0;
   A0=0;
   M0=0;
   M12=0;
@@ -733,6 +742,9 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
   myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
   myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+  myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
+  myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
+  myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
   myTree->Branch("M0",&nEvent.M0,"M0/F");
   myTree->Branch("A0",&nEvent.A0,"A0/F");
   myTree->Branch("M12",&nEvent.M12,"M12/F");
@@ -838,9 +850,6 @@ const bool JZBAnalysis::passMuTriggers() {
   if ( GetHLTResult("HLT_DoubleMu7_v11") )        return true;
   if ( GetHLTResult("HLT_DoubleMu7_v12") )        return true;
 
-  if ( GetHLTResult("HLT_DoubleMu8_v1") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu8_v2") )        return true;
-
   if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
@@ -852,6 +861,17 @@ const bool JZBAnalysis::passMuTriggers() {
 //  if ( GetHLTResult("HLT_Mu13_Mu8_v9") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v10") )        return true;
   if ( GetHLTResult("HLT_Mu13_Mu8_v11") )        return true;
+
+  if ( GetHLTResult("HLT_Mu17_Mu8_v1") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v2") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v3") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v4") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v6") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v7") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v10") )        return true;
+  if ( GetHLTResult("HLT_Mu17_Mu8_v11") )        return true;
+
+
   return false;
 } 
 
@@ -899,13 +919,14 @@ void JZBAnalysis::Analyze() {
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
-      nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
-      nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
       if(fisModelScan) {
         nEvent.process=fTR->process;
         nEvent.mGlu=fTR->MassGlu;
         nEvent.mChi=fTR->MassChi;
         nEvent.mLSP=fTR->MassLSP;
+        nEvent.mGMSBGlu=fTR->MassChi; // explanation: order in NTuple is wrong for GMSB
+        nEvent.mGMSBChi=fTR->MassLSP; // explanation: order in NTuple is wrong for GMSB
+        nEvent.mGMSBLSP=fTR->MassGlu; // explanation: order in NTuple is wrong for GMSB
         nEvent.A0=fTR->A0;
         nEvent.M0=fTR->M0;
         nEvent.signMu=fTR->signMu;
@@ -913,6 +934,10 @@ void JZBAnalysis::Analyze() {
         nEvent.NPdfs=fTR->NPdfs;
         for(int i=0;i<fTR->NPdfs;i++) nEvent.pdfW[i]=fTR->pdfW[i];
 	nEvent.pdfWsum=fTR->pdfWsum; 
+      } else {
+	//don't attempt to do PURW for model scans
+	nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
       }
     }
   // Trigger information
@@ -1104,8 +1129,8 @@ void JZBAnalysis::Analyze() {
     if(nEvent.id1==nEvent.id2&&nEvent.id1==1) lepweight=0.95;
     if(nEvent.id1!=nEvent.id2) lepweight=0.98;
 
-    nEvent.weight=nEvent.weight*lepweight;
-    nEvent.Efficiencyweightonly=lepweight;
+    if (isMC) nEvent.weight=nEvent.weight*lepweight;
+    if (isMC) nEvent.Efficiencyweightonly=lepweight;
 
   } else {
       
