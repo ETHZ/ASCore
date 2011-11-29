@@ -5,6 +5,7 @@
 #include <TRandom.h>
 #include "TF1.h"
 #include <cstdlib>
+#include <assert.h>
 //#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
@@ -520,15 +521,61 @@ TTree *myInfo;
 nanoEvent nEvent;
 
 
+void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
+                          unsigned int start, unsigned int end) {
+
+  for ( unsigned int i=start; i<=end; ++i ) {
+    ostringstream path;
+    path << base << "_v" << i;
+    paths.push_back(path.str());
+  }
+  std::cout << "Added " << base << " (v" << start;
+  if ( start!=end) std::cout << "-v" << end;
+  std::cout << ")" << std::endl;
+
+}
+
+
 JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall) :
   UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall){
+
+  // Define trigger paths to check
+  addPath(elTriggerPaths,"HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL",1,8);
+  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL",1,5);
+  addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL",1,10);
+
+  addPath(muTriggerPaths,"HLT_DoubleMu6",1,8); // v5 is actually not used
+  addPath(muTriggerPaths,"HLT_DoubleMu7",1,2); // v1,2,5,7,8,11,12 are really used
+  addPath(muTriggerPaths,"HLT_DoubleMu7",5,8); 
+  addPath(muTriggerPaths,"HLT_DoubleMu7",11,12);
+  addPath(muTriggerPaths,"HLT_Mu13_Mu8",2,4); // 2,3,4,6,7,10,11
+  addPath(muTriggerPaths,"HLT_Mu13_Mu8",6,7);
+  addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,11);
+  addPath(muTriggerPaths,"HLT_Mu17_Mu8",2,4); // 2,3,4,6,7,10,11
+  addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
+  addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,11);
+  
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",1,9);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",12,13);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",1,1);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",3,3);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",4,4);
+  addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL",7,8);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",1,1);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",3,3);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",4,4);
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",7,8);  
+  
   //	Util::SetStyle();	
   //	setTDRStyle();	
 }
 
-JZBAnalysis::~JZBAnalysis(){
-}
+//________________________________________________________________________________________
+JZBAnalysis::~JZBAnalysis(){}
 
+//________________________________________________________________________________________
 void JZBAnalysis::Begin(TFile *f){
 
   f->cd();
@@ -795,145 +842,25 @@ vector<lepton> JZBAnalysis::sortLeptonsByPt(vector<lepton>& leptons) {
   
 }
 
-const bool JZBAnalysis::IsValidTrigger(string name) {
-
-  if(!GetHLTResult(name.c_str())) return false;
-  if(GetHLTPrescale(name.c_str()) != 1) return false;
-  return true; 
-
-}
-
 
 
 //------------------------------------------------------------------------------
 //for triggers, check out
 // http://fwyzard.web.cern.ch/fwyzard/hlt/summary
-const bool JZBAnalysis::passElTriggers() {
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v7") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v8") )        return true;
+const bool JZBAnalysis::passTriggers( std::vector<std::string>& triggerPaths ) {
 
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
+  bool foundUnprescaled(false);
+  bool passed(false);
+  for ( size_t i=0; i<triggerPaths.size(); ++i ) {
+    if ( GetHLTResult(triggerPaths[i]) ) passed = true;
+    if ( GetHLTPrescale(triggerPaths[i]) == 1 ) foundUnprescaled = true;
+  }
 
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v9") )        return true;
-  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v10") )        return true;
-  return false;
+  // Check if found unprescaled trigger...
+  assert(foundUnprescaled);
 
-}
+  return passed;
 
-//------------------------------------------------------------------------------
-const bool JZBAnalysis::passMuTriggers() {
-  if ( IsValidTrigger("HLT_DoubleMu6_v1") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v2") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v3") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v4") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v5") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v6") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v7") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu6_v8") )        return true;
-
-  if ( IsValidTrigger("HLT_DoubleMu7_v1") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v2") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v3") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v4") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v5") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v6") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v7") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v8") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v9") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v10") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v11") )        return true;
-  if ( IsValidTrigger("HLT_DoubleMu7_v12") )        return true;
-
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v5") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v7") )        return true;
-//  if ( IsValidTrigger("HLT_Mu13_Mu8_v8") )        return true;
-//  if ( IsValidTrigger("HLT_Mu13_Mu8_v9") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v10") )        return true;
-  if ( IsValidTrigger("HLT_Mu13_Mu8_v11") )        return true;
-
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v7") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v10") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Mu8_v11") )        return true;
-
-
-  return false;
-} 
-
-//______________________________________________________________________________
-const bool JZBAnalysis::passEMuTriggers() {
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v9") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v13") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v12") )        return true;
-  
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v7") )        return true;
-  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v8") )        return true;
-
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v9") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v12") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v13") )        return true;
-  
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v1") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v2") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v3") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v4") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v5") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v6") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v7") )        return true;
-  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v8") )        return true;
-
-
-
-  return false;
 }
 
 
@@ -978,19 +905,19 @@ void JZBAnalysis::Analyze() {
   if ( fDataType_ != "mc" ) 
     {
       nEvent.is_data=true;
-      if ( passElTriggers() ) 
+      if ( passTriggers(elTriggerPaths) ) 
         {
           counters[EV].fill("... pass electron triggers");
           nEvent.passed_triggers=1;
           nEvent.trigger_bit |= 1;
         } 
-      if ( passMuTriggers() )
+      if ( passTriggers(muTriggerPaths) )
         {
           counters[EV].fill("... pass muon triggers");
           nEvent.passed_triggers=1;
           nEvent.trigger_bit |= (1<<1);
         } 
-      if ( passEMuTriggers() )
+      if ( passTriggers(emTriggerPaths) )
         {
           counters[EV].fill("... pass EM triggers");
           nEvent.passed_triggers=1;

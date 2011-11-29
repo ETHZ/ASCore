@@ -42,10 +42,7 @@ public:
   const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int);
   const bool IsConvertedPhoton( const int eIndex );
-  const bool passElTriggers(void);
-  const bool passEMuTriggers(void);
-  const bool passMuTriggers(void);
-  const bool IsValidTrigger(string);
+  const bool passTriggers(std::vector<std::string>& triggerPaths);
 
   string outputFileName_; // public name of the output file name
 
@@ -64,6 +61,9 @@ private:
   Monitor counters[count_end];
 
   vector<lepton> sortLeptonsByPt(vector<lepton>&);
+  // Add a set of paths to path container
+  void addPath(std::vector<std::string>& paths,std::string base, 
+               unsigned int start, unsigned int end);
 
   template<class T> std::string any2string(T i);
 
@@ -71,6 +71,8 @@ private:
   bool fFullCleaning_;
   bool fisModelScan;
   bool fmakeSmall;
+
+  std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths;
 
   TRandom* rand_;
 
