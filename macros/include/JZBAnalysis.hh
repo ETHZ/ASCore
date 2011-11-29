@@ -45,6 +45,7 @@ public:
   const bool passElTriggers(void);
   const bool passEMuTriggers(void);
   const bool passMuTriggers(void);
+  const bool IsValidTrigger(string);
 
   string outputFileName_; // public name of the output file name
 

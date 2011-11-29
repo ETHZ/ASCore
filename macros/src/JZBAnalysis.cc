@@ -16,12 +16,15 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.67 $";
+string sjzbversion="$Revision: 1.68 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.68  2011/11/25 18:22:45  buchmann
+Updated weighted for MC (trigger efficiency); added masses for GMSB SMS scans; deactivated PU weights for scans
+
 Revision 1.67  2011/11/17 13:36:07  buchmann
 Updated triggers
 
@@ -792,84 +795,93 @@ vector<lepton> JZBAnalysis::sortLeptonsByPt(vector<lepton>& leptons) {
   
 }
 
+const bool JZBAnalysis::IsValidTrigger(string name) {
+
+  if(!GetHLTResult(name.c_str())) return false;
+  if(GetHLTPrescale(name.c_str()) != 1) return false;
+  return true; 
+
+}
+
+
 
 //------------------------------------------------------------------------------
 //for triggers, check out
 // http://fwyzard.web.cern.ch/fwyzard/hlt/summary
 const bool JZBAnalysis::passElTriggers() {
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v7") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v8") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v7") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v8") )        return true;
 
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v5") )        return true;
 
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v9") )        return true;
-  if ( GetHLTResult("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v10") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v7") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v9") )        return true;
+  if ( IsValidTrigger("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v10") )        return true;
   return false;
 
 }
 
 //------------------------------------------------------------------------------
 const bool JZBAnalysis::passMuTriggers() {
-  if ( GetHLTResult("HLT_DoubleMu6_v1") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v2") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v3") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v4") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v5") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v6") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v7") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu6_v8") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v1") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v2") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v3") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v4") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v5") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v6") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v7") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu6_v8") )        return true;
 
-  if ( GetHLTResult("HLT_DoubleMu7_v1") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v2") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v3") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v4") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v5") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v6") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v7") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v8") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v9") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v10") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v11") )        return true;
-  if ( GetHLTResult("HLT_DoubleMu7_v12") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v1") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v2") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v3") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v4") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v5") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v6") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v7") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v8") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v9") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v10") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v11") )        return true;
+  if ( IsValidTrigger("HLT_DoubleMu7_v12") )        return true;
 
-  if ( GetHLTResult("HLT_Mu13_Mu8_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v6") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v7") )        return true;
-//  if ( GetHLTResult("HLT_Mu13_Mu8_v8") )        return true;
-//  if ( GetHLTResult("HLT_Mu13_Mu8_v9") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v10") )        return true;
-  if ( GetHLTResult("HLT_Mu13_Mu8_v11") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v5") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v7") )        return true;
+//  if ( IsValidTrigger("HLT_Mu13_Mu8_v8") )        return true;
+//  if ( IsValidTrigger("HLT_Mu13_Mu8_v9") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v10") )        return true;
+  if ( IsValidTrigger("HLT_Mu13_Mu8_v11") )        return true;
 
-  if ( GetHLTResult("HLT_Mu17_Mu8_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v6") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v7") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v10") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Mu8_v11") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v7") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v10") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Mu8_v11") )        return true;
 
 
   return false;
@@ -877,29 +889,50 @@ const bool JZBAnalysis::passMuTriggers() {
 
 //______________________________________________________________________________
 const bool JZBAnalysis::passEMuTriggers() {
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v9") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v13") )        return true;
-  if ( GetHLTResult("HLT_Mu17_Ele8_CaloIdL_v12") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v7") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v8") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v9") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v13") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdL_v12") )        return true;
+  
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v7") )        return true;
+  if ( IsValidTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v8") )        return true;
 
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v9") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v12") )        return true;
-  if ( GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v13") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v7") )        return true; 
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v8") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v9") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v12") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdL_v13") )        return true;
+  
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v1") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v2") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v3") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v4") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v5") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v6") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v7") )        return true;
+  if ( IsValidTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v8") )        return true;
+
+
+
   return false;
 }
 
