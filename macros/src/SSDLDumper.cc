@@ -1999,7 +1999,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM.open(filename.Data(), ios::trunc);
 	fOUTSTREAM << " Printing Cutflow for Mu/Mu channel..." << endl;
 	// printCutFlow(Muon, DoubleMu1, EleHad2);
-	printCutFlow(Muon, DoubleMu1, DoubleMu4);
+	printCutFlow(Muon, DoubleMu1, DoubleMu5);
 	printCutFlow(Muon, TTJets, GJets200);
 	printCutFlow(Muon, GVJets, ttbarW);
 	printCutFlow(Muon, LM0, LM6);
@@ -2009,7 +2009,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
-	printCutFlow(ElMu, MuEG1, MuEG4);
+	printCutFlow(ElMu, MuEG1, MuEG5);
 	printCutFlow(ElMu, TTJets, GJets200);
 	printCutFlow(ElMu, GVJets, ttbarW);
 	printCutFlow(ElMu, LM0, LM6);
@@ -2019,7 +2019,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
-	printCutFlow(Elec, DoubleEle1, DoubleEle4);
+	printCutFlow(Elec, DoubleEle1, DoubleEle5);
 	printCutFlow(Elec, TTJets, GJets200);
 	printCutFlow(Elec, GVJets, ttbarW);
 	printCutFlow(Elec, LM0, LM6);
@@ -3815,17 +3815,25 @@ bool SSDLDumper::isGoodSecMuon(int muon, float ptcut){
 
 //____________________________________________________________________________
 bool SSDLDumper::isFakeMuon(int muon){
-	if(isLooseMuon(muon) == false) return false;
-	if(MuGenMType[muon] == 2)  return false;
-	if(MuGenMType[muon] == 4)  return false;
+	if(isPromptMuon(muon)) return false;
 	return true;
 }
 bool SSDLDumper::isPromptMuon(int muon){
 	if(isLooseMuon(muon) == false) return false;
-	if(abs(MuGenID[muon]) != 13) return false; // not matched to mu
-	if(MuGenMType[muon] == 4) return true; // W/Z -> mu
-	if(abs(MuGenMID[muon]) == 15 && MuGenGMType[muon] == 4) return true; // W/Z -> tau -> mu
-	if(MuGenMType[muon] == 9) return true; // susy particle
+
+	// Mother or Grandmother is a SM hadron:
+	if(MuGenMType[muon] > 10 || MuGenGMType[muon] > 10) return false;
+
+	// Mother or Grandmother is a SUSY particle:
+	if(MuGenMType[muon] == 9 || MuGenGMType[muon] == 9) return true;
+	// sparticle -> SM hadron -> lepton is taken care of by previous
+
+	// Mother is Gaugeboson but not gluon or gamma:
+	if(MuGenMType[muon] == 4 && abs(MuGenMID[muon]) != 21 && abs(MuGenMID[muon]) != 22) return true;
+
+	// Mother is a tau from W or Z
+	if(abs(MuGenMID[muon]) == 15 && MuGenGMType[muon] == 4) return true;
+	
 	return false;
 }
 bool SSDLDumper::isChargeMatchedMuon(int mu){
@@ -3904,17 +3912,25 @@ bool SSDLDumper::isGoodSecElectron(int ele, float ptcut){
 
 //____________________________________________________________________________
 bool SSDLDumper::isFakeElectron(int ele){
-	if(isLooseElectron(ele) == false) return false;
-	if(ElGenMType[ele] == 2) return false;
-	if(ElGenMType[ele] == 4) return false;
+	if(isPromptElectron(ele)) return false;
 	return true;
 }
 bool SSDLDumper::isPromptElectron(int ele){
 	if(isLooseElectron(ele) == false) return false;
-	if(abs(ElGenID[ele]) != 11) return false; // not matched to e
-	if(ElGenMType[ele] == 4) return true; // W/Z -> el
-	if(abs(ElGenMID[ele]) == 15 && ElGenGMType[ele] == 4) return true; // W/Z -> tau -> el
-	if(ElGenMType[ele] == 9) return true; // susy particle
+
+	// Mother or Grandmother is a SM hadron:
+	if(ElGenMType[ele] > 10 || ElGenGMType[ele] > 10) return false;
+
+	// Mother or Grandmother is a SUSY particle:
+	if(ElGenMType[ele] == 9 || ElGenGMType[ele] == 9) return true;
+	// sparticle -> SM hadron -> lepton is taken care of by previous
+
+	// Mother is Gaugeboson but not gluon or gamma:
+	if(ElGenMType[ele] == 4 && abs(ElGenMID[ele]) != 21 && abs(ElGenMID[ele]) != 22) return true;
+
+	// Mother is a tau from W or Z
+	if(abs(ElGenMID[ele]) == 15 && ElGenGMType[ele] == 4) return true;
+	
 	return false;
 }
 bool SSDLDumper::isChargeMatchedElectron(int ele){
