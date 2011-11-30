@@ -21,6 +21,9 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSec;
+   Float_t         m0;
+   Float_t         m12;
+   Int_t           process;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -61,6 +64,7 @@ public :
    Int_t           NVrtx;
    Float_t         PUWeight;
    Int_t           NMus;
+   Int_t           IsSignalMuon[5];   //[NMus]
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
    Float_t         MuPhi[5];   //[NMus]
@@ -77,6 +81,7 @@ public :
    Int_t           MuGenGMType[5];   //[NMus]
    Float_t         MuMT[5];   //[NMus]
    Int_t           NEls;
+   Int_t           IsSignalElectron[5];   //[NEls]
    Int_t           ElCharge[5];   //[NEls]
    Int_t           ElChIsCons[5];   //[NEls]
    Float_t         ElPt[5];   //[NEls]
@@ -118,6 +123,9 @@ public :
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSec;   //!
+   TBranch        *b_m0;   //!
+   TBranch        *b_m12;   //!
+   TBranch        *b_process;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -158,6 +166,7 @@ public :
    TBranch        *b_NVrtx;   //!
    TBranch        *b_PUWeight;   //!
    TBranch        *b_NMus;   //!
+   TBranch        *b_IsSignalMuon;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
    TBranch        *b_MuPhi;   //!
@@ -174,6 +183,7 @@ public :
    TBranch        *b_MuGenGMType;   //!
    TBranch        *b_MuMT;   //!
    TBranch        *b_NEls;   //!
+   TBranch        *b_IsSignalElectron;   //!
    TBranch        *b_ElCharge;   //!
    TBranch        *b_ElChIsCons;   //!
    TBranch        *b_ElPt;   //!
