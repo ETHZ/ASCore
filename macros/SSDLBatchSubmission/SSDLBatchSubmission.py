@@ -122,7 +122,7 @@ def read_config(config_name):
 
 def print_status(t):
 	n_min = t/60
-	print '[status] still running after', n_min, 'minutes...'
+	print '[status] '+str(int(commands.getoutput('qstat | wc -l'))-2),' jobs still running after', n_min, 'minutes...'
 
 def check_commands():
 	print '[status] checking if `root\' and `hadd\' commands exist...'
@@ -162,31 +162,48 @@ def clean():
 		
 def merge_and_clean():
 	print '[status] now merging and cleaning up...'
-	hadd_string = 'hadd allYields.root'
+	print '[status] starting with the special directories...'
+	for dir in special_dirs:
+		dir_cat = 'cat '
+		for ls in os.listdir(output_location):
+			if os.path.isdir(ls) and dir+'_output' in ls:
+				dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
+		dir_hadd = 'hadd '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root'
+		dir_cat+=' >& '+output_location+dir+'_SignalEvents.txt '
+		os.system(dir_hadd)
+		os.system(dir_cat)
+
+	print '[status] done with the special dirs, now merging all together.'
+	hadd_string = 'hadd '+output_location+'allYields.root'
 	for ls in os.listdir(output_location):
 		if ls.endswith('.root'):
-			hadd_string+=' '+ls
-		if os.path.isdir(output_location+ls):
-			for sub_ls in os.listdir(output_location+ls):
-				if sub_ls.endswith('.root'):
-					hadd_string+=' '+ls+'/'+sub_ls
-	os.system('cd '+output_location+' ; '+hadd_string)
-	sorted_list = sorted(os.listdir(output_location))
-	for obj in sorted_list:
-		if obj.endswith('allYields.root'):
-			continue
-		elif os.path.isdir(output_location+obj):
-			os.system('rm -r '+output_location+obj)
-			continue
-		else:
-			os.system('rm '+output_location+obj)
+			hadd_string+=' '+output_location+ls
+		#if os.path.isdir(output_location+ls):
+		#	for sub_ls in os.listdir(output_location+ls):
+		#		if sub_ls.endswith('.root'):
+		#			hadd_string+=' '+ls+'/'+sub_ls
+	os.system(hadd_string)
+	#sorted_list = sorted(os.listdir(output_location))
+	##for obj in sorted_list:
+	##	if obj.endswith('allYields.root'):
+	##		continue
+		#elif os.path.isdir(output_location+obj):
+		#	os.system('rm -r '+output_location+obj)
+		#	continue
+		#else:
+		#	os.system('rm '+output_location+obj)
 	os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
+	for ls in os.listdir(output_location):
+		if os.path.isdir(output_location+ls) and 'output' in ls:
+			os.system('rm -rf '+output_location+ls)
 		
 
 def do_stuff(config_name):
 	print '[status] starting script...'
 
 	global srm_path, dcap_path, dumper_location, output_location, user, noj, release_dir, output_node
+	global special_dirs
+	special_dirs = []
 	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'
 	dcap_path = 'dcap://t3se01.psi.ch:22125/'
 	
@@ -221,7 +238,6 @@ def do_stuff(config_name):
 	qcd_cardFile = open('tmp/tmp_datacard_qcd.dat' , 'w')
 	ww_cardFile  = open('tmp/tmp_datacard_ww.dat'  , 'w')
 
-	special_dirs = []
 	
 	print '[status] reading info and creating cards...'
 	print '[status] searching for all the files on the SE'
@@ -319,5 +335,6 @@ def main(args):
 	if ('-c' in args) or ('--config' in args):
 		do_stuff(str(args[args.index('-c')+1]))
 
+print '[status] starting...'
 main(sys.argv)
-print '[status] done'
+print '[status] ...done'
