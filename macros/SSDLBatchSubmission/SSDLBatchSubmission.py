@@ -164,9 +164,10 @@ def merge_and_clean():
 	print '[status] now merging and cleaning up...'
 	print '[status] starting with the special directories...'
 	for dir in special_dirs:
+		print '[status] at special dir:', dir
 		dir_cat = 'cat '
 		for ls in os.listdir(output_location):
-			if os.path.isdir(ls) and dir+'_output' in ls:
+			if os.path.isdir(output_location+ls) and ls.startswith(dir+'_output'):
 				if os.path.isfile(output_location+ls+'/'+dir+'_SignalEvents.txt'):
 					dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
 		dir_hadd = 'hadd '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root'
