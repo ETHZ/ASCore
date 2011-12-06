@@ -70,7 +70,8 @@ def mk_dir_string(line):
 def mk_single_string(line, full_location=False, indiv_dir=False):
 	string = dumper_location + ' -v 1'
 	if not full_location:
-		string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+ line.split()[1]
+		string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+ line.split()[1]
+		#string+= ' -i '+ dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+ line.split()[1]
 	else:
 		string+=' -i '+ full_location
 	string+= ' -n '+line.split()[0]
@@ -85,7 +86,8 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 def mk_card_line(line):
 	name = line.split()[0]+'\t'
 	loc  = line.split()[1]+'\t'
-	card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
+	card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
+	#card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
 	return card_line
 
 def read_config(config_name):
@@ -166,34 +168,24 @@ def merge_and_clean():
 	for dir in special_dirs:
 		print '[status] at special dir:', dir
 		dir_cat = 'cat '
+		isdata=False
 		for ls in os.listdir(output_location):
 			if os.path.isdir(output_location+ls) and ls.startswith(dir+'_output'):
 				if os.path.isfile(output_location+ls+'/'+dir+'_SignalEvents.txt'):
 					dir_cat+=output_location+ls+'/'+dir+'_SignalEvents.txt '
+					isdata=True
 		dir_hadd = 'hadd '+output_location+dir+'_Yields.root '+output_location+dir+'_output*/*.root'
 		dir_cat+=' >& '+output_location+dir+'_SignalEvents.txt '
 		os.system(dir_hadd)
-		os.system(dir_cat)
+		if isdata:
+			os.system(dir_cat)
 
 	print '[status] done with the special dirs, now merging all together.'
 	hadd_string = 'hadd '+output_location+'allYields.root'
 	for ls in os.listdir(output_location):
 		if ls.endswith('.root'):
 			hadd_string+=' '+output_location+ls
-		#if os.path.isdir(output_location+ls):
-		#	for sub_ls in os.listdir(output_location+ls):
-		#		if sub_ls.endswith('.root'):
-		#			hadd_string+=' '+ls+'/'+sub_ls
 	os.system(hadd_string)
-	#sorted_list = sorted(os.listdir(output_location))
-	##for obj in sorted_list:
-	##	if obj.endswith('allYields.root'):
-	##		continue
-		#elif os.path.isdir(output_location+obj):
-		#	os.system('rm -r '+output_location+obj)
-		#	continue
-		#else:
-		#	os.system('rm '+output_location+obj)
 	os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
 	for ls in os.listdir(output_location):
 		if os.path.isdir(output_location+ls) and 'output' in ls:
@@ -206,8 +198,6 @@ def do_stuff(config_name):
 	global srm_path, dcap_path, dumper_location, output_location, user, noj, release_dir, output_node
 	global special_dirs
 	special_dirs = []
-	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'
-	dcap_path = 'dcap://t3se01.psi.ch:22125/'
 	
 	print '[status] reading config...'
 	info_dict = read_config(config_name)
@@ -219,6 +209,9 @@ def do_stuff(config_name):
 	batch_script    = info_dict['batch_script']
 	user            = info_dict['user']
 	release_dir     = info_dict['release_dir']
+
+	srm_path   = 'srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/'
+	dcap_path = 'dcap://t3se01.psi.ch:22125/'
 
 	noj = 10
 	
