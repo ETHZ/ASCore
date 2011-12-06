@@ -2940,7 +2940,8 @@ bool SSDLDumper::doubleMuTrigger(){
 	// Only look for mumu events
 	if(fSample->chansel != -1 && fSample->chansel != 0) return false;
 	return ( (HLT_DOUBLEMU7 > 0) || 
-	         (HLT_MU13_MU8  > 0) );
+		     (HLT_MU13_MU8  > 0) ||
+	         (HLT_MU17_MU8  > 0) );
 }
 bool SSDLDumper::doubleElTrigger(){
 	// Pretend MC samples always fire trigger
@@ -3864,27 +3865,26 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 }
 bool SSDLDumper::isLooseElectron(int ele){
 	if(isGoodElectron(ele) == false) return false;
-	if(fabs(ElEta[ele])  < 1.479){ if(ElRelIso[ele] > 1.00) return false;}
-	if(fabs(ElEta[ele]) >= 1.479){ if(ElRelIso[ele] > 0.60) return false;}
+	if(ElRelIso[ele] > 0.60) return false;
 	if(ElChIsCons[ele] != 1) return false;
 	
 	// Additional cuts for CaloIsoVL and TrkIsoVL
 	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
-
+	
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
 		if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
 		if(ElSigmaIetaIeta[ele]  > 0.011) return false; // CaloIdT
 		if(fabs(ElDPhi    [ele]) > 0.15)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL
+		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL // this is looser than WP90
 	}
 	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
-		if(ElHoverE[ele] > 0.075)        return false; // CaloIdT, what about tight??
+		// if(ElHoverE[ele] > 0.075)        return false; // CaloIdT, what about tight??
 		if(ElSigmaIetaIeta[ele]  > 0.031) return false; // CaloIdT
 		if(fabs(ElDPhi    [ele]) > 0.10)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL
+		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL // this is looser than WP90
 	}
 	return true;
 }
