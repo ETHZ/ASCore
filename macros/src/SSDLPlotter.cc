@@ -121,22 +121,19 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WW);
 	fMCBG.push_back(WZ);
 	fMCBG.push_back(ZZ);
-	// fMCBG.push_back(VVTo4L);
 	fMCBG.push_back(GVJets);
+
 	fMCBG.push_back(DPSWW);
-	// fMCBG.push_back(WWplus);
-	// fMCBG.push_back(WWminus);
-	// fMCBG.push_back(TTWplus);
-	// fMCBG.push_back(TTWminus);
-	fMCBG.push_back(TTZplus);
-	fMCBG.push_back(TTZminus);
-	fMCBG.push_back(TTWWplus);
-	fMCBG.push_back(TTWWminus);
-	fMCBG.push_back(WWWplus);
-	fMCBG.push_back(WWWminus);
+	fMCBG.push_back(TTbarW);
+	fMCBG.push_back(TTbarZ);
+	fMCBG.push_back(TTbarG);
 	fMCBG.push_back(WpWp);
 	fMCBG.push_back(WmWm);
-	fMCBG.push_back(ttbarW);
+	fMCBG.push_back(WWZ);
+	fMCBG.push_back(WZZ);
+	fMCBG.push_back(WWG);
+	fMCBG.push_back(WWW);
+	fMCBG.push_back(ZZZ);
 
 	fMCBG.push_back(QCD15);
 	fMCBG.push_back(QCD30);
@@ -173,12 +170,18 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnr.push_back(WW);
 	fMCBGMuEnr.push_back(WZ);
 	fMCBGMuEnr.push_back(ZZ);
-	// fMCBGMuEnr.push_back(VVTo4L);
 	fMCBGMuEnr.push_back(GVJets);
 	fMCBGMuEnr.push_back(DPSWW);
+	fMCBGMuEnr.push_back(TTbarW);
+	fMCBGMuEnr.push_back(TTbarZ);
+	fMCBGMuEnr.push_back(TTbarG);
 	fMCBGMuEnr.push_back(WpWp);
 	fMCBGMuEnr.push_back(WmWm);
-	fMCBGMuEnr.push_back(ttbarW);
+	fMCBGMuEnr.push_back(WWZ);
+	fMCBGMuEnr.push_back(WZZ);
+	fMCBGMuEnr.push_back(WWG);
+	fMCBGMuEnr.push_back(WWW);
+	fMCBGMuEnr.push_back(ZZZ);
 	fMCBGMuEnr.push_back(QCDMuEnr10);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
@@ -188,19 +191,16 @@ void SSDLPlotter::init(TString filename){
 	fMCRareSM.push_back(ZZ);
 	fMCRareSM.push_back(GVJets);
 	fMCRareSM.push_back(DPSWW);
-	// fMCRareSM.push_back(WWplus);
-	// fMCRareSM.push_back(WWminus);
-	// fMCRareSM.push_back(TTWplus);
-	// fMCRareSM.push_back(TTWminus);
-	fMCRareSM.push_back(TTZplus);
-	fMCRareSM.push_back(TTZminus);
-	fMCRareSM.push_back(TTWWplus);
-	fMCRareSM.push_back(TTWWminus);
-	fMCRareSM.push_back(WWWplus);
-	fMCRareSM.push_back(WWWminus);
+	fMCRareSM.push_back(TTbarW);
+	fMCRareSM.push_back(TTbarZ);
+	fMCRareSM.push_back(TTbarG);
 	fMCRareSM.push_back(WpWp);
 	fMCRareSM.push_back(WmWm);
-	fMCRareSM.push_back(ttbarW);
+	fMCRareSM.push_back(WWZ);
+	fMCRareSM.push_back(WZZ);
+	fMCRareSM.push_back(WWG);
+	fMCRareSM.push_back(WWW);
+	fMCRareSM.push_back(ZZZ);
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
@@ -535,43 +535,43 @@ void SSDLPlotter::doAnalysis(){
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	// fLumiNorm = 2096.; // Pre 2011B
-	fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
+	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
+	fLumiNorm = 4680.; // Full 2011B
 	// fLumiNorm = 1014.; // Only 2011B
 
 	// makePileUpPlots(true); // loops on all data!
 	
-	//printCutFlows(fOutputDir + "CutFlow.txt");
-	//printOrigins();
-	//
-	////makeMuIsolationPlots(); // loops on TTbar sample
-	////makeElIsolationPlots(); // loops on TTbar sample
-	//makeElIdPlots();
-	//makeNT2KinPlots();
-	//makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	printCutFlows(fOutputDir + "CutFlow.txt");
+	printOrigins();
 
-	//// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	//// makeMETvsHTPlotPRL();
-	//// makeMETvsHTPlotTau();
-	//// makePRLPlot1();
-	//
-	//// makeRatioPlots(Muon);
-	//makeRatioPlots(Elec);
-	//// makeNTightLoosePlots(Muon);
-	//// makeNTightLoosePlots(Elec);
+	// makeMuIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
+	// makeElIdPlots();
+	// makeNT2KinPlots();
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	// makeMETvsHTPlotPRL();
+	// makeMETvsHTPlotTau();
+	// makePRLPlot1();
+	
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
 
-	//// makeFRvsPtPlots(Muon, SigSup);
-	//makeFRvsPtPlots(Elec, SigSup);
-	//// makeFRvsPtPlots(Muon, ZDecay);
-	//makeFRvsPtPlots(Elec, ZDecay);
-	//// makeFRvsEtaPlots(Muon);
-	//makeFRvsEtaPlots(Elec);
-	//
-	//// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
-	//// makeTTbarClosure();
-	//
-	//makeAllIntPredictions();
-	//makeDiffPrediction();
-	makeRelIsoTTSigPlots();
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
+	
+	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeTTbarClosure();
+	
+	makeAllIntPredictions();
+	// makeDiffPrediction();
+	// makeRelIsoTTSigPlots();
 	//load_msugraInfo("/scratch/mdunser/111111_msugra/msugra_tan10.root");
 }
 
@@ -611,7 +611,7 @@ void SSDLPlotter::load_loxsecs(TFile * results) {
 	  float xsec;
 	  float m0_(-1), m12_(-1);
 	  sscanf(buffer, "%f | %f | %f", &m0_, &m12_, &xsec);
-	  if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f xsec: %10.5", m0_, m12_, xsec) << endl;
+	  if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f xsec: %10.5f", m0_, m12_, xsec) << endl;
 	  lo_xsec->Fill(m0_, m12_, xsec);
 	}
 	results->cd();
@@ -5982,7 +5982,47 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 
 	fLumiNorm = 1000.;
-	const int nsamples = fMCBG.size();
+	// vector<int> samples = fMCBG;
+	vector<int> samples;
+	samples.push_back(TTJets);
+	samples.push_back(TJets_t);
+	samples.push_back(TJets_tW);
+	samples.push_back(TJets_s);
+	samples.push_back(WJets);
+	samples.push_back(DYJets);
+	samples.push_back(GJets40);
+	samples.push_back(GJets100);
+	samples.push_back(GJets200);
+	samples.push_back(WW);
+	samples.push_back(WZ);
+	samples.push_back(ZZ);
+	samples.push_back(GVJets);
+	samples.push_back(DPSWW);
+	samples.push_back(TTbarW);
+	samples.push_back(TTbarZ);
+	samples.push_back(TTbarG);
+	samples.push_back(WpWp);
+	samples.push_back(WmWm);
+	samples.push_back(WWZ);
+	samples.push_back(WZZ);
+	samples.push_back(WWG);
+	samples.push_back(WWW);
+	samples.push_back(ZZZ);
+	// samples.push_back(QCD15);
+	// samples.push_back(QCD30);
+	// samples.push_back(QCD50);
+	// samples.push_back(QCD80);
+	// samples.push_back(QCD120);
+	// samples.push_back(QCD170);
+	// samples.push_back(QCD300);
+	// samples.push_back(QCD470);
+	// samples.push_back(QCD600);
+	// samples.push_back(QCD800);
+	// samples.push_back(QCD1000);
+	// samples.push_back(QCD1400);
+	// samples.push_back(QCD1800);
+	
+	const int nsamples = samples.size();
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions" << endl;
@@ -5993,10 +6033,10 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	///////////////////////////////////////////////////////////////////////////////////
 	float mf(0.), mf_e(0.), mp(0.), mp_e(0.), ef(0.), ef_e(0.), ep(0.), ep_e(0.);
 
-	calculateRatio(fMCBGMuEnr, Muon,     SigSup, mf, mf_e);
-	calculateRatio(fMCBGMuEnr, Muon,     ZDecay, mp, mp_e);
-	calculateRatio(fMCBG,      Elec, SigSup, ef, ef_e);
-	calculateRatio(fMCBG,      Elec, ZDecay, ep, ep_e);
+	calculateRatio(fMCBG, Muon, SigSup, mf, mf_e);
+	calculateRatio(fMCBG, Muon, ZDecay, mp, mp_e);
+	calculateRatio(fMCBG, Elec, SigSup, ef, ef_e);
+	calculateRatio(fMCBG, Elec, ZDecay, ep, ep_e);
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
@@ -6022,8 +6062,8 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 
 	vector<float> scales;
 	vector<TString> names;
-	for(size_t i = 0; i < fMCBG.size(); ++i){
-		Sample *S = fSamples[fMCBG[i]];
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
 		float scale = fLumiNorm / S->lumi;
 		names.push_back(S->sname);
 		scales.push_back(scale);
@@ -6091,16 +6131,21 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// Fiddle with ratios by hand...
-	// mf = 0.03;
-	// ef = 0.05;
-	// mp = 0.95;
-	// ep = 0.80;
+	// mf = 0.067;
+	// ef = 0.25;
+	// mp = 0.90;
+	// ep = 0.90;
+	// Cheating ratios:
+	// mf = 0.04;
+	// ef = 0.17;
+	// mp = 0.90;
+	// ep = 0.90;
 	///////////////////////////////////////////////////////////////////////////////////
 
-	FR->setMFRatio(mf, 0.05); // set error to pure statistical of ratio
-	FR->setEFRatio(ef, 0.05);
-	FR->setMPRatio(mp, 0.05);
-	FR->setEPRatio(ep, 0.05);
+	FR->setMFRatio(mf, mf_e); // set error to pure statistical of ratio
+	FR->setEFRatio(ef, ef_e);
+	FR->setMPRatio(mp, mp_e);
+	FR->setEPRatio(ep, ep_e);
 
 	vector<float> npp_pred_mm,    npf_pred_mm,    nff_pred_mm;
 	vector<float> npp_pred_mm_e1, npf_pred_mm_e1, nff_pred_mm_e1;
@@ -6174,16 +6219,25 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	float npp_cm_sum_ee(0.),    npp_cm_sum_em(0.);
 	float npp_tt_cm_sum_ee(0.), npp_tt_cm_sum_em(0.);
 
-	float ntt_diboson_mm(0.), ntt_diboson_em(0.), ntt_diboson_ee(0.);
-	ntt_diboson_mm += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Muon].nt2;
-	ntt_diboson_mm += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Muon].nt2;
-	ntt_diboson_mm += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Muon].nt2;
-	ntt_diboson_em += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][ElMu].nt2;
-	ntt_diboson_em += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][ElMu].nt2;
-	ntt_diboson_em += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][ElMu].nt2;
-	ntt_diboson_ee += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Elec].nt2;
-	ntt_diboson_ee += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Elec].nt2;
-	ntt_diboson_ee += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Elec].nt2;
+	float ntt_rare_mm(0.), ntt_rare_em(0.), ntt_rare_ee(0.);
+	// ntt_rare_mm += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Muon].nt2;
+	// ntt_rare_mm += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Muon].nt2;
+	// ntt_rare_mm += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Muon].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][ElMu].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][ElMu].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][ElMu].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Elec].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Elec].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Elec].nt2;
+	for(size_t i = 0; i < fMCRareSM.size(); ++i){
+		Sample *S = fSamples[fMCRareSM[i]];
+		float scale = fLumiNorm/S->lumi;
+		ntt_rare_mm += scale*S->numbers[Baseline][Muon].nt2;
+		ntt_rare_em += scale*S->numbers[Baseline][ElMu].nt2;
+		ntt_rare_ee += scale*S->numbers[Baseline][Elec].nt2;
+	}
+
+
 
 	// Squared errors
 	float npp_pred_sum_mm_e1(0.), npf_pred_sum_mm_e1(0.), nff_pred_sum_mm_e1(0.);
@@ -6266,7 +6320,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 
 	OUT << "==========================================================================================================================" << endl;
 	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-	OUT << "          YIELDS ||   Nt2   |   Nt1   |   Nt0   ||   Nt2   |   Nt10  |   Nt01  |   Nt0   ||   Nt2   |   Nt1   |   Nt0   ||" << endl;
+	OUT << "          YIELDS ||   Ntt   |   Ntl   |   Nll   ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	for(size_t i = 0; i < nsamples; ++i){
 		OUT << setw(16) << names[i] << " || ";
@@ -6296,7 +6350,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
 	OUT << endl;
 	OUT << setw(16) << "Channels sum"  << " || ";
-	OUT << Form("                    %6.3f ||                               %6.3f ||                     %6.3f || ",
+	OUT << Form("                    %6.3f ||                               %6.3f ||                      %6.3f || ",
 	ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
@@ -6332,7 +6386,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << setw(7) << Form("%6.3f", nff_sum_ee) << " || ";
 	OUT << endl;
 	OUT << setw(16) << "Channels sum"  << " || ";
-	OUT << Form("                    %6.3f ||                               %6.3f ||                     %6.3f || ",
+	OUT << Form("                    %6.3f ||                               %6.3f ||                      %6.3f || ",
 	npp_sum_mm+npf_sum_mm+nff_sum_mm, npp_sum_em+npf_sum_em+nfp_sum_em+nff_sum_em, npp_sum_ee+npf_sum_ee+nff_sum_ee) << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
@@ -6351,7 +6405,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 		OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
 		OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
 		OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*npf_ee[i]+nfp_ee[i]) << " | ";
+		OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
 		OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
 		OUT << endl;
 	}
@@ -6455,22 +6509,22 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << setw(16) << "Pred. Fakes"  << " || ";
 	OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " |                   || ";
 	OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee+npf_pred_sum_ee) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " |                   || ";
 	OUT << endl;
 	OUT << setw(16) << "Pred. Ch-MID"  << " ||         |                   || ";
 	OUT << setw(7) << Form("%6.3f", ntt_cm_sum_em) << " |                             || ";
 	OUT << setw(7) << Form("%6.3f", ntt_cm_sum_ee) << " |                   || ";
 	OUT << endl;
 	OUT << setw(16) << "Pred. DiBoson"  << " || ";
-	OUT << setw(7) << Form("%6.3f", ntt_diboson_mm) << " |                   || ";
-	OUT << setw(7) << Form("%6.3f", ntt_diboson_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", ntt_diboson_ee) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", ntt_rare_mm) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", ntt_rare_em) << " |                             || ";
+	OUT << setw(7) << Form("%6.3f", ntt_rare_ee) << " |                   || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Total BG Pred."  << " || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm+ntt_diboson_mm) << " |                   || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_diboson_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee+npf_pred_sum_ee+ntt_cm_sum_ee+ntt_diboson_ee) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em) << " |                             || ";
+	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee) << " |                   || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Observed"  << " || ";
@@ -6480,19 +6534,19 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
-	OUT << "===================================================================================================================================" << endl;
-	OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                      |" << endl;
+	OUT << "===========================================================================================================================================" << endl;
+	OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
 	for(size_t i = 0; i < nsamples; ++i){
 		OUT << setw(16) << left << names[i];
-		OUT << Form("  MM || %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) |                          |",
+		OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 		npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
 		OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
-		OUT << Form("  EM || %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) |",
+		OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
 		npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
-		OUT << Form("                  EE || %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) | %7.3f ± %7.3f (stat) |                          |",
+		OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 		npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
 	}
-	OUT << "===================================================================================================================================" << endl;
+	OUT << "===========================================================================================================================================" << endl;
 	OUT << endl;
 
 	OUT << "==========================================================================================================================" << endl;
@@ -6539,8 +6593,8 @@ void SSDLPlotter::makeTTbarClosure(){
 	// calculateRatio(ttjets, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
 	// calculateRatio(ttjets, Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
 	// calculateRatio(ttjets, Elec, ZDecay, elpratio_allmc, elpratio_allmc_e);
-	calculateRatio(fMCBGMuEnr, Muon,     SigSup, mufratio_allmc, mufratio_allmc_e);
-	calculateRatio(fMCBGMuEnr, Muon,     ZDecay, mupratio_allmc, mupratio_allmc_e);
+	calculateRatio(fMCBGMuEnr, Muon, SigSup, mufratio_allmc, mufratio_allmc_e);
+	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mupratio_allmc, mupratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, ZDecay, elpratio_allmc, elpratio_allmc_e);
 

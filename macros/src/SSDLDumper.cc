@@ -264,7 +264,6 @@ void SSDLDumper::readDatacard(TString cardfile){
 	char inputfile[500], sname[100];
 	int datamc, chan, color;
 	float lumi;
-
 	if(fVerbose > 2) cout << "------------------------------------" << endl;
 	if(fVerbose > 2) cout << "Reading datacard  " << cardfile << endl;
 	int counter(0);
@@ -325,6 +324,7 @@ const double *SSDLDumper::getEtaBins (gChannel chan){
 void SSDLDumper::loop(){
 	for(size_t i = 0; i < fSamples.size(); ++i){
 		fSample = fSamples[i]; // TODO: Clean this up, call the triggers with an argument
+		cout << fOutputDir << endl;
 		fOutputFileName = fOutputDir + fSample->sname + "_Yields.root";
 		loopEvents(fSample);
 	}
@@ -2001,7 +2001,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	// printCutFlow(Muon, DoubleMu1, EleHad2);
 	printCutFlow(Muon, DoubleMu1, DoubleMu5);
 	printCutFlow(Muon, TTJets, GJets200);
-	printCutFlow(Muon, GVJets, ttbarW);
+	printCutFlow(Muon, GVJets, WmWm);
 	printCutFlow(Muon, LM0, LM6);
 	printCutFlow(Muon, LM7, LM13);
 	printCutFlow(Muon, QCDMuEnr10, QCD470);
@@ -2011,7 +2011,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
 	printCutFlow(ElMu, MuEG1, MuEG5);
 	printCutFlow(ElMu, TTJets, GJets200);
-	printCutFlow(ElMu, GVJets, ttbarW);
+	printCutFlow(ElMu, GVJets, WmWm);
 	printCutFlow(ElMu, LM0, LM6);
 	printCutFlow(ElMu, LM7, LM13);
 	printCutFlow(ElMu, QCDMuEnr10, QCD470);
@@ -2021,7 +2021,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
 	printCutFlow(Elec, DoubleEle1, DoubleEle5);
 	printCutFlow(Elec, TTJets, GJets200);
-	printCutFlow(Elec, GVJets, ttbarW);
+	printCutFlow(Elec, GVJets, WmWm);
 	printCutFlow(Elec, LM0, LM6);
 	printCutFlow(Elec, LM7, LM13);
 	printCutFlow(Elec, QCDMuEnr10, QCD470);

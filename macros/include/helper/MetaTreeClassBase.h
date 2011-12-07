@@ -32,6 +32,8 @@ public :
    Int_t           HLT_DOUBLEMU7_PS;
    Int_t           HLT_MU13_MU8;
    Int_t           HLT_MU13_MU8_PS;
+   Int_t           HLT_MU17_MU8;
+   Int_t           HLT_MU17_MU8_PS;
    Int_t           HLT_ELE17_ELE8;
    Int_t           HLT_ELE17_ELE8_PS;
    Int_t           HLT_ELE17_ELE8_TIGHT;
@@ -134,6 +136,8 @@ public :
    TBranch        *b_HLT_DOUBLEMU7_PS;   //!
    TBranch        *b_HLT_MU13_MU8;   //!
    TBranch        *b_HLT_MU13_MU8_PS;   //!
+   TBranch        *b_HLT_MU17_MU8;   //!
+   TBranch        *b_HLT_MU17_MU8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8;   //!
    TBranch        *b_HLT_ELE17_ELE8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8_TIGHT;   //!
@@ -304,6 +308,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
    fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
    fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
+   fChain->SetBranchAddress("HLT_MU17_MU8", &HLT_MU17_MU8, &b_HLT_MU17_MU8);
+   fChain->SetBranchAddress("HLT_MU17_MU8_PS", &HLT_MU17_MU8_PS, &b_HLT_MU17_MU8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
