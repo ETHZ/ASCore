@@ -414,10 +414,10 @@ public:
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
 
 	virtual bool isSigSupMuEvent();
-	virtual bool isZMuMuEvent();
+	virtual bool isZMuMuEvent(int&, int&);
 
 	virtual bool isSigSupElEvent();
-	virtual bool isZElElEvent(int&);
+	virtual bool isZElElEvent(int&, int&);
 
 	virtual bool isGenMatchedSUSYDiLepEvent();
 	virtual bool isGenMatchedSUSYDiLepEvent(int&, int&);

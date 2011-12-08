@@ -486,16 +486,17 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 			if(S->datamc > 0) S->region[reg][hilo].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, puweight);
 		}
 	}
-	if(doubleMuTrigger() && isZMuMuEvent()){
-		if( isTightMuon(0) ){
-			S->region[reg][hilo].mm.pntight->Fill(MuPt[0], fabs(MuEta[0]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(0)-0.5, puweight);
+	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
+		if( isTightMuon(mu2) ){
+			S->region[reg][hilo].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), puweight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, puweight);
 		}
-		if( isLooseMuon(0) ){
-			S->region[reg][hilo].mm.pnloose->Fill(MuPt[0], fabs(MuEta[0]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(0)-0.5, puweight);
+		if( isLooseMuon(mu2) ){
+			S->region[reg][hilo].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), puweight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, puweight);
 		}
 	}				
+	resetHypLeptons();
 
 	// EE Channel
 	fCurrentChannel = Elec;
@@ -567,16 +568,17 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 		}
 	}
 	int elind;
-	if(doubleElTrigger() && isZElElEvent(elind)){
-		if( isTightElectron(elind) ){
-			S->region[reg][hilo].ee.pntight->Fill(ElPt[elind], fabs(ElEta[elind]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(elind)-0.5, puweight);
+	if(doubleElTrigger() && isZElElEvent(el1, el2)){
+		if( isTightElectron(el2) ){
+			S->region[reg][hilo].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), puweight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, puweight);
 		}
-		if( isLooseElectron(elind) ){
-			S->region[reg][hilo].ee.pnloose->Fill(ElPt[elind], fabs(ElEta[elind]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(elind)-0.5, puweight);
+		if( isLooseElectron(el2) ){
+			S->region[reg][hilo].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), puweight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, puweight);
 		}
 	}
+	resetHypLeptons();
 
 	// EMu Channel
 	fCurrentChannel = ElMu;
@@ -3529,8 +3531,7 @@ bool SSDLDumper::isSigSupMuEvent(){
 	if(NMus > 1)                    return false;
 	return true;
 }
-bool SSDLDumper::isZMuMuEvent(){
-	int mu1(-1), mu2(-1);
+bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	if(hasLooseMuons(mu1, mu2) < 2)  return false;
 	// if(!isTightMuon(0) && !isTightMuon(1)) return false; // at least one tight
 
@@ -3562,10 +3563,8 @@ bool SSDLDumper::isSigSupElEvent(){
 	if(NEls > 1)                        return false;
 	return true;
 }
-bool SSDLDumper::isZElElEvent(int &elind){
-	int el1(-1), el2(-1);
+bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	if(hasLooseElectrons(el1, el2) < 2)  return false;
-	// if(!isTightElectron(el1) && !isTightElectron(el2)) return false; // at least one tight
 
 	if(ElCharge[el1] == ElCharge[el2]) return false; // os
 
@@ -3578,13 +3577,6 @@ bool SSDLDumper::isZElElEvent(int &elind){
 
 	setHypLepton1(el1, Elec);
 	setHypLepton2(el2, Elec);
-
-
-	// If only the harder one tight or both tight, return the softer one
-	// If only the softer one tight, return the harder one
-	elind = el1;
-	// elind = el2;
-	// if(isTightElectron(el2) && !isTightElectron(el1)) elind = el1;
 
 	if(pfMET > 20.) return false;
 	if(!passesNJetCut(2)) return false;
@@ -3787,6 +3779,10 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 	if(ptcut < 0.) ptcut = fC_minMu2pt;
 	if(MuPt[muon] < ptcut) return false;
 	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
+
+	// Look away now...
+	if(Run == 177719 && Event == 152761720 && MuPt[muon] > 500.) return false;
+
 	return true;
 }
 bool SSDLDumper::isLooseMuon(int muon){
