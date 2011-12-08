@@ -17,20 +17,17 @@
 /susy/ntuples/mc/V02-05-00/GVJets_7TeV-madgraph-Summer11-PU_S4/                    '-s -v 1' -1 20
 
 # Rare SM
-/susy/ntuples/mc/V02-04-03/DoublePartonWWFastSim/                                  '-s -v 1' 1 -1
-/susy/ntuples/mc/V02-04-03/ttbarW/                                                 '-s -v 1' 1 -1
+/susy/ntuples/mc/V02-05-01/DoublePartonWWFastSim/                                  '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/WWZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/WZZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/WWPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv1/              '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/ZZZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/WWW_TuneZ2_7TeV-madgraph/                               '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/TTPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv3/              '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/TTW_TuneZ2_7TeV-madgraphCMSSW42xPUv2/                   '-s -v 1' -1 20 
+/susy/ntuples/mc/V02-05-01/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3/                   '-s -v 1' -1 20 
 /susy/ntuples/mc/V02-04-03/WplusWplus/                                             '-s -v 1' 1 -1
 /susy/ntuples/mc/V02-04-03/WminusWminus/                                           '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTWTo2Lplus2Nu_NTP/                                 '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTWTo2Lminus2Nu_NTP/                                '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTZTo2Lplus2Nu_NTP/                                 '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTZTo2Lminus2Nu_NTP/                                '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTWWTo2Lplus2Nu_NTP/                                '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/TTWWTo2Lminus2Nu_NTP/                               '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/WWWTo2Lplus2Nu_NTP/                                 '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/WWWTo2Lminus2Nu_NTP/                                '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/WWplusTo2L2Nu_NTP/                                  '-s -v 1' 1 -1
-/stiegerb/ntuples/mc/V02-04-07/WWminusTo2L2Nu_NTP/                                 '-s -v 1' 1 -1
 
 # SUSY Signal
 /susy/ntuples/mc/V02-01-01/LM0_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1' -1 20
