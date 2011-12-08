@@ -1,3 +1,7 @@
+## Latest runs
+/susy/ntuples/data/V02-05-00b/DoubleElectron-Run2011B-PromptReco-v1-AOD/  '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' -1 5
+/susy/ntuples/data/V02-05-00b/MuEG-Run2011B-PromptReco-v1-AOD/            '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' -1 5
+/susy/ntuples/data/V02-05-00b/DoubleMu-Run2011B-PromptReco-v1-AOD/        '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' -1 5
 ## Run2011B
 /susy/ntuples/data/V02-05-00/DoubleElectron-Run2011B-PromptReco-v1-AOD/        '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' 20 -1
 /susy/ntuples/data/V02-05-00/MuEG-Run2011B-PromptReco-v1-AOD/                  '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' 20 -1 
