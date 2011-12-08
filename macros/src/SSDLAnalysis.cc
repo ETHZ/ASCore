@@ -42,7 +42,7 @@ void SSDLAnalysis::Begin(const char* filename){
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), 100, 10, 2010, 38, 10, 770);
 		}
 	}
-	SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
+	//SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
 	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
 	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
 	BookTree();

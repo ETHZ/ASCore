@@ -57,8 +57,19 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 }
 
 // Method called before starting the event loop
+// there are two function for with/without PU reweighting
 void SSDLAnalyzer::BeginJob(){
 	// fSSDLAnalysis->SetOutputDir(fOutputDir);
+	fSSDLAnalysis->SetOutputFile(fOutputFile);
+	fSSDLAnalysis->SetVerbose(fVerbose);
+	fSSDLAnalysis->SetData(fIsData);
+	fSSDLAnalysis->DoFillEffTree(fDoFillEffTree);
+	fSSDLAnalysis->Begin();
+}
+
+void SSDLAnalyzer::BeginJob(std::string dataPuFile, std::string mcPuFile){
+	// fSSDLAnalysis->SetOutputDir(fOutputDir);
+	fSSDLAnalysis->SSDLAnalysis::SetPileUpSrc( dataPuFile , mcPuFile); //HERE
 	fSSDLAnalysis->SetOutputFile(fOutputFile);
 	fSSDLAnalysis->SetVerbose(fVerbose);
 	fSSDLAnalysis->SetData(fIsData);

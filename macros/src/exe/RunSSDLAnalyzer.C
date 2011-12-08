@@ -17,7 +17,7 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-s] [-v verbose] [-m maxevents] [-e filleff] [-j JSON] [-p pthat] [-l] file1 [... filen]" << endl;
+	cout << "Usage: RunSSDLAnalyzer [-o outfile] [-s] [-v verbose] [-m maxevents] [-e filleff] [-j JSON] [-p pthat] [-l] [-x data PU file] [-y MC PU file] file1 [... filen]" << endl;
 	cout << "  where:" << endl;
 	cout << "     outfile   is the output file                    " << endl;
 	cout << "                default is ssdlfile.root             " << endl;
@@ -35,6 +35,8 @@ void usage( int status = 0 ) {
 	cout << "     filen     are the input files (by default: ROOT files)" << endl;
 	cout << "               with option -l, these are read as text files" << endl;
 	cout << "               with one ROOT file name per line      " << endl;
+	cout << "     -x        path of PU distribution file of data" << endl;
+	cout << "     -y        path of PU distribution file of MC" << endl;
 	cout << endl;
 	exit(status);
 }
@@ -46,6 +48,8 @@ int main(int argc, char* argv[]) {
 	bool isdata = true;
 	// TString outputdir = "TempOutput/";
 	TString outputfile = "ssdlfile.root";
+	std::string datapufile;
+	std::string mcpufile;
 	string jsonfile = "";
 	int verbose = 0;
 	Long64_t maxevents = -1;
@@ -54,7 +58,7 @@ int main(int argc, char* argv[]) {
 
 // Parse options
 	char ch;
-	while ((ch = getopt(argc, argv, "o:sv:p:m:j:e:lh?")) != -1 ) {
+	while ((ch = getopt(argc, argv, "o:sv:p:m:j:e:x:y:lh?")) != -1 ) {
 		switch (ch) {
 			case 'o': outputfile = TString(optarg); break;
 			case 'l': isList     = true; break;
@@ -64,6 +68,8 @@ int main(int argc, char* argv[]) {
 			case 'm': maxevents  = atoi(optarg); break;
 			case 'j': jsonfile   = string(optarg); break;
 			case 'e': doeff      = atoi(optarg); break;
+			case 'x': datapufile = string(optarg); break;
+			case 'y': mcpufile   = string(optarg); break;
 			case '?':
 			case 'h': usage(0); break;
 			default:
@@ -100,6 +106,8 @@ int main(int argc, char* argv[]) {
 	cout << "OutputFile is:    " << outputfile << endl;
 	cout << "Verbose level is: " << verbose << endl;
 	cout << "JSON file is:     " << (jsonfile.length()>0?jsonfile:"empty") << endl;
+	cout << "PU distribution file of data is: " << datapufile << endl;
+	cout << "PU distribution file of MC is: " << mcpufile << endl;
 	cout << "Number of events: " << theChain->GetEntries() << endl;
 	if(pthatcut > -1.) cout << "Lower pthat cut: " << pthatcut << endl;
 	cout << "Running on " << (isdata?"data":"MC") << endl;
@@ -107,13 +115,15 @@ int main(int argc, char* argv[]) {
 
 	SSDLAnalyzer *tA = new SSDLAnalyzer(theChain);
 	tA->SetOutputFile(outputfile);
+	//tA->SetPuFiles(datapufile, mcpufile);
 	tA->SetData(isdata);
 	tA->SetVerbose(verbose);
 	tA->SetMaxEvents(maxevents);
 	if ( jsonfile.length() ) tA->ReadJSON(jsonfile.c_str());
 	tA->SetPtHatCut(pthatcut);
 	tA->DoFillEffTree(doeff);
-	tA->BeginJob();
+	if (isdata) tA->BeginJob();
+	else tA->BeginJob(datapufile, mcpufile);
 	tA->Loop();
 	tA->EndJob();
 	delete tA;
