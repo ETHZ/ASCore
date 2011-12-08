@@ -15,6 +15,10 @@
 /susy/ntuples/mc/V02-05-00/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
 /susy/ntuples/mc/V02-05-00/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
 /susy/ntuples/mc/V02-05-00/GVJets_7TeV-madgraph-Summer11-PU_S4/                    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
+/susy/ntuples/mc/V02-05-01/WGstarToLNu2E_TuneZ2_7TeV-madgraph/                     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
+/susy/ntuples/mc/V02-05-01/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph/                    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
+/susy/ntuples/mc/V02-05-01/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph/                   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
+
 
 # Rare SM
 /susy/ntuples/mc/V02-05-01/DoublePartonWWFastSim/                                  '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
