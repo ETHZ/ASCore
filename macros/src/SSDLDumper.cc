@@ -54,14 +54,14 @@ float SSDLDumper::Region::maxMet  [SSDLDumper::gNREGIONS] = {      7000.,       
 int   SSDLDumper::Region::minNjets[SSDLDumper::gNREGIONS] = {         2 ,              2 ,           2 ,           2 ,            2 ,           2 ,            2 ,           2 ,             2 ,          0 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
-double SSDLDumper::gMuPtbins [gNMuPtbins+1]  = {5., 10., 15., 20., 25., 35., 45, 60.};
-double SSDLDumper::gMuPt2bins[gNMuPt2bins+1] = {5., 10., 15., 20., 25., 35., 45, 60.};
-double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 1.0, 1.479, 2.0, 2.5};
+double SSDLDumper::gMuPtbins [gNMuPtbins+1]  = {10., 15., 20., 25., 30., 35., 40., 50., 60.};
+double SSDLDumper::gMuPt2bins[gNMuPt2bins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.};
+double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 
 // Electron Binning //////////////////////////////////////////////////////////////
-double SSDLDumper::gElPtbins [gNElPtbins+1]  = {10., 15., 20., 25., 35., 55.};
-double SSDLDumper::gElPt2bins[gNElPt2bins+1] = {10., 15., 20., 25., 35., 55.};
-double SSDLDumper::gElEtabins[gNElEtabins+1] = {0., 1.0, 1.479, 2.0, 2.5};
+double SSDLDumper::gElPtbins [gNElPtbins+1]  = {10., 15., 20., 25., 30., 40., 50., 60.};
+double SSDLDumper::gElPt2bins[gNElPt2bins+1] = {10., 15., 20., 25., 30., 40., 50., 60.};
+double SSDLDumper::gElEtabins[gNElEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 //////////////////////////////////////////////////////////////////////////////////
 
 // NVrtx Binning //////////////////////////////////////////////////////////////
@@ -71,9 +71,9 @@ double SSDLDumper::gNVrtxBins[gNNVrtxBins+1]  = {0, 2, 4, 6, 8, 10, 12, 14, 16, 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
 TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2"};
-int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = { 20 ,   20 ,      8 ,   20 ,   20 ,        30  ,        30  ,        30  ,        30  ,   20 };
-float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {100.,    0.,      0.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.};
-float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {800.,  210.,      8.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.};
+int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      6 ,   20 ,   20 ,        20  ,        20  ,        20  ,        20  ,   20 };
+float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      2.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.};
+float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 300.,      8.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} (GeV)",
                                                                      "E_{T}^{miss} (GeV)",
                                                                      "N_{Jets}",

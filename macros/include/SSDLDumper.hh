@@ -17,12 +17,12 @@ class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuPtbins  = 7;
-	static const int gNMuPt2bins = 7;
-	static const int gNMuEtabins = 4;
-	static const int gNElPtbins  = 5;
-	static const int gNElPt2bins = 5;
-	static const int gNElEtabins = 4;
+	static const int gNMuPtbins  = 8;
+	static const int gNMuPt2bins = 8;
+	static const int gNMuEtabins = 5;
+	static const int gNElPtbins  = 7;
+	static const int gNElPt2bins = 7;
+	static const int gNElEtabins = 5;
 	
 	static const int gNNVrtxBins = 9;
 

@@ -5050,11 +5050,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
 		Sample *S = fSamples[fMCRareSM[i]];
 		float scale = fLumiNorm/S->lumi;
-		nt2_rare_mc_mm += scale * S->numbers[reg][Muon].nt2;
-		nt2_rare_mc_em += scale * S->numbers[reg][ElMu].nt2;
-		nt2_rare_mc_ee += scale * S->numbers[reg][Elec].nt2;
-		
-		nt2_rare_mc_mm_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Muon].nt2);
+
+		float temp_nt2_mm  = scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt2_em  = scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt2_ee  = scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+
+		nt2_rare_mc_mm += temp_nt2_mm;
+		nt2_rare_mc_em += temp_nt2_em;
+		nt2_rare_mc_ee += temp_nt2_ee;
+
+		nt2_rare_mc_mm_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Muon].nt2); // for stat error take actual entries, not pileup weighted integral...
 		nt2_rare_mc_em_e1 += scale*scale * FR->getEStat2(S->numbers[reg][ElMu].nt2);
 		nt2_rare_mc_ee_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Elec].nt2);
 	}
