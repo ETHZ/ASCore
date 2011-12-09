@@ -61,7 +61,7 @@ public:
 		MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJets, TJets_t, TbarJet_t, TJets_tW, TbarJet_tW, TJets_s, TbarJet_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
-		GVJets, WW, WZ, ZZ, 
+		GVJets, WGstarE, WGstarMu, WGstarTau, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
