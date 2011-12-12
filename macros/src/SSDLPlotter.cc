@@ -550,16 +550,16 @@ void SSDLPlotter::doAnalysis(){
 	makeElIdPlots();
 	makeNT2KinPlots();
 	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
+	makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	makeMETvsHTPlotPRL();
-	// makeMETvsHTPlotTau();
-	// makePRLPlot1();
+	makeMETvsHTPlotTau();
+	makePRLPlot1();
 
 	makeRatioPlots(Muon);
 	makeRatioPlots(Elec);
 	makeNTightLoosePlots(Muon);
 	makeNTightLoosePlots(Elec);
-	
+
 	makeFRvsPtPlots(Muon, SigSup);
 	makeFRvsPtPlots(Elec, SigSup);
 	makeFRvsPtPlots(Muon, ZDecay);
@@ -600,7 +600,6 @@ void SSDLPlotter::load_kfacs(TFile * results) {
       kfac_[i]->Write();
     }
 }
-
 void SSDLPlotter::load_loxsecs(TFile * results) {
 	ifstream IN("msugraSSDL/xsec_lo.txt");
 	results->cd();
@@ -3479,14 +3478,14 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	h_ptratio_data->SetMarkerColor(kBlack);
 	h_ptratio_data->SetMarkerStyle(20);
-	h_ptratio_data->SetMarkerSize(1.3);
+	h_ptratio_data->SetMarkerSize(1.5);
 	h_ptratio_data->SetLineWidth(2);
 	h_ptratio_data->SetLineColor(kBlack);
 	h_ptratio_data->SetFillColor(kBlack);
 	
 	h_ptratio_mc  ->SetMarkerColor(kRed);
-	h_ptratio_mc  ->SetMarkerStyle(20);
-	h_ptratio_mc  ->SetMarkerSize(1.3);
+	h_ptratio_mc  ->SetMarkerStyle(23);
+	h_ptratio_mc  ->SetMarkerSize(1.5);
 	h_ptratio_mc  ->SetLineWidth(2);
 	h_ptratio_mc  ->SetLineColor(kRed);
 	h_ptratio_mc  ->SetFillColor(kRed);
@@ -3497,10 +3496,10 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	lat->SetTextSize(0.04);
 	
 	TLegend *leg;
-	if(fp == SigSup) leg = new TLegend(0.70,0.75,0.89,0.88);
-	if(fp == ZDecay) leg = new TLegend(0.70,0.15,0.89,0.28);
-	leg->AddEntry(h_ptratio_data, "Data","f");
-	leg->AddEntry(h_ptratio_mc,   "MC",  "f");
+	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
+	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
+	leg->AddEntry(h_ptratio_data, "Data",       "p");
+	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetBorderSize(0);
@@ -3522,7 +3521,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(fp == ZDecay) fpname = "P";
 	
 	// Util::PrintNoEPS( c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, fpname + "Ratio_" + name + "_Pt", fOutputDir + fOutputSubDir);
 	delete h_ptratio_mc, h_ptratio_data;
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
@@ -3654,21 +3653,21 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	h_etaratio_data->SetMinimum(0.0);
 	h_etaratio_mc  ->SetMinimum(0.0);
 
-	if(chan == Muon)     h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
+	if(chan == Muon) h_etaratio_mc->SetXTitle(convertVarName("MuEta[0]"));
 	if(chan == Elec) h_etaratio_mc->SetXTitle(convertVarName("ElEta[0]"));
 	h_etaratio_mc->GetYaxis()->SetTitleOffset(1.2);
 	h_etaratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
 	
 	h_etaratio_data->SetMarkerColor(kBlack);
 	h_etaratio_data->SetMarkerStyle(20);
-	h_etaratio_data->SetMarkerSize(1.3);
+	h_etaratio_data->SetMarkerSize(1.5);
 	h_etaratio_data->SetLineWidth(2);
 	h_etaratio_data->SetLineColor(kBlack);
 	h_etaratio_data->SetFillColor(kBlack);
 	
 	h_etaratio_mc  ->SetMarkerColor(kRed);
-	h_etaratio_mc  ->SetMarkerStyle(20);
-	h_etaratio_mc  ->SetMarkerSize(1.3);
+	h_etaratio_mc  ->SetMarkerStyle(23);
+	h_etaratio_mc  ->SetMarkerSize(1.5);
 	h_etaratio_mc  ->SetLineWidth(2);
 	h_etaratio_mc  ->SetLineColor(kRed);
 	h_etaratio_mc  ->SetFillColor(kRed);
@@ -3687,9 +3686,9 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
 	
-	TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-	leg->AddEntry(h_etaratio_data, "Data","f");
-	leg->AddEntry(h_etaratio_mc,   "MC",  "f");
+	TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
+	leg->AddEntry(h_etaratio_data, "Data",       "p");
+	leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetBorderSize(0);
@@ -3865,14 +3864,14 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 
 		h_ratio_data->SetMarkerColor(kBlack);
 		h_ratio_data->SetMarkerStyle(20);
-		h_ratio_data->SetMarkerSize(1.3);
+		h_ratio_data->SetMarkerSize(1.5);
 		h_ratio_data->SetLineWidth(2);
 		h_ratio_data->SetLineColor(kBlack);
 		h_ratio_data->SetFillColor(kBlack);
 
 		h_ratio_mc  ->SetMarkerColor(kRed);
-		h_ratio_mc  ->SetMarkerStyle(20);
-		h_ratio_mc  ->SetMarkerSize(1.3);
+		h_ratio_mc  ->SetMarkerStyle(23);
+		h_ratio_mc  ->SetMarkerSize(1.5);
 		h_ratio_mc  ->SetLineWidth(2);
 		h_ratio_mc  ->SetLineColor(kRed);
 		h_ratio_mc  ->SetFillColor(kRed);
@@ -3882,9 +3881,9 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		lat->SetTextColor(kBlack);
 		lat->SetTextSize(0.04);
 	
-		TLegend *leg = new TLegend(0.70,0.75,0.89,0.88);
-		leg->AddEntry(h_ratio_data, "Data","f");
-		leg->AddEntry(h_ratio_mc,   "MC",  "f");
+		TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
+		leg->AddEntry(h_ratio_data, "Data",         "p");
+		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
@@ -4842,20 +4841,25 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float nt2sum_mm(0.), nt10sum_mm(0.), nt0sum_mm(0.);
 	float nt2sum_em(0.), nt10sum_em(0.), nt01sum_em(0.), nt0sum_em(0.);
 	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
+
+	const float mumuTrigScale = 0.92;
+	const float emuTrigScale  = 0.95;
+	const float eeTrigScale   = 1.00;
+
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->lumi;
 
-		float temp_nt2_mm  = scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
-		float temp_nt10_mm = scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
-		float temp_nt2_em  = scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
-		float temp_nt10_em = scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1); nt10sum_em += temp_nt10_em;
-		float temp_nt01_em = scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1); nt01sum_em += temp_nt01_em;
-		float temp_nt0_em  = scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
-		float temp_nt2_ee  = scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
-		float temp_nt10_ee = scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt2_mm  = mumuTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
+		float temp_nt10_mm = mumuTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
+		float temp_nt0_mm  = mumuTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt2_em  = emuTrigScale *scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
+		float temp_nt10_em = emuTrigScale *scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1); nt10sum_em += temp_nt10_em;
+		float temp_nt01_em = emuTrigScale *scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1); nt01sum_em += temp_nt01_em;
+		float temp_nt0_em  = emuTrigScale *scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
+		float temp_nt2_ee  = eeTrigScale  *scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
+		float temp_nt10_ee = eeTrigScale  *scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1); nt10sum_ee += temp_nt10_ee;
+		float temp_nt0_ee  = eeTrigScale  *scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -4875,16 +4879,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->lumi;
 
-		float temp_nt2_mm  = scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt10_mm = scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt0_mm  = scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt10_em = scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt01_em = scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt0_em  = scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt10_ee = scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt0_ee  = scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm  = mumuTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt10_mm = mumuTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt0_mm  = mumuTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt2_em  = emuTrigScale *scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt10_em = emuTrigScale *scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt01_em = emuTrigScale *scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt0_em  = emuTrigScale *scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt2_ee  = eeTrigScale  *scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt10_ee = eeTrigScale  *scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt0_ee  = eeTrigScale  *scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -4902,9 +4906,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	FakeRatios *FR = new FakeRatios();
-	FR->setNToyMCs(100); // speedup
+	FR->setNToyMCs(100);
 	FR->setAddESyst(0.5);
-	// FR->setNToyMCs(100);
 	// FR->setAddESyst(0.0);
 
 	// FR->setMFRatio(mufratio_data, 0.10);
@@ -4993,18 +4996,18 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->lumi;
 		
-		mc_os_em_bb_sum += scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
-		mc_os_em_ee_sum += scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
-		mc_os_ee_bb_sum += scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries();
-		mc_os_ee_eb_sum += scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries();
-		mc_os_ee_ee_sum += scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries();
+		mc_os_em_bb_sum += emuTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
+		mc_os_em_ee_sum += emuTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
+		mc_os_ee_bb_sum += eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries();
+		mc_os_ee_eb_sum += eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries();
+		mc_os_ee_ee_sum += eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries();
 
 		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries() << " || ";
-		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << emuTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << emuTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << eeTrigScale *scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries() << " || ";
 		OUT << endl;
 	}	
 	OUT << "-----------------------------------------------------------------------" << endl;
@@ -5051,17 +5054,17 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCRareSM[i]];
 		float scale = fLumiNorm/S->lumi;
 
-		float temp_nt2_mm  = scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm  = mumuTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt2_em  = emuTrigScale *scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt2_ee  = eeTrigScale  *scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
 		nt2_rare_mc_ee += temp_nt2_ee;
 
-		nt2_rare_mc_mm_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Muon].nt2); // for stat error take actual entries, not pileup weighted integral...
-		nt2_rare_mc_em_e1 += scale*scale * FR->getEStat2(S->numbers[reg][ElMu].nt2);
-		nt2_rare_mc_ee_e1 += scale*scale * FR->getEStat2(S->numbers[reg][Elec].nt2);
+		nt2_rare_mc_mm_e1 += mumuTrigScale*mumuTrigScale*scale*scale * FR->getEStat2(S->numbers[reg][Muon].nt2); // for stat error take actual entries, not pileup weighted integral...
+		nt2_rare_mc_em_e1 += emuTrigScale *emuTrigScale *scale*scale * FR->getEStat2(S->numbers[reg][ElMu].nt2);
+		nt2_rare_mc_ee_e1 += eeTrigScale  *eeTrigScale  *scale*scale * FR->getEStat2(S->numbers[reg][Elec].nt2);
 	}
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (MC)",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1), RareESyst*nt2_rare_mc_mm,
