@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.142 2011/11/18 16:09:48 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.143 2011/11/25 18:46:16 buchmann Exp $
 //
 //
 
@@ -83,6 +83,8 @@ Implementation:
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
@@ -968,8 +970,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          edm::Handle<GenParticleCollection> gen;
          iEvent.getByLabel(fGenPartTag, gen);
          GenParticleCollection::const_iterator g_part;
+	
+ 	 // Steve Mrenna's status 2 parton jets
+	 edm::Handle<GenJetCollection> partonGenJets;
+	 bool partonGenJets_found = iEvent.getByLabel("partonGenJets", partonGenJets);
+	 GenJetCollection::const_iterator pGenJet;
 
-         std::vector<const GenParticle*> gen_photons;
+	 edm::Handle<View<Candidate> > partons;
+	 bool partons_found = iEvent.getByLabel("partons", partons);
+	 
+	 std::vector<const GenParticle*> gen_photons;
          std::vector<const GenParticle*> gen_photons_mothers;
 
          for(g_part = gen->begin(); g_part != gen->end(); g_part++){
@@ -1007,8 +1017,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
            fTGenPhotonMotherID[i] =   gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->pdgId() : -999;
            fTGenPhotonMotherStatus[i] = gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->status() : -999;
 
+	   // use Steve Mrenna's status 2 parton jets to compute dR to closest jet of prompt photon
+	   if(fTGenPhotonMotherStatus[i]!=3) continue;
+	   TLorentzVector photon(0,0,0,0);
+	   photon.SetPtEtaPhiM(fTGenPhotonPt[i],fTGenPhotonEta[i],fTGenPhotonPhi[i],0);
+	   double minDR=10;
+	   for(pGenJet = partonGenJets->begin(); pGenJet != partonGenJets->end(); pGenJet++){
+		TLorentzVector pJ(pGenJet->px(), pGenJet->py(), pGenJet->pz(), pGenJet->energy());
+		float dR = photon.DeltaR(pJ);
+		if(dR < minDR) minDR=dR;
+	   }
+	   fTGenPhotonPartonMindR[i] = minDR;
          }
-
        }
 
 
@@ -1594,7 +1614,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-	// Get electrons, order them by pt and apply selection
+	// Get photonss, order them by pt and apply selection
 	std::vector<OrderPair> phoOrdered;
 	int phoIndex(0);
 	for( View<Photon>::const_iterator ip = photons->begin();
@@ -2554,6 +2574,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETPATphi  = (pfMETpat->front()).phi();
 	fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
 
+
+
         ////////////////////////////////////////////////////////////////////////////////
 	// Special stuff for Model Scans ///////////////////////////////////////////////
 
@@ -2801,6 +2823,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("GenPhotonPt"      ,&fTGenPhotonPt         ,"GenPhotonPt[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonEta"     ,&fTGenPhotonEta        ,"GenPhotonEta[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonPhi"     ,&fTGenPhotonPhi        ,"GenPhotonPhi[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonPartonMindR",&fTGenPhotonPartonMindR ,"GenPhotonPartonMindR[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonMotherID"     ,&fTGenPhotonMotherID        ,"GenPhotonMotherID[NGenPhotons]/I");
 	fEventTree->Branch("GenPhotonMotherStatus"     ,&fTGenPhotonMotherStatus        ,"GenPhotonMotherStatus[NGenPhotons]/I");
 
@@ -3552,6 +3575,7 @@ void NTupleProducer::resetTree(){
        resetFloat(fTGenPhotonPt    ,gMaxngenphot);
        resetFloat(fTGenPhotonEta   ,gMaxngenphot);
        resetFloat(fTGenPhotonPhi   ,gMaxngenphot);
+       resetFloat(fTGenPhotonPartonMindR   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherID   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherStatus ,gMaxngenphot);
 

@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.112 2011/11/18 16:09:49 pnef Exp $
+// $Id: NTupleProducer.h,v 1.113 2011/11/25 18:46:16 buchmann Exp $
 //
 //
 
@@ -440,6 +440,7 @@ private:
   float fTGenPhotonPt[gMaxngenphot];      
   float fTGenPhotonEta[gMaxngenphot];     
   float fTGenPhotonPhi[gMaxngenphot];    
+  float fTGenPhotonPartonMindR[gMaxngenphot];    
   int fTGenPhotonMotherID[gMaxngenphot];
   int fTGenPhotonMotherStatus[gMaxngenphot];
 
