@@ -3,6 +3,7 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process("NTupleProducer")
+process.load("SimGeneral.HepPDTESSource.pdt_cfi")
 
 ### Message Logger #############################################################
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -37,7 +38,10 @@ options.register ('ModelScan', # register 'runon' option
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:/scratch/buchmann/mSUGRA_m0-20to2000_m12-20to760_tanb-10andA0-0_7TeV-Pythia6Z/AODSIM/PU_S4_START42_V11_FastSim-v1/0021/22AEB6CF-C8A3-E011-81E7-002354EF3BDC.root'
 #options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
-options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
+#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
+#options.files= 'file:/shome/pnef/G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_AODSIM_PU_S6_START42_V14B-v1_0000_FEF21EF5-65F3-E011-815A-003048678FC4.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
+#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11_QCD_TuneZ2_HT-500To1000_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00285D07-C6F7-E011-B86A-003048CF6346.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -458,8 +462,26 @@ process.analyze.leptons = (
     )
               
 
+#### Steve Mrenna's Photon - Parton DR match #######################	      
+process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
+	src = cms.InputTag("partonGenJets"),
+	maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.printPhotons = cms.EDAnalyzer("ParticleListDrawer",
+     src = cms.InputTag("photons"),
+     maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.printPartons = cms.EDAnalyzer("ParticleListDrawer",
+     src = cms.InputTag("myPhotonJetMatch"),
+     maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
+
 #### DEBUG #####################################################################
-# process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
 # )
@@ -475,8 +497,11 @@ process.analyze.leptons = (
 #### Path ######################################################################
 
 process.p = cms.Path(
-	process.scrapingVeto * (
+	process.scrapingVeto*(
 	process.goodVertices
+	+ (process.photonPartonMatch
+#	*process.printGenParticles*process.printPhotons*process.printPartons
+	)
        	+ process.HBHENoiseFilterResultProducerIso
        	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
@@ -490,7 +515,8 @@ process.p = cms.Path(
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
 #	+ process.dump
-       	+ process.analyze
+	+ process.analyze
+
        	)
    )
 

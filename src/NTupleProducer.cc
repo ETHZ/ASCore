@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.141 2011/11/17 19:37:19 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.143 2011/11/25 18:46:16 buchmann Exp $
 //
 //
 
@@ -83,6 +83,8 @@ Implementation:
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
@@ -199,18 +201,20 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 		NPdfs = LHAPDF::numberPDF();
 	}
 
-	CrackCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
-	LocalCorrFunc = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
+	CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
+	LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
 	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
 	// Create histograms and trees
-	fHhltstat    = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
-	fHl1physstat = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
-	fHl1techstat = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
-        fHpileupstat = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
-	fRunTree     = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
-	fEventTree   = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
+	fHhltstat        = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
+	fHl1physstat     = fTFileService->make<TH1I>("L1PhysTriggerStats", "L1PhysTriggerStatistics", gMaxl1physbits+2, 0, gMaxl1physbits+2);
+	fHl1techstat     = fTFileService->make<TH1I>("L1TechTriggerStats", "L1TechTriggerStatistics", gMaxl1techbits+2, 0, gMaxl1techbits+2);
+        fHpileupstat     = fTFileService->make<TH1I>("PileUpStats", "PileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
+        fHtruepileupstat = fTFileService->make<TH1I>("TruePileUpStats", "TruePileUpStats", 40, 0, 40 ); // Keep track of pileup distribution
+
+	fRunTree         = fTFileService->make<TTree>("RunInfo", "ETHZRunAnalysisTree");
+	fEventTree       = fTFileService->make<TTree>("Analysis", "ETHZAnalysisTree");
 
 	// Dump the full configuration
 	edm::LogVerbatim("NTP") << "---------------------------------";
@@ -569,6 +573,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		  if( PVI->getBunchCrossing() == 0 ){ // in-time PU
 		    fTpuNumInteractions  = PVI->getPU_NumInteractions();
 		    fHpileupstat->Fill( fTpuNumInteractions );
+		    fTpuNumTrueInteractions  = PVI->getTrueNumInteractions();
+		    fHtruepileupstat->Fill( fTpuNumTrueInteractions );
 		    
 		    if(fTpuNumInteractions > gMaxnpileup){
 		      edm::LogWarning("NTP") << "@SUB=analyze()"
@@ -964,8 +970,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
          edm::Handle<GenParticleCollection> gen;
          iEvent.getByLabel(fGenPartTag, gen);
          GenParticleCollection::const_iterator g_part;
+	
+ 	 // Steve Mrenna's status 2 parton jets
+	 edm::Handle<GenJetCollection> partonGenJets;
+	 bool partonGenJets_found = iEvent.getByLabel("partonGenJets", partonGenJets);
+	 GenJetCollection::const_iterator pGenJet;
 
-         std::vector<const GenParticle*> gen_photons;
+	 edm::Handle<View<Candidate> > partons;
+	 bool partons_found = iEvent.getByLabel("partons", partons);
+	 
+	 std::vector<const GenParticle*> gen_photons;
          std::vector<const GenParticle*> gen_photons_mothers;
 
          for(g_part = gen->begin(); g_part != gen->end(); g_part++){
@@ -1003,8 +1017,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
            fTGenPhotonMotherID[i] =   gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->pdgId() : -999;
            fTGenPhotonMotherStatus[i] = gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->status() : -999;
 
+	   // use Steve Mrenna's status 2 parton jets to compute dR to closest jet of prompt photon
+	   if(fTGenPhotonMotherStatus[i]!=3) continue;
+	   TLorentzVector photon(0,0,0,0);
+	   photon.SetPtEtaPhiM(fTGenPhotonPt[i],fTGenPhotonEta[i],fTGenPhotonPhi[i],0);
+	   double minDR=10;
+	   for(pGenJet = partonGenJets->begin(); pGenJet != partonGenJets->end(); pGenJet++){
+		TLorentzVector pJ(pGenJet->px(), pGenJet->py(), pGenJet->pz(), pGenJet->energy());
+		float dR = photon.DeltaR(pJ);
+		if(dR < minDR) minDR=dR;
+	   }
+	   fTGenPhotonPartonMindR[i] = minDR;
          }
-
        }
 
 
@@ -1590,7 +1614,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-	// Get electrons, order them by pt and apply selection
+	// Get photonss, order them by pt and apply selection
 	std::vector<OrderPair> phoOrdered;
 	int phoIndex(0);
 	for( View<Photon>::const_iterator ip = photons->begin();
@@ -2550,6 +2574,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETPATphi  = (pfMETpat->front()).phi();
 	fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
 
+
+
         ////////////////////////////////////////////////////////////////////////////////
 	// Special stuff for Model Scans ///////////////////////////////////////////////
 
@@ -2705,6 +2731,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 
 	// Pile-Up information:
 	fEventTree->Branch("PUnumInteractions",   &fTpuNumInteractions   ,"PUnumInteractions/I");
+	fEventTree->Branch("PUnumTrueInteractions",   &fTpuNumTrueInteractions   ,"PUnumTrueInteractions/I");
 	fEventTree->Branch("PUnumFilled",&fTpuNumFilled,"PUnumFilled/I");
 	fEventTree->Branch("PUOOTnumInteractionsEarly",&fTpuOOTNumInteractionsEarly,"PUOOTnumInteractionsEarly/I");
 	fEventTree->Branch("PUOOTnumInteractionsLate",&fTpuOOTNumInteractionsLate,"PUOOTnumInteractionsLate/I");
@@ -2796,6 +2823,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("GenPhotonPt"      ,&fTGenPhotonPt         ,"GenPhotonPt[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonEta"     ,&fTGenPhotonEta        ,"GenPhotonEta[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonPhi"     ,&fTGenPhotonPhi        ,"GenPhotonPhi[NGenPhotons]/F");
+	fEventTree->Branch("GenPhotonPartonMindR",&fTGenPhotonPartonMindR ,"GenPhotonPartonMindR[NGenPhotons]/F");
 	fEventTree->Branch("GenPhotonMotherID"     ,&fTGenPhotonMotherID        ,"GenPhotonMotherID[NGenPhotons]/I");
 	fEventTree->Branch("GenPhotonMotherStatus"     ,&fTGenPhotonMotherStatus        ,"GenPhotonMotherStatus[NGenPhotons]/I");
 
@@ -3547,6 +3575,7 @@ void NTupleProducer::resetTree(){
        resetFloat(fTGenPhotonPt    ,gMaxngenphot);
        resetFloat(fTGenPhotonEta   ,gMaxngenphot);
        resetFloat(fTGenPhotonPhi   ,gMaxngenphot);
+       resetFloat(fTGenPhotonPartonMindR   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherID   ,gMaxngenphot);
        resetInt(fTGenPhotonMotherStatus ,gMaxngenphot);
 
