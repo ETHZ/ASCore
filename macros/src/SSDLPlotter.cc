@@ -79,7 +79,7 @@ void SSDLPlotter::init(TString filename){
 
 	readDatacard(filename);
 
-	readVarNames("anavarnames.dat");
+	readVarNames("varnames.dat");
 	fOutputFileName = fOutputDir + "SSDLYields.root";
 	fLatex = new TLatex();
 	fLatex->SetNDC(kTRUE);
@@ -546,12 +546,12 @@ void SSDLPlotter::doAnalysis(){
 	// printOrigins();
 
 	// makeMuIsolationPlots(); // loops on TTbar sample
-	// makeElIsolationPlots(); // loops on TTbar sample
+	 makeElIsolationPlots(); // loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
-	makeMETvsHTPlotPRL();
+	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
@@ -1446,16 +1446,31 @@ void SSDLPlotter::makeMuIsolationPlots(){
 	TH1D    *hiso_data [gNSels];
 	TH1D    *hiso_mc   [gNSels];
 	TH1D	*hiso_ttbar[gNSels];
+	TH1D    *hiso_qcd  [gNSels];
+	TH1D    *hiso_ttj  [gNSels];
+	TH1D    *hiso_ewk  [gNSels];
+	TH1D    *hiso_rare [gNSels];
+	TH1D    *hiso_db   [gNSels];
 	THStack *hiso_mc_s [gNSels];
 
 	TH1D    *hiso_data_pt [gNSels][gNMuPt2bins];
 	TH1D    *hiso_mc_pt   [gNSels][gNMuPt2bins];
 	TH1D    *hiso_ttbar_pt[gNSels][gNMuPt2bins];
+	TH1D    *hiso_qcd_pt  [gNSels][gNMuPt2bins];
+	TH1D    *hiso_ttj_pt  [gNSels][gNMuPt2bins];
+	TH1D    *hiso_ewk_pt  [gNSels][gNMuPt2bins];
+	TH1D    *hiso_rare_pt [gNSels][gNMuPt2bins];
+	TH1D    *hiso_db_pt   [gNSels][gNMuPt2bins];
 	THStack *hiso_mc_pt_s [gNSels][gNMuPt2bins];
 
 	TH1D    *hiso_data_nv [gNSels][gNNVrtxBins];
 	TH1D    *hiso_mc_nv   [gNSels][gNNVrtxBins];
 	TH1D    *hiso_ttbar_nv[gNSels][gNNVrtxBins];
+	TH1D    *hiso_qcd_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_ttj_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_ewk_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_rare_nv [gNSels][gNNVrtxBins];
+	TH1D    *hiso_db_nv   [gNSels][gNNVrtxBins];
 	THStack *hiso_mc_nv_s [gNSels][gNNVrtxBins];
 
 	TLatex *lat = new TLatex();
@@ -1465,31 +1480,85 @@ void SSDLPlotter::makeMuIsolationPlots(){
 
 	// Create histograms
 	for(size_t i = 0; i < gNSels; ++i){
-		hiso_data[i]  = new TH1D("MuIsoData_"          + IsoPlots::sel_name[i], "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-		hiso_mc[i]    = new TH1D("MuIsoMC_"            + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-		hiso_ttbar[i] = new TH1D("MuIsoTTbar_"         + IsoPlots::sel_name[i], "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
+		hiso_data[i]  = new TH1D("MuIsoData_"          + IsoPlots::sel_name[i], "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_mc[i]    = new TH1D("MuIsoMC_"            + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ttbar[i] = new TH1D("MuIsoTTbar_"         + IsoPlots::sel_name[i], "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_qcd  [i] = new TH1D("MuIsoQCD_"         + IsoPlots::sel_name[i], "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ttj  [i] = new TH1D("MuIsoTop_"         + IsoPlots::sel_name[i], "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ewk  [i] = new TH1D("MuIsoEWK_"         + IsoPlots::sel_name[i], "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_rare [i] = new TH1D("MuIsorare_"         + IsoPlots::sel_name[i], "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_db   [i] = new TH1D("MuIsoDB_"         + IsoPlots::sel_name[i], "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 		hiso_mc_s[i]  = new THStack("MuIsoMC_stacked_" + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
-		hiso_data[i]  ->Sumw2();
-		hiso_mc[i]    ->Sumw2();
+		hiso_data [i] ->Sumw2();
+		hiso_mc   [i] ->Sumw2();
 		hiso_ttbar[i] ->Sumw2();
+		hiso_qcd  [i] ->Sumw2();
+		hiso_ttj  [i] ->Sumw2();
+		hiso_ewk  [i] ->Sumw2();
+		hiso_rare [i] ->Sumw2();
+		hiso_db   [i] ->Sumw2();
 
 		for(int k = 0; k < gNMuPt2bins; ++k){
-			hiso_data_pt [i][k] = new TH1D(Form("MuIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-			hiso_mc_pt   [i][k] = new TH1D(Form("MuIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-			hiso_ttbar_pt[i][k] = new TH1D(Form("MuIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
+			hiso_data_pt [i][k] = new TH1D(Form("MuIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_mc_pt   [i][k] = new TH1D(Form("MuIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttbar_pt[i][k] = new TH1D(Form("MuIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_qcd_pt[i][k]   = new TH1D(Form("MuIsoQCD_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttj_pt[i][k]   = new TH1D(Form("MuIsoTop_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ewk_pt[i][k]   = new TH1D(Form("MuIsoEWK_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_rare_pt[i][k]  = new TH1D(Form("MuIsorare_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_db_pt[i][k]    = new TH1D(Form("MuIsoDB_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_mc_pt_s [i][k] = new THStack(Form("MuIsoMC_stacked_%s_Pt%d", IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_pt [i][k]->Sumw2();
 			hiso_mc_pt   [i][k]->Sumw2();
 			hiso_ttbar_pt[i][k]->Sumw2();
+			hiso_qcd_pt  [i][k]->Sumw2();
+			hiso_ttj_pt  [i][k]->Sumw2();
+			hiso_ewk_pt  [i][k]->Sumw2();
+			hiso_rare_pt [i][k]->Sumw2();
+			hiso_db_pt   [i][k]->Sumw2();
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
-			hiso_data_nv [i][k] = new TH1D(Form("MuIsoData_%s_NVtx%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-			hiso_mc_nv   [i][k] = new TH1D(Form("MuIsoMC_%s_NVtx%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-			hiso_ttbar_nv[i][k] = new TH1D(Form("MuIsoTTbar_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
+			hiso_data_nv [i][k] = new TH1D(Form("MuIsoData_%s_NVtx%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_mc_nv   [i][k] = new TH1D(Form("MuIsoMC_%s_NVtx%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttbar_nv[i][k] = new TH1D(Form("MuIsoTTbar_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_qcd_nv[i][k]   = new TH1D(Form("MuIsoQCD_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttj_nv[i][k]   = new TH1D(Form("MuIsoTop_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ewk_nv[i][k]   = new TH1D(Form("MuIsoEWK_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_rare_nv[i][k]  = new TH1D(Form("MuIsorare_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_db_nv[i][k]    = new TH1D(Form("MuIsoDB_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_mc_nv_s [i][k] = new THStack(Form("MuIsoMC_stacked_%s_NVtx%d", IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_nv [i][k]->Sumw2();
 			hiso_mc_nv   [i][k]->Sumw2();
 			hiso_ttbar_nv[i][k]->Sumw2();
+			hiso_qcd_nv  [i][k]->Sumw2();
+			hiso_ttj_nv  [i][k]->Sumw2();
+			hiso_ewk_nv  [i][k]->Sumw2();
+			hiso_rare_nv [i][k]->Sumw2();
+			hiso_db_nv   [i][k]->Sumw2();
+		}
+	}
+
+	for(size_t i = 0; i < gNSels; ++i){
+		hiso_qcd [i]->SetFillColor(kYellow-4);
+		hiso_db  [i]->SetFillColor(kSpring-9);
+		hiso_ewk [i]->SetFillColor(kGreen +1);
+		hiso_ttj [i]->SetFillColor(kAzure-5);
+		hiso_rare[i]->SetFillColor(kAzure+8);
+
+		for(int k = 0; k < gNMuPt2bins; ++k){
+			hiso_qcd_pt [i][k]->SetFillColor(kYellow-4);
+			hiso_db_pt  [i][k]->SetFillColor(kSpring-9);
+			hiso_ewk_pt [i][k]->SetFillColor(kGreen +1);
+			hiso_ttj_pt [i][k]->SetFillColor(kAzure-5);
+			hiso_rare_pt[i][k]->SetFillColor(kAzure+8);
+		}
+
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			hiso_qcd_nv [i][k]->SetFillColor(kYellow-4);
+			hiso_db_nv  [i][k]->SetFillColor(kSpring-9);
+			hiso_ewk_nv [i][k]->SetFillColor(kGreen +1);
+			hiso_ttj_nv [i][k]->SetFillColor(kAzure-5);
+			hiso_rare_nv[i][k]->SetFillColor(kAzure+8);
 		}
 	}
 
@@ -1580,7 +1649,6 @@ void SSDLPlotter::makeMuIsolationPlots(){
 	cout << endl;
 	////////////////////////////////////////////////////
 	
-
 	// Create plots
 	vector<int> mcsamples = fMCBGMuEnr;
 	// vector<int> datasamples = fJMData;
@@ -1694,23 +1762,77 @@ void SSDLPlotter::makeMuIsolationPlots(){
 		// Fill MC stacks
 		for(size_t j = 0; j < mcsamples.size();   ++j){
 			Sample *S = fSamples[mcsamples[j]];
-			hiso_mc  [i]->Add(S->isoplots[0].hiso[i]);
-			hiso_mc_s[i]->Add(S->isoplots[0].hiso[i]);
-			hiso_mc_s[i]->Draw("goff");
-			hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+			TString s_name = S->sname;
+			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( sampleType(s_name) == 3) hiso_ewk[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( sampleType(s_name) == 4) hiso_rare[i]->Add( S->isoplots[0].hiso[i] );
+			if ( sampleType(s_name) == 5) hiso_db[i]  ->Add( S->isoplots[0].hiso[i] );
+
 			for(int k = 0; k < gNMuPt2bins; ++k){
-				hiso_mc_pt  [i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
-				hiso_mc_pt_s[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
-				hiso_mc_pt_s[i][k]->Draw("goff");
-				hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+				if ( sampleType(s_name) == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 4) hiso_rare_pt[i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 5) hiso_db_pt  [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
-				hiso_mc_nv  [i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
-				hiso_mc_nv_s[i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
-				hiso_mc_nv_s[i][k]->Draw("goff");
-				hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+				if ( sampleType(s_name) == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 4) hiso_rare_nv[i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 5) hiso_db_nv  [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
 			}
+
 		}
+		hiso_mc_s[i]->Add(hiso_qcd[i]);
+		hiso_mc_s[i]->Add(hiso_db[i]);
+		hiso_mc_s[i]->Add(hiso_ewk[i]);
+		hiso_mc_s[i]->Add(hiso_rare[i]);
+		hiso_mc_s[i]->Add(hiso_ttj[i]);
+		hiso_mc_s[i]->Draw("goff");
+		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+
+		for(int k = 0; k < gNMuPt2bins; ++k){
+			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_db_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_ewk_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_rare_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_ttj_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Draw("goff");
+			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		}
+
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			hiso_mc_nv_s[i][k]->Add(hiso_qcd_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_db_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_ewk_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_rare_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_ttj_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Draw("goff");
+			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		}
+		// Fill MC stacks
+		//for(size_t j = 0; j < mcsamples.size();   ++j){
+		//	Sample *S = fSamples[mcsamples[j]];
+		//	hiso_mc  [i]->Add(S->isoplots[0].hiso[i]);
+		//	hiso_mc_s[i]->Add(S->isoplots[0].hiso[i]);
+		//	hiso_mc_s[i]->Draw("goff");
+		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//	for(int k = 0; k < gNMuPt2bins; ++k){
+		//		hiso_mc_pt  [i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
+		//		hiso_mc_pt_s[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
+		//		hiso_mc_pt_s[i][k]->Draw("goff");
+		//		hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//	}
+		//	for(int k = 0; k < gNNVrtxBins; ++k){
+		//		hiso_mc_nv  [i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
+		//		hiso_mc_nv_s[i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
+		//		hiso_mc_nv_s[i][k]->Draw("goff");
+		//		hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//	}
+		//}
 
 		double max1 = hiso_mc_s[i]->GetMaximum();
 		double max2 = hiso_data[i]->GetMaximum();
@@ -1720,7 +1842,7 @@ void SSDLPlotter::makeMuIsolationPlots(){
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
 		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
-		int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
+		int bin1   = hiso_data[i]->FindBin(0.6)  - 1;
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
 		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
 		float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
@@ -1732,7 +1854,12 @@ void SSDLPlotter::makeMuIsolationPlots(){
 		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
 		leg->AddEntry(hiso_data[i], "Data","p");
 		leg->AddEntry(hiso_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		//for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		leg->AddEntry(hiso_ttj[i],  "Top","f");
+		leg->AddEntry(hiso_rare[i], "Rare SM","f");
+		leg->AddEntry(hiso_ewk[i],  "Single Boson","f");
+		leg->AddEntry(hiso_db[i],   "Di-Boson","f");
+		leg->AddEntry(hiso_qcd[i],  "QCD","f");
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
@@ -1772,7 +1899,12 @@ void SSDLPlotter::makeMuIsolationPlots(){
 			// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
 			leg_pt->AddEntry(hiso_data_pt[i][k], "Data","p");
 			leg_pt->AddEntry(hiso_ttbar_pt[i][k], "TTbar fake","p");
-			for(size_t j = 0; j < mcsamples.size(); ++j) leg_pt->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso_pt[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			//for(size_t j = 0; j < mcsamples.size(); ++j) leg_pt->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso_pt[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg_pt->AddEntry(hiso_ttj_pt  [i][k], "Top","f");
+			leg_pt->AddEntry(hiso_rare_pt [i][k], "Rare SM","f");
+			leg_pt->AddEntry(hiso_ewk_pt  [i][k], "Single Boson","f");
+			leg_pt->AddEntry(hiso_db_pt   [i][k], "Di-Boson","f");
+			leg_pt->AddEntry(hiso_qcd_pt  [i][k], "QCD","f");
 			leg_pt->SetFillStyle(0);
 			leg_pt->SetTextFont(42);
 			leg_pt->SetBorderSize(0);
@@ -1812,7 +1944,12 @@ void SSDLPlotter::makeMuIsolationPlots(){
 			// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
 			leg_nv->AddEntry(hiso_data_nv[i][k], "Data","p");
 			leg_nv->AddEntry(hiso_ttbar_nv[i][k], "TTbar fake","p");
-			for(size_t j = 0; j < mcsamples.size(); ++j) leg_nv->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso_nv[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			//for(size_t j = 0; j < mcsamples.size(); ++j) leg_nv->AddEntry(fSamples[mcsamples[j]]->isoplots[0].hiso_nv[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg_nv->AddEntry(hiso_ttj_nv  [i][k],  "Top","f");
+			leg_nv->AddEntry(hiso_rare_nv [i][k],  "Rare SM","f");
+			leg_nv->AddEntry(hiso_ewk_nv  [i][k],  "Single Boson","f");
+			leg_nv->AddEntry(hiso_db_nv   [i][k],  "Di-Boson","f");
+			leg_nv->AddEntry(hiso_qcd_nv  [i][k],  "QCD","f");
 			leg_nv->SetFillStyle(0);
 			leg_nv->SetTextFont(42);
 			leg_nv->SetBorderSize(0);
@@ -1843,16 +1980,31 @@ void SSDLPlotter::makeElIsolationPlots(){
 	TH1D    *hiso_data [gNSels];
 	TH1D    *hiso_mc   [gNSels];
 	TH1D	*hiso_ttbar[gNSels];
+	TH1D    *hiso_qcd  [gNSels];
+	TH1D    *hiso_ttj  [gNSels];
+	TH1D    *hiso_ewk  [gNSels];
+	TH1D    *hiso_rare [gNSels];
+	TH1D    *hiso_db   [gNSels];
 	THStack *hiso_mc_s [gNSels];
 
 	TH1D    *hiso_data_pt [gNSels][gNElPt2bins];
 	TH1D    *hiso_mc_pt   [gNSels][gNElPt2bins];
 	TH1D    *hiso_ttbar_pt[gNSels][gNElPt2bins];
+	TH1D    *hiso_qcd_pt  [gNSels][gNElPt2bins];
+	TH1D    *hiso_ttj_pt  [gNSels][gNElPt2bins];
+	TH1D    *hiso_ewk_pt  [gNSels][gNElPt2bins];
+	TH1D    *hiso_rare_pt [gNSels][gNElPt2bins];
+	TH1D    *hiso_db_pt   [gNSels][gNElPt2bins];
 	THStack *hiso_mc_pt_s [gNSels][gNElPt2bins];
 
 	TH1D    *hiso_data_nv [gNSels][gNNVrtxBins];
 	TH1D    *hiso_mc_nv   [gNSels][gNNVrtxBins];
 	TH1D    *hiso_ttbar_nv[gNSels][gNNVrtxBins];
+	TH1D    *hiso_qcd_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_ttj_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_ewk_nv  [gNSels][gNNVrtxBins];
+	TH1D    *hiso_rare_nv [gNSels][gNNVrtxBins];
+	TH1D    *hiso_db_nv   [gNSels][gNNVrtxBins];
 	THStack *hiso_mc_nv_s [gNSels][gNNVrtxBins];
 
 	TLatex *lat = new TLatex();
@@ -1862,31 +2014,85 @@ void SSDLPlotter::makeElIsolationPlots(){
 
 	// Create histograms
 	for(size_t i = 0; i < gNSels; ++i){
-		hiso_data[i]  = new TH1D("ElIsoData_"          + IsoPlots::sel_name[i], "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-		hiso_mc[i]    = new TH1D("ElIsoMC_"            + IsoPlots::sel_name[i], "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-		hiso_ttbar[i] = new TH1D("ElIsoTTbar_"         + IsoPlots::sel_name[i], "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
-		hiso_mc_s[i]  = new THStack("ElIsoMC_stacked_" + IsoPlots::sel_name[i], "Electron Isolation in MC for "    + IsoPlots::sel_name[i]);
-		hiso_data[i]  ->Sumw2();
-		hiso_mc[i]    ->Sumw2();
+		hiso_data [i] = new TH1D("ElIsoData_"          + IsoPlots::sel_name[i], "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_mc   [i] = new TH1D("ElIsoMC_"            + IsoPlots::sel_name[i], "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ttbar[i] = new TH1D("ElIsoTTbar_"         + IsoPlots::sel_name[i], "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_qcd  [i] = new TH1D("ElIsoQCD_"           + IsoPlots::sel_name[i], "Electron Isolation in QCD   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ttj  [i] = new TH1D("ElIsoTop_"           + IsoPlots::sel_name[i], "Electron Isolation in Top   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_ewk  [i] = new TH1D("ElIsoEWK_"           + IsoPlots::sel_name[i], "Electron Isolation in EWK   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_rare [i] = new TH1D("ElIsoRARE_"          + IsoPlots::sel_name[i], "Electron Isolation in RARE  for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_db   [i] = new TH1D("ElIsoDB_"            + IsoPlots::sel_name[i], "Electron Isolation in DB    for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_mc_s [i] = new THStack("ElIsoMC_stacked_" + IsoPlots::sel_name[i], "Electron Isolation in MC for "    + IsoPlots::sel_name[i]);
+		hiso_data [i] ->Sumw2();
+		hiso_mc   [i] ->Sumw2();
 		hiso_ttbar[i] ->Sumw2();
+		hiso_qcd  [i] ->Sumw2();
+		hiso_ttj  [i] ->Sumw2();
+		hiso_ewk  [i] ->Sumw2();
+		hiso_rare [i] ->Sumw2();
+		hiso_db   [i] ->Sumw2();
 
 		for(int k = 0; k < gNElPt2bins; ++k){
-			hiso_data_pt[i][k]  = new TH1D(Form("ElIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-			hiso_mc_pt  [i][k]  = new TH1D(Form("ElIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-			hiso_ttbar_pt[i][k] = new TH1D(Form("ElIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
+			hiso_data_pt[i][k]  = new TH1D(Form("ElIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_mc_pt  [i][k]  = new TH1D(Form("ElIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttbar_pt[i][k] = new TH1D(Form("ElIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_qcd_pt [i][k]  = new TH1D(Form("ElIsoQCD_%s_Pt%d",           IsoPlots::sel_name[i].Data(), k), "Electron Isolation in QCD   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttj_pt [i][k]  = new TH1D(Form("ElIsoTop_%s_Pt%d",           IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Top   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ewk_pt [i][k]  = new TH1D(Form("ElIsoEWK_%s_Pt%d",           IsoPlots::sel_name[i].Data(), k), "Electron Isolation in EWK   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_rare_pt[i][k]  = new TH1D(Form("ElIsoRARE_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Electron Isolation in RARE  for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_db_pt  [i][k]  = new TH1D(Form("ElIsoDB_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Electron Isolation in DB    for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_mc_pt_s[i][k]  = new THStack(Form("ElIsoMC_stacked_%s_Pt%d", IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_pt [i][k]->Sumw2();
 			hiso_mc_pt   [i][k]->Sumw2();
 			hiso_ttbar_pt[i][k]->Sumw2();
+			hiso_qcd_pt  [i][k]->Sumw2();
+			hiso_ttj_pt  [i][k]->Sumw2();
+			hiso_ewk_pt  [i][k]->Sumw2();
+			hiso_rare_pt [i][k]->Sumw2();
+			hiso_db_pt   [i][k]->Sumw2();
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
-			hiso_data_nv[i][k]  = new TH1D(Form("ElIsoData_%s_NVtx%d",          IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-			hiso_mc_nv  [i][k]  = new TH1D(Form("ElIsoMC_%s_NVtx%d",            IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
-			hiso_ttbar_nv[i][k] = new TH1D(Form("ElIsoTTbar_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.);
+			hiso_data_nv[i][k]  = new TH1D(Form("ElIsoData_%s_NVtx%d",      IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_mc_nv  [i][k]  = new TH1D(Form("ElIsoMC_%s_NVtx%d",        IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttbar_nv[i][k] = new TH1D(Form("ElIsoTTbar_%s_NVtx%d",     IsoPlots::sel_name[i].Data(), k), "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_qcd_nv [i][k]  = new TH1D(Form("ElIsoQCD_%s_NVtx%d",       IsoPlots::sel_name[i].Data(), k), "Electron Isolation in QCD   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ttj_nv [i][k]  = new TH1D(Form("ElIsoTop_%s_NVtx%d",       IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Top   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_ewk_nv [i][k]  = new TH1D(Form("ElIsoEWK_%s_NVtx%d",       IsoPlots::sel_name[i].Data(), k), "Electron Isolation in EWK   for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_rare_nv[i][k]  = new TH1D(Form("ElIsoRARE_%s_NVtx%d",      IsoPlots::sel_name[i].Data(), k), "Electron Isolation in RARE  for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_db_nv  [i][k]  = new TH1D(Form("ElIsoDB_%s_NVtx%d",        IsoPlots::sel_name[i].Data(), k), "Electron Isolation in DB    for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_mc_nv_s[i][k]  = new THStack(Form("ElIsoMC_stacked_%s_NVtx%d", IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_nv [i][k]->Sumw2();
 			hiso_mc_nv   [i][k]->Sumw2();
 			hiso_ttbar_nv[i][k]->Sumw2();
+			hiso_qcd_nv  [i][k]->Sumw2();
+			hiso_ttj_nv  [i][k]->Sumw2();
+			hiso_ewk_nv  [i][k]->Sumw2();
+			hiso_rare_nv [i][k]->Sumw2();
+			hiso_db_nv   [i][k]->Sumw2();
+		}
+	}
+
+	for(size_t i = 0; i < gNSels; ++i){
+		hiso_qcd [i]->SetFillColor(kYellow-4);
+		hiso_db  [i]->SetFillColor(kSpring-9);
+		hiso_ewk [i]->SetFillColor(kGreen +1);
+		hiso_ttj [i]->SetFillColor(kAzure-5);
+		hiso_rare[i]->SetFillColor(kAzure+8);
+
+		for(int k = 0; k < gNElPt2bins; ++k){
+			hiso_qcd_pt [i][k]->SetFillColor(kYellow-4);
+			hiso_db_pt  [i][k]->SetFillColor(kSpring-9);
+			hiso_ewk_pt [i][k]->SetFillColor(kGreen +1);
+			hiso_ttj_pt [i][k]->SetFillColor(kAzure-5);
+			hiso_rare_pt[i][k]->SetFillColor(kAzure+8);
+		}
+
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			hiso_qcd_nv [i][k]->SetFillColor(kYellow-4);
+			hiso_db_nv  [i][k]->SetFillColor(kSpring-9);
+			hiso_ewk_nv [i][k]->SetFillColor(kGreen +1);
+			hiso_ttj_nv [i][k]->SetFillColor(kAzure-5);
+			hiso_rare_nv[i][k]->SetFillColor(kAzure+8);
 		}
 	}
 
@@ -1958,8 +2164,8 @@ void SSDLPlotter::makeElIsolationPlots(){
 		}
 		////////////////////////////////////////////////////
 	}
-	cout << endl;
 	fSamples[TTJets]->cleanUp();
+	cout << endl;
 	////////////////////////////////////////////////////
 
 	// Create plots
@@ -2076,24 +2282,78 @@ void SSDLPlotter::makeElIsolationPlots(){
 
 		// Fill MC stacks
 		for(size_t j = 0; j < mcsamples.size();   ++j){
-			Sample *S = fSamples[mcsamples[j]];			
-			hiso_mc  [i]->Add(S->isoplots[1].hiso[i]);
-			hiso_mc_s[i]->Add(S->isoplots[1].hiso[i]);
-			hiso_mc_s[i]->Draw("goff");
-			hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
-			for(int k = 0; k < gNElPt2bins; ++k){
-				hiso_mc_pt  [i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
-				hiso_mc_pt_s[i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
-				hiso_mc_pt_s[i][k]->Draw("goff");
-				hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+			Sample *S = fSamples[mcsamples[j]];
+			TString s_name = S->sname;
+			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( sampleType(s_name) == 3) hiso_ewk[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( sampleType(s_name) == 4) hiso_rare[i]->Add( S->isoplots[1].hiso[i] );
+			if ( sampleType(s_name) == 5) hiso_db[i]  ->Add( S->isoplots[1].hiso[i] );
+
+			for(int k = 0; k < gNMuPt2bins; ++k){
+				if ( sampleType(s_name) == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 4) hiso_rare_pt[i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( sampleType(s_name) == 5) hiso_db_pt  [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
-				hiso_mc_nv  [i][k]->Add(S->isoplots[1].hiso_nv[i][k]);
-				hiso_mc_nv_s[i][k]->Add(S->isoplots[1].hiso_nv[i][k]);
-				hiso_mc_nv_s[i][k]->Draw("goff");
-				hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+				if ( sampleType(s_name) == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 4) hiso_rare_nv[i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( sampleType(s_name) == 5) hiso_db_nv  [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
 			}
+
 		}
+		hiso_mc_s[i]->Add(hiso_qcd[i]);
+		hiso_mc_s[i]->Add(hiso_db[i]);
+		hiso_mc_s[i]->Add(hiso_ewk[i]);
+		hiso_mc_s[i]->Add(hiso_rare[i]);
+		hiso_mc_s[i]->Add(hiso_ttj[i]);
+		hiso_mc_s[i]->Draw("goff");
+		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+
+		for(int k = 0; k < gNElPt2bins; ++k){
+			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_db_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_ewk_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_rare_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Add(hiso_ttj_pt[i][k]);
+			hiso_mc_pt_s[i][k]->Draw("goff");
+			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+		}
+
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			hiso_mc_nv_s[i][k]->Add(hiso_qcd_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_db_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_ewk_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_rare_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Add(hiso_ttj_nv[i][k]);
+			hiso_mc_nv_s[i][k]->Draw("goff");
+			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+		}
+		//// Fill MC stacks
+		//for(size_t j = 0; j < mcsamples.size();   ++j){
+		//	Sample *S = fSamples[mcsamples[j]];			
+		//	hiso_mc  [i]->Add(S->isoplots[1].hiso[i]);
+		//	hiso_mc_s[i]->Add(S->isoplots[1].hiso[i]);
+		//	hiso_mc_s[i]->Draw("goff");
+		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+		//	for(int k = 0; k < gNElPt2bins; ++k){
+		//		hiso_mc_pt  [i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
+		//		hiso_mc_pt_s[i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
+		//		hiso_mc_pt_s[i][k]->Draw("goff");
+		//		hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+		//	}
+		//	for(int k = 0; k < gNNVrtxBins; ++k){
+		//		hiso_mc_nv  [i][k]->Add(S->isoplots[1].hiso_nv[i][k]);
+		//		hiso_mc_nv_s[i][k]->Add(S->isoplots[1].hiso_nv[i][k]);
+		//		hiso_mc_nv_s[i][k]->Draw("goff");
+		//		hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
+		//	}
+		//}
 
 
 		double max1 = hiso_mc_s[i]->GetMaximum();
@@ -2105,7 +2365,7 @@ void SSDLPlotter::makeElIsolationPlots(){
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
 		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
-		int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
+		int bin1   = hiso_data[i]->FindBin(0.6)  - 1;
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
 		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
 		float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
@@ -2117,7 +2377,12 @@ void SSDLPlotter::makeElIsolationPlots(){
 		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
 		leg->AddEntry(hiso_data[i], "Data","p");
 		leg->AddEntry(hiso_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		//for(size_t j = 0; j < mcsamples.size(); ++j) leg->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso[i], fSamples[mcsamples[j]]->sname.Data(), "f");
+		leg->AddEntry(hiso_ttj[i],  "Top","f");
+		leg->AddEntry(hiso_rare[i], "Rare SM","f");
+		leg->AddEntry(hiso_ewk[i],  "Single Boson","f");
+		leg->AddEntry(hiso_db[i],   "Di-Boson","f");
+		leg->AddEntry(hiso_qcd[i],  "QCD","f");
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
@@ -2157,7 +2422,12 @@ void SSDLPlotter::makeElIsolationPlots(){
 			// TLegend *leg_pt = new TLegend(0.75,0.60,0.89,0.88);
 			leg_pt->AddEntry(hiso_data_pt[i][k], "Data","p");
 			leg_pt->AddEntry(hiso_ttbar_pt[i][k], "TTbar fake","p");
-			for(size_t j = 0; j < mcsamples.size(); ++j) leg_pt->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso_pt[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			//for(size_t j = 0; j < mcsamples.size(); ++j) leg_pt->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso_pt[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg_pt->AddEntry(hiso_ttj_pt  [i][k], "Top","f");
+			leg_pt->AddEntry(hiso_rare_pt [i][k], "Rare SM","f");
+			leg_pt->AddEntry(hiso_ewk_pt  [i][k], "Single Boson","f");
+			leg_pt->AddEntry(hiso_db_pt   [i][k], "Di-Boson","f");
+			leg_pt->AddEntry(hiso_qcd_pt  [i][k], "QCD","f");
 			leg_pt->SetFillStyle(0);
 			leg_pt->SetTextFont(42);
 			leg_pt->SetBorderSize(0);
@@ -2198,7 +2468,12 @@ void SSDLPlotter::makeElIsolationPlots(){
 			// TLegend *leg_nv = new TLegend(0.75,0.60,0.89,0.88);
 			leg_nv->AddEntry(hiso_data_nv[i][k], "Data","p");
 			leg_nv->AddEntry(hiso_ttbar_nv[i][k], "TTbar fake","p");
-			for(size_t j = 0; j < mcsamples.size(); ++j) leg_nv->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso_nv[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			//for(size_t j = 0; j < mcsamples.size(); ++j) leg_nv->AddEntry(fSamples[mcsamples[j]]->isoplots[1].hiso_nv[i][k], fSamples[mcsamples[j]]->sname.Data(), "f");
+			leg_nv->AddEntry(hiso_ttj_nv  [i][k],  "Top","f");
+			leg_nv->AddEntry(hiso_rare_nv [i][k],  "Rare SM","f");
+			leg_nv->AddEntry(hiso_ewk_nv  [i][k],  "Single Boson","f");
+			leg_nv->AddEntry(hiso_db_nv   [i][k],  "Di-Boson","f");
+			leg_nv->AddEntry(hiso_qcd_nv  [i][k],  "QCD","f");
 			leg_nv->SetFillStyle(0);
 			leg_nv->SetTextFont(42);
 			leg_nv->SetBorderSize(0);
@@ -2227,399 +2502,209 @@ void SSDLPlotter::makeElIdPlots(){
     sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
     system(cmd);
 
-	TH1D    *hhoe_data [gNSels];
-	TH1D    *hhoe_mc   [gNSels];
-	TH1D	*hhoe_ttbar[gNSels];
-	THStack *hhoe_mc_s [gNSels];
+	vector<int> mcsamples = fMCBG;
+	vector<int> datasamples = fEGData;
+	
+	TH1D    *data [4] [gNSels];
+	TH1D    *qcd  [4] [gNSels];
+	TH1D    *ttj  [4] [gNSels];
+	TH1D    *ewk  [4] [gNSels];
+	TH1D    *rare [4] [gNSels];
+	TH1D    *db   [4] [gNSels];
+	TH1D	*ttbar[4] [gNSels];
+	THStack *mc_s [4] [gNSels];
 
-	TH1D    *hsiesie_data [gNSels];
-	TH1D    *hsiesie_mc   [gNSels];
-	TH1D	*hsiesie_ttbar[gNSels];
-	THStack *hsiesie_mc_s [gNSels];
-
-	TH1D    *hdeta_data [gNSels];
-	TH1D    *hdeta_mc   [gNSels];
-	TH1D	*hdeta_ttbar[gNSels];
-	THStack *hdeta_mc_s [gNSels];
-
-	TH1D    *hdphi_data [gNSels];
-	TH1D    *hdphi_mc   [gNSels];
-	TH1D	*hdphi_ttbar[gNSels];
-	THStack *hdphi_mc_s [gNSels];
+	float intscale[4];
+	double datamax[4], mcmax[4], max[4];
+	double axismin[4], axismax[4];
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.04);
 
-	// Create histograms
-	for(size_t i = 0; i < gNSels; ++i){
-		hhoe_data[i]  = new TH1D("ElhoeData_"          + IdPlots::sel_name[i], "Electron hoe in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.15);
-		hhoe_mc[i]    = new TH1D("ElhoeMC_"            + IdPlots::sel_name[i], "Electron hoe in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.15);
-		//hhoe_ttbar[i] = new TH1D("ElhoeTTbar_"         + IdPlots::sel_name[i], "Electron hoe in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.015);
-		hhoe_mc_s[i]  = new THStack("ElhoeMC_stacked_" + IdPlots::sel_name[i], "Electron hoe in MC for "    + IdPlots::sel_name[i]);
-		hhoe_data[i]  ->Sumw2();
-		hhoe_mc[i]    ->Sumw2();
-		//hhoe_ttbar[i] ->Sumw2();
-		hsiesie_data[i]  = new TH1D("ElsiesieData_"          + IdPlots::sel_name[i], "Electron siesiein Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
-		hsiesie_mc[i]    = new TH1D("ElsiesieMC_"            + IdPlots::sel_name[i], "Electron siesiein MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
-		//hsiesie_ttbar[i] = new TH1D("ElsiesieTTbar_"         + IdPlots::sel_name[i], "Electron siesiein TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], 0., 0.035);
-		hsiesie_mc_s[i]  = new THStack("ElsiesieMC_stacked_" + IdPlots::sel_name[i], "Electron siesiein MC for "    + IdPlots::sel_name[i]);
-		hsiesie_data[i]  ->Sumw2();
-		hsiesie_mc[i]    ->Sumw2();
-		//hsiesie_ttbar[i] ->Sumw2();
-		hdeta_data[i]  = new TH1D("EldetaData_"          + IdPlots::sel_name[i], "Electron deta in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
-		hdeta_mc[i]    = new TH1D("EldetaMC_"            + IdPlots::sel_name[i], "Electron deta in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
-		//hdeta_ttbar[i] = new TH1D("EldetaTTbar_"         + IdPlots::sel_name[i], "Electron deta in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], -0.01, 0.01);
-		hdeta_mc_s[i]  = new THStack("EldetaMC_stacked_" + IdPlots::sel_name[i], "Electron deta in MC for "    + IdPlots::sel_name[i]);
-		hdeta_data[i]  ->Sumw2();
-		hdeta_mc[i]    ->Sumw2();
-		//hdeta_ttbar[i] ->Sumw2();
-		hdphi_data[i]  = new TH1D("EldphiData_"          + IdPlots::sel_name[i], "Electron dphi in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
-		hdphi_mc[i]    = new TH1D("EldphiMC_"            + IdPlots::sel_name[i], "Electron dphi in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
-		//hdphi_ttbar[i] = new TH1D("EldphiTTbar_"         + IdPlots::sel_name[i], "Electron dphi in TTbar for " + IdPlots::sel_name[i], IdPlots::nbins[i], -0.15, 0.15);
-		hdphi_mc_s[i]  = new THStack("EldphiMC_stacked_" + IdPlots::sel_name[i], "Electron dphi in MC for "    + IdPlots::sel_name[i]);
-		hdphi_data[i]  ->Sumw2();
-		hdphi_mc[i]    ->Sumw2();
-		//hdphi_ttbar[i] ->Sumw2();
-	}
-
-	////////////////////////////////////////////////////
-	// Fill ttbar histos
-	// Sample loop
-	// // // TTree *tree = fSamples[TTJets]->getTree();
-
-	// // // // Event loop
-	// // // tree->ResetBranchAddresses();
-	// // // InitMC(tree);
-
-	// // // if (fChain == 0) return;
-	// // // Long64_t nentries = fChain->GetEntriesFast();
-	// // // Long64_t nbytes = 0, nb = 0;
-	// // // for (Long64_t jentry=0; jentry<nentries;jentry++) {
-	// // // 	printProgress(jentry, nentries, fSamples[TTJets]->name);
-
-	// // // 	Long64_t ientry = LoadTree(jentry);
-	// // // 	if (ientry < 0) break;
-	// // // 	nb = fChain->GetEntry(jentry);   nbytes += nb;
-
-	// // // 	int elind1(-1), elind2(-1);
-	// // // 	if(hasLooseElectrons(elind1, elind2) < 1) continue;
-
-	// // // 	// Common event selections
-	// // // 	if(!passesJet50Cut()) continue; // make trigger 100% efficient
-
-	// // // 	// Common object selections
-	// // // 	if(!isLooseElectron(elind1)) continue;
-	// // // 	// if(ElIsGoodElId_WP80[elind1] != 1) return false; // apply tight ID for the iso plots?
-
-	// // // 	// Select genmatched fake muons
-	// // // 	if(ElGenMType[elind1] == 2 || ElGenMType[elind1] == 4) continue;
-	// // // 	// Exclude also conversions here?
-
-	// // // 	if(ElPt[elind1] < fC_minEl2pt) continue;
-	// // // 	if(ElPt[elind1] > gElPt2bins[gNElPt2bins]) continue;
-
-
-	// // // 	////////////////////////////////////////////////////
-	// // // 	// MOST LOOSE SELECTION
-	// // // 	hhoe_ttbar[0]->Fill(ElHoverE[elind1]);
-	// // // 	hsiesie_ttbar[0]->Fill(ElSigmaIetaIeta[elind1]);
-	// // // 	hdeta_ttbar[0]->Fill(ElDEta[elind1]);
-	// // // 	hdphi_ttbar[0]->Fill(ElDPhi[elind1]);
-
-	// // // 	////////////////////////////////////////////////////
-	// // // 	// SIGNAL SUPPRESSED SELECTION
-	// // // 	if(isSigSupElEvent()){
-	// // // 		hhoe_ttbar   [1]->Fill(ElRelIso        [elind1]);
-	// // // 		hsiesie_ttbar[1]->Fill(ElSigmaIetaIeta [elind1]);
-	// // // 		hdphi_ttbar  [1]->Fill(ElDEta          [elind1]);
-	// // // 		hdeta_ttbar  [1]->Fill(ElDPhi          [elind1]);
-	// // // 	}
-	// // // 	////////////////////////////////////////////////////
-	// // // }
-	// // // cout << endl;
-	// // // fSamples[TTJets]->cleanUp();
-	////////////////////////////////////////////////////
-
-	// Create plots
-	vector<int> mcsamples = fMCBG;
-	vector<int> datasamples = fEGData;
-
-	for(size_t i = 0; i < gNSels; ++i){
-		fOutputSubDir = "ElectronIDPlots/";
-		hhoe_data[i]->SetXTitle(convertVarName("ElHoverE"));
-		hhoe_data[i]->SetLineWidth(3);
-		hhoe_data[i]->SetLineColor(kBlack);
-		hhoe_data[i]->SetMarkerStyle(8);
-		hhoe_data[i]->SetMarkerColor(kBlack);
-		hhoe_data[i]->SetMarkerSize(1.2);
-
-		// // //hhoe_ttbar[i]->SetXTitle(convertVarName("ElHoverE"));
-		// // //hhoe_ttbar[i]->SetLineWidth(3);
-		// // //hhoe_ttbar[i]->SetLineColor(kRed);
-		// // //hhoe_ttbar[i]->SetMarkerStyle(23);
-		// // //hhoe_ttbar[i]->SetMarkerColor(kRed);
-		// // //hhoe_ttbar[i]->SetMarkerSize(1.3);
-		
-		hsiesie_data[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
-		hsiesie_data[i]->SetLineWidth(3);
-		hsiesie_data[i]->SetLineColor(kBlack);
-		hsiesie_data[i]->SetMarkerStyle(8);
-		hsiesie_data[i]->SetMarkerColor(kBlack);
-		hsiesie_data[i]->SetMarkerSize(1.2);
-
-		// // // hsiesie_ttbar[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
-		// // // hsiesie_ttbar[i]->SetLineWidth(3);
-		// // // hsiesie_ttbar[i]->SetLineColor(kRed);
-		// // // hsiesie_ttbar[i]->SetMarkerStyle(23);
-		// // // hsiesie_ttbar[i]->SetMarkerColor(kRed);
-		// // // hsiesie_ttbar[i]->SetMarkerSize(1.3);
-		
-		hdeta_data[i]->SetXTitle(convertVarName("ElDEta"));
-		hdeta_data[i]->SetLineWidth(3);
-		hdeta_data[i]->SetLineColor(kBlack);
-		hdeta_data[i]->SetMarkerStyle(8);
-		hdeta_data[i]->SetMarkerColor(kBlack);
-		hdeta_data[i]->SetMarkerSize(1.2);
-
-		// // // hdeta_ttbar[i]->SetXTitle(convertVarName("ElDEta"));
-		// // // hdeta_ttbar[i]->SetLineWidth(3);
-		// // // hdeta_ttbar[i]->SetLineColor(kRed);
-		// // // hdeta_ttbar[i]->SetMarkerStyle(23);
-		// // // hdeta_ttbar[i]->SetMarkerColor(kRed);
-		// // // hdeta_ttbar[i]->SetMarkerSize(1.3);
-		
-		hdphi_data[i]->SetXTitle(convertVarName("ElDPhi"));
-		hdphi_data[i]->SetLineWidth(3);
-		hdphi_data[i]->SetLineColor(kBlack);
-		hdphi_data[i]->SetMarkerStyle(8);
-		hdphi_data[i]->SetMarkerColor(kBlack);
-		hdphi_data[i]->SetMarkerSize(1.2);
-
-		// // //hdphi_ttbar[i]->SetXTitle(convertVarName("ElDPhi"));
-		// // //hdphi_ttbar[i]->SetLineWidth(3);
-		// // //hdphi_ttbar[i]->SetLineColor(kRed);
-		// // //hdphi_ttbar[i]->SetMarkerStyle(23);
-		// // //hdphi_ttbar[i]->SetMarkerColor(kRed);
-		// // //hdphi_ttbar[i]->SetMarkerSize(1.3);
-
-		// Apply weights to MC histos
-		for(size_t j = 0; j < gNSAMPLES; ++j){
-			Sample *S = fSamples[j];
-			float lumiscale = fLumiNorm / S->lumi;
-			if(S->datamc == 0) continue;
-			S->idplots.hhoe[i]->Scale(lumiscale);
-			S->idplots.hsiesie[i]->Scale(lumiscale);
-			S->idplots.hdeta[i]->Scale(lumiscale);
-			S->idplots.hdphi[i]->Scale(lumiscale);
+	// loop k is over the 4 ID variables: HoE, sigmaIetaIeta, dEta, dPhi
+	for (int k =0 ; k<4 ; k++){
+		TString varName;
+		switch (k) {
+			case 0: 
+				varName = "ElHoverE";
+				axismin[k] = 0.;
+				axismax[k] = 0.15;
+				break ;
+			case 1: 
+				varName = "ElSigmaIetaIeta";
+				axismin[k] = 0.;
+				axismax[k] = 0.035;
+				break ;
+			case 2: 
+				varName = "ElDEta";
+				axismin[k] = -0.01;
+				axismax[k] =  0.01;
+				break ;
+			case 3: 
+				varName = "ElDPhi";
+				axismin[k] = -0.15;
+				axismax[k] =  0.15;
+				break ;
 		}
+		for(size_t i = 0; i < gNSels; ++i){
+			data [k][i]  = new TH1D("El"+varName+"Data_"          + IdPlots::sel_name[i], "Electron "+varName+" in Data for "  + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			qcd  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			ttj  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			ewk  [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			rare [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			db   [k][i]  = new TH1D("El"+varName+"MC_"            + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i], IdPlots::nbins[i], axismin[k], axismax[k]);
+			mc_s [k][i]  = new THStack("El"+varName+"MC_stacked_" + IdPlots::sel_name[i], "Electron "+varName+" in MC for "    + IdPlots::sel_name[i]);
 
-		// Fill data histo
-		for(size_t j = 0; j < datasamples.size(); ++j){
-			Sample *S = fSamples[datasamples[j]];
-			hhoe_data[i]->Add(S->idplots.hhoe[i]);
-			hhoe_data[i]->SetXTitle(convertVarName("ElHoverE"));
-			hsiesie_data[i]->Add(S->idplots.hsiesie[i]);
-			hsiesie_data[i]->SetXTitle(convertVarName("ElSigmaIetaIeta"));
-			hdeta_data[i]->Add(S->idplots.hdeta[i]);
-			hdeta_data[i]->SetXTitle(convertVarName("ElDEta"));
-			hdphi_data[i]->Add(S->idplots.hdphi[i]);
-			hdphi_data[i]->SetXTitle(convertVarName("ElDPhi"));
-		}
+			data [k][i]->Sumw2();
+			qcd  [k][i]->Sumw2();
+			ttj  [k][i]->Sumw2();
+			ewk  [k][i]->Sumw2();
+			rare [k][i]->Sumw2();
+			db   [k][i]->Sumw2();
 
-		// Scale to get equal integrals
-		float hoe_intscale(0.);
-		float siesie_intscale(0.);
-		float deta_intscale(0.);
-		float dphi_intscale(0.);
-		for(size_t j = 0; j < mcsamples.size();   ++j){
-			Sample *S = fSamples[mcsamples[j]];
-			hoe_intscale    += S->idplots.hhoe[i]->Integral();
-			siesie_intscale += S->idplots.hsiesie[i]->Integral();
-			deta_intscale   += S->idplots.hdeta[i]->Integral();
-			dphi_intscale   += S->idplots.hdphi[i]->Integral();
-		}
-		hoe_intscale    = hhoe_data[i]->Integral() / hoe_intscale;
-		siesie_intscale = hsiesie_data[i]->Integral() / siesie_intscale;
-		deta_intscale   = hdeta_data[i]->Integral() / deta_intscale;
-		dphi_intscale   = hdphi_data[i]->Integral() / dphi_intscale;
-		
-		for(size_t j = 0; j < mcsamples.size();   ++j){
-			Sample *S = fSamples[mcsamples[j]];			
-			S->idplots.hhoe[i]->Scale(hoe_intscale);
-			S->idplots.hsiesie[i]->Scale(siesie_intscale);
-			S->idplots.hdeta[i]->Scale(deta_intscale);
-			S->idplots.hdphi[i]->Scale(dphi_intscale);
-		}
-		// // //hhoe_ttbar[i]    -> Scale(hhoe_data[i]    -> Integral() / hhoe_ttbar[i]    -> Integral());
-		// // //hsiesie_ttbar[i] -> Scale(hsiesie_data[i] -> Integral() / hsiesie_ttbar[i] -> Integral());
-		// // //hdeta_ttbar[i]   -> Scale(hdeta_data[i]   -> Integral() / hdeta_ttbar[i]   -> Integral());
-		// // //hdphi_ttbar[i]   -> Scale(hdphi_data[i]   -> Integral() / hdphi_ttbar[i]   -> Integral());
+			qcd  [k][i]->SetFillColor(kYellow-4);
+			ttj  [k][i]->SetFillColor(kAzure-5);
+			ewk  [k][i]->SetFillColor(kGreen +1);
+			rare [k][i]->SetFillColor(kAzure+8);
+			db   [k][i]->SetFillColor(kSpring-9);
 
-		// Fill MC stacks
-		for(size_t j = 0; j < mcsamples.size();   ++j){
-			Sample *S = fSamples[mcsamples[j]];			
-			hhoe_mc  [i]->Add(S->idplots.hhoe[i]);
-			hhoe_mc_s[i]->Add(S->idplots.hhoe[i]);
-			hhoe_mc_s[i]->Draw("goff");
-			hhoe_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElHoverE"));
-			hsiesie_mc  [i]->Add(S->idplots.hsiesie[i]);
-			hsiesie_mc_s[i]->Add(S->idplots.hsiesie[i]);
-			hsiesie_mc_s[i]->Draw("goff");
-			hsiesie_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElSigmaIetaIeta"));
-			hdeta_mc  [i]->Add(S->idplots.hdeta[i]);
-			hdeta_mc_s[i]->Add(S->idplots.hdeta[i]);
-			hdeta_mc_s[i]->Draw("goff");
-			hdeta_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElDEta"));
-			hdphi_mc  [i]->Add(S->idplots.hdphi[i]);
-			hdphi_mc_s[i]->Add(S->idplots.hdphi[i]);
-			hdphi_mc_s[i]->Draw("goff");
-			hdphi_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElDPhi"));
-		}
+			fOutputSubDir = "ElectronIDPlots/";
+			data[k][i]->SetXTitle(convertVarName(varName));
+			data[k][i]->SetLineWidth(3);
+			data[k][i]->SetLineColor(kBlack);
+			data[k][i]->SetMarkerStyle(8);
+			data[k][i]->SetMarkerColor(kBlack);
+			data[k][i]->SetMarkerSize(1.2);
+
+			// Apply weights to MC histos
+			for(size_t j = 0; j < gNSAMPLES; ++j){
+				Sample *S = fSamples[j];
+				float lumiscale = fLumiNorm / S->lumi;
+				if(S->datamc == 0) continue;
+				switch (k) {
+					case 0: S->idplots.hhoe[i]->Scale(lumiscale); break;
+					case 1: S->idplots.hsiesie[i]->Scale(lumiscale); break;
+					case 2: S->idplots.hdeta[i]->Scale(lumiscale); break;
+					case 3: S->idplots.hdphi[i]->Scale(lumiscale); break;
+				}
+			}
+
+			// Fill data histo
+			for(size_t j = 0; j < datasamples.size(); ++j){
+				Sample *S = fSamples[datasamples[j]];
+				switch (k) {
+					case 0: data[k][i]->Add(S->idplots.hhoe[i]); break;
+					case 1: data[k][i]->Add(S->idplots.hsiesie[i]); break;
+					case 2: data[k][i]->Add(S->idplots.hdeta[i]); break;
+					case 3: data[k][i]->Add(S->idplots.hdphi[i]); break;
+				}
+			}
+
+			// Scale to get equal integrals
+			intscale[k] = 0.;
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				Sample *S = fSamples[mcsamples[j]];
+				switch (k) {
+					case 0: intscale[k] += S->idplots.hhoe[i]->Integral(); break;
+					case 1: intscale[k] += S->idplots.hsiesie[i]->Integral(); break;
+					case 2: intscale[k] += S->idplots.hdeta[i]->Integral(); break;
+					case 3: intscale[k] += S->idplots.hdphi[i]->Integral(); break;
+				}
+			}
+			intscale[k] = data[k][i]->Integral() / intscale[k];
+			
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				Sample *S = fSamples[mcsamples[j]];			
+				switch (k) {
+					case 0: S -> idplots.hhoe[i]    -> Scale(intscale[k]); break;
+					case 1: S -> idplots.hsiesie[i] -> Scale(intscale[k]); break;
+					case 2: S -> idplots.hdeta[i]   -> Scale(intscale[k]); break;
+					case 3: S -> idplots.hdphi[i]   -> Scale(intscale[k]); break;
+				}
+			}
+
+			// Fill MC stacks
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+				Sample *S = fSamples[mcsamples[j]];			
+				TString s_name = S->sname;
+				TH1D * histo;
+				switch (k) {
+					case 0: histo = S->idplots.hhoe[i]   ; break;
+					case 1: histo = S->idplots.hsiesie[i]; break;
+					case 2: histo = S->idplots.hdeta[i]  ; break;
+					case 3: histo = S->idplots.hdphi[i]  ; break;
+				}
+				if ( sampleType(s_name) == 1) qcd [k][i]->Add( histo );
+				if ( sampleType(s_name) == 2) ttj [k][i]->Add( histo );
+				if ( sampleType(s_name) == 3) ewk [k][i]->Add( histo );
+				if ( sampleType(s_name) == 4) rare[k][i]->Add( histo );
+				if ( sampleType(s_name) == 5) db  [k][i]->Add( histo );
+				delete histo;
+			} // end loop over MC samples
+
+			mc_s[k][i]->Add(qcd [k][i]);
+			mc_s[k][i]->Add(db  [k][i]);
+			mc_s[k][i]->Add(ewk [k][i]);
+			mc_s[k][i]->Add(rare[k][i]);
+			mc_s[k][i]->Add(ttj [k][i]);
+			mc_s[k][i]->Draw("goff");
+			mc_s[k][i]->GetXaxis()->SetTitle(convertVarName(varName));
+
+			datamax[k] = data[k][i]->GetMaximum();
+			datamax[k] = mc_s[k][i]->GetMaximum();
+			max[k] = datamax[k] > mcmax[k] ? datamax[k] : mcmax[k];
+
+			mc_s[k][i]->SetMaximum(1.2*max[k]);
+			data[k][i]->SetMaximum(1.2*max[k]);
+
+			// H over E
+			TCanvas *temp = new TCanvas(varName + IdPlots::sel_name[i], "Electron "+varName+" in Data vs MC", 0, 0, 800, 600);
+			temp->cd();
+
+			TLegend *leg = new TLegend(0.70,0.65,0.89,0.88);
+			leg->AddEntry(data[k][i], "Data","p");
+			leg->AddEntry(ttj[k][i],  "Top","f");
+			leg->AddEntry(rare[k][i], "Rare SM","f");
+			leg->AddEntry(ewk[k][i],  "Single Boson","f");
+			leg->AddEntry(db[k][i],   "Di-Boson","f");
+			leg->AddEntry(qcd[k][i],  "QCD","f");
+
+			leg->SetFillStyle(0);
+			leg->SetTextFont(42);
+			leg->SetBorderSize(0);
+
+			// gPad->SetLogy();
+			mc_s[k][i]->Draw("hist");
+			data[k][i]->DrawCopy("PE X0 same");
+			leg->Draw();
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+			lat->SetTextColor(kRed);
+			//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
+			lat->SetTextColor(kBlack);
+
+			Util::PrintPDF(temp, varName + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
+			delete temp, leg;
+		} // end loop over region selections
+	} //end loop over ID variables
+} //end function
 
 
-		double hoe_max1 = hhoe_mc_s[i]->GetMaximum();
-		double hoe_max2 = hhoe_data[i]->GetMaximum();
-		double hoe_max = hoe_max1>hoe_max2?hoe_max1:hoe_max2;
-		double siesie_max1 = hsiesie_mc_s[i]->GetMaximum();
-		double siesie_max2 = hsiesie_data[i]->GetMaximum();
-		double siesie_max = siesie_max1>siesie_max2?siesie_max1:siesie_max2;
-		double deta_max1 = hdeta_mc_s[i]->GetMaximum();
-		double deta_max2 = hdeta_data[i]->GetMaximum();
-		double deta_max = deta_max1>deta_max2?deta_max1:deta_max2;
-		double dphi_max1 = hdphi_mc_s[i]->GetMaximum();
-		double dphi_max2 = hdphi_data[i]->GetMaximum();
-		double dphi_max = dphi_max1>dphi_max2?dphi_max1:dphi_max2;
-
-		hhoe_mc_s[i]->SetMaximum(1.2*hoe_max);
-		hhoe_data[i]->SetMaximum(1.2*hoe_max);
-		hsiesie_mc_s[i]->SetMaximum(1.2*siesie_max);
-		hsiesie_data[i]->SetMaximum(1.2*siesie_max);
-		hdeta_mc_s[i]->SetMaximum(1.2*deta_max);
-		hdeta_data[i]->SetMaximum(1.2*deta_max);
-		hdphi_mc_s[i]->SetMaximum(1.2*dphi_max);
-		hdphi_data[i]->SetMaximum(1.2*dphi_max);
-
-		//int bin0   = hiso_data[i]->FindBin(0.0);
-		//int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
-		//int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
-		//float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
-		//float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
-		//float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
-
-		// H over E
-		TCanvas *hoe_temp = new TCanvas("ElHoE" + IdPlots::sel_name[i], "Electron H/E in Data vs MC", 0, 0, 800, 600);
-		hoe_temp->cd();
-
-		TLegend *hoe_leg = new TLegend(0.70,0.30,0.90,0.68);
-		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		hoe_leg->AddEntry(hhoe_data[i], "Data","p");
-		// // //hoe_leg->AddEntry(hhoe_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) hoe_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hhoe[i], fSamples[mcsamples[j]]->sname.Data(), "f");
-		hoe_leg->SetFillStyle(0);
-		hoe_leg->SetTextFont(42);
-		hoe_leg->SetBorderSize(0);
-
-		// gPad->SetLogy();
-		hhoe_mc_s[i]->Draw("hist");
-		// // //hhoe_ttbar[i]->DrawCopy("PE X0 same");
-		hhoe_data[i]->DrawCopy("PE X0 same");
-		hoe_leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
-		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
-		lat->SetTextColor(kRed);
-		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-		lat->SetTextColor(kBlack);
-
-		Util::PrintPDF(hoe_temp, "ElHoE" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
-
-		// Sigma I eta I eta
-		TCanvas *siesie_temp = new TCanvas("ElSieSie" + IdPlots::sel_name[i], "Electron #sigma_{i#eta i#eta} in Data vs MC", 0, 0, 800, 600);
-		siesie_temp->cd();
-
-		TLegend *siesie_leg = new TLegend(0.70,0.30,0.90,0.68);
-		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		siesie_leg->AddEntry(hsiesie_data[i], "Data","p");
-		// // // siesie_leg->AddEntry(hsiesie_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) siesie_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hsiesie[i], fSamples[mcsamples[j]]->sname.Data(), "f");
-		siesie_leg->SetFillStyle(0);
-		siesie_leg->SetTextFont(42);
-		siesie_leg->SetBorderSize(0);
-
-		// gPad->SetLogy();
-		hsiesie_mc_s[i]->Draw("hist");
-		// // // hsiesie_ttbar[i]->DrawCopy("PE X0 same");
-		hsiesie_data[i]->DrawCopy("PE X0 same");
-		siesie_leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
-		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
-		lat->SetTextColor(kRed);
-		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-		lat->SetTextColor(kBlack);
-
-		Util::PrintPDF(siesie_temp, "ElSieSie" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
-
-		// Delta eta
-		TCanvas *deta_temp = new TCanvas("ElDeta" + IdPlots::sel_name[i], "Electron #Delta #eta in Data vs MC", 0, 0, 800, 600);
-		deta_temp->cd();
-
-		TLegend *deta_leg = new TLegend(0.70,0.30,0.90,0.68);
-		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		deta_leg->AddEntry(hdeta_data[i], "Data","p");
-		// // // deta_leg->AddEntry(hdeta_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) deta_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hdeta[i], fSamples[mcsamples[j]]->sname.Data(), "f");
-		deta_leg->SetFillStyle(0);
-		deta_leg->SetTextFont(42);
-		deta_leg->SetBorderSize(0);
-
-		// gPad->SetLogy();
-		hdeta_mc_s[i]->Draw("hist");
-		// // // hdeta_ttbar[i]->DrawCopy("PE X0 same");
-		hdeta_data[i]->DrawCopy("PE X0 same");
-		deta_leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
-		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
-		lat->SetTextColor(kRed);
-		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-		lat->SetTextColor(kBlack);
-
-		Util::PrintPDF(deta_temp, "ElDeta" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
-
-		// Delta phi
-		TCanvas *dphi_temp = new TCanvas("ElDphi" + IdPlots::sel_name[i], "Electron #Delta #phi in Data vs MC", 0, 0, 800, 600);
-		dphi_temp->cd();
-
-		TLegend *dphi_leg = new TLegend(0.70,0.30,0.90,0.68);
-		// TLegend *leg = new TLegend(0.75,0.60,0.89,0.88);
-		dphi_leg->AddEntry(hdphi_data[i], "Data","p");
-		// // // dphi_leg->AddEntry(hdphi_ttbar[i], "TTbar fake","p");
-		for(size_t j = 0; j < mcsamples.size(); ++j) dphi_leg->AddEntry(fSamples[mcsamples[j]]->idplots.hdphi[i], fSamples[mcsamples[j]]->sname.Data(), "f");
-		dphi_leg->SetFillStyle(0);
-		dphi_leg->SetTextFont(42);
-		dphi_leg->SetBorderSize(0);
-
-		// gPad->SetLogy();
-		hdphi_mc_s[i]->Draw("hist");
-		// // // hdphi_ttbar[i]->DrawCopy("PE X0 same");
-		hdphi_data[i]->DrawCopy("PE X0 same");
-		dphi_leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
-		//lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
-		//lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
-		lat->SetTextColor(kRed);
-		//lat->DrawLatex(0.75,0.75, Form("R^{T/L}_{TTbar} = %4.2f", ratio_ttbar));
-		lat->SetTextColor(kBlack);
-
-		Util::PrintPDF(dphi_temp, "ElDphi" + IdPlots::sel_name[i], fOutputDir + fOutputSubDir);
-
-	}
-}
-
-bool sampleIsRare(TString s_name){
+inline int SSDLPlotter::sampleType(TString s_name){
+	// returns an integer corresponding to the MC sample type:
+	// QCD = 1, Top = 2, EWK = 3, RARE = 4 and DiBoson = 5
+	// if non matches, returns 0
+	if ( (s_name.Contains("QCD")) ||
+	     (s_name) == "MuEnr10" )
+	return 1;
+	if ( (s_name.Contains("SingleT")) ||
+	     (s_name) == "TTJets" )
+	return 2;
+	if ( (s_name.Contains("DYJets")) ||
+	     (s_name.Contains("GJets"))  ||
+	     (s_name) == "WJets" )
+	return 3;
 	if ( (s_name) == "TTbarW"    ||
 	     (s_name) == "TTbarZ"    ||
 	     (s_name) == "TTbarG"    ||
@@ -2632,9 +2717,15 @@ bool sampleIsRare(TString s_name){
 	     (s_name) == "WWW"       ||
 	     (s_name) == "W+W+"      ||
 	     (s_name) == "W-W-")
-	return true;
-	else return false;
+	return 4;
+	if ( (s_name.Contains("GVJets"))    ||
+	     (s_name.Contains("WWTo2L2Nu")) ||
+	     (s_name.Contains("WZTo3LNu"))  ||
+	     (s_name.Contains("ZZTo4L")) )
+	return 5;
+	else return 0;
 }
+
 void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
 
@@ -2737,15 +2828,12 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			for(size_t j = 0; j < mcsamples.size();   ++j){
 				Sample *S = fSamples[mcsamples[j]];
 				TString s_name = S->sname;
-				if ( s_name == "TTJets" )         hvar_ttj[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("SingleT") ) hvar_ttj[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name == "WJets" )          hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("DYJets") )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("GJets")  )  hvar_ewk[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("QCD") )     hvar_qcd[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleIsRare(s_name) )       hvar_rare[i]->Add(S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("GVJets") )  hvar_db[i]->Add(  S->kinplots[s][hilo].hvar[i] );
-				if ( s_name.Contains("WWTo2L2Nu") or s_name.Contains("WZTo3LNu")   or s_name.Contains("ZZTo4L") ) hvar_db[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+				if ( sampleType(s_name) == 1) hvar_qcd [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleType(s_name) == 2) hvar_ttj [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleType(s_name) == 3) hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleType(s_name) == 4) hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( sampleType(s_name) == 5) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
 			}
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
 			hvar_mc_s[i]->Add(hvar_db[i]);
