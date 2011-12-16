@@ -2694,7 +2694,7 @@ void SSDLPlotter::makeElIdPlots(){
 inline int SSDLPlotter::sampleType(TString s_name){
 	// returns an integer corresponding to the MC sample type:
 	// QCD = 1, Top = 2, EWK = 3, RARE = 4 and DiBoson = 5
-	// if non matches, returns 0
+	// if none matches, returns 0
 	if ( (s_name.Contains("QCD")) ||
 	     (s_name) == "MuEnr10" )
 	return 1;
@@ -2723,7 +2723,10 @@ inline int SSDLPlotter::sampleType(TString s_name){
 	     (s_name.Contains("WZTo3LNu"))  ||
 	     (s_name.Contains("ZZTo4L")) )
 	return 5;
-	else return 0;
+	else {
+		cout << "ERROR: This should not happen! Check the SSDLPlotter::sampleType() function to have "<< s_name << "in one of the lists!" << endl;
+		return 0;
+	}
 }
 
 void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
