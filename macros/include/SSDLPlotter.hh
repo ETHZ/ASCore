@@ -163,6 +163,7 @@ public:
 	
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
+	inline int sampleType(TString);
 
 	private:
 	
