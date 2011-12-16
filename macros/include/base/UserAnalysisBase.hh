@@ -5,6 +5,7 @@
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
 #include "helper/PUWeight.h"
+#include "helper/Lumi3DReWeighting_standalone.hh"
 #include <map>
 #include <string>
 
@@ -36,8 +37,11 @@ public:
 
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string = "");
+  	virtual void  SetPileUp3DSrc(string, string);
+
 	virtual float GetPUWeight(int);
 	virtual float GetPUWeight(int, int);
+  virtual float GetPUWeight3D( int , int , int );
 
 
 	TreeReader *fTR;
@@ -132,8 +136,12 @@ private:
 	std::vector<Cut> fEvtSelCuts;
 	
 	// Pile UP reweighting
-	bool fDoPileUpReweight;
+  bool fDoPileUpReweight;
+  bool fDoPileUpReweight3D;
+
 	PUWeight  *fPUWeight;
+  Lumi3DReWeighting   *fPUWeight3D;
+
 
 };
 
