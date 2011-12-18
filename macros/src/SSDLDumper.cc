@@ -2125,32 +2125,53 @@ void SSDLDumper::bookHistos(Sample *S){
 		S->idplots.hdphi[j]->SetXTitle("#Delta#phi");
 		S->idplots.hdphi[j]->Sumw2();
 	}
+	// isolation histos for electrons
+	for(size_t j = 0; j < gNSels; ++j){
+		TString name = Form("%s_%s_%siso", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[1].Data());
+		S->isoplots[1].hiso[j] = new TH1D(name, Form("%siso", gEMULabel[1].Data()), IsoPlots::nbins[j], 0., 0.6);
+		S->isoplots[1].hiso[j]->SetFillColor(S->color);
+		S->isoplots[1].hiso[j]->SetXTitle("RelIso");
+		S->isoplots[1].hiso[j]->Sumw2();
+		for(int k = 0; k < gNMuPt2bins; ++k){
+			name = Form("%s_%s_%siso_pt%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[1].Data(), k);
+			S->isoplots[1].hiso_pt[j][k] = new TH1D(name, Form("%siso_pt%d", gEMULabel[1].Data(), k), IsoPlots::nbins[j], 0., 0.6);
+			S->isoplots[1].hiso_pt[j][k]->SetFillColor(S->color);
+			S->isoplots[1].hiso_pt[j][k]->SetXTitle("RelIso");
+			S->isoplots[1].hiso_pt[j][k]->Sumw2();
+		}
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			name = Form("%s_%s_%siso_nv%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[1].Data(), k);
+			S->isoplots[1].hiso_nv[j][k] = new TH1D(name, Form("%siso_nv%d", gEMULabel[1].Data(), k), IsoPlots::nbins[j], 0., 0.6);
+			S->isoplots[1].hiso_nv[j][k]->SetFillColor(S->color);
+			S->isoplots[1].hiso_nv[j][k]->SetXTitle("RelIso");
+			S->isoplots[1].hiso_nv[j][k]->Sumw2();
+		}
+	}
+	// isolation histos for muons
+	for(size_t j = 0; j < gNSels; ++j){
+		TString name = Form("%s_%s_%siso", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[0].Data());
+		S->isoplots[0].hiso[j] = new TH1D(name, Form("%siso", gEMULabel[0].Data()), IsoPlots::nbins[j], 0., 1.0);
+		S->isoplots[0].hiso[j]->SetFillColor(S->color);
+		S->isoplots[0].hiso[j]->SetXTitle("RelIso");
+		S->isoplots[0].hiso[j]->Sumw2();
+		for(int k = 0; k < gNMuPt2bins; ++k){
+			name = Form("%s_%s_%siso_pt%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[0].Data(), k);
+			S->isoplots[0].hiso_pt[j][k] = new TH1D(name, Form("%siso_pt%d", gEMULabel[0].Data(), k), IsoPlots::nbins[j], 0., 1.0);
+			S->isoplots[0].hiso_pt[j][k]->SetFillColor(S->color);
+			S->isoplots[0].hiso_pt[j][k]->SetXTitle("RelIso");
+			S->isoplots[0].hiso_pt[j][k]->Sumw2();
+		}
+		for(int k = 0; k < gNNVrtxBins; ++k){
+			name = Form("%s_%s_%siso_nv%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[0].Data(), k);
+			S->isoplots[0].hiso_nv[j][k] = new TH1D(name, Form("%siso_nv%d", gEMULabel[0].Data(), k), IsoPlots::nbins[j], 0., 1.0);
+			S->isoplots[0].hiso_nv[j][k]->SetFillColor(S->color);
+			S->isoplots[0].hiso_nv[j][k]->SetXTitle("RelIso");
+			S->isoplots[0].hiso_nv[j][k]->Sumw2();
+		}
+	}
 
 
 	for(size_t l = 0; l < 2; ++l){
-		// Isolation histos
-		for(size_t j = 0; j < gNSels; ++j){
-			TString name = Form("%s_%s_%siso", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[l].Data());
-			S->isoplots[l].hiso[j] = new TH1D(name, Form("%siso", gEMULabel[l].Data()), IsoPlots::nbins[j], 0., 0.6);
-			S->isoplots[l].hiso[j]->SetFillColor(S->color);
-			S->isoplots[l].hiso[j]->SetXTitle("RelIso");
-			S->isoplots[l].hiso[j]->Sumw2();
-			for(int k = 0; k < gNMuPt2bins; ++k){
-				name = Form("%s_%s_%siso_pt%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[l].Data(), k);
-				S->isoplots[l].hiso_pt[j][k] = new TH1D(name, Form("%siso_pt%d", gEMULabel[l].Data(), k), IsoPlots::nbins[j], 0., 0.6);
-				S->isoplots[l].hiso_pt[j][k]->SetFillColor(S->color);
-				S->isoplots[l].hiso_pt[j][k]->SetXTitle("RelIso");
-				S->isoplots[l].hiso_pt[j][k]->Sumw2();
-			}
-			for(int k = 0; k < gNNVrtxBins; ++k){
-				name = Form("%s_%s_%siso_nv%d", S->sname.Data(), IsoPlots::sel_name[j].Data(), gEMULabel[l].Data(), k);
-				S->isoplots[l].hiso_nv[j][k] = new TH1D(name, Form("%siso_nv%d", gEMULabel[l].Data(), k), IsoPlots::nbins[j], 0., 0.6);
-				S->isoplots[l].hiso_nv[j][k]->SetFillColor(S->color);
-				S->isoplots[l].hiso_nv[j][k]->SetXTitle("RelIso");
-				S->isoplots[l].hiso_nv[j][k]->Sumw2();
-			}
-		}
-
 		// Ratio histos
 		for(size_t j = 0; j < gNRatioVars; ++j){
 			TString name = Form("%s_%s_ntight_%s", S->sname.Data(), gEMULabel[l].Data(), FRatioPlots::var_name[j].Data());

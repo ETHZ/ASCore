@@ -545,8 +545,8 @@ void SSDLPlotter::doAnalysis(){
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// printOrigins();
 
-	// makeMuIsolationPlots(); // loops on TTbar sample
-	 makeElIsolationPlots(); // loops on TTbar sample
+	 makeMuIsolationPlots(); // loops on TTbar sample
+	 //makeElIsolationPlots(); // loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
@@ -1480,14 +1480,14 @@ void SSDLPlotter::makeMuIsolationPlots(){
 
 	// Create histograms
 	for(size_t i = 0; i < gNSels; ++i){
-		hiso_data[i]  = new TH1D("MuIsoData_"          + IsoPlots::sel_name[i], "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_mc[i]    = new TH1D("MuIsoMC_"            + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_ttbar[i] = new TH1D("MuIsoTTbar_"         + IsoPlots::sel_name[i], "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_qcd  [i] = new TH1D("MuIsoQCD_"         + IsoPlots::sel_name[i], "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_ttj  [i] = new TH1D("MuIsoTop_"         + IsoPlots::sel_name[i], "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_ewk  [i] = new TH1D("MuIsoEWK_"         + IsoPlots::sel_name[i], "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_rare [i] = new TH1D("MuIsorare_"         + IsoPlots::sel_name[i], "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-		hiso_db   [i] = new TH1D("MuIsoDB_"         + IsoPlots::sel_name[i], "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+		hiso_data [i] = new TH1D("MuIsoData_"          + IsoPlots::sel_name[i], "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_mc   [i] = new TH1D("MuIsoMC_"            + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_ttbar[i] = new TH1D("MuIsoTTbar_"         + IsoPlots::sel_name[i], "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_qcd  [i] = new TH1D("MuIsoQCD_"           + IsoPlots::sel_name[i], "Muon Isolation in QCD for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_ttj  [i] = new TH1D("MuIsoTop_"           + IsoPlots::sel_name[i], "Muon Isolation in Top for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_ewk  [i] = new TH1D("MuIsoEWK_"           + IsoPlots::sel_name[i], "Muon Isolation in EWK for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_rare [i] = new TH1D("MuIsorare_"          + IsoPlots::sel_name[i], "Muon Isolation in rare for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+		hiso_db   [i] = new TH1D("MuIsoDB_"            + IsoPlots::sel_name[i], "Muon Isolation in DB for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
 		hiso_mc_s[i]  = new THStack("MuIsoMC_stacked_" + IsoPlots::sel_name[i], "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
 		hiso_data [i] ->Sumw2();
 		hiso_mc   [i] ->Sumw2();
@@ -1499,14 +1499,14 @@ void SSDLPlotter::makeMuIsolationPlots(){
 		hiso_db   [i] ->Sumw2();
 
 		for(int k = 0; k < gNMuPt2bins; ++k){
-			hiso_data_pt [i][k] = new TH1D(Form("MuIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_mc_pt   [i][k] = new TH1D(Form("MuIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ttbar_pt[i][k] = new TH1D(Form("MuIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_qcd_pt[i][k]   = new TH1D(Form("MuIsoQCD_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ttj_pt[i][k]   = new TH1D(Form("MuIsoTop_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ewk_pt[i][k]   = new TH1D(Form("MuIsoEWK_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_rare_pt[i][k]  = new TH1D(Form("MuIsorare_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_db_pt[i][k]    = new TH1D(Form("MuIsoDB_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_data_pt [i][k] = new TH1D(Form("MuIsoData_%s_Pt%d"         , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_mc_pt   [i][k] = new TH1D(Form("MuIsoMC_%s_Pt%d"           , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ttbar_pt[i][k] = new TH1D(Form("MuIsoTTbar_%s_Pt%d"        , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_qcd_pt  [i][k] = new TH1D(Form("MuIsoQCD_%s_Pt%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ttj_pt  [i][k] = new TH1D(Form("MuIsoTop_%s_Pt%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ewk_pt  [i][k] = new TH1D(Form("MuIsoEWK_%s_Pt%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_rare_pt [i][k] = new TH1D(Form("MuIsorare_%s_Pt%d"         , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_db_pt   [i][k] = new TH1D(Form("MuIsoDB_%s_Pt%d"           , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
 			hiso_mc_pt_s [i][k] = new THStack(Form("MuIsoMC_stacked_%s_Pt%d", IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_pt [i][k]->Sumw2();
 			hiso_mc_pt   [i][k]->Sumw2();
@@ -1518,14 +1518,14 @@ void SSDLPlotter::makeMuIsolationPlots(){
 			hiso_db_pt   [i][k]->Sumw2();
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
-			hiso_data_nv [i][k] = new TH1D(Form("MuIsoData_%s_NVtx%d",          IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_mc_nv   [i][k] = new TH1D(Form("MuIsoMC_%s_NVtx%d",            IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ttbar_nv[i][k] = new TH1D(Form("MuIsoTTbar_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_qcd_nv[i][k]   = new TH1D(Form("MuIsoQCD_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ttj_nv[i][k]   = new TH1D(Form("MuIsoTop_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_ewk_nv[i][k]   = new TH1D(Form("MuIsoEWK_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_rare_nv[i][k]  = new TH1D(Form("MuIsorare_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
-			hiso_db_nv[i][k]    = new TH1D(Form("MuIsoDB_%s_NVtx%d",         IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
+			hiso_data_nv [i][k] = new TH1D(Form("MuIsoData_%s_NVtx%d"         , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_mc_nv   [i][k] = new TH1D(Form("MuIsoMC_%s_NVtx%d"           , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ttbar_nv[i][k] = new TH1D(Form("MuIsoTTbar_%s_NVtx%d"        , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_qcd_nv  [i][k] = new TH1D(Form("MuIsoQCD_%s_NVtx%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in QCD for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ttj_nv  [i][k] = new TH1D(Form("MuIsoTop_%s_NVtx%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Top for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_ewk_nv  [i][k] = new TH1D(Form("MuIsoEWK_%s_NVtx%d"          , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in EWK for "   + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_rare_nv [i][k] = new TH1D(Form("MuIsorare_%s_NVtx%d"         , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in rare for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
+			hiso_db_nv   [i][k] = new TH1D(Form("MuIsoDB_%s_NVtx%d"           , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in DB for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
 			hiso_mc_nv_s [i][k] = new THStack(Form("MuIsoMC_stacked_%s_NVtx%d", IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i]);
 			hiso_data_nv [i][k]->Sumw2();
 			hiso_mc_nv   [i][k]->Sumw2();
@@ -1763,6 +1763,7 @@ void SSDLPlotter::makeMuIsolationPlots(){
 		for(size_t j = 0; j < mcsamples.size();   ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			TString s_name = S->sname;
+			hiso_mc  [i]->Add(S->isoplots[0].hiso[i]);
 			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
 			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[0].hiso[i] );
 			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[0].hiso[i] );
@@ -1842,7 +1843,8 @@ void SSDLPlotter::makeMuIsolationPlots(){
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
 		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
-		int bin1   = hiso_data[i]->FindBin(0.6)  - 1;
+		int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
+		printf("bin 0: %3.0i bin015: %3.0i bin1: %3.0i \n", bin0, bin015, bin1);
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
 		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
 		float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
@@ -2284,6 +2286,7 @@ void SSDLPlotter::makeElIsolationPlots(){
 		for(size_t j = 0; j < mcsamples.size();   ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			TString s_name = S->sname;
+			hiso_mc  [i]->Add(S->isoplots[1].hiso[i]);
 			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
 			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[1].hiso[i] );
 			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[1].hiso[i] );
@@ -2365,10 +2368,10 @@ void SSDLPlotter::makeElIsolationPlots(){
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
 		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
-		int bin1   = hiso_data[i]->FindBin(0.6)  - 1;
-		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
-		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin1);
-		float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin1);
+		int bin06  = hiso_data[i]->FindBin(0.6)  - 1;
+		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin06);
+		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin06);
+		float ratio_ttbar = hiso_ttbar[i]->Integral(bin0, bin015) / hiso_ttbar[i]->Integral(bin0, bin06);
 
 		TCanvas *c_temp = new TCanvas("ElIso" + IsoPlots::sel_name[i], "Electron Isolation in Data vs MC", 0, 0, 800, 600);
 		c_temp->cd();
@@ -2411,9 +2414,9 @@ void SSDLPlotter::makeElIsolationPlots(){
 			hiso_mc_pt_s[i][k]->SetMaximum(1.2*max);
 			hiso_data_pt[i][k]->SetMaximum(1.2*max);
 						
-			ratio_data = hiso_data_pt[i][k]  ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin1);
-			ratio_mc   = hiso_mc_pt[i][k]    ->Integral(bin0, bin015) / hiso_mc_pt[i][k]   ->Integral(bin0, bin1);
-			ratio_ttbar = hiso_ttbar_pt[i][k]->Integral(bin0, bin015) / hiso_ttbar_pt[i][k]->Integral(bin0, bin1);
+			ratio_data = hiso_data_pt[i][k]  ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin06);
+			ratio_mc   = hiso_mc_pt[i][k]    ->Integral(bin0, bin015) / hiso_mc_pt[i][k]   ->Integral(bin0, bin06);
+			ratio_ttbar = hiso_ttbar_pt[i][k]->Integral(bin0, bin015) / hiso_ttbar_pt[i][k]->Integral(bin0, bin06);
 
 			TCanvas *c_temp = new TCanvas(Form("ElIso%s_pt_%d", IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data vs MC", 0, 0, 800, 600);
 			c_temp->cd();
@@ -2457,9 +2460,9 @@ void SSDLPlotter::makeElIsolationPlots(){
 			hiso_mc_nv_s[i][k]->SetMaximum(1.2*max);
 			hiso_data_nv[i][k]->SetMaximum(1.2*max);
 						
-			ratio_data = hiso_data_nv[i][k]  ->Integral(bin0, bin015) / hiso_data_nv[i][k] ->Integral(bin0, bin1);
-			ratio_mc   = hiso_mc_nv[i][k]    ->Integral(bin0, bin015) / hiso_mc_nv[i][k]   ->Integral(bin0, bin1);
-			ratio_ttbar = hiso_ttbar_nv[i][k]->Integral(bin0, bin015) / hiso_ttbar_nv[i][k]->Integral(bin0, bin1);
+			ratio_data = hiso_data_nv[i][k]  ->Integral(bin0, bin015) / hiso_data_nv[i][k] ->Integral(bin0, bin06);
+			ratio_mc   = hiso_mc_nv[i][k]    ->Integral(bin0, bin015) / hiso_mc_nv[i][k]   ->Integral(bin0, bin06);
+			ratio_ttbar = hiso_ttbar_nv[i][k]->Integral(bin0, bin015) / hiso_ttbar_nv[i][k]->Integral(bin0, bin06);
 
 			TCanvas *c_temp = new TCanvas(Form("ElIso%s_nv_%d", IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data vs MC", 0, 0, 800, 600);
 			c_temp->cd();
