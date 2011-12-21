@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.143 2011/11/25 18:46:16 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.144 2011/12/15 09:31:32 pnef Exp $
 //
 //
 
@@ -2553,7 +2553,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTPFMETpx  = (pfmet->front()).px();
 	fTPFMETpy  = (pfmet->front()).py();
 	fTPFMETphi = (pfmet->front()).phi();
-	fTPFMETSignificance = (pfmet->at(0)).significance();
+	fTPFMETSignificance = (pfmet->front()).significance();
         fTPFSumEt  = (pfmet->front()).sumEt();
 
 	fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
