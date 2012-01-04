@@ -121,6 +121,7 @@ public :
    Float_t         GenPhotonPhi[100];   //[NGenPhotons]
    Int_t           GenPhotonMotherID[100];   //[NGenPhotons]
    Int_t           GenPhotonMotherStatus[100];   //[NGenPhotons]
+   Float_t         GenPhotonPartonMindR[100];   //[NGenPhotons]
    Int_t           NGenJets;
    Float_t         GenJetPt[100];   //[NGenJets]
    Float_t         GenJetEta[100];   //[NGenJets]
@@ -958,6 +959,7 @@ public :
    TBranch        *b_GenPhotonPhi;   //!
    TBranch        *b_GenPhotonMotherID;   //!
    TBranch        *b_GenPhotonMotherStatus;   //!
+   TBranch        *b_GenPhotonPartonMindR;   //!
    TBranch        *b_NGenJets;   //!
    TBranch        *b_GenJetPt;   //!
    TBranch        *b_GenJetEta;   //!
@@ -1866,6 +1868,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("GenPhotonPhi", GenPhotonPhi, &b_GenPhotonPhi);
    fChain->SetBranchAddress("GenPhotonMotherID", GenPhotonMotherID, &b_GenPhotonMotherID);
    fChain->SetBranchAddress("GenPhotonMotherStatus", GenPhotonMotherStatus, &b_GenPhotonMotherStatus);
+   fChain->SetBranchAddress("GenPhotonPartonMindR", GenPhotonPartonMindR, &b_GenPhotonPartonMindR);
    fChain->SetBranchAddress("NGenJets", &NGenJets, &b_NGenJets);
    fChain->SetBranchAddress("GenJetPt", GenJetPt, &b_GenJetPt);
    fChain->SetBranchAddress("GenJetEta", GenJetEta, &b_GenJetEta);
