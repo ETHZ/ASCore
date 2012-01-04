@@ -79,6 +79,10 @@ float FakeRatios::getMMNppESyst(){
 	float addsyst = fAddESyst * getMMNpp();
 	return sqrt(fromtoys + addsyst*addsyst);
 }
+float FakeRatios::getMMNppETot(){
+	return sqrt(getMMNppEStat()*getMMNppEStat() + getMMNppESyst()*getMMNppESyst());
+}
+
 float FakeRatios::getMMNpf(){
 	return 2.*getNpf(           fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
@@ -90,6 +94,10 @@ float FakeRatios::getMMNpfESyst(){
 	float addsyst = fAddESyst * getMMNpf();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getMMNpfETot(){
+	return sqrt(getMMNpfEStat()*getMMNpfEStat() + getMMNpfESyst()*getMMNpfESyst());
+}
+
 float FakeRatios::getMMNff(){
 	return getNff(           fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], fMFRatio[0], fMFRatio[0], fMPRatio[0], fMPRatio[0]);
 }
@@ -101,6 +109,10 @@ float FakeRatios::getMMNffESyst(){
 	float addsyst = fAddESyst * getMMNff();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getMMNffETot(){
+	return sqrt(getMMNffEStat()*getMMNffEStat() + getMMNffESyst()*getMMNffESyst());
+}
+
 //____________________________________________________________________________________
 float FakeRatios::getEENpp(){
 	return getNpp(   fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
@@ -113,6 +125,10 @@ float FakeRatios::getEENppESyst(){
 	float addsyst = fAddESyst * getEENpp();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEENppETot(){
+	return sqrt(getEENppEStat()*getEENppEStat() + getEENppESyst()*getEENppESyst());
+}
+
 float FakeRatios::getEENpf(){
 	return 2.*getNfp(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
@@ -124,6 +140,10 @@ float FakeRatios::getEENpfESyst(){
 	float addsyst = fAddESyst * getEENpf();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEENpfETot(){
+	return sqrt(getEENpfEStat()*getEENpfEStat() + getEENpfESyst()*getEENpfESyst());
+}
+
 float FakeRatios::getEENff(){
 	return getNff(   fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], fEFRatio[0], fEFRatio[0], fEPRatio[0], fEPRatio[0]);
 }
@@ -135,6 +155,10 @@ float FakeRatios::getEENffESyst(){
 	float addsyst = fAddESyst * getEENff();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEENffETot(){
+	return sqrt(getEENffEStat()*getEENffEStat() + getEENffESyst()*getEENffESyst());
+}
+
 //____________________________________________________________________________________
 float FakeRatios::getEMNpp(){
 	return getNpp(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
@@ -147,6 +171,10 @@ float FakeRatios::getEMNppESyst(){
 	float addsyst = fAddESyst * getEMNpp();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEMNppETot(){
+	return sqrt(getEMNppEStat()*getEMNppEStat() + getEMNppESyst()*getEMNppESyst());
+}
+
 float FakeRatios::getEMNpf(){
 	return getNpf(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
@@ -158,6 +186,10 @@ float FakeRatios::getEMNpfESyst(){
 	float addsyst = fAddESyst * getEMNpf();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEMNpfETot(){
+	return sqrt(getEMNpfEStat()*getEMNpfEStat() + getEMNpfESyst()*getEMNpfESyst());
+}
+
 float FakeRatios::getEMNfp(){
 	return getNfp(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
@@ -169,6 +201,25 @@ float FakeRatios::getEMNfpESyst(){
 	float addsyst = fAddESyst * getEMNfp();
 	return sqrt(fromtoys + addsyst*addsyst);	
 }
+float FakeRatios::getEMNfpETot(){
+	return sqrt(getEMNfpEStat()*getEMNfpEStat() + getEMNfpESyst()*getEMNfpESyst());
+}
+
+float FakeRatios::getEMSingleFakes(){
+	return getEMNpf() + getEMNfp();
+}
+float FakeRatios::getEMSingleEStat(){
+	return getNfpNpfSumEStat(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
+}
+float FakeRatios::getEMSingleESyst(){
+	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNfpNpfSum);
+	float addsyst = fAddESyst * (getEMNfp() + getEMNpf());
+	return sqrt(fromtoys + addsyst*addsyst);
+}
+float FakeRatios::getEMSingleETot(){
+	return sqrt(getEMSingleEStat()*getEMSingleEStat() + getEMSingleESyst()*getEMSingleESyst());	
+}
+
 float FakeRatios::getEMNff(){
 	return getNff(           fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0]);
 }
@@ -179,6 +230,9 @@ float FakeRatios::getEMNffESyst(){
 	float fromtoys = getESystFromToys2(fEMNtl[0], fEMNtl[1], fEMNtl[2], fEMNtl[3], fMFRatio[0], fEFRatio[0], fMPRatio[0], fEPRatio[0], fMFRatio[1], fEFRatio[1], fMPRatio[1], fEPRatio[1], &FakeRatios::getNff);
 	float addsyst = fAddESyst * getEMNff();
 	return sqrt(fromtoys + addsyst*addsyst);	
+}
+float FakeRatios::getEMNffETot(){
+	return sqrt(getEMNffEStat()*getEMNffEStat() + getEMNffESyst()*getEMNffESyst());
 }
 
 //____________________________________________________________________________________
@@ -223,11 +277,31 @@ float FakeRatios::getTotFakes(){
 	// Simple sum
 	return getMMTotFakes() + getEETotFakes() + getEMTotFakes();
 }
+float FakeRatios::getTotSingleFakes(){
+	return getMMNpf() + getEENpf() + getEMNpf() + getEMNfp();
+}
+float FakeRatios::getTotDoubleFakes(){
+	return getMMNff() + getEENff() + getEMNff();
+}
 float FakeRatios::getTotEStat(){
 	// Control yields in different channels are independent!
 	float mm = getMMTotEStat();
 	float ee = getEETotEStat();
 	float em = getEMTotEStat();
+	return sqrt( mm*mm + ee*ee + em*em );
+}
+float FakeRatios::getTotSingleEStat(){
+	// Control yields in different channels are independent!
+	float mm = getMMNpfEStat();
+	float ee = getEENpfEStat();
+	float em = getEMSingleEStat();
+	return sqrt( mm*mm + ee*ee + em*em );
+}
+float FakeRatios::getTotDoubleEStat(){
+	// Control yields in different channels are independent!
+	float mm = getMMNffEStat();
+	float ee = getEENffEStat();
+	float em = getEMNffEStat();
 	return sqrt( mm*mm + ee*ee + em*em );
 }
 float FakeRatios::getTotESyst(){
@@ -280,10 +354,137 @@ float FakeRatios::getTotESyst(){
 	float addsyst = fAddESyst * getTotFakes();
 	return sqrt(fromtoys + addsyst*addsyst);
 }
+float FakeRatios::getTotSingleESyst(){
+	// Assume errors of p and f are uncorrelated
+	// Throw toys in a gaussian around f and p with df and dp as their sigmas
+	// Distributions for f and p are cut off at 0 and 1
+	float f1  = fMFRatio[0];
+	float df1 = fMFRatio[1];
+	float f2  = fEFRatio[0];
+	float df2 = fEFRatio[1];
+	float p1  = fMPRatio[0];
+	float dp1 = fMPRatio[1];
+	float p2  = fEPRatio[0];
+	float dp2 = fEPRatio[1];	
+
+	if(fVerbose > 2) cout << "FakeRatios::getTotESyst ..." << endl;
+	TRandom3 *rand = new TRandom3();
+	rand->SetSeed();
+	vector<float> f_results;
+	for(size_t i = 0; i < fNToyMCs; ++i){ // vary f1
+		float f1_v = rand->Gaus(f1, df1);
+		if(f1_v > 1. || f1_v < 0.){--i; continue;} // throw again if f<0 or f>1
+		for(size_t j = 0; j < fNToyMCs; ++j){ // vary f2
+			float f2_v = rand->Gaus(f2, df2);
+			if(f2_v > 1. || f2_v < 0.){--j; continue;} // throw again if f<0 or f>1
+			float result = getTotSingleFakes(f1_v, f2_v, p1, p2);
+			f_results.push_back(result);
+			if(fVerbose > 2) cout << result << endl;
+		}
+	}
+	float rms_f = TMath::RMS(f_results.begin(), f_results.end());
+	if(fVerbose > 2) cout << " RMS = " << rms_f << endl;
+	if(fVerbose > 2) cout << endl;
+	vector<float> p_results;
+	for(size_t i = 0; i < fNToyMCs; ++i){ // vary p1
+		float p1_v = rand->Gaus(p1, dp1);
+		if(p1_v > 1. || p1_v < 0.){--i; continue;} // throw again if p<0 or p>1
+		for(size_t j = 0; j < fNToyMCs; ++j){ // vary p2
+			float p2_v = rand->Gaus(p2, dp2);
+			if(p2_v > 1. || p2_v < 0.){--j; continue;} // throw again if p<0 or p>1
+			float result = getTotSingleFakes(f1, f2, p1_v, p2_v);
+			p_results.push_back(result);
+			if(fVerbose > 2) cout << result << endl;
+		}
+	}
+	float rms_p = TMath::RMS(p_results.begin(), p_results.end());
+	if(fVerbose > 2) cout << " RMS = " << rms_p << endl;
+	
+	float fromtoys = rms_f*rms_f + rms_p*rms_p;
+	float addsyst = fAddESyst * getTotSingleFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
+}
+float FakeRatios::getTotDoubleESyst(){
+	// Assume errors of p and f are uncorrelated
+	// Throw toys in a gaussian around f and p with df and dp as their sigmas
+	// Distributions for f and p are cut off at 0 and 1
+	float f1  = fMFRatio[0];
+	float df1 = fMFRatio[1];
+	float f2  = fEFRatio[0];
+	float df2 = fEFRatio[1];
+	float p1  = fMPRatio[0];
+	float dp1 = fMPRatio[1];
+	float p2  = fEPRatio[0];
+	float dp2 = fEPRatio[1];	
+
+	if(fVerbose > 2) cout << "FakeRatios::getTotESyst ..." << endl;
+	TRandom3 *rand = new TRandom3();
+	rand->SetSeed();
+	vector<float> f_results;
+	for(size_t i = 0; i < fNToyMCs; ++i){ // vary f1
+		float f1_v = rand->Gaus(f1, df1);
+		if(f1_v > 1. || f1_v < 0.){--i; continue;} // throw again if f<0 or f>1
+		for(size_t j = 0; j < fNToyMCs; ++j){ // vary f2
+			float f2_v = rand->Gaus(f2, df2);
+			if(f2_v > 1. || f2_v < 0.){--j; continue;} // throw again if f<0 or f>1
+			float result = getTotDoubleFakes(f1_v, f2_v, p1, p2);
+			f_results.push_back(result);
+			if(fVerbose > 2) cout << result << endl;
+		}
+	}
+	float rms_f = TMath::RMS(f_results.begin(), f_results.end());
+	if(fVerbose > 2) cout << " RMS = " << rms_f << endl;
+	if(fVerbose > 2) cout << endl;
+	vector<float> p_results;
+	for(size_t i = 0; i < fNToyMCs; ++i){ // vary p1
+		float p1_v = rand->Gaus(p1, dp1);
+		if(p1_v > 1. || p1_v < 0.){--i; continue;} // throw again if p<0 or p>1
+		for(size_t j = 0; j < fNToyMCs; ++j){ // vary p2
+			float p2_v = rand->Gaus(p2, dp2);
+			if(p2_v > 1. || p2_v < 0.){--j; continue;} // throw again if p<0 or p>1
+			float result = getTotDoubleFakes(f1, f2, p1_v, p2_v);
+			p_results.push_back(result);
+			if(fVerbose > 2) cout << result << endl;
+		}
+	}
+	float rms_p = TMath::RMS(p_results.begin(), p_results.end());
+	if(fVerbose > 2) cout << " RMS = " << rms_p << endl;
+	
+	float fromtoys = rms_f*rms_f + rms_p*rms_p;
+	float addsyst = fAddESyst * getTotDoubleFakes();
+	return sqrt(fromtoys + addsyst*addsyst);
+}
+float FakeRatios::getTotETot(){
+	return sqrt(getTotEStat()*getTotEStat() + getTotESyst()*getTotESyst());
+}
+float FakeRatios::getTotSingleETot(){
+	return sqrt(getTotSingleEStat()*getTotSingleEStat() + getTotSingleESyst()*getTotSingleESyst());
+}
+float FakeRatios::getTotDoubleETot(){
+	return sqrt(getTotDoubleEStat()*getTotDoubleEStat() + getTotDoubleESyst()*getTotDoubleESyst());
+}
+
+//____________________________________________________________________________________
+// Helper methods for inside the toy loops
 float FakeRatios::getTotFakes(float f1, float f2, float p1, float p2){
+	// Need this with custom ratios inside the ESyst toy MC loops
 	float mm = getNfpNpfNffSum(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], f1, f2, p1, p2);	
 	float ee = getNfpNpfNffSum(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], f1, f2, p1, p2);
 	float em = getNfpNpfNffSum(fEMNtl[0],     fEMNtl[1],     fEMNtl[2], fEMNtl[3], f1, f2, p1, p2);
+	return mm + ee + em;
+}
+float FakeRatios::getTotSingleFakes(float f1, float f2, float p1, float p2){
+	// Need this with custom ratios inside the ESyst toy MC loops
+	float mm = getNfpNpfSum(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], f1, f2, p1, p2);	
+	float ee = getNfpNpfSum(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], f1, f2, p1, p2);
+	float em = getNfpNpfSum(fEMNtl[0],     fEMNtl[1],     fEMNtl[2], fEMNtl[3], f1, f2, p1, p2);
+	return mm + ee + em;
+}
+float FakeRatios::getTotDoubleFakes(float f1, float f2, float p1, float p2){
+	// Need this with custom ratios inside the ESyst toy MC loops
+	float mm = getNff(fMMNtl[0], 0.5*fMMNtl[1], 0.5*fMMNtl[1], fMMNtl[2], f1, f2, p1, p2);	
+	float ee = getNff(fEENtl[0], 0.5*fEENtl[1], 0.5*fEENtl[1], fEENtl[2], f1, f2, p1, p2);
+	float em = getNff(fEMNtl[0],     fEMNtl[1],     fEMNtl[2], fEMNtl[3], f1, f2, p1, p2);
 	return mm + ee + em;
 }
 
@@ -368,6 +569,13 @@ float FakeRatios::getNfpNpfNffSum(float Ntt, float Ntl, float Nlt, float Nll, fl
 	                             +  (    p1*f2* f1    *(1.-p2) - f1*p2*    p1 *(f2-1.) - f1*f2*    p1 *(1.-p2))*Nlt
 	                             +  (-1.*p1*f2* f1    *   p2   - f1*p2*    p1 * f2     + f1*f2*    p1 *    p2 )*Nll ); 
 }
+float FakeRatios::getNfpNpfSum(float Ntt, float Ntl, float Nlt, float Nll, float f1, float f2, float p1, float p2){
+	// This is equivalent to p1*f2*Npf + f1*p2*Nfp
+	return 1./((f1-p1)*(f2-p2)) * ( (    p1*f2*(f1-1.)*(1.-p2) + f1*p2*(1.-p1)*(f2-1.))*Ntt
+	                             +  (-1.*p1*f2*(f1-1.)*   p2   + f1*p2*(1.-p1)* f2    )*Ntl
+	                             +  (    p1*f2* f1    *(1.-p2) - f1*p2*    p1 *(f2-1.))*Nlt
+	                             +  (-1.*p1*f2* f1    *   p2   - f1*p2*    p1 * f2    )*Nll ); 
+}
 
 //____________________________________________________________________________________
 // Simple error propagation on above formulas for stat errors
@@ -400,6 +608,12 @@ float FakeRatios::getNfpNpfNffSumEStat(float Ntt, float Ntl, float Nlt, float Nl
 	                                 +  (-1.*p1*f2*(f1-1)*   p2  + f1*p2*(1-p1)* f2    - f1*f2*(1-p1)*   p2 )*(-1.*p1*f2*(f1-1)*   p2  + f1*p2*(1-p1)* f2    - f1*f2*(1-p1)*   p2 )*getEStat2(Ntl)
 	                                 +  (    p1*f2* f1   *(1-p2) - f1*p2*   p1 *(f2-1) - f1*f2*   p1 *(1-p2))*(    p1*f2* f1   *(1-p2) - f1*p2*   p1 *(f2-1) - f1*f2*   p1 *(1-p2))*getEStat2(Nlt)
 	                                 +  (-1.*p1*f2* f1   *   p2  - f1*p2*   p1 * f2    + f1*f2*   p1 *   p2 )*(-1.*p1*f2* f1   *   p2  - f1*p2*   p1 * f2    + f1*f2*   p1 *   p2 )*getEStat2(Nll) ); 
+}
+float FakeRatios::getNfpNpfSumEStat(float Ntt, float Ntl, float Nlt, float Nll, float f1, float f2, float p1, float p2){
+	return 1./((f1-p1)*(f2-p2)) * sqrt( (    p1*f2*(f1-1)*(1-p2) + f1*p2*(1-p1)*(f2-1))*(    p1*f2*(f1-1)*(1-p2) + f1*p2*(1-p1)*(f2-1))*getEStat2(Ntt)
+	                                 +  (-1.*p1*f2*(f1-1)*   p2  + f1*p2*(1-p1)* f2   )*(-1.*p1*f2*(f1-1)*   p2  + f1*p2*(1-p1)* f2   )*getEStat2(Ntl)
+	                                 +  (    p1*f2* f1   *(1-p2) - f1*p2*   p1 *(f2-1))*(    p1*f2* f1   *(1-p2) - f1*p2*   p1 *(f2-1))*getEStat2(Nlt)
+	                                 +  (-1.*p1*f2* f1   *   p2  - f1*p2*   p1 * f2   )*(-1.*p1*f2* f1   *   p2  - f1*p2*   p1 * f2   )*getEStat2(Nll) ); 
 }
 
 //____________________________________________________________________________________

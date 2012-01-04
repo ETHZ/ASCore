@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Jun 15 16:29:20 2011 by ROOT version 5.27/06b
+// Tue Nov 15 17:07:04 2011 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root
+// found on file: /scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -21,6 +21,9 @@ public :
    Int_t           Run;
    Int_t           Event;
    Int_t           LumiSec;
+   Float_t         m0;
+   Float_t         m12;
+   Int_t           process;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -29,6 +32,8 @@ public :
    Int_t           HLT_DOUBLEMU7_PS;
    Int_t           HLT_MU13_MU8;
    Int_t           HLT_MU13_MU8_PS;
+   Int_t           HLT_MU17_MU8;
+   Int_t           HLT_MU17_MU8_PS;
    Int_t           HLT_ELE17_ELE8;
    Int_t           HLT_ELE17_ELE8_PS;
    Int_t           HLT_ELE17_ELE8_TIGHT;
@@ -37,6 +42,10 @@ public :
    Int_t           HLT_MU17_ELE8_PS;
    Int_t           HLT_MU8_ELE17;
    Int_t           HLT_MU8_ELE17_PS;
+   Int_t           HLT_MU8_ELE17_TIGHT;
+   Int_t           HLT_MU8_ELE17_TIGHT_PS;
+   Int_t           HLT_MU17_ELE8_TIGHT;
+   Int_t           HLT_MU17_ELE8_TIGHT_PS;
    Int_t           HLT_DOUBLEELE8_HT160;
    Int_t           HLT_DOUBLEELE8_HT160_PS;
    Int_t           HLT_DOUBLEELE8_HT160_TIGHT;
@@ -47,10 +56,17 @@ public :
    Int_t           HLT_MU3_ELE8_HT160_PS;
    Int_t           HLT_MU3_ELE8_HT160_TIGHT;
    Int_t           HLT_MU3_ELE8_HT160_TIGHT_PS;
+   Int_t           HLT_DOUBLEMU3_MASS4_HT150;
+   Int_t           HLT_DOUBLEMU3_MASS4_HT150_PS;
+   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;
+   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
+   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;
+   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
    Float_t         Rho;
    Int_t           NVrtx;
    Float_t         PUWeight;
    Int_t           NMus;
+   Int_t           IsSignalMuon[5];   //[NMus]
    Float_t         MuPt[5];   //[NMus]
    Float_t         MuEta[5];   //[NMus]
    Float_t         MuPhi[5];   //[NMus]
@@ -67,6 +83,7 @@ public :
    Int_t           MuGenGMType[5];   //[NMus]
    Float_t         MuMT[5];   //[NMus]
    Int_t           NEls;
+   Int_t           IsSignalElectron[5];   //[NEls]
    Int_t           ElCharge[5];   //[NEls]
    Int_t           ElChIsCons[5];   //[NEls]
    Float_t         ElPt[5];   //[NEls]
@@ -78,6 +95,12 @@ public :
    Float_t         ElDzErr[5];   //[NEls]
    Float_t         ElRelIso[5];   //[NEls]
    Float_t         ElEcalRecHitSumEt[5];   //[NEls]
+   Float_t         ElHcalTowerSumEt[5];   //[NEls]
+   Float_t         ElTkSumPt[5];   //[NEls]
+   Float_t         ElDPhi[5];   //[NEls]
+   Float_t         ElDEta[5];   //[NEls]
+   Float_t         ElSigmaIetaIeta[5];   //[NEls]
+   Float_t         ElHoverE[5];   //[NEls]
    Int_t           ElIsGoodElId_WP80[5];   //[NEls]
    Int_t           ElIsGoodElId_WP90[5];   //[NEls]
    Int_t           ElGenID[5];   //[NEls]
@@ -92,16 +115,19 @@ public :
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[40];   //[NJets]
-   Float_t         JetEta[40];   //[NJets]
-   Float_t         JetPhi[40];   //[NJets]
-   Float_t         JetSSVHPBTag[40];   //[NJets]
-   Float_t         JetArea[40];   //[NJets]
+   Float_t         JetPt[20];   //[NJets]
+   Float_t         JetEta[20];   //[NJets]
+   Float_t         JetPhi[20];   //[NJets]
+   Float_t         JetSSVHPBTag[20];   //[NJets]
+   Float_t         JetArea[20];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
    TBranch        *b_Event;   //!
    TBranch        *b_LumiSec;   //!
+   TBranch        *b_m0;   //!
+   TBranch        *b_m12;   //!
+   TBranch        *b_process;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -110,6 +136,8 @@ public :
    TBranch        *b_HLT_DOUBLEMU7_PS;   //!
    TBranch        *b_HLT_MU13_MU8;   //!
    TBranch        *b_HLT_MU13_MU8_PS;   //!
+   TBranch        *b_HLT_MU17_MU8;   //!
+   TBranch        *b_HLT_MU17_MU8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8;   //!
    TBranch        *b_HLT_ELE17_ELE8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8_TIGHT;   //!
@@ -118,6 +146,10 @@ public :
    TBranch        *b_HLT_MU17_ELE8_PS;   //!
    TBranch        *b_HLT_MU8_ELE17;   //!
    TBranch        *b_HLT_MU8_ELE17_PS;   //!
+   TBranch        *b_HLT_MU8_ELE17_TIGHT;   //!
+   TBranch        *b_HLT_MU8_ELE17_TIGHT_PS;   //!
+   TBranch        *b_HLT_MU17_ELE8_TIGHT;   //!
+   TBranch        *b_HLT_MU17_ELE8_TIGHT_PS;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160_PS;   //!
    TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT;   //!
@@ -128,10 +160,17 @@ public :
    TBranch        *b_HLT_MU3_ELE8_HT160_PS;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT;   //!
    TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT_PS;   //!
+   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150;   //!
+   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150_PS;   //!
+   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
+   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
+   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
+   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
    TBranch        *b_Rho;   //!
    TBranch        *b_NVrtx;   //!
    TBranch        *b_PUWeight;   //!
    TBranch        *b_NMus;   //!
+   TBranch        *b_IsSignalMuon;   //!
    TBranch        *b_MuPt;   //!
    TBranch        *b_MuEta;   //!
    TBranch        *b_MuPhi;   //!
@@ -148,6 +187,7 @@ public :
    TBranch        *b_MuGenGMType;   //!
    TBranch        *b_MuMT;   //!
    TBranch        *b_NEls;   //!
+   TBranch        *b_IsSignalElectron;   //!
    TBranch        *b_ElCharge;   //!
    TBranch        *b_ElChIsCons;   //!
    TBranch        *b_ElPt;   //!
@@ -159,6 +199,12 @@ public :
    TBranch        *b_ElDzErr;   //!
    TBranch        *b_ElRelIso;   //!
    TBranch        *b_ElEcalRecHitSumEt;   //!
+   TBranch        *b_ElHcalTowerSumEt;   //!
+   TBranch        *b_ElTkSumPt;   //!
+   TBranch        *b_ElDPhi;   //!
+   TBranch        *b_ElDEta;   //!
+   TBranch        *b_ElSigmaIetaIeta;   //!
+   TBranch        *b_ElHoverE;   //!
    TBranch        *b_ElIsGoodElId_WP80;   //!
    TBranch        *b_ElIsGoodElId_WP90;   //!
    TBranch        *b_ElGenID;   //!
@@ -198,9 +244,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011/Jun15/DoubleMu-Run2011A-May10ReReco-v1-AOD/output_9.root");
+         f = new TFile("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -262,6 +308,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
    fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
    fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
+   fChain->SetBranchAddress("HLT_MU17_MU8", &HLT_MU17_MU8, &b_HLT_MU17_MU8);
+   fChain->SetBranchAddress("HLT_MU17_MU8_PS", &HLT_MU17_MU8_PS, &b_HLT_MU17_MU8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
@@ -270,6 +318,10 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
    fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
    fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
+   fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT", &HLT_MU8_ELE17_TIGHT, &b_HLT_MU8_ELE17_TIGHT);
+   fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT_PS", &HLT_MU8_ELE17_TIGHT_PS, &b_HLT_MU8_ELE17_TIGHT_PS);
+   fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT", &HLT_MU17_ELE8_TIGHT, &b_HLT_MU17_ELE8_TIGHT);
+   fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT_PS", &HLT_MU17_ELE8_TIGHT_PS, &b_HLT_MU17_ELE8_TIGHT_PS);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
    fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
@@ -280,6 +332,12 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
    fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150", &HLT_DOUBLEMU3_MASS4_HT150, &b_HLT_DOUBLEMU3_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150_PS", &HLT_DOUBLEMU3_MASS4_HT150_PS, &b_HLT_DOUBLEMU3_MASS4_HT150_PS);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
+   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150);
+   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
@@ -311,6 +369,12 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
    fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
+   fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
+   fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
+   fChain->SetBranchAddress("ElDPhi", ElDPhi, &b_ElDPhi);
+   fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
+   fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
+   fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
    fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
    fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);

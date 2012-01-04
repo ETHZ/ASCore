@@ -2154,7 +2154,6 @@ void AnaClass::plotEffOverlayEE(TEfficiency *h1in, TString tag1, TEfficiency *h2
 /*****************************************************************************
 ###################| Utilities |##############################################
 *****************************************************************************/
-
 //____________________________________________________________________________
 TTree* AnaClass::getTree(TString treename, TString filename, TString subdir){
 	TFile *file = NULL;
@@ -2418,10 +2417,45 @@ void AnaClass::setPlottingRange(std::vector<TH1D*> &hists, float margin, bool lo
 		hists[i]->SetMaximum(max);
 	}
 }
+void AnaClass::getPlottingRange(float &minopt, float &maxopt, std::vector<TH1D*> hists, float margin, bool logy){
+	// Determine plotting range
+	// Default margin is 0.05
+	float max = hists[0]->GetBinContent(1);
+	float min = hists[0]->GetBinContent(1);
+	for(size_t i = 0; i < hists.size(); ++i){
+		float tempmax = getMaxYExtension(hists[i]);
+		float tempmin = getMinYExtension(hists[i]);
+		if(tempmax > max) max = tempmax;
+		if(tempmin < min) min = tempmin;
+	}
+	float range = max-min;
+
+	if(logy){
+		max *= 1.5;
+		if(min <= 0.){
+			float minval = hists[0]->GetBinContent(hists[0]->GetMinimumBin());
+			for(size_t i = 0; i < hists.size(); ++i){
+				float tempval = hists[i]->GetBinContent(hists[i]->GetMinimumBin());
+				if(tempval < minval) minval = tempval;
+			}
+			min = minval/1.5;
+		}
+		else min /= 1.5;
+	}
+	else{
+		max = max + margin * range;
+		min = min - margin * range;
+	}
+
+	minopt = min;
+	maxopt = max;
+	return;
+}
 
 //____________________________________________________________________________
 float AnaClass::getMaxYExtension(TH1 *h){
-	float max = h->GetMaximum();
+	float max = h->GetBinContent(1);
+	// float max = h->GetMaximum();
 	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
 		float temp = h->GetBinContent(i) + h->GetBinError(i);
 		if(temp > max) max = temp;
@@ -2429,12 +2463,28 @@ float AnaClass::getMaxYExtension(TH1 *h){
 	return max;
 }
 float AnaClass::getMinYExtension(TH1 *h){
-	float min = h->GetMinimum();
+	float min = h->GetBinContent(1);
+	// float min = h->GetMinimum();
 	for(size_t i = 1; i <= h->GetNbinsX(); ++i){
 		float temp = h->GetBinContent(i) - h->GetBinError(i);
 		if(temp < min) min = temp;
 	}
 	return min;
+}
+
+//____________________________________________________________________________
+void AnaClass::setZeroBinError(TH1D *ihist){
+//    - Sets all bin errors to zero
+	for( int i = 0; i < ihist->GetNbinsX()+2; i++ ) ihist->SetBinError(i,0.);
+}
+
+//____________________________________________________________________________
+void AnaClass::fillWithoutOF(TH1D *&ihist, double x, double w){
+	double xmax = ihist->GetBinLowEdge(ihist->GetNbinsX());
+	// double xmax = ihist->GetBinLowEdge(ihist->GetMaximumBin());
+	double bw = ihist->GetBinWidth(ihist->GetMaximumBin());
+	if(x > xmax) ihist->Fill(xmax + bw*0.5, w); // always increment last bin (i.e. never the overflow)
+	else ihist->Fill(x, w);
 }
 
 //____________________________________________________________________________
@@ -2447,8 +2497,8 @@ TCanvas* AnaClass::makeCanvas(const char* name){
 }
 
 //____________________________________________________________________________
-void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt, bool logy){
-	TCanvas *col = new TCanvas(canvname, canvtitle, 0, 0, 900, 700);
+void AnaClass::printObject(TObject* o, TString name, Option_t *drawopt, bool logy){
+	TCanvas *col = new TCanvas(o->GetName(), o->GetTitle(), 0, 0, 900, 700);
 	col->SetFillStyle(0);
 	col->SetFrameFillStyle(0);
 	col->cd();
@@ -2456,7 +2506,7 @@ void AnaClass::printObject(TObject* o, TString canvname, TString canvtitle, Opti
 	o->Draw(drawopt);
 	gPad->RedrawAxis();
 	if(logy) gPad->SetLogy(1);
-	Util::PrintNoEPS(col, canvname, fOutputDir + fOutputSubDir, fOutputFile);
+	Util::PrintNoEPS(col, name, fOutputDir + fOutputSubDir, fOutputFile);
 }
 
 //____________________________________________________________________________
@@ -2501,6 +2551,7 @@ void AnaClass::printProgress(int entry, const int nentries, TString header, int 
 	char progress[10];
 	sprintf(progress, "%5.1f", progress_f);
 	cout << " Processing " << setw(50) << left << header << setw(6) << right << progress << " %      \r" << flush;
+	if(entry+1 == nentries) cout << endl;
 }
 
 //____________________________________________________________________________

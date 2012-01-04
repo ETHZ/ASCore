@@ -5,8 +5,12 @@
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
 #include "helper/PUWeight.h"
+#include "helper/Lumi3DReWeighting_standalone.hh"
 #include <map>
 #include <string>
+
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 class UserAnalysisBase{
 public:
@@ -33,8 +37,11 @@ public:
 
 	// PileUp reweighting;
 	virtual void  SetPileUpSrc(string, string = "");
+  	virtual void  SetPileUp3DSrc(string, string);
+
 	virtual float GetPUWeight(int);
-  virtual float GetPUWeight(int, int);
+	virtual float GetPUWeight(int, int);
+  virtual float GetPUWeight3D( int , int , int );
 
 
 	TreeReader *fTR;
@@ -95,6 +102,7 @@ public:
 	virtual bool DiElectronSelection(int&, int&, int = 0, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	virtual bool SSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
 	virtual bool OSDiElectronSelection(int&, int&, bool(UserAnalysisBase::*eleSelector)(int) = NULL);
+
 	// TDL & RA5
 	virtual bool IsGoodElEvent_TDL();
 	virtual bool IsGoodElEvent_RA5();
@@ -102,6 +110,13 @@ public:
 	// Print interesting event
 	virtual void EventPrint();
 	virtual void GetEvtEmChFrac(double & fracEm, double & fracCh);
+
+        // Put all JES-related stuff between precompiler flags
+#ifdef DOJES 
+        FactorizedJetCorrector *fJetCorrector;
+        JetCorrectionUncertainty *jecUnc;
+	virtual float GetJetPtNoResidual(int);
+#endif
 
 private:
 
@@ -121,8 +136,12 @@ private:
 	std::vector<Cut> fEvtSelCuts;
 	
 	// Pile UP reweighting
-	bool fDoPileUpReweight;
+  bool fDoPileUpReweight;
+  bool fDoPileUpReweight3D;
+
 	PUWeight  *fPUWeight;
+  Lumi3DReWeighting   *fPUWeight3D;
+
 
 };
 
