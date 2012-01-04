@@ -108,6 +108,14 @@ public:
 /*****************************************************************************
 ##################| Utilities |###############################################
 *****************************************************************************/
+	template <class T> inline void getObjectSafe(TFile* pFile, TString name, T*& object){
+		pFile->GetObject(name, object);
+		if(!object){
+			std::cout << name + " not found!" << std::endl;
+			exit(-1);
+		}
+		return;
+	};
 	virtual TTree* getTree(TString treename, TString filename, TString subdir = "");
 	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double xmin, const double xmax, TTree* t, bool draw = false, const char* drawopt = "");
 	virtual TH1D* drawTree1D(const char* arg, const TCut reqs, const char* histn, const int nbins, const double *xbins, TTree* t, bool draw = false, const char* drawopt = "");
@@ -123,10 +131,15 @@ public:
 	virtual void setPlottingRange(TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(TH1D *&, TH1D *&, TH1D *&, float = 0.05, bool = false);
 	virtual void setPlottingRange(std::vector<TH1D*>&, float = 0.05, bool = false);
+	virtual void getPlottingRange(float&, float&, std::vector<TH1D*> , float = 0.05, bool = false);
+
 	virtual float getMaxYExtension(TH1*);
 	virtual float getMinYExtension(TH1*);
+	virtual void setZeroBinError(TH1D*);
+	virtual void fillWithoutOF(TH1D *&, double, double=1.);
+	
 	virtual TCanvas* makeCanvas(const char*);
-	virtual void printObject(TObject* o, TString canvname, TString canvtitle, Option_t *drawopt = "", bool logy = false);
+	virtual void printObject(TObject* o, TString name, Option_t *drawopt = "", bool logy = false);
 	virtual TH1D* bookTH1D(const char*, const char*, int, double, double);
 	virtual void printProgress(int, const int, TString, const int = -1);
 	virtual TString numbForm(double);
