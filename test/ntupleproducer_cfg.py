@@ -3,7 +3,6 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process("NTupleProducer")
-process.load("SimGeneral.HepPDTESSource.pdt_cfi")
 
 ### Message Logger #############################################################
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -16,10 +15,14 @@ process.MessageLogger.categories.append('EcalSeverityLevelError')
 process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.cerr.FwkReport.reportEvery = 50
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                       fileMode = cms.untracked.string("NOMERGE")
                                     )
+
+
+
+
 
 ### Parsing of command line parameters #############################################
 ### (type of run: data, MC; reconstruction: RECO, PAT, PF) #####################
@@ -36,12 +39,8 @@ options.register ('ModelScan', # register 'runon' option
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-#options.files= 'file:/scratch/buchmann/mSUGRA_m0-20to2000_m12-20to760_tanb-10andA0-0_7TeV-Pythia6Z/AODSIM/PU_S4_START42_V11_FastSim-v1/0021/22AEB6CF-C8A3-E011-81E7-002354EF3BDC.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
 #options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
-#options.files= 'file:/shome/pnef/G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_AODSIM_PU_S6_START42_V14B-v1_0000_FEF21EF5-65F3-E011-815A-003048678FC4.root'
-options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/Summer11_QCD_TuneZ2_HT-500To1000_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00285D07-C6F7-E011-B86A-003048CF6346.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -189,10 +188,18 @@ process.kt6PFJetsPFAntiIso = kt4PFJets.clone(
 		doRhoFastjet = cms.bool(True)
 	)
 
+process.load("RecoTauTag/RecoTau/PFRecoTauProducer_cfi")
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+
 ### Configuration in common to all collections
 pfPostfixes = [ 'PFAntiIso','PF2','PF3' ]
 for pf in pfPostfixes:
+
     usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
+
+    from PhysicsTools.PatAlgos.tools.pfTools import adaptPFTaus
+    adaptPFTaus(process,"hpsPFTau",pf)
+
     # configure PFnoPU
     getattr(process,'pfPileUp'+pf).Enable              = True
     getattr(process,'pfPileUp'+pf).checkClosestZVertex = cms.bool(False)
@@ -233,6 +240,8 @@ for pf in pfPostfixes:
     	simpleEleId70cIso  = cms.InputTag("simpleEleId70cIso"),
         simpleEleId60cIso  = cms.InputTag("simpleEleId60cIso"),
     )
+
+      
     # muon vertex 
     getattr(process, 'pfMuonsFromVertex'+pf).vertices=cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
     getattr(process, 'pfMuonsFromVertex'+pf).d0Cut   =cms.double(0.02) # transverse IP w.r.t. PV
@@ -249,9 +258,18 @@ for pf in pfPostfixes:
  		"abs( eta ) < 2.4 && pt > 5 && gsfTrackRef().isNonnull()" 
 		+"&& gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"       # conv rejection
     )
+
+
+    # tau cut
+    getattr(process, 'pfTaus'+pf).cut = cms.string(
+ 		"abs( eta ) < 2.4 && pt > 10  && abs( charge ) == 1. && leadPFChargedHadrCand().isNonnull()" 
+                )
+
+
     # ISOLATION
     getattr(process, 'pfIsolatedMuons'+pf)    .combinedIsolationCut = cms.double(0.20)
     getattr(process, 'pfIsolatedElectrons'+pf).combinedIsolationCut = cms.double(0.20)
+
 
 
 
@@ -273,6 +291,10 @@ process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso,
 		) 
 process.pfIsolatedMuonsPFAntiIso.combinedIsolationCut     = cms.double(2.0) # set min isolation to 2
 process.pfIsolatedElectronsPFAntiIso.combinedIsolationCut = cms.double(2.0) # set min isolation to 2
+
+
+process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseIsolation')")
+
 
 ### Specific to second PF collection: TIGHT
 # ID cuts
@@ -303,6 +325,9 @@ process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2,
 		process.pfSelectedElectronsPF2 
 		) 
 
+process.selectedPatTausPF2.cut = cms.string("tauID('againstElectronTight') && tauID('againstMuonTight')")
+
+
 ### Specific to second PF collection: LOOSE
 # ID cuts
 process.pfMuonsIDPF3 = cms.EDFilter("MuonIDPFCandidateSelector", 
@@ -319,6 +344,11 @@ process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3,
 		process.pfMuonsIDPF3 * 
 		process.pfSelectedMuonsPF3 
 		) 
+
+
+process.selectedPatTausPF3.cut = cms.string("tauID('againstElectronLoose') && tauID('againstMuonLoose')")
+
+
 
 ### GenJets ####################################################################
 # produce ak5GenJets (collection missing in case of some Spring10 samples)
@@ -406,7 +436,7 @@ process.analyze.leptons = (
     # PF Taus
     cms.PSet( type = cms.untracked.string('tau'),
               prefix = cms.untracked.string('PfTauAntiIso'),
-              tag = cms.untracked.InputTag('patTausPFAntiIso'),
+              tag = cms.untracked.InputTag('selectedPatTausPFAntiIso'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
@@ -430,7 +460,7 @@ process.analyze.leptons = (
     # PF Taus
     cms.PSet( type = cms.untracked.string('tau'),
               prefix = cms.untracked.string('PfTau2'),
-              tag = cms.untracked.InputTag('patTausPF2'),
+              tag = cms.untracked.InputTag('selectedPatTausPF2'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
@@ -454,7 +484,7 @@ process.analyze.leptons = (
     # PF Taus
     cms.PSet( type = cms.untracked.string('tau'),
               prefix = cms.untracked.string('PfTau3'),
-              tag = cms.untracked.InputTag('patTausPF3'),
+              tag = cms.untracked.InputTag('selectedPatTausPF3'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
@@ -462,26 +492,8 @@ process.analyze.leptons = (
     )
               
 
-#### Steve Mrenna's Photon - Parton DR match #######################	      
-process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
-	src = cms.InputTag("partonGenJets"),
-	maxEventsToPrint = cms.untracked.int32(10)
-)
-#
-process.printPhotons = cms.EDAnalyzer("ParticleListDrawer",
-     src = cms.InputTag("photons"),
-     maxEventsToPrint = cms.untracked.int32(10)
-)
-#
-process.printPartons = cms.EDAnalyzer("ParticleListDrawer",
-     src = cms.InputTag("myPhotonJetMatch"),
-     maxEventsToPrint = cms.untracked.int32(10)
-)
-#
-process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
-
 #### DEBUG #####################################################################
-process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+#process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
 # )
@@ -497,26 +509,23 @@ process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 #### Path ######################################################################
 
 process.p = cms.Path(
-	process.scrapingVeto*(
+	process.scrapingVeto * (
 	process.goodVertices
-	+ (process.photonPartonMatch
-#	*process.printGenParticles*process.printPhotons*process.printPartons
-	)
        	+ process.HBHENoiseFilterResultProducerIso
        	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
+        + process.PFTau
 	+ process.kt6PFJets
 	+ process.ak5PFJets
        	+ process.mygenjets
        	+ process.simpleEleIdSequence
        	+ process.metCorSequence
-       	+ process.patPF2PATSequencePFAntiIso
+        + process.patPF2PATSequencePFAntiIso
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
 #	+ process.dump
-	+ process.analyze
-
+       	+ process.analyze
        	)
    )
 
