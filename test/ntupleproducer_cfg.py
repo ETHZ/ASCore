@@ -3,6 +3,7 @@ import HLTrigger.HLTfilters.hltHighLevel_cfi as hlt
 import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process("NTupleProducer")
+process.load("SimGeneral.HepPDTESSource.pdt_cfi")
 
 ### Message Logger #############################################################
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -492,6 +493,24 @@ process.analyze.leptons = (
     )
               
 
+#### Steve Mrenna's Photon - Parton DR match #######################	      
+process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
+	src = cms.InputTag("partonGenJets"),
+	maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.printPhotons = cms.EDAnalyzer("ParticleListDrawer",
+     src = cms.InputTag("photons"),
+     maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.printPartons = cms.EDAnalyzer("ParticleListDrawer",
+     src = cms.InputTag("myPhotonJetMatch"),
+     maxEventsToPrint = cms.untracked.int32(10)
+)
+#
+process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
+
 #### DEBUG #####################################################################
 #process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
@@ -509,8 +528,11 @@ process.analyze.leptons = (
 #### Path ######################################################################
 
 process.p = cms.Path(
-	process.scrapingVeto * (
+	process.scrapingVeto*(
 	process.goodVertices
+	+ (process.photonPartonMatch
+#	*process.printGenParticles*process.printPhotons*process.printPartons
+	)
        	+ process.HBHENoiseFilterResultProducerIso
        	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
@@ -521,17 +543,18 @@ process.p = cms.Path(
        	+ process.mygenjets
        	+ process.simpleEleIdSequence
        	+ process.metCorSequence
-        + process.patPF2PATSequencePFAntiIso
+       	+ process.patPF2PATSequencePFAntiIso
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
 #	+ process.dump
-       	+ process.analyze
+	+ process.analyze
+
        	)
    )
-
 # remove ak5GenJets from the path if it will run on data
 if options.runon=='data':
     process.p.remove(process.mygenjets)
+    process.p.remove(process.photonPartonMatch)
 if options.runon!='data':
     process.p.remove(process.scrapingVeto)
 if options.ModelScan==True:
