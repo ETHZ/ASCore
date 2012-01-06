@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: FillerBase.h,v 1.4 2011/02/23 19:34:29 stiegerb Exp $
+// $Id: FillerBase.h,v 1.1 2011/04/06 16:14:13 fronga Exp $
 //
 //
 
@@ -46,6 +46,7 @@ protected:
   /// Resetting
   void resetDouble(double* v, size_t size = 1);
   void resetInt(int* v, size_t size = 1);
+  void resetFloat(float* v, size_t size = 1);
 
   std::string fPrefix;        /// Prefix for branches
   TTree* fTree;               /// Pointer to tree to fill

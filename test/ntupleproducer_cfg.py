@@ -16,7 +16,7 @@ process.MessageLogger.categories.append('EcalSeverityLevelError')
 process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
-process.MessageLogger.cerr.FwkReport.reportEvery = 50
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                       fileMode = cms.untracked.string("NOMERGE")
                                     )
@@ -537,7 +537,6 @@ process.p = cms.Path(
        	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
-        + process.PFTau
 	+ process.kt6PFJets
 	+ process.ak5PFJets
        	+ process.mygenjets

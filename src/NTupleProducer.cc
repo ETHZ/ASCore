@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.144 2011/12/15 09:31:32 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.145 2011/12/21 10:17:18 buchmann Exp $
 //
 //
 
@@ -863,7 +863,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			 && abs(g_part->pdgId()) != 15
 			 && abs(g_part->pdgId()) != 16 ) continue;
 
-			if(!( g_part->status() ==1 || (g_part->status() ==2 && abs(g_part->pdgId())==5))) continue;
+			if(!( g_part->status() ==1 || (g_part->status() ==2 && (abs(g_part->pdgId())==5 || abs(g_part->pdgId())==15)))) continue;
 
 			bool GenMomExists  (true);
 			bool GenGrMomExists(true);

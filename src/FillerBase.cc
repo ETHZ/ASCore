@@ -25,6 +25,14 @@ void FillerBase::resetInt(int* v, size_t size)
   for(size_t i = 0; i < size; ++i) v[i] = -999;
 }
 
+//________________________________________________________________________________________
+void FillerBase::resetFloat(float* v, size_t size)
+{
+  for(size_t i = 0; i < size; ++i) v[i] = -999;
+}
+
+
+
 
 //________________________________________________________________________________________
 const bool FillerBase::addBranch( const char* name, const char* type, 

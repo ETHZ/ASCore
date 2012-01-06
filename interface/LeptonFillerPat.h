@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.3 2011/04/28 13:40:37 pnef Exp $
+// $Id: LeptonFillerPat.h,v 1.4 2011/06/08 17:06:49 fronga Exp $
 //
 //
 
@@ -85,6 +85,50 @@ private:
   double* fTet;
   int*    fTcharge;
   int*    fTdecaymode;
+  float*  fTtauVz; 
+  float*  fTtauEmFraction; 
+  float*  fTtauJetPt;
+  float*  fTtauJetEta;
+  float*  fTtauJetPhi;
+  float*  fTtauJetMass;
+  float*  fTtauLeadingTkPt;
+  float*  fTtauLeadingNeuPt;
+  float*  fTtauLeadingTkHcalenergy;
+  float*  fTtauLeadingTkEcalenergy;
+  int*    fTtauNumChargedHadronsSignalCone;
+  int*    fTtauNumNeutralHadronsSignalCone;
+  int*    fTtauNumPhotonsSignalCone;
+  int*    fTtauNumParticlesSignalCone;
+  int*    fTtauNumChargedHadronsIsoCone;
+  int*    fTtauNumNeutralHadronsIsoCone;
+  int*    fTtauNumPhotonsIsolationCone;
+  int*    fTtauNumParticlesIsolationCone;
+  float*  fTtauPtSumChargedParticlesIsoCone;
+  float*  fTtauPtSumPhotonsIsoCone;
+  float*  fTtauDecayModeFinding;
+  float*  fTtauVLooseIso;
+  float*  fTtauLooseIso;
+  float*  fTtauTightIso;
+  float*  fTtauMediumIso;
+/*   float*  fTtauVLooseChargedIso; */
+/*   float*  fTtauLooseChargedIso; */
+/*   float*  fTtauTightChargedIso; */
+/*   float*  fTtauMediumChargedIso; */
+/*   float*  fTtauVLooseIsoDBSumPtCorr; */
+/*   float*  fTtauLooseIsoDBSumPtCorr; */
+/*   float*  fTtauTightIsoDBSumPtCorr; */
+/*   float*  fTtauMediumIsoDBSumPtCorr; */
+/*   float*  fTtauVLooseCombinedIsoDBSumPtCorr; */
+/*   float*  fTtauLooseCombinedIsoDBSumPtCorr; */
+/*   float*  fTtauTightCombinedIsoDBSumPtCorr; */
+/*   float*  fTtauMediumCombinedIsoDBSumPtCorr; */
+  float*  fTtauLooseElectronRejection;
+  float*  fTtauTightElectronRejection;
+  float*  fTtauMediumElectronRejection;
+  float*  fTtauLooseMuonRejection;
+  float*  fTtauTightMuonRejection;
+
+
   int*    fTelID80;
   int*    fTelID85;
   int*    fTelID90;
@@ -150,6 +194,48 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
 
   if(fType == Tau){
   	fTdecaymode    = new int[gMaxnobjs];
+	fTtauVz        = new float[gMaxnobjs]; 
+	fTtauEmFraction= new float[gMaxnobjs]; 
+	fTtauJetPt     = new float[gMaxnobjs];
+	fTtauJetEta    = new float[gMaxnobjs];
+	fTtauJetPhi    = new float[gMaxnobjs];
+	fTtauJetMass   = new float[gMaxnobjs];
+	fTtauLeadingTkPt    = new float[gMaxnobjs];
+	fTtauLeadingNeuPt   = new float[gMaxnobjs];
+	fTtauLeadingTkHcalenergy    = new float[gMaxnobjs];
+	fTtauLeadingTkEcalenergy    = new float[gMaxnobjs];
+	fTtauNumChargedHadronsSignalCone    = new int[gMaxnobjs];
+	fTtauNumNeutralHadronsSignalCone    = new int[gMaxnobjs];
+	fTtauNumPhotonsSignalCone   = new int[gMaxnobjs];
+	fTtauNumParticlesSignalCone = new int[gMaxnobjs];
+	fTtauNumChargedHadronsIsoCone   = new int[gMaxnobjs];
+	fTtauNumNeutralHadronsIsoCone   = new int[gMaxnobjs];
+	fTtauNumPhotonsIsolationCone    = new int[gMaxnobjs];
+	fTtauNumParticlesIsolationCone  = new int[gMaxnobjs];
+	fTtauPtSumChargedParticlesIsoCone    = new float[gMaxnobjs];
+	fTtauPtSumPhotonsIsoCone    = new float[gMaxnobjs];
+	fTtauDecayModeFinding = new float[gMaxnobjs];
+	fTtauVLooseIso   = new float[gMaxnobjs];
+	fTtauLooseIso    = new float[gMaxnobjs];
+	fTtauTightIso    = new float[gMaxnobjs];
+	fTtauMediumIso   = new float[gMaxnobjs];
+/* 	fTtauVLooseChargedIso   = new float[gMaxnobjs]; */
+/* 	fTtauLooseChargedIso    = new float[gMaxnobjs]; */
+/* 	fTtauTightChargedIso    = new float[gMaxnobjs]; */
+/* 	fTtauMediumChargedIso   = new float[gMaxnobjs]; */
+/* 	fTtauVLooseIsoDBSumPtCorr   = new float[gMaxnobjs]; */
+/* 	fTtauLooseIsoDBSumPtCorr    = new float[gMaxnobjs]; */
+/* 	fTtauTightIsoDBSumPtCorr    = new float[gMaxnobjs]; */
+/* 	fTtauMediumIsoDBSumPtCorr   = new float[gMaxnobjs]; */
+/* 	fTtauVLooseCombinedIsoDBSumPtCorr   = new float[gMaxnobjs]; */
+/* 	fTtauLooseCombinedIsoDBSumPtCorr    = new float[gMaxnobjs]; */
+/* 	fTtauTightCombinedIsoDBSumPtCorr    = new float[gMaxnobjs]; */
+/* 	fTtauMediumCombinedIsoDBSumPtCorr   = new float[gMaxnobjs]; */
+	fTtauLooseElectronRejection    = new float[gMaxnobjs];
+	fTtauTightElectronRejection    = new float[gMaxnobjs];
+	fTtauMediumElectronRejection   = new float[gMaxnobjs];
+	fTtauLooseMuonRejection    = new float[gMaxnobjs];
+	fTtauTightMuonRejection    = new float[gMaxnobjs];
   }else if(fType == El){
   	fTelID95       = new int[gMaxnobjs];
   	fTelID90       = new int[gMaxnobjs];
@@ -237,6 +323,48 @@ LeptonFillerPat<LeptonType>::~LeptonFillerPat(void) {
 
   if(fType == Tau){
   	delete [] fTdecaymode;
+	delete [] fTtauVz; 
+ 	delete [] fTtauEmFraction; 
+	delete [] fTtauJetPt;
+	delete [] fTtauJetEta;
+	delete [] fTtauJetPhi;
+	delete [] fTtauJetMass;
+	delete [] fTtauLeadingTkPt;
+	delete [] fTtauLeadingNeuPt;
+	delete [] fTtauLeadingTkHcalenergy;
+	delete [] fTtauLeadingTkEcalenergy;
+	delete [] fTtauNumChargedHadronsSignalCone;
+	delete [] fTtauNumNeutralHadronsSignalCone;
+	delete [] fTtauNumPhotonsSignalCone;
+	delete [] fTtauNumParticlesSignalCone;
+	delete [] fTtauNumChargedHadronsIsoCone;
+	delete [] fTtauNumNeutralHadronsIsoCone;
+	delete [] fTtauNumPhotonsIsolationCone;
+	delete [] fTtauNumParticlesIsolationCone;
+	delete [] fTtauPtSumChargedParticlesIsoCone;
+	delete [] fTtauPtSumPhotonsIsoCone;
+	delete [] fTtauDecayModeFinding;
+	delete [] fTtauVLooseIso;
+	delete [] fTtauLooseIso;
+	delete [] fTtauTightIso;
+	delete [] fTtauMediumIso;
+/* 	delete [] fTtauVLooseChargedIso; */
+/* 	delete [] fTtauLooseChargedIso; */
+/* 	delete [] fTtauTightChargedIso; */
+/* 	delete [] fTtauMediumChargedIso; */
+/* 	delete [] fTtauVLooseIsoDBSumPtCorr; */
+/* 	delete [] fTtauLooseIsoDBSumPtCorr; */
+/* 	delete [] fTtauTightIsoDBSumPtCorr; */
+/* 	delete [] fTtauMediumIsoDBSumPtCorr; */
+/* 	delete [] fTtauVLooseCombinedIsoDBSumPtCorr; */
+/* 	delete [] fTtauLooseCombinedIsoDBSumPtCorr; */
+/* 	delete [] fTtauTightCombinedIsoDBSumPtCorr; */
+/* 	delete [] fTtauMediumCombinedIsoDBSumPtCorr; */
+	delete [] fTtauLooseElectronRejection;
+	delete [] fTtauTightElectronRejection;
+	delete [] fTtauMediumElectronRejection;
+	delete [] fTtauLooseMuonRejection;
+	delete [] fTtauTightMuonRejection;
   }else if (fType == El){
   	delete [] fTelID95;
   	delete [] fTelID90;
@@ -273,6 +401,48 @@ void LeptonFillerPat<LeptonType>::createBranches(void) {
   
   if(fType == Tau){
   	addBranch("DecayMode", "I", fTdecaymode,"NObjs" );
+  	addBranch("Vz", "F", fTtauVz,"NObjs" ); 
+  	addBranch("EmFraction", "F", fTtauEmFraction,"NObjs" ); 
+  	addBranch("JetPt", "F", fTtauJetPt,"NObjs" );
+  	addBranch("JetEta", "F", fTtauJetEta,"NObjs" );
+  	addBranch("JetPhi", "F", fTtauJetPhi,"NObjs" );
+  	addBranch("JetMass", "F", fTtauJetMass,"NObjs" );
+  	addBranch("LeadingTkPt", "F", fTtauLeadingTkPt,"NObjs" );
+  	addBranch("LeadingNeuPt", "F", fTtauLeadingNeuPt,"NObjs" );
+  	addBranch("LeadingTkHcalenergy", "F", fTtauLeadingTkHcalenergy,"NObjs" );
+  	addBranch("LeadingTkEcalenergy", "F", fTtauLeadingTkEcalenergy,"NObjs" );
+  	addBranch("NumChargedHadronsSignalCone", "I", fTtauNumChargedHadronsSignalCone,"NObjs" );
+  	addBranch("NumNeutralHadronsSignalCone", "I", fTtauNumNeutralHadronsSignalCone,"NObjs" );
+  	addBranch("NumPhotonsSignalCone", "I", fTtauNumPhotonsSignalCone,"NObjs" );
+  	addBranch("NumParticlesSignalCone", "I", fTtauNumParticlesSignalCone,"NObjs" );
+  	addBranch("NumChargedHadronsIsoCone", "I", fTtauNumChargedHadronsIsoCone,"NObjs" );
+  	addBranch("NumNeutralHadronsIsoCone", "I", fTtauNumNeutralHadronsIsoCone,"NObjs" );
+  	addBranch("NumPhotonsIsolationCone", "I", fTtauNumPhotonsIsolationCone,"NObjs" );
+  	addBranch("NumParticlesIsolationCone", "I", fTtauNumParticlesIsolationCone,"NObjs" );
+  	addBranch("PtSumChargedParticlesIsoCone", "F", fTtauPtSumChargedParticlesIsoCone,"NObjs" );
+  	addBranch("PtSumPhotonsIsoCone", "F", fTtauPtSumPhotonsIsoCone,"NObjs" );
+	addBranch("DecayModeFinding", "F", fTtauDecayModeFinding,"NObjs" );
+  	addBranch("VLooseIso", "F", fTtauVLooseIso,"NObjs" );
+  	addBranch("LooseIso", "F", fTtauLooseIso,"NObjs" );
+  	addBranch("TightIso", "F", fTtauTightIso,"NObjs" );
+  	addBranch("MediumIso", "F", fTtauMediumIso,"NObjs" );
+/*   	addBranch("VLooseChargedIso", "F", fTtauVLooseChargedIso,"NObjs" ); */
+/*   	addBranch("LooseChargedIso", "F", fTtauLooseChargedIso,"NObjs" ); */
+/*   	addBranch("TightChargedIso", "F", fTtauTightChargedIso,"NObjs" ); */
+/*   	addBranch("MediumChargedIso", "F", fTtauMediumChargedIso,"NObjs" ); */
+/*   	addBranch("VLooseIsoDBSumPtCorr", "F", fTtauVLooseIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("LooseIsoDBSumPtCorr", "F", fTtauLooseIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("TightIsoDBSumPtCorr", "F", fTtauTightIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("MediumIsoDBSumPtCorr", "F", fTtauMediumIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("VLooseCombinedIsoDBSumPtCorr", "F", fTtauVLooseCombinedIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("LooseCombinedIsoDBSumPtCorr", "F", fTtauLooseCombinedIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("TightCombinedIsoDBSumPtCorr", "F", fTtauTightCombinedIsoDBSumPtCorr,"NObjs" ); */
+/*   	addBranch("MediumCombinedIsoDBSumPtCorr", "F", fTtauMediumCombinedIsoDBSumPtCorr,"NObjs" ); */
+  	addBranch("LooseElectronRejection", "F", fTtauLooseElectronRejection,"NObjs" );
+  	addBranch("TightElectronRejection", "F", fTtauTightElectronRejection,"NObjs" );
+  	addBranch("MediumElectronRejection", "F", fTtauMediumElectronRejection,"NObjs" );
+  	addBranch("LooseMuonRejection", "F", fTtauLooseMuonRejection,"NObjs" );
+  	addBranch("TightMuonRejection", "F", fTtauTightMuonRejection,"NObjs" );
   }else if(fType == El){
   	addBranch("ID95", "I", fTelID95, "NObjs");
   	addBranch("ID90", "I", fTelID90, "NObjs");
@@ -309,6 +479,48 @@ void LeptonFillerPat<LeptonType>::reset(void) {
 
   if(fType==Tau){
   	resetInt(fTdecaymode,gMaxnobjs);
+    resetFloat(fTtauVz,gMaxnobjs); 
+    resetFloat(fTtauEmFraction,gMaxnobjs); 
+    resetFloat(fTtauJetPt,gMaxnobjs);
+    resetFloat(fTtauJetEta,gMaxnobjs);
+    resetFloat(fTtauJetPhi,gMaxnobjs);
+    resetFloat(fTtauJetMass,gMaxnobjs);
+    resetFloat(fTtauLeadingTkPt,gMaxnobjs);
+    resetFloat(fTtauLeadingNeuPt,gMaxnobjs);
+    resetFloat(fTtauLeadingTkHcalenergy,gMaxnobjs);
+    resetFloat(fTtauLeadingTkEcalenergy,gMaxnobjs);
+    resetInt(fTtauNumChargedHadronsSignalCone,gMaxnobjs);
+    resetInt(fTtauNumNeutralHadronsSignalCone,gMaxnobjs);
+    resetInt(fTtauNumPhotonsSignalCone,gMaxnobjs);
+    resetInt(fTtauNumParticlesSignalCone,gMaxnobjs);
+    resetInt(fTtauNumChargedHadronsIsoCone,gMaxnobjs);
+    resetInt(fTtauNumNeutralHadronsIsoCone,gMaxnobjs);
+    resetInt(fTtauNumPhotonsIsolationCone,gMaxnobjs);
+    resetInt(fTtauNumParticlesIsolationCone,gMaxnobjs);
+    resetFloat(fTtauPtSumChargedParticlesIsoCone,gMaxnobjs);
+    resetFloat(fTtauPtSumPhotonsIsoCone,gMaxnobjs);
+    resetFloat(fTtauDecayModeFinding,gMaxnobjs);
+    resetFloat(fTtauVLooseIso,gMaxnobjs);
+    resetFloat(fTtauLooseIso,gMaxnobjs);
+    resetFloat(fTtauTightIso,gMaxnobjs);
+    resetFloat(fTtauMediumIso,gMaxnobjs);
+/*     resetFloat(fTtauVLooseChargedIso,gMaxnobjs); */
+/*     resetFloat(fTtauLooseChargedIso,gMaxnobjs); */
+/*     resetFloat(fTtauTightChargedIso,gMaxnobjs); */
+/*     resetFloat(fTtauMediumChargedIso,gMaxnobjs); */
+/*     resetFloat(fTtauVLooseIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauLooseIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauTightIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauMediumIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauVLooseCombinedIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauLooseCombinedIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauTightCombinedIsoDBSumPtCorr,gMaxnobjs); */
+/*     resetFloat(fTtauMediumCombinedIsoDBSumPtCorr,gMaxnobjs); */
+    resetFloat(fTtauLooseElectronRejection,gMaxnobjs);
+    resetFloat(fTtauTightElectronRejection,gMaxnobjs);
+    resetFloat(fTtauMediumElectronRejection,gMaxnobjs);
+    resetFloat(fTtauLooseMuonRejection,gMaxnobjs);
+    resetFloat(fTtauTightMuonRejection,gMaxnobjs);
   }else if(fType ==El ){
   	resetInt(fTelID95, gMaxnobjs);
   	resetInt(fTelID90, gMaxnobjs);
@@ -333,6 +545,48 @@ template <>
 void LeptonFillerPat<pat::Tau>::getSpecific(pat::Tau lepton, size_t index){
 	// speficic for PFTaus
 	fTdecaymode[index]   = lepton.decayMode();	
+	fTtauVz[index]       = lepton.vz();  
+	fTtauEmFraction[index]   = lepton.emFraction(); 
+	fTtauJetPt[index]    = lepton.pfJetRef().get()->pt();
+	fTtauJetEta[index]   = lepton.pfJetRef().get()->eta();
+	fTtauJetPhi[index]   = lepton.pfJetRef().get()->phi();
+	fTtauJetMass[index]  = lepton.pfJetRef().get()->mass();
+	fTtauLeadingTkPt[index]   = (lepton.leadPFChargedHadrCand())->pt();
+	fTtauLeadingNeuPt[index]  = (lepton.leadPFNeutralCand().isNonnull() ? lepton.leadPFNeutralCand()->pt() : 0.);
+	fTtauLeadingTkHcalenergy[index]   = lepton.leadPFChargedHadrCand()->hcalEnergy();
+	fTtauLeadingTkEcalenergy[index]   = lepton.leadPFChargedHadrCand()->ecalEnergy();
+	fTtauNumChargedHadronsSignalCone[index]   = lepton.signalPFChargedHadrCands().size();
+	fTtauNumNeutralHadronsSignalCone[index]   = lepton.signalPFNeutrHadrCands().size();
+	fTtauNumPhotonsSignalCone[index]   = lepton.signalPFGammaCands().size();
+	fTtauNumParticlesSignalCone[index]    = lepton.signalPFCands().size();
+	fTtauNumChargedHadronsIsoCone[index]  = lepton.isolationPFChargedHadrCands().size();
+	fTtauNumNeutralHadronsIsoCone[index]  = lepton.isolationPFNeutrHadrCands().size();
+	fTtauNumPhotonsIsolationCone[index]   = lepton.isolationPFGammaCands().size();
+	fTtauNumParticlesIsolationCone[index] = lepton.isolationPFCands().size();
+	fTtauPtSumChargedParticlesIsoCone[index]   = lepton.isolationPFChargedHadrCandsPtSum();
+	fTtauPtSumPhotonsIsoCone[index]   = lepton.isolationPFGammaCandsEtSum();
+	fTtauDecayModeFinding[index] = lepton.tauID("decayModeFinding");
+	fTtauVLooseIso[index]  = lepton.tauID("byVLooseIsolation");
+	fTtauLooseIso[index]   = lepton.tauID("byLooseIsolation");
+	fTtauTightIso[index]   = lepton.tauID("byTightIsolation");
+	fTtauMediumIso[index]  = lepton.tauID("byMediumIsolation");
+/* 	fTtauVLooseChargedIso[index]  = lepton.tauID("byVLooseChargedIsolation"); */
+/* 	fTtauLooseChargedIso[index]   = lepton.tauID("byLooseChargedIsolation"); */
+/* 	fTtauTightChargedIso[index]   = lepton.tauID("byTightChargedIsolation"); */
+/* 	fTtauMediumChargedIso[index]  = lepton.tauID("byMediumChargedIsolation"); */
+/*         fTtauVLooseIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseIsolationDeltaBetaCorr"); */
+/* 	fTtauLooseIsoDBSumPtCorr[index]   = lepton.tauID("byLooseIsolationDeltaBetaCorr"); */
+/* 	fTtauTightIsoDBSumPtCorr[index]   = lepton.tauID("byTightIsolationDeltaBetaCorr"); */
+/* 	fTtauMediumIsoDBSumPtCorr[index]  = lepton.tauID("byMediumIsolationDeltaBetaCorr"); */
+/* 	fTtauVLooseCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseCombinedIsolationDeltaBetaCorr"); */
+/* 	fTtauLooseCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byLooseCombinedIsolationDeltaBetaCorr"); */
+/* 	fTtauTightCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byTightCombinedIsolationDeltaBetaCorr"); */
+/* 	fTtauMediumCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byMediumCombinedIsolationDeltaBetaCorr"); */
+	fTtauLooseElectronRejection[index]   = lepton.tauID("againstElectronLoose");
+	fTtauTightElectronRejection[index]   = lepton.tauID("againstElectronTight");
+	fTtauMediumElectronRejection[index]  = lepton.tauID("againstElectronMedium");
+	fTtauLooseMuonRejection[index]   = lepton.tauID("againstMuonLoose");
+	fTtauTightMuonRejection[index]   = lepton.tauID("againstMuonTight");
 	return;
 }
 
