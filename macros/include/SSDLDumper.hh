@@ -341,6 +341,9 @@ public:
 	
 	//////////////////////////////
 	// I/O
+	void bookSigEvTree();
+	void fillSigEvTree(Sample*, gChannel, int, int);
+	void writeSigEvTree(TFile*);
 	void bookHistos(Sample*);
 	void deleteHistos(Sample*);
 	void writeHistos(Sample*, TFile*);
@@ -382,7 +385,8 @@ public:
 	virtual int getNJets();
 	virtual int getNBTags();
 	virtual float getHT();
-	virtual float getMT2(int, int, int);
+	virtual float getMT2(int, int, gChannel);
+	virtual float getMll(int, int, gChannel);
 	virtual int   getClosestJet(int, gChannel);
 	virtual float getClosestJetPt(int, gChannel);
 	virtual float getClosestJetDR(int, gChannel);
@@ -498,6 +502,26 @@ public:
 	vector<Sample*> fMCSamples;
 	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
 	
+	TTree *fSigEv_Tree;
+	bool fTreeFilled;
+	float       fSETree_PUWeight;
+	std::string fSETree_SName;
+	int         fSETree_Run;
+	int         fSETree_LS;
+	long        fSETree_Event;
+	int         fSETree_Flavor; // mm(0), ee(1), em(2)
+	int         fSETree_Charge;
+	float       fSETree_HT;
+	float       fSETree_MET;
+	int         fSETree_NJ;
+	int         fSETree_NbJ;
+	float       fSETree_MT2;
+	float       fSETree_Mll;
+	float       fSETree_pT1;
+	float       fSETree_pT2;
+	int         fSETree_T1;
+	int         fSETree_T2;
+
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
 	vector<float> fSigEv_LO_MM_HT;

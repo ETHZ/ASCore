@@ -339,6 +339,7 @@ void SSDLDumper::loopEvents(Sample *S){
 	TFile *pFile = new TFile(fOutputFileName, "RECREATE");
 		
 	bookHistos(S);
+	bookSigEvTree();
 	
 	TTree *tree = S->getTree();
 
@@ -360,6 +361,8 @@ void SSDLDumper::loopEvents(Sample *S){
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+		fTreeFilled = false;
 
 		fCounter[Muon].fill(fMMCutNames[0]);
 		fCounter[ElMu].fill(fEMCutNames[0]);
@@ -395,6 +398,8 @@ void SSDLDumper::loopEvents(Sample *S){
 	writeSigGraphs(S, Elec, LowPt,  pFile);
 	writeSigGraphs(S, ElMu, HighPt, pFile);
 	writeSigGraphs(S, ElMu, LowPt,  pFile);
+
+	writeSigEvTree(pFile);
 
 	deleteHistos(S);
 	S->cleanUp();
@@ -440,7 +445,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
 				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
-					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu1,mu2,1), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][hilo].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
@@ -511,7 +516,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
 				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
-					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(el1,el2,2), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][hilo].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
@@ -593,7 +598,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], puweight);
 				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
-					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu,el,3), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
+					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
 				if(S->datamc > 0){
@@ -691,7 +696,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minHT =  80.;
 		fC_minNjets = 2;
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			float MT2 = getMT2(mu1, mu2, 1);
+			float MT2 = getMT2(mu1, mu2, Muon);
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
 				fillWithoutOF(S->diffyields[Muon].hnt11[5], MT2,         puweight);
 				fillWithoutOF(S->diffyields[Muon].hnt11[6], MuPt[mu1],   puweight);
@@ -817,7 +822,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minHT =  80.;
 		fC_minNjets = 2;
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
-			float MT2 = getMT2(el1, el2, 2);
+			float MT2 = getMT2(el1, el2, Elec);
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				fillWithoutOF(S->diffyields[Elec].hnt11[5], MT2,         puweight);
 				fillWithoutOF(S->diffyields[Elec].hnt11[6], ElPt[el1],   puweight);
@@ -943,7 +948,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minHT =  80.;
 		fC_minNjets = 2;		
 		if( isSSLLElMuEvent(mu, el) ){
-			float MT2 = getMT2(mu, el, 3);
+			float MT2 = getMT2(mu, el, ElMu);
 			float ptmax = MuPt[mu];
 			float ptmin = ElPt[el];
 			if(ptmin > ptmax){
@@ -1077,7 +1082,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				float MT2 = getMT2(el1, el2, 2);
+				float MT2 = getMT2(el1, el2, Elec);
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
 					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[5], MT2,         puweight);
 					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[6], ElPt[el1],   puweight);
@@ -1212,7 +1217,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;		
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float MT2 = getMT2(mu, el, 3);
+				float MT2 = getMT2(mu, el, ElMu);
 				float ptmax = MuPt[mu];
 				float ptmin = ElPt[el];
 				if(ptmin > ptmax){
@@ -1462,13 +1467,12 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 			KP0->hvar[2]->Fill(getNJets(), puweight);
 			KP0->hvar[3]->Fill(MuPt[ind1], puweight);
 			KP0->hvar[4]->Fill(MuPt[ind2], puweight);
-			TLorentzVector p1, p2;
-			p1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
-			p2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);
-			float mass = (p1+p2).M();
-			KP0->hvar[5]->Fill(mass, puweight); // SF
-			KP0->hvar[6]->Fill(mass, puweight); // MM
-			KP0->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+			KP0->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
+			KP0->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM
+			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
+
+			// Fill signal event tree
+			if(hilo == HighPt) fillSigEvTree(S, Muon, ind1, ind2);
 
 			if(isTightMuon(ind1) && isTightMuon(ind2)){ // tight-tight
 				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
@@ -1477,9 +1481,9 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 				KP1->hvar[2]->Fill(getNJets(),            puweight);
 				KP1->hvar[3]->Fill(MuPt[ind1],            puweight);
 				KP1->hvar[4]->Fill(MuPt[ind2],            puweight);
-				KP1->hvar[5]->Fill(mass,                  puweight); // SF
-				KP1->hvar[6]->Fill(mass,                  puweight); // MM
-				KP1->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+				KP1->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
+				KP1->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM
+				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
 				if(isSSLLMuEvent(ind1, ind2)){ // signal region
 					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
 					if(hilo == HighPt){ // Store signal events
@@ -1490,14 +1494,16 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_MM_MET.push_back(pfMET);						
 					}					
 					
+					// Fill signal event tree
+					
 					KP2->hvar[0]->Fill(getHT(),    puweight);
 					KP2->hvar[1]->Fill(pfMET,      puweight);
 					KP2->hvar[2]->Fill(getNJets(), puweight);
 					KP2->hvar[3]->Fill(MuPt[ind1], puweight);
 					KP2->hvar[4]->Fill(MuPt[ind2], puweight);
-					KP2->hvar[5]->Fill(mass,       puweight); // SF
-					KP2->hvar[6]->Fill(mass,       puweight); // MM					
-					KP2->hvar[9]->Fill(getMT2(ind1, ind2, 1), puweight);
+					KP2->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
+					KP2->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM					
+					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
 				}
 			}
 		}
@@ -1515,13 +1521,13 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 			KP0->hvar[2]->Fill(getNJets(), puweight);
 			KP0->hvar[3]->Fill(ElPt[ind1], puweight);
 			KP0->hvar[4]->Fill(ElPt[ind2], puweight);
-			TLorentzVector p1, p2;
-			p1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
-			p2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);
-			float mass = (p1+p2).M();
-			KP0->hvar[5]->Fill(mass, puweight); // SF
-			KP0->hvar[7]->Fill(mass, puweight); // MM
-			KP0->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+			KP0->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
+			KP0->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
+			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
+
+			// Fill signal event tree
+			if(hilo == HighPt) fillSigEvTree(S, Elec, ind1, ind2);
+
 			if(isTightElectron(ind1) && isTightElectron(ind2)){ // tight-tight
 				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
 				KP1->hvar[0]->Fill(getHT(),               puweight);
@@ -1529,9 +1535,9 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 				KP1->hvar[2]->Fill(getNJets(),            puweight);
 				KP1->hvar[3]->Fill(ElPt[ind1],            puweight);
 				KP1->hvar[4]->Fill(ElPt[ind2],            puweight);
-				KP1->hvar[5]->Fill(mass,                  puweight); // SF
-				KP1->hvar[7]->Fill(mass,                  puweight); // MM
-				KP1->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+				KP1->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
+				KP1->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
+				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
 				if(isSSLLElEvent(ind1, ind2)){
 					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
 					if(hilo == HighPt){ // Store signal events
@@ -1541,14 +1547,15 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_EE_HT .push_back(getHT());
 						fSigEv_LO_EE_MET.push_back(pfMET);						
 					}
+										
 					KP2->hvar[0]->Fill(getHT(),               puweight);
 					KP2->hvar[1]->Fill(pfMET,                 puweight);
 					KP2->hvar[2]->Fill(getNJets(),            puweight);
 					KP2->hvar[3]->Fill(ElPt[ind1],            puweight);
 					KP2->hvar[4]->Fill(ElPt[ind2],            puweight);
-					KP2->hvar[5]->Fill(mass,                  puweight); // SF
-					KP2->hvar[7]->Fill(mass,                  puweight); // MM							
-					KP2->hvar[9]->Fill(getMT2(ind1, ind2, 2), puweight);
+					KP2->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
+					KP2->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
+					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
 				}
 			}
 		}
@@ -1572,12 +1579,12 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 			}
 			KP0->hvar[3]->Fill(ptmax, puweight);
 			KP0->hvar[4]->Fill(ptmin, puweight);
-			TLorentzVector p1, p2;
-			p1.SetPtEtaPhiM(MuPt[mu], MuEta[mu], MuPhi[mu], gMMU);
-			p2.SetPtEtaPhiM(ElPt[el], ElEta[el], ElPhi[el], gMEL);
-			float mass = (p1+p2).M();
-			KP0->hvar[8]->Fill(mass,                  puweight); // EM
-			KP0->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
+			KP0->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM
+			KP0->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
+
+			// Fill signal event tree
+			if(hilo == HighPt) fillSigEvTree(S, ElMu, mu, el);
+
 			if(isTightMuon(mu) && isTightElectron(el)){ // tight-tight
 				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
 				KP1->hvar[0]->Fill(getHT(),               puweight);
@@ -1585,8 +1592,8 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 				KP1->hvar[2]->Fill(getNJets(),            puweight);
 				KP1->hvar[3]->Fill(ptmax,                 puweight);
 				KP1->hvar[4]->Fill(ptmin,                 puweight);
-				KP1->hvar[8]->Fill(mass,                  puweight); // EM
-				KP1->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
+				KP1->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM
+				KP1->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
 				if( isSSLLElMuEvent(mu, el) ){
 					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
 					if(hilo == HighPt){ // Store signal events
@@ -1596,13 +1603,14 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_EM_HT .push_back(getHT());
 						fSigEv_LO_EM_MET.push_back(pfMET);						
 					}
-					KP2->hvar[0]->Fill(getHT(),               puweight);
-					KP2->hvar[1]->Fill(pfMET,                 puweight);
-					KP2->hvar[2]->Fill(getNJets(),            puweight);
-					KP2->hvar[3]->Fill(ptmax,                 puweight);
-					KP2->hvar[4]->Fill(ptmin,                 puweight);
-					KP2->hvar[8]->Fill(mass,                  puweight); // EM						
-					KP2->hvar[9]->Fill(getMT2(mu, el, 3), puweight);
+					
+					KP2->hvar[0]->Fill(getHT(),           puweight);
+					KP2->hvar[1]->Fill(pfMET,             puweight);
+					KP2->hvar[2]->Fill(getNJets(),        puweight);
+					KP2->hvar[3]->Fill(ptmax,             puweight);
+					KP2->hvar[4]->Fill(ptmin,             puweight);
+					KP2->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM						
+					KP2->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
 				}
 			}
 		}
@@ -2034,6 +2042,79 @@ void SSDLDumper::printCutFlows(TString filename){
 }
 
 //____________________________________________________________________________
+void SSDLDumper::bookSigEvTree(){
+	fSigEv_Tree = new TTree("SigEvents", "SigEventTree");
+	fSigEv_Tree->Branch("PUWeight", &fSETree_PUWeight, "PUWeight/F");
+	fSigEv_Tree->Branch("SName",    &fSETree_SName);
+	fSigEv_Tree->Branch("Run",      &fSETree_Run   , "Run   /I");
+	fSigEv_Tree->Branch("LS",       &fSETree_LS    , "LS    /I");
+	fSigEv_Tree->Branch("Event",    &fSETree_Event , "Event /I");
+	fSigEv_Tree->Branch("Flavor",   &fSETree_Flavor, "Flavor/I");
+	fSigEv_Tree->Branch("Charge",   &fSETree_Charge, "Charge/I");
+	fSigEv_Tree->Branch("HT",       &fSETree_HT    , "HT    /F");
+	fSigEv_Tree->Branch("MET",      &fSETree_MET   , "MET   /F");
+	fSigEv_Tree->Branch("NJ",       &fSETree_NJ    , "NJ    /I");
+	fSigEv_Tree->Branch("NbJ",      &fSETree_NbJ   , "NbJ   /I");
+	fSigEv_Tree->Branch("MT2",      &fSETree_MT2   , "MT2   /F");
+	fSigEv_Tree->Branch("Mll",      &fSETree_Mll   , "Mll   /F");
+	fSigEv_Tree->Branch("pT1",      &fSETree_pT1   , "pT1   /F");
+	fSigEv_Tree->Branch("pT2",      &fSETree_pT2   , "pT2   /F");
+	fSigEv_Tree->Branch("T1",       &fSETree_T1, "T1/I");
+	fSigEv_Tree->Branch("T2",       &fSETree_T2, "T2/I");
+}
+void SSDLDumper::fillSigEvTree(Sample *S, gChannel chan, int ind1, int ind2){
+	if(fTreeFilled){ // check for duplicate fillings
+		cout << "SSDLDumper::fillSigEvTree() ==> Trying to fill Tree multiple times!" << endl;
+		return;
+	}
+
+	float puweight = PUWeight;
+	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
+
+	fSETree_PUWeight = puweight;
+	fSETree_SName    = S->sname.Data();
+	fSETree_Run      = Run;
+	fSETree_LS       = LumiSec;
+	fSETree_Event    = Event;
+	fSETree_HT       = getHT();
+	fSETree_MET      = pfMET;
+	fSETree_NJ       = getNJets();
+	fSETree_NbJ      = getNBTags();
+	fSETree_MT2      = getMT2(ind1, ind2, chan);
+	fSETree_Mll      = getMll(ind1, ind2, chan);
+	
+	if(chan == Muon){
+		fSETree_Flavor = 0;
+		fSETree_Charge = MuCharge[ind1];
+		fSETree_pT1    = MuPt[ind1];
+		fSETree_pT2    = MuPt[ind2];
+		fSETree_T1     = isTightMuon(ind1)?1:0;
+		fSETree_T2     = isTightMuon(ind2)?1:0;
+	}
+	if(chan == Elec){
+		fSETree_Flavor = 1;
+		fSETree_Charge = ElCharge[ind1];
+		fSETree_pT1    = ElPt[ind1];
+		fSETree_pT2    = ElPt[ind2];
+		fSETree_T1     = isTightElectron(ind1)?1:0;
+		fSETree_T2     = isTightElectron(ind2)?1:0;
+	}
+	if(chan == ElMu){
+		fSETree_Flavor = 2;
+		fSETree_Charge = MuCharge[ind1];
+		fSETree_pT1    = MuPt[ind1];
+		fSETree_pT2    = ElPt[ind2];
+		fSETree_T1     = isTightMuon(ind1)?1:0;
+		fSETree_T2     = isTightElectron(ind2)?1:0;
+	}
+		
+	fSigEv_Tree->Fill();
+	fTreeFilled = true;
+}
+void SSDLDumper::writeSigEvTree(TFile *pFile){
+	pFile->cd();
+	fSigEv_Tree->Write("SigEvents", TObject::kWriteDelete);	
+}
 void SSDLDumper::bookHistos(Sample *S){
 	// Cut flow histos
 	S->cutFlowHisto[Muon] = new TH1D("MMCutFlow", "MMCutFlow", fMMCutNames.size(), 0, fMMCutNames.size());
@@ -3030,25 +3111,24 @@ float SSDLDumper::getHT(){
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) ht += JetPt[i];
 	return ht;
 }
-float SSDLDumper::getMT2(int ind1, int ind2, int toggle){
+float SSDLDumper::getMT2(int ind1, int ind2, gChannel chan){
 	// Calculate MT2 variable for two leptons and missing energy,
 	// assuming zero testmass
-	// Toggle switches between mumu (1), ee(2), emu(3)
 	double pa[3];
 	double pb[3];
 	double pmiss[3];
 
 	TLorentzVector pmet, pl1, pl2;
 
-	if(toggle == 1){ // mumu
+	if(chan == Muon){ // mumu
 		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
 		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);			
 	}
-	if(toggle == 2){ // ee
+	if(chan == Elec){ // ee
 		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
 		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
 	}
-	if(toggle == 3){ // emu
+	if(chan == ElMu){ // emu
 		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
 		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
 	}
@@ -3073,6 +3153,26 @@ float SSDLDumper::getMT2(int ind1, int ind2, int toggle){
 	double MT2 = DavisMT2->get_mt2();
 	delete DavisMT2;
 	return MT2;
+}
+float SSDLDumper::getMll(int ind1, int ind2, gChannel chan){
+	// Calculate inv mass for two leptons
+	TLorentzVector pl1, pl2;
+
+	if(chan == Muon){ // mumu
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(MuPt[ind2], MuEta[ind2], MuPhi[ind2], gMMU);			
+	}
+	if(chan == Elec){ // ee
+		pl1.SetPtEtaPhiM(ElPt[ind1], ElEta[ind1], ElPhi[ind1], gMEL);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
+	}
+	if(chan == ElMu){ // emu
+		pl1.SetPtEtaPhiM(MuPt[ind1], MuEta[ind1], MuPhi[ind1], gMMU);
+		pl2.SetPtEtaPhiM(ElPt[ind2], ElEta[ind2], ElPhi[ind2], gMEL);			
+	}
+	
+	float mass = (pl1+pl2).M();
+	return mass;
 }
 int   SSDLDumper::getClosestJet(int ind, gChannel chan){
 // Get index of the closest jet
