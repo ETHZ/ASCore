@@ -236,7 +236,10 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetPt",         &fTJetpt,    "JetPt[NJets]/F");
 	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
 	fAnalysisTree->Branch("JetPhi",        &fTJetphi,   "JetPhi[NJets]/F");
-	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag,  "JetSSVHPBTag[NJets]/F"); // tight WP: > 2.
+	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1, "JetSSVHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2, "JetSSVHEBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3, "JetTCHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4, "JetTCHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
 }
 
@@ -314,11 +317,14 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt  [ind] = GetJetPtNoResidual(jetindex);
-		fTJeteta [ind] = fTR->JEta[jetindex];
-		fTJetphi [ind] = fTR->JPhi[jetindex];
-		fTJetbtag[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
-		fTJetArea[ind] = fTR->JArea[jetindex];
+		fTJetpt   [ind] = GetJetPtNoResidual(jetindex);
+		fTJeteta  [ind] = fTR->JEta[jetindex];
+		fTJetphi  [ind] = fTR->JPhi[jetindex];
+		fTJetbtag1[ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
+		fTJetbtag2[ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
+		fTJetbtag3[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
+		fTJetbtag4[ind] = fTR->JbTagProbTkCntHighEff[jetindex];
+		fTJetArea [ind] = fTR->JArea[jetindex];
 	}
 
 	// Get METs
@@ -561,11 +567,14 @@ void SSDLAnalysis::ResetTree(){
 	// jet-MET properties
 	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt [i]  = -999.99;
-		fTJeteta[i]  = -999.99;
-		fTJetphi[i]  = -999.99;
-		fTJetbtag[i] = -999.99;
-		fTJetArea[i] = -999.99;
+		fTJetpt [i]   = -999.99;
+		fTJeteta[i]   = -999.99;
+		fTJetphi[i]   = -999.99;
+		fTJetbtag1[i] = -999.99;
+		fTJetbtag2[i] = -999.99;
+		fTJetbtag3[i] = -999.99;
+		fTJetbtag4[i] = -999.99;
+		fTJetArea[i]  = -999.99;
 	}
 	fTtcMET      = -999.99;
 	fTtcMETphi   = -999.99;
