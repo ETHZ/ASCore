@@ -42,7 +42,7 @@ public:
 	static const int gNDiffMT2Bins = 3;
 	static const int gNDiffPT1Bins = 5;
 	static const int gNDiffPT2Bins = 5;
-	static const int gNDiffNBJBins = 3;
+	static const int gNDiffNBJBins = 4;
 
 	static double gDiffHTBins [gNDiffHTBins+1];
 	static double gDiffMETBins[gNDiffMETBins+1];
@@ -82,14 +82,15 @@ public:
 		region_begin,
 		Baseline = region_begin,
 		Control,
-		HT80MET100,
+		HT80MET120,
 		HT200MET30,
 		HT200MET120,
 		HT400MET50,
 		HT400MET120,
 		HT400MET0,
-		HT80METInv30,
 		HT0MET120,
+		HT200MET302b,
+		HT80MET1202b,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -177,11 +178,12 @@ public:
 		static float minEl1pt[2];
 		static float minEl2pt[2];
 		// Custom selections for every region
-		static float minHT   [gNREGIONS];
-		static float maxHT   [gNREGIONS];
-		static float minMet  [gNREGIONS];
-		static float maxMet  [gNREGIONS];
-		static int   minNjets[gNREGIONS];
+		static float minHT    [gNREGIONS];
+		static float maxHT    [gNREGIONS];
+		static float minMet   [gNREGIONS];
+		static float maxMet   [gNREGIONS];
+		static int   minNjets [gNREGIONS];
+		static int   minNbjets[gNREGIONS];
 		
 		Channel mm;
 		Channel em;
@@ -199,7 +201,7 @@ public:
 		TH1D *nloose[gNRatioVars];
 	};
 	
-	static const int gNKinVars = 10;
+	static const int gNKinVars = 11;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
 		static TString axis_label[gNKinVars];
@@ -409,6 +411,7 @@ public:
 	virtual int hasLooseElectrons();
 	virtual bool passesNJetCut(int=2);
 	virtual bool passesJet50Cut();
+	virtual bool passesNbJetCut(int=2);
 	
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
@@ -462,6 +465,7 @@ public:
 	float fC_maxHT;
 	float fC_maxMet;
 	int   fC_minNjets;
+	int   fC_minNbjets;
 	float fC_minMu1pt;
 	float fC_minMu2pt;
 	float fC_minEl1pt;

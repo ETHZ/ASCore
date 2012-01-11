@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov 15 17:07:04 2011 by ROOT version 5.27/06b
+// Tue Jan 10 15:15:54 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: /scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -119,6 +119,9 @@ public :
    Float_t         JetEta[20];   //[NJets]
    Float_t         JetPhi[20];   //[NJets]
    Float_t         JetSSVHPBTag[20];   //[NJets]
+   Float_t         JetSSVHEBTag[20];   //[NJets]
+   Float_t         JetTCHPBTag[20];   //[NJets]
+   Float_t         JetTCHEBTag[20];   //[NJets]
    Float_t         JetArea[20];   //[NJets]
 
    // List of branches
@@ -223,6 +226,9 @@ public :
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
    TBranch        *b_JetSSVHPBTag;   //!
+   TBranch        *b_JetSSVHEBTag;   //!
+   TBranch        *b_JetTCHPBTag;   //!
+   TBranch        *b_JetTCHEBTag;   //!
    TBranch        *b_JetArea;   //!
 
    MetaTreeClassBase(TTree *tree=0);
@@ -244,9 +250,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root");
       if (!f) {
-         f = new TFile("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -300,6 +306,9 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
+   fChain->SetBranchAddress("m0", &m0, &b_m0);
+   fChain->SetBranchAddress("m12", &m12, &b_m12);
+   fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
@@ -342,6 +351,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
+   fChain->SetBranchAddress("IsSignalMuon", IsSignalMuon, &b_IsSignalMuon);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
    fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
@@ -358,6 +368,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
    fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
    fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
+   fChain->SetBranchAddress("IsSignalElectron", IsSignalElectron, &b_IsSignalElectron);
    fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
    fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
    fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
@@ -393,6 +404,9 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
    fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
+   fChain->SetBranchAddress("JetSSVHEBTag", JetSSVHEBTag, &b_JetSSVHEBTag);
+   fChain->SetBranchAddress("JetTCHPBTag", JetTCHPBTag, &b_JetTCHPBTag);
+   fChain->SetBranchAddress("JetTCHEBTag", JetTCHEBTag, &b_JetTCHEBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
    Notify();
 }
