@@ -9,8 +9,10 @@
 #include <map>
 #include <string>
 
+#ifdef DOJES
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#endif
 
 class UserAnalysisBase{
 public:

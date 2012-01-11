@@ -8,9 +8,9 @@
 #include "TLorentzVector.h"
 #include "TSystem.h"
 
+#ifdef DOJES
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
-#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#endif
 
 using namespace std;
 
