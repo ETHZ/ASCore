@@ -89,6 +89,7 @@ public:
 		HT400MET120,
 		HT400MET0,
 		HT0MET120,
+		HT80MET302b,
 		HT200MET302b,
 		HT80MET1202b,
 		gNREGIONS
@@ -333,6 +334,7 @@ public:
 	
 	//////////////////////////////
 	// Fillers
+	void fillSigEventTree(Sample*);
 	void fillYields(Sample*, gRegion, gHiLoSwitch);
 	void fillDiffYields(Sample*);
 	void fillRatioPlots(Sample*);
@@ -344,8 +346,9 @@ public:
 	//////////////////////////////
 	// I/O
 	void bookSigEvTree();
-	void fillSigEvTree(Sample*, gChannel, int, int);
 	void writeSigEvTree(TFile*);
+	int getSampleType(Sample*);
+
 	void bookHistos(Sample*);
 	void deleteHistos(Sample*);
 	void writeHistos(Sample*, TFile*);
@@ -507,14 +510,15 @@ public:
 	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
 	
 	TTree *fSigEv_Tree;
-	bool fTreeFilled;
 	float       fSETree_PUWeight;
 	std::string fSETree_SName;
+	int         fSETree_SType; // DoubleMu(0), DoubleEle(1), MuEG(2), MC(10)
 	int         fSETree_Run;
 	int         fSETree_LS;
 	long        fSETree_Event;
-	int         fSETree_Flavor; // mm(0), ee(1), em(2)
+	int         fSETree_Flavor; // mm(0), em(1), ee(2)
 	int         fSETree_Charge;
+	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
 	float       fSETree_HT;
 	float       fSETree_MET;
 	int         fSETree_NJ;
@@ -523,8 +527,6 @@ public:
 	float       fSETree_Mll;
 	float       fSETree_pT1;
 	float       fSETree_pT2;
-	int         fSETree_T1;
-	int         fSETree_T2;
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
