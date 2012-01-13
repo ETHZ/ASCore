@@ -10,20 +10,17 @@ DoubleMu1	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-PromptReco-v4-AOD.roo
 DoubleMu2	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-May10ReReco-v1-AOD.root		0	0
 DoubleMu3	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
 DoubleMu4	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
-DoubleMu5	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011B-PromptReco-v1-AOD			0	0
-# DoubleMu5	stiegerb/SSDLTrees/2011B/Jan10b/DoubleMu-Run2011B-PromptReco-v1-AOD.root		0	0
+DoubleMu5	mdunser/SSDLTrees/2011B/Jan12/DoubleMu-Run2011B-PromptReco-v1-AOD			0	0
 DoubleEle1	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
 DoubleEle2	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
 DoubleEle3	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
 DoubleEle4	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
-DoubleEle5	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011B-PromptReco-v1-AOD		0	1
-# DoubleEle5	stiegerb/SSDLTrees/2011B/Jan10b/DoubleElectron-Run2011B-PromptReco-v1-AOD.root		0	1
+DoubleEle5	mdunser/SSDLTrees/2011B/Jan12/DoubleElectron-Run2011B-PromptReco-v1-AOD			0	1
 MuEG1		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER		0	2
 MuEG2		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-May10ReReco-v1-AOD.root			0	2
 MuEG3		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-05Aug2011-v1-AOD__new.root			0	2
 MuEG4		stiegerb/SSDLTrees/2011B/Jan10/MuEG_Run2011A-PromptReco-v6_AOD__retry.root		0	2
-MuEG5		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011B-PromptReco-v1-AOD.root			0	2
-# MuEG5		stiegerb/SSDLTrees/2011B/Jan10b/MuEG-Run2011B-PromptReco-v1-AOD.root			0	2
+MuEG5		mdunser/SSDLTrees/2011B/Jan12/MuEG-Run2011B-PromptReco-v1-AOD				0	2
 MuHad1		stiegerb/SSDLTrees/2011/Jul6/MuHad-Run2011A-May10ReReco-v1-AOD.root			0	0
 MuHad2		stiegerb/SSDLTrees/2011/Jul6/MuHad-Run2011A-PromptReco-v4-AOD.root			0	0
 EleHad1		stiegerb/SSDLTrees/2011/Jul6/ElectronHad-Run2011A-May10ReReco-v1-AOD.root		0	1
