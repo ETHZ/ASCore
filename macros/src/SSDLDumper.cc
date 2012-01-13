@@ -1456,9 +1456,9 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
 }
 void SSDLDumper::fillSigEventTree(Sample *S){
+	resetSigEventTree();
 	resetHypLeptons();
 	fDoCounting = false;
-	int ind1(-1), ind2(-1);
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
@@ -1482,16 +1482,18 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fSETree_Run      = Run;
 	fSETree_LS       = LumiSec;
 	fSETree_Event    = Event;
-	fSETree_HT       = getHT();
 	fSETree_MET      = pfMET;
-	fSETree_NJ       = getNJets();
-	fSETree_NbJ      = getNBTags();
+
+	int ind1(-1), ind2(-1);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
-	if(mumuSignalTrigger() && abs(isSSLLMuEvent(ind1, ind2))){ // trigger && select loose mu/mu pair
+	if(mumuSignalTrigger() && isSSLLMuEvent(ind1, ind2)){ // trigger && select loose mu/mu pair
 		fSETree_MT2    = getMT2(ind1, ind2, Muon);
 		fSETree_Mll    = getMll(ind1, ind2, Muon);
+		fSETree_HT     = getHT();
+		fSETree_NJ     = getNJets();
+		fSETree_NbJ    = getNBTags();
 		fSETree_Flavor = 0;
 		fSETree_Charge = MuCharge[ind1];
 		fSETree_pT1    = MuPt[ind1];
@@ -1501,31 +1503,17 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
-		resetHypLeptons();
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// EE CHANNEL:  ////////////////////////////////////////////////////////////////////////////////////////
-	else if(elelSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 2){ // trigger && select loose e/e pair
-		fSETree_MT2      = getMT2(ind1, ind2, Elec);
-		fSETree_Mll      = getMll(ind1, ind2, Elec);
-		fSETree_Flavor = 2;
-		fSETree_Charge = ElCharge[ind1];
-		fSETree_pT1    = ElPt[ind1];
-		fSETree_pT2    = ElPt[ind2];
-		if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
-		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
-		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
-		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
-		fSigEv_Tree->Fill();
-		resetHypLeptons();
+		return;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// EMU CHANNEL:  ///////////////////////////////////////////////////////////////////////////////////////
-	else if(elmuSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 3){ // trigger && select loose e/mu pair
-		fSETree_MT2      = getMT2(ind1, ind2, ElMu);
-		fSETree_Mll      = getMll(ind1, ind2, ElMu);
+	if(elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
+		fSETree_MT2    = getMT2(ind1, ind2, ElMu);
+		fSETree_Mll    = getMll(ind1, ind2, ElMu);
+		fSETree_HT     = getHT();
+		fSETree_NJ     = getNJets();
+		fSETree_NbJ    = getNBTags();
 		fSETree_Flavor = 1;
 		fSETree_Charge = MuCharge[ind1];
 		fSETree_pT1    = MuPt[ind1];
@@ -1535,7 +1523,27 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
-		resetHypLeptons();
+		return;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// EE CHANNEL:  ////////////////////////////////////////////////////////////////////////////////////////
+	if(elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
+		fSETree_MT2    = getMT2(ind1, ind2, Elec);
+		fSETree_Mll    = getMll(ind1, ind2, Elec);
+		fSETree_HT     = getHT();
+		fSETree_NJ     = getNJets();
+		fSETree_NbJ    = getNBTags();
+		fSETree_Flavor = 2;
+		fSETree_Charge = ElCharge[ind1];
+		fSETree_pT1    = ElPt[ind1];
+		fSETree_pT2    = ElPt[ind2];
+		if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
+		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
+		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
+		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
+		fSigEv_Tree->Fill();
+		return;
 	}
 	return;
 }
@@ -2178,6 +2186,25 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("Mll",      &fSETree_Mll   , "Mll/F");
 	fSigEv_Tree->Branch("pT1",      &fSETree_pT1   , "pT1/F");
 	fSigEv_Tree->Branch("pT2",      &fSETree_pT2   , "pT2/F");
+}
+void SSDLDumper::resetSigEventTree(){
+	fSETree_PUWeight = -1.;
+	fSETree_SName    = "?";
+	fSETree_SType    = -1;
+	fSETree_Run      = -1;
+	fSETree_LS       = -1;
+	fSETree_Event    = -1;
+	fSETree_Flavor   = -1;
+	fSETree_Charge   = -99;
+	fSETree_TLCat    = -1;
+	fSETree_HT       = -1.;
+	fSETree_MET      = -1.;
+	fSETree_NJ       = -1;
+	fSETree_NbJ      = -1;
+	fSETree_MT2      = -1.;
+	fSETree_Mll      = -1.;
+	fSETree_pT1      = -1.;
+	fSETree_pT2      = -1.;
 }
 void SSDLDumper::writeSigEvTree(TFile *pFile){
 	pFile->cd();
@@ -2968,6 +2995,7 @@ int SSDLDumper::muIndexToBin(int ind){
 	int mid   = abs(MuGenMID[ind]);
 	int mtype = abs(MuGenMType[ind]);
 	if(id  != 13)                                 return 1; // mis id
+	if(mtype == 1)                                return 2; // W/Z skipped in madgraph event (WGstar/TTV samples)
 	if(mid == 24)                                 return 2; // W
 	if(mid == 23)                                 return 3; // Z
 	if(mtype == 2)                                return 4; // tau
@@ -2992,6 +3020,7 @@ int SSDLDumper::elIndexToBin(int ind){
 		   type == 18 || type == 19)               return 3;  // Hadr. fake
 		return 15;                                            // uid
 	}
+	if(mtype == 1)                                 return 4;  // W/Z skipped in madgraph event (WGstar/TTV samples)
 	if(mid == 24)                                  return 4;  // W
 	if(mid == 23)                                  return 5;  // Z
 	if(mtype == 2)                                 return 6;  // tau

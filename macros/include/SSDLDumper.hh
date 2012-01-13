@@ -335,6 +335,7 @@ public:
 	//////////////////////////////
 	// Fillers
 	void fillSigEventTree(Sample*);
+	void resetSigEventTree();
 	void fillYields(Sample*, gRegion, gHiLoSwitch);
 	void fillDiffYields(Sample*);
 	void fillRatioPlots(Sample*);
