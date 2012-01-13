@@ -18,6 +18,8 @@ public:
 	inline void setVerbose(int n){fVerbose = n;};
 	inline void setAddESyst(float e){fAddESyst = e;};
 
+	enum gTLCat { TT, TL, LT, LL };
+
 	//_____________________________________________________________________________
 	// Input
 	// Syntax is Ntt, Ntl, (Nlt), Nll
@@ -127,6 +129,12 @@ public:
 	float getNfpNpfSumEStat(float, float, float, float, float, float, float, float);
 
 	float getESystFromToys2(float, float, float, float, float, float, float, float, float, float, float, float, float(FakeRatios::*)(float, float, float, float, float, float, float, float));
+
+	// Event by event weights
+	float getWpp(gTLCat, float, float, float, float);
+	float getWpf(gTLCat, float, float, float, float);
+	float getWfp(gTLCat, float, float, float, float);
+	float getWff(gTLCat, float, float, float, float);
 
 	// Central place to fix how to handle statistical errors
 	float getEStat2(float);

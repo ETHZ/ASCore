@@ -659,6 +659,45 @@ float FakeRatios::getESystFromToys2(float Ntt, float Ntl, float Nlt, float Nll, 
 }
 
 //____________________________________________________________________________________
+// Event by event weights
+float FakeRatios::getWpp(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = p1*p2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(f1-1.)*(f2-1.);
+	if(cat == TL) return lambda*(f1-1.)* f2;
+	if(cat == LT) return lambda* f1*    (f2-1.);
+	if(cat == LL) return lambda* f1*     f2;
+	return 0.;
+}
+float FakeRatios::getWpf(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = p1*f2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(f1-1.)*(1.-p2);
+	if(cat == TL) return lambda*(1.-f1)*    p2;
+	if(cat == LT) return lambda* f1*    (1.-p2);
+	if(cat == LL) return lambda* f1*  (-1.)*p2;
+	return 0.;
+}
+float FakeRatios::getWfp(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = f1*p2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(1.-p1)*(f2-1.);
+	if(cat == TL) return lambda*(1.-p1)* f2;
+	if(cat == LT) return lambda*    p1 *(f2-1.)*(-1.);
+	if(cat == LL) return lambda*    p1 * f2    *(-1.);
+	return 0.;
+}
+float FakeRatios::getWff(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = f1*f2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(1.-p1)*(1.-p2);
+	if(cat == TL) return lambda*(1.-p1)*    p2 *(-1.);
+	if(cat == LT) return lambda*    p1 *(1.-p2)*(-1.);
+	if(cat == LL) return lambda*    p1 *    p2;
+	return 0.;
+}
+
+//____________________________________________________________________________________
 // This is the central place to fix how to calculate statistical errors
 float FakeRatios::getEStat2(float N){
 	if(N > 3.) return N;
