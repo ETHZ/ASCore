@@ -2797,3 +2797,17 @@ TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, dou
 	return result;
 }
 
+TH2D* AnaClass::mirrorHisto(TH2D * histo){ //small funtion that mirrors the upper left values of a symmetric TH2D onto the lower right.
+    TH2D* newHisto = (TH2D *)histo->Clone();
+    int nbins = histo->GetNbinsX();
+    for (int xbin=1; xbin<=nbins; xbin++){
+        for (int ybin=1; ybin<=nbins; ybin++){
+            if (ybin >= xbin) continue;
+            newHisto->SetBinContent(xbin, ybin, histo->GetBinContent(xbin, ybin) + histo->GetBinContent(ybin, xbin));
+            newHisto->SetBinContent(ybin, xbin, 0);
+        }
+    }
+    return newHisto;
+}
+
+
