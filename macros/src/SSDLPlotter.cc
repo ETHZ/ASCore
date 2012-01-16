@@ -543,9 +543,16 @@ void SSDLPlotter::doAnalysis(){
 	// makePileUpPlots(true); // loops on all data!
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
-	// printOrigins();
+	// printOrigins(Baseline);
+	// printOrigins(HT80MET302b);
+	//printOrigins(HT200MET30);
+	//printOrigins(HT200MET302b);
+	makeOriginPlots(Baseline);
+	makeOriginPlots(HT80MET302b);
+	//makeOriginPlots(HT200MET30);
+	//makeOriginPlots(HT200MET302b);
 
-	 makeMuIsolationPlots(); // loops on TTbar sample
+	// makeMuIsolationPlots(); // loops on TTbar sample
 	 //makeElIsolationPlots(); // loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots();
@@ -582,7 +589,7 @@ void SSDLPlotter::load_kfacs(TFile * results) {
     TH2D *kfac_[10];
     char buffer[1000];
     for (int i = 0 ; i< 10; i++){
-      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 100 , 10 , 2010 , 38 , 10 , 770);
+      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 139 , 230 , 3010 , 45 , 110 , 1010);
     }
 
     while( IN.getline(buffer, 1000, '\n') ){
@@ -603,7 +610,7 @@ void SSDLPlotter::load_kfacs(TFile * results) {
 void SSDLPlotter::load_loxsecs(TFile * results) {
 	ifstream IN("msugraSSDL/xsec_lo.txt");
 	results->cd();
-	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 100 , 10 , 2010 , 38 , 10 , 770);
+	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 139 , 230 , 3010 , 45 , 110 , 1010);
 	
 	char buffer[1000];
 	while( IN.getline(buffer, 1000, '\n') ){
@@ -4080,6 +4087,118 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	fOutputSubDir = "";
 }
 
+void SSDLPlotter::makeOriginPlots(gRegion reg){
+
+	gStyle->SetPaintTextFormat("5.2f");
+	useNiceColorPalette();
+	bool hasBjets = (Region::minNbjets[reg] > 0);
+
+	fOutputSubDir = "Origins/";
+	// make the histograms first. one for ttjets and one for all mc (without signal). this in each channel
+	TH2D    *horigin_tt [gNCHANNELS];
+	TH2D    *horigin_mc [gNCHANNELS];
+	int nbins(15);
+
+	std::vector<int> mcsamples;
+	std::vector<int>::const_iterator sampleInd;
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	lat->SetTextAlign(12);
+
+	for (int i=0; i < gNCHANNELS; i++){
+		if(i == 0) mcsamples = fMCBGMuEnr;
+		if(i == 1) mcsamples = fMCBG;
+		if(i == 2) mcsamples = fMCBG;
+		horigin_tt [i] = new TH2D("OriginHistoTTJ_" + SSDLDumper::gChanLabel[i], "Origin Histogram for TTJets "    + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
+		horigin_mc [i] = new TH2D("OriginHistoMC_"  + SSDLDumper::gChanLabel[i], "Origin Histogram for total MC "  + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
+		horigin_tt [i]->Sumw2();
+		horigin_mc [i]->Sumw2();
+		for (sampleInd=mcsamples.begin(); sampleInd != mcsamples.end(); sampleInd ++){ // sample loop
+			Sample *sample = fSamples[*sampleInd];
+			TString s_name = sample->sname;
+			float scale = fLumiNorm / fSamples[*sampleInd]->lumi;
+			if(i == 0) horigin_mc[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
+			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
+			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
+			if (s_name == "TTJets") {
+				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
+				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
+				if(i == 2) horigin_tt[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
+			}
+		} // end sample loop
+		TAxis* xAxis_tt = horigin_tt[i]->GetXaxis();
+		TAxis* yAxis_tt = horigin_tt[i]->GetYaxis();
+		TAxis* xAxis_mc = horigin_mc[i]->GetXaxis();
+		TAxis* yAxis_mc = horigin_mc[i]->GetYaxis();
+
+		horigin_mc[i]->GetZaxis()->SetRangeUser(0., 0.25);
+		horigin_tt[i]->GetZaxis()->SetRangeUser(0., 0.25);
+
+		if (i == 0){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+			}
+			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
+			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
+		}
+		if (i == 1){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+			}
+		}
+		if (i == 2){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+			}
+			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
+			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
+		}
+		TCanvas *c_temp = new TCanvas("Origin" + SSDLDumper::gChanLabel[i], "Origin plot in region " + SSDLDumper::Region::sname[reg], 0, 0, 600, 600);
+		c_temp->cd();
+		//gPad->SetRightMargin(0.15);
+		gPad->SetLeftMargin(0.23);
+		gPad->SetBottomMargin(0.13);
+		gPad->SetGrid(1,1);
+
+		float latX = 0.26;
+		float latY = 0.79;
+		// total MC histos
+		float total_mc = horigin_mc[i]->Integral();
+		horigin_mc[i]->Scale(100./total_mc);
+		horigin_mc[i]->Draw("col text");
+		lat->DrawLatex(0.23,0.93, "Origin histogram in "+SSDLDumper::gChanLabel[i]+" channel");
+		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		lat->DrawLatex(0.7, latY, Form("#MC: %5.2f", total_mc));
+		if (hasBjets) lat->DrawLatex(latX, latY-0.08, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
+		Util::PrintPDF(c_temp, "Origin_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
+
+		// TTJets only histos
+		float total_tt = horigin_tt[i]->Integral();
+		horigin_tt[i]->Scale(100./total_tt);
+		horigin_tt[i]->Draw("col text");
+		lat->DrawLatex(0.23,0.93, "Origin histogram in "+SSDLDumper::gChanLabel[i]+" channel, TTJets only");
+		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		lat->DrawLatex(0.7, latY, Form("#MC: %5.2f", total_tt));
+		if (hasBjets) lat->DrawLatex(latX, latY-0.08, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
+		Util::PrintPDF(c_temp, "Origin_TTJets_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
+
+		delete c_temp;
+	} // end channel loop
+	fOutputSubDir = "";
+} // end makeOriginPlotsfunction
+
 void SSDLPlotter::makePRLPlot1(){
 	FakeRatios *FR = new FakeRatios();
 	const int nchans = 8;
@@ -6115,6 +6234,7 @@ void SSDLPlotter::makeDiffPrediction(){
 	fOutputSubDir = "";
 }
 
+
 void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 
@@ -7163,7 +7283,7 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 // Geninfo stuff
 //____________________________________________________________________________
 void SSDLPlotter::printOrigins(gRegion reg){
-	TString filename = fOutputDir + "Origins.txt";
+	TString filename = fOutputDir + "Origins_"+SSDLDumper::Region::sname[reg]+".txt";
 	fOUTSTREAM.open(filename.Data(), ios::trunc);
 	printMuOriginTable(reg);
 	fOUTSTREAM << endl << endl;
@@ -7482,7 +7602,7 @@ void SSDLPlotter::printOriginSummary(vector<int> samples, int toggle, gChannel c
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 		Channel *C;
-		if(chan == Muon)     C = &S->region[reg][hilo].mm;
+		if(chan == Muon) C = &S->region[reg][hilo].mm;
 		if(chan == Elec) C = &S->region[reg][hilo].ee;
 
 		TH1D *histo;
@@ -7492,7 +7612,8 @@ void SSDLPlotter::printOriginSummary(vector<int> samples, int toggle, gChannel c
 		if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
 
 		float scale = fLumiNorm / S->lumi;
-		histosum->Add(histo, scale);
+		//histosum->Add(histo, scale);
+		if (!S->datamc == 2) { cout << S->name<< endl; histosum->Add(histo, scale);}
 	}
 	histosum->Scale(100./histosum->Integral());
 	fOUTSTREAM << " Weighted Sum       |";
@@ -7522,8 +7643,10 @@ void SSDLPlotter::printOriginSummary2L(vector<int> samples, int toggle, gChannel
 		if(toggle == 2)  histo2d = C->nt11_origin;
 
 		float scale = fLumiNorm / S->lumi;
-		histosum1->Add(histo2d->ProjectionX(), scale);
-		histosum2->Add(histo2d->ProjectionY(), scale);
+		if (S->datamc != 2) {
+			histosum1->Add(histo2d->ProjectionX(), scale);
+			histosum2->Add(histo2d->ProjectionY(), scale);
+		}
 	}
 	histosum1->Scale(100./histosum1->Integral());
 	histosum2->Scale(100./histosum2->Integral());
@@ -7577,10 +7700,8 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	SSDLPlotter::load_kfacs(res_);
 	SSDLPlotter::load_loxsecs(res_);
 
-	TH2D  * pass_  = new TH2D("msugra_pass"   , "msugra_pass"   , 100 , 10 , 2010 , 38 , 10 , 770);
+	TH2D  * pass_  = new TH2D("msugra_pass"   , "msugra_pass"   , 139 , 230 , 3010 , 45 , 110 , 1010);
 
-	//TFile * kfacs_ = new TFile("msugraSSDL/kfac_hs.root", "READ", "kfacs_");
-	//if ( kfacs_->IsOpen() ) cout << "kfac file is open " << endl;
 	TH2D * kfacs[10];
 	for (int i = 0; i < 10; i++) {
 		kfacs[i] = (TH2D *) res_->Get(Form("kfac_%i", i));
@@ -7652,7 +7773,7 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	fOUTSTREAM << "Total number of tight pairs: " << tightTot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/tightTot << endl;
 
 	TH2D * count_ = (TH2D *) file_->Get("msugra_count");
-	TH2D *eff_   = new TH2D("msugra_eff"   , "msugra_eff"   , 100 , 10 , 2010 , 38 , 10 , 770);
+	TH2D *eff_   = new TH2D("msugra_eff"   , "msugra_eff"   , 139 , 230 , 3010 , 45 , 110 , 1010);
 	eff_->Divide(pass_, count_, 1., 1.);
 
 	res_->cd();

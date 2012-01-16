@@ -54,6 +54,8 @@ public:
 	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
+
+	void makeOriginPlots(gRegion);
 	
 	void makeIsoVsMETPlot(gSample);
 	void makePileUpPlots(bool write = true);
