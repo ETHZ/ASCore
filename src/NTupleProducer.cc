@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.150 2012/01/18 17:35:01 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.151 2012/01/18 17:36:43 peruzzi Exp $
 //
 //
 
@@ -848,31 +848,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	bool doVertexingFlag=true;
 
-	/*
+
 	/////////////////////////////////////////
 	/// GenVertices 
-
-
-
-	TVector3 gv_pos[gMaxngenvtx];
-	TVector3 gv_p3[gMaxngenvtx];
-	Int_t gv_n;
-	Float_t gv_sumPtHi[gMaxngenvtx];
-	Float_t gv_sumPtLo[gMaxngenvtx];
-	Int_t gv_nTkHi[gMaxngenvtx];
-	Int_t gv_nTkLo[gMaxngenvtx];
-
-	
-	  //tree->Branch("gv_n", &gv_n, "gv_n/I");  
-	  //tree->Branch("gv_pos", "TClonesArray", &gv_pos, 32000, 0);
-	  //tree->Branch("gv_p3", "TClonesArray", &gv_p3, 32000, 0);
-	  //tree->Branch("gv_sumPtHi", gv_sumPtHi, "gv_sumPtHi[gv_n]/F");
-	  //tree->Branch("gv_sumPtLo", gv_sumPtLo, "gv_sumPtLo[gv_n]/F");
-	  //tree->Branch("gv_nTkHi", gv_nTkHi, "gv_nTkHi[gv_n]/S");
-	  //tree->Branch("gv_nTkLo", gv_nTkLo, "gv_nTkLo[gv_n]/S");
-	  //FARE_CLEARS;
-	
-
 
 	if (!fIsRealData && doVertexingFlag){
 
@@ -942,7 +920,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	} // end gen vertices
 
-	*/
+
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Get GenLeptons (+ Mother and GMother)
@@ -3635,19 +3613,29 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&fT_pho_Cone
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
 
- fEventTree->Branch("pho_conv_vtx","TVector3",&pho_conv_vtx);
+ // fEventTree->Branch("pho_conv_vtx",&pho_conv_vtx);
+ fEventTree->Branch("pho_conv_refitted_momentum",&pho_conv_refitted_momentum);
  fEventTree->Branch("pho_conv_validvtx",&pho_conv_validvtx,"pho_conv_validvtx[NPhotons]/O");
  fEventTree->Branch("pho_conv_ntracks",&pho_conv_ntracks,"pho_conv_ntracks[NPhotons]/I");
  fEventTree->Branch("pho_conv_chi2_probability",&pho_conv_chi2_probability,"pho_conv_chi2_probability[NPhotons]/F");
  fEventTree->Branch("pho_conv_eoverp",&pho_conv_eoverp,"pho_conv_eoverp[NPhotons]/F");
 
  fEventTree->Branch("conv_n",&conv_n,"conv_n/I");
- fEventTree->Branch("conv_vtx","TVector3",&conv_vtx);
+ // fEventTree->Branch("conv_vtx",&conv_vtx);
+ fEventTree->Branch("conv_refitted_momentum",&conv_refitted_momentum);
  fEventTree->Branch("conv_validvtx",&conv_validvtx,"conv_validvtx[NPhotons]/O");
  fEventTree->Branch("conv_ntracks",&conv_ntracks,"conv_ntracks[NPhotons]/I");
  fEventTree->Branch("conv_chi2_probability",&conv_chi2_probability,"conv_chi2_probability[NPhotons]/F");
  fEventTree->Branch("conv_eoverp",&conv_eoverp,"conv_eoverp[NPhotons]/F");
  fEventTree->Branch("conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"conv_zofprimvtxfromtrks[NPhotons]/F");
+
+ fEventTree->Branch("gv_n",&gv_n,"gv_n/I");
+ // fEventTree->Branch("gv_pos",&gv_pos);
+ // fEventTree->Branch("gv_p3",&gv_p3);
+ fEventTree->Branch("gv_sumPtHi",&gv_sumPtHi,"gv_sumPtHi[gv_n]/F");
+ fEventTree->Branch("gv_sumPtLo",&gv_sumPtLo,"gv_sumPtLo[gv_n]/F");
+ fEventTree->Branch("gv_nTkHi",&gv_nTkHi,"gv_nTkHi[gv_n]/I");
+ fEventTree->Branch("gv_nTkLo",&gv_nTkLo,"gv_nTkLo[gv_n]/I");
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -4020,6 +4008,7 @@ void NTupleProducer::resetTree(){
 	fTnvrtx       = 0;
 	fTnSC         = 0;
 	conv_n        = 0;
+	gv_n          = 0;
 
 	resetInt(fTGenLeptonId       ,gMaxngenlept);
 	resetFloat(fTGenLeptonPt    ,gMaxngenlept);
@@ -4379,14 +4368,33 @@ void NTupleProducer::resetTree(){
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
        
+       pho_conv_vtx.clear(); 
+       pho_conv_vtx.resize(gMaxnphos);
+       pho_conv_refitted_momentum.clear();
+       pho_conv_refitted_momentum.resize(gMaxnphos);
+       for (int i=0; i<gMaxnphos; i++) pho_conv_validvtx[i]=false;
        resetFloat(pho_conv_chi2_probability,gMaxnphos);
        resetFloat(pho_conv_eoverp,gMaxnphos);
        resetInt(pho_conv_ntracks,gMaxnphos);
 
+       conv_vtx.clear();
+       conv_vtx.resize(gMaxnconv);
+       conv_refitted_momentum.clear();
+       conv_refitted_momentum.resize(gMaxnconv);
+       for (int i=0; i<gMaxnconv; i++) conv_validvtx[i]=false;
        resetInt(conv_ntracks,gMaxnconv);
        resetFloat(conv_chi2_probability,gMaxnconv);
        resetFloat(conv_eoverp,gMaxnconv);
        resetFloat(conv_zofprimvtxfromtrks,gMaxnconv);
+
+       gv_pos.clear();
+       gv_pos.resize(gMaxngenvtx);
+       gv_p3.clear();
+       gv_p3.resize(gMaxngenvtx);
+       resetFloat(gv_sumPtHi,gMaxngenvtx);
+       resetFloat(gv_sumPtLo,gMaxngenvtx);
+       resetInt(gv_nTkHi,gMaxngenvtx);
+       resetInt(gv_nTkLo,gMaxngenvtx);
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
