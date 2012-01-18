@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146 2012/01/06 09:08:00 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.147 2012/01/18 12:05:58 buchmann Exp $
 //
 //
 
@@ -2616,6 +2616,50 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	            iss.str(smaller);
 	            iss >> mLSP;
 	            iss.clear();
+
+                     //model msugra_1900_100_10_0_1
+	             float m0,m12,tanb,A0,signMu;
+	             foundLength = (*cit).size();
+	             found = (*cit).find("=");
+	             smaller = (*cit).substr(found+1,foundLength);
+	             found = smaller.find("_");
+	             smaller = smaller.substr(found+1,smaller.size());
+	             //
+	             iss.clear();
+	             iss.str(smaller);
+	             iss >> m0;
+	             iss.clear();
+	             //
+	             found = smaller.find("_");
+	             smaller = smaller.substr(found+1,smaller.size());
+	             iss.str(smaller);
+	             iss >> m12;
+	             iss.clear();
+	             // 	 
+	             found = smaller.find("_");
+	             smaller = smaller.substr(found+1,smaller.size());
+	             iss.str(smaller);
+	             iss >> tanb;
+	             iss.clear();
+	             // 	 
+	             found = smaller.find("_");
+	             smaller = smaller.substr(found+1,smaller.size());
+	             iss.str(smaller);
+	             iss >> A0;
+	             iss.clear();
+	             // 	 
+	             found = smaller.find("_");
+	             smaller = smaller.substr(found+1,smaller.size());
+	             iss.str(smaller);
+	             iss >> signMu;
+	             iss.clear();
+
+	             // mSUGRA scan
+	             fTSUSYScanM0=m0;
+	             fTSUSYScanM12=m12;
+	             fTSUSYScanMu=signMu;
+	             fTSUSYScanA0=A0;
+
 	          }
 	        }
 	        fTMassGlu = mGL;
