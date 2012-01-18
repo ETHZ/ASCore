@@ -17,12 +17,16 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.68 $";
+string sjzbversion="$Revision: 1.70 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70  2011/11/29 16:17:08  fronga
+Improved trigger definitions (should help maintenance).
+Check that there is always an unprescaled trigger in any event (or crash!).
+
 Revision 1.68  2011/11/25 18:22:45  buchmann
 Updated weighted for MC (trigger efficiency); added masses for GMSB SMS scans; deactivated PU weights for scans
 
@@ -289,6 +293,8 @@ public:
   float mGlu;
   float mChi;
   float mLSP;
+  float xSMS;
+  float xbarSMS;
   float mGMSBGlu;
   float mGMSBChi;
   float mGMSBLSP;
@@ -505,6 +511,8 @@ void nanoEvent::reset()
   mGlu=0;
   mChi=0;
   mLSP=0;
+  xSMS=0;
+  xbarSMS=0;
   mGMSBGlu=0;
   mGMSBChi=0;
   mGMSBLSP=0;
@@ -792,6 +800,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
   myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
   myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+  myTree->Branch("xSMS",&nEvent.xSMS,"xSMS/F");
+  myTree->Branch("xbarSMS",&nEvent.xbarSMS,"xbarSMS/F");
   myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
   myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
   myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
@@ -887,6 +897,8 @@ void JZBAnalysis::Analyze() {
         nEvent.mGMSBGlu=fTR->MassChi; // explanation: order in NTuple is wrong for GMSB
         nEvent.mGMSBChi=fTR->MassLSP; // explanation: order in NTuple is wrong for GMSB
         nEvent.mGMSBLSP=fTR->MassGlu; // explanation: order in NTuple is wrong for GMSB
+        nEvent.xSMS=fTR->xSMS;
+        nEvent.xbarSMS=fTR->xbarSMS;
         nEvent.A0=fTR->A0;
         nEvent.M0=fTR->M0;
         nEvent.signMu=fTR->signMu;
