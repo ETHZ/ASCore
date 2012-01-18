@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.149 2012/01/18 15:07:46 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.150 2012/01/18 17:35:01 peruzzi Exp $
 //
 //
 
@@ -846,11 +846,13 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	IndexByPt indexComparator; // Need this to sort collections
 
+	bool doVertexingFlag=true;
+
 	/*
 	/////////////////////////////////////////
 	/// GenVertices 
 
-	bool doVertexingFlag=true;
+
 
 	TVector3 gv_pos[gMaxngenvtx];
 	TVector3 gv_p3[gMaxngenvtx];
