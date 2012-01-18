@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.115 2012/01/18 12:05:58 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.116 2012/01/18 15:07:45 peruzzi Exp $
 //
 //
 
@@ -65,6 +65,7 @@ Implementation:
 
 // Helpers
 #include "Math/VectorUtil.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
@@ -129,6 +130,8 @@ private:
   bool isInEtaCracks(double eta);
   bool CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i);
   double DeltaPhi(double phi1, double phi2);
+  double phiNorm(float &phi);
+  double etaTransformation(float EtaParticle , float Zvertex);
 
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
@@ -171,6 +174,7 @@ private:
 	static const int gMaxnjets    = 100;
 	static const int gMaxntrks    = 500;
 	static const int gMaxnphos    = 50;
+        static const int gMaxnconv    = 50;
         static const int gMaxnSC      = 100;
 	static const int gMaxngenlept = 100;
 	static const int gMaxngenphot = 100;

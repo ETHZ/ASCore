@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.148 2012/01/18 12:10:36 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.149 2012/01/18 15:07:46 peruzzi Exp $
 //
 //
 
@@ -846,6 +846,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	IndexByPt indexComparator; // Need this to sort collections
 
+	/*
 	/////////////////////////////////////////
 	/// GenVertices 
 
@@ -859,16 +860,16 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	Int_t gv_nTkHi[gMaxngenvtx];
 	Int_t gv_nTkLo[gMaxngenvtx];
 
-	/*
-	  tree->Branch("gv_n", &gv_n, "gv_n/I");  
-	  tree->Branch("gv_pos", "TClonesArray", &gv_pos, 32000, 0);
-	  tree->Branch("gv_p3", "TClonesArray", &gv_p3, 32000, 0);
-	  tree->Branch("gv_sumPtHi", gv_sumPtHi, "gv_sumPtHi[gv_n]/F");
-	  tree->Branch("gv_sumPtLo", gv_sumPtLo, "gv_sumPtLo[gv_n]/F");
-	  tree->Branch("gv_nTkHi", gv_nTkHi, "gv_nTkHi[gv_n]/S");
-	  tree->Branch("gv_nTkLo", gv_nTkLo, "gv_nTkLo[gv_n]/S");
-	  FARE_CLEARS;
-	*/
+	
+	  //tree->Branch("gv_n", &gv_n, "gv_n/I");  
+	  //tree->Branch("gv_pos", "TClonesArray", &gv_pos, 32000, 0);
+	  //tree->Branch("gv_p3", "TClonesArray", &gv_p3, 32000, 0);
+	  //tree->Branch("gv_sumPtHi", gv_sumPtHi, "gv_sumPtHi[gv_n]/F");
+	  //tree->Branch("gv_sumPtLo", gv_sumPtLo, "gv_sumPtLo[gv_n]/F");
+	  //tree->Branch("gv_nTkHi", gv_nTkHi, "gv_nTkHi[gv_n]/S");
+	  //tree->Branch("gv_nTkLo", gv_nTkLo, "gv_nTkLo[gv_n]/S");
+	  //FARE_CLEARS;
+	
 
 
 	if (!fIsRealData && doVertexingFlag){
@@ -938,6 +939,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  }
 
 	} // end gen vertices
+
+	*/
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Get GenLeptons (+ Mother and GMother)
