@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114 2011/12/15 09:31:32 pnef Exp $
+// $Id: NTupleProducer.h,v 1.115 2012/01/18 12:05:58 buchmann Exp $
 //
 //
 
@@ -70,6 +70,12 @@ Implementation:
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/LeptonFillerPat.h"
+
+#include "h2gglobe/VertexAnalysis/interface/HggVertexAnalyzer.h"
+#include "h2gglobe/VertexAnalysis/interface/HggVertexFromConversions.h"
+#include "h2gglobe/VertexAnalysis/interface/PhotonInfo.h"
+#include "h2gglobe/VertexAnalysis/interface/VertexAlgoParameters.h"
+#include "TMVA/Reader.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
 using namespace reco;
@@ -127,6 +133,19 @@ private:
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
 
+  std::string perVtxMvaWeights, perVtxMvaMethod;
+  std::string perEvtMvaWeights, perEvtMvaMethod;
+  VertexAlgoParameters vtxAlgoParams;
+  std::vector<std::string> rankVariables;
+
+  PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
+  std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
+				      PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
+				      bool useMva, TMVA::Reader * tmvaReader, std::string tmvaMethod);
+  int  matchPhotonToConversion(int lpho);
+  bool tkIsHighPurity(reco::TrackRef tk) const;
+  bool TrackCut(reco::TrackRef tk) const;
+  bool ConversionsCut(const reco::Conversion &conv);
 
 // ----------member data ---------------------------
 	edm::Service<TFileService> fTFileService;
@@ -159,6 +178,7 @@ private:
 	static const int gMaxnvrtx    = 25;
 	static const int gMaxnpileup  = 50;
 	static const int gMaxnEBhits  = 20;
+        static const int gMaxngenvtx = 40;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -197,6 +217,8 @@ private:
         edm::InputTag pfProducerTag;
         edm::InputTag fSCTagBarrel;
         edm::InputTag fSCTagEndcap;
+        edm::InputTag fTrackCollForVertexing;
+        edm::InputTag fallConversionsCollForVertexing;
 
 	int NPdfs;
 	float fTpdfW[100];
@@ -797,6 +819,21 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 
+  TVector3 pho_conv_vtx[gMaxnphos];
+  TVector3 pho_conv_refitted_momentum[gMaxnphos];
+  bool pho_conv_validvtx[gMaxnphos];
+  int pho_conv_ntracks[gMaxnphos];
+  float pho_conv_chi2_probability[gMaxnphos];
+  float pho_conv_eoverp[gMaxnphos];
+  
+  int conv_n;
+  TVector3 conv_vtx[gMaxnconv];
+  TVector3 conv_refitted_momentum[gMaxnconv];
+  bool conv_validvtx[gMaxnconv];
+  int conv_ntracks[gMaxnconv];
+  float conv_chi2_probability[gMaxnconv];
+  float conv_eoverp[gMaxnconv];
+  float conv_zofprimvtxfromtrks[gMaxnconv];
 
   // SC
   int fTnSC;
@@ -944,4 +981,77 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 	float fTMETR12;
 	float fTMETR21;
 ////////////////////////////////////////////////////////
+};
+
+
+
+class ETHVertexInfo : public VertexInfoAdapter
+{
+public:
+
+  ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz, 
+		int ntracks, float * tkpx, float * tkpy, float * tkpz,
+		float * tkPtErr, int * tkVtxId, 
+		float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
+		bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+		);
+
+  virtual int nvtx() const    { return nvtx_; };
+  virtual int ntracks() const { return ntracks_; };
+
+  virtual bool hasVtxTracks()  const { return true; };
+  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_[ii][0]); };
+  virtual int vtxNTracks(int ii) const { return vtx_std_ntks_[ii]; };
+  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_[ii][0]); };
+
+  virtual float tkpx(int ii) const { return tkpx_ != 0 ? tkpx_[ii] : 0.; };
+  virtual float tkpy(int ii) const { return tkpx_ != 0 ? tkpy_[ii] : 0.; };
+  virtual float tkpz(int ii) const { return tkpx_ != 0 ? tkpz_[ii] : 0.; };
+	
+  virtual float tkPtErr(int ii) const { return tkPtErr_  != 0 ? tkPtErr_[ii] : 999.; };
+  virtual int   tkVtxId(int ii) const { return tkVtxId_  != 0 ? tkVtxId_[ii] : 999; };
+
+  //	virtual float tkWeight(int ii, int jj) const { return tkWeight_ != 0 ? tkWeight_[ii]*(float)( tkVtxId(ii) == jj) : 0.; };
+  virtual float tkWeight(int ii, int jj) const { return vtx_std_tkweight_[jj][ii]; };
+
+	
+  virtual float vtxx(int ii) const { return vtxx_ != 0 ? vtxx_[ii] : 0.; };
+  virtual float vtxy(int ii) const { return vtxy_ != 0 ? vtxy_[ii] : 0.; };
+  virtual float vtxz(int ii) const { return vtxz_ != 0 ? vtxz_[ii] : 0.; };
+
+  virtual float tkd0(int ii, int jj) const { assert(tkVtxId(ii) == jj); return tkd0_ != 0 ? tkd0_[ii] : 0.; };
+  virtual float tkd0Err(int ii, int jj) const { assert(tkVtxId(ii) == jj); return tkd0Err_ != 0 ? tkd0Err_[ii] : 0.; };
+
+  virtual float tkdz(int ii, int jj) const { assert(tkVtxId(ii) == jj); return tkdz_ != 0 ? tkdz_[ii] : 0.; };
+  virtual float tkdzErr(int ii, int jj) const { assert(tkVtxId(ii) == jj); return tkdzErr_ != 0 ? tkdzErr_[ii] : 0.; };
+
+  virtual bool tkIsHighPurity(int ii) const { return tkIsHighPurity_ != 0 ? tkIsHighPurity_[ii] : 0.; };
+
+  virtual ~ETHVertexInfo();
+       	
+private:
+
+  int nvtx_;
+  float * vtxx_;
+  float * vtxy_;
+  float * vtxz_;
+
+  int ntracks_;
+  float * tkpx_;
+  float * tkpy_;
+  float * tkpz_;
+  float * tkPtErr_;
+  int * tkVtxId_;	
+
+  float * tkd0_;
+  float * tkd0Err_;
+  float * tkdz_;
+  float * tkdzErr_;
+
+  bool * tkIsHighPurity_;
+  
+  std::vector<unsigned short> * vtx_std_tkind_;
+  std::vector<float> * vtx_std_tkweight_;
+  int * vtx_std_ntks_;
+
 };

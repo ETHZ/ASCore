@@ -40,6 +40,13 @@ analyze = cms.EDAnalyzer('NTupleProducer',
 	tag_pfProducer = cms.untracked.InputTag("particleFlow"),
         tag_SC_barrel    = cms.untracked.InputTag("correctedHybridSuperClusters"),
         tag_SC_endcap    = cms.untracked.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
+
+        tag_fTrackCollForVertexing = cms.untracked.InputTag("generalTracks"),
+        tag_fallConversionsCollForVertexing = cms.untracked.InputTag("allConversions"),
+        tag_perVtxMvaWeights = cms.untracked.string("/shome/peruzzi/localafs/afs/cern.ch/user/m/musella/public/higgs/vertex_likelihoods/TMVAClassification_BDTCat_conversions_tmva_407.weights.xml"),
+        tag_perVtxMvaMethod = cms.untracked.string("BDTCat"),
+        tag_perEvtMvaWeights = cms.untracked.string("/shome/peruzzi/localafs/afs/cern.ch/user/m/musella/public/higgs/vertex_likelihoods/TMVAClassification_evtBDTG_conversions_tmva_407.weights.xml"),
+        tag_perEvtMvaMethod = cms.untracked.string("evtBDTG"),
                          
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',

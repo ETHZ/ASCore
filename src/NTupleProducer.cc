@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.147 2012/01/18 12:05:58 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.148 2012/01/18 12:10:36 buchmann Exp $
 //
 //
 
@@ -170,7 +170,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
 	fSCTagBarrel = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_barrel");
         fSCTagEndcap = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_endcap");
-
+	fTrackCollForVertexing = iConfig.getUntrackedParameter<edm::InputTag>("tag_fTrackCollForVertexing");
+	fallConversionsCollForVertexing = iConfig.getUntrackedParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
+	perVtxMvaWeights = iConfig.getUntrackedParameter<std::string>("tag_perVtxMvaWeights");
+	perVtxMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perVtxMvaMethod");
+	perEvtMvaWeights = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaWeights");
+       	perEvtMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaMethod");
 
 	// Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -840,6 +845,99 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTbeamspotz = (beamSpot.position()).z();
 
 	IndexByPt indexComparator; // Need this to sort collections
+
+	/////////////////////////////////////////
+	/// GenVertices 
+
+	bool doVertexingFlag=true;
+
+	TVector3 gv_pos[gMaxngenvtx];
+	TVector3 gv_p3[gMaxngenvtx];
+	Int_t gv_n;
+	Float_t gv_sumPtHi[gMaxngenvtx];
+	Float_t gv_sumPtLo[gMaxngenvtx];
+	Int_t gv_nTkHi[gMaxngenvtx];
+	Int_t gv_nTkLo[gMaxngenvtx];
+
+	/*
+	  tree->Branch("gv_n", &gv_n, "gv_n/I");  
+	  tree->Branch("gv_pos", "TClonesArray", &gv_pos, 32000, 0);
+	  tree->Branch("gv_p3", "TClonesArray", &gv_p3, 32000, 0);
+	  tree->Branch("gv_sumPtHi", gv_sumPtHi, "gv_sumPtHi[gv_n]/F");
+	  tree->Branch("gv_sumPtLo", gv_sumPtLo, "gv_sumPtLo[gv_n]/F");
+	  tree->Branch("gv_nTkHi", gv_nTkHi, "gv_nTkHi[gv_n]/S");
+	  tree->Branch("gv_nTkLo", gv_nTkLo, "gv_nTkLo[gv_n]/S");
+	  FARE_CLEARS;
+	*/
+
+
+	if (!fIsRealData && doVertexingFlag){
+
+	  edm::Handle<reco::GenParticleCollection> gpH;
+	  iEvent.getByLabel(fGenPartTag, gpH);
+
+	  const float lowPtThrGenVtx = 0.1;
+	  const float highPtThrGenVtx = 0.5;
+
+	  gv_n = 0;
+
+	  for(reco::GenParticleCollection::const_iterator it_gen = 
+		gpH->begin(); it_gen!= gpH->end(); it_gen++){   
+
+	    if (gv_n>=gMaxngenvtx){
+	      edm::LogWarning("NTP") << "@SUB=analyze"
+				     << "Maximum number of gen-vertices exceeded..";
+	      fTgoodevent = 1;
+	      break;
+	    }
+
+	    if( it_gen->status() != 3 || !(it_gen->vx()!=0. || it_gen->vy()!=0. || it_gen->vx()!=0.)  ) { continue; }
+
+	    // check for duplicate vertex
+	    bool duplicate = false;
+	    for(Int_t itv = 0; itv < gv_n; itv++) {
+	      TVector3 checkVtx = gv_pos[itv];
+	      if( (fabs(it_gen->vx()-checkVtx.X())<1e-5) &&  (fabs(it_gen->vy()-checkVtx.Y())<1e-5) && (fabs(it_gen->vz()-checkVtx.Z())<1e-5)) {
+		duplicate = true;
+		break;
+	      }
+	    }
+
+	    if (duplicate) continue;
+    
+	    gv_pos[gv_n].SetXYZ(it_gen->vx(), it_gen->vy(), it_gen->vz());
+    
+	    TVector3  this_gv_pos = gv_pos[gv_n];
+	    TVector3 p3(0,0,0);
+    
+	    gv_sumPtLo[gv_n] = 0;
+	    gv_nTkLo[gv_n] = 0;
+	    gv_sumPtHi[gv_n] = 0;
+	    gv_nTkHi[gv_n] = 0;
+
+	    for(reco::GenParticleCollection::const_iterator part = gpH->begin(); part!= gpH->end(); part++){   
+	      if( part->status() == 1 && part->charge() != 0 && fabs(part->eta())<2.5 &&
+		  ( fabs(part->vx()-this_gv_pos.X())<1.e-5 && fabs(part->vy()-this_gv_pos.Y())<1.e-5 && fabs(part->vz()-this_gv_pos.Z())<1.e-5 ) )  {
+	
+		TVector3 m(part->px(),part->py(),part->pz());
+		p3 += m;
+		if( m.Pt() > lowPtThrGenVtx ) {
+		  gv_sumPtLo[gv_n] += m.Pt();
+		  gv_nTkLo[gv_n] += 1;
+		  if( m.Pt() > highPtThrGenVtx ) {
+		    gv_sumPtHi[gv_n] += m.Pt();
+		    gv_nTkHi[gv_n] += 1;
+		  }
+		}
+	      }
+	    }
+
+	    gv_p3[gv_n].SetXYZ(p3.X(),p3.Y(),p3.Z());
+
+	    gv_n++;
+	  }
+
+	} // end gen vertices
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Get GenLeptons (+ Mother and GMother)
@@ -1717,6 +1815,31 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
        fTPhotisPFlowPhoton[phoqi]= photon.isPFlowPhoton();
        fTPhotisStandardPhoton[phoqi]= photon.isStandardPhoton();
 
+
+
+       if (photon.hasConversionTracks()) { // photon conversions
+
+	 reco::ConversionRefVector conversions = photon.conversions();
+	 if (conversions.size()<1) { std::cout << "something wrong here" << std::endl; }
+	 reco::ConversionRef conv = conversions[0];
+	 pho_conv_validvtx[phoqi]=conv->conversionVertex().isValid();
+	 if (!pho_conv_validvtx[phoqi]) continue;
+
+	 for (unsigned int i=0; i<conversions.size(); i++) {
+	   conv=conversions[i];
+	   if(ConversionsCut(*conv)) continue;
+	   reco::Vertex vtx=conv->conversionVertex();
+	   pho_conv_vtx[phoqi].SetXYZ(vtx.x(), vtx.y(), vtx.z());
+	   pho_conv_chi2_probability[phoqi]=ChiSquaredProbability(vtx.chi2(), vtx.ndof());
+	   pho_conv_ntracks[phoqi]=conv->nTracks();
+	   pho_conv_eoverp[phoqi]=conv->EoverPrefittedTracks();
+	   pho_conv_refitted_momentum[phoqi].SetXYZ(conv->refittedPairMomentum().x(), conv->refittedPairMomentum().y(), conv->refittedPairMomentum().z());
+	 }
+
+       }
+
+
+
        if (!fIsRealData){
 
          edm::Handle<GenParticleCollection> gen;
@@ -1782,6 +1905,291 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   //			    break;
 	 }
        }
+
+       std::vector<std::pair<int,int> > diphotons;
+       std::vector<std::vector<int> > vtx_dipho_h2gglobe;
+       std::vector<std::vector<int> > vtx_dipho_mva;
+       std::vector<std::vector<int> > vtx_dipho_productrank;
+	
+       /*
+
+	 USAGE OF VERTEX CHOICE:
+
+	 diphotons is a vector of pairs (photon_1_index,photon_2_index)
+
+	 vtx_dipho_??? is vector of vector of vertex indices
+
+	 For example: best vertex for diphoton pair diphotons.at(3) : vtx_dipho_bla.at(3).at(0), second choice vtx_dipho_bla.at(3).at(1) ...
+
+       */
+
+
+       if (doVertexingFlag) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
+
+	 bool VTX_MVA_DEBUG = false;
+
+	 edm::Handle<reco::TrackCollection> tkH;
+	 iEvent.getByLabel(fTrackCollForVertexing, tkH);
+
+	 edm::Handle<VertexCollection> vtxH = vertices;
+
+	 edm::Handle<reco::ConversionCollection> convH;
+	 iEvent.getByLabel(fallConversionsCollForVertexing, convH);
+
+	 int tk_n = 0; 
+
+	 const int __TRK_AUX_ARRAYS_DIM__ = 500;
+	 const int __VTX_AUX_ARRAYS_DIM__ = 100;
+
+	 float tk_px[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_py[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_pz[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_d0[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_dz[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_d0err[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_dzerr[__TRK_AUX_ARRAYS_DIM__];
+	 float tk_pterr[__TRK_AUX_ARRAYS_DIM__];
+	 bool tk_ishighpurity[__TRK_AUX_ARRAYS_DIM__];
+	 std::vector<unsigned short> vtx_std_tkind[__VTX_AUX_ARRAYS_DIM__];
+	 std::vector<float> vtx_std_tkweight[__VTX_AUX_ARRAYS_DIM__];
+	 int vtx_std_ntks[__VTX_AUX_ARRAYS_DIM__];
+	 int tkVtxId[__TRK_AUX_ARRAYS_DIM__];
+
+
+	 { // tracks
+	  
+	   std::vector<reco::TrackBaseRef>::const_iterator tk;
+	 
+	   for(unsigned int i=0; i<vtxH->size(); i++) {
+
+	     reco::VertexRef vtx(vtxH, i);
+	  
+	     vtx_std_ntks[i]=vtx->tracksSize();
+
+	     std::vector<unsigned short> temp;
+	     std::vector<float> temp_float;
+
+	     for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
+	       int index = 0;
+	       bool ismatched = false; 
+	       for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
+		 reco::TrackRef track(tkH, j);
+		 if(TrackCut(track)) continue; 
+		 if (&(**tk) == &(*track)) {
+		   temp.push_back(index);
+		   temp_float.push_back(vtx->trackWeight(track));
+		   ismatched = true;
+		   break;
+		 }
+		 index++;
+	       }
+	       if(!ismatched) {
+		 temp.push_back(-9999);
+		 temp_float.push_back(-9999);
+	       }
+	     }
+      
+	     //	      for (std::vector<unsigned short>::const_iterator it=temp.begin(); it!=temp.end(); it++) {int k=0; vtx_std_tkind[i][k]=*it; k++;}
+	     //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
+	     vtx_std_tkind[i]=temp;
+	     vtx_std_tkweight[i]=temp_float;
+
+	   }	  
+
+	   for(unsigned int i=0; i<tkH->size(); i++) {
+
+	     reco::TrackRef tk(tkH, i);
+
+	     if(TrackCut(tk))continue; 
+	
+	     tk_px[tk_n] = tk->px();
+	     tk_py[tk_n] = tk->py();
+	     tk_pz[tk_n] = tk->pz();
+	     tk_d0[tk_n] = tk->d0();
+	     tk_dz[tk_n] = tk->dz();
+	     tk_dzerr[tk_n] = tk->dzError();
+	     tk_d0err[tk_n] = tk->d0Error();   
+	     tk_pterr[tk_n] = tk->ptError();
+	     tk_ishighpurity[tk_n] = tkIsHighPurity(tk);
+	     tkVtxId[tk_n] = -1; 
+	 
+
+	     tk_n++;
+	   } // for i (loop over all tracks)
+
+	   if (VTX_MVA_DEBUG)	  cout << "done tracks" << endl;
+	 }
+
+	 conv_n=0;
+
+	 { // all conversions
+
+	  
+	   for( reco::ConversionCollection::const_iterator  iConv = convH->begin(); iConv != convH->end(); iConv++) {
+
+	     reco::Conversion localConv = reco::Conversion(*iConv);
+  
+	     if(ConversionsCut(localConv)) continue;
+  
+	     conv_validvtx[conv_n]=localConv.conversionVertex().isValid();
+  
+	     if ( !localConv.conversionVertex().isValid() ) continue;
+  
+	     reco::Vertex vtx=localConv.conversionVertex();
+	     conv_vtx[conv_n].SetXYZ(vtx.x(), vtx.y(), vtx.z());
+	     conv_ntracks[conv_n]=localConv.nTracks();
+	     conv_chi2_probability[conv_n]=ChiSquaredProbability(vtx.chi2(), vtx.ndof());
+	     conv_eoverp[conv_n]=localConv.EoverPrefittedTracks();
+	     conv_zofprimvtxfromtrks[conv_n]=localConv.zOfPrimaryVertexFromTracks();
+	     conv_refitted_momentum[conv_n].SetXYZ(localConv.refittedPairMomentum().x(), localConv.refittedPairMomentum().y(), localConv.refittedPairMomentum().z());
+	     conv_n++;
+
+	   }
+
+	 }
+
+	 if (VTX_MVA_DEBUG)	  cout << "done convs" << endl;
+
+	 VertexAlgoParameters vtxAlgoParams;
+	 vector<string> rankVariables;
+	 HggVertexAnalyzer vAna(vtxAlgoParams,fTnvrtx); 
+	 HggVertexFromConversions vConv(vtxAlgoParams);
+	 
+	
+      
+
+	 //	 std::string perVtxMvaWeights, perVtxMvaMethod;
+	 
+	 //	 std::string perEvtMvaWeights, perEvtMvaMethod;
+	 TMVA::Reader * perVtxReader;	 
+	 TMVA::Reader * perEvtReader;
+	 vAna.setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
+	 std::vector<std::string> vtxVarNames;
+	 vtxVarNames.push_back("ptbal"), vtxVarNames.push_back("ptasym"), vtxVarNames.push_back("logsumpt2");
+
+	 if (VTX_MVA_DEBUG)	 cout << "ready: remember delete readers" << endl;	 
+
+
+	 if( fTnphotons < 2 ) {
+
+	   vtx_dipho_h2gglobe.push_back( std::vector<int>() );
+	   vtx_dipho_mva.push_back( std::vector<int>() );
+	   vtx_dipho_productrank.push_back( std::vector<int>() );
+	   
+	   for(int ii=0;ii<fTnvrtx; ++ii) {vtx_dipho_h2gglobe.back().push_back(ii); }
+	   for(int ii=0;ii<fTnvrtx; ++ii) {vtx_dipho_mva.back().push_back(ii); }
+	   for(int ii=0;ii<fTnvrtx; ++ii) {vtx_dipho_productrank.back().push_back(ii); }
+
+	 } else {
+
+	   if (VTX_MVA_DEBUG)	   cout << "temp" << endl;
+
+	   // fully combinatorial vertex selection
+	   std::vector<std::pair<int,int> > diphotons;
+	   for(int ip=0; ip<fTnphotons; ++ip) {
+	     for(int jp=ip+1; jp<fTnphotons; ++jp) {
+	       diphotons.push_back( std::make_pair(ip,jp) );
+	     }
+	   }
+
+	   int dipho_n=0;
+	   int dipho_leadind[100];
+	   int dipho_subleadind[100];
+
+	   for(unsigned int id=0; id<diphotons.size(); ++id ) {
+			
+	     if (VTX_MVA_DEBUG)	     cout << "processing diphoton pair " << id << endl;
+
+	     int ipho1 = diphotons[id].first;
+	     int ipho2 = diphotons[id].second;
+
+	     dipho_n = id+1;
+	     dipho_leadind[id] = ipho1;
+	     dipho_subleadind[id] = ipho2;
+		  
+		  
+	     PhotonInfo pho1=fillPhotonInfos(ipho1,vtxAlgoParams.useAllConversions);
+	     PhotonInfo pho2=fillPhotonInfos(ipho2,vtxAlgoParams.useAllConversions);
+	     
+	     ETHVertexInfo vinfo(int(fTnvrtx),
+				 fTvrtxx+0,
+				 fTvrtxy+0,
+				 fTvrtxz+0,
+				 int(tk_n),
+				 tk_px+0,
+				 tk_py+0,
+				 tk_pz+0,
+				 tk_pterr+0,
+				 tkVtxId+0,
+				 tk_d0+0,
+				 tk_d0err+0,
+				 tk_dz+0,
+				 tk_dzerr+0,
+				 tk_ishighpurity+0,
+				 vtx_std_tkind+0,
+				 vtx_std_tkweight+0,
+				 vtx_std_ntks+0
+				 );
+
+
+	     if (VTX_MVA_DEBUG)	     cout << "filled photon/tuplevertex info" << endl;
+	     if (VTX_MVA_DEBUG)	     cout << vinfo.nvtx() << " vertices" << endl;
+
+	     vAna.analyze(vinfo,pho1,pho2);
+
+	     if (VTX_MVA_DEBUG)	     cout << "initialized vAna" << endl;
+
+	     // make sure that vertex analysis indexes are in synch 
+	     assert( int(id) == vAna.pairID(ipho1,ipho2) );
+
+	     if (VTX_MVA_DEBUG)	     cout << "starting rankings" << endl;
+
+	     if (VTX_MVA_DEBUG)	     cout << "rankprod" << endl;
+	     /// rank product vertex selection. Including pre-selection based on conversions information.
+	     vtx_dipho_productrank.push_back(vAna.rankprod(rankVariables));
+
+
+	     if (VTX_MVA_DEBUG)	     cout << "mva pasquale" << endl;
+	     /// MVA vertex selection
+	     vtx_dipho_mva.push_back(vAna.rank(*perVtxReader,perVtxMvaMethod));
+
+
+	     // vertex probability through per-event MVA (not used so far)
+	     // float vtxEvtMva = vAna.perEventMva( *perEvtReader,  perEvtMvaMethod, vtx_dipho_mva->back() );
+	     // float vtxProb = vAna.vertexProbability( vtxEvtMva );
+	     
+	     if (VTX_MVA_DEBUG)	     cout << "mva hgg globe" << endl;
+	     // Globe vertex selection with conversions
+	     vtx_dipho_h2gglobe.push_back(HggVertexSelection(vAna, vConv, pho1, pho2, vtxVarNames,false,0,""));
+
+
+	     if (VTX_MVA_DEBUG){
+	       cout << "ranking : ";
+	       for (std::vector<int>::const_iterator it=vtx_dipho_productrank.at(id).begin(); it!=vtx_dipho_productrank.at(id).end(); it++) cout << *it;
+	       cout << endl;
+	       cout << "pasquale : ";
+	       for (std::vector<int>::const_iterator it=vtx_dipho_mva.at(id).begin(); it!=vtx_dipho_mva.at(id).end(); it++) cout << *it;
+	       cout << endl;
+	       cout << "globe : ";
+	       for (std::vector<int>::const_iterator it=vtx_dipho_h2gglobe.at(id).begin(); it!=vtx_dipho_h2gglobe.at(id).end(); it++) cout << *it;
+	       cout << endl;
+	     }
+	     
+
+	   } // end diphoton loop
+ 
+
+	 } // end else
+	
+
+	 if (VTX_MVA_DEBUG)	 cout << "deleting reader" << endl;
+	 delete perVtxReader;
+	 delete perEvtReader;
+
+       } // end vertex selection for diphoton events
+
+
+
 
 
        
@@ -3222,7 +3630,19 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&fT_pho_Cone
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
 
+ fEventTree->Branch("pho_conv_vtx","TVector3",&pho_conv_vtx);
+ fEventTree->Branch("pho_conv_validvtx",&pho_conv_validvtx,"pho_conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("pho_conv_ntracks",&pho_conv_ntracks,"pho_conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("pho_conv_chi2_probability",&pho_conv_chi2_probability,"pho_conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("pho_conv_eoverp",&pho_conv_eoverp,"pho_conv_eoverp[NPhotons]/F");
 
+ fEventTree->Branch("conv_n",&conv_n,"conv_n/I");
+ fEventTree->Branch("conv_vtx","TVector3",&conv_vtx);
+ fEventTree->Branch("conv_validvtx",&conv_validvtx,"conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("conv_ntracks",&conv_ntracks,"conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("conv_chi2_probability",&conv_chi2_probability,"conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("conv_eoverp",&conv_eoverp,"conv_eoverp[NPhotons]/F");
+ fEventTree->Branch("conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"conv_zofprimvtxfromtrks[NPhotons]/F");
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -3594,6 +4014,7 @@ void NTupleProducer::resetTree(){
 	fTNGenJets    = 0;
 	fTnvrtx       = 0;
 	fTnSC         = 0;
+	conv_n        = 0;
 
 	resetInt(fTGenLeptonId       ,gMaxngenlept);
 	resetFloat(fTGenLeptonPt    ,gMaxngenlept);
@@ -3952,6 +4373,15 @@ void NTupleProducer::resetTree(){
        resetInt( fT_pho_isPFPhoton, gMaxnphos);
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
+       
+       resetFloat(pho_conv_chi2_probability,gMaxnphos);
+       resetFloat(pho_conv_eoverp,gMaxnphos);
+       resetInt(pho_conv_ntracks,gMaxnphos);
+
+       resetInt(conv_ntracks,gMaxnconv);
+       resetFloat(conv_chi2_probability,gMaxnconv);
+       resetFloat(conv_eoverp,gMaxnconv);
+       resetFloat(conv_zofprimvtxfromtrks,gMaxnconv);
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
@@ -4800,6 +5230,285 @@ double NTupleProducer::DeltaPhi(double phi1, double phi2){
   return dphi;
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+PhotonInfo NTupleProducer::fillPhotonInfos(int p1, bool useAllConvs) 
+{
+	
+	int iConv1 = useAllConvs ? matchPhotonToConversion(p1) : -1;
+	
+	if ( iConv1 >= 0) {
+		// conversions infos
+		return PhotonInfo(p1,
+				  TVector3(fTPhotcaloPosX[p1],fTPhotcaloPosY[p1],fTPhotcaloPosZ[p1]),
+				  TVector3(fTbeamspotx,fTbeamspoty,fTbeamspotz),
+				  conv_vtx[iConv1],
+				  conv_refitted_momentum[iConv1],
+				  fTPhotEnergy[p1],
+				  fTPhotisEB[p1],
+				  conv_ntracks[iConv1],
+				  conv_validvtx[iConv1],
+				  conv_chi2_probability[iConv1],
+				  conv_eoverp[iConv1]
+			);
+	} 
+
+	
+	return PhotonInfo(p1, 
+			  TVector3(fTPhotcaloPosX[p1],fTPhotcaloPosY[p1],fTPhotcaloPosZ[p1]),
+			  TVector3(fTbeamspotx,fTbeamspoty,fTbeamspotz),
+			  pho_conv_vtx[p1],
+			  pho_conv_refitted_momentum[p1],
+			  fTPhotEnergy[p1],
+			  fTPhotisEB[p1],
+			  pho_conv_ntracks[p1],                                                                                                                             
+			  pho_conv_validvtx[p1],                                                                                                                            
+			  pho_conv_chi2_probability[p1] ,                                                                                                                   
+			  pho_conv_eoverp[p1]                                                                                                                               
+		);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
+					  PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
+					  bool useMva=false, TMVA::Reader * tmvaReader=0, std::string tmvaMethod="")
+{
+	int p1 = pho1.id(), p2 = pho2.id();
+	// assert( p1 == vtxAna.pho1() && p2 == vtxAna.pho2() );
+	vtxAna.setPairID(p1,p2);
+	
+	// preselect vertices : all vertices
+        std::vector<int> preselAll;
+        for(int i=0; i<fTnvrtx ; i++) {
+          preselAll.push_back(i); 
+        }
+
+        float zconv = 0; 
+        float dzconv = 0;
+        std::vector<int> preselConv;
+
+        if ( (pho1.isAConversion() || pho2.isAConversion() ) )  {
+	  
+          if (pho1.isAConversion()  && !pho2.isAConversion() ){
+            zconv  = vtxAnaFromConv.vtxZ(pho1);
+            dzconv = vtxAnaFromConv.vtxdZ(pho1);
+          }
+	  
+          if (pho2.isAConversion() && !pho1.isAConversion()){
+            zconv  = vtxAnaFromConv.vtxZ(pho2);
+            dzconv = vtxAnaFromConv.vtxdZ(pho2);
+          }
+	  
+          if ( pho1.isAConversion() && pho2.isAConversion()){
+            float z1  = vtxAnaFromConv.vtxZ(pho1);
+            float dz1 = vtxAnaFromConv.vtxdZ(pho1);
+            
+            float z2  = vtxAnaFromConv.vtxZ(pho2);
+            float dz2 = vtxAnaFromConv.vtxdZ(pho2);
+            
+            zconv  = (z1/dz1/dz1 + z2/dz2/dz2)/(1./dz1/dz1 + 1./dz2/dz2 );  // weighted average
+            dzconv = sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
+          }
+	  
+	  // preselect vertices : only vertices in a window zconv +/- dzconv
+	  for(int i=0; i < fTnvrtx; i++) {
+	    TVector3 * vtxpos= new TVector3(fTvrtxx[i],fTvrtxy[i],fTvrtxz[i]);
+	    if ( fabs(zconv - vtxpos->Z() ) < dzconv ) 
+              preselConv.push_back(i); 
+          }
+	  
+        }
+	
+	// ---- METHOD 1 	
+	// preselection 
+	//	if ( preselConv.size()==0 )
+        //  vtxAna.preselection(preselAll);
+        //else
+        //  vtxAna.preselection(preselConv);
+	
+	//std::vector<int> rankprod = vtxAna.rankprod(vtxVarNames);
+	
+	// ---- METHOD 1 
+
+	
+	// ---- NEW METHOD 2 (suggested by MarcoP) : first use ranking, then conversions info, e.g. on the N vtxs with best rank
+	// preselection  : all vtxs
+	std::vector<int> rankprodAll = useMva ? vtxAna.rank(*tmvaReader,tmvaMethod) : vtxAna.rankprod(vtxVarNames);
+	int iClosestConv = -1;
+	float dminconv = 9999999;
+	
+	TLorentzVector dipho = TLorentzVector(fTPhotPx[p1],fTPhotPy[p1],fTPhotPz[p1],fTPhotEnergy[p1]) + TLorentzVector(fTPhotPx[p2],fTPhotPy[p2],fTPhotPz[p2],fTPhotEnergy[p2]);
+	
+	unsigned int nbest ;
+	if (  dipho.Pt() < 30 ) nbest = 5;
+	else nbest = 3; 
+	if (rankprodAll.size() < nbest ) nbest = rankprodAll.size();
+
+	for (unsigned int ii = 0; ii < nbest; ii++ ){
+	  TVector3 * vtxpos= new TVector3(fTvrtxx[rankprodAll[ii]],fTvrtxy[rankprodAll[ii]],fTvrtxz[rankprodAll[ii]]);
+	   if ( fabs( vtxpos->Z()-zconv ) < dzconv && fabs(vtxpos->Z() - zconv ) < dminconv){
+	     iClosestConv = rankprodAll[ii];
+	     dminconv = fabs(vtxpos->Z()-zconv );
+	   }
+	}
+	std::vector<int> rankprod;
+	rankprod.clear();
+	if (iClosestConv!=-1 ) rankprod.push_back(iClosestConv);
+
+	//for (int kk = 0; kk  < nbest; kk++ ){
+	for (unsigned int kk = 0; kk  < rankprodAll.size(); kk++ ){
+	  if ( iClosestConv == rankprodAll[kk] ) continue;
+	  else rankprod.push_back(rankprodAll[kk]);
+	}
+	// ---- METHOD 2
+
+
+ 
+	return rankprod;
+}
+
+int  NTupleProducer::matchPhotonToConversion( int lpho) {
+
+  int result=-99;
+  double conv_eta=-999.;
+  double conv_phi=-999.;
+             
+  int p1=lpho;
+  
+  float sc_eta  = TVector3(fTPhotcaloPosX[p1],fTPhotcaloPosY[p1],fTPhotcaloPosZ[p1]).Eta();
+  float  phi  = TVector3(fTPhotcaloPosX[p1],fTPhotcaloPosY[p1],fTPhotcaloPosZ[p1]).Phi();
+  double sc_phi = phiNorm(phi);
+  
+  TLorentzVector * p4 = new TLorentzVector(fTPhotPx[p1],fTPhotPy[p1],fTPhotPz[p1],fTPhotEnergy[p1]);
+  float et = fTPhotPt[p1];
+  
+  float detaMin=999.;
+  float dphiMin=999.;   
+  float dRMin = 999.;
+
+  float mconv_pt=-999999;
+  int iMatch=-1;     
+  float conv_pt = -9999;
+
+  // if(LDEBUG)  cout << "   LoopAll::matchPhotonToConversion conv_n " << conv_n << endl; 
+  for(int iconv=0; iconv<conv_n; iconv++) {
+    TVector3 refittedPairMomentum= conv_refitted_momentum[iconv];
+    conv_pt =  refittedPairMomentum.Pt();
+    if (conv_pt < 1 ) continue;    
+    if ( !conv_validvtx[iconv] || conv_ntracks[iconv]!=2 || conv_chi2_probability[iconv]<0.000001) continue;
+
+    phi  = conv_refitted_momentum[iconv].Phi();
+    conv_phi  = phiNorm(phi);
+    float eta  = conv_refitted_momentum[iconv].Eta();
+    conv_eta = etaTransformation(eta, conv_zofprimvtxfromtrks[iconv] );
+
+    double delta_phi = acos( cos(conv_phi - sc_phi) );       
+    double delta_eta = conv_eta - sc_eta;
+
+    delta_phi*=delta_phi;
+    delta_eta*=delta_eta;
+    float dR = sqrt( delta_phi + delta_eta ); 
+    
+    if ( fabs(delta_eta) < detaMin && fabs(delta_phi) < dphiMin ) {
+    // if ( dR < dRMin ) {
+      detaMin=  fabs(delta_eta);
+      dphiMin=  fabs(delta_phi);
+      dRMin=dR;
+      iMatch=iconv;
+      mconv_pt = conv_pt;
+    }
+    
+  }
+  
+  if ( detaMin < 0.1 && dphiMin < 0.1 ) {
+    result = iMatch;
+  } else {
+    result = -1;
+  }
+  
+  return result;
+}
+
+bool NTupleProducer::tkIsHighPurity(reco::TrackRef tk) const { return ( tk->qualityMask() & (1<<2) ) >> 2; }
+bool NTupleProducer::TrackCut(reco::TrackRef tk) const { return false; }
+bool NTupleProducer::ConversionsCut(const reco::Conversion &conv) { 
+  //  return (sqrt(conv.refittedPairMomentum().perp2()) <  0); 
+  return false;
+}
+
+double NTupleProducer::phiNorm(float &phi) {
+
+  const float pi = 3.1415927;
+  const float twopi = 2.0*pi;
+
+  if(phi >  pi) {phi = phi - twopi;}
+  if(phi < -pi) {phi = phi + twopi;}
+
+  return phi;
+}
+
+
+double NTupleProducer::etaTransformation(  float EtaParticle , float Zvertex)  {
+
+  //---Definitions
+  const float pi = 3.1415927;
+
+  //---Definitions for ECAL
+  const float R_ECAL           = 136.5;
+  const float Z_Endcap         = 328.0;
+  const float etaBarrelEndcap  = 1.479; 
+   
+  //---ETA correction
+
+  float Theta = 0.0  ; 
+  float ZEcal = R_ECAL*sinh(EtaParticle)+Zvertex;
+
+  if(ZEcal != 0.0) Theta = atan(R_ECAL/ZEcal);
+  if(Theta<0.0) Theta = Theta+pi ;
+  double ETA = - log(tan(0.5*Theta));
+         
+  if( fabs(ETA) > etaBarrelEndcap )
+    {
+      float Zend = Z_Endcap ;
+      if(EtaParticle<0.0 )  Zend = -Zend ;
+      float Zlen = Zend - Zvertex ;
+      float RR = Zlen/sinh(EtaParticle); 
+      Theta = atan(RR/Zend);
+      if(Theta<0.0) Theta = Theta+pi ;
+      ETA = - log(tan(0.5*Theta));		      
+    } 
+  //---Return the result
+  return ETA;
+  //---end
+}
+
+ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz, 
+				 int ntracks, float * tkpx, float * tkpy, float * tkpz,
+				 float * tkPtErr, int * tkVtxId,
+				 float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
+			     bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+) :
+	nvtx_(nvtx),
+	vtxx_(vtxx),
+	vtxy_(vtxy),
+	vtxz_(vtxz),
+	ntracks_(ntracks),
+	tkpx_(tkpx),
+	tkpy_(tkpy),
+	tkpz_(tkpz),
+	tkPtErr_(tkPtErr),
+	tkVtxId_(tkVtxId),
+	tkd0_(tkd0),
+	tkd0Err_(tkd0Err),
+	tkdz_(tkdz),
+	tkdzErr_(tkdzErr),
+	tkIsHighPurity_(tkIsHighPurity),
+	vtx_std_tkind_(vtx_std_tkind),
+	vtx_std_tkweight_(vtx_std_tkweight),
+	vtx_std_ntks_(vtx_std_ntks)
+{
+}
+
+ETHVertexInfo::~ETHVertexInfo() {}
 
 
 
