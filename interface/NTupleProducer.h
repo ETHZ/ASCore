@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.113 2011/11/25 18:46:16 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114 2011/12/15 09:31:32 pnef Exp $
 //
 //
 
@@ -296,6 +296,8 @@ private:
         float fTMassGlu;
         float fTMassChi;
         float fTMassLSP;
+        float fTxSMS;
+        float fTxbarSMS;
         float fTSUSYScanM0;
         float fTSUSYScanM12;
         float fTSUSYScanA0;
