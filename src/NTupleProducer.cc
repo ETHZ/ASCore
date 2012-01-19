@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.151 2012/01/18 17:36:43 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.152 2012/01/18 19:19:52 peruzzi Exp $
 //
 //
 
@@ -3614,7 +3614,7 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_ph
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
 
  // fEventTree->Branch("pho_conv_vtx",&pho_conv_vtx);
- fEventTree->Branch("pho_conv_refitted_momentum",&pho_conv_refitted_momentum);
+// fEventTree->Branch("pho_conv_refitted_momentum",&pho_conv_refitted_momentum);
  fEventTree->Branch("pho_conv_validvtx",&pho_conv_validvtx,"pho_conv_validvtx[NPhotons]/O");
  fEventTree->Branch("pho_conv_ntracks",&pho_conv_ntracks,"pho_conv_ntracks[NPhotons]/I");
  fEventTree->Branch("pho_conv_chi2_probability",&pho_conv_chi2_probability,"pho_conv_chi2_probability[NPhotons]/F");
@@ -3622,7 +3622,7 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 
  fEventTree->Branch("conv_n",&conv_n,"conv_n/I");
  // fEventTree->Branch("conv_vtx",&conv_vtx);
- fEventTree->Branch("conv_refitted_momentum",&conv_refitted_momentum);
+ // fEventTree->Branch("conv_refitted_momentum",&conv_refitted_momentum);
  fEventTree->Branch("conv_validvtx",&conv_validvtx,"conv_validvtx[NPhotons]/O");
  fEventTree->Branch("conv_ntracks",&conv_ntracks,"conv_ntracks[NPhotons]/I");
  fEventTree->Branch("conv_chi2_probability",&conv_chi2_probability,"conv_chi2_probability[NPhotons]/F");
