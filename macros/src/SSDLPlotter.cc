@@ -267,6 +267,9 @@ void SSDLPlotter::InitMC(TTree *tree){
 	fChain->SetBranchAddress("Run", &Run, &b_Run);
 	fChain->SetBranchAddress("Event", &Event, &b_Event);
 	fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
+   fChain->SetBranchAddress("m0", &m0, &b_m0);
+   fChain->SetBranchAddress("m12", &m12, &b_m12);
+   fChain->SetBranchAddress("process", &process, &b_process);
 	fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
 	fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
 	fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
@@ -547,8 +550,8 @@ void SSDLPlotter::doAnalysis(){
 	// printOrigins(HT80MET302b);
 	//printOrigins(HT200MET30);
 	//printOrigins(HT200MET302b);
-	makeOriginPlots(Baseline);
-	makeOriginPlots(HT80MET302b);
+	//makeOriginPlots(Baseline);
+	//makeOriginPlots(HT80MET302b);
 	//makeOriginPlots(HT200MET30);
 	//makeOriginPlots(HT200MET302b);
 
@@ -580,49 +583,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeAllIntPredictions();
 	// makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
-	// load_msugraInfo("/scratch/mdunser/111111_msugra/msugra_tan10.root");
-}
-
-void SSDLPlotter::load_kfacs(TFile * results) {
-    ifstream IN("msugraSSDL/nlo_kfactors.txt");
-
-    TH2D *kfac_[10];
-    char buffer[1000];
-    for (int i = 0 ; i< 10; i++){
-      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 139 , 230 , 3010 , 45 , 110 , 1010);
-    }
-
-    while( IN.getline(buffer, 1000, '\n') ){
-      if (buffer[0] == '#') continue; // Skip lines commented with '#'
-      float p[10];
-      float m0_(-1), m12_(-1);
-      sscanf(buffer, "%f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f", &m0_, &m12_, &p[0], &p[1], &p[2], &p[3], &p[4], &p[5], &p[6], &p[7], &p[8], &p[9]);
-      if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f (1) %1.5f (2) %1.5f (3) %1.5f (4) %1.5f (5) %1.5f (6) %1.5f (7) %1.5f (8) %1.5f (9) %1.5f (10) %1.5f", m0_, m12_, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) << endl;
-      for (int i = 0 ; i< 10; i++){
-          kfac_[i]->Fill(m0_, m12_, p[i]);
-      }
-    }
-	results->cd();
-    for (int i = 0 ; i< 10; i++){
-      kfac_[i]->Write();
-    }
-}
-void SSDLPlotter::load_loxsecs(TFile * results) {
-	ifstream IN("msugraSSDL/xsec_lo.txt");
-	results->cd();
-	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 139 , 230 , 3010 , 45 , 110 , 1010);
-	
-	char buffer[1000];
-	while( IN.getline(buffer, 1000, '\n') ){
-	  if (buffer[0] == '#') continue; // Skip lines commented with '#'
-	  float xsec;
-	  float m0_(-1), m12_(-1);
-	  sscanf(buffer, "%f | %f | %f", &m0_, &m12_, &xsec);
-	  if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f xsec: %10.5f", m0_, m12_, xsec) << endl;
-	  lo_xsec->Fill(m0_, m12_, xsec);
-	}
-	results->cd();
-	lo_xsec->Write();
+	 load_msugraInfo("/scratch/mdunser/120116/120116_msugraNewScan.root");
 }
 
 //____________________________________________________________________________
@@ -7689,6 +7650,50 @@ void SSDLPlotter::drawDiffCuts(int j){
 	if(j==3)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 450 GeV, N_{Jets} #geq 2");
 	return;
 }
+
+void SSDLPlotter::load_kfacs(TFile * results) {
+    ifstream IN("msugraSSDL/nlo_kfactors.txt");
+
+    TH2D *kfac_[10];
+    char buffer[1000];
+    for (int i = 0 ; i< 10; i++){
+      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 140, 210, 3010, 46, 90, 1010);
+    }
+
+    while( IN.getline(buffer, 1000, '\n') ){
+      if (buffer[0] == '#') continue; // Skip lines commented with '#'
+      float p[10];
+      float m0_(-1), m12_(-1);
+      sscanf(buffer, "%f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f | %f", &m0_, &m12_, &p[0], &p[1], &p[2], &p[3], &p[4], &p[5], &p[6], &p[7], &p[8], &p[9]);
+      if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f (1) %1.5f (2) %1.5f (3) %1.5f (4) %1.5f (5) %1.5f (6) %1.5f (7) %1.5f (8) %1.5f (9) %1.5f (10) %1.5f", m0_, m12_, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) << endl;
+      for (int i = 0 ; i< 10; i++){
+          kfac_[i]->Fill(m0_, m12_, p[i]);
+      }
+    }
+	results->cd();
+    for (int i = 0 ; i< 10; i++){
+      kfac_[i]->Write();
+    }
+}
+
+void SSDLPlotter::load_loxsecs(TFile * results) {
+	ifstream IN("msugraSSDL/xsec_lo.txt");
+	results->cd();
+	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 140, 210, 3010, 46, 90, 1010);
+	
+	char buffer[1000];
+	while( IN.getline(buffer, 1000, '\n') ){
+	  if (buffer[0] == '#') continue; // Skip lines commented with '#'
+	  float xsec;
+	  float m0_(-1), m12_(-1);
+	  sscanf(buffer, "%f | %f | %f", &m0_, &m12_, &xsec);
+	  if(fVerbose > 1) cout << Form("m0: %4.0f m12: %4.0f xsec: %10.5f", m0_, m12_, xsec) << endl;
+	  lo_xsec->Fill(m0_, m12_, xsec);
+	}
+	results->cd();
+	lo_xsec->Write();
+}
+
 void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	// ATTENTION: it is important that m0, m12 and process are known by the InitMC function!!
 
@@ -7700,7 +7705,10 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	SSDLPlotter::load_kfacs(res_);
 	SSDLPlotter::load_loxsecs(res_);
 
-	TH2D  * pass_  = new TH2D("msugra_pass"   , "msugra_pass"   , 139 , 230 , 3010 , 45 , 110 , 1010);
+	int m0_bins(140), m0_min(220), m0_max(3000);
+	int m12_bins(46), m12_min(100), m12_max(1000);
+
+	TH2D  * pass_  = new TH2D("msugra_pass", "msugra_pass", m0_bins, m0_min-10, m0_max+10, m12_bins, m12_min-10, m12_max+10);
 
 	TH2D * kfacs[10];
 	for (int i = 0; i < 10; i++) {
@@ -7719,19 +7727,31 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	int n_tot = 0;
 	float tightTot(0);
 	float signalTot(0);
+
+	fC_minMu1pt = 20.;
+	fC_minMu2pt = 10.;
+	fC_minEl1pt = 20.;
+	fC_minEl2pt = 10.;
+	fC_minHT    = 450.;
+	fC_minMet   = 120.;
+	fC_maxHT    = 7000.;
+	fC_maxMet   = 7000.;
+	fC_minNjets = 2;
 	
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		tree_->GetEntry(jentry);
-		if ( !(getHT() > 450 && pfMET > 120) ) continue;
+		//if ( !(getHT() > 450 && pfMET > 120) ) continue;
     	int mu1(-1), mu2(-1);
 		if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
 			if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-			tightTot++;
-			if ( !(tree_->GetLeaf("IsSignalMuon")->GetValue(mu1) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu2) == 1) ) continue;
+				tightTot++;
+				if ( !(tree_->GetLeaf("IsSignalMuon")->GetValue(mu1) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu2) == 1) ) continue;
 				signalTot++;
 				fOUTSTREAM << Form("MuMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				n_tot++;
-				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				int m0bin = (m0-m0_min)/20 + 1;
+				int m12bin = (m12-m12_min)/20 + 1;
+				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
 				fOUTSTREAM << " m0: " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
 				pass_->Fill(m0, m12, weight);
 				continue;
@@ -7741,28 +7761,31 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 		int el1(-1), el2(-1);
 		if( isSSLLElEvent(el1, el2) ){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-			tightTot++;
-			if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el1) == 1 && tree_->GetLeaf("IsSignalElectron")->GetValue(el2) == 1) ) continue;
+				tightTot++;
+				if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el1) == 1 && tree_->GetLeaf("IsSignalElectron")->GetValue(el2) == 1) ) continue;
 				signalTot++;
 				fOUTSTREAM << Form("ElEl - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				n_tot++;
-				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				int m0bin = (m0-m0_min)/20 + 1;
+				int m12bin = (m12-m12_min)/20 + 1;
+				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
 				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
 				pass_->Fill(m0, m12, weight);
 				continue;
 			}
 		}
-
 		resetHypLeptons();
 		int mu(-1), el(-1);
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-			tightTot++;
-			if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu) == 1) ) continue;
+				tightTot++;
+				if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu) == 1) ) continue;
 				signalTot++;
 				fOUTSTREAM << Form("ElMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu]) << endl ;
 				n_tot++;
-				float weight = kfacs[process-1]->GetBinContent(m0/20., m12/20.);
+				int m0bin = (m0-m0_min)/20 + 1;
+				int m12bin = (m12-m12_min)/20 + 1;
+				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
 				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
 				pass_->Fill(m0, m12, weight);
 			}
@@ -7773,7 +7796,7 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	fOUTSTREAM << "Total number of tight pairs: " << tightTot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/tightTot << endl;
 
 	TH2D * count_ = (TH2D *) file_->Get("msugra_count");
-	TH2D *eff_   = new TH2D("msugra_eff"   , "msugra_eff"   , 139 , 230 , 3010 , 45 , 110 , 1010);
+	TH2D *eff_   = new TH2D("msugra_eff", "msugra_eff", m0_bins, m0_min-10, m0_max+10, m12_bins, m12_min-10, m12_max+10);
 	eff_->Divide(pass_, count_, 1., 1.);
 
 	res_->cd();
