@@ -1,11 +1,11 @@
 #! /usr/bin/python
-import commands, os
+import sys, commands, os
 
 def print_status(t):
     n_min = t/60
     print '[status] still running after', n_min, 'minutes...'
 
-for m0 in range(20, 2000, 20):
+for m0 in range(220, 500, 20):
 	os.system('qsub -q short.q -N job_limit -e $PWD -o $PWD wrapper.sh ' + str(m0))
 
 time_elapsed = 0

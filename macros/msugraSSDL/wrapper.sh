@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source /swshare/ROOT/root_v5.30.00_40807_slc5_amd64//bin/thisroot.sh
+source /swshare/ROOT/thisroot.sh
+#source /swshare/ROOT/root_v5.30.00_40807_slc5_amd64//bin/thisroot.sh
 
 cd /shome/mdunser/workspace/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/msugraSSDL
 
