@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.154 2012/01/20 12:54:00 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.155 2012/01/20 13:53:55 peruzzi Exp $
 //
 //
 
@@ -1801,7 +1801,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-       if (photon.hasConversionTracks()) { // photon conversions
+       if (doVertexingFlag && photon.hasConversionTracks()) { // photon conversions
 
 	 reco::ConversionRefVector conversions = photon.conversions();
 	 if (conversions.size()<1) { std::cout << "something wrong here" << std::endl; }
