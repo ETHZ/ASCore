@@ -1467,12 +1467,12 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fC_minMu2pt  = Region::minMu2pt[HighPt];
 	fC_minEl1pt  = Region::minEl1pt[HighPt];
 	fC_minEl2pt  = Region::minEl2pt[HighPt];
-	fC_minHT     = Region::minHT    [Baseline];
-	fC_maxHT     = Region::maxHT    [Baseline];
-	fC_minMet    = Region::minMet   [Baseline];
-	fC_maxMet    = Region::maxMet   [Baseline];
-	fC_minNjets  = Region::minNjets [Baseline];
-	fC_minNbjets = Region::minNbjets[Baseline];
+	fC_minHT     = 0.;
+	fC_maxHT     = 7000.;
+	fC_minMet    = 0.;
+	fC_maxMet    = 7000.;
+	fC_minNjets  = 0;
+	fC_minNbjets = 0;
 
 	float puweight = PUWeight;
 	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
