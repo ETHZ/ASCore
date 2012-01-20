@@ -2847,7 +2847,7 @@ int  SSDLDumper::readHistos(TString filename){
 				getname = Form("%s_%s_NT00_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt00[j]);
 				getname = Form("%s_%s_NPP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
-				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnff[j]);
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnpp[j]);
 				getname = Form("%s_%s_NPF_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnpf[j]);
 				getname = Form("%s_%s_NFP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
