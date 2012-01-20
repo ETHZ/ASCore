@@ -116,14 +116,20 @@ public:
 	};
 	
 	struct NumberSet{
-		long nt2;
-		long nt10;
-		long nt01;
-		long nt0;
 		long nsst;
 		long nssl;
 		long nzl;
 		long nzt;
+
+		long nt2; // get these from signal events tree (overwrite the old ones, should agree)
+		long nt10;
+		long nt01;
+		long nt0;
+		
+		float npp; // sum of event by event weights
+		float npf;
+		float nfp;
+		float nff;
 	};
 
 	struct Channel{ // MM/EE/EM
@@ -251,6 +257,11 @@ public:
 		TH1D *hnt01[gNDiffVars];
 		TH1D *hnt00[gNDiffVars];
 
+		TH1D *hnpp[gNDiffVars]; // EbE predictions
+		TH1D *hnpf[gNDiffVars];
+		TH1D *hnfp[gNDiffVars];
+		TH1D *hnff[gNDiffVars];
+
 		TH1D *hnt2_os_BB[gNDiffVars]; // OS yields
 		TH1D *hnt2_os_EB[gNDiffVars];
 		TH1D *hnt2_os_EE[gNDiffVars];
@@ -290,7 +301,7 @@ public:
 		NumberSet numbers[gNREGIONS][gNCHANNELS]; // summary of integrated numbers
 		KinPlots kinplots[gNKinSels][2]; // tt and ll and signal for both low and high pt analysis
 		IsoPlots isoplots[2]; // e and mu
-		IdPlots  idplots; //only for electrons
+		IdPlots  idplots; // only for electrons
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
 
@@ -509,6 +520,7 @@ public:
 	vector<Sample*> fSamples;
 	vector<Sample*> fMCSamples;
 	map<TString, Sample*> fSampleMap;	// Mapping of sample to name
+	// map<TString, gSample> fSampleMap;	// Mapping of sample number to name
 	
 	TTree *fSigEv_Tree;
 	float       fSETree_PUWeight;
@@ -544,21 +556,7 @@ public:
 	
 	
 	TFile *fStorageFile;
-	
-	TH2D *fH2D_MufRatio;
-	TH1D *fH1D_MufRatioPt;
-	TH1D *fH1D_MufRatioEta;
-	TH2D *fH2D_MupRatio;
-	TH1D *fH1D_MupRatioPt;
-	TH1D *fH1D_MupRatioEta;
-
-	TH2D *fH2D_ElfRatio;
-	TH1D *fH1D_ElfRatioPt;
-	TH1D *fH1D_ElfRatioEta;
-	TH2D *fH2D_ElpRatio;
-	TH1D *fH1D_ElpRatioPt;
-	TH1D *fH1D_ElpRatioEta;
-	
+		
 	TString fOutputFileName;
 
 	Sample *fSample;

@@ -294,6 +294,7 @@ void SSDLDumper::readDatacard(TString cardfile){
 		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d", sname, inputfile, &datamc, &chan, &lumi, &color) > 3){
 			Sample *S = new Sample(inputfile, sname, datamc, chan, lumi, color);
 			fSamples.push_back(S);
+			fSampleMap[sname] = S;
 			if(fVerbose > 2){
 				cout << " ---- " << endl;
 				cout << "  New sample added: " << S->sname << endl;
@@ -1963,6 +1964,10 @@ void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
 	if(chan == Muon) C = &S->region[reg][HighPt].mm;
 	if(chan == Elec) C = &S->region[reg][HighPt].ee;
 	if(chan == ElMu) C = &S->region[reg][HighPt].em;
+	S->numbers[reg][chan].npp = 0.;
+	S->numbers[reg][chan].npf = 0.;
+	S->numbers[reg][chan].nfp = 0.;
+	S->numbers[reg][chan].nff = 0.;
 	S->numbers[reg][chan].nt2  = C->nt20_pt->GetEntries();
 	S->numbers[reg][chan].nt10 = C->nt10_pt->GetEntries();
 	S->numbers[reg][chan].nt01 = C->nt01_pt->GetEntries();
@@ -2255,6 +2260,27 @@ void SSDLDumper::bookHistos(Sample *S){
 			S->diffyields[k].hnt00[j]->SetXTitle(DiffPredYields::axis_label[j]);
 			S->diffyields[k].hnt00[j]->Sumw2();
 
+			name = Form("%s_%s_NPP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+			S->diffyields[k].hnpp[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
+			S->diffyields[k].hnpp[j]->SetFillColor(S->color);
+			S->diffyields[k].hnpp[j]->SetXTitle(DiffPredYields::axis_label[j]);
+			S->diffyields[k].hnpp[j]->Sumw2();
+			name = Form("%s_%s_NPF_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+			S->diffyields[k].hnpf[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
+			S->diffyields[k].hnpf[j]->SetFillColor(S->color);
+			S->diffyields[k].hnpf[j]->SetXTitle(DiffPredYields::axis_label[j]);
+			S->diffyields[k].hnpf[j]->Sumw2();
+			name = Form("%s_%s_NFP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+			S->diffyields[k].hnfp[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
+			S->diffyields[k].hnfp[j]->SetFillColor(S->color);
+			S->diffyields[k].hnfp[j]->SetXTitle(DiffPredYields::axis_label[j]);
+			S->diffyields[k].hnfp[j]->Sumw2();
+			name = Form("%s_%s_NFF_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+			S->diffyields[k].hnff[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
+			S->diffyields[k].hnff[j]->SetFillColor(S->color);
+			S->diffyields[k].hnff[j]->SetXTitle(DiffPredYields::axis_label[j]);
+			S->diffyields[k].hnff[j]->Sumw2();
+
 			if(k == Muon) continue;
 			name = Form("%s_%s_NT11_OS_BB_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 			S->diffyields[k].hnt2_os_BB[j] = new TH1D(name, DiffPredYields::var_name[j].Data(), DiffPredYields::nbins[j], DiffPredYields::bins[j]);
@@ -2473,6 +2499,10 @@ void SSDLDumper::deleteHistos(Sample *S){
 			delete S->diffyields[k].hnt10[j];
 			delete S->diffyields[k].hnt01[j];
 			delete S->diffyields[k].hnt00[j];
+			delete S->diffyields[k].hnpp[j];
+			delete S->diffyields[k].hnpf[j];
+			delete S->diffyields[k].hnfp[j];
+			delete S->diffyields[k].hnff[j];
 			if(k == Muon) continue;
 			delete S->diffyields[k].hnt2_os_BB[j];
 			delete S->diffyields[k].hnt2_os_EE[j];
@@ -2601,6 +2631,10 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 			S->diffyields[k].hnt10[j]->Write(S->diffyields[k].hnt10[j]->GetName(), TObject::kWriteDelete);
 			S->diffyields[k].hnt01[j]->Write(S->diffyields[k].hnt01[j]->GetName(), TObject::kWriteDelete);
 			S->diffyields[k].hnt00[j]->Write(S->diffyields[k].hnt00[j]->GetName(), TObject::kWriteDelete);
+			S->diffyields[k].hnpp[j] ->Write(S->diffyields[k].hnpp[j] ->GetName(), TObject::kWriteDelete);
+			S->diffyields[k].hnpf[j] ->Write(S->diffyields[k].hnpf[j] ->GetName(), TObject::kWriteDelete);
+			S->diffyields[k].hnfp[j] ->Write(S->diffyields[k].hnfp[j] ->GetName(), TObject::kWriteDelete);
+			S->diffyields[k].hnff[j] ->Write(S->diffyields[k].hnff[j] ->GetName(), TObject::kWriteDelete);
 			if(k == Muon) continue;
 			S->diffyields[k].hnt2_os_BB[j]->Write(S->diffyields[k].hnt2_os_BB[j]->GetName(), TObject::kWriteDelete);
 			S->diffyields[k].hnt2_os_EE[j]->Write(S->diffyields[k].hnt2_os_EE[j]->GetName(), TObject::kWriteDelete);
@@ -2812,6 +2846,14 @@ int  SSDLDumper::readHistos(TString filename){
 				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt01[j]);
 				getname = Form("%s_%s_NT00_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt00[j]);
+				getname = Form("%s_%s_NPP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnff[j]);
+				getname = Form("%s_%s_NPF_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnpf[j]);
+				getname = Form("%s_%s_NFP_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnfp[j]);
+				getname = Form("%s_%s_NFF_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
+				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnff[j]);
 				if(k == Muon) continue;
 				getname = Form("%s_%s_NT11_OS_BB_%s", S->sname.Data(), DiffPredYields::var_name[j].Data(), gChanLabel[k].Data());
 				getObjectSafe(pFile, S->sname + "/DiffYields/" + getname, S->diffyields[k].hnt2_os_BB[j]);
