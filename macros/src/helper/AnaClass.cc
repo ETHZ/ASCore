@@ -2482,7 +2482,7 @@ void AnaClass::setZeroBinError(TH1D *ihist){
 void AnaClass::fillWithoutOF(TH1D *&ihist, double x, double w){
 	double xmax = ihist->GetBinLowEdge(ihist->GetNbinsX());
 	// double xmax = ihist->GetBinLowEdge(ihist->GetMaximumBin());
-	double bw = ihist->GetBinWidth(ihist->GetMaximumBin());
+	double bw = ihist->GetBinWidth(ihist->GetNbinsX()); // take binwidth of last bin
 	if(x > xmax) ihist->Fill(xmax + bw*0.5, w); // always increment last bin (i.e. never the overflow)
 	else ihist->Fill(x, w);
 }
