@@ -79,7 +79,7 @@ void SSDLPlotter::init(TString filename){
 
 	readDatacard(filename);
 
-	readVarNames("varnames.dat");
+	readVarNames("anavarnames.dat");
 	fOutputFileName = fOutputDir + "SSDLYields.root";
 	fLatex = new TLatex();
 	fLatex->SetNDC(kTRUE);
@@ -92,6 +92,13 @@ void SSDLPlotter::init(TString filename){
 	resetHypLeptons();
 	initCutNames();
 	
+	// Luminosity
+	// fLumiNorm = 2096.; // Pre 2011B
+	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
+	fLumiNorm = 4680.; // Full 2011B
+	// fLumiNorm = 1000.; // Rare Yields Sync
+	// fLumiNorm = 1014.; // Only 2011B
+
 	// Cuts:
 	fC_minMu1pt = 20.;
 	fC_minMu2pt = 10.;
@@ -247,263 +254,6 @@ void SSDLPlotter::init(TString filename){
 	fLowPtData.push_back(MuEG3);
 	fLowPtData.push_back(MuEG4);
 }
-void SSDLPlotter::InitMC(TTree *tree){
-// Copied from MetaTreeClassBase, remove a few branches that are not in older version of minitrees
-	
-   // The Init() function is called when the selector needs to initialize
-   // a new tree or chain. Typically here the branch addresses and branch
-   // pointers of the tree will be set.
-   // It is normally not necessary to make changes to the generated
-   // code, but the routine can be extended by the user if needed.
-   // Init() will be called many times when running on PROOF
-   // (once per file to be processed).
-
-   // Set branch addresses and branch pointers
-   if (!tree) return;
-   fChain = tree;
-   fCurrent = -1;
-   fChain->SetMakeClass(1);
-
-	fChain->SetBranchAddress("Run", &Run, &b_Run);
-	fChain->SetBranchAddress("Event", &Event, &b_Event);
-	fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
-   fChain->SetBranchAddress("m0", &m0, &b_m0);
-   fChain->SetBranchAddress("m12", &m12, &b_m12);
-   fChain->SetBranchAddress("process", &process, &b_process);
-	fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
-	fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
-	fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
-	fChain->SetBranchAddress("HLT_ELE8_JET40_PS", &HLT_ELE8_JET40_PS, &b_HLT_ELE8_JET40_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEMU7", &HLT_DOUBLEMU7, &b_HLT_DOUBLEMU7);
-	fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
-	fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
-	fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
-	fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
-	fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
-	fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
-	fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT_PS", &HLT_ELE17_ELE8_TIGHT_PS, &b_HLT_ELE17_ELE8_TIGHT_PS);
-	fChain->SetBranchAddress("HLT_MU17_ELE8", &HLT_MU17_ELE8, &b_HLT_MU17_ELE8);
-	fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
-	fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
-	fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
-	fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT", &HLT_MU8_ELE17_TIGHT, &b_HLT_MU8_ELE17_TIGHT);
-	fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT_PS", &HLT_MU8_ELE17_TIGHT_PS, &b_HLT_MU8_ELE17_TIGHT_PS);
-	fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT", &HLT_MU17_ELE8_TIGHT, &b_HLT_MU17_ELE8_TIGHT);
-	fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT_PS", &HLT_MU17_ELE8_TIGHT_PS, &b_HLT_MU17_ELE8_TIGHT_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT_PS", &HLT_DOUBLEELE8_HT160_TIGHT_PS, &b_HLT_DOUBLEELE8_HT160_TIGHT_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160", &HLT_DOUBLEMU3_HT160, &b_HLT_DOUBLEMU3_HT160);
-	fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160_PS", &HLT_DOUBLEMU3_HT160_PS, &b_HLT_DOUBLEMU3_HT160_PS);
-	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160", &HLT_MU3_ELE8_HT160, &b_HLT_MU3_ELE8_HT160);
-	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
-	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
-	fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150", &HLT_DOUBLEMU3_MASS4_HT150, &b_HLT_DOUBLEMU3_MASS4_HT150);
-	fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150_PS", &HLT_DOUBLEMU3_MASS4_HT150_PS, &b_HLT_DOUBLEMU3_MASS4_HT150_PS);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150);
-	fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
-	fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150);
-	fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
-	fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
-	fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
-	fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
-	fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
-	fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
-	fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
-	fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
-	fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
-	fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
-	fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
-	fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
-	fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
-	fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
-	fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
-	fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
-	fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
-	fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
-	fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
-	fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
-	fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
-	fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
-	fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
-	fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
-	fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
-	fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
-	fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
-	fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
-	fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
-	fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
-	fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
-	fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
-	fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
-	fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
-	fChain->SetBranchAddress("ElDPhi", ElDPhi, &b_ElDPhi);
-	fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
-	fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
-	fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
-	fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
-	fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
-	fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
-	fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
-	fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
-	fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
-	fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
-	fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
-	fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-	fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-	fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
-	fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
-	fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
-	fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
-	fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
-	fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
-	fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
-	fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
-	fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
-
-
-   //fChain->SetBranchAddress("Run", &Run, &b_Run);
-   //fChain->SetBranchAddress("Event", &Event, &b_Event);
-   //fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
-   //fChain->SetBranchAddress("m0", &m0, &b_m0);
-   //fChain->SetBranchAddress("m12", &m12, &b_m12);
-   //fChain->SetBranchAddress("process", &process, &b_process);
-   //fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
-   //fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
-   //fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
-   //fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
-   //fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
-   //fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
-   //fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
-   //fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
-   //fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
-   //fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
-   //fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
-   //fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
-   //fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
-   //fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
-   //fChain->SetBranchAddress("MuGenGMID", MuGenGMID, &b_MuGenGMID);
-   //fChain->SetBranchAddress("MuGenType", MuGenType, &b_MuGenType);
-   //fChain->SetBranchAddress("MuGenMType", MuGenMType, &b_MuGenMType);
-   //fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
-   //fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
-   //fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
-   //fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
-   //fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
-   //fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
-   //fChain->SetBranchAddress("ElEta", ElEta, &b_ElEta);
-   //fChain->SetBranchAddress("ElPhi", ElPhi, &b_ElPhi);
-   //fChain->SetBranchAddress("ElD0", ElD0, &b_ElD0);
-   //fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
-   //fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
-   //fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
-   //fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
-   //fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
-   //fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
-   //fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
-   //fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
-   //fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
-   //fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
-   //fChain->SetBranchAddress("ElGenType", ElGenType, &b_ElGenType);
-   //fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
-   //fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
-   //fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   //fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   //fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
-   //fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
-   //fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
-   //fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
-   //fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
-   //fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
-   //fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
-   //fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
-   //fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
-   Notify();
-}
-void SSDLPlotter::readSamples(const char* filename){
-	char buffer[200];
-	ifstream IN(filename);
-
-	char ParName[100], StringValue[1000];
-	float ParValue;
-
-	if(fVerbose > 2) cout << "------------------------------------" << endl;
-	if(fVerbose > 2) cout << "Sample File  " << filename << endl;
-	int counter(0);
-
-	while( IN.getline(buffer, 200, '\n') ){
-		// ok = false;
-		if (buffer[0] == '#') continue; // Skip lines commented with '#'
-		if( !strcmp(buffer, "SAMPLE")){
-			Sample *s = new Sample();
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "Name\t%s", StringValue);
-			s->name = TString(StringValue);
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "SName\t%s", StringValue);
-			s->sname = TString(StringValue);
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "File\t%s", StringValue);
-			s->location = TString(StringValue);
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "Lumi\t%f", &ParValue);
-			s->lumi = ParValue;
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "DataMC\t%f", &ParValue);
-			s->datamc = (int)ParValue;
-
-			IN.getline(buffer, 200, '\n');
-			sscanf(buffer, "Color\t%f", &ParValue);
-			s->color = ParValue;
-
-			if(fVerbose > 2){
-				cout << " ---- " << endl;
-				cout << "  New sample added: " << s->name << endl;
-				cout << "   Sample no.  " << counter << endl;
-				cout << "   Short name: " << s->sname << endl;
-				cout << "   Lumi:       " << s->lumi << endl;
-				cout << "   Color:      " << s->color << endl;
-				cout << "   DataMC:     " << s->datamc << endl;
-			}
-
-			// for(size_t hilo = 0; hilo < 2; ++hilo){
-			// 	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
-			// 		Region *R = &(s->region[r][hilo]);
-			// 		for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
-			// 			Channel *C;
-			// 			if(c == Muon){
-			// 				C = &R->mm;
-			// 				C->name  = "Mu/Mu";
-			// 				C->sname = "MM";
-			// 			}
-			// 			if(c == Elec){
-			// 				C = &R->ee;
-			// 				C->name  = "El/El";
-			// 				C->sname = "EE";
-			// 			}
-			// 			if(c == ElMu){
-			// 				C = &R->em;
-			// 				C->name  = "El/Mu";
-			// 				C->sname = "EM";
-			// 			}
-			// 		}
-			// 	}
-			// }
-
-			fSamples.push_back(s);
-			fSampleMap[s->sname] = s;
-			counter++;
-		}
-	}
-	if(fVerbose > 2) cout << "------------------------------------" << endl;
-}
 
 //____________________________________________________________________________
 const int     SSDLPlotter::getNPtBins (gChannel chan){
@@ -532,31 +282,26 @@ const double *SSDLPlotter::getEtaBins (gChannel chan){
 }
 
 //____________________________________________________________________________
-void SSDLPlotter::doAnalysis(){
+void SSDLPlotter::doAnalysis(){	
 	// sandBox();
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	// fLumiNorm = 2096.; // Pre 2011B
-	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
-	fLumiNorm = 4680.; // Full 2011B
-	// fLumiNorm = 1000.; // Rare Yields Sync
-	// fLumiNorm = 1014.; // Only 2011B
+	storeWeightedPred();
 
 	// makePileUpPlots(true); // loops on all data!
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
+	// makeOriginPlots(Baseline);
+	// makeOriginPlots(HT80MET302b);
+	makeOriginPlots(HT200MET30);
+	makeOriginPlots(HT200MET302b);
 	// printOrigins(Baseline);
-	// printOrigins(HT80MET302b);
-	//printOrigins(HT200MET30);
-	//printOrigins(HT200MET302b);
-	//makeOriginPlots(Baseline);
-	//makeOriginPlots(HT80MET302b);
-	//makeOriginPlots(HT200MET30);
-	//makeOriginPlots(HT200MET302b);
+	printOrigins(HT200MET30);
+	printOrigins(HT200MET302b);
 
 	// makeMuIsolationPlots(); // loops on TTbar sample
-	 //makeElIsolationPlots(); // loops on TTbar sample
+	// makeElIsolationPlots(); // loops on TTbar sample
 	// makeElIdPlots();
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
@@ -577,13 +322,14 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 	
-	// makeIntMCClosure(fOutputDir + "MCClosure.txt");	
+	// makeIntMCClosure(fOutputDir + "MCClosure_HT80MET30.txt", Baseline);
+	// makeIntMCClosure(fOutputDir + "MCClosure_HT200MET30.txt", HT200MET30);
 	// makeTTbarClosure();
 	
 	// makeAllIntPredictions();
 	// makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
-	 load_msugraInfo("/scratch/mdunser/120116/120116_msugraNewScan.root");
+	 // load_msugraInfo("/scratch/mdunser/120116/120116_msugraNewScan.root");
 }
 
 //____________________________________________________________________________
@@ -2661,7 +2407,6 @@ void SSDLPlotter::makeElIdPlots(){
 	} //end loop over ID variables
 } //end function
 
-
 inline int SSDLPlotter::sampleType(TString s_name){
 	// returns an integer corresponding to the MC sample type:
 	// QCD = 1, Top = 2, EWK = 3, RARE = 4 and DiBoson = 5
@@ -2821,10 +2566,12 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			double max1 = hvar_mc_s[i]->GetMaximum();
 			double max2 = hvar_data[i]->GetMaximum();
 			double max = max1>max2?max1:max2;
-			hvar_mc_s[i]->SetMaximum(5.*max);
-			hvar_data[i]->SetMaximum(5.*max);
 			// hvar_mc_s[i]->SetMaximum(1.5*max);
 			// hvar_data[i]->SetMaximum(1.5*max);
+			// hvar_mc_s[i]->SetMinimum(0.);
+			// hvar_data[i]->SetMinimum(0.);
+			hvar_mc_s[i]->SetMaximum(5.*max);
+			hvar_data[i]->SetMaximum(5.*max);
 			hvar_mc_s[i]->SetMinimum(0.5);
 			hvar_data[i]->SetMinimum(0.5);
 
@@ -2848,7 +2595,7 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
 
-			gPad->SetLogy();
+			// gPad->SetLogy();
 			hvar_mc_s[i]->Draw("hist");
 			hvar_data[i]->DrawCopy("PE X0 same");
 			leg->Draw();
@@ -3502,7 +3249,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
     system(cmd);
 
 	TString name;
-	if(chan == Muon)     name = "Muons";
+	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
 	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
@@ -3533,7 +3280,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	h_ptratio_data->SetMinimum(0.0);
 	h_ptratio_mc  ->SetMinimum(0.0);
 
-	if(chan == Muon)     h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
+	if(chan == Muon) h_ptratio_mc->SetXTitle(convertVarName("MuPt[0]"));
 	if(chan == Elec) h_ptratio_mc->SetXTitle(convertVarName("ElPt[0]"));
 	h_ptratio_mc->GetYaxis()->SetTitleOffset(1.2);
 	h_ptratio_mc->SetYTitle("N_{Tight}/N_{Loose}");
@@ -4048,118 +3795,6 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	fOutputSubDir = "";
 }
 
-void SSDLPlotter::makeOriginPlots(gRegion reg){
-
-	gStyle->SetPaintTextFormat("5.2f");
-	useNiceColorPalette();
-	bool hasBjets = (Region::minNbjets[reg] > 0);
-
-	fOutputSubDir = "Origins/";
-	// make the histograms first. one for ttjets and one for all mc (without signal). this in each channel
-	TH2D    *horigin_tt [gNCHANNELS];
-	TH2D    *horigin_mc [gNCHANNELS];
-	int nbins(15);
-
-	std::vector<int> mcsamples;
-	std::vector<int>::const_iterator sampleInd;
-
-	TLatex *lat = new TLatex();
-	lat->SetNDC(kTRUE);
-	lat->SetTextColor(kBlack);
-	lat->SetTextSize(0.04);
-	lat->SetTextAlign(12);
-
-	for (int i=0; i < gNCHANNELS; i++){
-		if(i == 0) mcsamples = fMCBGMuEnr;
-		if(i == 1) mcsamples = fMCBG;
-		if(i == 2) mcsamples = fMCBG;
-		horigin_tt [i] = new TH2D("OriginHistoTTJ_" + SSDLDumper::gChanLabel[i], "Origin Histogram for TTJets "    + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
-		horigin_mc [i] = new TH2D("OriginHistoMC_"  + SSDLDumper::gChanLabel[i], "Origin Histogram for total MC "  + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
-		horigin_tt [i]->Sumw2();
-		horigin_mc [i]->Sumw2();
-		for (sampleInd=mcsamples.begin(); sampleInd != mcsamples.end(); sampleInd ++){ // sample loop
-			Sample *sample = fSamples[*sampleInd];
-			TString s_name = sample->sname;
-			float scale = fLumiNorm / fSamples[*sampleInd]->lumi;
-			if(i == 0) horigin_mc[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
-			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
-			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
-			if (s_name == "TTJets") {
-				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
-				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
-				if(i == 2) horigin_tt[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
-			}
-		} // end sample loop
-		TAxis* xAxis_tt = horigin_tt[i]->GetXaxis();
-		TAxis* yAxis_tt = horigin_tt[i]->GetYaxis();
-		TAxis* xAxis_mc = horigin_mc[i]->GetXaxis();
-		TAxis* yAxis_mc = horigin_mc[i]->GetYaxis();
-
-		horigin_mc[i]->GetZaxis()->SetRangeUser(0., 0.25);
-		horigin_tt[i]->GetZaxis()->SetRangeUser(0., 0.25);
-
-		if (i == 0){
-			for (int bin = 1; bin<=nbins; bin++) {
-				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-				yAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-				yAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-			}
-			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
-			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
-		}
-		if (i == 1){
-			for (int bin = 1; bin<=nbins; bin++) {
-				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
-				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-			}
-		}
-		if (i == 2){
-			for (int bin = 1; bin<=nbins; bin++) {
-				xAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-				xAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
-			}
-			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
-			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
-		}
-		TCanvas *c_temp = new TCanvas("Origin" + SSDLDumper::gChanLabel[i], "Origin plot in region " + SSDLDumper::Region::sname[reg], 0, 0, 600, 600);
-		c_temp->cd();
-		//gPad->SetRightMargin(0.15);
-		gPad->SetLeftMargin(0.23);
-		gPad->SetBottomMargin(0.13);
-		gPad->SetGrid(1,1);
-
-		float latX = 0.26;
-		float latY = 0.79;
-		// total MC histos
-		float total_mc = horigin_mc[i]->Integral();
-		horigin_mc[i]->Scale(100./total_mc);
-		horigin_mc[i]->Draw("col text");
-		lat->DrawLatex(0.23,0.93, "Origin histogram in "+SSDLDumper::gChanLabel[i]+" channel");
-		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
-		lat->DrawLatex(0.7, latY, Form("#MC: %5.2f", total_mc));
-		if (hasBjets) lat->DrawLatex(latX, latY-0.08, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
-		Util::PrintPDF(c_temp, "Origin_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
-
-		// TTJets only histos
-		float total_tt = horigin_tt[i]->Integral();
-		horigin_tt[i]->Scale(100./total_tt);
-		horigin_tt[i]->Draw("col text");
-		lat->DrawLatex(0.23,0.93, "Origin histogram in "+SSDLDumper::gChanLabel[i]+" channel, TTJets only");
-		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
-		lat->DrawLatex(0.7, latY, Form("#MC: %5.2f", total_tt));
-		if (hasBjets) lat->DrawLatex(latX, latY-0.08, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
-		Util::PrintPDF(c_temp, "Origin_TTJets_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
-
-		delete c_temp;
-	} // end channel loop
-	fOutputSubDir = "";
-} // end makeOriginPlotsfunction
-
 void SSDLPlotter::makePRLPlot1(){
 	FakeRatios *FR = new FakeRatios();
 	const int nchans = 8;
@@ -4365,7 +4000,6 @@ void SSDLPlotter::makePRLPlot1(){
 	delete h_obs, h_pred_sf, h_pred_df, h_pred_cm, h_pred_mc, h_pred_tot, hs_pred;
 	delete FR;	
 }
-
 void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 	fOutputSubDir = "IsoVsMETPlots/";
 	fCurrentSample = sample;
@@ -4447,171 +4081,42 @@ void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 }
 
 //____________________________________________________________________________
-void SSDLPlotter::produceRatio(gChannel chan, int sample, int index, bool(SSDLPlotter::*eventSelector)(), bool(SSDLPlotter::*objSelector)(int), TH2D *&h_2d, TH1D *&h_pt, TH1D *&h_eta, bool output){
+void SSDLPlotter::fillRatios(vector<int> musamples, vector<int> elsamples, int datamc){
+	if(datamc == 0){
+		fH1D_MufRatio = fillRatioPt(Muon, musamples, SigSup, false);
+		fH1D_MupRatio = fillRatioPt(Muon, musamples, ZDecay, false);
+		fH1D_ElfRatio = fillRatioPt(Elec, elsamples, SigSup, false);
+		fH1D_ElpRatio = fillRatioPt(Elec, elsamples, ZDecay, false);
+	}
+	if(datamc == 1){
+		fH1D_MufRatio_MC = fillRatioPt(Muon, musamples, SigSup, false);
+		fH1D_MupRatio_MC = fillRatioPt(Muon, musamples, ZDecay, false);
+		fH1D_ElfRatio_MC = fillRatioPt(Elec, elsamples, SigSup, false);
+		fH1D_ElpRatio_MC = fillRatioPt(Elec, elsamples, ZDecay, false);
+	}
+}
+TH1D* SSDLPlotter::fillRatioPt(gChannel chan, int sample, gFPSwitch fp, bool output){
 	vector<int> samples; samples.push_back(sample);
-	produceRatio(chan, samples, index, eventSelector, objSelector, h_2d, h_pt, h_eta, output);
+	return fillRatioPt(chan, samples, fp);
 }
-void SSDLPlotter::produceRatio(gChannel chan, vector<int> samples, int index, bool(SSDLPlotter::*eventSelector)(), bool(SSDLPlotter::*objSelector)(int), TH2D *&h_2d, TH1D *&h_pt, TH1D *&h_eta, bool output){
-// Base function for production of all ratios
-/*
-TODO Fix treatment of statistical errors and luminosity scaling here!
-*/
+TH1D* SSDLPlotter::fillRatioPt(gChannel chan, vector<int> samples, gFPSwitch fp, bool output){
 	gStyle->SetOptStat(0);
-	h_2d->Sumw2();
-	h_pt->Sumw2();
-	h_eta->Sumw2();
-	TString sname = "Mu";
-	TString fname = "Muon";
-	if(chan == Elec){
-		sname = "El";
-		fname = "Electron";
-	}
-	TH2D *H_ntight = new TH2D(Form("%sNTight", sname.Data()), Form("NTight %ss", fname.Data()), h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
-	TH2D *H_nloose = new TH2D(Form("%sNLoose", sname.Data()), Form("NLoose %ss", fname.Data()), h_2d->GetNbinsX(), h_2d->GetXaxis()->GetXbins()->GetArray(), h_2d->GetNbinsY(),  h_2d->GetYaxis()->GetXbins()->GetArray());
-	H_ntight->Sumw2();
-	H_nloose->Sumw2();
+	TString shortname[2] = {"Mu", "El"};
+	TString longname[2] = {"Muons", "Electrons"};
+	int muelswitch = 0;
+	if(chan == Elec) muelswitch = 1;
+	TH2D *h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan));
+	TH1D *h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
 
-	if(fVerbose>2) cout << "---------------" << endl;
-	for(size_t i = 0; i < samples.size(); ++i){
-		int sample = samples[i];
-		TTree *tree = fSamples[sample]->getTree();
-		if(fVerbose>2) cout << "Producing ratios for " << fSamples[sample]->sname << endl;
-		tree->ResetBranchAddresses();
-		if(fSamples[sample]->datamc < 1) Init(tree);
-		if(fSamples[sample]->datamc > 0) InitMC(tree);
-		if (fChain == 0) return;
-		Long64_t nentries = fChain->GetEntriesFast();
-
-		float scale = fLumiNorm / fSamples[sample]->lumi;
-		if(fSamples[sample]->datamc == 0) scale = 1;
-
-		Long64_t nbytes = 0, nb = 0;
-		for (Long64_t jentry=0; jentry<nentries;jentry++) {
-			Long64_t ientry = LoadTree(jentry);
-			if (ientry < 0) break;
-			nb = fChain->GetEntry(jentry);   nbytes += nb;
-			printProgress(jentry, nentries, fSamples[sample]->name);
-
-			if((*this.*eventSelector)() == false) continue;
-			if((*this.*objSelector)(index) == false) continue;
-
-			if(chan == Muon){
-				if(isLooseMuon(index)) H_nloose->Fill(MuPt[index], MuEta[index], scale); // Tight or loose
-				if(isTightMuon(index)) H_ntight->Fill(MuPt[index], MuEta[index], scale); // Tight
-			}
-			if(chan == Elec){
-				if(isLooseElectron(index)) H_nloose->Fill(ElPt[index], ElEta[index], scale); // Tight or loose
-				if(isTightElectron(index)) H_ntight->Fill(ElPt[index], ElEta[index], scale); // Tight
-			}
-
-		}
-		cout << endl;
-		fSamples[sample]->cleanUp();
-
-		if(fVerbose>2) cout << " Tight entries so far: " << H_ntight->GetEntries() << " / " << H_ntight->Integral() << endl;
-		if(fVerbose>2) cout << " Loose entries so far: " << H_nloose->GetEntries() << " / " << H_nloose->Integral() << endl;
-		if(fVerbose>2) cout << "  Ratio: " << (double)H_ntight->GetEntries()/(double)H_nloose->GetEntries() << endl;
-	}
-	h_2d->Divide(H_ntight, H_nloose, 1., 1., "B"); // binomial, weights are ignored
-
-	TH1D *hloosept  = H_nloose->ProjectionX();
-	TH1D *hlooseeta = H_nloose->ProjectionY();
-	TH1D *htightpt  = H_ntight->ProjectionX();
-	TH1D *htighteta = H_ntight->ProjectionY();
-	h_pt ->Divide(htightpt,  hloosept,  1., 1., "B");
-	h_eta->Divide(htighteta, hlooseeta, 1., 1., "B");
-
-	h_pt ->SetXTitle(convertVarName(sname + "Pt[0]"));
-	h_eta->SetXTitle(convertVarName(sname + "Eta[0]"));
-	h_pt ->SetYTitle("# Tight / # Loose");
-	h_eta->SetYTitle("# Tight / # Loose");
-	h_2d->SetXTitle(convertVarName(sname + "Pt[0]"));
-	h_2d->SetYTitle(convertVarName(sname + "Eta[0]"));
-	TString name = "";
-	for(size_t i = 0; i < samples.size(); ++i){
-		int sample = samples[i];
-		name += h_2d->GetName();
-		name += "_";
-		name += fSamples[sample]->sname;
-	}
-	if(output){
-		printObject(h_2d,  sname + "Ratio"    + name, "colz");
-		printObject(h_pt,  sname + "RatioPt"  + name, "PE1");
-		printObject(h_eta, sname + "RatioEta" + name, "PE1");
-	}
-	delete H_ntight, H_nloose, hloosept, hlooseeta, htightpt, htighteta;
-}
-
-//____________________________________________________________________________
-TH1D* SSDLPlotter::fillMuRatioPt(int sample, int muon, bool(SSDLPlotter::*eventSelector)(), bool(SSDLPlotter::*muonSelector)(int), bool output){
-	vector<int> samples; samples.push_back(sample);
-	return fillMuRatioPt(samples, muon, eventSelector, muonSelector, output);
-}
-TH1D* SSDLPlotter::fillMuRatioPt(vector<int> samples, int muon, bool(SSDLPlotter::*eventSelector)(), bool(SSDLPlotter::*muonSelector)(int), bool output){
-	gStyle->SetOptStat(0);
-	TH2D *h_2d  = new TH2D("MuRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", getNPt2Bins(Muon), getPt2Bins(Muon), getNEtaBins(Muon), getEtaBins(Muon));
-	TH1D *h_pt  = new TH1D("MuRatioPt",  "Ratio of tight to loose Muons vs Pt",        getNPt2Bins(Muon), getPt2Bins(Muon));
-	TH1D *h_eta = new TH1D("MuRatioEta", "Ratio of tight to loose Muons vs Eta",       getNEtaBins(Muon), getEtaBins(Muon));
-
-	h_pt->SetXTitle(convertVarName("MuPt[0]"));
-	h_pt ->SetYTitle("# Tight / # Loose");
-	h_pt->GetYaxis()->SetTitleOffset(1.2);
-
-	produceRatio(Muon, samples, muon, eventSelector, muonSelector, h_2d, h_pt, h_eta, output);
-	return h_pt;
-}
-TH1D* SSDLPlotter::fillMuRatioPt(vector<int> samples, int muon, bool(SSDLPlotter::*eventSelector)(), bool(SSDLPlotter::*muonSelector)(int), const int nptbins, const double* ptbins, const int netabins, const double* etabins, bool output){
-	gStyle->SetOptStat(0);
-	TH2D *h_2d  = new TH2D("MuRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", nptbins, ptbins, netabins, etabins);
-	TH1D *h_pt  = new TH1D("MuRatioPt",  "Ratio of tight to loose Muons vs Pt",        nptbins, ptbins);
-	TH1D *h_eta = new TH1D("MuRatioEta", "Ratio of tight to loose Muons vs Eta",       netabins, etabins);
-
-	h_pt->SetXTitle(convertVarName("MuPt[0]"));
-	h_pt ->SetYTitle("# Tight / # Loose");
-	h_pt->GetYaxis()->SetTitleOffset(1.2);
-
-	produceRatio(Muon, samples, muon, eventSelector, muonSelector, h_2d, h_pt, h_eta, output);
-	return h_pt;
-}
-
-//____________________________________________________________________________
-TH1D* SSDLPlotter::fillMuRatioPt(int sample, gFPSwitch fp, bool output){
-	vector<int> samples; samples.push_back(sample);
-	return fillMuRatioPt(samples, fp);
-}
-TH1D* SSDLPlotter::fillMuRatioPt(vector<int> samples, gFPSwitch fp, bool output){
-	gStyle->SetOptStat(0);
-	TH2D *h_2d  = new TH2D("MuRatio",    "Ratio of tight to loose Muons vs Pt vs Eta", getNPt2Bins(Muon), getPt2Bins(Muon), getNEtaBins(Muon), getEtaBins(Muon));
-	TH1D *h_pt  = new TH1D("MuRatioPt",  "Ratio of tight to loose Muons vs Pt",        getNPt2Bins(Muon), getPt2Bins(Muon));
-	TH1D *h_eta = new TH1D("MuRatioEta", "Ratio of tight to loose Muons vs Eta",       getNEtaBins(Muon), getEtaBins(Muon));
-
-	h_pt->SetXTitle(convertVarName("MuPt[0]"));
+	h_pt->SetXTitle("p_{#perp} (GeV)");
 	h_pt->SetYTitle("# Tight / # Loose");
 	h_pt->GetYaxis()->SetTitleOffset(1.2);
 
-	calculateRatio(samples, Muon, fp, h_2d, h_pt, h_eta, output);
+	calculateRatio(samples, chan, fp, h_2d, h_pt, h_eta, output);
 	delete h_2d, h_eta;
 	return h_pt;
 }
-
-//____________________________________________________________________________
-TH1D* SSDLPlotter::fillElRatioPt(int sample, gFPSwitch fp, bool output){
-	vector<int> samples; samples.push_back(sample);
-	return fillElRatioPt(samples, fp, output);
-}
-TH1D* SSDLPlotter::fillElRatioPt(vector<int> samples, gFPSwitch fp, bool output){
-	gStyle->SetOptStat(0);
-	TH2D *h_2d  = new TH2D("ElRatio",    "Ratio of tight to loose Electrons vs Pt vs Eta", getNPt2Bins(Elec), getPt2Bins(Elec), getNEtaBins(Elec), getEtaBins(Elec));
-	TH1D *h_pt  = new TH1D("ElRatioPt",  "Ratio of tight to loose Electrons vs Pt",        getNPt2Bins(Elec), getPt2Bins(Elec));
-	TH1D *h_eta = new TH1D("ElRatioEta", "Ratio of tight to loose Electrons vs Eta",       getNEtaBins(Elec), getEtaBins(Elec));
-
-	h_pt->SetXTitle(convertVarName("ElPt[0]"));
-	h_pt->SetYTitle("# Tight / # Loose");
-	h_pt->GetYaxis()->SetTitleOffset(1.2);
-
-	calculateRatio(samples, Elec, fp, h_2d, h_pt, h_eta, output);
-	return h_pt;
-};
 
 //____________________________________________________________________________
 void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_2d, bool output){
@@ -4785,7 +4290,7 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		if(S->datamc == 0) scale = 1;
 
 		Channel *C;
-		if(chan == Muon)     C = &S->region[Baseline][hilo].mm;
+		if(chan == Muon) C = &S->region[Baseline][hilo].mm;
 		if(chan == Elec) C = &S->region[Baseline][hilo].ee;
 		TH2D *ntight, *nloose;
 		if(fp == SigSup){
@@ -4916,10 +4421,12 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	vector<int> elsamples;
 	vector<int> emusamples;
 	
-	const float RareESyst = 0.5;
+	const float RareESyst  = 0.5;
 	const float RareESyst2 = RareESyst*RareESyst;
+	
+	const float FakeESyst  = 0.5;
+	const float FakeESyst2 = FakeESyst*FakeESyst;
 
-	// TODO: Check these samples!
 	musamples = fMuData;
 	elsamples = fEGData;
 	emusamples = fMuEGData;
@@ -4958,6 +4465,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float nt2_em(0.), nt10_em(0.), nt01_em(0.), nt0_em(0.);
 	float nt2_ee(0.), nt10_ee(0.), nt0_ee(0.);
 
+	// FR Predictions from event-by-event weights (pre stored)
+	float npp_mm(0.), npf_mm(0.), nff_mm(0.);
+	float npp_em(0.), npf_em(0.), nfp_em(0.), nff_em(0.);
+	float npp_ee(0.), npf_ee(0.), nff_ee(0.);
+
 	// OS yields
 	float nt2_ee_BB_os(0.), nt2_ee_EE_os(0.), nt2_ee_EB_os(0.);
 	float nt2_em_BB_os(0.), nt2_em_EE_os(0.);
@@ -4967,6 +4479,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt2_mm  += S->numbers[reg][Muon].nt2;
 		nt10_mm += S->numbers[reg][Muon].nt10;
 		nt0_mm  += S->numbers[reg][Muon].nt0;
+		
+		npp_mm += S->numbers[reg][Muon].npp;
+		npf_mm += S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp;
+		nff_mm += S->numbers[reg][Muon].nff;
 	}
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
@@ -4974,6 +4490,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt10_em += S->numbers[reg][ElMu].nt10;
 		nt01_em += S->numbers[reg][ElMu].nt01;
 		nt0_em  += S->numbers[reg][ElMu].nt0;
+
+		npp_em += S->numbers[reg][ElMu].npp;
+		npf_em += S->numbers[reg][ElMu].npf;
+		nfp_em += S->numbers[reg][ElMu].nfp;
+		nff_em += S->numbers[reg][ElMu].nff;
 
 		nt2_em_BB_os += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
 		nt2_em_EE_os += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
@@ -4983,6 +4504,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt2_ee  += S->numbers[reg][Elec].nt2;
 		nt10_ee += S->numbers[reg][Elec].nt10;
 		nt0_ee  += S->numbers[reg][Elec].nt0;
+
+		npp_ee += S->numbers[reg][Elec].npp;
+		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Muon].nfp;
+		nff_ee += S->numbers[reg][Elec].nff;
 
 		nt2_ee_BB_os += S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
 		nt2_ee_EE_os += S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
@@ -5096,30 +4621,54 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FR->setMMNtl(nt2_mm, nt10_mm, nt0_mm);
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
 	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
-	
+
+	// Event-by-event differential ratios:
+	float nF_mm = npf_mm + nff_mm;
+	float nF_em = npf_em+nfp_em+nff_em;
+	float nF_ee = npf_ee+nff_ee;
+	float nSF = npf_mm + npf_em + nfp_em + npf_ee;
+	float nDF = nff_mm + nff_em + nff_ee;
+	float nF = nF_mm + nF_em + nF_ee;
+	float esyst = 0.5;
+	// Flat ratios:
+	// npp_mm = FR->getMMNpp();
+	// npf_mm = FR->getMMNpf();
+	// nff_mm = FR->getMMNff();
+	// npp_ee = FR->getEENpp();
+	// npf_ee = FR->getEENpf();
+	// nff_ee = FR->getEENff();
+	// npp_em = FR->getEMNpp();
+	// npf_em = FR->getEMNpf();
+	// nfp_em = FR->getEMNfp();
+	// nff_em = FR->getEMNff();
+	// float nF_mm = FR->getMMTotFakes();
+	// float nF_em = FR->getEMTotFakes();
+	// float nF_ee = FR->getEETotFakes();
+	// float nF = FR->getTotFakes();
+
 	OUT << "  Fake Predictions:" << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << "                 |          Mu/Mu        |         El/El         |          El/Mu        |" << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
-	FR->getMMNpp(), FR->getMMNppEStat(), FR->getMMNppESyst(),
-	FR->getEENpp(), FR->getEENppEStat(), FR->getEENppESyst(), 
-	FR->getEMNpp(), FR->getEMNppEStat(), FR->getEMNppESyst()) << endl;
+	npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
+	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
+	npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
 	OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
-	FR->getMMNpf(), FR->getMMNpfEStat(), FR->getMMNpfESyst(),
-	FR->getEENpf(), FR->getEENpfEStat(), FR->getEENpfESyst(), 
-	FR->getEMNpf(), FR->getEMNpfEStat(), FR->getEMNpfESyst()) << endl;
+	npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
+	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
+	npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
-	FR->getEMNfp(), FR->getEMNfpEStat(), FR->getEMNfpESyst()) << endl;
+	nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
 	OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
-	FR->getMMNff(), FR->getMMNffEStat(), FR->getMMNffESyst(),
-	FR->getEENff(), FR->getEENffEStat(), FR->getEENffESyst(), 
-	FR->getEMNff(), FR->getEMNffEStat(), FR->getEMNffESyst()) << endl;
+	nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
+	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
+	nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
-	FR->getMMTotFakes(), FR->getMMTotEStat(), FR->getMMTotESyst(),
-	FR->getEETotFakes(), FR->getEETotEStat(), FR->getEETotESyst(), 
-	FR->getEMTotFakes(), FR->getEMTotEStat(), FR->getEMTotESyst()) << endl;
+	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
+	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
+	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
 	OUT << " (Value ± E_stat ± E_syst) " << endl;
 	OUT << "//////////////////////////////////////////////////////////////////////////////////////////" << endl;
@@ -5210,15 +4759,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << endl;
 	OUT << "-----------------------------------------------------------------------" << endl << endl;
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-
-
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. fakes",
-	FR->getMMTotFakes(), FR->getMMTotEStat(), FR->getMMTotESyst(),
-	FR->getEMTotFakes(), FR->getEMTotEStat(), FR->getEMTotESyst(),
-	FR->getEETotFakes(), FR->getEETotEStat(), FR->getEETotESyst());
+	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
+	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em,
+	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee);
 	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. chmisid",
 	nt2_em_chmid, nt2_em_chmid_e1, nt2_em_chmid_e2, nt2_ee_chmid, nt2_ee_chmid_e1, nt2_ee_chmid_e2);
 
@@ -5229,9 +4776,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCRareSM[i]];
 		float scale = fLumiNorm/S->lumi;
 
-		float temp_nt2_mm  = mmTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = emTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = eeTrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm = mmTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt2_em = emTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt2_ee = eeTrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
@@ -5256,28 +4803,28 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat() + nt2_rare_mc_mm_e1;
 	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1;
 	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
-	float mm_tot_sqerr2 = FR->getMMTotESyst()*FR->getMMTotESyst() + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm;
-	float em_tot_sqerr2 = FR->getEMTotESyst()*FR->getEMTotESyst() + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em;
-	float ee_tot_sqerr2 = FR->getEETotESyst()*FR->getEETotESyst() + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee;
+	float mm_tot_sqerr2 = nF_mm*nF_mm*FakeESyst2 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm;
+	float em_tot_sqerr2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em;
+	float ee_tot_sqerr2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee;
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "tot. backgr.",
-	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
-	FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
-	FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
+	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
+	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
+	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "",
-	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
-	FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
+	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << Form("%16s || %5.0f                 || %5.0f                 || %5.0f                 ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
 	OUT << "==============================================================================================" << endl;
-	OUT << setw(20) << "combined observed: ";
+	OUT << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
-	OUT << setw(20) << "        predicted: ";
-	float tot_pred        = FR->getTotFakes() + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee;
+	OUT << "        predicted: ";
+	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee;
 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
-	float comb_tot_sqerr2 = FR->getTotESyst()*FR->getTotESyst() + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
-	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " +/- ";
-	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " +/- ";
+	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
+	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
+	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
@@ -5287,9 +4834,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////////////////////////////////////////////
 	fOUTSTREAM << Region::sname[reg] << endl;
 	fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
-	FR->getEETotFakes() + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-	FR->getMMTotFakes() + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	FR->getEMTotFakes() + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
 	fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
 	
@@ -5310,26 +4857,29 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	FR->getEENff() + FR->getMMNff() + FR->getEMNff(), FR->getTotDoubleETot(),
-	FR->getEENff(), FR->getEENffETot(), FR->getMMNff(), FR->getMMNffETot(), FR->getEMNff(), FR->getEMNffETot());
+	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
+	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
+	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
+	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
 	fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	FR->getEENpf() + FR->getMMNpf() + FR->getEMNpf() + FR->getEMNfp(), FR->getTotSingleETot(),
-	FR->getEENpf(), FR->getEENpfETot(), FR->getMMNpf(), FR->getMMNpfETot(), FR->getEMSingleFakes(), FR->getEMSingleETot());
+	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
+	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
+	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
+	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
 	fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
 	fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + 0.25*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
+	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
-	// fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
-	FR->getEETotFakes() + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-	FR->getMMTotFakes() + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	FR->getEMTotFakes() + nt2_rare_mc_em + nt2_em_chmid, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
+	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	nF_mm + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	nF_em + nt2_rare_mc_em + nt2_em_chmid, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << endl;
@@ -5378,16 +4928,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
 	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
 	
-	h_pred_sfake->SetBinContent(1, FR->getEENpf());
-	h_pred_sfake->SetBinContent(2, FR->getMMNpf());
-	h_pred_sfake->SetBinContent(3, FR->getEMNpf()+FR->getEMNfp());
+	h_pred_sfake->SetBinContent(1, npf_ee);
+	h_pred_sfake->SetBinContent(2, npf_mm);
+	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
 	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
 	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
 	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
 	
-	h_pred_dfake->SetBinContent(1, FR->getEENff());
-	h_pred_dfake->SetBinContent(2, FR->getMMNff());
-	h_pred_dfake->SetBinContent(3, FR->getEMNff());
+	h_pred_dfake->SetBinContent(1, nff_ee);
+	h_pred_dfake->SetBinContent(2, nff_mm);
+	h_pred_dfake->SetBinContent(3, nff_em);
 	
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
@@ -5655,7 +5205,28 @@ void SSDLPlotter::makeDiffPrediction(){
 		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
 		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
 
+		// Differential ratios
+		for(size_t i = 0; i < musamples.size(); ++i){
+			Sample *S = fSamples[musamples[i]];
+			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		}
+		for(size_t i = 0; i < elsamples.size(); ++i){
+			Sample *S = fSamples[elsamples[i]];
+			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		}
+		for(size_t i = 0; i < emusamples.size(); ++i){
+			Sample *S = fSamples[emusamples[i]];
+			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		}
+
 		for(size_t i = 0; i < nbins; ++i){
+			const float FakeESyst2 = 0.25;
 			FakeRatios *FR = new FakeRatios();
 			FR->setNToyMCs(100); // speedup
 			FR->setAddESyst(0.5); // additional systematics
@@ -5669,18 +5240,23 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 			
-			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
 			
-			// Errors
-			float esyst2_mm  = FR->getMMTotESyst()*FR->getMMTotESyst();
-			float esyst2_ee  = FR->getEETotESyst()*FR->getEETotESyst();
-			float esyst2_em  = FR->getEMTotESyst()*FR->getEMTotESyst();
-			float esyst2_tot = FR->getTotESyst()  *FR->getTotESyst();
+			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
+			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
+			float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
+			float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
+			
+			// Errors (add total errors of fakes)
+			float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+			float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+			float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+			float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
 			float estat2_mm  = FR->getMMTotEStat()*FR->getMMTotEStat();
 			float estat2_ee  = FR->getEETotEStat()*FR->getEETotEStat();
 			float estat2_em  = FR->getEMTotEStat()*FR->getEMTotEStat();
@@ -6195,8 +5771,7 @@ void SSDLPlotter::makeDiffPrediction(){
 	fOutputSubDir = "";
 }
 
-
-void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
+void SSDLPlotter::makeIntMCClosure(TString filename, gRegion reg, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 
 	fLumiNorm = 1000.;
@@ -6285,59 +5860,59 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 		float scale = fLumiNorm / S->lumi;
 		names.push_back(S->sname);
 		scales.push_back(scale);
-		ntt_mm.push_back(S->numbers[Baseline][Muon].nt2);
-		ntl_mm.push_back(S->numbers[Baseline][Muon].nt10);
-		nll_mm.push_back(S->numbers[Baseline][Muon].nt0);
+		ntt_mm.push_back(S->numbers[reg][Muon].nt2);
+		ntl_mm.push_back(S->numbers[reg][Muon].nt10);
+		nll_mm.push_back(S->numbers[reg][Muon].nt0);
 
-		ntt_em.push_back(S->numbers[Baseline][ElMu].nt2);
-		ntl_em.push_back(S->numbers[Baseline][ElMu].nt10);
-		nlt_em.push_back(S->numbers[Baseline][ElMu].nt01);
-		nll_em.push_back(S->numbers[Baseline][ElMu].nt0);
+		ntt_em.push_back(S->numbers[reg][ElMu].nt2);
+		ntl_em.push_back(S->numbers[reg][ElMu].nt10);
+		nlt_em.push_back(S->numbers[reg][ElMu].nt01);
+		nll_em.push_back(S->numbers[reg][ElMu].nt0);
 
-		ntt_ee.push_back(S->numbers[Baseline][Elec].nt2);
-		ntl_ee.push_back(S->numbers[Baseline][Elec].nt10);
-		nll_ee.push_back(S->numbers[Baseline][Elec].nt0);
+		ntt_ee.push_back(S->numbers[reg][Elec].nt2);
+		ntl_ee.push_back(S->numbers[reg][Elec].nt10);
+		nll_ee.push_back(S->numbers[reg][Elec].nt0);
 
-		npp_mm.push_back(S->region[Baseline][hilo].mm.npp_pt->GetEntries());
-		npf_mm.push_back(S->region[Baseline][hilo].mm.npf_pt->GetEntries());
-		nfp_mm.push_back(S->region[Baseline][hilo].mm.nfp_pt->GetEntries());
-		nff_mm.push_back(S->region[Baseline][hilo].mm.nff_pt->GetEntries());
+		npp_mm.push_back(S->region[reg][hilo].mm.npp_pt->GetEntries());
+		npf_mm.push_back(S->region[reg][hilo].mm.npf_pt->GetEntries());
+		nfp_mm.push_back(S->region[reg][hilo].mm.nfp_pt->GetEntries());
+		nff_mm.push_back(S->region[reg][hilo].mm.nff_pt->GetEntries());
 
-		npp_em.push_back(S->region[Baseline][hilo].em.npp_pt->GetEntries());
-		npf_em.push_back(S->region[Baseline][hilo].em.npf_pt->GetEntries());
-		nfp_em.push_back(S->region[Baseline][hilo].em.nfp_pt->GetEntries());
-		nff_em.push_back(S->region[Baseline][hilo].em.nff_pt->GetEntries());
+		npp_em.push_back(S->region[reg][hilo].em.npp_pt->GetEntries());
+		npf_em.push_back(S->region[reg][hilo].em.npf_pt->GetEntries());
+		nfp_em.push_back(S->region[reg][hilo].em.nfp_pt->GetEntries());
+		nff_em.push_back(S->region[reg][hilo].em.nff_pt->GetEntries());
 
-		npp_ee.push_back(S->region[Baseline][hilo].ee.npp_pt->GetEntries());
-		npf_ee.push_back(S->region[Baseline][hilo].ee.npf_pt->GetEntries());
-		nfp_ee.push_back(S->region[Baseline][hilo].ee.nfp_pt->GetEntries());
-		nff_ee.push_back(S->region[Baseline][hilo].ee.nff_pt->GetEntries());
+		npp_ee.push_back(S->region[reg][hilo].ee.npp_pt->GetEntries());
+		npf_ee.push_back(S->region[reg][hilo].ee.npf_pt->GetEntries());
+		nfp_ee.push_back(S->region[reg][hilo].ee.nfp_pt->GetEntries());
+		nff_ee.push_back(S->region[reg][hilo].ee.nff_pt->GetEntries());
 
-		npp_tt_mm.push_back(S->region[Baseline][hilo].mm.nt2pp_pt->GetEntries());
-		npf_tt_mm.push_back(S->region[Baseline][hilo].mm.nt2pf_pt->GetEntries());
-		nfp_tt_mm.push_back(S->region[Baseline][hilo].mm.nt2fp_pt->GetEntries());
-		nff_tt_mm.push_back(S->region[Baseline][hilo].mm.nt2ff_pt->GetEntries());
+		npp_tt_mm.push_back(S->region[reg][hilo].mm.nt2pp_pt->GetEntries());
+		npf_tt_mm.push_back(S->region[reg][hilo].mm.nt2pf_pt->GetEntries());
+		nfp_tt_mm.push_back(S->region[reg][hilo].mm.nt2fp_pt->GetEntries());
+		nff_tt_mm.push_back(S->region[reg][hilo].mm.nt2ff_pt->GetEntries());
 
-		npp_tt_em.push_back(S->region[Baseline][hilo].em.nt2pp_pt->GetEntries());
-		npf_tt_em.push_back(S->region[Baseline][hilo].em.nt2pf_pt->GetEntries());
-		nfp_tt_em.push_back(S->region[Baseline][hilo].em.nt2fp_pt->GetEntries());
-		nff_tt_em.push_back(S->region[Baseline][hilo].em.nt2ff_pt->GetEntries());
+		npp_tt_em.push_back(S->region[reg][hilo].em.nt2pp_pt->GetEntries());
+		npf_tt_em.push_back(S->region[reg][hilo].em.nt2pf_pt->GetEntries());
+		nfp_tt_em.push_back(S->region[reg][hilo].em.nt2fp_pt->GetEntries());
+		nff_tt_em.push_back(S->region[reg][hilo].em.nt2ff_pt->GetEntries());
 
-		npp_tt_ee.push_back(S->region[Baseline][hilo].ee.nt2pp_pt->GetEntries());
-		npf_tt_ee.push_back(S->region[Baseline][hilo].ee.nt2pf_pt->GetEntries());
-		nfp_tt_ee.push_back(S->region[Baseline][hilo].ee.nt2fp_pt->GetEntries());
-		nff_tt_ee.push_back(S->region[Baseline][hilo].ee.nt2ff_pt->GetEntries());
+		npp_tt_ee.push_back(S->region[reg][hilo].ee.nt2pp_pt->GetEntries());
+		npf_tt_ee.push_back(S->region[reg][hilo].ee.nt2pf_pt->GetEntries());
+		nfp_tt_ee.push_back(S->region[reg][hilo].ee.nt2fp_pt->GetEntries());
+		nff_tt_ee.push_back(S->region[reg][hilo].ee.nt2ff_pt->GetEntries());
 		
-		ntt_os_BB_em.push_back(S->region[Baseline][hilo].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
-		ntt_os_EE_em.push_back(S->region[Baseline][hilo].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
-		ntt_os_BB_ee.push_back(S->region[Baseline][hilo].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
-		ntt_os_EE_ee.push_back(S->region[Baseline][hilo].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
-		ntt_os_EB_ee.push_back(S->region[Baseline][hilo].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
+		ntt_os_BB_em.push_back(S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
+		ntt_os_EE_em.push_back(S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
+		ntt_os_BB_ee.push_back(S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
+		ntt_os_EE_ee.push_back(S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
+		ntt_os_EB_ee.push_back(S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
 		
-		npp_tt_cm_ee.push_back(scale*S->region[Baseline][hilo].ee.nt2pp_cm_pt->GetEntries());
-		npp_cm_ee   .push_back(scale*S->region[Baseline][hilo].ee.npp_cm_pt->GetEntries());
-		npp_tt_cm_em.push_back(scale*S->region[Baseline][hilo].em.nt2pp_cm_pt->GetEntries());
-		npp_cm_em   .push_back(scale*S->region[Baseline][hilo].em.npp_cm_pt->GetEntries());
+		npp_tt_cm_ee.push_back(scale*S->region[reg][hilo].ee.nt2pp_cm_pt->GetEntries());
+		npp_cm_ee   .push_back(scale*S->region[reg][hilo].ee.npp_cm_pt->GetEntries());
+		npp_tt_cm_em.push_back(scale*S->region[reg][hilo].em.nt2pp_cm_pt->GetEntries());
+		npp_cm_em   .push_back(scale*S->region[reg][hilo].em.npp_cm_pt->GetEntries());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6379,31 +5954,60 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 		FR->setEENtl(ntt_ee[i], ntl_ee[i], nll_ee[i]);
 		FR->setEMNtl(ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i]);
 
-		npp_pred_mm   .push_back(FR->getMMNpp());
+		Sample *S = fSamples[samples[i]];
+		npp_pred_mm.push_back(S->numbers[reg][Muon].npp);
+		npf_pred_mm.push_back(S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp);
+		nff_pred_mm.push_back(S->numbers[reg][Muon].nff);
+		npp_pred_ee.push_back(S->numbers[reg][Elec].npp);
+		npf_pred_ee.push_back(S->numbers[reg][Elec].npf + S->numbers[reg][Muon].nfp);
+		nff_pred_ee.push_back(S->numbers[reg][Elec].nff);
+		npp_pred_em.push_back(S->numbers[reg][ElMu].npp);
+		npf_pred_em.push_back(S->numbers[reg][ElMu].npf);
+		nfp_pred_em.push_back(S->numbers[reg][ElMu].nfp);
+		nff_pred_em.push_back(S->numbers[reg][ElMu].nff);
+
+
 		npp_pred_mm_e1.push_back(FR->getMMNppEStat());
-		npf_pred_mm   .push_back(FR->getMMNpf());
 		npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
-		nff_pred_mm   .push_back(FR->getMMNff());
 		nff_pred_mm_e1.push_back(FR->getMMNffEStat());
 		nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
 
-		npp_pred_ee   .push_back(FR->getEENpp());
 		npp_pred_ee_e1.push_back(FR->getEENppEStat());
-		npf_pred_ee   .push_back(FR->getEENpf());
 		npf_pred_ee_e1.push_back(FR->getEENpfEStat());
-		nff_pred_ee   .push_back(FR->getEENff());
 		nff_pred_ee_e1.push_back(FR->getEENffEStat());
 		nF_pred_ee_e1 .push_back(FR->getEETotEStat());
 
-		npp_pred_em   .push_back(FR->getEMNpp());
 		npp_pred_em_e1.push_back(FR->getEMNppEStat());
-		npf_pred_em   .push_back(FR->getEMNpf());
 		npf_pred_em_e1.push_back(FR->getEMNpfEStat());
-		nfp_pred_em   .push_back(FR->getEMNfp());
 		nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
-		nff_pred_em   .push_back(FR->getEMNff());
 		nff_pred_em_e1.push_back(FR->getEMNffEStat());
 		nF_pred_em_e1 .push_back(FR->getEMTotEStat());
+
+		// npp_pred_mm   .push_back(FR->getMMNpp());
+		// npp_pred_mm_e1.push_back(FR->getMMNppEStat());
+		// npf_pred_mm   .push_back(FR->getMMNpf());
+		// npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
+		// nff_pred_mm   .push_back(FR->getMMNff());
+		// nff_pred_mm_e1.push_back(FR->getMMNffEStat());
+		// nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
+		// 
+		// npp_pred_ee   .push_back(FR->getEENpp());
+		// npp_pred_ee_e1.push_back(FR->getEENppEStat());
+		// npf_pred_ee   .push_back(FR->getEENpf());
+		// npf_pred_ee_e1.push_back(FR->getEENpfEStat());
+		// nff_pred_ee   .push_back(FR->getEENff());
+		// nff_pred_ee_e1.push_back(FR->getEENffEStat());
+		// nF_pred_ee_e1 .push_back(FR->getEETotEStat());
+		// 
+		// npp_pred_em   .push_back(FR->getEMNpp());
+		// npp_pred_em_e1.push_back(FR->getEMNppEStat());
+		// npf_pred_em   .push_back(FR->getEMNpf());
+		// npf_pred_em_e1.push_back(FR->getEMNpfEStat());
+		// nfp_pred_em   .push_back(FR->getEMNfp());
+		// nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
+		// nff_pred_em   .push_back(FR->getEMNff());
+		// nff_pred_em_e1.push_back(FR->getEMNffEStat());
+		// nF_pred_em_e1 .push_back(FR->getEMTotEStat());
 	}
 	
 	// Charge MisID Predictions
@@ -6438,21 +6042,21 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	float npp_tt_cm_sum_ee(0.), npp_tt_cm_sum_em(0.);
 
 	float ntt_rare_mm(0.), ntt_rare_em(0.), ntt_rare_ee(0.);
-	// ntt_rare_mm += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Muon].nt2;
-	// ntt_rare_mm += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Muon].nt2;
-	// ntt_rare_mm += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Muon].nt2;
-	// ntt_rare_em += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][ElMu].nt2;
-	// ntt_rare_em += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][ElMu].nt2;
-	// ntt_rare_em += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][ElMu].nt2;
-	// ntt_rare_ee += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[Baseline][Elec].nt2;
-	// ntt_rare_ee += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[Baseline][Elec].nt2;
-	// ntt_rare_ee += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[Baseline][Elec].nt2;
+	// ntt_rare_mm += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[reg][Muon].nt2;
+	// ntt_rare_mm += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[reg][Muon].nt2;
+	// ntt_rare_mm += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[reg][Muon].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[reg][ElMu].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[reg][ElMu].nt2;
+	// ntt_rare_em += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[reg][ElMu].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[WW]->lumi*fSamples[WW]->numbers[reg][Elec].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[WZ]->lumi*fSamples[WZ]->numbers[reg][Elec].nt2;
+	// ntt_rare_ee += fLumiNorm/fSamples[ZZ]->lumi*fSamples[ZZ]->numbers[reg][Elec].nt2;
 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
 		Sample *S = fSamples[fMCRareSM[i]];
 		float scale = fLumiNorm/S->lumi;
-		ntt_rare_mm += scale*S->numbers[Baseline][Muon].nt2;
-		ntt_rare_em += scale*S->numbers[Baseline][ElMu].nt2;
-		ntt_rare_ee += scale*S->numbers[Baseline][Elec].nt2;
+		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
+		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
+		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
 	}
 
 
@@ -6568,7 +6172,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
 	OUT << endl;
 	OUT << setw(16) << "Channels sum"  << " || ";
-	OUT << Form("                    %6.3f ||                               %6.3f ||                      %6.3f || ",
+	OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
 	ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
@@ -6740,15 +6344,18 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gHiLoSwitch hilo){
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Total BG Pred."  << " || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm) << " |                   || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee) << " |                   || ";
+	float tot_bg_mm = npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm;
+	float tot_bg_em = npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em;
+	float tot_bg_ee = npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee;
+	OUT << setw(7) << Form("%6.3f", tot_bg_mm) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", tot_bg_em) << " |                             || ";
+	OUT << setw(7) << Form("%6.3f", tot_bg_ee) << " |                   || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Observed"  << " || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " |                   || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_ee) << " |                   || ";
+	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_mm, tot_bg_mm/ntt_sum_mm) << "         || ";
+	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_em, tot_bg_em/ntt_sum_em) << "                   || ";
+	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_ee, tot_bg_ee/ntt_sum_ee) << "         || ";
 	OUT << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
@@ -7055,6 +6662,188 @@ void SSDLPlotter::makeTTbarClosure(){
 	delete fEEFPRatios;
 }
 
+void SSDLPlotter::storeWeightedPred(){
+	fillRatios(fMuData, fEGData, 0);
+	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+
+	string *sname = 0;
+	int   stype, flav, cat, njets, nbjets;
+	float puweight, pT1, pT2, HT, MET, MT2;
+
+	sigtree->SetBranchAddress("SName",    &sname);
+	sigtree->SetBranchAddress("SType",    &stype);
+	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("Flavor",   &flav);
+	sigtree->SetBranchAddress("pT1",      &pT1);
+	sigtree->SetBranchAddress("pT2",      &pT2);
+	sigtree->SetBranchAddress("TLCat",    &cat);
+	sigtree->SetBranchAddress("HT",       &HT);
+	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("MT2",      &MT2);
+	sigtree->SetBranchAddress("NJ",       &njets);
+	sigtree->SetBranchAddress("NbJ",      &nbjets);
+	
+	FakeRatios *FR = new FakeRatios();
+
+	float npp(0.), npf(0.), nfp(0.), nff(0.);
+	float f1(0.), f2(0.), p1(0.), p2(0.);
+	
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		Sample *S = fSampleMap[TString(*sname)];
+		int datamc = S->datamc;
+		
+		gChannel chan = gChannel(flav);
+		f1 = getFRatio(chan, pT1, S->datamc);
+		f2 = getFRatio(chan, pT2, S->datamc);
+		p1 = getPRatio(chan, pT1, S->datamc);
+		p2 = getPRatio(chan, pT2, S->datamc);
+		if(chan == ElMu){
+			f1 = getFRatio(Muon, pT1, S->datamc);
+			f2 = getFRatio(Elec, pT2, S->datamc);
+			p1 = getPRatio(Muon, pT1, S->datamc);
+			p2 = getPRatio(Elec, pT2, S->datamc);			
+		}
+
+		// Get the weights (don't depend on event selection)
+		npp = FR->getWpp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
+		npf = FR->getWpf(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
+		nfp = FR->getWfp(FakeRatios::gTLCat(cat), f1, f2, p1, p2);
+		nff = FR->getWff(FakeRatios::gTLCat(cat), f1, f2, p1, p2);			
+
+		// Store them in the right places for the different purposes
+		// Integrated predictions
+		for(gRegion r = region_begin; r < gNREGIONS; r = gRegion(r+1)){
+			// Event Selection:
+			if(HT     < Region::minHT    [r] || HT  > Region::maxHT [r]) continue;
+			if(MET    < Region::minMet   [r] || MET > Region::maxMet[r]) continue;
+			if(njets  < Region::minNjets [r]) continue;
+			if(nbjets < Region::minNbjets[r]) continue;
+
+			S->numbers[r][chan].npp += puweight * npp;
+			S->numbers[r][chan].npf += puweight * npf;
+			S->numbers[r][chan].nfp += puweight * nfp;
+			S->numbers[r][chan].nff += puweight * nff;
+		}
+		
+		// Differential predictions
+		if(MET > 50.){
+			fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[0], HT, puweight * nff);
+
+			fillWithoutOF(S->diffyields[chan].hnpp[4], njets + 0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[4], njets + 0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[4], njets + 0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[4], njets + 0.5, puweight * nff);			
+		}
+		if(MET > 120.){
+			fillWithoutOF(S->diffyields[chan].hnpp[1], HT, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[1], HT, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[1], HT, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[1], HT, puweight * nff);			
+		}
+		if(HT > 80. && MET > 30. && njets > 1){
+			fillWithoutOF(S->diffyields[chan].hnpp[5], MT2, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[5], MT2, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[5], MT2, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[5], MT2, puweight * nff);
+
+			fillWithoutOF(S->diffyields[chan].hnpp[6], pT1, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[6], pT1, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[6], pT1, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[6], pT1, puweight * nff);
+
+			fillWithoutOF(S->diffyields[chan].hnpp[7], pT2, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[7], pT2, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[7], pT2, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[7], pT2, puweight * nff);
+		}
+		if(HT > 200. && MET > 30. && njets > 1){
+			fillWithoutOF(S->diffyields[chan].hnpp[2], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[2], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[2], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[2], MET, puweight * nff);
+
+			fillWithoutOF(S->diffyields[chan].hnpp[8], nbjets + 0.5, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[8], nbjets + 0.5, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[8], nbjets + 0.5, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[8], nbjets + 0.5, puweight * nff);
+		}
+		if(HT > 450. && MET > 30. && njets > 1){
+			fillWithoutOF(S->diffyields[chan].hnpp[3], MET, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[3], MET, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[3], MET, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[3], MET, puweight * nff);
+		}
+	}
+	delete FR;
+}
+float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
+	// if(chan == Muon) return 0.0672; // flat ratios
+	// if(chan == Elec) return 0.224;
+
+	const float mu_flatout = 35.;
+	const float el_flatout = 40.;
+	
+	if(chan == Muon){
+		TH1D *histo          = fH1D_MufRatio;
+		if(datamc > 0) histo = fH1D_MufRatio_MC;
+		if(!histo){
+			cerr << "SSDLPlotter::getPRatio ==> Warning: ratio histo not filled, exiting" << endl;
+			exit(-1);
+		}
+		if(pt >= mu_flatout){
+			Int_t asym_val_bin = histo->FindBin(mu_flatout);
+			return histo->GetBinContent(asym_val_bin - 1); // findbin(35) returns bin from 35-45, want the previous one
+		}
+		Int_t binnumb = histo->FindBin(pt);
+		return histo->GetBinContent(binnumb);
+	}
+	if(chan == Elec){
+		TH1D *histo          = fH1D_ElfRatio;
+		if(datamc > 0) histo = fH1D_ElfRatio_MC;
+		if(!histo){
+			cerr << "SSDLPlotter::getPRatio ==> Warning: ratio histo not filled, exiting" << endl;
+			exit(-1);
+		}
+		if(pt >= el_flatout){
+			Int_t asym_val_bin = histo->FindBin(el_flatout);
+			return histo->GetBinContent(asym_val_bin - 1);
+		}
+		Int_t binnumb = histo->FindBin(pt);
+		return histo->GetBinContent(binnumb);
+	}
+}
+float SSDLPlotter::getPRatio(gChannel chan, float pt, int datamc){
+	// if(chan == Muon) return 0.941; // flat ratios
+	// if(chan == Elec) return 0.922;
+	
+	if(chan == Muon){
+		TH1D *histo          = fH1D_MupRatio;
+		if(datamc > 0) histo = fH1D_MupRatio_MC;
+		if(!histo){
+			cerr << "SSDLPlotter::getPRatio ==> Warning: ratio histo not filled, exiting" << endl;
+			exit(-1);
+		}
+		Int_t binnumb = histo->FindBin(pt);
+		return histo->GetBinContent(binnumb);
+	}
+	if(chan == Elec){
+		TH1D *histo          = fH1D_ElpRatio;
+		if(datamc > 0) histo = fH1D_ElpRatio_MC;
+		if(!histo){
+			cerr << "SSDLPlotter::getPRatio ==> Warning: ratio histo not filled, exiting" << endl;
+			exit(-1);
+		}
+		Int_t binnumb = histo->FindBin(pt);
+		return histo->GetBinContent(binnumb);
+	}
+}
+
 //____________________________________________________________________________
 void SSDLPlotter::printYields(gChannel chan, float lumiscale){
 	cout << setfill('-') << setw(97) << "-" << endl;
@@ -7243,6 +7032,126 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 //////////////////////////////////////////////////////////////////////////////
 // Geninfo stuff
 //____________________________________________________________________________
+void SSDLPlotter::makeOriginPlots(gRegion reg){
+	gStyle->SetPaintTextFormat("5.2f");
+	// useNiceColorPalette();
+	bool hasBjets = (Region::minNbjets[reg] > 0);
+
+	fOutputSubDir = "Origins/";
+	// make the histograms first. one for ttjets and one for all mc (without signal). this in each channel
+	TH2D    *horigin_tt [gNCHANNELS];
+	TH2D    *horigin_mc [gNCHANNELS];
+	int nbins(15);
+
+	std::vector<int> mcsamples;
+	std::vector<int>::const_iterator sampleInd;
+
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+	lat->SetTextAlign(12);
+
+	for (int i=0; i < gNCHANNELS; i++){
+		if(i == 0) mcsamples = fMCBGMuEnr;
+		if(i == 1) mcsamples = fMCBG;
+		if(i == 2) mcsamples = fMCBG;
+		horigin_tt [i] = new TH2D("OriginHistoTTJ_" + SSDLDumper::gChanLabel[i], "Origin Histogram for TTJets "    + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
+		horigin_mc [i] = new TH2D("OriginHistoMC_"  + SSDLDumper::gChanLabel[i], "Origin Histogram for total MC "  + SSDLDumper::gChanLabel[i], nbins, 0, nbins, nbins, 0, nbins);
+		horigin_tt [i]->Sumw2();
+		horigin_mc [i]->Sumw2();
+		for (sampleInd=mcsamples.begin(); sampleInd != mcsamples.end(); sampleInd ++){ // sample loop
+			Sample *sample = fSamples[*sampleInd];
+			TString s_name = sample->sname;
+			float scale = fLumiNorm / fSamples[*sampleInd]->lumi;
+			if(i == 0) horigin_mc[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
+			if(i == 1) horigin_mc[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
+			if(i == 2) horigin_mc[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
+			if (s_name == "TTJets") {
+				if(i == 0) horigin_tt[i]->Add(sample->region[reg][HighPt].mm.nt11_origin, scale);
+				if(i == 1) horigin_tt[i]->Add(sample->region[reg][HighPt].em.nt11_origin, scale);
+				if(i == 2) horigin_tt[i]->Add(sample->region[reg][HighPt].ee.nt11_origin, scale);
+			}
+		} // end sample loop
+		TAxis* xAxis_tt = horigin_tt[i]->GetXaxis();
+		TAxis* yAxis_tt = horigin_tt[i]->GetYaxis();
+		TAxis* xAxis_mc = horigin_mc[i]->GetXaxis();
+		TAxis* yAxis_mc = horigin_mc[i]->GetYaxis();
+
+		horigin_mc[i]->GetZaxis()->SetRangeUser(0., 0.25);
+		horigin_tt[i]->GetZaxis()->SetRangeUser(0., 0.25);
+
+		if (i == 0){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+			}
+			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
+			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
+		}
+		if (i == 1){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::muBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+			}
+		}
+		if (i == 2){
+			for (int bin = 1; bin<=nbins; bin++) {
+				xAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				yAxis_tt->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				xAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+				yAxis_mc->SetBinLabel(bin, SSDLDumper::elBinToLabel(bin));
+			}
+			horigin_mc[i] = mirrorHisto(horigin_mc[i]);
+			horigin_tt[i] = mirrorHisto(horigin_tt[i]);
+		}
+		
+		horigin_tt[i]->GetXaxis()->LabelsOption("v");
+		horigin_tt[i]->GetYaxis()->LabelsOption("d");
+		horigin_mc[i]->GetXaxis()->LabelsOption("v");
+		horigin_mc[i]->GetYaxis()->LabelsOption("d");
+		
+		TCanvas *c_temp = new TCanvas("Origin" + SSDLDumper::gChanLabel[i], "Origin plot in region " + SSDLDumper::Region::sname[reg], 0, 0, 600, 600);
+		c_temp->cd();
+		gPad->SetRightMargin(0.05);
+		gPad->SetLeftMargin(0.3);
+		gPad->SetBottomMargin(0.3);
+		gPad->SetGrid(1,1);
+
+		float latX = 0.035;
+		float latY = 0.18;
+		// total MC histos
+		float total_mc = horigin_mc[i]->Integral();
+		horigin_mc[i]->Scale(100./total_mc);
+		horigin_mc[i]->Draw("col text");
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel");
+		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
+		lat->SetTextSize(0.03);
+		lat->DrawLatex(0.75, 0.93, Form("Exp. # ev.: %5.2f", total_mc));
+		Util::PrintPDF(c_temp, "Origin_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
+
+		// TTJets only histos
+		float total_tt = horigin_tt[i]->Integral();
+		horigin_tt[i]->Scale(100./total_tt);
+		horigin_tt[i]->Draw("col text");
+		lat->SetTextSize(0.04);
+		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel (ttbar only)");
+		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
+		lat->SetTextSize(0.03);
+		lat->DrawLatex(0.75, 0.93, Form("Exp. # ev.: %5.2f", total_tt));
+		Util::PrintPDF(c_temp, "Origin_TTJets_" + SSDLDumper::gChanLabel[i] + "_" + SSDLDumper::Region::sname[reg], fOutputDir + fOutputSubDir);
+
+		delete c_temp;
+	} // end channel loop
+	fOutputSubDir = "";
+}
 void SSDLPlotter::printOrigins(gRegion reg){
 	TString filename = fOutputDir + "Origins_"+SSDLDumper::Region::sname[reg]+".txt";
 	fOUTSTREAM.open(filename.Data(), ios::trunc);
@@ -7643,7 +7552,8 @@ void SSDLPlotter::drawTopLine(){
 void SSDLPlotter::drawDiffCuts(int j){
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(0.03);
-	if(j>4)        fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
+	if(j==8)       fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 200 GeV, N_{Jets} #geq 2");
+	if(j>4&&j<8)   fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 30 GeV, H_{T} > 80 GeV, N_{Jets} #geq 2");
 	if(j==0||j==4) fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 50 GeV");
 	if(j==1)       fLatex->DrawLatex(0.13,0.85, "E_{T}^{miss} > 120 GeV");
 	if(j==2)       fLatex->DrawLatex(0.13,0.85, "H_{T} > 200 GeV, N_{Jets} #geq 2");
@@ -7651,13 +7561,13 @@ void SSDLPlotter::drawDiffCuts(int j){
 	return;
 }
 
-void SSDLPlotter::load_kfacs(TFile * results) {
+void SSDLPlotter::load_kfacs(TFile * results){
     ifstream IN("msugraSSDL/nlo_kfactors.txt");
 
     TH2D *kfac_[10];
     char buffer[1000];
-    for (int i = 0 ; i< 10; i++){
-      kfac_[i]  = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 140, 210, 3010, 46, 90, 1010);
+    for (int i   = 0 ; i< 10; i++){
+      kfac_[i]   = new TH2D(Form("kfac_%i", i), Form("kfac_%i", i), 140, 210, 3010, 46, 90, 1010);
     }
 
     while( IN.getline(buffer, 1000, '\n') ){
@@ -7671,15 +7581,14 @@ void SSDLPlotter::load_kfacs(TFile * results) {
       }
     }
 	results->cd();
-    for (int i = 0 ; i< 10; i++){
+    for (int i   = 0 ; i< 10; i++){
       kfac_[i]->Write();
     }
 }
-
-void SSDLPlotter::load_loxsecs(TFile * results) {
+void SSDLPlotter::load_loxsecs(TFile * results){
 	ifstream IN("msugraSSDL/xsec_lo.txt");
 	results->cd();
-	TH2D * lo_xsec   = new TH2D("lo_xsec", "lo_xsec", 140, 210, 3010, 46, 90, 1010);
+	TH2D * lo_xsec = new TH2D("lo_xsec", "lo_xsec", 140, 210, 3010, 46, 90, 1010);
 	
 	char buffer[1000];
 	while( IN.getline(buffer, 1000, '\n') ){
@@ -7693,8 +7602,7 @@ void SSDLPlotter::load_loxsecs(TFile * results) {
 	results->cd();
 	lo_xsec->Write();
 }
-
-void SSDLPlotter::load_msugraInfo( const char * filestring) {
+void SSDLPlotter::load_msugraInfo( const char * filestring){
 	// ATTENTION: it is important that m0, m12 and process are known by the InitMC function!!
 
 	fOUTSTREAM.open("msugraSSDL/output.txt", ios::trunc);
@@ -7740,12 +7648,15 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 	
 	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
 		tree_->GetEntry(jentry);
+		printProgress(jentry, tot_events, "CMSSM Scan");
+
 		//if ( !(getHT() > 450 && pfMET > 120) ) continue;
-    	int mu1(-1), mu2(-1);
+		int mu1(-1), mu2(-1);
 		if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
 			if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
 				tightTot++;
-				if ( !(tree_->GetLeaf("IsSignalMuon")->GetValue(mu1) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu2) == 1) ) continue;
+				// if ( !(tree_->GetLeaf("IsSignalMuon")->GetValue(mu1) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu2) == 1) ) continue;
+				if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
 				signalTot++;
 				fOUTSTREAM << Form("MuMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				n_tot++;
@@ -7756,30 +7667,14 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 				pass_->Fill(m0, m12, weight);
 				continue;
 			}
+			resetHypLeptons();
 		}
-		resetHypLeptons();
-		int el1(-1), el2(-1);
-		if( isSSLLElEvent(el1, el2) ){
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				tightTot++;
-				if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el1) == 1 && tree_->GetLeaf("IsSignalElectron")->GetValue(el2) == 1) ) continue;
-				signalTot++;
-				fOUTSTREAM << Form("ElEl - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
-				n_tot++;
-				int m0bin = (m0-m0_min)/20 + 1;
-				int m12bin = (m12-m12_min)/20 + 1;
-				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
-				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
-				pass_->Fill(m0, m12, weight);
-				continue;
-			}
-		}
-		resetHypLeptons();
 		int mu(-1), el(-1);
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				tightTot++;
-				if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu) == 1) ) continue;
+				// if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el) == 1 && tree_->GetLeaf("IsSignalMuon")->GetValue(mu) == 1) ) continue;
+				if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
 				signalTot++;
 				fOUTSTREAM << Form("ElMu - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu]) << endl ;
 				n_tot++;
@@ -7788,8 +7683,25 @@ void SSDLPlotter::load_msugraInfo( const char * filestring) {
 				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
 				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
 				pass_->Fill(m0, m12, weight);
+				continue;
 			}
 			resetHypLeptons();
+		}
+		int el1(-1), el2(-1);
+		if( isSSLLElEvent(el1, el2) ){
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				tightTot++;
+				// if ( !(tree_->GetLeaf("IsSignalElectron")->GetValue(el1) == 1 && tree_->GetLeaf("IsSignalElectron")->GetValue(el2) == 1) ) continue;
+				if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("ElEl - ev %11.0d - m0 %4.0f - m12 %4.0f - process %2.0i - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", Event, m0, m12, process, getHT(), getNJets(), getNBTags(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+				n_tot++;
+				int m0bin = (m0-m0_min)/20 + 1;
+				int m12bin = (m12-m12_min)/20 + 1;
+				float weight = kfacs[process-1]->GetBinContent(m0bin, m12bin);
+				fOUTSTREAM << " m0 " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
+				pass_->Fill(m0, m12, weight);
+			}
 		}
 	}
 	cout << "Total Number of SS events (with MET > 120 GeV and HT > 450 GeV): " << n_tot << endl;

@@ -28,8 +28,6 @@ public:
 	virtual ~SSDLPlotter();
 
 	virtual void init(TString filename = "samples.dat");
-	virtual void InitMC(TTree*); // remove a few branches
-	virtual void readSamples(const char* filename = "samples.dat");
 
 	virtual void doAnalysis();
 	virtual void sandBox();
@@ -70,27 +68,20 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeDiffPrediction();
-	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
+	void makeIntMCClosure(TString, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
+	void storeWeightedPred();
+	float getFRatio(gChannel, float, int = 0);
+	float getPRatio(gChannel, float, int = 0);
+	
 	//////////////////////////////
 	// Fake ratios
-	// Produce from tree, with given selections:
-	void produceRatio(gChannel, int, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceRatio(gChannel, vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-
-	TH1D* fillMuRatioPt(int, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-
 	// Calculate from pre stored numbers, with fixed selections:
-	void fillMuElRatios(vector<int>);
-
-	TH1D* fillMuRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillMuRatioPt(vector<int>, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(vector<int>, gFPSwitch, bool = false);
+	void fillRatios(vector<int>, vector<int>, int = 0);
+	TH1D* fillRatioPt(gChannel, int, gFPSwitch, bool = false);
+	TH1D* fillRatioPt(gChannel, vector<int>, gFPSwitch, bool = false);
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
@@ -104,11 +95,8 @@ public:
 	void ratioWithPoissErrors(float, float, float&, float&);
 	void ratioWithAsymmCPErrors(int, int, float&, float&, float&);
 
-	void storeNumbers(Sample*, gChannel, gRegion);
-	
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
-
 
 	void fixPRatios();
 	
@@ -166,6 +154,16 @@ public:
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
 	inline int sampleType(TString);
+
+	TH1D *fH1D_MufRatio;
+	TH1D *fH1D_MupRatio;
+	TH1D *fH1D_ElfRatio;
+	TH1D *fH1D_ElpRatio;
+
+	TH1D *fH1D_MufRatio_MC;
+	TH1D *fH1D_MupRatio_MC;
+	TH1D *fH1D_ElfRatio_MC;
+	TH1D *fH1D_ElpRatio_MC;
 
 	private:
 	
