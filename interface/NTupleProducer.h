@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.118 2012/01/18 19:19:52 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.119 2012/01/20 12:53:59 peruzzi Exp $
 //
 //
 
@@ -167,6 +167,8 @@ private:
 	bool fIsModelScan;
 	int fNTotEvents;
 	int fNFillTree;
+
+        bool doVertexingFlag;
 
 	static const int gMaxnmus     = 30;
 	static const int gMaxneles    = 20;

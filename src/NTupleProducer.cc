@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.153 2012/01/19 18:05:39 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.154 2012/01/20 12:54:00 peruzzi Exp $
 //
 //
 
@@ -176,6 +176,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	perVtxMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perVtxMvaMethod");
 	perEvtMvaWeights = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaWeights");
        	perEvtMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaMethod");
+
+	doVertexingFlag = iConfig.getUntrackedParameter<bool>("tag_doVertexing");
+	if (fIsModelScan) doVertexingFlag=false;
 
 	// Event Selection
 	fMinmupt        = iConfig.getParameter<double>("sel_minmupt");
@@ -845,8 +848,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	fTbeamspotz = (beamSpot.position()).z();
 
 	IndexByPt indexComparator; // Need this to sort collections
-
-	bool doVertexingFlag=true;
 
 
 	/////////////////////////////////////////
