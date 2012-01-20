@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.117 2012/01/18 17:35:01 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.118 2012/01/18 19:19:52 peruzzi Exp $
 //
 //
 
@@ -846,6 +846,12 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   Float_t gv_sumPtLo[gMaxngenvtx];
   Int_t gv_nTkHi[gMaxngenvtx];
   Int_t gv_nTkLo[gMaxngenvtx];
+
+  std::vector<int> diphotons_first;	       
+  std::vector<int> diphotons_second;	       
+  std::vector<std::vector<int> > vtx_dipho_h2gglobe;   
+  std::vector<std::vector<int> > vtx_dipho_mva;	       
+  std::vector<std::vector<int> > vtx_dipho_productrank;
   
   // SC
   int fTnSC;
