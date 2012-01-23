@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.119 2012/01/20 12:53:59 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.120 2012/01/20 13:52:53 peruzzi Exp $
 //
 //
 
@@ -174,7 +174,7 @@ private:
 	static const int gMaxneles    = 20;
 	static const int gMaxntaus    = 20;
 	static const int gMaxnjets    = 100;
-	static const int gMaxntrks    = 500;
+	static const int gMaxntrks    = 800;
 	static const int gMaxnphos    = 50;
         static const int gMaxnconv    = 50;
         static const int gMaxnSC      = 100;
@@ -185,6 +185,7 @@ private:
 	static const int gMaxnpileup  = 50;
 	static const int gMaxnEBhits  = 20;
         static const int gMaxngenvtx = 40;
+        static const int nStoredGenParticles = 1000;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -334,6 +335,25 @@ private:
         float fTSUSYScanTanBeta;
 
 
+// Generator information
+	int fTnGenParticles;
+        int fTgenInfoId[nStoredGenParticles];
+        int fTgenInfoStatus[nStoredGenParticles];
+        float fTgenInfoMass[nStoredGenParticles];
+        int fTgenInfoNMo[nStoredGenParticles];
+        int fTgenInfoNDa[nStoredGenParticles];
+        int fTgenInfoMo1[nStoredGenParticles];
+        int fTgenInfoMo2[nStoredGenParticles];
+        int fTgenInfoDa1[nStoredGenParticles];
+        int fTgenInfoDa2[nStoredGenParticles];
+        float fTgenInfoPt[nStoredGenParticles];
+        float fTgenInfoEta[nStoredGenParticles];
+        float fTgenInfoPhi[nStoredGenParticles];
+        float fTgenInfoPx[nStoredGenParticles];
+        float fTgenInfoPy[nStoredGenParticles];
+        float fTgenInfoPz[nStoredGenParticles];
+        float fTgenInfoM[nStoredGenParticles];
+
 
 	// Pile-up
 	int fTpuNumInteractions;
@@ -447,6 +467,7 @@ private:
 	int fTflagmaxgenphotexc; // Found more than 100 genphotons in event
 	int fTflagmaxgenjetexc;  // Found more than 100 genjets in event
 	int fTflagmaxvrtxexc;    // Found more than 25 vertices in event
+	int fTflagmaxgenpartexc; // Found more than nStoredGenParticles in event
 
 // GenLeptons
 	int   fTngenleptons;      

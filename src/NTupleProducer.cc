@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.155 2012/01/20 13:53:55 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.156 2012/01/20 13:59:45 peruzzi Exp $
 //
 //
 
@@ -849,7 +849,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	IndexByPt indexComparator; // Need this to sort collections
 
-
 	/////////////////////////////////////////
 	/// GenVertices 
 
@@ -1020,7 +1019,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			for(int i=0; i<fTngenleptons; ++i){
 				if( i >= gMaxngenlept){
 					edm::LogWarning("NTP") << "@SUB=analyze"
-						<< "Maximum number of gen-leptons exceeded..";
+						<< "Maximum number of gen-leptons exceeded...";
 					fTflagmaxgenleptexc = 1;
 					fTgoodevent = 1;
 					break;
@@ -3051,6 +3050,52 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	        fTMassChi = xCHI;
 	        fTMassLSP = mLSP;
 
+
+	bool blabalot=false;
+	bool BloatWithGenInfo=true;
+
+	if(BloatWithGenInfo && !fIsRealData) {
+		
+	        Handle<GenParticleCollection> genParticles;
+	        iEvent.getByLabel("genParticles", genParticles);
+	        for(size_t i = 0; i < genParticles->size(); ++ i) {
+		     fTnGenParticles++;
+	             if((int)i>nStoredGenParticles) {
+				edm::LogWarning("NTP") << "@SUB=analyze()"
+					<< "Maximum number of gen particles exceeded";
+				fTflagmaxgenpartexc = 1;
+				break;
+		     }
+	             const GenParticle & p = (*genParticles)[i];
+	             fTgenInfoId[i] = p.pdgId();
+	             fTgenInfoStatus[i] = p.status();
+		     fTgenInfoMo1[i]=-1;
+		     fTgenInfoMo2[i]=-1;
+		     fTgenInfoDa1[i]=-1;
+		     fTgenInfoDa2[i]=-1;
+		     fTgenInfoNMo[i] = p.numberOfMothers();
+	             fTgenInfoNDa[i] = p.numberOfDaughters();
+	             for(int j=0;j<2&&j<fTgenInfoNMo[i];j++) {
+			const Candidate * mom = p.mother(j);
+			if(j==0) fTgenInfoMo1[i] = abs(mom->pdgId());
+			if(j==1) fTgenInfoMo2[i] = abs(mom->pdgId());
+	             }
+	             for(int j=0;j<2&&j<fTgenInfoNDa[i];j++) {
+			const Candidate * dau = p.daughter(j);
+			if(j==0) fTgenInfoDa1[i] = abs(dau->pdgId());
+			if(j==1) fTgenInfoDa2[i] = abs(dau->pdgId());
+	             }
+	             fTgenInfoPt[i] = p.pt();
+	             fTgenInfoEta[i] = p.eta();
+	             fTgenInfoPhi[i] = p.phi();
+	             fTgenInfoPx[i] = p.px();
+	             fTgenInfoPy[i] = p.py();
+	             fTgenInfoPz[i] = p.pz();
+	             fTgenInfoM[i] = p.mass();
+	}
+       }
+
+
 	        Handle<GenParticleCollection> genParticles;
 	        iEvent.getByLabel("genParticles", genParticles);
 	        float gluinomass=0;
@@ -3186,6 +3231,28 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("signMu"           ,&fTSUSYScanMu      ,"signMu/F");
         fEventTree->Branch("A0"               ,&fTSUSYScanA0      ,"A0/F");
         fEventTree->Branch("process"          ,&fTprocess         ,"process/I");
+//        fEventTree->Branch("nStoredGeneratorParticles",(int *) &nStoredGenParticles,"nStoredGeneratorParticles/I");
+
+
+        fEventTree->Branch("FlagMaxGenPartExceeded",&fTflagmaxgenpartexc,"FlagMaxGenPartExceeded/I");
+        fEventTree->Branch("nGenParticles",&fTnGenParticles,"nGenParticles/I");
+        fEventTree->Branch("genInfoId"        ,&fTgenInfoId         ,"genInfoId[nGenParticles]/I");
+        fEventTree->Branch("genInfoStatus"    ,&fTgenInfoStatus     ,"genInfoStatus[nGenParticles]/I");
+        fEventTree->Branch("genInfoMass"      ,&fTgenInfoMass       ,"genInfoMass[nGenParticles]/F");
+        fEventTree->Branch("genInfoNMo"       ,&fTgenInfoNMo        ,"genInfoNMo[nGenParticles]/I");
+        fEventTree->Branch("genInfoNDa"       ,&fTgenInfoNDa        ,"genInfoNDa[nGenParticles]/I");
+        fEventTree->Branch("genInfoMo1"       ,&fTgenInfoMo1        ,"genInfoMo1[nGenParticles]/I");
+        fEventTree->Branch("genInfoMo2"       ,&fTgenInfoMo2        ,"genInfoMo2[nGenParticles]/I");
+        fEventTree->Branch("genInfoDa1"       ,&fTgenInfoDa1        ,"genInfoDa1[nGenParticles]/I");
+        fEventTree->Branch("genInfoDa2"       ,&fTgenInfoDa2        ,"genInfoDa2[nGenParticles]/I");
+        fEventTree->Branch("genInfoPt"        ,&fTgenInfoPt         ,"genInfoPt[nGenParticles]/F");
+        fEventTree->Branch("genInfoEta"       ,&fTgenInfoEta        ,"genInfoEta[nGenParticles]/F");
+        fEventTree->Branch("genInfoPhi"       ,&fTgenInfoPhi        ,"genInfoPhi[nGenParticles]/F");
+        fEventTree->Branch("genInfoPx"        ,&fTgenInfoPx         ,"genInfoPx[nGenParticles]/F");
+        fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
+        fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
+        fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
+
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
 	fEventTree->Branch("PrimVtxx"         ,&fTprimvtxx          ,"PrimVtxx/F");
@@ -3965,6 +4032,24 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTvrtxsumpt, gMaxnvrtx);
 	resetInt(fTvrtxisfake,   gMaxnvrtx);
 
+	fTnGenParticles = 0;
+	resetInt(fTgenInfoStatus,nStoredGenParticles);
+	resetInt(fTgenInfoId,nStoredGenParticles);
+	resetFloat(fTgenInfoMass,nStoredGenParticles);
+	resetInt(fTgenInfoNMo,nStoredGenParticles);
+	resetInt(fTgenInfoNDa,nStoredGenParticles);
+	resetInt(fTgenInfoMo1,nStoredGenParticles);
+	resetInt(fTgenInfoMo2,nStoredGenParticles);
+	resetInt(fTgenInfoDa1,nStoredGenParticles);
+	resetInt(fTgenInfoDa2,nStoredGenParticles);
+	resetFloat(fTgenInfoPt,nStoredGenParticles);
+	resetFloat(fTgenInfoEta,nStoredGenParticles);
+	resetFloat(fTgenInfoPhi,nStoredGenParticles);
+	resetFloat(fTgenInfoPx,nStoredGenParticles);
+	resetFloat(fTgenInfoPy,nStoredGenParticles);
+	resetFloat(fTgenInfoPz,nStoredGenParticles);
+	resetFloat(fTgenInfoM,nStoredGenParticles);
+
 	// Pile-up
 	fTpuNumInteractions    = -999;
 	fTpuNumFilled = -999;
@@ -3976,6 +4061,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTpuSumpT_highpT ,gMaxnpileup);
 	resetFloat(fTpuNtrks_lowpT  ,gMaxnpileup);
 	resetFloat(fTpuNtrks_highpT ,gMaxnpileup);
+
+
 	// resetFloat(fTpuInstLumi     ,gMaxnpileup);
 
 	fTgoodevent         = 0;
@@ -3989,6 +4076,8 @@ void NTupleProducer::resetTree(){
 	fTflagmaxgenphotexc = 0;
 	fTflagmaxgenjetexc = 0;
 	fTflagmaxvrtxexc    = 0;
+	fTflagmaxgenpartexc = 0;
+
 
 	fTnmu         = 0;
 	fTnmutot      = 0;
@@ -4010,6 +4099,7 @@ void NTupleProducer::resetTree(){
 	conv_n        = 0;
 	gv_n          = 0;
 
+	fTnGenParticles = 0;
 	resetInt(fTGenLeptonId       ,gMaxngenlept);
 	resetFloat(fTGenLeptonPt    ,gMaxngenlept);
 	resetFloat(fTGenLeptonEta   ,gMaxngenlept);
