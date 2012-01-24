@@ -8,9 +8,8 @@
 #______________________________________________________________
 
 
-import sys, subprocess, os
-from subprocess import call
-from ROOT import TTree, TFile, gDirectory
+import sys, subprocess, os,re
+#from ROOT import TTree, TFile, gDirectory
 
 usage = "Usage: makeTreeClassBase.py filename.root"
 
@@ -20,89 +19,150 @@ if len(sys.argv) < 2:
 
 FILENAME = sys.argv[1]
 CLASSNAME = 'TreeClassBase'
-HEADERNAME = CLASSNAME + '.h'
-SOURCENAME = CLASSNAME + '.C'
-MAXPFLEPT     = 20
-MAXNJETS      = 100
-MAXNPHOS      = 50
-MAXNGENPHOS   = 100
-MAXNSC        = 100
-rules = { # Reco
-          'NMus'    : 30,
-          'NEles'   : 20,
-          'NPhotons': 50,
-          'NJets'   : MAXNJETS,
-          # PF
-          'PfMuNObjs'  : MAXPFLEPT,
-          'PfMu2NObjs' : MAXPFLEPT,
-          'PfMu3NObjs' : MAXPFLEPT,
-          'PfElNObjs'  : MAXPFLEPT,
-          'PfEl2NObjs' : MAXPFLEPT,
-          'PfEl3NObjs' : MAXPFLEPT,
-          'PfTauNObjs' : MAXPFLEPT,
-          'PfTau2NObjs': MAXPFLEPT,
-          'PfTau3NObjs': MAXPFLEPT,
-          'PF2PATNJets' : MAXNJETS,
-          'PF2PAT2NJets': MAXNJETS,
-          'PF2PAT3NJets': MAXNJETS,
-          # Anti-iso
-          'PfMuAntiIsoNObjs'  : MAXPFLEPT,
-          'PfElAntiIsoNObjs'  : MAXPFLEPT,
-          'PfTauAntiIsoNObjs' : MAXPFLEPT,
-          'PF2PATAntiIsoNJets': MAXNJETS,
-          # Other jets
-          'CANJets' : MAXNJETS,
-          'JPTNJets': MAXNJETS,
-          # Generator
-          'NGenLeptons': 100,
-          'NGenJets'   : 100,
-          'NGenPhotons': 100,
-	  # Photons
-	  'MaxNPhotons':MAXNGENPHOS,
-	  'NSuperClusters':MAXNSC,
-          # Others
-          'NTracks' : 500,
-          'NPaths'  : 10,
-          'NVrtx'   : 25,
-          'NEBhits' : 20,
-          'PUnumInteractions': 50,
-          'PUnumFilled'      : 50
-          }
+HEADERNAME = CLASSNAME + '.hh'
+SOURCENAME = CLASSNAME + '.cc'
 
 #______________________________________________________________
-def makeClass(filename, classname, treename):
-	f = TFile.Open(filename)
-	tree = gDirectory.Get(treename)
-	tree.MakeClass(classname)
-	f.Close()
+def isVector(typename):
+    return (typename[-1] == 's')
+
+#______________________________________________________________
+def typename(vartype):
+    typename = vartype.lower() # protect against "Strings"
+    # Special case for strings
+    if typename.find('string')>-1:
+        typename = 'std::string'
+
+    if isVector(vartype): return 'std::vector<'+typename.rstrip('s')+'>'
+    else: return typename
+        
+#______________________________________________________________
+def declareVars(names,file):
+    indent = 35 # Formatting attempt
+    for k,v in sorted(names.iteritems()):
+        type = typename(v)
+        # Variable
+        spaces = (indent-len(type))*' '+' '
+        file.write(4*' '+type+spaces+' '+k+';\n')
+        # edm::Handle
+        spaces = (indent-14-len(type))*' '+' '
+        file.write(4*' '+'edm::Handle<'+type)
+        if isVector(v): file.write(' >'+spaces+'h'+k+';\n')
+        else: file.write('> '+spaces+'h'+k+';\n')
+        # edm::InputTag
+        spaces = (indent-13)*' '+' '
+        file.write(4*' '+'edm::InputTag'+spaces+'t'+k+';\n')
+
+#______________________________________________________________
+def getVars(names,file,spaces,treename):
+    indent = spaces*' '
+    for k,v in sorted(names.iteritems()):
+        line = 'result &= '+treename+'getByLabel( t'+k+', h'+k+' );\n'
+        file.write(indent+line)
+        line = 'if ( h'+k+'.isValid() ) '+k+' = *h'+k+';\n'
+        file.write(indent+line)
+        
+
+#______________________________________________________________
+def defineLabels(names,file):
+    indent = 25
+    for k,v in sorted(names.iteritems()):
+        spaces = (indent-len(k))*' '
+        file.write(4*' '+'t'+k+spaces+' = edm::InputTag("analyze","'+k+'");\n')
+
+#______________________________________________________________
+def processImpl(rBranches,eBranches):
+    finput = open('src/base/'+SOURCENAME+'.tpl')
+    foutput = open(SOURCENAME,'w')
+    patGet    = ('\s*<GET(\w+)HANDLES>.*')
+    patLabels = ('\s*<DEFINELABELS>.*')
+
+    for line in finput.readlines():
+        m1 = re.match(patGet,line)
+        m2 = re.match(patLabels,line)
+        if m1:
+            if m1.group(1) == 'RUN':
+                getVars(rBranches,foutput,6,'run.')
+            elif m1.group(1) == 'EVENT':
+                getVars(eBranches,foutput,4,'event->')
+            else:
+                print >>sys.stderr,'*** Unknown header pattern:',line
+        elif m2:
+            defineLabels(rBranches,foutput)
+            defineLabels(eBranches,foutput)
+        else:
+            foutput.write(line)
+
+    finput.close()
+    foutput.close()
+    return foutput.name
+
+#______________________________________________________________
+def processHeader(rBranches,eBranches):
+    finput = open('include/base/'+HEADERNAME+'.tpl')
+    foutput = open(HEADERNAME,'w')
+    pattern = ('\s*<(\w+)LEAFDECLARATION>.*')
+
+    for line in finput.readlines():
+        m = re.match(pattern,line)
+        if m:
+            if m.group(1) == 'RUN':
+                declareVars(rBranches,foutput)
+            elif m.group(1) == 'EVENT':
+                declareVars(eBranches,foutput)
+            else:
+                print >>sys.stderr,'*** Unknown header pattern:',line
+        else:
+            foutput.write(line)
+
+    finput.close()
+    foutput.close()
+    return foutput.name
+            
+    
+    
+#______________________________________________________________
+def getBranches(file,tree):
+    cmd = ['edmFileUtil','-P','-t',tree,file]
+    run = subprocess.Popen(cmd,stdout=subprocess.PIPE)
+    output = run.communicate()[0]
+    if run.returncode:
+        print >>sys.stderr,"*** Error while parsing file:",output
+        return []
+    branches = dict()
+    pattern = re.compile(r".*?(\w+)_analyze_(\S+)_NTupleProducer.*")
+    for line in output.split('\n'):
+        m = re.match(pattern,line)
+        if m:
+            branches[m.group(2)] = m.group(1)
+
+    return branches
 
 #______________________________________________________________
 if __name__=='__main__':
-	print 'makeTreeClassBase >> Creating MakeClass from ' + FILENAME
-	makeClass(FILENAME, CLASSNAME, 'analyze/Analysis')
 
-	headerFile = open(HEADERNAME, 'r')
-	headerLines = headerFile.readlines()
-	headerFile = open(HEADERNAME, 'w')
-	
-	for line in headerLines:
-                for key,val in rules.iteritems():
-                    pos = line.find('//['+key+']')
-                    if ( pos != -1):
-                       line = line[0:line.find('[')+1] + str(val) + line[pos-5:len(line)]
-		headerFile.write(line)
-	
-	headerFile.close()
+#     # Check location
+#     if os.getcwd().find('macros') < 0:
+#         print 'This script has to be run in the \'macros\' directory'
+#         print 'where you wish to update the TreeClassBase class'
+#         exit(2)
 
-	sourceFile = open(SOURCENAME, 'r')
-	sourceLines = sourceFile.readlines()
-	sourceFile = open(SOURCENAME, 'w')
+    # Check input file
+    if not os.path.exists(FILENAME):
+        print 'File',FILENAME,'does not seem to exist'
+        exit(3)
+    
+    print 'Processing input file...'
+    runBranches = getBranches(FILENAME,'Runs')
+    eventBranches = getBranches(FILENAME,'Events')
+    print '  -> found',len(runBranches),' run branches',
+    print 'and',len(eventBranches),'event branches'
+
+    # Process templates and write to output files
+    hName = processHeader(runBranches,eventBranches)
+    print '  -> Wrote',hName
+    iName = processImpl(runBranches,eventBranches)
+    print '  -> Wrote',iName
 	
-	sourceLines[1] = '#include "base/' + HEADERNAME + '"\n'
-	for line in sourceLines:
-		sourceFile.write(line)
-		
-	sourceFile.close()
-	
-	call(['mv', '-f', HEADERNAME, 'include/base/'])
-	call(['mv', '-f', SOURCENAME, 'src/base/'])
+    subprocess.call(['mv', '-vf', hName, 'include/base/'])
+    subprocess.call(['mv', '-vf', iName, 'src/base/'])

@@ -14,21 +14,21 @@
 
 class UserAnalysis : public UserAnalysisBase{
 public:
-	UserAnalysis(TreeReader *tr = NULL);
-	virtual ~UserAnalysis();
+    UserAnalysis(TreeReader *tr = NULL);
+    virtual ~UserAnalysis();
 
-	void Begin();
-	void Analyze();
-	void End();
+    void Begin();
+    void Analyze();
+    void End();
 
 private:
 	
-	// file for histograms:
-	TFile *fHistFile;
+    // file for histograms:
+    TFile *fHistFile;
 	
-	TH1D *fHjetMult;
-	TH1D *fHjetPt;
-	TH1D *fHmuMult;
-	TH1D *fHmuPt;
+    TH1D *fHjetMult;
+    TH1D *fHjetPt;
+    TH1D *fHmuMult;
+    TH1D *fHmuPt;
 };
 #endif

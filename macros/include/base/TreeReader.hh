@@ -1,30 +1,34 @@
-#ifndef TreeReader_hh
-#define TreeReader_hh
+#ifndef TreeReader_h
+#define TreeReader_h
+
+//
+// Interface to TreeClassBase
+//
 
 
-#include <vector>
-#include <cmath>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include "DataFormats/FWLite/interface/Handle.h"   
+#include "DataFormats/FWLite/interface/ChainEvent.h"
 
-#include <TCanvas.h>
-#include <TTree.h>
-#include <TStyle.h>
-#include <TLatex.h>
-#include <TLeaf.h>
-#include <TBranch.h>
-
-#include "TreeClassBase.h"
-
-class TreeReader : public TreeClassBase{
+#include "base/TreeClassBase.hh"
+    
+class TreeReader : public TreeClassBase {
 public:
-	TreeReader(TTree *tree = NULL);
-	virtual ~TreeReader();
-	inline virtual Long64_t GetEntries(){return fChain->GetEntries();};
-  inline virtual bool isChain() { return fIsChain; }
-private:
-  bool fIsChain;
-	
+    TreeReader(const std::vector<std::string>& fileList) : TreeClassBase(fileList) {}
+    virtual ~TreeReader() {}
+
+    // Load information
+    virtual const Int_t GetEntry(const Long64_t entry);
+    virtual const bool LoadAll(void);
+
+    // Getters
+    inline virtual const Long64_t GetEntries() const { return fEvent->size(); };
+
+    // Looping interface
+    virtual const TreeReader& ToBegin();
+    inline virtual bool AtEnd() { return fEvent->atEnd(); }
+    virtual const TreeReader &operator++();
+
+    
 };
+
 #endif

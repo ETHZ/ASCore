@@ -10,14 +10,14 @@
 
 class UserAnalyzer : public TreeAnalyzerBase {
 public:
-	UserAnalyzer(TTree *tree = 0);
-	virtual ~UserAnalyzer();
-	void BeginJob();
-	void EndJob();
-	void Loop();
+    UserAnalyzer(std::vector<std::string>& fileList);
+    virtual ~UserAnalyzer();
+    void BeginJob();
+    void EndJob();
+    void Loop();
 
 private:
-	UserAnalysis *fUserAnalysis;
+    UserAnalysis *fUserAnalysis;
 
 };
 #endif
