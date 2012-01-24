@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.113 2011/11/25 18:46:16 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114 2011/12/15 09:31:32 pnef Exp $
 //
 //
 
@@ -31,7 +31,7 @@ Implementation:
 // Framework include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -74,872 +74,865 @@ Implementation:
 typedef math::XYZTLorentzVector LorentzVector;
 using namespace reco;
 
-class NTupleProducer : public edm::EDAnalyzer {
+class NTupleProducer : public edm::EDFilter {
 public:
-	explicit NTupleProducer(const edm::ParameterSet&);
-	~NTupleProducer();
+  explicit NTupleProducer(const edm::ParameterSet&);
+  ~NTupleProducer() {}
+  
+  virtual void beginJob(void); //336  beginJob(const edm::EventSetup&)
+  virtual bool beginRun(edm::Run&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
+  virtual void endJob(void);
+  virtual bool endRun(edm::Run&, const edm::EventSetup&);
+  std::vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
+  const int matchJet(const reco::Jet *jet);
+  
+  void declareProducts(void);
+  void resetProducts(void);        // Called for each event
+  void resetRunProducts(void);     // Called in beginRun
+  void putProducts( edm::Event& ); // Called for each event
+  void putRunProducts( edm::Event& ); // Called in endRun
+  
+  void resetDouble(double *v, unsigned int size = 20);
+  void resetFloat(float *v, unsigned int size = 20);
+  void resetInt(int *v, unsigned int size = 20);
+  void resetTree();
 
-	virtual void beginJob(); //336  beginJob(const edm::EventSetup&)
-	virtual void beginRun(const edm::Run&, const edm::EventSetup&);
-	virtual void analyze(const edm::Event&, const edm::EventSetup&);
-	virtual void endJob();
-	virtual void endRun(const edm::Run&, const edm::EventSetup&);
-	std::vector<const reco::GenParticle*> matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent);
-	const int matchJet(const reco::Jet *jet);
-	void resetDouble(double *v, unsigned int size = 20);
-	void resetFloat(float *v, unsigned int size = 20);
-	void resetInt(int *v, unsigned int size = 20);
-	void resetTree();
 
 private:
 
-	virtual void ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr);
-	virtual void PhotonElectronDuplicate(std::vector<const SuperCluster*>, std::vector<const SuperCluster*>);
-	virtual void ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-	virtual void PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-	virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
-	virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
-	virtual float CaloTowerSizePhi(float eta);
-	virtual float CaloTowerSizeEta(float eta);
-	virtual bool IsInPhiWindow(float phi, float phimin, float phimax);
-	virtual float DeltaPhiSigned(float v1, float v2);
-	virtual float GetPhiMin(float phi1, float phi2);
-	virtual float GetPhiMax(float phi1, float phi2);
-
-        typedef std::pair<int,double> OrderPair;
-	struct IndexByPt {
-		const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
-			return j1.second > j2.second;
-		}
-	};
-
+  virtual void ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr);
+  virtual void PhotonElectronDuplicate(std::vector<const SuperCluster*>, std::vector<const SuperCluster*>);
+  virtual void ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+  virtual void PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
+  virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
+  virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
+  virtual float CaloTowerSizePhi(float eta);
+  virtual float CaloTowerSizeEta(float eta);
+  virtual bool IsInPhiWindow(float phi, float phimin, float phimax);
+  virtual float DeltaPhiSigned(float v1, float v2);
+  virtual float GetPhiMin(float phi1, float phi2);
+  virtual float GetPhiMax(float phi1, float phi2);
+  
+  typedef std::pair<int,double> OrderPair;
+  struct IndexByPt {
+    const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
+      return j1.second > j2.second;
+    }
+  };
+  
   double DeltaR(double phi1, double phi2, double eta1, double eta2);
-  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
-//   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
-//   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
+  //void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
+  //   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
+  //   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
   reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;
   int FindPFCandType(int id);
   bool isInPhiCracks(double phi, double eta);
   bool isInEtaCracks(double eta);
   bool CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i);
   double DeltaPhi(double phi1, double phi2);
-
+  
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
 
 
-// ----------member data ---------------------------
-	edm::Service<TFileService> fTFileService;
-        AdaptiveVertexFitter avFitter;
+  // ----------member data ---------------------------
+  edm::Service<TFileService> fTFileService;
+  AdaptiveVertexFitter avFitter;
 
   //for OOT reweighting in Summer11_S3 samples
   edm::LumiReWeighting LumiWeights_;
 
+//   std::vector<JetFillerBase*>     jetFillers;
+//   std::vector<PatMuonFiller*>     muonFillers;
+//   std::vector<PatElectronFiller*> electronFillers;
+//   std::vector<PatTauFiller*>      tauFillers;
 
-	std::vector<JetFillerBase*>     jetFillers;
-        std::vector<PatMuonFiller*>     muonFillers;
-        std::vector<PatElectronFiller*> electronFillers;
-        std::vector<PatTauFiller*>      tauFillers;
+  bool fIsRealData;
+  bool fIsModelScan;
+  int fNTotEvents;
+  int fNFillTree;
 
-	bool fIsRealData;
-	bool fIsModelScan;
-	int fNTotEvents;
-	int fNFillTree;
+  static const int gMaxNMus     = 30;
+  static const int gMaxNEles    = 20;
+  static const int gMaxNTaus    = 20;
+  static const int gMaxNJets    = 100;
+  static const int gMaxNTrks    = 500;
+  static const int gMaxNPhotons = 50;
+  static const int gMaxNSC      = 100;
+  static const int gMaxNGenLept = 100;
+  static const int gMaxNGenPhot = 100;
+  static const int gMaxNGenJets = 100;
+  static const int gMaxNVrtx    = 25;
+  static const int gMaxNPileup  = 50;
+  static const int gMaxNEBhits  = 20;
 
-	static const int gMaxnmus     = 30;
-	static const int gMaxneles    = 20;
-	static const int gMaxntaus    = 20;
-	static const int gMaxnjets    = 100;
-	static const int gMaxntrks    = 500;
-	static const int gMaxnphos    = 50;
-        static const int gMaxnSC      = 100;
-	static const int gMaxngenlept = 100;
-	static const int gMaxngenphot = 100;
-	static const int gMaxngenjets = 100;
-	static const int gMaxnvrtx    = 25;
-	static const int gMaxnpileup  = 50;
-	static const int gMaxnEBhits  = 20;
+  edm::InputTag fMuonTag;
+  edm::InputTag fElectronTag;
+  std::string fEleIdWP;
+  edm::InputTag fMuIsoDepTkTag;
+  edm::InputTag fMuIsoDepECTag;
+  edm::InputTag fMuIsoDepHCTag;
+  edm::InputTag fJetTag;
+  std::string fJetCorrs;
+  edm::InputTag fBtag1Tag;
+  edm::InputTag fBtag2Tag;
+  edm::InputTag fBtag3Tag;
+  edm::InputTag fBtag4Tag;
+  edm::InputTag fRawCaloMETTag;
+  edm::InputTag fTCMETTag;
+  edm::InputTag fPFMETTag;
+  edm::InputTag fPFMETPATTag;
+  edm::InputTag fCorrCaloMETTag;
+  edm::InputTag fGenMETTag;
+  edm::InputTag fVertexTag;
+  edm::InputTag fTrackTag;
+  edm::InputTag fPhotonTag;
+  edm::InputTag fCalTowTag;
+  edm::InputTag fEBRecHitsTag;
+  edm::InputTag fEERecHitsTag;
+  edm::InputTag fGenPartTag;
+  edm::InputTag fGenJetTag;
+  edm::InputTag fL1TriggerTag;
+  edm::InputTag fHLTTrigEventTag;
+  edm::InputTag fHBHENoiseResultTag;
+  edm::InputTag fHBHENoiseResultTagIso;
+  edm::InputTag fSrcRho;
+  edm::InputTag fSrcRhoPFnoPU;
+  edm::InputTag fpdfWeightTag;
+  edm::InputTag pfphotonsProducerTag;
+  edm::InputTag pfProducerTag;
+  edm::InputTag fSCTagBarrel;
+  edm::InputTag fSCTagEndcap;
 
-	edm::InputTag fMuonTag;
-	edm::InputTag fElectronTag;
-        std::string fEleIdWP;
-	edm::InputTag fMuIsoDepTkTag;
-	edm::InputTag fMuIsoDepECTag;
-	edm::InputTag fMuIsoDepHCTag;
-	edm::InputTag fJetTag;
-        std::string fJetCorrs;
-	edm::InputTag fBtag1Tag;
-	edm::InputTag fBtag2Tag;
-	edm::InputTag fBtag3Tag;
-	edm::InputTag fBtag4Tag;
-	edm::InputTag fRawCaloMETTag;
-	edm::InputTag fTCMETTag;
-	edm::InputTag fPFMETTag;
-	edm::InputTag fPFMETPATTag;
-	edm::InputTag fCorrCaloMETTag;
-	edm::InputTag fGenMETTag;
-	edm::InputTag fVertexTag;
-	edm::InputTag fTrackTag;
-	edm::InputTag fPhotonTag;
-	edm::InputTag fCalTowTag;
-	edm::InputTag fEBRecHitsTag;
-	edm::InputTag fEERecHitsTag;
-	edm::InputTag fGenPartTag;
-	edm::InputTag fGenJetTag;
-	edm::InputTag fL1TriggerTag;
-	edm::InputTag fHLTTrigEventTag;
-	edm::InputTag fHBHENoiseResultTag;
-	edm::InputTag fHBHENoiseResultTagIso;
-	edm::InputTag fSrcRho;
-	edm::InputTag fSrcRhoPFnoPU;
-	edm::InputTag fpdfWeightTag;
-        edm::InputTag pfphotonsProducerTag;
-        edm::InputTag pfProducerTag;
-        edm::InputTag fSCTagBarrel;
-        edm::InputTag fSCTagEndcap;
+  // Selection cuts
+  float fMinMuPt;
+  float fMaxMuEta;
+  float fMinElPt;
+  float fMaxElEta;
+  float fMinCorJPt;
+  float fMinRawJPt;
+  float fMaxJEta;
+  float fMinJEMFrac;
 
-	int NPdfs;
-	float fTpdfW[100];
-	float fTpdfWsum;
-	int fTprocess;
+  float fMinTrkPt;
+  float fMaxTrkEta;
+  float fMaxTrkNChi2;
+  int	fMinTrkNHits;
 
-	float fMinmupt;
-	float fMaxmueta;
-	float fMinelpt;
-	float fMaxeleta;
-	float fMincorjpt;
-	float fMinrawjpt;
-	float fMaxjeta;
-	float fMinjemfrac;
-	float fMintrkpt;
-	float fMaxtrketa;
-	float fMaxtrknchi2;
-	int	fMintrknhits;
-	float fMinphopt;
-	float fMaxphoeta;
-        float fMinSCraw;
-
-	float fMingenleptpt; 
-	float fMaxgenlepteta;
-	float fMingenphotpt; 
-	float fMaxgenphoteta;
-	float fMingenjetpt;
-	float fMaxgenjeteta;
+  float fMinPhotonPt;
+  float fMaxPhotonEta;
+  float fMinSCraw;
+  float fMinEBRechitE; 
+  
+  float fMinGenLeptPt; 
+  float fMaxGenLeptEta;
+  float fMinGenPhotPt; 
+  float fMaxGenPhotEta;
+  float fMinGenJetPt;
+  float fMaxGenJetEta;
 	
-	float fBtagMatchdeltaR;
+  float fBtagMatchDeltaR;
 
-	TH1I *fHhltstat; // Added to keep track of trigger names
-	TH1I *fHl1physstat;
-	TH1I *fHl1techstat;
-	bool fFirstevent;
+  bool fFirstevent;
 
-        // Trigger stuff
-        std::string fProcessName; // process name of (HLT) process for which to get HLT configuration
-	HLTConfigProvider fHltConfig;
+  // Trigger stuff
+  HLTConfigProvider fHltConfig;
 
-        ////////////////////////////////////////////////////////
-        // Trees:
-	TTree *fRunTree;
+  /////////////////////////////////////////////////////////////////////////
+  // Products stored in the output file
 
-	int fRTrunnumber;
-	float fRTextxslo;
-	float fRTextxsnlo;
-	float fRTintxs;
+  ////////////////////////////////////////////////////////
+  // Run information:
+  std::auto_ptr<float> fRExtXSecLO;
+  std::auto_ptr<float> fRExtXSecNLO;
+  std::auto_ptr<float> fRIntXSec;
 
-	float fRTMinmupt;
-	float fRTMaxmueta;
-	float fRTMinelpt;
-	float fRTMaxeleta;
-	float fRTMinjpt;
-	float fRTMinrawjpt;
-	float fRTMaxjeta;
-	float fRTMinjemfrac;
+  std::auto_ptr<float> fRMinMuPt;
+  std::auto_ptr<float> fRMaxMuEta;
+  std::auto_ptr<float> fRMinElPt;
+  std::auto_ptr<float> fRMaxElEta;
+  std::auto_ptr<float> fRMinJPt;
+  std::auto_ptr<float> fRMinRawJPt;
+  std::auto_ptr<float> fRMaxJEta;
+  std::auto_ptr<float> fRMinJEMFrac;
 
-	float fRTMintrkpt;
-	float fRTMaxtrketa;
-	float fRTMaxtrknchi2;
-	int fRTMintrknhits;
+  std::auto_ptr<float> fRMinTrkPt;
+  std::auto_ptr<float> fRMaxTrkEta;
+  std::auto_ptr<float> fRMaxTrkNChi2;
+  std::auto_ptr<int>   fRMinTrkNHits;
 
-	float fRTMinphopt;
-	float fRTMaxphoeta;
-        float fRTMinSCraw;
+  std::auto_ptr<float> fRMinPhotonPt;
+  std::auto_ptr<float> fRMaxPhotonEta;
+  std::auto_ptr<float> fRMinSCraw;
+  std::auto_ptr<float> fRMinEBRechitE;
 
-
-	int fRTmaxnmu;
-	int fRTmaxnel;
-	int fRTmaxnjet;
-	int fRTmaxntrk;
-	int fRTmaxnphot;
-
-	float fMinebrechitE; 
-
-	TTree *fEventTree;
-
-	// General event information
-	int fTrunnumber;
-	unsigned int fTeventnumber;
-	int fTlumisection;
-	float fTpthat;
-	float fTqcdPartonicHT;
-	int fTsigprocid;
-	float fTpdfscalePDF;
-	int fTpdfid1;
-	int fTpdfid2;
-	float fTpdfx1;
-	float fTpdfx2;
-	float fTpdfxPDF1;
-	float fTpdfxPDF2;
-	float fTgenweight;
-	float fTextxslo;
-	float fTintxs;
-	float fTweight;
-        float fTMassGlu;
-        float fTMassChi;
-        float fTMassLSP;
-        float fTSUSYScanM0;
-        float fTSUSYScanM12;
-        float fTSUSYScanA0;
-        float fTSUSYScanMu;
-        float fTSUSYScanCrossSection;
-        float fTSUSYScanTanBeta;
-
-
-
-	// Pile-up
-	int fTpuNumInteractions;
-	int fTpuNumTrueInteractions;
-        int fTpuNumFilled;
-        int fTpuOOTNumInteractionsLate;
-        int fTpuOOTNumInteractionsEarly;
-
-	float fTpuZpositions[gMaxnpileup];
-	float fTpuSumpT_lowpT[gMaxnpileup];
-	float fTpuSumpT_highpT[gMaxnpileup];
-	float fTpuNtrks_lowpT[gMaxnpileup];
-	float fTpuNtrks_highpT[gMaxnpileup];
-	float fTrho; // rho from L1FastJetCorrection
-	float fTrhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
-	// float fTpuInstLumi[gMaxnpileup];
-        TH1I* fHpileupstat;
-        TH1I* fHtruepileupstat;
-  	float fTpuWeightTotal;
-  	float fTpuWeightInTime;
-	std::vector<std::string> fTPileUpHistoData;
-	std::vector<std::string> fTPileUpHistoMC;
-
-	// ECAL & HCAL Noise
-	int fTHBHENoiseFlag;
-	int fTHBHENoiseFlagIso;
-	int fRecovRecHitFilterFlag;
-
-	int fTnEBhits;
-	float fTEBrechitE[gMaxnEBhits];
-	float fTEBrechitPt[gMaxnEBhits];
-	float fTEBrechitEta[gMaxnEBhits];
-	float fTEBrechitPhi[gMaxnEBhits];
-	float fTEBrechitChi2[gMaxnEBhits];
-	float fTEBrechitTime[gMaxnEBhits];
-	float fTEBrechitE4oE1[gMaxnEBhits];
-	float fTEBrechitE2oE9[gMaxnEBhits];
+  std::auto_ptr<float> fRMinGenLeptPt;
+  std::auto_ptr<float> fRMaxGenLeptEta;
+  std::auto_ptr<float> fRMinGenPhotPt; 
+  std::auto_ptr<float> fRMaxGenPhotEta;
+  std::auto_ptr<float> fRMinGenJetPt;
+  std::auto_ptr<float> fRMaxGenJetEta;
 	
-	int fTecalDeadTPFilterFlag;
-	// int fTEcalDeadCellBEFlag;
-	// static const unsigned int gMaxnECALGapClusters = 50;
-	// unsigned int fTnECALGapClusters;
-	// float fTEcalGapBE[gMaxnECALGapClusters];
-	// int fTEcalGapClusterSize[gMaxnECALGapClusters];
-	//
+  std::auto_ptr<float> fRBtagMatchDeltaR;
+
+  std::auto_ptr<int>   fRMaxNMus;
+  std::auto_ptr<int>   fRMaxNEles;
+  std::auto_ptr<int>   fRMaxNJets;
+  std::auto_ptr<int>   fRMaxNTrks;
+  std::auto_ptr<int>   fRMaxNPhotons;    
+  std::auto_ptr<int>   fRMaxNSC;
+  std::auto_ptr<int>   fRMaxNGenLept;
+  std::auto_ptr<int>   fRMaxNGenPhot;
+  std::auto_ptr<int>   fRMaxNGenJets;
+  std::auto_ptr<int>   fRMaxNVrtx;
+  std::auto_ptr<int>   fRMaxNPileup;
+  std::auto_ptr<int>   fRMaxNEBhits; 
+
+  std::auto_ptr<std::vector<std::string> > fRHLTNames;  // Full HLT menu
+  std::auto_ptr<std::vector<std::string> > fRL1PhysMenu;
+  std::auto_ptr<std::vector<std::string> > fRHLTLabels; // HLT Paths to store the triggering objects of
+
+  std::auto_ptr<std::vector<std::string> > fRPileUpData;
+  std::auto_ptr<std::vector<std::string> > fRPileUpMC;
+
+
+
+  ////////////////////////////////////////////////////////
+  // Event information:
+  // General event information
+  std::auto_ptr<int>   fTRun;
+  std::auto_ptr<int>   fTEvent;
+  std::auto_ptr<int>   fTLumiSection;
+
+  std::auto_ptr<std::vector<float> >  fTpdfW;
+  std::auto_ptr<float>  fTpdfWsum;
+  std::auto_ptr<int>    fTNPdfs;
+  std::auto_ptr<int>    fTprocess;
+
+
+  // Generator event information
+  std::auto_ptr<float> fTPtHat;
+  std::auto_ptr<float> fTQCDPartonicHT;
+  std::auto_ptr<int>   fTSigProcID;
+  std::auto_ptr<float> fTPDFScalePDF;
+  std::auto_ptr<int>   fTPDFID1;
+  std::auto_ptr<int>   fTPDFID2;
+  std::auto_ptr<float> fTPDFx1;
+  std::auto_ptr<float> fTPDFx2;
+  std::auto_ptr<float> fTPDFxPDF1;
+  std::auto_ptr<float> fTPDFxPDF2;
+  std::auto_ptr<float> fTGenWeight;
+  std::auto_ptr<float> fTWeight;
+  std::auto_ptr<float> fTMassGlu;
+  std::auto_ptr<float> fTMassChi;
+  std::auto_ptr<float> fTMassLSP;
+  std::auto_ptr<float> fTM0;
+  std::auto_ptr<float> fTM12;
+  std::auto_ptr<float> fTA0;
+  std::auto_ptr<float> fTsignMu;
+
+  // Pile-up event info
+  std::auto_ptr<int>  fTPUnumInteractions;
+  std::auto_ptr<int>  fTPUnumTrueInteractions;
+  std::auto_ptr<int>  fTPUnumFilled;
+  std::auto_ptr<int>  fTPUOOTnumInteractionsEarly;
+  std::auto_ptr<int>  fTPUOOTnumInteractionsLate;
+
+  std::auto_ptr<std::vector<float> >  fTPUzPositions;
+  std::auto_ptr<std::vector<float> >  fTPUsumPtLowPt;
+  std::auto_ptr<std::vector<float> >  fTPUsumPtHighPt;
+  std::auto_ptr<std::vector<float> >  fTPUnTrksLowPt;
+  std::auto_ptr<std::vector<float> >  fTPUnTrksHighPt;
+  std::auto_ptr<float>  fTRho; // rho from L1FastJetCorrection
+  std::auto_ptr<float>  fTRhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
+
+  std::auto_ptr<float>  fTPUWeightTotal;
+  std::auto_ptr<float>  fTPUWeightInTime;
+
+  // ECAL & HCAL Noise
+  std::auto_ptr<int> fTHBHENoiseFlag;
+  std::auto_ptr<int> fTHBHENoiseFlagIso;
+  std::auto_ptr<int> fTRecovRecHitFilterFlag;
+  
+  std::auto_ptr<int>  fTNEBhits;
+  std::auto_ptr<std::vector<float> >  fTEBrechitE;
+  std::auto_ptr<std::vector<float> >  fTEBrechitPt;
+  std::auto_ptr<std::vector<float> >  fTEBrechitEta;
+  std::auto_ptr<std::vector<float> >  fTEBrechitPhi;
+  std::auto_ptr<std::vector<float> >  fTEBrechitChi2;
+  std::auto_ptr<std::vector<float> >  fTEBrechitTime;
+  std::auto_ptr<std::vector<float> >  fTEBrechitE4oE1;
+  std::auto_ptr<std::vector<float> >  fTEBrechitE2oE9;
+
+  std::auto_ptr<int>  fTEcalDeadTPFilterFlag;
+  // int fTEcalDeadCellBEFlag;
+  // static const unsigned int gMaxnECALGapClusters = 50;
+  // unsigned int fTnECALGapClusters;
+  // float fTEcalGapBE[gMaxnECALGapClusters];
+  // int fTEcalGapClusterSize[gMaxnECALGapClusters];
 	
-	// CSCBeamHalo
-	int fTcscTightHaloID;
+  // CSCBeamHalo 
+  std::auto_ptr<int>  fTCSCTightHaloID;
 
-	int fTgoodvtx;
-	float fTprimvtxx;
-	float fTprimvtxy;
-	float fTprimvtxz;
-	float fTprimvtxrho;
-	float fTprimvtxxE;
-	float fTprimvtxyE;
-	float fTprimvtxzE;
-	float fTpvtxznchi2;
-	float fTpvtxndof;
-	int   fTpvtxisfake;
-	float fTpvtxptsum;
+  // Vertex information
+  std::auto_ptr<int>    fTPrimVtxGood;
+  std::auto_ptr<float>  fTPrimVtxx;
+  std::auto_ptr<float>  fTPrimVtxy;
+  std::auto_ptr<float>  fTPrimVtxz;
+  std::auto_ptr<float>  fTPrimVtxRho;
+  std::auto_ptr<float>  fTPrimVtxxE;
+  std::auto_ptr<float>  fTPrimVtxyE;
+  std::auto_ptr<float>  fTPrimVtxzE;
+  std::auto_ptr<float>  fTPrimVtxNChi2;
+  std::auto_ptr<float>  fTPrimVtxNdof;
+  std::auto_ptr<int>    fTPrimVtxIsFake;
+  std::auto_ptr<float>  fTPrimVtxPtSum;
 
-	float fTbeamspotx;
-	float fTbeamspoty;
-	float fTbeamspotz;
+  std::auto_ptr<float>  fTBeamspotx;
+  std::auto_ptr<float>  fTBeamspoty;
+  std::auto_ptr<float>  fTBeamspotz;
 
-	int fTnvrtx;
-	float fTvrtxx[gMaxnvrtx];
-	float fTvrtxy[gMaxnvrtx];
-	float fTvrtxz[gMaxnvrtx];
-	float fTvrtxxE[gMaxnvrtx];
-	float fTvrtxyE[gMaxnvrtx];
-	float fTvrtxzE[gMaxnvrtx];
-	float fTvrtxndof[gMaxnvrtx];
-	float fTvrtxchi2[gMaxnvrtx];
-	float fTvrtxntrks[gMaxnvrtx];
-	float fTvrtxsumpt[gMaxnvrtx];
-	int fTvrtxisfake[gMaxnvrtx];
+  std::auto_ptr<int>  fTNVrtx;
+  std::auto_ptr<std::vector<float> >  fTVrtxX;
+  std::auto_ptr<std::vector<float> >  fTVrtxY;
+  std::auto_ptr<std::vector<float> >  fTVrtxZ;
+  std::auto_ptr<std::vector<float> >  fTVrtxXE;
+  std::auto_ptr<std::vector<float> >  fTVrtxYE;
+  std::auto_ptr<std::vector<float> >  fTVrtxZE;
+  std::auto_ptr<std::vector<float> >  fTVrtxNdof;
+  std::auto_ptr<std::vector<float> >  fTVrtxChi2;
+  std::auto_ptr<std::vector<float> >  fTVrtxNtrks;
+  std::auto_ptr<std::vector<float> >  fTVrtxSumPt;
+  std::auto_ptr<std::vector<int> >  fTVrtxIsFake;
+  
+  std::auto_ptr<int>  fTNCaloTowers;
 
-	int fTNCaloTowers;
+  // Trigger
+  static const unsigned int gMaxHltBits = 400;
+  static const unsigned int gMaxL1PhysBits = 128;
+  static const unsigned int gMaxL1TechBits = 64;
 
-// Trigger
-	static const unsigned int gMaxhltbits = 500;
-	static const unsigned int gMaxl1physbits = 128;
-	static const unsigned int gMaxl1techbits = 64;
-	int fTHLTres[gMaxhltbits];
-	int fTL1physres[gMaxl1physbits];
-	int fTL1techres[gMaxl1techbits];
-	int fTHLTprescale[gMaxhltbits];
-	std::vector<std::string> fTHLTmenu;
-	std::vector<std::string> fTL1physmenu;
+  std::auto_ptr<std::vector<int> >  fTHLTResults;
+  std::auto_ptr<std::vector<int> >  fTHLTPrescale;
+  std::auto_ptr<std::vector<int> >  fTL1PhysResults;
+  std::auto_ptr<std::vector<int> >  fTL1TechResults;
 
-	static const unsigned int gMaxhltnobjs  = 10;
-	std::vector<std::string> fTHltLabels; // HLT Paths to store the triggering objects of
-	unsigned int fTNpaths;
-	unsigned int fTNHLTobjects;
-	int**    fTHLTObjectID;
-	float** fTHLTObjectPt;
-	float** fTHLTObjectEta;
-	float** fTHLTObjectPhi;
+  static const unsigned int gMaxHltNObjs  = 10;
+  std::auto_ptr<int>  fTNHLTObjs;
+  std::auto_ptr<std::vector<int> >  fTHLTObjectID[10];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectPt[10];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectEta[10];
+  std::auto_ptr<std::vector<float> >  fTHLTObjectPhi[10];
 
-// Flags
-	int fTgoodevent;         // 0 for good events, 1 for bad events
-	int fTflagmaxmuexc;      // Found more than 20 muons in event (0 is good, 1 is bad)
-	int fTflagmaxelexc;      // Found more than 20 electrons in event
-	int fTflagmaxujetexc;    // Found more than 50 jets in event
-	int fTflagmaxjetexc;     // Found more than 50 uncorrected jets in event
-	int fTflagmaxtrkexc;     // Found more than 500 tracks in event
-	int fTflagmaxphoexc;     // Found more than 500 photons in event
-	int fTflagmaxgenleptexc; // Found more than 100 genleptons in event
-	int fTflagmaxgenphotexc; // Found more than 100 genphotons in event
-	int fTflagmaxgenjetexc;  // Found more than 100 genjets in event
-	int fTflagmaxvrtxexc;    // Found more than 25 vertices in event
+  unsigned int fTNpaths;
 
-// GenLeptons
-	int   fTngenleptons;      
-	int   fTGenLeptonId[gMaxngenlept];      
-	float fTGenLeptonPt[gMaxngenlept];      
-	float fTGenLeptonEta[gMaxngenlept];     
-	float fTGenLeptonPhi[gMaxngenlept];     
-	int   fTGenLeptonMId[gMaxngenlept];     
-	int   fTGenLeptonMStatus[gMaxngenlept]; 
-	float fTGenLeptonMPt[gMaxngenlept];     
-	float fTGenLeptonMEta[gMaxngenlept];    
-	float fTGenLeptonMPhi[gMaxngenlept];    
-	int   fTGenLeptonGMId[gMaxngenlept];    
-	int   fTGenLeptonGMStatus[gMaxngenlept];
-	float fTGenLeptonGMPt[gMaxngenlept];    
-	float fTGenLeptonGMEta[gMaxngenlept];   
-	float fTGenLeptonGMPhi[gMaxngenlept]; 
+  // Flags
+  std::auto_ptr<int>  fTGoodEvent;         // 0 for good events, 1 for bad events                     
+  std::auto_ptr<int>  fTMaxMuExceed;       // Found more than 20 muons in event (0 is good, 1 is bad) 
+  std::auto_ptr<int>  fTMaxElExceed;       // Found more than 20 electrons in event                   
+  std::auto_ptr<int>  fTMaxJetExceed;      // Found more than 50 jets in event                        
+  std::auto_ptr<int>  fTMaxUncJetExceed;   // Found more than 50 uncorrected jets in event            
+  std::auto_ptr<int>  fTMaxTrkExceed;      // Found more than 500 tracks in event                     
+  std::auto_ptr<int>  fTMaxPhotonsExceed;  // Found more than 500 photons in event                    
+  std::auto_ptr<int>  fTMaxGenLepExceed;   // Found more than 100 genleptons in event                 
+  std::auto_ptr<int>  fTMaxGenPhoExceed;   // Found more than 100 genphotons in event                 
+  std::auto_ptr<int>  fTMaxGenJetExceed;   // Found more than 100 genjets in event                    
+  std::auto_ptr<int>  fTMaxVerticesExceed; // Found more than 25 vertices in event                    
+
+  // GenLeptons
+  std::auto_ptr<int>  fTNGenLeptons;
+  std::auto_ptr<std::vector<int> >  fTGenLeptonID;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonPt;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonEta;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonPhi;
+  std::auto_ptr<std::vector<int> >  fTGenLeptonMID;
+  std::auto_ptr<std::vector<int> >  fTGenLeptonMStatus;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonMPt;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonMEta;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonMPhi;
+  std::auto_ptr<std::vector<int> >  fTGenLeptonGMID;
+  std::auto_ptr<std::vector<int> >  fTGenLeptonGMStatus;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonGMPt;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonGMEta;
+  std::auto_ptr<std::vector<float> >  fTGenLeptonGMPhi;
 
   // GenPhotons
-  int fTngenphotons;
-  float fTGenPhotonPt[gMaxngenphot];      
-  float fTGenPhotonEta[gMaxngenphot];     
-  float fTGenPhotonPhi[gMaxngenphot];    
-  float fTGenPhotonPartonMindR[gMaxngenphot];    
-  int fTGenPhotonMotherID[gMaxngenphot];
-  int fTGenPhotonMotherStatus[gMaxngenphot];
+  std::auto_ptr<int>  fTNGenPhotons;
+  std::auto_ptr<std::vector<float> >  fTGenPhotonPt;
+  std::auto_ptr<std::vector<float> >  fTGenPhotonEta;
+  std::auto_ptr<std::vector<float> >  fTGenPhotonPhi;
+  std::auto_ptr<std::vector<float> >  fTGenPhotonPartonMindR;
+  std::auto_ptr<std::vector<int> >  fTGenPhotonMotherID;
+  std::auto_ptr<std::vector<int> >  fTGenPhotonMotherStatus;
 
-// GenJets
-	int   fTNGenJets;
-	float fTGenJetPt  [gMaxngenjets];
-	float fTGenJetEta [gMaxngenjets];
-	float fTGenJetPhi [gMaxngenjets];
-	float fTGenJetE   [gMaxngenjets];
-	float fTGenJetemE [gMaxngenjets];
-	float fTGenJethadE[gMaxngenjets];
-	float fTGenJetinvE[gMaxngenjets];
+  // GenJets
+  std::auto_ptr<int>  fTNGenJets;
+  std::auto_ptr<std::vector<float> >  fTGenJetPt;
+  std::auto_ptr<std::vector<float> >  fTGenJetEta;
+  std::auto_ptr<std::vector<float> >  fTGenJetPhi;
+  std::auto_ptr<std::vector<float> >  fTGenJetE;
+  std::auto_ptr<std::vector<float> >  fTGenJetEmE;
+  std::auto_ptr<std::vector<float> >  fTGenJetHadE;
+  std::auto_ptr<std::vector<float> >  fTGenJetInvE;
 
+  // Muons:
+  std::auto_ptr<int>  fTNMus;
+  std::auto_ptr<int>  fTNMusTot;
+  std::auto_ptr<int>  fTNGMus;
+  std::auto_ptr<int>  fTNTMus;
+  std::auto_ptr<std::vector<int> >  fTMuGood;
+  std::auto_ptr<std::vector<int> >  fTMuIsIso;
+  std::auto_ptr<std::vector<int> >  fTMuIsGlobalMuon;
+  std::auto_ptr<std::vector<int> >  fTMuIsTrackerMuon;
+  std::auto_ptr<std::vector<float> >  fTMuPx;
+  std::auto_ptr<std::vector<float> >  fTMuPy;
+  std::auto_ptr<std::vector<float> >  fTMuPz;
+  std::auto_ptr<std::vector<float> >  fTMuPt;
+  std::auto_ptr<std::vector<float> >  fTMuInnerTkPt;
+  std::auto_ptr<std::vector<float> >  fTMuPtE;
+  std::auto_ptr<std::vector<float> >  fTMuE;
+  std::auto_ptr<std::vector<float> >  fTMuEt;
+  std::auto_ptr<std::vector<float> >  fTMuEta;
+  std::auto_ptr<std::vector<float> >  fTMuPhi;
+  std::auto_ptr<std::vector<int> >  fTMuCharge;
+  std::auto_ptr<std::vector<float> >  fTMuRelIso03;
+  std::auto_ptr<std::vector<float> >  fTMuIso03SumPt;
+  std::auto_ptr<std::vector<float> >  fTMuIso03EmEt;
+  std::auto_ptr<std::vector<float> >  fTMuIso03HadEt;
+  std::auto_ptr<std::vector<float> >  fTMuIso03EMVetoEt;
+  std::auto_ptr<std::vector<float> >  fTMuIso03HadVetoEt;
+  std::auto_ptr<std::vector<float> >  fTMuIso05SumPt;
+  std::auto_ptr<std::vector<float> >  fTMuIso05EmEt;
+  std::auto_ptr<std::vector<float> >  fTMuIso05HadEt;
+  std::auto_ptr<std::vector<float> >  fTMuEem;
+  std::auto_ptr<std::vector<float> >  fTMuEhad;
+  std::auto_ptr<std::vector<float> >  fTMuD0BS;
+  std::auto_ptr<std::vector<float> >  fTMuD0PV;
+  std::auto_ptr<std::vector<float> >  fTMuD0E;
+  std::auto_ptr<std::vector<float> >  fTMuDzBS;
+  std::auto_ptr<std::vector<float> >  fTMuDzPV;
+  std::auto_ptr<std::vector<float> >  fTMuDzE;
+  std::auto_ptr<std::vector<float> >  fTMuNChi2;
+  std::auto_ptr<std::vector<int> >  fTMuNGlHits;
+  std::auto_ptr<std::vector<int> >  fTMuNMuHits;
+  std::auto_ptr<std::vector<int> >  fTMuNTkHits;
+  std::auto_ptr<std::vector<int> >  fTMuNPxHits;
+  std::auto_ptr<std::vector<float> >  fTMuInnerTkNChi2;
+  std::auto_ptr<std::vector<int> >  fTMuNMatches;
+  std::auto_ptr<std::vector<int> >  fTMuNChambers;
+  std::auto_ptr<std::vector<float> >  fTMuCaloComp;
+  std::auto_ptr<std::vector<float> >  fTMuSegmComp;
+  std::auto_ptr<std::vector<int> >  fTMuIsGMPT;
+  std::auto_ptr<std::vector<int> >  fTMuIsGMTkChiComp;
+  std::auto_ptr<std::vector<int> >  fTMuIsGMStaChiComp;
+  std::auto_ptr<std::vector<int> >  fTMuIsGMTkKinkTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsAllStaMuons;
+  std::auto_ptr<std::vector<int> >  fTMuIsAllTrkMuons;
+  std::auto_ptr<std::vector<int> >  fTMuIsTrkMuonArbitrated;
+  std::auto_ptr<std::vector<int> >  fTMuIsAllArbitrated;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMLSLoose;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMLSTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsTM2DCompLoose;
+  std::auto_ptr<std::vector<int> >  fTMuIsTM2DCompTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationLoose;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMLSOptLowPtLoose;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMLSAngLoose;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMLSAngTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationAngTight;
+  std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationAngLoose;
+  std::auto_ptr<std::vector<int> >  fTMuGenID;
+  std::auto_ptr<std::vector<int> >  fTMuGenStatus;
+  std::auto_ptr<std::vector<float> >  fTMuGenPt;
+  std::auto_ptr<std::vector<float> >  fTMuGenEta;
+  std::auto_ptr<std::vector<float> >  fTMuGenPhi;
+  std::auto_ptr<std::vector<float> >  fTMuGenE;
+  std::auto_ptr<std::vector<int> >  fTMuGenMID;
+  std::auto_ptr<std::vector<int> >  fTMuGenMStatus;
+  std::auto_ptr<std::vector<float> >  fTMuGenMPt;
+  std::auto_ptr<std::vector<float> >  fTMuGenMEta;
+  std::auto_ptr<std::vector<float> >  fTMuGenMPhi;
+  std::auto_ptr<std::vector<float> >  fTMuGenME;
+  std::auto_ptr<std::vector<int> >  fTMuGenGMID;
+  std::auto_ptr<std::vector<int> >  fTMuGenGMStatus;
+  std::auto_ptr<std::vector<float> >  fTMuGenGMPt;
+  std::auto_ptr<std::vector<float> >  fTMuGenGMEta;
+  std::auto_ptr<std::vector<float> >  fTMuGenGMPhi;
+  std::auto_ptr<std::vector<float> >  fTMuGenGME;
 
-// Muons:
-	int fTnmu;
-	int fTnmutot; // before preselection
-	int fTnglobalmu;
-	int fTntrackermu;
-	int fTgoodmu     [gMaxnmus];
-	int fTmuIsIso    [gMaxnmus];
-	int fTmuIsGM     [gMaxnmus];
-	int fTmuIsTM     [gMaxnmus];
-	float fTmupx     [gMaxnmus];
-	float fTmupy     [gMaxnmus];
-	float fTmupz     [gMaxnmus];
-	float fTmue      [gMaxnmus];
-	float fTmuet     [gMaxnmus];
-	float fTmupt     [gMaxnmus];
-	float fTmuinnerpt[gMaxnmus];
-	float fTmuptE    [gMaxnmus];
-	float fTmueta    [gMaxnmus];
-	float fTmuphi    [gMaxnmus];
-	int fTmucharge   [gMaxnmus];
+  //- Electrons:
+  std::auto_ptr<int>  fTNEles;
+  std::auto_ptr<int>  fTNElesTot;
+  std::auto_ptr<std::vector<int> >  fTElGood;
+  std::auto_ptr<std::vector<int> >  fTElIsIso;
+  std::auto_ptr<std::vector<int> >  fTElChargeMisIDProb;
+  // Kinematics
+  std::auto_ptr<std::vector<float> >  fTElPx;
+  std::auto_ptr<std::vector<float> >  fTElPy;
+  std::auto_ptr<std::vector<float> >  fTElPz;
+  std::auto_ptr<std::vector<float> >  fTElPt;
+  std::auto_ptr<std::vector<float> >  fTElPtE;
+  std::auto_ptr<std::vector<float> >  fTElE;
+  std::auto_ptr<std::vector<float> >  fTElEt;
+  std::auto_ptr<std::vector<float> >  fTElEta;
+  std::auto_ptr<std::vector<float> >  fTElTheta;
+  std::auto_ptr<std::vector<float> >  fTElSCEta;
+  std::auto_ptr<std::vector<float> >  fTElPhi;
+  std::auto_ptr<std::vector<float> >  fTElGsfTkPt;
+  std::auto_ptr<std::vector<float> >  fTElGsfTkEta;
+  std::auto_ptr<std::vector<float> >  fTElGsfTkPhi;
+  std::auto_ptr<std::vector<float> >  fTElTrkMomentumError;
+  std::auto_ptr<std::vector<float> >  fTElEcalEnergyError;
+  std::auto_ptr<std::vector<float> >  fTElEleMomentumError;
+  std::auto_ptr<std::vector<int> >  fTElNBrems;
+  // Impact Parameter
+  std::auto_ptr<std::vector<float> >  fTElD0BS;
+  std::auto_ptr<std::vector<float> >  fTElD0PV;
+  std::auto_ptr<std::vector<float> >  fTElD0E;
+  std::auto_ptr<std::vector<float> >  fTElDzBS;
+  std::auto_ptr<std::vector<float> >  fTElDzPV;
+  std::auto_ptr<std::vector<float> >  fTElDzE;
+  // Isolation
+  std::auto_ptr<std::vector<float> >  fTElRelIso03;
+  std::auto_ptr<std::vector<float> >  fTElRelIso04;
+  std::auto_ptr<std::vector<float> >  fTElDR03TkSumPt;
+  std::auto_ptr<std::vector<float> >  fTElDR04TkSumPt;
+  std::auto_ptr<std::vector<float> >  fTElDR03EcalRecHitSumEt;
+  std::auto_ptr<std::vector<float> >  fTElDR04EcalRecHitSumEt;
+  std::auto_ptr<std::vector<float> >  fTElDR03HcalTowerSumEt;
+  std::auto_ptr<std::vector<float> >  fTElDR04HcalTowerSumEt;
+  std::auto_ptr<std::vector<float> >  fTElNChi2;
+  // Identification
+  std::auto_ptr<std::vector<int> >  fTElCharge;
+  std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfCtfCons;
+  std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfCtfScPixCons;
+  std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfScPixCons;
+  std::auto_ptr<std::vector<int> >  fTElScPixCharge;
+  std::auto_ptr<std::vector<float> >  fTElClosestCtfTrackPt;
+  std::auto_ptr<std::vector<float> >  fTElClosestCtfTrackEta;
+  std::auto_ptr<std::vector<float> >  fTElClosestCtfTrackPhi;
+  std::auto_ptr<std::vector<int> >  fTElClosestCtfTrackCharge;
+  std::auto_ptr<std::vector<float> >  fTElIDMva;
+  std::auto_ptr<std::vector<int> >  fTElIDTight;
+  std::auto_ptr<std::vector<int> >  fTElIDLoose;
+  std::auto_ptr<std::vector<int> >  fTElIDRobustTight;
+  std::auto_ptr<std::vector<int> >  fTElIDRobustLoose;
+  std::auto_ptr<std::vector<int> >  fTElIDsimpleWPrelIso;
+  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP80relIso;
+  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP85relIso;
+  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP90relIso;
+  std::auto_ptr<std::vector<int> >  fTElIDsimpleWP95relIso;
+  std::auto_ptr<std::vector<int> >  fTElInGap;
+  std::auto_ptr<std::vector<int> >  fTElEcalDriven;
+  std::auto_ptr<std::vector<int> >  fTElTrackerDriven;
+  std::auto_ptr<std::vector<int> >  fTElBasicClustersSize;
+  std::auto_ptr<std::vector<float> >  fTElfbrem;
+  std::auto_ptr<std::vector<float> >  fTElHcalOverEcal;
+  std::auto_ptr<std::vector<float> >  fTElE1x5;
+  std::auto_ptr<std::vector<float> >  fTElE5x5;
+  std::auto_ptr<std::vector<float> >  fTElE2x5Max;
+  std::auto_ptr<std::vector<float> >  fTElSigmaIetaIeta;
+  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSeedClusterAtCalo;
+  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSeedClusterAtCalo;
+  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSuperClusterAtVtx;
+  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSuperClusterAtVtx;
+  std::auto_ptr<std::vector<float> >  fTElCaloEnergy;
+  std::auto_ptr<std::vector<float> >  fTElTrkMomAtVtx;
+  std::auto_ptr<std::vector<float> >  fTElESuperClusterOverP;
+  std::auto_ptr<std::vector<int> >  fTElNumberOfMissingInnerHits;
+  std::auto_ptr<std::vector<int> >  fTElSCindex;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkDist;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkDCot;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkPt;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkEta;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkPhi;
+  std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkCharge;
+  // Spike cleaning
+  std::auto_ptr<std::vector<int> >  fTElScSeedSeverity;
+  std::auto_ptr<std::vector<float> >  fTElE1OverE9;
+  std::auto_ptr<std::vector<float> >  fTElS4OverS1;
+  // Gen info
+  std::auto_ptr<std::vector<int> >  fTElGenID;
+  std::auto_ptr<std::vector<int> >  fTElGenStatus;
+  std::auto_ptr<std::vector<float> >  fTElGenPt;
+  std::auto_ptr<std::vector<float> >  fTElGenEta;
+  std::auto_ptr<std::vector<float> >  fTElGenPhi;
+  std::auto_ptr<std::vector<float> >  fTElGenE;
+  std::auto_ptr<std::vector<int> >  fTElGenMID;
+  std::auto_ptr<std::vector<int> >  fTElGenMStatus;
+  std::auto_ptr<std::vector<float> >  fTElGenMPt;
+  std::auto_ptr<std::vector<float> >  fTElGenMEta;
+  std::auto_ptr<std::vector<float> >  fTElGenMPhi;
+  std::auto_ptr<std::vector<float> >  fTElGenME;
+  std::auto_ptr<std::vector<int> >  fTElGenGMID;
+  std::auto_ptr<std::vector<int> >  fTElGenGMStatus;
+  std::auto_ptr<std::vector<float> >  fTElGenGMPt;
+  std::auto_ptr<std::vector<float> >  fTElGenGMEta;
+  std::auto_ptr<std::vector<float> >  fTElGenGMPhi;
+  std::auto_ptr<std::vector<float> >  fTElGenGME;
 
-// - Isolation Variables
-	float fTmuiso           [gMaxnmus];
-	float fTmuIso03sumPt    [gMaxnmus];
-	float fTmuIso03emEt     [gMaxnmus];
-	float fTmuIso03hadEt    [gMaxnmus];
-	float fTmuIso03emVetoEt [gMaxnmus];
-	float fTmuIso03hadVetoEt[gMaxnmus];
-	float fTmuIso05sumPt    [gMaxnmus];
-	float fTmuIso05emEt     [gMaxnmus];
-	float fTmuIso05hadEt    [gMaxnmus];
-	float fTmueecal         [gMaxnmus];
-	float fTmuehcal         [gMaxnmus];
+  //- Photons:
+  std::auto_ptr<int>  fTNPhotons;
+  std::auto_ptr<int>  fTNPhotonsTot;
+  std::auto_ptr<std::vector<int> >  fTPhoGood;
+  std::auto_ptr<std::vector<int> >  fTPhoIsIso;
+  std::auto_ptr<std::vector<float> >  fTPhoPt;
+  std::auto_ptr<std::vector<float> >  fTPhoPx;
+  std::auto_ptr<std::vector<float> >  fTPhoPy;
+  std::auto_ptr<std::vector<float> >  fTPhoPz;
+  std::auto_ptr<std::vector<float> >  fTPhoEta;
+  std::auto_ptr<std::vector<float> >  fTPhoPhi;
+  std::auto_ptr<std::vector<float> >  fTPhoEnergy;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03Ecal;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03Hcal;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03TrkSolid;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03TrkHollow;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04Ecal;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04Hcal;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04TrkSolid;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04TrkHollow;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04;
+  std::auto_ptr<std::vector<float> >  fTPhoR9;
+  std::auto_ptr<std::vector<float> >  fTPhoCaloPositionX;
+  std::auto_ptr<std::vector<float> >  fTPhoCaloPositionY;
+  std::auto_ptr<std::vector<float> >  fTPhoCaloPositionZ;
+  std::auto_ptr<std::vector<float> >  fTPhoHoverE;
+  std::auto_ptr<std::vector<float> >  fTPhoH1overE;
+  std::auto_ptr<std::vector<float> >  fTPhoH2overE;
+  std::auto_ptr<std::vector<float> >  fTPhoSigmaIetaIeta;
+  std::auto_ptr<std::vector<float> >  fTPhoSCRawEnergy;
+  std::auto_ptr<std::vector<float> >  fTPhoSCEtaWidth;
+  std::auto_ptr<std::vector<float> >  fTPhoSCSigmaPhiPhi;
+  std::auto_ptr<std::vector<int> >  fTPhoHasPixSeed;
+  std::auto_ptr<std::vector<int> >  fTPhoHasConvTrks;
+  // Spike cleaning
+  std::auto_ptr<std::vector<int> >  fTPhoScSeedSeverity;
+  std::auto_ptr<std::vector<float> >  fTPhoE1OverE9;
+  std::auto_ptr<std::vector<float> >  fTPhoS4OverS1;
+  // ID
+  std::auto_ptr<std::vector<float> >  fTPhoSigmaEtaEta;
+  std::auto_ptr<std::vector<float> >  fTPhoE1x5;
+  std::auto_ptr<std::vector<float> >  fTPhoE2x5;
+  std::auto_ptr<std::vector<float> >  fTPhoE3x3;
+  std::auto_ptr<std::vector<float> >  fTPhoE5x5;
+  std::auto_ptr<std::vector<float> >  fTPhomaxEnergyXtal;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03HcalDepth1;
+  std::auto_ptr<std::vector<float> >  fTPhoIso03HcalDepth2;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04HcalDepth1;
+  std::auto_ptr<std::vector<float> >  fTPhoIso04HcalDepth2;
+  std::auto_ptr<std::vector<int> >  fTPhoIso03nTrksSolid;
+  std::auto_ptr<std::vector<int> >  fTPhoIso03nTrksHollow;
+  std::auto_ptr<std::vector<int> >  fTPhoIso04nTrksSolid;
+  std::auto_ptr<std::vector<int> >  fTPhoIso04nTrksHollow;
+  std::auto_ptr<std::vector<int> >  fTPhoisEB;
+  std::auto_ptr<std::vector<int> >  fTPhoisEE;
+  std::auto_ptr<std::vector<int> >  fTPhoisEBEtaGap;
+  std::auto_ptr<std::vector<int> >  fTPhoisEBPhiGap;
+  std::auto_ptr<std::vector<int> >  fTPhoisEERingGap;
+  std::auto_ptr<std::vector<int> >  fTPhoisEEDeeGap;
+  std::auto_ptr<std::vector<int> >  fTPhoisEBEEGap;
+  std::auto_ptr<std::vector<int> >  fTPhoisPFlowPhoton;
+  std::auto_ptr<std::vector<int> >  fTPhoisStandardPhoton;
+  std::auto_ptr<std::vector<int> >  fTPhoMCmatchindex;
+  std::auto_ptr<std::vector<int> >  fTPhoMCmatchexitcode;
+  std::auto_ptr<std::vector<float> >  fTPhoChargedHadronIso;
+  std::auto_ptr<std::vector<float> >  fTPhoNeutralHadronIso;
+  std::auto_ptr<std::vector<float> >  fTPhoPhotonIso;
+  std::auto_ptr<std::vector<int> >  fTPhoisPFPhoton;
+  std::auto_ptr<std::vector<int> >  fTPhoisPFElectron;
+  std::auto_ptr<std::vector<int> >  fTPhotSCindex;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04PhotonIsodR0dEta0pt0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04PhotonIsodR0dEta0pt5;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04PhotonIsodR8dEta0pt0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04PhotonIsodR8dEta0pt5;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR0dEta0pt0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR0dEta0pt5;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR7dEta0pt0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR7dEta0pt5;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01;
+  std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU;
 
-// - Impact Parameters
-	float fTmud0bs[gMaxnmus];
-	float fTmud0pv[gMaxnmus];
-	float fTmud0E [gMaxnmus];
-	float fTmudzbs[gMaxnmus];
-	float fTmudzpv[gMaxnmus];
-	float fTmudzE [gMaxnmus];
+  //- Superclusters:
+  std::auto_ptr<int>  fTNSuperClusters;
+  std::auto_ptr<std::vector<float> >  fTSCRaw;
+  std::auto_ptr<std::vector<float> >  fTSCPre;
+  std::auto_ptr<std::vector<float> >  fTSCEnergy;
+  std::auto_ptr<std::vector<float> >  fTSCEta;
+  std::auto_ptr<std::vector<float> >  fTSCPhi;
+  std::auto_ptr<std::vector<float> >  fTSCPhiWidth;
+  std::auto_ptr<std::vector<float> >  fTSCEtaWidth;
+  std::auto_ptr<std::vector<float> >  fTSCBrem;
+  std::auto_ptr<std::vector<float> >  fTSCR9;
+  std::auto_ptr<std::vector<float> >  fTSCcrackcorrseed;
+  std::auto_ptr<std::vector<float> >  fTSCcrackcorr;
+  std::auto_ptr<std::vector<float> >  fTSClocalcorrseed;
+  std::auto_ptr<std::vector<float> >  fTSClocalcorr;
+  std::auto_ptr<std::vector<float> >  fTSCcrackcorrseedfactor;
+  std::auto_ptr<std::vector<float> >  fTSClocalcorrseedfactor;
 
-// - MuID Variables
-	float fTmunchi2     [gMaxnmus];
-	int fTmunglhits     [gMaxnmus];
-	int fTmunmuhits     [gMaxnmus];
-	int fTmuntkhits     [gMaxnmus];
-	int fTmunpxhits     [gMaxnmus];
-	float fTmuinntknchi2[gMaxnmus];
-	int fTmunmatches    [gMaxnmus];
-	int fTmunchambers   [gMaxnmus];
-	float fTmucalocomp  [gMaxnmus];
-	float fTmusegmcomp  [gMaxnmus];
+  //- Jets:
+  std::auto_ptr<int>  fTNJets;
+  std::auto_ptr<int>  fTNJetsTot;
+  std::auto_ptr<std::vector<int> >  fTJGood;
+  std::auto_ptr<std::vector<float> >  fTJPx;
+  std::auto_ptr<std::vector<float> >  fTJPy;
+  std::auto_ptr<std::vector<float> >  fTJPz;
+  std::auto_ptr<std::vector<float> >  fTJPt;
+  std::auto_ptr<std::vector<float> >  fTJE;
+  std::auto_ptr<std::vector<float> >  fTJEt;
+  std::auto_ptr<std::vector<float> >  fTJEta;
+  std::auto_ptr<std::vector<float> >  fTJPhi;
+  std::auto_ptr<std::vector<float> >  fTJEcorr;
+  std::auto_ptr<std::vector<float> >  fTJArea;
+  
+  std::auto_ptr<std::vector<float> >  fTJEtaRms;
+  std::auto_ptr<std::vector<float> >  fTJPhiRms;
+  
+  std::auto_ptr<std::vector<int> >  fTJNConstituents;
+  std::auto_ptr<std::vector<int> >  fTJNAssoTracks;
+  std::auto_ptr<std::vector<int> >  fTJNNeutrals;
+  std::auto_ptr<std::vector<float> >  fTJChargedEmFrac;
+  std::auto_ptr<std::vector<float> >  fTJNeutralEmFrac;
+  std::auto_ptr<std::vector<float> >  fTJChargedHadFrac;
+  std::auto_ptr<std::vector<float> >  fTJNeutralHadFrac;
+  std::auto_ptr<std::vector<float> >  fTJChargedMuEnergyFrac;
 
-	int fTmuIsGMPT                 [gMaxnmus];
-	int fTmuIsGMTkChiComp          [gMaxnmus];
-	int fTmuIsGMStaChiComp         [gMaxnmus];
-	int fTmuIsGMTkKinkTight        [gMaxnmus];
-	int fTmuIsAllStaMuons          [gMaxnmus];
-	int fTmuIsAllTrkMuons          [gMaxnmus];
-	int fTmuIsTrkMuArb             [gMaxnmus];
-	int fTmuIsAllArb               [gMaxnmus];
-	int fTmuIsTMLastStationLoose   [gMaxnmus];
-	int fTmuIsTMLastStationTight   [gMaxnmus];
-	int fTmuIsTM2DCompLoose        [gMaxnmus];
-	int fTmuIsTM2DCompTight        [gMaxnmus];
-	int fTmuIsTMOneStationLoose    [gMaxnmus];
-	int fTmuIsTMOneStationTight    [gMaxnmus];
-	int fTmuIsTMLSOPL              [gMaxnmus];
-	int fTmuIsTMLastStationAngLoose[gMaxnmus];
-	int fTmuIsTMLastStationAngTight[gMaxnmus];
-	int fTmuIsTMOneStationAngTight [gMaxnmus];
-	int fTmuIsTMOneStationAngLoose [gMaxnmus];
+  std::auto_ptr<std::vector<float> >  fTJeMinDR;
+  std::auto_ptr<std::vector<float> >  fTJbTagProbTkCntHighEff;
+  std::auto_ptr<std::vector<float> >  fTJbTagProbTkCntHighPur;
+  std::auto_ptr<std::vector<float> >  fTJbTagProbSimpSVHighEff;
+  std::auto_ptr<std::vector<float> >  fTJbTagProbSimpSVHighPur;
+  std::auto_ptr<std::vector<float> >  fTJMass;
+  std::auto_ptr<std::vector<float> >  fTJtrk1px;
+  std::auto_ptr<std::vector<float> >  fTJtrk1py;
+  std::auto_ptr<std::vector<float> >  fTJtrk1pz;
+  std::auto_ptr<std::vector<float> >  fTJtrk2px;
+  std::auto_ptr<std::vector<float> >  fTJtrk2py;
+  std::auto_ptr<std::vector<float> >  fTJtrk2pz;
+  std::auto_ptr<std::vector<float> >  fTJtrk3px;
+  std::auto_ptr<std::vector<float> >  fTJtrk3py;
+  std::auto_ptr<std::vector<float> >  fTJtrk3pz;
 
-// - Gen Info:
-	int   fTGenMuId      [gMaxnmus];
-	int   fTGenMuStatus  [gMaxnmus];
-	float fTGenMuPt      [gMaxnmus];
-	float fTGenMuEta     [gMaxnmus];
-	float fTGenMuPhi     [gMaxnmus];
-	float fTGenMuE       [gMaxnmus];
-	int   fTGenMuMId     [gMaxnmus];
-	int   fTGenMuMStatus [gMaxnmus];
-	float fTGenMuMPt     [gMaxnmus];
-	float fTGenMuMEta    [gMaxnmus];
-	float fTGenMuMPhi    [gMaxnmus];
-	float fTGenMuME      [gMaxnmus];
-	int   fTGenMuGMId    [gMaxnmus];
-	int   fTGenMuGMStatus[gMaxnmus];
-	float fTGenMuGMPt    [gMaxnmus];
-	float fTGenMuGMEta   [gMaxnmus];
-	float fTGenMuGMPhi   [gMaxnmus];
-	float fTGenMuGME     [gMaxnmus];
+  std::auto_ptr<std::vector<float> >  fTJVtxx;
+  std::auto_ptr<std::vector<float> >  fTJVtxy;
+  std::auto_ptr<std::vector<float> >  fTJVtxz;
+  std::auto_ptr<std::vector<float> >  fTJVtxExx;
+  std::auto_ptr<std::vector<float> >  fTJVtxEyx;
+  std::auto_ptr<std::vector<float> >  fTJVtxEyy;
+  std::auto_ptr<std::vector<float> >  fTJVtxEzy;
+  std::auto_ptr<std::vector<float> >  fTJVtxEzz;
+  std::auto_ptr<std::vector<float> >  fTJVtxEzx;
+  std::auto_ptr<std::vector<float> >  fTJVtxNChi2;
 
+  std::auto_ptr<std::vector<int> >  fTJGenJetIndex;
 
-// Electrons:
-	int fTneles;
-	int fTnelestot; // before preselection
-	int fTgoodel[gMaxneles];
-	int fTeIsIso[gMaxneles];
-	int fTeChargeMisIDProb[gMaxneles];
-// Kinematics
-	float fTepx[gMaxneles];
-	float fTepy[gMaxneles];
-	float fTepz[gMaxneles];
-	float fTept[gMaxneles];
-	float fTeptE[gMaxneles];
-	float fTee[gMaxneles];
-	float fTeet[gMaxneles];
-	float fTeeta[gMaxneles];
-	float fTephi[gMaxneles];
-	float fTetheta[gMaxneles];
-	float fTesceta[gMaxneles];
-	float fTegsfpt[gMaxneles];
-	float fTegsfeta[gMaxneles];
-	float fTegsfphi[gMaxneles];
-	float fTetrkmomerror[gMaxneles];
-	float fTeecalergerror[gMaxneles];
-	float fTeelemomerror[gMaxneles];
-	int   fTenbrems[gMaxneles];
+  //- Tracks:
+  std::auto_ptr<int>  fTNTracks;
+  std::auto_ptr<int>  fTNTracksTot;
+  std::auto_ptr<std::vector<int> >  fTTrkGood;
+  std::auto_ptr<std::vector<float> >  fTTrkPt;
+  std::auto_ptr<std::vector<float> >  fTTrkEta;
+  std::auto_ptr<std::vector<float> >  fTTrkPhi;
+  std::auto_ptr<std::vector<float> >  fTTrkNChi2;
+  std::auto_ptr<std::vector<float> >  fTTrkNHits;
+  std::auto_ptr<std::vector<float> >  fTTrkVtxDz;
+  std::auto_ptr<std::vector<float> >  fTTrkVtxDxy;
 
-// Impact parameter
-	float fTed0bs[gMaxneles];
-	float fTed0pv[gMaxneles];
-	float fTed0E[gMaxneles];
-	float fTedzbs[gMaxneles];
-	float fTedzpv[gMaxneles];
-	float fTedzE[gMaxneles];
-// Isolation
-	float fTeiso03[gMaxneles];
-	float fTeiso04[gMaxneles];
-	float fTdr03tksumpt[gMaxneles];
-	float fTdr04tksumpt[gMaxneles];
-	float fTdr03ecalrechitsumet[gMaxneles];
-	float fTdr04ecalrechitsumet[gMaxneles];
-	float fTdr03hcaltowersumet[gMaxneles];
-	float fTdr04hcaltowersumet[gMaxneles];
-	float fTenchi2[gMaxneles];
-// Electron ID
-	float fTeIDMva[gMaxneles];
-	int fTeIDTight[gMaxneles];
-	int fTeIDLoose[gMaxneles];
-	int fTeIDRobustTight[gMaxneles];
-	int fTeIDRobustLoose[gMaxneles];
-	int fTeIDsimpleWPrelIso[gMaxneles];
-	int fTeIDsimpleWP95relIso[gMaxneles];
-	int fTeIDsimpleWP90relIso[gMaxneles];
-	int fTeIDsimpleWP85relIso[gMaxneles];
-	int fTeIDsimpleWP80relIso[gMaxneles];
-	int fTecharge[gMaxneles];
-	int fTeCInfoIsGsfCtfCons[gMaxneles];
-	int fTeCInfoIsGsfCtfScPixCons[gMaxneles];
-	int fTeCInfoIsGsfScPixCons[gMaxneles];
-	int fTeCInfoScPixCharge[gMaxneles];
-	float fTeClosestCtfTrackpt[gMaxneles];
-	float fTeClosestCtfTracketa[gMaxneles];
-	float fTeClosestCtfTrackphi[gMaxneles];
-	int fTeClosestCtfTrackcharge[gMaxneles];
-	int fTeInGap[gMaxneles];  // seed crystal next to a gap
-	int fTeEcalDriven[gMaxneles];
-	int fTeTrackerDriven[gMaxneles];
-	int fTeBasicClustersSize[gMaxneles];
-	float fTefbrem[gMaxneles];
-	float fTeHcalOverEcal[gMaxneles];
-	float fTeE1x5[gMaxneles];                      // 5x5 arround seed
-	float fTeE5x5[gMaxneles];                      // 5x5 arround seed
-	float fTeE2x5Max[gMaxneles];                   // 2x5 arround seed
-	float fTeSigmaIetaIeta[gMaxneles];             // shower shape covariance
-	float fTeDeltaPhiSeedClusterAtCalo[gMaxneles]; // Dphi (seed-track) at calo from p_out
-	float fTeDeltaEtaSeedClusterAtCalo[gMaxneles]; // outermost track state extrapolated at calo
-	float fTeDeltaPhiSuperClusterAtVtx[gMaxneles]; // Dphi (sc-track) at calo extrapolated from p_in
-	float fTeDeltaEtaSuperClusterAtVtx[gMaxneles]; // Deta (sc-track) at calo extrapolated from p_in
-	float fTecaloenergy[gMaxneles];                // caloEnergy() = supercluster energy 99.9% of the time
-	float fTetrkmomatvtx[gMaxneles];               // trackMomentumAtVtx().R()
-	float fTeESuperClusterOverP[gMaxneles];        // Esc/Pin
-	int fTeNumberOfMissingInnerHits[gMaxneles];
-	// int fTeIsInJet[gMaxneles];
-	// float fTeSharedPx[gMaxneles];
-	// float fTeSharedPy[gMaxneles];
-	// float fTeSharedPz[gMaxneles];
-	// float fTeSharedEnergy[gMaxneles];
-	// int fTeDupEl[gMaxneles];
-        int fTElSCindex[gMaxneles];
-	float fTeConvPartTrackDist[gMaxneles];
-	float fTeConvPartTrackDCot[gMaxneles];
-	float fTeConvPartTrackPt[gMaxneles];
-	float fTeConvPartTrackEta[gMaxneles];
-	float fTeConvPartTrackPhi[gMaxneles];
-	float fTeConvPartTrackCharge[gMaxneles];
-// Spike cleaning
-	int fTeScSeedSeverity[gMaxneles];
-	float fTeE1OverE9[gMaxneles];
-	float fTeS4OverS1[gMaxneles];
-
-
-// - Gen Info:
-	int   fTGenElId[gMaxneles];
-	int   fTGenElStatus[gMaxneles];
-	float fTGenElPt[gMaxneles];
-	float fTGenElEta[gMaxneles];
-	float fTGenElPhi[gMaxneles];
-	float fTGenElE[gMaxneles];
-	int   fTGenElMId[gMaxneles];
-	int   fTGenElMStatus[gMaxneles];
-	float fTGenElMPt[gMaxneles];
-	float fTGenElMEta[gMaxneles];
-	float fTGenElMPhi[gMaxneles];
-	float fTGenElME[gMaxneles];
-	int   fTGenElGMId[gMaxneles];
-	int   fTGenElGMStatus[gMaxneles];
-	float fTGenElGMPt[gMaxneles];
-	float fTGenElGMEta[gMaxneles];
-	float fTGenElGMPhi[gMaxneles];
-	float fTGenElGME[gMaxneles];
-
-// Photons:
-	int fTnphotons;
-	int fTnphotonstot; // before preselection
-	int fTgoodphoton[gMaxnphos];
-	int fTPhotIsIso[gMaxnphos];
-	float fTPhotPt[gMaxnphos];  
-	float fTPhotPx[gMaxnphos];  
-	float fTPhotPy[gMaxnphos];  
-	float fTPhotPz[gMaxnphos];  
-	float fTPhotEta[gMaxnphos];
-	float fTPhotPhi[gMaxnphos];
-	float fTPhotEnergy[gMaxnphos];
-	float fTPhotIso03Ecal[gMaxnphos];
-	float fTPhotIso03Hcal[gMaxnphos];
-	float fTPhotIso03TrkSolid[gMaxnphos];
-	float fTPhotIso03TrkHollow[gMaxnphos];
-	float fTPhotIso03[gMaxnphos];
-	float fTPhotIso04Ecal[gMaxnphos];
-	float fTPhotIso04Hcal[gMaxnphos];
-	float fTPhotIso04TrkSolid[gMaxnphos];
-	float fTPhotIso04TrkHollow[gMaxnphos];
-	float fTPhotIso04[gMaxnphos];
-	float fTPhotR9[gMaxnphos];
-	float fTPhotSCEnergy[gMaxnphos];
-	float fTPhotcaloPosX[gMaxnphos];
-	float fTPhotcaloPosY[gMaxnphos];
-	float fTPhotcaloPosZ[gMaxnphos];
-	float fTPhotHoverE[gMaxnphos];
-	float fTPhotH1overE[gMaxnphos];
-	float fTPhotH2overE[gMaxnphos];
-	float fTPhotSigmaIetaIeta[gMaxnphos];
-	float fTPhotSCEtaWidth[gMaxnphos];
-	float fTPhotSCSigmaPhiPhi[gMaxnphos];
-	int   fTPhotHasPixSeed[gMaxnphos];
-	int   fTPhotHasConvTrks[gMaxnphos];
-	// int   fTPhotIsInJet[gMaxnphos];
-	// int   fTPhotDupEl[gMaxnphos];
-	// float fTPhotSharedPx[gMaxnphos];
-	// float fTPhotSharedPy[gMaxnphos];
-	// float fTPhotSharedPz[gMaxnphos];
-	// float fTPhotSharedEnergy[gMaxnphos];
-// Spike cleaning
-	int   fTPhotScSeedSeverity[gMaxnphos];
-	float fTPhotE1OverE9[gMaxnphos];
-	float fTPhotS4OverS1[gMaxnphos];
-  float fTPhotSigmaEtaEta[gMaxnphos];
-  float fTPhote1x5[gMaxnphos];
-  float fTPhote2x5[gMaxnphos];
-  float fTPhote3x3[gMaxnphos];
-  float fTPhote5x5[gMaxnphos];
-  float fTPhotmaxEnergyXtal[gMaxnphos];
-  float fTPhotIso03HcalDepth1[gMaxnphos];
-  float fTPhotIso03HcalDepth2[gMaxnphos];
-  float fTPhotIso04HcalDepth1[gMaxnphos];
-  float fTPhotIso04HcalDepth2[gMaxnphos];
-  int fTPhotIso03nTrksSolid[gMaxnphos];
-  int fTPhotIso03nTrksHollow[gMaxnphos];
-  int fTPhotIso04nTrksSolid[gMaxnphos];
-  int fTPhotIso04nTrksHollow[gMaxnphos];
-  int fTPhotisEB[gMaxnphos];
-  int fTPhotisEE[gMaxnphos];
-  int fTPhotisEBEtaGap[gMaxnphos];
-  int fTPhotisEBPhiGap[gMaxnphos];
-  int fTPhotisEERingGap[gMaxnphos];
-  int fTPhotisEEDeeGap[gMaxnphos];
-  int fTPhotisEBEEGap[gMaxnphos];
-  int fTPhotisPFlowPhoton[gMaxnphos];
-  int fTPhotisStandardPhoton[gMaxnphos];
-  int fTPhotMCmatchindex[gMaxnphos];
-  int fTPhotMCmatchexitcode[gMaxnphos];
- 
-  float fT_pho_ChargedHadronIso[gMaxnphos];
-  float fT_pho_NeutralHadronIso[gMaxnphos];
-  float fT_pho_PhotonIso[gMaxnphos];
-  int fT_pho_isPFPhoton[gMaxnphos];
-  int fT_pho_isPFElectron[gMaxnphos];
-  int fTPhotSCindex[gMaxnphos];
-
-float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];
-float fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[gMaxnphos];
-float fT_pho_Cone04PhotonIso_dR8_dEta0_pt0[gMaxnphos];
-float fT_pho_Cone04PhotonIso_dR8_dEta0_pt5[gMaxnphos];
-float fT_pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
-float fT_pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
-float fT_pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
-float fT_pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_nocracks[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt5_nocracks[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt0[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR7_dEta0_pt5[gMaxnphos];
-float fT_pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
-float fT_pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
-float fT_pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
-float fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0_old[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU_old[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0_old[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU_old[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
-float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
-
-
-  // SC
-  int fTnSC;
-  float fTSCraw[gMaxnSC];
-  float fTSCpre[gMaxnSC];
-  float fTSCenergy[gMaxnSC];
-  float fTSCeta[gMaxnSC];
-  float fTSCphi[gMaxnSC];
-  float fTSCsigmaPhi[gMaxnSC];
-  float fTSCsigmaEta[gMaxnSC];
-  float fTSCbrem[gMaxnSC];
-  float fTSCR9[gMaxnSC];
-  float fTSCcrackcorrseed[gMaxnSC];
-  float fTSCcrackcorr[gMaxnSC];
-  float fTSClocalcorrseed[gMaxnSC];
-  float fTSClocalcorr[gMaxnSC];
-  float fTSCcrackcorrseedfactor[gMaxnSC];
-  float fTSClocalcorrseedfactor[gMaxnSC];
-
-
-// Jets:
-	int fTnjets;
-	int fTnjetstot; // before preselection
-	int fTgoodjet[gMaxnjets];
-	float fTjpx[gMaxnjets];
-	float fTjpy[gMaxnjets];
-	float fTjpz[gMaxnjets];
-	float fTje[gMaxnjets];
-	float fTjet[gMaxnjets];
-	float fTjpt[gMaxnjets];
-	float fTjeta[gMaxnjets];
-	float fTjphi[gMaxnjets];
-	float fTjEcorr[gMaxnjets];
-	float fTjArea[gMaxnjets];
-
-	float fTJEtaRms[gMaxnjets];
-	float fTJPhiRms[gMaxnjets];
-
-	int fTjNconstituents[gMaxnjets];
-	int fTjChMult[gMaxnjets];
-	int fTjNeuMult[gMaxnjets];
-	float fTjChHadFrac[gMaxnjets];
-	float fTjNeuHadFrac[gMaxnjets];
-	float fTjChEmFrac[gMaxnjets];
-	float fTjNeuEmFrac[gMaxnjets];
-	float fTjChMuEFrac[gMaxnjets];
-
-	float fTjbTagProbTkCntHighEff[gMaxnjets];
-	float fTjbTagProbTkCntHighPur[gMaxnjets];
-	float fTjbTagProbSimpSVHighEff[gMaxnjets];
-	float fTjbTagProbSimpSVHighPur[gMaxnjets];
-	float fTjMass[gMaxnjets];
-	float fTjtrk1px[gMaxnjets];
-	float fTjtrk1py[gMaxnjets];
-	float fTjtrk1pz[gMaxnjets];
-	float fTjtrk2px[gMaxnjets];
-	float fTjtrk2py[gMaxnjets];
-	float fTjtrk2pz[gMaxnjets];
-	float fTjtrk3px[gMaxnjets];
-	float fTjtrk3py[gMaxnjets];
-	float fTjtrk3pz[gMaxnjets];
-	float fTjeMinDR[gMaxnjets];
-	float fTjetVtxx[gMaxnjets];
-	float fTjetVtxy[gMaxnjets];
-	float fTjetVtxz[gMaxnjets];
-	float fTjetVtxExx[gMaxnjets];
-	float fTjetVtxEyx[gMaxnjets];
-	float fTjetVtxEyy[gMaxnjets];
-	float fTjetVtxEzy[gMaxnjets];
-	float fTjetVtxEzz[gMaxnjets];
-	float fTjetVtxEzx[gMaxnjets];
-	float fTjetVtxNChi2[gMaxnjets];
-	
-	int   fTjetGenJetIndex[gMaxnjets];
-
-// Tracks:
-	int fTntracks;
-	int fTntrackstot; // before preselection
-	int fTgoodtrk[gMaxntrks];
-	float fTtrkpt[gMaxntrks]; // this is actually charge*pt
-	float fTtrketa[gMaxntrks];
-	float fTtrkphi[gMaxntrks];
-	float fTtrknchi2[gMaxntrks];
-	float fTtrknhits[gMaxntrks];
-	float fTtrkVtxDz[gMaxntrks];
-	float fTtrkVtxDxy[gMaxntrks];
-
-// (M)E(T):
-	float fTTrkPtSumx;
-	float fTTrkPtSumy;
-	float fTTrkPtSumphi;
-	float fTTrkPtSum;
-	float fTSumEt;
-	float fTECALSumEt;
-	float fTHCALSumEt;
-	float fTECALEsumx;
-	float fTECALEsumy;
-	float fTECALEsumz;
-	float fTECALMETphi;
-	float fTECALMETeta;
-	float fTECALMET;
-	float fTHCALEsumx;
-	float fTHCALEsumy;
-	float fTHCALEsumz;
-	float fTHCALMETphi;
-	float fTHCALMETeta;
-	float fTHCALMET;
-	float fTRawMET;
-	float fTRawMETpx;
-	float fTRawMETpy;
-	float fTRawMETphi;
-	float fTRawMETemEtFrac;
-	float fTRawMETemEtInEB;
-	float fTRawMETemEtInEE;
-	float fTRawMETemEtInHF;
-	float fTRawMEThadEtFrac;
-	float fTRawMEThadEtInHB;
-	float fTRawMEThadEtInHE;
-	float fTRawMEThadEtInHF;
-	float fTRawMETSignificance;
-	float fTGenMET;
-	float fTGenMETpx;
-	float fTGenMETpy;
-	float fTGenMETphi;
-	float fTTCMET;
-	float fTTCMETpx;
-	float fTTCMETpy;
-	float fTTCMETphi;
-	float fTTCMETSignificance;
-	float fTMuJESCorrMET;
-	float fTMuJESCorrMETpx;
-	float fTMuJESCorrMETpy;
-	float fTMuJESCorrMETphi;
-	float fTPFMET;
-	float fTPFMETpx;
-	float fTPFMETpy;
-	float fTPFMETphi;
-	float fTPFMETSignificance;
-        float fTPFSumEt;
-	float fTPFMETPAT;
-	float fTPFMETPATpx;
-	float fTPFMETPATpy;
-	float fTPFMETPATphi;
-	float fTPFMETPATSignificance;
-	float fTMETR12;
-	float fTMETR21;
-////////////////////////////////////////////////////////
+  //- (M)E(T):
+  std::auto_ptr<float>  fTTrkPtSumx;
+  std::auto_ptr<float>  fTTrkPtSumy;
+  std::auto_ptr<float>  fTTrkPtSum;
+  std::auto_ptr<float>  fTTrkPtSumPhi;
+  std::auto_ptr<float>  fTSumEt;
+  std::auto_ptr<float>  fTECALSumEt;
+  std::auto_ptr<float>  fTHCALSumEt;
+  std::auto_ptr<float>  fTECALEsumx;
+  std::auto_ptr<float>  fTECALEsumy;
+  std::auto_ptr<float>  fTECALEsumz;
+  std::auto_ptr<float>  fTECALMET;
+  std::auto_ptr<float>  fTECALMETPhi;
+  std::auto_ptr<float>  fTECALMETEta;
+  std::auto_ptr<float>  fTHCALEsumx;
+  std::auto_ptr<float>  fTHCALEsumy;
+  std::auto_ptr<float>  fTHCALEsumz;
+  std::auto_ptr<float>  fTHCALMET;
+  std::auto_ptr<float>  fTHCALMETPhi;
+  std::auto_ptr<float>  fTHCALMETeta;
+  std::auto_ptr<float>  fTRawMET;
+  std::auto_ptr<float>  fTRawMETpx;
+  std::auto_ptr<float>  fTRawMETpy;
+  std::auto_ptr<float>  fTRawMETphi;
+  std::auto_ptr<float>  fTRawMETemEtFrac;
+  std::auto_ptr<float>  fTRawMETemEtInEB;
+  std::auto_ptr<float>  fTRawMETemEtInEE;
+  std::auto_ptr<float>  fTRawMETemEtInHF;
+  std::auto_ptr<float>  fTRawMEThadEtFrac;
+  std::auto_ptr<float>  fTRawMEThadEtInHB;
+  std::auto_ptr<float>  fTRawMEThadEtInHE;
+  std::auto_ptr<float>  fTRawMEThadEtInHF;
+  std::auto_ptr<float>  fTRawMETSignificance;
+  std::auto_ptr<float>  fTGenMET;
+  std::auto_ptr<float>  fTGenMETpx;
+  std::auto_ptr<float>  fTGenMETpy;
+  std::auto_ptr<float>  fTGenMETphi;
+  std::auto_ptr<float>  fTTCMET;
+  std::auto_ptr<float>  fTTCMETpx;
+  std::auto_ptr<float>  fTTCMETpy;
+  std::auto_ptr<float>  fTTCMETphi;
+  std::auto_ptr<float>  fTTCMETSignificance;
+  std::auto_ptr<float>  fTMuJESCorrMET;
+  std::auto_ptr<float>  fTMuJESCorrMETpx;
+  std::auto_ptr<float>  fTMuJESCorrMETpy;
+  std::auto_ptr<float>  fTMuJESCorrMETphi;
+  std::auto_ptr<float>  fTPFMET;
+  std::auto_ptr<float>  fTPFMETpx;
+  std::auto_ptr<float>  fTPFMETpy;
+  std::auto_ptr<float>  fTPFMETphi;
+  std::auto_ptr<float>  fTPFMETSignificance;
+  std::auto_ptr<float>  fTPFSumEt;
+  std::auto_ptr<float>  fTPFMETPAT;
+  std::auto_ptr<float>  fTPFMETPATpx;
+  std::auto_ptr<float>  fTPFMETPATpy;
+  std::auto_ptr<float>  fTPFMETPATphi;
+  std::auto_ptr<float>  fTPFMETPATSignificance;
+  std::auto_ptr<float>  fTMETR12;
+  std::auto_ptr<float>  fTMETR21;
 };

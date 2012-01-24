@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyze = cms.EDAnalyzer('NTupleProducer',
+analyze = cms.EDFilter('NTupleProducer',
 	# Main settings
 	isRealData       = cms.untracked.bool(False),
 	# Collections
