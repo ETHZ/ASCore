@@ -41,7 +41,7 @@ analyze = cms.EDAnalyzer('NTupleProducer',
         tag_SC_barrel    = cms.untracked.InputTag("correctedHybridSuperClusters"),
         tag_SC_endcap    = cms.untracked.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
 
-        tag_doVertexing = cms.untracked.bool(True),
+        tag_doVertexing = cms.untracked.bool(False),
         tag_fTrackCollForVertexing = cms.untracked.InputTag("generalTracks"),
         tag_fallConversionsCollForVertexing = cms.untracked.InputTag("allConversions"),
         tag_perVtxMvaWeights = cms.untracked.string("/shome/peruzzi/localafs/afs/cern.ch/user/m/musella/public/higgs/vertex_likelihoods/TMVAClassification_BDTCat_conversions_tmva_407.weights.xml"),
