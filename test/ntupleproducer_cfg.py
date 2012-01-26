@@ -78,7 +78,7 @@ process.TFileService = cms.Service("TFileService",
 )
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
-#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
                               #process.out.splitLevel = cms.untracked.int32(99),  # Turn on split level (smaller files???)
                                dropMetaData = cms.untracked.string('DROPPED'),   # Get rid of metadata related to dropped collections
                                outputCommands = cms.untracked.vstring() # Will be overwritten by PAT: we overwrite at the end
@@ -273,9 +273,9 @@ for pf in pfPostfixes:
 
 
 
-    ### Specific to first PF collection: AntiIsolated electrons and muons: Isolation cuts is set to 2
-    # ID Cuts
-    process.pfMuonsIDPFAntiIso = cms.EDFilter("MuonIDPFCandidateSelector", 
+### Specific to first PF collection: AntiIsolated electrons and muons: Isolation cuts is set to 2
+# ID Cuts
+process.pfMuonsIDPFAntiIso = cms.EDFilter("MuonIDPFCandidateSelector", 
     		src = cms.InputTag("pfMuonsFromVertexPFAntiIso"), 
     		cut = cms.string( 
     			"muonID('GlobalMuonPromptTight') && " + 
@@ -284,21 +284,21 @@ for pf in pfPostfixes:
     			"track.hitPattern.numberOfValidPixelHits > 0" 
     			), 
     		) 
-    process.pfSelectedMuonsPFAntiIso.src = 'pfMuonsIDPFAntiIso' 
-    process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso, 
+process.pfSelectedMuonsPFAntiIso.src = 'pfMuonsIDPFAntiIso' 
+process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso, 
     		process.pfMuonsIDPFAntiIso * 
     		process.pfSelectedMuonsPFAntiIso 
     		) 
-    process.pfIsolatedMuonsPFAntiIso.combinedIsolationCut     = cms.double(2.0) # set min isolation to 2
-    process.pfIsolatedElectronsPFAntiIso.combinedIsolationCut = cms.double(2.0) # set min isolation to 2
+process.pfIsolatedMuonsPFAntiIso.combinedIsolationCut     = cms.double(2.0) # set min isolation to 2
+process.pfIsolatedElectronsPFAntiIso.combinedIsolationCut = cms.double(2.0) # set min isolation to 2
+
+
+process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseIsolation')")
     
     
-    process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseIsolation')")
-    
-    
-    ### Specific to second PF collection: TIGHT
-    # ID cuts
-    process.pfMuonsIDPF2 = cms.EDFilter("MuonIDPFCandidateSelector", 
+### Specific to second PF collection: TIGHT
+# ID cuts
+process.pfMuonsIDPF2 = cms.EDFilter("MuonIDPFCandidateSelector", 
     		 src = cms.InputTag("pfMuonsFromVertexPF2"), 
     		 cut = cms.string( 
     			"muonID('GlobalMuonPromptTight') && " + 
@@ -308,29 +308,29 @@ for pf in pfPostfixes:
     			"globalTrack.ptError/pt < 0.1"
     			), 
     		 ) 
-    process.pfSelectedMuonsPF2.src = 'pfMuonsIDPF2' 
-    process.pfMuonSequencePF2.replace( process.pfSelectedMuonsPF2, 
+process.pfSelectedMuonsPF2.src = 'pfMuonsIDPF2' 
+process.pfMuonSequencePF2.replace( process.pfSelectedMuonsPF2, 
     		process.pfMuonsIDPF2 * 
     		process.pfSelectedMuonsPF2 
     		) 
-    process.pfElectronsIDPF2 = cms.EDFilter("ElectronIDPFCandidateSelector", 
+process.pfElectronsIDPF2 = cms.EDFilter("ElectronIDPFCandidateSelector", 
     		src = cms.InputTag("pfElectronsFromVertexPF2"), 
     		recoGsfElectrons = cms.InputTag('gsfElectrons'), 
     		electronIdMap = cms.InputTag('simpleEleId90relIso'), 
     		bitsToCheck = cms.vstring('id'), 
     		) 
-    process.pfSelectedElectronsPF2.src = 'pfElectronsIDPF2' 
-    process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2, 
+process.pfSelectedElectronsPF2.src = 'pfElectronsIDPF2' 
+process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2, 
     		process.pfElectronsIDPF2 * 
     		process.pfSelectedElectronsPF2 
     		) 
     
-    process.selectedPatTausPF2.cut = cms.string("tauID('againstElectronTight') && tauID('againstMuonTight')")
+process.selectedPatTausPF2.cut = cms.string("tauID('againstElectronTight') && tauID('againstMuonTight')")
     
     
-    ### Specific to second PF collection: LOOSE
-    # ID cuts
-    process.pfMuonsIDPF3 = cms.EDFilter("MuonIDPFCandidateSelector", 
+### Specific to second PF collection: LOOSE
+# ID cuts
+process.pfMuonsIDPF3 = cms.EDFilter("MuonIDPFCandidateSelector", 
     		 src = cms.InputTag("pfMuonsFromVertexPF3"), 
     		 cut = cms.string( 
     			"muonID('GlobalMuonPromptTight') && " + 
@@ -339,14 +339,14 @@ for pf in pfPostfixes:
     			"track.hitPattern.numberOfValidPixelHits > 0 " 
     			), 
     		 ) 
-    process.pfSelectedMuonsPF3.src = 'pfMuonsIDPF3' 
-    process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3, 
+process.pfSelectedMuonsPF3.src = 'pfMuonsIDPF3' 
+process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3, 
     		process.pfMuonsIDPF3 * 
     		process.pfSelectedMuonsPF3 
     		) 
     
     
-    process.selectedPatTausPF3.cut = cms.string("tauID('againstElectronLoose') && tauID('againstMuonLoose')")
+process.selectedPatTausPF3.cut = cms.string("tauID('againstElectronLoose') && tauID('againstMuonLoose')")
 
 
 

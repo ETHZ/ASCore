@@ -37,3 +37,4 @@
 <use name="RecoParticleFlow/PFClusterTools"/>
 
 <flags   EDM_PLUGIN="1"/>
+<flags   CXXFLAGS="-g"/>

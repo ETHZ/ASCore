@@ -10,47 +10,53 @@
 
 */
 //
-// $Id: FillerBase.h,v 1.1 2011/04/06 16:14:13 fronga Exp $
+// $Id: FillerBase.h,v 1.2 2012/01/06 09:08:00 pnef Exp $
 //
 //
 
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 #include "TTree.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/TypeID.h"
+
+namespace filler {
+  // Gory details of production (need to hand over to producer class)
+  // This is because of how the EDFilter::produce() method works.
+  // So we make a list of products and type names, 
+  // and use a specialized EDFilter::produce() method.
+  typedef std::pair<edm::TypeID,std::string> PPair;
+}
 
 
 class FillerBase {
+
 public:
   /// Constructor: set pointer to tree
-  FillerBase( const edm::ParameterSet& cfg, TTree* tree, const bool& isRealData );
+  FillerBase( const edm::ParameterSet& cfg, const bool& isRealData );
   virtual ~FillerBase(void) {}
 
   // Interface: needs to be implemented in specialised classes
-  /// Define all branches
-  virtual void createBranches(void) = 0;
-  /// Reset all branch containers
-  virtual void reset(void) = 0;
-  /// Fill all branches
-  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& ) = 0;
-
+  /// Define all variables
+  virtual const std::vector<filler::PPair> declareProducts(void) = 0;
+  /// Reset all variable containers
+  virtual void resetProducts(void) = 0;
+  /// Fill variables (called for each event)
+  virtual void putProducts(edm::Event&, const edm::EventSetup&) = 0;
 
 protected:
 
-  /// Add a branch to the tree (takes care of prefixing branch names)
-  const bool addBranch(const char* name, const char* type, 
-                       void* address, const char* size = 0);
-  /// Resetting
-  void resetDouble(double* v, size_t size = 1);
-  void resetInt(int* v, size_t size = 1);
-  void resetFloat(float* v, size_t size = 1);
+  /// Add a product to the list
+  const bool addProduct(const char* name, const type_info& address);
 
   std::string fPrefix;        /// Prefix for branches
-  TTree* fTree;               /// Pointer to tree to fill
   bool   fIsRealData;         /// Global switch
+  std::vector<filler::PPair> productList;
+  
 
 };
 
