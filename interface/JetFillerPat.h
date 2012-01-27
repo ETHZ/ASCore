@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerPat.h,v 1.2 2011/02/21 21:29:51 jfernan2 Exp $
+// $Id: JetFillerPat.h,v 1.3 2011/02/23 19:34:29 stiegerb Exp $
 //
 //
 
@@ -31,11 +31,11 @@
 class JetFillerPat : public JetFillerBase {
 public:
   /// Constructor: set pointer to tree
-  JetFillerPat( const edm::ParameterSet&, TTree* tree, const bool& isRealData );
+  JetFillerPat( const edm::ParameterSet&, const bool& isRealData );
   virtual ~JetFillerPat(void) {}
 
   /// Fill all branches
-  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& );
+  virtual void fillProducts(edm::Event&, const edm::EventSetup& );
 
 private:
 

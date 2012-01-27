@@ -12,223 +12,185 @@
 
 
 //________________________________________________________________________________________
-JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, 
-                              const bool& isRealData )
-  : FillerBase(cfg,tree,isRealData)
+JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, const bool& isRealData )
+    : FillerBase(cfg,isRealData)
 {
 	
-  // Retrieve configuration parameters
-  std::string jettype = cfg.getUntrackedParameter<edm::InputTag>("tag").label();
+    // Retrieve configuration parameters
+    std::string jettype = cfg.getUntrackedParameter<edm::InputTag>("tag").label();
 
-  // parse fTag label for jet-type
-  if      (std::string::npos != jettype.find("PF"))   setJetType(PF);
-  else if (std::string::npos != jettype.find("Calo")) setJetType(CALO);
-  else if (std::string::npos != jettype.find("JPT"))  setJetType(JPT);  
-  else {
-    setJetType(unknown);
-    edm::LogWarning("NTP") << "!! Don't know JetType !!" << jettype;
-  }
+    // parse fTag label for jet-type
+    if      (std::string::npos != jettype.find("PF"))   setJetType(PF);
+    else if (std::string::npos != jettype.find("Calo")) setJetType(CALO);
+    else if (std::string::npos != jettype.find("JPT"))  setJetType(JPT);  
+    else {
+        setJetType(unknown);
+        edm::LogWarning("NTP") << "!! Don't know JetType !!" << jettype;
+    }
 
-
-  //FIXME: could be set from configuration file...
-  gMaxnobjs = 100;
-
-  // Define all arrays
-  fTpx                     = new double[gMaxnobjs];
-  fTpy                     = new double[gMaxnobjs];
-  fTpz                     = new double[gMaxnobjs];
-  fTpt                     = new double[gMaxnobjs];
-  fTe                      = new double[gMaxnobjs];
-  fTet                     = new double[gMaxnobjs];
-  fTeta                    = new double[gMaxnobjs];
-  fTphi                    = new double[gMaxnobjs];
-  fTflavour                    = new int[gMaxnobjs];
-
-  fTscale                  = new double[gMaxnobjs];
-  fTL1FastJetScale         = new double[gMaxnobjs];
-  fTarea                   = new double[gMaxnobjs];
-  fTjbTagProbTkCntHighEff  = new double[gMaxnobjs];
-  fTjbTagProbTkCntHighPur  = new double[gMaxnobjs];
-  fTjbTagProbSimpSVHighEff = new double[gMaxnobjs];
-  fTjbTagProbSimpSVHighPur = new double[gMaxnobjs];
-  fTIDLoose               = new int[gMaxnobjs]; 
-  if(fJetType==CALO) {
-    fTID_HPD        = new double[gMaxnobjs];
-    fTID_RBX        = new double[gMaxnobjs];
-    fTID_n90Hits    = new double[gMaxnobjs];
-    fTID_resEMF     = new double[gMaxnobjs];
-    fTEMfrac        = new double[gMaxnobjs];
-    fTjChfrac       = new double[gMaxnobjs];
-    fTjnAssoTracks  = new int[gMaxnobjs];
-    fTNConstituents = new int[gMaxnobjs];		
-    fTn90           = new int[gMaxnobjs];
-  } else if (fJetType==JPT) {
-    fTChMult        = new int[gMaxnobjs];
-    fTID_HPD        = new double[gMaxnobjs];
-    fTID_RBX        = new double[gMaxnobjs];
-    fTID_n90Hits    = new double[gMaxnobjs];
-    fTID_resEMF     = new double[gMaxnobjs];
-  } else if (fJetType==PF) {
-    fTChMult        = new int[gMaxnobjs];
-    fTChHadFrac     = new double[gMaxnobjs];
-    fTNeuHadFrac    = new double[gMaxnobjs];
-    fTChEmFrac      = new double[gMaxnobjs];
-    fTNeuEmFrac     = new double[gMaxnobjs];
-    fTChMuFrac      = new double[gMaxnobjs];
-    fTNeuMult       = new int[gMaxnobjs];	
-    fTNConstituents = new int[gMaxnobjs];
-  }
-}
-
-
-//________________________________________________________________________________________
-JetFillerBase::~JetFillerBase(void) {
-  
-  // Delete all arrays
-  delete [] fTpx;
-  delete [] fTpy;
-  delete [] fTpz;
-  delete [] fTpt;
-  delete [] fTe;
-  delete [] fTet;
-  delete [] fTeta;
-  delete [] fTarea;
-  delete [] fTphi;
-  delete [] fTflavour;
-
-  delete [] fTscale;
-  delete [] fTL1FastJetScale;
-  delete [] fTjbTagProbTkCntHighEff ;
-  delete [] fTjbTagProbTkCntHighPur ;
-  delete [] fTjbTagProbSimpSVHighEff;
-  delete [] fTjbTagProbSimpSVHighPur;
-  delete [] fTIDLoose; 
-  if (fJetType==CALO) {
-    delete [] fTID_HPD;
-    delete [] fTID_RBX; 
-    delete [] fTID_n90Hits;
-    delete [] fTID_resEMF;
-    delete [] fTEMfrac;
-    delete [] fTjnAssoTracks;
-    delete [] fTjChfrac;
-    delete [] fTn90;		
-    delete [] fTNConstituents;		
-  } else if (fJetType==JPT) {
-    delete [] fTChMult;     
-    delete [] fTID_HPD;    
-    delete [] fTID_RBX;    
-    delete [] fTID_n90Hits; 
-    delete [] fTID_resEMF;
-  } else if (fJetType==PF) {
-    delete [] fTChMult;     
-    delete [] fTChHadFrac;  
-    delete [] fTNeuHadFrac; 
-    delete [] fTChEmFrac;   
-    delete [] fTNeuEmFrac;  
-    delete [] fTChMuFrac;  
-    delete [] fTNeuMult;    	
-    delete [] fTNConstituents;		
-  }
+    //FIXME: could be set from configuration file...
+    gMaxnobjs = 100;
 
 }
 
 //________________________________________________________________________________________
-void JetFillerBase::createBranches(void) {
+const std::vector<filler::PPair> JetFillerBase::declareProducts(void) {
 
-  addBranch("NJets",  "I", &fTnobj );
-  addBranch("JPx",    "D", fTpx,   "NJets" );
-  addBranch("JPy",    "D", fTpy,   "NJets" );
-  addBranch("JPz",    "D", fTpz,   "NJets" );
-  addBranch("JPt",    "D", fTpt,   "NJets" );
-  addBranch("JE",     "D", fTe,    "NJets" );
-  addBranch("JEt",    "D", fTet,   "NJets" );
-  addBranch("JEta",   "D", fTeta,  "NJets" );
-  addBranch("JPhi",   "D", fTphi,  "NJets" );
-  addBranch("JFlavour",   "I", fTflavour,  "NJets" );
+    addProduct("NJets",   typeid(*fTNObjs));
+    addProduct("JPx",     typeid(*fTPx));
+    addProduct("JPy",     typeid(*fTPy));
+    addProduct("JPz",     typeid(*fTPz));
+    addProduct("JPt",     typeid(*fTPt));
+    addProduct("JE",      typeid(*fTE));
+    addProduct("JEt",     typeid(*fTEt));
+    addProduct("JEta",    typeid(*fTEta));
+    addProduct("JPhi",    typeid(*fTPhi));
+    addProduct("JFlavour",typeid(*fTFlavour));
 
-  addBranch("JScale", "D", fTscale,"NJets" );
-  addBranch("JL1FastJetScale", "D", fTL1FastJetScale,"NJets" );
-  addBranch("JArea",  "D", fTarea, "NJets" );
-  addBranch("JbTagProbTkCntHighEff" , "D", fTjbTagProbTkCntHighEff , "NJets" );
-  addBranch("JbTagProbTkCntHighPur" , "D", fTjbTagProbTkCntHighPur , "NJets" );
-  addBranch("JbTagProbSimpSVHighEff", "D", fTjbTagProbSimpSVHighEff, "NJets" );
-  addBranch("JbTagProbSimpSVHighPur", "D", fTjbTagProbSimpSVHighPur, "NJets" );
-  addBranch("JIDLoose","I",fTIDLoose,"NJets" );
-
+    addProduct("JScale",  typeid(*fTScale));
+    addProduct("JL1FastJetScale", typeid(*fTL1FastJetScale));
+    addProduct("JArea",   typeid(*fTArea));
+    addProduct("JbTagProbTkCntHighEff" , typeid(*fTbTagProbTkCntHighEff));
+    addProduct("JbTagProbTkCntHighPur" , typeid(*fTbTagProbTkCntHighPur));
+    addProduct("JbTagProbSimpSVHighEff", typeid(*fTbTagProbSimpSVHighEff));
+    addProduct("JbTagProbSimpSVHighPur", typeid(*fTbTagProbSimpSVHighPur));
+    addProduct("JIDLoose",typeid(*fTIDLoose));
 	
-  if(fJetType==CALO) {
-    addBranch("JID_HPD",        "D", fTID_HPD,       "NJets" );
-    addBranch("JID_RBX",        "D", fTID_RBX,       "NJets" );
-    addBranch("JID_n90Hits",    "D", fTID_n90Hits,   "NJets" );
-    addBranch("JID_resEMF",     "D", fTID_resEMF,    "NJets" );   
-    addBranch("JEMfrac",        "D", fTEMfrac,       "NJets" );
-    addBranch("JNAssoTracks",   "I", fTjnAssoTracks, "NJets" );
-    addBranch("JChfrac",        "D", fTjChfrac,      "NJets" );
-    addBranch("JNConstituents", "I", fTNConstituents,"NJets" );				
-    addBranch("Jn90"          , "I", fTn90,          "NJets" );				
-  } else if (fJetType==JPT) {
-    addBranch("JChMult",    "I", fTChMult,    "NJets");
-    addBranch("JID_HPD",    "D",fTID_HPD     ,"NJets" );
-    addBranch("JID_RBX",    "D",fTID_RBX     ,"NJets" );
-    addBranch("JID_n90Hits","D",fTID_n90Hits ,"NJets" );
-    addBranch("JID_resEMF", "D",fTID_resEMF  ,"NJets" );
-  } else if (fJetType==PF) {
-    addBranch("JChMult",    "I", fTChMult,    "NJets");   													
-    addBranch("JNeuMult",   "I", fTNeuMult,    "NJets");		
-    addBranch("JChHadfrac", "D", fTChHadFrac, "NJets" );
-    addBranch("JNeuHadfrac","D", fTNeuHadFrac,"NJets" );
-    addBranch("JChEmfrac",  "D", fTChEmFrac,  "NJets" );
-    addBranch("JNeuEmfrac", "D", fTNeuEmFrac, "NJets" );
-    addBranch("JChMufrac",  "D", fTChMuFrac,  "NJets" );
-    addBranch("JNConstituents", "I", fTNConstituents,"NJets" );		
-  }
+    if(fJetType==CALO) {
+        addProduct("JNConstituents", typeid(*fTNConstituents));
+        addProduct("JNAssoTracks",   typeid(*fTNAssoTracks));
+        addProduct("JChfrac",        typeid(*fTChfrac));
+        addProduct("JEMfrac",        typeid(*fTEMfrac));
+        addProduct("JIDHPD",         typeid(*fTID_HPD));
+        addProduct("JIDRBX",         typeid(*fTID_RBX));
+        addProduct("JIDn90Hits",     typeid(*fTID_n90Hits));
+        addProduct("Jn90",           typeid(*fTn90));
+        addProduct("JIDresEMF",      typeid(*fTID_resEMF));
+    } else if (fJetType==JPT) {
+        addProduct("JChMult",    typeid(*fTChMult));
+        addProduct("JIDHPD",    typeid(*fTID_HPD));
+        addProduct("JIDRBX",    typeid(*fTID_RBX));
+        addProduct("JIDn90Hits",typeid(*fTID_n90Hits));
+        addProduct("JIDresEMF", typeid(*fTID_resEMF));
+    } else if (fJetType==PF) {
+        addProduct("JNConstituents", typeid(*fTNConstituents));
+        addProduct("JChMult",    typeid(*fTChMult));
+        addProduct("JNeuMult",   typeid(*fTNeuMult));
+        addProduct("JChHadfrac", typeid(*fTChHadfrac));
+        addProduct("JNeuHadfrac",typeid(*fTNeuHadfrac));
+        addProduct("JChEmfrac",  typeid(*fTChEmfrac));
+        addProduct("JNeuEmfrac", typeid(*fTNeuEmfrac));
+        addProduct("JChMufrac",  typeid(*fTChMufrac));
+    }
+
+    return typeList;
 }
 
 //________________________________________________________________________________________
-void JetFillerBase::reset(void) {
+void JetFillerBase::resetProducts(void) {
 
-  fTnobj = 0;
+    fTNObjs.reset(new int(0));
 	
-  resetDouble(fTpx  ,gMaxnobjs);
-  resetDouble(fTpy  ,gMaxnobjs);
-  resetDouble(fTpz  ,gMaxnobjs);
-  resetDouble(fTpt  ,gMaxnobjs);
-  resetDouble(fTe   ,gMaxnobjs);
-  resetDouble(fTet  ,gMaxnobjs);
-  resetDouble(fTeta ,gMaxnobjs);
-  resetDouble(fTphi ,gMaxnobjs);
-  resetInt(fTflavour ,gMaxnobjs);
+    fTPx     .reset(new std::vector<float>);
+    fTPy     .reset(new std::vector<float>);
+    fTPz     .reset(new std::vector<float>);
+    fTPt     .reset(new std::vector<float>);
+    fTE      .reset(new std::vector<float>);
+    fTEt     .reset(new std::vector<float>);
+    fTEta    .reset(new std::vector<float>);
+    fTPhi    .reset(new std::vector<float>);
+    fTArea   .reset(new std::vector<float>);
+    fTScale  .reset(new std::vector<float>);
+    fTL1FastJetScale.reset(new std::vector<float>);
+    fTFlavour.reset(new std::vector<int>);
 
-  resetDouble(fTarea,gMaxnobjs);
-  resetDouble(fTjbTagProbTkCntHighEff ,gMaxnobjs);
-  resetDouble(fTjbTagProbTkCntHighPur ,gMaxnobjs);
-  resetDouble(fTjbTagProbSimpSVHighEff,gMaxnobjs);
-  resetDouble(fTjbTagProbSimpSVHighPur,gMaxnobjs);
-  resetInt (fTIDLoose, gMaxnobjs);
+    fTbTagProbTkCntHighEff .reset(new std::vector<float>);
+    fTbTagProbTkCntHighPur .reset(new std::vector<float>);
+    fTbTagProbSimpSVHighEff.reset(new std::vector<float>);
+    fTbTagProbSimpSVHighPur.reset(new std::vector<float>);
+
+    fTIDLoose.reset(new std::vector<int>);
 	
-  if (fJetType==CALO) {	
-    resetDouble(fTID_RBX,gMaxnobjs);
-    resetDouble(fTID_HPD,gMaxnobjs);
-    resetDouble(fTID_n90Hits,gMaxnobjs);
-    resetDouble(fTID_resEMF,gMaxnobjs);
-    resetDouble(fTEMfrac,gMaxnobjs);
-    resetInt(fTjnAssoTracks,gMaxnobjs);
-    resetDouble(fTjChfrac, gMaxnobjs);
-    resetInt(fTNConstituents,gMaxnobjs);		
-  } else if (fJetType==JPT) {	
-    resetDouble(fTID_RBX,gMaxnobjs);
-    resetDouble(fTID_HPD,gMaxnobjs);
-    resetDouble(fTID_n90Hits,gMaxnobjs);
-    resetDouble(fTID_resEMF,gMaxnobjs);
-    resetInt(fTChMult, gMaxnobjs);
-  } else if (fJetType==PF) {
-    resetInt(fTNeuMult, gMaxnobjs);
-    resetInt(fTChMult, gMaxnobjs);
-    resetDouble(fTChHadFrac,gMaxnobjs);
-    resetDouble(fTNeuHadFrac,gMaxnobjs);
-    resetDouble(fTChEmFrac,gMaxnobjs);
-    resetDouble(fTNeuEmFrac,gMaxnobjs);
-    resetDouble(fTChMuFrac,gMaxnobjs);
-    resetInt(fTNConstituents,gMaxnobjs);
-  }
+    if (fJetType==CALO) {	
+        fTNConstituents.reset(new std::vector<int>);		
+        fTNAssoTracks .reset(new std::vector<int>);
+        fTChfrac      .reset(new std::vector<float>);
+        fTEMfrac       .reset(new std::vector<float>);
+        fTID_RBX       .reset(new std::vector<float>);
+        fTID_HPD       .reset(new std::vector<float>);
+        fTID_n90Hits   .reset(new std::vector<float>);
+        fTn90          .reset(new std::vector<int>);
+        fTID_resEMF    .reset(new std::vector<float>);
+    } else if (fJetType==JPT) {	
+        fTID_RBX       .reset(new std::vector<float>);
+        fTID_HPD       .reset(new std::vector<float>);
+        fTID_n90Hits   .reset(new std::vector<float>);
+        fTID_resEMF    .reset(new std::vector<float>);
+        fTChMult       .reset(new std::vector<int>);
+    } else if (fJetType==PF) {
+        fTNConstituents.reset(new std::vector<int>);
+        fTChMult       .reset(new std::vector<int>);
+        fTNeuMult      .reset(new std::vector<int>);
+        fTChHadfrac    .reset(new std::vector<float>);
+        fTNeuHadfrac   .reset(new std::vector<float>);
+        fTChEmfrac     .reset(new std::vector<float>);
+        fTNeuEmfrac    .reset(new std::vector<float>);
+        fTChMufrac     .reset(new std::vector<float>);
+    }
+}
+
+
+//______________________________________________________________________________
+void JetFillerBase::putProducts( edm::Event& e ) { 
+
+    e.put(fTNObjs,fullName("NJets"));
+	
+    e.put(fTPx, fullName("JPx"));
+    e.put(fTPy, fullName("JPy"));
+    e.put(fTPz, fullName("JPz"));
+    e.put(fTPt, fullName("JPt"));
+    e.put(fTE,  fullName("JE"));
+    e.put(fTEt, fullName("JEt"));
+    e.put(fTEta,fullName("JEta"));
+    e.put(fTPhi,fullName("JPhi"));
+    e.put(fTFlavour,fullName("JFlavour"));
+
+    e.put(fTScale,  fullName("JScale"));
+    e.put(fTL1FastJetScale,fullName("JL1FastJetScale"));
+    e.put(fTArea,   fullName("JArea"));
+    e.put(fTbTagProbTkCntHighEff, fullName("JbTagProbTkCntHighEff"));
+    e.put(fTbTagProbTkCntHighPur, fullName("JbTagProbTkCntHighPur"));
+    e.put(fTbTagProbSimpSVHighEff,fullName("JbTagProbSimpSVHighEff"));
+    e.put(fTbTagProbSimpSVHighPur,fullName("JbTagProbSimpSVHighPur"));
+    e.put(fTIDLoose,fullName("JIDLoose"));
+	
+    if (fJetType==CALO) {	
+        e.put(fTNConstituents,fullName("JNConstituents")); 
+        e.put(fTNAssoTracks,  fullName("JNAssoTracks"));
+        e.put(fTChfrac,       fullName("JChfrac"));
+        e.put(fTEMfrac,       fullName("JEMfrac"));
+        e.put(fTID_HPD,       fullName("JIDHPD"));
+        e.put(fTID_RBX,       fullName("JIDRBX"));
+        e.put(fTID_n90Hits,   fullName("JIDn90Hits"));
+        e.put(fTn90,          fullName("Jn90"));
+        e.put(fTID_resEMF,    fullName("JIDresEMF"));
+    } else if (fJetType==JPT) {	
+        e.put(fTChMult,       fullName("JChMult"));
+        e.put(fTID_HPD,       fullName("JIDHPD"));
+        e.put(fTID_RBX,       fullName("JIDRBX"));
+        e.put(fTID_n90Hits,   fullName("JIDn90Hits"));
+        e.put(fTID_resEMF,    fullName("JIDresEMF"));
+    } else if (fJetType==PF) {
+        e.put(fTNConstituents,fullName("JNConstituents"));
+        e.put(fTChMult,       fullName("JChMult"));
+        e.put(fTNeuMult,      fullName("JNeuMult"));
+        e.put(fTChHadfrac,    fullName("JChHadfrac"));
+        e.put(fTNeuHadfrac,   fullName("JNeuHadfrac"));
+        e.put(fTChEmfrac,     fullName("JChEmfrac"));
+        e.put(fTNeuEmfrac,    fullName("JNeuEmfrac"));
+        e.put(fTChMufrac,     fullName("JChMufrac"));
+    }
+
+    
+
 }

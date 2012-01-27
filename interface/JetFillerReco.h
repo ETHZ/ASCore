@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerReco.h,v 1.2 2010/11/13 14:31:06 pnef Exp $
+// $Id: JetFillerReco.h,v 1.3 2011/02/23 19:34:29 stiegerb Exp $
 //
 //
 
@@ -31,11 +31,11 @@
 class JetFillerReco : public JetFillerBase {
 public:
   /// Constructor: set pointer to tree
-  JetFillerReco( const edm::ParameterSet&, TTree* tree, const bool& isRealData );
+  JetFillerReco( const edm::ParameterSet&, const bool& isRealData );
   virtual ~JetFillerReco(void) {}
 
   /// Fill all branches
-  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& );
+  virtual void fillProducts(edm::Event&, const edm::EventSetup& );
 
 private:
 

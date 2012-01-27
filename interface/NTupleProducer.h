@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.1 2012/01/24 10:08:32 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.2 2012/01/26 12:15:13 fronga Exp $
 //
 //
 
@@ -67,8 +67,8 @@ Implementation:
 #include "Math/VectorUtil.h"
 
 // Local classes
-// #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
-// #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
+#include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
+#include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/LeptonFillerPat.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
@@ -143,7 +143,7 @@ private:
   //for OOT reweighting in Summer11_S3 samples
   edm::LumiReWeighting LumiWeights_;
 
-//   std::vector<JetFillerBase*>     jetFillers;
+  std::vector<JetFillerBase*>     jetFillers;
   std::vector<PatMuonFiller*>     muonFillers;
   std::vector<PatElectronFiller*> electronFillers;
   std::vector<PatTauFiller*>      tauFillers;

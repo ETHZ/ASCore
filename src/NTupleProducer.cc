@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.1 2012/01/24 10:08:33 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.2 2012/01/26 12:15:14 fronga Exp $
 //
 //
 
@@ -210,11 +210,11 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
     edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
     edm::LogVerbatim("NTP") << iConfig;
 
-    // 	// Create additional jet fillers
-    // 	std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
-    // 	for (size_t i=0; i<jConfigs.size(); ++i)
-    //           if ( jConfigs[i].getUntrackedParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fIsRealData) );
-    //           else jetFillers.push_back( new JetFillerReco(jConfigs[i], fIsRealData) );
+    // Create additional jet fillers
+    std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
+    for (size_t i=0; i<jConfigs.size(); ++i)
+      if ( jConfigs[i].getUntrackedParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fIsRealData) );
+      else jetFillers.push_back( new JetFillerReco(jConfigs[i], fIsRealData) );
 
     // Create additional lepton fillers
     std::vector<edm::ParameterSet> lConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("leptons");
@@ -245,6 +245,32 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
     // Declare all products to be stored (needs to be done at construction time)
     declareProducts();
+    std::vector<filler::PPair > list;
+    typedef std::vector<filler::PPair>::iterator PPI;
+    for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
+          it != jetFillers.end(); ++it ) {
+      list = (*it)->declareProducts();
+      for ( PPI ip = list.begin(); ip != list.end(); ++ip )
+        produces<edm::InEvent>( ip->first, ip->second );
+    }
+    for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+          it != muonFillers.end(); ++it ) {
+      list = (*it)->declareProducts();
+      for ( PPI ip = list.begin(); ip != list.end(); ++ip )
+        produces<edm::InEvent>( ip->first, ip->second );
+    }
+    for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+          it != electronFillers.end(); ++it ) {
+      list = (*it)->declareProducts();
+      for (PPI ip = list.begin(); ip != list.end(); ++ip)
+        produces<edm::InEvent>( ip->first, ip->second );
+    }
+    for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+          it != tauFillers.end(); ++it ) {
+      list = (*it)->declareProducts();
+      for ( PPI ip = list.begin();  ip != list.end(); ++ip )
+        produces<edm::InEvent>( ip->first, ip->second );
+    }
 
 }
 
@@ -273,10 +299,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     // Reset all the variables
     resetProducts();
-
-    // 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
-    //               it != jetFillers.end(); ++it ) 
-    //           (*it)->resetProducts();
+    for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin(); 
+          it != jetFillers.end(); ++it ) 
+      (*it)->resetProducts();
     for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
           it != muonFillers.end(); ++it ) 
       (*it)->resetProducts();
@@ -2354,21 +2379,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     //   // PhotonJetOverlap(jetPtr, photSCs, calotowers);
 
     //   ////////////////////////////////////////////////////////
-    //   // Process other jet collections, as configured
-    //   for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-    //         it != jetFillers.end(); ++it )
-    //     (*it)->putProducts(iEvent,iSetup);
-    for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
-          it != muonFillers.end(); ++it ) 
-      (*it)->putProducts(iEvent,iSetup);
-    for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
-          it != electronFillers.end(); ++it ) 
-      (*it)->putProducts(iEvent,iSetup);
-    for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
-          it != tauFillers.end(); ++it ) 
-      (*it)->putProducts(iEvent,iSetup);
-
-    //   ////////////////////////////////////////////////////////
     //   // Get and Dump (M)E(T) Variables:
     //   // Tracks:
     //   int nqtrk(-1);
@@ -2581,9 +2591,36 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     //   }
 
 
+    ////////////////////////////////////////////////////////
+    // Process other jet collections, as configured
+    for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
+          it != jetFillers.end(); ++it )
+      (*it)->fillProducts(iEvent,iSetup);
+    for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+          it != muonFillers.end(); ++it ) 
+      (*it)->fillProducts(iEvent,iSetup);
+    for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+          it != electronFillers.end(); ++it ) 
+      (*it)->fillProducts(iEvent,iSetup);
+    for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+          it != tauFillers.end(); ++it ) 
+      (*it)->fillProducts(iEvent,iSetup);
+
     ///////////////////////////////////////////////////////////////////////////////
     // Fill Tree //////////////////////////////////////////////////////////////////
     putProducts( iEvent );
+    for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
+          it != jetFillers.end(); ++it )
+      (*it)->putProducts(iEvent);
+    for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+          it != muonFillers.end(); ++it ) 
+      (*it)->putProducts(iEvent);
+    for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+          it != electronFillers.end(); ++it ) 
+      (*it)->putProducts(iEvent);
+    for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+          it != tauFillers.end(); ++it ) 
+      (*it)->putProducts(iEvent);
 
     fNFillTree++;
 
@@ -3217,32 +3254,6 @@ void NTupleProducer::declareProducts(void) {
     produces<float>("PFMETPATSignificance");
     produces<float>("METR12");
     produces<float>("METR21");
-
-    // Additional collections
-    std::vector<filler::PPair > list;
-    typedef std::vector<filler::PPair>::iterator PPI;
-    // 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-    //               it != jetFillers.end(); ++it )
-    //           (*it)->declareProducts();
-    for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
-          it != muonFillers.end(); ++it ) {
-      list = (*it)->declareProducts();
-      for ( PPI ip = list.begin(); ip != list.end(); ++ip )
-        produces<edm::InEvent>( ip->first, ip->second );
-               
-    }
-    for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
-          it != electronFillers.end(); ++it ) {
-      list = (*it)->declareProducts();
-      for (PPI ip = list.begin(); ip != list.end(); ++ip)
-        produces<edm::InEvent>( ip->first, ip->second );
-    }
-    for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
-          it != tauFillers.end(); ++it ) {
-      list = (*it)->declareProducts();
-      for ( PPI ip = list.begin();  ip != list.end(); ++ip )
-        produces<edm::InEvent>( ip->first, ip->second );
-    }
 
 }
 

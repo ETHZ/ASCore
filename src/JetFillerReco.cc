@@ -18,8 +18,8 @@
 
 
 //________________________________________________________________________________________
-JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree, const bool& isRealData )
-  : JetFillerBase( config, tree, isRealData )
+JetFillerReco::JetFillerReco( const edm::ParameterSet& config, const bool& isRealData )
+  : JetFillerBase( config, isRealData )
 {
 
   // Retrieve configuration parameters
@@ -41,8 +41,8 @@ JetFillerReco::JetFillerReco( const edm::ParameterSet& config, TTree* tree, cons
 
 
 //________________________________________________________________________________________
-const int JetFillerReco::fillBranches(const edm::Event& iEvent, 
-                                      const edm::EventSetup& iSetup ) {
+void JetFillerReco::fillProducts(edm::Event& iEvent, 
+                                 const edm::EventSetup& iSetup ) {
 
   using namespace edm;
   using namespace std;
@@ -116,15 +116,15 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
     }
 
     // Store the information (corrected)
-    fTpx[ijet]    = jet->px()*scale;
-    fTpy[ijet]    = jet->py()*scale;
-    fTpz[ijet]    = jet->pz()*scale;
-    fTpt[ijet]    = jet->pt()*scale;
-    fTe[ijet]     = jet->energy()*scale;
-    fTet[ijet]    = jet->et()*scale;
-    fTphi[ijet]   = jet->phi();
-    fTeta[ijet]   = jet->eta();
-    fTscale[ijet] = scale;
+    fTPx   ->push_back(jet->px()*scale);
+    fTPy   ->push_back(jet->py()*scale);
+    fTPz   ->push_back(jet->pz()*scale);
+    fTPt   ->push_back(jet->pt()*scale);
+    fTE    ->push_back(jet->energy()*scale);
+    fTEt   ->push_back(jet->et()*scale);
+    fTEta  ->push_back(jet->eta());
+    fTPhi  ->push_back(jet->phi());
+    fTScale->push_back(scale);
 
     // B-tagging probability (for 4 b-taggings)
     double mindr(999.99);
@@ -134,7 +134,7 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
                                     (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighEff)[i].first->phi());
       if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-        fTjbTagProbTkCntHighEff[ijet]=(*jetsAndProbsTkCntHighEff)[i].second;
+        fTbTagProbTkCntHighEff->push_back((*jetsAndProbsTkCntHighEff)[i].second);
         mindr = deltar;
       }
     }
@@ -145,7 +145,7 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
                                     (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighPur)[i].first->phi());
       if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-        fTjbTagProbTkCntHighPur[ijet]=(*jetsAndProbsTkCntHighPur)[i].second;
+        fTbTagProbTkCntHighPur->push_back((*jetsAndProbsTkCntHighPur)[i].second);
         mindr = deltar;
       }
     }
@@ -156,7 +156,7 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
                                     (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighEff)[i].first->phi());
       if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-        fTjbTagProbSimpSVHighEff[ijet]=(*jetsAndProbsSimpSVHighEff)[i].second;
+        fTbTagProbSimpSVHighEff->push_back((*jetsAndProbsSimpSVHighEff)[i].second);
         mindr = deltar;
       }
     }
@@ -167,7 +167,7 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
                                     (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighPur)[i].first->phi());
       if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-        fTjbTagProbSimpSVHighPur[ijet]=(*jetsAndProbsSimpSVHighPur)[i].second;
+        fTbTagProbSimpSVHighPur->push_back((*jetsAndProbsSimpSVHighPur)[i].second);
         mindr = deltar;
       }
     }
@@ -180,12 +180,11 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
       edm::RefToBase<reco::Jet>  jetRef = jptjet->getCaloJetRef();
       jetID = (*jetsID)[ jetRef ];
 
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-
-      fTChMult[ijet]      = jptjet->chargedMultiplicity();
+      fTID_HPD    ->push_back(jetID.fHPD);
+      fTID_RBX    ->push_back(jetID.fRBX);
+      fTID_n90Hits->push_back(jetID.n90Hits);
+      fTID_resEMF ->push_back(jetID.restrictedEMF);
+      fTChMult    ->push_back(jptjet->chargedMultiplicity());
 
     }	  
 
@@ -210,13 +209,13 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
       } else {
         edm::LogWarning("NTP") << "PFJets: energy fraction ==0 ";
       }
-      fTChHadFrac[ijet]     = CHF;
-      fTNeuHadFrac[ijet]    = NHF;
-      fTChEmFrac[ijet]      = CEF;
-      fTNeuEmFrac[ijet]     = NEF;
-      fTChMult[ijet]        = pjet->chargedMultiplicity();
-      fTNeuMult[ijet]       = pjet->neutralMultiplicity(); 
-      fTNConstituents[ijet] = pjet->nConstituents();  
+      fTNConstituents->push_back(pjet->nConstituents());  
+      fTChMult       ->push_back(pjet->chargedMultiplicity());
+      fTNeuMult      ->push_back(pjet->neutralMultiplicity()); 
+      fTChHadfrac    ->push_back(CHF);
+      fTNeuHadfrac   ->push_back(NHF);
+      fTChEmfrac     ->push_back(CEF);
+      fTNeuEmfrac    ->push_back(NEF);
     }
 
     // ------------------------------------------------------------
@@ -227,15 +226,13 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
       edm::RefToBase<reco::Jet> jetRef = jets->refAt(ijet);
       jetID = (*jetsID)[ jetRef ];
 
-      fTID_HPD[ijet]      = jetID.fHPD;
-      fTID_RBX[ijet]      = jetID.fRBX;
-      fTID_n90Hits[ijet]  = jetID.n90Hits;
-      fTID_resEMF[ijet]   = jetID.restrictedEMF;
-
-      fTEMfrac[ijet]        = cjet->emEnergyFraction();
-      fTNConstituents[ijet] = cjet->nConstituents();
-      fTn90[ijet]           = cjet->n90();
-
+      fTNConstituents->push_back(cjet->nConstituents());
+      fTEMfrac       ->push_back(cjet->emEnergyFraction());
+      fTID_HPD       ->push_back(jetID.fHPD);
+      fTID_RBX       ->push_back(jetID.fRBX);
+      fTID_n90Hits   ->push_back(jetID.n90Hits);
+      fTn90          ->push_back(cjet->n90());
+      fTID_resEMF    ->push_back(jetID.restrictedEMF);
 
 
       /////////////////////////////////////////////////////
@@ -251,8 +248,8 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
 
       // Jet-track association: make transient tracks and store information
       vector<TransientTrack> AssociatedTTracks;
-      fTjnAssoTracks[ijet] = 0;
-      fTjChfrac[ijet] = -1.; // Default (if jet-tracks association cone is outside tracker acceptance)
+      fTNAssoTracks->push_back(0);
+      fTChfrac->push_back(-1.); // Default (if jet-tracks association cone is outside tracker acceptance)
       if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 				// Tmp variables for vectorial sum of pt of tracks
         double pXtmp(0.), pYtmp(0.);
@@ -262,13 +259,13 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
           if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
             pXtmp += AssociatedTracks[t]->px();
             pYtmp += AssociatedTracks[t]->py();
-            fTjnAssoTracks[ijet]++;
+            (*fTNAssoTracks)[ijet]++;
           }
         }
-        fTjChfrac[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
+        fTChfrac->push_back(sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale));
 
       } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-        fTjChfrac[ijet] = -1.;
+        fTChfrac->push_back(-1.);
       }
       AssociatedTracks.clear();
       AssociatedTTracks.clear();
@@ -278,8 +275,6 @@ const int JetFillerReco::fillBranches(const edm::Event& iEvent,
 
     ++ijet;
   }
-  fTnobj = ijet;
-
-  return 0;
+  *fTNObjs = ijet;
 
 }

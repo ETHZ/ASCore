@@ -12,14 +12,12 @@ FillerBase::FillerBase( const edm::ParameterSet& cfg, const bool& isRealData )
 
 
 //________________________________________________________________________________________
-const bool FillerBase::addProduct( const char* name,const type_info& type )
+void FillerBase::addProduct( const char* name, const type_info& type)
 {
   
   // Form input
-  std::string fullname(fPrefix+name);
   edm::TypeID tid(type);
 
-  //std::cout << "Adding product " << fullname << " of type " << tid  << std::endl;
-  productList.push_back( std::make_pair(tid,fullname) );
+  typeList.push_back( std::make_pair(tid,fullName(name)) );
 
 }

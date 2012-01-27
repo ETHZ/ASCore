@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: FillerBase.h,v 1.2 2012/01/06 09:08:00 pnef Exp $
+// $Id: FillerBase.h,v 1.2.2.1 2012/01/26 12:15:13 fronga Exp $
 //
 //
 
@@ -30,6 +30,7 @@ namespace filler {
   // So we make a list of products and type names, 
   // and use a specialized EDFilter::produce() method.
   typedef std::pair<edm::TypeID,std::string> PPair;
+  typedef std::pair<void*,std::string> APair;
 }
 
 
@@ -45,17 +46,21 @@ public:
   virtual const std::vector<filler::PPair> declareProducts(void) = 0;
   /// Reset all variable containers
   virtual void resetProducts(void) = 0;
-  /// Fill variables (called for each event)
-  virtual void putProducts(edm::Event&, const edm::EventSetup&) = 0;
+  /// Fill variables 
+  virtual void fillProducts(edm::Event&, const edm::EventSetup&) = 0;
+  /// Put products in the event data
+  virtual void putProducts( edm::Event& ) = 0;
 
 protected:
 
-  /// Add a product to the list
-  const bool addProduct(const char* name, const type_info& address);
+  /// Add a product to the list (with prefix)
+  void addProduct(const char* name, const type_info& type);
+  /// Returns prefixed name (always use this method!)
+  const std::string fullName(const char* name) { return std::string(fPrefix+name); }
 
   std::string fPrefix;        /// Prefix for branches
   bool   fIsRealData;         /// Global switch
-  std::vector<filler::PPair> productList;
+  std::vector<filler::PPair> typeList;
   
 
 };

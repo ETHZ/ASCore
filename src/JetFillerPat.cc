@@ -19,8 +19,8 @@
 
 
 //________________________________________________________________________________________
-JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, const bool& isRealData )
-  : JetFillerBase( config, tree, isRealData )
+JetFillerPat::JetFillerPat( const edm::ParameterSet& config, const bool& isRealData )
+  : JetFillerBase( config, isRealData )
 {
 
   // Retrieve configuration parameters
@@ -40,8 +40,7 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, const 
 
 
 //________________________________________________________________________________________
-const int JetFillerPat::fillBranches(const edm::Event& iEvent,
-                                      const edm::EventSetup& iSetup ) {
+void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup ) {
 
   using namespace edm;
   using namespace std;
@@ -94,36 +93,31 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
         break;
       }
       // Store the information (corrected)
-      fTpx[ijet]    = Jit->px();
-      fTpy[ijet]    = Jit->py();
-      fTpz[ijet]    = Jit->pz();
-      fTpt[ijet]    = Jit->pt();
-      fTe[ijet]     = Jit->energy();
-      fTet[ijet]    = Jit->et();
-      fTphi[ijet]   = Jit->phi();
-      fTeta[ijet]   = Jit->eta();
-      fTarea[ijet]  = Jit->jetArea();
+      fTPx    ->push_back(Jit->px());
+      fTPy    ->push_back(Jit->py());
+      fTPz    ->push_back(Jit->pz());
+      fTPt    ->push_back(Jit->pt());
+      fTE     ->push_back(Jit->energy());
+      fTEt    ->push_back(Jit->et());
+      fTPhi   ->push_back(Jit->phi());
+      fTEta   ->push_back(Jit->eta());
+      fTArea  ->push_back(Jit->jetArea());
 
-      if(Jit->genJet()){
-	fTflavour[ijet] = Jit->partonFlavour();
-      }
-      else
-	fTflavour[ijet] = 0 ;
+      fTScale ->push_back(1.0/Jit->jecFactor("Uncorrected")); // This is the inverse correction...
+      fTL1FastJetScale ->push_back(Jit->jecFactor("L1FastJet")/Jit->jecFactor("Uncorrected")); 
 
-      fTscale[ijet] = 1.0/Jit->jecFactor("Uncorrected"); // This is the inverse correction...
-      fTL1FastJetScale[ijet] = Jit->jecFactor("L1FastJet")/Jit->jecFactor("Uncorrected"); 
+      if(Jit->genJet())	fTFlavour ->push_back(Jit->partonFlavour());
+      else fTFlavour ->push_back(0 );
 
       // B-tagging probability (for 4 b-taggings)
-      fTjbTagProbTkCntHighEff [ijet] = Jit->bDiscriminator("trackCountingHighEffBJetTags"        );
-      fTjbTagProbTkCntHighPur [ijet] = Jit->bDiscriminator("trackCountingHighPurBJetTags"        );
-      fTjbTagProbSimpSVHighEff[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-      fTjbTagProbSimpSVHighPur[ijet] = Jit->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
+      fTbTagProbTkCntHighEff  ->push_back(Jit->bDiscriminator("trackCountingHighEffBJetTags"        ));
+      fTbTagProbTkCntHighPur  ->push_back(Jit->bDiscriminator("trackCountingHighPurBJetTags"        ));
+      fTbTagProbSimpSVHighEff ->push_back(Jit->bDiscriminator("simpleSecondaryVertexHighEffBJetTags"));
+      fTbTagProbSimpSVHighPur ->push_back(Jit->bDiscriminator("simpleSecondaryVertexHighPurBJetTags"));
 
-      if(Jit->isPFJet()){
-	fTIDLoose[ijet] = (int) PFjetIDLoose(*Jit);
-      } else {
-	fTIDLoose[ijet] = (int) jetIDLoose(*Jit);
-      } 
+      if(Jit->isPFJet()) fTIDLoose ->push_back((int) PFjetIDLoose(*Jit));
+      else fTIDLoose ->push_back((int) jetIDLoose(*Jit));
+      
 
       // -------------------------------------------------
       // PF jet specific
@@ -134,23 +128,21 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
 	// PFJet IDs calculated from these definitions of energy fractions are consistent with the result of the PFJetIDSelectionFunctor
 	// moreover, the energy fractions add up to 1.
 	pat::Jet const & jetuncorr=Jit->correctedJet("Uncorrected");
-        fTChHadFrac[ijet]  =jetuncorr.chargedHadronEnergyFraction();
-        fTNeuHadFrac[ijet] =jetuncorr.neutralHadronEnergyFraction() + jetuncorr.HFHadronEnergyFraction();
-        fTChEmFrac[ijet]   =jetuncorr.chargedEmEnergyFraction();
-        fTNeuEmFrac[ijet]  =jetuncorr.neutralEmEnergyFraction();
-        fTChMuFrac[ijet]   =jetuncorr.chargedMuEnergyFraction();
-    
+
 	// multiplicities do not depend on energy
-	fTChMult[ijet]        = Jit->chargedMultiplicity();
-        fTNeuMult[ijet]       = Jit->neutralMultiplicity();
-        fTNConstituents[ijet] = Jit->numberOfDaughters(); // same as nConstituents
-    
+        fTNConstituents ->push_back(Jit->numberOfDaughters()); // same as nConstituents
+	fTChMult        ->push_back(Jit->chargedMultiplicity());
+        fTNeuMult       ->push_back(Jit->neutralMultiplicity());
+
+        fTChHadfrac  ->push_back(jetuncorr.chargedHadronEnergyFraction());
+        fTNeuHadfrac ->push_back(jetuncorr.neutralHadronEnergyFraction() + jetuncorr.HFHadronEnergyFraction());
+        fTChEmfrac   ->push_back(jetuncorr.chargedEmEnergyFraction());
+        fTNeuEmfrac  ->push_back(jetuncorr.neutralEmEnergyFraction());
+        fTChMufrac   ->push_back(jetuncorr.chargedMuEnergyFraction());    
       }
 
       ijet++;
     }
-  fTnobj = ijet;
-
-  return 0;
+  *fTNObjs = ijet;
 
 }

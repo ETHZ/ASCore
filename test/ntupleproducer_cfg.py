@@ -17,7 +17,7 @@ process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
                                       fileMode = cms.untracked.string("NOMERGE")
                                     )
 
@@ -80,7 +80,7 @@ process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
                                SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
                               #process.out.splitLevel = cms.untracked.int32(99),  # Turn on split level (smaller files???)
-                               dropMetaData = cms.untracked.string('DROPPED'),   # Get rid of metadata related to dropped collections
+                               dropMetaData = cms.untracked.string('ALL'), #DROPPED   # Get rid of metadata related to dropped collections
                                outputCommands = cms.untracked.vstring() # Will be overwritten by PAT: we overwrite at the end
                                )
 
@@ -417,7 +417,7 @@ if options.runon == 'data':
 	
 # Add some PF lepton collections
 process.analyze.leptons = (
-        # PF Electrons
+        # PF Electrons anti-isolated
         cms.PSet( type = cms.untracked.string('electron'),
                   prefix = cms.untracked.string('PfElAntiIso'),
                   tag = cms.untracked.InputTag('patElectronsPFAntiIso'),
@@ -425,7 +425,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Muons
+        # PF Muons anti-isolated
         cms.PSet( type = cms.untracked.string('muon'),
                   prefix = cms.untracked.string('PfMuAntiIso'),
                   tag = cms.untracked.InputTag('patMuonsPFAntiIso'),
@@ -433,7 +433,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Taus
+        # PF Taus anti-isolated
         cms.PSet( type = cms.untracked.string('tau'),
                   prefix = cms.untracked.string('PfTauAntiIso'),
                   tag = cms.untracked.InputTag('selectedPatTausPFAntiIso'),
@@ -441,7 +441,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Electrons
+        # PF Electrons TIGHT
         cms.PSet( type = cms.untracked.string('electron'),
                   prefix = cms.untracked.string('PfEl2'),
                   tag = cms.untracked.InputTag('patElectronsPF2'),
@@ -449,7 +449,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Muons
+        # PF Muons TIGHT
         cms.PSet( type = cms.untracked.string('muon'),
                   prefix = cms.untracked.string('PfMu2'),
                   tag = cms.untracked.InputTag('patMuonsPF2'),
@@ -457,7 +457,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Taus
+        # PF Taus TIGHT
         cms.PSet( type = cms.untracked.string('tau'),
                   prefix = cms.untracked.string('PfTau2'),
                   tag = cms.untracked.InputTag('selectedPatTausPF2'),
@@ -465,7 +465,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Electrons
+        # PF Electrons LOOSE
         cms.PSet( type = cms.untracked.string('electron'),
                   prefix = cms.untracked.string('PfEl3'),
                   tag = cms.untracked.InputTag('patElectronsPF3'),
@@ -473,7 +473,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Muons
+        # PF Muons LOOSE
         cms.PSet( type = cms.untracked.string('muon'),
                   prefix = cms.untracked.string('PfMu3'),
                   tag = cms.untracked.InputTag('patMuonsPF3'),
@@ -481,7 +481,7 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.untracked.uint32(20)
                   ),
-        # PF Taus
+        # PF Taus LOOSE
         cms.PSet( type = cms.untracked.string('tau'),
                   prefix = cms.untracked.string('PfTau3'),
                   tag = cms.untracked.InputTag('selectedPatTausPF3'),

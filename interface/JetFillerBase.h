@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.9 2011/06/09 08:04:48 fronga Exp $
+// $Id: JetFillerBase.h,v 1.10 2011/07/05 11:50:32 leo Exp $
 //
 //
 
@@ -35,16 +35,18 @@ public:
   };
 
   /// Constructor: set pointer to tree
-  JetFillerBase( const edm::ParameterSet& cfg, TTree* tree, const bool& isRealData );
-  virtual ~JetFillerBase(void);
+  JetFillerBase( const edm::ParameterSet& cfg, const bool& isRealData );
+  virtual ~JetFillerBase(void) {}
 
   /// Define all branches
-  void createBranches(void);
+  virtual const std::vector<filler::PPair> declareProducts(void);
   /// Reset all branch containers
-  void reset(void);
+  virtual void resetProducts(void);
+  /// Fill variables (needs to be implemented in specialised classes)
+  virtual void fillProducts(edm::Event&, const edm::EventSetup& ) = 0;
+  /// Put products in the event data
+  virtual void putProducts( edm::Event& );
 
-  /// Fill all branches (needs to be implemented in specialised classes)
-  virtual const int fillBranches(const edm::Event&, const edm::EventSetup& ) = 0;
 
 
 protected:
@@ -65,43 +67,43 @@ protected:
 
   size_t gMaxnobjs;
 
-  // Tree variables
-  int     fTnobj;
-  double* fTpx;
-  double* fTpy;
-  double* fTpz;
-  double* fTpt;
-  double* fTe;
-  double* fTet;
-  double* fTeta;
-  double* fTphi;
-  double* fTscale;
-  double* fTL1FastJetScale;
-  double* fTarea;
-  int *fTflavour;
+  // Stored variables
+  std::auto_ptr<int>     fTNObjs;
+  std::auto_ptr<std::vector<float> > fTPx;
+  std::auto_ptr<std::vector<float> > fTPy;
+  std::auto_ptr<std::vector<float> > fTPz;
+  std::auto_ptr<std::vector<float> > fTPt;
+  std::auto_ptr<std::vector<float> > fTE;
+  std::auto_ptr<std::vector<float> > fTEt;
+  std::auto_ptr<std::vector<float> > fTEta;
+  std::auto_ptr<std::vector<float> > fTPhi;
+  std::auto_ptr<std::vector<float> > fTScale;
+  std::auto_ptr<std::vector<float> > fTL1FastJetScale;
+  std::auto_ptr<std::vector<float> > fTArea;
+  std::auto_ptr<std::vector<int> >   fTFlavour;
   // b-taggers
-  double* fTjbTagProbTkCntHighEff ;
-  double* fTjbTagProbTkCntHighPur ;
-  double* fTjbTagProbSimpSVHighEff;
-  double* fTjbTagProbSimpSVHighPur;
+  std::auto_ptr<std::vector<float> > fTbTagProbTkCntHighEff ;
+  std::auto_ptr<std::vector<float> > fTbTagProbTkCntHighPur ;
+  std::auto_ptr<std::vector<float> > fTbTagProbSimpSVHighEff;
+  std::auto_ptr<std::vector<float> > fTbTagProbSimpSVHighPur;
+  std::auto_ptr<std::vector<int> >   fTIDLoose;
   // jet algo dependant info
-  int*    fTNConstituents;
-  double* fTjChfrac;
-  double* fTEMfrac;
-  int*    fTNeuMult;
-  int*    fTChMult;
-  int*    fTn90;
-  double* fTID_HPD; 
-  double* fTID_RBX;    
-  double* fTID_n90Hits;
-  double* fTID_resEMF; 
-  int*    fTjnAssoTracks;
-  double* fTChHadFrac;
-  double* fTNeuHadFrac;
-  double* fTChEmFrac;
-  double* fTNeuEmFrac;
-  double* fTChMuFrac;
-  int*    fTIDLoose;
+  std::auto_ptr<std::vector<int> >   fTNConstituents;
+  std::auto_ptr<std::vector<int> >   fTNAssoTracks;
+  std::auto_ptr<std::vector<float> > fTChfrac;
+  std::auto_ptr<std::vector<float> > fTEMfrac;
+  std::auto_ptr<std::vector<float> > fTID_HPD; 
+  std::auto_ptr<std::vector<float> > fTID_RBX;    
+  std::auto_ptr<std::vector<float> > fTID_n90Hits;
+  std::auto_ptr<std::vector<int> >   fTn90;
+  std::auto_ptr<std::vector<float> > fTID_resEMF; 
+  std::auto_ptr<std::vector<int> >   fTChMult;
+  std::auto_ptr<std::vector<int> >   fTNeuMult;
+  std::auto_ptr<std::vector<float> > fTChHadfrac;
+  std::auto_ptr<std::vector<float> > fTNeuHadfrac;
+  std::auto_ptr<std::vector<float> > fTChEmfrac;
+  std::auto_ptr<std::vector<float> > fTNeuEmfrac;
+  std::auto_ptr<std::vector<float> > fTChMufrac;
 
 };
 

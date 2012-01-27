@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5 2012/01/06 09:08:00 pnef Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.1 2012/01/26 12:15:13 fronga Exp $
 //
 //
 
@@ -43,7 +43,9 @@ public:
     /// Reset all branch containers
     virtual void resetProducts(void);
     /// Fill all branches
-    virtual void putProducts(edm::Event&, const edm::EventSetup& );
+    virtual void fillProducts(edm::Event&, const edm::EventSetup& );
+    /// Put products in the event data
+    virtual void putProducts( edm::Event& );
 
     enum Type {
         El, Mu, Tau, unknown
@@ -180,7 +182,7 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, c
 
 //________________________________________________________________________________________
 template <class LeptonType>
-void LeptonFillerPat<LeptonType>::putProducts(edm::Event& iEvent,
+void LeptonFillerPat<LeptonType>::fillProducts(edm::Event& iEvent,
                                               const edm::EventSetup& iSetup ) {
 
     // Retrieve collection
@@ -193,7 +195,7 @@ void LeptonFillerPat<LeptonType>::putProducts(edm::Event& iEvent,
         // Check if maximum number of leptons is exceeded already:
         if(pfqi >= gMaxnobjs){
             edm::LogWarning("NTP") << "@SUB=analyze()"
-                                   << "Maximum number of " << fPrefix << " exceeded";
+                                   << "Maximum number of " << fPrefix << " leptons exceeded";
             *fTMaxLepExc = 1;
             break;
         }
@@ -233,79 +235,158 @@ template <class LeptonType>
 const std::vector<filler::PPair> LeptonFillerPat<LeptonType>::declareProducts(void) {
 
     addProduct("MaxLepExc",typeid(*fTMaxLepExc));
-    addProduct("NObjsTot", typeid(*fTNObjsTot) );
-    addProduct("NObjs",    typeid(*fTNObjs)    );
+    addProduct("NObjsTot", typeid(*fTNObjsTot));
+    addProduct("NObjs",    typeid(*fTNObjs));
 
-    addProduct("Px",       typeid(*fTPx)       );
-    addProduct("Py",       typeid(*fTPy)       );
-    addProduct("Pz",       typeid(*fTPz)       );
-    addProduct("Pt",       typeid(*fTPt)       );
-    addProduct("E",        typeid(*fTE)        );
-    addProduct("Et",       typeid(*fTEt)       );
-    addProduct("Eta",      typeid(*fTEta)      );
-    addProduct("Phi",      typeid(*fTPhi)      );
-    addProduct("Charge",   typeid(*fTCharge)   );
+    addProduct("Px",       typeid(*fTPx));
+    addProduct("Py",       typeid(*fTPy));
+    addProduct("Pz",       typeid(*fTPz));
+    addProduct("Pt",       typeid(*fTPt));
+    addProduct("E",        typeid(*fTE));
+    addProduct("Et",       typeid(*fTEt));
+    addProduct("Eta",      typeid(*fTEta));
+    addProduct("Phi",      typeid(*fTPhi));
+    addProduct("Charge",   typeid(*fTCharge));
 
-    addProduct("ParticleIso",      typeid(*fTParticleIso)      );
-    addProduct("ChargedHadronIso", typeid(*fTChargedHadronIso) );
-    addProduct("NeutralHadronIso", typeid(*fTNeutralHadronIso) );
-    addProduct("PhotonIso",        typeid(*fTPhotonIso)        );
+    addProduct("ParticleIso",      typeid(*fTParticleIso));
+    addProduct("ChargedHadronIso", typeid(*fTChargedHadronIso));
+    addProduct("NeutralHadronIso", typeid(*fTNeutralHadronIso));
+    addProduct("PhotonIso",        typeid(*fTPhotonIso));
   
     if(fType == Tau){
-  	addProduct("DecayMode", typeid(*fTDecayMode) );
-  	addProduct("Vz",        typeid(*fTVz) ); 
-  	addProduct("EmFraction",typeid(*fTEmFraction) ); 
-  	addProduct("JetPt",     typeid(*fTJetPt) );
-  	addProduct("JetEta",    typeid(*fTJetEta) );
-  	addProduct("JetPhi",    typeid(*fTJetPhi) );
-  	addProduct("JetMass",   typeid(*fTJetMass) );
-  	addProduct("LeadingTkPt", typeid(*fTLeadingTkPt) );
-  	addProduct("LeadingNeuPt",typeid(*fTLeadingNeuPt) );
-  	addProduct("LeadingTkHcalenergy", typeid(*fTLeadingTkHcalenergy) );
-  	addProduct("LeadingTkEcalenergy", typeid(*fTLeadingTkEcalenergy) );
-  	addProduct("NumChargedHadronsSignalCone", typeid(*fTNumChargedHadronsSignalCone) );
-  	addProduct("NumNeutralHadronsSignalCone", typeid(*fTNumNeutralHadronsSignalCone) );
-  	addProduct("NumPhotonsSignalCone",     typeid(*fTNumPhotonsSignalCone) );
-  	addProduct("NumParticlesSignalCone",   typeid(*fTNumParticlesSignalCone) );
-  	addProduct("NumChargedHadronsIsoCone", typeid(*fTNumChargedHadronsIsoCone) );
-  	addProduct("NumNeutralHadronsIsoCone", typeid(*fTNumNeutralHadronsIsoCone) );
-  	addProduct("NumPhotonsIsolationCone",  typeid(*fTNumPhotonsIsolationCone) );
-  	addProduct("NumParticlesIsolationCone",typeid(*fTNumParticlesIsolationCone) );
-  	addProduct("PtSumChargedParticlesIsoCone", typeid(*fTPtSumChargedParticlesIsoCone) );
-  	addProduct("PtSumPhotonsIsoCone",      typeid(*fTPtSumPhotonsIsoCone) );
-	addProduct("DecayModeFinding", typeid(*fTDecayModeFinding) );
-  	addProduct("VLooseIso", typeid(*fTVLooseIso) );
-  	addProduct("LooseIso",  typeid(*fTLooseIso) );
-  	addProduct("TightIso",  typeid(*fTTightIso) );
-  	addProduct("MediumIso", typeid(*fTMediumIso) );
-/*   	addProduct("VLooseChargedIso", typeid(*fTVLooseChargedIso) ); */
-/*   	addProduct("LooseChargedIso",  typeid(*fTLooseChargedIso) ); */
-/*   	addProduct("TightChargedIso",  typeid(*fTTightChargedIso) ); */
-/*   	addProduct("MediumChargedIso", typeid(*fTMediumChargedIso) ); */
-/*   	addProduct("VLooseIsoDBSumPtCorr", typeid(*fTVLooseIsoDBSumPtCorr) ); */
-/*   	addProduct("LooseIsoDBSumPtCorr",  typeid(*fTLooseIsoDBSumPtCorr) ); */
-/*   	addProduct("TightIsoDBSumPtCorr",  typeid(*fTTightIsoDBSumPtCorr) ); */
-/*   	addProduct("MediumIsoDBSumPtCorr", typeid(*fTMediumIsoDBSumPtCorr) ); */
-/*   	addProduct("VLooseCombinedIsoDBSumPtCorr", typeid(*fTVLooseCombinedIsoDBSumPtCorr) ); */
-/*   	addProduct("LooseCombinedIsoDBSumPtCorr",  typeid(*fTLooseCombinedIsoDBSumPtCorr) ); */
-/*   	addProduct("TightCombinedIsoDBSumPtCorr",  typeid(*fTTightCombinedIsoDBSumPtCorr) ); */
-/*   	addProduct("MediumCombinedIsoDBSumPtCorr", typeid(*fTMediumCombinedIsoDBSumPtCorr) ); */
-  	addProduct("LooseElectronRejection", typeid(*fTLooseElectronRejection) );
-  	addProduct("TightElectronRejection", typeid(*fTTightElectronRejection) );
-  	addProduct("MediumElectronRejection",typeid(*fTMediumElectronRejection) );
-  	addProduct("LooseMuonRejection", typeid(*fTLooseMuonRejection) );
-  	addProduct("TightMuonRejection", typeid(*fTTightMuonRejection) );
+  	addProduct("DecayMode", typeid(*fTDecayMode));
+  	addProduct("Vz",        typeid(*fTVz)); 
+  	addProduct("EmFraction",typeid(*fTEmFraction)); 
+  	addProduct("JetPt",     typeid(*fTJetPt));
+  	addProduct("JetEta",    typeid(*fTJetEta));
+  	addProduct("JetPhi",    typeid(*fTJetPhi));
+  	addProduct("JetMass",   typeid(*fTJetMass));
+  	addProduct("LeadingTkPt", typeid(*fTLeadingTkPt));
+  	addProduct("LeadingNeuPt",typeid(*fTLeadingNeuPt));
+  	addProduct("LeadingTkHcalenergy", typeid(*fTLeadingTkHcalenergy));
+  	addProduct("LeadingTkEcalenergy", typeid(*fTLeadingTkEcalenergy));
+  	addProduct("NumChargedHadronsSignalCone", typeid(*fTNumChargedHadronsSignalCone));
+  	addProduct("NumNeutralHadronsSignalCone", typeid(*fTNumNeutralHadronsSignalCone));
+  	addProduct("NumPhotonsSignalCone",     typeid(*fTNumPhotonsSignalCone));
+  	addProduct("NumParticlesSignalCone",   typeid(*fTNumParticlesSignalCone));
+  	addProduct("NumChargedHadronsIsoCone", typeid(*fTNumChargedHadronsIsoCone));
+  	addProduct("NumNeutralHadronsIsoCone", typeid(*fTNumNeutralHadronsIsoCone));
+  	addProduct("NumPhotonsIsolationCone",  typeid(*fTNumPhotonsIsolationCone));
+  	addProduct("NumParticlesIsolationCone",typeid(*fTNumParticlesIsolationCone));
+  	addProduct("PtSumChargedParticlesIsoCone", typeid(*fTPtSumChargedParticlesIsoCone));
+  	addProduct("PtSumPhotonsIsoCone",      typeid(*fTPtSumPhotonsIsoCone));
+	addProduct("DecayModeFinding", typeid(*fTDecayModeFinding));
+  	addProduct("VLooseIso", typeid(*fTVLooseIso));
+  	addProduct("LooseIso",  typeid(*fTLooseIso));
+  	addProduct("TightIso",  typeid(*fTTightIso));
+  	addProduct("MediumIso", typeid(*fTMediumIso));
+/*   	addProduct("VLooseChargedIso", typeid(*fTVLooseChargedIso)); */
+/*   	addProduct("LooseChargedIso",  typeid(*fTLooseChargedIso)); */
+/*   	addProduct("TightChargedIso",  typeid(*fTTightChargedIso)); */
+/*   	addProduct("MediumChargedIso", typeid(*fTMediumChargedIso)); */
+/*   	addProduct("VLooseIsoDBSumPtCorr", typeid(*fTVLooseIsoDBSumPtCorr)); */
+/*   	addProduct("LooseIsoDBSumPtCorr",  typeid(*fTLooseIsoDBSumPtCorr)); */
+/*   	addProduct("TightIsoDBSumPtCorr",  typeid(*fTTightIsoDBSumPtCorr)); */
+/*   	addProduct("MediumIsoDBSumPtCorr", typeid(*fTMediumIsoDBSumPtCorr)); */
+/*   	addProduct("VLooseCombinedIsoDBSumPtCorr", typeid(*fTVLooseCombinedIsoDBSumPtCorr)); */
+/*   	addProduct("LooseCombinedIsoDBSumPtCorr",  typeid(*fTLooseCombinedIsoDBSumPtCorr)); */
+/*   	addProduct("TightCombinedIsoDBSumPtCorr",  typeid(*fTTightCombinedIsoDBSumPtCorr)); */
+/*   	addProduct("MediumCombinedIsoDBSumPtCorr", typeid(*fTMediumCombinedIsoDBSumPtCorr)); */
+  	addProduct("LooseElectronRejection", typeid(*fTLooseElectronRejection));
+  	addProduct("TightElectronRejection", typeid(*fTTightElectronRejection));
+  	addProduct("MediumElectronRejection",typeid(*fTMediumElectronRejection));
+  	addProduct("LooseMuonRejection", typeid(*fTLooseMuonRejection));
+  	addProduct("TightMuonRejection", typeid(*fTTightMuonRejection));
     }else if(fType == El){
   	addProduct("ID95", typeid(*fTID95));
   	addProduct("ID90", typeid(*fTID90));
   	addProduct("ID85", typeid(*fTID85));
   	addProduct("ID80", typeid(*fTID80));
     }else if(fType == Mu){
-  	addProduct("PtErr"   , typeid(*fTPtErr      ));
-	addProduct("NMatches", typeid(*fTMuNMatches ));
+  	addProduct("PtErr"   , typeid(*fTPtErr));
+	addProduct("NMatches", typeid(*fTMuNMatches));
     }
 
-    return productList;
+    return typeList;
+
+}
+
+//________________________________________________________________________________________
+template <class LeptonType>
+void LeptonFillerPat<LeptonType>::putProducts(edm::Event& e) {
+
+    e.put(fTMaxLepExc,fullName("MaxLepExc"));
+    e.put(fTNObjsTot,fullName("NObjsTot"));
+    e.put(fTNObjs,fullName("NObjs"));
+
+    e.put(fTPx,fullName("Px"));
+    e.put(fTPy,fullName("Py"));
+    e.put(fTPz,fullName("Pz"));
+    e.put(fTPt,fullName("Pt"));
+    e.put(fTE,fullName("E"));
+    e.put(fTEt,fullName("Et"));
+    e.put(fTEta,fullName("Eta"));
+    e.put(fTPhi,fullName("Phi"));
+    e.put(fTCharge,fullName("Charge"));
+
+    e.put(fTParticleIso,fullName("ParticleIso"));
+    e.put(fTChargedHadronIso,fullName("ChargedHadronIso"));
+    e.put(fTNeutralHadronIso,fullName("NeutralHadronIso"));
+    e.put(fTPhotonIso,fullName("PhotonIso"));
+  
+    if(fType == Tau){
+  	e.put(fTDecayMode,fullName("DecayMode"));
+  	e.put(fTVz,fullName("Vz")); 
+  	e.put(fTEmFraction,fullName("EmFraction")); 
+  	e.put(fTJetPt,fullName("JetPt"));
+  	e.put(fTJetEta,fullName("JetEta"));
+  	e.put(fTJetPhi,fullName("JetPhi"));
+  	e.put(fTJetMass,fullName("JetMass"));
+  	e.put(fTLeadingTkPt,fullName("LeadingTkPt"));
+  	e.put(fTLeadingNeuPt,fullName("LeadingNeuPt"));
+  	e.put(fTLeadingTkHcalenergy,fullName("LeadingTkHcalenergy"));
+  	e.put(fTLeadingTkEcalenergy,fullName("LeadingTkEcalenergy"));
+  	e.put(fTNumChargedHadronsSignalCone,fullName("NumChargedHadronsSignalCone"));
+  	e.put(fTNumNeutralHadronsSignalCone,fullName("NumNeutralHadronsSignalCone"));
+  	e.put(fTNumPhotonsSignalCone,fullName("NumPhotonsSignalCone"));
+  	e.put(fTNumParticlesSignalCone,fullName("NumParticlesSignalCone"));
+  	e.put(fTNumChargedHadronsIsoCone,fullName("NumChargedHadronsIsoCone"));
+  	e.put(fTNumNeutralHadronsIsoCone,fullName("NumNeutralHadronsIsoCone"));
+  	e.put(fTNumPhotonsIsolationCone,fullName("NumPhotonsIsolationCone"));
+  	e.put(fTNumParticlesIsolationCone,fullName("NumParticlesIsolationCone"));
+  	e.put(fTPtSumChargedParticlesIsoCone,fullName("PtSumChargedParticlesIsoCone"));
+  	e.put(fTPtSumPhotonsIsoCone,fullName("PtSumPhotonsIsoCone"));
+	e.put(fTDecayModeFinding,fullName("DecayModeFinding"));
+  	e.put(fTVLooseIso,fullName("VLooseIso"));
+  	e.put(fTLooseIso,fullName("LooseIso"));
+  	e.put(fTTightIso,fullName("TightIso"));
+  	e.put(fTMediumIso,fullName("MediumIso"));
+/*   	e.put(fTVLooseChargedIso,fullName("VLooseChargedIso")); */
+/*   	e.put(fTLooseChargedIso,fullName("LooseChargedIso")); */
+/*   	e.put(fTTightChargedIso,fullName("TightChargedIso")); */
+/*   	e.put(fTMediumChargedIso,fullName("MediumChargedIso")); */
+/*   	e.put(fTVLooseIsoDBSumPtCorr,fullName("VLooseIsoDBSumPtCorr")); */
+/*   	e.put(fTLooseIsoDBSumPtCorr,fullName("LooseIsoDBSumPtCorr")); */
+/*   	e.put(fTTightIsoDBSumPtCorr,fullName("TightIsoDBSumPtCorr")); */
+/*   	e.put(fTMediumIsoDBSumPtCorr,fullName("MediumIsoDBSumPtCorr")); */
+/*   	e.put(fTVLooseCombinedIsoDBSumPtCorr,fullName("VLooseCombinedIsoDBSumPtCorr")); */
+/*   	e.put(fTLooseCombinedIsoDBSumPtCorr,fullName("LooseCombinedIsoDBSumPtCorr")); */
+/*   	e.put(fTTightCombinedIsoDBSumPtCorr,fullName("TightCombinedIsoDBSumPtCorr")); */
+/*   	e.put(fTMediumCombinedIsoDBSumPtCorr,fullName("MediumCombinedIsoDBSumPtCorr")); */
+  	e.put(fTLooseElectronRejection,  fullName("LooseElectronRejection"));
+  	e.put(fTTightElectronRejection,  fullName("TightElectronRejection"));
+  	e.put(fTMediumElectronRejection, fullName("MediumElectronRejection"));
+  	e.put(fTLooseMuonRejection,      fullName("LooseMuonRejection"));
+  	e.put(fTTightMuonRejection,      fullName("TightMuonRejection"));
+    }else if(fType == El){
+  	e.put(fTID95,fullName("ID95"));
+  	e.put(fTID90,fullName("ID90"));
+  	e.put(fTID85,fullName("ID85"));
+  	e.put(fTID80,fullName("ID80"));
+    }else if(fType == Mu){
+  	e.put(fTPtErr,     fullName("PtErr"));
+	e.put(fTMuNMatches,fullName("NMatches"));
+    }
 
 }
 
