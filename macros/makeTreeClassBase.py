@@ -27,6 +27,7 @@ MAXNJETS      = 100
 MAXNPHOS      = 50
 MAXNGENPHOS   = 100
 MAXNSC        = 100
+MAXGENINFO    = 1000
 rules = { # Reco
           'NMus'    : 30,
           'NEles'   : 20,
@@ -67,6 +68,7 @@ rules = { # Reco
           'NEBhits' : 20,
           'PUnumInteractions': 50,
           'PUnumFilled'      : 50
+	  'nGenParticles'    : MAXGENINFO
           }
 
 #______________________________________________________________
