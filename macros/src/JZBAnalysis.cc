@@ -13,16 +13,20 @@ using namespace std;
 
 #define jMax 30  // do not touch this
 #define rMax 30
+#define Zmax 30
 
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70 $";
+string sjzbversion="$Revision: 1.71 $";
 string sjzbinfo="";
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.71  2012/01/18 12:55:53  buchmann
+Added x value for scans
+
 Revision 1.70  2011/11/29 16:17:08  fronga
 Improved trigger definitions (should help maintenance).
 Check that there is always an unprescaled trigger in any event (or crash!).
@@ -52,47 +56,6 @@ Added cut on SuperCluster ET.
 
 Revision 1.62  2011/10/20 14:26:15  buchmann
 Adapted custom electron function (basically from WP95 to WP90)
-
-Revision 1.61  2011/10/18 12:19:33  buchmann
-Changed the event number to ULong64_t (to accomodate even very large event numbers)
-
-Revision 1.60  2011/09/15 16:59:03  fronga
-Fixed bug (I think) in storage of mother and grand-mother IDs of selected leptons.
-
-Revision 1.59  2011/09/08 15:50:10  fronga
-Fix bug in Jet ID (was removing jets above 3.0...).
-
-Revision 1.58  2011/09/06 21:12:44  buchmann
-Added process variable to JZB tree (important for mSUGRA scans)
-
-Revision 1.57  2011/09/06 13:44:46  fronga
-cd() to output file before opening trees.
-Removed histograms.
-Cleaned up fHistFile.
-
-Revision 1.56  2011/09/06 09:27:15  buchmann
-changed jet eta cut from 2.6 to 3.0
-
-Revision 1.55  2011/09/06 09:09:40  buchmann
-Added a 'small' option, which leads to uninteresting events not being stored
-
-Revision 1.54  2011/09/05 16:25:47  buchmann
-Included v8 for dimuon triggers
-
-Revision 1.53  2011/09/01 07:20:20  buchmann
-Updated trigger paths
-
-Revision 1.52  2011/08/30 18:56:21  buchmann
-Added pdfWsum to JZB analysis
-
-Revision 1.51  2011/08/30 14:06:38  buchmann
-Bringing mSUGRA scans to JZB: Parameters introduced, PDF weights implemented for PDF systematics; also had to deactivate some PF variables as they are no longer in the NTuple
-
-Revision 1.50  2011/08/16 12:33:19  buchmann
-Updated trigger paths
-
-Revision 1.49  2011/08/11 17:03:19  fronga
-Only keep "empty" events for MC.
 
 */
 
@@ -302,6 +265,14 @@ public:
   float A0;
   float M12;
   float signMu;
+  
+  
+  //gen information
+  int nZ; // number of generator Z's in the process
+  int SourceOfZ[Zmax];//mother particle of the (first Zmax) Z's
+  int DecayCode; //decay code: 100*h + l, where h = number of hadronically decaying Z's, l = number of leptonically decaying Z's (e.g. 102 = 1 had. Z, 2 lep. Z's)
+  float realx; // this is the "x" we measure (for scans)
+  float imposedx; // this is the "x" we imposed.
 };
 
 nanoEvent::nanoEvent(){};
@@ -520,6 +491,12 @@ void nanoEvent::reset()
   M0=0;
   M12=0;
   signMu=0;
+  
+  // gen info
+  nZ=0;
+  for(int i=0;i<Zmax;i++) SourceOfZ[i]=0;
+  DecayCode=0;
+  realx=0;
 }
 
 
@@ -812,6 +789,13 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
   myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
+  
+  //generator information
+  myTree->Branch("nZ",&nEvent.nZ,"nZ/I");
+  myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
+  myTree->Branch("DecayCode",&nEvent.DecayCode,"DecayCode/I");
+  myTree->Branch("realx",&nEvent.realx,"realx/F");
+  myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -911,7 +895,51 @@ void JZBAnalysis::Analyze() {
 	nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
 	nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
       }
-    }
+      
+     // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
+	float chimass=0;
+	int nchimass=0;
+	float lspmass=0;
+	int nlspmass=0;
+	float glumass=0;
+	int nglumass=0;
+	
+	for(int i=0;i<fTR->nGenParticles;i++) {
+	  if(fTR->genInfoStatus[i]==2) continue;
+	  int thisParticleId = fTR->genInfoId[i];
+	  if(abs(thisParticleId)==23) {
+	    //dealing with a Z
+	    nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoMo1[i];
+	    nEvent.nZ++;
+	    if(abs(fTR->genInfoDa1[i])<10||abs(fTR->genInfoDa2[i])<10) {//dealing with a hadronic decay
+	      nEvent.DecayCode+=100;
+	    }else {
+	      if((abs(fTR->genInfoDa1[i])>10&&abs(fTR->genInfoDa1[i])<10)||(abs(fTR->genInfoDa2[i])>10&&abs(fTR->genInfoDa2[i])<20)) {//dealing with a leptonic decay
+		nEvent.DecayCode+=1;
+	      }
+	    }
+	  }
+	  if(abs(thisParticleId)==1000021) {//mglu
+	    glumass+=fTR->genInfoM[i];
+	    nglumass++;
+	  }
+	  if(abs(thisParticleId)==1000022) {//mlsp
+	    lspmass+=fTR->genInfoM[i];
+	    nlspmass++;
+	  }
+	  if(abs(thisParticleId)==1000023) {//mchi
+	    chimass+=fTR->genInfoM[i];
+	    nchimass++;
+	  }
+	}// done with gen info loop
+	if(nchimass>0&&nlspmass>0&&nglumass>0)  nEvent.realx=(chimass/nchimass - lspmass/nlspmass)/(glumass/nglumass-lspmass/nlspmass);
+	//at this point we use the fact that one of the three bits of information in the LHE event comment is the imposed x - the only question is which one ;-) 
+	//note: the bit of information in the comment is actually xbar, so we need to store 1-xbar to get our definition of x. 
+	if(nEvent.mGlu>0 && nEvent.mGlu<1) nEvent.imposedx=1-nEvent.mGlu;
+	if(nEvent.mChi>0 && nEvent.mChi<1) nEvent.imposedx=1-nEvent.mChi;
+	if(nEvent.mLSP>0 && nEvent.mLSP<1) nEvent.imposedx=1-nEvent.mLSP;
+  } // end of mc if
+  
   // Trigger information
   nEvent.passed_triggers=0;
   if ( fDataType_ != "mc" ) 
