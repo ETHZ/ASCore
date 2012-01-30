@@ -139,7 +139,6 @@ def fixPath(path):
 #                                                             #
 #-------------------------------------------------------------# 
 def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, executablePath, nameOfSRM, hpname, task):
-
   CFGFile = open(nameOfConf)
   cfgText = CFGFile.read()
 
@@ -165,11 +164,11 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
 
   nameOfConf2 = nameOfConf.replace(".", "_"+str(step)+ ".")
  
+  ensure_dir(str(nameOfDirectory + taskName + "/"))
   outputCFGFile = open(nameOfDirectory + taskName + "/" + nameOfConf2, "w")
   outputCFGFile.write(newcfgText7)
   CFGFile.close()
   outputCFGFile.close()
-
 
   outputName = "output_" + str(step) + ".root"
   stderr = nameOfDirectory + taskName + '/job_' + str(step) + '.err'
@@ -204,7 +203,6 @@ def createJob(step, FilesPerJob, NumberOfJobs, OverloadedJobs, stringInfo, listO
   inputFilesForCMS = getFiles(step, FilesPerJob, NumberOfJobs, OverloadedJobs, listOfFiles)
   if(inputFilesForCMS == ""):
     return "Error: No input files available"
-  
   result = createCMSConf(step, nameOfCurrentDirectory, releasePath, 
            nameOfConfigurationFile, inputFilesForCMS, executablePath, nameOfSRMPath, hpname, task)
   return result
@@ -472,7 +470,7 @@ if __name__ == '__main__' :
 
         totaljobnumber=len(jobnumbers)
         counter=0
-        print 'Total job numbers:',totaljobnumber
+        print 'Total number of jobs:',totaljobnumber
         while(len(jobnumbers)>0 and counter<300) :
                 time.sleep(60)
                 counter+=1
