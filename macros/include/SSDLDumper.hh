@@ -83,13 +83,16 @@ public:
 		Baseline = region_begin,
 		Control,
 		HT80MET120,
+		HT80MET120x,  // exclusive (HT < 200)
 		HT200MET30,
 		HT200MET120,
+		HT200MET120x, // exclusive (HT < 450)
 		HT400MET50,
+		HT400MET50x,  // exclusive (MET < 120)
 		HT400MET120,
 		HT400MET0,
 		HT0MET120,
-		HT80MET302b,
+		HT80MET302b,  // > 1 bjet
 		HT200MET302b,
 		HT80MET1202b,
 		gNREGIONS
