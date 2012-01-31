@@ -1,3 +1,6 @@
+//
+// DO NOT MODIFY UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING
+//
 #include "base/TreeClassBase.hh"
 #include <TH2.h>
 #include <TStyle.h>

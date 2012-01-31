@@ -16,15 +16,15 @@ void UserAnalysis::Begin(){
     fHistFile = new TFile(fOutputDir + TString(filename), "RECREATE");
 	
     // Define the histograms
-//     fHjetMult = new TH1D("jetMult", "Jet multiplicity", 15, 0, 15);
-//     fHjetPt   = new TH1D("jetPt", "Pt of jets", 100, 0., 500.);
+    fHjetMult = new TH1D("jetMult", "Jet multiplicity", 15, 0, 15);
+    fHjetPt   = new TH1D("jetPt", "Pt of jets", 100, 0., 500.);
     fHmuMult  = new TH1D("muMult", "Muon multiplicity", 5, 0, 5);
     fHmuPt    = new TH1D("muPt", "Pt of muons", 100, 0., 300.);
 }
 
 void UserAnalysis::Analyze(){
-//     // Some event selection
-//     if( fTR->NJets < 1 ) return;		
+  // Some event selection
+  if( fTR->NJets < 1 ) return;		
 	
 //     // Plot some jet quantities
 //     int nqjets = 0;
