@@ -33,7 +33,7 @@ void TreeAnalyzerBase::PrintProgress(Long64_t entry){
     Long64_t power = 1;
     for ( size_t i=1; i<10; ++i ) { // up to 10^10...
         power *= 10;
-        if ( !(entry/power) ) break;
+        if ( !((entry/10.)/power) ) break;
         step = power;
     }
     if( !(entry%step) ) cout << ">>> Processing event # " << entry << endl;

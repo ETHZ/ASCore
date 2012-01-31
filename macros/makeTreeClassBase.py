@@ -155,7 +155,7 @@ if __name__=='__main__':
     print 'Processing input file...'
     runBranches = getBranches(FILENAME,'Runs')
     eventBranches = getBranches(FILENAME,'Events')
-    print '  -> found',len(runBranches),' run branches',
+    print '  -> Found',len(runBranches),'run branches',
     print 'and',len(eventBranches),'event branches'
 
     # Process templates and write to output files
