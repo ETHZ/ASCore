@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.120 2012/01/20 13:52:53 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.121 2012/01/23 21:08:33 buchmann Exp $
 //
 //
 
@@ -381,6 +381,8 @@ private:
 	int fTHBHENoiseFlag;
 	int fTHBHENoiseFlagIso;
 	int fRecovRecHitFilterFlag;
+	int fTra2TrackingFailureFilterFlag;
+	int fPBNRFlag;
 
 	int fTnEBhits;
 	float fTEBrechitE[gMaxnEBhits];

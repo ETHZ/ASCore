@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.156 2012/01/20 13:59:45 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.157 2012/01/23 21:08:33 buchmann Exp $
 //
 //
 
@@ -464,6 +464,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<bool> RecovRecHitFilterFlag;
 	iEvent.getByLabel("recovRecHitFilter","Result",RecovRecHitFilterFlag);
 	fRecovRecHitFilterFlag =(int) *RecovRecHitFilterFlag;
+
+	// RA2 tracking tailure filter
+	// https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
+	// http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/seema/SandBox/Skims/python/trackingFailureFilter_cfi.py?hideattic=0&revision=1.3&view=markup&pathrev=MAIN
+	edm::Handle<bool> RA2TrackingFailureFlag;
+	iEvent.getByLabel("trackingFailureFilter",RA2TrackingFailureFlag);
+	fTra2TrackingFailureFilterFlag = (int) *RA2TrackingFailureFlag;
+
+	// Colin's PBNR filter
+	edm::Handle<bool> ParticleBasedNoiseRejectionFlag;
+	iEvent.getByLabel("jetIDFailure",ParticleBasedNoiseRejectionFlag);
+	fPBNRFlag = (int) *ParticleBasedNoiseRejectionFlag;
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -3284,8 +3296,10 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("HBHENoiseFlag"    ,&fTHBHENoiseFlag     ,"HBHENoiseFlag/I");
 	fEventTree->Branch("HBHENoiseFlagIso" ,&fTHBHENoiseFlagIso  ,"HBHENoiseFlagIso/I");
 	fEventTree->Branch("CSCTightHaloID"   ,&fTcscTightHaloID    ,"CSCTightHaloID/I");
-	fEventTree->Branch("EcalDeadTPFilterFlag",&fTecalDeadTPFilterFlag,"EcalDeadTPFilterFlag/I");
-	fEventTree->Branch("RecovRecHitFilterFlag",&fRecovRecHitFilterFlag,"RecovRecHitFilterFlag/I");
+	fEventTree->Branch("EcalDeadTPFilterFlag"        ,&fTecalDeadTPFilterFlag        ,"EcalDeadTPFilterFlag/I");
+	fEventTree->Branch("RecovRecHitFilterFlag"       ,&fRecovRecHitFilterFlag        ,"RecovRecHitFilterFlag/I");
+	fEventTree->Branch("RA2TrackingFailureFilterFlag",&fTra2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag/I");
+	fEventTree->Branch("PBNRFlag"         ,&fPBNRFlag           ,"PBNRFlag/I");
 	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
 	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
@@ -4015,6 +4029,8 @@ void NTupleProducer::resetTree(){
 
 	fTecalDeadTPFilterFlag = -999;
 	fRecovRecHitFilterFlag = -999;
+	fTra2TrackingFailureFilterFlag = -999;
+	fPBNRFlag              = -999;
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
 	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);

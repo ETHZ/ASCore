@@ -40,8 +40,7 @@ options.register ('ModelScan', # register 'runon' option
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -119,8 +118,9 @@ process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumEt       = cms.doubl
 
 # RA2 RecHitFilter: tagging mode
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
-process.load('SandBox.RecovRecHitFilter.recovRecHitFilter_cfi')
+process.load('SandBox.Skims.recovRecHitFilter_cfi')
 process.recovRecHitFilter.TaggingMode           = cms.bool(True)
+
 
 # ECAL dead cells: this is not a filter. Only a flag is stored.
 from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
@@ -491,7 +491,21 @@ process.analyze.leptons = (
               maxnobjs = cms.untracked.uint32(20)
               ),
     )
+
+# Colins Bernet's Particle Based Noise Rejection Filter
+process.load('SandBox.Skims.jetIDFailureFilter_cfi')
+process.jetIDFailure.taggingMode   = cms.bool(True) # events are not filtered, but tagged
               
+# RA2 TrackingFailureFilter
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
+process.load('SandBox.Skims.trackingFailureFilter_cfi')
+process.trackingFailureFilter.JetSource             = cms.InputTag('patJetsPF3')
+process.trackingFailureFilter.TrackSource           = cms.InputTag('generalTracks')
+process.trackingFailureFilter.VertexSource          = cms.InputTag('goodVertices')
+process.trackingFailureFilter.DzTrVtxMax            = cms.double(1)
+process.trackingFailureFilter.DxyTrVtxMax           = cms.double(0.2)
+process.trackingFailureFilter.MinSumPtOverHT        = cms.double(0.10)
+process.trackingFailureFilter.taggingMode           = cms.bool(True)
 
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
@@ -545,6 +559,8 @@ process.p = cms.Path(
        	+ process.patPF2PATSequencePFAntiIso
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
+	+ process.trackingFailureFilter
+	+ process.jetIDFailure
 #	+ process.dump
 	+ process.analyze
 
