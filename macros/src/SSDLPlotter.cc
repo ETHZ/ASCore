@@ -291,20 +291,20 @@ void SSDLPlotter::doAnalysis(){
 
 	// makePileUpPlots(true); // loops on all data!
 	
-	// printCutFlows(fOutputDir + "CutFlow.txt");
-	// makeOriginPlots(Baseline);
+	printCutFlows(fOutputDir + "CutFlow.txt");
+	makeOriginPlots(Baseline);
 	// makeOriginPlots(HT80MET302b);
 	makeOriginPlots(HT200MET30);
-	makeOriginPlots(HT200MET302b);
+	// makeOriginPlots(HT200MET302b);
 	// printOrigins(Baseline);
-	printOrigins(HT200MET30);
-	printOrigins(HT200MET302b);
+	// printOrigins(HT200MET30);
+	// printOrigins(HT200MET302b);
 
 	// makeMuIsolationPlots(); // loops on TTbar sample
 	// makeElIsolationPlots(); // loops on TTbar sample
 	// makeElIdPlots();
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlotTau();
@@ -315,19 +315,19 @@ void SSDLPlotter::doAnalysis(){
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 	
 	// makeIntMCClosure(fOutputDir + "MCClosure_HT80MET30.txt", Baseline);
 	// makeIntMCClosure(fOutputDir + "MCClosure_HT200MET30.txt", HT200MET30);
 	// makeTTbarClosure();
 	
-	// makeAllIntPredictions();
-	// makeDiffPrediction();
+	makeAllIntPredictions();
+	makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
 	 // load_msugraInfo("/scratch/mdunser/120116/120116_msugraNewScan.root");
 }
@@ -2566,14 +2566,14 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			double max1 = hvar_mc_s[i]->GetMaximum();
 			double max2 = hvar_data[i]->GetMaximum();
 			double max = max1>max2?max1:max2;
-			// hvar_mc_s[i]->SetMaximum(1.5*max);
-			// hvar_data[i]->SetMaximum(1.5*max);
-			// hvar_mc_s[i]->SetMinimum(0.);
-			// hvar_data[i]->SetMinimum(0.);
-			hvar_mc_s[i]->SetMaximum(5.*max);
-			hvar_data[i]->SetMaximum(5.*max);
-			hvar_mc_s[i]->SetMinimum(0.5);
-			hvar_data[i]->SetMinimum(0.5);
+			hvar_mc_s[i]->SetMaximum(1.5*max);
+			hvar_data[i]->SetMaximum(1.5*max);
+			hvar_mc_s[i]->SetMinimum(0.);
+			hvar_data[i]->SetMinimum(0.);
+			// hvar_mc_s[i]->SetMaximum(5.*max);
+			// hvar_data[i]->SetMaximum(5.*max);
+			// hvar_mc_s[i]->SetMinimum(0.5);
+			// hvar_data[i]->SetMinimum(0.5);
 
 			TCanvas *c_temp = new TCanvas("C_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data vs MC", 0, 0, 800, 600);
 			c_temp->cd();
@@ -4431,6 +4431,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
+	bool diffratio = true; // use flat or differential ratios
+
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
 	OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
@@ -4480,9 +4482,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt10_mm += S->numbers[reg][Muon].nt10;
 		nt0_mm  += S->numbers[reg][Muon].nt0;
 		
-		npp_mm += S->numbers[reg][Muon].npp;
-		npf_mm += S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp;
-		nff_mm += S->numbers[reg][Muon].nff;
+		if(diffratio){
+			npp_mm += S->numbers[reg][Muon].npp;
+			npf_mm += S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp;
+			nff_mm += S->numbers[reg][Muon].nff;			
+		}
 	}
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
@@ -4491,10 +4495,12 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt01_em += S->numbers[reg][ElMu].nt01;
 		nt0_em  += S->numbers[reg][ElMu].nt0;
 
-		npp_em += S->numbers[reg][ElMu].npp;
-		npf_em += S->numbers[reg][ElMu].npf;
-		nfp_em += S->numbers[reg][ElMu].nfp;
-		nff_em += S->numbers[reg][ElMu].nff;
+		if(diffratio){
+			npp_em += S->numbers[reg][ElMu].npp;
+			npf_em += S->numbers[reg][ElMu].npf;
+			nfp_em += S->numbers[reg][ElMu].nfp;
+			nff_em += S->numbers[reg][ElMu].nff;
+		}
 
 		nt2_em_BB_os += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
 		nt2_em_EE_os += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
@@ -4505,10 +4511,12 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nt10_ee += S->numbers[reg][Elec].nt10;
 		nt0_ee  += S->numbers[reg][Elec].nt0;
 
-		npp_ee += S->numbers[reg][Elec].npp;
-		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Muon].nfp;
-		nff_ee += S->numbers[reg][Elec].nff;
-
+		if(diffratio){
+			npp_ee += S->numbers[reg][Elec].npp;
+			npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Muon].nfp;
+			nff_ee += S->numbers[reg][Elec].nff;
+		}
+		
 		nt2_ee_BB_os += S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
 		nt2_ee_EE_os += S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
 		nt2_ee_EB_os += S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
@@ -4622,29 +4630,41 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
 	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
 
+	float nF_mm = 0;
+	float nF_em = 0;
+	float nF_ee = 0;
+	float nSF   = 0;
+	float nDF   = 0;
+	float nF    = 0;
+
 	// Event-by-event differential ratios:
-	float nF_mm = npf_mm + nff_mm;
-	float nF_em = npf_em+nfp_em+nff_em;
-	float nF_ee = npf_ee+nff_ee;
-	float nSF = npf_mm + npf_em + nfp_em + npf_ee;
-	float nDF = nff_mm + nff_em + nff_ee;
-	float nF = nF_mm + nF_em + nF_ee;
-	float esyst = 0.5;
+	if(diffratio){
+		nF_mm = npf_mm + nff_mm;
+		nF_em = npf_em+nfp_em+nff_em;
+		nF_ee = npf_ee+nff_ee;
+		nSF   = npf_mm + npf_em + nfp_em + npf_ee;
+		nDF   = nff_mm + nff_em + nff_ee;
+		nF    = nF_mm + nF_em + nF_ee;
+	}
 	// Flat ratios:
-	// npp_mm = FR->getMMNpp();
-	// npf_mm = FR->getMMNpf();
-	// nff_mm = FR->getMMNff();
-	// npp_ee = FR->getEENpp();
-	// npf_ee = FR->getEENpf();
-	// nff_ee = FR->getEENff();
-	// npp_em = FR->getEMNpp();
-	// npf_em = FR->getEMNpf();
-	// nfp_em = FR->getEMNfp();
-	// nff_em = FR->getEMNff();
-	// float nF_mm = FR->getMMTotFakes();
-	// float nF_em = FR->getEMTotFakes();
-	// float nF_ee = FR->getEETotFakes();
-	// float nF = FR->getTotFakes();
+	else{
+		npp_mm = FR->getMMNpp();
+		npf_mm = FR->getMMNpf();
+		nff_mm = FR->getMMNff();
+		npp_ee = FR->getEENpp();
+		npf_ee = FR->getEENpf();
+		nff_ee = FR->getEENff();
+		npp_em = FR->getEMNpp();
+		npf_em = FR->getEMNpf();
+		nfp_em = FR->getEMNfp();
+		nff_em = FR->getEMNff();
+		nF_mm  = FR->getMMTotFakes();
+		nF_em  = FR->getEMTotFakes();
+		nF_ee  = FR->getEETotFakes();
+		nSF    = FR->getTotSingleFakes();
+		nDF    = FR->getTotDoubleFakes();
+		nF     = FR->getTotFakes();		
+	}
 
 	OUT << "  Fake Predictions:" << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
@@ -6208,7 +6228,7 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gRegion reg, gHiLoSwitch hi
 	OUT << setw(7) << Form("%6.3f", nff_sum_ee) << " || ";
 	OUT << endl;
 	OUT << setw(16) << "Channels sum"  << " || ";
-	OUT << Form("                    %6.3f ||                               %6.3f ||                      %6.3f || ",
+	OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
 	npp_sum_mm+npf_sum_mm+nff_sum_mm, npp_sum_em+npf_sum_em+nfp_sum_em+nff_sum_em, npp_sum_ee+npf_sum_ee+nff_sum_ee) << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
@@ -6347,15 +6367,15 @@ void SSDLPlotter::makeIntMCClosure(TString filename, gRegion reg, gHiLoSwitch hi
 	float tot_bg_mm = npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm;
 	float tot_bg_em = npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em;
 	float tot_bg_ee = npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee;
-	OUT << setw(7) << Form("%6.3f", tot_bg_mm) << " |                   || ";
-	OUT << setw(7) << Form("%6.3f", tot_bg_em) << " |                             || ";
-	OUT << setw(7) << Form("%6.3f", tot_bg_ee) << " |                   || ";
+	OUT << setw(7) << Form("%6.3f", tot_bg_mm) << " | P/O  | P-O/P |    || ";
+	OUT << setw(7) << Form("%6.3f", tot_bg_em) << " | P/O  | P-O/P |              || ";
+	OUT << setw(7) << Form("%6.3f", tot_bg_ee) << " | P/O  | P-O/P |    || ";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "Observed"  << " || ";
-	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_mm, tot_bg_mm/ntt_sum_mm) << "         || ";
-	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_em, tot_bg_em/ntt_sum_em) << "                   || ";
-	OUT << setw(7) << Form(" %6.3f | P/O: %4.2f", ntt_sum_ee, tot_bg_ee/ntt_sum_ee) << "         || ";
+	OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_mm, tot_bg_mm/ntt_sum_mm, (tot_bg_mm-ntt_sum_mm)/tot_bg_mm) << "    || ";
+	OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_em, tot_bg_em/ntt_sum_em, (tot_bg_em-ntt_sum_em)/tot_bg_em) << "              || ";
+	OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_ee, tot_bg_ee/ntt_sum_ee, (tot_bg_ee-ntt_sum_ee)/tot_bg_ee) << "    || ";
 	OUT << endl;
 	OUT << "==========================================================================================================================" << endl;
 	OUT << endl;
