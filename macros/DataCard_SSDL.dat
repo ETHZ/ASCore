@@ -5,17 +5,26 @@
 #    - lumi only used for MC weights, default is set to 1.0
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
+# Changelog:
+#  - stiegerb/../Jan10 is the first big production in 2012 with more b-tagging information
+#  - mdunser/../Jan12/ is the merge of Run2011B with the latest runs that were missing
+#  - Feb01 is a fix with some missing files in DoubleEle5, TTZ, WWW and WJets
+#  - Feb01 DoubleMu1 includes some additional events that weren't transferred before
+#  - Feb02 is the merge of Feb01 with the additional runs from Jan10b again (for DoubleEle5)
+###################################################################################################################
 # Data
-DoubleMu1	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-PromptReco-v4-AOD.root			0	0
+DoubleMu1	stiegerb/SSDLTrees/2011B/Feb01/DoubleMu-Run2011A-PromptReco-v4-AOD_RETRANSFER		0	0
 DoubleMu2	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-May10ReReco-v1-AOD.root		0	0
 DoubleMu3	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
 DoubleMu4	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
 DoubleMu5	mdunser/SSDLTrees/2011B/Jan12/DoubleMu-Run2011B-PromptReco-v1-AOD			0	0
+## needs to be fixed:
 DoubleEle1	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
+#####
 DoubleEle2	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
 DoubleEle3	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
 DoubleEle4	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
-DoubleEle5	mdunser/SSDLTrees/2011B/Jan12/DoubleElectron-Run2011B-PromptReco-v1-AOD			0	1
+DoubleEle5	stiegerb/SSDLTrees/2011B/Feb02/DoubleElectron-Run2011B-PromptReco-v1-AOD		0	1
 MuEG1		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER		0	2
 MuEG2		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-May10ReReco-v1-AOD.root			0	2
 MuEG3		stiegerb/SSDLTrees/2011B/Jan10/MuEG-Run2011A-05Aug2011-v1-AOD__new.root			0	2
@@ -34,7 +43,7 @@ SingleT_tW	stiegerb/SSDLTrees/2011B/Jan10/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-
 SingleTbar_tW	stiegerb/SSDLTrees/2011B/Jan10/MC/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root	1	-1	10034.80	55
 SingleT_s	stiegerb/SSDLTrees/2011B/Jan10/MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2.root		1	-1	79323.83	57
 SingleTbar_s	stiegerb/SSDLTrees/2011B/Jan10/MC/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11.root	1	-1	95819.44	57
-WJets		stiegerb/SSDLTrees/2011B/Jan10/MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2		1	-1	1809.89		61
+WJets		stiegerb/SSDLTrees/2011B/Feb01/MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2		1	-1	1809.89		61
 DYJets		stiegerb/SSDLTrees/2011B/Jan10/MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11		1	-1	11463.49	64
 GJets40		stiegerb/SSDLTrees/2011B/Jan10/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root	1	-1	4.9556e+02	38
 GJets100	stiegerb/SSDLTrees/2011B/Jan10/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root	1	-1	2.9470e+02	39
@@ -49,14 +58,14 @@ ZZTo4L		stiegerb/SSDLTrees/2011B/Jan10/MC/ZZTo4LMadgraph.root						1	-1	1.5595e+
 ###################################################################################################################
 # Rare SM
 TTbarW		stiegerb/SSDLTrees/2011B/Jan10/MC/TTW_TuneZ2_7TeV-madgraphCMSSW42xPUv2.root		3	-1	6.672e+06	51
-TTbarZ		stiegerb/SSDLTrees/2011B/Jan10/MC/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root		3	-1	1.056e+07	51
+TTbarZ		stiegerb/SSDLTrees/2011B/Feb01/MC/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root		3	-1	1.056e+07	51
 TTbarG		stiegerb/SSDLTrees/2011B/Jan10/MC/TTPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root	3	-1	7.898e+04	51
 DPSWW		stiegerb/SSDLTrees/2011B/Jan10/MC/DoublePartonWWFastSim.root				3	-1	1.059e+06	51
 WWZ		stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	9.781e+06	51
 WZZ		stiegerb/SSDLTrees/2011B/Jan10/MC/WZZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	1.980e+08	51
 WWG		stiegerb/SSDLTrees/2011B/Jan10/MC/WWPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root	3	-1	3.132e+05	51
 ZZZ		stiegerb/SSDLTrees/2011B/Jan10/MC/ZZZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	6.256e+08	51
-WWW		stiegerb/SSDLTrees/2011B/Jan10/MC/WWW_TuneZ2_7TeV-madgraph.root				3	-1	2.808e+07	51
+WWW		stiegerb/SSDLTrees/2011B/Feb01/MC/WWW_TuneZ2_7TeV-madgraph.root				3	-1	2.808e+07	51
 ###################################################################################################################
 # Rare SM with no pileup, correct all by 1/puweight = 1/0.2674456 = 3.739078
 W+W+		stiegerb/SSDLTrees/2011B/Jan10/MC/WplusWplus.root					4	-1	8.106e+05	51
