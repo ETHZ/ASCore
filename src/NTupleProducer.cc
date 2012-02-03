@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.157 2012/01/23 21:08:33 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.158 2012/01/31 14:24:41 pnef Exp $
 //
 //
 
@@ -474,8 +474,9 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Colin's PBNR filter
 	edm::Handle<bool> ParticleBasedNoiseRejectionFlag;
-	iEvent.getByLabel("jetIDFailure",ParticleBasedNoiseRejectionFlag);
-	fPBNRFlag = (int) *ParticleBasedNoiseRejectionFlag;
+	//FR: this requires modifications in the CVS code.
+        //iEvent.getByLabel("jetIDFailure",ParticleBasedNoiseRejectionFlag);
+	//fPBNRFlag = (int) *ParticleBasedNoiseRejectionFlag;
 
 /*
 	// TEMPORARILY DISABLED FOR RUNNING ON CMSSW_3_9_X
@@ -3299,7 +3300,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("EcalDeadTPFilterFlag"        ,&fTecalDeadTPFilterFlag        ,"EcalDeadTPFilterFlag/I");
 	fEventTree->Branch("RecovRecHitFilterFlag"       ,&fRecovRecHitFilterFlag        ,"RecovRecHitFilterFlag/I");
 	fEventTree->Branch("RA2TrackingFailureFilterFlag",&fTra2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag/I");
-	fEventTree->Branch("PBNRFlag"         ,&fPBNRFlag           ,"PBNRFlag/I");
+	//FR fEventTree->Branch("PBNRFlag"         ,&fPBNRFlag           ,"PBNRFlag/I");
 	// fEventTree->Branch("EcalDeadCellBEFlag",&fTEcalDeadCellBEFlag,"EcalDeadCellBEFlag/I");
 	// fEventTree->Branch("NECALGapClusters"  ,&fTnECALGapClusters  ,"NECALGapClusters/I");
 	// fEventTree->Branch("EcalGapBE"         ,&fTEcalGapBE         ,"EcalGapBE[NECALGapClusters]/F");
@@ -4030,7 +4031,7 @@ void NTupleProducer::resetTree(){
 	fTecalDeadTPFilterFlag = -999;
 	fRecovRecHitFilterFlag = -999;
 	fTra2TrackingFailureFilterFlag = -999;
-	fPBNRFlag              = -999;
+	//FR fPBNRFlag              = -999;
 	// fTEcalDeadCellBEFlag= -999;
 	// fTnECALGapClusters  = 0;
 	// resetFloat(fTEcalGapBE, gMaxnECALGapClusters);

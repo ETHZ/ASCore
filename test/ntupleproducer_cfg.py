@@ -492,9 +492,10 @@ process.analyze.leptons = (
               ),
     )
 
-# Colins Bernet's Particle Based Noise Rejection Filter
-process.load('SandBox.Skims.jetIDFailureFilter_cfi')
-process.jetIDFailure.taggingMode   = cms.bool(True) # events are not filtered, but tagged
+## Colins Bernet's Particle Based Noise Rejection Filter
+#process.load('SandBox.Skims.jetIDFailureFilter_cfi')
+#process.jetIDFailure.taggingMode   = cms.bool(True) # events are not filtered, but tagged
+#process.jetIDFailure.JetSource     = cms.InputTag('patJetsPF3')
               
 # RA2 TrackingFailureFilter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
@@ -560,7 +561,7 @@ process.p = cms.Path(
        	+ process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
 	+ process.trackingFailureFilter
-	+ process.jetIDFailure
+#	+ process.jetIDFailure
 #	+ process.dump
 	+ process.analyze
 
