@@ -3068,7 +3068,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	bool blabalot=false;
 	bool BloatWithGenInfo=true;
 
-/*	if(BloatWithGenInfo && !fIsRealData) {
+	if(BloatWithGenInfo && !fIsRealData) {
 	  //Generator information (this is saved for all MC samples)
 	  
 	        Handle<GenParticleCollection> genParticles;
@@ -3121,24 +3121,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				fTgenInfoMo1Pt[i] = abs(mom->pt());
 				float mometa=mom->eta();
 				fTgenInfoMoIndex[i]=-1;
-				if(blabalot&&i<10) cout << "Looking for a particle with momid="<<fTgenInfoMo1[i]<< " , " << mometa << " ; " << fTgenInfoMo1Pt[i] << endl;
-				if(blabalot&&i<10) cout << "This is id="<<fTgenInfoId[i]<< " , " << fTgenInfoEta[i] << " ; " << fTgenInfoPt[i]<< endl;
 
 				for(int k=0;k<(int)genParticles->size()&&k<(int)i;k++) {
 	             			const GenParticle & pcand = (*genParticles)[k];
 					if((abs(pcand.eta()-mometa)/abs(pcand.eta()+mometa)<0.01)&&(abs(pcand.pt()-fTgenInfoMo1Pt[i])/abs(1+pcand.pt()+fTgenInfoMo1Pt[i])<0.01)&&((pcand.charge()==momcharge&&fTgenInfoMo1[i]==pcand.pdgId()))||(abs(fTgenInfoMo1[i])<10&&abs(fTgenInfoMo1[i])==pcand.pdgId())) {
-						if(blabalot&&i<10) cout << "Got a hit! k=" << k << endl;
 						fTgenInfoMoIndex[i]=k;
 						break;
-					} else {
-					      if(blabalot&&i<10) {
-						      cout << "Particle k=" << k << " is not a hit " << endl;
-						      cout << "   " << pcand.eta() << " : " << mometa << endl;
-						      cout << "   " << pcand.pt() << " : " << fTgenInfoMo1Pt[i] << endl;
-						      cout << "   " << pcand.charge() << " : " << momcharge << endl;
-						      cout << "   " << fTgenInfoMo1[i] << " : " << pcand.pdgId() << endl;
-					      }
-
 					}
 				}
 			}
@@ -3162,17 +3150,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	             fTPromptnessLevel[i] = -1;
 	             int levelid=fTgenInfoId[i];
 	             int motherindex=fTgenInfoMoIndex[i];
-		     if(blabalot&&i<10) cout << "   Start checking; motherindex=" << motherindex << " , levelid=" << levelid << endl; 
 	             for(int k=0;k<=(int)i;k++) {
 			if(abs(levelid)==2212) {
-				if(blabalot) cout << "      Produced a hit! Promptness level is " << k << endl;
 				fTPromptnessLevel[i]=k;
 				break;
 			} else {
 				if(motherindex>=0) {
 					levelid=fTgenInfoId[motherindex];
 					motherindex=fTgenInfoMoIndex[motherindex];
-				if(blabalot) cout << "      Not yet. Going to levelid=" << levelid << " and motherindex=" << motherindex << "." << endl;
 				} else {
 					// no mother information available!
 					fTPromptnessLevel[i]=-1;
@@ -3212,7 +3197,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	             fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
 	        }
 	}// end of if(BloatWithGenInfo && !fIsRealData)
-*/
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
 	fEventTree->Fill();
