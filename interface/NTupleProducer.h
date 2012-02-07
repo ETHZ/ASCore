@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.122 2012/01/31 14:24:44 pnef Exp $
+// $Id: NTupleProducer.h,v 1.123 2012/02/03 17:50:28 fronga Exp $
 //
 //
 
@@ -341,6 +341,8 @@ private:
         int fTgenInfoStatus[nStoredGenParticles];
         float fTgenInfoMass[nStoredGenParticles];
         int fTgenInfoNMo[nStoredGenParticles];
+	float fTgenInfoMo1Pt[nStoredGenParticles];
+	float fTgenInfoMo2Pt[nStoredGenParticles];
         int fTgenInfoNDa[nStoredGenParticles];
         int fTgenInfoMo1[nStoredGenParticles];
         int fTgenInfoMo2[nStoredGenParticles];
@@ -353,6 +355,9 @@ private:
         float fTgenInfoPy[nStoredGenParticles];
         float fTgenInfoPz[nStoredGenParticles];
         float fTgenInfoM[nStoredGenParticles];
+	float fTgenInfoPromptFlag[nStoredGenParticles];
+	int fTgenInfoMoIndex[nStoredGenParticles];
+	int fTPromptnessLevel[nStoredGenParticles];
 
 
 	// Pile-up

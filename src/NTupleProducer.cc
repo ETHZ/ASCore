@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.158 2012/01/31 14:24:41 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.159 2012/02/03 17:50:29 fronga Exp $
 //
 //
 
@@ -3062,13 +3062,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	        fTMassGlu = mGL;
 	        fTMassChi = xCHI;
 	        fTMassLSP = mLSP;
-
+	}
+	
 
 	bool blabalot=false;
 	bool BloatWithGenInfo=true;
 
-	if(BloatWithGenInfo && !fIsRealData) {
-		
+/*	if(BloatWithGenInfo && !fIsRealData) {
+	  //Generator information (this is saved for all MC samples)
+	  
 	        Handle<GenParticleCollection> genParticles;
 	        iEvent.getByLabel("genParticles", genParticles);
 	        for(size_t i = 0; i < genParticles->size(); ++ i) {
@@ -3082,17 +3084,69 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	             const GenParticle & p = (*genParticles)[i];
 	             fTgenInfoId[i] = p.pdgId();
 	             fTgenInfoStatus[i] = p.status();
-		     fTgenInfoMo1[i]=-1;
-		     fTgenInfoMo2[i]=-1;
-		     fTgenInfoDa1[i]=-1;
-		     fTgenInfoDa2[i]=-1;
+		     fTgenInfoMo1[i]=0;
+		     fTgenInfoMo2[i]=0;
+		     fTgenInfoDa1[i]=0;
+		     fTgenInfoDa2[i]=0;
 		     fTgenInfoNMo[i] = p.numberOfMothers();
+		     fTgenInfoMo1Pt[i]=0;
+		     fTgenInfoMo2Pt[i]=0;
+		     fTgenInfoPromptFlag[i]=0;
+		     float momcharge=0;
+
+		     if(abs(fTgenInfoId[i])==2212)fTgenInfoPromptFlag[i]=1;
+
 	             fTgenInfoNDa[i] = p.numberOfDaughters();
 	             for(int j=0;j<2&&j<fTgenInfoNMo[i];j++) {
-			const Candidate * mom = p.mother(j);
-			if(j==0) fTgenInfoMo1[i] = abs(mom->pdgId());
-			if(j==1) fTgenInfoMo2[i] = abs(mom->pdgId());
-	             }
+			const GenParticle* mom = static_cast<const GenParticle*> (p.mother());
+			int momid=0,gmomid=0,ggmomid=0;
+			momcharge=mom->charge();
+
+			if (mom != NULL) {
+				const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
+				momid=mom->pdgId();
+				if(abs(momid)==2212) fTgenInfoPromptFlag[i]=1; 
+				if (!fTgenInfoPromptFlag[i] && gmom != NULL) {
+					gmomid=gmom->pdgId();
+					if(abs(gmomid)==2212) fTgenInfoPromptFlag[i]=1;
+					const GenParticle* ggmom = static_cast<const GenParticle*> (gmom->mother());
+					if(ggmom != NULL) ggmomid=ggmom->pdgId();
+					if(abs(ggmomid)==2212) fTgenInfoPromptFlag[i]=1;
+				}
+			}
+			
+					
+			if(j==0) {
+				fTgenInfoMo1[i] = abs(mom->pdgId());
+				fTgenInfoMo1Pt[i] = abs(mom->pt());
+				float mometa=mom->eta();
+				fTgenInfoMoIndex[i]=-1;
+				if(blabalot&&i<10) cout << "Looking for a particle with momid="<<fTgenInfoMo1[i]<< " , " << mometa << " ; " << fTgenInfoMo1Pt[i] << endl;
+				if(blabalot&&i<10) cout << "This is id="<<fTgenInfoId[i]<< " , " << fTgenInfoEta[i] << " ; " << fTgenInfoPt[i]<< endl;
+
+				for(int k=0;k<(int)genParticles->size()&&k<(int)i;k++) {
+	             			const GenParticle & pcand = (*genParticles)[k];
+					if((abs(pcand.eta()-mometa)/abs(pcand.eta()+mometa)<0.01)&&(abs(pcand.pt()-fTgenInfoMo1Pt[i])/abs(1+pcand.pt()+fTgenInfoMo1Pt[i])<0.01)&&((pcand.charge()==momcharge&&fTgenInfoMo1[i]==pcand.pdgId()))||(abs(fTgenInfoMo1[i])<10&&abs(fTgenInfoMo1[i])==pcand.pdgId())) {
+						if(blabalot&&i<10) cout << "Got a hit! k=" << k << endl;
+						fTgenInfoMoIndex[i]=k;
+						break;
+					} else {
+					      if(blabalot&&i<10) {
+						      cout << "Particle k=" << k << " is not a hit " << endl;
+						      cout << "   " << pcand.eta() << " : " << mometa << endl;
+						      cout << "   " << pcand.pt() << " : " << fTgenInfoMo1Pt[i] << endl;
+						      cout << "   " << pcand.charge() << " : " << momcharge << endl;
+						      cout << "   " << fTgenInfoMo1[i] << " : " << pcand.pdgId() << endl;
+					      }
+
+					}
+				}
+			}
+			if(j==1) {
+				fTgenInfoMo2[i] = abs(mom->pdgId());
+				fTgenInfoMo2Pt[i] = abs(mom->pt());
+			}
+	             }//end of "mother loop"
 	             for(int j=0;j<2&&j<fTgenInfoNDa[i];j++) {
 			const Candidate * dau = p.daughter(j);
 			if(j==0) fTgenInfoDa1[i] = abs(dau->pdgId());
@@ -3105,12 +3159,29 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	             fTgenInfoPy[i] = p.py();
 	             fTgenInfoPz[i] = p.pz();
 	             fTgenInfoM[i] = p.mass();
-	}
-       }
+	             fTPromptnessLevel[i] = -1;
+	             int levelid=fTgenInfoId[i];
+	             int motherindex=fTgenInfoMoIndex[i];
+		     if(blabalot&&i<10) cout << "   Start checking; motherindex=" << motherindex << " , levelid=" << levelid << endl; 
+	             for(int k=0;k<=(int)i;k++) {
+			if(abs(levelid)==2212) {
+				if(blabalot) cout << "      Produced a hit! Promptness level is " << k << endl;
+				fTPromptnessLevel[i]=k;
+				break;
+			} else {
+				if(motherindex>=0) {
+					levelid=fTgenInfoId[motherindex];
+					motherindex=fTgenInfoMoIndex[motherindex];
+				if(blabalot) cout << "      Not yet. Going to levelid=" << levelid << " and motherindex=" << motherindex << "." << endl;
+				} else {
+					// no mother information available!
+					fTPromptnessLevel[i]=-1;
+					break;
+				}
+			}
+	             }//end of "promptness loop"
+	        }//end of particle loop
 
-
-	        Handle<GenParticleCollection> genParticles;
-	        iEvent.getByLabel("genParticles", genParticles);
 	        float gluinomass=0;
 	        float ngluinomass=0;
 	        float chi2mass=0;
@@ -3140,8 +3211,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	             fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
 	             fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
 	        }
-	}
-
+	}// end of if(BloatWithGenInfo && !fIsRealData)
+*/
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
 	fEventTree->Fill();
@@ -3253,6 +3324,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("genInfoStatus"    ,&fTgenInfoStatus     ,"genInfoStatus[nGenParticles]/I");
         fEventTree->Branch("genInfoMass"      ,&fTgenInfoMass       ,"genInfoMass[nGenParticles]/F");
         fEventTree->Branch("genInfoNMo"       ,&fTgenInfoNMo        ,"genInfoNMo[nGenParticles]/I");
+        fEventTree->Branch("genInfoMo1Pt"     ,&fTgenInfoMo1Pt      ,"genInfoMo1Pt[nGenParticles]/F");
+        fEventTree->Branch("genInfoMo2Pt"     ,&fTgenInfoMo2Pt      ,"genInfoMo2Pt[nGenParticles]/F");
         fEventTree->Branch("genInfoNDa"       ,&fTgenInfoNDa        ,"genInfoNDa[nGenParticles]/I");
         fEventTree->Branch("genInfoMo1"       ,&fTgenInfoMo1        ,"genInfoMo1[nGenParticles]/I");
         fEventTree->Branch("genInfoMo2"       ,&fTgenInfoMo2        ,"genInfoMo2[nGenParticles]/I");
@@ -3265,6 +3338,9 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
         fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
         fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
+	fEventTree->Branch("genInfoPromptFlag",&fTgenInfoPromptFlag ,"genInfoPromptFlag[nGenParticles]/I");
+	fEventTree->Branch("genInfoMoIndex"   ,&fTgenInfoMoIndex    ,"genInfoMoIndex[nGenParticles]/I");
+	fEventTree->Branch("PromptnessLevel"  ,&fTPromptnessLevel   ,"PromptnessLevel[nGenParticles]/I");
 
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
@@ -4054,6 +4130,8 @@ void NTupleProducer::resetTree(){
 	resetInt(fTgenInfoId,nStoredGenParticles);
 	resetFloat(fTgenInfoMass,nStoredGenParticles);
 	resetInt(fTgenInfoNMo,nStoredGenParticles);
+	resetFloat(fTgenInfoMo1Pt,nStoredGenParticles);
+	resetFloat(fTgenInfoMo2Pt,nStoredGenParticles);
 	resetInt(fTgenInfoNDa,nStoredGenParticles);
 	resetInt(fTgenInfoMo1,nStoredGenParticles);
 	resetInt(fTgenInfoMo2,nStoredGenParticles);
@@ -4066,6 +4144,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTgenInfoPy,nStoredGenParticles);
 	resetFloat(fTgenInfoPz,nStoredGenParticles);
 	resetFloat(fTgenInfoM,nStoredGenParticles);
+	resetInt(fTgenInfoMoIndex,nStoredGenParticles);
+	resetInt(fTPromptnessLevel,nStoredGenParticles);
 
 	// Pile-up
 	fTpuNumInteractions    = -999;
