@@ -37,8 +37,8 @@ public:
 
 	//////////////////////////////
 	// Plots
-	void makeMuIsolationPlots();
-	void makeElIsolationPlots();
+	void makeMuIsolationPlots(bool = false);
+	void makeElIsolationPlots(bool = false);
 	void makeElIdPlots();
 	
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
@@ -68,7 +68,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeDiffPrediction();
-	void makeIntMCClosure(TString, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
