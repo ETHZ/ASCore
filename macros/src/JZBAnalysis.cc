@@ -6,7 +6,6 @@
 #include "TF1.h"
 #include <cstdlib>
 #include <assert.h>
-//#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
 
@@ -122,6 +121,7 @@ public:
   float phi2;
   float dphi;
   float dphiZpfMet;
+  float dphigenZgenMet;
   float dphiZs1;
   float dphiZs2;
   float dphiMet1;
@@ -273,6 +273,21 @@ public:
   int DecayCode; //decay code: 100*h + l, where h = number of hadronically decaying Z's, l = number of leptonically decaying Z's (e.g. 102 = 1 had. Z, 2 lep. Z's)
   float realx; // this is the "x" we measure (for scans)
   float imposedx; // this is the "x" we imposed.
+  float pureGeneratorJZB;
+  float pure2ndGeneratorJZB;
+  float pure2ndGeneratorZpt;
+  int nLSPs;
+  float angleLSPLSP;
+  float angleLSPLSP2d;
+  float dphiSumLSPgenMET;
+  int LSPPromptnessLevel[2];
+  float LSP1pt;
+  float LSP2pt;
+  int LSP1Mo;
+  int LSP2Mo;
+  float LSP1Mopt;
+  float LSP2Mopt;
+
 };
 
 nanoEvent::nanoEvent(){};
@@ -336,6 +351,7 @@ void nanoEvent::reset()
   phi1=0;
   phi2=0;
   dphiZpfMet=0;
+  dphigenZgenMet=0;
   dphiZs1=0;
   dphiZs2=0;
   dphiMet1=0;
@@ -497,6 +513,22 @@ void nanoEvent::reset()
   for(int i=0;i<Zmax;i++) SourceOfZ[i]=0;
   DecayCode=0;
   realx=0;
+  pureGeneratorJZB=0;
+  pure2ndGeneratorJZB=0;
+  pure2ndGeneratorZpt=0;
+  nLSPs=0;
+  angleLSPLSP=0;
+  angleLSPLSP2d=-5;
+  dphiSumLSPgenMET=0;
+  LSPPromptnessLevel[0]=-1;
+  LSPPromptnessLevel[1]=-1;
+  LSP1pt=0;
+  LSP2pt=0;
+  LSP1Mo=0;
+  LSP2Mo=0;
+  LSP1Mopt=0;
+  LSP2Mopt=0;
+
 }
 
 
@@ -521,9 +553,8 @@ void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
 }
 
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall) :
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall){
-
+JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo) :
+  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
   // Define trigger paths to check
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL",1,8);
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL",1,5);
@@ -791,9 +822,30 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
   
   //generator information
-  myTree->Branch("nZ",&nEvent.nZ,"nZ/I");
-  myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
-  myTree->Branch("DecayCode",&nEvent.DecayCode,"DecayCode/I");
+  if(fdoGenInfo) {
+	myTree->Branch("nZ",&nEvent.nZ,"nZ/I");
+	myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
+	myTree->Branch("DecayCode",&nEvent.DecayCode,"DecayCode/I");
+	myTree->Branch("pureGeneratorJZB",&nEvent.pureGeneratorJZB,"pureGeneratorJZB/F");
+	myTree->Branch("pure2ndGeneratorJZB",&nEvent.pure2ndGeneratorJZB,"pure2ndGeneratorJZB/F");
+	myTree->Branch("pure2ndGeneratorZpt",&nEvent.pure2ndGeneratorZpt,"pure2ndGeneratorZpt/F");
+	myTree->Branch("LSPPromptnessLevel",&nEvent.LSPPromptnessLevel,"LSPPromptnessLevel[2]/I");
+	myTree->Branch("LSP1pt",&nEvent.LSP1pt,"LSP1pt/F");
+	myTree->Branch("LSP2pt",&nEvent.LSP2pt,"LSP2pt/F");
+
+	myTree->Branch("LSP1Mo",&nEvent.LSP1Mo,"LSP1Mo/I");
+	myTree->Branch("LSP2Mo",&nEvent.LSP2Mo,"LSP2Mo/I");
+	myTree->Branch("LSP1Mopt",&nEvent.LSP1Mopt,"LSP1Mopt/F");
+	myTree->Branch("LSP2Mopt",&nEvent.LSP2Mopt,"LSP2Mopt/F");
+
+	myTree->Branch("nLSPs",&nEvent.nLSPs,"nLSPs/I");
+	myTree->Branch("angleLSPLSP",&nEvent.angleLSPLSP,"angleLSPLSP/F");
+	myTree->Branch("angleLSPLSP2d",&nEvent.angleLSPLSP2d,"angleLSPLSP2d/F");
+	myTree->Branch("dphiSumLSPgenMET",&nEvent.dphiSumLSPgenMET,"dphiSumLSPgenMET/F");
+	myTree->Branch("dphigenZgenMet",&nEvent.dphigenZgenMet,"dphigenZgenMet/F");
+	myTree->Branch("LSPPromptnessLevel",&nEvent.LSPPromptnessLevel,"LSPPromptnessLevel[2]/I");
+  }
+
   myTree->Branch("realx",&nEvent.realx,"realx/F");
   myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
 
@@ -857,6 +909,21 @@ const bool JZBAnalysis::passTriggers( std::vector<std::string>& triggerPaths ) {
 
 }
 
+bool is_neutrino(int code) {
+  if(abs(code)==12) return true; // electron neutrino
+  if(abs(code)==14) return true; // muon neutrino
+  if(abs(code)==16) return true; // tau neutrino
+  if(abs(code)==18) return true; // tau' neutrino
+  return false;
+}
+
+bool is_charged_lepton(int code) {
+  if(abs(code)==11) return true; // electron
+  if(abs(code)==13) return true; // muon
+  if(abs(code)==15) return true; // tau
+  if(abs(code)==17) return true; // tau'
+  return false;
+}
 
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
@@ -870,6 +937,7 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
+
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
@@ -904,18 +972,54 @@ void JZBAnalysis::Analyze() {
 	float glumass=0;
 	int nglumass=0;
 	
-	for(int i=0;i<fTR->nGenParticles;i++) {
-	  if(fTR->genInfoStatus[i]==2) continue;
+	float genZpt=0,genZeta=0,genZphi=0,genZM=0;
+	float genZ2pt=0,genZ2eta=0,genZ2phi=0,genZ2M=0;
+	int Promptness[5];
+	vector<TLorentzVector> LSPvecs;
+	vector<int> LSPMother;
+	vector<float> LSPMotherPt;
+
+	TLorentzVector summedLSPs;
+	int nGenParticles=fTR->nGenParticles;
+	if(nGenParticles<2) {
+		//this happens if you use an old file or one that doesn't contain the necessary generator information.
+		if(fdoGenInfo) cerr << "WATCH OUT : GENERATOR INFORMATION HAS BEEN DISABLED BECAUSE THE NUMBER OF GEN PARTICLES WAS TOO LOW (" << nGenParticles << ")" << endl;
+		fdoGenInfo=false;
+		nGenParticles=0;
+	}
+	for(int i=0;i<nGenParticles;i++) {
+	  if(fTR->genInfoStatus[i]!=3) continue;
 	  int thisParticleId = fTR->genInfoId[i];
-	  if(abs(thisParticleId)==23) {
+	  if(fdoGenInfo&&abs(thisParticleId)==23) {
 	    //dealing with a Z
 	    nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoMo1[i];
 	    nEvent.nZ++;
 	    if(abs(fTR->genInfoDa1[i])<10||abs(fTR->genInfoDa2[i])<10) {//dealing with a hadronic decay
 	      nEvent.DecayCode+=100;
 	    }else {
-	      if((abs(fTR->genInfoDa1[i])>10&&abs(fTR->genInfoDa1[i])<10)||(abs(fTR->genInfoDa2[i])>10&&abs(fTR->genInfoDa2[i])<20)) {//dealing with a leptonic decay
+	      if(is_charged_lepton(fTR->genInfoDa1[i])||is_charged_lepton(fTR->genInfoDa2[i])) {//dealing with a leptonic decay
 		nEvent.DecayCode+=1;
+		if(fTR->genInfoPt[i]>genZpt) {
+		  genZ2pt=genZpt;
+		  genZ2M=genZM;
+		  genZ2eta=genZeta;
+		  genZ2phi=genZphi;
+
+		  genZpt=fTR->genInfoPt[i];
+		  genZM=fTR->genInfoM[i];
+		  genZeta=fTR->genInfoEta[i];
+		  genZphi=fTR->genInfoPhi[i];
+		} else {
+		   if(fTR->genInfoPt[i]>genZ2pt) {
+			genZ2pt=fTR->genInfoPt[i];
+			genZ2M=fTR->genInfoM[i];
+			genZ2eta=fTR->genInfoEta[i];
+			genZ2phi=fTR->genInfoPhi[i];
+		   }
+		}			
+	      }
+	      if(is_neutrino(fTR->genInfoDa1[i])||is_neutrino(fTR->genInfoDa2[i])) {//dealing with a leptonic decay
+		nEvent.DecayCode+=10;
 	      }
 	    }
 	  }
@@ -924,14 +1028,66 @@ void JZBAnalysis::Analyze() {
 	    nglumass++;
 	  }
 	  if(abs(thisParticleId)==1000022) {//mlsp
+	    LSPMother.push_back(fTR->genInfoMo1[i]);
+	    LSPMotherPt.push_back(fTR->genInfoMo1Pt[i]);
 	    lspmass+=fTR->genInfoM[i];
 	    nlspmass++;
+	    TLorentzVector newLSP;
+	    newLSP.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    LSPvecs.push_back(newLSP);
+	    if(LSPvecs.size()==1) summedLSPs.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    else summedLSPs=summedLSPs+newLSP;
+	    Promptness[nEvent.nLSPs]=fTR->PromptnessLevel[i];
+	    nEvent.nLSPs++;
 	  }
 	  if(abs(thisParticleId)==1000023) {//mchi
 	    chimass+=fTR->genInfoM[i];
 	    nchimass++;
 	  }
 	}// done with gen info loop
+
+	if(fdoGenInfo) {
+		TLorentzVector pureGenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
+
+		if(nEvent.nLSPs==2) nEvent.angleLSPLSP=LSPvecs[0].Angle(LSPvecs[1].Vect());
+		if(nEvent.nLSPs==2) nEvent.angleLSPLSP2d=LSPvecs[0].DeltaPhi(LSPvecs[1]);
+		nEvent.dphiSumLSPgenMET=summedLSPs.DeltaPhi(pureGenMETvector);
+
+		TLorentzVector pureGenZvector;
+		pureGenZvector.SetPtEtaPhiM(genZpt,genZeta,genZphi,genZM);
+
+		float LSPdRa = LSPvecs[0].DeltaR(pureGenZvector);
+		float LSPdRb = LSPvecs[1].DeltaR(pureGenZvector);
+		if(LSPdRa<LSPdRb) {
+			nEvent.LSPPromptnessLevel[0]=Promptness[0];
+			nEvent.LSPPromptnessLevel[1]=Promptness[1];
+			nEvent.LSP1pt=LSPvecs[0].Pt();
+			nEvent.LSP2pt=LSPvecs[1].Pt();
+			nEvent.LSP1Mo=LSPMother[0];
+			nEvent.LSP2Mo=LSPMother[1];
+			nEvent.LSP1Mopt=LSPMotherPt[0];
+			nEvent.LSP2Mopt=LSPMotherPt[1];
+		} else {
+			nEvent.LSPPromptnessLevel[0]=Promptness[1];
+			nEvent.LSPPromptnessLevel[1]=Promptness[0];
+			nEvent.LSP1pt=LSPvecs[1].Pt();
+			nEvent.LSP2pt=LSPvecs[0].Pt();
+			nEvent.LSP1Mo=LSPMother[1];
+			nEvent.LSP2Mo=LSPMother[0];
+			nEvent.LSP1Mopt=LSPMotherPt[1];
+			nEvent.LSP2Mopt=LSPMotherPt[0];
+		}
+
+		TLorentzVector pureGenZ2vector;
+		pureGenZ2vector.SetPtEtaPhiM(genZ2pt,genZ2eta,genZ2phi,genZ2M);
+		nEvent.pureGeneratorJZB=(-pureGenMETvector-pureGenZvector).Pt() - pureGenZvector.Pt();
+		nEvent.pure2ndGeneratorJZB=(-pureGenMETvector-pureGenZ2vector).Pt() - pureGenZ2vector.Pt();
+		nEvent.pure2ndGeneratorZpt=pureGenZ2vector.Pt();
+
+		if(genZpt<0.01) nEvent.pureGeneratorJZB=0; // in case there is no leptonic Z
+	}//end of if(f_doGenInfo)
+
+	
 	if(nchimass>0&&nlspmass>0&&nglumass>0)  nEvent.realx=(chimass/nchimass - lspmass/nlspmass)/(glumass/nglumass-lspmass/nlspmass);
 	//at this point we use the fact that one of the three bits of information in the LHE event comment is the imposed x - the only question is which one ;-) 
 	//note: the bit of information in the comment is actually xbar, so we need to store 1-xbar to get our definition of x. 
@@ -1886,6 +2042,7 @@ void JZBAnalysis::GeneratorInfo(void) {
           nEvent.genZPt     = genZvector.Pt();
           nEvent.genMll     = genZvector.M();
           nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
+	  nEvent.dphigenZgenMet = (sortedGLeptons[i1].p + sortedGLeptons[i2].p).DeltaPhi(GenMETvector);
         }
     }
 }

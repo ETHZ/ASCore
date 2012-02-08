@@ -16,11 +16,12 @@ using namespace std;
 //________________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-  cout << "Usage: RunJZBAnalyzer [-o filename] [-a analysis] [-v verbose] [-n maxEvents] [-j JSON] [-t type] [-c] [-l] [-s] [-M] [-p data_PileUp] [-P mc_PileUP] file1 [... filen]" << endl;
+  cout << "Usage: RunJZBAnalyzer [-o filename] [-a analysis] [-v verbose] [-n maxEvents] [-j JSON] [-t type] [-c] [-l] [-s] [-M] [-g] [-p data_PileUp] [-P mc_PileUP] file1 [... filen]" << endl;
   cout << "  where:" << endl;
   cout << "     -c       runs full lepton cleaning                                       " << endl;
   cout << "     -M       is for Model scans (also loads masses)                          " << endl;
   cout << "     -s       saves a smaller version (only events w/ 2 lep above 20 GeV)     " << endl;
+  cout << "     -g       stores quite a bit of generator information                     " << endl;
   cout << "     filename    is the output filename                                       " << endl;
   cout << "               default is /tmp/delete.root                                    " << endl;
   cout << "     verbose  sets the verbose level                                          " << endl;
@@ -57,14 +58,16 @@ int main(int argc, char* argv[]) {
   int whichanalysis=1;
   string type = "data";
   bool type_is_set=false;
+  bool doGenInfo=false;
   // Parse options
   char ch;
-  while ((ch = getopt(argc, argv, "o:v:n:j:t:lMh?csp:P:a:")) != -1 ) {
+  while ((ch = getopt(argc, argv, "o:v:n:j:t:lgMh?csp:P:a:")) != -1 ) {
     switch (ch) {
     case 'o': outputFileName = string(optarg); break;
     case 'v': verbose = atoi(optarg); break;
     case 'a': whichanalysis = atoi(optarg); break;
     case 's': makeSmall = true; break;
+    case 'g': doGenInfo = true; break;
     case 'l': isList = true; break;
     case 'M': isModelScan = true; break;
     case '?':
@@ -120,10 +123,12 @@ int main(int argc, char* argv[]) {
   cout << "Analysis chosen: " << whichanalysis << " (0=both, 1=reco [default], 2=pf)"<< endl;
   cout << "Model scan is " << (isModelScan?"activated":"deactivated") << endl;
   cout << (makeSmall?"Making a small version":"Not making small version") << endl;
+  cout << (doGenInfo?"Including generator information":"Not including generator information") << endl;
 
   cout << "--------------" << endl;
-
-  JZBAnalyzer *tA = new JZBAnalyzer(theChain,type,fullCleaning,isModelScan,makeSmall);
+  
+  cout << "INPUT NAME (S) " << endl;
+  JZBAnalyzer *tA = new JZBAnalyzer(theChain,type,fullCleaning,isModelScan,makeSmall,doGenInfo);
   //	tA->SetOutputFile(outputfile);
   tA->SetOutputFileName(outputFileName);
   tA->SetVerbose(verbose);

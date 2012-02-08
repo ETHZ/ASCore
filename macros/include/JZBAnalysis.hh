@@ -34,7 +34,7 @@ struct lepton {
 
 class JZBAnalysis : public UserAnalysisBase{
 public:
-  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false);
+  JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false);
   virtual ~JZBAnalysis();
   const bool IsCustomMu(const int);
   const bool IsCustomEl(const int);
@@ -70,6 +70,7 @@ private:
   std::string fDataType_;
   bool fFullCleaning_;
   bool fisModelScan;
+  bool fdoGenInfo;
   bool fmakeSmall;
 
   std::vector<std::string> elTriggerPaths, muTriggerPaths, emTriggerPaths;
