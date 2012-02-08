@@ -281,7 +281,7 @@ void SSDLPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	// storeWeightedPred();
+	storeWeightedPred();
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -296,7 +296,7 @@ void SSDLPlotter::doAnalysis(){
 
 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
-	makeElIdPlots();
+	// makeElIdPlots();
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
@@ -316,17 +316,12 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 	
-	// makeIntMCClosure(fMCBG,    fOutputDir + "MCClosure_HT80MET30.txt",       Baseline);
-	// makeIntMCClosure(fMCBG,    fOutputDir + "MCClosure_HT80MET20to50.txt",   Control);
-	// makeIntMCClosure(fMCBG,    fOutputDir + "MCClosure_HT200MET30.txt",      HT200MET30);
-	// makeIntMCClosure(fMCBGSig, fOutputDir + "MCClosure_HT450MET50_Sig.txt",  HT450MET50);
-	// makeIntMCClosure(fMCBGSig, fOutputDir + "MCClosure_HT450MET120_Sig.txt", HT450MET120);
-	// makeTTbarClosure();
-	
-	// makeAllIntPredictions();
+	makeAllClosureTests();
+	makeAllIntPredictions();
+
 	// makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
-	 load_msugraInfo("/scratch/mdunser/120131/msugraScan_2.root");
+	// load_msugraInfo("/scratch/mdunser/120131/msugraScan_2.root");
 }
 
 //____________________________________________________________________________
@@ -4390,16 +4385,17 @@ void SSDLPlotter::ratioWithAsymmCPErrors(int passed, int total, float &ratio, fl
 
 //____________________________________________________________________________
 void SSDLPlotter::makeAllIntPredictions(){
-	fOutputSubDir = Util::MakeOutputDir("IntPredictions");
+	TString outputdir = Util::MakeOutputDir(fOutputDir + "IntPredictions");
+	fOutputSubDir = "IntPredictions/";
 	time_t rawtime;
 	struct tm* timeinfo;
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 	// access a chararray containing the date with asctime(timeinfo)
 	
-	TString tablefilename = fOutputDir + fOutputSubDir + "Table2.tex";
+	TString tablefilename = outputdir + "Table2.tex";
 	// TString didarfilename = fOutputDir + fOutputSubDir + "forDidar.txt";
-	TString notetable     = fOutputDir + fOutputSubDir + "NoteTable.tex";
+	TString notetable     = outputdir + "NoteTable.tex";
 	fOUTSTREAM.open(tablefilename.Data(), ios::trunc);
 	fOUTSTREAM << "==========================================================================================================" << endl;
 	fOUTSTREAM << " Table 2 inputs from ETH Analysis" << endl;
@@ -4421,10 +4417,9 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM3 << endl;
 
 	for(size_t i = 0; i < gNREGIONS; ++i){
-		TString outputname = fOutputDir + fOutputSubDir + "DataPred_" + Region::sname[i] + ".txt";
+		TString outputname = outputdir + "DataPred_" + Region::sname[i] + ".txt";
 		makeIntPrediction(outputname, gRegion(i));
 	}
-
 
 	fOUTSTREAM.close();
 	fOUTSTREAM2.close();
@@ -5812,6 +5807,19 @@ void SSDLPlotter::makeDiffPrediction(){
 	fOutputSubDir = "";
 }
 
+//____________________________________________________________________________
+void SSDLPlotter::makeAllClosureTests(){
+	TString outputdir = Util::MakeOutputDir(fOutputDir + "MCClosure");
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = outputdir + "MCClosure_" + Region::sname[i] + ".txt";
+		makeIntMCClosure(fMCBG, outputname, gRegion(i));
+	}
+	for(size_t i = 0; i < gNREGIONS; ++i){
+		TString outputname = outputdir + "MCClosure_Sig_" + Region::sname[i] + ".txt";
+		makeIntMCClosure(fMCBGSig, outputname, gRegion(i));
+	}
+	fOutputSubDir = "";
+}
 void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegion reg, gHiLoSwitch hilo){
 	ofstream OUT(filename.Data(), ios::trunc);
 	const int nsamples = samples.size();

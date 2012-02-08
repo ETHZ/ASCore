@@ -61,15 +61,16 @@ public:
 	
 	void makePRLPlot1();
 	
-	void makeMCClosurePlots(vector<int>);
-	void makeDataClosurePlots();
 	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeDiffPrediction();
+
+	void makeAllClosureTests();
 	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline, gHiLoSwitch = HighPt);
+
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
