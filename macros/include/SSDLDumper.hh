@@ -52,6 +52,13 @@ public:
 	static double gDiffPT2Bins[gNDiffPT2Bins+1];
 	static double gDiffNBJBins[gNDiffNBJBins+1];
 
+	static const int gM0bins  = 150  ; // these values
+	static const int gM0min   = 0    ; // are 
+	static const int gM0max   = 3000 ; // the same
+	static const int gM12bins = 50   ; // as in
+	static const int gM12min  = 0    ; // SSDLAnalysis
+	static const int gM12max  = 1000 ; //
+
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,

@@ -33,6 +33,7 @@ public:
 	virtual void sandBox();
 	virtual void load_kfacs(TFile *);
 	virtual void load_loxsecs(TFile *);
+	virtual void load_nloxsecs(TFile *);
 	virtual void load_msugraInfo(const char * filestring);
 
 	//////////////////////////////

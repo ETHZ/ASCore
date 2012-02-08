@@ -36,10 +36,11 @@ void SSDLAnalysis::Begin(const char* filename){
 	// SetPileUpSrc(pileupsrc);
 	// ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	// ReadPDGTable(gBaseDir + "pdgtable.txt");
+	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
 	if ( !fIsData) {
-		fMsugraCount = new TH2D("msugra_count", "msugra_count", 100, 10, 2010, 38, 10, 770);
+		fMsugraCount = new TH2D("msugra_count", "msugra_count", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		for (int i=0; i<10; i++) {
-			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), 100, 10, 2010, 38, 10, 770);
+			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
 	}
 	//SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
