@@ -18,9 +18,7 @@ DoubleMu2	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-May10ReReco-v1-AOD.ro
 DoubleMu3	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
 DoubleMu4	stiegerb/SSDLTrees/2011B/Jan10/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
 DoubleMu5	mdunser/SSDLTrees/2011B/Jan12/DoubleMu-Run2011B-PromptReco-v1-AOD			0	0
-## needs to be fixed:
-DoubleEle1	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
-#####
+DoubleEle1	stiegerb/SSDLTrees/2011B/Feb08/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
 DoubleEle2	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
 DoubleEle3	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
 DoubleEle4	stiegerb/SSDLTrees/2011B/Jan10/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
