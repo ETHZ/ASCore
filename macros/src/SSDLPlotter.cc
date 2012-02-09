@@ -4850,8 +4850,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
 	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
-	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	OUT << "==============================================================================================" << endl;
 	OUT << Form("%16s || %5.0f                 || %5.0f                 || %5.0f                 ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "MC sum", nt2sum_mm, nt2sum_em, nt2sum_ee);
 	OUT << "==============================================================================================" << endl;
 	OUT << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
