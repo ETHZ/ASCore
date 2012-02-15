@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.73 $";
+string sjzbversion="$Revision: 1.74 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +26,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.74  2012/02/15 10:26:27  buchmann
+Added Z pt, Z mass, Z eta, Z phi, Z promptness, and LSP promptness to events tree; added possibility to go lower in lepton pt for additional studies (currently at 10 GeV)
+
 Revision 1.73  2012/02/08 18:18:38  buchmann
 Updated JZB analysis: there is a new switch (-g) to include all generator information implemented so far (and much more). If the file you're using the analysis on does not contain the necessary information the switch will be deactivated (it reaacts to the number of gen particles). New generator information added recently: Promptness level, lsp mother pt, lsp mother id, and much, much, MUCH more :-)
 
@@ -289,7 +292,9 @@ public:
   int nLSPs;
   float angleLSPLSP;
   float angleLSPLSP2d;
+  float angleLSPZ;
   float dphiSumLSPgenMET;
+  float absvalSumLSP;
   int LSPPromptnessLevel[2];
   int ZPromptnessLevel[2];
   float LSP1pt;
@@ -534,7 +539,9 @@ void nanoEvent::reset()
   nLSPs=0;
   angleLSPLSP=0;
   angleLSPLSP2d=-5;
+  angleLSPZ=0;
   dphiSumLSPgenMET=0;
+  absvalSumLSP=0;
   LSPPromptnessLevel[0]=-1;
   LSPPromptnessLevel[1]=-1;
   ZPromptnessLevel[0]=-1;
@@ -863,7 +870,9 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("nLSPs",&nEvent.nLSPs,"nLSPs/I");
 	myTree->Branch("angleLSPLSP",&nEvent.angleLSPLSP,"angleLSPLSP/F");
 	myTree->Branch("angleLSPLSP2d",&nEvent.angleLSPLSP2d,"angleLSPLSP2d/F");
+	myTree->Branch("angleLSPZ",&nEvent.angleLSPZ,"angleLSPZ/F");
 	myTree->Branch("dphiSumLSPgenMET",&nEvent.dphiSumLSPgenMET,"dphiSumLSPgenMET/F");
+	myTree->Branch("absvalSumLSP",&nEvent.absvalSumLSP,"absvalSumLSP/F");
 	myTree->Branch("dphigenZgenMet",&nEvent.dphigenZgenMet,"dphigenZgenMet/F");
   }
 
@@ -1077,6 +1086,7 @@ void JZBAnalysis::Analyze() {
 		if(nEvent.nLSPs==2) nEvent.angleLSPLSP=LSPvecs[0].Angle(LSPvecs[1].Vect());
 		if(nEvent.nLSPs==2) nEvent.angleLSPLSP2d=LSPvecs[0].DeltaPhi(LSPvecs[1]);
 		nEvent.dphiSumLSPgenMET=summedLSPs.DeltaPhi(pureGenMETvector);
+		nEvent.absvalSumLSP=summedLSPs.Pt();
 
 		TLorentzVector pureGenZvector;
 		pureGenZvector.SetPtEtaPhiM(genZpt,genZeta,genZphi,genZM);
@@ -1094,6 +1104,7 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP2Mo=LSPMother[1];
 			nEvent.LSP1Mopt=LSPMotherPt[0];
 			nEvent.LSP2Mopt=LSPMotherPt[1];
+			nEvent.angleLSPZ=LSPvecs[0].Angle(pureGenZvector.Vect());
 		} else {
 			nEvent.LSPPromptnessLevel[0]=Promptness[1];
 			nEvent.LSPPromptnessLevel[1]=Promptness[0];
@@ -1103,6 +1114,7 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP2Mo=LSPMother[0];
 			nEvent.LSP1Mopt=LSPMotherPt[1];
 			nEvent.LSP2Mopt=LSPMotherPt[0];
+			nEvent.angleLSPZ=LSPvecs[1].Angle(pureGenZvector.Vect());
 		}
 
 		TLorentzVector pureGenZ2vector;
