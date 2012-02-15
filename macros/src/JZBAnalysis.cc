@@ -17,12 +17,18 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.71 $";
+string sjzbversion="$Revision: 1.73 $";
 string sjzbinfo="";
+
+float firstLeptonPtCut  = 10.0;
+float secondLeptonPtCut = 10.0;
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.73  2012/02/08 18:18:38  buchmann
+Updated JZB analysis: there is a new switch (-g) to include all generator information implemented so far (and much more). If the file you're using the analysis on does not contain the necessary information the switch will be deactivated (it reaacts to the number of gen particles). New generator information added recently: Promptness level, lsp mother pt, lsp mother id, and much, much, MUCH more :-)
+
 Revision 1.71  2012/01/18 12:55:53  buchmann
 Added x value for scans
 
@@ -273,6 +279,10 @@ public:
   int DecayCode; //decay code: 100*h + l, where h = number of hadronically decaying Z's, l = number of leptonically decaying Z's (e.g. 102 = 1 had. Z, 2 lep. Z's)
   float realx; // this is the "x" we measure (for scans)
   float imposedx; // this is the "x" we imposed.
+  float pureGeneratorZpt;
+  float pureGeneratorZM;
+  float pureGeneratorZphi;
+  float pureGeneratorZeta;
   float pureGeneratorJZB;
   float pure2ndGeneratorJZB;
   float pure2ndGeneratorZpt;
@@ -281,6 +291,7 @@ public:
   float angleLSPLSP2d;
   float dphiSumLSPgenMET;
   int LSPPromptnessLevel[2];
+  int ZPromptnessLevel[2];
   float LSP1pt;
   float LSP2pt;
   int LSP1Mo;
@@ -516,12 +527,18 @@ void nanoEvent::reset()
   pureGeneratorJZB=0;
   pure2ndGeneratorJZB=0;
   pure2ndGeneratorZpt=0;
+  pureGeneratorZpt=0;
+  pureGeneratorZM=0;
+  pureGeneratorZeta=0;
+  pureGeneratorZphi=0;
   nLSPs=0;
   angleLSPLSP=0;
   angleLSPLSP2d=-5;
   dphiSumLSPgenMET=0;
   LSPPromptnessLevel[0]=-1;
   LSPPromptnessLevel[1]=-1;
+  ZPromptnessLevel[0]=-1;
+  ZPromptnessLevel[1]=-1;
   LSP1pt=0;
   LSP2pt=0;
   LSP1Mo=0;
@@ -827,9 +844,14 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
 	myTree->Branch("DecayCode",&nEvent.DecayCode,"DecayCode/I");
 	myTree->Branch("pureGeneratorJZB",&nEvent.pureGeneratorJZB,"pureGeneratorJZB/F");
+	myTree->Branch("pureGeneratorZpt",&nEvent.pureGeneratorZpt,"pureGeneratorZpt/F");
+	myTree->Branch("pureGeneratorZM",&nEvent.pureGeneratorZM,"pureGeneratorZM/F");
+	myTree->Branch("pureGeneratorZeta",&nEvent.pureGeneratorZeta,"pureGeneratorZeta/F");
+	myTree->Branch("pureGeneratorZphi",&nEvent.pureGeneratorZphi,"pureGeneratorZphi/F");
 	myTree->Branch("pure2ndGeneratorJZB",&nEvent.pure2ndGeneratorJZB,"pure2ndGeneratorJZB/F");
 	myTree->Branch("pure2ndGeneratorZpt",&nEvent.pure2ndGeneratorZpt,"pure2ndGeneratorZpt/F");
 	myTree->Branch("LSPPromptnessLevel",&nEvent.LSPPromptnessLevel,"LSPPromptnessLevel[2]/I");
+	myTree->Branch("ZPromptnessLevel",&nEvent.ZPromptnessLevel,"ZPromptnessLevel[2]/I");
 	myTree->Branch("LSP1pt",&nEvent.LSP1pt,"LSP1pt/F");
 	myTree->Branch("LSP2pt",&nEvent.LSP2pt,"LSP2pt/F");
 
@@ -843,7 +865,6 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("angleLSPLSP2d",&nEvent.angleLSPLSP2d,"angleLSPLSP2d/F");
 	myTree->Branch("dphiSumLSPgenMET",&nEvent.dphiSumLSPgenMET,"dphiSumLSPgenMET/F");
 	myTree->Branch("dphigenZgenMet",&nEvent.dphigenZgenMet,"dphigenZgenMet/F");
-	myTree->Branch("LSPPromptnessLevel",&nEvent.LSPPromptnessLevel,"LSPPromptnessLevel[2]/I");
   }
 
   myTree->Branch("realx",&nEvent.realx,"realx/F");
@@ -974,6 +995,7 @@ void JZBAnalysis::Analyze() {
 	
 	float genZpt=0,genZeta=0,genZphi=0,genZM=0;
 	float genZ2pt=0,genZ2eta=0,genZ2phi=0,genZ2M=0;
+	int Zprompt1=0,Zprompt2=0;
 	int Promptness[5];
 	vector<TLorentzVector> LSPvecs;
 	vector<int> LSPMother;
@@ -1004,17 +1026,20 @@ void JZBAnalysis::Analyze() {
 		  genZ2M=genZM;
 		  genZ2eta=genZeta;
 		  genZ2phi=genZphi;
+		  Zprompt2=Zprompt1;
 
 		  genZpt=fTR->genInfoPt[i];
 		  genZM=fTR->genInfoM[i];
 		  genZeta=fTR->genInfoEta[i];
 		  genZphi=fTR->genInfoPhi[i];
+		  Zprompt1=fTR->PromptnessLevel[i];
 		} else {
 		   if(fTR->genInfoPt[i]>genZ2pt) {
 			genZ2pt=fTR->genInfoPt[i];
 			genZ2M=fTR->genInfoM[i];
 			genZ2eta=fTR->genInfoEta[i];
 			genZ2phi=fTR->genInfoPhi[i];
+			Zprompt2=fTR->PromptnessLevel[i];
 		   }
 		}			
 	      }
@@ -1058,6 +1083,8 @@ void JZBAnalysis::Analyze() {
 
 		float LSPdRa = LSPvecs[0].DeltaR(pureGenZvector);
 		float LSPdRb = LSPvecs[1].DeltaR(pureGenZvector);
+		nEvent.ZPromptnessLevel[0]=Zprompt1;
+		nEvent.ZPromptnessLevel[1]=Zprompt2;
 		if(LSPdRa<LSPdRb) {
 			nEvent.LSPPromptnessLevel[0]=Promptness[0];
 			nEvent.LSPPromptnessLevel[1]=Promptness[1];
@@ -1081,6 +1108,10 @@ void JZBAnalysis::Analyze() {
 		TLorentzVector pureGenZ2vector;
 		pureGenZ2vector.SetPtEtaPhiM(genZ2pt,genZ2eta,genZ2phi,genZ2M);
 		nEvent.pureGeneratorJZB=(-pureGenMETvector-pureGenZvector).Pt() - pureGenZvector.Pt();
+		nEvent.pureGeneratorZpt=genZpt;
+		nEvent.pureGeneratorZM=genZM;
+		nEvent.pureGeneratorZphi=genZphi;
+		nEvent.pureGeneratorZeta=genZeta;
 		nEvent.pure2ndGeneratorJZB=(-pureGenMETvector-pureGenZ2vector).Pt() - pureGenZ2vector.Pt();
 		nEvent.pure2ndGeneratorZpt=pureGenZ2vector.Pt();
 
@@ -1251,7 +1282,7 @@ void JZBAnalysis::Analyze() {
   counters[EV].fill("... has at least 2 OS leptons");
 
   // Preselection
-  if(sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
+  if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
 
     nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
     nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
