@@ -320,13 +320,14 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsPtPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
-
-	makeAllClosureTests();
-	makeAllIntPredictions();
+	
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
 
 	// makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
-	// load_msugraInfo("/scratch/mdunser/120131/msugraScan_2.root");
+	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
+	 scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS.root");
 }
 
 //____________________________________________________________________________
@@ -7064,7 +7065,7 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 	// make the histograms first. one for ttjets and one for all mc (without signal). this in each channel
 	TH2D    *horigin_tt [gNCHANNELS];
 	TH2D    *horigin_mc [gNCHANNELS];
-	int nbins(15);
+	int nbins(12);
 
 	std::vector<int> mcsamples;
 	std::vector<int>::const_iterator sampleInd;
@@ -7812,5 +7813,130 @@ void SSDLPlotter::load_msugraInfo( const char * filestring){
 	//wCount_->Write();
 	nPass_->Write();
 	eff_->Write();
+
+}
+
+void SSDLPlotter::scanSMS( const char * filestring){
+
+	fC_minMu1pt = 20.;
+	fC_minMu2pt = 10.;
+	fC_minEl1pt = 20.;
+	fC_minEl2pt = 10.;
+	fC_minHT    = 0.;
+	fC_minMet   = 120.;
+	fC_maxHT    = 20.;
+	fC_maxMet   = 7000.;
+	fC_minNjets = 0;
+	
+	TString htString;
+	if (fC_maxHT < 40.) htString = "HT0";
+	else if (fC_maxHT == 7000.) htString = "noHTcut";
+	else htString = Form("HT%3.0f", fC_maxHT);
+
+	fOUTSTREAM.open(Form("SMSoutput_"+htString+"_MET%3.0f.txt", fC_minMet), ios::trunc);
+	TFile * res_ = new TFile(Form("SMSresults_"+htString+"_MET%3.0f_PT%2.0f_%2.0f.root", fC_minMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
+
+	TH2D  * nPass_  = new TH2D("SMSnPass"  , "SMSnPass"  , 51 , -5 , 505 , 51 , -5 , 505);
+	TH1D  * nJets_  = new TH1D("SMSnJets"  , "SMSnJets"  , 10 , 0 , 10);
+	TH1D  * pt1_  = new TH1D("SMSpt1"  , "SMSpt1"  , 50 , 0. , 400.);
+	TH1D  * pt2_  = new TH1D("SMSpt2"  , "SMSpt2"  , 50 , 0. , 400.);
+
+	// get the histo with the count for each point
+	TFile * file_ = new TFile(filestring, "READ", "file_"); // example file: "/scratch/mdunser/111111_msugra/msugra_tan10.root"
+	TH2D * nTot_ = (TH2D *) file_->Get("sms_count");
+
+	TTree * tree_= (TTree *) file_->Get("Analysis");
+	tree_->ResetBranchAddresses();
+
+	InitMC(tree_);
+	double tot_events = tree_->GetEntriesFast();
+	cout << "Total Number of entries: " << tot_events << endl;
+	int n_tot = 0;
+	float tightTot(0);
+	float signalTot(0);
+	float nEE(0), nEM(0), nMM(0);
+
+	for (Long64_t jentry=0; jentry<tree_->GetEntriesFast();jentry++) {
+		tree_->GetEntry(jentry);
+		printProgress(jentry, tot_events, "SMS Scan");
+
+		int mu1(-1), mu2(-1);
+		if( isSSLLMuEvent(mu1, mu2) ){ // Same-sign loose-loose di muon event
+			if(isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+				tightTot++;
+				if ( IsSignalMuon[mu1] != 1 || IsSignalMuon[mu2] != 1 ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("MM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d", mGlu, mLSP, getHT(), pfMET, MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+				n_tot++;
+				nPass_->Fill(mGlu, mLSP);
+				nJets_->Fill(getNJets());
+				pt1_->Fill(MuPt[mu1]);
+				pt2_->Fill(MuPt[mu2]);
+				nMM++;
+				continue;
+			}
+			resetHypLeptons();
+		}
+		int mu(-1), el(-1);
+		if( isSSLLElMuEvent(mu, el) ){
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				tightTot++;
+				if ( IsSignalMuon[mu] != 1 || IsSignalElectron[el] != 1 ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("EM - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d", mGlu, mLSP, getHT(), pfMET, MuPt[mu], ElPt[el], MuCharge[mu1]) << endl ;
+				n_tot++;
+				nPass_->Fill(mGlu, mLSP);
+				nJets_->Fill(getNJets());
+				pt1_->Fill(MuPt[mu]);
+				pt2_->Fill(ElPt[el]);
+				nEM++;
+				continue;
+			}
+			resetHypLeptons();
+		}
+		int el1(-1), el2(-1);
+		if( isSSLLElEvent(el1, el2) ){
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				tightTot++;
+				if ( IsSignalElectron[el1] != 1 || IsSignalElectron[el2] != 1 ) continue;
+				signalTot++;
+				fOUTSTREAM << Form("EE - mGlu %4.0f - mLSP %4.0f - HT %4.2f - MET %6.2f Pt1 %6.2f Pt2 %6.2f | %2d", mGlu, mLSP, getHT(), pfMET, ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
+				n_tot++;
+				nPass_->Fill(mGlu, mLSP);
+				nJets_->Fill(getNJets());
+				pt1_->Fill(ElPt[el1]);
+				pt2_->Fill(ElPt[el2]);
+				nEE++;
+			}
+		}
+	}
+	cout << "Total Number of SS events: " << n_tot << endl;
+	cout << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
+	fOUTSTREAM << "Total Number of SS events: " << n_tot << endl;
+	fOUTSTREAM << "Total number of tight pairs: " << tightTot << " total number of signal pairs: " << signalTot << " resulting efficiency: " << signalTot/tightTot << endl;
+	fOUTSTREAM << "nEE: " << nEE << " nEM: " << nEM << " nMM: " << nMM << endl;
+
+	TH2D *eff_   = new TH2D("SMSeff"   , "SMSeff"  , 51, -5, 505, 51, -5, 505);
+	eff_->Divide(nPass_, nTot_, 1., 1.);
+
+	res_->cd();
+	nJets_->Write();
+	pt1_->Write();
+	pt2_->Write();
+	nPass_->Write();
+	nTot_->Write();
+	eff_->Write();
+
+	TCanvas * canv = new TCanvas();
+	canv->cd();
+	canv->SetRightMargin(0.15);
+	eff_->Draw("colz");
+	eff_->GetXaxis()->SetTitle("m_chi2");
+	eff_->GetYaxis()->SetTitle("m_LSP");
+	eff_->GetZaxis()->SetRangeUser(0.,0.15);
+	eff_->SetTitle(Form("SMSeff, "+htString+", MET > %3.0f, pt %2.0f/%2.0f", fC_minMet, fC_minMu1pt, fC_minMu2pt));
+	canv->SetLogz(1);
+	eff_->Draw("colz");
+	canv->SaveAs(Form("SMSefficiency_"+htString+"_MET%3.0f.pdf",fC_minMet));
 
 }

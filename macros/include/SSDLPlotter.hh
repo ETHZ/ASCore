@@ -35,6 +35,7 @@ public:
 	virtual void load_loxsecs(TFile *);
 	virtual void load_nloxsecs(TFile *);
 	virtual void load_msugraInfo(const char * filestring);
+	virtual void scanSMS(const char * filestring);
 
 	//////////////////////////////
 	// Plots
