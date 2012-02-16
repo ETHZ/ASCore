@@ -290,6 +290,11 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT80MET302b);
 	// makeOriginPlots(HT200MET30);
 	// makeOriginPlots(HT200MET302b);
+	makeOriginPlots(HT80MET120);
+	makeOriginPlots(HT0MET120);
+	makeOriginPlots(HT0MET200);
+	makeOriginPlots(HT0MET120JV);
+	makeOriginPlots(HT0MET200JV);
 	// printOrigins(Baseline);
 	// printOrigins(HT200MET30);
 	// printOrigins(HT200MET302b);
@@ -315,7 +320,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsPtPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
-	
+
 	makeAllClosureTests();
 	makeAllIntPredictions();
 
@@ -4850,13 +4855,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
 	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
-	OUT << "==============================================================================================" << endl;
-	OUT << Form("%16s || %5.0f                 || %5.0f                 || %5.0f                 ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "MC sum", nt2sum_mm, nt2sum_em, nt2sum_ee);
+	OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "tot. MC", nt2sum_mm, nt2sum_em, nt2sum_ee);
 	OUT << "==============================================================================================" << endl;
-	OUT << "combined observed: ";
-	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
+	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
+	OUT << "==============================================================================================" << endl;
 	OUT << "        predicted: ";
 	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee;
 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
@@ -4864,6 +4867,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
+	OUT << "      combined MC: ";
+	OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
+	OUT << "combined observed: ";
+	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
 	
