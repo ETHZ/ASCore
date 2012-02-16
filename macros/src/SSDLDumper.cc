@@ -213,6 +213,8 @@ void SSDLDumper::InitMC(TTree *tree){
    fChain->SetBranchAddress("m0", &m0, &b_m0);
    fChain->SetBranchAddress("m12", &m12, &b_m12);
    fChain->SetBranchAddress("process", &process, &b_process);
+   fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
+   fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);

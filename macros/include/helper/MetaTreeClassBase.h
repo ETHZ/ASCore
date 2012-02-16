@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Jan 10 15:15:54 2012 by ROOT version 5.27/06b
+// Thu Feb 16 08:15:36 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root
+// found on file: SMS.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -24,6 +24,8 @@ public :
    Float_t         m0;
    Float_t         m12;
    Int_t           process;
+   Float_t         mGlu;
+   Float_t         mLSP;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -115,14 +117,14 @@ public :
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[20];   //[NJets]
-   Float_t         JetEta[20];   //[NJets]
-   Float_t         JetPhi[20];   //[NJets]
-   Float_t         JetSSVHPBTag[20];   //[NJets]
-   Float_t         JetSSVHEBTag[20];   //[NJets]
-   Float_t         JetTCHPBTag[20];   //[NJets]
-   Float_t         JetTCHEBTag[20];   //[NJets]
-   Float_t         JetArea[20];   //[NJets]
+   Float_t         JetPt[10];   //[NJets]
+   Float_t         JetEta[10];   //[NJets]
+   Float_t         JetPhi[10];   //[NJets]
+   Float_t         JetSSVHPBTag[10];   //[NJets]
+   Float_t         JetSSVHEBTag[10];   //[NJets]
+   Float_t         JetTCHPBTag[10];   //[NJets]
+   Float_t         JetTCHEBTag[10];   //[NJets]
+   Float_t         JetArea[10];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -131,6 +133,8 @@ public :
    TBranch        *b_m0;   //!
    TBranch        *b_m12;   //!
    TBranch        *b_process;   //!
+   TBranch        *b_mGlu;   //!
+   TBranch        *b_mLSP;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -250,9 +254,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SMS.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Jan10/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root");
+         f = new TFile("SMS.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -309,6 +313,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("m0", &m0, &b_m0);
    fChain->SetBranchAddress("m12", &m12, &b_m12);
    fChain->SetBranchAddress("process", &process, &b_process);
+   fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
+   fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
