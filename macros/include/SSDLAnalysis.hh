@@ -78,6 +78,7 @@ private:
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
 	TH2D* fProcessCount[10];
+	TH2D* fSMSCount;
 	
 	/////////////////////////////////////
 	// Tree branches
@@ -88,6 +89,8 @@ private:
 	float  fTm0;
 	float  fTm12;
 	int    fTprocess;
+	float  fTmGlu;
+	float  fTmLSP;
 
 	// PileUP info
 	float fTrho;

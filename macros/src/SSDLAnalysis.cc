@@ -42,6 +42,7 @@ void SSDLAnalysis::Begin(const char* filename){
 		for (int i=0; i<10; i++) {
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
+		fSMSCount = new TH2D("sms_count", "sms_count", 51, -5, 505, 51, -5, 505);
 	}
 	//SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
 	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
@@ -57,6 +58,7 @@ void SSDLAnalysis::End(){
 		for (int i=0; i<10; i++) {
 			fProcessCount[i]->Write();
 		}
+		fSMSCount->Write();
 	}
 	fOutputFile->cd();
 	fAnalysisTree->Write();
@@ -170,6 +172,9 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("m12",           &fTm12,        "m12/F");
 	fAnalysisTree->Branch("process",       &fTprocess,    "process/I");
 
+	fAnalysisTree->Branch("mGlu",          &fTmGlu,       "mGlu/F");
+	fAnalysisTree->Branch("mLSP",          &fTmLSP,       "mLSP/F");
+
 	// HLT triggers
 	AddTriggerBranches();
 	
@@ -276,6 +281,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 	if (!fIsData){
 		fMsugraCount->Fill(fTR->M0, fTR->M12);
 		if (fTR->process > 0 && fTR->process < 11) fProcessCount[(fTR->process)-1]->Fill(fTR->M0, fTR->M12);
+		fSMSCount->Fill(fTR->MassGlu, fTR->MassLSP);
 	}
 	// initial event selection: good event trigger, good primary vertex...
 	if( !IsGoodEvent() ) return;
@@ -308,11 +314,15 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTm0   = fTR->M0;
 		fTm12  = fTR->M12;
 		fTprocess = fTR->process;
+		fTmGlu = fTR->MassGlu;
+		fTmLSP = fTR->MassLSP;
 	}
 	else {
-		fTm0   = -1;
-		fTm12  = -1;
+		fTm0      = -1;
+		fTm12     = -1;
 		fTprocess = -1;
+		fTmGlu    = -1;
+		fTmLSP    = -1;
 
 	}
 	// Dump basic jet and MET properties
@@ -499,9 +509,11 @@ void SSDLAnalysis::ResetTree(){
 	fTEventNumber                = 0;
 	fTLumiSection                = 0;
 
-	fTm0                         = -999.99;
-	fTm12                        = -999.99;
-	fTprocess                    = -999;
+	fTm0      = -999.99;
+	fTm12     = -999.99;
+	fTprocess = -999;
+	fTmGlu    = -999.99;
+	fTmLSP    = -999.99;
 
 	for(size_t i = 0; i < fHLTPathSets.size(); ++i){
 		fHLTResults[i]   -2;
