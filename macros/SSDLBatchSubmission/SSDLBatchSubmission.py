@@ -77,6 +77,8 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 	string+= ' -n '+line.split()[0]
 	string+= ' -m '+line.split()[2]
 	string+= ' -c '+line.split()[3]
+	if len(line.split()) > 4:
+		string+= ' -s '+line.split()[4]
 	if not indiv_dir:
 		string+= ' -o '+output_node
 	else:
@@ -86,8 +88,10 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 def mk_card_line(line):
 	name = line.split()[0]+'\t'
 	loc  = line.split()[1]+'\t'
-	card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
-	#card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
+	if len(line.split()) > 4:
+		card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\t'+line.split()[4]+'\n'
+	else:
+		card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
 	return card_line
 
 def read_config(config_name):
@@ -180,12 +184,12 @@ def merge_and_clean():
 		if isdata:
 			os.system(dir_cat)
 
-	print '[status] done with the special dirs, now merging all together.'
-	hadd_string = 'hadd '+output_location+'allYields.root'
-	for ls in os.listdir(output_location):
-		if ls.endswith('.root'):
-			hadd_string+=' '+output_location+ls
-	os.system(hadd_string)
+	# print '[status] done with the special dirs, now merging all together.'
+	# hadd_string = 'hadd '+output_location+'SSDLYields.root'
+	# for ls in os.listdir(output_location):
+	# 	if ls.endswith('.root'):
+	# 		hadd_string+=' '+output_location+ls
+	# os.system(hadd_string)
 	os.system('rm -r tmp/ ; rm job_* ; rm sgejob-* -rf')
 	for ls in os.listdir(output_location):
 		if os.path.isdir(output_location+ls) and 'output' in ls:
@@ -314,10 +318,11 @@ def do_stuff(config_name):
 			print_status(time_elapsed)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
 	
-	if check_commands():
-		merge_and_clean()
-	else:
-		clean()
+	# if check_commands():
+	# 	merge_and_clean()
+	# else:
+	# 	clean()
+	merge_and_clean()
 	
 def main(args):
 	if len(args)==1:

@@ -339,7 +339,7 @@ public:
 
 	virtual void init();
 	virtual void init(TString); // samples read from a datacard
-	virtual void init(TString, TString, int, int = -1); // running on single sample
+	virtual void init(TString, TString, int, int = -1, float = 1.0); // running on single sample
 	virtual void InitMC(TTree*); // removed a few branches (triggers)
 
 	virtual void readDatacard(TString); // read in a datacard

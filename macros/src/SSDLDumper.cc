@@ -139,8 +139,8 @@ SSDLDumper::~SSDLDumper(){
 }
 
 //____________________________________________________________________________
-void SSDLDumper::init(TString inputfile, TString sname, int datamc, int chan){
-	fSample = new Sample(inputfile, sname, datamc, chan);
+void SSDLDumper::init(TString inputfile, TString sname, int datamc, int chan, float lumi){
+	fSample = new Sample(inputfile, sname, datamc, chan, lumi);
 	fSamples.push_back(fSample);
 
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
@@ -148,6 +148,7 @@ void SSDLDumper::init(TString inputfile, TString sname, int datamc, int chan){
 	if(fVerbose > 0) cout << "   Running on:      " << fSample->location << endl;
 	if(fVerbose > 0) cout << "   Naming it:       " << fSample->sname << endl;
 	if(fVerbose > 0) cout << "   Is data/mc:      " << fSample->datamc << endl;
+	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSample->lumi << endl;
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
 	init();
 }
@@ -2219,8 +2220,9 @@ void SSDLDumper::writeSigEvTree(TFile *pFile){
 	fSigEv_Tree->Write("SigEvents", TObject::kWriteDelete);	
 }
 int SSDLDumper::getSampleType(Sample *S){
-	if(S->datamc > 0) return 10;
-	if(S->sname.Contains("DoubleMu"))  return 0;
+	if(S->datamc == 2) return 20; // signal
+	if(S->datamc > 0) return 10;  // SM MC
+	if(S->sname.Contains("DoubleMu"))  return 0; // Data
 	if(S->sname.Contains("DoubleEle")) return 1;
 	if(S->sname.Contains("MuEG"))      return 2;
 	if(S->sname.Contains("MuHad"))     return 3;
@@ -2433,10 +2435,10 @@ void SSDLDumper::bookHistos(Sample *S){
 					C->nt2pf_pt = new TH2D(rootname + "_NT2PF_pt", "NT2PF_pt", getNPt2Bins(c), getPt2Bins(c), getNPt2Bins(c), getPt2Bins(c)); C->nt2pf_pt->Sumw2();
 					C->nt2ff_pt = new TH2D(rootname + "_NT2FF_pt", "NT2FF_pt", getNPt2Bins(c), getPt2Bins(c), getNPt2Bins(c), getPt2Bins(c)); C->nt2ff_pt->Sumw2();
 
-					C->nt11_origin = new TH2D(rootname + "_NT20_Origin",  "NT2Origin",  15, 0, 15, 15, 0, 15);
-					C->nt10_origin = new TH2D(rootname + "_NT10_Origin",  "NT1Origin",  15, 0, 15, 15, 0, 15);
-					C->nt01_origin = new TH2D(rootname + "_NT01_Origin",  "NT01Origin", 15, 0, 15, 15, 0, 15);
-					C->nt00_origin = new TH2D(rootname + "_NT00_Origin",  "NT0Origin",  15, 0, 15, 15, 0, 15);
+					C->nt11_origin = new TH2D(rootname + "_NT20_Origin",  "NT2Origin",  12, 0, 12, 12, 0, 12);
+					C->nt10_origin = new TH2D(rootname + "_NT10_Origin",  "NT1Origin",  12, 0, 12, 12, 0, 12);
+					C->nt01_origin = new TH2D(rootname + "_NT01_Origin",  "NT01Origin", 12, 0, 12, 12, 0, 12);
+					C->nt00_origin = new TH2D(rootname + "_NT00_Origin",  "NT0Origin",  12, 0, 12, 12, 0, 12);
 					label2OriginAxes(C->nt11_origin->GetXaxis(), C->nt11_origin->GetYaxis(), c);
 					label2OriginAxes(C->nt10_origin->GetXaxis(), C->nt10_origin->GetYaxis(), c);
 					label2OriginAxes(C->nt01_origin->GetXaxis(), C->nt01_origin->GetYaxis(), c);
@@ -3049,7 +3051,7 @@ int SSDLDumper::muIndexToBin(int ind){
 	if(mtype == 14 || mtype == 16 || mtype == 20) return 7; // charmed hadrons
 	if(mtype == 15 || mtype == 17 || mtype == 21) return 8; // bottom hadrons
 	if(mtype == 91 || mtype == 92)                return 9; // pythia strings
-	return 15;                                              // uid
+	return 12;                                              // uid
 }
 int SSDLDumper::elIndexToBin(int ind){
 	// For the origin histograms
@@ -3075,7 +3077,7 @@ int SSDLDumper::elIndexToBin(int ind){
 	if(mtype == 14 || mtype == 16 || mtype == 20)  return 9;  // charmed hadrons
 	if(mtype == 15 || mtype == 17 || mtype == 21)  return 10; // bottom hadrons
 	if(mtype == 91 || mtype == 92)                 return 11; // pythia strings
-	return 15;                                                // uid
+	return 12;                                                // uid
 }
 TString SSDLDumper::muBinToLabel(int bin){
 	// For the origin histograms
@@ -3092,10 +3094,7 @@ TString SSDLDumper::muBinToLabel(int bin){
 		case 9:  return "QCD String";
 		case 10: return "";
 		case 11: return "";
-		case 12: return "";
-		case 13: return "";
-		case 14: return "";
-		case 15: return "Unidentified";
+		case 12: return "Unidentified";
 		default: return "?";
 	}
 }
@@ -3114,23 +3113,20 @@ TString SSDLDumper::elBinToLabel(int bin){
 		case 9:  return "Charmed had.";
 		case 10: return "Bottom had.";
 		case 11: return "QCD string";
-		case 12: return "";
-		case 13: return "";
-		case 14: return "";
-		case 15: return "Unidentified";
+		case 12: return "Unidentified";
 		default: return "?";
 	}
 }
 void SSDLDumper::labelOriginAxis(TAxis *axis, gChannel chan){
 	if(chan == Muon){
 		axis->SetTitle("#mu Origin");
-		for(size_t i = 1; i <= 15; ++i){
+		for(size_t i = 1; i <= 12; ++i){
 			axis->SetBinLabel(i, muBinToLabel(i));
 		}		
 	}
 	if(chan == Elec){
 		axis->SetTitle("e Origin");
-		for(size_t i = 1; i <= 15; ++i){
+		for(size_t i = 1; i <= 12; ++i){
 			axis->SetBinLabel(i, elBinToLabel(i));
 		}
 	}
