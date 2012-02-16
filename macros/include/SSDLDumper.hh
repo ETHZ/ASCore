@@ -100,6 +100,8 @@ public:
 		HT450MET0,
 		HT0MET120,
 		HT0MET200,
+		HT0MET120JV,  // Jet veto
+		HT0MET200JV,
 		HT80MET302b,  // > 1 bjet
 		HT200MET302b,
 		HT80MET1202b,
@@ -535,6 +537,7 @@ public:
 	
 	TTree *fSigEv_Tree;
 	float       fSETree_PUWeight;
+	float       fSETree_SLumi;
 	std::string fSETree_SName;
 	int         fSETree_SType; // DoubleMu(0), DoubleEle(1), MuEG(2), MC(10)
 	int         fSETree_Run;

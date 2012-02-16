@@ -50,13 +50,13 @@ float SSDLDumper::Region::minMu2pt[2] = {10.,   5.};
 float SSDLDumper::Region::minEl1pt[2] = {20.,  10.};
 float SSDLDumper::Region::minEl2pt[2] = {10.,  10.};
 
-TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT80MET30", "HT80MET20to50", "HT80MET120", "HT80MET120x", "HT200MET30", "HT200MET120", "HT200MET120x", "HT450MET50", "HT450MET50x", "HT450MET120", "HT450MET0", "HT0MET120", "HT0MET200", "HT80MET302b", "HT200MET302b", "HT80MET1202b"};
-float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {        80.,             80.,          80.,           80.,         200.,          200.,           200.,         450.,          450.,          450.,        450.,          0.,          0.,           80.,           200.,            80.};
-float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {      7000.,           7000.,        7000.,          200.,        7000.,         7000.,           450.,        7000.,         7000.,         7000.,       7000.,       7000.,       7000.,         7000.,          7000.,          7000.};
-float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {        30.,             20.,         120.,          120.,          30.,          120.,           120.,          50.,           50.,          120.,          0.,        120.,        200.,           30.,            30.,           120.};
-float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {      7000.,             50.,        7000.,         7000.,        7000.,         7000.,          7000.,        7000.,          120.,         7000.,       7000.,       7000.,       7000.,         7000.,          7000.,          7000.};
-int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {         2 ,              2 ,           2 ,            2 ,           2 ,            2 ,             2 ,           2 ,            2 ,            2 ,          2 ,          0 ,          0 ,            2 ,             2 ,             2 };
-int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {         0 ,              0 ,           0 ,            0 ,           0 ,            0 ,             0 ,           0 ,            0 ,            0 ,          0 ,          0 ,          0 ,            2 ,             2 ,             2 };
+TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT80MET30", "HT80MET20to50", "HT80MET120", "HT80MET120x", "HT200MET30", "HT200MET120", "HT200MET120x", "HT450MET50", "HT450MET50x", "HT450MET120", "HT450MET0", "HT0MET120", "HT0MET200", "HT0MET120JV", "HT0MET200JV", "HT80MET302b", "HT200MET302b", "HT80MET1202b"};
+float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {        80.,             80.,          80.,           80.,         200.,          200.,           200.,         450.,          450.,          450.,        450.,          0.,          0.,            0.,            0.,           80.,           200.,            80.};
+float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {      7000.,           7000.,        7000.,          200.,        7000.,         7000.,           450.,        7000.,         7000.,         7000.,       7000.,       7000.,       7000.,           20.,           20.,         7000.,          7000.,          7000.};
+float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {        30.,             20.,         120.,          120.,          30.,          120.,           120.,          50.,           50.,          120.,          0.,        120.,        200.,          120.,          200.,           30.,            30.,           120.};
+float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {      7000.,             50.,        7000.,         7000.,        7000.,         7000.,          7000.,        7000.,          120.,         7000.,       7000.,       7000.,       7000.,         7000.,         7000.,         7000.,          7000.,          7000.};
+int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {         2 ,              2 ,           2 ,            2 ,           2 ,            2 ,             2 ,           2 ,            2 ,            2 ,          2 ,          0 ,          0 ,            0 ,            0 ,            2 ,             2 ,             2 };
+int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {         0 ,              0 ,           0 ,            0 ,           0 ,            0 ,             0 ,           0 ,            0 ,            0 ,          0 ,          0 ,          0 ,            0 ,            0 ,            2 ,             2 ,             2 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuPtbins [gNMuPtbins+1]  = {10., 15., 20., 25., 30., 35., 40., 50., 60.};
@@ -1478,6 +1478,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	fSETree_PUWeight = puweight;
+	fSETree_SLumi    = S->lumi;
 	fSETree_SName    = S->sname.Data();
 	fSETree_SType    = getSampleType(S);
 	fSETree_Run      = Run;
@@ -2175,6 +2176,7 @@ void SSDLDumper::printCutFlows(TString filename){
 void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree = new TTree("SigEvents", "SigEventTree");
 	fSigEv_Tree->Branch("PUWeight", &fSETree_PUWeight, "PUWeight/F");
+	fSigEv_Tree->Branch("SLumi",    &fSETree_SLumi,    "SLumi/F");
 	fSigEv_Tree->Branch("SName",    &fSETree_SName);
 	fSigEv_Tree->Branch("SType",    &fSETree_SType , "SType/I");
 	fSigEv_Tree->Branch("Run",      &fSETree_Run   , "Run/I");
@@ -2194,6 +2196,7 @@ void SSDLDumper::bookSigEvTree(){
 }
 void SSDLDumper::resetSigEventTree(){
 	fSETree_PUWeight = -1.;
+	fSETree_SLumi    = -1.;
 	fSETree_SName    = "?";
 	fSETree_SType    = -1;
 	fSETree_Run      = -1;
