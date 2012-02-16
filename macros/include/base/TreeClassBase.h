@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Jan 18 13:37:49 2012 by ROOT version 5.27/06b
+// Tue Feb  7 10:33:46 2012 by ROOT version 5.27/06b
 // from TTree Analysis/ETHZAnalysisTree
-// found on file: ../NTupleProducer_42X_MC_numEvent1000.root
+// found on file: ../NTupleProducer_42X_mc_numEvent100.root
 //////////////////////////////////////////////////////////
 
 #ifndef TreeClassBase_h
@@ -71,6 +71,29 @@ public :
    Float_t         signMu;
    Float_t         A0;
    Int_t           process;
+   Int_t           FlagMaxGenPartExceeded;
+   Int_t           nGenParticles;
+   Int_t           genInfoId[1000];   //[nGenParticles]
+   Int_t           genInfoStatus[1000];   //[nGenParticles]
+   Float_t         genInfoMass[1000];   //[nGenParticles]
+   Int_t           genInfoNMo[1000];   //[nGenParticles]
+   Float_t         genInfoMo1Pt[1000];   //[nGenParticles]
+   Float_t         genInfoMo2Pt[1000];   //[nGenParticles]
+   Int_t           genInfoNDa[1000];   //[nGenParticles]
+   Int_t           genInfoMo1[1000];   //[nGenParticles]
+   Int_t           genInfoMo2[1000];   //[nGenParticles]
+   Int_t           genInfoDa1[1000];   //[nGenParticles]
+   Int_t           genInfoDa2[1000];   //[nGenParticles]
+   Float_t         genInfoPt[1000];   //[nGenParticles]
+   Float_t         genInfoEta[1000];   //[nGenParticles]
+   Float_t         genInfoPhi[1000];   //[nGenParticles]
+   Float_t         genInfoPx[1000];   //[nGenParticles]
+   Float_t         genInfoPy[1000];   //[nGenParticles]
+   Float_t         genInfoPz[1000];   //[nGenParticles]
+   Float_t         genInfoM[1000];   //[nGenParticles]
+   Int_t           genInfoPromptFlag[1000];   //[nGenParticles]
+   Int_t           genInfoMoIndex[1000];   //[nGenParticles]
+   Int_t           PromptnessLevel[1000];   //[nGenParticles]
    Int_t           PrimVtxGood;
    Float_t         PrimVtxx;
    Float_t         PrimVtxy;
@@ -103,6 +126,7 @@ public :
    Int_t           CSCTightHaloID;
    Int_t           EcalDeadTPFilterFlag;
    Int_t           RecovRecHitFilterFlag;
+   Int_t           RA2TrackingFailureFilterFlag;
    Int_t           NGenLeptons;
    Int_t           GenLeptonID[100];   //[NGenLeptons]
    Float_t         GenLeptonPt[100];   //[NGenLeptons]
@@ -454,6 +478,26 @@ public :
    Float_t         Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[50];   //[NPhotons]
    Float_t         Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[50];   //[NPhotons]
    Float_t         Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[50];   //[NPhotons]
+   Bool_t          pho_conv_validvtx[50];   //[NPhotons]
+   Int_t           pho_conv_ntracks[50];   //[NPhotons]
+   Float_t         pho_conv_chi2_probability[50];   //[NPhotons]
+   Float_t         pho_conv_eoverp[50];   //[NPhotons]
+   Int_t           conv_n;
+   Bool_t          conv_validvtx[50];   //[NPhotons]
+   Int_t           conv_ntracks[50];   //[NPhotons]
+   Float_t         conv_chi2_probability[50];   //[NPhotons]
+   Float_t         conv_eoverp[50];   //[NPhotons]
+   Float_t         conv_zofprimvtxfromtrks[50];   //[NPhotons]
+   Int_t           gv_n;
+   Float_t         gv_sumPtHi[1];   //[gv_n]
+   Float_t         gv_sumPtLo[1];   //[gv_n]
+   Int_t           gv_nTkHi[1];   //[gv_n]
+   Int_t           gv_nTkLo[1];   //[gv_n]
+/*   vector<int>     *diphotons_first;
+   vector<int>     *diphotons_second;
+   vector<vector<int> > *vtx_dipho_h2gglobe;
+   vector<vector<int> > *vtx_dipho_mva;
+   vector<vector<int> > *vtx_dipho_productrank;*/
    Int_t           NSuperClusters;
    Float_t         SCRaw[100];   //[NSuperClusters]
    Float_t         SCPre[100];   //[NSuperClusters]
@@ -1002,6 +1046,29 @@ public :
    TBranch        *b_signMu;   //!
    TBranch        *b_A0;   //!
    TBranch        *b_process;   //!
+   TBranch        *b_FlagMaxGenPartExceeded;   //!
+   TBranch        *b_nGenParticles;   //!
+   TBranch        *b_genInfoId;   //!
+   TBranch        *b_genInfoStatus;   //!
+   TBranch        *b_genInfoMass;   //!
+   TBranch        *b_genInfoNMo;   //!
+   TBranch        *b_genInfoMo1Pt;   //!
+   TBranch        *b_genInfoMo2Pt;   //!
+   TBranch        *b_genInfoNDa;   //!
+   TBranch        *b_genInfoMo1;   //!
+   TBranch        *b_genInfoMo2;   //!
+   TBranch        *b_genInfoDa1;   //!
+   TBranch        *b_genInfoDa2;   //!
+   TBranch        *b_genInfoPt;   //!
+   TBranch        *b_genInfoEta;   //!
+   TBranch        *b_genInfoPhi;   //!
+   TBranch        *b_genInfoPx;   //!
+   TBranch        *b_genInfoPy;   //!
+   TBranch        *b_genInfoPz;   //!
+   TBranch        *b_genInfoM;   //!
+   TBranch        *b_genInfoPromptFlag;   //!
+   TBranch        *b_genInfoMoIndex;   //!
+   TBranch        *b_PromptnessLevel;   //!
    TBranch        *b_PrimVtxGood;   //!
    TBranch        *b_PrimVtxx;   //!
    TBranch        *b_PrimVtxy;   //!
@@ -1034,6 +1101,7 @@ public :
    TBranch        *b_CSCTightHaloID;   //!
    TBranch        *b_EcalDeadTPFilterFlag;   //!
    TBranch        *b_RecovRecHitFilterFlag;   //!
+   TBranch        *b_RA2TrackingFailureFilterFlag;   //!
    TBranch        *b_NGenLeptons;   //!
    TBranch        *b_GenLeptonID;   //!
    TBranch        *b_GenLeptonPt;   //!
@@ -1385,6 +1453,26 @@ public :
    TBranch        *b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0;   //!
    TBranch        *b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01;   //!
    TBranch        *b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU;   //!
+   TBranch        *b_pho_conv_validvtx;   //!
+   TBranch        *b_pho_conv_ntracks;   //!
+   TBranch        *b_pho_conv_chi2_probability;   //!
+   TBranch        *b_pho_conv_eoverp;   //!
+   TBranch        *b_conv_n;   //!
+   TBranch        *b_conv_validvtx;   //!
+   TBranch        *b_conv_ntracks;   //!
+   TBranch        *b_conv_chi2_probability;   //!
+   TBranch        *b_conv_eoverp;   //!
+   TBranch        *b_conv_zofprimvtxfromtrks;   //!
+   TBranch        *b_gv_n;   //!
+   TBranch        *b_gv_sumPtHi;   //!
+   TBranch        *b_gv_sumPtLo;   //!
+   TBranch        *b_gv_nTkHi;   //!
+   TBranch        *b_gv_nTkLo;   //!
+   TBranch        *b_diphotons_first;   //!
+   TBranch        *b_diphotons_second;   //!
+   TBranch        *b_vtx_dipho_h2gglobe;   //!
+   TBranch        *b_vtx_dipho_mva;   //!
+   TBranch        *b_vtx_dipho_productrank;   //!
    TBranch        *b_NSuperClusters;   //!
    TBranch        *b_SCRaw;   //!
    TBranch        *b_SCPre;   //!
@@ -1898,9 +1986,9 @@ TreeClassBase::TreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../NTupleProducer_42X_MC_numEvent1000.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../NTupleProducer_42X_mc_numEvent100.root");
       if (!f) {
-         f = new TFile("../NTupleProducer_42X_MC_numEvent1000.root");
+         f = new TFile("../NTupleProducer_42X_mc_numEvent100.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -1945,6 +2033,12 @@ void TreeClassBase::Init(TTree *tree)
    // Init() will be called many times when running on PROOF
    // (once per file to be processed).
 
+   // Set object pointer
+/*   diphotons_first = 0;
+   diphotons_second = 0;
+   vtx_dipho_h2gglobe = 0;
+   vtx_dipho_mva = 0;
+   vtx_dipho_productrank = 0;*/
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -2004,6 +2098,29 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("signMu", &signMu, &b_signMu);
    fChain->SetBranchAddress("A0", &A0, &b_A0);
    fChain->SetBranchAddress("process", &process, &b_process);
+   fChain->SetBranchAddress("FlagMaxGenPartExceeded", &FlagMaxGenPartExceeded, &b_FlagMaxGenPartExceeded);
+   fChain->SetBranchAddress("nGenParticles", &nGenParticles, &b_nGenParticles);
+   fChain->SetBranchAddress("genInfoId", genInfoId, &b_genInfoId);
+   fChain->SetBranchAddress("genInfoStatus", genInfoStatus, &b_genInfoStatus);
+   fChain->SetBranchAddress("genInfoMass", genInfoMass, &b_genInfoMass);
+   fChain->SetBranchAddress("genInfoNMo", genInfoNMo, &b_genInfoNMo);
+   fChain->SetBranchAddress("genInfoMo1Pt", genInfoMo1Pt, &b_genInfoMo1Pt);
+   fChain->SetBranchAddress("genInfoMo2Pt", genInfoMo2Pt, &b_genInfoMo2Pt);
+   fChain->SetBranchAddress("genInfoNDa", genInfoNDa, &b_genInfoNDa);
+   fChain->SetBranchAddress("genInfoMo1", genInfoMo1, &b_genInfoMo1);
+   fChain->SetBranchAddress("genInfoMo2", genInfoMo2, &b_genInfoMo2);
+   fChain->SetBranchAddress("genInfoDa1", genInfoDa1, &b_genInfoDa1);
+   fChain->SetBranchAddress("genInfoDa2", genInfoDa2, &b_genInfoDa2);
+   fChain->SetBranchAddress("genInfoPt", genInfoPt, &b_genInfoPt);
+   fChain->SetBranchAddress("genInfoEta", genInfoEta, &b_genInfoEta);
+   fChain->SetBranchAddress("genInfoPhi", genInfoPhi, &b_genInfoPhi);
+   fChain->SetBranchAddress("genInfoPx", genInfoPx, &b_genInfoPx);
+   fChain->SetBranchAddress("genInfoPy", genInfoPy, &b_genInfoPy);
+   fChain->SetBranchAddress("genInfoPz", genInfoPz, &b_genInfoPz);
+   fChain->SetBranchAddress("genInfoM", genInfoM, &b_genInfoM);
+   fChain->SetBranchAddress("genInfoPromptFlag", genInfoPromptFlag, &b_genInfoPromptFlag);
+   fChain->SetBranchAddress("genInfoMoIndex", genInfoMoIndex, &b_genInfoMoIndex);
+   fChain->SetBranchAddress("PromptnessLevel", PromptnessLevel, &b_PromptnessLevel);
    fChain->SetBranchAddress("PrimVtxGood", &PrimVtxGood, &b_PrimVtxGood);
    fChain->SetBranchAddress("PrimVtxx", &PrimVtxx, &b_PrimVtxx);
    fChain->SetBranchAddress("PrimVtxy", &PrimVtxy, &b_PrimVtxy);
@@ -2036,6 +2153,7 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("CSCTightHaloID", &CSCTightHaloID, &b_CSCTightHaloID);
    fChain->SetBranchAddress("EcalDeadTPFilterFlag", &EcalDeadTPFilterFlag, &b_EcalDeadTPFilterFlag);
    fChain->SetBranchAddress("RecovRecHitFilterFlag", &RecovRecHitFilterFlag, &b_RecovRecHitFilterFlag);
+   fChain->SetBranchAddress("RA2TrackingFailureFilterFlag", &RA2TrackingFailureFilterFlag, &b_RA2TrackingFailureFilterFlag);
    fChain->SetBranchAddress("NGenLeptons", &NGenLeptons, &b_NGenLeptons);
    fChain->SetBranchAddress("GenLeptonID", GenLeptonID, &b_GenLeptonID);
    fChain->SetBranchAddress("GenLeptonPt", GenLeptonPt, &b_GenLeptonPt);
@@ -2387,6 +2505,26 @@ void TreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0", Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0, &b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0);
    fChain->SetBranchAddress("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01", Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01, &b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01);
    fChain->SetBranchAddress("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU", Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU, &b_Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU);
+   fChain->SetBranchAddress("pho_conv_validvtx", pho_conv_validvtx, &b_pho_conv_validvtx);
+   fChain->SetBranchAddress("pho_conv_ntracks", pho_conv_ntracks, &b_pho_conv_ntracks);
+   fChain->SetBranchAddress("pho_conv_chi2_probability", pho_conv_chi2_probability, &b_pho_conv_chi2_probability);
+   fChain->SetBranchAddress("pho_conv_eoverp", pho_conv_eoverp, &b_pho_conv_eoverp);
+   fChain->SetBranchAddress("conv_n", &conv_n, &b_conv_n);
+   fChain->SetBranchAddress("conv_validvtx", conv_validvtx, &b_conv_validvtx);
+   fChain->SetBranchAddress("conv_ntracks", conv_ntracks, &b_conv_ntracks);
+   fChain->SetBranchAddress("conv_chi2_probability", conv_chi2_probability, &b_conv_chi2_probability);
+   fChain->SetBranchAddress("conv_eoverp", conv_eoverp, &b_conv_eoverp);
+   fChain->SetBranchAddress("conv_zofprimvtxfromtrks", conv_zofprimvtxfromtrks, &b_conv_zofprimvtxfromtrks);
+   fChain->SetBranchAddress("gv_n", &gv_n, &b_gv_n);
+   fChain->SetBranchAddress("gv_sumPtHi", &gv_sumPtHi, &b_gv_sumPtHi);
+   fChain->SetBranchAddress("gv_sumPtLo", &gv_sumPtLo, &b_gv_sumPtLo);
+   fChain->SetBranchAddress("gv_nTkHi", &gv_nTkHi, &b_gv_nTkHi);
+   fChain->SetBranchAddress("gv_nTkLo", &gv_nTkLo, &b_gv_nTkLo);
+/*   fChain->SetBranchAddress("diphotons_first", &diphotons_first, &b_diphotons_first);
+   fChain->SetBranchAddress("diphotons_second", &diphotons_second, &b_diphotons_second);
+   fChain->SetBranchAddress("vtx_dipho_h2gglobe", &vtx_dipho_h2gglobe, &b_vtx_dipho_h2gglobe);
+   fChain->SetBranchAddress("vtx_dipho_mva", &vtx_dipho_mva, &b_vtx_dipho_mva);
+   fChain->SetBranchAddress("vtx_dipho_productrank", &vtx_dipho_productrank, &b_vtx_dipho_productrank);*/
    fChain->SetBranchAddress("NSuperClusters", &NSuperClusters, &b_NSuperClusters);
    fChain->SetBranchAddress("SCRaw", SCRaw, &b_SCRaw);
    fChain->SetBranchAddress("SCPre", SCPre, &b_SCPre);
