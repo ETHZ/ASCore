@@ -290,7 +290,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT80MET302b);
 	// makeOriginPlots(HT200MET30);
 	// makeOriginPlots(HT200MET302b);
-	makeOriginPlots(HT80MET120);
+	// makeOriginPlots(HT80MET120);
 	makeOriginPlots(HT0MET120);
 	makeOriginPlots(HT0MET200);
 	makeOriginPlots(HT0MET120JV);
@@ -327,7 +327,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
 	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
-	 scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS.root");
+	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS.root");
 }
 
 //____________________________________________________________________________
@@ -7154,7 +7154,10 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 		horigin_mc[i]->Draw("col text");
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel");
-		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		if (Region::maxHT[reg] < 39.) {
+			lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
+		}
+		else lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
 		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
 		lat->SetTextSize(0.03);
 		lat->DrawLatex(0.75, 0.93, Form("Exp. # ev.: %5.2f", total_mc));
@@ -7166,7 +7169,10 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 		horigin_tt[i]->Draw("col text");
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel (ttbar only)");
-		lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
+		if (Region::maxHT[reg] < 39.) {
+			lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
+		}
+		else lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
 		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
 		lat->SetTextSize(0.03);
 		lat->DrawLatex(0.75, 0.93, Form("Exp. # ev.: %5.2f", total_tt));
