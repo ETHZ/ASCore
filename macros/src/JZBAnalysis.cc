@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.74 $";
+string sjzbversion="$Revision: 1.75 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +26,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.75  2012/02/15 16:20:55  buchmann
+Added angle between LSP and Z; added pt of lsp sum
+
 Revision 1.74  2012/02/15 10:26:27  buchmann
 Added Z pt, Z mass, Z eta, Z phi, Z promptness, and LSP promptness to events tree; added possibility to go lower in lepton pt for additional studies (currently at 10 GeV)
 
@@ -293,6 +296,9 @@ public:
   float angleLSPLSP;
   float angleLSPLSP2d;
   float angleLSPZ;
+  float angleLSPZ2d;
+  float angleChi2Z2d;
+  float angleChi2Z;
   float dphiSumLSPgenMET;
   float absvalSumLSP;
   int LSPPromptnessLevel[2];
@@ -542,6 +548,10 @@ void nanoEvent::reset()
   angleLSPZ=0;
   dphiSumLSPgenMET=0;
   absvalSumLSP=0;
+  angleLSPZ2d=-5;
+  angleChi2Z2d=-5;
+  angleChi2Z=-5;
+
   LSPPromptnessLevel[0]=-1;
   LSPPromptnessLevel[1]=-1;
   ZPromptnessLevel[0]=-1;
@@ -870,6 +880,10 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("nLSPs",&nEvent.nLSPs,"nLSPs/I");
 	myTree->Branch("angleLSPLSP",&nEvent.angleLSPLSP,"angleLSPLSP/F");
 	myTree->Branch("angleLSPLSP2d",&nEvent.angleLSPLSP2d,"angleLSPLSP2d/F");
+	
+	myTree->Branch("angleLSPZ2d",&nEvent.angleLSPZ2d,"angleLSPZ2d/F");
+	myTree->Branch("angleChi2Z2d",&nEvent.angleChi2Z2d,"angleChi2Z2d/F");
+	myTree->Branch("angleChi2Z",&nEvent.angleChi2Z,"angleChi2Z/F");
 	myTree->Branch("angleLSPZ",&nEvent.angleLSPZ,"angleLSPZ/F");
 	myTree->Branch("dphiSumLSPgenMET",&nEvent.dphiSumLSPgenMET,"dphiSumLSPgenMET/F");
 	myTree->Branch("absvalSumLSP",&nEvent.absvalSumLSP,"absvalSumLSP/F");
@@ -1007,6 +1021,7 @@ void JZBAnalysis::Analyze() {
 	int Zprompt1=0,Zprompt2=0;
 	int Promptness[5];
 	vector<TLorentzVector> LSPvecs;
+	vector<TLorentzVector> LSPMothervecs;
 	vector<int> LSPMother;
 	vector<float> LSPMotherPt;
 
@@ -1077,6 +1092,9 @@ void JZBAnalysis::Analyze() {
 	  if(abs(thisParticleId)==1000023) {//mchi
 	    chimass+=fTR->genInfoM[i];
 	    nchimass++;
+	    TLorentzVector thismom;
+	    thismom.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    LSPMothervecs.push_back(thismom);
 	  }
 	}// done with gen info loop
 
@@ -1085,12 +1103,14 @@ void JZBAnalysis::Analyze() {
 
 		if(nEvent.nLSPs==2) nEvent.angleLSPLSP=LSPvecs[0].Angle(LSPvecs[1].Vect());
 		if(nEvent.nLSPs==2) nEvent.angleLSPLSP2d=LSPvecs[0].DeltaPhi(LSPvecs[1]);
+		
 		nEvent.dphiSumLSPgenMET=summedLSPs.DeltaPhi(pureGenMETvector);
 		nEvent.absvalSumLSP=summedLSPs.Pt();
 
 		TLorentzVector pureGenZvector;
 		pureGenZvector.SetPtEtaPhiM(genZpt,genZeta,genZphi,genZM);
 
+		
 		float LSPdRa = LSPvecs[0].DeltaR(pureGenZvector);
 		float LSPdRb = LSPvecs[1].DeltaR(pureGenZvector);
 		nEvent.ZPromptnessLevel[0]=Zprompt1;
@@ -1105,6 +1125,14 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP1Mopt=LSPMotherPt[0];
 			nEvent.LSP2Mopt=LSPMotherPt[1];
 			nEvent.angleLSPZ=LSPvecs[0].Angle(pureGenZvector.Vect());
+			nEvent.angleLSPZ2d=LSPvecs[0].DeltaPhi(pureGenZvector);
+			if(abs(LSPMotherPt[0]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[0]-LSPMothervecs[1].Pt()))
+			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[0]);
+			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[0].Vect());
+			} else {
+			  nEvent.angleChi2Z2d=LSPMothervecs[1].DeltaPhi(LSPvecs[0]);
+			  nEvent.angleChi2Z=LSPMothervecs[1].Angle(LSPvecs[0].Vect());
+			}
 		} else {
 			nEvent.LSPPromptnessLevel[0]=Promptness[1];
 			nEvent.LSPPromptnessLevel[1]=Promptness[0];
@@ -1115,6 +1143,14 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP1Mopt=LSPMotherPt[1];
 			nEvent.LSP2Mopt=LSPMotherPt[0];
 			nEvent.angleLSPZ=LSPvecs[1].Angle(pureGenZvector.Vect());
+			nEvent.angleLSPZ2d=LSPvecs[1].DeltaPhi(pureGenZvector);
+			if(abs(LSPMotherPt[1]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[1]-LSPMothervecs[1].Pt()))
+			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[1]);
+			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[1].Vect());
+			} else {
+			  nEvent.angleChi2Z2d=LSPMothervecs[1].DeltaPhi(LSPvecs[1]);
+			  nEvent.angleChi2Z=LSPMothervecs[1].Angle(LSPvecs[1].Vect());
+			}
 		}
 
 		TLorentzVector pureGenZ2vector;
