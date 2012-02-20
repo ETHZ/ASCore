@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from math import *
-import os
+import os, datetime
 from optparse import OptionParser
 import ROOT
 parser = OptionParser(usage="usage: %prog [options] workspace min max \nrun with --help to get list of options")
@@ -19,6 +19,7 @@ parser.add_option("-I", "--interleave", dest="interl", default=1, type="int",   
 parser.add_option("-v", "--verbose",  dest="v",        default=0, type="int",    help="Verbosity")
 parser.add_option("-l", "--log",      dest="log",   default=False, action="store_true", help="Use log-scale grid")
 parser.add_option("-r", "--random",   dest="random",   default=False, action="store_true", help="Use random seeds for the jobs")
+parser.add_option("-i", "--iterations",   dest="iterations",   default=20, type="int", help="Number of iterations (default 20)")
 parser.add_option("-P", "--priority", dest="prio",     default=False, action="store_true", help="Use PriorityUser role")
 parser.add_option("-s", "--smart",    dest="smart",     default=False, action="store_true", help="Run more toys at low edge of the band, to get better low range")
 parser.add_option("-S", "--signif",   dest="signif",     default=False, action="store_true", help="Compute significance. You should set min = 1, max = 1")
@@ -45,6 +46,39 @@ if options.log:
 
 print "Creating executable script ",options.out+".sh"
 script = open(options.out+".sh", "w")
+#script.write("""
+##!/bin/bash
+##############################################################
+##
+## Driver script for creating Hybrid or Frequentist grids
+##
+## author: Giovanni Petrucciani, UCSD                       
+##         from a similar script by Luca Lista, INFN        
+##
+###############################################################
+#
+#i="$1"
+#if [ "$i" = "" ]; then
+#  echo "Error: missing job index"
+#  exit 1;
+#fi
+##echo "max events from CRAB: $MaxEvents"
+##n="$MaxEvents"
+##if [ "$n" = "" ]; then
+##  n="$2"
+##fi
+##if [ "$n" = "" ]; then
+##  echo "Error: missing number of experiments"
+##  exit 2;
+##fi
+#
+### Save memory on batch systems by avoinding a redundant fork when only one child will be ever spawned
+##nchild={fork};
+##if  [[ "$nchild" == "1" && "$n" == "1" ]]; then
+##    nchild=0;
+##fi;
+#echo "## Starting at $(date)"
+#""".format(fork=options.fork))
 script.write("""
 #!/bin/bash
 #############################################################
@@ -61,36 +95,24 @@ if [ "$i" = "" ]; then
   echo "Error: missing job index"
   exit 1;
 fi
-echo "max events from CRAB: $MaxEvents"
-n="$MaxEvents"
-if [ "$n" = "" ]; then
-  n="$2"
-fi
-if [ "$n" = "" ]; then
-  echo "Error: missing number of experiments"
-  exit 2;
-fi
 
-## Save memory on batch systems by avoinding a redundant fork when only one child will be ever spawned
-nchild={fork};
-if  [[ "$nchild" == "1" && "$n" == "1" ]]; then
-    nchild=0;
-fi;
 echo "## Starting at $(date)"
 """.format(fork=options.fork))
 for i,x in enumerate(points):
     seed = ("$((%d + $i))" % (i*10000)) if options.random == False else "-1"
     interleave = "(( ($i + %d) %% %d == 0 )) && " % (i, options.interl)
-    toys = "$n"
+    #toys = "$n"
     if options.smart:
         if i < 0.25 * options.points:
             toys = "$(( 4 * $n ))";
         elif i < 0.4 * options.points:
             toys = "$(( 2 * $n ))";
     what = "--singlePoint %g " % x if options.signif == False else "--signif";
-    script.write("{cond} ./combine {wsp} -M HybridNew {opts} --fork $nchild -T {T} --clsAcc 0 -v {v} -n {out} --saveHybridResult --saveToys -s {seed} -i {toys} {what}\n".format(
+    #script.write("{cond} ./combine {wsp} -M HybridNew {opts} --fork $nchild -T {T} --clsAcc 0 -v {v} -n {out} --saveHybridResult --saveToys -s {seed} -i {toys} {what}\n".format(
+    script.write("{cond} ./combine {wsp} -M HybridNew {opts} --fork 1 -T {T} --clsAcc 0 -v {v} -n {out} --saveHybridResult --saveToys -s {seed} -i {toys} {what}\n".format(
                 wsp=workspace, opts=options.options, fork=options.fork, T=options.T, seed=seed, out=options.out, what=what, v=options.v,
-                cond=interleave, toys=toys
+                #cond=interleave, toys=toys
+                cond=interleave, toys=options.iterations
               ))
 
 script.write("\n");
@@ -132,8 +154,8 @@ additional_input_files = /shome/mdunser/workspace/CMSSW_4_2_8/src/DiLeptonAnalys
 copy_data = 1
 storage_element = t3se01.psi.ch
 storage_path = /srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/mdunser
-user_remote_dir = Limits_2
-""".format(wsp=workspace, out=options.out, sched=sched, srv=(1 if options.server else 0), queue=options.queue, jobs=options.j, total=options.t))
+user_remote_dir = Limits/{date}
+""".format(wsp=workspace, out=options.out, sched=sched, srv=(1 if options.server else 0), queue=options.queue, jobs=options.j, total=options.t, date=str(datetime.date.today().month)+str(datetime.date.today().day)))
 
 if options.prio: cfg.write("""
 [GRID]
