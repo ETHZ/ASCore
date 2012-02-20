@@ -290,6 +290,11 @@ public:
   float pureGeneratorZphi;
   float pureGeneratorZeta;
   float pureGeneratorJZB;
+  float pureGeneratorMet;
+  float pureGeneratorMetPhi;
+  float pureGeneratorSumJetPt;
+  float pureGeneratorSumJetEta;
+  float pureGeneratorSumJetPhi;
   float pure2ndGeneratorJZB;
   float pure2ndGeneratorZpt;
   int nLSPs;
@@ -536,6 +541,12 @@ void nanoEvent::reset()
   DecayCode=0;
   realx=0;
   pureGeneratorJZB=0;
+  pureGeneratorMet=0;
+  pureGeneratorMetPhi=0;
+  pureGeneratorSumJetPt=0;
+  pureGeneratorSumJetEta=0;
+  pureGeneratorSumJetPhi=0;
+
   pure2ndGeneratorJZB=0;
   pure2ndGeneratorZpt=0;
   pureGeneratorZpt=0;
@@ -872,6 +883,12 @@ void JZBAnalysis::Begin(TFile *f){
 	myTree->Branch("LSP1pt",&nEvent.LSP1pt,"LSP1pt/F");
 	myTree->Branch("LSP2pt",&nEvent.LSP2pt,"LSP2pt/F");
 
+	myTree->Branch("pureGeneratorMet",&nEvent.pureGeneratorMet,"pureGeneratorMet/F");
+	myTree->Branch("pureGeneratorMetPhi",&nEvent.pureGeneratorMetPhi,"pureGeneratorMetPhi/F");
+	myTree->Branch("pureGeneratorSumJetPt",&nEvent.pureGeneratorSumJetPt,"pureGeneratorSumJetPt/F");
+	myTree->Branch("pureGeneratorSumJetEta",&nEvent.pureGeneratorSumJetEta,"pureGeneratorSumJetEta/F");
+	myTree->Branch("pureGeneratorSumJetPhi",&nEvent.pureGeneratorSumJetPhi,"pureGeneratorSumJetPhi/F");
+
 	myTree->Branch("LSP1Mo",&nEvent.LSP1Mo,"LSP1Mo/I");
 	myTree->Branch("LSP2Mo",&nEvent.LSP2Mo,"LSP2Mo/I");
 	myTree->Branch("LSP1Mopt",&nEvent.LSP1Mopt,"LSP1Mopt/F");
@@ -1126,7 +1143,7 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP2Mopt=LSPMotherPt[1];
 			nEvent.angleLSPZ=LSPvecs[0].Angle(pureGenZvector.Vect());
 			nEvent.angleLSPZ2d=LSPvecs[0].DeltaPhi(pureGenZvector);
-			if(abs(LSPMotherPt[0]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[0]-LSPMothervecs[1].Pt()))
+			if(abs(LSPMotherPt[0]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[0]-LSPMothervecs[1].Pt())) {
 			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[0]);
 			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[0].Vect());
 			} else {
@@ -1144,7 +1161,7 @@ void JZBAnalysis::Analyze() {
 			nEvent.LSP2Mopt=LSPMotherPt[0];
 			nEvent.angleLSPZ=LSPvecs[1].Angle(pureGenZvector.Vect());
 			nEvent.angleLSPZ2d=LSPvecs[1].DeltaPhi(pureGenZvector);
-			if(abs(LSPMotherPt[1]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[1]-LSPMothervecs[1].Pt()))
+			if(abs(LSPMotherPt[1]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[1]-LSPMothervecs[1].Pt())) {
 			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[1]);
 			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[1].Vect());
 			} else {
@@ -1156,6 +1173,13 @@ void JZBAnalysis::Analyze() {
 		TLorentzVector pureGenZ2vector;
 		pureGenZ2vector.SetPtEtaPhiM(genZ2pt,genZ2eta,genZ2phi,genZ2M);
 		nEvent.pureGeneratorJZB=(-pureGenMETvector-pureGenZvector).Pt() - pureGenZvector.Pt();
+		nEvent.pureGeneratorMet=pureGenMETvector.Pt();
+		nEvent.pureGeneratorMetPhi=pureGenMETvector.Phi();
+		nEvent.pureGeneratorSumJetPt=(-pureGenMETvector-pureGenZvector).Pt();
+		nEvent.pureGeneratorSumJetEta=(-pureGenMETvector-pureGenZvector).Eta();
+		nEvent.pureGeneratorSumJetPhi=(-pureGenMETvector-pureGenZvector).Phi();
+
+
 		nEvent.pureGeneratorZpt=genZpt;
 		nEvent.pureGeneratorZM=genZM;
 		nEvent.pureGeneratorZphi=genZphi;
