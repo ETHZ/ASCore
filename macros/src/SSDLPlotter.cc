@@ -291,10 +291,10 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT200MET30);
 	// makeOriginPlots(HT200MET302b);
 	// makeOriginPlots(HT80MET120);
-	makeOriginPlots(HT0MET120);
-	makeOriginPlots(HT0MET200);
-	makeOriginPlots(HT0MET120JV);
-	makeOriginPlots(HT0MET200JV);
+	// makeOriginPlots(HT0MET120);
+	// makeOriginPlots(HT0MET200);
+	// makeOriginPlots(HT0MET120JV);
+	// makeOriginPlots(HT0MET200JV);
 	// printOrigins(Baseline);
 	// printOrigins(HT200MET30);
 	// printOrigins(HT200MET302b);
@@ -309,22 +309,22 @@ void SSDLPlotter::doAnalysis(){
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	 // makeRatioPlots(Muon);
+	 // makeRatioPlots(Elec);
+	 // makeNTightLoosePlots(Muon);
+	 // makeNTightLoosePlots(Elec);
 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	 // makeFRvsPtPlots(Muon, SigSup);
+	 // makeFRvsPtPlots(Elec, SigSup);
+	 // makeFRvsPtPlots(Muon, ZDecay);
+	 // makeFRvsPtPlots(Elec, ZDecay);
+	 // makeFRvsEtaPlots(Muon);
+	 // makeFRvsEtaPlots(Elec);
 	
-	// makeAllClosureTests();
-	// makeAllIntPredictions();
+	 // makeAllClosureTests();
+	 makeAllIntPredictions();
 
-	// makeDiffPrediction();
+	 //makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
 	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS.root");
@@ -5044,7 +5044,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	leg->Draw();
 	
 	lat->SetTextSize(0.03);
-	lat->DrawLatex(0.16,0.60, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
+	if (Region::maxHT[reg] < 39.) lat->DrawLatex(0.16,0.60, "N_{Jets} = 0");
+	else lat->DrawLatex(0.16,0.60, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
 	if(reg != Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV", Region::minMet[reg]));
 	if(reg == Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV, < %.0f GeV", Region::minMet[reg], Region::maxMet[reg]));
 	drawTopLine();
@@ -7154,9 +7155,7 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 		horigin_mc[i]->Draw("col text");
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel");
-		if (Region::maxHT[reg] < 39.) {
-			lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
-		}
+		if (Region::maxHT[reg] < 39.) lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
 		else lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
 		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
 		lat->SetTextSize(0.03);
@@ -7169,9 +7168,7 @@ void SSDLPlotter::makeOriginPlots(gRegion reg){
 		horigin_tt[i]->Draw("col text");
 		lat->SetTextSize(0.04);
 		lat->DrawLatex(0.05, 0.93, "Origins in "+SSDLDumper::gChanLabel[i]+" channel (ttbar only)");
-		if (Region::maxHT[reg] < 39.) {
-			lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
-		}
+		if (Region::maxHT[reg] < 39.) lat->DrawLatex(latX, latY, Form("#splitline{N_{Jets} = 0}{E_{T}^{miss} > %.0f GeV}", Region::minMet[reg]));
 		else lat->DrawLatex(latX, latY, Form("#splitline{H_{T} > %.0f GeV}{E_{T}^{miss} > %.0f GeV}", Region::minHT[reg], Region::minMet[reg]));
 		if (hasBjets) lat->DrawLatex(latX, latY-0.09, Form("N_{b-jets} #geq %1d", Region::minNbjets[reg]));
 		lat->SetTextSize(0.03);
@@ -7829,15 +7826,26 @@ void SSDLPlotter::scanSMS( const char * filestring){
 	fC_minEl1pt = 20.;
 	fC_minEl2pt = 10.;
 	fC_minHT    = 0.;
-	fC_minMet   = 120.;
-	fC_maxHT    = 20.;
+	fC_minMet   = 200.;
+	fC_maxHT    = 7000.;
 	fC_maxMet   = 7000.;
 	fC_minNjets = 0;
 	
 	TString htString;
-	if (fC_maxHT < 40.) htString = "HT0";
-	else if (fC_maxHT == 7000.) htString = "noHTcut";
-	else htString = Form("HT%3.0f", fC_maxHT);
+	TString htTitleString;
+
+	if (fC_maxHT < 40.) {
+		htString = "HT0JV";
+		htTitleString = "N_{Jets} = 0";
+	}
+	else if (fC_maxHT == 7000.) {
+		htString = "HT0";
+		htTitleString = "H_{T} > 0 GeV";
+	}
+	else {
+		htString = Form("HT%3.0f", fC_maxHT);
+		htTitleString = Form("H_{T} > %3.0f GeV", fC_maxHT);
+	}
 
 	fOUTSTREAM.open(Form("SMSoutput_"+htString+"_MET%3.0f.txt", fC_minMet), ios::trunc);
 	TFile * res_ = new TFile(Form("SMSresults_"+htString+"_MET%3.0f_PT%2.0f_%2.0f.root", fC_minMet, fC_minMu1pt, fC_minMu2pt), "RECREATE", "res_");
@@ -7933,16 +7941,26 @@ void SSDLPlotter::scanSMS( const char * filestring){
 	nTot_->Write();
 	eff_->Write();
 
+	// some plotting of the efficiency histogram
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	float maxValue = eff_->GetMaximum();
+	//eff_->SetTitle(Form("SMS efficiency, "+htTitleString+", E_{T}^{miss} > %3.0f, p_{T}^{leptons} %2.0f/%2.0f", fC_minMet, fC_minMu1pt, fC_minMu2pt));
 	TCanvas * canv = new TCanvas();
+	useNiceColorPalette();
 	canv->cd();
 	canv->SetRightMargin(0.15);
 	eff_->Draw("colz");
-	eff_->GetXaxis()->SetTitle("m_chi2");
-	eff_->GetYaxis()->SetTitle("m_LSP");
-	eff_->GetZaxis()->SetRangeUser(0.,0.15);
-	eff_->SetTitle(Form("SMSeff, "+htString+", MET > %3.0f, pt %2.0f/%2.0f", fC_minMet, fC_minMu1pt, fC_minMu2pt));
-	canv->SetLogz(1);
+	eff_->GetXaxis()->SetTitle("m_{#chi^{2}}");
+	eff_->GetYaxis()->SetTitle("m_{LSP}");
+	eff_->GetZaxis()->SetRangeUser(0.,maxValue);
+	gPad->Update();
+	//canv->SetLogz(1);
 	eff_->Draw("colz");
+	lat->DrawLatex(0.24,0.94, Form("SMS efficiency, "+htTitleString+", E_{T}^{miss} > %3.0f, p_{T}^{leptons} %2.0f/%2.0f", fC_minMet, fC_minMu1pt, fC_minMu2pt));
 	canv->SaveAs(Form("SMSefficiency_"+htString+"_MET%3.0f.pdf",fC_minMet));
 
 }
