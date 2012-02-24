@@ -100,17 +100,19 @@ double SSDLDumper::gDiffPT1Bins[gNDiffPT1Bins+1] = { 20., 40., 60., 80., 100., 2
 double SSDLDumper::gDiffPT2Bins[gNDiffPT2Bins+1] = { 10., 20., 30., 40.,  50., 100.};
 double SSDLDumper::gDiffNBJBins[gNDiffNBJBins+1] = { 0., 1., 2., 3., 4.};
 
+double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
+
 //////////////////////////////////////////////////////////////////////////////////
-TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets"};
-int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffHTBins, gNDiffMETBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins};
-double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffHTBins,  gDiffMETBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins};
+TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3"};
+int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffHTBins, gNDiffMETBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins};
+double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffHTBins,  gDiffMETBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} (GeV)", "H_{T} (GeV)",
                                                                           "E_{T}^{miss} (GeV)", "E_{T}^{miss} (GeV)",
                                                                           "N_{Jets}",
                                                                           "M_{T2} (GeV)",
                                                                           "P_{T} (l_{1}) (GeV)",
                                                                           "P_{T} (l_{2}) (GeV)",
-                                                                          "N_{Btag}"};
+                                                                          "N_{Btag}", "E_{T}^{miss} (GeV)"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
@@ -148,7 +150,7 @@ void SSDLDumper::init(TString inputfile, TString sname, int datamc, int chan, fl
 	if(fVerbose > 0) cout << "   Running on:      " << fSample->location << endl;
 	if(fVerbose > 0) cout << "   Naming it:       " << fSample->sname << endl;
 	if(fVerbose > 0) cout << "   Is data/mc:      " << fSample->datamc << endl;
-	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSample->lumi << endl;
+	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSample->getLumi() << endl;
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
 	init();
 }
@@ -285,27 +287,46 @@ void SSDLDumper::readDatacard(TString cardfile){
 
 	char inputfile[500], sname[100];
 	int datamc, chan, color;
+	int ngen;
 	float lumi;
+	float xsec;
 	if(fVerbose > 2) cout << "------------------------------------" << endl;
 	if(fVerbose > 2) cout << "Reading datacard  " << cardfile << endl;
 	int counter(0);
 
 	while( IN.getline(buffer, 600, '\n') ){
 		lumi = 1.0;
+		xsec = 1.0;
 		color = 1;
+		ngen = 1;
 		if (buffer[0] == '#') continue; // Skip lines commented with '#'
-		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d", sname, inputfile, &datamc, &chan, &lumi, &color) > 3){
-			Sample *S = new Sample(inputfile, sname, datamc, chan, lumi, color);
+		// if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d", sname, inputfile, &datamc, &chan, &lumi, &color) > 3){
+		// 	Sample *S = new Sample(inputfile, sname, datamc, chan, lumi, color);
+		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d\t%d", sname, inputfile, &datamc, &chan, &xsec, &ngen, &color) > 3){
+			Sample *S = new Sample(inputfile, sname, datamc, chan, xsec, ngen, color);
+			
 			fSamples.push_back(S);
 			fSampleMap[sname] = S;
+			if(fVerbose > 1 && fVerbose < 3){
+				cout << Form("%13s/%2d/%2d/%12.2f/%12d/%12.2f - %s",
+				S->sname.Data()   ,
+				S->datamc         ,
+				S->chansel        ,
+				S->xsec           ,
+				S->ngen           ,
+				S->getLumi()      ,
+				S->location.Data()) << endl;
+			}
 			if(fVerbose > 2){
 				cout << " ---- " << endl;
-				cout << "  New sample added: " << S->sname << endl;
-				cout << "   Input:      " << S->location << endl;
-				cout << "   DataMC:     " << S->datamc << endl;
-				cout << "   Channel:    " << S->chansel << endl;
-				cout << "   Lumi:       " << S->lumi << endl;
-				cout << "   Color:      " << S->color << endl;
+				cout << "  New sample added: " << S->sname     << endl;
+				cout << "   Input:      "      << S->location  << endl;
+				cout << "   DataMC:     "      << S->datamc    << endl;
+				cout << "   Channel:    "      << S->chansel   << endl;
+				cout << "   XSec:       "      << S->xsec      << endl;
+				cout << "   NGen:       "      << S->ngen      << endl;
+				cout << "   Lumi:       "      << S->getLumi() << endl;
+				cout << "   Color:      "      << S->color     << endl;
 			}
 		}
 		else{
@@ -835,6 +856,26 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+
+		// MET BINNING, HT > 0
+		fC_minMet = 30.;
+		fC_minHT =  0.;
+		fC_minNjets = 0;
+		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
+			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[Muon].hnt11[9], pfMET, puweight);
+			}
+			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[Muon].hnt10[9], pfMET, puweight);
+			}
+			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[Muon].hnt01[9], pfMET, puweight);
+			}
+			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[Muon].hnt00[9], pfMET, puweight);
+			}
+		}
+		resetHypLeptons();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -962,6 +1003,26 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+
+		// MET BINNING, HT > 0
+		fC_minMet = 30.;
+		fC_minHT =  0.;
+		fC_minNjets = 0;
+		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di muon event
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[Elec].hnt11[9], pfMET, puweight);
+			}
+			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[Elec].hnt10[9], pfMET, puweight);
+			}
+			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[Elec].hnt01[9], pfMET, puweight);
+			}
+			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[Elec].hnt00[9], pfMET, puweight);
+			}
+		}
+		resetHypLeptons();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -1074,6 +1135,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+
 		// MET BINNING, HT > 450
 		fC_minMet = 30.;
 		fC_minHT  = 450.;
@@ -1090,6 +1152,26 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[3], pfMET, puweight);
+			}
+		}
+		resetHypLeptons();
+
+		// MET BINNING, HT > 0
+		fC_minMet = 30.;
+		fC_minHT  = 0.;
+		fC_minNjets = 0;
+		if( isSSLLElMuEvent(mu, el) ){
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[ElMu].hnt11[9], pfMET, puweight);
+			}
+			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[ElMu].hnt10[9], pfMET, puweight);
+			}
+			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[ElMu].hnt01[9], pfMET, puweight);
+			}
+			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[ElMu].hnt00[9], pfMET, puweight);
 			}
 		}
 		resetHypLeptons();
@@ -1233,6 +1315,28 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+
+		// MET BINNING, HT > 0
+		fC_minMet = 30.;
+		fC_minHT =  0.;
+		fC_minNjets = 0;
+		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[9], pfMET, puweight);
+				}
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[9], pfMET, puweight);
+				}
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, puweight);
+				}
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, puweight);
+				}
+			}
+		}
+		resetHypLeptons();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -1331,13 +1435,27 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float HT  = getHT();
-				float NJ  = getNJets() + 0.5;
 				if( isBarrelElectron(el)){
 					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[3], pfMET, puweight);
 				}
 				if(!isBarrelElectron(el)){
 					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[3], pfMET, puweight);
+				}
+			}
+		}
+		resetHypLeptons();
+
+		// MET BINNING, HT > 0
+		fC_minMet = 30.;
+		fC_minHT  = 0.;
+		fC_minNjets = 0;
+		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				if( isBarrelElectron(el)){
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[9], pfMET, puweight);
+				}
+				if(!isBarrelElectron(el)){
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[9], pfMET, puweight);
 				}
 			}
 		}
@@ -1481,7 +1599,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	fSETree_PUWeight = puweight;
-	fSETree_SLumi    = S->lumi;
+	fSETree_SLumi    = S->getLumi();
 	fSETree_SName    = S->sname.Data();
 	fSETree_SType    = getSampleType(S);
 	fSETree_Run      = Run;
@@ -2149,7 +2267,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(Muon, LM0, LM6);
 	printCutFlow(Muon, LM7, LM13);
 	printCutFlow(Muon, QCDMuEnr10, QCD470);
-	printCutFlow(Muon, QCD600, QCD1000MG);
+	printCutFlow(Muon, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/Mu channel..." << endl;
@@ -2159,7 +2277,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(ElMu, LM0, LM6);
 	printCutFlow(ElMu, LM7, LM13);
 	printCutFlow(ElMu, QCDMuEnr10, QCD470);
-	printCutFlow(ElMu, QCD600, QCD1000MG);
+	printCutFlow(ElMu, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 	
 	fOUTSTREAM << " Printing Cutflow for E/E channel..." << endl;
@@ -2169,7 +2287,7 @@ void SSDLDumper::printCutFlows(TString filename){
 	printCutFlow(Elec, LM0, LM6);
 	printCutFlow(Elec, LM7, LM13);
 	printCutFlow(Elec, QCDMuEnr10, QCD470);
-	printCutFlow(Elec, QCD600, QCD1000MG);
+	printCutFlow(Elec, QCD600, gNSAMPLES);
 	fOUTSTREAM << endl << endl;
 
 	fOUTSTREAM.close();

@@ -38,19 +38,21 @@ public:
 
 	static const int gNDiffHTBins  = 5;
 	static const int gNDiffMETBins = 4;
+	static const int gNDiffMET3Bins = 9;
 	static const int gNDiffNJBins  = 5;
 	static const int gNDiffMT2Bins = 3;
 	static const int gNDiffPT1Bins = 5;
 	static const int gNDiffPT2Bins = 5;
 	static const int gNDiffNBJBins = 4;
 
-	static double gDiffHTBins [gNDiffHTBins+1];
-	static double gDiffMETBins[gNDiffMETBins+1];
-	static double gDiffNJBins [gNDiffNJBins+1];
-	static double gDiffMT2Bins[gNDiffMT2Bins+1];
-	static double gDiffPT1Bins[gNDiffPT1Bins+1];
-	static double gDiffPT2Bins[gNDiffPT2Bins+1];
-	static double gDiffNBJBins[gNDiffNBJBins+1];
+	static double gDiffHTBins  [gNDiffHTBins+1];
+	static double gDiffMETBins [gNDiffMETBins+1];
+	static double gDiffMET3Bins[gNDiffMET3Bins+1];
+	static double gDiffNJBins  [gNDiffNJBins+1];
+	static double gDiffMT2Bins [gNDiffMT2Bins+1];
+	static double gDiffPT1Bins [gNDiffPT1Bins+1];
+	static double gDiffPT2Bins [gNDiffPT2Bins+1];
+	static double gDiffNBJBins [gNDiffNBJBins+1];
 
 	static const int gM0bins  = 150  ; // these values
 	static const int gM0min   = 0    ; // are 
@@ -66,14 +68,14 @@ public:
 		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
 		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
 		MuHad1, MuHad2, EleHad1, EleHad2,
-		TTJets, TJets_t, TbarJet_t, TJets_tW, TbarJet_tW, TJets_s, TbarJet_s, WJets, DYJets,
+		TTJets, TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
 		GVJets, WGstarE, WGstarMu, WGstarTau, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
 		QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
-		QCD1000, QCD1400, QCD1800, QCD50MG, QCD100MG, QCD250MG, QCD500MG, QCD1000MG,
+		QCD1000, QCD1400, QCD1800,
 		gNSAMPLES
 	};
 	enum gHiLoSwitch{
@@ -258,7 +260,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 9;
+	static const int gNDiffVars = 10;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -289,12 +291,21 @@ public:
 	class Sample{
 	public:
 		Sample(){};
-		Sample(TString loc, TString tag, int dm, int cs = -1, float lum = 1.0, int col = 1){
+		// Sample(TString loc, TString tag, int dm, int cs = -1, float lum = 1.0, int col = 1){
+		// 	location = loc;
+		// 	sname    = tag;
+		// 	datamc   = dm;
+		// 	chansel  = cs;
+		// 	lumi     = lum;
+		// 	color    = col;
+		// };
+		Sample(TString loc, TString tag, int dm, int cs = -1, float xs = 1.0, long ng = 1, int col = 1){
 			location = loc;
 			sname    = tag;
 			datamc   = dm;
 			chansel  = cs;
-			lumi     = lum;
+			xsec     = xs;
+			ngen     = ng;
 			color    = col;
 		};
 		~Sample(){};
@@ -304,10 +315,13 @@ public:
 		TString location;
 		TFile *file;
 		TTree *tree;
-		float lumi;
+		float lumi; // simulated lumi = ngen/xsec
+		float xsec; // cross-section
+		int ngen;   // generated number of events
 		int color;
 		int datamc;  // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC, 4: rare MC (no pileup)
 		int chansel; // -1: Ignore, 0: mumu, 1: elel, 2: elmu
+		int proc;    // process type, to group binned samples like QCD and give latex namees
 		TH1D *cutFlowHisto[gNCHANNELS];
 		Region region[gNREGIONS][2];
 		DiffPredYields diffyields[gNCHANNELS];
@@ -318,10 +332,74 @@ public:
 		FRatioPlots ratioplots[2]; // e and mu
 		TGraph *sigevents[gNCHANNELS][2];
 
+		float getLumi(){
+			if(ngen > 0 && xsec > 0) return float(ngen)/xsec;
+			else return -1.;
+		}
+
+		int getType(){ // -1: undef, 0: data, 1: QCD, 2: top, 3: EWK, 4: Rare SM, 5: diboson
+			if(datamc == 0) return 0;
+			if( (sname.Contains("QCD")) ||
+			    (sname) == "MuEnr10" ) return 1;
+			if( (sname.Contains("SingleT")) ||
+			    (sname) == "TTJets" )  return 2;
+			if( (sname.Contains("DYJets")) ||
+			    (sname.Contains("GJets"))  ||
+			    (sname) == "WJets" )   return 3;
+			if( (sname) == "TTbarW"    ||
+			    (sname) == "TTbarZ"    ||
+			    (sname) == "TTbarG"    ||
+			    (sname) == "DPSWW"     ||
+			    (sname) == "WWZ"       ||
+			    (sname) == "WZZ"       ||
+			    (sname) == "WZZ"       ||
+			    (sname) == "WWG"       ||
+			    (sname) == "ZZZ"       ||
+			    (sname) == "WWW"       ||
+			    (sname) == "W+W+"      ||
+			    (sname) == "W-W-")     return 4;
+			if( (sname.Contains("GVJets"))    ||
+			    (sname.Contains("WWTo2L2Nu")) ||
+			    (sname.Contains("WZTo3LNu"))  ||
+			    (sname.Contains("ZZTo4L")) ) return 5;
+			else {
+				cout << "SSDLDumper::Sample::getType() ==> ERROR: "<< sname << " has no defined type!" << endl;
+				return -1;
+			}
+		}
+		int getProc(){ // used for binned samples
+			if(datamc == 0) return 0;
+			if(sname.Contains("QCD") || sname == "MuEnr10") return 1;
+			if(sname.Contains("SingleT"))                   return 2;
+			if(sname == "TTJets" )                          return 3;
+			if(sname.Contains("DYJets"))                    return 4;
+			if(sname.Contains("GJets"))                     return 5;
+			if(sname == "WJets" )                           return 6;
+			if(sname == "TTbarW")                           return 7;
+			if(sname == "TTbarZ")                           return 8;
+			if(sname == "TTbarG")                           return 9;
+			if(sname == "DPSWW" )                           return 10;
+			if(sname == "WWZ"   )                           return 11;
+			if(sname == "WZZ"   )                           return 12;
+			if(sname == "WZZ"   )                           return 13;
+			if(sname == "WWG"   )                           return 14;
+			if(sname == "ZZZ"   )                           return 15;
+			if(sname == "WWW"   )                           return 16;
+			if(sname == "W+W+"  )                           return 17;
+			if(sname == "W-W-"  )                           return 18;
+			if(sname.Contains("GVJets"))                    return 19;
+			if(sname.Contains("WWTo2L2Nu"))                 return 20;
+			if(sname.Contains("WZTo3LNu"))                  return 21;
+			if(sname.Contains("ZZTo4L"))                    return 22;
+			else {
+				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
+				return -1;
+			}
+		}
 		TTree* getTree(){
 			file = TFile::Open(location);
 			if(file->IsZombie()){
-				cout << "SSDLDumper::Sample::getTree ==> Error opening file " << location << endl;
+				cout << "SSDLDumper::Sample::getTree() ==> Error opening file " << location << endl;
 				exit(1);
 			}
 			tree = (TTree*)file->Get("Analysis");

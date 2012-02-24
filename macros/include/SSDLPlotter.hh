@@ -46,6 +46,7 @@ public:
 	void makeNT2KinPlots(gHiLoSwitch = HighPt);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
 	void makeMETvsHTPlotPRL();
+	void makeMETvsHTPlot0HT();
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
@@ -100,6 +101,8 @@ public:
 
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
+
+	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
 
 	void fixPRatios();
 	
@@ -156,7 +159,6 @@ public:
 	
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
-	inline int sampleType(TString);
 
 	TH1D *fH1D_MufRatio;
 	TH1D *fH1D_MupRatio;

@@ -95,7 +95,8 @@ void SSDLPlotter::init(TString filename){
 	// Luminosity
 	// fLumiNorm = 2096.; // Pre 2011B
 	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
-	fLumiNorm = 4680.; // Full 2011B
+	// fLumiNorm = 4680.; // Full 2011B
+	fLumiNorm = 4961.; // 4680. * 1.06 to fix lumi calculation (Feb. 2012)
 	// fLumiNorm = 1000.; // Rare Yields Sync
 	// fLumiNorm = 1014.; // Only 2011B
 
@@ -118,8 +119,11 @@ void SSDLPlotter::init(TString filename){
 
 	fMCBG.push_back(TTJets);
 	fMCBG.push_back(TJets_t);
+	fMCBG.push_back(TbarJets_t);
 	fMCBG.push_back(TJets_tW);
+	fMCBG.push_back(TbarJets_tW);
 	fMCBG.push_back(TJets_s);
+	fMCBG.push_back(TbarJets_s);
 	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
 	fMCBG.push_back(GJets40);
@@ -161,8 +165,11 @@ void SSDLPlotter::init(TString filename){
 
 	fMCBGMuEnr.push_back(TTJets);
 	fMCBGMuEnr.push_back(TJets_t);
+	fMCBGMuEnr.push_back(TbarJets_t);
 	fMCBGMuEnr.push_back(TJets_tW);
+	fMCBGMuEnr.push_back(TbarJets_tW);
 	fMCBGMuEnr.push_back(TJets_s);
+	fMCBGMuEnr.push_back(TbarJets_s);
 	fMCBGMuEnr.push_back(WJets);
 	fMCBGMuEnr.push_back(DYJets);
 	fMCBGMuEnr.push_back(GJets40);
@@ -291,40 +298,41 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(HT200MET30);
 	// makeOriginPlots(HT200MET302b);
 	// makeOriginPlots(HT80MET120);
-	// makeOriginPlots(HT0MET120);
-	// makeOriginPlots(HT0MET200);
+	makeOriginPlots(HT0MET120);
+	makeOriginPlots(HT0MET200);
 	// makeOriginPlots(HT0MET120JV);
 	// makeOriginPlots(HT0MET200JV);
 	// printOrigins(Baseline);
 	// printOrigins(HT200MET30);
 	// printOrigins(HT200MET302b);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIdPlots();
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIdPlots();
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlot(fMuHadData, fEleHadData, fMuEGData, LowPt);
 	// makeMETvsHTPlotPRL();
+	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
-	 // makeRatioPlots(Muon);
-	 // makeRatioPlots(Elec);
-	 // makeNTightLoosePlots(Muon);
-	 // makeNTightLoosePlots(Elec);
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
+    
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 
-	 // makeFRvsPtPlots(Muon, SigSup);
-	 // makeFRvsPtPlots(Elec, SigSup);
-	 // makeFRvsPtPlots(Muon, ZDecay);
-	 // makeFRvsPtPlots(Elec, ZDecay);
-	 // makeFRvsEtaPlots(Muon);
-	 // makeFRvsEtaPlots(Elec);
+	makeAllClosureTests();
+	makeAllIntPredictions();
+	makeDiffPrediction();
 	
-	 // makeAllClosureTests();
-	 makeAllIntPredictions();
-
-	 //makeDiffPrediction();
 	// makeRelIsoTTSigPlots();
 	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS.root");
@@ -677,7 +685,7 @@ void SSDLPlotter::makeNT012Plots(vector<int> mcsamples, gChannel chan, gRegion r
 
 	for(size_t i = 0; i < mcsamples.size(); ++i){
 		Sample *S = fSamples[mcsamples[i]];
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		Channel *cha;
 		if(chan == Muon)     cha = &S->region[reg][hilo].mm;
 		if(chan == Elec) cha = &S->region[reg][hilo].ee;
@@ -1419,7 +1427,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		// Apply weights to MC histos
 		for(size_t j = 0; j < gNSAMPLES; ++j){
 			Sample *S = fSamples[j];
-			float lumiscale = fLumiNorm / S->lumi;
+			float lumiscale = fLumiNorm / S->getLumi();
 			if(S->datamc == 0) continue;
 			S->isoplots[0].hiso[i]->Scale(lumiscale);
 			for(size_t k = 0; k < gNMuPt2bins; ++k){
@@ -1481,26 +1489,26 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			Sample *S = fSamples[mcsamples[j]];
 			TString s_name = S->sname;
 			hiso_mc  [i]->Add(S->isoplots[0].hiso[i]);
-			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[0].hiso[i] );
-			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[0].hiso[i] );
-			if ( sampleType(s_name) == 3) hiso_ewk[i] ->Add( S->isoplots[0].hiso[i] );
-			if ( sampleType(s_name) == 4) hiso_rare[i]->Add( S->isoplots[0].hiso[i] );
-			if ( sampleType(s_name) == 5) hiso_db[i]  ->Add( S->isoplots[0].hiso[i] );
+			// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+			if ( S->getType() == 1) hiso_qcd[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( S->getType() == 2) hiso_ttj[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( S->getType() == 3) hiso_ewk[i] ->Add( S->isoplots[0].hiso[i] );
+			if ( S->getType() == 4) hiso_rare[i]->Add( S->isoplots[0].hiso[i] );
+			if ( S->getType() == 5) hiso_db[i]  ->Add( S->isoplots[0].hiso[i] );
 
 			for(int k = 0; k < gNMuPt2bins; ++k){
-				if ( sampleType(s_name) == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 4) hiso_rare_pt[i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 5) hiso_db_pt  [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( S->getType() == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( S->getType() == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( S->getType() == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( S->getType() == 4) hiso_rare_pt[i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
+				if ( S->getType() == 5) hiso_db_pt  [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
-				if ( sampleType(s_name) == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 4) hiso_rare_nv[i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 5) hiso_db_nv  [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( S->getType() == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( S->getType() == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( S->getType() == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( S->getType() == 4) hiso_rare_nv[i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
+				if ( S->getType() == 5) hiso_db_nv  [i][k]->Add( S->isoplots[0].hiso_nv[i][k] );
 			}
 
 		}
@@ -1943,7 +1951,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		// Apply weights to MC histos
 		for(size_t j = 0; j < gNSAMPLES; ++j){
 			Sample *S = fSamples[j];
-			float lumiscale = fLumiNorm / S->lumi;
+			float lumiscale = fLumiNorm / S->getLumi();
 			if(S->datamc == 0) continue;
 			S->isoplots[1].hiso[i]->Scale(lumiscale);
 			for(size_t k = 0; k < gNElPt2bins; ++k){
@@ -2008,26 +2016,26 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			Sample *S = fSamples[mcsamples[j]];
 			TString s_name = S->sname;
 			hiso_mc  [i]->Add(S->isoplots[1].hiso[i]);
-			// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-			if ( sampleType(s_name) == 1) hiso_qcd[i] ->Add( S->isoplots[1].hiso[i] );
-			if ( sampleType(s_name) == 2) hiso_ttj[i] ->Add( S->isoplots[1].hiso[i] );
-			if ( sampleType(s_name) == 3) hiso_ewk[i] ->Add( S->isoplots[1].hiso[i] );
-			if ( sampleType(s_name) == 4) hiso_rare[i]->Add( S->isoplots[1].hiso[i] );
-			if ( sampleType(s_name) == 5) hiso_db[i]  ->Add( S->isoplots[1].hiso[i] );
+			// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+			if ( S->getType() == 1) hiso_qcd[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( S->getType() == 2) hiso_ttj[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( S->getType() == 3) hiso_ewk[i] ->Add( S->isoplots[1].hiso[i] );
+			if ( S->getType() == 4) hiso_rare[i]->Add( S->isoplots[1].hiso[i] );
+			if ( S->getType() == 5) hiso_db[i]  ->Add( S->isoplots[1].hiso[i] );
 
 			for(int k = 0; k < gNMuPt2bins; ++k){
-				if ( sampleType(s_name) == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 4) hiso_rare_pt[i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
-				if ( sampleType(s_name) == 5) hiso_db_pt  [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( S->getType() == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( S->getType() == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( S->getType() == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( S->getType() == 4) hiso_rare_pt[i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
+				if ( S->getType() == 5) hiso_db_pt  [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
-				if ( sampleType(s_name) == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 4) hiso_rare_nv[i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
-				if ( sampleType(s_name) == 5) hiso_db_nv  [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( S->getType() == 1) hiso_qcd_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( S->getType() == 2) hiso_ttj_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( S->getType() == 3) hiso_ewk_nv [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( S->getType() == 4) hiso_rare_nv[i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
+				if ( S->getType() == 5) hiso_db_nv  [i][k]->Add( S->isoplots[1].hiso_nv[i][k] );
 			}
 
 		}
@@ -2308,7 +2316,7 @@ void SSDLPlotter::makeElIdPlots(){
 			// Apply weights to MC histos
 			for(size_t j = 0; j < gNSAMPLES; ++j){
 				Sample *S = fSamples[j];
-				float lumiscale = fLumiNorm / S->lumi;
+				float lumiscale = fLumiNorm / S->getLumi();
 				if(S->datamc == 0) continue;
 				switch (k) {
 					case 0: S->idplots.hhoe[i]->Scale(lumiscale); break;
@@ -2363,11 +2371,11 @@ void SSDLPlotter::makeElIdPlots(){
 					case 2: histo = S->idplots.hdeta[i]  ; break;
 					case 3: histo = S->idplots.hdphi[i]  ; break;
 				}
-				if ( sampleType(s_name) == 1) qcd [k][i]->Add( histo );
-				if ( sampleType(s_name) == 2) ttj [k][i]->Add( histo );
-				if ( sampleType(s_name) == 3) ewk [k][i]->Add( histo );
-				if ( sampleType(s_name) == 4) rare[k][i]->Add( histo );
-				if ( sampleType(s_name) == 5) db  [k][i]->Add( histo );
+				if ( S->getType() == 1) qcd [k][i]->Add( histo );
+				if ( S->getType() == 2) ttj [k][i]->Add( histo );
+				if ( S->getType() == 3) ewk [k][i]->Add( histo );
+				if ( S->getType() == 4) rare[k][i]->Add( histo );
+				if ( S->getType() == 5) db  [k][i]->Add( histo );
 				delete histo;
 			} // end loop over MC samples
 
@@ -2416,44 +2424,6 @@ void SSDLPlotter::makeElIdPlots(){
 		} // end loop over region selections
 	} //end loop over ID variables
 } //end function
-
-inline int SSDLPlotter::sampleType(TString s_name){
-	// returns an integer corresponding to the MC sample type:
-	// QCD = 1, Top = 2, EWK = 3, RARE = 4 and DiBoson = 5
-	// if none matches, returns 0
-	if ( (s_name.Contains("QCD")) ||
-	     (s_name) == "MuEnr10" )
-	return 1;
-	if ( (s_name.Contains("SingleT")) ||
-	     (s_name) == "TTJets" )
-	return 2;
-	if ( (s_name.Contains("DYJets")) ||
-	     (s_name.Contains("GJets"))  ||
-	     (s_name) == "WJets" )
-	return 3;
-	if ( (s_name) == "TTbarW"    ||
-	     (s_name) == "TTbarZ"    ||
-	     (s_name) == "TTbarG"    ||
-	     (s_name) == "DPSWW"     ||
-	     (s_name) == "WWZ"       ||
-	     (s_name) == "WZZ"       ||
-	     (s_name) == "WZZ"       ||
-	     (s_name) == "WWG"       ||
-	     (s_name) == "ZZZ"       ||
-	     (s_name) == "WWW"       ||
-	     (s_name) == "W+W+"      ||
-	     (s_name) == "W-W-")
-	return 4;
-	if ( (s_name.Contains("GVJets"))    ||
-	     (s_name.Contains("WWTo2L2Nu")) ||
-	     (s_name.Contains("WZTo3LNu"))  ||
-	     (s_name.Contains("ZZTo4L")) )
-	return 5;
-	else {
-		cout << "ERROR: This should not happen! Check the SSDLPlotter::sampleType() function to have "<< s_name << "in one of the lists!" << endl;
-		return 0;
-	}
-}
 
 void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
@@ -2515,11 +2485,11 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			hvar_data[i]->SetLineColor(kBlack);
 			hvar_data[i]->SetMarkerStyle(8);
 			hvar_data[i]->SetMarkerColor(kBlack);
-			hvar_data[i]->SetMarkerSize(1.2);
+			hvar_data[i]->SetMarkerSize(1.5);
 
 			// Scale by luminosity
 			for(size_t j = 0; j < gNSAMPLES; ++j){
-				float lumiscale = fLumiNorm / fSamples[j]->lumi;
+				float lumiscale = fLumiNorm / fSamples[j]->getLumi();
 				if(fSamples[j]->datamc == 0) continue;
 				fSamples[j]->kinplots[s][hilo].hvar[i]->Scale(lumiscale);
 			}
@@ -2557,12 +2527,12 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			for(size_t j = 0; j < mcsamples.size();   ++j){
 				Sample *S = fSamples[mcsamples[j]];
 				TString s_name = S->sname;
-				// sampleType Function: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-				if ( sampleType(s_name) == 1) hvar_qcd [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleType(s_name) == 2) hvar_ttj [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleType(s_name) == 3) hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleType(s_name) == 4) hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( sampleType(s_name) == 5) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+				if ( S->getType() == 1) hvar_qcd [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 2) hvar_ttj [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 3) hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 4) hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 5) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
 			}
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
 			hvar_mc_s[i]->Add(hvar_db[i]);
@@ -2979,15 +2949,17 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 
 	// Special effects:
 	const float lowerht = hilo==HighPt? 80.:200.;
+	// const float lowerht = 350.; // tau only
+	const float minmet = 30.;
 
-	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
-	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
+	TWbox *lowhtbox  = new TWbox(0.,      0., lowerht, metmax, kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,   minmet, kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
-	TLine *boxborder1 = new TLine(lowerht,30.,lowerht, metmax);
-	TLine *boxborder2 = new TLine(lowerht,30.,htmax,30.);
+	TLine *boxborder1 = new TLine(lowerht, minmet, lowerht, metmax);
+	TLine *boxborder2 = new TLine(lowerht, minmet, htmax,   minmet);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
 	boxborder1->SetLineColor(14);
@@ -3085,6 +3057,219 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp, "HTvsMET_PRL", fOutputDir + fOutputSubDir);
+	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
+	delete c_temp;
+	delete leg, regleg;
+	delete hmetvsht_da_mm, hmetvsht_da_ee, hmetvsht_da_em;//, hmetvsht_mc;
+	delete gmetvsht_da_mm, gmetvsht_da_ee, gmetvsht_da_em;//, hmetvsht_mc;
+}
+void SSDLPlotter::makeMETvsHTPlot0HT(){
+	fOutputSubDir = "NoHT";
+	char cmd[100];
+    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+    system(cmd);
+	
+	const float htmax = 1500.;
+	const float metmax = 350.;
+	const float metmin = 50.;
+	
+	Color_t col_mm = kBlack;
+	Color_t col_ee = kRed;
+	Color_t col_em = kBlue;
+	// Color_t col_mt = kMagenta;
+	// Color_t col_et = kGreen;
+	// Color_t col_tt = kCyan;
+	// Color_t col_mm = kAzure   +2;
+	// Color_t col_ee = kPink    +2;
+	// Color_t col_em = kOrange  +2;
+	Color_t col_mt = kGreen;
+	Color_t col_et = kMagenta;
+	Color_t col_tt = kCyan;
+
+	// Create histograms
+	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, metmin, metmax);
+	TH2D *hmetvsht_da_ee = new TH2D("Data_HTvsMET_ee", "Data_HTvsMET_ee", 100, 0., htmax, 100, metmin, metmax);
+	TH2D *hmetvsht_da_em = new TH2D("Data_HTvsMET_em", "Data_HTvsMET_em", 100, 0., htmax, 100, metmin, metmax);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs HT plot:
+	hmetvsht_da_mm->SetMarkerStyle(8);
+	hmetvsht_da_mm->SetMarkerColor(col_mm);
+	hmetvsht_da_mm->SetMarkerSize(1.5);
+	hmetvsht_da_mm->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_ee->SetMarkerStyle(21);
+	hmetvsht_da_ee->SetMarkerColor(col_ee);
+	hmetvsht_da_ee->SetMarkerSize(1.4);
+	hmetvsht_da_ee->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_em->SetMarkerStyle(23);
+	hmetvsht_da_em->SetMarkerColor(col_em);
+	hmetvsht_da_em->SetMarkerSize(1.7  );
+	hmetvsht_da_em->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_mm->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_mm->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsht_da_ee->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_ee->SetYTitle(KinPlots::axis_label[1]);
+	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
+
+	// TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
+	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
+	leg->AddEntry(hmetvsht_da_ee, "ee","p");
+	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetTextSize(0.05);
+	leg->SetBorderSize(0);
+
+///////////// FROM SIGEVENTS TREE
+
+	// TGraphs:
+	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, HT0MET120);
+	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, HT0MET120);
+	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, HT0MET120);
+
+///////////////////////
+
+
+	//////////////////////////////////////////////////////////
+	// TAUS //////////////////////////////////////////////////
+	// Create histograms
+	TH2D *hmetvsht_da_mt = new TH2D("Data_HTvsMET_mt", "Data_HTvsMET_mt", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_et = new TH2D("Data_HTvsMET_et", "Data_HTvsMET_et", 100, 0., htmax, 100, 0., metmax);
+	TH2D *hmetvsht_da_tt = new TH2D("Data_HTvsMET_tt", "Data_HTvsMET_tt", 100, 0., htmax, 100, 0., metmax);
+
+	//////////////////////////////////////////////////////////
+	// Make MET vs HT plot:
+	hmetvsht_da_mt->SetMarkerStyle(22);
+	hmetvsht_da_mt->SetMarkerSize(1.8);
+	hmetvsht_da_mt->SetMarkerColor(col_mt);
+	hmetvsht_da_mt->GetYaxis()->SetTitleOffset(1.4);
+
+	hmetvsht_da_et->SetMarkerStyle(33);
+	hmetvsht_da_et->SetMarkerSize(2.3);
+	hmetvsht_da_et->SetMarkerColor(col_et);
+	// hmetvsht_da_et->SetMarkerColor(46);
+
+	hmetvsht_da_tt->SetMarkerStyle(34);
+	hmetvsht_da_tt->SetMarkerSize(1.8);
+	hmetvsht_da_tt->SetMarkerColor(col_tt);
+	// hmetvsht_da_tt->SetMarkerColor(38);
+
+
+	// 0 HT tau numbers
+	const int nmtev = 19;
+	float a_mt_ht [nmtev] = {338.843, 454.149, 96.3014, 549.702, 197.151, 0, 487.826, 228.581, 0, 144.391, 149.425, 218.886, 122.39, 57.3992, 398.942, 334.117, 864.134, 233.842, 215.262};
+	float a_mt_met[nmtev] = {151.176, 144.284, 124.364, 143.927, 127.371, 204.468, 161.936, 145.025, 126.596, 128.989, 199.845, 162.472, 142.881, 149.945, 142.304, 163.266, 134.839, 127.221, 122.126};
+
+	const int netev = 9;
+	float a_et_ht [netev] = {0, 137.963, 250.429, 0, 312.128, 252.608, 219.162, 48.0821, 134.521};
+	float a_et_met[netev] = {129.379, 131.362, 139.101, 228.448, 133.339, 176.02 , 124.487, 142.518, 135.69};
+
+	TGraph *gmetvsht_da_mt = new TGraph(nmtev, a_mt_ht, a_mt_met);
+	gmetvsht_da_mt->SetName("Data_HTvsMET_mt_graph");
+	gmetvsht_da_mt->SetMarkerStyle(hmetvsht_da_mt->GetMarkerStyle());
+	gmetvsht_da_mt->SetMarkerSize( hmetvsht_da_mt->GetMarkerSize());
+	gmetvsht_da_mt->SetMarkerColor(hmetvsht_da_mt->GetMarkerColor());
+
+	TGraph *gmetvsht_da_et = new TGraph(netev, a_et_ht, a_et_met);
+	gmetvsht_da_et->SetName("Data_HTvsMET_et_graph");
+	gmetvsht_da_et->SetMarkerStyle(hmetvsht_da_et->GetMarkerStyle());
+	gmetvsht_da_et->SetMarkerSize( hmetvsht_da_et->GetMarkerSize());
+	gmetvsht_da_et->SetMarkerColor(hmetvsht_da_et->GetMarkerColor());
+
+	hmetvsht_da_mt->SetXTitle(KinPlots::axis_label[0]);
+	hmetvsht_da_mt->SetYTitle(KinPlots::axis_label[1]);
+
+	// TLegend *leg = new TLegend(0.80,0.82,0.95,0.88);
+	TLegend *leg2 = new TLegend(0.80,0.70,0.95,0.88);
+	leg2->AddEntry(hmetvsht_da_mt, "#mu#tau","p");
+	leg2->AddEntry(hmetvsht_da_et, "e#tau","p");
+	leg2->AddEntry(hmetvsht_da_tt, "#tau#tau","p");
+	leg2->SetFillStyle(0);
+	leg2->SetTextFont(42);
+	leg2->SetTextSize(0.05);
+	leg2->SetBorderSize(0);
+
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+
+	// Special effects:
+	const float lowerht = 0.;
+	// const float lowerht = 350.; // tau only
+	const float minmet = 120.;
+
+	TWbox *lowhtbox  = new TWbox(0.,      0., lowerht, metmax, kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, metmin, htmax, minmet, kBlack, 0, 0);
+	lowhtbox ->SetFillColor(12);
+	lowmetbox->SetFillColor(12);
+	lowhtbox ->SetFillStyle(3005);
+	lowmetbox->SetFillStyle(3005);
+	TLine *boxborder1 = new TLine(lowerht, minmet, lowerht, metmax);
+	TLine *boxborder2 = new TLine(lowerht, minmet, htmax,   minmet);
+	boxborder1->SetLineWidth(1);
+	boxborder2->SetLineWidth(1);
+	boxborder1->SetLineColor(14);
+	boxborder2->SetLineColor(14);
+
+	TLine *sig1 = new TLine(lowerht, 200., htmax, 200.); // met 120 ht 80
+
+	sig1->SetLineWidth(2);
+	sig1->SetLineStyle(1);
+
+	// TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
+	// TLegend *regleg = new TLegend(0.67,0.51,0.87,0.68);
+	TLegend *regleg = new TLegend(0.70,0.19,0.93,0.46);
+	regleg->AddEntry(sig1, "Signal Region","l");
+	regleg->SetFillStyle(0);
+	regleg->SetTextFont(42);
+	regleg->SetTextSize(0.03);
+	regleg->SetBorderSize(0);
+	
+
+	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
+	c_temp->cd();
+	c_temp->SetRightMargin(0.05);
+	c_temp->SetLeftMargin(0.13);
+
+	hmetvsht_da_mm->DrawCopy("axis");
+
+	lowhtbox ->Draw();
+	lowmetbox->Draw();
+	boxborder1->Draw();
+	boxborder2->Draw();
+
+	sig1->Draw();
+
+	// Graphs
+	gmetvsht_da_ee->Draw("P");
+	gmetvsht_da_em->Draw("P");
+	gmetvsht_da_mm->Draw("P");
+	
+	gmetvsht_da_mt->Draw("P");
+	gmetvsht_da_et->Draw("P");
+	
+	leg->Draw();
+	leg2->Draw();
+	regleg->Draw();
+
+	drawTopLine();
+	// TPaveText *pave = new TPaveText(0.16, 0.83, 0.55, 0.88, "NDC");
+	// pave->SetFillColor(0);
+	// pave->SetFillStyle(1001);
+	// pave->SetBorderSize(0);
+	// pave->SetMargin(0.05);
+	// pave->SetTextFont(42);
+	// pave->SetTextSize(0.04);
+	// pave->SetTextAlign(12);
+	// pave->Draw();
+	gPad->RedrawAxis();
+
+	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
+	Util::PrintPDF(c_temp, "HTvsMET_NoHT", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
@@ -3779,7 +3964,7 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 			if(chan == Elec) rat = &S->ratioplots[1];
 			rat->ntight[i]->SetFillColor(S->color);
 			rat->nloose[i]->SetFillColor(S->color);
-			float scale = fLumiNorm / S->lumi;
+			float scale = fLumiNorm / S->getLumi();
 			rat->ntight[i]->Scale(scale);
 			rat->nloose[i]->Scale(scale);
 			hsntight->Add(rat->ntight[i]);
@@ -4199,7 +4384,7 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 		int ntight_sam(0), nloose_sam(0);
 		v_name.push_back(S->sname);
 
-		float scale = fLumiNorm/S->lumi; // Normalize all
+		float scale = fLumiNorm/S->getLumi(); // Normalize all
 		if(S->datamc == 0) scale = 1;
 		if(fp == SigSup){
 			ntight += scale * S->numbers[Baseline][chan].nsst;
@@ -4257,7 +4442,7 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 		int ntight_sam(0), nloose_sam(0);
 		v_name.push_back(S->sname);
 
-		float scale = fLumiNorm/S->lumi; // Normalize all
+		float scale = fLumiNorm/S->getLumi(); // Normalize all
 		if(S->datamc == 0) scale = 1;
 		if(fp == SigSup){
 			ntight += scale * S->numbers[Baseline][chan].nsst;
@@ -4308,7 +4493,7 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		if(S->datamc == 0) scale = 1;
 
 		Channel *C;
@@ -4347,7 +4532,7 @@ TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, b
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
 
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		if(S->datamc == 0) scale = 1;
 
 		FRatioPlots *RP;
@@ -4453,7 +4638,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
-	bool diffratio = true; // use flat or differential ratios
+	bool diffratio = false; // use flat or differential ratios
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
@@ -4481,6 +4666,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	calculateRatio(fMCBGMuEnr, Muon, ZDecay, mupratio_allmc, mupratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, SigSup, elfratio_allmc, elfratio_allmc_e);
 	calculateRatio(fMCBG,      Elec, ZDecay, elpratio_allmc, elpratio_allmc_e);
+
+	// mupratio_data = 1.;
+	// elpratio_data = 1.;
+	// mupratio_allmc = 1.;
+	// elpratio_allmc = 1.;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
@@ -4577,7 +4767,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 
 		float temp_nt2_mm  = mmTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
 		float temp_nt10_mm = mmTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
@@ -4606,7 +4796,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
 		if(S->datamc != 2) continue;
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 
 		float temp_nt2_mm  = mmTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
 		float temp_nt10_mm = mmTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
@@ -4759,7 +4949,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		Sample *S = fSamples[fMCBG[i]];
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		
 		mc_os_em_bb_sum += emTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
 		mc_os_em_ee_sum += emTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
@@ -4816,7 +5006,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
 		Sample *S = fSamples[fMCRareSM[i]];
-		float scale = fLumiNorm/S->lumi;
+		float scale = fLumiNorm/S->getLumi();
 
 		float temp_nt2_mm = mmTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
 		float temp_nt2_em = emTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
@@ -5087,8 +5277,8 @@ void SSDLPlotter::makeDiffPrediction(){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
-	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets"};
-	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1.};
+	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3"};
+	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1., 30.};
 
 	// Loop on the different variables
 	for(size_t j = 0; j < gNDiffVars; ++j){
@@ -5176,7 +5366,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// 
 		// for(size_t i = 0; i < fMCBG.size(); ++i){
 		// 	Sample *S = fSamples[fMCBG[i]];
-		// 	float scale = fLumiNorm / S->lumi;
+		// 	float scale = fLumiNorm / S->getLumi();
 		// 	nt11_mm_mc->Add(S->diffyields[Muon].hnt11[j], scale);
 		// 	nt11_ee_mc->Add(S->diffyields[Elec].hnt11[j], scale);
 		// 	nt11_em_mc->Add(S->diffyields[ElMu].hnt11[j], scale);
@@ -5198,7 +5388,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		for(size_t i = 0; i < fMCRareSM.size(); ++i){
 			FakeRatios *FR = new FakeRatios();
 			Sample *S = fSamples[fMCRareSM[i]];
-			float scale = fLumiNorm / S->lumi;
+			float scale = fLumiNorm / S->getLumi();
 			nt11_mm_ss->Add(S->diffyields[Muon].hnt11[j], scale);
 			nt11_ee_ss->Add(S->diffyields[Elec].hnt11[j], scale);
 			nt11_em_ss->Add(S->diffyields[ElMu].hnt11[j], scale);
@@ -5252,25 +5442,25 @@ void SSDLPlotter::makeDiffPrediction(){
 		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
 		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
 
-		// Differential ratios
-		for(size_t i = 0; i < musamples.size(); ++i){
-			Sample *S = fSamples[musamples[i]];
-			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-		}
-		for(size_t i = 0; i < elsamples.size(); ++i){
-			Sample *S = fSamples[elsamples[i]];
-			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-		}
-		for(size_t i = 0; i < emusamples.size(); ++i){
-			Sample *S = fSamples[emusamples[i]];
-			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-		}
+		// // Differential ratios
+		// for(size_t i = 0; i < musamples.size(); ++i){
+		// 	Sample *S = fSamples[musamples[i]];
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+		// 	nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		// }
+		// for(size_t i = 0; i < elsamples.size(); ++i){
+		// 	Sample *S = fSamples[elsamples[i]];
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+		// 	nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		// }
+		// for(size_t i = 0; i < emusamples.size(); ++i){
+		// 	Sample *S = fSamples[emusamples[i]];
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+		// 	nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		// }
 
 		for(size_t i = 0; i < nbins; ++i){
 			const float FakeESyst2 = 0.25;
@@ -5287,12 +5477,13 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 			
-			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			// Flat ratios:
+			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
 			
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
@@ -5875,7 +6066,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	vector<TString> names;
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		names.push_back(S->sname);
 		scales.push_back(scale);
 		ntt_mm.push_back(S->numbers[reg][Muon].nt2);
@@ -6062,7 +6253,7 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	float ntt_rare_mm(0.), ntt_rare_em(0.), ntt_rare_ee(0.);
 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
 		Sample *S = fSamples[fMCRareSM[i]];
-		float scale = fLumiNorm/S->lumi;
+		float scale = fLumiNorm/S->getLumi();
 		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
 		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
 		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
@@ -6382,46 +6573,44 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	OUT << "=============================================" << endl;
 	OUT << endl;
 
-	
+	OUT << "===========================================================================================================================================" << endl;
+	OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
+	for(size_t i = 0; i < nsamples; ++i){
+		OUT << setw(16) << left << names[i];
+		OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
+		npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
+		OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
+		OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
+		npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
+		OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
+		npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
+	}
+	OUT << "===========================================================================================================================================" << endl;
+	OUT << endl;
 
-	// OUT << "===========================================================================================================================================" << endl;
-	// OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
-	// for(size_t i = 0; i < nsamples; ++i){
-	// 	OUT << setw(16) << left << names[i];
-	// 	OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
-	// 	npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
-	// 	OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
-	// 	OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
-	// 	npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
-	// 	OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
-	// 	npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
-	// }
-	// OUT << "===========================================================================================================================================" << endl;
-	// OUT << endl;
-
-	// OUT << "==========================================================================================================================" << endl;
-	// OUT << "  PREDICTIONS (in tt window)" << endl;
-	// OUT << "--------------------------------------------------------------" << endl;
-	// OUT << " Mu/Mu Channel:" << endl;
-	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
-	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
-	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
-	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
-	// OUT << "--------------------------------------------------------------" << endl;
-	// OUT << " E/Mu Channel:" << endl;
-	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
-	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
-	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
-	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
-	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
-	// OUT << "--------------------------------------------------------------" << endl;
-	// OUT << " E/E Channel:" << endl;
-	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
-	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
-	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
-	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
-	// OUT << "==========================================================================================================================" << endl;
-	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << "==========================================================================================================================" << endl;
+	OUT << "  PREDICTIONS (in tt window)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " Mu/Mu Channel:" << endl;
+	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
+	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
+	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
+	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/Mu Channel:" << endl;
+	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
+	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
+	OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
+	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
+	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
+	OUT << "--------------------------------------------------------------" << endl;
+	OUT << " E/E Channel:" << endl;
+	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
+	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
+	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
+	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
+	OUT << "==========================================================================================================================" << endl;
+	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	
 	OUT.close();
 	delete FR;
@@ -6718,6 +6907,7 @@ void SSDLPlotter::storeWeightedPred(){
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		Sample *S = fSampleMap[TString(*sname)];
+
 		int datamc = S->datamc;
 		
 		gChannel chan = gChannel(flav);
@@ -6883,7 +7073,7 @@ void SSDLPlotter::printYields(gChannel chan, float lumiscale){
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
 		NumberSet numbers = S->numbers[Baseline][chan];
-		float scale = lumiscale / S->lumi;
+		float scale = lumiscale / S->getLumi();
 		if(S->datamc == 0 || scale < 0) scale = 1;
 		cout << setw(15) << S->sname << " |";
 		cout << setw(8)  << setprecision(3) << scale*numbers.nt2  << " |";
@@ -6981,7 +7171,7 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 	for(size_t i = 0; i < fMCBG.size(); ++i){
 		int index = fMCBG[i];
 		Sample *S = fSamples[index];
-		float scale = luminorm / S->lumi;
+		float scale = luminorm / S->getLumi();
 		if(luminorm < 0) scale = 1;
 		nt2sum_mumu  += scale*S->numbers[Baseline][Muon]    .nt2;
 		nt10sum_mumu += scale*S->numbers[Baseline][Muon]    .nt10;
@@ -7052,6 +7242,75 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 	cout << endl;
 	cout << "-------------------------------------------------------------------------------------------------------------------" << endl;
 
+}
+
+//____________________________________________________________________________
+TGraph* SSDLPlotter::getSigEventGraph(gChannel chan, gRegion reg){
+	TString channame = "MM";
+	if(chan == Elec) channame = "EE";
+	if(chan == ElMu)      channame = "EM";
+	vector<float> ht;
+	vector<float> met;
+
+	TFile *pFile = TFile::Open(fOutputFileName);
+	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
+
+	string *sname = 0;
+	int   stype, flav, cat, njets, nbjets;
+	float puweight, pT1, pT2, HT, MET, MT2;
+
+	sigtree->SetBranchAddress("SName",    &sname);
+	sigtree->SetBranchAddress("SType",    &stype);
+	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("Flavor",   &flav);
+	sigtree->SetBranchAddress("pT1",      &pT1);
+	sigtree->SetBranchAddress("pT2",      &pT2);
+	sigtree->SetBranchAddress("TLCat",    &cat);
+	sigtree->SetBranchAddress("HT",       &HT);
+	sigtree->SetBranchAddress("MET",      &MET);
+	sigtree->SetBranchAddress("MT2",      &MT2);
+	sigtree->SetBranchAddress("NJ",       &njets);
+	sigtree->SetBranchAddress("NbJ",      &nbjets);
+	
+	for( int i = 0; i < sigtree->GetEntries(); i++ ){
+		sigtree->GetEntry(i);
+		Sample *S = fSampleMap[TString(*sname)];
+		int datamc = S->datamc;
+		
+		if(stype > 2)              continue; // 0,1,2 are DoubleMu, DoubleEle, MuEG
+		if(cat != 0)               continue; // tight-tight selection
+		if(gChannel(flav) != chan) continue; // channel selection
+		
+		// Region selections
+		if(HT     < Region::minHT    [reg] || HT  > Region::maxHT [reg]) continue;
+		if(MET    < Region::minMet   [reg] || MET > Region::maxMet[reg]) continue;
+		if(njets  < Region::minNjets [reg]) continue;
+		if(nbjets < Region::minNbjets[reg]) continue;
+		
+		ht.push_back(HT);
+		met.push_back(MET);
+	}
+	
+	const int nsig = ht.size();
+	float ht_a [nsig];
+	float met_a[nsig];
+	for(size_t i = 0; i < ht.size(); ++i){
+		ht_a[i] = ht[i];
+		met_a[i] = met[i];
+	}
+	
+	Color_t color[3] = {kBlack, kBlue, kRed};
+	Size_t size = 1.5;
+	Style_t style[3] = {8, 23, 21};
+	
+	TGraph *sigevents = new TGraph(nsig, ht_a, met_a);
+	sigevents->SetName(Form("%s_%s_SigEvents", Region::sname[reg].Data(), channame.Data()));
+	
+	sigevents->SetMarkerColor(color[chan]);
+	sigevents->SetMarkerStyle(style[chan]);
+	sigevents->SetMarkerSize(size);
+	
+	return sigevents;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -7508,7 +7767,7 @@ void SSDLPlotter::printOriginSummary(vector<int> samples, int toggle, gChannel c
 		if(toggle == 3) histo = (TH1D*)C->zt_origin->Clone();
 		if(toggle == 4) histo = (TH1D*)C->zl_origin->Clone();
 
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		//histosum->Add(histo, scale);
 		if (!S->datamc == 2) { cout << S->name<< endl; histosum->Add(histo, scale);}
 	}
@@ -7539,7 +7798,7 @@ void SSDLPlotter::printOriginSummary2L(vector<int> samples, int toggle, gChannel
 		if(toggle == 10) histo2d = C->nt01_origin;
 		if(toggle == 2)  histo2d = C->nt11_origin;
 
-		float scale = fLumiNorm / S->lumi;
+		float scale = fLumiNorm / S->getLumi();
 		if (S->datamc != 2) {
 			histosum1->Add(histo2d->ProjectionX(), scale);
 			histosum2->Add(histo2d->ProjectionY(), scale);
