@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.159 2012/02/03 17:50:29 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.161 2012/02/07 08:08:15 buchmann Exp $
 //
 //
 
@@ -885,7 +885,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	      break;
 	    }
 
-	    if( it_gen->status() != 3 || !(it_gen->vx()!=0. || it_gen->vy()!=0. || it_gen->vx()!=0.)  ) { continue; }
+	    if( it_gen->status() != 3 || !(it_gen->vx()!=0. || it_gen->vy()!=0. || it_gen->vz()!=0.)  ) { continue; }
 
 	    // check for duplicate vertex
 	    bool duplicate = false;
@@ -910,6 +910,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    gv_nTkHi[gv_n] = 0;
 
 	    for(reco::GenParticleCollection::const_iterator part = gpH->begin(); part!= gpH->end(); part++){   
+	      if (part->pt()==0) continue;
 	      if( part->status() == 1 && part->charge() != 0 && fabs(part->eta())<2.5 &&
 		  ( fabs(part->vx()-this_gv_pos.X())<1.e-5 && fabs(part->vy()-this_gv_pos.Y())<1.e-5 && fabs(part->vz()-this_gv_pos.Z())<1.e-5 ) )  {
 	
@@ -2312,16 +2313,21 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	
        /*
 
-	 USAGE OF VERTEX CHOICE:
+	 USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
 
-	 diphotons is a vector of pairs (photon_1_index,photon_2_index)
+	 diphotons_{first,second} are vectors of {photon_1_index,photon_2_index}
 
-	 vtx_dipho_??? is vector of vector of vertex indices
+	 vtx_dipho_??? are, for each diphoton pair, vectors of vertex indices (as ranked by the different algos)
 
-	 For example: best vertex for diphoton pair diphotons.at(3) : vtx_dipho_bla.at(3).at(0), second choice vtx_dipho_bla.at(3).at(1) ...
+	 For example: best vertex for diphoton pair 3, with photon_1_index=diphotons_first[3] and photon_2_index=diphotons_second[3]: vtx_dipho_bla[3].at(0), second choice vtx_dipho_bla[3].at(1) ...
 
        */
 
+	std::vector<int> diphotons_first;
+	std::vector<int> diphotons_second;
+	std::vector<std::vector<int> > vtx_dipho_h2gglobe;
+	std::vector<std::vector<int> > vtx_dipho_mva;
+	std::vector<std::vector<int> > vtx_dipho_productrank;
 
        if (doVertexingFlag) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
 
@@ -2337,8 +2343,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 int tk_n = 0; 
 
-	 const int __TRK_AUX_ARRAYS_DIM__ = 500;
-	 const int __VTX_AUX_ARRAYS_DIM__ = 100;
+	 const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+	 const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
 	 float tk_px[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_py[__TRK_AUX_ARRAYS_DIM__];
@@ -2360,6 +2366,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   std::vector<reco::TrackBaseRef>::const_iterator tk;
 	 
 	   for(unsigned int i=0; i<vtxH->size(); i++) {
+
+	     if (vtxH->size()>__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
 
 	     reco::VertexRef vtx(vtxH, i);
 	  
@@ -2396,6 +2404,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   }	  
 
 	   for(unsigned int i=0; i<tkH->size(); i++) {
+
+	     if (tkH->size()>__TRK_AUX_ARRAYS_DIM__) std::cout << "Too many tracks in the event; please enlarge the value of __TRK_AUX_ARRAYS_DIM__" << std::endl;
 
 	     reco::TrackRef tk(tkH, i);
 
@@ -2484,7 +2494,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   if (VTX_MVA_DEBUG)	   cout << "temp" << endl;
 
 	   // fully combinatorial vertex selection
-	   std::vector<std::pair<int,int> > diphotons;
 	   for(int ip=0; ip<fTnphotons; ++ip) {
 	     for(int jp=ip+1; jp<fTnphotons; ++jp) {
 	       diphotons_first.push_back(ip);
@@ -3774,11 +3783,13 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
  fEventTree->Branch("gv_nTkHi",&gv_nTkHi,"gv_nTkHi[gv_n]/I");
  fEventTree->Branch("gv_nTkLo",&gv_nTkLo,"gv_nTkLo[gv_n]/I");
 
+ /*
  fEventTree->Branch("diphotons_first",&diphotons_first);
  fEventTree->Branch("diphotons_second",&diphotons_second);
  fEventTree->Branch("vtx_dipho_h2gglobe",&vtx_dipho_h2gglobe);
  fEventTree->Branch("vtx_dipho_mva",&vtx_dipho_mva);
  fEventTree->Branch("vtx_dipho_productrank",&vtx_dipho_productrank);
+ */
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -4568,11 +4579,13 @@ void NTupleProducer::resetTree(){
        resetInt(gv_nTkHi,gMaxngenvtx);
        resetInt(gv_nTkLo,gMaxngenvtx);
 
+       /*
        diphotons_first.clear();
        diphotons_second.clear();
        vtx_dipho_h2gglobe.clear();
        vtx_dipho_mva.clear();
        vtx_dipho_productrank.clear();
+       */
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);

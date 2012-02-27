@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.123 2012/02/03 17:50:28 fronga Exp $
+// $Id: NTupleProducer.h,v 1.124 2012/02/07 08:01:19 buchmann Exp $
 //
 //
 
@@ -184,8 +184,8 @@ private:
 	static const int gMaxnvrtx    = 25;
 	static const int gMaxnpileup  = 50;
 	static const int gMaxnEBhits  = 20;
-        static const int gMaxngenvtx = 40;
-        static const int nStoredGenParticles = 1000;
+        static const int gMaxngenvtx = 60;
+        static const int nStoredGenParticles = 2000;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -877,12 +877,6 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   Int_t gv_nTkHi[gMaxngenvtx];
   Int_t gv_nTkLo[gMaxngenvtx];
 
-  std::vector<int> diphotons_first;	       
-  std::vector<int> diphotons_second;	       
-  std::vector<std::vector<int> > vtx_dipho_h2gglobe;   
-  std::vector<std::vector<int> > vtx_dipho_mva;	       
-  std::vector<std::vector<int> > vtx_dipho_productrank;
-  
   // SC
   int fTnSC;
   float fTSCraw[gMaxnSC];

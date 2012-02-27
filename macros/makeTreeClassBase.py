@@ -27,7 +27,8 @@ MAXNJETS      = 100
 MAXNPHOS      = 50
 MAXNGENPHOS   = 100
 MAXNSC        = 100
-MAXGENINFO    = 1000
+MAXGENINFO    = 2000
+MAXGENVTX     = 60
 rules = { # Reco
           'NMus'    : 30,
           'NEles'   : 20,
@@ -58,6 +59,7 @@ rules = { # Reco
           'NGenLeptons': 100,
           'NGenJets'   : 100,
           'NGenPhotons': 100,
+          'gv_n': MAXGENVTX,
 	  # Photons
 	  'MaxNPhotons':MAXNGENPHOS,
 	  'NSuperClusters':MAXNSC,

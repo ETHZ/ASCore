@@ -38,6 +38,21 @@ options.register ('ModelScan', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
+options.register ('doVertexing',
+                  False,
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you want to run the vertex improved choice (MVA) for diphoton events, set to True, otherwise False (default)")
+options.register ('perVtxMvaWeights',
+                  '',
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Input weights for vertexing perVtx MVA")
+options.register ('perEvtMvaWeights',
+                  '',
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
@@ -76,6 +91,12 @@ process.TFileService = cms.Service("TFileService",
 	closeFileFast = cms.untracked.bool(True)
 )
 
+if options.doVertexing==True:
+    if options.perVtxMvaWeights=='':
+        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perVtxMvaWeights)')
+    if options.perEvtMvaWeights=='':
+        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perEvtMvaWeights)')
+    
 ### Electron ID ##############################################################
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
@@ -361,6 +382,10 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
 process.analyze.isModelScan = cms.untracked.bool(options.ModelScan)
+process.analyze.tag_doVertexing = cms.untracked.bool(options.doVertexing)
+process.analyze.tag_perVtxMvaWeights = cms.untracked.string(options.perVtxMvaWeights)
+process.analyze.tag_perEvtMvaWeights = cms.untracked.string(options.perEvtMvaWeights)
+
 
 # Add some jet collections
 process.analyze.jets = (
