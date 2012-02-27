@@ -489,10 +489,10 @@ public :
    Float_t         conv_eoverp[50];   //[NPhotons]
    Float_t         conv_zofprimvtxfromtrks[50];   //[NPhotons]
    Int_t           gv_n;
-   Float_t         gv_sumPtHi[1];   //[gv_n]
-   Float_t         gv_sumPtLo[1];   //[gv_n]
-   Int_t           gv_nTkHi[1];   //[gv_n]
-   Int_t           gv_nTkLo[1];   //[gv_n]
+   Float_t         gv_sumPtHi[40];   //[gv_n]
+   Float_t         gv_sumPtLo[40];   //[gv_n]
+   Int_t           gv_nTkHi[40];   //[gv_n]
+   Int_t           gv_nTkLo[40];   //[gv_n]
 /*   vector<int>     *diphotons_first;
    vector<int>     *diphotons_second;
    vector<vector<int> > *vtx_dipho_h2gglobe;
