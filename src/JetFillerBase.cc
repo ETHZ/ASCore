@@ -75,6 +75,9 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, TTree* tree,
     fTChEmFrac      = new double[gMaxnobjs];
     fTNeuEmFrac     = new double[gMaxnobjs];
     fTChMuFrac      = new double[gMaxnobjs];
+    fTPhoFrac       = new double[gMaxnobjs];
+    fTHFHadFrac     = new double[gMaxnobjs];
+    fTHFEMFrac      = new double[gMaxnobjs];
     fTNeuMult       = new int[gMaxnobjs];	
     fTNConstituents = new int[gMaxnobjs];
   }
@@ -126,6 +129,9 @@ JetFillerBase::~JetFillerBase(void) {
     delete [] fTChEmFrac;   
     delete [] fTNeuEmFrac;  
     delete [] fTChMuFrac;  
+    delete [] fTPhoFrac  ;
+    delete [] fTHFHadFrac;
+    delete [] fTHFEMFrac ;
     delete [] fTNeuMult;    	
     delete [] fTNConstituents;		
   }
@@ -180,6 +186,9 @@ void JetFillerBase::createBranches(void) {
     addBranch("JChEmfrac",  "D", fTChEmFrac,  "NJets" );
     addBranch("JNeuEmfrac", "D", fTNeuEmFrac, "NJets" );
     addBranch("JChMufrac",  "D", fTChMuFrac,  "NJets" );
+    addBranch("JPhofrac",   "D", fTPhoFrac  ,  "NJets" );
+    addBranch("JHFHadfrac", "D", fTHFHadFrac,  "NJets" );
+    addBranch("JHFEMfrac",  "D", fTHFEMFrac ,  "NJets" );
     addBranch("JNConstituents", "I", fTNConstituents,"NJets" );		
   }
 }
@@ -229,6 +238,9 @@ void JetFillerBase::reset(void) {
     resetDouble(fTChEmFrac,gMaxnobjs);
     resetDouble(fTNeuEmFrac,gMaxnobjs);
     resetDouble(fTChMuFrac,gMaxnobjs);
+    resetDouble(fTPhoFrac   ,gMaxnobjs);
+    resetDouble(fTHFHadFrac ,gMaxnobjs);
+    resetDouble(fTHFEMFrac  ,gMaxnobjs);
     resetInt(fTNConstituents,gMaxnobjs);
   }
 }

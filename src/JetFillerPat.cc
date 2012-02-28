@@ -139,6 +139,9 @@ const int JetFillerPat::fillBranches(const edm::Event& iEvent,
         fTChEmFrac[ijet]   =jetuncorr.chargedEmEnergyFraction();
         fTNeuEmFrac[ijet]  =jetuncorr.neutralEmEnergyFraction();
         fTChMuFrac[ijet]   =jetuncorr.chargedMuEnergyFraction();
+	fTPhoFrac  [ijet] = jetuncorr.photonEnergyFraction(); // photons also count for neutralEmEnergy
+	fTHFHadFrac[ijet] = jetuncorr.HFHadronEnergyFraction();
+	fTHFEMFrac [ijet] = jetuncorr.HFEMEnergyFraction();   // also contained in neutralEmEnergy
     
 	// multiplicities do not depend on energy
 	fTChMult[ijet]        = Jit->chargedMultiplicity();

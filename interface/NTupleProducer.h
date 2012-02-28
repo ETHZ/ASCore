@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.124 2012/02/07 08:01:19 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.125 2012/02/27 14:09:41 peruzzi Exp $
 //
 //
 
@@ -922,6 +922,9 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 	float fTjChEmFrac[gMaxnjets];
 	float fTjNeuEmFrac[gMaxnjets];
 	float fTjChMuEFrac[gMaxnjets];
+	float fTjPhoFrac[gMaxnjets];
+	float fTjHFHadFrac[gMaxnjets];
+	float fTjHFEMFrac[gMaxnjets];
 
 	float fTjbTagProbTkCntHighEff[gMaxnjets];
 	float fTjbTagProbTkCntHighPur[gMaxnjets];

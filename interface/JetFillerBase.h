@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.9 2011/06/09 08:04:48 fronga Exp $
+// $Id: JetFillerBase.h,v 1.10 2011/07/05 11:50:32 leo Exp $
 //
 //
 
@@ -101,6 +101,10 @@ protected:
   double* fTChEmFrac;
   double* fTNeuEmFrac;
   double* fTChMuFrac;
+  double* fTPhoFrac;
+  double* fTHFHadFrac;
+  double* fTHFEMFrac; 
+
   int*    fTIDLoose;
 
 };

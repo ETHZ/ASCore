@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.161 2012/02/07 08:08:15 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.162 2012/02/27 14:09:42 peruzzi Exp $
 //
 //
 
@@ -2670,11 +2670,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		// see for instance https://twiki.cern.ch/twiki/bin/view/CMS/JetID
 		// or http://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_1_3/doc/html/dc/dd5/classPFJetIDSelectionFunctor.html  
 		double uncorr_energy  = jet->energy()/scale;
-		fTjChHadFrac    [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
-		fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
-		fTjChEmFrac     [jqi] = jet->chargedEmEnergy()/uncorr_energy;
-		fTjNeuEmFrac    [jqi] = jet->neutralEmEnergy()/uncorr_energy;
-		fTjChMuEFrac    [jqi] = jet->chargedMuEnergy()/uncorr_energy;
+		fTjChHadFrac     [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
+		fTjNeuHadFrac    [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
+		fTjChEmFrac      [jqi] = jet->chargedEmEnergy()/uncorr_energy;
+		fTjNeuEmFrac     [jqi] = jet->neutralEmEnergy()/uncorr_energy;
+		fTjChMuEFrac     [jqi] = jet->chargedMuEnergy()/uncorr_energy;
+		fTjPhoFrac       [jqi] = jet->photonEnergy()/uncorr_energy; // photons also count for neutralEmEnergy
+		fTjHFHadFrac     [jqi] = jet->HFHadronEnergy()/uncorr_energy;
+		fTjHFEMFrac      [jqi] = jet->HFEMEnergy()/uncorr_energy;   // also contained in neutralEmEnergy
+		// see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
 
 		// Calculate the DR wrt the closest electron
 		float ejDRmin = 10.; // Default when no electrons previously selected
@@ -3833,6 +3837,9 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("JChargedHadFrac"     ,&fTjChHadFrac     ,"JChargedHadFrac[NJets]/F");
 	fEventTree->Branch("JNeutralHadFrac"     ,&fTjNeuHadFrac    ,"JNeutralHadFrac[NJets]/F");
 	fEventTree->Branch("JChargedMuEnergyFrac",&fTjChMuEFrac     ,"JChargedMuEnergyFrac[NJets]/F");
+	fEventTree->Branch("JPhotonEnergyFrac"   ,&fTjPhoFrac       ,"JPhotonEnergyFrac[NJets]/F");
+	fEventTree->Branch("JHFHadEnergyFrac"    ,&fTjHFHadFrac     ,"JHFHadEnergyFrac[NJets]/F");
+	fEventTree->Branch("JHFEMEnergyFrac"     ,&fTjHFEMFrac      ,"JHFEMEnergyFrac[NJets]/F");
 
 	fEventTree->Branch("JeMinDR"               ,&fTjeMinDR               ,"JeMinDR[NJets]/F");
 	fEventTree->Branch("JbTagProbTkCntHighEff" ,&fTjbTagProbTkCntHighEff ,"JbTagProbTkCntHighEff[NJets]/F");
@@ -4439,6 +4446,9 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjChEmFrac, gMaxnjets);
 	resetFloat(fTjNeuEmFrac, gMaxnjets);
 	resetFloat(fTjChMuEFrac, gMaxnjets);
+	resetFloat(fTjPhoFrac, gMaxnjets);
+	resetFloat(fTjHFHadFrac, gMaxnjets);
+	resetFloat(fTjHFEMFrac, gMaxnjets);
 
 	resetFloat(fTjbTagProbTkCntHighEff, gMaxnjets);
 	resetFloat(fTjbTagProbTkCntHighPur, gMaxnjets);
