@@ -329,6 +329,17 @@ public:
 			else return -1.;
 		}
 
+		float getError(int n){
+			// If n passed of ngen generated, what is upper limit
+			// on number of events passing?
+			if(ngen <= 0) return -1.;
+			TEfficiency *eff = new TEfficiency();
+			float upper = eff->ClopperPearson(ngen, n, 0.68, true);
+			float delta = upper - float(n)/float(ngen);
+			delete eff;
+			return delta * float(ngen);
+		}
+
 		int getType(){ // -1: undef, 0: data, 1: QCD, 2: top, 3: EWK, 4: Rare SM, 5: diboson
 			if(datamc == 0) return 0;
 			if( (sname.Contains("QCD")) ||

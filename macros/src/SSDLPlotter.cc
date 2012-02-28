@@ -7277,15 +7277,18 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	float ntt_mm[nprocs], ntl_mm[nprocs], nll_mm[nprocs]; // yields per process
 	float ntt_em[nprocs], ntl_em[nprocs], nlt_em[nprocs], nll_em[nprocs];
 	float ntt_ee[nprocs], ntl_ee[nprocs], nll_ee[nprocs];
+	float ntt_mm_e2[nprocs], ntt_em_e2[nprocs], ntt_ee_e2[nprocs]; // squared errors
 	float ntt_sum_mm(0.), ntl_sum_mm(0.), nll_sum_mm(0.); // total sum
 	float ntt_sum_em(0.), ntl_sum_em(0.), nlt_sum_em(0.), nll_sum_em(0.);
 	float ntt_sum_ee(0.), ntl_sum_ee(0.), nll_sum_ee(0.);
+	float ntt_sum_mm_e2(0.), ntt_sum_em_e2(0.), ntt_sum_ee_e2(0.);
 	float ntt_sum(0.), ntl_sum(0.), nlt_sum(0.), nll_sum(0.);
 	
 	for(size_t i = 0; i < nprocs; ++i){ // reset everything
 		ntt_mm[i] = 0.; ntl_mm[i] = 0.; nll_mm[i] = 0.;
 		ntt_em[i] = 0.; ntl_em[i] = 0.; nlt_em[i] = 0.; nll_em[i] = 0.;
 		ntt_ee[i] = 0.; ntl_ee[i] = 0.; nll_ee[i] = 0.;
+		ntt_mm_e2[i] = 0.; ntt_em_e2[i] = 0.; ntt_ee_e2[i] = 0.; // squared errors
 	}
 	for(size_t i = 0; i < gNCHANNELS; ++i){ // reset everything
 		nt20[i] = 0; nt10[i] = 0; nt01[i] = 0; nt00[i] = 0;
@@ -7296,7 +7299,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		float scale = fLumiNorm / S->getLumi();
 		int proc = S->getProc();
 		if(proc == 0 || proc >= nprocs) continue; // safety
-
+		
 		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
 		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
 		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1);
@@ -7329,6 +7332,21 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		ntt_sum_ee += ntt_ee_temp;
 		ntl_sum_ee += ntl_ee_temp;
 		nll_sum_ee += nll_ee_temp;
+		
+		if(proc == 5 || proc == 16) continue; // fuck QCD and g+jets for the errors
+		// Careful, I assume now that they will always have 0 events in tight-tight,
+		// otherwise my yield table won't be self consistent anymore
+
+		// Errors
+		float ntt_mm_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries()),2);
+		float ntt_em_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()),2);
+		float ntt_ee_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()),2);
+		ntt_mm_e2[proc] += ntt_mm_e2_temp;
+		ntt_em_e2[proc] += ntt_em_e2_temp;
+		ntt_ee_e2[proc] += ntt_ee_e2_temp;
+		ntt_sum_mm_e2 += ntt_mm_e2_temp;
+		ntt_sum_em_e2 += ntt_em_e2_temp;
+		ntt_sum_ee_e2 += ntt_ee_e2_temp;
 	}
 
 	for(size_t i = 0; i < musamples.size(); ++i){
@@ -7337,7 +7355,6 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		nt10[Muon] += S->numbers[reg][Muon].nt10;
 		nt00[Muon] += S->numbers[reg][Muon].nt0;
 	}
-
 	for(size_t i = 0; i < emusamples.size(); ++i){
 		Sample *S = fSamples[emusamples[i]];
 		nt20[ElMu] += S->numbers[reg][ElMu].nt2;
@@ -7345,7 +7362,6 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		nt01[ElMu] += S->numbers[reg][ElMu].nt01;
 		nt00[ElMu] += S->numbers[reg][ElMu].nt0;
 	}		
-
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
 		nt20[Elec] += S->numbers[reg][Elec].nt2;
@@ -7373,23 +7389,31 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 	OUT << Form("%20s || %6d | %6d | %6d || %6d | %6d | %6d | %6d || %6d | %6d | %6d ||",
 	"Data", nt20[Muon], nt10[Muon], nt00[Muon], nt20[ElMu], nt10[ElMu], nt01[ElMu], nt00[ElMu], nt20[Elec], nt10[Elec], nt00[Elec]) << endl;
 	OUT << "--------------------------------------------------------------------------------------------------------------------" << endl;
+
+	OUT << endl;
+	OUT << "REMINDER: CHECK THAT QCD AND G+JETS REALLY HAVE ZERO YIELDS IN TIGHT-TIGHT EVERYWHERE" << endl;
+	OUT << "          OTHERWISE THE SUMS IN THE TABLE BELOW ARE NOT CONSISTENT!" << endl;
 	OUT << endl;
 
-	OUT << "----------------------------------------------------------" << endl;
-	OUT << "  Process            | Mu/Mu  |  E/Mu  |  E/E   |  Tot   |" << endl;
-	OUT << "----------------------------------------------------------" << endl;
 
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	OUT << "  Process            |  Mu/Mu          |  E/Mu           |  E/E            |  Tot            |" << endl;
+	OUT << "----------------------------------------------------------------------------------------------" << endl;
+	
 	for(size_t i = 1; i < nprocs; ++i){ // skip data
-		OUT << Form("%20s & %6.2f & %6.2f & %6.2f & %6.2f \\\\",
+		if(i == 5 || i == 16) continue; // fuck QCD and g+jets
+		OUT << Form("%20s & %6.2f ± %6.2f & %6.2f ± %6.2f & %6.2f ± %6.2f & %6.2f ± %6.2f \\\\",
 		fSamples[DoubleMu1]->getProcName(i).Data(),
-		ntt_mm[i], ntt_em[i], ntt_ee[i], ntt_mm[i]+ntt_em[i]+ntt_ee[i]) << endl;
+		ntt_mm[i], sqrt(ntt_mm_e2[i]), ntt_em[i], sqrt(ntt_em_e2[i]), ntt_ee[i], sqrt(ntt_ee_e2[i]),
+		ntt_mm[i]+ntt_em[i]+ntt_ee[i], sqrt(ntt_mm_e2[i]+ntt_em_e2[i]+ntt_ee_e2[i])) << endl;
 	}
 	OUT << "\\hline \\hline" << endl;
-	OUT << Form("%20s & %6.2f & %6.2f & %6.2f & %6.2f \\\\",
-	"Sum", 	ntt_sum_mm, ntt_sum_em, ntt_sum_ee, ntt_sum_mm+ntt_sum_em+ntt_sum_ee) << endl;
+	OUT << Form("%20s & %6.2f ± %6.2f & %6.2f ± %6.2f & %6.2f ± %6.2f & %6.2f ± %6.2f \\\\",
+	"Sum", ntt_sum_mm, sqrt(ntt_sum_mm_e2), ntt_sum_em, sqrt(ntt_sum_em_e2), ntt_sum_ee, sqrt(ntt_sum_ee_e2),
+	       ntt_sum_mm+ntt_sum_em+ntt_sum_ee, sqrt(ntt_sum_mm_e2+ntt_sum_em_e2+ntt_sum_ee_e2)) << endl;
 	
 	OUT << "\\hline \\hline" << endl;
-	OUT << Form("%20s & %6d & %6d & %6d & %6d \\\\",
+	OUT << Form("%20s & %6d          & %6d          & %6d          & %6d          \\\\",
 	"Data", nt20[Muon], nt20[ElMu], nt20[Elec], nt20[Muon]+nt20[ElMu]+nt20[Elec]) << endl;
 	OUT << "----------------------------------------------------------" << endl;
 	OUT << endl;
