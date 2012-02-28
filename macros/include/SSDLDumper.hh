@@ -36,14 +36,14 @@ public:
 	static double gElPt2bins[gNElPt2bins+1];
 	static double gElEtabins[gNElEtabins+1];
 
-	static const int gNDiffHTBins  = 5;
-	static const int gNDiffMETBins = 4;
+	static const int gNDiffHTBins   = 5;
+	static const int gNDiffMETBins  = 4;
 	static const int gNDiffMET3Bins = 9;
-	static const int gNDiffNJBins  = 5;
-	static const int gNDiffMT2Bins = 3;
-	static const int gNDiffPT1Bins = 5;
-	static const int gNDiffPT2Bins = 5;
-	static const int gNDiffNBJBins = 4;
+	static const int gNDiffNJBins   = 5;
+	static const int gNDiffMT2Bins  = 3;
+	static const int gNDiffPT1Bins  = 5;
+	static const int gNDiffPT2Bins  = 5;
+	static const int gNDiffNBJBins  = 4;
 
 	static double gDiffHTBins  [gNDiffHTBins+1];
 	static double gDiffMETBins [gNDiffMETBins+1];
@@ -291,14 +291,6 @@ public:
 	class Sample{
 	public:
 		Sample(){};
-		// Sample(TString loc, TString tag, int dm, int cs = -1, float lum = 1.0, int col = 1){
-		// 	location = loc;
-		// 	sname    = tag;
-		// 	datamc   = dm;
-		// 	chansel  = cs;
-		// 	lumi     = lum;
-		// 	color    = col;
-		// };
 		Sample(TString loc, TString tag, int dm, int cs = -1, float xs = 1.0, long ng = 1, int col = 1){
 			location = loc;
 			sname    = tag;
@@ -368,34 +360,58 @@ public:
 			}
 		}
 		int getProc(){ // used for binned samples
-			if(datamc == 0) return 0;
-			if(sname.Contains("QCD") || sname == "MuEnr10") return 1;
+			if(datamc == 0)                                 return 0;
+			if(sname == "TTJets" )                          return 1;
 			if(sname.Contains("SingleT"))                   return 2;
-			if(sname == "TTJets" )                          return 3;
+			if(sname == "WJets" )                           return 3;
 			if(sname.Contains("DYJets"))                    return 4;
 			if(sname.Contains("GJets"))                     return 5;
-			if(sname == "WJets" )                           return 6;
-			if(sname == "TTbarW")                           return 7;
-			if(sname == "TTbarZ")                           return 8;
-			if(sname == "TTbarG")                           return 9;
-			if(sname == "DPSWW" )                           return 10;
-			if(sname == "WWZ"   )                           return 11;
-			if(sname == "WZZ"   )                           return 12;
-			if(sname == "WZZ"   )                           return 13;
-			if(sname == "WWG"   )                           return 14;
-			if(sname == "ZZZ"   )                           return 15;
-			if(sname == "WWW"   )                           return 16;
-			if(sname == "W+W+"  )                           return 17;
-			if(sname == "W-W-"  )                           return 18;
-			if(sname.Contains("GVJets"))                    return 19;
-			if(sname.Contains("WWTo2L2Nu"))                 return 20;
-			if(sname.Contains("WZTo3LNu"))                  return 21;
-			if(sname.Contains("ZZTo4L"))                    return 22;
+			if(sname.Contains("WWTo2L2Nu"))                 return 6; 
+			if(sname.Contains("WZTo3LNu"))                  return 7; 
+			if(sname.Contains("ZZTo4L"))                    return 8; 
+			if(sname.Contains("GVJets"))                    return 9; 
+			if(sname == "TTbarW")                           return 10;
+			if(sname == "TTbarZ")                           return 11;
+			if(sname == "TTbarG")                           return 12;
+			if(sname == "W+W+" || sname == "W-W-")          return 13;
+			if(sname == "WWZ" ||                                     
+			   sname == "WZZ" ||                                     
+			   sname == "WZZ" ||                                     
+			   sname == "WWG" ||                                     
+			   sname == "ZZZ" ||                                     
+			   sname == "WWW" )                             return 14;
+			if(sname == "DPSWW")                            return 15;
+			if(sname.Contains("QCD") || sname == "MuEnr10") return 16;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
 			}
 		}
+		TString getProcName(int proc){ // used for binned samples
+			if(proc ==  0) return "Data";
+			if(proc ==  1) return "t\\bar{t}";
+			if(proc ==  2) return "Single t";
+			if(proc ==  3) return "W+jets";
+			if(proc ==  4) return "Z+jets";
+			if(proc ==  5) return "\\gamma+jets";
+			if(proc ==  6) return "WW";
+			if(proc ==  7) return "WZ";
+			if(proc ==  8) return "ZZ";
+			if(proc ==  9) return "V\\gamma+jets";
+			if(proc == 10) return "t\\bar{t}W";
+			if(proc == 11) return "t\\bar{t}Z";
+			if(proc == 12) return "t\\bar{t}\\gamma";
+			if(proc == 13) return "W^{\\pm}W^{\\pm}";
+			if(proc == 14) return "Tri-Boson";
+			if(proc == 15) return "DPS (2\\times W+jets)";
+			if(proc == 16) return "QCD";
+			else {
+				cout << "SSDLDumper::Sample::getProcName() ==> ERROR: "<< proc << " has no defined process name!" << endl;
+				return "";
+			}
+		}
+		inline int getNProcs(){return 17;} // make sure this number corresponds to the number of
+		                                   // processes define in the previous method
 		TTree* getTree(){
 			file = TFile::Open(location);
 			if(file->IsZombie()){

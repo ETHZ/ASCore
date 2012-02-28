@@ -22,6 +22,10 @@ public:
 	static double gEChMisIDE;
 	static double gEChMisIDE_E;
 
+	static float gMMTrigScale;
+	static float gEMTrigScale;
+	static float gEETrigScale;
+
 	SSDLPlotter();
 	SSDLPlotter(TString);
 	SSDLPlotter(TString, TString);
@@ -101,6 +105,9 @@ public:
 
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
+	
+	void printAllYieldTables();
+	void printMCYieldTable(TString, gRegion = Baseline);
 
 	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
 
