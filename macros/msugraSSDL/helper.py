@@ -1,5 +1,18 @@
-import ROOT
+import ROOT, commands
 from array import array
+
+def getLimits():
+	limits = {}
+	for uncert in [5, 10, 15, 20, 25, 30, 35, 40, 45]:
+		combString = './combine card_HT0_MET200_sigUncert'+str(uncert)+'.txt '
+		fileString = '-M HybridNew --freq --grid=/scratch/mdunser/Limits/Mar6/limit_HT0_MET200_sigUncert'+str(uncert)+'.root'
+		limits[uncert] = {}
+		limits[uncert]['obs']   = commands.getoutput(combString+fileString)                           .split('\n')[-2].split()[3]
+		limits[uncert]['exp']   = commands.getoutput(combString+fileString+' --expectedFromGrid 0.50').split('\n')[-2].split()[3]
+		limits[uncert]['exphi'] = commands.getoutput(combString+fileString+' --expectedFromGrid 0.84').split('\n')[-2].split()[3]
+		limits[uncert]['explo'] = commands.getoutput(combString+fileString+' --expectedFromGrid 0.16').split('\n')[-2].split()[3]
+	return limits
+	
 
 def getContourGraph(histo, n=10):
 	histo.Draw('cont list')
@@ -33,11 +46,11 @@ def drawLatex(string, x, y, size = 0.04, font=42):
 	lat.SetTextFont(font)
 	lat.DrawLatex(x, y, string)
 
-def drawTopLine(lumi, pb = True):
+def drawTopLine(lumi, pbFb):
 	latex = ROOT.TLatex()
 	drawLatex('CMS Preliminary', 0.13, 0.92, 0.05, 62)    
-	if pb: drawLatex('L_{int.} = %4.0f pb^{-1}' %(lumi)      , 0.70, 0.92)
-	else: drawLatex('L_{int.} = %2.1f fb^{-1}' %(lumi/1000.), 0.70, 0.92)
+	if pbFb   =='pb': drawLatex('L_{int.} = %4.0f pb^{-1}' %(lumi)      , 0.70, 0.92)
+	elif pbFb =='fb': drawLatex('L_{int.} = %2.1f fb^{-1}' %(lumi/1000.), 0.70, 0.92)
 
 def makeLegend(a,b,c,d,e=''):
 	legend = ROOT.TLegend(a,b,c,d,e)
