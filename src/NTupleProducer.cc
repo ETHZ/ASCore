@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.162 2012/02/27 14:09:42 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.163 2012/02/28 13:41:12 pnef Exp $
 //
 //
 
@@ -299,6 +299,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	++fNTotEvents;
 
+	//	std::cout << "processing event " << fNTotEvents << std::endl;
 
 	using namespace edm;
 	using namespace std;
@@ -2355,8 +2356,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 float tk_dzerr[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_pterr[__TRK_AUX_ARRAYS_DIM__];
 	 bool tk_ishighpurity[__TRK_AUX_ARRAYS_DIM__];
-	 std::vector<unsigned short> vtx_std_tkind[__VTX_AUX_ARRAYS_DIM__];
-	 std::vector<float> vtx_std_tkweight[__VTX_AUX_ARRAYS_DIM__];
+	 std::vector<std::vector<unsigned short> > vtx_std_tkind;
+	 std::vector<std::vector<float> > vtx_std_tkweight;
 	 int vtx_std_ntks[__VTX_AUX_ARRAYS_DIM__];
 	 int tkVtxId[__TRK_AUX_ARRAYS_DIM__];
 
@@ -2398,10 +2399,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       
 	     //	      for (std::vector<unsigned short>::const_iterator it=temp.begin(); it!=temp.end(); it++) {int k=0; vtx_std_tkind[i][k]=*it; k++;}
 	     //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
-	     vtx_std_tkind[i]=temp;
-	     vtx_std_tkweight[i]=temp_float;
-
+	     vtx_std_tkind.push_back(temp);
+	     vtx_std_tkweight.push_back(temp_float);
+	     //	     std::cout << "tracks: " <<  temp.size() << std::endl;
 	   }	  
+
 
 	   for(unsigned int i=0; i<tkH->size(); i++) {
 
@@ -2528,8 +2530,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				 tk_dz+0,
 				 tk_dzerr+0,
 				 tk_ishighpurity+0,
-				 vtx_std_tkind+0,
-				 vtx_std_tkweight+0,
+				 vtx_std_tkind,
+				 vtx_std_tkweight,
 				 vtx_std_ntks+0
 				 );
 
@@ -5699,7 +5701,7 @@ ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz,
 				 int ntracks, float * tkpx, float * tkpy, float * tkpz,
 				 float * tkPtErr, int * tkVtxId,
 				 float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
-			     bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+			     bool * tkIsHighPurity, std::vector<std::vector<unsigned short> > vtx_std_tkind, std::vector<std::vector<float> > vtx_std_tkweight, int * vtx_std_ntks
 ) :
 	nvtx_(nvtx),
 	vtxx_(vtxx),

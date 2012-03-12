@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.125 2012/02/27 14:09:41 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.126 2012/02/28 13:41:13 pnef Exp $
 //
 //
 
@@ -1038,16 +1038,16 @@ public:
 		int ntracks, float * tkpx, float * tkpy, float * tkpz,
 		float * tkPtErr, int * tkVtxId, 
 		float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
-		bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+		bool * tkIsHighPurity, std::vector<std::vector<unsigned short> > vtx_std_tkind, std::vector<std::vector<float> > vtx_std_tkweight, int * vtx_std_ntks
 		);
 
   virtual int nvtx() const    { return nvtx_; };
   virtual int ntracks() const { return ntracks_; };
 
   virtual bool hasVtxTracks()  const { return true; };
-  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_[ii][0]); };
+  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_.at(ii).at(0)); };
   virtual int vtxNTracks(int ii) const { return vtx_std_ntks_[ii]; };
-  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_[ii][0]); };
+  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_.at(ii).at(0)); };
 
   virtual float tkpx(int ii) const { return tkpx_ != 0 ? tkpx_[ii] : 0.; };
   virtual float tkpy(int ii) const { return tkpx_ != 0 ? tkpy_[ii] : 0.; };
@@ -1057,8 +1057,22 @@ public:
   virtual int   tkVtxId(int ii) const { return tkVtxId_  != 0 ? tkVtxId_[ii] : 999; };
 
   //	virtual float tkWeight(int ii, int jj) const { return tkWeight_ != 0 ? tkWeight_[ii]*(float)( tkVtxId(ii) == jj) : 0.; };
-  virtual float tkWeight(int ii, int jj) const { return vtx_std_tkweight_[jj][ii]; };
+  virtual float tkWeight(int ii, int jj) const { 
+    if (jj>=(int)(vtx_std_tkind_.size())) {std::cout << "wrong vertex index call" << std::endl; return 0;}
 
+    int trkid=-1;
+    int n=0;
+    for (std::vector<unsigned short>::const_iterator it=vtx_std_tkind_.at(jj).begin(); it!=vtx_std_tkind_.at(jj).end(); it++){
+      if (*it==ii) trkid=n;
+      n++;
+    }
+
+    float out=0;
+    if (trkid!=-1) out=vtx_std_tkweight_.at(jj).at(trkid);
+    return out;
+
+  };
+  
 	
   virtual float vtxx(int ii) const { return vtxx_ != 0 ? vtxx_[ii] : 0.; };
   virtual float vtxy(int ii) const { return vtxy_ != 0 ? vtxy_[ii] : 0.; };
@@ -1095,8 +1109,8 @@ private:
 
   bool * tkIsHighPurity_;
   
-  std::vector<unsigned short> * vtx_std_tkind_;
-  std::vector<float> * vtx_std_tkweight_;
+  std::vector<std::vector<unsigned short> > vtx_std_tkind_;
+  std::vector<std::vector<float> > vtx_std_tkweight_;
   int * vtx_std_ntks_;
 
 };
