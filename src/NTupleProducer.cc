@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.163 2012/02/28 13:41:12 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.164 2012/03/12 17:29:18 peruzzi Exp $
 //
 //
 
@@ -298,8 +298,6 @@ NTupleProducer::~NTupleProducer(){
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	++fNTotEvents;
-
-	//	std::cout << "processing event " << fNTotEvents << std::endl;
 
 	using namespace edm;
 	using namespace std;
@@ -2344,9 +2342,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 int tk_n = 0; 
 
-	 const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
-	 const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
-
 	 float tk_px[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_py[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_pz[__TRK_AUX_ARRAYS_DIM__];
@@ -2363,46 +2358,64 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 	 { // tracks
-	  
+	   //	   cout << "tracks begin" << endl;
 	   std::vector<reco::TrackBaseRef>::const_iterator tk;
 	 
 	   for(unsigned int i=0; i<vtxH->size(); i++) {
+
+	     //	     cout << "working on vtx " << i << endl;
 
 	     if (vtxH->size()>__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
 
 	     reco::VertexRef vtx(vtxH, i);
 	  
 	     vtx_std_ntks[i]=vtx->tracksSize();
-
+	     //	     cout << "vtx tracks " << vtx->tracksSize() << endl;
+	     
 	     std::vector<unsigned short> temp;
 	     std::vector<float> temp_float;
 
-	     for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
-	       int index = 0;
-	       bool ismatched = false; 
-	       for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
-		 reco::TrackRef track(tkH, j);
-		 if(TrackCut(track)) continue; 
-		 if (&(**tk) == &(*track)) {
-		   temp.push_back(index);
-		   temp_float.push_back(vtx->trackWeight(track));
-		   ismatched = true;
-		   break;
+	     if (vtx->tracksSize()>0){
+	       for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
+		 //		 cout << "processing vtx track (out of " << vtx->tracksSize() << ")" << endl;
+		 int index = 0;
+		 bool ismatched = false; 
+		 for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
+		   //		   std::cout << j << std::endl;
+		   reco::TrackRef track(tkH, j);
+		   if(TrackCut(track)) continue; 
+		   if (&(**tk) == &(*track)) {
+		     temp.push_back(index);
+		     temp_float.push_back(vtx->trackWeight(track));
+		     ismatched = true;
+		     //		     cout << "matching found index" << index << " weight " << vtx->trackWeight(track) << endl;
+		     break;
+		   }
+		   index++;
 		 }
-		 index++;
+		 if(!ismatched) {
+		   temp.push_back(-9999);
+		   temp_float.push_back(-9999);
+		 }
 	       }
-	       if(!ismatched) {
-		 temp.push_back(-9999);
-		 temp_float.push_back(-9999);
-	       }
+	     }
+	     else {
+	       //	       cout << "no vertex tracks found" << endl;
+	       temp = std::vector<unsigned short>(0);
+	       temp_float = std::vector<float>(0);
 	     }
       
 	     //	      for (std::vector<unsigned short>::const_iterator it=temp.begin(); it!=temp.end(); it++) {int k=0; vtx_std_tkind[i][k]=*it; k++;}
 	     //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
 	     vtx_std_tkind.push_back(temp);
 	     vtx_std_tkweight.push_back(temp_float);
-	     //	     std::cout << "tracks: " <<  temp.size() << std::endl;
+	     //	     	     std::cout << "tracks: " <<  temp.size() << std::endl;
 	   }	  
+
+	   //	   std::cout << "tkWeight is " << std::endl;
+	   //	   for (int a=0; a<(int)(vtx_std_tkind.size()); a++) std::cout << a << ":" << vtx_std_tkind.at(a).size() << " " ;
+	   //	   std::cout << std::endl;
+
 
 
 	   for(unsigned int i=0; i<tkH->size(); i++) {
@@ -5722,8 +5735,21 @@ ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz,
 	vtx_std_tkweight_(vtx_std_tkweight),
 	vtx_std_ntks_(vtx_std_ntks)
 {
-}
 
+  for (unsigned int i=0; i<vtx_std_tkind_.size();i++){
+    for (unsigned int j=0; j<vtx_std_tkind_.at(i).size();j++){
+      vtx_std_tkind_helper_[i][j]=vtx_std_tkind_.at(i).at(j);
+    }
+  }
+
+  for (unsigned int i=0; i<vtx_std_tkweight_.size();i++){
+    for (unsigned int j=0; j<vtx_std_tkweight_.at(i).size();j++){
+      vtx_std_tkweight_helper_[i][j]=vtx_std_tkweight_.at(i).at(j);
+    }
+  }
+
+}
+  
 ETHVertexInfo::~ETHVertexInfo() {}
 
 

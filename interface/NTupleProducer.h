@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.126 2012/02/28 13:41:13 pnef Exp $
+// $Id: NTupleProducer.h,v 1.127 2012/03/12 17:29:17 peruzzi Exp $
 //
 //
 
@@ -186,6 +186,9 @@ private:
 	static const int gMaxnEBhits  = 20;
         static const int gMaxngenvtx = 60;
         static const int nStoredGenParticles = 2000;
+
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -1045,9 +1048,9 @@ public:
   virtual int ntracks() const { return ntracks_; };
 
   virtual bool hasVtxTracks()  const { return true; };
-  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_.at(ii).at(0)); };
+  virtual const unsigned short * vtxTracks(int ii) const { return vtx_std_tkind_helper_[ii]+0; };
   virtual int vtxNTracks(int ii) const { return vtx_std_ntks_[ii]; };
-  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_.at(ii).at(0)); };
+  virtual const float * vtxTkWeights(int ii) const { return vtx_std_tkweight_helper_[ii]+0; };
 
   virtual float tkpx(int ii) const { return tkpx_ != 0 ? tkpx_[ii] : 0.; };
   virtual float tkpy(int ii) const { return tkpx_ != 0 ? tkpy_[ii] : 0.; };
@@ -1112,5 +1115,12 @@ private:
   std::vector<std::vector<unsigned short> > vtx_std_tkind_;
   std::vector<std::vector<float> > vtx_std_tkweight_;
   int * vtx_std_ntks_;
+
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
+
+  unsigned short vtx_std_tkind_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
+  float vtx_std_tkweight_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
+
 
 };
