@@ -29,8 +29,9 @@ private:
 
   Float_t* kfactors;
 
-  std::vector<int> PhotonSelection(TreeReader *fTR);
+  std::vector<int> PhotonSelection(TreeReader *fTR, int mode);
   bool TriggerSelection();
+  bool EventSelection(std::vector<int> passing);
 
   EnergyCorrection *phocorr;
   TLorentzVector CorrPhoton(TreeReader *fTR, int i, int mode);
@@ -40,7 +41,7 @@ private:
 
   Float_t AddWeight;
 
-  TTree* OutputTree;
+  TTree* OutputTree[4];
 
   Float_t event_luminormfactor;
   Float_t event_Kfactor;
