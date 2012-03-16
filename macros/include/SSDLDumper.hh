@@ -387,7 +387,6 @@ public:
 			if(sname == "W+W+" || sname == "W-W-")          return 13;
 			if(sname == "WWZ" ||                                     
 			   sname == "WZZ" ||                                     
-			   sname == "WZZ" ||                                     
 			   sname == "WWG" ||                                     
 			   sname == "ZZZ" ||                                     
 			   sname == "WWW" )                             return 14;
@@ -400,21 +399,21 @@ public:
 		}
 		TString getProcName(int proc){ // used for binned samples
 			if(proc ==  0) return "Data";
-			if(proc ==  1) return "t\\bar{t}";
+			if(proc ==  1) return "$t\\bar{t}$";
 			if(proc ==  2) return "Single t";
 			if(proc ==  3) return "W+jets";
 			if(proc ==  4) return "Z+jets";
-			if(proc ==  5) return "\\gamma+jets";
+			if(proc ==  5) return "$\\gamma$+jets";
 			if(proc ==  6) return "WW";
 			if(proc ==  7) return "WZ";
 			if(proc ==  8) return "ZZ";
-			if(proc ==  9) return "V\\gamma+jets";
-			if(proc == 10) return "t\\bar{t}W";
-			if(proc == 11) return "t\\bar{t}Z";
-			if(proc == 12) return "t\\bar{t}\\gamma";
-			if(proc == 13) return "W^{\\pm}W^{\\pm}";
+			if(proc ==  9) return "V$\\gamma$+jets";
+			if(proc == 10) return "$t\\bar{t}$W";
+			if(proc == 11) return "$t\\bar{t}$Z";
+			if(proc == 12) return "$t\\bar{t}\\gamma$";
+			if(proc == 13) return "W$^{\\pm}$W$^{\\pm}$";
 			if(proc == 14) return "Tri-Boson";
-			if(proc == 15) return "DPS (2\\times W+jets)";
+			if(proc == 15) return "DPS (2$\\times$ W+jets)";
 			if(proc == 16) return "QCD";
 			else {
 				cout << "SSDLDumper::Sample::getProcName() ==> ERROR: "<< proc << " has no defined process name!" << endl;

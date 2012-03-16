@@ -110,6 +110,7 @@ public:
 	void printMCYieldTable(TString, gRegion = Baseline);
 
 	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
+	TGraph* getSigEventGraph(gChannel, float, float, float, float);
 
 	void fixPRatios();
 	
