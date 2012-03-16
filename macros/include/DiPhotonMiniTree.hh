@@ -18,7 +18,7 @@
 
 class DiPhotonMiniTree : public UserAnalysisBase{
 public:
-  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", Float_t aw=-999, Float_t* _kfac=NULL);
+  DiPhotonMiniTree(TreeReader *tr = NULL, std::string dataType="data", std::string tchoice="", Float_t aw=-999, Float_t* _kfac=NULL);
   virtual ~DiPhotonMiniTree();
 
   void Begin();
@@ -26,6 +26,8 @@ public:
   void End();
 
 private:
+
+  std::string templateChoice;
 
   Float_t* kfactors;
 

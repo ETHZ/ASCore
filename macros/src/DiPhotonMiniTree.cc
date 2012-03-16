@@ -10,7 +10,7 @@
 
 using namespace std;
 
-DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, Float_t aw, Float_t* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), AddWeight(aw), kfactors(_kfac){
+DiPhotonMiniTree::DiPhotonMiniTree(TreeReader *tr, std::string dataType, std::string _tchoice, Float_t aw, Float_t* _kfac) : UserAnalysisBase(tr), fDataType_(dataType), templateChoice(_tchoice), AddWeight(aw), kfactors(_kfac){
   Util::SetStyle();	
   if (fDataType_ == "mc") isdata=false;
   else if (fDataType_ == "data") isdata=true; 
@@ -627,36 +627,80 @@ std::vector<int> DiPhotonMiniTree::PhotonSelection(TreeReader *fTR, int mode){
     if ((phocorr->isInPhiCracks(phi,eta)) || (phocorr->isInEBEtaCracks(eta))) it=passing.erase(it); else it++;
   }
 
-  for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
-    bool ok=true;
-    if (fTR->PhoIso04Ecal[*it]>4.2) ok=false;
-    if (fTR->PhoIso04Hcal[*it]>2.2) ok=false;
-    if (fTR->PhoHoverE[*it]>0.05) ok=false;  
-    if (mode==0||mode==3) { // standard or DY pixel veto reversed
-      if (fTR->PhoIso04TrkHollow[*it]>2.0) ok=false;
-    }
-    else if (mode==1){ // trk iso sideband
-      if (fTR->PhoIso04TrkHollow[*it]<2.0) ok=false;
-      if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
-    }
-    else if (mode==2){ // inclusive=standard or sideband
-      if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
-    }
+  if (templateChoice=="sieie"){
+
+    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+      bool ok=true;
+      if (fTR->PhoIso04Ecal[*it]>4.2) ok=false;
+      if (fTR->PhoIso04Hcal[*it]>2.2) ok=false;
+      if (fTR->PhoHoverE[*it]>0.05) ok=false;  
+      if (mode==0||mode==3) { // standard or DY pixel veto reversed
+	if (fTR->PhoIso04TrkHollow[*it]>2.0) ok=false;
+      }
+      else if (mode==1){ // trk iso sideband
+	if (fTR->PhoIso04TrkHollow[*it]<2.0) ok=false;
+	if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
+      }
+      else if (mode==2){ // inclusive=standard or sideband
+	if (fTR->PhoIso04TrkHollow[*it]>5.0) ok=false;
+      }
     
-    if (!ok) it=passing.erase(it); else it++;
-  }
+      if (!ok) it=passing.erase(it); else it++;
+    }
   
+  } // end special selection for sieie templates 
+
+  if (templateChoice=="combiso"){
+    
+    for (vector<int>::iterator it = passing.begin(); it != passing.end(); ){
+      bool ok=true;
+      float cutUP, cutLOW, sidecutUP, sidecutLOW;
+
+      if (fTR->PhoHoverE[*it]>0.05) ok=false;  
+
+      if (fabs(fTR->PhoEta[*it])<1.4442) {cutLOW=0; cutUP=0.011;} // EB
+      else {cutLOW=0; cutUP=0.028;} // EE
+
+      if (fabs(fTR->PhoEta[*it])<1.4442) {sidecutLOW=0.011; sidecutUP=0.014;} // EB
+      else{sidecutLOW=0.028; sidecutUP=0.045;} // EE
+      
+      bool ok_std=!(fTR->PhoSigmaIetaIeta[*it]>cutUP || fTR->PhoSigmaIetaIeta[*it]<cutLOW);
+      bool ok_side=!(fTR->PhoSigmaIetaIeta[*it]>sidecutUP || fTR->PhoSigmaIetaIeta[*it]<sidecutLOW);
+
+      if (mode==0||mode==3) { // standard or DY pixel veto reversed
+	if (!ok_std) ok=false;
+      }
+      else if (mode==1){ // sieie sideband
+	if (!ok_side) ok=false;
+      }
+      else if (mode==2){ // inclusive=standard or sideband
+	if (!(ok_std || ok_side)) ok=false;
+      }
+    
+      if (!ok) it=passing.erase(it); else it++;
+    }
+
+    
+  } // end special selection for combiso templates
+
+
   return passing;
 
 };
 
 bool DiPhotonMiniTree::EventSelection(std::vector<int> passing){
   float invmass0 = (CorrPhoton(fTR,passing.at(0),0)+CorrPhoton(fTR,passing.at(1),0)).M();
-  //  cout << fTR->PhoPt[passing.at(0)] << " " << fTR->PhoPt[passing.at(1)] << " " << invmass0 << endl;
+  float deta=fTR->PhoEta[passing.at(0)]-fTR->PhoEta[passing.at(1)];
+  float dphi=fTR->PhoPhi[passing.at(0)]-fTR->PhoPhi[passing.at(1)];
+  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
+  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+  double dR=sqrt(dphi*dphi+deta*deta);
+
   if (fTR->PhoPt[passing.at(0)]<40) return false;
   if (fTR->PhoPt[passing.at(1)]<30) return false;
   if (invmass0<80) return false;
-  //  cout << "passing event selection!" << endl;
+  if (dR<0.4) return false;
+
   return true;
 };
 

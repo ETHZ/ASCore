@@ -35,7 +35,7 @@ endif
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
                  src/UserAnalyzer.cc src/TreeSkimmer.cc src/UserAnalysis.cc \
-                 src/helper/PUWeight.C src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc src/helper/MetaTreeClassBase.C src/helper/Lumi3DReWeighting_standalone.cc
+                 src/helper/PUWeight.C src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/LeptJetStat.cc src/helper/Hemisphere.cc src/helper/MetaTreeClassBase.C src/helper/Lumi3DReWeighting_standalone.cc src/EnergyCorrection.cc src/DiPhotonMiniTree.cc src/DiPhotonPurity.cc src/DiPhotonJetsAnalyzer.cc
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
@@ -43,17 +43,13 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunUserAnalyzer RunTreeSkimmer RunJZBAnalyzer 
+all: RunUserAnalyzer RunDiPhotonJetsAnalyzer 
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
-RunTreeSkimmer: src/exe/RunTreeSkimmer.C $(OBJS)
+RunDiPhotonJetsAnalyzer: src/exe/RunDiPhotonJetsAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS) src/JZBAnalyzer.o src/JZBAnalysis.o src/JZBPFAnalysis.o
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
 
 
 clean:
@@ -61,6 +57,7 @@ clean:
 	$(RM) RunUserAnalyzer
 	$(RM) RunTreeSkimmer
 	$(RM) RunJZBAnalyzer
+	$(RM) RunDiPhotonJetsAnalyzer
 
 purge:
 	$(RM) $(OBJS)
@@ -130,101 +127,7 @@ src/base/UserAnalysisBase.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 src/base/UserAnalysisBase.o: /usr/include/bits/stdio_lim.h
 src/base/UserAnalysisBase.o: /usr/include/bits/sys_errlist.h
 src/base/UserAnalysisBase.o: ./include/helper/PUWeight.h
-src/base/UserAnalysisBase.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h
-src/base/UserAnalysisBase.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h
-src/base/UserAnalysisBase.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/JetCorrectorParameters.h
-src/base/UserAnalysisBase.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/FWCore/Utilities/interface/Exception.h
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_base_and_derived.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_class.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/user.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/select_compiler_config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/compiler/gcc.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/select_stdlib_config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/select_platform_config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config/posix_features.hpp
-src/base/UserAnalysisBase.o: /usr/include/unistd.h
-src/base/UserAnalysisBase.o: /usr/include/bits/posix_opt.h
-src/base/UserAnalysisBase.o: /usr/include/bits/confname.h
-src/base/UserAnalysisBase.o: /usr/include/getopt.h
-src/base/UserAnalysisBase.o: /usr/include/boost/config/suffix.hpp
-src/base/UserAnalysisBase.o: /usr/include/limits.h
-src/base/UserAnalysisBase.o: /usr/include/bits/posix1_lim.h
-src/base/UserAnalysisBase.o: /usr/include/bits/local_lim.h
-src/base/UserAnalysisBase.o: /usr/include/linux/limits.h
-src/base/UserAnalysisBase.o: /usr/include/bits/posix2_lim.h
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_union.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/remove_cv.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/broken_compiler_spec.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/lambda_support.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/lambda.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/ttp.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/msvc.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/gcc.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/workaround.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/detail/workaround.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/ctps.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/cv_traits_impl.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/yes_no_type.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/type_trait_def.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/template_arity_spec.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/int.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/int_fwd.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/adl_barrier.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/adl.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/intel.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/nttp_decl.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/nttp.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/cat.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/config/config.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/integral_wrapper.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/integral_c_tag.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/static_constant.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/static_cast.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/template_arity_fwd.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/preprocessor/params.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/preprocessor.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/comma_if.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/punctuation/comma_if.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/control/if.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/control/iif.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/logical/bool.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/facilities/empty.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/punctuation/comma.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/repeat.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/repetition/repeat.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/debug/error.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/detail/auto_rec.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/tuple/eat.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/inc.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/preprocessor/arithmetic/inc.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/aux_/config/overload_resolution.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/type_trait_undef.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/intrinsics.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/bool_trait_def.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/integral_constant.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/bool.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/bool_fwd.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/integral_c.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/mpl/integral_c_fwd.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/bool_trait_undef.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/ice_and.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/ice_not.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_same.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_convertible.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_array.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/add_reference.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_reference.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/ice.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/ice_or.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/detail/ice_eq.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_arithmetic.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_integral.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_float.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/type_traits/is_abstract.hpp
-src/base/UserAnalysisBase.o: /usr/include/boost/static_assert.hpp
+src/base/UserAnalysisBase.o: ./include/helper/Lumi3DReWeighting_standalone.hh
 src/UserAnalyzer.o: ./include/UserAnalyzer.hh
 src/UserAnalyzer.o: ./include/base/TreeAnalyzerBase.hh
 src/UserAnalyzer.o: ./include/base/TreeReader.hh
@@ -248,8 +151,7 @@ src/UserAnalyzer.o: ./include/base/TreeReader.hh ./include/UserAnalysis.hh
 src/UserAnalyzer.o: ./include/base/UserAnalysisBase.hh
 src/UserAnalyzer.o: ./include/helper/pdgparticle.hh
 src/UserAnalyzer.o: ./include/helper/PUWeight.h
-src/UserAnalyzer.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h
-src/UserAnalyzer.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h
+src/UserAnalyzer.o: ./include/helper/Lumi3DReWeighting_standalone.hh
 src/TreeSkimmer.o: ./include/TreeSkimmer.hh
 src/TreeSkimmer.o: ./include/base/TreeAnalyzerBase.hh
 src/TreeSkimmer.o: ./include/base/TreeReader.hh
@@ -291,8 +193,7 @@ src/UserAnalysis.o: ./include/base/UserAnalysisBase.hh
 src/UserAnalysis.o: ./include/base/TreeReader.hh
 src/UserAnalysis.o: ./include/helper/pdgparticle.hh
 src/UserAnalysis.o: ./include/helper/PUWeight.h
-src/UserAnalysis.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h
-src/UserAnalysis.o: /swshare/cms/slc5_amd64_gcc434/cms/cmssw/CMSSW_4_2_8/src/CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h
+src/UserAnalysis.o: ./include/helper/Lumi3DReWeighting_standalone.hh
 src/helper/PUWeight.o: ./include/helper/PUWeight.h
 src/helper/AnaClass.o: ./include/helper/AnaClass.hh /usr/include/math.h
 src/helper/AnaClass.o: /usr/include/features.h /usr/include/sys/cdefs.h
@@ -344,3 +245,96 @@ src/helper/Hemisphere.o: /usr/include/sys/sysmacros.h
 src/helper/Hemisphere.o: /usr/include/bits/pthreadtypes.h
 src/helper/Hemisphere.o: /usr/include/alloca.h
 src/helper/MetaTreeClassBase.o: ./include/helper/MetaTreeClassBase.h
+src/helper/Lumi3DReWeighting_standalone.o: ./include/helper/Lumi3DReWeighting_standalone.hh
+src/EnergyCorrection.o: ./include/EnergyCorrection.hh
+src/EnergyCorrection.o: ./include/base/TreeReader.hh
+src/EnergyCorrection.o: ./include/base/TreeClassBase.h /usr/include/assert.h
+src/EnergyCorrection.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/EnergyCorrection.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/EnergyCorrection.o: /usr/include/gnu/stubs-64.h
+src/DiPhotonMiniTree.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/DiPhotonMiniTree.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/DiPhotonMiniTree.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/DiPhotonMiniTree.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
+src/DiPhotonMiniTree.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/DiPhotonMiniTree.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/DiPhotonMiniTree.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/DiPhotonMiniTree.o: /usr/include/bits/stdio_lim.h
+src/DiPhotonMiniTree.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/DiPhotonMiniTree.o: /usr/include/sys/types.h /usr/include/time.h
+src/DiPhotonMiniTree.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/DiPhotonMiniTree.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/DiPhotonMiniTree.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/DiPhotonMiniTree.o: /usr/include/sys/sysmacros.h
+src/DiPhotonMiniTree.o: /usr/include/bits/pthreadtypes.h
+src/DiPhotonMiniTree.o: /usr/include/alloca.h ./include/DiPhotonMiniTree.hh
+src/DiPhotonMiniTree.o: ./include/base/TreeReader.hh
+src/DiPhotonMiniTree.o: ./include/base/TreeClassBase.h
+src/DiPhotonMiniTree.o: ./include/base/UserAnalysisBase.hh
+src/DiPhotonMiniTree.o: ./include/base/TreeReader.hh
+src/DiPhotonMiniTree.o: ./include/helper/pdgparticle.hh
+src/DiPhotonMiniTree.o: ./include/helper/PUWeight.h
+src/DiPhotonMiniTree.o: ./include/helper/Lumi3DReWeighting_standalone.hh
+src/DiPhotonMiniTree.o: ./include/EnergyCorrection.hh
+src/DiPhotonMiniTree.o: ./include/DiPhotonPurity.hh /usr/include/assert.h
+src/DiPhotonMiniTree.o: src/DiPhotonTriggerSelection.cc
+src/DiPhotonPurity.o: ./include/helper/Utilities.hh /usr/include/stdio.h
+src/DiPhotonPurity.o: /usr/include/features.h /usr/include/sys/cdefs.h
+src/DiPhotonPurity.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+src/DiPhotonPurity.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
+src/DiPhotonPurity.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+src/DiPhotonPurity.o: /usr/include/_G_config.h /usr/include/wchar.h
+src/DiPhotonPurity.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+src/DiPhotonPurity.o: /usr/include/bits/stdio_lim.h
+src/DiPhotonPurity.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+src/DiPhotonPurity.o: /usr/include/sys/types.h /usr/include/time.h
+src/DiPhotonPurity.o: /usr/include/endian.h /usr/include/bits/endian.h
+src/DiPhotonPurity.o: /usr/include/sys/select.h /usr/include/bits/select.h
+src/DiPhotonPurity.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+src/DiPhotonPurity.o: /usr/include/sys/sysmacros.h
+src/DiPhotonPurity.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+src/DiPhotonPurity.o: ./include/DiPhotonPurity.hh
+src/DiPhotonPurity.o: ./include/base/TreeReader.hh
+src/DiPhotonPurity.o: ./include/base/TreeClassBase.h
+src/DiPhotonPurity.o: ./include/base/UserAnalysisBase.hh
+src/DiPhotonPurity.o: ./include/base/TreeReader.hh
+src/DiPhotonPurity.o: ./include/helper/pdgparticle.hh
+src/DiPhotonPurity.o: ./include/helper/PUWeight.h
+src/DiPhotonPurity.o: ./include/helper/Lumi3DReWeighting_standalone.hh
+src/DiPhotonPurity.o: ./include/EnergyCorrection.hh /usr/include/assert.h
+src/DiPhotonPurity.o: src/DiPhotonTriggerSelection.cc
+src/DiPhotonJetsAnalyzer.o: ./include/DiPhotonJetsAnalyzer.hh
+src/DiPhotonJetsAnalyzer.o: ./include/base/TreeAnalyzerBase.hh
+src/DiPhotonJetsAnalyzer.o: ./include/base/TreeReader.hh
+src/DiPhotonJetsAnalyzer.o: ./include/base/TreeClassBase.h
+src/DiPhotonJetsAnalyzer.o: ./include/helper/Utilities.hh
+src/DiPhotonJetsAnalyzer.o: /usr/include/stdio.h /usr/include/features.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/sys/cdefs.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/wordsize.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/gnu/stubs.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/gnu/stubs-64.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/types.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/typesizes.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/libio.h /usr/include/_G_config.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/wchar.h /usr/include/bits/wchar.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/gconv.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/stdio_lim.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/sys_errlist.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/stdlib.h /usr/include/sys/types.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/time.h /usr/include/endian.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/endian.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/sys/select.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/select.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/sigset.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/time.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/sys/sysmacros.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/bits/pthreadtypes.h
+src/DiPhotonJetsAnalyzer.o: /usr/include/alloca.h
+src/DiPhotonJetsAnalyzer.o: ./include/base/TreeReader.hh
+src/DiPhotonJetsAnalyzer.o: ./include/DiPhotonPurity.hh
+src/DiPhotonJetsAnalyzer.o: ./include/base/UserAnalysisBase.hh
+src/DiPhotonJetsAnalyzer.o: ./include/helper/pdgparticle.hh
+src/DiPhotonJetsAnalyzer.o: ./include/helper/PUWeight.h
+src/DiPhotonJetsAnalyzer.o: ./include/helper/Lumi3DReWeighting_standalone.hh
+src/DiPhotonJetsAnalyzer.o: ./include/EnergyCorrection.hh
+src/DiPhotonJetsAnalyzer.o: ./include/DiPhotonMiniTree.hh
