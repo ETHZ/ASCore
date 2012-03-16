@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.127 2012/03/12 17:29:17 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.128 2012/03/14 16:03:55 peruzzi Exp $
 //
 //
 
@@ -27,6 +27,7 @@ Implementation:
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
+#include "TVector3.h"
 
 // Framework include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -856,29 +857,31 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 
-  std::vector<TVector3> pho_conv_vtx;
-  std::vector<TVector3> pho_conv_refitted_momentum;
+	TVector3 pho_conv_vtx[gMaxnphos];
+	TVector3 pho_conv_refitted_momentum[gMaxnphos];
+	TVector3 conv_vtx[gMaxnphos];
+	TVector3 conv_refitted_momentum[gMaxnphos];
+	TVector3 gv_pos[gMaxngenvtx];
+	TVector3 gv_p3[gMaxngenvtx];
+
+
   bool pho_conv_validvtx[gMaxnphos];
   int pho_conv_ntracks[gMaxnphos];
   float pho_conv_chi2_probability[gMaxnphos];
   float pho_conv_eoverp[gMaxnphos];
   
   int conv_n;
-  std::vector<TVector3> conv_vtx;
-  std::vector<TVector3> conv_refitted_momentum;
   bool conv_validvtx[gMaxnconv];
   int conv_ntracks[gMaxnconv];
   float conv_chi2_probability[gMaxnconv];
   float conv_eoverp[gMaxnconv];
   float conv_zofprimvtxfromtrks[gMaxnconv];
 
-  Int_t gv_n;
-  std::vector<TVector3> gv_pos;
-  std::vector<TVector3> gv_p3;
-  Float_t gv_sumPtHi[gMaxngenvtx];
-  Float_t gv_sumPtLo[gMaxngenvtx];
-  Int_t gv_nTkHi[gMaxngenvtx];
-  Int_t gv_nTkLo[gMaxngenvtx];
+  int gv_n;
+  float gv_sumPtHi[gMaxngenvtx];
+  float gv_sumPtLo[gMaxngenvtx];
+  int gv_nTkHi[gMaxngenvtx];
+  int gv_nTkLo[gMaxngenvtx];
 
   // SC
   int fTnSC;

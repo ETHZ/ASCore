@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.164 2012/03/12 17:29:18 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.165 2012/03/14 16:03:55 peruzzi Exp $
 //
 //
 
@@ -1697,8 +1697,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 
 
-	
-
 
 	////////////////////////////////////////////////////////
 	// Photon Variables:
@@ -2358,37 +2356,37 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 	 { // tracks
-	   //	   cout << "tracks begin" << endl;
+	   if (VTX_MVA_DEBUG)	   	   cout << "tracks begin" << endl;
 	   std::vector<reco::TrackBaseRef>::const_iterator tk;
 	 
 	   for(unsigned int i=0; i<vtxH->size(); i++) {
 
-	     //	     cout << "working on vtx " << i << endl;
+if (VTX_MVA_DEBUG)	     	     cout << "working on vtx " << i << endl;
 
 	     if (vtxH->size()>__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
 
 	     reco::VertexRef vtx(vtxH, i);
 	  
 	     vtx_std_ntks[i]=vtx->tracksSize();
-	     //	     cout << "vtx tracks " << vtx->tracksSize() << endl;
+if (VTX_MVA_DEBUG)	     	     cout << "vtx tracks " << vtx->tracksSize() << endl;
 	     
 	     std::vector<unsigned short> temp;
 	     std::vector<float> temp_float;
 
 	     if (vtx->tracksSize()>0){
 	       for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
-		 //		 cout << "processing vtx track (out of " << vtx->tracksSize() << ")" << endl;
+if (VTX_MVA_DEBUG)		 		 cout << "processing vtx track (out of " << vtx->tracksSize() << ")" << endl;
 		 int index = 0;
 		 bool ismatched = false; 
 		 for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
-		   //		   std::cout << j << std::endl;
+if (VTX_MVA_DEBUG)		   		   std::cout << j << std::endl;
 		   reco::TrackRef track(tkH, j);
 		   if(TrackCut(track)) continue; 
 		   if (&(**tk) == &(*track)) {
 		     temp.push_back(index);
 		     temp_float.push_back(vtx->trackWeight(track));
 		     ismatched = true;
-		     //		     cout << "matching found index" << index << " weight " << vtx->trackWeight(track) << endl;
+if (VTX_MVA_DEBUG)		     		     cout << "matching found index" << index << " weight " << vtx->trackWeight(track) << endl;
 		     break;
 		   }
 		   index++;
@@ -2400,7 +2398,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       }
 	     }
 	     else {
-	       //	       cout << "no vertex tracks found" << endl;
+if (VTX_MVA_DEBUG)	       	       cout << "no vertex tracks found" << endl;
 	       temp = std::vector<unsigned short>(0);
 	       temp_float = std::vector<float>(0);
 	     }
@@ -2409,13 +2407,14 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
 	     vtx_std_tkind.push_back(temp);
 	     vtx_std_tkweight.push_back(temp_float);
-	     //	     	     std::cout << "tracks: " <<  temp.size() << std::endl;
+if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << std::endl;
 	   }	  
 
-	   //	   std::cout << "tkWeight is " << std::endl;
-	   //	   for (int a=0; a<(int)(vtx_std_tkind.size()); a++) std::cout << a << ":" << vtx_std_tkind.at(a).size() << " " ;
-	   //	   std::cout << std::endl;
-
+	   if (VTX_MVA_DEBUG){
+	   	   std::cout << "tkWeight is " << std::endl;
+	   	   for (int a=0; a<(int)(vtx_std_tkind.size()); a++) std::cout << a << ":" << vtx_std_tkind.at(a).size() << " " ;
+	   	   std::cout << std::endl;
+	   }
 
 
 	   for(unsigned int i=0; i<tkH->size(); i++) {
@@ -2607,7 +2606,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-
+       //       cout << "end vertex selection MVA" << endl;
 
 
 
@@ -3690,12 +3689,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoSCSigmaPhiPhi" ,&fTPhotSCSigmaPhiPhi ,"PhoSCSigmaPhiPhi[NPhotons]/F");
 	fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
 	fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
-	// fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
-	// fEventTree->Branch("PhoIsElDupl"      ,&fTPhotDupEl         ,"PhoIsElDupl[NPhotons]/I");
-	// fEventTree->Branch("PhoSharedPx"      ,&fTPhotSharedPx      ,"PhoSharedPx[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedEnergy"  ,&fTPhotSharedEnergy  ,"PhoSharedEnergy[NPhotons]/F");
 	fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
 	fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/F");
 	fEventTree->Branch("PhoS4OverS1"      ,&fTPhotS4OverS1      ,"PhoS4OverS1[NPhotons]/F");
@@ -3778,37 +3771,25 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&fT_pho_Cone
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
 
- // fEventTree->Branch("pho_conv_vtx",&pho_conv_vtx);
-// fEventTree->Branch("pho_conv_refitted_momentum",&pho_conv_refitted_momentum);
- fEventTree->Branch("pho_conv_validvtx",&pho_conv_validvtx,"pho_conv_validvtx[NPhotons]/O");
- fEventTree->Branch("pho_conv_ntracks",&pho_conv_ntracks,"pho_conv_ntracks[NPhotons]/I");
- fEventTree->Branch("pho_conv_chi2_probability",&pho_conv_chi2_probability,"pho_conv_chi2_probability[NPhotons]/F");
- fEventTree->Branch("pho_conv_eoverp",&pho_conv_eoverp,"pho_conv_eoverp[NPhotons]/F");
 
- fEventTree->Branch("conv_n",&conv_n,"conv_n/I");
- // fEventTree->Branch("conv_vtx",&conv_vtx);
- // fEventTree->Branch("conv_refitted_momentum",&conv_refitted_momentum);
- fEventTree->Branch("conv_validvtx",&conv_validvtx,"conv_validvtx[NPhotons]/O");
- fEventTree->Branch("conv_ntracks",&conv_ntracks,"conv_ntracks[NPhotons]/I");
- fEventTree->Branch("conv_chi2_probability",&conv_chi2_probability,"conv_chi2_probability[NPhotons]/F");
- fEventTree->Branch("conv_eoverp",&conv_eoverp,"conv_eoverp[NPhotons]/F");
- fEventTree->Branch("conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"conv_zofprimvtxfromtrks[NPhotons]/F");
+ fEventTree->Branch("Pho_conv_validvtx",&pho_conv_validvtx,"Pho_conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("Pho_conv_ntracks",&pho_conv_ntracks,"Pho_conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("Pho_conv_chi2_probability",&pho_conv_chi2_probability,"Pho_conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("Pho_conv_eoverp",&pho_conv_eoverp,"Pho_conv_eoverp[NPhotons]/F");
 
- fEventTree->Branch("gv_n",&gv_n,"gv_n/I");
- // fEventTree->Branch("gv_pos",&gv_pos);
- // fEventTree->Branch("gv_p3",&gv_p3);
- fEventTree->Branch("gv_sumPtHi",&gv_sumPtHi,"gv_sumPtHi[gv_n]/F");
- fEventTree->Branch("gv_sumPtLo",&gv_sumPtLo,"gv_sumPtLo[gv_n]/F");
- fEventTree->Branch("gv_nTkHi",&gv_nTkHi,"gv_nTkHi[gv_n]/I");
- fEventTree->Branch("gv_nTkLo",&gv_nTkLo,"gv_nTkLo[gv_n]/I");
+ fEventTree->Branch("Conv_n",&conv_n,"Conv_n/I");
+ fEventTree->Branch("Conv_validvtx",&conv_validvtx,"Conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("Conv_ntracks",&conv_ntracks,"Conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("Conv_chi2_probability",&conv_chi2_probability,"Conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("Conv_eoverp",&conv_eoverp,"Conv_eoverp[NPhotons]/F");
+ fEventTree->Branch("Conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"Conv_zofprimvtxfromtrks[NPhotons]/F");
 
- /*
- fEventTree->Branch("diphotons_first",&diphotons_first);
- fEventTree->Branch("diphotons_second",&diphotons_second);
- fEventTree->Branch("vtx_dipho_h2gglobe",&vtx_dipho_h2gglobe);
- fEventTree->Branch("vtx_dipho_mva",&vtx_dipho_mva);
- fEventTree->Branch("vtx_dipho_productrank",&vtx_dipho_productrank);
- */
+// fEventTree->Branch("Gvn",&gv_n,"Gvn/I");
+// fEventTree->Branch("Gv_sumPtHi",&gv_sumPtHi,"Gv_sumPtHi[Gvn]/F");
+// fEventTree->Branch("Gv_sumPtLo",&gv_sumPtLo,"Gv_sumPtLo[Gvn]/F");
+// fEventTree->Branch("Gv_nTkHi",&gv_nTkHi,"Gv_nTkHi[Gvn]/I");
+// fEventTree->Branch("Gv_nTkLo",&gv_nTkLo,"Gv_nTkLo[Gvn]/I");
+
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -4576,41 +4557,21 @@ void NTupleProducer::resetTree(){
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
        
-       pho_conv_vtx.clear(); 
-       pho_conv_vtx.resize(gMaxnphos);
-       pho_conv_refitted_momentum.clear();
-       pho_conv_refitted_momentum.resize(gMaxnphos);
        for (int i=0; i<gMaxnphos; i++) pho_conv_validvtx[i]=false;
        resetFloat(pho_conv_chi2_probability,gMaxnphos);
        resetFloat(pho_conv_eoverp,gMaxnphos);
        resetInt(pho_conv_ntracks,gMaxnphos);
 
-       conv_vtx.clear();
-       conv_vtx.resize(gMaxnconv);
-       conv_refitted_momentum.clear();
-       conv_refitted_momentum.resize(gMaxnconv);
        for (int i=0; i<gMaxnconv; i++) conv_validvtx[i]=false;
        resetInt(conv_ntracks,gMaxnconv);
        resetFloat(conv_chi2_probability,gMaxnconv);
        resetFloat(conv_eoverp,gMaxnconv);
        resetFloat(conv_zofprimvtxfromtrks,gMaxnconv);
 
-       gv_pos.clear();
-       gv_pos.resize(gMaxngenvtx);
-       gv_p3.clear();
-       gv_p3.resize(gMaxngenvtx);
        resetFloat(gv_sumPtHi,gMaxngenvtx);
        resetFloat(gv_sumPtLo,gMaxngenvtx);
        resetInt(gv_nTkHi,gMaxngenvtx);
        resetInt(gv_nTkLo,gMaxngenvtx);
-
-       /*
-       diphotons_first.clear();
-       diphotons_second.clear();
-       vtx_dipho_h2gglobe.clear();
-       vtx_dipho_mva.clear();
-       vtx_dipho_productrank.clear();
-       */
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
@@ -4659,6 +4620,18 @@ void NTupleProducer::resetTree(){
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,gMaxnphos);
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,gMaxnphos);
 
+       for (int i=0; i<gMaxnphos; i++) {
+	 pho_conv_vtx[i]=TVector3();
+	 pho_conv_refitted_momentum[i]=TVector3();
+	 conv_vtx[i]=TVector3();
+	 conv_refitted_momentum[i]=TVector3();
+       }
+       
+       for (int i=0; i<gMaxngenvtx; i++) {
+	 gv_pos[i]=TVector3();
+	 gv_p3[i]=TVector3();
+       }
+       
 
 	resetFloat(fTSCraw,gMaxnSC);
 	resetFloat(fTSCpre,gMaxnSC);
