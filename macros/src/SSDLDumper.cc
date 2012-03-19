@@ -1617,6 +1617,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_Charge = MuCharge[ind1];
 		fSETree_pT1    = MuPt[ind1];
 		fSETree_pT2    = MuPt[ind2];
+		fSETree_eta1   = MuEta[ind1];
+		fSETree_eta2   = MuEta[ind2];
 		if( isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 0;
 		if( isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
@@ -1637,6 +1639,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_Charge = MuCharge[ind1];
 		fSETree_pT1    = MuPt[ind1];
 		fSETree_pT2    = ElPt[ind2];
+		fSETree_eta1   = MuEta[ind1];
+		fSETree_eta2   = ElEta[ind2];
 		if( isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
 		if( isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
@@ -1657,6 +1661,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_Charge = ElCharge[ind1];
 		fSETree_pT1    = ElPt[ind1];
 		fSETree_pT2    = ElPt[ind2];
+		fSETree_eta1   = ElEta[ind1];
+		fSETree_eta2   = ElEta[ind2];
 		if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
 		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
@@ -2310,6 +2316,8 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("Mll",      &fSETree_Mll   , "Mll/F");
 	fSigEv_Tree->Branch("pT1",      &fSETree_pT1   , "pT1/F");
 	fSigEv_Tree->Branch("pT2",      &fSETree_pT2   , "pT2/F");
+	fSigEv_Tree->Branch("eta1",     &fSETree_eta1  , "eta1/F");
+	fSigEv_Tree->Branch("eta2",     &fSETree_eta2  , "eta2/F");
 }
 void SSDLDumper::resetSigEventTree(){
 	fSETree_PUWeight = -1.;
@@ -2330,6 +2338,8 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_Mll      = -1.;
 	fSETree_pT1      = -1.;
 	fSETree_pT2      = -1.;
+	fSETree_eta1     = -99.;
+	fSETree_eta2     = -99.;
 }
 void SSDLDumper::writeSigEvTree(TFile *pFile){
 	pFile->cd();

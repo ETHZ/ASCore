@@ -58,6 +58,7 @@ public:
 	void makeFRvsPtPlotsForPAS(gChannel);
 	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
+	void make2DRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
 
 	void makeOriginPlots(gRegion);
@@ -80,8 +81,9 @@ public:
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
-	void storeWeightedPred();
-	float getFRatio(gChannel, float, int = 0);
+	void storeWeightedPred(bool diffeta = false);
+	float getFRatio(gChannel, float, int = 0);        // diff in pt only
+	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta
 	float getPRatio(gChannel, float, int = 0);
 	
 	//////////////////////////////
@@ -90,6 +92,8 @@ public:
 	void fillRatios(vector<int>, vector<int>, int = 0);
 	TH1D* fillRatioPt(gChannel, int, gFPSwitch, bool = false);
 	TH1D* fillRatioPt(gChannel, vector<int>, gFPSwitch, bool = false);
+	TH2D* fillRatio(gChannel, int, gFPSwitch, bool = false);
+	TH2D* fillRatio(gChannel, vector<int>, gFPSwitch, bool = false);
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
@@ -151,6 +155,8 @@ public:
 	const double *getEtaBins (gChannel);
 	
 	vector<int> fMCBG;    // SM background MC samples
+	vector<int> fMCBGNoQCDNoGJets;    // SM background MC samples without QCD or GJets
+	vector<int> fMCBGNoQCDNoGJetsSig;    // SM background MC samples without QCD or GJets, with signal
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
 	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
@@ -177,6 +183,16 @@ public:
 	TH1D *fH1D_MupRatio_MC;
 	TH1D *fH1D_ElfRatio_MC;
 	TH1D *fH1D_ElpRatio_MC;
+
+	TH2D *fH2D_MufRatio;
+	TH2D *fH2D_MupRatio;
+	TH2D *fH2D_ElfRatio;
+	TH2D *fH2D_ElpRatio;
+
+	TH2D *fH2D_MufRatio_MC;
+	TH2D *fH2D_MupRatio_MC;
+	TH2D *fH2D_ElfRatio_MC;
+	TH2D *fH2D_ElpRatio_MC;
 
 	private:
 	

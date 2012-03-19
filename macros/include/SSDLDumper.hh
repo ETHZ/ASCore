@@ -658,6 +658,8 @@ public:
 	float       fSETree_Mll;
 	float       fSETree_pT1;
 	float       fSETree_pT2;
+	float       fSETree_eta1;
+	float       fSETree_eta2;
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
