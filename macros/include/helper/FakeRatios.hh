@@ -17,6 +17,8 @@ public:
 	inline void setNToyMCs(int n){fNToyMCs = n;};
 	inline void setVerbose(int n){fVerbose = n;};
 	inline void setAddESyst(float e){fAddESyst = e;};
+	inline void setIsMC(bool b){fIsMC = b;};
+	inline void setNGen(long n){fNGen = n;};
 
 	enum gTLCat { TT, TL, LT, LL };
 
@@ -144,6 +146,11 @@ private:
 	int fVerbose; // default 0
 	int fNToyMCs; // default 100
 	// Additional relative systematic error on predictions (added in quadrature), default 0.
+	
+	bool fIsMC; // default false
+	long fNGen; // number of generated events, only used if fIsMC is true
+	// Switches between different handlings of statistical errors
+	
 	float fAddESyst;
 
 	float fMMNtl[3]; // tt, tl, ll

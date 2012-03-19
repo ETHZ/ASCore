@@ -13,10 +13,11 @@
 #include "helper/FakeRatios.hh"
 #include "TMath.h"
 #include "TRandom3.h"
+#include "TEfficiency.h"
 
 using namespace std;
 
-FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100), fAddESyst(0.0) {
+FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100), fAddESyst(0.0), fIsMC(false), fNGen(0) {
 	// Initialize arrays to avoid segfaults
 	fMMNtl[0] = -1.; fMMNtl[1] = -1.; fMMNtl[2] = -1.; 
 	fEENtl[0] = -1.; fEENtl[1] = -1.; fEENtl[2] = -1.; 
@@ -700,6 +701,16 @@ float FakeRatios::getWff(gTLCat cat, float f1, float f2, float p1, float p2){
 //____________________________________________________________________________________
 // This is the central place to fix how to calculate statistical errors
 float FakeRatios::getEStat2(float N){
+	if(fIsMC && fNGen > 0){
+		// If n passed of ngen generated, what is upper limit
+		// on number of events passing?
+		TEfficiency *eff = new TEfficiency();
+		float upper = eff->ClopperPearson(fNGen, N, 0.68, true);
+		float delta = upper - float(N)/float(fNGen);
+		delete eff;
+		return delta * float(fNGen);
+	}	
+	
 	if(N > 3.) return N;
 	// Get these limits from TMath::ChisquaredQuantile() according to formulas
 	// 32.51a and 32.51b in the PDG:
