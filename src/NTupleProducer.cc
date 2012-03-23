@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.165 2012/03/14 16:03:55 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.166 2012/03/16 13:38:08 peruzzi Exp $
 //
 //
 
@@ -113,6 +113,7 @@ Implementation:
 //#include <pair>
 #include <sstream>
 
+
 namespace LHAPDF {
   void initPDFSet(const std::string& filename, int member=0);
   void initPDF(int member=0);
@@ -126,6 +127,16 @@ namespace LHAPDF {
   double getQ2max(int nset, int member);
   void extrapolate(bool extrapolate=true);
 }
+
+void FlipGenStoreFlag(int index, int Promptness[], int genMo1Index[], int genMo2Index[], bool StoreFlag[]) {
+  if(StoreFlag[index]) return;//particle has already been marked. 
+  StoreFlag[index]=true;
+  if(genMo1Index[index]>0) FlipGenStoreFlag(genMo1Index[index], Promptness, genMo1Index, genMo2Index, StoreFlag);
+  if(genMo2Index[index]>0) FlipGenStoreFlag(genMo2Index[index], Promptness, genMo1Index, genMo2Index, StoreFlag);
+}
+  
+  
+  
 
 NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	// Main settings
@@ -3095,135 +3106,178 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	bool blabalot=false;
 	bool BloatWithGenInfo=true;
 
+	
 	if(BloatWithGenInfo && !fIsRealData) {
-	  //Generator information (this is saved for all MC samples)
+	  int genIndex[1200];
+	  int genNIndex[1200];
+	  int genID[1200];
+	  float genPx[1200];
+	  float genPy[1200];
+	  float genPz[1200];
+	  float genPt[1200];
+	  float genEta[1200];
+	  float genPhi[1200];
+	  float genM[1200];
+	  int genMo1Index[1200];
+	  int genMo2Index[1200];
+	  int genNMo[1200];
+	  int genStatus[1200];
+	  int Promptness[1200];
+	  bool StoreFlag[1200];
 	  
-	        Handle<GenParticleCollection> genParticles;
-	        iEvent.getByLabel("genParticles", genParticles);
-	        for(size_t i = 0; i < genParticles->size(); ++ i) {
-		     fTnGenParticles++;
-	             if((int)i>nStoredGenParticles) {
-				edm::LogWarning("NTP") << "@SUB=analyze()"
-					<< "Maximum number of gen particles exceeded";
-				fTflagmaxgenpartexc = 1;
-				break;
-		     }
-	             const GenParticle & p = (*genParticles)[i];
-	             fTgenInfoId[i] = p.pdgId();
-	             fTgenInfoStatus[i] = p.status();
-		     fTgenInfoMo1[i]=0;
-		     fTgenInfoMo2[i]=0;
-		     fTgenInfoDa1[i]=0;
-		     fTgenInfoDa2[i]=0;
-		     fTgenInfoNMo[i] = p.numberOfMothers();
-		     fTgenInfoMo1Pt[i]=0;
-		     fTgenInfoMo2Pt[i]=0;
-		     fTgenInfoPromptFlag[i]=0;
-		     float momcharge=0;
+	  int nGenParticles=0;
+	  
+	  Handle<GenParticleCollection> genParticles;
+	  iEvent.getByLabel("genParticles", genParticles);
+	  
+	  // STEP 1: Loop over all particles and store the information.
+	  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	    nGenParticles++;
+	    const GenParticle & p = (*genParticles)[i];
+	    genIndex[i]=i;
+	    genNIndex[i]=0;
+	    genID[i]=p.pdgId();
+	    genPx[i]=p.px();
+	    genPy[i]=p.py();
+	    genPz[i]=p.pz();
+	    genPt[i]=p.pt();
+	    genPhi[i]=p.phi();
+	    genEta[i]=p.eta();
+	    genM[i]=p.mass();
+	    genStatus[i]=p.status();
+	    genMo1Index[i]=-1;
+	    genMo2Index[i]=-1;
+	    genNMo[i]=p.numberOfMothers();
+	    StoreFlag[i]=false;
+	    if(genID[i]==2212) Promptness[i]=0;
+	    else Promptness[i]=-1;
+	    
 
-		     if(abs(fTgenInfoId[i])==2212)fTgenInfoPromptFlag[i]=1;
+	    if(blabalot) cout << "Reading particle " << i << " (is pdgid=" << genID[i] << ") with " << genNMo[i] << " mothers" << endl;
+	    for(int j=0;j<genNMo[i]&&j<2;j++) {
+	      int idx = -1;
+	      const GenParticle* mom = static_cast<const GenParticle*> (p.mother(j));
+	      const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
+	      if (mom == NULL) break;
+	      for (unsigned int k = 0; k < genParticles->size() && k<i; ++k) {
+		const reco::GenParticle& testm = (*genParticles)[k];
+		const GenParticle* testgm = static_cast<const GenParticle*> (testm.mother());
+		if (testm.pt() == mom->pt()) {
+		  if(gmom == NULL || (testgm!=NULL) && (gmom->pt() == testgm->pt())) {
+		    idx = k;
+		    if(blabalot) cout << "     Found a hit for a mother for index " << i << "! It's index " << idx << " (pdgid " << genID[idx] << ")" << endl;
+		    break;
+		  }
+		}
+	      }
+	      if(j==0) genMo1Index[i]=idx;
+	      if(j==1) genMo2Index[i]=idx;
+	    }
+	    if(Promptness[i]==-1&&genMo1Index[i]>=0&&Promptness[genMo1Index[i]]>-1) Promptness[i]=Promptness[genMo1Index[i]]+1;
+	    if(blabalot) cout << "                    Promtpness: " << Promptness[i] << endl;
+	    if(blabalot) cout << "          Mother 1: " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+	    if(blabalot) cout << "          Mother 2: " << genMo2Index[i] << endl;
+	  }
+	  
+	  // STEP 2: Loop from end to start flipping storeflag when necessary
+	  float genPtThreshold=5.0; // any particle with less pt than this will not be stored.
+	  for(int i=nGenParticles-1;i>=0;i--) {
+	    if(genStatus[i]!=1) continue;
+	    if(genPt[i]<genPtThreshold) continue;
+	    FlipGenStoreFlag(i,Promptness,genMo1Index,genMo2Index,StoreFlag);
+	  }
+	  
+	  // Intermediate step: Make sure that all first particles are stored, and that the earliest particles are stored (i.e. promptness criteria are met)
+	  for(int i=nGenParticles-1;i>=0;i--) {
+	    if(Promptness[i]<4&&Promptness[i]>=0) StoreFlag[i]=true;
+	    if(i<20) StoreFlag[i]=true;
+	  }
+	  
+	  // STEP 3: Loop again, setting new index ("nindex") and replacing Mo1 by if(Mo1>-1) Mo1=nindex[index];, same for Mo2. If storeflag, store it directly.
+	  fTnGenParticles=-1;
+	  for(int i=0;i<nGenParticles;i++) {
+	    if(!StoreFlag[i]) continue;
+	    fTnGenParticles++;
+	    if(fTnGenParticles>nStoredGenParticles) {
+	      edm::LogWarning("NTP") << "@SUB=analyze()"
+	      << "Maximum number of gen particles exceeded";
+	      fTflagmaxgenpartexc = 1;
+	      break;
+	    }
+	    
+	    genNIndex[i]=fTnGenParticles;
+	    
+	    //store everything
+	    fTgenInfoId[fTnGenParticles] = genID[i];
+	    fTgenInfoStatus[fTnGenParticles] = genStatus[i];
+	    fTgenInfoNMo[fTnGenParticles] = genNMo[i];
+	    fTgenInfoMo1Pt[fTnGenParticles]=0;
+	    fTgenInfoMo2Pt[fTnGenParticles]=0;
+	    if(genMo1Index[i]>=0) {
+	      fTgenInfoMo1Pt[fTnGenParticles]=genPt[genMo1Index[i]];
+	      fTgenInfoMo1[fTnGenParticles]=genNIndex[genMo1Index[i]];
+	    } else {
+	      fTgenInfoMo1[fTnGenParticles]=-1;
+	    }
+	    if(genMo2Index[i]>=0) {
+	      fTgenInfoMo2Pt[fTnGenParticles]=genPt[genMo2Index[i]];
+	      fTgenInfoMo2[fTnGenParticles]=genNIndex[genMo2Index[i]];
+	    } else {
+	      fTgenInfoMo2[fTnGenParticles]=-1;
+	    }
+	    
+	    fTPromptnessLevel[fTnGenParticles]=Promptness[i];
+	    fTgenInfoPt[fTnGenParticles] = genPt[i];
+	    fTgenInfoEta[fTnGenParticles] = genEta[i];
+	    fTgenInfoPhi[fTnGenParticles] = genPhi[i];
+	    fTgenInfoPx[fTnGenParticles] = genPx[i];
+	    fTgenInfoPy[fTnGenParticles] = genPy[i];
+	    fTgenInfoPz[fTnGenParticles] = genPz[i];
+	    fTgenInfoM[fTnGenParticles] = genM[i];
 
-	             fTgenInfoNDa[i] = p.numberOfDaughters();
-	             for(int j=0;j<2&&j<fTgenInfoNMo[i];j++) {
-			const GenParticle* mom = static_cast<const GenParticle*> (p.mother());
-			int momid=0,gmomid=0,ggmomid=0;
-			momcharge=mom->charge();
-
-			if (mom != NULL) {
-				const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
-				momid=mom->pdgId();
-				if(abs(momid)==2212) fTgenInfoPromptFlag[i]=1; 
-				if (!fTgenInfoPromptFlag[i] && gmom != NULL) {
-					gmomid=gmom->pdgId();
-					if(abs(gmomid)==2212) fTgenInfoPromptFlag[i]=1;
-					const GenParticle* ggmom = static_cast<const GenParticle*> (gmom->mother());
-					if(ggmom != NULL) ggmomid=ggmom->pdgId();
-					if(abs(ggmomid)==2212) fTgenInfoPromptFlag[i]=1;
-				}
-			}
-			
-					
-			if(j==0) {
-				fTgenInfoMo1[i] = abs(mom->pdgId());
-				fTgenInfoMo1Pt[i] = abs(mom->pt());
-				float mometa=mom->eta();
-				fTgenInfoMoIndex[i]=-1;
-
-				for(int k=0;k<(int)genParticles->size()&&k<(int)i;k++) {
-	             			const GenParticle & pcand = (*genParticles)[k];
-					if((abs(pcand.eta()-mometa)/abs(pcand.eta()+mometa)<0.01)&&(abs(pcand.pt()-fTgenInfoMo1Pt[i])/abs(1+pcand.pt()+fTgenInfoMo1Pt[i])<0.01)&&((pcand.charge()==momcharge&&fTgenInfoMo1[i]==pcand.pdgId()))||(abs(fTgenInfoMo1[i])<10&&abs(fTgenInfoMo1[i])==pcand.pdgId())) {
-						fTgenInfoMoIndex[i]=k;
-						break;
-					}
-				}
-			}
-			if(j==1) {
-				fTgenInfoMo2[i] = abs(mom->pdgId());
-				fTgenInfoMo2Pt[i] = abs(mom->pt());
-			}
-	             }//end of "mother loop"
-	             for(int j=0;j<2&&j<fTgenInfoNDa[i];j++) {
-			const Candidate * dau = p.daughter(j);
-			if(j==0) fTgenInfoDa1[i] = abs(dau->pdgId());
-			if(j==1) fTgenInfoDa2[i] = abs(dau->pdgId());
-	             }
-	             fTgenInfoPt[i] = p.pt();
-	             fTgenInfoEta[i] = p.eta();
-	             fTgenInfoPhi[i] = p.phi();
-	             fTgenInfoPx[i] = p.px();
-	             fTgenInfoPy[i] = p.py();
-	             fTgenInfoPz[i] = p.pz();
-	             fTgenInfoM[i] = p.mass();
-	             fTPromptnessLevel[i] = -1;
-	             int levelid=fTgenInfoId[i];
-	             int motherindex=fTgenInfoMoIndex[i];
-	             for(int k=0;k<=(int)i;k++) {
-			if(abs(levelid)==2212) {
-				fTPromptnessLevel[i]=k;
-				break;
-			} else {
-				if(motherindex>=0) {
-					levelid=fTgenInfoId[motherindex];
-					motherindex=fTgenInfoMoIndex[motherindex];
-				} else {
-					// no mother information available!
-					fTPromptnessLevel[i]=-1;
-					break;
-				}
-			}
-	             }//end of "promptness loop"
-	        }//end of particle loop
-
-	        float gluinomass=0;
-	        float ngluinomass=0;
-	        float chi2mass=0;
-	        float nchi2mass=0;
-   	        float chi1mass=0;
-   	        float nchi1mass=0;
-
-   	        for(size_t i = 0; i < genParticles->size(); ++ i) {
-	             const GenParticle & p = (*genParticles)[i];
-	             int id = p.pdgId();
-	             double mass = p.mass();
-	             if(id==1000021) {
-	        	gluinomass+=mass;
-	        	ngluinomass++;
-	             }
-	             if(id==1000023) {
-	        	chi2mass+=mass;
-	        	nchi2mass++;
-	             }
-	             if(id==1000022) {
-	        	chi1mass+=mass;
-		        nchi1mass++;
-	             }
-   	        }
-
-	        if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
-	             fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
-	             fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
-	        }
-	}// end of if(BloatWithGenInfo && !fIsRealData)
+	    if(blabalot) {
+	      cout << "Working particle " << i << " with Promptness: " << Promptness[i] << "  (storage number: " << fTnGenParticles << ")" << endl;
+	      cout << "    Mother is Particle " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+	      cout << "Particle " << fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i]                     << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
+	      cout << "stored:  " << fTnGenParticles << "  (" << i << ")                      " << fTgenInfoId[fTnGenParticles] << "                          " << fTgenInfoMo1[fTnGenParticles] << "         " << fTgenInfoMo1Pt[fTnGenParticles] << endl;
+	    }
+	    
+	  }
+	  
+	  fTnGenParticles++;
+	  if(blabalot) cout << "A total of " << fTnGenParticles << " Particles  have been stored out of " << nGenParticles << " ( " << 100*fTnGenParticles/(float)nGenParticles << " %)" << endl;
+	  
+	  
+	  float gluinomass=0;
+	  float ngluinomass=0;
+	  float chi2mass=0;
+	  float nchi2mass=0;
+	  float chi1mass=0;
+	  float nchi1mass=0;
+	  
+	  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	    const GenParticle & p = (*genParticles)[i];
+	    int id = p.pdgId();
+	    double mass = p.mass();
+	    if(id==1000021) {
+	      gluinomass+=mass;
+	      ngluinomass++;
+	    }
+	    if(id==1000023) {
+	      chi2mass+=mass;
+	      nchi2mass++;
+	    }
+	    if(id==1000022) {
+	      chi1mass+=mass;
+	      nchi1mass++;
+	    }
+	  }
+	  
+	  if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
+	    fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
+	    fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
+	  }
+	}// end of bloat with gen information
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
@@ -3350,7 +3404,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
         fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
         fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
-	fEventTree->Branch("genInfoPromptFlag",&fTgenInfoPromptFlag ,"genInfoPromptFlag[nGenParticles]/I");
 	fEventTree->Branch("genInfoMoIndex"   ,&fTgenInfoMoIndex    ,"genInfoMoIndex[nGenParticles]/I");
 	fEventTree->Branch("PromptnessLevel"  ,&fTPromptnessLevel   ,"PromptnessLevel[nGenParticles]/I");
 
