@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.166 2012/03/16 13:38:08 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.167 2012/03/23 12:26:45 buchmann Exp $
 //
 //
 
@@ -2705,6 +2705,35 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		fTjHFEMFrac      [jqi] = jet->HFEMEnergy()/uncorr_energy;   // also contained in neutralEmEnergy
 		// see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
 
+		vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
+		
+		float sumPt_cands=0.;
+		float sumPt2_cands=0.;
+		float rms_cands=0.;
+		
+		TLorentzVector jetp4;
+		jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
+
+		for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
+		  
+		  math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
+		  TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
+		  if(pCand.Pt()>0.){
+		    sumPt_cands += pCand.Pt();
+		    sumPt2_cands += (pCand.Pt()*pCand.Pt());
+
+		    float deltaR = pCand.DeltaR(jetp4);
+		    rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
+
+		  }
+
+		} //for PFCandidates
+
+		fTjPtD      [jqi] = sqrt( sumPt2_cands )/sumPt_cands;
+		fTjRMSCand  [jqi] = rms_cands/sumPt2_cands;
+
+
+
 		// Calculate the DR wrt the closest electron
 		float ejDRmin = 10.; // Default when no electrons previously selected
 		for( int j = 0; j < fTneles; j++ ){
@@ -2714,38 +2743,10 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		fTjeMinDR[jqi] = ejDRmin;
 
 		// B-tagging probability (for 4 b-taggings), with delta R matching for now
-		float mindr(999.99);
-		for( size_t i = 0; i < jetsAndProbsTkCntHighEff->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighEff)[i].first->eta(), (*jetsAndProbsTkCntHighEff)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbTkCntHighEff[jqi] = (*jetsAndProbsTkCntHighEff)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsTkCntHighPur->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighPur)[i].first->eta(), (*jetsAndProbsTkCntHighPur)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbTkCntHighPur[jqi] = (*jetsAndProbsTkCntHighPur)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighEff)[i].first->eta(), (*jetsAndProbsSimpSVHighEff)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighPur)[i].first->eta(), (*jetsAndProbsSimpSVHighPur)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[i].second;
-				mindr = deltar;
-			}
-		}
+		fTjbTagProbTkCntHighEff[jqi] = (*jetsAndProbsTkCntHighEff)[jqi].second;
+		fTjbTagProbTkCntHighPur[jqi] = (*jetsAndProbsTkCntHighPur)[jqi].second;
+		fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[jqi].second;
+		fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[jqi].second;
 
 		// Jet-track association: get associated tracks
 		const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -3889,6 +3890,8 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("JPhotonEnergyFrac"   ,&fTjPhoFrac       ,"JPhotonEnergyFrac[NJets]/F");
 	fEventTree->Branch("JHFHadEnergyFrac"    ,&fTjHFHadFrac     ,"JHFHadEnergyFrac[NJets]/F");
 	fEventTree->Branch("JHFEMEnergyFrac"     ,&fTjHFEMFrac      ,"JHFEMEnergyFrac[NJets]/F");
+	fEventTree->Branch("JPtD"                ,&fTjPtD           ,"JPtD[NJets]/F");
+	fEventTree->Branch("JRMSCand"            ,&fTjRMSCand       ,"JRMSCand[NJets]/F");
 
 	fEventTree->Branch("JeMinDR"               ,&fTjeMinDR               ,"JeMinDR[NJets]/F");
 	fEventTree->Branch("JbTagProbTkCntHighEff" ,&fTjbTagProbTkCntHighEff ,"JbTagProbTkCntHighEff[NJets]/F");
@@ -4498,6 +4501,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjPhoFrac, gMaxnjets);
 	resetFloat(fTjHFHadFrac, gMaxnjets);
 	resetFloat(fTjHFEMFrac, gMaxnjets);
+	resetFloat(fTjPtD, gMaxnjets);
+	resetFloat(fTjRMSCand, gMaxnjets);
 
 	resetFloat(fTjbTagProbTkCntHighEff, gMaxnjets);
 	resetFloat(fTjbTagProbTkCntHighPur, gMaxnjets);
