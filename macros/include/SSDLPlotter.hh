@@ -144,7 +144,7 @@ public:
 	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
-	virtual void drawTopLine();
+	virtual void drawTopLine(float = 0.70);
 	virtual void drawDiffCuts(int);
 	
 	const int     getNPtBins (gChannel);

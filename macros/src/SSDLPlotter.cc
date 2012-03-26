@@ -100,7 +100,7 @@ void SSDLPlotter::init(TString filename){
 	// fLumiNorm = 2096.; // Pre 2011B
 	// fLumiNorm = 3200.; // Including 2011B (1.014 /fb)
 	// fLumiNorm = 4680.; // Full 2011B
-	fLumiNorm = 4961.; // 4680. * 1.06 to fix lumi calculation (Feb. 2012)
+	fLumiNorm = 4980.; // New number from Mar 19
 	// fLumiNorm = 1000.; // Rare Yields Sync
 	// fLumiNorm = 1014.; // Only 2011B
 
@@ -188,8 +188,8 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(ZZZ);
 
 	fMCBGSig = fMCBG;
-	fMCBGNoQCDNoGJetsSig = fMCBG;
-	fMCBGSig            .push_back(LM6);
+	fMCBGSig.push_back(LM6);
+	fMCBGNoQCDNoGJetsSig = fMCBGNoQCDNoGJets;
 	fMCBGNoQCDNoGJetsSig.push_back(LM6);
 
 	fMCBGMuEnr.push_back(TTJets);
@@ -317,7 +317,7 @@ void SSDLPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	storeWeightedPred(true);
+	storeWeightedPred(false);
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -340,15 +340,15 @@ void SSDLPlotter::doAnalysis(){
 	// makeElIdPlots();
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	// makeMETvsHTPlotPRL();
+	makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
 	// makeRatioPlots(Muon);
 	// makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
+	// make2DRatioPlots(Muon);
+	// make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
     
@@ -359,10 +359,10 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
-	makeAllIntPredictions();
-	makeDiffPrediction();
-	printAllYieldTables();
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
+	// makeDiffPrediction();
+	// printAllYieldTables();
 	
 	// makeRelIsoTTSigPlots();
 	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
@@ -1605,7 +1605,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		if(dottbar) hiso_ttbar[i]->DrawCopy("PE X0 same");
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 		lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 		lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 		lat->SetTextColor(kRed);
@@ -1651,7 +1651,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
 			lat->DrawLatex(0.20,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", getPt2Bins(Muon)[k], getPt2Bins(Muon)[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -1696,7 +1696,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_data_nv[i][k]->DrawCopy("PE X0 same");
 			leg_nv->Draw();
 			lat->DrawLatex(0.20,0.92, Form("N_{Vrtx.} %2.0f - %2.0f", gNVrtxBins[k], gNVrtxBins[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -2134,7 +2134,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		if(dottbar) hiso_ttbar[i]->DrawCopy("PE X0 same");
 		hiso_data[i]->DrawCopy("PE X0 same");
 		leg->Draw();
-		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 		lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 		lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 		lat->SetTextColor(kRed);
@@ -2181,7 +2181,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
 			lat->DrawLatex(0.20,0.92, Form("p_{T}(e) %3.0f - %3.0f GeV", getPt2Bins(Elec)[k], getPt2Bins(Elec)[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -2228,7 +2228,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			hiso_data_nv[i][k]->DrawCopy("PE X0 same");
 			leg_nv->Draw();
 			lat->DrawLatex(0.20,0.92, Form("N_{Vrtx.} %2.0f - %2.0f", gNVrtxBins[k], gNVrtxBins[k+1]));
-			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
 			lat->SetTextColor(kRed);
@@ -2979,6 +2979,23 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	hmetvsht_da_mt->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_mt->SetYTitle(KinPlots::axis_label[1]);
 
+	//////////////////////////////////////////////////////////
+	// Custom added for 0 < MET < 50:
+	TGraph *gmetvsht_da_mm_lowmet = getSigEventGraph(Muon, 450., 7000., 0., 50.);
+	TGraph *gmetvsht_da_ee_lowmet = getSigEventGraph(Elec, 450., 7000., 0., 50.);
+	TGraph *gmetvsht_da_em_lowmet = getSigEventGraph(ElMu, 450., 7000., 0., 50.);
+
+	gmetvsht_da_mm_lowmet->SetMarkerColor(col_mm);
+	gmetvsht_da_mm_lowmet->SetMarkerStyle(8);
+	gmetvsht_da_mm_lowmet->SetMarkerSize(1.5);
+	gmetvsht_da_em_lowmet->SetMarkerColor(col_em);
+	gmetvsht_da_em_lowmet->SetMarkerStyle(23);
+	gmetvsht_da_em_lowmet->SetMarkerSize(1.5);
+	gmetvsht_da_ee_lowmet->SetMarkerColor(col_ee);
+	gmetvsht_da_ee_lowmet->SetMarkerStyle(21);
+	gmetvsht_da_ee_lowmet->SetMarkerSize(1.5);
+	//////////////////////////////////////////////////////////
+
 	// TLegend *leg = new TLegend(0.80,0.82,0.95,0.88);
 	TLegend *leg2 = new TLegend(0.80,0.70,0.95,0.88);
 	leg2->AddEntry(hmetvsht_da_mt, "#mu#tau","p");
@@ -2998,17 +3015,20 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	const float minmet = 30.;
 
 	TWbox *lowhtbox  = new TWbox(0.,      0., lowerht, metmax, kBlack, 0, 0);
-	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,   minmet, kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., 450.,   minmet, kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
 	TLine *boxborder1 = new TLine(lowerht, minmet, lowerht, metmax);
-	TLine *boxborder2 = new TLine(lowerht, minmet, htmax,   minmet);
+	TLine *boxborder2 = new TLine(lowerht, minmet, 450.,   minmet);
+	TLine *boxborder3 = new TLine(450., 0., 450., 30.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
+	boxborder3->SetLineWidth(1);
 	boxborder1->SetLineColor(14);
 	boxborder2->SetLineColor(14);
+	boxborder3->SetLineColor(14);
 
 	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
 	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
@@ -3018,6 +3038,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	TLine *sig3y = new TLine(450.,  50., htmax,  50.);
 	TLine *sig4x = new TLine(450., 120., 450.,  metmax);      // met 120 ht 450
 	TLine *sig4y = new TLine(450., 120., htmax, 120.);
+	TLine *sig5x = new TLine(450.,   0., 450.,  metmax);      // met 0 ht 450
 
 	sig1x->SetLineWidth(2);
 	sig1y->SetLineWidth(2);
@@ -3027,6 +3048,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	sig3y->SetLineWidth(1);
 	sig4x->SetLineWidth(3);
 	sig4y->SetLineWidth(3);
+	sig5x->SetLineWidth(2);
 
 	sig1x->SetLineStyle(3);
 	sig1y->SetLineStyle(3);
@@ -3036,14 +3058,17 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	sig3y->SetLineStyle(1);
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
+	sig5x->SetLineStyle(4);
 
 	// TLegend *regleg = new TLegend(0.70,0.47,0.88,0.6);
 	// TLegend *regleg = new TLegend(0.67,0.51,0.87,0.68);
-	TLegend *regleg = new TLegend(0.76,0.29,0.93,0.46);
+	// TLegend *regleg = new TLegend(0.76,0.29,0.93,0.46);
+	TLegend *regleg = new TLegend(0.76,0.26,0.93,0.48);
 	regleg->AddEntry(sig1x, "Region 1","l");
 	regleg->AddEntry(sig2x, "Region 2","l");
 	regleg->AddEntry(sig3x, "Region 3","l");
 	regleg->AddEntry(sig4x, "Region 4","l");
+	regleg->AddEntry(sig5x, "Region 5","l");
 	regleg->SetFillStyle(0);
 	regleg->SetTextFont(42);
 	regleg->SetTextSize(0.03);
@@ -3061,6 +3086,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	lowmetbox->Draw();
 	boxborder1->Draw();
 	boxborder2->Draw();
+	boxborder3->Draw();
 
 	if(hilo != LowPt) sig1x->Draw();
 	if(hilo != LowPt) sig1y->Draw();
@@ -3070,6 +3096,7 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	sig3y->Draw();
 	sig4x->Draw();
 	sig4y->Draw();
+	sig5x->Draw();
 
 	// Graphs
 	gmetvsht_da_ee->Draw("P");
@@ -3082,6 +3109,10 @@ void SSDLPlotter::makeMETvsHTPlotPRL(){
 	
 	gmetvsht_da_mt->Draw("P");
 	gmetvsht_da_et->Draw("P");
+	
+	gmetvsht_da_ee_lowmet->Draw("P");
+	gmetvsht_da_em_lowmet->Draw("P");
+	gmetvsht_da_mm_lowmet->Draw("P");
 	
 	leg->Draw();
 	leg2->Draw();
@@ -4759,7 +4790,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
-	bool diffratio = true; // use flat or differential ratios
+	bool diffratio = false; // use flat or differential ratios
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
@@ -4892,14 +4923,14 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
 		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
 		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
 		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1); nt10sum_em += temp_nt10_em;
 		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1); nt01sum_em += temp_nt01_em;
 		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
 		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
 		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5176,6 +5207,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee;
 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1;
 	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
+	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
@@ -5185,18 +5217,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
-	
-	///////////////////////////////////////////////////////////////////////////////////
-	//  OUTPUT FOR PAS TABLE  /////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////
-	fOUTSTREAM << Region::sname[reg] << endl;
-	fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
-	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-	nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
-	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
-	
+		
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT FOR DIDARS PLOT  ///////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -5240,6 +5261,39 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 	fOUTSTREAM3 << endl;
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	//  OUTPUT FOR AN TABLE  /////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	fOUTSTREAM << Region::sname[reg] << endl;
+	fOUTSTREAM << Form("Double Fakes   &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
+	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
+	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
+	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
+	fOUTSTREAM << Form("Single Fakes   &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
+	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
+	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
+	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
+	fOUTSTREAM << Form("Charge MisID   & \\multicolumn{2}{c}{-} &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
+	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
+	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
+	fOUTSTREAM << Form("Rare SM        &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \\hline \n",
+	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
+	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
+	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
+	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
+	fOUTSTREAM << Form("Total Bkg      &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \\hline \n",
+	nF_mm + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	nF_em + nt2_rare_mc_em + nt2_em_chmid, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+	fOUTSTREAM << Form("Observed       & \\multicolumn{2}{c}{%3.0f} & \\multicolumn{2}{c}{%3.0f}  & \\multicolumn{2}{c}{%3.0f} & \\multicolumn{2}{|c}{%3.0f} \\\\ \\hline \\hline \n",
+	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
+	fOUTSTREAM << endl;
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
@@ -5317,7 +5371,17 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	hs_pred->Add(h_pred_chmid);
 	hs_pred->Add(h_pred_mc);
 	
-	double max = h_obs->Integral();
+	// double max = h_obs->Integral();
+	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
+	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+	
+	if(reg == Baseline)    max = 265.;
+	if(reg == HT80MET120)  max = 27.;
+	if(reg == HT200MET120) max = 20.;
+	if(reg == HT450MET0)   max = 19.;
+	if(reg == HT450MET50)  max = 9.;
+	if(reg == HT450MET120) max = 4.;
+	
 	h_obs       ->SetMaximum(max>1?max+1:1.);
 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
 	h_pred_dfake->SetMaximum(max>1?max+1:1.);
@@ -5348,18 +5412,19 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	
 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
 	c_temp->cd();
-	
+
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
 	h_obs->DrawCopy("PE X0 same");
 	leg->Draw();
 	
-	lat->SetTextSize(0.03);
-	if (Region::maxHT[reg] < 39.) lat->DrawLatex(0.16,0.60, "N_{Jets} = 0");
-	else lat->DrawLatex(0.16,0.60, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
-	if(reg != Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV", Region::minMet[reg]));
-	if(reg == Control) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV, < %.0f GeV", Region::minMet[reg], Region::maxMet[reg]));
-	drawTopLine();
+	lat->SetTextSize(0.03); // DrawLatex(0.16, 0.6/0.55)
+	if (Region::maxHT[reg] < 39.)                    lat->DrawLatex(0.55,0.85, "N_{Jets} = 0");
+	else                                             lat->DrawLatex(0.55,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
+	if(reg != Control && Region::minMet[reg] != 0.)  lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} > %.0f GeV", Region::minMet[reg]));
+	if(Region::minMet[reg] == 0.)                    lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} #geq %.0f GeV", Region::minMet[reg]));
+	if(reg == Control)                               lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} > %.0f GeV, < %.0f GeV", Region::minMet[reg], Region::maxMet[reg]));
+	drawTopLine(0.66);
 	
 	gPad->RedrawAxis();
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
@@ -5563,25 +5628,27 @@ void SSDLPlotter::makeDiffPrediction(){
 		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
 		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
 
-		// Differential ratios
-		for(size_t i = 0; i < musamples.size(); ++i){
-			Sample *S = fSamples[musamples[i]];
-			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-		}
-		for(size_t i = 0; i < elsamples.size(); ++i){
-			Sample *S = fSamples[elsamples[i]];
-			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-		}
-		for(size_t i = 0; i < emusamples.size(); ++i){
-			Sample *S = fSamples[emusamples[i]];
-			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-		}
+		///////////////////////////////////////////////////////
+		// // Differential ratios
+		// for(size_t i = 0; i < musamples.size(); ++i){
+		// 	Sample *S = fSamples[musamples[i]];
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+		// 	nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		// }
+		// for(size_t i = 0; i < elsamples.size(); ++i){
+		// 	Sample *S = fSamples[elsamples[i]];
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+		// 	nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		// }
+		// for(size_t i = 0; i < emusamples.size(); ++i){
+		// 	Sample *S = fSamples[emusamples[i]];
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+		// 	nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		// }
+		///////////////////////////////////////////////////////
 
 		for(size_t i = 0; i < nbins; ++i){
 			const float FakeESyst2 = 0.25;
@@ -5598,13 +5665,15 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 			
-			// // Flat ratios:
-			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			///////////////////////////////////////////////////////
+			// Flat ratios:
+			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			///////////////////////////////////////////////////////
 			
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
@@ -7562,7 +7631,7 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		float nll_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
 		float ntt_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
 		float ntl_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float nll_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float nll_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1);
 		
 		ntt_mm[proc] += ntt_mm_temp;
 		ntl_mm[proc] += ntl_mm_temp;
@@ -7622,26 +7691,49 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		nt00[Elec] += S->numbers[reg][Elec].nt0;
 	}
 
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << "                         ||          Mu/Mu           ||               E/Mu                ||           E/E            ||" << endl;
-	OUT << "  Process                ||  Ntt   |  Ntl   |  Nll   ||  Ntt   |  Ntl   |  Nlt   |  Nll   ||  Ntt   |  Ntl   |  Nll   ||" << endl;
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                         |          Mu/Mu           |               E/Mu                |           E/E            |" << endl;
+	OUT << "  Process                |  Ntt   |  Ntl   |  Nll   |  Ntt   |  Ntl   |  Nlt   |  Nll   |  Ntt   |  Ntl   |  Nll   |" << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------" << endl;
 
 	for(size_t i = 1; i < nprocs; ++i){ // skip data
-		OUT << Form("%24s || %6.2f | %6.2f | %6.2f || %6.2f | %6.2f | %6.2f | %6.2f || %6.2f | %6.2f | %6.2f ||",
+		OUT << Form("%24s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\",
 		fSamples[DoubleMu1]->getProcName(i).Data(),
 		ntt_mm[i], ntl_mm[i], nll_mm[i],
 		ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i],
 		ntt_ee[i], ntl_ee[i], nll_ee[i]) << endl;
 	}
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << Form("%24s || %6.2f | %6.2f | %6.2f || %6.2f | %6.2f | %6.2f | %6.2f || %6.2f | %6.2f | %6.2f ||",
+	OUT << "\\hline" << endl;
+	OUT << Form("%24s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\",
 	"Sum", ntt_sum_mm, ntl_sum_mm, nll_sum_mm, ntt_sum_em, ntl_sum_em, nlt_sum_em, nll_sum_em, ntt_sum_ee, ntl_sum_ee, nll_sum_ee) << endl;
-	
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << Form("%24s || %6d | %6d | %6d || %6d | %6d | %6d | %6d || %6d | %6d | %6d ||",
+	OUT << "\\hline" << endl;
+	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+		Sample *S = fSamples[i];
+		if(S->datamc != 2) continue;
+		float scale = fLumiNorm / S->getLumi();
+
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1);
+
+		TString tempname = S->sname;
+		OUT << Form("%24s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
+		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
+		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
+		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
+	}	
+
+	OUT << "\\hline" << endl;
+	OUT << Form("%24s & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d & %6d \\\\",
 	"Data", nt20[Muon], nt10[Muon], nt00[Muon], nt20[ElMu], nt10[ElMu], nt01[ElMu], nt00[ElMu], nt20[Elec], nt10[Elec], nt00[Elec]) << endl;
-	OUT << "------------------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "--------------------------------------------------------------------------------------------------------------------" << endl;
 
 	OUT << endl;
 	OUT << "REMINDER: CHECK THAT QCD AND G+JETS REALLY HAVE ZERO YIELDS IN TIGHT-TIGHT EVERYWHERE" << endl;
@@ -8313,13 +8405,13 @@ void SSDLPlotter::printOriginSummary2L(vector<int> samples, int toggle, gChannel
 }
 
 //____________________________________________________________________________
-void SSDLPlotter::drawTopLine(){
+void SSDLPlotter::drawTopLine(float rightedge){
 	fLatex->SetTextFont(62);
 	fLatex->SetTextSize(0.05);
 	fLatex->DrawLatex(0.13,0.92, "CMS Preliminary");	
 	fLatex->SetTextFont(42);
 	fLatex->SetTextSize(0.04);
-	fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+	fLatex->DrawLatex(rightedge,0.92, Form("L_{int.} = %4.2f fb^{-1}", fLumiNorm/1000.));
 	// fLatex->DrawLatex(0.70,0.92, Form("L_{int.} = %4.0f pb^{-1}", fLumiNorm));
 	return;
 }
