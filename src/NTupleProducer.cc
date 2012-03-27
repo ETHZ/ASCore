@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.158 2012/01/31 14:24:41 pnef Exp $
+// $Id: NTupleProducer.cc,v 1.169 2012/03/27 10:29:17 pandolf Exp $
 //
 //
 
@@ -113,6 +113,7 @@ Implementation:
 //#include <pair>
 #include <sstream>
 
+
 namespace LHAPDF {
   void initPDFSet(const std::string& filename, int member=0);
   void initPDF(int member=0);
@@ -126,6 +127,16 @@ namespace LHAPDF {
   double getQ2max(int nset, int member);
   void extrapolate(bool extrapolate=true);
 }
+
+void FlipGenStoreFlag(int index, int Promptness[], int genMo1Index[], int genMo2Index[], bool StoreFlag[]) {
+  if(StoreFlag[index]) return;//particle has already been marked. 
+  StoreFlag[index]=true;
+  if(genMo1Index[index]>0) FlipGenStoreFlag(genMo1Index[index], Promptness, genMo1Index, genMo2Index, StoreFlag);
+  if(genMo2Index[index]>0) FlipGenStoreFlag(genMo2Index[index], Promptness, genMo1Index, genMo2Index, StoreFlag);
+}
+  
+  
+  
 
 NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	// Main settings
@@ -298,7 +309,6 @@ NTupleProducer::~NTupleProducer(){
 void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	++fNTotEvents;
-
 
 	using namespace edm;
 	using namespace std;
@@ -885,7 +895,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	      break;
 	    }
 
-	    if( it_gen->status() != 3 || !(it_gen->vx()!=0. || it_gen->vy()!=0. || it_gen->vx()!=0.)  ) { continue; }
+	    if( it_gen->status() != 3 || !(it_gen->vx()!=0. || it_gen->vy()!=0. || it_gen->vz()!=0.)  ) { continue; }
 
 	    // check for duplicate vertex
 	    bool duplicate = false;
@@ -910,6 +920,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    gv_nTkHi[gv_n] = 0;
 
 	    for(reco::GenParticleCollection::const_iterator part = gpH->begin(); part!= gpH->end(); part++){   
+	      if (part->pt()==0) continue;
 	      if( part->status() == 1 && part->charge() != 0 && fabs(part->eta())<2.5 &&
 		  ( fabs(part->vx()-this_gv_pos.X())<1.e-5 && fabs(part->vy()-this_gv_pos.Y())<1.e-5 && fabs(part->vz()-this_gv_pos.Z())<1.e-5 ) )  {
 	
@@ -1697,8 +1708,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 
 
-	
-
 
 	////////////////////////////////////////////////////////
 	// Photon Variables:
@@ -2312,16 +2321,21 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	
        /*
 
-	 USAGE OF VERTEX CHOICE:
+	 USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
 
-	 diphotons is a vector of pairs (photon_1_index,photon_2_index)
+	 diphotons_{first,second} are vectors of {photon_1_index,photon_2_index}
 
-	 vtx_dipho_??? is vector of vector of vertex indices
+	 vtx_dipho_??? are, for each diphoton pair, vectors of vertex indices (as ranked by the different algos)
 
-	 For example: best vertex for diphoton pair diphotons.at(3) : vtx_dipho_bla.at(3).at(0), second choice vtx_dipho_bla.at(3).at(1) ...
+	 For example: best vertex for diphoton pair 3, with photon_1_index=diphotons_first[3] and photon_2_index=diphotons_second[3]: vtx_dipho_bla[3].at(0), second choice vtx_dipho_bla[3].at(1) ...
 
        */
 
+	std::vector<int> diphotons_first;
+	std::vector<int> diphotons_second;
+	std::vector<std::vector<int> > vtx_dipho_h2gglobe;
+	std::vector<std::vector<int> > vtx_dipho_mva;
+	std::vector<std::vector<int> > vtx_dipho_productrank;
 
        if (doVertexingFlag) { // start vertex selection stuff with MVA from Hgg (Musella) UserCode/HiggsAnalysis/HiggsTo2photons/h2gglobe/VertexAnalysis tag vertex_mva_v4
 
@@ -2337,9 +2351,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 int tk_n = 0; 
 
-	 const int __TRK_AUX_ARRAYS_DIM__ = 500;
-	 const int __VTX_AUX_ARRAYS_DIM__ = 100;
-
 	 float tk_px[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_py[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_pz[__TRK_AUX_ARRAYS_DIM__];
@@ -2349,53 +2360,77 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	 float tk_dzerr[__TRK_AUX_ARRAYS_DIM__];
 	 float tk_pterr[__TRK_AUX_ARRAYS_DIM__];
 	 bool tk_ishighpurity[__TRK_AUX_ARRAYS_DIM__];
-	 std::vector<unsigned short> vtx_std_tkind[__VTX_AUX_ARRAYS_DIM__];
-	 std::vector<float> vtx_std_tkweight[__VTX_AUX_ARRAYS_DIM__];
+	 std::vector<std::vector<unsigned short> > vtx_std_tkind;
+	 std::vector<std::vector<float> > vtx_std_tkweight;
 	 int vtx_std_ntks[__VTX_AUX_ARRAYS_DIM__];
 	 int tkVtxId[__TRK_AUX_ARRAYS_DIM__];
 
 
 	 { // tracks
-	  
+	   if (VTX_MVA_DEBUG)	   	   cout << "tracks begin" << endl;
 	   std::vector<reco::TrackBaseRef>::const_iterator tk;
 	 
 	   for(unsigned int i=0; i<vtxH->size(); i++) {
 
+if (VTX_MVA_DEBUG)	     	     cout << "working on vtx " << i << endl;
+
+	     if (vtxH->size()>__VTX_AUX_ARRAYS_DIM__) std::cout << "Too many vertices in the event; please enlarge the value of __VTX_AUX_ARRAYS_DIM__" << std::endl;
+
 	     reco::VertexRef vtx(vtxH, i);
 	  
 	     vtx_std_ntks[i]=vtx->tracksSize();
-
+if (VTX_MVA_DEBUG)	     	     cout << "vtx tracks " << vtx->tracksSize() << endl;
+	     
 	     std::vector<unsigned short> temp;
 	     std::vector<float> temp_float;
 
-	     for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
-	       int index = 0;
-	       bool ismatched = false; 
-	       for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
-		 reco::TrackRef track(tkH, j);
-		 if(TrackCut(track)) continue; 
-		 if (&(**tk) == &(*track)) {
-		   temp.push_back(index);
-		   temp_float.push_back(vtx->trackWeight(track));
-		   ismatched = true;
-		   break;
+	     if (vtx->tracksSize()>0){
+	       for(tk=vtx->tracks_begin();tk!=vtx->tracks_end();++tk) {
+if (VTX_MVA_DEBUG)		 		 cout << "processing vtx track (out of " << vtx->tracksSize() << ")" << endl;
+		 int index = 0;
+		 bool ismatched = false; 
+		 for(reco::TrackCollection::size_type j = 0; j<tkH->size(); ++j) {
+if (VTX_MVA_DEBUG)		   		   std::cout << j << std::endl;
+		   reco::TrackRef track(tkH, j);
+		   if(TrackCut(track)) continue; 
+		   if (&(**tk) == &(*track)) {
+		     temp.push_back(index);
+		     temp_float.push_back(vtx->trackWeight(track));
+		     ismatched = true;
+if (VTX_MVA_DEBUG)		     		     cout << "matching found index" << index << " weight " << vtx->trackWeight(track) << endl;
+		     break;
+		   }
+		   index++;
 		 }
-		 index++;
+		 if(!ismatched) {
+		   temp.push_back(-9999);
+		   temp_float.push_back(-9999);
+		 }
 	       }
-	       if(!ismatched) {
-		 temp.push_back(-9999);
-		 temp_float.push_back(-9999);
-	       }
+	     }
+	     else {
+if (VTX_MVA_DEBUG)	       	       cout << "no vertex tracks found" << endl;
+	       temp = std::vector<unsigned short>(0);
+	       temp_float = std::vector<float>(0);
 	     }
       
 	     //	      for (std::vector<unsigned short>::const_iterator it=temp.begin(); it!=temp.end(); it++) {int k=0; vtx_std_tkind[i][k]=*it; k++;}
 	     //	      for (std::vector<float>::const_iterator it=temp_float.begin(); it!=temp_float.end(); it++) {int k=0; vtx_std_tkweight[i][k]=*it; k++;}	    
-	     vtx_std_tkind[i]=temp;
-	     vtx_std_tkweight[i]=temp_float;
-
+	     vtx_std_tkind.push_back(temp);
+	     vtx_std_tkweight.push_back(temp_float);
+if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << std::endl;
 	   }	  
 
+	   if (VTX_MVA_DEBUG){
+	   	   std::cout << "tkWeight is " << std::endl;
+	   	   for (int a=0; a<(int)(vtx_std_tkind.size()); a++) std::cout << a << ":" << vtx_std_tkind.at(a).size() << " " ;
+	   	   std::cout << std::endl;
+	   }
+
+
 	   for(unsigned int i=0; i<tkH->size(); i++) {
+
+	     if (tkH->size()>__TRK_AUX_ARRAYS_DIM__) std::cout << "Too many tracks in the event; please enlarge the value of __TRK_AUX_ARRAYS_DIM__" << std::endl;
 
 	     reco::TrackRef tk(tkH, i);
 
@@ -2484,7 +2519,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   if (VTX_MVA_DEBUG)	   cout << "temp" << endl;
 
 	   // fully combinatorial vertex selection
-	   std::vector<std::pair<int,int> > diphotons;
 	   for(int ip=0; ip<fTnphotons; ++ip) {
 	     for(int jp=ip+1; jp<fTnphotons; ++jp) {
 	       diphotons_first.push_back(ip);
@@ -2519,8 +2553,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 				 tk_dz+0,
 				 tk_dzerr+0,
 				 tk_ishighpurity+0,
-				 vtx_std_tkind+0,
-				 vtx_std_tkweight+0,
+				 vtx_std_tkind,
+				 vtx_std_tkweight,
 				 vtx_std_ntks+0
 				 );
 
@@ -2583,7 +2617,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 
 
-
+       //       cout << "end vertex selection MVA" << endl;
 
 
 
@@ -2661,11 +2695,44 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		// see for instance https://twiki.cern.ch/twiki/bin/view/CMS/JetID
 		// or http://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_1_3/doc/html/dc/dd5/classPFJetIDSelectionFunctor.html  
 		double uncorr_energy  = jet->energy()/scale;
-		fTjChHadFrac    [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
-		fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
-		fTjChEmFrac     [jqi] = jet->chargedEmEnergy()/uncorr_energy;
-		fTjNeuEmFrac    [jqi] = jet->neutralEmEnergy()/uncorr_energy;
-		fTjChMuEFrac    [jqi] = jet->chargedMuEnergy()/uncorr_energy;
+		fTjChHadFrac     [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
+		fTjNeuHadFrac    [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
+		fTjChEmFrac      [jqi] = jet->chargedEmEnergy()/uncorr_energy;
+		fTjNeuEmFrac     [jqi] = jet->neutralEmEnergy()/uncorr_energy;
+		fTjChMuEFrac     [jqi] = jet->chargedMuEnergy()/uncorr_energy;
+		fTjPhoFrac       [jqi] = jet->photonEnergy()/uncorr_energy; // photons also count for neutralEmEnergy
+		fTjHFHadFrac     [jqi] = jet->HFHadronEnergy()/uncorr_energy;
+		fTjHFEMFrac      [jqi] = jet->HFEMEnergy()/uncorr_energy;   // also contained in neutralEmEnergy
+		// see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
+
+		vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
+		
+		float sumPt_cands=0.;
+		float sumPt2_cands=0.;
+		float rms_cands=0.;
+		
+		TLorentzVector jetp4;
+		jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
+
+		for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
+		  
+		  math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
+		  TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
+		  if(pCand.Pt()>0.){
+		    sumPt_cands += pCand.Pt();
+		    sumPt2_cands += (pCand.Pt()*pCand.Pt());
+
+		    float deltaR = pCand.DeltaR(jetp4);
+		    rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
+
+		  }
+
+		} //for PFCandidates
+
+		fTjPtD      [jqi] = sqrt( sumPt2_cands )/sumPt_cands;
+		fTjRMSCand  [jqi] = rms_cands/sumPt2_cands;
+
+
 
 		// Calculate the DR wrt the closest electron
 		float ejDRmin = 10.; // Default when no electrons previously selected
@@ -2675,39 +2742,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		}
 		fTjeMinDR[jqi] = ejDRmin;
 
-		// B-tagging probability (for 4 b-taggings), with delta R matching for now
-		float mindr(999.99);
-		for( size_t i = 0; i < jetsAndProbsTkCntHighEff->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighEff)[i].first->eta(), (*jetsAndProbsTkCntHighEff)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbTkCntHighEff[jqi] = (*jetsAndProbsTkCntHighEff)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsTkCntHighPur->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsTkCntHighPur)[i].first->eta(), (*jetsAndProbsTkCntHighPur)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbTkCntHighPur[jqi] = (*jetsAndProbsTkCntHighPur)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighEff)[i].first->eta(), (*jetsAndProbsSimpSVHighEff)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[i].second;
-				mindr = deltar;
-			}
-		}
-		mindr = 999.99;
-		for( size_t i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++ ){
-			float deltar = reco::deltaR( jet->eta(), jet->phi(), (*jetsAndProbsSimpSVHighPur)[i].first->eta(), (*jetsAndProbsSimpSVHighPur)[i].first->phi());
-			if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
-				fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[i].second;
-				mindr = deltar;
-			}
-		}
+		// B-tagging probability (for 4 b-taggings)
+		// remember: 'index' is the index of the uncorrected jet, as saved in the event
+		fTjbTagProbTkCntHighEff[jqi]  = (*jetsAndProbsTkCntHighEff) [index].second;
+		fTjbTagProbTkCntHighPur[jqi]  = (*jetsAndProbsTkCntHighPur) [index].second;
+		fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[index].second;
+		fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[index].second;
 
 		// Jet-track association: get associated tracks
 		const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -3062,85 +3102,184 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	        fTMassGlu = mGL;
 	        fTMassChi = xCHI;
 	        fTMassLSP = mLSP;
-
+	}
+	
 
 	bool blabalot=false;
 	bool BloatWithGenInfo=true;
 
+	
 	if(BloatWithGenInfo && !fIsRealData) {
-		
-	        Handle<GenParticleCollection> genParticles;
-	        iEvent.getByLabel("genParticles", genParticles);
-	        for(size_t i = 0; i < genParticles->size(); ++ i) {
-		     fTnGenParticles++;
-	             if((int)i>nStoredGenParticles) {
-				edm::LogWarning("NTP") << "@SUB=analyze()"
-					<< "Maximum number of gen particles exceeded";
-				fTflagmaxgenpartexc = 1;
-				break;
-		     }
-	             const GenParticle & p = (*genParticles)[i];
-	             fTgenInfoId[i] = p.pdgId();
-	             fTgenInfoStatus[i] = p.status();
-		     fTgenInfoMo1[i]=-1;
-		     fTgenInfoMo2[i]=-1;
-		     fTgenInfoDa1[i]=-1;
-		     fTgenInfoDa2[i]=-1;
-		     fTgenInfoNMo[i] = p.numberOfMothers();
-	             fTgenInfoNDa[i] = p.numberOfDaughters();
-	             for(int j=0;j<2&&j<fTgenInfoNMo[i];j++) {
-			const Candidate * mom = p.mother(j);
-			if(j==0) fTgenInfoMo1[i] = abs(mom->pdgId());
-			if(j==1) fTgenInfoMo2[i] = abs(mom->pdgId());
-	             }
-	             for(int j=0;j<2&&j<fTgenInfoNDa[i];j++) {
-			const Candidate * dau = p.daughter(j);
-			if(j==0) fTgenInfoDa1[i] = abs(dau->pdgId());
-			if(j==1) fTgenInfoDa2[i] = abs(dau->pdgId());
-	             }
-	             fTgenInfoPt[i] = p.pt();
-	             fTgenInfoEta[i] = p.eta();
-	             fTgenInfoPhi[i] = p.phi();
-	             fTgenInfoPx[i] = p.px();
-	             fTgenInfoPy[i] = p.py();
-	             fTgenInfoPz[i] = p.pz();
-	             fTgenInfoM[i] = p.mass();
-	}
-       }
+	  int genIndex[1200];
+	  int genNIndex[1200];
+	  int genID[1200];
+	  float genPx[1200];
+	  float genPy[1200];
+	  float genPz[1200];
+	  float genPt[1200];
+	  float genEta[1200];
+	  float genPhi[1200];
+	  float genM[1200];
+	  int genMo1Index[1200];
+	  int genMo2Index[1200];
+	  int genNMo[1200];
+	  int genStatus[1200];
+	  int Promptness[1200];
+	  bool StoreFlag[1200];
+	  
+	  int nGenParticles=0;
+	  
+	  Handle<GenParticleCollection> genParticles;
+	  iEvent.getByLabel("genParticles", genParticles);
+	  
+	  // STEP 1: Loop over all particles and store the information.
+	  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	    nGenParticles++;
+	    const GenParticle & p = (*genParticles)[i];
+	    genIndex[i]=i;
+	    genNIndex[i]=0;
+	    genID[i]=p.pdgId();
+	    genPx[i]=p.px();
+	    genPy[i]=p.py();
+	    genPz[i]=p.pz();
+	    genPt[i]=p.pt();
+	    genPhi[i]=p.phi();
+	    genEta[i]=p.eta();
+	    genM[i]=p.mass();
+	    genStatus[i]=p.status();
+	    genMo1Index[i]=-1;
+	    genMo2Index[i]=-1;
+	    genNMo[i]=p.numberOfMothers();
+	    StoreFlag[i]=false;
+	    if(genID[i]==2212) Promptness[i]=0;
+	    else Promptness[i]=-1;
+	    
 
+	    if(blabalot) cout << "Reading particle " << i << " (is pdgid=" << genID[i] << ") with " << genNMo[i] << " mothers" << endl;
+	    for(int j=0;j<genNMo[i]&&j<2;j++) {
+	      int idx = -1;
+	      const GenParticle* mom = static_cast<const GenParticle*> (p.mother(j));
+	      const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
+	      if (mom == NULL) break;
+	      for (unsigned int k = 0; k < genParticles->size() && k<i; ++k) {
+		const reco::GenParticle& testm = (*genParticles)[k];
+		const GenParticle* testgm = static_cast<const GenParticle*> (testm.mother());
+		if (testm.pt() == mom->pt()) {
+		  if(gmom == NULL || (testgm!=NULL) && (gmom->pt() == testgm->pt())) {
+		    idx = k;
+		    if(blabalot) cout << "     Found a hit for a mother for index " << i << "! It's index " << idx << " (pdgid " << genID[idx] << ")" << endl;
+		    break;
+		  }
+		}
+	      }
+	      if(j==0) genMo1Index[i]=idx;
+	      if(j==1) genMo2Index[i]=idx;
+	    }
+	    if(Promptness[i]==-1&&genMo1Index[i]>=0&&Promptness[genMo1Index[i]]>-1) Promptness[i]=Promptness[genMo1Index[i]]+1;
+	    if(blabalot) cout << "                    Promtpness: " << Promptness[i] << endl;
+	    if(blabalot) cout << "          Mother 1: " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+	    if(blabalot) cout << "          Mother 2: " << genMo2Index[i] << endl;
+	  }
+	  
+	  // STEP 2: Loop from end to start flipping storeflag when necessary
+	  float genPtThreshold=5.0; // any particle with less pt than this will not be stored.
+	  for(int i=nGenParticles-1;i>=0;i--) {
+	    if(genStatus[i]!=1) continue;
+	    if(genPt[i]<genPtThreshold) continue;
+	    FlipGenStoreFlag(i,Promptness,genMo1Index,genMo2Index,StoreFlag);
+	  }
+	  
+	  // Intermediate step: Make sure that all first particles are stored, and that the earliest particles are stored (i.e. promptness criteria are met)
+	  for(int i=nGenParticles-1;i>=0;i--) {
+	    if(Promptness[i]<4&&Promptness[i]>=0) StoreFlag[i]=true;
+	    if(i<20) StoreFlag[i]=true;
+	  }
+	  
+	  // STEP 3: Loop again, setting new index ("nindex") and replacing Mo1 by if(Mo1>-1) Mo1=nindex[index];, same for Mo2. If storeflag, store it directly.
+	  fTnGenParticles=-1;
+	  for(int i=0;i<nGenParticles;i++) {
+	    if(!StoreFlag[i]) continue;
+	    fTnGenParticles++;
+	    if(fTnGenParticles>nStoredGenParticles) {
+	      edm::LogWarning("NTP") << "@SUB=analyze()"
+	      << "Maximum number of gen particles exceeded";
+	      fTflagmaxgenpartexc = 1;
+	      break;
+	    }
+	    
+	    genNIndex[i]=fTnGenParticles;
+	    
+	    //store everything
+	    fTgenInfoId[fTnGenParticles] = genID[i];
+	    fTgenInfoStatus[fTnGenParticles] = genStatus[i];
+	    fTgenInfoNMo[fTnGenParticles] = genNMo[i];
+	    fTgenInfoMo1Pt[fTnGenParticles]=0;
+	    fTgenInfoMo2Pt[fTnGenParticles]=0;
+	    if(genMo1Index[i]>=0) {
+	      fTgenInfoMo1Pt[fTnGenParticles]=genPt[genMo1Index[i]];
+	      fTgenInfoMo1[fTnGenParticles]=genNIndex[genMo1Index[i]];
+	    } else {
+	      fTgenInfoMo1[fTnGenParticles]=-1;
+	    }
+	    if(genMo2Index[i]>=0) {
+	      fTgenInfoMo2Pt[fTnGenParticles]=genPt[genMo2Index[i]];
+	      fTgenInfoMo2[fTnGenParticles]=genNIndex[genMo2Index[i]];
+	    } else {
+	      fTgenInfoMo2[fTnGenParticles]=-1;
+	    }
+	    
+	    fTPromptnessLevel[fTnGenParticles]=Promptness[i];
+	    fTgenInfoPt[fTnGenParticles] = genPt[i];
+	    fTgenInfoEta[fTnGenParticles] = genEta[i];
+	    fTgenInfoPhi[fTnGenParticles] = genPhi[i];
+	    fTgenInfoPx[fTnGenParticles] = genPx[i];
+	    fTgenInfoPy[fTnGenParticles] = genPy[i];
+	    fTgenInfoPz[fTnGenParticles] = genPz[i];
+	    fTgenInfoM[fTnGenParticles] = genM[i];
 
-	        Handle<GenParticleCollection> genParticles;
-	        iEvent.getByLabel("genParticles", genParticles);
-	        float gluinomass=0;
-	        float ngluinomass=0;
-	        float chi2mass=0;
-	        float nchi2mass=0;
-   	        float chi1mass=0;
-   	        float nchi1mass=0;
-
-   	        for(size_t i = 0; i < genParticles->size(); ++ i) {
-	             const GenParticle & p = (*genParticles)[i];
-	             int id = p.pdgId();
-	             double mass = p.mass();
-	             if(id==1000021) {
-	        	gluinomass+=mass;
-	        	ngluinomass++;
-	             }
-	             if(id==1000023) {
-	        	chi2mass+=mass;
-	        	nchi2mass++;
-	             }
-	             if(id==1000022) {
-	        	chi1mass+=mass;
-		        nchi1mass++;
-	             }
-   	        }
-
-	        if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
-	             fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
-	             fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
-	        }
-	}
+	    if(blabalot) {
+	      cout << "Working particle " << i << " with Promptness: " << Promptness[i] << "  (storage number: " << fTnGenParticles << ")" << endl;
+	      cout << "    Mother is Particle " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+	      cout << "Particle " << fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i]                     << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
+	      cout << "stored:  " << fTnGenParticles << "  (" << i << ")                      " << fTgenInfoId[fTnGenParticles] << "                          " << fTgenInfoMo1[fTnGenParticles] << "         " << fTgenInfoMo1Pt[fTnGenParticles] << endl;
+	    }
+	    
+	  }
+	  
+	  fTnGenParticles++;
+	  if(blabalot) cout << "A total of " << fTnGenParticles << " Particles  have been stored out of " << nGenParticles << " ( " << 100*fTnGenParticles/(float)nGenParticles << " %)" << endl;
+	  
+	  
+	  float gluinomass=0;
+	  float ngluinomass=0;
+	  float chi2mass=0;
+	  float nchi2mass=0;
+	  float chi1mass=0;
+	  float nchi1mass=0;
+	  
+	  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	    const GenParticle & p = (*genParticles)[i];
+	    int id = p.pdgId();
+	    double mass = p.mass();
+	    if(id==1000021) {
+	      gluinomass+=mass;
+	      ngluinomass++;
+	    }
+	    if(id==1000023) {
+	      chi2mass+=mass;
+	      nchi2mass++;
+	    }
+	    if(id==1000022) {
+	      chi1mass+=mass;
+	      nchi1mass++;
+	    }
+	  }
+	  
+	  if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
+	    fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
+	    fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
+	  }
+	}// end of bloat with gen information
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
@@ -3253,6 +3392,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("genInfoStatus"    ,&fTgenInfoStatus     ,"genInfoStatus[nGenParticles]/I");
         fEventTree->Branch("genInfoMass"      ,&fTgenInfoMass       ,"genInfoMass[nGenParticles]/F");
         fEventTree->Branch("genInfoNMo"       ,&fTgenInfoNMo        ,"genInfoNMo[nGenParticles]/I");
+        fEventTree->Branch("genInfoMo1Pt"     ,&fTgenInfoMo1Pt      ,"genInfoMo1Pt[nGenParticles]/F");
+        fEventTree->Branch("genInfoMo2Pt"     ,&fTgenInfoMo2Pt      ,"genInfoMo2Pt[nGenParticles]/F");
         fEventTree->Branch("genInfoNDa"       ,&fTgenInfoNDa        ,"genInfoNDa[nGenParticles]/I");
         fEventTree->Branch("genInfoMo1"       ,&fTgenInfoMo1        ,"genInfoMo1[nGenParticles]/I");
         fEventTree->Branch("genInfoMo2"       ,&fTgenInfoMo2        ,"genInfoMo2[nGenParticles]/I");
@@ -3265,6 +3406,8 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
         fEventTree->Branch("genInfoPy"        ,&fTgenInfoPy         ,"genInfoPy[nGenParticles]/F");
         fEventTree->Branch("genInfoPz"        ,&fTgenInfoPz         ,"genInfoPz[nGenParticles]/F");
         fEventTree->Branch("genInfoM"         ,&fTgenInfoM          ,"genInfoM[nGenParticles]/F");
+	fEventTree->Branch("genInfoMoIndex"   ,&fTgenInfoMoIndex    ,"genInfoMoIndex[nGenParticles]/I");
+	fEventTree->Branch("PromptnessLevel"  ,&fTPromptnessLevel   ,"PromptnessLevel[nGenParticles]/I");
 
 
 	fEventTree->Branch("PrimVtxGood"      ,&fTgoodvtx           ,"PrimVtxGood/I");
@@ -3601,12 +3744,6 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PhoSCSigmaPhiPhi" ,&fTPhotSCSigmaPhiPhi ,"PhoSCSigmaPhiPhi[NPhotons]/F");
 	fEventTree->Branch("PhoHasPixSeed"    ,&fTPhotHasPixSeed    ,"PhoHasPixSeed[NPhotons]/I");
 	fEventTree->Branch("PhoHasConvTrks"   ,&fTPhotHasConvTrks   ,"PhoHasConvTrks[NPhotons]/I");
-	// fEventTree->Branch("PhoIsInJet"       ,&fTPhotIsInJet       ,"PhoIsInJet[NPhotons]/I");
-	// fEventTree->Branch("PhoIsElDupl"      ,&fTPhotDupEl         ,"PhoIsElDupl[NPhotons]/I");
-	// fEventTree->Branch("PhoSharedPx"      ,&fTPhotSharedPx      ,"PhoSharedPx[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedPy"      ,&fTPhotSharedPy      ,"PhoSharedPy[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedPz"      ,&fTPhotSharedPz      ,"PhoSharedPz[NPhotons]/F");
-	// fEventTree->Branch("PhoSharedEnergy"  ,&fTPhotSharedEnergy  ,"PhoSharedEnergy[NPhotons]/F");
 	fEventTree->Branch("PhoScSeedSeverity",&fTPhotScSeedSeverity,"PhoScSeedSeverity[NPhotons]/I");
 	fEventTree->Branch("PhoE1OverE9"      ,&fTPhotE1OverE9      ,"PhoE1OverE9[NPhotons]/F");
 	fEventTree->Branch("PhoS4OverS1"      ,&fTPhotS4OverS1      ,"PhoS4OverS1[NPhotons]/F");
@@ -3689,35 +3826,25 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&fT_pho_Cone
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
 
- // fEventTree->Branch("pho_conv_vtx",&pho_conv_vtx);
-// fEventTree->Branch("pho_conv_refitted_momentum",&pho_conv_refitted_momentum);
- fEventTree->Branch("pho_conv_validvtx",&pho_conv_validvtx,"pho_conv_validvtx[NPhotons]/O");
- fEventTree->Branch("pho_conv_ntracks",&pho_conv_ntracks,"pho_conv_ntracks[NPhotons]/I");
- fEventTree->Branch("pho_conv_chi2_probability",&pho_conv_chi2_probability,"pho_conv_chi2_probability[NPhotons]/F");
- fEventTree->Branch("pho_conv_eoverp",&pho_conv_eoverp,"pho_conv_eoverp[NPhotons]/F");
 
- fEventTree->Branch("conv_n",&conv_n,"conv_n/I");
- // fEventTree->Branch("conv_vtx",&conv_vtx);
- // fEventTree->Branch("conv_refitted_momentum",&conv_refitted_momentum);
- fEventTree->Branch("conv_validvtx",&conv_validvtx,"conv_validvtx[NPhotons]/O");
- fEventTree->Branch("conv_ntracks",&conv_ntracks,"conv_ntracks[NPhotons]/I");
- fEventTree->Branch("conv_chi2_probability",&conv_chi2_probability,"conv_chi2_probability[NPhotons]/F");
- fEventTree->Branch("conv_eoverp",&conv_eoverp,"conv_eoverp[NPhotons]/F");
- fEventTree->Branch("conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"conv_zofprimvtxfromtrks[NPhotons]/F");
+ fEventTree->Branch("Pho_conv_validvtx",&pho_conv_validvtx,"Pho_conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("Pho_conv_ntracks",&pho_conv_ntracks,"Pho_conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("Pho_conv_chi2_probability",&pho_conv_chi2_probability,"Pho_conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("Pho_conv_eoverp",&pho_conv_eoverp,"Pho_conv_eoverp[NPhotons]/F");
 
- fEventTree->Branch("gv_n",&gv_n,"gv_n/I");
- // fEventTree->Branch("gv_pos",&gv_pos);
- // fEventTree->Branch("gv_p3",&gv_p3);
- fEventTree->Branch("gv_sumPtHi",&gv_sumPtHi,"gv_sumPtHi[gv_n]/F");
- fEventTree->Branch("gv_sumPtLo",&gv_sumPtLo,"gv_sumPtLo[gv_n]/F");
- fEventTree->Branch("gv_nTkHi",&gv_nTkHi,"gv_nTkHi[gv_n]/I");
- fEventTree->Branch("gv_nTkLo",&gv_nTkLo,"gv_nTkLo[gv_n]/I");
+ fEventTree->Branch("Conv_n",&conv_n,"Conv_n/I");
+ fEventTree->Branch("Conv_validvtx",&conv_validvtx,"Conv_validvtx[NPhotons]/O");
+ fEventTree->Branch("Conv_ntracks",&conv_ntracks,"Conv_ntracks[NPhotons]/I");
+ fEventTree->Branch("Conv_chi2_probability",&conv_chi2_probability,"Conv_chi2_probability[NPhotons]/F");
+ fEventTree->Branch("Conv_eoverp",&conv_eoverp,"Conv_eoverp[NPhotons]/F");
+ fEventTree->Branch("Conv_zofprimvtxfromtrks",&conv_zofprimvtxfromtrks,"Conv_zofprimvtxfromtrks[NPhotons]/F");
 
- fEventTree->Branch("diphotons_first",&diphotons_first);
- fEventTree->Branch("diphotons_second",&diphotons_second);
- fEventTree->Branch("vtx_dipho_h2gglobe",&vtx_dipho_h2gglobe);
- fEventTree->Branch("vtx_dipho_mva",&vtx_dipho_mva);
- fEventTree->Branch("vtx_dipho_productrank",&vtx_dipho_productrank);
+// fEventTree->Branch("Gvn",&gv_n,"Gvn/I");
+// fEventTree->Branch("Gv_sumPtHi",&gv_sumPtHi,"Gv_sumPtHi[Gvn]/F");
+// fEventTree->Branch("Gv_sumPtLo",&gv_sumPtLo,"Gv_sumPtLo[Gvn]/F");
+// fEventTree->Branch("Gv_nTkHi",&gv_nTkHi,"Gv_nTkHi[Gvn]/I");
+// fEventTree->Branch("Gv_nTkLo",&gv_nTkLo,"Gv_nTkLo[Gvn]/I");
+
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -3761,6 +3888,11 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("JChargedHadFrac"     ,&fTjChHadFrac     ,"JChargedHadFrac[NJets]/F");
 	fEventTree->Branch("JNeutralHadFrac"     ,&fTjNeuHadFrac    ,"JNeutralHadFrac[NJets]/F");
 	fEventTree->Branch("JChargedMuEnergyFrac",&fTjChMuEFrac     ,"JChargedMuEnergyFrac[NJets]/F");
+	fEventTree->Branch("JPhotonEnergyFrac"   ,&fTjPhoFrac       ,"JPhotonEnergyFrac[NJets]/F");
+	fEventTree->Branch("JHFHadEnergyFrac"    ,&fTjHFHadFrac     ,"JHFHadEnergyFrac[NJets]/F");
+	fEventTree->Branch("JHFEMEnergyFrac"     ,&fTjHFEMFrac      ,"JHFEMEnergyFrac[NJets]/F");
+	fEventTree->Branch("JPtD"                ,&fTjPtD           ,"JPtD[NJets]/F");
+	fEventTree->Branch("JRMSCand"            ,&fTjRMSCand       ,"JRMSCand[NJets]/F");
 
 	fEventTree->Branch("JeMinDR"               ,&fTjeMinDR               ,"JeMinDR[NJets]/F");
 	fEventTree->Branch("JbTagProbTkCntHighEff" ,&fTjbTagProbTkCntHighEff ,"JbTagProbTkCntHighEff[NJets]/F");
@@ -4054,6 +4186,8 @@ void NTupleProducer::resetTree(){
 	resetInt(fTgenInfoId,nStoredGenParticles);
 	resetFloat(fTgenInfoMass,nStoredGenParticles);
 	resetInt(fTgenInfoNMo,nStoredGenParticles);
+	resetFloat(fTgenInfoMo1Pt,nStoredGenParticles);
+	resetFloat(fTgenInfoMo2Pt,nStoredGenParticles);
 	resetInt(fTgenInfoNDa,nStoredGenParticles);
 	resetInt(fTgenInfoMo1,nStoredGenParticles);
 	resetInt(fTgenInfoMo2,nStoredGenParticles);
@@ -4066,6 +4200,8 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTgenInfoPy,nStoredGenParticles);
 	resetFloat(fTgenInfoPz,nStoredGenParticles);
 	resetFloat(fTgenInfoM,nStoredGenParticles);
+	resetInt(fTgenInfoMoIndex,nStoredGenParticles);
+	resetInt(fTPromptnessLevel,nStoredGenParticles);
 
 	// Pile-up
 	fTpuNumInteractions    = -999;
@@ -4363,6 +4499,11 @@ void NTupleProducer::resetTree(){
 	resetFloat(fTjChEmFrac, gMaxnjets);
 	resetFloat(fTjNeuEmFrac, gMaxnjets);
 	resetFloat(fTjChMuEFrac, gMaxnjets);
+	resetFloat(fTjPhoFrac, gMaxnjets);
+	resetFloat(fTjHFHadFrac, gMaxnjets);
+	resetFloat(fTjHFEMFrac, gMaxnjets);
+	resetFloat(fTjPtD, gMaxnjets);
+	resetFloat(fTjRMSCand, gMaxnjets);
 
 	resetFloat(fTjbTagProbTkCntHighEff, gMaxnjets);
 	resetFloat(fTjbTagProbTkCntHighPur, gMaxnjets);
@@ -4475,39 +4616,21 @@ void NTupleProducer::resetTree(){
        resetInt( fT_pho_isPFElectron, gMaxnphos);
        resetInt (fTPhotSCindex, gMaxnphos);
        
-       pho_conv_vtx.clear(); 
-       pho_conv_vtx.resize(gMaxnphos);
-       pho_conv_refitted_momentum.clear();
-       pho_conv_refitted_momentum.resize(gMaxnphos);
        for (int i=0; i<gMaxnphos; i++) pho_conv_validvtx[i]=false;
        resetFloat(pho_conv_chi2_probability,gMaxnphos);
        resetFloat(pho_conv_eoverp,gMaxnphos);
        resetInt(pho_conv_ntracks,gMaxnphos);
 
-       conv_vtx.clear();
-       conv_vtx.resize(gMaxnconv);
-       conv_refitted_momentum.clear();
-       conv_refitted_momentum.resize(gMaxnconv);
        for (int i=0; i<gMaxnconv; i++) conv_validvtx[i]=false;
        resetInt(conv_ntracks,gMaxnconv);
        resetFloat(conv_chi2_probability,gMaxnconv);
        resetFloat(conv_eoverp,gMaxnconv);
        resetFloat(conv_zofprimvtxfromtrks,gMaxnconv);
 
-       gv_pos.clear();
-       gv_pos.resize(gMaxngenvtx);
-       gv_p3.clear();
-       gv_p3.resize(gMaxngenvtx);
        resetFloat(gv_sumPtHi,gMaxngenvtx);
        resetFloat(gv_sumPtLo,gMaxngenvtx);
        resetInt(gv_nTkHi,gMaxngenvtx);
        resetInt(gv_nTkLo,gMaxngenvtx);
-
-       diphotons_first.clear();
-       diphotons_second.clear();
-       vtx_dipho_h2gglobe.clear();
-       vtx_dipho_mva.clear();
-       vtx_dipho_productrank.clear();
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
@@ -4556,6 +4679,18 @@ void NTupleProducer::resetTree(){
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,gMaxnphos);
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,gMaxnphos);
 
+       for (int i=0; i<gMaxnphos; i++) {
+	 pho_conv_vtx[i]=TVector3();
+	 pho_conv_refitted_momentum[i]=TVector3();
+	 conv_vtx[i]=TVector3();
+	 conv_refitted_momentum[i]=TVector3();
+       }
+       
+       for (int i=0; i<gMaxngenvtx; i++) {
+	 gv_pos[i]=TVector3();
+	 gv_p3[i]=TVector3();
+       }
+       
 
 	resetFloat(fTSCraw,gMaxnSC);
 	resetFloat(fTSCpre,gMaxnSC);
@@ -5611,7 +5746,7 @@ ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz,
 				 int ntracks, float * tkpx, float * tkpy, float * tkpz,
 				 float * tkPtErr, int * tkVtxId,
 				 float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
-			     bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+			     bool * tkIsHighPurity, std::vector<std::vector<unsigned short> > vtx_std_tkind, std::vector<std::vector<float> > vtx_std_tkweight, int * vtx_std_ntks
 ) :
 	nvtx_(nvtx),
 	vtxx_(vtxx),
@@ -5632,8 +5767,21 @@ ETHVertexInfo::ETHVertexInfo(int nvtx, float * vtxx, float * vtxy, float * vtxz,
 	vtx_std_tkweight_(vtx_std_tkweight),
 	vtx_std_ntks_(vtx_std_ntks)
 {
-}
 
+  for (unsigned int i=0; i<vtx_std_tkind_.size();i++){
+    for (unsigned int j=0; j<vtx_std_tkind_.at(i).size();j++){
+      vtx_std_tkind_helper_[i][j]=vtx_std_tkind_.at(i).at(j);
+    }
+  }
+
+  for (unsigned int i=0; i<vtx_std_tkweight_.size();i++){
+    for (unsigned int j=0; j<vtx_std_tkweight_.at(i).size();j++){
+      vtx_std_tkweight_helper_[i][j]=vtx_std_tkweight_.at(i).at(j);
+    }
+  }
+
+}
+  
 ETHVertexInfo::~ETHVertexInfo() {}
 
 

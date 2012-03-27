@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.122 2012/01/31 14:24:44 pnef Exp $
+// $Id: NTupleProducer.h,v 1.129 2012/03/16 13:38:12 peruzzi Exp $
 //
 //
 
@@ -27,6 +27,7 @@ Implementation:
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
+#include "TVector3.h"
 
 // Framework include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -184,8 +185,11 @@ private:
 	static const int gMaxnvrtx    = 25;
 	static const int gMaxnpileup  = 50;
 	static const int gMaxnEBhits  = 20;
-        static const int gMaxngenvtx = 40;
-        static const int nStoredGenParticles = 1000;
+        static const int gMaxngenvtx = 60;
+        static const int nStoredGenParticles = 2000;
+
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
 	edm::InputTag fMuonTag;
 	edm::InputTag fElectronTag;
@@ -341,6 +345,8 @@ private:
         int fTgenInfoStatus[nStoredGenParticles];
         float fTgenInfoMass[nStoredGenParticles];
         int fTgenInfoNMo[nStoredGenParticles];
+	float fTgenInfoMo1Pt[nStoredGenParticles];
+	float fTgenInfoMo2Pt[nStoredGenParticles];
         int fTgenInfoNDa[nStoredGenParticles];
         int fTgenInfoMo1[nStoredGenParticles];
         int fTgenInfoMo2[nStoredGenParticles];
@@ -353,6 +359,9 @@ private:
         float fTgenInfoPy[nStoredGenParticles];
         float fTgenInfoPz[nStoredGenParticles];
         float fTgenInfoM[nStoredGenParticles];
+	float fTgenInfoPromptFlag[nStoredGenParticles];
+	int fTgenInfoMoIndex[nStoredGenParticles];
+	int fTPromptnessLevel[nStoredGenParticles];
 
 
 	// Pile-up
@@ -848,36 +857,32 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 
-  std::vector<TVector3> pho_conv_vtx;
-  std::vector<TVector3> pho_conv_refitted_momentum;
+	TVector3 pho_conv_vtx[gMaxnphos];
+	TVector3 pho_conv_refitted_momentum[gMaxnphos];
+	TVector3 conv_vtx[gMaxnphos];
+	TVector3 conv_refitted_momentum[gMaxnphos];
+	TVector3 gv_pos[gMaxngenvtx];
+	TVector3 gv_p3[gMaxngenvtx];
+
+
   bool pho_conv_validvtx[gMaxnphos];
   int pho_conv_ntracks[gMaxnphos];
   float pho_conv_chi2_probability[gMaxnphos];
   float pho_conv_eoverp[gMaxnphos];
   
   int conv_n;
-  std::vector<TVector3> conv_vtx;
-  std::vector<TVector3> conv_refitted_momentum;
   bool conv_validvtx[gMaxnconv];
   int conv_ntracks[gMaxnconv];
   float conv_chi2_probability[gMaxnconv];
   float conv_eoverp[gMaxnconv];
   float conv_zofprimvtxfromtrks[gMaxnconv];
 
-  Int_t gv_n;
-  std::vector<TVector3> gv_pos;
-  std::vector<TVector3> gv_p3;
-  Float_t gv_sumPtHi[gMaxngenvtx];
-  Float_t gv_sumPtLo[gMaxngenvtx];
-  Int_t gv_nTkHi[gMaxngenvtx];
-  Int_t gv_nTkLo[gMaxngenvtx];
+  int gv_n;
+  float gv_sumPtHi[gMaxngenvtx];
+  float gv_sumPtLo[gMaxngenvtx];
+  int gv_nTkHi[gMaxngenvtx];
+  int gv_nTkLo[gMaxngenvtx];
 
-  std::vector<int> diphotons_first;	       
-  std::vector<int> diphotons_second;	       
-  std::vector<std::vector<int> > vtx_dipho_h2gglobe;   
-  std::vector<std::vector<int> > vtx_dipho_mva;	       
-  std::vector<std::vector<int> > vtx_dipho_productrank;
-  
   // SC
   int fTnSC;
   float fTSCraw[gMaxnSC];
@@ -923,6 +928,11 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
 	float fTjChEmFrac[gMaxnjets];
 	float fTjNeuEmFrac[gMaxnjets];
 	float fTjChMuEFrac[gMaxnjets];
+	float fTjPhoFrac[gMaxnjets];
+	float fTjHFHadFrac[gMaxnjets];
+	float fTjHFEMFrac[gMaxnjets];
+	float fTjPtD[gMaxnjets];
+	float fTjRMSCand[gMaxnjets];
 
 	float fTjbTagProbTkCntHighEff[gMaxnjets];
 	float fTjbTagProbTkCntHighPur[gMaxnjets];
@@ -1036,16 +1046,16 @@ public:
 		int ntracks, float * tkpx, float * tkpy, float * tkpz,
 		float * tkPtErr, int * tkVtxId, 
 		float * tkd0, float * tkd0Err, float * tkdz, float * tkdzErr,
-		bool * tkIsHighPurity, std::vector<unsigned short> * vtx_std_tkind, std::vector<float> * vtx_std_tkweight, int * vtx_std_ntks
+		bool * tkIsHighPurity, std::vector<std::vector<unsigned short> > vtx_std_tkind, std::vector<std::vector<float> > vtx_std_tkweight, int * vtx_std_ntks
 		);
 
   virtual int nvtx() const    { return nvtx_; };
   virtual int ntracks() const { return ntracks_; };
 
   virtual bool hasVtxTracks()  const { return true; };
-  virtual const unsigned short * vtxTracks(int ii) const { return &(vtx_std_tkind_[ii][0]); };
+  virtual const unsigned short * vtxTracks(int ii) const { return vtx_std_tkind_helper_[ii]+0; };
   virtual int vtxNTracks(int ii) const { return vtx_std_ntks_[ii]; };
-  virtual const float * vtxTkWeights(int ii) const { return &(vtx_std_tkweight_[ii][0]); };
+  virtual const float * vtxTkWeights(int ii) const { return vtx_std_tkweight_helper_[ii]+0; };
 
   virtual float tkpx(int ii) const { return tkpx_ != 0 ? tkpx_[ii] : 0.; };
   virtual float tkpy(int ii) const { return tkpx_ != 0 ? tkpy_[ii] : 0.; };
@@ -1055,8 +1065,22 @@ public:
   virtual int   tkVtxId(int ii) const { return tkVtxId_  != 0 ? tkVtxId_[ii] : 999; };
 
   //	virtual float tkWeight(int ii, int jj) const { return tkWeight_ != 0 ? tkWeight_[ii]*(float)( tkVtxId(ii) == jj) : 0.; };
-  virtual float tkWeight(int ii, int jj) const { return vtx_std_tkweight_[jj][ii]; };
+  virtual float tkWeight(int ii, int jj) const { 
+    if (jj>=(int)(vtx_std_tkind_.size())) {std::cout << "wrong vertex index call" << std::endl; return 0;}
 
+    int trkid=-1;
+    int n=0;
+    for (std::vector<unsigned short>::const_iterator it=vtx_std_tkind_.at(jj).begin(); it!=vtx_std_tkind_.at(jj).end(); it++){
+      if (*it==ii) trkid=n;
+      n++;
+    }
+
+    float out=0;
+    if (trkid!=-1) out=vtx_std_tkweight_.at(jj).at(trkid);
+    return out;
+
+  };
+  
 	
   virtual float vtxx(int ii) const { return vtxx_ != 0 ? vtxx_[ii] : 0.; };
   virtual float vtxy(int ii) const { return vtxy_ != 0 ? vtxy_[ii] : 0.; };
@@ -1093,8 +1117,15 @@ private:
 
   bool * tkIsHighPurity_;
   
-  std::vector<unsigned short> * vtx_std_tkind_;
-  std::vector<float> * vtx_std_tkweight_;
+  std::vector<std::vector<unsigned short> > vtx_std_tkind_;
+  std::vector<std::vector<float> > vtx_std_tkweight_;
   int * vtx_std_ntks_;
+
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
+
+  unsigned short vtx_std_tkind_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
+  float vtx_std_tkweight_helper_[__VTX_AUX_ARRAYS_DIM__][__TRK_AUX_ARRAYS_DIM__];
+
 
 };
