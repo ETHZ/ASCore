@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.168 2012/03/26 19:13:18 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.169 2012/03/27 10:29:17 pandolf Exp $
 //
 //
 
@@ -173,8 +173,8 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fGenJetTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
 	fL1TriggerTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
 	fHLTTrigEventTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
-	//if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
-	//if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
+	if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
+	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
 	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
 	pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
@@ -545,15 +545,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	// Retrieve HB/HE noise flag
 	
-	//if(!fIsModelScan) {
-	//   edm::Handle<bool> hbHeNoiseFlag;
-	//   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
-	//   fTHBHENoiseFlag    = static_cast<int>(*hbHeNoiseFlag);
-	//   
-	//   edm::Handle<bool> hbHeNoiseFlagIso;
-	//   iEvent.getByLabel(fHBHENoiseResultTagIso,hbHeNoiseFlagIso);
-	//   fTHBHENoiseFlagIso = static_cast<int>(*hbHeNoiseFlagIso);
-	//}
+	if(!fIsModelScan) {
+	   edm::Handle<bool> hbHeNoiseFlag;
+	   iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
+	   fTHBHENoiseFlag    = static_cast<int>(*hbHeNoiseFlag);
+	   
+	   edm::Handle<bool> hbHeNoiseFlagIso;
+	   iEvent.getByLabel(fHBHENoiseResultTagIso,hbHeNoiseFlagIso);
+	   fTHBHENoiseFlagIso = static_cast<int>(*hbHeNoiseFlagIso);
+	}
 
 	// Get Transient Track Builder
 	ESHandle<TransientTrackBuilder> theB;
@@ -2643,7 +2643,6 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
                 JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
 		double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
 		corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
-		float btag  = (*jetsAndProbsTkCntHighEff) [iraw].second;
 	}
 	
 	// Sort corrected jet collection by decreasing pt
