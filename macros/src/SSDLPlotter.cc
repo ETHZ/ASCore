@@ -317,7 +317,7 @@ void SSDLPlotter::doAnalysis(){
 	// return;
 	
 	if(readHistos(fOutputFileName) != 0) return;
-	storeWeightedPred(false);
+	storeWeightedPred();
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -338,31 +338,31 @@ void SSDLPlotter::doAnalysis(){
 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	// makeNT2KinPlots();
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
-	makeMETvsHTPlotPRL();
+	makeNT2KinPlots();
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
-	// makeRatioPlots(Muon);
-	// makeRatioPlots(Elec);
-	// make2DRatioPlots(Muon);
-	// make2DRatioPlots(Elec);
+	makeRatioPlots(Muon);
+	makeRatioPlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
     
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 
-	// makeAllClosureTests();
-	// makeAllIntPredictions();
-	// makeDiffPrediction();
-	// printAllYieldTables();
+	makeAllClosureTests();
+	makeAllIntPredictions();
+	makeDiffPrediction();
+	printAllYieldTables();
 	
 	// makeRelIsoTTSigPlots();
 	// load_msugraInfo("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
@@ -2623,7 +2623,11 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     system(cmd);
 	
 	const float htmax = 1300.;
-	const float metmax = 450.;
+	const float metmax = 250.;
+
+	Color_t col_mm = kBlack;
+	Color_t col_ee = kRed;
+	Color_t col_em = kBlue;
 
 	// Create histograms
 	TH2D *hmetvsht_da_mm = new TH2D("Data_HTvsMET_mm", "Data_HTvsMET_mm", 100, 0., htmax, 100, 0., metmax);
@@ -2674,9 +2678,9 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	TGraph *gmetvsht_da_mm_ex1 = getSigEventGraph(Muon, 0., 7000., 0., 30.);
-	TGraph *gmetvsht_da_ee_ex1 = getSigEventGraph(Elec, 0., 7000., 0., 30.);
-	TGraph *gmetvsht_da_em_ex1 = getSigEventGraph(ElMu, 0., 7000., 0., 30.);
+	TGraph *gmetvsht_da_mm_ex1 = getSigEventGraph(Muon, 0., 450., 0., 30.);
+	TGraph *gmetvsht_da_ee_ex1 = getSigEventGraph(Elec, 0., 450., 0., 30.);
+	TGraph *gmetvsht_da_em_ex1 = getSigEventGraph(ElMu, 0., 450., 0., 30.);
 	TGraph *gmetvsht_da_mm_ex2 = getSigEventGraph(Muon, 0., 80., 30., 7000.);
 	TGraph *gmetvsht_da_ee_ex2 = getSigEventGraph(Elec, 0., 80., 30., 7000.);
 	TGraph *gmetvsht_da_em_ex2 = getSigEventGraph(ElMu, 0., 80., 30., 7000.);
@@ -2694,6 +2698,23 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     gmetvsht_da_ee_ex2->SetMarkerSize(1.2);
     gmetvsht_da_em_ex2->SetMarkerSize(1.2);
 
+	//////////////////////////////////////////////////////////
+	// Custom added for 0 < MET < 50:
+	TGraph *gmetvsht_da_mm_lowmet = getSigEventGraph(Muon, 450., 7000., 0., 50.);
+	TGraph *gmetvsht_da_ee_lowmet = getSigEventGraph(Elec, 450., 7000., 0., 50.);
+	TGraph *gmetvsht_da_em_lowmet = getSigEventGraph(ElMu, 450., 7000., 0., 50.);
+
+	gmetvsht_da_mm_lowmet->SetMarkerColor(col_mm);
+	gmetvsht_da_mm_lowmet->SetMarkerStyle(8);
+	gmetvsht_da_mm_lowmet->SetMarkerSize(1.5);
+	gmetvsht_da_em_lowmet->SetMarkerColor(col_em);
+	gmetvsht_da_em_lowmet->SetMarkerStyle(23);
+	gmetvsht_da_em_lowmet->SetMarkerSize(1.5);
+	gmetvsht_da_ee_lowmet->SetMarkerColor(col_ee);
+	gmetvsht_da_ee_lowmet->SetMarkerStyle(21);
+	gmetvsht_da_ee_lowmet->SetMarkerSize(1.5);
+	//////////////////////////////////////////////////////////
+
 
 
 	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
@@ -2710,17 +2731,20 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	// const float lowerht = hilo==HighPt? 0.:200.;
 
 	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
-	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,    30., kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., 450.,  30., kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
 	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,metmax);
-	TLine *boxborder2 = new TLine(lowerht,30.,htmax,30.);
+	TLine *boxborder2 = new TLine(lowerht,30.,450.,30.);
+	TLine *boxborder3 = new TLine(450.,0.,450.,30.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
+	boxborder3->SetLineWidth(1);
 	boxborder1->SetLineColor(14);
 	boxborder2->SetLineColor(14);
+	boxborder3->SetLineColor(14);
 
 	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
 	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
@@ -2730,6 +2754,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	TLine *sig3y = new TLine(450.,  50., htmax,  50.);
 	TLine *sig4x = new TLine(450., 120., 450.,  metmax);      // met 120 ht 450
 	TLine *sig4y = new TLine(450., 120., htmax, 120.);
+	TLine *sig5x = new TLine(450.,   0., 450.,  metmax);      // met 0 ht 450
 
 	sig1x->SetLineWidth(2);
 	sig1y->SetLineWidth(2);
@@ -2739,6 +2764,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	sig3y->SetLineWidth(1);
 	sig4x->SetLineWidth(3);
 	sig4y->SetLineWidth(3);
+	sig5x->SetLineWidth(2);
 
 	sig1x->SetLineStyle(3);
 	sig1y->SetLineStyle(3);
@@ -2748,20 +2774,22 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	sig3y->SetLineStyle(1);
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
+	sig5x->SetLineStyle(4);
 
 	// float legymax = hilo==HighPt?0.54:0.50;
 	// TLegend *regleg = new TLegend(0.70,0.37,0.88,0.54);
 	// TLegend *regleg = new TLegend(0.70,0.45,0.88,0.62);
-	TLegend *regleg = new TLegend(0.70,0.29,0.88,0.46);
+	// TLegend *regleg = new TLegend(0.70,0.29,0.88,0.46);
+	TLegend *regleg = new TLegend(0.70,0.27,0.88,0.47);
 	regleg->AddEntry(sig4x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
 	if(hilo != LowPt) regleg->AddEntry(sig1x, "Search Region 4","l");
+	regleg->AddEntry(sig5x, "Search Region 5","l");
 	regleg->SetFillStyle(0);
 	regleg->SetTextFont(42);
 	regleg->SetTextSize(0.03);
 	regleg->SetBorderSize(0);
-	
 
 	TCanvas *c_temp = new TCanvas("C_HTvsMET", "HT vs MET in Data vs MC", 0, 0, 600, 600);
 	c_temp->cd();
@@ -2776,11 +2804,12 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
     gmetvsht_da_mm_ex2->Draw("P");
     gmetvsht_da_ee_ex2->Draw("P");
     gmetvsht_da_em_ex2->Draw("P");
-
+	
 	lowhtbox ->Draw();
 	lowmetbox->Draw();
 	boxborder1->Draw();
 	boxborder2->Draw();
+	boxborder3->Draw();
 
 	if(hilo != LowPt) sig1x->Draw();
 	if(hilo != LowPt) sig1y->Draw();
@@ -2790,25 +2819,30 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	sig3y->Draw();
 	sig4x->Draw();
 	sig4y->Draw();
+	sig5x->Draw();
 
 	// Graphs
 	gmetvsht_da_ee->Draw("P");
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
-	
+
+	gmetvsht_da_mm_lowmet->Draw("P");
+	gmetvsht_da_ee_lowmet->Draw("P");
+	gmetvsht_da_em_lowmet->Draw("P");
+
 	leg->Draw();
 	regleg->Draw();
 	drawTopLine();
-	TPaveText *pave = new TPaveText(0.16, 0.83, 0.53, 0.88, "NDC");
-	pave->SetFillColor(0);
-	pave->SetFillStyle(1001);
-	pave->SetBorderSize(0);
-	pave->SetMargin(0.05);
-	pave->SetTextFont(42);
-	pave->SetTextSize(0.04);
-	pave->SetTextAlign(12);
-	pave->AddText(hiloname[hilo]);
-	pave->Draw();
+	// TPaveText *pave = new TPaveText(0.16, 0.83, 0.53, 0.88, "NDC");
+	// pave->SetFillColor(0);
+	// pave->SetFillStyle(1001);
+	// pave->SetBorderSize(0);
+	// pave->SetMargin(0.05);
+	// pave->SetTextFont(42);
+	// pave->SetTextSize(0.04);
+	// pave->SetTextAlign(12);
+	// pave->AddText(hiloname[hilo]);
+	// pave->Draw();
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
@@ -4790,7 +4824,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
-	bool diffratio = false; // use flat or differential ratios
+	bool diffratio = true; // use flat or differential ratios
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
@@ -5628,27 +5662,27 @@ void SSDLPlotter::makeDiffPrediction(){
 		TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
 		TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
 
-		///////////////////////////////////////////////////////
-		// // Differential ratios
-		// for(size_t i = 0; i < musamples.size(); ++i){
-		// 	Sample *S = fSamples[musamples[i]];
-		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-		// 	nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-		// }
-		// for(size_t i = 0; i < elsamples.size(); ++i){
-		// 	Sample *S = fSamples[elsamples[i]];
-		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-		// 	nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-		// }
-		// for(size_t i = 0; i < emusamples.size(); ++i){
-		// 	Sample *S = fSamples[emusamples[i]];
-		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-		// 	nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-		// }
-		///////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////
+		// Differential ratios
+		for(size_t i = 0; i < musamples.size(); ++i){
+			Sample *S = fSamples[musamples[i]];
+			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		}
+		for(size_t i = 0; i < elsamples.size(); ++i){
+			Sample *S = fSamples[elsamples[i]];
+			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		}
+		for(size_t i = 0; i < emusamples.size(); ++i){
+			Sample *S = fSamples[emusamples[i]];
+			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		}
+		/////////////////////////////////////////////////////
 
 		for(size_t i = 0; i < nbins; ++i){
 			const float FakeESyst2 = 0.25;
@@ -5665,15 +5699,15 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 			
-			///////////////////////////////////////////////////////
-			// Flat ratios:
-			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
-			///////////////////////////////////////////////////////
+			// ///////////////////////////////////////////////////////
+			// // Flat ratios:
+			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			// ///////////////////////////////////////////////////////
 			
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
@@ -6357,6 +6391,9 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		FR->setEMNtl(ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i]);
 
 		Sample *S = fSamples[samples[i]];
+		FR->setNGen(S->ngen);
+
+		//// Differential Ratios
 		npp_pred_mm.push_back(S->numbers[reg][Muon].npp);
 		npf_pred_mm.push_back(S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp);
 		nff_pred_mm.push_back(S->numbers[reg][Muon].nff);
@@ -6367,24 +6404,24 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		npf_pred_em.push_back(S->numbers[reg][ElMu].npf);
 		nfp_pred_em.push_back(S->numbers[reg][ElMu].nfp);
 		nff_pred_em.push_back(S->numbers[reg][ElMu].nff);
-
-		FR->setNGen(S->ngen);
+		
 		npp_pred_mm_e1.push_back(FR->getMMNppEStat());
 		npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
 		nff_pred_mm_e1.push_back(FR->getMMNffEStat());
 		nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
-
+		
 		npp_pred_ee_e1.push_back(FR->getEENppEStat());
 		npf_pred_ee_e1.push_back(FR->getEENpfEStat());
 		nff_pred_ee_e1.push_back(FR->getEENffEStat());
 		nF_pred_ee_e1 .push_back(FR->getEETotEStat());
-
+		
 		npp_pred_em_e1.push_back(FR->getEMNppEStat());
 		npf_pred_em_e1.push_back(FR->getEMNpfEStat());
 		nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
 		nff_pred_em_e1.push_back(FR->getEMNffEStat());
 		nF_pred_em_e1 .push_back(FR->getEMTotEStat());
 
+		//// Flat Ratios
 		// npp_pred_mm   .push_back(FR->getMMNpp());
 		// npp_pred_mm_e1.push_back(FR->getMMNppEStat());
 		// npf_pred_mm   .push_back(FR->getMMNpf());
@@ -6542,53 +6579,53 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	OUT << "-------------------------------------------------------------------------------------------------" << endl;
-	OUT << "         RATIOS  ||    Mu-fRatio     |    Mu-pRatio     ||    El-fRatio     |    El-pRatio     ||" << endl;
-	OUT << "-------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "           MC    ||";
-	OUT << setw(7)  << setprecision(2) << mf << " ± " << setw(7) << setprecision(2) << mf_e << " |";
-	OUT << setw(7)  << setprecision(2) << mp << " ± " << setw(7) << setprecision(2) << mp_e << " ||";
-	OUT << setw(7)  << setprecision(2) << ef << " ± " << setw(7) << setprecision(2) << ef_e << " |";
-	OUT << setw(7)  << setprecision(2) << ep << " ± " << setw(7) << setprecision(2) << ep_e << " ||";
-	OUT << endl;
-	OUT << "-------------------------------------------------------------------------------------------------" << endl << endl;
+	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
+	// OUT << "         RATIOS  ||    Mu-fRatio     |    Mu-pRatio     ||    El-fRatio     |    El-pRatio     ||" << endl;
+	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
+	// OUT << setw(16) << "           MC    ||";
+	// OUT << setw(7)  << setprecision(2) << mf << " ± " << setw(7) << setprecision(2) << mf_e << " |";
+	// OUT << setw(7)  << setprecision(2) << mp << " ± " << setw(7) << setprecision(2) << mp_e << " ||";
+	// OUT << setw(7)  << setprecision(2) << ef << " ± " << setw(7) << setprecision(2) << ef_e << " |";
+	// OUT << setw(7)  << setprecision(2) << ep << " ± " << setw(7) << setprecision(2) << ep_e << " ||";
+	// OUT << endl;
+	// OUT << "-------------------------------------------------------------------------------------------------" << endl << endl;
 
-	OUT << "==========================================================================================================================" << endl;
-	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-	OUT << "          YIELDS ||   Ntt   |   Ntl   |   Nll   ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	for(size_t i = 0; i < nsamples; ++i){
-		OUT << setw(16) << names[i] << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_mm[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nlt_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_em[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nll_ee[i]) << " || ";
-		OUT << endl;
-	}	
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "Sum"  << " || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " | ";
-	OUT << setw(7) << Form("%6.3f", ntl_sum_mm) << " | ";
-	OUT << setw(7) << Form("%6.3f", nll_sum_mm) << " || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", ntl_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", nlt_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", nll_sum_em) << " || ";
-	OUT << setw(7) << Form("%6.3f", ntt_sum_ee) << " | ";
-	OUT << setw(7) << Form("%6.3f", ntl_sum_ee) << " | ";
-	OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
-	OUT << endl;
-	OUT << setw(16) << "Channels sum"  << " || ";
-	OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
-	ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
-	OUT << "==========================================================================================================================" << endl;
-	OUT << endl;
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+	// OUT << "          YIELDS ||   Ntt   |   Ntl   |   Nll   ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
+	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	// for(size_t i = 0; i < nsamples; ++i){
+	// 	OUT << setw(16) << names[i] << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_mm[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_mm[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_mm[i]) << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nlt_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_em[i]) << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_ee[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_ee[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_ee[i]) << " || ";
+	// 	OUT << endl;
+	// }	
+	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	// OUT << setw(16) << "Sum"  << " || ";
+	// OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " | ";
+	// OUT << setw(7) << Form("%6.3f", ntl_sum_mm) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nll_sum_mm) << " || ";
+	// OUT << setw(7) << Form("%6.3f", ntt_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", ntl_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nlt_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nll_sum_em) << " || ";
+	// OUT << setw(7) << Form("%6.3f", ntt_sum_ee) << " | ";
+	// OUT << setw(7) << Form("%6.3f", ntl_sum_ee) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
+	// OUT << endl;
+	// OUT << setw(16) << "Channels sum"  << " || ";
+	// OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
+	// ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << endl;
 
 	// OUT << "==========================================================================================================================" << endl;
 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
@@ -6661,56 +6698,56 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	// OUT << "==========================================================================================================================" << endl;
 	// OUT << endl;
 
-	OUT << "==========================================================================================================================" << endl;
-	OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-	OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	for(size_t i = 0; i < nsamples; ++i){
-		OUT << setw(16) << names[i] << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_mm[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_mm[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_pred_em[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_em[i]) << " || ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_ee[i]) << " | ";
-		OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_ee[i]) << " || ";
-		OUT << endl;
-	}
-	OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-	OUT << setw(16) << "Pred Sum"  << " || ";
-	OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
-	OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
-	OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
-	OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
-	OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
-	OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
-	OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
-	OUT << endl;
-	OUT << "==========================================================================================================================" << endl;
-	OUT << endl;
-
-	OUT << "=========================================================" << endl;
-	OUT << "                 ||       E/Mu      ||       E/E       ||" << endl;
-	OUT << "    CHARGE MISID ||  Pred  |  Truth ||  Pred  |  Truth ||" << endl;
-	OUT << "---------------------------------------------------------" << endl;
-	for(size_t i = 0; i < nsamples; ++i){
-		OUT << setw(16) << names[i] << " || ";
-		OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_em[i], scales[i]*npp_tt_cm_em[i]);
-		OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_ee[i], scales[i]*npp_tt_cm_ee[i]);
-		OUT << endl;
-	}	
-	OUT << "---------------------------------------------------------" << endl;
-	OUT << setw(16) << "Sum"  << " || ";
-	OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
-	OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_ee, npp_tt_cm_sum_ee) << endl;
-	OUT << "=========================================================" << endl;
-	OUT << endl;
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+	// OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	// for(size_t i = 0; i < nsamples; ++i){
+	// 	OUT << setw(16) << names[i] << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_mm[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_mm[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_mm[i]) << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_pred_em[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_em[i]) << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_ee[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_ee[i]) << " | ";
+	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_ee[i]) << " || ";
+	// 	OUT << endl;
+	// }
+	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+	// OUT << setw(16) << "Pred Sum"  << " || ";
+	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
+	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
+	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
+	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
+	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
+	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
+	// OUT << endl;
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << endl;
+	// 
+	// OUT << "=========================================================" << endl;
+	// OUT << "                 ||       E/Mu      ||       E/E       ||" << endl;
+	// OUT << "    CHARGE MISID ||  Pred  |  Truth ||  Pred  |  Truth ||" << endl;
+	// OUT << "---------------------------------------------------------" << endl;
+	// for(size_t i = 0; i < nsamples; ++i){
+	// 	OUT << setw(16) << names[i] << " || ";
+	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_em[i], scales[i]*npp_tt_cm_em[i]);
+	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_ee[i], scales[i]*npp_tt_cm_ee[i]);
+	// 	OUT << endl;
+	// }	
+	// OUT << "---------------------------------------------------------" << endl;
+	// OUT << setw(16) << "Sum"  << " || ";
+	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
+	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_ee, npp_tt_cm_sum_ee) << endl;
+	// OUT << "=========================================================" << endl;
+	// OUT << endl;
 
 	OUT << "===================================================================================" << endl;
 	OUT << "                 ||     Mu/Mu     |     E/Mu      |      E/E      |      Sum      |" << endl;
@@ -6861,31 +6898,31 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	// 	npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
 	// }
 	// OUT << "===========================================================================================================================================" << endl;
-	OUT << endl;
-
-	OUT << "==========================================================================================================================" << endl;
-	OUT << "  PREDICTIONS (in tt window)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " Mu/Mu Channel:" << endl;
-	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
-	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
-	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
-	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " E/Mu Channel:" << endl;
-	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
-	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
-	OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
-	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
-	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
-	OUT << "--------------------------------------------------------------" << endl;
-	OUT << " E/E Channel:" << endl;
-	OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
-	OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
-	OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
-	OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
-	OUT << "==========================================================================================================================" << endl;
-	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	// OUT << endl;
+	// 
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << "  PREDICTIONS (in tt window)" << endl;
+	// OUT << "--------------------------------------------------------------" << endl;
+	// OUT << " Mu/Mu Channel:" << endl;
+	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
+	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
+	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
+	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
+	// OUT << "--------------------------------------------------------------" << endl;
+	// OUT << " E/Mu Channel:" << endl;
+	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
+	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
+	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
+	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
+	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
+	// OUT << "--------------------------------------------------------------" << endl;
+	// OUT << " E/E Channel:" << endl;
+	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
+	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
+	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
+	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
+	// OUT << "==========================================================================================================================" << endl;
+	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	
 	OUT.close();
 	delete FR;

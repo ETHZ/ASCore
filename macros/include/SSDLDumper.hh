@@ -569,6 +569,7 @@ public:
 	virtual bool isSSLLElMuEvent(int&, int&);
 
 	virtual bool isGoodMuon(int, float = -1.);
+	virtual bool isGoodMuonForZVeto(int);
 	virtual bool isLooseMuon(int);
 	virtual bool isTightMuon(int);
 	virtual bool isGoodPrimMuon(int, float = -1.);
@@ -579,6 +580,7 @@ public:
 	virtual bool isChargeMatchedMuon(int);
 
 	virtual bool isGoodElectron(int, float = -1.);
+	virtual bool isGoodEleForZVeto(int);
 	virtual bool isLooseElectron(int);
 	virtual bool isTightElectron(int);
 	virtual bool isGoodPrimElectron(int, float = -1.);

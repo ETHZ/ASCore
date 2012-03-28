@@ -3844,8 +3844,10 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 	return true;
 }
 bool SSDLDumper::passesZVeto(float dm){
-	return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
+	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
 	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
+	return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
+	// return true;
 }
 bool SSDLDumper::passesMllEventVeto(float cut){
 // Checks if any combination of opposite sign, same flavor tight leptons (e or mu)
@@ -4193,6 +4195,12 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 
 	return true;
 }
+bool SSDLDumper::isGoodMuonForZVeto(int muon){
+	// Remove stupid PtE/Pt cut
+	if(muon >= NMus) return false; // Sanity check
+	if(MuPt[muon] < 5.) return false;
+	return true;
+}
 bool SSDLDumper::isLooseMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(MuIso[muon] > 1.00) return false;
@@ -4201,8 +4209,9 @@ bool SSDLDumper::isLooseMuon(int muon){
 bool SSDLDumper::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(isLooseMuon(muon) == false) return false;
-	if(MuIso[muon] > 0.15) return false;
-	// if(MuIso[muon] > 0.1) return false;
+	// if(MuIso[muon] > 0.15) return false;
+	if(MuIso[muon] > 0.10) return false;
+	// if(MuIso[muon] > 0.05) return false;
 	return true;
 }
 bool SSDLDumper::isGoodPrimMuon(int muon, float ptcut){
@@ -4267,6 +4276,12 @@ bool SSDLDumper::isGoodElectron(int ele, float ptcut){
 	
 	return true;
 }
+bool SSDLDumper::isGoodEleForZVeto(int ele){
+	// Don't care about charge consistency or trigger efficiency
+	if(ele >= NEls) return false; // Sanity check
+	if(ElPt[ele] < 10.) return false;
+	return true;	
+}
 bool SSDLDumper::isLooseElectron(int ele){
 	if(isGoodElectron(ele) == false) return false;
 	if(ElRelIso[ele] > 0.60) return false;
@@ -4296,8 +4311,9 @@ bool SSDLDumper::isTightElectron(int ele){
 	if(!isLooseElectron(ele))       return false;
 	if(ElIsGoodElId_WP80[ele] != 1) return false;
 
-	if(ElRelIso[ele]    > 0.15) return false;
-	// if(ElRelIso[ele]    > 0.1) return false;
+	// if(ElRelIso[ele] > 0.15) return false;
+	if(ElRelIso[ele] > 0.10) return false;
+	// if(ElRelIso[ele] > 0.05) return false;
 
 	return true;
 }

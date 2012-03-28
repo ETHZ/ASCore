@@ -81,7 +81,7 @@ public:
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
-	void storeWeightedPred(bool diffeta = false);
+	void storeWeightedPred(bool diffeta = true);
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only
 	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta
 	float getPRatio(gChannel, float, int = 0);
