@@ -35,11 +35,12 @@ public:
 
 	virtual void doAnalysis();
 	virtual void sandBox();
-	virtual void load_kfacs(TFile *);
-	virtual void load_loxsecs(TFile *);
-	virtual void load_nloxsecs(TFile *);
-	virtual void load_msugraInfo(const char * filestring);
+	virtual void msugraKfacs(TFile *);
+	virtual void msugraLOxsecs(TFile *);
+	virtual void msugraNLOxsecs(TFile *);
+	virtual void scanMSUGRA(const char * filestring);
 	virtual void scanSMS(const char * filestring);
+	virtual void plotWeightedHT();
 
 	//////////////////////////////
 	// Plots
@@ -73,6 +74,7 @@ public:
 
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
+	void makePredicitonSignalEvents(float, float, float, float, int, int);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();
