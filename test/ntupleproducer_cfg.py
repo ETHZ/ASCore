@@ -565,6 +565,18 @@ process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 #process.options = cms.untracked.PSet(
 # 	wantSummary = cms.untracked.bool(True)
 #)
+
+
+# b-tagging general configuration
+from RecoJets.JetAssociationProducers.ak5JTA_cff import *
+from RecoBTag.Configuration.RecoBTag_cff import *
+
+process.myBtag = cms.Sequence(process.ak5JetTracksAssociatorAtVertex*process.btagging)
+process.ak5JetTracksAssociatorAtVertex.jets = cms.InputTag("ak5PFJets")
+
+
+
+
 #### Path ######################################################################
 
 process.p = cms.Path(
@@ -579,6 +591,7 @@ process.p = cms.Path(
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
 	+ process.ak5PFJets
+	+ process.myBtag
        	+ process.mygenjets
        	+ process.simpleEleIdSequence
        	+ process.metCorSequence
