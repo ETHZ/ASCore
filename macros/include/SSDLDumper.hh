@@ -107,6 +107,7 @@ public:
 		HT80MET302b,  // > 1 bjet
 		HT200MET302b,
 		HT80MET1202b,
+		HT0MET02b,
 		gNREGIONS
 	};
 	enum gChannel {
@@ -291,7 +292,7 @@ public:
 	class Sample{
 	public:
 		Sample(){};
-		Sample(TString loc, TString tag, int dm, int cs = -1, float xs = 1.0, long ng = 1, int col = 1){
+		Sample(TString loc, TString tag, int dm, long ng, float xs, int cs = -1, int col = 1){
 			location = loc;
 			sname    = tag;
 			datamc   = dm;
@@ -309,7 +310,7 @@ public:
 		TTree *tree;
 		float lumi; // simulated lumi = ngen/xsec
 		float xsec; // cross-section
-		int ngen;   // generated number of events
+		int ngen;   // number of generated events
 		int color;
 		int datamc;  // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC, 4: rare MC (no pileup)
 		int chansel; // -1: Ignore, 0: mumu, 1: elel, 2: elmu
@@ -447,7 +448,7 @@ public:
 
 	virtual void init();
 	virtual void init(TString); // samples read from a datacard
-	virtual void init(TString, TString, int, int = -1, float = 1.0); // running on single sample
+	virtual void init(TString, TString, int, long int, float, int = -1); // running on single sample
 	virtual void InitMC(TTree*); // removed a few branches (triggers)
 
 	virtual void readDatacard(TString); // read in a datacard
@@ -597,7 +598,7 @@ public:
 
 	virtual bool isBarrelElectron(int);
 
-	virtual bool isGoodJet(int, float = 40.);
+	virtual bool isGoodJet(int, float = 20.);
 
 	float fC_minHT;
 	float fC_minMet;
