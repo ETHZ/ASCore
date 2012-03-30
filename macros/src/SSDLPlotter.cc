@@ -4868,7 +4868,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
-	bool diffratio = false; // use flat or differential ratios
+	bool diffratio = true; // use flat or differential ratios
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
@@ -6193,24 +6193,24 @@ void SSDLPlotter::makeDiffPrediction(){
 
 		/////////////////////////////////////////////////////
 		// Differential ratios
-		// for(size_t i = 0; i < musamples.size(); ++i){
-		// 	Sample *S = fSamples[musamples[i]];
-		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-		// 	nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-		// }
-		// for(size_t i = 0; i < elsamples.size(); ++i){
-		// 	Sample *S = fSamples[elsamples[i]];
-		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-		// 	nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-		// }
-		// for(size_t i = 0; i < emusamples.size(); ++i){
-		// 	Sample *S = fSamples[emusamples[i]];
-		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-		// 	nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-		// }
+		for(size_t i = 0; i < musamples.size(); ++i){
+			Sample *S = fSamples[musamples[i]];
+			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		}
+		for(size_t i = 0; i < elsamples.size(); ++i){
+			Sample *S = fSamples[elsamples[i]];
+			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		}
+		for(size_t i = 0; i < emusamples.size(); ++i){
+			Sample *S = fSamples[emusamples[i]];
+			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		}
 		/////////////////////////////////////////////////////
 
 		for(size_t i = 0; i < nbins; ++i){
@@ -6230,12 +6230,12 @@ void SSDLPlotter::makeDiffPrediction(){
 			
 			///////////////////////////////////////////////////////
 			// Flat ratios:
-			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
 			///////////////////////////////////////////////////////
 			
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
