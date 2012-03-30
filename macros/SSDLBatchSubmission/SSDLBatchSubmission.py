@@ -2,6 +2,7 @@
 import os, sys, commands, subprocess
 
 def usage():
+	print ' Usage: ./SSDLBatchSubmission -c BatchConfig.cfg'
 	print '--------------------------------------------------------------------'
 	print 'Here are your options:'
 	print '        -c <your_config_file>'
@@ -14,6 +15,10 @@ def usage():
 	print '              temporary folders.'
 	print '        -h'
 	print '              Shows this message.\n'
+	print '        -n'
+	print '              Starts a dry run, i.e. it doesn\'t submit anything to the batch system.\n'
+	print '              This will not clean up anything, the tmp/ directory with all the\n'
+	print '              non-submitted scripts will still be there. Good for debugging.\n'
 	
 	print '--------------------------------------------------------------------'
 	print 'The config file must look as follows:'
@@ -78,7 +83,8 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 	string+= ' -m '+line.split()[2]
 	string+= ' -c '+line.split()[3]
 	if len(line.split()) > 4:
-		string+= ' -s '+line.split()[4]
+		string+= ' -g '+line.split()[5]
+		string+= ' -x '+line.split()[4]
 	if not indiv_dir:
 		string+= ' -o '+output_node
 	else:
@@ -88,10 +94,10 @@ def mk_single_string(line, full_location=False, indiv_dir=False):
 def mk_card_line(line):
 	name = line.split()[0]+'\t'
 	loc  = line.split()[1]+'\t'
-	if len(line.split()) > 4:
-		card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\t'+line.split()[4]+'\n'
-	else:
-		card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
+	xsec = line.split()[4]+'\t'
+	ngen = line.split()[1]+'\t'
+	card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/'+loc+line.split()[2]+'\t'+line.split()[3]+'\t'+xsec+'\t'+ngen+'\n'
+	#card_line = name+dcap_path+'/pnfs/psi.ch/cms/trivcat/store/user/stiegerb/'+loc+line.split()[2]+'\t'+line.split()[3]+'\n'
 	return card_line
 
 def read_config(config_name):
@@ -233,9 +239,9 @@ def do_stuff(config_name):
 		os.system('rm -r tmp')
 	os.mkdir('tmp')
 	
-	lm_cardFile  = open('tmp/tmp_datacard_lm.dat'  , 'w')
-	qcd_cardFile = open('tmp/tmp_datacard_qcd.dat' , 'w')
-	ww_cardFile  = open('tmp/tmp_datacard_ww.dat'  , 'w')
+	#lm_cardFile  = open('tmp/tmp_datacard_lm.dat'  , 'w')
+	#qcd_cardFile = open('tmp/tmp_datacard_qcd.dat' , 'w')
+	#ww_cardFile  = open('tmp/tmp_datacard_ww.dat'  , 'w')
 
 	
 	print '[status] reading info and creating cards...'
@@ -244,22 +250,22 @@ def do_stuff(config_name):
 		if '#' in line or len(line) == 0:
 			continue
 		if line.split()[1].endswith('.root'):
-			if 'LM' in line.split()[0]:
-				lm_cardFile.writelines(mk_card_line(line))
-			elif 'QCD' in line.split()[0]:
-				qcd_cardFile.writelines(mk_card_line(line))
-			elif 'WW' in line.split()[0]:
-				ww_cardFile.writelines(mk_card_line(line))
-			else:
-				commit_strings.append(mk_single_string(line))
+		#	if 'LM' in line.split()[0]:
+		#		lm_cardFile.writelines(mk_card_line(line))
+		#	elif 'QCD' in line.split()[0]:
+		#		qcd_cardFile.writelines(mk_card_line(line))
+		#	elif 'WW' in line.split()[0]:
+		#		ww_cardFile.writelines(mk_card_line(line))
+		#	else:
+			commit_strings.append(mk_single_string(line))
 		else:
 			print '[status] looking up single files for', line.split()[0]
 			special_dirs.append(line.split()[0])
 			commit_strings.extend(mk_dir_string(line))
 		
-	lm_cardFile.close()
-	qcd_cardFile.close()
-	ww_cardFile.close()
+	#lm_cardFile.close()
+	#qcd_cardFile.close()
+	#ww_cardFile.close()
 	
 	cardFile.close()
 	
@@ -303,10 +309,10 @@ def do_stuff(config_name):
 			else:
 				tmpScript.writelines(line)
 		tmpScript.close()
-		os.system('qsub -q short.q  -N job_'+str(ind)+' '+tmpScript_name)
+		#os.system('qsub -q all.q  -N job_'+str(ind)+' '+tmpScript_name)
+		if not dryrun:
+			os.system('qsub -q short.q  -N job_'+str(ind)+' '+tmpScript_name)
 	print '[status] submitted', len(commit_strings), 'jobs'
-		#os.system('sleep 1')
-		#os.system('rm '+tmpScript_name)
 
 	print '[status] done submitting jobs...'
 
@@ -318,17 +324,22 @@ def do_stuff(config_name):
 			print_status(time_elapsed)
 	print '[status] done with running on the files, it took', time_elapsed, 'seconds!'
 	
-	# if check_commands():
-	# 	merge_and_clean()
-	# else:
-	# 	clean()
-	merge_and_clean()
+	if not dryrun:
+		if check_commands():
+			merge_and_clean()
+		else:
+			clean()
 	
 def main(args):
+	global dryrun
+	dryrun = False
 	if len(args)==1:
 		print 'You must specify at least something... Let me help you:\n'
 		usage()
 		sys.exit()
+	if ('-n' in args):
+		print 'Dry running only....'
+		dryrun = True
 	if ('--help' in args) or ('-h' in args):
 		usage()
 		sys.exit()
