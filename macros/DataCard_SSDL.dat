@@ -51,7 +51,8 @@ WGstarE		stiegerb/SSDLTrees/2011B/Jan10/MC/WGstarToLNu2E_TuneZ2_7TeV-madgraph.ro
 WGstarMu	stiegerb/SSDLTrees/2011B/Jan10/MC/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph.root			1	-1	1.604	99990		41
 WGstarTau	stiegerb/SSDLTrees/2011B/Jan10/MC/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph.root			1	-1	0.287	48188		41
 WWTo2L2Nu	stiegerb/SSDLTrees/2011B/Jan10/MC/WWTo2L2NuMadgraph.root					1	-1	2.927	1197558		66
-WZTo3LNu	stiegerb/SSDLTrees/2011B/Jan10/MC/WZTo3LNuMadgraph.root						1	-1	0.856	1221134		73
+WZTo3LNu	stiegerb/SSDLTrees/2011B/Jan10/MC/WZTo3LNuMadgraph.root						1	-1	0.558	1221134		73
+# WZTo3LNu	stiegerb/SSDLTrees/2011B/Jan10/MC/WZTo3LNuMadgraph.root						1	-1	0.856	1221134		73
 ZZTo4L		stiegerb/SSDLTrees/2011B/Jan10/MC/ZZTo4LMadgraph.root						1	-1	0.0646	1185188		84
 ###################################################################################################################
 # Rare SM
