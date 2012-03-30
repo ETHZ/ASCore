@@ -519,6 +519,7 @@ public:
 	virtual int getNJets();
 	virtual int getNBTags();
 	virtual float getHT();
+	virtual float getWeightedHT();
 	virtual float getMT2(int, int, gChannel);
 	virtual float getMll(int, int, gChannel);
 	virtual int   getClosestJet(int, gChannel);

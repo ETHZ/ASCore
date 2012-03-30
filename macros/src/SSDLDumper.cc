@@ -3386,6 +3386,11 @@ float SSDLDumper::getHT(){
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) ht += JetPt[i];
 	return ht;
 }
+float SSDLDumper::getWeightedHT(){
+    float ht(0.);
+    for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i)) ht += JetPt[i]*exp(-fabs(JetEta[i]));
+    return ht;
+}
 float SSDLDumper::getMT2(int ind1, int ind2, gChannel chan){
 	// Calculate MT2 variable for two leptons and missing energy,
 	// assuming zero testmass
@@ -3844,9 +3849,9 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 	return true;
 }
 bool SSDLDumper::passesZVeto(float dm){
-	// return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
+	return passesZVeto(&SSDLDumper::isTightMuon, &SSDLDumper::isTightElectron, dm);
 	// return passesZVeto(&SSDLDumper::isLooseMuon, &SSDLDumper::isLooseElectron, dm);
-	return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
+	// return passesZVeto(&SSDLDumper::isGoodMuonForZVeto, &SSDLDumper::isGoodEleForZVeto, dm);
 	// return true;
 }
 bool SSDLDumper::passesMllEventVeto(float cut){
@@ -4198,7 +4203,7 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 bool SSDLDumper::isGoodMuonForZVeto(int muon){
 	// Remove stupid PtE/Pt cut
 	if(muon >= NMus) return false; // Sanity check
-	if(MuPt[muon] < 5.) return false;
+	if(MuPt[muon] < 10.) return false;
 	return true;
 }
 bool SSDLDumper::isLooseMuon(int muon){
@@ -4209,8 +4214,8 @@ bool SSDLDumper::isLooseMuon(int muon){
 bool SSDLDumper::isTightMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
 	if(isLooseMuon(muon) == false) return false;
-	// if(MuIso[muon] > 0.15) return false;
-	if(MuIso[muon] > 0.10) return false;
+	if(MuIso[muon] > 0.15) return false;
+	// if(MuIso[muon] > 0.10) return false;
 	// if(MuIso[muon] > 0.05) return false;
 	return true;
 }
@@ -4311,8 +4316,8 @@ bool SSDLDumper::isTightElectron(int ele){
 	if(!isLooseElectron(ele))       return false;
 	if(ElIsGoodElId_WP80[ele] != 1) return false;
 
-	// if(ElRelIso[ele] > 0.15) return false;
-	if(ElRelIso[ele] > 0.10) return false;
+	if(ElRelIso[ele] > 0.15) return false;
+	// if(ElRelIso[ele] > 0.10) return false;
 	// if(ElRelIso[ele] > 0.05) return false;
 
 	return true;

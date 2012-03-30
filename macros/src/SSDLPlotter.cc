@@ -367,7 +367,7 @@ void SSDLPlotter::doAnalysis(){
 	printAllYieldTables();
 	
 	// makeRelIsoTTSigPlots();
-	scanMSUGRA("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
+	// scanMSUGRA("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root");
 }
 
@@ -4868,7 +4868,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	elsamples = fEGData;
 	emusamples = fMuEGData;
 
-	bool diffratio = true; // use flat or differential ratios
+	bool diffratio = false; // use flat or differential ratios
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing integrated predictions for region " << Region::sname[reg] << endl;
@@ -6193,24 +6193,24 @@ void SSDLPlotter::makeDiffPrediction(){
 
 		/////////////////////////////////////////////////////
 		// Differential ratios
-		for(size_t i = 0; i < musamples.size(); ++i){
-			Sample *S = fSamples[musamples[i]];
-			nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
-			nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
-			nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
-		}
-		for(size_t i = 0; i < elsamples.size(); ++i){
-			Sample *S = fSamples[elsamples[i]];
-			nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
-			nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
-			nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
-		}
-		for(size_t i = 0; i < emusamples.size(); ++i){
-			Sample *S = fSamples[emusamples[i]];
-			nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
-			nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
-			nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
-		}
+		// for(size_t i = 0; i < musamples.size(); ++i){
+		// 	Sample *S = fSamples[musamples[i]];
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnpf[j]);
+		// 	nt11_mm_sf->Add(S->diffyields[Muon].hnfp[j]);
+		// 	nt11_mm_df->Add(S->diffyields[Muon].hnff[j]);
+		// }
+		// for(size_t i = 0; i < elsamples.size(); ++i){
+		// 	Sample *S = fSamples[elsamples[i]];
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnpf[j]);
+		// 	nt11_ee_sf->Add(S->diffyields[Elec].hnfp[j]);
+		// 	nt11_ee_df->Add(S->diffyields[Elec].hnff[j]);
+		// }
+		// for(size_t i = 0; i < emusamples.size(); ++i){
+		// 	Sample *S = fSamples[emusamples[i]];
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnpf[j]);
+		// 	nt11_em_sf->Add(S->diffyields[ElMu].hnfp[j]);
+		// 	nt11_em_df->Add(S->diffyields[ElMu].hnff[j]);
+		// }
 		/////////////////////////////////////////////////////
 
 		for(size_t i = 0; i < nbins; ++i){
@@ -6228,15 +6228,15 @@ void SSDLPlotter::makeDiffPrediction(){
 			FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
 			FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
 			
-			// ///////////////////////////////////////////////////////
-			// // Flat ratios:
-			// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
-			// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
-			// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
-			// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
-			// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
-			// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
-			// ///////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////
+			// Flat ratios:
+			nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+			nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+			nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+			nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+			nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+			nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+			///////////////////////////////////////////////////////
 			
 			float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
 			float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
