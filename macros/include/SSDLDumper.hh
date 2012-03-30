@@ -146,7 +146,7 @@ public:
 		float nfp;
 		float nff;
 	};
-
+	
 	struct Channel{ // MM/EE/EM
 		TH2D *nt20_pt; // pt1 vs pt2
 		TH2D *nt10_pt;
@@ -338,6 +338,10 @@ public:
 			float delta = upper - float(n)/float(ngen);
 			delete eff;
 			return delta * float(ngen);
+		}
+		float getError2(int n){
+			float err = getError(n);
+			return err*err;
 		}
 
 		int getType(){ // -1: undef, 0: data, 1: QCD, 2: top, 3: EWK, 4: Rare SM, 5: diboson
