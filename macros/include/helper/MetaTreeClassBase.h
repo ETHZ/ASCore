@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Feb 16 08:15:36 2012 by ROOT version 5.27/06b
+// Sat Mar  3 13:37:19 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: SMS.root
+// found on file: SMS_2.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -26,6 +26,7 @@ public :
    Int_t           process;
    Float_t         mGlu;
    Float_t         mLSP;
+   Int_t           isTChiSlepSnu;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -135,6 +136,7 @@ public :
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
    TBranch        *b_mLSP;   //!
+   TBranch        *b_isTChiSlepSnu;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -254,9 +256,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SMS.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SMS_2.root");
       if (!f) {
-         f = new TFile("SMS.root");
+         f = new TFile("SMS_2.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -315,6 +317,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
+   fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
