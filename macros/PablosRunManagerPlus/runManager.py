@@ -173,6 +173,7 @@ def createCMSConf(step, nameOfDirectory, releasePath, nameOfConf, inputString, e
   outputName = "output_" + str(step) + ".root"
   stderr = nameOfDirectory + taskName + '/job_' + str(step) + '.err'
   stdout = nameOfDirectory + taskName + '/job_' + str(step) + '.out'
+  
   thisjobnumber=0
 
   cmd = " ".join(['qsub','-q all.q','-N',"RMG"+str(step)+taskName,'-o',stdout,'-e',stderr,nameOfDirectory+taskName+'/'+nameOfConf2+' '+str(step)])
@@ -331,7 +332,7 @@ def process(task, conf):
   
   numberOfFiles = len(allmyfiles)
   if(numberOfFiles == 0):
-    showMessage("No files found")
+    showMessage("No files found in "+str(fask[0]))
     return "Error"
 
   correctList = [];
@@ -442,6 +443,13 @@ if __name__ == '__main__' :
         if len(args) != 1:
                 parser.print_usage()
                 sys.exit(-1)
+        
+        timeleft=commands.getoutput("timeleft=`voms-proxy-info -valid -timeleft | grep timeleft | awk '{ print $3 }'` && pos=`expr index "+'"$timeleft" :`&& timelefth=${timeleft:0:$pos-1} && echo $timelefth');
+        if(timeleft<2): 
+		print "You need to refresh your proxy! (will run voms-proxy-init -voms cms for you)"
+		os.system("voms-proxy-init -voms cms");
+	else:
+		print "Proxy lifetime is acceptable (more than "+str(timeleft)+" hours)"
         
         result = parseInputFile(args[0])
         if(result == "Error"):
