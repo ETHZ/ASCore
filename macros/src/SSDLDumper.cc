@@ -306,7 +306,7 @@ void SSDLDumper::readDatacard(TString cardfile){
 		// if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d", sname, inputfile, &datamc, &chan, &lumi, &color) > 3){
 		// 	Sample *S = new Sample(inputfile, sname, datamc, chan, lumi, color);
 		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d\t%d", sname, inputfile, &datamc, &chan, &xsec, &ngen, &color) > 3){
-			Sample *S = new Sample(inputfile, sname, datamc, chan, xsec, ngen, color);
+			Sample *S = new Sample(inputfile, sname, datamc, ngen, xsec, chan, color);
 			
 			fSamples.push_back(S);
 			fSampleMap[sname] = S;
