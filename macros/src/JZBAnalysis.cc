@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.75 $";
+string sjzbversion="$Revision: 1.77 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +26,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.77  2012/02/20 17:03:11  buchmann
+Added some new variables: generator level sum jet (pt,eta,phi) and met phi
+
 Revision 1.75  2012/02/15 16:20:55  buchmann
 Added angle between LSP and Z; added pt of lsp sum
 
@@ -1050,7 +1053,7 @@ void JZBAnalysis::Analyze() {
 		fdoGenInfo=false;
 		nGenParticles=0;
 	}
-	for(int i=0;i<nGenParticles;i++) {
+	for(int i=0;i<nGenParticles&&fdoGenInfo;i++) {
 	  if(fTR->genInfoStatus[i]!=3) continue;
 	  int thisParticleId = fTR->genInfoId[i];
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {
