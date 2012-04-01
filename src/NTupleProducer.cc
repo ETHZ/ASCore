@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.169 2012/03/27 10:29:17 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.170 2012/03/27 10:31:50 pandolf Exp $
 //
 //
 
@@ -224,7 +224,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
 	LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
-	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
 	// Create histograms and trees
 	fHhltstat        = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
@@ -2874,6 +2873,11 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	// Check photon/jet duplication
 	// PhotonJetOverlap(jetPtr, photSCs, calotowers);
 
+
+
+
+
+
 	////////////////////////////////////////////////////////
 	// Process other jet collections, as configured
 	for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
@@ -3280,6 +3284,8 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
 	  }
 	}// end of bloat with gen information
+
+
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////

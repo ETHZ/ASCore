@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.129 2012/03/16 13:38:12 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.130 2012/03/26 19:13:18 pandolf Exp $
 //
 //
 
@@ -259,7 +259,6 @@ private:
 	float fMingenjetpt;
 	float fMaxgenjeteta;
 	
-	float fBtagMatchdeltaR;
 
 	TH1I *fHhltstat; // Added to keep track of trigger names
 	TH1I *fHl1physstat;
