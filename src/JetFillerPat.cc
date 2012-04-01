@@ -29,7 +29,6 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, TTree* tree, const 
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
   fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
-  fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerPat Constructor - " << fPrefix;
