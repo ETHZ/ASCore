@@ -36,14 +36,13 @@ class JZBAnalysis : public UserAnalysisBase{
 public:
   JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false);
   virtual ~JZBAnalysis();
-  int IsCustomMu(const int);
-  int IsCustomEl(const int);
+  const bool IsCustomMu(const int);
+  const bool IsCustomEl(const int);
   const bool IsCustomPfMu(const int, const int);
   const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int);
   const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
-  bool DealWithLooseAndAntiSelectedLeptons(vector<lepton> sortedLooseLeptons,vector<lepton> sortedAntiSelectedLeptons);
 
   string outputFileName_; // public name of the output file name
 

@@ -262,8 +262,6 @@ public:
   float sjzb[jzbtype_max]; // smeared JZB
   float dphi_sumJetVSZ[jzbtype_max];
   float sumJetPt[jzbtype_max];
-  float antiseljzb;
-  float loosejzb;
 
   float weight;
   float Efficiencyweightonly;
@@ -527,8 +525,6 @@ void nanoEvent::reset()
     dphi_sumJetVSZ[rCounter]=0;
     sumJetPt[rCounter]=0;
   }
-  antiseljzb=0;
-  loosejzb=0;
 
   weight = 1.0;
   PUweight = 1.0;
@@ -854,8 +850,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
   myTree->Branch("jzb",nEvent.jzb,Form("jzb[%d]/F",int(jzbtype_max)));
-  myTree->Branch("loosejzb",&nEvent.loosejzb,"loosejzb/F");
-  myTree->Branch("antiseljzb",&nEvent.antiseljzb,"antiseljzb/F");
   myTree->Branch("sjzb",nEvent.sjzb,Form("sjzb[%d]/F",int(jzbtype_max)));
   myTree->Branch("dphi_sumJetVSZ",nEvent.dphi_sumJetVSZ,Form("dphi_sumJetVSZ[%d]/F",int(jzbtype_max)));
   myTree->Branch("sumJetPt",nEvent.sumJetPt,Form("sumJetPt[%d]/F",int(jzbtype_max)));
@@ -1264,8 +1258,6 @@ void JZBAnalysis::Analyze() {
   counters[EV].fill("... pass good event requirements");
 
   vector<lepton> leptons;
-  vector<lepton> antiselectedleptons;
-  vector<lepton> looseselectedleptons;
 
   TLorentzVector genZvector; // To store the true Z vector
 
@@ -1273,8 +1265,7 @@ void JZBAnalysis::Analyze() {
   for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
     {
       counters[MU].fill("All mus");
-      int customIndex=IsCustomMu(muIndex);
-      if(customIndex>0) // is either a loose muon, an anti-selected muon or a custom muon (0=complete failure->rejected)
+      if(IsCustomMu(muIndex))
         {
           counters[MU].fill("... pass mu selection");
           float px= fTR->MuPx[muIndex];
@@ -1295,27 +1286,16 @@ void JZBAnalysis::Analyze() {
           tmpLepton.ElCInfoIsGsfCtfCons=true;
           tmpLepton.ElCInfoIsGsfCtfScPixCons=true;
           tmpLepton.ElCInfoIsGsfScPixCons=true;
-          if(customIndex==1||customIndex==2) {
-		counters[MU].fill("... pass anti isolation  selection");
-		antiselectedleptons.push_back(tmpLepton);
-          }
-          if(customIndex==2||customIndex==3) {
-		counters[MU].fill("... pass loose selection");
-		looseselectedleptons.push_back(tmpLepton);
-          }
-          if(customIndex==3) {
-		counters[MU].fill("... pass mu selection");
-		leptons.push_back(tmpLepton);
-          }
+          leptons.push_back(tmpLepton);
         }
     }
+
   
   // #--- electron loop
   for(int elIndex=0;elIndex<fTR->NEles;elIndex++)
     {
       counters[EL].fill("All eles");
-      int customIndex=IsCustomEl(elIndex);
-      if(customIndex>0)	 // is either a loose electron, an anti-selected muon or a custom electron (0=complete failure->rejected)
+      if(IsCustomEl(elIndex))	
         {
           counters[EL].fill("... pass e selection");
           float px= fTR->ElPx[elIndex];
@@ -1338,20 +1318,10 @@ void JZBAnalysis::Analyze() {
           tmpLepton.ElCInfoIsGsfCtfCons=fTR->ElCInfoIsGsfCtfCons[elIndex];
           tmpLepton.ElCInfoIsGsfCtfScPixCons=fTR->ElCInfoIsGsfCtfScPixCons[elIndex];
           tmpLepton.ElCInfoIsGsfScPixCons=fTR->ElCInfoIsGsfScPixCons[elIndex];
-          if(customIndex==1||customIndex==2) {
-		counters[EL].fill("... pass anti isolation  selection");
-		antiselectedleptons.push_back(tmpLepton);
-          }
-          if(customIndex==2||customIndex==3) {
-		counters[EL].fill("... pass loose selection");
-		looseselectedleptons.push_back(tmpLepton);
-          }
-          if(customIndex==3) {
-		counters[EL].fill("... pass e selection");
-		leptons.push_back(tmpLepton);
-          }
+          leptons.push_back(tmpLepton);
         }
     }
+
 
   
   // #-- PF muon loop (just for comparison)
@@ -1381,13 +1351,9 @@ void JZBAnalysis::Analyze() {
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
-  vector<lepton> sortedAntiSelectedLeptons = sortLeptonsByPt(antiselectedleptons);
-  vector<lepton> sortedLooseLeptons = sortLeptonsByPt(looseselectedleptons);
-
-  bool StoreEventAnyway = DealWithLooseAndAntiSelectedLeptons(sortedLooseLeptons,sortedAntiSelectedLeptons);
 
   if(sortedGoodLeptons.size() < 2) {
-    if (StoreEventAnyway||isMC&&!fmakeSmall) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
 
@@ -1401,7 +1367,7 @@ void JZBAnalysis::Analyze() {
     if(sortedGoodLeptons[0].charge*sortedGoodLeptons[PosLepton2].charge<0) break;
   }
   if(PosLepton2 == sortedGoodLeptons.size()) {
-    if (StoreEventAnyway||isMC&&!fmakeSmall) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
   counters[EV].fill("... has at least 2 OS leptons");
@@ -1447,7 +1413,7 @@ void JZBAnalysis::Analyze() {
   } else {
       
     //If there are less than two leptons the event is not considered
-    if (StoreEventAnyway||isMC&&!fmakeSmall) myTree->Fill();
+    if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
   counters[EV].fill("... pass dilepton pt selection");
@@ -1885,7 +1851,7 @@ std::string JZBAnalysis::any2string(T i)
   return buffer.str();
 }
 
-/*const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
+const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
   //VERY TEMPORARY !!!!
   // Basic muon cleaning and ID
   // Acceptance cuts
@@ -1927,7 +1893,7 @@ std::string JZBAnalysis::any2string(T i)
 
       if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
       counters[MU].fill(" ... dpt/pt < 0.1");
-  *//*
+  */
   return true;
 }
 
@@ -1973,22 +1939,14 @@ const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
     //   counters[EL].fill("... passes WP80 ID");
     //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
     //   counters[EL].fill("... MVA>0.4");
-    *//*
+    */
   return true;
 
 	
 }
 
-*/
 
-
-int JZBAnalysis::IsCustomMu(const int index){
-  /* Code: 
-	0 = complete failure
-	1 = fails loose iso (iso>1.0)
-	2 = fails tight iso but passes loose iso (iso>0.15&&iso<1) -- to be used with 1 for anti-iso selection
-	3 = passes isolation completely (iso<0.15)
-  */
+const bool JZBAnalysis::IsCustomMu(const int index){
 
   // Basic muon cleaning and ID
 
@@ -2022,24 +1980,17 @@ int JZBAnalysis::IsCustomMu(const int index){
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
   double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
+  if ( !(hybridIso < 0.15) ) return false;
+  counters[MU].fill(" ... hybridIso < 0.15");
 
   if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
   counters[MU].fill(" ... dpt/pt < 0.1");
 
-  if ( !(hybridIso < 1.0) ) return 1; //fails loose iso
-
-  if ( !(hybridIso < 0.15) ) return 2; //fails tight iso
-  counters[MU].fill(" ... hybridIso < 0.15");
-  return 3;
+  return true;
 }
 
-int JZBAnalysis::IsCustomEl(const int index){
-  /* Code: 
-	0 = complete failure
-	1 = fails loose iso (iso>1.0)
-	2 = fails tight iso but passes loose iso (iso>0.15&&iso<1) -- to be used with 1 for anti-iso selection
-	3 = passes isolation completely (iso<0.15)
-  */
+
+const bool JZBAnalysis::IsCustomEl(const int index){
 
   // kinematic acceptance
   if(!(fTR->ElPt[index]>10) )return false;
@@ -2086,18 +2037,18 @@ int JZBAnalysis::IsCustomEl(const int index){
   if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
   double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
   double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
-//  if ( !(hybridIso < 0.15) ) return false;
-//  counters[EL].fill(" ... hybridIso < 0.15");
+  if ( !(hybridIso < 0.15) ) return false;
+  counters[EL].fill(" ... hybridIso < 0.15");
 
   //  Conversion rejection (NOT FOR NOW)
 //  if ( IsConvertedPhoton(index) ) return false;
 //  counters[EL].fill(" ... passes conversion rejection");
 
-  if ( !(hybridIso < 1.0) ) return 1; //fails loose iso
-  if ( !(hybridIso < 0.15) ) return 2; //fails tight iso
-  counters[EL].fill(" ... hybridIso < 0.15");
-  return 3;
+  return true;
+
+	
 }
+
 
 
 // Check if electron is from photon conversion
@@ -2216,46 +2167,3 @@ void JZBAnalysis::GeneratorInfo(void) {
         }
     }
 }
-
-bool JZBAnalysis::DealWithLooseAndAntiSelectedLeptons(vector<lepton> sortedLooseLeptons,vector<lepton> sortedAntiSelectedLeptons) {
-  
-  
-  int loosePosLepton1 = 0;
-  int loosePosLepton2 = 1;
-  
-  bool noteworthy=false;
-
-  // Check for OS combination
-  for(; loosePosLepton2 < sortedLooseLeptons.size(); loosePosLepton2++) {
-    if(sortedLooseLeptons[0].charge*sortedLooseLeptons[loosePosLepton2].charge<0) break;
-  }
-  
-  int antiselPosLepton1 = 0;
-  int antiselPosLepton2 = 1;
-    
-  // Check for OS combination
-  for(; antiselPosLepton2 < sortedAntiSelectedLeptons.size(); antiselPosLepton2++) {
-    if(sortedAntiSelectedLeptons[0].charge*sortedAntiSelectedLeptons[antiselPosLepton2].charge<0) break;
-  }
-  
-  TLorentzVector pfMETvector(fTR->PFMETpx,fTR->PFMETpy,0,0);
-
-  if(loosePosLepton2<sortedLooseLeptons.size() && sortedLooseLeptons[loosePosLepton1].p.Pt() > firstLeptonPtCut && sortedLooseLeptons[loosePosLepton2].p.Pt() > secondLeptonPtCut) {  
-     TLorentzVector looses1 = sortedLooseLeptons[loosePosLepton1].p;
-     TLorentzVector looses2 = sortedLooseLeptons[loosePosLepton2].p;
-     TLorentzVector loosepfNoCutsJetVector = -pfMETvector - looses1 - looses2;
-     nEvent.loosejzb = loosepfNoCutsJetVector.Pt() - (looses1+looses2).Pt(); // to be used with pfMET
-     noteworthy=true; 
-  }
-
-  if(antiselPosLepton2<sortedAntiSelectedLeptons.size() && sortedAntiSelectedLeptons[antiselPosLepton1].p.Pt() > firstLeptonPtCut && sortedAntiSelectedLeptons[antiselPosLepton1].p.Pt() > secondLeptonPtCut) {  
-     TLorentzVector antisels1 = sortedAntiSelectedLeptons[antiselPosLepton1].p;
-     TLorentzVector antisels2 = sortedAntiSelectedLeptons[antiselPosLepton2].p;
-     TLorentzVector antiselpfNoCutsJetVector = -pfMETvector - antisels1 - antisels2;
-     nEvent.antiseljzb = antiselpfNoCutsJetVector.Pt() - (antisels1+antisels2).Pt(); // to be used with pfMET
-     noteworthy=true; 
-  }
-  
-  return noteworthy;
-}
-
