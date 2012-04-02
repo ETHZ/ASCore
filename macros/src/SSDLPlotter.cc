@@ -360,13 +360,14 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
-	makeAllIntPredictions();
-	makeDiffPrediction();
-	printAllYieldTables();
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
+	// makeDiffPrediction();
+	// printAllYieldTables();
 	
+	makePredicitonSignalEvents(0., 7000., 120., 7000., 0, 0);
 	// makeRelIsoTTSigPlots();
-	// scanMSUGRA("/scratch/mdunser/SSDLTrees/msugra/msugraScan_2.root");
+	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root");
 }
 
@@ -5522,7 +5523,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjets){
 
-	ofstream OUT("test.txt", ios::trunc);
+	ofstream OUT("test_apr1.txt", ios::trunc);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -5595,11 +5596,12 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 	
 	string *sname = 0;
 	int   SType, Flavor, TLCat, NJ, NbJ;
-	float puweight, pT1, pT2, HT, MET, MT2;
+	float puweight, pT1, pT2, HT, MET, MT2, SLumi;
 
 	sigtree->SetBranchAddress("SName",    &sname);
 	sigtree->SetBranchAddress("SType",    &SType);
 	sigtree->SetBranchAddress("PUWeight", &puweight);
+	sigtree->SetBranchAddress("SLumi",    &SLumi);
 	sigtree->SetBranchAddress("Flavor",   &Flavor);
 	sigtree->SetBranchAddress("pT1",      &pT1);
 	sigtree->SetBranchAddress("pT2",      &pT2);
@@ -5613,7 +5615,7 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
 		
-		// if(stype > 2)              continue; // 0,1,2 are DoubleMu, DoubleEle, MuEG
+		// if(stype > 2)              continue; 
 		// if(cat != 0)               continue; // tight-tight selection
 		
 		if(HT  < minHT  || HT  > maxHT)  continue;
@@ -5622,7 +5624,7 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 		if(NbJ < minNbjets) continue;
 
 		// GET ALL DATA EVENTS
-		if(SType < 3) {
+		if(SType < 3) {             // 0,1,2 are DoubleMu, DoubleEle, MuEG
 			if(Flavor == 0) {       // MUMU
 				if (TLCat == 0) nt2_mm++;
 				if (TLCat == 1 || TLCat == 2) nt10_mm++;
@@ -5652,7 +5654,7 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 
 		// GET RARE MC EVENTS
 		if (SType == 15 && TLCat == 0) { // tight-tight rare MC events
-			float scale = 1.; // FIXME, get scale from Datacard or so...
+			float scale = fLumiNorm / SLumi; // FIXME, get scale from Datacard or so...
 			if(Flavor == 0) {       // MUMU
 				nt2_rare_mc_mm    += gMMTrigScale*scale;
 				nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale;
@@ -5746,6 +5748,7 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 		nDF    = FR->getTotDoubleFakes();
 		nF     = FR->getTotFakes();		
 	}
+	cout << "DEBUG npf_mm: " << npf_mm << " nff_mm " << nff_mm << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
@@ -5832,50 +5835,6 @@ void SSDLPlotter::makePredicitonSignalEvents(float minHT, float maxHT, float min
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
 	OUT.close();
-	
-	// ///////////////////////////////////////////////////////////////////////////////////
-	// //  OUTPUT FOR PAS TABLE  /////////////////////////////////////////////////////////
-	// ///////////////////////////////////////////////////////////////////////////////////
-	// fOUTSTREAM << Region::sname[reg] << endl;
-	// fOUTSTREAM << Form("{\\bf predicted BG b} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f \\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & {\\boldmath $%5.2f\\pm %5.2f$} & \\\\ \n",
-	// nF_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-	// nF_mm + nt2_rare_mc_mm,                sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	// nF_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
-	// tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	// fOUTSTREAM << Form("{\\bf observed} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f} & {\\bf %2.0f}  & {\\bf XX} \\\\ \\hline \n", nt2_ee, nt2_mm, nt2_em, nt2_ee+nt2_mm+nt2_em);
-	// 
-	// ///////////////////////////////////////////////////////////////////////////////////
-	// //  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
-	// ///////////////////////////////////////////////////////////////////////////////////
-	// fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
-	// fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-	// fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	// nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
-	// nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
-	// nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
-	// nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
-	// fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	// npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
-	// npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
-	// npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
-	// npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
-	// fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
-	// nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
-	// nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
-	// nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-	// fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	// nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
-	// nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
-	// nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
-	// nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
-	// fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
-	// tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
-	// nF_ee + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-	// nF_mm + nt2_rare_mc_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-	// nF_em + nt2_rare_mc_em + nt2_em_chmid, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
-	// fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
-	// fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-	// fOUTSTREAM3 << endl;
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
@@ -7735,7 +7694,9 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 	int   stype, flav, cat, njets, nbjets;
 	float puweight, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
+	int event;
 
+	sigtree->SetBranchAddress("Event",    &event);
 	sigtree->SetBranchAddress("SName",    &sname);
 	sigtree->SetBranchAddress("SType",    &stype);
 	sigtree->SetBranchAddress("PUWeight", &puweight);
@@ -7756,8 +7717,10 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 	float npp(0.), npf(0.), nfp(0.), nff(0.);
 	float f1(0.), f2(0.), p1(0.), p2(0.);
 	
+	
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
+		if ( flav > 2 ) continue; // OS events
 		Sample *S = fSampleMap[TString(*sname)];
 
 		int datamc = S->datamc;
@@ -9077,7 +9040,7 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	fC_minEl1pt = 20.;
 	fC_minEl2pt = 10.;
 	fC_minHT    = 0.;
-	fC_maxHT    = 30.;
+	fC_maxHT    = 29.;
 	fC_minMet   = 120.;
 	fC_maxMet   = 7000.;
 	fC_minNjets = 0;
@@ -9181,6 +9144,8 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 				if (isLeptonSkim){
 					int newbin = filterEff_->FindBin(m0, m12);
 					//if (bin != newbin) cout << "Binning is different in the leptonic filter efficiency skim!" << endl;
+					//float pointFilterEff = filterEff_->GetBinContent(newbin);
+					//cout << " m0 , m12 : " << m0 << " , " << m12 << " filterEff: " << pointFilterEff << endl;
 					weight *= filterEff_->GetBinContent(newbin);
 				}
 				if (verbose) fOUTSTREAM << " m0: " << m0 << " m12: " << m12 << " process " << process << " weight: " << weight << endl;
