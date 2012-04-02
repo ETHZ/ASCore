@@ -46,9 +46,9 @@ static const double gStatBetaBeta  = 1.;
 // float SSDLDumper::Region::minEl1pt[2] = {20.,  10.};
 // float SSDLDumper::Region::minEl2pt[2] = {20.,  10.};
 float SSDLDumper::Region::minMu1pt[2] = {20.,   5.};
-float SSDLDumper::Region::minMu2pt[2] = {20.,   5.};
+float SSDLDumper::Region::minMu2pt[2] = {10.,   5.};
 float SSDLDumper::Region::minEl1pt[2] = {20.,  10.};
-float SSDLDumper::Region::minEl2pt[2] = {20.,  10.};
+float SSDLDumper::Region::minEl2pt[2] = {10.,  10.};
 
 TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT80MET30", "HT80MET20to50", "HT80MET120", "HT80MET120x", "HT200MET30", "HT200MET120", "HT200MET120x", "HT450MET50", "HT450MET50x", "HT450MET120", "HT450MET0", "HT0MET120", "HT0MET200", "HT0MET120JV", "HT0MET200JV", "HT80MET302b", "HT200MET302b", "HT80MET1202b", "HT0MET02b"};
 float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {        80.,             80.,          80.,           80.,         200.,          200.,           200.,         450.,          450.,          450.,        450.,          0.,          0.,            0.,            0.,           80.,           200.,            80.,             0.};
@@ -173,14 +173,14 @@ void SSDLDumper::init(){
 	initCutNames();
 	
 	// Cuts:
+	//fC_minMu1pt  = 20.;
+	//fC_minMu2pt  = 20.;
+	//fC_minEl1pt  = 20.;
+	//fC_minEl2pt  = 20.;
 	fC_minMu1pt  = 20.;
-	fC_minMu2pt  = 20.;
+	fC_minMu2pt  = 10.;
 	fC_minEl1pt  = 20.;
-	fC_minEl2pt  = 20.;
-	// fC_minMu1pt  = 20.;
-	// fC_minMu2pt  = 10.;
-	// fC_minEl1pt  = 20.;
-	// fC_minEl2pt  = 10.;
+	fC_minEl2pt  = 10.;
 	fC_minHT     = 80.;
 	fC_minMet    = 30.;
 	fC_maxHT     = 7000.;
