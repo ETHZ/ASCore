@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.2 2012/01/26 12:15:13 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.3 2012/01/27 15:07:22 fronga Exp $
 //
 //
 
@@ -27,6 +27,7 @@ Implementation:
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
+#include "TVector3.h"
 
 // Framework include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -65,11 +66,17 @@ Implementation:
 
 // Helpers
 #include "Math/VectorUtil.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 
 // Local classes
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerReco.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/JetFillerPat.h"
 #include "DiLeptonAnalysis/NTupleProducer/interface/LeptonFillerPat.h"
+
+#include "h2gglobe/VertexAnalysis/interface/HggVertexFromConversions.h"
+#include "h2gglobe/VertexAnalysis/interface/PhotonInfo.h"
+#include "h2gglobe/VertexAnalysis/interface/VertexAlgoParameters.h"
+#include "TMVA/Reader.h"
 
 typedef math::XYZTLorentzVector LorentzVector;
 using namespace reco;
@@ -79,7 +86,7 @@ public:
   explicit NTupleProducer(const edm::ParameterSet&);
   ~NTupleProducer() {}
   
-  virtual void beginJob(void); //336  beginJob(const edm::EventSetup&)
+  virtual void beginJob(void);
   virtual bool beginRun(edm::Run&, const edm::EventSetup&);
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob(void);
@@ -93,11 +100,6 @@ public:
   void putProducts( edm::Event& ); // Called for each event
   void putRunProducts( edm::Event& ); // Called in endRun
   
-  void resetDouble(double *v, unsigned int size = 20);
-  void resetFloat(float *v, unsigned int size = 20);
-  void resetInt(int *v, unsigned int size = 20);
-  void resetTree();
-
 
 private:
 
@@ -110,7 +112,7 @@ private:
   virtual float CaloTowerSizePhi(float eta);
   virtual float CaloTowerSizeEta(float eta);
   virtual bool IsInPhiWindow(float phi, float phimin, float phimax);
-  virtual float DeltaPhiSigned(float v1, float v2);
+  //virtual float DeltaPhiSigned(float v1, float v2); --> this is reco::deltaPhi()
   virtual float GetPhiMin(float phi1, float phi2);
   virtual float GetPhiMax(float phi1, float phi2);
   
@@ -121,8 +123,7 @@ private:
     }
   };
   
-  double DeltaR(double phi1, double phi2, double eta1, double eta2);
-  //void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
+  void FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi);
   //   void FillPhotonIsoVariables_Frixione_Neutrals(int type, int ipf, int phoqi);
   //   void FillPhotonIsoVariables_Frixione_ChHad(int type, bool isPU, int ipf, int phoqi);
   reco::VertexRef chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const ;
@@ -130,11 +131,27 @@ private:
   bool isInPhiCracks(double phi, double eta);
   bool isInEtaCracks(double eta);
   bool CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i);
-  double DeltaPhi(double phi1, double phi2);
+  double phiNorm(float &phi);
+  double etaTransformation(float EtaParticle , float Zvertex);
   
   EcalClusterFunctionBaseClass *CrackCorrFunc;
   EcalClusterFunctionBaseClass *LocalCorrFunc;
 
+  std::string perVtxMvaWeights, perVtxMvaMethod;
+  std::string perEvtMvaWeights, perEvtMvaMethod;
+  VertexAlgoParameters vtxAlgoParams;
+  std::vector<std::string> rankVariables;
+
+  PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
+  std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
+				      PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
+				      bool useMva, TMVA::Reader * tmvaReader, std::string tmvaMethod);
+  int  matchPhotonToConversion(int lpho);
+  bool tkIsHighPurity(reco::TrackRef tk) const;
+  bool TrackCut(reco::TrackRef tk) const;
+  bool ConversionsCut(const reco::Conversion &conv);
+
+  double DeltaPhi( double phi1, double phi2);
 
   // ----------member data ---------------------------
   edm::Service<TFileService> fTFileService;
@@ -153,12 +170,15 @@ private:
   int fNTotEvents;
   int fNFillTree;
 
+  bool doVertexingFlag;
+
   static const int gMaxNMus     = 30;
   static const int gMaxNEles    = 20;
   static const int gMaxNTaus    = 20;
   static const int gMaxNJets    = 100;
-  static const int gMaxNTrks    = 500;
+  static const int gMaxNTrks    = 800;
   static const int gMaxNPhotons = 50;
+  static const int gMaxNConv    = 50;
   static const int gMaxNSC      = 100;
   static const int gMaxNGenLept = 100;
   static const int gMaxNGenPhot = 100;
@@ -166,6 +186,12 @@ private:
   static const int gMaxNVrtx    = 25;
   static const int gMaxNPileup  = 50;
   static const int gMaxNEBhits  = 20;
+  static const int gMaxNGenVtx = 60;
+  static const int gMaxNGenParticles = 2000;
+
+  static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
+  static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
+
 
   edm::InputTag fMuonTag;
   edm::InputTag fElectronTag;
@@ -204,6 +230,8 @@ private:
   edm::InputTag pfProducerTag;
   edm::InputTag fSCTagBarrel;
   edm::InputTag fSCTagEndcap;
+  edm::InputTag fTrackCollForVertexing;
+  edm::InputTag fAllConversionsCollForVertexing;
 
   // Selection cuts
   float fMinMuPt;
@@ -232,8 +260,6 @@ private:
   float fMinGenJetPt;
   float fMaxGenJetEta;
 	
-  float fBtagMatchDeltaR;
-
   bool fFirstevent;
 
   // Trigger stuff
@@ -274,8 +300,6 @@ private:
   std::auto_ptr<float> fRMinGenJetPt;
   std::auto_ptr<float> fRMaxGenJetEta;
 	
-  std::auto_ptr<float> fRBtagMatchDeltaR;
-
   std::auto_ptr<int>   fRMaxNMus;
   std::auto_ptr<int>   fRMaxNEles;
   std::auto_ptr<int>   fRMaxNJets;
@@ -327,10 +351,39 @@ private:
   std::auto_ptr<float> fTMassGlu;
   std::auto_ptr<float> fTMassChi;
   std::auto_ptr<float> fTMassLSP;
+  std::auto_ptr<float> fTxSMS;
+  std::auto_ptr<float> fTxbarSMS;
   std::auto_ptr<float> fTM0;
   std::auto_ptr<float> fTM12;
   std::auto_ptr<float> fTA0;
   std::auto_ptr<float> fTsignMu;
+  std::auto_ptr<float> fTtanBeta;
+  std::auto_ptr<float> fTCrossSection;
+
+  // Generator information
+  std::auto_ptr<int> fTnGenParticles;
+  std::auto_ptr<std::vector<int> > fTgenInfoId;
+  std::auto_ptr<std::vector<int> > fTgenInfoStatus;
+  std::auto_ptr<std::vector<int> > fTgenInfoNMo;
+  std::auto_ptr<std::vector<int> > fTgenInfoNDa;
+  std::auto_ptr<std::vector<int> > fTgenInfoMo1;
+  std::auto_ptr<std::vector<int> > fTgenInfoMo2;
+  std::auto_ptr<std::vector<int> > fTgenInfoDa1;
+  std::auto_ptr<std::vector<int> > fTgenInfoDa2;
+  std::auto_ptr<std::vector<int> > fTgenInfoMoIndex;
+  std::auto_ptr<std::vector<int> > fTPromptnessLevel;
+  std::auto_ptr<std::vector<float> > fTgenInfoMass;
+  std::auto_ptr<std::vector<float> > fTgenInfoMo1Pt;
+  std::auto_ptr<std::vector<float> > fTgenInfoMo2Pt;
+  std::auto_ptr<std::vector<float> > fTgenInfoPt;
+  std::auto_ptr<std::vector<float> > fTgenInfoEta;
+  std::auto_ptr<std::vector<float> > fTgenInfoPhi;
+  std::auto_ptr<std::vector<float> > fTgenInfoPx;
+  std::auto_ptr<std::vector<float> > fTgenInfoPy;
+  std::auto_ptr<std::vector<float> > fTgenInfoPz;
+  std::auto_ptr<std::vector<float> > fTgenInfoM;
+  std::auto_ptr<std::vector<float> > fTgenInfoPromptFlag;
+
 
   // Pile-up event info
   std::auto_ptr<int>  fTPUnumInteractions;
@@ -354,6 +407,8 @@ private:
   std::auto_ptr<int> fTHBHENoiseFlag;
   std::auto_ptr<int> fTHBHENoiseFlagIso;
   std::auto_ptr<int> fTRecovRecHitFilterFlag;
+  std::auto_ptr<int> fTRA2TrackingFailureFilterFlag;
+  //FR std::auto_ptr<int> fPBNRFlag;
   
   std::auto_ptr<int>  fTNEBhits;
   std::auto_ptr<std::vector<float> >  fTEBrechitE;
@@ -433,12 +488,13 @@ private:
   std::auto_ptr<int>  fTMaxElExceed;       // Found more than 20 electrons in event                   
   std::auto_ptr<int>  fTMaxJetExceed;      // Found more than 50 jets in event                        
   std::auto_ptr<int>  fTMaxUncJetExceed;   // Found more than 50 uncorrected jets in event            
-  std::auto_ptr<int>  fTMaxTrkExceed;      // Found more than 500 tracks in event                     
+  std::auto_ptr<int>  fTMaxTrkExceed;      // Found more than 800 tracks in event                     
   std::auto_ptr<int>  fTMaxPhotonsExceed;  // Found more than 500 photons in event                    
   std::auto_ptr<int>  fTMaxGenLepExceed;   // Found more than 100 genleptons in event                 
   std::auto_ptr<int>  fTMaxGenPhoExceed;   // Found more than 100 genphotons in event                 
   std::auto_ptr<int>  fTMaxGenJetExceed;   // Found more than 100 genjets in event                    
   std::auto_ptr<int>  fTMaxVerticesExceed; // Found more than 25 vertices in event                    
+  std::auto_ptr<int>  fTMaxGenPartExceed;  // Found more than 2000 gen particles in event
 
   // GenLeptons
   std::auto_ptr<int>  fTNGenLeptons;
@@ -790,6 +846,32 @@ private:
   std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01;
   std::auto_ptr<std::vector<float> >  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU;
 
+  TVector3 pho_conv_vtx[gMaxNPhotons];
+  TVector3 pho_conv_refitted_momentum[gMaxNPhotons];
+  TVector3 conv_vtx[gMaxNPhotons];
+  TVector3 conv_refitted_momentum[gMaxNPhotons];
+
+  std::auto_ptr<std::vector<bool> >  fTPhoConvValidVtx;
+  std::auto_ptr<std::vector<int> >   fTPhoConvNtracks;
+  std::auto_ptr<std::vector<float> > fTPhoConvChi2Probability;
+  std::auto_ptr<std::vector<float> > fTPhoConvEoverP;
+  
+  std::auto_ptr<int> fTNconv;
+  std::auto_ptr<std::vector<bool> >  fTConvValidVtx;
+  std::auto_ptr<std::vector<int> >   fTConvNtracks;
+  std::auto_ptr<std::vector<float> > fTConvChi2Probability;
+  std::auto_ptr<std::vector<float> > fTConvEoverP;
+  std::auto_ptr<std::vector<float> > fTConvZofPrimVtxFromTrks;
+
+  TVector3 gv_pos[gMaxNGenVtx];
+  TVector3 gv_p3[gMaxNGenVtx];
+  std::auto_ptr<int> fTNgv;
+  std::auto_ptr<std::vector<float> > fTgvSumPtHi;
+  std::auto_ptr<std::vector<float> > fTgvSumPtLo;
+  std::auto_ptr<std::vector<int> >   fTgvNTkHi;
+  std::auto_ptr<std::vector<int> >   fTgvNTkLo;
+
+
   //- Superclusters:
   std::auto_ptr<int>  fTNSuperClusters;
   std::auto_ptr<std::vector<float> >  fTSCRaw;
@@ -829,11 +911,16 @@ private:
   std::auto_ptr<std::vector<int> >  fTJNConstituents;
   std::auto_ptr<std::vector<int> >  fTJNAssoTracks;
   std::auto_ptr<std::vector<int> >  fTJNNeutrals;
-  std::auto_ptr<std::vector<float> >  fTJChargedEmFrac;
-  std::auto_ptr<std::vector<float> >  fTJNeutralEmFrac;
-  std::auto_ptr<std::vector<float> >  fTJChargedHadFrac;
-  std::auto_ptr<std::vector<float> >  fTJNeutralHadFrac;
-  std::auto_ptr<std::vector<float> >  fTJChargedMuEnergyFrac;
+  std::auto_ptr<std::vector<float> > fTJChargedEmFrac;
+  std::auto_ptr<std::vector<float> > fTJNeutralEmFrac;
+  std::auto_ptr<std::vector<float> > fTJChargedHadFrac;
+  std::auto_ptr<std::vector<float> > fTJNeutralHadFrac;
+  std::auto_ptr<std::vector<float> > fTJChargedMuEnergyFrac;
+  std::auto_ptr<std::vector<float> > fTJPhoFrac;
+  std::auto_ptr<std::vector<float> > fTJHFHadFrac;
+  std::auto_ptr<std::vector<float> > fTJHFEMFrac;
+  std::auto_ptr<std::vector<float> > fTJPtD;
+  std::auto_ptr<std::vector<float> > fTJRMSCand;
 
   std::auto_ptr<std::vector<float> >  fTJeMinDR;
   std::auto_ptr<std::vector<float> >  fTJbTagProbTkCntHighEff;
@@ -936,3 +1023,5 @@ private:
   std::auto_ptr<float>  fTMETR12;
   std::auto_ptr<float>  fTMETR21;
 };
+
+

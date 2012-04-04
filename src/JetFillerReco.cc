@@ -30,7 +30,6 @@ JetFillerReco::JetFillerReco( const edm::ParameterSet& config, const bool& isRea
   fJetCorrs        = config.getParameter<std::string>("corrections");
   fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
   fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
-  fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;
@@ -64,17 +63,24 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
 
   // collect information for b-tagging (4 tags)
+  // FIXME: THIS SHOULD BE CONFIGURABLE!
   Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
-  iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
-
   Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
-  iEvent.getByLabel("trackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
-
   Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
-  iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
-
   Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
-  iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
+
+  if( jetType()==PF ) {
+    iEvent.getByLabel("newPFTrackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
+    iEvent.getByLabel("newPFTrackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
+    iEvent.getByLabel("newPFSimpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
+    iEvent.getByLabel("newPFSimpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
+  } else {
+    iEvent.getByLabel("newTrackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
+    iEvent.getByLabel("newTrackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
+    iEvent.getByLabel("newSimpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
+    iEvent.getByLabel("newSimpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
+  }
+
 
   const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs,iSetup);
 
@@ -127,46 +133,43 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
     fTScale->push_back(scale);
 
     // B-tagging probability (for 4 b-taggings)
+    float btag_match_deltaR = 0.5;
     double mindr(999.99);
     for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
-      // Angular match between the two "collections"
       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
                                     (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighEff)[i].first->phi());
-      if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+      if( deltar <= btag_match_deltaR && deltar < mindr)  {
         fTbTagProbTkCntHighEff->push_back((*jetsAndProbsTkCntHighEff)[i].second);
         mindr = deltar;
       }
     }
     mindr = 999.99;
     for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
-      // Angular match between the two "collections"
       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
                                     (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighPur)[i].first->phi());
-      if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+      if( deltar <= btag_match_deltaR && deltar < mindr)  {
         fTbTagProbTkCntHighPur->push_back((*jetsAndProbsTkCntHighPur)[i].second);
         mindr = deltar;
       }
     }
     mindr = 999.99;
     for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
-      // Angular match between the two "collections"
       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
                                     (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighEff)[i].first->phi());
-      if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+      if( deltar <= btag_match_deltaR && deltar < mindr)  {
         fTbTagProbSimpSVHighEff->push_back((*jetsAndProbsSimpSVHighEff)[i].second);
         mindr = deltar;
       }
     }
     mindr = 999.99;
     for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
-      // Angular match between the two "collections"
       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
                                     (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighPur)[i].first->phi());
-      if( deltar <= fBtagMatchdeltaR && deltar < mindr)  {
+      if( deltar <= btag_match_deltaR && deltar < mindr)  {
         fTbTagProbSimpSVHighPur->push_back((*jetsAndProbsSimpSVHighPur)[i].second);
         mindr = deltar;
       }

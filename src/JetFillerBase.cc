@@ -81,6 +81,9 @@ const std::vector<filler::PPair> JetFillerBase::declareProducts(void) {
         addProduct("JChEmfrac",  typeid(*fTChEmfrac));
         addProduct("JNeuEmfrac", typeid(*fTNeuEmfrac));
         addProduct("JChMufrac",  typeid(*fTChMufrac));
+        addProduct("JPhofrac",   typeid(*fTPhofrac));
+        addProduct("JHFHadfrac", typeid(*fTHFHadfrac));
+        addProduct("JHFEMfrac",  typeid(*fTHFEMfrac));
     }
 
     return typeList;
@@ -136,6 +139,9 @@ void JetFillerBase::resetProducts(void) {
         fTChEmfrac     .reset(new std::vector<float>);
         fTNeuEmfrac    .reset(new std::vector<float>);
         fTChMufrac     .reset(new std::vector<float>);
+        fTPhofrac      .reset(new std::vector<float>);
+        fTHFHadfrac    .reset(new std::vector<float>);
+        fTHFEMfrac     .reset(new std::vector<float>);
     }
 }
 
@@ -189,8 +195,8 @@ void JetFillerBase::putProducts( edm::Event& e ) {
         e.put(fTChEmfrac,     fullName("JChEmfrac"));
         e.put(fTNeuEmfrac,    fullName("JNeuEmfrac"));
         e.put(fTChMufrac,     fullName("JChMufrac"));
+        e.put(fTPhofrac,      fullName("JPhofrac"));
+        e.put(fTHFHadfrac,    fullName("JHFHadfrac"));
+        e.put(fTHFEMfrac,     fullName("JHFEMfrac"));
     }
-
-    
-
 }

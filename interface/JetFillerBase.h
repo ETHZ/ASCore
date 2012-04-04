@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.10 2011/07/05 11:50:32 leo Exp $
+// $Id: JetFillerBase.h,v 1.10.2.1 2012/01/27 15:07:21 fronga Exp $
 //
 //
 
@@ -104,6 +104,9 @@ protected:
   std::auto_ptr<std::vector<float> > fTChEmfrac;
   std::auto_ptr<std::vector<float> > fTNeuEmfrac;
   std::auto_ptr<std::vector<float> > fTChMufrac;
+  std::auto_ptr<std::vector<float> > fTPhofrac;
+  std::auto_ptr<std::vector<float> > fTHFHadfrac;
+  std::auto_ptr<std::vector<float> > fTHFEMfrac;
 
 };
 

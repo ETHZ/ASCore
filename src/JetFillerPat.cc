@@ -29,7 +29,6 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, const bool& isRealD
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
   fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
-  fBtagMatchdeltaR = config.getParameter<double>("btag_matchdeltaR");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerPat Constructor - " << fPrefix;
@@ -139,6 +138,11 @@ void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup
         fTChEmfrac   ->push_back(jetuncorr.chargedEmEnergyFraction());
         fTNeuEmfrac  ->push_back(jetuncorr.neutralEmEnergyFraction());
         fTChMufrac   ->push_back(jetuncorr.chargedMuEnergyFraction());    
+
+	fTPhofrac    ->push_back(jetuncorr.photonEnergyFraction()); // photons also count for neutralEmEnergy
+        fTHFHadfrac  ->push_back(jetuncorr.HFHadronEnergyFraction());
+        fTHFEMfrac   ->push_back(jetuncorr.HFEMEnergyFraction());   // also contained in neutralEmEnergy
+
       }
 
       ijet++;
