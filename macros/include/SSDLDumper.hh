@@ -89,27 +89,41 @@ public:
 	};
 	enum gRegion {
 		region_begin,
-		Baseline = region_begin,
-		Control,
-		HT80MET120,
-		HT80MET120x,  // exclusive (HT < 200)
+		Baseline = region_begin, //HT0MET0
+		HT80MET30,
 		HT200MET30,
-		HT200MET120,
-		HT200MET120x, // exclusive (HT < 450)
-		HT450MET50,
-		HT450MET50x,  // exclusive (MET < 120)
-		HT450MET120,
-		HT450MET0,
 		HT0MET120,
 		HT0MET200,
-		HT0MET120JV,  // Jet veto
-		HT0MET200JV,
-		HT80MET302b,  // > 1 bjet
-		HT200MET302b,
-		HT80MET1202b,
-		HT0MET02b,
+		HT0MET120JV,
+		TTbarWPresel,
+		TTbarWSel1,
+		TTbarWSel2,
+		TTbarWSel3,
 		gNREGIONS
 	};
+	// enum gRegion {
+	// 	region_begin,
+	// 	Baseline = region_begin,
+	// 	Control,
+	// 	HT80MET120,
+	// 	HT80MET120x,  // exclusive (HT < 200)
+	// 	HT200MET30,
+	// 	HT200MET120,
+	// 	HT200MET120x, // exclusive (HT < 450)
+	// 	HT450MET50,
+	// 	HT450MET50x,  // exclusive (MET < 120)
+	// 	HT450MET120,
+	// 	HT450MET0,
+	// 	HT0MET120,
+	// 	HT0MET200,
+	// 	HT0MET120JV,  // Jet veto
+	// 	HT0MET200JV,
+	// 	HT80MET302b,  // > 1 bjet
+	// 	HT200MET302b,
+	// 	HT80MET1202b,
+	// 	// HT0MET02b,
+	// 	gNREGIONS
+	// };
 	enum gChannel {
 		channels_begin,
 		Muon = channels_begin,
@@ -196,10 +210,10 @@ public:
 	struct Region{
 		static TString sname[gNREGIONS];
 		// Two different pt cuts
-		static float minMu1pt[2];
-		static float minMu2pt[2];
-		static float minEl1pt[2];
-		static float minEl2pt[2];
+		static float minMu1pt[gNREGIONS];
+		static float minMu2pt[gNREGIONS];
+		static float minEl1pt[gNREGIONS];
+		static float minEl2pt[gNREGIONS];
 		// Custom selections for every region
 		static float minHT    [gNREGIONS];
 		static float maxHT    [gNREGIONS];
@@ -207,6 +221,7 @@ public:
 		static float maxMet   [gNREGIONS];
 		static int   minNjets [gNREGIONS];
 		static int   minNbjets[gNREGIONS];
+		static int   minNbjmed[gNREGIONS];
 		
 		Channel mm;
 		Channel em;
@@ -523,6 +538,7 @@ public:
 	// Event and Object selectors:
 	virtual int getNJets();
 	virtual int getNBTags();
+	virtual int getNBTagsMed();
 	virtual float getHT();
 	virtual float getWeightedHT();
 	virtual float getMT2(int, int, gChannel);
@@ -549,7 +565,7 @@ public:
 	virtual int hasLooseElectrons();
 	virtual bool passesNJetCut(int=2);
 	virtual bool passesJet50Cut();
-	virtual bool passesNbJetCut(int=2);
+	virtual bool passesNbJetCut(int=2, int=0);
 	
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
@@ -606,6 +622,7 @@ public:
 	float fC_maxMet;
 	int   fC_minNjets;
 	int   fC_minNbjets;
+	int   fC_minNbjmed;
 	float fC_minMu1pt;
 	float fC_minMu2pt;
 	float fC_minEl1pt;
@@ -662,6 +679,7 @@ public:
 	float       fSETree_MET;
 	int         fSETree_NJ;
 	int         fSETree_NbJ;
+	int         fSETree_NbJmed;
 	float       fSETree_MT2;
 	float       fSETree_Mll;
 	float       fSETree_pT1;
