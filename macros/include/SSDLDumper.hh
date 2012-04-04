@@ -219,6 +219,7 @@ public:
 		static float maxHT    [gNREGIONS];
 		static float minMet   [gNREGIONS];
 		static float maxMet   [gNREGIONS];
+		static float minJetPt [gNREGIONS];
 		static int   minNjets [gNREGIONS];
 		static int   minNbjets[gNREGIONS];
 		static int   minNbjmed[gNREGIONS];
@@ -563,7 +564,7 @@ public:
 	virtual int hasLooseMuons();
 	virtual int hasLooseElectrons(int&, int&);
 	virtual int hasLooseElectrons();
-	virtual bool passesNJetCut(int=2);
+	virtual bool passesNJetCut(int=2, float=20.);
 	virtual bool passesJet50Cut();
 	virtual bool passesNbJetCut(int=2, int=0);
 	
@@ -620,6 +621,7 @@ public:
 	float fC_minMet;
 	float fC_maxHT;
 	float fC_maxMet;
+	float fC_minJetPt;
 	int   fC_minNjets;
 	int   fC_minNbjets;
 	int   fC_minNbjmed;

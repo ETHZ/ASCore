@@ -55,7 +55,8 @@ float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,        
 float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,           10.,          7000.,        7000.,        7000.,        7000.};
 float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.};
 float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,          7000.,        7000.,        7000.,        7000.};
-int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 };
+float SSDLDumper::Region::minJetPt [SSDLDumper::gNREGIONS] = {      20 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 };
+int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {      20.,         40.,          40.,         40.,         40.,           40.,            20.,          20.,          20.,          20.};
 int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             2 ,           2 ,           2 ,           2 };
 int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 };
 float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.};
@@ -186,6 +187,7 @@ void SSDLDumper::init(){
 	fC_minMet    = 30.;
 	fC_maxHT     = 7000.;
 	fC_maxMet    = 7000.;
+	fC_minJetPt  = 20.;
 	fC_minNjets  = 2;
 	fC_minNbjets = 0;
 	fC_minNbjmed = 0;
@@ -471,6 +473,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	fC_maxHT     = Region::maxHT    [reg];
 	fC_minMet    = Region::minMet   [reg];
 	fC_maxMet    = Region::maxMet   [reg];
+	fC_minJetPt  = Region::minJetPt [reg];
 	fC_minNjets  = Region::minNjets [reg];
 	fC_minNbjets = Region::minNbjets[reg];
 	fC_minNbjmed = Region::minNbjmed[reg];
@@ -1484,6 +1487,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	fC_minMet    = Region::minMet   [Baseline];
 	fC_maxHT     = Region::maxHT    [Baseline];
 	fC_maxMet    = Region::maxMet   [Baseline];
+	fC_minJetPt  = Region::minJetPt [Baseline];
 	fC_minNjets  = Region::minNjets [Baseline];
 	fC_minNbjets = Region::minNbjets[Baseline];
 	fC_minNbjmed = Region::minNbjmed[Baseline];
@@ -1754,6 +1758,7 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 	fC_maxHT     = Region::maxHT    [Baseline];
 	fC_minMet    = Region::minMet   [Baseline];
 	fC_maxMet    = Region::maxMet   [Baseline];
+	fC_minJetPt  = Region::minJetPt [Baseline];
 	fC_minNjets  = Region::minNjets [Baseline];
 	fC_minNbjets = Region::minNbjets[Baseline];
 	fC_minNbjmed = Region::minNbjmed[Baseline];
@@ -1935,6 +1940,7 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 	fC_maxHT     = Region::maxHT    [Baseline];
 	fC_minMet    = Region::minMet   [Baseline];
 	fC_maxMet    = Region::maxMet   [Baseline];
+	fC_minJetPt  = Region::minJetPt [Baseline];
 	fC_minNjets  = Region::minNjets [Baseline];
 	fC_minNbjets = Region::minNbjets[Baseline];
 	fC_minNbjmed = Region::minNbjmed[Baseline];
@@ -2005,6 +2011,7 @@ void SSDLDumper::fillElIdPlots(Sample *S){
 	fC_maxHT     = Region::maxHT    [Baseline];
 	fC_minMet    = Region::minMet   [Baseline];
 	fC_maxMet    = Region::maxMet   [Baseline];
+	fC_minJetPt  = Region::minJetPt [Baseline];
 	fC_minNjets  = Region::minNjets [Baseline];
 	fC_minNbjets = Region::minNbjets[Baseline];
 	fC_minNbjmed = Region::minNbjmed[Baseline];
@@ -2084,6 +2091,7 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 	fC_maxHT     = Region::maxHT    [Baseline];
 	fC_minMet    = Region::minMet   [Baseline];
 	fC_maxMet    = Region::maxMet   [Baseline];
+	fC_minJetPt  = Region::minJetPt [Baseline];
 	fC_minNjets  = Region::minNjets [Baseline];
 	fC_minNbjets = Region::minNbjets[Baseline];
 	fC_minNbjmed = Region::minNbjmed[Baseline];
@@ -3859,7 +3867,7 @@ vector<SSDLDumper::lepton> SSDLDumper::sortLeptonsByTypeAndPt(vector<lepton>& le
 }
 
 //____________________________________________________________________________
-bool SSDLDumper::passesNJetCut(int cut){
+bool SSDLDumper::passesNJetCut(int cut, float pt){
 	return getNJets() >= cut;
 }
 bool SSDLDumper::passesJet50Cut(){
@@ -4000,7 +4008,7 @@ bool SSDLDumper::isSigSupMuEvent(){
 	if(hasLooseMuons(mu1, mu2) < 1) return false;
 	setHypLepton1(mu1, Muon);
 	if(!passesJet50Cut())           return false;
-	if(!passesNJetCut(1))           return false;
+	if(!passesNJetCut(1, fC_minJetPt))           return false;
 	// if(!passesNJetCut(fC_minNjets)) return false;
 	if(MuMT[0] > fC_maxMt_Control)  return false;
 	if(pfMET > fC_maxMet_Control)   return false;
@@ -4024,7 +4032,7 @@ bool SSDLDumper::isZMuMuEvent(int &mu1, int &mu2){
 	setHypLepton2(mu2, Muon);
 
 	if(pfMET > 20.) return false;
-	if(!passesNJetCut(2)) return false;
+	if(!passesNJetCut(2, fC_minJetPt)) return false;
 	return true;
 }
 bool SSDLDumper::isSigSupElEvent(){
@@ -4032,7 +4040,7 @@ bool SSDLDumper::isSigSupElEvent(){
 	if(hasLooseElectrons(el1, el2) < 1) return false;
 	setHypLepton1(el1, Elec);
 	if(!passesJet50Cut())               return false;
-	if(!passesNJetCut(1))               return false;
+	if(!passesNJetCut(1, fC_minJetPt))               return false;
 	// if(!passesNJetCut(fC_minNjets))     return false;
 	if(ElMT[0] > fC_maxMt_Control)      return false;
 	if(pfMET > fC_maxMet_Control)       return false;
@@ -4055,7 +4063,7 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	setHypLepton2(el2, Elec);
 
 	if(pfMET > 20.) return false;
-	if(!passesNJetCut(2)) return false;
+	if(!passesNJetCut(2, fC_minJetPt)) return false;
 	return true;
 }
 
@@ -4120,7 +4128,7 @@ bool SSDLDumper::isSSLLMuEvent(int& mu1, int& mu2){
 	// if(!passesJet50Cut()) return false; // one jet with pt > 50
 	// if(fDoCounting) fCounter[Muon].fill(fMMCutNames[8]);
 
-	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
+	if(!passesNJetCut(fC_minNjets, fC_minJetPt) ) return false;    // njets cut
 	if(fDoCounting) fCounter[Muon].fill(fMMCutNames[9]);
 
 	if(!passesNbJetCut(fC_minNbjets, fC_minNbjmed) ) return false;    // nbjets cut
@@ -4174,7 +4182,7 @@ bool SSDLDumper::isSSLLElEvent(int& el1, int& el2){
 	// if(!passesJet50Cut()) return false;
 	// if(fDoCounting) fCounter[Elec].fill(fEECutNames[8]);
 
-	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
+	if(!passesNJetCut(fC_minNjets, fC_minJetPt) ) return false;    // njets cut
 	if(fDoCounting) fCounter[Elec].fill(fEECutNames[9]);
 
 	if(!passesNbJetCut(fC_minNbjets, fC_minNbjmed) ) return false;    // nbjets cut
@@ -4227,7 +4235,7 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 	// if(!passesJet50Cut()) return false;
 	// if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[8]);
 
-	if(!passesNJetCut(fC_minNjets) ) return false;    // njets cut
+	if(!passesNJetCut(fC_minNjets, fC_minJetPt) ) return false;    // njets cut
 	if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[9]);
 
 	if(!passesNbJetCut(fC_minNbjets, fC_minNbjmed) ) return false;    // nbjets cut
