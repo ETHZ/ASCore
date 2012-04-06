@@ -33,14 +33,14 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 /// Definition of tight isolation:
-static const float gMuMaxIso = 0.05;
-static const float gElMaxIso = 0.05;
+// static const float gMuMaxIso = 0.05;
+// static const float gElMaxIso = 0.05;
 // static const float gMuMaxIso = 0.07;
 // static const float gElMaxIso = 0.07;
 // static const float gMuMaxIso = 0.10;
 // static const float gElMaxIso = 0.10;
-// static const float gMuMaxIso = 0.15;
-// static const float gElMaxIso = 0.15;
+static const float gMuMaxIso = 0.15;
+static const float gElMaxIso = 0.15;
 
 static const float gMMU = 0.1057;
 static const float gMEL = 0.0005;
@@ -55,8 +55,8 @@ float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,        
 float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,           10.,          7000.,        7000.,        7000.,        7000.};
 float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.};
 float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,          7000.,        7000.,        7000.,        7000.};
-float SSDLDumper::Region::minJetPt [SSDLDumper::gNREGIONS] = {      20 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 };
-int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {      20.,         40.,          40.,         40.,         40.,           40.,            20.,          20.,          20.,          20.};
+float SSDLDumper::Region::minJetPt [SSDLDumper::gNREGIONS] = {      20.,         40.,          40.,         40.,         40.,           40.,            20.,          20.,          20.,          20.};
+int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 };
 int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             2 ,           2 ,           2 ,           2 };
 int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 };
 float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.};
