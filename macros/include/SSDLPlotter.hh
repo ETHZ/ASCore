@@ -74,6 +74,7 @@ public:
 
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
+	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
 	void makePredicitonSignalEvents(float, float, float, float, int, int);
 	void makeDiffPrediction();
 

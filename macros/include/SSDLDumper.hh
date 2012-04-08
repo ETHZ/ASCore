@@ -551,6 +551,9 @@ public:
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
 	
+	virtual int getNTightMuons();
+	virtual int getNTightElectrons();
+	
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
 	virtual int isSSEvent(int&, bool(SSDLDumper::*)(int), int&, bool(SSDLDumper::*)(int));
@@ -564,9 +567,7 @@ public:
 	virtual int hasLooseMuons();
 	virtual int hasLooseElectrons(int&, int&);
 	virtual int hasLooseElectrons();
-	virtual bool passesNJetCut(int=2, float=20.);
 	virtual bool passesJet50Cut();
-	virtual bool passesNbJetCut(int=2, int=0);
 	
 	virtual bool passesHTCut(float, float = 7000.);
 	virtual bool passesMETCut(float = -1., float = 7000.);
@@ -679,6 +680,8 @@ public:
 	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
 	float       fSETree_HT;
 	float       fSETree_MET;
+	int         fSETree_NM; // number of tight muons
+	int         fSETree_NE; // number of tight electrons
 	int         fSETree_NJ;
 	int         fSETree_NbJ;
 	int         fSETree_NbJmed;
