@@ -30,6 +30,11 @@
 #include <iomanip>
 #include <time.h> // access to date/time
 
+
+
+int DEBUG_EVENTNUMBER_ = -1;
+
+
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1618,6 +1623,19 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fSETree_NM = getNTightMuons();
 	fSETree_NE = getNTightElectrons();
 	
+
+      if( Event==DEBUG_EVENTNUMBER_ ) {
+ 
+        std::cout << std::endl << std::endl << "------------------------------------------------------------" << std::endl;
+        std::cout << "  Debug log for run: " << Run << "  LS: " << LumiSec << "  Event: " << Event << std::endl;
+       
+        std::cout << std::endl << "Here are the jets: " << std::endl;
+        for(size_t i = 0; i < NJets; ++i) 
+          std::cout << "Pt: " << JetPt[i] << "  Eta: " << JetEta[i] << " TCHE: " << JetTCHEBTag[i] << std::endl;
+
+      }
+
+
 	int ind1(-1), ind2(-1);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1640,6 +1658,23 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
+
+		if( Event==DEBUG_EVENTNUMBER_ ) {
+            	std::cout << " -> This is a mu-mu event." << std::endl;
+			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
+			std::cout << "HT    :" << fSETree_HT     << std::endl;
+			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
+			std::cout << "Charge:" << fSETree_Charge << std::endl;
+			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+		}
+
 		resetHypLeptons();
 	}
 
@@ -1663,6 +1698,23 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
+
+		if( Event==DEBUG_EVENTNUMBER_ ) {
+            	std::cout << " -> This is a mu-ele event." << std::endl;
+			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
+			std::cout << "HT    :" << fSETree_HT     << std::endl;
+			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
+			std::cout << "Charge:" << fSETree_Charge << std::endl;
+			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+		}
+
 		resetHypLeptons();
 	}
 
@@ -1686,6 +1738,23 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
 		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
+
+		if( Event==DEBUG_EVENTNUMBER_ ) {
+            	std::cout << " -> This is an ele-ele event." << std::endl;
+			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
+			std::cout << "HT    :" << fSETree_HT     << std::endl;
+			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
+			std::cout << "Charge:" << fSETree_Charge << std::endl;
+			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+		}
+
 		resetHypLeptons();
 	}
 	/// OS YIELDS
