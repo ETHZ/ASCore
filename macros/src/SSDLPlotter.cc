@@ -26,6 +26,11 @@
 #include <iomanip>
 #include <time.h> // access to date/time
 
+
+
+bool DO_OPT=false;
+
+
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -8535,14 +8540,15 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
 
 	string *sname = 0;
-	int   stype, flav, cat, njets, nbjets;
-	float puweight, pT1, pT2, HT, MET, MT2;
+	int   stype, flav, cat, njets, nbjets, nbjetsmed;
+	float puweight, slumi, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
 	int event;
 
 	sigtree->SetBranchAddress("Event",    &event);
 	sigtree->SetBranchAddress("SName",    &sname);
 	sigtree->SetBranchAddress("SType",    &stype);
+	sigtree->SetBranchAddress("SLumi",    &slumi);
 	sigtree->SetBranchAddress("PUWeight", &puweight);
 	sigtree->SetBranchAddress("Flavor",   &flav);
 	sigtree->SetBranchAddress("pT1",      &pT1);
@@ -8555,12 +8561,36 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 	sigtree->SetBranchAddress("MT2",      &MT2);
 	sigtree->SetBranchAddress("NJ",       &njets);
 	sigtree->SetBranchAddress("NbJ",      &nbjets);
+	sigtree->SetBranchAddress("NbJmed",   &nbjetsmed);
 	
 	FakeRatios *FR = new FakeRatios();
 
 	float npp(0.), npf(0.), nfp(0.), nff(0.);
 	float f1(0.), f2(0.), p1(0.), p2(0.);
 	
+
+	TFile* file_opt;
+	TTree* tree_opt;
+      float eventWeight;
+
+	if( DO_OPT ) {
+   
+		system( "mkdir -p OPT_ttW" );
+		file_opt = TFile::Open("OPT_ttW/opt_ttW.root", "recreate");
+		tree_opt = new TTree("tree_opt", "");
+
+		tree_opt->Branch( "SName", &*sname );
+		tree_opt->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
+		tree_opt->Branch( "NJ", &njets, "njets/I" );
+		tree_opt->Branch( "NbJ", &nbjets, "nbjets/I" );
+		tree_opt->Branch( "NbJmed", &nbjetsmed, "nbjetsmed/I" );
+		tree_opt->Branch( "pT1", &pT1, "pT1/F" );
+		tree_opt->Branch( "pT2", &pT2, "pT2/F" );
+		tree_opt->Branch( "HT", &HT, "HT/F" );
+		tree_opt->Branch( "MET", &MET, "MET/F" );
+
+	}
+
 	
 	for( int i = 0; i < sigtree->GetEntries(); i++ ){
 		sigtree->GetEntry(i);
@@ -8674,7 +8704,29 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 			fillWithoutOF(S->diffyields[chan].hnfp[3], MET, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[3], MET, puweight * nff);
 		}
+
+		if( DO_OPT && cat==0 ) {
+
+			float lumi_pb = 5000.;
+			eventWeight = lumi_pb*puweight*( npf + nfp + nff )/slumi;
+
+			if( *sname=="TTbarW" || *sname=="TTbarZ" ) 
+				eventWeight = lumi_pb*puweight/slumi;
+			tree_opt->Fill();
+
+		}
 	}
+
+
+	if( DO_OPT ) {
+
+		file_opt->cd();
+		tree_opt->Write();
+		file_opt->Close();
+
+	}
+      
+
 	delete FR;
 }
 float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
