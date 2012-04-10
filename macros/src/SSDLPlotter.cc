@@ -28,7 +28,7 @@
 
 
 
-bool DO_OPT=false;
+bool DO_OPT=true;
 
 
 using namespace std;
@@ -8580,6 +8580,7 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 		tree_opt = new TTree("tree_opt", "");
 
 		tree_opt->Branch( "SName", &*sname );
+		tree_opt->Branch( "Flavor", &flav, "&flav/I" );
 		tree_opt->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
 		tree_opt->Branch( "NJ", &njets, "njets/I" );
 		tree_opt->Branch( "NbJ", &nbjets, "nbjets/I" );
@@ -8705,7 +8706,7 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 			fillWithoutOF(S->diffyields[chan].hnff[3], MET, puweight * nff);
 		}
 
-		if( DO_OPT && cat==0 ) {
+		if( DO_OPT && cat==0 && flav<3 ) {
 
 			float lumi_pb = 5000.;
 			eventWeight = lumi_pb*puweight*( npf + nfp + nff )/slumi;
