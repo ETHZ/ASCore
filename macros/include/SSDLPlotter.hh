@@ -75,7 +75,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
-	void makePredicitonSignalEvents(float, float, float, float, int, int, int);
+	void makePredictionSignalEvents(float, float, float, float, int, int, int);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();
@@ -148,6 +148,7 @@ public:
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
 	virtual void drawTopLine(float = 0.70);
+	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	
 	const int     getNPtBins (gChannel);
