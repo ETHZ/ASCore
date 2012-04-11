@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C 31458 2009-11-30 13:58:20Z stelzer $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.1 2012/04/10 13:05:58 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -50,7 +50,7 @@
 // read input data file with ascii format (otherwise ROOT) ?
 Bool_t ReadDataFromAsciiIFormat = kFALSE;
    
-void TMVAClassification( TString myMethodList = "" ) 
+void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20", TString myMethodList = "" ) 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the 
@@ -200,7 +200,7 @@ void TMVAClassification( TString myMethodList = "" )
       // load the signal and background event samples from ROOT trees
       TFile *input(0);
       //TString fname = "../macros/tmva_example.root";
-      TString fname = "opt_ttW.root";
+      TString fname = "opt_ttW_" + selectionType + ".root";
       if (!gSystem->AccessPathName( fname )) {
          input = TFile::Open( fname ); // check if file in local directory exists
       } 
@@ -517,7 +517,7 @@ void TMVAClassification( TString myMethodList = "" )
        TMVA::MethodCuts* cuts = dynamic_cast<TMVA::MethodCuts*>(method);
 
        char cutsFileName[500];
-       sprintf( cutsFileName, "optcuts/cuts_Seff%d.txt", 10*iEff );
+       sprintf( cutsFileName, "optcuts_%s/cuts_Seff%d.txt", selectionType.c_str(), 10*iEff );
 
        ofstream ofs(cutsFileName);
 
