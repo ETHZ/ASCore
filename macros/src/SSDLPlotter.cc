@@ -8641,7 +8641,10 @@ void SSDLPlotter::storeWeightedPred(){
 	if( gDO_OPT ) {
    
 		system( "mkdir -p OPT_ttW" );
-		file_opt = TFile::Open("OPT_ttW/opt_ttW.root", "recreate");
+		std::string outputdir_str(fOutputDir);
+		outputdir_str.erase(outputdir_str.end()-1); //get rid of last slash
+		TString file_opt_name = "OPT_ttW/opt_ttW_" + outputdir_str + ".root";
+		file_opt = TFile::Open(file_opt_name, "recreate");
 		tree_opt = new TTree("tree_opt", "");
 
 		tree_opt->Branch( "SName",       &*sname );
