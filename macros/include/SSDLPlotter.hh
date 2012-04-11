@@ -12,6 +12,24 @@
 #include "TLorentzVector.h"
 
 
+
+struct SSDLPrediction {
+
+	float bg_mm;
+	float bg_em;
+	float bg_ee;
+
+	float bg_mm_err;
+	float bg_em_err;
+	float bg_ee_err;
+
+	float s_mm;
+	float s_em;
+	float s_ee;
+
+};
+
+
 class SSDLPlotter : public SSDLDumper{
 
 public:
@@ -75,7 +93,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
-	void makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10.);
+	SSDLPrediction makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10.);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();

@@ -373,7 +373,7 @@ void SSDLPlotter::doAnalysis(){
 	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM);
-	makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10.);
+	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10.);
 	// makePredictionSignalEvents(0., 7000., 50., 7000., 4, 2);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0);
 	// makeRelIsoTTSigPlots();
@@ -6215,7 +6215,7 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	delete FR;
 }
 
-void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2){
+SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2){
 	fOutputSubDir = "IntPredictions/";
 	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0fMET%.0fNJ%.0iNBJ%.0i.txt", minHT, minMET, minNjets, minNbjetsL), ios::trunc);
 
@@ -6785,6 +6785,24 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
 	delete FR;
+
+
+	SSDLPrediction ssdlpred;
+
+	ssdlpred.bg_mm = nF_mm + nt2_wz_mc_mm + nt2_rare_mc_mm;
+	ssdlpred.bg_em = nF_em + nt2_wz_mc_em + nt2_rare_mc_em;
+	ssdlpred.bg_ee = nF_ee + nt2_wz_mc_ee + nt2_rare_mc_ee;
+
+	ssdlpred.bg_mm_err = sqrt(mm_tot_stat2 + mm_tot_syst2);
+	ssdlpred.bg_em_err = sqrt(em_tot_stat2 + em_tot_syst2);
+	ssdlpred.bg_ee_err = sqrt(ee_tot_stat2 + ee_tot_syst2);
+
+	ssdlpred.s_mm = 0.;
+	ssdlpred.s_em = 0.;
+	ssdlpred.s_ee = 0.;
+
+	return ssdlpred;
+
 }
 
 void SSDLPlotter::makeDiffPrediction(){
@@ -8758,10 +8776,7 @@ void SSDLPlotter::storeWeightedPred(){
 		if( gDO_OPT && flav<3 ) {
 
 			float lumi_pb = 5000.;
-			eventWeight = lumi_pb*puweight*( npf + nfp + nff )/slumi;
-
-			if( *sname=="TTbarW" || *sname=="TTbarZ" ) 
-				eventWeight = lumi_pb*puweight/slumi;
+			eventWeight = lumi_pb*puweight/slumi;
 			tree_opt->Fill();
 
 		}
