@@ -75,7 +75,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
-	void makePredictionSignalEvents(float, float, float, float, int, int, int);
+	void makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10.);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();
@@ -84,7 +84,7 @@ public:
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
 	
-	void storeWeightedPred(bool diffeta = true);
+	void storeWeightedPred();
 	float getFRatio(gChannel, float, int = 0);        // diff in pt only
 	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta
 	float getPRatio(gChannel, float, int = 0);

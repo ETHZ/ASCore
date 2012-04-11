@@ -367,13 +367,13 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
+	// makeAllClosureTests();
 	makeAllIntPredictions();
-	makeDiffPrediction();
+	// makeDiffPrediction();
 	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM);
-	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0);
+	makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10.);
 	// makePredictionSignalEvents(0., 7000., 50., 7000., 4, 2);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0);
 	// makeRelIsoTTSigPlots();
@@ -5050,12 +5050,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FakeRatios *FR = new FakeRatios();
 	FR->setNToyMCs(100);
 	FR->setAddESyst(0.5);
-	// FR->setAddESyst(0.0);
 
-	// FR->setMFRatio(mufratio_data, 0.10);
-	// FR->setEFRatio(elfratio_data, 0.10);
-	// FR->setMPRatio(mupratio_data, 0.05);
-	// FR->setEPRatio(elpratio_data, 0.05);
 	FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
 	FR->setEFRatio(elfratio_data, elfratio_data_e);
 	FR->setMPRatio(mupratio_data, mupratio_data_e);
@@ -5065,19 +5060,12 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
 	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
 
-	float nF_mm = 0;
-	float nF_em = 0;
-	float nF_ee = 0;
-	float nSF   = 0;
-	float nDF   = 0;
-	float nF    = 0;
-
-	nF_mm = npf_mm + nff_mm;
-	nF_em = npf_em+nfp_em+nff_em;
-	nF_ee = npf_ee+nff_ee;
-	nSF   = npf_mm + npf_em + nfp_em + npf_ee;
-	nDF   = nff_mm + nff_em + nff_ee;
-	nF    = nF_mm + nF_em + nF_ee;
+	float nF_mm = npf_mm + nff_mm;
+	float nF_em = npf_em+nfp_em+nff_em;
+	float nF_ee = npf_ee+nff_ee;
+	float nSF   = npf_mm + npf_em + nfp_em + npf_ee;
+	float nDF   = nff_mm + nff_em + nff_ee;
+	float nF    = nF_mm + nF_em + nF_ee;
 
 	OUT << "  Fake Predictions:" << endl;
 	OUT << "------------------------------------------------------------------------------------------" << endl;
@@ -6227,8 +6215,7 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	delete FR;
 }
 
-void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM){
-
+void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2){
 	fOutputSubDir = "IntPredictions/";
 	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0fMET%.0fNJ%.0iNBJ%.0i.txt", minHT, minMET, minNjets, minNbjetsL), ios::trunc);
 
@@ -6246,18 +6233,18 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	const float WZESyst  = 0.2;
 	const float WZESyst2 = WZESyst*WZESyst;
 
-	bool diffratio = true; // use flat or differential ratios
-
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << " Producing predictions " ;
 	OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
 	OUT << "-----------------------------------------------------------------------------" << endl;
-	OUT << "These are the cuts: " << endl;
-	OUT << Form("minHT:    %4.0f  || maxHT:     %4.0f", minHT   , maxHT    ) << endl;
-	OUT << Form("minMET:   %4.0f  || maxMET:    %4.0f", minMET  , maxMET   ) << endl;
-	OUT << Form("minNjets:   %2i  ", minNjets) << endl;
-	OUT << Form("minNbjetsL: %2i  ", minNbjetsL) << endl;
-	OUT << Form("minNbjetsM: %2i  ", minNbjetsM) << endl;
+	OUT << " These are the cuts: " << endl;
+	OUT << Form("  minHT:    %4.0f  || maxHT:     %4.0f", minHT   , maxHT    ) << endl;
+	OUT << Form("  minMET:   %4.0f  || maxMET:    %4.0f", minMET  , maxMET   ) << endl;
+	OUT << Form("  minNjets:   %2i  ", minNjets) << endl;
+	OUT << Form("  minNbjetsL: %2i  ", minNbjetsL) << endl;
+	OUT << Form("  minNbjetsM: %2i  ", minNbjetsM) << endl;
+	OUT << Form("  minpT1:     %2.0f  ", minPt1) << endl;
+	OUT << Form("  minpT2:     %2.0f  ", minPt2) << endl;
 	OUT << "-----------------------------------------------------------------------------" << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6297,17 +6284,17 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	float nt2_wz_mc_mm_e2(0.), nt2_wz_mc_em_e2(0.), nt2_wz_mc_ee_e2(0.);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	bool diffeta = true;
-
 	TFile *pFile = TFile::Open(fOutputFileName);
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
 	
 	string *sname = 0;
-	int   SType, Flavor, TLCat, NJ, NbJ;
+	int   SType, Flavor, TLCat, NJ, NbJ, NbJmed;
 	float puweight, pT1, pT2, HT, MET, MT2, SLumi;
 	float eta1, eta2, mll;
-	int NbJmed;
+	int   event, run;
 
+	sigtree->SetBranchAddress("Event",    &event);
+	sigtree->SetBranchAddress("Run",      &run);
 	sigtree->SetBranchAddress("SName",    &sname);
 	sigtree->SetBranchAddress("SType",    &SType);
 	sigtree->SetBranchAddress("PUWeight", &puweight);
@@ -6352,15 +6339,30 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 		if ( mll < 8.) continue;
 		if ( HT  < minHT  || HT  > maxHT)  continue;
 		if ( MET < minMET || MET > maxMET) continue;
-		if ( NJ  < minNjets)  continue;
-		if ( NbJ < minNbjetsL) continue;
+		if ( NJ  < minNjets)      continue;
+		if ( NbJ < minNbjetsL)    continue;
 		if ( NbJmed < minNbjetsM) continue;
+
+		gChannel chan = gChannel(Flavor);
+		if(chan == ElMu || Flavor == 3){
+			if(pT1 > pT2){
+				if(pT1 < minPt1) continue;
+				if(pT2 < minPt2) continue;
+			}
+			if(pT1 < pT2){
+				if(pT1 < minPt2) continue;
+				if(pT2 < minPt1) continue;
+			}
+		}
+		else{
+			if(pT1 < minPt1) continue;
+			if(pT2 < minPt2) continue;
+		}
 
 		// GET ALL DATA EVENTS
 		if(SType < 3) {             // 0,1,2 are DoubleMu, DoubleEle, MuEG
 			if (Flavor < 3) {
 				Sample *S = fSampleMap[TString(*sname)];
-				gChannel chan = gChannel(Flavor);
 
 				float npp(0.) , npf(0.) , nfp(0.) , nff(0.);
 				float f1(0.)  , f2(0.)  , p1(0.)  , p2(0.);
@@ -6381,30 +6383,30 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 				nff = FR->getWff(FakeRatios::gTLCat(TLCat), f1, f2, p1, p2);			
 
 				if (Flavor == 0) {      // MUMU
-						npp_mm+=npp;
-						npf_mm+=(npf+nfp);
-						nff_mm+=nff;
-						if (TLCat == 0) nt2_mm++;
-					 	if (TLCat == 1 || TLCat == 2) nt10_mm++;
-					 	if (TLCat == 3) nt0_mm++;
+					npp_mm += npp;
+					npf_mm += (npf+nfp);
+					nff_mm += nff;
+					if (TLCat == 0)               nt2_mm++;
+				 	if (TLCat == 1 || TLCat == 2) nt10_mm++;
+				 	if (TLCat == 3)               nt0_mm++;
 				}
 				if (Flavor == 1) {       // E-MU
-						npp_em+=npp;
-						npf_em+=npf;
-						nfp_em+=nfp;
-						nff_em+=nff;
-						if (TLCat == 0) nt2_em++;
-					 	if (TLCat == 1) nt10_em++;
-					 	if (TLCat == 2) nt01_em++;
-					 	if (TLCat == 3) nt0_em++;
+					npp_em += npp;
+					npf_em += npf;
+					nfp_em += nfp;
+					nff_em += nff;
+					if (TLCat == 0) nt2_em++;
+				 	if (TLCat == 1) nt10_em++;
+				 	if (TLCat == 2) nt01_em++;
+				 	if (TLCat == 3) nt0_em++;
 				}
 				if (Flavor == 2) {       // E-E
-						npp_ee+=npp;
-						npf_ee+=(nfp+npf);
-						nff_ee+=nff;
-						if (TLCat == 0) nt2_ee++;
-					 	if (TLCat == 1 || TLCat == 2) nt10_ee++;
-					 	if (TLCat == 3) nt0_ee++;
+					npp_ee += npp;
+					npf_ee += (nfp+npf);
+					nff_ee += nff;
+					if (TLCat == 0)               nt2_ee++;
+				 	if (TLCat == 1 || TLCat == 2) nt10_ee++;
+				 	if (TLCat == 3)               nt0_ee++;
 				}
 			}
 
@@ -6413,9 +6415,9 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 				if (TLCat == 1) nt2_em_EE_os++;
 			}
 			if(Flavor == 4) {       // E-E OS
-				if (TLCat == 0) nt2_ee_BB_os++;
+				if (TLCat == 0)               nt2_ee_BB_os++;
 				if (TLCat == 1 || TLCat == 2) nt2_ee_EB_os++;
-				if (TLCat == 3) nt2_ee_EE_os++;
+				if (TLCat == 3)               nt2_ee_EE_os++;
 			}
 		} // end data events
 
@@ -6450,7 +6452,6 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	float nt2_wz_mc_em_e1 = sqrt(nt2_wz_mc_em_e2);
 	float nt2_wz_mc_ee_e1 = sqrt(nt2_wz_mc_ee_e2);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
@@ -6463,8 +6464,8 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	OUT << setw(7)  << setprecision(3) << elfratio_data  << " +/- " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
 	OUT << setw(7)  << setprecision(3) << elpratio_data  << " +/- " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
 	OUT << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
 
-	OUT << "\\hline" << endl;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
@@ -6482,20 +6483,13 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
 	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
 
-	float nF_mm = 0;
-	float nF_em = 0;
-	float nF_ee = 0;
-	float nSF   = 0;
-	float nDF   = 0;
-	float nF    = 0;
-
 	// Event-by-event differential ratios:
-	nF_mm = npf_mm + nff_mm;
-	nF_em = npf_em + nfp_em + nff_em;
-	nF_ee = npf_ee + nff_ee;
-	nSF   = npf_mm + npf_em + nfp_em + npf_ee;
-	nDF   = nff_mm + nff_em + nff_ee;
-	nF    = nF_mm + nF_em + nF_ee;
+	float nF_mm = npf_mm + nff_mm;
+	float nF_em = npf_em + nfp_em + nff_em;
+	float nF_ee = npf_ee + nff_ee;
+	float nSF   = npf_mm + npf_em + nfp_em + npf_ee;
+	float nDF   = nff_mm + nff_em + nff_ee;
+	float nF    = nF_mm + nF_em + nF_ee;
 
 	///////////////////////////////////////////////////////////////////////////////////
 	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
@@ -6582,7 +6576,7 @@ void SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float min
 		       EE_yiel, EE_stat, RareESyst*(EE_yiel)) << endl;
 	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	//RARE SM BACKGROUND WITHOUT WZ
+	// RARE SM BACKGROUND WITHOUT WZ
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e2), RareESyst*nt2_rare_mc_mm,
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e2), RareESyst*nt2_rare_mc_em,
@@ -8585,7 +8579,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	delete fEEFPRatios;
 }
 
-void SSDLPlotter::storeWeightedPred(bool diffeta){
+void SSDLPlotter::storeWeightedPred(){
 	fillRatios(fMuData, fEGData, 0);
 	fillRatios(fMCBGMuEnr, fMCBG, 1);
 	TFile *pFile = TFile::Open(fOutputFileName);
@@ -8595,9 +8589,10 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 	int   stype, flav, cat, njets, nbjets, nbjetsmed;
 	float puweight, slumi, pT1, pT2, HT, MET, MT2;
 	float eta1, eta2;
-	int event;
+	int event, run;
 
 	sigtree->SetBranchAddress("Event",    &event);
+	sigtree->SetBranchAddress("Run",      &run);
 	sigtree->SetBranchAddress("SName",    &sname);
 	sigtree->SetBranchAddress("SType",    &stype);
 	sigtree->SetBranchAddress("SLumi",    &slumi);
@@ -8679,12 +8674,22 @@ void SSDLPlotter::storeWeightedPred(bool diffeta){
 			if(njets  < Region::minNjets [r]) continue;
 			if(nbjets < Region::minNbjets[r]) continue;
 
-			if(chan == Muon && pT1 < Region::minMu1pt[r]) continue;
-			if(chan == Muon && pT2 < Region::minMu2pt[r]) continue;
-			if(chan == Elec && pT1 < Region::minEl1pt[r]) continue;
-			if(chan == Elec && pT2 < Region::minEl2pt[r]) continue;
-			if(chan == ElMu && pT1 < Region::minMu1pt[r]) continue;
-			if(chan == ElMu && pT2 < Region::minEl2pt[r]) continue;
+			if(chan == ElMu){ // apply asymmetrical pt cuts
+				if(pT1 > pT2){
+					if(pT1 < Region::minMu1pt[r]) continue;
+					if(pT2 < Region::minEl2pt[r]) continue;
+				}
+				if(pT1 < pT2){
+					if(pT1 < Region::minMu2pt[r]) continue;
+					if(pT2 < Region::minEl1pt[r]) continue;
+				}
+			}
+			else{
+				if(chan == Muon && pT1 < Region::minMu1pt[r]) continue;
+				if(chan == Muon && pT2 < Region::minMu2pt[r]) continue;
+				if(chan == Elec && pT1 < Region::minEl1pt[r]) continue;
+				if(chan == Elec && pT2 < Region::minEl2pt[r]) continue;
+			}
 
 			S->numbers[r][chan].npp += puweight * npp;
 			S->numbers[r][chan].npf += puweight * npf;
