@@ -12,33 +12,54 @@
 
 #include "DrawBase.h"
 
+#include "../include/SSDLPlotter.hh"
 
 
-TH1F* getHistoPassingCuts( std::string histoName, TTree* tree, int nbtags, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax, float massMin, float massMax );
+std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax );
+float computeZBi( float obs, float b_pred, float b_pred_err );
 
 
 int main( int argc, char* argv[] ) {
 
+  std::string selectionType = "Apr10_Iso005_NoZVeto_jet20";
+  if( argc>1 ) {
+    std::string selectionType_str(argv[1]);
+    selectionType = selectionType_str;
+  }
 
-  TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr5_Iso015_NoZVeto_3jets/SSDLYields.root");
 
-  TTree* sigEvents = (TTree*)yieldsFile->Get("SigEvents");
+  DrawBase* db = new DrawBase("OPT_ZBi");
 
-  std::string ZBiFileName = "optcuts/ZBiScan.txt";
+  SSDLPlotter* plotter = new SSDLPlotter();
+  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
+  plotter->setOutputDir(outputdir);
+  plotter->init("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/DataCard_SSDL.dat");
 
-  ofstream ofs_ZBi(ZBiFileName);
-  ofs_Zbi << "Expected for 5 fb-1:" << std::endl;
+
+  //TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr5_Iso015_NoZVeto_3jets/SSDLYields.root");
+  TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/OPT_ttW/opt_ttW.root");
+
+  //TTree* sigEvents = (TTree*)yieldsFile->Get("SigEvents");
+  TTree* sigEvents = (TTree*)yieldsFile->Get("tree_opt");
+
+  std::string optcutsdir = "optcuts_" + selectionType;
+  std::string ZBiFileName = optcutsdir + "/ZBiScan.txt";
+
+  ofstream ofs_ZBi(ZBiFileName.c_str());
+  ofs_ZBi << "Expected for 5 fb-1:" << std::endl;
   ofs_ZBi << "Seff   \tS     \tB  \tZBi" << std::endl;
 
   TGraphErrors* gr_ZBi = new TGraphErrors(0);
   float ZBi_max = 0.;
-  float effS_Zbi_max = 0.;
+  float effS_ZBi_max = 0.;
+  float effMax = 0.;
 
+  float nTotal_s = 1089608.; //hardwired!!! HORRIBLE!!
 
   for( unsigned iEff=1; iEff<10; ++iEff ) {
 
     char infileName[300];
-    sprintf( infileName, "optcuts/cuts_Seff%d.txt", iEff*10);
+    sprintf( infileName, "%s/cuts_Seff%d.txt", optcutsdir.c_str(), iEff*10);
     ifstream ifs(infileName);
     std::cout << "-> Opening Seff file: " << infileName << std::endl;
   
@@ -67,7 +88,7 @@ int main( int argc, char* argv[] ) {
     cutsMax.pop_back();
 
     std::pair<TH1F*, TH1F*> sig_bg = getHistoPassingCuts( sigEvents, varNames, cutsMin, cutsMax );
-    TH1F* h1_sig = sig_bg.first;
+    TH1F* h1_signal = sig_bg.first;
     TH1F* h1_bg  = sig_bg.second;
 
     h1_signal->SetFillColor( 46 );
@@ -78,17 +99,43 @@ int main( int argc, char* argv[] ) {
     float b = h1_bg->Integral(0, h1_bg->GetNbinsX());
 
 
-    float Zbi = computeZBi();
+    int min_NJets = 0;
+    int min_NBJets = 0;
+    int min_NBJets_med = 0;
+    float min_ptLept1 = 0.;
+    float min_ptLept2 = 0.;
+    float min_met = 0.;
 
+    for( unsigned iVar=0; iVar<varNames.size(); iVar++ ) {
+
+      if( varNames[iVar]=="NJ"     ) min_NJets      = cutsMin[iVar];
+      if( varNames[iVar]=="NbJ"    ) min_NBJets     = cutsMin[iVar];
+      if( varNames[iVar]=="NbJmed" ) min_NBJets_med = cutsMin[iVar];
+      if( varNames[iVar]=="pT1"    ) min_ptLept1    = cutsMin[iVar];
+      if( varNames[iVar]=="pT2"    ) min_ptLept2    = cutsMin[iVar];
+      if( varNames[iVar]=="MET"    ) min_met        = cutsMin[iVar];
+
+    }
+
+
+    SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(0., 10000., 0., 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2);
+
+    float b_pred = ssdlpred.bg_mm + ssdlpred.bg_em + ssdlpred.bg_ee;
+    float b_pred_err = sqrt( ssdlpred.bg_mm_err*ssdlpred.bg_mm_err + ssdlpred.bg_em_err*ssdlpred.bg_em_err + ssdlpred.bg_ee_err*ssdlpred.bg_ee_err );
+    float obs = b_pred + ssdlpred.s_mm + + ssdlpred.s_em + + ssdlpred.s_ee;
+
+    float ZBi = computeZBi( obs, b_pred, b_pred_err );
 
     float effS = (float)h1_signal->GetEntries()/nTotal_s;
 
+    if( effS > effMax )
+      effMax = effS;
 
-    gr_Zbi->SetPoint( iEff-1, 100.*effS, ZBi );
+    gr_ZBi->SetPoint( iEff-1, 100.*effS, ZBi );
 
     if( ZBi > ZBi_max ) {
       ZBi_max = ZBi;
-      effS_Zbi_max = effS;
+      effS_ZBi_max = effS;
     }
 
     float yMax = h1_signal->GetMaximum() + h1_bg->GetMaximum();
@@ -98,11 +145,12 @@ int main( int argc, char* argv[] ) {
     stack->Add( h1_bg );
     stack->Add( h1_signal );
 
-    TH2D* h2_axes = new TH2D("axes", "", 10, massMin, massMax, 10, 0., yMax);
-    h2_axes->SetXTitle("ZZ Invariant Mass [GeV/c^{2}]");
-    h2_axes->SetYTitle("Events / fb^{-1}");
-    h2_axes->GetXaxis()->SetTitleOffset(1.1);
-    h2_axes->GetYaxis()->SetTitleOffset(1.5);
+    TH2D* h2_axes = new TH2D("axes", "", 3, -0.5, 2.5, 10, 0., yMax);
+    h2_axes->GetXaxis()->SetLabelSize(0.085);
+    h2_axes->GetXaxis()->SetBinLabel(1, "#mu#mu");
+    h2_axes->GetXaxis()->SetBinLabel(2, "e#mu");
+    h2_axes->GetXaxis()->SetBinLabel(3, "ee");
+    h2_axes->SetYTitle("Events");
 
 
     TLegend* legend = new TLegend(0.6, 0.75, 0.88, 0.88);
@@ -131,8 +179,6 @@ int main( int argc, char* argv[] ) {
     
     TCanvas* c1 = new TCanvas("c1", "c1", 600., 600.);
     c1->cd();
-    c1->SetLeftMargin(0.12);
-    c1->SetBottomMargin(0.12);
     h2_axes->Draw();
     stack->Draw("histo same");
     legend->Draw("same");
@@ -146,7 +192,7 @@ int main( int argc, char* argv[] ) {
     delete stack;
     
 
-    ofs_sign << effS << "\t" << s << "\t" << b << "\t" << ZBi << std::endl;
+    ofs_ZBi << effS << "\t" << s << "\t" << b << "\t" << ZBi << std::endl;
 
     delete h1_signal;
     delete h1_bg;
@@ -157,167 +203,74 @@ std::cout << "### " << iEff << std::endl;
   std::cout << "> > >   BEST ZBi: " << ZBi_max << std::endl;
   std::cout << "> > >   signal eff: " << effS_ZBi_max << std::endl;
 
-  ofs_sign.close();
+  ofs_ZBi.close();
 
-  graph->SetMarkerSize(2.);
-  graph->SetMarkerStyle(29);
-  graph->SetMarkerColor(kRed+3);
+  gr_ZBi->SetMarkerSize(2.);
+  gr_ZBi->SetMarkerStyle(29);
+  gr_ZBi->SetMarkerColor(kRed+3);
 
-  graphUL->SetMarkerSize(2.);
-  graphUL->SetMarkerStyle(29);
-  graphUL->SetMarkerColor(kRed+3);
 
-  graphUL_bg30->SetMarkerSize(2.);
-  graphUL_bg30->SetMarkerStyle(20);
-  graphUL_bg30->SetMarkerColor(kOrange+1);
-
-  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effMax*100., 10, 0., 1.6*signMax ); 
+  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effMax*100., 10, 0., 1.6*ZBi_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
   h2_axes_gr->SetYTitle("ZBi (5 fb^{-1})");
   h2_axes_gr->SetXTitle("Signal Efficiency [%]");
-  h2_axes_gr->GetXaxis()->SetTitleOffset(1.1);
-  h2_axes_gr->GetYaxis()->SetTitleOffset(1.5);
 
 
   TCanvas* c_gr = new TCanvas("c_gr", "c_gr", 600., 600.);
-  c_gr->SetLeftMargin(0.12);
-  c_gr->SetBottomMargin(0.12);
   c_gr->cd();
 
   
   h2_axes_gr->Draw();
-  gr_Zbi->Draw("P same");
+  gr_ZBi->Draw("P same");
 
   char ZBi_vs_Seff_name[250];
-  sprintf(ZBi_vs_Seff_name, "ZBi_vs_Seff.eps" );
+  sprintf(ZBi_vs_Seff_name, "%s/ZBi_vs_Seff.eps", optcutsdir.c_str() );
   c_gr->SaveAs(ZBi_vs_Seff_name);
 
 }
 
 
 
-TH1F* getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax ) {
+std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax ) {
 
 
-  TH1F* histo = new TH1F(histoName.c_str(), "", 50, massMin, massMax);
-  histo->Sumw2();
-
-
-  Float_t eventWeight;
-  tree->SetBranchAddress( "eventWeight", &eventWeight );
-
-  Float_t absEtaLept1;
-  tree->SetBranchAddress( "absEtaLept1", &absEtaLept1 );
-
-  std::vector<float> variables(names.size());
-  int index_mZZ=-1;
-  int index_mZjj=-1;
-  int index_mZll=-1;
-  int index_ptLept1=-1;
-
-
-  for( unsigned i=0; i<names.size(); ++i ) {
-    //std::cout << "::getHistoPassingCuts:: Setting Branch Address: '" << names[i] << "'" << std::endl;
-    if( names[i]=="QGLikelihoodJet1_T_QGLikelihoodJet2" ) continue;
-  //  tree->SetBranchAddress("QGLikelihoodJet1"
-  //} else {
-      tree->SetBranchAddress( names[i].c_str(), &(variables[i]) );
-//std::cout << "set " << names[i] << std::endl;
-  //}
-    if( names[i]=="mZZ" )
-      index_mZZ = i;
-    if( names[i]=="mZll" )
-      index_mZll = i;
-    if( names[i]=="mZjj" )
-      index_mZjj = i;
-    if( names[i]=="ptLept1" )
-      index_ptLept1 = i;
+  std::string base_selection = "eventWeight*(";
+  for( unsigned iVar=0; iVar<names.size(); ++iVar) {
+    char additionalCut[300];
+    sprintf( additionalCut, "%s > %f && %s < %f && ", names[iVar].c_str(), cutsMin[iVar], names[iVar].c_str(), cutsMax[iVar] );
+    std::string additionalCut_str(additionalCut);
+    base_selection += additionalCut_str;
   }
 
-  Int_t leptType;
-  tree->SetBranchAddress( "leptType", &leptType );
+  std::string signal_selection = base_selection + "  ( SName==\"TTbarW\" || SName==\"TTbarZ\" ) )";
+  std::string bg_selection     = base_selection + " !( SName==\"TTbarW\" || SName==\"TTbarZ\" ) )";
 
-  Int_t nBTags;
-  tree->SetBranchAddress( "nBTags", &nBTags );
+  TH1F* h1_signal = new TH1F("signal", "", 3, -0.5, 2.5);
+  h1_signal->Sumw2();
+  TH1F* h1_bg = new TH1F("bg", "", 3, -0.5, 2.5);
+  h1_bg->Sumw2();
 
-  Float_t mZZ;
-  if( index_mZZ<0 )
-    tree->SetBranchAddress( "mZZ", &mZZ );
+  tree->Project( "signal", "Flavor",  signal_selection.c_str() );
+  tree->Project( "bg",  "Flavor", bg_selection.c_str() );
 
-  Float_t mZjj;
-  if( index_mZjj<0 )
-    tree->SetBranchAddress( "mZjj", &mZjj );
+  std::pair<TH1F*, TH1F*> returnPair;
+  returnPair.first = h1_signal;
+  returnPair.second = h1_bg;
 
-  Float_t mZll;
-  if( index_mZll<0 )
-    tree->SetBranchAddress( "mZll", &mZll );
+  return returnPair;
 
-  Float_t ptLept1;
-  if( index_ptLept1<0 )
-    tree->SetBranchAddress( "ptLept1", &ptLept1 );
+}
 
 
-  int nentries = tree->GetEntries();
-
-  //std::cout << "::getHistoPassingCuts:: Begin Loop." << std::endl;
-
-  for( unsigned iEntry=0; iEntry<nentries; ++iEntry) {
- 
-    tree->GetEntry(iEntry);
-
-    bool pass = true;
-
-    for( unsigned iVar=0; iVar<variables.size() /*&& pass*/; ++iVar) {
-
- //   // preselection:
- //   if( absEtaLept1>2.1 ) pass=false;
-
- //   if( names[iVar]=="mZZ" ) {
- //     if( variables[iVar]<190. ) pass=false;
- //   }
- //   else if( names[iVar]=="ptLept1" ) {
- //     if( variables[iVar]<35.0324 ) pass=false;
- //   }
- //   else if( names[iVar]=="deltaRll" ) {
- //     if( variables[iVar]>2.14868 ) pass=false;
- //   }
- //   else if( names[iVar]=="ptJet1" ) {
- //     if( variables[iVar]<34.2011 ) pass=false;
- //   }
- //   else if( names[iVar]=="ptJet2" ) {
- //     if( variables[iVar]<22.5958 ) pass=false;
- //   }
- //   else if( names[iVar]=="mZjj" ) {
- //     if( variables[iVar]<56.9411 || variables[iVar]>112.121 ) pass=false;
- //   }
 
 
-      // selection:
-//std::cout << "requiring " << names[iVar] << ">" << cutsMin[iVar] << " && " << names[iVar] << "<" << cutsMax[iVar] << std::endl;
-      if( variables[iVar]<cutsMin[iVar] || variables[iVar]>cutsMax[iVar] )
-        pass = false;
+float computeZBi( float obs, float b_pred, float b_pred_err ) {
 
-    }
+  float tau = b_pred / ( b_pred_err*b_pred_err );
+  float n_off = tau*b_pred;
+  float P_Bi = TMath::BetaIncomplete( 1./(1.+tau), obs, n_off+1. );
+  float Z_Bi = sqrt(2)*TMath::ErfInverse( 1 - 2.*P_Bi );
 
-    //if( leptType != 1 ) pass = false;
+  return Z_Bi;
 
-    if( index_ptLept1<0 )
-      if( ptLept1<40. ) pass=false;
-
-    if( nBTags != nbtags ) pass = false;
-
-
-    if( !pass ) continue;
-
-    if( index_mZZ<0 )
-      histo->Fill( mZZ, 1000.*eventWeight ); //1 fb-1
-    else
-      histo->Fill( variables[index_mZZ], 1000.*eventWeight ); //1 fb-1
-
-  } // for entries
-
-  //std::cout << "::getHistoPassingCuts:: End Loop." << std::endl;
-
-  return histo;
-
-} // getHistoPassingCuts
+}
