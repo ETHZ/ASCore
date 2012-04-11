@@ -93,7 +93,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
-	SSDLPrediction makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10.);
+	SSDLPrediction makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10., bool=false);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();

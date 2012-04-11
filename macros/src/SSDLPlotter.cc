@@ -318,7 +318,7 @@ const double *SSDLPlotter::getEtaBins (gChannel chan){
 }
 
 //____________________________________________________________________________
-void SSDLPlotter::doAnalysis(){	
+void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// return;
 	
@@ -368,12 +368,14 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Elec);
 
 	// makeAllClosureTests();
-	makeAllIntPredictions();
+	// makeAllIntPredictions();
 	// makeDiffPrediction();
 	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM);
-	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10.);
+	makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
+	makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
+	makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
 	// makePredictionSignalEvents(0., 7000., 50., 7000., 4, 2);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0);
 	// makeRelIsoTTSigPlots();
@@ -6215,9 +6217,12 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	delete FR;
 }
 
-SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2){
+SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float minPt1, float minPt2, bool ttw){
 	fOutputSubDir = "IntPredictions/";
-	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0fMET%.0fNJ%.0iNBJ%.0i.txt", minHT, minMET, minNjets, minNbjetsL), ios::trunc);
+
+	TString jvString = "";
+	if (maxHT < 20.) jvString = "JV";
+	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0i.txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM), ios::trunc);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -6537,6 +6542,11 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
+
+	float nt2_sig_mc_mm (0.); float nt2_sig_mc_mm_e2(0.);
+	float nt2_sig_mc_em (0.); float nt2_sig_mc_em_e2(0.);
+	float nt2_sig_mc_ee (0.); float nt2_sig_mc_ee_e2(0.);
+
 	// PLOT ALL NUMBERS FOR RARE SAMPLES
 	std::map<std::string , float >::const_iterator it = rareMapMM.begin();
 	for ( ; it != rareMapMM.end() ; it++){
@@ -6564,9 +6574,17 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 			continue;
 		}
 		else {
-			nt2_rare_mc_mm += MM_yiel; nt2_rare_mc_mm_e2 += MM_stat*MM_stat;
-			nt2_rare_mc_em += EM_yiel; nt2_rare_mc_em_e2 += EM_stat*EM_stat;
-			nt2_rare_mc_ee += EE_yiel; nt2_rare_mc_ee_e2 += EE_stat*EE_stat;
+			if (ttw && (it->first == "TTbarW" || it->first == "TTbarZ") ) {
+				nt2_sig_mc_mm += MM_yiel; nt2_sig_mc_mm_e2 += MM_stat*MM_stat;
+				nt2_sig_mc_em += EM_yiel; nt2_sig_mc_em_e2 += EM_stat*EM_stat;
+				nt2_sig_mc_ee += EE_yiel; nt2_sig_mc_ee_e2 += EE_stat*EE_stat;
+				continue;
+			}
+			else {
+				nt2_rare_mc_mm += MM_yiel; nt2_rare_mc_mm_e2 += MM_stat*MM_stat;
+				nt2_rare_mc_em += EM_yiel; nt2_rare_mc_em_e2 += EM_stat*EM_stat;
+				nt2_rare_mc_ee += EE_yiel; nt2_rare_mc_ee_e2 += EE_stat*EE_stat;
+			}
 		}
 
 
@@ -6576,7 +6594,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		       EE_yiel, EE_stat, RareESyst*(EE_yiel)) << endl;
 	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-	// RARE SM BACKGROUND WITHOUT WZ
+	// RARE SM BACKGROUND  in case of ttw == true, without TTW
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e2), RareESyst*nt2_rare_mc_mm,
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e2), RareESyst*nt2_rare_mc_em,
@@ -6615,6 +6633,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	nF_ee + nt2_wz_mc_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_stat2 + ee_tot_syst2));
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	// OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "tot. MC", nt2sum_mm, nt2sum_em, nt2sum_ee);
+	if (ttw) {
+		OUT << "==============================================================================================" << endl;
+		OUT << Form("%16s || %5.2f   %5.2f         || %5.2f   %5.2f         || %5.2f   %5.2f         ||\n", "ttW+ttZ",
+		nt2_sig_mc_mm, sqrt(nt2_sig_mc_mm_e2),
+		nt2_sig_mc_em, sqrt(nt2_sig_mc_em_e2),
+		nt2_sig_mc_ee, sqrt(nt2_sig_mc_ee_e2));
+		OUT << "==============================================================================================" << endl;
+	}
 	OUT << "==============================================================================================" << endl;
 	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
 	OUT << "==============================================================================================" << endl;
@@ -6781,7 +6807,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	gPad->RedrawAxis();
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0fMET%.0fNJ%.0iNBJ%.0i", minHT, minMET, minNjets, minNbjetsL) , fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNBJ%.0i", minHT, minMET, minNjets, minNbjetsL) , fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
 	delete FR;
@@ -6797,9 +6823,9 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	ssdlpred.bg_em_err = sqrt(em_tot_stat2 + em_tot_syst2);
 	ssdlpred.bg_ee_err = sqrt(ee_tot_stat2 + ee_tot_syst2);
 
-	ssdlpred.s_mm = 0.;
-	ssdlpred.s_em = 0.;
-	ssdlpred.s_ee = 0.;
+	ssdlpred.s_mm = nt2_sig_mc_mm;
+	ssdlpred.s_em = nt2_sig_mc_em;
+	ssdlpred.s_ee = nt2_sig_mc_ee;
 
 	return ssdlpred;
 
