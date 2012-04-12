@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.1 2012/04/10 13:05:58 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.2 2012/04/11 15:57:30 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -277,8 +277,8 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
    factory->SetBackgroundWeightExpression("eventWeight");
 
    // Apply additional cuts on the signal and background samples (can be different)
-   TCut mycuts = ""; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
-   TCut mycutb = ""; // for example: TCut mycutb = "abs(var1)<0.5";
+   TCut mycuts = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+   TCut mycutb = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycutb = "abs(var1)<0.5";
 
    // tell the factory to use all remaining events in the trees after training for testing:
    factory->PrepareTrainingAndTestTree( mycuts, mycutb,
