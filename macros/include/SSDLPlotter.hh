@@ -95,7 +95,7 @@ public:
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
 	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
-	SSDLPrediction makePredictionSignalEvents(float, float, float, float, int, int, int, float=20., float=10., bool=false);
+	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false);
 	void makeDiffPrediction();
 
 	void makeAllClosureTests();
