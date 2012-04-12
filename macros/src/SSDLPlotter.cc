@@ -28,7 +28,6 @@
 
 
 
-bool gDO_OPT=false;
 
 
 using namespace std;
@@ -59,17 +58,20 @@ float SSDLPlotter::gEETrigScale = 1.00;
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(){
 // Default constructor, no samples are set
+	fDO_OPT=false;
 }
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(TString outputdir){
 // Explicit constructor with output directory
+	fDO_OPT=false;
 	setOutputDir(outputdir);
 }
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(TString outputdir, TString outputfile){
 // Explicit constructor with output directory and output file
+	fDO_OPT=false;
 	setOutputDir(outputdir);
 	setOutputFile(outputfile);
 }
@@ -8664,7 +8666,7 @@ void SSDLPlotter::storeWeightedPred(){
 	TTree* tree_opt;
       float eventWeight;
 
-	if( gDO_OPT ) {
+	if( fDO_OPT ) {
    
 		system( "mkdir -p OPT_ttW" );
 		std::string outputdir_str(fOutputDir);
@@ -8802,7 +8804,7 @@ void SSDLPlotter::storeWeightedPred(){
 			fillWithoutOF(S->diffyields[chan].hnff[3], MET, puweight * nff);
 		}
 
-		if( gDO_OPT && flav<3 ) {
+		if( fDO_OPT && flav<3 ) {
 
 			float lumi_pb = 5000.;
 			eventWeight = lumi_pb*puweight/slumi;
@@ -8812,7 +8814,7 @@ void SSDLPlotter::storeWeightedPred(){
 	}
 
 
-	if( gDO_OPT ) {
+	if( fDO_OPT ) {
 
 		file_opt->cd();
 		tree_opt->Write();

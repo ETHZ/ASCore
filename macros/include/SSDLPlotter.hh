@@ -44,6 +44,8 @@ public:
 	static float gEMTrigScale;
 	static float gEETrigScale;
 
+	bool fDO_OPT;
+
 	SSDLPlotter();
 	SSDLPlotter(TString);
 	SSDLPlotter(TString, TString);
