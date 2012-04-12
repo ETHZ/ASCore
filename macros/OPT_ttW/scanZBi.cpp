@@ -32,8 +32,13 @@ int main( int argc, char* argv[] ) {
 
   SSDLPlotter* plotter = new SSDLPlotter();
   std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
+  plotter->setVerbose(1);
+  plotter->fDO_OPT = false;
   plotter->setOutputDir(outputdir);
   plotter->init("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/DataCard_SSDL.dat");
+  plotter->readHistos(plotter->fOutputFileName);
+  plotter->storeWeightedPred();
+  //plotter->doAnalysis();
 
 
   //TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr5_Iso015_NoZVeto_3jets/SSDLYields.root");
@@ -118,13 +123,19 @@ int main( int argc, char* argv[] ) {
     }
 
 
-    SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(0., 10000., 0., 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2);
+    SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(0., 10000., 0., 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
 
     float b_pred = ssdlpred.bg_mm + ssdlpred.bg_em + ssdlpred.bg_ee;
     float b_pred_err = sqrt( ssdlpred.bg_mm_err*ssdlpred.bg_mm_err + ssdlpred.bg_em_err*ssdlpred.bg_em_err + ssdlpred.bg_ee_err*ssdlpred.bg_ee_err );
     float obs = b_pred + ssdlpred.s_mm + + ssdlpred.s_em + + ssdlpred.s_ee;
 
     float ZBi = computeZBi( obs, b_pred, b_pred_err );
+
+    std::cout << std::endl;
+    std::cout << "b_pred: " << b_pred << std::endl;
+    std::cout << "b_pred_err: " << b_pred_err << std::endl;
+    std::cout << "obs: " << obs << std::endl;
+    std::cout << "ZBi: " << ZBi << std::endl;
 
     float effS = (float)h1_signal->GetEntries()/nTotal_s;
 
@@ -160,7 +171,7 @@ int main( int argc, char* argv[] ) {
     legend->AddEntry( h1_bg, "Background", "F");
 
     char canvasName[250];
-    sprintf( canvasName, "optcuts/yieldPlot_Seff%d.eps", iEff*10);
+    sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
 
     TPaveText* label = new TPaveText( 0.15, 0.65, 0.45, 0.85, "brNDC");
     label->SetFillColor(0);
