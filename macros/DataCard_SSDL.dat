@@ -46,7 +46,7 @@ DYJets		mdunser/SSDLTrees/2012/Mar12/MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tau
 GJets40		mdunser/SSDLTrees/2012/Mar12/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root	1	-1	25690.0	12730972	38
 GJets100	mdunser/SSDLTrees/2012/Mar12/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root	1	-1	5213.0	1536287		39
 GJets200	mdunser/SSDLTrees/2012/Mar12/MC/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4.root   	1	-1	798.3	9377170		40
-GVJets		mdunser/SSDLTrees/2012/Mar12/MC/GVJets_7TeV-madgraph-Summer11-PU_S4.root			1	-1	173.0	1067879		41
+GVJets		mdunser/SSDLTrees/2012/Mar12/MC/GVJets_7TeV-madgraph-Summer11-PU_S4.root			1	-1	56.64	1067879		41
 WGstarE		mdunser/SSDLTrees/2012/Mar12/MC/WGstarToLNu2E_TuneZ2_7TeV-madgraph.root			1	-1	5.546	266882		41
 WGstarMu	mdunser/SSDLTrees/2012/Mar12/MC/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph.root			1	-1	1.604	99990		41
 WGstarTau	mdunser/SSDLTrees/2012/Mar12/MC/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph.root			1	-1	0.287	48188		41
