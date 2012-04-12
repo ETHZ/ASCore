@@ -370,18 +370,18 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Elec);
 
 	// makeAllClosureTests();
-	makeAllIntPredictions();
+	// makeAllIntPredictions();
 	// makeDiffPrediction();
 	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 3, 2, 1, 20., 20., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 1, 40., 20., true);
-	// makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
+	makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
+	makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
+	makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
+	makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
+	makePredictionSignalEvents(0., 7000.,   0., 7000., 3, 2, 1, 20., 20., true);
+	makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 1, 40., 20., true);
+	makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root");
@@ -6205,15 +6205,11 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	h_obs->DrawCopy("PE X0 same");
 	leg->Draw();
 	
-	lat->SetTextSize(0.03); // DrawLatex(0.16, 0.6/0.55)
-	if (Region::maxHT[reg] < 39.)                    lat->DrawLatex(0.55,0.85, "N_{Jets} = 0");
-	else                                             lat->DrawLatex(0.55,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
-	// if(reg != Control && Region::minMet[reg] != 0.)  lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} > %.0f GeV", Region::minMet[reg]));
-	if(Region::minMet[reg] == 0.)                    lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} #geq %.0f GeV", Region::minMet[reg]));
-	// if(reg == Control)                               lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} > %.0f GeV, < %.0f GeV", Region::minMet[reg], Region::maxMet[reg]));
+	drawRegionSel(reg);
 	drawTopLine(0.66);
 	
 	gPad->RedrawAxis();
+
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 	delete c_temp;	
@@ -6543,6 +6539,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+	OUT << endl;
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
 	OUT << "==============================================================================================" << endl;
@@ -6556,9 +6553,13 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 
-	float nt2_sig_mc_mm (0.); float nt2_sig_mc_mm_e2(0.);
-	float nt2_sig_mc_em (0.); float nt2_sig_mc_em_e2(0.);
-	float nt2_sig_mc_ee (0.); float nt2_sig_mc_ee_e2(0.);
+	float nt2_ttw_mc_mm (0.); float nt2_ttw_mc_mm_e2(0.);
+	float nt2_ttw_mc_em (0.); float nt2_ttw_mc_em_e2(0.);
+	float nt2_ttw_mc_ee (0.); float nt2_ttw_mc_ee_e2(0.);
+
+	float nt2_ttz_mc_mm (0.); float nt2_ttz_mc_mm_e2(0.);
+	float nt2_ttz_mc_em (0.); float nt2_ttz_mc_em_e2(0.);
+	float nt2_ttz_mc_ee (0.); float nt2_ttz_mc_ee_e2(0.);
 
 	// PLOT ALL NUMBERS FOR RARE SAMPLES
 	std::map<std::string , float >::const_iterator it = rareMapMM.begin();
@@ -6587,10 +6588,16 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 			continue;
 		}
 		else {
-			if (ttw && (it->first == "TTbarW" || it->first == "TTbarZ") ) {
-				nt2_sig_mc_mm += MM_yiel; nt2_sig_mc_mm_e2 += MM_stat*MM_stat;
-				nt2_sig_mc_em += EM_yiel; nt2_sig_mc_em_e2 += EM_stat*EM_stat;
-				nt2_sig_mc_ee += EE_yiel; nt2_sig_mc_ee_e2 += EE_stat*EE_stat;
+			if (ttw && (it->first == "TTbarW") ){
+				nt2_ttw_mc_mm += MM_yiel; nt2_ttw_mc_mm_e2 += MM_stat*MM_stat;
+				nt2_ttw_mc_em += EM_yiel; nt2_ttw_mc_em_e2 += EM_stat*EM_stat;
+				nt2_ttw_mc_ee += EE_yiel; nt2_ttw_mc_ee_e2 += EE_stat*EE_stat;
+				continue;
+			}
+			else if (ttw && (it->first == "TTbarZ") ){
+				nt2_ttz_mc_mm += MM_yiel; nt2_ttz_mc_mm_e2 += MM_stat*MM_stat;
+				nt2_ttz_mc_em += EM_yiel; nt2_ttz_mc_em_e2 += EM_stat*EM_stat;
+				nt2_ttz_mc_ee += EE_yiel; nt2_ttz_mc_ee_e2 += EE_stat*EE_stat;
 				continue;
 			}
 			else {
@@ -6606,6 +6613,10 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		       EM_yiel, EM_stat, RareESyst*(EM_yiel),
 		       EE_yiel, EE_stat, RareESyst*(EE_yiel)) << endl;
 	}
+	float nt2_sig_mc_mm = nt2_ttw_mc_mm + nt2_ttz_mc_mm; float nt2_sig_mc_mm_e2 = nt2_ttw_mc_mm_e2 + nt2_ttz_mc_mm_e2;
+	float nt2_sig_mc_em = nt2_ttw_mc_em + nt2_ttz_mc_em; float nt2_sig_mc_em_e2 = nt2_ttw_mc_em_e2 + nt2_ttz_mc_em_e2;
+	float nt2_sig_mc_ee = nt2_ttw_mc_ee + nt2_ttz_mc_ee; float nt2_sig_mc_ee_e2 = nt2_ttw_mc_ee_e2 + nt2_ttz_mc_ee_e2;
+
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	// RARE SM BACKGROUND  in case of ttw == true, without TTW
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
@@ -6648,10 +6659,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	// OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "tot. MC", nt2sum_mm, nt2sum_em, nt2sum_ee);
 	if (ttw) {
 		OUT << "==============================================================================================" << endl;
-		OUT << Form("%16s || %5.2f   %5.2f         || %5.2f   %5.2f         || %5.2f   %5.2f         ||\n", "ttW+ttZ",
-		nt2_sig_mc_mm, sqrt(nt2_sig_mc_mm_e2),
-		nt2_sig_mc_em, sqrt(nt2_sig_mc_em_e2),
-		nt2_sig_mc_ee, sqrt(nt2_sig_mc_ee_e2));
+		OUT << Form("%16s || %5.2f   %5.2f         || %5.2f   %5.2f         || %5.2f   %5.2f         ||\n", "ttW",
+		nt2_ttw_mc_mm, sqrt(nt2_ttw_mc_mm_e2),
+		nt2_ttw_mc_em, sqrt(nt2_ttw_mc_em_e2),
+		nt2_ttw_mc_ee, sqrt(nt2_ttw_mc_ee_e2));
+		OUT << Form("%16s || %5.2f   %5.2f         || %5.2f   %5.2f         || %5.2f   %5.2f         ||\n", "ttZ",
+		nt2_ttz_mc_mm, sqrt(nt2_ttz_mc_mm_e2),
+		nt2_ttz_mc_em, sqrt(nt2_ttz_mc_em_e2),
+		nt2_ttz_mc_ee, sqrt(nt2_ttz_mc_ee_e2));
 		OUT << "==============================================================================================" << endl;
 	}
 	OUT << "==============================================================================================" << endl;
@@ -6692,6 +6707,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
 	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted Rare SM", 3, 0., 3.);
 	TH1D    *h_pred_wz    = new TH1D("h_pred_wz",    "Predicted WZ", 3, 0., 3.);
+	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted ttW", 3, 0., 3.);
+	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz",   "Predicted ttZ", 3, 0., 3.);
 	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
 
@@ -6707,6 +6724,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_chmid->SetLineWidth(1);
 	h_pred_mc   ->SetLineWidth(1);
 	h_pred_wz   ->SetLineWidth(1);
+	h_pred_ttw  ->SetLineWidth(1);
+	h_pred_ttz  ->SetLineWidth(1);
 	h_pred_sfake->SetLineColor(50);
 	h_pred_sfake->SetFillColor(50);
 	h_pred_dfake->SetLineColor(38);
@@ -6715,8 +6734,12 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_chmid->SetFillColor(42);
 	h_pred_mc   ->SetLineColor(31);
 	h_pred_mc   ->SetFillColor(31);
-	h_pred_wz   ->SetLineColor(29);
-	h_pred_wz   ->SetFillColor(29);
+	h_pred_wz   ->SetLineColor(39);
+	h_pred_wz   ->SetFillColor(39);
+	h_pred_ttw  ->SetLineColor(29);
+	h_pred_ttw  ->SetFillColor(29);
+	h_pred_ttz  ->SetLineColor(30);
+	h_pred_ttz  ->SetFillColor(30);
 
 	h_pred_tot  ->SetLineWidth(1);
 	// h_pred_tot  ->SetFillColor(kBlack);
@@ -6755,6 +6778,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_wz->SetBinContent(2, nt2_wz_mc_mm);
 	h_pred_wz->SetBinContent(3, nt2_wz_mc_em);
 
+	h_pred_ttw->SetBinContent(1, nt2_ttw_mc_ee);
+	h_pred_ttw->SetBinContent(2, nt2_ttw_mc_mm);
+	h_pred_ttw->SetBinContent(3, nt2_ttw_mc_em);
+
+	h_pred_ttz->SetBinContent(1, nt2_ttz_mc_ee);
+	h_pred_ttz->SetBinContent(2, nt2_ttz_mc_mm);
+	h_pred_ttz->SetBinContent(3, nt2_ttz_mc_em);
+
 	h_pred_tot->Add(h_pred_sfake);
 	h_pred_tot->Add(h_pred_dfake);
 	h_pred_tot->Add(h_pred_chmid);
@@ -6769,6 +6800,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	hs_pred->Add(h_pred_chmid);
 	hs_pred->Add(h_pred_mc);
 	hs_pred->Add(h_pred_wz);
+	hs_pred->Add(h_pred_ttw);
+	hs_pred->Add(h_pred_ttz);
 
 	
 	// double max = h_obs->Integral();
@@ -6781,6 +6814,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_chmid->SetMaximum(max>1?max+1:1.);
 	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
 	h_pred_wz   ->SetMaximum(max>1?max+1:1.);
+	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
+	h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
 	hs_pred     ->SetMaximum(max>1?max+1:1.);
 
@@ -6792,14 +6827,16 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	hs_pred->GetXaxis()->SetLabelFont(42);
 	hs_pred->GetXaxis()->SetLabelSize(0.1);
 
-	TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
+	TLegend *leg = new TLegend(0.15,0.62,0.50,0.88);
 	leg->AddEntry(h_obs,        "Observed","p");
 	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
 	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
 	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
 	leg->AddEntry(h_pred_wz,    "WZ Production","f");
-	leg->AddEntry(h_pred_tot,    "Total Uncertainty","f");
+	leg->AddEntry(h_pred_ttw,   "ttW Production","f");
+	leg->AddEntry(h_pred_ttz,   "ttZ Production","f");
+	leg->AddEntry(h_pred_tot,   "Total Uncertainty","f");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	// leg->SetTextSize(0.05);
@@ -6815,13 +6852,16 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	lat->SetTextSize(0.03);
 
-	if (maxHT < 39.) lat->DrawLatex(0.16,0.60, "N_{Jets} = 0");
-	else if (maxHT == 7000.) lat->DrawLatex(0.16,0.60, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", minHT, minNjets));
-	else lat->DrawLatex(0.16,0.60, Form("%.0f GeV < H_{T} < %.0f GeV, N_{Jets} #geq %1d", minHT, maxHT, minNjets));
+	if (maxHT < 19.) lat->DrawLatex(0.45,0.85, "N_{Jets} = 0");
+	else if (maxHT == 7000.) lat->DrawLatex(0.45,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", minHT, minNjets));
+	else lat->DrawLatex(0.45,0.85, Form("%.0f GeV < H_{T} < %.0f GeV, N_{Jets} #geq %1d", minHT, maxHT, minNjets));
 
-	if (maxMET == 7000.) lat->DrawLatex(0.16,0.55, Form("E_{T}^{miss} > %.0f GeV", minMET));
-	else lat->DrawLatex(0.16,0.55, Form("%.0f GeV < E_{T}^{miss} < %.0f GeV", minMET, maxMET));
-	drawTopLine();
+	if (maxMET == 7000.) lat->DrawLatex(0.45,0.80, Form("E_{T}^{miss} > %.0f GeV", minMET));
+	else lat->DrawLatex(0.45,0.80, Form("%.0f GeV < E_{T}^{miss} < %.0f GeV", minMET, maxMET));
+
+	if (minNbjetsL != 0) lat->DrawLatex(0.45,0.75, Form("N_{b-Jets} #geq %.0d", minNbjetsL));
+
+	drawTopLine(0.66);
 	
 	gPad->RedrawAxis();
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
