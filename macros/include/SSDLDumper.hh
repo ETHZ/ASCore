@@ -99,6 +99,7 @@ public:
 		TTbarWSel1,
 		TTbarWSel2,
 		TTbarWSel3,
+		TTbarWSel4,
 		gNREGIONS
 	};
 	// enum gRegion {

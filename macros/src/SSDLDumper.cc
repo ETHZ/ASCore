@@ -32,7 +32,7 @@
 
 
 
-int DEBUG_EVENTNUMBER_ = -1;
+int gDEBUG_EVENTNUMBER_ = -1;
 
 
 using namespace std;
@@ -40,16 +40,16 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 /// Definition of tight isolation:
-static const float gMuMaxIso = 0.10;
-static const float gElMaxIso = 0.10;
+static const float gMuMaxIso = 0.05;
+static const float gElMaxIso = 0.05;
 // static const float gMuMaxIso = 0.07;
 // static const float gElMaxIso = 0.07;
 // static const float gMuMaxIso = 0.10;
 // static const float gElMaxIso = 0.10;
 // static const float gMuMaxIso = 0.15;
 // static const float gElMaxIso = 0.15;
-static const float gMinJetPt = 40.;
-static const bool  gApplyZVeto = true;
+static const float gMinJetPt = 20.;
+static const bool  gApplyZVeto = false;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -60,18 +60,18 @@ static const double gStatBetaAlpha = 1.;
 static const double gStatBetaBeta  = 1.;
 
 // Regions ///////////////////////////////////////////////////////////////////////
-TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET120", "HT0MET200", "HT0MET120JV", "TTbarWPresel", "TTbarWSel1", "TTbarWSel2", "TTbarWSel3"};
-float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,             0.,           0.,           0.,           0.};
-float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,           10.,          7000.,        7000.,        7000.,        7000.};
-float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.};
-float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,          7000.,        7000.,        7000.,        7000.};
-int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 };
-int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             2 ,           2 ,           2 ,           2 };
-int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 };
-float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.};
-float SSDLDumper::Region::minMu2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.};
-float SSDLDumper::Region::minEl1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.};
-float SSDLDumper::Region::minEl2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.};
+TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET120", "HT0MET200", "HT0MET120JV", "TTbarWPresel", "TTbarWSel1", "TTbarWSel2", "TTbarWSel3", "TTbarWSel4"};
+float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,             0.,           0.,           0.,           0.,          60.};
+float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,           10.,          7000.,        7000.,        7000.,        7000.,        7000.};
+float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.,          30.};
+float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,          7000.,        7000.,        7000.,        7000.,        7000.};
+int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 ,           3 };
+int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             2 ,           2 ,           2 ,           2 ,           1 };
+int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 ,           0 };
+float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          54.};
+float SSDLDumper::Region::minMu2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          23.};
+float SSDLDumper::Region::minEl1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          54.};
+float SSDLDumper::Region::minEl2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          23.};
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuPtbins [gNMuPtbins+1]  = {10., 15., 20., 25., 30., 35., 40., 50., 60.};
@@ -1624,16 +1624,16 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fSETree_NE = getNTightElectrons();
 	
 
-      if( Event==DEBUG_EVENTNUMBER_ ) {
- 
-        std::cout << std::endl << std::endl << "------------------------------------------------------------" << std::endl;
-        std::cout << "  Debug log for run: " << Run << "  LS: " << LumiSec << "  Event: " << Event << std::endl;
-       
-        std::cout << std::endl << "Here are the jets: " << std::endl;
-        for(size_t i = 0; i < NJets; ++i) 
-          std::cout << "Pt: " << JetPt[i] << "  Eta: " << JetEta[i] << " TCHE: " << JetTCHEBTag[i] << std::endl;
+	if( Event==gDEBUG_EVENTNUMBER_ ) {
 
-      }
+		std::cout << std::endl << std::endl << "------------------------------------------------------------" << std::endl;
+		std::cout << "  Debug log for run: " << Run << "  LS: " << LumiSec << "  Event: " << Event << std::endl;
+
+		std::cout << std::endl << "Here are the jets: " << std::endl;
+		for(size_t i = 0; i < NJets; ++i) 
+			std::cout << "Pt: " << JetPt[i] << "  Eta: " << JetEta[i] << " TCHE: " << JetTCHEBTag[i] << std::endl;
+
+	}
 
 
 	int ind1(-1), ind2(-1);
@@ -1659,8 +1659,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==DEBUG_EVENTNUMBER_ ) {
-            	std::cout << " -> This is a mu-mu event." << std::endl;
+		if( Event==gDEBUG_EVENTNUMBER_ ) {
+			std::cout << " -> This is a mu-mu event." << std::endl;
 			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
 			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
 			std::cout << "HT    :" << fSETree_HT     << std::endl;
@@ -1699,8 +1699,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==DEBUG_EVENTNUMBER_ ) {
-            	std::cout << " -> This is a mu-ele event." << std::endl;
+		if( Event==gDEBUG_EVENTNUMBER_ ) {
+			std::cout << " -> This is a mu-ele event." << std::endl;
 			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
 			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
 			std::cout << "HT    :" << fSETree_HT     << std::endl;
@@ -1739,8 +1739,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==DEBUG_EVENTNUMBER_ ) {
-            	std::cout << " -> This is an ele-ele event." << std::endl;
+		if( Event==gDEBUG_EVENTNUMBER_ ) {
+			std::cout << " -> This is an ele-ele event." << std::endl;
 			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
 			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
 			std::cout << "HT    :" << fSETree_HT     << std::endl;
