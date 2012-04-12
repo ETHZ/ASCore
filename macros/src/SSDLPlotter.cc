@@ -6224,7 +6224,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	TString jvString = "";
 	if (maxHT < 20.) jvString = "JV";
-	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0i.txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM), ios::trunc);
+	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%dNbjL%dNbjM%d.txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM), ios::trunc);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
