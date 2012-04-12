@@ -1757,56 +1757,58 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 
 		resetHypLeptons();
 	}
-	/// OS YIELDS
-	fChargeSwitch = 1;
+	/// OS YIELDS only for data:
+	if (S->datamc == 0) {
+		fChargeSwitch = 1;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// EM CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
-	if (elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
-		if ( isTightMuon(ind1) && isTightElectron(ind2)) {
-			fSETree_MT2    = getMT2(ind1, ind2, ElMu);
-			fSETree_Mll    = getMll(ind1, ind2, ElMu);
-			fSETree_HT     = getHT();
-			fSETree_NJ     = getNJets();
-			fSETree_NbJ    = getNBTags();
-			fSETree_NbJmed = getNBTagsMed();
-			fSETree_Flavor = 3;
-			fSETree_Charge = MuCharge[ind1];
-			fSETree_pT1    = MuPt[ind1];
-			fSETree_pT2    = ElPt[ind2];
-			fSETree_eta1   = MuEta[ind1];
-			fSETree_eta2   = ElEta[ind2];
-			if( isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel-Electron
-			if(!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Endcap-Electron
-			fSigEv_Tree->Fill();
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// EM CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
+		if (elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2)){ // trigger && select loose e/mu pair
+			if ( isTightMuon(ind1) && isTightElectron(ind2)) {
+				fSETree_MT2    = getMT2(ind1, ind2, ElMu);
+				fSETree_Mll    = getMll(ind1, ind2, ElMu);
+				fSETree_HT     = getHT();
+				fSETree_NJ     = getNJets();
+				fSETree_NbJ    = getNBTags();
+				fSETree_NbJmed = getNBTagsMed();
+				fSETree_Flavor = 3;
+				fSETree_Charge = MuCharge[ind1];
+				fSETree_pT1    = MuPt[ind1];
+				fSETree_pT2    = ElPt[ind2];
+				fSETree_eta1   = MuEta[ind1];
+				fSETree_eta2   = ElEta[ind2];
+				if( isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel-Electron
+				if(!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Endcap-Electron
+				fSigEv_Tree->Fill();
+			}
+			resetHypLeptons();
 		}
-		resetHypLeptons();
-	}
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// EE CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
-	if (elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
-		if ( isTightElectron(ind1) && isTightElectron(ind2)) {
-			fSETree_MT2    = getMT2(ind1, ind2, Elec);
-			fSETree_Mll    = getMll(ind1, ind2, Elec);
-			fSETree_HT     = getHT();
-			fSETree_NJ     = getNJets();
-			fSETree_NbJ    = getNBTags();
-			fSETree_NbJmed = getNBTagsMed();
-			fSETree_Flavor = 4;
-			fSETree_Charge = ElCharge[ind1];
-			fSETree_pT1    = ElPt[ind1];
-			fSETree_pT2    = ElPt[ind2];
-			fSETree_eta1   = ElEta[ind1];
-			fSETree_eta2   = ElEta[ind2];
-			if( isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel/Barrel
-			if( isBarrelElectron(ind1)&&!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Barrel/Endcap
-			if(!isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 2; // TLCat == 1 if Endcap/Barrel
-			if(!isBarrelElectron(ind1)&&!isBarrelElectron(ind2)) fSETree_TLCat = 3; // TLCat == 1 if Endcap/Endcap
-			fSigEv_Tree->Fill();
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// EE CHANNEL:  OS  ////////////////////////////////////////////////////////////////////////////////////////
+		if (elelSignalTrigger() && isSSLLElEvent(ind1, ind2)){ // trigger && select loose e/e pair
+			if ( isTightElectron(ind1) && isTightElectron(ind2)) {
+				fSETree_MT2    = getMT2(ind1, ind2, Elec);
+				fSETree_Mll    = getMll(ind1, ind2, Elec);
+				fSETree_HT     = getHT();
+				fSETree_NJ     = getNJets();
+				fSETree_NbJ    = getNBTags();
+				fSETree_NbJmed = getNBTagsMed();
+				fSETree_Flavor = 4;
+				fSETree_Charge = ElCharge[ind1];
+				fSETree_pT1    = ElPt[ind1];
+				fSETree_pT2    = ElPt[ind2];
+				fSETree_eta1   = ElEta[ind1];
+				fSETree_eta2   = ElEta[ind2];
+				if( isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel/Barrel
+				if( isBarrelElectron(ind1)&&!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Barrel/Endcap
+				if(!isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 2; // TLCat == 2 if Endcap/Barrel
+				if(!isBarrelElectron(ind1)&&!isBarrelElectron(ind2)) fSETree_TLCat = 3; // TLCat == 3 if Endcap/Endcap
+				fSigEv_Tree->Fill();
+			}
+			resetHypLeptons();
 		}
-		resetHypLeptons();
+		fChargeSwitch = 0;
 	}
-	fChargeSwitch = 0;
 	return;
 }
 void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){

@@ -370,16 +370,18 @@ void SSDLPlotter::doAnalysis(){
 	// makeFRvsEtaPlots(Elec);
 
 	// makeAllClosureTests();
-	// makeAllIntPredictions();
+	makeAllIntPredictions();
 	// makeDiffPrediction();
 	// printAllYieldTables();
 	
-	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM);
-	makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
-	makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
-	makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
-	// makePredictionSignalEvents(0., 7000., 50., 7000., 4, 2);
-	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0);
+	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
+	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
+	// makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
+	// makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
+	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
+	// makePredictionSignalEvents(0., 7000.,   0., 7000., 3, 2, 1, 20., 20., true);
+	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 1, 40., 20., true);
+	// makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root");
@@ -6224,7 +6226,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	TString jvString = "";
 	if (maxHT < 20.) jvString = "JV";
-	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%dNbjL%dNbjM%d.txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM), ios::trunc);
+	ofstream OUT(fOutputDir+fOutputSubDir+Form("DataPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f.txt", minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2), ios::trunc);
 
 	TLatex *lat = new TLatex();
 	lat->SetNDC(kTRUE);
@@ -6531,6 +6533,15 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << endl;
 	OUT << "--------------------------------------------------------------" << endl << endl;
 
+	OUT << endl;
+	OUT << "---------------------------------------------------------------------------------------------------------" << endl << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << "                 |           Mu/Mu          |                E/Mu               |           E/E            ||" << endl;
+	OUT << "         YIELDS  |   Ntt  |   Nt1  |   Nll  |   Ntt  |   Ntl  |   Nlt  |   Nll  |   Ntt  |   Nt1  |   Nll  ||" << endl;
+	OUT << "-------------------------------------------------------------------------------------------------------------" << endl;
+	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
+	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
+
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
@@ -6662,6 +6673,11 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_syst2)) << endl;
 	// OUT << "      combined MC: ";
 	// OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
+	if (ttw) {
+		OUT << "ttW + ttZ signal : ";
+		OUT << setw(5) << left << Form("%5.2f", (nt2_sig_mc_mm + nt2_sig_mc_em + nt2_sig_mc_ee )) << " ±";
+		OUT << setw(5) << left << Form("%5.2f", sqrt(nt2_sig_mc_mm_e2 + nt2_sig_mc_em_e2 + nt2_sig_mc_ee_e2)) << endl;
+	}
 	OUT << "combined observed: ";
 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
 	OUT << "==============================================================================================" << endl;
@@ -6809,7 +6825,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	gPad->RedrawAxis();
 	// Util::PrintNoEPS(c_temp, "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNBJ%.0i", minHT, minMET, minNjets, minNbjetsL) , fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f", minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2) , fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
 	delete FR;
@@ -8722,6 +8738,7 @@ void SSDLPlotter::storeWeightedPred(){
 			if(MET    < Region::minMet   [r] || MET > Region::maxMet[r]) continue;
 			if(njets  < Region::minNjets [r]) continue;
 			if(nbjets < Region::minNbjets[r]) continue;
+			if(nbjetsmed < Region::minNbjmed[r]) continue;
 
 			if(chan == ElMu){ // apply asymmetrical pt cuts
 				if(pT1 > pT2){
