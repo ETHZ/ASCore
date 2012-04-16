@@ -4287,6 +4287,14 @@ void SSDLPlotter::makePRLPlot1(){
 		h_pred_tot->SetBinError(i+1, p_E[i]);
 		h_obs     ->SetBinError(i+1, FR->getEStat(n_obs[i]));
 	}
+
+	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
+	gr_obs->SetMarkerColor(kBlack);
+	gr_obs->SetMarkerStyle(20);
+	gr_obs->SetMarkerSize(2.5);
+	gr_obs->SetLineWidth(2);
+	gr_obs->SetLineColor(kBlack);
+	gr_obs->SetFillColor(kBlack);
 	
 	h_pred_tot->Add(h_pred_sf);
 	h_pred_tot->Add(h_pred_df);
@@ -4341,7 +4349,7 @@ void SSDLPlotter::makePRLPlot1(){
 	c_temp->SetRightMargin(0.05);
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
-	h_obs->DrawCopy("PE X0 same");
+	gr_obs->Draw("P same");
 	leg->Draw();
 
 	for(size_t i = 0; i < nchans; ++i){
@@ -4412,6 +4420,7 @@ void SSDLPlotter::makePRLPlot1(){
 	Util::PrintPDF(c_temp, "ObsPred_MultiChan", fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sf, h_pred_df, h_pred_cm, h_pred_mc, h_pred_tot, hs_pred;
+	delete gr_obs;
 	delete FR;	
 }
 void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
@@ -5408,9 +5417,17 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
-	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
-	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
-	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+	//h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
+	//h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
+	//h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+
+	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
+	gr_obs->SetMarkerColor(kBlack);
+	gr_obs->SetMarkerStyle(20);
+	gr_obs->SetMarkerSize(2.5);
+	gr_obs->SetLineWidth(2);
+	gr_obs->SetLineColor(kBlack);
+	gr_obs->SetFillColor(kBlack);
 	
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
@@ -5498,7 +5515,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
-	h_obs->DrawCopy("PE X0 same");
+	gr_obs->Draw("P same");
 	leg->Draw();
 	
 	drawRegionSel(reg);
@@ -5508,6 +5525,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_tot, hs_pred;
+	delete gr_obs;
 	delete FR;
 }
 void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitch hilo){
@@ -6125,9 +6143,18 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
-	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
-	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
-	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+	//h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
+	//h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
+	//h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+
+	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
+	gr_obs->SetMarkerColor(kBlack);
+	gr_obs->SetMarkerStyle(20);
+	gr_obs->SetMarkerSize(2.5);
+	gr_obs->SetLineWidth(2);
+	gr_obs->SetLineColor(kBlack);
+	gr_obs->SetFillColor(kBlack);
+
 	
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
@@ -6224,7 +6251,7 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
-	h_obs->DrawCopy("PE X0 same");
+	gr_obs->Draw("P same");
 	leg->Draw();
 	
 	drawRegionSel(reg);
@@ -6236,6 +6263,7 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_ttz, h_pred_tot, hs_pred;
+	delete gr_obs;
 	delete FR;
 }
 
@@ -6753,8 +6781,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_dfake->SetFillColor(38);
 	h_pred_chmid->SetLineColor(42);
 	h_pred_chmid->SetFillColor(42);
-	h_pred_mc   ->SetLineColor(31);
-	h_pred_mc   ->SetFillColor(31);
+	h_pred_mc   ->SetLineColor(44);
+	h_pred_mc   ->SetFillColor(44);
 	h_pred_wz   ->SetLineColor(39);
 	h_pred_wz   ->SetFillColor(39);
 	h_pred_ttw  ->SetLineColor(29);
@@ -6773,10 +6801,15 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
 	h_obs->SetBinContent(4, nt2_ee+nt2_mm+nt2_em);
-	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
-	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
-	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
-	h_obs->SetBinError(4, FR->getEStat(nt2_ee+nt2_mm+nt2_em)); // FIXME
+
+	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
+	gr_obs->SetMarkerColor(kBlack);
+	gr_obs->SetMarkerStyle(20);
+	gr_obs->SetMarkerSize(2.5);
+	gr_obs->SetLineWidth(2);
+	gr_obs->SetLineColor(kBlack);
+	gr_obs->SetFillColor(kBlack);
+	
 	
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
@@ -6896,7 +6929,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	
 	hs_pred->Draw("hist");
 	h_pred_tot->DrawCopy("0 E2 same");
-	h_obs->DrawCopy("PE X0 same");
+	gr_obs->Draw("P same");
 	leg->Draw();
 	
 	lat->SetTextSize(0.03);
@@ -6917,6 +6950,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	Util::PrintPDF(c_temp,   Form("ObsPred_customRegion_HT%.0f"+jvString+"MET%.0fNJ%.0iNbjL%.0iNbjM%.0iPT1%.0fPT2%.0f", minHT, minMET, minNjets, minNbjetsL, minNbjetsM, minPt1, minPt2) , fOutputDir + fOutputSubDir);
 	delete c_temp;	
 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_tot, hs_pred;
+	delete gr_obs;
 	delete FR;
 
 
