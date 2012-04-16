@@ -34,7 +34,7 @@ options.register ('runon', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,         # string, int, or float
                   "Type of sample to run on: data (default), MC")
-options.register ('ModelScan', # register 'runon' option
+options.register ('ModelScan', # register 'ModelScan' option
                   False,  # the default value
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
@@ -56,8 +56,8 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:/shome/mdunser/randomTTWfile.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
+#options.files= 'file:/shome/mdunser/randomTTWfile.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -679,8 +679,8 @@ process.p = cms.Path(
 	+ (process.photonPartonMatch
 #	*process.printGenParticles*process.printPhotons*process.printPartons
 	)
-       #	+ process.HBHENoiseFilterResultProducerIso
-       #	+ process.HBHENoiseFilterResultProducerStd
+        + process.HBHENoiseFilterResultProducerIso
+       	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
