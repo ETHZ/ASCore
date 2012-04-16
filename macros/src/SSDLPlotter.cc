@@ -368,16 +368,10 @@ void SSDLPlotter::doAnalysis(){
 	// printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
 	// makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
 	// makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 0, 20., 20., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 3, 2, 1, 20., 20., true);
-	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 1, 40., 20., true);
 	// makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
 	makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
-	// makePredictionSignalEvents(60., 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
-	makePredictionSignalEvents(60., 7000.,  30., 7000., 3, 1, 0, 54., 23., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
@@ -6782,7 +6776,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
 	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
 	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
-	h_obs->SetBinError(3, FR->getEStat(nt2_ee+nt2_mm+nt2_em)); // FIXME
+	h_obs->SetBinError(4, FR->getEStat(nt2_ee+nt2_mm+nt2_em)); // FIXME
 	
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
