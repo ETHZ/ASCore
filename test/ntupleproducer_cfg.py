@@ -57,7 +57,7 @@ options.register ('perEvtMvaWeights',
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:/shome/mdunser/randomTTWfile.root'
-options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
+options.files= 'file:////scratch/buchmann/DoubleMu_2012A_2C29FAF9-3787-E111-9A63-001D09F291D7.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -70,11 +70,13 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
-    # CMSSW_4_2
-    process.GlobalTag.globaltag = "GR_R_42_V19::All"
+#https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
+    # CMSSW_5_2
+    process.GlobalTag.globaltag = "GR_P_V32::All"
+#    process.GlobalTag.globaltag = "GR_R_42_V19::All"
 else:
-    # CMSSW_4_2_X:
-    process.GlobalTag.globaltag = "START42_V14B::All"
+    # CMSSW_5_2_X:
+    process.GlobalTag.globaltag = "START52_V9::All"
     #process.GlobalTag.globaltag = "START42_V13::All"
 
 
@@ -222,8 +224,10 @@ for pf in pfPostfixes:
 
     usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
 
-    from PhysicsTools.PatAlgos.tools.pfTools import adaptPFTaus
-    adaptPFTaus(process,"hpsPFTau",pf)
+#    from PhysicsTools.PatAlgos.tools.pfTools import adaptPFTaus
+#    adaptPFTaus(process,"hpsPFTau",pf)
+#    No longer necessary: 
+#    https://savannah.cern.ch/task/?27285
 
     # configure PFnoPU
     getattr(process,'pfPileUp'+pf).Enable              = True
@@ -523,7 +527,8 @@ process.analyze.leptons = (
               
 # RA2 TrackingFailureFilter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
-process.load('SandBox.Skims.trackingFailureFilter_cfi')
+#process.load('SandBox.Skims.trackingFailureFilter_cfi')
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
 process.trackingFailureFilter.JetSource             = cms.InputTag('patJetsPF3')
 process.trackingFailureFilter.TrackSource           = cms.InputTag('generalTracks')
 process.trackingFailureFilter.VertexSource          = cms.InputTag('goodVertices')
