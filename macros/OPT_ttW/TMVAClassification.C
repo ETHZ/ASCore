@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.2 2012/04/11 15:57:30 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.3 2012/04/12 08:46:34 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -49,8 +49,9 @@
 
 // read input data file with ascii format (otherwise ROOT) ?
 Bool_t ReadDataFromAsciiIFormat = kFALSE;
+bool btagMed_presel_ = true;
    
-void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20", TString myMethodList = "" ) 
+void TMVAClassification( std::string selectionName, TString myMethodList = "" ) 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the 
@@ -169,13 +170,13 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
    // Define the input variables that shall be used for the MVA training
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
+   factory->AddVariable( "pT1"      , "Lead Lepton p_{T}", "GeV", 'F');
+   factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
    factory->AddVariable( "pT2"      , "Sublead Lepton p_{T}", "GeV", 'F');
-   factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
-// factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
-// factory->AddVariable( "pT1"      , "Lead Lepton p_{T}", "GeV", 'F');
-// factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
-// factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
-// factory->AddVariable( "NJ"       , "N Jets", "", 'I');
+   factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
+   //factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
+   //factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
+   //factory->AddVariable( "NJ"       , "N Jets", "", 'I');
 
    // You can add so-called "Spectator variables", which are not used in the MVA training, 
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the 
@@ -200,7 +201,9 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
       // load the signal and background event samples from ROOT trees
       TFile *input(0);
       //TString fname = "../macros/tmva_example.root";
-      TString fname = "opt_ttW_" + selectionType + ".root";
+      //TString fname = "opt_ttW_Apr10_Iso005_NoZVeto_jet20.root";
+      TString fname = "opt_ttW_Apr12_Iso005_NoZVeto_jet20_new.root";
+      //TString fname = "opt_ttW_" + selectionName + ".root";
       if (!gSystem->AccessPathName( fname )) {
          input = TFile::Open( fname ); // check if file in local directory exists
       } 
@@ -219,7 +222,8 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
 
       
       TTree *signal     = (TTree*)opt_tree->CopyTree("SName==\"TTbarW\"");
-      TTree *background = (TTree*)opt_tree->CopyTree("SName==\"TTJets\"");
+      TTree *background = (TTree*)opt_tree->CopyTree("SName==\"TTJets\" || SName==\"DYJets\" || SName==\"WZTo3LNu\"");
+      //TTree *background = (TTree*)opt_tree->CopyTree("SName==\"DYJets\"");
 
 
       // global event weights per tree (see below for setting event-wise weights)
@@ -277,8 +281,21 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
    factory->SetBackgroundWeightExpression("eventWeight");
 
    // Apply additional cuts on the signal and background samples (can be different)
+   float ptLep1_min_presel = 20.;
+   float ptLep2_min_presel = 20.;
+   int nJ_min_presel = 3.;
+   int nbJ_min_presel = 1.;
+   char presel[500];
+   sprintf( presel, "NJ>=%d && NbJ>=%d && pT1>%f && pT2>%f", nJ_min_presel, nbJ_min_presel, ptLep1_min_presel, ptLep2_min_presel );
+
    TCut mycuts = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    TCut mycutb = "NJ>=3 && pT1>20. && pT2>20. && NbJ>0"; // for example: TCut mycutb = "abs(var1)<0.5";
+
+   if( btagMed_presel_ ) {
+     mycuts += "NbJmed>0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+     mycutb += "NbJmed>0"; // for example: TCut mycutb = "abs(var1)<0.5";
+   }
+
 
    // tell the factory to use all remaining events in the trees after training for testing:
    factory->PrepareTrainingAndTestTree( mycuts, mycutb,
@@ -303,15 +320,18 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
 
       std::string bookConditions;
       bookConditions = "H:!V:FitMethod=MC";
-      bookConditions += ":VarProp[0]=FMax"; //pt2
-// factory->AddVariable( "pT2"      , "Sublead Lepton p_{T}", "GeV", 'F');
-// factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
-// factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
+      bookConditions += ":VarProp[0]=FMax"; //pt1
+      bookConditions += ":VarProp[1]=FMax"; //MET
+      bookConditions += ":VarProp[2]=FMax"; //pt2
+      bookConditions += ":VarProp[3]=FMax"; //HT
 // factory->AddVariable( "pT1"      , "Lead Lepton p_{T}", "GeV", 'F');
-// factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
 // factory->AddVariable( "MET"      , "ME_{T}", "GeV", 'F');
+// factory->AddVariable( "pT2"      , "Sublead Lepton p_{T}", "GeV", 'F');
+// factory->AddVariable( "NbJ"      , "N B Jets", "", 'I');
+// factory->AddVariable( "HT"       , "H_{T}", "GeV", 'F');
+// factory->AddVariable( "NbJmed"   , "N B Jets (medium)", "", 'I');
 // factory->AddVariable( "NJ"       , "N Jets", "", 'I');
-      bookConditions += ":EffSel:SampleSize=5000000";
+      bookConditions += ":EffSel:SampleSize=500000000";
       //bookConditions += ":EffSel:SampleSize=500000000";
 
       factory->BookMethod( TMVA::Types::kCuts, "Cuts", bookConditions.c_str() );
@@ -516,17 +536,39 @@ void TMVAClassification( std::string selectionType="Apr10_Iso005_NoZVeto_jet20",
        TMVA::IMethod* method = (TMVA::IMethod*)factory->GetMethod("Cuts");
        TMVA::MethodCuts* cuts = dynamic_cast<TMVA::MethodCuts*>(method);
 
+       std::string optcutsdir = "optcuts_" + selectionName;
+       std::string mkdir_command = "mkdir -p " + optcutsdir;
+       system(mkdir_command.c_str());
        char cutsFileName[500];
-       sprintf( cutsFileName, "optcuts_%s/cuts_Seff%d.txt", selectionType.c_str(), 10*iEff );
+       sprintf( cutsFileName, "%s/cuts_Seff%d.txt", optcutsdir.c_str(), 10*iEff );
 
        ofstream ofs(cutsFileName);
 
        std::vector<Double_t> cutsMin, cutsMax;
        cuts->GetCuts((float)iEff*0.10, cutsMin, cutsMax);
 
+       bool found_pT1 = false;
+       bool found_pT2 = false;
+       bool found_NJ = false;
+       bool found_NbJ = false;
+       bool found_NbJmed = false;
 
-       for( unsigned iCut=0; iCut<cutsMin.size(); ++iCut)
-         ofs << factory->DefaultDataSetInfo().GetVariableInfo(iCut).GetInternalName() << " "  << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+       for( unsigned iCut=0; iCut<cutsMin.size(); ++iCut) {
+         TString varName = factory->DefaultDataSetInfo().GetVariableInfo(iCut).GetInternalName();
+         ofs << varName << " "  << cutsMin[iCut] << " " << cutsMax[iCut] << std::endl;
+         if( varName=="pT1" ) found_pT1 = true;
+         if( varName=="pT2" ) found_pT2 = true;
+         if( varName=="NJ" ) found_NJ = true;
+         if( varName=="NbJ" ) found_NbJ = true;
+         if( varName=="NbJmed" ) found_NbJmed = true;
+       }
+
+       // preselection cuts (if not optimized):
+       if( !found_pT1 ) ofs << "pT1 20. 100000." << std::endl;
+       if( !found_pT2 ) ofs << "pT2 20. 100000." << std::endl;
+       if( !found_NJ )  ofs << "NJ 3 100000." << std::endl;
+       if( !found_NbJ ) ofs << "NbJ 1 100000." << std::endl;
+       if( !found_NbJmed && btagMed_presel_ ) ofs << "NbJmed 1 100000." << std::endl;
 
        ofs.close();
 
