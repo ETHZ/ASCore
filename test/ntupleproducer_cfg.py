@@ -38,10 +38,24 @@ options.register ('ModelScan', # register 'runon' option
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.bool,         # string, int, or float
                   "If you are dealing with a model scan, set this to True, otherwise to False (default)")
+options.register ('doVertexing',
+                  False,
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.bool,         # string, int, or float
+                  "If you want to run the vertex improved choice (MVA) for diphoton events, set to True, otherwise False (default)")
+options.register ('perVtxMvaWeights',
+                  '',
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Input weights for vertexing perVtx MVA")
+options.register ('perEvtMvaWeights',
+                  '',
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.string,         # string, int, or float
+                  "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:/shome/pnef/SUSY/reco-data/data//Run2011A/HT/AOD/PromptReco-v4/000/165/102/C49C75EC-CF80-E011-9BA4-003048F110BE.root'
-#options.files= 'file:/shome/pnef/SUSY/reco-data/mc/ZJetsToNuNu_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_54347C0C-C1B4-E011-ABA2-0025901D4932.root'
+options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -58,7 +72,8 @@ if options.runon=='data':
     process.GlobalTag.globaltag = "GR_R_42_V19::All"
 else:
     # CMSSW_4_2_X:
-    process.GlobalTag.globaltag = "START42_V13::All"
+    process.GlobalTag.globaltag = "START42_V14B::All"
+    #process.GlobalTag.globaltag = "START42_V13::All"
 
 
 ### Input/Output ###############################################################
@@ -79,11 +94,17 @@ process.TFileService = cms.Service("TFileService",
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
                                SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-                              #process.out.splitLevel = cms.untracked.int32(99),  # Turn on split level (smaller files???)
-                               dropMetaData = cms.untracked.string('ALL'), #DROPPED   # Get rid of metadata related to dropped collections
+                               splitLevel = cms.untracked.int32(99),  # Turn on split level (smaller files???)
+                               dropMetaData = cms.untracked.string('ALL'), # Get rid of metadata related to dropped collections
                                outputCommands = cms.untracked.vstring() # Will be overwritten by PAT: we overwrite at the end
                                )
 
+if options.doVertexing==True:
+    if options.perVtxMvaWeights=='':
+        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perVtxMvaWeights)')
+    if options.perEvtMvaWeights=='':
+        raise Exception('NO VERTEX MVA WEIGHTS SPECIFIED (perEvtMvaWeights)')
+    
 ### Electron ID ##############################################################
 process.load("DiLeptonAnalysis.NTupleProducer.simpleEleIdSequence_cff")
 
@@ -126,7 +147,7 @@ process.HBHENoiseFilterResultProducerStd.minIsolatedNoiseSumEt       = cms.doubl
 
 # RA2 RecHitFilter: tagging mode
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters#RecovRecHitFilter
-process.load('SandBox.RecovRecHitFilter.recovRecHitFilter_cfi')
+process.load('SandBox.Skims.recovRecHitFilter_cfi')
 process.recovRecHitFilter.TaggingMode           = cms.bool(True)
 
 # ECAL dead cells: this is not a filter. Only a flag is stored.
@@ -360,6 +381,9 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
 process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
 process.analyze.isModelScan = cms.untracked.bool(options.ModelScan)
+process.analyze.tag_doVertexing = cms.untracked.bool(options.doVertexing)
+process.analyze.tag_perVtxMvaWeights = cms.untracked.string(options.perVtxMvaWeights)
+process.analyze.tag_perEvtMvaWeights = cms.untracked.string(options.perEvtMvaWeights)
 
 # Add some jet collections
 process.analyze.jets = (
@@ -372,7 +396,6 @@ process.analyze.jets = (
                sel_minpt  = process.analyze.sel_mincorjpt,
                sel_maxeta = process.analyze.sel_maxjeta,
                corrections = cms.string('ak5CaloL2L3'),
-               btag_matchdeltaR = cms.double(0.25),
                ),
         # PF jets from PF2PAT
         cms.PSet( prefix = cms.untracked.string('PF2PATAntiIso'),
@@ -383,7 +406,6 @@ process.analyze.jets = (
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
-                  btag_matchdeltaR = cms.double(0.25),
                   ),
         cms.PSet( prefix = cms.untracked.string('PF2PAT2'),
                   tag = cms.untracked.InputTag('patJetsPF2'),
@@ -393,7 +415,6 @@ process.analyze.jets = (
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
-                  btag_matchdeltaR = cms.double(0.25),
                   ),
         cms.PSet( prefix = cms.untracked.string('PF2PAT3'),
                   tag = cms.untracked.InputTag('patJetsPF3'),
@@ -403,7 +424,6 @@ process.analyze.jets = (
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
-                  btag_matchdeltaR = cms.double(0.25),
                   ),
     )
 # # Add residual correction for running on data
@@ -491,6 +511,21 @@ process.analyze.leptons = (
                   ),
     )
               
+## Colins Bernet's Particle Based Noise Rejection Filter
+#process.load('SandBox.Skims.jetIDFailureFilter_cfi')
+#process.jetIDFailure.taggingMode   = cms.bool(True) # events are not filtered, but tagged
+#process.jetIDFailure.JetSource     = cms.InputTag('patJetsPF3')
+              
+# RA2 TrackingFailureFilter
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
+process.load('SandBox.Skims.trackingFailureFilter_cfi')
+process.trackingFailureFilter.JetSource             = cms.InputTag('patJetsPF3')
+process.trackingFailureFilter.TrackSource           = cms.InputTag('generalTracks')
+process.trackingFailureFilter.VertexSource          = cms.InputTag('goodVertices')
+process.trackingFailureFilter.DzTrVtxMax            = cms.double(1)
+process.trackingFailureFilter.DxyTrVtxMax           = cms.double(0.2)
+process.trackingFailureFilter.MinSumPtOverHT        = cms.double(0.10)
+process.trackingFailureFilter.taggingMode           = cms.bool(True)
 
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
@@ -524,6 +559,106 @@ process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 #process.options = cms.untracked.PSet(
 # 	wantSummary = cms.untracked.bool(True)
 #)
+
+
+###############################################################################
+### B-tagging general configuration ###########################################
+### Need to re-do b-tagging when not using PF2PAT
+from RecoJets.JetAssociationProducers.ak5JTA_cff import *
+from RecoBTag.Configuration.RecoBTag_cff import *
+
+# create a new jets and tracks association
+import RecoJets.JetAssociationProducers.ak5JTA_cff
+process.newJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
+process.newJetTracksAssociatorAtVertex.jets = "ak5PFJets"
+process.newJetTracksAssociatorAtVertex.tracks = "generalTracks"
+
+process.newImpactParameterTagInfos = RecoBTag.Configuration.RecoBTag_cff.impactParameterTagInfos.clone()
+process.newImpactParameterTagInfos.jetTracks = "newJetTracksAssociatorAtVertex"
+process.newTrackCountingHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighEffBJetTags.clone()
+process.newTrackCountingHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+process.newTrackCountingHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
+process.newTrackCountingHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+
+process.newSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
+process.newSecondaryVertexTagInfos.trackIPTagInfos = "newImpactParameterTagInfos"
+process.newSimpleSecondaryVertexHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighEffBJetTags.clone()
+process.newSimpleSecondaryVertexHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
+process.newSimpleSecondaryVertexHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
+process.newSimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
+
+process.newJetTracksAssociator = cms.Sequence(
+    process.newJetTracksAssociatorAtVertex
+    )
+
+process.newJetBtaggingIP = cms.Sequence(
+    process.newImpactParameterTagInfos * (
+       process.newTrackCountingHighEffBJetTags +
+       process.newTrackCountingHighPurBJetTags )
+    )
+
+process.newJetBtaggingSV = cms.Sequence(
+    process.newImpactParameterTagInfos *
+    process.newSecondaryVertexTagInfos * (
+       process.newSimpleSecondaryVertexHighEffBJetTags +
+       process.newSimpleSecondaryVertexHighPurBJetTags )
+    )
+
+process.newJetBtagging = cms.Sequence(
+    process.newJetBtaggingIP +
+    process.newJetBtaggingSV )
+
+process.newBtaggingSequence = cms.Sequence(
+    process.newJetTracksAssociator *
+       process.newJetBtagging )
+
+
+
+#same thing for PF:
+import RecoJets.JetAssociationProducers.ak5JTA_cff
+process.newPFJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
+process.newPFJetTracksAssociatorAtVertex.jets = "ak5PFJets"
+process.newPFJetTracksAssociatorAtVertex.tracks = "generalTracks"
+
+process.newPFImpactParameterTagInfos = RecoBTag.Configuration.RecoBTag_cff.impactParameterTagInfos.clone()
+process.newPFImpactParameterTagInfos.jetTracks = "newPFJetTracksAssociatorAtVertex"
+process.newPFTrackCountingHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighEffBJetTags.clone()
+process.newPFTrackCountingHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
+process.newPFTrackCountingHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
+process.newPFTrackCountingHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
+
+process.newPFSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
+process.newPFSecondaryVertexTagInfos.trackIPTagInfos = "newPFImpactParameterTagInfos"
+process.newPFSimpleSecondaryVertexHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighEffBJetTags.clone()
+process.newPFSimpleSecondaryVertexHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFSecondaryVertexTagInfos") )
+process.newPFSimpleSecondaryVertexHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
+process.newPFSimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFSecondaryVertexTagInfos") )
+
+process.newPFJetTracksAssociator = cms.Sequence(
+    process.newPFJetTracksAssociatorAtVertex
+    )
+
+process.newPFJetBtaggingIP = cms.Sequence(
+    process.newPFImpactParameterTagInfos * (
+       process.newPFTrackCountingHighEffBJetTags +
+       process.newPFTrackCountingHighPurBJetTags )
+    )
+
+process.newPFJetBtaggingSV = cms.Sequence(
+    process.newPFImpactParameterTagInfos *
+    process.newPFSecondaryVertexTagInfos * (
+       process.newPFSimpleSecondaryVertexHighEffBJetTags +
+       process.newPFSimpleSecondaryVertexHighPurBJetTags )
+    )
+
+process.newPFJetBtagging = cms.Sequence(
+    process.newPFJetBtaggingIP +
+    process.newPFJetBtaggingSV )
+
+process.newPFBtaggingSequence = cms.Sequence(
+    process.newPFJetTracksAssociator *
+       process.newPFJetBtagging )
+
 #### Path ######################################################################
 
 process.p = cms.Path(
@@ -538,12 +673,16 @@ process.p = cms.Path(
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
 	+ process.ak5PFJets
+	+ process.newBtaggingSequence
+	+ process.newPFBtaggingSequence
        	+ process.mygenjets
        	+ process.simpleEleIdSequence
        	+ process.metCorSequence
         + process.patPF2PATSequencePFAntiIso
         + process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
+	+ process.trackingFailureFilter
+#	+ process.jetIDFailure
 	+ process.analyze
 #	+ process.dump
 

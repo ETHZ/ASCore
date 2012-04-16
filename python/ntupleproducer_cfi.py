@@ -12,10 +12,10 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_elidWP       = cms.untracked.string('simpleEleId90relIso'),
 	tag_jets         = cms.untracked.InputTag('ak5PFJets'),
 	jetCorrs         = cms.untracked.string('ak5PFL1FastL2L3'),
-	tag_btag1        = cms.untracked.InputTag('trackCountingHighEffBJetTags'),
-	tag_btag2        = cms.untracked.InputTag('trackCountingHighPurBJetTags'),
-	tag_btag3        = cms.untracked.InputTag('simpleSecondaryVertexHighEffBJetTags'),
-	tag_btag4        = cms.untracked.InputTag('simpleSecondaryVertexHighPurBJetTags'),
+	tag_btag1        = cms.untracked.InputTag('newPFTrackCountingHighEffBJetTags'),
+	tag_btag2        = cms.untracked.InputTag('newPFTrackCountingHighPurBJetTags'),
+	tag_btag3        = cms.untracked.InputTag('newPFSimpleSecondaryVertexHighEffBJetTags'),
+	tag_btag4        = cms.untracked.InputTag('newPFSimpleSecondaryVertexHighPurBJetTags'),
 	tag_rawcalomet   = cms.untracked.InputTag('met'),
 	tag_tcmet        = cms.untracked.InputTag('tcMet'),
 	tag_pfmet        = cms.untracked.InputTag('pfMet'),
@@ -40,6 +40,15 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_pfProducer = cms.untracked.InputTag("particleFlow"),
         tag_SC_barrel    = cms.untracked.InputTag("correctedHybridSuperClusters"),
         tag_SC_endcap    = cms.untracked.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
+
+        tag_doVertexing = cms.untracked.bool(False), # overwritten from test/ntupleproducer_cfg.py
+        tag_fTrackCollForVertexing = cms.untracked.InputTag("generalTracks"),
+        tag_fallConversionsCollForVertexing = cms.untracked.InputTag("allConversions"),
+        tag_perVtxMvaWeights = cms.untracked.string(""), # overwritten from test/ntupleproducer_cfg.py
+        tag_perVtxMvaMethod = cms.untracked.string("BDTCat"),
+        tag_perEvtMvaWeights = cms.untracked.string(""), # overwritten from test/ntupleproducer_cfg.py
+        tag_perEvtMvaMethod = cms.untracked.string("evtBDTG"),
+
                          
 	# Trigger paths to store the triggering object information of
 	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',
@@ -81,8 +90,6 @@ analyze = cms.EDFilter('NTupleProducer',
 	# GenJets
 	sel_mingenjetpt  = cms.double(10.0),
 	sel_maxgenjeteta = cms.double(6.0),
-
-	btag_matchdeltaR = cms.double(0.25),
 
 	# EB rechits
         sel_fminebrechitE = cms.double(20.),
