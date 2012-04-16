@@ -59,7 +59,7 @@ public:
 	virtual void msugraLOxsecs(TFile *);
 	virtual void msugraNLOxsecs(TFile *);
 	virtual void scanMSUGRA(const char * filestring);
-	virtual void scanSMS(const char * filestring);
+	virtual void scanSMS(const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2);
 	virtual void plotWeightedHT();
 
 	//////////////////////////////
