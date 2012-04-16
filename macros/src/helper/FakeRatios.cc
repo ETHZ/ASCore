@@ -14,6 +14,9 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
+#include "TH1D.h"
+#include "RooHistError.h"
 
 using namespace std;
 
@@ -721,5 +724,45 @@ float FakeRatios::getEStat2(float N){
 	
 	// Always just return the upper one (will always be larger)
 	return ((up-N)*(up-N));
+}
+
+
+TGraphAsymmErrors* FakeRatios::getGraphPoissonErrors( TH1D* histo, float nSigma, const std::string& xErrType ) {
+
+  TGraphAsymmErrors* graph = new TGraphAsymmErrors(0);
+
+  for( unsigned iBin=1; iBin<(histo->GetXaxis()->GetNbins()+1); ++iBin ) {
+
+    int y; // these are data histograms, so y has to be integer
+    double x, xerr, yerrplus, yerrminus;
+
+    x = histo->GetBinCenter(iBin);
+    if( xErrType=="0" )
+      xerr = 0.;
+    else if( xErrType=="binWidth" )
+      xerr = histo->GetBinWidth(iBin)/2.;
+    else if( xErrType=="sqrt12" )
+      xerr = histo->GetBinWidth(iBin)/sqrt(12.);
+    else {
+      std::cout << "Unkown xErrType '" << xErrType << "'. Setting to bin width." << std::endl;
+      xerr = histo->GetBinWidth(iBin);
+    }
+    y = (int)histo->GetBinContent(iBin);
+       
+    double ym, yp;
+    RooHistError::instance().getPoissonInterval(y,ym,yp,nSigma);
+
+    yerrplus = yp - y;
+    yerrminus = y - ym;
+
+    int thisPoint = graph->GetN();
+    graph->SetPoint( thisPoint, x, y );
+    graph->SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
+
+  }
+
+  return graph;
+
+
 }
 
