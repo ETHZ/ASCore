@@ -355,26 +355,19 @@ void SSDLPlotter::doAnalysis(){
 	// makeMETvsHTPlotTau();
 	// makePRLPlot1();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Elec);
-    
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
 
-	makeAllClosureTests();
-	makeAllIntPredictions();
-	makeDiffPrediction();
-	printAllYieldTables();
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
+	// makeDiffPrediction();
+	// printAllYieldTables();
 	
-	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM);
+	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
 	// makePredictionSignalEvents(0., 7000., 120., 7000., 0, 0, 0, 20., 10., true);
 	// makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
 	// makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
@@ -382,9 +375,13 @@ void SSDLPlotter::doAnalysis(){
 	// makePredictionSignalEvents(0., 7000.,   0., 7000., 3, 2, 1, 20., 20., true);
 	// makePredictionSignalEvents(0., 7000.,   0., 7000., 4, 2, 1, 40., 20., true);
 	// makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
+	makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
+	// makePredictionSignalEvents(60., 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
+	makePredictionSignalEvents(60., 7000.,  30., 7000., 3, 1, 0, 54., 23., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
-	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root");
+	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
+	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0., 7000., 200., 7000., 20., 10.); // MET 200 region , no HT cut
 }
 
 //____________________________________________________________________________
@@ -6731,15 +6728,15 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	///////////////////////////////////////////////////////////////////////////////////
 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
-	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
-	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
-	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 3, 0., 3.);
-	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
-	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted Rare SM", 3, 0., 3.);
-	TH1D    *h_pred_wz    = new TH1D("h_pred_wz",    "Predicted WZ", 3, 0., 3.);
-	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted ttW", 3, 0., 3.);
-	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz",   "Predicted ttZ", 3, 0., 3.);
-	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
+	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  4, 0., 4.);
+	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 4, 0., 4.);
+	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 4, 0., 4.);
+	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 4, 0., 4.);
+	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted Rare SM", 4, 0., 4.);
+	TH1D    *h_pred_wz    = new TH1D("h_pred_wz",    "Predicted WZ", 4, 0., 4.);
+	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted ttW", 4, 0., 4.);
+	TH1D    *h_pred_ttz   = new TH1D("h_pred_ttz",   "Predicted ttZ", 4, 0., 4.);
+	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 4, 0., 4.);
 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
 
 	h_obs->SetMarkerColor(kBlack);
@@ -6781,40 +6778,50 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_obs->SetBinContent(1, nt2_ee);
 	h_obs->SetBinContent(2, nt2_mm);
 	h_obs->SetBinContent(3, nt2_em);
+	h_obs->SetBinContent(4, nt2_ee+nt2_mm+nt2_em);
 	h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
 	h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
 	h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+	h_obs->SetBinError(3, FR->getEStat(nt2_ee+nt2_mm+nt2_em)); // FIXME
 	
 	h_pred_sfake->SetBinContent(1, npf_ee);
 	h_pred_sfake->SetBinContent(2, npf_mm);
 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
+	h_pred_sfake->SetBinContent(4, npf_ee+npf_mm+npf_em+nfp_em);
 	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
 	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
 	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
+	h_pred_sfake->GetXaxis()->SetBinLabel(4, "all");
 
 	h_pred_dfake->SetBinContent(1, nff_ee);
 	h_pred_dfake->SetBinContent(2, nff_mm);
 	h_pred_dfake->SetBinContent(3, nff_em);
+	h_pred_dfake->SetBinContent(4, nff_ee+nff_mm+nff_em);
 
 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
 	h_pred_chmid->SetBinContent(2, 0.);
 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
+	h_pred_chmid->SetBinContent(4, nt2_ee_chmid+nt2_em_chmid);
 
 	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
 	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
 	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
+	h_pred_mc->SetBinContent(4, nt2_rare_mc_ee+nt2_rare_mc_mm+nt2_rare_mc_em);
 
 	h_pred_wz->SetBinContent(1, nt2_wz_mc_ee);
 	h_pred_wz->SetBinContent(2, nt2_wz_mc_mm);
 	h_pred_wz->SetBinContent(3, nt2_wz_mc_em);
+	h_pred_wz->SetBinContent(4, nt2_wz_mc_ee+nt2_wz_mc_mm+nt2_wz_mc_em);
 
 	h_pred_ttw->SetBinContent(1, nt2_ttw_mc_ee);
 	h_pred_ttw->SetBinContent(2, nt2_ttw_mc_mm);
 	h_pred_ttw->SetBinContent(3, nt2_ttw_mc_em);
+	h_pred_ttw->SetBinContent(4, nt2_ttw_mc_ee+nt2_ttw_mc_mm+nt2_ttw_mc_em);
 
 	h_pred_ttz->SetBinContent(1, nt2_ttz_mc_ee);
 	h_pred_ttz->SetBinContent(2, nt2_ttz_mc_mm);
 	h_pred_ttz->SetBinContent(3, nt2_ttz_mc_em);
+	h_pred_ttz->SetBinContent(4, nt2_ttz_mc_ee+nt2_ttz_mc_mm+nt2_ttz_mc_em);
 
 	h_pred_tot->Add(h_pred_sfake);
 	h_pred_tot->Add(h_pred_dfake);
@@ -6824,6 +6831,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_tot->SetBinError(1, sqrt(ee_tot_stat2 + ee_tot_syst2));
 	h_pred_tot->SetBinError(2, sqrt(mm_tot_stat2 + mm_tot_syst2));
 	h_pred_tot->SetBinError(3, sqrt(em_tot_stat2 + em_tot_syst2));
+	h_pred_tot->SetBinError(4, sqrt(ee_tot_stat2 + ee_tot_syst2 + mm_tot_stat2 + mm_tot_syst2 + em_tot_stat2 + em_tot_syst2));
 
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_dfake);
@@ -6835,24 +6843,41 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	
 	// double max = h_obs->Integral();
-	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
-	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+	double max(0.);
+	if (ttw) {
+		max = 1.3*(h_obs->GetBinContent(4)>hs_pred->GetMaximum() ? h_obs->GetBinContent(4) : hs_pred->GetMaximum());
+	}
+	else {
+		max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
+		max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+	}
 
-	h_obs       ->SetMaximum(max>1?max+1:1.);
-	h_pred_sfake->SetMaximum(max>1?max+1:1.);
-	h_pred_dfake->SetMaximum(max>1?max+1:1.);
-	h_pred_chmid->SetMaximum(max>1?max+1:1.);
-	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
-	h_pred_wz   ->SetMaximum(max>1?max+1:1.);
-	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
-	h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
-	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
-	hs_pred     ->SetMaximum(max>1?max+1:1.);
+	// h_obs       ->SetMaximum(max>1?max+1:1.);
+	// h_pred_sfake->SetMaximum(max>1?max+1:1.);
+	// h_pred_dfake->SetMaximum(max>1?max+1:1.);
+	// h_pred_chmid->SetMaximum(max>1?max+1:1.);
+	// h_pred_mc   ->SetMaximum(max>1?max+1:1.);
+	// h_pred_wz   ->SetMaximum(max>1?max+1:1.);
+	// h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
+	// h_pred_ttz  ->SetMaximum(max>1?max+1:1.);
+	// h_pred_tot  ->SetMaximum(max>1?max+1:1.);
+	// hs_pred     ->SetMaximum(max>1?max+1:1.);
+	h_obs       ->SetMaximum(max);
+	h_pred_sfake->SetMaximum(max);
+	h_pred_dfake->SetMaximum(max);
+	h_pred_chmid->SetMaximum(max);
+	h_pred_mc   ->SetMaximum(max);
+	h_pred_wz   ->SetMaximum(max);
+	h_pred_ttw  ->SetMaximum(max);
+	h_pred_ttz  ->SetMaximum(max);
+	h_pred_tot  ->SetMaximum(max);
+	hs_pred     ->SetMaximum(max);
 
 	hs_pred->Draw("goff");
 	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
 	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
 	hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
+	hs_pred->GetXaxis()->SetBinLabel(4, "all");
 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
 	hs_pred->GetXaxis()->SetLabelFont(42);
 	hs_pred->GetXaxis()->SetLabelSize(0.1);
@@ -10339,20 +10364,20 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 
 }
 
-void SSDLPlotter::scanSMS( const char * filestring){
+void SSDLPlotter::scanSMS( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2){
 
-	float myMinMet = 120.;
-	float myLep1Pt = 20.;
-	float myLep2Pt = 10.;
+	float myMinMet = minMET;
+	float myLep1Pt = pt1;
+	float myLep2Pt = pt2;
 
 	fC_minMu1pt = myLep1Pt;
 	fC_minMu2pt = myLep2Pt;
 	fC_minEl1pt = myLep1Pt;
 	fC_minEl2pt = myLep2Pt;
 	fC_minMet   = myMinMet;
-	fC_minHT    = 0.;
-	fC_maxHT    = 39.;
-	fC_maxMet   = 7000.;
+	fC_minHT    = minHT;
+	fC_maxHT    = maxHT;
+	fC_maxMet   = maxMET;
 	fC_minNjets = 0;
 	
 	TString htString;
