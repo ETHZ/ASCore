@@ -11,12 +11,12 @@
 #include <fstream>
 
 #include "DrawBase.h"
+#include "ZBiCalculator.h"
 
 #include "../include/SSDLPlotter.hh"
 
 
 std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string> names, std::vector<float> cutsMin, std::vector<float> cutsMax );
-float computeZBi( float obs, float b_pred, float b_pred_err );
 
 
 int main( int argc, char* argv[] ) {
@@ -27,11 +27,19 @@ int main( int argc, char* argv[] ) {
     selectionType = selectionType_str;
   }
 
+  std::cout << "marc's ZBi: " << ZBiCalculator::computeZBi( 9.95,  3.93, 1.59 ) << std::endl;
 
+  // this sets the style:
   DrawBase* db = new DrawBase("OPT_ZBi");
+  db->set_lumiOnRightSide();
+  db->set_lumiNormalization(4980.);
+
+  TPaveText* label_sqrt = db->get_labelSqrt();
+    
 
   SSDLPlotter* plotter = new SSDLPlotter();
-  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
+  //std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
+  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr12_Iso005_NoZVeto_jet20_new";
   plotter->setVerbose(1);
   plotter->fDO_OPT = false;
   plotter->setOutputDir(outputdir);
@@ -41,18 +49,13 @@ int main( int argc, char* argv[] ) {
   //plotter->doAnalysis();
 
 
-  //TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr5_Iso015_NoZVeto_3jets/SSDLYields.root");
-  TFile* yieldsFile = TFile::Open("/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/OPT_ttW/opt_ttW.root");
-
-  //TTree* sigEvents = (TTree*)yieldsFile->Get("SigEvents");
-  TTree* sigEvents = (TTree*)yieldsFile->Get("tree_opt");
 
   std::string optcutsdir = "optcuts_" + selectionType;
   std::string ZBiFileName = optcutsdir + "/ZBiScan.txt";
 
   ofstream ofs_ZBi(ZBiFileName.c_str());
   ofs_ZBi << "Expected for 5 fb-1:" << std::endl;
-  ofs_ZBi << "Seff   \tS     \tB  \tZBi" << std::endl;
+  ofs_ZBi << "Seff   \tS     \tB +- s(B)\tZBi" << std::endl;
 
   TGraphErrors* gr_ZBi = new TGraphErrors(0);
   float ZBi_max = 0.;
@@ -92,17 +95,6 @@ int main( int argc, char* argv[] ) {
     cutsMin.pop_back();
     cutsMax.pop_back();
 
-    std::pair<TH1F*, TH1F*> sig_bg = getHistoPassingCuts( sigEvents, varNames, cutsMin, cutsMax );
-    TH1F* h1_signal = sig_bg.first;
-    TH1F* h1_bg  = sig_bg.second;
-
-    h1_signal->SetFillColor( 46 );
-    h1_bg->SetFillColor( 38 );
-
-
-    float s = h1_signal->Integral(0, h1_signal->GetNbinsX());
-    float b = h1_bg->Integral(0, h1_bg->GetNbinsX());
-
 
     int min_NJets = 0;
     int min_NBJets = 0;
@@ -110,6 +102,7 @@ int main( int argc, char* argv[] ) {
     float min_ptLept1 = 0.;
     float min_ptLept2 = 0.;
     float min_met = 0.;
+    float min_ht = 0.;
 
     for( unsigned iVar=0; iVar<varNames.size(); iVar++ ) {
 
@@ -119,25 +112,55 @@ int main( int argc, char* argv[] ) {
       if( varNames[iVar]=="pT1"    ) min_ptLept1    = cutsMin[iVar];
       if( varNames[iVar]=="pT2"    ) min_ptLept2    = cutsMin[iVar];
       if( varNames[iVar]=="MET"    ) min_met        = cutsMin[iVar];
+      if( varNames[iVar]=="HT"     ) min_ht         = cutsMin[iVar];
 
     }
 
 
-    SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(0., 10000., 0., 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
+    SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(min_ht, 10000., min_met, 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
 
-    float b_pred = ssdlpred.bg_mm + ssdlpred.bg_em + ssdlpred.bg_ee;
-    float b_pred_err = sqrt( ssdlpred.bg_mm_err*ssdlpred.bg_mm_err + ssdlpred.bg_em_err*ssdlpred.bg_em_err + ssdlpred.bg_ee_err*ssdlpred.bg_ee_err );
-    float obs = b_pred + ssdlpred.s_mm + + ssdlpred.s_em + + ssdlpred.s_ee;
+    float b_pred_mm = ssdlpred.bg_mm;
+    float b_pred_em = ssdlpred.bg_em;
+    float b_pred_ee = ssdlpred.bg_ee;
 
-    float ZBi = computeZBi( obs, b_pred, b_pred_err );
+    float b_pred_mm_err = ssdlpred.bg_mm_err;
+    float b_pred_em_err = ssdlpred.bg_em_err;
+    float b_pred_ee_err = ssdlpred.bg_ee_err;
 
-    std::cout << std::endl;
-    std::cout << "b_pred: " << b_pred << std::endl;
-    std::cout << "b_pred_err: " << b_pred_err << std::endl;
-    std::cout << "obs: " << obs << std::endl;
-    std::cout << "ZBi: " << ZBi << std::endl;
+    float s_mm = ssdlpred.s_mm;
+    float s_em = ssdlpred.s_em;
+    float s_ee = ssdlpred.s_ee;
 
-    float effS = (float)h1_signal->GetEntries()/nTotal_s;
+    float b_pred = b_pred_mm + b_pred_em + b_pred_ee;
+    float b_pred_err = sqrt( b_pred_mm_err*b_pred_mm_err + b_pred_em_err*b_pred_em_err + b_pred_ee_err*b_pred_ee_err );
+    float s = s_mm + s_em + s_ee;
+    float obs = b_pred + s;
+
+    float ZBi = ZBiCalculator::computeZBi( obs, b_pred, b_pred_err );
+
+
+    TH1F* h1_signal = new TH1F("signal", "", 3, -0.5, 2.5);
+    h1_signal->SetBinContent( 1, s_mm+b_pred_mm );
+    h1_signal->SetBinContent( 2, s_em+b_pred_em );
+    h1_signal->SetBinContent( 3, s_ee+b_pred_ee );
+
+    TH1F* h1_bg = new TH1F("bg", "", 3, -0.5, 2.5);
+    h1_bg->SetBinContent( 1, b_pred_mm );
+    h1_bg->SetBinContent( 2, b_pred_em );
+    h1_bg->SetBinContent( 3, b_pred_ee );
+    h1_bg->SetBinError( 1, b_pred_mm_err );
+    h1_bg->SetBinError( 2, b_pred_em_err );
+    h1_bg->SetBinError( 3, b_pred_ee_err );
+    h1_bg->SetLineWidth(1);
+    h1_bg->SetFillColor(12);
+    h1_bg->SetFillStyle(3005);
+
+
+    h1_signal->SetFillColor( 46 );
+    h1_bg->SetFillColor( 38 );
+
+
+    float effS = (s_mm+s_em+s_ee)*0.1633*5000./nTotal_s/(0.22*0.22*0.67);
 
     if( effS > effMax )
       effMax = effS;
@@ -173,42 +196,58 @@ int main( int argc, char* argv[] ) {
     char canvasName[250];
     sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
 
-    TPaveText* label = new TPaveText( 0.15, 0.65, 0.45, 0.85, "brNDC");
-    label->SetFillColor(0);
-    label->SetTextSize(0.035);
-    label->AddText("L = 5 fb^{-1}");
-    char signalLabel[100];
-    sprintf( signalLabel, "s = %.2f (%d%%)", s, (int)(((float)h1_signal->GetEntries()/nTotal_s)*100) );
-    label->AddText( signalLabel );
-    char bgLabel[100];
-    sprintf( bgLabel, "b = %.2f", b);
-    label->AddText( bgLabel );
-    char signifLabel[100];
-    sprintf( signifLabel, "ZBi = %.2f", ZBi);
-    label->AddText( signifLabel );
+    //TPaveText* label = new TPaveText( 0.15, 0.65, 0.45, 0.85, "brNDC");
+    //label->SetFillColor(0);
+    //label->SetTextSize(0.035);
+    //label->AddText("L = 5 fb^{-1}");
+    //char signalLabel[100];
+    //sprintf( signalLabel, "s = %.2f (%d%%)", s, (int)(((float)h1_signal->GetEntries()/nTotal_s)*100) );
+    //label->AddText( signalLabel );
+    //char bgLabel[100];
+    //sprintf( bgLabel, "b = %.2f", b_pred);
+    //label->AddText( bgLabel );
+    //char signifLabel[100];
+    //sprintf( signifLabel, "ZBi = %.2f", ZBi);
+    //label->AddText( signifLabel );
 
-    
+    char b_text[500];
+    sprintf( b_text, "BG = %.2f #pm %.2f", b_pred, b_pred_err );
+    char obs_text[500];
+    sprintf( obs_text, "OBS = %.2f", obs );
+    char Zbi_text[100];
+    sprintf( Zbi_text, "ZBi = %.3f", ZBi );
+    TPaveText* label_ZBi = new TPaveText( 0.23, 0.73, 0.5, 0.88, "brNDC" );
+    label_ZBi->SetFillColor(0);
+    label_ZBi->SetTextSize(0.035);
+    label_ZBi->AddText(b_text);
+    label_ZBi->AddText(obs_text);
+    label_ZBi->AddText(Zbi_text);
+
     TCanvas* c1 = new TCanvas("c1", "c1", 600., 600.);
     c1->cd();
     h2_axes->Draw();
+    //h1_signal->Draw("same");
     stack->Draw("histo same");
+    h1_bg->Draw("0 E2 same");
     legend->Draw("same");
-    label->Draw("same");
-    //gPad->RedrawAxis();
+    //label->Draw("same");
+    label_ZBi->Draw("same");
+    label_sqrt->Draw("same");
+    gPad->RedrawAxis();
     c1->SaveAs(canvasName);
 
     delete c1;
     delete legend;
     delete h2_axes;
-    delete stack;
+    //delete stack;
     
 
-    ofs_ZBi << effS << "\t" << s << "\t" << b << "\t" << ZBi << std::endl;
+    ofs_ZBi << effS << "\t" << s << "\t" << b_pred << " +- " << b_pred_err << "\t" << ZBi << std::endl;
 
     delete h1_signal;
     delete h1_bg;
 
-std::cout << "### " << iEff << std::endl;
+std::cout << "### " << iEff << "   ZBi: " << ZBi << std::endl;
   } // for iEff
 
   std::cout << "> > >   BEST ZBi: " << ZBi_max << std::endl;
@@ -216,8 +255,10 @@ std::cout << "### " << iEff << std::endl;
 
   ofs_ZBi.close();
 
+  db->resetStyle();
+
   gr_ZBi->SetMarkerSize(2.);
-  gr_ZBi->SetMarkerStyle(29);
+  gr_ZBi->SetMarkerStyle(21);
   gr_ZBi->SetMarkerColor(kRed+3);
 
 
@@ -233,6 +274,7 @@ std::cout << "### " << iEff << std::endl;
   
   h2_axes_gr->Draw();
   gr_ZBi->Draw("P same");
+  label_sqrt->Draw("same");
 
   char ZBi_vs_Seff_name[250];
   sprintf(ZBi_vs_Seff_name, "%s/ZBi_vs_Seff.eps", optcutsdir.c_str() );
@@ -275,13 +317,3 @@ std::pair<TH1F*,TH1F*> getHistoPassingCuts( TTree* tree, std::vector<std::string
 
 
 
-float computeZBi( float obs, float b_pred, float b_pred_err ) {
-
-  float tau = b_pred / ( b_pred_err*b_pred_err );
-  float n_off = tau*b_pred;
-  float P_Bi = TMath::BetaIncomplete( 1./(1.+tau), obs, n_off+1. );
-  float Z_Bi = sqrt(2)*TMath::ErfInverse( 1 - 2.*P_Bi );
-
-  return Z_Bi;
-
-}
