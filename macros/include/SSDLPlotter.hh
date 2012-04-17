@@ -31,6 +31,14 @@ struct SSDLPrediction {
 	float s_ttz_em;
 	float s_ttz_ee;
 
+	int ns_ttw_mm;
+	int ns_ttw_em;
+	int ns_ttw_ee;
+
+	int ns_ttz_mm;
+	int ns_ttz_em;
+	int ns_ttz_ee;
+
 	float s_mm;
 	float s_em;
 	float s_ee;

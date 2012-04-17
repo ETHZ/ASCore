@@ -6604,9 +6604,17 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	float nt2_ttw_mc_em (0.); float nt2_ttw_mc_em_e2(0.);
 	float nt2_ttw_mc_ee (0.); float nt2_ttw_mc_ee_e2(0.);
 
+	int nt2_ttw_Nmc_mm (0);
+	int nt2_ttw_Nmc_em (0);
+	int nt2_ttw_Nmc_ee (0);
+
 	float nt2_ttz_mc_mm (0.); float nt2_ttz_mc_mm_e2(0.);
 	float nt2_ttz_mc_em (0.); float nt2_ttz_mc_em_e2(0.);
 	float nt2_ttz_mc_ee (0.); float nt2_ttz_mc_ee_e2(0.);
+
+	int nt2_ttz_Nmc_mm (0);
+	int nt2_ttz_Nmc_em (0);
+	int nt2_ttz_Nmc_ee (0);
 
 	// PLOT ALL NUMBERS FOR RARE SAMPLES
 	std::map<std::string , float >::const_iterator it = rareMapMM.begin();
@@ -6639,12 +6647,18 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 				nt2_ttw_mc_mm += MM_yiel; nt2_ttw_mc_mm_e2 += MM_stat*MM_stat;
 				nt2_ttw_mc_em += EM_yiel; nt2_ttw_mc_em_e2 += EM_stat*EM_stat;
 				nt2_ttw_mc_ee += EE_yiel; nt2_ttw_mc_ee_e2 += EE_stat*EE_stat;
+				nt2_ttw_Nmc_mm += 1; 
+				nt2_ttw_Nmc_em += 1; 
+				nt2_ttw_Nmc_ee += 1; 
 				continue;
 			}
 			else if (ttw && (it->first == "TTbarZ") ){
 				nt2_ttz_mc_mm += MM_yiel; nt2_ttz_mc_mm_e2 += MM_stat*MM_stat;
 				nt2_ttz_mc_em += EM_yiel; nt2_ttz_mc_em_e2 += EM_stat*EM_stat;
 				nt2_ttz_mc_ee += EE_yiel; nt2_ttz_mc_ee_e2 += EE_stat*EE_stat;
+				nt2_ttz_Nmc_mm += 1; 
+				nt2_ttz_Nmc_em += 1; 
+				nt2_ttz_Nmc_ee += 1; 
 				continue;
 			}
 			else {
@@ -6955,8 +6969,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	SSDLPrediction ssdlpred;
 
 	ssdlpred.bg_mm = nF_mm + nt2_wz_mc_mm + nt2_rare_mc_mm;
-	ssdlpred.bg_em = nF_em + nt2_wz_mc_em + nt2_rare_mc_em;
-	ssdlpred.bg_ee = nF_ee + nt2_wz_mc_ee + nt2_rare_mc_ee;
+	ssdlpred.bg_em = nF_em + nt2_wz_mc_em + nt2_em_chmid + nt2_rare_mc_em;
+	ssdlpred.bg_ee = nF_ee + nt2_wz_mc_ee + nt2_ee_chmid + nt2_rare_mc_ee;
 
 	ssdlpred.bg_mm_err = sqrt(mm_tot_stat2 + mm_tot_syst2);
 	ssdlpred.bg_em_err = sqrt(em_tot_stat2 + em_tot_syst2);
@@ -6969,6 +6983,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	ssdlpred.s_ttz_mm = nt2_ttz_mc_mm;
 	ssdlpred.s_ttz_em = nt2_ttz_mc_em;
 	ssdlpred.s_ttz_ee = nt2_ttz_mc_ee;
+
+	ssdlpred.ns_ttw_mm = nt2_ttw_Nmc_mm;
+	ssdlpred.ns_ttw_em = nt2_ttw_Nmc_em;
+	ssdlpred.ns_ttw_ee = nt2_ttw_Nmc_ee;
+
+	ssdlpred.ns_ttz_mm = nt2_ttz_Nmc_mm;
+	ssdlpred.ns_ttz_em = nt2_ttz_Nmc_em;
+	ssdlpred.ns_ttz_ee = nt2_ttz_Nmc_ee;
 
 	ssdlpred.s_mm = nt2_sig_mc_mm;
 	ssdlpred.s_em = nt2_sig_mc_em;
