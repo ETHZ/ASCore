@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.170 2012/03/27 10:31:50 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.171 2012/04/01 19:59:08 pandolf Exp $
 //
 //
 
@@ -2640,7 +2640,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		}
                 
                 JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
-		double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
+		double scale = jetCorr->correction(*Jit,iEvent,iSetup);
 		corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
 	}
 	

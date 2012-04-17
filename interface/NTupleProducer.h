@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.132 2012/04/16 12:56:14 fronga Exp $
+// $Id: NTupleProducer.h,v 1.133 2012/04/16 13:04:48 fronga Exp $
 //
 //
 
@@ -158,7 +158,6 @@ private:
   //for OOT reweighting in Summer11_S3 samples
   edm::LumiReWeighting LumiWeights_;
 
-
   std::vector<JetFillerBase*>     jetFillers;
   std::vector<PatMuonFiller*>     muonFillers;
   std::vector<PatElectronFiller*> electronFillers;
@@ -182,8 +181,8 @@ private:
   static const int gMaxngenlept = 100;
   static const int gMaxngenphot = 100;
   static const int gMaxngenjets = 100;
-  static const int gMaxnvrtx    = 25;
-  static const int gMaxnpileup  = 50;
+  static const int gMaxnvrtx    = 45;
+  static const int gMaxnpileup  = 60;
   static const int gMaxnEBhits  = 20;
   static const int gMaxngenvtx = 60;
   static const int nStoredGenParticles = 2000;
