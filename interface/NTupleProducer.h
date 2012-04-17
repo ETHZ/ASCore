@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.3 2012/01/27 15:07:22 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.4 2012/04/04 12:21:33 fronga Exp $
 //
 //
 
@@ -103,19 +103,6 @@ public:
 
 private:
 
-  virtual void ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr);
-  virtual void PhotonElectronDuplicate(std::vector<const SuperCluster*>, std::vector<const SuperCluster*>);
-  virtual void ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-  virtual void PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers);
-  virtual bool IsEMObjectInJet(const SuperCluster* theElecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum);
-  virtual bool EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax);
-  virtual float CaloTowerSizePhi(float eta);
-  virtual float CaloTowerSizeEta(float eta);
-  virtual bool IsInPhiWindow(float phi, float phimin, float phimax);
-  //virtual float DeltaPhiSigned(float v1, float v2); --> this is reco::deltaPhi()
-  virtual float GetPhiMin(float phi1, float phi2);
-  virtual float GetPhiMax(float phi1, float phi2);
-  
   typedef std::pair<int,double> OrderPair;
   struct IndexByPt {
     const bool operator()(const OrderPair& j1, const OrderPair& j2 ) const {
@@ -547,6 +534,9 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuPt;
   std::auto_ptr<std::vector<float> >  fTMuInnerTkPt;
   std::auto_ptr<std::vector<float> >  fTMuPtE;
+  std::auto_ptr<std::vector<float> >  fTMuTkPtE;
+  std::auto_ptr<std::vector<float> >  fTMuTkD0E;
+  std::auto_ptr<std::vector<float> >  fTMuTkDzE;  
   std::auto_ptr<std::vector<float> >  fTMuE;
   std::auto_ptr<std::vector<float> >  fTMuEt;
   std::auto_ptr<std::vector<float> >  fTMuEta;

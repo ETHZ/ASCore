@@ -135,12 +135,19 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
     // B-tagging probability (for 4 b-taggings)
     float btag_match_deltaR = 0.5;
     double mindr(999.99);
+
+    // Initialization (needed because filling is non-linear)
+    fTbTagProbTkCntHighEff->push_back(-999.9);
+    fTbTagProbTkCntHighPur->push_back(-999.9);
+    fTbTagProbSimpSVHighEff->push_back(-999.9);
+    fTbTagProbSimpSVHighPur->push_back(-999.9);
+
     for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
                                     (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighEff)[i].first->phi());
       if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        fTbTagProbTkCntHighEff->push_back((*jetsAndProbsTkCntHighEff)[i].second);
+        (*fTbTagProbTkCntHighEff)[ijet] = (*jetsAndProbsTkCntHighEff)[i].second;
         mindr = deltar;
       }
     }
@@ -150,7 +157,7 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
                                     (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
                                     (*jetsAndProbsTkCntHighPur)[i].first->phi());
       if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        fTbTagProbTkCntHighPur->push_back((*jetsAndProbsTkCntHighPur)[i].second);
+        (*fTbTagProbTkCntHighPur)[ijet] = (*jetsAndProbsTkCntHighPur)[i].second;
         mindr = deltar;
       }
     }
@@ -160,7 +167,7 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
                                     (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighEff)[i].first->phi());
       if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        fTbTagProbSimpSVHighEff->push_back((*jetsAndProbsSimpSVHighEff)[i].second);
+        (*fTbTagProbSimpSVHighEff)[ijet] = (*jetsAndProbsSimpSVHighEff)[i].second;
         mindr = deltar;
       }
     }
@@ -170,7 +177,7 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
                                     (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
                                     (*jetsAndProbsSimpSVHighPur)[i].first->phi());
       if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        fTbTagProbSimpSVHighPur->push_back((*jetsAndProbsSimpSVHighPur)[i].second);
+        (*fTbTagProbSimpSVHighPur)[ijet] = (*jetsAndProbsSimpSVHighPur)[i].second;
         mindr = deltar;
       }
     }
@@ -253,7 +260,7 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
       vector<TransientTrack> AssociatedTTracks;
       fTNAssoTracks->push_back(0);
       fTChfrac->push_back(-1.); // Default (if jet-tracks association cone is outside tracker acceptance)
-      if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
+      if(fabs(jet->eta())<2.9) { // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
 				// Tmp variables for vectorial sum of pt of tracks
         double pXtmp(0.), pYtmp(0.);
         // Loop over associated tracks:
@@ -265,10 +272,7 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
             (*fTNAssoTracks)[ijet]++;
           }
         }
-        fTChfrac->push_back(sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale));
-
-      } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-        fTChfrac->push_back(-1.);
+        (*fTChfrac)[ijet] = sqrt(pXtmp*pXtmp + pYtmp*pYtmp) / (jet->pt()*scale);
       }
       AssociatedTracks.clear();
       AssociatedTTracks.clear();

@@ -12,7 +12,8 @@ ROOTGLIBS      = $(shell root-config --glibs)
 INCLUDES       = -I./include -I$(CMSSW_RELEASE_BASE)/src/
 
 CXX            = g++
-CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) 
+#CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) 
+CXXFLAGS       = -g -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) 
 LD             = g++
 LDFLAGS        = -g 
 SOFLAGS        = -O --no_exceptions -shared

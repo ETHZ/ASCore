@@ -24,17 +24,17 @@ void UserAnalysis::Begin(){
 
 void UserAnalysis::Analyze(){
   // Some event selection
-  if( fTR->NJets < 1 ) return;		
+  if( fTR->CANJets < 1 ) return;		
 	
-//     // Plot some jet quantities
-//     int nqjets = 0;
-//     for( int ij = 0; ij < fTR->NJets; ++ij ){
-//         fHjetPt->Fill(fTR->JPt[ij]);
+    // Plot some jet quantities
+    int nqjets = 0;
+    for( int ij = 0; ij < fTR->CANJets; ++ij ){
+        fHjetPt->Fill(fTR->CAJPt[ij]);
 
-//         // Some jet selection
-//         if( fTR->JPt[ij] > 30. ) nqjets++;
-//     }    
-//     fHjetMult->Fill(nqjets);
+        // Some jet selection
+        if( fTR->CAJPt[ij] > 30. ) nqjets++;
+    }    
+    fHjetMult->Fill(nqjets);
 
     // Plot some muon quantities
     int nqmus = 0;
@@ -59,8 +59,8 @@ void UserAnalysis::Analyze(){
 
 void UserAnalysis::End(){
     fHistFile->cd();	
-//     fHjetMult->Write();
-//     fHjetPt  ->Write();
+    fHjetMult->Write();
+    fHjetPt  ->Write();
     fHmuMult ->Write();
     fHmuPt   ->Write();	
     fHistFile->Close();

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.4 2012/04/04 12:21:36 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.5 2012/04/16 13:07:39 fronga Exp $
 //
 //
 
@@ -252,10 +252,12 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fTNpaths = fRHLTLabels->size();
 	
   //OOT pu reweighting
-  if(!fIsRealData){
+  fRPileUpData  .reset(new std::vector<std::string>);
+  fRPileUpMC    .reset(new std::vector<std::string>);
+  if( !fIsRealData ) {
     *fRPileUpData = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_data");
     *fRPileUpMC   = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_mc");
-    if(! (*fRPileUpData)[0].empty() && !(*fRPileUpMC)[0].empty() ){
+    if(!(*fRPileUpData)[0].empty() && !(*fRPileUpMC)[0].empty() ){
       LumiWeights_      = edm::LumiReWeighting((*fRPileUpMC)[0], (*fRPileUpData)[0], (*fRPileUpMC)[1], (*fRPileUpData)[1]);
     }
   }
@@ -542,8 +544,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   }
   */
 
-  // Retrieve HB/HE noise flag
-	
+  // Retrieve HB/HE noise flag	
   if(!fIsModelScan) {
     edm::Handle<bool> hbHeNoiseFlag;
     iEvent.getByLabel(fHBHENoiseResultTag,hbHeNoiseFlag);
@@ -887,6 +888,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   ////////////////////////////////////////////////////////////////////////////////
   // Get GenLeptons (+ Mother and GMother)
+  // FIXME: TO BE REMOVED ONCE WE ARE HAPPY WITH THE FULL GEN. INFO
   if(!fIsRealData){
     edm::Handle<GenParticleCollection> gen;
     iEvent.getByLabel(fGenPartTag, gen);
@@ -1011,6 +1013,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   ////////////////////////////////////////////////////////////////////////////////
   // Gen GenPhotons
+  // FIXME: TO BE REMOVED ONCE WE ARE HAPPY WITH THE FULL GEN. INFO
   if(!fIsRealData){
     edm::Handle<GenParticleCollection> gen;
     iEvent.getByLabel(fGenPartTag, gen);
@@ -1211,17 +1214,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // Separate methods:
     if((*fTMuIsTrackerMuon)[mqi]){ // Tracker Muons
       (*fTNTMus)++;
-      fTMuPtE->push_back( muon.innerTrack()->ptError() );
-      fTMuD0E->push_back( muon.innerTrack()->dxyError() );
-      fTMuDzE->push_back( muon.innerTrack()->dzError() );
+      fTMuTkPtE->push_back( muon.innerTrack()->ptError() );
+      fTMuTkD0E->push_back( muon.innerTrack()->dxyError() );
+      fTMuTkDzE->push_back( muon.innerTrack()->dzError() );
 
-      fTMuNChi2->push_back( (*fTMuInnerTkNChi2)[mqi] ); // No difference for TM
-      fTMuNGlHits->push_back( 0 );
       fTMuNTkHits->push_back( muon.innerTrack()->hitPattern().numberOfValidHits() );
       fTMuNPxHits->push_back( muon.innerTrack()->hitPattern().numberOfValidPixelHits() );
-      fTMuNMuHits->push_back( 0 );
-      fTMuNMatches->push_back( 0 );
-      fTMuNChambers->push_back( 0 );
     }
     if((*fTMuIsGlobalMuon)[mqi]){ // Global Muons
       (*fTNGMus)++;
@@ -1231,14 +1229,13 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       fTMuNChi2->push_back( muon.globalTrack()->normalizedChi2() );
       fTMuNGlHits->push_back( muon.globalTrack()->hitPattern().numberOfValidHits() );
-      fTMuNTkHits->push_back( muon.innerTrack()->hitPattern().numberOfValidHits() );
-      fTMuNPxHits->push_back( muon.innerTrack()->hitPattern().numberOfValidPixelHits() );
       fTMuNMuHits->push_back( muon.outerTrack()->hitPattern().numberOfValidHits() );
       fTMuNMatches->push_back( muon.numberOfMatches() );
       fTMuNChambers->push_back( muon.numberOfChambers() );
     }
 
     // MC Matching
+    // FIXME: TO BE REMOVED ONCE WE ARE HAPPY WITH THE FULL GEN. INFO
     if(!fIsRealData){
       std::vector<const GenParticle*> MuMatch = matchRecoCand(&muon, iEvent);
       if(MuMatch[0] != NULL){
@@ -1477,6 +1474,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         fTElClosestCtfTrackEta     ->push_back((electron.closestCtfTrack().ctfTrack)->eta());
         fTElClosestCtfTrackPhi     ->push_back((electron.closestCtfTrack().ctfTrack)->phi());
         fTElClosestCtfTrackCharge  ->push_back((electron.closestCtfTrack().ctfTrack)->charge());
+      } else {
+        fTElClosestCtfTrackPt      ->push_back(-999.99);
+        fTElClosestCtfTrackEta     ->push_back(-999.99);
+        fTElClosestCtfTrackPhi     ->push_back(-999.99);
+        fTElClosestCtfTrackCharge  ->push_back(-999.99);
       }
       fTElBasicClustersSize         ->push_back(electron.basicClustersSize());
       fTElfbrem                     ->push_back(electron.fbrem());
@@ -1525,7 +1527,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElIDsimpleWP80relIso ->push_back(eIDmapsimpleWP80[electronRef]);
 
       {
-        (*fTElSCindex)[eqi] = -1;
+        fTElSCindex->push_back( -1 ); // Initialize
         float diff=1e+4;
         for (int scind=0; scind<*fTNSuperClusters; scind++){
           if (fabs((*fTSCRaw)[scind]-electron.superCluster()->rawEnergy())<diff) {
@@ -1537,9 +1539,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         if ((*fTElSCindex)[eqi]!=-1)
           if (fabs((*fTSCEta)[(*fTElSCindex)[eqi]]-electron.superCluster()->eta())>0.1 || 
               DeltaPhi((*fTSCPhi)[(*fTElSCindex)[eqi]],electron.superCluster()->phi())>0.1){
-            // std::cout << fTSCraw[fTElSCindex[eqi]] << " " << electron.superCluster()->rawEnergy() << std::endl;
-            // std::cout << fTSCeta[fTElSCindex[eqi]] << " " << electron.superCluster()->eta() << std::endl;
-            // std::cout << fTSCphi[fTElSCindex[eqi]] << " " << electron.superCluster()->phi() << std::endl;
             (*fTElSCindex)[eqi] = -1;			    
           }
 
@@ -1631,10 +1630,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTEBrechitChi2 ->push_back(chi2);
       //4_2 		fTEBrechitE4oE1[fTnEBhits] =e4oe1 ;
       //4_2 		fTEBrechitE2oE9[fTnEBhits] = e2oe9;
-
-      //	cout << "ebrechit P =" << fTEBrechitE[fTnEBhits] << " Pt = " << fTEBrechitPt[fTnEBhits] ;
-      //	cout << " eta = " << fTEBrechitEta[fTnEBhits] << "phi = " << fTEBrechitPhi[fTnEBhits] << " time = "<< fTEBrechitTime[fTnEBhits] ;
-      //	cout << " chi2 = "<< fTEBrechitChi2[fTnEBhits] << " e4oe1 = "<< fTEBrechitE4oE1[fTnEBhits] << " e2oe9 = " << e2oe9 << endl;
 
       (*fTNEBhits)++;
     }
@@ -1771,6 +1766,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
     
 
+    // FIXME: TO BE REMOVED ONCE WE ARE HAPPY WITH THE FULL GEN. INFO
     if (!fIsRealData){
 
       edm::Handle<GenParticleCollection> gen;
@@ -1833,14 +1829,20 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
 
 
-    /*
     { // start PF stuff from Nicholas
-
+      
       reco::PhotonCollection::const_iterator gamIterSl;
 
       const Photon* gamIter = &photon;
 	 
       // Initialization
+      fTPhoisPFPhoton  ->push_back(0);
+      fTPhoisPFElectron->push_back(0);
+
+      fTPhoChargedHadronIso->push_back(0);
+      fTPhoNeutralHadronIso->push_back(0);
+      fTPhoPhotonIso       ->push_back(0);
+
       fTPhoCone04PhotonIsodR0dEta0pt0 ->push_back(0);
       fTPhoCone04PhotonIsodR0dEta0pt5 ->push_back(0);
       fTPhoCone04PhotonIsodR8dEta0pt0 ->push_back(0);
@@ -1954,8 +1956,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       if (FoundPFPhoton){ //use PFPhoton
 
-        fTPhoisPFPhoton   ->push_back(1);
-        fTPhoisPFElectron ->push_back(0);
+        (*fTPhoisPFPhoton)[phoqi]   = 1;
+        (*fTPhoisPFElectron)[phoqi] = 0;
 
         if (pfPhotonHandle->size()>0){
           double Emin=4000;
@@ -1967,9 +1969,9 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
             }
           }
           if (Emin<4000){
-            fTPhoChargedHadronIso ->push_back(pfgamIterSl->chargedHadronIso());
-            fTPhoNeutralHadronIso ->push_back(pfgamIterSl->neutralHadronIso());
-            fTPhoPhotonIso        ->push_back(pfgamIterSl->photonIso());
+            (*fTPhoChargedHadronIso)[phoqi] = pfgamIterSl->chargedHadronIso();
+            (*fTPhoNeutralHadronIso)[phoqi] = pfgamIterSl->neutralHadronIso();
+            (*fTPhoPhotonIso)[phoqi]        = pfgamIterSl->photonIso();
           }
         }
 
@@ -1982,13 +1984,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       else if (!FoundPFPhoton && FoundPFElectron){ //use PFElectron
 
+        (*fTPhoisPFPhoton)[phoqi]   = 0;
+        (*fTPhoisPFElectron)[phoqi] = 1;
 
-        fTPhoisPFPhoton ->push_back(0);
-        fTPhoisPFElectron ->push_back(1);
-
-        fTPhoChargedHadronIso ->push_back(elIterSl->pfIsolationVariables().chargedHadronIso);
-        fTPhoNeutralHadronIso ->push_back(elIterSl->pfIsolationVariables().neutralHadronIso);
-        fTPhoPhotonIso ->push_back(elIterSl->pfIsolationVariables().photonIso);
+        (*fTPhoChargedHadronIso)[phoqi] = elIterSl->pfIsolationVariables().chargedHadronIso;
+        (*fTPhoNeutralHadronIso)[phoqi] = elIterSl->pfIsolationVariables().neutralHadronIso;
+        (*fTPhoPhotonIso)[phoqi]        = elIterSl->pfIsolationVariables().photonIso;
 
         iPFduplicata = iel;
         photonPhi = (*pfCandidates)[iel].phi();
@@ -2000,9 +2001,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       else if (!FoundPFPhoton && !FoundPFElectron){ //e/g only => use cones
 
-        fTPhoisPFPhoton ->push_back(0);
-        fTPhoisPFElectron ->push_back(0);
-
+        (*fTPhoisPFPhoton)[phoqi]   = 0;
+        (*fTPhoisPFElectron)[phoqi] = 0;
 
         photonPhi = phoSC_GeomPhi;
         photonEta = phoSC_GeomEta;
@@ -2011,11 +2011,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
 
 
-
       if (FoundPFPhoton && FoundPFElectron){ //both => we have used PFPhoton
 
-        fTPhoisPFPhoton ->push_back(1);
-        fTPhoisPFElectron ->push_back(1);
+        (*fTPhoisPFPhoton)[phoqi]   = 1;
+        (*fTPhoisPFElectron)[phoqi] = 1;
 
       }
 
@@ -2040,9 +2039,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       //Recompute pflow isolation keeping all the pfcandidates in a 0.6 cone
       pho_Cone06NbPfCand = 0;
       int ipf=0;
-
-      //if (iphot!=-1){
-    
       double dR;
       int type = -1;
 
@@ -2064,17 +2060,17 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
               bool isOverlapping = false;
               //isOverlapping = CheckPhotonPFCandOverlap(gamIter->superCluster(), pfCandidates, i);
 	       
-              pho_Cone06PfCandType ->push_back(type);
-              pho_Cone06PfCandOverlap ->push_back(isOverlapping);
+              pho_Cone06PfCandType[ipf] = type;
+              pho_Cone06PfCandOverlap[ipf] = isOverlapping;
 	       
-              pho_Cone06PfCandEta ->push_back((*pfCandidates)[i].eta());
-              pho_Cone06PfCandPhi ->push_back((*pfCandidates)[i].phi());
-              pho_Cone06PfCandDeltaR ->push_back(reco::deltaR( photonEta,photonPhi,(*pfCandidates)[i].eta(),(*pfCandidates)[i].phi()));
-              pho_Cone06PfCandDeltaEta ->push_back((*pfCandidates)[i].eta()-photonEta);
-              pho_Cone06PfCandDeltaPhi ->push_back(DeltaPhi(photonPhi,(*pfCandidates)[i].phi()));
-              pho_Cone06PfCandPt ->push_back((*pfCandidates)[i].pt());
-              pho_Cone06PfCandDz ->push_back(fabs((*pfCandidates)[i].vz()-photonVz));
-              pho_Cone06PfCandDxy ->push_back(( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt());
+              pho_Cone06PfCandEta[ipf] = (*pfCandidates)[i].eta();
+              pho_Cone06PfCandPhi[ipf] = (*pfCandidates)[i].phi();
+              pho_Cone06PfCandDeltaR[ipf] = reco::deltaR( photonEta,photonPhi,(*pfCandidates)[i].eta(),(*pfCandidates)[i].phi());
+              pho_Cone06PfCandDeltaEta[ipf] = (*pfCandidates)[i].eta()-photonEta;
+              pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
+              pho_Cone06PfCandPt[ipf] = (*pfCandidates)[i].pt();
+              pho_Cone06PfCandDz[ipf] = fabs((*pfCandidates)[i].vz()-photonVz);
+              pho_Cone06PfCandDxy[ipf] = ( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt();
 
               math::XYZVector vCand = math::XYZVector(gamIter->superCluster()->x(), gamIter->superCluster()->y(), gamIter->superCluster()->z());
               float r = vCand.R();
@@ -2085,19 +2081,19 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
               //float dEta = fabs(vCand.Eta() - pvm.Eta());
               //double dPhi = fabs(vCand.Phi() - pvm.Phi());
 
-              pho_Cone06PfCandDeltaRrecomputed ->push_back(reco::deltaR( vCand.Eta(),vCand.Phi(),pvm.Eta(),pvm.Phi()));
-              pho_Cone06PfCandDeltaEtarecomputed ->push_back(pvm.Eta() - vCand.Eta());
-              pho_Cone06PfCandDeltaPhirecomputed ->push_back(DeltaPhi(vCand.Phi(),pvm.Phi()));
-              pho_Cone06PfCandPtrecomputed ->push_back((*pfCandidates)[i].pt());	       
+              pho_Cone06PfCandDeltaRrecomputed[ipf] = reco::deltaR( vCand.Eta(),vCand.Phi(),pvm.Eta(),pvm.Phi());
+              pho_Cone06PfCandDeltaEtarecomputed[ipf] = pvm.Eta() - vCand.Eta();
+              pho_Cone06PfCandDeltaPhirecomputed[ipf] = DeltaPhi(vCand.Phi(),pvm.Phi());
+              pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();	       
 
 
-              pho_Cone06PfCandIsFromPU ->push_back(-1);
+              pho_Cone06PfCandIsFromPU[ipf] = -1;
               if (type==1){
                 //cout << "A" << endl;
                 reco::VertexRef chvtx = chargedHadronVertex(alternativeVertexHandle, (*pfCandidates)[i]);
                 //cout << "B"<<endl;
-                if (chvtx.isNull() || chvtx.key()==0) pho_Cone06PfCandIsFromPU ->push_back(0);
-                else pho_Cone06PfCandIsFromPU ->push_back(1);
+                if (chvtx.isNull() || chvtx.key()==0) pho_Cone06PfCandIsFromPU[ipf] = 0;
+                else pho_Cone06PfCandIsFromPU[ipf] = 1;
                 //cout << "C"<<endl;
               }
               ipf++;
@@ -2106,37 +2102,29 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pho_Cone06PfCandIsFromPU[ipf], pfCandidates, i, phoqi);
                 { //		 FillPhotonIsoVariables_Frixione_Neutrals(type, ipf, phoqi);
 
-
                   double pt = pho_Cone06PfCandPt[ipf];
                   double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
                   double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
                   double dR = sqrt(dEta*dEta+dPhi*dPhi);
   
-
-
-                  if (type==0){ //Neutral Hadron
-    
-                    if (dR<0.1) fTPhoCone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-                    if (dR<0.2) fTPhoCone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-                    if (dR<0.3) fTPhoCone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-                    if (dR<0.4) fTPhoCone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
+                  if (type==0){ //Neutral Hadron  
+                    if (dR<0.1) (*fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx)[phoqi] += pt;
+                    if (dR<0.2) (*fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx)[phoqi] += pt;
+                    if (dR<0.3) (*fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx)[phoqi] += pt;
+                    if (dR<0.4) (*fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx)[phoqi] += pt;
                   }
-
                   if (type==2) { //Photon
-
                     if ((dR>0.045 && gamIter->isEB() && pt>0.08)||(dR>0.07 && gamIter->isEE() && pt>0.1)){
-                      if (dR<0.1) fTPhoCone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
-                      if (dR<0.2) fTPhoCone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
-                      if (dR<0.3) fTPhoCone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;  
-                      if (dR<0.4) fTPhoCone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
+                      if (dR<0.1) (*fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx)[phoqi] += pt;
+                      if (dR<0.2) (*fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx)[phoqi] += pt;
+                      if (dR<0.3) (*fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx)[phoqi] += pt;  
+                      if (dR<0.4) (*fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx)[phoqi] += pt;
                     }
                   }
                 }
-
                 { // FillPhotonIsoVariables_Frixione_ChHad(type, pho_Cone06PfCandIsFromPU[ipf], ipf, phoqi);
 
                   bool isPU=pho_Cone06PfCandIsFromPU[ipf];
-
                   double pt = pho_Cone06PfCandPt[ipf];
                   double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
                   double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
@@ -2144,62 +2132,49 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   double dz = pho_Cone06PfCandDz[ipf];
                   double dxy = pho_Cone06PfCandDxy[ipf];
   
-                  if (type==1){ //Charged Hadron
-    
+                  if (type==1){ //Charged Hadron    
                     //no cut
-                    if (dR<0.1) fTPhoCone01ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-                    if (dR<0.2) fTPhoCone02ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-                    if (dR<0.3) fTPhoCone03ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-                    if (dR<0.4) fTPhoCone04ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-
+                    if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0)[phoqi] += pt;
+                    if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0)[phoqi] += pt;
+                    if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0)[phoqi] += pt;
+                    if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0)[phoqi] += pt;
                     if (dR>0.015){
-                      if (dR<0.1) fTPhoCone01ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-                      if (dR<0.2) fTPhoCone02ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-                      if (dR<0.3) fTPhoCone03ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-                      if (dR<0.4) fTPhoCone04ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
+                      if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0)[phoqi] += pt;
+                      if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0)[phoqi] += pt;
+                      if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0)[phoqi] += pt;
+                      if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0)[phoqi] += pt;
                     }
     
                     //dz/dxy
                     if (dz<1. && dxy<0.1){
-
-                      if (dR<0.1) fTPhoCone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                      if (dR<0.2) fTPhoCone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                      if (dR<0.3) fTPhoCone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                      if (dR<0.4) fTPhoCone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-
+                      if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01)[phoqi] += pt;
+                      if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01)[phoqi] += pt;
+                      if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01)[phoqi] += pt;
+                      if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01)[phoqi] += pt;
                       if (dR>0.015){
-                        if (dR<0.1) fTPhoCone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                        if (dR<0.2) fTPhoCone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                        if (dR<0.3) fTPhoCone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-                        if (dR<0.4) fTPhoCone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
+                        if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01)[phoqi] += pt;
+                        if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01)[phoqi] += pt;
+                        if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01)[phoqi] += pt;
+                        if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01)[phoqi] += pt;
                       }
-
                     }
 
                     //pfNoPU
                     if (isPU==false){
-
-                      if (dR<0.1) fTPhoCone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-                      if (dR<0.2) fTPhoCone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-                      if (dR<0.3) fTPhoCone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-                      if (dR<0.4) fTPhoCone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-
+                      if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU)[phoqi] += pt;
+                      if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU)[phoqi] += pt;
+                      if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU)[phoqi] += pt;
+                      if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU)[phoqi] += pt;
                       if (dR>0.015){
-                        if (dR<0.1) fTPhoCone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-                        if (dR<0.2) fTPhoCone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-                        if (dR<0.3) fTPhoCone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-                        if (dR<0.4) fTPhoCone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
+                        if (dR<0.1) (*fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU)[phoqi] += pt;
+                        if (dR<0.2) (*fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU)[phoqi] += pt;
+                        if (dR<0.3) (*fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU)[phoqi] += pt;
+                        if (dR<0.4) (*fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU)[phoqi] += pt;
                       }
                     }
-
                   }
 
-
                 }
-
-
-
-		
 
               }
             }
@@ -2210,15 +2185,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       pho_Cone06NbPfCand = ipf;
 
-
-
     }     // end PF stuff from Nicholas
-    */
-
-
-		
-
-
+    
     // DISABLED: NO SEED IN AOD (UPDATE IT IN 4_2)
     // 	// Spike removal information
     // 	if ( photon.superCluster()->seed()->caloID().detector( reco::CaloID::DET_ECAL_BARREL ) ) {
@@ -2233,17 +2201,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // 			edm::LogWarning("NTP") << "Photon supercluster seed crystal neither in EB nor in EE!";
   } // end photons
 
-  /*
-    USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
-    
-    diphotons_{first,second} are vectors of {photon_1_index,photon_2_index}
-    
-    vtx_dipho_??? are, for each diphoton pair, vectors of vertex indices (as ranked by the different algos)
-    
-    For example: best vertex for diphoton pair 3, with photon_1_index=diphotons_first[3] and photon_2_index=diphotons_second[3]: vtx_dipho_bla[3].at(0), second choice vtx_dipho_bla[3].at(1) ...
-    
-  */
-
+  ///////////////////////////////////////////////////////
+  // USAGE OF VERTEX CHOICE FOR DIPHOTON EVENTS:
+  //
+  // diphotons_{first,second} are vectors of {photon_1_index,photon_2_index}
+  // vtx_dipho_??? are, for each diphoton pair, vectors of vertex indices (as ranked by the different algos)
+  //
+  // For example: best vertex for diphoton pair 3, with photon_1_index=diphotons_first[3] and photon_2_index=diphotons_second[3]: vtx_dipho_bla[3].at(0), second choice vtx_dipho_bla[3].at(1) ...
+  //
   std::vector<int> diphotons_first;
   std::vector<int> diphotons_second;
   std::vector<std::vector<int> > vtx_dipho_h2gglobe;
@@ -2528,3778 +2493,3469 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   } // end vertex selection for diphoton events
 
-
-
   //       cout << "end vertex selection MVA" << endl;
 
 
 
-      //   ////////////////////////////////////////////////////////
-      //   // Jet Variables:
-      //   const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs, iSetup);
-      //   std::vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
-      //   int iraw(0);
-      //   fTnjetstot = jets->size();
-      //   // Loop over uncorr. jets
-      //   for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit, ++iraw){
-      //     // Cut on uncorrected pT (for startup)
-      //     if(Jit->pt() < fMinrawjpt) continue;
-      //     // Save only the gMaxNJets first uncorrected jets
-      //     if(iraw >= gMaxNJets){
-      //       edm::LogWarning("NTP") << "@SUB=analyze"
-      //                              << "Found more than " << static_cast<int>(gMaxNJets) << " uncorrected jets, I'm scared ...";
-      //       fTflagmaxujetexc = 1;
-      //       *fTGoodEvent = 1;
-      //       break;
-      //     }
+  ////////////////////////////////////////////////////////
+  // Jet Variables:
+  const JetCorrector* jetCorr = JetCorrector::getJetCorrector(fJetCorrs, iSetup);
+  std::vector<OrderPair> corrIndices;  // Vector of indices and pt of corr. jets to re-order them
+  int iraw(0);
+  *fTNJetsTot = jets->size();
+  // Loop over uncorr. jets
+  for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit, ++iraw){
+    // Cut on uncorrected pT (for startup)
+    if(Jit->pt() < fMinRawJPt) continue;
+    // Save only the gMaxNJets first uncorrected jets
+    if(iraw >= gMaxNJets){
+      edm::LogWarning("NTP") << "@SUB=analyze"
+                             << "Found more than " << static_cast<int>(gMaxNJets) << " uncorrected jets, I'm scared ...";
+      *fTMaxUncJetExceed = 1;
+      *fTGoodEvent = 1;
+      break;
+    }
                 
-      //     JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
-      //     double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
-      //     corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
-      //   }
+    JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
+    double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
+    corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
+  }
 	
-      //   // Sort corrected jet collection by decreasing pt
-      //   std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
+  // Sort corrected jet collection by decreasing pt
+  std::sort(corrIndices.begin(), corrIndices.end(), indexComparator);
 	
-      //   // Determine corrected jets
-      //   int jqi(-1); // counts # of qualified jets
-      //   // Loop over corr. jet indices
-      //   for(std::vector<OrderPair>::const_iterator it = corrIndices.begin(); it != corrIndices.end(); ++it ) {
-      //     // Check if maximum number of jets is exceeded already
-      //     if(jqi >= gMaxNJets-1) {
-      //       edm::LogWarning("NTP") << "@SUB=analyze"
-      //                              << "Maximum number of jets exceeded";
-      //       fTflagmaxjetexc = 1;
-      //       *fTGoodEvent = 1;
-      //       break;
-      //     }
-      //     int index = it->first;
-      //     const PFJet* cojet = static_cast<const PFJet*>( &((*jets)[index]) ); // look away...
-      //     std::auto_ptr<PFJet> jet(new PFJet(*cojet));
-
-      //     // The correction was calculated above: use it
-      //     double scale = it->second/jet->pt();
-      //     jet->scaleEnergy(scale);
+  // Determine corrected jets
+  int jqi(-1); // counts # of qualified jets
+  // Loop over corr. jet indices
+  for(std::vector<OrderPair>::const_iterator it = corrIndices.begin(); 
+      it != corrIndices.end(); ++it ) {
+    // Check if maximum number of jets is exceeded already
+    if(jqi >= gMaxNJets-1) {
+      edm::LogWarning("NTP") << "@SUB=analyze"
+                             << "Maximum number of jets exceeded";
+      *fTMaxJetExceed = 1;
+      *fTGoodEvent = 1;
+      break;
+    }
+    int index = it->first;
+    const PFJet* cojet = static_cast<const PFJet*>( &((*jets)[index]) ); // look away...
+    std::auto_ptr<PFJet> jet(new PFJet(*cojet));
+    
+    // The correction was calculated above: use it
+    double scale = it->second/jet->pt();
+    jet->scaleEnergy(scale);
 	
-      //     // Jet preselection
-      //     if(jet->pt() < fMincorjpt) continue; 
-      //     if(fabs(jet->eta()) > fMaxjeta) continue;
-      //     jqi++;
+    // Jet preselection
+    if(jet->pt() < fMinCorJPt) continue; 
+    if(fabs(jet->eta()) > fMaxJEta) continue;
+    jqi++;
 
-      //     // Dump jet properties into tree variables
-      //     fTjpx    [jqi] = jet->px();
-      //     fTjpy    [jqi] = jet->py();
-      //     fTjpz    [jqi] = jet->pz();
-      //     fTjpt    [jqi] = jet->pt();
-      //     fTjeta   [jqi] = jet->eta();
-      //     fTjphi   [jqi] = jet->phi();
-      //     fTje     [jqi] = jet->energy();
-      //     fTjet    [jqi] = jet->et();
-      //     fTjEcorr [jqi] = scale;
-      //     fTJEtaRms[jqi] = sqrt(jet->etaetaMoment());
-      //     fTJPhiRms[jqi] = sqrt(jet->etaphiMoment());
-      //     fTjArea  [jqi] = jet->jetArea();
+    // Dump jet properties into tree variables
+    fTJPx     ->push_back(jet->px());
+    fTJPy     ->push_back(jet->py());
+    fTJPz     ->push_back(jet->pz());
+    fTJPt     ->push_back(jet->pt());
+    fTJEta    ->push_back(jet->eta());
+    fTJPhi    ->push_back(jet->phi());
+    fTJE      ->push_back(jet->energy());
+    fTJEt     ->push_back(jet->et());
+    fTJEcorr  ->push_back(scale);
+    fTJEtaRms ->push_back(sqrt(jet->etaetaMoment()));
+    fTJPhiRms ->push_back(sqrt(jet->etaphiMoment()));
+    fTJArea   ->push_back(jet->jetArea());
 
-      //     fTjNconstituents[jqi] = jet->nConstituents();
-      //     fTjChMult       [jqi] = jet->chargedMultiplicity(); // do it the pf way...
-      //     fTjNeuMult      [jqi] = jet->neutralMultiplicity(); 
+    fTJNConstituents->push_back(jet->nConstituents());
+    fTJNAssoTracks  ->push_back(jet->chargedMultiplicity()); // do it the pf way...
+    fTJNNeutrals    ->push_back(jet->neutralMultiplicity()); 
 		
-      //     // energy fractions for JID need to be computed w.r.t. uncorrected jet energy!!
-      //     // see for instance https://twiki.cern.ch/twiki/bin/view/CMS/JetID
-      //     // or http://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_1_3/doc/html/dc/dd5/classPFJetIDSelectionFunctor.html  
-      //     double uncorr_energy  = jet->energy()/scale;
-      //     fTjChHadFrac    [jqi] = jet->chargedHadronEnergy()/uncorr_energy;
-      //     fTjNeuHadFrac   [jqi] = jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy;
-      //     fTjChEmFrac     [jqi] = jet->chargedEmEnergy()/uncorr_energy;
-      //     fTjNeuEmFrac    [jqi] = jet->neutralEmEnergy()/uncorr_energy;
-      //     fTjChMuEFrac    [jqi] = jet->chargedMuEnergy()/uncorr_energy;
-      // 		fTjPhoFrac       [jqi] = jet->photonEnergy()/uncorr_energy; // photons also count for neutralEmEnergy
-      // 		fTjHFHadFrac     [jqi] = jet->HFHadronEnergy()/uncorr_energy;
-      // 		fTjHFEMFrac      [jqi] = jet->HFEMEnergy()/uncorr_energy;   // also contained in neutralEmEnergy
-      // 		// see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
+    // energy fractions for JID need to be computed w.r.t. uncorrected jet energy!!
+    // see for instance https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+    // or http://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_1_3/doc/html/dc/dd5/classPFJetIDSelectionFunctor.html  
+    double uncorr_energy  = jet->energy()/scale;
+    fTJChargedHadFrac     ->push_back(jet->chargedHadronEnergy()/uncorr_energy);
+    fTJNeutralHadFrac     ->push_back(jet->neutralHadronEnergy()/uncorr_energy + jet->HFHadronEnergy()/uncorr_energy);
+    fTJChargedEmFrac      ->push_back(jet->chargedEmEnergy()/uncorr_energy);
+    fTJNeutralEmFrac      ->push_back(jet->neutralEmEnergy()/uncorr_energy);
+    fTJChargedMuEnergyFrac->push_back(jet->chargedMuEnergy()/uncorr_energy);
+    fTJPhoFrac            ->push_back(jet->photonEnergy()/uncorr_energy); // photons also count for neutralEmEnergy
+    fTJHFHadFrac          ->push_back(jet->HFHadronEnergy()/uncorr_energy);
+    fTJHFEMFrac           ->push_back(jet->HFEMEnergy()/uncorr_energy);   // also contained in neutralEmEnergy
+    // see CMSSW/RecoJets/JetProducers/src/JetSpecific.cc
 
-      // 		vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
+    vector<PFCandidatePtr> pfCandidates = jet->getPFConstituents();
 		
-      // 		float sumPt_cands=0.;
-      // 		float sumPt2_cands=0.;
-      // 		float rms_cands=0.;
+    float sumPt_cands=0.;
+    float sumPt2_cands=0.;
+    float rms_cands=0.;
 		
-      // 		TLorentzVector jetp4;
-      // 		jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
+    TLorentzVector jetp4;
+    jetp4.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->energy());
 
-      // 		for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
+    for (vector<PFCandidatePtr>::const_iterator jCand = pfCandidates.begin(); jCand != pfCandidates.end(); ++jCand) {
 		  
-      // 		  math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
-      // 		  TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
-      // 		  if(pCand.Pt()>0.){
-      // 		    sumPt_cands += pCand.Pt();
-      // 		    sumPt2_cands += (pCand.Pt()*pCand.Pt());
+      math::XYZTLorentzVectorD const& pCand_t = (*jCand)->p4();
+      TLorentzVector pCand(pCand_t.px(), pCand_t.py(), pCand_t.pz(), pCand_t.energy());
+      if(pCand.Pt()>0.){
+        sumPt_cands += pCand.Pt();
+        sumPt2_cands += (pCand.Pt()*pCand.Pt());
 
-      // 		    float deltaR = pCand.DeltaR(jetp4);
-      // 		    rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
+        float deltaR = pCand.DeltaR(jetp4);
+        rms_cands += (pCand.Pt()*pCand.Pt()*deltaR*deltaR);
 
-      // 		  }
+      }
 
-      // 		} //for PFCandidates
+    } //for PFCandidates
 
-      // 		fTjPtD      [jqi] = sqrt( sumPt2_cands )/sumPt_cands;
-      // 		fTjRMSCand  [jqi] = rms_cands/sumPt2_cands;
+    fTJPtD       ->push_back(sqrt( sumPt2_cands )/sumPt_cands);
+    fTJRMSCand   ->push_back(rms_cands/sumPt2_cands);
 
 
 
-      //     // Calculate the DR wrt the closest electron
-      //     float ejDRmin = 10.; // Default when no electrons previously selected
-      //     for( int j = 0; j < fTneles; j++ ){
-      //       float ejDR = reco::deltaR(jet->eta(), jet->phi(), fTeeta[j], fTephi[j]);
-      //       if(ejDR<ejDRmin) ejDRmin = ejDR;
-      //     }
-      //     fTjeMinDR[jqi] = ejDRmin;
+    // Calculate the DR wrt the closest electron
+    float ejDRmin = 10.; // Default when no electrons previously selected
+    for( int j = 0; j < (*fTNEles); j++ ){
+      float ejDR = reco::deltaR(jet->eta(), jet->phi(), (*fTElEta)[j], (*fTElPhi)[j]);
+      if(ejDR<ejDRmin) ejDRmin = ejDR;
+    }
+    fTJeMinDR ->push_back(ejDRmin);
 
-      // 		// B-tagging probability (for 4 b-taggings)
-      // 		// remember: 'index' is the index of the uncorrected jet, as saved in the event
-      // 		fTjbTagProbTkCntHighEff[jqi]  = (*jetsAndProbsTkCntHighEff) [index].second;
-      // 		fTjbTagProbTkCntHighPur[jqi]  = (*jetsAndProbsTkCntHighPur) [index].second;
-      // 		fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[index].second;
-      // 		fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[index].second;
+    // B-tagging probability (for 4 b-taggings)
+    // remember: 'index' is the index of the uncorrected jet, as saved in the event
+    fTJbTagProbTkCntHighEff  ->push_back((*jetsAndProbsTkCntHighEff) [index].second);
+    fTJbTagProbTkCntHighPur  ->push_back((*jetsAndProbsTkCntHighPur) [index].second);
+    fTJbTagProbSimpSVHighEff ->push_back((*jetsAndProbsSimpSVHighEff)[index].second);
+    fTJbTagProbSimpSVHighPur ->push_back((*jetsAndProbsSimpSVHighPur)[index].second);
 
-      //     // Jet-track association: get associated tracks
-      //     const reco::TrackRefVector& tracks = jet->getTrackRefs();
-      //     std::vector<const reco::Track*> AssociatedTracks;
-      //     for( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ) AssociatedTracks.push_back( it->get() );
+    // Jet-track association: get associated tracks
+    const reco::TrackRefVector& tracks = jet->getTrackRefs();
+    std::vector<const reco::Track*> AssociatedTracks;
+    for( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ) AssociatedTracks.push_back( it->get() );
 			
-      //     // Below save the momenta of the three leading tracks associated to the jet
-      //     float pT1(0.), pT2(0.), pT3(0.);
-      //     int idx1(-1), idx2(-1), idx3(-1);
+    // Below save the momenta of the three leading tracks associated to the jet
+    float pT1(0.), pT2(0.), pT3(0.);
+    int idx1(-1), idx2(-1), idx3(-1);
 			
-      //     // Jet-track association: make transient tracks and store information
-      //     std::vector<TransientTrack> AssociatedTTracks;
-      //     fTjMass[jqi] = 0.;
-      //     if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
-      //       // Tmp variables for vectorial sum of pt of tracks
-      //       double pXtmp(0.), pYtmp(0.), pZtmp(0.), E2tmp(0.);
-      //       const double trkmass = 0.; // Assumed mass for tracks
+    // Jet-track association: make transient tracks and store information
+    std::vector<TransientTrack> AssociatedTTracks;
+    // Initialization
+    fTJMass ->push_back(0.);
+    fTJtrk1px->push_back(-999.);
+    fTJtrk1py->push_back(-999.);
+    fTJtrk1pz->push_back(-999.);
+    fTJtrk2px->push_back(-999.);
+    fTJtrk2py->push_back(-999.);
+    fTJtrk2pz->push_back(-999.);
+    fTJtrk3px->push_back(-999.);
+    fTJtrk3py->push_back(-999.);
+    fTJtrk3pz->push_back(-999.);
+    if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
+      // Tmp variables for vectorial sum of pt of tracks
+      double pXtmp(0.), pYtmp(0.), pZtmp(0.), E2tmp(0.);
+      const double trkmass = 0.; // Assumed mass for tracks
 
-      //       // Loop over associated tracks:
-      //       for(size_t t = 0; t < AssociatedTracks.size(); ++t){
-      //         AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks for vertex fitting below
-      //         if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
-      //           pXtmp += AssociatedTracks[t]->px();
-      //           pYtmp += AssociatedTracks[t]->py();
-      //           pZtmp += AssociatedTracks[t]->pz();
-      //           E2tmp += trkmass*trkmass + pXtmp*pXtmp + pYtmp*pYtmp + pZtmp*pZtmp;
-      //         }
-      //         // Find the three highest pT tracks
-      //         if(AssociatedTracks[t]->pt() > pT1 && AssociatedTracks.size() >= 1){
-      //           pT1=AssociatedTracks[t]->pt();
-      //           idx3=idx2;
-      //           idx2=idx1;
-      //           idx1=t;
-      //         } else if (AssociatedTracks[t]->pt() < pT1 && AssociatedTracks[t]->pt() > pT2 && AssociatedTracks.size() >= 2) {
-      //           pT2=AssociatedTracks[t]->pt();
-      //           idx3=idx2;
-      //           idx2=t;
-      //         } else if (AssociatedTracks[t]->pt() < pT2 && AssociatedTracks[t]->pt() > pT3 && AssociatedTracks.size() >= 3){
-      //           pT3=AssociatedTracks[t]->pt();
-      //           idx3=t;
-      //         }
-      //       }
-      //       // Fill the momenta
-      //       if(AssociatedTracks.size()>=1){
-      //         fTjtrk1px[jqi] = AssociatedTracks[idx1]->px();
-      //         fTjtrk1py[jqi] = AssociatedTracks[idx1]->py();
-      //         fTjtrk1pz[jqi] = AssociatedTracks[idx1]->pz();
-      //       }
-      //       if(AssociatedTracks.size()>=2){
-      //         fTjtrk2px[jqi] = AssociatedTracks[idx2]->px();
-      //         fTjtrk2py[jqi] = AssociatedTracks[idx2]->py();
-      //         fTjtrk2pz[jqi] = AssociatedTracks[idx2]->pz();
-      //       }
-      //       if(AssociatedTracks.size()>=3){
-      //         fTjtrk3px[jqi] = AssociatedTracks[idx3]->px();
-      //         fTjtrk3py[jqi] = AssociatedTracks[idx3]->py();
-      //         fTjtrk3pz[jqi] = AssociatedTracks[idx3]->pz();
-      //       }
+      // Loop over associated tracks:
+      for(size_t t = 0; t < AssociatedTracks.size(); ++t){
+        AssociatedTTracks.push_back(theB->build(AssociatedTracks[t])); // build transient tracks for vertex fitting below
+        if(AssociatedTracks[t]->normalizedChi2()<10. && AssociatedTracks[t]->numberOfValidHits()>10 && AssociatedTracks[t]->pt()>1.){
+          pXtmp += AssociatedTracks[t]->px();
+          pYtmp += AssociatedTracks[t]->py();
+          pZtmp += AssociatedTracks[t]->pz();
+          E2tmp += trkmass*trkmass + pXtmp*pXtmp + pYtmp*pYtmp + pZtmp*pZtmp;
+        }
+        // Find the three highest pT tracks
+        if(AssociatedTracks[t]->pt() > pT1 && AssociatedTracks.size() >= 1){
+          pT1=AssociatedTracks[t]->pt();
+          idx3=idx2;
+          idx2=idx1;
+          idx1=t;
+        } else if (AssociatedTracks[t]->pt() < pT1 && AssociatedTracks[t]->pt() > pT2 && AssociatedTracks.size() >= 2) {
+          pT2=AssociatedTracks[t]->pt();
+          idx3=idx2;
+          idx2=t;
+        } else if (AssociatedTracks[t]->pt() < pT2 && AssociatedTracks[t]->pt() > pT3 && AssociatedTracks.size() >= 3){
+          pT3=AssociatedTracks[t]->pt();
+          idx3=t;
+        }
+      }
+      // Fill the momenta
+      if(AssociatedTracks.size()>=1){
+        (*fTJtrk1px)[jqi] = AssociatedTracks[idx1]->px();
+        (*fTJtrk1py)[jqi] = AssociatedTracks[idx1]->py();
+        (*fTJtrk1pz)[jqi] = AssociatedTracks[idx1]->pz();
+      }
+      if(AssociatedTracks.size()>=2){
+        (*fTJtrk2px)[jqi] = AssociatedTracks[idx2]->px();
+        (*fTJtrk2py)[jqi] = AssociatedTracks[idx2]->py();
+        (*fTJtrk2pz)[jqi] = AssociatedTracks[idx2]->pz();
+      }
+      if(AssociatedTracks.size()>=3){
+        (*fTJtrk3px)[jqi] = AssociatedTracks[idx3]->px();
+        (*fTJtrk3py)[jqi] = AssociatedTracks[idx3]->py();
+        (*fTJtrk3pz)[jqi] = AssociatedTracks[idx3]->pz();
+      }
 			
-      //       fTjMass[jqi]   = sqrt(E2tmp - pXtmp*pXtmp - pYtmp*pYtmp - pZtmp*pZtmp);
-      //       if(fTjChMult[jqi] > 0) fTjMass[jqi] *= fTjNconstituents[jqi]/fTjChMult[jqi]; // apparantly there ARE cases where ChMult is 0, but we still end up here...
-      //       else fTjMass[jqi] = 0.;
-      //     } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
-      //       fTjMass[jqi] = -888.88;
-      //     }
+      (*fTJMass)[jqi]   = sqrt(E2tmp - pXtmp*pXtmp - pYtmp*pYtmp - pZtmp*pZtmp);
+      // apparently there ARE cases where ChMult is 0, but we still end up here...
+      if((*fTJNAssoTracks)[jqi] > 0) (*fTJMass)[jqi] *= (*fTJNConstituents)[jqi]/(*fTJNAssoTracks)[jqi];
+    } else { // The whole cone used for jet-tracks association is outside of the tracker acceptance
+      (*fTJMass)[jqi] = -888.88;
+    }
 
-      //     // Do a vertex fitting with the tracks
-      //     if(AssociatedTTracks.size() > 1) {
-      //       TransientVertex jetVtx = avFitter.vertex(AssociatedTTracks);
-      //       if(jetVtx.isValid()){
-      //         fTjetVtxx    [jqi] = jetVtx.position().x();
-      //         fTjetVtxy    [jqi] = jetVtx.position().y();
-      //         fTjetVtxz    [jqi] = jetVtx.position().z();
-      //         fTjetVtxExx  [jqi] = jetVtx.positionError().cxx();
-      //         fTjetVtxEyx  [jqi] = jetVtx.positionError().cyx();
-      //         fTjetVtxEyy  [jqi] = jetVtx.positionError().cyy();
-      //         fTjetVtxEzy  [jqi] = jetVtx.positionError().czy();
-      //         fTjetVtxEzz  [jqi] = jetVtx.positionError().czz();
-      //         fTjetVtxEzx  [jqi] = jetVtx.positionError().czx();
-      //         fTjetVtxNChi2[jqi] = jetVtx.normalisedChiSquared();
-      //       }else{
-      //         fTjetVtxx    [jqi] = -777.77;
-      //         fTjetVtxy    [jqi] = -777.77;
-      //         fTjetVtxz    [jqi] = -777.77;
-      //         fTjetVtxExx  [jqi] = -777.77;
-      //         fTjetVtxEyx  [jqi] = -777.77;
-      //         fTjetVtxEyy  [jqi] = -777.77;
-      //         fTjetVtxEzy  [jqi] = -777.77;
-      //         fTjetVtxEzz  [jqi] = -777.77;
-      //         fTjetVtxEzx  [jqi] = -777.77;
-      //         fTjetVtxNChi2[jqi] = -777.77;
-      //       }
-      //     }else{
-      //       fTjetVtxx    [jqi] = -888.88;
-      //       fTjetVtxy    [jqi] = -888.88;
-      //       fTjetVtxz    [jqi] = -888.88;
-      //       fTjetVtxExx  [jqi] = -888.88;
-      //       fTjetVtxEyx  [jqi] = -888.88;
-      //       fTjetVtxEyy  [jqi] = -888.88;
-      //       fTjetVtxEzy  [jqi] = -888.88;
-      //       fTjetVtxEzz  [jqi] = -888.88;
-      //       fTjetVtxEzx  [jqi] = -888.88;
-      //       fTjetVtxNChi2[jqi] = -888.88;
-      //     }
-      //     AssociatedTracks.clear();
-      //     AssociatedTTracks.clear();
+    // Do a vertex fitting with the tracks
+    if(AssociatedTTracks.size() > 1) {
+      TransientVertex jetVtx = avFitter.vertex(AssociatedTTracks);
+      if(jetVtx.isValid()){
+        fTJVtxx     ->push_back(jetVtx.position().x());
+        fTJVtxy     ->push_back(jetVtx.position().y());
+        fTJVtxz     ->push_back(jetVtx.position().z());
+        fTJVtxExx   ->push_back(jetVtx.positionError().cxx());
+        fTJVtxEyx   ->push_back(jetVtx.positionError().cyx());
+        fTJVtxEyy   ->push_back(jetVtx.positionError().cyy());
+        fTJVtxEzy   ->push_back(jetVtx.positionError().czy());
+        fTJVtxEzz   ->push_back(jetVtx.positionError().czz());
+        fTJVtxEzx   ->push_back(jetVtx.positionError().czx());
+        fTJVtxNChi2 ->push_back(jetVtx.normalisedChiSquared());
+      }else{
+        fTJVtxx     ->push_back(-777.77);
+        fTJVtxy     ->push_back(-777.77);
+        fTJVtxz     ->push_back(-777.77);
+        fTJVtxExx   ->push_back(-777.77);
+        fTJVtxEyx   ->push_back(-777.77);
+        fTJVtxEyy   ->push_back(-777.77);
+        fTJVtxEzy   ->push_back(-777.77);
+        fTJVtxEzz   ->push_back(-777.77);
+        fTJVtxEzx   ->push_back(-777.77);
+        fTJVtxNChi2 ->push_back(-777.77);
+      }
+    }else{
+      fTJVtxx     ->push_back(-888.88);
+      fTJVtxy     ->push_back(-888.88);
+      fTJVtxz     ->push_back(-888.88);
+      fTJVtxExx   ->push_back(-888.88);
+      fTJVtxEyx   ->push_back(-888.88);
+      fTJVtxEyy   ->push_back(-888.88);
+      fTJVtxEzy   ->push_back(-888.88);
+      fTJVtxEzz   ->push_back(-888.88);
+      fTJVtxEzx   ->push_back(-888.88);
+      fTJVtxNChi2 ->push_back(-888.88);
+    }
+    AssociatedTracks.clear();
+    AssociatedTTracks.clear();
 	
-      //     // GenJet matching
-      //     if (!fIsRealData && fTNGenJets > 0) fTjetGenJetIndex[jqi] = matchJet(&(*jet));
-      //     fTgoodjet[jqi] = 0;
-      //   }
-      //   fTnjets = jqi+1;
-      //   // corrJets.clear();
-      //   corrIndices.clear();
+    // GenJet matching
+    if (!fIsRealData && (*fTNGenJets) > 0) fTJGenJetIndex->push_back( matchJet(&(*jet)) );
+    fTJGood->push_back( 0 );
+  }
+  (*fTNJets) = jqi+1;
+  corrIndices.clear();
 
-      //   // Check electron duplication
-      //   ElectronDuplicate(elecPtr, trckPtr);
-      //   // Check photon/electron duplication
-      //   PhotonElectronDuplicate(elecPtr, photSCs);
-
-      //   // These don't work for pf jets yet
-      //   // Check electron/jet duplication
-      //   // ElJetOverlap(jetPtr, elecPtr, calotowers);
-      //   // Check photon/jet duplication
-      //   // PhotonJetOverlap(jetPtr, photSCs, calotowers);
-
-      //   ////////////////////////////////////////////////////////
-      //   // Get and Dump (M)E(T) Variables:
-      //   // Tracks:
-      //   int nqtrk(-1);
-      //   fTntrackstot = tracks->size();
-      //   fTTrkPtSumx = 0.; fTTrkPtSumy = 0.;
-      //   for( TrackCollection::const_iterator it = tracks->begin(); it != tracks->end() ; ++it ){
-      //     fTTrkPtSumx += it->px(); // Calculated for ALL tracks
-      //     fTTrkPtSumy += it->py();
-      //     if(it->pt() < fMintrkpt) continue;
-      //     if(fabs(it->eta()) > fMaxtrketa) continue;
-      //     if(it->normalizedChi2() > fMaxtrknchi2) continue;
-      //     if(it->numberOfValidHits() < fMintrknhits) continue;
-      //     nqtrk++; // starts at 0
-      //     // Check if maximum number of tracks is exceeded already
-      //     if(nqtrk >= gMaxNTrks) {
-      //       edm::LogWarning("NTP") << "@SUB=analyze"
-      //                              << "Maximum number of tracks exceeded";
-      //       fTflagmaxtrkexc = 1;
-      //       *fTGoodEvent = 1;
-      //       break;
-      //     }
-      //     fTtrkpt[nqtrk]    = it->pt()*it->charge();
-      //     fTtrketa[nqtrk]   = it->eta();
-      //     fTtrkphi[nqtrk]   = it->phi();
-      //     fTtrknchi2[nqtrk] = it->normalizedChi2();
-      //     fTtrknhits[nqtrk] = it->numberOfValidHits();
-      //     fTtrkVtxDz[nqtrk] = it->dz(primVtx->position());
-      //     fTtrkVtxDxy[nqtrk]= it->dxy(primVtx->position());	
-      //     fTgoodtrk[nqtrk]  = 0;
-      //   }
-      //   fTntracks = nqtrk+1;
-
-      //   fTTrkPtSum = sqrt(fTTrkPtSumx*fTTrkPtSumx + fTTrkPtSumy*fTTrkPtSumy);
-      //   TVector3 trkPtSum(fTTrkPtSumx, fTTrkPtSumy, 0.);
-      //   fTTrkPtSumphi = trkPtSum.Phi();
-
-      //   // Calotowers:
-      //   fTNCaloTowers = calotowers->size();
-      //   fTECALEsumx = 0.; fTECALEsumy = 0.; fTECALEsumz = 0.;
-      //   fTHCALEsumx = 0.; fTHCALEsumy = 0.; fTHCALEsumz = 0.;
-      //   fTSumEt = 0.; fTECALSumEt = 0.; fTHCALSumEt = 0.;
-      //   for(CaloTowerCollection::const_iterator itow = calotowers->begin();
-      //       itow!=calotowers->end(); ++itow ){
-      //     if(itow->energy() == 0.) continue; // Check against zero energy towers
-      //     fTSumEt += itow->et();
-      //     fTECALSumEt += itow->emEt();
-      //     fTHCALSumEt += itow->hadEt();
-      //     double emFrac = itow->emEnergy()/itow->energy();
-      //     double hadFrac = itow->hadEnergy()/itow->energy();
-      //     fTECALEsumx += itow->px()*emFrac;
-      //     fTECALEsumy += itow->py()*emFrac;
-      //     fTECALEsumz += itow->pz()*emFrac;
-      //     fTHCALEsumx += itow->px()*hadFrac;
-      //     fTHCALEsumy += itow->py()*hadFrac;
-      //     fTHCALEsumz += itow->pz()*hadFrac;
-      //   }
-      //   TVector3 ecalMET(fTECALEsumx, fTECALEsumy, fTECALEsumz);
-      //   TVector3 hcalMET(fTHCALEsumx, fTHCALEsumy, fTHCALEsumz);
-      //   fTECALMET    = ecalMET.Mag();
-      //   fTECALMETphi = ecalMET.Phi();
-      //   fTHCALMET    = hcalMET.Mag();
-      //   fTHCALMETphi = hcalMET.Phi();
-      //   if(fTECALEsumz != 0.) fTECALMETeta = ecalMET.Eta();
-      //   else fTECALMETeta = 0.;
-      //   if(fTHCALEsumz != 0.) fTHCALMETeta = hcalMET.Eta();
-      //   else fTHCALMETeta = 0.;
-
-      //   // MET Collections:
-      //   fTRawMET             = (calomet->at(0)).pt();
-      //   fTRawMETpx           = (calomet->at(0)).px();
-      //   fTRawMETpy           = (calomet->at(0)).py();
-      //   fTRawMETphi          = (calomet->at(0)).phi();
-      //   fTRawMETemEtFrac     = (calomet->at(0)).emEtFraction();
-      //   fTRawMETemEtInEB     = (calomet->at(0)).emEtInEB();
-      //   fTRawMETemEtInEE     = (calomet->at(0)).emEtInEE();
-      //   fTRawMETemEtInHF     = (calomet->at(0)).emEtInHF();
-      //   fTRawMEThadEtFrac    = (calomet->at(0)).etFractionHadronic();
-      //   fTRawMEThadEtInHB    = (calomet->at(0)).hadEtInHB();
-      //   fTRawMEThadEtInHE    = (calomet->at(0)).hadEtInHE();
-      //   fTRawMEThadEtInHF    = (calomet->at(0)).hadEtInHF();
-      //   fTRawMETSignificance = (calomet->at(0)).significance();
-
-      //   if (!fIsRealData) {
-      //     Handle<View<GenMET> > GenMET;
-      //     iEvent.getByLabel(fGenMETTag, GenMET);
-      //     fTGenMET    = (GenMET->front()).pt();
-      //     fTGenMETpx  = (GenMET->front()).px();
-      //     fTGenMETpy  = (GenMET->front()).py();
-      //     fTGenMETphi = (GenMET->front()).phi();
-      //   }
-
-      //   fTTCMET    = (tcmet->at(0)).pt();
-      //   fTTCMETpx  = (tcmet->at(0)).px();
-      //   fTTCMETpy  = (tcmet->at(0)).py();
-      //   fTTCMETphi = (tcmet->at(0)).phi();
-      //   fTTCMETSignificance = (tcmet->at(0)).significance();
-
-      //   fTPFMET    = (pfmet->front()).pt();
-      //   fTPFMETpx  = (pfmet->front()).px();
-      //   fTPFMETpy  = (pfmet->front()).py();
-      //   fTPFMETphi = (pfmet->front()).phi();
-      //   fTPFMETSignificance = (pfmet->front()).significance();
-      //   fTPFSumEt  = (pfmet->front()).sumEt();
-
-      //   fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
-      //   fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
-      //   fTMuJESCorrMETpy  = (corrmujesmet->at(0)).py();
-      //   fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
-
-      //   if(fTnjets > 1){
-      //     double dPhiMJ1 = TMath::Abs(reco::deltaPhi(fTjphi[0], fTMuJESCorrMETphi));
-      //     double dPhiMJ2 = TMath::Abs(reco::deltaPhi(fTjphi[1], fTMuJESCorrMETphi));
-      //     fTMETR12 = TMath::Sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
-      //     fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
-      //   }
-
-      //   fTPFMETPAT     = (pfMETpat->front()).pt();
-      //   fTPFMETPATpx   = (pfMETpat->front()).px();
-      //   fTPFMETPATpy   = (pfMETpat->front()).py();
-      //   fTPFMETPATphi  = (pfMETpat->front()).phi();
-      //   fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
-
-
-
-      //   ////////////////////////////////////////////////////////////////////////////////
-      //   // Special stuff for Model Scans ///////////////////////////////////////////////
-
-      // 	fTxSMS=-1;
-      // 	fTxbarSMS=-1;
-
-      //   if(!fIsRealData&&fIsModelScan) {
-      //     Handle<LHEEventProduct> product;
-      //     bool LHEEventProduct_found=iEvent.getByLabel("source", product);
-      //     LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
-      //     LHEEventProduct::comments_const_iterator c_end = product->comments_end();
-
-      //     float mGL;
-      //     float mLSP;
-      //     float xCHI;
-
-      //     for(LHEEventProduct::comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
-      //       size_t found = (*cit).find("model");
-
-      //       //# model T5zz_0.5_925.0_400.0to1000.0_450.0.lhe
-      //       if( found != std::string::npos)   {
-      //         size_t foundLength = (*cit).size();
-      //         found = (*cit).find("T5zz");
-      //         std::string smaller = (*cit).substr(found+1,foundLength);
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         std::istringstream iss(smaller);
-      //         iss >> xCHI;
-      //         iss.clear();
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> mGL;
-      //         iss.clear();
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> mLSP;
-      //         iss.clear();
-
-      //         //model msugra_1900_100_10_0_1
-      //         float m0,m12,tanb,A0,signMu;
-      //         foundLength = (*cit).size();
-      //         found = (*cit).find("=");
-      //         smaller = (*cit).substr(found+1,foundLength);
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         //
-      //         iss.clear();
-      //         iss.str(smaller);
-      //         iss >> m0;
-      //         iss.clear();
-      //         //
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> m12;
-      //         iss.clear();
-      //         //
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> tanb;
-      //         iss.clear();
-      //         //
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> A0;
-      //         iss.clear();
-      //         //
-      //         found = smaller.find("_");
-      //         smaller = smaller.substr(found+1,smaller.size());
-      //         iss.str(smaller);
-      //         iss >> signMu;
-      //         iss.clear();
-
-      //         // mSUGRA scan
-      //         fTSUSYScanM0=m0;
-      //         fTSUSYScanM12=m12;
-      //         fTSUSYScanMu=signMu;
-      //         fTSUSYScanA0=A0;
-
-      //       }
-      //     }
-      //     fTMassGlu = mGL;
-      //     fTMassChi = xCHI;
-      //     fTMassLSP = mLSP;
-      //   }
-
-
-      // 	bool blabalot=false;
-      // 	bool BloatWithGenInfo=true;
-
-	
-      // 	if(BloatWithGenInfo && !fIsRealData) {
-      // 	  int genIndex[1200];
-      // 	  int genNIndex[1200];
-      // 	  int genID[1200];
-      // 	  float genPx[1200];
-      // 	  float genPy[1200];
-      // 	  float genPz[1200];
-      // 	  float genPt[1200];
-      // 	  float genEta[1200];
-      // 	  float genPhi[1200];
-      // 	  float genM[1200];
-      // 	  int genMo1Index[1200];
-      // 	  int genMo2Index[1200];
-      // 	  int genNMo[1200];
-      // 	  int genStatus[1200];
-      // 	  int Promptness[1200];
-      // 	  bool StoreFlag[1200];
-	  
-      // 	  int nGenParticles=0;
-	  
-      // 	  Handle<GenParticleCollection> genParticles;
-      // 	  iEvent.getByLabel("genParticles", genParticles);
-	  
-      // 	  // STEP 1: Loop over all particles and store the information.
-      // 	  for(size_t i = 0; i < genParticles->size(); ++ i) {
-      // 	    nGenParticles++;
-      // 	    const GenParticle & p = (*genParticles)[i];
-      // 	    genIndex[i]=i;
-      // 	    genNIndex[i]=0;
-      // 	    genID[i]=p.pdgId();
-      // 	    genPx[i]=p.px();
-      // 	    genPy[i]=p.py();
-      // 	    genPz[i]=p.pz();
-      // 	    genPt[i]=p.pt();
-      // 	    genPhi[i]=p.phi();
-      // 	    genEta[i]=p.eta();
-      // 	    genM[i]=p.mass();
-      // 	    genStatus[i]=p.status();
-      // 	    genMo1Index[i]=-1;
-      // 	    genMo2Index[i]=-1;
-      // 	    genNMo[i]=p.numberOfMothers();
-      // 	    StoreFlag[i]=false;
-      // 	    if(genID[i]==2212) Promptness[i]=0;
-      // 	    else Promptness[i]=-1;
-	    
-
-      // 	    if(blabalot) cout << "Reading particle " << i << " (is pdgid=" << genID[i] << ") with " << genNMo[i] << " mothers" << endl;
-      // 	    for(int j=0;j<genNMo[i]&&j<2;j++) {
-      // 	      int idx = -1;
-      // 	      const GenParticle* mom = static_cast<const GenParticle*> (p.mother(j));
-      // 	      const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
-      // 	      if (mom == NULL) break;
-      // 	      for (unsigned int k = 0; k < genParticles->size() && k<i; ++k) {
-      // 		const reco::GenParticle& testm = (*genParticles)[k];
-      // 		const GenParticle* testgm = static_cast<const GenParticle*> (testm.mother());
-      // 		if (testm.pt() == mom->pt()) {
-      // 		  if(gmom == NULL || (testgm!=NULL) && (gmom->pt() == testgm->pt())) {
-      // 		    idx = k;
-      // 		    if(blabalot) cout << "     Found a hit for a mother for index " << i << "! It's index " << idx << " (pdgid " << genID[idx] << ")" << endl;
-      // 		    break;
-      // 		  }
-      // 		}
-      // 	      }
-      // 	      if(j==0) genMo1Index[i]=idx;
-      // 	      if(j==1) genMo2Index[i]=idx;
-      // 	    }
-      // 	    if(Promptness[i]==-1&&genMo1Index[i]>=0&&Promptness[genMo1Index[i]]>-1) Promptness[i]=Promptness[genMo1Index[i]]+1;
-      // 	    if(blabalot) cout << "                    Promtpness: " << Promptness[i] << endl;
-      // 	    if(blabalot) cout << "          Mother 1: " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
-      // 	    if(blabalot) cout << "          Mother 2: " << genMo2Index[i] << endl;
-      // 	  }
-	  
-      // 	  // STEP 2: Loop from end to start flipping storeflag when necessary
-      // 	  float genPtThreshold=5.0; // any particle with less pt than this will not be stored.
-      // 	  for(int i=nGenParticles-1;i>=0;i--) {
-      // 	    if(genStatus[i]!=1) continue;
-      // 	    if(genPt[i]<genPtThreshold) continue;
-      // 	    FlipGenStoreFlag(i,Promptness,genMo1Index,genMo2Index,StoreFlag);
-      // 	  }
-	  
-      // 	  // Intermediate step: Make sure that all first particles are stored, and that the earliest particles are stored (i.e. promptness criteria are met)
-      // 	  for(int i=nGenParticles-1;i>=0;i--) {
-      // 	    if(Promptness[i]<4&&Promptness[i]>=0) StoreFlag[i]=true;
-      // 	    if(i<20) StoreFlag[i]=true;
-      // 	  }
-	  
-      // 	  // STEP 3: Loop again, setting new index ("nindex") and replacing Mo1 by if(Mo1>-1) Mo1=nindex[index];, same for Mo2. If storeflag, store it directly.
-      // 	  fTnGenParticles=-1;
-      // 	  for(int i=0;i<nGenParticles;i++) {
-      // 	    if(!StoreFlag[i]) continue;
-      // 	    fTnGenParticles++;
-      // 	    if(fTnGenParticles>nStoredGenParticles) {
-      // 	      edm::LogWarning("NTP") << "@SUB=analyze()"
-      // 	      << "Maximum number of gen particles exceeded";
-      // 	      fTflagmaxgenpartexc = 1;
-      // 	      break;
-      // 	    }
-	    
-      // 	    genNIndex[i]=fTnGenParticles;
-	    
-      // 	    //store everything
-      // 	    fTgenInfoId[fTnGenParticles] = genID[i];
-      // 	    fTgenInfoStatus[fTnGenParticles] = genStatus[i];
-      // 	    fTgenInfoNMo[fTnGenParticles] = genNMo[i];
-      // 	    fTgenInfoMo1Pt[fTnGenParticles]=0;
-      // 	    fTgenInfoMo2Pt[fTnGenParticles]=0;
-      // 	    if(genMo1Index[i]>=0) {
-      // 	      fTgenInfoMo1Pt[fTnGenParticles]=genPt[genMo1Index[i]];
-      // 	      fTgenInfoMo1[fTnGenParticles]=genNIndex[genMo1Index[i]];
-      // 	    } else {
-      // 	      fTgenInfoMo1[fTnGenParticles]=-1;
-      // 	    }
-      // 	    if(genMo2Index[i]>=0) {
-      // 	      fTgenInfoMo2Pt[fTnGenParticles]=genPt[genMo2Index[i]];
-      // 	      fTgenInfoMo2[fTnGenParticles]=genNIndex[genMo2Index[i]];
-      // 	    } else {
-      // 	      fTgenInfoMo2[fTnGenParticles]=-1;
-      // 	    }
-	    
-      // 	    fTPromptnessLevel[fTnGenParticles]=Promptness[i];
-      // 	    fTgenInfoPt[fTnGenParticles] = genPt[i];
-      // 	    fTgenInfoEta[fTnGenParticles] = genEta[i];
-      // 	    fTgenInfoPhi[fTnGenParticles] = genPhi[i];
-      // 	    fTgenInfoPx[fTnGenParticles] = genPx[i];
-      // 	    fTgenInfoPy[fTnGenParticles] = genPy[i];
-      // 	    fTgenInfoPz[fTnGenParticles] = genPz[i];
-      // 	    fTgenInfoM[fTnGenParticles] = genM[i];
-
-      // 	    if(blabalot) {
-      // 	      cout << "Working particle " << i << " with Promptness: " << Promptness[i] << "  (storage number: " << fTnGenParticles << ")" << endl;
-      // 	      cout << "    Mother is Particle " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
-      // 	      cout << "Particle " << fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i]                     << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
-      // 	      cout << "stored:  " << fTnGenParticles << "  (" << i << ")                      " << fTgenInfoId[fTnGenParticles] << "                          " << fTgenInfoMo1[fTnGenParticles] << "         " << fTgenInfoMo1Pt[fTnGenParticles] << endl;
-      // 	    }
-	    
-      // 	  }
-	  
-      // 	  fTnGenParticles++;
-      // 	  if(blabalot) cout << "A total of " << fTnGenParticles << " Particles  have been stored out of " << nGenParticles << " ( " << 100*fTnGenParticles/(float)nGenParticles << " %)" << endl;
-	  
-	  
-      // 	  float gluinomass=0;
-      // 	  float ngluinomass=0;
-      // 	  float chi2mass=0;
-      // 	  float nchi2mass=0;
-      // 	  float chi1mass=0;
-      // 	  float nchi1mass=0;
-	  
-      // 	  for(size_t i = 0; i < genParticles->size(); ++ i) {
-      // 	    const GenParticle & p = (*genParticles)[i];
-      // 	    int id = p.pdgId();
-      // 	    double mass = p.mass();
-      // 	    if(id==1000021) {
-      // 	      gluinomass+=mass;
-      // 	      ngluinomass++;
-      // 	    }
-      // 	    if(id==1000023) {
-      // 	      chi2mass+=mass;
-      // 	      nchi2mass++;
-      // 	    }
-      // 	    if(id==1000022) {
-      // 	      chi1mass+=mass;
-      // 	      nchi1mass++;
-      // 	    }
-      // 	  }
-	  
-      // 	  if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
-      // 	    fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
-      // 	    fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
-      // 	  }
-      // 	}// end of bloat with gen information
-
-
-      ////////////////////////////////////////////////////////
-      // Process other jet collections, as configured
-      for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-            it != jetFillers.end(); ++it )
-        (*it)->fillProducts(iEvent,iSetup);
-      for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
-            it != muonFillers.end(); ++it ) 
-        (*it)->fillProducts(iEvent,iSetup);
-      for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
-            it != electronFillers.end(); ++it ) 
-        (*it)->fillProducts(iEvent,iSetup);
-      for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
-            it != tauFillers.end(); ++it ) 
-        (*it)->fillProducts(iEvent,iSetup);
-
-      ///////////////////////////////////////////////////////////////////////////////
-      // Fill Tree //////////////////////////////////////////////////////////////////
-      putProducts( iEvent );
-      for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
-            it != jetFillers.end(); ++it )
-        (*it)->putProducts(iEvent);
-      for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
-            it != muonFillers.end(); ++it ) 
-        (*it)->putProducts(iEvent);
-      for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
-            it != electronFillers.end(); ++it ) 
-        (*it)->putProducts(iEvent);
-      for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
-            it != tauFillers.end(); ++it ) 
-        (*it)->putProducts(iEvent);
-
-      fNFillTree++;
-
-      // Not used as a filter right now
-      return true;
+  ////////////////////////////////////////////////////////
+  // Get and Dump (M)E(T) Variables:
+  // Tracks:
+  int nqtrk(-1);
+  *fTNTracksTot = tracks->size();
+  *fTTrkPtSumx = 0.; *fTTrkPtSumy = 0.;
+  for( TrackCollection::const_iterator it = tracks->begin(); it != tracks->end() ; ++it ){
+    *fTTrkPtSumx += it->px(); // Calculated for ALL tracks
+    *fTTrkPtSumy += it->py();
+    if(it->pt() < fMinTrkPt) continue;
+    if(fabs(it->eta()) > fMaxTrkEta) continue;
+    if(it->normalizedChi2() > fMaxTrkNChi2) continue;
+    if(it->numberOfValidHits() < fMinTrkNHits) continue;
+    nqtrk++; // starts at 0
+    // Check if maximum number of tracks is exceeded already
+    if(nqtrk >= gMaxNTrks) {
+      edm::LogWarning("NTP") << "@SUB=analyze"
+                             << "Maximum number of tracks exceeded";
+      *fTMaxTrkExceed = 1;
+      *fTGoodEvent = 1;
+      break;
     }
+    fTTrkPt    ->push_back(it->pt()*it->charge());
+    fTTrkEta   ->push_back(it->eta());
+    fTTrkPhi   ->push_back(it->phi());
+    fTTrkNChi2 ->push_back(it->normalizedChi2());
+    fTTrkNHits ->push_back(it->numberOfValidHits());
+    fTTrkVtxDz ->push_back(it->dz(primVtx->position()));
+    fTTrkVtxDxy->push_back(it->dxy(primVtx->position()));	
+    fTTrkGood  ->push_back(0);
+  }
+  *fTNTracks = nqtrk+1;
+
+  *fTTrkPtSum = sqrt((*fTTrkPtSumx)*(*fTTrkPtSumx) + (*fTTrkPtSumy)*(*fTTrkPtSumy));
+  TVector3 trkPtSum(*fTTrkPtSumx, *fTTrkPtSumy, 0.);
+  *fTTrkPtSumPhi = trkPtSum.Phi();
+
+  // Calotowers:
+  (*fTNCaloTowers) = calotowers->size();
+  *fTECALEsumx = 0.; *fTECALEsumy = 0.; *fTECALEsumz = 0.;
+  *fTHCALEsumx = 0.; *fTHCALEsumy = 0.; *fTHCALEsumz = 0.;
+  *fTSumEt = 0.; *fTECALSumEt = 0.; *fTHCALSumEt = 0.;
+  for(CaloTowerCollection::const_iterator itow = calotowers->begin();
+      itow!=calotowers->end(); ++itow ){
+    if(itow->energy() == 0.) continue; // Check against zero energy towers
+    *fTSumEt += itow->et();
+    *fTECALSumEt += itow->emEt();
+    *fTHCALSumEt += itow->hadEt();
+    double emFrac = itow->emEnergy()/itow->energy();
+    double hadFrac = itow->hadEnergy()/itow->energy();
+    *fTECALEsumx += itow->px()*emFrac;
+    *fTECALEsumy += itow->py()*emFrac;
+    *fTECALEsumz += itow->pz()*emFrac;
+    *fTHCALEsumx += itow->px()*hadFrac;
+    *fTHCALEsumy += itow->py()*hadFrac;
+    *fTHCALEsumz += itow->pz()*hadFrac;
+  }
+  TVector3 ecalMET(*fTECALEsumx, *fTECALEsumy, *fTECALEsumz);
+  TVector3 hcalMET(*fTHCALEsumx, *fTHCALEsumy, *fTHCALEsumz);
+  *fTECALMET    = ecalMET.Mag();
+  *fTECALMETPhi = ecalMET.Phi();
+  *fTHCALMET    = hcalMET.Mag();
+  *fTHCALMETPhi = hcalMET.Phi();
+  if(*fTECALEsumz != 0.) *fTECALMETEta = ecalMET.Eta();
+  else *fTECALMETEta = 0.;
+  if(*fTHCALEsumz != 0.) *fTHCALMETeta = hcalMET.Eta();
+  else *fTHCALMETeta = 0.;
+
+  // MET Collections:
+  *fTRawMET             = (calomet->at(0)).pt();
+  *fTRawMETpx           = (calomet->at(0)).px();
+  *fTRawMETpy           = (calomet->at(0)).py();
+  *fTRawMETphi          = (calomet->at(0)).phi();
+  *fTRawMETemEtFrac     = (calomet->at(0)).emEtFraction();
+  *fTRawMETemEtInEB     = (calomet->at(0)).emEtInEB();
+  *fTRawMETemEtInEE     = (calomet->at(0)).emEtInEE();
+  *fTRawMETemEtInHF     = (calomet->at(0)).emEtInHF();
+  *fTRawMEThadEtFrac    = (calomet->at(0)).etFractionHadronic();
+  *fTRawMEThadEtInHB    = (calomet->at(0)).hadEtInHB();
+  *fTRawMEThadEtInHE    = (calomet->at(0)).hadEtInHE();
+  *fTRawMEThadEtInHF    = (calomet->at(0)).hadEtInHF();
+  *fTRawMETSignificance = (calomet->at(0)).significance();
+
+  if (!fIsRealData) {
+    Handle<View<GenMET> > GenMET;
+    iEvent.getByLabel(fGenMETTag, GenMET);
+    *fTGenMET    = (GenMET->front()).pt();
+    *fTGenMETpx  = (GenMET->front()).px();
+    *fTGenMETpy  = (GenMET->front()).py();
+    *fTGenMETphi = (GenMET->front()).phi();
+  }
+
+  *fTTCMET    = (tcmet->at(0)).pt();
+  *fTTCMETpx  = (tcmet->at(0)).px();
+  *fTTCMETpy  = (tcmet->at(0)).py();
+  *fTTCMETphi = (tcmet->at(0)).phi();
+  *fTTCMETSignificance = (tcmet->at(0)).significance();
+
+  *fTPFMET    = (pfmet->front()).pt();
+  *fTPFMETpx  = (pfmet->front()).px();
+  *fTPFMETpy  = (pfmet->front()).py();
+  *fTPFMETphi = (pfmet->front()).phi();
+  *fTPFMETSignificance = (pfmet->front()).significance();
+  *fTPFSumEt  = (pfmet->front()).sumEt();
+
+  *fTMuJESCorrMET    = (corrmujesmet->at(0)).pt();
+  *fTMuJESCorrMETpx  = (corrmujesmet->at(0)).px();
+  *fTMuJESCorrMETpy  = (corrmujesmet->at(0)).py();
+  *fTMuJESCorrMETphi = (corrmujesmet->at(0)).phi();
+
+  if(*fTNJets > 1){
+    double dPhiMJ1 = TMath::Abs(reco::deltaPhi((*fTJPhi)[0], *fTMuJESCorrMETphi));
+    double dPhiMJ2 = TMath::Abs(reco::deltaPhi((*fTJPhi)[1], *fTMuJESCorrMETphi));
+    *fTMETR12 = TMath::Sqrt(dPhiMJ1*dPhiMJ1 + (TMath::Pi()-dPhiMJ2)*(TMath::Pi()-dPhiMJ2) );
+    *fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
+  }
+
+  *fTPFMETPAT     = (pfMETpat->front()).pt();
+  *fTPFMETPATpx   = (pfMETpat->front()).px();
+  *fTPFMETPATpy   = (pfMETpat->front()).py();
+  *fTPFMETPATphi  = (pfMETpat->front()).phi();
+  *fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
+
 
-    //________________________________________________________________________________________
-    // Declare all products
-    void NTupleProducer::declareProducts(void) { 
 
-      // Run products
-      produces<float,edm::InRun>("ExtXSecLO"     );
-      produces<float,edm::InRun>("ExtXSecNLO"    );
-      produces<float,edm::InRun>("IntXSec"       );
-      produces<float,edm::InRun>("MinMuPt"       );
-      produces<float,edm::InRun>("MaxMuEta"      );
-      produces<float,edm::InRun>("MinElPt"       );
-      produces<float,edm::InRun>("MaxElEta"      );
-      produces<float,edm::InRun>("MinJPt"        );
-      produces<float,edm::InRun>("MinRawJPt"     );
-      produces<float,edm::InRun>("MaxJEta"       );
-      produces<float,edm::InRun>("MinJEMfrac"    );
-                                                                
-      produces<float,edm::InRun>("MinTrkPt"      );
-      produces<float,edm::InRun>("MaxTrkEta"     );
-      produces<float,edm::InRun>("MaxTrkNChi2"   );
-      produces<int,edm::InRun>  ("MinTrkNHits"   );
-                                                                
-      produces<float,edm::InRun>("MinPhotonPt"   );
-      produces<float,edm::InRun>("MaxPhotonEta"  );
-      produces<float,edm::InRun>("MinSCraw"      );
-      produces<float,edm::InRun>("MinEBRechitE"  );
-  
-      produces<float,edm::InRun>("MinGenLeptPt"  );
-      produces<float,edm::InRun>("MaxGenLeptEta" );
-      produces<float,edm::InRun>("MinGenPhotPt"  );
-      produces<float,edm::InRun>("MaxGenPhotEta" );
-      produces<float,edm::InRun>("MinGenJetPt"   );
-      produces<float,edm::InRun>("MaxGenJetEta"  );
-
-      produces<float,edm::InRun>("BtagMatchDeltaR"  );
-                                                                
-      produces<int,edm::InRun>("MaxNMus"       );
-      produces<int,edm::InRun>("MaxNEles"      );
-      produces<int,edm::InRun>("MaxNJets"      );
-      produces<int,edm::InRun>("MaxNTrks"      );
-      produces<int,edm::InRun>("MaxNPhotons"   );
-      produces<int,edm::InRun>("MaxNSC"        );
-      produces<int,edm::InRun>("MaxNGenLep"    );
-      produces<int,edm::InRun>("MaxNGenPho"    );
-      produces<int,edm::InRun>("MaxNGenJet"    );
-      produces<int,edm::InRun>("MaxNVrtx"      );
-      produces<int,edm::InRun>("MaxNPileup"    );
-      produces<int,edm::InRun>("MaxNEBhits"    );
-
-      produces<std::vector<std::string>,edm::InRun>("HLTNames");
-      produces<std::vector<std::string>,edm::InRun>("L1PhysMenu");
-      produces<std::vector<std::string>,edm::InRun>("HLTLabels");
-
-      produces<std::vector<std::string>,edm::InRun>("PileUpData");
-      produces<std::vector<std::string>,edm::InRun>("PileUpMC");
-
-      // Event products
-      produces<int>("Run");
-      produces<int>("Event");
-      produces<int>("LumiSection");
-      produces<float>("PtHat");
-      produces<float>("QCDPartonicHT");
-      produces<int>("SigProcID");
-      produces<float>("PDFScalePDF");
-      produces<int>("PDFID1");
-      produces<int>("PDFID2");
-      produces<float>("PDFx1");
-      produces<float>("PDFx2");
-      produces<float>("PDFxPDF1");
-      produces<float>("PDFxPDF2");
-      produces<float>("GenWeight");
-      produces<std::vector<float> >("pdfW");
-      produces<float>("pdfWsum");
-      produces<int>("NPdfs");
-      produces<int>("PUnumInteractions");
-      produces<int>("PUnumTrueInteractions");
-      produces<int>("PUnumFilled");
-      produces<int>("PUOOTnumInteractionsEarly");
-      produces<int>("PUOOTnumInteractionsLate");
-      produces<std::vector<float> >("PUzPositions");
-      produces<std::vector<float> >("PUsumPtLowPt");
-      produces<std::vector<float> >("PUsumPtHighPt");
-      produces<std::vector<float> >("PUnTrksLowPt");
-      produces<std::vector<float> >("PUnTrksHighPt");
-      produces<float>("Rho");
-      produces<float>("RhoPFnoPU");
-      produces<float>("Weight");
-      produces<std::vector<int> >("HLTResults");
-      produces<std::vector<int> >("HLTPrescale");
-      produces<std::vector<int> >("L1PhysResults");
-      produces<std::vector<int> >("L1TechResults");
-      produces<int>("NHLTObjs");
-      for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
-        std::ostringstream s;
-        s << i;
-        produces<std::vector<int> >(("HLTObjectID"+s.str()).c_str());
-        produces<std::vector<float> >(("HLTObjectPt"+s.str()).c_str());
-        produces<std::vector<float> >(("HLTObjectEta"+s.str()).c_str());
-        produces<std::vector<float> >(("HLTObjectPhi"+s.str()).c_str());
-      }
-      produces<float>("PUWeightTotal");
-      produces<float>("PUWeightInTime");
-      produces<float>("MassGlu");
-      produces<float>("MassChi");
-      produces<float>("MassLSP");
-      produces<float>("xSMS");
-      produces<float>("xbarSMS");
-      produces<float>("M0");
-      produces<float>("M12");
-      produces<float>("signMu");
-      produces<float>("A0");
-      produces<int>("process");
-
-      produces<int>("MaxGenPartExceed");
-      produces<int>("nGenParticles");
-      produces<std::vector<int> >("genInfoId");
-      produces<std::vector<int> >("genInfoStatus");
-      produces<std::vector<int> >("genInfoNMo");
-      produces<std::vector<int> >("genInfoNDa");
-      produces<std::vector<int> >("genInfoMo1");
-      produces<std::vector<int> >("genInfoMo2");
-      produces<std::vector<int> >("genInfoDa1");
-      produces<std::vector<int> >("genInfoDa2");
-      produces<std::vector<int> >("genInfoMoIndex");
-      produces<std::vector<int> >("PromptnessLevel");
-      produces<std::vector<float> >("genInfoMass");
-      produces<std::vector<float> >("genInfoMo1Pt");
-      produces<std::vector<float> >("genInfoMo2Pt");
-      produces<std::vector<float> >("genInfoPt");
-      produces<std::vector<float> >("genInfoEta");
-      produces<std::vector<float> >("genInfoPhi");
-      produces<std::vector<float> >("genInfoPx");
-      produces<std::vector<float> >("genInfoPy");
-      produces<std::vector<float> >("genInfoPz");
-      produces<std::vector<float> >("genInfoM");
-      produces<std::vector<float> >("genInfoPromptFlag");
-
-      produces<int>("PrimVtxGood");
-      produces<float>("PrimVtxx");
-      produces<float>("PrimVtxy");
-      produces<float>("PrimVtxz");
-      produces<float>("PrimVtxRho");
-      produces<float>("PrimVtxxE");
-      produces<float>("PrimVtxyE");
-      produces<float>("PrimVtxzE");
-      produces<float>("PrimVtxNChi2");
-      produces<float>("PrimVtxNdof");
-      produces<int>("PrimVtxIsFake");
-      produces<float>("PrimVtxPtSum");
-      produces<float>("Beamspotx");
-      produces<float>("Beamspoty");
-      produces<float>("Beamspotz");
-      produces<int>("NCaloTowers");
-      produces<int>("GoodEvent");
-      produces<int>("MaxMuExceed");
-      produces<int>("MaxElExceed");
-      produces<int>("MaxJetExceed");
-      produces<int>("MaxUncJetExceed");
-      produces<int>("MaxTrkExceed");
-      produces<int>("MaxPhotonsExceed");
-      produces<int>("MaxGenLepExceed");
-      produces<int>("MaxGenPhoExceed");
-      produces<int>("MaxGenJetExceed");
-      produces<int>("MaxVerticesExceed");
-      produces<int>("HBHENoiseFlag");
-      produces<int>("HBHENoiseFlagIso");
-      produces<int>("CSCTightHaloID");
-      produces<int>("EcalDeadTPFilterFlag");
-      produces<int>("RecovRecHitFilterFlag");
-      produces<int>("RA2TrackingFailureFilterFlag");
-      //FR produces<int>("PBNRFlag");
-      produces<int>("NGenLeptons");
-      produces<std::vector<int> >("GenLeptonID");
-      produces<std::vector<float> >("GenLeptonPt");
-      produces<std::vector<float> >("GenLeptonEta");
-      produces<std::vector<float> >("GenLeptonPhi");
-      produces<std::vector<int> >("GenLeptonMID");
-      produces<std::vector<int> >("GenLeptonMStatus");
-      produces<std::vector<float> >("GenLeptonMPt");
-      produces<std::vector<float> >("GenLeptonMEta");
-      produces<std::vector<float> >("GenLeptonMPhi");
-      produces<std::vector<int> >("GenLeptonGMID");
-      produces<std::vector<int> >("GenLeptonGMStatus");
-      produces<std::vector<float> >("GenLeptonGMPt");
-      produces<std::vector<float> >("GenLeptonGMEta");
-      produces<std::vector<float> >("GenLeptonGMPhi");
-      produces<int>("NGenPhotons");
-      produces<std::vector<float> >("GenPhotonPt");
-      produces<std::vector<float> >("GenPhotonEta");
-      produces<std::vector<float> >("GenPhotonPhi");
-      produces<std::vector<float> >("GenPhotonPartonMindR");
-      produces<std::vector<int> >("GenPhotonMotherID");
-      produces<std::vector<int> >("GenPhotonMotherStatus");
-      produces<int>("NGenJets");
-      produces<std::vector<float> >("GenJetPt");
-      produces<std::vector<float> >("GenJetEta");
-      produces<std::vector<float> >("GenJetPhi");
-      produces<std::vector<float> >("GenJetE");
-      produces<std::vector<float> >("GenJetEmE");
-      produces<std::vector<float> >("GenJetHadE");
-      produces<std::vector<float> >("GenJetInvE");
-      produces<int>("NVrtx");
-      produces<std::vector<float> >("VrtxX");
-      produces<std::vector<float> >("VrtxY");
-      produces<std::vector<float> >("VrtxZ");
-      produces<std::vector<float> >("VrtxXE");
-      produces<std::vector<float> >("VrtxYE");
-      produces<std::vector<float> >("VrtxZE");
-      produces<std::vector<float> >("VrtxNdof");
-      produces<std::vector<float> >("VrtxChi2");
-      produces<std::vector<float> >("VrtxNtrks");
-      produces<std::vector<float> >("VrtxSumPt");
-      produces<std::vector<int> >("VrtxIsFake");
-      produces<int>("NMus");
-      produces<int>("NMusTot");
-      produces<int>("NGMus");
-      produces<int>("NTMus");
-      produces<std::vector<int> >("MuGood");
-      produces<std::vector<int> >("MuIsIso");
-      produces<std::vector<int> >("MuIsGlobalMuon");
-      produces<std::vector<int> >("MuIsTrackerMuon");
-      produces<std::vector<float> >("MuPx");
-      produces<std::vector<float> >("MuPy");
-      produces<std::vector<float> >("MuPz");
-      produces<std::vector<float> >("MuPt");
-      produces<std::vector<float> >("MuInnerTkPt");
-      produces<std::vector<float> >("MuPtE");
-      produces<std::vector<float> >("MuE");
-      produces<std::vector<float> >("MuEt");
-      produces<std::vector<float> >("MuEta");
-      produces<std::vector<float> >("MuPhi");
-      produces<std::vector<int> >("MuCharge");
-      produces<std::vector<float> >("MuRelIso03");
-      produces<std::vector<float> >("MuIso03SumPt");
-      produces<std::vector<float> >("MuIso03EmEt");
-      produces<std::vector<float> >("MuIso03HadEt");
-      produces<std::vector<float> >("MuIso03EMVetoEt");
-      produces<std::vector<float> >("MuIso03HadVetoEt");
-      produces<std::vector<float> >("MuIso05SumPt");
-      produces<std::vector<float> >("MuIso05EmEt");
-      produces<std::vector<float> >("MuIso05HadEt");
-      produces<std::vector<float> >("MuEem");
-      produces<std::vector<float> >("MuEhad");
-      produces<std::vector<float> >("MuD0BS");
-      produces<std::vector<float> >("MuD0PV");
-      produces<std::vector<float> >("MuD0E");
-      produces<std::vector<float> >("MuDzBS");
-      produces<std::vector<float> >("MuDzPV");
-      produces<std::vector<float> >("MuDzE");
-      produces<std::vector<float> >("MuNChi2");
-      produces<std::vector<int> >("MuNGlHits");
-      produces<std::vector<int> >("MuNMuHits");
-      produces<std::vector<int> >("MuNTkHits");
-      produces<std::vector<int> >("MuNPxHits");
-      produces<std::vector<float> >("MuInnerTkNChi2");
-      produces<std::vector<int> >("MuNMatches");
-      produces<std::vector<int> >("MuNChambers");
-      produces<std::vector<float> >("MuCaloComp");
-      produces<std::vector<float> >("MuSegmComp");
-      produces<std::vector<int> >("MuIsGMPT");
-      produces<std::vector<int> >("MuIsGMTkChiComp");
-      produces<std::vector<int> >("MuIsGMStaChiComp");
-      produces<std::vector<int> >("MuIsGMTkKinkTight");
-      produces<std::vector<int> >("MuIsAllStaMuons");
-      produces<std::vector<int> >("MuIsAllTrkMuons");
-      produces<std::vector<int> >("MuIsTrkMuonArbitrated");
-      produces<std::vector<int> >("MuIsAllArbitrated");
-      produces<std::vector<int> >("MuIsTMLSLoose");
-      produces<std::vector<int> >("MuIsTMLSTight");
-      produces<std::vector<int> >("MuIsTM2DCompLoose");
-      produces<std::vector<int> >("MuIsTM2DCompTight");
-      produces<std::vector<int> >("MuIsTMOneStationLoose");
-      produces<std::vector<int> >("MuIsTMOneStationTight");
-      produces<std::vector<int> >("MuIsTMLSOptLowPtLoose");
-      produces<std::vector<int> >("MuIsTMLSAngLoose");
-      produces<std::vector<int> >("MuIsTMLSAngTight");
-      produces<std::vector<int> >("MuIsTMOneStationAngTight");
-      produces<std::vector<int> >("MuIsTMOneStationAngLoose");
-      produces<std::vector<int> >("MuGenID");
-      produces<std::vector<int> >("MuGenStatus");
-      produces<std::vector<float> >("MuGenPt");
-      produces<std::vector<float> >("MuGenEta");
-      produces<std::vector<float> >("MuGenPhi");
-      produces<std::vector<float> >("MuGenE");
-      produces<std::vector<int> >("MuGenMID");
-      produces<std::vector<int> >("MuGenMStatus");
-      produces<std::vector<float> >("MuGenMPt");
-      produces<std::vector<float> >("MuGenMEta");
-      produces<std::vector<float> >("MuGenMPhi");
-      produces<std::vector<float> >("MuGenME");
-      produces<std::vector<int> >("MuGenGMID");
-      produces<std::vector<int> >("MuGenGMStatus");
-      produces<std::vector<float> >("MuGenGMPt");
-      produces<std::vector<float> >("MuGenGMEta");
-      produces<std::vector<float> >("MuGenGMPhi");
-      produces<std::vector<float> >("MuGenGME");
-      produces<int>("NEBhits");
-      produces<std::vector<float> >("EBrechitE");
-      produces<std::vector<float> >("EBrechitPt");
-      produces<std::vector<float> >("EBrechitEta");
-      produces<std::vector<float> >("EBrechitPhi");
-      produces<std::vector<float> >("EBrechitChi2");
-      produces<std::vector<float> >("EBrechitTime");
-      produces<std::vector<float> >("EBrechitE4oE1");
-      produces<std::vector<float> >("EBrechitE2oE9");
-      produces<int>("NEles");
-      produces<int>("NElesTot");
-      produces<std::vector<int> >("ElGood");
-      produces<std::vector<int> >("ElIsIso");
-      produces<std::vector<int> >("ElChargeMisIDProb");
-      produces<std::vector<float> >("ElPx");
-      produces<std::vector<float> >("ElPy");
-      produces<std::vector<float> >("ElPz");
-      produces<std::vector<float> >("ElPt");
-      produces<std::vector<float> >("ElPtE");
-      produces<std::vector<float> >("ElE");
-      produces<std::vector<float> >("ElEt");
-      produces<std::vector<float> >("ElEta");
-      produces<std::vector<float> >("ElTheta");
-      produces<std::vector<float> >("ElSCEta");
-      produces<std::vector<float> >("ElPhi");
-      produces<std::vector<float> >("ElGsfTkPt");
-      produces<std::vector<float> >("ElGsfTkEta");
-      produces<std::vector<float> >("ElGsfTkPhi");
-      produces<std::vector<float> >("ElTrkMomentumError");
-      produces<std::vector<float> >("ElEcalEnergyError");
-      produces<std::vector<float> >("ElEleMomentumError");
-      produces<std::vector<int> >("ElNBrems");
-      produces<std::vector<float> >("ElD0BS");
-      produces<std::vector<float> >("ElD0PV");
-      produces<std::vector<float> >("ElD0E");
-      produces<std::vector<float> >("ElDzBS");
-      produces<std::vector<float> >("ElDzPV");
-      produces<std::vector<float> >("ElDzE");
-      produces<std::vector<float> >("ElRelIso03");
-      produces<std::vector<float> >("ElRelIso04");
-      produces<std::vector<float> >("ElDR03TkSumPt");
-      produces<std::vector<float> >("ElDR04TkSumPt");
-      produces<std::vector<float> >("ElDR03EcalRecHitSumEt");
-      produces<std::vector<float> >("ElDR04EcalRecHitSumEt");
-      produces<std::vector<float> >("ElDR03HcalTowerSumEt");
-      produces<std::vector<float> >("ElDR04HcalTowerSumEt");
-      produces<std::vector<float> >("ElNChi2");
-      produces<std::vector<int> >("ElCharge");
-      produces<std::vector<int> >("ElCInfoIsGsfCtfCons");
-      produces<std::vector<int> >("ElCInfoIsGsfCtfScPixCons");
-      produces<std::vector<int> >("ElCInfoIsGsfScPixCons");
-      produces<std::vector<int> >("ElScPixCharge");
-      produces<std::vector<float> >("ElClosestCtfTrackPt");
-      produces<std::vector<float> >("ElClosestCtfTrackEta");
-      produces<std::vector<float> >("ElClosestCtfTrackPhi");
-      produces<std::vector<int> >("ElClosestCtfTrackCharge");
-      produces<std::vector<float> >("ElIDMva");
-      produces<std::vector<int> >("ElIDTight");
-      produces<std::vector<int> >("ElIDLoose");
-      produces<std::vector<int> >("ElIDRobustTight");
-      produces<std::vector<int> >("ElIDRobustLoose");
-      produces<std::vector<int> >("ElIDsimpleWPrelIso");
-      produces<std::vector<int> >("ElIDsimpleWP80relIso");
-      produces<std::vector<int> >("ElIDsimpleWP85relIso");
-      produces<std::vector<int> >("ElIDsimpleWP90relIso");
-      produces<std::vector<int> >("ElIDsimpleWP95relIso");
-      produces<std::vector<int> >("ElInGap");
-      produces<std::vector<int> >("ElEcalDriven");
-      produces<std::vector<int> >("ElTrackerDriven");
-      produces<std::vector<int> >("ElBasicClustersSize");
-      produces<std::vector<float> >("Elfbrem");
-      produces<std::vector<float> >("ElHcalOverEcal");
-      produces<std::vector<float> >("ElE1x5");
-      produces<std::vector<float> >("ElE5x5");
-      produces<std::vector<float> >("ElE2x5Max");
-      produces<std::vector<float> >("ElSigmaIetaIeta");
-      produces<std::vector<float> >("ElDeltaPhiSeedClusterAtCalo");
-      produces<std::vector<float> >("ElDeltaEtaSeedClusterAtCalo");
-      produces<std::vector<float> >("ElDeltaPhiSuperClusterAtVtx");
-      produces<std::vector<float> >("ElDeltaEtaSuperClusterAtVtx");
-      produces<std::vector<float> >("ElCaloEnergy");
-      produces<std::vector<float> >("ElTrkMomAtVtx");
-      produces<std::vector<float> >("ElESuperClusterOverP");
-      produces<std::vector<int> >("ElNumberOfMissingInnerHits");
-      produces<std::vector<int> >("ElSCindex");
-      produces<std::vector<float> >("ElConvPartnerTrkDist");
-      produces<std::vector<float> >("ElConvPartnerTrkDCot");
-      produces<std::vector<float> >("ElConvPartnerTrkPt");
-      produces<std::vector<float> >("ElConvPartnerTrkEta");
-      produces<std::vector<float> >("ElConvPartnerTrkPhi");
-      produces<std::vector<float> >("ElConvPartnerTrkCharge");
-      produces<std::vector<int> >("ElScSeedSeverity");
-      produces<std::vector<float> >("ElE1OverE9");
-      produces<std::vector<float> >("ElS4OverS1");
-      produces<std::vector<int> >("ElGenID");
-      produces<std::vector<int> >("ElGenStatus");
-      produces<std::vector<float> >("ElGenPt");
-      produces<std::vector<float> >("ElGenEta");
-      produces<std::vector<float> >("ElGenPhi");
-      produces<std::vector<float> >("ElGenE");
-      produces<std::vector<int> >("ElGenMID");
-      produces<std::vector<int> >("ElGenMStatus");
-      produces<std::vector<float> >("ElGenMPt");
-      produces<std::vector<float> >("ElGenMEta");
-      produces<std::vector<float> >("ElGenMPhi");
-      produces<std::vector<float> >("ElGenME");
-      produces<std::vector<int> >("ElGenGMID");
-      produces<std::vector<int> >("ElGenGMStatus");
-      produces<std::vector<float> >("ElGenGMPt");
-      produces<std::vector<float> >("ElGenGMEta");
-      produces<std::vector<float> >("ElGenGMPhi");
-      produces<std::vector<float> >("ElGenGME");
-      produces<int>("NPhotons");
-      produces<int>("NPhotonsTot");
-      produces<std::vector<int> >("PhoGood");
-      produces<std::vector<int> >("PhoIsIso");
-      produces<std::vector<float> >("PhoPt");
-      produces<std::vector<float> >("PhoPx");
-      produces<std::vector<float> >("PhoPy");
-      produces<std::vector<float> >("PhoPz");
-      produces<std::vector<float> >("PhoEta");
-      produces<std::vector<float> >("PhoPhi");
-      produces<std::vector<float> >("PhoEnergy");
-      produces<std::vector<float> >("PhoIso03Ecal");
-      produces<std::vector<float> >("PhoIso03Hcal");
-      produces<std::vector<float> >("PhoIso03TrkSolid");
-      produces<std::vector<float> >("PhoIso03TrkHollow");
-      produces<std::vector<float> >("PhoIso03");
-      produces<std::vector<float> >("PhoIso04Ecal");
-      produces<std::vector<float> >("PhoIso04Hcal");
-      produces<std::vector<float> >("PhoIso04TrkSolid");
-      produces<std::vector<float> >("PhoIso04TrkHollow");
-      produces<std::vector<float> >("PhoIso04");
-      produces<std::vector<float> >("PhoR9");
-      produces<std::vector<float> >("PhoCaloPositionX");
-      produces<std::vector<float> >("PhoCaloPositionY");
-      produces<std::vector<float> >("PhoCaloPositionZ");
-      produces<std::vector<float> >("PhoHoverE");
-      produces<std::vector<float> >("PhoH1overE");
-      produces<std::vector<float> >("PhoH2overE");
-      produces<std::vector<float> >("PhoSigmaIetaIeta");
-      produces<std::vector<float> >("PhoSCRawEnergy");
-      produces<std::vector<float> >("PhoSCEtaWidth");
-      produces<std::vector<float> >("PhoSCSigmaPhiPhi");
-      produces<std::vector<int> >("PhoHasPixSeed");
-      produces<std::vector<int> >("PhoHasConvTrks");
-      produces<std::vector<int> >("PhoScSeedSeverity");
-      produces<std::vector<float> >("PhoE1OverE9");
-      produces<std::vector<float> >("PhoS4OverS1");
-      produces<std::vector<float> >("PhoSigmaEtaEta");
-      produces<std::vector<float> >("PhoE1x5");
-      produces<std::vector<float> >("PhoE2x5");
-      produces<std::vector<float> >("PhoE3x3");
-      produces<std::vector<float> >("PhoE5x5");
-      produces<std::vector<float> >("PhomaxEnergyXtal");
-      produces<std::vector<float> >("PhoIso03HcalDepth1");
-      produces<std::vector<float> >("PhoIso03HcalDepth2");
-      produces<std::vector<float> >("PhoIso04HcalDepth1");
-      produces<std::vector<float> >("PhoIso04HcalDepth2");
-      produces<std::vector<int> >("PhoIso03nTrksSolid");
-      produces<std::vector<int> >("PhoIso03nTrksHollow");
-      produces<std::vector<int> >("PhoIso04nTrksSolid");
-      produces<std::vector<int> >("PhoIso04nTrksHollow");
-      produces<std::vector<int> >("PhoisEB");
-      produces<std::vector<int> >("PhoisEE");
-      produces<std::vector<int> >("PhoisEBEtaGap");
-      produces<std::vector<int> >("PhoisEBPhiGap");
-      produces<std::vector<int> >("PhoisEERingGap");
-      produces<std::vector<int> >("PhoisEEDeeGap");
-      produces<std::vector<int> >("PhoisEBEEGap");
-      produces<std::vector<int> >("PhoisPFlowPhoton");
-      produces<std::vector<int> >("PhoisStandardPhoton");
-      produces<std::vector<int> >("PhoMCmatchindex");
-      produces<std::vector<int> >("PhoMCmatchexitcode");
-      produces<std::vector<float> >("PhoChargedHadronIso");
-      produces<std::vector<float> >("PhoNeutralHadronIso");
-      produces<std::vector<float> >("PhoPhotonIso");
-      produces<std::vector<int> >("PhoisPFPhoton");
-      produces<std::vector<int> >("PhoisPFElectron");
-      produces<std::vector<int> >("PhotSCindex");
-      produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt0");
-      produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt5");
-      produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt0");
-      produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt5");
-      produces<std::vector<float> >("PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      produces<std::vector<float> >("PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      produces<std::vector<float> >("PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      produces<std::vector<float> >("PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt0");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt5");
-      produces<std::vector<float> >("PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
-      produces<std::vector<float> >("PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
-      produces<std::vector<float> >("PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
-      produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
-      produces<std::vector<bool> > ("PhoConvValidVtx");
-      produces<std::vector<int> >  ("PhoConvNtracks");
-      produces<std::vector<float> >("PhoConvChi2Probability");
-      produces<std::vector<float> >("PhoConvEoverP");
-      produces<int>("Nconv");
-      produces<std::vector<bool> >("ConvValidVtx");
-      produces<std::vector<int> >("ConvNtracks");
-      produces<std::vector<float> >("ConvChi2Probability");
-      produces<std::vector<float> >("ConvEoverP");
-      produces<std::vector<float> >("ConvZofPrimVtxFromTrks");
-      //     produces<int>("Ngv");
-      //     produces<std::vector<float> >("gvSumPtHi");
-      //     produces<std::vector<float> >("gvSumPtLo");
-      //     produces<std::vector<int> >("gvNTkHi");
-      //     produces<std::vector<int> >("gvNTkLo");
-      produces<int>("NSuperClusters");
-      produces<std::vector<float> >("SCRaw");
-      produces<std::vector<float> >("SCPre");
-      produces<std::vector<float> >("SCEnergy");
-      produces<std::vector<float> >("SCEta");
-      produces<std::vector<float> >("SCPhi");
-      produces<std::vector<float> >("SCPhiWidth");
-      produces<std::vector<float> >("SCEtaWidth");
-      produces<std::vector<float> >("SCBrem");
-      produces<std::vector<float> >("SCR9");
-      produces<std::vector<float> >("SCcrackcorrseed");
-      produces<std::vector<float> >("SCcrackcorr");
-      produces<std::vector<float> >("SClocalcorrseed");
-      produces<std::vector<float> >("SClocalcorr");
-      produces<std::vector<float> >("SCcrackcorrseedfactor");
-      produces<std::vector<float> >("SClocalcorrseedfactor");
-      produces<int>("NJets");
-      produces<int>("NJetsTot");
-      produces<std::vector<int> >("JGood");
-      produces<std::vector<float> >("JPx");
-      produces<std::vector<float> >("JPy");
-      produces<std::vector<float> >("JPz");
-      produces<std::vector<float> >("JPt");
-      produces<std::vector<float> >("JE");
-      produces<std::vector<float> >("JEt");
-      produces<std::vector<float> >("JEta");
-      produces<std::vector<float> >("JPhi");
-      produces<std::vector<float> >("JEcorr");
-      produces<std::vector<float> >("JArea");
-      produces<std::vector<float> >("JEtaRms");
-      produces<std::vector<float> >("JPhiRms");
-      produces<std::vector<int> >("JNConstituents");
-      produces<std::vector<int> >("JNAssoTracks");
-      produces<std::vector<int> >("JNNeutrals");
-      produces<std::vector<float> >("JChargedEmFrac");
-      produces<std::vector<float> >("JNeutralEmFrac");
-      produces<std::vector<float> >("JChargedHadFrac");
-      produces<std::vector<float> >("JNeutralHadFrac");
-      produces<std::vector<float> >("JChargedMuEnergyFrac");
-      produces<std::vector<float> >("JPhoFrac");
-      produces<std::vector<float> >("JHFHadFrac");
-      produces<std::vector<float> >("JHFEMFrac");
-      produces<std::vector<float> >("JPtD");
-      produces<std::vector<float> >("JRMSCand");
-      produces<std::vector<float> >("JeMinDR");
-      produces<std::vector<float> >("JbTagProbTkCntHighEff");
-      produces<std::vector<float> >("JbTagProbTkCntHighPur");
-      produces<std::vector<float> >("JbTagProbSimpSVHighEff");
-      produces<std::vector<float> >("JbTagProbSimpSVHighPur");
-      produces<std::vector<float> >("JMass");
-      produces<std::vector<float> >("Jtrk1px");
-      produces<std::vector<float> >("Jtrk1py");
-      produces<std::vector<float> >("Jtrk1pz");
-      produces<std::vector<float> >("Jtrk2px");
-      produces<std::vector<float> >("Jtrk2py");
-      produces<std::vector<float> >("Jtrk2pz");
-      produces<std::vector<float> >("Jtrk3px");
-      produces<std::vector<float> >("Jtrk3py");
-      produces<std::vector<float> >("Jtrk3pz");
-      produces<std::vector<float> >("JVtxx");
-      produces<std::vector<float> >("JVtxy");
-      produces<std::vector<float> >("JVtxz");
-      produces<std::vector<float> >("JVtxExx");
-      produces<std::vector<float> >("JVtxEyx");
-      produces<std::vector<float> >("JVtxEyy");
-      produces<std::vector<float> >("JVtxEzy");
-      produces<std::vector<float> >("JVtxEzz");
-      produces<std::vector<float> >("JVtxEzx");
-      produces<std::vector<float> >("JVtxNChi2");
-      produces<std::vector<int> >("JGenJetIndex");
-      produces<int>("NTracks");
-      produces<int>("NTracksTot");
-      produces<std::vector<int> >("TrkGood");
-      produces<std::vector<float> >("TrkPt");
-      produces<std::vector<float> >("TrkEta");
-      produces<std::vector<float> >("TrkPhi");
-      produces<std::vector<float> >("TrkNChi2");
-      produces<std::vector<float> >("TrkNHits");
-      produces<std::vector<float> >("TrkVtxDz");
-      produces<std::vector<float> >("TrkVtxDxy");
-      produces<float>("TrkPtSumx");
-      produces<float>("TrkPtSumy");
-      produces<float>("TrkPtSum");
-      produces<float>("TrkPtSumPhi");
-      produces<float>("SumEt");
-      produces<float>("ECALSumEt");
-      produces<float>("HCALSumEt");
-      produces<float>("ECALEsumx");
-      produces<float>("ECALEsumy");
-      produces<float>("ECALEsumz");
-      produces<float>("ECALMET");
-      produces<float>("ECALMETPhi");
-      produces<float>("ECALMETEta");
-      produces<float>("HCALEsumx");
-      produces<float>("HCALEsumy");
-      produces<float>("HCALEsumz");
-      produces<float>("HCALMET");
-      produces<float>("HCALMETPhi");
-      produces<float>("HCALMETeta");
-      produces<float>("RawMET");
-      produces<float>("RawMETpx");
-      produces<float>("RawMETpy");
-      produces<float>("RawMETphi");
-      produces<float>("RawMETemEtFrac");
-      produces<float>("RawMETemEtInEB");
-      produces<float>("RawMETemEtInEE");
-      produces<float>("RawMETemEtInHF");
-      produces<float>("RawMEThadEtFrac");
-      produces<float>("RawMEThadEtInHB");
-      produces<float>("RawMEThadEtInHE");
-      produces<float>("RawMEThadEtInHF");
-      produces<float>("RawMETSignificance");
-      produces<float>("GenMET");
-      produces<float>("GenMETpx");
-      produces<float>("GenMETpy");
-      produces<float>("GenMETphi");
-      produces<float>("TCMET");
-      produces<float>("TCMETpx");
-      produces<float>("TCMETpy");
-      produces<float>("TCMETphi");
-      produces<float>("TCMETSignificance");
-      produces<float>("MuJESCorrMET");
-      produces<float>("MuJESCorrMETpx");
-      produces<float>("MuJESCorrMETpy");
-      produces<float>("MuJESCorrMETphi");
-      produces<float>("PFMET");
-      produces<float>("PFMETpx");
-      produces<float>("PFMETpy");
-      produces<float>("PFMETphi");
-      produces<float>("PFMETSignificance");
-      produces<float>("PFSumEt");
-      produces<float>("PFMETPAT");
-      produces<float>("PFMETPATpx");
-      produces<float>("PFMETPATpy");
-      produces<float>("PFMETPATphi");
-      produces<float>("PFMETPATSignificance");
-      produces<float>("METR12");
-      produces<float>("METR21");
-
-    }
-
-    //________________________________________________________________________________________
-    // Reset all event variables
-    void NTupleProducer::resetProducts( void ) {
-  
-      fTRun.reset(new int(-999));
-      fTEvent.reset(new int(-999));
-      fTLumiSection.reset(new int(-999));
-      fTPtHat.reset(new float(-999.99));
-      fTQCDPartonicHT.reset(new float(-999.99));
-      fTSigProcID.reset(new int(-999));
-      fTPDFScalePDF.reset(new float(-999.99));
-      fTPDFID1.reset(new int(-999));
-      fTPDFID2.reset(new int(-999));
-      fTPDFx1.reset(new float(-999.99));
-      fTPDFx2.reset(new float(-999.99));
-      fTPDFxPDF1.reset(new float(-999.99));
-      fTPDFxPDF2.reset(new float(-999.99));
-      fTGenWeight.reset(new float(-999.99));
-      fTpdfW.reset(new std::vector<float> );
-      fTpdfWsum.reset(new float(-999.99));
-      fTNPdfs.reset(new int(-999));
-      fTPUnumInteractions.reset(new int(-999));
-      fTPUnumTrueInteractions.reset(new int(-999));
-      fTPUnumFilled.reset(new int(-999));
-      fTPUOOTnumInteractionsEarly.reset(new int(-999));
-      fTPUOOTnumInteractionsLate.reset(new int(-999));
-      fTPUzPositions.reset(new std::vector<float> );
-      fTPUsumPtLowPt.reset(new std::vector<float> );
-      fTPUsumPtHighPt.reset(new std::vector<float> );
-      fTPUnTrksLowPt.reset(new std::vector<float> );
-      fTPUnTrksHighPt.reset(new std::vector<float> );
-      fTRho.reset(new float(-999.99));
-      fTRhoPFnoPU.reset(new float(-999.99));
-      fTWeight.reset(new float(-999.99));
-      fTHLTResults.reset(new std::vector<int> );
-      fTHLTPrescale.reset(new std::vector<int> );
-      fTL1PhysResults.reset(new std::vector<int> );
-      fTL1TechResults.reset(new std::vector<int> );
-      fTNHLTObjs.reset(new int(-999));
-      for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
-        fTHLTObjectID[i].reset(new std::vector<int> );
-        fTHLTObjectPt[i].reset(new std::vector<float> );
-        fTHLTObjectEta[i].reset(new std::vector<float> );
-        fTHLTObjectPhi[i].reset(new std::vector<float> );
-      }
-      fTPUWeightTotal.reset(new float(-999.99));
-      fTPUWeightInTime.reset(new float(-999.99));
-      fTMassGlu.reset(new float(-999.99));
-      fTMassChi.reset(new float(-999.99));
-      fTMassLSP.reset(new float(-999.99));
-      fTxSMS.reset(new float(-999.99));
-      fTxbarSMS.reset(new float(-999.99));
-      fTM0.reset(new float(-999.99));
-      fTM12.reset(new float(-999.99));
-      fTsignMu.reset(new float(-999.99));
-      fTA0.reset(new float(-999.99));
-      fTprocess.reset(new int(-999));
-
-      fTMaxGenPartExceed.reset(new int(-999));
-      fTnGenParticles.reset(new int(-999));
-      fTgenInfoId.reset(new std::vector<int>);
-      fTgenInfoStatus.reset(new std::vector<int>);
-      fTgenInfoNMo.reset(new std::vector<int>);
-      fTgenInfoNDa.reset(new std::vector<int>);
-      fTgenInfoMo1.reset(new std::vector<int>);
-      fTgenInfoMo2.reset(new std::vector<int>);
-      fTgenInfoDa1.reset(new std::vector<int>);
-      fTgenInfoDa2.reset(new std::vector<int>);
-      fTgenInfoMoIndex.reset(new std::vector<int>);
-      fTPromptnessLevel.reset(new std::vector<int>);
-      fTgenInfoMass.reset(new std::vector<float>);
-      fTgenInfoMo1Pt.reset(new std::vector<float>);
-      fTgenInfoMo2Pt.reset(new std::vector<float>);
-      fTgenInfoPt.reset(new std::vector<float>);
-      fTgenInfoEta.reset(new std::vector<float>);
-      fTgenInfoPhi.reset(new std::vector<float>);
-      fTgenInfoPx.reset(new std::vector<float>);
-      fTgenInfoPy.reset(new std::vector<float>);
-      fTgenInfoPz.reset(new std::vector<float>);
-      fTgenInfoM.reset(new std::vector<float>);
-      fTgenInfoPromptFlag.reset(new std::vector<float>);
-
-      fTPrimVtxGood.reset(new int(-999));
-      fTPrimVtxx.reset(new float(-999.99));
-      fTPrimVtxy.reset(new float(-999.99));
-      fTPrimVtxz.reset(new float(-999.99));
-      fTPrimVtxRho.reset(new float(-999.99));
-      fTPrimVtxxE.reset(new float(-999.99));
-      fTPrimVtxyE.reset(new float(-999.99));
-      fTPrimVtxzE.reset(new float(-999.99));
-      fTPrimVtxNChi2.reset(new float(-999.99));
-      fTPrimVtxNdof.reset(new float(-999.99));
-      fTPrimVtxIsFake.reset(new int(-999));
-      fTPrimVtxPtSum.reset(new float(-999.99));
-      fTBeamspotx.reset(new float(-999.99));
-      fTBeamspoty.reset(new float(-999.99));
-      fTBeamspotz.reset(new float(-999.99));
-      fTNCaloTowers.reset(new int(-999));
-      fTGoodEvent.reset(new int(-999));
-      fTMaxMuExceed.reset(new int(-999));
-      fTMaxElExceed.reset(new int(-999));
-      fTMaxJetExceed.reset(new int(-999));
-      fTMaxUncJetExceed.reset(new int(-999));
-      fTMaxTrkExceed.reset(new int(-999));
-      fTMaxPhotonsExceed.reset(new int(-999));
-      fTMaxGenLepExceed.reset(new int(-999));
-      fTMaxGenPhoExceed.reset(new int(-999));
-      fTMaxGenJetExceed.reset(new int(-999));
-      fTMaxVerticesExceed.reset(new int(-999));
-      fTHBHENoiseFlag.reset(new int(-999));
-      fTHBHENoiseFlagIso.reset(new int(-999));
-      fTCSCTightHaloID.reset(new int(-999));
-      fTEcalDeadTPFilterFlag.reset(new int(-999));
-      fTRecovRecHitFilterFlag.reset(new int(-999));
-      fTRA2TrackingFailureFilterFlag.reset(new int(-999));
-      //FR fPBNRFlag.reset(new int(-999));
-      fTNGenLeptons.reset(new int(-999));
-      fTGenLeptonID.reset(new std::vector<int> );
-      fTGenLeptonPt.reset(new std::vector<float> );
-      fTGenLeptonEta.reset(new std::vector<float> );
-      fTGenLeptonPhi.reset(new std::vector<float> );
-      fTGenLeptonMID.reset(new std::vector<int> );
-      fTGenLeptonMStatus.reset(new std::vector<int> );
-      fTGenLeptonMPt.reset(new std::vector<float> );
-      fTGenLeptonMEta.reset(new std::vector<float> );
-      fTGenLeptonMPhi.reset(new std::vector<float> );
-      fTGenLeptonGMID.reset(new std::vector<int> );
-      fTGenLeptonGMStatus.reset(new std::vector<int> );
-      fTGenLeptonGMPt.reset(new std::vector<float> );
-      fTGenLeptonGMEta.reset(new std::vector<float> );
-      fTGenLeptonGMPhi.reset(new std::vector<float> );
-      fTNGenPhotons.reset(new int(-999));
-      fTGenPhotonPt.reset(new std::vector<float> );
-      fTGenPhotonEta.reset(new std::vector<float> );
-      fTGenPhotonPhi.reset(new std::vector<float> );
-      fTGenPhotonPartonMindR.reset(new std::vector<float> );
-      fTGenPhotonMotherID.reset(new std::vector<int> );
-      fTGenPhotonMotherStatus.reset(new std::vector<int> );
-      fTNGenJets.reset(new int(-999));
-      fTGenJetPt.reset(new std::vector<float> );
-      fTGenJetEta.reset(new std::vector<float> );
-      fTGenJetPhi.reset(new std::vector<float> );
-      fTGenJetE.reset(new std::vector<float> );
-      fTGenJetEmE.reset(new std::vector<float> );
-      fTGenJetHadE.reset(new std::vector<float> );
-      fTGenJetInvE.reset(new std::vector<float> );
-      fTNVrtx.reset(new int(-999));
-      fTVrtxX.reset(new std::vector<float> );
-      fTVrtxY.reset(new std::vector<float> );
-      fTVrtxZ.reset(new std::vector<float> );
-      fTVrtxXE.reset(new std::vector<float> );
-      fTVrtxYE.reset(new std::vector<float> );
-      fTVrtxZE.reset(new std::vector<float> );
-      fTVrtxNdof.reset(new std::vector<float> );
-      fTVrtxChi2.reset(new std::vector<float> );
-      fTVrtxNtrks.reset(new std::vector<float> );
-      fTVrtxSumPt.reset(new std::vector<float> );
-      fTVrtxIsFake.reset(new std::vector<int> );
-      fTNMus.reset(new int(-999));
-      fTNMusTot.reset(new int(-999));
-      fTNGMus.reset(new int(-999));
-      fTNTMus.reset(new int(-999));
-      fTMuGood.reset(new std::vector<int> );
-      fTMuIsIso.reset(new std::vector<int> );
-      fTMuIsGlobalMuon.reset(new std::vector<int> );
-      fTMuIsTrackerMuon.reset(new std::vector<int> );
-      fTMuPx.reset(new std::vector<float> );
-      fTMuPy.reset(new std::vector<float> );
-      fTMuPz.reset(new std::vector<float> );
-      fTMuPt.reset(new std::vector<float> );
-      fTMuInnerTkPt.reset(new std::vector<float> );
-      fTMuPtE.reset(new std::vector<float> );
-      fTMuE.reset(new std::vector<float> );
-      fTMuEt.reset(new std::vector<float> );
-      fTMuEta.reset(new std::vector<float> );
-      fTMuPhi.reset(new std::vector<float> );
-      fTMuCharge.reset(new std::vector<int> );
-      fTMuRelIso03.reset(new std::vector<float> );
-      fTMuIso03SumPt.reset(new std::vector<float> );
-      fTMuIso03EmEt.reset(new std::vector<float> );
-      fTMuIso03HadEt.reset(new std::vector<float> );
-      fTMuIso03EMVetoEt.reset(new std::vector<float> );
-      fTMuIso03HadVetoEt.reset(new std::vector<float> );
-      fTMuIso05SumPt.reset(new std::vector<float> );
-      fTMuIso05EmEt.reset(new std::vector<float> );
-      fTMuIso05HadEt.reset(new std::vector<float> );
-      fTMuEem.reset(new std::vector<float> );
-      fTMuEhad.reset(new std::vector<float> );
-      fTMuD0BS.reset(new std::vector<float> );
-      fTMuD0PV.reset(new std::vector<float> );
-      fTMuD0E.reset(new std::vector<float> );
-      fTMuDzBS.reset(new std::vector<float> );
-      fTMuDzPV.reset(new std::vector<float> );
-      fTMuDzE.reset(new std::vector<float> );
-      fTMuNChi2.reset(new std::vector<float> );
-      fTMuNGlHits.reset(new std::vector<int> );
-      fTMuNMuHits.reset(new std::vector<int> );
-      fTMuNTkHits.reset(new std::vector<int> );
-      fTMuNPxHits.reset(new std::vector<int> );
-      fTMuInnerTkNChi2.reset(new std::vector<float> );
-      fTMuNMatches.reset(new std::vector<int> );
-      fTMuNChambers.reset(new std::vector<int> );
-      fTMuCaloComp.reset(new std::vector<float> );
-      fTMuSegmComp.reset(new std::vector<float> );
-      fTMuIsGMPT.reset(new std::vector<int> );
-      fTMuIsGMTkChiComp.reset(new std::vector<int> );
-      fTMuIsGMStaChiComp.reset(new std::vector<int> );
-      fTMuIsGMTkKinkTight.reset(new std::vector<int> );
-      fTMuIsAllStaMuons.reset(new std::vector<int> );
-      fTMuIsAllTrkMuons.reset(new std::vector<int> );
-      fTMuIsTrkMuonArbitrated.reset(new std::vector<int> );
-      fTMuIsAllArbitrated.reset(new std::vector<int> );
-      fTMuIsTMLSLoose.reset(new std::vector<int> );
-      fTMuIsTMLSTight.reset(new std::vector<int> );
-      fTMuIsTM2DCompLoose.reset(new std::vector<int> );
-      fTMuIsTM2DCompTight.reset(new std::vector<int> );
-      fTMuIsTMOneStationLoose.reset(new std::vector<int> );
-      fTMuIsTMOneStationTight.reset(new std::vector<int> );
-      fTMuIsTMLSOptLowPtLoose.reset(new std::vector<int> );
-      fTMuIsTMLSAngLoose.reset(new std::vector<int> );
-      fTMuIsTMLSAngTight.reset(new std::vector<int> );
-      fTMuIsTMOneStationAngTight.reset(new std::vector<int> );
-      fTMuIsTMOneStationAngLoose.reset(new std::vector<int> );
-      fTMuGenID.reset(new std::vector<int> );
-      fTMuGenStatus.reset(new std::vector<int> );
-      fTMuGenPt.reset(new std::vector<float> );
-      fTMuGenEta.reset(new std::vector<float> );
-      fTMuGenPhi.reset(new std::vector<float> );
-      fTMuGenE.reset(new std::vector<float> );
-      fTMuGenMID.reset(new std::vector<int> );
-      fTMuGenMStatus.reset(new std::vector<int> );
-      fTMuGenMPt.reset(new std::vector<float> );
-      fTMuGenMEta.reset(new std::vector<float> );
-      fTMuGenMPhi.reset(new std::vector<float> );
-      fTMuGenME.reset(new std::vector<float> );
-      fTMuGenGMID.reset(new std::vector<int> );
-      fTMuGenGMStatus.reset(new std::vector<int> );
-      fTMuGenGMPt.reset(new std::vector<float> );
-      fTMuGenGMEta.reset(new std::vector<float> );
-      fTMuGenGMPhi.reset(new std::vector<float> );
-      fTMuGenGME.reset(new std::vector<float> );
-      fTNEBhits.reset(new int(-999));
-      fTEBrechitE.reset(new std::vector<float> );
-      fTEBrechitPt.reset(new std::vector<float> );
-      fTEBrechitEta.reset(new std::vector<float> );
-      fTEBrechitPhi.reset(new std::vector<float> );
-      fTEBrechitChi2.reset(new std::vector<float> );
-      fTEBrechitTime.reset(new std::vector<float> );
-      fTEBrechitE4oE1.reset(new std::vector<float> );
-      fTEBrechitE2oE9.reset(new std::vector<float> );
-      fTNEles.reset(new int(-999));
-      fTNElesTot.reset(new int(-999));
-      fTElGood.reset(new std::vector<int> );
-      fTElIsIso.reset(new std::vector<int> );
-      fTElChargeMisIDProb.reset(new std::vector<int> );
-      fTElPx.reset(new std::vector<float> );
-      fTElPy.reset(new std::vector<float> );
-      fTElPz.reset(new std::vector<float> );
-      fTElPt.reset(new std::vector<float> );
-      fTElPtE.reset(new std::vector<float> );
-      fTElE.reset(new std::vector<float> );
-      fTElEt.reset(new std::vector<float> );
-      fTElEta.reset(new std::vector<float> );
-      fTElTheta.reset(new std::vector<float> );
-      fTElSCEta.reset(new std::vector<float> );
-      fTElPhi.reset(new std::vector<float> );
-      fTElGsfTkPt.reset(new std::vector<float> );
-      fTElGsfTkEta.reset(new std::vector<float> );
-      fTElGsfTkPhi.reset(new std::vector<float> );
-      fTElTrkMomentumError.reset(new std::vector<float> );
-      fTElEcalEnergyError.reset(new std::vector<float> );
-      fTElEleMomentumError.reset(new std::vector<float> );
-      fTElNBrems.reset(new std::vector<int> );
-      fTElD0BS.reset(new std::vector<float> );
-      fTElD0PV.reset(new std::vector<float> );
-      fTElD0E.reset(new std::vector<float> );
-      fTElDzBS.reset(new std::vector<float> );
-      fTElDzPV.reset(new std::vector<float> );
-      fTElDzE.reset(new std::vector<float> );
-      fTElRelIso03.reset(new std::vector<float> );
-      fTElRelIso04.reset(new std::vector<float> );
-      fTElDR03TkSumPt.reset(new std::vector<float> );
-      fTElDR04TkSumPt.reset(new std::vector<float> );
-      fTElDR03EcalRecHitSumEt.reset(new std::vector<float> );
-      fTElDR04EcalRecHitSumEt.reset(new std::vector<float> );
-      fTElDR03HcalTowerSumEt.reset(new std::vector<float> );
-      fTElDR04HcalTowerSumEt.reset(new std::vector<float> );
-      fTElNChi2.reset(new std::vector<float> );
-      fTElCharge.reset(new std::vector<int> );
-      fTElCInfoIsGsfCtfCons.reset(new std::vector<int> );
-      fTElCInfoIsGsfCtfScPixCons.reset(new std::vector<int> );
-      fTElCInfoIsGsfScPixCons.reset(new std::vector<int> );
-      fTElScPixCharge.reset(new std::vector<int> );
-      fTElClosestCtfTrackPt.reset(new std::vector<float> );
-      fTElClosestCtfTrackEta.reset(new std::vector<float> );
-      fTElClosestCtfTrackPhi.reset(new std::vector<float> );
-      fTElClosestCtfTrackCharge.reset(new std::vector<int> );
-      fTElIDMva.reset(new std::vector<float> );
-      fTElIDTight.reset(new std::vector<int> );
-      fTElIDLoose.reset(new std::vector<int> );
-      fTElIDRobustTight.reset(new std::vector<int> );
-      fTElIDRobustLoose.reset(new std::vector<int> );
-      fTElIDsimpleWPrelIso.reset(new std::vector<int> );
-      fTElIDsimpleWP80relIso.reset(new std::vector<int> );
-      fTElIDsimpleWP85relIso.reset(new std::vector<int> );
-      fTElIDsimpleWP90relIso.reset(new std::vector<int> );
-      fTElIDsimpleWP95relIso.reset(new std::vector<int> );
-      fTElInGap.reset(new std::vector<int> );
-      fTElEcalDriven.reset(new std::vector<int> );
-      fTElTrackerDriven.reset(new std::vector<int> );
-      fTElBasicClustersSize.reset(new std::vector<int> );
-      fTElfbrem.reset(new std::vector<float> );
-      fTElHcalOverEcal.reset(new std::vector<float> );
-      fTElE1x5.reset(new std::vector<float> );
-      fTElE5x5.reset(new std::vector<float> );
-      fTElE2x5Max.reset(new std::vector<float> );
-      fTElSigmaIetaIeta.reset(new std::vector<float> );
-      fTElDeltaPhiSeedClusterAtCalo.reset(new std::vector<float> );
-      fTElDeltaEtaSeedClusterAtCalo.reset(new std::vector<float> );
-      fTElDeltaPhiSuperClusterAtVtx.reset(new std::vector<float> );
-      fTElDeltaEtaSuperClusterAtVtx.reset(new std::vector<float> );
-      fTElCaloEnergy.reset(new std::vector<float> );
-      fTElTrkMomAtVtx.reset(new std::vector<float> );
-      fTElESuperClusterOverP.reset(new std::vector<float> );
-      fTElNumberOfMissingInnerHits.reset(new std::vector<int> );
-      fTElSCindex.reset(new std::vector<int> );
-      fTElConvPartnerTrkDist.reset(new std::vector<float> );
-      fTElConvPartnerTrkDCot.reset(new std::vector<float> );
-      fTElConvPartnerTrkPt.reset(new std::vector<float> );
-      fTElConvPartnerTrkEta.reset(new std::vector<float> );
-      fTElConvPartnerTrkPhi.reset(new std::vector<float> );
-      fTElConvPartnerTrkCharge.reset(new std::vector<float> );
-      fTElScSeedSeverity.reset(new std::vector<int> );
-      fTElE1OverE9.reset(new std::vector<float> );
-      fTElS4OverS1.reset(new std::vector<float> );
-      fTElGenID.reset(new std::vector<int> );
-      fTElGenStatus.reset(new std::vector<int> );
-      fTElGenPt.reset(new std::vector<float> );
-      fTElGenEta.reset(new std::vector<float> );
-      fTElGenPhi.reset(new std::vector<float> );
-      fTElGenE.reset(new std::vector<float> );
-      fTElGenMID.reset(new std::vector<int> );
-      fTElGenMStatus.reset(new std::vector<int> );
-      fTElGenMPt.reset(new std::vector<float> );
-      fTElGenMEta.reset(new std::vector<float> );
-      fTElGenMPhi.reset(new std::vector<float> );
-      fTElGenME.reset(new std::vector<float> );
-      fTElGenGMID.reset(new std::vector<int> );
-      fTElGenGMStatus.reset(new std::vector<int> );
-      fTElGenGMPt.reset(new std::vector<float> );
-      fTElGenGMEta.reset(new std::vector<float> );
-      fTElGenGMPhi.reset(new std::vector<float> );
-      fTElGenGME.reset(new std::vector<float> );
-      fTNPhotons.reset(new int(-999));
-      fTNPhotonsTot.reset(new int(-999));
-      fTPhoGood.reset(new std::vector<int> );
-      fTPhoIsIso.reset(new std::vector<int> );
-      fTPhoPt.reset(new std::vector<float> );
-      fTPhoPx.reset(new std::vector<float> );
-      fTPhoPy.reset(new std::vector<float> );
-      fTPhoPz.reset(new std::vector<float> );
-      fTPhoEta.reset(new std::vector<float> );
-      fTPhoPhi.reset(new std::vector<float> );
-      fTPhoEnergy.reset(new std::vector<float> );
-      fTPhoIso03Ecal.reset(new std::vector<float> );
-      fTPhoIso03Hcal.reset(new std::vector<float> );
-      fTPhoIso03TrkSolid.reset(new std::vector<float> );
-      fTPhoIso03TrkHollow.reset(new std::vector<float> );
-      fTPhoIso03.reset(new std::vector<float> );
-      fTPhoIso04Ecal.reset(new std::vector<float> );
-      fTPhoIso04Hcal.reset(new std::vector<float> );
-      fTPhoIso04TrkSolid.reset(new std::vector<float> );
-      fTPhoIso04TrkHollow.reset(new std::vector<float> );
-      fTPhoIso04.reset(new std::vector<float> );
-      fTPhoR9.reset(new std::vector<float> );
-      fTPhoCaloPositionX.reset(new std::vector<float> );
-      fTPhoCaloPositionY.reset(new std::vector<float> );
-      fTPhoCaloPositionZ.reset(new std::vector<float> );
-      fTPhoHoverE.reset(new std::vector<float> );
-      fTPhoH1overE.reset(new std::vector<float> );
-      fTPhoH2overE.reset(new std::vector<float> );
-      fTPhoSigmaIetaIeta.reset(new std::vector<float> );
-      fTPhoSCRawEnergy.reset(new std::vector<float> );
-      fTPhoSCEtaWidth.reset(new std::vector<float> );
-      fTPhoSCSigmaPhiPhi.reset(new std::vector<float> );
-      fTPhoHasPixSeed.reset(new std::vector<int> );
-      fTPhoHasConvTrks.reset(new std::vector<int> );
-      fTPhoScSeedSeverity.reset(new std::vector<int> );
-      fTPhoE1OverE9.reset(new std::vector<float> );
-      fTPhoS4OverS1.reset(new std::vector<float> );
-      fTPhoSigmaEtaEta.reset(new std::vector<float> );
-      fTPhoE1x5.reset(new std::vector<float> );
-      fTPhoE2x5.reset(new std::vector<float> );
-      fTPhoE3x3.reset(new std::vector<float> );
-      fTPhoE5x5.reset(new std::vector<float> );
-      fTPhomaxEnergyXtal.reset(new std::vector<float> );
-      fTPhoIso03HcalDepth1.reset(new std::vector<float> );
-      fTPhoIso03HcalDepth2.reset(new std::vector<float> );
-      fTPhoIso04HcalDepth1.reset(new std::vector<float> );
-      fTPhoIso04HcalDepth2.reset(new std::vector<float> );
-      fTPhoIso03nTrksSolid.reset(new std::vector<int> );
-      fTPhoIso03nTrksHollow.reset(new std::vector<int> );
-      fTPhoIso04nTrksSolid.reset(new std::vector<int> );
-      fTPhoIso04nTrksHollow.reset(new std::vector<int> );
-      fTPhoisEB.reset(new std::vector<int> );
-      fTPhoisEE.reset(new std::vector<int> );
-      fTPhoisEBEtaGap.reset(new std::vector<int> );
-      fTPhoisEBPhiGap.reset(new std::vector<int> );
-      fTPhoisEERingGap.reset(new std::vector<int> );
-      fTPhoisEEDeeGap.reset(new std::vector<int> );
-      fTPhoisEBEEGap.reset(new std::vector<int> );
-      fTPhoisPFlowPhoton.reset(new std::vector<int> );
-      fTPhoisStandardPhoton.reset(new std::vector<int> );
-      fTPhoMCmatchindex.reset(new std::vector<int> );
-      fTPhoMCmatchexitcode.reset(new std::vector<int> );
-      fTPhoChargedHadronIso.reset(new std::vector<float> );
-      fTPhoNeutralHadronIso.reset(new std::vector<float> );
-      fTPhoPhotonIso.reset(new std::vector<float> );
-      fTPhoisPFPhoton.reset(new std::vector<int> );
-      fTPhoisPFElectron.reset(new std::vector<int> );
-      fTPhotSCindex.reset(new std::vector<int> );
-      fTPhoCone04PhotonIsodR0dEta0pt0.reset(new std::vector<float> );
-      fTPhoCone04PhotonIsodR0dEta0pt5.reset(new std::vector<float> );
-      fTPhoCone04PhotonIsodR8dEta0pt0.reset(new std::vector<float> );
-      fTPhoCone04PhotonIsodR8dEta0pt5.reset(new std::vector<float> );
-      fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-      fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-      fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-      fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR0dEta0pt0.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR0dEta0pt5.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR7dEta0pt0.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR7dEta0pt5.reset(new std::vector<float> );
-      fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-      fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-      fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-      fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
-      fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
-      fTPhoConvValidVtx.reset(new std::vector<bool>);
-      fTPhoConvNtracks.reset(new std::vector<int>);
-      fTPhoConvChi2Probability.reset(new std::vector<float>);
-      fTPhoConvEoverP.reset(new std::vector<float>);
-      fTNconv.reset(new int(-999));
-      fTConvValidVtx.reset(new std::vector<bool>);
-      fTConvNtracks.reset(new std::vector<int>);
-      fTConvChi2Probability.reset(new std::vector<float>);
-      fTConvEoverP.reset(new std::vector<float>);
-      fTConvZofPrimVtxFromTrks.reset(new std::vector<float>);
-      //     fTNgv.reset(new int(-999));
-      //     fTgvSumPtHi.reset(new std::vector<float>);
-      //     fTgvSumPtLo.reset(new std::vector<float>);
-      //     fTgvNTkHi.reset(new std::vector<int>);
-      //     fTgvNTkLo.reset(new std::vector<int>);
-      for (int i=0; i<gMaxNPhotons; i++) {
-        pho_conv_vtx[i]=TVector3();
-        pho_conv_refitted_momentum[i]=TVector3();
-        conv_vtx[i]=TVector3();
-        conv_refitted_momentum[i]=TVector3();
-      }
-      for (int i=0; i<gMaxNGenVtx; i++) {
-        gv_pos[i]=TVector3();
-        gv_p3[i]=TVector3();
-      }
-      fTNSuperClusters.reset(new int(-999));
-      fTSCRaw.reset(new std::vector<float> );
-      fTSCPre.reset(new std::vector<float> );
-      fTSCEnergy.reset(new std::vector<float> );
-      fTSCEta.reset(new std::vector<float> );
-      fTSCPhi.reset(new std::vector<float> );
-      fTSCPhiWidth.reset(new std::vector<float> );
-      fTSCEtaWidth.reset(new std::vector<float> );
-      fTSCBrem.reset(new std::vector<float> );
-      fTSCR9.reset(new std::vector<float> );
-      fTSCcrackcorrseed.reset(new std::vector<float> );
-      fTSCcrackcorr.reset(new std::vector<float> );
-      fTSClocalcorrseed.reset(new std::vector<float> );
-      fTSClocalcorr.reset(new std::vector<float> );
-      fTSCcrackcorrseedfactor.reset(new std::vector<float> );
-      fTSClocalcorrseedfactor.reset(new std::vector<float> );
-      fTNJets.reset(new int(-999));
-      fTNJetsTot.reset(new int(-999));
-      fTJGood.reset(new std::vector<int> );
-      fTJPx.reset(new std::vector<float> );
-      fTJPy.reset(new std::vector<float> );
-      fTJPz.reset(new std::vector<float> );
-      fTJPt.reset(new std::vector<float> );
-      fTJE.reset(new std::vector<float> );
-      fTJEt.reset(new std::vector<float> );
-      fTJEta.reset(new std::vector<float> );
-      fTJPhi.reset(new std::vector<float> );
-      fTJEcorr.reset(new std::vector<float> );
-      fTJArea.reset(new std::vector<float> );
-      fTJEtaRms.reset(new std::vector<float> );
-      fTJPhiRms.reset(new std::vector<float> );
-      fTJNConstituents.reset(new std::vector<int> );
-      fTJNAssoTracks.reset(new std::vector<int> );
-      fTJNNeutrals.reset(new std::vector<int> );
-      fTJChargedEmFrac.reset(new std::vector<float> );
-      fTJNeutralEmFrac.reset(new std::vector<float> );
-      fTJChargedHadFrac.reset(new std::vector<float> );
-      fTJNeutralHadFrac.reset(new std::vector<float> );
-      fTJChargedMuEnergyFrac.reset(new std::vector<float> );
-      fTJPhoFrac.reset(new std::vector<float>);
-      fTJHFHadFrac.reset(new std::vector<float>);
-      fTJHFEMFrac.reset(new std::vector<float>);
-      fTJPtD.reset(new std::vector<float>);
-      fTJRMSCand.reset(new std::vector<float>);
-      fTJeMinDR.reset(new std::vector<float> );
-      fTJbTagProbTkCntHighEff.reset(new std::vector<float> );
-      fTJbTagProbTkCntHighPur.reset(new std::vector<float> );
-      fTJbTagProbSimpSVHighEff.reset(new std::vector<float> );
-      fTJbTagProbSimpSVHighPur.reset(new std::vector<float> );
-      fTJMass.reset(new std::vector<float> );
-      fTJtrk1px.reset(new std::vector<float> );
-      fTJtrk1py.reset(new std::vector<float> );
-      fTJtrk1pz.reset(new std::vector<float> );
-      fTJtrk2px.reset(new std::vector<float> );
-      fTJtrk2py.reset(new std::vector<float> );
-      fTJtrk2pz.reset(new std::vector<float> );
-      fTJtrk3px.reset(new std::vector<float> );
-      fTJtrk3py.reset(new std::vector<float> );
-      fTJtrk3pz.reset(new std::vector<float> );
-      fTJVtxx.reset(new std::vector<float> );
-      fTJVtxy.reset(new std::vector<float> );
-      fTJVtxz.reset(new std::vector<float> );
-      fTJVtxExx.reset(new std::vector<float> );
-      fTJVtxEyx.reset(new std::vector<float> );
-      fTJVtxEyy.reset(new std::vector<float> );
-      fTJVtxEzy.reset(new std::vector<float> );
-      fTJVtxEzz.reset(new std::vector<float> );
-      fTJVtxEzx.reset(new std::vector<float> );
-      fTJVtxNChi2.reset(new std::vector<float> );
-      fTJGenJetIndex.reset(new std::vector<int> );
-      fTNTracks.reset(new int(-999));
-      fTNTracksTot.reset(new int(-999));
-      fTTrkGood.reset(new std::vector<int> );
-      fTTrkPt.reset(new std::vector<float> );
-      fTTrkEta.reset(new std::vector<float> );
-      fTTrkPhi.reset(new std::vector<float> );
-      fTTrkNChi2.reset(new std::vector<float> );
-      fTTrkNHits.reset(new std::vector<float> );
-      fTTrkVtxDz.reset(new std::vector<float> );
-      fTTrkVtxDxy.reset(new std::vector<float> );
-      fTTrkPtSumx.reset(new float(-999.99));
-      fTTrkPtSumy.reset(new float(-999.99));
-      fTTrkPtSum.reset(new float(-999.99));
-      fTTrkPtSumPhi.reset(new float(-999.99));
-      fTSumEt.reset(new float(-999.99));
-      fTECALSumEt.reset(new float(-999.99));
-      fTHCALSumEt.reset(new float(-999.99));
-      fTECALEsumx.reset(new float(-999.99));
-      fTECALEsumy.reset(new float(-999.99));
-      fTECALEsumz.reset(new float(-999.99));
-      fTECALMET.reset(new float(-999.99));
-      fTECALMETPhi.reset(new float(-999.99));
-      fTECALMETEta.reset(new float(-999.99));
-      fTHCALEsumx.reset(new float(-999.99));
-      fTHCALEsumy.reset(new float(-999.99));
-      fTHCALEsumz.reset(new float(-999.99));
-      fTHCALMET.reset(new float(-999.99));
-      fTHCALMETPhi.reset(new float(-999.99));
-      fTHCALMETeta.reset(new float(-999.99));
-      fTRawMET.reset(new float(-999.99));
-      fTRawMETpx.reset(new float(-999.99));
-      fTRawMETpy.reset(new float(-999.99));
-      fTRawMETphi.reset(new float(-999.99));
-      fTRawMETemEtFrac.reset(new float(-999.99));
-      fTRawMETemEtInEB.reset(new float(-999.99));
-      fTRawMETemEtInEE.reset(new float(-999.99));
-      fTRawMETemEtInHF.reset(new float(-999.99));
-      fTRawMEThadEtFrac.reset(new float(-999.99));
-      fTRawMEThadEtInHB.reset(new float(-999.99));
-      fTRawMEThadEtInHE.reset(new float(-999.99));
-      fTRawMEThadEtInHF.reset(new float(-999.99));
-      fTRawMETSignificance.reset(new float(-999.99));
-      fTGenMET.reset(new float(-999.99));
-      fTGenMETpx.reset(new float(-999.99));
-      fTGenMETpy.reset(new float(-999.99));
-      fTGenMETphi.reset(new float(-999.99));
-      fTTCMET.reset(new float(-999.99));
-      fTTCMETpx.reset(new float(-999.99));
-      fTTCMETpy.reset(new float(-999.99));
-      fTTCMETphi.reset(new float(-999.99));
-      fTTCMETSignificance.reset(new float(-999.99));
-      fTMuJESCorrMET.reset(new float(-999.99));
-      fTMuJESCorrMETpx.reset(new float(-999.99));
-      fTMuJESCorrMETpy.reset(new float(-999.99));
-      fTMuJESCorrMETphi.reset(new float(-999.99));
-      fTPFMET.reset(new float(-999.99));
-      fTPFMETpx.reset(new float(-999.99));
-      fTPFMETpy.reset(new float(-999.99));
-      fTPFMETphi.reset(new float(-999.99));
-      fTPFMETSignificance.reset(new float(-999.99));
-      fTPFSumEt.reset(new float(-999.99));
-      fTPFMETPAT.reset(new float(-999.99));
-      fTPFMETPATpx.reset(new float(-999.99));
-      fTPFMETPATpy.reset(new float(-999.99));
-      fTPFMETPATphi.reset(new float(-999.99));
-      fTPFMETPATSignificance.reset(new float(-999.99));
-      fTMETR12.reset(new float(-999.99));
-      fTMETR21.reset(new float(-999.99));
-
-    }
-
-    //____________________________________________________________________
-    void NTupleProducer::resetRunProducts( void ) {
-  
-      // Reset run variables
-      fRExtXSecLO   .reset(new float(-999.99));
-      fRExtXSecNLO  .reset(new float(-999.99));
-      fRIntXSec     .reset(new float(-999.99));
-                                         
-      fRMinMuPt     .reset(new float(-999.99));
-      fRMaxMuEta    .reset(new float(-999.99));
-      fRMinElPt     .reset(new float(-999.99));
-      fRMaxElEta    .reset(new float(-999.99));
-      fRMinJPt      .reset(new float(-999.99));
-      fRMinRawJPt   .reset(new float(-999.99));
-      fRMaxJEta     .reset(new float(-999.99));
-      fRMinJEMFrac  .reset(new float(-999.99));
-                                         
-      fRMinTrkPt    .reset(new float(-999.99));
-      fRMaxTrkEta   .reset(new float(-999.99));
-      fRMaxTrkNChi2 .reset(new float(-999.99));
-      fRMinTrkNHits .reset(new int(-999));
-                                         
-      fRMinPhotonPt .reset(new float(-999.99));
-      fRMaxPhotonEta.reset(new float(-999.99));
-      fRMinSCraw    .reset(new float(-999.99));                                         
-      fRMinEBRechitE.reset(new float(-999.99)); 
-
-      fRMinGenLeptPt .reset(new float(-999.99)); 
-      fRMaxGenLeptEta.reset(new float(-999.99)); 
-      fRMinGenPhotPt .reset(new float(-999.99)); 
-      fRMaxGenPhotEta.reset(new float(-999.99)); 
-      fRMinGenJetPt  .reset(new float(-999.99)); 
-      fRMaxGenJetEta .reset(new float(-999.99)); 
-               
-      fRMaxNMus     .reset(new int(-999));
-      fRMaxNEles    .reset(new int(-999));
-      fRMaxNJets    .reset(new int(-999));
-      fRMaxNTrks    .reset(new int(-999));
-      fRMaxNPhotons .reset(new int(-999));
-      fRMaxNSC      .reset(new int(-999));
-      fRMaxNGenLept .reset(new int(-999));
-      fRMaxNGenPhot .reset(new int(-999));
-      fRMaxNGenJets .reset(new int(-999));
-      fRMaxNVrtx    .reset(new int(-999));
-      fRMaxNPileup  .reset(new int(-999));
-      fRMaxNEBhits  .reset(new int(-999));
-
-      fRL1PhysMenu  .reset(new std::vector<std::string>);
-
-      fRPileUpData  .reset(new std::vector<std::string>);
-      fRPileUpMC    .reset(new std::vector<std::string>);
-
-    }
-
-    //________________________________________________________________________________________
-    void NTupleProducer::putProducts( edm::Event& event ) {
-  
-      event.put(fTEvent, "Event");
-      event.put(fTLumiSection, "LumiSection");
-      event.put(fTPtHat, "PtHat");
-      event.put(fTQCDPartonicHT, "QCDPartonicHT");
-      event.put(fTSigProcID, "SigProcID");
-      event.put(fTPDFScalePDF, "PDFScalePDF");
-      event.put(fTPDFID1, "PDFID1");
-      event.put(fTPDFID2, "PDFID2");
-      event.put(fTPDFx1, "PDFx1");
-      event.put(fTPDFx2, "PDFx2");
-      event.put(fTPDFxPDF1, "PDFxPDF1");
-      event.put(fTPDFxPDF2, "PDFxPDF2");
-      event.put(fTGenWeight, "GenWeight");
-      event.put(fTpdfW, "pdfW");
-      event.put(fTpdfWsum, "pdfWsum");
-      event.put(fTNPdfs, "NPdfs");
-      event.put(fTPUnumInteractions, "PUnumInteractions");
-      event.put(fTPUnumTrueInteractions, "PUnumTrueInteractions");
-      event.put(fTPUnumFilled, "PUnumFilled");
-      event.put(fTPUOOTnumInteractionsEarly, "PUOOTnumInteractionsEarly");
-      event.put(fTPUOOTnumInteractionsLate, "PUOOTnumInteractionsLate");
-      event.put(fTPUzPositions, "PUzPositions");
-      event.put(fTPUsumPtLowPt, "PUsumPtLowPt");
-      event.put(fTPUsumPtHighPt, "PUsumPtHighPt");
-      event.put(fTPUnTrksLowPt, "PUnTrksLowPt");
-      event.put(fTPUnTrksHighPt, "PUnTrksHighPt");
-      event.put(fTRho, "Rho");
-      event.put(fTRhoPFnoPU, "RhoPFnoPU");
-      event.put(fTWeight, "Weight");
-      event.put(fTHLTResults, "HLTResults");
-      event.put(fTHLTPrescale, "HLTPrescale");
-      event.put(fTL1PhysResults, "L1PhysResults");
-      event.put(fTL1TechResults, "L1TechResults");
-      event.put(fTNHLTObjs, "NHLTObjs");
-      for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
-        std::ostringstream s;
-        s << i;
-        event.put(fTHLTObjectID[i], ("HLTObjectID"+s.str()).c_str());
-        event.put(fTHLTObjectPt[i], ("HLTObjectPt"+s.str()).c_str());
-        event.put(fTHLTObjectEta[i], ("HLTObjectEta"+s.str()).c_str());
-        event.put(fTHLTObjectPhi[i], ("HLTObjectPhi"+s.str()).c_str());
-      }
-      event.put(fTPUWeightTotal, "PUWeightTotal");
-      event.put(fTPUWeightInTime, "PUWeightInTime");
-      event.put(fTMassGlu, "MassGlu");
-      event.put(fTMassChi, "MassChi");
-      event.put(fTMassLSP, "MassLSP");
-      event.put(fTxSMS, "xSMS");
-      event.put(fTxbarSMS, "xbarSMS");
-      event.put(fTM0, "M0");
-      event.put(fTM12, "M12");
-      event.put(fTsignMu, "signMu");
-      event.put(fTA0, "A0");
-      event.put(fTprocess, "process");
-      event.put(fTMaxGenPartExceed,"MaxGenPartExceed");
-      event.put(fTnGenParticles,"nGenParticles");
-      event.put(fTgenInfoId,"genInfoId");
-      event.put(fTgenInfoStatus,"genInfoStatus");
-      event.put(fTgenInfoNMo,"genInfoNMo");
-      event.put(fTgenInfoNDa,"genInfoNDa");
-      event.put(fTgenInfoMo1,"genInfoMo1");
-      event.put(fTgenInfoMo2,"genInfoMo2");
-      event.put(fTgenInfoDa1,"genInfoDa1");
-      event.put(fTgenInfoDa2,"genInfoDa2");
-      event.put(fTgenInfoMoIndex,"genInfoMoIndex");
-      event.put(fTPromptnessLevel,"PromptnessLevel");
-      event.put(fTgenInfoMass,"genInfoMass");
-      event.put(fTgenInfoMo1Pt,"genInfoMo1Pt");
-      event.put(fTgenInfoMo2Pt,"genInfoMo2Pt");
-      event.put(fTgenInfoPt,"genInfoPt");
-      event.put(fTgenInfoEta,"genInfoEta");
-      event.put(fTgenInfoPhi,"genInfoPhi");
-      event.put(fTgenInfoPx,"genInfoPx");
-      event.put(fTgenInfoPy,"genInfoPy");
-      event.put(fTgenInfoPz,"genInfoPz");
-      event.put(fTgenInfoM,"genInfoM");
-      event.put(fTgenInfoPromptFlag,"genInfoPromptFlag");
-      event.put(fTPrimVtxGood, "PrimVtxGood");
-      event.put(fTPrimVtxx, "PrimVtxx");
-      event.put(fTPrimVtxy, "PrimVtxy");
-      event.put(fTPrimVtxz, "PrimVtxz");
-      event.put(fTPrimVtxRho, "PrimVtxRho");
-      event.put(fTPrimVtxxE, "PrimVtxxE");
-      event.put(fTPrimVtxyE, "PrimVtxyE");
-      event.put(fTPrimVtxzE, "PrimVtxzE");
-      event.put(fTPrimVtxNChi2, "PrimVtxNChi2");
-      event.put(fTPrimVtxNdof, "PrimVtxNdof");
-      event.put(fTPrimVtxIsFake, "PrimVtxIsFake");
-      event.put(fTPrimVtxPtSum, "PrimVtxPtSum");
-      event.put(fTBeamspotx, "Beamspotx");
-      event.put(fTBeamspoty, "Beamspoty");
-      event.put(fTBeamspotz, "Beamspotz");
-      event.put(fTNCaloTowers, "NCaloTowers");
-      event.put(fTGoodEvent, "GoodEvent");
-      event.put(fTMaxMuExceed, "MaxMuExceed");
-      event.put(fTMaxElExceed, "MaxElExceed");
-      event.put(fTMaxJetExceed, "MaxJetExceed");
-      event.put(fTMaxUncJetExceed, "MaxUncJetExceed");
-      event.put(fTMaxTrkExceed, "MaxTrkExceed");
-      event.put(fTMaxPhotonsExceed, "MaxPhotonsExceed");
-      event.put(fTMaxGenLepExceed, "MaxGenLepExceed");
-      event.put(fTMaxGenPhoExceed, "MaxGenPhoExceed");
-      event.put(fTMaxGenJetExceed, "MaxGenJetExceed");
-      event.put(fTMaxVerticesExceed, "MaxVerticesExceed");
-      event.put(fTHBHENoiseFlag, "HBHENoiseFlag");
-      event.put(fTHBHENoiseFlagIso, "HBHENoiseFlagIso");
-      event.put(fTCSCTightHaloID, "CSCTightHaloID");
-      event.put(fTEcalDeadTPFilterFlag, "EcalDeadTPFilterFlag");
-      event.put(fTRecovRecHitFilterFlag, "RecovRecHitFilterFlag");
-      event.put(fTRA2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag");
-      //FR event.put(fPBNRFlag,"PBNRFlag");
-      event.put(fTNGenLeptons, "NGenLeptons");
-      event.put(fTGenLeptonID, "GenLeptonID");
-      event.put(fTGenLeptonPt, "GenLeptonPt");
-      event.put(fTGenLeptonEta, "GenLeptonEta");
-      event.put(fTGenLeptonPhi, "GenLeptonPhi");
-      event.put(fTGenLeptonMID, "GenLeptonMID");
-      event.put(fTGenLeptonMStatus, "GenLeptonMStatus");
-      event.put(fTGenLeptonMPt, "GenLeptonMPt");
-      event.put(fTGenLeptonMEta, "GenLeptonMEta");
-      event.put(fTGenLeptonMPhi, "GenLeptonMPhi");
-      event.put(fTGenLeptonGMID, "GenLeptonGMID");
-      event.put(fTGenLeptonGMStatus, "GenLeptonGMStatus");
-      event.put(fTGenLeptonGMPt, "GenLeptonGMPt");
-      event.put(fTGenLeptonGMEta, "GenLeptonGMEta");
-      event.put(fTGenLeptonGMPhi, "GenLeptonGMPhi");
-      event.put(fTNGenPhotons, "NGenPhotons");
-      event.put(fTGenPhotonPt, "GenPhotonPt");
-      event.put(fTGenPhotonEta, "GenPhotonEta");
-      event.put(fTGenPhotonPhi, "GenPhotonPhi");
-      event.put(fTGenPhotonPartonMindR, "GenPhotonPartonMindR");
-      event.put(fTGenPhotonMotherID, "GenPhotonMotherID");
-      event.put(fTGenPhotonMotherStatus, "GenPhotonMotherStatus");
-      event.put(fTNGenJets, "NGenJets");
-      event.put(fTGenJetPt, "GenJetPt");
-      event.put(fTGenJetEta, "GenJetEta");
-      event.put(fTGenJetPhi, "GenJetPhi");
-      event.put(fTGenJetE, "GenJetE");
-      event.put(fTGenJetEmE, "GenJetEmE");
-      event.put(fTGenJetHadE, "GenJetHadE");
-      event.put(fTGenJetInvE, "GenJetInvE");
-      event.put(fTNVrtx, "NVrtx");
-      event.put(fTVrtxX, "VrtxX");
-      event.put(fTVrtxY, "VrtxY");
-      event.put(fTVrtxZ, "VrtxZ");
-      event.put(fTVrtxXE, "VrtxXE");
-      event.put(fTVrtxYE, "VrtxYE");
-      event.put(fTVrtxZE, "VrtxZE");
-      event.put(fTVrtxNdof, "VrtxNdof");
-      event.put(fTVrtxChi2, "VrtxChi2");
-      event.put(fTVrtxNtrks, "VrtxNtrks");
-      event.put(fTVrtxSumPt, "VrtxSumPt");
-      event.put(fTVrtxIsFake, "VrtxIsFake");
-      event.put(fTNMus, "NMus");
-      event.put(fTNMusTot, "NMusTot");
-      event.put(fTNGMus, "NGMus");
-      event.put(fTNTMus, "NTMus");
-      event.put(fTMuGood, "MuGood");
-      event.put(fTMuIsIso, "MuIsIso");
-      event.put(fTMuIsGlobalMuon, "MuIsGlobalMuon");
-      event.put(fTMuIsTrackerMuon, "MuIsTrackerMuon");
-      event.put(fTMuPx, "MuPx");
-      event.put(fTMuPy, "MuPy");
-      event.put(fTMuPz, "MuPz");
-      event.put(fTMuPt, "MuPt");
-      event.put(fTMuInnerTkPt, "MuInnerTkPt");
-      event.put(fTMuPtE, "MuPtE");
-      event.put(fTMuE, "MuE");
-      event.put(fTMuEt, "MuEt");
-      event.put(fTMuEta, "MuEta");
-      event.put(fTMuPhi, "MuPhi");
-      event.put(fTMuCharge, "MuCharge");
-      event.put(fTMuRelIso03, "MuRelIso03");
-      event.put(fTMuIso03SumPt, "MuIso03SumPt");
-      event.put(fTMuIso03EmEt, "MuIso03EmEt");
-      event.put(fTMuIso03HadEt, "MuIso03HadEt");
-      event.put(fTMuIso03EMVetoEt, "MuIso03EMVetoEt");
-      event.put(fTMuIso03HadVetoEt, "MuIso03HadVetoEt");
-      event.put(fTMuIso05SumPt, "MuIso05SumPt");
-      event.put(fTMuIso05EmEt, "MuIso05EmEt");
-      event.put(fTMuIso05HadEt, "MuIso05HadEt");
-      event.put(fTMuEem, "MuEem");
-      event.put(fTMuEhad, "MuEhad");
-      event.put(fTMuD0BS, "MuD0BS");
-      event.put(fTMuD0PV, "MuD0PV");
-      event.put(fTMuD0E, "MuD0E");
-      event.put(fTMuDzBS, "MuDzBS");
-      event.put(fTMuDzPV, "MuDzPV");
-      event.put(fTMuDzE, "MuDzE");
-      event.put(fTMuNChi2, "MuNChi2");
-      event.put(fTMuNGlHits, "MuNGlHits");
-      event.put(fTMuNMuHits, "MuNMuHits");
-      event.put(fTMuNTkHits, "MuNTkHits");
-      event.put(fTMuNPxHits, "MuNPxHits");
-      event.put(fTMuInnerTkNChi2, "MuInnerTkNChi2");
-      event.put(fTMuNMatches, "MuNMatches");
-      event.put(fTMuNChambers, "MuNChambers");
-      event.put(fTMuCaloComp, "MuCaloComp");
-      event.put(fTMuSegmComp, "MuSegmComp");
-      event.put(fTMuIsGMPT, "MuIsGMPT");
-      event.put(fTMuIsGMTkChiComp, "MuIsGMTkChiComp");
-      event.put(fTMuIsGMStaChiComp, "MuIsGMStaChiComp");
-      event.put(fTMuIsGMTkKinkTight, "MuIsGMTkKinkTight");
-      event.put(fTMuIsAllStaMuons, "MuIsAllStaMuons");
-      event.put(fTMuIsAllTrkMuons, "MuIsAllTrkMuons");
-      event.put(fTMuIsTrkMuonArbitrated, "MuIsTrkMuonArbitrated");
-      event.put(fTMuIsAllArbitrated, "MuIsAllArbitrated");
-      event.put(fTMuIsTMLSLoose, "MuIsTMLSLoose");
-      event.put(fTMuIsTMLSTight, "MuIsTMLSTight");
-      event.put(fTMuIsTM2DCompLoose, "MuIsTM2DCompLoose");
-      event.put(fTMuIsTM2DCompTight, "MuIsTM2DCompTight");
-      event.put(fTMuIsTMOneStationLoose, "MuIsTMOneStationLoose");
-      event.put(fTMuIsTMOneStationTight, "MuIsTMOneStationTight");
-      event.put(fTMuIsTMLSOptLowPtLoose, "MuIsTMLSOptLowPtLoose");
-      event.put(fTMuIsTMLSAngLoose, "MuIsTMLSAngLoose");
-      event.put(fTMuIsTMLSAngTight, "MuIsTMLSAngTight");
-      event.put(fTMuIsTMOneStationAngTight, "MuIsTMOneStationAngTight");
-      event.put(fTMuIsTMOneStationAngLoose, "MuIsTMOneStationAngLoose");
-      event.put(fTMuGenID, "MuGenID");
-      event.put(fTMuGenStatus, "MuGenStatus");
-      event.put(fTMuGenPt, "MuGenPt");
-      event.put(fTMuGenEta, "MuGenEta");
-      event.put(fTMuGenPhi, "MuGenPhi");
-      event.put(fTMuGenE, "MuGenE");
-      event.put(fTMuGenMID, "MuGenMID");
-      event.put(fTMuGenMStatus, "MuGenMStatus");
-      event.put(fTMuGenMPt, "MuGenMPt");
-      event.put(fTMuGenMEta, "MuGenMEta");
-      event.put(fTMuGenMPhi, "MuGenMPhi");
-      event.put(fTMuGenME, "MuGenME");
-      event.put(fTMuGenGMID, "MuGenGMID");
-      event.put(fTMuGenGMStatus, "MuGenGMStatus");
-      event.put(fTMuGenGMPt, "MuGenGMPt");
-      event.put(fTMuGenGMEta, "MuGenGMEta");
-      event.put(fTMuGenGMPhi, "MuGenGMPhi");
-      event.put(fTMuGenGME, "MuGenGME");
-      event.put(fTNEBhits, "NEBhits");
-      event.put(fTEBrechitE, "EBrechitE");
-      event.put(fTEBrechitPt, "EBrechitPt");
-      event.put(fTEBrechitEta, "EBrechitEta");
-      event.put(fTEBrechitPhi, "EBrechitPhi");
-      event.put(fTEBrechitChi2, "EBrechitChi2");
-      event.put(fTEBrechitTime, "EBrechitTime");
-      event.put(fTEBrechitE4oE1, "EBrechitE4oE1");
-      event.put(fTEBrechitE2oE9, "EBrechitE2oE9");
-      event.put(fTNEles, "NEles");
-      event.put(fTNElesTot, "NElesTot");
-      event.put(fTElGood, "ElGood");
-      event.put(fTElIsIso, "ElIsIso");
-      event.put(fTElChargeMisIDProb, "ElChargeMisIDProb");
-      event.put(fTElPx, "ElPx");
-      event.put(fTElPy, "ElPy");
-      event.put(fTElPz, "ElPz");
-      event.put(fTElPt, "ElPt");
-      event.put(fTElPtE, "ElPtE");
-      event.put(fTElE, "ElE");
-      event.put(fTElEt, "ElEt");
-      event.put(fTElEta, "ElEta");
-      event.put(fTElTheta, "ElTheta");
-      event.put(fTElSCEta, "ElSCEta");
-      event.put(fTElPhi, "ElPhi");
-      event.put(fTElGsfTkPt, "ElGsfTkPt");
-      event.put(fTElGsfTkEta, "ElGsfTkEta");
-      event.put(fTElGsfTkPhi, "ElGsfTkPhi");
-      event.put(fTElTrkMomentumError, "ElTrkMomentumError");
-      event.put(fTElEcalEnergyError, "ElEcalEnergyError");
-      event.put(fTElEleMomentumError, "ElEleMomentumError");
-      event.put(fTElNBrems, "ElNBrems");
-      event.put(fTElD0BS, "ElD0BS");
-      event.put(fTElD0PV, "ElD0PV");
-      event.put(fTElD0E, "ElD0E");
-      event.put(fTElDzBS, "ElDzBS");
-      event.put(fTElDzPV, "ElDzPV");
-      event.put(fTElDzE, "ElDzE");
-      event.put(fTElRelIso03, "ElRelIso03");
-      event.put(fTElRelIso04, "ElRelIso04");
-      event.put(fTElDR03TkSumPt, "ElDR03TkSumPt");
-      event.put(fTElDR04TkSumPt, "ElDR04TkSumPt");
-      event.put(fTElDR03EcalRecHitSumEt, "ElDR03EcalRecHitSumEt");
-      event.put(fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt");
-      event.put(fTElDR03HcalTowerSumEt, "ElDR03HcalTowerSumEt");
-      event.put(fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt");
-      event.put(fTElNChi2, "ElNChi2");
-      event.put(fTElCharge, "ElCharge");
-      event.put(fTElCInfoIsGsfCtfCons, "ElCInfoIsGsfCtfCons");
-      event.put(fTElCInfoIsGsfCtfScPixCons, "ElCInfoIsGsfCtfScPixCons");
-      event.put(fTElCInfoIsGsfScPixCons, "ElCInfoIsGsfScPixCons");
-      event.put(fTElScPixCharge, "ElScPixCharge");
-      event.put(fTElClosestCtfTrackPt, "ElClosestCtfTrackPt");
-      event.put(fTElClosestCtfTrackEta, "ElClosestCtfTrackEta");
-      event.put(fTElClosestCtfTrackPhi, "ElClosestCtfTrackPhi");
-      event.put(fTElClosestCtfTrackCharge, "ElClosestCtfTrackCharge");
-      event.put(fTElIDMva, "ElIDMva");
-      event.put(fTElIDTight, "ElIDTight");
-      event.put(fTElIDLoose, "ElIDLoose");
-      event.put(fTElIDRobustTight, "ElIDRobustTight");
-      event.put(fTElIDRobustLoose, "ElIDRobustLoose");
-      event.put(fTElIDsimpleWPrelIso, "ElIDsimpleWPrelIso");
-      event.put(fTElIDsimpleWP80relIso, "ElIDsimpleWP80relIso");
-      event.put(fTElIDsimpleWP85relIso, "ElIDsimpleWP85relIso");
-      event.put(fTElIDsimpleWP90relIso, "ElIDsimpleWP90relIso");
-      event.put(fTElIDsimpleWP95relIso, "ElIDsimpleWP95relIso");
-      event.put(fTElInGap, "ElInGap");
-      event.put(fTElEcalDriven, "ElEcalDriven");
-      event.put(fTElTrackerDriven, "ElTrackerDriven");
-      event.put(fTElBasicClustersSize, "ElBasicClustersSize");
-      event.put(fTElfbrem, "Elfbrem");
-      event.put(fTElHcalOverEcal, "ElHcalOverEcal");
-      event.put(fTElE1x5, "ElE1x5");
-      event.put(fTElE5x5, "ElE5x5");
-      event.put(fTElE2x5Max, "ElE2x5Max");
-      event.put(fTElSigmaIetaIeta, "ElSigmaIetaIeta");
-      event.put(fTElDeltaPhiSeedClusterAtCalo, "ElDeltaPhiSeedClusterAtCalo");
-      event.put(fTElDeltaEtaSeedClusterAtCalo, "ElDeltaEtaSeedClusterAtCalo");
-      event.put(fTElDeltaPhiSuperClusterAtVtx, "ElDeltaPhiSuperClusterAtVtx");
-      event.put(fTElDeltaEtaSuperClusterAtVtx, "ElDeltaEtaSuperClusterAtVtx");
-      event.put(fTElCaloEnergy, "ElCaloEnergy");
-      event.put(fTElTrkMomAtVtx, "ElTrkMomAtVtx");
-      event.put(fTElESuperClusterOverP, "ElESuperClusterOverP");
-      event.put(fTElNumberOfMissingInnerHits, "ElNumberOfMissingInnerHits");
-      event.put(fTElSCindex, "ElSCindex");
-      event.put(fTElConvPartnerTrkDist, "ElConvPartnerTrkDist");
-      event.put(fTElConvPartnerTrkDCot, "ElConvPartnerTrkDCot");
-      event.put(fTElConvPartnerTrkPt, "ElConvPartnerTrkPt");
-      event.put(fTElConvPartnerTrkEta, "ElConvPartnerTrkEta");
-      event.put(fTElConvPartnerTrkPhi, "ElConvPartnerTrkPhi");
-      event.put(fTElConvPartnerTrkCharge, "ElConvPartnerTrkCharge");
-      event.put(fTElScSeedSeverity, "ElScSeedSeverity");
-      event.put(fTElE1OverE9, "ElE1OverE9");
-      event.put(fTElS4OverS1, "ElS4OverS1");
-      event.put(fTElGenID, "ElGenID");
-      event.put(fTElGenStatus, "ElGenStatus");
-      event.put(fTElGenPt, "ElGenPt");
-      event.put(fTElGenEta, "ElGenEta");
-      event.put(fTElGenPhi, "ElGenPhi");
-      event.put(fTElGenE, "ElGenE");
-      event.put(fTElGenMID, "ElGenMID");
-      event.put(fTElGenMStatus, "ElGenMStatus");
-      event.put(fTElGenMPt, "ElGenMPt");
-      event.put(fTElGenMEta, "ElGenMEta");
-      event.put(fTElGenMPhi, "ElGenMPhi");
-      event.put(fTElGenME, "ElGenME");
-      event.put(fTElGenGMID, "ElGenGMID");
-      event.put(fTElGenGMStatus, "ElGenGMStatus");
-      event.put(fTElGenGMPt, "ElGenGMPt");
-      event.put(fTElGenGMEta, "ElGenGMEta");
-      event.put(fTElGenGMPhi, "ElGenGMPhi");
-      event.put(fTElGenGME, "ElGenGME");
-      event.put(fTNPhotons, "NPhotons");
-      event.put(fTNPhotonsTot, "NPhotonsTot");
-      event.put(fTPhoGood, "PhoGood");
-      event.put(fTPhoIsIso, "PhoIsIso");
-      event.put(fTPhoPt, "PhoPt");
-      event.put(fTPhoPx, "PhoPx");
-      event.put(fTPhoPy, "PhoPy");
-      event.put(fTPhoPz, "PhoPz");
-      event.put(fTPhoEta, "PhoEta");
-      event.put(fTPhoPhi, "PhoPhi");
-      event.put(fTPhoEnergy, "PhoEnergy");
-      event.put(fTPhoIso03Ecal, "PhoIso03Ecal");
-      event.put(fTPhoIso03Hcal, "PhoIso03Hcal");
-      event.put(fTPhoIso03TrkSolid, "PhoIso03TrkSolid");
-      event.put(fTPhoIso03TrkHollow, "PhoIso03TrkHollow");
-      event.put(fTPhoIso03, "PhoIso03");
-      event.put(fTPhoIso04Ecal, "PhoIso04Ecal");
-      event.put(fTPhoIso04Hcal, "PhoIso04Hcal");
-      event.put(fTPhoIso04TrkSolid, "PhoIso04TrkSolid");
-      event.put(fTPhoIso04TrkHollow, "PhoIso04TrkHollow");
-      event.put(fTPhoIso04, "PhoIso04");
-      event.put(fTPhoR9, "PhoR9");
-      event.put(fTPhoCaloPositionX, "PhoCaloPositionX");
-      event.put(fTPhoCaloPositionY, "PhoCaloPositionY");
-      event.put(fTPhoCaloPositionZ, "PhoCaloPositionZ");
-      event.put(fTPhoHoverE, "PhoHoverE");
-      event.put(fTPhoH1overE, "PhoH1overE");
-      event.put(fTPhoH2overE, "PhoH2overE");
-      event.put(fTPhoSigmaIetaIeta, "PhoSigmaIetaIeta");
-      event.put(fTPhoSCRawEnergy, "PhoSCRawEnergy");
-      event.put(fTPhoSCEtaWidth, "PhoSCEtaWidth");
-      event.put(fTPhoSCSigmaPhiPhi, "PhoSCSigmaPhiPhi");
-      event.put(fTPhoHasPixSeed, "PhoHasPixSeed");
-      event.put(fTPhoHasConvTrks, "PhoHasConvTrks");
-      event.put(fTPhoScSeedSeverity, "PhoScSeedSeverity");
-      event.put(fTPhoE1OverE9, "PhoE1OverE9");
-      event.put(fTPhoS4OverS1, "PhoS4OverS1");
-      event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
-      event.put(fTPhoE1x5, "PhoE1x5");
-      event.put(fTPhoE2x5, "PhoE2x5");
-      event.put(fTPhoE3x3, "PhoE3x3");
-      event.put(fTPhoE5x5, "PhoE5x5");
-      event.put(fTPhomaxEnergyXtal, "PhomaxEnergyXtal");
-      event.put(fTPhoIso03HcalDepth1, "PhoIso03HcalDepth1");
-      event.put(fTPhoIso03HcalDepth2, "PhoIso03HcalDepth2");
-      event.put(fTPhoIso04HcalDepth1, "PhoIso04HcalDepth1");
-      event.put(fTPhoIso04HcalDepth2, "PhoIso04HcalDepth2");
-      event.put(fTPhoIso03nTrksSolid, "PhoIso03nTrksSolid");
-      event.put(fTPhoIso03nTrksHollow, "PhoIso03nTrksHollow");
-      event.put(fTPhoIso04nTrksSolid, "PhoIso04nTrksSolid");
-      event.put(fTPhoIso04nTrksHollow, "PhoIso04nTrksHollow");
-      event.put(fTPhoisEB, "PhoisEB");
-      event.put(fTPhoisEE, "PhoisEE");
-      event.put(fTPhoisEBEtaGap, "PhoisEBEtaGap");
-      event.put(fTPhoisEBPhiGap, "PhoisEBPhiGap");
-      event.put(fTPhoisEERingGap, "PhoisEERingGap");
-      event.put(fTPhoisEEDeeGap, "PhoisEEDeeGap");
-      event.put(fTPhoisEBEEGap, "PhoisEBEEGap");
-      event.put(fTPhoisPFlowPhoton, "PhoisPFlowPhoton");
-      event.put(fTPhoisStandardPhoton, "PhoisStandardPhoton");
-      event.put(fTPhoMCmatchindex, "PhoMCmatchindex");
-      event.put(fTPhoMCmatchexitcode, "PhoMCmatchexitcode");
-      event.put(fTPhoChargedHadronIso, "PhoChargedHadronIso");
-      event.put(fTPhoNeutralHadronIso, "PhoNeutralHadronIso");
-      event.put(fTPhoPhotonIso, "PhoPhotonIso");
-      event.put(fTPhoisPFPhoton, "PhoisPFPhoton");
-      event.put(fTPhoisPFElectron, "PhoisPFElectron");
-      event.put(fTPhotSCindex, "PhotSCindex");
-      event.put(fTPhoCone04PhotonIsodR0dEta0pt0, "PhoCone04PhotonIsodR0dEta0pt0");
-      event.put(fTPhoCone04PhotonIsodR0dEta0pt5, "PhoCone04PhotonIsodR0dEta0pt5");
-      event.put(fTPhoCone04PhotonIsodR8dEta0pt0, "PhoCone04PhotonIsodR8dEta0pt0");
-      event.put(fTPhoCone04PhotonIsodR8dEta0pt5, "PhoCone04PhotonIsodR8dEta0pt5");
-      event.put(fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      event.put(fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      event.put(fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      event.put(fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
-      event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0, "PhoCone04NeutralHadronIsodR0dEta0pt0");
-      event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5, "PhoCone04NeutralHadronIsodR0dEta0pt5");
-      event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
-      event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
-      event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt0, "PhoCone04NeutralHadronIsodR7dEta0pt0");
-      event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt5, "PhoCone04NeutralHadronIsodR7dEta0pt5");
-      event.put(fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
-      event.put(fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
-      event.put(fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
-      event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
-      event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
-      event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
-      event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
-      event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
-      event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0, "PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
-      event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
-      event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0, "PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
-      event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
-      event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0, "PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
-      event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
-      event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0, "PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
-      event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
-      event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0, "PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
-      event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
-      event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0, "PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
-      event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
-      event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
-      event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
-      event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
-      event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
-      event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
-      event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
-      event.put(fTPhoConvValidVtx, "PhoConvValidVtx");
-      event.put(fTPhoConvNtracks, "PhoConvNtracks");
-      event.put(fTPhoConvChi2Probability, "PhoConvChi2Probability");
-      event.put(fTPhoConvEoverP, "PhoConvEoverP");
-      event.put(fTNconv, "Nconv");
-      event.put(fTConvValidVtx, "ConvValidVtx");
-      event.put(fTConvNtracks, "ConvNtracks");
-      event.put(fTConvChi2Probability, "ConvChi2Probability");
-      event.put(fTConvEoverP, "ConvEoverP");
-      event.put(fTConvZofPrimVtxFromTrks, "ConvZofPrimVtxFromTrks");
-      //     event.put(fTNgv, "Ngv");
-      //     event.put(fTgvSumPtHi, "gvSumPtHi");
-      //     event.put(fTgvSumPtLo, "gvSumPtLo");
-      //     event.put(fTgvNTkHi, "gvNTkHi");
-      //     event.put(fTgvNTkLo, "gvNTkLo");
-      event.put(fTNSuperClusters, "NSuperClusters");
-      event.put(fTSCRaw, "SCRaw");
-      event.put(fTSCPre, "SCPre");
-      event.put(fTSCEnergy, "SCEnergy");
-      event.put(fTSCEta, "SCEta");
-      event.put(fTSCPhi, "SCPhi");
-      event.put(fTSCPhiWidth, "SCPhiWidth");
-      event.put(fTSCEtaWidth, "SCEtaWidth");
-      event.put(fTSCBrem, "SCBrem");
-      event.put(fTSCR9, "SCR9");
-      event.put(fTSCcrackcorrseed, "SCcrackcorrseed");
-      event.put(fTSCcrackcorr, "SCcrackcorr");
-      event.put(fTSClocalcorrseed, "SClocalcorrseed");
-      event.put(fTSClocalcorr, "SClocalcorr");
-      event.put(fTSCcrackcorrseedfactor, "SCcrackcorrseedfactor");
-      event.put(fTSClocalcorrseedfactor, "SClocalcorrseedfactor");
-      event.put(fTNJets, "NJets");
-      event.put(fTNJetsTot, "NJetsTot");
-      event.put(fTJGood, "JGood");
-      event.put(fTJPx, "JPx");
-      event.put(fTJPy, "JPy");
-      event.put(fTJPz, "JPz");
-      event.put(fTJPt, "JPt");
-      event.put(fTJE, "JE");
-      event.put(fTJEt, "JEt");
-      event.put(fTJEta, "JEta");
-      event.put(fTJPhi, "JPhi");
-      event.put(fTJEcorr, "JEcorr");
-      event.put(fTJArea, "JArea");
-      event.put(fTJEtaRms, "JEtaRms");
-      event.put(fTJPhiRms, "JPhiRms");
-      event.put(fTJNConstituents, "JNConstituents");
-      event.put(fTJNAssoTracks, "JNAssoTracks");
-      event.put(fTJNNeutrals, "JNNeutrals");
-      event.put(fTJChargedEmFrac, "JChargedEmFrac");
-      event.put(fTJNeutralEmFrac, "JNeutralEmFrac");
-      event.put(fTJChargedHadFrac, "JChargedHadFrac");
-      event.put(fTJNeutralHadFrac, "JNeutralHadFrac");
-      event.put(fTJChargedMuEnergyFrac, "JChargedMuEnergyFrac");
-      event.put(fTJPhoFrac, "JPhoFrac");
-      event.put(fTJHFHadFrac, "JHFHadFrac");
-      event.put(fTJHFEMFrac, "JHFEMFrac");
-      event.put(fTJPtD, "JPtD");
-      event.put(fTJRMSCand, "JRMSCand");
-      event.put(fTJeMinDR, "JeMinDR");
-      event.put(fTJbTagProbTkCntHighEff, "JbTagProbTkCntHighEff");
-      event.put(fTJbTagProbTkCntHighPur, "JbTagProbTkCntHighPur");
-      event.put(fTJbTagProbSimpSVHighEff, "JbTagProbSimpSVHighEff");
-      event.put(fTJbTagProbSimpSVHighPur, "JbTagProbSimpSVHighPur");
-      event.put(fTJMass, "JMass");
-      event.put(fTJtrk1px, "Jtrk1px");
-      event.put(fTJtrk1py, "Jtrk1py");
-      event.put(fTJtrk1pz, "Jtrk1pz");
-      event.put(fTJtrk2px, "Jtrk2px");
-      event.put(fTJtrk2py, "Jtrk2py");
-      event.put(fTJtrk2pz, "Jtrk2pz");
-      event.put(fTJtrk3px, "Jtrk3px");
-      event.put(fTJtrk3py, "Jtrk3py");
-      event.put(fTJtrk3pz, "Jtrk3pz");
-      event.put(fTJVtxx, "JVtxx");
-      event.put(fTJVtxy, "JVtxy");
-      event.put(fTJVtxz, "JVtxz");
-      event.put(fTJVtxExx, "JVtxExx");
-      event.put(fTJVtxEyx, "JVtxEyx");
-      event.put(fTJVtxEyy, "JVtxEyy");
-      event.put(fTJVtxEzy, "JVtxEzy");
-      event.put(fTJVtxEzz, "JVtxEzz");
-      event.put(fTJVtxEzx, "JVtxEzx");
-      event.put(fTJVtxNChi2, "JVtxNChi2");
-      event.put(fTJGenJetIndex, "JGenJetIndex");
-      event.put(fTNTracks, "NTracks");
-      event.put(fTNTracksTot, "NTracksTot");
-      event.put(fTTrkGood, "TrkGood");
-      event.put(fTTrkPt, "TrkPt");
-      event.put(fTTrkEta, "TrkEta");
-      event.put(fTTrkPhi, "TrkPhi");
-      event.put(fTTrkNChi2, "TrkNChi2");
-      event.put(fTTrkNHits, "TrkNHits");
-      event.put(fTTrkVtxDz, "TrkVtxDz");
-      event.put(fTTrkVtxDxy, "TrkVtxDxy");
-      event.put(fTTrkPtSumx, "TrkPtSumx");
-      event.put(fTTrkPtSumy, "TrkPtSumy");
-      event.put(fTTrkPtSum, "TrkPtSum");
-      event.put(fTTrkPtSumPhi, "TrkPtSumPhi");
-      event.put(fTSumEt, "SumEt");
-      event.put(fTECALSumEt, "ECALSumEt");
-      event.put(fTHCALSumEt, "HCALSumEt");
-      event.put(fTECALEsumx, "ECALEsumx");
-      event.put(fTECALEsumy, "ECALEsumy");
-      event.put(fTECALEsumz, "ECALEsumz");
-      event.put(fTECALMET, "ECALMET");
-      event.put(fTECALMETPhi, "ECALMETPhi");
-      event.put(fTECALMETEta, "ECALMETEta");
-      event.put(fTHCALEsumx, "HCALEsumx");
-      event.put(fTHCALEsumy, "HCALEsumy");
-      event.put(fTHCALEsumz, "HCALEsumz");
-      event.put(fTHCALMET, "HCALMET");
-      event.put(fTHCALMETPhi, "HCALMETPhi");
-      event.put(fTHCALMETeta, "HCALMETeta");
-      event.put(fTRawMET, "RawMET");
-      event.put(fTRawMETpx, "RawMETpx");
-      event.put(fTRawMETpy, "RawMETpy");
-      event.put(fTRawMETphi, "RawMETphi");
-      event.put(fTRawMETemEtFrac, "RawMETemEtFrac");
-      event.put(fTRawMETemEtInEB, "RawMETemEtInEB");
-      event.put(fTRawMETemEtInEE, "RawMETemEtInEE");
-      event.put(fTRawMETemEtInHF, "RawMETemEtInHF");
-      event.put(fTRawMEThadEtFrac, "RawMEThadEtFrac");
-      event.put(fTRawMEThadEtInHB, "RawMEThadEtInHB");
-      event.put(fTRawMEThadEtInHE, "RawMEThadEtInHE");
-      event.put(fTRawMEThadEtInHF, "RawMEThadEtInHF");
-      event.put(fTRawMETSignificance, "RawMETSignificance");
-      event.put(fTGenMET, "GenMET");
-      event.put(fTGenMETpx, "GenMETpx");
-      event.put(fTGenMETpy, "GenMETpy");
-      event.put(fTGenMETphi, "GenMETphi");
-      event.put(fTTCMET, "TCMET");
-      event.put(fTTCMETpx, "TCMETpx");
-      event.put(fTTCMETpy, "TCMETpy");
-      event.put(fTTCMETphi, "TCMETphi");
-      event.put(fTTCMETSignificance, "TCMETSignificance");
-      event.put(fTMuJESCorrMET, "MuJESCorrMET");
-      event.put(fTMuJESCorrMETpx, "MuJESCorrMETpx");
-      event.put(fTMuJESCorrMETpy, "MuJESCorrMETpy");
-      event.put(fTMuJESCorrMETphi, "MuJESCorrMETphi");
-      event.put(fTPFMET, "PFMET");
-      event.put(fTPFMETpx, "PFMETpx");
-      event.put(fTPFMETpy, "PFMETpy");
-      event.put(fTPFMETphi, "PFMETphi");
-      event.put(fTPFMETSignificance, "PFMETSignificance");
-      event.put(fTPFSumEt, "PFSumEt");
-      event.put(fTPFMETPAT, "PFMETPAT");
-      event.put(fTPFMETPATpx, "PFMETPATpx");
-      event.put(fTPFMETPATpy, "PFMETPATpy");
-      event.put(fTPFMETPATphi, "PFMETPATphi");
-      event.put(fTPFMETPATSignificance, "PFMETPATSignificance");
-      event.put(fTMETR12, "METR12");
-      event.put(fTMETR21, "METR21");
-
-
-    }
-
-    // Method called once before each run
-    bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
-
-      resetRunProducts();
-
-      // Retrieve and fill RunTree information
-
-      // Retrieve HLT trigger menu 
-      bool changed;
-      if ( !(fHltConfig.init(r,es,"*",changed)) ) { // "*": auto-discovery
-        edm::LogError("NTP") << " hlt config extraction failure with process name "
-                             << fHltConfig.processName();
-      }
-      fRHLTNames.reset(new std::vector<std::string>(fHltConfig.triggerNames()));
-
-      // Store L1 trigger names
-      edm::ESHandle<L1GtTriggerMenu> menuRcd;
-      es.get<L1GtTriggerMenuRcd>().get(menuRcd);
-      const L1GtTriggerMenu *menu = menuRcd.product();
-      const AlgorithmMap& algoMap = menu->gtAlgorithmMap();
-      (*fRL1PhysMenu).resize( gMaxL1PhysBits );
-      for( AlgorithmMap::const_iterator it = algoMap.begin(); it != algoMap.end(); ++it ){
-        (*fRL1PhysMenu)[(*it).second.algoBitNumber()] = std::string((*it).first); 
-      }
-
-      if(!fIsRealData) {
-        edm::Handle<GenRunInfoProduct> genRunInfo;
-        r.getByLabel("generator", genRunInfo);
-        *fRExtXSecLO  = genRunInfo->externalXSecLO().value();
-        *fRIntXSec    = genRunInfo->internalXSec().value();
-        *fRExtXSecNLO = genRunInfo->externalXSecNLO().value();
-      }
-  
-      *fRMinMuPt       = fMinMuPt;
-      *fRMaxMuEta      = fMaxMuEta;
-      *fRMinElPt       = fMinElPt;
-      *fRMaxElEta      = fMaxElEta;
-      *fRMinJPt        = fMinCorJPt;
-      *fRMinRawJPt     = fMinRawJPt;
-      *fRMaxJEta       = fMaxJEta;
-      *fRMinJEMFrac    = fMinJEMFrac;
-
-      *fRMinTrkPt      = fMinTrkPt;
-      *fRMaxTrkEta     = fMaxTrkEta;
-      *fRMaxTrkNChi2   = fMaxTrkNChi2;
-      *fRMinTrkNHits   = fMinTrkNHits;
-
-      *fRMinPhotonPt   = fMinPhotonPt;
-      *fRMaxPhotonEta  = fMaxPhotonEta;
-      *fRMinSCraw      = fMinSCraw;
-      *fRMinEBRechitE  = fMinEBRechitE;
-  
-      *fRMinGenLeptPt  = fMinGenLeptPt;
-      *fRMaxGenLeptEta = fMaxGenLeptEta;
-      *fRMinGenPhotPt  = fMinGenPhotPt;
-      *fRMaxGenPhotEta = fMaxGenPhotEta;
-      *fRMinGenJetPt   = fMinGenJetPt;
-      *fRMaxGenJetEta  = fMaxGenJetEta;
-
-      *fRMaxNMus       = gMaxNMus;
-      *fRMaxNEles      = gMaxNEles;
-      *fRMaxNJets      = gMaxNJets;
-      *fRMaxNTrks      = gMaxNTrks;
-      *fRMaxNPhotons   = gMaxNPhotons;
-      *fRMaxNSC        = gMaxNSC;
-      *fRMaxNGenLept   = gMaxNGenLept;
-      *fRMaxNGenPhot   = gMaxNGenPhot;
-      *fRMaxNGenJets   = gMaxNGenJets;
-      *fRMaxNVrtx      = gMaxNVrtx;
-      *fRMaxNPileup    = gMaxNPileup;
-      *fRMaxNEBhits    = gMaxNEBhits;
-
-      return true; // Not an actual filter
-    }
-
-    // Method called once after each run
-    bool NTupleProducer::endRun(edm::Run& r, const edm::EventSetup&){
-
-      // Store run information
-      r.put(fRExtXSecLO     ,"ExtXSecLO"     );
-      r.put(fRExtXSecNLO    ,"ExtXSecNLO"    );
-      r.put(fRIntXSec       ,"IntXSec"       );
-                         
-      r.put(fRMinMuPt       ,"MinMuPt"       );
-      r.put(fRMaxMuEta      ,"MaxMuEta"      );
-      r.put(fRMinElPt       ,"MinElPt"       );
-      r.put(fRMaxElEta      ,"MaxElEta"      );
-      r.put(fRMinJPt        ,"MinJPt"        );
-      r.put(fRMinRawJPt     ,"MinRawJPt"     );
-      r.put(fRMaxJEta       ,"MaxJEta"       );
-      r.put(fRMinJEMFrac    ,"MinJEMfrac"    );
-                                           
-      r.put(fRMinTrkPt      ,"MinTrkPt"      );
-      r.put(fRMaxTrkEta     ,"MaxTrkEta"     );
-      r.put(fRMaxTrkNChi2   ,"MaxTrkNChi2"   );
-      r.put(fRMinTrkNHits   ,"MinTrkNHits"   );
-                                           
-      r.put(fRMinPhotonPt   ,"MinPhotonPt"   );
-      r.put(fRMaxPhotonEta  ,"MaxPhotonEta"  );
-      r.put(fRMinSCraw      ,"MinSCraw"      );
-      r.put(fRMinEBRechitE  ,"MinEBRechitE"  );
-                                                                        
-      r.put(fRMinGenLeptPt  ,"MinGenLeptPt"  );
-      r.put(fRMaxGenLeptEta ,"MaxGenLeptEta" );
-      r.put(fRMinGenPhotPt  ,"MinGenPhotPt"  );
-      r.put(fRMaxGenPhotEta ,"MaxGenPhotEta" );
-      r.put(fRMinGenJetPt   ,"MinGenJetPt"   );
-      r.put(fRMaxGenJetEta  ,"MaxGenJetEta"  );
-                                                                        
-      r.put(fRMaxNMus    ,"MaxNMus"       );
-      r.put(fRMaxNEles   ,"MaxNEles"      );
-      r.put(fRMaxNJets   ,"MaxNJets"      );
-      r.put(fRMaxNTrks   ,"MaxNTrks"      );
-      r.put(fRMaxNPhotons,"MaxNPhotons"   );
-      r.put(fRMaxNSC     ,"MaxNSC"        );
-      r.put(fRMaxNGenLept,"MaxNGenLep"    );
-      r.put(fRMaxNGenPhot,"MaxNGenPho"    );
-      r.put(fRMaxNGenJets,"MaxNGenJet"    );
-      r.put(fRMaxNVrtx  , "MaxNVrtx"      );
-      r.put(fRMaxNPileup, "MaxNPileup"    );
-      r.put(fRMaxNEBhits, "MaxNEBhits"    );
-
-      r.put(fRHLTNames   ,"HLTNames"      );
-      r.put(fRL1PhysMenu ,"L1PhysMenu"    );
-      r.put(fRHLTLabels  ,"HLTLabels"     );
-
-      r.put(fRPileUpData ,"PileUpData"    );
-      r.put(fRPileUpMC   ,"PileUpMC"      );
-
-      return true;
-    }
-
-    //________________________________________________________________________________________
-    // Method called once each job just after ending the event loop
-    void NTupleProducer::endJob( void ){
-
-      edm::LogVerbatim("NTP") << " ---------------------------------------------------";
-      edm::LogVerbatim("NTP") << " ==> NTupleProducer::endJob() ...";
-      edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
-      edm::LogVerbatim("NTP") << "  Number of times Tree was filled:  " << fNFillTree;
-      edm::LogVerbatim("NTP") << " ---------------------------------------------------";
-
-    }
-
-    //________________________________________________________________________________________
-    // Method for matching of reco candidates
-    std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent){
-      using namespace std;
-      const GenParticle *GenCand = NULL;
-      const GenParticle *GenMom  = NULL;
-      const GenParticle *GenGMom = NULL;
-      std::vector<const GenParticle*> res;
-      if(fIsRealData){
-        edm::LogWarning("NTP") << "@SUB=matchRecoCand"
-                               << "Trying to access generator info on real data...";
-        res.push_back(GenCand);
-        res.push_back(GenMom);
-        res.push_back(GenGMom);
-        return res;
-      }
-
-      int id(0), mid(0), gmid(0);
-
-      edm::Handle<GenParticleCollection> genparts;
-      iEvent.getByLabel(fGenPartTag, genparts);
-      GenParticleCollection::const_iterator gpart;
-      GenCand = new GenParticle();
-      GenMom  = new GenParticle();
-      GenGMom = new GenParticle();
-      // initialize the results
-      // btw, this is a little memory leak
-      res.push_back(GenCand);
-      res.push_back(GenMom);
-      res.push_back(GenGMom);
-
-      bool matched = false;
-
-      // Try to match the reco candidate to a generator object
-      double mindr(999.99);
-      for(gpart = genparts->begin(); gpart != genparts->end(); gpart++){
-        if( gpart->status() != 1 ) continue;
-
-        // Restrict to cone of 0.1 in DR around candidate
-        double dr = reco::deltaR(gpart->eta(), gpart->phi(), Cand->eta(), Cand->phi());
-        if(dr > 0.1) continue;
-
-        // Restrict to pt match within a factor of 2
-        double ndpt = fabs(gpart->pt() - Cand->pt())/gpart->pt();
-        if(ndpt > 2.) continue;
-
-        // Minimize DeltaR
-        if(dr > mindr) continue;
-        mindr = dr;
-
-        matched = true;
-        GenCand = &(*gpart);
-      }
-
-
-      // Fill generator information in case match was successful
-      if(matched){
-        // update the results
-        res[0]=GenCand;
-        id  = GenCand->pdgId();
-        if ( !GenCand->mother() ) return res;
-
-        // Determine mother object of matched gen object:
-        // (Make sure that the mother has a different PDG ID)
-        GenMom = static_cast<const GenParticle*>(GenCand->mother());
-        mid = GenMom->pdgId();
-        if(mid != id); // do nothing
-        else{
-          int tempid = mid;
-          while(tempid == id){
-            GenMom = static_cast<const GenParticle*>(GenMom->mother());
-            tempid = GenMom->pdgId();
-          }
-        }
-        mid = GenMom->pdgId();
-        // update the results
-        res[1] = GenMom;
-
-        if ( !GenMom->mother() ) return res;
-        // Determine grand-mother object of matched gen object:
-        // (Make sure that the grand-mother has a different PDG ID than the mother)
-        GenGMom = static_cast<const GenParticle*>(GenMom->mother());
-        gmid = GenGMom->pdgId();
-        if(gmid != mid); // do nothing
-        else{
-          int tempid = gmid;
-          while(tempid == mid){
-            GenGMom = static_cast<const GenParticle*>(GenGMom->mother());
-            tempid = GenGMom->pdgId();
-          }
-        }
-
-        res[2] = GenGMom;
-      }
-      return res;
-    }
-
-    //________________________________________________________________________________________
-    // Method for matching of jets
-    const int NTupleProducer::matchJet(const reco::Jet* jet){
-      // match to already filled genjets in ntuple:
-      // this can only be called AFTER the genjets have been stored!
-      if(fIsRealData || *fTNGenJets < 1){
-        edm::LogWarning("NTP") << "@SUB=matchJet"
-                               << "Trying to access generator info on real data...";
-        return -1;
-      }
-
-      // Try to match the reco jet to a stored generator jet
-      double mindr(999.99);
-      int matchedindex = -1;
-      for(int i = 0; i < *fTNGenJets; i++){
-
-        // Restrict to cone of 0.1 in DR around candidate
-        double dr = reco::deltaR((*fTGenJetEta)[i], (*fTGenJetPhi)[i], jet->eta(), jet->phi());
-        if(dr > 0.3) continue;
-
-        // Restrict to pt match within a factor of 2
-        double ndpt = fabs((*fTGenJetPt)[i] - jet->pt())/(*fTGenJetPt)[i];
-        if(ndpt > 2.) continue;
-
-        // Minimize DeltaR
-        if(dr > mindr) continue;
-        mindr = dr;
-        matchedindex = i;
-      }
-      return matchedindex;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    // Cleaning methods
-    //________________________________________________________________________________________
-    void NTupleProducer::ElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const GsfTrack*> trckPtr) {
-      // Looks for duplication among electrons
-      if( *fTNEles <= 0 ) return;
-
-      // loop over the electrons
-      for (int i = 0; i < *fTNEles; ++i) {
-        const SuperCluster* supercluster = elecPtr[i];
-        const GsfTrack* eletrack = trckPtr[i];
-
-        // loop over the electrons again
-        for (int j = i+1; j < *fTNEles; ++j) {
-          const SuperCluster* newsuper = elecPtr[j];
-          const GsfTrack* newtrack = trckPtr[j];
-
-          // check if duplicate
-          if (newsuper == supercluster || newtrack == eletrack){
-            // fTeDupEl[i] = j;
-            // fTeDupEl[j] = i;
-            break;
-          }
-        }
-      }
-
-      return;
-    }
-
-    //________________________________________________________________________________________
-    void NTupleProducer::PhotonElectronDuplicate(std::vector<const SuperCluster*> elecPtr, std::vector<const SuperCluster*> phoPtr) {
-      // Looks for duplication between photons and electrons
-      if( *fTNEles <= 0 ) return;
-      if( *fTNPhotons <= 0 ) return;
-
-      // loop over the photons
-      for( int i = 0; i < *fTNPhotons; ++i ){
-        const SuperCluster* phoSC = phoPtr[i];
-
-        // loop over the electrons again
-        for( int j = 0; j < *fTNEles; ++j ){
-          const SuperCluster* elSC = elecPtr[j];
-
-          // check if duplicate
-          if( elSC == phoSC ){
-            // fTPhotDupEl[i] = j;
-            break;
-          }
-        }
-      }
-
-      return;
-    }
-
-    //________________________________________________________________________________________
-    void NTupleProducer::ElJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> electrons, edm::Handle<CaloTowerCollection> calotowers){
-      // checks for jets made from electrons
-      // jetIndex and elecIndex contain the indices of the selected jets and
-      //   electrons in the Views
-      // (electrons and jets should be filled in the ntuple before checking)
-      if (*fTNJets <= 0) return;
-      if (*fTNEles <= 0) return;
-
-      std::vector<CaloTowerPtr> jetCaloRefs;
-
-      // loop over the jets
-      for (int i = 0; i < *fTNJets; ++i) {
-
-        // Collect the CaloTowers detIds for the jet
-        const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
-        jetCaloRefs = theJet->getCaloConstituents();
-
-        // loop over the electrons
-        for( int j = 0; j < *fTNEles; ++j ){
-          const SuperCluster* theElecSC = electrons[j];
-
-          math::XYZVector sharedP(0., 0., 0.);
-          bool isInJet = IsEMObjectInJet(theElecSC, jetCaloRefs, calotowers, &sharedP);
-          // float sharedE = sqrt(sharedP.X()*sharedP.X() + sharedP.Y()*sharedP.Y() + sharedP.Z()*sharedP.Z() );
-          if (isInJet) {
-            // fTeIsInJet[j] = i;
-            // fTeSharedPx[j] = sharedP.X();
-            // fTeSharedPy[j] = sharedP.Y();
-            // fTeSharedPz[j] = sharedP.Z();
-            // fTeSharedEnergy[j] = sharedE;
-            break;
-          }
-        }
-      }
-
-      return;
-    }
-
-    //________________________________________________________________________________________
-    void NTupleProducer::PhotonJetOverlap(std::vector<const Jet*> jets, std::vector<const SuperCluster*> superclusters, edm::Handle<CaloTowerCollection> calotowers){
-      // checks for jets made from photons
-      // (photons and jets should be filled in the ntuple before checking)
-      if( *fTNJets <= 0 ) return;
-      if( *fTNPhotons <= 0 ) return;
-
-      std::vector<CaloTowerPtr> jetCaloRefs;
-
-      // loop over the jets
-      for( int i = 0; i < *fTNJets; ++i ){
-
-        // Collect the CaloTowers detIds for the jet
-        const CaloJet* theJet = static_cast<const CaloJet*>(&(*jets[i]));
-        jetCaloRefs = theJet->getCaloConstituents();
-
-        // loop over the photons
-        for( int j = 0; j < *fTNPhotons; ++j ){
-          const SuperCluster* theSC = superclusters[j];
-
-          math::XYZVector sharedP(0., 0., 0.);
-          bool isInJet = IsEMObjectInJet(theSC, jetCaloRefs, calotowers, &sharedP);
-          // float sharedE = sqrt(sharedP.X()*sharedP.X() + sharedP.Y()*sharedP.Y() + sharedP.Z()*sharedP.Z() );
-          if( isInJet ){
-            // ftPhoisInJet[j] = i;
-            // fTPhotSharedPx[j] = sharedP.X();
-            // fTPhotSharedPy[j] = sharedP.Y();
-            // fTPhotSharedPz[j] = sharedP.Z();
-            // fTPhotSharedEnergy[j] = sharedE;
-            break;
-          }
-        }
-      }
-
-      return;
-    }
-
-    //________________________________________________________________________________________
-    bool NTupleProducer::IsEMObjectInJet(const SuperCluster* elecSC, std::vector<CaloTowerPtr> jetCaloRefs, edm::Handle<CaloTowerCollection> calotowers, math::XYZVector* sharedMomentum){
-      // Checks whether an electron or photon is included in the jet energy
-      // and if true, it returns the momentum vector shared by the two
-
-      // Define a window in eta,phi for the SuperCluster
-      float phimin=0., phimax=0., etamin=0., etamax=0.;
-      bool window = EMCaloTowerWindow(elecSC, phimin, phimax, etamin, etamax);
-      if (!window){ return false;}
-
-      // Collect the CaloTowers inside this window, save their detId in a vector
-      std::vector<CaloTowerDetId> eleDetId;
-      std::vector<float> eleTowerEnergy;
-      std::vector<float> eleTowerEta;
-      std::vector<float> eleTowerPhi;
-      float eleEnergySum = 0.;
-      CaloTowerCollection::const_iterator calo;
-      for (calo = calotowers->begin(); calo != calotowers->end(); ++calo ){
-        float tow_eta = calo->eta();
-        float tow_phi = calo->phi();
-        if (IsInPhiWindow (tow_phi, phimin, phimax)
-            && (tow_eta-etamin)*(tow_eta-etamax) <= 0.){
-          eleDetId.push_back(calo->id());
-          eleTowerEnergy.push_back(calo->emEnergy());
-          eleTowerEta.push_back(calo->eta());
-          eleTowerPhi.push_back(calo->phi());
-          eleEnergySum += calo->emEnergy();
-        }
-      }
-
-      // Loop over the detIds vector of the electron
-      float sharedEnergy = 0.;
-      float sharedPx = 0.;
-      float sharedPy = 0.;
-      float sharedPz = 0.;
-      for (unsigned int i = 0; i < eleDetId.size(); ++i){
-        // find whether this detId is in the jet detId list
-        for (unsigned int j = 0; j < jetCaloRefs.size(); ++j){
-          // if yes, add its energy to the sum
-          if (eleDetId[i] == jetCaloRefs[j]->id() ){
-            sharedEnergy += eleTowerEnergy[i];
-            float eleTowerTheta = 2. * atan(exp(-eleTowerEta[i]));
-            if (eleTowerTheta < 0.) {eleTowerTheta += 3.141592654;}
-            float sintheta = sin(eleTowerTheta);
-            sharedPx += eleTowerEnergy[i]*sintheta*cos(eleTowerPhi[i]);
-            sharedPy += eleTowerEnergy[i]*sintheta*sin(eleTowerPhi[i]);
-            sharedPz += eleTowerEnergy[i]*cos(eleTowerTheta);
-          }
-        }
-      }
-
-      eleDetId.clear();
-      eleTowerEnergy.clear();
-      eleTowerEta.clear();
-      eleTowerPhi.clear();
-      jetCaloRefs.clear();
-
-      sharedMomentum->SetXYZ(sharedPx,sharedPy,sharedPz);
-
-      if (sharedEnergy > 0.) {return true;}
-      else {return false;}
-
-    }
-
-    //________________________________________________________________________________________
-    bool NTupleProducer::EMCaloTowerWindow(const SuperCluster* superCluster, float & phimin, float & phimax, float & etamin, float & etamax){
-      // Define a window for CaloTowers around an electron or photon
-      // First, find the extremes from the basicCluster positions
-      phimin=0.;
-      phimax=0.;
-      etamin=0.;
-      etamax=0.;
-      float pi    = 3.141592654;
-      float twopi = 6.283185307;
-      float clusterEsum = 0.;
-      reco::CaloCluster_iterator iCluster = superCluster->clustersBegin();
-      for (; iCluster != superCluster->clustersEnd(); ++iCluster){
-        math::XYZPoint clusterXYZ = (*iCluster)->position();
-        float clusterE = (*iCluster)->energy();
-        clusterEsum += clusterE;
-        float clusterphi = atan2(clusterXYZ.Y(), clusterXYZ.X());
-        float clustertheta = acos(clusterXYZ.Z() /
-                                  sqrt(clusterXYZ.X()*clusterXYZ.X()+clusterXYZ.Y()*clusterXYZ.Y()
-                                       +clusterXYZ.Z()*clusterXYZ.Z()) );
-        if (clustertheta < 0.) {clustertheta = clustertheta + 3.141592654;}
-        float clustereta = -log(tan(0.5*clustertheta));
-        if (iCluster == superCluster->clustersBegin() ){
-          etamin = clustereta;
-          etamax = clustereta;
-          phimin = clusterphi;
-          phimax = clusterphi;
-        } else {
-          if (etamin > clustereta){etamin = clustereta;}
-          if (etamax < clustereta){etamax = clustereta;}
-          phimin = GetPhiMin(phimin, clusterphi);
-          phimax = GetPhiMax(phimax, clusterphi);
-        }
-      }
-
-      // Then put a tolerance for the bigger caloTowers
-      // (adding 1/2 of the caloTower size)
-      float etamean = fabs(0.5*(etamin+etamax) );
-      phimin -= CaloTowerSizePhi(etamean);
-      phimax += CaloTowerSizePhi(etamean);
-      etamin -= CaloTowerSizeEta(etamin);
-      etamax += CaloTowerSizeEta(etamax);
-      // Check that they are still correctly normalized (-pi < phi < pi)
-      if (phimin < -pi) {phimin += twopi;}
-      if (phimax >  pi) {phimax -= twopi;}
-
-      return true;
-
-    }
-
-    float NTupleProducer::CaloTowerSizePhi(float eta){
-      // Returns the half size of a CaloTower in phi
-      // numbers from ptdr1, p.201
-
-      float sizePhi = 0.;
-      if (fabs(eta) <= 1.74){
-        sizePhi = 0.0435+0.0174;
-      } else {
-        sizePhi = 0.087+0.0174;
-      }
-
-      return sizePhi;
-    }
-
-    float NTupleProducer::CaloTowerSizeEta(float eta){
-      // Returns the half size of a CaloTower in eta
-      // numbers from ptdr1, p.201
-
-      float abseta = fabs(eta);
-      float sizeEta = 0.;
-      if (abseta <= 1.74){
-        sizeEta = 0.0435+0.0174;
-      } else if (abseta <= 2.5){
-        sizeEta = 0.0435 + 0.0678*(abseta-1.74)+0.0174;
-      } else {
-        sizeEta = 0.0875+0.0174;
-      }
-
-      return sizeEta;
-    }
-
-    bool NTupleProducer::IsInPhiWindow(float phi, float phimin, float phimax){
-      // Checks whether phi is inside a given window
-
-      float dphimin = reco::deltaPhi(phi, phimin);
-      float dphimax = reco::deltaPhi(phi, phimax);
-
-      float pi    = 3.141592654;
-      if (dphimin*dphimax <= 0. && fabs(dphimin-dphimax) < pi){return true;}
-      else {return false;}
-
-    }
-
-    float NTupleProducer::GetPhiMin(float phi1, float phi2){
-      // Computes the minimum of two phi values
-
-      float pi    = 3.141592654;
-      float phimin = phi1;
-      if ((phimin-phi2)>0. && (phimin-phi2)< pi){phimin = phi2;}
-      else if ((phimin-phi2)<-pi){phimin = phi2;}
-
-      return phimin;
-
-    }
-
-    float NTupleProducer::GetPhiMax(float phi1, float phi2){
-      // Computes the minimum of two phi values
-
-      float pi    = 3.141592654;
-      float phimax = phi1;
-      if ((phimax-phi2)<0. && (phimax-phi2)>-pi){phimax = phi2;}
-      else if ((phimax-phi2)> pi){phimax = phi2;}
-
-      return phimax;
-
-    }
-
-    //________________________________________________________________________________________
-    double NTupleProducer::DeltaPhi(double phi1, double phi2){
-
-      double dphi=phi1-phi2;
-      if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
-      if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
-
-      return dphi;
-    }
-
-
-    //________________________________________________________________________________________
-    // void NTupleProducer::FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi){
-
-    //   double pt = (*pfCandidates)[ipf].pt();
-    //   double dEta = fabs(photonEta - (*pfCandidates)[ipf].eta());
-    //   double dPhi = DeltaPhi(photonPhi,(*pfCandidates)[ipf].phi());
-    //   double dR = sqrt(dEta*dEta+dPhi*dPhi);
-    //   //  double dz = fabs(photonVz - (*pfCandidates)[ipf].vz());
-
-
-    //   //cout << "FillPhotonIsoVariables pt="<<pt<<endl;
-    //   if (type==0){
-
-    //     fTPhoCone04NeutralHadronIsodR0dEta0pt0[phoqi] += pt;
-    //     if (pt>0.5) fTPhoCone04NeutralHadronIsodR0dEta0pt5[phoqi] += pt;
-  
-    //     if (dR>0.07) {
-    //       fTPhoCone04NeutralHadronIsodR7dEta0pt0[phoqi] += pt;
-    //       if (pt>0.5) fTPhoCone04NeutralHadronIsodR7dEta0pt5[phoqi] += pt;
-    //     }
-    //     if (isInEtaCracks((*pfCandidates)[ipf].eta())==false && isInPhiCracks((*pfCandidates)[ipf].phi(),(*pfCandidates)[ipf].eta())==false){
-    //       fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks[phoqi] += pt;
-    //       if (pt>0.5) fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks[phoqi] += pt;
-    //     }
-    //   }
-  
-    //   if (type==1) { //Charged hadron
-    //     fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old[phoqi] += pt;
-
-    //     if (isPU==0) fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold[phoqi] += pt;
-    //     if (dR>0.015) {
-    //       fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old[phoqi] += pt;
-    //       if (isPU==0) fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold[phoqi] += pt;
-    //     }
-    //   }
-
-    //   if (type==2) { //Photon
-    //     fTPhoCone04PhotonIsodR0dEta0pt0[phoqi] += pt;
-    //     if (pt>0.5) fTPhoCone04PhotonIsodR0dEta0pt5[phoqi] += pt;
-    //     if (dR>0.08) {
-    //       fTPhoCone04PhotonIsodR8dEta0pt0[phoqi] += pt;
-    //       if (pt>0.5) fTPhoCone04PhotonIsodR8dEta0pt5[phoqi] += pt;
-    //     }
-    //   }
-  
-    //   return;
-    // }
-
-    //________________________________________________________________________________________
-    reco::VertexRef NTupleProducer::chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const {
-
-      //PfPileUp candidates!
-
-      //  cout << "chargedHadronVertex finding" << endl;
-
-      reco::TrackBaseRef trackBaseRef( pfcand.trackRef() );
-  
-      size_t  iVertex = 0;
-      unsigned index=0;
-      unsigned nFoundVertex = 0;
-      typedef reco::VertexCollection::const_iterator IV;
-      float bestweight=0;
-      for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
-
-        const reco::Vertex& vtx = *iv;
-    
-        typedef reco::Vertex::trackRef_iterator IT;
-    
-        // loop on tracks in vertices
-        for(IT iTrack=vtx.tracks_begin(); 
-            iTrack!=vtx.tracks_end(); ++iTrack) {
-	 
-          const reco::TrackBaseRef& baseRef = *iTrack;
-
-          // one of the tracks in the vertex is the same as 
-          // the track considered in the function
-          float w = vtx.trackWeight(baseRef);
-          if(baseRef == trackBaseRef ) {
-            //select the vertex for which the track has the highest weight
-            if (w > bestweight){
-              bestweight=w;
-              iVertex=index;
-              nFoundVertex++;
-            }	 	
-          }
-        }
-      }
-
-      if (nFoundVertex>0){
-        if (nFoundVertex!=1)
-          edm::LogWarning("TrackOnTwoVertex")<<"a track is shared by at least two verteces. Used to be an assert";
-        return reco::VertexRef( vertices, iVertex);
-      }
-      // no vertex found with this track. 
-
-      bool checkClosestZVertex_ = true;
-
-      // optional: as a secondary solution, associate the closest vertex in z
-      if ( checkClosestZVertex_ ) {
-
-        double dzmin = 10000;
-        double ztrack = pfcand.vertex().z();
-        bool foundVertex = false;
-        index = 0;
-        for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
-
-          double dz = fabs(ztrack - iv->z());
-          if(dz<dzmin) {
-            dzmin = dz; 
-            iVertex = index;
-            foundVertex = true;
-          }
-        }
-
-        if( foundVertex ) 
-          return reco::VertexRef( vertices, iVertex);  
-
-      }
-
-
-      return reco::VertexRef();
-    }
-
-    //________________________________________________________________________________________
-    int NTupleProducer::FindPFCandType(int id){
-
-      int type = -1;
-
-      if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
-      if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
-      if (id==22) type=2; //photons
-      if (fabs(id)==11) type=3; //electrons
-      if (fabs(id)==13) type=4; //muons
-
-      return type;
-    }
-
-    //________________________________________________________________________________________
-    bool NTupleProducer::isInPhiCracks(double phi, double eta){
-
-
-      // tranform radiants [-pi,pi] in degrees [0,360]
-      phi = (phi+TMath::Pi()) *180/TMath::Pi();
-
-      // each supermodule is 20 degrees wide
-      Double_t moduleWidth = 20;
-
-      // the first module is centered at phi=0, so the first cracks are +10 and -10
-      Double_t phi0 = 10.;
-
-      // set a fiducial cut around the crack of +2-2 degrees
-      Double_t fiducialCut = 2.;
-
-      bool OK = false;
-      if (fabs(eta)<1.44){
-        for (Int_t i = 0 ; i < 18; ++i){
-          if ((phi0 + moduleWidth*i -fiducialCut) <= phi && phi <= (phi0 + moduleWidth*i + fiducialCut)) OK = true;
-          //        cout << " PHI " << (phi0 + moduleWidth*i -fiducialCut) << " " << phi << " " <<  (phi0 + moduleWidth*i + fiducialCut)  << " " << OK << endl ;
-        }
-      }
-
-      //  cout << "is in phi crack ? " << OK << endl;
-      return OK;
-    }
-
-    //________________________________________________________________________________________
-    bool NTupleProducer::isInEtaCracks(double eta){
-
-      /*
-        Yuri Maravin eta cracks def :
-        double emAbsEta = fabs(phoSC_GeomEta);
-        pho_isInCrack = 0;
-        if ( emAbsEta < 0.018 ||
-        (emAbsEta > 0.423 && emAbsEta < 0.461) || 
-        (emAbsEta > 0.770 && emAbsEta < 0.806) || 
-        (emAbsEta > 1.127 && emAbsEta < 1.163) || 
-        (emAbsEta > 1.460 && emAbsEta < 1.558) )
-        pho_isInCrack = 1;
-      */
-
-      const Int_t nBinsEta = 5;
-      Double_t leftEta [nBinsEta]       = {0.00, 0.42, 0.77, 1.13, 1.46};
-      Double_t rightEta[nBinsEta]       = {0.02, 0.46, 0.81, 1.16, 9999.};
-
-      bool OK = false;
-      if (TMath::Abs(eta)<1.44) {
-        for (Int_t i = 0; i< nBinsEta; ++i){
-          if (leftEta[i] < TMath::Abs(eta) && TMath::Abs(eta) < rightEta[i] ) OK = true;
-        }
-      }
-      else if (TMath::Abs(eta)>1.44 && TMath::Abs(eta)<1.56) OK = true;
-      else if (TMath::Abs(eta)>1.56) OK = false;
-      //    cout << leftEta[i] << " " << TMath::Abs(eta) << " " << rightEta[i] <<  " " << OK << endl;
-
-      //  cout << "IS IN CRACK ? " << OK << endl;
-      return OK;
-    }
-
-    //________________________________________________________________________________________
-    bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i){
-
-      //This tool can be used in RECO only
-
-      bool isOverlapping = false;
-  
-      const reco::SuperCluster* supercluster = new reco::SuperCluster(*(scRef));
-      //const reco::SuperCluster* supercluster = (const reco::SuperCluster *)gamIter->superCluster());
-      std::vector<const reco::SuperCluster*> sc;
-      sc.push_back(supercluster);
-		 
-      for(unsigned iele=0; iele<(*pfCandidates)[i].elementsInBlocks().size(); ++iele) {
-        // first get the block 
-        reco::PFBlockRef blockRef = (*pfCandidates)[i].elementsInBlocks()[iele].first;
+  ////////////////////////////////////////////////////////////////////////////////
+  // Special stuff for Model Scans ///////////////////////////////////////////////
+  *fTxSMS=-1;
+  *fTxbarSMS=-1;
+
+  if(!fIsRealData&&fIsModelScan) {
+    Handle<LHEEventProduct> product;
+    bool LHEEventProduct_found = iEvent.getByLabel("source", product);
+    LHEEventProduct::comments_const_iterator c_begin = product->comments_begin();
+    LHEEventProduct::comments_const_iterator c_end = product->comments_end();
+
+    float mGL;
+    float mLSP;
+    float xCHI;
+
+    for(LHEEventProduct::comments_const_iterator cit=c_begin; cit!=c_end; ++cit) {
+      size_t found = (*cit).find("model");
+
+      //# model T5zz_0.5_925.0_400.0to1000.0_450.0.lhe
+      if( found != std::string::npos)   {
+        size_t foundLength = (*cit).size();
+        found = (*cit).find("T5zz");
+        std::string smaller = (*cit).substr(found+1,foundLength);
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        std::istringstream iss(smaller);
+        iss >> xCHI;
+        iss.clear();
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> mGL;
+        iss.clear();
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> mLSP;
+        iss.clear();
+
+        //model msugra_1900_100_10_0_1
+        float m0,m12,tanb,A0,signMu;
+        foundLength = (*cit).size();
+        found = (*cit).find("=");
+        smaller = (*cit).substr(found+1,foundLength);
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
         //
-        unsigned elementIndex = (*pfCandidates)[i].elementsInBlocks()[iele].second;
-        // check it actually exists 
-        if(!blockRef.isNull()){
-		 
-          // then get the elements of the block
-          const edm::OwnVector< reco::PFBlockElement >&  elements = (*blockRef).elements();
-		 
-          const reco::PFBlockElement & pfbe (elements[elementIndex]); 
-          // The first ECAL element should be the cluster associated to the GSF; defined as the seed
-          //if(pfbe.type()==reco::PFBlockElement::ECAL || pfbe.type()==reco::PFBlockElement::PS1 || pfbe.type()==reco::PFBlockElement::PS2 || pfbe.type()==reco::PFBlockElement::HCAL)
-          //{	  
-		 
-          reco::PFClusterRef myPFClusterRef = pfbe.clusterRef();
-          if(!myPFClusterRef.isNull()){  
-		 
-            const reco::PFCluster & myPFCluster (*myPFClusterRef);
-            //reco::PFCluster & myPFCluster (*myPFClusterRef);
-	
-            //	cout << "PFcand has a ClusterRef"<<endl;
-            int hasOverlap = ClusterClusterMapping::checkOverlap(myPFCluster,sc);
-            //	if (hasOverlap==-1) cout << "NO Overlap with E/gamma SC"<<endl;
-            //	else cout << "Overlap with E/gamma SC"<<endl;
-            if (hasOverlap!=-1) isOverlapping = true;
+        iss.clear();
+        iss.str(smaller);
+        iss >> m0;
+        iss.clear();
+        //
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> m12;
+        iss.clear();
+        //
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> tanb;
+        iss.clear();
+        //
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> A0;
+        iss.clear();
+        //
+        found = smaller.find("_");
+        smaller = smaller.substr(found+1,smaller.size());
+        iss.str(smaller);
+        iss >> signMu;
+        iss.clear();
 
+        // mSUGRA scan
+        *fTM0      = m0;
+        *fTM12     = m12;
+        *fTsignMu  = signMu;
+        *fTA0      = A0;
+        *fTtanBeta = tanb;
+      }
+    }
+    *fTMassGlu = mGL;
+    *fTMassChi = xCHI;
+    *fTMassLSP = mLSP;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Full generator information ///////////////////////////////////////////////
+  bool blabalot=false;
+  bool BloatWithGenInfo=true;	
+  if(BloatWithGenInfo && !fIsRealData) {
+    int genIndex[1200];
+    int genNIndex[1200];
+    int genID[1200];
+    float genPx[1200];
+    float genPy[1200];
+    float genPz[1200];
+    float genPt[1200];
+    float genEta[1200];
+    float genPhi[1200];
+    float genM[1200];
+    int genMo1Index[1200];
+    int genMo2Index[1200];
+    int genNMo[1200];
+    int genStatus[1200];
+    int Promptness[1200];
+    bool StoreFlag[1200];
+
+    int nGenParticles=0;
+	  
+    Handle<GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+	  
+    // STEP 1: Loop over all particles and store the information.
+    for(size_t i = 0; i < genParticles->size(); ++ i) {
+      nGenParticles++;
+      const GenParticle & p = (*genParticles)[i];
+      genIndex[i]=i;
+      genNIndex[i]=0;
+      genID[i]=p.pdgId();
+      genPx[i]=p.px();
+      genPy[i]=p.py();
+      genPz[i]=p.pz();
+      genPt[i]=p.pt();
+      genPhi[i]=p.phi();
+      genEta[i]=p.eta();
+      genM[i]=p.mass();
+      genStatus[i]=p.status();
+      genMo1Index[i]=-1;
+      genMo2Index[i]=-1;
+      genNMo[i]=p.numberOfMothers();
+      StoreFlag[i]=false;
+      if(genID[i]==2212) Promptness[i]=0;
+      else Promptness[i]=-1;
+ 
+
+      if(blabalot) cout << "Reading particle " << i << " (is pdgid=" << genID[i] << ") with " << genNMo[i] << " mothers" << endl;
+      for(int j=0;j<genNMo[i]&&j<2;j++) {
+        int idx = -1;
+        const GenParticle* mom = static_cast<const GenParticle*> (p.mother(j));
+        const GenParticle* gmom = static_cast<const GenParticle*> (mom->mother());
+        if (mom == NULL) break;
+        for (unsigned int k = 0; k < genParticles->size() && k<i; ++k) {
+          const reco::GenParticle& testm = (*genParticles)[k];
+          const GenParticle* testgm = static_cast<const GenParticle*> (testm.mother());
+          if (testm.pt() == mom->pt()) {
+            if( gmom == NULL || ((testgm!=NULL) && (gmom->pt() == testgm->pt())) ) {
+              idx = k;
+              if(blabalot) cout << "     Found a hit for a mother for index " << i << "! It's index " << idx << " (pdgid " << genID[idx] << ")" << endl;
+              break;
+            }
           }
         }
+        if(j==0) genMo1Index[i]=idx;
+        if(j==1) genMo2Index[i]=idx;
       }
+      if(Promptness[i]==-1&&genMo1Index[i]>=0&&Promptness[genMo1Index[i]]>-1) Promptness[i]=Promptness[genMo1Index[i]]+1;
+      if(blabalot) cout << "                    Promtpness: " << Promptness[i] << endl;
+      if(blabalot) cout << "          Mother 1: " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+      if(blabalot) cout << "          Mother 2: " << genMo2Index[i] << endl;
+    }
+	  
+    // STEP 2: Loop from end to start flipping storeflag when necessary
+    float genPtThreshold=5.0; // any particle with less pt than this will not be stored.
+    for(int i=nGenParticles-1;i>=0;i--) {
+      if(genStatus[i]!=1) continue;
+      if(genPt[i]<genPtThreshold) continue;
+      FlipGenStoreFlag(i,Promptness,genMo1Index,genMo2Index,StoreFlag);
+    }
+	  
+    // Intermediate step: Make sure that all first particles are stored, and that the earliest particles are stored (i.e. promptness criteria are met)
+    for(int i=nGenParticles-1;i>=0;i--) {
+      if(Promptness[i]<4&&Promptness[i]>=0) StoreFlag[i]=true;
+      if(i<20) StoreFlag[i]=true;
+    }
+	  
+    // STEP 3: Loop again, setting new index ("nindex") and replacing Mo1 by if(Mo1>-1) Mo1=nindex[index];, same for Mo2. If storeflag, store it directly.
+    *fTnGenParticles =  -1;
+    for(int i=0;i<nGenParticles;i++) {
+      if(!StoreFlag[i]) continue;
+      (*fTnGenParticles)++;
+      if( *fTnGenParticles > gMaxNGenParticles ) {
+        edm::LogWarning("NTP") << "@SUB=analyze()"
+                               << "Maximum number of gen particles exceeded";
+        *fTMaxGenPartExceed = 1;
+        break;
+      }
+	    
+      genNIndex[i] = *fTnGenParticles;
+	    
+      //store everything
+      fTgenInfoId ->push_back( genID[i] );
+      fTgenInfoStatus ->push_back( genStatus[i] );
+      fTgenInfoNMo ->push_back( genNMo[i] );
+      fTgenInfoMo1Pt->push_back( 0 );
+      fTgenInfoMo2Pt->push_back( 0 );
+      if(genMo1Index[i]>=0) {
+        fTgenInfoMo1Pt->push_back( genPt[genMo1Index[i]] );
+        fTgenInfoMo1->push_back( genNIndex[genMo1Index[i]] );
+      } else {
+        fTgenInfoMo1->push_back( -1 );
+      }
+      if(genMo2Index[i]>=0) {
+        fTgenInfoMo2Pt->push_back( genPt[genMo2Index[i]] );
+        fTgenInfoMo2->push_back( genNIndex[genMo2Index[i]] );
+      } else {
+        fTgenInfoMo2->push_back( -1 );
+      }
+	    
+      fTPromptnessLevel->push_back( Promptness[i] );
+      fTgenInfoPt ->push_back( genPt[i] );
+      fTgenInfoEta ->push_back( genEta[i] );
+      fTgenInfoPhi ->push_back( genPhi[i] );
+      fTgenInfoPx ->push_back( genPx[i] );
+      fTgenInfoPy ->push_back( genPy[i] );
+      fTgenInfoPz ->push_back( genPz[i] );
+      fTgenInfoM ->push_back( genM[i] );
 
-      return isOverlapping;
-	
+      if(blabalot) {
+        cout << "Working particle " << i << " with Promptness: " << Promptness[i] << "  (storage number: " << *fTnGenParticles << ")" << endl;
+        cout << "    Mother is Particle " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
+        cout << "Particle " << *fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i]                     << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
+        cout << "stored:  " << *fTnGenParticles << "  (" << i << ")                      " << (*fTgenInfoId)[*fTnGenParticles] << "                          " << (*fTgenInfoMo1)[*fTnGenParticles] << "         " << (*fTgenInfoMo1Pt)[*fTnGenParticles] << endl;
+      }
+	    
+    }
+	  
+    (*fTnGenParticles)++;
+    if(blabalot) cout << "A total of " << *fTnGenParticles << " Particles  have been stored out of " << nGenParticles << " ( " << 100*(*fTnGenParticles)/(float)nGenParticles << " %)" << endl;
+	  
+	  
+    float gluinomass=0;
+    float ngluinomass=0;
+    float chi2mass=0;
+    float nchi2mass=0;
+    float chi1mass=0;
+    float nchi1mass=0;
+	  
+    for(size_t i = 0; i < genParticles->size(); ++ i) {
+      const GenParticle & p = (*genParticles)[i];
+      int id = p.pdgId();
+      double mass = p.mass();
+      if(id==1000021) {
+        gluinomass+=mass;
+        ngluinomass++;
+      }
+      if(id==1000023) {
+        chi2mass+=mass;
+        nchi2mass++;
+      }
+      if(id==1000022) {
+        chi1mass+=mass;
+        nchi1mass++;
+      }
+    }
+	  
+    if(ngluinomass>0&&nchi2mass>0&&nchi1mass>0) {
+      *fTxSMS = (chi2mass/nchi1mass - chi1mass/nchi1mass) / (gluinomass/ngluinomass - chi1mass/nchi1mass);
+      *fTxbarSMS = 1 - *fTxSMS; // Mariarosaria's definition of x
+    }
+  }// end of bloat with gen information
+
+
+  ////////////////////////////////////////////////////////
+  // Process other jet collections, as configured
+  for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
+        it != jetFillers.end(); ++it )
+    (*it)->fillProducts(iEvent,iSetup);
+  for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+        it != muonFillers.end(); ++it ) 
+    (*it)->fillProducts(iEvent,iSetup);
+  for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+        it != electronFillers.end(); ++it ) 
+    (*it)->fillProducts(iEvent,iSetup);
+  for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+        it != tauFillers.end(); ++it ) 
+    (*it)->fillProducts(iEvent,iSetup);
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Fill Tree //////////////////////////////////////////////////////////////////
+  putProducts( iEvent );
+  for ( std::vector<JetFillerBase*>::iterator it = jetFillers.begin();
+        it != jetFillers.end(); ++it )
+    (*it)->putProducts(iEvent);
+  for ( std::vector<PatMuonFiller*>::iterator it = muonFillers.begin(); 
+        it != muonFillers.end(); ++it ) 
+    (*it)->putProducts(iEvent);
+  for ( std::vector<PatElectronFiller*>::iterator it = electronFillers.begin(); 
+        it != electronFillers.end(); ++it ) 
+    (*it)->putProducts(iEvent);
+  for ( std::vector<PatTauFiller*>::iterator it = tauFillers.begin(); 
+        it != tauFillers.end(); ++it ) 
+    (*it)->putProducts(iEvent);
+  
+  fNFillTree++;
+  
+  // Not used as a filter right now
+  return true;
+}
+
+//________________________________________________________________________________________
+// Declare all products
+void NTupleProducer::declareProducts(void) { 
+
+  // Run products
+  produces<float,edm::InRun>("ExtXSecLO"     );
+  produces<float,edm::InRun>("ExtXSecNLO"    );
+  produces<float,edm::InRun>("IntXSec"       );
+  produces<float,edm::InRun>("MinMuPt"       );
+  produces<float,edm::InRun>("MaxMuEta"      );
+  produces<float,edm::InRun>("MinElPt"       );
+  produces<float,edm::InRun>("MaxElEta"      );
+  produces<float,edm::InRun>("MinJPt"        );
+  produces<float,edm::InRun>("MinRawJPt"     );
+  produces<float,edm::InRun>("MaxJEta"       );
+  produces<float,edm::InRun>("MinJEMfrac"    );
+                                                                
+  produces<float,edm::InRun>("MinTrkPt"      );
+  produces<float,edm::InRun>("MaxTrkEta"     );
+  produces<float,edm::InRun>("MaxTrkNChi2"   );
+  produces<int,edm::InRun>  ("MinTrkNHits"   );
+                                                                
+  produces<float,edm::InRun>("MinPhotonPt"   );
+  produces<float,edm::InRun>("MaxPhotonEta"  );
+  produces<float,edm::InRun>("MinSCraw"      );
+  produces<float,edm::InRun>("MinEBRechitE"  );
+  
+  produces<float,edm::InRun>("MinGenLeptPt"  );
+  produces<float,edm::InRun>("MaxGenLeptEta" );
+  produces<float,edm::InRun>("MinGenPhotPt"  );
+  produces<float,edm::InRun>("MaxGenPhotEta" );
+  produces<float,edm::InRun>("MinGenJetPt"   );
+  produces<float,edm::InRun>("MaxGenJetEta"  );
+
+  produces<float,edm::InRun>("BtagMatchDeltaR"  );
+                                                                
+  produces<int,edm::InRun>("MaxNMus"       );
+  produces<int,edm::InRun>("MaxNEles"      );
+  produces<int,edm::InRun>("MaxNJets"      );
+  produces<int,edm::InRun>("MaxNTrks"      );
+  produces<int,edm::InRun>("MaxNPhotons"   );
+  produces<int,edm::InRun>("MaxNSC"        );
+  produces<int,edm::InRun>("MaxNGenLep"    );
+  produces<int,edm::InRun>("MaxNGenPho"    );
+  produces<int,edm::InRun>("MaxNGenJet"    );
+  produces<int,edm::InRun>("MaxNVrtx"      );
+  produces<int,edm::InRun>("MaxNPileup"    );
+  produces<int,edm::InRun>("MaxNEBhits"    );
+
+  produces<std::vector<std::string>,edm::InRun>("HLTNames");
+  produces<std::vector<std::string>,edm::InRun>("L1PhysMenu");
+  produces<std::vector<std::string>,edm::InRun>("HLTLabels");
+
+  produces<std::vector<std::string>,edm::InRun>("PileUpData");
+  produces<std::vector<std::string>,edm::InRun>("PileUpMC");
+
+  // Event products
+  produces<int>("Run");
+  produces<int>("Event");
+  produces<int>("LumiSection");
+  produces<float>("PtHat");
+  produces<float>("QCDPartonicHT");
+  produces<int>("SigProcID");
+  produces<float>("PDFScalePDF");
+  produces<int>("PDFID1");
+  produces<int>("PDFID2");
+  produces<float>("PDFx1");
+  produces<float>("PDFx2");
+  produces<float>("PDFxPDF1");
+  produces<float>("PDFxPDF2");
+  produces<float>("GenWeight");
+  produces<std::vector<float> >("pdfW");
+  produces<float>("pdfWsum");
+  produces<int>("NPdfs");
+  produces<int>("PUnumInteractions");
+  produces<int>("PUnumTrueInteractions");
+  produces<int>("PUnumFilled");
+  produces<int>("PUOOTnumInteractionsEarly");
+  produces<int>("PUOOTnumInteractionsLate");
+  produces<std::vector<float> >("PUzPositions");
+  produces<std::vector<float> >("PUsumPtLowPt");
+  produces<std::vector<float> >("PUsumPtHighPt");
+  produces<std::vector<float> >("PUnTrksLowPt");
+  produces<std::vector<float> >("PUnTrksHighPt");
+  produces<float>("Rho");
+  produces<float>("RhoPFnoPU");
+  produces<float>("Weight");
+  produces<std::vector<int> >("HLTResults");
+  produces<std::vector<int> >("HLTPrescale");
+  produces<std::vector<int> >("L1PhysResults");
+  produces<std::vector<int> >("L1TechResults");
+  produces<int>("NHLTObjs");
+  for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
+    std::ostringstream s;
+    s << i;
+    produces<std::vector<int> >(("HLTObjectID"+s.str()).c_str());
+    produces<std::vector<float> >(("HLTObjectPt"+s.str()).c_str());
+    produces<std::vector<float> >(("HLTObjectEta"+s.str()).c_str());
+    produces<std::vector<float> >(("HLTObjectPhi"+s.str()).c_str());
+  }
+  produces<float>("PUWeightTotal");
+  produces<float>("PUWeightInTime");
+  produces<float>("MassGlu");
+  produces<float>("MassChi");
+  produces<float>("MassLSP");
+  produces<float>("xSMS");
+  produces<float>("xbarSMS");
+  produces<float>("M0");
+  produces<float>("M12");
+  produces<float>("signMu");
+  produces<float>("A0");
+  produces<int>("process");
+
+  produces<int>("MaxGenPartExceed");
+  produces<int>("nGenParticles");
+  produces<std::vector<int> >("genInfoId");
+  produces<std::vector<int> >("genInfoStatus");
+  produces<std::vector<int> >("genInfoNMo");
+  produces<std::vector<int> >("genInfoNDa");
+  produces<std::vector<int> >("genInfoMo1");
+  produces<std::vector<int> >("genInfoMo2");
+  produces<std::vector<int> >("genInfoDa1");
+  produces<std::vector<int> >("genInfoDa2");
+  produces<std::vector<int> >("genInfoMoIndex");
+  produces<std::vector<int> >("PromptnessLevel");
+  produces<std::vector<float> >("genInfoMass");
+  produces<std::vector<float> >("genInfoMo1Pt");
+  produces<std::vector<float> >("genInfoMo2Pt");
+  produces<std::vector<float> >("genInfoPt");
+  produces<std::vector<float> >("genInfoEta");
+  produces<std::vector<float> >("genInfoPhi");
+  produces<std::vector<float> >("genInfoPx");
+  produces<std::vector<float> >("genInfoPy");
+  produces<std::vector<float> >("genInfoPz");
+  produces<std::vector<float> >("genInfoM");
+  produces<std::vector<float> >("genInfoPromptFlag");
+
+  produces<int>("PrimVtxGood");
+  produces<float>("PrimVtxx");
+  produces<float>("PrimVtxy");
+  produces<float>("PrimVtxz");
+  produces<float>("PrimVtxRho");
+  produces<float>("PrimVtxxE");
+  produces<float>("PrimVtxyE");
+  produces<float>("PrimVtxzE");
+  produces<float>("PrimVtxNChi2");
+  produces<float>("PrimVtxNdof");
+  produces<int>("PrimVtxIsFake");
+  produces<float>("PrimVtxPtSum");
+  produces<float>("Beamspotx");
+  produces<float>("Beamspoty");
+  produces<float>("Beamspotz");
+  produces<int>("NCaloTowers");
+  produces<int>("GoodEvent");
+  produces<int>("MaxMuExceed");
+  produces<int>("MaxElExceed");
+  produces<int>("MaxJetExceed");
+  produces<int>("MaxUncJetExceed");
+  produces<int>("MaxTrkExceed");
+  produces<int>("MaxPhotonsExceed");
+  produces<int>("MaxGenLepExceed");
+  produces<int>("MaxGenPhoExceed");
+  produces<int>("MaxGenJetExceed");
+  produces<int>("MaxVerticesExceed");
+  produces<int>("HBHENoiseFlag");
+  produces<int>("HBHENoiseFlagIso");
+  produces<int>("CSCTightHaloID");
+  produces<int>("EcalDeadTPFilterFlag");
+  produces<int>("RecovRecHitFilterFlag");
+  produces<int>("RA2TrackingFailureFilterFlag");
+  //FR produces<int>("PBNRFlag");
+  produces<int>("NGenLeptons");
+  produces<std::vector<int> >("GenLeptonID");
+  produces<std::vector<float> >("GenLeptonPt");
+  produces<std::vector<float> >("GenLeptonEta");
+  produces<std::vector<float> >("GenLeptonPhi");
+  produces<std::vector<int> >("GenLeptonMID");
+  produces<std::vector<int> >("GenLeptonMStatus");
+  produces<std::vector<float> >("GenLeptonMPt");
+  produces<std::vector<float> >("GenLeptonMEta");
+  produces<std::vector<float> >("GenLeptonMPhi");
+  produces<std::vector<int> >("GenLeptonGMID");
+  produces<std::vector<int> >("GenLeptonGMStatus");
+  produces<std::vector<float> >("GenLeptonGMPt");
+  produces<std::vector<float> >("GenLeptonGMEta");
+  produces<std::vector<float> >("GenLeptonGMPhi");
+  produces<int>("NGenPhotons");
+  produces<std::vector<float> >("GenPhotonPt");
+  produces<std::vector<float> >("GenPhotonEta");
+  produces<std::vector<float> >("GenPhotonPhi");
+  produces<std::vector<float> >("GenPhotonPartonMindR");
+  produces<std::vector<int> >("GenPhotonMotherID");
+  produces<std::vector<int> >("GenPhotonMotherStatus");
+  produces<int>("NGenJets");
+  produces<std::vector<float> >("GenJetPt");
+  produces<std::vector<float> >("GenJetEta");
+  produces<std::vector<float> >("GenJetPhi");
+  produces<std::vector<float> >("GenJetE");
+  produces<std::vector<float> >("GenJetEmE");
+  produces<std::vector<float> >("GenJetHadE");
+  produces<std::vector<float> >("GenJetInvE");
+  produces<int>("NVrtx");
+  produces<std::vector<float> >("VrtxX");
+  produces<std::vector<float> >("VrtxY");
+  produces<std::vector<float> >("VrtxZ");
+  produces<std::vector<float> >("VrtxXE");
+  produces<std::vector<float> >("VrtxYE");
+  produces<std::vector<float> >("VrtxZE");
+  produces<std::vector<float> >("VrtxNdof");
+  produces<std::vector<float> >("VrtxChi2");
+  produces<std::vector<float> >("VrtxNtrks");
+  produces<std::vector<float> >("VrtxSumPt");
+  produces<std::vector<int> >("VrtxIsFake");
+  produces<int>("NMus");
+  produces<int>("NMusTot");
+  produces<int>("NGMus");
+  produces<int>("NTMus");
+  produces<std::vector<int> >("MuGood");
+  produces<std::vector<int> >("MuIsIso");
+  produces<std::vector<int> >("MuIsGlobalMuon");
+  produces<std::vector<int> >("MuIsTrackerMuon");
+  produces<std::vector<float> >("MuPx");
+  produces<std::vector<float> >("MuPy");
+  produces<std::vector<float> >("MuPz");
+  produces<std::vector<float> >("MuPt");
+  produces<std::vector<float> >("MuInnerTkPt");
+  produces<std::vector<float> >("MuTkPtE");
+  produces<std::vector<float> >("MuTkD0E");
+  produces<std::vector<float> >("MuTkDzE");
+  produces<std::vector<float> >("MuPtE");
+  produces<std::vector<float> >("MuE");
+  produces<std::vector<float> >("MuEt");
+  produces<std::vector<float> >("MuEta");
+  produces<std::vector<float> >("MuPhi");
+  produces<std::vector<int> >("MuCharge");
+  produces<std::vector<float> >("MuRelIso03");
+  produces<std::vector<float> >("MuIso03SumPt");
+  produces<std::vector<float> >("MuIso03EmEt");
+  produces<std::vector<float> >("MuIso03HadEt");
+  produces<std::vector<float> >("MuIso03EMVetoEt");
+  produces<std::vector<float> >("MuIso03HadVetoEt");
+  produces<std::vector<float> >("MuIso05SumPt");
+  produces<std::vector<float> >("MuIso05EmEt");
+  produces<std::vector<float> >("MuIso05HadEt");
+  produces<std::vector<float> >("MuEem");
+  produces<std::vector<float> >("MuEhad");
+  produces<std::vector<float> >("MuD0BS");
+  produces<std::vector<float> >("MuD0PV");
+  produces<std::vector<float> >("MuD0E");
+  produces<std::vector<float> >("MuDzBS");
+  produces<std::vector<float> >("MuDzPV");
+  produces<std::vector<float> >("MuDzE");
+  produces<std::vector<float> >("MuNChi2");
+  produces<std::vector<int> >("MuNGlHits");
+  produces<std::vector<int> >("MuNMuHits");
+  produces<std::vector<int> >("MuNTkHits");
+  produces<std::vector<int> >("MuNPxHits");
+  produces<std::vector<float> >("MuInnerTkNChi2");
+  produces<std::vector<int> >("MuNMatches");
+  produces<std::vector<int> >("MuNChambers");
+  produces<std::vector<float> >("MuCaloComp");
+  produces<std::vector<float> >("MuSegmComp");
+  produces<std::vector<int> >("MuIsGMPT");
+  produces<std::vector<int> >("MuIsGMTkChiComp");
+  produces<std::vector<int> >("MuIsGMStaChiComp");
+  produces<std::vector<int> >("MuIsGMTkKinkTight");
+  produces<std::vector<int> >("MuIsAllStaMuons");
+  produces<std::vector<int> >("MuIsAllTrkMuons");
+  produces<std::vector<int> >("MuIsTrkMuonArbitrated");
+  produces<std::vector<int> >("MuIsAllArbitrated");
+  produces<std::vector<int> >("MuIsTMLSLoose");
+  produces<std::vector<int> >("MuIsTMLSTight");
+  produces<std::vector<int> >("MuIsTM2DCompLoose");
+  produces<std::vector<int> >("MuIsTM2DCompTight");
+  produces<std::vector<int> >("MuIsTMOneStationLoose");
+  produces<std::vector<int> >("MuIsTMOneStationTight");
+  produces<std::vector<int> >("MuIsTMLSOptLowPtLoose");
+  produces<std::vector<int> >("MuIsTMLSAngLoose");
+  produces<std::vector<int> >("MuIsTMLSAngTight");
+  produces<std::vector<int> >("MuIsTMOneStationAngTight");
+  produces<std::vector<int> >("MuIsTMOneStationAngLoose");
+  produces<std::vector<int> >("MuGenID");
+  produces<std::vector<int> >("MuGenStatus");
+  produces<std::vector<float> >("MuGenPt");
+  produces<std::vector<float> >("MuGenEta");
+  produces<std::vector<float> >("MuGenPhi");
+  produces<std::vector<float> >("MuGenE");
+  produces<std::vector<int> >("MuGenMID");
+  produces<std::vector<int> >("MuGenMStatus");
+  produces<std::vector<float> >("MuGenMPt");
+  produces<std::vector<float> >("MuGenMEta");
+  produces<std::vector<float> >("MuGenMPhi");
+  produces<std::vector<float> >("MuGenME");
+  produces<std::vector<int> >("MuGenGMID");
+  produces<std::vector<int> >("MuGenGMStatus");
+  produces<std::vector<float> >("MuGenGMPt");
+  produces<std::vector<float> >("MuGenGMEta");
+  produces<std::vector<float> >("MuGenGMPhi");
+  produces<std::vector<float> >("MuGenGME");
+  produces<int>("NEBhits");
+  produces<std::vector<float> >("EBrechitE");
+  produces<std::vector<float> >("EBrechitPt");
+  produces<std::vector<float> >("EBrechitEta");
+  produces<std::vector<float> >("EBrechitPhi");
+  produces<std::vector<float> >("EBrechitChi2");
+  produces<std::vector<float> >("EBrechitTime");
+  produces<std::vector<float> >("EBrechitE4oE1");
+  produces<std::vector<float> >("EBrechitE2oE9");
+  produces<int>("NEles");
+  produces<int>("NElesTot");
+  produces<std::vector<int> >("ElGood");
+  produces<std::vector<int> >("ElIsIso");
+  produces<std::vector<int> >("ElChargeMisIDProb");
+  produces<std::vector<float> >("ElPx");
+  produces<std::vector<float> >("ElPy");
+  produces<std::vector<float> >("ElPz");
+  produces<std::vector<float> >("ElPt");
+  produces<std::vector<float> >("ElPtE");
+  produces<std::vector<float> >("ElE");
+  produces<std::vector<float> >("ElEt");
+  produces<std::vector<float> >("ElEta");
+  produces<std::vector<float> >("ElTheta");
+  produces<std::vector<float> >("ElSCEta");
+  produces<std::vector<float> >("ElPhi");
+  produces<std::vector<float> >("ElGsfTkPt");
+  produces<std::vector<float> >("ElGsfTkEta");
+  produces<std::vector<float> >("ElGsfTkPhi");
+  produces<std::vector<float> >("ElTrkMomentumError");
+  produces<std::vector<float> >("ElEcalEnergyError");
+  produces<std::vector<float> >("ElEleMomentumError");
+  produces<std::vector<int> >("ElNBrems");
+  produces<std::vector<float> >("ElD0BS");
+  produces<std::vector<float> >("ElD0PV");
+  produces<std::vector<float> >("ElD0E");
+  produces<std::vector<float> >("ElDzBS");
+  produces<std::vector<float> >("ElDzPV");
+  produces<std::vector<float> >("ElDzE");
+  produces<std::vector<float> >("ElRelIso03");
+  produces<std::vector<float> >("ElRelIso04");
+  produces<std::vector<float> >("ElDR03TkSumPt");
+  produces<std::vector<float> >("ElDR04TkSumPt");
+  produces<std::vector<float> >("ElDR03EcalRecHitSumEt");
+  produces<std::vector<float> >("ElDR04EcalRecHitSumEt");
+  produces<std::vector<float> >("ElDR03HcalTowerSumEt");
+  produces<std::vector<float> >("ElDR04HcalTowerSumEt");
+  produces<std::vector<float> >("ElNChi2");
+  produces<std::vector<int> >("ElCharge");
+  produces<std::vector<int> >("ElCInfoIsGsfCtfCons");
+  produces<std::vector<int> >("ElCInfoIsGsfCtfScPixCons");
+  produces<std::vector<int> >("ElCInfoIsGsfScPixCons");
+  produces<std::vector<int> >("ElScPixCharge");
+  produces<std::vector<float> >("ElClosestCtfTrackPt");
+  produces<std::vector<float> >("ElClosestCtfTrackEta");
+  produces<std::vector<float> >("ElClosestCtfTrackPhi");
+  produces<std::vector<int> >("ElClosestCtfTrackCharge");
+  produces<std::vector<float> >("ElIDMva");
+  produces<std::vector<int> >("ElIDTight");
+  produces<std::vector<int> >("ElIDLoose");
+  produces<std::vector<int> >("ElIDRobustTight");
+  produces<std::vector<int> >("ElIDRobustLoose");
+  produces<std::vector<int> >("ElIDsimpleWPrelIso");
+  produces<std::vector<int> >("ElIDsimpleWP80relIso");
+  produces<std::vector<int> >("ElIDsimpleWP85relIso");
+  produces<std::vector<int> >("ElIDsimpleWP90relIso");
+  produces<std::vector<int> >("ElIDsimpleWP95relIso");
+  produces<std::vector<int> >("ElInGap");
+  produces<std::vector<int> >("ElEcalDriven");
+  produces<std::vector<int> >("ElTrackerDriven");
+  produces<std::vector<int> >("ElBasicClustersSize");
+  produces<std::vector<float> >("Elfbrem");
+  produces<std::vector<float> >("ElHcalOverEcal");
+  produces<std::vector<float> >("ElE1x5");
+  produces<std::vector<float> >("ElE5x5");
+  produces<std::vector<float> >("ElE2x5Max");
+  produces<std::vector<float> >("ElSigmaIetaIeta");
+  produces<std::vector<float> >("ElDeltaPhiSeedClusterAtCalo");
+  produces<std::vector<float> >("ElDeltaEtaSeedClusterAtCalo");
+  produces<std::vector<float> >("ElDeltaPhiSuperClusterAtVtx");
+  produces<std::vector<float> >("ElDeltaEtaSuperClusterAtVtx");
+  produces<std::vector<float> >("ElCaloEnergy");
+  produces<std::vector<float> >("ElTrkMomAtVtx");
+  produces<std::vector<float> >("ElESuperClusterOverP");
+  produces<std::vector<int> >("ElNumberOfMissingInnerHits");
+  produces<std::vector<int> >("ElSCindex");
+  produces<std::vector<float> >("ElConvPartnerTrkDist");
+  produces<std::vector<float> >("ElConvPartnerTrkDCot");
+  produces<std::vector<float> >("ElConvPartnerTrkPt");
+  produces<std::vector<float> >("ElConvPartnerTrkEta");
+  produces<std::vector<float> >("ElConvPartnerTrkPhi");
+  produces<std::vector<float> >("ElConvPartnerTrkCharge");
+  produces<std::vector<int> >("ElScSeedSeverity");
+  produces<std::vector<float> >("ElE1OverE9");
+  produces<std::vector<float> >("ElS4OverS1");
+  produces<std::vector<int> >("ElGenID");
+  produces<std::vector<int> >("ElGenStatus");
+  produces<std::vector<float> >("ElGenPt");
+  produces<std::vector<float> >("ElGenEta");
+  produces<std::vector<float> >("ElGenPhi");
+  produces<std::vector<float> >("ElGenE");
+  produces<std::vector<int> >("ElGenMID");
+  produces<std::vector<int> >("ElGenMStatus");
+  produces<std::vector<float> >("ElGenMPt");
+  produces<std::vector<float> >("ElGenMEta");
+  produces<std::vector<float> >("ElGenMPhi");
+  produces<std::vector<float> >("ElGenME");
+  produces<std::vector<int> >("ElGenGMID");
+  produces<std::vector<int> >("ElGenGMStatus");
+  produces<std::vector<float> >("ElGenGMPt");
+  produces<std::vector<float> >("ElGenGMEta");
+  produces<std::vector<float> >("ElGenGMPhi");
+  produces<std::vector<float> >("ElGenGME");
+  produces<int>("NPhotons");
+  produces<int>("NPhotonsTot");
+  produces<std::vector<int> >("PhoGood");
+  produces<std::vector<int> >("PhoIsIso");
+  produces<std::vector<float> >("PhoPt");
+  produces<std::vector<float> >("PhoPx");
+  produces<std::vector<float> >("PhoPy");
+  produces<std::vector<float> >("PhoPz");
+  produces<std::vector<float> >("PhoEta");
+  produces<std::vector<float> >("PhoPhi");
+  produces<std::vector<float> >("PhoEnergy");
+  produces<std::vector<float> >("PhoIso03Ecal");
+  produces<std::vector<float> >("PhoIso03Hcal");
+  produces<std::vector<float> >("PhoIso03TrkSolid");
+  produces<std::vector<float> >("PhoIso03TrkHollow");
+  produces<std::vector<float> >("PhoIso03");
+  produces<std::vector<float> >("PhoIso04Ecal");
+  produces<std::vector<float> >("PhoIso04Hcal");
+  produces<std::vector<float> >("PhoIso04TrkSolid");
+  produces<std::vector<float> >("PhoIso04TrkHollow");
+  produces<std::vector<float> >("PhoIso04");
+  produces<std::vector<float> >("PhoR9");
+  produces<std::vector<float> >("PhoCaloPositionX");
+  produces<std::vector<float> >("PhoCaloPositionY");
+  produces<std::vector<float> >("PhoCaloPositionZ");
+  produces<std::vector<float> >("PhoHoverE");
+  produces<std::vector<float> >("PhoH1overE");
+  produces<std::vector<float> >("PhoH2overE");
+  produces<std::vector<float> >("PhoSigmaIetaIeta");
+  produces<std::vector<float> >("PhoSCRawEnergy");
+  produces<std::vector<float> >("PhoSCEtaWidth");
+  produces<std::vector<float> >("PhoSCSigmaPhiPhi");
+  produces<std::vector<int> >("PhoHasPixSeed");
+  produces<std::vector<int> >("PhoHasConvTrks");
+  produces<std::vector<int> >("PhoScSeedSeverity");
+  produces<std::vector<float> >("PhoE1OverE9");
+  produces<std::vector<float> >("PhoS4OverS1");
+  produces<std::vector<float> >("PhoSigmaEtaEta");
+  produces<std::vector<float> >("PhoE1x5");
+  produces<std::vector<float> >("PhoE2x5");
+  produces<std::vector<float> >("PhoE3x3");
+  produces<std::vector<float> >("PhoE5x5");
+  produces<std::vector<float> >("PhomaxEnergyXtal");
+  produces<std::vector<float> >("PhoIso03HcalDepth1");
+  produces<std::vector<float> >("PhoIso03HcalDepth2");
+  produces<std::vector<float> >("PhoIso04HcalDepth1");
+  produces<std::vector<float> >("PhoIso04HcalDepth2");
+  produces<std::vector<int> >("PhoIso03nTrksSolid");
+  produces<std::vector<int> >("PhoIso03nTrksHollow");
+  produces<std::vector<int> >("PhoIso04nTrksSolid");
+  produces<std::vector<int> >("PhoIso04nTrksHollow");
+  produces<std::vector<int> >("PhoisEB");
+  produces<std::vector<int> >("PhoisEE");
+  produces<std::vector<int> >("PhoisEBEtaGap");
+  produces<std::vector<int> >("PhoisEBPhiGap");
+  produces<std::vector<int> >("PhoisEERingGap");
+  produces<std::vector<int> >("PhoisEEDeeGap");
+  produces<std::vector<int> >("PhoisEBEEGap");
+  produces<std::vector<int> >("PhoisPFlowPhoton");
+  produces<std::vector<int> >("PhoisStandardPhoton");
+  produces<std::vector<int> >("PhoMCmatchindex");
+  produces<std::vector<int> >("PhoMCmatchexitcode");
+  produces<std::vector<float> >("PhoChargedHadronIso");
+  produces<std::vector<float> >("PhoNeutralHadronIso");
+  produces<std::vector<float> >("PhoPhotonIso");
+  produces<std::vector<int> >("PhoisPFPhoton");
+  produces<std::vector<int> >("PhoisPFElectron");
+  produces<std::vector<int> >("PhotSCindex");
+  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt0");
+  produces<std::vector<float> >("PhoCone04PhotonIsodR0dEta0pt5");
+  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt0");
+  produces<std::vector<float> >("PhoCone04PhotonIsodR8dEta0pt5");
+  produces<std::vector<float> >("PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  produces<std::vector<float> >("PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  produces<std::vector<float> >("PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  produces<std::vector<float> >("PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt0");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR7dEta0pt5");
+  produces<std::vector<float> >("PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
+  produces<std::vector<float> >("PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
+  produces<std::vector<float> >("PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
+  produces<std::vector<float> >("PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
+  produces<std::vector<bool> > ("PhoConvValidVtx");
+  produces<std::vector<int> >  ("PhoConvNtracks");
+  produces<std::vector<float> >("PhoConvChi2Probability");
+  produces<std::vector<float> >("PhoConvEoverP");
+  produces<int>("Nconv");
+  produces<std::vector<bool> >("ConvValidVtx");
+  produces<std::vector<int> >("ConvNtracks");
+  produces<std::vector<float> >("ConvChi2Probability");
+  produces<std::vector<float> >("ConvEoverP");
+  produces<std::vector<float> >("ConvZofPrimVtxFromTrks");
+  //     produces<int>("Ngv");
+  //     produces<std::vector<float> >("gvSumPtHi");
+  //     produces<std::vector<float> >("gvSumPtLo");
+  //     produces<std::vector<int> >("gvNTkHi");
+  //     produces<std::vector<int> >("gvNTkLo");
+  produces<int>("NSuperClusters");
+  produces<std::vector<float> >("SCRaw");
+  produces<std::vector<float> >("SCPre");
+  produces<std::vector<float> >("SCEnergy");
+  produces<std::vector<float> >("SCEta");
+  produces<std::vector<float> >("SCPhi");
+  produces<std::vector<float> >("SCPhiWidth");
+  produces<std::vector<float> >("SCEtaWidth");
+  produces<std::vector<float> >("SCBrem");
+  produces<std::vector<float> >("SCR9");
+  produces<std::vector<float> >("SCcrackcorrseed");
+  produces<std::vector<float> >("SCcrackcorr");
+  produces<std::vector<float> >("SClocalcorrseed");
+  produces<std::vector<float> >("SClocalcorr");
+  produces<std::vector<float> >("SCcrackcorrseedfactor");
+  produces<std::vector<float> >("SClocalcorrseedfactor");
+  produces<int>("NJets");
+  produces<int>("NJetsTot");
+  produces<std::vector<int> >("JGood");
+  produces<std::vector<float> >("JPx");
+  produces<std::vector<float> >("JPy");
+  produces<std::vector<float> >("JPz");
+  produces<std::vector<float> >("JPt");
+  produces<std::vector<float> >("JE");
+  produces<std::vector<float> >("JEt");
+  produces<std::vector<float> >("JEta");
+  produces<std::vector<float> >("JPhi");
+  produces<std::vector<float> >("JEcorr");
+  produces<std::vector<float> >("JArea");
+  produces<std::vector<float> >("JEtaRms");
+  produces<std::vector<float> >("JPhiRms");
+  produces<std::vector<int> >("JNConstituents");
+  produces<std::vector<int> >("JNAssoTracks");
+  produces<std::vector<int> >("JNNeutrals");
+  produces<std::vector<float> >("JChargedEmFrac");
+  produces<std::vector<float> >("JNeutralEmFrac");
+  produces<std::vector<float> >("JChargedHadFrac");
+  produces<std::vector<float> >("JNeutralHadFrac");
+  produces<std::vector<float> >("JChargedMuEnergyFrac");
+  produces<std::vector<float> >("JPhoFrac");
+  produces<std::vector<float> >("JHFHadFrac");
+  produces<std::vector<float> >("JHFEMFrac");
+  produces<std::vector<float> >("JPtD");
+  produces<std::vector<float> >("JRMSCand");
+  produces<std::vector<float> >("JeMinDR");
+  produces<std::vector<float> >("JbTagProbTkCntHighEff");
+  produces<std::vector<float> >("JbTagProbTkCntHighPur");
+  produces<std::vector<float> >("JbTagProbSimpSVHighEff");
+  produces<std::vector<float> >("JbTagProbSimpSVHighPur");
+  produces<std::vector<float> >("JMass");
+  produces<std::vector<float> >("Jtrk1px");
+  produces<std::vector<float> >("Jtrk1py");
+  produces<std::vector<float> >("Jtrk1pz");
+  produces<std::vector<float> >("Jtrk2px");
+  produces<std::vector<float> >("Jtrk2py");
+  produces<std::vector<float> >("Jtrk2pz");
+  produces<std::vector<float> >("Jtrk3px");
+  produces<std::vector<float> >("Jtrk3py");
+  produces<std::vector<float> >("Jtrk3pz");
+  produces<std::vector<float> >("JVtxx");
+  produces<std::vector<float> >("JVtxy");
+  produces<std::vector<float> >("JVtxz");
+  produces<std::vector<float> >("JVtxExx");
+  produces<std::vector<float> >("JVtxEyx");
+  produces<std::vector<float> >("JVtxEyy");
+  produces<std::vector<float> >("JVtxEzy");
+  produces<std::vector<float> >("JVtxEzz");
+  produces<std::vector<float> >("JVtxEzx");
+  produces<std::vector<float> >("JVtxNChi2");
+  produces<std::vector<int> >("JGenJetIndex");
+  produces<int>("NTracks");
+  produces<int>("NTracksTot");
+  produces<std::vector<int> >("TrkGood");
+  produces<std::vector<float> >("TrkPt");
+  produces<std::vector<float> >("TrkEta");
+  produces<std::vector<float> >("TrkPhi");
+  produces<std::vector<float> >("TrkNChi2");
+  produces<std::vector<float> >("TrkNHits");
+  produces<std::vector<float> >("TrkVtxDz");
+  produces<std::vector<float> >("TrkVtxDxy");
+  produces<float>("TrkPtSumx");
+  produces<float>("TrkPtSumy");
+  produces<float>("TrkPtSum");
+  produces<float>("TrkPtSumPhi");
+  produces<float>("SumEt");
+  produces<float>("ECALSumEt");
+  produces<float>("HCALSumEt");
+  produces<float>("ECALEsumx");
+  produces<float>("ECALEsumy");
+  produces<float>("ECALEsumz");
+  produces<float>("ECALMET");
+  produces<float>("ECALMETPhi");
+  produces<float>("ECALMETEta");
+  produces<float>("HCALEsumx");
+  produces<float>("HCALEsumy");
+  produces<float>("HCALEsumz");
+  produces<float>("HCALMET");
+  produces<float>("HCALMETPhi");
+  produces<float>("HCALMETeta");
+  produces<float>("RawMET");
+  produces<float>("RawMETpx");
+  produces<float>("RawMETpy");
+  produces<float>("RawMETphi");
+  produces<float>("RawMETemEtFrac");
+  produces<float>("RawMETemEtInEB");
+  produces<float>("RawMETemEtInEE");
+  produces<float>("RawMETemEtInHF");
+  produces<float>("RawMEThadEtFrac");
+  produces<float>("RawMEThadEtInHB");
+  produces<float>("RawMEThadEtInHE");
+  produces<float>("RawMEThadEtInHF");
+  produces<float>("RawMETSignificance");
+  produces<float>("GenMET");
+  produces<float>("GenMETpx");
+  produces<float>("GenMETpy");
+  produces<float>("GenMETphi");
+  produces<float>("TCMET");
+  produces<float>("TCMETpx");
+  produces<float>("TCMETpy");
+  produces<float>("TCMETphi");
+  produces<float>("TCMETSignificance");
+  produces<float>("MuJESCorrMET");
+  produces<float>("MuJESCorrMETpx");
+  produces<float>("MuJESCorrMETpy");
+  produces<float>("MuJESCorrMETphi");
+  produces<float>("PFMET");
+  produces<float>("PFMETpx");
+  produces<float>("PFMETpy");
+  produces<float>("PFMETphi");
+  produces<float>("PFMETSignificance");
+  produces<float>("PFSumEt");
+  produces<float>("PFMETPAT");
+  produces<float>("PFMETPATpx");
+  produces<float>("PFMETPATpy");
+  produces<float>("PFMETPATphi");
+  produces<float>("PFMETPATSignificance");
+  produces<float>("METR12");
+  produces<float>("METR21");
+
+}
+
+//________________________________________________________________________________________
+// Reset all event variables
+void NTupleProducer::resetProducts( void ) {
+  
+  fTRun.reset(new int(-999));
+  fTEvent.reset(new int(-999));
+  fTLumiSection.reset(new int(-999));
+  fTPtHat.reset(new float(-999.99));
+  fTQCDPartonicHT.reset(new float(-999.99));
+  fTSigProcID.reset(new int(-999));
+  fTPDFScalePDF.reset(new float(-999.99));
+  fTPDFID1.reset(new int(-999));
+  fTPDFID2.reset(new int(-999));
+  fTPDFx1.reset(new float(-999.99));
+  fTPDFx2.reset(new float(-999.99));
+  fTPDFxPDF1.reset(new float(-999.99));
+  fTPDFxPDF2.reset(new float(-999.99));
+  fTGenWeight.reset(new float(-999.99));
+  fTpdfW.reset(new std::vector<float> );
+  fTpdfWsum.reset(new float(-999.99));
+  fTNPdfs.reset(new int(-999));
+  fTPUnumInteractions.reset(new int(-999));
+  fTPUnumTrueInteractions.reset(new int(-999));
+  fTPUnumFilled.reset(new int(-999));
+  fTPUOOTnumInteractionsEarly.reset(new int(-999));
+  fTPUOOTnumInteractionsLate.reset(new int(-999));
+  fTPUzPositions.reset(new std::vector<float> );
+  fTPUsumPtLowPt.reset(new std::vector<float> );
+  fTPUsumPtHighPt.reset(new std::vector<float> );
+  fTPUnTrksLowPt.reset(new std::vector<float> );
+  fTPUnTrksHighPt.reset(new std::vector<float> );
+  fTRho.reset(new float(-999.99));
+  fTRhoPFnoPU.reset(new float(-999.99));
+  fTWeight.reset(new float(-999.99));
+  fTHLTResults.reset(new std::vector<int> );
+  fTHLTPrescale.reset(new std::vector<int> );
+  fTL1PhysResults.reset(new std::vector<int> );
+  fTL1TechResults.reset(new std::vector<int> );
+  fTNHLTObjs.reset(new int(-999));
+  for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
+    fTHLTObjectID[i].reset(new std::vector<int> );
+    fTHLTObjectPt[i].reset(new std::vector<float> );
+    fTHLTObjectEta[i].reset(new std::vector<float> );
+    fTHLTObjectPhi[i].reset(new std::vector<float> );
+  }
+  fTPUWeightTotal.reset(new float(-999.99));
+  fTPUWeightInTime.reset(new float(-999.99));
+  fTMassGlu.reset(new float(-999.99));
+  fTMassChi.reset(new float(-999.99));
+  fTMassLSP.reset(new float(-999.99));
+  fTxSMS.reset(new float(-999.99));
+  fTxbarSMS.reset(new float(-999.99));
+  fTM0.reset(new float(-999.99));
+  fTM12.reset(new float(-999.99));
+  fTsignMu.reset(new float(-999.99));
+  fTA0.reset(new float(-999.99));
+  fTprocess.reset(new int(-999));
+
+  fTMaxGenPartExceed.reset(new int(-999));
+  fTnGenParticles.reset(new int(-999));
+  fTgenInfoId.reset(new std::vector<int>);
+  fTgenInfoStatus.reset(new std::vector<int>);
+  fTgenInfoNMo.reset(new std::vector<int>);
+  fTgenInfoNDa.reset(new std::vector<int>);
+  fTgenInfoMo1.reset(new std::vector<int>);
+  fTgenInfoMo2.reset(new std::vector<int>);
+  fTgenInfoDa1.reset(new std::vector<int>);
+  fTgenInfoDa2.reset(new std::vector<int>);
+  fTgenInfoMoIndex.reset(new std::vector<int>);
+  fTPromptnessLevel.reset(new std::vector<int>);
+  fTgenInfoMass.reset(new std::vector<float>);
+  fTgenInfoMo1Pt.reset(new std::vector<float>);
+  fTgenInfoMo2Pt.reset(new std::vector<float>);
+  fTgenInfoPt.reset(new std::vector<float>);
+  fTgenInfoEta.reset(new std::vector<float>);
+  fTgenInfoPhi.reset(new std::vector<float>);
+  fTgenInfoPx.reset(new std::vector<float>);
+  fTgenInfoPy.reset(new std::vector<float>);
+  fTgenInfoPz.reset(new std::vector<float>);
+  fTgenInfoM.reset(new std::vector<float>);
+  fTgenInfoPromptFlag.reset(new std::vector<float>);
+
+  fTPrimVtxGood.reset(new int(-999));
+  fTPrimVtxx.reset(new float(-999.99));
+  fTPrimVtxy.reset(new float(-999.99));
+  fTPrimVtxz.reset(new float(-999.99));
+  fTPrimVtxRho.reset(new float(-999.99));
+  fTPrimVtxxE.reset(new float(-999.99));
+  fTPrimVtxyE.reset(new float(-999.99));
+  fTPrimVtxzE.reset(new float(-999.99));
+  fTPrimVtxNChi2.reset(new float(-999.99));
+  fTPrimVtxNdof.reset(new float(-999.99));
+  fTPrimVtxIsFake.reset(new int(-999));
+  fTPrimVtxPtSum.reset(new float(-999.99));
+  fTBeamspotx.reset(new float(-999.99));
+  fTBeamspoty.reset(new float(-999.99));
+  fTBeamspotz.reset(new float(-999.99));
+  fTNCaloTowers.reset(new int(-999));
+  fTGoodEvent.reset(new int(-999));
+  fTMaxMuExceed.reset(new int(-999));
+  fTMaxElExceed.reset(new int(-999));
+  fTMaxJetExceed.reset(new int(-999));
+  fTMaxUncJetExceed.reset(new int(-999));
+  fTMaxTrkExceed.reset(new int(-999));
+  fTMaxPhotonsExceed.reset(new int(-999));
+  fTMaxGenLepExceed.reset(new int(-999));
+  fTMaxGenPhoExceed.reset(new int(-999));
+  fTMaxGenJetExceed.reset(new int(-999));
+  fTMaxVerticesExceed.reset(new int(-999));
+  fTHBHENoiseFlag.reset(new int(-999));
+  fTHBHENoiseFlagIso.reset(new int(-999));
+  fTCSCTightHaloID.reset(new int(-999));
+  fTEcalDeadTPFilterFlag.reset(new int(-999));
+  fTRecovRecHitFilterFlag.reset(new int(-999));
+  fTRA2TrackingFailureFilterFlag.reset(new int(-999));
+  //FR fPBNRFlag.reset(new int(-999));
+  fTNGenLeptons.reset(new int(-999));
+  fTGenLeptonID.reset(new std::vector<int> );
+  fTGenLeptonPt.reset(new std::vector<float> );
+  fTGenLeptonEta.reset(new std::vector<float> );
+  fTGenLeptonPhi.reset(new std::vector<float> );
+  fTGenLeptonMID.reset(new std::vector<int> );
+  fTGenLeptonMStatus.reset(new std::vector<int> );
+  fTGenLeptonMPt.reset(new std::vector<float> );
+  fTGenLeptonMEta.reset(new std::vector<float> );
+  fTGenLeptonMPhi.reset(new std::vector<float> );
+  fTGenLeptonGMID.reset(new std::vector<int> );
+  fTGenLeptonGMStatus.reset(new std::vector<int> );
+  fTGenLeptonGMPt.reset(new std::vector<float> );
+  fTGenLeptonGMEta.reset(new std::vector<float> );
+  fTGenLeptonGMPhi.reset(new std::vector<float> );
+  fTNGenPhotons.reset(new int(-999));
+  fTGenPhotonPt.reset(new std::vector<float> );
+  fTGenPhotonEta.reset(new std::vector<float> );
+  fTGenPhotonPhi.reset(new std::vector<float> );
+  fTGenPhotonPartonMindR.reset(new std::vector<float> );
+  fTGenPhotonMotherID.reset(new std::vector<int> );
+  fTGenPhotonMotherStatus.reset(new std::vector<int> );
+  fTNGenJets.reset(new int(-999));
+  fTGenJetPt.reset(new std::vector<float> );
+  fTGenJetEta.reset(new std::vector<float> );
+  fTGenJetPhi.reset(new std::vector<float> );
+  fTGenJetE.reset(new std::vector<float> );
+  fTGenJetEmE.reset(new std::vector<float> );
+  fTGenJetHadE.reset(new std::vector<float> );
+  fTGenJetInvE.reset(new std::vector<float> );
+  fTNVrtx.reset(new int(-999));
+  fTVrtxX.reset(new std::vector<float> );
+  fTVrtxY.reset(new std::vector<float> );
+  fTVrtxZ.reset(new std::vector<float> );
+  fTVrtxXE.reset(new std::vector<float> );
+  fTVrtxYE.reset(new std::vector<float> );
+  fTVrtxZE.reset(new std::vector<float> );
+  fTVrtxNdof.reset(new std::vector<float> );
+  fTVrtxChi2.reset(new std::vector<float> );
+  fTVrtxNtrks.reset(new std::vector<float> );
+  fTVrtxSumPt.reset(new std::vector<float> );
+  fTVrtxIsFake.reset(new std::vector<int> );
+  fTNMus.reset(new int(-999));
+  fTNMusTot.reset(new int(-999));
+  fTNGMus.reset(new int(-999));
+  fTNTMus.reset(new int(-999));
+  fTMuGood.reset(new std::vector<int> );
+  fTMuIsIso.reset(new std::vector<int> );
+  fTMuIsGlobalMuon.reset(new std::vector<int> );
+  fTMuIsTrackerMuon.reset(new std::vector<int> );
+  fTMuPx.reset(new std::vector<float> );
+  fTMuPy.reset(new std::vector<float> );
+  fTMuPz.reset(new std::vector<float> );
+  fTMuPt.reset(new std::vector<float> );
+  fTMuInnerTkPt.reset(new std::vector<float> );
+  fTMuE.reset(new std::vector<float> );
+  fTMuEt.reset(new std::vector<float> );
+  fTMuEta.reset(new std::vector<float> );
+  fTMuPhi.reset(new std::vector<float> );
+  fTMuCharge.reset(new std::vector<int> );
+  fTMuRelIso03.reset(new std::vector<float> );
+  fTMuIso03SumPt.reset(new std::vector<float> );
+  fTMuIso03EmEt.reset(new std::vector<float> );
+  fTMuIso03HadEt.reset(new std::vector<float> );
+  fTMuIso03EMVetoEt.reset(new std::vector<float> );
+  fTMuIso03HadVetoEt.reset(new std::vector<float> );
+  fTMuIso05SumPt.reset(new std::vector<float> );
+  fTMuIso05EmEt.reset(new std::vector<float> );
+  fTMuIso05HadEt.reset(new std::vector<float> );
+  fTMuEem.reset(new std::vector<float> );
+  fTMuEhad.reset(new std::vector<float> );
+  fTMuD0BS.reset(new std::vector<float> );
+  fTMuD0PV.reset(new std::vector<float> );
+  fTMuDzBS.reset(new std::vector<float> );
+  fTMuDzPV.reset(new std::vector<float> );
+  fTMuTkPtE.reset(new std::vector<float> );
+  fTMuTkD0E.reset(new std::vector<float> );
+  fTMuTkDzE.reset(new std::vector<float> );
+  fTMuPtE.reset(new std::vector<float> );
+  fTMuD0E.reset(new std::vector<float> );
+  fTMuDzE.reset(new std::vector<float> );
+  fTMuNChi2.reset(new std::vector<float> );
+  fTMuNGlHits.reset(new std::vector<int> );
+  fTMuNMuHits.reset(new std::vector<int> );
+  fTMuNTkHits.reset(new std::vector<int> );
+  fTMuNPxHits.reset(new std::vector<int> );
+  fTMuInnerTkNChi2.reset(new std::vector<float> );
+  fTMuNMatches.reset(new std::vector<int> );
+  fTMuNChambers.reset(new std::vector<int> );
+  fTMuCaloComp.reset(new std::vector<float> );
+  fTMuSegmComp.reset(new std::vector<float> );
+  fTMuIsGMPT.reset(new std::vector<int> );
+  fTMuIsGMTkChiComp.reset(new std::vector<int> );
+  fTMuIsGMStaChiComp.reset(new std::vector<int> );
+  fTMuIsGMTkKinkTight.reset(new std::vector<int> );
+  fTMuIsAllStaMuons.reset(new std::vector<int> );
+  fTMuIsAllTrkMuons.reset(new std::vector<int> );
+  fTMuIsTrkMuonArbitrated.reset(new std::vector<int> );
+  fTMuIsAllArbitrated.reset(new std::vector<int> );
+  fTMuIsTMLSLoose.reset(new std::vector<int> );
+  fTMuIsTMLSTight.reset(new std::vector<int> );
+  fTMuIsTM2DCompLoose.reset(new std::vector<int> );
+  fTMuIsTM2DCompTight.reset(new std::vector<int> );
+  fTMuIsTMOneStationLoose.reset(new std::vector<int> );
+  fTMuIsTMOneStationTight.reset(new std::vector<int> );
+  fTMuIsTMLSOptLowPtLoose.reset(new std::vector<int> );
+  fTMuIsTMLSAngLoose.reset(new std::vector<int> );
+  fTMuIsTMLSAngTight.reset(new std::vector<int> );
+  fTMuIsTMOneStationAngTight.reset(new std::vector<int> );
+  fTMuIsTMOneStationAngLoose.reset(new std::vector<int> );
+  fTMuGenID.reset(new std::vector<int> );
+  fTMuGenStatus.reset(new std::vector<int> );
+  fTMuGenPt.reset(new std::vector<float> );
+  fTMuGenEta.reset(new std::vector<float> );
+  fTMuGenPhi.reset(new std::vector<float> );
+  fTMuGenE.reset(new std::vector<float> );
+  fTMuGenMID.reset(new std::vector<int> );
+  fTMuGenMStatus.reset(new std::vector<int> );
+  fTMuGenMPt.reset(new std::vector<float> );
+  fTMuGenMEta.reset(new std::vector<float> );
+  fTMuGenMPhi.reset(new std::vector<float> );
+  fTMuGenME.reset(new std::vector<float> );
+  fTMuGenGMID.reset(new std::vector<int> );
+  fTMuGenGMStatus.reset(new std::vector<int> );
+  fTMuGenGMPt.reset(new std::vector<float> );
+  fTMuGenGMEta.reset(new std::vector<float> );
+  fTMuGenGMPhi.reset(new std::vector<float> );
+  fTMuGenGME.reset(new std::vector<float> );
+  fTNEBhits.reset(new int(-999));
+  fTEBrechitE.reset(new std::vector<float> );
+  fTEBrechitPt.reset(new std::vector<float> );
+  fTEBrechitEta.reset(new std::vector<float> );
+  fTEBrechitPhi.reset(new std::vector<float> );
+  fTEBrechitChi2.reset(new std::vector<float> );
+  fTEBrechitTime.reset(new std::vector<float> );
+  fTEBrechitE4oE1.reset(new std::vector<float> );
+  fTEBrechitE2oE9.reset(new std::vector<float> );
+  fTNEles.reset(new int(-999));
+  fTNElesTot.reset(new int(-999));
+  fTElGood.reset(new std::vector<int> );
+  fTElIsIso.reset(new std::vector<int> );
+  fTElChargeMisIDProb.reset(new std::vector<int> );
+  fTElPx.reset(new std::vector<float> );
+  fTElPy.reset(new std::vector<float> );
+  fTElPz.reset(new std::vector<float> );
+  fTElPt.reset(new std::vector<float> );
+  fTElPtE.reset(new std::vector<float> );
+  fTElE.reset(new std::vector<float> );
+  fTElEt.reset(new std::vector<float> );
+  fTElEta.reset(new std::vector<float> );
+  fTElTheta.reset(new std::vector<float> );
+  fTElSCEta.reset(new std::vector<float> );
+  fTElPhi.reset(new std::vector<float> );
+  fTElGsfTkPt.reset(new std::vector<float> );
+  fTElGsfTkEta.reset(new std::vector<float> );
+  fTElGsfTkPhi.reset(new std::vector<float> );
+  fTElTrkMomentumError.reset(new std::vector<float> );
+  fTElEcalEnergyError.reset(new std::vector<float> );
+  fTElEleMomentumError.reset(new std::vector<float> );
+  fTElNBrems.reset(new std::vector<int> );
+  fTElD0BS.reset(new std::vector<float> );
+  fTElD0PV.reset(new std::vector<float> );
+  fTElD0E.reset(new std::vector<float> );
+  fTElDzBS.reset(new std::vector<float> );
+  fTElDzPV.reset(new std::vector<float> );
+  fTElDzE.reset(new std::vector<float> );
+  fTElRelIso03.reset(new std::vector<float> );
+  fTElRelIso04.reset(new std::vector<float> );
+  fTElDR03TkSumPt.reset(new std::vector<float> );
+  fTElDR04TkSumPt.reset(new std::vector<float> );
+  fTElDR03EcalRecHitSumEt.reset(new std::vector<float> );
+  fTElDR04EcalRecHitSumEt.reset(new std::vector<float> );
+  fTElDR03HcalTowerSumEt.reset(new std::vector<float> );
+  fTElDR04HcalTowerSumEt.reset(new std::vector<float> );
+  fTElNChi2.reset(new std::vector<float> );
+  fTElCharge.reset(new std::vector<int> );
+  fTElCInfoIsGsfCtfCons.reset(new std::vector<int> );
+  fTElCInfoIsGsfCtfScPixCons.reset(new std::vector<int> );
+  fTElCInfoIsGsfScPixCons.reset(new std::vector<int> );
+  fTElScPixCharge.reset(new std::vector<int> );
+  fTElClosestCtfTrackPt.reset(new std::vector<float> );
+  fTElClosestCtfTrackEta.reset(new std::vector<float> );
+  fTElClosestCtfTrackPhi.reset(new std::vector<float> );
+  fTElClosestCtfTrackCharge.reset(new std::vector<int> );
+  fTElIDMva.reset(new std::vector<float> );
+  fTElIDTight.reset(new std::vector<int> );
+  fTElIDLoose.reset(new std::vector<int> );
+  fTElIDRobustTight.reset(new std::vector<int> );
+  fTElIDRobustLoose.reset(new std::vector<int> );
+  fTElIDsimpleWPrelIso.reset(new std::vector<int> );
+  fTElIDsimpleWP80relIso.reset(new std::vector<int> );
+  fTElIDsimpleWP85relIso.reset(new std::vector<int> );
+  fTElIDsimpleWP90relIso.reset(new std::vector<int> );
+  fTElIDsimpleWP95relIso.reset(new std::vector<int> );
+  fTElInGap.reset(new std::vector<int> );
+  fTElEcalDriven.reset(new std::vector<int> );
+  fTElTrackerDriven.reset(new std::vector<int> );
+  fTElBasicClustersSize.reset(new std::vector<int> );
+  fTElfbrem.reset(new std::vector<float> );
+  fTElHcalOverEcal.reset(new std::vector<float> );
+  fTElE1x5.reset(new std::vector<float> );
+  fTElE5x5.reset(new std::vector<float> );
+  fTElE2x5Max.reset(new std::vector<float> );
+  fTElSigmaIetaIeta.reset(new std::vector<float> );
+  fTElDeltaPhiSeedClusterAtCalo.reset(new std::vector<float> );
+  fTElDeltaEtaSeedClusterAtCalo.reset(new std::vector<float> );
+  fTElDeltaPhiSuperClusterAtVtx.reset(new std::vector<float> );
+  fTElDeltaEtaSuperClusterAtVtx.reset(new std::vector<float> );
+  fTElCaloEnergy.reset(new std::vector<float> );
+  fTElTrkMomAtVtx.reset(new std::vector<float> );
+  fTElESuperClusterOverP.reset(new std::vector<float> );
+  fTElNumberOfMissingInnerHits.reset(new std::vector<int> );
+  fTElSCindex.reset(new std::vector<int> );
+  fTElConvPartnerTrkDist.reset(new std::vector<float> );
+  fTElConvPartnerTrkDCot.reset(new std::vector<float> );
+  fTElConvPartnerTrkPt.reset(new std::vector<float> );
+  fTElConvPartnerTrkEta.reset(new std::vector<float> );
+  fTElConvPartnerTrkPhi.reset(new std::vector<float> );
+  fTElConvPartnerTrkCharge.reset(new std::vector<float> );
+  fTElScSeedSeverity.reset(new std::vector<int> );
+  fTElE1OverE9.reset(new std::vector<float> );
+  fTElS4OverS1.reset(new std::vector<float> );
+  fTElGenID.reset(new std::vector<int> );
+  fTElGenStatus.reset(new std::vector<int> );
+  fTElGenPt.reset(new std::vector<float> );
+  fTElGenEta.reset(new std::vector<float> );
+  fTElGenPhi.reset(new std::vector<float> );
+  fTElGenE.reset(new std::vector<float> );
+  fTElGenMID.reset(new std::vector<int> );
+  fTElGenMStatus.reset(new std::vector<int> );
+  fTElGenMPt.reset(new std::vector<float> );
+  fTElGenMEta.reset(new std::vector<float> );
+  fTElGenMPhi.reset(new std::vector<float> );
+  fTElGenME.reset(new std::vector<float> );
+  fTElGenGMID.reset(new std::vector<int> );
+  fTElGenGMStatus.reset(new std::vector<int> );
+  fTElGenGMPt.reset(new std::vector<float> );
+  fTElGenGMEta.reset(new std::vector<float> );
+  fTElGenGMPhi.reset(new std::vector<float> );
+  fTElGenGME.reset(new std::vector<float> );
+  fTNPhotons.reset(new int(-999));
+  fTNPhotonsTot.reset(new int(-999));
+  fTPhoGood.reset(new std::vector<int> );
+  fTPhoIsIso.reset(new std::vector<int> );
+  fTPhoPt.reset(new std::vector<float> );
+  fTPhoPx.reset(new std::vector<float> );
+  fTPhoPy.reset(new std::vector<float> );
+  fTPhoPz.reset(new std::vector<float> );
+  fTPhoEta.reset(new std::vector<float> );
+  fTPhoPhi.reset(new std::vector<float> );
+  fTPhoEnergy.reset(new std::vector<float> );
+  fTPhoIso03Ecal.reset(new std::vector<float> );
+  fTPhoIso03Hcal.reset(new std::vector<float> );
+  fTPhoIso03TrkSolid.reset(new std::vector<float> );
+  fTPhoIso03TrkHollow.reset(new std::vector<float> );
+  fTPhoIso03.reset(new std::vector<float> );
+  fTPhoIso04Ecal.reset(new std::vector<float> );
+  fTPhoIso04Hcal.reset(new std::vector<float> );
+  fTPhoIso04TrkSolid.reset(new std::vector<float> );
+  fTPhoIso04TrkHollow.reset(new std::vector<float> );
+  fTPhoIso04.reset(new std::vector<float> );
+  fTPhoR9.reset(new std::vector<float> );
+  fTPhoCaloPositionX.reset(new std::vector<float> );
+  fTPhoCaloPositionY.reset(new std::vector<float> );
+  fTPhoCaloPositionZ.reset(new std::vector<float> );
+  fTPhoHoverE.reset(new std::vector<float> );
+  fTPhoH1overE.reset(new std::vector<float> );
+  fTPhoH2overE.reset(new std::vector<float> );
+  fTPhoSigmaIetaIeta.reset(new std::vector<float> );
+  fTPhoSCRawEnergy.reset(new std::vector<float> );
+  fTPhoSCEtaWidth.reset(new std::vector<float> );
+  fTPhoSCSigmaPhiPhi.reset(new std::vector<float> );
+  fTPhoHasPixSeed.reset(new std::vector<int> );
+  fTPhoHasConvTrks.reset(new std::vector<int> );
+  fTPhoScSeedSeverity.reset(new std::vector<int> );
+  fTPhoE1OverE9.reset(new std::vector<float> );
+  fTPhoS4OverS1.reset(new std::vector<float> );
+  fTPhoSigmaEtaEta.reset(new std::vector<float> );
+  fTPhoE1x5.reset(new std::vector<float> );
+  fTPhoE2x5.reset(new std::vector<float> );
+  fTPhoE3x3.reset(new std::vector<float> );
+  fTPhoE5x5.reset(new std::vector<float> );
+  fTPhomaxEnergyXtal.reset(new std::vector<float> );
+  fTPhoIso03HcalDepth1.reset(new std::vector<float> );
+  fTPhoIso03HcalDepth2.reset(new std::vector<float> );
+  fTPhoIso04HcalDepth1.reset(new std::vector<float> );
+  fTPhoIso04HcalDepth2.reset(new std::vector<float> );
+  fTPhoIso03nTrksSolid.reset(new std::vector<int> );
+  fTPhoIso03nTrksHollow.reset(new std::vector<int> );
+  fTPhoIso04nTrksSolid.reset(new std::vector<int> );
+  fTPhoIso04nTrksHollow.reset(new std::vector<int> );
+  fTPhoisEB.reset(new std::vector<int> );
+  fTPhoisEE.reset(new std::vector<int> );
+  fTPhoisEBEtaGap.reset(new std::vector<int> );
+  fTPhoisEBPhiGap.reset(new std::vector<int> );
+  fTPhoisEERingGap.reset(new std::vector<int> );
+  fTPhoisEEDeeGap.reset(new std::vector<int> );
+  fTPhoisEBEEGap.reset(new std::vector<int> );
+  fTPhoisPFlowPhoton.reset(new std::vector<int> );
+  fTPhoisStandardPhoton.reset(new std::vector<int> );
+  fTPhoMCmatchindex.reset(new std::vector<int> );
+  fTPhoMCmatchexitcode.reset(new std::vector<int> );
+  fTPhoChargedHadronIso.reset(new std::vector<float> );
+  fTPhoNeutralHadronIso.reset(new std::vector<float> );
+  fTPhoPhotonIso.reset(new std::vector<float> );
+  fTPhoisPFPhoton.reset(new std::vector<int> );
+  fTPhoisPFElectron.reset(new std::vector<int> );
+  fTPhotSCindex.reset(new std::vector<int> );
+  fTPhoCone04PhotonIsodR0dEta0pt0.reset(new std::vector<float> );
+  fTPhoCone04PhotonIsodR0dEta0pt5.reset(new std::vector<float> );
+  fTPhoCone04PhotonIsodR8dEta0pt0.reset(new std::vector<float> );
+  fTPhoCone04PhotonIsodR8dEta0pt5.reset(new std::vector<float> );
+  fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+  fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+  fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+  fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR0dEta0pt0.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR0dEta0pt5.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR7dEta0pt0.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR7dEta0pt5.reset(new std::vector<float> );
+  fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+  fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+  fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+  fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01.reset(new std::vector<float> );
+  fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU.reset(new std::vector<float> );
+  fTPhoConvValidVtx.reset(new std::vector<bool>);
+  fTPhoConvNtracks.reset(new std::vector<int>);
+  fTPhoConvChi2Probability.reset(new std::vector<float>);
+  fTPhoConvEoverP.reset(new std::vector<float>);
+  fTNconv.reset(new int(-999));
+  fTConvValidVtx.reset(new std::vector<bool>);
+  fTConvNtracks.reset(new std::vector<int>);
+  fTConvChi2Probability.reset(new std::vector<float>);
+  fTConvEoverP.reset(new std::vector<float>);
+  fTConvZofPrimVtxFromTrks.reset(new std::vector<float>);
+  //     fTNgv.reset(new int(-999));
+  //     fTgvSumPtHi.reset(new std::vector<float>);
+  //     fTgvSumPtLo.reset(new std::vector<float>);
+  //     fTgvNTkHi.reset(new std::vector<int>);
+  //     fTgvNTkLo.reset(new std::vector<int>);
+  for (int i=0; i<gMaxNPhotons; i++) {
+    pho_conv_vtx[i]=TVector3();
+    pho_conv_refitted_momentum[i]=TVector3();
+    conv_vtx[i]=TVector3();
+    conv_refitted_momentum[i]=TVector3();
+  }
+  for (int i=0; i<gMaxNGenVtx; i++) {
+    gv_pos[i]=TVector3();
+    gv_p3[i]=TVector3();
+  }
+  fTNSuperClusters.reset(new int(-999));
+  fTSCRaw.reset(new std::vector<float> );
+  fTSCPre.reset(new std::vector<float> );
+  fTSCEnergy.reset(new std::vector<float> );
+  fTSCEta.reset(new std::vector<float> );
+  fTSCPhi.reset(new std::vector<float> );
+  fTSCPhiWidth.reset(new std::vector<float> );
+  fTSCEtaWidth.reset(new std::vector<float> );
+  fTSCBrem.reset(new std::vector<float> );
+  fTSCR9.reset(new std::vector<float> );
+  fTSCcrackcorrseed.reset(new std::vector<float> );
+  fTSCcrackcorr.reset(new std::vector<float> );
+  fTSClocalcorrseed.reset(new std::vector<float> );
+  fTSClocalcorr.reset(new std::vector<float> );
+  fTSCcrackcorrseedfactor.reset(new std::vector<float> );
+  fTSClocalcorrseedfactor.reset(new std::vector<float> );
+  fTNJets.reset(new int(-999));
+  fTNJetsTot.reset(new int(-999));
+  fTJGood.reset(new std::vector<int> );
+  fTJPx.reset(new std::vector<float> );
+  fTJPy.reset(new std::vector<float> );
+  fTJPz.reset(new std::vector<float> );
+  fTJPt.reset(new std::vector<float> );
+  fTJE.reset(new std::vector<float> );
+  fTJEt.reset(new std::vector<float> );
+  fTJEta.reset(new std::vector<float> );
+  fTJPhi.reset(new std::vector<float> );
+  fTJEcorr.reset(new std::vector<float> );
+  fTJArea.reset(new std::vector<float> );
+  fTJEtaRms.reset(new std::vector<float> );
+  fTJPhiRms.reset(new std::vector<float> );
+  fTJNConstituents.reset(new std::vector<int> );
+  fTJNAssoTracks.reset(new std::vector<int> );
+  fTJNNeutrals.reset(new std::vector<int> );
+  fTJChargedEmFrac.reset(new std::vector<float> );
+  fTJNeutralEmFrac.reset(new std::vector<float> );
+  fTJChargedHadFrac.reset(new std::vector<float> );
+  fTJNeutralHadFrac.reset(new std::vector<float> );
+  fTJChargedMuEnergyFrac.reset(new std::vector<float> );
+  fTJPhoFrac.reset(new std::vector<float>);
+  fTJHFHadFrac.reset(new std::vector<float>);
+  fTJHFEMFrac.reset(new std::vector<float>);
+  fTJPtD.reset(new std::vector<float>);
+  fTJRMSCand.reset(new std::vector<float>);
+  fTJeMinDR.reset(new std::vector<float> );
+  fTJbTagProbTkCntHighEff.reset(new std::vector<float> );
+  fTJbTagProbTkCntHighPur.reset(new std::vector<float> );
+  fTJbTagProbSimpSVHighEff.reset(new std::vector<float> );
+  fTJbTagProbSimpSVHighPur.reset(new std::vector<float> );
+  fTJMass.reset(new std::vector<float> );
+  fTJtrk1px.reset(new std::vector<float> );
+  fTJtrk1py.reset(new std::vector<float> );
+  fTJtrk1pz.reset(new std::vector<float> );
+  fTJtrk2px.reset(new std::vector<float> );
+  fTJtrk2py.reset(new std::vector<float> );
+  fTJtrk2pz.reset(new std::vector<float> );
+  fTJtrk3px.reset(new std::vector<float> );
+  fTJtrk3py.reset(new std::vector<float> );
+  fTJtrk3pz.reset(new std::vector<float> );
+  fTJVtxx.reset(new std::vector<float> );
+  fTJVtxy.reset(new std::vector<float> );
+  fTJVtxz.reset(new std::vector<float> );
+  fTJVtxExx.reset(new std::vector<float> );
+  fTJVtxEyx.reset(new std::vector<float> );
+  fTJVtxEyy.reset(new std::vector<float> );
+  fTJVtxEzy.reset(new std::vector<float> );
+  fTJVtxEzz.reset(new std::vector<float> );
+  fTJVtxEzx.reset(new std::vector<float> );
+  fTJVtxNChi2.reset(new std::vector<float> );
+  fTJGenJetIndex.reset(new std::vector<int> );
+  fTNTracks.reset(new int(-999));
+  fTNTracksTot.reset(new int(-999));
+  fTTrkGood.reset(new std::vector<int> );
+  fTTrkPt.reset(new std::vector<float> );
+  fTTrkEta.reset(new std::vector<float> );
+  fTTrkPhi.reset(new std::vector<float> );
+  fTTrkNChi2.reset(new std::vector<float> );
+  fTTrkNHits.reset(new std::vector<float> );
+  fTTrkVtxDz.reset(new std::vector<float> );
+  fTTrkVtxDxy.reset(new std::vector<float> );
+  fTTrkPtSumx.reset(new float(-999.99));
+  fTTrkPtSumy.reset(new float(-999.99));
+  fTTrkPtSum.reset(new float(-999.99));
+  fTTrkPtSumPhi.reset(new float(-999.99));
+  fTSumEt.reset(new float(-999.99));
+  fTECALSumEt.reset(new float(-999.99));
+  fTHCALSumEt.reset(new float(-999.99));
+  fTECALEsumx.reset(new float(-999.99));
+  fTECALEsumy.reset(new float(-999.99));
+  fTECALEsumz.reset(new float(-999.99));
+  fTECALMET.reset(new float(-999.99));
+  fTECALMETPhi.reset(new float(-999.99));
+  fTECALMETEta.reset(new float(-999.99));
+  fTHCALEsumx.reset(new float(-999.99));
+  fTHCALEsumy.reset(new float(-999.99));
+  fTHCALEsumz.reset(new float(-999.99));
+  fTHCALMET.reset(new float(-999.99));
+  fTHCALMETPhi.reset(new float(-999.99));
+  fTHCALMETeta.reset(new float(-999.99));
+  fTRawMET.reset(new float(-999.99));
+  fTRawMETpx.reset(new float(-999.99));
+  fTRawMETpy.reset(new float(-999.99));
+  fTRawMETphi.reset(new float(-999.99));
+  fTRawMETemEtFrac.reset(new float(-999.99));
+  fTRawMETemEtInEB.reset(new float(-999.99));
+  fTRawMETemEtInEE.reset(new float(-999.99));
+  fTRawMETemEtInHF.reset(new float(-999.99));
+  fTRawMEThadEtFrac.reset(new float(-999.99));
+  fTRawMEThadEtInHB.reset(new float(-999.99));
+  fTRawMEThadEtInHE.reset(new float(-999.99));
+  fTRawMEThadEtInHF.reset(new float(-999.99));
+  fTRawMETSignificance.reset(new float(-999.99));
+  fTGenMET.reset(new float(-999.99));
+  fTGenMETpx.reset(new float(-999.99));
+  fTGenMETpy.reset(new float(-999.99));
+  fTGenMETphi.reset(new float(-999.99));
+  fTTCMET.reset(new float(-999.99));
+  fTTCMETpx.reset(new float(-999.99));
+  fTTCMETpy.reset(new float(-999.99));
+  fTTCMETphi.reset(new float(-999.99));
+  fTTCMETSignificance.reset(new float(-999.99));
+  fTMuJESCorrMET.reset(new float(-999.99));
+  fTMuJESCorrMETpx.reset(new float(-999.99));
+  fTMuJESCorrMETpy.reset(new float(-999.99));
+  fTMuJESCorrMETphi.reset(new float(-999.99));
+  fTPFMET.reset(new float(-999.99));
+  fTPFMETpx.reset(new float(-999.99));
+  fTPFMETpy.reset(new float(-999.99));
+  fTPFMETphi.reset(new float(-999.99));
+  fTPFMETSignificance.reset(new float(-999.99));
+  fTPFSumEt.reset(new float(-999.99));
+  fTPFMETPAT.reset(new float(-999.99));
+  fTPFMETPATpx.reset(new float(-999.99));
+  fTPFMETPATpy.reset(new float(-999.99));
+  fTPFMETPATphi.reset(new float(-999.99));
+  fTPFMETPATSignificance.reset(new float(-999.99));
+  fTMETR12.reset(new float(-999.99));
+  fTMETR21.reset(new float(-999.99));
+
+}
+
+//____________________________________________________________________
+void NTupleProducer::resetRunProducts( void ) {
+  
+  // Reset run variables
+  fRExtXSecLO   .reset(new float(-999.99));
+  fRExtXSecNLO  .reset(new float(-999.99));
+  fRIntXSec     .reset(new float(-999.99));
+                                         
+  fRMinMuPt     .reset(new float(-999.99));
+  fRMaxMuEta    .reset(new float(-999.99));
+  fRMinElPt     .reset(new float(-999.99));
+  fRMaxElEta    .reset(new float(-999.99));
+  fRMinJPt      .reset(new float(-999.99));
+  fRMinRawJPt   .reset(new float(-999.99));
+  fRMaxJEta     .reset(new float(-999.99));
+  fRMinJEMFrac  .reset(new float(-999.99));
+                                         
+  fRMinTrkPt    .reset(new float(-999.99));
+  fRMaxTrkEta   .reset(new float(-999.99));
+  fRMaxTrkNChi2 .reset(new float(-999.99));
+  fRMinTrkNHits .reset(new int(-999));
+                                         
+  fRMinPhotonPt .reset(new float(-999.99));
+  fRMaxPhotonEta.reset(new float(-999.99));
+  fRMinSCraw    .reset(new float(-999.99));                                         
+  fRMinEBRechitE.reset(new float(-999.99)); 
+
+  fRMinGenLeptPt .reset(new float(-999.99)); 
+  fRMaxGenLeptEta.reset(new float(-999.99)); 
+  fRMinGenPhotPt .reset(new float(-999.99)); 
+  fRMaxGenPhotEta.reset(new float(-999.99)); 
+  fRMinGenJetPt  .reset(new float(-999.99)); 
+  fRMaxGenJetEta .reset(new float(-999.99)); 
+               
+  fRMaxNMus     .reset(new int(-999));
+  fRMaxNEles    .reset(new int(-999));
+  fRMaxNJets    .reset(new int(-999));
+  fRMaxNTrks    .reset(new int(-999));
+  fRMaxNPhotons .reset(new int(-999));
+  fRMaxNSC      .reset(new int(-999));
+  fRMaxNGenLept .reset(new int(-999));
+  fRMaxNGenPhot .reset(new int(-999));
+  fRMaxNGenJets .reset(new int(-999));
+  fRMaxNVrtx    .reset(new int(-999));
+  fRMaxNPileup  .reset(new int(-999));
+  fRMaxNEBhits  .reset(new int(-999));
+
+  fRL1PhysMenu  .reset(new std::vector<std::string>);
+
+}
+
+//________________________________________________________________________________________
+void NTupleProducer::putProducts( edm::Event& event ) {
+  
+  event.put(fTEvent, "Event");
+  event.put(fTLumiSection, "LumiSection");
+  event.put(fTPtHat, "PtHat");
+  event.put(fTQCDPartonicHT, "QCDPartonicHT");
+  event.put(fTSigProcID, "SigProcID");
+  event.put(fTPDFScalePDF, "PDFScalePDF");
+  event.put(fTPDFID1, "PDFID1");
+  event.put(fTPDFID2, "PDFID2");
+  event.put(fTPDFx1, "PDFx1");
+  event.put(fTPDFx2, "PDFx2");
+  event.put(fTPDFxPDF1, "PDFxPDF1");
+  event.put(fTPDFxPDF2, "PDFxPDF2");
+  event.put(fTGenWeight, "GenWeight");
+  event.put(fTpdfW, "pdfW");
+  event.put(fTpdfWsum, "pdfWsum");
+  event.put(fTNPdfs, "NPdfs");
+  event.put(fTPUnumInteractions, "PUnumInteractions");
+  event.put(fTPUnumTrueInteractions, "PUnumTrueInteractions");
+  event.put(fTPUnumFilled, "PUnumFilled");
+  event.put(fTPUOOTnumInteractionsEarly, "PUOOTnumInteractionsEarly");
+  event.put(fTPUOOTnumInteractionsLate, "PUOOTnumInteractionsLate");
+  event.put(fTPUzPositions, "PUzPositions");
+  event.put(fTPUsumPtLowPt, "PUsumPtLowPt");
+  event.put(fTPUsumPtHighPt, "PUsumPtHighPt");
+  event.put(fTPUnTrksLowPt, "PUnTrksLowPt");
+  event.put(fTPUnTrksHighPt, "PUnTrksHighPt");
+  event.put(fTRho, "Rho");
+  event.put(fTRhoPFnoPU, "RhoPFnoPU");
+  event.put(fTWeight, "Weight");
+  event.put(fTHLTResults, "HLTResults");
+  event.put(fTHLTPrescale, "HLTPrescale");
+  event.put(fTL1PhysResults, "L1PhysResults");
+  event.put(fTL1TechResults, "L1TechResults");
+  event.put(fTNHLTObjs, "NHLTObjs");
+  for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
+    std::ostringstream s;
+    s << i;
+    event.put(fTHLTObjectID[i], ("HLTObjectID"+s.str()).c_str());
+    event.put(fTHLTObjectPt[i], ("HLTObjectPt"+s.str()).c_str());
+    event.put(fTHLTObjectEta[i], ("HLTObjectEta"+s.str()).c_str());
+    event.put(fTHLTObjectPhi[i], ("HLTObjectPhi"+s.str()).c_str());
+  }
+  event.put(fTPUWeightTotal, "PUWeightTotal");
+  event.put(fTPUWeightInTime, "PUWeightInTime");
+  event.put(fTMassGlu, "MassGlu");
+  event.put(fTMassChi, "MassChi");
+  event.put(fTMassLSP, "MassLSP");
+  event.put(fTxSMS, "xSMS");
+  event.put(fTxbarSMS, "xbarSMS");
+  event.put(fTM0, "M0");
+  event.put(fTM12, "M12");
+  event.put(fTsignMu, "signMu");
+  event.put(fTA0, "A0");
+  event.put(fTprocess, "process");
+  event.put(fTMaxGenPartExceed,"MaxGenPartExceed");
+  event.put(fTnGenParticles,"nGenParticles");
+  event.put(fTgenInfoId,"genInfoId");
+  event.put(fTgenInfoStatus,"genInfoStatus");
+  event.put(fTgenInfoNMo,"genInfoNMo");
+  event.put(fTgenInfoNDa,"genInfoNDa");
+  event.put(fTgenInfoMo1,"genInfoMo1");
+  event.put(fTgenInfoMo2,"genInfoMo2");
+  event.put(fTgenInfoDa1,"genInfoDa1");
+  event.put(fTgenInfoDa2,"genInfoDa2");
+  event.put(fTgenInfoMoIndex,"genInfoMoIndex");
+  event.put(fTPromptnessLevel,"PromptnessLevel");
+  event.put(fTgenInfoMass,"genInfoMass");
+  event.put(fTgenInfoMo1Pt,"genInfoMo1Pt");
+  event.put(fTgenInfoMo2Pt,"genInfoMo2Pt");
+  event.put(fTgenInfoPt,"genInfoPt");
+  event.put(fTgenInfoEta,"genInfoEta");
+  event.put(fTgenInfoPhi,"genInfoPhi");
+  event.put(fTgenInfoPx,"genInfoPx");
+  event.put(fTgenInfoPy,"genInfoPy");
+  event.put(fTgenInfoPz,"genInfoPz");
+  event.put(fTgenInfoM,"genInfoM");
+  event.put(fTgenInfoPromptFlag,"genInfoPromptFlag");
+  event.put(fTPrimVtxGood, "PrimVtxGood");
+  event.put(fTPrimVtxx, "PrimVtxx");
+  event.put(fTPrimVtxy, "PrimVtxy");
+  event.put(fTPrimVtxz, "PrimVtxz");
+  event.put(fTPrimVtxRho, "PrimVtxRho");
+  event.put(fTPrimVtxxE, "PrimVtxxE");
+  event.put(fTPrimVtxyE, "PrimVtxyE");
+  event.put(fTPrimVtxzE, "PrimVtxzE");
+  event.put(fTPrimVtxNChi2, "PrimVtxNChi2");
+  event.put(fTPrimVtxNdof, "PrimVtxNdof");
+  event.put(fTPrimVtxIsFake, "PrimVtxIsFake");
+  event.put(fTPrimVtxPtSum, "PrimVtxPtSum");
+  event.put(fTBeamspotx, "Beamspotx");
+  event.put(fTBeamspoty, "Beamspoty");
+  event.put(fTBeamspotz, "Beamspotz");
+  event.put(fTNCaloTowers, "NCaloTowers");
+  event.put(fTGoodEvent, "GoodEvent");
+  event.put(fTMaxMuExceed, "MaxMuExceed");
+  event.put(fTMaxElExceed, "MaxElExceed");
+  event.put(fTMaxJetExceed, "MaxJetExceed");
+  event.put(fTMaxUncJetExceed, "MaxUncJetExceed");
+  event.put(fTMaxTrkExceed, "MaxTrkExceed");
+  event.put(fTMaxPhotonsExceed, "MaxPhotonsExceed");
+  event.put(fTMaxGenLepExceed, "MaxGenLepExceed");
+  event.put(fTMaxGenPhoExceed, "MaxGenPhoExceed");
+  event.put(fTMaxGenJetExceed, "MaxGenJetExceed");
+  event.put(fTMaxVerticesExceed, "MaxVerticesExceed");
+  event.put(fTHBHENoiseFlag, "HBHENoiseFlag");
+  event.put(fTHBHENoiseFlagIso, "HBHENoiseFlagIso");
+  event.put(fTCSCTightHaloID, "CSCTightHaloID");
+  event.put(fTEcalDeadTPFilterFlag, "EcalDeadTPFilterFlag");
+  event.put(fTRecovRecHitFilterFlag, "RecovRecHitFilterFlag");
+  event.put(fTRA2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag");
+  //FR event.put(fPBNRFlag,"PBNRFlag");
+  event.put(fTNGenLeptons, "NGenLeptons");
+  event.put(fTGenLeptonID, "GenLeptonID");
+  event.put(fTGenLeptonPt, "GenLeptonPt");
+  event.put(fTGenLeptonEta, "GenLeptonEta");
+  event.put(fTGenLeptonPhi, "GenLeptonPhi");
+  event.put(fTGenLeptonMID, "GenLeptonMID");
+  event.put(fTGenLeptonMStatus, "GenLeptonMStatus");
+  event.put(fTGenLeptonMPt, "GenLeptonMPt");
+  event.put(fTGenLeptonMEta, "GenLeptonMEta");
+  event.put(fTGenLeptonMPhi, "GenLeptonMPhi");
+  event.put(fTGenLeptonGMID, "GenLeptonGMID");
+  event.put(fTGenLeptonGMStatus, "GenLeptonGMStatus");
+  event.put(fTGenLeptonGMPt, "GenLeptonGMPt");
+  event.put(fTGenLeptonGMEta, "GenLeptonGMEta");
+  event.put(fTGenLeptonGMPhi, "GenLeptonGMPhi");
+  event.put(fTNGenPhotons, "NGenPhotons");
+  event.put(fTGenPhotonPt, "GenPhotonPt");
+  event.put(fTGenPhotonEta, "GenPhotonEta");
+  event.put(fTGenPhotonPhi, "GenPhotonPhi");
+  event.put(fTGenPhotonPartonMindR, "GenPhotonPartonMindR");
+  event.put(fTGenPhotonMotherID, "GenPhotonMotherID");
+  event.put(fTGenPhotonMotherStatus, "GenPhotonMotherStatus");
+  event.put(fTNGenJets, "NGenJets");
+  event.put(fTGenJetPt, "GenJetPt");
+  event.put(fTGenJetEta, "GenJetEta");
+  event.put(fTGenJetPhi, "GenJetPhi");
+  event.put(fTGenJetE, "GenJetE");
+  event.put(fTGenJetEmE, "GenJetEmE");
+  event.put(fTGenJetHadE, "GenJetHadE");
+  event.put(fTGenJetInvE, "GenJetInvE");
+  event.put(fTNVrtx, "NVrtx");
+  event.put(fTVrtxX, "VrtxX");
+  event.put(fTVrtxY, "VrtxY");
+  event.put(fTVrtxZ, "VrtxZ");
+  event.put(fTVrtxXE, "VrtxXE");
+  event.put(fTVrtxYE, "VrtxYE");
+  event.put(fTVrtxZE, "VrtxZE");
+  event.put(fTVrtxNdof, "VrtxNdof");
+  event.put(fTVrtxChi2, "VrtxChi2");
+  event.put(fTVrtxNtrks, "VrtxNtrks");
+  event.put(fTVrtxSumPt, "VrtxSumPt");
+  event.put(fTVrtxIsFake, "VrtxIsFake");
+  event.put(fTNMus, "NMus");
+  event.put(fTNMusTot, "NMusTot");
+  event.put(fTNGMus, "NGMus");
+  event.put(fTNTMus, "NTMus");
+  event.put(fTMuGood, "MuGood");
+  event.put(fTMuIsIso, "MuIsIso");
+  event.put(fTMuIsGlobalMuon, "MuIsGlobalMuon");
+  event.put(fTMuIsTrackerMuon, "MuIsTrackerMuon");
+  event.put(fTMuPx, "MuPx");
+  event.put(fTMuPy, "MuPy");
+  event.put(fTMuPz, "MuPz");
+  event.put(fTMuPt, "MuPt");
+  event.put(fTMuInnerTkPt, "MuInnerTkPt");
+  event.put(fTMuTkPtE,"MuTkPtE");
+  event.put(fTMuTkD0E,"MuTkD0E");
+  event.put(fTMuTkDzE,"MuTkDzE");
+  event.put(fTMuPtE, "MuPtE");
+  event.put(fTMuE, "MuE");
+  event.put(fTMuEt, "MuEt");
+  event.put(fTMuEta, "MuEta");
+  event.put(fTMuPhi, "MuPhi");
+  event.put(fTMuCharge, "MuCharge");
+  event.put(fTMuRelIso03, "MuRelIso03");
+  event.put(fTMuIso03SumPt, "MuIso03SumPt");
+  event.put(fTMuIso03EmEt, "MuIso03EmEt");
+  event.put(fTMuIso03HadEt, "MuIso03HadEt");
+  event.put(fTMuIso03EMVetoEt, "MuIso03EMVetoEt");
+  event.put(fTMuIso03HadVetoEt, "MuIso03HadVetoEt");
+  event.put(fTMuIso05SumPt, "MuIso05SumPt");
+  event.put(fTMuIso05EmEt, "MuIso05EmEt");
+  event.put(fTMuIso05HadEt, "MuIso05HadEt");
+  event.put(fTMuEem, "MuEem");
+  event.put(fTMuEhad, "MuEhad");
+  event.put(fTMuD0BS, "MuD0BS");
+  event.put(fTMuD0PV, "MuD0PV");
+  event.put(fTMuD0E, "MuD0E");
+  event.put(fTMuDzBS, "MuDzBS");
+  event.put(fTMuDzPV, "MuDzPV");
+  event.put(fTMuDzE, "MuDzE");
+  event.put(fTMuNChi2, "MuNChi2");
+  event.put(fTMuNGlHits, "MuNGlHits");
+  event.put(fTMuNMuHits, "MuNMuHits");
+  event.put(fTMuNTkHits, "MuNTkHits");
+  event.put(fTMuNPxHits, "MuNPxHits");
+  event.put(fTMuInnerTkNChi2, "MuInnerTkNChi2");
+  event.put(fTMuNMatches, "MuNMatches");
+  event.put(fTMuNChambers, "MuNChambers");
+  event.put(fTMuCaloComp, "MuCaloComp");
+  event.put(fTMuSegmComp, "MuSegmComp");
+  event.put(fTMuIsGMPT, "MuIsGMPT");
+  event.put(fTMuIsGMTkChiComp, "MuIsGMTkChiComp");
+  event.put(fTMuIsGMStaChiComp, "MuIsGMStaChiComp");
+  event.put(fTMuIsGMTkKinkTight, "MuIsGMTkKinkTight");
+  event.put(fTMuIsAllStaMuons, "MuIsAllStaMuons");
+  event.put(fTMuIsAllTrkMuons, "MuIsAllTrkMuons");
+  event.put(fTMuIsTrkMuonArbitrated, "MuIsTrkMuonArbitrated");
+  event.put(fTMuIsAllArbitrated, "MuIsAllArbitrated");
+  event.put(fTMuIsTMLSLoose, "MuIsTMLSLoose");
+  event.put(fTMuIsTMLSTight, "MuIsTMLSTight");
+  event.put(fTMuIsTM2DCompLoose, "MuIsTM2DCompLoose");
+  event.put(fTMuIsTM2DCompTight, "MuIsTM2DCompTight");
+  event.put(fTMuIsTMOneStationLoose, "MuIsTMOneStationLoose");
+  event.put(fTMuIsTMOneStationTight, "MuIsTMOneStationTight");
+  event.put(fTMuIsTMLSOptLowPtLoose, "MuIsTMLSOptLowPtLoose");
+  event.put(fTMuIsTMLSAngLoose, "MuIsTMLSAngLoose");
+  event.put(fTMuIsTMLSAngTight, "MuIsTMLSAngTight");
+  event.put(fTMuIsTMOneStationAngTight, "MuIsTMOneStationAngTight");
+  event.put(fTMuIsTMOneStationAngLoose, "MuIsTMOneStationAngLoose");
+  event.put(fTMuGenID, "MuGenID");
+  event.put(fTMuGenStatus, "MuGenStatus");
+  event.put(fTMuGenPt, "MuGenPt");
+  event.put(fTMuGenEta, "MuGenEta");
+  event.put(fTMuGenPhi, "MuGenPhi");
+  event.put(fTMuGenE, "MuGenE");
+  event.put(fTMuGenMID, "MuGenMID");
+  event.put(fTMuGenMStatus, "MuGenMStatus");
+  event.put(fTMuGenMPt, "MuGenMPt");
+  event.put(fTMuGenMEta, "MuGenMEta");
+  event.put(fTMuGenMPhi, "MuGenMPhi");
+  event.put(fTMuGenME, "MuGenME");
+  event.put(fTMuGenGMID, "MuGenGMID");
+  event.put(fTMuGenGMStatus, "MuGenGMStatus");
+  event.put(fTMuGenGMPt, "MuGenGMPt");
+  event.put(fTMuGenGMEta, "MuGenGMEta");
+  event.put(fTMuGenGMPhi, "MuGenGMPhi");
+  event.put(fTMuGenGME, "MuGenGME");
+  event.put(fTNEBhits, "NEBhits");
+  event.put(fTEBrechitE, "EBrechitE");
+  event.put(fTEBrechitPt, "EBrechitPt");
+  event.put(fTEBrechitEta, "EBrechitEta");
+  event.put(fTEBrechitPhi, "EBrechitPhi");
+  event.put(fTEBrechitChi2, "EBrechitChi2");
+  event.put(fTEBrechitTime, "EBrechitTime");
+  event.put(fTEBrechitE4oE1, "EBrechitE4oE1");
+  event.put(fTEBrechitE2oE9, "EBrechitE2oE9");
+  event.put(fTNEles, "NEles");
+  event.put(fTNElesTot, "NElesTot");
+  event.put(fTElGood, "ElGood");
+  event.put(fTElIsIso, "ElIsIso");
+  event.put(fTElChargeMisIDProb, "ElChargeMisIDProb");
+  event.put(fTElPx, "ElPx");
+  event.put(fTElPy, "ElPy");
+  event.put(fTElPz, "ElPz");
+  event.put(fTElPt, "ElPt");
+  event.put(fTElPtE, "ElPtE");
+  event.put(fTElE, "ElE");
+  event.put(fTElEt, "ElEt");
+  event.put(fTElEta, "ElEta");
+  event.put(fTElTheta, "ElTheta");
+  event.put(fTElSCEta, "ElSCEta");
+  event.put(fTElPhi, "ElPhi");
+  event.put(fTElGsfTkPt, "ElGsfTkPt");
+  event.put(fTElGsfTkEta, "ElGsfTkEta");
+  event.put(fTElGsfTkPhi, "ElGsfTkPhi");
+  event.put(fTElTrkMomentumError, "ElTrkMomentumError");
+  event.put(fTElEcalEnergyError, "ElEcalEnergyError");
+  event.put(fTElEleMomentumError, "ElEleMomentumError");
+  event.put(fTElNBrems, "ElNBrems");
+  event.put(fTElD0BS, "ElD0BS");
+  event.put(fTElD0PV, "ElD0PV");
+  event.put(fTElD0E, "ElD0E");
+  event.put(fTElDzBS, "ElDzBS");
+  event.put(fTElDzPV, "ElDzPV");
+  event.put(fTElDzE, "ElDzE");
+  event.put(fTElRelIso03, "ElRelIso03");
+  event.put(fTElRelIso04, "ElRelIso04");
+  event.put(fTElDR03TkSumPt, "ElDR03TkSumPt");
+  event.put(fTElDR04TkSumPt, "ElDR04TkSumPt");
+  event.put(fTElDR03EcalRecHitSumEt, "ElDR03EcalRecHitSumEt");
+  event.put(fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt");
+  event.put(fTElDR03HcalTowerSumEt, "ElDR03HcalTowerSumEt");
+  event.put(fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt");
+  event.put(fTElNChi2, "ElNChi2");
+  event.put(fTElCharge, "ElCharge");
+  event.put(fTElCInfoIsGsfCtfCons, "ElCInfoIsGsfCtfCons");
+  event.put(fTElCInfoIsGsfCtfScPixCons, "ElCInfoIsGsfCtfScPixCons");
+  event.put(fTElCInfoIsGsfScPixCons, "ElCInfoIsGsfScPixCons");
+  event.put(fTElScPixCharge, "ElScPixCharge");
+  event.put(fTElClosestCtfTrackPt, "ElClosestCtfTrackPt");
+  event.put(fTElClosestCtfTrackEta, "ElClosestCtfTrackEta");
+  event.put(fTElClosestCtfTrackPhi, "ElClosestCtfTrackPhi");
+  event.put(fTElClosestCtfTrackCharge, "ElClosestCtfTrackCharge");
+  event.put(fTElIDMva, "ElIDMva");
+  event.put(fTElIDTight, "ElIDTight");
+  event.put(fTElIDLoose, "ElIDLoose");
+  event.put(fTElIDRobustTight, "ElIDRobustTight");
+  event.put(fTElIDRobustLoose, "ElIDRobustLoose");
+  event.put(fTElIDsimpleWPrelIso, "ElIDsimpleWPrelIso");
+  event.put(fTElIDsimpleWP80relIso, "ElIDsimpleWP80relIso");
+  event.put(fTElIDsimpleWP85relIso, "ElIDsimpleWP85relIso");
+  event.put(fTElIDsimpleWP90relIso, "ElIDsimpleWP90relIso");
+  event.put(fTElIDsimpleWP95relIso, "ElIDsimpleWP95relIso");
+  event.put(fTElInGap, "ElInGap");
+  event.put(fTElEcalDriven, "ElEcalDriven");
+  event.put(fTElTrackerDriven, "ElTrackerDriven");
+  event.put(fTElBasicClustersSize, "ElBasicClustersSize");
+  event.put(fTElfbrem, "Elfbrem");
+  event.put(fTElHcalOverEcal, "ElHcalOverEcal");
+  event.put(fTElE1x5, "ElE1x5");
+  event.put(fTElE5x5, "ElE5x5");
+  event.put(fTElE2x5Max, "ElE2x5Max");
+  event.put(fTElSigmaIetaIeta, "ElSigmaIetaIeta");
+  event.put(fTElDeltaPhiSeedClusterAtCalo, "ElDeltaPhiSeedClusterAtCalo");
+  event.put(fTElDeltaEtaSeedClusterAtCalo, "ElDeltaEtaSeedClusterAtCalo");
+  event.put(fTElDeltaPhiSuperClusterAtVtx, "ElDeltaPhiSuperClusterAtVtx");
+  event.put(fTElDeltaEtaSuperClusterAtVtx, "ElDeltaEtaSuperClusterAtVtx");
+  event.put(fTElCaloEnergy, "ElCaloEnergy");
+  event.put(fTElTrkMomAtVtx, "ElTrkMomAtVtx");
+  event.put(fTElESuperClusterOverP, "ElESuperClusterOverP");
+  event.put(fTElNumberOfMissingInnerHits, "ElNumberOfMissingInnerHits");
+  event.put(fTElSCindex, "ElSCindex");
+  event.put(fTElConvPartnerTrkDist, "ElConvPartnerTrkDist");
+  event.put(fTElConvPartnerTrkDCot, "ElConvPartnerTrkDCot");
+  event.put(fTElConvPartnerTrkPt, "ElConvPartnerTrkPt");
+  event.put(fTElConvPartnerTrkEta, "ElConvPartnerTrkEta");
+  event.put(fTElConvPartnerTrkPhi, "ElConvPartnerTrkPhi");
+  event.put(fTElConvPartnerTrkCharge, "ElConvPartnerTrkCharge");
+  event.put(fTElScSeedSeverity, "ElScSeedSeverity");
+  event.put(fTElE1OverE9, "ElE1OverE9");
+  event.put(fTElS4OverS1, "ElS4OverS1");
+  event.put(fTElGenID, "ElGenID");
+  event.put(fTElGenStatus, "ElGenStatus");
+  event.put(fTElGenPt, "ElGenPt");
+  event.put(fTElGenEta, "ElGenEta");
+  event.put(fTElGenPhi, "ElGenPhi");
+  event.put(fTElGenE, "ElGenE");
+  event.put(fTElGenMID, "ElGenMID");
+  event.put(fTElGenMStatus, "ElGenMStatus");
+  event.put(fTElGenMPt, "ElGenMPt");
+  event.put(fTElGenMEta, "ElGenMEta");
+  event.put(fTElGenMPhi, "ElGenMPhi");
+  event.put(fTElGenME, "ElGenME");
+  event.put(fTElGenGMID, "ElGenGMID");
+  event.put(fTElGenGMStatus, "ElGenGMStatus");
+  event.put(fTElGenGMPt, "ElGenGMPt");
+  event.put(fTElGenGMEta, "ElGenGMEta");
+  event.put(fTElGenGMPhi, "ElGenGMPhi");
+  event.put(fTElGenGME, "ElGenGME");
+  event.put(fTNPhotons, "NPhotons");
+  event.put(fTNPhotonsTot, "NPhotonsTot");
+  event.put(fTPhoGood, "PhoGood");
+  event.put(fTPhoIsIso, "PhoIsIso");
+  event.put(fTPhoPt, "PhoPt");
+  event.put(fTPhoPx, "PhoPx");
+  event.put(fTPhoPy, "PhoPy");
+  event.put(fTPhoPz, "PhoPz");
+  event.put(fTPhoEta, "PhoEta");
+  event.put(fTPhoPhi, "PhoPhi");
+  event.put(fTPhoEnergy, "PhoEnergy");
+  event.put(fTPhoIso03Ecal, "PhoIso03Ecal");
+  event.put(fTPhoIso03Hcal, "PhoIso03Hcal");
+  event.put(fTPhoIso03TrkSolid, "PhoIso03TrkSolid");
+  event.put(fTPhoIso03TrkHollow, "PhoIso03TrkHollow");
+  event.put(fTPhoIso03, "PhoIso03");
+  event.put(fTPhoIso04Ecal, "PhoIso04Ecal");
+  event.put(fTPhoIso04Hcal, "PhoIso04Hcal");
+  event.put(fTPhoIso04TrkSolid, "PhoIso04TrkSolid");
+  event.put(fTPhoIso04TrkHollow, "PhoIso04TrkHollow");
+  event.put(fTPhoIso04, "PhoIso04");
+  event.put(fTPhoR9, "PhoR9");
+  event.put(fTPhoCaloPositionX, "PhoCaloPositionX");
+  event.put(fTPhoCaloPositionY, "PhoCaloPositionY");
+  event.put(fTPhoCaloPositionZ, "PhoCaloPositionZ");
+  event.put(fTPhoHoverE, "PhoHoverE");
+  event.put(fTPhoH1overE, "PhoH1overE");
+  event.put(fTPhoH2overE, "PhoH2overE");
+  event.put(fTPhoSigmaIetaIeta, "PhoSigmaIetaIeta");
+  event.put(fTPhoSCRawEnergy, "PhoSCRawEnergy");
+  event.put(fTPhoSCEtaWidth, "PhoSCEtaWidth");
+  event.put(fTPhoSCSigmaPhiPhi, "PhoSCSigmaPhiPhi");
+  event.put(fTPhoHasPixSeed, "PhoHasPixSeed");
+  event.put(fTPhoHasConvTrks, "PhoHasConvTrks");
+  event.put(fTPhoScSeedSeverity, "PhoScSeedSeverity");
+  event.put(fTPhoE1OverE9, "PhoE1OverE9");
+  event.put(fTPhoS4OverS1, "PhoS4OverS1");
+  event.put(fTPhoSigmaEtaEta, "PhoSigmaEtaEta");
+  event.put(fTPhoE1x5, "PhoE1x5");
+  event.put(fTPhoE2x5, "PhoE2x5");
+  event.put(fTPhoE3x3, "PhoE3x3");
+  event.put(fTPhoE5x5, "PhoE5x5");
+  event.put(fTPhomaxEnergyXtal, "PhomaxEnergyXtal");
+  event.put(fTPhoIso03HcalDepth1, "PhoIso03HcalDepth1");
+  event.put(fTPhoIso03HcalDepth2, "PhoIso03HcalDepth2");
+  event.put(fTPhoIso04HcalDepth1, "PhoIso04HcalDepth1");
+  event.put(fTPhoIso04HcalDepth2, "PhoIso04HcalDepth2");
+  event.put(fTPhoIso03nTrksSolid, "PhoIso03nTrksSolid");
+  event.put(fTPhoIso03nTrksHollow, "PhoIso03nTrksHollow");
+  event.put(fTPhoIso04nTrksSolid, "PhoIso04nTrksSolid");
+  event.put(fTPhoIso04nTrksHollow, "PhoIso04nTrksHollow");
+  event.put(fTPhoisEB, "PhoisEB");
+  event.put(fTPhoisEE, "PhoisEE");
+  event.put(fTPhoisEBEtaGap, "PhoisEBEtaGap");
+  event.put(fTPhoisEBPhiGap, "PhoisEBPhiGap");
+  event.put(fTPhoisEERingGap, "PhoisEERingGap");
+  event.put(fTPhoisEEDeeGap, "PhoisEEDeeGap");
+  event.put(fTPhoisEBEEGap, "PhoisEBEEGap");
+  event.put(fTPhoisPFlowPhoton, "PhoisPFlowPhoton");
+  event.put(fTPhoisStandardPhoton, "PhoisStandardPhoton");
+  event.put(fTPhoMCmatchindex, "PhoMCmatchindex");
+  event.put(fTPhoMCmatchexitcode, "PhoMCmatchexitcode");
+  event.put(fTPhoChargedHadronIso, "PhoChargedHadronIso");
+  event.put(fTPhoNeutralHadronIso, "PhoNeutralHadronIso");
+  event.put(fTPhoPhotonIso, "PhoPhotonIso");
+  event.put(fTPhoisPFPhoton, "PhoisPFPhoton");
+  event.put(fTPhoisPFElectron, "PhoisPFElectron");
+  event.put(fTPhotSCindex, "PhotSCindex");
+  event.put(fTPhoCone04PhotonIsodR0dEta0pt0, "PhoCone04PhotonIsodR0dEta0pt0");
+  event.put(fTPhoCone04PhotonIsodR0dEta0pt5, "PhoCone04PhotonIsodR0dEta0pt5");
+  event.put(fTPhoCone04PhotonIsodR8dEta0pt0, "PhoCone04PhotonIsodR8dEta0pt0");
+  event.put(fTPhoCone04PhotonIsodR8dEta0pt5, "PhoCone04PhotonIsodR8dEta0pt5");
+  event.put(fTPhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone01PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  event.put(fTPhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone02PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  event.put(fTPhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone03PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  event.put(fTPhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx, "PhoCone04PhotonIsodR045EB070EEdEta015pt08EB1EEmvVtx");
+  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0, "PhoCone04NeutralHadronIsodR0dEta0pt0");
+  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5, "PhoCone04NeutralHadronIsodR0dEta0pt5");
+  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt0nocracks");
+  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks, "PhoCone04NeutralHadronIsodR0dEta0pt5nocracks");
+  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt0, "PhoCone04NeutralHadronIsodR7dEta0pt0");
+  event.put(fTPhoCone04NeutralHadronIsodR7dEta0pt5, "PhoCone04NeutralHadronIsodR7dEta0pt5");
+  event.put(fTPhoCone01NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone01NeutralHadronIsodR0dEta0pt0mvVtx");
+  event.put(fTPhoCone02NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone02NeutralHadronIsodR0dEta0pt0mvVtx");
+  event.put(fTPhoCone03NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone03NeutralHadronIsodR0dEta0pt0mvVtx");
+  event.put(fTPhoCone04NeutralHadronIsodR0dEta0pt0mvVtx, "PhoCone04NeutralHadronIsodR0dEta0pt0mvVtx");
+  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0old");
+  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold");
+  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0old");
+  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold");
+  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz0, "PhoCone01ChargedHadronIsodR0dEta0pt0dz0");
+  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  event.put(fTPhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR0dEta0pt0PFnoPU");
+  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz0, "PhoCone01ChargedHadronIsodR015dEta0pt0dz0");
+  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone01ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  event.put(fTPhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone01ChargedHadronIsodR015dEta0pt0PFnoPU");
+  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz0, "PhoCone02ChargedHadronIsodR0dEta0pt0dz0");
+  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  event.put(fTPhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR0dEta0pt0PFnoPU");
+  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz0, "PhoCone02ChargedHadronIsodR015dEta0pt0dz0");
+  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone02ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  event.put(fTPhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone02ChargedHadronIsodR015dEta0pt0PFnoPU");
+  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz0, "PhoCone03ChargedHadronIsodR0dEta0pt0dz0");
+  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  event.put(fTPhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR0dEta0pt0PFnoPU");
+  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz0, "PhoCone03ChargedHadronIsodR015dEta0pt0dz0");
+  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone03ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  event.put(fTPhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone03ChargedHadronIsodR015dEta0pt0PFnoPU");
+  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0, "PhoCone04ChargedHadronIsodR0dEta0pt0dz0");
+  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR0dEta0pt0dz1dxy01");
+  event.put(fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR0dEta0pt0PFnoPU");
+  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0, "PhoCone04ChargedHadronIsodR015dEta0pt0dz0");
+  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01, "PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
+  event.put(fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU, "PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
+  event.put(fTPhoConvValidVtx, "PhoConvValidVtx");
+  event.put(fTPhoConvNtracks, "PhoConvNtracks");
+  event.put(fTPhoConvChi2Probability, "PhoConvChi2Probability");
+  event.put(fTPhoConvEoverP, "PhoConvEoverP");
+  event.put(fTNconv, "Nconv");
+  event.put(fTConvValidVtx, "ConvValidVtx");
+  event.put(fTConvNtracks, "ConvNtracks");
+  event.put(fTConvChi2Probability, "ConvChi2Probability");
+  event.put(fTConvEoverP, "ConvEoverP");
+  event.put(fTConvZofPrimVtxFromTrks, "ConvZofPrimVtxFromTrks");
+  //     event.put(fTNgv, "Ngv");
+  //     event.put(fTgvSumPtHi, "gvSumPtHi");
+  //     event.put(fTgvSumPtLo, "gvSumPtLo");
+  //     event.put(fTgvNTkHi, "gvNTkHi");
+  //     event.put(fTgvNTkLo, "gvNTkLo");
+  event.put(fTNSuperClusters, "NSuperClusters");
+  event.put(fTSCRaw, "SCRaw");
+  event.put(fTSCPre, "SCPre");
+  event.put(fTSCEnergy, "SCEnergy");
+  event.put(fTSCEta, "SCEta");
+  event.put(fTSCPhi, "SCPhi");
+  event.put(fTSCPhiWidth, "SCPhiWidth");
+  event.put(fTSCEtaWidth, "SCEtaWidth");
+  event.put(fTSCBrem, "SCBrem");
+  event.put(fTSCR9, "SCR9");
+  event.put(fTSCcrackcorrseed, "SCcrackcorrseed");
+  event.put(fTSCcrackcorr, "SCcrackcorr");
+  event.put(fTSClocalcorrseed, "SClocalcorrseed");
+  event.put(fTSClocalcorr, "SClocalcorr");
+  event.put(fTSCcrackcorrseedfactor, "SCcrackcorrseedfactor");
+  event.put(fTSClocalcorrseedfactor, "SClocalcorrseedfactor");
+  event.put(fTNJets, "NJets");
+  event.put(fTNJetsTot, "NJetsTot");
+  event.put(fTJGood, "JGood");
+  event.put(fTJPx, "JPx");
+  event.put(fTJPy, "JPy");
+  event.put(fTJPz, "JPz");
+  event.put(fTJPt, "JPt");
+  event.put(fTJE, "JE");
+  event.put(fTJEt, "JEt");
+  event.put(fTJEta, "JEta");
+  event.put(fTJPhi, "JPhi");
+  event.put(fTJEcorr, "JEcorr");
+  event.put(fTJArea, "JArea");
+  event.put(fTJEtaRms, "JEtaRms");
+  event.put(fTJPhiRms, "JPhiRms");
+  event.put(fTJNConstituents, "JNConstituents");
+  event.put(fTJNAssoTracks, "JNAssoTracks");
+  event.put(fTJNNeutrals, "JNNeutrals");
+  event.put(fTJChargedEmFrac, "JChargedEmFrac");
+  event.put(fTJNeutralEmFrac, "JNeutralEmFrac");
+  event.put(fTJChargedHadFrac, "JChargedHadFrac");
+  event.put(fTJNeutralHadFrac, "JNeutralHadFrac");
+  event.put(fTJChargedMuEnergyFrac, "JChargedMuEnergyFrac");
+  event.put(fTJPhoFrac, "JPhoFrac");
+  event.put(fTJHFHadFrac, "JHFHadFrac");
+  event.put(fTJHFEMFrac, "JHFEMFrac");
+  event.put(fTJPtD, "JPtD");
+  event.put(fTJRMSCand, "JRMSCand");
+  event.put(fTJeMinDR, "JeMinDR");
+  event.put(fTJbTagProbTkCntHighEff, "JbTagProbTkCntHighEff");
+  event.put(fTJbTagProbTkCntHighPur, "JbTagProbTkCntHighPur");
+  event.put(fTJbTagProbSimpSVHighEff, "JbTagProbSimpSVHighEff");
+  event.put(fTJbTagProbSimpSVHighPur, "JbTagProbSimpSVHighPur");
+  event.put(fTJMass, "JMass");
+  event.put(fTJtrk1px, "Jtrk1px");
+  event.put(fTJtrk1py, "Jtrk1py");
+  event.put(fTJtrk1pz, "Jtrk1pz");
+  event.put(fTJtrk2px, "Jtrk2px");
+  event.put(fTJtrk2py, "Jtrk2py");
+  event.put(fTJtrk2pz, "Jtrk2pz");
+  event.put(fTJtrk3px, "Jtrk3px");
+  event.put(fTJtrk3py, "Jtrk3py");
+  event.put(fTJtrk3pz, "Jtrk3pz");
+  event.put(fTJVtxx, "JVtxx");
+  event.put(fTJVtxy, "JVtxy");
+  event.put(fTJVtxz, "JVtxz");
+  event.put(fTJVtxExx, "JVtxExx");
+  event.put(fTJVtxEyx, "JVtxEyx");
+  event.put(fTJVtxEyy, "JVtxEyy");
+  event.put(fTJVtxEzy, "JVtxEzy");
+  event.put(fTJVtxEzz, "JVtxEzz");
+  event.put(fTJVtxEzx, "JVtxEzx");
+  event.put(fTJVtxNChi2, "JVtxNChi2");
+  event.put(fTJGenJetIndex, "JGenJetIndex");
+  event.put(fTNTracks, "NTracks");
+  event.put(fTNTracksTot, "NTracksTot");
+  event.put(fTTrkGood, "TrkGood");
+  event.put(fTTrkPt, "TrkPt");
+  event.put(fTTrkEta, "TrkEta");
+  event.put(fTTrkPhi, "TrkPhi");
+  event.put(fTTrkNChi2, "TrkNChi2");
+  event.put(fTTrkNHits, "TrkNHits");
+  event.put(fTTrkVtxDz, "TrkVtxDz");
+  event.put(fTTrkVtxDxy, "TrkVtxDxy");
+  event.put(fTTrkPtSumx, "TrkPtSumx");
+  event.put(fTTrkPtSumy, "TrkPtSumy");
+  event.put(fTTrkPtSum, "TrkPtSum");
+  event.put(fTTrkPtSumPhi, "TrkPtSumPhi");
+  event.put(fTSumEt, "SumEt");
+  event.put(fTECALSumEt, "ECALSumEt");
+  event.put(fTHCALSumEt, "HCALSumEt");
+  event.put(fTECALEsumx, "ECALEsumx");
+  event.put(fTECALEsumy, "ECALEsumy");
+  event.put(fTECALEsumz, "ECALEsumz");
+  event.put(fTECALMET, "ECALMET");
+  event.put(fTECALMETPhi, "ECALMETPhi");
+  event.put(fTECALMETEta, "ECALMETEta");
+  event.put(fTHCALEsumx, "HCALEsumx");
+  event.put(fTHCALEsumy, "HCALEsumy");
+  event.put(fTHCALEsumz, "HCALEsumz");
+  event.put(fTHCALMET, "HCALMET");
+  event.put(fTHCALMETPhi, "HCALMETPhi");
+  event.put(fTHCALMETeta, "HCALMETeta");
+  event.put(fTRawMET, "RawMET");
+  event.put(fTRawMETpx, "RawMETpx");
+  event.put(fTRawMETpy, "RawMETpy");
+  event.put(fTRawMETphi, "RawMETphi");
+  event.put(fTRawMETemEtFrac, "RawMETemEtFrac");
+  event.put(fTRawMETemEtInEB, "RawMETemEtInEB");
+  event.put(fTRawMETemEtInEE, "RawMETemEtInEE");
+  event.put(fTRawMETemEtInHF, "RawMETemEtInHF");
+  event.put(fTRawMEThadEtFrac, "RawMEThadEtFrac");
+  event.put(fTRawMEThadEtInHB, "RawMEThadEtInHB");
+  event.put(fTRawMEThadEtInHE, "RawMEThadEtInHE");
+  event.put(fTRawMEThadEtInHF, "RawMEThadEtInHF");
+  event.put(fTRawMETSignificance, "RawMETSignificance");
+  event.put(fTGenMET, "GenMET");
+  event.put(fTGenMETpx, "GenMETpx");
+  event.put(fTGenMETpy, "GenMETpy");
+  event.put(fTGenMETphi, "GenMETphi");
+  event.put(fTTCMET, "TCMET");
+  event.put(fTTCMETpx, "TCMETpx");
+  event.put(fTTCMETpy, "TCMETpy");
+  event.put(fTTCMETphi, "TCMETphi");
+  event.put(fTTCMETSignificance, "TCMETSignificance");
+  event.put(fTMuJESCorrMET, "MuJESCorrMET");
+  event.put(fTMuJESCorrMETpx, "MuJESCorrMETpx");
+  event.put(fTMuJESCorrMETpy, "MuJESCorrMETpy");
+  event.put(fTMuJESCorrMETphi, "MuJESCorrMETphi");
+  event.put(fTPFMET, "PFMET");
+  event.put(fTPFMETpx, "PFMETpx");
+  event.put(fTPFMETpy, "PFMETpy");
+  event.put(fTPFMETphi, "PFMETphi");
+  event.put(fTPFMETSignificance, "PFMETSignificance");
+  event.put(fTPFSumEt, "PFSumEt");
+  event.put(fTPFMETPAT, "PFMETPAT");
+  event.put(fTPFMETPATpx, "PFMETPATpx");
+  event.put(fTPFMETPATpy, "PFMETPATpy");
+  event.put(fTPFMETPATphi, "PFMETPATphi");
+  event.put(fTPFMETPATSignificance, "PFMETPATSignificance");
+  event.put(fTMETR12, "METR12");
+  event.put(fTMETR21, "METR21");
+
+
+}
+
+// Method called once before each run
+bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
+
+  resetRunProducts();
+
+  // Retrieve and fill RunTree information
+
+  // Retrieve HLT trigger menu 
+  bool changed;
+  if ( !(fHltConfig.init(r,es,"*",changed)) ) { // "*": auto-discovery
+    edm::LogError("NTP") << " hlt config extraction failure with process name "
+                         << fHltConfig.processName();
+  }
+  fRHLTNames.reset(new std::vector<std::string>(fHltConfig.triggerNames()));
+
+  // Store L1 trigger names
+  edm::ESHandle<L1GtTriggerMenu> menuRcd;
+  es.get<L1GtTriggerMenuRcd>().get(menuRcd);
+  const L1GtTriggerMenu *menu = menuRcd.product();
+  const AlgorithmMap& algoMap = menu->gtAlgorithmMap();
+  (*fRL1PhysMenu).resize( gMaxL1PhysBits );
+  for( AlgorithmMap::const_iterator it = algoMap.begin(); it != algoMap.end(); ++it ){
+    (*fRL1PhysMenu)[(*it).second.algoBitNumber()] = std::string((*it).first); 
+  }
+
+  if(!fIsRealData) {
+    edm::Handle<GenRunInfoProduct> genRunInfo;
+    r.getByLabel("generator", genRunInfo);
+    *fRExtXSecLO  = genRunInfo->externalXSecLO().value();
+    *fRIntXSec    = genRunInfo->internalXSec().value();
+    *fRExtXSecNLO = genRunInfo->externalXSecNLO().value();
+  }
+  
+  *fRMinMuPt       = fMinMuPt;
+  *fRMaxMuEta      = fMaxMuEta;
+  *fRMinElPt       = fMinElPt;
+  *fRMaxElEta      = fMaxElEta;
+  *fRMinJPt        = fMinCorJPt;
+  *fRMinRawJPt     = fMinRawJPt;
+  *fRMaxJEta       = fMaxJEta;
+  *fRMinJEMFrac    = fMinJEMFrac;
+
+  *fRMinTrkPt      = fMinTrkPt;
+  *fRMaxTrkEta     = fMaxTrkEta;
+  *fRMaxTrkNChi2   = fMaxTrkNChi2;
+  *fRMinTrkNHits   = fMinTrkNHits;
+
+  *fRMinPhotonPt   = fMinPhotonPt;
+  *fRMaxPhotonEta  = fMaxPhotonEta;
+  *fRMinSCraw      = fMinSCraw;
+  *fRMinEBRechitE  = fMinEBRechitE;
+  
+  *fRMinGenLeptPt  = fMinGenLeptPt;
+  *fRMaxGenLeptEta = fMaxGenLeptEta;
+  *fRMinGenPhotPt  = fMinGenPhotPt;
+  *fRMaxGenPhotEta = fMaxGenPhotEta;
+  *fRMinGenJetPt   = fMinGenJetPt;
+  *fRMaxGenJetEta  = fMaxGenJetEta;
+
+  *fRMaxNMus       = gMaxNMus;
+  *fRMaxNEles      = gMaxNEles;
+  *fRMaxNJets      = gMaxNJets;
+  *fRMaxNTrks      = gMaxNTrks;
+  *fRMaxNPhotons   = gMaxNPhotons;
+  *fRMaxNSC        = gMaxNSC;
+  *fRMaxNGenLept   = gMaxNGenLept;
+  *fRMaxNGenPhot   = gMaxNGenPhot;
+  *fRMaxNGenJets   = gMaxNGenJets;
+  *fRMaxNVrtx      = gMaxNVrtx;
+  *fRMaxNPileup    = gMaxNPileup;
+  *fRMaxNEBhits    = gMaxNEBhits;
+
+  return true; // Not an actual filter
+}
+
+// Method called once after each run
+bool NTupleProducer::endRun(edm::Run& r, const edm::EventSetup&){
+
+  // Store run information
+  r.put(fRExtXSecLO     ,"ExtXSecLO"     );
+  r.put(fRExtXSecNLO    ,"ExtXSecNLO"    );
+  r.put(fRIntXSec       ,"IntXSec"       );
+                         
+  r.put(fRMinMuPt       ,"MinMuPt"       );
+  r.put(fRMaxMuEta      ,"MaxMuEta"      );
+  r.put(fRMinElPt       ,"MinElPt"       );
+  r.put(fRMaxElEta      ,"MaxElEta"      );
+  r.put(fRMinJPt        ,"MinJPt"        );
+  r.put(fRMinRawJPt     ,"MinRawJPt"     );
+  r.put(fRMaxJEta       ,"MaxJEta"       );
+  r.put(fRMinJEMFrac    ,"MinJEMfrac"    );
+                                           
+  r.put(fRMinTrkPt      ,"MinTrkPt"      );
+  r.put(fRMaxTrkEta     ,"MaxTrkEta"     );
+  r.put(fRMaxTrkNChi2   ,"MaxTrkNChi2"   );
+  r.put(fRMinTrkNHits   ,"MinTrkNHits"   );
+                                           
+  r.put(fRMinPhotonPt   ,"MinPhotonPt"   );
+  r.put(fRMaxPhotonEta  ,"MaxPhotonEta"  );
+  r.put(fRMinSCraw      ,"MinSCraw"      );
+  r.put(fRMinEBRechitE  ,"MinEBRechitE"  );
+                                                                        
+  r.put(fRMinGenLeptPt  ,"MinGenLeptPt"  );
+  r.put(fRMaxGenLeptEta ,"MaxGenLeptEta" );
+  r.put(fRMinGenPhotPt  ,"MinGenPhotPt"  );
+  r.put(fRMaxGenPhotEta ,"MaxGenPhotEta" );
+  r.put(fRMinGenJetPt   ,"MinGenJetPt"   );
+  r.put(fRMaxGenJetEta  ,"MaxGenJetEta"  );
+                                                                        
+  r.put(fRMaxNMus    ,"MaxNMus"       );
+  r.put(fRMaxNEles   ,"MaxNEles"      );
+  r.put(fRMaxNJets   ,"MaxNJets"      );
+  r.put(fRMaxNTrks   ,"MaxNTrks"      );
+  r.put(fRMaxNPhotons,"MaxNPhotons"   );
+  r.put(fRMaxNSC     ,"MaxNSC"        );
+  r.put(fRMaxNGenLept,"MaxNGenLep"    );
+  r.put(fRMaxNGenPhot,"MaxNGenPho"    );
+  r.put(fRMaxNGenJets,"MaxNGenJet"    );
+  r.put(fRMaxNVrtx  , "MaxNVrtx"      );
+  r.put(fRMaxNPileup, "MaxNPileup"    );
+  r.put(fRMaxNEBhits, "MaxNEBhits"    );
+
+  r.put(fRHLTNames   ,"HLTNames"      );
+  r.put(fRL1PhysMenu ,"L1PhysMenu"    );
+  r.put(fRHLTLabels  ,"HLTLabels"     );
+
+  r.put(fRPileUpData ,"PileUpData"    );
+  r.put(fRPileUpMC   ,"PileUpMC"      );
+
+  return true;
+}
+
+//________________________________________________________________________________________
+// Method called once each job just after ending the event loop
+void NTupleProducer::endJob( void ){
+
+  edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+  edm::LogVerbatim("NTP") << " ==> NTupleProducer::endJob() ...";
+  edm::LogVerbatim("NTP") << "  Total number of processed Events: " << fNTotEvents;
+  edm::LogVerbatim("NTP") << "  Number of times Tree was filled:  " << fNFillTree;
+  edm::LogVerbatim("NTP") << " ---------------------------------------------------";
+
+}
+
+//________________________________________________________________________________________
+// Method for matching of reco candidates
+std::vector<const reco::GenParticle*> NTupleProducer::matchRecoCand(const reco::RecoCandidate *Cand, const edm::Event& iEvent){
+  using namespace std;
+  const GenParticle *GenCand = NULL;
+  const GenParticle *GenMom  = NULL;
+  const GenParticle *GenGMom = NULL;
+  std::vector<const GenParticle*> res;
+  if(fIsRealData){
+    edm::LogWarning("NTP") << "@SUB=matchRecoCand"
+                           << "Trying to access generator info on real data...";
+    res.push_back(GenCand);
+    res.push_back(GenMom);
+    res.push_back(GenGMom);
+    return res;
+  }
+
+  int id(0), mid(0), gmid(0);
+
+  edm::Handle<GenParticleCollection> genparts;
+  iEvent.getByLabel(fGenPartTag, genparts);
+  GenParticleCollection::const_iterator gpart;
+  GenCand = new GenParticle();
+  GenMom  = new GenParticle();
+  GenGMom = new GenParticle();
+  // initialize the results
+  // btw, this is a little memory leak
+  res.push_back(GenCand);
+  res.push_back(GenMom);
+  res.push_back(GenGMom);
+
+  bool matched = false;
+
+  // Try to match the reco candidate to a generator object
+  double mindr(999.99);
+  for(gpart = genparts->begin(); gpart != genparts->end(); gpart++){
+    if( gpart->status() != 1 ) continue;
+
+    // Restrict to cone of 0.1 in DR around candidate
+    double dr = reco::deltaR(gpart->eta(), gpart->phi(), Cand->eta(), Cand->phi());
+    if(dr > 0.1) continue;
+
+    // Restrict to pt match within a factor of 2
+    double ndpt = fabs(gpart->pt() - Cand->pt())/gpart->pt();
+    if(ndpt > 2.) continue;
+
+    // Minimize DeltaR
+    if(dr > mindr) continue;
+    mindr = dr;
+
+    matched = true;
+    GenCand = &(*gpart);
+  }
+
+
+  // Fill generator information in case match was successful
+  if(matched){
+    // update the results
+    res[0]=GenCand;
+    id  = GenCand->pdgId();
+    if ( !GenCand->mother() ) return res;
+
+    // Determine mother object of matched gen object:
+    // (Make sure that the mother has a different PDG ID)
+    GenMom = static_cast<const GenParticle*>(GenCand->mother());
+    mid = GenMom->pdgId();
+    if(mid != id); // do nothing
+    else{
+      int tempid = mid;
+      while(tempid == id){
+        GenMom = static_cast<const GenParticle*>(GenMom->mother());
+        tempid = GenMom->pdgId();
+      }
+    }
+    mid = GenMom->pdgId();
+    // update the results
+    res[1] = GenMom;
+
+    if ( !GenMom->mother() ) return res;
+    // Determine grand-mother object of matched gen object:
+    // (Make sure that the grand-mother has a different PDG ID than the mother)
+    GenGMom = static_cast<const GenParticle*>(GenMom->mother());
+    gmid = GenGMom->pdgId();
+    if(gmid != mid); // do nothing
+    else{
+      int tempid = gmid;
+      while(tempid == mid){
+        GenGMom = static_cast<const GenParticle*>(GenGMom->mother());
+        tempid = GenGMom->pdgId();
+      }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------
-    PhotonInfo NTupleProducer::fillPhotonInfos(int p1, bool useAllConvs) 
-    {
-	
-      int iConv1 = useAllConvs ? matchPhotonToConversion(p1) : -1;
-	
-      if ( iConv1 >= 0) {
-        // conversions infos
-        return PhotonInfo(p1,
-                          TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
-                          TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
-                          conv_vtx[iConv1],
-                          conv_refitted_momentum[iConv1],
-                          (*fTPhoEnergy)[p1],
-                          (*fTPhoisEB)[p1],
-                          (*fTConvNtracks)[iConv1],
-                          (*fTPhoConvValidVtx)[iConv1],
-                          (*fTConvChi2Probability)[iConv1],
-                          (*fTConvEoverP)[iConv1]
-                          );
-      } 
+    res[2] = GenGMom;
+  }
+  return res;
+}
 
-	
-      return PhotonInfo(p1, 
-                        TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
-                        TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
-                        pho_conv_vtx[p1],
-                        pho_conv_refitted_momentum[p1],
-                        (*fTPhoEnergy)[p1],
-                        (*fTPhoisEB)[p1],
-                        (*fTPhoConvNtracks)[p1],                                                                                                                             
-                        (*fTPhoConvValidVtx)[p1],                                                                                                                            
-                        (*fTPhoConvChi2Probability)[p1] ,                                                                                                                   
-                        (*fTPhoConvEoverP)[p1]                                                                                                                               
-                        );
+//________________________________________________________________________________________
+// Method for matching of jets
+const int NTupleProducer::matchJet(const reco::Jet* jet){
+  // match to already filled genjets in ntuple:
+  // this can only be called AFTER the genjets have been stored!
+  if(fIsRealData || *fTNGenJets < 1){
+    edm::LogWarning("NTP") << "@SUB=matchJet"
+                           << "Trying to access generator info on real data...";
+    return -1;
+  }
+
+  // Try to match the reco jet to a stored generator jet
+  double mindr(999.99);
+  int matchedindex = -1;
+  for(int i = 0; i < *fTNGenJets; i++){
+
+    // Restrict to cone of 0.1 in DR around candidate
+    double dr = reco::deltaR((*fTGenJetEta)[i], (*fTGenJetPhi)[i], jet->eta(), jet->phi());
+    if(dr > 0.3) continue;
+
+    // Restrict to pt match within a factor of 2
+    double ndpt = fabs((*fTGenJetPt)[i] - jet->pt())/(*fTGenJetPt)[i];
+    if(ndpt > 2.) continue;
+
+    // Minimize DeltaR
+    if(dr > mindr) continue;
+    mindr = dr;
+    matchedindex = i;
+  }
+  return matchedindex;
+}
+
+//________________________________________________________________________________________
+double NTupleProducer::DeltaPhi(double phi1, double phi2){
+
+  // FIXME: this should use reco::DeltaPhi() (but there is a sign difference)
+  
+  double dphi=phi1-phi2;
+  if (dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
+  if (dphi<-TMath::Pi()) dphi=-2*TMath::Pi()-dphi;
+  
+  return dphi;
+}
+
+
+//________________________________________________________________________________________
+void NTupleProducer::FillPhotonIsoVariables( double photonEta, double photonPhi, double photonVz, 
+                                             int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi ) 
+{
+
+  double pt = (*pfCandidates)[ipf].pt();
+  double dEta = fabs(photonEta - (*pfCandidates)[ipf].eta());
+  double dPhi = DeltaPhi(photonPhi,(*pfCandidates)[ipf].phi());
+  double dR = sqrt(dEta*dEta+dPhi*dPhi);
+  //  double dz = fabs(photonVz - (*pfCandidates)[ipf].vz());
+
+  if (type==0) {
+    (*fTPhoCone04NeutralHadronIsodR0dEta0pt0)[phoqi] += pt;
+    if (pt>0.5) (*fTPhoCone04NeutralHadronIsodR0dEta0pt5)[phoqi] += pt;
+    if (dR>0.07) {
+      (*fTPhoCone04NeutralHadronIsodR7dEta0pt0)[phoqi] += pt;
+      if (pt>0.5) (*fTPhoCone04NeutralHadronIsodR7dEta0pt5)[phoqi] += pt;
+    }
+    if (isInEtaCracks((*pfCandidates)[ipf].eta())==false && isInPhiCracks((*pfCandidates)[ipf].phi(),(*pfCandidates)[ipf].eta())==false){
+      (*fTPhoCone04NeutralHadronIsodR0dEta0pt0nocracks)[phoqi] += pt;
+      if (pt>0.5) (*fTPhoCone04NeutralHadronIsodR0dEta0pt5nocracks)[phoqi] += pt;
+    }
+  }
+  
+  if (type==1) { //Charged hadron
+    (*fTPhoCone04ChargedHadronIsodR0dEta0pt0dz0old)[phoqi] += pt;
+
+    if (isPU==0) (*fTPhoCone04ChargedHadronIsodR0dEta0pt0PFnoPUold)[phoqi] += pt;
+    if (dR>0.015) {
+      (*fTPhoCone04ChargedHadronIsodR015dEta0pt0dz0old)[phoqi] += pt;
+      if (isPU==0) (*fTPhoCone04ChargedHadronIsodR015dEta0pt0PFnoPUold)[phoqi] += pt;
+    }
+  }
+
+  if (type==2) { //Photon
+    (*fTPhoCone04PhotonIsodR0dEta0pt0)[phoqi] += pt;
+    if (pt>0.5) (*fTPhoCone04PhotonIsodR0dEta0pt5)[phoqi] += pt;
+    if (dR>0.08) {
+      (*fTPhoCone04PhotonIsodR8dEta0pt0)[phoqi] += pt;
+      if (pt>0.5) (*fTPhoCone04PhotonIsodR8dEta0pt5)[phoqi] += pt;
+    }
+  }
+  
+  return;
+}
+
+//________________________________________________________________________________________
+reco::VertexRef NTupleProducer::chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const {
+
+  //PfPileUp candidates!
+
+  //  cout << "chargedHadronVertex finding" << endl;
+
+  reco::TrackBaseRef trackBaseRef( pfcand.trackRef() );
+  
+  size_t  iVertex = 0;
+  unsigned index=0;
+  unsigned nFoundVertex = 0;
+  typedef reco::VertexCollection::const_iterator IV;
+  float bestweight=0;
+  for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
+
+    const reco::Vertex& vtx = *iv;
+    
+    typedef reco::Vertex::trackRef_iterator IT;
+    
+    // loop on tracks in vertices
+    for(IT iTrack=vtx.tracks_begin(); 
+        iTrack!=vtx.tracks_end(); ++iTrack) {
+	 
+      const reco::TrackBaseRef& baseRef = *iTrack;
+
+      // one of the tracks in the vertex is the same as 
+      // the track considered in the function
+      float w = vtx.trackWeight(baseRef);
+      if(baseRef == trackBaseRef ) {
+        //select the vertex for which the track has the highest weight
+        if (w > bestweight){
+          bestweight=w;
+          iVertex=index;
+          nFoundVertex++;
+        }	 	
+      }
+    }
+  }
+
+  if (nFoundVertex>0){
+    if (nFoundVertex!=1)
+      edm::LogWarning("TrackOnTwoVertex")<<"a track is shared by at least two verteces. Used to be an assert";
+    return reco::VertexRef( vertices, iVertex);
+  }
+  // no vertex found with this track. 
+
+  bool checkClosestZVertex_ = true;
+
+  // optional: as a secondary solution, associate the closest vertex in z
+  if ( checkClosestZVertex_ ) {
+
+    double dzmin = 10000;
+    double ztrack = pfcand.vertex().z();
+    bool foundVertex = false;
+    index = 0;
+    for(IV iv=vertices->begin(); iv!=vertices->end(); ++iv, ++index) {
+
+      double dz = fabs(ztrack - iv->z());
+      if(dz<dzmin) {
+        dzmin = dz; 
+        iVertex = index;
+        foundVertex = true;
+      }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------
-    std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
-                                                        PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
-                                                        bool useMva=false, TMVA::Reader * tmvaReader=0, std::string tmvaMethod="")
-    {
-      int p1 = pho1.id(), p2 = pho2.id();
-      // assert( p1 == vtxAna.pho1() && p2 == vtxAna.pho2() );
-      vtxAna.setPairID(p1,p2);
+    if( foundVertex ) 
+      return reco::VertexRef( vertices, iVertex);  
+
+  }
+
+
+  return reco::VertexRef();
+}
+
+//________________________________________________________________________________________
+int NTupleProducer::FindPFCandType(int id){
+
+  int type = -1;
+
+  if (id==111 || id==130 || id==310 || id==2112) type=0; //neutral hadrons
+  if (fabs(id)==211 || fabs(id)==321 || id==999211 || fabs(id)==2212) type=1; //charged hadrons
+  if (id==22) type=2; //photons
+  if (fabs(id)==11) type=3; //electrons
+  if (fabs(id)==13) type=4; //muons
+
+  return type;
+}
+
+//________________________________________________________________________________________
+bool NTupleProducer::isInPhiCracks(double phi, double eta){
+
+
+  // tranform radiants [-pi,pi] in degrees [0,360]
+  phi = (phi+TMath::Pi()) *180/TMath::Pi();
+
+  // each supermodule is 20 degrees wide
+  Double_t moduleWidth = 20;
+
+  // the first module is centered at phi=0, so the first cracks are +10 and -10
+  Double_t phi0 = 10.;
+
+  // set a fiducial cut around the crack of +2-2 degrees
+  Double_t fiducialCut = 2.;
+
+  bool OK = false;
+  if (fabs(eta)<1.44){
+    for (Int_t i = 0 ; i < 18; ++i){
+      if ((phi0 + moduleWidth*i -fiducialCut) <= phi && phi <= (phi0 + moduleWidth*i + fiducialCut)) OK = true;
+      //        cout << " PHI " << (phi0 + moduleWidth*i -fiducialCut) << " " << phi << " " <<  (phi0 + moduleWidth*i + fiducialCut)  << " " << OK << endl ;
+    }
+  }
+
+  //  cout << "is in phi crack ? " << OK << endl;
+  return OK;
+}
+
+//________________________________________________________________________________________
+bool NTupleProducer::isInEtaCracks(double eta){
+
+  /*
+    Yuri Maravin eta cracks def :
+    double emAbsEta = fabs(phoSC_GeomEta);
+    pho_isInCrack = 0;
+    if ( emAbsEta < 0.018 ||
+    (emAbsEta > 0.423 && emAbsEta < 0.461) || 
+    (emAbsEta > 0.770 && emAbsEta < 0.806) || 
+    (emAbsEta > 1.127 && emAbsEta < 1.163) || 
+    (emAbsEta > 1.460 && emAbsEta < 1.558) )
+    pho_isInCrack = 1;
+  */
+
+  const Int_t nBinsEta = 5;
+  Double_t leftEta [nBinsEta]       = {0.00, 0.42, 0.77, 1.13, 1.46};
+  Double_t rightEta[nBinsEta]       = {0.02, 0.46, 0.81, 1.16, 9999.};
+
+  bool OK = false;
+  if (TMath::Abs(eta)<1.44) {
+    for (Int_t i = 0; i< nBinsEta; ++i){
+      if (leftEta[i] < TMath::Abs(eta) && TMath::Abs(eta) < rightEta[i] ) OK = true;
+    }
+  }
+  else if (TMath::Abs(eta)>1.44 && TMath::Abs(eta)<1.56) OK = true;
+  else if (TMath::Abs(eta)>1.56) OK = false;
+  //    cout << leftEta[i] << " " << TMath::Abs(eta) << " " << rightEta[i] <<  " " << OK << endl;
+
+  //  cout << "IS IN CRACK ? " << OK << endl;
+  return OK;
+}
+
+//________________________________________________________________________________________
+bool NTupleProducer::CheckPhotonPFCandOverlap(reco::SuperClusterRef scRef, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int i){
+
+  //This tool can be used in RECO only
+
+  bool isOverlapping = false;
+  
+  const reco::SuperCluster* supercluster = new reco::SuperCluster(*(scRef));
+  //const reco::SuperCluster* supercluster = (const reco::SuperCluster *)gamIter->superCluster());
+  std::vector<const reco::SuperCluster*> sc;
+  sc.push_back(supercluster);
+		 
+  for(unsigned iele=0; iele<(*pfCandidates)[i].elementsInBlocks().size(); ++iele) {
+    // first get the block 
+    reco::PFBlockRef blockRef = (*pfCandidates)[i].elementsInBlocks()[iele].first;
+    //
+    unsigned elementIndex = (*pfCandidates)[i].elementsInBlocks()[iele].second;
+    // check it actually exists 
+    if(!blockRef.isNull()){
+		 
+      // then get the elements of the block
+      const edm::OwnVector< reco::PFBlockElement >&  elements = (*blockRef).elements();
+		 
+      const reco::PFBlockElement & pfbe (elements[elementIndex]); 
+      // The first ECAL element should be the cluster associated to the GSF; defined as the seed
+      //if(pfbe.type()==reco::PFBlockElement::ECAL || pfbe.type()==reco::PFBlockElement::PS1 || pfbe.type()==reco::PFBlockElement::PS2 || pfbe.type()==reco::PFBlockElement::HCAL)
+      //{	  
+		 
+      reco::PFClusterRef myPFClusterRef = pfbe.clusterRef();
+      if(!myPFClusterRef.isNull()){  
+		 
+        const reco::PFCluster & myPFCluster (*myPFClusterRef);
+        //reco::PFCluster & myPFCluster (*myPFClusterRef);
 	
-      // preselect vertices : all vertices
-      std::vector<int> preselAll;
-      for(int i=0; i<(*fTNVrtx) ; i++) {
-        preselAll.push_back(i); 
+        //	cout << "PFcand has a ClusterRef"<<endl;
+        int hasOverlap = ClusterClusterMapping::checkOverlap(myPFCluster,sc);
+        //	if (hasOverlap==-1) cout << "NO Overlap with E/gamma SC"<<endl;
+        //	else cout << "Overlap with E/gamma SC"<<endl;
+        if (hasOverlap!=-1) isOverlapping = true;
+
       }
+    }
+  }
 
-      float zconv = 0; 
-      float dzconv = 0;
-      std::vector<int> preselConv;
+  return isOverlapping;
+	
+}
 
-      if ( (pho1.isAConversion() || pho2.isAConversion() ) )  {
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+PhotonInfo NTupleProducer::fillPhotonInfos(int p1, bool useAllConvs) 
+{
+	
+  int iConv1 = useAllConvs ? matchPhotonToConversion(p1) : -1;
+	
+  if ( iConv1 >= 0) {
+    // conversions infos
+    return PhotonInfo(p1,
+                      TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
+                      TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
+                      conv_vtx[iConv1],
+                      conv_refitted_momentum[iConv1],
+                      (*fTPhoEnergy)[p1],
+                      (*fTPhoisEB)[p1],
+                      (*fTConvNtracks)[iConv1],
+                      (*fTPhoConvValidVtx)[iConv1],
+                      (*fTConvChi2Probability)[iConv1],
+                      (*fTConvEoverP)[iConv1]
+                      );
+  } 
+
+	
+  return PhotonInfo(p1, 
+                    TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]),
+                    TVector3((*fTBeamspotx),(*fTBeamspoty),(*fTBeamspotz)),
+                    pho_conv_vtx[p1],
+                    pho_conv_refitted_momentum[p1],
+                    (*fTPhoEnergy)[p1],
+                    (*fTPhoisEB)[p1],
+                    (*fTPhoConvNtracks)[p1],                                                                                                                             
+                    (*fTPhoConvValidVtx)[p1],                                                                                                                            
+                    (*fTPhoConvChi2Probability)[p1] ,                                                                                                                   
+                    (*fTPhoConvEoverP)[p1]                                                                                                                               
+                    );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+std::vector<int> NTupleProducer::HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 
+                                                    PhotonInfo & pho1, PhotonInfo & pho2, std::vector<std::string> & vtxVarNames, 
+                                                    bool useMva=false, TMVA::Reader * tmvaReader=0, std::string tmvaMethod="")
+{
+  int p1 = pho1.id(), p2 = pho2.id();
+  // assert( p1 == vtxAna.pho1() && p2 == vtxAna.pho2() );
+  vtxAna.setPairID(p1,p2);
+	
+  // preselect vertices : all vertices
+  std::vector<int> preselAll;
+  for(int i=0; i<(*fTNVrtx) ; i++) {
+    preselAll.push_back(i); 
+  }
+
+  float zconv = 0; 
+  float dzconv = 0;
+  std::vector<int> preselConv;
+
+  if ( (pho1.isAConversion() || pho2.isAConversion() ) )  {
 	  
-        if (pho1.isAConversion()  && !pho2.isAConversion() ){
-          zconv  = vtxAnaFromConv.vtxZ(pho1);
-          dzconv = vtxAnaFromConv.vtxdZ(pho1);
-        }
+    if (pho1.isAConversion()  && !pho2.isAConversion() ){
+      zconv  = vtxAnaFromConv.vtxZ(pho1);
+      dzconv = vtxAnaFromConv.vtxdZ(pho1);
+    }
 	  
-        if (pho2.isAConversion() && !pho1.isAConversion()){
-          zconv  = vtxAnaFromConv.vtxZ(pho2);
-          dzconv = vtxAnaFromConv.vtxdZ(pho2);
-        }
+    if (pho2.isAConversion() && !pho1.isAConversion()){
+      zconv  = vtxAnaFromConv.vtxZ(pho2);
+      dzconv = vtxAnaFromConv.vtxdZ(pho2);
+    }
 	  
-        if ( pho1.isAConversion() && pho2.isAConversion()){
-          float z1  = vtxAnaFromConv.vtxZ(pho1);
-          float dz1 = vtxAnaFromConv.vtxdZ(pho1);
+    if ( pho1.isAConversion() && pho2.isAConversion()){
+      float z1  = vtxAnaFromConv.vtxZ(pho1);
+      float dz1 = vtxAnaFromConv.vtxdZ(pho1);
             
-          float z2  = vtxAnaFromConv.vtxZ(pho2);
-          float dz2 = vtxAnaFromConv.vtxdZ(pho2);
+      float z2  = vtxAnaFromConv.vtxZ(pho2);
+      float dz2 = vtxAnaFromConv.vtxdZ(pho2);
             
-          zconv  = (z1/dz1/dz1 + z2/dz2/dz2)/(1./dz1/dz1 + 1./dz2/dz2 );  // weighted average
-          dzconv = sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
-        }
+      zconv  = (z1/dz1/dz1 + z2/dz2/dz2)/(1./dz1/dz1 + 1./dz2/dz2 );  // weighted average
+      dzconv = sqrt( 1./(1./dz1/dz1 + 1./dz2/dz2)) ;
+    }
 	  
-        // preselect vertices : only vertices in a window zconv +/- dzconv
-        for(int i=0; i < (*fTNVrtx); i++) {
-          TVector3 * vtxpos= new TVector3((*fTVrtxX)[i],(*fTVrtxY)[i],(*fTVrtxZ)[i]);
-          if ( fabs(zconv - vtxpos->Z() ) < dzconv ) 
-            preselConv.push_back(i); 
-        }
+    // preselect vertices : only vertices in a window zconv +/- dzconv
+    for(int i=0; i < (*fTNVrtx); i++) {
+      TVector3 * vtxpos= new TVector3((*fTVrtxX)[i],(*fTVrtxY)[i],(*fTVrtxZ)[i]);
+      if ( fabs(zconv - vtxpos->Z() ) < dzconv ) 
+        preselConv.push_back(i); 
+    }
 	  
-      }
+  }
 	
-      // ---- METHOD 1 	
-      // preselection 
-      //	if ( preselConv.size()==0 )
-      //  vtxAna.preselection(preselAll);
-      //else
-      //  vtxAna.preselection(preselConv);
+  // ---- METHOD 1 	
+  // preselection 
+  //	if ( preselConv.size()==0 )
+  //  vtxAna.preselection(preselAll);
+  //else
+  //  vtxAna.preselection(preselConv);
 	
-      //std::vector<int> rankprod = vtxAna.rankprod(vtxVarNames);
+  //std::vector<int> rankprod = vtxAna.rankprod(vtxVarNames);
 	
-      // ---- METHOD 1 
+  // ---- METHOD 1 
 
 	
-      // ---- NEW METHOD 2 (suggested by MarcoP) : first use ranking, then conversions info, e.g. on the N vtxs with best rank
-      // preselection  : all vtxs
-      std::vector<int> rankprodAll = useMva ? vtxAna.rank(*tmvaReader,tmvaMethod) : vtxAna.rankprod(vtxVarNames);
-      int iClosestConv = -1;
-      float dminconv = 9999999;
+  // ---- NEW METHOD 2 (suggested by MarcoP) : first use ranking, then conversions info, e.g. on the N vtxs with best rank
+  // preselection  : all vtxs
+  std::vector<int> rankprodAll = useMva ? vtxAna.rank(*tmvaReader,tmvaMethod) : vtxAna.rankprod(vtxVarNames);
+  int iClosestConv = -1;
+  float dminconv = 9999999;
 	
-      TLorentzVector dipho = TLorentzVector((*fTPhoPx)[p1],(*fTPhoPy)[p1],(*fTPhoPz)[p1],(*fTPhoEnergy)[p1]) 
-        + TLorentzVector((*fTPhoPx)[p2],(*fTPhoPy)[p2],(*fTPhoPz)[p2],(*fTPhoEnergy)[p2]);
+  TLorentzVector dipho = TLorentzVector((*fTPhoPx)[p1],(*fTPhoPy)[p1],(*fTPhoPz)[p1],(*fTPhoEnergy)[p1]) 
+    + TLorentzVector((*fTPhoPx)[p2],(*fTPhoPy)[p2],(*fTPhoPz)[p2],(*fTPhoEnergy)[p2]);
 	
-      unsigned int nbest ;
-      if (  dipho.Pt() < 30 ) nbest = 5;
-      else nbest = 3; 
-      if (rankprodAll.size() < nbest ) nbest = rankprodAll.size();
+  unsigned int nbest ;
+  if (  dipho.Pt() < 30 ) nbest = 5;
+  else nbest = 3; 
+  if (rankprodAll.size() < nbest ) nbest = rankprodAll.size();
 
-      for (unsigned int ii = 0; ii < nbest; ii++ ){
-        TVector3 * vtxpos= new TVector3((*fTVrtxX)[rankprodAll[ii]],(*fTVrtxY)[rankprodAll[ii]],(*fTVrtxZ)[rankprodAll[ii]]);
-        if ( fabs( vtxpos->Z()-zconv ) < dzconv && fabs(vtxpos->Z() - zconv ) < dminconv){
-          iClosestConv = rankprodAll[ii];
-          dminconv = fabs(vtxpos->Z()-zconv );
-        }
-      }
-      std::vector<int> rankprod;
-      rankprod.clear();
-      if (iClosestConv!=-1 ) rankprod.push_back(iClosestConv);
+  for (unsigned int ii = 0; ii < nbest; ii++ ){
+    TVector3 * vtxpos= new TVector3((*fTVrtxX)[rankprodAll[ii]],(*fTVrtxY)[rankprodAll[ii]],(*fTVrtxZ)[rankprodAll[ii]]);
+    if ( fabs( vtxpos->Z()-zconv ) < dzconv && fabs(vtxpos->Z() - zconv ) < dminconv){
+      iClosestConv = rankprodAll[ii];
+      dminconv = fabs(vtxpos->Z()-zconv );
+    }
+  }
+  std::vector<int> rankprod;
+  rankprod.clear();
+  if (iClosestConv!=-1 ) rankprod.push_back(iClosestConv);
 
-      //for (int kk = 0; kk  < nbest; kk++ ){
-      for (unsigned int kk = 0; kk  < rankprodAll.size(); kk++ ){
-        if ( iClosestConv == rankprodAll[kk] ) continue;
-        else rankprod.push_back(rankprodAll[kk]);
-      }
-      // ---- METHOD 2
+  //for (int kk = 0; kk  < nbest; kk++ ){
+  for (unsigned int kk = 0; kk  < rankprodAll.size(); kk++ ){
+    if ( iClosestConv == rankprodAll[kk] ) continue;
+    else rankprod.push_back(rankprodAll[kk]);
+  }
+  // ---- METHOD 2
 
 
  
-      return rankprod;
-    }
+  return rankprod;
+}
 
-    int  NTupleProducer::matchPhotonToConversion( int lpho) {
+int  NTupleProducer::matchPhotonToConversion( int lpho) {
 
-      int result=-99;
-      double conv_eta=-999.;
-      double conv_phi=-999.;
+  int result=-99;
+  double conv_eta=-999.;
+  double conv_phi=-999.;
              
-      int p1=lpho;
+  int p1=lpho;
   
-      float sc_eta  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Eta();
-      float  phi  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Phi();
-      double sc_phi = phiNorm(phi);
+  float sc_eta  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Eta();
+  float  phi  = TVector3((*fTPhoCaloPositionX)[p1],(*fTPhoCaloPositionY)[p1],(*fTPhoCaloPositionZ)[p1]).Phi();
+  double sc_phi = phiNorm(phi);
 
-      // FIXME: Not used anywhere
-      //   TLorentzVector * p4 = new TLorentzVector((*fTPhoPx)[p1],(*fTPhoPy)[p1],(*fTPhoPz)[p1],(*fTPhoEnergy)[p1]);
-      //   float et = (*fTPhoPt)[p1];
+  // FIXME: Not used anywhere
+  //   TLorentzVector * p4 = new TLorentzVector((*fTPhoPx)[p1],(*fTPhoPy)[p1],(*fTPhoPz)[p1],(*fTPhoEnergy)[p1]);
+  //   float et = (*fTPhoPt)[p1];
   
-      float detaMin=999.;
-      float dphiMin=999.;   
-      float dRMin = 999.;
+  float detaMin=999.;
+  float dphiMin=999.;   
+  float dRMin = 999.;
 
-      float mconv_pt=-999999;
-      int iMatch=-1;     
-      float conv_pt = -9999;
+  float mconv_pt=-999999;
+  int iMatch=-1;     
+  float conv_pt = -9999;
 
-      // if(LDEBUG)  cout << "   LoopAll::matchPhotonToConversion conv_n " << conv_n << endl; 
-      for(int iconv=0; iconv<(*fTNconv); iconv++) {
-        TVector3 refittedPairMomentum= conv_refitted_momentum[iconv];
-        conv_pt =  refittedPairMomentum.Pt();
-        if (conv_pt < 1 ) continue;    
-        if ( !(*fTPhoConvValidVtx)[iconv] || (*fTConvNtracks)[iconv]!=2 || (*fTConvChi2Probability)[iconv]<0.000001) continue;
+  // if(LDEBUG)  cout << "   LoopAll::matchPhotonToConversion conv_n " << conv_n << endl; 
+  for(int iconv=0; iconv<(*fTNconv); iconv++) {
+    TVector3 refittedPairMomentum= conv_refitted_momentum[iconv];
+    conv_pt =  refittedPairMomentum.Pt();
+    if (conv_pt < 1 ) continue;    
+    if ( !(*fTPhoConvValidVtx)[iconv] || (*fTConvNtracks)[iconv]!=2 || (*fTConvChi2Probability)[iconv]<0.000001) continue;
 
-        phi  = conv_refitted_momentum[iconv].Phi();
-        conv_phi  = phiNorm(phi);
-        float eta  = conv_refitted_momentum[iconv].Eta();
-        conv_eta = etaTransformation(eta, (*fTConvZofPrimVtxFromTrks)[iconv] );
+    phi  = conv_refitted_momentum[iconv].Phi();
+    conv_phi  = phiNorm(phi);
+    float eta  = conv_refitted_momentum[iconv].Eta();
+    conv_eta = etaTransformation(eta, (*fTConvZofPrimVtxFromTrks)[iconv] );
 
-        double delta_phi = acos( cos(conv_phi - sc_phi) );       
-        double delta_eta = conv_eta - sc_eta;
+    double delta_phi = acos( cos(conv_phi - sc_phi) );       
+    double delta_eta = conv_eta - sc_eta;
 
-        delta_phi*=delta_phi;
-        delta_eta*=delta_eta;
-        float dR = sqrt( delta_phi + delta_eta ); 
+    delta_phi*=delta_phi;
+    delta_eta*=delta_eta;
+    float dR = sqrt( delta_phi + delta_eta ); 
     
-        if ( fabs(delta_eta) < detaMin && fabs(delta_phi) < dphiMin ) {
-          // if ( dR < dRMin ) {
-          detaMin=  fabs(delta_eta);
-          dphiMin=  fabs(delta_phi);
-          dRMin=dR;
-          iMatch=iconv;
-          mconv_pt = conv_pt;
-        }
+    if ( fabs(delta_eta) < detaMin && fabs(delta_phi) < dphiMin ) {
+      // if ( dR < dRMin ) {
+      detaMin=  fabs(delta_eta);
+      dphiMin=  fabs(delta_phi);
+      dRMin=dR;
+      iMatch=iconv;
+      mconv_pt = conv_pt;
+    }
     
-      }
+  }
   
-      if ( detaMin < 0.1 && dphiMin < 0.1 ) {
-        result = iMatch;
-      } else {
-        result = -1;
-      }
+  if ( detaMin < 0.1 && dphiMin < 0.1 ) {
+    result = iMatch;
+  } else {
+    result = -1;
+  }
   
-      return result;
-    }
+  return result;
+}
 
-    //________________________________________________________________________________________
-    bool NTupleProducer::tkIsHighPurity(reco::TrackRef tk) const { return ( tk->qualityMask() & (1<<2) ) >> 2; }
-    bool NTupleProducer::TrackCut(reco::TrackRef tk) const { return false; }
-    bool NTupleProducer::ConversionsCut(const reco::Conversion &conv) { 
-      //  return (sqrt(conv.refittedPairMomentum().perp2()) <  0); 
-      return false;
-    }
+//________________________________________________________________________________________
+bool NTupleProducer::tkIsHighPurity(reco::TrackRef tk) const { return ( tk->qualityMask() & (1<<2) ) >> 2; }
+bool NTupleProducer::TrackCut(reco::TrackRef tk) const { return false; }
+bool NTupleProducer::ConversionsCut(const reco::Conversion &conv) { 
+  //  return (sqrt(conv.refittedPairMomentum().perp2()) <  0); 
+  return false;
+}
 
-    //________________________________________________________________________________________
-    double NTupleProducer::phiNorm(float &phi) {
+//________________________________________________________________________________________
+double NTupleProducer::phiNorm(float &phi) {
 
-      const float pi = 3.1415927;
-      const float twopi = 2.0*pi;
+  const float pi = 3.1415927;
+  const float twopi = 2.0*pi;
 
-      if(phi >  pi) {phi = phi - twopi;}
-      if(phi < -pi) {phi = phi + twopi;}
+  if(phi >  pi) {phi = phi - twopi;}
+  if(phi < -pi) {phi = phi + twopi;}
 
-      return phi;
-    }
+  return phi;
+}
 
-    //________________________________________________________________________________________
-    double NTupleProducer::etaTransformation(  float EtaParticle , float Zvertex)  {
+//________________________________________________________________________________________
+double NTupleProducer::etaTransformation(  float EtaParticle , float Zvertex)  {
 
-      //---Definitions
-      const float pi = 3.1415927;
+  //---Definitions
+  const float pi = 3.1415927;
 
-      //---Definitions for ECAL
-      const float R_ECAL           = 136.5;
-      const float Z_Endcap         = 328.0;
-      const float etaBarrelEndcap  = 1.479; 
+  //---Definitions for ECAL
+  const float R_ECAL           = 136.5;
+  const float Z_Endcap         = 328.0;
+  const float etaBarrelEndcap  = 1.479; 
    
-      //---ETA correction
+  //---ETA correction
 
-      float Theta = 0.0  ; 
-      float ZEcal = R_ECAL*sinh(EtaParticle)+Zvertex;
+  float Theta = 0.0  ; 
+  float ZEcal = R_ECAL*sinh(EtaParticle)+Zvertex;
 
-      if(ZEcal != 0.0) Theta = atan(R_ECAL/ZEcal);
-      if(Theta<0.0) Theta = Theta+pi ;
-      double ETA = - log(tan(0.5*Theta));
+  if(ZEcal != 0.0) Theta = atan(R_ECAL/ZEcal);
+  if(Theta<0.0) Theta = Theta+pi ;
+  double ETA = - log(tan(0.5*Theta));
          
-      if( fabs(ETA) > etaBarrelEndcap )
-        {
-          float Zend = Z_Endcap ;
-          if(EtaParticle<0.0 )  Zend = -Zend ;
-          float Zlen = Zend - Zvertex ;
-          float RR = Zlen/sinh(EtaParticle); 
-          Theta = atan(RR/Zend);
-          if(Theta<0.0) Theta = Theta+pi ;
-          ETA = - log(tan(0.5*Theta));		      
-        } 
-      //---Return the result
-      return ETA;
-      //---end
-    }
+  if( fabs(ETA) > etaBarrelEndcap )
+    {
+      float Zend = Z_Endcap ;
+      if(EtaParticle<0.0 )  Zend = -Zend ;
+      float Zlen = Zend - Zvertex ;
+      float RR = Zlen/sinh(EtaParticle); 
+      Theta = atan(RR/Zend);
+      if(Theta<0.0) Theta = Theta+pi ;
+      ETA = - log(tan(0.5*Theta));		      
+    } 
+  //---Return the result
+  return ETA;
+  //---end
+}
 
 
-    //define this as a plug-in
-    DEFINE_FWK_MODULE(NTupleProducer);
+//define this as a plug-in
+DEFINE_FWK_MODULE(NTupleProducer);
