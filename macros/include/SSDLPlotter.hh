@@ -27,6 +27,10 @@ struct SSDLPrediction {
 	float s_em;
 	float s_ee;
 
+	int obs_mm;
+	int obs_em;
+	int obs_ee;
+
 };
 
 

@@ -4989,9 +4989,6 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	float nt2sum_em(0.), nt10sum_em(0.), nt01sum_em(0.), nt0sum_em(0.);
 	float nt2sum_ee(0.), nt10sum_ee(0.), nt0sum_ee(0.);
 
-	const float gMMTrigScale = 0.92;
-	const float gEMTrigScale = 0.95;
-	const float gEETrigScale = 1.00;
 
 	// Background MC
 	for(size_t i = 0; i < fMCBG.size(); ++i){
@@ -5219,6 +5216,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[mcbkg[i]];
 		float scale = fLumiNorm/S->getLumi();
 
+		
 		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
 		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
 		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
@@ -6967,6 +6965,10 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	ssdlpred.s_mm = nt2_sig_mc_mm;
 	ssdlpred.s_em = nt2_sig_mc_em;
 	ssdlpred.s_ee = nt2_sig_mc_ee;
+
+	ssdlpred.obs_mm = nt2_mm;
+	ssdlpred.obs_em = nt2_em;
+	ssdlpred.obs_ee = nt2_ee;
 
 	return ssdlpred;
 
