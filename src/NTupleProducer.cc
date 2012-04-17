@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171 2012/04/01 19:59:08 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.172 2012/04/17 12:55:50 mdunser Exp $
 //
 //
 
@@ -157,6 +157,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fBtag2Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
 	fBtag3Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
 	fBtag4Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag4");
+	fBtag5Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag5");
+	fBtag6Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag6");
+	fBtag7Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag7");
+	fBtag8Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag8");
 	fRawCaloMETTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_rawcalomet");
 	fTCMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tcmet");
 	fPFMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmet");
@@ -371,6 +375,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
 	iEvent.getByLabel(fBtag4Tag,jetsAndProbsSimpSVHighPur);
+
+	Handle<JetTagCollection> jetsAndProbsCombinedSV;
+	iEvent.getByLabel(fBtag5Tag,jetsAndProbsCombinedSV);
+
+	Handle<JetTagCollection> jetsAndProbsCombinedSVMVA;
+	iEvent.getByLabel(fBtag6Tag,jetsAndProbsCombinedSVMVA);
+
+	Handle<JetTagCollection> jetsAndProbsJetProbability;
+	iEvent.getByLabel(fBtag7Tag,jetsAndProbsJetProbability);
+
+	Handle<JetTagCollection> jetsAndProbsJetBProbability;
+	iEvent.getByLabel(fBtag8Tag,jetsAndProbsJetBProbability);
 
 	//Get Tracks collection
 	Handle<TrackCollection> tracks;
@@ -2747,6 +2763,10 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		fTjbTagProbTkCntHighPur[jqi]  = (*jetsAndProbsTkCntHighPur) [index].second;
 		fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[index].second;
 		fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[index].second;
+		fTjbTagProbCombinedSV[jqi] = (*jetsAndProbsCombinedSV)[index].second;
+		fTjbTagProbCombinedSVMVA[jqi] = (*jetsAndProbsCombinedSVMVA)[index].second;
+		fTjbTagProbJetProbability[jqi] = (*jetsAndProbsJetProbability)[index].second;
+		fTjbTagProbJetBProbability[jqi] = (*jetsAndProbsJetBProbability)[index].second;
 
 		// Jet-track association: get associated tracks
 		const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -3905,6 +3925,10 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("JbTagProbTkCntHighPur" ,&fTjbTagProbTkCntHighPur ,"JbTagProbTkCntHighPur[NJets]/F");
 	fEventTree->Branch("JbTagProbSimpSVHighEff",&fTjbTagProbSimpSVHighEff,"JbTagProbSimpSVHighEff[NJets]/F");
 	fEventTree->Branch("JbTagProbSimpSVHighPur",&fTjbTagProbSimpSVHighPur,"JbTagProbSimpSVHighPur[NJets]/F");
+	fEventTree->Branch("JbTagProbCombinedSV",   &fTjbTagProbCombinedSV,   "JbTagProbCombinedSV[NJets]/F");
+	fEventTree->Branch("JbTagProbCombinedSVMVA",&fTjbTagProbCombinedSVMVA,"JbTagProbCombinedSVMVA[NJets]/F");
+	fEventTree->Branch("JbTagProbJetProbability",&fTjbTagProbJetProbability,"JbTagProbJetProbability[NJets]/F");
+	fEventTree->Branch("JbTagProbJetBProbability",&fTjbTagProbJetBProbability,"JbTagProbJetBProbability[NJets]/F");
 
 	fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/F");
 	fEventTree->Branch("Jtrk1px"        ,&fTjtrk1px        ,"Jtrk1px[NJets]/F");

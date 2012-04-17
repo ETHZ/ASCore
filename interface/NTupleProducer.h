@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.133 2012/04/16 13:04:48 fronga Exp $
+// $Id: NTupleProducer.h,v 1.134 2012/04/17 12:55:50 mdunser Exp $
 //
 //
 
@@ -172,7 +172,7 @@ private:
 
   static const int gMaxnmus     = 30;
   static const int gMaxneles    = 20;
-  static const int gMaxntaus    = 20;
+  static const int gMaxntaus    = 30;
   static const int gMaxnjets    = 100;
   static const int gMaxntrks    = 800;
   static const int gMaxnphos    = 50;
@@ -202,6 +202,10 @@ private:
   edm::InputTag fBtag2Tag;
   edm::InputTag fBtag3Tag;
   edm::InputTag fBtag4Tag;
+  edm::InputTag fBtag5Tag;
+  edm::InputTag fBtag6Tag;
+  edm::InputTag fBtag7Tag;
+  edm::InputTag fBtag8Tag;
   edm::InputTag fRawCaloMETTag;
   edm::InputTag fTCMETTag;
   edm::InputTag fPFMETTag;
@@ -936,6 +940,10 @@ private:
   float fTjbTagProbTkCntHighPur[gMaxnjets];
   float fTjbTagProbSimpSVHighEff[gMaxnjets];
   float fTjbTagProbSimpSVHighPur[gMaxnjets];
+  float fTjbTagProbCombinedSV[gMaxnjets];
+  float fTjbTagProbCombinedSVMVA[gMaxnjets];
+  float fTjbTagProbJetProbability[gMaxnjets];
+  float fTjbTagProbJetBProbability[gMaxnjets];
   float fTjMass[gMaxnjets];
   float fTjtrk1px[gMaxnjets];
   float fTjtrk1py[gMaxnjets];
