@@ -69,10 +69,15 @@ options.output='NTupleProducer_42X_'+options.runon+'.root'
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+
+# try this in the future instead of a global tag. still gives some errors at the moment (apr17)
+#from Configuration.AlCa.autoCond import autoCond
+#process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
     # CMSSW_5_2
-    process.GlobalTag.globaltag = "GR_P_V32::All"
+    process.GlobalTag.globaltag = "GR_R_50_V9::All"
+#    process.GlobalTag.globaltag = "GR_P_V32::All"
 #    process.GlobalTag.globaltag = "GR_R_42_V19::All"
 else:
     # CMSSW_5_2_X:
