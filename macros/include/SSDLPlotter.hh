@@ -23,6 +23,14 @@ struct SSDLPrediction {
 	float bg_em_err;
 	float bg_ee_err;
 
+	float s_ttw_mm;
+	float s_ttw_em;
+	float s_ttw_ee;
+
+	float s_ttz_mm;
+	float s_ttz_em;
+	float s_ttz_ee;
+
 	float s_mm;
 	float s_em;
 	float s_ee;

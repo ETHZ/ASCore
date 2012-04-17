@@ -6962,6 +6962,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	ssdlpred.bg_em_err = sqrt(em_tot_stat2 + em_tot_syst2);
 	ssdlpred.bg_ee_err = sqrt(ee_tot_stat2 + ee_tot_syst2);
 
+	ssdlpred.s_ttw_mm = nt2_ttw_mc_mm;
+	ssdlpred.s_ttw_em = nt2_ttw_mc_em;
+	ssdlpred.s_ttw_ee = nt2_ttw_mc_ee;
+
+	ssdlpred.s_ttz_mm = nt2_ttz_mc_mm;
+	ssdlpred.s_ttz_em = nt2_ttz_mc_em;
+	ssdlpred.s_ttz_ee = nt2_ttz_mc_ee;
+
 	ssdlpred.s_mm = nt2_sig_mc_mm;
 	ssdlpred.s_em = nt2_sig_mc_em;
 	ssdlpred.s_ee = nt2_sig_mc_ee;
