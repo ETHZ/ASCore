@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.169 2012/03/27 10:29:17 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.172 2012/04/17 12:55:50 mdunser Exp $
 //
 //
 
@@ -157,6 +157,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	fBtag2Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
 	fBtag3Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
 	fBtag4Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag4");
+	fBtag5Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag5");
+	fBtag6Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag6");
+	fBtag7Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag7");
+	fBtag8Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag8");
 	fRawCaloMETTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_rawcalomet");
 	fTCMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tcmet");
 	fPFMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmet");
@@ -224,7 +228,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
 	LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
-	fBtagMatchdeltaR = iConfig.getParameter<double>("btag_matchdeltaR"); // 0.25
 
 	// Create histograms and trees
 	fHhltstat        = fTFileService->make<TH1I>("HLTTriggerStats",    "HLTTriggerStatistics",    gMaxhltbits+2,    0, gMaxhltbits+2);
@@ -372,6 +375,18 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
 	iEvent.getByLabel(fBtag4Tag,jetsAndProbsSimpSVHighPur);
+
+	Handle<JetTagCollection> jetsAndProbsCombinedSV;
+	iEvent.getByLabel(fBtag5Tag,jetsAndProbsCombinedSV);
+
+	Handle<JetTagCollection> jetsAndProbsCombinedSVMVA;
+	iEvent.getByLabel(fBtag6Tag,jetsAndProbsCombinedSVMVA);
+
+	Handle<JetTagCollection> jetsAndProbsJetProbability;
+	iEvent.getByLabel(fBtag7Tag,jetsAndProbsJetProbability);
+
+	Handle<JetTagCollection> jetsAndProbsJetBProbability;
+	iEvent.getByLabel(fBtag8Tag,jetsAndProbsJetBProbability);
 
 	//Get Tracks collection
 	Handle<TrackCollection> tracks;
@@ -2641,7 +2656,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		}
                 
                 JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
-		double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
+		double scale = jetCorr->correction(*Jit,iEvent,iSetup);
 		corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
 	}
 	
@@ -2748,6 +2763,10 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 		fTjbTagProbTkCntHighPur[jqi]  = (*jetsAndProbsTkCntHighPur) [index].second;
 		fTjbTagProbSimpSVHighEff[jqi] = (*jetsAndProbsSimpSVHighEff)[index].second;
 		fTjbTagProbSimpSVHighPur[jqi] = (*jetsAndProbsSimpSVHighPur)[index].second;
+		fTjbTagProbCombinedSV[jqi] = (*jetsAndProbsCombinedSV)[index].second;
+		fTjbTagProbCombinedSVMVA[jqi] = (*jetsAndProbsCombinedSVMVA)[index].second;
+		fTjbTagProbJetProbability[jqi] = (*jetsAndProbsJetProbability)[index].second;
+		fTjbTagProbJetBProbability[jqi] = (*jetsAndProbsJetBProbability)[index].second;
 
 		// Jet-track association: get associated tracks
 		const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -2873,6 +2892,11 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	// ElJetOverlap(jetPtr, elecPtr, calotowers);
 	// Check photon/jet duplication
 	// PhotonJetOverlap(jetPtr, photSCs, calotowers);
+
+
+
+
+
 
 	////////////////////////////////////////////////////////
 	// Process other jet collections, as configured
@@ -3280,6 +3304,8 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    fTxbarSMS = 1 - fTxSMS; // Mariarosaria's definition of x
 	  }
 	}// end of bloat with gen information
+
+
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Fill Tree ///////////////////////////////////////////////////////////////////
@@ -3899,6 +3925,10 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 	fEventTree->Branch("JbTagProbTkCntHighPur" ,&fTjbTagProbTkCntHighPur ,"JbTagProbTkCntHighPur[NJets]/F");
 	fEventTree->Branch("JbTagProbSimpSVHighEff",&fTjbTagProbSimpSVHighEff,"JbTagProbSimpSVHighEff[NJets]/F");
 	fEventTree->Branch("JbTagProbSimpSVHighPur",&fTjbTagProbSimpSVHighPur,"JbTagProbSimpSVHighPur[NJets]/F");
+	fEventTree->Branch("JbTagProbCombinedSV",   &fTjbTagProbCombinedSV,   "JbTagProbCombinedSV[NJets]/F");
+	fEventTree->Branch("JbTagProbCombinedSVMVA",&fTjbTagProbCombinedSVMVA,"JbTagProbCombinedSVMVA[NJets]/F");
+	fEventTree->Branch("JbTagProbJetProbability",&fTjbTagProbJetProbability,"JbTagProbJetProbability[NJets]/F");
+	fEventTree->Branch("JbTagProbJetBProbability",&fTjbTagProbJetBProbability,"JbTagProbJetBProbability[NJets]/F");
 
 	fEventTree->Branch("JMass"          ,&fTjMass          ,"JMass[NJets]/F");
 	fEventTree->Branch("Jtrk1px"        ,&fTjtrk1px        ,"Jtrk1px[NJets]/F");
