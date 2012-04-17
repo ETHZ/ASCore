@@ -58,7 +58,7 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:/shome/mdunser/randomTTWfile.root'
 options.files= 'file:////scratch/buchmann/DoubleMu_2012A_2C29FAF9-3787-E111-9A63-001D09F291D7.root'
-options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
+options.maxEvents = 100# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_42X_'+options.runon+'.root'
@@ -596,6 +596,11 @@ process.newTrackCountingHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.tr
 process.newTrackCountingHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
 process.newTrackCountingHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
 process.newTrackCountingHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+#pandolfi
+process.newJetProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetProbabilityBJetTags.clone()
+process.newJetProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+process.newJetBProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetBProbabilityBJetTags.clone()
+process.newJetBProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
 
 process.newSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 process.newSecondaryVertexTagInfos.trackIPTagInfos = "newImpactParameterTagInfos"
@@ -603,6 +608,11 @@ process.newSimpleSecondaryVertexHighEffBJetTags = RecoBTag.Configuration.RecoBTa
 process.newSimpleSecondaryVertexHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
 process.newSimpleSecondaryVertexHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
 process.newSimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
+#pandolfi
+process.newCombinedSecondaryVertexBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexBJetTags.clone()
+process.newCombinedSecondaryVertexBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos"), cms.InputTag("newSecondaryVertexTagInfos") )
+process.newCombinedSecondaryVertexMVABPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexMVABJetTags.clone()
+process.newCombinedSecondaryVertexMVABPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos"), cms.InputTag("newSecondaryVertexTagInfos") )
 
 process.newJetTracksAssociator = cms.Sequence(
     process.newJetTracksAssociatorAtVertex
@@ -611,14 +621,18 @@ process.newJetTracksAssociator = cms.Sequence(
 process.newJetBtaggingIP = cms.Sequence(
     process.newImpactParameterTagInfos * (
        process.newTrackCountingHighEffBJetTags +
-       process.newTrackCountingHighPurBJetTags )
+       process.newTrackCountingHighPurBJetTags +
+       process.newJetProbabilityBPFJetTags +
+       process.newJetBProbabilityBPFJetTags )
     )
 
 process.newJetBtaggingSV = cms.Sequence(
     process.newImpactParameterTagInfos *
     process.newSecondaryVertexTagInfos * (
        process.newSimpleSecondaryVertexHighEffBJetTags +
-       process.newSimpleSecondaryVertexHighPurBJetTags )
+       process.newSimpleSecondaryVertexHighPurBJetTags +
+       process.newCombinedSecondaryVertexBPFJetTags +
+       process.newCombinedSecondaryVertexMVABPFJetTags )
     )
 
 process.newJetBtagging = cms.Sequence(
@@ -644,6 +658,11 @@ process.newPFTrackCountingHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.
 process.newPFTrackCountingHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
 process.newPFTrackCountingHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
 process.newPFTrackCountingHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
+#pandolfi
+process.newPFJetProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetProbabilityBJetTags.clone()
+process.newPFJetProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
+process.newPFJetBProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetBProbabilityBJetTags.clone()
+process.newPFJetBProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos") )
 
 process.newPFSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 process.newPFSecondaryVertexTagInfos.trackIPTagInfos = "newPFImpactParameterTagInfos"
@@ -651,6 +670,11 @@ process.newPFSimpleSecondaryVertexHighEffBJetTags = RecoBTag.Configuration.RecoB
 process.newPFSimpleSecondaryVertexHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFSecondaryVertexTagInfos") )
 process.newPFSimpleSecondaryVertexHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
 process.newPFSimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFSecondaryVertexTagInfos") )
+#pandolfi
+process.newPFCombinedSecondaryVertexBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexBJetTags.clone()
+process.newPFCombinedSecondaryVertexBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos"), cms.InputTag("newPFSecondaryVertexTagInfos") )
+process.newPFCombinedSecondaryVertexMVABPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexMVABJetTags.clone()
+process.newPFCombinedSecondaryVertexMVABPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos"), cms.InputTag("newPFSecondaryVertexTagInfos") )
 
 process.newPFJetTracksAssociator = cms.Sequence(
     process.newPFJetTracksAssociatorAtVertex
@@ -659,14 +683,18 @@ process.newPFJetTracksAssociator = cms.Sequence(
 process.newPFJetBtaggingIP = cms.Sequence(
     process.newPFImpactParameterTagInfos * (
        process.newPFTrackCountingHighEffBJetTags +
-       process.newPFTrackCountingHighPurBJetTags )
+       process.newPFTrackCountingHighPurBJetTags +
+       process.newPFJetProbabilityBPFJetTags +
+       process.newPFJetBProbabilityBPFJetTags )
     )
 
 process.newPFJetBtaggingSV = cms.Sequence(
     process.newPFImpactParameterTagInfos *
     process.newPFSecondaryVertexTagInfos * (
        process.newPFSimpleSecondaryVertexHighEffBJetTags +
-       process.newPFSimpleSecondaryVertexHighPurBJetTags )
+       process.newPFSimpleSecondaryVertexHighPurBJetTags +
+       process.newPFCombinedSecondaryVertexBPFJetTags +
+       process.newPFCombinedSecondaryVertexMVABPFJetTags )
     )
 
 process.newPFJetBtagging = cms.Sequence(
