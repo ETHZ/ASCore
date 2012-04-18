@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.172 2012/04/17 12:55:50 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.173 2012/04/17 19:35:51 mdunser Exp $
 //
 //
 
@@ -3134,22 +3134,22 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
 	
 	if(BloatWithGenInfo && !fIsRealData) {
-	  int genIndex[1200];
-	  int genNIndex[1200];
-	  int genID[1200];
-	  float genPx[1200];
-	  float genPy[1200];
-	  float genPz[1200];
-	  float genPt[1200];
-	  float genEta[1200];
-	  float genPhi[1200];
-	  float genM[1200];
-	  int genMo1Index[1200];
-	  int genMo2Index[1200];
-	  int genNMo[1200];
-	  int genStatus[1200];
-	  int Promptness[1200];
-	  bool StoreFlag[1200];
+	  int genIndex[2000];
+	  int genNIndex[2000];
+	  int genID[2000];
+	  float genPx[2000];
+	  float genPy[2000];
+	  float genPz[2000];
+	  float genPt[2000];
+	  float genEta[2000];
+	  float genPhi[2000];
+	  float genM[2000];
+	  int genMo1Index[2000];
+	  int genMo2Index[2000];
+	  int genNMo[2000];
+	  int genStatus[2000];
+	  int Promptness[2000];
+	  bool StoreFlag[2000];
 	  
 	  int nGenParticles=0;
 	  
@@ -3158,6 +3158,11 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	  
 	  // STEP 1: Loop over all particles and store the information.
 	  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	    if(i>=2000) {
+	      edm::LogWarning("NTP") << "@SUB=analyze()"
+	      << "Maximum number of gen particles for array exceeded";
+	      continue;
+	    }
 	    nGenParticles++;
 	    const GenParticle & p = (*genParticles)[i];
 	    genIndex[i]=i;
@@ -3226,7 +3231,7 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	    fTnGenParticles++;
 	    if(fTnGenParticles>nStoredGenParticles) {
 	      edm::LogWarning("NTP") << "@SUB=analyze()"
-	      << "Maximum number of gen particles exceeded";
+	      << "Maximum number of gen particles for storage exceeded";
 	      fTflagmaxgenpartexc = 1;
 	      break;
 	    }
