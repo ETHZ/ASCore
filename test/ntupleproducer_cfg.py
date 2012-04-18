@@ -467,14 +467,6 @@ process.analyze.leptons = (
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
               ),
-    # PF Taus
-    cms.PSet( type = cms.untracked.string('tau'),
-              prefix = cms.untracked.string('PfTauAntiIso'),
-              tag = cms.untracked.InputTag('selectedPatTausPFAntiIso'),
-              sel_minpt = process.analyze.sel_minelpt,
-              sel_maxeta = process.analyze.sel_maxeleta,
-              maxnobjs = cms.untracked.uint32(20)
-              ),
     # PF Electrons
     cms.PSet( type = cms.untracked.string('electron'),
               prefix = cms.untracked.string('PfEl2'),
@@ -487,14 +479,6 @@ process.analyze.leptons = (
     cms.PSet( type = cms.untracked.string('muon'),
               prefix = cms.untracked.string('PfMu2'),
               tag = cms.untracked.InputTag('patMuonsPF2'),
-              sel_minpt = process.analyze.sel_minelpt,
-              sel_maxeta = process.analyze.sel_maxeleta,
-              maxnobjs = cms.untracked.uint32(20)
-              ),
-    # PF Taus
-    cms.PSet( type = cms.untracked.string('tau'),
-              prefix = cms.untracked.string('PfTau2'),
-              tag = cms.untracked.InputTag('selectedPatTausPF2'),
               sel_minpt = process.analyze.sel_minelpt,
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
@@ -515,14 +499,31 @@ process.analyze.leptons = (
               sel_maxeta = process.analyze.sel_maxeleta,
               maxnobjs = cms.untracked.uint32(20)
               ),
-    # PF Taus
-    cms.PSet( type = cms.untracked.string('tau'),
-              prefix = cms.untracked.string('PfTau3'),
-              tag = cms.untracked.InputTag('selectedPatTausPF3'),
-              sel_minpt = process.analyze.sel_minelpt,
-              sel_maxeta = process.analyze.sel_maxeleta,
-              maxnobjs = cms.untracked.uint32(20)
-              ),
+# TAUS NEED TO BE WORKED ON WITH THE NEW PILEUP CONDITIONS
+#    # PF Taus
+#    cms.PSet( type = cms.untracked.string('tau'),
+#              prefix = cms.untracked.string('PfTauAntiIso'),
+#              tag = cms.untracked.InputTag('selectedPatTausPFAntiIso'),
+#              sel_minpt = process.analyze.sel_minelpt,
+#              sel_maxeta = process.analyze.sel_maxeleta,
+#              maxnobjs = cms.untracked.uint32(20)
+#              ),
+#    # PF Taus
+#    cms.PSet( type = cms.untracked.string('tau'),
+#              prefix = cms.untracked.string('PfTau2'),
+#              tag = cms.untracked.InputTag('selectedPatTausPF2'),
+#              sel_minpt = process.analyze.sel_minelpt,
+#              sel_maxeta = process.analyze.sel_maxeleta,
+#              maxnobjs = cms.untracked.uint32(20)
+#              ),
+#    # PF Taus
+#    cms.PSet( type = cms.untracked.string('tau'),
+#              prefix = cms.untracked.string('PfTau3'),
+#              tag = cms.untracked.InputTag('selectedPatTausPF3'),
+#              sel_minpt = process.analyze.sel_minelpt,
+#              sel_maxeta = process.analyze.sel_maxeleta,
+#              maxnobjs = cms.untracked.uint32(20)
+#              ),
     )
 
 ## Colins Bernet's Particle Based Noise Rejection Filter
