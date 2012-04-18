@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.6 2012/04/17 15:44:12 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.7 2012/04/18 08:41:59 fronga Exp $
 //
 //
 
@@ -743,7 +743,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           break;
         }
         // Update number of objects stored
-        if ( *fTNHLTObjs<(int)hlto ) *fTNHLTObjs = hlto+1; // Not an index...
+        if ( *fTNHLTObjs<=(int)hlto ) *fTNHLTObjs = hlto+1; // Not an index...
         const trigger::TriggerObject& TO(TOC[keys[hlto]]);
         fTHLTObjectID[i]->push_back( TO.id() );
         fTHLTObjectPt[i]->push_back( TO.pt() );
@@ -1815,12 +1815,10 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
           }
         }
 
-        if ((*fTPhoMCmatchindex)[phoqi] != -999){
-          if ( (*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]>=-6 
-               && (*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]<=6) (*fTPhoMCmatchexitcode)[phoqi]=1;
-          else if ((*fTGenPhotonMotherID)[phoqi]==21 ) (*fTPhoMCmatchexitcode)[phoqi]=1;
-          else if ((*fTGenPhotonMotherID)[phoqi]==22 
-                   && (*fTGenPhotonMotherStatus)[(*fTPhoMCmatchindex)[phoqi]]==3) (*fTPhoMCmatchexitcode)[phoqi]=2;
+        if ((*fTPhoMCmatchindex)[phoqi] != -999) {
+          if ( (*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]>=-6 && (*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]<=6) (*fTPhoMCmatchexitcode)[phoqi]=1;
+          else if ((*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]==21 ) (*fTPhoMCmatchexitcode)[phoqi]=1;
+          else if ((*fTGenPhotonMotherID)[(*fTPhoMCmatchindex)[phoqi]]==22 && (*fTGenPhotonMotherStatus)[(*fTPhoMCmatchindex)[phoqi]]==3) (*fTPhoMCmatchexitcode)[phoqi]=2;
           else (*fTPhoMCmatchexitcode)[phoqi] = 3;
         }
         else (*fTPhoMCmatchexitcode)[phoqi] = -2;
