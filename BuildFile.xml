@@ -30,6 +30,7 @@
 <use   name="RecoJets/JetAlgorithms"/>
 <use   name="RecoLocalCalo/EcalRecAlgos"/>
 <use   name="RecoEcal/EgammaCoreTools"/>
+<use   name="MyAnalysis/IsolationTools"/>
 <use name="PhysicsTools/Utilities"/>
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
