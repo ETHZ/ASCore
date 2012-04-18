@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.78 $";
+string sjzbversion="$Revision: 1.80 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +26,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.80  2012/04/01 17:40:46  buchmann
+Removing anti-selected objects again (as well as loose objects)
+
 Revision 1.78  2012/04/01 17:23:58  buchmann
 fixed issue with ttbar sample (missing ngenparticles variable lead to crashes)
 
@@ -588,6 +591,7 @@ void nanoEvent::reset()
 
 
 TTree *myTree;
+TTree *FullTree;
 TTree *myInfo;
 
 nanoEvent nEvent;
@@ -680,6 +684,9 @@ void JZBAnalysis::Begin(TFile *f){
   myInfo->Fill();
   myInfo->Write();
 
+  FullTree = new TTree("Allevents","Allevents");
+  FullTree->Branch("is_data",&nEvent.is_data,"is_data/O");
+  
   myTree = new TTree("events","events");
 
   myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
@@ -1010,7 +1017,7 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
-
+  FullTree->Fill();
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
@@ -1829,6 +1836,7 @@ void JZBAnalysis::End(TFile *f){
   f->cd();	
 
   myTree->Write();
+  FullTree->Write();
 
   // Dump statistics
   if (1) { // Put that to 0 if you are annoyed
