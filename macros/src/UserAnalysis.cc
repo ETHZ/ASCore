@@ -23,12 +23,12 @@ void UserAnalysis::Begin(){
 }
 
 void UserAnalysis::Analyze(){
-  // Some event selection
-  if( fTR->CANJets < 1 ) return;		
+    // Some event selection
+    if( fTR->NJets < 1 ) return;		
 	
     // Plot some jet quantities
     int nqjets = 0;
-    for( int ij = 0; ij < fTR->CANJets; ++ij ){
+    for( int ij = 0; ij < fTR->NJets; ++ij ){
         fHjetPt->Fill(fTR->CAJPt[ij]);
 
         // Some jet selection
