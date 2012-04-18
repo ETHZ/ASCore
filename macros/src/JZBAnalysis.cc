@@ -17,7 +17,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.80 $";
+string sjzbversion="$Revision: 1.81 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +26,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.81  2012/04/18 09:18:55  buchmann
+Added a tiny tree to keep track of the number of mc events
+
 Revision 1.80  2012/04/01 17:40:46  buchmann
 Removing anti-selected objects again (as well as loose objects)
 
@@ -1063,7 +1066,7 @@ void JZBAnalysis::Analyze() {
 
 	TLorentzVector summedLSPs;
 	int nGenParticles=fTR->nGenParticles;
-	if(nGenParticles<2) {
+	if(nGenParticles<2||nGenParticles>2000) {
 		//this happens if you use an old file or one that doesn't contain the necessary generator information.
 		if(fdoGenInfo) cerr << "WATCH OUT : GENERATOR INFORMATION HAS BEEN DISABLED BECAUSE THE NUMBER OF GEN PARTICLES WAS TOO LOW (" << nGenParticles << ")" << endl;
 		fdoGenInfo=false;
@@ -1074,40 +1077,42 @@ void JZBAnalysis::Analyze() {
 	  int thisParticleId = fTR->genInfoId[i];
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {
 	    //dealing with a Z
-	    nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoMo1[i];
+	    int motherIndex=fTR->genInfoMoIndex[i];
+	    if(motherIndex>=0) nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoId[motherIndex];
 	    nEvent.nZ++;
-	    if(abs(fTR->genInfoDa1[i])<10||abs(fTR->genInfoDa2[i])<10) {//dealing with a hadronic decay
-	      nEvent.DecayCode+=100;
-	    }else {
-	      if(is_charged_lepton(fTR->genInfoDa1[i])||is_charged_lepton(fTR->genInfoDa2[i])) {//dealing with a leptonic decay
-		nEvent.DecayCode+=1;
-		if(fTR->genInfoPt[i]>genZpt) {
-		  genZ2pt=genZpt;
-		  genZ2M=genZM;
-		  genZ2eta=genZeta;
-		  genZ2phi=genZphi;
-		  Zprompt2=Zprompt1;
-
-		  genZpt=fTR->genInfoPt[i];
-		  genZM=fTR->genInfoM[i];
-		  genZeta=fTR->genInfoEta[i];
-		  genZphi=fTR->genInfoPhi[i];
-		  Zprompt1=fTR->PromptnessLevel[i];
-		} else {
-		   if(fTR->genInfoPt[i]>genZ2pt) {
-			genZ2pt=fTR->genInfoPt[i];
-			genZ2M=fTR->genInfoM[i];
-			genZ2eta=fTR->genInfoEta[i];
-			genZ2phi=fTR->genInfoPhi[i];
-			Zprompt2=fTR->PromptnessLevel[i];
-		   }
-		}			
-	      }
-	      if(is_neutrino(fTR->genInfoDa1[i])||is_neutrino(fTR->genInfoDa2[i])) {//dealing with a leptonic decay
-		nEvent.DecayCode+=10;
-	      }
-	    }
-	  }
+	    for(int da=0;da<fTR->nGenParticles;da++) {
+	      if(fTR->genInfoMoIndex[da]==i) {
+		//dealing with a daughter
+		if(abs(fTR->genInfoId[da])<10) nEvent.DecayCode+=100;
+		if(abs(fTR->genInfoId[da])==12||abs(fTR->genInfoId[da])==14||abs(fTR->genInfoId[da])==16) nEvent.DecayCode+=10;
+		if(abs(fTR->genInfoId[da])==11||abs(fTR->genInfoId[da])==13||abs(fTR->genInfoId[da])==15) {
+		  nEvent.DecayCode+=1;
+		  if(fTR->genInfoPt[i]>genZpt) {
+		    genZ2pt=genZpt;
+		    genZ2M=genZM;
+		    genZ2eta=genZeta;
+		    genZ2phi=genZphi;
+		    Zprompt2=Zprompt1;
+		    
+		    genZpt=fTR->genInfoPt[i];
+		    genZM=fTR->genInfoM[i];
+		    genZeta=fTR->genInfoEta[i];
+		    genZphi=fTR->genInfoPhi[i];
+		    Zprompt1=fTR->PromptnessLevel[i];
+		  } else {
+		    if(fTR->genInfoPt[i]>genZ2pt) {
+		      genZ2pt=fTR->genInfoPt[i];
+		      genZ2M=fTR->genInfoM[i];
+		      genZ2eta=fTR->genInfoEta[i];
+		      genZ2phi=fTR->genInfoPhi[i];
+		      Zprompt2=fTR->PromptnessLevel[i];
+		    }
+		  }//end of if fTR->genInfoPt[i]>genZpt)
+		}//end of if leptonic decay
+	      }//end of if daughter
+	    }//end of daughter search
+	  }//end of Z case
+	  
 	  if(abs(thisParticleId)==1000021) {//mglu
 	    glumass+=fTR->genInfoM[i];
 	    nglumass++;
