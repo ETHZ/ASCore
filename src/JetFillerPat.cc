@@ -24,11 +24,11 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, const bool& isRealD
 {
 
   // Retrieve configuration parameters
-  fPrefix          = config.getUntrackedParameter<std::string>("prefix");
-  fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
+  fPrefix          = config.getParameter<std::string>("prefix");
+  fTag             = config.getParameter<edm::InputTag>("tag");
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
-  fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+  fJetTracksTag    = config.getParameter<edm::InputTag>("tag_jetTracks");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerPat Constructor - " << fPrefix;

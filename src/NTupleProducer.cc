@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.7 2012/04/18 08:41:59 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.8 2012/04/18 10:07:11 fronga Exp $
 //
 //
 
@@ -136,55 +136,55 @@ void FlipGenStoreFlag(int index, int Promptness[], int genMo1Index[], int genMo2
 
 NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Main settings
-  fIsRealData = iConfig.getUntrackedParameter<bool>("isRealData");
-  fIsModelScan = iConfig.getUntrackedParameter<bool>("isModelScan");
+  fIsRealData = iConfig.getParameter<bool>("isRealData");
+  fIsModelScan = iConfig.getParameter<bool>("isModelScan");
   if(fIsRealData&&fIsModelScan) fIsModelScan=false; // avoiding possible mistakes
 
   // InputTags
-  fMuonTag            = iConfig.getUntrackedParameter<edm::InputTag>("tag_muons");
-  fElectronTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_electrons");
-  fEleIdWP            = iConfig.getUntrackedParameter<std::string>("tag_elidWP");
-  fMuIsoDepTkTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodeptk");
-  fMuIsoDepECTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodepec");
-  fMuIsoDepHCTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_muisodephc");
-  fJetTag             = iConfig.getUntrackedParameter<edm::InputTag>("tag_jets");
-  fJetCorrs           = iConfig.getUntrackedParameter<std::string>("jetCorrs");
-  fBtag1Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag1");
-  fBtag2Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag2");
-  fBtag3Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag3");
-  fBtag4Tag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_btag4");
-  fRawCaloMETTag      = iConfig.getUntrackedParameter<edm::InputTag>("tag_rawcalomet");
-  fTCMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tcmet");
-  fPFMETTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmet");
-  fPFMETPATTag        = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfmetPAT");
-  fCorrCaloMETTag     = iConfig.getUntrackedParameter<edm::InputTag>("tag_corrcalomet");
-  fGenMETTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genmet");
-  fVertexTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_vertex");
-  fTrackTag           = iConfig.getUntrackedParameter<edm::InputTag>("tag_tracks");
-  fPhotonTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_photons");
-  fCalTowTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_caltow");
-  fEBRecHitsTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_EBrechits");
-  fEERecHitsTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_EErechits");
-  fGenPartTag         = iConfig.getUntrackedParameter<edm::InputTag>("tag_genpart");
-  fGenJetTag          = iConfig.getUntrackedParameter<edm::InputTag>("tag_genjets");
-  fL1TriggerTag       = iConfig.getUntrackedParameter<edm::InputTag>("tag_l1trig");
-  fHLTTrigEventTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hlttrigevent");
-  if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
-  if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
-  fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
-  fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
-  pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
-  pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
-  fSCTagBarrel = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_barrel");
-  fSCTagEndcap = iConfig.getUntrackedParameter<edm::InputTag>("tag_SC_endcap");
-  fTrackCollForVertexing = iConfig.getUntrackedParameter<edm::InputTag>("tag_fTrackCollForVertexing");
-  fAllConversionsCollForVertexing = iConfig.getUntrackedParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
-  perVtxMvaWeights = iConfig.getUntrackedParameter<std::string>("tag_perVtxMvaWeights");
-  perVtxMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perVtxMvaMethod");
-  perEvtMvaWeights = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaWeights");
-  perEvtMvaMethod = iConfig.getUntrackedParameter<std::string>("tag_perEvtMvaMethod");
+  fMuonTag            = iConfig.getParameter<edm::InputTag>("tag_muons");
+  fElectronTag        = iConfig.getParameter<edm::InputTag>("tag_electrons");
+  fEleIdWP            = iConfig.getParameter<std::string>("tag_elidWP");
+  fMuIsoDepTkTag      = iConfig.getParameter<edm::InputTag>("tag_muisodeptk");
+  fMuIsoDepECTag      = iConfig.getParameter<edm::InputTag>("tag_muisodepec");
+  fMuIsoDepHCTag      = iConfig.getParameter<edm::InputTag>("tag_muisodephc");
+  fJetTag             = iConfig.getParameter<edm::InputTag>("tag_jets");
+  fJetCorrs           = iConfig.getParameter<std::string>("jetCorrs");
+  fBtag1Tag           = iConfig.getParameter<edm::InputTag>("tag_btag1");
+  fBtag2Tag           = iConfig.getParameter<edm::InputTag>("tag_btag2");
+  fBtag3Tag           = iConfig.getParameter<edm::InputTag>("tag_btag3");
+  fBtag4Tag           = iConfig.getParameter<edm::InputTag>("tag_btag4");
+  fRawCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
+  fTCMETTag           = iConfig.getParameter<edm::InputTag>("tag_tcmet");
+  fPFMETTag           = iConfig.getParameter<edm::InputTag>("tag_pfmet");
+  fPFMETPATTag        = iConfig.getParameter<edm::InputTag>("tag_pfmetPAT");
+  fCorrCaloMETTag     = iConfig.getParameter<edm::InputTag>("tag_corrcalomet");
+  fGenMETTag          = iConfig.getParameter<edm::InputTag>("tag_genmet");
+  fVertexTag          = iConfig.getParameter<edm::InputTag>("tag_vertex");
+  fTrackTag           = iConfig.getParameter<edm::InputTag>("tag_tracks");
+  fPhotonTag          = iConfig.getParameter<edm::InputTag>("tag_photons");
+  fCalTowTag          = iConfig.getParameter<edm::InputTag>("tag_caltow");
+  fEBRecHitsTag       = iConfig.getParameter<edm::InputTag>("tag_EBrechits");
+  fEERecHitsTag       = iConfig.getParameter<edm::InputTag>("tag_EErechits");
+  fGenPartTag         = iConfig.getParameter<edm::InputTag>("tag_genpart");
+  fGenJetTag          = iConfig.getParameter<edm::InputTag>("tag_genjets");
+  fL1TriggerTag       = iConfig.getParameter<edm::InputTag>("tag_l1trig");
+  fHLTTrigEventTag    = iConfig.getParameter<edm::InputTag>("tag_hlttrigevent");
+  if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getParameter<edm::InputTag>("tag_hcalnoise");
+  if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getParameter<edm::InputTag>("tag_hcalnoiseIso");
+  fSrcRho             = iConfig.getParameter<edm::InputTag>("tag_srcRho");
+  fSrcRhoPFnoPU       = iConfig.getParameter<edm::InputTag>("tag_srcRhoPFnoPU");
+  pfphotonsProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfphotonsProducer");
+  pfProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfProducer");
+  fSCTagBarrel = iConfig.getParameter<edm::InputTag>("tag_SC_barrel");
+  fSCTagEndcap = iConfig.getParameter<edm::InputTag>("tag_SC_endcap");
+  fTrackCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
+  fAllConversionsCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
+  perVtxMvaWeights = iConfig.getParameter<std::string>("tag_perVtxMvaWeights");
+  perVtxMvaMethod = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
+  perEvtMvaWeights = iConfig.getParameter<std::string>("tag_perEvtMvaWeights");
+  perEvtMvaMethod = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
 
-  doVertexingFlag = iConfig.getUntrackedParameter<bool>("tag_doVertexing");
+  doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
   if (fIsModelScan) doVertexingFlag=false;
 
   // Event Selection
@@ -230,13 +230,13 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Create additional jet fillers
   std::vector<edm::ParameterSet> jConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("jets");
   for (size_t i=0; i<jConfigs.size(); ++i)
-    if ( jConfigs[i].getUntrackedParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fIsRealData) );
+    if ( jConfigs[i].getParameter<bool>("isPat") ) jetFillers.push_back( new JetFillerPat(jConfigs[i], fIsRealData) );
     else jetFillers.push_back( new JetFillerReco(jConfigs[i], fIsRealData) );
 
   // Create additional lepton fillers
   std::vector<edm::ParameterSet> lConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("leptons");
   for (size_t i=0; i<lConfigs.size(); ++i) {
-    std::string type(lConfigs[i].getUntrackedParameter<std::string>("type"));
+    std::string type(lConfigs[i].getParameter<std::string>("type"));
     if ( type == "electron" ) 
       electronFillers.push_back( new PatElectronFiller(lConfigs[i], fIsRealData) );
     else if ( type == "muon" ) 
@@ -247,16 +247,16 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
         
 
   // Get list of trigger paths to store the triggering object info. of
-  //std::vector<std::string> v(iConfig.getUntrackedParameter<std::vector<std::string> >("hlt_labels"));
-  fRHLTLabels.reset( new std::vector<std::string>(iConfig.getUntrackedParameter<std::vector<std::string> >("hlt_labels")) );
+  //std::vector<std::string> v(iConfig.getParameter<std::vector<std::string> >("hlt_labels"));
+  fRHLTLabels.reset( new std::vector<std::string>(iConfig.getParameter<std::vector<std::string> >("hlt_labels")) );
   fTNpaths = fRHLTLabels->size();
 	
   //OOT pu reweighting
   fRPileUpData  .reset(new std::vector<std::string>);
   fRPileUpMC    .reset(new std::vector<std::string>);
   if( !fIsRealData ) {
-    *fRPileUpData = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_data");
-    *fRPileUpMC   = iConfig.getUntrackedParameter<std::vector<std::string> >("pu_mc");
+    *fRPileUpData = iConfig.getParameter<std::vector<std::string> >("pu_data");
+    *fRPileUpMC   = iConfig.getParameter<std::vector<std::string> >("pu_mc");
     if(!(*fRPileUpData)[0].empty() && !(*fRPileUpMC)[0].empty() ){
       LumiWeights_      = edm::LumiReWeighting((*fRPileUpMC)[0], (*fRPileUpData)[0], (*fRPileUpMC)[1], (*fRPileUpData)[1]);
     }
@@ -3233,8 +3233,6 @@ void NTupleProducer::declareProducts(void) {
   produces<float,edm::InRun>("MinGenJetPt"   );
   produces<float,edm::InRun>("MaxGenJetEta"  );
 
-  produces<float,edm::InRun>("BtagMatchDeltaR"  );
-                                                                
   produces<int,edm::InRun>("MaxNMus"       );
   produces<int,edm::InRun>("MaxNEles"      );
   produces<int,edm::InRun>("MaxNJets"      );

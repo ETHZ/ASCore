@@ -379,47 +379,47 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
-process.analyze.isRealData = cms.untracked.bool(options.runon=='data')
-process.analyze.isModelScan = cms.untracked.bool(options.ModelScan)
-process.analyze.tag_doVertexing = cms.untracked.bool(options.doVertexing)
-process.analyze.tag_perVtxMvaWeights = cms.untracked.string(options.perVtxMvaWeights)
-process.analyze.tag_perEvtMvaWeights = cms.untracked.string(options.perEvtMvaWeights)
+process.analyze.isRealData = cms.bool(options.runon=='data')
+process.analyze.isModelScan = cms.bool(options.ModelScan)
+process.analyze.tag_doVertexing = cms.bool(options.doVertexing)
+process.analyze.tag_perVtxMvaWeights = cms.string(options.perVtxMvaWeights)
+process.analyze.tag_perEvtMvaWeights = cms.string(options.perEvtMvaWeights)
 
 # Add some jet collections
 process.analyze.jets = (
    # Calo jets
-     cms.PSet( prefix = cms.untracked.string('CA'),
-               tag = cms.untracked.InputTag('ak5CaloJets'),
-               isPat = cms.untracked.bool(False),
-               tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
-               jet_id = cms.untracked.InputTag('ak5JetID'),
+     cms.PSet( prefix = cms.string('CA'),
+               tag = cms.InputTag('ak5CaloJets'),
+               isPat = cms.bool(False),
+               tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
+               jet_id = cms.InputTag('ak5JetID'),
                sel_minpt  = process.analyze.sel_mincorjpt,
                sel_maxeta = process.analyze.sel_maxjeta,
                corrections = cms.string('ak5CaloL2L3'),
                ),
         # PF jets from PF2PAT
-        cms.PSet( prefix = cms.untracked.string('PF2PATAntiIso'),
-                  tag = cms.untracked.InputTag('patJetsPFAntiIso'),
-                  isPat = cms.untracked.bool(True),
-                  tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+        cms.PSet( prefix = cms.string('PF2PATAntiIso'),
+                  tag = cms.InputTag('patJetsPFAntiIso'),
+                  isPat = cms.bool(True),
+                  tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
                   ),
-        cms.PSet( prefix = cms.untracked.string('PF2PAT2'),
-                  tag = cms.untracked.InputTag('patJetsPF2'),
-                  isPat = cms.untracked.bool(True),
-                  tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+        cms.PSet( prefix = cms.string('PF2PAT2'),
+                  tag = cms.InputTag('patJetsPF2'),
+                  isPat = cms.bool(True),
+                  tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
                   ),
-        cms.PSet( prefix = cms.untracked.string('PF2PAT3'),
-                  tag = cms.untracked.InputTag('patJetsPF3'),
-                  isPat = cms.untracked.bool(True),
-                  tag_jetTracks  = cms.untracked.InputTag('ak5JetTracksAssociatorAtVertex'),
+        cms.PSet( prefix = cms.string('PF2PAT3'),
+                  tag = cms.InputTag('patJetsPF3'),
+                  isPat = cms.bool(True),
+                  tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
                   # The corrections are irrelevant for PF2PAT
@@ -438,76 +438,76 @@ if options.runon == 'data':
 # Add some PF lepton collections
 process.analyze.leptons = (
         # PF Electrons anti-isolated
-        cms.PSet( type = cms.untracked.string('electron'),
-                  prefix = cms.untracked.string('PfElAntiIso'),
-                  tag = cms.untracked.InputTag('patElectronsPFAntiIso'),
+        cms.PSet( type = cms.string('electron'),
+                  prefix = cms.string('PfElAntiIso'),
+                  tag = cms.InputTag('patElectronsPFAntiIso'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Muons anti-isolated
-        cms.PSet( type = cms.untracked.string('muon'),
-                  prefix = cms.untracked.string('PfMuAntiIso'),
-                  tag = cms.untracked.InputTag('patMuonsPFAntiIso'),
+        cms.PSet( type = cms.string('muon'),
+                  prefix = cms.string('PfMuAntiIso'),
+                  tag = cms.InputTag('patMuonsPFAntiIso'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Taus anti-isolated
-        cms.PSet( type = cms.untracked.string('tau'),
-                  prefix = cms.untracked.string('PfTauAntiIso'),
-                  tag = cms.untracked.InputTag('selectedPatTausPFAntiIso'),
+        cms.PSet( type = cms.string('tau'),
+                  prefix = cms.string('PfTauAntiIso'),
+                  tag = cms.InputTag('selectedPatTausPFAntiIso'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Electrons TIGHT
-        cms.PSet( type = cms.untracked.string('electron'),
-                  prefix = cms.untracked.string('PfEl2'),
-                  tag = cms.untracked.InputTag('patElectronsPF2'),
+        cms.PSet( type = cms.string('electron'),
+                  prefix = cms.string('PfEl2'),
+                  tag = cms.InputTag('patElectronsPF2'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Muons TIGHT
-        cms.PSet( type = cms.untracked.string('muon'),
-                  prefix = cms.untracked.string('PfMu2'),
-                  tag = cms.untracked.InputTag('patMuonsPF2'),
+        cms.PSet( type = cms.string('muon'),
+                  prefix = cms.string('PfMu2'),
+                  tag = cms.InputTag('patMuonsPF2'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Taus TIGHT
-        cms.PSet( type = cms.untracked.string('tau'),
-                  prefix = cms.untracked.string('PfTau2'),
-                  tag = cms.untracked.InputTag('selectedPatTausPF2'),
+        cms.PSet( type = cms.string('tau'),
+                  prefix = cms.string('PfTau2'),
+                  tag = cms.InputTag('selectedPatTausPF2'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Electrons LOOSE
-        cms.PSet( type = cms.untracked.string('electron'),
-                  prefix = cms.untracked.string('PfEl3'),
-                  tag = cms.untracked.InputTag('patElectronsPF3'),
+        cms.PSet( type = cms.string('electron'),
+                  prefix = cms.string('PfEl3'),
+                  tag = cms.InputTag('patElectronsPF3'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Muons LOOSE
-        cms.PSet( type = cms.untracked.string('muon'),
-                  prefix = cms.untracked.string('PfMu3'),
-                  tag = cms.untracked.InputTag('patMuonsPF3'),
+        cms.PSet( type = cms.string('muon'),
+                  prefix = cms.string('PfMu3'),
+                  tag = cms.InputTag('patMuonsPF3'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
         # PF Taus LOOSE
-        cms.PSet( type = cms.untracked.string('tau'),
-                  prefix = cms.untracked.string('PfTau3'),
-                  tag = cms.untracked.InputTag('selectedPatTausPF3'),
+        cms.PSet( type = cms.string('tau'),
+                  prefix = cms.string('PfTau3'),
+                  tag = cms.InputTag('selectedPatTausPF3'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.untracked.uint32(20)
+                  maxnobjs = cms.uint32(20)
                   ),
     )
               
@@ -530,7 +530,7 @@ process.trackingFailureFilter.taggingMode           = cms.bool(True)
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
 	src = cms.InputTag("partonGenJets"),
-	maxEventsToPrint = cms.untracked.int32(10)
+	maxEventsToPrint = cms.int32(10)
 )
 #
 process.printPhotons = cms.EDAnalyzer("ParticleListDrawer",

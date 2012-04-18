@@ -6,7 +6,7 @@ FillerBase::FillerBase( const edm::ParameterSet& cfg, const bool& isRealData )
   : fIsRealData(isRealData){
 	
   // Retrieve configuration parameters
-  fPrefix = cfg.getUntrackedParameter<std::string>("prefix");
+  fPrefix = cfg.getParameter<std::string>("prefix");
 
 }
 

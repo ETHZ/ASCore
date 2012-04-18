@@ -2,56 +2,56 @@ import FWCore.ParameterSet.Config as cms
 
 analyze = cms.EDFilter('NTupleProducer',
 	# Main settings
-	isRealData       = cms.untracked.bool(False),
+	isRealData       = cms.bool(False),
 	# Collections
-	tag_muons        = cms.untracked.InputTag('muons'),
-	tag_muisodeptk   = cms.untracked.InputTag('muIsoDepositTk'),
-	tag_muisodepec   = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
-	tag_muisodephc   = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
-	tag_electrons    = cms.untracked.InputTag('gsfElectrons'),
-	tag_elidWP       = cms.untracked.string('simpleEleId90relIso'),
-	tag_jets         = cms.untracked.InputTag('ak5PFJets'),
-	jetCorrs         = cms.untracked.string('ak5PFL1FastL2L3'),
-	tag_btag1        = cms.untracked.InputTag('newPFTrackCountingHighEffBJetTags'),
-	tag_btag2        = cms.untracked.InputTag('newPFTrackCountingHighPurBJetTags'),
-	tag_btag3        = cms.untracked.InputTag('newPFSimpleSecondaryVertexHighEffBJetTags'),
-	tag_btag4        = cms.untracked.InputTag('newPFSimpleSecondaryVertexHighPurBJetTags'),
-	tag_rawcalomet   = cms.untracked.InputTag('met'),
-	tag_tcmet        = cms.untracked.InputTag('tcMet'),
-	tag_pfmet        = cms.untracked.InputTag('pfMet'),
-	tag_pfmetPAT     = cms.untracked.InputTag('patMETsPF3'),
-	tag_corrcalomet  = cms.untracked.InputTag('metMuonJESCorAK5'),
-	tag_genmet       = cms.untracked.InputTag('genMetTrue'),
-	tag_vertex       = cms.untracked.InputTag('offlinePrimaryVertices'),
-	tag_tracks       = cms.untracked.InputTag('generalTracks'),
-	tag_photons      = cms.untracked.InputTag('photons'),
-	tag_caltow       = cms.untracked.InputTag('towerMaker'),
-	tag_EBrechits    = cms.untracked.InputTag('reducedEcalRecHitsEB'),
-	tag_EErechits    = cms.untracked.InputTag('reducedEcalRecHitsEE'),
-	tag_genpart      = cms.untracked.InputTag('genParticles'),
-	tag_genjets      = cms.untracked.InputTag('ak5GenJets'),
-	tag_l1trig       = cms.untracked.InputTag("gtDigis"),
-	tag_hlttrigevent = cms.untracked.InputTag("hltTriggerSummaryAOD"),
-	tag_hcalnoise    = cms.untracked.InputTag('HBHENoiseFilterResultProducerStd','HBHENoiseFilterResult'),
-	tag_hcalnoiseIso = cms.untracked.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
-	tag_srcRho       = cms.untracked.InputTag('kt6PFJets','rho'),
-	tag_srcRhoPFnoPU = cms.untracked.InputTag('kt6PFJetsPF3','rho'),
-	tag_pfphotonsProducer  = cms.untracked.InputTag("pfPhotonTranslator:pfphot"),
-	tag_pfProducer = cms.untracked.InputTag("particleFlow"),
-        tag_SC_barrel    = cms.untracked.InputTag("correctedHybridSuperClusters"),
-        tag_SC_endcap    = cms.untracked.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
+	tag_muons        = cms.InputTag('muons'),
+	tag_muisodeptk   = cms.InputTag('muIsoDepositTk'),
+	tag_muisodepec   = cms.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
+	tag_muisodephc   = cms.InputTag("muIsoDepositCalByAssociatorTowers","hcal"),
+	tag_electrons    = cms.InputTag('gsfElectrons'),
+	tag_elidWP       = cms.string('simpleEleId90relIso'),
+	tag_jets         = cms.InputTag('ak5PFJets'),
+	jetCorrs         = cms.string('ak5PFL1FastL2L3'),
+	tag_btag1        = cms.InputTag('newPFTrackCountingHighEffBJetTags'),
+	tag_btag2        = cms.InputTag('newPFTrackCountingHighPurBJetTags'),
+	tag_btag3        = cms.InputTag('newPFSimpleSecondaryVertexHighEffBJetTags'),
+	tag_btag4        = cms.InputTag('newPFSimpleSecondaryVertexHighPurBJetTags'),
+	tag_rawcalomet   = cms.InputTag('met'),
+	tag_tcmet        = cms.InputTag('tcMet'),
+	tag_pfmet        = cms.InputTag('pfMet'),
+	tag_pfmetPAT     = cms.InputTag('patMETsPF3'),
+	tag_corrcalomet  = cms.InputTag('metMuonJESCorAK5'),
+	tag_genmet       = cms.InputTag('genMetTrue'),
+	tag_vertex       = cms.InputTag('offlinePrimaryVertices'),
+	tag_tracks       = cms.InputTag('generalTracks'),
+	tag_photons      = cms.InputTag('photons'),
+	tag_caltow       = cms.InputTag('towerMaker'),
+	tag_EBrechits    = cms.InputTag('reducedEcalRecHitsEB'),
+	tag_EErechits    = cms.InputTag('reducedEcalRecHitsEE'),
+	tag_genpart      = cms.InputTag('genParticles'),
+	tag_genjets      = cms.InputTag('ak5GenJets'),
+	tag_l1trig       = cms.InputTag("gtDigis"),
+	tag_hlttrigevent = cms.InputTag("hltTriggerSummaryAOD"),
+	tag_hcalnoise    = cms.InputTag('HBHENoiseFilterResultProducerStd','HBHENoiseFilterResult'),
+	tag_hcalnoiseIso = cms.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
+	tag_srcRho       = cms.InputTag('kt6PFJets','rho'),
+	tag_srcRhoPFnoPU = cms.InputTag('kt6PFJetsPF3','rho'),
+	tag_pfphotonsProducer  = cms.InputTag("pfPhotonTranslator:pfphot"),
+	tag_pfProducer = cms.InputTag("particleFlow"),
+        tag_SC_barrel    = cms.InputTag("correctedHybridSuperClusters"),
+        tag_SC_endcap    = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
 
-        tag_doVertexing = cms.untracked.bool(False), # overwritten from test/ntupleproducer_cfg.py
-        tag_fTrackCollForVertexing = cms.untracked.InputTag("generalTracks"),
-        tag_fallConversionsCollForVertexing = cms.untracked.InputTag("allConversions"),
-        tag_perVtxMvaWeights = cms.untracked.string(""), # overwritten from test/ntupleproducer_cfg.py
-        tag_perVtxMvaMethod = cms.untracked.string("BDTCat"),
-        tag_perEvtMvaWeights = cms.untracked.string(""), # overwritten from test/ntupleproducer_cfg.py
-        tag_perEvtMvaMethod = cms.untracked.string("evtBDTG"),
+        tag_doVertexing = cms.bool(False), # overwritten from test/ntupleproducer_cfg.py
+        tag_fTrackCollForVertexing = cms.InputTag("generalTracks"),
+        tag_fallConversionsCollForVertexing = cms.InputTag("allConversions"),
+        tag_perVtxMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
+        tag_perVtxMvaMethod = cms.string("BDTCat"),
+        tag_perEvtMvaWeights = cms.string(""), # overwritten from test/ntupleproducer_cfg.py
+        tag_perEvtMvaMethod = cms.string("evtBDTG"),
 
                          
 	# Trigger paths to store the triggering object information of
-	hlt_labels = cms.untracked.vstring('hltSingleMu3L3Filtered3',
+	hlt_labels = cms.vstring('hltSingleMu3L3Filtered3',
 	                              'hltSingleMu5L3Filtered5',
 	                              'hltSingleMu9L3Filtered9',
 	                              'hltL1NonIsoHLTNonIsoSingleElectronLWEt10EleIdDphiFilteroHLTNonIsoSingleElectronLWEt10PixelMatchFilter',
@@ -99,8 +99,8 @@ analyze = cms.EDFilter('NTupleProducer',
         leptons = cms.VPSet(),
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
-	pu_data = cms.untracked.vstring('', ''), # replace this by cms.untracked.vstring('data_pileup.root', 'name_of_histo')
-	pu_mc   = cms.untracked.vstring('', '')  # replace this by cms.untracked.vstring('mc_pileup.root'  , 'name_of_histo')
+	pu_data = cms.vstring('', ''), # replace this by cms.vstring('data_pileup.root', 'name_of_histo')
+	pu_mc   = cms.vstring('', '')  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
 
 )
 

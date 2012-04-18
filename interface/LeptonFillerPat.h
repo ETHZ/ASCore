@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5.2.1 2012/01/26 12:15:13 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.2 2012/01/27 15:07:22 fronga Exp $
 //
 //
 
@@ -155,12 +155,12 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, c
 {
 
     // Retrieve configuration parameters
-    std::string leptontype    = config.getUntrackedParameter<std::string>("type");
+    std::string leptontype    = config.getParameter<std::string>("type");
     fMinpt                    = config.getParameter<double>("sel_minpt");
     fMaxeta                   = config.getParameter<double>("sel_maxeta");
-    gMaxnobjs                 = config.getUntrackedParameter<uint>("maxnobjs");
+    gMaxnobjs                 = config.getParameter<uint>("maxnobjs");
   
-    fTag                      = config.getUntrackedParameter<edm::InputTag>("tag");
+    fTag                      = config.getParameter<edm::InputTag>("tag");
 
     edm::LogVerbatim("NTP") << " ==> LeptonFillerPat Constructor - " << fPrefix;
     edm::LogVerbatim("NTP") << "  Input Tag:      " << fTag.label();

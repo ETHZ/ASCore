@@ -23,13 +23,13 @@ JetFillerReco::JetFillerReco( const edm::ParameterSet& config, const bool& isRea
 {
 
   // Retrieve configuration parameters
-  fPrefix          = config.getUntrackedParameter<std::string>("prefix");
-  fTag             = config.getUntrackedParameter<edm::InputTag>("tag");
+  fPrefix          = config.getParameter<std::string>("prefix");
+  fTag             = config.getParameter<edm::InputTag>("tag");
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
   fJetCorrs        = config.getParameter<std::string>("corrections");
-  fJetID           = config.getUntrackedParameter<edm::InputTag>("jet_id");		
-  fJetTracksTag    = config.getUntrackedParameter<edm::InputTag>("tag_jetTracks");
+  fJetID           = config.getParameter<edm::InputTag>("jet_id");		
+  fJetTracksTag    = config.getParameter<edm::InputTag>("tag_jetTracks");
 
 
   edm::LogVerbatim("NTP") << " ==> JetFillerReco Constructor - " << fPrefix;

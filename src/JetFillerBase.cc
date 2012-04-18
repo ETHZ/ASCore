@@ -17,7 +17,7 @@ JetFillerBase::JetFillerBase( const edm::ParameterSet& cfg, const bool& isRealDa
 {
 	
     // Retrieve configuration parameters
-    std::string jettype = cfg.getUntrackedParameter<edm::InputTag>("tag").label();
+    std::string jettype = cfg.getParameter<edm::InputTag>("tag").label();
 
     // parse fTag label for jet-type
     if      (std::string::npos != jettype.find("PF"))   setJetType(PF);
