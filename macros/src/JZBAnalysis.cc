@@ -1084,8 +1084,8 @@ void JZBAnalysis::Analyze() {
 	      if(fTR->genInfoMoIndex[da]==i) {
 		//dealing with a daughter
 		if(abs(fTR->genInfoId[da])<10) nEvent.DecayCode+=100;
-		if(abs(fTR->genInfoId[da])==12||abs(fTR->genInfoId[da])==14||abs(fTR->genInfoId[da])==16) nEvent.DecayCode+=10;
-		if(abs(fTR->genInfoId[da])==11||abs(fTR->genInfoId[da])==13||abs(fTR->genInfoId[da])==15) {
+		if(is_neutrino(abs(fTR->genInfoId[da]))) nEvent.DecayCode+=10;
+		if(is_charged_lepton(abs(fTR->genInfoId[da]))) {
 		  nEvent.DecayCode+=1;
 		  if(fTR->genInfoPt[i]>genZpt) {
 		    genZ2pt=genZpt;
