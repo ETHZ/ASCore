@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.5 2012/04/16 13:07:39 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.6 2012/04/17 15:44:12 fronga Exp $
 //
 //
 
@@ -1064,6 +1064,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTGenPhotonPhi->push_back( gen_photons[i]->phi() );
       fTGenPhotonMotherID->push_back( gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->pdgId() : -999 );
       fTGenPhotonMotherStatus->push_back( gen_photons_mothers[i]!=NULL ? gen_photons_mothers[i]->status() : -999 );
+      fTGenPhotonPartonMindR->push_back( -999.99 ); // Initialize
 
       // use Steve Mrenna's status 2 parton jets to compute dR to closest jet of prompt photon
       if((*fTGenPhotonMotherStatus)[i]!=3) continue;
@@ -1075,7 +1076,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         float dR = photon.DeltaR(pJ);
         if(dR < minDR) minDR=dR;
       }
-      fTGenPhotonPartonMindR->push_back( minDR );
+      (*fTGenPhotonPartonMindR)[i] = minDR;
     }
   }
 
@@ -1220,6 +1221,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       fTMuNTkHits->push_back( muon.innerTrack()->hitPattern().numberOfValidHits() );
       fTMuNPxHits->push_back( muon.innerTrack()->hitPattern().numberOfValidPixelHits() );
+    } else {
+      fTMuTkPtE->push_back( 0.0 );
+      fTMuTkD0E->push_back( 0.0 );
+      fTMuTkDzE->push_back( 0.0 );
+      fTMuNTkHits->push_back( 0.0 );
+      fTMuNPxHits->push_back( 0.0 );
     }
     if((*fTMuIsGlobalMuon)[mqi]){ // Global Muons
       (*fTNGMus)++;
@@ -1232,6 +1239,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTMuNMuHits->push_back( muon.outerTrack()->hitPattern().numberOfValidHits() );
       fTMuNMatches->push_back( muon.numberOfMatches() );
       fTMuNChambers->push_back( muon.numberOfChambers() );
+    } else {
+      fTMuPtE->push_back( 0.0 );
+      fTMuD0E->push_back( 0.0 );
+      fTMuDzE->push_back( 0.0 );
+      fTMuNChi2->push_back( 0.0 );
+      fTMuNGlHits->push_back( 0.0 );
+      fTMuNMuHits->push_back( 0.0 );
+      fTMuNMatches->push_back( 0.0 );
+      fTMuNChambers->push_back( 0.0 );
     }
 
     // MC Matching
@@ -1590,6 +1606,13 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         fTElConvPartnerTrkEta    ->push_back(ConvPartnerTrack->eta());
         fTElConvPartnerTrkPhi    ->push_back(ConvPartnerTrack->phi());
         fTElConvPartnerTrkCharge ->push_back(ConvPartnerTrack->charge());
+      } else {
+        fTElConvPartnerTrkDist   ->push_back(-999.99);
+        fTElConvPartnerTrkDCot   ->push_back(-999.99);
+        fTElConvPartnerTrkPt     ->push_back(-999.99);
+        fTElConvPartnerTrkEta    ->push_back(-999.99);
+        fTElConvPartnerTrkPhi    ->push_back(-999.99);
+        fTElConvPartnerTrkCharge ->push_back(-999.99);
       }
 
 
@@ -1782,8 +1805,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         fTPhoMCmatchindex->push_back(-999);
       }
       else {
+        fTPhoMCmatchexitcode->push_back(-999);
         fTPhoMCmatchindex->push_back(-999);
-        fTPhoMCmatchexitcode->push_back(-1); // Initialize
         for(int i=0; i<*fTNGenPhotons; ++i){
           if ( (fabs((*fTGenPhotonPt)[i]-matched[0]->pt())<0.01*matched[0]->pt()) 
                && (fabs((*fTGenPhotonEta)[i]-matched[0]->eta())<0.01) 
@@ -1800,7 +1823,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
                    && (*fTGenPhotonMotherStatus)[(*fTPhoMCmatchindex)[phoqi]]==3) (*fTPhoMCmatchexitcode)[phoqi]=2;
           else (*fTPhoMCmatchexitcode)[phoqi] = 3;
         }
-        else (*fTPhoMCmatchexitcode)[phoqi] = 2;
+        else (*fTPhoMCmatchexitcode)[phoqi] = -2;
       }
 
     }
@@ -2639,15 +2662,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     std::vector<TransientTrack> AssociatedTTracks;
     // Initialization
     fTJMass ->push_back(0.);
-    fTJtrk1px->push_back(-999.);
-    fTJtrk1py->push_back(-999.);
-    fTJtrk1pz->push_back(-999.);
-    fTJtrk2px->push_back(-999.);
-    fTJtrk2py->push_back(-999.);
-    fTJtrk2pz->push_back(-999.);
-    fTJtrk3px->push_back(-999.);
-    fTJtrk3py->push_back(-999.);
-    fTJtrk3pz->push_back(-999.);
+    fTJtrk1px->push_back(-999.99 );
+    fTJtrk1py->push_back(-999.99 );
+    fTJtrk1pz->push_back(-999.99 );
+    fTJtrk2px->push_back(-999.99 );
+    fTJtrk2py->push_back(-999.99 );
+    fTJtrk2pz->push_back(-999.99 );
+    fTJtrk3px->push_back(-999.99 );
+    fTJtrk3py->push_back(-999.99 );
+    fTJtrk3pz->push_back(-999.99 );
     if(fabs(jet->eta())<2.9){ // when the cone of dR=0.5 around the jet is (at least partially) inside the tracker acceptance
       // Tmp variables for vectorial sum of pt of tracks
       double pXtmp(0.), pYtmp(0.), pZtmp(0.), E2tmp(0.);
@@ -3075,18 +3098,18 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTgenInfoMo1Pt->push_back( 0 );
       fTgenInfoMo2Pt->push_back( 0 );
       if(genMo1Index[i]>=0) {
-        fTgenInfoMo1Pt->push_back( genPt[genMo1Index[i]] );
+        (*fTgenInfoMo1Pt)[*fTnGenParticles] = genPt[genMo1Index[i]];
         fTgenInfoMo1->push_back( genNIndex[genMo1Index[i]] );
       } else {
         fTgenInfoMo1->push_back( -1 );
       }
       if(genMo2Index[i]>=0) {
-        fTgenInfoMo2Pt->push_back( genPt[genMo2Index[i]] );
+        (*fTgenInfoMo2Pt)[*fTnGenParticles] =  genPt[genMo2Index[i]];
         fTgenInfoMo2->push_back( genNIndex[genMo2Index[i]] );
       } else {
         fTgenInfoMo2->push_back( -1 );
       }
-	    
+          
       fTPromptnessLevel->push_back( Promptness[i] );
       fTgenInfoPt ->push_back( genPt[i] );
       fTgenInfoEta ->push_back( genEta[i] );
@@ -3878,8 +3901,8 @@ void NTupleProducer::resetProducts( void ) {
   fTPDFxPDF2.reset(new float(-999.99));
   fTGenWeight.reset(new float(-999.99));
   fTpdfW.reset(new std::vector<float> );
-  fTpdfWsum.reset(new float(-999.99));
-  fTNPdfs.reset(new int(-999));
+  fTpdfWsum.reset(new float(0.0));
+  fTNPdfs.reset(new int(0));
   fTPUnumInteractions.reset(new int(-999));
   fTPUnumTrueInteractions.reset(new int(-999));
   fTPUnumFilled.reset(new int(-999));
@@ -3897,7 +3920,7 @@ void NTupleProducer::resetProducts( void ) {
   fTHLTPrescale.reset(new std::vector<int> );
   fTL1PhysResults.reset(new std::vector<int> );
   fTL1TechResults.reset(new std::vector<int> );
-  fTNHLTObjs.reset(new int(-999));
+  fTNHLTObjs.reset(new int(0));
   for ( size_t i=0; i<gMaxHltNObjs; ++i ) {
     fTHLTObjectID[i].reset(new std::vector<int> );
     fTHLTObjectPt[i].reset(new std::vector<float> );
@@ -3918,7 +3941,7 @@ void NTupleProducer::resetProducts( void ) {
   fTprocess.reset(new int(-999));
 
   fTMaxGenPartExceed.reset(new int(-999));
-  fTnGenParticles.reset(new int(-999));
+  fTnGenParticles.reset(new int(0));
   fTgenInfoId.reset(new std::vector<int>);
   fTgenInfoStatus.reset(new std::vector<int>);
   fTgenInfoNMo.reset(new std::vector<int>);
@@ -3956,18 +3979,18 @@ void NTupleProducer::resetProducts( void ) {
   fTBeamspotx.reset(new float(-999.99));
   fTBeamspoty.reset(new float(-999.99));
   fTBeamspotz.reset(new float(-999.99));
-  fTNCaloTowers.reset(new int(-999));
-  fTGoodEvent.reset(new int(-999));
-  fTMaxMuExceed.reset(new int(-999));
-  fTMaxElExceed.reset(new int(-999));
-  fTMaxJetExceed.reset(new int(-999));
-  fTMaxUncJetExceed.reset(new int(-999));
-  fTMaxTrkExceed.reset(new int(-999));
-  fTMaxPhotonsExceed.reset(new int(-999));
-  fTMaxGenLepExceed.reset(new int(-999));
-  fTMaxGenPhoExceed.reset(new int(-999));
-  fTMaxGenJetExceed.reset(new int(-999));
-  fTMaxVerticesExceed.reset(new int(-999));
+  fTNCaloTowers.reset(new int(0));
+  fTGoodEvent.reset(new int(0));
+  fTMaxMuExceed.reset(new int(0));
+  fTMaxElExceed.reset(new int(0));
+  fTMaxJetExceed.reset(new int(0));
+  fTMaxUncJetExceed.reset(new int(0));
+  fTMaxTrkExceed.reset(new int(0));
+  fTMaxPhotonsExceed.reset(new int(0));
+  fTMaxGenLepExceed.reset(new int(0));
+  fTMaxGenPhoExceed.reset(new int(0));
+  fTMaxGenJetExceed.reset(new int(0));
+  fTMaxVerticesExceed.reset(new int(0));
   fTHBHENoiseFlag.reset(new int(-999));
   fTHBHENoiseFlagIso.reset(new int(-999));
   fTCSCTightHaloID.reset(new int(-999));
@@ -3975,7 +3998,7 @@ void NTupleProducer::resetProducts( void ) {
   fTRecovRecHitFilterFlag.reset(new int(-999));
   fTRA2TrackingFailureFilterFlag.reset(new int(-999));
   //FR fPBNRFlag.reset(new int(-999));
-  fTNGenLeptons.reset(new int(-999));
+  fTNGenLeptons.reset(new int(0));
   fTGenLeptonID.reset(new std::vector<int> );
   fTGenLeptonPt.reset(new std::vector<float> );
   fTGenLeptonEta.reset(new std::vector<float> );
@@ -3990,14 +4013,14 @@ void NTupleProducer::resetProducts( void ) {
   fTGenLeptonGMPt.reset(new std::vector<float> );
   fTGenLeptonGMEta.reset(new std::vector<float> );
   fTGenLeptonGMPhi.reset(new std::vector<float> );
-  fTNGenPhotons.reset(new int(-999));
+  fTNGenPhotons.reset(new int(0));
   fTGenPhotonPt.reset(new std::vector<float> );
   fTGenPhotonEta.reset(new std::vector<float> );
   fTGenPhotonPhi.reset(new std::vector<float> );
   fTGenPhotonPartonMindR.reset(new std::vector<float> );
   fTGenPhotonMotherID.reset(new std::vector<int> );
   fTGenPhotonMotherStatus.reset(new std::vector<int> );
-  fTNGenJets.reset(new int(-999));
+  fTNGenJets.reset(new int(0));
   fTGenJetPt.reset(new std::vector<float> );
   fTGenJetEta.reset(new std::vector<float> );
   fTGenJetPhi.reset(new std::vector<float> );
@@ -4005,7 +4028,7 @@ void NTupleProducer::resetProducts( void ) {
   fTGenJetEmE.reset(new std::vector<float> );
   fTGenJetHadE.reset(new std::vector<float> );
   fTGenJetInvE.reset(new std::vector<float> );
-  fTNVrtx.reset(new int(-999));
+  fTNVrtx.reset(new int(0));
   fTVrtxX.reset(new std::vector<float> );
   fTVrtxY.reset(new std::vector<float> );
   fTVrtxZ.reset(new std::vector<float> );
@@ -4017,10 +4040,10 @@ void NTupleProducer::resetProducts( void ) {
   fTVrtxNtrks.reset(new std::vector<float> );
   fTVrtxSumPt.reset(new std::vector<float> );
   fTVrtxIsFake.reset(new std::vector<int> );
-  fTNMus.reset(new int(-999));
-  fTNMusTot.reset(new int(-999));
-  fTNGMus.reset(new int(-999));
-  fTNTMus.reset(new int(-999));
+  fTNMus.reset(new int(0));
+  fTNMusTot.reset(new int(0));
+  fTNGMus.reset(new int(0));
+  fTNTMus.reset(new int(0));
   fTMuGood.reset(new std::vector<int> );
   fTMuIsIso.reset(new std::vector<int> );
   fTMuIsGlobalMuon.reset(new std::vector<int> );
@@ -4103,7 +4126,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuGenGMEta.reset(new std::vector<float> );
   fTMuGenGMPhi.reset(new std::vector<float> );
   fTMuGenGME.reset(new std::vector<float> );
-  fTNEBhits.reset(new int(-999));
+  fTNEBhits.reset(new int(0));
   fTEBrechitE.reset(new std::vector<float> );
   fTEBrechitPt.reset(new std::vector<float> );
   fTEBrechitEta.reset(new std::vector<float> );
@@ -4112,8 +4135,8 @@ void NTupleProducer::resetProducts( void ) {
   fTEBrechitTime.reset(new std::vector<float> );
   fTEBrechitE4oE1.reset(new std::vector<float> );
   fTEBrechitE2oE9.reset(new std::vector<float> );
-  fTNEles.reset(new int(-999));
-  fTNElesTot.reset(new int(-999));
+  fTNEles.reset(new int(0));
+  fTNElesTot.reset(new int(0));
   fTElGood.reset(new std::vector<int> );
   fTElIsIso.reset(new std::vector<int> );
   fTElChargeMisIDProb.reset(new std::vector<int> );
@@ -4215,8 +4238,8 @@ void NTupleProducer::resetProducts( void ) {
   fTElGenGMEta.reset(new std::vector<float> );
   fTElGenGMPhi.reset(new std::vector<float> );
   fTElGenGME.reset(new std::vector<float> );
-  fTNPhotons.reset(new int(-999));
-  fTNPhotonsTot.reset(new int(-999));
+  fTNPhotons.reset(new int(0));
+  fTNPhotonsTot.reset(new int(0));
   fTPhoGood.reset(new std::vector<int> );
   fTPhoIsIso.reset(new std::vector<int> );
   fTPhoPt.reset(new std::vector<float> );
@@ -4333,13 +4356,13 @@ void NTupleProducer::resetProducts( void ) {
   fTPhoConvNtracks.reset(new std::vector<int>);
   fTPhoConvChi2Probability.reset(new std::vector<float>);
   fTPhoConvEoverP.reset(new std::vector<float>);
-  fTNconv.reset(new int(-999));
+  fTNconv.reset(new int(0));
   fTConvValidVtx.reset(new std::vector<bool>);
   fTConvNtracks.reset(new std::vector<int>);
   fTConvChi2Probability.reset(new std::vector<float>);
   fTConvEoverP.reset(new std::vector<float>);
   fTConvZofPrimVtxFromTrks.reset(new std::vector<float>);
-  //     fTNgv.reset(new int(-999));
+  //     fTNgv.reset(new int(0));
   //     fTgvSumPtHi.reset(new std::vector<float>);
   //     fTgvSumPtLo.reset(new std::vector<float>);
   //     fTgvNTkHi.reset(new std::vector<int>);
@@ -4354,7 +4377,7 @@ void NTupleProducer::resetProducts( void ) {
     gv_pos[i]=TVector3();
     gv_p3[i]=TVector3();
   }
-  fTNSuperClusters.reset(new int(-999));
+  fTNSuperClusters.reset(new int(0));
   fTSCRaw.reset(new std::vector<float> );
   fTSCPre.reset(new std::vector<float> );
   fTSCEnergy.reset(new std::vector<float> );
@@ -4370,8 +4393,8 @@ void NTupleProducer::resetProducts( void ) {
   fTSClocalcorr.reset(new std::vector<float> );
   fTSCcrackcorrseedfactor.reset(new std::vector<float> );
   fTSClocalcorrseedfactor.reset(new std::vector<float> );
-  fTNJets.reset(new int(-999));
-  fTNJetsTot.reset(new int(-999));
+  fTNJets.reset(new int(0));
+  fTNJetsTot.reset(new int(0));
   fTJGood.reset(new std::vector<int> );
   fTJPx.reset(new std::vector<float> );
   fTJPy.reset(new std::vector<float> );
@@ -4424,8 +4447,8 @@ void NTupleProducer::resetProducts( void ) {
   fTJVtxEzx.reset(new std::vector<float> );
   fTJVtxNChi2.reset(new std::vector<float> );
   fTJGenJetIndex.reset(new std::vector<int> );
-  fTNTracks.reset(new int(-999));
-  fTNTracksTot.reset(new int(-999));
+  fTNTracks.reset(new int(0));
+  fTNTracksTot.reset(new int(0));
   fTTrkGood.reset(new std::vector<int> );
   fTTrkPt.reset(new std::vector<float> );
   fTTrkEta.reset(new std::vector<float> );
@@ -4549,6 +4572,7 @@ void NTupleProducer::resetRunProducts( void ) {
 //________________________________________________________________________________________
 void NTupleProducer::putProducts( edm::Event& event ) {
   
+  event.put(fTRun,   "Run");
   event.put(fTEvent, "Event");
   event.put(fTLumiSection, "LumiSection");
   event.put(fTPtHat, "PtHat");
