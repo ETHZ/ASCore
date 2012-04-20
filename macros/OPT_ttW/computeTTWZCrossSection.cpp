@@ -47,7 +47,7 @@ int main( int argc, char* argv[] ) {
   float min_ht = 100.;
 
 
-  SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(min_ht, 10000., min_met, 10000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
+  SSDLPrediction ssdlpred =  plotter->makePredictionSignalEvents(min_ht, 7000., min_met, 7000., min_NJets, min_NBJets, min_NBJets_med, min_ptLept1, min_ptLept2, true);
 
   float b_pred_mm = ssdlpred.bg_mm;
   float b_pred_em = ssdlpred.bg_em;
@@ -56,6 +56,9 @@ int main( int argc, char* argv[] ) {
   float b_pred_mm_err = ssdlpred.bg_mm_err;
   float b_pred_em_err = ssdlpred.bg_em_err;
   float b_pred_ee_err = ssdlpred.bg_ee_err;
+
+  float b_pred     = ssdlpred.bg;
+  float b_pred_err = ssdlpred.bg_err;
 
   float s_ttw_mm = ssdlpred.s_ttw_mm;
   float s_ttw_em = ssdlpred.s_ttw_em;
@@ -77,9 +80,6 @@ int main( int argc, char* argv[] ) {
   int obs_em = ssdlpred.obs_em;
   int obs_ee = ssdlpred.obs_ee;
 
-  float b_pred = b_pred_mm + b_pred_em + b_pred_ee;
-  float b_pred_err = sqrt( b_pred_mm_err*b_pred_mm_err + b_pred_em_err*b_pred_em_err + b_pred_ee_err*b_pred_ee_err );
-
   float s_ttw = s_ttw_mm + s_ttw_em + s_ttw_ee;
   float s_ttz = s_ttz_mm + s_ttz_em + s_ttz_ee;
   float s = s_ttw + s_ttz;
@@ -98,6 +98,7 @@ int main( int argc, char* argv[] ) {
 
 
   float ZBi = ZBiCalculator::computeZBi( s+b_pred, b_pred, b_pred_err );
+  float ZBi_obs = ZBiCalculator::computeZBi( obs, b_pred, b_pred_err );
 
   float obs_ttWZ = obs - b_pred;
 
@@ -118,7 +119,7 @@ int main( int argc, char* argv[] ) {
   float xsecErr_stat_plus = obs_errPlus / ( lumi_pb*eff_ttwz );
   float xsecErr_stat_minus = obs_errMinus / ( lumi_pb*eff_ttwz );
 
-  float lumi_err = 0.045*lumi_pb;
+  float lumi_err = 0.025*lumi_pb;
   float xsecErr_syst_lumi = lumi_err * crossSection/lumi_pb;
 
   float xsecErr_syst = xsecErr_syst_lumi; //just lumi for now
@@ -136,12 +137,12 @@ int main( int argc, char* argv[] ) {
   std::cout << " Expected B+S: " << s+b_pred << std::endl;
   std::cout << " ZBi: " << ZBi << std::endl;
   std::cout << " Observed Events: " << obs << std::endl;
+  std::cout << " ZBi (observed): " << ZBi_obs << std::endl;
   std::cout << " Observed Signal (BG subtracted): " << obs_ttWZ << std::endl;
   std::cout << " Expected Cross Section: " << (crossSection_ttw+crossSection_ttz) << " pb" << std::endl;
   std::cout << " Measured Cross Section: " << std::endl;
   std::cout << " " <<  crossSection << "  +" << xsecErr_stat_plus << "/-" << xsecErr_stat_minus << " (stat)   +-" << xsecErr_syst << " (syst)  pb" << std::endl;
   std::cout << " " <<  crossSection << "  +" << xsecErr_tot_plus << "/-" << xsecErr_tot_minus << " pb" << std::endl;
-  std::cout << " Significance of signal: " << significance << std::endl;
   std::cout << std::endl;
   std::cout << "=========================================" << std::endl;
   std::cout << std::endl;
