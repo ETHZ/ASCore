@@ -44,6 +44,7 @@ public:
 	static const int gNDiffPT1Bins  = 5;
 	static const int gNDiffPT2Bins  = 5;
 	static const int gNDiffNBJBins  = 4;
+	static const int gNDiffNBJMBins = 3;
 
 	static double gDiffHTBins  [gNDiffHTBins+1];
 	static double gDiffMETBins [gNDiffMETBins+1];
@@ -53,6 +54,7 @@ public:
 	static double gDiffPT1Bins [gNDiffPT1Bins+1];
 	static double gDiffPT2Bins [gNDiffPT2Bins+1];
 	static double gDiffNBJBins [gNDiffNBJBins+1];
+	static double gDiffNBJMBins[gNDiffNBJMBins+1];
 
 	static const int gM0bins  = 150  ; // these values
 	static const int gM0min   = 0    ; // are 
@@ -278,7 +280,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 10;
+	static const int gNDiffVars = 11;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -639,6 +641,8 @@ public:
 	void setHypLepton2(int, gChannel);
 	lepton fHypLepton1;
 	lepton fHypLepton2;
+	
+	void setRegionCuts(gRegion reg = Baseline);
 	
 	const int     getNPtBins (gChannel);
 	const double *getPtBins  (gChannel);

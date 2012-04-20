@@ -61,17 +61,17 @@ static const double gStatBetaBeta  = 1.;
 
 // Regions ///////////////////////////////////////////////////////////////////////
 TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET120", "HT0MET200", "HT0MET120JV", "TTbarWPresel", "TTbarWSel1", "TTbarWSel2", "TTbarWSel3", "TTbarWSel4"};
-float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,             0.,           0.,           0.,           0.,          60.};
+float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,             0.,           0.,           0.,           0.,         100.};
 float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,           10.,          7000.,        7000.,        7000.,        7000.,        7000.};
-float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.,          30.};
+float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,             0.,           0.,           0.,          40.,           0.};
 float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,          7000.,        7000.,        7000.,        7000.,        7000.};
 int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,             4 ,           3 ,           4 ,           3 ,           3 };
 int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             2 ,           2 ,           2 ,           2 ,           1 };
-int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 ,           0 };
-float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          54.};
-float SSDLDumper::Region::minMu2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          23.};
-float SSDLDumper::Region::minEl1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          54.};
-float SSDLDumper::Region::minEl2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          23.};
+int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,             0 ,           1 ,           1 ,           1 ,           1 };
+float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          55.};
+float SSDLDumper::Region::minMu2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          30.};
+float SSDLDumper::Region::minEl1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,            20.,          20.,          40.,          20.,          55.};
+float SSDLDumper::Region::minEl2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,            20.,          20.,          20.,          20.,          30.};
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuPtbins [gNMuPtbins+1]  = {10., 15., 20., 25., 30., 35., 40., 50., 60.};
@@ -107,27 +107,28 @@ TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} (GeV)"
                                                                    "N_{bJets}"};
 
 //////////////////////////////////////////////////////////////////////////////////
-double SSDLDumper::gDiffHTBins[gNDiffHTBins+1]   = { 0., 80., 200., 320., 450., 600.};
-double SSDLDumper::gDiffMETBins[gNDiffMETBins+1] = {30., 50.,  85., 120., 200.};
-double SSDLDumper::gDiffNJBins[gNDiffNJBins+1]   = { 0., 1., 2., 3., 4., 5.}; // fill NJets + 0.5 to hit the right bin
-double SSDLDumper::gDiffMT2Bins[gNDiffMT2Bins+1] = { 0.,  25.,  50., 100.};
-double SSDLDumper::gDiffPT1Bins[gNDiffPT1Bins+1] = { 20., 40., 60., 80., 100., 200.};
-double SSDLDumper::gDiffPT2Bins[gNDiffPT2Bins+1] = { 10., 20., 30., 40.,  50., 100.};
-double SSDLDumper::gDiffNBJBins[gNDiffNBJBins+1] = { 0., 1., 2., 3., 4.};
+double SSDLDumper::gDiffHTBins[gNDiffHTBins+1]     = { 0., 80., 200., 320., 450., 600.};
+double SSDLDumper::gDiffMETBins[gNDiffMETBins+1]   = {30., 50.,  85., 120., 200.};
+double SSDLDumper::gDiffNJBins[gNDiffNJBins+1]     = { 0., 1., 2., 3., 4., 5.}; // fill NJets + 0.5 to hit the right bin
+double SSDLDumper::gDiffMT2Bins[gNDiffMT2Bins+1]   = { 0.,  25.,  50., 100.};
+double SSDLDumper::gDiffPT1Bins[gNDiffPT1Bins+1]   = { 20., 40., 60., 80., 100., 200.};
+double SSDLDumper::gDiffPT2Bins[gNDiffPT2Bins+1]   = { 10., 20., 30., 40.,  50., 100.};
+double SSDLDumper::gDiffNBJBins[gNDiffNBJBins+1]   = { 0., 1., 2., 3., 4.};
+double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
 
 double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
 
 //////////////////////////////////////////////////////////////////////////////////
-TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3"};
-int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffHTBins, gNDiffMETBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins};
-double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffHTBins,  gDiffMETBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins};
+TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed"};
+int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffHTBins, gNDiffMETBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins};
+double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffHTBins,  gDiffMETBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins};
 TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} (GeV)", "H_{T} (GeV)",
                                                                           "E_{T}^{miss} (GeV)", "E_{T}^{miss} (GeV)",
                                                                           "N_{Jets}",
                                                                           "M_{T2} (GeV)",
                                                                           "P_{T} (l_{1}) (GeV)",
                                                                           "P_{T} (l_{2}) (GeV)",
-                                                                          "N_{Btag}", "E_{T}^{miss} (GeV)"};
+                                                                          "N_{Btag}", "E_{T}^{miss} (GeV)", "N_{Btag}"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
@@ -187,18 +188,7 @@ void SSDLDumper::init(){
 	resetHypLeptons();
 	initCutNames();
 	
-	// Cuts:
-	fC_minMu1pt  = 10.;
-	fC_minMu2pt  = 10.;
-	fC_minEl1pt  = 10.;
-	fC_minEl2pt  = 10.;
-	fC_minHT     = 0.;
-	fC_minMet    = 0.;
-	fC_maxHT     = 7000.;
-	fC_maxMet    = 7000.;
-	fC_minNjets  = 0;
-	fC_minNbjets = 0;
-	fC_minNbjmed = 0;
+	setRegionCuts(); // no argument = reset to baseline
 	
 	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 20.;
@@ -473,17 +463,7 @@ void SSDLDumper::loopEvents(Sample *S){
 void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	fC_minMu1pt  = Region::minMu1pt [reg];
-	fC_minMu2pt  = Region::minMu2pt [reg];
-	fC_minEl1pt  = Region::minEl1pt [reg];
-	fC_minEl2pt  = Region::minEl2pt [reg];
-	fC_minHT     = Region::minHT    [reg];
-	fC_maxHT     = Region::maxHT    [reg];
-	fC_minMet    = Region::minMet   [reg];
-	fC_maxMet    = Region::maxMet   [reg];
-	fC_minNjets  = Region::minNjets [reg];
-	fC_minNbjets = Region::minNbjets[reg];
-	fC_minNbjmed = Region::minNbjmed[reg];
+	setRegionCuts(reg);
 
 	///////////////////////////////////////////////////
 	// SS YIELDS
@@ -733,13 +713,8 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 void SSDLDumper::fillDiffYields(Sample *S){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	fC_minMu1pt = Region::minMu1pt[Baseline];
-	fC_minMu2pt = Region::minMu2pt[Baseline];
-	fC_minEl1pt = Region::minEl1pt[Baseline];
-	fC_minEl2pt = Region::minEl2pt[Baseline];
-	fC_maxMet = 7000.;
-	fC_maxHT  = 7000.;
-	fC_minNbjets = 0;
+	setRegionCuts();
+	
 	////////////////////////////////////////////////////////////////////////////////
 	// SS YIELDS
 	fDoCounting = false;
@@ -891,7 +866,29 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+		
+		// NBtag binning, ttbarW Selection
+		setRegionCuts(TTbarWSel4);
+		fC_minNbjets = 0;
+		fC_minNbjmed = 0;
+		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loopoose di muon event
+			float NbJ = getNBTagsMed() + 0.5;
+			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[Muon].hnt11[10], NbJ,   puweight);
+			}
+			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[Muon].hnt10[10], NbJ,   puweight);
+			}
+			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[Muon].hnt01[10], NbJ,   puweight);
+			}
+			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[Muon].hnt00[10], NbJ,   puweight);
+			}
+		}
+		resetHypLeptons();
 	}
+	setRegionCuts();
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EE Channel
@@ -1022,7 +1019,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di muon event
+		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose event
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				fillWithoutOF(S->diffyields[Elec].hnt11[9], pfMET, puweight);
 			}
@@ -1037,7 +1034,29 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+
+		// NBtag binning, ttbarW Selection
+		setRegionCuts(TTbarWSel4);
+		fC_minNbjets = 0;
+		fC_minNbjmed = 0;
+		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose event
+			float NbJ = getNBTagsMed() + 0.5;
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[Elec].hnt11[10], NbJ,   puweight);
+			}
+			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[Elec].hnt10[10], NbJ,   puweight);
+			}
+			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[Elec].hnt01[10], NbJ,   puweight);
+			}
+			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[Elec].hnt00[10], NbJ,   puweight);
+			}
+		}
+		resetHypLeptons();
 	}
+	setRegionCuts();
 
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
@@ -1071,7 +1090,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				fillWithoutOF(S->diffyields[ElMu].hnt01[6], ptmax, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt01[7], ptmin, puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[5], MT2,   puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt00[6], ptmax, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt00[7], ptmin, puweight);
@@ -1094,7 +1113,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fillWithoutOF(S->diffyields[ElMu].hnt01[0], HT, puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[0], HT, puweight);
 			}
 		}
@@ -1118,7 +1137,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				fillWithoutOF(S->diffyields[ElMu].hnt01[1], HT, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt01[4], NJ, puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[1], HT, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt00[4], NJ, puweight);
 			}
@@ -1142,7 +1161,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				fillWithoutOF(S->diffyields[ElMu].hnt01[2], pfMET, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt01[8], NbJ,   puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[2], pfMET, puweight);
 				fillWithoutOF(S->diffyields[ElMu].hnt00[8], NbJ,   puweight);
 			}
@@ -1163,7 +1182,7 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fillWithoutOF(S->diffyields[ElMu].hnt01[3], pfMET, puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[3], pfMET, puweight);
 			}
 		}
@@ -1183,12 +1202,34 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				fillWithoutOF(S->diffyields[ElMu].hnt01[9], pfMET, puweight);
 			}
-			if( !isTightElectron(0) && !isTightMuon(0) ){ // Loose-loose
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[9], pfMET, puweight);
 			}
 		}
 		resetHypLeptons();
+		
+		// NBtag binning, ttbarW Selection
+		setRegionCuts(TTbarWSel4);
+		fC_minNbjets = 0;
+		fC_minNbjmed = 0;
+		if(isSSLLElMuEvent(mu, el)){ // Same-sign loose-loose event
+			float NbJ = getNBTagsMed() + 0.5;
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				fillWithoutOF(S->diffyields[ElMu].hnt11[10], NbJ,   puweight);
+			}
+			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
+				fillWithoutOF(S->diffyields[ElMu].hnt10[10], NbJ,   puweight);
+			}
+			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
+				fillWithoutOF(S->diffyields[ElMu].hnt01[10], NbJ,   puweight);
+			}
+			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
+				fillWithoutOF(S->diffyields[ElMu].hnt00[10], NbJ,   puweight);
+			}
+		}
+		resetHypLeptons();		
 	}
+	setRegionCuts();
 
 	///////////////////////////////////////////////////
 	// OS YIELDS
@@ -1350,8 +1391,32 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			}
 		}
 		resetHypLeptons();
+		
+		// NBtag binning, ttbarW Selection
+		setRegionCuts(TTbarWSel4);
+		fC_minNbjets = 0;
+		fC_minNbjmed = 0;
+		if(isSSLLElEvent(el1, el2)){
+			float NbJ = getNBTagsMed() + 0.5;
+			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[10], NbJ, puweight);
+				}
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[10], NbJ, puweight);
+				}
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[10], NbJ, puweight);
+				}
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[10], NbJ, puweight);
+				}
+			}
+		}
+		resetHypLeptons();		
 	}
-
+	setRegionCuts();
+	
 	////////////////////////////////////////////////////////////////////////////////
 	// EMu Channel
 	fCurrentChannel = ElMu;
@@ -1473,10 +1538,27 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		}
 		resetHypLeptons();
 
+		// NBtag binning, ttbarW Selection
+		setRegionCuts(TTbarWSel4);
+		fC_minNbjets = 0;
+		fC_minNbjmed = 0;
+		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
+			float NbJ = getNBTagsMed() + 0.5;
+			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
+				if( isBarrelElectron(el)){
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[10], NbJ, puweight);
+				}
+				if(!isBarrelElectron(el)){
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[10], NbJ, puweight);
+				}
+			}
+		}
+		resetHypLeptons();
 	}
 
 	fChargeSwitch = 0;
 	resetHypLeptons();
+	setRegionCuts();
 }
 void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
@@ -3726,6 +3808,20 @@ void SSDLDumper::setHypLepton2(int index, gChannel chan){
 
 //////////////////////////////////////////////////////////////////////////////
 // Event Selections:
+void SSDLDumper::setRegionCuts(gRegion reg){
+	fC_minMu1pt  = Region::minMu1pt [reg];
+	fC_minMu2pt  = Region::minMu2pt [reg];
+	fC_minEl1pt  = Region::minEl1pt [reg];
+	fC_minEl2pt  = Region::minEl2pt [reg];
+	fC_minHT     = Region::minHT    [reg];
+	fC_maxHT     = Region::maxHT    [reg];
+	fC_minMet    = Region::minMet   [reg];
+	fC_maxMet    = Region::maxMet   [reg];
+	fC_minNjets  = Region::minNjets [reg];
+	fC_minNbjets = Region::minNbjets[reg];
+	fC_minNbjmed = Region::minNbjmed[reg];
+}
+
 //____________________________________________________________________________
 bool SSDLDumper::isGoodEvent(){
 	// Global cuts?

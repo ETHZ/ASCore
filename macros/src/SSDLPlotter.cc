@@ -324,26 +324,16 @@ void SSDLPlotter::doAnalysis(){
 	// sandBox();
 	// return;
 	
-	 if(readHistos(fOutputFileName) != 0) return;
-	 storeWeightedPred();
+	if(readHistos(fOutputFileName) != 0) return;
+	fillRatios(fMuData, fEGData, 0);
+	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	storeWeightedPred();
 
 	// makePileUpPlots(true); // loops on all data!
 	
 	// printCutFlows(fOutputDir + "CutFlow.txt");
 	// makeOriginPlots(Baseline);
-	// makeOriginPlots(HT80MET302b);
-	// makeOriginPlots(HT200MET30);
-	// makeOriginPlots(HT200MET302b);
-	// makeOriginPlots(HT80MET120);
-	// makeOriginPlots(HT0MET120);
-	// makeOriginPlots(HT0MET200);
-	// makeOriginPlots(HT0MET120JV);
-	// makeOriginPlots(HT0MET200JV);
-	// makeOriginPlots(HT0MET02b);
 	// printOrigins(Baseline);
-	// printOrigins(HT200MET30);
-	// printOrigins(HT200MET302b);
-	// printOrigins(HT0MET02b);
 
 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
@@ -351,26 +341,29 @@ void SSDLPlotter::doAnalysis(){
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
-	// makeMETvsHTPlot0HT();
+	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
-	// makePRLPlot1();
 
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// make2DRatioPlots(Muon);
+	// make2DRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
 
-	// makeAllClosureTests();
-	// makeAllIntPredictions();
-	// makeDiffPrediction();
-	// printAllYieldTables();
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
+
+	makeAllClosureTests();
+	makeAllIntPredictions();
+	makeDiffPrediction();
+	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	// makePredictionSignalEvents(0.,   10., 120., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0., 7000., 200., 7000., 0, 0, 0, 20., 10., true);
-	// makePredictionSignalEvents(0., 7000.,  40., 7000., 3, 2, 1, 20., 20., true);
 	makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
@@ -3276,8 +3269,8 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
-	// TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
+	// TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
 	leg->AddEntry(hmetvsht_da_ee, "ee","p");
 	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
@@ -3289,9 +3282,12 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 ///////////// FROM SIGEVENTS TREE
 
 	// TGraphs:
-	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, HT0MET120);
-	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, HT0MET120);
-	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, HT0MET120);
+	TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, 0., 7000., 120., 7000.);
+	TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, 0., 7000., 120., 7000.);
+	TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, 0., 7000., 120., 7000.);
+	// TGraph *gmetvsht_da_mm = getSigEventGraph(Muon, HT0MET120);
+	// TGraph *gmetvsht_da_ee = getSigEventGraph(Elec, HT0MET120);
+	// TGraph *gmetvsht_da_em = getSigEventGraph(ElMu, HT0MET120);
 
 	TGraph *gmetvsht_da_mm_ex = getSigEventGraph(Muon, 0., 7000., 0., 120.);
 	TGraph *gmetvsht_da_ee_ex = getSigEventGraph(Elec, 0., 7000., 0., 120.);
@@ -3425,11 +3421,11 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
-	// gmetvsht_da_mt->Draw("P");
-	// gmetvsht_da_et->Draw("P");
+	gmetvsht_da_mt->Draw("P");
+	gmetvsht_da_et->Draw("P");
 	
 	leg->Draw();
-	// leg2->Draw();
+	leg2->Draw();
 	regleg->Draw();
 
 	drawTopLine();
@@ -3445,7 +3441,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp, "HTvsMET_NoHT", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, "HTvsMET_NoHT_Tau", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
@@ -7033,8 +7029,8 @@ void SSDLPlotter::makeDiffPrediction(){
 	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
 	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
 
-	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3"};
-	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1., 10.};
+	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed"};
+	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1., 10., 1.};
 
 	// Loop on the different variables
 	for(size_t j = 0; j < gNDiffVars; ++j){
@@ -7608,7 +7604,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_em_tot->Add(nt11_em_sig);
 
 		TString ytitle = Form("Events / %3.0f GeV", binwidthscale[j]);
-		if(j==4 || j==8) ytitle = "Events";
+		if(j==4 || j==8 || j==10) ytitle = "Events";
 		nt11_tot->Draw("goff");
 		nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[j]);
 		nt11_tot->GetYaxis()->SetTitle(ytitle);
@@ -8815,8 +8811,6 @@ void SSDLPlotter::makeTTbarClosure(){
 }
 
 void SSDLPlotter::storeWeightedPred(){
-	fillRatios(fMuData, fEGData, 0);
-	fillRatios(fMCBGMuEnr, fMCBG, 1);
 	TFile *pFile = TFile::Open(fOutputFileName);
 	TTree *sigtree; getObjectSafe(pFile, "SigEvents", sigtree);
 
@@ -8992,6 +8986,37 @@ void SSDLPlotter::storeWeightedPred(){
 			fillWithoutOF(S->diffyields[chan].hnpf[3], MET, puweight * npf);
 			fillWithoutOF(S->diffyields[chan].hnfp[3], MET, puweight * nfp);
 			fillWithoutOF(S->diffyields[chan].hnff[3], MET, puweight * nff);
+		}
+		
+		// Check pt cuts of TTbarWSel4:
+		bool passespt = true;
+		if(chan == ElMu){
+			if(pT1 > pT2){
+				if(pT1 < Region::minMu1pt[TTbarWSel4]) passespt = false;
+				if(pT2 < Region::minEl2pt[TTbarWSel4]) passespt = false;
+			}
+			if(pT1 < pT2){
+				if(pT1 < Region::minMu1pt[TTbarWSel4]) passespt = false;
+				if(pT2 < Region::minMu1pt[TTbarWSel4]) passespt = false;
+			}
+		}
+		else{
+			if(chan == Muon && pT1 < Region::minMu1pt[TTbarWSel4]) passespt = false;
+			if(chan == Muon && pT2 < Region::minMu2pt[TTbarWSel4]) passespt = false;
+			if(chan == Elec && pT1 < Region::minEl1pt[TTbarWSel4]) passespt = false;
+			if(chan == Elec && pT2 < Region::minEl2pt[TTbarWSel4]) passespt = false;
+		}
+		
+		if(HT    > Region::minHT   [TTbarWSel4] &&
+		   HT    < Region::maxHT   [TTbarWSel4] &&
+		   MET   > Region::minMet  [TTbarWSel4] &&
+		   MET   < Region::maxMet  [TTbarWSel4] &&
+		   njets < Region::minNjets[TTbarWSel4] &&
+		   passespt){
+			fillWithoutOF(S->diffyields[chan].hnpp[10], nbjetsmed, puweight * npp);
+			fillWithoutOF(S->diffyields[chan].hnpf[10], nbjetsmed, puweight * npf);
+			fillWithoutOF(S->diffyields[chan].hnfp[10], nbjetsmed, puweight * nfp);
+			fillWithoutOF(S->diffyields[chan].hnff[10], nbjetsmed, puweight * nff);			
 		}
 
 		if( fDO_OPT && flav<3 ) {
