@@ -29,7 +29,8 @@ int main( int argc, char* argv[] ) {
 
   SSDLPlotter* plotter = new SSDLPlotter();
   //std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/" + selectionType;
-  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr12_Iso005_NoZVeto_jet20_new";
+  //std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr12_Iso005_NoZVeto_jet20_new";
+  std::string outputdir = "/shome/pandolf/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/Apr23_Iso005_NoZVeto_jet20";
   plotter->setVerbose(1);
   plotter->fDO_OPT = false;
   plotter->setOutputDir(outputdir);
@@ -135,7 +136,7 @@ int main( int argc, char* argv[] ) {
   std::cout << " Expected BG: " << b_pred << " +- " << b_pred_err << std::endl;
   std::cout << " Expected Signal: " << s << " (eff=" << eff_ttwz*100. << "%)" << std::endl;
   std::cout << " Expected B+S: " << s+b_pred << std::endl;
-  std::cout << " ZBi: " << ZBi << std::endl;
+  std::cout << " Expected ZBi: " << ZBi << std::endl;
   std::cout << " Observed Events: " << obs << std::endl;
   std::cout << " ZBi (observed): " << ZBi_obs << std::endl;
   std::cout << " Observed Signal (BG subtracted): " << obs_ttWZ << std::endl;
