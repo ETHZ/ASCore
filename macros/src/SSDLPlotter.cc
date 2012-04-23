@@ -364,7 +364,7 @@ void SSDLPlotter::doAnalysis(){
 	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
+	// makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
@@ -4847,6 +4847,9 @@ void SSDLPlotter::makeAllIntPredictions(){
 	ewkregions.push_back(HT0MET120);
 	ewkregions.push_back(HT0MET200);
 	ewkregions.push_back(HT0MET120JV);
+	ewkregions.push_back(HT0MET1203V);
+	ewkregions.push_back(HT0MET2003V);
+	ewkregions.push_back(HT0MET120JV3V);
 	for(size_t i = 0; i < ewkregions.size(); ++i){
 		gRegion reg = gRegion(ewkregions[i]);
 		TString outputname = outputdir + "DataPred_" + Region::sname[reg] + ".txt";

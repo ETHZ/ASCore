@@ -96,7 +96,10 @@ public:
 		HT200MET30,
 		HT0MET120,
 		HT0MET200,
-		HT0MET120JV,
+		HT0MET1203V, // 3rd lep veto
+		HT0MET2003V, // 3rd lep veto
+		HT0MET120JV, // jet veto
+		HT0MET120JV3V, // jet veto + 3rd lep veto
 		TTbarWPresel,
 		TTbarWSel1,
 		TTbarWSel2,
@@ -226,6 +229,7 @@ public:
 		static int   minNjets [gNREGIONS];
 		static int   minNbjets[gNREGIONS];
 		static int   minNbjmed[gNREGIONS];
+		static int   app3rdVet[gNREGIONS];
 		
 		Channel mm;
 		Channel em;
@@ -578,6 +582,7 @@ public:
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
+	virtual bool passes3rdLepVeto(bool = false);
 
 	virtual bool isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
@@ -597,6 +602,7 @@ public:
 
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
+	virtual bool isGoodMuonFor3rdLepVeto(int);
 	virtual bool isLooseMuon(int);
 	virtual bool isTightMuon(int);
 	virtual bool isGoodPrimMuon(int, float = -1.);
@@ -608,6 +614,7 @@ public:
 
 	virtual bool isGoodElectron(int, float = -1.);
 	virtual bool isGoodEleForZVeto(int);
+	virtual bool isGoodEleFor3rdLepVeto(int);
 	virtual bool isLooseElectron(int);
 	virtual bool isTightElectron(int);
 	virtual bool isGoodPrimElectron(int, float = -1.);
@@ -635,6 +642,7 @@ public:
 	float fC_minEl2pt;
 	float fC_maxMet_Control;
 	float fC_maxMt_Control;
+	int   fC_app3rdVet; // 3rd lepton veto
 	
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
@@ -683,6 +691,8 @@ public:
 	int         fSETree_Flavor; // mm(0), em(1), ee(2)
 	int         fSETree_Charge;
 	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
+	int         fSETree_ZVeto;   // passes Z veto
+	int         fSETree_3rdVeto; // passes 3rd lepton veto
 	float       fSETree_HT;
 	float       fSETree_MET;
 	int         fSETree_NM; // number of tight muons
