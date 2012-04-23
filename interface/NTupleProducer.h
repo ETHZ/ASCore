@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.4 2012/04/04 12:21:33 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.5 2012/04/17 15:44:11 fronga Exp $
 //
 //
 
@@ -161,7 +161,7 @@ private:
 
   static const int gMaxNMus     = 30;
   static const int gMaxNEles    = 20;
-  static const int gMaxNTaus    = 20;
+  static const int gMaxNTaus    = 30;
   static const int gMaxNJets    = 100;
   static const int gMaxNTrks    = 800;
   static const int gMaxNPhotons = 50;
@@ -170,8 +170,8 @@ private:
   static const int gMaxNGenLept = 100;
   static const int gMaxNGenPhot = 100;
   static const int gMaxNGenJets = 100;
-  static const int gMaxNVrtx    = 25;
-  static const int gMaxNPileup  = 50;
+  static const int gMaxNVrtx    = 45;
+  static const int gMaxNPileup  = 60;
   static const int gMaxNEBhits  = 20;
   static const int gMaxNGenVtx = 60;
   static const int gMaxNGenParticles = 2000;

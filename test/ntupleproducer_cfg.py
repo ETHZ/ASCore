@@ -17,7 +17,7 @@ process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
                                       fileMode = cms.untracked.string("NOMERGE")
                                     )
 
@@ -55,7 +55,7 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:/shome/pnef/SUSY/reco-data/mc/GJets_TuneZ2_200_HT_inf_7TeV-madgraph_AODSIM_PU_S4_START42_V11-v1_0000_00F3A238-FFCC-E011-AA04-0026B94D1AEF.root'
+options.files= 'file:////scratch/buchmann/DoubleMu_2012A_2C29FAF9-3787-E111-9A63-001D09F291D7.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -67,12 +67,17 @@ options.output='NTupleProducer_42X_'+options.runon+'.root'
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+
+# try this in the future instead of a global tag. still gives some errors at the moment (apr17)
+#from Configuration.AlCa.autoCond import autoCond
+#process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
 if options.runon=='data':
-    # CMSSW_4_2
-    process.GlobalTag.globaltag = "GR_R_42_V19::All"
+#https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
+    # CMSSW_5_2
+    process.GlobalTag.globaltag = "GR_R_50_V9::All"
 else:
-    # CMSSW_4_2_X:
-    process.GlobalTag.globaltag = "START42_V14B::All"
+    # CMSSW_5_2_X:
+    process.GlobalTag.globaltag = "START52_V9::All"
     #process.GlobalTag.globaltag = "START42_V13::All"
 
 
@@ -217,9 +222,6 @@ pfPostfixes = [ 'PFAntiIso','PF2','PF3' ]
 for pf in pfPostfixes:
 
     usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=(options.runon != 'data'), postfix=pf) 
-
-    from PhysicsTools.PatAlgos.tools.pfTools import adaptPFTaus
-    adaptPFTaus(process,"hpsPFTau",pf)
 
     # configure PFnoPU
     getattr(process,'pfPileUp'+pf).Enable              = True
@@ -453,14 +455,6 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.uint32(20)
                   ),
-        # PF Taus anti-isolated
-        cms.PSet( type = cms.string('tau'),
-                  prefix = cms.string('PfTauAntiIso'),
-                  tag = cms.InputTag('selectedPatTausPFAntiIso'),
-                  sel_minpt = process.analyze.sel_minelpt,
-                  sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.uint32(20)
-                  ),
         # PF Electrons TIGHT
         cms.PSet( type = cms.string('electron'),
                   prefix = cms.string('PfEl2'),
@@ -473,14 +467,6 @@ process.analyze.leptons = (
         cms.PSet( type = cms.string('muon'),
                   prefix = cms.string('PfMu2'),
                   tag = cms.InputTag('patMuonsPF2'),
-                  sel_minpt = process.analyze.sel_minelpt,
-                  sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.uint32(20)
-                  ),
-        # PF Taus TIGHT
-        cms.PSet( type = cms.string('tau'),
-                  prefix = cms.string('PfTau2'),
-                  tag = cms.InputTag('selectedPatTausPF2'),
                   sel_minpt = process.analyze.sel_minelpt,
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.uint32(20)
@@ -501,14 +487,31 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.uint32(20)
                   ),
-        # PF Taus LOOSE
-        cms.PSet( type = cms.string('tau'),
-                  prefix = cms.string('PfTau3'),
-                  tag = cms.InputTag('selectedPatTausPF3'),
-                  sel_minpt = process.analyze.sel_minelpt,
-                  sel_maxeta = process.analyze.sel_maxeleta,
-                  maxnobjs = cms.uint32(20)
-                  ),
+# TAUS NEED TO BE WORKED ON WITH THE NEW PILEUP CONDITIONS
+#         # PF Taus anti-isolated
+#         cms.PSet( type = cms.string('tau'),
+#                   prefix = cms.string('PfTauAntiIso'),
+#                   tag = cms.InputTag('selectedPatTausPFAntiIso'),
+#                   sel_minpt = process.analyze.sel_minelpt,
+#                   sel_maxeta = process.analyze.sel_maxeleta,
+#                   maxnobjs = cms.uint32(20)
+#                   ),
+#         # PF Taus TIGHT
+#         cms.PSet( type = cms.string('tau'),
+#                   prefix = cms.string('PfTau2'),
+#                   tag = cms.InputTag('selectedPatTausPF2'),
+#                   sel_minpt = process.analyze.sel_minelpt,
+#                   sel_maxeta = process.analyze.sel_maxeleta,
+#                   maxnobjs = cms.uint32(20)
+#                   ),
+#         # PF Taus LOOSE
+#         cms.PSet( type = cms.string('tau'),
+#                   prefix = cms.string('PfTau3'),
+#                   tag = cms.InputTag('selectedPatTausPF3'),
+#                   sel_minpt = process.analyze.sel_minelpt,
+#                   sel_maxeta = process.analyze.sel_maxeleta,
+#                   maxnobjs = cms.uint32(20)
+#                   ),
     )
               
 ## Colins Bernet's Particle Based Noise Rejection Filter
@@ -518,7 +521,7 @@ process.analyze.leptons = (
               
 # RA2 TrackingFailureFilter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
-process.load('SandBox.Skims.trackingFailureFilter_cfi')
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
 process.trackingFailureFilter.JetSource             = cms.InputTag('patJetsPF3')
 process.trackingFailureFilter.TrackSource           = cms.InputTag('generalTracks')
 process.trackingFailureFilter.VertexSource          = cms.InputTag('goodVertices')

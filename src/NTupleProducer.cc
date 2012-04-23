@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.8 2012/04/18 10:07:11 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.9 2012/04/18 13:20:01 fronga Exp $
 //
 //
 
@@ -2537,8 +2537,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       break;
     }
                 
-    JetBaseRef jetRef(edm::Ref<JetView>(jets,iraw));
-    double scale = jetCorr->correction(*Jit,jetRef,iEvent,iSetup);
+    double scale = jetCorr->correction(*Jit,iEvent,iSetup);
     corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
   }
 	
