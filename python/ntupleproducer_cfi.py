@@ -12,10 +12,14 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_elidWP       = cms.string('simpleEleId90relIso'),
 	tag_jets         = cms.InputTag('ak5PFJets'),
 	jetCorrs         = cms.string('ak5PFL1FastL2L3'),
-	tag_btag1        = cms.InputTag('newPFTrackCountingHighEffBJetTags'),
-	tag_btag2        = cms.InputTag('newPFTrackCountingHighPurBJetTags'),
-	tag_btag3        = cms.InputTag('newPFSimpleSecondaryVertexHighEffBJetTags'),
-	tag_btag4        = cms.InputTag('newPFSimpleSecondaryVertexHighPurBJetTags'),
+	tag_btags        = cms.VInputTag('newPFTrackCountingHighEffBJetTags',
+                                         'newPFTrackCountingHighPurBJetTags',
+	                                 'newPFSimpleSecondaryVertexHighEffBJetTags',
+	                                 'newPFSimpleSecondaryVertexHighPurBJetTags',
+                                         'newPFCombinedSecondaryVertexBPFJetTags',
+                                         'newPFCombinedSecondaryVertexMVABPFJetTags',
+                                         'newPFJetProbabilityBPFJetTags',
+                                         'newPFJetBProbabilityBPFJetTags'),
 	tag_rawcalomet   = cms.InputTag('met'),
 	tag_tcmet        = cms.InputTag('tcMet'),
 	tag_pfmet        = cms.InputTag('pfMet'),
@@ -35,6 +39,7 @@ analyze = cms.EDFilter('NTupleProducer',
 	tag_hcalnoise    = cms.InputTag('HBHENoiseFilterResultProducerStd','HBHENoiseFilterResult'),
 	tag_hcalnoiseIso = cms.InputTag('HBHENoiseFilterResultProducerIso','HBHENoiseFilterResult'),
 	tag_srcRho       = cms.InputTag('kt6PFJets','rho'),
+        tag_srcRhoForIso = cms.InputTag('kt6PFJetsForIso','rho'),
 	tag_srcRhoPFnoPU = cms.InputTag('kt6PFJetsPF3','rho'),
 	tag_pfphotonsProducer  = cms.InputTag("pfPhotonTranslator:pfphot"),
 	tag_pfProducer = cms.InputTag("particleFlow"),
@@ -94,8 +99,8 @@ analyze = cms.EDFilter('NTupleProducer',
 	# EB rechits
         sel_fminebrechitE = cms.double(20.),
 
-	# Additional jet collections
-	jets = cms.VPSet(),
+	# Additional collections
+	jets    = cms.VPSet(),
         leptons = cms.VPSet(),
 
 	# tag pile up distributions: replace empty strings in order to calculate in time and OOT pileup weights
@@ -103,4 +108,6 @@ analyze = cms.EDFilter('NTupleProducer',
 	pu_mc   = cms.vstring('', '')  # replace this by cms.vstring('mc_pileup.root'  , 'name_of_histo')
 
 )
+
+
 

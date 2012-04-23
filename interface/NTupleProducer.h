@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.5 2012/04/17 15:44:11 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.6 2012/04/23 16:04:14 fronga Exp $
 //
 //
 
@@ -188,10 +188,7 @@ private:
   edm::InputTag fMuIsoDepHCTag;
   edm::InputTag fJetTag;
   std::string fJetCorrs;
-  edm::InputTag fBtag1Tag;
-  edm::InputTag fBtag2Tag;
-  edm::InputTag fBtag3Tag;
-  edm::InputTag fBtag4Tag;
+  std::vector<edm::InputTag> fBtagTags;
   edm::InputTag fRawCaloMETTag;
   edm::InputTag fTCMETTag;
   edm::InputTag fPFMETTag;
@@ -911,12 +908,11 @@ private:
   std::auto_ptr<std::vector<float> > fTJHFEMFrac;
   std::auto_ptr<std::vector<float> > fTJPtD;
   std::auto_ptr<std::vector<float> > fTJRMSCand;
-
   std::auto_ptr<std::vector<float> >  fTJeMinDR;
-  std::auto_ptr<std::vector<float> >  fTJbTagProbTkCntHighEff;
-  std::auto_ptr<std::vector<float> >  fTJbTagProbTkCntHighPur;
-  std::auto_ptr<std::vector<float> >  fTJbTagProbSimpSVHighEff;
-  std::auto_ptr<std::vector<float> >  fTJbTagProbSimpSVHighPur;
+
+  static const unsigned int gMaxNBtags  = 10;
+  std::auto_ptr<std::vector<float> >  fTJbTagProb[gMaxNBtags];
+
   std::auto_ptr<std::vector<float> >  fTJMass;
   std::auto_ptr<std::vector<float> >  fTJtrk1px;
   std::auto_ptr<std::vector<float> >  fTJtrk1py;

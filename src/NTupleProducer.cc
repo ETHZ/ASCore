@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.9 2012/04/18 13:20:01 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.10 2012/04/23 16:04:15 fronga Exp $
 //
 //
 
@@ -35,6 +35,7 @@
 // Framework include files
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Utilities/interface/Exception.h"
 
 // Utilities
 #include "CommonTools/Utils/interface/PtComparator.h"
@@ -149,10 +150,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fMuIsoDepHCTag      = iConfig.getParameter<edm::InputTag>("tag_muisodephc");
   fJetTag             = iConfig.getParameter<edm::InputTag>("tag_jets");
   fJetCorrs           = iConfig.getParameter<std::string>("jetCorrs");
-  fBtag1Tag           = iConfig.getParameter<edm::InputTag>("tag_btag1");
-  fBtag2Tag           = iConfig.getParameter<edm::InputTag>("tag_btag2");
-  fBtag3Tag           = iConfig.getParameter<edm::InputTag>("tag_btag3");
-  fBtag4Tag           = iConfig.getParameter<edm::InputTag>("tag_btag4");
+  fBtagTags           = iConfig.getParameter<std::vector<edm::InputTag> >("tag_btags");
   fRawCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
   fTCMETTag           = iConfig.getParameter<edm::InputTag>("tag_tcmet");
   fPFMETTag           = iConfig.getParameter<edm::InputTag>("tag_pfmet");
@@ -221,6 +219,11 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
   CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
   LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
+
+  // Check on number of btag alogs configured
+  if ( fBtagTags.size()>gMaxNBtags )
+    throw cms::Exception("BadConfig") << "Too many (" << fBtagTags.size() << ") btagging algos requested. "
+                                      << "Maximum is " << gMaxNBtags;
 
   // Dump the full configuration
   edm::LogVerbatim("NTP") << "---------------------------------";
@@ -360,19 +363,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   const BeamHaloSummary TheSummary = (*TheBeamHaloSummary.product());
   *fTCSCTightHaloID = static_cast<int>  (TheSummary.CSCTightHaloId());
 
-
   // collect information for b-tagging (4 tags)
-  Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
-  iEvent.getByLabel(fBtag1Tag,jetsAndProbsTkCntHighEff);
-
-  Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
-  iEvent.getByLabel(fBtag2Tag,jetsAndProbsTkCntHighPur);
-
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
-  iEvent.getByLabel(fBtag3Tag,jetsAndProbsSimpSVHighEff);
-
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
-  iEvent.getByLabel(fBtag4Tag,jetsAndProbsSimpSVHighPur);
+  Handle<JetTagCollection> jetsBtag[gMaxNBtags];
+  size_t ibtag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it=fBtagTags.begin(); it!=fBtagTags.end(); ++it ) 
+      iEvent.getByLabel((*it),jetsBtag[ibtag++]);
 
   //Get Tracks collection
   Handle<TrackCollection> tracks;
@@ -2639,12 +2634,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
     fTJeMinDR ->push_back(ejDRmin);
 
-    // B-tagging probability (for 4 b-taggings)
+    // B-tagging probability
     // remember: 'index' is the index of the uncorrected jet, as saved in the event
-    fTJbTagProbTkCntHighEff  ->push_back((*jetsAndProbsTkCntHighEff) [index].second);
-    fTJbTagProbTkCntHighPur  ->push_back((*jetsAndProbsTkCntHighPur) [index].second);
-    fTJbTagProbSimpSVHighEff ->push_back((*jetsAndProbsSimpSVHighEff)[index].second);
-    fTJbTagProbSimpSVHighPur ->push_back((*jetsAndProbsSimpSVHighPur)[index].second);
+    ibtag = 0;
+    for ( std::vector<edm::InputTag>::const_iterator it = fBtagTags.begin();
+          it != fBtagTags.end(); ++it ) {
+      fTJbTagProb[ibtag]->push_back((*jetsBtag[ibtag])[index].second);
+      ++ibtag;
+    }
 
     // Jet-track association: get associated tracks
     const reco::TrackRefVector& tracks = jet->getTrackRefs();
@@ -3781,10 +3778,10 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("JPtD");
   produces<std::vector<float> >("JRMSCand");
   produces<std::vector<float> >("JeMinDR");
-  produces<std::vector<float> >("JbTagProbTkCntHighEff");
-  produces<std::vector<float> >("JbTagProbTkCntHighPur");
-  produces<std::vector<float> >("JbTagProbSimpSVHighEff");
-  produces<std::vector<float> >("JbTagProbSimpSVHighPur");
+  for ( std::vector<edm::InputTag>::const_iterator it = fBtagTags.begin();
+          it != fBtagTags.end(); ++it ) {
+    produces<std::vector<float> >(("J"+(*it).label()).c_str());
+  }
   produces<std::vector<float> >("JMass");
   produces<std::vector<float> >("Jtrk1px");
   produces<std::vector<float> >("Jtrk1py");
@@ -4417,10 +4414,11 @@ void NTupleProducer::resetProducts( void ) {
   fTJPtD.reset(new std::vector<float>);
   fTJRMSCand.reset(new std::vector<float>);
   fTJeMinDR.reset(new std::vector<float> );
-  fTJbTagProbTkCntHighEff.reset(new std::vector<float> );
-  fTJbTagProbTkCntHighPur.reset(new std::vector<float> );
-  fTJbTagProbSimpSVHighEff.reset(new std::vector<float> );
-  fTJbTagProbSimpSVHighPur.reset(new std::vector<float> );
+  size_t ibtag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fBtagTags.begin();
+          it != fBtagTags.end(); ++it ) {
+     fTJbTagProb[ibtag++].reset(new std::vector<float> );
+  }
   fTJMass.reset(new std::vector<float> );
   fTJtrk1px.reset(new std::vector<float> );
   fTJtrk1py.reset(new std::vector<float> );
@@ -5093,10 +5091,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTJPtD, "JPtD");
   event.put(fTJRMSCand, "JRMSCand");
   event.put(fTJeMinDR, "JeMinDR");
-  event.put(fTJbTagProbTkCntHighEff, "JbTagProbTkCntHighEff");
-  event.put(fTJbTagProbTkCntHighPur, "JbTagProbTkCntHighPur");
-  event.put(fTJbTagProbSimpSVHighEff, "JbTagProbSimpSVHighEff");
-  event.put(fTJbTagProbSimpSVHighPur, "JbTagProbSimpSVHighPur");
+  size_t ibtag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fBtagTags.begin();
+          it != fBtagTags.end(); ++it ) {
+     event.put(fTJbTagProb[ibtag++], ("J"+(*it).label()).c_str());
+  }
   event.put(fTJMass, "JMass");
   event.put(fTJtrk1px, "Jtrk1px");
   event.put(fTJtrk1py, "Jtrk1py");
