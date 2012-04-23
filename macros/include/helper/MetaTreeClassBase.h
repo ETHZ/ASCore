@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Mar  3 13:37:19 2012 by ROOT version 5.27/06b
+// Mon Apr 23 17:53:36 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: SMS_2.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -26,7 +26,6 @@ public :
    Int_t           process;
    Float_t         mGlu;
    Float_t         mLSP;
-   Int_t           isTChiSlepSnu;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -77,6 +76,8 @@ public :
    Float_t         MuIso[5];   //[NMus]
    Float_t         MuD0[5];   //[NMus]
    Float_t         MuDz[5];   //[NMus]
+   Float_t         MuEMVetoEt[5];   //[NMus]
+   Float_t         MuHadVetoEt[5];   //[NMus]
    Float_t         MuPtE[5];   //[NMus]
    Int_t           MuGenID[5];   //[NMus]
    Int_t           MuGenMID[5];   //[NMus]
@@ -113,19 +114,17 @@ public :
    Int_t           ElGenMType[5];   //[NEls]
    Int_t           ElGenGMType[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
-   Float_t         tcMET;
-   Float_t         tcMETPhi;
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[10];   //[NJets]
-   Float_t         JetEta[10];   //[NJets]
-   Float_t         JetPhi[10];   //[NJets]
-   Float_t         JetSSVHPBTag[10];   //[NJets]
-   Float_t         JetSSVHEBTag[10];   //[NJets]
-   Float_t         JetTCHPBTag[10];   //[NJets]
-   Float_t         JetTCHEBTag[10];   //[NJets]
-   Float_t         JetArea[10];   //[NJets]
+   Float_t         JetPt[40];   //[NJets]
+   Float_t         JetEta[40];   //[NJets]
+   Float_t         JetPhi[40];   //[NJets]
+   Float_t         JetSSVHPBTag[40];   //[NJets]
+   Float_t         JetSSVHEBTag[40];   //[NJets]
+   Float_t         JetTCHPBTag[40];   //[NJets]
+   Float_t         JetTCHEBTag[40];   //[NJets]
+   Float_t         JetArea[40];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -136,7 +135,6 @@ public :
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
    TBranch        *b_mLSP;   //!
-   TBranch        *b_isTChiSlepSnu;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -187,6 +185,8 @@ public :
    TBranch        *b_MuIso;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
+   TBranch        *b_MuEMVetoEt;   //!
+   TBranch        *b_MuHadVetoEt;   //!
    TBranch        *b_MuPtE;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenMID;   //!
@@ -223,8 +223,6 @@ public :
    TBranch        *b_ElGenMType;   //!
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElMT;   //!
-   TBranch        *b_tcMET;   //!
-   TBranch        *b_tcMETPhi;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_pfMETPhi;   //!
    TBranch        *b_NJets;   //!
@@ -256,9 +254,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("SMS_2.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root");
       if (!f) {
-         f = new TFile("SMS_2.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -317,7 +315,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
-   fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
@@ -368,6 +365,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+   fChain->SetBranchAddress("MuEMVetoEt", MuEMVetoEt, &b_MuEMVetoEt);
+   fChain->SetBranchAddress("MuHadVetoEt", MuHadVetoEt, &b_MuHadVetoEt);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
@@ -404,8 +403,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);

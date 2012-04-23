@@ -194,6 +194,8 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuIso"         ,&fTmuiso,          "MuIso[NMus]/F");
 	fAnalysisTree->Branch("MuD0"          ,&fTmud0,           "MuD0[NMus]/F");
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
+	fAnalysisTree->Branch("MuEMVetoEt"    ,&fTmuEMVetoEt,     "MuEMVetoEt[NMus]/F");
+	fAnalysisTree->Branch("MuHadVetoEt"   ,&fTmuHadVetoEt,    "MuHadVetoEt[NMus]/F");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
 	fAnalysisTree->Branch("MuGenID"       ,&fTmuid,           "MuGenID[NMus]/I");
 	fAnalysisTree->Branch("MuGenMID"      ,&fTmumoid,         "MuGenMID[NMus]/I");
@@ -234,8 +236,6 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
 	// jet-MET properties
-	fAnalysisTree->Branch("tcMET",         &fTtcMET,    "tcMET/F");
-	fAnalysisTree->Branch("tcMETPhi",      &fTtcMETphi, "tcMETPhi/F");
 	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
 	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi, "pfMETPhi/F");
 	fAnalysisTree->Branch("NJets",         &fTnqjets,   "NJets/I");
@@ -296,7 +296,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Do object selections
 	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsLooseMu);
 	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsLooseEl);
-	vector<int> selectedJetInd = PFJetSelection(40., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
+	vector<int> selectedJetInd = PFJetSelection(15., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
 	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
 	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets);
@@ -328,7 +328,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt   [ind] = GetJetPtNoResidual(jetindex);
+		fTJetpt   [ind] = fTR->JPt[jetindex];
+		// fTJetpt   [ind] = GetJetPtNoResidual(jetindex);
 		fTJeteta  [ind] = fTR->JEta[jetindex];
 		fTJetphi  [ind] = fTR->JPhi[jetindex];
 		fTJetbtag1[ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
@@ -339,8 +340,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 	}
 
 	// Get METs
-	fTtcMET     = fTR->TCMET;
-	fTtcMETphi  = fTR->TCMETphi;
 	fTpfMET     = fTR->PFMET;
 	fTpfMETphi  = fTR->PFMETphi;
 
@@ -361,6 +360,8 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmud0    [i] = fTR->MuD0PV    [index];
 		fTmudz    [i] = fTR->MuDzPV    [index];
 		fTmuptE   [i] = fTR->MuPtE     [index];
+		fTmuEMVetoEt [i] = fTR->MuIso03EMVetoEt [index];
+		fTmuHadVetoEt[i] = fTR->MuIso03HadVetoEt[index];
 		
 		if(fIsData == false){ // mc truth information
 			fTmuid     [i] = fTR->MuGenID  [index];
@@ -536,6 +537,8 @@ void SSDLAnalysis::ResetTree(){
 		fTmud0          [i] = -999.99;
 		fTmudz          [i] = -999.99;
 		fTmuptE         [i] = -999.99;
+		fTmuEMVetoEt    [i] = -999.99;
+		fTmuHadVetoEt   [i] = -999.99;
 		fTmuid          [i] = -999;
 		fTmumoid        [i] = -999;
 		fTmugmoid       [i] = -999;
@@ -589,8 +592,6 @@ void SSDLAnalysis::ResetTree(){
 		fTJetbtag4[i] = -999.99;
 		fTJetArea[i]  = -999.99;
 	}
-	fTtcMET      = -999.99;
-	fTtcMETphi   = -999.99;
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
 }

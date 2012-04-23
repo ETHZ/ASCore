@@ -114,8 +114,6 @@ private:
 	float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
 
-	float fTtcMET;
-	float fTtcMETphi;
 	float fTpfMET;
 	float fTpfMETphi;
 	
@@ -130,6 +128,8 @@ private:
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
 	float fTmuptE         [fMaxNmus];
+	float fTmuEMVetoEt    [fMaxNmus];
+	float fTmuHadVetoEt   [fMaxNmus];
 	int   fTmuid          [fMaxNmus];
 	int   fTmumoid        [fMaxNmus];
 	int   fTmugmoid       [fMaxNmus];
