@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.173 2012/04/17 19:35:51 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.174 2012/04/18 15:20:50 buchmann Exp $
 //
 //
 
@@ -180,6 +180,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 	if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoise");
 	if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getUntrackedParameter<edm::InputTag>("tag_hcalnoiseIso");
 	fSrcRho             = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRho");
+	fSrcRhoForIso       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoForIso");
 	fSrcRhoPFnoPU       = iConfig.getUntrackedParameter<edm::InputTag>("tag_srcRhoPFnoPU");
 	pfphotonsProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfphotonsProducer");
 	pfProducerTag = iConfig.getUntrackedParameter<edm::InputTag>("tag_pfProducer");
@@ -352,6 +353,11 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	iEvent.getByLabel(fSrcRho,rho);
 	fTrho = *rho;
 	
+	// rho for correcting isolation
+	edm::Handle<double> rhoForIso;
+	iEvent.getByLabel(fSrcRhoForIso,rhoForIso);
+	fTrhoForIso = *rhoForIso;
+	
 	// rho for L1FastJet running PFnoPU
 	edm::Handle<double> rhoNoPU;
 	iEvent.getByLabel(fSrcRhoPFnoPU,rhoNoPU);
@@ -406,6 +412,152 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	edm::Handle<reco::PFCandidateCollection> pfCandidates;
 	iEvent.getByLabel(pfProducerTag, pfCandidates);
 	
+	// pf candidate isolations:
+	edm::Handle< edm::ValueMap<float> > muonPFIsoChHad02_h;
+	iEvent.getByLabel( "muonPFIsoChHad02", muonPFIsoChHad02_h );
+	const edm::ValueMap<float> & muonsPfIsoChHad02 = *( muonPFIsoChHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoChHad03_h;
+	iEvent.getByLabel( "muonPFIsoChHad03", muonPFIsoChHad03_h );
+	const edm::ValueMap<float> & muonsPfIsoChHad03 = *( muonPFIsoChHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoChHad04_h;
+	iEvent.getByLabel( "muonPFIsoChHad04", muonPFIsoChHad04_h );
+	const edm::ValueMap<float> & muonsPfIsoChHad04 = *( muonPFIsoChHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoNHad02_h;
+	iEvent.getByLabel( "muonPFIsoNHad02", muonPFIsoNHad02_h );
+	const edm::ValueMap<float> & muonsPfIsoNHad02 = *( muonPFIsoNHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoNHad03_h;
+	iEvent.getByLabel( "muonPFIsoNHad03", muonPFIsoNHad03_h );
+	const edm::ValueMap<float> & muonsPfIsoNHad03 = *( muonPFIsoNHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoNHad04_h;
+	iEvent.getByLabel( "muonPFIsoNHad04", muonPFIsoNHad04_h );
+	const edm::ValueMap<float> & muonsPfIsoNHad04 = *( muonPFIsoNHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoPhoton02_h;
+	iEvent.getByLabel( "muonPFIsoPhoton02", muonPFIsoPhoton02_h );
+	const edm::ValueMap<float> & muonsPfIsoPhoton02 = *( muonPFIsoPhoton02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoPhoton03_h;
+	iEvent.getByLabel( "muonPFIsoPhoton03", muonPFIsoPhoton03_h );
+	const edm::ValueMap<float> & muonsPfIsoPhoton03 = *( muonPFIsoPhoton03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonPFIsoPhoton04_h;
+	iEvent.getByLabel( "muonPFIsoPhoton04", muonPFIsoPhoton04_h );
+	const edm::ValueMap<float> & muonsPfIsoPhoton04 = *( muonPFIsoPhoton04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoChHad02_h;
+	iEvent.getByLabel( "electronPFIsoChHad02", electronPFIsoChHad02_h );
+	const edm::ValueMap<float> & electronsPfIsoChHad02 = *( electronPFIsoChHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoChHad03_h;
+	iEvent.getByLabel( "electronPFIsoChHad03", electronPFIsoChHad03_h );
+	const edm::ValueMap<float> & electronsPfIsoChHad03 = *( electronPFIsoChHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoChHad04_h;
+	iEvent.getByLabel( "electronPFIsoChHad04", electronPFIsoChHad04_h );
+	const edm::ValueMap<float> & electronsPfIsoChHad04 = *( electronPFIsoChHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoNHad02_h;
+	iEvent.getByLabel( "electronPFIsoNHad02", electronPFIsoNHad02_h );
+	const edm::ValueMap<float> & electronsPfIsoNHad02 = *( electronPFIsoNHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoNHad03_h;
+	iEvent.getByLabel( "electronPFIsoNHad03", electronPFIsoNHad03_h );
+	const edm::ValueMap<float> & electronsPfIsoNHad03 = *( electronPFIsoNHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoNHad04_h;
+	iEvent.getByLabel( "electronPFIsoNHad04", electronPFIsoNHad04_h );
+	const edm::ValueMap<float> & electronsPfIsoNHad04 = *( electronPFIsoNHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoPhoton02_h;
+	iEvent.getByLabel( "electronPFIsoPhoton02", electronPFIsoPhoton02_h );
+	const edm::ValueMap<float> & electronsPfIsoPhoton02 = *( electronPFIsoPhoton02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoPhoton03_h;
+	iEvent.getByLabel( "electronPFIsoPhoton03", electronPFIsoPhoton03_h );
+	const edm::ValueMap<float> & electronsPfIsoPhoton03 = *( electronPFIsoPhoton03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronPFIsoPhoton04_h;
+	iEvent.getByLabel( "electronPFIsoPhoton04", electronPFIsoPhoton04_h );
+	const edm::ValueMap<float> & electronsPfIsoPhoton04 = *( electronPFIsoPhoton04_h );
+
+        // and now radial isolation:
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoChHad02_h;
+	iEvent.getByLabel( "muonRadPFIsoChHad02", muonRadPFIsoChHad02_h );
+	const edm::ValueMap<float> & muonsPfRadIsoChHad02 = *( muonRadPFIsoChHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoChHad03_h;
+	iEvent.getByLabel( "muonRadPFIsoChHad03", muonRadPFIsoChHad03_h );
+	const edm::ValueMap<float> & muonsPfRadIsoChHad03 = *( muonRadPFIsoChHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoChHad04_h;
+	iEvent.getByLabel( "muonRadPFIsoChHad04", muonRadPFIsoChHad04_h );
+	const edm::ValueMap<float> & muonsPfRadIsoChHad04 = *( muonRadPFIsoChHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoNHad02_h;
+	iEvent.getByLabel( "muonRadPFIsoNHad02", muonRadPFIsoNHad02_h );
+	const edm::ValueMap<float> & muonsPfRadIsoNHad02 = *( muonRadPFIsoNHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoNHad03_h;
+	iEvent.getByLabel( "muonRadPFIsoNHad03", muonRadPFIsoNHad03_h );
+	const edm::ValueMap<float> & muonsPfRadIsoNHad03 = *( muonRadPFIsoNHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoNHad04_h;
+	iEvent.getByLabel( "muonRadPFIsoNHad04", muonRadPFIsoNHad04_h );
+	const edm::ValueMap<float> & muonsPfRadIsoNHad04 = *( muonRadPFIsoNHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoPhoton02_h;
+	iEvent.getByLabel( "muonRadPFIsoPhoton02", muonRadPFIsoPhoton02_h );
+	const edm::ValueMap<float> & muonsPfRadIsoPhoton02 = *( muonRadPFIsoPhoton02_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoPhoton03_h;
+	iEvent.getByLabel( "muonRadPFIsoPhoton03", muonRadPFIsoPhoton03_h );
+	const edm::ValueMap<float> & muonsPfRadIsoPhoton03 = *( muonRadPFIsoPhoton03_h );
+
+	edm::Handle< edm::ValueMap<float> > muonRadPFIsoPhoton04_h;
+	iEvent.getByLabel( "muonRadPFIsoPhoton04", muonRadPFIsoPhoton04_h );
+	const edm::ValueMap<float> & muonsPfRadIsoPhoton04 = *( muonRadPFIsoPhoton04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoChHad02_h;
+	iEvent.getByLabel( "electronRadPFIsoChHad02", electronRadPFIsoChHad02_h );
+	const edm::ValueMap<float> & electronsPfRadIsoChHad02 = *( electronRadPFIsoChHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoChHad03_h;
+	iEvent.getByLabel( "electronRadPFIsoChHad03", electronRadPFIsoChHad03_h );
+	const edm::ValueMap<float> & electronsPfRadIsoChHad03 = *( electronRadPFIsoChHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoChHad04_h;
+	iEvent.getByLabel( "electronRadPFIsoChHad04", electronRadPFIsoChHad04_h );
+	const edm::ValueMap<float> & electronsPfRadIsoChHad04 = *( electronRadPFIsoChHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoNHad02_h;
+	iEvent.getByLabel( "electronRadPFIsoNHad02", electronRadPFIsoNHad02_h );
+	const edm::ValueMap<float> & electronsPfRadIsoNHad02 = *( electronRadPFIsoNHad02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoNHad03_h;
+	iEvent.getByLabel( "electronRadPFIsoNHad03", electronRadPFIsoNHad03_h );
+	const edm::ValueMap<float> & electronsPfRadIsoNHad03 = *( electronRadPFIsoNHad03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoNHad04_h;
+	iEvent.getByLabel( "electronRadPFIsoNHad04", electronRadPFIsoNHad04_h );
+	const edm::ValueMap<float> & electronsPfRadIsoNHad04 = *( electronRadPFIsoNHad04_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoPhoton02_h;
+	iEvent.getByLabel( "electronRadPFIsoPhoton02", electronRadPFIsoPhoton02_h );
+	const edm::ValueMap<float> & electronsPfRadIsoPhoton02 = *( electronRadPFIsoPhoton02_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoPhoton03_h;
+	iEvent.getByLabel( "electronRadPFIsoPhoton03", electronRadPFIsoPhoton03_h );
+	const edm::ValueMap<float> & electronsPfRadIsoPhoton03 = *( electronRadPFIsoPhoton03_h );
+
+	edm::Handle< edm::ValueMap<float> > electronRadPFIsoPhoton04_h;
+	iEvent.getByLabel( "electronRadPFIsoPhoton04", electronRadPFIsoPhoton04_h );
+	const edm::ValueMap<float> & electronsPfRadIsoPhoton04 = *( electronRadPFIsoPhoton04_h );
+
 	//Electron collection
 	edm::Handle<reco::GsfElectronCollection> electronHandle;
 	iEvent.getByLabel(fElectronTag, electronHandle);
@@ -1222,6 +1374,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	it != muOrdered.end(); ++it, ++mqi ) {
 		int index = it->first;
 		const Muon& muon = (*muons)[index];
+		Ref<View<Muon> > muonRef(muons,index);
 
 		fTmuIsGM[mqi]   = muon.isGlobalMuon() ? 1:0;
 		fTmuIsTM[mqi]   = muon.isTrackerMuon() ? 1:0;
@@ -1248,6 +1401,27 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIso05emEt[mqi]      = muon.isolationR05().emEt;
 		fTmuIso05hadEt[mqi]     = muon.isolationR05().hadEt;
 
+		// pf isolations:
+		fTmuPfIsoChHad02[mqi] = muonsPfIsoChHad02[muonRef];
+		fTmuPfIsoChHad03[mqi] = muonsPfIsoChHad03[muonRef];
+		fTmuPfIsoChHad04[mqi] = muonsPfIsoChHad04[muonRef];
+		fTmuPfIsoNHad02[mqi] = muonsPfIsoNHad02[muonRef];
+		fTmuPfIsoNHad03[mqi] = muonsPfIsoNHad03[muonRef];
+		fTmuPfIsoNHad04[mqi] = muonsPfIsoNHad04[muonRef];
+		fTmuPfIsoPhoton02[mqi] = muonsPfIsoPhoton02[muonRef];
+		fTmuPfIsoPhoton03[mqi] = muonsPfIsoPhoton03[muonRef];
+		fTmuPfIsoPhoton04[mqi] = muonsPfIsoPhoton04[muonRef];
+
+		fTmuPfRadIsoChHad02[mqi]  = muonsPfRadIsoChHad02[muonRef];
+		fTmuPfRadIsoChHad03[mqi]  = muonsPfRadIsoChHad03[muonRef];
+		fTmuPfRadIsoChHad04[mqi]  = muonsPfRadIsoChHad04[muonRef];
+		fTmuPfRadIsoNHad02[mqi]   = muonsPfRadIsoNHad02[muonRef];
+		fTmuPfRadIsoNHad03[mqi]   = muonsPfRadIsoNHad03[muonRef];
+		fTmuPfRadIsoNHad04[mqi]   = muonsPfRadIsoNHad04[muonRef];
+		fTmuPfRadIsoPhoton02[mqi] = muonsPfRadIsoPhoton02[muonRef];
+		fTmuPfRadIsoPhoton03[mqi] = muonsPfRadIsoPhoton03[muonRef];
+		fTmuPfRadIsoPhoton04[mqi] = muonsPfRadIsoPhoton04[muonRef];
+
 		fTmucalocomp[mqi] = muon.caloCompatibility();
 		fTmusegmcomp[mqi] = muon::segmentCompatibility(muon);
 
@@ -1272,7 +1446,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		fTmuIsTMOneStationAngLoose[mqi]  = muon::isGoodMuon(muon, muon::TMOneStationAngLoose) ? 1:0;
 		fTmuIsTMOneStationAngTight[mqi]  = muon::isGoodMuon(muon, muon::TMOneStationAngTight) ? 1:0;
 
-		Ref<View<Muon> > muonRef(muons,index);
 		const reco::IsoDeposit ECDep = ECDepMap[muonRef];
 		const reco::IsoDeposit HCDep = HCDepMap[muonRef];
 		fTmueecal[mqi] = ECDep.candEnergy();
@@ -1503,6 +1676,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			int index = it->first;
 			const GsfElectron& electron = (*electrons)[index];
+			Ref<View<GsfElectron> > electronRef(electrons,index);
 
 			// Save the electron SuperCluster pointer
 			elecPtr.push_back(&(*electron.superCluster()));
@@ -1532,6 +1706,8 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTedzpv[eqi]                   = electron.gsfTrack()->dz(primVtx->position());
 			fTedzE[eqi]                    = electron.gsfTrack()->dzError();
 			fTenchi2[eqi]                  = electron.gsfTrack()->normalizedChi2();
+
+                        // isolation:
 			fTdr03tksumpt[eqi]             = electron.dr03TkSumPt();
 			fTdr03ecalrechitsumet[eqi]     = electron.dr03EcalRecHitSumEt();
 			fTdr03hcaltowersumet[eqi]      = electron.dr03HcalTowerSumEt();
@@ -1540,6 +1716,28 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 			fTdr04hcaltowersumet[eqi]      = electron.dr04HcalTowerSumEt();
 			fTeiso03[eqi]                  = (fTdr03tksumpt[eqi] + fTdr03ecalrechitsumet[eqi] + fTdr03hcaltowersumet[eqi]) / fTept[eqi];
 			fTeiso04[eqi]                  = (fTdr04tksumpt[eqi] + fTdr04ecalrechitsumet[eqi] + fTdr04hcaltowersumet[eqi]) / fTept[eqi];
+
+			// pf isolations:
+			fTePfIsoChHad02[mqi]  = electronsPfIsoChHad02 [electronRef];
+			fTePfIsoChHad03[mqi]  = electronsPfIsoChHad03 [electronRef];
+			fTePfIsoChHad04[mqi]  = electronsPfIsoChHad04 [electronRef];
+			fTePfIsoNHad02[mqi]   = electronsPfIsoNHad02  [electronRef];
+			fTePfIsoNHad03[mqi]   = electronsPfIsoNHad03  [electronRef];
+			fTePfIsoNHad04[mqi]   = electronsPfIsoNHad04  [electronRef];
+			fTePfIsoPhoton02[mqi] = electronsPfIsoPhoton02[electronRef];
+			fTePfIsoPhoton03[mqi] = electronsPfIsoPhoton03[electronRef];
+			fTePfIsoPhoton04[mqi] = electronsPfIsoPhoton04[electronRef];
+
+			fTePfRadIsoChHad02[mqi]  = electronsPfRadIsoChHad02 [electronRef];
+			fTePfRadIsoChHad03[mqi]  = electronsPfRadIsoChHad03 [electronRef];
+			fTePfRadIsoChHad04[mqi]  = electronsPfRadIsoChHad04 [electronRef];
+			fTePfRadIsoNHad02[mqi]   = electronsPfRadIsoNHad02  [electronRef];
+			fTePfRadIsoNHad03[mqi]   = electronsPfRadIsoNHad03  [electronRef];
+			fTePfRadIsoNHad04[mqi]   = electronsPfRadIsoNHad04  [electronRef];
+			fTePfRadIsoPhoton02[mqi] = electronsPfRadIsoPhoton02[electronRef];
+			fTePfRadIsoPhoton03[mqi] = electronsPfRadIsoPhoton03[electronRef];
+			fTePfRadIsoPhoton04[mqi] = electronsPfRadIsoPhoton04[electronRef];
+
 			fTecharge[eqi]                 = electron.charge();
 			fTeInGap[eqi]                  = electron.isGap() ? 1:0;
 			fTeEcalDriven[eqi]             = electron.ecalDrivenSeed() ? 1:0;
@@ -1590,7 +1788,6 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			// Read in Electron ID
 			fTeIDMva[eqi] = electron.mva();
-			Ref<View<GsfElectron> > electronRef(electrons,index);
 			fTeIDTight[eqi]            = eIDmapT[electronRef]  ? 1:0;
 			fTeIDLoose[eqi]            = eIDmapL[electronRef]  ? 1:0;
 			fTeIDRobustTight[eqi]      = eIDmapRT[electronRef] ? 1:0;
@@ -3390,6 +3587,7 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("PUnTrksLowPt"     ,&fTpuNtrks_lowpT    ,"PUnTrksLowPt[PUnumFilled]/F");
 	fEventTree->Branch("PUnTrksHighPt"    ,&fTpuNtrks_highpT   ,"PUnTrksHighPt[PUnumFilled]/F");
 	fEventTree->Branch("Rho"              ,&fTrho              ,"Rho/F");
+	fEventTree->Branch("RhoForIso"        ,&fTrhoForIso        ,"RhoForIso/F");
 	fEventTree->Branch("RhoPFnoPU"        ,&fTrhoPFnoPU        ,"RhoPFnoPU/F");
 	// fEventTree->Branch("PUinstLumi"       ,&fTpuInstLumi       ,"PUinstLumi[PUnumFilled]/F");
 	fEventTree->Branch("Weight"           ,&fTweight          ,"Weight/F");
@@ -3559,6 +3757,24 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("MuIso05SumPt"     ,&fTmuIso05sumPt     ,"MuIso05SumPt[NMus]/F");
 	fEventTree->Branch("MuIso05EmEt"      ,&fTmuIso05emEt      ,"MuIso05EmEt[NMus]/F");
 	fEventTree->Branch("MuIso05HadEt"     ,&fTmuIso05hadEt     ,"MuIso05HadEt[NMus]/F");
+	fEventTree->Branch("MuPfIsoChHad02"   ,&fTmuPfIsoChHad02   ,"MuPfIsoChHad02[NMus]/F");
+	fEventTree->Branch("MuPfIsoChHad03"   ,&fTmuPfIsoChHad03   ,"MuPfIsoChHad03[NMus]/F");
+	fEventTree->Branch("MuPfIsoChHad04"   ,&fTmuPfIsoChHad04   ,"MuPfIsoChHad04[NMus]/F");
+	fEventTree->Branch("MuPfIsoNHad02"    ,&fTmuPfIsoNHad02    ,"MuPfIsoNHad02[NMus]/F");
+	fEventTree->Branch("MuPfIsoNHad03"    ,&fTmuPfIsoNHad03    ,"MuPfIsoNHad03[NMus]/F");
+	fEventTree->Branch("MuPfIsoNHad04"    ,&fTmuPfIsoNHad04    ,"MuPfIsoNHad04[NMus]/F");
+	fEventTree->Branch("MuPfIsoPhoton02"  ,&fTmuPfIsoPhoton02  ,"MuPfIsoPhoton02[NMus]/F");
+	fEventTree->Branch("MuPfIsoPhoton03"  ,&fTmuPfIsoPhoton03  ,"MuPfIsoPhoton03[NMus]/F");
+	fEventTree->Branch("MuPfIsoPhoton04"  ,&fTmuPfIsoPhoton04  ,"MuPfIsoPhoton04[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoChHad02"   ,&fTmuPfRadIsoChHad02   ,"MuPfRadIsoChHad02[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoChHad03"   ,&fTmuPfRadIsoChHad03   ,"MuPfRadIsoChHad03[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoChHad04"   ,&fTmuPfRadIsoChHad04   ,"MuPfRadIsoChHad04[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoNHad02"    ,&fTmuPfRadIsoNHad02    ,"MuPfRadIsoNHad02[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoNHad03"    ,&fTmuPfRadIsoNHad03    ,"MuPfRadIsoNHad03[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoNHad04"    ,&fTmuPfRadIsoNHad04    ,"MuPfRadIsoNHad04[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoPhoton02"  ,&fTmuPfRadIsoPhoton02  ,"MuPfRadIsoPhoton02[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoPhoton03"  ,&fTmuPfRadIsoPhoton03  ,"MuPfRadIsoPhoton03[NMus]/F");
+	fEventTree->Branch("MuPfRadIsoPhoton04"  ,&fTmuPfRadIsoPhoton04  ,"MuPfRadIsoPhoton04[NMus]/F");
 	fEventTree->Branch("MuEem"            ,&fTmueecal          ,"MuEem[NMus]/F");
 	fEventTree->Branch("MuEhad"           ,&fTmuehcal          ,"MuEhad[NMus]/F");
 	fEventTree->Branch("MuD0BS"           ,&fTmud0bs           ,"MuD0BS[NMus]/F");
@@ -3665,6 +3881,24 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
 	fEventTree->Branch("ElDR04EcalRecHitSumEt"       ,&fTdr04ecalrechitsumet     ,"ElDR04EcalRecHitSumEt[NEles]/F");
 	fEventTree->Branch("ElDR03HcalTowerSumEt"        ,&fTdr03hcaltowersumet      ,"ElDR03HcalTowerSumEt[NEles]/F");
 	fEventTree->Branch("ElDR04HcalTowerSumEt"        ,&fTdr04hcaltowersumet      ,"ElDR04HcalTowerSumEt[NEles]/F");
+	fEventTree->Branch("ElPfIsoChHad02"              ,&fTePfIsoChHad02      ,"ElPfIsoChHad02[NEles]/F");
+	fEventTree->Branch("ElPfIsoChHad03"              ,&fTePfIsoChHad03      ,"ElPfIsoChHad03[NEles]/F");
+	fEventTree->Branch("ElPfIsoChHad04"              ,&fTePfIsoChHad04      ,"ElPfIsoChHad04[NEles]/F");
+	fEventTree->Branch("ElPfIsoNHad02"               ,&fTePfIsoNHad02       ,"ElPfIsoNHad02[NEles]/F");
+	fEventTree->Branch("ElPfIsoNHad03"               ,&fTePfIsoNHad03       ,"ElPfIsoNHad03[NEles]/F");
+	fEventTree->Branch("ElPfIsoNHad04"               ,&fTePfIsoNHad04       ,"ElPfIsoNHad04[NEles]/F");
+	fEventTree->Branch("ElPfIsoPhoton02"             ,&fTePfIsoPhoton02     ,"ElPfIsoPhoton02[NEles]/F");
+	fEventTree->Branch("ElPfIsoPhoton03"             ,&fTePfIsoPhoton03     ,"ElPfIsoPhoton03[NEles]/F");
+	fEventTree->Branch("ElPfIsoPhoton04"             ,&fTePfIsoPhoton04     ,"ElPfIsoPhoton04[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoChHad02"           ,&fTePfRadIsoChHad02   ,"ElPfRadIsoChHad02[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoChHad03"           ,&fTePfRadIsoChHad03   ,"ElPfRadIsoChHad03[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoChHad04"           ,&fTePfRadIsoChHad04   ,"ElPfRadIsoChHad04[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoNHad02"            ,&fTePfRadIsoNHad02    ,"ElPfRadIsoNHad02[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoNHad03"            ,&fTePfRadIsoNHad03    ,"ElPfRadIsoNHad03[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoNHad04"            ,&fTePfRadIsoNHad04    ,"ElPfRadIsoNHad04[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoPhoton02"          ,&fTePfRadIsoPhoton02  ,"ElPfRadIsoPhoton02[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoPhoton03"          ,&fTePfRadIsoPhoton03  ,"ElPfRadIsoPhoton03[NEles]/F");
+	fEventTree->Branch("ElPfRadIsoPhoton04"          ,&fTePfRadIsoPhoton04  ,"ElPfRadIsoPhoton04[NEles]/F");
 	fEventTree->Branch("ElNChi2"                     ,&fTenchi2                  ,"ElNChi2[NEles]/F");
 	fEventTree->Branch("ElCharge"                    ,&fTecharge                 ,"ElCharge[NEles]/I");
 	fEventTree->Branch("ElCInfoIsGsfCtfCons"         ,&fTeCInfoIsGsfCtfCons      ,"ElCInfoIsGsfCtfCons[NEles]/I");

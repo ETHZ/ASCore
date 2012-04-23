@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.4 2011/06/08 17:06:49 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.5 2012/01/06 09:08:00 pnef Exp $
 //
 //
 
@@ -110,18 +110,18 @@ private:
   float*  fTtauLooseIso;
   float*  fTtauTightIso;
   float*  fTtauMediumIso;
-/*   float*  fTtauVLooseChargedIso; */
-/*   float*  fTtauLooseChargedIso; */
-/*   float*  fTtauTightChargedIso; */
-/*   float*  fTtauMediumChargedIso; */
-/*   float*  fTtauVLooseIsoDBSumPtCorr; */
-/*   float*  fTtauLooseIsoDBSumPtCorr; */
-/*   float*  fTtauTightIsoDBSumPtCorr; */
-/*   float*  fTtauMediumIsoDBSumPtCorr; */
-/*   float*  fTtauVLooseCombinedIsoDBSumPtCorr; */
-/*   float*  fTtauLooseCombinedIsoDBSumPtCorr; */
-/*   float*  fTtauTightCombinedIsoDBSumPtCorr; */
-/*   float*  fTtauMediumCombinedIsoDBSumPtCorr; */
+  float*  fTtauVLooseChargedIso;
+  float*  fTtauLooseChargedIso;
+  float*  fTtauTightChargedIso;
+  float*  fTtauMediumChargedIso;
+  float*  fTtauVLooseIsoDBSumPtCorr;
+  float*  fTtauLooseIsoDBSumPtCorr;
+  float*  fTtauTightIsoDBSumPtCorr;
+  float*  fTtauMediumIsoDBSumPtCorr;
+  float*  fTtauVLooseCombinedIsoDBSumPtCorr;
+  float*  fTtauLooseCombinedIsoDBSumPtCorr;
+  float*  fTtauTightCombinedIsoDBSumPtCorr;
+  float*  fTtauMediumCombinedIsoDBSumPtCorr;
   float*  fTtauLooseElectronRejection;
   float*  fTtauTightElectronRejection;
   float*  fTtauMediumElectronRejection;
@@ -219,18 +219,18 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, T
 	fTtauLooseIso    = new float[gMaxnobjs];
 	fTtauTightIso    = new float[gMaxnobjs];
 	fTtauMediumIso   = new float[gMaxnobjs];
-/* 	fTtauVLooseChargedIso   = new float[gMaxnobjs]; */
-/* 	fTtauLooseChargedIso    = new float[gMaxnobjs]; */
-/* 	fTtauTightChargedIso    = new float[gMaxnobjs]; */
-/* 	fTtauMediumChargedIso   = new float[gMaxnobjs]; */
-/* 	fTtauVLooseIsoDBSumPtCorr   = new float[gMaxnobjs]; */
-/* 	fTtauLooseIsoDBSumPtCorr    = new float[gMaxnobjs]; */
-/* 	fTtauTightIsoDBSumPtCorr    = new float[gMaxnobjs]; */
-/* 	fTtauMediumIsoDBSumPtCorr   = new float[gMaxnobjs]; */
-/* 	fTtauVLooseCombinedIsoDBSumPtCorr   = new float[gMaxnobjs]; */
-/* 	fTtauLooseCombinedIsoDBSumPtCorr    = new float[gMaxnobjs]; */
-/* 	fTtauTightCombinedIsoDBSumPtCorr    = new float[gMaxnobjs]; */
-/* 	fTtauMediumCombinedIsoDBSumPtCorr   = new float[gMaxnobjs]; */
+	fTtauVLooseChargedIso   = new float[gMaxnobjs];
+	fTtauLooseChargedIso    = new float[gMaxnobjs];
+	fTtauTightChargedIso    = new float[gMaxnobjs];
+	fTtauMediumChargedIso   = new float[gMaxnobjs];
+	fTtauVLooseIsoDBSumPtCorr   = new float[gMaxnobjs];
+	fTtauLooseIsoDBSumPtCorr    = new float[gMaxnobjs];
+	fTtauTightIsoDBSumPtCorr    = new float[gMaxnobjs];
+	fTtauMediumIsoDBSumPtCorr   = new float[gMaxnobjs];
+	fTtauVLooseCombinedIsoDBSumPtCorr   = new float[gMaxnobjs];
+	fTtauLooseCombinedIsoDBSumPtCorr    = new float[gMaxnobjs];
+	fTtauTightCombinedIsoDBSumPtCorr    = new float[gMaxnobjs];
+	fTtauMediumCombinedIsoDBSumPtCorr   = new float[gMaxnobjs];
 	fTtauLooseElectronRejection    = new float[gMaxnobjs];
 	fTtauTightElectronRejection    = new float[gMaxnobjs];
 	fTtauMediumElectronRejection   = new float[gMaxnobjs];
@@ -348,18 +348,18 @@ LeptonFillerPat<LeptonType>::~LeptonFillerPat(void) {
 	delete [] fTtauLooseIso;
 	delete [] fTtauTightIso;
 	delete [] fTtauMediumIso;
-/* 	delete [] fTtauVLooseChargedIso; */
-/* 	delete [] fTtauLooseChargedIso; */
-/* 	delete [] fTtauTightChargedIso; */
-/* 	delete [] fTtauMediumChargedIso; */
-/* 	delete [] fTtauVLooseIsoDBSumPtCorr; */
-/* 	delete [] fTtauLooseIsoDBSumPtCorr; */
-/* 	delete [] fTtauTightIsoDBSumPtCorr; */
-/* 	delete [] fTtauMediumIsoDBSumPtCorr; */
-/* 	delete [] fTtauVLooseCombinedIsoDBSumPtCorr; */
-/* 	delete [] fTtauLooseCombinedIsoDBSumPtCorr; */
-/* 	delete [] fTtauTightCombinedIsoDBSumPtCorr; */
-/* 	delete [] fTtauMediumCombinedIsoDBSumPtCorr; */
+	delete [] fTtauVLooseChargedIso;
+	delete [] fTtauLooseChargedIso;
+	delete [] fTtauTightChargedIso;
+	delete [] fTtauMediumChargedIso;
+	delete [] fTtauVLooseIsoDBSumPtCorr;
+	delete [] fTtauLooseIsoDBSumPtCorr;
+	delete [] fTtauTightIsoDBSumPtCorr;
+	delete [] fTtauMediumIsoDBSumPtCorr;
+	delete [] fTtauVLooseCombinedIsoDBSumPtCorr;
+	delete [] fTtauLooseCombinedIsoDBSumPtCorr;
+	delete [] fTtauTightCombinedIsoDBSumPtCorr;
+	delete [] fTtauMediumCombinedIsoDBSumPtCorr;
 	delete [] fTtauLooseElectronRejection;
 	delete [] fTtauTightElectronRejection;
 	delete [] fTtauMediumElectronRejection;
@@ -426,18 +426,18 @@ void LeptonFillerPat<LeptonType>::createBranches(void) {
   	addBranch("LooseIso", "F", fTtauLooseIso,"NObjs" );
   	addBranch("TightIso", "F", fTtauTightIso,"NObjs" );
   	addBranch("MediumIso", "F", fTtauMediumIso,"NObjs" );
-/*   	addBranch("VLooseChargedIso", "F", fTtauVLooseChargedIso,"NObjs" ); */
-/*   	addBranch("LooseChargedIso", "F", fTtauLooseChargedIso,"NObjs" ); */
-/*   	addBranch("TightChargedIso", "F", fTtauTightChargedIso,"NObjs" ); */
-/*   	addBranch("MediumChargedIso", "F", fTtauMediumChargedIso,"NObjs" ); */
-/*   	addBranch("VLooseIsoDBSumPtCorr", "F", fTtauVLooseIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("LooseIsoDBSumPtCorr", "F", fTtauLooseIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("TightIsoDBSumPtCorr", "F", fTtauTightIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("MediumIsoDBSumPtCorr", "F", fTtauMediumIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("VLooseCombinedIsoDBSumPtCorr", "F", fTtauVLooseCombinedIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("LooseCombinedIsoDBSumPtCorr", "F", fTtauLooseCombinedIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("TightCombinedIsoDBSumPtCorr", "F", fTtauTightCombinedIsoDBSumPtCorr,"NObjs" ); */
-/*   	addBranch("MediumCombinedIsoDBSumPtCorr", "F", fTtauMediumCombinedIsoDBSumPtCorr,"NObjs" ); */
+  	addBranch("VLooseChargedIso", "F", fTtauVLooseChargedIso,"NObjs" );
+  	addBranch("LooseChargedIso", "F", fTtauLooseChargedIso,"NObjs" );
+  	addBranch("TightChargedIso", "F", fTtauTightChargedIso,"NObjs" );
+  	addBranch("MediumChargedIso", "F", fTtauMediumChargedIso,"NObjs" );
+  	addBranch("VLooseIsoDBSumPtCorr", "F", fTtauVLooseIsoDBSumPtCorr,"NObjs" );
+  	addBranch("LooseIsoDBSumPtCorr", "F", fTtauLooseIsoDBSumPtCorr,"NObjs" );
+  	addBranch("TightIsoDBSumPtCorr", "F", fTtauTightIsoDBSumPtCorr,"NObjs" );
+  	addBranch("MediumIsoDBSumPtCorr", "F", fTtauMediumIsoDBSumPtCorr,"NObjs" );
+  	addBranch("VLooseCombinedIsoDBSumPtCorr", "F", fTtauVLooseCombinedIsoDBSumPtCorr,"NObjs" );
+  	addBranch("LooseCombinedIsoDBSumPtCorr", "F", fTtauLooseCombinedIsoDBSumPtCorr,"NObjs" );
+  	addBranch("TightCombinedIsoDBSumPtCorr", "F", fTtauTightCombinedIsoDBSumPtCorr,"NObjs" );
+  	addBranch("MediumCombinedIsoDBSumPtCorr", "F", fTtauMediumCombinedIsoDBSumPtCorr,"NObjs" );
   	addBranch("LooseElectronRejection", "F", fTtauLooseElectronRejection,"NObjs" );
   	addBranch("TightElectronRejection", "F", fTtauTightElectronRejection,"NObjs" );
   	addBranch("MediumElectronRejection", "F", fTtauMediumElectronRejection,"NObjs" );
@@ -504,18 +504,18 @@ void LeptonFillerPat<LeptonType>::reset(void) {
     resetFloat(fTtauLooseIso,gMaxnobjs);
     resetFloat(fTtauTightIso,gMaxnobjs);
     resetFloat(fTtauMediumIso,gMaxnobjs);
-/*     resetFloat(fTtauVLooseChargedIso,gMaxnobjs); */
-/*     resetFloat(fTtauLooseChargedIso,gMaxnobjs); */
-/*     resetFloat(fTtauTightChargedIso,gMaxnobjs); */
-/*     resetFloat(fTtauMediumChargedIso,gMaxnobjs); */
-/*     resetFloat(fTtauVLooseIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauLooseIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauTightIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauMediumIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauVLooseCombinedIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauLooseCombinedIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauTightCombinedIsoDBSumPtCorr,gMaxnobjs); */
-/*     resetFloat(fTtauMediumCombinedIsoDBSumPtCorr,gMaxnobjs); */
+    resetFloat(fTtauVLooseChargedIso,gMaxnobjs);
+    resetFloat(fTtauLooseChargedIso,gMaxnobjs);
+    resetFloat(fTtauTightChargedIso,gMaxnobjs);
+    resetFloat(fTtauMediumChargedIso,gMaxnobjs);
+    resetFloat(fTtauVLooseIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauLooseIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauTightIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauMediumIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauVLooseCombinedIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauLooseCombinedIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauTightCombinedIsoDBSumPtCorr,gMaxnobjs);
+    resetFloat(fTtauMediumCombinedIsoDBSumPtCorr,gMaxnobjs);
     resetFloat(fTtauLooseElectronRejection,gMaxnobjs);
     resetFloat(fTtauTightElectronRejection,gMaxnobjs);
     resetFloat(fTtauMediumElectronRejection,gMaxnobjs);
@@ -566,22 +566,22 @@ void LeptonFillerPat<pat::Tau>::getSpecific(pat::Tau lepton, size_t index){
 	fTtauPtSumChargedParticlesIsoCone[index]   = lepton.isolationPFChargedHadrCandsPtSum();
 	fTtauPtSumPhotonsIsoCone[index]   = lepton.isolationPFGammaCandsEtSum();
 	fTtauDecayModeFinding[index] = lepton.tauID("decayModeFinding");
+	fTtauVLooseChargedIso[index]  = lepton.tauID("byVLooseChargedIsolation");
+	fTtauLooseChargedIso[index]   = lepton.tauID("byLooseChargedIsolation");
+	fTtauTightChargedIso[index]   = lepton.tauID("byTightChargedIsolation");
+	fTtauMediumChargedIso[index]  = lepton.tauID("byMediumChargedIsolation");
 	fTtauVLooseIso[index]  = lepton.tauID("byVLooseIsolation");
 	fTtauLooseIso[index]   = lepton.tauID("byLooseIsolation");
 	fTtauTightIso[index]   = lepton.tauID("byTightIsolation");
 	fTtauMediumIso[index]  = lepton.tauID("byMediumIsolation");
-/* 	fTtauVLooseChargedIso[index]  = lepton.tauID("byVLooseChargedIsolation"); */
-/* 	fTtauLooseChargedIso[index]   = lepton.tauID("byLooseChargedIsolation"); */
-/* 	fTtauTightChargedIso[index]   = lepton.tauID("byTightChargedIsolation"); */
-/* 	fTtauMediumChargedIso[index]  = lepton.tauID("byMediumChargedIsolation"); */
-/*         fTtauVLooseIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseIsolationDeltaBetaCorr"); */
-/* 	fTtauLooseIsoDBSumPtCorr[index]   = lepton.tauID("byLooseIsolationDeltaBetaCorr"); */
-/* 	fTtauTightIsoDBSumPtCorr[index]   = lepton.tauID("byTightIsolationDeltaBetaCorr"); */
-/* 	fTtauMediumIsoDBSumPtCorr[index]  = lepton.tauID("byMediumIsolationDeltaBetaCorr"); */
-/* 	fTtauVLooseCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseCombinedIsolationDeltaBetaCorr"); */
-/* 	fTtauLooseCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byLooseCombinedIsolationDeltaBetaCorr"); */
-/* 	fTtauTightCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byTightCombinedIsolationDeltaBetaCorr"); */
-/* 	fTtauMediumCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byMediumCombinedIsolationDeltaBetaCorr"); */
+        fTtauVLooseIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseIsolationDBSumPtCorr");
+	fTtauLooseIsoDBSumPtCorr[index]   = lepton.tauID("byLooseIsolationDBSumPtCorr");
+	fTtauTightIsoDBSumPtCorr[index]   = lepton.tauID("byTightIsolationDBSumPtCorr");
+	fTtauMediumIsoDBSumPtCorr[index]  = lepton.tauID("byMediumIsolationDBSumPtCorr");
+	fTtauVLooseCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byVLooseCombinedIsolationDBSumPtCorr");
+	fTtauLooseCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byLooseCombinedIsolationDBSumPtCorr");
+	fTtauTightCombinedIsoDBSumPtCorr[index]   = lepton.tauID("byTightCombinedIsolationDBSumPtCorr");
+	fTtauMediumCombinedIsoDBSumPtCorr[index]  = lepton.tauID("byMediumCombinedIsolationDBSumPtCorr");
 	fTtauLooseElectronRejection[index]   = lepton.tauID("againstElectronLoose");
 	fTtauTightElectronRejection[index]   = lepton.tauID("againstElectronTight");
 	fTtauMediumElectronRejection[index]  = lepton.tauID("againstElectronMedium");

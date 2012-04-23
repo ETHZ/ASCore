@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.134 2012/04/17 12:55:50 mdunser Exp $
+// $Id: NTupleProducer.h,v 1.135 2012/04/17 19:35:51 mdunser Exp $
 //
 //
 
@@ -225,6 +225,7 @@ private:
   edm::InputTag fHBHENoiseResultTag;
   edm::InputTag fHBHENoiseResultTagIso;
   edm::InputTag fSrcRho;
+  edm::InputTag fSrcRhoForIso;
   edm::InputTag fSrcRhoPFnoPU;
   edm::InputTag fpdfWeightTag;
   edm::InputTag pfphotonsProducerTag;
@@ -379,6 +380,7 @@ private:
   float fTpuNtrks_lowpT[gMaxnpileup];
   float fTpuNtrks_highpT[gMaxnpileup];
   float fTrho; // rho from L1FastJetCorrection
+  float fTrhoForIso; // rho computed up to eta=2.5
   float fTrhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
   // float fTpuInstLumi[gMaxnpileup];
   TH1I* fHpileupstat;
@@ -553,6 +555,27 @@ private:
   float fTmueecal         [gMaxnmus];
   float fTmuehcal         [gMaxnmus];
 
+  // - PF Isolation Variables
+  float fTmuPfIsoChHad02  [gMaxnmus];
+  float fTmuPfIsoChHad03  [gMaxnmus];
+  float fTmuPfIsoChHad04  [gMaxnmus];
+  float fTmuPfIsoNHad02  [gMaxnmus];
+  float fTmuPfIsoNHad03  [gMaxnmus];
+  float fTmuPfIsoNHad04  [gMaxnmus];
+  float fTmuPfIsoPhoton02  [gMaxnmus];
+  float fTmuPfIsoPhoton03  [gMaxnmus];
+  float fTmuPfIsoPhoton04  [gMaxnmus];
+
+  float fTmuPfRadIsoChHad02  [gMaxnmus];
+  float fTmuPfRadIsoChHad03  [gMaxnmus];
+  float fTmuPfRadIsoChHad04  [gMaxnmus];
+  float fTmuPfRadIsoNHad02  [gMaxnmus];
+  float fTmuPfRadIsoNHad03  [gMaxnmus];
+  float fTmuPfRadIsoNHad04  [gMaxnmus];
+  float fTmuPfRadIsoPhoton02  [gMaxnmus];
+  float fTmuPfRadIsoPhoton03  [gMaxnmus];
+  float fTmuPfRadIsoPhoton04  [gMaxnmus];
+
   // - Impact Parameters
   float fTmud0bs[gMaxnmus];
   float fTmud0pv[gMaxnmus];
@@ -657,6 +680,28 @@ private:
   float fTdr03hcaltowersumet[gMaxneles];
   float fTdr04hcaltowersumet[gMaxneles];
   float fTenchi2[gMaxneles];
+
+  // - PF Isolation Variables
+  float fTePfIsoChHad02  [gMaxnmus];
+  float fTePfIsoChHad03  [gMaxnmus];
+  float fTePfIsoChHad04  [gMaxnmus];
+  float fTePfIsoNHad02  [gMaxnmus];
+  float fTePfIsoNHad03  [gMaxnmus];
+  float fTePfIsoNHad04  [gMaxnmus];
+  float fTePfIsoPhoton02  [gMaxnmus];
+  float fTePfIsoPhoton03  [gMaxnmus];
+  float fTePfIsoPhoton04  [gMaxnmus];
+
+  float fTePfRadIsoChHad02  [gMaxnmus];
+  float fTePfRadIsoChHad03  [gMaxnmus];
+  float fTePfRadIsoChHad04  [gMaxnmus];
+  float fTePfRadIsoNHad02  [gMaxnmus];
+  float fTePfRadIsoNHad03  [gMaxnmus];
+  float fTePfRadIsoNHad04  [gMaxnmus];
+  float fTePfRadIsoPhoton02  [gMaxnmus];
+  float fTePfRadIsoPhoton03  [gMaxnmus];
+  float fTePfRadIsoPhoton04  [gMaxnmus];
+
   // Electron ID
   float fTeIDMva[gMaxneles];
   int fTeIDTight[gMaxneles];
