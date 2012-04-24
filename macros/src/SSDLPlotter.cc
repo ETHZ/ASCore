@@ -341,7 +341,7 @@ void SSDLPlotter::doAnalysis(){
 	// makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
-	makeMETvsHTPlot0HT();
+	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
 	// makeRatioPlots(Muon);
@@ -351,20 +351,21 @@ void SSDLPlotter::doAnalysis(){
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
-	makeFRvsPtPlots(Elec, ZDecay);
-	makeFRvsEtaPlots(Muon);
-	makeFRvsEtaPlots(Elec);
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+	// makeFRvsPtPlots(Elec, ZDecay);
+	// makeFRvsEtaPlots(Muon);
+	// makeFRvsEtaPlots(Elec);
 
 	makeAllClosureTests();
 	makeAllIntPredictions();
 	makeDiffPrediction();
+	makeDiffPredictionTTW();
 	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	// makePredictionSignalEvents(0. , 7000.,  30., 7000., 3, 2, 1, 54., 23., true);
+	makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
@@ -5315,7 +5316,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
-	fOUTSTREAM3 << Form("WZ: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+	fOUTSTREAM3 << Form("WZ:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
 	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
@@ -7837,6 +7838,1002 @@ void SSDLPlotter::makeDiffPrediction(){
 		delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
 		delete totbg, totbg_mm, totbg_em, totbg_ee;
 	}
+	fOutputSubDir = "";
+}
+void SSDLPlotter::makeDiffPredictionTTW(){
+	fOutputSubDir = "DiffPredictionPlots/";
+	TLatex *lat = new TLatex();
+	lat->SetNDC(kTRUE);
+	lat->SetTextColor(kBlack);
+	lat->SetTextSize(0.04);
+
+	vector<int> musamples;
+	vector<int> elsamples;
+	vector<int> emusamples;
+
+	musamples = fMuData;
+	elsamples = fEGData;
+	emusamples = fMuEGData;
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// RATIOS /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	float mufratio_data(0.),  mufratio_data_e(0.);
+	float mupratio_data(0.),  mupratio_data_e(0.);
+	float elfratio_data(0.),  elfratio_data_e(0.);
+	float elpratio_data(0.),  elpratio_data_e(0.);
+
+	calculateRatio(fMuData, Muon, SigSup, mufratio_data, mufratio_data_e);
+	calculateRatio(fMuData, Muon, ZDecay, mupratio_data, mupratio_data_e);
+
+	calculateRatio(fEGData, Elec, SigSup, elfratio_data, elfratio_data_e);
+	calculateRatio(fEGData, Elec, ZDecay, elpratio_data, elpratio_data_e);
+
+	//{"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed"};
+	float binwidthscale[gNDiffVars] = {100., 100., 30., 30., 1., 25., 20., 10., 1., 10., 1.};
+
+	// Loop on the different variables
+	int j = 10;
+	TString varname    = DiffPredYields::var_name[10];
+	const int nbins    = DiffPredYields::nbins[10];
+	const double *bins = DiffPredYields::bins[10];
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11 = new TH1D(Form("NT11_%s", varname.Data()), varname, nbins, bins); nt11->Sumw2();
+
+	TH1D *nt11_mm = new TH1D(Form("NT11_MM_%s", varname.Data()), varname, nbins, bins); nt11_mm->Sumw2();
+	TH1D *nt10_mm = new TH1D(Form("NT10_MM_%s", varname.Data()), varname, nbins, bins); nt10_mm->Sumw2();
+	TH1D *nt01_mm = new TH1D(Form("NT01_MM_%s", varname.Data()), varname, nbins, bins); nt01_mm->Sumw2();
+	TH1D *nt00_mm = new TH1D(Form("NT00_MM_%s", varname.Data()), varname, nbins, bins); nt00_mm->Sumw2();
+	TH1D *nt11_ee = new TH1D(Form("NT11_EE_%s", varname.Data()), varname, nbins, bins); nt11_ee->Sumw2();
+	TH1D *nt10_ee = new TH1D(Form("NT10_EE_%s", varname.Data()), varname, nbins, bins); nt10_ee->Sumw2();
+	TH1D *nt01_ee = new TH1D(Form("NT01_EE_%s", varname.Data()), varname, nbins, bins); nt01_ee->Sumw2();
+	TH1D *nt00_ee = new TH1D(Form("NT00_EE_%s", varname.Data()), varname, nbins, bins); nt00_ee->Sumw2();
+	TH1D *nt11_em = new TH1D(Form("NT11_EM_%s", varname.Data()), varname, nbins, bins); nt11_em->Sumw2();
+	TH1D *nt10_em = new TH1D(Form("NT10_EM_%s", varname.Data()), varname, nbins, bins); nt10_em->Sumw2();
+	TH1D *nt01_em = new TH1D(Form("NT01_EM_%s", varname.Data()), varname, nbins, bins); nt01_em->Sumw2();
+	TH1D *nt00_em = new TH1D(Form("NT00_EM_%s", varname.Data()), varname, nbins, bins); nt00_em->Sumw2();
+
+	// OS yields
+	TH1D *nt2_os_ee_bb = new TH1D(Form("NT2_OS_EE_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_bb->Sumw2();
+	TH1D *nt2_os_ee_eb = new TH1D(Form("NT2_OS_EE_EB_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_eb->Sumw2();
+	TH1D *nt2_os_ee_ee = new TH1D(Form("NT2_OS_EE_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_ee_ee->Sumw2();
+	TH1D *nt2_os_em_bb = new TH1D(Form("NT2_OS_EM_BB_%s", varname.Data()), varname, nbins, bins); nt2_os_em_bb->Sumw2();
+	TH1D *nt2_os_em_ee = new TH1D(Form("NT2_OS_EM_EE_%s", varname.Data()), varname, nbins, bins); nt2_os_em_ee->Sumw2();
+
+	for(size_t i = 0; i < musamples.size(); ++i){
+		Sample *S = fSamples[musamples[i]];
+		nt11_mm->Add(S->diffyields[Muon].hnt11[10]);
+		nt10_mm->Add(S->diffyields[Muon].hnt10[10]);
+		nt01_mm->Add(S->diffyields[Muon].hnt01[10]);
+		nt00_mm->Add(S->diffyields[Muon].hnt00[10]);
+	}
+	for(size_t i = 0; i < elsamples.size(); ++i){
+		Sample *S = fSamples[elsamples[i]];
+		nt11_ee->Add(S->diffyields[Elec].hnt11[10]);
+		nt10_ee->Add(S->diffyields[Elec].hnt10[10]);
+		nt01_ee->Add(S->diffyields[Elec].hnt01[10]);
+		nt00_ee->Add(S->diffyields[Elec].hnt00[10]);
+
+		nt2_os_ee_bb->Add(S->diffyields[Elec].hnt2_os_BB[10]);
+		nt2_os_ee_eb->Add(S->diffyields[Elec].hnt2_os_EB[10]);
+		nt2_os_ee_ee->Add(S->diffyields[Elec].hnt2_os_EE[10]);
+	}
+	for(size_t i = 0; i < emusamples.size(); ++i){
+		Sample *S = fSamples[emusamples[i]];
+		nt11_em->Add(S->diffyields[ElMu].hnt11[10]);
+		nt10_em->Add(S->diffyields[ElMu].hnt10[10]);
+		nt01_em->Add(S->diffyields[ElMu].hnt01[10]);
+		nt00_em->Add(S->diffyields[ElMu].hnt00[10]);
+
+		nt2_os_em_bb->Add(S->diffyields[ElMu].hnt2_os_BB[10]);
+		nt2_os_em_ee->Add(S->diffyields[ElMu].hnt2_os_EE[10]);
+	}
+	
+	nt11->Add(nt11_mm);
+	nt11->Add(nt11_ee);
+	nt11->Add(nt11_em);
+
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// Errors /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	// Save the squared sum of total error in the bin errors of these histos,
+	// then apply square root before plotting
+	TH1D *totbg    = new TH1D(Form("TotBG_%s",    varname.Data()), varname, nbins, bins); totbg   ->Sumw2();
+	TH1D *totbg_mm = new TH1D(Form("TotBG_mm_%s", varname.Data()), varname, nbins, bins); totbg_mm->Sumw2();
+	TH1D *totbg_em = new TH1D(Form("TotBG_em_%s", varname.Data()), varname, nbins, bins); totbg_em->Sumw2();
+	TH1D *totbg_ee = new TH1D(Form("TotBG_ee_%s", varname.Data()), varname, nbins, bins); totbg_ee->Sumw2();
+
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// RARE SM MC /////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_ss = new TH1D(Form("NT11_SS_%s", varname.Data()), varname, nbins, bins); nt11_ss->Sumw2();
+
+	TH1D *nt11_mm_ss = new TH1D(Form("NT11_MM_SS_%s", varname.Data()), varname, nbins, bins); nt11_mm_ss->Sumw2();
+	TH1D *nt11_ee_ss = new TH1D(Form("NT11_EE_SS_%s", varname.Data()), varname, nbins, bins); nt11_ee_ss->Sumw2();
+	TH1D *nt11_em_ss = new TH1D(Form("NT11_EM_SS_%s", varname.Data()), varname, nbins, bins); nt11_em_ss->Sumw2();
+
+	vector<int> raremc;
+	raremc.push_back(WZ);
+	raremc.push_back(ZZ);
+	raremc.push_back(GVJets);
+	raremc.push_back(DPSWW);
+	raremc.push_back(TTbarG);
+	raremc.push_back(WpWp);
+	raremc.push_back(WmWm);
+	raremc.push_back(WWZ);
+	raremc.push_back(WZZ);
+	raremc.push_back(WWG);
+	raremc.push_back(WWW);
+	raremc.push_back(ZZZ);
+	
+	for(size_t i = 0; i < raremc.size(); ++i){
+		Sample *S = fSamples[raremc[i]];
+		float scale = fLumiNorm / S->getLumi();
+		nt11_mm_ss->Add(S->diffyields[Muon].hnt11[10], scale);
+		nt11_ee_ss->Add(S->diffyields[Elec].hnt11[10], scale);
+		nt11_em_ss->Add(S->diffyields[ElMu].hnt11[10], scale);
+
+		// Errors
+		for(size_t b = 0; b < nbins; ++b){
+			float ss_mm = S->diffyields[Muon].hnt11[10]->GetBinContent(b+1);
+			float ss_ee = S->diffyields[Elec].hnt11[10]->GetBinContent(b+1);
+			float ss_em = S->diffyields[ElMu].hnt11[10]->GetBinContent(b+1);
+
+			float esyst2_mm = 0.25 * ss_mm*ss_mm*scale*scale;
+			float esyst2_ee = 0.25 * ss_ee*ss_ee*scale*scale;
+			float esyst2_em = 0.25 * ss_em*ss_em*scale*scale;
+
+			float estat2_mm = scale*scale*S->getError2(ss_mm);
+			float estat2_ee = scale*scale*S->getError2(ss_ee);
+			float estat2_em = scale*scale*S->getError2(ss_em);
+
+			float prev    = totbg   ->GetBinError(b+1);
+			float prev_mm = totbg_mm->GetBinError(b+1);
+			float prev_em = totbg_em->GetBinError(b+1);
+			float prev_ee = totbg_ee->GetBinError(b+1);
+
+			totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+			totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+			totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+			totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+		}
+	}
+
+	nt11_ss->Add(nt11_mm_ss);
+	nt11_ss->Add(nt11_ee_ss);
+	nt11_ss->Add(nt11_em_ss);
+
+	totbg   ->Add(nt11_ss);
+	totbg_mm->Add(nt11_mm_ss);
+	totbg_em->Add(nt11_em_ss);
+	totbg_ee->Add(nt11_ee_ss);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// WZ PRODUCTION //////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_wz = new TH1D(Form("NT11_WZ_%s", varname.Data()), varname, nbins, bins); nt11_wz->Sumw2();
+
+	TH1D *nt11_mm_wz = new TH1D(Form("NT11_MM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_mm_wz->Sumw2();
+	TH1D *nt11_ee_wz = new TH1D(Form("NT11_EE_WZ_%s", varname.Data()), varname, nbins, bins); nt11_ee_wz->Sumw2();
+	TH1D *nt11_em_wz = new TH1D(Form("NT11_EM_WZ_%s", varname.Data()), varname, nbins, bins); nt11_em_wz->Sumw2();
+
+	float wzscale = fLumiNorm / fSamples[WZ]->getLumi();
+	nt11_mm_wz->Add(fSamples[WZ]->diffyields[Muon].hnt11[j], wzscale);
+	nt11_ee_wz->Add(fSamples[WZ]->diffyields[Elec].hnt11[j], wzscale);
+	nt11_em_wz->Add(fSamples[WZ]->diffyields[ElMu].hnt11[j], wzscale);
+
+	// Errors
+	for(size_t b = 0; b < nbins; ++b){
+		float ss_mm = fSamples[WZ]->diffyields[Muon].hnt11[j]->GetBinContent(b+1);
+		float ss_ee = fSamples[WZ]->diffyields[Elec].hnt11[j]->GetBinContent(b+1);
+		float ss_em = fSamples[WZ]->diffyields[ElMu].hnt11[j]->GetBinContent(b+1);
+
+		float esyst2_mm = 0.25 * ss_mm*ss_mm*wzscale*wzscale;
+		float esyst2_ee = 0.25 * ss_ee*ss_ee*wzscale*wzscale;
+		float esyst2_em = 0.25 * ss_em*ss_em*wzscale*wzscale;
+
+		float estat2_mm = wzscale*wzscale*fSamples[WZ]->getError2(ss_mm);
+		float estat2_ee = wzscale*wzscale*fSamples[WZ]->getError2(ss_ee);
+		float estat2_em = wzscale*wzscale*fSamples[WZ]->getError2(ss_em);
+
+		float prev    = totbg   ->GetBinError(b+1);
+		float prev_mm = totbg_mm->GetBinError(b+1);
+		float prev_em = totbg_em->GetBinError(b+1);
+		float prev_ee = totbg_ee->GetBinError(b+1);
+
+		totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+		totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+		totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+		totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+	}
+
+	nt11_wz->Add(nt11_mm_wz);
+	nt11_wz->Add(nt11_ee_wz);
+	nt11_wz->Add(nt11_em_wz);
+
+	totbg   ->Add(nt11_wz);
+	totbg_mm->Add(nt11_mm_wz);
+	totbg_em->Add(nt11_em_wz);
+	totbg_ee->Add(nt11_ee_wz);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// TTW PRODUCTION /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_ttw = new TH1D(Form("NT11_TTW_%s", varname.Data()), varname, nbins, bins); nt11_ttw->Sumw2();
+
+	TH1D *nt11_mm_ttw = new TH1D(Form("NT11_MM_TTW_%s", varname.Data()), varname, nbins, bins); nt11_mm_ttw->Sumw2();
+	TH1D *nt11_ee_ttw = new TH1D(Form("NT11_EE_TTW_%s", varname.Data()), varname, nbins, bins); nt11_ee_ttw->Sumw2();
+	TH1D *nt11_em_ttw = new TH1D(Form("NT11_EM_TTW_%s", varname.Data()), varname, nbins, bins); nt11_em_ttw->Sumw2();
+
+	float ttwscale = fLumiNorm / fSamples[TTbarW]->getLumi();
+	nt11_mm_ttw->Add(fSamples[TTbarW]->diffyields[Muon].hnt11[10], ttwscale);
+	nt11_ee_ttw->Add(fSamples[TTbarW]->diffyields[Elec].hnt11[10], ttwscale);
+	nt11_em_ttw->Add(fSamples[TTbarW]->diffyields[ElMu].hnt11[10], ttwscale);
+
+	// Errors
+	for(size_t b = 0; b < nbins; ++b){
+		float ss_mm = fSamples[TTbarW]->diffyields[Muon].hnt11[10]->GetBinContent(b+1);
+		float ss_ee = fSamples[TTbarW]->diffyields[Elec].hnt11[10]->GetBinContent(b+1);
+		float ss_em = fSamples[TTbarW]->diffyields[ElMu].hnt11[10]->GetBinContent(b+1);
+
+		float esyst2_mm = 0.25 * ss_mm*ss_mm*ttwscale*ttwscale;
+		float esyst2_ee = 0.25 * ss_ee*ss_ee*ttwscale*ttwscale;
+		float esyst2_em = 0.25 * ss_em*ss_em*ttwscale*ttwscale;
+
+		float estat2_mm = ttwscale*ttwscale*fSamples[TTbarW]->getError2(ss_mm);
+		float estat2_ee = ttwscale*ttwscale*fSamples[TTbarW]->getError2(ss_ee);
+		float estat2_em = ttwscale*ttwscale*fSamples[TTbarW]->getError2(ss_em);
+
+		float prev    = totbg   ->GetBinError(b+1);
+		float prev_mm = totbg_mm->GetBinError(b+1);
+		float prev_em = totbg_em->GetBinError(b+1);
+		float prev_ee = totbg_ee->GetBinError(b+1);
+
+		totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+		totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+		totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+		totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+	}
+
+	nt11_ttw->Add(nt11_mm_ttw);
+	nt11_ttw->Add(nt11_ee_ttw);
+	nt11_ttw->Add(nt11_em_ttw);
+
+	// totbg   ->Add(nt11_ttw);
+	// totbg_mm->Add(nt11_mm_ttw);
+	// totbg_em->Add(nt11_em_ttw);
+	// totbg_ee->Add(nt11_ee_ttw);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// TTZ PRODUCTION /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_ttz = new TH1D(Form("NT11_TTZ_%s", varname.Data()), varname, nbins, bins); nt11_ttz->Sumw2();
+
+	TH1D *nt11_mm_ttz = new TH1D(Form("NT11_MM_TTZ_%s", varname.Data()), varname, nbins, bins); nt11_mm_ttz->Sumw2();
+	TH1D *nt11_ee_ttz = new TH1D(Form("NT11_EE_TTZ_%s", varname.Data()), varname, nbins, bins); nt11_ee_ttz->Sumw2();
+	TH1D *nt11_em_ttz = new TH1D(Form("NT11_EM_TTZ_%s", varname.Data()), varname, nbins, bins); nt11_em_ttz->Sumw2();
+
+	float ttzscale = fLumiNorm / fSamples[TTbarZ]->getLumi();
+	nt11_mm_ttz->Add(fSamples[TTbarZ]->diffyields[Muon].hnt11[10], ttzscale);
+	nt11_ee_ttz->Add(fSamples[TTbarZ]->diffyields[Elec].hnt11[10], ttzscale);
+	nt11_em_ttz->Add(fSamples[TTbarZ]->diffyields[ElMu].hnt11[10], ttzscale);
+
+	// Errors
+	for(size_t b = 0; b < nbins; ++b){
+		float ss_mm = fSamples[TTbarZ]->diffyields[Muon].hnt11[10]->GetBinContent(b+1);
+		float ss_ee = fSamples[TTbarZ]->diffyields[Elec].hnt11[10]->GetBinContent(b+1);
+		float ss_em = fSamples[TTbarZ]->diffyields[ElMu].hnt11[10]->GetBinContent(b+1);
+
+		float esyst2_mm = 0.25 * ss_mm*ss_mm*ttzscale*ttzscale;
+		float esyst2_ee = 0.25 * ss_ee*ss_ee*ttzscale*ttzscale;
+		float esyst2_em = 0.25 * ss_em*ss_em*ttzscale*ttzscale;
+
+		float estat2_mm = ttzscale*ttzscale*fSamples[TTbarZ]->getError2(ss_mm);
+		float estat2_ee = ttzscale*ttzscale*fSamples[TTbarZ]->getError2(ss_ee);
+		float estat2_em = ttzscale*ttzscale*fSamples[TTbarZ]->getError2(ss_em);
+
+		float prev    = totbg   ->GetBinError(b+1);
+		float prev_mm = totbg_mm->GetBinError(b+1);
+		float prev_em = totbg_em->GetBinError(b+1);
+		float prev_ee = totbg_ee->GetBinError(b+1);
+
+		totbg   ->SetBinError(b+1, prev    + esyst2_mm + esyst2_ee + esyst2_em + estat2_mm + estat2_ee + estat2_em);
+		totbg_mm->SetBinError(b+1, prev_mm + esyst2_mm + estat2_mm);
+		totbg_em->SetBinError(b+1, prev_em + esyst2_em + estat2_em);
+		totbg_ee->SetBinError(b+1, prev_ee + esyst2_ee + estat2_ee);
+	}
+
+	nt11_ttz->Add(nt11_mm_ttz);
+	nt11_ttz->Add(nt11_ee_ttz);
+	nt11_ttz->Add(nt11_em_ttz);
+
+	// totbg   ->Add(nt11_ttz);
+	// totbg_mm->Add(nt11_mm_ttz);
+	// totbg_em->Add(nt11_em_ttz);
+	// totbg_ee->Add(nt11_ee_ttz);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// FAKE PREDICTIONS ///////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_sf = new TH1D(Form("NT11_SF_%s", varname.Data()), varname, nbins, bins); nt11_sf->Sumw2();
+	TH1D *nt11_df = new TH1D(Form("NT11_DF_%s", varname.Data()), varname, nbins, bins); nt11_df->Sumw2();
+
+	TH1D *nt11_mm_sf = new TH1D(Form("NT11_MM_SF_%s", varname.Data()), varname, nbins, bins); nt11_mm_sf->Sumw2();
+	TH1D *nt11_ee_sf = new TH1D(Form("NT11_EE_SF_%s", varname.Data()), varname, nbins, bins); nt11_ee_sf->Sumw2();
+	TH1D *nt11_em_sf = new TH1D(Form("NT11_EM_SF_%s", varname.Data()), varname, nbins, bins); nt11_em_sf->Sumw2();
+	TH1D *nt11_mm_df = new TH1D(Form("NT11_MM_DF_%s", varname.Data()), varname, nbins, bins); nt11_mm_df->Sumw2();
+	TH1D *nt11_ee_df = new TH1D(Form("NT11_EE_DF_%s", varname.Data()), varname, nbins, bins); nt11_ee_df->Sumw2();
+	TH1D *nt11_em_df = new TH1D(Form("NT11_EM_DF_%s", varname.Data()), varname, nbins, bins); nt11_em_df->Sumw2();
+
+	/////////////////////////////////////////////////////
+	// Differential ratios
+	for(size_t i = 0; i < musamples.size(); ++i){
+		Sample *S = fSamples[musamples[i]];
+		nt11_mm_sf->Add(S->diffyields[Muon].hnpf[10]);
+		nt11_mm_sf->Add(S->diffyields[Muon].hnfp[10]);
+		nt11_mm_df->Add(S->diffyields[Muon].hnff[10]);
+	}
+	for(size_t i = 0; i < elsamples.size(); ++i){
+		Sample *S = fSamples[elsamples[i]];
+		nt11_ee_sf->Add(S->diffyields[Elec].hnpf[10]);
+		nt11_ee_sf->Add(S->diffyields[Elec].hnfp[10]);
+		nt11_ee_df->Add(S->diffyields[Elec].hnff[10]);
+	}
+	for(size_t i = 0; i < emusamples.size(); ++i){
+		Sample *S = fSamples[emusamples[i]];
+		nt11_em_sf->Add(S->diffyields[ElMu].hnpf[10]);
+		nt11_em_sf->Add(S->diffyields[ElMu].hnfp[10]);
+		nt11_em_df->Add(S->diffyields[ElMu].hnff[10]);
+	}
+	/////////////////////////////////////////////////////
+
+	for(size_t i = 0; i < nbins; ++i){
+		const float FakeESyst2 = 0.25;
+		FakeRatios *FR = new FakeRatios();
+		FR->setNToyMCs(100); // speedup
+		FR->setAddESyst(0.5); // additional systematics
+
+		FR->setMFRatio(mufratio_data, mufratio_data_e); // set error to pure statistical of ratio
+		FR->setEFRatio(elfratio_data, elfratio_data_e);
+		FR->setMPRatio(mupratio_data, mupratio_data_e);
+		FR->setEPRatio(elpratio_data, elpratio_data_e);
+
+		FR->setMMNtl(nt11_mm->GetBinContent(i+1), nt10_mm->GetBinContent(i+1) + nt01_mm->GetBinContent(i+1), nt00_mm->GetBinContent(i+1));
+		FR->setEENtl(nt11_ee->GetBinContent(i+1), nt10_ee->GetBinContent(i+1) + nt01_ee->GetBinContent(i+1), nt00_ee->GetBinContent(i+1));
+		FR->setEMNtl(nt11_em->GetBinContent(i+1), nt10_em->GetBinContent(i+1),  nt01_em->GetBinContent(i+1), nt00_em->GetBinContent(i+1));
+		
+		///////////////////////////////////////////////////////
+		// Flat ratios:
+		// nt11_mm_sf->SetBinContent(i+1, FR->getMMNpf());
+		// nt11_ee_sf->SetBinContent(i+1, FR->getEENpf());
+		// nt11_em_sf->SetBinContent(i+1, FR->getEMNpf() + FR->getEMNfp());
+		// nt11_mm_df->SetBinContent(i+1, FR->getMMNff());
+		// nt11_ee_df->SetBinContent(i+1, FR->getEENff());
+		// nt11_em_df->SetBinContent(i+1, FR->getEMNff());
+		///////////////////////////////////////////////////////
+		
+		float mm_tot_fakes = nt11_mm_sf->GetBinContent(i+1) + nt11_mm_df->GetBinContent(i+1);
+		float ee_tot_fakes = nt11_ee_sf->GetBinContent(i+1) + nt11_ee_df->GetBinContent(i+1);
+		float em_tot_fakes = nt11_em_sf->GetBinContent(i+1) + nt11_em_df->GetBinContent(i+1);
+		float tot_fakes = mm_tot_fakes + ee_tot_fakes + em_tot_fakes;
+		
+		// Errors (add total errors of fakes)
+		float esyst2_mm  = FakeESyst2*mm_tot_fakes*mm_tot_fakes;
+		float esyst2_ee  = FakeESyst2*ee_tot_fakes*ee_tot_fakes;
+		float esyst2_em  = FakeESyst2*em_tot_fakes*em_tot_fakes;
+		float esyst2_tot = FakeESyst2*tot_fakes*tot_fakes;
+		float estat2_mm  = FR->getMMTotEStat()*FR->getMMTotEStat();
+		float estat2_ee  = FR->getEETotEStat()*FR->getEETotEStat();
+		float estat2_em  = FR->getEMTotEStat()*FR->getEMTotEStat();
+		float estat2_tot = FR->getTotEStat()  *FR->getTotEStat();
+
+		float prev    = totbg   ->GetBinError(i+1);
+		float prev_mm = totbg_mm->GetBinError(i+1);
+		float prev_em = totbg_em->GetBinError(i+1);
+		float prev_ee = totbg_ee->GetBinError(i+1);
+
+		totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		totbg_mm->SetBinError(i+1, prev_mm + esyst2_mm + estat2_mm);
+		totbg_em->SetBinError(i+1, prev_em + esyst2_em + estat2_em);
+		totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee + estat2_ee);
+		
+		delete FR;
+	}
+	
+	nt11_sf->Add(nt11_mm_sf);
+	nt11_sf->Add(nt11_ee_sf);
+	nt11_sf->Add(nt11_em_sf);
+
+	nt11_df->Add(nt11_mm_df);
+	nt11_df->Add(nt11_ee_df);
+	nt11_df->Add(nt11_em_df);
+
+	totbg   ->Add(nt11_sf);
+	totbg   ->Add(nt11_df);
+	totbg_mm->Add(nt11_mm_sf);
+	totbg_mm->Add(nt11_mm_df);
+	totbg_em->Add(nt11_em_sf);
+	totbg_em->Add(nt11_em_df);
+	totbg_ee->Add(nt11_ee_sf);
+	totbg_ee->Add(nt11_ee_df);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// E-CHARGE MISID /////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	TH1D *nt11_cm = new TH1D(Form("NT11_CM_%s", varname.Data()), varname, nbins, bins); nt11_cm->Sumw2();
+
+	TH1D *nt11_ee_cm = new TH1D(Form("NT11_EE_CM_%s", varname.Data()), varname, nbins, bins); nt11_ee_cm->Sumw2();
+	TH1D *nt11_em_cm = new TH1D(Form("NT11_EM_CM_%s", varname.Data()), varname, nbins, bins); nt11_em_cm->Sumw2();
+
+	// Abbreviations
+	float fb  = gEChMisIDB;
+	float fbE = gEChMisIDB_E;
+	float fe  = gEChMisIDE;
+	float feE = gEChMisIDE_E;
+
+	for(size_t i = 0; i < nbins; ++i){
+		float nt2_ee_BB_os = nt2_os_ee_bb->GetBinContent(i+1);
+		float nt2_ee_EB_os = nt2_os_ee_eb->GetBinContent(i+1);
+		float nt2_ee_EE_os = nt2_os_ee_ee->GetBinContent(i+1);
+		float nt2_em_BB_os = nt2_os_em_bb->GetBinContent(i+1);
+		float nt2_em_EE_os = nt2_os_em_ee->GetBinContent(i+1);
+		
+		// Errors
+		FakeRatios *FR = new FakeRatios();
+
+		// Simple error propagation assuming error on number of events is FR->getEStat2()
+		nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os);
+		float nt11_ee_cm_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+		float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+
+		nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
+		float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
+		float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+		
+		float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
+		float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
+		float esyst2_tot = nt11_ee_cm_e2*nt11_ee_cm_e2 + nt11_em_cm_e2*nt11_em_cm_e2;
+		float estat2_ee  = nt11_ee_cm_e1*nt11_ee_cm_e1;
+		float estat2_em  = nt11_em_cm_e1*nt11_em_cm_e1;
+		float estat2_tot = nt11_ee_cm_e1*nt11_ee_cm_e1 + nt11_em_cm_e1*nt11_em_cm_e1;
+
+		float prev    = totbg   ->GetBinError(i+1);
+		float prev_em = totbg_em->GetBinError(i+1);
+		float prev_ee = totbg_ee->GetBinError(i+1);
+
+		totbg   ->SetBinError(i+1, prev    + esyst2_tot + estat2_tot);
+		totbg_em->SetBinError(i+1, prev_em + esyst2_em  + estat2_em);
+		totbg_ee->SetBinError(i+1, prev_ee + esyst2_ee  + estat2_ee);
+		delete FR;
+	}
+
+	nt11_cm->Add(nt11_ee_cm);
+	nt11_cm->Add(nt11_em_cm);
+
+	totbg   ->Add(nt11_cm);
+	totbg_em->Add(nt11_em_cm);
+	totbg_ee->Add(nt11_ee_cm);
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// SIGNAL /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	gSample sigsam = LM11;
+	TH1D *nt11_sig    = new TH1D(Form("NT11_Sig%s",    varname.Data()), varname, nbins, bins); nt11_sig   ->Sumw2();
+	TH1D *nt11_mm_sig = new TH1D(Form("NT11_mm_Sig%s", varname.Data()), varname, nbins, bins); nt11_mm_sig->Sumw2();
+	TH1D *nt11_em_sig = new TH1D(Form("NT11_em_Sig%s", varname.Data()), varname, nbins, bins); nt11_em_sig->Sumw2();
+	TH1D *nt11_ee_sig = new TH1D(Form("NT11_ee_Sig%s", varname.Data()), varname, nbins, bins); nt11_ee_sig->Sumw2();
+	nt11_mm_sig->Add(fSamples[sigsam]->diffyields[Muon].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+	nt11_ee_sig->Add(fSamples[sigsam]->diffyields[Elec].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+	nt11_em_sig->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+	nt11_sig   ->Add(fSamples[sigsam]->diffyields[Muon].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+	nt11_sig   ->Add(fSamples[sigsam]->diffyields[Elec].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+	nt11_sig   ->Add(fSamples[sigsam]->diffyields[ElMu].hnt11[10], fLumiNorm / fSamples[LM4]->getLumi());
+
+	///////////////////////////////////////////////////////////////////////////////////
+	// OUTPUT /////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
+	nt11->SetMarkerColor(kBlack);
+	nt11->SetMarkerStyle(20);
+	nt11->SetMarkerSize(2.0);
+	nt11->SetLineWidth(2);
+	nt11->SetLineColor(kBlack);
+	nt11->SetFillColor(kBlack);
+	nt11_mm->SetMarkerColor(kBlack);
+	nt11_mm->SetMarkerStyle(20);
+	nt11_mm->SetMarkerSize(2.0);
+	nt11_mm->SetLineWidth(2);
+	nt11_mm->SetLineColor(kBlack);
+	nt11_mm->SetFillColor(kBlack);
+	nt11_ee->SetMarkerColor(kBlack);
+	nt11_ee->SetMarkerStyle(20);
+	nt11_ee->SetMarkerSize(2.0);
+	nt11_ee->SetLineWidth(2);
+	nt11_ee->SetLineColor(kBlack);
+	nt11_ee->SetFillColor(kBlack);
+	nt11_em->SetMarkerColor(kBlack);
+	nt11_em->SetMarkerStyle(20);
+	nt11_em->SetMarkerSize(2.0);
+	nt11_em->SetLineWidth(2);
+	nt11_em->SetLineColor(kBlack);
+	nt11_em->SetFillColor(kBlack);
+
+	nt11_sf->SetLineWidth(1);
+	nt11_df->SetLineWidth(1);
+	nt11_ss->SetLineWidth(1);
+	nt11_wz->SetLineWidth(1);
+	nt11_ttw->SetLineWidth(1);
+	nt11_ttz->SetLineWidth(1);
+	nt11_sf->SetLineColor(50);
+	nt11_sf->SetFillColor(50);
+	nt11_df->SetLineColor(38);
+	nt11_df->SetFillColor(38);
+	nt11_cm->SetLineColor(42);
+	nt11_cm->SetFillColor(42);
+	nt11_ss->SetLineColor(31);
+	nt11_ss->SetFillColor(31);
+	nt11_wz->SetLineColor(39);
+	nt11_wz->SetFillColor(39);
+	nt11_ttw->SetLineColor(29);
+	nt11_ttw->SetFillColor(29);
+	nt11_ttz->SetLineColor(30);
+	nt11_ttz->SetFillColor(30);
+
+	nt11_mm_sf->SetLineWidth(1);
+	nt11_mm_df->SetLineWidth(1);
+	nt11_mm_ss->SetLineWidth(1);
+	nt11_mm_wz->SetLineWidth(1);
+	nt11_mm_ttw->SetLineWidth(1);
+	nt11_mm_ttz->SetLineWidth(1);
+	nt11_mm_sf->SetLineColor(50);
+	nt11_mm_sf->SetFillColor(50);
+	nt11_mm_df->SetLineColor(38);
+	nt11_mm_df->SetFillColor(38);
+	nt11_mm_ss->SetLineColor(31);
+	nt11_mm_ss->SetFillColor(31);
+	nt11_mm_wz->SetLineColor(39);
+	nt11_mm_wz->SetFillColor(39);
+	nt11_mm_ttw->SetLineColor(29);
+	nt11_mm_ttw->SetFillColor(29);
+	nt11_mm_ttz->SetLineColor(30);
+	nt11_mm_ttz->SetFillColor(30);
+
+	nt11_ee_sf->SetLineWidth(1);
+	nt11_ee_df->SetLineWidth(1);
+	nt11_ee_ss->SetLineWidth(1);
+	nt11_ee_wz->SetLineWidth(1);
+	nt11_ee_ttw->SetLineWidth(1);
+	nt11_ee_ttz->SetLineWidth(1);
+	nt11_ee_sf->SetLineColor(50);
+	nt11_ee_sf->SetFillColor(50);
+	nt11_ee_df->SetLineColor(38);
+	nt11_ee_df->SetFillColor(38);
+	nt11_ee_cm->SetLineColor(42);
+	nt11_ee_cm->SetFillColor(42);
+	nt11_ee_ss->SetLineColor(31);
+	nt11_ee_ss->SetFillColor(31);
+	nt11_ee_wz->SetLineColor(39);
+	nt11_ee_wz->SetFillColor(39);
+	nt11_ee_ttw->SetLineColor(29);
+	nt11_ee_ttw->SetFillColor(29);
+	nt11_ee_ttz->SetLineColor(30);
+	nt11_ee_ttz->SetFillColor(30);
+
+	nt11_em_sf->SetLineWidth(1);
+	nt11_em_df->SetLineWidth(1);
+	nt11_em_ss->SetLineWidth(1);
+	nt11_em_wz->SetLineWidth(1);
+	nt11_em_ttw->SetLineWidth(1);
+	nt11_em_ttz->SetLineWidth(1);
+	nt11_em_sf->SetLineColor(50);
+	nt11_em_sf->SetFillColor(50);
+	nt11_em_df->SetLineColor(38);
+	nt11_em_df->SetFillColor(38);
+	nt11_em_cm->SetLineColor(42);
+	nt11_em_cm->SetFillColor(42);
+	nt11_em_ss->SetLineColor(31);
+	nt11_em_ss->SetFillColor(31);
+	nt11_em_wz->SetLineColor(39);
+	nt11_em_wz->SetFillColor(39);
+	nt11_em_ttw->SetLineColor(29);
+	nt11_em_ttw->SetFillColor(29);
+	nt11_em_ttz->SetLineColor(30);
+	nt11_em_ttz->SetFillColor(30);
+	
+	nt11_sig   ->SetLineWidth(2);
+	nt11_mm_sig->SetLineWidth(2);
+	nt11_em_sig->SetLineWidth(2);
+	nt11_ee_sig->SetLineWidth(2);
+
+	nt11_sig   ->SetLineColor(kBlue);
+	nt11_mm_sig->SetLineColor(kBlue);
+	nt11_em_sig->SetLineColor(kBlue);
+	nt11_ee_sig->SetLineColor(kBlue);
+	
+	nt11_sig   ->SetFillStyle(0);
+	nt11_mm_sig->SetFillStyle(0);
+	nt11_em_sig->SetFillStyle(0);
+	nt11_ee_sig->SetFillStyle(0);
+	
+	totbg   ->SetLineWidth(1);
+	totbg_mm->SetLineWidth(1);
+	totbg_em->SetLineWidth(1);
+	totbg_ee->SetLineWidth(1);
+
+	totbg   ->SetFillColor(12);
+	totbg_mm->SetFillColor(12);
+	totbg_em->SetFillColor(12);
+	totbg_ee->SetFillColor(12);
+	totbg   ->SetFillStyle(3005);
+	totbg_mm->SetFillStyle(3005);
+	totbg_em->SetFillStyle(3005);
+	totbg_ee->SetFillStyle(3005);
+
+	// Take square root of sum of squared errors:
+	// (stored the SQUARED errors before)
+	for(size_t i = 0; i < nbins; ++i){
+		float prev    = totbg   ->GetBinError(i+1);
+		float prev_mm = totbg_mm->GetBinError(i+1);
+		float prev_em = totbg_em->GetBinError(i+1);
+		float prev_ee = totbg_ee->GetBinError(i+1);
+
+		totbg   ->SetBinError(i+1, sqrt(prev)   );
+		totbg_mm->SetBinError(i+1, sqrt(prev_mm));
+		totbg_em->SetBinError(i+1, sqrt(prev_em));
+		totbg_ee->SetBinError(i+1, sqrt(prev_ee));
+	}
+
+	// Normalize everything to binwidth
+	nt11_sf    = normHistBW(nt11_sf,  binwidthscale[10]);
+	nt11_df    = normHistBW(nt11_df,  binwidthscale[10]);
+	nt11_ss    = normHistBW(nt11_ss,  binwidthscale[10]);
+	nt11_wz    = normHistBW(nt11_wz,  binwidthscale[10]);
+	nt11_ttw   = normHistBW(nt11_ttw, binwidthscale[10]);
+	nt11_ttz   = normHistBW(nt11_ttz, binwidthscale[10]);
+	nt11_cm    = normHistBW(nt11_cm,  binwidthscale[10]);
+
+	nt11_mm_sf  = normHistBW(nt11_mm_sf, binwidthscale[10]);
+	nt11_mm_df  = normHistBW(nt11_mm_df, binwidthscale[10]);
+	nt11_mm_ss  = normHistBW(nt11_mm_ss, binwidthscale[10]);
+	nt11_mm_wz  = normHistBW(nt11_mm_wz, binwidthscale[10]);
+	nt11_mm_ttw = normHistBW(nt11_mm_ttw, binwidthscale[10]);
+	nt11_mm_ttz = normHistBW(nt11_mm_ttz, binwidthscale[10]);
+
+	nt11_ee_sf  = normHistBW(nt11_ee_sf, binwidthscale[10]);
+	nt11_ee_df  = normHistBW(nt11_ee_df, binwidthscale[10]);
+	nt11_ee_ss  = normHistBW(nt11_ee_ss, binwidthscale[10]);
+	nt11_ee_wz  = normHistBW(nt11_ee_wz, binwidthscale[10]);
+	nt11_ee_ttw = normHistBW(nt11_ee_ttw, binwidthscale[10]);
+	nt11_ee_ttz = normHistBW(nt11_ee_ttz, binwidthscale[10]);
+	nt11_ee_cm  = normHistBW(nt11_ee_cm, binwidthscale[10]);
+	
+	nt11_em_sf  = normHistBW(nt11_em_sf, binwidthscale[10]);
+	nt11_em_df  = normHistBW(nt11_em_df, binwidthscale[10]);
+	nt11_em_ss  = normHistBW(nt11_em_ss, binwidthscale[10]);
+	nt11_em_ttw = normHistBW(nt11_em_ttw, binwidthscale[10]);
+	nt11_em_ttz = normHistBW(nt11_em_ttz, binwidthscale[10]);
+	nt11_em_wz  = normHistBW(nt11_em_wz, binwidthscale[10]);
+	nt11_em_cm  = normHistBW(nt11_em_cm, binwidthscale[10]);
+	
+	totbg      = normHistBW(totbg,    binwidthscale[10]);
+	totbg_mm   = normHistBW(totbg_mm, binwidthscale[10]);
+	totbg_em   = normHistBW(totbg_em, binwidthscale[10]);
+	totbg_ee   = normHistBW(totbg_ee, binwidthscale[10]);
+
+	nt11       = normHistBW(nt11,    binwidthscale[10]);
+	nt11_mm    = normHistBW(nt11_mm, binwidthscale[10]);
+	nt11_em    = normHistBW(nt11_em, binwidthscale[10]);
+	nt11_ee    = normHistBW(nt11_ee, binwidthscale[10]);
+
+	// Fill stacks
+	THStack *nt11_tot    = new THStack("NT11_TotalBG", "NT11_TotalBG");
+	THStack *nt11_mm_tot = new THStack("NT11_MM_TotalBG", "NT11_MM_TotalBG");
+	THStack *nt11_ee_tot = new THStack("NT11_EE_TotalBG", "NT11_EE_TotalBG");
+	THStack *nt11_em_tot = new THStack("NT11_EM_TotalBG", "NT11_EM_TotalBG");
+	
+	nt11_tot->Add(nt11_sf);
+	nt11_tot->Add(nt11_df);
+	nt11_tot->Add(nt11_cm);
+	nt11_tot->Add(nt11_ss);
+	nt11_tot->Add(nt11_wz);
+	nt11_tot->Add(nt11_ttw);
+	nt11_tot->Add(nt11_ttz);
+
+	nt11_mm_tot->Add(nt11_mm_sf);
+	nt11_mm_tot->Add(nt11_mm_df);
+	nt11_mm_tot->Add(nt11_mm_ss);
+	nt11_mm_tot->Add(nt11_mm_wz);
+	nt11_mm_tot->Add(nt11_mm_ttw);
+	nt11_mm_tot->Add(nt11_mm_ttz);
+
+	nt11_ee_tot->Add(nt11_ee_sf);
+	nt11_ee_tot->Add(nt11_ee_df);
+	nt11_ee_tot->Add(nt11_ee_cm);
+	nt11_ee_tot->Add(nt11_ee_ss);
+	nt11_ee_tot->Add(nt11_ee_wz);
+	nt11_ee_tot->Add(nt11_ee_ttw);
+	nt11_ee_tot->Add(nt11_ee_ttz);
+
+	nt11_em_tot->Add(nt11_em_sf);
+	nt11_em_tot->Add(nt11_em_df);
+	nt11_em_tot->Add(nt11_em_cm);
+	nt11_em_tot->Add(nt11_em_ss);
+	nt11_em_tot->Add(nt11_em_wz);
+	nt11_em_tot->Add(nt11_em_ttw);
+	nt11_em_tot->Add(nt11_em_ttz);
+
+	// Signal
+	// nt11_tot->Add(nt11_sig);
+	// nt11_mm_tot->Add(nt11_mm_sig);
+	// nt11_ee_tot->Add(nt11_ee_sig);
+	// nt11_em_tot->Add(nt11_em_sig);
+
+	TString ytitle = "Events";
+	nt11_tot->Draw("goff");
+	for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
+	nt11_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[10]);
+	nt11_tot->GetXaxis()->SetLabelSize(0.06);
+	nt11_tot->GetYaxis()->SetTitle(ytitle);
+
+	nt11_mm_tot->Draw("goff");
+	for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_mm_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
+	nt11_mm_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[10]);
+	nt11_mm_tot->GetXaxis()->SetLabelSize(0.06);
+	nt11_mm_tot->GetYaxis()->SetTitle(ytitle);
+
+	nt11_ee_tot->Draw("goff");
+	for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_ee_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
+	nt11_ee_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[10]);
+	nt11_ee_tot->GetXaxis()->SetLabelSize(0.06);
+	nt11_ee_tot->GetYaxis()->SetTitle(ytitle);
+
+	nt11_em_tot->Draw("goff");
+	for(size_t i = 1; i <= nt11_sf->GetNbinsX(); ++i) nt11_em_tot->GetXaxis()->SetBinLabel(i, Form("%d", i-1));
+	nt11_em_tot->GetXaxis()->SetTitle(DiffPredYields::axis_label[10]);
+	nt11_em_tot->GetXaxis()->SetLabelSize(0.06);
+	nt11_em_tot->GetYaxis()->SetTitle(ytitle);
+
+	nt11_tot   ->SetMinimum(0.5*nt11   ->GetMinimum());
+	nt11_mm_tot->SetMinimum(0.5*nt11_mm->GetMinimum());
+	nt11_ee_tot->SetMinimum(0.5*nt11_ee->GetMinimum());
+	nt11_em_tot->SetMinimum(0.5*nt11_em->GetMinimum());
+
+	double max = nt11->Integral();
+	nt11    ->SetMaximum(max>1?max+1:1.);
+	nt11_sf ->SetMaximum(max>1?max+1:1.);
+	nt11_df ->SetMaximum(max>1?max+1:1.);
+	nt11_cm ->SetMaximum(max>1?max+1:1.);
+	nt11_ss ->SetMaximum(max>1?max+1:1.);
+	nt11_wz ->SetMaximum(max>1?max+1:1.);
+	nt11_ttw->SetMaximum(max>1?max+1:1.);
+	nt11_ttz->SetMaximum(max>1?max+1:1.);
+	nt11_tot->SetMaximum(max>1?max+1:1.);
+
+	double max_mm = nt11_mm->Integral();
+	nt11_mm    ->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_sf ->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_df ->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_ss ->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_wz ->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_ttw->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_ttz->SetMaximum(max_mm>1?max_mm+1:1.);
+	nt11_mm_tot->SetMaximum(max_mm>1?max_mm+1:1.);
+
+	double max_ee = nt11_ee->Integral();
+	nt11_ee    ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_sf ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_df ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_cm ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_ss ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_wz ->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_ttw->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_ttz->SetMaximum(max_ee>1?max_ee+1:1.);
+	nt11_ee_tot->SetMaximum(max_ee>1?max_ee+1:1.);
+
+	double max_em = nt11_em->Integral();
+	nt11_em    ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_sf ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_df ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_cm ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_ss ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_wz ->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_ttw->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_ttz->SetMaximum(max_em>1?max_em+1:1.);
+	nt11_em_tot->SetMaximum(max_em>1?max_em+1:1.);
+	
+	fOutputSubDir = "DiffPredictionPlots/";
+	/////////////////////////////////////////////////////////////////
+	TLegend *leg = new TLegend(0.60,0.62,0.90,0.88);
+	leg->AddEntry(nt11,     "Observed","p");
+	leg->AddEntry(nt11_ttz, "TTZ Production","f");
+	leg->AddEntry(nt11_ttw, "TTW Production","f");
+	leg->AddEntry(nt11_wz,  "WZ Production","f");
+	leg->AddEntry(nt11_ss,  "Rare SM","f");
+	leg->AddEntry(nt11_cm,  "Charge MisID","f");
+	leg->AddEntry(nt11_df,  "Double Fakes","f");
+	leg->AddEntry(nt11_sf,  "Single Fakes","f");
+	leg->AddEntry(totbg,    "Total Uncertainty","f");
+	// leg->AddEntry(nt11_sig,fSamples[sigsam]->sname,"l");
+	leg->SetFillStyle(0);
+	leg->SetTextFont(42);
+	leg->SetBorderSize(0);
+	
+	TCanvas *c_temp = new TCanvas("C_ObsPred_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+	c_temp->cd();
+	gPad->SetLogy();
+	
+	nt11_tot->Draw("hist");
+	// nt11_error->DrawCopy("X0 E1 same");
+	nt11->DrawCopy("PE X0 same");
+	totbg->DrawCopy("0 E2 same");
+	// nt11_sig->DrawCopy("hist same");
+	leg->Draw();
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
+	drawDiffCuts(j);
+	drawTopLine();
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, "ObsPred_" + varname, fOutputDir + fOutputSubDir);
+	gPad->SetLogy(0);
+	float minopt, maxopt;
+	vector<TH1D*> histvec;
+	histvec.push_back(nt11);
+	histvec.push_back(totbg);
+	getPlottingRange(minopt, maxopt, histvec, 0.1);
+	nt11_tot->SetMinimum(0);
+	nt11_tot->SetMaximum(maxopt);
+	Util::PrintPDF(c_temp, "ObsPred_" + varname + "_lin", fOutputDir + fOutputSubDir + "lin/");
+
+	fOutputSubDir = "DiffPredictionPlots/IndividualChannels/";
+	/////////////////////////////////////////////////////////////////
+	TLegend *leg_mm = new TLegend(0.60,0.64,0.90,0.88);
+	leg_mm->AddEntry(nt11_mm,     "Observed","p");
+	leg_mm->AddEntry(nt11_mm_ttz, "TTZ Production","f");
+	leg_mm->AddEntry(nt11_mm_ttw, "TTW Production","f");
+	leg_mm->AddEntry(nt11_mm_wz,  "WZ Production","f");
+	leg_mm->AddEntry(nt11_mm_ss,  "Rare SM","f");
+	leg_mm->AddEntry(nt11_mm_df,  "Double Fakes","f");
+	leg_mm->AddEntry(nt11_mm_sf,  "Single Fakes","f");
+	leg_mm->AddEntry(totbg_mm,    "Total Uncertainty","f");
+	// leg_mm->AddEntry(nt11_mm_sig,fSamples[sigsam]->sname,"l");
+	leg_mm->SetFillStyle(0);
+	leg_mm->SetTextFont(42);
+	leg_mm->SetBorderSize(0);
+	
+	c_temp = new TCanvas("C_ObsPred_MM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+	c_temp->cd();
+	gPad->SetLogy();
+	
+	nt11_mm_tot->Draw("hist");
+	// nt11_error->DrawCopy("X0 E1 same");
+	nt11_mm->DrawCopy("PE X0 same");
+	totbg_mm->DrawCopy("0 E2 same");
+	// nt11_mm_sig->DrawCopy("hist same");
+	leg_mm->Draw();
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.65,0.92, "#mu#mu");
+	drawDiffCuts(j);
+	drawTopLine();
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, varname + "_MM_ObsPred", fOutputDir + fOutputSubDir);
+
+	histvec.clear();
+	histvec.push_back(nt11_mm);
+	histvec.push_back(totbg_mm);
+	getPlottingRange(minopt, maxopt, histvec, 0.1);
+	nt11_mm_tot->SetMinimum(0);
+	nt11_mm_tot->SetMaximum(maxopt);
+	gPad->SetLogy(0);
+	Util::PrintPDF(c_temp, varname + "_MM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+	/////////////////////////////////////////////////////////////////
+	TLegend *leg_ee = new TLegend(0.60,0.62,0.90,0.88);
+	leg_ee->AddEntry(nt11_ee,     "Observed","p");
+	leg_ee->AddEntry(nt11_ee_ttz, "TTZ Production","f");
+	leg_ee->AddEntry(nt11_ee_ttw, "TTW Production","f");
+	leg_ee->AddEntry(nt11_ee_wz,  "WZ Production","f");
+	leg_ee->AddEntry(nt11_ee_ss,  "Rare SM","f");
+	leg_ee->AddEntry(nt11_ee_cm,  "Charge MisID","f");
+	leg_ee->AddEntry(nt11_ee_df,  "Double Fakes","f");
+	leg_ee->AddEntry(nt11_ee_sf,  "Single Fakes","f");
+	leg_ee->AddEntry(totbg_ee,    "Total Uncertainty","f");
+	// leg_mm->AddEntry(nt11_ee_sig,fSamples[sigsam]->sname,"l");
+	leg_ee->SetFillStyle(0);
+	leg_ee->SetTextFont(42);
+	leg_ee->SetBorderSize(0);
+	
+	c_temp = new TCanvas("C_ObsPred_EE_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+	c_temp->cd();
+	gPad->SetLogy();
+	
+	nt11_ee_tot->Draw("hist");
+	// nt11_error->DrawCopy("X0 E1 same");
+	nt11_ee->DrawCopy("PE X0 same");
+	totbg_ee->DrawCopy("0 E2 same");
+	// nt11_ee_sig->DrawCopy("hist same");
+	leg_ee->Draw();
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.65,0.92, "ee");
+	drawDiffCuts(j);
+	drawTopLine();
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, varname + "_EE_ObsPred", fOutputDir + fOutputSubDir);
+
+	histvec.clear();
+	histvec.push_back(nt11_ee);
+	histvec.push_back(totbg_ee);
+	getPlottingRange(minopt, maxopt, histvec, 0.1);
+	nt11_ee_tot->SetMinimum(0);
+	nt11_ee_tot->SetMaximum(maxopt);
+	gPad->SetLogy(0);
+	Util::PrintPDF(c_temp, varname + "_EE_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+	/////////////////////////////////////////////////////////////////
+	TLegend *leg_em = new TLegend(0.60,0.62,0.90,0.88);
+	leg_em->AddEntry(nt11_em,     "Observed","p");
+	leg_em->AddEntry(nt11_em_ttz, "TTZ Production","f");
+	leg_em->AddEntry(nt11_em_ttw, "TTW Production","f");
+	leg_em->AddEntry(nt11_em_wz,  "WZ Production","f");
+	leg_em->AddEntry(nt11_em_ss,  "Rare SM","f");
+	leg_em->AddEntry(nt11_em_cm,  "Charge MisID","f");
+	leg_em->AddEntry(nt11_em_df,  "Double Fakes","f");
+	leg_em->AddEntry(nt11_em_sf,  "Single Fakes","f");
+	leg_em->AddEntry(totbg_em,    "Total Uncertainty","f");
+	// leg_mm->AddEntry(nt11_em_sig,fSamples[sigsam]->sname,"l");
+	leg_em->SetFillStyle(0);
+	leg_em->SetTextFont(42);
+	leg_em->SetBorderSize(0);
+	
+	c_temp = new TCanvas("C_ObsPred_EM_" + varname, "Observed vs Predicted", 0, 0, 800, 600);
+	c_temp->cd();
+	gPad->SetLogy();
+	
+	nt11_em_tot->Draw("hist");
+	totbg_em->DrawCopy("0 E2 same");
+	nt11_em->DrawCopy("PE X0 same");
+	// nt11_em_sig->DrawCopy("hist same");
+	leg_em->Draw();
+	lat->SetTextSize(0.04);
+	lat->DrawLatex(0.65,0.92, "e#mu");
+	drawDiffCuts(j);
+	drawTopLine();
+	
+	gPad->RedrawAxis();
+	Util::PrintPDF(c_temp, varname + "_EM_ObsPred", fOutputDir + fOutputSubDir);
+
+	histvec.clear();
+	histvec.push_back(nt11_em);
+	histvec.push_back(totbg_em);
+	getPlottingRange(minopt, maxopt, histvec, 0.1);
+	nt11_em_tot->SetMinimum(0);
+	nt11_em_tot->SetMaximum(maxopt);
+	gPad->SetLogy(0);
+	Util::PrintPDF(c_temp, varname + "_EM_ObsPred_lin", fOutputDir + fOutputSubDir + "lin/");
+
+	// Cleanup
+	delete c_temp, leg, leg_mm, leg_em, leg_ee;
+	delete nt11, nt11_mm, nt11_ee, nt11_em;
+	delete nt11_sig, nt11_mm_sig, nt11_ee_sig, nt11_em_sig;
+	delete nt10_mm, nt10_em, nt10_ee, nt01_mm, nt01_em, nt01_ee, nt00_mm, nt00_em, nt00_ee;
+	delete nt2_os_ee_bb, nt2_os_ee_eb, nt2_os_ee_ee, nt2_os_em_bb, nt2_os_em_ee;
+	delete nt11_ss, nt11_mm_ss, nt11_em_ss, nt11_ee_ss;
+	delete nt11_wz, nt11_mm_wz, nt11_em_wz, nt11_ee_wz;
+	delete nt11_ttw, nt11_mm_ttw, nt11_em_ttw, nt11_ee_ttw;
+	delete nt11_ttz, nt11_mm_ttz, nt11_em_ttz, nt11_ee_ttz;
+	delete nt11_sf, nt11_mm_sf, nt11_em_sf, nt11_ee_sf;
+	delete nt11_df, nt11_mm_df, nt11_em_df, nt11_ee_df;
+	delete nt11_cm, nt11_em_cm, nt11_ee_cm;
+	// delete nt11_mc, nt11_mm_mc, nt11_ee_mc, nt11_em_mc;
+	delete nt11_tot, nt11_mm_tot, nt11_ee_tot, nt11_em_tot;
+	delete totbg, totbg_mm, totbg_em, totbg_ee;
+
 	fOutputSubDir = "";
 }
 
