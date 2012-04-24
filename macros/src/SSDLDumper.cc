@@ -40,12 +40,12 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 /// Definition of tight isolation:
-static const float gMuMaxIso = 0.05;
-static const float gElMaxIso = 0.05;
-// static const float gMuMaxIso = 0.10;
-// static const float gElMaxIso = 0.10;
-static const float gMinJetPt = 20.;
-static const bool  gApplyZVeto = false;
+// static const float gMuMaxIso = 0.05;
+// static const float gElMaxIso = 0.05;
+static const float gMuMaxIso = 0.10;
+static const float gElMaxIso = 0.10;
+static const float gMinJetPt = 40.;
+static const bool  gApplyZVeto = true;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -4418,10 +4418,6 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 	if(muon >= NMus) return false; // Sanity check
 	if(ptcut < 0.) ptcut = fC_minMu2pt;
 	if(MuPt[muon] < ptcut) return false;
-	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
-
-	// Look away now...
-	if(Run == 177719 && Event == 152761720 && MuPt[muon] > 500.) return false;
 
 	return true;
 }
@@ -4439,6 +4435,12 @@ bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
 }
 bool SSDLDumper::isLooseMuon(int muon){
 	if(isGoodMuon(muon) == false)  return false;
+
+	// Veto dep cuts previously in SSDLAnalysis presel
+	if(MuEMVetoEt[muon]  > 4.0)      return false;
+	if(MuHadVetoEt[muon] > 6.0)      return false;
+	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
+
 	if(MuIso[muon] > 1.00) return false;
 	return true;
 }
