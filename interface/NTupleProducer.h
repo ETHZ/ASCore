@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.6 2012/04/23 16:04:14 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.7 2012/04/23 21:00:51 fronga Exp $
 //
 //
 
@@ -176,12 +176,18 @@ private:
   static const int gMaxNGenVtx = 60;
   static const int gMaxNGenParticles = 2000;
 
+  // Maximum configurable number of tags (b-tagging and PF iso)
+  static const unsigned int gMaxNPfIsoTags  = 20;
+  static const unsigned int gMaxNBtags      = 10;
+
   static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
   static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
 
 
   edm::InputTag fMuonTag;
+  std::vector<edm::InputTag> fMuonPfIsoTags;
   edm::InputTag fElectronTag;
+  std::vector<edm::InputTag> fElePfIsoTags;
   std::string fEleIdWP;
   edm::InputTag fMuIsoDepTkTag;
   edm::InputTag fMuIsoDepECTag;
@@ -208,6 +214,7 @@ private:
   edm::InputTag fHBHENoiseResultTag;
   edm::InputTag fHBHENoiseResultTagIso;
   edm::InputTag fSrcRho;
+  edm::InputTag fSrcRhoForIso;
   edm::InputTag fSrcRhoPFnoPU;
   edm::InputTag fpdfWeightTag;
   edm::InputTag pfphotonsProducerTag;
@@ -382,6 +389,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTPUnTrksLowPt;
   std::auto_ptr<std::vector<float> >  fTPUnTrksHighPt;
   std::auto_ptr<float>  fTRho; // rho from L1FastJetCorrection
+  std::auto_ptr<float>  fTRhoForIso; // rho computed up to eta=2.5
   std::auto_ptr<float>  fTRhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
 
   std::auto_ptr<float>  fTPUWeightTotal;
@@ -518,7 +526,7 @@ private:
 
   // Muons:
   std::auto_ptr<int>  fTNMus;
-  std::auto_ptr<int>  fTNMusTot;
+  std::auto_ptr<int>  fTNMusTot; // before preselection
   std::auto_ptr<int>  fTNGMus;
   std::auto_ptr<int>  fTNTMus;
   std::auto_ptr<std::vector<int> >  fTMuGood;
@@ -539,6 +547,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuEta;
   std::auto_ptr<std::vector<float> >  fTMuPhi;
   std::auto_ptr<std::vector<int> >  fTMuCharge;
+  // Isolation variables
   std::auto_ptr<std::vector<float> >  fTMuRelIso03;
   std::auto_ptr<std::vector<float> >  fTMuIso03SumPt;
   std::auto_ptr<std::vector<float> >  fTMuIso03EmEt;
@@ -550,12 +559,16 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuIso05HadEt;
   std::auto_ptr<std::vector<float> >  fTMuEem;
   std::auto_ptr<std::vector<float> >  fTMuEhad;
+  // PF isolation variables
+  std::auto_ptr<std::vector<float> >  fTMuPfIsos[gMaxNPfIsoTags];
+  // Impact parameters
   std::auto_ptr<std::vector<float> >  fTMuD0BS;
   std::auto_ptr<std::vector<float> >  fTMuD0PV;
   std::auto_ptr<std::vector<float> >  fTMuD0E;
   std::auto_ptr<std::vector<float> >  fTMuDzBS;
   std::auto_ptr<std::vector<float> >  fTMuDzPV;
   std::auto_ptr<std::vector<float> >  fTMuDzE;
+  // Mu ID variables
   std::auto_ptr<std::vector<float> >  fTMuNChi2;
   std::auto_ptr<std::vector<int> >  fTMuNGlHits;
   std::auto_ptr<std::vector<int> >  fTMuNMuHits;
@@ -585,6 +598,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTMuIsTMLSAngTight;
   std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationAngTight;
   std::auto_ptr<std::vector<int> >  fTMuIsTMOneStationAngLoose;
+  // Generator information
   std::auto_ptr<std::vector<int> >  fTMuGenID;
   std::auto_ptr<std::vector<int> >  fTMuGenStatus;
   std::auto_ptr<std::vector<float> >  fTMuGenPt;
@@ -636,7 +650,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTElDzBS;
   std::auto_ptr<std::vector<float> >  fTElDzPV;
   std::auto_ptr<std::vector<float> >  fTElDzE;
-  // Isolation
+  // Isolation variables
   std::auto_ptr<std::vector<float> >  fTElRelIso03;
   std::auto_ptr<std::vector<float> >  fTElRelIso04;
   std::auto_ptr<std::vector<float> >  fTElDR03TkSumPt;
@@ -646,7 +660,9 @@ private:
   std::auto_ptr<std::vector<float> >  fTElDR03HcalTowerSumEt;
   std::auto_ptr<std::vector<float> >  fTElDR04HcalTowerSumEt;
   std::auto_ptr<std::vector<float> >  fTElNChi2;
-  // Identification
+  // PF Isolation Variables
+  std::auto_ptr<std::vector<float> >  fTElPfIsos[gMaxNPfIsoTags];
+  // Electron ID variables
   std::auto_ptr<std::vector<int> >  fTElCharge;
   std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfCtfCons;
   std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfCtfScPixCons;
@@ -666,23 +682,23 @@ private:
   std::auto_ptr<std::vector<int> >  fTElIDsimpleWP85relIso;
   std::auto_ptr<std::vector<int> >  fTElIDsimpleWP90relIso;
   std::auto_ptr<std::vector<int> >  fTElIDsimpleWP95relIso;
-  std::auto_ptr<std::vector<int> >  fTElInGap;
+  std::auto_ptr<std::vector<int> >  fTElInGap; // seed crystal next to a gap
   std::auto_ptr<std::vector<int> >  fTElEcalDriven;
   std::auto_ptr<std::vector<int> >  fTElTrackerDriven;
   std::auto_ptr<std::vector<int> >  fTElBasicClustersSize;
   std::auto_ptr<std::vector<float> >  fTElfbrem;
   std::auto_ptr<std::vector<float> >  fTElHcalOverEcal;
-  std::auto_ptr<std::vector<float> >  fTElE1x5;
-  std::auto_ptr<std::vector<float> >  fTElE5x5;
-  std::auto_ptr<std::vector<float> >  fTElE2x5Max;
-  std::auto_ptr<std::vector<float> >  fTElSigmaIetaIeta;
-  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSeedClusterAtCalo;
-  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSeedClusterAtCalo;
-  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSuperClusterAtVtx;
-  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSuperClusterAtVtx;
-  std::auto_ptr<std::vector<float> >  fTElCaloEnergy;
-  std::auto_ptr<std::vector<float> >  fTElTrkMomAtVtx;
-  std::auto_ptr<std::vector<float> >  fTElESuperClusterOverP;
+  std::auto_ptr<std::vector<float> >  fTElE1x5;                       // 5x5 arround seed                                     
+  std::auto_ptr<std::vector<float> >  fTElE5x5;                       // 5x5 arround seed                                     
+  std::auto_ptr<std::vector<float> >  fTElE2x5Max;                    // 2x5 arround seed                                     
+  std::auto_ptr<std::vector<float> >  fTElSigmaIetaIeta;              // shower shape covariance                              
+  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSeedClusterAtCalo;  // Dphi (seed-track) at calo from p_out                 
+  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSeedClusterAtCalo;  // outermost track state extrapolated at calo           
+  std::auto_ptr<std::vector<float> >  fTElDeltaPhiSuperClusterAtVtx;  // Dphi (sc-track) at calo extrapolated from p_in       
+  std::auto_ptr<std::vector<float> >  fTElDeltaEtaSuperClusterAtVtx;  // Deta (sc-track) at calo extrapolated from p_in       
+  std::auto_ptr<std::vector<float> >  fTElCaloEnergy;                 // caloEnergy() = supercluster energy 99.9% of the time 
+  std::auto_ptr<std::vector<float> >  fTElTrkMomAtVtx;                // trackMomentumAtVtx().R()                             
+  std::auto_ptr<std::vector<float> >  fTElESuperClusterOverP;         // Esc/Pin                                              
   std::auto_ptr<std::vector<int> >  fTElNumberOfMissingInnerHits;
   std::auto_ptr<std::vector<int> >  fTElSCindex;
   std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkDist;
@@ -910,7 +926,6 @@ private:
   std::auto_ptr<std::vector<float> > fTJRMSCand;
   std::auto_ptr<std::vector<float> >  fTJeMinDR;
 
-  static const unsigned int gMaxNBtags  = 10;
   std::auto_ptr<std::vector<float> >  fTJbTagProb[gMaxNBtags];
 
   std::auto_ptr<std::vector<float> >  fTJMass;

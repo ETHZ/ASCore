@@ -126,6 +126,9 @@ process.kt6PFJets.doRhoFastjet = True
 process.ak5PFJets.doAreaFastjet = True
 process.ak5PFJets.Rho_EtaMax = process.kt6PFJets.Rho_EtaMax
 
+process.kt6PFJetsForIso = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+process.kt6PFJetsForIso.Rho_EtaMax = cms.double(2.5)
+
 ### JES MET Corrections ########################################################
 from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
 
@@ -288,6 +291,36 @@ for pf in pfPostfixes:
  		"abs( eta ) < 2.4 && pt > 10  && abs( charge ) == 1. && leadPFChargedHadrCand().isNonnull()" 
                 )
 
+
+    getattr(process, 'pfTaus'+pf).discriminators  =    cms.VPSet(cms.PSet(
+        discriminator = cms.InputTag("pfTausBaseDiscriminationByDecayModeFinding"+pf),
+        selectionCut = cms.double(0.5)                    
+        ))
+
+    getattr(process,"patTaus"+pf).tauIDSources = cms.PSet(
+        decayModeFinding = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+pf),
+        byVLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseChargedIsolation"+pf),
+        byLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByLooseChargedIsolation"+pf),
+        byMediumChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByMediumChargedIsolation"+pf),
+        byTightChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByTightChargedIsolation"+pf),
+        byVLooseIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseIsolation"+pf),
+        byLooseIsolation = cms.InputTag("hpsPFTauDiscriminationByLooseIsolation"+pf),
+        byMediumIsolation = cms.InputTag("hpsPFTauDiscriminationByMediumIsolation"+pf),
+        byTightIsolation = cms.InputTag("hpsPFTauDiscriminationByTightIsolation"+pf),
+        byVLooseIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByVLooseIsolationDBSumPtCorr"+pf),
+        byLooseIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByLooseIsolationDBSumPtCorr"+pf),
+        byMediumIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationDBSumPtCorr"+pf),
+        byTightIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightIsolationDBSumPtCorr"+pf),
+        byVLooseCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByVLooseCombinedIsolationDBSumPtCorr"+pf),
+        byLooseCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr"+pf),
+        byMediumCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr"+pf),
+        byTightCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"+pf),
+        againstElectronLoose = cms.InputTag("hpsPFTauDiscriminationByLooseElectronRejection"+pf),
+        againstElectronMedium = cms.InputTag("hpsPFTauDiscriminationByMediumElectronRejection"+pf),
+        againstElectronTight = cms.InputTag("hpsPFTauDiscriminationByTightElectronRejection"+pf),
+        againstMuonLoose = cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection"+pf),
+        againstMuonTight = cms.InputTag("hpsPFTauDiscriminationByTightMuonRejection"+pf)
+        )
 
     # ISOLATION
     getattr(process, 'pfIsolatedMuons'+pf)    .combinedIsolationCut = cms.double(0.20)
@@ -548,7 +581,7 @@ process.printPartons = cms.EDAnalyzer("ParticleListDrawer",
 #
 process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 
-#### DEBUG #####################################################################
+#### DEBUG TOOLS ###################################################
 #process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
@@ -688,6 +721,9 @@ process.newPFBtaggingSequence = cms.Sequence(
     process.newPFJetTracksAssociator *
        process.newPFJetBtagging )
 
+# PF isolation settings
+process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
+
 #### Path ######################################################################
 
 process.p = cms.Path(
@@ -700,8 +736,10 @@ process.p = cms.Path(
        	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
+	+ process.pfIsolationAllSequence
 	+ process.kt6PFJets
 	+ process.ak5PFJets
+	+ process.kt6PFJetsForIso
 	+ process.newBtaggingSequence
 	+ process.newPFBtaggingSequence
        	+ process.mygenjets

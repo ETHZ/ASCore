@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.10 2012/04/23 16:04:15 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.11 2012/04/23 21:00:52 fronga Exp $
 //
 //
 
@@ -143,7 +143,9 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
   // InputTags
   fMuonTag            = iConfig.getParameter<edm::InputTag>("tag_muons");
+  fMuonPfIsoTags      = iConfig.getParameter<std::vector<edm::InputTag> >("tag_muonpfisos");
   fElectronTag        = iConfig.getParameter<edm::InputTag>("tag_electrons");
+  fElePfIsoTags      = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisos");
   fEleIdWP            = iConfig.getParameter<std::string>("tag_elidWP");
   fMuIsoDepTkTag      = iConfig.getParameter<edm::InputTag>("tag_muisodeptk");
   fMuIsoDepECTag      = iConfig.getParameter<edm::InputTag>("tag_muisodepec");
@@ -169,18 +171,19 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fHLTTrigEventTag    = iConfig.getParameter<edm::InputTag>("tag_hlttrigevent");
   if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getParameter<edm::InputTag>("tag_hcalnoise");
   if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getParameter<edm::InputTag>("tag_hcalnoiseIso");
-  fSrcRho             = iConfig.getParameter<edm::InputTag>("tag_srcRho");
-  fSrcRhoPFnoPU       = iConfig.getParameter<edm::InputTag>("tag_srcRhoPFnoPU");
+  fSrcRho              = iConfig.getParameter<edm::InputTag>("tag_srcRho");
+  fSrcRhoForIso        = iConfig.getParameter<edm::InputTag>("tag_srcRhoForIso");
+  fSrcRhoPFnoPU        = iConfig.getParameter<edm::InputTag>("tag_srcRhoPFnoPU");
   pfphotonsProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfphotonsProducer");
-  pfProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfProducer");
+  pfProducerTag        = iConfig.getParameter<edm::InputTag>("tag_pfProducer");
   fSCTagBarrel = iConfig.getParameter<edm::InputTag>("tag_SC_barrel");
   fSCTagEndcap = iConfig.getParameter<edm::InputTag>("tag_SC_endcap");
-  fTrackCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
+  fTrackCollForVertexing          = iConfig.getParameter<edm::InputTag>("tag_fTrackCollForVertexing");
   fAllConversionsCollForVertexing = iConfig.getParameter<edm::InputTag>("tag_fallConversionsCollForVertexing");
   perVtxMvaWeights = iConfig.getParameter<std::string>("tag_perVtxMvaWeights");
-  perVtxMvaMethod = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
+  perVtxMvaMethod  = iConfig.getParameter<std::string>("tag_perVtxMvaMethod");
   perEvtMvaWeights = iConfig.getParameter<std::string>("tag_perEvtMvaWeights");
-  perEvtMvaMethod = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
+  perEvtMvaMethod  = iConfig.getParameter<std::string>("tag_perEvtMvaMethod");
 
   doVertexingFlag = iConfig.getParameter<bool>("tag_doVertexing");
   if (fIsModelScan) doVertexingFlag=false;
@@ -220,12 +223,18 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   CrackCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterCrackCorrection", iConfig);
   LocalCorrFunc    = EcalClusterFunctionFactory::get()->create("EcalClusterLocalContCorrection",iConfig);
 
-  // Check on number of btag alogs configured
+  // Check on number of allowed tags
   if ( fBtagTags.size()>gMaxNBtags )
     throw cms::Exception("BadConfig") << "Too many (" << fBtagTags.size() << ") btagging algos requested. "
                                       << "Maximum is " << gMaxNBtags;
+  if ( fMuonPfIsoTags.size()>gMaxNPfIsoTags )
+    throw cms::Exception("BadConfig") << "Too many (" << fMuonPfIsoTags.size() << ") muon PF iso tags requested. "
+                                      << "Maximum is " << gMaxNPfIsoTags;
+  if ( fElePfIsoTags.size()>gMaxNPfIsoTags )
+    throw cms::Exception("BadConfig") << "Too many (" << fElePfIsoTags.size() << ") electron PF iso tags requested. "
+                                      << "Maximum is " << gMaxNPfIsoTags;
 
-  // Dump the full configuration
+  // Dump the full configuration FIXME: not needed with EDM and provenance...
   edm::LogVerbatim("NTP") << "---------------------------------";
   edm::LogVerbatim("NTP") << " ==> NTupleProducer Constructor ...";
   edm::LogVerbatim("NTP") << iConfig;
@@ -352,6 +361,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(fSrcRho,rho);
   *fTRho = *rho;
 	
+  // rho for correcting isolation
+  edm::Handle<double> rhoForIso;
+  iEvent.getByLabel(fSrcRhoForIso,rhoForIso);
+  *fTRhoForIso = *rhoForIso;
+
   // rho for L1FastJet running PFnoPU
   edm::Handle<double> rhoNoPU;
   iEvent.getByLabel(fSrcRhoPFnoPU,rhoNoPU);
@@ -383,9 +397,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(fSCTagBarrel,BarrelSuperClusters);
   iEvent.getByLabel(fSCTagEndcap,EndcapSuperClusters);
 	
-  //PFcandidates
+  // PFcandidates
   edm::Handle<reco::PFCandidateCollection> pfCandidates;
   iEvent.getByLabel(pfProducerTag, pfCandidates);
+
+  // PF candidate isolation
+  Handle< edm::ValueMap<float> > muonPfIsoTags[gMaxNPfIsoTags];
+  size_t ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTags.begin(); 
+        it!=fMuonPfIsoTags.end(); ++it ) 
+    iEvent.getByLabel((*it),muonPfIsoTags[ipfisotag++]);
+  Handle< edm::ValueMap<float> > elePfIsoTags[gMaxNPfIsoTags];
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTags.begin(); 
+        it!=fElePfIsoTags.end(); ++it ) 
+    iEvent.getByLabel((*it),elePfIsoTags[ipfisotag++]);
 	
   //Electron collection
   edm::Handle<reco::GsfElectronCollection> electronHandle;
@@ -1145,6 +1171,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
        it != muOrdered.end(); ++it, ++mqi ) {
     int index = it->first;
     const Muon& muon = (*muons)[index];
+    Ref<View<Muon> > muonRef(muons,index);
 
     fTMuIsGlobalMuon->push_back( muon.isGlobalMuon() ? 1:0 );
     fTMuIsTrackerMuon->push_back( muon.isTrackerMuon() ? 1:0 );
@@ -1171,6 +1198,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIso05EmEt->push_back( muon.isolationR05().emEt );
     fTMuIso05HadEt->push_back( muon.isolationR05().hadEt );
 
+    // PF isolations:
+    ipfisotag = 0;
+    for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTags.begin(); 
+          it!=fMuonPfIsoTags.end(); ++it ) {
+      fTMuPfIsos[ipfisotag]->push_back( (*muonPfIsoTags[ipfisotag])[muonRef] );
+      ++ipfisotag;
+    }
+
     fTMuCaloComp->push_back( muon.caloCompatibility() );
     fTMuSegmComp->push_back( muon::segmentCompatibility(muon) );
 
@@ -1195,7 +1230,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIsTMOneStationAngLoose->push_back( muon::isGoodMuon(muon, muon::TMOneStationAngLoose) ? 1:0 );
     fTMuIsTMOneStationAngTight->push_back( muon::isGoodMuon(muon, muon::TMOneStationAngTight) ? 1:0 );
 
-    Ref<View<Muon> > muonRef(muons,index);
     const reco::IsoDeposit ECDep = ECDepMap[muonRef];
     const reco::IsoDeposit HCDep = HCDepMap[muonRef];
     fTMuEem->push_back( ECDep.candEnergy() );
@@ -1435,6 +1469,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       int index = it->first;
       const GsfElectron& electron = (*electrons)[index];
+      Ref<View<GsfElectron> > electronRef(electrons,index);
 
       // Save the electron SuperCluster pointer
       elecPtr.push_back(&(*electron.superCluster()));
@@ -1464,6 +1499,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElDzPV                   ->push_back(electron.gsfTrack()->dz(primVtx->position()));
       fTElDzE                    ->push_back(electron.gsfTrack()->dzError());
       fTElNChi2                  ->push_back(electron.gsfTrack()->normalizedChi2());
+
+      // Isolation:
       fTElDR03TkSumPt            ->push_back(electron.dr03TkSumPt());
       fTElDR03EcalRecHitSumEt    ->push_back(electron.dr03EcalRecHitSumEt());
       fTElDR03HcalTowerSumEt     ->push_back(electron.dr03HcalTowerSumEt());
@@ -1472,6 +1509,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElDR04HcalTowerSumEt     ->push_back(electron.dr04HcalTowerSumEt());
       fTElRelIso03               ->push_back(((*fTElDR03TkSumPt)[eqi] + (*fTElDR03EcalRecHitSumEt)[eqi] + (*fTElDR03HcalTowerSumEt)[eqi]) / (*fTElPt)[eqi]);
       fTElRelIso04               ->push_back(((*fTElDR04TkSumPt)[eqi] + (*fTElDR04EcalRecHitSumEt)[eqi] + (*fTElDR04HcalTowerSumEt)[eqi]) / (*fTElPt)[eqi]);
+      // PF isolations:
+      ipfisotag = 0;
+      for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTags.begin(); 
+            it!=fElePfIsoTags.end(); ++it ) {
+        fTElPfIsos[ipfisotag]->push_back( (*elePfIsoTags[ipfisotag])[electronRef] );
+        ++ipfisotag;
+      }
+
       fTElCharge                 ->push_back(electron.charge());
       fTElInGap                  ->push_back(electron.isGap() ? 1:0);
       fTElEcalDriven             ->push_back(electron.ecalDrivenSeed() ? 1:0);
@@ -1526,7 +1571,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
       // Read in Electron ID
       fTElIDMva ->push_back(electron.mva());
-      Ref<View<GsfElectron> > electronRef(electrons,index);
       fTElIDTight            ->push_back(eIDmapT[electronRef]  ? 1:0);
       fTElIDLoose            ->push_back(eIDmapL[electronRef]  ? 1:0);
       fTElIDRobustTight      ->push_back(eIDmapRT[electronRef] ? 1:0);
@@ -2986,30 +3030,36 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   bool blabalot=false;
   bool BloatWithGenInfo=true;	
   if(BloatWithGenInfo && !fIsRealData) {
-    int genIndex[1200];
-    int genNIndex[1200];
-    int genID[1200];
-    float genPx[1200];
-    float genPy[1200];
-    float genPz[1200];
-    float genPt[1200];
-    float genEta[1200];
-    float genPhi[1200];
-    float genM[1200];
-    int genMo1Index[1200];
-    int genMo2Index[1200];
-    int genNMo[1200];
-    int genStatus[1200];
-    int Promptness[1200];
-    bool StoreFlag[1200];
+    static const size_t maxNGenLocal = 2000;
+    int genIndex[maxNGenLocal];
+    int genNIndex[maxNGenLocal];
+    int genID[maxNGenLocal];
+    float genPx[maxNGenLocal];
+    float genPy[maxNGenLocal];
+    float genPz[maxNGenLocal];
+    float genPt[maxNGenLocal];
+    float genEta[maxNGenLocal];
+    float genPhi[maxNGenLocal];
+    float genM[maxNGenLocal];
+    int genMo1Index[maxNGenLocal];
+    int genMo2Index[maxNGenLocal];
+    int genNMo[maxNGenLocal];
+    int genStatus[maxNGenLocal];
+    int Promptness[maxNGenLocal];
+    bool StoreFlag[maxNGenLocal];
 
     int nGenParticles=0;
-	  
+    
     Handle<GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
 	  
     // STEP 1: Loop over all particles and store the information.
     for(size_t i = 0; i < genParticles->size(); ++ i) {
+      if(i>=maxNGenLocal) {
+        edm::LogWarning("NTP") << "@SUB=analyze()"
+                               << "Maximum number of gen particles for local array exceeded";
+        break;
+      }
       nGenParticles++;
       const GenParticle & p = (*genParticles)[i];
       genIndex[i]=i;
@@ -3278,6 +3328,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PUnTrksLowPt");
   produces<std::vector<float> >("PUnTrksHighPt");
   produces<float>("Rho");
+  produces<float>("RhoForIso");
   produces<float>("RhoPFnoPU");
   produces<float>("Weight");
   produces<std::vector<int> >("HLTResults");
@@ -3437,6 +3488,10 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuIso05SumPt");
   produces<std::vector<float> >("MuIso05EmEt");
   produces<std::vector<float> >("MuIso05HadEt");
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
+        it != fMuonPfIsoTags.end(); ++it ) {
+    produces<std::vector<float> >(("Mu"+(*it).label()).c_str());
+  }
   produces<std::vector<float> >("MuEem");
   produces<std::vector<float> >("MuEhad");
   produces<std::vector<float> >("MuD0BS");
@@ -3538,6 +3593,10 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElDR04EcalRecHitSumEt");
   produces<std::vector<float> >("ElDR03HcalTowerSumEt");
   produces<std::vector<float> >("ElDR04HcalTowerSumEt");
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
+        it != fElePfIsoTags.end(); ++it ) {
+    produces<std::vector<float> >(("El"+(*it).label()).c_str());
+  }
   produces<std::vector<float> >("ElNChi2");
   produces<std::vector<int> >("ElCharge");
   produces<std::vector<int> >("ElCInfoIsGsfCtfCons");
@@ -3906,6 +3965,7 @@ void NTupleProducer::resetProducts( void ) {
   fTPUnTrksLowPt.reset(new std::vector<float> );
   fTPUnTrksHighPt.reset(new std::vector<float> );
   fTRho.reset(new float(-999.99));
+  fTRhoForIso.reset(new float(-999.99));
   fTRhoPFnoPU.reset(new float(-999.99));
   fTWeight.reset(new float(-999.99));
   fTHLTResults.reset(new std::vector<int> );
@@ -4059,6 +4119,11 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIso05SumPt.reset(new std::vector<float> );
   fTMuIso05EmEt.reset(new std::vector<float> );
   fTMuIso05HadEt.reset(new std::vector<float> );
+  size_t ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
+        it != fMuonPfIsoTags.end(); ++it ) {
+    fTMuPfIsos[ipfisotag++].reset(new std::vector<float> );
+  }
   fTMuEem.reset(new std::vector<float> );
   fTMuEhad.reset(new std::vector<float> );
   fTMuD0BS.reset(new std::vector<float> );
@@ -4164,6 +4229,11 @@ void NTupleProducer::resetProducts( void ) {
   fTElDR04EcalRecHitSumEt.reset(new std::vector<float> );
   fTElDR03HcalTowerSumEt.reset(new std::vector<float> );
   fTElDR04HcalTowerSumEt.reset(new std::vector<float> );
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
+        it != fElePfIsoTags.end(); ++it ) {
+    fTElPfIsos[ipfisotag++].reset(new std::vector<float> );
+  }
   fTElNChi2.reset(new std::vector<float> );
   fTElCharge.reset(new std::vector<int> );
   fTElCInfoIsGsfCtfCons.reset(new std::vector<int> );
@@ -4592,7 +4662,8 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPUsumPtHighPt, "PUsumPtHighPt");
   event.put(fTPUnTrksLowPt, "PUnTrksLowPt");
   event.put(fTPUnTrksHighPt, "PUnTrksHighPt");
-  event.put(fTRho, "Rho");
+  event.put(fTRho,       "Rho");
+  event.put(fTRhoForIso, "RhoForIso");
   event.put(fTRhoPFnoPU, "RhoPFnoPU");
   event.put(fTWeight, "Weight");
   event.put(fTHLTResults, "HLTResults");
@@ -4750,6 +4821,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIso05SumPt, "MuIso05SumPt");
   event.put(fTMuIso05EmEt, "MuIso05EmEt");
   event.put(fTMuIso05HadEt, "MuIso05HadEt");
+  size_t ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
+        it != fMuonPfIsoTags.end(); ++it ) {
+     event.put(fTMuPfIsos[ipfisotag++], ("Mu"+(*it).label()).c_str());
+  }
   event.put(fTMuEem, "MuEem");
   event.put(fTMuEhad, "MuEhad");
   event.put(fTMuD0BS, "MuD0BS");
@@ -4851,6 +4927,11 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElDR04EcalRecHitSumEt, "ElDR04EcalRecHitSumEt");
   event.put(fTElDR03HcalTowerSumEt, "ElDR03HcalTowerSumEt");
   event.put(fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt");
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
+        it != fElePfIsoTags.end(); ++it ) {
+     event.put(fTElPfIsos[ipfisotag++], ("El"+(*it).label()).c_str());
+  }
   event.put(fTElNChi2, "ElNChi2");
   event.put(fTElCharge, "ElCharge");
   event.put(fTElCInfoIsGsfCtfCons, "ElCInfoIsGsfCtfCons");
