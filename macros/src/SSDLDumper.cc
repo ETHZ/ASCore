@@ -40,12 +40,12 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
 /// Definition of tight isolation:
-// static const float gMuMaxIso = 0.05;
-// static const float gElMaxIso = 0.05;
-static const float gMuMaxIso = 0.10;
-static const float gElMaxIso = 0.10;
-static const float gMinJetPt = 40.;
-static const bool  gApplyZVeto = true;
+static const float gMuMaxIso = 0.05;
+static const float gElMaxIso = 0.05;
+// static const float gMuMaxIso = 0.10;
+// static const float gElMaxIso = 0.10;
+static const float gMinJetPt = 20.;
+static const bool  gApplyZVeto = false;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -231,6 +231,8 @@ void SSDLDumper::InitMC(TTree *tree){
    fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+   fChain->SetBranchAddress("MuEMVetoEt", MuEMVetoEt, &b_MuEMVetoEt);
+   fChain->SetBranchAddress("MuHadVetoEt", MuHadVetoEt, &b_MuHadVetoEt);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
@@ -267,8 +269,6 @@ void SSDLDumper::InitMC(TTree *tree){
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
