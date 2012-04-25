@@ -4,6 +4,7 @@ import optparse
 import sys, re
 import os, subprocess
 
+
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -36,11 +37,13 @@ def query_yes_no(question, default="yes"):
             sys.stdout.write("Please respond with 'yes' or 'no' "\
                 "(or 'y' or 'n').\n")
 
-def refreshFileList( srmPath, tmpFile ):
+def refreshFileList( srmPath, tmpFile, options ):
 #     print 'Reloading list of files in '+tmpFile+'...',
 #     sys.stdout.flush()
 
-    srmls = subprocess.Popen('srmls -count=1000 '+srmPath+' | grep .root > '+tmpFile, shell=True)
+    cmd = 'srmls -count=1000 '+srmPath+' | grep .root > '+tmpFile
+    if options.debug: print '\nRunning',cmd
+    srmls = subprocess.Popen(cmd, shell=True)
     srmls.wait()
     attempts = 1
     while ( (sum(1 for line in open(tmpFile)))==1000*attempts ):
@@ -71,9 +74,9 @@ def performDelete( files, srmSite, logFile ):
         print 'No file deleted'
 
 def findDuplicates():
+
     usage = 'usage: %prog [options] path'
     parser = optparse.OptionParser(usage)
-
     parser.add_option('--site', dest='site', help='Site where files are located. Can be [t2cscs,t3psi]')
     parser.add_option('--moveTo', dest='moveTo', help='Destination for the duplicates')
     parser.add_option('--refresh', dest='refresh', help='Refresh the list of files', action='store_true')
@@ -81,6 +84,7 @@ def findDuplicates():
     parser.add_option('--deleteAll', dest='deleteAll', help='Delete all the duplicates', action='store_true')
     parser.add_option('--dcap', dest='dcap', help='Print the list of files in dcap format', action='store_true')
     parser.add_option('--auto', dest='auto', help='Automatically guess remote location (argument should be crab task directory)', action='store_true', default=False)
+    parser.add_option('--debug', dest='debug', help='Turn on debugging information', action='store_true', default=False)
 #     parser.add_option('--tag', dest='tag', default='MC', help='tag to match the files [MC,data]')
 
     (opt, args) = parser.parse_args()
@@ -95,8 +99,12 @@ def findDuplicates():
         srmSite = "srm://storage01.lcg.cscs.ch:8443/srm/managerv2?SFN="
         rootpath = srmSite+"/pnfs/lcg.cscs.ch/cms/trivcat"
         dcapPrefix= ''
+    elif opt.site == 't2rwth' or opt.site == 'T2_DE_RWTH':
+        srmSite = "srm://grid-srm.physik.rwth-aachen.de:8443/srm/managerv2?SFN="
+        rootpath = srmSite+"/pnfs/physik.rwth-aachen.de/cms"
+        dcapPrefix= ''
     else:
-        parser.error('site can be either t3psi or t2cscs')
+        parser.error('site can be t3psi, t2cscs, or t2rwth')
 
     if len(args)!=1:
         parser.error('Wrong number of arguments')
@@ -116,13 +124,18 @@ def findDuplicates():
     srmPath = rootpath+path
     # Automatic recognition of srm path: in that case, path is a crab task directory
     if opt.auto:
-        query = subprocess.Popen(['sqlite3',path+'/share/crabDB','select lfn from bl_runningjob limit 1'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-        query.wait()
-        if query.returncode != 0:
-            print "Unable to retrieve storage path automatically:",query.stdout.readlines()
+        query = 'select lfn from bl_runningjob where lfn not null limit 1'
+        if opt.debug: print query
+        cmd = subprocess.Popen(['sqlite3',path+'/share/crabDB',query],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        cmd.wait()
+        if cmd.returncode != 0:
+            print "Unable to retrieve storage path automatically:",cmd.stdout.readlines()
             sys.exit(-1)
         else:
-            srmPath = rootpath + os.path.dirname(query.stdout.readline()[2:-2])
+            # cmd.stdout.readlines() returns an array of lines: we take the first
+            result = eval(cmd.stdout.readlines()[0])
+            # the line is actually a python array of files: we take the first
+            srmPath = rootpath + os.path.dirname(result[0])
     
     
     hline = '-'*80
@@ -135,7 +148,7 @@ def findDuplicates():
         print 'Fetching the list of files to '+tmpFile+'...',
         sys.stdout.flush()
 
-        refreshFileList(srmPath,tmpFile)
+        refreshFileList(srmPath,tmpFile,opt)
         print 'Done'
     else:
         print 'Using',tmpFile,'as source'
@@ -144,7 +157,7 @@ def findDuplicates():
     if len(out) is 0:
         print 'The file',tmpFile,'exists but is probably empty. Trying to fetch the list once more...',
         sys.stdout.flush()
-        refreshFileList(srmPath,tmpFile)
+        refreshFileList(srmPath,tmpFile,opt)
         print 'done'
         out = open(tmpFile).read()
  
