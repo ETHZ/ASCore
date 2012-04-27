@@ -2,6 +2,8 @@
 #include "helper/Monitor.hh"
 #include "helper/PUWeight.h"
 
+#include "JetCorrectionUncertainty.h"
+
 
 using namespace std;
 
@@ -9,8 +11,7 @@ const int SSDLAnalysis::fMaxNjets;
 const int SSDLAnalysis::fMaxNmus;
 const int SSDLAnalysis::fMaxNeles;
 
-TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
-// TString SSDLAnalysis::gBaseDir = "/home/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/";
+TString SSDLAnalysis::gBaseDir = "/shome/stiegerb/Workspace/cmssw/CMSSW_4_2_8/src/DiLeptonAnalysis/NTupleProducer/macros/";
 
 //____________________________________________________________________________
 SSDLAnalysis::SSDLAnalysis(TreeReader *tr): UserAnalysisBase(tr){
@@ -32,21 +33,18 @@ SSDLAnalysis::~SSDLAnalysis(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Begin(const char* filename){
-	// string pileupsrc = string(gBaseDir + "data_pileup.root");
-	// SetPileUpSrc(pileupsrc);
-	// ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
-	// ReadPDGTable(gBaseDir + "pdgtable.txt");
+	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
+	ReadPDGTable(gBaseDir + "pdgtable.txt");
+	InitJetCorrectionUncertainty("/shome/stiegerb/Workspace/JetEnergyCorrection/GR_R_42_V19_AK5PF/AK5Calo_Uncertainty.txt");
+
 	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
-	if ( !fIsData) {
+	if(!fIsData){
 		fMsugraCount = new TH2D("msugra_count", "msugra_count", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		for (int i=0; i<10; i++) {
 			fProcessCount[i] = new TH2D(Form("msugra_count_process%i",i+1), Form("msugra_count_process%i",i+1), gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
 		}
 		fSMSCount = new TH2D("sms_count", "sms_count", 51, -5, 505, 51, -5, 505);
 	}
-	//SetPileUpSrc("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/data_pileup.root");
-	ReadTriggers("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/HLTPaths_SSDL.dat");
-	ReadPDGTable("/shome/stiegerb/Workspace/cmssw/CMSSW_4_1_3/src/DiLeptonAnalysis/NTupleProducer/macros/pdgtable.txt");
 	BookTree();
 	if(!fIsData && fDoFillEffTree) BookEffTree();
 }
@@ -248,6 +246,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
 	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
+	fAnalysisTree->Branch("JetJECUncert",  &fTJetJECUncert,"JetJECUncert[NJets]/F");
 }
 
 void SSDLAnalysis::BookEffTree(){
@@ -340,6 +339,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetArea    [ind] = fTR->JArea[jetindex];
 		if(!fIsData) fTJetPartonID[ind] = JetPartonMatch(jetindex);
 		else fTJetPartonID[ind] = -1;
+		fTJetJECUncert[ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex]);
 	}
 
 	// Get METs
@@ -586,15 +586,16 @@ void SSDLAnalysis::ResetTree(){
 	// jet-MET properties
 	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt [i]      = -999.99;
-		fTJeteta[i]      = -999.99;
-		fTJetphi[i]      = -999.99;
-		fTJetbtag1[i]    = -999.99;
-		fTJetbtag2[i]    = -999.99;
-		fTJetbtag3[i]    = -999.99;
-		fTJetbtag4[i]    = -999.99;
-		fTJetArea[i]     = -999.99;
-		fTJetPartonID[i] = -999;
+		fTJetpt [i]       = -999.99;
+		fTJeteta[i]       = -999.99;
+		fTJetphi[i]       = -999.99;
+		fTJetbtag1[i]     = -999.99;
+		fTJetbtag2[i]     = -999.99;
+		fTJetbtag3[i]     = -999.99;
+		fTJetbtag4[i]     = -999.99;
+		fTJetArea[i]      = -999.99;
+		fTJetPartonID[i]  = -999;
+		fTJetJECUncert[i] = -999.99;
 	}
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
@@ -739,6 +740,25 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 }
 
 //____________________________________________________________________________
+// Jets and JES uncertainty, this should go in UserAnalysisBase
+void SSDLAnalysis::InitJetCorrectionUncertainty(const char* file){
+	string filename = string(file);
+	ifstream filePF(filename.c_str());
+	if(!filePF) {cout << "ERROR: cannot open file " << filename << endl; exit(1); }
+	else        {cout << "  using file "            << filename << endl;          }
+	fJetCorrUnc = new JetCorrectionUncertainty(filename);
+}
+float SSDLAnalysis::GetJECUncert(float pt, float eta){
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
+
+	fJetCorrUnc->setJetPt(pt);   
+	fJetCorrUnc->setJetEta(eta); 
+	float uncert= fJetCorrUnc->getUncertainty(true);
+	return uncert;
+}
+
+//____________________________________________________________________________
 int SSDLAnalysis::JetPartonMatch(int index){
 	// Returns PDG id of matched parton, any of (1,2,3,4,5,21)
 	// Unmatched returns 0
@@ -759,6 +779,7 @@ int SSDLAnalysis::JetPartonMatch(int index){
 
 		// Minimize DeltaR
 		float DR = Util::GetDeltaR(jeta, fTR->genInfoEta[i], jphi, fTR->genInfoPhi[i]);
+		if(DR > 0.5) continue;
 		if(DR > mindr) continue;
 
 		mindr = DR;

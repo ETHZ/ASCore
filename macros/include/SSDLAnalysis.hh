@@ -54,6 +54,8 @@ public:
 	bool IsTightEle(int, int);
 	
 	int JetPartonMatch(int);
+	void InitJetCorrectionUncertainty(const char*);
+	float GetJECUncert(float pt, float eta);
 	
 	double corrMuIso(int);
 	double corrElIso(int);
@@ -76,6 +78,8 @@ private:
 	static const int fMaxNeles = 5;
 	
 	static TString gBaseDir;
+	
+	JetCorrectionUncertainty *fJetCorrUnc;
 	
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
@@ -116,6 +120,7 @@ private:
 	float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
 	int   fTJetPartonID[fMaxNjets];
+	float fTJetJECUncert[fMaxNjets];
 
 	float fTpfMET;
 	float fTpfMETphi;
