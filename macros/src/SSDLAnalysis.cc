@@ -236,17 +236,18 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("ElMT",                   &fTElMT,                "ElMT[NEls]/F");
 
 	// jet-MET properties
-	fAnalysisTree->Branch("pfMET",         &fTpfMET,    "pfMET/F");
-	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi, "pfMETPhi/F");
-	fAnalysisTree->Branch("NJets",         &fTnqjets,   "NJets/I");
-	fAnalysisTree->Branch("JetPt",         &fTJetpt,    "JetPt[NJets]/F");
-	fAnalysisTree->Branch("JetEta",        &fTJeteta,   "JetEta[NJets]/F");
-	fAnalysisTree->Branch("JetPhi",        &fTJetphi,   "JetPhi[NJets]/F");
-	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1, "JetSSVHPBTag[NJets]/F");
-	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2, "JetSSVHEBTag[NJets]/F");
-	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3, "JetTCHPBTag[NJets]/F");
-	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4, "JetTCHEBTag[NJets]/F");
-	fAnalysisTree->Branch("JetArea",       &fTJetArea,  "JetArea[NJets]/F");
+	fAnalysisTree->Branch("pfMET",         &fTpfMET,       "pfMET/F");
+	fAnalysisTree->Branch("pfMETPhi",      &fTpfMETphi,    "pfMETPhi/F");
+	fAnalysisTree->Branch("NJets",         &fTnqjets,      "NJets/I");
+	fAnalysisTree->Branch("JetPt",         &fTJetpt,       "JetPt[NJets]/F");
+	fAnalysisTree->Branch("JetEta",        &fTJeteta,      "JetEta[NJets]/F");
+	fAnalysisTree->Branch("JetPhi",        &fTJetphi,      "JetPhi[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHPBTag",  &fTJetbtag1,    "JetSSVHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetSSVHEBTag",  &fTJetbtag2,    "JetSSVHEBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
+	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
+	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
+	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
 }
 
 void SSDLAnalysis::BookEffTree(){
@@ -328,15 +329,17 @@ void SSDLAnalysis::FillAnalysisTree(){
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
-		fTJetpt   [ind] = fTR->JPt[jetindex];
-		// fTJetpt   [ind] = GetJetPtNoResidual(jetindex);
-		fTJeteta  [ind] = fTR->JEta[jetindex];
-		fTJetphi  [ind] = fTR->JPhi[jetindex];
-		fTJetbtag1[ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
-		fTJetbtag2[ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
-		fTJetbtag3[ind] = fTR->JbTagProbTkCntHighPur[jetindex];
-		fTJetbtag4[ind] = fTR->JbTagProbTkCntHighEff[jetindex];
-		fTJetArea [ind] = fTR->JArea[jetindex];
+		fTJetpt      [ind] = fTR->JPt[jetindex];
+		// fTJetpt      [ind] = GetJetPtNoResidual(jetindex);
+		fTJeteta     [ind] = fTR->JEta[jetindex];
+		fTJetphi     [ind] = fTR->JPhi[jetindex];
+		fTJetbtag1   [ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
+		fTJetbtag2   [ind] = fTR->JbTagProbSimpSVHighEff[jetindex];
+		fTJetbtag3   [ind] = fTR->JbTagProbTkCntHighPur[jetindex];
+		fTJetbtag4   [ind] = fTR->JbTagProbTkCntHighEff[jetindex];
+		fTJetArea    [ind] = fTR->JArea[jetindex];
+		if(!fIsData) fTJetPartonID[ind] = JetPartonMatch(jetindex);
+		else fTJetPartonID[ind] = -1;
 	}
 
 	// Get METs
@@ -583,14 +586,15 @@ void SSDLAnalysis::ResetTree(){
 	// jet-MET properties
 	fTnqjets = 0;
 	for(int i = 0; i < fMaxNjets; i++){
-		fTJetpt [i]   = -999.99;
-		fTJeteta[i]   = -999.99;
-		fTJetphi[i]   = -999.99;
-		fTJetbtag1[i] = -999.99;
-		fTJetbtag2[i] = -999.99;
-		fTJetbtag3[i] = -999.99;
-		fTJetbtag4[i] = -999.99;
-		fTJetArea[i]  = -999.99;
+		fTJetpt [i]      = -999.99;
+		fTJeteta[i]      = -999.99;
+		fTJetphi[i]      = -999.99;
+		fTJetbtag1[i]    = -999.99;
+		fTJetbtag2[i]    = -999.99;
+		fTJetbtag3[i]    = -999.99;
+		fTJetbtag4[i]    = -999.99;
+		fTJetArea[i]     = -999.99;
+		fTJetPartonID[i] = -999;
 	}
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
@@ -732,6 +736,35 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 	}
 	cout << "Choose your toggle!" << endl;
 	return false;
+}
+
+//____________________________________________________________________________
+int SSDLAnalysis::JetPartonMatch(int index){
+	// Returns PDG id of matched parton, any of (1,2,3,4,5,21)
+	// Unmatched returns 0
+	float jpt  = fTR->JPt[index];
+	float jeta = fTR->JEta[index];
+	float jphi = fTR->JPhi[index];
+	int match = 0;
+	float mindr = 100;
+	for(size_t i = 0; i < fTR->nGenParticles; ++i){
+		// Only status 3 particles
+		if(fTR->genInfoStatus[i] != 3) continue;
+		
+		// Restrict to non-top quarks and gluons
+		if(abs(fTR->genInfoId[i]) > 5 && fTR->genInfoId[i] != 21) continue;
+
+		// Cutoff for low pt genparticles
+		if(fTR->genInfoPt[i]/jpt < 0.1) continue;
+
+		// Minimize DeltaR
+		float DR = Util::GetDeltaR(jeta, fTR->genInfoEta[i], jphi, fTR->genInfoPhi[i]);
+		if(DR > mindr) continue;
+
+		mindr = DR;
+		match = abs(fTR->genInfoId[i]);		
+	}
+	return match;
 }
 
 //____________________________________________________________________________

@@ -53,6 +53,8 @@ public:
 	bool IsTightMuon(int, int);
 	bool IsTightEle(int, int);
 	
+	int JetPartonMatch(int);
+	
 	double corrMuIso(int);
 	double corrElIso(int);
 	
@@ -113,6 +115,7 @@ private:
 	float fTJetbtag3[fMaxNjets]; // TCHP
 	float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
+	int   fTJetPartonID[fMaxNjets];
 
 	float fTpfMET;
 	float fTpfMETphi;
