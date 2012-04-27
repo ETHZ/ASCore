@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.7 2012/04/23 21:00:51 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.8 2012/04/24 10:31:43 fronga Exp $
 //
 //
 
@@ -306,11 +306,16 @@ private:
 
   std::auto_ptr<std::vector<std::string> > fRHLTNames;  // Full HLT menu
   std::auto_ptr<std::vector<std::string> > fRL1PhysMenu;
-  std::auto_ptr<std::vector<std::string> > fRHLTLabels; // HLT Paths to store the triggering objects of
 
+  // These vectors are stored in the run info, but they are set in the constructor
+  // Since the "Run::put" operation deletes the pointers, we need to reset them
+  // at each run, so we have to duplicate the vectors to keep the original info.
+  std::auto_ptr<std::vector<std::string> > fRHLTLabels; // HLT Paths to store the triggering objects of
   std::auto_ptr<std::vector<std::string> > fRPileUpData;
   std::auto_ptr<std::vector<std::string> > fRPileUpMC;
-
+  std::vector<std::string> fHLTLabels;
+  std::vector<std::string> fPileUpData;
+  std::vector<std::string> fPileUpMC;
 
 
   ////////////////////////////////////////////////////////

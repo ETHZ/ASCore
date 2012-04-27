@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.11 2012/04/23 21:00:52 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.12 2012/04/24 10:31:44 fronga Exp $
 //
 //
 
@@ -260,17 +260,15 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
   // Get list of trigger paths to store the triggering object info. of
   //std::vector<std::string> v(iConfig.getParameter<std::vector<std::string> >("hlt_labels"));
-  fRHLTLabels.reset( new std::vector<std::string>(iConfig.getParameter<std::vector<std::string> >("hlt_labels")) );
-  fTNpaths = fRHLTLabels->size();
+  fHLTLabels = iConfig.getParameter<std::vector<std::string> >("hlt_labels");
+  fTNpaths = fHLTLabels.size();
 	
   //OOT pu reweighting
-  fRPileUpData  .reset(new std::vector<std::string>);
-  fRPileUpMC    .reset(new std::vector<std::string>);
   if( !fIsRealData ) {
-    *fRPileUpData = iConfig.getParameter<std::vector<std::string> >("pu_data");
-    *fRPileUpMC   = iConfig.getParameter<std::vector<std::string> >("pu_mc");
-    if(!(*fRPileUpData)[0].empty() && !(*fRPileUpMC)[0].empty() ){
-      LumiWeights_      = edm::LumiReWeighting((*fRPileUpMC)[0], (*fRPileUpData)[0], (*fRPileUpMC)[1], (*fRPileUpData)[1]);
+    fPileUpData = iConfig.getParameter<std::vector<std::string> >("pu_data");
+    fPileUpMC   = iConfig.getParameter<std::vector<std::string> >("pu_mc");
+    if(!fPileUpData[0].empty() && !fPileUpMC[0].empty() ){
+      LumiWeights_      = edm::LumiReWeighting(fPileUpMC[0], fPileUpData[0], fPileUpMC[1], fPileUpData[1]);
     }
   }
 
@@ -651,7 +649,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
     //see https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities 
     // as well as http://cmslxr.fnal.gov/lxr/source/PhysicsTools/Utilities/src/LumiReWeighting.cc
-    if(!(*fRPileUpData)[0].empty() && !(*fRPileUpMC)[0].empty() ){
+    if(!fPileUpData[0].empty() && !fPileUpMC[0].empty() ){
       //const EventBase* iEventB = dynamic_cast<const EventBase*>(&iEvent);
       MyWeightTotal  = LumiWeights_.weightOOT( iEvent ); // this is the total weight inTimeWeight * WeightOOTPU * Correct_Weights2011
       MyWeightInTime = LumiWeights_.weight   ( iEvent ); // this is the inTimeWeight only
@@ -750,7 +748,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   InputTag collectionTag;
   // Loop over path names and get related objects
   for (size_t i=0; i<fTNpaths; ++i) {
-    collectionTag = edm::InputTag((*fRHLTLabels)[i],"",fHltConfig.processName());
+    collectionTag = edm::InputTag(fHLTLabels[i],"",fHltConfig.processName());
     size_t  filterIndex_ = trgEvent->filterIndex(collectionTag);
     if (filterIndex_<trgEvent->sizeFilters()) {
       const trigger::TriggerObjectCollection& TOC(trgEvent->getObjects());
@@ -760,7 +758,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
         if (hlto>=gMaxHltNObjs) {
           edm::LogWarning("NTP") << "@SUB=analyze()"
                                  << "Maximum number of triggering objects exceeded"
-                                 << " for filter " << (*fRHLTLabels)[i];
+                                 << " for filter " << fHLTLabels[i];
           break;
         }
         // Update number of objects stored
@@ -5276,6 +5274,11 @@ bool NTupleProducer::beginRun(edm::Run& r, const edm::EventSetup& es){
   resetRunProducts();
 
   // Retrieve and fill RunTree information
+  
+  // Need to reset at each run, since "put" deletes the pointers
+  fRHLTLabels.reset( new std::vector<std::string>(fHLTLabels) );
+  fRPileUpData.reset( new std::vector<std::string>(fPileUpData) );
+  fRPileUpMC.reset( new std::vector<std::string>(fPileUpMC) );
 
   // Retrieve HLT trigger menu 
   bool changed;
