@@ -437,8 +437,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		}
 
-		gEventWeight = PUWeight * gHLTSF * gBtagSF;
-		if( S->datamc==4 ) gEventWeight /= PUWeight; //no pu weight for mc with no pu
+		gEventWeight = gHLTSF * gBtagSF;
+		if( S->datamc!=4 ) gEventWeight *= PUWeight; //no pu weight for mc with no pu
 
 
 		fillKinPlots(S, HighPt);
