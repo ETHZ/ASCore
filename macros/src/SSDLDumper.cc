@@ -1,4 +1,4 @@
-/*****************************************************************************
+/******************************************************************************
 *   Collection of tools for producing plots for same-sign dilepton analysis  *
 *                                                                            *
 *                                                  (c) 2010 Benjamin Stieger *
@@ -419,6 +419,28 @@ void SSDLDumper::loopEvents(Sample *S){
 		fCounter[ElMu].fill(fEMCutNames[1]);
 		fCounter[Elec].fill(fEECutNames[1]);
 
+
+		// compute event-by-event weights:
+		gHLTSF = 1.;
+		gBtagSF = 1.;
+
+		if( S->datamc!=0 ) {
+
+			int ind1(-1), ind2(-1);
+
+			if(mumuSignalTrigger() && isSSLLMuEvent(ind1, ind2)) 
+				gHLTSF = getHLTSF_DoubleMu( MuPt[ind1], MuEta[ind1], "" ) * getHLTSF_DoubleMu( MuPt[ind2], MuEta[ind2], "" );
+			else if(elmuSignalTrigger() && isSSLLElMuEvent(ind1, ind2))
+				gHLTSF = getHLTSF_MuEG( MuPt[ind1], MuEta[ind1], "" ) * getHLTSF_MuEG( ElPt[ind2], ElEta[ind2], "" );
+			else if(elelSignalTrigger() && isSSLLElEvent(ind1, ind2))
+				gHLTSF = getHLTSF_DoubleElectron( ElPt[ind1], ElEta[ind1], "" ) * getHLTSF_DoubleElectron( ElPt[ind2], ElEta[ind2], "" );
+
+		}
+
+		gEventWeight = PUWeight * gHLTSF * gBtagSF;
+		if( S->datamc==4 ) gEventWeight /= PUWeight; //no pu weight for mc with no pu
+
+
 		fillKinPlots(S, HighPt);
 		fillKinPlots(S, LowPt);
 		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r, HighPt);
@@ -469,8 +491,6 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	fDoCounting = false;
 	if(reg == Baseline && hilo == HighPt) fDoCounting = true;
 	fCurrentChannel = Muon;
-	float puweight = PUWeight;
-	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
 		if(fDoCounting) fCounter[Muon].fill(fMMCutNames[2]);
@@ -479,63 +499,63 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[15]); // ... first muon passes tight cut
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[16]); // ... second muon passes tight cut
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[17]); // ... both muons pass tight cut
-				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
+				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
 					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
-					S->region[reg][hilo].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
-					if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2pp_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-					if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2pf_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-					if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2fp_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-					if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2ff_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
+					S->region[reg][hilo].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
+					if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2pp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2pf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2fp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2ff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
 				}
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[15]); // ... first muon passes tight cut
-				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
+				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[16]); // ... second muon passes tight cut
-				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], puweight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu2]), fabs(MuEta[mu1]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, puweight);
+				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], gEventWeight); // tight one always in x axis; fill same again
+				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu2]), fabs(MuEta[mu1]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				S->region[reg][hilo].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], puweight);
-				S->region[reg][hilo].mm.nt00_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, puweight);
+				S->region[reg][hilo].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][hilo].mm.nt00_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0){
-				if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.npp_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-				if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.npf_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-				if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nfp_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);
-				if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nff_pt->Fill(MuPt[mu1], MuPt[mu2], puweight);			
+				if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.npp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.npf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nfp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);			
 			}
 		}
 		resetHypLeptons();
 	}
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
-			S->region[reg][hilo].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.sst_origin->Fill(muIndexToBin(0)-0.5, puweight);
+			S->region[reg][hilo].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(0) ){
-			S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, puweight);
+			S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
 	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
 		if( isTightMuon(mu2) ){
-			S->region[reg][hilo].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, puweight);
+			S->region[reg][hilo].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(mu2) ){
-			S->region[reg][hilo].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, puweight);
+			S->region[reg][hilo].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 	}				
 	resetHypLeptons();
@@ -550,74 +570,74 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[15]); // " ... first electron passes tight cut
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[16]); // " ... second electron passes tight cut
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[17]); // " ... both electrons pass tight cut
-				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
+				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
 					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
-					S->region[reg][hilo].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
+					S->region[reg][hilo].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 					if(isPromptElectron(el1) && isPromptElectron(el2)){
-						S->region[reg][hilo].ee.nt2pp_pt->Fill(ElPt[el1], ElPt[el2], puweight);
+						S->region[reg][hilo].ee.nt2pp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 						if(!isChargeMatchedElectron(el1) || !isChargeMatchedElectron(el2)){
-							S->region[reg][hilo].ee.nt2pp_cm_pt->Fill(ElPt[el1], ElPt[el2], puweight);							
+							S->region[reg][hilo].ee.nt2pp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
 						}
 					}
-					if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2pf_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-					if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nt2fp_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-					if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2ff_pt->Fill(ElPt[el1], ElPt[el2], puweight);
+					if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2pf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nt2fp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2ff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 				}
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[15]);
-				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
+				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[16]);
-				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], puweight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el2]), fabs(ElEta[el2]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, puweight);
+				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], gEventWeight); // tight one always in x axis; fill same again
+				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el2]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				S->region[reg][hilo].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], puweight);
-				S->region[reg][hilo].ee.nt00_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, puweight);
+				S->region[reg][hilo].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][hilo].ee.nt00_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0 ){
 				if(isPromptElectron(el1) && isPromptElectron(el2)){
-					S->region[reg][hilo].ee.npp_pt->Fill(ElPt[el1], ElPt[el2], puweight);
+					S->region[reg][hilo].ee.npp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 					if(!isChargeMatchedElectron(el1) || !isChargeMatchedElectron(el2)){
-						S->region[reg][hilo].ee.npp_cm_pt->Fill(ElPt[el1], ElPt[el2], puweight);							
+						S->region[reg][hilo].ee.npp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
 					}
 				}
-				if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.npf_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-				if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nfp_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-				if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nff_pt->Fill(ElPt[el1], ElPt[el2], puweight);
+				if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.npf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nfp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
-			S->region[reg][hilo].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.sst_origin->Fill(elIndexToBin(0)-0.5, puweight);
+			S->region[reg][hilo].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(0) ){
-			S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, puweight);
+			S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
 	int elind;
 	if(doubleElTrigger() && isZElElEvent(el1, el2)){
 		if( isTightElectron(el2) ){
-			S->region[reg][hilo].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, puweight);
+			S->region[reg][hilo].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(el2) ){
-			S->region[reg][hilo].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), puweight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, puweight);
+			S->region[reg][hilo].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 	}
 	resetHypLeptons();
@@ -632,42 +652,42 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[15]);
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[16]);
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[17]);
-				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
+				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
 				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
 					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), pfMET, getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
 				if(S->datamc > 0){
-					S->region[reg][hilo].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
-					if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2pp_pt->Fill(MuPt[mu], ElPt[el], puweight);
-					if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2pf_pt->Fill(MuPt[mu], ElPt[el], puweight);
-					if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2fp_pt->Fill(MuPt[mu], ElPt[el], puweight);
-					if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2ff_pt->Fill(MuPt[mu], ElPt[el], puweight);
+					S->region[reg][hilo].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
+					if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2pp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2pf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2fp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2ff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 				}
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[15]);
-				S->region[reg][hilo].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
+				S->region[reg][hilo].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][hilo].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[16]);
-				S->region[reg][hilo].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], puweight); // muon always in x axis for e/mu
-				S->region[reg][hilo].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
+				S->region[reg][hilo].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight); // muon always in x axis for e/mu
+				S->region[reg][hilo].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				S->region[reg][hilo].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], puweight);
-				S->region[reg][hilo].em.nt00_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), puweight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, puweight);
+				S->region[reg][hilo].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][hilo].em.nt00_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][hilo].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0){
-				if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.npp_pt->Fill(MuPt[mu], ElPt[el], puweight);
-				if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.npf_pt->Fill(MuPt[mu], ElPt[el], puweight);
-				if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nfp_pt->Fill(MuPt[mu], ElPt[el], puweight);
-				if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nff_pt->Fill(MuPt[mu], ElPt[el], puweight);
+				if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.npp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.npf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nfp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -683,10 +703,10 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	if(elelSignalTrigger()){
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], puweight);
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], puweight);
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -697,8 +717,8 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	if(elmuSignalTrigger()){
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				if( isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_BB_pt->Fill(MuPt[mu], ElPt[el], puweight);
-				if(!isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_EE_pt->Fill(MuPt[mu], ElPt[el], puweight);
+				if( isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(!isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -714,8 +734,6 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	////////////////////////////////////////////////////////////////////////////////
 	// SS YIELDS
 	fDoCounting = false;
-	float puweight = PUWeight;
-	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 	resetHypLeptons();
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -730,24 +748,24 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			float MT2 = getMT2(mu1, mu2, Muon);
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[6], MuPt[mu1], puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[7], MuPt[mu2], puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[6], MuPt[mu1], gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[7], MuPt[mu2], gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[6], MuPt[mu1], puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[7], MuPt[mu2], puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[6], MuPt[mu1], gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[7], MuPt[mu2], gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[6], MuPt[mu1], puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[7], MuPt[mu2], puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[6], MuPt[mu1], gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[7], MuPt[mu2], gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[6], MuPt[mu1], puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[7], MuPt[mu2], puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[6], MuPt[mu1], gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[7], MuPt[mu2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -759,16 +777,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			float HT  = getHT();
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[0], HT, gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[0], HT, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[0], HT, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[0], HT, gEventWeight);
 			}
 		}
 		// HT BINNING, MET > 120
@@ -780,20 +798,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			float HT  = getHT();
 			float NJ  = getNJets() + 0.5;
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[4], NJ, gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[4], NJ, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[4], NJ, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[4], NJ, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -805,20 +823,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			float NbJ = getNBTags() + 0.5;
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[8], NbJ,   gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[8], NbJ,   gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[8], NbJ,   gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[8], NbJ,   gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -829,16 +847,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[3], pfMET, gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[3], pfMET, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[3], pfMET, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[3], pfMET, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -849,16 +867,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 0;
 		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
 			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt11[9], pfMET, gEventWeight);
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt10[9], pfMET, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt01[9], pfMET, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Muon].hnt00[9], pfMET, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -898,24 +916,24 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
 			float MT2 = getMT2(el1, el2, Elec);
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[6], ElPt[el1], puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[7], ElPt[el2], puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[6], ElPt[el1], gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[7], ElPt[el2], gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[6], ElPt[el1], puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[7], ElPt[el2], puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[6], ElPt[el1], gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[7], ElPt[el2], gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[6], ElPt[el1], puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[7], ElPt[el2], puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[6], ElPt[el1], gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[7], ElPt[el2], gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[5], MT2,       puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[6], ElPt[el1], puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[7], ElPt[el2], puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[5], MT2,       gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[6], ElPt[el1], gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[7], ElPt[el2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -927,16 +945,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
 			float HT  = getHT();
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[0], HT, gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[0], HT, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[0], HT, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[0], HT, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[0], HT, gEventWeight);
 			}
 		}
 		// HT BINNING, MET > 120
@@ -948,20 +966,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			float HT  = getHT();
 			float NJ  = getNJets() + 0.5;
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[4], NJ, gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[4], NJ, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[4], NJ, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[1], HT, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[4], NJ, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -973,20 +991,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
 			float NbJ = getNBTags() + 0.5;
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[8], NbJ,   gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[8], NbJ,   gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[8], NbJ,   gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[8], NbJ,   gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -997,16 +1015,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di elon event
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[3], pfMET, gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[3], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[3], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[3], pfMET, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -1017,16 +1035,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 0;
 		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose event
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt11[9], pfMET, gEventWeight);
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt10[9], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt01[9], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[Elec].hnt00[9], pfMET, gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -1072,19 +1090,19 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				ptmax = ElPt[el];
 			}
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[5], MT2,   puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[6], ptmax, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[7], ptmin, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[5], MT2,   gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[6], ptmax, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[7], ptmin, gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[5], MT2,   puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[6], ptmax, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[7], ptmin, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[5], MT2,   gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[6], ptmax, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[7], ptmin, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[5], MT2,   puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[6], ptmax, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[7], ptmin, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[5], MT2,   gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[6], ptmax, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[7], ptmin, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[5], MT2,   puweight);
@@ -1101,13 +1119,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElMuEvent(mu, el) ){
 			float HT  = getHT();
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[0], HT, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[0], HT, gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[0], HT, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[0], HT, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[0], HT, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[0], HT, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[0], HT, puweight);
@@ -1122,16 +1140,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			float HT  = getHT();
 			float NJ  = getNJets() + 0.5;
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[1], HT, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[4], NJ, gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[1], HT, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[4], NJ, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[1], HT, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[4], NJ, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[1], HT, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[4], NJ, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[1], HT, puweight);
@@ -1146,16 +1164,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElMuEvent(mu, el) ){
 			float NbJ = getNBTags() + 0.5;
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[8], NbJ,   gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[8], NbJ,   gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[2], pfMET, puweight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[8], NbJ,   puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[2], pfMET, gEventWeight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[8], NbJ,   gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[2], pfMET, puweight);
@@ -1170,13 +1188,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 2;
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[3], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[3], pfMET, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[3], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[3], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[3], pfMET, puweight);
@@ -1190,13 +1208,13 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		fC_minNjets = 0;
 		if( isSSLLElMuEvent(mu, el) ){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt11[9], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt10[9], pfMET, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[9], pfMET, puweight);
+				fillWithoutOF(S->diffyields[ElMu].hnt01[9], pfMET, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
 				fillWithoutOF(S->diffyields[ElMu].hnt00[9], pfMET, puweight);
@@ -1243,24 +1261,24 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				float MT2 = getMT2(el1, el2, Elec);
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[5], MT2,       puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[6], ElPt[el1], puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[7], ElPt[el2], puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[5], MT2,       gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[6], ElPt[el1], gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[7], ElPt[el2], gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[5], MT2,       puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[6], ElPt[el1], puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[7], ElPt[el2], puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[5], MT2,       gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[6], ElPt[el1], gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[7], ElPt[el2], gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], gEventWeight);
 				}
 			}
 		}
@@ -1274,16 +1292,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				float HT  = getHT();
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[0], HT, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[0], HT, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[0], HT, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[0], HT, gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, gEventWeight);
 				}
 			}
 		}
@@ -1298,20 +1316,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				float HT  = getHT();
 				float NJ  = getNJets() + 0.5;
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[1], HT, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[4], NJ, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[1], HT, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[4], NJ, gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, gEventWeight);
 				}
 			}
 		}
@@ -1325,20 +1343,20 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				float NbJ = getNBTags() + 0.5;
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[8], NbJ,   gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[8], NbJ,   gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   gEventWeight);
 				}
 			}
 		}
@@ -1351,16 +1369,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[3], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[3], pfMET, gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], pfMET, gEventWeight);
 				}
 			}
 		}
@@ -1373,16 +1391,16 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
 				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[9], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[9], pfMET, gEventWeight);
 				}
 				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], pfMET, gEventWeight);
 				}
 			}
 		}
@@ -1431,14 +1449,14 @@ void SSDLDumper::fillDiffYields(Sample *S){
 					ptmax = ElPt[el];
 				}
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[5], MT2,   puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[6], ptmax, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[7], ptmin, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[5], MT2,   gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[6], ptmax, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[7], ptmin, gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[5], MT2,   puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[6], ptmax, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[7], ptmin, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[5], MT2,   gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[6], ptmax, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[7], ptmin, gEventWeight);
 				}
 			}
 		}
@@ -1452,10 +1470,10 @@ void SSDLDumper::fillDiffYields(Sample *S){
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				float HT  = getHT();
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[0], HT, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[0], HT, gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[0], HT, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[0], HT, gEventWeight);
 				}
 			}
 		}
@@ -1470,12 +1488,12 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				float HT  = getHT();
 				float NJ  = getNJets() + 0.5;
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[1], HT, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[4], NJ, gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[1], HT, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[4], NJ, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[1], HT, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[4], NJ, gEventWeight);
 				}
 			}
 		}
@@ -1491,12 +1509,12 @@ void SSDLDumper::fillDiffYields(Sample *S){
 				float HT  = getHT();
 				float NJ  = getNJets() + 0.5;
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[8], NbJ,   gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[2], pfMET, puweight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[8], NbJ,   puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[2], pfMET, gEventWeight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[8], NbJ,   gEventWeight);
 				}
 			}
 		}
@@ -1509,10 +1527,10 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[3], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[3], pfMET, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[3], pfMET, gEventWeight);
 				}
 			}
 		}
@@ -1525,10 +1543,10 @@ void SSDLDumper::fillDiffYields(Sample *S){
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
 				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[9], pfMET, gEventWeight);
 				}
 				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[9], pfMET, puweight);
+					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[9], pfMET, gEventWeight);
 				}
 			}
 		}
@@ -1560,8 +1578,6 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
 	fDoCounting = false;
 	fChargeSwitch = 0;
-	float puweight = PUWeight;
-	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	// Reset event selections to baseline:
 	setRegionCuts();
@@ -1573,41 +1589,41 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	if(singleMuTrigger()){
 		if(isSigSupMuEvent()){
 			if( isTightMuon(0) ){
-				RP0->ntight[0]->Fill(getNJets(),               puweight);
-				RP0->ntight[1]->Fill(getHT(),                  puweight);
-				RP0->ntight[2]->Fill(getMaxJPt(),              puweight);
-				RP0->ntight[3]->Fill(NVrtx,                    puweight);
-				RP0->ntight[4]->Fill(getClosestJetPt(0, Muon), puweight);
-				RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    puweight);
-				RP0->ntight[6]->Fill(getNBTags(),              puweight);
+				RP0->ntight[0]->Fill(getNJets(),               gEventWeight);
+				RP0->ntight[1]->Fill(getHT(),                  gEventWeight);
+				RP0->ntight[2]->Fill(getMaxJPt(),              gEventWeight);
+				RP0->ntight[3]->Fill(NVrtx,                    gEventWeight);
+				RP0->ntight[4]->Fill(getClosestJetPt(0, Muon), gEventWeight);
+				RP0->ntight[5]->Fill(getAwayJetPt(0, Muon),    gEventWeight);
+				RP0->ntight[6]->Fill(getNBTags(),              gEventWeight);
 			}
 			if( isLooseMuon(0) ){
-				RP0->nloose[0]->Fill(getNJets(),               puweight);
-				RP0->nloose[1]->Fill(getHT(),                  puweight);
-				RP0->nloose[2]->Fill(getMaxJPt(),              puweight);
-				RP0->nloose[3]->Fill(NVrtx,                    puweight);
-				RP0->nloose[4]->Fill(getClosestJetPt(0, Muon), puweight);
-				RP0->nloose[5]->Fill(getAwayJetPt(0, Muon),    puweight);
-				RP0->nloose[6]->Fill(getNBTags(),              puweight);
+				RP0->nloose[0]->Fill(getNJets(),               gEventWeight);
+				RP0->nloose[1]->Fill(getHT(),                  gEventWeight);
+				RP0->nloose[2]->Fill(getMaxJPt(),              gEventWeight);
+				RP0->nloose[3]->Fill(NVrtx,                    gEventWeight);
+				RP0->nloose[4]->Fill(getClosestJetPt(0, Muon), gEventWeight);
+				RP0->nloose[5]->Fill(getAwayJetPt(0, Muon),    gEventWeight);
+				RP0->nloose[6]->Fill(getNBTags(),              gEventWeight);
 			}
 		}
 		fC_maxMet_Control = 1000.;
 		if(isSigSupMuEvent()){
 			if( isTightMuon(0) ){
-				RP0->ntight[7]->Fill(pfMET,                    puweight);
+				RP0->ntight[7]->Fill(pfMET,                    gEventWeight);
 			}
 			if( isLooseMuon(0) ){
-				RP0->nloose[7]->Fill(pfMET,                    puweight);
+				RP0->nloose[7]->Fill(pfMET,                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
 		if(isSigSupMuEvent()){
 			if( isTightMuon(0) ){
-				RP0->ntight[8]->Fill(MuMT[0],                  puweight);
+				RP0->ntight[8]->Fill(MuMT[0],                  gEventWeight);
 			}
 			if( isLooseMuon(0) ){
-				RP0->nloose[8]->Fill(MuMT[0],                  puweight);
+				RP0->nloose[8]->Fill(MuMT[0],                  gEventWeight);
 			}
 		}		
 		fC_maxMt_Control = 20.;
@@ -1617,41 +1633,41 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	if(singleElTrigger()){
 		if(isSigSupElEvent()){
 			if( isTightElectron(0) ){
-				RP1->ntight[0]->Fill(getNJets(),                   puweight);
-				RP1->ntight[1]->Fill(getHT(),                      puweight);
-				RP1->ntight[2]->Fill(getMaxJPt(),                  puweight);
-				RP1->ntight[3]->Fill(NVrtx,                        puweight);
-				RP1->ntight[4]->Fill(getClosestJetPt(0, Elec), puweight);
-				RP1->ntight[5]->Fill(getAwayJetPt(0, Elec),    puweight);
-				RP1->ntight[6]->Fill(getNBTags(),                  puweight);
+				RP1->ntight[0]->Fill(getNJets(),                   gEventWeight);
+				RP1->ntight[1]->Fill(getHT(),                      gEventWeight);
+				RP1->ntight[2]->Fill(getMaxJPt(),                  gEventWeight);
+				RP1->ntight[3]->Fill(NVrtx,                        gEventWeight);
+				RP1->ntight[4]->Fill(getClosestJetPt(0, Elec), gEventWeight);
+				RP1->ntight[5]->Fill(getAwayJetPt(0, Elec),    gEventWeight);
+				RP1->ntight[6]->Fill(getNBTags(),                  gEventWeight);
 			}
 			if( isLooseElectron(0) ){
-				RP1->nloose[0]->Fill(getNJets(),                   puweight);
-				RP1->nloose[1]->Fill(getHT(),                      puweight);
-				RP1->nloose[2]->Fill(getMaxJPt(),                  puweight);
-				RP1->nloose[3]->Fill(NVrtx,                        puweight);
-				RP1->nloose[4]->Fill(getClosestJetPt(0, Elec), puweight);
-				RP1->nloose[5]->Fill(getAwayJetPt(0, Elec),    puweight);
-				RP1->nloose[6]->Fill(getNBTags(),                  puweight);
+				RP1->nloose[0]->Fill(getNJets(),                   gEventWeight);
+				RP1->nloose[1]->Fill(getHT(),                      gEventWeight);
+				RP1->nloose[2]->Fill(getMaxJPt(),                  gEventWeight);
+				RP1->nloose[3]->Fill(NVrtx,                        gEventWeight);
+				RP1->nloose[4]->Fill(getClosestJetPt(0, Elec), gEventWeight);
+				RP1->nloose[5]->Fill(getAwayJetPt(0, Elec),    gEventWeight);
+				RP1->nloose[6]->Fill(getNBTags(),                  gEventWeight);
 			}
 		}
 		fC_maxMet_Control = 1000.;
 		if(isSigSupElEvent()){
 			if( isTightElectron(0) ){
-				RP1->ntight[7]->Fill(pfMET,                    puweight);
+				RP1->ntight[7]->Fill(pfMET,                    gEventWeight);
 			}
 			if( isLooseElectron(0) ){
-				RP1->nloose[7]->Fill(pfMET,                    puweight);
+				RP1->nloose[7]->Fill(pfMET,                    gEventWeight);
 			}
 		}		
 		fC_maxMet_Control = 20.;
 		fC_maxMt_Control = 1000.;
 		if(isSigSupElEvent()){
 			if( isTightElectron(0) ){
-				RP1->ntight[8]->Fill(ElMT[0],                  puweight);
+				RP1->ntight[8]->Fill(ElMT[0],                  gEventWeight);
 			}
 			if( isLooseElectron(0) ){
-				RP1->nloose[8]->Fill(ElMT[0],                  puweight);
+				RP1->nloose[8]->Fill(ElMT[0],                  gEventWeight);
 			}
 		}		
 		fC_maxMt_Control = 20.;
@@ -1670,10 +1686,10 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
 
-	float puweight = PUWeight;
-	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
-	fSETree_PUWeight = puweight;
+	fSETree_PUWeight = PUWeight;
+	fSETree_HLTSF    = gHLTSF;
+	fSETree_BtagSF   = gBtagSF;
 	fSETree_SLumi    = S->getLumi();
 	fSETree_SName    = S->sname.Data();
 	fSETree_SType    = getSampleType(S);
@@ -1893,8 +1909,6 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 	int ind1(-1), ind2(-1);
 	int mu(-1), el(-1); // for e/mu channel, easier readability
 
-	float puweight = PUWeight;
-	if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
@@ -1907,31 +1921,31 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 		if(MuPt[ind1] > fC_minMu1pt && MuPt[ind2] > fC_minMu2pt){ // pt cuts
 
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), pfMET, puweight);
+			KP0->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
 			
-			KP0->hvar[0]->Fill(getHT(),    puweight);
-			KP0->hvar[1]->Fill(pfMET,      puweight);
-			KP0->hvar[2]->Fill(getNJets(), puweight);
-			KP0->hvar[3]->Fill(MuPt[ind1], puweight);
-			KP0->hvar[4]->Fill(MuPt[ind2], puweight);
-			KP0->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
-			KP0->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM
-			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
-			KP0->hvar[10]->Fill(getNBTags(), puweight);
+			KP0->hvar[0]->Fill(getHT(),    gEventWeight);
+			KP0->hvar[1]->Fill(pfMET,      gEventWeight);
+			KP0->hvar[2]->Fill(getNJets(), gEventWeight);
+			KP0->hvar[3]->Fill(MuPt[ind1], gEventWeight);
+			KP0->hvar[4]->Fill(MuPt[ind2], gEventWeight);
+			KP0->hvar[5]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // SF
+			KP0->hvar[6]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // MM
+			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Muon), gEventWeight);
+			KP0->hvar[10]->Fill(getNBTags(), gEventWeight);
 
 			if(isTightMuon(ind1) && isTightMuon(ind2)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
-				KP1->hvar[0]->Fill(getHT(),               puweight);
-				KP1->hvar[1]->Fill(pfMET,                 puweight);
-				KP1->hvar[2]->Fill(getNJets(),            puweight);
-				KP1->hvar[3]->Fill(MuPt[ind1],            puweight);
-				KP1->hvar[4]->Fill(MuPt[ind2],            puweight);
-				KP1->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
-				KP1->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM
-				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
-				KP1->hvar[10]->Fill(getNBTags(), puweight);
+				KP1->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
+				KP1->hvar[0]->Fill(getHT(),               gEventWeight);
+				KP1->hvar[1]->Fill(pfMET,                 gEventWeight);
+				KP1->hvar[2]->Fill(getNJets(),            gEventWeight);
+				KP1->hvar[3]->Fill(MuPt[ind1],            gEventWeight);
+				KP1->hvar[4]->Fill(MuPt[ind2],            gEventWeight);
+				KP1->hvar[5]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // SF
+				KP1->hvar[6]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // MM
+				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Muon), gEventWeight);
+				KP1->hvar[10]->Fill(getNBTags(), gEventWeight);
 				if(isSSLLMuEvent(ind1, ind2)){ // signal region
-					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
+					KP2->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
 					if(hilo == HighPt){ // Store signal events
 						fSigEv_HI_MM_HT .push_back(getHT());
 						fSigEv_HI_MM_MET.push_back(pfMET);
@@ -1940,15 +1954,15 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_MM_MET.push_back(pfMET);						
 					}					
 					
-					KP2->hvar[0]->Fill(getHT(),    puweight);
-					KP2->hvar[1]->Fill(pfMET,      puweight);
-					KP2->hvar[2]->Fill(getNJets(), puweight);
-					KP2->hvar[3]->Fill(MuPt[ind1], puweight);
-					KP2->hvar[4]->Fill(MuPt[ind2], puweight);
-					KP2->hvar[5]->Fill(getMll(ind1, ind2, Muon), puweight); // SF
-					KP2->hvar[6]->Fill(getMll(ind1, ind2, Muon), puweight); // MM					
-					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Muon), puweight);
-					KP2->hvar[10]->Fill(getNBTags(), puweight);
+					KP2->hvar[0]->Fill(getHT(),    gEventWeight);
+					KP2->hvar[1]->Fill(pfMET,      gEventWeight);
+					KP2->hvar[2]->Fill(getNJets(), gEventWeight);
+					KP2->hvar[3]->Fill(MuPt[ind1], gEventWeight);
+					KP2->hvar[4]->Fill(MuPt[ind2], gEventWeight);
+					KP2->hvar[5]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // SF
+					KP2->hvar[6]->Fill(getMll(ind1, ind2, Muon), gEventWeight); // MM					
+					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Muon), gEventWeight);
+					KP2->hvar[10]->Fill(getNBTags(), gEventWeight);
 				}
 			}
 		}
@@ -1960,30 +1974,30 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 	else if(elelSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 2){ // trigger && select loose e/e pair
 		if(ElPt[ind1] > fC_minEl1pt && ElPt[ind2] > fC_minEl2pt){ // pt cuts
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), pfMET, puweight);
-			KP0->hvar[0]->Fill(getHT(),    puweight);
-			KP0->hvar[1]->Fill(pfMET,      puweight);
-			KP0->hvar[2]->Fill(getNJets(), puweight);
-			KP0->hvar[3]->Fill(ElPt[ind1], puweight);
-			KP0->hvar[4]->Fill(ElPt[ind2], puweight);
-			KP0->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
-			KP0->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
-			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
-			KP0->hvar[10]->Fill(getNBTags(), puweight);
+			KP0->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
+			KP0->hvar[0]->Fill(getHT(),    gEventWeight);
+			KP0->hvar[1]->Fill(pfMET,      gEventWeight);
+			KP0->hvar[2]->Fill(getNJets(), gEventWeight);
+			KP0->hvar[3]->Fill(ElPt[ind1], gEventWeight);
+			KP0->hvar[4]->Fill(ElPt[ind2], gEventWeight);
+			KP0->hvar[5]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // SF
+			KP0->hvar[7]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // EE
+			KP0->hvar[9]->Fill(getMT2(ind1, ind2, Elec), gEventWeight);
+			KP0->hvar[10]->Fill(getNBTags(), gEventWeight);
 
 			if(isTightElectron(ind1) && isTightElectron(ind2)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
-				KP1->hvar[0]->Fill(getHT(),               puweight);
-				KP1->hvar[1]->Fill(pfMET,                 puweight);
-				KP1->hvar[2]->Fill(getNJets(),            puweight);
-				KP1->hvar[3]->Fill(ElPt[ind1],            puweight);
-				KP1->hvar[4]->Fill(ElPt[ind2],            puweight);
-				KP1->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
-				KP1->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
-				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
-				KP1->hvar[10]->Fill(getNBTags(), puweight);
+				KP1->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
+				KP1->hvar[0]->Fill(getHT(),               gEventWeight);
+				KP1->hvar[1]->Fill(pfMET,                 gEventWeight);
+				KP1->hvar[2]->Fill(getNJets(),            gEventWeight);
+				KP1->hvar[3]->Fill(ElPt[ind1],            gEventWeight);
+				KP1->hvar[4]->Fill(ElPt[ind2],            gEventWeight);
+				KP1->hvar[5]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // SF
+				KP1->hvar[7]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // EE
+				KP1->hvar[9]->Fill(getMT2(ind1, ind2, Elec), gEventWeight);
+				KP1->hvar[10]->Fill(getNBTags(), gEventWeight);
 				if(isSSLLElEvent(ind1, ind2)){
-					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
+					KP2->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
 					if(hilo == HighPt){ // Store signal events
 						fSigEv_HI_EE_HT .push_back(getHT());
 						fSigEv_HI_EE_MET.push_back(pfMET);
@@ -1992,15 +2006,15 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_EE_MET.push_back(pfMET);						
 					}
 										
-					KP2->hvar[0]->Fill(getHT(),               puweight);
-					KP2->hvar[1]->Fill(pfMET,                 puweight);
-					KP2->hvar[2]->Fill(getNJets(),            puweight);
-					KP2->hvar[3]->Fill(ElPt[ind1],            puweight);
-					KP2->hvar[4]->Fill(ElPt[ind2],            puweight);
-					KP2->hvar[5]->Fill(getMll(ind1, ind2, Elec), puweight); // SF
-					KP2->hvar[7]->Fill(getMll(ind1, ind2, Elec), puweight); // EE
-					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Elec), puweight);
-					KP2->hvar[10]->Fill(getNBTags(), puweight);
+					KP2->hvar[0]->Fill(getHT(),               gEventWeight);
+					KP2->hvar[1]->Fill(pfMET,                 gEventWeight);
+					KP2->hvar[2]->Fill(getNJets(),            gEventWeight);
+					KP2->hvar[3]->Fill(ElPt[ind1],            gEventWeight);
+					KP2->hvar[4]->Fill(ElPt[ind2],            gEventWeight);
+					KP2->hvar[5]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // SF
+					KP2->hvar[7]->Fill(getMll(ind1, ind2, Elec), gEventWeight); // EE
+					KP2->hvar[9]->Fill(getMT2(ind1, ind2, Elec), gEventWeight);
+					KP2->hvar[10]->Fill(getNBTags(), gEventWeight);
 				}
 			}
 		}
@@ -2012,34 +2026,34 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 	else if(elmuSignalTrigger() && abs(isSSLLEvent(mu, el)) == 3){ // trigger && select loose e/mu pair
 		if( (MuPt[mu] > fC_minMu1pt && ElPt[el] > fC_minEl2pt) || (MuPt[mu] > fC_minMu2pt && ElPt[el] > fC_minEl1pt) ){
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), pfMET, puweight);
-			KP0->hvar[0]->Fill(getHT(),    puweight);
-			KP0->hvar[1]->Fill(pfMET,      puweight);
-			KP0->hvar[2]->Fill(getNJets(), puweight);
+			KP0->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
+			KP0->hvar[0]->Fill(getHT(),    gEventWeight);
+			KP0->hvar[1]->Fill(pfMET,      gEventWeight);
+			KP0->hvar[2]->Fill(getNJets(), gEventWeight);
 			float ptmax = MuPt[mu];
 			float ptmin = ElPt[el];
 			if(ptmin > ptmax){
 				ptmin = MuPt[mu];
 				ptmax = ElPt[el];
 			}
-			KP0->hvar[3]->Fill(ptmax, puweight);
-			KP0->hvar[4]->Fill(ptmin, puweight);
-			KP0->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM
-			KP0->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
-			KP0->hvar[10]->Fill(getNBTags(), puweight);
+			KP0->hvar[3]->Fill(ptmax, gEventWeight);
+			KP0->hvar[4]->Fill(ptmin, gEventWeight);
+			KP0->hvar[8]->Fill(getMll(mu, el, ElMu), gEventWeight); // EM
+			KP0->hvar[9]->Fill(getMT2(mu, el, ElMu), gEventWeight);
+			KP0->hvar[10]->Fill(getNBTags(), gEventWeight);
 
 			if(isTightMuon(mu) && isTightElectron(el)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), pfMET, puweight);
-				KP1->hvar[0]->Fill(getHT(),               puweight);
-				KP1->hvar[1]->Fill(pfMET,                 puweight);
-				KP1->hvar[2]->Fill(getNJets(),            puweight);
-				KP1->hvar[3]->Fill(ptmax,                 puweight);
-				KP1->hvar[4]->Fill(ptmin,                 puweight);
-				KP1->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM
-				KP1->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
-				KP1->hvar[10]->Fill(getNBTags(), puweight);
+				KP1->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
+				KP1->hvar[0]->Fill(getHT(),               gEventWeight);
+				KP1->hvar[1]->Fill(pfMET,                 gEventWeight);
+				KP1->hvar[2]->Fill(getNJets(),            gEventWeight);
+				KP1->hvar[3]->Fill(ptmax,                 gEventWeight);
+				KP1->hvar[4]->Fill(ptmin,                 gEventWeight);
+				KP1->hvar[8]->Fill(getMll(mu, el, ElMu), gEventWeight); // EM
+				KP1->hvar[9]->Fill(getMT2(mu, el, ElMu), gEventWeight);
+				KP1->hvar[10]->Fill(getNBTags(), gEventWeight);
 				if( isSSLLElMuEvent(mu, el) ){
-					KP2->hmetvsht->Fill(getHT(), pfMET, puweight);
+					KP2->hmetvsht->Fill(getHT(), pfMET, gEventWeight);
 					if(hilo == HighPt){ // Store signal events
 						fSigEv_HI_EM_HT .push_back(getHT());
 						fSigEv_HI_EM_MET.push_back(pfMET);
@@ -2048,14 +2062,14 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 						fSigEv_LO_EM_MET.push_back(pfMET);						
 					}
 					
-					KP2->hvar[0]->Fill(getHT(),           puweight);
-					KP2->hvar[1]->Fill(pfMET,             puweight);
-					KP2->hvar[2]->Fill(getNJets(),        puweight);
-					KP2->hvar[3]->Fill(ptmax,             puweight);
-					KP2->hvar[4]->Fill(ptmin,             puweight);
-					KP2->hvar[8]->Fill(getMll(mu, el, ElMu), puweight); // EM						
-					KP2->hvar[9]->Fill(getMT2(mu, el, ElMu), puweight);
-					KP2->hvar[10]->Fill(getNBTags(), puweight);
+					KP2->hvar[0]->Fill(getHT(),           gEventWeight);
+					KP2->hvar[1]->Fill(pfMET,             gEventWeight);
+					KP2->hvar[2]->Fill(getNJets(),        gEventWeight);
+					KP2->hvar[3]->Fill(ptmax,             gEventWeight);
+					KP2->hvar[4]->Fill(ptmin,             gEventWeight);
+					KP2->hvar[8]->Fill(getMll(mu, el, ElMu), gEventWeight); // EM						
+					KP2->hvar[9]->Fill(getMT2(mu, el, ElMu), gEventWeight);
+					KP2->hvar[10]->Fill(getNBTags(), gEventWeight);
 				}
 			}
 		}
@@ -2078,9 +2092,7 @@ void SSDLDumper::fillMuIsoPlots(Sample *S){
 		// Common trigger selection
 		if(!singleMuTrigger()) return;
 		float prescale = singleMuPrescale();
-		float puweight = PUWeight;
-		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
-		float scale = prescale * puweight;
+		float scale = prescale * gEventWeight;
 
 		// Common event selections
 		if(!passesJet50Cut()) return; // make trigger 100% efficient
@@ -2139,9 +2151,7 @@ void SSDLDumper::fillElIdPlots(Sample *S){
 		// Common trigger selection
 		if(!singleElTrigger()) return;
 		float prescale = singleElPrescale();
-		float puweight = PUWeight;
-		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
-		float scale = prescale * puweight;
+		float scale = prescale * gEventWeight;
 
 		// Common event selections
 		if(!passesJet50Cut()) return; // make trigger 100% efficient
@@ -2209,9 +2219,7 @@ void SSDLDumper::fillElIsoPlots(Sample *S){
 		// Common trigger selection
 		if(!singleElTrigger()) return;
 		float prescale = singleElPrescale();
-		float puweight = PUWeight;
-		if(S->datamc == 4) puweight = 1; // fix for samples with no pileup
-		float scale = prescale * puweight;
+		float scale = prescale * gEventWeight;
 
 		// Common event selections
 		if(!passesJet50Cut()) return; // make trigger 100% efficient
@@ -2476,6 +2484,8 @@ void SSDLDumper::printCutFlows(TString filename){
 void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree = new TTree("SigEvents", "SigEventTree");
 	fSigEv_Tree->Branch("PUWeight",    &fSETree_PUWeight, "PUWeight/F");
+	fSigEv_Tree->Branch("HLTSF",    &fSETree_HLTSF   , "HLTSF/F");
+	fSigEv_Tree->Branch("BtagSF",   &fSETree_BtagSF  , "BtagSF/F");
 	fSigEv_Tree->Branch("SLumi",       &fSETree_SLumi   , "SLumi/F");
 	fSigEv_Tree->Branch("SName",       &fSETree_SName);
 	fSigEv_Tree->Branch("SType",       &fSETree_SType   , "SType/I");
@@ -2503,6 +2513,8 @@ void SSDLDumper::bookSigEvTree(){
 }
 void SSDLDumper::resetSigEventTree(){
 	fSETree_PUWeight = -1.;
+	fSETree_HLTSF    = -1.;
+	fSETree_BtagSF   = -1.;
 	fSETree_SLumi    = -1.;
 	fSETree_SName    = "?";
 	fSETree_SType    = -1;
@@ -4661,4 +4673,63 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 		return false;
 	}
 	return true;
+}
+
+
+
+float SSDLDumper::getHLTSF_DoubleMu( float pt, float eta, const std::string& runPeriod ) {
+
+
+  float hltsf = 0.;
+
+  if( runPeriod=="Run2011A" ) {
+
+    if( fabs(eta)<0.8 )
+      hltsf = 0.975;
+    else if( fabs(eta)<2.1 )
+      hltsf = 0.955;
+    else
+      hltsf = 0.910;
+
+  } else if( runPeriod=="Run2011B" ) {
+
+    if( fabs(eta)<0.8 )
+      hltsf = 0.972;
+    else if( fabs(eta)<2.1 )
+      hltsf = 0.945;
+    else { // eta 2.1 -> 2.4
+      if( pt<40. ) {
+        hltsf = 0.85;
+      } else {
+        hltsf = 0.87;
+      }
+    }
+
+  } else if( runPeriod=="Run2011" ) { //lumi weighted average of RunA/RunB scale factors
+
+    hltsf = ( 2.3*this->getHLTSF_DoubleMu( pt, eta, "Run2011A") + 2.7*this->getHLTSF_DoubleMu( pt, eta, "Run2011B") ) / 5.;
+
+  } else {
+
+    // default (so that squared is equal to 0.92)
+    hltsf = sqrt(0.92);
+
+  }
+
+  return hltsf;
+
+}
+
+
+float SSDLDumper::getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod ) {
+
+  return 1.;
+
+}
+
+
+float SSDLDumper::getHLTSF_MuEG( float pt, float eta, const std::string& runPeriod ) {
+
+  return sqrt(0.95);
+
 }

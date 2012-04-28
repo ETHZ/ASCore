@@ -63,6 +63,10 @@ public:
 	static const int gM12min  = 0    ; // SSDLAnalysis
 	static const int gM12max  = 1000 ; //
 
+	float gHLTSF;
+	float gBtagSF;
+	float gEventWeight;
+
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
@@ -628,6 +632,10 @@ public:
 
 	virtual bool isGoodJet(int, float = 20.);
 
+	float getHLTSF_DoubleMu( float pt, float eta, const std::string& runPeriod="" );
+	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
+	float getHLTSF_MuEG( float pt, float eta, const std::string& runPeriod="" );
+
 	float fC_minHT;
 	float fC_minMet;
 	float fC_maxHT;
@@ -682,6 +690,8 @@ public:
 	
 	TTree *fSigEv_Tree;
 	float       fSETree_PUWeight;
+	float       fSETree_HLTSF;
+	float       fSETree_BtagSF;
 	float       fSETree_SLumi;
 	std::string fSETree_SName;
 	int         fSETree_SType; // DoubleMu(0), DoubleEle(1), MuEG(2), MC(10)
@@ -726,6 +736,8 @@ public:
 	TString fOutputFileName;
 
 	Sample *fSample;
+
+	bool isTChiSlepSnu;
 
 	private:
 	
