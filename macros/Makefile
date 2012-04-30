@@ -31,6 +31,11 @@ NGLIBS         = $(ROOTGLIBS) -L$(ROOFIT_LIBDIR)/ -lMinuit -lMinuit2 -lTreePlaye
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) 
 ifdef DOJES
 GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lCondFormatsJetMETObjects
+
+ifneq (,$(findstring patch,$(CMSSW_VERSION)))
+	CMSSW_BASE_VERSION = $(filter CMSSW%, $(subst _patch, , $(CMSSW_VERSION) ))
+	GLIBS         += -L /afs/cern.ch/cms/$(SCRAM_ARCH)/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH)
+endif
 endif
 
 
@@ -38,8 +43,8 @@ endif
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
                  src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/FPRatios.cc src/helper/PUWeight.C src/helper/Lumi3DReWeighting_standalone.cc \
                  src/helper/FakeRatios.cc \
-                 src/SSDLAnalyzer.cc src/SSDLAnalysis.cc \
-                 src/SSDLPlotter.cc src/SSDLDumper.cc src/helper/MetaTreeClassBase.C
+                 src/JZBAnalyzer.cc src/JZBAnalysis.cc \
+                 src/helper/MetaTreeClassBase.C
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
@@ -47,18 +52,9 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunSSDLAnalyzer RunSSDLDumper MakeSSDLPlots
+all: RunJZBAnalyzer 
 
-RunSSDLDumper: src/exe/RunSSDLDumper.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-MakeSSDLPlots: src/exe/MakeSSDLPlots.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-RunSSDLAnalyzer: src/exe/RunSSDLAnalyzer.C $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-
-JZB: src/exe/RunJZBAnalyzer.C $(OBJS) src/JZBAnalyzer.o src/JZBAnalysis.o src/JZBPFAnalysis.o
+RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS) src/JZBAnalyzer.o src/JZBAnalysis.o src/JZBPFAnalysis.o
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 clean:
