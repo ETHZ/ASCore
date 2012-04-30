@@ -156,11 +156,11 @@ process.recovRecHitFilter.TaggingMode           = cms.bool(True)
 # ECAL dead cells: this is not a filter. Only a flag is stored.
 from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import *
 process.ecalDeadCellTPfilter                           = EcalDeadCellEventFilter.clone()
-process.ecalDeadCellTPfilter.tpDigiCollection          = cms.InputTag("ecalTPSkim")
-process.ecalDeadCellTPfilter.etValToBeFlagged          = cms.double(63.75)
-process.ecalDeadCellTPfilter.ebReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEB")
-process.ecalDeadCellTPfilter.eeReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEE")
-process.ecalDeadCellTPfilter.taggingMode               = cms.bool( True )
+process.ecalDeadCellTPfilter.tpDigiCollection          = 'ecalTPSkim'
+process.ecalDeadCellTPfilter.etValToBeFlagged          = 63.75
+process.ecalDeadCellTPfilter.ebReducedRecHitCollection = 'reducedEcalRecHitsEB'
+process.ecalDeadCellTPfilter.eeReducedRecHitCollection = 'reducedEcalRecHitsEE'
+process.ecalDeadCellTPfilter.taggingMode               = True
 
 # See for example DPGAnalysis/Skims/python/MinBiasPDSkim_cfg.py
 # require scraping filter
@@ -223,8 +223,8 @@ for pf in pfPostfixes:
 
     # configure PFnoPU
     getattr(process,'pfPileUp'+pf).Enable              = True
-    getattr(process,'pfPileUp'+pf).checkClosestZVertex = cms.bool(False)
-    getattr(process,'pfPileUp'+pf).Vertices            = cms.InputTag('goodVertices')
+    getattr(process,'pfPileUp'+pf).checkClosestZVertex = False
+    getattr(process,'pfPileUp'+pf).Vertices            = 'goodVertices'
     getattr(process,'pfJets'+pf).doAreaFastjet         = True
     getattr(process,'pfJets'+pf).doRhoFastjet          = False
     getattr(process,'pfNoPileUp'+pf).enable            = False  # !!! this is a switch to turn on and off the pile-up removal !!!!
@@ -234,9 +234,9 @@ for pf in pfPostfixes:
 	getattr(process,"pfNoElectron"+pf)*getattr(process,'kt6PFJets'+pf)) # pfNoElectron is src of kt6PFJets
     # Jet corrections 
     getattr(process,'patJetCorrFactors'+pf).levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-    getattr(process,'patJetCorrFactors'+pf).rho    = cms.InputTag('kt6PFJets'+pf,'rho')
-#   getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PFchs')  # !!! if pfnoPU is turned ON use these JEC!!!
-    getattr(process,'patJetCorrFactors'+pf).payload= cms.string('AK5PF')     # !!! if pfnoPU is turned OFF use these JEC!!!
+    getattr(process,'patJetCorrFactors'+pf).rho    = 'kt6PFJets'+pf+':rho'
+#   getattr(process,'patJetCorrFactors'+pf).payload= 'AK5PFchs'  # !!! if pfnoPU is turned ON use these JEC!!!
+    getattr(process,'patJetCorrFactors'+pf).payload= 'AK5PF'     # !!! if pfnoPU is turned OFF use these JEC!!!
 
     # set to false to disable jet to be cleaned from Taus
     getattr(process,"pfNoTau"+pf).enable      = False
@@ -246,7 +246,7 @@ for pf in pfPostfixes:
     getattr(process, 'patMuons'+pf).embedGenMatch = False
 
     # PatElectronID
-    getattr(process, 'patElectrons'+pf).addElectronID = cms.bool(True)
+    getattr(process, 'patElectrons'+pf).addElectronID = True
     getattr(process, 'patElectrons'+pf).electronIDSources = cms.PSet(
 	simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
 	simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
@@ -264,29 +264,21 @@ for pf in pfPostfixes:
 
       
     # muon vertex 
-    getattr(process, 'pfMuonsFromVertex'+pf).vertices=cms.InputTag("goodVertices") # require muon to come from the good vertices as defined above
-    getattr(process, 'pfMuonsFromVertex'+pf).d0Cut   =cms.double(0.02) # transverse IP w.r.t. PV
-    getattr(process, 'pfMuonsFromVertex'+pf).dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
-    getattr(process, 'pfSelectedMuons'+pf).cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 5 && muonRef().isNonnull()" 
-    )
+    getattr(process, 'pfMuonsFromVertex'+pf).vertices= 'goodVertices' # require muon to come from the good vertices as defined above
+    getattr(process, 'pfMuonsFromVertex'+pf).d0Cut   = 0.02 # transverse IP w.r.t. PV
+    getattr(process, 'pfMuonsFromVertex'+pf).dzCut   = 1.   # longitudinal IP w.r.t. PV
+    getattr(process, 'pfSelectedMuons'+pf).cut       = 'abs( eta ) < 2.4 && pt > 5 && muonRef().isNonnull()' 
     
     # electron vertex
-    getattr(process, 'pfElectronsFromVertex'+pf).vertices=cms.InputTag("goodVertices") # require eles to come from the good vertices as defined above
-    getattr(process, 'pfElectronsFromVertex'+pf).d0Cut   =cms.double(0.04) # transverse IP w.r.t. PV
-    getattr(process, 'pfElectronsFromVertex'+pf).dzCut   =cms.double(1.)   # longitudinal IP w.r.t. PV
-    getattr(process, 'pfSelectedElectrons'+pf).cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 5 && gsfTrackRef().isNonnull()" 
-		+"&& gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1"       # conv rejection
-    )
+    getattr(process, 'pfElectronsFromVertex'+pf).vertices= 'goodVertices' # require eles to come from the good vertices as defined above
+    getattr(process, 'pfElectronsFromVertex'+pf).d0Cut   = 0.04 # transverse IP w.r.t. PV
+    getattr(process, 'pfElectronsFromVertex'+pf).dzCut   = 1.   # longitudinal IP w.r.t. PV
+    getattr(process, 'pfSelectedElectrons'+pf).cut = ( 'abs( eta ) < 2.4 && pt > 5 && gsfTrackRef().isNonnull()'
+                                                     + '&& gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1' )     # conv rejection
 
 
     # tau cut
-    getattr(process, 'pfTaus'+pf).cut = cms.string(
- 		"abs( eta ) < 2.4 && pt > 10  && abs( charge ) == 1. && leadPFChargedHadrCand().isNonnull()" 
-                )
-
-
+    getattr(process, 'pfTaus'+pf).cut = cms.string('abs( eta ) < 2.4 && pt > 10  && abs( charge ) == 1. && leadPFChargedHadrCand().isNonnull()')
     getattr(process, 'pfTaus'+pf).discriminators  =    cms.VPSet(cms.PSet(
         discriminator = cms.InputTag("pfTausBaseDiscriminationByDecayModeFinding"+pf),
         selectionCut = cms.double(0.5)                    
@@ -318,9 +310,8 @@ for pf in pfPostfixes:
         )
 
     # ISOLATION
-    getattr(process, 'pfIsolatedMuons'+pf)    .combinedIsolationCut = cms.double(0.20)
-    getattr(process, 'pfIsolatedElectrons'+pf).combinedIsolationCut = cms.double(0.20)
-
+    getattr(process, 'pfIsolatedMuons'+pf)    .isolationCut = 0.20
+    getattr(process, 'pfIsolatedElectrons'+pf).isolationCut = 0.20
 
 
 
@@ -340,11 +331,10 @@ process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso,
     		process.pfMuonsIDPFAntiIso * 
     		process.pfSelectedMuonsPFAntiIso 
     		) 
-process.pfIsolatedMuonsPFAntiIso.combinedIsolationCut     = cms.double(2.0) # set min isolation to 2
-process.pfIsolatedElectronsPFAntiIso.combinedIsolationCut = cms.double(2.0) # set min isolation to 2
+process.pfIsolatedMuonsPFAntiIso.isolationCut     = 2.0 # set min isolation to 2
+process.pfIsolatedElectronsPFAntiIso.isolationCut = 2.0 # set min isolation to 2
 
-
-process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseIsolation')")
+process.selectedPatTausPFAntiIso.cut = "tauID('byVLooseIsolation')"
     
     
 ### Specific to second PF collection: TIGHT
@@ -376,7 +366,7 @@ process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2,
     		process.pfSelectedElectronsPF2 
     		) 
     
-process.selectedPatTausPF2.cut = cms.string("tauID('againstElectronTight') && tauID('againstMuonTight')")
+process.selectedPatTausPF2.cut = "tauID('againstElectronTight') && tauID('againstMuonTight')"
     
     
 ### Specific to second PF collection: LOOSE
@@ -397,7 +387,7 @@ process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3,
     		) 
     
     
-process.selectedPatTausPF3.cut = cms.string("tauID('againstElectronLoose') && tauID('againstMuonLoose')")
+process.selectedPatTausPF3.cut = "tauID('againstElectronLoose') && tauID('againstMuonLoose')"
 
 
 
@@ -409,11 +399,11 @@ process.mygenjets = cms.Sequence( process.genParticlesForJets * process.ak5GenJe
 
 ### Analysis configuration #####################################################
 process.load("DiLeptonAnalysis.NTupleProducer.ntupleproducer_cfi")
-process.analyze.isRealData = cms.bool(options.runon=='data')
-process.analyze.isModelScan = cms.bool(options.ModelScan)
-process.analyze.tag_doVertexing = cms.bool(options.doVertexing)
-process.analyze.tag_perVtxMvaWeights = cms.string(options.perVtxMvaWeights)
-process.analyze.tag_perEvtMvaWeights = cms.string(options.perEvtMvaWeights)
+process.analyze.isRealData      = (options.runon=='data')
+process.analyze.isModelScan     = options.ModelScan
+process.analyze.tag_doVertexing = options.doVertexing
+process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
+process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights
 
 # Add some jet collections
 process.analyze.jets = (
@@ -550,13 +540,13 @@ process.analyze.leptons = (
 # RA2 TrackingFailureFilter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
 process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-process.trackingFailureFilter.JetSource             = cms.InputTag('patJetsPF3')
-process.trackingFailureFilter.TrackSource           = cms.InputTag('generalTracks')
-process.trackingFailureFilter.VertexSource          = cms.InputTag('goodVertices')
-process.trackingFailureFilter.DzTrVtxMax            = cms.double(1)
-process.trackingFailureFilter.DxyTrVtxMax           = cms.double(0.2)
-process.trackingFailureFilter.MinSumPtOverHT        = cms.double(0.10)
-process.trackingFailureFilter.taggingMode           = cms.bool(True)
+process.trackingFailureFilter.JetSource             = 'patJetsPF3'
+process.trackingFailureFilter.TrackSource           = 'generalTracks'
+process.trackingFailureFilter.VertexSource          = 'goodVertices'
+process.trackingFailureFilter.DzTrVtxMax            = 1.0
+process.trackingFailureFilter.DxyTrVtxMax           = 0.2
+process.trackingFailureFilter.MinSumPtOverHT        = 0.10
+process.trackingFailureFilter.taggingMode           = True
 
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
@@ -601,34 +591,32 @@ from RecoBTag.Configuration.RecoBTag_cff import *
 # create a new jets and tracks association
 import RecoJets.JetAssociationProducers.ak5JTA_cff
 process.newJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
-process.newJetTracksAssociatorAtVertex.jets = "ak5PFJets"
-process.newJetTracksAssociatorAtVertex.tracks = "generalTracks"
+process.newJetTracksAssociatorAtVertex.jets   = 'ak5PFJets'
+process.newJetTracksAssociatorAtVertex.tracks = 'generalTracks'
 
 process.newImpactParameterTagInfos = RecoBTag.Configuration.RecoBTag_cff.impactParameterTagInfos.clone()
 process.newImpactParameterTagInfos.jetTracks = "newJetTracksAssociatorAtVertex"
-process.newTrackCountingHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighEffBJetTags.clone()
+process.newTrackCountingHighEffBJetTags          = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighEffBJetTags.clone()
 process.newTrackCountingHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
-process.newTrackCountingHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
-process.newTrackCountingHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
-process.newJetProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetProbabilityBJetTags.clone()
+process.newTrackCountingHighPurBJetTags         = RecoBTag.Configuration.RecoBTag_cff.trackCountingHighPurBJetTags.clone()
+process.newTrackCountingHighPurBJetTags.tagInfos= cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+process.newJetProbabilityBPFJetTags          = RecoBTag.Configuration.RecoBTag_cff.jetProbabilityBJetTags.clone()
 process.newJetProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
-process.newJetBProbabilityBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.jetBProbabilityBJetTags.clone()
+process.newJetBProbabilityBPFJetTags          = RecoBTag.Configuration.RecoBTag_cff.jetBProbabilityBJetTags.clone()
 process.newJetBProbabilityBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
 
-process.newSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
+process.newSecondaryVertexTagInfos                 = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 process.newSecondaryVertexTagInfos.trackIPTagInfos = "newImpactParameterTagInfos"
-process.newSimpleSecondaryVertexHighEffBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighEffBJetTags.clone()
+process.newSimpleSecondaryVertexHighEffBJetTags          = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighEffBJetTags.clone()
 process.newSimpleSecondaryVertexHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
-process.newSimpleSecondaryVertexHighPurBJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
-process.newSimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
-process.newCombinedSecondaryVertexBPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexBJetTags.clone()
+process.newSimpleSecondaryVertexHighPurBJetTags         = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
+process.newSimpleSecondaryVertexHighPurBJetTags.tagInfos= cms.VInputTag( cms.InputTag("newSecondaryVertexTagInfos") )
+process.newCombinedSecondaryVertexBPFJetTags          = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexBJetTags.clone()
 process.newCombinedSecondaryVertexBPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos"), cms.InputTag("newSecondaryVertexTagInfos") )
-process.newCombinedSecondaryVertexMVABPFJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexMVABJetTags.clone()
+process.newCombinedSecondaryVertexMVABPFJetTags          = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexMVABJetTags.clone()
 process.newCombinedSecondaryVertexMVABPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos"), cms.InputTag("newSecondaryVertexTagInfos") )
 
-process.newJetTracksAssociator = cms.Sequence(
-    process.newJetTracksAssociatorAtVertex
-    )
+process.newJetTracksAssociator = cms.Sequence( process.newJetTracksAssociatorAtVertex )
 
 process.newJetBtaggingIP = cms.Sequence(
     process.newImpactParameterTagInfos * (
@@ -651,17 +639,15 @@ process.newJetBtagging = cms.Sequence(
     process.newJetBtaggingIP +
     process.newJetBtaggingSV )
 
-process.newBtaggingSequence = cms.Sequence(
-    process.newJetTracksAssociator *
-       process.newJetBtagging )
+process.newBtaggingSequence = cms.Sequence( process.newJetTracksAssociator * process.newJetBtagging )
 
 
 
 #same thing for PF:
 import RecoJets.JetAssociationProducers.ak5JTA_cff
-process.newPFJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
-process.newPFJetTracksAssociatorAtVertex.jets = "ak5PFJets"
-process.newPFJetTracksAssociatorAtVertex.tracks = "generalTracks"
+process.newPFJetTracksAssociatorAtVertex        = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
+process.newPFJetTracksAssociatorAtVertex.jets   = 'ak5PFJets'
+process.newPFJetTracksAssociatorAtVertex.tracks = 'generalTracks'
 
 process.newPFImpactParameterTagInfos = RecoBTag.Configuration.RecoBTag_cff.impactParameterTagInfos.clone()
 process.newPFImpactParameterTagInfos.jetTracks = "newPFJetTracksAssociatorAtVertex"
@@ -687,9 +673,7 @@ process.newPFCombinedSecondaryVertexMVABPFJetTags = RecoBTag.Configuration.RecoB
 process.newPFCombinedSecondaryVertexMVABPFJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFImpactParameterTagInfos"), cms.InputTag("newPFSecondaryVertexTagInfos") )
 
 
-process.newPFJetTracksAssociator = cms.Sequence(
-    process.newPFJetTracksAssociatorAtVertex
-    )
+process.newPFJetTracksAssociator = cms.Sequence( process.newPFJetTracksAssociatorAtVertex )
 
 process.newPFJetBtaggingIP = cms.Sequence(
     process.newPFImpactParameterTagInfos * (
@@ -716,7 +700,9 @@ process.newPFBtaggingSequence = cms.Sequence(
     process.newPFJetTracksAssociator *
        process.newPFJetBtagging )
 
-# PF isolation settings
+
+##########################################################################
+### PF isolation settings ################################################
 process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
 
 #### Path ######################################################################
