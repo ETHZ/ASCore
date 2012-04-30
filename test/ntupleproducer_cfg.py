@@ -91,11 +91,6 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.ModelScan = cms.untracked.PSet( input = cms.untracked.bool(options.ModelScan) )
 # Output
-process.TFileService = cms.Service("TFileService",
-# Keep track of the type of data source and reco type in the ntuple file name
-	fileName = cms.string(options.output),
-	closeFileFast = cms.untracked.bool(True)
-)
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string(options.output),
                                SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),

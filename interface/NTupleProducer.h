@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.8 2012/04/24 10:31:43 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.9 2012/04/27 12:57:03 fronga Exp $
 //
 //
 
@@ -36,7 +36,6 @@ Implementation:
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 // Data formats
@@ -141,7 +140,6 @@ private:
   double DeltaPhi( double phi1, double phi2);
 
   // ----------member data ---------------------------
-  edm::Service<TFileService> fTFileService;
   AdaptiveVertexFitter avFitter;
 
   //for OOT reweighting in Summer11_S3 samples
