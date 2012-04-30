@@ -14,7 +14,7 @@ ROOFIT_LIBDIR  = $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIB
 INCLUDES       = -I./include -I$(CMSSW_RELEASE_BASE)/src/ -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/
 
 CXX            = g++
-CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) 
+CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) -std=gnu++0x
 LD             = g++
 LDFLAGS        = -g 
 SOFLAGS        = -O --no_exceptions -shared
@@ -31,13 +31,12 @@ NGLIBS         = $(ROOTGLIBS) -L$(ROOFIT_LIBDIR)/ -lMinuit -lMinuit2 -lTreePlaye
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) 
 ifdef DOJES
 GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lCondFormatsJetMETObjects
+endif
 
 ifneq (,$(findstring patch,$(CMSSW_VERSION)))
 	CMSSW_BASE_VERSION = $(filter CMSSW%, $(subst _patch, , $(CMSSW_VERSION) ))
-	GLIBS         += -L /afs/cern.ch/cms/$(SCRAM_ARCH)/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH)
+	GLIBS         += -L/afs/cern.ch/cms/$(SCRAM_ARCH)/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH)
 endif
-endif
-
 
 
 SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
