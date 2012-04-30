@@ -126,7 +126,7 @@ public:
 public:
   std::vector<std::string> countNames;
   Cmap counters;
-  int maxLength;
+  size_t maxLength;
   std::string name;
 
 };

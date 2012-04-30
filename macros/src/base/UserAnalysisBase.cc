@@ -39,7 +39,10 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 
     fJetCorrector = new FactorizedJetCorrector(JetCorPar);
     jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
-    delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
+    delete L1JetPar;
+    delete L2JetPar; 
+    delete L3JetPar; 
+    delete ResJetPar; 
 
 }
 
@@ -102,7 +105,7 @@ void UserAnalysisBase::GetHLTNames(){
     fHLTLabelMap.clear();
     fHLTLabels.clear();
     fHLTLabels.reserve(fTR->HLTNames.size());
-    for( int i=0; i < fTR->HLTNames.size(); i++ ){
+    for( size_t i=0; i < fTR->HLTNames.size(); i++ ){
         fHLTLabelMap[fTR->HLTNames[i]] = i; 
         fHLTLabels.push_back(fTR->HLTNames[i]);
         if (fVerbose>3) cout << " " << i << " " << fTR->HLTNames[i] << endl;
@@ -796,7 +799,7 @@ bool UserAnalysisBase::SingleMuonSelection(int &index){
     // Assumes the muons are sorted by pt in the ntuple
     if( fTR->NMus < 1 ) return false;
     vector<int> MuInd;
-    for(size_t imu = 0; imu < fTR->NMus; ++imu){
+    for(int imu = 0; imu < fTR->NMus; ++imu){
         if(!IsGoodBasicMu(imu)) continue;
         MuInd.push_back(imu);
     }
@@ -817,7 +820,7 @@ bool UserAnalysisBase::DiMuonSelection(int &ind1, int &ind2, int charge){
     // charge is the relative charge, 0 = no cut on charge, 1 = SS, -1 = OS
     if( fTR->NMus < 2 ) return false;
     vector<int> MuInd;
-    for(size_t imu = 0; imu < fTR->NMus; ++imu){
+    for(int imu = 0; imu < fTR->NMus; ++imu){
         if(fTR->MuPt[imu] < 10.) continue;
         if(!IsGoodBasicMu(imu)) continue;
         MuInd.push_back(imu);

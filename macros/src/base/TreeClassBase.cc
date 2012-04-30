@@ -28,7 +28,7 @@ TreeClassBase::~TreeClassBase()
 const bool TreeClassBase::GetAllByLabel(void) {
 
     const edm::EventBase* event = fEvent;
-    bool result;
+    bool result = true;
 
     // Load run information if run has changed
     if ( fCurRun != event->id().run() ) {

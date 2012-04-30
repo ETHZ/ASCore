@@ -38,7 +38,7 @@ void UserAnalysis::Analyze(){
 
     // Plot some muon quantities
     int nqmus = 0;
-    for( int im = 0; im < fTR->MuPt.size(); ++im ){
+    for( size_t im = 0; im < fTR->MuPt.size(); ++im ){
       //if ( !GetHLTResult("HLT_Mu8_Ele17_CaloIdL_v4") ) continue;
       if(fTR->MuIsGlobalMuon[im] == 0) continue;
       fHmuPt->Fill(fTR->MuPt[im]);
@@ -52,7 +52,7 @@ void UserAnalysis::Analyze(){
     }    
     fHmuMult->Fill(nqmus);
 
-    for ( int ih = 0; ih<fTR->HLTObjectPt0.size(); ++ih ) {
+    for ( size_t ih = 0; ih<fTR->HLTObjectPt0.size(); ++ih ) {
       fTR->HLTObjectID0[ih];
     }
 }

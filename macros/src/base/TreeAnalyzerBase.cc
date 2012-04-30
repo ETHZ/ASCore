@@ -67,9 +67,8 @@ void TreeAnalyzerBase::ReadJSON(const char* JSONpath) {
     }	       
     splitted.push_back(line); // for the last entry
 	
-    fCurRunLumi;
     // loop over runs (with lumis)
-    for(int i=0; i<splitted.size(); ++i){
+    for(size_t i=0; i<splitted.size(); ++i){
         fCurRunLumi.run =0;
         fCurRunLumi.lumi_min.clear();
         fCurRunLumi.lumi_max.clear();
@@ -113,9 +112,9 @@ void TreeAnalyzerBase::ReadJSON(const char* JSONpath) {
     if(fVerbose >1){
         cout << "-----------------------------------------------" << endl;
         cout << "Reading the following runs and lumi sections from JSON file:" << endl; 
-        for(int i=0; i<fRunLumis.size(); ++i){
+        for(size_t i=0; i<fRunLumis.size(); ++i){
             cout << "  Run: " << fRunLumis[i].run << " Lumis: " ;
-            for(int k=0; k<fRunLumis[i].lumi_min.size(); ++k){
+            for(size_t k=0; k<fRunLumis[i].lumi_min.size(); ++k){
                 cout << " [" << fRunLumis[i].lumi_min[k] << ", " << fRunLumis[i].lumi_max[k] << "] ";
             }
             cout << endl;
@@ -131,9 +130,9 @@ const bool TreeAnalyzerBase::CheckRunLumi(void) const {
             cout << "CheckRunLumi: fRunLumis is empty. Assuming no JSON." << endl; 
         return true;
     }
-    for(int r=0; r<fRunLumis.size(); ++r){
+    for(size_t r=0; r<fRunLumis.size(); ++r){
         if(fTR->Run != fRunLumis[r].run) continue;
-        for(int l=0; l<fRunLumis[r].lumi_min.size(); ++l){
+        for(size_t l=0; l<fRunLumis[r].lumi_min.size(); ++l){
             if(fTR->LumiSection < fRunLumis[r].lumi_min[l]) continue;
             if(fTR->LumiSection > fRunLumis[r].lumi_max[l]) continue;
             good = true;
@@ -158,7 +157,7 @@ const bool TreeAnalyzerBase::CheckRun(void) const {
             cout << "CheckRunLumi: fRunLumis is empty. Assuming no JSON." << endl; 
         return true;
     }
-    for(int r=0; r<fRunLumis.size(); ++r)
+    for(size_t r=0; r<fRunLumis.size(); ++r)
         if(fTR->Run == fRunLumis[r].run)
             runInJson = true;
 
