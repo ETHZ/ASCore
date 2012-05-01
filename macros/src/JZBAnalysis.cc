@@ -4,6 +4,7 @@
 #include <time.h>
 #include <TRandom.h>
 #include "TF1.h"
+#include "TTree.h"
 #include <cstdlib>
 #include <assert.h>
 
@@ -17,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.81 $";
+string sjzbversion="$Revision: 1.83 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -26,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.83  2012/04/18 16:26:31  buchmann
+made code a bit more legible by using the is_neutrino and is_charged_lepton functions
+
 Revision 1.81  2012/04/18 09:18:55  buchmann
 Added a tiny tree to keep track of the number of mc events
 
@@ -1536,10 +1540,10 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
         nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-        nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
-        nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
-        nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
-        nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
+//        nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
+//        nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
+//        nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
+//        nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
         
         if(isJetID>0) nEvent.pfJetGoodNumID++;
         nEvent.pfJetGoodNum++;
@@ -2078,9 +2082,9 @@ const bool JZBAnalysis::IsCustomJet(const int index){
   // Basic Jet ID cuts (loose Jet ID)
   // See https://twiki.cern.ch/twiki/bin/view/CMS/JetID
 
-  if ( !(fTR->CAJID_n90Hits[index] > 1) ) return false;
+//  if ( !(fTR->CAJID_n90Hits[index] > 1) ) return false;
   counters[JE].fill(" ... n90Hits > 1");
-  if ( !(fTR->CAJID_HPD[index] < 0.98)  ) return false;
+//  if ( !(fTR->CAJID_HPD[index] < 0.98)  ) return false;
   counters[JE].fill(" ... HPD < 0.98");
 
   if ( fabs(fTR->CAJEta[index])<3.0 ) {
