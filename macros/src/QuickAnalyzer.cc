@@ -6,13 +6,12 @@
 
 using namespace std;
 
-QuickAnalyzer::QuickAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
+QuickAnalyzer::QuickAnalyzer(std::vector<std::string>& fileList) : TreeAnalyzerBase(fileList) {
 	fQuickAnalysis = new QuickAnalysis(fTR);
 }
 
 QuickAnalyzer::~QuickAnalyzer(){
 	delete fQuickAnalysis;
-	if(!fTR->fChain) cout << "QuickAnalyzer ==> No chain!" << endl;
 }
 
 // Method for looping over the tree
@@ -22,9 +21,9 @@ void QuickAnalyzer::Loop(){
 	
 	// loop over all ntuple entries
 	// nentries = 200;
-	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		PrintProgress(jentry);
-		fTR->GetEntry(jentry);
+	Long64_t jentry=0;
+	for ( fTR->ToBegin();!(fTR->AtEnd()) && (jentry<fMaxEvents || fMaxEvents<0);++(*fTR) ) {
+		PrintProgress(jentry++);
                 if ( fCurRun != fTR->Run ) {
                   fCurRun = fTR->Run;
                   fQuickAnalysis->BeginRun(fCurRun);
@@ -37,7 +36,7 @@ void QuickAnalyzer::Loop(){
 // Method called before starting the event loop
 void QuickAnalyzer::BeginJob(TString filename){
 	fQuickAnalysis->SetOutputDir(fOutputDir);
-	fQuickAnalysis->fVerbose = fVerbose;
+	fQuickAnalysis->SetVerbose(fVerbose);
 
 	fQuickAnalysis->Begin(filename);
 

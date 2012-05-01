@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <stdio.h>
+#include <vector>
 
 // ROOT includes
 #include <TROOT.h>
@@ -10,6 +11,8 @@
 #include <TChain.h>
 
 #include "QuickAnalyzer.hh"
+
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 using namespace std;
 
@@ -32,6 +35,7 @@ void usage( int status = 0 ) {
 
 //________________________________________________________________________________________
 int main(int argc, char* argv[]) {
+  AutoLibraryLoader::enable();
 // Default options
 	bool isList = false;
 	TString outputdir = "TempOutput/";
@@ -62,17 +66,17 @@ int main(int argc, char* argv[]) {
 		usage(-1);
 	}
 
-	TChain *theChain = new TChain("analyze/Analysis");
+	std::vector<std::string> fileList;
 	for(int i = 0; i < argc; i++){
 		if( !isList ){
-			theChain->Add(argv[i]);
+			fileList.push_back(argv[i]);
 			printf(" Adding file: %s\n",argv[i]);
 		} else {
 			TString rootFile;
 			ifstream is(argv[i]);
 			while(rootFile.ReadLine(is) && (!rootFile.IsNull())){
 				if(rootFile[0] == '#') continue;
-				theChain->Add(rootFile);
+				 fileList.push_back(rootFile.Data());
 				printf(" Adding file: %s\n", rootFile.Data());
 			}
 		}
@@ -82,10 +86,10 @@ int main(int argc, char* argv[]) {
 	cout << "OutputDir is:     " << outputdir << endl;
 	cout << "OutputFile is:    " << filename << endl;
 	cout << "Verbose level is: " << verbose << endl;
-	cout << "Number of events: " << theChain->GetEntries() << endl;
+	cout << "Number of files: " << fileList.size() << endl;
 	cout << "--------------" << endl;
 
-	QuickAnalyzer *tA = new QuickAnalyzer(theChain);
+	QuickAnalyzer *tA = new QuickAnalyzer(fileList);
 	tA->SetOutputDir(outputdir);
 	tA->SetVerbose(verbose);
 	tA->BeginJob(filename);
