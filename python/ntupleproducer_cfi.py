@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 analyze = cms.EDFilter('NTupleProducer',
 	# Main settings
 	isRealData       = cms.bool(False),
+        isModelScan      = cms.bool(False),
 	# Collections
 	tag_muons        = cms.InputTag('muons'),
         tag_muonpfisos   = cms.VInputTag('muonPFIsoChHad02',  'muonPFIsoChHad03',  'muonPFIsoChHad04',
