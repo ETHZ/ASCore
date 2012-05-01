@@ -35,7 +35,7 @@ SSDLAnalysis::~SSDLAnalysis(){
 void SSDLAnalysis::Begin(const char* filename){
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
-	InitJetCorrectionUncertainty("/shome/stiegerb/Workspace/JetEnergyCorrection/GR_R_42_V19_AK5PF/AK5Calo_Uncertainty.txt");
+	InitJetCorrectionUncertainty("/shome/stiegerb/Workspace/JetEnergyCorrection/GR_R_42_V19_AK5PF/AK5PF_Uncertainty.txt");
 
 	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
 	if(!fIsData){
