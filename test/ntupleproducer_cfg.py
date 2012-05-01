@@ -17,12 +17,7 @@ process.MessageLogger.cerr.EcalSeverityLevelError = cms.untracked.PSet(
     limit = cms.untracked.int32(1),
     )
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
-                                      fileMode = cms.untracked.string("NOMERGE")
-                                    )
-
-
-
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False))
 
 
 ### Parsing of command line parameters #############################################
