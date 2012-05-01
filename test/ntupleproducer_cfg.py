@@ -271,14 +271,6 @@ for pf in pfPostfixes:
     getattr(process, 'pfSelectedElectrons'+pf).cut = ( 'abs( eta ) < 2.4 && pt > 5 && gsfTrackRef().isNonnull()'
                                                      + '&& gsfTrackRef().trackerExpectedHitsInner().numberOfHits() <= 1' )     # conv rejection
 
-
-    # tau cut
-    getattr(process, 'pfTaus'+pf).cut = cms.string('abs( eta ) < 2.4 && pt > 10  && abs( charge ) == 1. && leadPFChargedHadrCand().isNonnull()')
-    getattr(process, 'pfTaus'+pf).discriminators  =    cms.VPSet(cms.PSet(
-        discriminator = cms.InputTag("pfTausBaseDiscriminationByDecayModeFinding"+pf),
-        selectionCut = cms.double(0.5)                    
-        ))
-
     getattr(process,"patTaus"+pf).tauIDSources = cms.PSet(
         decayModeFinding = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+pf),
         byVLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseChargedIsolation"+pf),
@@ -303,6 +295,8 @@ for pf in pfPostfixes:
         againstMuonLoose = cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection"+pf),
         againstMuonTight = cms.InputTag("hpsPFTauDiscriminationByTightMuonRejection"+pf)
         )
+
+    getattr(process,"patTaus"+pf).cut = cms.string("tauID('decayModeFinding')")
 
     # ISOLATION
     getattr(process, 'pfIsolatedMuons'+pf)    .isolationCut = 0.20
@@ -329,8 +323,8 @@ process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso,
 process.pfIsolatedMuonsPFAntiIso.isolationCut     = 2.0 # set min isolation to 2
 process.pfIsolatedElectronsPFAntiIso.isolationCut = 2.0 # set min isolation to 2
 
-process.selectedPatTausPFAntiIso.cut = "tauID('byVLooseIsolation')"
-    
+process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseCombinedIsolationDBSumPtCorr') "
+                                                 +"&& abs( eta ) < 2.3 && pt > 15 && abs(charge) == 1 ")
     
 ### Specific to second PF collection: TIGHT
 # ID cuts
@@ -361,7 +355,9 @@ process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2,
     		process.pfSelectedElectronsPF2 
     		) 
     
-process.selectedPatTausPF2.cut = "tauID('againstElectronTight') && tauID('againstMuonTight')"
+process.selectedPatTausPF2.cut = cms.string("tauID('byLooseCombinedIsolationDBSumPtCorr')"
+                                           +"&& tauID('againstElectronTight')"+"&& tauID('againstMuonTight') "
+                                           +"&& abs( eta ) < 2.3 && pt > 15 && abs(charge) == 1 ")
     
     
 ### Specific to second PF collection: LOOSE
@@ -381,8 +377,8 @@ process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3,
     		process.pfSelectedMuonsPF3 
     		) 
     
-    
-process.selectedPatTausPF3.cut = "tauID('againstElectronLoose') && tauID('againstMuonLoose')"
+process.selectedPatTausPF3.cut = cms.string("tauID('decayModeFinding') "
+                                           +"&& abs(charge) == 1 && abs( eta ) < 2.3 && pt > 15 ")
 
 
 
@@ -500,31 +496,30 @@ process.analyze.leptons = (
                   sel_maxeta = process.analyze.sel_maxeleta,
                   maxnobjs = cms.uint32(20)
                   ),
-# TAUS NEED TO BE WORKED ON WITH THE NEW PILEUP CONDITIONS
-#         # PF Taus anti-isolated
-#         cms.PSet( type = cms.string('tau'),
-#                   prefix = cms.string('PfTauAntiIso'),
-#                   tag = cms.InputTag('selectedPatTausPFAntiIso'),
-#                   sel_minpt = process.analyze.sel_minelpt,
-#                   sel_maxeta = process.analyze.sel_maxeleta,
-#                   maxnobjs = cms.uint32(20)
-#                   ),
-#         # PF Taus TIGHT
-#         cms.PSet( type = cms.string('tau'),
-#                   prefix = cms.string('PfTau2'),
-#                   tag = cms.InputTag('selectedPatTausPF2'),
-#                   sel_minpt = process.analyze.sel_minelpt,
-#                   sel_maxeta = process.analyze.sel_maxeleta,
-#                   maxnobjs = cms.uint32(20)
-#                   ),
-#         # PF Taus LOOSE
-#         cms.PSet( type = cms.string('tau'),
-#                   prefix = cms.string('PfTau3'),
-#                   tag = cms.InputTag('selectedPatTausPF3'),
-#                   sel_minpt = process.analyze.sel_minelpt,
-#                   sel_maxeta = process.analyze.sel_maxeleta,
-#                   maxnobjs = cms.uint32(20)
-#                   ),
+         # PF Taus anti-isolated
+         cms.PSet( type = cms.string('tau'),
+                   prefix = cms.string('PfTauAntiIso'),
+                   tag = cms.InputTag('selectedPatTausPFAntiIso'),
+                   sel_minpt = process.analyze.sel_minelpt,
+                   sel_maxeta = process.analyze.sel_maxeleta,
+                   maxnobjs = cms.uint32(20)
+                   ),
+         # PF Taus TIGHT
+         cms.PSet( type = cms.string('tau'),
+                   prefix = cms.string('PfTau2'),
+                   tag = cms.InputTag('selectedPatTausPF2'),
+                   sel_minpt = process.analyze.sel_minelpt,
+                   sel_maxeta = process.analyze.sel_maxeleta,
+                   maxnobjs = cms.uint32(20)
+                   ),
+         # PF Taus LOOSE
+         cms.PSet( type = cms.string('tau'),
+                   prefix = cms.string('PfTau3'),
+                   tag = cms.InputTag('selectedPatTausPF3'),
+                   sel_minpt = process.analyze.sel_minelpt,
+                   sel_maxeta = process.analyze.sel_maxeleta,
+                   maxnobjs = cms.uint32(20)
+                   ),
     )
               
 ## Colins Bernet's Particle Based Noise Rejection Filter
