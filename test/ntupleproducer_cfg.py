@@ -296,8 +296,6 @@ for pf in pfPostfixes:
         againstMuonTight = cms.InputTag("hpsPFTauDiscriminationByTightMuonRejection"+pf)
         )
 
-    getattr(process,"patTaus"+pf).cut = cms.string("tauID('decayModeFinding')")
-
     # ISOLATION
     getattr(process, 'pfIsolatedMuons'+pf)    .isolationCut = 0.20
     getattr(process, 'pfIsolatedElectrons'+pf).isolationCut = 0.20
@@ -323,8 +321,7 @@ process.pfMuonSequencePFAntiIso.replace( process.pfSelectedMuonsPFAntiIso,
 process.pfIsolatedMuonsPFAntiIso.isolationCut     = 2.0 # set min isolation to 2
 process.pfIsolatedElectronsPFAntiIso.isolationCut = 2.0 # set min isolation to 2
 
-process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseCombinedIsolationDBSumPtCorr') "
-                                                 +"&& abs( eta ) < 2.3 && pt > 15 && abs(charge) == 1 ")
+process.selectedPatTausPFAntiIso.cut = cms.string("tauID('byVLooseCombinedIsolationDBSumPtCorr') ")
     
 ### Specific to second PF collection: TIGHT
 # ID cuts
@@ -355,9 +352,8 @@ process.pfElectronSequencePF2.replace( process.pfSelectedElectronsPF2,
     		process.pfSelectedElectronsPF2 
     		) 
     
-process.selectedPatTausPF2.cut = cms.string("tauID('byLooseCombinedIsolationDBSumPtCorr')"
-                                           +"&& tauID('againstElectronTight')"+"&& tauID('againstMuonTight') "
-                                           +"&& abs( eta ) < 2.3 && pt > 15 && abs(charge) == 1 ")
+process.selectedPatTausPF2.cut = cms.string( "tauID('byLooseCombinedIsolationDBSumPtCorr')"
+                                           + "&& tauID('againstElectronTight')"+"&& tauID('againstMuonTight') ")
     
     
 ### Specific to second PF collection: LOOSE
@@ -377,8 +373,7 @@ process.pfMuonSequencePF3.replace( process.pfSelectedMuonsPF3,
     		process.pfSelectedMuonsPF3 
     		) 
     
-process.selectedPatTausPF3.cut = cms.string("tauID('decayModeFinding') "
-                                           +"&& abs(charge) == 1 && abs( eta ) < 2.3 && pt > 15 ")
+process.selectedPatTausPF3.cut = cms.string("tauID('decayModeFinding') ")
 
 
 
