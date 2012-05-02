@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.9 2012/04/27 12:57:03 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.10 2012/04/30 07:44:54 fronga Exp $
 //
 //
 
@@ -359,22 +359,14 @@ private:
   std::auto_ptr<std::vector<int> > fTgenInfoId;
   std::auto_ptr<std::vector<int> > fTgenInfoStatus;
   std::auto_ptr<std::vector<int> > fTgenInfoNMo;
-  std::auto_ptr<std::vector<int> > fTgenInfoNDa;
   std::auto_ptr<std::vector<int> > fTgenInfoMo1;
   std::auto_ptr<std::vector<int> > fTgenInfoMo2;
-  std::auto_ptr<std::vector<int> > fTgenInfoDa1;
-  std::auto_ptr<std::vector<int> > fTgenInfoDa2;
-  std::auto_ptr<std::vector<int> > fTgenInfoMoIndex;
   std::auto_ptr<std::vector<int> > fTPromptnessLevel;
-  std::auto_ptr<std::vector<float> > fTgenInfoMass;
   std::auto_ptr<std::vector<float> > fTgenInfoMo1Pt;
   std::auto_ptr<std::vector<float> > fTgenInfoMo2Pt;
   std::auto_ptr<std::vector<float> > fTgenInfoPt;
   std::auto_ptr<std::vector<float> > fTgenInfoEta;
   std::auto_ptr<std::vector<float> > fTgenInfoPhi;
-  std::auto_ptr<std::vector<float> > fTgenInfoPx;
-  std::auto_ptr<std::vector<float> > fTgenInfoPy;
-  std::auto_ptr<std::vector<float> > fTgenInfoPz;
   std::auto_ptr<std::vector<float> > fTgenInfoM;
   std::auto_ptr<std::vector<float> > fTgenInfoPromptFlag;
 

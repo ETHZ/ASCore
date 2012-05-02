@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.13 2012/04/27 12:57:04 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.14 2012/05/02 09:45:44 fronga Exp $
 //
 //
 
@@ -3066,7 +3066,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       genMo2Index[i]=-1;
       genNMo[i]=p.numberOfMothers();
       StoreFlag[i]=false;
-      if(genID[i]==2212) Promptness[i]=0;
+      if(genID[i]==2212 && p.numberOfMothers()==0) Promptness[i]=0;
       else Promptness[i]=-1;
  
 
@@ -3147,9 +3147,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTgenInfoPt ->push_back( genPt[i] );
       fTgenInfoEta ->push_back( genEta[i] );
       fTgenInfoPhi ->push_back( genPhi[i] );
-      fTgenInfoPx ->push_back( genPx[i] );
-      fTgenInfoPy ->push_back( genPy[i] );
-      fTgenInfoPz ->push_back( genPz[i] );
       fTgenInfoM ->push_back( genM[i] );
 
       if(blabalot) {
@@ -3351,14 +3348,9 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("genInfoId");
   produces<std::vector<int> >("genInfoStatus");
   produces<std::vector<int> >("genInfoNMo");
-  produces<std::vector<int> >("genInfoNDa");
   produces<std::vector<int> >("genInfoMo1");
   produces<std::vector<int> >("genInfoMo2");
-  produces<std::vector<int> >("genInfoDa1");
-  produces<std::vector<int> >("genInfoDa2");
-  produces<std::vector<int> >("genInfoMoIndex");
   produces<std::vector<int> >("PromptnessLevel");
-  produces<std::vector<float> >("genInfoMass");
   produces<std::vector<float> >("genInfoMo1Pt");
   produces<std::vector<float> >("genInfoMo2Pt");
   produces<std::vector<float> >("genInfoPt");
@@ -3986,22 +3978,14 @@ void NTupleProducer::resetProducts( void ) {
   fTgenInfoId.reset(new std::vector<int>);
   fTgenInfoStatus.reset(new std::vector<int>);
   fTgenInfoNMo.reset(new std::vector<int>);
-  fTgenInfoNDa.reset(new std::vector<int>);
   fTgenInfoMo1.reset(new std::vector<int>);
   fTgenInfoMo2.reset(new std::vector<int>);
-  fTgenInfoDa1.reset(new std::vector<int>);
-  fTgenInfoDa2.reset(new std::vector<int>);
-  fTgenInfoMoIndex.reset(new std::vector<int>);
   fTPromptnessLevel.reset(new std::vector<int>);
-  fTgenInfoMass.reset(new std::vector<float>);
   fTgenInfoMo1Pt.reset(new std::vector<float>);
   fTgenInfoMo2Pt.reset(new std::vector<float>);
   fTgenInfoPt.reset(new std::vector<float>);
   fTgenInfoEta.reset(new std::vector<float>);
   fTgenInfoPhi.reset(new std::vector<float>);
-  fTgenInfoPx.reset(new std::vector<float>);
-  fTgenInfoPy.reset(new std::vector<float>);
-  fTgenInfoPz.reset(new std::vector<float>);
   fTgenInfoM.reset(new std::vector<float>);
   fTgenInfoPromptFlag.reset(new std::vector<float>);
 
@@ -4685,22 +4669,14 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTgenInfoId,"genInfoId");
   event.put(fTgenInfoStatus,"genInfoStatus");
   event.put(fTgenInfoNMo,"genInfoNMo");
-  event.put(fTgenInfoNDa,"genInfoNDa");
   event.put(fTgenInfoMo1,"genInfoMo1");
   event.put(fTgenInfoMo2,"genInfoMo2");
-  event.put(fTgenInfoDa1,"genInfoDa1");
-  event.put(fTgenInfoDa2,"genInfoDa2");
-  event.put(fTgenInfoMoIndex,"genInfoMoIndex");
   event.put(fTPromptnessLevel,"PromptnessLevel");
-  event.put(fTgenInfoMass,"genInfoMass");
   event.put(fTgenInfoMo1Pt,"genInfoMo1Pt");
   event.put(fTgenInfoMo2Pt,"genInfoMo2Pt");
   event.put(fTgenInfoPt,"genInfoPt");
   event.put(fTgenInfoEta,"genInfoEta");
   event.put(fTgenInfoPhi,"genInfoPhi");
-  event.put(fTgenInfoPx,"genInfoPx");
-  event.put(fTgenInfoPy,"genInfoPy");
-  event.put(fTgenInfoPz,"genInfoPz");
   event.put(fTgenInfoM,"genInfoM");
   event.put(fTgenInfoPromptFlag,"genInfoPromptFlag");
   event.put(fTPrimVtxGood, "PrimVtxGood");
