@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.12 2012/04/24 10:31:44 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.13 2012/04/27 12:57:04 fronga Exp $
 //
 //
 
@@ -2565,15 +2565,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for(View<Jet>::const_iterator Jit = jets->begin(); Jit != jets->end(); ++Jit, ++iraw){
     // Cut on uncorrected pT (for startup)
     if(Jit->pt() < fMinRawJPt) continue;
-    // Save only the gMaxNJets first uncorrected jets
-    if(iraw >= gMaxNJets){
-      edm::LogWarning("NTP") << "@SUB=analyze"
-                             << "Found more than " << static_cast<int>(gMaxNJets) << " uncorrected jets, I'm scared ...";
-      *fTMaxUncJetExceed = 1;
-      *fTGoodEvent = 1;
-      break;
-    }
-                
     double scale = jetCorr->correction(*Jit,iEvent,iSetup);
     corrIndices.push_back(make_pair(iraw, scale*Jit->pt()));
   }
