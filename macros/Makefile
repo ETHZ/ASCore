@@ -8,42 +8,33 @@
 ROOTCFLAGS     = $(shell root-config --cflags)
 ROOTLIBS       = $(shell root-config --libs)
 ROOTGLIBS      = $(shell root-config --glibs)
-ROOFIT_INCLUDE = $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep INCLUDE= | sed 's|INCLUDE=||')
-ROOFIT_LIBDIR  = $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIBDIR= | sed 's|LIBDIR=||')
 
-INCLUDES       = -I./include -I$(CMSSW_RELEASE_BASE)/src/ -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/
+INCLUDES       = -I./include -I$(CMSSW_RELEASE_BASE)/src/
 
 CXX            = g++
-CXXFLAGS       = -g -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 $(INCLUDES) -std=gnu++0x
+CXXFLAGS       = -g -fno-var-tracking -fPIC -Wno-deprecated -D_GNU_SOURCE -O2 -std=c++0x $(INCLUDES) 
 LD             = g++
 LDFLAGS        = -g 
 SOFLAGS        = -O --no_exceptions -shared
 
 
 CXXFLAGS      += $(ROOTCFLAGS)
-ifdef DOJES
-CXXFLAGS      += -D DOJES
-endif
 
 LIBS           = $(ROOTLIBS) 
 
-NGLIBS         = $(ROOTGLIBS) -L$(ROOFIT_LIBDIR)/ -lMinuit -lMinuit2 -lTreePlayer -lRooFitCore -lRooFit
+
+NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) 
-ifdef DOJES
-GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lCondFormatsJetMETObjects
-endif
 
-ifneq (,$(findstring patch,$(CMSSW_VERSION)))
-	CMSSW_BASE_VERSION = $(filter CMSSW%, $(subst _patch, , $(CMSSW_VERSION) ))
-	GLIBS         += -L/afs/cern.ch/cms/$(SCRAM_ARCH)/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH)
-endif
+# Juggle with patch versions...
+CMSSW_BASE_VERSION = $(filter CMSSW%, $(subst _patch, , $(CMSSW_VERSION) ))
+GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/$(SCRAM_ARCH)/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lFWCoreUtilities -lDataFormatsCommon -lDataFormatsFWLite -lCondFormatsJetMETObjects
 
 
-SRCS           = src/base/TreeClassBase.C src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/helper/AnaClass.cc src/helper/Davismt2.cc src/helper/FPRatios.cc src/helper/PUWeight.C src/helper/Lumi3DReWeighting_standalone.cc \
-                 src/helper/FakeRatios.cc \
-                 src/JZBAnalyzer.cc src/JZBAnalysis.cc \
-                 src/helper/MetaTreeClassBase.C
+
+SRCS           = src/base/TreeClassBase.cc src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
+                 src/UserAnalyzer.cc src/UserAnalysis.cc \
+                 src/helper/PUWeight.C src/JZBAnalyzer.cc src/JZBAnalysis.cc src/QuickAnalyzer.cc src/QuickAnalysis.cc
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 
@@ -51,18 +42,22 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunJZBAnalyzer 
+all: RunUserAnalyzer RunJZBAnalyzer RunQuickAnalyzer
 
-RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS) src/JZBAnalyzer.o src/JZBAnalysis.o src/JZBPFAnalysis.o
+RunUserAnalyzer: src/exe/RunUserAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
+
+RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C $(OBJS)
+	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
+
+RunQuickAnalyzer: src/exe/RunQuickAnalyzer.C $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
 
 clean:
-	find src -name '*.o' -exec $(RM) -v {} ';'
-	$(RM) $(OBJS)	
-	$(RM) RunSSDLDumper
-	$(RM) MakeSSDLPlots
-	$(RM) RunSSDLAnalyzer
+	find src -name '*.o' -exec $(RM) -v {} ';' 
+	$(RM) RunUserAnalyzer
 	$(RM) RunJZBAnalyzer
+	$(RM) RunQuickAnalyzer
 
 purge:
 	$(RM) $(OBJS)
@@ -70,6 +65,4 @@ purge:
 deps: $(SRCS)
 	makedepend $(INCLUDES) $^
 
-
-	
 # DO NOT DELETE THIS LINE -- make depend needs it
