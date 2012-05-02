@@ -15,12 +15,12 @@ void QuickAnalysis::Begin(const char* filename){
 	fHistFile = new TFile(TString(filename), "RECREATE");
 	
 	// Define the histograms
-	fHpileup = new TH1D("pileup", "in-time pileup distribution", 36, -0.5, 35.5);
+	fHpileup = new TH1D("pileup", "in-time pileup distribution", 60, 0, 60);
 }
 
 void QuickAnalysis::Analyze(){
 	// fill histo
-	fHpileup->Fill(fTR->PUnumInteractions);
+	fHpileup->Fill(fTR->PUnumTrueInteractions);
 }
 
 void QuickAnalysis::End(){
