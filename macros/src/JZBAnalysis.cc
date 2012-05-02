@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.83 $";
+string sjzbversion="$Revision: 1.84 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.84  2012/05/01 06:51:33  buchmann
+First EDM JZB version; requires testing. still need to implement btag variables and some CAJID variables
+
 Revision 1.83  2012/04/18 16:26:31  buchmann
 made code a bit more legible by using the is_neutrino and is_charged_lepton functions
 
@@ -1081,11 +1084,11 @@ void JZBAnalysis::Analyze() {
 	  int thisParticleId = fTR->genInfoId[i];
 	  if(fdoGenInfo&&abs(thisParticleId)==23) {
 	    //dealing with a Z
-	    int motherIndex=fTR->genInfoMoIndex[i];
+	    int motherIndex=fTR->genInfoMo1[i];
 	    if(motherIndex>=0) nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoId[motherIndex];
 	    nEvent.nZ++;
 	    for(int da=0;da<fTR->nGenParticles;da++) {
-	      if(fTR->genInfoMoIndex[da]==i) {
+	      if(fTR->genInfoMo1[da]==i) {
 		//dealing with a daughter
 		if(abs(fTR->genInfoId[da])<10) nEvent.DecayCode+=100;
 		if(is_neutrino(abs(fTR->genInfoId[da]))) nEvent.DecayCode+=10;
@@ -1123,7 +1126,7 @@ void JZBAnalysis::Analyze() {
 	  }
 	  if(abs(thisParticleId)==1000022) {//mlsp
 	    LSPMother.push_back(fTR->genInfoMo1[i]);
-	    LSPMotherPt.push_back(fTR->genInfoMo1Pt[i]);
+	    LSPMotherPt.push_back(fTR->genInfoPt[fTR->genInfoMo1[i]]);
 	    lspmass+=fTR->genInfoM[i];
 	    nlspmass++;
 	    TLorentzVector newLSP;
