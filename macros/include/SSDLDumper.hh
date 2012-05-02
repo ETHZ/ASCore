@@ -17,23 +17,23 @@ class SSDLDumper : public AnaClass{
 
 public:
 	// Binning
-	static const int gNMuPtbins  = 8;
-	static const int gNMuPt2bins = 8;
+	static const int gNMuFPtBins = 8;
+	static const int gNMuPPtbins = 12;
 	static const int gNMuEtabins = 5;
-	static const int gNElPtbins  = 7;
-	static const int gNElPt2bins = 7;
+	static const int gNElFPtBins = 11;
+	static const int gNElPPtbins = 12;
 	static const int gNElEtabins = 5;
 	
 	static const int gNNVrtxBins = 9;
 
 	static double gNVrtxBins[gNNVrtxBins+1];
 
-	static double gMuPtbins [gNMuPtbins+1];
-	static double gMuPt2bins[gNMuPt2bins+1];
+	static double gMuPPtbins[gNMuPPtbins+1];
+	static double gMuFPtBins[gNMuFPtBins+1];
 	static double gMuEtabins[gNMuEtabins+1];
 
-	static double gElPtbins [gNElPtbins+1];
-	static double gElPt2bins[gNElPt2bins+1];
+	static double gElPPtbins[gNElPPtbins+1];
+	static double gElFPtBins[gNElFPtBins+1];
 	static double gElEtabins[gNElEtabins+1];
 
 	static const int gNDiffHTBins   = 5;
@@ -73,7 +73,7 @@ public:
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, DoubleMu4, DoubleMu5,
 		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
 		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
-		MuHad1, MuHad2, EleHad1, EleHad2,
+		// MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJets, TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
 		GVJets, WGstarE, WGstarMu, WGstarTau, WW, WZ, ZZ, 
@@ -273,7 +273,7 @@ public:
 		static TString sel_name[gNSels];
 		static int nbins[gNSels];
 		TH1D *hiso[gNSels];
-		TH1D *hiso_pt[gNSels][gNMuPt2bins];
+		TH1D *hiso_pt[gNSels][gNMuFPtBins];
 		TH1D *hiso_nv[gNSels][gNNVrtxBins];
 	};
 
@@ -284,7 +284,7 @@ public:
 		TH1D *hsiesie[gNSels];
 		TH1D *hdphi[gNSels];
 		TH1D *hdeta[gNSels];
-		//TH1D *hid_pt[gNSels][gNMuPt2bins];
+		//TH1D *hid_pt[gNSels][gNMuFPtBins];
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
@@ -476,7 +476,6 @@ public:
 	virtual void init();
 	virtual void init(TString); // samples read from a datacard
 	virtual void init(TString, TString, int, long int, float, int = -1); // running on single sample
-	virtual void InitMC(TTree*); // removed a few branches (triggers)
 
 	virtual void readDatacard(TString); // read in a datacard
 
@@ -548,6 +547,9 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
+	virtual float getJetPt(int); // for shifting and smearing
+	virtual float getMET();
+	virtual float getMETPhi();
 	virtual int getNJets();
 	virtual int getNBTags();
 	virtual int getNBTagsMed();
@@ -660,10 +662,10 @@ public:
 	
 	void setRegionCuts(gRegion reg = Baseline);
 	
-	const int     getNPtBins (gChannel);
-	const double *getPtBins  (gChannel);
-	const int     getNPt2Bins(gChannel);
-	const double *getPt2Bins (gChannel);
+	const int     getNFPtBins(gChannel); // fake ratios
+	const double *getFPtBins (gChannel);
+	const int     getNPPtBins (gChannel); // prompt ratios
+	const double *getPPtBins  (gChannel);
 	const int     getNEtaBins(gChannel);
 	const double *getEtaBins (gChannel);
 	
@@ -736,8 +738,6 @@ public:
 	TString fOutputFileName;
 
 	Sample *fSample;
-
-	bool isTChiSlepSnu;
 
 	private:
 	

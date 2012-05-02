@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Apr 23 17:53:36 2012 by ROOT version 5.27/06b
+// Tue May  1 12:03:44 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root
+// found on file: test.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -126,6 +126,8 @@ public :
    Float_t         JetTCHPBTag[40];   //[NJets]
    Float_t         JetTCHEBTag[40];   //[NJets]
    Float_t         JetArea[40];   //[NJets]
+   Int_t           JetPartonID[40];   //[NJets]
+   Float_t         JetJECUncert[40];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -236,6 +238,8 @@ public :
    TBranch        *b_JetTCHPBTag;   //!
    TBranch        *b_JetTCHEBTag;   //!
    TBranch        *b_JetArea;   //!
+   TBranch        *b_JetPartonID;   //!
+   TBranch        *b_JetJECUncert;   //!
 
    MetaTreeClassBase(TTree *tree=0);
    virtual ~MetaTreeClassBase();
@@ -256,9 +260,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("test.root");
       if (!f) {
-         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/Apr23/DoubleMu-Run2011B-PromptReco-v1-AOD/output_3.root");
+         f = new TFile("test.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -417,6 +421,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetTCHPBTag", JetTCHPBTag, &b_JetTCHPBTag);
    fChain->SetBranchAddress("JetTCHEBTag", JetTCHEBTag, &b_JetTCHEBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
+   fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
+   fChain->SetBranchAddress("JetJECUncert", JetJECUncert, &b_JetJECUncert);
    Notify();
 }
 
