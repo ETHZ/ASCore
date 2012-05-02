@@ -691,9 +691,33 @@ process.newPFBtaggingSequence = cms.Sequence(
        process.newPFJetBtagging )
 
 
+# Now retrieve them in the NTupleProducer
+process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
+                             'newPFTrackCountingHighPurBJetTags',
+                             'newPFSimpleSecondaryVertexHighEffBJetTags',
+                             'newPFSimpleSecondaryVertexHighPurBJetTags',
+                             'newPFCombinedSecondaryVertexBPFJetTags',
+                             'newPFCombinedSecondaryVertexMVABPFJetTags',
+                             'newPFJetProbabilityBPFJetTags',
+                             'newPFJetBProbabilityBPFJetTags']
+
 ##########################################################################
 ### PF isolation settings ################################################
 process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
+process.analyze.tag_muonpfisos = ['muonPFIsoChHad02',  'muonPFIsoChHad03',  'muonPFIsoChHad04',
+                                 'muonPFIsoNHad02',   'muonPFIsoNHad03',   'muonPFIsoNHad04',
+                                 'muonPFIsoPhoton02', 'muonPFIsoPhoton03', 'muonPFIsoPhoton04',
+                                 'muonRadPFIsoChHad02',  'muonRadPFIsoChHad03',  'muonRadPFIsoChHad04', 
+                                 'muonRadPFIsoNHad02',   'muonRadPFIsoNHad03',   'muonRadPFIsoNHad04', 
+                                 'muonRadPFIsoPhoton02', 'muonRadPFIsoPhoton03', 'muonRadPFIsoPhoton04' ]
+process.analyze.tag_elepfisos  = ['electronPFIsoChHad02',  'electronPFIsoChHad03',  'electronPFIsoChHad04',
+                                  'electronPFIsoNHad02',   'electronPFIsoNHad03',   'electronPFIsoNHad04',
+                                  'electronPFIsoPhoton02', 'electronPFIsoPhoton03', 'electronPFIsoPhoton04',
+                                  'electronRadPFIsoChHad02',  'electronRadPFIsoChHad03',  'electronRadPFIsoChHad04',
+                                  'electronRadPFIsoNHad02',   'electronRadPFIsoNHad03',   'electronRadPFIsoNHad04',
+                                  'electronRadPFIsoPhoton02', 'electronRadPFIsoPhoton03', 'electronRadPFIsoPhoton04']
+	
+
 
 #### Path ######################################################################
 
