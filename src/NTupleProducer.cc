@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.15 2012/05/02 14:36:57 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.16 2012/05/02 14:51:23 fronga Exp $
 //
 //
 
@@ -3347,8 +3347,6 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("genInfoMo1");
   produces<std::vector<int> >("genInfoMo2");
   produces<std::vector<int> >("PromptnessLevel");
-  produces<std::vector<float> >("genInfoMo1Pt");
-  produces<std::vector<float> >("genInfoMo2Pt");
   produces<std::vector<float> >("genInfoPt");
   produces<std::vector<float> >("genInfoEta");
   produces<std::vector<float> >("genInfoPhi");
@@ -3977,8 +3975,6 @@ void NTupleProducer::resetProducts( void ) {
   fTgenInfoMo1.reset(new std::vector<int>);
   fTgenInfoMo2.reset(new std::vector<int>);
   fTPromptnessLevel.reset(new std::vector<int>);
-  fTgenInfoMo1Pt.reset(new std::vector<float>);
-  fTgenInfoMo2Pt.reset(new std::vector<float>);
   fTgenInfoPt.reset(new std::vector<float>);
   fTgenInfoEta.reset(new std::vector<float>);
   fTgenInfoPhi.reset(new std::vector<float>);
@@ -4668,8 +4664,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTgenInfoMo1,"genInfoMo1");
   event.put(fTgenInfoMo2,"genInfoMo2");
   event.put(fTPromptnessLevel,"PromptnessLevel");
-  event.put(fTgenInfoMo1Pt,"genInfoMo1Pt");
-  event.put(fTgenInfoMo2Pt,"genInfoMo2Pt");
   event.put(fTgenInfoPt,"genInfoPt");
   event.put(fTgenInfoEta,"genInfoEta");
   event.put(fTgenInfoPhi,"genInfoPhi");
