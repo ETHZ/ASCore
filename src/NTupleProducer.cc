@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.14 2012/05/02 09:45:44 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.15 2012/05/02 14:36:57 buchmann Exp $
 //
 //
 
@@ -3017,8 +3017,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   ////////////////////////////////////////////////////////////////////////////////
   // Full generator information ///////////////////////////////////////////////
   bool blabalot=false;
-  bool BloatWithGenInfo=true;	
-  if(BloatWithGenInfo && !fIsRealData) {
+  if(!fIsRealData) {
     static const size_t maxNGenLocal = 2000;
     int genIndex[maxNGenLocal];
     int genNIndex[maxNGenLocal];
@@ -3128,16 +3127,12 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTgenInfoId ->push_back( genID[i] );
       fTgenInfoStatus ->push_back( genStatus[i] );
       fTgenInfoNMo ->push_back( genNMo[i] );
-      fTgenInfoMo1Pt->push_back( 0 );
-      fTgenInfoMo2Pt->push_back( 0 );
       if(genMo1Index[i]>=0) {
-        (*fTgenInfoMo1Pt)[*fTnGenParticles] = genPt[genMo1Index[i]];
         fTgenInfoMo1->push_back( genNIndex[genMo1Index[i]] );
       } else {
         fTgenInfoMo1->push_back( -1 );
       }
       if(genMo2Index[i]>=0) {
-        (*fTgenInfoMo2Pt)[*fTnGenParticles] =  genPt[genMo2Index[i]];
         fTgenInfoMo2->push_back( genNIndex[genMo2Index[i]] );
       } else {
         fTgenInfoMo2->push_back( -1 );
@@ -3152,10 +3147,11 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       if(blabalot) {
         cout << "Working particle " << i << " with Promptness: " << Promptness[i] << "  (storage number: " << *fTnGenParticles << ")" << endl;
         cout << "    Mother is Particle " << genMo1Index[i] << " with Promptness " << Promptness[genMo1Index[i]] << endl;
-        cout << "Particle " << *fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i]                     << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
-        cout << "stored:  " << *fTnGenParticles << "  (" << i << ")                      " << (*fTgenInfoId)[*fTnGenParticles] << "                          " << (*fTgenInfoMo1)[*fTnGenParticles] << "         " << (*fTgenInfoMo1Pt)[*fTnGenParticles] << endl;
+        cout << "Particle " << *fTnGenParticles << "  (" << i << "): The particle has ID = " << genID[i] 
+             << " and its mother has index " << genNIndex[genMo1Index[i]]     << " mo pt : " << genPt[genMo1Index[i]] << endl;
+        cout << "stored:  " << *fTnGenParticles << "  (" << i << ")                      " << (*fTgenInfoId)[*fTnGenParticles] 
+             << "                          " << (*fTgenInfoMo1)[*fTnGenParticles] << endl;
       }
-	    
     }
 	  
     (*fTnGenParticles)++;

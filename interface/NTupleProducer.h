@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.10 2012/04/30 07:44:54 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.11 2012/05/02 14:36:58 buchmann Exp $
 //
 //
 
@@ -362,8 +362,6 @@ private:
   std::auto_ptr<std::vector<int> > fTgenInfoMo1;
   std::auto_ptr<std::vector<int> > fTgenInfoMo2;
   std::auto_ptr<std::vector<int> > fTPromptnessLevel;
-  std::auto_ptr<std::vector<float> > fTgenInfoMo1Pt;
-  std::auto_ptr<std::vector<float> > fTgenInfoMo2Pt;
   std::auto_ptr<std::vector<float> > fTgenInfoPt;
   std::auto_ptr<std::vector<float> > fTgenInfoEta;
   std::auto_ptr<std::vector<float> > fTgenInfoPhi;
