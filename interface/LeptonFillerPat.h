@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5.2.3 2012/04/18 13:20:00 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.4 2012/04/24 10:31:43 fronga Exp $
 //
 //
 
@@ -509,14 +509,14 @@ void LeptonFillerPat<pat::Tau>::getSpecific(const pat::Tau& lepton){
   fTLooseChargedIso ->push_back( lepton.tauID("byLooseChargedIsolation") );
   fTTightChargedIso ->push_back( lepton.tauID("byTightChargedIsolation") );
   fTMediumChargedIso->push_back( lepton.tauID("byMediumChargedIsolation") );
-  fTVLooseIsoDBSumPtCorr->push_back( lepton.tauID("byVLooseIsolationDeltaBetaCorr") );
-  fTLooseIsoDBSumPtCorr ->push_back( lepton.tauID("byLooseIsolationDeltaBetaCorr") );
-  fTTightIsoDBSumPtCorr ->push_back( lepton.tauID("byTightIsolationDeltaBetaCorr") );
-  fTMediumIsoDBSumPtCorr->push_back( lepton.tauID("byMediumIsolationDeltaBetaCorr") );
-  fTVLooseCombinedIsoDBSumPtCorr->push_back( lepton.tauID("byVLooseCombinedIsolationDeltaBetaCorr") );
-  fTLooseCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byLooseCombinedIsolationDeltaBetaCorr") );
-  fTTightCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byTightCombinedIsolationDeltaBetaCorr") );
-  fTMediumCombinedIsoDBSumPtCorr->push_back( lepton.tauID("byMediumCombinedIsolationDeltaBetaCorr") );
+  fTVLooseIsoDBSumPtCorr->push_back( lepton.tauID("byVLooseIsolationDBSumPtCorr") );
+  fTLooseIsoDBSumPtCorr ->push_back( lepton.tauID("byLooseIsolationDBSumPtCorr") );
+  fTTightIsoDBSumPtCorr ->push_back( lepton.tauID("byTightIsolationDBSumPtCorr") );
+  fTMediumIsoDBSumPtCorr->push_back( lepton.tauID("byMediumIsolationDBSumPtCorr") );
+  fTVLooseCombinedIsoDBSumPtCorr->push_back( lepton.tauID("byVLooseCombinedIsolationDBSumPtCorr") );
+  fTLooseCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byLooseCombinedIsolationDBSumPtCorr") );
+  fTTightCombinedIsoDBSumPtCorr ->push_back( lepton.tauID("byTightCombinedIsolationDBSumPtCorr") );
+  fTMediumCombinedIsoDBSumPtCorr->push_back( lepton.tauID("byMediumCombinedIsolationDBSumPtCorr") );
 
   fTLooseElectronRejection ->push_back( lepton.tauID("againstElectronLoose") );
   fTTightElectronRejection ->push_back( lepton.tauID("againstElectronTight") );
