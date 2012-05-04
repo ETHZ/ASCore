@@ -37,5 +37,6 @@
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="RecoParticleFlow/PFClusterTools"/>
 <use   name="h2gglobe/VertexAnalysis"/>
+<use name="RecoEgamma/EgammaTools">
 <flags   EDM_PLUGIN="1"/>
 <flags   CXXFLAGS="-g"/>
