@@ -2523,7 +2523,7 @@ TString AnaClass::numbForm(double n){
 	TString s(Form("1.e%i", expo));
 	double scale = s.Atof();
 	TString out("-");
-	if(isnan(n))       out.Form("NaN");
+	if(isnan((long double)n))       out.Form("NaN");
 	else if(expo < -2) out.Form("%1.2f E%i", n/scale, expo);
 	else if(expo < -1) out.Form("%4.4f", n);
 	else if(expo < 0 ) out.Form("%4.3f", n);
