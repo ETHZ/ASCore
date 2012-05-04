@@ -50,11 +50,11 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:////scratch/buchmann/DoubleMu_2012A_2C29FAF9-3787-E111-9A63-001D09F291D7.root'
+options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
-options.output='NTupleProducer_42X_'+options.runon+'.root'
+options.output='NTupleProducer_52X_'+options.runon+'.root'
 
 ### Running conditions #########################################################
 # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions
@@ -699,6 +699,7 @@ process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
 ##########################################################################
 ### PF isolation settings ################################################
 process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
+process.pfPileUp.Vertices = 'goodVertices'
 process.analyze.tag_muonpfisos = ['muonPFIsoChHad02',  'muonPFIsoChHad03',  'muonPFIsoChHad04',
                                  'muonPFIsoNHad02',   'muonPFIsoNHad03',   'muonPFIsoNHad04',
                                  'muonPFIsoPhoton02', 'muonPFIsoPhoton03', 'muonPFIsoPhoton04',

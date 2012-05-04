@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.17 2012/05/02 14:52:23 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.18 2012/05/04 08:58:48 buchmann Exp $
 //
 //
 
@@ -1174,6 +1174,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     fTMuIsGlobalMuon->push_back( muon.isGlobalMuon() ? 1:0 );
     fTMuIsTrackerMuon->push_back( muon.isTrackerMuon() ? 1:0 );
+	fTMuIsPFMuon->push_back( muon.isPFMuon() ? 1:0);
 
     // Combined methods for Global and Tracker muons:
     fTMuPx->push_back( muon.px() );
@@ -1196,6 +1197,14 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIso05SumPt->push_back( muon.isolationR05().sumPt );
     fTMuIso05EmEt->push_back( muon.isolationR05().emEt );
     fTMuIso05HadEt->push_back( muon.isolationR05().hadEt );
+
+	fTMuPfIsoR03NeHadHighThresh  ->push_back( muon.pfIsolationR03().sumNeutralHadronEtHighThreshold );
+	fTMuPfIsoR03PhotonHighThresh ->push_back( muon.pfIsolationR03().sumPhotonEtHighThreshold );
+	fTMuPfIsoR03SumPUPt->push_back( muon.pfIsolationR03().sumPUPt );
+
+	fTMuPfIsoR04NeHadHighThresh  ->push_back( muon.pfIsolationR04().sumNeutralHadronEtHighThreshold );
+	fTMuPfIsoR04PhotonHighThresh ->push_back( muon.pfIsolationR04().sumPhotonEtHighThreshold );
+	fTMuPfIsoR04SumPUPt->push_back( muon.pfIsolationR04().sumPUPt );
 
     // PF isolations:
     ipfisotag = 0;
@@ -1239,6 +1248,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuDzBS->push_back( muon.innerTrack()->dz(beamSpot.position()) );
     fTMuDzPV->push_back( muon.innerTrack()->dz(primVtx->position()) );
     fTMuInnerTkNChi2->push_back( muon.innerTrack()->normalizedChi2() );
+	fTMuNSiLayers->push_back (muon.innerTrack()->hitPattern().trackerLayersWithMeasurement());
 
     // Separate methods:
     if((*fTMuIsTrackerMuon)[mqi]){ // Tracker Muons
@@ -3443,6 +3453,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("MuIsIso");
   produces<std::vector<int> >("MuIsGlobalMuon");
   produces<std::vector<int> >("MuIsTrackerMuon");
+  produces<std::vector<int> >("MuIsPFMuon");
   produces<std::vector<float> >("MuPx");
   produces<std::vector<float> >("MuPy");
   produces<std::vector<float> >("MuPz");
@@ -3466,6 +3477,12 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuIso05SumPt");
   produces<std::vector<float> >("MuIso05EmEt");
   produces<std::vector<float> >("MuIso05HadEt");
+  produces<std::vector<float> >("MuPfIsoR03NeHadHighThresh");
+  produces<std::vector<float> >("MuPfIsoR03PhotonHighThresh");
+  produces<std::vector<float> >("MuPfIsoR03SumPUPt");
+  produces<std::vector<float> >("MuPfIsoR04NeHadHighThresh");
+  produces<std::vector<float> >("MuPfIsoR04PhotonHighThresh");
+  produces<std::vector<float> >("MuPfIsoR04SumPUPt");
   for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
         it != fMuonPfIsoTags.end(); ++it ) {
     produces<std::vector<float> >(("Mu"+(*it).label()).c_str());
@@ -3484,6 +3501,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<int> >("MuNTkHits");
   produces<std::vector<int> >("MuNPxHits");
   produces<std::vector<float> >("MuInnerTkNChi2");
+  produces<std::vector<int> >("MuNSiLayers");
   produces<std::vector<int> >("MuNMatches");
   produces<std::vector<int> >("MuNChambers");
   produces<std::vector<float> >("MuCaloComp");
@@ -4069,6 +4087,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIsIso.reset(new std::vector<int> );
   fTMuIsGlobalMuon.reset(new std::vector<int> );
   fTMuIsTrackerMuon.reset(new std::vector<int> );
+  fTMuIsPFMuon.reset(new std::vector<int> );
   fTMuPx.reset(new std::vector<float> );
   fTMuPy.reset(new std::vector<float> );
   fTMuPz.reset(new std::vector<float> );
@@ -4088,6 +4107,12 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIso05SumPt.reset(new std::vector<float> );
   fTMuIso05EmEt.reset(new std::vector<float> );
   fTMuIso05HadEt.reset(new std::vector<float> );
+  fTMuPfIsoR03NeHadHighThresh  .reset(new std::vector<float> );
+  fTMuPfIsoR03PhotonHighThresh .reset(new std::vector<float> );
+  fTMuPfIsoR03SumPUPt.reset(new std::vector<float> );
+  fTMuPfIsoR04NeHadHighThresh  .reset(new std::vector<float> );
+  fTMuPfIsoR04PhotonHighThresh .reset(new std::vector<float> );
+  fTMuPfIsoR04SumPUPt.reset(new std::vector<float> );
   size_t ipfisotag = 0;
   for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
         it != fMuonPfIsoTags.end(); ++it ) {
@@ -4111,6 +4136,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuNTkHits.reset(new std::vector<int> );
   fTMuNPxHits.reset(new std::vector<int> );
   fTMuInnerTkNChi2.reset(new std::vector<float> );
+  fTMuNSiLayers.reset(new std::vector<int> );
   fTMuNMatches.reset(new std::vector<int> );
   fTMuNChambers.reset(new std::vector<int> );
   fTMuCaloComp.reset(new std::vector<float> );
@@ -4758,6 +4784,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIsIso, "MuIsIso");
   event.put(fTMuIsGlobalMuon, "MuIsGlobalMuon");
   event.put(fTMuIsTrackerMuon, "MuIsTrackerMuon");
+  event.put(fTMuIsPFMuon, "MuIsPFMuon");
   event.put(fTMuPx, "MuPx");
   event.put(fTMuPy, "MuPy");
   event.put(fTMuPz, "MuPz");
@@ -4781,6 +4808,12 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIso05SumPt, "MuIso05SumPt");
   event.put(fTMuIso05EmEt, "MuIso05EmEt");
   event.put(fTMuIso05HadEt, "MuIso05HadEt");
+  event.put(fTMuPfIsoR03NeHadHighThresh  , "MuPfIsoR03NeHadHighThresh");
+  event.put(fTMuPfIsoR03PhotonHighThresh , "MuPfIsoR03PhotonHighThresh");
+  event.put(fTMuPfIsoR03SumPUPt, "MuPfIsoR03SumPUPt");
+  event.put(fTMuPfIsoR04NeHadHighThresh  , "MuPfIsoR04NeHadHighThresh");
+  event.put(fTMuPfIsoR04PhotonHighThresh , "MuPfIsoR04PhotonHighThresh");
+  event.put(fTMuPfIsoR04SumPUPt, "MuPfIsoR04SumPUPt");
   size_t ipfisotag = 0;
   for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
         it != fMuonPfIsoTags.end(); ++it ) {
@@ -4800,6 +4833,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuNTkHits, "MuNTkHits");
   event.put(fTMuNPxHits, "MuNPxHits");
   event.put(fTMuInnerTkNChi2, "MuInnerTkNChi2");
+  event.put(fTMuNSiLayers, "MuNSiLayers");
   event.put(fTMuNMatches, "MuNMatches");
   event.put(fTMuNChambers, "MuNChambers");
   event.put(fTMuCaloComp, "MuCaloComp");

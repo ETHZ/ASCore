@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.12 2012/05/02 14:51:22 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.13 2012/05/04 08:58:51 buchmann Exp $
 //
 //
 
@@ -526,6 +526,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTMuIsIso;
   std::auto_ptr<std::vector<int> >  fTMuIsGlobalMuon;
   std::auto_ptr<std::vector<int> >  fTMuIsTrackerMuon;
+  std::auto_ptr<std::vector<int> >  fTMuIsPFMuon;
   std::auto_ptr<std::vector<float> >  fTMuPx;
   std::auto_ptr<std::vector<float> >  fTMuPy;
   std::auto_ptr<std::vector<float> >  fTMuPz;
@@ -550,6 +551,12 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuIso05SumPt;
   std::auto_ptr<std::vector<float> >  fTMuIso05EmEt;
   std::auto_ptr<std::vector<float> >  fTMuIso05HadEt;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03NeHadHighThresh  ;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03PhotonHighThresh ;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03SumPUPt;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04NeHadHighThresh  ;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04PhotonHighThresh ;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04SumPUPt;
   std::auto_ptr<std::vector<float> >  fTMuEem;
   std::auto_ptr<std::vector<float> >  fTMuEhad;
   // PF isolation variables
@@ -568,6 +575,7 @@ private:
   std::auto_ptr<std::vector<int> >  fTMuNTkHits;
   std::auto_ptr<std::vector<int> >  fTMuNPxHits;
   std::auto_ptr<std::vector<float> >  fTMuInnerTkNChi2;
+  std::auto_ptr<std::vector<int> >  fTMuNSiLayers;
   std::auto_ptr<std::vector<int> >  fTMuNMatches;
   std::auto_ptr<std::vector<int> >  fTMuNChambers;
   std::auto_ptr<std::vector<float> >  fTMuCaloComp;
