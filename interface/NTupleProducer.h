@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.11 2012/05/02 14:36:58 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114.2.12 2012/05/02 14:51:22 fronga Exp $
 //
 //
 
@@ -694,6 +694,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTElESuperClusterOverP;         // Esc/Pin                                              
   std::auto_ptr<std::vector<int> >  fTElNumberOfMissingInnerHits;
   std::auto_ptr<std::vector<int> >  fTElSCindex;
+  std::auto_ptr<std::vector<bool> >  fTElPassConversionVeto;
   std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkDist;
   std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkDCot;
   std::auto_ptr<std::vector<float> >  fTElConvPartnerTrkPt;

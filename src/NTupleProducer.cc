@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.16 2012/05/02 14:51:23 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.17 2012/05/02 14:52:23 fronga Exp $
 //
 //
 
@@ -46,6 +46,7 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
 // Data formats
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -1634,6 +1635,16 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 
       // Conversion Information
+      edm::Handle<reco::BeamSpot> beamspotHandle;
+      iEvent.getByLabel("offlineBeamSpot", beamspotHandle);
+      const reco::BeamSpot &beamspot = *beamspotHandle.product();
+      
+      edm::Handle<reco::ConversionCollection> hConversions;
+      iEvent.getByLabel("allConversions", hConversions);
+      
+      bool passconversionveto = !ConversionTools::hasMatchedConversion(electron,hConversions, beamspot.position());
+      fTElPassConversionVeto->push_back(passconversionveto);
+
       reco::GsfElectron::ConversionRejection ConvRejVars = electron.conversionRejectionVariables();
       reco::TrackBaseRef ConvPartnerTrack = ConvRejVars.partner;
       if( ConvPartnerTrack.isNonnull() ){
@@ -3019,12 +3030,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   bool blabalot=false;
   if(!fIsRealData) {
     static const size_t maxNGenLocal = 2000;
-    int genIndex[maxNGenLocal];
     int genNIndex[maxNGenLocal];
     int genID[maxNGenLocal];
-    float genPx[maxNGenLocal];
-    float genPy[maxNGenLocal];
-    float genPz[maxNGenLocal];
     float genPt[maxNGenLocal];
     float genEta[maxNGenLocal];
     float genPhi[maxNGenLocal];
@@ -3050,12 +3057,8 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       nGenParticles++;
       const GenParticle & p = (*genParticles)[i];
-      genIndex[i]=i;
       genNIndex[i]=0;
       genID[i]=p.pdgId();
-      genPx[i]=p.px();
-      genPy[i]=p.py();
-      genPz[i]=p.pz();
       genPt[i]=p.pt();
       genPhi[i]=p.phi();
       genEta[i]=p.eta();
@@ -3753,6 +3756,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0dz1dxy01");
   produces<std::vector<float> >("PhoCone04ChargedHadronIsodR015dEta0pt0PFnoPU");
   produces<std::vector<bool> > ("PhoConvValidVtx");
+  produces<std::vector<bool> > ("ElPassConversionVeto");
   produces<std::vector<int> >  ("PhoConvNtracks");
   produces<std::vector<float> >("PhoConvChi2Probability");
   produces<std::vector<float> >("PhoConvEoverP");
@@ -4239,6 +4243,7 @@ void NTupleProducer::resetProducts( void ) {
   fTElNumberOfMissingInnerHits.reset(new std::vector<int> );
   fTElSCindex.reset(new std::vector<int> );
   fTElConvPartnerTrkDist.reset(new std::vector<float> );
+  fTElPassConversionVeto.reset(new std::vector<bool>);
   fTElConvPartnerTrkDCot.reset(new std::vector<float> );
   fTElConvPartnerTrkPt.reset(new std::vector<float> );
   fTElConvPartnerTrkEta.reset(new std::vector<float> );
@@ -4927,6 +4932,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElNumberOfMissingInnerHits, "ElNumberOfMissingInnerHits");
   event.put(fTElSCindex, "ElSCindex");
   event.put(fTElConvPartnerTrkDist, "ElConvPartnerTrkDist");
+  event.put(fTElPassConversionVeto,"ElPassConversionVeto");
   event.put(fTElConvPartnerTrkDCot, "ElConvPartnerTrkDCot");
   event.put(fTElConvPartnerTrkPt, "ElConvPartnerTrkPt");
   event.put(fTElConvPartnerTrkEta, "ElConvPartnerTrkEta");
