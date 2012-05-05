@@ -96,8 +96,6 @@ public:
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
-	void makeFRvsPtPlotsForPAS(gChannel);
-	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
 	void make2DRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
@@ -143,6 +141,9 @@ public:
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
+	
+	TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
+	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
 	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, gHiLoSwitch = HighPt);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
@@ -191,13 +192,6 @@ public:
 	virtual void drawTopLine(float = 0.70);
 	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
-	
-	const int     getNPtBins (gChannel);
-	const double *getPtBins  (gChannel);
-	const int     getNPt2Bins(gChannel);
-	const double *getPt2Bins (gChannel);
-	const int     getNEtaBins(gChannel);
-	const double *getEtaBins (gChannel);
 	
 	vector<int> fMCBG;    // SM background MC samples
 	vector<int> fMCBGNoQCDNoGJets;    // SM background MC samples without QCD or GJets

@@ -20,7 +20,7 @@ public:
 	static const int gNMuFPtBins = 8;
 	static const int gNMuPPtbins = 12;
 	static const int gNMuEtabins = 5;
-	static const int gNElFPtBins = 11;
+	static const int gNElFPtBins = 10;
 	static const int gNElPPtbins = 12;
 	static const int gNElEtabins = 5;
 	
@@ -186,6 +186,11 @@ public:
 		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
+		
+		TEfficiency *fratio_pt;
+		TEfficiency *pratio_pt;
+		TEfficiency *fratio_eta;
+		TEfficiency *pratio_eta;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -547,6 +552,7 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
+	virtual void smearMET();
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
 	virtual float getMETPhi();
@@ -738,6 +744,8 @@ public:
 	TString fOutputFileName;
 
 	Sample *fSample;
+	
+	bool isTChiSlepSnu;
 
 	private:
 	

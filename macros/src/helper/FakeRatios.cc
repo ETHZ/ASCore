@@ -726,43 +726,39 @@ float FakeRatios::getEStat2(float N){
 	return ((up-N)*(up-N));
 }
 
+TGraphAsymmErrors* FakeRatios::getGraphPoissonErrors(TH1D* histo, float nSigma, const std::string& xErrType){
+	TGraphAsymmErrors* graph = new TGraphAsymmErrors(0);
 
-TGraphAsymmErrors* FakeRatios::getGraphPoissonErrors( TH1D* histo, float nSigma, const std::string& xErrType ) {
+	for(unsigned iBin=1; iBin<(histo->GetXaxis()->GetNbins()+1); ++iBin){
 
-  TGraphAsymmErrors* graph = new TGraphAsymmErrors(0);
+		int y; // these are data histograms, so y has to be integer
+		double x, xerr, yerrplus, yerrminus;
 
-  for( unsigned iBin=1; iBin<(histo->GetXaxis()->GetNbins()+1); ++iBin ) {
+		x = histo->GetBinCenter(iBin);
+		if( xErrType=="0" )
+			xerr = 0.;
+		else if( xErrType=="binWidth" )
+			xerr = histo->GetBinWidth(iBin)/2.;
+		else if( xErrType=="sqrt12" )
+			xerr = histo->GetBinWidth(iBin)/sqrt(12.);
+		else {
+			std::cout << "Unkown xErrType '" << xErrType << "'. Setting to bin width." << std::endl;
+			xerr = histo->GetBinWidth(iBin);
+		}
+		y = (int)histo->GetBinContent(iBin);
 
-    int y; // these are data histograms, so y has to be integer
-    double x, xerr, yerrplus, yerrminus;
+		double ym, yp;
+		RooHistError::instance().getPoissonInterval(y,ym,yp,nSigma);
 
-    x = histo->GetBinCenter(iBin);
-    if( xErrType=="0" )
-      xerr = 0.;
-    else if( xErrType=="binWidth" )
-      xerr = histo->GetBinWidth(iBin)/2.;
-    else if( xErrType=="sqrt12" )
-      xerr = histo->GetBinWidth(iBin)/sqrt(12.);
-    else {
-      std::cout << "Unkown xErrType '" << xErrType << "'. Setting to bin width." << std::endl;
-      xerr = histo->GetBinWidth(iBin);
-    }
-    y = (int)histo->GetBinContent(iBin);
-       
-    double ym, yp;
-    RooHistError::instance().getPoissonInterval(y,ym,yp,nSigma);
+		yerrplus = yp - y;
+		yerrminus = y - ym;
 
-    yerrplus = yp - y;
-    yerrminus = y - ym;
+		int thisPoint = graph->GetN();
+		graph->SetPoint( thisPoint, x, y );
+		graph->SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
 
-    int thisPoint = graph->GetN();
-    graph->SetPoint( thisPoint, x, y );
-    graph->SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
+	}
 
-  }
-
-  return graph;
-
-
+	return graph;
 }
 

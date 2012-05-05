@@ -88,6 +88,7 @@ void SSDLPlotter::init(TString filename){
 	if(fVerbose > 0) cout << "Initializing SSDLPlotter ... " << endl;
 	Util::SetStyle();
 	gStyle->SetOptStat(0);
+	
 
 	readDatacard(filename);
 
@@ -252,15 +253,15 @@ void SSDLPlotter::init(TString filename){
 	fMuData    .push_back(DoubleMu3);
 	fMuData    .push_back(DoubleMu4);
 	fMuData    .push_back(DoubleMu5);
-	fMuHadData .push_back(MuHad1);
-	fMuHadData .push_back(MuHad2);
+	// fMuHadData .push_back(MuHad1);
+	// fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
 	fEGData    .push_back(DoubleEle2);
 	fEGData    .push_back(DoubleEle3);
 	fEGData    .push_back(DoubleEle4);
 	fEGData    .push_back(DoubleEle5);
-	fEleHadData.push_back(EleHad1);
-	fEleHadData.push_back(EleHad2);
+	// fEleHadData.push_back(EleHad1);
+	// fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
 	fMuEGData  .push_back(MuEG2);
 	fMuEGData  .push_back(MuEG3);
@@ -283,40 +284,14 @@ void SSDLPlotter::init(TString filename){
 	fHighPtData.push_back(MuEG4);
 	fHighPtData.push_back(MuEG5);
 
-	fLowPtData.push_back(MuHad1);
-	fLowPtData.push_back(MuHad2);
-	fLowPtData.push_back(EleHad1);
-	fLowPtData.push_back(EleHad2);
-	fLowPtData.push_back(MuEG1);
-	fLowPtData.push_back(MuEG2);
-	fLowPtData.push_back(MuEG3);
-	fLowPtData.push_back(MuEG4);
-}
-
-//____________________________________________________________________________
-const int     SSDLPlotter::getNPtBins (gChannel chan){
-	if(chan == Muon || chan == ElMu) return gNMuPtbins;
-	if(chan == Elec) return gNElPtbins;
-}
-const double *SSDLPlotter::getPtBins  (gChannel chan){
-	if(chan == Muon || chan == ElMu) return gMuPtbins;
-	if(chan == Elec) return gElPtbins;
-}
-const int     SSDLPlotter::getNPt2Bins(gChannel chan){
-	if(chan == Muon || chan == ElMu) return gNMuPt2bins;
-	if(chan == Elec) return gNElPt2bins;
-}
-const double *SSDLPlotter::getPt2Bins (gChannel chan){
-	if(chan == Muon || chan == ElMu) return gMuPt2bins;
-	if(chan == Elec) return gElPt2bins;
-}
-const int     SSDLPlotter::getNEtaBins(gChannel chan){
-	if(chan == Muon || chan == ElMu) return gNMuEtabins;
-	if(chan == Elec)            return gNElEtabins;
-}
-const double *SSDLPlotter::getEtaBins (gChannel chan){
-	if(chan == Muon || chan == ElMu) return gMuEtabins;
-	if(chan == Elec)            return gElEtabins;
+	// fLowPtData.push_back(MuHad1);
+	// fLowPtData.push_back(MuHad2);
+	// fLowPtData.push_back(EleHad1);
+	// fLowPtData.push_back(EleHad2);
+	// fLowPtData.push_back(MuEG1);
+	// fLowPtData.push_back(MuEG2);
+	// fLowPtData.push_back(MuEG3);
+	// fLowPtData.push_back(MuEG4);
 }
 
 //____________________________________________________________________________
@@ -350,22 +325,22 @@ void SSDLPlotter::doAnalysis(){
 	// make2DRatioPlots(Elec);
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
-
+	
 	// makeFRvsPtPlots(Muon, SigSup);
 	// makeFRvsPtPlots(Elec, SigSup);
 	// makeFRvsPtPlots(Muon, ZDecay);
 	// makeFRvsPtPlots(Elec, ZDecay);
 	// makeFRvsEtaPlots(Muon);
 	// makeFRvsEtaPlots(Elec);
-
+	
 	makeAllClosureTests();
 	makeAllIntPredictions();
 	makeDiffPrediction();
-	makeDiffPredictionTTW();
+	// makeDiffPredictionTTW();
 	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
-	makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
+	// makePredictionSignalEvents(100., 7000., 0., 7000., 3, 1, 1, 55., 30., true);
 	// makeRelIsoTTSigPlots();
 	// scanMSUGRA("/shome/mdunser/ssdltrees/msugra_dilepton/msugraScan_diLeptonSkim.root");
 	// scanSMS("/scratch/mdunser/SSDLTrees/sms_TChiNuSlept/SMS_2.root" , 0.,   10., 120., 7000., 20., 10.); // JV - region with MET > 120.
@@ -421,9 +396,8 @@ void SSDLPlotter::plotWeightedHT(){
 		
 		//TTree *tree = S->getTree();
 		//tree->ResetBranchAddresses();
-		//if(S->datamc < 1) Init(tree);
-		//if(S->datamc > 0) InitMC(tree);
-		InitMC(tree);
+		//Init(tree);
+		Init(tree);
 		for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
 			tree->GetEntry(jentry);
 			printProgress(jentry, tree->GetEntriesFast(), "TTJets");
@@ -546,8 +520,7 @@ void SSDLPlotter::makePileUpPlots(bool write){
 		
 			TTree *tree = S->getTree();
 			tree->ResetBranchAddresses();
-			if(S->datamc < 1) Init(tree);
-			if(S->datamc > 0) InitMC(tree);
+			Init(tree);
 			for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
 				tree->GetEntry(jentry);
 				printProgress(jentry, tree->GetEntriesFast(), S->sname);
@@ -850,10 +823,10 @@ void SSDLPlotter::makeNT012Plots(gChannel chan, vector<int> mcsamples, bool(SSDL
 		for(size_t i = 0; i < mcsamples.size(); ++i){
 			int index = mcsamples[i];
 			tree = fSamples[index]->getTree();
-			hnt20[i] = new TH1D(Form("nt20_%s", fSamples[index]->sname.Data()), "Observed Nt20", getNPt2Bins(Muon), getPt2Bins(Muon));
-			hnt10[i] = new TH1D(Form("nt10_%s", fSamples[index]->sname.Data()), "Observed Nt10", getNPt2Bins(Muon), getPt2Bins(Muon));
-			hnt01[i] = new TH1D(Form("nt01_%s", fSamples[index]->sname.Data()), "Observed Nt01", getNPt2Bins(Muon), getPt2Bins(Muon));
-			hnt00[i] = new TH1D(Form("nt00_%s", fSamples[index]->sname.Data()), "Observed Nt00", getNPt2Bins(Muon), getPt2Bins(Muon));
+			hnt20[i] = new TH1D(Form("nt20_%s", fSamples[index]->sname.Data()), "Observed Nt20", getNFPtBins(Muon), getFPtBins(Muon));
+			hnt10[i] = new TH1D(Form("nt10_%s", fSamples[index]->sname.Data()), "Observed Nt10", getNFPtBins(Muon), getFPtBins(Muon));
+			hnt01[i] = new TH1D(Form("nt01_%s", fSamples[index]->sname.Data()), "Observed Nt01", getNFPtBins(Muon), getFPtBins(Muon));
+			hnt00[i] = new TH1D(Form("nt00_%s", fSamples[index]->sname.Data()), "Observed Nt00", getNFPtBins(Muon), getFPtBins(Muon));
 			hnt20[i]->SetFillColor(fSamples[index]->color);
 			hnt10[i]->SetFillColor(fSamples[index]->color);
 			hnt01[i]->SetFillColor(fSamples[index]->color);
@@ -981,7 +954,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	// Fill ttbar histos
 	TTree *ttbar_tree = fSamples[TTJets]->getTree();
 	ttbar_tree->ResetBranchAddresses();
-	InitMC(ttbar_tree);
+	Init(ttbar_tree);
 
 	// Event loop muons and electrons
 	if (fChain == 0) return;
@@ -1038,7 +1011,7 @@ void SSDLPlotter::makeRelIsoTTSigPlots(){
 	// Fill signal histos
 	TTree *signal_tree = fSamples[LM6]->getTree();
 	signal_tree->ResetBranchAddresses();
-	InitMC(signal_tree);
+	Init(signal_tree);
 	// Event loop
 
 	// Event loop muons and electrons
@@ -1227,15 +1200,15 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 	TH1D    *hiso_db   [gNSels];
 	THStack *hiso_mc_s [gNSels];
 
-	TH1D    *hiso_data_pt [gNSels][gNMuPt2bins];
-	TH1D    *hiso_mc_pt   [gNSels][gNMuPt2bins];
-	TH1D    *hiso_ttbar_pt[gNSels][gNMuPt2bins];
-	TH1D    *hiso_qcd_pt  [gNSels][gNMuPt2bins];
-	TH1D    *hiso_ttj_pt  [gNSels][gNMuPt2bins];
-	TH1D    *hiso_ewk_pt  [gNSels][gNMuPt2bins];
-	TH1D    *hiso_rare_pt [gNSels][gNMuPt2bins];
-	TH1D    *hiso_db_pt   [gNSels][gNMuPt2bins];
-	THStack *hiso_mc_pt_s [gNSels][gNMuPt2bins];
+	TH1D    *hiso_data_pt [gNSels][gNMuFPtBins];
+	TH1D    *hiso_mc_pt   [gNSels][gNMuFPtBins];
+	TH1D    *hiso_ttbar_pt[gNSels][gNMuFPtBins];
+	TH1D    *hiso_qcd_pt  [gNSels][gNMuFPtBins];
+	TH1D    *hiso_ttj_pt  [gNSels][gNMuFPtBins];
+	TH1D    *hiso_ewk_pt  [gNSels][gNMuFPtBins];
+	TH1D    *hiso_rare_pt [gNSels][gNMuFPtBins];
+	TH1D    *hiso_db_pt   [gNSels][gNMuFPtBins];
+	THStack *hiso_mc_pt_s [gNSels][gNMuFPtBins];
 
 	TH1D    *hiso_data_nv [gNSels][gNNVrtxBins];
 	TH1D    *hiso_mc_nv   [gNSels][gNNVrtxBins];
@@ -1272,7 +1245,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_rare [i] ->Sumw2();
 		hiso_db   [i] ->Sumw2();
 
-		for(int k = 0; k < gNMuPt2bins; ++k){
+		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_data_pt [i][k] = new TH1D(Form("MuIsoData_%s_Pt%d"         , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
 			hiso_mc_pt   [i][k] = new TH1D(Form("MuIsoMC_%s_Pt%d"           , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
 			hiso_ttbar_pt[i][k] = new TH1D(Form("MuIsoTTbar_%s_Pt%d"        , IsoPlots::sel_name[i].Data(), k), "Muon Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 1.0);
@@ -1319,7 +1292,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_ttj [i]->SetFillColor(kAzure-5);
 		hiso_rare[i]->SetFillColor(kAzure+8);
 
-		for(int k = 0; k < gNMuPt2bins; ++k){
+		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_qcd_pt [i][k]->SetFillColor(kYellow-4);
 			hiso_db_pt  [i][k]->SetFillColor(kSpring-9);
 			hiso_ewk_pt [i][k]->SetFillColor(kGreen +1);
@@ -1345,7 +1318,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 
 		// Event loop
 		tree->ResetBranchAddresses();
-		InitMC(tree);
+		Init(tree);
 
 		if (fChain == 0) return;
 		Long64_t nentries = fChain->GetEntriesFast();
@@ -1366,7 +1339,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// Common object selections
 			if(!isLooseMuon(muind1)) continue;
 			if(MuPt[muind1] < fC_minMu2pt) continue;
-			if(MuPt[muind1] > gMuPt2bins[gNMuPt2bins]) continue;
+			if(MuPt[muind1] > gMuFPtBins[gNMuFPtBins]) continue;
 
 			// Select genmatched fake muons
 			if(isPromptMuon(muind1)) continue;
@@ -1374,9 +1347,9 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			////////////////////////////////////////////////////
 			// MOST LOOSE SELECTION
 			hiso_ttbar[0]->Fill(MuIso[muind1]);
-			for(size_t k = 0; k < gNMuPt2bins; ++k){
-				if(MuPt[muind1] < gMuPt2bins[k]) continue;
-				if(MuPt[muind1] > gMuPt2bins[k+1]) continue;
+			for(size_t k = 0; k < gNMuFPtBins; ++k){
+				if(MuPt[muind1] < gMuFPtBins[k]) continue;
+				if(MuPt[muind1] > gMuFPtBins[k+1]) continue;
 				hiso_ttbar_pt[0][k]->Fill(MuIso[muind1]);
 			}
 			for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1389,9 +1362,9 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// SIGNAL SUPPRESSED SELECTION
 			if(isSigSupMuEvent()){
 				hiso_ttbar[1]->Fill(MuIso[muind1]);
-				for(size_t k = 0; k < gNMuPt2bins; ++k){
-					if(MuPt[muind1] < gMuPt2bins[k]) continue;
-					if(MuPt[muind1] > gMuPt2bins[k+1]) continue;
+				for(size_t k = 0; k < gNMuFPtBins; ++k){
+					if(MuPt[muind1] < gMuFPtBins[k]) continue;
+					if(MuPt[muind1] > gMuFPtBins[k+1]) continue;
 					hiso_ttbar_pt[1][k]->Fill(MuIso[muind1]);
 				}
 				for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1408,9 +1381,9 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			// 	if(isPromptMuon(muind1) && !isPromptMuon(muind2)) fakemu = muind2;
 			// 	
 			// 	hiso_ttbar[1]->Fill(MuIso[fakemu]);
-			// 	for(size_t k = 0; k < gNMuPt2bins; ++k){
-			// 		if(MuPt[fakemu] < gMuPt2bins[k]) continue;
-			// 		if(MuPt[fakemu] > gMuPt2bins[k+1]) continue;
+			// 	for(size_t k = 0; k < gNMuFPtBins; ++k){
+			// 		if(MuPt[fakemu] < gMuFPtBins[k]) continue;
+			// 		if(MuPt[fakemu] > gMuFPtBins[k+1]) continue;
 			// 		hiso_ttbar_pt[1][k]->Fill(MuIso[fakemu]);
 			// 	}
 			// 	for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1447,7 +1420,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_ttbar[i]->SetMarkerColor(kRed);
 		hiso_ttbar[i]->SetMarkerSize(1.3);
 		
-		for(int k = 0; k < gNMuPt2bins; ++k){
+		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_data_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
 			hiso_data_pt[i][k]->SetLineWidth(3);
 			hiso_data_pt[i][k]->SetLineColor(kBlack);
@@ -1484,7 +1457,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			float lumiscale = fLumiNorm / S->getLumi();
 			if(S->datamc == 0) continue;
 			S->isoplots[0].hiso[i]->Scale(lumiscale);
-			for(size_t k = 0; k < gNMuPt2bins; ++k){
+			for(size_t k = 0; k < gNMuFPtBins; ++k){
 				S->isoplots[0].hiso_pt[i][k]->Scale(lumiscale);
 			}
 			for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1497,7 +1470,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			Sample *S = fSamples[datasamples[j]];
 			hiso_data[i]->Add(S->isoplots[0].hiso[i]);
 			hiso_data[i]->SetXTitle(convertVarName("MuIso[0]"));
-			for(int k = 0; k < gNMuPt2bins; ++k){
+			for(int k = 0; k < gNMuFPtBins; ++k){
 				hiso_data_pt[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
 				hiso_data_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
 			}
@@ -1509,12 +1482,12 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 
 		// Scale to get equal integrals
 		float intscale(0.);
-		float intscale_pt[gNMuPt2bins];
+		float intscale_pt[gNMuFPtBins];
 		float intscale_nv[gNNVrtxBins];
 		for(size_t j = 0; j < mcsamples.size(); ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			intscale += S->isoplots[0].hiso[i]->Integral();
-			for(int k = 0; k < gNMuPt2bins; ++k){
+			for(int k = 0; k < gNMuFPtBins; ++k){
 				intscale_pt[k] += S->isoplots[0].hiso_pt[i][k]->Integral();
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
@@ -1522,18 +1495,18 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			}
 		}
 		intscale = hiso_data[i]->Integral() / intscale;
-		for(size_t j = 0; j < gNMuPt2bins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
+		for(size_t j = 0; j < gNMuFPtBins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
 		for(size_t j = 0; j < gNNVrtxBins; ++j) intscale_nv[j] = hiso_data_nv[i][j]->Integral() / intscale_nv[j];
 		
 		for(size_t j = 0; j < mcsamples.size(); ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			S->isoplots[0].hiso[i]->Scale(intscale);
-			for(int k = 0; k < gNMuPt2bins; ++k) S->isoplots[0].hiso_pt[i][k]->Scale(intscale_pt[k]);
+			for(int k = 0; k < gNMuFPtBins; ++k) S->isoplots[0].hiso_pt[i][k]->Scale(intscale_pt[k]);
 			for(int k = 0; k < gNNVrtxBins; ++k) S->isoplots[0].hiso_nv[i][k]->Scale(intscale_nv[k]);
 		}
 		if(dottbar){
 			hiso_ttbar[i]->Scale(hiso_data[i]->Integral() / hiso_ttbar[i]->Integral());
-			for(int k = 0; k < gNMuPt2bins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
+			for(int k = 0; k < gNMuFPtBins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
 			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());			
 		}
 		
@@ -1550,7 +1523,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			if ( S->getType() == 4) hiso_rare[i]->Add( S->isoplots[0].hiso[i] );
 			if ( S->getType() == 5) hiso_db[i]  ->Add( S->isoplots[0].hiso[i] );
 
-			for(int k = 0; k < gNMuPt2bins; ++k){
+			for(int k = 0; k < gNMuFPtBins; ++k){
 				if ( S->getType() == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
 				if ( S->getType() == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
 				if ( S->getType() == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[0].hiso_pt[i][k] );
@@ -1574,7 +1547,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_mc_s[i]->Draw("goff");
 		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
 
-		for(int k = 0; k < gNMuPt2bins; ++k){
+		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_db_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_ewk_pt[i][k]);
@@ -1600,7 +1573,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		//	hiso_mc_s[i]->Add(S->isoplots[0].hiso[i]);
 		//	hiso_mc_s[i]->Draw("goff");
 		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
-		//	for(int k = 0; k < gNMuPt2bins; ++k){
+		//	for(int k = 0; k < gNMuFPtBins; ++k){
 		//		hiso_mc_pt  [i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Draw("goff");
@@ -1661,7 +1634,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		// Util::PrintNoEPS(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
 		Util::PrintPDF(c_temp, "MuIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
-		for(int k = 0; k < gNMuPt2bins; ++k){
+		for(int k = 0; k < gNMuFPtBins; ++k){
 			fOutputSubDir = "Isolation/Muons/PtBinned/";
 			ratio_data  = hiso_data_pt[i][k] ->Integral(bin0, bin015) / hiso_data_pt[i][k] ->Integral(bin0, bin1);
 			ratio_mc    = hiso_mc_pt[i][k]   ->Integral(bin0, bin015) / hiso_mc_pt[i][k]   ->Integral(bin0, bin1);
@@ -1695,7 +1668,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			if(dottbar) hiso_ttbar_pt[i][k]->DrawCopy("PE X0 same");
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
-			lat->DrawLatex(0.20,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", getPt2Bins(Muon)[k], getPt2Bins(Muon)[k+1]));
+			lat->DrawLatex(0.20,0.92, Form("p_{T}(#mu) %3.0f - %3.0f GeV", getFPtBins(Muon)[k], getFPtBins(Muon)[k+1]));
 			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data}  = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}   = %4.2f", ratio_mc));
@@ -1768,15 +1741,15 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	TH1D    *hiso_db   [gNSels];
 	THStack *hiso_mc_s [gNSels];
 
-	TH1D    *hiso_data_pt [gNSels][gNElPt2bins];
-	TH1D    *hiso_mc_pt   [gNSels][gNElPt2bins];
-	TH1D    *hiso_ttbar_pt[gNSels][gNElPt2bins];
-	TH1D    *hiso_qcd_pt  [gNSels][gNElPt2bins];
-	TH1D    *hiso_ttj_pt  [gNSels][gNElPt2bins];
-	TH1D    *hiso_ewk_pt  [gNSels][gNElPt2bins];
-	TH1D    *hiso_rare_pt [gNSels][gNElPt2bins];
-	TH1D    *hiso_db_pt   [gNSels][gNElPt2bins];
-	THStack *hiso_mc_pt_s [gNSels][gNElPt2bins];
+	TH1D    *hiso_data_pt [gNSels][gNElFPtBins];
+	TH1D    *hiso_mc_pt   [gNSels][gNElFPtBins];
+	TH1D    *hiso_ttbar_pt[gNSels][gNElFPtBins];
+	TH1D    *hiso_qcd_pt  [gNSels][gNElFPtBins];
+	TH1D    *hiso_ttj_pt  [gNSels][gNElFPtBins];
+	TH1D    *hiso_ewk_pt  [gNSels][gNElFPtBins];
+	TH1D    *hiso_rare_pt [gNSels][gNElFPtBins];
+	TH1D    *hiso_db_pt   [gNSels][gNElFPtBins];
+	THStack *hiso_mc_pt_s [gNSels][gNElFPtBins];
 
 	TH1D    *hiso_data_nv [gNSels][gNNVrtxBins];
 	TH1D    *hiso_mc_nv   [gNSels][gNNVrtxBins];
@@ -1813,7 +1786,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_rare [i] ->Sumw2();
 		hiso_db   [i] ->Sumw2();
 
-		for(int k = 0; k < gNElPt2bins; ++k){
+		for(int k = 0; k < gNElFPtBins; ++k){
 			hiso_data_pt[i][k]  = new TH1D(Form("ElIsoData_%s_Pt%d",          IsoPlots::sel_name[i].Data(), k), "Electron Isolation in Data for "  + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_mc_pt  [i][k]  = new TH1D(Form("ElIsoMC_%s_Pt%d",            IsoPlots::sel_name[i].Data(), k), "Electron Isolation in MC for "    + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
 			hiso_ttbar_pt[i][k] = new TH1D(Form("ElIsoTTbar_%s_Pt%d",         IsoPlots::sel_name[i].Data(), k), "Electron Isolation in TTbar for " + IsoPlots::sel_name[i], IsoPlots::nbins[i], 0., 0.6);
@@ -1860,7 +1833,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_ttj [i]->SetFillColor(kAzure-5);
 		hiso_rare[i]->SetFillColor(kAzure+8);
 
-		for(int k = 0; k < gNElPt2bins; ++k){
+		for(int k = 0; k < gNElFPtBins; ++k){
 			hiso_qcd_pt [i][k]->SetFillColor(kYellow-4);
 			hiso_db_pt  [i][k]->SetFillColor(kSpring-9);
 			hiso_ewk_pt [i][k]->SetFillColor(kGreen +1);
@@ -1885,7 +1858,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 
 		// Event loop
 		tree->ResetBranchAddresses();
-		InitMC(tree);
+		Init(tree);
 
 		if (fChain == 0) return;
 		Long64_t nentries = fChain->GetEntriesFast();
@@ -1912,15 +1885,15 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			// Exclude also conversions here?
 
 			if(ElPt[elind1] < fC_minEl2pt) continue;
-			if(ElPt[elind1] > gElPt2bins[gNElPt2bins]) continue;
+			if(ElPt[elind1] > gElFPtBins[gNElFPtBins]) continue;
 
 
 			////////////////////////////////////////////////////
 			// MOST LOOSE SELECTION
 			hiso_ttbar[0]->Fill(ElRelIso[elind1]);
-			for(size_t k = 0; k < gNElPt2bins; ++k){
-				if(ElPt[elind1] < gElPt2bins[k]) continue;
-				if(ElPt[elind1] > gElPt2bins[k+1]) continue;
+			for(size_t k = 0; k < gNElFPtBins; ++k){
+				if(ElPt[elind1] < gElFPtBins[k]) continue;
+				if(ElPt[elind1] > gElFPtBins[k+1]) continue;
 				hiso_ttbar_pt[0][k]->Fill(ElRelIso[elind1]);
 			}
 			for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1933,9 +1906,9 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			// SIGNAL SUPPRESSED SELECTION
 			if(isSigSupElEvent()){
 				hiso_ttbar[1]->Fill(ElRelIso[elind1]);
-				for(size_t k = 0; k < gNElPt2bins; ++k){
-					if(ElPt[elind1] < gElPt2bins[k]) continue;
-					if(ElPt[elind1] > gElPt2bins[k+1]) continue;
+				for(size_t k = 0; k < gNElFPtBins; ++k){
+					if(ElPt[elind1] < gElFPtBins[k]) continue;
+					if(ElPt[elind1] > gElFPtBins[k+1]) continue;
 					hiso_ttbar_pt[1][k]->Fill(ElRelIso[elind1]);
 				}
 				for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -1971,7 +1944,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_ttbar[i]->SetMarkerColor(kRed);
 		hiso_ttbar[i]->SetMarkerSize(1.3);
 		
-		for(int k = 0; k < gNElPt2bins; ++k){
+		for(int k = 0; k < gNElFPtBins; ++k){
 			hiso_data_pt[i][k]->SetXTitle(convertVarName("ElRelIso[0]"));
 			hiso_data_pt[i][k]->SetLineWidth(3);
 			hiso_data_pt[i][k]->SetLineColor(kBlack);
@@ -2008,7 +1981,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			float lumiscale = fLumiNorm / S->getLumi();
 			if(S->datamc == 0) continue;
 			S->isoplots[1].hiso[i]->Scale(lumiscale);
-			for(size_t k = 0; k < gNElPt2bins; ++k){
+			for(size_t k = 0; k < gNElFPtBins; ++k){
 				S->isoplots[1].hiso_pt[i][k]->Scale(lumiscale);
 			}
 			for(size_t k = 0; k < gNNVrtxBins; ++k){
@@ -2021,7 +1994,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			Sample *S = fSamples[datasamples[j]];
 			hiso_data[i]->Add(S->isoplots[1].hiso[i]);
 			hiso_data[i]->SetXTitle(convertVarName("ElRelIso[0]"));
-			for(int k = 0; k < gNElPt2bins; ++k){
+			for(int k = 0; k < gNElFPtBins; ++k){
 				hiso_data_pt[i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
 				hiso_data_pt[i][k]->SetXTitle(convertVarName("ElRelIso[0]"));
 			}
@@ -2033,12 +2006,12 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 
 		// Scale to get equal integrals
 		float intscale(0.);
-		float intscale_pt[gNElPt2bins];
+		float intscale_pt[gNElFPtBins];
 		float intscale_nv[gNNVrtxBins];
 		for(size_t j = 0; j < mcsamples.size();   ++j){
 			Sample *S = fSamples[mcsamples[j]];
 			intscale += S->isoplots[1].hiso[i]->Integral();
-			for(int k = 0; k < gNElPt2bins; ++k){
+			for(int k = 0; k < gNElFPtBins; ++k){
 				intscale_pt[k] += S->isoplots[1].hiso_pt[i][k]->Integral();
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
@@ -2046,13 +2019,13 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			}
 		}
 		intscale = hiso_data[i]->Integral() / intscale;
-		for(size_t j = 0; j < gNElPt2bins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
+		for(size_t j = 0; j < gNElFPtBins; ++j) intscale_pt[j] = hiso_data_pt[i][j]->Integral() / intscale_pt[j];
 		for(size_t j = 0; j < gNNVrtxBins; ++j) intscale_nv[j] = hiso_data_nv[i][j]->Integral() / intscale_nv[j];
 		
 		for(size_t j = 0; j < mcsamples.size();   ++j){
 			Sample *S = fSamples[mcsamples[j]];			
 			S->isoplots[1].hiso[i]->Scale(intscale);
-			for(int k = 0; k < gNElPt2bins; ++k){
+			for(int k = 0; k < gNElFPtBins; ++k){
 				S->isoplots[1].hiso_pt[i][k]->Scale(intscale_pt[k]);
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
@@ -2061,7 +2034,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		}
 		if(dottbar){
 			hiso_ttbar[i]->Scale(hiso_data[i]->Integral() / hiso_ttbar[i]->Integral());
-			for(int k = 0; k < gNElPt2bins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
+			for(int k = 0; k < gNElFPtBins; ++k) hiso_ttbar_pt[i][k]->Scale(hiso_data_pt[i][k]->Integral() / hiso_ttbar_pt[i][k]->Integral());
 			for(int k = 0; k < gNNVrtxBins; ++k) hiso_ttbar_nv[i][k]->Scale(hiso_data_nv[i][k]->Integral() / hiso_ttbar_nv[i][k]->Integral());			
 		}
 
@@ -2077,7 +2050,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			if ( S->getType() == 4) hiso_rare[i]->Add( S->isoplots[1].hiso[i] );
 			if ( S->getType() == 5) hiso_db[i]  ->Add( S->isoplots[1].hiso[i] );
 
-			for(int k = 0; k < gNMuPt2bins; ++k){
+			for(int k = 0; k < gNMuFPtBins; ++k){
 				if ( S->getType() == 1) hiso_qcd_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
 				if ( S->getType() == 2) hiso_ttj_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
 				if ( S->getType() == 3) hiso_ewk_pt [i][k]->Add( S->isoplots[1].hiso_pt[i][k] );
@@ -2101,7 +2074,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_mc_s[i]->Draw("goff");
 		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
 
-		for(int k = 0; k < gNElPt2bins; ++k){
+		for(int k = 0; k < gNElFPtBins; ++k){
 			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_db_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_ewk_pt[i][k]);
@@ -2127,7 +2100,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		//	hiso_mc_s[i]->Add(S->isoplots[1].hiso[i]);
 		//	hiso_mc_s[i]->Draw("goff");
 		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("ElRelIso[0]"));
-		//	for(int k = 0; k < gNElPt2bins; ++k){
+		//	for(int k = 0; k < gNElFPtBins; ++k){
 		//		hiso_mc_pt  [i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Add(S->isoplots[1].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Draw("goff");
@@ -2189,7 +2162,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		// Util::PrintNoEPS(c_temp, "Iso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir, NULL);
 		Util::PrintPDF(c_temp, "ElIso" + IsoPlots::sel_name[i], fOutputDir + fOutputSubDir);
 
-		for(int k = 0; k < gNElPt2bins; ++k){
+		for(int k = 0; k < gNElFPtBins; ++k){
 			fOutputSubDir = "Isolation/Electrons/PtBinned/";
 			double max1 = hiso_mc_pt_s[i][k]->GetMaximum();
 			double max2 = hiso_data_pt[i][k]->GetMaximum();
@@ -2225,7 +2198,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 			if(dottbar) hiso_ttbar_pt[i][k]->DrawCopy("PE X0 same");
 			hiso_data_pt[i][k]->DrawCopy("PE X0 same");
 			leg_pt->Draw();
-			lat->DrawLatex(0.20,0.92, Form("p_{T}(e) %3.0f - %3.0f GeV", getPt2Bins(Elec)[k], getPt2Bins(Elec)[k+1]));
+			lat->DrawLatex(0.20,0.92, Form("p_{T}(e) %3.0f - %3.0f GeV", getFPtBins(Elec)[k], getFPtBins(Elec)[k+1]));
 			lat->DrawLatex(0.70,0.92, Form("L_{int.} = %5.2f fb^{-1}", fLumiNorm/1000.));
 			lat->DrawLatex(0.75,0.85, Form("R^{T/L}_{Data} = %4.2f", ratio_data));
 			lat->DrawLatex(0.75,0.80, Form("R^{T/L}_{MC}  = %4.2f", ratio_mc));
@@ -2496,6 +2469,9 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 		TH1D    *hvar_ewk  [gNKinVars];
 		TH1D    *hvar_rare [gNKinVars];
 		TH1D    *hvar_db   [gNKinVars];
+		TH1D    *hvar_tot  [gNKinVars];
+
+		TH1D    *hvar_rat  [gNKinVars]; // ratio
 
 		THStack *hvar_mc_s[gNKinVars];
 
@@ -2506,13 +2482,14 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 
 		// Create histograms
 		for(size_t i = 0; i < gNKinVars; ++i){
-			hvar_data[i] = new TH1D("Data_"          + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-
-			hvar_qcd [i] = new TH1D("QCD_"           + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-			hvar_ttj [i] = new TH1D("TTjets_"        + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-			hvar_ewk [i] = new TH1D("EWK_"           + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-			hvar_rare[i] = new TH1D("Rare_"          + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
-			hvar_db[i]   = new TH1D("DB_"            + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_data[i] = new TH1D("Data_"    + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_qcd [i] = new TH1D("QCD_"     + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_ttj [i] = new TH1D("TTjets_"  + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_ewk [i] = new TH1D("EWK_"     + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_rare[i] = new TH1D("Rare_"    + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_db[i]   = new TH1D("DB_"      + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_tot[i]  = new TH1D("Tot_"     + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC",   KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
+			hvar_rat[i]  = new TH1D("Ratio_"   + KinPlots::var_name[i], KinPlots::var_name[i] + " Data/MC", KinPlots::nbins[i], KinPlots::xmin[i], KinPlots::xmax[i]);
 
 			hvar_mc_s[i] = new THStack("MC_stacked_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in MC");
 		}
@@ -2540,7 +2517,7 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			hvar_data[i]->SetLineColor(kBlack);
 			hvar_data[i]->SetMarkerStyle(8);
 			hvar_data[i]->SetMarkerColor(kBlack);
-			hvar_data[i]->SetMarkerSize(1.5);
+			hvar_data[i]->SetMarkerSize(1.3);
 
 			// Scale by luminosity
 			for(size_t j = 0; j < gNSAMPLES; ++j){
@@ -2585,17 +2562,24 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
 				if ( S->getType() == 1) hvar_qcd [i]->Add( S->kinplots[s][hilo].hvar[i] );
 				if ( S->getType() == 2) hvar_ttj [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( S->getType() == 3) hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 3 || (S->getType() == 5 && S->getProc() != 7) )
+				                        hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
 				if ( S->getType() == 4) hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( S->getType() == 5) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getProc() == 7) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
 			}
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
-			hvar_mc_s[i]->Add(hvar_db[i]);
-			hvar_mc_s[i]->Add(hvar_ewk[i]);
-			hvar_mc_s[i]->Add(hvar_rare[i]);
 			hvar_mc_s[i]->Add(hvar_ttj[i]);
+			hvar_mc_s[i]->Add(hvar_rare[i]);
+			hvar_mc_s[i]->Add(hvar_ewk[i]);
+			hvar_mc_s[i]->Add(hvar_db[i]);
 			hvar_mc_s[i]->Draw("goff");
 			hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
+
+			hvar_tot[i]->Add(hvar_qcd[i]);
+			hvar_tot[i]->Add(hvar_db[i]);
+			hvar_tot[i]->Add(hvar_ewk[i]);
+			hvar_tot[i]->Add(hvar_rare[i]);
+			hvar_tot[i]->Add(hvar_ttj[i]);
 
 			float binwidth = hvar_data[i]->GetBinWidth(1);
 			TString ytitle = Form("Events / %3.0f GeV", binwidth);
@@ -2617,27 +2601,71 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				hvar_mc_s[i]->SetMinimum(0.);
 				hvar_data[i]->SetMinimum(0.);				
 			}
+			
+			// Ratio plot:
+			float border = 0.3;
+			float scale = (1-border)/border;
+						
+			hvar_rat[i]->SetXTitle(hvar_data[i]->GetXaxis()->GetTitle());
+			hvar_rat[i]->SetYTitle("Obs./Pred.");
+			hvar_rat[i]->GetXaxis()->SetTitleSize(scale * hvar_data[i]->GetXaxis()->GetTitleSize());
+			hvar_rat[i]->GetYaxis()->SetTitleSize(scale * hvar_data[i]->GetYaxis()->GetTitleSize());
+			hvar_rat[i]->GetXaxis()->SetLabelSize(scale * hvar_data[i]->GetXaxis()->GetLabelSize());
+			hvar_rat[i]->GetYaxis()->SetLabelSize(scale * hvar_data[i]->GetYaxis()->GetLabelSize());
+			hvar_rat[i]->GetXaxis()->SetTickLength(scale * hvar_data[i]->GetXaxis()->GetTickLength());
+			hvar_rat[i]->GetYaxis()->SetTickLength(hvar_data[i]->GetYaxis()->GetTickLength());
 
-			TCanvas *c_temp = new TCanvas("C_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data vs MC", 0, 0, 800, 600);
+			hvar_rat[i]->SetFillStyle(1001);
+			hvar_rat[i]->SetLineWidth(1);
+			hvar_rat[i]->SetFillColor(  kGray+1);
+			hvar_rat[i]->SetLineColor(  kGray+1);
+			hvar_rat[i]->SetMarkerColor(kGray+1);
+
+			hvar_rat[i]->Divide(hvar_data[i], hvar_tot[i]);
+			
+			// Canvas
+			TCanvas *c_temp = new TCanvas("C_" + KinPlots::var_name[i], KinPlots::var_name[i] + " in Data vs MC", 0, 0, 600, 600);
 			c_temp->cd();
+
+			TPad *p_plot  = new TPad("plotpad",  "Pad containing the plot", 0.00, border, 1.00, 1.00, 0, 0);
+			p_plot->SetBottomMargin(0);
+			p_plot->Draw();
+			TPad *p_ratio = new TPad("ratiopad", "Pad containing the ratio", 0.00, 0.00, 1.00, border, 0, 0);
+			p_ratio->SetTopMargin(0);
+			p_ratio->SetBottomMargin(0.35);
+			p_ratio->Draw();
+
+			FakeRatios *FR = new FakeRatios();
+			TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors(hvar_data[i]);
+			gr_obs->SetMarkerColor(kBlack);
+			gr_obs->SetMarkerStyle(8);
+			gr_obs->SetMarkerSize(1.2);
+			gr_obs->SetLineWidth(2);
+			gr_obs->SetLineColor(kBlack);
+			gr_obs->SetFillColor(kBlack);
+			
+			p_plot->cd();
+			if(loglin) p_plot->SetLogy(1);
 
 			// TLegend *leg = new TLegend(0.15,0.50,0.40,0.88);
 			// TLegend *leg = new TLegend(0.70,0.30,0.90,0.68);
-			TLegend *leg = new TLegend(0.70,0.65,0.89,0.88);
-			leg->AddEntry(hvar_data[i], "Data","p");
-			leg->AddEntry(hvar_ttj[i],  "Top","f");
-			leg->AddEntry(hvar_rare[i], "Rare SM","f");
-			leg->AddEntry(hvar_ewk[i],  "Single Boson","f");
-			leg->AddEntry(hvar_db[i],   "Di-Boson","f");
-			leg->AddEntry(hvar_qcd[i],  "QCD","f");
+			TLegend *leg = new TLegend(0.70,0.62,0.89,0.88);
+			leg->AddEntry(hvar_data[i], "Data",      "p");
+			leg->AddEntry(hvar_db[i],   "WZ",        "f");
+			leg->AddEntry(hvar_ewk[i],  "W/Z/WW/ZZ", "f");
+			leg->AddEntry(hvar_rare[i], "Rare SM",   "f");
+			leg->AddEntry(hvar_ttj[i],  "Top",       "f");
+			leg->AddEntry(hvar_qcd[i],  "QCD",       "f");
+			leg->AddEntry(hvar_rat[i],  "Ratio",     "f");
 	
 			leg->SetFillStyle(0);
 			leg->SetTextFont(42);
 			leg->SetBorderSize(0);
 
-			if(loglin) gPad->SetLogy();
+			// if(loglin) gPad->SetLogy();
 			hvar_mc_s[i]->Draw("hist");
-			hvar_data[i]->DrawCopy("PE X0 same");
+			// hvar_data[i]->DrawCopy("PE X0 same");
+			gr_obs->Draw("P same");
 			leg->Draw();
 			
 			drawTopLine();
@@ -2651,8 +2679,27 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			if(i == 8) lat->DrawLatex(0.14,0.85, "e#mu");
 			if(i > 8)  lat->DrawLatex(0.14,0.85, "ee/e#mu/#mu#mu");
 
+			p_ratio->cd();
+			hvar_rat[i]->GetYaxis()->SetTitleOffset(hvar_data[i]->GetYaxis()->GetTitleOffset());
+			hvar_rat[i]->GetYaxis()->SetTitle("Ratio");
+			hvar_rat[i]->GetYaxis()->SetNdivisions(505);
+			// setPlottingRange(hvar_rat[i], 0.3);
+			hvar_rat[i]->SetMaximum(2.1);
+			hvar_rat[i]->SetMinimum(0.0);
+			hvar_rat[i]->DrawCopy("E2 ");
+			TLine *l3 = new TLine(hvar_data[i]->GetXaxis()->GetXmin(), 1.00, hvar_data[i]->GetXaxis()->GetXmax(), 1.00);
+			l3->SetLineWidth(2);
+			l3->SetLineStyle(7);
+			l3->Draw();
+			gPad->RedrawAxis();
+			p_ratio->Draw();
+
+			c_temp->Update();
+
+
 			// Util::PrintNoEPS(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir, NULL);
 			Util::PrintPDF(c_temp, KinPlots::var_name[i], fOutputDir + fOutputSubDir);
+			delete FR, gr_obs;
 			delete c_temp;
 			delete leg;
 		}
@@ -3270,8 +3317,8 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	// TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
-	TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
+	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
+	// TLegend *leg = new TLegend(0.67,0.70,0.82,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
 	leg->AddEntry(hmetvsht_da_ee, "ee","p");
 	leg->AddEntry(hmetvsht_da_em, "e#mu","p");
@@ -3422,11 +3469,11 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 	
-	gmetvsht_da_mt->Draw("P");
-	gmetvsht_da_et->Draw("P");
+	// gmetvsht_da_mt->Draw("P");
+	// gmetvsht_da_et->Draw("P");
 	
 	leg->Draw();
-	leg2->Draw();
+	// leg2->Draw();
 	regleg->Draw();
 
 	drawTopLine();
@@ -3442,7 +3489,7 @@ void SSDLPlotter::makeMETvsHTPlot0HT(){
 	gPad->RedrawAxis();
 
 	// Util::PrintNoEPS(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(c_temp, "HTvsMET_NoHT_Tau", fOutputDir + fOutputSubDir);
+	Util::PrintPDF(c_temp, "HTvsMET_NoHT", fOutputDir + fOutputSubDir);
 	// Util::SaveAsMacro(c_temp, "HTvsMET_" + gHiLoLabel[hilo], fOutputDir + fOutputSubDir);
 	delete c_temp;
 	delete leg, regleg;
@@ -3624,11 +3671,23 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(chan == Muon) name = "Muons";
 	if(chan == Elec) name = "Electrons";
 
-	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
-	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_dummy1, *h_ptratio_data, *h_ptratio_mc;
+	TH2D *h_dummy2;
 
-	TH1D *h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPt2Bins(chan), getPt2Bins(chan));
-	TH1D *h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPt2Bins(chan), getPt2Bins(chan));
+	TH2D *h2d_ntight, *h2d_nloose;
+
+	if(fp == SigSup){
+		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNFPtBins(chan), getFPtBins(chan));
+		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNFPtBins(chan), getFPtBins(chan));		
+		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
+		h_dummy2       = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+	}
+	if(fp == ZDecay){
+		h_ptratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNPPtBins(chan), getPPtBins(chan));
+		h_ptratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNPPtBins(chan), getPPtBins(chan));		
+		h_dummy1       = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
+		h_dummy2       = new TH2D("dummy2", "dummy2", getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+	}
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
@@ -3644,6 +3703,24 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
 	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
+
+	//////////////
+	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, fp, 0);
+	eff_data->SetName("eff_data_pt");
+	eff_data->SetLineWidth(2);
+	eff_data->SetMarkerStyle(20);
+	eff_data->SetMarkerSize(1.5);
+
+	// TGraphAsymmErrors *eff_mc = getCombEfficiency(mcsamples, chan, fp, 0);
+	// eff_mc->SetName("eff_mc_pt");
+	// eff_mc->SetMarkerColor(kRed);
+	// eff_mc->SetMarkerStyle(23);
+	// eff_mc->SetMarkerSize(1.5);
+	// eff_mc->SetLineWidth(2);
+	// eff_mc->SetLineColor(kRed);
+	// eff_mc->SetFillColor(kRed);
+
+	//////////////
 
 	float maximum = 0.8;
 	if(fp == ZDecay) maximum = 1.1;
@@ -3688,9 +3765,10 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	TCanvas *c_temp = new TCanvas("C_PtRatioPlot", "fRatio vs Pt in Data vs MC", 0, 0, 800, 600);
 	c_temp->cd();
-
-	h_ptratio_mc->DrawCopy("PE X0");
-	h_ptratio_data->Draw("PE X0 same");
+	h_ptratio_mc->DrawCopy("PE 0");
+	// eff_mc->Draw("P same");
+	// h_ptratio_data->Draw("PE X0 same");
+	eff_data->Draw("PZ 0 same");
 	leg->Draw();
 	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	lat->SetTextSize(0.04);
@@ -3711,93 +3789,6 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	delete c_temp, lat, leg;
 	fOutputSubDir = "";
 }
-void SSDLPlotter::makeFRvsPtPlotsForPAS(gChannel chan){
-	Util::SetTDRStyle();
-	fOutputSubDir = "Ratios/forPAS/";
-	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
-
-	TString name;
-	if(chan == Muon)     name = "Muons";
-	if(chan == Elec) name = "Electrons";
-
-	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNEtaBins(chan), getEtaBins(chan));
-	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
-
-	TH1D *h_ratio_A2 = new TH1D("Ratio_data2", "Tight/Loose Ratio in data for A2", getNPt2Bins(chan), getPt2Bins(chan));
-	TH1D *h_ratio_A1 = new TH1D("Ratio_data1", "Tight/Loose Ratio in data for A1", getNPt2Bins(chan), getPt2Bins(chan));
-
-	vector<int> datasamples;
-
-	if(chan == Muon)     datasamples = fMuData;
-	if(chan == Elec) datasamples = fEGData;
-
-	float A1MBins [5] = {0.31, 0.25, 0.21, 0.18, 0.20};
-	float A1MBinsE[5] = {0.002, 0.002, 0.002, 0.003, 0.001};
-
-	float A1EBins [5] = {0.22, 0.21, 0.14, 0.22, 0.35};
-	float A1EBinsE[5] = {0.02, 0.02, 0.02, 0.02, 0.04};
-
-	for(size_t i = 0; i < 5; ++i){
-		if(chan == Muon){
-			h_ratio_A1->SetBinContent(i+1, A1MBins[i]);
-			h_ratio_A1->SetBinError(i+1,   A1MBinsE[i]);
-		}
-		if(chan == Elec){
-			h_ratio_A1->SetBinContent(i+1, A1EBins[i]);
-			h_ratio_A1->SetBinError(i+1,   A1EBinsE[i]);
-		}
-	}
-
-	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_ratio_A2, h_dummy1);
-
-	h_ratio_A2->GetXaxis()->SetTitle("p_{T} (GeV)");
-	h_ratio_A2->GetYaxis()->SetTitle("TL Ratio");
-	h_ratio_A2->SetMarkerStyle(20);
-	h_ratio_A2->SetMarkerSize(1.6);
-	h_ratio_A2->SetMarkerColor(kBlue);
-	h_ratio_A2->SetLineColor(kBlue);
-
-	h_ratio_A1->GetXaxis()->SetTitle("p_{T} (GeV)");
-	h_ratio_A1->GetYaxis()->SetTitle("TL Ratio");
-	h_ratio_A1->SetMarkerStyle(23);
-	h_ratio_A1->SetMarkerSize(1.8);
-	h_ratio_A1->SetMarkerColor(kBlack);
-	h_ratio_A1->SetLineColor(kBlack);
-
-	h_ratio_A2->GetYaxis()->SetRangeUser(0., 0.7);
-	h_ratio_A1->GetYaxis()->SetRangeUser(0., 0.7);
-
-	TLegend *leg = new TLegend(0.21,0.58,0.47,0.78);
-	leg->AddEntry(h_ratio_A1, "Method A1","p");
-	leg->AddEntry(h_ratio_A2, "Method A2","p");
-	leg->SetTextSize(0.05);
-	// leg->SetTextFont(42);
-	leg->SetFillStyle(0);
-	leg->SetBorderSize(0);	
-
-	TCanvas *c_temp = new TCanvas();
-	c_temp->cd();
-	c_temp->SetRightMargin(0.05);
-
-	h_ratio_A2->Draw("PE");
-	h_ratio_A1->Draw("PE same");
-	leg->Draw();
-	TLatex lat;
-	lat.SetNDC(kTRUE);
-	lat.SetTextSize(0.05);
-	lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
-	lat.DrawLatex(0.70, 0.88, name);
-	lat.DrawLatex(0.23, 0.81, "L_{int.} = 0.98 fb^{-1},   #sqrt{s} = 7 TeV");
-
-	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Pt_A1vsA2", fOutputDir + fOutputSubDir);
-	delete h_ratio_A1, h_ratio_A2;
-	delete c_temp;
-	fOutputSubDir = "";
-}
 void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	fOutputSubDir = "Ratios/";
 	char cmd[100];
@@ -3810,13 +3801,11 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	TString pfname = "Non-prompt ";
 
-	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNPt2Bins(chan), getPt2Bins(chan));
-	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
+	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNFPtBins(chan), getFPtBins(chan));
+	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
 
 	TH1D *h_etaratio_data = new TH1D("Ratio_data", "Tight/Loose Ratio in data", getNEtaBins(chan), getEtaBins(chan));
 	TH1D *h_etaratio_mc   = new TH1D("Ratio_mc",   "Tight/Loose Ratio in MC",   getNEtaBins(chan), getEtaBins(chan));
-	// h_etaratio_data->Sumw2();
-	// h_etaratio_mc  ->Sumw2();
 
 	vector<int> datasamples;
 	vector<int> mcsamples;
@@ -3832,6 +3821,13 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
 	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
+
+	//////////////
+	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, SigSup, 1);
+	eff_data->SetName("eff_data_eta");
+	eff_data->SetLineWidth(2);
+	eff_data->SetMarkerStyle(20);
+	eff_data->SetMarkerSize(1.5);
 
 	float max = 0.4;
 	if(chan==Elec) max = 0.8;
@@ -3895,7 +3891,8 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	//     lat.DrawLatex(0.83, 0.88, name);
 	
 	h_etaratio_mc->DrawCopy("PE X0");
-	h_etaratio_data->Draw("PE X0 same");
+	// h_etaratio_data->Draw("PE X0 same");
+	eff_data->Draw("PZ 0 same");
 	leg->Draw();
 	drawTopLine();
 	lat->SetTextSize(0.04);
@@ -3910,99 +3907,6 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	delete h_etaratio_mc, h_etaratio_data;
 	// delete c_temp;
 	delete c_temp, lat, leg;
-	fOutputSubDir = "";
-}
-void SSDLPlotter::makeFRvsEtaPlotsForPAS(gChannel chan){
-	Util::SetTDRStyle();
-	fOutputSubDir = "Ratios/forPAS";
-	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
-
-	TString name;
-	if(chan == Muon)     name = "Muons";
-	if(chan == Elec) name = "Electrons";
-
-	TH1D *h_dummy1 = new TH1D("dummy1", "dummy1", getNPt2Bins(chan), getPt2Bins(chan));
-	TH2D *h_dummy2 = new TH2D("dummy2", "dummy2", getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
-
-	TH1D *h_ratio_A2 = new TH1D("Ratio_data2", "Tight/Loose Ratio in data for A2", getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_ratio_A1 = new TH1D("Ratio_data1", "Tight/Loose Ratio in data for A1", getNEtaBins(chan), getEtaBins(chan));
-
-	vector<int> datasamples;
-
-	if(chan == Muon)     datasamples = fMuData;
-	if(chan == Elec) datasamples = fEGData;
-
-	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_ratio_A2);
-
-	float A1MBins [4] = {0.2, 0.23, 0.25, 0.26};
-	float A1MBinsE[4] = {0.001, 0.002, 0.002, 0.002};
-
-	float A1EBins [4] = {0.2, 0.22, 0.23, 0.28};
-	float A1EBinsE[4] = {0.01, 0.02, 0.02, 0.03};
-
-	for(size_t i = 0; i < 4; ++i){
-		if(chan == Muon){
-			h_ratio_A1->SetBinContent(i+1, A1MBins[i]);
-			h_ratio_A1->SetBinError(i+1,   A1MBinsE[i]);
-		}
-		if(chan == Elec){
-			h_ratio_A1->SetBinContent(i+1, A1EBins[i]);
-			h_ratio_A1->SetBinError(i+1,   A1EBinsE[i]);
-		}
-	}
-
-	h_ratio_A2->SetMaximum(0.4);
-	h_ratio_A2->SetMinimum(0.0);
-	h_ratio_A1->SetMaximum(0.4);
-	h_ratio_A1->SetMinimum(0.0);
-
-	// h_ratio_data->GetXaxis()->SetTitle("p_{T} (GeV)");
-	h_ratio_A2->GetXaxis()->SetTitle("#left|#eta#right|");
-	h_ratio_A2->GetYaxis()->SetTitle("TL Ratio");
-	h_ratio_A2->SetMarkerStyle(20);
-	h_ratio_A2->SetMarkerSize(1.6);
-	h_ratio_A2->SetMarkerColor(kBlue);
-	h_ratio_A2->SetLineColor(kBlue);
-
-	h_ratio_A1->GetXaxis()->SetTitle("#left|#eta#right|");
-	h_ratio_A1->GetYaxis()->SetTitle("TL Ratio");
-	h_ratio_A1->SetMarkerStyle(23);
-	h_ratio_A1->SetMarkerSize(1.8);
-	h_ratio_A1->SetMarkerColor(kBlack);
-	h_ratio_A1->SetLineColor(kBlack);
-
-	h_ratio_A2->GetYaxis()->SetRangeUser(0., 0.5);
-	h_ratio_A1->GetYaxis()->SetRangeUser(0., 0.5);
-
-	TLegend *leg = new TLegend(0.21,0.58,0.47,0.78);
-	leg->AddEntry(h_ratio_A1, "Method A1","p");
-	leg->AddEntry(h_ratio_A2, "Method A2","p");
-	leg->SetTextSize(0.05);
-	// leg->SetTextFont(42);
-	leg->SetFillStyle(0);
-	leg->SetBorderSize(0);	
-
-	TCanvas *c_temp = new TCanvas();
-	c_temp->cd();
-	c_temp->SetRightMargin(0.05);
-
-	h_ratio_A2->Draw("PE");
-	h_ratio_A1->Draw("PE same");
-	leg->Draw();
-	TLatex lat;
-	lat.SetNDC(kTRUE);
-	lat.SetTextSize(0.05);
-	lat.DrawLatex(0.23, 0.88, "CMS Preliminary");
-	lat.DrawLatex(0.70, 0.88, name);
-	lat.DrawLatex(0.23, 0.81, "L_{int.} = 0.98 fb^{-1},   #sqrt{s} = 7 TeV");
-	
-	Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir, NULL);
-	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir);
-	Util::SaveAsMacro(c_temp, "FRatio_" + name + "_Eta_A1vsA2", fOutputDir + fOutputSubDir);
-	delete h_ratio_A1, h_ratio_A2;
-	delete c_temp;
 	fOutputSubDir = "";
 }
 void SSDLPlotter::makeRatioPlots(gChannel chan){
@@ -4449,8 +4353,7 @@ void SSDLPlotter::makeIsoVsMETPlot(gSample sample){
 	}
 		
 	tree->ResetBranchAddresses();
-	if(fSamples[sample]->datamc < 1) Init(tree);
-	if(fSamples[sample]->datamc > 0) InitMC(tree);
+	Init(tree);
 	fSample = fSamples[sample];
 	for (Long64_t jentry=0; jentry<tree->GetEntriesFast();jentry++) {
 		tree->GetEntry(jentry);
@@ -4533,9 +4436,19 @@ TH1D* SSDLPlotter::fillRatioPt(gChannel chan, vector<int> samples, gFPSwitch fp,
 	TString longname[2] = {"Muons", "Electrons"};
 	int muelswitch = 0;
 	if(chan == Elec) muelswitch = 1;
-	TH2D *h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan));
-	TH1D *h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+	
+	TH2D *h_2d;
+	TH1D *h_pt, *h_eta;
+	if(fp == SigSup){
+		h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+		h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNFPtBins(chan), getFPtBins(chan));
+		h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+	}
+	if(fp == ZDecay){
+		h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+		h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNPPtBins(chan), getPPtBins(chan));
+		h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+	}
 
 	h_pt->SetXTitle("p_{#perp} (GeV)");
 	h_pt->SetYTitle("# Tight / # Loose");
@@ -4555,9 +4468,19 @@ TH2D* SSDLPlotter::fillRatio(gChannel chan, vector<int> samples, gFPSwitch fp, b
 	TString longname[2] = {"Muons", "Electrons"};
 	int muelswitch = 0;
 	if(chan == Elec) muelswitch = 1;
-	TH2D *h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan), getNEtaBins(chan), getEtaBins(chan));
-	TH1D *h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNPt2Bins(chan), getPt2Bins(chan));
-	TH1D *h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+
+	TH2D *h_2d;
+	TH1D *h_pt, *h_eta;
+	if(fp == SigSup){
+		h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNFPtBins(chan), getFPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+		h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNFPtBins(chan), getFPtBins(chan));
+		h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+	}
+	if(fp == ZDecay){
+		h_2d  = new TH2D(Form("%sRatio",   shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt vs Eta", longname[muelswitch].Data()), getNPPtBins(chan), getPPtBins(chan), getNEtaBins(chan), getEtaBins(chan));
+		h_pt  = new TH1D(Form("%sRatioPt" ,shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Pt"       , longname[muelswitch].Data()), getNPPtBins(chan), getPPtBins(chan));
+		h_eta = new TH1D(Form("%sRatioEta",shortname[muelswitch].Data()), Form("Ratio of tight to loose %s vs Eta"      , longname[muelswitch].Data()), getNEtaBins(chan), getEtaBins(chan));
+	}
 
 	h_2d->SetXTitle("p_{#perp} (GeV)");
 	h_2d->SetYTitle("#eta");
@@ -4730,8 +4653,58 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 }
 
 //____________________________________________________________________________
+TEfficiency *SSDLPlotter::getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta){
+	// Only call for data! For MC call the combination one
+	// pteta switch: 0: pt (default), 1: eta
+	TEfficiency *eff;
+	if(fp == SigSup && pteta == 0) eff = new TEfficiency("fRatio_pt",  "fRatio_pt",  getNFPtBins(chan), getFPtBins(chan));
+	if(fp == ZDecay && pteta == 0) eff = new TEfficiency("fRatio_pt",  "fRatio_pt",  getNPPtBins(chan), getPPtBins(chan));
+	if(fp == SigSup && pteta == 1) eff = new TEfficiency("fRatio_eta", "fRatio_eta", getNEtaBins(chan), getEtaBins(chan));
+	if(fp == ZDecay && pteta == 1) eff = new TEfficiency("fRatio_eta", "fRatio_eta", getNEtaBins(chan), getEtaBins(chan));
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
+
+		if(S->datamc > 0) { cout << "Calling the wrong method -> call the combined one" << endl; exit(-1);}
+		Channel *C;
+		if(chan == Muon) C = &S->region[Baseline][HighPt].mm;
+		if(chan == Elec) C = &S->region[Baseline][HighPt].ee;
+		TEfficiency *tempeff;
+		if(fp == SigSup && pteta == 0) tempeff = new TEfficiency(*C->fratio_pt);
+		if(fp == SigSup && pteta == 1) tempeff = new TEfficiency(*C->fratio_eta);
+		if(fp == ZDecay && pteta == 0) tempeff = new TEfficiency(*C->pratio_pt);
+		if(fp == ZDecay && pteta == 1) tempeff = new TEfficiency(*C->pratio_eta);
+		
+		eff->Add(*tempeff);
+		delete tempeff;
+	}
+	return eff;
+}
+TGraphAsymmErrors *SSDLPlotter::getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta){
+	// pteta switch: 0: pt (default), 1: eta
+	TList *list = new TList();
+	vector<TEfficiency*> veff;
+	for(size_t i = 0; i < samples.size(); ++i){
+		Sample *S = fSamples[samples[i]];
+		float scale = fLumiNorm / S->getLumi();
+
+		Channel *C;
+		if(chan == Muon) C = &S->region[Baseline][HighPt].mm;
+		if(chan == Elec) C = &S->region[Baseline][HighPt].ee;
+		if(fp == SigSup && pteta == 0) veff.push_back(new TEfficiency(*C->fratio_pt));
+		if(fp == SigSup && pteta == 1) veff.push_back(new TEfficiency(*C->fratio_eta));
+		if(fp == ZDecay && pteta == 0) veff.push_back(new TEfficiency(*C->pratio_pt));
+		if(fp == ZDecay && pteta == 1) veff.push_back(new TEfficiency(*C->pratio_eta));
+		cout << veff[i]->GetName() << endl;
+		veff[i]->SetWeight(scale);
+		list->Add(veff[i]);
+	}
+	TEfficiency *eff = new TEfficiency();
+	TGraphAsymmErrors *asym = eff->Combine(list);
+	for(size_t i = 0; i < veff.size(); ++i) delete veff[i];
+	return asym;
+}
+
 void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output, gHiLoSwitch hilo){
-	// toggle: choose binning: 0: pt, default, 1: nvrtx, 2: closest jet pt
 	if(fVerbose>2) cout << "---------------" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
@@ -4779,7 +4752,7 @@ TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, b
 		if(S->datamc == 0) scale = 1;
 
 		FRatioPlots *RP;
-		if(chan == Muon)     RP = &S->ratioplots[0];
+		if(chan == Muon) RP = &S->ratioplots[0];
 		if(chan == Elec) RP = &S->ratioplots[1];
 		ntight->Add(RP->ntight[ratiovar], scale);
 		nloose->Add(RP->nloose[ratiovar], scale);
@@ -4893,8 +4866,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	const float WZESyst  = 0.2;
 	const float WZESyst2 = WZESyst*WZESyst;
 
-	musamples = fMuData;
-	elsamples = fEGData;
+	musamples  = fMuData;
+	elsamples  = fEGData;
 	emusamples = fMuEGData;
 
 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
@@ -4995,16 +4968,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1); nt10sum_em += temp_nt10_em;
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1); nt01sum_em += temp_nt01_em;
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5025,16 +4998,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5217,9 +5190,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		float scale = fLumiNorm/S->getLumi();
 
 		
-		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
@@ -5244,9 +5217,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
 	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].em.nt20_pt->GetEntries());
@@ -5337,36 +5310,36 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	fOUTSTREAM << Region::sname[reg] << endl;
-	fOUTSTREAM << Form("Double Fakes   &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Double Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
-	fOUTSTREAM << Form("Single Fakes   &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Single Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
-	fOUTSTREAM << Form("Charge MisID   & \\multicolumn{2}{c}{-} &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Charge MisID   &        -          & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-	fOUTSTREAM << Form("Rare SM        &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \\hline \n",
+	fOUTSTREAM << Form("Rare SM        & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
-	fOUTSTREAM << Form("WZ Prod.       &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \\hline \n",
+	fOUTSTREAM << Form("WZ Prod.       & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em),
 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
 	wz_nt2_ee + wz_nt2_mm + wz_nt2_em, sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)));
-	fOUTSTREAM << Form("Total Bkg      &        %5.1f & %5.1f  &          %5.1f & %5.1f &        %5.1f & %5.1f &          %5.1f & %5.1f \\\\ \\hline \n",
+	fOUTSTREAM << Form("Total Bkg      & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	fOUTSTREAM << Form("Observed       & \\multicolumn{2}{c}{%3.0f} & \\multicolumn{2}{c}{%3.0f}  & \\multicolumn{2}{c}{%3.0f} & \\multicolumn{2}{|c}{%3.0f} \\\\ \\hline \\hline \n",
+	fOUTSTREAM << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
 	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
 	fOUTSTREAM << endl;
 	
@@ -5652,16 +5625,16 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1); nt10sum_em += temp_nt10_em;
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1); nt01sum_em += temp_nt01_em;
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5682,16 +5655,16 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5884,9 +5857,9 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		Sample *S = fSamples[mcbkg[i]];
 		float scale = fLumiNorm/S->getLumi();
 
-		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
@@ -5911,9 +5884,9 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
 	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].em.nt20_pt->GetEntries());
@@ -5929,18 +5902,18 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	///////////////////////////////////////////
 	// ttX production
 	float ttwscale = fLumiNorm/fSamples[TTbarW]->getLumi();
-	float ttw_nt2_mm = gMMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-	float ttw_nt2_em = gEMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-	float ttw_nt2_ee = gEETrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+	float ttw_nt2_mm = gMMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttw_nt2_em = gEMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttw_nt2_ee = gEETrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 	float ttw_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
 	float ttw_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].em.nt20_pt->GetEntries());
 	float ttw_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].ee.nt20_pt->GetEntries());
 
 	float ttzscale = fLumiNorm/fSamples[TTbarZ]->getLumi();
-	float ttz_nt2_mm = gMMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-	float ttz_nt2_em = gEMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-	float ttz_nt2_ee = gEETrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
+	float ttz_nt2_mm = gMMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttz_nt2_em = gEMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttz_nt2_ee = gEETrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 	float ttz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
 	float ttz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][hilo].em.nt20_pt->GetEntries());
@@ -9586,8 +9559,7 @@ void SSDLPlotter::makeTTbarClosure(){
 	// Event loop
 	tree->ResetBranchAddresses();
 	// Init(tree);
-	if(S->datamc == 0) Init(tree);
-	else InitMC(tree);
+	Init(tree);
 
 	if (fChain == 0) return;
 	Long64_t nentries = fChain->GetEntriesFast();
@@ -10008,38 +9980,33 @@ void SSDLPlotter::storeWeightedPred(){
 		}
 		
 		if(HT    > Region::minHT   [TTbarWSel4] &&
-		   HT    < Region::maxHT   [TTbarWSel4] &&
-		   MET   > Region::minMet  [TTbarWSel4] &&
-		   MET   < Region::maxMet  [TTbarWSel4] &&
-		   njets < Region::minNjets[TTbarWSel4] &&
-		   passespt){
+           HT    < Region::maxHT   [TTbarWSel4] &&
+           MET   > Region::minMet  [TTbarWSel4] &&
+           MET   < Region::maxMet  [TTbarWSel4] &&
+           njets < Region::minNjets[TTbarWSel4] &&
+           passespt)
+		{
 			fillWithoutOF(S->diffyields[chan].hnpp[10], nbjetsmed, puweight * npp);
 			fillWithoutOF(S->diffyields[chan].hnpf[10], nbjetsmed, puweight * npf);
 			fillWithoutOF(S->diffyields[chan].hnfp[10], nbjetsmed, puweight * nfp);
-			fillWithoutOF(S->diffyields[chan].hnff[10], nbjetsmed, puweight * nff);			
+			fillWithoutOF(S->diffyields[chan].hnff[10], nbjetsmed, puweight * nff);
 		}
 
-		if( fDO_OPT && flav<3 ) {
-
+		if( fDO_OPT && flav<3 ){
 			float lumi_pb = 5000.;
 			eventWeight = lumi_pb*puweight/slumi;
 			tree_opt->Fill();
-
 		}
 	}
 
-
-	if( fDO_OPT ) {
-
+	if( fDO_OPT ){
 		file_opt->cd();
 		tree_opt->Write();
 		file_opt->Close();
-
 	}
-      
-
 	delete FR;
 }
+
 float SSDLPlotter::getFRatio(gChannel chan, float pt, int datamc){
 	// if(chan == Muon) return 0.0672; // flat ratios
 	// if(chan == Elec) return 0.224;
@@ -10373,16 +10340,16 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		int proc = S->getProc();
 		if(proc == 0 || proc >= nprocs) continue; // safety
 		
-		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float ntt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float ntl_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float nlt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float nll_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float ntt_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float ntl_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float nll_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
+		float ntt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float ntl_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float nlt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float nll_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float ntt_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float ntl_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float nll_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
 		
 		ntt_mm[proc] += ntt_mm_temp;
 		ntl_mm[proc] += ntl_mm_temp;
@@ -10463,16 +10430,16 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNPt2Bins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNPt2Bins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNPt2Bins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNPt2Bins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%24s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -11232,7 +11199,6 @@ void SSDLPlotter::msugraLOxsecs(TFile * results){
 	results->cd();
 	lo_xsec->Write();
 }
-
 void SSDLPlotter::msugraNLOxsecs(TFile * results) {
 	results->cd();
 	TH2D * nlo_xsec   = new TH2D("nlo_xsec", "nlo_xsec", gM0bins, gM0min+10, gM0max+10, gM12bins, gM12min+10, gM12max+10);
@@ -11252,7 +11218,6 @@ void SSDLPlotter::msugraNLOxsecs(TFile * results) {
 	results->cd();
 	nlo_xsec->Write();
 }
-
 void SSDLPlotter::scanMSUGRA( const char * filestring){
 
 	bool isLeptonSkim = true;
@@ -11261,7 +11226,6 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	TString lepString = "";
 	if (isLeptonSkim) lepString = "_leptonSkim";
 
-	// ATTENTION: it is important that m0, m12 and process are known by the InitMC function!! This function is in SSDLDumper now, so no problem
 	fC_minMu1pt = 20.;
 	fC_minMu2pt = 10.;
 	fC_minEl1pt = 20.;
@@ -11345,7 +11309,7 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	TTree * tree_= (TTree *) file_->Get("Analysis");
 	tree_->ResetBranchAddresses();
 
-	InitMC(tree_);
+	Init(tree_);
 	double tot_events = tree_->GetEntriesFast();
 	cout << "Total Number of entries: " << tot_events << endl;
 	int n_tot = 0;
@@ -11448,7 +11412,6 @@ void SSDLPlotter::scanMSUGRA( const char * filestring){
 	eff_->Write();
 
 }
-
 void SSDLPlotter::scanSMS( const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2){
 
 	float myMinMet = minMET;
@@ -11521,7 +11484,7 @@ void SSDLPlotter::scanSMS( const char * filestring, float minHT, float maxHT, fl
 	TTree * tree_ = (TTree *) file_->Get("Analysis");
 	tree_->ResetBranchAddresses();
 
-	InitMC(tree_);
+	Init(tree_);
 	double tot_events = tree_->GetEntriesFast();
 	cout << "Total Number of entries: " << tot_events << endl;
 	int n_tot = 0;

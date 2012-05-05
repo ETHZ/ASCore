@@ -26,7 +26,7 @@ public :
    Int_t           process;
    Float_t         mGlu;
    Float_t         mLSP;
-   Int_t           isTChiSlepSnu;
+   // Int_t           isTChiSlepSnu;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -138,7 +138,7 @@ public :
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
    TBranch        *b_mLSP;   //!
-   TBranch        *b_isTChiSlepSnu;   //!
+   // TBranch        *b_isTChiSlepSnu;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -321,7 +321,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
-   fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
+   // fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
