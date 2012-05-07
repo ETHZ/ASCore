@@ -54,8 +54,6 @@ public:
 	bool IsTightEle(int, int);
 	
 	int JetPartonMatch(int);
-	void InitJetCorrectionUncertainty(const char*);
-	float GetJECUncert(float pt, float eta);
 	
 	double corrMuIso(int);
 	double corrElIso(int);
@@ -68,6 +66,8 @@ public:
 	};
 
 private:
+	TH1F *fHEvCount;
+	
 	bool fDoFillEffTree;
 	
 	Monitor fCounter;

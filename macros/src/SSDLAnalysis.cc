@@ -35,7 +35,6 @@ SSDLAnalysis::~SSDLAnalysis(){
 void SSDLAnalysis::Begin(const char* filename){
 	ReadTriggers(gBaseDir + "HLTPaths_SSDL.dat");
 	ReadPDGTable(gBaseDir + "pdgtable.txt");
-	InitJetCorrectionUncertainty("/shome/stiegerb/Workspace/JetEnergyCorrection/GR_R_42_V19_AK5PF/AK5PF_Uncertainty.txt");
 
 	static const int gM0bins(150), gM0min(0), gM0max(3000), gM12bins(50), gM12min(0), gM12max(1000);
 	if(!fIsData){
@@ -46,6 +45,7 @@ void SSDLAnalysis::Begin(const char* filename){
 		fSMSCount = new TH2D("sms_count", "sms_count", 51, -5, 505, 51, -5, 505);
 	}
 	BookTree();
+	fHEvCount = new TH1F("EventCount", "Event Counter", 1, 0., 1.); // count number of generated events
 	if(!fIsData && fDoFillEffTree) BookEffTree();
 }
 
@@ -59,6 +59,7 @@ void SSDLAnalysis::End(){
 		fSMSCount->Write();
 	}
 	fOutputFile->cd();
+	fHEvCount->Write();
 	fAnalysisTree->Write();
 	if(fDoFillEffTree && !fIsData) fLepEffTree->Write();
 	fOutputFile->Close();
@@ -273,6 +274,7 @@ void SSDLAnalysis::BookEffTree(){
 
 //____________________________________________________________________________
 void SSDLAnalysis::Analyze(){
+	fHEvCount->Fill(0.);
 	FillAnalysisTree();
 	if(fDoFillEffTree && !fIsData) FillEffTree();
 }
@@ -737,25 +739,6 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 	}
 	cout << "Choose your toggle!" << endl;
 	return false;
-}
-
-//____________________________________________________________________________
-// Jets and JES uncertainty, this should go in UserAnalysisBase
-void SSDLAnalysis::InitJetCorrectionUncertainty(const char* file){
-	string filename = string(file);
-	ifstream filePF(filename.c_str());
-	if(!filePF) {cout << "ERROR: cannot open file " << filename << endl; exit(1); }
-	else        {cout << "  using file "            << filename << endl;          }
-	fJetCorrUnc = new JetCorrectionUncertainty(filename);
-}
-float SSDLAnalysis::GetJECUncert(float pt, float eta){
-	if      (eta> 5.0) eta = 5.0;
-	else if (eta<-5.0) eta =-5.0;
-
-	fJetCorrUnc->setJetPt(pt);   
-	fJetCorrUnc->setJetEta(eta); 
-	float uncert= fJetCorrUnc->getUncertainty(true);
-	return uncert;
 }
 
 //____________________________________________________________________________

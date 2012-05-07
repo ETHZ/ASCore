@@ -35,8 +35,8 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
 	JetCorPar.push_back(*ResJetPar);
 
 	fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-        jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
-	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, jecUnc;
+	fJECUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
+	delete L1JetPar, L2JetPar, L3JetPar, ResJetPar, fJECUnc;
 #endif
 
 }
@@ -48,7 +48,7 @@ UserAnalysisBase::~UserAnalysisBase(){
 
 #ifdef DOJES       
 	delete fJetCorrector;
-        delete jecUnc;
+	delete fJECUnc;
 #endif
 
 }
@@ -901,6 +901,15 @@ float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 
 	double l1l2l3scale = factors[2];
 	return rawpt*l1l2l3scale;
+}
+float UserAnalysisBase::GetJECUncert(float pt, float eta){
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
+
+	fJECUnc->setJetPt(pt);   
+	fJECUnc->setJetEta(eta); 
+	float uncert= fJECUnc->getUncertainty(true);
+	return uncert;
 }
 #endif
 
