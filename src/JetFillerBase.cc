@@ -50,12 +50,12 @@ const std::vector<filler::PPair> JetFillerBase::declareProducts(void) {
     addProduct("JScale",  typeid(*fTScale));
     addProduct("JL1FastJetScale", typeid(*fTL1FastJetScale));
     addProduct("JArea",   typeid(*fTArea));
-    addProduct("JbTagProbTkCntHighEff" , typeid(*fTbTagProbTkCntHighEff));
-    addProduct("JbTagProbTkCntHighPur" , typeid(*fTbTagProbTkCntHighPur));
-    addProduct("JbTagProbSimpSVHighEff", typeid(*fTbTagProbSimpSVHighEff));
-    addProduct("JbTagProbSimpSVHighPur", typeid(*fTbTagProbSimpSVHighPur));
     addProduct("JIDLoose",typeid(*fTIDLoose));
-	
+    for ( std::vector<std::string>::const_iterator it = fBtagNames.begin();
+        it != fBtagNames.end(); ++it ) {
+        addProduct(("J"+(*it)).c_str(), typeid((*fTJbTagProb[0])));
+
+    }
     if(fJetType==CALO) {
         addProduct("JNConstituents", typeid(*fTNConstituents));
         addProduct("JNAssoTracks",   typeid(*fTNAssoTracks));
@@ -106,14 +106,12 @@ void JetFillerBase::resetProducts(void) {
     fTScale  .reset(new std::vector<float>);
     fTL1FastJetScale.reset(new std::vector<float>);
     fTFlavour.reset(new std::vector<int>);
-
-    fTbTagProbTkCntHighEff .reset(new std::vector<float>);
-    fTbTagProbTkCntHighPur .reset(new std::vector<float>);
-    fTbTagProbSimpSVHighEff.reset(new std::vector<float>);
-    fTbTagProbSimpSVHighPur.reset(new std::vector<float>);
-
+    size_t ibtag = 0;
+    for ( std::vector<std::string>::const_iterator it = fBtagNames.begin();
+        it != fBtagNames.end(); ++it ) {
+        fTJbTagProb[ibtag++].reset(new std::vector<float> );
+    }
     fTIDLoose.reset(new std::vector<int>);
-	
     if (fJetType==CALO) {	
         fTNConstituents.reset(new std::vector<int>);		
         fTNAssoTracks .reset(new std::vector<int>);
@@ -160,16 +158,15 @@ void JetFillerBase::putProducts( edm::Event& e ) {
     e.put(fTEta,fullName("JEta"));
     e.put(fTPhi,fullName("JPhi"));
     e.put(fTFlavour,fullName("JFlavour"));
-
     e.put(fTScale,  fullName("JScale"));
     e.put(fTL1FastJetScale,fullName("JL1FastJetScale"));
     e.put(fTArea,   fullName("JArea"));
-    e.put(fTbTagProbTkCntHighEff, fullName("JbTagProbTkCntHighEff"));
-    e.put(fTbTagProbTkCntHighPur, fullName("JbTagProbTkCntHighPur"));
-    e.put(fTbTagProbSimpSVHighEff,fullName("JbTagProbSimpSVHighEff"));
-    e.put(fTbTagProbSimpSVHighPur,fullName("JbTagProbSimpSVHighPur"));
     e.put(fTIDLoose,fullName("JIDLoose"));
-	
+    size_t ibtag = 0;
+    for ( std::vector<std::string>::const_iterator it = fBtagNames.begin();
+        it != fBtagNames.end(); ++it ) {
+        e.put(fTJbTagProb[ibtag++], fullName(("J"+(*it)).c_str()));
+    }
     if (fJetType==CALO) {	
         e.put(fTNConstituents,fullName("JNConstituents")); 
         e.put(fTNAssoTracks,  fullName("JNAssoTracks"));

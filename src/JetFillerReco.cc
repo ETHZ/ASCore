@@ -137,50 +137,50 @@ void JetFillerReco::fillProducts(edm::Event& iEvent,
     double mindr(999.99);
 
     // Initialization (needed because filling is non-linear)
-    fTbTagProbTkCntHighEff->push_back(-999.9);
-    fTbTagProbTkCntHighPur->push_back(-999.9);
-    fTbTagProbSimpSVHighEff->push_back(-999.9);
-    fTbTagProbSimpSVHighPur->push_back(-999.9);
-
-    for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
-      double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-                                    (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
-                                    (*jetsAndProbsTkCntHighEff)[i].first->phi());
-      if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        (*fTbTagProbTkCntHighEff)[ijet] = (*jetsAndProbsTkCntHighEff)[i].second;
-        mindr = deltar;
-      }
-    }
-    mindr = 999.99;
-    for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
-      double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-                                    (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
-                                    (*jetsAndProbsTkCntHighPur)[i].first->phi());
-      if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        (*fTbTagProbTkCntHighPur)[ijet] = (*jetsAndProbsTkCntHighPur)[i].second;
-        mindr = deltar;
-      }
-    }
-    mindr = 999.99;
-    for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
-      double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-                                    (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
-                                    (*jetsAndProbsSimpSVHighEff)[i].first->phi());
-      if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        (*fTbTagProbSimpSVHighEff)[ijet] = (*jetsAndProbsSimpSVHighEff)[i].second;
-        mindr = deltar;
-      }
-    }
-    mindr = 999.99;
-    for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
-      double deltar = reco::deltaR( jet->eta(), jet->phi(), 
-                                    (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
-                                    (*jetsAndProbsSimpSVHighPur)[i].first->phi());
-      if( deltar <= btag_match_deltaR && deltar < mindr)  {
-        (*fTbTagProbSimpSVHighPur)[ijet] = (*jetsAndProbsSimpSVHighPur)[i].second;
-        mindr = deltar;
-      }
-    }
+//     fTbTagProbTkCntHighEff->push_back(-999.9);
+//     fTbTagProbTkCntHighPur->push_back(-999.9);
+//     fTbTagProbSimpSVHighEff->push_back(-999.9);
+//     fTbTagProbSimpSVHighPur->push_back(-999.9);
+// 
+//     for (unsigned int i = 0; i < jetsAndProbsTkCntHighEff->size(); i++){
+//       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+//                                     (*jetsAndProbsTkCntHighEff)[i].first->eta(), 
+//                                     (*jetsAndProbsTkCntHighEff)[i].first->phi());
+//       if( deltar <= btag_match_deltaR && deltar < mindr)  {
+//         (*fTbTagProbTkCntHighEff)[ijet] = (*jetsAndProbsTkCntHighEff)[i].second;
+//         mindr = deltar;
+//       }
+//     }
+//     mindr = 999.99;
+//     for (unsigned int i = 0; i < jetsAndProbsTkCntHighPur->size(); i++){
+//       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+//                                     (*jetsAndProbsTkCntHighPur)[i].first->eta(), 
+//                                     (*jetsAndProbsTkCntHighPur)[i].first->phi());
+//       if( deltar <= btag_match_deltaR && deltar < mindr)  {
+//         (*fTbTagProbTkCntHighPur)[ijet] = (*jetsAndProbsTkCntHighPur)[i].second;
+//         mindr = deltar;
+//       }
+//     }
+//     mindr = 999.99;
+//     for (unsigned int i = 0; i < jetsAndProbsSimpSVHighEff->size(); i++){
+//       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+//                                     (*jetsAndProbsSimpSVHighEff)[i].first->eta(), 
+//                                     (*jetsAndProbsSimpSVHighEff)[i].first->phi());
+//       if( deltar <= btag_match_deltaR && deltar < mindr)  {
+//         (*fTbTagProbSimpSVHighEff)[ijet] = (*jetsAndProbsSimpSVHighEff)[i].second;
+//         mindr = deltar;
+//       }
+//     }
+//     mindr = 999.99;
+//     for (unsigned int i = 0; i < jetsAndProbsSimpSVHighPur->size(); i++){
+//       double deltar = reco::deltaR( jet->eta(), jet->phi(), 
+//                                     (*jetsAndProbsSimpSVHighPur)[i].first->eta(), 
+//                                     (*jetsAndProbsSimpSVHighPur)[i].first->phi());
+//       if( deltar <= btag_match_deltaR && deltar < mindr)  {
+//         (*fTbTagProbSimpSVHighPur)[ijet] = (*jetsAndProbsSimpSVHighPur)[i].second;
+//         mindr = deltar;
+//       }
+//     }
 
     // -----------------------------------------
     // JPT jet specific

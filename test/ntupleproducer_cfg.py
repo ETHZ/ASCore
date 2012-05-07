@@ -392,6 +392,10 @@ process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
 process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights
 
 # Add some jet collections
+glist_btags = cms.vstring('trackCountingHighEffBJetTags','trackCountingHighPurBJetTags',
+		          'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags',
+			  'combinedSecondaryVertexBJetTags', 'combinedSecondaryVertexMVABJetTags',
+			  'jetBProbabilityBJetTags','jetProbabilityBJetTags')
 process.analyze.jets = (
    # Calo jets
      cms.PSet( prefix = cms.string('CA'),
@@ -410,6 +414,7 @@ process.analyze.jets = (
                   tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
+		  list_btags = glist_btags,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
                   ),
@@ -419,6 +424,7 @@ process.analyze.jets = (
                   tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
+		  list_btags = glist_btags,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
                   ),
@@ -428,6 +434,7 @@ process.analyze.jets = (
                   tag_jetTracks  = cms.InputTag('ak5JetTracksAssociatorAtVertex'),
                   sel_minpt  = cms.double(15.0),
                   sel_maxeta = process.analyze.sel_maxjeta,
+		  list_btags = glist_btags,
                   # The corrections are irrelevant for PF2PAT
                   corrections = cms.string(''), 
                   ),

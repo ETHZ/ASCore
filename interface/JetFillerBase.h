@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: JetFillerBase.h,v 1.10.2.1 2012/01/27 15:07:21 fronga Exp $
+// $Id: JetFillerBase.h,v 1.10.2.2 2012/04/04 12:21:31 fronga Exp $
 //
 //
 
@@ -55,6 +55,8 @@ protected:
   void setJetType( const JetType& type ) { fJetType = type; }
   const JetType jetType(void) const { return fJetType; }
 
+  static const unsigned int gMaxNBtags      = 10;
+
   // To order indices by pt
   typedef std::pair<unsigned int,double> OrderPair;
   struct IndexByPt {
@@ -66,6 +68,9 @@ protected:
   JetType fJetType;	
 
   size_t gMaxnobjs;
+
+  //- Configuration parameters
+  std::vector<std::string> fBtagNames;
 
   // Stored variables
   std::auto_ptr<int>     fTNObjs;
@@ -81,12 +86,9 @@ protected:
   std::auto_ptr<std::vector<float> > fTL1FastJetScale;
   std::auto_ptr<std::vector<float> > fTArea;
   std::auto_ptr<std::vector<int> >   fTFlavour;
-  // b-taggers
-  std::auto_ptr<std::vector<float> > fTbTagProbTkCntHighEff ;
-  std::auto_ptr<std::vector<float> > fTbTagProbTkCntHighPur ;
-  std::auto_ptr<std::vector<float> > fTbTagProbSimpSVHighEff;
-  std::auto_ptr<std::vector<float> > fTbTagProbSimpSVHighPur;
   std::auto_ptr<std::vector<int> >   fTIDLoose;
+  // b-taggers
+  std::auto_ptr<std::vector<float> >  fTJbTagProb[gMaxNBtags];
   // jet algo dependant info
   std::auto_ptr<std::vector<int> >   fTNConstituents;
   std::auto_ptr<std::vector<int> >   fTNAssoTracks;

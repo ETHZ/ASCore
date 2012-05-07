@@ -29,7 +29,12 @@ JetFillerPat::JetFillerPat( const edm::ParameterSet& config, const bool& isRealD
   fMinpt           = config.getParameter<double>("sel_minpt");
   fMaxeta          = config.getParameter<double>("sel_maxeta");
   fJetTracksTag    = config.getParameter<edm::InputTag>("tag_jetTracks");
+  fBtagNames        = config.getParameter<std::vector<std::string> >("list_btags");
 
+  // Check on number of allowed tags
+  if ( fBtagNames.size()>gMaxNBtags )
+    throw cms::Exception("BadConfig") << "Too many (" << fBtagNames.size() << ") btagging algos requested. "
+                                      << "Maximum is " << gMaxNBtags;
 
   edm::LogVerbatim("NTP") << " ==> JetFillerPat Constructor - " << fPrefix;
   edm::LogVerbatim("NTP") << "  Input Tag:        " << fTag.label();
@@ -57,19 +62,6 @@ void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup
   // Get Transient Track Builder
   ESHandle<TransientTrackBuilder> theB;
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-
-  // collect information for b-tagging (4 tags)
-  Handle<JetTagCollection> jetsAndProbsTkCntHighEff;
-  iEvent.getByLabel("trackCountingHighEffBJetTags",jetsAndProbsTkCntHighEff);
-
-  Handle<JetTagCollection> jetsAndProbsTkCntHighPur;
-  iEvent.getByLabel("trackCountingHighPurBJetTags",jetsAndProbsTkCntHighPur);
-
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighEff;
-  iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags",jetsAndProbsSimpSVHighEff);
-
-  Handle<JetTagCollection> jetsAndProbsSimpSVHighPur;
-  iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags",jetsAndProbsSimpSVHighPur);
 
   // PFJetIDSelectionFunctor for LooseID.
   PFJetIDSelectionFunctor PFjetIDLoose( PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::LOOSE );
@@ -108,11 +100,13 @@ void JetFillerPat::fillProducts(edm::Event& iEvent,const edm::EventSetup& iSetup
       if(Jit->genJet())	fTFlavour ->push_back(Jit->partonFlavour());
       else fTFlavour ->push_back(0 );
 
-      // B-tagging probability (for 4 b-taggings)
-      fTbTagProbTkCntHighEff  ->push_back(Jit->bDiscriminator("trackCountingHighEffBJetTags"        ));
-      fTbTagProbTkCntHighPur  ->push_back(Jit->bDiscriminator("trackCountingHighPurBJetTags"        ));
-      fTbTagProbSimpSVHighEff ->push_back(Jit->bDiscriminator("simpleSecondaryVertexHighEffBJetTags"));
-      fTbTagProbSimpSVHighPur ->push_back(Jit->bDiscriminator("simpleSecondaryVertexHighPurBJetTags"));
+      // B-tagging probability (for 8 b-taggings)
+      size_t ibtag = 0;
+      for ( std::vector<std::string>::const_iterator it = fBtagNames.begin();
+         it != fBtagNames.end(); ++it ) {
+         fTJbTagProb[ibtag]->push_back(Jit->bDiscriminator(*it));
+         ++ibtag;
+      }
 
       if(Jit->isPFJet()) fTIDLoose ->push_back((int) PFjetIDLoose(*Jit));
       else fTIDLoose ->push_back((int) jetIDLoose(*Jit));
