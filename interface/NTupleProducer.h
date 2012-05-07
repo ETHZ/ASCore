@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.13 2012/05/04 08:58:51 buchmann Exp $
+// $Id: NTupleProducer.h,v 1.114.2.14 2012/05/04 15:22:07 mdunser Exp $
 //
 //
 
@@ -931,6 +931,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTJbTagProb[gMaxNBtags];
 
   std::auto_ptr<std::vector<float> >  fTJMass;
+  std::auto_ptr<std::vector<float> >  fTJBetaStar;
   std::auto_ptr<std::vector<float> >  fTJtrk1px;
   std::auto_ptr<std::vector<float> >  fTJtrk1py;
   std::auto_ptr<std::vector<float> >  fTJtrk1pz;

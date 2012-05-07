@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.18 2012/05/04 08:58:48 buchmann Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.19 2012/05/04 15:22:07 mdunser Exp $
 //
 //
 
@@ -2697,10 +2697,65 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       ++ibtag;
     }
 
+
+
+    // start computation of betaStar variable (pileUp ID)
+    float sumTrkPt = 0.;
+    float sumTrkPtBetaStar = 0.;
+
     // Jet-track association: get associated tracks
     const reco::TrackRefVector& tracks = jet->getTrackRefs();
     std::vector<const reco::Track*> AssociatedTracks;
-    for( TrackRefVector::iterator it = tracks.begin(); it != tracks.end(); ++it ) AssociatedTracks.push_back( it->get() );
+
+    for( TrackRefVector::iterator i_trk = tracks.begin(); i_trk != tracks.end(); ++i_trk )  { 
+
+      AssociatedTracks.push_back( i_trk->get() );
+
+      if ( vertices->size() == 0) continue;
+      sumTrkPt += (*i_trk)->pt();
+      
+      // check if track is associated to primary vertex
+      bool isFirstVtx=false;
+      // loop over the tracks associated with the vertex
+      if (!((*vertices)[0].isFake()) && (*vertices)[0].ndof() >= 4 && fabs((*vertices)[0].z()) <= 24.) {
+        for(reco::Vertex::trackRef_iterator i_vtxTrk = (*vertices)[0].tracks_begin(); i_vtxTrk != (*vertices)[0].tracks_end(); ++i_vtxTrk) {
+          // match the jet track to the track from the vertex 
+          reco::TrackRef trkRef(i_vtxTrk->castTo<reco::TrackRef>());
+          // check if the tracks match
+          if (trkRef == (*i_trk)) {
+            isFirstVtx=true; 
+            break;
+          }
+        }
+      }
+      
+      // if not associated to primary vertex, check other vertices:
+      bool isOtherVtx = false;
+      if (!isFirstVtx) {   
+        for(unsigned iotherVtx=1; iotherVtx<vertices->size();iotherVtx++) {
+          if (!((*vertices)[iotherVtx].isFake()) && (*vertices)[iotherVtx].ndof() >= 4 && fabs((*vertices)[iotherVtx].z()) <= 24.) {
+            for(reco::Vertex::trackRef_iterator i_vtxTrk = (*vertices)[iotherVtx].tracks_begin(); 
+                i_vtxTrk != (*vertices)[iotherVtx].tracks_end(); ++i_vtxTrk) {
+              reco::TrackRef trkRef(i_vtxTrk->castTo<reco::TrackRef>());
+              if (trkRef == (*i_trk) ) {
+                isOtherVtx=true;
+                break;
+              }
+            } // for tracks
+          } // if vtx is good
+        } // for other vertices
+      } // if !isFirstVt
+
+      if(!isFirstVtx && isOtherVtx) { sumTrkPtBetaStar += (*i_trk)->pt(); } 
+
+    } // for tracks
+    
+    
+    float betaStar = -999.;
+    if (sumTrkPt > 0.) 
+      betaStar = sumTrkPtBetaStar/sumTrkPt;
+    fTJBetaStar->push_back( betaStar ); 
+
 			
     // Below save the momenta of the three leading tracks associated to the jet
     float pT1(0.), pT2(0.), pT3(0.);
@@ -3839,6 +3894,7 @@ void NTupleProducer::declareProducts(void) {
     produces<std::vector<float> >(("J"+(*it).label()).c_str());
   }
   produces<std::vector<float> >("JMass");
+  produces<std::vector<float> >("JBetaStar");
   produces<std::vector<float> >("Jtrk1px");
   produces<std::vector<float> >("Jtrk1py");
   produces<std::vector<float> >("Jtrk1pz");
@@ -4486,6 +4542,7 @@ void NTupleProducer::resetProducts( void ) {
      fTJbTagProb[ibtag++].reset(new std::vector<float> );
   }
   fTJMass.reset(new std::vector<float> );
+  fTJBetaStar.reset(new std::vector<float> );
   fTJtrk1px.reset(new std::vector<float> );
   fTJtrk1py.reset(new std::vector<float> );
   fTJtrk1pz.reset(new std::vector<float> );
@@ -5173,6 +5230,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
      event.put(fTJbTagProb[ibtag++], ("J"+(*it).label()).c_str());
   }
   event.put(fTJMass, "JMass");
+  event.put(fTJBetaStar, "JBetaStar");
   event.put(fTJtrk1px, "Jtrk1px");
   event.put(fTJtrk1py, "Jtrk1py");
   event.put(fTJtrk1pz, "Jtrk1pz");
