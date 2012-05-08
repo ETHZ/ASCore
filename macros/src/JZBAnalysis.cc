@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.3 $";
+string sjzbversion="$Revision: 1.70.2.4 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.4  2012/05/08 15:37:59  pablom
+Fixed maximum eta of the muons.
+
 Revision 1.70.2.3  2012/05/08 15:27:48  pablom
 New good muon definition updated for 2012.
 
@@ -1296,7 +1299,7 @@ void JZBAnalysis::Analyze() {
   for(int muIndex=0;muIndex<fTR->NMus;muIndex++)
     {
       counters[MU].fill("All mus");
-      if(IsCustomMu(muIndex))
+      if(IsCustomMu2012(muIndex))
         {
           counters[MU].fill("... pass mu selection");
           float px= fTR->MuPx[muIndex];
@@ -1326,7 +1329,7 @@ void JZBAnalysis::Analyze() {
   for(int elIndex=0;elIndex<fTR->NEles;elIndex++)
     {
       counters[EL].fill("All eles");
-      if(IsCustomEl(elIndex))	
+      if(IsCustomEl2012(elIndex))	
         {
           counters[EL].fill("... pass e selection");
           float px= fTR->ElPx[elIndex];
@@ -2076,6 +2079,9 @@ const bool JZBAnalysis::IsCustomMu(const int index){
 
 const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
+  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+  counters[EL].fill(" ... |eta| < 2.5");
+
   // Medium Working Point
   if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
      if(!fTR->ElDeltaEtaSuperClusterAtVtx[index]<0.004) return false;
@@ -2097,8 +2103,8 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   counters[EL].fill(" ... D0(PV)<0.02 and DZ(PV)<0.1");
 
 //  if(!fTR->ElPassConversionVeto[index]) return false;
-  if(!fTR->ElNumberOfMissingInnerHits[index]<1) return false;
-  counters[EL].fill(" ... N(missing inner hits) == 0");
+  if(!fTR->ElNumberOfMissingInnerHits[index]<=1) return false;
+  counters[EL].fill(" ... N(missing inner hits) <= 1");
 
   float e=fTR->ElCaloEnergy[index];
   float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];
