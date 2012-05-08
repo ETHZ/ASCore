@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.85 $";
+string sjzbversion="$Revision: 1.70.2.1 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.1  2012/05/08 12:50:28  buchmann
+Updated files for JZBAnalysis (in EDM)
+
 Revision 1.85  2012/05/02 14:56:57  buchmann
 updated jzb analysis to use geninfomo instead of geninfomoindex (new generatorinfo format)
 
@@ -2012,6 +2015,52 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   return true;
 }
 
+
+const bool JZBAnalysis::IsCustomEl2012(const int index) {
+  
+  // Medium Working Point
+  if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
+     if(!fTR->ElDeltaEtaSuperClusterAtVtx[index]<0.004) return false;
+     if(!fTR->ElDeltaPhiSuperClusterAtVtx[index]<0.06) return false;
+     if(!fTR->ElSigmaIetaIeta[index]<0.01) return false;
+     if(!fTR->ElHcalOverEcal[index]<0.12) return false;
+  } else { // Endcap
+     if(!(fTR->ElPt[index]>20) )return false; // endcap only starting at 20 GeV
+     if(!fTR->ElDeltaEtaSuperClusterAtVtx[index]<0.007) return false;
+     if(!fTR->ElDeltaPhiSuperClusterAtVtx[index]<0.06) return false;
+     if(!fTR->ElSigmaIetaIeta[index]<0.03) return false;
+     if(!fTR->ElHcalOverEcal[index]<0.10) return false;
+  }
+  
+  counters[EL].fill(" ... passes additional electron ID cuts");
+
+  if(!fTR->ElD0PV[index]<0.02) return false;
+  if(!fTR->ElDzPV[index]<0.1) return false;
+  counters[EL].fill(" ... D0(PV)<0.02 and DZ(PV)<0.1");
+
+//  if(!fTR->ElPassConversionVeto[index]) return false;
+  if(!fTR->ElNumberOfMissingInnerHits[index]<1) return false;
+  counters[EL].fill(" ... N(missing inner hits) == 0");
+
+  float e=fTR->ElCaloEnergy[index];
+  float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];
+  if(!fabs(1/e-1/p)<0.05) return false;
+  counters[EL].fill(" ... |1/e-1/p|<0.05");
+  
+  // ECAL gap veto
+  if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;  //fbrem : fTElNBrems (reco::GsfElectron::fbrem())
+  counters[EL].fill(" ... not in ECAL gap");
+  
+  // Compute isolation separately (corresponds to WP95 iso)
+  double pedestal = 0.;
+  if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
+  double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
+  double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
+  if ( !(hybridIso < 0.15) ) return false;
+  counters[EL].fill(" ... hybridIso < 0.15");
+
+  return true;
+}
 
 const bool JZBAnalysis::IsCustomEl(const int index){
 
