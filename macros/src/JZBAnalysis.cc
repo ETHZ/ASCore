@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.4 $";
+string sjzbversion="$Revision: 1.70.2.5 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.5  2012/05/08 15:40:48  buchmann
+Using both electron & muon definition for 2012; added a cut on |eta|<2.5 for electrons; changed n(missing inner hits) to <= 1
+
 Revision 1.70.2.4  2012/05/08 15:37:59  pablom
 Fixed maximum eta of the muons.
 
@@ -1416,7 +1419,7 @@ void JZBAnalysis::Analyze() {
     nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
     nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
     nEvent.chid1 = (sortedGoodLeptons[PosLepton1].type+1)*sortedGoodLeptons[PosLepton1].charge;
-    nEvent.isConv1 = IsConvertedPhoton(sortedGoodLeptons[PosLepton1].index);
+//    nEvent.isConv1 = IsConvertedPhoton(sortedGoodLeptons[PosLepton1].index);
       
     nEvent.eta2 = sortedGoodLeptons[PosLepton2].p.Eta();
     nEvent.pt2 = sortedGoodLeptons[PosLepton2].p.Pt();
@@ -1425,7 +1428,7 @@ void JZBAnalysis::Analyze() {
     nEvent.ch2 = sortedGoodLeptons[PosLepton2].charge;
     nEvent.id2 = sortedGoodLeptons[PosLepton2].type; //??????
     nEvent.chid2 = (sortedGoodLeptons[PosLepton2].type+1)*sortedGoodLeptons[PosLepton2].charge;
-    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
+//    nEvent.isConv2 = IsConvertedPhoton(sortedGoodLeptons[PosLepton2].index);
     
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
     nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
@@ -2084,31 +2087,32 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
   // Medium Working Point
   if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
-     if(!fTR->ElDeltaEtaSuperClusterAtVtx[index]<0.004) return false;
-     if(!fTR->ElDeltaPhiSuperClusterAtVtx[index]<0.06) return false;
-     if(!fTR->ElSigmaIetaIeta[index]<0.01) return false;
+     if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.004)) return false;
+     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
+     if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
      if(!fTR->ElHcalOverEcal[index]<0.12) return false;
   } else { // Endcap
      if(!(fTR->ElPt[index]>20) )return false; // endcap only starting at 20 GeV
-     if(!fTR->ElDeltaEtaSuperClusterAtVtx[index]<0.007) return false;
-     if(!fTR->ElDeltaPhiSuperClusterAtVtx[index]<0.06) return false;
-     if(!fTR->ElSigmaIetaIeta[index]<0.03) return false;
-     if(!fTR->ElHcalOverEcal[index]<0.10) return false;
+     if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
+     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
+     if(!(fTR->ElSigmaIetaIeta[index]<0.03)) return false;
+     if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
   }
   
-  counters[EL].fill(" ... passes additional electron ID cuts");
+  counters[EL].fill(" ... pass additional electron ID cuts");
 
-  if(!fTR->ElD0PV[index]<0.02) return false;
-  if(!fTR->ElDzPV[index]<0.1) return false;
-  counters[EL].fill(" ... D0(PV)<0.02 and DZ(PV)<0.1");
+  if(!(fTR->ElD0PV[index]<0.02)) return false;
+  counters[EL].fill(" ... D0(PV)<0.02");
+  if(!(fTR->ElDzPV[index]<0.1)) return false;
+  counters[EL].fill(" ... DZ(PV)<0.1");
 
-//  if(!fTR->ElPassConversionVeto[index]) return false;
-  if(!fTR->ElNumberOfMissingInnerHits[index]<=1) return false;
+//  if(!(fTR->ElPassConversionVeto[index])) return false;
+  if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
   counters[EL].fill(" ... N(missing inner hits) <= 1");
 
   float e=fTR->ElCaloEnergy[index];
   float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];
-  if(!fabs(1/e-1/p)<0.05) return false;
+  if(!(fabs(1/e-1/p)<0.05)) return false;
   counters[EL].fill(" ... |1/e-1/p|<0.05");
   
   // ECAL gap veto
