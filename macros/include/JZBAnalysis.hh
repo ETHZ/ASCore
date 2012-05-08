@@ -37,7 +37,9 @@ public:
   JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false);
   virtual ~JZBAnalysis();
   const bool IsCustomMu(const int);
+  const bool IsCustomMu2012(const int);
   const bool IsCustomEl(const int);
+  const bool IsCustomEl2012(const int);
   const bool IsCustomPfMu(const int, const int);
   const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int);

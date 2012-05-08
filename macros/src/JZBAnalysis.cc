@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.1 $";
+string sjzbversion="$Revision: 1.70.2.2 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.2  2012/05/08 14:54:11  buchmann
+First attempt at an electron definition for 2012 (not active yet). Needs review and testing
+
 Revision 1.70.2.1  2012/05/08 12:50:28  buchmann
 Updated files for JZBAnalysis (in EDM)
 
@@ -1970,6 +1973,58 @@ const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
 
 	
 }
+
+
+const bool JZBAnalysis::IsCustomMu2012(const int index){
+
+  // Basic muon cleaning and ID
+
+  // Acceptance cuts
+  if (!(fTR->MuPt[index] > 10) )       return false;
+  counters[MU].fill(" ... pt > 10");
+  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
+  counters[MU].fill(" ... |eta| < 2.4");
+
+  // Quality cuts
+  if ( !fTR->MuIsGlobalMuon[index] )  return false;
+  counters[MU].fill(" ... is global muon");
+  if ( !fTR->MuIsTrackerMuon[index] ) return false;
+  counters[MU].fill(" ... is tracker muon");
+  if ( !fTR->MuIsPFMuon[index] )        return false;
+  counters[MU].fill(" ... is pf muon");
+
+  // Hits
+  if ( !(fTR->MuNChi2[index] < 10) )     return false;
+  counters[MU].fill(" ... nChi2 < 10");
+  if ( !(fTR->MuNMuHits[index] > 0) )     return false;
+  counters[MU].fill(" ... nValidHits > 0");
+  if ( !(fTR->MuNPxHits[index] > 0) )       return false;
+  counters[MU].fill(" ... nPxHits > 0");
+  if ( !(fTR->MuNMatches[index] > 1) )      return false;
+  counters[MU].fill(" ... nMatches > 1");
+  if ( !(fTR->MuNSiLayers[index] > 5) )      return false;
+  counters[MU].fill(" ... nLayers > 5");
+
+
+  // Vertex compatibility
+  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
+  counters[MU].fill(" ... D0(pv) < 0.02");
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.5 ) ) return false;
+  counters[MU].fill(" ... DZ(pv) < 0.5");
+
+  // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
+
+  double Iso = (fTR->MuPfIsoR03ChHad[index] + std::max(0.0,
+                fTR->MuPfIsoR03NeHadHighThresh[index]+fTR->MuPfIsoR03PhotonHighThresh[index]-0.5*fTR->MuPfIsoR03SumPUPt[index])
+                )/fTR->MuPt[index];
+  if ( !(Iso < 0.2) ) return false;
+  counters[MU].fill(" ... Iso < 0.2");
+
+
+  return true;
+}
+
+
 
 
 const bool JZBAnalysis::IsCustomMu(const int index){
