@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.14 2012/05/04 15:22:07 mdunser Exp $
+// $Id: NTupleProducer.h,v 1.114.2.15 2012/05/07 07:19:12 pandolf Exp $
 //
 //
 
@@ -183,9 +183,10 @@ private:
 
 
   edm::InputTag fMuonTag;
-  std::vector<edm::InputTag> fMuonPfIsoTags;
+  std::vector<edm::InputTag> fMuonPfIsoTagsCustom;
   edm::InputTag fElectronTag;
-  std::vector<edm::InputTag> fElePfIsoTags;
+  std::vector<edm::InputTag> fElePfIsoTagsCustom;
+  std::vector<edm::InputTag> fElePfIsoTagsEvent;
   std::string fEleIdWP;
   edm::InputTag fMuIsoDepTkTag;
   edm::InputTag fMuIsoDepECTag;
@@ -551,16 +552,18 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuIso05SumPt;
   std::auto_ptr<std::vector<float> >  fTMuIso05EmEt;
   std::auto_ptr<std::vector<float> >  fTMuIso05HadEt;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03ChHad;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03NeHadHighThresh  ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03PhotonHighThresh ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03SumPUPt;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04ChHad;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04NeHadHighThresh  ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04PhotonHighThresh ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04SumPUPt;
   std::auto_ptr<std::vector<float> >  fTMuEem;
   std::auto_ptr<std::vector<float> >  fTMuEhad;
   // PF isolation variables
-  std::auto_ptr<std::vector<float> >  fTMuPfIsos[gMaxNPfIsoTags];
+  std::auto_ptr<std::vector<float> >  fTMuPfIsosCustom[gMaxNPfIsoTags];
   // Impact parameters
   std::auto_ptr<std::vector<float> >  fTMuD0BS;
   std::auto_ptr<std::vector<float> >  fTMuD0PV;
@@ -654,6 +657,9 @@ private:
   // Isolation variables
   std::auto_ptr<std::vector<float> >  fTElRelIso03;
   std::auto_ptr<std::vector<float> >  fTElRelIso04;
+  std::auto_ptr<std::vector<float> >  fTElPfIsoChHad03;
+  std::auto_ptr<std::vector<float> >  fTElPfIsoNeHad03;
+  std::auto_ptr<std::vector<float> >  fTElPfIsoPhoton03;
   std::auto_ptr<std::vector<float> >  fTElDR03TkSumPt;
   std::auto_ptr<std::vector<float> >  fTElDR04TkSumPt;
   std::auto_ptr<std::vector<float> >  fTElDR03EcalRecHitSumEt;
@@ -662,7 +668,8 @@ private:
   std::auto_ptr<std::vector<float> >  fTElDR04HcalTowerSumEt;
   std::auto_ptr<std::vector<float> >  fTElNChi2;
   // PF Isolation Variables
-  std::auto_ptr<std::vector<float> >  fTElPfIsos[gMaxNPfIsoTags];
+  std::auto_ptr<std::vector<float> >   fTElPfIsosCustom[gMaxNPfIsoTags];
+  std::auto_ptr<std::vector<float> >  fTElPfIsosEvent[gMaxNPfIsoTags];
   // Electron ID variables
   std::auto_ptr<std::vector<int> >  fTElCharge;
   std::auto_ptr<std::vector<int> >  fTElCInfoIsGsfCtfCons;

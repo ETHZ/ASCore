@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.19 2012/05/04 15:22:07 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.20 2012/05/07 07:19:12 pandolf Exp $
 //
 //
 
@@ -143,33 +143,34 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   if(fIsRealData&&fIsModelScan) fIsModelScan=false; // avoiding possible mistakes
 
   // InputTags
-  fMuonTag            = iConfig.getParameter<edm::InputTag>("tag_muons");
-  fMuonPfIsoTags      = iConfig.getParameter<std::vector<edm::InputTag> >("tag_muonpfisos");
-  fElectronTag        = iConfig.getParameter<edm::InputTag>("tag_electrons");
-  fElePfIsoTags      = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisos");
-  fEleIdWP            = iConfig.getParameter<std::string>("tag_elidWP");
-  fMuIsoDepTkTag      = iConfig.getParameter<edm::InputTag>("tag_muisodeptk");
-  fMuIsoDepECTag      = iConfig.getParameter<edm::InputTag>("tag_muisodepec");
-  fMuIsoDepHCTag      = iConfig.getParameter<edm::InputTag>("tag_muisodephc");
-  fJetTag             = iConfig.getParameter<edm::InputTag>("tag_jets");
-  fJetCorrs           = iConfig.getParameter<std::string>("jetCorrs");
-  fBtagTags           = iConfig.getParameter<std::vector<edm::InputTag> >("tag_btags");
-  fRawCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
-  fTCMETTag           = iConfig.getParameter<edm::InputTag>("tag_tcmet");
-  fPFMETTag           = iConfig.getParameter<edm::InputTag>("tag_pfmet");
-  fPFMETPATTag        = iConfig.getParameter<edm::InputTag>("tag_pfmetPAT");
-  fCorrCaloMETTag     = iConfig.getParameter<edm::InputTag>("tag_corrcalomet");
-  fGenMETTag          = iConfig.getParameter<edm::InputTag>("tag_genmet");
-  fVertexTag          = iConfig.getParameter<edm::InputTag>("tag_vertex");
-  fTrackTag           = iConfig.getParameter<edm::InputTag>("tag_tracks");
-  fPhotonTag          = iConfig.getParameter<edm::InputTag>("tag_photons");
-  fCalTowTag          = iConfig.getParameter<edm::InputTag>("tag_caltow");
-  fEBRecHitsTag       = iConfig.getParameter<edm::InputTag>("tag_EBrechits");
-  fEERecHitsTag       = iConfig.getParameter<edm::InputTag>("tag_EErechits");
-  fGenPartTag         = iConfig.getParameter<edm::InputTag>("tag_genpart");
-  fGenJetTag          = iConfig.getParameter<edm::InputTag>("tag_genjets");
-  fL1TriggerTag       = iConfig.getParameter<edm::InputTag>("tag_l1trig");
-  fHLTTrigEventTag    = iConfig.getParameter<edm::InputTag>("tag_hlttrigevent");
+  fMuonTag             = iConfig.getParameter<edm::InputTag>("tag_muons");
+  fMuonPfIsoTagsCustom = iConfig.getParameter<std::vector<edm::InputTag> >("tag_muonpfisosCustom");
+  fElectronTag         = iConfig.getParameter<edm::InputTag>("tag_electrons");
+  fElePfIsoTagsCustom  = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisosCustom");
+  fElePfIsoTagsEvent   = iConfig.getParameter<std::vector<edm::InputTag> >("tag_elepfisosEvent");
+  fEleIdWP             = iConfig.getParameter<std::string>("tag_elidWP");
+  fMuIsoDepTkTag       = iConfig.getParameter<edm::InputTag>("tag_muisodeptk");
+  fMuIsoDepECTag       = iConfig.getParameter<edm::InputTag>("tag_muisodepec");
+  fMuIsoDepHCTag       = iConfig.getParameter<edm::InputTag>("tag_muisodephc");
+  fJetTag              = iConfig.getParameter<edm::InputTag>("tag_jets");
+  fJetCorrs            = iConfig.getParameter<std::string>("jetCorrs");
+  fBtagTags            = iConfig.getParameter<std::vector<edm::InputTag> >("tag_btags");
+  fRawCaloMETTag       = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
+  fTCMETTag            = iConfig.getParameter<edm::InputTag>("tag_tcmet");
+  fPFMETTag            = iConfig.getParameter<edm::InputTag>("tag_pfmet");
+  fPFMETPATTag         = iConfig.getParameter<edm::InputTag>("tag_pfmetPAT");
+  fCorrCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_corrcalomet");
+  fGenMETTag           = iConfig.getParameter<edm::InputTag>("tag_genmet");
+  fVertexTag           = iConfig.getParameter<edm::InputTag>("tag_vertex");
+  fTrackTag            = iConfig.getParameter<edm::InputTag>("tag_tracks");
+  fPhotonTag           = iConfig.getParameter<edm::InputTag>("tag_photons");
+  fCalTowTag           = iConfig.getParameter<edm::InputTag>("tag_caltow");
+  fEBRecHitsTag        = iConfig.getParameter<edm::InputTag>("tag_EBrechits");
+  fEERecHitsTag        = iConfig.getParameter<edm::InputTag>("tag_EErechits");
+  fGenPartTag          = iConfig.getParameter<edm::InputTag>("tag_genpart");
+  fGenJetTag           = iConfig.getParameter<edm::InputTag>("tag_genjets");
+  fL1TriggerTag        = iConfig.getParameter<edm::InputTag>("tag_l1trig");
+  fHLTTrigEventTag     = iConfig.getParameter<edm::InputTag>("tag_hlttrigevent");
   if(!fIsModelScan) fHBHENoiseResultTag    = iConfig.getParameter<edm::InputTag>("tag_hcalnoise");
   if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getParameter<edm::InputTag>("tag_hcalnoiseIso");
   fSrcRho              = iConfig.getParameter<edm::InputTag>("tag_srcRho");
@@ -228,11 +229,14 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   if ( fBtagTags.size()>gMaxNBtags )
     throw cms::Exception("BadConfig") << "Too many (" << fBtagTags.size() << ") btagging algos requested. "
                                       << "Maximum is " << gMaxNBtags;
-  if ( fMuonPfIsoTags.size()>gMaxNPfIsoTags )
-    throw cms::Exception("BadConfig") << "Too many (" << fMuonPfIsoTags.size() << ") muon PF iso tags requested. "
+  if ( fMuonPfIsoTagsCustom.size()>gMaxNPfIsoTags )
+    throw cms::Exception("BadConfig") << "Too many (" << fMuonPfIsoTagsCustom.size() << ") muon PF iso tags requested. "
                                       << "Maximum is " << gMaxNPfIsoTags;
-  if ( fElePfIsoTags.size()>gMaxNPfIsoTags )
-    throw cms::Exception("BadConfig") << "Too many (" << fElePfIsoTags.size() << ") electron PF iso tags requested. "
+  if ( fElePfIsoTagsCustom.size()>gMaxNPfIsoTags )
+    throw cms::Exception("BadConfig") << "Too many (" << fElePfIsoTagsCustom.size() << ") electron PF iso tags requested. "
+                                      << "Maximum is " << gMaxNPfIsoTags;
+  if ( fElePfIsoTagsEvent.size()>gMaxNPfIsoTags )
+    throw cms::Exception("BadConfig") << "Too many (" << fElePfIsoTagsEvent.size() << ") electron PF iso tags requested. "
                                       << "Maximum is " << gMaxNPfIsoTags;
 
   // Dump the full configuration FIXME: not needed with EDM and provenance...
@@ -401,16 +405,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(pfProducerTag, pfCandidates);
 
   // PF candidate isolation
-  Handle< edm::ValueMap<float> > muonPfIsoTags[gMaxNPfIsoTags];
+  Handle< edm::ValueMap<float> > muonPfIsoTagsCustom[gMaxNPfIsoTags];
   size_t ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTags.begin(); 
-        it!=fMuonPfIsoTags.end(); ++it ) 
-    iEvent.getByLabel((*it),muonPfIsoTags[ipfisotag++]);
-  Handle< edm::ValueMap<float> > elePfIsoTags[gMaxNPfIsoTags];
+  for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTagsCustom.begin(); 
+        it!=fMuonPfIsoTagsCustom.end(); ++it ) 
+    iEvent.getByLabel((*it),muonPfIsoTagsCustom[ipfisotag++]);
+  Handle< edm::ValueMap<float> > elePfIsoTagsCustom[gMaxNPfIsoTags];
   ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTags.begin(); 
-        it!=fElePfIsoTags.end(); ++it ) 
-    iEvent.getByLabel((*it),elePfIsoTags[ipfisotag++]);
+  for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTagsCustom.begin(); 
+        it!=fElePfIsoTagsCustom.end(); ++it ) 
+    iEvent.getByLabel((*it),elePfIsoTagsCustom[ipfisotag++]);
+  Handle< edm::ValueMap<double> > elePfIsoTagsEvent[gMaxNPfIsoTags];
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTagsEvent.begin(); 
+        it!=fElePfIsoTagsEvent.end(); ++it ) 
+    iEvent.getByLabel((*it),elePfIsoTagsEvent[ipfisotag++]);
 	
   //Electron collection
   edm::Handle<reco::GsfElectronCollection> electronHandle;
@@ -1198,19 +1207,21 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIso05EmEt->push_back( muon.isolationR05().emEt );
     fTMuIso05HadEt->push_back( muon.isolationR05().hadEt );
 
-	fTMuPfIsoR03NeHadHighThresh  ->push_back( muon.pfIsolationR03().sumNeutralHadronEtHighThreshold );
-	fTMuPfIsoR03PhotonHighThresh ->push_back( muon.pfIsolationR03().sumPhotonEtHighThreshold );
-	fTMuPfIsoR03SumPUPt->push_back( muon.pfIsolationR03().sumPUPt );
+    fTMuPfIsoR03ChHad  ->push_back( muon.pfIsolationR03().sumChargedHadronPt );
+    fTMuPfIsoR03NeHadHighThresh  ->push_back( muon.pfIsolationR03().sumNeutralHadronEtHighThreshold );
+    fTMuPfIsoR03PhotonHighThresh ->push_back( muon.pfIsolationR03().sumPhotonEtHighThreshold );
+    fTMuPfIsoR03SumPUPt->push_back( muon.pfIsolationR03().sumPUPt );
 
-	fTMuPfIsoR04NeHadHighThresh  ->push_back( muon.pfIsolationR04().sumNeutralHadronEtHighThreshold );
-	fTMuPfIsoR04PhotonHighThresh ->push_back( muon.pfIsolationR04().sumPhotonEtHighThreshold );
-	fTMuPfIsoR04SumPUPt->push_back( muon.pfIsolationR04().sumPUPt );
+    fTMuPfIsoR04ChHad  ->push_back( muon.pfIsolationR04().sumChargedHadronPt );
+    fTMuPfIsoR04NeHadHighThresh  ->push_back( muon.pfIsolationR04().sumNeutralHadronEtHighThreshold );
+    fTMuPfIsoR04PhotonHighThresh ->push_back( muon.pfIsolationR04().sumPhotonEtHighThreshold );
+    fTMuPfIsoR04SumPUPt->push_back( muon.pfIsolationR04().sumPUPt );
 
     // PF isolations:
     ipfisotag = 0;
-    for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTags.begin(); 
-          it!=fMuonPfIsoTags.end(); ++it ) {
-      fTMuPfIsos[ipfisotag]->push_back( (*muonPfIsoTags[ipfisotag])[muonRef] );
+    for ( std::vector<edm::InputTag>::const_iterator it=fMuonPfIsoTagsCustom.begin(); 
+          it!=fMuonPfIsoTagsCustom.end(); ++it ) {
+      fTMuPfIsosCustom[ipfisotag]->push_back( (*muonPfIsoTagsCustom[ipfisotag])[muonRef] );
       ++ipfisotag;
     }
 
@@ -1518,11 +1529,22 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTElDR04HcalTowerSumEt     ->push_back(electron.dr04HcalTowerSumEt());
       fTElRelIso03               ->push_back(((*fTElDR03TkSumPt)[eqi] + (*fTElDR03EcalRecHitSumEt)[eqi] + (*fTElDR03HcalTowerSumEt)[eqi]) / (*fTElPt)[eqi]);
       fTElRelIso04               ->push_back(((*fTElDR04TkSumPt)[eqi] + (*fTElDR04EcalRecHitSumEt)[eqi] + (*fTElDR04HcalTowerSumEt)[eqi]) / (*fTElPt)[eqi]);
+
       // PF isolations:
+      fTElPfIsoChHad03           ->push_back(electron.pfIsolationVariables().chargedHadronIso );
+      fTElPfIsoNeHad03           ->push_back(electron.pfIsolationVariables().neutralHadronIso );
+      fTElPfIsoPhoton03          ->push_back(electron.pfIsolationVariables().photonIso );
+
       ipfisotag = 0;
-      for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTags.begin(); 
-            it!=fElePfIsoTags.end(); ++it ) {
-        fTElPfIsos[ipfisotag]->push_back( (*elePfIsoTags[ipfisotag])[electronRef] );
+      for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTagsCustom.begin(); 
+            it!=fElePfIsoTagsCustom.end(); ++it ) {
+        fTElPfIsosCustom[ipfisotag]->push_back( (*elePfIsoTagsCustom[ipfisotag])[electronRef] );
+        ++ipfisotag;
+      }
+      ipfisotag = 0;
+      for ( std::vector<edm::InputTag>::const_iterator it=fElePfIsoTagsEvent.begin(); 
+            it!=fElePfIsoTagsEvent.end(); ++it ) {
+        fTElPfIsosEvent[ipfisotag]->push_back( (*elePfIsoTagsEvent[ipfisotag])[electronRef] );
         ++ipfisotag;
       }
 
@@ -3532,14 +3554,16 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuIso05SumPt");
   produces<std::vector<float> >("MuIso05EmEt");
   produces<std::vector<float> >("MuIso05HadEt");
+  produces<std::vector<float> >("MuPfIsoR03ChHad");
   produces<std::vector<float> >("MuPfIsoR03NeHadHighThresh");
   produces<std::vector<float> >("MuPfIsoR03PhotonHighThresh");
   produces<std::vector<float> >("MuPfIsoR03SumPUPt");
+  produces<std::vector<float> >("MuPfIsoR04ChHad");
   produces<std::vector<float> >("MuPfIsoR04NeHadHighThresh");
   produces<std::vector<float> >("MuPfIsoR04PhotonHighThresh");
   produces<std::vector<float> >("MuPfIsoR04SumPUPt");
-  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
-        it != fMuonPfIsoTags.end(); ++it ) {
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTagsCustom.begin();
+        it != fMuonPfIsoTagsCustom.end(); ++it ) {
     produces<std::vector<float> >(("Mu"+(*it).label()).c_str());
   }
   produces<std::vector<float> >("MuEem");
@@ -3638,15 +3662,22 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("ElDzE");
   produces<std::vector<float> >("ElRelIso03");
   produces<std::vector<float> >("ElRelIso04");
+  produces<std::vector<float> >("ElPfIsoChHad03");
+  produces<std::vector<float> >("ElPfIsoNeHad03");
+  produces<std::vector<float> >("ElPfIsoPhoton03");
   produces<std::vector<float> >("ElDR03TkSumPt");
   produces<std::vector<float> >("ElDR04TkSumPt");
   produces<std::vector<float> >("ElDR03EcalRecHitSumEt");
   produces<std::vector<float> >("ElDR04EcalRecHitSumEt");
   produces<std::vector<float> >("ElDR03HcalTowerSumEt");
   produces<std::vector<float> >("ElDR04HcalTowerSumEt");
-  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
-        it != fElePfIsoTags.end(); ++it ) {
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsCustom.begin();
+        it != fElePfIsoTagsCustom.end(); ++it ) {
     produces<std::vector<float> >(("El"+(*it).label()).c_str());
+  }
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsEvent.begin();
+        it != fElePfIsoTagsEvent.end(); ++it ) {
+    produces<std::vector<float> >(("ElEvent"+(*it).label()).c_str());
   }
   produces<std::vector<float> >("ElNChi2");
   produces<std::vector<int> >("ElCharge");
@@ -4163,16 +4194,18 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIso05SumPt.reset(new std::vector<float> );
   fTMuIso05EmEt.reset(new std::vector<float> );
   fTMuIso05HadEt.reset(new std::vector<float> );
+  fTMuPfIsoR03ChHad  .reset(new std::vector<float> );
   fTMuPfIsoR03NeHadHighThresh  .reset(new std::vector<float> );
   fTMuPfIsoR03PhotonHighThresh .reset(new std::vector<float> );
   fTMuPfIsoR03SumPUPt.reset(new std::vector<float> );
+  fTMuPfIsoR04ChHad  .reset(new std::vector<float> );
   fTMuPfIsoR04NeHadHighThresh  .reset(new std::vector<float> );
   fTMuPfIsoR04PhotonHighThresh .reset(new std::vector<float> );
   fTMuPfIsoR04SumPUPt.reset(new std::vector<float> );
   size_t ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
-        it != fMuonPfIsoTags.end(); ++it ) {
-    fTMuPfIsos[ipfisotag++].reset(new std::vector<float> );
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTagsCustom.begin();
+        it != fMuonPfIsoTagsCustom.end(); ++it ) {
+    fTMuPfIsosCustom[ipfisotag++].reset(new std::vector<float> );
   }
   fTMuEem.reset(new std::vector<float> );
   fTMuEhad.reset(new std::vector<float> );
@@ -4274,6 +4307,9 @@ void NTupleProducer::resetProducts( void ) {
   fTElDzE.reset(new std::vector<float> );
   fTElRelIso03.reset(new std::vector<float> );
   fTElRelIso04.reset(new std::vector<float> );
+  fTElPfIsoChHad03.reset(new std::vector<float> );
+  fTElPfIsoNeHad03.reset(new std::vector<float> );
+  fTElPfIsoPhoton03.reset(new std::vector<float> );
   fTElDR03TkSumPt.reset(new std::vector<float> );
   fTElDR04TkSumPt.reset(new std::vector<float> );
   fTElDR03EcalRecHitSumEt.reset(new std::vector<float> );
@@ -4281,9 +4317,14 @@ void NTupleProducer::resetProducts( void ) {
   fTElDR03HcalTowerSumEt.reset(new std::vector<float> );
   fTElDR04HcalTowerSumEt.reset(new std::vector<float> );
   ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
-        it != fElePfIsoTags.end(); ++it ) {
-    fTElPfIsos[ipfisotag++].reset(new std::vector<float> );
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsCustom.begin();
+        it != fElePfIsoTagsCustom.end(); ++it ) {
+    fTElPfIsosCustom[ipfisotag++].reset(new std::vector<float> );
+  }
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsEvent.begin();
+        it != fElePfIsoTagsEvent.end(); ++it ) {
+    fTElPfIsosEvent[ipfisotag++].reset(new std::vector<float> );
   }
   fTElNChi2.reset(new std::vector<float> );
   fTElCharge.reset(new std::vector<int> );
@@ -4865,16 +4906,18 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIso05SumPt, "MuIso05SumPt");
   event.put(fTMuIso05EmEt, "MuIso05EmEt");
   event.put(fTMuIso05HadEt, "MuIso05HadEt");
+  event.put(fTMuPfIsoR03ChHad  , "MuPfIsoR03ChHad");
   event.put(fTMuPfIsoR03NeHadHighThresh  , "MuPfIsoR03NeHadHighThresh");
   event.put(fTMuPfIsoR03PhotonHighThresh , "MuPfIsoR03PhotonHighThresh");
   event.put(fTMuPfIsoR03SumPUPt, "MuPfIsoR03SumPUPt");
+  event.put(fTMuPfIsoR04ChHad  , "MuPfIsoR04ChHad");
   event.put(fTMuPfIsoR04NeHadHighThresh  , "MuPfIsoR04NeHadHighThresh");
   event.put(fTMuPfIsoR04PhotonHighThresh , "MuPfIsoR04PhotonHighThresh");
   event.put(fTMuPfIsoR04SumPUPt, "MuPfIsoR04SumPUPt");
   size_t ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTags.begin();
-        it != fMuonPfIsoTags.end(); ++it ) {
-     event.put(fTMuPfIsos[ipfisotag++], ("Mu"+(*it).label()).c_str());
+  for ( std::vector<edm::InputTag>::const_iterator it = fMuonPfIsoTagsCustom.begin();
+        it != fMuonPfIsoTagsCustom.end(); ++it ) {
+     event.put(fTMuPfIsosCustom[ipfisotag++], ("Mu"+(*it).label()).c_str());
   }
   event.put(fTMuEem, "MuEem");
   event.put(fTMuEhad, "MuEhad");
@@ -4972,6 +5015,9 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElDzE, "ElDzE");
   event.put(fTElRelIso03, "ElRelIso03");
   event.put(fTElRelIso04, "ElRelIso04");
+  event.put(fTElPfIsoChHad03, "ElPfIsoChHad03");
+  event.put(fTElPfIsoNeHad03, "ElPfIsoNeHad03");
+  event.put(fTElPfIsoPhoton03, "ElPfIsoPhoton03");
   event.put(fTElDR03TkSumPt, "ElDR03TkSumPt");
   event.put(fTElDR04TkSumPt, "ElDR04TkSumPt");
   event.put(fTElDR03EcalRecHitSumEt, "ElDR03EcalRecHitSumEt");
@@ -4979,9 +5025,14 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTElDR03HcalTowerSumEt, "ElDR03HcalTowerSumEt");
   event.put(fTElDR04HcalTowerSumEt, "ElDR04HcalTowerSumEt");
   ipfisotag = 0;
-  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTags.begin();
-        it != fElePfIsoTags.end(); ++it ) {
-     event.put(fTElPfIsos[ipfisotag++], ("El"+(*it).label()).c_str());
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsCustom.begin();
+        it != fElePfIsoTagsCustom.end(); ++it ) {
+     event.put(fTElPfIsosCustom[ipfisotag++], ("El"+(*it).label()).c_str());
+  }
+  ipfisotag = 0;
+  for ( std::vector<edm::InputTag>::const_iterator it = fElePfIsoTagsEvent.begin();
+        it != fElePfIsoTagsEvent.end(); ++it ) {
+     event.put(fTElPfIsosEvent[ipfisotag++], ("ElEvent"+(*it).label()).c_str());
   }
   event.put(fTElNChi2, "ElNChi2");
   event.put(fTElCharge, "ElCharge");

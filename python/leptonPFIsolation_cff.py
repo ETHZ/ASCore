@@ -1,8 +1,9 @@
 from CommonTools.ParticleFlow.pfNoPileUp_cff import *
+from CommonTools.ParticleFlow.pfNoPileUpIso_cff import *
 pfPileUp.PFCandidates = "particleFlow"
 pfNoPileUp.bottomCollection = "particleFlow"
 
-pfPUSequence = cms.Sequence( pfPileUp * pfNoPileUp )
+pfPUSequence = cms.Sequence( pfPileUp * pfNoPileUp * pfNoPileUpIsoSequence  )
 
 
 #--- keep this order of loading, otherwise the neutral threshold setting won't work properly
@@ -10,8 +11,11 @@ from MyAnalysis.IsolationTools.electronPFIsoSingleType_cfi import *
 from MyAnalysis.IsolationTools.muonPFIsoSingleType_cfi import *
 
 neuThr_ = 0.5 # threshold applied to the neutrals (photon and neutral hadrons) in GeV
-electronPFIsoSingleTypeMapProd.neutralThreshold = cms.untracked.double(neuThr_)
+# the muon reconstruction uses a neutral threshold of 0.5 GeV while the electrons seem to have 0 GeV
 muonPFIsoSingleTypeMapProd.neutralThreshold     = cms.untracked.double(neuThr_)
+muonPFIsoSingleTypeMapProd.pfLabel              = cms.untracked.InputTag("pfNoPileUpIso")
+electronPFIsoSingleTypeMapProd.neutralThreshold = cms.untracked.double(0.)
+electronPFIsoSingleTypeMapProd.pfLabel          = cms.untracked.InputTag("pfNoPileUpIso")
 
 
 from MyAnalysis.IsolationTools.electronPFIsolations_cff import *

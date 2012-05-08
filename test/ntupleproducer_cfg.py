@@ -702,23 +702,28 @@ process.analyze.tag_btags = ['newPFTrackCountingHighEffBJetTags',
                              'newPFCombinedSecondaryVertexMVABPFJetTags',
                              'newPFJetProbabilityBPFJetTags',
                              'newPFJetBProbabilityBPFJetTags']
-
 ##########################################################################
 ### PF isolation settings ################################################
+from CommonTools.ParticleFlow.Tools.pfIsolation import setupPFElectronIso
+process.eleIsoSequence = setupPFElectronIso(process, 'gsfElectrons', postfix='Standard')
+process.analyze.tag_elepfisosEvent = ['elPFIsoValueCharged03PFIdStandard' , 'elPFIsoValueCharged04PFIdStandard'  ,
+                                      'elPFIsoValueNeutral03PFIdStandard' , 'elPFIsoValueNeutral04PFIdStandard'  ,
+                                      'elPFIsoValueGamma03PFIdStandard'   , 'elPFIsoValueGamma04PFIdStandard'  ]
+
 process.load("DiLeptonAnalysis.NTupleProducer.leptonPFIsolation_cff")
 process.pfPileUp.Vertices = 'goodVertices'
-process.analyze.tag_muonpfisos = ['muonPFIsoChHad02',  'muonPFIsoChHad03',  'muonPFIsoChHad04',
-                                 'muonPFIsoNHad02',   'muonPFIsoNHad03',   'muonPFIsoNHad04',
-                                 'muonPFIsoPhoton02', 'muonPFIsoPhoton03', 'muonPFIsoPhoton04',
-                                 'muonRadPFIsoChHad02',  'muonRadPFIsoChHad03',  'muonRadPFIsoChHad04', 
-                                 'muonRadPFIsoNHad02',   'muonRadPFIsoNHad03',   'muonRadPFIsoNHad04', 
-                                 'muonRadPFIsoPhoton02', 'muonRadPFIsoPhoton03', 'muonRadPFIsoPhoton04' ]
-process.analyze.tag_elepfisos  = ['electronPFIsoChHad02',  'electronPFIsoChHad03',  'electronPFIsoChHad04',
-                                  'electronPFIsoNHad02',   'electronPFIsoNHad03',   'electronPFIsoNHad04',
-                                  'electronPFIsoPhoton02', 'electronPFIsoPhoton03', 'electronPFIsoPhoton04',
-                                  'electronRadPFIsoChHad02',  'electronRadPFIsoChHad03',  'electronRadPFIsoChHad04',
-                                  'electronRadPFIsoNHad02',   'electronRadPFIsoNHad03',   'electronRadPFIsoNHad04',
-                                  'electronRadPFIsoPhoton02', 'electronRadPFIsoPhoton03', 'electronRadPFIsoPhoton04']
+process.analyze.tag_muonpfisosCustom = ['muonPFIsoChHad03'   , 'muonPFIsoChHad04'   ,
+                                        'muonPFIsoNHad03'    , 'muonPFIsoNHad04'    ,
+                                        'muonPFIsoPhoton03'  , 'muonPFIsoPhoton04'  ,
+                                        'muonRadPFIsoChHad03', 'muonRadPFIsoChHad04',
+                                        'muonRadPFIsoNHad03' , 'muonRadPFIsoNHad04' ,
+                                        'muonRadPFIsoPhoton03', 'muonRadPFIsoPhoton04' ]
+process.analyze.tag_elepfisosCustom  = ['electronPFIsoChHad03'    , 'electronPFIsoChHad04'     ,
+                                        'electronPFIsoNHad03'     , 'electronPFIsoNHad04'      ,
+                                        'electronPFIsoPhoton03'   , 'electronPFIsoPhoton04'    ,
+                                        'electronRadPFIsoChHad03' , 'electronRadPFIsoChHad04'  ,
+                                        'electronRadPFIsoNHad03'  , 'electronRadPFIsoNHad04'   ,
+                                        'electronRadPFIsoPhoton03', 'electronRadPFIsoPhoton04' ]
 	
 
 
@@ -747,6 +752,8 @@ process.p = cms.Path(
         + process.patPF2PATSequencePF2
        	+ process.patPF2PATSequencePF3
 	+ process.trackingFailureFilter
+        + process.pfParticleSelectionSequence
+ 	+ process.eleIsoSequence
 #	+ process.jetIDFailure
 	+ process.analyze
 #	+ process.dump

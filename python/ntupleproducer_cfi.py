@@ -6,12 +6,13 @@ analyze = cms.EDFilter('NTupleProducer',
         isModelScan      = cms.bool(False),
 	# Collections
 	tag_muons        = cms.InputTag('muons'),
-        tag_muonpfisos   = cms.VInputTag(''), # No defaults: set in _cfg.py
+        tag_muonpfisosCustom = cms.VInputTag(''), # No defaults: set in _cfg.py
 	tag_muisodeptk   = cms.InputTag('muons','muIsoDepositTk'),
 	tag_muisodepec   = cms.InputTag('muons','ecal'),
 	tag_muisodephc   = cms.InputTag('muons','hcal'),
 	tag_electrons    = cms.InputTag('gsfElectrons'),
-        tag_elepfisos    = cms.VInputTag(''), # No defaults: set in _cfg.py
+        tag_elepfisosCustom = cms.VInputTag(''), # No defaults: set in _cfg.py
+        tag_elepfisosEvent  = cms.VInputTag(''), # No defaults: set in _cfg.py
 	tag_elidWP       = cms.string('simpleEleId90relIso'),
 	tag_jets         = cms.InputTag('ak5PFJets'),
 	jetCorrs         = cms.string('ak5PFL1FastL2L3'),
