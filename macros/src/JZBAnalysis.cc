@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.5 $";
+string sjzbversion="$Revision: 1.70.2.6 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.6  2012/05/08 16:36:02  buchmann
+corrected electron 2012 definition
+
 Revision 1.70.2.5  2012/05/08 15:40:48  buchmann
 Using both electron & muon definition for 2012; added a cut on |eta|<2.5 for electrons; changed n(missing inner hits) to <= 1
 
@@ -2092,7 +2095,6 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
      if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
      if(!fTR->ElHcalOverEcal[index]<0.12) return false;
   } else { // Endcap
-     if(!(fTR->ElPt[index]>20) )return false; // endcap only starting at 20 GeV
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
      if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.03)) return false;
@@ -2124,8 +2126,14 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
   double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
   double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
-  if ( !(hybridIso < 0.15) ) return false;
-  counters[EL].fill(" ... hybridIso < 0.15");
+
+  if ( fabs(fTR->ElEta[index]) < 1.479 || fTR->ElPt[index]>20.0) { // Barrel
+    if ( !((hybridIso < 0.15) ) ) return false;
+  } else {
+    //Endcap with pt<20
+    if ( !((hybridIso < 0.10) ) ) return false;
+  }
+  counters[EL].fill(" ... hybridIso < 0.15 (or 0.1 for endcaps with pt<20)");
 
   return true;
 }
