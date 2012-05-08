@@ -39,4 +39,4 @@
 <use   name="h2gglobe/VertexAnalysis"/>
 <use   name="RecoEgamma/EgammaTools"/>
 <flags   EDM_PLUGIN="1"/>
-<flags   CXXFLAGS="-g"/>
+<flags   CXXFLAGS="-g -fno-var-tracking-assignments"/>
