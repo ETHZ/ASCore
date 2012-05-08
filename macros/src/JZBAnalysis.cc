@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.2 $";
+string sjzbversion="$Revision: 1.70.2.3 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.3  2012/05/08 15:27:48  pablom
+New good muon definition updated for 2012.
+
 Revision 1.70.2.2  2012/05/08 14:54:11  buchmann
 First attempt at an electron definition for 2012 (not active yet). Needs review and testing
 
@@ -1982,8 +1985,8 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   // Acceptance cuts
   if (!(fTR->MuPt[index] > 10) )       return false;
   counters[MU].fill(" ... pt > 10");
-  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
-  counters[MU].fill(" ... |eta| < 2.4");
+  if (!(fabs(fTR->MuEta[index])<2.5) ) return false;
+  counters[MU].fill(" ... |eta| < 2.5");
 
   // Quality cuts
   if ( !fTR->MuIsGlobalMuon[index] )  return false;
