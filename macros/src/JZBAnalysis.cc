@@ -4,25 +4,66 @@
 #include <time.h>
 #include <TRandom.h>
 #include "TF1.h"
+#include "TTree.h"
 #include <cstdlib>
 #include <assert.h>
-//#include "/shome/theofil/setTDRStyle.C"
 
 using namespace std;
 
 
 #define jMax 30  // do not touch this
 #define rMax 30
+#define Zmax 30
 
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.68 $";
+string sjzbversion="$Revision: 1.85 $";
 string sjzbinfo="";
+
+float firstLeptonPtCut  = 10.0;
+float secondLeptonPtCut = 10.0;
 
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.85  2012/05/02 14:56:57  buchmann
+updated jzb analysis to use geninfomo instead of geninfomoindex (new generatorinfo format)
+
+Revision 1.84  2012/05/01 06:51:33  buchmann
+First EDM JZB version; requires testing. still need to implement btag variables and some CAJID variables
+
+Revision 1.83  2012/04/18 16:26:31  buchmann
+made code a bit more legible by using the is_neutrino and is_charged_lepton functions
+
+Revision 1.81  2012/04/18 09:18:55  buchmann
+Added a tiny tree to keep track of the number of mc events
+
+Revision 1.80  2012/04/01 17:40:46  buchmann
+Removing anti-selected objects again (as well as loose objects)
+
+Revision 1.78  2012/04/01 17:23:58  buchmann
+fixed issue with ttbar sample (missing ngenparticles variable lead to crashes)
+
+Revision 1.77  2012/02/20 17:03:11  buchmann
+Added some new variables: generator level sum jet (pt,eta,phi) and met phi
+
+Revision 1.75  2012/02/15 16:20:55  buchmann
+Added angle between LSP and Z; added pt of lsp sum
+
+Revision 1.74  2012/02/15 10:26:27  buchmann
+Added Z pt, Z mass, Z eta, Z phi, Z promptness, and LSP promptness to events tree; added possibility to go lower in lepton pt for additional studies (currently at 10 GeV)
+
+Revision 1.73  2012/02/08 18:18:38  buchmann
+Updated JZB analysis: there is a new switch (-g) to include all generator information implemented so far (and much more). If the file you're using the analysis on does not contain the necessary information the switch will be deactivated (it reaacts to the number of gen particles). New generator information added recently: Promptness level, lsp mother pt, lsp mother id, and much, much, MUCH more :-)
+
+Revision 1.71  2012/01/18 12:55:53  buchmann
+Added x value for scans
+
+Revision 1.70  2011/11/29 16:17:08  fronga
+Improved trigger definitions (should help maintenance).
+Check that there is always an unprescaled trigger in any event (or crash!).
+
 Revision 1.68  2011/11/25 18:22:45  buchmann
 Updated weighted for MC (trigger efficiency); added masses for GMSB SMS scans; deactivated PU weights for scans
 
@@ -48,47 +89,6 @@ Added cut on SuperCluster ET.
 
 Revision 1.62  2011/10/20 14:26:15  buchmann
 Adapted custom electron function (basically from WP95 to WP90)
-
-Revision 1.61  2011/10/18 12:19:33  buchmann
-Changed the event number to ULong64_t (to accomodate even very large event numbers)
-
-Revision 1.60  2011/09/15 16:59:03  fronga
-Fixed bug (I think) in storage of mother and grand-mother IDs of selected leptons.
-
-Revision 1.59  2011/09/08 15:50:10  fronga
-Fix bug in Jet ID (was removing jets above 3.0...).
-
-Revision 1.58  2011/09/06 21:12:44  buchmann
-Added process variable to JZB tree (important for mSUGRA scans)
-
-Revision 1.57  2011/09/06 13:44:46  fronga
-cd() to output file before opening trees.
-Removed histograms.
-Cleaned up fHistFile.
-
-Revision 1.56  2011/09/06 09:27:15  buchmann
-changed jet eta cut from 2.6 to 3.0
-
-Revision 1.55  2011/09/06 09:09:40  buchmann
-Added a 'small' option, which leads to uninteresting events not being stored
-
-Revision 1.54  2011/09/05 16:25:47  buchmann
-Included v8 for dimuon triggers
-
-Revision 1.53  2011/09/01 07:20:20  buchmann
-Updated trigger paths
-
-Revision 1.52  2011/08/30 18:56:21  buchmann
-Added pdfWsum to JZB analysis
-
-Revision 1.51  2011/08/30 14:06:38  buchmann
-Bringing mSUGRA scans to JZB: Parameters introduced, PDF weights implemented for PDF systematics; also had to deactivate some PF variables as they are no longer in the NTuple
-
-Revision 1.50  2011/08/16 12:33:19  buchmann
-Updated trigger paths
-
-Revision 1.49  2011/08/11 17:03:19  fronga
-Only keep "empty" events for MC.
 
 */
 
@@ -155,6 +155,7 @@ public:
   float phi2;
   float dphi;
   float dphiZpfMet;
+  float dphigenZgenMet;
   float dphiZs1;
   float dphiZs2;
   float dphiMet1;
@@ -289,6 +290,8 @@ public:
   float mGlu;
   float mChi;
   float mLSP;
+  float xSMS;
+  float xbarSMS;
   float mGMSBGlu;
   float mGMSBChi;
   float mGMSBLSP;
@@ -296,6 +299,46 @@ public:
   float A0;
   float M12;
   float signMu;
+  
+  
+  //gen information
+  int nZ; // number of generator Z's in the process
+  int SourceOfZ[Zmax];//mother particle of the (first Zmax) Z's
+  int DecayCode; //decay code: 100*h + l, where h = number of hadronically decaying Z's, l = number of leptonically decaying Z's (e.g. 102 = 1 had. Z, 2 lep. Z's)
+  float realx; // this is the "x" we measure (for scans)
+  float imposedx; // this is the "x" we imposed.
+  float pureGeneratorZpt;
+  float pureGeneratorZM;
+  float pureGeneratorZphi;
+  float pureGeneratorZeta;
+  float pureGeneratorJZB;
+  float pureGeneratorMet;
+  float pureGeneratorMetPhi;
+  float pureGeneratorSumJetPt;
+  float pureGeneratorSumJetEta;
+  float pureGeneratorSumJetPhi;
+  float pure2ndGeneratorJZB;
+  float pure2ndGeneratorZpt;
+  int nLSPs;
+  float angleLSPLSP;
+  float angleLSPLSP2d;
+  float angleLSPZ;
+  float angleLSPZ2d;
+  float angleChi2Z2d;
+  float angleChi2Z;
+  float dphiSumLSPgenMET;
+  float SumLSPEta;
+  float SumLSPPhi;
+  float absvalSumLSP;
+  int LSPPromptnessLevel[2];
+  int ZPromptnessLevel[2];
+  float LSP1pt;
+  float LSP2pt;
+  int LSP1Mo;
+  int LSP2Mo;
+  float LSP1Mopt;
+  float LSP2Mopt;
+
 };
 
 nanoEvent::nanoEvent(){};
@@ -359,6 +402,7 @@ void nanoEvent::reset()
   phi1=0;
   phi2=0;
   dphiZpfMet=0;
+  dphigenZgenMet=0;
   dphiZs1=0;
   dphiZs2=0;
   dphiMet1=0;
@@ -505,6 +549,8 @@ void nanoEvent::reset()
   mGlu=0;
   mChi=0;
   mLSP=0;
+  xSMS=0;
+  xbarSMS=0;
   mGMSBGlu=0;
   mGMSBChi=0;
   mGMSBLSP=0;
@@ -512,10 +558,53 @@ void nanoEvent::reset()
   M0=0;
   M12=0;
   signMu=0;
+  
+  // gen info
+  nZ=0;
+  for(int i=0;i<Zmax;i++) SourceOfZ[i]=0;
+  DecayCode=0;
+  realx=0;
+  pureGeneratorJZB=0;
+  pureGeneratorMet=0;
+  pureGeneratorMetPhi=0;
+  pureGeneratorSumJetPt=0;
+  pureGeneratorSumJetEta=0;
+  pureGeneratorSumJetPhi=0;
+
+  pure2ndGeneratorJZB=0;
+  pure2ndGeneratorZpt=0;
+  pureGeneratorZpt=0;
+  pureGeneratorZM=0;
+  pureGeneratorZeta=0;
+  pureGeneratorZphi=0;
+  nLSPs=0;
+  angleLSPLSP=0;
+  angleLSPLSP2d=-5;
+  angleLSPZ=0;
+  dphiSumLSPgenMET=0;
+  SumLSPEta=0;
+  SumLSPPhi=0;
+  absvalSumLSP=0;
+  angleLSPZ2d=-5;
+  angleChi2Z2d=-5;
+  angleChi2Z=-5;
+
+  LSPPromptnessLevel[0]=-1;
+  LSPPromptnessLevel[1]=-1;
+  ZPromptnessLevel[0]=-1;
+  ZPromptnessLevel[1]=-1;
+  LSP1pt=0;
+  LSP2pt=0;
+  LSP1Mo=0;
+  LSP2Mo=0;
+  LSP1Mopt=0;
+  LSP2Mopt=0;
+
 }
 
 
 TTree *myTree;
+TTree *FullTree;
 TTree *myInfo;
 
 nanoEvent nEvent;
@@ -536,9 +625,8 @@ void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
 }
 
 
-JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall) :
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall){
-
+JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo) :
+  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
   // Define trigger paths to check
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL",1,8);
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL",1,5);
@@ -609,6 +697,9 @@ void JZBAnalysis::Begin(TFile *f){
   myInfo->Fill();
   myInfo->Write();
 
+  FullTree = new TTree("Allevents","Allevents");
+  FullTree->Branch("is_data",&nEvent.is_data,"is_data/O");
+  
   myTree = new TTree("events","events");
 
   myTree->Branch("is_data",&nEvent.is_data,"is_data/O");
@@ -792,6 +883,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("MassGlu",&nEvent.mGlu,"MassGlu/F");
   myTree->Branch("MassChi",&nEvent.mChi,"MassChi/F");
   myTree->Branch("MassLSP",&nEvent.mLSP,"MassLSP/F");
+  myTree->Branch("xSMS",&nEvent.xSMS,"xSMS/F");
+  myTree->Branch("xbarSMS",&nEvent.xbarSMS,"xbarSMS/F");
   myTree->Branch("MassGMSBGlu",&nEvent.mGMSBGlu,"MassGlu/F");
   myTree->Branch("MassGMSBChi",&nEvent.mGMSBChi,"MassChi/F");
   myTree->Branch("MassGMSBLSP",&nEvent.mGMSBLSP,"MassLSP/F");
@@ -802,6 +895,52 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("NPdfs",&nEvent.NPdfs,"NPdfs/I");
   myTree->Branch("pdfW",nEvent.pdfW,"pdfW[NPdfs]/F");
   myTree->Branch("pdfWsum",&nEvent.pdfWsum,"pdfWsum/F");
+  
+  //generator information
+  if(fdoGenInfo) {
+	myTree->Branch("nZ",&nEvent.nZ,"nZ/I");
+	myTree->Branch("SourceOfZ",&nEvent.SourceOfZ,"SourceOfZ[nZ]/I");
+	myTree->Branch("DecayCode",&nEvent.DecayCode,"DecayCode/I");
+	myTree->Branch("pureGeneratorJZB",&nEvent.pureGeneratorJZB,"pureGeneratorJZB/F");
+	myTree->Branch("pureGeneratorZpt",&nEvent.pureGeneratorZpt,"pureGeneratorZpt/F");
+	myTree->Branch("pureGeneratorZM",&nEvent.pureGeneratorZM,"pureGeneratorZM/F");
+	myTree->Branch("pureGeneratorZeta",&nEvent.pureGeneratorZeta,"pureGeneratorZeta/F");
+	myTree->Branch("pureGeneratorZphi",&nEvent.pureGeneratorZphi,"pureGeneratorZphi/F");
+	myTree->Branch("pure2ndGeneratorJZB",&nEvent.pure2ndGeneratorJZB,"pure2ndGeneratorJZB/F");
+	myTree->Branch("pure2ndGeneratorZpt",&nEvent.pure2ndGeneratorZpt,"pure2ndGeneratorZpt/F");
+	myTree->Branch("LSPPromptnessLevel",&nEvent.LSPPromptnessLevel,"LSPPromptnessLevel[2]/I");
+	myTree->Branch("ZPromptnessLevel",&nEvent.ZPromptnessLevel,"ZPromptnessLevel[2]/I");
+	myTree->Branch("LSP1pt",&nEvent.LSP1pt,"LSP1pt/F");
+	myTree->Branch("LSP2pt",&nEvent.LSP2pt,"LSP2pt/F");
+
+	myTree->Branch("pureGeneratorMet",&nEvent.pureGeneratorMet,"pureGeneratorMet/F");
+	myTree->Branch("pureGeneratorMetPhi",&nEvent.pureGeneratorMetPhi,"pureGeneratorMetPhi/F");
+	myTree->Branch("pureGeneratorSumJetPt",&nEvent.pureGeneratorSumJetPt,"pureGeneratorSumJetPt/F");
+	myTree->Branch("pureGeneratorSumJetEta",&nEvent.pureGeneratorSumJetEta,"pureGeneratorSumJetEta/F");
+	myTree->Branch("pureGeneratorSumJetPhi",&nEvent.pureGeneratorSumJetPhi,"pureGeneratorSumJetPhi/F");
+
+	myTree->Branch("LSP1Mo",&nEvent.LSP1Mo,"LSP1Mo/I");
+	myTree->Branch("LSP2Mo",&nEvent.LSP2Mo,"LSP2Mo/I");
+	myTree->Branch("LSP1Mopt",&nEvent.LSP1Mopt,"LSP1Mopt/F");
+	myTree->Branch("LSP2Mopt",&nEvent.LSP2Mopt,"LSP2Mopt/F");
+
+	myTree->Branch("nLSPs",&nEvent.nLSPs,"nLSPs/I");
+	myTree->Branch("angleLSPLSP",&nEvent.angleLSPLSP,"angleLSPLSP/F");
+	myTree->Branch("angleLSPLSP2d",&nEvent.angleLSPLSP2d,"angleLSPLSP2d/F");
+	
+	myTree->Branch("angleLSPZ2d",&nEvent.angleLSPZ2d,"angleLSPZ2d/F");
+	myTree->Branch("angleChi2Z2d",&nEvent.angleChi2Z2d,"angleChi2Z2d/F");
+	myTree->Branch("angleChi2Z",&nEvent.angleChi2Z,"angleChi2Z/F");
+	myTree->Branch("angleLSPZ",&nEvent.angleLSPZ,"angleLSPZ/F");
+	myTree->Branch("dphiSumLSPgenMET",&nEvent.dphiSumLSPgenMET,"dphiSumLSPgenMET/F");
+	myTree->Branch("absvalSumLSP",&nEvent.absvalSumLSP,"absvalSumLSP/F");
+	myTree->Branch("dphigenZgenMet",&nEvent.dphigenZgenMet,"dphigenZgenMet/F");
+	myTree->Branch("SumLSPEta",&nEvent.SumLSPEta,"SumLSPEta/F");
+	myTree->Branch("SumLSPPhi",&nEvent.SumLSPPhi,"SumLSPPhi/F");
+  }
+
+  myTree->Branch("realx",&nEvent.realx,"realx/F");
+  myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -863,6 +1002,21 @@ const bool JZBAnalysis::passTriggers( std::vector<std::string>& triggerPaths ) {
 
 }
 
+bool is_neutrino(int code) {
+  if(abs(code)==12) return true; // electron neutrino
+  if(abs(code)==14) return true; // muon neutrino
+  if(abs(code)==16) return true; // tau neutrino
+  if(abs(code)==18) return true; // tau' neutrino
+  return false;
+}
+
+bool is_charged_lepton(int code) {
+  if(abs(code)==11) return true; // electron
+  if(abs(code)==13) return true; // muon
+  if(abs(code)==15) return true; // tau
+  if(abs(code)==17) return true; // tau'
+  return false;
+}
 
 //______________________________________________________________________________
 void JZBAnalysis::Analyze() {
@@ -876,6 +1030,7 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
+  FullTree->Fill();
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
@@ -887,6 +1042,8 @@ void JZBAnalysis::Analyze() {
         nEvent.mGMSBGlu=fTR->MassChi; // explanation: order in NTuple is wrong for GMSB
         nEvent.mGMSBChi=fTR->MassLSP; // explanation: order in NTuple is wrong for GMSB
         nEvent.mGMSBLSP=fTR->MassGlu; // explanation: order in NTuple is wrong for GMSB
+        nEvent.xSMS=fTR->xSMS;
+        nEvent.xbarSMS=fTR->xbarSMS;
         nEvent.A0=fTR->A0;
         nEvent.M0=fTR->M0;
         nEvent.signMu=fTR->signMu;
@@ -899,7 +1056,185 @@ void JZBAnalysis::Analyze() {
 	nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
 	nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
       }
-    }
+      
+     // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
+	float chimass=0;
+	int nchimass=0;
+	float lspmass=0;
+	int nlspmass=0;
+	float glumass=0;
+	int nglumass=0;
+	
+	float genZpt=0,genZeta=0,genZphi=0,genZM=0;
+	float genZ2pt=0,genZ2eta=0,genZ2phi=0,genZ2M=0;
+	int Zprompt1=0,Zprompt2=0;
+	int Promptness[5];
+	vector<TLorentzVector> LSPvecs;
+	vector<TLorentzVector> LSPMothervecs;
+	vector<int> LSPMother;
+	vector<float> LSPMotherPt;
+
+	TLorentzVector summedLSPs;
+	int nGenParticles=fTR->nGenParticles;
+	if(nGenParticles<2||nGenParticles>2000) {
+		//this happens if you use an old file or one that doesn't contain the necessary generator information.
+		if(fdoGenInfo) cerr << "WATCH OUT : GENERATOR INFORMATION HAS BEEN DISABLED BECAUSE THE NUMBER OF GEN PARTICLES WAS TOO LOW (" << nGenParticles << ")" << endl;
+		fdoGenInfo=false;
+		nGenParticles=0;
+	}
+	for(int i=0;i<nGenParticles&&fdoGenInfo;i++) {
+	  if(fTR->genInfoStatus[i]!=3) continue;
+	  int thisParticleId = fTR->genInfoId[i];
+	  if(fdoGenInfo&&abs(thisParticleId)==23) {
+	    //dealing with a Z
+	    int motherIndex=fTR->genInfoMo1[i];
+	    if(motherIndex>=0) nEvent.SourceOfZ[nEvent.nZ]=fTR->genInfoId[motherIndex];
+	    nEvent.nZ++;
+	    for(int da=0;da<fTR->nGenParticles;da++) {
+	      if(fTR->genInfoMo1[da]==i) {
+		//dealing with a daughter
+		if(abs(fTR->genInfoId[da])<10) nEvent.DecayCode+=100;
+		if(is_neutrino(abs(fTR->genInfoId[da]))) nEvent.DecayCode+=10;
+		if(is_charged_lepton(abs(fTR->genInfoId[da]))) {
+		  nEvent.DecayCode+=1;
+		  if(fTR->genInfoPt[i]>genZpt) {
+		    genZ2pt=genZpt;
+		    genZ2M=genZM;
+		    genZ2eta=genZeta;
+		    genZ2phi=genZphi;
+		    Zprompt2=Zprompt1;
+		    
+		    genZpt=fTR->genInfoPt[i];
+		    genZM=fTR->genInfoM[i];
+		    genZeta=fTR->genInfoEta[i];
+		    genZphi=fTR->genInfoPhi[i];
+		    Zprompt1=fTR->PromptnessLevel[i];
+		  } else {
+		    if(fTR->genInfoPt[i]>genZ2pt) {
+		      genZ2pt=fTR->genInfoPt[i];
+		      genZ2M=fTR->genInfoM[i];
+		      genZ2eta=fTR->genInfoEta[i];
+		      genZ2phi=fTR->genInfoPhi[i];
+		      Zprompt2=fTR->PromptnessLevel[i];
+		    }
+		  }//end of if fTR->genInfoPt[i]>genZpt)
+		}//end of if leptonic decay
+	      }//end of if daughter
+	    }//end of daughter search
+	  }//end of Z case
+	  
+	  if(abs(thisParticleId)==1000021) {//mglu
+	    glumass+=fTR->genInfoM[i];
+	    nglumass++;
+	  }
+	  if(abs(thisParticleId)==1000022) {//mlsp
+	    LSPMother.push_back(fTR->genInfoMo1[i]);
+	    LSPMotherPt.push_back(fTR->genInfoPt[fTR->genInfoMo1[i]]);
+	    lspmass+=fTR->genInfoM[i];
+	    nlspmass++;
+	    TLorentzVector newLSP;
+	    newLSP.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    LSPvecs.push_back(newLSP);
+	    if(LSPvecs.size()==1) summedLSPs.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    else summedLSPs=summedLSPs+newLSP;
+	    Promptness[nEvent.nLSPs]=fTR->PromptnessLevel[i];
+	    nEvent.nLSPs++;
+	  }
+	  if(abs(thisParticleId)==1000023) {//mchi
+	    chimass+=fTR->genInfoM[i];
+	    nchimass++;
+	    TLorentzVector thismom;
+	    thismom.SetPtEtaPhiM(fTR->genInfoPt[i],fTR->genInfoEta[i],fTR->genInfoPhi[i],fTR->genInfoM[i]);
+	    LSPMothervecs.push_back(thismom);
+	  }
+	}// done with gen info loop
+
+	if(fdoGenInfo) {
+		TLorentzVector pureGenMETvector(fTR->GenMETpx,fTR->GenMETpy,0,0);
+
+		if(nEvent.nLSPs==2) nEvent.angleLSPLSP=LSPvecs[0].Angle(LSPvecs[1].Vect());
+		if(nEvent.nLSPs==2) nEvent.angleLSPLSP2d=LSPvecs[0].DeltaPhi(LSPvecs[1]);
+		
+		nEvent.dphiSumLSPgenMET=summedLSPs.DeltaPhi(pureGenMETvector);
+		nEvent.SumLSPEta=summedLSPs.Eta();
+		nEvent.SumLSPPhi=summedLSPs.Phi();
+		nEvent.absvalSumLSP=summedLSPs.Pt();
+
+		TLorentzVector pureGenZvector;
+		pureGenZvector.SetPtEtaPhiM(genZpt,genZeta,genZphi,genZM);
+
+		
+		float LSPdRa = LSPvecs[0].DeltaR(pureGenZvector);
+		float LSPdRb = LSPvecs[1].DeltaR(pureGenZvector);
+		nEvent.ZPromptnessLevel[0]=Zprompt1;
+		nEvent.ZPromptnessLevel[1]=Zprompt2;
+		if(LSPdRa<LSPdRb) {
+			nEvent.LSPPromptnessLevel[0]=Promptness[0];
+			nEvent.LSPPromptnessLevel[1]=Promptness[1];
+			nEvent.LSP1pt=LSPvecs[0].Pt();
+			nEvent.LSP2pt=LSPvecs[1].Pt();
+			nEvent.LSP1Mo=LSPMother[0];
+			nEvent.LSP2Mo=LSPMother[1];
+			nEvent.LSP1Mopt=LSPMotherPt[0];
+			nEvent.LSP2Mopt=LSPMotherPt[1];
+			nEvent.angleLSPZ=LSPvecs[0].Angle(pureGenZvector.Vect());
+			nEvent.angleLSPZ2d=LSPvecs[0].DeltaPhi(pureGenZvector);
+			if(abs(LSPMotherPt[0]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[0]-LSPMothervecs[1].Pt())) {
+			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[0]);
+			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[0].Vect());
+			} else {
+			  nEvent.angleChi2Z2d=LSPMothervecs[1].DeltaPhi(LSPvecs[0]);
+			  nEvent.angleChi2Z=LSPMothervecs[1].Angle(LSPvecs[0].Vect());
+			}
+		} else {
+			nEvent.LSPPromptnessLevel[0]=Promptness[1];
+			nEvent.LSPPromptnessLevel[1]=Promptness[0];
+			nEvent.LSP1pt=LSPvecs[1].Pt();
+			nEvent.LSP2pt=LSPvecs[0].Pt();
+			nEvent.LSP1Mo=LSPMother[1];
+			nEvent.LSP2Mo=LSPMother[0];
+			nEvent.LSP1Mopt=LSPMotherPt[1];
+			nEvent.LSP2Mopt=LSPMotherPt[0];
+			nEvent.angleLSPZ=LSPvecs[1].Angle(pureGenZvector.Vect());
+			nEvent.angleLSPZ2d=LSPvecs[1].DeltaPhi(pureGenZvector);
+			if(abs(LSPMotherPt[1]-LSPMothervecs[0].Pt())<abs(LSPMotherPt[1]-LSPMothervecs[1].Pt())) {
+			  nEvent.angleChi2Z2d=LSPMothervecs[0].DeltaPhi(LSPvecs[1]);
+			  nEvent.angleChi2Z=LSPMothervecs[0].Angle(LSPvecs[1].Vect());
+			} else {
+			  nEvent.angleChi2Z2d=LSPMothervecs[1].DeltaPhi(LSPvecs[1]);
+			  nEvent.angleChi2Z=LSPMothervecs[1].Angle(LSPvecs[1].Vect());
+			}
+		}
+
+		TLorentzVector pureGenZ2vector;
+		pureGenZ2vector.SetPtEtaPhiM(genZ2pt,genZ2eta,genZ2phi,genZ2M);
+		nEvent.pureGeneratorJZB=(-pureGenMETvector-pureGenZvector).Pt() - pureGenZvector.Pt();
+		nEvent.pureGeneratorMet=pureGenMETvector.Pt();
+		nEvent.pureGeneratorMetPhi=pureGenMETvector.Phi();
+		nEvent.pureGeneratorSumJetPt=(-pureGenMETvector-pureGenZvector).Pt();
+		nEvent.pureGeneratorSumJetEta=(-pureGenMETvector-pureGenZvector).Eta();
+		nEvent.pureGeneratorSumJetPhi=(-pureGenMETvector-pureGenZvector).Phi();
+
+
+		nEvent.pureGeneratorZpt=genZpt;
+		nEvent.pureGeneratorZM=genZM;
+		nEvent.pureGeneratorZphi=genZphi;
+		nEvent.pureGeneratorZeta=genZeta;
+		nEvent.pure2ndGeneratorJZB=(-pureGenMETvector-pureGenZ2vector).Pt() - pureGenZ2vector.Pt();
+		nEvent.pure2ndGeneratorZpt=pureGenZ2vector.Pt();
+
+		if(genZpt<0.01) nEvent.pureGeneratorJZB=0; // in case there is no leptonic Z
+	}//end of if(f_doGenInfo)
+
+	
+	if(nchimass>0&&nlspmass>0&&nglumass>0)  nEvent.realx=(chimass/nchimass - lspmass/nlspmass)/(glumass/nglumass-lspmass/nlspmass);
+	//at this point we use the fact that one of the three bits of information in the LHE event comment is the imposed x - the only question is which one ;-) 
+	//note: the bit of information in the comment is actually xbar, so we need to store 1-xbar to get our definition of x. 
+	if(nEvent.mGlu>0 && nEvent.mGlu<1) nEvent.imposedx=1-nEvent.mGlu;
+	if(nEvent.mChi>0 && nEvent.mChi<1) nEvent.imposedx=1-nEvent.mChi;
+	if(nEvent.mLSP>0 && nEvent.mLSP<1) nEvent.imposedx=1-nEvent.mLSP;
+  } // end of mc if
+  
   // Trigger information
   nEvent.passed_triggers=0;
   if ( fDataType_ != "mc" ) 
@@ -976,6 +1311,7 @@ void JZBAnalysis::Analyze() {
           leptons.push_back(tmpLepton);
         }
     }
+
   
   // #--- electron loop
   for(int elIndex=0;elIndex<fTR->NEles;elIndex++)
@@ -1007,6 +1343,8 @@ void JZBAnalysis::Analyze() {
           leptons.push_back(tmpLepton);
         }
     }
+
+
   
   // #-- PF muon loop (just for comparison)
   for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
@@ -1035,10 +1373,12 @@ void JZBAnalysis::Analyze() {
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
+
   if(sortedGoodLeptons.size() < 2) {
     if (isMC&&!fmakeSmall) myTree->Fill();
     return;
   }
+
     
   counters[EV].fill("... has at least 2 leptons");
   int PosLepton1 = 0;
@@ -1055,7 +1395,7 @@ void JZBAnalysis::Analyze() {
   counters[EV].fill("... has at least 2 OS leptons");
 
   // Preselection
-  if(sortedGoodLeptons[PosLepton1].p.Pt() > 20 && sortedGoodLeptons[PosLepton2].p.Pt() > 20) {
+  if(sortedGoodLeptons[PosLepton1].p.Pt() > firstLeptonPtCut && sortedGoodLeptons[PosLepton2].p.Pt() > secondLeptonPtCut) {
 
     nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
     nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
@@ -1097,7 +1437,6 @@ void JZBAnalysis::Analyze() {
     //If there are less than two leptons the event is not considered
     if (isMC&&!fmakeSmall) myTree->Fill();
     return;
-    
   }
   counters[EV].fill("... pass dilepton pt selection");
         
@@ -1207,10 +1546,10 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
         nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-        nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
-        nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
-        nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
-        nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
+//        nEvent.bTagProbTHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighEff[i];
+//        nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
+//        nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
+//        nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
         
         if(isJetID>0) nEvent.pfJetGoodNumID++;
         nEvent.pfJetGoodNum++;
@@ -1512,6 +1851,7 @@ void JZBAnalysis::End(TFile *f){
   f->cd();	
 
   myTree->Write();
+  FullTree->Write();
 
   // Dump statistics
   if (1) { // Put that to 0 if you are annoyed
@@ -1629,10 +1969,8 @@ const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
 }
 
 
-
-
 const bool JZBAnalysis::IsCustomMu(const int index){
-  
+
   // Basic muon cleaning and ID
 
   // Acceptance cuts
@@ -1734,6 +2072,8 @@ const bool JZBAnalysis::IsCustomEl(const int index){
 	
 }
 
+
+
 // Check if electron is from photon conversion
 const bool JZBAnalysis::IsConvertedPhoton( const int eIndex ) {
  
@@ -1748,9 +2088,9 @@ const bool JZBAnalysis::IsCustomJet(const int index){
   // Basic Jet ID cuts (loose Jet ID)
   // See https://twiki.cern.ch/twiki/bin/view/CMS/JetID
 
-  if ( !(fTR->CAJID_n90Hits[index] > 1) ) return false;
+//  if ( !(fTR->CAJID_n90Hits[index] > 1) ) return false;
   counters[JE].fill(" ... n90Hits > 1");
-  if ( !(fTR->CAJID_HPD[index] < 0.98)  ) return false;
+//  if ( !(fTR->CAJID_HPD[index] < 0.98)  ) return false;
   counters[JE].fill(" ... HPD < 0.98");
 
   if ( fabs(fTR->CAJEta[index])<3.0 ) {
@@ -1846,6 +2186,7 @@ void JZBAnalysis::GeneratorInfo(void) {
           nEvent.genZPt     = genZvector.Pt();
           nEvent.genMll     = genZvector.M();
           nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
+	  nEvent.dphigenZgenMet = (sortedGLeptons[i1].p + sortedGLeptons[i2].p).DeltaPhi(GenMETvector);
         }
     }
 }
