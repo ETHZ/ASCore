@@ -29,7 +29,7 @@ CMSSW_BASE_VERSION = $(filter CMSSW%, $(subst _patch, , $(CMSSW_VERSION) ))
 
 NGLIBS         = $(ROOTGLIBS) -lMinuit -lMinuit2 -lTreePlayer
 GLIBS          = $(filter-out -lNew, $(NGLIBS)) 
-GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_2_4/lib/slc5_amd64_gcc462 -lFWCoreFWLite -lFWCoreUtilities -lDataFormatsCommon -lDataFormatsFWLite -lCondFormatsJetMETObjects
+GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/slc5_amd64_gcc462/cms/cmssw/$(CMSSW_BASE_VERSION)/lib/$(SCRAM_ARCH) -lFWCoreFWLite -lFWCoreUtilities -lDataFormatsCommon -lDataFormatsFWLite -lCondFormatsJetMETObjects
 
 
 
@@ -43,7 +43,7 @@ OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
 .PHONY : clean purge all depend
 
 # Rules ====================================
-all: RunUserAnalyzer RunJZBAnalyzer RunQuickAnalyzer
+all: RunUserAnalyzer RunJZBAnalyzer #RunQuickAnalyzer
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C src/UserAnalyzer.cc src/UserAnalysis.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
@@ -55,10 +55,10 @@ RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C src/JZBAnalyzer.cc src/JZBAnalysis.cc $
 	mv RunJZBAnalyzer /scratch/$$USERNAME/RunJZBAnalyzer
 	mv /scratch/$$USERNAME/RunJZBAnalyzer RunJZBAnalyzer
 
-RunQuickAnalyzer: src/exe/RunQuickAnalyzer.C src/QuickAnalyzer.cc src/QuickAnalysis.cc $(OBJS)
-	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-	mv RunQuickAnalyzer /scratch/$$USERNAME/RunQuickAnalyzer
-	mv /scratch/$$USERNAME/RunQuickAnalyzer RunQuickAnalyzer
+#RunQuickAnalyzer: src/exe/RunQuickAnalyzer.C src/QuickAnalyzer.cc src/QuickAnalysis.cc $(OBJS)
+#	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
+#	mv RunQuickAnalyzer /scratch/$$USERNAME/RunQuickAnalyzer
+#	mv /scratch/$$USERNAME/RunQuickAnalyzer RunQuickAnalyzer
 
 clean:
 	find src -name '*.o' -exec $(RM) -v {} ';' 
