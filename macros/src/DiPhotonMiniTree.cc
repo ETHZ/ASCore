@@ -360,8 +360,8 @@ void DiPhotonMiniTree::Analyze(){
 
   pholead_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
   photrail_SCeta = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
-  pholead_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(0)]];
-  photrail_SCphi = fTR->SCEta[fTR->PhotSCindex[passing.at(1)]];
+  pholead_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(0)]];
+  photrail_SCphi = fTR->SCPhi[fTR->PhotSCindex[passing.at(1)]];
  
   pholead_PhoHasPixSeed=fTR->PhoHasPixSeed[passing.at(0)];
   pholead_PhoHasConvTrks=fTR->PhoHasConvTrks[passing.at(0)];
