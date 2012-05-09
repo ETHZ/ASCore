@@ -84,7 +84,7 @@ fLumiSummary     = jobName+'-'+ntupleVersion+'_lumi.txt'
 
 # initialize basic data/mc commands
 command_report = 'crab -c '+jobName+' -report'
-command_lumiCalc = 'pixelLumiCalc.py -i '+fJsonSummaryCrab+' --nowarning overview > '+fLumiSummary
+command_lumiCalc = 'lumiCalc2.py -i '+fJsonSummaryCrab+' --nowarning overview > '+fLumiSummary
 command_lumiSumm = 'mv '+fJsonSummaryCrab+' '+fJsonSummary
 
 
@@ -122,7 +122,7 @@ dasURL = 'https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs
 
 # perform crab tasks for data jobs
 if (datamc=="data"):
-   print '--> Getting crab report...\n   ',command_report
+   print '--> Getting crab report... (this can take a while)\n   ',command_report
    return_value,output = commands.getstatusoutput(command_report)
    if return_value != 0:
       print 'Problem with crab -report of the job '+jobName+'. Exiting...'
@@ -144,7 +144,7 @@ if (datamc=="data"):
    # get misc. information to be put on the twiki
    [range,lumi] = get_info(fLumiSummary,fJsonSummary)
 
-   format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']]  |'+iDatasetPath+' | [[%ATTACHURL%/'+fLumiSummary+']['+lumi+']]  | [['+dasURL+'][DAS]]  |'+cmsswVersion+'  |'+ntupleVersion+'  |'+userNickName+'  ||'
+   format_Twiki = '| [[%ATTACHURL%/'+fJsonSummary+']['+range+']]  | '+iDatasetPath+' | [[%ATTACHURL%/'+fLumiSummary+']['+lumi+']]  | [['+dasURL+'][DAS]]  | '+cmsswVersion+'  | '+ntupleVersion+'  | '+userNickName+'  ||'
 else:
    format_Twiki = '| '+iPrimaryDataset+'  | '+iDatasetPath+'  | [['+dasURL+'][DAS]]  | ...pb | '+cmsswVersion+'  | '+ntupleVersion+'  | '+userNickName+'  ||'
    format_Twiki += '\n\nAND DO NOT FORGET TO FILL IN THE CROSS-SECTION INFORMATION!\n'
