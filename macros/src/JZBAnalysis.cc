@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.8 $";
+string sjzbversion="$Revision: 1.70.2.9 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.9  2012/05/09 10:43:17  pablom
+Add ecal deposits to muons and bug fix for electrons selections.
+
 Revision 1.70.2.8  2012/05/09 08:31:57  buchmann
 updated electron isolation (pf iso)
 
@@ -304,6 +307,8 @@ public:
   float sumJetPt[jzbtype_max];
 
   float weight;
+  float weightEffDown;
+  float weightEffUp;
   float Efficiencyweightonly;
   int NPdfs;
   float pdfW[100];
@@ -569,6 +574,8 @@ void nanoEvent::reset()
   weight = 1.0;
   PUweight = 1.0;
   Efficiencyweightonly = 1.0;
+  weightEffDown = 1.0;
+  weightEffUp = 1.0;
 
   mGlu=0;
   mChi=0;
@@ -901,6 +908,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
   myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
+  myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
+  myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
 
   myTree->Branch("passed_triggers", &nEvent.passed_triggers,"passed_triggers/O");
   myTree->Branch("trigger_bit", &nEvent.trigger_bit,"trigger_bit/I");
@@ -1448,13 +1457,15 @@ void JZBAnalysis::Analyze() {
     nEvent.ElCInfoIsGsfCtfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfCtfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfCtfScPixCons;
     nEvent.ElCInfoIsGsfScPixCons=sortedGoodLeptons[PosLepton2].ElCInfoIsGsfScPixCons&&sortedGoodLeptons[PosLepton1].ElCInfoIsGsfScPixCons;
 
-    float lepweight=1.0;
-    if(nEvent.id1==nEvent.id2&&nEvent.id1==0) lepweight=0.99;
-    if(nEvent.id1==nEvent.id2&&nEvent.id1==1) lepweight=0.95;
-    if(nEvent.id1!=nEvent.id2) lepweight=0.98;
-
-    if (isMC) nEvent.weight=nEvent.weight*lepweight;
-    if (isMC) nEvent.Efficiencyweightonly=lepweight;
+    float lepweightErr;
+    float lepweight=GetLeptonWeight(nEvent.id1,nEvent.phi1,nEvent.eta1,nEvent.id2,nEvent.phi2,nEvent.eta2,lepweightErr);
+    
+    if (isMC) {
+      nEvent.weight=nEvent.weight*lepweight;
+      nEvent.weightEffDown=nEvent.weight*(lepweight-lepweightErr);
+      nEvent.weightEffUp=nEvent.weight*(lepweight+lepweightErr);
+      nEvent.Efficiencyweightonly=lepweight;
+    }
 
   } else {
       
@@ -2097,6 +2108,26 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   return true;
 }
 
+const float JZBAnalysis::GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr) {
+    //this function will become more sophisticated in the future (eta & phi based efficiency)
+    if(id1==id2&&id1==0) {
+      //ee
+      EffErr=0.01;
+      return 0.99;
+    }
+    if(id1==id2&&id1==1) {
+      //mm
+      EffErr=0.02;
+      return 0.95;
+    }
+    if(id1!=id2) {
+      //em
+      EffErr=0.03;
+      return 0.98;
+    }
+}
+
+    
 const float JZBAnalysis::EffArea(float abseta) {
   abseta=fabs(abseta); // making sure we're looking at |eta|
   if(abseta<1.0) return 0.10;
@@ -2119,12 +2150,12 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.004)) return false;
      if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
-     if(!fTR->ElHcalOverEcal[index]<0.12) return false;
+     if(!fTR->ElHcalOverEcal[index]<0.10) return false;
   } else { // Endcap
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
      if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.03)) return false;
-     if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
+     if(!(fTR->ElHcalOverEcal[index]<0.075)) return false;
   }
   
   counters[EL].fill(" ... pass additional electron ID cuts");
@@ -2135,8 +2166,8 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   counters[EL].fill(" ... DZ(PV)<0.1");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
-  if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
-  counters[EL].fill(" ... N(missing inner hits) <= 1");
+  if(!(fTR->ElNumberOfMissingInnerHits[index]==0)) return false;
+  counters[EL].fill(" ... N(missing inner hits) == 0");
 
   float e=fTR->ElCaloEnergy[index];
   float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];

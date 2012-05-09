@@ -46,6 +46,7 @@ public:
   const bool IsCustomJet(const int);
   const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
+  const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);
 
   string outputFileName_; // public name of the output file name
 
