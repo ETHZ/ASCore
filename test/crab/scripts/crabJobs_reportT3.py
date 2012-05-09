@@ -44,21 +44,16 @@ def get_info(lumiFile,jsonFile):
   
 
 # check the command line arguments
-if (len(sys.argv[1:]) < 3 or len(sys.argv[1:]) > 4):                                # if not all three arguments are specified,
+if (len(sys.argv[1:]) != 3):                                # if not all three arguments are specified,
    print 'Usage:' 
    print ' python crabJobs_reportT3.py taskName datamc ntupleVersion'
    print ' e.g.'
    print ' 	python crabJobs_reportT3.py DYJetsToLL  mc V0X-0Y-0Z'
    sys.exit()
 else:
-   if len(sys.argv[1:]) == 3:                              # use the default multicrab.cfg file
-      jobName = sys.argv[1]
-      datamc = sys.argv[2]
-      ntupleVersion = sys.argv[3]
-   elif len(sys.argv[1:]) == 4:                              # otherwise, use the specifed multicrab cfg file
-      jobName = sys.argv[1]
-      datamc = sys.argv[2]
-      ntupleVersion = sys.argv[3]
+   jobName = sys.argv[1]
+   datamc = sys.argv[2]
+   ntupleVersion = sys.argv[3]
 
 # Intialization: we'll get essential information from crab.log!
 crabLogFile = jobName+'/log/crab.log'
@@ -99,7 +94,7 @@ iPrimaryDataset = ''
 oDatasetPath = ''
 
 if (not os.path.exists(crabLogFile)):
-   print '*** crab log file <'+crabCMSSWexec+'> not found! Stopping here.'
+   print '*** ERROR: crab log file <'+crabLogFile+'> not found! Stopping here.'
    sys.exit(-1)
 else:
    for line in open(crabLogFile).readlines():
@@ -152,6 +147,6 @@ if (datamc=="data"):
 else:
    dasURL = 'https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_ph_analysis_02&input=dataset+dataset%3D'+oDatasetPath
    format_Twiki = '| '+iPrimaryDataset+'  | '+iDatasetPath+'  | [['+dasURL+'][DAS]]  | ...pb | '+cmsswVersion+'  | '+ntupleVersion+'  | '+userNickName+'  ||'
-   format_Twiki += '\nAND DO NOT FORGET TO FILL IN THE CROSS-SECTION INFORMATION!\n'
+   format_Twiki += '\n\nAND DO NOT FORGET TO FILL IN THE CROSS-SECTION INFORMATION!\n'
 
-print '---------------------------------------\nAdd the following line to the Twiki:\n\n',format_Twiki
+print '---------------------------------------\nTask '+jobName+':\nAdd the following line to the Twiki:\n\n',format_Twiki

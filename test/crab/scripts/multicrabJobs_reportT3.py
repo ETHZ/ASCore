@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import sys, os, commands, shlex
 
-print sys.argv[1:]
 # check the command line arguments
 if (len(sys.argv[1:]) > 3) or len(sys.argv[1:]) < 2:        # if no number or filename is specified,
 	print 'Usage:' 

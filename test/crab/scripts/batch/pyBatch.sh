@@ -49,21 +49,13 @@ echo "################################################################"
 ##### RUNNING ####################################################
 
 echo "Arguments: $EXE, $ARGUMENTS"
-CMSSW_DIR=/shome/predragm/CMSSW_3_8_6/
 RUNDIR=`pwd`
 echo "Pwd: " `pwd`
 
 # Set the CMSSW environment (for ROOT, mainly...)
 source $VO_CMS_SW_DIR/cmsset_default.sh
-#source /swshare/psit3/etc/profile.d/cms_ui_env.sh
-#cmsenv
-
-cd $CMSSW_DIR/src
-eval `scramv1 runtime -sh`
-if test $? -ne 0; then
-   echo "ERROR: Failed to source scram environment" >&2
-   exit 1
-fi
+export SCRAM_ARCH=slc5_amd64_gcc462
+eval `scram runtime -sh`
 
 # Fix problem with DCache and ROOT
 LD_LIBRARY_PATH="/swshare/glite/d-cache/dcap/lib/:$LD_LIBRARY_PATH"
