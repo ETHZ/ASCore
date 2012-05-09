@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.6 $";
+string sjzbversion="$Revision: 1.70.2.7 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.7  2012/05/08 16:43:53  buchmann
+adapted isolation for electrons in the endcaps with pt<20 GeV
+
 Revision 1.70.2.6  2012/05/08 16:36:02  buchmann
 corrected electron 2012 definition
 
@@ -1346,13 +1349,12 @@ void JZBAnalysis::Analyze() {
           int tmpCharge=fTR->ElCharge[elIndex];
           double pedestal=0.;
           if ( fabs(fTR->ElEta[elIndex]) < 1.479 ) pedestal = 1.0;
-          double iso = fTR->ElDR03TkSumPt[elIndex]+std::max(fTR->ElDR03EcalRecHitSumEt[elIndex]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[elIndex];
-          double hybridIso = iso/std::max((float)20.,fTR->ElPt[elIndex]);
+          double pfIso = (fTR->ElPfIsoChHad03[index] + std::max((float)0.0, fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[index]))))/fTR->ElPt[index];
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
           tmpLepton.index = elIndex;
-          tmpLepton.iso = hybridIso;
+          tmpLepton.iso = pfIso;
           tmpLepton.type = 0;
           tmpLepton.genPt = 0.;
           tmpLepton.ElCInfoIsGsfCtfCons=fTR->ElCInfoIsGsfCtfCons[elIndex];
@@ -1568,6 +1570,7 @@ void JZBAnalysis::Analyze() {
 //        nEvent.bTagProbTHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbTkCntHighPur[i];
 //        nEvent.bTagProbSHighEff[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighEff[i];
 //        nEvent.bTagProbSHighPur[nEvent.pfJetGoodNum]  = fTR->JbTagProbSimpSVHighPur[i];
+
         
         if(isJetID>0) nEvent.pfJetGoodNumID++;
         nEvent.pfJetGoodNum++;
@@ -2082,6 +2085,17 @@ const bool JZBAnalysis::IsCustomMu(const int index){
   return true;
 }
 
+const float JZBAnalysis::EffArea(float abseta) {
+  abseta=fabs(abseta); // making sure we're looking at |eta|
+  if(abseta<1.0) return 0.10;
+  if(abseta<1.479) return 0.12;
+  if(abseta<2.0) return 0.085;
+  if(abseta<2.2) return 0.11;
+  if(abseta<2.3) return 0.12;
+  if(abseta<2.4) return 0.12;
+  return 0.13;
+}
+
 
 const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
@@ -2118,22 +2132,20 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   counters[EL].fill(" ... |1/e-1/p|<0.05");
   
   // ECAL gap veto
-  if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;  //fbrem : fTElNBrems (reco::GsfElectron::fbrem())
+  if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;  
   counters[EL].fill(" ... not in ECAL gap");
+
+//fbrem : fTElNBrems (reco::GsfElectron::fbrem())  --> no cut?
   
-  // Compute isolation separately (corresponds to WP95 iso)
-  double pedestal = 0.;
-  if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
-  double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
-  double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
+  float pfIso = (fTR->ElPfIsoChHad03[index] + std::max((float)0.0, fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[index]))))/fTR->ElPt[index];
 
   if ( fabs(fTR->ElEta[index]) < 1.479 || fTR->ElPt[index]>20.0) { // Barrel
-    if ( !((hybridIso < 0.15) ) ) return false;
+    if ( !((pfIso  < 0.15) ) ) return false;
   } else {
     //Endcap with pt<20
-    if ( !((hybridIso < 0.10) ) ) return false;
+    if ( !((pfIso  < 0.10) ) ) return false;
   }
-  counters[EL].fill(" ... hybridIso < 0.15 (or 0.1 for endcaps with pt<20)");
+  counters[EL].fill(" ... pfIso  < 0.15 (or 0.1 for endcaps with pt<20)");
 
   return true;
 }
