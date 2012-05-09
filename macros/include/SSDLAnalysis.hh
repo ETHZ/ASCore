@@ -54,6 +54,7 @@ public:
 	bool IsTightEle(int, int);
 	
 	int JetPartonMatch(int);
+	int GenJetMatch(int);
 	
 	double corrMuIso(int);
 	double corrElIso(int);
@@ -119,8 +120,11 @@ private:
 	float fTJetbtag3[fMaxNjets]; // TCHP
 	float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
-	int   fTJetPartonID[fMaxNjets];
 	float fTJetJECUncert[fMaxNjets];
+	int   fTJetPartonID[fMaxNjets];
+	float fTJetGenpt [fMaxNjets];
+	float fTJetGeneta[fMaxNjets];
+	float fTJetGenphi[fMaxNjets];
 
 	float fTpfMET;
 	float fTpfMETphi;

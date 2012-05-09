@@ -246,8 +246,11 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("JetTCHPBTag",   &fTJetbtag3,    "JetTCHPBTag[NJets]/F");
 	fAnalysisTree->Branch("JetTCHEBTag",   &fTJetbtag4,    "JetTCHEBTag[NJets]/F");
 	fAnalysisTree->Branch("JetArea",       &fTJetArea,     "JetArea[NJets]/F");
-	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
 	fAnalysisTree->Branch("JetJECUncert",  &fTJetJECUncert,"JetJECUncert[NJets]/F");
+	fAnalysisTree->Branch("JetPartonID",   &fTJetPartonID, "JetPartonID[NJets]/I");
+	fAnalysisTree->Branch("JetGenPt",      &fTJetGenpt ,   "JetGenPt[NJets]/F");
+	fAnalysisTree->Branch("JetGenEta",     &fTJetGeneta,   "JetGenEta[NJets]/F");
+	fAnalysisTree->Branch("JetGenPhi",     &fTJetGenphi,   "JetGenPhi[NJets]/F");
 }
 
 void SSDLAnalysis::BookEffTree(){
@@ -332,7 +335,6 @@ void SSDLAnalysis::FillAnalysisTree(){
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
 		fTJetpt      [ind] = fTR->JPt[jetindex];
-		// fTJetpt      [ind] = GetJetPtNoResidual(jetindex);
 		fTJeteta     [ind] = fTR->JEta[jetindex];
 		fTJetphi     [ind] = fTR->JPhi[jetindex];
 		fTJetbtag1   [ind] = fTR->JbTagProbSimpSVHighPur[jetindex];
@@ -340,11 +342,21 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTJetbtag3   [ind] = fTR->JbTagProbTkCntHighPur[jetindex];
 		fTJetbtag4   [ind] = fTR->JbTagProbTkCntHighEff[jetindex];
 		fTJetArea    [ind] = fTR->JArea[jetindex];
-		if(!fIsData) fTJetPartonID[ind] = JetPartonMatch(jetindex);
-		else fTJetPartonID[ind] = -1;
 		fTJetJECUncert[ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex]);
+		fTJetPartonID[ind] = JetPartonMatch(jetindex);
+		int genjetind = GenJetMatch(jetindex);
+		if(genjetind > -1){
+			fTJetGenpt [ind] = fTR->GenJetPt [genjetind];
+			fTJetGeneta[ind] = fTR->GenJetEta[genjetind];
+			fTJetGenphi[ind] = fTR->GenJetPhi[genjetind];
+		}
+		else{
+			fTJetGenpt [ind] = -888.88;
+			fTJetGeneta[ind] = -888.88;
+			fTJetGenphi[ind] = -888.88;
+		}
+		
 	}
-
 
 	// Get METs
 	fTpfMET     = fTR->PFMET;
@@ -598,8 +610,11 @@ void SSDLAnalysis::ResetTree(){
 		fTJetbtag3[i]     = -999.99;
 		fTJetbtag4[i]     = -999.99;
 		fTJetArea[i]      = -999.99;
-		fTJetPartonID[i]  = -999;
 		fTJetJECUncert[i] = -999.99;
+		fTJetPartonID[i]  = -999;
+		fTJetGenpt [i]    = -999.99;
+		fTJetGeneta[i]    = -999.99;
+		fTJetGenphi[i]    = -999.99;
 	}
 	fTpfMET      = -999.99;
 	fTpfMETphi   = -999.99;
@@ -745,6 +760,7 @@ bool SSDLAnalysis::IsTightEle(int toggle, int index){
 
 //____________________________________________________________________________
 int SSDLAnalysis::JetPartonMatch(int index){
+	if(fIsData) return -1;
 	// Returns PDG id of matched parton, any of (1,2,3,4,5,21)
 	// Unmatched returns 0
 	float jpt  = fTR->JPt[index];
@@ -752,6 +768,13 @@ int SSDLAnalysis::JetPartonMatch(int index){
 	float jphi = fTR->JPhi[index];
 	int match = 0;
 	float mindr = 100;
+
+	////////////////////////////
+	////////////////////////////
+	return -2;
+	////////////////////////////
+	////////////////////////////
+
 	if(fTR->nGenParticles > 1000) return -2;
 	for(size_t i = 0; i < fTR->nGenParticles; ++i){
 		// Only status 3 particles
@@ -767,9 +790,30 @@ int SSDLAnalysis::JetPartonMatch(int index){
 		float DR = Util::GetDeltaR(jeta, fTR->genInfoEta[i], jphi, fTR->genInfoPhi[i]);
 		if(DR > 0.5) continue;
 		if(DR > mindr) continue;
-
 		mindr = DR;
-		match = abs(fTR->genInfoId[i]);		
+		match = abs(fTR->genInfoId[i]);
+	}
+	return match;
+}
+int SSDLAnalysis::GenJetMatch(int index){
+	if(fIsData) return -1;
+	// Returns index of matched genjet
+	// Unmatched returns -1
+	float jpt  = fTR->JPt[index];
+	float jeta = fTR->JEta[index];
+	float jphi = fTR->JPhi[index];
+
+	int match = -1;
+	float mindr = 100;
+
+	for(size_t i = 0; i < fTR->NGenJets; ++i){
+		// Gen jets are stored with pt > 10
+		// Minimize DeltaR
+		float DR = Util::GetDeltaR(jeta, fTR->GenJetEta[i], jphi, fTR->GenJetPhi[i]);
+		if(DR > 0.5) continue;
+		if(DR > mindr) continue;
+		mindr = DR;
+		match = i;
 	}
 	return match;
 }
