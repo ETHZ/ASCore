@@ -118,6 +118,7 @@ oDatasetPath = oDatasetPath.lstrip()
 
 # Get CMSSW version
 cmsswVersion = os.getenv('CMSSW_VERSION')[6:] # Remove leading "CMSSW_"
+dasURL = 'https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_ph_analysis_02&input=dataset+dataset%3D'+oDatasetPath
 
 # perform crab tasks for data jobs
 if (datamc=="data"):
@@ -143,9 +144,8 @@ if (datamc=="data"):
    # get misc. information to be put on the twiki
    [range,lumi] = get_info(fLumiSummary,fJsonSummary)
 
-   format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']] |'+datasetName+' |'+datasetSize+' |'+datasetEvents+' |[[%ATTACHURL%/'+fLumiSummary+']['+lumi+']] | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% |'+cmsswVersion+' |'+ntupleVersion+' |'+userNickName+' | |'
+   format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']]  |'+iDatasetPath+' | [[%ATTACHURL%/'+fLumiSummary+']['+lumi+']]  | [['+dasURL+'][DAS]]  |'+cmsswVersion+'  |'+ntupleVersion+'  |'+userNickName+'  ||'
 else:
-   dasURL = 'https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_ph_analysis_02&input=dataset+dataset%3D'+oDatasetPath
    format_Twiki = '| '+iPrimaryDataset+'  | '+iDatasetPath+'  | [['+dasURL+'][DAS]]  | ...pb | '+cmsswVersion+'  | '+ntupleVersion+'  | '+userNickName+'  ||'
    format_Twiki += '\n\nAND DO NOT FORGET TO FILL IN THE CROSS-SECTION INFORMATION!\n'
 
