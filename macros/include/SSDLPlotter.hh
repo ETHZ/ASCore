@@ -88,7 +88,7 @@ public:
 	void makeElIsolationPlots(bool = false);
 	void makeElIdPlots();
 	
-	void makeNT2KinPlots(gHiLoSwitch = HighPt);
+	void makeNT2KinPlots();
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
 	void makeMETvsHTPlotPRL();
 	void makeMETvsHTPlot0HT();
@@ -111,14 +111,14 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
-	void makeIntPredictionTTW(TString, gRegion, gHiLoSwitch = HighPt);
+	void makeIntPrediction(TString, gRegion);
+	void makeIntPredictionTTW(TString, gRegion);
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false);
 	void makeDiffPrediction();
 	void makeDiffPredictionTTW();
 
 	void makeAllClosureTests();
-	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline, gHiLoSwitch = HighPt);
+	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
 
 	void makeTTbarClosure();
 	void makeRelIsoTTSigPlots();
@@ -145,7 +145,7 @@ public:
 	TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
-	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, gHiLoSwitch = HighPt);
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);

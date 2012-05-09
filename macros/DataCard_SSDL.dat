@@ -1,8 +1,8 @@
 ###################################################################################################################
 # Datacard for Same-sign dilepton analysis
-#   Format is: tag \t inputfile \t datamctype \t channel \t lumi[/pb] \t color
+#   Format is: tag \t inputfile \t datamctype \t channel \t xsec
 #    - datamctype can be: 0(data), 1(sm mc), 2(sig mc), 3(rare sm mc), 4(rare sm mc w/ no PU)
-#    - lumi only used for MC weights, default is set to 1.0
+#    - xsec only used for MC weights, default is set to 1.0
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Changelog:
@@ -11,92 +11,87 @@
 #  - Feb01 is a fix with some missing files in DoubleEle5, TTZ, WWW and WJets
 #  - Feb01 DoubleMu1 includes some additional events that weren't transferred before
 #  - Feb02 is the merge of Feb01 with the additional runs from Jan10b again (for DoubleEle5)
+#  - Apr23 is with lower jet pt cuts
+#  - May8 is with jet parton id matching, autom. ngen events counter and JECUncert, May8d is with parton id disabled (temp)
 ###################################################################################################################
 # Data
-DoubleMu1	stiegerb/SSDLTrees/2011B/Apr23b/DoubleMu-Run2011A-PromptReco-v4-AOD_RETRANSFER/		0	0
-DoubleMu2	stiegerb/SSDLTrees/2011B/Apr23b/DoubleMu-Run2011A-May10ReReco-v1-AOD.root		0	0
-DoubleMu3	stiegerb/SSDLTrees/2011B/Apr23b/DoubleMu-Run2011A-05Aug2011-v1-AOD.root			0	0
-DoubleMu4	stiegerb/SSDLTrees/2011B/Apr23b/DoubleMu_Run2011A-PromptReco-v6_AOD__retry.root		0	0
-DoubleMu5	stiegerb/SSDLTrees/2011B/Apr23b/DoubleMu-Run2011B-PromptReco-v1-AOD			0	0
-DoubleEle1	stiegerb/SSDLTrees/2011B/Apr23b/DoubleElectron-Run2011A-PromptReco-v4-AOD.root		0	1
-DoubleEle2	stiegerb/SSDLTrees/2011B/Apr23b/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root		0	1
-DoubleEle3	stiegerb/SSDLTrees/2011B/Apr23b/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root		0	1
-DoubleEle4	stiegerb/SSDLTrees/2011B/Apr23b/DoubleElectron_Run2011A-PromptReco-v6_AOD__retry.root	0	1
-DoubleEle5	stiegerb/SSDLTrees/2011B/Apr23b/DoubleElectron-Run2011B-PromptReco-v1-AOD		0	1
-MuEG1		stiegerb/SSDLTrees/2011B/Apr23b/MuEG-Run2011A-PromptReco-v4-AOD_RETRANSFER		0	2
-MuEG2		stiegerb/SSDLTrees/2011B/Apr23b/MuEG-Run2011A-May10ReReco-v1-AOD.root			0	2
-MuEG3		stiegerb/SSDLTrees/2011B/Apr23b/MuEG-Run2011A-05Aug2011-v1-AOD__new.root			0	2
-MuEG4		stiegerb/SSDLTrees/2011B/Apr23b/MuEG_Run2011A-PromptReco-v6_AOD__retry.root		0	2
-MuEG5		stiegerb/SSDLTrees/2011B/Apr23b/MuEG-Run2011B-PromptReco-v1-AOD				0	2
-# MuHad1		stiegerb/SSDLTrees/2011/Jul6/MuHad-Run2011A-May10ReReco-v1-AOD.root			0	0
-# MuHad2		stiegerb/SSDLTrees/2011/Jul6/MuHad-Run2011A-PromptReco-v4-AOD.root			0	0
-# EleHad1		stiegerb/SSDLTrees/2011/Jul6/ElectronHad-Run2011A-May10ReReco-v1-AOD.root		0	1
-# EleHad2		stiegerb/SSDLTrees/2011/Jul6/ElectronHad-Run2011A-PromptReco-v4-AOD.root		0	1
+DoubleMu1	stiegerb/SSDLTrees/2011B/May8/DoubleMu-Run2011A-PromptReco-v4-AOD		0	0
+DoubleMu2	stiegerb/SSDLTrees/2011B/May8/DoubleMu-Run2011A-May10ReReco-v1-AOD.root 	0	0
+DoubleMu3	stiegerb/SSDLTrees/2011B/May8/DoubleMu-Run2011A-05Aug2011-v1-AOD.root		0	0
+DoubleMu4	stiegerb/SSDLTrees/2011B/May8/DoubleMu-Run2011A-PromptReco-v6-AOD.root		0	0
+DoubleMu5	stiegerb/SSDLTrees/2011B/May8/DoubleMu-Run2011B-PromptReco-v1-AOD	  	0	0
+DoubleEle1	stiegerb/SSDLTrees/2011B/May8/DoubleElectron-Run2011A-PromptReco-v4-AOD	 	0	1
+DoubleEle2	stiegerb/SSDLTrees/2011B/May8/DoubleElectron-Run2011A-May10ReReco-v1-AOD.root	0	1
+DoubleEle3	stiegerb/SSDLTrees/2011B/May8/DoubleElectron-Run2011A-05Aug2011-v1-AOD.root	0	1
+DoubleEle4	stiegerb/SSDLTrees/2011B/May8/DoubleElectron-Run2011A-PromptReco-v6-AOD.root	0	1
+DoubleEle5	stiegerb/SSDLTrees/2011B/May8/DoubleElectron-Run2011B-PromptReco-v1-AOD	 	0	1
+MuEG1		stiegerb/SSDLTrees/2011B/May8/MuEG-Run2011A-PromptReco-v4-AOD		0	2
+MuEG2		stiegerb/SSDLTrees/2011B/May8/MuEG-Run2011A-May10ReReco-v1-AOD.root		0	2
+MuEG3		stiegerb/SSDLTrees/2011B/May8/MuEG-Run2011A-05Aug2011-v1-AOD.root		0	2
+MuEG4		stiegerb/SSDLTrees/2011B/May8/MuEG-Run2011A-PromptReco-v6-AOD.root		0	2
+MuEG5		stiegerb/SSDLTrees/2011B/May8/MuEG-Run2011B-PromptReco-v1-AOD			0	2
 #####################################################################################################################
 ## Top and EWK
-TTJets		stiegerb/SSDLTrees/2011B/Apr23b/MC/TTJets_Fall11-PU_S6_START42_V14B				1	-1	157.5	59574249	51
-SingleT_t	stiegerb/SSDLTrees/2011B/Apr23b/MC/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root		1	-1	41.92	3861171		53
-SingleTbar_t	stiegerb/SSDLTrees/2011B/Apr23b/MC/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root	1	-1	22.65	1925378		53
-SingleT_tW	stiegerb/SSDLTrees/2011B/Apr23b/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root	1	-1	7.87	814390		55
-SingleTbar_tW	stiegerb/SSDLTrees/2011B/Apr23b/MC/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root	1	-1	7.87	789739		55
-SingleT_s	stiegerb/SSDLTrees/2011B/Apr23b/MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2.root		1	-1	3.19	253043		57
-SingleTbar_s	stiegerb/SSDLTrees/2011B/Apr23b/MC/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11.root	1	-1	1.44	137980		57
-WJets		stiegerb/SSDLTrees/2011B/Apr23b/MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2		1	-1	19305	34940743	61
-DYJets		stiegerb/SSDLTrees/2011B/Apr23b/MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11		1	-1	3048	35942736	64
-GJets40		stiegerb/SSDLTrees/2011B/Apr23b/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root	1	-1	25690.0	12730972	38
-GJets100	stiegerb/SSDLTrees/2011B/Apr23b/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root	1	-1	5213.0	1536287		39
-GJets200	stiegerb/SSDLTrees/2011B/Apr23b/MC/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4.root   	1	-1	798.3	9377170		40
-GVJets		stiegerb/SSDLTrees/2011B/Apr23b/MC/GVJets_7TeV-madgraph-Summer11-PU_S4.root			1	-1	56.64	1067879		41
-WGstarE		stiegerb/SSDLTrees/2011B/Apr23b/MC/WGstarToLNu2E_TuneZ2_7TeV-madgraph.root			1	-1	5.546	266882		41
-WGstarMu	stiegerb/SSDLTrees/2011B/Apr23b/MC/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph.root			1	-1	1.604	99990		41
-WGstarTau	stiegerb/SSDLTrees/2011B/Apr23b/MC/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph.root			1	-1	0.287	48188		41
-WWTo2L2Nu	stiegerb/SSDLTrees/2011B/Apr23b/MC/WWTo2L2NuMadgraph.root					1	-1	2.927	1197558		66
-WZTo3LNu	stiegerb/SSDLTrees/2011B/Apr23b/MC/WZTo3LNuMadgraph.root						1	-1	0.558	1221134		73
-ZZTo4L		stiegerb/SSDLTrees/2011B/Apr23b/MC/ZZTo4LMadgraph.root						1	-1	0.0646	1185188		84
+TTJets		stiegerb/SSDLTrees/2011B/May8/MC/TTJets_Fall11-PU_S6_START42_V14B						1	-1	157.5
+SingleT_t	stiegerb/SSDLTrees/2011B/May8/MC/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root				1	-1	41.92
+SingleTbar_t	stiegerb/SSDLTrees/2011B/May8/MC/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root				1	-1	22.65
+SingleT_tW	stiegerb/SSDLTrees/2011B/May8/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root			1	-1	7.87
+SingleTbar_tW	stiegerb/SSDLTrees/2011B/May8/MC/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root			1	-1	7.87
+SingleT_s	stiegerb/SSDLTrees/2011B/May8/MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2.root				1	-1	3.19
+SingleTbar_s	stiegerb/SSDLTrees/2011B/May8/MC/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11.root				1	-1	1.44
+WJets		stiegerb/SSDLTrees/2011B/May8/MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2				1	-1	19305
+DYJets		stiegerb/SSDLTrees/2011B/May8/MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1	1	-1	3048
+GJets40		stiegerb/SSDLTrees/2011B/May8/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root			1	-1	25690.0
+GJets100	stiegerb/SSDLTrees/2011B/May8/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root			1	-1	5213.0
+GJets200	stiegerb/SSDLTrees/2011B/May8/MC/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4.root   			1	-1	798.3
+GVJets		stiegerb/SSDLTrees/2011B/May8/MC/GVJets_7TeV-madgraph-Summer11-PU_S4.root					1	-1	56.64
+WWTo2L2Nu	stiegerb/SSDLTrees/2011B/May8/MC/WWTo2L2NuMadgraph.root								1	-1	2.927
+WZTo3LNu	stiegerb/SSDLTrees/2011B/May8/MC/WZTo3LNuMadgraph.root								1	-1	0.558
+ZZTo4L		stiegerb/SSDLTrees/2011B/May8/MC/ZZTo4LMadgraph.root								1	-1	0.0646
 ####################################################################################################################
 ## Rare SM
-TTbarW		stiegerb/SSDLTrees/2011B/Apr23b/MC/TTW_TuneZ2_7TeV-madgraphCMSSW42xPUv2.root		3	-1	0.1633	1089608	51
-TTbarZ		stiegerb/SSDLTrees/2011B/Apr23b/MC/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root		3	-1	0.139	1467136	51
-TTbarG		stiegerb/SSDLTrees/2011B/Apr23b/MC/TTPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root	3	-1	0.6545	51691	51
-DPSWW		stiegerb/SSDLTrees/2011B/Apr23b/MC/DoublePartonWWFastSim.root				3	-1	0.3778	400000	51
-WWZ		stiegerb/SSDLTrees/2011B/Apr23b/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	0.0268	262123	51
-WZZ		stiegerb/SSDLTrees/2011B/Apr23b/MC/WZZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	0.0088	1742151	51
-WWG		stiegerb/SSDLTrees/2011B/Apr23b/MC/WWPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root	3	-1	0.177	55430	51
-ZZZ		stiegerb/SSDLTrees/2011B/Apr23b/MC/ZZZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	0.00288	1801678	51
-WWW		stiegerb/SSDLTrees/2011B/Apr23b/MC/WWW_TuneZ2_7TeV-madgraph.root				3	-1	0.038	1067117	51
+TTbarW		stiegerb/SSDLTrees/2011B/May8/MC/TTW_TuneZ2_7TeV-madgraphCMSSW42xPUv2.root			3	-1	0.1633
+TTbarZ		stiegerb/SSDLTrees/2011B/May8/MC/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root			3	-1	0.139
+TTbarG		stiegerb/SSDLTrees/2011B/May8/MC/TTPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv3.root			3	-1	0.6545
+DPSWW		stiegerb/SSDLTrees/2011B/May8/MC/DoublePartonWWFastSim_CMSSW425PUv1.root					3	-1	0.3778
+WWZ		stiegerb/SSDLTrees/2011B/May8/MC/WWZNoGstar_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root		3	-1	0.0268
+WZZ		stiegerb/SSDLTrees/2011B/May8/MC/WZZNoGstar_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root		3	-1	0.0088
+WWG		stiegerb/SSDLTrees/2011B/May8/MC/WWPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root			3	-1	0.177
+ZZZ		stiegerb/SSDLTrees/2011B/May8/MC/ZZZNoGstar_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root		3	-1	0.00288
+WWW		stiegerb/SSDLTrees/2011B/May8/MC/WWW_TuneZ2_7TeV-madgraphCMSSW42xPUv1.root			3	-1	0.038
 ####################################################################################################################
 ## Rare SM with no pileup, correct all by 1/puweight = 1/0.2674456 = 3.739078
-W+W+		stiegerb/SSDLTrees/2011B/Apr23b/MC/WplusWplus.root					4	-1	0.165	133747	51
-W-W-		stiegerb/SSDLTrees/2011B/Apr23b/MC/WminusWminus.root					4	-1	0.056	175075	51
+W+W+		stiegerb/SSDLTrees/2011B/May8d/MC/WplusWplus.root					4	-1	0.165
+W-W-		stiegerb/SSDLTrees/2011B/May8d/MC/WminusWminus.root					4	-1	0.056
 ####################################################################################################################
 ## SUSY Signal
-LM0		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	54.8913	218335	18
-LM1		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM1_SUSY_sftsht_7TeV-pythia6.root			2	-1	6.54992	218176	18
-LM2		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM2_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.80159	206336	18
-LM3		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM3_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.81320	215120	18
-LM4		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM4_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.53665	218380	18
-LM5		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM5_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.63382	223992	18
-LM6		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM6_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.40352	220000	18
-LM7		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM7_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.34199	5368	18
-LM8		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM8_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.02930	180960	18
-LM9		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM9_SUSY_sftsht_7TeV-pythia6.root			2	-1	10.5583	227808	18
-LM11		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM11_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.11186	218703	18
-LM12		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM12_SUSY_sftsht_7TeV-pythia6.root			2	-1	5.91476	223491	18
-LM13		stiegerb/SSDLTrees/2011B/Apr23b/MC/LM13_SUSY_sftsht_7TeV-pythia6.root			2	-1	9.79658	173240	18
+LM0		stiegerb/SSDLTrees/2011B/May8d/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	54.8913
+LM1		stiegerb/SSDLTrees/2011B/May8d/MC/LM1_SUSY_sftsht_7TeV-pythia6.root			2	-1	6.54992
+LM2		stiegerb/SSDLTrees/2011B/May8d/MC/LM2_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.80159
+LM3		stiegerb/SSDLTrees/2011B/May8d/MC/LM3_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.81320
+LM4		stiegerb/SSDLTrees/2011B/May8d/MC/LM4_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.53665
+LM5		stiegerb/SSDLTrees/2011B/May8d/MC/LM5_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.63382
+LM6		stiegerb/SSDLTrees/2011B/May8d/MC/LM6_SUSY_sftsht_7TeV-pythia6.root			2	-1	0.40352
+LM7		stiegerb/SSDLTrees/2011B/May8d/MC/LM7_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.34199
+LM8		stiegerb/SSDLTrees/2011B/May8d/MC/LM8_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.02930
+LM9		stiegerb/SSDLTrees/2011B/May8d/MC/LM9_SUSY_sftsht_7TeV-pythia6.root			2	-1	10.5583
+LM11		stiegerb/SSDLTrees/2011B/May8d/MC/LM11_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.11186
+LM12		stiegerb/SSDLTrees/2011B/May8d/MC/LM12_SUSY_sftsht_7TeV-pythia6.root			2	-1	5.91476
+LM13		stiegerb/SSDLTrees/2011B/May8d/MC/LM13_SUSY_sftsht_7TeV-pythia6.root			2	-1	9.79658
 ###################################################################################################################
 # QCD
-MuEnr10		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6			1	-1	349988		8009642		94
-QCD15		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-15to30_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	8.159E+8	10535564	90
-QCD30		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-30to50_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	5.312E+7	6495294		91
-QCD50		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-50to80_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	6.359E+6	6217996		92
-QCD80		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-80to120_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	7.843E+5	6589956		93
-QCD120		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-120to170_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.151E+5	6073064		94
-QCD170		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-170to300_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	2.426E+4	5888432		95
-QCD300		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-300to470_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.168E+3	6050735		96
-QCD470		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-470to600_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	7.022E+1	3483152		97
-QCD600		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-600to800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.555E+1	4231169		98
-QCD800		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-800to1000_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.844E+0	3996570		99
-QCD1000		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-1000to1400_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	3.321E-1	2083920		100
-QCD1400		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-1400to1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.087E-2	2157160		46
-QCD1800		stiegerb/SSDLTrees/2011B/Apr23b/MC/QCD_Pt-1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	3.575E-4	293139		50
+MuEnr10		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6			1	-1	349988
+QCD15		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-15to30_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	8.159E+8
+QCD30		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-30to50_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	5.312E+7
+QCD50		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-50to80_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	6.359E+6
+QCD80		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-80to120_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	7.843E+5
+QCD120		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-120to170_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.151E+5
+QCD170		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-170to300_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	2.426E+4
+QCD300		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-300to470_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.168E+3
+QCD470		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-470to600_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	7.022E+1
+QCD600		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-600to800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.555E+1
+QCD800		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-800to1000_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.844E+0
+QCD1000		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-1000to1400_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	3.321E-1
+QCD1400		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-1400to1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.087E-2
+QCD1800		stiegerb/SSDLTrees/2011B/May8d/MC/QCD_Pt-1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	3.575E-4
 ###################################################################################################################

@@ -313,10 +313,10 @@ void SSDLPlotter::doAnalysis(){
 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	// makeNT2KinPlots();
+	makeNT2KinPlots();
 	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
-	// makeMETvsHTPlot0HT();
+	makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
 	// makeRatioPlots(Muon);
@@ -326,17 +326,17 @@ void SSDLPlotter::doAnalysis(){
 	// makeNTightLoosePlots(Muon);
 	// makeNTightLoosePlots(Elec);
 	
-	// makeFRvsPtPlots(Muon, SigSup);
-	// makeFRvsPtPlots(Elec, SigSup);
-	// makeFRvsPtPlots(Muon, ZDecay);
-	// makeFRvsPtPlots(Elec, ZDecay);
-	// makeFRvsEtaPlots(Muon);
-	// makeFRvsEtaPlots(Elec);
+	makeFRvsPtPlots(Muon, SigSup);
+	makeFRvsPtPlots(Elec, SigSup);
+	makeFRvsPtPlots(Muon, ZDecay);
+	makeFRvsPtPlots(Elec, ZDecay);
+	makeFRvsEtaPlots(Muon);
+	makeFRvsEtaPlots(Elec);
 	
 	makeAllClosureTests();
 	makeAllIntPredictions();
 	makeDiffPrediction();
-	// makeDiffPredictionTTW();
+	makeDiffPredictionTTW();
 	printAllYieldTables();
 	
 	// makePredictionSignalEvents( minHT, maxHT, minMET, maxMET, minNjets, minNBjetsL, minNBjetsM, ttw);
@@ -2452,12 +2452,12 @@ void SSDLPlotter::makeElIdPlots(){
 	} //end loop over ID variables
 } //end function
 
-void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
+void SSDLPlotter::makeNT2KinPlots(){
 	TString selname[3] = {"LooseLoose", "TightTight", "Signal"};
 	const bool loglin = true; // true = log, false = linear
 
 	for(size_t s = 0; s < 3; ++s){ // loop on selections
-		fOutputSubDir = "KinematicPlots/" + gHiLoLabel[hilo] + "/" + selname[s];
+		fOutputSubDir = "KinematicPlots/" + selname[s];
 		char cmd[100];
 	    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
 	    system(cmd);
@@ -2497,10 +2497,10 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 		// Adjust overflow bins:
 		for(size_t i = 0; i < gNKinVars; ++i){
 			for(gSample j = sample_begin; j < gNSAMPLES; j=gSample(j+1)){
-				Int_t nbins     = fSamples[j]->kinplots[s][hilo].hvar[i]->GetNbinsX();
-				Double_t binc   = fSamples[j]->kinplots[s][hilo].hvar[i]->GetBinContent(nbins);
-				Double_t overfl = fSamples[j]->kinplots[s][hilo].hvar[i]->GetBinContent(nbins+1);
-				fSamples[j]->kinplots[s][hilo].hvar[i]->SetBinContent(nbins, binc + overfl);
+				Int_t nbins     = fSamples[j]->kinplots[s][HighPt].hvar[i]->GetNbinsX();
+				Double_t binc   = fSamples[j]->kinplots[s][HighPt].hvar[i]->GetBinContent(nbins);
+				Double_t overfl = fSamples[j]->kinplots[s][HighPt].hvar[i]->GetBinContent(nbins+1);
+				fSamples[j]->kinplots[s][HighPt].hvar[i]->SetBinContent(nbins, binc + overfl);
 			}
 		}
 
@@ -2523,13 +2523,13 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			for(size_t j = 0; j < gNSAMPLES; ++j){
 				float lumiscale = fLumiNorm / fSamples[j]->getLumi();
 				if(fSamples[j]->datamc == 0) continue;
-				fSamples[j]->kinplots[s][hilo].hvar[i]->Scale(lumiscale);
+				fSamples[j]->kinplots[s][HighPt].hvar[i]->Scale(lumiscale);
 			}
 
 			// Fill data histo
 			for(size_t j = 0; j < datasamples.size(); ++j){
 				Sample *S = fSamples[datasamples[j]];
-				hvar_data[i]->Add(S->kinplots[s][hilo].hvar[i]);
+				hvar_data[i]->Add(S->kinplots[s][HighPt].hvar[i]);
 				hvar_data[i]->SetXTitle(KinPlots::axis_label[i]);
 			}
 
@@ -2537,13 +2537,13 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 			float intscale(0.);
 			for(size_t j = 0; j < mcsamples.size();   ++j){
 				Sample *S = fSamples[mcsamples[j]];
-				intscale += S->kinplots[s][hilo].hvar[i]->Integral();
+				intscale += S->kinplots[s][HighPt].hvar[i]->Integral();
 			}
 			intscale = hvar_data[i]->Integral() / intscale;
 			
 			for(size_t j = 0; j < mcsamples.size();   ++j){
 				Sample *S = fSamples[mcsamples[j]];
-				S->kinplots[s][hilo].hvar[i]->Scale(intscale);
+				S->kinplots[s][HighPt].hvar[i]->Scale(intscale);
 			}
 
 			hvar_qcd [i]->SetFillColor(kYellow-4);
@@ -2560,12 +2560,12 @@ void SSDLPlotter::makeNT2KinPlots(gHiLoSwitch hilo){
 				Sample *S = fSamples[mcsamples[j]];
 				TString s_name = S->sname;
 				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-				if ( S->getType() == 1) hvar_qcd [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( S->getType() == 2) hvar_ttj [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				if ( S->getType() == 1) hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] );
+				if ( S->getType() == 2) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] );
 				if ( S->getType() == 3 || (S->getType() == 5 && S->getProc() != 7) )
-				                        hvar_ewk [i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( S->getType() == 4) hvar_rare[i]->Add( S->kinplots[s][hilo].hvar[i] );
-				if ( S->getProc() == 7) hvar_db  [i]->Add( S->kinplots[s][hilo].hvar[i] );
+				                        hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] );
+				if ( S->getType() == 4) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] );
+				if ( S->getProc() == 7) hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] );
 			}
 			hvar_mc_s[i]->Add(hvar_qcd[i]);
 			hvar_mc_s[i]->Add(hvar_ttj[i]);
@@ -4704,7 +4704,7 @@ TGraphAsymmErrors *SSDLPlotter::getCombEfficiency(vector<int> samples, gChannel 
 	return asym;
 }
 
-void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output, gHiLoSwitch hilo){
+void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch fp, TH2D*& h_passed, TH2D*& h_total, bool output){
 	if(fVerbose>2) cout << "---------------" << endl;
 	for(size_t i = 0; i < samples.size(); ++i){
 		Sample *S = fSamples[samples[i]];
@@ -4713,8 +4713,8 @@ void SSDLPlotter::getPassedTotal(vector<int> samples, gChannel chan, gFPSwitch f
 		if(S->datamc == 0) scale = 1;
 
 		Channel *C;
-		if(chan == Muon) C = &S->region[Baseline][hilo].mm;
-		if(chan == Elec) C = &S->region[Baseline][hilo].ee;
+		if(chan == Muon) C = &S->region[Baseline][HighPt].mm;
+		if(chan == Elec) C = &S->region[Baseline][HighPt].ee;
 		TH2D *ntight, *nloose;
 		if(fp == SigSup){
 			ntight = C->fntight;
@@ -4845,7 +4845,7 @@ void SSDLPlotter::makeAllIntPredictions(){
 	fOUTSTREAM2.close();
 	fOutputSubDir = "";
 }
-void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch hilo){
+void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
 
 	TLatex *lat = new TLatex();
@@ -4925,8 +4925,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		nfp_em += S->numbers[reg][ElMu].nfp;
 		nff_em += S->numbers[reg][ElMu].nff;
 
-		nt2_em_BB_os += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
-		nt2_em_EE_os += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
+		nt2_em_BB_os += S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
+		nt2_em_EE_os += S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
 	}
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
@@ -4938,9 +4938,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp;
 		nff_ee += S->numbers[reg][Elec].nff;
 		
-		nt2_ee_BB_os += S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
-		nt2_ee_EE_os += S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
-		nt2_ee_EB_os += S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
+		nt2_ee_BB_os += S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
+		nt2_ee_EE_os += S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
+		nt2_ee_EB_os += S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -4968,16 +4968,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -4998,16 +4998,16 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5117,18 +5117,18 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 		
-		mc_os_em_bb_sum += gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
-		mc_os_em_ee_sum += gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
-		mc_os_ee_bb_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries();
-		mc_os_ee_eb_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries();
-		mc_os_ee_ee_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries();
+		mc_os_em_bb_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries();
+		mc_os_em_ee_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries();
+		mc_os_ee_bb_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries();
+		mc_os_ee_eb_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries();
+		mc_os_ee_ee_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries();
 
 		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries() << " || ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries() << " || ";
 		OUT << endl;
 	}	
 	OUT << "-----------------------------------------------------------------------" << endl;
@@ -5190,22 +5190,22 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 		float scale = fLumiNorm/S->getLumi();
 
 		
-		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
 		nt2_rare_mc_ee += temp_nt2_ee;
 
-		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale * S->getError2(S->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale * S->getError2(S->region[reg][hilo].em.nt20_pt->GetEntries());
-		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale * S->getError2(S->region[reg][hilo].ee.nt20_pt->GetEntries());
+		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
-		temp_nt2_mm, gMMTrigScale*scale*S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries()),
-		temp_nt2_em, gEMTrigScale*scale*S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()),
-		temp_nt2_ee, gEETrigScale*scale*S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()));
+		temp_nt2_mm, gMMTrigScale*scale*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
+		temp_nt2_em, gEMTrigScale*scale*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
+		temp_nt2_ee, gEETrigScale*scale*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
 	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
@@ -5217,13 +5217,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
-	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].em.nt20_pt->GetEntries());
-	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].ee.nt20_pt->GetEntries());
+	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
 	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
@@ -5499,7 +5499,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg, gHiLoSwitch h
 	delete gr_obs;
 	delete FR;
 }
-void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitch hilo){
+void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
 
 	TLatex *lat = new TLatex();
@@ -5579,8 +5579,8 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		nfp_em += S->numbers[reg][ElMu].nfp;
 		nff_em += S->numbers[reg][ElMu].nff;
 
-		nt2_em_BB_os += S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
-		nt2_em_EE_os += S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
+		nt2_em_BB_os += S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries(); // ele in barrel
+		nt2_em_EE_os += S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries(); // ele in endcal
 	}
 	for(size_t i = 0; i < elsamples.size(); ++i){
 		Sample *S = fSamples[elsamples[i]];
@@ -5592,9 +5592,9 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		npf_ee += S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp;
 		nff_ee += S->numbers[reg][Elec].nff;
 		
-		nt2_ee_BB_os += S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
-		nt2_ee_EE_os += S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
-		nt2_ee_EB_os += S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
+		nt2_ee_BB_os += S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries(); // both in barrel
+		nt2_ee_EE_os += S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries(); // both in endcal
+		nt2_ee_EB_os += S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries(); // one barrel, one endcap
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -5625,16 +5625,16 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1); nt2sum_mm  += temp_nt2_mm ;
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1); nt10sum_mm += temp_nt10_mm;
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1); nt0sum_mm  += temp_nt0_mm ;
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1); nt2sum_em  += temp_nt2_em ;
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1); nt10sum_em += temp_nt10_em;
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1); nt01sum_em += temp_nt01_em;
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1); nt0sum_em  += temp_nt0_em ;
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1); nt2sum_ee  += temp_nt2_ee ;
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1); nt10sum_ee += temp_nt10_ee;
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1); nt0sum_ee  += temp_nt0_ee ;
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5655,16 +5655,16 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
@@ -5786,18 +5786,18 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		Sample *S = fSamples[fMCBG[i]];
 		float scale = fLumiNorm / S->getLumi();
 		
-		mc_os_em_bb_sum += gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries();
-		mc_os_em_ee_sum += gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries();
-		mc_os_ee_bb_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries();
-		mc_os_ee_eb_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries();
-		mc_os_ee_ee_sum += gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries();
+		mc_os_em_bb_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries();
+		mc_os_em_ee_sum += gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries();
+		mc_os_ee_bb_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries();
+		mc_os_ee_eb_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries();
+		mc_os_ee_ee_sum += gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries();
 
 		OUT << setw(16) << S->sname << " || ";
-		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries() << " || ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries() << " | ";
-		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries() << " || ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries() << " | ";
+		OUT << setw(7)  << setprecision(2) << gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries() << " || ";
 		OUT << endl;
 	}	
 	OUT << "-----------------------------------------------------------------------" << endl;
@@ -5857,22 +5857,22 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 		Sample *S = fSamples[mcbkg[i]];
 		float scale = fLumiNorm/S->getLumi();
 
-		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		nt2_rare_mc_mm += temp_nt2_mm;
 		nt2_rare_mc_em += temp_nt2_em;
 		nt2_rare_mc_ee += temp_nt2_ee;
 
-		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale * S->getError2(S->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale * S->getError2(S->region[reg][hilo].em.nt20_pt->GetEntries());
-		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale * S->getError2(S->region[reg][hilo].ee.nt20_pt->GetEntries());
+		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
-		temp_nt2_mm, gMMTrigScale*scale*S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries()),
-		temp_nt2_em, gEMTrigScale*scale*S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()),
-		temp_nt2_ee, gEETrigScale*scale*S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()));
+		temp_nt2_mm, gMMTrigScale*scale*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
+		temp_nt2_em, gEMTrigScale*scale*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
+		temp_nt2_ee, gEETrigScale*scale*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
 	}
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
@@ -5884,13 +5884,13 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	///////////////////////////////////////////
 	// WZ production
 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
-	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].em.nt20_pt->GetEntries());
-	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][hilo].ee.nt20_pt->GetEntries());
+	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
 	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
@@ -5902,22 +5902,22 @@ void SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg, gHiLoSwitc
 	///////////////////////////////////////////
 	// ttX production
 	float ttwscale = fLumiNorm/fSamples[TTbarW]->getLumi();
-	float ttw_nt2_mm = gMMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float ttw_nt2_em = gEMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float ttw_nt2_ee = gEETrigScale*ttwscale*fSamples[TTbarW]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float ttw_nt2_mm = gMMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttw_nt2_em = gEMTrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttw_nt2_ee = gEETrigScale*ttwscale*fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
-	float ttw_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float ttw_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].em.nt20_pt->GetEntries());
-	float ttw_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][hilo].ee.nt20_pt->GetEntries());
+	float ttw_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float ttw_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float ttw_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttwscale*ttwscale * fSamples[TTbarW]->getError2(fSamples[TTbarW]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	float ttzscale = fLumiNorm/fSamples[TTbarZ]->getLumi();
-	float ttz_nt2_mm = gMMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-	float ttz_nt2_em = gEMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-	float ttz_nt2_ee = gEETrigScale*ttzscale*fSamples[TTbarZ]->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	float ttz_nt2_mm = gMMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	float ttz_nt2_em = gEMTrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	float ttz_nt2_ee = gEETrigScale*ttzscale*fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
 
-	float ttz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][hilo].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-	float ttz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][hilo].em.nt20_pt->GetEntries());
-	float ttz_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][hilo].ee.nt20_pt->GetEntries());
+	float ttz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+	float ttz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+	float ttz_nt2_ee_e1 = gEETrigScale*gEETrigScale*ttzscale*ttzscale * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 
 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttW Prod.",
 	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1),
@@ -8821,7 +8821,7 @@ void SSDLPlotter::makeAllClosureTests(){
 	}
 	fOutputSubDir = "";
 }
-void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegion reg, gHiLoSwitch hilo){
+void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegion reg){
 	ofstream OUT(filename.Data(), ios::trunc);
 	const int nsamples = samples.size();
 
@@ -8886,56 +8886,56 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		ntl_ee.push_back(S->numbers[reg][Elec].nt10);
 		nll_ee.push_back(S->numbers[reg][Elec].nt0);
 
-		ntt_mm_e1.push_back(S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries())); // take unweighted entries
-		ntt_ee_e1.push_back(S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()));
-		ntt_em_e1.push_back(S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()));
+		ntt_mm_e1.push_back(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries())); // take unweighted entries
+		ntt_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
+		ntt_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()));
 
-		npp_mm.push_back(S->region[reg][hilo].mm.npp_pt->GetEntries());
-		npf_mm.push_back(S->region[reg][hilo].mm.npf_pt->GetEntries());
-		nfp_mm.push_back(S->region[reg][hilo].mm.nfp_pt->GetEntries());
-		nff_mm.push_back(S->region[reg][hilo].mm.nff_pt->GetEntries());
+		npp_mm.push_back(S->region[reg][HighPt].mm.npp_pt->GetEntries());
+		npf_mm.push_back(S->region[reg][HighPt].mm.npf_pt->GetEntries());
+		nfp_mm.push_back(S->region[reg][HighPt].mm.nfp_pt->GetEntries());
+		nff_mm.push_back(S->region[reg][HighPt].mm.nff_pt->GetEntries());
 
-		npp_em.push_back(S->region[reg][hilo].em.npp_pt->GetEntries());
-		npf_em.push_back(S->region[reg][hilo].em.npf_pt->GetEntries());
-		nfp_em.push_back(S->region[reg][hilo].em.nfp_pt->GetEntries());
-		nff_em.push_back(S->region[reg][hilo].em.nff_pt->GetEntries());
+		npp_em.push_back(S->region[reg][HighPt].em.npp_pt->GetEntries());
+		npf_em.push_back(S->region[reg][HighPt].em.npf_pt->GetEntries());
+		nfp_em.push_back(S->region[reg][HighPt].em.nfp_pt->GetEntries());
+		nff_em.push_back(S->region[reg][HighPt].em.nff_pt->GetEntries());
 
-		npp_ee.push_back(S->region[reg][hilo].ee.npp_pt->GetEntries());
-		npf_ee.push_back(S->region[reg][hilo].ee.npf_pt->GetEntries());
-		nfp_ee.push_back(S->region[reg][hilo].ee.nfp_pt->GetEntries());
-		nff_ee.push_back(S->region[reg][hilo].ee.nff_pt->GetEntries());
+		npp_ee.push_back(S->region[reg][HighPt].ee.npp_pt->GetEntries());
+		npf_ee.push_back(S->region[reg][HighPt].ee.npf_pt->GetEntries());
+		nfp_ee.push_back(S->region[reg][HighPt].ee.nfp_pt->GetEntries());
+		nff_ee.push_back(S->region[reg][HighPt].ee.nff_pt->GetEntries());
 
-		npp_tt_mm.push_back(S->region[reg][hilo].mm.nt2pp_pt->GetEntries());
-		npf_tt_mm.push_back(S->region[reg][hilo].mm.nt2pf_pt->GetEntries());
-		nfp_tt_mm.push_back(S->region[reg][hilo].mm.nt2fp_pt->GetEntries());
-		nff_tt_mm.push_back(S->region[reg][hilo].mm.nt2ff_pt->GetEntries());
+		npp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pp_pt->GetEntries());
+		npf_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pf_pt->GetEntries());
+		nfp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2fp_pt->GetEntries());
+		nff_tt_mm.push_back(S->region[reg][HighPt].mm.nt2ff_pt->GetEntries());
 
-		npp_tt_em.push_back(S->region[reg][hilo].em.nt2pp_pt->GetEntries());
-		npf_tt_em.push_back(S->region[reg][hilo].em.nt2pf_pt->GetEntries());
-		nfp_tt_em.push_back(S->region[reg][hilo].em.nt2fp_pt->GetEntries());
-		nff_tt_em.push_back(S->region[reg][hilo].em.nt2ff_pt->GetEntries());
+		npp_tt_em.push_back(S->region[reg][HighPt].em.nt2pp_pt->GetEntries());
+		npf_tt_em.push_back(S->region[reg][HighPt].em.nt2pf_pt->GetEntries());
+		nfp_tt_em.push_back(S->region[reg][HighPt].em.nt2fp_pt->GetEntries());
+		nff_tt_em.push_back(S->region[reg][HighPt].em.nt2ff_pt->GetEntries());
 
-		npp_tt_ee.push_back(S->region[reg][hilo].ee.nt2pp_pt->GetEntries());
-		npf_tt_ee.push_back(S->region[reg][hilo].ee.nt2pf_pt->GetEntries());
-		nfp_tt_ee.push_back(S->region[reg][hilo].ee.nt2fp_pt->GetEntries());
-		nff_tt_ee.push_back(S->region[reg][hilo].ee.nt2ff_pt->GetEntries());
+		npp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pp_pt->GetEntries());
+		npf_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pf_pt->GetEntries());
+		nfp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2fp_pt->GetEntries());
+		nff_tt_ee.push_back(S->region[reg][HighPt].ee.nt2ff_pt->GetEntries());
 		
-		ntt_os_BB_em.push_back(S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
-		ntt_os_EE_em.push_back(S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
-		ntt_os_BB_ee.push_back(S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
-		ntt_os_EE_ee.push_back(S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
-		ntt_os_EB_ee.push_back(S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
+		ntt_os_BB_em.push_back(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
+		ntt_os_EE_em.push_back(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
+		ntt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
+		ntt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
+		ntt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
 		
-		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][hilo].em.nt20_OS_BB_pt->GetEntries()));
-		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][hilo].em.nt20_OS_EE_pt->GetEntries()));
-		ntt_os_BB_ee_e1.push_back(S->getError(S->region[reg][hilo].ee.nt20_OS_BB_pt->GetEntries()));
-		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][hilo].ee.nt20_OS_EE_pt->GetEntries()));
-		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][hilo].ee.nt20_OS_EB_pt->GetEntries()));
+		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()));
+		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()));
+		ntt_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()));
+		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()));
+		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()));
 		
-		npp_tt_cm_ee.push_back(scale*S->region[reg][hilo].ee.nt2pp_cm_pt->GetEntries());
-		npp_cm_ee   .push_back(scale*S->region[reg][hilo].ee.npp_cm_pt->GetEntries());
-		npp_tt_cm_em.push_back(scale*S->region[reg][hilo].em.nt2pp_cm_pt->GetEntries());
-		npp_cm_em   .push_back(scale*S->region[reg][hilo].em.npp_cm_pt->GetEntries());
+		npp_tt_cm_ee.push_back(scale*S->region[reg][HighPt].ee.nt2pp_cm_pt->GetEntries());
+		npp_cm_ee   .push_back(scale*S->region[reg][HighPt].ee.npp_cm_pt->GetEntries());
+		npp_tt_cm_em.push_back(scale*S->region[reg][HighPt].em.nt2pp_cm_pt->GetEntries());
+		npp_cm_em   .push_back(scale*S->region[reg][HighPt].em.npp_cm_pt->GetEntries());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -9075,9 +9075,9 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
 		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
 		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
-		ntt_rare_mm_e1 += scale*scale*pow(S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries()),2);
-		ntt_rare_em_e1 += scale*scale*pow(S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()),2);
-		ntt_rare_ee_e1 += scale*scale*pow(S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()),2);
+		ntt_rare_mm_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),2);
+		ntt_rare_em_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
+		ntt_rare_ee_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
 	}
 
 	///////////////////////////////////////////
@@ -9087,9 +9087,9 @@ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegio
 	float ntt_wz_em = wzscale*fSamples[WZ]->numbers[reg][ElMu].nt2;
 	float ntt_wz_ee = wzscale*fSamples[WZ]->numbers[reg][Elec].nt2;
 
-	float ntt_wz_mm_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][hilo].mm.nt20_pt->GetEntries()),2); // for stat error take actual entries, not pileup weighted integral...
-	float ntt_wz_em_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][hilo].em.nt20_pt->GetEntries()),2);
-	float ntt_wz_ee_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][hilo].ee.nt20_pt->GetEntries()),2);
+	float ntt_wz_mm_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()),2); // for stat error take actual entries, not pileup weighted integral...
+	float ntt_wz_em_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
+	float ntt_wz_ee_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
 
 	// Squared errors
 	float npp_pred_sum_mm_e1(0.), npf_pred_sum_mm_e1(0.), nff_pred_sum_mm_e1(0.);
@@ -10304,7 +10304,6 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 
 	vector<int> musamples, elsamples, emusamples, mcsamples;
 
-	gHiLoSwitch hilo = HighPt;
 	musamples  = fMuData;
 	elsamples  = fEGData;
 	emusamples = fMuEGData;
@@ -10338,17 +10337,17 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		int proc = S->getProc();
 		if(proc == 0 || proc >= nprocs) continue; // safety
 		
-		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
-		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
-		float ntt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float ntl_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float nlt_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float nll_em_temp = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float ntt_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-		float ntl_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
-		float nll_ee_temp = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
-		
+		float ntt_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float ntl_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float nll_mm_temp = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
+		float ntt_em_temp = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float ntl_em_temp = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float nlt_em_temp = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float nll_em_temp = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float ntt_ee_temp = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float ntl_ee_temp = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float nll_ee_temp = gEETrigScale*scale*S->region[reg][HighPt].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
+
 		ntt_mm[proc] += ntt_mm_temp;
 		ntl_mm[proc] += ntl_mm_temp;
 		nll_mm[proc] += nll_mm_temp;
@@ -10376,9 +10375,9 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		// otherwise my yield table won't be self consistent anymore
 
 		// Errors
-		float ntt_mm_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].mm.nt20_pt->GetEntries()),2);
-		float ntt_em_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].em.nt20_pt->GetEntries()),2);
-		float ntt_ee_e2_temp = pow(gMMTrigScale*scale*S->getError(S->region[reg][hilo].ee.nt20_pt->GetEntries()),2);
+		float ntt_mm_e2_temp = pow(gMMTrigScale*scale*S->numbers[reg][Muon].tt_avweight*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),2);
+		float ntt_em_e2_temp = pow(gEMTrigScale*scale*S->numbers[reg][ElMu].tt_avweight*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
+		float ntt_ee_e2_temp = pow(gEETrigScale*scale*S->numbers[reg][Elec].tt_avweight*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
 		ntt_mm_e2[proc] += ntt_mm_e2_temp;
 		ntt_em_e2[proc] += ntt_em_e2_temp;
 		ntt_ee_e2[proc] += ntt_ee_e2_temp;
@@ -10428,16 +10427,16 @@ void SSDLPlotter::printMCYieldTable(TString filename, gRegion reg){
 		if(S->datamc != 2) continue;
 		float scale = fLumiNorm / S->getLumi();
 
-		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][hilo].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][hilo].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
-		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][hilo].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][hilo].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
-		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][hilo].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
-		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][hilo].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt00_pt->Integral(0, getNFPtBins(Muon)+1);
+		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt00_pt->Integral(0, getNFPtBins(Elec)+1);
 
 		TString tempname = S->sname;
 		OUT << Form("%24s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
