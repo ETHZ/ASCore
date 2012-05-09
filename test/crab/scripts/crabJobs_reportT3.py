@@ -46,25 +46,24 @@ def get_info(lumiFile,jsonFile):
 # check the command line arguments
 if (len(sys.argv[1:]) < 3 or len(sys.argv[1:]) > 4):                                # if not all three arguments are specified,
    print 'Usage:' 
-   print ' python crabJobs_reportT3.py jobName datamc ntupleVersion [multicrabConfig]'
+   print ' python crabJobs_reportT3.py taskName datamc ntupleVersion'
    print ' e.g.'
-   print ' 	python crabJobs_reportT3.py NTupleProducer mc V0X-0Y-0Z'
-   print ' 	(the default multicrab config file is multicrab.cfg)'
-   print ' 	python crabJobs_reportT3.py NTupleProducer mc V0X-0Y-0Z multicrab.cfg'
+   print ' 	python crabJobs_reportT3.py DYJetsToLL  mc V0X-0Y-0Z'
    sys.exit()
 else:
    if len(sys.argv[1:]) == 3:                              # use the default multicrab.cfg file
       jobName = sys.argv[1]
       datamc = sys.argv[2]
       ntupleVersion = sys.argv[3]
-      multicrabConfigName = "multicrab.cfg"
    elif len(sys.argv[1:]) == 4:                              # otherwise, use the specifed multicrab cfg file
       jobName = sys.argv[1]
       datamc = sys.argv[2]
       ntupleVersion = sys.argv[3]
-      multicrabConfigName = sys.argv[4]
 
-# initialize SRM variables
+# Intialization: we'll get essential information from crab.log!
+crabLogFile = jobName+'/log/crab.log'
+
+# Usernames we know
 USERNAME=os.getenv('USER')
 if (USERNAME == "pnef"):
    userNickName = "Pascal"
@@ -72,90 +71,58 @@ elif (USERNAME == "pablom"):
    userNickName = "Pablo"
 elif (USERNAME == "thea"):
    userNickName = "Alessandro"
-elif (USERNAME == "predragm"):
-   userNickName = "Pedja"
 elif (USERNAME == "buchmann"):
    userNickName = "Marco-Andrea"
 elif (USERNAME == "fronga"):
    userNickName = "Frederic"
+elif (USERNAME == "mdunser"):
+   userNickName = "Marc"
+elif (USERNAME == "peruzzi"):
+   userNickName = "Marco"
 else:
    userNickName = "Great guy!"
-jobDir="ntuples/"+datamc+"/"+ntupleVersion+"/"+jobName
-T3SRMDIR="srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/susy/"+jobDir
-T3SRM="srm://t3se01.psi.ch:8443/srm/managerv2?SFN="
 
 # Filenames
 fJsonSummaryCrab = jobName+'/res/lumiSummary.json'
-fJsonSummary = jobName+'-'+ntupleVersion+'_lumiSummary.json.txt'
-fLumiSummary = jobName+'-'+ntupleVersion+'_lumi.txt'
+fJsonSummary     = jobName+'-'+ntupleVersion+'_lumiSummary.json.txt'
+fLumiSummary     = jobName+'-'+ntupleVersion+'_lumi.txt'
 
 # initialize basic data/mc commands
-command_status = 'crab -c '+jobName+' -status'
-command_getoutput = 'crab -c '+jobName+' -getoutput'
 command_report = 'crab -c '+jobName+' -report'
-command_lumiCalc = 'lumiCalc2.py -i '+fJsonSummaryCrab+' --nowarning overview > '+fLumiSummary
+command_lumiCalc = 'pixelLumiCalc.py -i '+fJsonSummaryCrab+' --nowarning overview > '+fLumiSummary
 command_lumiSumm = 'mv '+fJsonSummaryCrab+' '+fJsonSummary
-command_getSize = 'awk -F\\" \'$0 ~ "Timing-file-write-totalMegabytes" {s+=$4} END {print s}\' '+jobName+'/res/crab_fjr_*.xml'
-#"srmls "+T3SRMDIR+" | awk 'BEGIN{size=0}{size+=$1}END{printf( \"Size(GB): %5.1f , Entries: %d\",size/1e9,NR-2)}'"
 
-command_getEvents = 'awk \'$0 ~ "EventsRead" { getline; s+=$1; getline} END {print s}\' '+jobName+'/res/crab_fjr_*.xml'
-#"python ../scripts/GetNEvents_CrabReport.py "+jobDir
 
-# check if multicrab config file exists and get the dataset name
-datasetFound = 0
-if (not os.path.exists(multicrabConfigName)):
-   print 'Multicrab config file <'+multicrabConfigName+'> does not exist...'
-   datasetName = "\MULTICRAB\CONFIG\NOT\FOUND"
+# get the input and output dataset names from the crab.cfg file
+iDatasetPath = ''
+iPrimaryDataset = ''
+oDatasetPath = ''
+
+if (not os.path.exists(crabLogFile)):
+   print '*** crab log file <'+crabCMSSWexec+'> not found! Stopping here.'
+   sys.exit(-1)
 else:
-   datasetName = "\NOT\FOUND\IN\MULTICRAB\CONFIG"
-   for line in open(multicrabConfigName):
-      if jobName in line:
-         datasetFound = 1
-      if "CMSSW.datasetpath" in line and datasetFound:
-         datasetName = line.split("=")[1].splitlines()[0]
+   for line in open(crabLogFile).readlines():
+      if "CMSSW.datasetpath :" in line:
+         iDatasetPath = line.split(':')[1].splitlines()[0]
+         iPrimaryDataset = iDatasetPath.split('/')[1]
+      if "User Dataset Name" in line:
+         oDatasetPath = line.split('=')[1].splitlines()[0]
+      if ( len(iDatasetPath)>0 and len(oDatasetPath)>0 ):
          break
 
+# We NEED this information!
+if ( not (len(iDatasetPath)>0 and len(oDatasetPath)>0) ):
+   print 'Couldn\'t find dataset names. Stopping here.'
+   sys.exit(-1)
+
+# Remove leading white spaces
+iDatasetPath = iDatasetPath.lstrip()
+iPrimaryDataset = iPrimaryDataset.lstrip()
+oDatasetPath = oDatasetPath.lstrip()
 
 # Get CMSSW version
 cmsswVersion = os.getenv('CMSSW_VERSION')[6:] # Remove leading "CMSSW_"
-print 'cmsswVersion =',cmsswVersion
-
-print '--> Getting status of all jobs\n   ',command_status
-return_value,output = commands.getstatusoutput(command_status)
-if return_value != 0:
-   print 'Problem with crab -status of the job '+jobName+'. Exiting...'
-   print output
-   sys.exit()
-
-print '--> Getting output of all jobs...\n   ',command_getoutput
-return_value,output = commands.getstatusoutput(command_getoutput)
-if return_value != 0:
-   print 'Problem with crab -getoutput of the job '+jobName+'. Continuing anyway...'
-   print output
-
-# get the dataset size on SE
-print '--> Getting size of dataset...\n   ',command_getSize
-status, output = commands.getstatusoutput(command_getSize)
-if status != 0:
-   print 'Problem with getting size of the job '+jobName+'. Exiting...'
-   print output
-   datasetSize = "XX.X"
-datasetSize =  "%3.1fGB" % (float(output)/1024)
-print 'datasetSize =',datasetSize
-
-# get number of events ib the dataset
-print '--> Getting number of events in dataset...\n   ',command_getEvents
-status, output = commands.getstatusoutput(command_getEvents)
-if status != 0:
-   print 'Problem with getting number of events for the job '+jobName+'. Exiting...'
-   print output
-   datasetEvents = "XX.X"
-if datamc=="data":
-   datasetEvents = "%3.1fM" % (float(output)/1e6)
-else: 
-   datasetEvents = output
-print 'datasetEvents =',datasetEvents
-
 
 # perform crab tasks for data jobs
 if (datamc=="data"):
@@ -183,6 +150,8 @@ if (datamc=="data"):
 
    format_Twiki = '|[[%ATTACHURL%/'+fJsonSummary+']['+range+']] |'+datasetName+' |'+datasetSize+' |'+datasetEvents+' |[[%ATTACHURL%/'+fLumiSummary+']['+lumi+']] | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% |'+cmsswVersion+' |'+ntupleVersion+' |'+userNickName+' | |'
 else:
-   format_Twiki = "| "+jobName+" | "+datasetName+" | "+datasetSize+" | "+datasetEvents+' | ... pb | %TWISTY{showlink="Show..." hidelink="Hide"}%<br>/store/user/susy/'+jobDir+'/ <br>%ENDTWISTY% | '+cmsswVersion+' | '+ntupleVersion+" | "+userNickName+" | |"
+   dasURL = 'https://cmsweb.cern.ch/das/request?view=list&limit=10&instance=cms_dbs_ph_analysis_02&input=dataset+dataset%3D'+oDatasetPath
+   format_Twiki = '| '+iPrimaryDataset+'  | '+iDatasetPath+'  | [['+dasURL+'][DAS]]  | ...pb | '+cmsswVersion+'  | '+ntupleVersion+'  | '+userNickName+'  ||'
+   format_Twiki += '\nAND DO NOT FORGET TO FILL IN THE CROSS-SECTION INFORMATION!\n'
 
 print '---------------------------------------\nAdd the following line to the Twiki:\n\n',format_Twiki
