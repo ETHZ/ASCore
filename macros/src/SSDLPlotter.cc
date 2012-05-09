@@ -6609,6 +6609,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		// float EM_stat = rareMapEM_stat.find(it->first) != rareMapEM_stat.end() ? weight*S->getError(rareMapEM_npass[it->first]):0.;
 		// float EE_stat = rareMapEE_stat.find(it->first) != rareMapEE_stat.end() ? weight*S->getError(rareMapEE_npass[it->first]):0.;
 
+
 		if (it->first == "WZTo3LNu") {
 			nt2_wz_mc_mm = MM_yiel; nt2_wz_mc_mm_e2 = MM_stat*MM_stat;
 			nt2_wz_mc_em = EM_yiel; nt2_wz_mc_em_e2 = EM_stat*EM_stat;
@@ -6620,18 +6621,12 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 				nt2_ttw_mc_mm += MM_yiel; nt2_ttw_mc_mm_e2 += MM_stat*MM_stat;
 				nt2_ttw_mc_em += EM_yiel; nt2_ttw_mc_em_e2 += EM_stat*EM_stat;
 				nt2_ttw_mc_ee += EE_yiel; nt2_ttw_mc_ee_e2 += EE_stat*EE_stat;
-				nt2_ttw_Nmc_mm += 1; 
-				nt2_ttw_Nmc_em += 1; 
-				nt2_ttw_Nmc_ee += 1; 
 				continue;
 			}
 			else if (ttw && (it->first == "TTbarZ") ){
 				nt2_ttz_mc_mm += MM_yiel; nt2_ttz_mc_mm_e2 += MM_stat*MM_stat;
 				nt2_ttz_mc_em += EM_yiel; nt2_ttz_mc_em_e2 += EM_stat*EM_stat;
 				nt2_ttz_mc_ee += EE_yiel; nt2_ttz_mc_ee_e2 += EE_stat*EE_stat;
-				nt2_ttz_Nmc_mm += 1; 
-				nt2_ttz_Nmc_em += 1; 
-				nt2_ttz_Nmc_ee += 1; 
 				continue;
 			}
 			else {
@@ -6670,9 +6665,9 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	float em_tot_stat2 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e2 + nt2_wz_mc_em_e2;
 	float ee_tot_stat2 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e2 + nt2_wz_mc_ee_e2;
 
-	float mm_tot_syst2 = nF_mm*nF_mm*FakeESyst2 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + WZESyst*nt2_wz_mc_mm_e2;
-	float em_tot_syst2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst*nt2_wz_mc_em_e2;
-	float ee_tot_syst2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst*nt2_wz_mc_ee_e2;
+	float mm_tot_syst2 = nF_mm*nF_mm*FakeESyst2 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + WZESyst2*nt2_wz_mc_mm_e2;
+	float em_tot_syst2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst2*nt2_wz_mc_em_e2;
+	float ee_tot_syst2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst2*nt2_wz_mc_ee_e2;
 	// benjamins error calculation
 	//float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat() + nt2_rare_mc_mm_e1 + nt2_wz_mc_mm_e1;
 	//float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_wz_mc_em_e1;
@@ -6843,7 +6838,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	h_pred_tot->SetBinError(1, sqrt(ee_tot_stat2 + ee_tot_syst2));
 	h_pred_tot->SetBinError(2, sqrt(mm_tot_stat2 + mm_tot_syst2));
 	h_pred_tot->SetBinError(3, sqrt(em_tot_stat2 + em_tot_syst2));
-	h_pred_tot->SetBinError(4, sqrt(ee_tot_stat2 + ee_tot_syst2 + mm_tot_stat2 + mm_tot_syst2 + em_tot_stat2 + em_tot_syst2));
+	h_pred_tot->SetBinError(4, sqrt(comb_tot_stat2 + comb_tot_syst2));
 
 	hs_pred->Add(h_pred_sfake);
 	hs_pred->Add(h_pred_dfake);
@@ -6948,6 +6943,9 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	ssdlpred.bg_mm_err = sqrt(mm_tot_stat2 + mm_tot_syst2);
 	ssdlpred.bg_em_err = sqrt(em_tot_stat2 + em_tot_syst2);
 	ssdlpred.bg_ee_err = sqrt(ee_tot_stat2 + ee_tot_syst2);
+
+	ssdlpred.bg = ssdlpred.bg_mm + ssdlpred.bg_em + ssdlpred.bg_ee;
+	ssdlpred.bg_err = sqrt(comb_tot_stat2 + comb_tot_syst2);
 
 	ssdlpred.s_ttw_mm = nt2_ttw_mc_mm;
 	ssdlpred.s_ttw_em = nt2_ttw_mc_em;
