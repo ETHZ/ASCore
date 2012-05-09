@@ -40,6 +40,7 @@ public:
   const bool IsCustomMu2012(const int);
   const bool IsCustomEl(const int);
   const bool IsCustomEl2012(const int);
+  const float EffArea(float); //Used for the calculation of Electron isolation
   const bool IsCustomPfMu(const int, const int);
   const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int);

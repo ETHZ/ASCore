@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.7 $";
+string sjzbversion="$Revision: 1.70.2.8 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.8  2012/05/09 08:31:57  buchmann
+updated electron isolation (pf iso)
+
 Revision 1.70.2.7  2012/05/08 16:43:53  buchmann
 adapted isolation for electrons in the endcaps with pt<20 GeV
 
@@ -1317,8 +1320,9 @@ void JZBAnalysis::Analyze() {
           float energy =  fTR->MuE[muIndex];
           TLorentzVector tmpVector(px,py,pz,energy);
           int tmpCharge = fTR->MuCharge[muIndex];
-          float muonIso = fTR->MuRelIso03[muIndex]*fTR->MuPt[muIndex]/std::max((float)20.,fTR->MuPt[muIndex]);
-
+          float muonIso = (fTR->MuPfIsoR03ChHad[muIndex] + std::max(0.0,
+                           fTR->MuPfIsoR03NeHadHighThresh[muIndex]+fTR->MuPfIsoR03PhotonHighThresh[muIndex]-0.5*fTR->MuPfIsoR03SumPUPt[muIndex])
+                          )/fTR->MuPt[muIndex];
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
@@ -1349,7 +1353,7 @@ void JZBAnalysis::Analyze() {
           int tmpCharge=fTR->ElCharge[elIndex];
           double pedestal=0.;
           if ( fabs(fTR->ElEta[elIndex]) < 1.479 ) pedestal = 1.0;
-          double pfIso = (fTR->ElPfIsoChHad03[index] + std::max((float)0.0, fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[index]))))/fTR->ElPt[index];
+          double pfIso = (fTR->ElPfIsoChHad03[elIndex] + std::max((float)0.0, fTR->ElPfIsoNeHad03[elIndex] + fTR->ElPfIsoPhoton03[elIndex] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[elIndex]))))/fTR->ElPt[elIndex];
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
@@ -2024,8 +2028,16 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   // Vertex compatibility
   if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
   counters[MU].fill(" ... D0(pv) < 0.02");
-  if ( !(fabs(fTR->MuDzPV[index]) < 0.5 ) ) return false;
-  counters[MU].fill(" ... DZ(pv) < 0.5");
+  //HPA recommendation not POG
+  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
+  counters[MU].fill(" ... DZ(pv) < 1.0");
+
+  //HPA specifics
+  if ( !(fTR->MuIso03EmEt[index] < 4) ) return false;
+  counters[MU].fill(" ... MuIso03EmEt < 4");
+  if ( !(fTR->MuIso03HadEt[index] < 6) ) return false;
+  counters[MU].fill(" ... MuIso03HadEt < 6");
+
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
 
