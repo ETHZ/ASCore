@@ -15,6 +15,10 @@
 
 struct SSDLPrediction {
 
+  float bg;
+  float bg_err;
+  
+
 	float bg_mm;
 	float bg_em;
 	float bg_ee;
