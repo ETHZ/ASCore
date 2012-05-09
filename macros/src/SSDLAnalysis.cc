@@ -327,6 +327,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmLSP    = -1;
 
 	}
+		
 	// Dump basic jet and MET properties
 	for(int ind = 0; ind < fTnqjets; ind++){
 		int jetindex = selectedJetInd[ind];
@@ -343,6 +344,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		else fTJetPartonID[ind] = -1;
 		fTJetJECUncert[ind] = GetJECUncert(fTR->JPt[jetindex], fTR->JEta[jetindex]);
 	}
+
 
 	// Get METs
 	fTpfMET     = fTR->PFMET;
@@ -750,6 +752,7 @@ int SSDLAnalysis::JetPartonMatch(int index){
 	float jphi = fTR->JPhi[index];
 	int match = 0;
 	float mindr = 100;
+	if(fTR->nGenParticles > 1000) return -2;
 	for(size_t i = 0; i < fTR->nGenParticles; ++i){
 		// Only status 3 particles
 		if(fTR->genInfoStatus[i] != 3) continue;
