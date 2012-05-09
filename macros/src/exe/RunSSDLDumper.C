@@ -16,7 +16,7 @@ using namespace std;
 //_____________________________________________________________________________________
 // Print out usage
 void usage( int status = 0 ) {
-	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-g ngen] [-x cross-section]" << endl;
+	cout << "Usage: RunSSDLDumper [-v verbose] [-i input]/[-l datacard] [-n name] [-m datamc] [-o output] [-c channel] [-x cross-section]" << endl;
 	cout << "  where:" << endl;
 	cout << "     verbose         sets the verbose level                  " << endl;
 	cout << "                        default is 0 (quiet mode)            " << endl;
@@ -36,8 +36,6 @@ void usage( int status = 0 ) {
 	cout << "                        (0) MuMu                             " << endl;
 	cout << "                        (1) ElEl                             " << endl;
 	cout << "                        (2) ElMu                             " << endl;
-	cout << "     ngen            Is the number of generated events for   " << endl;
-	cout << "                     each sample, only relevant for MC       " << endl;
 	cout << "     cross-section   Is the cross-section for each MC sample " << endl;
 	cout << "     datacard        switches to input of a datacard         " << endl;
 	cout << "                     containing several input files          " << endl;
@@ -56,7 +54,6 @@ int main(int argc, char* argv[]) {
 	int channel = -1; // ignore(-1), mumu(0), elel(1), elmu(2)
 	int verbose = 0;
 	int datamc = 0;
-	long ngen = 1;
 	double xsec = 1.;
 	
 	bool card = false; // toggle between running on single file or datacard
@@ -68,7 +65,6 @@ int main(int argc, char* argv[]) {
 			case 'v': verbose    = atoi(optarg);         break;
 			case 'm': datamc     = atoi(optarg);         break;
 			case 'c': channel    = atoi(optarg);         break;
-			case 'g': ngen       = atoi(optarg);         break;
 			case 'x': xsec       = strtod(optarg, NULL); break;
 			case 'l': datacard   = TString(optarg);      break;
 			case 'i': inputfile  = TString(optarg);      break;
@@ -114,7 +110,6 @@ int main(int argc, char* argv[]) {
 	if(verbose > 0 && !card) cout << " Name is:           " << name << endl;
 	if(verbose > 0 && !card) cout << " Type is:           " << type << endl;
 	if(verbose > 0 && !card) cout << " Channel is:        " << chan << endl;
-	if(verbose > 0 && !card) cout << " nGenerated is:     " << ngen << endl;
 	if(verbose > 0 && !card) cout << " Cross-section is:  " << xsec << endl;
 	if(verbose > 0 &&  card) cout << " Datacard is:       " << datacard << endl;
 	if(verbose > 0)          cout << " Outputdir is:      " << outputdir << endl;
@@ -122,7 +117,7 @@ int main(int argc, char* argv[]) {
 	SSDLDumper *tA = new SSDLDumper();
 	tA->setVerbose(verbose);
 	tA->setOutputDir(outputdir);
-	if(!card) tA->init(inputfile, name, datamc, ngen, xsec, channel);
+	if(!card) tA->init(inputfile, name, datamc, xsec, channel);
 	if( card) tA->init(datacard);
 	tA->loop();
 	delete tA;

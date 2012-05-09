@@ -8,6 +8,7 @@
 
 #include "helper/AnaClass.hh"
 #include "helper/Monitor.hh"
+#include "helper/BTagSFUtil/BTagSFUtil.h"
 
 #include "TLorentzVector.h"
 
@@ -73,10 +74,9 @@ public:
 		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, DoubleMu4, DoubleMu5,
 		DoubleEle1, DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
 		MuEG1, MuEG2, MuEG3, MuEG4, MuEG5,
-		// MuHad1, MuHad2, EleHad1, EleHad2,
 		TTJets, TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, DYJets,
 		GJets40, GJets100, GJets200,
-		GVJets, WGstarE, WGstarMu, WGstarTau, WW, WZ, ZZ, 
+		GVJets, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr10,
@@ -170,6 +170,11 @@ public:
 		float npf;
 		float nfp;
 		float nff;
+		
+		float tt_avweight;
+		float tl_avweight;
+		float lt_avweight;
+		float ll_avweight;
 	};
 	
 	struct Channel{ // MM/EE/EM
@@ -324,13 +329,12 @@ public:
 	class Sample{
 	public:
 		Sample(){};
-		Sample(TString loc, TString tag, int dm, long ng, float xs, int cs = -1, int col = 1){
+		Sample(TString loc, TString tag, int dm, float xs, int cs = -1, int col = 1){
 			location = loc;
 			sname    = tag;
 			datamc   = dm;
 			chansel  = cs;
 			xsec     = xs;
-			ngen     = ng;
 			color    = col;
 		};
 		~Sample(){};
@@ -343,6 +347,7 @@ public:
 		float lumi; // simulated lumi = ngen/xsec
 		float xsec; // cross-section
 		int ngen;   // number of generated events
+		TH1F *evcount; // count number of generated events
 		int color;
 		int datamc;  // 0: Data, 1: SM MC, 2: Signal MC, 3: rare MC, 4: rare MC (no pileup)
 		int chansel; // -1: Ignore, 0: mumu, 1: elel, 2: elmu
@@ -358,6 +363,7 @@ public:
 		TGraph *sigevents[gNCHANNELS][2];
 
 		float getLumi(){
+			if(datamc == 0) return -1;
 			if(ngen > 0 && xsec > 0) return float(ngen)/xsec;
 			else return -1.;
 		}
@@ -468,6 +474,14 @@ public:
 			tree = (TTree*)file->Get("Analysis");
 			return tree;
 		}
+		TH1F* getEvCount(){
+			file = TFile::Open(location);
+			if(file->IsZombie()){
+				cout << "SSDLDumper::Sample::getEvCount() ==> Error opening file " << location << endl;
+				exit(1);
+			}
+			return (TH1F*)file->Get("EventCount");
+		}
 		
 		void cleanUp(){
 			tree = NULL;
@@ -480,7 +494,7 @@ public:
 
 	virtual void init();
 	virtual void init(TString); // samples read from a datacard
-	virtual void init(TString, TString, int, long int, float, int = -1); // running on single sample
+	virtual void init(TString, TString, int, float, int = -1); // running on single sample
 
 	virtual void readDatacard(TString); // read in a datacard
 
@@ -500,13 +514,13 @@ public:
 	// Fillers
 	void fillSigEventTree(Sample*);
 	void resetSigEventTree();
-	void fillYields(Sample*, gRegion, gHiLoSwitch);
+	void fillYields(Sample*, gRegion);
 	void fillDiffYields(Sample*);
 	void fillRatioPlots(Sample*);
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
 	void fillElIdPlots (Sample*);
-	void fillKinPlots(Sample*, gHiLoSwitch);
+	void fillKinPlots(Sample*);
 	
 	//////////////////////////////
 	// I/O
@@ -517,7 +531,7 @@ public:
 	void bookHistos(Sample*);
 	void deleteHistos(Sample*);
 	void writeHistos(Sample*, TFile*);
-	void writeSigGraphs(Sample*, gChannel, gHiLoSwitch, TFile*);
+	void writeSigGraphs(Sample*, gChannel, TFile*);
 	int readHistos(TString);
 	int readSigGraphs(TString);
 	
@@ -552,6 +566,8 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
+	virtual void scaleBTags();
+	virtual void smearJetPts();
 	virtual void smearMET();
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
@@ -639,6 +655,8 @@ public:
 	virtual bool isBarrelElectron(int);
 
 	virtual bool isGoodJet(int, float = 20.);
+	virtual float getJERScale(int);
+	
 
 	float getHLTSF_DoubleMu( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
@@ -727,23 +745,18 @@ public:
 
 	vector<float> fSigEv_HI_MM_HT;
 	vector<float> fSigEv_HI_MM_MET;
-	vector<float> fSigEv_LO_MM_HT;
-	vector<float> fSigEv_LO_MM_MET;
 	vector<float> fSigEv_HI_EE_HT;
 	vector<float> fSigEv_HI_EE_MET;
-	vector<float> fSigEv_LO_EE_HT;
-	vector<float> fSigEv_LO_EE_MET;
 	vector<float> fSigEv_HI_EM_HT;
 	vector<float> fSigEv_HI_EM_MET;
-	vector<float> fSigEv_LO_EM_HT;
-	vector<float> fSigEv_LO_EM_MET;
 	
 	
 	TFile *fStorageFile;
-		
 	TString fOutputFileName;
-
 	Sample *fSample;
+	
+	BTagSFUtil *fBTagSFUtil;
+	TRandom3 *fRand3;
 	
 	bool isTChiSlepSnu;
 

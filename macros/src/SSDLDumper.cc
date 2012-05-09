@@ -18,6 +18,8 @@
 #include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
 
+#include "helper/BTagSFUtil/BTagSFUtil.h"
+
 #include "TLorentzVector.h"
 #include "TGraphAsymmErrors.h"
 #include "TEfficiency.h"
@@ -32,7 +34,6 @@
 #include <time.h> // access to date/time
 
 
-
 int gDEBUG_EVENTNUMBER_ = -1;
 
 
@@ -40,13 +41,14 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////
 // Global parameters:
-/// Definition of tight isolation:
-static const float gMuMaxIso = 0.10;
-static const float gElMaxIso = 0.10;
-static const float gMinJetPt = 40.;
-static const bool  gApplyZVeto = true;
-static const bool  gSmearMET = false;
-static const int   gJECScaling = 0; // 0 (do nothing), 1 (scale up), 2 (scale dn), 3 (smear)
+static const float gMaxJetEta  = 2.4;
+static const float gMuMaxIso   = 0.05;
+static const float gElMaxIso   = 0.05;
+static const float gMinJetPt   = 20.;
+static const bool  gApplyZVeto = false;
+static const bool  gSmearMET   = false;
+static const int   gScaleBTags = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
+static const int   gJECScaling = 0; // 0 (no scaling), 1 (scale up), 2 (scale down), 3 (JER smearing)
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -137,7 +139,6 @@ int     SSDLDumper::IsoPlots::nbins[SSDLDumper::gNSels]    = {12, 12};
 TString SSDLDumper::IdPlots::sel_name[SSDLDumper::gNSels] = {"Base", "SigSup"};
 int     SSDLDumper::IdPlots::nbins[SSDLDumper::gNSels]    = {20, 20};
 
-
 TString SSDLDumper::gEMULabel[2] = {"mu", "el"};
 TString SSDLDumper::gChanLabel[3] = {"MM", "EM", "EE"}; // make SURE this is the same order as gChannel enum!
 TString SSDLDumper::gHiLoLabel[3] = {"HighPt", "LowPt", "TauChan"};
@@ -152,8 +153,8 @@ SSDLDumper::~SSDLDumper(){
 }
 
 //____________________________________________________________________________
-void SSDLDumper::init(TString inputfile, TString sname, int datamc, long int ngen, float xsec, int chan){
-	fSample = new Sample(inputfile, sname, datamc, ngen, xsec, chan);
+void SSDLDumper::init(TString inputfile, TString sname, int datamc, float xsec, int chan){
+	fSample = new Sample(inputfile, sname, datamc, xsec, chan);
 	fSamples.push_back(fSample);
 
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
@@ -161,7 +162,6 @@ void SSDLDumper::init(TString inputfile, TString sname, int datamc, long int nge
 	if(fVerbose > 0) cout << "   Running on:      " << fSample->location << endl;
 	if(fVerbose > 0) cout << "   Naming it:       " << fSample->sname << endl;
 	if(fVerbose > 0) cout << "   Is data/mc:      " << fSample->datamc << endl;
-	if(fVerbose > 0) cout << "   nGenerated is:   " << fSample->ngen << endl;
 	if(fVerbose > 0) cout << "   x-section is:    " << fSample->xsec << endl;
 	if(fVerbose > 0) cout << "   Int. Lumi is:    " << fSample->getLumi() << endl;
 	if(fVerbose > 0) cout << "------------------------------------" << endl;
@@ -180,6 +180,9 @@ void SSDLDumper::init(){
 	Util::SetStyle();
 	fDoCounting = false;  // Disable counters by default
 
+	fBTagSFUtil = new BTagSFUtil("TCHE", 28);
+	fRand3 = new TRandom3(0);
+
 	resetHypLeptons();
 	initCutNames();
 	
@@ -197,8 +200,7 @@ void SSDLDumper::readDatacard(TString cardfile){
 	ifstream IN(cardfile);
 
 	char inputfile[500], sname[100];
-	int datamc, chan, color;
-	int ngen;
+	int datamc, chan;
 	float lumi;
 	float xsec;
 	if(fVerbose > 2) cout << "------------------------------------" << endl;
@@ -208,24 +210,18 @@ void SSDLDumper::readDatacard(TString cardfile){
 	while( IN.getline(buffer, 600, '\n') ){
 		lumi = 1.0;
 		xsec = 1.0;
-		color = 1;
-		ngen = 1;
 		if (buffer[0] == '#') continue; // Skip lines commented with '#'
-		// if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d", sname, inputfile, &datamc, &chan, &lumi, &color) > 3){
-		// 	Sample *S = new Sample(inputfile, sname, datamc, chan, lumi, color);
-		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f\t%d\t%d", sname, inputfile, &datamc, &chan, &xsec, &ngen, &color) > 3){
-			Sample *S = new Sample(inputfile, sname, datamc, ngen, xsec, chan, color);
-			
+		if( sscanf(buffer, "%s\t%s\t%d\t%d\t%f", sname, inputfile, &datamc, &chan, &xsec) > 3){
+			Sample *S = new Sample(inputfile, sname, datamc, xsec, chan);
+
 			fSamples.push_back(S);
 			fSampleMap[sname] = S;
 			if(fVerbose > 1 && fVerbose < 3){
-				cout << Form("%13s/%2d/%2d/%12.2f/%12d/%12.2f - %s",
+				cout << Form("%13s/%2d/%2d/%12.2f - %s",
 				S->sname.Data()   ,
 				S->datamc         ,
 				S->chansel        ,
 				S->xsec           ,
-				S->ngen           ,
-				S->getLumi()      ,
 				S->location.Data()) << endl;
 			}
 			if(fVerbose > 2){
@@ -235,9 +231,6 @@ void SSDLDumper::readDatacard(TString cardfile){
 				cout << "   DataMC:     "      << S->datamc    << endl;
 				cout << "   Channel:    "      << S->chansel   << endl;
 				cout << "   XSec:       "      << S->xsec      << endl;
-				cout << "   NGen:       "      << S->ngen      << endl;
-				cout << "   Lumi:       "      << S->getLumi() << endl;
-				cout << "   Color:      "      << S->color     << endl;
 			}
 		}
 		else{
@@ -258,11 +251,11 @@ const double *SSDLDumper::getFPtBins (gChannel chan){
 	if(chan == Muon || chan == ElMu) return gMuFPtBins;
 	if(chan == Elec) return gElFPtBins;
 }
-const int     SSDLDumper::getNPPtBins (gChannel chan){ // prompt ratios
+const int     SSDLDumper::getNPPtBins(gChannel chan){ // prompt ratios
 	if(chan == Muon || chan == ElMu) return gNMuPPtbins;
 	if(chan == Elec) return gNElPPtbins;
 }
-const double *SSDLDumper::getPPtBins  (gChannel chan){
+const double *SSDLDumper::getPPtBins (gChannel chan){
 	if(chan == Muon || chan == ElMu) return gMuPPtbins;
 	if(chan == Elec) return gElPPtbins;
 }
@@ -279,7 +272,6 @@ const double *SSDLDumper::getEtaBins (gChannel chan){
 void SSDLDumper::loop(){
 	for(size_t i = 0; i < fSamples.size(); ++i){
 		fSample = fSamples[i]; // TODO: Clean this up, call the triggers with an argument
-		cout << fOutputDir << endl;
 		fOutputFileName = fOutputDir + fSample->sname + "_Yields.root";
 		loopEvents(fSample);
 	}
@@ -292,11 +284,12 @@ void SSDLDumper::loopEvents(Sample *S){
 	}
 
 	TFile *pFile = new TFile(fOutputFileName, "RECREATE");
-		
+
 	bookHistos(S);
 	bookSigEvTree();
 	
 	TTree *tree = S->getTree();
+	S->evcount->Add(S->getEvCount());	
 
 	// Stuff to execute for each sample BEFORE looping on the events
 	initCounters();
@@ -316,9 +309,13 @@ void SSDLDumper::loopEvents(Sample *S){
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-		// Smear MET
+		/////////////////////////////////////////////
+		// Event modifications
+		scaleBTags();
 		if(gSmearMET) smearMET();
-
+		if(gJECScaling == 3) smearJetPts();
+		/////////////////////////////////////////////
+		
 		fCounter[Muon].fill(fMMCutNames[0]);
 		fCounter[ElMu].fill(fEMCutNames[0]);
 		fCounter[Elec].fill(fEECutNames[0]);
@@ -335,23 +332,21 @@ void SSDLDumper::loopEvents(Sample *S){
 		gHLTSF = 1.;
 		gBtagSF = 1.;
 
-		// if( S->datamc!=0 ) {
-		// 	int ind1(-1), ind2(-1);
-		// 	fDoCounting = false;
-		// 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getHLTSF_DoubleMu(      MuPt[ind1], MuEta[ind1], "") * getHLTSF_DoubleMu(      MuPt[ind2], MuEta[ind2], "");
-		// 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
-		// 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
-		// 	fDoCounting = true;
-		// }
+		if( S->datamc!=0 ) {
+			int ind1(-1), ind2(-1);
+			fDoCounting = false;
+			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getHLTSF_DoubleMu(      MuPt[ind1], MuEta[ind1], "") * getHLTSF_DoubleMu(      MuPt[ind2], MuEta[ind2], "");
+			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
+			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
+			fDoCounting = true;
+		}
 
 		gEventWeight = gHLTSF * gBtagSF;
 		if( S->datamc!=4 ) gEventWeight *= PUWeight; //no pu weight for mc with no pu
 
 
-		fillKinPlots(S, HighPt);
-		fillKinPlots(S, LowPt);
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r, HighPt);
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r, LowPt);
+		fillKinPlots(S);
+		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r);
 
 		fillSigEventTree(S);
 		fillDiffYields(S);
@@ -359,19 +354,15 @@ void SSDLDumper::loopEvents(Sample *S){
 		fillMuIsoPlots(S);
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
-
 	}
 
 	// Stuff to execute for each sample AFTER looping on the events
 	fillCutFlowHistos(S);
 
 	writeHistos(S, pFile);
-	writeSigGraphs(S, Muon, HighPt, pFile);
-	writeSigGraphs(S, Muon, LowPt,  pFile);
-	writeSigGraphs(S, Elec, HighPt, pFile);
-	writeSigGraphs(S, Elec, LowPt,  pFile);
-	writeSigGraphs(S, ElMu, HighPt, pFile);
-	writeSigGraphs(S, ElMu, LowPt,  pFile);
+	writeSigGraphs(S, Muon, pFile);
+	writeSigGraphs(S, Elec, pFile);
+	writeSigGraphs(S, ElMu, pFile);
 
 	writeSigEvTree(pFile);
 
@@ -386,7 +377,7 @@ void SSDLDumper::loopEvents(Sample *S){
 }
 
 //____________________________________________________________________________
-void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
+void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(reg);
@@ -396,7 +387,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	// MuMu Channel
 	resetHypLeptons();
 	fDoCounting = false;
-	if(reg == Baseline && hilo == HighPt) fDoCounting = true;
+	if(reg == Baseline) fDoCounting = true;
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
@@ -406,75 +397,75 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[15]); // ... first muon passes tight cut
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[16]); // ... second muon passes tight cut
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[17]); // ... both muons pass tight cut
-				S->region[reg][hilo].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
-				S->region[reg][hilo].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
+				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
+				if(S->datamc == 0 && reg == Baseline){
 					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
-					S->region[reg][hilo].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
-					if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2pp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-					if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2pf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-					if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nt2fp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-					if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nt2ff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					S->region[reg][HighPt].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
+					if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][HighPt].mm.nt2pp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][HighPt].mm.nt2pf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][HighPt].mm.nt2fp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+					if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][HighPt].mm.nt2ff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
 				}
 			}
 			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[15]); // ... first muon passes tight cut
-				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
-				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
+				S->region[reg][HighPt].mm.nt10_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][HighPt].mm.nt10_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].mm.nt10_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
 			}
 			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
 				if(fDoCounting) fCounter[Muon].fill(fMMCutNames[16]); // ... second muon passes tight cut
-				S->region[reg][hilo].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], gEventWeight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].mm.nt10_eta->Fill(fabs(MuEta[mu2]), fabs(MuEta[mu1]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, gEventWeight);
+				S->region[reg][HighPt].mm.nt10_pt ->Fill(MuPt [mu2], MuPt [mu1], gEventWeight); // tight one always in x axis; fill same again
+				S->region[reg][HighPt].mm.nt10_eta->Fill(fabs(MuEta[mu2]), fabs(MuEta[mu1]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].mm.nt10_origin->Fill(muIndexToBin(mu2)-0.5, muIndexToBin(mu1)-0.5, gEventWeight);
 			}
 			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				S->region[reg][hilo].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
-				S->region[reg][hilo].mm.nt00_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
+				S->region[reg][HighPt].mm.nt00_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
+				S->region[reg][HighPt].mm.nt00_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].mm.nt00_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0){
-				if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.npp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-				if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.npf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-				if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][hilo].mm.nfp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
-				if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][hilo].mm.nff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);			
+				if(isPromptMuon(mu1) && isPromptMuon(mu2)) S->region[reg][HighPt].mm.npp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(isPromptMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][HighPt].mm.npf_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(  isFakeMuon(mu1) && isPromptMuon(mu2)) S->region[reg][HighPt].mm.nfp_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);
+				if(  isFakeMuon(mu1) &&   isFakeMuon(mu2)) S->region[reg][HighPt].mm.nff_pt->Fill(MuPt[mu1], MuPt[mu2], gEventWeight);			
 			}
 		}
 		resetHypLeptons();
 	}
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
-			S->region[reg][hilo].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-			// S->region[reg][hilo].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
+			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+			// S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].mm.sst_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(0) ){
-			S->region[reg][hilo].mm.fratio_pt ->Fill(isTightMuon(0), MuPt[0]);
-			S->region[reg][hilo].mm.fratio_eta->Fill(isTightMuon(0), fabs(MuEta[0]));
-			// S->region[reg][hilo].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
-			// S->region[reg][hilo].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
+			S->region[reg][HighPt].mm.fratio_pt ->Fill(isTightMuon(0), MuPt[0]);
+			S->region[reg][HighPt].mm.fratio_eta->Fill(isTightMuon(0), fabs(MuEta[0]));
+			// S->region[reg][HighPt].mm.fratio_pt ->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, MuPt[0]);
+			// S->region[reg][HighPt].mm.fratio_eta->FillWeighted(isTightMuon(0), singleMuPrescale() * gEventWeight, fabs(MuEta[0]));
 
-			S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
-			// S->region[reg][hilo].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
+			S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
+			// S->region[reg][HighPt].mm.fnloose->Fill(MuPt[0], fabs(MuEta[0]), singleMuPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].mm.ssl_origin->Fill(muIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
 	if(doubleMuTrigger() && isZMuMuEvent(mu1, mu2)){
 		if( isTightMuon(mu2) ){
-			S->region[reg][hilo].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
+			S->region[reg][HighPt].mm.pntight->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].mm.zt_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 		if( isLooseMuon(mu2) ){
-			S->region[reg][hilo].mm.pratio_pt ->Fill(isTightMuon(mu2), MuPt[mu2]);
-			S->region[reg][hilo].mm.pratio_eta->Fill(isTightMuon(mu2), fabs(MuEta[mu2]));
-			// S->region[reg][hilo].mm.pratio_pt ->FillWeighted(isTightMuon(mu2), gEventWeight, MuPt[mu2]);
-			// S->region[reg][hilo].mm.pratio_eta->FillWeighted(isTightMuon(mu2), gEventWeight, fabs(MuEta[mu2]));
+			S->region[reg][HighPt].mm.pratio_pt ->Fill(isTightMuon(mu2), MuPt[mu2]);
+			S->region[reg][HighPt].mm.pratio_eta->Fill(isTightMuon(mu2), fabs(MuEta[mu2]));
+			// S->region[reg][HighPt].mm.pratio_pt ->FillWeighted(isTightMuon(mu2), gEventWeight, MuPt[mu2]);
+			// S->region[reg][HighPt].mm.pratio_eta->FillWeighted(isTightMuon(mu2), gEventWeight, fabs(MuEta[mu2]));
 
-			S->region[reg][hilo].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
+			S->region[reg][HighPt].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
 	}				
 	resetHypLeptons();
@@ -489,86 +480,86 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[15]); // " ... first electron passes tight cut
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[16]); // " ... second electron passes tight cut
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[17]); // " ... both electrons pass tight cut
-				S->region[reg][hilo].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
-				S->region[reg][hilo].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
+				S->region[reg][HighPt].ee.nt20_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][HighPt].ee.nt20_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
 					fOUTSTREAM << Form("%12s: ElEl - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(el1,el2,Elec), ElPt[el1], ElPt[el2], ElCharge[el1]) << endl ;
 				}
 				if(S->datamc > 0 ){
-					S->region[reg][hilo].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
+					S->region[reg][HighPt].ee.nt11_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 					if(isPromptElectron(el1) && isPromptElectron(el2)){
-						S->region[reg][hilo].ee.nt2pp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+						S->region[reg][HighPt].ee.nt2pp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 						if(!isChargeMatchedElectron(el1) || !isChargeMatchedElectron(el2)){
-							S->region[reg][hilo].ee.nt2pp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
+							S->region[reg][HighPt].ee.nt2pp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
 						}
 					}
-					if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2pf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-					if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nt2fp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-					if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nt2ff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][HighPt].ee.nt2pf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][HighPt].ee.nt2fp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][HighPt].ee.nt2ff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 				}
 			}
 			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[15]);
-				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
-				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
+				S->region[reg][HighPt].ee.nt10_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][HighPt].ee.nt10_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].ee.nt10_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
 				if(fDoCounting) fCounter[Elec].fill(fEECutNames[16]);
-				S->region[reg][hilo].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], gEventWeight); // tight one always in x axis; fill same again
-				S->region[reg][hilo].ee.nt10_eta->Fill(fabs(ElEta[el2]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, gEventWeight);
+				S->region[reg][HighPt].ee.nt10_pt ->Fill(ElPt [el2], ElPt [el1], gEventWeight); // tight one always in x axis; fill same again
+				S->region[reg][HighPt].ee.nt10_eta->Fill(fabs(ElEta[el2]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].ee.nt10_origin->Fill(elIndexToBin(el2)-0.5, elIndexToBin(el1)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				S->region[reg][hilo].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
-				S->region[reg][hilo].ee.nt00_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
+				S->region[reg][HighPt].ee.nt00_pt ->Fill(ElPt [el1], ElPt [el2], gEventWeight);
+				S->region[reg][HighPt].ee.nt00_eta->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].ee.nt00_origin->Fill(elIndexToBin(el1)-0.5, elIndexToBin(el2)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0 ){
 				if(isPromptElectron(el1) && isPromptElectron(el2)){
-					S->region[reg][hilo].ee.npp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+					S->region[reg][HighPt].ee.npp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 					if(!isChargeMatchedElectron(el1) || !isChargeMatchedElectron(el2)){
-						S->region[reg][hilo].ee.npp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
+						S->region[reg][HighPt].ee.npp_cm_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);							
 					}
 				}
-				if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.npf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-				if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][hilo].ee.nfp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-				if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][hilo].ee.nff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(isPromptElectron(el1) &&   isFakeElectron(el2)) S->region[reg][HighPt].ee.npf_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(  isFakeElectron(el1) && isPromptElectron(el2)) S->region[reg][HighPt].ee.nfp_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(  isFakeElectron(el1) &&   isFakeElectron(el2)) S->region[reg][HighPt].ee.nff_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
 	}
 	if(singleElTrigger() && isSigSupElEvent()){
 		if( isTightElectron(0) ){
-			S->region[reg][hilo].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-			// S->region[reg][hilo].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
+			S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+			// S->region[reg][HighPt].ee.fntight->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].ee.sst_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(0) ){
-			S->region[reg][hilo].ee.fratio_pt ->Fill(isTightElectron(0), ElPt[0]);
-			S->region[reg][hilo].ee.fratio_eta->Fill(isTightElectron(0), fabs(ElEta[0]));
-			// S->region[reg][hilo].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
-			// S->region[reg][hilo].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
+			S->region[reg][HighPt].ee.fratio_pt ->Fill(isTightElectron(0), ElPt[0]);
+			S->region[reg][HighPt].ee.fratio_eta->Fill(isTightElectron(0), fabs(ElEta[0]));
+			// S->region[reg][HighPt].ee.fratio_pt ->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, ElPt[0]);
+			// S->region[reg][HighPt].ee.fratio_eta->FillWeighted(isTightElectron(0), singleElPrescale() * gEventWeight, fabs(ElEta[0]));
 
-			S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
-			// S->region[reg][hilo].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
+			S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), gEventWeight);
+			// S->region[reg][HighPt].ee.fnloose->Fill(ElPt[0], fabs(ElEta[0]), singleElPrescale() * gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].ee.ssl_origin->Fill(elIndexToBin(0)-0.5, gEventWeight);
 		}
 	}
 	int elind;
 	if(doubleElTrigger() && isZElElEvent(el1, el2)){
 		if( isTightElectron(el2) ){
-			S->region[reg][hilo].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
+			S->region[reg][HighPt].ee.pntight->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].ee.zt_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 		if( isLooseElectron(el2) ){
-			S->region[reg][hilo].ee.pratio_pt ->Fill(isTightElectron(el2), ElPt[el2]);
-			S->region[reg][hilo].ee.pratio_eta->Fill(isTightElectron(el2), fabs(ElEta[el2]));
-			// S->region[reg][hilo].ee.pratio_pt ->FillWeighted(isTightElectron(el2), gEventWeight, ElPt[el2]);
-			// S->region[reg][hilo].ee.pratio_eta->FillWeighted(isTightElectron(el2), gEventWeight, fabs(ElEta[el2]));
+			S->region[reg][HighPt].ee.pratio_pt ->Fill(isTightElectron(el2), ElPt[el2]);
+			S->region[reg][HighPt].ee.pratio_eta->Fill(isTightElectron(el2), fabs(ElEta[el2]));
+			// S->region[reg][HighPt].ee.pratio_pt ->FillWeighted(isTightElectron(el2), gEventWeight, ElPt[el2]);
+			// S->region[reg][HighPt].ee.pratio_eta->FillWeighted(isTightElectron(el2), gEventWeight, fabs(ElEta[el2]));
 
-			S->region[reg][hilo].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
-			if(S->datamc > 0) S->region[reg][hilo].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
+			S->region[reg][HighPt].ee.pnloose->Fill(ElPt[el2], fabs(ElEta[el2]), gEventWeight);
+			if(S->datamc > 0) S->region[reg][HighPt].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 	}
 	resetHypLeptons();
@@ -583,42 +574,42 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[15]);
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[16]);
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[17]);
-				S->region[reg][hilo].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
-				S->region[reg][hilo].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc == 0 && reg == Baseline && hilo == HighPt){
+				S->region[reg][HighPt].em.nt20_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][HighPt].em.nt20_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc == 0 && reg == Baseline && HighPt == HighPt){
 					fOUTSTREAM << Form("%12s: ElMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu,el,ElMu), MuPt[mu], ElPt[el], ElCharge[el]) << endl;
 				}
 				
 				if(S->datamc > 0){
-					S->region[reg][hilo].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
-					if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2pp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-					if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2pf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-					if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nt2fp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-					if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nt2ff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					S->region[reg][HighPt].em.nt11_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
+					if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][HighPt].em.nt2pp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][HighPt].em.nt2pf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][HighPt].em.nt2fp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+					if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][HighPt].em.nt2ff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 				}
 			}
 			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[15]);
-				S->region[reg][hilo].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
-				S->region[reg][hilo].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
+				S->region[reg][HighPt].em.nt10_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][HighPt].em.nt10_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].em.nt10_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
 				if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[16]);
-				S->region[reg][hilo].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight); // muon always in x axis for e/mu
-				S->region[reg][hilo].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
+				S->region[reg][HighPt].em.nt01_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight); // muon always in x axis for e/mu
+				S->region[reg][HighPt].em.nt01_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].em.nt01_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				S->region[reg][hilo].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
-				S->region[reg][hilo].em.nt00_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
-				if(S->datamc > 0) S->region[reg][hilo].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
+				S->region[reg][HighPt].em.nt00_pt ->Fill(MuPt [mu], ElPt [el], gEventWeight);
+				S->region[reg][HighPt].em.nt00_eta->Fill(fabs(MuEta[mu]), fabs(ElEta[el]), gEventWeight);
+				if(S->datamc > 0) S->region[reg][HighPt].em.nt00_origin->Fill(muIndexToBin(mu)-0.5, elIndexToBin(el)-0.5, gEventWeight);
 			}
 			if(S->datamc > 0){
-				if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.npp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-				if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.npf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-				if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][hilo].em.nfp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-				if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][hilo].em.nff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(isPromptMuon(mu) && isPromptElectron(el)) S->region[reg][HighPt].em.npp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(isPromptMuon(mu) &&   isFakeElectron(el)) S->region[reg][HighPt].em.npf_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(  isFakeMuon(mu) && isPromptElectron(el)) S->region[reg][HighPt].em.nfp_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(  isFakeMuon(mu) &&   isFakeElectron(el)) S->region[reg][HighPt].em.nff_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -634,10 +625,10 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	if(elelSignalTrigger()){
 		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][hilo].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_BB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_EE_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if( isBarrelElectron(el1) && !isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
+				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)) S->region[reg][HighPt].ee.nt20_OS_EB_pt->Fill(ElPt[el1], ElPt[el2], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -648,8 +639,8 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg, gHiLoSwitch hilo){
 	if(elmuSignalTrigger()){
 		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
 			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				if( isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
-				if(!isBarrelElectron(el)) S->region[reg][hilo].em.nt20_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if( isBarrelElectron(el)) S->region[reg][HighPt].em.nt20_OS_BB_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
+				if(!isBarrelElectron(el)) S->region[reg][HighPt].em.nt20_OS_EE_pt->Fill(MuPt[mu], ElPt[el], gEventWeight);
 			}
 		}
 		resetHypLeptons();
@@ -1831,12 +1822,12 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	setRegionCuts();
 	return;
 }
-void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
+void SSDLDumper::fillKinPlots(Sample *S){
 	resetHypLeptons();
 	fDoCounting = false;
-	KinPlots *KP0 = &S->kinplots[0][hilo];
-	KinPlots *KP1 = &S->kinplots[1][hilo];
-	KinPlots *KP2 = &S->kinplots[2][hilo];
+	KinPlots *KP0 = &S->kinplots[0][HighPt];
+	KinPlots *KP1 = &S->kinplots[1][HighPt];
+	KinPlots *KP2 = &S->kinplots[2][HighPt];
 	int ind1(-1), ind2(-1);
 	int mu(-1), el(-1); // for e/mu channel, easier readability
 
@@ -1844,7 +1835,6 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts();
-	if(hilo == LowPt) fC_minHT = 200.;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
@@ -1877,13 +1867,8 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 
 				if(isSSLLMuEvent(ind1, ind2)){ // signal region
 					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
-					if(hilo == HighPt){ // Store signal events
-						fSigEv_HI_MM_HT .push_back(getHT());
-						fSigEv_HI_MM_MET.push_back(getMET());
-					} else{
-						fSigEv_LO_MM_HT .push_back(getHT());
-						fSigEv_LO_MM_MET.push_back(getMET());						
-					}					
+					fSigEv_HI_MM_HT .push_back(getHT());
+					fSigEv_HI_MM_MET.push_back(getMET());
 					
 					fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
 					fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
@@ -1929,13 +1914,8 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 				fillWithoutOF(KP1->hvar[10], getNBTags(),              gEventWeight);
 				if(isSSLLElEvent(ind1, ind2)){
 					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
-					if(hilo == HighPt){ // Store signal events
-						fSigEv_HI_EE_HT .push_back(getHT());
-						fSigEv_HI_EE_MET.push_back(getMET());
-					} else{
-						fSigEv_LO_EE_HT .push_back(getHT());
-						fSigEv_LO_EE_MET.push_back(getMET());						
-					}
+					fSigEv_HI_EE_HT .push_back(getHT());
+					fSigEv_HI_EE_MET.push_back(getMET());
 										
 					fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
 					fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
@@ -1986,13 +1966,8 @@ void SSDLDumper::fillKinPlots(Sample *S, gHiLoSwitch hilo){
 				fillWithoutOF(KP1->hvar[10], getNBTags(),          gEventWeight);			
 				if( isSSLLElMuEvent(mu, el) ){
 					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
-					if(hilo == HighPt){ // Store signal events
-						fSigEv_HI_EM_HT .push_back(getHT());
-						fSigEv_HI_EM_MET.push_back(getMET());
-					} else{
-						fSigEv_LO_EM_HT .push_back(getHT());
-						fSigEv_LO_EM_MET.push_back(getMET());						
-					}
+					fSigEv_HI_EM_HT .push_back(getHT());
+					fSigEv_HI_EM_MET.push_back(getMET());
 					fillWithoutOF(KP2->hvar[0],  getHT(),              gEventWeight);
 					fillWithoutOF(KP2->hvar[1],  getMET(),             gEventWeight);
 					fillWithoutOF(KP2->hvar[2],  getNJets(),           gEventWeight);
@@ -2212,6 +2187,12 @@ void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
 	S->numbers[reg][chan].nt10 = C->nt10_pt->GetEntries();
 	S->numbers[reg][chan].nt01 = C->nt01_pt->GetEntries();
 	S->numbers[reg][chan].nt0  = C->nt00_pt->GetEntries();
+	
+	S->numbers[reg][chan].tt_avweight = C->nt20_pt->GetEntries()>0?C->nt20_pt->Integral(0, getNFPtBins(chan)+1)/C->nt20_pt->GetEntries():1.;
+	S->numbers[reg][chan].tl_avweight = C->nt10_pt->GetEntries()>0?C->nt10_pt->Integral(0, getNFPtBins(chan)+1)/C->nt10_pt->GetEntries():1.;
+	S->numbers[reg][chan].lt_avweight = C->nt01_pt->GetEntries()>0?C->nt01_pt->Integral(0, getNFPtBins(chan)+1)/C->nt01_pt->GetEntries():1.;
+	S->numbers[reg][chan].ll_avweight = C->nt00_pt->GetEntries()>0?C->nt00_pt->Integral(0, getNFPtBins(chan)+1)/C->nt00_pt->GetEntries():1.;
+	
 	if(chan != ElMu){
 		S->numbers[reg][chan].nsst = C->fntight->GetEntries();
 		S->numbers[reg][chan].nssl = C->fnloose->GetEntries();
@@ -2489,6 +2470,9 @@ int SSDLDumper::getSampleType(Sample *S){
 
 //____________________________________________________________________________
 void SSDLDumper::bookHistos(Sample *S){
+	// Event counter
+	S->evcount = new TH1F(S->sname + "_EventCount", "Event Counter", 1, 0., 1.);	
+	
 	// Cut flow histos
 	S->cutFlowHisto[Muon] = new TH1D("MMCutFlow", "MMCutFlow", fMMCutNames.size(), 0, fMMCutNames.size());
 	S->cutFlowHisto[Elec] = new TH1D("EECutFlow", "EECutFlow", fEECutNames.size(), 0, fEECutNames.size());
@@ -2564,17 +2548,15 @@ void SSDLDumper::bookHistos(Sample *S){
 	}	
 
 	// Kinematical histos
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		for(size_t k = 0; k < gNKinSels; ++k){
-			TString name = Form("%s_%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data());
-			S->kinplots[k][hilo].hmetvsht = new TH2D(name, "HTvsMET", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
-			for(size_t j = 0; j < gNKinVars; ++j){
-				name = Form("%s_%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data(), KinPlots::var_name[j].Data());
-				S->kinplots[k][hilo].hvar[j] = new TH1D(name, KinPlots::var_name[j].Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
-				S->kinplots[k][hilo].hvar[j]->SetFillColor(S->color);
-				S->kinplots[k][hilo].hvar[j]->SetXTitle(KinPlots::axis_label[j]);
-				S->kinplots[k][hilo].hvar[j]->Sumw2();
-			}
+	for(size_t k = 0; k < gNKinSels; ++k){
+		TString name = Form("%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data());
+		S->kinplots[k][HighPt].hmetvsht = new TH2D(name, "HTvsMET", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
+		for(size_t j = 0; j < gNKinVars; ++j){
+			name = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
+			S->kinplots[k][HighPt].hvar[j] = new TH1D(name, KinPlots::var_name[j].Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
+			S->kinplots[k][HighPt].hvar[j]->SetFillColor(S->color);
+			S->kinplots[k][HighPt].hvar[j]->SetXTitle(KinPlots::axis_label[j]);
+			S->kinplots[k][HighPt].hvar[j]->Sumw2();
 		}
 	}
 	// id histos for electrons
@@ -2662,94 +2644,93 @@ void SSDLDumper::bookHistos(Sample *S){
 		}
 	}
 
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
-			Region *R = &S->region[r][hilo];
-			for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
-				Channel *C;
-				if(c == Muon) C = &R->mm;
-				if(c == Elec) C = &R->ee;
-				if(c == ElMu) C = &R->em;
-				TString rootname = S->sname + "_" + Region::sname[r] + "_" + gChanLabel[c] + "_" + gHiLoLabel[hilo];
-				// Yields common for all channels and data-mc:
-				C->nt20_pt  = new TH2D(rootname + "_NT20_pt",  "NT20_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_pt ->Sumw2();
-				C->nt10_pt  = new TH2D(rootname + "_NT10_pt",  "NT10_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_pt ->Sumw2();
-				C->nt01_pt  = new TH2D(rootname + "_NT01_pt",  "NT01_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt01_pt ->Sumw2();
-				C->nt00_pt  = new TH2D(rootname + "_NT00_pt",  "NT00_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt00_pt ->Sumw2();
-				C->nt20_eta = new TH2D(rootname + "_NT20_eta", "NT20_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt20_eta->Sumw2();
-				C->nt10_eta = new TH2D(rootname + "_NT10_eta", "NT10_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt10_eta->Sumw2();
-				C->nt01_eta = new TH2D(rootname + "_NT01_eta", "NT01_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt01_eta->Sumw2();
-				C->nt00_eta = new TH2D(rootname + "_NT00_eta", "NT00_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt00_eta->Sumw2();
+	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+		Region *R = &S->region[r][HighPt];
+		for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
+			Channel *C;
+			if(c == Muon) C = &R->mm;
+			if(c == Elec) C = &R->ee;
+			if(c == ElMu) C = &R->em;
+			TString rootname = S->sname + "_" + Region::sname[r] + "_" + gChanLabel[c];
+			// Yields common for all channels and data-mc:
+			C->nt20_pt  = new TH2D(rootname + "_NT20_pt",  "NT20_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_pt ->Sumw2();
+			C->nt10_pt  = new TH2D(rootname + "_NT10_pt",  "NT10_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt10_pt ->Sumw2();
+			C->nt01_pt  = new TH2D(rootname + "_NT01_pt",  "NT01_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt01_pt ->Sumw2();
+			C->nt00_pt  = new TH2D(rootname + "_NT00_pt",  "NT00_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt00_pt ->Sumw2();
+			C->nt20_eta = new TH2D(rootname + "_NT20_eta", "NT20_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt20_eta->Sumw2();
+			C->nt10_eta = new TH2D(rootname + "_NT10_eta", "NT10_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt10_eta->Sumw2();
+			C->nt01_eta = new TH2D(rootname + "_NT01_eta", "NT01_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt01_eta->Sumw2();
+			C->nt00_eta = new TH2D(rootname + "_NT00_eta", "NT00_eta", getNEtaBins(c), getEtaBins(c), getNEtaBins(c), getEtaBins(c)); C->nt00_eta->Sumw2();
 
-				// MC truth info
+			// MC truth info
+			if(S->datamc > 0){
+				C->npp_pt   = new TH2D(rootname + "_NPP_pt",   "NPP_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npp_pt->Sumw2();
+				C->nfp_pt   = new TH2D(rootname + "_NFP_pt",   "NFP_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nfp_pt->Sumw2();
+				C->npf_pt   = new TH2D(rootname + "_NPF_pt",   "NPF_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npf_pt->Sumw2();
+				C->nff_pt   = new TH2D(rootname + "_NFF_pt",   "NFF_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nff_pt->Sumw2();
+				C->nt2pp_pt = new TH2D(rootname + "_NT2PP_pt", "NT2PP_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pp_pt->Sumw2();
+				C->nt2fp_pt = new TH2D(rootname + "_NT2FP_pt", "NT2FP_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2fp_pt->Sumw2();
+				C->nt2pf_pt = new TH2D(rootname + "_NT2PF_pt", "NT2PF_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pf_pt->Sumw2();
+				C->nt2ff_pt = new TH2D(rootname + "_NT2FF_pt", "NT2FF_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2ff_pt->Sumw2();
+
+				C->nt11_origin = new TH2D(rootname + "_NT20_Origin",  "NT2Origin",  12, 0, 12, 12, 0, 12);
+				C->nt10_origin = new TH2D(rootname + "_NT10_Origin",  "NT1Origin",  12, 0, 12, 12, 0, 12);
+				C->nt01_origin = new TH2D(rootname + "_NT01_Origin",  "NT01Origin", 12, 0, 12, 12, 0, 12);
+				C->nt00_origin = new TH2D(rootname + "_NT00_Origin",  "NT0Origin",  12, 0, 12, 12, 0, 12);
+				label2OriginAxes(C->nt11_origin->GetXaxis(), C->nt11_origin->GetYaxis(), c);
+				label2OriginAxes(C->nt10_origin->GetXaxis(), C->nt10_origin->GetYaxis(), c);
+				label2OriginAxes(C->nt01_origin->GetXaxis(), C->nt01_origin->GetYaxis(), c);
+				label2OriginAxes(C->nt00_origin->GetXaxis(), C->nt00_origin->GetYaxis(), c);					
+			}
+
+			// Charge misid truth
+			if(c != Muon){
+				C->npp_cm_pt   = new TH2D(rootname + "_NPP_CM_pt",   "NPP_CM_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npp_cm_pt->Sumw2();
+				C->nt2pp_cm_pt = new TH2D(rootname + "_NT2PP_CM_pt", "NT2PP_CM_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pp_cm_pt->Sumw2();					
+			}
+
+				// OS Yields
+			if(c == Elec){
+				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_BB_pt ->Sumw2();
+                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
+                   C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
+			}
+			if(c == ElMu){
+				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_BB_pt ->Sumw2();
+                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
+			}
+
+			// Ratios
+			if(c != ElMu){
+				C->fntight  = new TH2D(rootname + "_fNTight",  "fNTight",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fntight ->Sumw2();
+				C->fnloose  = new TH2D(rootname + "_fNLoose",  "fNLoose",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose ->Sumw2();
+				C->pntight  = new TH2D(rootname + "_pNTight",  "pNTight",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight ->Sumw2();
+				C->pnloose  = new TH2D(rootname + "_pNLoose",  "pNLoose",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose ->Sumw2();
+				
+				C->fratio_pt  = new TEfficiency(rootname + "_fRatio_pt",  "fRatio_pt",  getNFPtBins(c), getFPtBins(c));
+				C->fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
+				C->pratio_pt  = new TEfficiency(rootname + "_pRatio_pt",  "pRatio_pt",  getNPPtBins(c), getPPtBins(c));
+				C->pratio_eta = new TEfficiency(rootname + "_pRatio_eta", "pRatio_eta", getNEtaBins(c), getEtaBins(c));
+
+				// C->fratio_pt ->SetUseWeightedEvents();
+				// C->fratio_eta->SetUseWeightedEvents();
+				// C->pratio_pt ->SetUseWeightedEvents();
+				// C->pratio_eta->SetUseWeightedEvents();
+
 				if(S->datamc > 0){
-					C->npp_pt   = new TH2D(rootname + "_NPP_pt",   "NPP_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npp_pt->Sumw2();
-					C->nfp_pt   = new TH2D(rootname + "_NFP_pt",   "NFP_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nfp_pt->Sumw2();
-					C->npf_pt   = new TH2D(rootname + "_NPF_pt",   "NPF_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npf_pt->Sumw2();
-					C->nff_pt   = new TH2D(rootname + "_NFF_pt",   "NFF_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nff_pt->Sumw2();
-					C->nt2pp_pt = new TH2D(rootname + "_NT2PP_pt", "NT2PP_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pp_pt->Sumw2();
-					C->nt2fp_pt = new TH2D(rootname + "_NT2FP_pt", "NT2FP_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2fp_pt->Sumw2();
-					C->nt2pf_pt = new TH2D(rootname + "_NT2PF_pt", "NT2PF_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pf_pt->Sumw2();
-					C->nt2ff_pt = new TH2D(rootname + "_NT2FF_pt", "NT2FF_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2ff_pt->Sumw2();
-
-					C->nt11_origin = new TH2D(rootname + "_NT20_Origin",  "NT2Origin",  12, 0, 12, 12, 0, 12);
-					C->nt10_origin = new TH2D(rootname + "_NT10_Origin",  "NT1Origin",  12, 0, 12, 12, 0, 12);
-					C->nt01_origin = new TH2D(rootname + "_NT01_Origin",  "NT01Origin", 12, 0, 12, 12, 0, 12);
-					C->nt00_origin = new TH2D(rootname + "_NT00_Origin",  "NT0Origin",  12, 0, 12, 12, 0, 12);
-					label2OriginAxes(C->nt11_origin->GetXaxis(), C->nt11_origin->GetYaxis(), c);
-					label2OriginAxes(C->nt10_origin->GetXaxis(), C->nt10_origin->GetYaxis(), c);
-					label2OriginAxes(C->nt01_origin->GetXaxis(), C->nt01_origin->GetYaxis(), c);
-					label2OriginAxes(C->nt00_origin->GetXaxis(), C->nt00_origin->GetYaxis(), c);					
-				}
-
-				// Charge misid truth
-				if(c != Muon){
-					C->npp_cm_pt   = new TH2D(rootname + "_NPP_CM_pt",   "NPP_CM_pt",   getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->npp_cm_pt->Sumw2();
-					C->nt2pp_cm_pt = new TH2D(rootname + "_NT2PP_CM_pt", "NT2PP_CM_pt", getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt2pp_cm_pt->Sumw2();					
-				}
-
-					// OS Yields
-				if(c == Elec){
-					C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_BB_pt ->Sumw2();
-	                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
-	                   C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
-				}
-				if(c == ElMu){
-					C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_BB_pt ->Sumw2();
-	                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
-				}
-
-				// Ratios
-				if(c != ElMu){
-					C->fntight  = new TH2D(rootname + "_fNTight",  "fNTight",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fntight ->Sumw2();
-					C->fnloose  = new TH2D(rootname + "_fNLoose",  "fNLoose",  getNFPtBins(c), getFPtBins(c), getNEtaBins(c), getEtaBins(c)); C->fnloose ->Sumw2();
-					C->pntight  = new TH2D(rootname + "_pNTight",  "pNTight",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pntight ->Sumw2();
-					C->pnloose  = new TH2D(rootname + "_pNLoose",  "pNLoose",  getNPPtBins(c), getPPtBins(c), getNEtaBins(c), getEtaBins(c)); C->pnloose ->Sumw2();
-					
-					C->fratio_pt  = new TEfficiency(rootname + "_fRatio_pt",  "fRatio_pt",  getNFPtBins(c), getFPtBins(c));
-					C->fratio_eta = new TEfficiency(rootname + "_fRatio_eta", "fRatio_eta", getNEtaBins(c), getEtaBins(c));
-					C->pratio_pt  = new TEfficiency(rootname + "_pRatio_pt",  "pRatio_pt",  getNPPtBins(c), getPPtBins(c));
-					C->pratio_eta = new TEfficiency(rootname + "_pRatio_eta", "pRatio_eta", getNEtaBins(c), getEtaBins(c));
-
-					// C->fratio_pt ->SetUseWeightedEvents();
-					// C->fratio_eta->SetUseWeightedEvents();
-					// C->pratio_pt ->SetUseWeightedEvents();
-					// C->pratio_eta->SetUseWeightedEvents();
-
-					if(S->datamc > 0){
-						C->sst_origin = new TH1D(rootname + "_fTOrigin", "fTOrigin", 15, 0, 15); C->sst_origin->Sumw2();
-						C->ssl_origin = new TH1D(rootname + "_fLOrigin", "fLOrigin", 15, 0, 15); C->ssl_origin->Sumw2();
-						C->zt_origin  = new TH1D(rootname + "_pTOrigin", "pTOrigin", 15, 0, 15); C->zt_origin ->Sumw2();
-						C->zl_origin  = new TH1D(rootname + "_pLOrigin", "pLOrigin", 15, 0, 15); C->zl_origin ->Sumw2();
-						labelOriginAxis(C->sst_origin->GetXaxis() , c);
-						labelOriginAxis(C->ssl_origin->GetXaxis() , c);
-						labelOriginAxis(C->zt_origin->GetXaxis()  , c);
-						labelOriginAxis(C->zl_origin->GetXaxis()  , c);
-					}
+					C->sst_origin = new TH1D(rootname + "_fTOrigin", "fTOrigin", 15, 0, 15); C->sst_origin->Sumw2();
+					C->ssl_origin = new TH1D(rootname + "_fLOrigin", "fLOrigin", 15, 0, 15); C->ssl_origin->Sumw2();
+					C->zt_origin  = new TH1D(rootname + "_pTOrigin", "pTOrigin", 15, 0, 15); C->zt_origin ->Sumw2();
+					C->zl_origin  = new TH1D(rootname + "_pLOrigin", "pLOrigin", 15, 0, 15); C->zl_origin ->Sumw2();
+					labelOriginAxis(C->sst_origin->GetXaxis() , c);
+					labelOriginAxis(C->ssl_origin->GetXaxis() , c);
+					labelOriginAxis(C->zt_origin->GetXaxis()  , c);
+					labelOriginAxis(C->zl_origin->GetXaxis()  , c);
 				}
 			}
 		}
 	}
+	// }
 }
 void SSDLDumper::deleteHistos(Sample *S){
 	delete S->cutFlowHisto[Muon];
@@ -2757,11 +2738,9 @@ void SSDLDumper::deleteHistos(Sample *S){
 	delete S->cutFlowHisto[ElMu];
 	
 	// Kinematical histos
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		for(size_t k = 0; k < gNKinSels; ++k){
-			delete S->kinplots[k][hilo].hmetvsht;
-			for(size_t j = 0; j < gNKinVars; ++j) delete S->kinplots[k][hilo].hvar[j];
-		}
+	for(size_t k = 0; k < gNKinSels; ++k){
+		delete S->kinplots[k][HighPt].hmetvsht;
+		for(size_t j = 0; j < gNKinVars; ++j) delete S->kinplots[k][HighPt].hvar[j];
 	}
 
 	// Histos for differential yields
@@ -2810,80 +2789,79 @@ void SSDLDumper::deleteHistos(Sample *S){
 		}
 	}
 
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
-			Region *R = &S->region[r][hilo];
-			for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
-				Channel *C;
-				if(c == Muon) C = &R->mm;
-				if(c == Elec) C = &R->ee;
-				if(c == ElMu) C = &R->em;
+	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+		Region *R = &S->region[r][HighPt];
+		for(gChannel c = channels_begin; c < gNCHANNELS; c=gChannel(c+1)){
+			Channel *C;
+			if(c == Muon) C = &R->mm;
+			if(c == Elec) C = &R->ee;
+			if(c == ElMu) C = &R->em;
 
-				delete C->nt20_pt;
-				delete C->nt10_pt;
-				delete C->nt01_pt;
-				delete C->nt00_pt;
-				delete C->nt20_eta;
-				delete C->nt10_eta;
-				delete C->nt01_eta;
-				delete C->nt00_eta;
+			delete C->nt20_pt;
+			delete C->nt10_pt;
+			delete C->nt01_pt;
+			delete C->nt00_pt;
+			delete C->nt20_eta;
+			delete C->nt10_eta;
+			delete C->nt01_eta;
+			delete C->nt00_eta;
 
-				// MC truth info
+			// MC truth info
+			if(S->datamc > 0){
+				delete C->npp_pt;
+				delete C->nfp_pt;
+				delete C->npf_pt;
+				delete C->nff_pt;
+				delete C->nt2pp_pt;
+				delete C->nt2fp_pt;
+				delete C->nt2pf_pt;
+				delete C->nt2ff_pt;
+
+				delete C->nt11_origin;
+				delete C->nt10_origin;
+				delete C->nt01_origin;
+				delete C->nt00_origin;
+			}
+
+			// Charge misid truth
+			if(c != Muon){
+				delete C->npp_cm_pt;
+				delete C->nt2pp_cm_pt;
+			}
+
+				// OS Yields
+			if(c == Elec){
+				delete C->nt20_OS_BB_pt;
+				delete C->nt20_OS_EE_pt;
+				delete C->nt20_OS_EB_pt;
+			}
+			if(c == ElMu){
+				delete C->nt20_OS_BB_pt;
+				delete C->nt20_OS_EE_pt;
+			}
+
+			// Ratios
+			if(c != ElMu){
+				delete C->fntight;
+				delete C->fnloose;
+				delete C->pntight;
+				delete C->pnloose;
+				
+				delete C->fratio_pt;
+				delete C->pratio_pt;
+				delete C->fratio_eta;
+				delete C->pratio_eta;
+
 				if(S->datamc > 0){
-					delete C->npp_pt;
-					delete C->nfp_pt;
-					delete C->npf_pt;
-					delete C->nff_pt;
-					delete C->nt2pp_pt;
-					delete C->nt2fp_pt;
-					delete C->nt2pf_pt;
-					delete C->nt2ff_pt;
-
-					delete C->nt11_origin;
-					delete C->nt10_origin;
-					delete C->nt01_origin;
-					delete C->nt00_origin;
-				}
-
-				// Charge misid truth
-				if(c != Muon){
-					delete C->npp_cm_pt;
-					delete C->nt2pp_cm_pt;
-				}
-
-					// OS Yields
-				if(c == Elec){
-					delete C->nt20_OS_BB_pt;
-					delete C->nt20_OS_EE_pt;
-					delete C->nt20_OS_EB_pt;
-				}
-				if(c == ElMu){
-					delete C->nt20_OS_BB_pt;
-					delete C->nt20_OS_EE_pt;
-				}
-
-				// Ratios
-				if(c != ElMu){
-					delete C->fntight;
-					delete C->fnloose;
-					delete C->pntight;
-					delete C->pnloose;
-					
-					delete C->fratio_pt;
-					delete C->pratio_pt;
-					delete C->fratio_eta;
-					delete C->pratio_eta;
-
-					if(S->datamc > 0){
-						delete C->sst_origin;
-						delete C->ssl_origin;
-						delete C->zt_origin;
-						delete C->zl_origin;
-					}
+					delete C->sst_origin;
+					delete C->ssl_origin;
+					delete C->zt_origin;
+					delete C->zl_origin;
 				}
 			}
 		}
 	}
+	// }
 }
 void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	pFile->cd();
@@ -2892,6 +2870,9 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 
 	TString temp;
 	TDirectory *rdir;
+
+	// Event counter
+	S->evcount->Write(S->evcount->GetName(), TObject::kWriteDelete);
 
 	// Cut Flows
 	S->cutFlowHisto[Muon]->Write(S->cutFlowHisto[Muon]->GetName(), TObject::kWriteDelete);
@@ -2921,15 +2902,13 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	}	
 
 	// Kinematic histos
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		temp = S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/";
-		rdir = Util::FindOrCreate(temp, pFile);
-		rdir->cd();
-		for(size_t k = 0; k < gNKinSels; ++k){
-			KinPlots *kp = &S->kinplots[k][hilo];
-			kp->hmetvsht->Write(kp->hmetvsht->GetName(), TObject::kWriteDelete);
-			for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
-		}
+	temp = S->sname + "/KinPlots/";
+	rdir = Util::FindOrCreate(temp, pFile);
+	rdir->cd();
+	for(size_t k = 0; k < gNKinSels; ++k){
+		KinPlots *kp = &S->kinplots[k][HighPt];
+		kp->hmetvsht->Write(kp->hmetvsht->GetName(), TObject::kWriteDelete);
+		for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
 	}
 
 
@@ -2971,108 +2950,88 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	}
 
 	// Yields
-	for(size_t hilo = 0; hilo < 2; ++hilo){
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
-			Region *R = &S->region[r][hilo];
-			TString temp = S->sname + "/" + Region::sname[r] + "/" + gHiLoLabel[hilo] + "/";
-			TDirectory* rdir = Util::FindOrCreate(temp, pFile);
-			rdir->cd();
+	for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){
+		Region *R = &S->region[r][HighPt];
+		TString temp = S->sname + "/" + Region::sname[r];
+		TDirectory* rdir = Util::FindOrCreate(temp, pFile);
+		rdir->cd();
 
-			for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
-				Channel *C;
-				if(ch == Muon)     C = &R->mm;
-				if(ch == Elec) C = &R->ee;
-				if(ch == ElMu)      C = &R->em;
-				C->nt20_pt    ->Write(C->nt20_pt    ->GetName(), TObject::kWriteDelete);
-				C->nt10_pt    ->Write(C->nt10_pt    ->GetName(), TObject::kWriteDelete);
-				C->nt01_pt    ->Write(C->nt01_pt    ->GetName(), TObject::kWriteDelete);
-				C->nt00_pt    ->Write(C->nt00_pt    ->GetName(), TObject::kWriteDelete);
-				C->nt20_eta   ->Write(C->nt20_eta   ->GetName(), TObject::kWriteDelete);
-				C->nt10_eta   ->Write(C->nt10_eta   ->GetName(), TObject::kWriteDelete);
-				C->nt01_eta   ->Write(C->nt01_eta   ->GetName(), TObject::kWriteDelete);
-				C->nt00_eta   ->Write(C->nt00_eta   ->GetName(), TObject::kWriteDelete);
-			
-				if(ch == Elec || ch == ElMu){
-					C->nt20_OS_BB_pt->Write(C->nt20_OS_BB_pt->GetName(), TObject::kWriteDelete);
-					C->nt20_OS_EE_pt->Write(C->nt20_OS_EE_pt->GetName(), TObject::kWriteDelete);
-					if(ch == Elec) C->nt20_OS_EB_pt->Write(C->nt20_OS_EB_pt->GetName(), TObject::kWriteDelete);					
+		for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
+			Channel *C;
+			if(ch == Muon)     C = &R->mm;
+			if(ch == Elec) C = &R->ee;
+			if(ch == ElMu)      C = &R->em;
+			C->nt20_pt    ->Write(C->nt20_pt    ->GetName(), TObject::kWriteDelete);
+			C->nt10_pt    ->Write(C->nt10_pt    ->GetName(), TObject::kWriteDelete);
+			C->nt01_pt    ->Write(C->nt01_pt    ->GetName(), TObject::kWriteDelete);
+			C->nt00_pt    ->Write(C->nt00_pt    ->GetName(), TObject::kWriteDelete);
+			C->nt20_eta   ->Write(C->nt20_eta   ->GetName(), TObject::kWriteDelete);
+			C->nt10_eta   ->Write(C->nt10_eta   ->GetName(), TObject::kWriteDelete);
+			C->nt01_eta   ->Write(C->nt01_eta   ->GetName(), TObject::kWriteDelete);
+			C->nt00_eta   ->Write(C->nt00_eta   ->GetName(), TObject::kWriteDelete);
+		
+			if(ch == Elec || ch == ElMu){
+				C->nt20_OS_BB_pt->Write(C->nt20_OS_BB_pt->GetName(), TObject::kWriteDelete);
+				C->nt20_OS_EE_pt->Write(C->nt20_OS_EE_pt->GetName(), TObject::kWriteDelete);
+				if(ch == Elec) C->nt20_OS_EB_pt->Write(C->nt20_OS_EB_pt->GetName(), TObject::kWriteDelete);					
+			}
+		
+			if(S->datamc > 0){
+				C->npp_pt     ->Write(C->npp_pt     ->GetName(), TObject::kWriteDelete);
+				C->nfp_pt     ->Write(C->nfp_pt     ->GetName(), TObject::kWriteDelete);
+				C->npf_pt     ->Write(C->npf_pt     ->GetName(), TObject::kWriteDelete);
+				C->nff_pt     ->Write(C->nff_pt     ->GetName(), TObject::kWriteDelete);
+				C->nt2pp_pt   ->Write(C->nt2pp_pt   ->GetName(), TObject::kWriteDelete);
+				C->nt2fp_pt   ->Write(C->nt2fp_pt   ->GetName(), TObject::kWriteDelete);
+				C->nt2pf_pt   ->Write(C->nt2pf_pt   ->GetName(), TObject::kWriteDelete);
+				C->nt2ff_pt   ->Write(C->nt2ff_pt   ->GetName(), TObject::kWriteDelete);
+				C->nt11_origin->Write(C->nt11_origin->GetName(), TObject::kWriteDelete);
+				C->nt10_origin->Write(C->nt10_origin->GetName(), TObject::kWriteDelete);
+				C->nt01_origin->Write(C->nt01_origin->GetName(), TObject::kWriteDelete);
+				C->nt00_origin->Write(C->nt00_origin->GetName(), TObject::kWriteDelete);
+				if(ch != Muon){
+					C->npp_cm_pt  ->Write(C->npp_cm_pt  ->GetName(), TObject::kWriteDelete);
+					C->nt2pp_cm_pt->Write(C->nt2pp_cm_pt->GetName(), TObject::kWriteDelete);						
 				}
-			
+			}
+			if(ch != ElMu){
+				C->fntight    ->Write(C->fntight    ->GetName(), TObject::kWriteDelete);
+				C->fnloose    ->Write(C->fnloose    ->GetName(), TObject::kWriteDelete);
+				C->pntight    ->Write(C->pntight    ->GetName(), TObject::kWriteDelete);
+				C->pnloose    ->Write(C->pnloose    ->GetName(), TObject::kWriteDelete);
+
+				C->fratio_pt ->Write(C->fratio_pt ->GetName(), TObject::kWriteDelete);
+				C->pratio_pt ->Write(C->pratio_pt ->GetName(), TObject::kWriteDelete);
+				C->fratio_eta->Write(C->fratio_eta->GetName(), TObject::kWriteDelete);
+				C->pratio_eta->Write(C->pratio_eta->GetName(), TObject::kWriteDelete);
+
 				if(S->datamc > 0){
-					C->npp_pt     ->Write(C->npp_pt     ->GetName(), TObject::kWriteDelete);
-					C->nfp_pt     ->Write(C->nfp_pt     ->GetName(), TObject::kWriteDelete);
-					C->npf_pt     ->Write(C->npf_pt     ->GetName(), TObject::kWriteDelete);
-					C->nff_pt     ->Write(C->nff_pt     ->GetName(), TObject::kWriteDelete);
-					C->nt2pp_pt   ->Write(C->nt2pp_pt   ->GetName(), TObject::kWriteDelete);
-					C->nt2fp_pt   ->Write(C->nt2fp_pt   ->GetName(), TObject::kWriteDelete);
-					C->nt2pf_pt   ->Write(C->nt2pf_pt   ->GetName(), TObject::kWriteDelete);
-					C->nt2ff_pt   ->Write(C->nt2ff_pt   ->GetName(), TObject::kWriteDelete);
-					C->nt11_origin->Write(C->nt11_origin->GetName(), TObject::kWriteDelete);
-					C->nt10_origin->Write(C->nt10_origin->GetName(), TObject::kWriteDelete);
-					C->nt01_origin->Write(C->nt01_origin->GetName(), TObject::kWriteDelete);
-					C->nt00_origin->Write(C->nt00_origin->GetName(), TObject::kWriteDelete);
-					if(ch != Muon){
-						C->npp_cm_pt  ->Write(C->npp_cm_pt  ->GetName(), TObject::kWriteDelete);
-						C->nt2pp_cm_pt->Write(C->nt2pp_cm_pt->GetName(), TObject::kWriteDelete);						
-					}
-				}
-				if(ch != ElMu){
-					C->fntight    ->Write(C->fntight    ->GetName(), TObject::kWriteDelete);
-					C->fnloose    ->Write(C->fnloose    ->GetName(), TObject::kWriteDelete);
-					C->pntight    ->Write(C->pntight    ->GetName(), TObject::kWriteDelete);
-					C->pnloose    ->Write(C->pnloose    ->GetName(), TObject::kWriteDelete);
-
-					C->fratio_pt ->Write(C->fratio_pt ->GetName(), TObject::kWriteDelete);
-					C->pratio_pt ->Write(C->pratio_pt ->GetName(), TObject::kWriteDelete);
-					C->fratio_eta->Write(C->fratio_eta->GetName(), TObject::kWriteDelete);
-					C->pratio_eta->Write(C->pratio_eta->GetName(), TObject::kWriteDelete);
-
-					if(S->datamc > 0){
-						C->sst_origin ->Write(C->sst_origin ->GetName(), TObject::kWriteDelete);
-						C->ssl_origin ->Write(C->ssl_origin ->GetName(), TObject::kWriteDelete);
-						C->zt_origin  ->Write(C->zt_origin  ->GetName(), TObject::kWriteDelete);
-						C->zl_origin  ->Write(C->zl_origin  ->GetName(), TObject::kWriteDelete);						
-					}
+					C->sst_origin ->Write(C->sst_origin ->GetName(), TObject::kWriteDelete);
+					C->ssl_origin ->Write(C->ssl_origin ->GetName(), TObject::kWriteDelete);
+					C->zt_origin  ->Write(C->zt_origin  ->GetName(), TObject::kWriteDelete);
+					C->zl_origin  ->Write(C->zl_origin  ->GetName(), TObject::kWriteDelete);						
 				}
 			}
 		}
 	}
 }
-void SSDLDumper::writeSigGraphs(Sample *S, gChannel chan, gHiLoSwitch hilo, TFile *pFile){
+void SSDLDumper::writeSigGraphs(Sample *S, gChannel chan, TFile *pFile){
 	TString channame = "MM";
 	if(chan == Elec) channame = "EE";
 	if(chan == ElMu)      channame = "EM";
 	vector<float> ht;
 	vector<float> met;
 	if(chan == Muon){
-		if(hilo == HighPt){
-			ht  = fSigEv_HI_MM_HT;
-			met = fSigEv_HI_MM_MET;
-		}
-		if(hilo == LowPt){
-			ht  = fSigEv_LO_MM_HT;
-			met = fSigEv_LO_MM_MET;
-		}
+		ht  = fSigEv_HI_MM_HT;
+		met = fSigEv_HI_MM_MET;
 	}
 	if(chan == Elec){
-		if(hilo == HighPt){
-			ht  = fSigEv_HI_EE_HT;
-			met = fSigEv_HI_EE_MET;
-		}
-		if(hilo == LowPt){
-			ht  = fSigEv_LO_EE_HT;
-			met = fSigEv_LO_EE_MET;
-		}
+		ht  = fSigEv_HI_EE_HT;
+		met = fSigEv_HI_EE_MET;
 	}
 	if(chan == ElMu){
-		if(hilo == HighPt){
-			ht  = fSigEv_HI_EM_HT;
-			met = fSigEv_HI_EM_MET;
-		}
-		if(hilo == LowPt){
-			ht  = fSigEv_LO_EM_HT;
-			met = fSigEv_LO_EM_MET;
-		}
+		ht  = fSigEv_HI_EM_HT;
+		met = fSigEv_HI_EM_MET;
 	}
 	
 	const int nsig = ht.size();
@@ -3084,7 +3043,7 @@ void SSDLDumper::writeSigGraphs(Sample *S, gChannel chan, gHiLoSwitch hilo, TFil
 	}
 	
 	TGraph *sigevents = new TGraph(nsig, ht_a, met_a);
-	sigevents->SetName(Form("%s_%s_%s_SigEvents", S->sname.Data(), channame.Data(), gHiLoLabel[hilo].Data()));
+	sigevents->SetName(Form("%s_%s_SigEvents", S->sname.Data(), channame.Data()));
 
 	pFile->cd();
 	TString dirname = S->sname + "/SigGraphs/";
@@ -3110,7 +3069,11 @@ int  SSDLDumper::readHistos(TString filename){
 	
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
-		if(fVerbose > 1) cout << "Reading histos for " << S->sname << endl;
+		if(fVerbose > 2) cout << "Reading histos for " << S->sname << endl;
+
+		// Event count histo
+		getObjectSafe(pFile, S->sname + "/" + S->sname + "_EventCount", S->evcount);
+		S->ngen = S->evcount->GetEntries();
 
 		// Cut flow histos
 		getObjectSafe(pFile, S->sname + "/MMCutFlow", S->cutFlowHisto[Muon]);
@@ -3150,16 +3113,14 @@ int  SSDLDumper::readHistos(TString filename){
 
 
 		// Kinematic histos
-		for(size_t hilo = 0; hilo < 2; ++hilo){
-			for(size_t k = 0; k < gNKinSels; ++k){
-				KinPlots *kp = &S->kinplots[k][hilo];
-				getname = Form("%s_%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data());
-				getObjectSafe(pFile, S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname, kp->hmetvsht);
-				for(size_t j = 0; j < gNKinVars; ++j){
-					getname = Form("%s_%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), gHiLoLabel[hilo].Data(), KinPlots::var_name[j].Data());
-					getObjectSafe(pFile, S->sname + "/KinPlots/" + gHiLoLabel[hilo] + "/" + getname, kp->hvar[j]);
-					kp->hvar[j]->SetFillColor(S->color);
-				}
+		for(size_t k = 0; k < gNKinSels; ++k){
+			KinPlots *kp = &S->kinplots[k][HighPt];
+			getname = Form("%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data());
+			getObjectSafe(pFile, S->sname + "/KinPlots/" + getname, kp->hmetvsht);
+			for(size_t j = 0; j < gNKinVars; ++j){
+				getname = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
+				getObjectSafe(pFile, S->sname + "/KinPlots/" + getname, kp->hvar[j]);
+				kp->hvar[j]->SetFillColor(S->color);
 			}
 		}
 
@@ -3214,15 +3175,15 @@ int  SSDLDumper::readHistos(TString filename){
 		}
 
 		// Yields
-		for(size_t hilo = 0; hilo < 2; ++hilo){
+		for(size_t HighPt = 0; HighPt < 2; ++HighPt){
 			for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)){ // Loop over regions
-				Region *R = &S->region[r][hilo];
+				Region *R = &S->region[r][HighPt];
 				for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
 					Channel *C;
 					if(ch == Muon) C = &R->mm;
 					if(ch == Elec) C = &R->ee;
 					if(ch == ElMu) C = &R->em;
-					TString root = S->sname +"/"+ Region::sname[r] +"/"+ gHiLoLabel[hilo] +"/"+ S->sname +"_"+ Region::sname[r] +"_"+ gChanLabel[ch] +"_"+ gHiLoLabel[hilo];
+					TString root = S->sname +"/"+ Region::sname[r] +"/"+ S->sname +"_"+ Region::sname[r] +"_"+ gChanLabel[ch];
 					getObjectSafe(pFile, root + "_NT20_pt",  C->nt20_pt );
 					getObjectSafe(pFile, root + "_NT10_pt" , C->nt10_pt );
 					getObjectSafe(pFile, root + "_NT01_pt" , C->nt01_pt );
@@ -3275,7 +3236,7 @@ int  SSDLDumper::readHistos(TString filename){
 						}
 					}
 				}
-				if(hilo == HighPt){
+				if(HighPt == HighPt){
 					storeNumbers(S, Muon, r);
 					storeNumbers(S, Elec, r);
 					storeNumbers(S, ElMu, r);					
@@ -3300,16 +3261,16 @@ int  SSDLDumper::readSigGraphs(TString filename){
 	
 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
 		Sample *S = fSamples[i];
-		for(size_t hilo = 0; hilo < 2; ++hilo){
+		for(size_t HighPt = 0; HighPt < 2; ++HighPt){
 			for(gChannel ch = channels_begin; ch < gNCHANNELS; ch=gChannel(ch+1)){ // Loop over channels, mumu, emu, ee
 				if(ch == Muon)     channame = "MM";
 				if(ch == Elec) channame = "EE";
 				if(ch == ElMu)      channame = "EM";
-				getname = Form("%s/SigGraphs/%s_%s_%s_SigEvents", S->sname.Data(), S->sname.Data(), channame.Data(), gHiLoLabel[hilo].Data());
-				getObjectSafe(pFile, getname, S->sigevents[ch][hilo]);
-				S->sigevents[ch][hilo]->SetMarkerColor(color[ch]);
-				S->sigevents[ch][hilo]->SetMarkerStyle(style[ch]);
-				S->sigevents[ch][hilo]->SetMarkerSize(size);
+				getname = Form("%s/SigGraphs/%s_%s_SigEvents", S->sname.Data(), S->sname.Data(), channame.Data());
+				getObjectSafe(pFile, getname, S->sigevents[ch][HighPt]);
+				S->sigevents[ch][HighPt]->SetMarkerColor(color[ch]);
+				S->sigevents[ch][HighPt]->SetMarkerStyle(style[ch]);
+				S->sigevents[ch][HighPt]->SetMarkerSize(size);
 			}
 		}
 	}
@@ -3529,37 +3490,61 @@ bool SSDLDumper::eMuHTTrigger(){
 //////////////////////////////////////////////////////////////////////////////
 // Helper functions:
 //____________________________________________________________________________
+void SSDLDumper::scaleBTags(){
+	for(size_t i = 0; i < NJets; ++i){
+		// if(isGoodJet(i) == false) continue;
+		bool is_tagged_lse = JetTCHEBTag[i] > 1.7;
+		bool is_tagged_med = JetTCHEBTag[i] > 3.3;
+		int pdgid = 0;
+		if(JetPartonID[i] == 0 || JetPartonID[i] == -2) pdgid = -999;
+		else if(JetPartonID[i] == -1)                   pdgid = 0;
+		else pdgid = JetPartonID[i];
+
+		string meanminmax = "mean";
+		if(gScaleBTags == 1) meanminmax = "max";
+		if(gScaleBTags == 2) meanminmax = "min";
+		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], JetPartonID[i], meanminmax);
+		if(!is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 0.5; // not tagged
+		if( is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 2.0; // loose tagged
+		if( is_tagged_lse &&  is_tagged_med) JetTCHEBTag[i] = 3.5; // medium tagged
+	}
+}
+void SSDLDumper::smearJetPts(){
+	if(gJECScaling != 3) return;
+
+	// // reco jet:
+	// AnalysisJet thisJet_tmp;
+	// thisJet_tmp.SetPtEtaPhiE( ptJet_corr, etaJet[iJet], phiJet[iJet], eJet[iJet]);
+	// 
+	// // gen jet:
+	// AnalysisJet thisGenJet_tmp;
+	// thisGenJet_tmp.SetPtEtaPhiE( ptGenJet[iJet], etaGenJet[iJet], phiGenJet[iJet], eGenJet[iJet]);
+
+	// bool matched = (thisGenJet_tmp.Pt()>3.) ? thisJet_tmp.DeltaR(thisGenJet_tmp)<0.5 : false;
+
+	// if(0) return TMath::Max(0., thisGenJet_tmp.Pt()+jer_SF*(thisJet_tmp.Pt()-thisGenJet_tmp.Pt() ) );
+	// else
+	for(size_t i = 0; i < NJets; ++i){
+		JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));		
+	}
+}
 void SSDLDumper::smearMET(){
-	TRandom3 *rand3 = new TRandom3(0);
-	float sm_met = pfMET + rand3->Gaus(0, 0.05) * pfMET;
+	float sm_met = pfMET + fRand3->Gaus(0, 0.05) * pfMET;
 	pfMET = sm_met;
 }
 float SSDLDumper::getJetPt(int i){
 	// Return the jet pt, either the true one stored in the tree, or something
 	// shifted or smeared for systematics studies.
 	if(gJECScaling == 0) return JetPt[i];
+	if(gJECScaling == 1) return JetPt[i] + JetJECUncert[i]*JetPt[i];
+	if(gJECScaling == 2) return JetPt[i] - JetJECUncert[i]*JetPt[i];
 	return JetPt[i];
-	// if(gJECScaling == 1) return JetPt[i] + JetJECUncert[i]*JetPt[i];
-	// if(gJECScaling == 2) return JetPt[i] - JetJECUncert[i]*JetPt[i];
-	// if(gJECScaling != 3) return JetPt[i];
-	// 
-	// // Smear
-	// TRandom3 *rand3 = new TRandom3(0);
-	// float sm_pt = JetPt[i] + rand3->Gaus(0, JetJECUncert[i]) * JetPt[i];
-	// delete rand3;
-	// return sm_pt;
 }
 float SSDLDumper::getMET(){
 	// Return the MET, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
 	float met = pfMET;
 	return met;
-
-	// Smear
-	// TRandom3 *rand3 = new TRandom3(0);
-	// float sm_met = pfMET + rand3->Gaus(0, 0.05) * pfMET;
-	// delete rand3;
-	// return sm_met;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
@@ -4651,6 +4636,8 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 	if(getJetPt(jet) < gMinJetPt) return false;
 	if(getJetPt(jet) < pt) return false;
 	
+	if(fabs(JetEta[jet]) > gMaxJetEta) return false; // btagging only up to 2.4
+	
 	// Remove jets close to hypothesis leptons
 	if(fHypLepton1.index > -1) if(Util::GetDeltaR(fHypLepton1.p.Eta(), JetEta[jet], fHypLepton1.p.Phi(), JetPhi[jet]) < minDR) return false;
 	if(fHypLepton2.index > -1) if(Util::GetDeltaR(fHypLepton2.p.Eta(), JetEta[jet], fHypLepton2.p.Phi(), JetPhi[jet]) < minDR) return false;
@@ -4669,6 +4656,14 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 		return false;
 	}
 	return true;
+}
+float SSDLDumper::getJERScale(int jet){
+	float eta = JetEta[jet];
+	if(     fabs(eta) < 0.5) return 1.052;
+	else if(fabs(eta) < 1.1) return 1.057;
+	else if(fabs(eta) < 1.7) return 1.096;
+	else if(fabs(eta) < 2.3) return 1.134;
+	else                     return 1.288;
 }
 
 //////////////////////////////////////////////////////////////////////////////
