@@ -148,17 +148,6 @@ def getBranches(file,tree):
 #______________________________________________________________
 if __name__=='__main__':
 
-#     # Check location
-#     if os.getcwd().find('macros') < 0:
-#         print 'This script has to be run in the \'macros\' directory'
-#         print 'where you wish to update the TreeClassBase class'
-#         exit(2)
-
-    # Check input file
-    if not os.path.exists(FILENAME):
-        print 'File',FILENAME,'does not seem to exist'
-        exit(3)
-    
     print 'Processing input file...'
     runBranches = getBranches(FILENAME,'Runs')
     eventBranches = getBranches(FILENAME,'Events')
