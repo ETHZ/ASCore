@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.10 $";
+string sjzbversion="$Revision: 1.70.2.11 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.11  2012/05/11 07:56:27  pablom
+Correct use of deposits and isolation for muons.
+
 Revision 1.70.2.10  2012/05/09 15:05:22  buchmann
 Adapted electron selection (now corresponds to hpa one); added GetLeptonWeight function to be able to assign efficiency weights (including uncertainty)
 
@@ -1408,7 +1411,9 @@ void JZBAnalysis::Analyze() {
     }
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
+cout << "Currently have " << leptons.size() << " selected leptons " << endl;
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
+cout << "Currently have " << sortedGoodLeptons.size() << " ordered selected leptons " << endl;
 
   if(sortedGoodLeptons.size() < 2) {
     if (isMC&&!fmakeSmall) myTree->Fill();
@@ -1471,7 +1476,6 @@ void JZBAnalysis::Analyze() {
     }
 
   } else {
-      
     //If there are less than two leptons the event is not considered
     if (isMC&&!fmakeSmall) myTree->Fill();
     return;
@@ -2144,15 +2148,18 @@ const float JZBAnalysis::EffArea(float abseta) {
 
 const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
-  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
-  counters[EL].fill(" ... |eta| < 2.5");
+  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
+  counters[EL].fill(" ... |eta| < 2.4");
+
+  if(!(fabs(fTR->ElPt[index]) > 10.0 ) ) return false;
+  counters[EL].fill(" ... pT > 10");
 
   // Medium Working Point
   if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.004)) return false;
      if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
-     if(!fTR->ElHcalOverEcal[index]<0.10) return false;
+     if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
   } else { // Endcap
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
      if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
@@ -2162,9 +2169,9 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
   counters[EL].fill(" ... pass additional electron ID cuts");
 
-  if(!(fTR->ElD0PV[index]<0.02)) return false;
+  if(!(abs(fTR->ElD0PV[index])<0.02)) return false;
   counters[EL].fill(" ... D0(PV)<0.02");
-  if(!(fTR->ElDzPV[index]<0.1)) return false;
+  if(!(abs(fTR->ElDzPV[index])<0.1)) return false;
   counters[EL].fill(" ... DZ(PV)<0.1");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
