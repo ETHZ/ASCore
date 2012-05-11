@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.15 2012/05/07 07:19:12 pandolf Exp $
+// $Id: NTupleProducer.h,v 1.114.2.16 2012/05/08 09:10:53 fronga Exp $
 //
 //
 
@@ -553,10 +553,14 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuIso05EmEt;
   std::auto_ptr<std::vector<float> >  fTMuIso05HadEt;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03ChHad;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03NeHad;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR03Photon;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03NeHadHighThresh  ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03PhotonHighThresh ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR03SumPUPt;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04ChHad;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04NeHad;
+  std::auto_ptr<std::vector<float> >  fTMuPfIsoR04Photon;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04NeHadHighThresh  ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04PhotonHighThresh ;
   std::auto_ptr<std::vector<float> >  fTMuPfIsoR04SumPUPt;

@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.20 2012/05/07 07:19:12 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.21 2012/05/08 09:10:54 fronga Exp $
 //
 //
 
@@ -1208,11 +1208,15 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     fTMuIso05HadEt->push_back( muon.isolationR05().hadEt );
 
     fTMuPfIsoR03ChHad  ->push_back( muon.pfIsolationR03().sumChargedHadronPt );
+    fTMuPfIsoR03NeHad  ->push_back( muon.pfIsolationR03().sumNeutralHadronEt );
+    fTMuPfIsoR03Photon ->push_back( muon.pfIsolationR03().sumPhotonEt );
     fTMuPfIsoR03NeHadHighThresh  ->push_back( muon.pfIsolationR03().sumNeutralHadronEtHighThreshold );
     fTMuPfIsoR03PhotonHighThresh ->push_back( muon.pfIsolationR03().sumPhotonEtHighThreshold );
     fTMuPfIsoR03SumPUPt->push_back( muon.pfIsolationR03().sumPUPt );
 
     fTMuPfIsoR04ChHad  ->push_back( muon.pfIsolationR04().sumChargedHadronPt );
+    fTMuPfIsoR04NeHad  ->push_back( muon.pfIsolationR04().sumNeutralHadronEt );
+    fTMuPfIsoR04Photon ->push_back( muon.pfIsolationR04().sumPhotonEt );
     fTMuPfIsoR04NeHadHighThresh  ->push_back( muon.pfIsolationR04().sumNeutralHadronEtHighThreshold );
     fTMuPfIsoR04PhotonHighThresh ->push_back( muon.pfIsolationR04().sumPhotonEtHighThreshold );
     fTMuPfIsoR04SumPUPt->push_back( muon.pfIsolationR04().sumPUPt );
@@ -3555,10 +3559,14 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuIso05EmEt");
   produces<std::vector<float> >("MuIso05HadEt");
   produces<std::vector<float> >("MuPfIsoR03ChHad");
+  produces<std::vector<float> >("MuPfIsoR03NeHad");
+  produces<std::vector<float> >("MuPfIsoR03Photon");
   produces<std::vector<float> >("MuPfIsoR03NeHadHighThresh");
   produces<std::vector<float> >("MuPfIsoR03PhotonHighThresh");
   produces<std::vector<float> >("MuPfIsoR03SumPUPt");
   produces<std::vector<float> >("MuPfIsoR04ChHad");
+  produces<std::vector<float> >("MuPfIsoR04NeHad");
+  produces<std::vector<float> >("MuPfIsoR04Photon");
   produces<std::vector<float> >("MuPfIsoR04NeHadHighThresh");
   produces<std::vector<float> >("MuPfIsoR04PhotonHighThresh");
   produces<std::vector<float> >("MuPfIsoR04SumPUPt");
@@ -4195,10 +4203,14 @@ void NTupleProducer::resetProducts( void ) {
   fTMuIso05EmEt.reset(new std::vector<float> );
   fTMuIso05HadEt.reset(new std::vector<float> );
   fTMuPfIsoR03ChHad  .reset(new std::vector<float> );
+  fTMuPfIsoR03NeHad  .reset(new std::vector<float> );
+  fTMuPfIsoR03Photon .reset(new std::vector<float> );
   fTMuPfIsoR03NeHadHighThresh  .reset(new std::vector<float> );
   fTMuPfIsoR03PhotonHighThresh .reset(new std::vector<float> );
   fTMuPfIsoR03SumPUPt.reset(new std::vector<float> );
   fTMuPfIsoR04ChHad  .reset(new std::vector<float> );
+  fTMuPfIsoR04NeHad  .reset(new std::vector<float> );
+  fTMuPfIsoR04Photon .reset(new std::vector<float> );
   fTMuPfIsoR04NeHadHighThresh  .reset(new std::vector<float> );
   fTMuPfIsoR04PhotonHighThresh .reset(new std::vector<float> );
   fTMuPfIsoR04SumPUPt.reset(new std::vector<float> );
@@ -4907,10 +4919,14 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuIso05EmEt, "MuIso05EmEt");
   event.put(fTMuIso05HadEt, "MuIso05HadEt");
   event.put(fTMuPfIsoR03ChHad  , "MuPfIsoR03ChHad");
+  event.put(fTMuPfIsoR03NeHad  , "MuPfIsoR03NeHad");
+  event.put(fTMuPfIsoR03Photon , "MuPfIsoR03Photon");
   event.put(fTMuPfIsoR03NeHadHighThresh  , "MuPfIsoR03NeHadHighThresh");
   event.put(fTMuPfIsoR03PhotonHighThresh , "MuPfIsoR03PhotonHighThresh");
   event.put(fTMuPfIsoR03SumPUPt, "MuPfIsoR03SumPUPt");
   event.put(fTMuPfIsoR04ChHad  , "MuPfIsoR04ChHad");
+  event.put(fTMuPfIsoR04NeHad  , "MuPfIsoR04NeHad");
+  event.put(fTMuPfIsoR04Photon , "MuPfIsoR04Photon");
   event.put(fTMuPfIsoR04NeHadHighThresh  , "MuPfIsoR04NeHadHighThresh");
   event.put(fTMuPfIsoR04PhotonHighThresh , "MuPfIsoR04PhotonHighThresh");
   event.put(fTMuPfIsoR04SumPUPt, "MuPfIsoR04SumPUPt");

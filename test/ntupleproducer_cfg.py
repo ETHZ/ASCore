@@ -50,7 +50,8 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
+#options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -390,6 +391,7 @@ process.analyze.isModelScan     = options.ModelScan
 process.analyze.tag_doVertexing = options.doVertexing
 process.analyze.tag_perVtxMvaWeights = options.perVtxMvaWeights
 process.analyze.tag_perEvtMvaWeights = options.perEvtMvaWeights
+process.analyze.tag_vertex = 'goodVertices'
 
 # Add some jet collections
 glist_btags = cms.vstring('trackCountingHighEffBJetTags','trackCountingHighPurBJetTags',
