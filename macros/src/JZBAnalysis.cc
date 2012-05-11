@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.9 $";
+string sjzbversion="$Revision: 1.70.2.10 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.10  2012/05/09 15:05:22  buchmann
+Adapted electron selection (now corresponds to hpa one); added GetLeptonWeight function to be able to assign efficiency weights (including uncertainty)
+
 Revision 1.70.2.9  2012/05/09 10:43:17  pablom
 Add ecal deposits to muons and bug fix for electrons selections.
 
@@ -2043,17 +2046,16 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
   counters[MU].fill(" ... DZ(pv) < 1.0");
 
+
   //HPA specifics
-  if ( !(fTR->MuIso03EmEt[index] < 4) ) return false;
+  if ( !(fTR->MuEem[index] < 4) ) return false;
   counters[MU].fill(" ... MuIso03EmEt < 4");
-  if ( !(fTR->MuIso03HadEt[index] < 6) ) return false;
+  if ( !(fTR->MuEhad[index] < 6) ) return false;
   counters[MU].fill(" ... MuIso03HadEt < 6");
 
-
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-
-  double Iso = (fTR->MuPfIsoR03ChHad[index] + std::max(0.0,
-                fTR->MuPfIsoR03NeHadHighThresh[index]+fTR->MuPfIsoR03PhotonHighThresh[index]-0.5*fTR->MuPfIsoR03SumPUPt[index])
+  double Iso = (fTR->MumuonPFIsoChHad03[index] + std::max(0.0,
+                fTR->MumuonPFIsoNHad03[index]+fTR->MumuonPFIsoPhoton03[index]-0.5*fTR->MuPfIsoR03SumPUPt[index])
                 )/fTR->MuPt[index];
   if ( !(Iso < 0.2) ) return false;
   counters[MU].fill(" ... Iso < 0.2");
