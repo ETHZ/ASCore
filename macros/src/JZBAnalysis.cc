@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.11 $";
+string sjzbversion="$Revision: 1.70.2.12 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.12  2012/05/11 16:04:24  buchmann
+electron synchronization completed
+
 Revision 1.70.2.11  2012/05/11 07:56:27  pablom
 Correct use of deposits and isolation for muons.
 
@@ -1411,9 +1414,7 @@ void JZBAnalysis::Analyze() {
     }
   
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
-cout << "Currently have " << leptons.size() << " selected leptons " << endl;
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
-cout << "Currently have " << sortedGoodLeptons.size() << " ordered selected leptons " << endl;
 
   if(sortedGoodLeptons.size() < 2) {
     if (isMC&&!fmakeSmall) myTree->Fill();
