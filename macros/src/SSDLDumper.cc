@@ -46,9 +46,12 @@ static const float gMuMaxIso   = 0.05;
 static const float gElMaxIso   = 0.05;
 static const float gMinJetPt   = 20.;
 static const bool  gApplyZVeto = false;
-static const bool  gSmearMET   = false;
-static const int   gScaleBTags = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
-static const int   gJECScaling = 0; // 0 (no scaling), 1 (scale up), 2 (scale down), 3 (JER smearing)
+static bool  gSmearMET     = false;
+static int   gScaleBTags   = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
+static int   gJECScaling   = 0; // 0 (no scaling), 1 (scale up), 2 (scale down), 3 (JER smearing)
+static int   gScaleLeptons = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
+
+static const bool gDoSystStudies = true;
 
 //////////////////////////////////////////////////////////////////////////////////
 static const float gMMU = 0.1057;
@@ -56,19 +59,20 @@ static const float gMEL = 0.0005;
 static const float gMZ  = 91.2;
 
 // Regions ///////////////////////////////////////////////////////////////////////
-TString SSDLDumper::Region::sname  [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET120", "HT0MET200", "HT0MET1203V", "HT0MET2003V", "HT0MET120JV", "HT0MET120JV3V", "TTbarWPresel", "TTbarWSel1", "TTbarWSel2", "TTbarWSel3", "TTbarWSel4"};
-float SSDLDumper::Region::minHT    [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,            0.,            0.,              0.,             0.,           0.,           0.,           0.,         100.};
-float SSDLDumper::Region::maxHT    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,         7000.,           10.,             10.,          7000.,        7000.,        7000.,        7000.,        7000.};
-float SSDLDumper::Region::minMet   [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,          200.,          120.,            120.,             0.,           0.,           0.,          40.,           0.};
-float SSDLDumper::Region::maxMet   [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,         7000.,         7000.,           7000.,          7000.,        7000.,        7000.,        7000.,        7000.};
-int   SSDLDumper::Region::minNjets [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             4 ,           3 ,           4 ,           3 ,           3 };
-int   SSDLDumper::Region::minNbjets[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             2 ,           2 ,           2 ,           2 ,           1 };
-int   SSDLDumper::Region::minNbjmed[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             0 ,           1 ,           1 ,           1 ,           1 };
-float SSDLDumper::Region::minMu1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,           20.,           20.,             20.,            20.,          20.,          40.,          20.,          55.};
-float SSDLDumper::Region::minMu2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,           10.,           10.,             10.,            20.,          20.,          20.,          20.,          30.};
-float SSDLDumper::Region::minEl1pt [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,           20.,           20.,             20.,            20.,          20.,          40.,          20.,          55.};
-float SSDLDumper::Region::minEl2pt [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,           10.,           10.,             10.,            20.,          20.,          20.,          20.,          30.};
-int   SSDLDumper::Region::app3rdVet[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0.,            1 ,            1.,            0 ,              1 ,             0 ,           0 ,           0 ,           0 ,           0 };
+TString SSDLDumper::Region::sname   [SSDLDumper::gNREGIONS] = {"HT0MET0", "HT80MET30", "HT200MET30", "HT0MET120", "HT0MET200", "HT0MET1203V", "HT0MET2003V", "HT0MET120JV", "HT0MET120JV3V", "TTbarWPresel", "TTbarWSelIncl", "TTbarWSel", "TTbarWSelJU", "TTbarWSelJD", "TTbarWSelJS", "TTbarWSelBU", "TTbarWSelBD", "TTbarWSelLU", "TTbarWSelLD"};
+float SSDLDumper::Region::minHT     [SSDLDumper::gNREGIONS] = {       0.,         80.,         200.,          0.,          0.,            0.,            0.,            0.,              0.,             0.,            100.,        100.,          100.,          100.,          100.,          100.,          100.,          100.,          100.};
+float SSDLDumper::Region::maxHT     [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,         7000.,           10.,             10.,          7000.,           7000.,       7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.};
+float SSDLDumper::Region::minMet    [SSDLDumper::gNREGIONS] = {       0.,         30.,          30.,        120.,        200.,          120.,          200.,          120.,            120.,             0.,              0.,          0.,            0.,            0.,            0.,            0.,            0.,            0.,            0.};
+float SSDLDumper::Region::maxMet    [SSDLDumper::gNREGIONS] = {    7000.,       7000.,        7000.,       7000.,       7000.,         7000.,         7000.,         7000.,           7000.,          7000.,           7000.,       7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.,         7000.};
+int   SSDLDumper::Region::minNjets  [SSDLDumper::gNREGIONS] = {       0 ,          2 ,           2 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             3 ,              3 ,          3 ,            3 ,            3 ,            3 ,            3 ,            3 ,            3 ,            3 };
+int   SSDLDumper::Region::minNbjets [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             0 ,              1 ,          1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 };
+int   SSDLDumper::Region::minNbjmed [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             0 ,              1 ,          1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 };
+float SSDLDumper::Region::minMu1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,           20.,           20.,             20.,            20.,             55.,         55.,           55.,           55.,           55.,           55.,           55.,           55.,           55.};
+float SSDLDumper::Region::minMu2pt  [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,           10.,           10.,             10.,            20.,             30.,         30.,           30.,           30.,           30.,           30.,           30.,           30.,           30.};
+float SSDLDumper::Region::minEl1pt  [SSDLDumper::gNREGIONS] = {      20.,         20.,          20.,         20.,         20.,           20.,           20.,           20.,             20.,            20.,             55.,         55.,           55.,           55.,           55.,           55.,           55.,           55.,           55.};
+float SSDLDumper::Region::minEl2pt  [SSDLDumper::gNREGIONS] = {      10.,         10.,          10.,         10.,         10.,           10.,           10.,           10.,             10.,            20.,             30.,         30.,           30.,           30.,           30.,           30.,           30.,           30.,           30.};
+int   SSDLDumper::Region::app3rdVet [SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            1 ,            1 ,            0 ,              1 ,             0 ,              0 ,          0 ,            0 ,            0 ,            0 ,            0 ,            0 ,            0 ,            0 };
+int   SSDLDumper::Region::vetoTTZSel[SSDLDumper::gNREGIONS] = {       0 ,          0 ,           0 ,          0 ,          0 ,            0 ,            0 ,            0 ,              0 ,             0 ,              0 ,          1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 ,            1 };
 
 // Muon Binning //////////////////////////////////////////////////////////////////
 double SSDLDumper::gMuFPtBins[gNMuFPtBins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60.}; // fake ratios
@@ -87,45 +91,50 @@ double SSDLDumper::gNVrtxBins[gNNVrtxBins+1]  = {0, 2, 4, 6, 8, 10, 12, 14, 16, 
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
-TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets"};
-int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      6 ,   20 ,   20 ,        20  ,        20  ,        20  ,        20  ,   20 ,       4 };
-float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      2.,   10.,   10.,        20. ,        20. ,        20. ,        20. ,    0.,       0.};
-float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 300.,      8.,  200.,  100.,       300. ,       300. ,       300. ,       300. ,  100.,       4.};
-TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} (GeV)",
-                                                                   "E_{T}^{miss} (GeV)",
-                                                                   "N_{Jets}",
-                                                                   "P_{T} (l_{1}) (GeV)",
-                                                                   "P_{T} (l_{2}) (GeV)",
-                                                                   "m_{ll} (SF) (GeV)",
-                                                                   "m_{#mu#mu} (GeV)",
-                                                                   "m_{ee} (GeV)",
-                                                                   "m_{ll} (OF) (GeV)",
-                                                                   "M_{T2} (GeV)",
-                                                                   "N_{bJets}"};
+TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets", "NbJetsMed"};
+int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        20  ,        20  ,        20  ,        20  ,   20 ,       5 ,          5 };
+// int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
+float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
+float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 200.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
+TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
+                                                                   "Particle Flow ME_{T} [GeV]",
+                                                                   "Jet Multiplicity",
+                                                                   "Leading Lepton p_{T} [GeV]",
+                                                                   "Subleading Lepton p_{T} [GeV]",
+                                                                   "m_{ll} (SF) [GeV]",
+                                                                   "m_{#mu#mu} [GeV]",
+                                                                   "m_{ee} [GeV]",
+                                                                   "m_{ll} (OF) [GeV]",
+                                                                   "M_{T2} [GeV]",
+                                                                   "b-Jet Multiplicity (loose)",
+                                                                   "b-Jet Multiplicity (medium)"};
 
 //////////////////////////////////////////////////////////////////////////////////
-double SSDLDumper::gDiffHTBins[gNDiffHTBins+1]     = { 0., 80., 200., 320., 450., 600.};
-double SSDLDumper::gDiffMETBins[gNDiffMETBins+1]   = {30., 50.,  85., 120., 200.};
-double SSDLDumper::gDiffNJBins[gNDiffNJBins+1]     = { 0., 1., 2., 3., 4., 5.}; // fill NJets + 0.5 to hit the right bin
-double SSDLDumper::gDiffMT2Bins[gNDiffMT2Bins+1]   = { 0.,  25.,  50., 100.};
-double SSDLDumper::gDiffPT1Bins[gNDiffPT1Bins+1]   = { 20., 40., 60., 80., 100., 200.};
-double SSDLDumper::gDiffPT2Bins[gNDiffPT2Bins+1]   = { 10., 20., 30., 40.,  50., 100.};
-double SSDLDumper::gDiffNBJBins[gNDiffNBJBins+1]   = { 0., 1., 2., 3., 4.};
+double SSDLDumper::gDiffHTBins  [gNDiffHTBins+1]   = { 0., 100., 200., 300., 400., 500., 600.};
+double SSDLDumper::gDiffMETBins [gNDiffMETBins+1]  = { 0.,  20.,  40.,  60.,  80., 100., 120.};
+double SSDLDumper::gDiffNJBins  [gNDiffNJBins+1]   = { 0., 1., 2., 3., 4., 5., 6.}; // fill NJets + 0.5 to hit the right bin
+double SSDLDumper::gDiffMT2Bins [gNDiffMT2Bins+1]  = { 0.,  25.,  50., 100.};
+double SSDLDumper::gDiffPT1Bins [gNDiffPT1Bins+1]  = { 20., 40., 60., 80., 100., 120., 140., 160., 180., 200.};
+double SSDLDumper::gDiffPT2Bins [gNDiffPT2Bins+1]  = { 20., 30., 40., 50.,  60.,  70.,  80.,  90., 100.};
+double SSDLDumper::gDiffNBJBins [gNDiffNBJBins+1]  = { 0., 1., 2., 3., 4.};
 double SSDLDumper::gDiffNBJMBins[gNDiffNBJMBins+1] = { 0., 1., 2., 3.};
 
 double SSDLDumper::gDiffMET3Bins[gNDiffMET3Bins+1] = {30., 40., 50., 60., 80., 100., 120., 160., 200., 250.};
 
 //////////////////////////////////////////////////////////////////////////////////
-TString SSDLDumper::DiffPredYields::var_name[SSDLDumper::gNDiffVars] = {"HT1", "HT2", "MET1", "MET2", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed"};
-int     SSDLDumper::DiffPredYields::nbins[SSDLDumper::gNDiffVars]    = {gNDiffHTBins, gNDiffHTBins, gNDiffMETBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins};
-double* SSDLDumper::DiffPredYields::bins[SSDLDumper::gNDiffVars]     = {gDiffHTBins,  gDiffHTBins,  gDiffMETBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins};
-TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} (GeV)", "H_{T} (GeV)",
-                                                                          "E_{T}^{miss} (GeV)", "E_{T}^{miss} (GeV)",
-                                                                          "N_{Jets}",
-                                                                          "M_{T2} (GeV)",
-                                                                          "P_{T} (l_{1}) (GeV)",
-                                                                          "P_{T} (l_{2}) (GeV)",
-                                                                          "N_{Btag}", "E_{T}^{miss} (GeV)", "N_{Btag}"};
+TString SSDLDumper::DiffPredYields::var_name  [SSDLDumper::gNDiffVars] = {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"};
+int     SSDLDumper::DiffPredYields::nbins     [SSDLDumper::gNDiffVars] = {gNDiffHTBins, gNDiffMETBins, gNDiffNJBins, gNDiffMT2Bins, gNDiffPT1Bins, gNDiffPT2Bins, gNDiffNBJBins, gNDiffMET3Bins, gNDiffNBJMBins, gNDiffNBJMBins};
+double* SSDLDumper::DiffPredYields::bins      [SSDLDumper::gNDiffVars] = { gDiffHTBins,  gDiffMETBins,  gDiffNJBins,  gDiffMT2Bins,  gDiffPT1Bins,  gDiffPT2Bins,  gDiffNBJBins,  gDiffMET3Bins,  gDiffNBJMBins,  gDiffNBJMBins};
+TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T} [GeV]",
+                                                                          "Particle Flow ME_{T} [GeV]",
+                                                                          "Jet Multiplicity",
+                                                                          "M_{T2} [GeV]",
+                                                                          "Leading Lepton p_{T} [GeV]",
+                                                                          "Subleading Lepton p_{T} [GeV]",
+                                                                          "b-Jet Multiplicity (loose)",
+                                                                          "Particle Flow ME_{T} [GeV]",
+                                                                          "b-Jet Multiplicity (medium)",
+                                                                          "b-Jet Multiplicity (medium)"};
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
@@ -311,9 +320,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		/////////////////////////////////////////////
 		// Event modifications
-		scaleBTags();
-		if(gSmearMET) smearMET();
-		if(gJECScaling == 3) smearJetPts();
+		gScaleBTags = 0;
+		scaleBTags(S);
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -335,7 +343,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		if( S->datamc!=0 ) {
 			int ind1(-1), ind2(-1);
 			fDoCounting = false;
-			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getHLTSF_DoubleMu(      MuPt[ind1], MuEta[ind1], "") * getHLTSF_DoubleMu(      MuPt[ind2], MuEta[ind2], "");
+			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getMuMuHLTSF(           MuPt[ind1], MuEta[ind1], "Run2011").val * getMuMuHLTSF(MuPt[ind2], MuEta[ind2], "Run2011").val;
 			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
 			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
 			fDoCounting = true;
@@ -346,14 +354,67 @@ void SSDLDumper::loopEvents(Sample *S){
 
 
 		fillKinPlots(S);
-		for(gRegion r = region_begin; r < gNREGIONS; r=gRegion(r+1)) fillYields(S, r);
+		for(gRegion r = region_begin; r < TTbarWSelJU; r=gRegion(r+1)) fillYields(S, r);
 
-		fillSigEventTree(S);
+		fillSigEventTree(S, 0);
 		fillDiffYields(S);
 		fillRatioPlots(S);
 		fillMuIsoPlots(S);
 		fillElIsoPlots(S);
 		fillElIdPlots(S);
+		
+		/////////////////////////////////////////////
+		// Systematic studies
+		if(!gDoSystStudies) continue;
+		fChain->GetEntry(jentry); // reset tree vars
+
+		// Jet pts scaled down
+		gJECScaling = 1;
+		smearJetPts(S);
+		fillYields(S, TTbarWSelJU);
+		fillSigEventTree(S, 1);
+
+		// Jet pts scaled down
+		fChain->GetEntry(jentry); // reset tree vars
+		gJECScaling = 2;
+		smearJetPts(S);
+		fillYields(S, TTbarWSelJD);
+		fillSigEventTree(S, 2);
+
+		// Jet pts smeared
+		fChain->GetEntry(jentry); // reset tree vars
+		gJECScaling = 3;
+		smearJetPts(S);
+		fillYields(S, TTbarWSelJS);
+		fillSigEventTree(S, 3);
+
+		// Btags scaled up
+		fChain->GetEntry(jentry); // reset tree vars
+		gScaleBTags = 1;
+		scaleBTags(S);
+		fillYields(S, TTbarWSelBU);
+		fillSigEventTree(S, 4);
+
+		// Btags scaled down
+		fChain->GetEntry(jentry); // reset tree vars
+		gScaleBTags = 2;
+		scaleBTags(S);
+		fillYields(S, TTbarWSelBD);
+		fillSigEventTree(S, 5);
+
+		// Lepton pts scaled up
+		fChain->GetEntry(jentry); // reset tree vars
+		gScaleLeptons = 1;
+		scaleLeptons(S);
+		fillYields(S, TTbarWSelLU);
+		fillSigEventTree(S, 6);
+
+		// Lepton pts scaled down
+		fChain->GetEntry(jentry); // reset tree vars
+		gScaleLeptons = 2;
+		scaleLeptons(S);
+		fillYields(S, TTbarWSelLD);
+		fillSigEventTree(S, 7);
 	}
 
 	// Stuff to execute for each sample AFTER looping on the events
@@ -650,6 +711,8 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	resetHypLeptons();
 }
 void SSDLDumper::fillDiffYields(Sample *S){
+	// {  0 ,   1  ,    2   ,   3  ,   4  ,   5  ,    6    ,   7   ,      8     ,      9      }
+	// {"HT", "MET", "NJets", "MT2", "PT1", "PT2", "NBJets", "MET3", "NBJetsMed", "NBJetsMed2"}
 	///////////////////////////////////////////////////
 	setRegionCuts();
 	
@@ -663,165 +726,42 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	fCurrentChannel = Muon;
 	int mu1(-1), mu2(-1);
 	if(mumuSignalTrigger()){ // Trigger selection
-		// BASELINE
-		fC_minMet = 30.;
-		fC_minHT =  80.;
-		fC_minNjets = 2;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			float MT2 = getMT2(mu1, mu2, Muon);
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[6], MuPt[mu1], gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[7], MuPt[mu2], gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[6], MuPt[mu1], gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[7], MuPt[mu2], gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[6], MuPt[mu1], gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[7], MuPt[mu2], gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[6], MuPt[mu1], gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[7], MuPt[mu2], gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
-		// HT BINNING, MET > 50
-		fC_minMet = 50.;
-		fC_minHT  = 0.;
+		////////////////////////////
+		// njets binning, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
 		fC_minNjets = 0;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			float HT  = getHT();
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[0], HT, gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[0], HT, gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[0], HT, gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[0], HT, gEventWeight);
-			}
-		}
-		// HT BINNING, MET > 120
+		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNJets()+0.5, 2, Muon);
 		resetHypLeptons();
-		fC_minMet = 120.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			float HT  = getHT();
-			float NJ  = getNJets() + 0.5;
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[4], NJ, gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[4], NJ, gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[4], NJ, gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[4], NJ, gEventWeight);
-			}
+
+		////////////////////////////
+		// Other binnings, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		if(isSSLLMuEvent(mu1, mu2)){
+			fillDiffVar(S, mu1, mu2, getHT(),                0, Muon);
+			fillDiffVar(S, mu1, mu2, getMET(),               1, Muon);
+			fillDiffVar(S, mu1, mu2, getMT2(mu1, mu2, Muon), 3, Muon);
+			fillDiffVar(S, mu1, mu2, MuPt[mu1],              4, Muon);
+			fillDiffVar(S, mu1, mu2, MuPt[mu2],              5, Muon);
+			fillDiffVar(S, mu1, mu2, getNBTags()+0.5,        6, Muon);
+			fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5,     8, Muon);
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 200
-		fC_minMet = 30.;
-		fC_minHT =  200.;
-		fC_minNjets = 2;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			float NbJ = getNBTags() + 0.5;
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt11[8], NbJ,   gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt10[8], NbJ,   gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt01[8], NbJ,   gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Muon].hnt00[8], NbJ,   gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 450
-		fC_minMet = 30.;
-		fC_minHT =  450.;
-		fC_minNjets = 2;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[3], getMET(), gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[3], getMET(), gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[3], getMET(), gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[3], getMET(), gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
+		////////////////////////////
 		// MET BINNING, HT > 0
+		setRegionCuts();
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loose di muon event
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[9], getMET(), gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[9], getMET(), gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[9], getMET(), gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[9], getMET(), gEventWeight);
-			}
-		}
+		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getMET(), 7, Muon);
 		resetHypLeptons();
 		
+		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(TTbarWSel4);
+		setRegionCuts(TTbarWSel);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLMuEvent(mu1, mu2)){ // Same-sign loose-loopoose di muon event
-			float NbJ = getNBTagsMed() + 0.5;
-			if(  isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Muon].hnt11[10], NbJ,   gEventWeight);
-			}
-			if(  isTightMuon(mu1) && !isTightMuon(mu2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Muon].hnt10[10], NbJ,   gEventWeight);
-			}
-			if( !isTightMuon(mu1) &&  isTightMuon(mu2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Muon].hnt01[10], NbJ,   gEventWeight);
-			}
-			if( !isTightMuon(mu1) && !isTightMuon(mu2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Muon].hnt00[10], NbJ,   gEventWeight);
-			}
-		}
+		if(isSSLLMuEvent(mu1, mu2)) fillDiffVar(S, mu1, mu2, getNBTagsMed()+0.5, 9, Muon);
 		resetHypLeptons();
 	}
 	setRegionCuts();
@@ -831,165 +771,42 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	fCurrentChannel = Elec;
 	int el1(-1), el2(-1);
 	if(elelSignalTrigger()){
-		// BASELINE
-		fC_minMet = 30.;
-		fC_minHT =  80.;
-		fC_minNjets = 2;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
-			float MT2 = getMT2(el1, el2, Elec);
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[6], ElPt[el1], gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[7], ElPt[el2], gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[6], ElPt[el1], gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[7], ElPt[el2], gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[6], ElPt[el1], gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[7], ElPt[el2], gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[5], MT2,       gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[6], ElPt[el1], gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[7], ElPt[el2], gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
-		// HT BINNING, MET > 50
-		fC_minMet = 50.;
-		fC_minHT  = 0.;
+		////////////////////////////
+		// njets binning, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
 		fC_minNjets = 0;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
-			float HT  = getHT();
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[0], HT, gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[0], HT, gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[0], HT, gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[0], HT, gEventWeight);
-			}
-		}
-		// HT BINNING, MET > 120
+		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
-		fC_minMet = 120.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
-			float HT  = getHT();
-			float NJ  = getNJets() + 0.5;
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[4], NJ, gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[4], NJ, gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[4], NJ, gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[4], NJ, gEventWeight);
-			}
+
+		////////////////////////////
+		// Other binnings, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		if(isSSLLElEvent(el1, el2)){
+			fillDiffVar(S, el1, el2, getHT(),                0, Elec);
+			fillDiffVar(S, el1, el2, getMET(),               1, Elec);
+			fillDiffVar(S, el1, el2, getMT2(el1, el2, Elec), 3, Elec);
+			fillDiffVar(S, el1, el2, ElPt[el1],              4, Elec);
+			fillDiffVar(S, el1, el2, ElPt[el2],              5, Elec);
+			fillDiffVar(S, el1, el2, getNBTags()+0.5,        6, Elec);
+			fillDiffVar(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 200
-		fC_minMet = 30.;
-		fC_minHT =  200.;
-		fC_minNjets = 2;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di el event
-			float NbJ = getNBTags() + 0.5;
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt11[8], NbJ,   gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt10[8], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt01[8], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[Elec].hnt00[8], NbJ,   gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 450
-		fC_minMet = 30.;
-		fC_minHT =  450.;
-		fC_minNjets = 2;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose di elon event
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[3], getMET(), gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[3], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[3], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[3], getMET(), gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
+		////////////////////////////
 		// MET BINNING, HT > 0
+		setRegionCuts();
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose event
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[9], getMET(), gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[9], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[9], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[9], getMET(), gEventWeight);
-			}
-		}
+		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getMET(), 7, Elec);
 		resetHypLeptons();
-
+		
+		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(TTbarWSel4);
+		setRegionCuts(TTbarWSel);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElEvent(el1, el2)){ // Same-sign loose-loose event
-			float NbJ = getNBTagsMed() + 0.5;
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[Elec].hnt11[10], NbJ,   gEventWeight);
-			}
-			if(  isTightElectron(el1) && !isTightElectron(el2) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[Elec].hnt10[10], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el1) &&  isTightElectron(el2) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[Elec].hnt01[10], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el1) && !isTightElectron(el2) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[Elec].hnt00[10], NbJ,   gEventWeight);
-			}
-		}
+		if(isSSLLElEvent(el1, el2)) fillDiffVar(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
 		resetHypLeptons();
 	}
 	setRegionCuts();
@@ -999,171 +816,49 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	fCurrentChannel = ElMu;
 	int mu(-1), el(-1);
 	if(elmuSignalTrigger()){
-		// BASELINE
-		fC_minMet = 30.;
-		fC_minHT =  80.;
-		fC_minNjets = 2;		
-		if( isSSLLElMuEvent(mu, el) ){
-			float MT2 = getMT2(mu, el, ElMu);
+		////////////////////////////
+		// njets binning, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		fC_minNjets = 0;
+		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNJets()+0.5, 2, ElMu);
+		resetHypLeptons();
+
+		////////////////////////////
+		// Other binnings, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		if(isSSLLElMuEvent(mu, el)){
+			fillDiffVar(S, mu, el, getHT(),              0, ElMu);
+			fillDiffVar(S, mu, el, getMET(),             1, ElMu);
+			fillDiffVar(S, mu, el, getMT2(mu, el, ElMu), 3, ElMu);
+			fillDiffVar(S, mu, el, getNBTags()+0.5,      6, ElMu);
+			fillDiffVar(S, mu, el, getNBTagsMed()+0.5,   8, ElMu);
 			float ptmax = MuPt[mu];
 			float ptmin = ElPt[el];
 			if(ptmin > ptmax){
 				ptmin = MuPt[mu];
 				ptmax = ElPt[el];
 			}
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[5], MT2,   gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[6], ptmax, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[7], ptmin, gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[5], MT2,   gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[6], ptmax, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[7], ptmin, gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[5], MT2,   gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[6], ptmax, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[7], ptmin, gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[5], MT2,   gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt00[6], ptmax, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt00[7], ptmin, gEventWeight);
-			}
+			fillDiffVar(S, mu, el, ptmax,          4, ElMu);
+			fillDiffVar(S, mu, el, ptmin,          5, ElMu);
 		}
 		resetHypLeptons();
 
-		// HT BINNING, MET > 50
-		fC_minMet = 50.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){
-			float HT  = getHT();
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[0], HT, gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[0], HT, gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[0], HT, gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[0], HT, gEventWeight);
-			}
-		}
-		resetHypLeptons();
-		// HT BINNING, MET > 120
-		fC_minMet = 120.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){
-			float HT  = getHT();
-			float NJ  = getNJets() + 0.5;
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[4], NJ, gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[4], NJ, gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[4], NJ, gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[1], HT, gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt00[4], NJ, gEventWeight);
-			}
-		}
-		resetHypLeptons();
-		// MET BINNING, HT > 200
-		fC_minMet = 30.;
-		fC_minHT  = 200.;
-		fC_minNjets = 2;
-		if( isSSLLElMuEvent(mu, el) ){
-			float NbJ = getNBTags() + 0.5;
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt11[8], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt10[8], NbJ,   gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt01[8], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[2], getMET(), gEventWeight);
-				fillWithoutOF(S->diffyields[ElMu].hnt00[8], NbJ,   gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 450
-		fC_minMet = 30.;
-		fC_minHT  = 450.;
-		fC_minNjets = 2;
-		if( isSSLLElMuEvent(mu, el) ){
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[3], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[3], getMET(), gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[3], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[3], getMET(), gEventWeight);
-			}
-		}
-		resetHypLeptons();
-
+		////////////////////////////
 		// MET BINNING, HT > 0
+		setRegionCuts();
 		fC_minMet = 30.;
-		fC_minHT  = 0.;
+		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[9], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[9], getMET(), gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[9], getMET(), gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[9], getMET(), gEventWeight);
-			}
-		}
+		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getMET(), 7, ElMu);
 		resetHypLeptons();
 		
+		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(TTbarWSel4);
+		setRegionCuts(TTbarWSel);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElMuEvent(mu, el)){ // Same-sign loose-loose event
-			float NbJ = getNBTagsMed() + 0.5;
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt11[10], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt10[10], NbJ,   gEventWeight);
-			}
-			if(  isTightElectron(el) && !isTightMuon(mu) ){ // Loose-tight
-				fillWithoutOF(S->diffyields[ElMu].hnt01[10], NbJ,   gEventWeight);
-			}
-			if( !isTightElectron(el) && !isTightMuon(mu) ){ // Loose-loose
-				fillWithoutOF(S->diffyields[ElMu].hnt00[10], NbJ,   gEventWeight);
-			}
-		}
-		resetHypLeptons();		
+		if(isSSLLElMuEvent(mu, el)) fillDiffVar(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
+		resetHypLeptons();
 	}
 	setRegionCuts();
 
@@ -1175,181 +870,44 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	// EE Channel
 	fCurrentChannel = Elec;
 	if(elelSignalTrigger()){
-		// BASELINE
-		fC_minMet = 30.;
-		fC_minHT =  80.;
-		fC_minNjets = 2;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				float MT2 = getMT2(el1, el2, Elec);
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[5], MT2,       gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[6], ElPt[el1], gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[7], ElPt[el2], gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[5], MT2,       gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[6], ElPt[el1], gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[7], ElPt[el2], gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[5], MT2,       gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[6], ElPt[el1], gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[7], ElPt[el2], gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
 
-		// HT BINNING, MET > 50
-		fC_minMet = 50.;
-		fC_minHT  = 0.;
+		////////////////////////////
+		// njets binning, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
 		fC_minNjets = 0;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				float HT  = getHT();
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[0], HT, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[0], HT, gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[0], HT, gEventWeight);
-				}
-			}
-		}
-
-		// HT BINNING, MET > 120
+		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNJets()+0.5, 2, Elec);
 		resetHypLeptons();
-		fC_minMet = 120.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				float HT  = getHT();
-				float NJ  = getNJets() + 0.5;
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[4], NJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[4], NJ, gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[4], NJ, gEventWeight);
-				}
-			}
+
+		////////////////////////////
+		// Other binnings, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		if(isSSLLElEvent(el1, el2)){
+			fillDiffVarOS(S, el1, el2, getHT(),                0, Elec);
+			fillDiffVarOS(S, el1, el2, getMET(),               1, Elec);
+			fillDiffVarOS(S, el1, el2, getMT2(el1, el2, Elec), 3, Elec);
+			fillDiffVarOS(S, el1, el2, ElPt[el1],              4, Elec);
+			fillDiffVarOS(S, el1, el2, ElPt[el2],              5, Elec);
+			fillDiffVarOS(S, el1, el2, getNBTags()+0.5,        6, Elec);
+			fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5,     8, Elec);
 		}
 		resetHypLeptons();
 
-		// MET BINNING, HT > 200
-		fC_minMet = 30.;
-		fC_minHT =  200.;
-		fC_minNjets = 2;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				float NbJ = getNBTags() + 0.5;
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[8], NbJ,   gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[8], NbJ,   gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[8], NbJ,   gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 450
-		fC_minMet = 30.;
-		fC_minHT =  450.;
-		fC_minNjets = 2;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[3], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[3], getMET(), gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[3], getMET(), gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
+		////////////////////////////
 		// MET BINNING, HT > 0
+		setRegionCuts();
 		fC_minMet = 30.;
 		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if( isSSLLElEvent(el1, el2) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[9], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[9], getMET(), gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[9], getMET(), gEventWeight);
-				}
-			}
-		}
+		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getMET(), 7, Elec);
 		resetHypLeptons();
 		
+		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(TTbarWSel4);
+		setRegionCuts(TTbarWSel);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if(isSSLLElEvent(el1, el2)){
-			float NbJ = getNBTagsMed() + 0.5;
-			if(  isTightElectron(el1) &&  isTightElectron(el2) ){ // Tight-tight
-				if( isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_BB[10], NbJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EE[10], NbJ, gEventWeight);
-				}
-				if( isBarrelElectron(el1) && !isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[10], NbJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el1) &&  isBarrelElectron(el2)){
-					fillWithoutOF(S->diffyields[Elec].hnt2_os_EB[10], NbJ, gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();		
+		if(isSSLLElEvent(el1, el2)) fillDiffVarOS(S, el1, el2, getNBTagsMed()+0.5, 9, Elec);
+		resetHypLeptons();
 	}
 	setRegionCuts();
 	
@@ -1357,138 +915,48 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	// EMu Channel
 	fCurrentChannel = ElMu;
 	if(elmuSignalTrigger()){
-		// BASELINE
-		fC_minMet = 30.;
-		fC_minHT =  80.;
-		fC_minNjets = 2;		
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float MT2 = getMT2(mu, el, ElMu);
-				float ptmax = MuPt[mu];
-				float ptmin = ElPt[el];
-				if(ptmin > ptmax){
-					ptmin = MuPt[mu];
-					ptmax = ElPt[el];
-				}
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[5], MT2,   gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[6], ptmax, gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[7], ptmin, gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[5], MT2,   gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[6], ptmax, gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[7], ptmin, gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
-		// HT BINNING, MET > 50
-		fC_minMet = 50.;
-		fC_minHT  = 0.;
+		////////////////////////////
+		// njets binning, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
 		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float HT  = getHT();
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[0], HT, gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[0], HT, gEventWeight);
-				}
+		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNJets()+0.5, 2, ElMu);
+		resetHypLeptons();
+
+		////////////////////////////
+		// Other binnings, ttbarW preselection
+		setRegionCuts(TTbarWPresel);
+		if(isSSLLElMuEvent(mu, el)){
+			fillDiffVarOS(S, mu, el, getHT(),              0, ElMu);
+			fillDiffVarOS(S, mu, el, getMET(),             1, ElMu);
+			fillDiffVarOS(S, mu, el, getMT2(mu, el, ElMu), 3, ElMu);
+			fillDiffVarOS(S, mu, el, getNBTags()+0.5,      6, ElMu);
+			fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5,   8, ElMu);
+			float ptmax = MuPt[mu];
+			float ptmin = ElPt[el];
+			if(ptmin > ptmax){
+				ptmin = MuPt[mu];
+				ptmax = ElPt[el];
 			}
+			fillDiffVarOS(S, mu, el, ptmax,          4, ElMu);
+			fillDiffVarOS(S, mu, el, ptmin,          5, ElMu);
 		}
 		resetHypLeptons();
 
-		// HT BINNING, MET > 120
-		fC_minMet = 120.;
-		fC_minHT  = 0.;
-		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float HT  = getHT();
-				float NJ  = getNJets() + 0.5;
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[4], NJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[1], HT, gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[4], NJ, gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 200
-		fC_minMet = 30.;
-		fC_minHT  = 200.;
-		fC_minNjets = 2;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			float NbJ = getNBTags() + 0.5;
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				float HT  = getHT();
-				float NJ  = getNJets() + 0.5;
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[8], NbJ,   gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[2], getMET(), gEventWeight);
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[8], NbJ,   gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
-		// MET BINNING, HT > 450
-		fC_minMet = 30.;
-		fC_minHT  = 450.;
-		fC_minNjets = 2;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[3], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[3], getMET(), gEventWeight);
-				}
-			}
-		}
-		resetHypLeptons();
-
+		////////////////////////////
 		// MET BINNING, HT > 0
+		setRegionCuts();
 		fC_minMet = 30.;
-		fC_minHT  = 0.;
+		fC_minHT =  0.;
 		fC_minNjets = 0;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[9], getMET(), gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[9], getMET(), gEventWeight);
-				}
-			}
-		}
+		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getMET(), 7, ElMu);
 		resetHypLeptons();
-
+		
+		////////////////////////////
 		// NBtag binning, ttbarW Selection
-		setRegionCuts(TTbarWSel4);
+		setRegionCuts(TTbarWSel);
 		fC_minNbjets = 0;
 		fC_minNbjmed = 0;
-		if( isSSLLElMuEvent(mu, el) ){ // this selects now OS events with the exact same cuts
-			float NbJ = getNBTagsMed() + 0.5;
-			if(  isTightElectron(el) &&  isTightMuon(mu) ){ // Tight-tight
-				if( isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_BB[10], NbJ, gEventWeight);
-				}
-				if(!isBarrelElectron(el)){
-					fillWithoutOF(S->diffyields[ElMu].hnt2_os_EE[10], NbJ, gEventWeight);
-				}
-			}
-		}
+		if(isSSLLElMuEvent(mu, el)) fillDiffVarOS(S, mu, el, getNBTagsMed()+0.5, 9, ElMu);
 		resetHypLeptons();
 	}
 
@@ -1496,6 +964,66 @@ void SSDLDumper::fillDiffYields(Sample *S){
 	resetHypLeptons();
 	setRegionCuts();
 }
+void SSDLDumper::fillDiffVar(  Sample *S, int lep1, int lep2, float val, int bin, gChannel chan){
+	if(bin > gNDiffVars-1){
+		cerr << "SSDLDumper::fillDiffVar ==> Trying to fill diff var out of bounds! Check number of vars!" << endl;
+		exit(-1);
+	}
+	int tlcat = -1;
+	if(chan == Muon){
+		if(  isTightMuon(lep1) &&  isTightMuon(lep2) )         tlcat = 0; 
+		if(  isTightMuon(lep1) && !isTightMuon(lep2) )         tlcat = 1;
+		if( !isTightMuon(lep1) &&  isTightMuon(lep2) )         tlcat = 2;
+		if( !isTightMuon(lep1) && !isTightMuon(lep2) )         tlcat = 3;
+	}
+	if(chan == Elec){
+		if(  isTightElectron(lep1) &&  isTightElectron(lep2) ) tlcat = 0; 
+		if(  isTightElectron(lep1) && !isTightElectron(lep2) ) tlcat = 1;
+		if( !isTightElectron(lep1) &&  isTightElectron(lep2) ) tlcat = 2;
+		if( !isTightElectron(lep1) && !isTightElectron(lep2) ) tlcat = 3;
+	}
+	if(chan == ElMu){
+		if(  isTightMuon(lep1) &&  isTightElectron(lep2) )     tlcat = 0; 
+		if(  isTightMuon(lep1) && !isTightElectron(lep2) )     tlcat = 1;
+		if( !isTightMuon(lep1) &&  isTightElectron(lep2) )     tlcat = 2;
+		if( !isTightMuon(lep1) && !isTightElectron(lep2) )     tlcat = 3;
+	}
+
+	if(tlcat == 0) fillWithoutOF(S->diffyields[chan].hnt11[bin], val, gEventWeight);
+	if(tlcat == 1) fillWithoutOF(S->diffyields[chan].hnt10[bin], val, gEventWeight);
+	if(tlcat == 2) fillWithoutOF(S->diffyields[chan].hnt01[bin], val, gEventWeight);
+	if(tlcat == 3) fillWithoutOF(S->diffyields[chan].hnt00[bin], val, gEventWeight);
+}
+void SSDLDumper::fillDiffVarOS(Sample *S, int lep1, int lep2, float val, int bin, gChannel chan){
+	if(bin > gNDiffVars-1){
+		cerr << "SSDLDumper::fillDiffVar ==> Trying to fill diff var out of bounds! Check number of vars!" << endl;
+		exit(-1);
+	}
+	int ebcat = -1;
+	if(chan == Muon) return;
+	if(chan == Elec){
+		if( !isTightElectron(lep1) || !isTightElectron(lep2) ) return; // tight-tight
+
+		if(  isBarrelElectron(lep1) &&  isBarrelElectron(lep2) ) ebcat = 0; 
+		if( !isBarrelElectron(lep1) && !isBarrelElectron(lep2) ) ebcat = 1;
+		if(  isBarrelElectron(lep1) && !isBarrelElectron(lep2) ) ebcat = 2;
+		if( !isBarrelElectron(lep1) &&  isBarrelElectron(lep2) ) ebcat = 3;
+	}
+
+
+	if(chan == ElMu){
+		if( !isTightMuon(lep1) || !isTightElectron(lep2) ) return; // tight-tight
+
+		if(  isBarrelElectron(lep2) ) ebcat = 0; 
+		if( !isBarrelElectron(lep2) ) ebcat = 1;
+	}
+
+	if(ebcat == 0) fillWithoutOF(S->diffyields[chan].hnt2_os_BB[bin], val, gEventWeight);
+	if(ebcat == 1) fillWithoutOF(S->diffyields[chan].hnt2_os_EE[bin], val, gEventWeight);
+	if(ebcat == 2) fillWithoutOF(S->diffyields[chan].hnt2_os_EB[bin], val, gEventWeight);
+	if(ebcat == 3) fillWithoutOF(S->diffyields[chan].hnt2_os_EB[bin], val, gEventWeight);
+}
+
 void SSDLDumper::fillRatioPlots(Sample *S){
 	resetHypLeptons();
 	fDoCounting = false;
@@ -1597,7 +1125,7 @@ void SSDLDumper::fillRatioPlots(Sample *S){
 	setRegionCuts();
 	resetHypLeptons();
 }
-void SSDLDumper::fillSigEventTree(Sample *S){
+void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	resetSigEventTree();
 	resetHypLeptons();
 	fDoCounting = false;
@@ -1608,7 +1136,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 	fC_minMu1pt  = 10.; // lower pt cuts for sig tree
 	fC_minEl1pt  = 10.;
 
-
+	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
 	fSETree_HLTSF    = gHLTSF;
 	fSETree_BtagSF   = gBtagSF;
@@ -1654,7 +1182,8 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_eta1    = MuEta[ind1];
 		fSETree_eta2    = MuEta[ind2];
 		fSETree_ZVeto   = passesZVeto()?1:0;
-		fSETree_3rdVeto = passes3rdLepVeto(true)?1:0;
+		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+		fSETree_ttZSel  = passesTTZSel()?1:0;
 		if( isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 0;
 		if( isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightMuon(ind2)) fSETree_TLCat = 2;
@@ -1697,6 +1226,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_eta2   = ElEta[ind2];
 		fSETree_ZVeto   = passesZVeto()?1:0;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+		fSETree_ttZSel  = passesTTZSel()?1:0;
 		if( isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
 		if( isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightMuon(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
@@ -1739,6 +1269,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 		fSETree_eta2   = ElEta[ind2];
 		fSETree_ZVeto   = passesZVeto()?1:0;
 		fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+		fSETree_ttZSel  = passesTTZSel()?1:0;
 		if( isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 0;
 		if( isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 1;
 		if(!isTightElectron(ind1)&& isTightElectron(ind2)) fSETree_TLCat = 2;
@@ -1785,6 +1316,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 				fSETree_eta2    = ElEta[ind2];
 				fSETree_ZVeto   = passesZVeto()?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+				fSETree_ttZSel  = passesTTZSel()?1:0;
 				if( isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel-Electron
 				if(!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Endcap-Electron
 				fSigEv_Tree->Fill();
@@ -1809,6 +1341,7 @@ void SSDLDumper::fillSigEventTree(Sample *S){
 				fSETree_eta2    = ElEta[ind2];
 				fSETree_ZVeto   = passesZVeto()?1:0;
 				fSETree_3rdVeto = passes3rdLepVeto()?1:0;
+				fSETree_ttZSel  = passesTTZSel()?1:0;
 				if( isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 0; // TLCat == 0 if Barrel/Barrel
 				if( isBarrelElectron(ind1)&&!isBarrelElectron(ind2)) fSETree_TLCat = 1; // TLCat == 1 if Barrel/Endcap
 				if(!isBarrelElectron(ind1)&& isBarrelElectron(ind2)) fSETree_TLCat = 2; // TLCat == 2 if Endcap/Barrel
@@ -1834,7 +1367,7 @@ void SSDLDumper::fillKinPlots(Sample *S){
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	setRegionCuts();
+	setRegionCuts(TTbarWPresel);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
@@ -1842,7 +1375,6 @@ void SSDLDumper::fillKinPlots(Sample *S){
 		if(MuPt[ind1] > fC_minMu1pt && MuPt[ind2] > fC_minMu2pt){ // pt cuts
 
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 			fillWithoutOF(KP0->hvar[0],  getHT(),                  gEventWeight);
 			fillWithoutOF(KP0->hvar[1],  getMET(),                 gEventWeight);
 			fillWithoutOF(KP0->hvar[2],  getNJets(),               gEventWeight);
@@ -1852,9 +1384,9 @@ void SSDLDumper::fillKinPlots(Sample *S){
 			fillWithoutOF(KP0->hvar[6],  getMll(ind1, ind2, Muon), gEventWeight); // MM
 			fillWithoutOF(KP0->hvar[9],  getMT2(ind1, ind2, Muon), gEventWeight);
 			fillWithoutOF(KP0->hvar[10], getNBTags(),              gEventWeight);
+			fillWithoutOF(KP0->hvar[11], getNBTagsMed(),           gEventWeight);
 
 			if(isTightMuon(ind1) && isTightMuon(ind2)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 				fillWithoutOF(KP1->hvar[0],  getHT(),                  gEventWeight);
 				fillWithoutOF(KP1->hvar[1],  getMET(),                 gEventWeight);
 				fillWithoutOF(KP1->hvar[2],  getNJets(),               gEventWeight);
@@ -1864,21 +1396,25 @@ void SSDLDumper::fillKinPlots(Sample *S){
 				fillWithoutOF(KP1->hvar[6],  getMll(ind1, ind2, Muon), gEventWeight); // MM
 				fillWithoutOF(KP1->hvar[9],  getMT2(ind1, ind2, Muon), gEventWeight);
 				fillWithoutOF(KP1->hvar[10], getNBTags(),              gEventWeight);
+				fillWithoutOF(KP1->hvar[11], getNBTagsMed(),           gEventWeight);
 
-				if(isSSLLMuEvent(ind1, ind2)){ // signal region
-					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
-					fSigEv_HI_MM_HT .push_back(getHT());
-					fSigEv_HI_MM_MET.push_back(getMET());
-					
-					fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
-					fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
+				if(passesMllEventVeto(ind1, ind2, 1, 8.)){
+					// Want to fill njets with all but njets cut
 					fillWithoutOF(KP2->hvar[2],  getNJets(),               gEventWeight);
-					fillWithoutOF(KP2->hvar[3],  MuPt[ind1],               gEventWeight);
-					fillWithoutOF(KP2->hvar[4],  MuPt[ind2],               gEventWeight);
-					fillWithoutOF(KP2->hvar[5],  getMll(ind1, ind2, Muon), gEventWeight); // SF
-					fillWithoutOF(KP2->hvar[6],  getMll(ind1, ind2, Muon), gEventWeight); // MM
-					fillWithoutOF(KP2->hvar[9],  getMT2(ind1, ind2, Muon), gEventWeight);
-					fillWithoutOF(KP2->hvar[10], getNBTags(),              gEventWeight);
+					if(isSSLLMuEvent(ind1, ind2)){ // signal region
+						fSigEv_HI_MM_HT .push_back(getHT());
+						fSigEv_HI_MM_MET.push_back(getMET());
+					
+						fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
+						fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
+						fillWithoutOF(KP2->hvar[3],  MuPt[ind1],               gEventWeight);
+						fillWithoutOF(KP2->hvar[4],  MuPt[ind2],               gEventWeight);
+						fillWithoutOF(KP2->hvar[5],  getMll(ind1, ind2, Muon), gEventWeight); // SF
+						fillWithoutOF(KP2->hvar[6],  getMll(ind1, ind2, Muon), gEventWeight); // MM
+						fillWithoutOF(KP2->hvar[9],  getMT2(ind1, ind2, Muon), gEventWeight);
+						fillWithoutOF(KP2->hvar[10], getNBTags(),              gEventWeight);
+						fillWithoutOF(KP2->hvar[11], getNBTagsMed(),           gEventWeight);
+					}
 				}
 			}
 		}
@@ -1890,7 +1426,6 @@ void SSDLDumper::fillKinPlots(Sample *S){
 	else if(elelSignalTrigger() && abs(isSSLLEvent(ind1, ind2)) == 2){ // trigger && select loose e/e pair
 		if(ElPt[ind1] > fC_minEl1pt && ElPt[ind2] > fC_minEl2pt){ // pt cuts
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 			fillWithoutOF(KP0->hvar[0],  getHT(),                  gEventWeight);
 			fillWithoutOF(KP0->hvar[1],  getMET(),                 gEventWeight);
 			fillWithoutOF(KP0->hvar[2],  getNJets(),               gEventWeight);
@@ -1900,9 +1435,9 @@ void SSDLDumper::fillKinPlots(Sample *S){
 			fillWithoutOF(KP0->hvar[7],  getMll(ind1, ind2, Elec), gEventWeight); // EE
 			fillWithoutOF(KP0->hvar[9],  getMT2(ind1, ind2, Elec), gEventWeight);
 			fillWithoutOF(KP0->hvar[10], getNBTags(),              gEventWeight);
+			fillWithoutOF(KP0->hvar[11], getNBTagsMed(),           gEventWeight);
 			
 			if(isTightElectron(ind1) && isTightElectron(ind2)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 				fillWithoutOF(KP1->hvar[0],  getHT(),                  gEventWeight);
 				fillWithoutOF(KP1->hvar[1],  getMET(),                 gEventWeight);
 				fillWithoutOF(KP1->hvar[2],  getNJets(),               gEventWeight);
@@ -1912,20 +1447,26 @@ void SSDLDumper::fillKinPlots(Sample *S){
 				fillWithoutOF(KP1->hvar[7],  getMll(ind1, ind2, Elec), gEventWeight); // EE
 				fillWithoutOF(KP1->hvar[9],  getMT2(ind1, ind2, Elec), gEventWeight);
 				fillWithoutOF(KP1->hvar[10], getNBTags(),              gEventWeight);
-				if(isSSLLElEvent(ind1, ind2)){
-					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
-					fSigEv_HI_EE_HT .push_back(getHT());
-					fSigEv_HI_EE_MET.push_back(getMET());
-										
-					fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
-					fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
+				fillWithoutOF(KP1->hvar[11], getNBTagsMed(),           gEventWeight);
+
+				if(passesMllEventVeto(ind1, ind2, 2, 8.)){
+					// Want to fill njets with all but njets cut
 					fillWithoutOF(KP2->hvar[2],  getNJets(),               gEventWeight);
-					fillWithoutOF(KP2->hvar[3],  ElPt[ind1],               gEventWeight);
-					fillWithoutOF(KP2->hvar[4],  ElPt[ind2],               gEventWeight);
-					fillWithoutOF(KP2->hvar[5],  getMll(ind1, ind2, Elec), gEventWeight); // SF
-					fillWithoutOF(KP2->hvar[7],  getMll(ind1, ind2, Elec), gEventWeight); // EE
-					fillWithoutOF(KP2->hvar[9],  getMT2(ind1, ind2, Elec), gEventWeight);
-					fillWithoutOF(KP2->hvar[10], getNBTags(),              gEventWeight);
+
+					if(isSSLLElEvent(ind1, ind2)){
+						fSigEv_HI_EE_HT .push_back(getHT());
+						fSigEv_HI_EE_MET.push_back(getMET());
+										
+						fillWithoutOF(KP2->hvar[0],  getHT(),                  gEventWeight);
+						fillWithoutOF(KP2->hvar[1],  getMET(),                 gEventWeight);
+						fillWithoutOF(KP2->hvar[3],  ElPt[ind1],               gEventWeight);
+						fillWithoutOF(KP2->hvar[4],  ElPt[ind2],               gEventWeight);
+						fillWithoutOF(KP2->hvar[5],  getMll(ind1, ind2, Elec), gEventWeight); // SF
+						fillWithoutOF(KP2->hvar[7],  getMll(ind1, ind2, Elec), gEventWeight); // EE
+						fillWithoutOF(KP2->hvar[9],  getMT2(ind1, ind2, Elec), gEventWeight);
+						fillWithoutOF(KP2->hvar[10], getNBTags(),              gEventWeight);
+						fillWithoutOF(KP2->hvar[11], getNBTagsMed(),           gEventWeight);
+					}
 				}
 			}
 		}
@@ -1937,7 +1478,6 @@ void SSDLDumper::fillKinPlots(Sample *S){
 	else if(elmuSignalTrigger() && abs(isSSLLEvent(mu, el)) == 3){ // trigger && select loose e/mu pair
 		if( (MuPt[mu] > fC_minMu1pt && ElPt[el] > fC_minEl2pt) || (MuPt[mu] > fC_minMu2pt && ElPt[el] > fC_minEl1pt) ){
 			// Fill histos
-			KP0->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 			
 			fillWithoutOF(KP0->hvar[0],  getHT(),              gEventWeight);
 			fillWithoutOF(KP0->hvar[1],  getMET(),             gEventWeight);
@@ -1953,9 +1493,9 @@ void SSDLDumper::fillKinPlots(Sample *S){
 			fillWithoutOF(KP0->hvar[8],  getMll(mu, el, ElMu), gEventWeight); // SF
 			fillWithoutOF(KP0->hvar[9],  getMT2(mu, el, ElMu), gEventWeight);
 			fillWithoutOF(KP0->hvar[10], getNBTags(),          gEventWeight);			
+			fillWithoutOF(KP0->hvar[11], getNBTagsMed(),       gEventWeight);
 
 			if(isTightMuon(mu) && isTightElectron(el)){ // tight-tight
-				KP1->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 				fillWithoutOF(KP1->hvar[0],  getHT(),              gEventWeight);
 				fillWithoutOF(KP1->hvar[1],  getMET(),             gEventWeight);
 				fillWithoutOF(KP1->hvar[2],  getNJets(),           gEventWeight);
@@ -1964,18 +1504,20 @@ void SSDLDumper::fillKinPlots(Sample *S){
 				fillWithoutOF(KP1->hvar[8],  getMll(mu, el, ElMu), gEventWeight); // SF
 				fillWithoutOF(KP1->hvar[9],  getMT2(mu, el, ElMu), gEventWeight);
 				fillWithoutOF(KP1->hvar[10], getNBTags(),          gEventWeight);			
+				fillWithoutOF(KP1->hvar[11], getNBTagsMed(),       gEventWeight);
+
+				fillWithoutOF(KP2->hvar[2],  getNJets(),           gEventWeight);
 				if( isSSLLElMuEvent(mu, el) ){
-					KP2->hmetvsht->Fill(getHT(), getMET(), gEventWeight);
 					fSigEv_HI_EM_HT .push_back(getHT());
 					fSigEv_HI_EM_MET.push_back(getMET());
 					fillWithoutOF(KP2->hvar[0],  getHT(),              gEventWeight);
 					fillWithoutOF(KP2->hvar[1],  getMET(),             gEventWeight);
-					fillWithoutOF(KP2->hvar[2],  getNJets(),           gEventWeight);
 					fillWithoutOF(KP2->hvar[3],  ptmax,                gEventWeight);
 					fillWithoutOF(KP2->hvar[4],  ptmin,                gEventWeight);
 					fillWithoutOF(KP2->hvar[8],  getMll(mu, el, ElMu), gEventWeight); // SF
 					fillWithoutOF(KP2->hvar[9],  getMT2(mu, el, ElMu), gEventWeight);
 					fillWithoutOF(KP2->hvar[10], getNBTags(),          gEventWeight);			
+					fillWithoutOF(KP2->hvar[11], getNBTagsMed(),       gEventWeight);
 				}
 			}
 		}
@@ -2183,10 +1725,10 @@ void SSDLDumper::storeNumbers(Sample *S, gChannel chan, gRegion reg){
 	S->numbers[reg][chan].npf = 0.;
 	S->numbers[reg][chan].nfp = 0.;
 	S->numbers[reg][chan].nff = 0.;
-	S->numbers[reg][chan].nt2  = C->nt20_pt->GetEntries();
-	S->numbers[reg][chan].nt10 = C->nt10_pt->GetEntries();
-	S->numbers[reg][chan].nt01 = C->nt01_pt->GetEntries();
-	S->numbers[reg][chan].nt0  = C->nt00_pt->GetEntries();
+	S->numbers[reg][chan].nt2  = C->nt20_pt->Integral(0, getNFPtBins(chan)+1);
+	S->numbers[reg][chan].nt10 = C->nt10_pt->Integral(0, getNFPtBins(chan)+1);
+	S->numbers[reg][chan].nt01 = C->nt01_pt->Integral(0, getNFPtBins(chan)+1);
+	S->numbers[reg][chan].nt0  = C->nt00_pt->Integral(0, getNFPtBins(chan)+1);
 	
 	S->numbers[reg][chan].tt_avweight = C->nt20_pt->GetEntries()>0?C->nt20_pt->Integral(0, getNFPtBins(chan)+1)/C->nt20_pt->GetEntries():1.;
 	S->numbers[reg][chan].tl_avweight = C->nt10_pt->GetEntries()>0?C->nt10_pt->Integral(0, getNFPtBins(chan)+1)/C->nt10_pt->GetEntries():1.;
@@ -2396,8 +1938,9 @@ void SSDLDumper::printCutFlows(TString filename){
 void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree = new TTree("SigEvents", "SigEventTree");
 	fSigEv_Tree->Branch("PUWeight",    &fSETree_PUWeight, "PUWeight/F");
-	fSigEv_Tree->Branch("HLTSF",    &fSETree_HLTSF   , "HLTSF/F");
-	fSigEv_Tree->Branch("BtagSF",   &fSETree_BtagSF  , "BtagSF/F");
+	fSigEv_Tree->Branch("SystFlag",    &fSETree_SystFlag, "SystFlag/I");
+	fSigEv_Tree->Branch("HLTSF",       &fSETree_HLTSF   , "HLTSF/F");
+	fSigEv_Tree->Branch("BtagSF",      &fSETree_BtagSF  , "BtagSF/F");
 	fSigEv_Tree->Branch("SLumi",       &fSETree_SLumi   , "SLumi/F");
 	fSigEv_Tree->Branch("SName",       &fSETree_SName);
 	fSigEv_Tree->Branch("SType",       &fSETree_SType   , "SType/I");
@@ -2408,6 +1951,7 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("Charge",      &fSETree_Charge  , "Charge/I");
 	fSigEv_Tree->Branch("TLCat",       &fSETree_TLCat   , "TLCat/I");
 	fSigEv_Tree->Branch("Pass3rdVeto", &fSETree_3rdVeto , "Pass3rdVeto/I");
+	fSigEv_Tree->Branch("PassTTZSel",  &fSETree_ttZSel  , "PassTTZSel/I");
 	fSigEv_Tree->Branch("PassZVeto",   &fSETree_ZVeto   , "PassZVeto/I");
 	fSigEv_Tree->Branch("HT",          &fSETree_HT      , "HT/F");
 	fSigEv_Tree->Branch("MET",         &fSETree_MET     , "MET/F");
@@ -2424,6 +1968,7 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("eta2",        &fSETree_eta2    , "eta2/F");
 }
 void SSDLDumper::resetSigEventTree(){
+	fSETree_SystFlag = -1;
 	fSETree_PUWeight = -1.;
 	fSETree_HLTSF    = -1.;
 	fSETree_BtagSF   = -1.;
@@ -2438,6 +1983,7 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_TLCat    = -1;
 	fSETree_ZVeto    = -1;
 	fSETree_3rdVeto  = -1;
+	fSETree_ttZSel   = -1;
 	fSETree_HT       = -1.;
 	fSETree_MET      = -1.;
 	fSETree_NM       = -1;
@@ -2550,7 +2096,6 @@ void SSDLDumper::bookHistos(Sample *S){
 	// Kinematical histos
 	for(size_t k = 0; k < gNKinSels; ++k){
 		TString name = Form("%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data());
-		S->kinplots[k][HighPt].hmetvsht = new TH2D(name, "HTvsMET", KinPlots::nHTBins, KinPlots::HTmin, KinPlots::HTmax, KinPlots::nMETBins, KinPlots::METmin, KinPlots::METmax);
 		for(size_t j = 0; j < gNKinVars; ++j){
 			name = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
 			S->kinplots[k][HighPt].hvar[j] = new TH1D(name, KinPlots::var_name[j].Data(), KinPlots::nbins[j], KinPlots::xmin[j], KinPlots::xmax[j]);
@@ -2692,12 +2237,12 @@ void SSDLDumper::bookHistos(Sample *S){
 				// OS Yields
 			if(c == Elec){
 				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_BB_pt ->Sumw2();
-                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
-                   C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
+            C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EE_pt ->Sumw2();
+            C->nt20_OS_EB_pt = new TH2D(rootname + "_NT20_OS_EB_pt",  "NT20_OS_EB_pt",  getNFPtBins(c), getFPtBins(c), getNFPtBins(c), getFPtBins(c)); C->nt20_OS_EB_pt ->Sumw2();
 			}
 			if(c == ElMu){
 				C->nt20_OS_BB_pt = new TH2D(rootname + "_NT20_OS_BB_pt",  "NT20_OS_BB_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_BB_pt ->Sumw2();
-                   C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
+            C->nt20_OS_EE_pt = new TH2D(rootname + "_NT20_OS_EE_pt",  "NT20_OS_EE_pt",  getNFPtBins(Muon), getFPtBins(Muon), getNFPtBins(Elec), getFPtBins(Elec)); C->nt20_OS_EE_pt ->Sumw2();
 			}
 
 			// Ratios
@@ -2739,7 +2284,6 @@ void SSDLDumper::deleteHistos(Sample *S){
 	
 	// Kinematical histos
 	for(size_t k = 0; k < gNKinSels; ++k){
-		delete S->kinplots[k][HighPt].hmetvsht;
 		for(size_t j = 0; j < gNKinVars; ++j) delete S->kinplots[k][HighPt].hvar[j];
 	}
 
@@ -2907,7 +2451,6 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 	rdir->cd();
 	for(size_t k = 0; k < gNKinSels; ++k){
 		KinPlots *kp = &S->kinplots[k][HighPt];
-		kp->hmetvsht->Write(kp->hmetvsht->GetName(), TObject::kWriteDelete);
 		for(size_t j = 0; j < gNKinVars; ++j) kp->hvar[j]->Write(kp->hvar[j]->GetName(), TObject::kWriteDelete);
 	}
 
@@ -3116,7 +2659,6 @@ int  SSDLDumper::readHistos(TString filename){
 		for(size_t k = 0; k < gNKinSels; ++k){
 			KinPlots *kp = &S->kinplots[k][HighPt];
 			getname = Form("%s_%s_HTvsMET", S->sname.Data(), gKinSelNames[k].Data());
-			getObjectSafe(pFile, S->sname + "/KinPlots/" + getname, kp->hmetvsht);
 			for(size_t j = 0; j < gNKinVars; ++j){
 				getname = Form("%s_%s_%s", S->sname.Data(), gKinSelNames[k].Data(), KinPlots::var_name[j].Data());
 				getObjectSafe(pFile, S->sname + "/KinPlots/" + getname, kp->hvar[j]);
@@ -3490,7 +3032,8 @@ bool SSDLDumper::eMuHTTrigger(){
 //////////////////////////////////////////////////////////////////////////////
 // Helper functions:
 //____________________________________________________________________________
-void SSDLDumper::scaleBTags(){
+void SSDLDumper::scaleBTags(Sample *S){
+	if(S->datamc == 0) return; // don't smear data
 	for(size_t i = 0; i < NJets; ++i){
 		// if(isGoodJet(i) == false) continue;
 		bool is_tagged_lse = JetTCHEBTag[i] > 1.7;
@@ -3499,52 +3042,56 @@ void SSDLDumper::scaleBTags(){
 		if(JetPartonID[i] == 0 || JetPartonID[i] == -2) pdgid = -999;
 		else if(JetPartonID[i] == -1)                   pdgid = 0;
 		else pdgid = JetPartonID[i];
-
+		
 		string meanminmax = "mean";
 		if(gScaleBTags == 1) meanminmax = "max";
 		if(gScaleBTags == 2) meanminmax = "min";
-		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], JetPartonID[i], meanminmax);
+		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], pdgid, meanminmax);
 		if(!is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 0.5; // not tagged
 		if( is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 2.0; // loose tagged
 		if( is_tagged_lse &&  is_tagged_med) JetTCHEBTag[i] = 3.5; // medium tagged
 	}
 }
-void SSDLDumper::smearJetPts(){
-	if(gJECScaling != 3) return;
-
-	// // reco jet:
-	// AnalysisJet thisJet_tmp;
-	// thisJet_tmp.SetPtEtaPhiE( ptJet_corr, etaJet[iJet], phiJet[iJet], eJet[iJet]);
-	// 
-	// // gen jet:
-	// AnalysisJet thisGenJet_tmp;
-	// thisGenJet_tmp.SetPtEtaPhiE( ptGenJet[iJet], etaGenJet[iJet], phiGenJet[iJet], eGenJet[iJet]);
-
-	// bool matched = (thisGenJet_tmp.Pt()>3.) ? thisJet_tmp.DeltaR(thisGenJet_tmp)<0.5 : false;
-
-	// if(0) return TMath::Max(0., thisGenJet_tmp.Pt()+jer_SF*(thisJet_tmp.Pt()-thisGenJet_tmp.Pt() ) );
-	// else
+void SSDLDumper::smearJetPts(Sample *S){
+	// Modify the jet pt for systematics studies
+	// Either shifted or smeared
+	if(S->datamc == 0) return; // don't smear data
+	if(gJECScaling == 0) return;
 	for(size_t i = 0; i < NJets; ++i){
-		JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));		
+		if(gJECScaling == 1){ JetPt[i] += JetJECUncert[i]*JetPt[i]; continue; }
+		if(gJECScaling == 2){ JetPt[i] -= JetJECUncert[i]*JetPt[i]; continue; }
+		if(gJECScaling == 3){
+			if(JetGenPt[i] > -100.)	JetPt[i] = TMath::Max(float(0.), JetGenPt[i] + getJERScale(i)*(JetPt[i] - JetGenPt[i]));
+			else                    JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));
+		}
 	}
 }
-void SSDLDumper::smearMET(){
+void SSDLDumper::scaleLeptons(Sample *S){
+	// Shift the lepton pts for systematics studies
+	if(S->datamc == 0) return; // don't smear data
+	if(gScaleLeptons == 0) return;
+	float scale = 0.;
+	for(size_t i = 0; i < NMus; ++i){
+		scale = getMuScale(MuPt[i], MuEta[i]);
+		if(gScaleLeptons == 1) MuPt[i] += scale*MuPt[i];
+		if(gScaleLeptons == 2) MuPt[i] -= scale*MuPt[i];
+	}
+	for(size_t i = 0; i < NEls; ++i){
+		scale = getElScale(ElPt[i], ElEta[i]);
+		if(gScaleLeptons == 1) ElPt[i] += scale*ElPt[i];
+		if(gScaleLeptons == 2) ElPt[i] -= scale*ElPt[i];
+	}
+}
+void SSDLDumper::smearMET(Sample *S){
+	if(S->datamc == 0) return; // don't smear data
 	float sm_met = pfMET + fRand3->Gaus(0, 0.05) * pfMET;
 	pfMET = sm_met;
 }
 float SSDLDumper::getJetPt(int i){
-	// Return the jet pt, either the true one stored in the tree, or something
-	// shifted or smeared for systematics studies.
-	if(gJECScaling == 0) return JetPt[i];
-	if(gJECScaling == 1) return JetPt[i] + JetJECUncert[i]*JetPt[i];
-	if(gJECScaling == 2) return JetPt[i] - JetJECUncert[i]*JetPt[i];
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-	// Return the MET, either the true one or the one corrected for applied
-	// JES/JER smearing/scaling
-	float met = pfMET;
-	return met;
+	return pfMET;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
@@ -3732,6 +3279,7 @@ void SSDLDumper::resetHypLeptons(){
 	TLorentzVector vec(0., 0., 0., 0.);
 	fHypLepton1 = lepton(vec, 0, -1, -1);
 	fHypLepton2 = lepton(vec, 0, -1, -1);
+	fHypLepton3 = lepton(vec, 0, -1, -1);
 }
 void SSDLDumper::setHypLepton1(int index, gChannel chan){
 	TLorentzVector vec(0., 0., 0., 0.);
@@ -3757,22 +3305,35 @@ void SSDLDumper::setHypLepton2(int index, gChannel chan){
 	}
 	else exit(-1);
 }
+void SSDLDumper::setHypLepton3(int index, gChannel chan){
+	TLorentzVector vec(0., 0., 0., 0.);
+	if(chan == Muon){
+		vec.SetPtEtaPhiM(MuPt[index], MuEta[index], MuPhi[index], gMMU);
+		fHypLepton3 = lepton(vec, MuCharge[index], 0, index);
+	}
+	else if(chan == Elec){
+		vec.SetPtEtaPhiM(ElPt[index], ElEta[index], ElPhi[index], gMEL);
+		fHypLepton3 = lepton(vec, ElCharge[index], 1, index);
+	}
+	else exit(-1);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Event Selections:
 void SSDLDumper::setRegionCuts(gRegion reg){
-	fC_minMu1pt  = Region::minMu1pt [reg];
-	fC_minMu2pt  = Region::minMu2pt [reg];
-	fC_minEl1pt  = Region::minEl1pt [reg];
-	fC_minEl2pt  = Region::minEl2pt [reg];
-	fC_minHT     = Region::minHT    [reg];
-	fC_maxHT     = Region::maxHT    [reg];
-	fC_minMet    = Region::minMet   [reg];
-	fC_maxMet    = Region::maxMet   [reg];
-	fC_minNjets  = Region::minNjets [reg];
-	fC_minNbjets = Region::minNbjets[reg];
-	fC_minNbjmed = Region::minNbjmed[reg];
-	fC_app3rdVet = Region::app3rdVet[reg];
+	fC_minMu1pt   = Region::minMu1pt  [reg];
+	fC_minMu2pt   = Region::minMu2pt  [reg];
+	fC_minEl1pt   = Region::minEl1pt  [reg];
+	fC_minEl2pt   = Region::minEl2pt  [reg];
+	fC_minHT      = Region::minHT     [reg];
+	fC_maxHT      = Region::maxHT     [reg];
+	fC_minMet     = Region::minMet    [reg];
+	fC_maxMet     = Region::maxMet    [reg];
+	fC_minNjets   = Region::minNjets  [reg];
+	fC_minNbjets  = Region::minNbjets [reg];
+	fC_minNbjmed  = Region::minNbjmed [reg];
+	fC_app3rdVet  = Region::app3rdVet [reg];
+	fC_vetoTTZSel = Region::vetoTTZSel[reg];
 }
 
 //____________________________________________________________________________
@@ -4118,7 +3679,7 @@ bool SSDLDumper::passesMllEventVeto(int ind1, int ind2, int toggle, float cut){
 	if( (pl1+pl2).M() < cut ) return false;
 	return true;
 }
-bool SSDLDumper::passes3rdLepVeto(bool verbose){
+bool SSDLDumper::passes3rdLepVeto(){
 	// Checks if there is a 3rd lepton (other than hyp leptons) in the event
 	// Obviously requires for hyp leptons to be set...
 	for(size_t i = 0; i < NMus; ++i){
@@ -4131,6 +3692,54 @@ bool SSDLDumper::passes3rdLepVeto(bool verbose){
 		if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
 		if(isGoodEleFor3rdLepVeto(i)) return false;
 	}
+	return true;
+}
+bool SSDLDumper::passesTTZSel(){
+	int ind1(-1), ind2(-1);
+
+	// OS Dilepton:
+	int osev = isOSEvent(ind1, &SSDLDumper::isGoodMuonForTTZ, ind2, &SSDLDumper::isGoodEleForTTZ);
+	if(abs(osev) != 1 && abs(osev) != 2 ) return false; // mumu or elel
+
+	gChannel chan = Muon;
+	if(osev == 2) chan = Elec;
+
+	setHypLepton1(ind1, chan);
+	setHypLepton2(ind2, chan);
+	
+	TLorentzVector pz = fHypLepton1.p + fHypLepton2.p;
+	
+	// Cuts on inv. mass and pt:
+	if(pz.M() < 81. || pz.M() > 101.) return false;
+	if(pz.Pt() < 35.) return false;
+	
+	// Require 3rd lepton:
+	bool found3rd = false;
+	for(size_t i = 0; i < NMus; ++i){
+		if(fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
+		if(fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
+		if(!isGoodMuonForTTZ(i, 10.)) continue;
+		found3rd = true;
+		setHypLepton3(i, Muon);
+		break;
+	}
+	if(found3rd == false){ // only look for 3rd ele if no 3rd mu found
+		for(size_t i = 0; i < NEls; ++i){
+			if(fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
+			if(fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
+			if(!isGoodEleForTTZ(i, 10.)) continue;
+			found3rd = true;
+			setHypLepton3(i, Elec);
+			break;
+		}
+	}
+	if(found3rd == false) return false;
+	
+	// Cut on jets and btags
+	if(getNJets() < 3)     return false;
+	if(getHT() < 120.)     return false;
+	if(getNBTags() < 2)    return false;
+	if(getNBTagsMed() < 1) return false;
 	return true;
 }
 
@@ -4268,6 +3877,9 @@ bool SSDLDumper::isSSLLMuEvent(int& mu1, int& mu2){
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
 	if(fDoCounting) fCounter[Muon].fill(fMMCutNames[8]);
 
+	if(fC_vetoTTZSel && passesTTZSel()) return false; // ttZ veto
+	// if(fDoCounting) fCounter[Muon].fill(fMMCutNames[8]);
+
 	if(getNJets() < fC_minNjets ) return false;    // njets cut
 	if(fDoCounting) fCounter[Muon].fill(fMMCutNames[9]);
 
@@ -4322,6 +3934,9 @@ bool SSDLDumper::isSSLLElEvent(int& el1, int& el2){
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
 	if(fDoCounting) fCounter[Elec].fill(fEECutNames[8]);
 
+	if(fC_vetoTTZSel && passesTTZSel()) return false; // ttZ veto
+	// if(fDoCounting) fCounter[Elec].fill(fEECutNames[8]);
+
 	if(getNJets() < fC_minNjets ) return false;    // njets cut
 	if(fDoCounting) fCounter[Elec].fill(fEECutNames[9]);
 
@@ -4375,6 +3990,9 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 	if(fC_app3rdVet && !passes3rdLepVeto()) return false; // 3rd lepton veto
 	if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[8]);
 
+	if(fC_vetoTTZSel && passesTTZSel()) return false; // ttZ veto
+	// if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[8]);
+
 	if(getNJets() < fC_minNjets ) return false;    // njets cut
 	if(fDoCounting) fCounter[ElMu].fill(fEMCutNames[9]);
 
@@ -4405,6 +4023,26 @@ bool SSDLDumper::isSSLLElMuEvent(int& mu, int& el){
 //////////////////////////////////////////////////////////////////////////////
 // Object selections:
 //////////////////////////////////////////////////////////////////////////////
+bool SSDLDumper::passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan){
+	if(chan == ElMu){
+		if(pT1 > pT2){
+			if(pT1 < Region::minMu1pt[reg]) return false;
+			if(pT2 < Region::minEl2pt[reg]) return false;
+		}
+		if(pT1 < pT2){
+			if(pT1 < Region::minMu2pt[reg]) return false;
+			if(pT2 < Region::minEl1pt[reg]) return false;
+		}
+	}
+	else{
+		if(chan == Muon && pT1 < Region::minMu1pt[reg]) return false;
+		if(chan == Muon && pT2 < Region::minMu2pt[reg]) return false;
+		if(chan == Elec && pT1 < Region::minEl1pt[reg]) return false;
+		if(chan == Elec && pT2 < Region::minEl2pt[reg]) return false;
+	}
+	return true;
+}
+
 // Muons
 //____________________________________________________________________________
 bool SSDLDumper::isGoodMuon(int muon, float ptcut){
@@ -4422,6 +4060,15 @@ bool SSDLDumper::isGoodMuonForZVeto(int muon){
 }
 bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
 	if(isGoodMuon(muon, 10.) == false)  return false;
+	if(MuIso[muon] > 0.15) return false;
+
+	return true;
+}
+bool SSDLDumper::isGoodMuonForTTZ(int muon){
+	return isGoodMuonForTTZ(muon, 20.);
+}
+bool SSDLDumper::isGoodMuonForTTZ(int muon, float pt){
+	if(isGoodMuon(muon, pt) == false)  return false;
 	if(MuIso[muon] > 0.15) return false;
 
 	return true;
@@ -4541,6 +4188,41 @@ bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 	
 	return true;	
 }
+bool SSDLDumper::isGoodEleForTTZ(int ele){
+	return isGoodEleForTTZ(ele, 20.);
+}
+bool SSDLDumper::isGoodEleForTTZ(int ele, float pt){
+	// Don't care about charge consistency or trigger efficiency
+	if(ele >= NEls) return false; // Sanity check
+	if(ElPt[ele] < pt) return false;
+
+	// Additional cuts from AN-12-059_v5:
+	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
+		if(ElRelIso[ele] > 0.15)     return false;
+
+		if(ElSigmaIetaIeta[ele] > 0.01)  return false;
+		if(fabs(ElDPhi[ele])    > 0.15)  return false;
+		if(fabs(ElDEta[ele])    > 0.007) return false;
+		if(ElHoverE[ele]        > 0.15)  return false;
+	}
+	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
+		if(ElRelIso[ele]  > 0.10)     return false;
+
+		if(ElSigmaIetaIeta[ele] > 0.03)  return false;
+		if(fabs(ElDPhi[ele])    > 0.10)  return false;
+		if(fabs(ElDEta[ele])    > 0.01)  return false;
+		if(ElHoverE[ele]        > 0.10)  return false;
+	}
+
+	// Reject electrons closer than 0.1 in DR to tight muons
+	for(size_t i = 0; i < NMus; ++i){
+		if(!isTightMuon(i)) continue;
+		if(Util::GetDeltaR(MuEta[i], ElEta[ele], MuPhi[i], ElPhi[ele]) > 0.1 ) continue;
+		return false;
+	}
+	
+	return true;	
+}
 bool SSDLDumper::isLooseElectron(int ele){
 	if(isGoodElectron(ele) == false) return false;
 	if(ElRelIso[ele] > 0.60) return false;
@@ -4619,7 +4301,6 @@ bool SSDLDumper::isChargeMatchedElectron(int ele){
 	if(ElGenID[ele] == -11) return ElCharge[ele] > 0; // positron
 	return true;
 }
-
 bool SSDLDumper::isBarrelElectron(int ele){
 	// true if in barrel, false if in endcap
 	if(fabs(ElEta[ele]) < 1.479 ) return true;
@@ -4641,6 +4322,7 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 	// Remove jets close to hypothesis leptons
 	if(fHypLepton1.index > -1) if(Util::GetDeltaR(fHypLepton1.p.Eta(), JetEta[jet], fHypLepton1.p.Phi(), JetPhi[jet]) < minDR) return false;
 	if(fHypLepton2.index > -1) if(Util::GetDeltaR(fHypLepton2.p.Eta(), JetEta[jet], fHypLepton2.p.Phi(), JetPhi[jet]) < minDR) return false;
+	if(fHypLepton3.index > -1) if(Util::GetDeltaR(fHypLepton3.p.Eta(), JetEta[jet], fHypLepton3.p.Phi(), JetPhi[jet]) < minDR) return false;
 
 	// Remove jets close to all tight leptons
 	for(size_t imu = 0; imu < NMus; ++imu){
@@ -4669,32 +4351,212 @@ float SSDLDumper::getJERScale(int jet){
 //////////////////////////////////////////////////////////////////////////////
 // HLT Scale Factors
 //____________________________________________________________________________
-float SSDLDumper::getHLTSF_DoubleMu( float pt, float eta, const std::string& runPeriod ) {
-	float hltsf = 0.;
-
-	if(runPeriod == "Run2011A") {
-		if(fabs(eta) < 0.8)      hltsf = 0.975;
-		else if(fabs(eta) < 2.1) hltsf = 0.955;
-		else                     hltsf = 0.910;
-
-	} else if(runPeriod == "Run2011B") {
-		if(fabs(eta) < 0.8)      hltsf = 0.972;
-		else if(fabs(eta) < 2.1) hltsf = 0.945;
-		else { // eta 2.1 -> 2.4
-			if(pt < 40.) hltsf = 0.85;
-			else         hltsf = 0.87;
-		}
-
-	} else if(runPeriod == "Run2011") { //lumi weighted average of RunA/RunB scale factors
-			hltsf = ( 2.3*this->getHLTSF_DoubleMu( pt, eta, "Run2011A") + 2.7*this->getHLTSF_DoubleMu( pt, eta, "Run2011B") ) / 5.;
-	} else { // default (so that squared is equal to 0.92)
-			hltsf = sqrt(0.92);
-	}
-	return hltsf;
-}
 float SSDLDumper::getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod ) {
 	return 1.;
 }
 float SSDLDumper::getHLTSF_MuEG( float pt, float eta, const std::string& runPeriod ) {
 	return sqrt(0.95);
+}
+SSDLDumper::ValueAndError SSDLDumper::getMuMuHLTSF( float pt, float eta, const std::string& runPeriod ) {
+	// These numbers taken from AN2011-399-v4
+	float hltsf = 0.;
+	float hltsf_err = 0.;
+
+	if( runPeriod=="Run2011A" ) {
+		if( fabs(eta)<0.8 ) {
+			hltsf = 0.975;
+			hltsf_err = 0.004;
+		} else if( fabs(eta)<2.1 ) {
+			hltsf = 0.950;
+			hltsf_err = 0.005;
+		} else  {
+			hltsf = 0.910;
+			hltsf_err = 0.01;
+		}
+	} else if( runPeriod=="Run2011B" ) {
+		if( fabs(eta)<0.8 ) {
+			if( pt<40. ) {
+				hltsf = 0.977;
+				hltsf_err = 0.001;
+			} else {
+				hltsf = 0.975;
+				hltsf_err = 0.001;
+			}
+		} else if( fabs(eta)<2.1 ){
+			if( pt<40. ) {
+				hltsf = 0.955;
+				hltsf_err = 0.002;
+			} else {
+				hltsf = 0.955;
+				hltsf_err = 0.001;
+			}
+		} else { // eta 2.1 -> 2.4
+			if( pt<40. ) {
+				hltsf = 0.89;
+				hltsf_err = 0.007;
+			} else {
+				hltsf = 0.90;
+				hltsf_err = 0.006;
+			}
+		}
+	} else if( runPeriod=="Run2011") {
+		hltsf     = ( 2.3*this->getMuMuHLTSF(pt, eta, "Run2011A").val + 2.7*this->getMuMuHLTSF(pt, eta, "Run2011B").val ) / 5.;
+		hltsf_err = ( 2.3*this->getMuMuHLTSF(pt, eta, "Run2011A").err + 2.7*this->getMuMuHLTSF(pt, eta, "Run2011B").err ) / 5.;
+	} else {
+		std::cout << "WARNING! Unknown run period: " << runPeriod << "! Returning HLTSF=0." << std::endl;
+	}
+
+	ValueAndError ve_hlt;
+	ve_hlt.val = hltsf;
+	ve_hlt.err = hltsf_err;
+
+	return ve_hlt;
+}
+
+float SSDLDumper::getMuScale(float pt, float eta){
+	// Returns the combined error of hlt/id/iso/reco scale factors
+	ValueAndError HLTSF_Run2011A = getMuMuHLTSF(pt, eta, "Run2011A");
+	ValueAndError HLTSF_Run2011B = getMuMuHLTSF(pt, eta, "Run2011B");
+
+	ValueAndError hltscale;
+	hltscale.val = ((217.+920.+1000.) * HLTSF_Run2011A.val + 2100. * HLTSF_Run2011B.val)/(217.+920.+1000.+2100.);
+	hltscale.err = ((217.+920.+1000.) * HLTSF_Run2011A.err + 2100. * HLTSF_Run2011B.err)/(217.+920.+1000.+2100.);
+	ValueAndError recoscale = getMuonRecoSF(pt, eta);
+	ValueAndError isoscale  = getMuonIsoSF(pt, eta);
+	
+	float sqscale = hltscale.err*hltscale.err * recoscale.val*recoscale.val * isoscale.val*isoscale.val
+	              + hltscale.val*hltscale.val * recoscale.err*recoscale.err * isoscale.val*isoscale.val
+	              + hltscale.val*hltscale.val * recoscale.val*recoscale.val * isoscale.err*isoscale.err;
+	return sqrt(sqscale);
+}
+float SSDLDumper::getElScale(float pt, float eta){
+	// Returns the combined error of hlt/id/iso/reco scale factors
+	ValueAndError hltscale; hltscale.val = 1.0; hltscale.err = 0.01;
+	ValueAndError recoscale = getElectronRecoSF(pt, eta);
+	ValueAndError isoscale  = getElectronIsoSF(pt, eta);
+	
+	float sqscale = hltscale.err*hltscale.err * recoscale.val*recoscale.val * isoscale.val*isoscale.val
+	              + hltscale.val*hltscale.val * recoscale.err*recoscale.err * isoscale.val*isoscale.val
+	              + hltscale.val*hltscale.val * recoscale.val*recoscale.val * isoscale.err*isoscale.err;
+	return sqrt(sqscale);
+}
+
+SSDLDumper::ValueAndError SSDLDumper::getMuonRecoSF( float pt, float eta ) {
+
+	float recoSF;
+	float recoSF_err;
+
+	if( fabs(eta)<1.2 ) {
+		recoSF = 0.996;
+		recoSF_err = 0.001;
+	} else {
+		recoSF = 0.986;
+		recoSF_err = 0.001;
+	}
+
+	ValueAndError ve_reco;
+	ve_reco.val = recoSF;
+	ve_reco.err = recoSF_err;
+
+	return ve_reco;
+
+}
+SSDLDumper::ValueAndError SSDLDumper::getElectronRecoSF( float pt, float eta ) {
+
+	float recoSF;
+	float recoSF_err;
+
+	if( fabs(eta)<0.8 ) {
+		recoSF = 0.999;
+		recoSF_err = 0.005;
+	} else if( fabs(eta)<1.44 ) {
+		recoSF = 0.964;
+		recoSF_err = 0.003;
+	} else if( fabs(eta)<1.57 ) {
+		recoSF = 0.99;
+		recoSF_err = 0.04;
+	} else if( fabs(eta)<2.0 ) {
+		recoSF = 0.992;
+		recoSF_err = 0.006;
+	} else {
+		recoSF = 1.001;
+		recoSF_err = 0.006;
+	}
+
+	ValueAndError ve_reco;
+	ve_reco.val = recoSF;
+	ve_reco.err = recoSF_err;
+
+	return ve_reco;
+
+}
+SSDLDumper::ValueAndError SSDLDumper::getMuonIsoSF( float pt, float eta ) {
+
+	float recoSF;
+	float recoSF_err;
+
+	if( pt<40. ) {
+
+		if( fabs(eta)<0.9 ) {
+			recoSF = 0.987;
+			recoSF_err = 0.006;
+		} else {
+			recoSF = 0.995;
+			recoSF_err = 0.005;
+		}
+
+	} else {
+
+		if( fabs(eta)<0.9 ) {
+			recoSF = 0.994;
+			recoSF_err = 0.002;
+		} else {
+			recoSF = 0.996;
+			recoSF_err = 0.002;
+		}
+
+	}
+
+
+	ValueAndError ve_reco;
+	ve_reco.val = recoSF;
+	ve_reco.err = recoSF_err;
+
+	return ve_reco;
+
+}
+SSDLDumper::ValueAndError SSDLDumper::getElectronIsoSF( float pt, float eta ) {
+
+	float recoSF;
+	float recoSF_err;
+
+	if( pt<40. ) {
+
+		if( fabs(eta)<1.5 ) {
+			recoSF = 0.988;
+			recoSF_err = 0.006;
+		} else {
+			recoSF = 0.998;
+			recoSF_err = 0.011;
+		}
+
+	} else {
+
+		if( fabs(eta)<1.5 ) {
+			recoSF = 0.988;
+			recoSF_err = 0.003;
+		} else {
+			recoSF = 1.016;
+			recoSF_err = 0.064;
+		}
+
+	}
+
+
+	ValueAndError ve_reco;
+	ve_reco.val = recoSF;
+	ve_reco.err = recoSF_err;
+
+	return ve_reco;
+
 }

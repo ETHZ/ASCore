@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue May  1 12:03:44 2012 by ROOT version 5.27/06b
+// Fri May 11 10:17:29 2012 by ROOT version 5.27/06b
 // from TTree Analysis/AnalysisTree
-// found on file: test.root
+// found on file: dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -26,7 +26,6 @@ public :
    Int_t           process;
    Float_t         mGlu;
    Float_t         mLSP;
-   // Int_t           isTChiSlepSnu;
    Int_t           HLT_MU8_JET40;
    Int_t           HLT_MU8_JET40_PS;
    Int_t           HLT_ELE8_JET40;
@@ -126,8 +125,11 @@ public :
    Float_t         JetTCHPBTag[40];   //[NJets]
    Float_t         JetTCHEBTag[40];   //[NJets]
    Float_t         JetArea[40];   //[NJets]
-   Int_t           JetPartonID[40];   //[NJets]
    Float_t         JetJECUncert[40];   //[NJets]
+   Int_t           JetPartonID[40];   //[NJets]
+   Float_t         JetGenPt[40];   //[NJets]
+   Float_t         JetGenEta[40];   //[NJets]
+   Float_t         JetGenPhi[40];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -138,7 +140,6 @@ public :
    TBranch        *b_process;   //!
    TBranch        *b_mGlu;   //!
    TBranch        *b_mLSP;   //!
-   // TBranch        *b_isTChiSlepSnu;   //!
    TBranch        *b_HLT_MU8_JET40;   //!
    TBranch        *b_HLT_MU8_JET40_PS;   //!
    TBranch        *b_HLT_ELE8_JET40;   //!
@@ -238,8 +239,11 @@ public :
    TBranch        *b_JetTCHPBTag;   //!
    TBranch        *b_JetTCHEBTag;   //!
    TBranch        *b_JetArea;   //!
-   TBranch        *b_JetPartonID;   //!
    TBranch        *b_JetJECUncert;   //!
+   TBranch        *b_JetPartonID;   //!
+   TBranch        *b_JetGenPt;   //!
+   TBranch        *b_JetGenEta;   //!
+   TBranch        *b_JetGenPhi;   //!
 
    MetaTreeClassBase(TTree *tree=0);
    virtual ~MetaTreeClassBase();
@@ -260,9 +264,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("test.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root");
       if (!f) {
-         f = new TFile("test.root");
+         f = new TFile("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat/store/user/stiegerb/SSDLTrees/2011B/May9/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root");
       }
       tree = (TTree*)gDirectory->Get("Analysis");
 
@@ -321,7 +325,6 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("process", &process, &b_process);
    fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
    fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
-   // fChain->SetBranchAddress("isTChiSlepSnu", &isTChiSlepSnu, &b_isTChiSlepSnu);
    fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
    fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
@@ -421,8 +424,11 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("JetTCHPBTag", JetTCHPBTag, &b_JetTCHPBTag);
    fChain->SetBranchAddress("JetTCHEBTag", JetTCHEBTag, &b_JetTCHEBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
-   fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
    fChain->SetBranchAddress("JetJECUncert", JetJECUncert, &b_JetJECUncert);
+   fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
+   fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
+   fChain->SetBranchAddress("JetGenEta", JetGenEta, &b_JetGenEta);
+   fChain->SetBranchAddress("JetGenPhi", JetGenPhi, &b_JetGenPhi);
    Notify();
 }
 

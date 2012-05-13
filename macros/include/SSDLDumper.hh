@@ -37,13 +37,13 @@ public:
 	static double gElFPtBins[gNElFPtBins+1];
 	static double gElEtabins[gNElEtabins+1];
 
-	static const int gNDiffHTBins   = 5;
-	static const int gNDiffMETBins  = 4;
+	static const int gNDiffHTBins   = 6;
+	static const int gNDiffMETBins  = 6;
 	static const int gNDiffMET3Bins = 9;
-	static const int gNDiffNJBins   = 5;
+	static const int gNDiffNJBins   = 6;
 	static const int gNDiffMT2Bins  = 3;
-	static const int gNDiffPT1Bins  = 5;
-	static const int gNDiffPT2Bins  = 5;
+	static const int gNDiffPT1Bins  = 9;
+	static const int gNDiffPT2Bins  = 8;
 	static const int gNDiffNBJBins  = 4;
 	static const int gNDiffNBJMBins = 3;
 
@@ -104,11 +104,8 @@ public:
 		HT0MET2003V, // 3rd lep veto
 		HT0MET120JV, // jet veto
 		HT0MET120JV3V, // jet veto + 3rd lep veto
-		TTbarWPresel,
-		TTbarWSel1,
-		TTbarWSel2,
-		TTbarWSel3,
-		TTbarWSel4,
+		TTbarWPresel, TTbarWSelIncl, TTbarWSel,
+		TTbarWSelJU, TTbarWSelJD, TTbarWSelJS, TTbarWSelBU, TTbarWSelBD, TTbarWSelLU, TTbarWSelLD,
 		gNREGIONS
 	};
 	// enum gRegion {
@@ -140,6 +137,10 @@ public:
 		ElMu,
 		Elec,
 		gNCHANNELS
+	};
+	struct ValueAndError {
+		float val;
+		float err;
 	};
 	struct lepton{
 		lepton(){};
@@ -235,15 +236,16 @@ public:
 		static float minEl1pt[gNREGIONS];
 		static float minEl2pt[gNREGIONS];
 		// Custom selections for every region
-		static float minHT    [gNREGIONS];
-		static float maxHT    [gNREGIONS];
-		static float minMet   [gNREGIONS];
-		static float maxMet   [gNREGIONS];
-		static float minJetPt [gNREGIONS];
-		static int   minNjets [gNREGIONS];
-		static int   minNbjets[gNREGIONS];
-		static int   minNbjmed[gNREGIONS];
-		static int   app3rdVet[gNREGIONS];
+		static float minHT     [gNREGIONS];
+		static float maxHT     [gNREGIONS];
+		static float minMet    [gNREGIONS];
+		static float maxMet    [gNREGIONS];
+		static float minJetPt  [gNREGIONS];
+		static int   minNjets  [gNREGIONS];
+		static int   minNbjets [gNREGIONS];
+		static int   minNbjmed [gNREGIONS];
+		static int   app3rdVet [gNREGIONS];
+		static int   vetoTTZSel[gNREGIONS];
 		
 		Channel mm;
 		Channel em;
@@ -261,7 +263,7 @@ public:
 		TH1D *nloose[gNRatioVars];
 	};
 	
-	static const int gNKinVars = 11;
+	static const int gNKinVars = 12;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
 		static TString axis_label[gNKinVars];
@@ -269,13 +271,6 @@ public:
 		static float xmin[gNKinVars];
 		static float xmax[gNKinVars];
 		TH1D *hvar[gNKinVars];
-		TH2D *hmetvsht;
-		static const int nMETBins = 100;
-		static const int nHTBins = 200;
-		static const float METmin = 0.;
-		static const float METmax = 400.;
-		static const float HTmin = 0.;
-		static const float HTmax = 1000.;
 	};
 	
 	static const int gNSels = 2;
@@ -298,7 +293,7 @@ public:
 		//TH1D *hid_nv[gNSels][gNNVrtxBins];
 	};
 	
-	static const int gNDiffVars = 11;
+	static const int gNDiffVars = 10;
 	struct DiffPredYields{
 		static TString var_name[gNDiffVars];
 		static TString axis_label[gNDiffVars];
@@ -512,10 +507,12 @@ public:
 	
 	//////////////////////////////
 	// Fillers
-	void fillSigEventTree(Sample*);
+	void fillSigEventTree(Sample*, int);
 	void resetSigEventTree();
 	void fillYields(Sample*, gRegion);
 	void fillDiffYields(Sample*);
+	void fillDiffVar(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
+	void fillDiffVarOS(Sample* S, int lep1, int lep2, float val, int bin, gChannel chan);
 	void fillRatioPlots(Sample*);
 	void fillMuIsoPlots(Sample*);
 	void fillElIsoPlots(Sample*);
@@ -566,9 +563,10 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
-	virtual void scaleBTags();
-	virtual void smearJetPts();
-	virtual void smearMET();
+	virtual void scaleBTags(Sample *S);
+	virtual void smearJetPts(Sample *S);
+	virtual void scaleLeptons(Sample *S);
+	virtual void smearMET(Sample *S);
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
 	virtual float getMETPhi();
@@ -610,7 +608,8 @@ public:
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
-	virtual bool passes3rdLepVeto(bool = false);
+	virtual bool passes3rdLepVeto();
+	virtual bool passesTTZSel();
 
 	virtual bool isSigSupMuEvent();
 	virtual bool isZMuMuEvent(int&, int&);
@@ -628,9 +627,13 @@ public:
 	virtual bool isSSLLElEvent(int&, int&);
 	virtual bool isSSLLElMuEvent(int&, int&);
 
+	virtual bool passesPtCuts(float pT1, float pT2, gRegion reg, gChannel chan);
+	
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
 	virtual bool isGoodMuonFor3rdLepVeto(int);
+	virtual bool isGoodMuonForTTZ(int);
+	virtual bool isGoodMuonForTTZ(int, float = 20.);
 	virtual bool isLooseMuon(int);
 	virtual bool isTightMuon(int);
 	virtual bool isGoodPrimMuon(int, float = -1.);
@@ -643,6 +646,8 @@ public:
 	virtual bool isGoodElectron(int, float = -1.);
 	virtual bool isGoodEleForZVeto(int);
 	virtual bool isGoodEleFor3rdLepVeto(int);
+	virtual bool isGoodEleForTTZ(int);
+	virtual bool isGoodEleForTTZ(int, float = 20.);
 	virtual bool isLooseElectron(int);
 	virtual bool isTightElectron(int);
 	virtual bool isGoodPrimElectron(int, float = -1.);
@@ -658,9 +663,17 @@ public:
 	virtual float getJERScale(int);
 	
 
-	float getHLTSF_DoubleMu( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
-	float getHLTSF_MuEG( float pt, float eta, const std::string& runPeriod="" );
+	float getHLTSF_MuEG(           float pt, float eta, const std::string& runPeriod="" );
+
+	ValueAndError getMuMuHLTSF( float pt, float eta, const std::string& runPeriod );
+	ValueAndError getMuonRecoSF(              float pt, float eta );
+	ValueAndError getMuonIsoSF(               float pt, float eta );
+	ValueAndError getElectronRecoSF(          float pt, float eta );
+	ValueAndError getElectronIsoSF(           float pt, float eta );
+
+	float getMuScale(float pt, float eta);
+	float getElScale(float pt, float eta);
 
 	float fC_minHT;
 	float fC_minMet;
@@ -677,12 +690,15 @@ public:
 	float fC_maxMet_Control;
 	float fC_maxMt_Control;
 	int   fC_app3rdVet; // 3rd lepton veto
+	int   fC_vetoTTZSel; // ttZ veto
 	
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
 	void setHypLepton2(int, gChannel);
+	void setHypLepton3(int, gChannel);
 	lepton fHypLepton1;
 	lepton fHypLepton2;
+	lepton fHypLepton3;
 	
 	void setRegionCuts(gRegion reg = Baseline);
 	
@@ -715,6 +731,7 @@ public:
 	// map<TString, gSample> fSampleMap;	// Mapping of sample number to name
 	
 	TTree *fSigEv_Tree;
+	int         fSETree_SystFlag; // 0 nominal, 1 jets up, 2 jets dn, 3 jets smeared, 4 btag up, 5 btag dn, 6 lep up, 7 lep dn
 	float       fSETree_PUWeight;
 	float       fSETree_HLTSF;
 	float       fSETree_BtagSF;
@@ -729,6 +746,7 @@ public:
 	int         fSETree_TLCat; // TL category: TT(0), TL(1), LT(2), LL(3)
 	int         fSETree_ZVeto;   // passes Z veto
 	int         fSETree_3rdVeto; // passes 3rd lepton veto
+	int         fSETree_ttZSel;  // passes ttz sel
 	float       fSETree_HT;
 	float       fSETree_MET;
 	int         fSETree_NM; // number of tight muons

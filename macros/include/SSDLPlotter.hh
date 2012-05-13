@@ -15,9 +15,8 @@
 
 struct SSDLPrediction {
 
-  float bg;
-  float bg_err;
-  
+	float bg;
+	float bg_err;
 
 	float bg_mm;
 	float bg_em;
@@ -51,6 +50,22 @@ struct SSDLPrediction {
 	int obs_em;
 	int obs_ee;
 
+};
+
+struct TTWZPrediction {
+	int obs;
+	float ttwz;
+	float ttw;
+	float ttz;
+
+	float fake;
+	float fake_err;
+	float cmid;
+	float cmid_err;
+	float wz;
+	float wz_err;
+	float rare;
+	float rare_err;
 };
 
 
@@ -92,7 +107,7 @@ public:
 	void makeElIsolationPlots(bool = false);
 	void makeElIdPlots();
 	
-	void makeNT2KinPlots();
+	void makeNT2KinPlots(bool=false);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
 	void makeMETvsHTPlotPRL();
 	void makeMETvsHTPlot0HT();
@@ -116,10 +131,11 @@ public:
 
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion);
-	void makeIntPredictionTTW(TString, gRegion);
-	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false);
+	TTWZPrediction makeIntPredictionTTW(TString, gRegion);
+	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
 	void makeDiffPrediction();
-	void makeDiffPredictionTTW();
+	void makeTTWDiffPredictions();
+	void makeDiffPredictionTTW(int);
 
 	void makeAllClosureTests();
 	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
@@ -193,7 +209,7 @@ public:
 	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
-	virtual void drawTopLine(float = 0.70);
+	virtual void drawTopLine(float = 0.60, float = 1.0, float = 0.13);
 	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	
