@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.12 $";
+string sjzbversion="$Revision: 1.70.2.13 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.13  2012/05/11 16:05:40  buchmann
+removed a bit of (synch) verbosity
+
 Revision 1.70.2.12  2012/05/11 16:04:24  buchmann
 electron synchronization completed
 
@@ -1074,6 +1077,7 @@ void JZBAnalysis::Analyze() {
   nEvent.totEvents = fTR->GetEntries();
   FullTree->Fill();
 
+
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
     {
       if(fisModelScan) {
@@ -1338,8 +1342,8 @@ void JZBAnalysis::Analyze() {
           float energy =  fTR->MuE[muIndex];
           TLorentzVector tmpVector(px,py,pz,energy);
           int tmpCharge = fTR->MuCharge[muIndex];
-          float muonIso = (fTR->MuPfIsoR03ChHad[muIndex] + std::max(0.0,
-                           fTR->MuPfIsoR03NeHadHighThresh[muIndex]+fTR->MuPfIsoR03PhotonHighThresh[muIndex]-0.5*fTR->MuPfIsoR03SumPUPt[muIndex])
+          float muonIso = (fTR->MumuonPFIsoChHad03[muIndex] + std::max(0.0,
+                           fTR->MumuonPFIsoNHad03[muIndex]+fTR->MumuonPFIsoPhoton03[muIndex]-0.5*fTR->MuPfIsoR03SumPUPt[muIndex])
                           )/fTR->MuPt[muIndex];
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
@@ -2023,6 +2027,7 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   if (!(fabs(fTR->MuEta[index])<2.5) ) return false;
   counters[MU].fill(" ... |eta| < 2.5");
 
+
   // Quality cuts
   if ( !fTR->MuIsGlobalMuon[index] )  return false;
   counters[MU].fill(" ... is global muon");
@@ -2048,22 +2053,22 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
   counters[MU].fill(" ... D0(pv) < 0.02");
   //HPA recommendation not POG
-  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-  counters[MU].fill(" ... DZ(pv) < 1.0");
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false;
+  counters[MU].fill(" ... DZ(pv) < 0.1");
 
 
   //HPA specifics
   if ( !(fTR->MuEem[index] < 4) ) return false;
-  counters[MU].fill(" ... MuIso03EmEt < 4");
+  counters[MU].fill(" ... MuEm < 4");
   if ( !(fTR->MuEhad[index] < 6) ) return false;
-  counters[MU].fill(" ... MuIso03HadEt < 6");
+  counters[MU].fill(" ... MuHad < 6");
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
   double Iso = (fTR->MumuonPFIsoChHad03[index] + std::max(0.0,
                 fTR->MumuonPFIsoNHad03[index]+fTR->MumuonPFIsoPhoton03[index]-0.5*fTR->MuPfIsoR03SumPUPt[index])
                 )/fTR->MuPt[index];
-  if ( !(Iso < 0.2) ) return false;
-  counters[MU].fill(" ... Iso < 0.2");
+  if ( !(Iso < 0.1) ) return false;
+  counters[MU].fill(" ... Iso < 0.1");
 
 
   return true;
