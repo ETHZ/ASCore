@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.16 2012/05/08 09:10:53 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.17 2012/05/11 09:45:31 mdunser Exp $
 //
 //
 
@@ -395,6 +395,12 @@ private:
   std::auto_ptr<int> fTRecovRecHitFilterFlag;
   std::auto_ptr<int> fTRA2TrackingFailureFilterFlag;
   //FR std::auto_ptr<int> fPBNRFlag;
+  std::auto_ptr<float> fTPFType1MET;
+  std::auto_ptr<float> fTPFType1METpx;
+  std::auto_ptr<float> fTPFType1METpy;
+  std::auto_ptr<float> fTPFType1METphi;
+  std::auto_ptr<float> fTPFType1METSignificance;
+  std::auto_ptr<float> fTPFType1SumEt;
   
   std::auto_ptr<int>  fTNEBhits;
   std::auto_ptr<std::vector<float> >  fTEBrechitE;

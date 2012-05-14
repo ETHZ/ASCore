@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.21 2012/05/08 09:10:54 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.22 2012/05/11 09:45:31 mdunser Exp $
 //
 //
 
@@ -511,6 +511,17 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<bool> RA2TrackingFailureFlag;
   iEvent.getByLabel("trackingFailureFilter",RA2TrackingFailureFlag);
   *fTRA2TrackingFailureFilterFlag = (int) *RA2TrackingFailureFlag;
+
+  // type-I corrected MET for 2012 analyses
+  edm::Handle<View<PFMET> > typeICorMET;
+  iEvent.getByLabel("pfType1CorrectedMet",typeICorMET);
+  // *fTtypeICorMET = (float) *typeICorMET;
+  *fTPFType1MET             = (typeICorMET->front()).pt();
+  *fTPFType1METpx           = (typeICorMET->front()).px();
+  *fTPFType1METpy           = (typeICorMET->front()).py();
+  *fTPFType1METphi          = (typeICorMET->front()).phi();
+  *fTPFType1METSignificance = (typeICorMET->front()).significance();
+  *fTPFType1SumEt           = (typeICorMET->front()).sumEt();
 
   // Colin's PBNR filter
   edm::Handle<bool> ParticleBasedNoiseRejectionFlag;
@@ -3483,6 +3494,12 @@ void NTupleProducer::declareProducts(void) {
   produces<int>("EcalDeadTPFilterFlag");
   produces<int>("RecovRecHitFilterFlag");
   produces<int>("RA2TrackingFailureFilterFlag");
+  produces<float>("PFType1MET");
+  produces<float>("PFType1METpx");
+  produces<float>("PFType1METpy");
+  produces<float>("PFType1METphi");
+  produces<float>("PFType1METSignificance");
+  produces<float>("PFType1SumEt");
   //FR produces<int>("PBNRFlag");
   produces<int>("NGenLeptons");
   produces<std::vector<int> >("GenLeptonID");
@@ -4131,6 +4148,12 @@ void NTupleProducer::resetProducts( void ) {
   fTEcalDeadTPFilterFlag.reset(new int(-999));
   fTRecovRecHitFilterFlag.reset(new int(-999));
   fTRA2TrackingFailureFilterFlag.reset(new int(-999));
+  fTPFType1MET.reset(new float(-999.99));
+  fTPFType1METpx.reset(new float(-999.99));
+  fTPFType1METpy.reset(new float(-999.99));
+  fTPFType1METphi.reset(new float(-999.99));
+  fTPFType1METSignificance.reset(new float(-999.99));
+  fTPFType1SumEt.reset(new float(-999.99));
   //FR fPBNRFlag.reset(new int(-999));
   fTNGenLeptons.reset(new int(0));
   fTGenLeptonID.reset(new std::vector<int> );
@@ -4843,6 +4866,12 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTEcalDeadTPFilterFlag, "EcalDeadTPFilterFlag");
   event.put(fTRecovRecHitFilterFlag, "RecovRecHitFilterFlag");
   event.put(fTRA2TrackingFailureFilterFlag,"RA2TrackingFailureFilterFlag");
+  event.put(fTPFType1MET, "PFType1MET");
+  event.put(fTPFType1METpx, "PFType1METpx");
+  event.put(fTPFType1METpy, "PFType1METpy");
+  event.put(fTPFType1METphi, "PFType1METphi");
+  event.put(fTPFType1METSignificance, "PFType1METSignificance");
+  event.put(fTPFType1SumEt, "PFType1SumEt");
   //FR event.put(fPBNRFlag,"PBNRFlag");
   event.put(fTNGenLeptons, "NGenLeptons");
   event.put(fTGenLeptonID, "GenLeptonID");

@@ -50,8 +50,8 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-#options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+#options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
+options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
 options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
@@ -70,7 +70,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if options.runon=='data':
 #https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions
     # CMSSW_5_2
-    process.GlobalTag.globaltag = "GR_R_50_V9::All"
+    process.GlobalTag.globaltag = "GR_R_52_V7::All"
+    #process.GlobalTag.globaltag = "GR_R_50_V9::All"
 else:
     # CMSSW_5_2_X:
     process.GlobalTag.globaltag = "START52_V9::All"
@@ -542,6 +543,13 @@ process.trackingFailureFilter.DxyTrVtxMax           = 0.2
 process.trackingFailureFilter.MinSumPtOverHT        = 0.10
 process.trackingFailureFilter.taggingMode           = True
 
+### TYPE-I corrected MET
+process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
+process.metAnalysisSequence=cms.Sequence(
+		process.producePFMETCorrections
+	)
+
+
 #### Steve Mrenna's Photon - Parton DR match #######################	      
 process.printGenParticles = cms.EDAnalyzer("ParticleListDrawer",
 	src = cms.InputTag("partonGenJets"),
@@ -757,8 +765,9 @@ process.p = cms.Path(
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
 #	+ process.jetIDFailure
-	+ process.analyze
+	+ process.metAnalysisSequence
 #	+ process.dump
+	+ process.analyze
 
        	)
    )
