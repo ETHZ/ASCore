@@ -35,6 +35,7 @@
 
 
 int gDEBUG_EVENTNUMBER_ = -1;
+int gDEBUG_RUNNUMBER_ = -1;
 
 
 using namespace std;
@@ -47,9 +48,6 @@ static const float gElMaxIso   = 0.05;
 static const float gMinJetPt   = 20.;
 static const bool  gApplyZVeto = false;
 static bool  gSmearMET     = false;
-static int   gScaleBTags   = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
-static int   gJECScaling   = 0; // 0 (no scaling), 1 (scale up), 2 (scale down), 3 (JER smearing)
-static int   gScaleLeptons = 0; // 0 (no scaling), 1 (scale up), 2 (scale down)
 
 static const bool gDoSystStudies = true;
 
@@ -92,8 +90,7 @@ double SSDLDumper::gNVrtxBins[gNNVrtxBins+1]  = {0, 2, 4, 6, 8, 10, 12, 14, 16, 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::gKinSelNames[gNKinSels] = {"LL", "TT", "Sig"};
 TString SSDLDumper::KinPlots::var_name[SSDLDumper::gNKinVars] = {"HT", "MET", "NJets", "Pt1", "Pt2", "InvMassSF", "InvMassMM", "InvMassEE", "InvMassEM", "MT2", "NbJets", "NbJetsMed"};
-int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        20  ,        20  ,        20  ,        20  ,   20 ,       5 ,          5 };
-// int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
+int     SSDLDumper::KinPlots::nbins[SSDLDumper::gNKinVars]    = {  20 ,  20 ,      8 ,   14 ,   14 ,        14  ,        14  ,        14  ,        14  ,   20 ,       5 ,          5 };
 float   SSDLDumper::KinPlots::xmin[SSDLDumper::gNKinVars]     = {   0.,   0.,      0.,   20.,   20.,        20. ,        20. ,        20. ,        20. ,    0.,       0.,          0.};
 float   SSDLDumper::KinPlots::xmax[SSDLDumper::gNKinVars]     = {1000., 200.,      8.,  300.,  160.,       300. ,       300. ,       300. ,       300. ,  100.,       5.,          5.};
 TString SSDLDumper::KinPlots::axis_label[SSDLDumper::gNKinVars] = {"H_{T} [GeV]",
@@ -319,9 +316,14 @@ void SSDLDumper::loopEvents(Sample *S){
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 
 		/////////////////////////////////////////////
+		// DEBUG
+		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
+		// if(jentry > 10000) break;
+		/////////////////////////////////////////////
+
+		/////////////////////////////////////////////
 		// Event modifications
-		gScaleBTags = 0;
-		scaleBTags(S);
+		scaleBTags(S, 0);
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -367,52 +369,50 @@ void SSDLDumper::loopEvents(Sample *S){
 		// Systematic studies
 		if(!gDoSystStudies) continue;
 		fChain->GetEntry(jentry); // reset tree vars
+		scaleBTags(S, 0);
 
 		// Jet pts scaled down
-		gJECScaling = 1;
-		smearJetPts(S);
+		smearJetPts(S, 1);
 		fillYields(S, TTbarWSelJU);
 		fillSigEventTree(S, 1);
 
 		// Jet pts scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		gJECScaling = 2;
-		smearJetPts(S);
+		scaleBTags(S, 0);
+		smearJetPts(S, 2);
 		fillYields(S, TTbarWSelJD);
 		fillSigEventTree(S, 2);
 
 		// Jet pts smeared
 		fChain->GetEntry(jentry); // reset tree vars
-		gJECScaling = 3;
-		smearJetPts(S);
+		scaleBTags(S, 0);
+		smearJetPts(S, 3);
 		fillYields(S, TTbarWSelJS);
 		fillSigEventTree(S, 3);
 
 		// Btags scaled up
 		fChain->GetEntry(jentry); // reset tree vars
-		gScaleBTags = 1;
-		scaleBTags(S);
+		scaleBTags(S, 1);
 		fillYields(S, TTbarWSelBU);
 		fillSigEventTree(S, 4);
 
 		// Btags scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		gScaleBTags = 2;
-		scaleBTags(S);
+		scaleBTags(S, 2);
 		fillYields(S, TTbarWSelBD);
 		fillSigEventTree(S, 5);
 
 		// Lepton pts scaled up
 		fChain->GetEntry(jentry); // reset tree vars
-		gScaleLeptons = 1;
-		scaleLeptons(S);
+		scaleBTags(S, 0);
+		scaleLeptons(S, 1);
 		fillYields(S, TTbarWSelLU);
 		fillSigEventTree(S, 6);
 
 		// Lepton pts scaled down
 		fChain->GetEntry(jentry); // reset tree vars
-		gScaleLeptons = 2;
-		scaleLeptons(S);
+		scaleBTags(S, 0);
+		scaleLeptons(S, 2);
 		fillYields(S, TTbarWSelLD);
 		fillSigEventTree(S, 7);
 	}
@@ -1151,8 +1151,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	fSETree_NM = getNTightMuons();
 	fSETree_NE = getNTightElectrons();
 	
-
-	if( Event==gDEBUG_EVENTNUMBER_ ) {
+	if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 
 		std::cout << std::endl << std::endl << "------------------------------------------------------------" << std::endl;
 		std::cout << "  Debug log for run: " << Run << "  LS: " << LumiSec << "  Event: " << Event << std::endl;
@@ -1190,20 +1189,21 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if(!isTightMuon(ind1)&&!isTightMuon(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==gDEBUG_EVENTNUMBER_ ) {
+		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 			std::cout << " -> This is a mu-mu event." << std::endl;
-			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
-			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
-			std::cout << "HT    :" << fSETree_HT     << std::endl;
-			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
-			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
-			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
-			std::cout << "Charge:" << fSETree_Charge << std::endl;
-			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
-			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
-			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
-			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
-			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+			std::cout << "HT       :" << fSETree_HT     << std::endl;
+			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
 		}
 
 		resetHypLeptons();
@@ -1233,20 +1233,21 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if(!isTightMuon(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==gDEBUG_EVENTNUMBER_ ) {
+		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 			std::cout << " -> This is a mu-ele event." << std::endl;
-			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
-			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
-			std::cout << "HT    :" << fSETree_HT     << std::endl;
-			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
-			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
-			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
-			std::cout << "Charge:" << fSETree_Charge << std::endl;
-			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
-			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
-			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
-			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
-			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+			std::cout << "HT       :" << fSETree_HT     << std::endl;
+			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
 		}
 
 		resetHypLeptons();
@@ -1276,20 +1277,21 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		if(!isTightElectron(ind1)&&!isTightElectron(ind2)) fSETree_TLCat = 3;
 		fSigEv_Tree->Fill();
 
-		if( Event==gDEBUG_EVENTNUMBER_ ) {
+		if( Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_ ) {
 			std::cout << " -> This is an ele-ele event." << std::endl;
-			std::cout << "MT2   :" << fSETree_MT2    << std::endl;
-			std::cout << "Mll   :" << fSETree_Mll    << std::endl;
-			std::cout << "HT    :" << fSETree_HT     << std::endl;
-			std::cout << "NJ    :" << fSETree_NJ     << std::endl;
-			std::cout << "NbJ   :" << fSETree_NbJ    << std::endl;
-			std::cout << "Flavor:" << fSETree_Flavor << std::endl;
-			std::cout << "Charge:" << fSETree_Charge << std::endl;
-			std::cout << "pT1   :" << fSETree_pT1    << std::endl;
-			std::cout << "pT2   :" << fSETree_pT2    << std::endl;
-			std::cout << "eta1  :" << fSETree_eta1   << std::endl;
-			std::cout << "eta2  :" << fSETree_eta2   << std::endl;
-			std::cout << "TLCat :" << fSETree_TLCat  << std::endl;
+			std::cout << "SystFlag :" << fSETree_SystFlag << std::endl;
+			std::cout << "MT2      :" << fSETree_MT2    << std::endl;
+			std::cout << "Mll      :" << fSETree_Mll    << std::endl;
+			std::cout << "HT       :" << fSETree_HT     << std::endl;
+			std::cout << "NJ       :" << fSETree_NJ     << std::endl;
+			std::cout << "NbJ      :" << fSETree_NbJ    << std::endl;
+			std::cout << "Flavor   :" << fSETree_Flavor << std::endl;
+			std::cout << "Charge   :" << fSETree_Charge << std::endl;
+			std::cout << "pT1      :" << fSETree_pT1    << std::endl;
+			std::cout << "pT2      :" << fSETree_pT2    << std::endl;
+			std::cout << "eta1     :" << fSETree_eta1   << std::endl;
+			std::cout << "eta2     :" << fSETree_eta2   << std::endl;
+			std::cout << "TLCat    :" << fSETree_TLCat  << std::endl;
 		}
 
 		resetHypLeptons();
@@ -1352,6 +1354,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 		}
 		fChargeSwitch = 0;
 	}
+
 	setRegionCuts();
 	return;
 }
@@ -3032,7 +3035,7 @@ bool SSDLDumper::eMuHTTrigger(){
 //////////////////////////////////////////////////////////////////////////////
 // Helper functions:
 //____________________________________________________________________________
-void SSDLDumper::scaleBTags(Sample *S){
+void SSDLDumper::scaleBTags(Sample *S, int flag){
 	if(S->datamc == 0) return; // don't smear data
 	for(size_t i = 0; i < NJets; ++i){
 		// if(isGoodJet(i) == false) continue;
@@ -3044,42 +3047,42 @@ void SSDLDumper::scaleBTags(Sample *S){
 		else pdgid = JetPartonID[i];
 		
 		string meanminmax = "mean";
-		if(gScaleBTags == 1) meanminmax = "max";
-		if(gScaleBTags == 2) meanminmax = "min";
+		if(flag == 1) meanminmax = "max";
+		if(flag == 2) meanminmax = "min";
 		fBTagSFUtil->modifyBTagsWithSF_fast(is_tagged_lse, is_tagged_med, JetPt[i], JetEta[i], pdgid, meanminmax);
 		if(!is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 0.5; // not tagged
 		if( is_tagged_lse && !is_tagged_med) JetTCHEBTag[i] = 2.0; // loose tagged
 		if( is_tagged_lse &&  is_tagged_med) JetTCHEBTag[i] = 3.5; // medium tagged
 	}
 }
-void SSDLDumper::smearJetPts(Sample *S){
+void SSDLDumper::smearJetPts(Sample *S, int flag){
 	// Modify the jet pt for systematics studies
 	// Either shifted or smeared
 	if(S->datamc == 0) return; // don't smear data
-	if(gJECScaling == 0) return;
+	if(flag == 0) return;
 	for(size_t i = 0; i < NJets; ++i){
-		if(gJECScaling == 1){ JetPt[i] += JetJECUncert[i]*JetPt[i]; continue; }
-		if(gJECScaling == 2){ JetPt[i] -= JetJECUncert[i]*JetPt[i]; continue; }
-		if(gJECScaling == 3){
+		if(flag == 1){ JetPt[i] += JetJECUncert[i]*JetPt[i]; continue; }
+		if(flag == 2){ JetPt[i] -= JetJECUncert[i]*JetPt[i]; continue; }
+		if(flag == 3){
 			if(JetGenPt[i] > -100.)	JetPt[i] = TMath::Max(float(0.), JetGenPt[i] + getJERScale(i)*(JetPt[i] - JetGenPt[i]));
 			else                    JetPt[i] = JetPt[i] * fRand3->Gaus(1., fabs(1. - getJERScale(i)));
 		}
 	}
 }
-void SSDLDumper::scaleLeptons(Sample *S){
+void SSDLDumper::scaleLeptons(Sample *S, int flag){
 	// Shift the lepton pts for systematics studies
 	if(S->datamc == 0) return; // don't smear data
-	if(gScaleLeptons == 0) return;
+	if(flag == 0) return;
 	float scale = 0.;
 	for(size_t i = 0; i < NMus; ++i){
 		scale = getMuScale(MuPt[i], MuEta[i]);
-		if(gScaleLeptons == 1) MuPt[i] += scale*MuPt[i];
-		if(gScaleLeptons == 2) MuPt[i] -= scale*MuPt[i];
+		if(flag == 1) MuPt[i] += scale*MuPt[i];
+		if(flag == 2) MuPt[i] -= scale*MuPt[i];
 	}
 	for(size_t i = 0; i < NEls; ++i){
 		scale = getElScale(ElPt[i], ElEta[i]);
-		if(gScaleLeptons == 1) ElPt[i] += scale*ElPt[i];
-		if(gScaleLeptons == 2) ElPt[i] -= scale*ElPt[i];
+		if(flag == 1) ElPt[i] += scale*ElPt[i];
+		if(flag == 2) ElPt[i] -= scale*ElPt[i];
 	}
 }
 void SSDLDumper::smearMET(Sample *S){
@@ -3516,7 +3519,7 @@ int SSDLDumper::isOSEvent(int &ind1, bool(SSDLDumper::*muonSelector)(int), int &
 		tmp_Leptons.push_back(tmpLepton);
 	}
 
-	// Sort these vector by their flavor and their pt
+	// Sort these vectors by their flavor and their pt
 	vector<lepton> v_Leptons;
 	v_Leptons = sortLeptonsByTypeAndPt(tmp_Leptons);
 
@@ -3696,14 +3699,64 @@ bool SSDLDumper::passes3rdLepVeto(){
 }
 bool SSDLDumper::passesTTZSel(){
 	int ind1(-1), ind2(-1);
+	gChannel chan = Muon;
 
 	// OS Dilepton:
-	int osev = isOSEvent(ind1, &SSDLDumper::isGoodMuonForTTZ, ind2, &SSDLDumper::isGoodEleForTTZ);
-	if(abs(osev) != 1 && abs(osev) != 2 ) return false; // mumu or elel
+	// Store leptons in vectors
+	vector<lepton> tmp_Leptons_p;
+	vector<lepton> tmp_Leptons_m;
+	TLorentzVector plep;
+	for(size_t i = 0; i < NMus; ++i){
+		if(isGoodMuonForTTZ(i, 20.) == false) continue;
+		if(MuCharge[i] == 1 ){
+			plep.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			lepton tmpLepton(plep, 1, 0, i);
+			tmp_Leptons_p.push_back(tmpLepton);
+		}
+		if(MuCharge[i] == -1){
+			plep.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+			lepton tmpLepton(plep, -1, 0, i);
+			tmp_Leptons_m.push_back(tmpLepton);
+		}
+	}
+	for(size_t i = 0; i < NEls; ++i){
+		if(isGoodEleForTTZ(i, 20.) == false) continue;
+		if(ElCharge[i] == 1 ){
+			plep.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			lepton tmpLepton(plep, 1, 1, i);
+			tmp_Leptons_p.push_back(tmpLepton);
+		}
+		if(ElCharge[i] == -1){
+			plep.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+			lepton tmpLepton(plep, -1, 1, i);
+			tmp_Leptons_m.push_back(tmpLepton);
+		}
+	}
 
-	gChannel chan = Muon;
-	if(osev == 2) chan = Elec;
+	// Select OSSF pair with best Z mass
+	float bestMZ = 999999999.;
+	for(size_t iPlus = 0; iPlus < tmp_Leptons_p.size(); ++iPlus){
+		for(size_t iMinus = 0; iMinus < tmp_Leptons_m.size(); ++iMinus){
+			// OS pair
+			lepton l1(tmp_Leptons_p[iPlus]);
+			lepton l2(tmp_Leptons_m[iMinus]);
 
+			// Same flavor
+			if(l2.type != l1.type) continue;
+
+			// Minimize difference to Z mass
+			TLorentzVector dilepton = l1.p+l2.p;
+			if(fabs(dilepton.M() - gMZ) > fabs(bestMZ - gMZ)) continue;
+			ind1 = l1.index;
+			ind2 = l2.index;
+			bestMZ = dilepton.M();
+			if(l1.type == 1) chan = Elec;
+		}
+	}
+	if(bestMZ > 1000) return false;
+	tmp_Leptons_p.clear();
+	tmp_Leptons_m.clear();
+	
 	setHypLepton1(ind1, chan);
 	setHypLepton2(ind2, chan);
 	
@@ -4064,9 +4117,6 @@ bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
 
 	return true;
 }
-bool SSDLDumper::isGoodMuonForTTZ(int muon){
-	return isGoodMuonForTTZ(muon, 20.);
-}
 bool SSDLDumper::isGoodMuonForTTZ(int muon, float pt){
 	if(isGoodMuon(muon, pt) == false)  return false;
 	if(MuIso[muon] > 0.15) return false;
@@ -4187,9 +4237,6 @@ bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 	}
 	
 	return true;	
-}
-bool SSDLDumper::isGoodEleForTTZ(int ele){
-	return isGoodEleForTTZ(ele, 20.);
 }
 bool SSDLDumper::isGoodEleForTTZ(int ele, float pt){
 	// Don't care about charge consistency or trigger efficiency

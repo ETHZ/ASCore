@@ -563,9 +563,9 @@ public:
 	virtual bool isGoodRun(Sample*);
 
 	// Event and Object selectors:
-	virtual void scaleBTags(Sample *S);
-	virtual void smearJetPts(Sample *S);
-	virtual void scaleLeptons(Sample *S);
+	virtual void scaleBTags(Sample *S, int flag = 0);
+	virtual void smearJetPts(Sample *S, int flag = 0);
+	virtual void scaleLeptons(Sample *S, int flag = 0);
 	virtual void smearMET(Sample *S);
 	virtual float getJetPt(int); // for shifting and smearing
 	virtual float getMET();
@@ -632,7 +632,6 @@ public:
 	virtual bool isGoodMuon(int, float = -1.);
 	virtual bool isGoodMuonForZVeto(int);
 	virtual bool isGoodMuonFor3rdLepVeto(int);
-	virtual bool isGoodMuonForTTZ(int);
 	virtual bool isGoodMuonForTTZ(int, float = 20.);
 	virtual bool isLooseMuon(int);
 	virtual bool isTightMuon(int);
@@ -646,7 +645,6 @@ public:
 	virtual bool isGoodElectron(int, float = -1.);
 	virtual bool isGoodEleForZVeto(int);
 	virtual bool isGoodEleFor3rdLepVeto(int);
-	virtual bool isGoodEleForTTZ(int);
 	virtual bool isGoodEleForTTZ(int, float = 20.);
 	virtual bool isLooseElectron(int);
 	virtual bool isTightElectron(int);
