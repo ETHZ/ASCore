@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.13 $";
+string sjzbversion="$Revision: 1.70.2.14 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.14  2012/05/13 08:33:39  pablom
+Muon selection improvements.
+
 Revision 1.70.2.13  2012/05/11 16:05:40  buchmann
 removed a bit of (synch) verbosity
 
@@ -2168,7 +2171,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
      if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
   } else { // Endcap
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
-     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
+     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.03)) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.03)) return false;
      if(!(fTR->ElHcalOverEcal[index]<0.075)) return false;
   }
