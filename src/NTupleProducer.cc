@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.22 2012/05/11 09:45:31 mdunser Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.23 2012/05/14 20:41:02 mdunser Exp $
 //
 //
 
@@ -158,7 +158,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   fRawCaloMETTag       = iConfig.getParameter<edm::InputTag>("tag_rawcalomet");
   fTCMETTag            = iConfig.getParameter<edm::InputTag>("tag_tcmet");
   fPFMETTag            = iConfig.getParameter<edm::InputTag>("tag_pfmet");
-  fPFMETPATTag         = iConfig.getParameter<edm::InputTag>("tag_pfmetPAT");
   fCorrCaloMETTag      = iConfig.getParameter<edm::InputTag>("tag_corrcalomet");
   fGenMETTag           = iConfig.getParameter<edm::InputTag>("tag_genmet");
   fVertexTag           = iConfig.getParameter<edm::InputTag>("tag_vertex");
@@ -175,7 +174,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   if(!fIsModelScan) fHBHENoiseResultTagIso = iConfig.getParameter<edm::InputTag>("tag_hcalnoiseIso");
   fSrcRho              = iConfig.getParameter<edm::InputTag>("tag_srcRho");
   fSrcRhoForIso        = iConfig.getParameter<edm::InputTag>("tag_srcRhoForIso");
-  fSrcRhoPFnoPU        = iConfig.getParameter<edm::InputTag>("tag_srcRhoPFnoPU");
   pfphotonsProducerTag = iConfig.getParameter<edm::InputTag>("tag_pfphotonsProducer");
   pfProducerTag        = iConfig.getParameter<edm::InputTag>("tag_pfProducer");
   fSCTagBarrel = iConfig.getParameter<edm::InputTag>("tag_SC_barrel");
@@ -369,11 +367,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(fSrcRhoForIso,rhoForIso);
   *fTRhoForIso = *rhoForIso;
 
-  // rho for L1FastJet running PFnoPU
-  edm::Handle<double> rhoNoPU;
-  iEvent.getByLabel(fSrcRhoPFnoPU,rhoNoPU);
-  *fTRhoPFnoPU = *rhoNoPU;
-
   // beam halo
   edm::Handle<BeamHaloSummary> TheBeamHaloSummary;
   iEvent.getByLabel("BeamHaloSummary",TheBeamHaloSummary);
@@ -442,10 +435,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   Handle<View<PFMET> > pfmet;
   iEvent.getByLabel(fPFMETTag, pfmet);
 	
-  Handle<View<pat::MET> > pfMETpat;
-  iEvent.getByLabel(fPFMETPATTag,pfMETpat);  //'pfMET PAT'
-
-
   Handle<CaloMETCollection> corrmujesmet;
   iEvent.getByLabel(fCorrCaloMETTag, corrmujesmet);
 
@@ -3029,13 +3018,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
     *fTMETR21 = TMath::Sqrt(dPhiMJ2*dPhiMJ2 + (TMath::Pi()-dPhiMJ1)*(TMath::Pi()-dPhiMJ1) );
   }
 
-  *fTPFMETPAT     = (pfMETpat->front()).pt();
-  *fTPFMETPATpx   = (pfMETpat->front()).px();
-  *fTPFMETPATpy   = (pfMETpat->front()).py();
-  *fTPFMETPATphi  = (pfMETpat->front()).phi();
-  *fTPFMETPATSignificance = (pfMETpat->at(0)).significance();
-
-
 
   ////////////////////////////////////////////////////////////////////////////////
   // Special stuff for Model Scans ///////////////////////////////////////////////
@@ -3416,7 +3398,6 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("PUnTrksHighPt");
   produces<float>("Rho");
   produces<float>("RhoForIso");
-  produces<float>("RhoPFnoPU");
   produces<float>("Weight");
   produces<std::vector<int> >("HLTResults");
   produces<std::vector<int> >("HLTPrescale");
@@ -4032,11 +4013,6 @@ void NTupleProducer::declareProducts(void) {
   produces<float>("PFMETphi");
   produces<float>("PFMETSignificance");
   produces<float>("PFSumEt");
-  produces<float>("PFMETPAT");
-  produces<float>("PFMETPATpx");
-  produces<float>("PFMETPATpy");
-  produces<float>("PFMETPATphi");
-  produces<float>("PFMETPATSignificance");
   produces<float>("METR12");
   produces<float>("METR21");
 
@@ -4075,7 +4051,6 @@ void NTupleProducer::resetProducts( void ) {
   fTPUnTrksHighPt.reset(new std::vector<float> );
   fTRho.reset(new float(-999.99));
   fTRhoForIso.reset(new float(-999.99));
-  fTRhoPFnoPU.reset(new float(-999.99));
   fTWeight.reset(new float(-999.99));
   fTHLTResults.reset(new std::vector<int> );
   fTHLTPrescale.reset(new std::vector<int> );
@@ -4700,11 +4675,6 @@ void NTupleProducer::resetProducts( void ) {
   fTPFMETphi.reset(new float(-999.99));
   fTPFMETSignificance.reset(new float(-999.99));
   fTPFSumEt.reset(new float(-999.99));
-  fTPFMETPAT.reset(new float(-999.99));
-  fTPFMETPATpx.reset(new float(-999.99));
-  fTPFMETPATpy.reset(new float(-999.99));
-  fTPFMETPATphi.reset(new float(-999.99));
-  fTPFMETPATSignificance.reset(new float(-999.99));
   fTMETR12.reset(new float(-999.99));
   fTMETR21.reset(new float(-999.99));
 
@@ -4793,7 +4763,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPUnTrksHighPt, "PUnTrksHighPt");
   event.put(fTRho,       "Rho");
   event.put(fTRhoForIso, "RhoForIso");
-  event.put(fTRhoPFnoPU, "RhoPFnoPU");
   event.put(fTWeight, "Weight");
   event.put(fTHLTResults, "HLTResults");
   event.put(fTHLTPrescale, "HLTPrescale");
@@ -5408,11 +5377,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTPFMETphi, "PFMETphi");
   event.put(fTPFMETSignificance, "PFMETSignificance");
   event.put(fTPFSumEt, "PFSumEt");
-  event.put(fTPFMETPAT, "PFMETPAT");
-  event.put(fTPFMETPATpx, "PFMETPATpx");
-  event.put(fTPFMETPATpy, "PFMETPATpy");
-  event.put(fTPFMETPATphi, "PFMETPATphi");
-  event.put(fTPFMETPATSignificance, "PFMETPATSignificance");
   event.put(fTMETR12, "METR12");
   event.put(fTMETR21, "METR21");
 

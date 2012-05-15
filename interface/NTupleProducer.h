@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.17 2012/05/11 09:45:31 mdunser Exp $
+// $Id: NTupleProducer.h,v 1.114.2.18 2012/05/14 20:41:08 mdunser Exp $
 //
 //
 
@@ -197,7 +197,6 @@ private:
   edm::InputTag fRawCaloMETTag;
   edm::InputTag fTCMETTag;
   edm::InputTag fPFMETTag;
-  edm::InputTag fPFMETPATTag;
   edm::InputTag fCorrCaloMETTag;
   edm::InputTag fGenMETTag;
   edm::InputTag fVertexTag;
@@ -214,7 +213,6 @@ private:
   edm::InputTag fHBHENoiseResultTagIso;
   edm::InputTag fSrcRho;
   edm::InputTag fSrcRhoForIso;
-  edm::InputTag fSrcRhoPFnoPU;
   edm::InputTag fpdfWeightTag;
   edm::InputTag pfphotonsProducerTag;
   edm::InputTag pfProducerTag;
@@ -384,8 +382,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTPUnTrksHighPt;
   std::auto_ptr<float>  fTRho; // rho from L1FastJetCorrection
   std::auto_ptr<float>  fTRhoForIso; // rho computed up to eta=2.5
-  std::auto_ptr<float>  fTRhoPFnoPU; // rho from L1FastJetCorrection running PFnoPU
-
+ 
   std::auto_ptr<float>  fTPUWeightTotal;
   std::auto_ptr<float>  fTPUWeightInTime;
 
@@ -1036,11 +1033,6 @@ private:
   std::auto_ptr<float>  fTPFMETphi;
   std::auto_ptr<float>  fTPFMETSignificance;
   std::auto_ptr<float>  fTPFSumEt;
-  std::auto_ptr<float>  fTPFMETPAT;
-  std::auto_ptr<float>  fTPFMETPATpx;
-  std::auto_ptr<float>  fTPFMETPATpy;
-  std::auto_ptr<float>  fTPFMETPATphi;
-  std::auto_ptr<float>  fTPFMETPATSignificance;
   std::auto_ptr<float>  fTMETR12;
   std::auto_ptr<float>  fTMETR21;
 };
