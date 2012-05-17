@@ -43,11 +43,11 @@ public:
 
     // PileUp reweighting;
     virtual void  SetPileUpSrc(string, string = "");
-//     virtual void  SetPileUp3DSrc(string, string);
+    virtual void  SetPileUp3DSrc(string, string);
 
     virtual float GetPUWeight(int);
     virtual float GetPUWeight(int, int);
-//     virtual float GetPUWeight3D( int , int , int );
+    virtual float GetPUWeight3D( int , int , int );
 
 
     TreeReader *fTR;
@@ -144,7 +144,7 @@ private:
     bool fDoPileUpReweight3D;
 
     PUWeight  *fPUWeight;
-//     Lumi3DReWeighting   *fPUWeight3D;
+    Lumi3DReWeighting   *fPUWeight3D;
 
 
 };

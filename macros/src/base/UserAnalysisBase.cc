@@ -1205,17 +1205,17 @@ void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
 }
 
 // // Pile Up Reweighting - 3D
-// void UserAnalysisBase::SetPileUp3DSrc(string data_PileUp, string mc_PileUp){
-//     if(data_PileUp.size() == 0 ) return;
-//     if(fDoPileUpReweight3D == 1 ) {cout << "ERROR in SetPileUpSrc3D: fPUWeight already initialized" << endl; return; }
-//     //if(mc_PileUp.size() ==0){
-//     //	fPUWeight = new Lumi3DReWeighting(data_PileUp.c_str());
-//     //}else {
-//     fPUWeight3D = new Lumi3DReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
-//     fPUWeight3D->weight3D_init(1);
-//     //} 
-//     fDoPileUpReweight3D = true;
-// }
+void UserAnalysisBase::SetPileUp3DSrc(string data_PileUp, string mc_PileUp){
+    if(data_PileUp.size() == 0 ) return;
+    if(fDoPileUpReweight3D == 1 ) {cout << "ERROR in SetPileUpSrc3D: fPUWeight already initialized" << endl; return; }
+    //if(mc_PileUp.size() ==0){
+    //	fPUWeight = new Lumi3DReWeighting(data_PileUp.c_str());
+    //}else {
+    fPUWeight3D = new Lumi3DReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
+    fPUWeight3D->weight3D_init(1);
+    //} 
+    fDoPileUpReweight3D = true;
+}
 
 float UserAnalysisBase::GetPUWeight(int nPUinteractions){
     if(! fDoPileUpReweight) return -999.99;
@@ -1227,9 +1227,9 @@ float UserAnalysisBase::GetPUWeight(int nPUinteractions, int nPUinteractionsLate
     else return fPUWeight->weightOOT(nPUinteractions, nPUinteractionsLate);
 }
 
-// float UserAnalysisBase::GetPUWeight3D( int nPUinteractionsEarly, int nPUinteractions, int nPUinteractionsLate){
-//     //  return -1;
-//     if(! fDoPileUpReweight3D) return -999.99;
-//     else return fPUWeight3D->weight3D(nPUinteractionsEarly ,nPUinteractions , nPUinteractionsLate);
-// }
+float UserAnalysisBase::GetPUWeight3D( int nPUinteractionsEarly, int nPUinteractions, int nPUinteractionsLate){
+    //  return -1;
+    if(! fDoPileUpReweight3D) return -999.99;
+    else return fPUWeight3D->weight3D(nPUinteractionsEarly ,nPUinteractions , nPUinteractionsLate);
+}
 
