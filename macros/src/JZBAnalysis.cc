@@ -2104,6 +2104,9 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
   if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
   counters[EL].fill(" ... N(missing inner hits) <= 1");
+  if(!fTR->ElPassConversionVeto[index]) return false;
+  counters[EL].fill(" ... passed conversion rejection");
+  
 
   float e=fTR->ElCaloEnergy[index];
   float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];
