@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.14 $";
+string sjzbversion="$Revision: 1.70.2.15 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.15  2012/05/15 14:27:56  buchmann
+Updated ele definition (the egamma recommendation changed for dPhiIn in the endcap)
+
 Revision 1.70.2.14  2012/05/13 08:33:39  pablom
 Muon selection improvements.
 
@@ -47,91 +50,6 @@ Add ecal deposits to muons and bug fix for electrons selections.
 
 Revision 1.70.2.8  2012/05/09 08:31:57  buchmann
 updated electron isolation (pf iso)
-
-Revision 1.70.2.7  2012/05/08 16:43:53  buchmann
-adapted isolation for electrons in the endcaps with pt<20 GeV
-
-Revision 1.70.2.6  2012/05/08 16:36:02  buchmann
-corrected electron 2012 definition
-
-Revision 1.70.2.5  2012/05/08 15:40:48  buchmann
-Using both electron & muon definition for 2012; added a cut on |eta|<2.5 for electrons; changed n(missing inner hits) to <= 1
-
-Revision 1.70.2.4  2012/05/08 15:37:59  pablom
-Fixed maximum eta of the muons.
-
-Revision 1.70.2.3  2012/05/08 15:27:48  pablom
-New good muon definition updated for 2012.
-
-Revision 1.70.2.2  2012/05/08 14:54:11  buchmann
-First attempt at an electron definition for 2012 (not active yet). Needs review and testing
-
-Revision 1.70.2.1  2012/05/08 12:50:28  buchmann
-Updated files for JZBAnalysis (in EDM)
-
-Revision 1.85  2012/05/02 14:56:57  buchmann
-updated jzb analysis to use geninfomo instead of geninfomoindex (new generatorinfo format)
-
-Revision 1.84  2012/05/01 06:51:33  buchmann
-First EDM JZB version; requires testing. still need to implement btag variables and some CAJID variables
-
-Revision 1.83  2012/04/18 16:26:31  buchmann
-made code a bit more legible by using the is_neutrino and is_charged_lepton functions
-
-Revision 1.81  2012/04/18 09:18:55  buchmann
-Added a tiny tree to keep track of the number of mc events
-
-Revision 1.80  2012/04/01 17:40:46  buchmann
-Removing anti-selected objects again (as well as loose objects)
-
-Revision 1.78  2012/04/01 17:23:58  buchmann
-fixed issue with ttbar sample (missing ngenparticles variable lead to crashes)
-
-Revision 1.77  2012/02/20 17:03:11  buchmann
-Added some new variables: generator level sum jet (pt,eta,phi) and met phi
-
-Revision 1.75  2012/02/15 16:20:55  buchmann
-Added angle between LSP and Z; added pt of lsp sum
-
-Revision 1.74  2012/02/15 10:26:27  buchmann
-Added Z pt, Z mass, Z eta, Z phi, Z promptness, and LSP promptness to events tree; added possibility to go lower in lepton pt for additional studies (currently at 10 GeV)
-
-Revision 1.73  2012/02/08 18:18:38  buchmann
-Updated JZB analysis: there is a new switch (-g) to include all generator information implemented so far (and much more). If the file you're using the analysis on does not contain the necessary information the switch will be deactivated (it reaacts to the number of gen particles). New generator information added recently: Promptness level, lsp mother pt, lsp mother id, and much, much, MUCH more :-)
-
-Revision 1.71  2012/01/18 12:55:53  buchmann
-Added x value for scans
-
-Revision 1.70  2011/11/29 16:17:08  fronga
-Improved trigger definitions (should help maintenance).
-Check that there is always an unprescaled trigger in any event (or crash!).
-
-Revision 1.68  2011/11/25 18:22:45  buchmann
-Updated weighted for MC (trigger efficiency); added masses for GMSB SMS scans; deactivated PU weights for scans
-
-Revision 1.67  2011/11/17 13:36:07  buchmann
-Updated triggers
-
-Revision 1.66  2011/11/09 15:18:13  buchmann
-Adapted weight (used to be PU only) to also have an efficiency related weight (which is saved separately to Efficiencyweightonly)
-
-Revision 1.65  2011/11/07 11:00:25  fronga
-Fixed use of jec uncertainties.
-FIXME: move these txt files to the repository...
-
-Revision 1.64  2011/11/05 14:11:41  pablom
-
-Added JET Energy Scale uncertainty
-
-Revision 1.63  2011/10/20 16:05:10  fronga
-Flag electrons from photon conversion.
-Open eta to 2.5 (can cut offline).
-Some additional comments in electron ID.
-Added cut on SuperCluster ET.
-
-Revision 1.62  2011/10/20 14:26:15  buchmann
-Adapted custom electron function (basically from WP95 to WP90)
-
 */
 
 
@@ -1477,7 +1395,7 @@ void JZBAnalysis::Analyze() {
     float lepweight=GetLeptonWeight(nEvent.id1,nEvent.phi1,nEvent.eta1,nEvent.id2,nEvent.phi2,nEvent.eta2,lepweightErr);
     
     if (isMC) {
-      nEvent.weight=nEvent.weight*lepweight;
+//      nEvent.weight=nEvent.weight*lepweight;
       nEvent.weightEffDown=nEvent.weight*(lepweight-lepweightErr);
       nEvent.weightEffUp=nEvent.weight*(lepweight+lepweightErr);
       nEvent.Efficiencyweightonly=lepweight;
@@ -2165,15 +2083,15 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
   // Medium Working Point
   if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
-     if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.004)) return false;
-     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.06)) return false;
-     if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
-     if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
-  } else { // Endcap
      if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.007)) return false;
-     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.03)) return false;
+     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15)) return false;
+     if(!(fTR->ElSigmaIetaIeta[index]<0.01)) return false;
+     if(!(fTR->ElHcalOverEcal[index]<0.12)) return false;
+  } else { // Endcap
+     if(!(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.009 )) return false;
+     if(!(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.10 )) return false;
      if(!(fTR->ElSigmaIetaIeta[index]<0.03)) return false;
-     if(!(fTR->ElHcalOverEcal[index]<0.075)) return false;
+     if(!(fTR->ElHcalOverEcal[index]<0.10)) return false;
   }
   
   counters[EL].fill(" ... pass additional electron ID cuts");
@@ -2184,8 +2102,8 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   counters[EL].fill(" ... DZ(PV)<0.1");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
-  if(!(fTR->ElNumberOfMissingInnerHits[index]==0)) return false;
-  counters[EL].fill(" ... N(missing inner hits) == 0");
+  if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
+  counters[EL].fill(" ... N(missing inner hits) <= 1");
 
   float e=fTR->ElCaloEnergy[index];
   float p=fTR->ElCaloEnergy[index]/fTR->ElESuperClusterOverP[index];
