@@ -52,7 +52,7 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
-options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name
+options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_52X_'+options.runon+'.root'
@@ -255,10 +255,10 @@ process.load('DiLeptonAnalysis.NTupleProducer.photonPartonMatch_cfi')
 
 #### DEBUG TOOLS ###################################################
 #process.dump = cms.EDAnalyzer("EventContentAnalyzer")
-# process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
-#    ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
-# )
-# process.ProfilerService = cms.Service("ProfilerService",
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+##                                        ignoreTotal = cms.untracked.int32(1) # number of events to ignore at start (default is one)
+#                                        )
+#process.ProfilerService = cms.Service("ProfilerService",
 #                                      firstEvent = cms.untracked.int32(2),
 #                                      lastEvent = cms.untracked.int32(51),
 #                                      paths = cms.untracked.vstring(['p'])
@@ -421,7 +421,49 @@ process.analyze.tag_elepfisosCustom  = ['electronPFIsoChHad03'    , 'electronPFI
                                         'electronRadPFIsoChHad03' , 'electronRadPFIsoChHad04'  ,
                                         'electronRadPFIsoNHad03'  , 'electronRadPFIsoNHad04'   ,
                                         'electronRadPFIsoPhoton03', 'electronRadPFIsoPhoton04' ]
-	
+
+#To add the tauID's
+from PhysicsTools.PatAlgos.patSequences_cff import tauIsoDepositPFCandidates,tauIsoDepositPFChargedHadrons,tauIsoDepositPFNeutralHadrons,tauIsoDepositPFGammas,patTaus
+process.tauIsoDepositPFCandidates = tauIsoDepositPFCandidates.clone()
+process.tauIsoDepositPFChargedHadrons = tauIsoDepositPFChargedHadrons.clone()
+process.tauIsoDepositPFNeutralHadrons = tauIsoDepositPFNeutralHadrons.clone()
+process.tauIsoDepositPFGammas = tauIsoDepositPFGammas.clone()
+process.patTaus = patTaus.clone()
+
+process.patTaus.tauIDSources = cms.PSet(
+    decayModeFinding = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
+    byVLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseChargedIsolation"),
+    byLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByLooseChargedIsolation"),
+    byMediumChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByMediumChargedIsolation"),
+    byTightChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByTightChargedIsolation"),
+    byVLooseIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseIsolation"),
+    byLooseIsolation = cms.InputTag("hpsPFTauDiscriminationByLooseIsolation"),
+    byMediumIsolation = cms.InputTag("hpsPFTauDiscriminationByMediumIsolation"),
+    byTightIsolation = cms.InputTag("hpsPFTauDiscriminationByTightIsolation"),
+    byVLooseIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByVLooseIsolationDBSumPtCorr"),
+    byLooseIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByLooseIsolationDBSumPtCorr"),
+    byMediumIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationDBSumPtCorr"),
+    byTightIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightIsolationDBSumPtCorr"),
+    byVLooseCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByVLooseCombinedIsolationDBSumPtCorr"),
+    byLooseCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr"),
+    byMediumCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr"),
+    byTightCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"),
+    againstElectronLoose = cms.InputTag("hpsPFTauDiscriminationByLooseElectronRejection"),
+    againstElectronMedium = cms.InputTag("hpsPFTauDiscriminationByMediumElectronRejection"),
+    againstElectronTight = cms.InputTag("hpsPFTauDiscriminationByTightElectronRejection"),
+    againstElectronMVA = cms.InputTag("hpsPFTauDiscriminationByMVAElectronRejection"),
+    againstMuonLoose = cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection"),
+    againstMuonMedium = cms.InputTag("hpsPFTauDiscriminationByMediumMuonRejection"),
+    againstMuonTight = cms.InputTag("hpsPFTauDiscriminationByTightMuonRejection")
+    )
+
+process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus)
+
+#Only an obvious and loose selection
+process.selectedNewTaus = cms.EDFilter("PATTauSelector",
+                                       src = cms.InputTag("patTaus"),
+                                       cut = cms.string("tauID('decayModeFinding')")
+                                       )
 
 
 #### Path ######################################################################
@@ -449,8 +491,10 @@ process.p = cms.Path(
 	+ process.trackingFailureFilter
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
+        + process.newTaus  
+        + process.selectedNewTaus 
 #	+ process.jetIDFailure
-#	+ process.dump
+#	+ process.dump  
 	+ process.analyze
 
        	)

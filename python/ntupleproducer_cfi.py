@@ -63,6 +63,9 @@ analyze = cms.EDFilter('NTupleProducer',
 	# Muons:
 	sel_minmupt       = cms.double(5.0),
 	sel_maxmueta      = cms.double(2.5),
+	# Taus:
+	sel_mintaupt      = cms.double(10.0),
+	sel_maxtaueta     = cms.double(2.5),
 	# Electrons:
 	sel_minelpt       = cms.double(5.0),
 	sel_maxeleta      = cms.double(2.5),
