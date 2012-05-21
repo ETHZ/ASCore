@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.17 $";
+string sjzbversion="$Revision: 1.70.2.18 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.18  2012/05/21 13:25:22  buchmann
+Updated object definitions and cleaned up: muon eta cut now at 2.4, adapted isolation for electrons and muons, using a cone of 0.4 for muons (still 0.3 for electrons), removed hpa specific cuts for muons (for candidate ecal&hcal deposits); two items are still up for discussion: muon dz and muon d0
+
 Revision 1.70.2.17  2012/05/18 16:04:55  buchmann
 Updated conversion rejection
 
@@ -1365,8 +1368,8 @@ void JZBAnalysis::Analyze() {
   float caloMETpx = fTR->RawMETpx;
   float caloMETpy = fTR->RawMETpy;
   
-  float pfMETpx = fTR->PFType1METpx;
-  float pfMETpy = fTR->PFType1METpy;
+  float pfMETpx = fTR->PFType1METpx; // type 1 corrected met
+  float pfMETpy = fTR->PFType1METpy; // type 1 corrected met
   
   float tcMETpx = fTR->TCMETpx;
   float tcMETpy = fTR->TCMETpy;
@@ -1774,7 +1777,7 @@ void JZBAnalysis::End(TFile *f){
   FullTree->Write();
 
   // Dump statistics
-  if (0) { // Put that to 0 if you are annoyed
+  if (1) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
