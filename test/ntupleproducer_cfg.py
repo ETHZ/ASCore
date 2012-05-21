@@ -52,7 +52,7 @@ options.register ('perEvtMvaWeights',
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
 #options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
 options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
-options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
+options.maxEvents = 100# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_52X_'+options.runon+'.root'
@@ -211,6 +211,15 @@ process.analyze.jets = (
                sel_maxeta = process.analyze.sel_maxjeta,
                corrections = cms.string('ak5CaloL2L3'),
                ), )
+
+process.analyze.leptons = (
+    cms.PSet( type = cms.string('tau'),
+              prefix = cms.string('Tau'),
+              tag = cms.InputTag('selectedNewTaus'),
+              sel_minpt = process.analyze.sel_minelpt,
+              sel_maxeta = process.analyze.sel_maxeleta,
+              maxnobjs = cms.uint32(20)
+              ),)
     
 # # Add residual correction for running on data
 # # taken from local sqlite file. see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011V2 

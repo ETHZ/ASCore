@@ -191,8 +191,6 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
   // Event Selection
   fMinMuPt        = iConfig.getParameter<double>("sel_minmupt");
   fMaxMuEta       = iConfig.getParameter<double>("sel_maxmueta");
-  fMinTauPt       = iConfig.getParameter<double>("sel_mintaupt");
-  fMaxTauEta      = iConfig.getParameter<double>("sel_maxtaueta");
   fMinElPt        = iConfig.getParameter<double>("sel_minelpt");
   fMaxElEta       = iConfig.getParameter<double>("sel_maxeleta");
   fMinCorJPt      = iConfig.getParameter<double>("sel_mincorjpt");
@@ -252,7 +250,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 
   // Create additional lepton fillers
   std::vector<edm::ParameterSet> lConfigs = iConfig.getParameter<std::vector<edm::ParameterSet> >("leptons");
-  for (size_t i=0; i<lConfigs.size(); ++i) {
+   for (size_t i=0; i<lConfigs.size(); ++i) {
     std::string type(lConfigs[i].getParameter<std::string>("type"));
     if ( type == "electron" ) 
       electronFillers.push_back( new PatElectronFiller(lConfigs[i], fIsRealData) );
@@ -260,7 +258,7 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
       muonFillers.push_back( new PatMuonFiller(lConfigs[i], fIsRealData) );
     else if ( type == "tau" ) 
       tauFillers.push_back( new PatTauFiller(lConfigs[i], fIsRealData) );
-  }
+   }
         
 
   // Get list of trigger paths to store the triggering object info. of
@@ -351,9 +349,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // Get the collections /////////////////////////////////////////////////////////
   Handle<View<Muon> > muons;
   iEvent.getByLabel(fMuonTag,muons); // 'muons'
-
-  Handle<View<pat::Tau> > taus;
-  iEvent.getByLabel("selectedNewTaus",taus); // 'taus'
 
   Handle<View<GsfElectron> > electrons;
   iEvent.getByLabel(fElectronTag, electrons); // 'gsfElectrons'
@@ -1145,110 +1140,6 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTGenJetInvE->push_back( gjet->invisibleEnergy() );
     }
     *fTNGenJets = jqi+1;
-  }
-
-
-  ////////////////////////////////////////////////////////
-  // Tau Variables:
-  int tauqi(0);  // Index of qualified taus
-  *fTNTausTot = 0; // Total number of taus
-  
-  // Get taus, order them by pt and apply selection
-  std::vector<OrderPair> tauOrdered;
-  int tauIndex(0);
-
-  for ( View<pat::Tau>::const_iterator Tit = taus->begin(); Tit != taus->end();
-        ++Tit,++tauIndex ) {
-    // Check if maximum number of taus is exceeded already:
-    if(tauqi >= gMaxNTaus){
-      edm::LogWarning("NTP") << "@SUB=analyze()"
-                             << "Maximum number of taus exceeded";
-      *fTMaxTauExceed = 1;
-      *fTGoodEvent = 1;
-      break;
-    }
-    // Tau preselection:
-    (*fTNTausTot)++;     // Count all
-    if(Tit->pt() < fMinTauPt) continue;
-    if(fabs(Tit->eta()) > fMaxTauEta) continue;
-    ++tauqi;          // Count how many we'll eventually store
-    tauOrdered.push_back(make_pair(tauIndex,Tit->pt()));
-  }  
-  std::sort(tauOrdered.begin(),tauOrdered.end(),indexComparator);
-  *fTNTaus = tauOrdered.size();
-  tauqi = 0;
-
-  // Dump tau properties in tree variables
-  for (std::vector<OrderPair>::const_iterator it = tauOrdered.begin();
-       it != tauOrdered.end(); ++it, ++tauqi ) {
-    int index = it->first;
-    const pat::Tau& tau = (*taus)[index];
-    Ref<View<pat::Tau> > tauRef(taus,index);
-
-    fTTauIsPFTau->push_back( tau.isPFTau() ? 1:0);//keep just for similarity with others, can be removed
-
-    fTTauPx->push_back( tau.px() );
-    fTTauPy->push_back( tau.py() );
-    fTTauPz->push_back( tau.pz() );
-    fTTauPt->push_back( tau.pt() );
-    fTTauEta->push_back( tau.eta() );
-    fTTauPhi->push_back( tau.phi() );
-    fTTauE->push_back( tau.energy() );
-    fTTauEt->push_back( tau.et() );
-    fTTauCharge->push_back( tau.charge() );
-  
-    fTTauDecayMode  ->push_back( tau.decayMode() );	
-    fTTauVz         ->push_back( tau.vz() );  
-    fTTauEmFraction ->push_back( tau.emFraction() );
-
-    fTTauJetPt      ->push_back( tau.pfJetRef().get()->pt() );
-    fTTauJetEta     ->push_back( tau.pfJetRef().get()->eta() );
-    fTTauJetPhi     ->push_back( tau.pfJetRef().get()->phi() );
-    fTTauJetMass    ->push_back( tau.pfJetRef().get()->mass() );
-
-    fTTauLeadingTkPt        ->push_back( (tau.leadPFChargedHadrCand())->pt() );  
-    fTTauLeadingNeuPt       ->push_back( (tau.leadPFNeutralCand().isNonnull() ? tau.leadPFNeutralCand()->pt() : 0.) );
-    fTTauLeadingTkHcalenergy->push_back( tau.leadPFChargedHadrCand()->hcalEnergy() );
-    fTTauLeadingTkEcalenergy->push_back( tau.leadPFChargedHadrCand()->ecalEnergy() );
-
-    fTTauNumChargedHadronsSignalCone->push_back( tau.signalPFChargedHadrCands().size() );
-    fTTauNumNeutralHadronsSignalCone->push_back( tau.signalPFNeutrHadrCands().size() );
-    fTTauNumPhotonsSignalCone->push_back( tau.signalPFGammaCands().size() );
-    fTTauNumParticlesSignalCone->push_back( tau.signalPFCands().size() );
-  
-    fTTauNumChargedHadronsIsoCone->push_back( tau.isolationPFChargedHadrCands().size() );
-    fTTauNumNeutralHadronsIsoCone->push_back( tau.isolationPFNeutrHadrCands().size() );
-    fTTauNumPhotonsIsolationCone->push_back( tau.isolationPFGammaCands().size() );
-    fTTauNumParticlesIsolationCone->push_back( tau.isolationPFCands().size() );
-    fTTauPtSumChargedParticlesIsoCone->push_back( tau.isolationPFChargedHadrCandsPtSum() );
-    fTTauPtSumPhotonsIsoCone->push_back( tau.isolationPFGammaCandsEtSum() );
-
-    fTTauDecayModeFinding->push_back( tau.tauID("decayModeFinding") );
-    fTTauVLooseIso       ->push_back( tau.tauID("byVLooseIsolation") );
-    fTTauLooseIso        ->push_back( tau.tauID("byLooseIsolation") );
-    fTTauTightIso        ->push_back( tau.tauID("byTightIsolation") );
-    fTTauMediumIso       ->push_back( tau.tauID("byMediumIsolation") );
-    fTTauVLooseChargedIso->push_back( tau.tauID("byVLooseChargedIsolation") );
-    fTTauLooseChargedIso ->push_back( tau.tauID("byLooseChargedIsolation") );
-    fTTauTightChargedIso ->push_back( tau.tauID("byTightChargedIsolation") );
-    fTTauMediumChargedIso->push_back( tau.tauID("byMediumChargedIsolation") );
-    fTTauVLooseIsoDBSumPtCorr->push_back( tau.tauID("byVLooseIsolationDBSumPtCorr") );
-    fTTauLooseIsoDBSumPtCorr ->push_back( tau.tauID("byLooseIsolationDBSumPtCorr") );
-    fTTauTightIsoDBSumPtCorr ->push_back( tau.tauID("byTightIsolationDBSumPtCorr") );
-    fTTauMediumIsoDBSumPtCorr->push_back( tau.tauID("byMediumIsolationDBSumPtCorr") );
-    fTTauVLooseCombinedIsoDBSumPtCorr->push_back( tau.tauID("byVLooseCombinedIsolationDBSumPtCorr") );
-    fTTauLooseCombinedIsoDBSumPtCorr ->push_back( tau.tauID("byLooseCombinedIsolationDBSumPtCorr") );
-    fTTauTightCombinedIsoDBSumPtCorr ->push_back( tau.tauID("byTightCombinedIsolationDBSumPtCorr") );
-    fTTauMediumCombinedIsoDBSumPtCorr->push_back( tau.tauID("byMediumCombinedIsolationDBSumPtCorr") );
- 
-    fTTauLooseElectronRejection ->push_back( tau.tauID("againstElectronLoose") );
-    fTTauTightElectronRejection ->push_back( tau.tauID("againstElectronTight") );
-    fTTauMediumElectronRejection->push_back( tau.tauID("againstElectronMedium") );
-    fTTauElectronMVARejection->push_back( tau.tauID("againstElectronMVA") );
-    
-    fTTauLooseMuonRejection->push_back( tau.tauID("againstMuonLoose") );
-    fTTauMediumMuonRejection->push_back( tau.tauID("againstMuonMedium") );
-    fTTauTightMuonRejection->push_back( tau.tauID("againstMuonTight") );
   }
 
   ////////////////////////////////////////////////////////
@@ -3570,7 +3461,6 @@ void NTupleProducer::declareProducts(void) {
   produces<int>("NCaloTowers");
   produces<int>("GoodEvent");
   produces<int>("MaxMuExceed");
-  produces<int>("MaxTauExceed");
   produces<int>("MaxElExceed");
   produces<int>("MaxJetExceed");
   produces<int>("MaxUncJetExceed");
@@ -3635,64 +3525,6 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("VrtxNtrks");
   produces<std::vector<float> >("VrtxSumPt");
   produces<std::vector<int> >("VrtxIsFake");
-
-  produces<int>("NTaus");
-  produces<int>("NTausTot");
-  produces<std::vector<int> >("TauIsPFTau");
-  produces<std::vector<float> >("TauPx");
-  produces<std::vector<float> >("TauPy");
-  produces<std::vector<float> >("TauPz");
-  produces<std::vector<float> >("TauPt");
-  produces<std::vector<float> >("TauE");
-  produces<std::vector<float> >("TauEt");
-  produces<std::vector<float> >("TauEta");
-  produces<std::vector<float> >("TauPhi");
-  produces<std::vector<int> >("TauCharge");
-  produces<std::vector<int> >("TauDecayMode");
-  produces<std::vector<float> >("TauVz"); 
-  produces<std::vector<float> >("TauEmFraction"); 
-  produces<std::vector<float> >("TauJetPt");
-  produces<std::vector<float> >("TauJetEta");
-  produces<std::vector<float> >("TauJetPhi");
-  produces<std::vector<float> >("TauJetMass");
-  produces<std::vector<float> >("TauLeadingTkPt");
-  produces<std::vector<float> >("TauLeadingNeuPt");
-  produces<std::vector<float> >("TauLeadingTkHcalenergy");
-  produces<std::vector<float> >("TauLeadingTkEcalenergy");
-  produces<std::vector<int> >("TauNumChargedHadronsSignalCone");
-  produces<std::vector<int> >("TauNumNeutralHadronsSignalCone");
-  produces<std::vector<int> >("TauNumPhotonsSignalCone");
-  produces<std::vector<int> >("TauNumParticlesSignalCone");
-  produces<std::vector<int> >("TauNumChargedHadronsIsoCone");
-  produces<std::vector<int> >("TauNumNeutralHadronsIsoCone");
-  produces<std::vector<int> >("TauNumPhotonsIsolationCone");
-  produces<std::vector<int> >("TauNumParticlesIsolationCone");
-  produces<std::vector<float> >("TauPtSumChargedParticlesIsoCone");
-  produces<std::vector<float> >("TauPtSumPhotonsIsoCone");
-  produces<std::vector<float> >("TauDecayModeFinding");
-  produces<std::vector<float> >("TauVLooseIso");
-  produces<std::vector<float> >("TauLooseIso");
-  produces<std::vector<float> >("TauTightIso");
-  produces<std::vector<float> >("TauMediumIso");
-  produces<std::vector<float> >("TauVLooseChargedIso");
-  produces<std::vector<float> >("TauLooseChargedIso");
-  produces<std::vector<float> >("TauTightChargedIso");
-  produces<std::vector<float> >("TauMediumChargedIso");
-  produces<std::vector<float> >("TauVLooseIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauLooseIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauTightIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauMediumIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauVLooseCombinedIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauLooseCombinedIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauTightCombinedIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauMediumCombinedIsoDBSumPtCorr");
-  produces<std::vector<float> >("TauLooseElectronRejection");
-  produces<std::vector<float> >("TauTightElectronRejection");
-  produces<std::vector<float> >("TauMediumElectronRejection");
-  produces<std::vector<float> >("TauElectronMVARejection");
-  produces<std::vector<float> >("TauLooseMuonRejection");
-  produces<std::vector<float> >("TauMediumMuonRejection");
-  produces<std::vector<float> >("TauTightMuonRejection");
 
   produces<int>("NMus");
   produces<int>("NMusTot");
@@ -4278,7 +4110,6 @@ void NTupleProducer::resetProducts( void ) {
   fTNCaloTowers.reset(new int(0));
   fTGoodEvent.reset(new int(0));
   fTMaxMuExceed.reset(new int(0));
-  fTMaxTauExceed.reset(new int(0));
   fTMaxElExceed.reset(new int(0));
   fTMaxJetExceed.reset(new int(0));
   fTMaxUncJetExceed.reset(new int(0));
@@ -4343,66 +4174,6 @@ void NTupleProducer::resetProducts( void ) {
   fTVrtxNtrks.reset(new std::vector<float> );
   fTVrtxSumPt.reset(new std::vector<float> );
   fTVrtxIsFake.reset(new std::vector<int> );
-
-
-
-  fTNTaus.reset(new int(0));
-  fTNTausTot.reset(new int(0));
-  fTTauIsPFTau.reset(new std::vector<int> );
-  fTTauPx.reset(new std::vector<float> );
-  fTTauPy.reset(new std::vector<float> );
-  fTTauPz.reset(new std::vector<float> );
-  fTTauPt.reset(new std::vector<float> );
-  fTTauE.reset(new std::vector<float> );
-  fTTauEt.reset(new std::vector<float> );
-  fTTauEta.reset(new std::vector<float> );
-  fTTauPhi.reset(new std::vector<float> );
-  fTTauCharge.reset(new std::vector<int> );
-  fTTauDecayMode.reset(new std::vector<int>);
-  fTTauVz.reset(new std::vector<float>); 
-  fTTauEmFraction.reset(new std::vector<float>); 
-  fTTauJetPt.reset(new std::vector<float>);
-  fTTauJetEta.reset(new std::vector<float>);
-  fTTauJetPhi.reset(new std::vector<float>);
-  fTTauJetMass.reset(new std::vector<float>);
-  fTTauLeadingTkPt.reset(new std::vector<float>);
-  fTTauLeadingNeuPt.reset(new std::vector<float>);
-  fTTauLeadingTkHcalenergy.reset(new std::vector<float>);
-  fTTauLeadingTkEcalenergy.reset(new std::vector<float>);
-  fTTauNumChargedHadronsSignalCone.reset(new std::vector<int>);
-  fTTauNumNeutralHadronsSignalCone.reset(new std::vector<int>);
-  fTTauNumPhotonsSignalCone.reset(new std::vector<int>);
-  fTTauNumParticlesSignalCone.reset(new std::vector<int>);
-  fTTauNumChargedHadronsIsoCone.reset(new std::vector<int>);
-  fTTauNumNeutralHadronsIsoCone.reset(new std::vector<int>);
-  fTTauNumPhotonsIsolationCone.reset(new std::vector<int>);
-  fTTauNumParticlesIsolationCone.reset(new std::vector<int>);
-  fTTauPtSumChargedParticlesIsoCone.reset(new std::vector<float>);
-  fTTauPtSumPhotonsIsoCone.reset(new std::vector<float>);
-  fTTauDecayModeFinding.reset(new std::vector<float>);
-  fTTauVLooseIso.reset(new std::vector<float>);
-  fTTauLooseIso.reset(new std::vector<float>);
-  fTTauTightIso.reset(new std::vector<float>);
-  fTTauMediumIso.reset(new std::vector<float>);
-  fTTauVLooseChargedIso.reset(new std::vector<float>);
-  fTTauLooseChargedIso.reset(new std::vector<float>);
-  fTTauTightChargedIso.reset(new std::vector<float>);
-  fTTauMediumChargedIso.reset(new std::vector<float>);
-  fTTauVLooseIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauLooseIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauTightIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauMediumIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauVLooseCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauLooseCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauTightCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauMediumCombinedIsoDBSumPtCorr.reset(new std::vector<float>);
-  fTTauLooseElectronRejection.reset(new std::vector<float>);
-  fTTauTightElectronRejection.reset(new std::vector<float>);
-  fTTauMediumElectronRejection.reset(new std::vector<float>);
-  fTTauElectronMVARejection.reset(new std::vector<float>);
-  fTTauLooseMuonRejection.reset(new std::vector<float>);
-  fTTauMediumMuonRejection.reset(new std::vector<float>);
-  fTTauTightMuonRejection.reset(new std::vector<float>);
 
   fTNMus.reset(new int(0));
   fTNMusTot.reset(new int(0));
@@ -5052,7 +4823,6 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTNCaloTowers, "NCaloTowers");
   event.put(fTGoodEvent, "GoodEvent");
   event.put(fTMaxMuExceed, "MaxMuExceed");
-  event.put(fTMaxTauExceed, "MaxTauExceed");
   event.put(fTMaxElExceed, "MaxElExceed");
   event.put(fTMaxJetExceed, "MaxJetExceed");
   event.put(fTMaxUncJetExceed, "MaxUncJetExceed");
@@ -5117,65 +4887,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTVrtxNtrks, "VrtxNtrks");
   event.put(fTVrtxSumPt, "VrtxSumPt");
   event.put(fTVrtxIsFake, "VrtxIsFake");
-
-  event.put(fTNTaus, "NTaus");
-  event.put(fTNTausTot, "NTausTot");
-  event.put(fTTauIsPFTau, "TauIsPFTau");
-  event.put(fTTauPx, "TauPx");
-  event.put(fTTauPy, "TauPy");
-  event.put(fTTauPz, "TauPz");
-  event.put(fTTauPt, "TauPt");
-  event.put(fTTauE, "TauE");
-  event.put(fTTauEt, "TauEt");
-  event.put(fTTauEta, "TauEta");
-  event.put(fTTauPhi, "TauPhi");
-  event.put(fTTauCharge, "TauCharge");
-  event.put(fTTauDecayMode,"TauDecayMode");
-  event.put(fTTauVz,"TauVz"); 
-  event.put(fTTauEmFraction,"TauEmFraction"); 
-  event.put(fTTauJetPt,"TauJetPt");
-  event.put(fTTauJetEta,"TauJetEta");
-  event.put(fTTauJetPhi,"TauJetPhi");
-  event.put(fTTauJetMass,"TauJetMass");
-  event.put(fTTauLeadingTkPt,"TauLeadingTkPt");
-  event.put(fTTauLeadingNeuPt,"TauLeadingNeuPt");
-  event.put(fTTauLeadingTkHcalenergy,"TauLeadingTkHcalenergy");
-  event.put(fTTauLeadingTkEcalenergy,"TauLeadingTkEcalenergy");
-  event.put(fTTauNumChargedHadronsSignalCone,"TauNumChargedHadronsSignalCone");
-  event.put(fTTauNumNeutralHadronsSignalCone,"TauNumNeutralHadronsSignalCone");
-  event.put(fTTauNumPhotonsSignalCone,"TauNumPhotonsSignalCone");
-  event.put(fTTauNumParticlesSignalCone,"TauNumParticlesSignalCone");
-  event.put(fTTauNumChargedHadronsIsoCone,"TauNumChargedHadronsIsoCone");
-  event.put(fTTauNumNeutralHadronsIsoCone,"TauNumNeutralHadronsIsoCone");
-  event.put(fTTauNumPhotonsIsolationCone,"TauNumPhotonsIsolationCone");
-  event.put(fTTauNumParticlesIsolationCone,"TauNumParticlesIsolationCone");
-  event.put(fTTauPtSumChargedParticlesIsoCone,"TauPtSumChargedParticlesIsoCone");
-  event.put(fTTauPtSumPhotonsIsoCone,"TauPtSumPhotonsIsoCone");
-  event.put(fTTauDecayModeFinding,"TauDecayModeFinding");
-  event.put(fTTauVLooseIso,"TauVLooseIso");
-  event.put(fTTauLooseIso,"TauLooseIso");
-  event.put(fTTauTightIso,"TauTightIso");
-  event.put(fTTauMediumIso,"TauMediumIso");
-  event.put(fTTauVLooseChargedIso,"TauVLooseChargedIso");
-  event.put(fTTauLooseChargedIso,"TauLooseChargedIso");
-  event.put(fTTauTightChargedIso,"TauTightChargedIso");
-  event.put(fTTauMediumChargedIso,"TauMediumChargedIso");
-  event.put(fTTauVLooseIsoDBSumPtCorr,"TauVLooseIsoDBSumPtCorr");
-  event.put(fTTauLooseIsoDBSumPtCorr,"TauLooseIsoDBSumPtCorr");
-  event.put(fTTauTightIsoDBSumPtCorr,"TauTightIsoDBSumPtCorr");
-  event.put(fTTauMediumIsoDBSumPtCorr,"TauMediumIsoDBSumPtCorr");
-  event.put(fTTauVLooseCombinedIsoDBSumPtCorr,"TauVLooseCombinedIsoDBSumPtCorr");
-  event.put(fTTauLooseCombinedIsoDBSumPtCorr,"TauLooseCombinedIsoDBSumPtCorr");
-  event.put(fTTauTightCombinedIsoDBSumPtCorr,"TauTightCombinedIsoDBSumPtCorr");
-  event.put(fTTauMediumCombinedIsoDBSumPtCorr,"TauMediumCombinedIsoDBSumPtCorr");
-  event.put(fTTauLooseElectronRejection,"TauLooseElectronRejection");
-  event.put(fTTauTightElectronRejection,"TauTightElectronRejection");
-  event.put(fTTauMediumElectronRejection,"TauMediumElectronRejection");
-  event.put(fTTauElectronMVARejection,"TauElectronMVARejection");
-  event.put(fTTauLooseMuonRejection,"TauLooseMuonRejection");
-  event.put(fTTauMediumMuonRejection,"TauMediumMuonRejection");
-  event.put(fTTauTightMuonRejection,"TauTightMuonRejection");
-
+ 
   event.put(fTNMus, "NMus");
   event.put(fTNMusTot, "NMusTot");
   event.put(fTNGMus, "NGMus");

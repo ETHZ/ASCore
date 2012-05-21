@@ -159,7 +159,6 @@ private:
 
   static const int gMaxNMus     = 30;
   static const int gMaxNEles    = 20;
-  static const int gMaxNTaus    = 30;
   static const int gMaxNJets    = 100;
   static const int gMaxNTrks    = 800;
   static const int gMaxNPhotons = 50;
@@ -224,8 +223,6 @@ private:
   // Selection cuts
   float fMinMuPt;
   float fMaxMuEta;
-  float fMinTauPt;
-  float fMaxTauEta;
   float fMinElPt;
   float fMaxElEta;
   float fMinCorJPt;
@@ -476,7 +473,6 @@ private:
   // Flags
   std::auto_ptr<int>  fTGoodEvent;         // 0 for good events, 1 for bad events                     
   std::auto_ptr<int>  fTMaxMuExceed;       // Found more than 20 muons in event (0 is good, 1 is bad) 
-  std::auto_ptr<int>  fTMaxTauExceed;      // Found more than 20 taus in event (0 is good, 1 is bad) 
   std::auto_ptr<int>  fTMaxElExceed;       // Found more than 20 electrons in event                   
   std::auto_ptr<int>  fTMaxJetExceed;      // Found more than 50 jets in event                        
   std::auto_ptr<int>  fTMaxUncJetExceed;   // Found more than 50 uncorrected jets in event            
@@ -523,69 +519,6 @@ private:
   std::auto_ptr<std::vector<float> >  fTGenJetEmE;
   std::auto_ptr<std::vector<float> >  fTGenJetHadE;
   std::auto_ptr<std::vector<float> >  fTGenJetInvE;
-
- 
-  // Taus:
-  std::auto_ptr<int>  fTNTaus;
-  std::auto_ptr<int>  fTNTausTot; // before preselection
-  std::auto_ptr<std::vector<int> >  fTTauIsPFTau;
-  std::auto_ptr<std::vector<float> >  fTTauPx;
-  std::auto_ptr<std::vector<float> >  fTTauPy;
-  std::auto_ptr<std::vector<float> >  fTTauPz;
-  std::auto_ptr<std::vector<float> >  fTTauPt;
-  std::auto_ptr<std::vector<float> >  fTTauE;
-  std::auto_ptr<std::vector<float> >  fTTauEt;
-  std::auto_ptr<std::vector<float> >  fTTauEta;
-  std::auto_ptr<std::vector<float> >  fTTauPhi;
-  std::auto_ptr<std::vector<int> >    fTTauCharge;
- 
-  std::auto_ptr<std::vector<int> >    fTTauDecayMode;
-  std::auto_ptr<std::vector<float> >  fTTauVz; 
-  std::auto_ptr<std::vector<float> >  fTTauEmFraction; 
-  std::auto_ptr<std::vector<float> >  fTTauJetPt;
-  std::auto_ptr<std::vector<float> >  fTTauJetEta;
-  std::auto_ptr<std::vector<float> >  fTTauJetPhi;
-  std::auto_ptr<std::vector<float> >  fTTauJetMass;
-  std::auto_ptr<std::vector<float> >  fTTauLeadingTkPt;
-  std::auto_ptr<std::vector<float> >  fTTauLeadingNeuPt;
-  std::auto_ptr<std::vector<float> >  fTTauLeadingTkHcalenergy;
-  std::auto_ptr<std::vector<float> >  fTTauLeadingTkEcalenergy;
-  std::auto_ptr<std::vector<int> >    fTTauNumChargedHadronsSignalCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumNeutralHadronsSignalCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumPhotonsSignalCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumParticlesSignalCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumChargedHadronsIsoCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumNeutralHadronsIsoCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumPhotonsIsolationCone;
-  std::auto_ptr<std::vector<int> >    fTTauNumParticlesIsolationCone;
-  std::auto_ptr<std::vector<float> >  fTTauPtSumChargedParticlesIsoCone;
-  std::auto_ptr<std::vector<float> >  fTTauPtSumPhotonsIsoCone;
-  std::auto_ptr<std::vector<float> >  fTTauDecayModeFinding;
-  std::auto_ptr<std::vector<float> >  fTTauVLooseIso;
-  std::auto_ptr<std::vector<float> >  fTTauLooseIso;
-  std::auto_ptr<std::vector<float> >  fTTauTightIso;
-  std::auto_ptr<std::vector<float> >  fTTauMediumIso;
-  std::auto_ptr<std::vector<float> >  fTTauVLooseChargedIso;
-  std::auto_ptr<std::vector<float> >  fTTauLooseChargedIso;
-  std::auto_ptr<std::vector<float> >  fTTauTightChargedIso;
-  std::auto_ptr<std::vector<float> >  fTTauMediumChargedIso;
-  std::auto_ptr<std::vector<float> >  fTTauVLooseIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauLooseIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauTightIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauMediumIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauVLooseCombinedIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauLooseCombinedIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauTightCombinedIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauMediumCombinedIsoDBSumPtCorr;
-  std::auto_ptr<std::vector<float> >  fTTauLooseElectronRejection;
-  std::auto_ptr<std::vector<float> >  fTTauTightElectronRejection;
-  std::auto_ptr<std::vector<float> >  fTTauMediumElectronRejection;
-  std::auto_ptr<std::vector<float> >  fTTauElectronMVARejection;
-  std::auto_ptr<std::vector<float> >  fTTauLooseMuonRejection;
-  std::auto_ptr<std::vector<float> >  fTTauMediumMuonRejection;
-  std::auto_ptr<std::vector<float> >  fTTauTightMuonRejection;
-
-
 
 
   // Muons:

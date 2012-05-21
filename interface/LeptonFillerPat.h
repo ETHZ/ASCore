@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5.2.4 2012/04/24 10:31:43 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.5 2012/05/02 09:48:10 fronga Exp $
 //
 //
 
@@ -85,6 +85,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTE;
   std::auto_ptr<std::vector<float> >  fTEt;
   std::auto_ptr<std::vector<int> >    fTCharge;
+  std::auto_ptr<std::vector<int> >    fTIsPFTau;
   std::auto_ptr<std::vector<int> >    fTDecayMode;
   std::auto_ptr<std::vector<float> >  fTVz; 
   std::auto_ptr<std::vector<float> >  fTEmFraction; 
@@ -125,8 +126,10 @@ private:
   std::auto_ptr<std::vector<float> >  fTMediumCombinedIsoDBSumPtCorr;
   std::auto_ptr<std::vector<float> >  fTLooseElectronRejection;
   std::auto_ptr<std::vector<float> >  fTTightElectronRejection;
-  std::auto_ptr<std::vector<float> >  fTMediumElectronRejection;
+  std::auto_ptr<std::vector<float> >  fTMediumElectronRejection;  
+  std::auto_ptr<std::vector<float> >  fTElectronMVARejection;
   std::auto_ptr<std::vector<float> >  fTLooseMuonRejection;
+  std::auto_ptr<std::vector<float> >  fTMediumMuonRejection;
   std::auto_ptr<std::vector<float> >  fTTightMuonRejection;
 
 
@@ -171,8 +174,9 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, c
 
   if      (leptontype == "electron")   setType(El);
   else if (leptontype == "muon")       setType(Mu);
-  else if (leptontype == "tau")        setType(Tau);  
-  else {
+  else if (leptontype == "tau") {       setType(Tau);
+    std::cout<<"TauaTauTau"<<std::endl;
+  }  else {
     setType(unknown);
     edm::LogWarning("NTP") << "!! Don't know Lepton Type !!" << leptontype;
   }
@@ -254,6 +258,7 @@ const std::vector<filler::PPair> LeptonFillerPat<LeptonType>::declareProducts(vo
   addProduct("PhotonIso",        typeid(*fTPhotonIso));
   
   if(fType == Tau){
+    addProduct("IsPFTau", typeid(*fTIsPFTau));
     addProduct("DecayMode", typeid(*fTDecayMode));
     addProduct("Vz",        typeid(*fTVz)); 
     addProduct("EmFraction",typeid(*fTEmFraction)); 
@@ -295,7 +300,9 @@ const std::vector<filler::PPair> LeptonFillerPat<LeptonType>::declareProducts(vo
     addProduct("LooseElectronRejection", typeid(*fTLooseElectronRejection));
     addProduct("TightElectronRejection", typeid(*fTTightElectronRejection));
     addProduct("MediumElectronRejection",typeid(*fTMediumElectronRejection));
+    addProduct("ElectronMVARejection",typeid(*fTElectronMVARejection));
     addProduct("LooseMuonRejection", typeid(*fTLooseMuonRejection));
+    addProduct("MediumMuonRejection", typeid(*fTMediumMuonRejection));
     addProduct("TightMuonRejection", typeid(*fTTightMuonRejection));
   }else if(fType == El){
     addProduct("ID95", typeid(*fTID95));
@@ -336,6 +343,7 @@ void LeptonFillerPat<LeptonType>::putProducts(edm::Event& e) {
   
   if(fType == Tau){
     e.put(fTDecayMode,fullName("DecayMode"));
+    e.put(fTIsPFTau,fullName("IsPFTau"));
     e.put(fTVz,fullName("Vz")); 
     e.put(fTEmFraction,fullName("EmFraction")); 
     e.put(fTJetPt,fullName("JetPt"));
@@ -376,7 +384,9 @@ void LeptonFillerPat<LeptonType>::putProducts(edm::Event& e) {
     e.put(fTLooseElectronRejection,  fullName("LooseElectronRejection"));
     e.put(fTTightElectronRejection,  fullName("TightElectronRejection"));
     e.put(fTMediumElectronRejection, fullName("MediumElectronRejection"));
+    e.put(fTElectronMVARejection, fullName("ElectronMVARejection"));
     e.put(fTLooseMuonRejection,      fullName("LooseMuonRejection"));
+    e.put(fTMediumMuonRejection,      fullName("MediumMuonRejection"));
     e.put(fTTightMuonRejection,      fullName("TightMuonRejection"));
   }else if(fType == El){
     e.put(fTID95,fullName("ID95"));
@@ -416,6 +426,7 @@ void LeptonFillerPat<LeptonType>::resetProducts(void) {
 
   if(fType == Tau){
     fTDecayMode.reset(new std::vector<int>);
+    fTIsPFTau.reset(new std::vector<int>);
     fTVz.reset(new std::vector<float>); 
     fTEmFraction.reset(new std::vector<float>); 
     fTJetPt.reset(new std::vector<float>);
@@ -456,7 +467,9 @@ void LeptonFillerPat<LeptonType>::resetProducts(void) {
     fTLooseElectronRejection.reset(new std::vector<float>);
     fTTightElectronRejection.reset(new std::vector<float>);
     fTMediumElectronRejection.reset(new std::vector<float>);
+    fTElectronMVARejection.reset(new std::vector<float>);
     fTLooseMuonRejection.reset(new std::vector<float>);
+    fTMediumMuonRejection.reset(new std::vector<float>);
     fTTightMuonRejection.reset(new std::vector<float>);
   }else if(fType == El){
     fTID95.reset(new std::vector<int>);
@@ -475,6 +488,7 @@ void LeptonFillerPat<LeptonType>::resetProducts(void) {
 template <>
 void LeptonFillerPat<pat::Tau>::getSpecific(const pat::Tau& lepton){
   // speficic for PFTaus
+  fTIsPFTau  ->push_back( lepton.isPFTau() );	
   fTDecayMode  ->push_back( lepton.decayMode() );	
   fTVz         ->push_back( lepton.vz() );  
   fTEmFraction ->push_back( lepton.emFraction() ); 
@@ -521,8 +535,10 @@ void LeptonFillerPat<pat::Tau>::getSpecific(const pat::Tau& lepton){
   fTLooseElectronRejection ->push_back( lepton.tauID("againstElectronLoose") );
   fTTightElectronRejection ->push_back( lepton.tauID("againstElectronTight") );
   fTMediumElectronRejection->push_back( lepton.tauID("againstElectronMedium") );
-    
+  fTElectronMVARejection->push_back( lepton.tauID("againstElectronMVA") );
+
   fTLooseMuonRejection->push_back( lepton.tauID("againstMuonLoose") );
+  fTMediumMuonRejection->push_back( lepton.tauID("againstMuonMedium") );
   fTTightMuonRejection->push_back( lepton.tauID("againstMuonTight") );
   return;
 }
