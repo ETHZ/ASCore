@@ -25,43 +25,7 @@ float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-
-$Log: JZBAnalysis.cc,v $
-Revision 1.70.2.20  2012/05/21 15:23:11  buchmann
-Restored 0.3 cone for muons; remove most pfjetgoodnum variables except for 30,40,50,60
-
-Revision 1.70.2.19  2012/05/21 14:19:42  buchmann
-switched statistics back on; added a comment regarind type1 corrected met (basically saying that we're using it)
-
-Revision 1.70.2.18  2012/05/21 13:25:22  buchmann
-Updated object definitions and cleaned up: muon eta cut now at 2.4, adapted isolation for electrons and muons, using a cone of 0.4 for muons (still 0.3 for electrons), removed hpa specific cuts for muons (for candidate ecal&hcal deposits); two items are still up for discussion: muon dz and muon d0
-
-Revision 1.70.2.17  2012/05/18 16:04:55  buchmann
-Updated conversion rejection
-
-Revision 1.70.2.15  2012/05/15 14:27:56  buchmann
-Updated ele definition (the egamma recommendation changed for dPhiIn in the endcap)
-
-Revision 1.70.2.14  2012/05/13 08:33:39  pablom
-Muon selection improvements.
-
-Revision 1.70.2.13  2012/05/11 16:05:40  buchmann
-removed a bit of (synch) verbosity
-
-Revision 1.70.2.12  2012/05/11 16:04:24  buchmann
-electron synchronization completed
-
-Revision 1.70.2.11  2012/05/11 07:56:27  pablom
-Correct use of deposits and isolation for muons.
-
-Revision 1.70.2.10  2012/05/09 15:05:22  buchmann
-Adapted electron selection (now corresponds to hpa one); added GetLeptonWeight function to be able to assign efficiency weights (including uncertainty)
-
-Revision 1.70.2.9  2012/05/09 10:43:17  pablom
-Add ecal deposits to muons and bug fix for electrons selections.
-
-Revision 1.70.2.8  2012/05/09 08:31:57  buchmann
-updated electron isolation (pf iso)
+$Id$
 */
 
 
@@ -150,15 +114,6 @@ public:
 
   int process;
 
-  int jetNum;
-  int goodJetNum;
-  float jetpt[jMax]; // jets in barrel + endcaps
-  float jeteta[jMax];
-  float jetphi[jMax];
-  float jetscale[jMax];
-  int jetID[jMax];
-
-
   int leptonNum; // store all leptons (reduntant for the 2 leptons that form the Z)
   float leptonPt[jMax]; 
   float leptonEta[jMax];
@@ -194,8 +149,7 @@ public:
   bool  pfJetGoodID[jMax];
   float bTagProbCSVBP[jMax];
   float bTagProbCSVMVA[jMax];
-
-
+  
   int pfJetGoodNumBtag;
   int pfJetGoodNumIDBtag;
   float pfJetGoodPtBtag[jMax];
@@ -207,15 +161,6 @@ public:
   int pfJetGoodNum50;
   int pfJetGoodNum60;
 
-
-  float recoilpt;
-  float dphiRecoilLep;
-  float vjetpt;
-  float vjeteta;
-  float vjetphi;
-  float recoilenergy;
-  float recoilphi;
-  float recoileta;
 
   float met[mettype_max];
   float metPhi[mettype_max];
@@ -385,16 +330,6 @@ void nanoEvent::reset()
   for(int i=0;i<100;i++) pdfW[i]=1.0;
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
-    jetpt[jCounter]=0; // jets in barrel + endcaps
-    jeteta[jCounter]=0;
-    jetphi[jCounter]=0;
-    jetscale[jCounter]=0;
-    jetID[jCounter]=0;
-  }
-  jetNum=0;
-  goodJetNum=0;
-
-  for(int jCounter=0;jCounter<jMax;jCounter++){
     leptonPt[jCounter]=0; 
     leptonEta[jCounter]=0;
     leptonPhi[jCounter]=0;
@@ -410,16 +345,6 @@ void nanoEvent::reset()
   } 
   leptonPairNum=0;
  
-  recoilpt=0;
-  dphiRecoilLep=0;
-  vjetpt=0;
-  vjeteta=0;
-  vjetphi=0;
-  recoilenergy=0;
-  recoilphi=0;
-  recoileta=0;
-
-    
   for(int metCounter=int(mettype_min);metCounter<int(mettype_max);metCounter++){
     met[metCounter]=0;
     metPhi[metCounter]=0;
@@ -587,8 +512,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,11);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",12,16);
- 
- 
+  
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
   addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",1,9);
@@ -600,14 +524,10 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",1,1);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",3,3);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",4,4);
-  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",7,8);  
+  addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL",7,8);
   addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 10);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL", 1, 10);
- 
-
- 
-  //	Util::SetStyle();	
-  //	setTDRStyle();	
+  
 }
 
 //________________________________________________________________________________________
@@ -721,14 +641,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("chid2",&nEvent.chid2,"chid2/I");
   myTree->Branch("process",&nEvent.process,"process/I");
 
-  myTree->Branch("jetNum",&nEvent.jetNum,"jetNum/I");
-  myTree->Branch("goodJetNum",&nEvent.goodJetNum,"goodJetNum/I");
-  myTree->Branch("jetID",nEvent.jetID,"jetID[jetNum]/I");
-  myTree->Branch("jetpt",nEvent.jetpt,"jetpt[jetNum]/F");
-  myTree->Branch("jeteta",nEvent.jeteta,"jeteta[jetNum]/F");
-  myTree->Branch("jetphi",nEvent.jetphi,"jetphi[jetNum]/F");
-  myTree->Branch("jetscale",nEvent.jetscale,"jetscale[jetNum]/F");
-
   myTree->Branch("leptonNum",&nEvent.leptonNum,"leptonNum/I");
   myTree->Branch("leptonPt",nEvent.leptonPt,"leptonPt[leptonNum]/F");
   myTree->Branch("leptonEta",nEvent.leptonEta,"leptonEta[leptonNum]/F");
@@ -740,16 +652,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("leptonPairMass",nEvent.leptonPairMass,"leptonPairMass[leptonPairNum]/F");
   myTree->Branch("leptonPairDphi",nEvent.leptonPairDphi,"leptonPairDphi[leptonPairNum]/F");
   myTree->Branch("leptonPairId",nEvent.leptonPairId,"leptonPairId[leptonPairNum]/I");
-
-  myTree->Branch("recoilpt",&nEvent.recoilpt,"recoilpt/F");
-  myTree->Branch("dphiRecoilLep",&nEvent.dphiRecoilLep,"dphiRecoilLep/F");
-  myTree->Branch("recoilphi",&nEvent.recoilphi,"recoilphi/F");
-  myTree->Branch("recoileta",&nEvent.recoileta,"recoileta/F");
-  myTree->Branch("recoilenergy",&nEvent.recoilenergy,"recoilenergy/F");
-
-  myTree->Branch("vjetpt",&nEvent.vjetpt,"vjetpt/F");
-  myTree->Branch("vjeteta",&nEvent.vjeteta,"vjeteta/F");
-  myTree->Branch("vjetphi",&nEvent.vjetphi,"vjetphi/F");
 
   myTree->Branch("met",nEvent.met,Form("met[%d]/F",int(mettype_max)));
   myTree->Branch("metPhi",nEvent.metPhi,Form("metPhi[%d]/F",int(mettype_max)));
@@ -795,7 +697,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodEtaBtag",nEvent.pfJetGoodEtaBtag,"pfJetGoodEtaBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodPhiBtag",nEvent.pfJetGoodPhiBtag,"pfJetGoodPhiBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodIDBtag", nEvent.pfJetGoodIDBtag,"pfJetGoodID[pfJetGoodNumBtag]/O");
-
   myTree->Branch("bTagProbCSVBP", nEvent.bTagProbCSVBP,"bTagProbCSVBP[pfJetGoodNum]/F");
   myTree->Branch("bTagProbCSVMVA", nEvent.bTagProbCSVMVA,"bTagProbCSVMVA[pfJetGoodNum]/F");
 
@@ -883,7 +784,6 @@ void JZBAnalysis::Begin(TFile *f){
   counters[MU].setName("Muons");
   counters[EL].setName("Electrons");
   counters[PJ].setName("PFJets");
-  counters[JE].setName("CaloJets");
 
   // Define counters (so we have them in the right order)
   counters[EV].fill("All events",0.);
@@ -1352,16 +1252,12 @@ void JZBAnalysis::Analyze() {
   // #--- construct different recoil models, initial the recoil vector will hold only the sum over the hard jets, only in the end we will add-up the lepton system
 
   // --- construct met vectors here
-  float caloMETpx = fTR->RawMETpx;
-  float caloMETpy = fTR->RawMETpy;
-  
   float pfMETpx = fTR->PFMETpx;
   float pfMETpy = fTR->PFMETpy;
   
   float tcMETpx = fTR->PFType1METpx;
   float tcMETpy = fTR->PFType1METpy;
   
-  TLorentzVector caloMETvector(caloMETpx,caloMETpy,0,0);
   TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
   TLorentzVector type1METvector(tcMETpx,tcMETpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
@@ -1452,16 +1348,15 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
         nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-        nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-        nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
-       
- 
+	nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+	nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
+        
         if(isJetID>0) {
-          nEvent.pfJetGoodNumID++;
-          if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumIDBtag++; 
-        }
+	  nEvent.pfJetGoodNumID++;
+	  if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumIDBtag++;
+	}
         nEvent.pfJetGoodNum++;
-        if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumBtag++; 
+	if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumBtag++;
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
@@ -1469,77 +1364,6 @@ void JZBAnalysis::Analyze() {
       if ( jpt>40. )  nEvent.pfJetGoodNum40++;
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
-    }
-    
-
-  // #-- Calo jet loop (only for reference)
-  TLorentzVector recoil(0,0,0,0); // different constructions of recoil model (under dev, need cleaning)    
-  nEvent.jetNum=0;        // total jet counting
-  nEvent.goodJetNum=0;    // Jets passing tighter pt cut
-  for(int i =0 ; i<fTR->NJets;i++) // CALO jet loop
-    {
-      counters[JE].fill("All Calo jets");
-      if(i==jMax) { cout<<"max Num was reached"<<endl; break; }
-	
-      float jpt  = fTR->CAJPt[i];
-      float jeta = fTR->CAJEta[i];
-      float jpx  = fTR->CAJPx[i];
-      float jpy  = fTR->CAJPy[i];
-      float jpz  = fTR->CAJPz[i];
-      float jenergy = fTR->CAJE[i];
-      float jesC    = fTR->CAJScale[i];
-      bool isJetID  = IsCustomJet(i);
-	
-      // Consider only Jets passing JetID
-      if (!isJetID) continue;
-      //FIXME: throw away event if good jet does not pass JetID?
-      counters[JE].fill("... pass jet ID");
-	
-      TLorentzVector aJet(jpx,jpy,jpz,jenergy);
-
-      // lepton-jet cleaning
-      if ( fFullCleaning_ ) { 
-        // Remove jet close to any lepton
-        bool isClean(true);
-        for ( size_t ilep = 0; ilep<sortedGoodLeptons.size(); ++ilep )
-          if ( aJet.DeltaR(sortedGoodLeptons[ilep].p)<DRmax) isClean=false;
-        if ( !isClean ) continue;
-        counters[JE].fill("... pass full lepton cleaning");
-      } else {
-        // Remove jet close to leptons from Z candidate
-        if(aJet.DeltaR(sortedGoodLeptons[PosLepton1].p)<DRmax) continue; 
-        counters[JE].fill("... pass lepton 1 veto");
-        if(aJet.DeltaR(sortedGoodLeptons[PosLepton2].p)<DRmax) continue;
-        counters[JE].fill("... pass lepton 2 veto");
-      }
-
-      // Acceptance cuts before we use this jet
-      if ( !(fabs(jeta)<3.0 && jpt>20.) ) continue;
-      counters[JE].fill("... |eta|<3.0 && pt>20.");
-	
-      recoil+=aJet;
-      
-      nEvent.jetpt[nEvent.jetNum]  = aJet.Pt();
-      nEvent.jeteta[nEvent.jetNum] = aJet.Eta();
-      nEvent.jetphi[nEvent.jetNum] = aJet.Phi();
-      nEvent.jetscale[nEvent.jetNum]  = jesC;
-      if(isJetID) nEvent.jetID[nEvent.jetNum] = 1;
-      
-      nEvent.jetNum = nEvent.jetNum + 1 ;
-      
-      if ( jpt>30 ) {
-        counters[JE].fill("... pt>30");
-        nEvent.goodJetNum++;
-      }
-    }
-  
-
-  int index;
-  if(recoil.Pt()!=0) // so far we had not added the lepton system in the recoil, so our recoil represents the sumJPt (ugly but it should work)
-    {
-      nEvent.vjetpt=recoil.Pt();  // vjet = vector sum of jets, vjetpt = sumJPt
-      nEvent.vjeteta=recoil.Eta();
-      nEvent.vjetphi=recoil.Phi();
     }
     
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
@@ -1552,39 +1376,33 @@ void JZBAnalysis::Analyze() {
   nEvent.met[PFMET]=fTR->PFMET;
   nEvent.met[SUMET]=fTR->SumEt;
 
-  TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
   TLorentzVector type1NoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
-  nEvent.metPhi[RAW]=caloMETvector.Phi();
+  nEvent.metPhi[RAW]=0.;//kicked! caloMETvector.Phi();
   nEvent.metPhi[DUM]=0.;
   nEvent.metPhi[TCMET]=type1METvector.Phi();
   nEvent.metPhi[MUJESCORRMET]=0.;
   nEvent.metPhi[PFMET]=pfMETvector.Phi();
   nEvent.metPhi[SUMET]=0.;
-    
-  // Remove electrons from MET
-  caloVector = -caloMETvector;
-  if ( sortedGoodLeptons[PosLepton1].type == 0 ) caloVector -= s1;
-  if ( sortedGoodLeptons[PosLepton2].type == 0 ) caloVector -= s2;
 
   // remove the leptons from PFMET and tcMET blublu
   pfNoCutsJetVector = -pfMETvector - s1 - s2;
   type1NoCutsJetVector = -type1METvector - s1 - s2;
 
   // #--- different versions of JZB
-  nEvent.dphi_sumJetVSZ[CALOJZB]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
-  nEvent.sumJetPt[CALOJZB]=caloVector.Pt();
-  nEvent.jzb[CALOJZB] = caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
+  nEvent.dphi_sumJetVSZ[CALOJZB]=0.; // kicked caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
+  nEvent.sumJetPt[CALOJZB]=0.; // kicked caloVector.Pt();
+  nEvent.jzb[CALOJZB] = 0.; //kicked caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
     
   nEvent.dphi_sumJetVSZ[PFJZB] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
   nEvent.sumJetPt[PFJZB] = pfNoCutsJetVector.Pt(); 
   nEvent.jzb[PFJZB] = pfNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with pfMET
   nEvent.sjzb[PFJZB] = GausRandom(nEvent.jzb[1]+1.3,7); // to be used with pfMET
 
-  nEvent.dphi_sumJetVSZ[RECOILJZB] = recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
-  nEvent.sumJetPt[RECOILJZB] = recoil.Pt(); 
-  nEvent.jzb[RECOILJZB] = recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
+  nEvent.dphi_sumJetVSZ[RECOILJZB] = 0.; // kicked recoil.DeltaPhi(s1+s2);  // recoil is not yet a recoil but the sumJPt, since the leptons will be added only later (ugly)
+  nEvent.sumJetPt[RECOILJZB] = 0.;//kicked recoil.Pt(); 
+  nEvent.jzb[RECOILJZB] = 0.;//kicked recoil.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])    
   nEvent.jzb[PFRECOILJZB] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
   nEvent.sumJetPt[PFRECOILJZB] = sumOfPFJets.Pt();
 
@@ -1594,17 +1412,7 @@ void JZBAnalysis::Analyze() {
 
   // --- recoil met and pf recoil met
   nEvent.met[PFRECOILMET] = (sumOfPFJets + s1 + s2).Pt(); 
-  nEvent.met[RECOILMET] = (recoil + s1 + s2).Pt();
-    
-  // ----------------------------------------
-  recoil+=s1+s2;   // now add also the leptons to the recoil! to form the complete recoil model
-
-  if(recoil.Pt()!=0)
-    {
-      nEvent.recoilpt=recoil.Pt();
-      nEvent.recoileta=recoil.Eta();
-      nEvent.recoilphi=recoil.Phi();
-    }
+  nEvent.met[RECOILMET] = 0.;//kicked (recoil + s1 + s2).Pt();
     
   // Statistics ///////////////////////////////////////
   string type("");
@@ -1680,10 +1488,8 @@ void JZBAnalysis::Analyze() {
   // Store minimum dphi between some mets and any kind of lepton
   for ( size_t i=0; i<sortedGoodLeptons.size(); ++i ) {
     TLorentzVector lp(sortedGoodLeptons[i].p);
-    if ( fabs(recoil.DeltaPhi(lp))<fabs(nEvent.dphiRecoilLep) ) nEvent.dphiRecoilLep = recoil.DeltaPhi(lp);
     if ( fabs(pfMETvector.DeltaPhi(lp))<fabs(nEvent.dphiMetLep[PFMET]) ) nEvent.dphiMetLep[PFMET] = pfMETvector.DeltaPhi(lp);
     if ( fabs((sumOfPFJets + s1 + s2).DeltaPhi(lp))< fabs(nEvent.dphiMetLep[PFRECOILMET]) ) nEvent.dphiMetLep[PFRECOILMET] = (sumOfPFJets + s1 + s2).DeltaPhi(lp);
-    if ( fabs((recoil + s1 + s2).DeltaPhi(lp)) < fabs(nEvent.dphiMetLep[RECOILMET]) ) nEvent.dphiMetLep[RECOILMET] = (recoil + s1 + s2).DeltaPhi(lp);
   }
 
   // Store minimum dphi between some mets and any good jet
@@ -1722,11 +1528,6 @@ void JZBAnalysis::Analyze() {
 
     nEvent.genMID1     = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenMID[i1]:fTR->ElGenMID[i1]); // WW study
     nEvent.genMID2     = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenMID[i2]:fTR->ElGenMID[i2]); // WW study
-
-    //// This won't work: the index is not correct!
-    //if(sortedGoodLeptons.size()>=3) {i3=sortedGoodLeptons[2].index;nEvent.genMID3 = fTR->GenLeptonMID[i3];} else nEvent.genMID3=-999; // WW study
-    //if(sortedGoodLeptons.size()>=4) {i4=sortedGoodLeptons[3].index;nEvent.genMID4 = fTR->GenLeptonMID[i4];} else nEvent.genMID4=-999; // WW study
-    //if(sortedGoodLeptons.size()>=5) {i5=sortedGoodLeptons[4].index;nEvent.genMID5 = fTR->GenLeptonMID[i5];} else nEvent.genMID5=-999; // WW study
 
     nEvent.genGMID1    = (sortedGoodLeptons[PosLepton1].type?fTR->MuGenGMID[i1]:fTR->ElGenGMID[i1]); // WW study
     nEvent.genGMID2    = (sortedGoodLeptons[PosLepton2].type?fTR->MuGenGMID[i2]:fTR->ElGenGMID[i2]); // WW study
