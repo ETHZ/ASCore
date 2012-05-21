@@ -362,7 +362,7 @@ def process(task, conf):
   value = nameOfFolder.rfind("/")
   taskName = nameOfFolder[value+1:len(nameOfFolder)] 
   os.system("mkdir -p " + taskName)
-#  os.system("mkdir -p ../" + taskName)
+  os.system("mkdir -p ../" + taskName)
 
   showMessage(str(NumberOfJobs) + " jobs with " + str(FilesPerJob) + " files each will be created")
   jobnumbercollection=[]
