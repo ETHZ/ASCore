@@ -10,7 +10,7 @@
 
 */
 //
-// $Id: LeptonFillerPat.h,v 1.5.2.5 2012/05/02 09:48:10 fronga Exp $
+// $Id: LeptonFillerPat.h,v 1.5.2.6 2012/05/21 17:14:37 paktinat Exp $
 //
 //
 
@@ -174,9 +174,8 @@ LeptonFillerPat<LeptonType>::LeptonFillerPat( const edm::ParameterSet& config, c
 
   if      (leptontype == "electron")   setType(El);
   else if (leptontype == "muon")       setType(Mu);
-  else if (leptontype == "tau") {       setType(Tau);
-    std::cout<<"TauaTauTau"<<std::endl;
-  }  else {
+  else if (leptontype == "tau")        setType(Tau);
+	  else {
     setType(unknown);
     edm::LogWarning("NTP") << "!! Don't know Lepton Type !!" << leptontype;
   }
