@@ -36,17 +36,15 @@ class JZBAnalysis : public UserAnalysisBase{
 public:
   JZBAnalysis(TreeReader *tr=NULL, std::string dataType="mc", bool fullCleaning=false, bool isModelScan=false, bool makeSmall=false, bool doGenInfo=false);
   virtual ~JZBAnalysis();
-  const bool IsCustomMu(const int);
   const bool IsCustomMu2012(const int);
-  const bool IsCustomEl(const int);
   const bool IsCustomEl2012(const int);
   const float EffArea(float); //Used for the calculation of Electron isolation
-  const bool IsCustomPfMu(const int, const int);
-  const bool IsCustomPfEl(const int, const int);
   const bool IsCustomJet(const int);
   const bool IsConvertedPhoton( const int eIndex );
   const bool passTriggers(std::vector<std::string>& triggerPaths);
   const float GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr);
+  float ElPFIso(int index);
+  float MuPFIso(int index);
 
   string outputFileName_; // public name of the output file name
 
