@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.20 $";
+string sjzbversion="$Revision: 1.70.2.22 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id$
+$Id: JZBAnalysis.cc,v 1.70.2.22 2012/05/21 16:47:21 buchmann Exp $
 */
 
 
@@ -183,6 +183,7 @@ public:
   float sumJetPt[jzbtype_max];
 
   float weight;
+  float weight3D;
   float weightEffDown;
   float weightEffUp;
   float Efficiencyweightonly;
@@ -190,6 +191,7 @@ public:
   float pdfW[100];
   float pdfWsum;
   float PUweight;
+  float PUweight3D;
   bool passed_triggers;
   int trigger_bit;
   float mGlu;
@@ -409,7 +411,9 @@ void nanoEvent::reset()
   }
 
   weight = 1.0;
+  weight3D = 1.0;
   PUweight = 1.0;
+  PUweight3D = 1.0;
   Efficiencyweightonly = 1.0;
   weightEffDown = 1.0;
   weightEffUp = 1.0;
@@ -711,6 +715,8 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
+  myTree->Branch("weight3D", &nEvent.weight3D,"weight3D/F");
+  myTree->Branch("PUweight3D",&nEvent.PUweight3D,"PUweight3D/F");
   myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
@@ -832,7 +838,7 @@ const bool JZBAnalysis::passTriggers( std::vector<std::string>& triggerPaths ) {
   }
 
   // Check if found unprescaled trigger...
-  assert(foundUnprescaled);
+//  assert(foundUnprescaled);
 
   return passed;
 
@@ -890,8 +896,10 @@ void JZBAnalysis::Analyze() {
 	nEvent.pdfWsum=fTR->pdfWsum; 
       } else {
 	//don't attempt to do PURW for model scans
-	nEvent.PUweight  = GetPUWeight(fTR->PUnumInteractions);
-	nEvent.weight    = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.PUweight   = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.weight     = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.PUweight3D = GetPUWeight3D(fTR->PUOOTnumInteractionsEarly,fTR->PUnumInteractions,fTR->PUOOTnumInteractionsLate);
+	nEvent.weight3D   = nEvent.PUweight3D;
       }
       
      // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
@@ -1179,6 +1187,7 @@ void JZBAnalysis::Analyze() {
         }
     }
 
+  
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
 
@@ -1622,6 +1631,11 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
 
 const float JZBAnalysis::GetLeptonWeight(int id1, float phi1, float eta1, int id2, float phi2, float eta2, float &EffErr) {
     //this function will become more sophisticated in the future (eta & phi based efficiency)
+
+  // FIXME: Need to update!
+  EffErr = 0.0;
+  return 1.0;
+  
     if(id1==id2&&id1==0) {
       //ee
       EffErr=0.01;
