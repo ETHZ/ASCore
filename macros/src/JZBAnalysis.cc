@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.15 $";
+string sjzbversion="$Revision: 1.70.2.17 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.17  2012/05/18 16:04:55  buchmann
+Updated conversion rejection
+
 Revision 1.70.2.15  2012/05/15 14:27:56  buchmann
 Updated ele definition (the egamma recommendation changed for dPhiIn in the endcap)
 
@@ -153,13 +156,6 @@ public:
   float leptonPhi[jMax];
   int leptonId[jMax];
   int leptonCharge[jMax];
-
-  int pfLeptonNum; // store all leptons (reduntant for the 2 leptons that form the Z)
-  float pfLeptonPt[jMax]; 
-  float pfLeptonEta[jMax];
-  float pfLeptonPhi[jMax];
-  int pfLeptonId[jMax];
-  int pfLeptonCharge[jMax];
 
   int leptonPairNum;
   int leptonPairId[jMax];
@@ -404,15 +400,6 @@ void nanoEvent::reset()
     leptonCharge[jCounter]=0;
   }
   leptonNum=0;
-
-  for(int jCounter=0;jCounter<jMax;jCounter++){
-    pfLeptonPt[jCounter]=0; 
-    pfLeptonEta[jCounter]=0;
-    pfLeptonPhi[jCounter]=0;
-    pfLeptonId[jCounter]=0;
-    pfLeptonCharge[jCounter]=0;
-  }
-  pfLeptonNum=0;
 
   for(int jCounter=0;jCounter<jMax;jCounter++){
     leptonPairMass[jCounter]=0;
@@ -749,13 +736,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("leptonPhi",nEvent.leptonPhi,"leptonPhi[leptonNum]/F");
   myTree->Branch("leptonId",nEvent.leptonId,"leptonId[leptonNum]/I");
   myTree->Branch("leptonCharge",nEvent.leptonCharge,"leptonCharge[leptonNum]/I");
-
-  myTree->Branch("pfLeptonNum",&nEvent.pfLeptonNum,"pfLeptonNum/I");
-  myTree->Branch("pfLeptonPt",nEvent.pfLeptonPt,"pfLeptonPt[pfLeptonNum]/F");
-  myTree->Branch("pfLeptonEta",nEvent.pfLeptonEta,"pfLeptonEta[pfLeptonNum]/F");
-  myTree->Branch("pfLeptonPhi",nEvent.pfLeptonPhi,"pfLeptonPhi[pfLeptonNum]/F");
-  myTree->Branch("pfLeptonId",nEvent.pfLeptonId,"pfLeptonId[pfLeptonNum]/I");
-  myTree->Branch("pfLeptonCharge",nEvent.pfLeptonCharge,"pfLeptonCharge[pfLeptonNum]/I");
 
   myTree->Branch("leptonPairNum",&nEvent.leptonPairNum,"leptonPairNum/I");
   myTree->Branch("leptonPairMass",nEvent.leptonPairMass,"leptonPairMass[leptonPairNum]/F");
@@ -1263,9 +1243,7 @@ void JZBAnalysis::Analyze() {
           float energy =  fTR->MuE[muIndex];
           TLorentzVector tmpVector(px,py,pz,energy);
           int tmpCharge = fTR->MuCharge[muIndex];
-          float muonIso = (fTR->MumuonPFIsoChHad03[muIndex] + std::max(0.0,
-                           fTR->MumuonPFIsoNHad03[muIndex]+fTR->MumuonPFIsoPhoton03[muIndex]-0.5*fTR->MuPfIsoR03SumPUPt[muIndex])
-                          )/fTR->MuPt[muIndex];
+          float muonIso = MuPFIso(muIndex);
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
@@ -1296,7 +1274,7 @@ void JZBAnalysis::Analyze() {
           int tmpCharge=fTR->ElCharge[elIndex];
           double pedestal=0.;
           if ( fabs(fTR->ElEta[elIndex]) < 1.479 ) pedestal = 1.0;
-          double pfIso = (fTR->ElPfIsoChHad03[elIndex] + std::max((float)0.0, fTR->ElPfIsoNeHad03[elIndex] + fTR->ElPfIsoPhoton03[elIndex] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[elIndex]))))/fTR->ElPt[elIndex];
+          double pfIso = ElPFIso(elIndex);
           lepton tmpLepton;
           tmpLepton.p = tmpVector;
           tmpLepton.charge = tmpCharge;
@@ -1311,33 +1289,6 @@ void JZBAnalysis::Analyze() {
         }
     }
 
-
-  
-  // #-- PF muon loop (just for comparison)
-  for(int muIndex=0;muIndex<fTR->PfMu3NObjs;muIndex++)
-    {
-      if ( nEvent.pfLeptonNum>=jMax ) break;
-      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfMu3Pt[muIndex];
-      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfMu3Eta[muIndex];
-      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfMu3Phi[muIndex];
-      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 13*fTR->PfMu3Charge[muIndex];
-      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfMu3Charge[muIndex];
-      nEvent.pfLeptonNum++;
-    }
-
-
-  // #-- PF electron loop (just for comparison)
-  for(int elIndex=0;elIndex<fTR->PfEl3NObjs;elIndex++)
-    {
-      if ( nEvent.pfLeptonNum>=jMax ) break;
-      nEvent.pfLeptonPt[nEvent.pfLeptonNum]     = fTR->PfEl3Pt[elIndex];
-      nEvent.pfLeptonEta[nEvent.pfLeptonNum]    = fTR->PfEl3Eta[elIndex];
-      nEvent.pfLeptonPhi[nEvent.pfLeptonNum]    = fTR->PfEl3Phi[elIndex];
-      nEvent.pfLeptonId[nEvent.pfLeptonNum]     = 11*fTR->PfEl3Charge[elIndex];
-      nEvent.pfLeptonCharge[nEvent.pfLeptonNum] = fTR->PfEl3Charge[elIndex];
-      nEvent.pfLeptonNum++;
-    }
-  
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
 
@@ -1414,8 +1365,8 @@ void JZBAnalysis::Analyze() {
   float caloMETpx = fTR->RawMETpx;
   float caloMETpy = fTR->RawMETpy;
   
-  float pfMETpx = fTR->PFMETpx;
-  float pfMETpy = fTR->PFMETpy;
+  float pfMETpx = fTR->PFType1METpx;
+  float pfMETpy = fTR->PFType1METpy;
   
   float tcMETpx = fTR->TCMETpx;
   float tcMETpy = fTR->TCMETpy;
@@ -1622,7 +1573,7 @@ void JZBAnalysis::Analyze() {
   nEvent.met[DUM]=0.; // Not there anymore: fTR->MuJESCorrMET;
   nEvent.met[TCMET]=fTR->TCMET;
   nEvent.met[MUJESCORRMET]=fTR->MuJESCorrMET;
-  nEvent.met[PFMET]=fTR->PFMET;
+  nEvent.met[PFMET]=fTR->PFType1MET;
   nEvent.met[SUMET]=fTR->SumEt;
 
   TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
@@ -1823,7 +1774,7 @@ void JZBAnalysis::End(TFile *f){
   FullTree->Write();
 
   // Dump statistics
-  if (1) { // Put that to 0 if you are annoyed
+  if (0) { // Put that to 0 if you are annoyed
     std::cout << setfill('=') << std::setw(70) << "" << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << setfill('-') << std::setw(70) << "" << setfill(' ') << std::endl;
@@ -1843,101 +1794,6 @@ std::string JZBAnalysis::any2string(T i)
   return buffer.str();
 }
 
-const bool JZBAnalysis::IsCustomPfMu(const int index, const int pftype){
-  //VERY TEMPORARY !!!!
-  // Basic muon cleaning and ID
-  // Acceptance cuts
-//  if (pftype==1 && !(fTR->PfMuPt[index] > 10) )       return false;
-  if (pftype==2 && !(fTR->PfMu2Pt[index] > 10) )       return false;
-  if (pftype==3 && !(fTR->PfMu3Pt[index] > 10) )       return false;
-  counters[MU].fill(" ... PF pt > 10");
-//  if (pftype==1 && !(fabs(fTR->PfMuEta[index])<2.4) ) return false;
-  if (pftype==2 && !(fabs(fTR->PfMu2Eta[index])<2.4) ) return false;
-  if (pftype==3 && !(fabs(fTR->PfMu3Eta[index])<2.4) ) return false;
-  counters[MU].fill(" ... PF |eta| < 2.4");
-
-  /*  // Quality cuts
-      if ( !fTR->fTR->PfMu3IsGMPT[index])        return false;
-      counters[MU].fill(" ... is global muon prompt tight");
-      if ( !fTR->MuIsGlobalMuon[index] )  return false;
-      counters[MU].fill(" ... is global muon");
-      if ( !fTR->MuIsTrackerMuon[index] ) return false;
-      counters[MU].fill(" ... is tracker muon");
-
-      // Hits
-      if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-      counters[MU].fill(" ... nTkHits >= 11");
-      if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-      counters[MU].fill(" ... nPxHits > 0");
-      if ( !(fTR->MuNMatches[index] > 1) )      return false;
-      counters[MU].fill(" ... nMatches > 1");
-
-      // Vertex compatibility
-      if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-      counters[MU].fill(" ... D0(pv) < 0.02");
-      if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-      counters[MU].fill(" ... DZ(pv) < 1.0");
-
-      // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-      double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
-      if ( !(hybridIso < 0.15) ) return false;
-      counters[MU].fill(" ... hybridIso < 0.15");
-
-      if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-      counters[MU].fill(" ... dpt/pt < 0.1");
-  */
-  return true;
-}
-
-
-const bool JZBAnalysis::IsCustomPfEl(const int index, const int pftype){
-  std::cout << "IF YOU USE THIS FUNCTION YOU NEED TO REVISE IT - PfElPt and other branches are no longer available" << std::endl;
-  // kinematic acceptance
-//  if(pftype==1&&!(fTR->PfElPt[index]>10) )return false;
-  if(pftype==2&&!(fTR->PfEl2Pt[index]>10) )return false;
-  if(pftype==3&&!(fTR->PfEl3Pt[index]>10) )return false;
-  counters[EL].fill(" ... PF pt > 10");
-//  if(pftype==1&&!(fabs(fTR->PfElEta[index]) < 2.4) ) return false;
-  if(pftype==2&&!(fabs(fTR->PfEl2Eta[index]) < 2.4) ) return false;
-  if(pftype==3&&!(fabs(fTR->PfEl3Eta[index]) < 2.4) ) return false;
-  counters[EL].fill(" ... PF |eta| < 2.4");
-//  if(pftype==1&&!((fTR->PfElID95[index]))) return false;
-//  if(pftype==2&&!((fTR->PfElID95[index]))) return false;
-//  if(pftype==3&&!((fTR->PfElID95[index]))) return false;
-  //if(!(fTR->PfElID80[index])) return false;
-  /*
-    if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-    counters[EL].fill(" ... missing inner hits <= 1");
-    if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-    counters[EL].fill(" ... D0(pv) < 0.04");
-    if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-    counters[EL].fill(" ... DZ(pv) < 1.0");
-
-    // Electron ID
-    int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-    if (elIDWP95!=7) return false;
-    counters[EL].fill(" ... passes WP95 ID");
-
-    // Flat isolation below 20 GeV (only for synch.)
-    double hybridIso = fTR->ElRelIso03[index]
-    *fTR->ElPt[index]/std::max((float)20.,fTR->ElPt[index]);
-    if ( !(hybridIso < 0.15) ) return false;  
-    counters[EL].fill(" ... hybridIso < 0.15");
-
-    //   // Other choices for electron ID
-    //   if ( fTR->ElIDsimpleWP90relIso[index]!=7 ) return false;
-    //   counters[EL].fill("... passes WP90 ID");
-    //   if ( fTR->ElIDsimpleWP80relIso[index]!=7 ) return false;
-    //   counters[EL].fill("... passes WP80 ID");
-    //   if ( !(fTR->ElIDMva[index]>0.4) ) return false;
-    //   counters[EL].fill("... MVA>0.4");
-    */
-  return true;
-
-	
-}
-
-
 const bool JZBAnalysis::IsCustomMu2012(const int index){
 
   // Basic muon cleaning and ID
@@ -1945,8 +1801,8 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   // Acceptance cuts
   if (!(fTR->MuPt[index] > 10) )       return false;
   counters[MU].fill(" ... pt > 10");
-  if (!(fabs(fTR->MuEta[index])<2.5) ) return false;
-  counters[MU].fill(" ... |eta| < 2.5");
+  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
+  counters[MU].fill(" ... |eta| < 2.4");
 
 
   // Quality cuts
@@ -1971,72 +1827,18 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
 
 
   // Vertex compatibility
-  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
+  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false; //still open
   counters[MU].fill(" ... D0(pv) < 0.02");
   //HPA recommendation not POG
-  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false;
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false; //still open
   counters[MU].fill(" ... DZ(pv) < 0.1");
 
 
-  //HPA specifics
-  if ( !(fTR->MuEem[index] < 4) ) return false;
-  counters[MU].fill(" ... MuEm < 4");
-  if ( !(fTR->MuEhad[index] < 6) ) return false;
-  counters[MU].fill(" ... MuHad < 6");
-
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-  double Iso = (fTR->MumuonPFIsoChHad03[index] + std::max(0.0,
-                fTR->MumuonPFIsoNHad03[index]+fTR->MumuonPFIsoPhoton03[index]-0.5*fTR->MuPfIsoR03SumPUPt[index])
-                )/fTR->MuPt[index];
+  double Iso = MuPFIso(index);
   if ( !(Iso < 0.1) ) return false;
   counters[MU].fill(" ... Iso < 0.1");
 
-
-  return true;
-}
-
-
-
-
-const bool JZBAnalysis::IsCustomMu(const int index){
-
-  // Basic muon cleaning and ID
-
-  // Acceptance cuts
-  if (!(fTR->MuPt[index] > 10) )       return false;
-  counters[MU].fill(" ... pt > 10");
-  if (!(fabs(fTR->MuEta[index])<2.4) ) return false;
-  counters[MU].fill(" ... |eta| < 2.4");
-
-  // Quality cuts
-  if ( !fTR->MuIsGMPT[index] )        return false;
-  counters[MU].fill(" ... is global muon prompt tight");
-  if ( !fTR->MuIsGlobalMuon[index] )  return false;
-  counters[MU].fill(" ... is global muon");
-  if ( !fTR->MuIsTrackerMuon[index] ) return false;
-  counters[MU].fill(" ... is tracker muon");
-  
-  // Hits
-  if ( !(fTR->MuNTkHits[index] >= 11) )     return false;
-  counters[MU].fill(" ... nTkHits >= 11");
-  if ( !(fTR->MuNPxHits[index] > 0) )       return false;
-  counters[MU].fill(" ... nPxHits > 0");
-  if ( !(fTR->MuNMatches[index] > 1) )      return false;
-  counters[MU].fill(" ... nMatches > 1");
-
-  // Vertex compatibility
-  if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false;
-  counters[MU].fill(" ... D0(pv) < 0.02");
-  if ( !(fabs(fTR->MuDzPV[index]) < 1.0 ) ) return false;
-  counters[MU].fill(" ... DZ(pv) < 1.0");
-
-  // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
-  double hybridIso = fTR->MuRelIso03[index]*fTR->MuPt[index]/std::max((float)20.,fTR->MuPt[index]);
-  if ( !(hybridIso < 0.15) ) return false;
-  counters[MU].fill(" ... hybridIso < 0.15");
-
-  if ( !(fTR->MuPtE[index]/fTR->MuPt[index] < 0.1) ) return false;
-  counters[MU].fill(" ... dpt/pt < 0.1");
 
   return true;
 }
@@ -2072,6 +1874,18 @@ const float JZBAnalysis::EffArea(float abseta) {
   return 0.13;
 }
 
+float JZBAnalysis::MuPFIso(int index){
+   double neutral = (fTR->MuPfIsoR04NeHad[index] + fTR->MuPfIsoR04Photon[index] - 0.5*fTR->MuPfIsoR04SumPUPt[index] );
+   float iso = ( fTR->MuPfIsoR04ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
+   return iso;
+}
+
+float JZBAnalysis::ElPFIso(int index){
+   double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
+   double rhocorr = fTR->RhoForIso * EffArea(fTR->ElEta[index]);
+   double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
+   return iso;
+}
 
 const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
@@ -2119,8 +1933,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
 //fbrem : fTElNBrems (reco::GsfElectron::fbrem())  --> no cut?
   
-  float pfIso = (fTR->ElPfIsoChHad03[index] + std::max((float)0.0, fTR->ElPfIsoNeHad03[index] + fTR->ElPfIsoPhoton03[index] - fTR->RhoForIso * EffArea(fabs(fTR->ElEta[index]))))/fTR->ElPt[index];
-
+  float pfIso = ElPFIso(index);
   if ( fabs(fTR->ElEta[index]) < 1.479 || fTR->ElPt[index]>20.0) { // Barrel
     if ( !((pfIso  < 0.15) ) ) return false;
   } else {
@@ -2131,67 +1944,6 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
   return true;
 }
-
-const bool JZBAnalysis::IsCustomEl(const int index){
-
-  // kinematic acceptance
-  if(!(fTR->ElPt[index]>10) )return false;
-  counters[EL].fill(" ... pt > 10");
-  if ( !(fTR->ElESuperClusterOverP[index]*fTR->ElTrkMomAtVtx[index]>10) ) return false;
-  counters[EL].fill(" ... SC pt > 10");
-  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
-  counters[EL].fill(" ... |eta| < 2.5");
-  if ( !(fTR->ElNumberOfMissingInnerHits[index] <= 1 ) ) return false;
-  counters[EL].fill(" ... missing inner hits <= 1");
-  if ( !(fabs(fTR->ElD0PV[index]) < 0.04) ) return false;
-  counters[EL].fill(" ... D0(pv) < 0.04");
-  if ( !(fabs(fTR->ElDzPV[index]) < 1.0 ) ) return false;
-  counters[EL].fill(" ... DZ(pv) < 1.0");
-
-  // Electron ID
-  // int elIDWP95 = fTR->ElIDsimpleWP95relIso[index];
-  // if (elIDWP95!=7) return false;
-  // counters[EL].fill(" ... passes WP95 ID");
-
-  //  Electron ID (exclusively)
-  int elIDWP90 = fTR->ElIDsimpleWP90relIso[index];
-  if (!(elIDWP90&1)) return false;
-  counters[EL].fill(" ... passes WP90 ID");
-
-  // Additional requirements for trigger consistency
-  // See https://twiki.cern.ch/twiki/bin/view/CMS/EgammaWorkingPointsv3
-  // WP90 cuts are in comments
-  if ( fabs(fTR->ElEta[index]) < 1.479 ) { // Barrel
-     if ( !(fTR->ElHcalOverEcal[index]<0.1) ) return false;    // 0.12
-     if ( !(fTR->ElSigmaIetaIeta[index]<0.011) ) return false; // 0.01
-     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.15) ) return false; // 0.8
-     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.007
-  } else { // Endcap
-     if ( !(fTR->ElHcalOverEcal[index]<0.075) ) return false;  // 0.05
-     if ( !(fTR->ElSigmaIetaIeta[index]<0.031) ) return false; // 0.03
-     if ( !(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index])<0.1) ) return false;  // 0.7
-     if ( !(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index])<0.01) ) return false; // 0.009
-  }
-  counters[EL].fill(" ... passes additional electron ID cuts");
-
-  // Compute isolation separately (corresponds to WP95 iso)
-  double pedestal = 0.;
-  if ( fabs(fTR->ElEta[index]) < 1.479 ) pedestal = 1.0;
-  double iso = fTR->ElDR03TkSumPt[index]+std::max(fTR->ElDR03EcalRecHitSumEt[index]-pedestal,0.)+fTR->ElDR03HcalTowerSumEt[index];
-  double hybridIso = iso/fTR->ElPt[index]; // Ditched the flat iso below 20GeV (irrelevant anyway)
-  if ( !(hybridIso < 0.15) ) return false;
-  counters[EL].fill(" ... hybridIso < 0.15");
-
-  //  Conversion rejection (NOT FOR NOW)
-//  if ( IsConvertedPhoton(index) ) return false;
-//  counters[EL].fill(" ... passes conversion rejection");
-
-  return true;
-
-	
-}
-
-
 
 // Check if electron is from photon conversion
 const bool JZBAnalysis::IsConvertedPhoton( const int eIndex ) {
