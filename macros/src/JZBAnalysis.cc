@@ -18,7 +18,7 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.18 $";
+string sjzbversion="$Revision: 1.70.2.19 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
@@ -27,6 +27,9 @@ float secondLeptonPtCut = 10.0;
 /*
 
 $Log: JZBAnalysis.cc,v $
+Revision 1.70.2.19  2012/05/21 14:19:42  buchmann
+switched statistics back on; added a comment regarind type1 corrected met (basically saying that we're using it)
+
 Revision 1.70.2.18  2012/05/21 13:25:22  buchmann
 Updated object definitions and cleaned up: muon eta cut now at 2.4, adapted isolation for electrons and muons, using a cone of 0.4 for muons (still 0.3 for electrons), removed hpa specific cuts for muons (for candidate ecal&hcal deposits); two items are still up for discussion: muon dz and muon d0
 
@@ -182,10 +185,6 @@ public:
   int pfJetGoodNumID;
   int pfJetGoodNump1sigma;
   int pfJetGoodNumn1sigma;
-  int pfJetGoodNumEta2p4;
-  int pfJetGoodNumEta2p0;
-  int pfJetGoodNumEta1p4;
-  int pfJetGoodNumEta1p2;
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
@@ -195,18 +194,9 @@ public:
   float bTagProbSHighEff[jMax];
   float bTagProbSHighPur[jMax];
 
-  int pfJetGoodNum60;
-  int pfJetGoodNum55;
-  int pfJetGoodNum50;
-  int pfJetGoodNum45;
   int pfJetGoodNum40;
-  int pfJetGoodNum35;
-  int pfJetGoodNum33;
-  int pfJetGoodNum315;
-  int pfJetGoodNum285;
-  int pfJetGoodNum27;
-  int pfJetGoodNum25;
-  int pfJetGoodNum20;
+  int pfJetGoodNum50;
+  int pfJetGoodNum60;
 
 
   float recoilpt;
@@ -461,22 +451,9 @@ void nanoEvent::reset()
   pfJetGoodNumID=0;
   pfJetGoodNump1sigma=0;
   pfJetGoodNumn1sigma=0;
-  pfJetGoodNumEta2p4=0;
-  pfJetGoodNumEta2p0=0;
-  pfJetGoodNumEta1p4=0;
-  pfJetGoodNumEta1p2=0;
 
-  pfJetGoodNum20=0;
-  pfJetGoodNum25=0;
-  pfJetGoodNum27=0;
-  pfJetGoodNum285=0;
-  pfJetGoodNum315=0;
-  pfJetGoodNum33=0;
-  pfJetGoodNum35=0;
   pfJetGoodNum40=0;
-  pfJetGoodNum45=0;
   pfJetGoodNum50=0;
-  pfJetGoodNum55=0;
   pfJetGoodNum60=0;
 
   eventNum=0;
@@ -788,10 +765,6 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
   myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
   myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
-  myTree->Branch("pfJetGoodNumEta2p4",&nEvent.pfJetGoodNumEta2p4,"pfJetGoodNumEta2p4/I");
-  myTree->Branch("pfJetGoodNumEta2p0",&nEvent.pfJetGoodNumEta2p0,"pfJetGoodNumEta2p0/I");
-  myTree->Branch("pfJetGoodNumEta1p4",&nEvent.pfJetGoodNumEta1p4,"pfJetGoodNumEta1p4/I");
-  myTree->Branch("pfJetGoodNumEta1p2",&nEvent.pfJetGoodNumEta1p2,"pfJetGoodNumEta1p2/I");
 
   myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
@@ -803,17 +776,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("bTagProbSHighEff", nEvent.bTagProbSHighEff,"bTagProbSHighEff[pfJetGoodNum]/F");
   myTree->Branch("bTagProbSHighPur", nEvent.bTagProbSHighPur,"bTagProbSHighPur[pfJetGoodNum]/F");
 
-  myTree->Branch("pfJetGoodNum20",&nEvent.pfJetGoodNum20,"pfJetGoodNum20/I");
-  myTree->Branch("pfJetGoodNum25",&nEvent.pfJetGoodNum25,"pfJetGoodNum25/I");
-  myTree->Branch("pfJetGoodNum27",&nEvent.pfJetGoodNum27,"pfJetGoodNum27/I");
-  myTree->Branch("pfJetGoodNum285",&nEvent.pfJetGoodNum285,"pfJetGoodNum285/I");
-  myTree->Branch("pfJetGoodNum315",&nEvent.pfJetGoodNum315,"pfJetGoodNum315/I");
-  myTree->Branch("pfJetGoodNum33",&nEvent.pfJetGoodNum33,"pfJetGoodNum33/I");
-  myTree->Branch("pfJetGoodNum35",&nEvent.pfJetGoodNum35,"pfJetGoodNum35/I");
   myTree->Branch("pfJetGoodNum40",&nEvent.pfJetGoodNum40,"pfJetGoodNum40/I");
-  myTree->Branch("pfJetGoodNum45",&nEvent.pfJetGoodNum45,"pfJetGoodNum45/I");
   myTree->Branch("pfJetGoodNum50",&nEvent.pfJetGoodNum50,"pfJetGoodNum50/I");
-  myTree->Branch("pfJetGoodNum55",&nEvent.pfJetGoodNum55,"pfJetGoodNum55/I");
   myTree->Branch("pfJetGoodNum60",&nEvent.pfJetGoodNum60,"pfJetGoodNum60/I");
 
   myTree->Branch("jzb",nEvent.jzb,Form("jzb[%d]/F",int(jzbtype_max)));
@@ -1368,25 +1332,21 @@ void JZBAnalysis::Analyze() {
   float caloMETpx = fTR->RawMETpx;
   float caloMETpy = fTR->RawMETpy;
   
-  float pfMETpx = fTR->PFType1METpx; // type 1 corrected met
-  float pfMETpy = fTR->PFType1METpy; // type 1 corrected met
+  float pfMETpx = fTR->PFMETpx;
+  float pfMETpy = fTR->PFMETpy;
   
-  float tcMETpx = fTR->TCMETpx;
-  float tcMETpy = fTR->TCMETpy;
+  float tcMETpx = fTR->PFType1METpx;
+  float tcMETpy = fTR->PFType1METpy;
   
   TLorentzVector caloMETvector(caloMETpx,caloMETpy,0,0);
   TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
-  TLorentzVector tcMETvector(tcMETpx,tcMETpy,0,0);
+  TLorentzVector type1METvector(tcMETpx,tcMETpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
   nEvent.pfJetNum=0;
   nEvent.pfJetGoodNum=0;
-  nEvent.pfJetGoodNum20=0;
-  nEvent.pfJetGoodNum25=0;
-  nEvent.pfJetGoodNum27=0;
-  nEvent.pfJetGoodNum285=0;
-  nEvent.pfJetGoodNum315=0;
-  nEvent.pfJetGoodNum33=0;
-  nEvent.pfJetGoodNum35=0;
+  nEvent.pfJetGoodNum40=0;
+  nEvent.pfJetGoodNum50=0;
+  nEvent.pfJetGoodNum60=0;
   
   // #--- PF jet loop (this is what we use)
   vector<lepton> pfGoodJets;
@@ -1476,25 +1436,12 @@ void JZBAnalysis::Analyze() {
         
         if(isJetID>0) nEvent.pfJetGoodNumID++;
         nEvent.pfJetGoodNum++;
-        if (abs(jeta)<2.4) nEvent.pfJetGoodNumEta2p4++;
-        if (abs(jeta)<2.0) nEvent.pfJetGoodNumEta2p0++;
-        if (abs(jeta)<1.4) nEvent.pfJetGoodNumEta1p4++;
-        if (abs(jeta)<1.2) nEvent.pfJetGoodNumEta1p2++;
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
 
-      if ( jpt>20. )  nEvent.pfJetGoodNum20++;
-      if ( jpt>25. )  nEvent.pfJetGoodNum25++;
-      if ( jpt>27. )  nEvent.pfJetGoodNum27++;
-      if ( jpt>28.5 ) nEvent.pfJetGoodNum285++;
-      if ( jpt>31.5 ) nEvent.pfJetGoodNum315++;
-      if ( jpt>33. )  nEvent.pfJetGoodNum33++;
-      if ( jpt>35. )  nEvent.pfJetGoodNum35++;
       if ( jpt>40. )  nEvent.pfJetGoodNum40++;
-      if ( jpt>45. )  nEvent.pfJetGoodNum45++;
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
-      if ( jpt>55. )  nEvent.pfJetGoodNum55++;
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
     }
     
@@ -1574,18 +1521,18 @@ void JZBAnalysis::Analyze() {
 
   nEvent.met[RAW]=fTR->RawMET;
   nEvent.met[DUM]=0.; // Not there anymore: fTR->MuJESCorrMET;
-  nEvent.met[TCMET]=fTR->TCMET;
+  nEvent.met[TCMET]=fTR->PFType1MET;
   nEvent.met[MUJESCORRMET]=fTR->MuJESCorrMET;
-  nEvent.met[PFMET]=fTR->PFType1MET;
+  nEvent.met[PFMET]=fTR->PFMET;
   nEvent.met[SUMET]=fTR->SumEt;
 
   TLorentzVector caloVector(0,0,0,0); // for constructing SumJPt from raw calomet
   TLorentzVector pfJetVector(0,0,0,0); // for constructing SumJPt from pf jets, as Pablo
   TLorentzVector pfNoCutsJetVector(0,0,0,0); // for constructing SumJPt from pfmet (unclustered), as Kostas
-  TLorentzVector tcNoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
+  TLorentzVector type1NoCutsJetVector(0,0,0,0); // for constructing SumJPt from tcmet (unclustered), new
   nEvent.metPhi[RAW]=caloMETvector.Phi();
   nEvent.metPhi[DUM]=0.;
-  nEvent.metPhi[TCMET]=tcMETvector.Phi();
+  nEvent.metPhi[TCMET]=type1METvector.Phi();
   nEvent.metPhi[MUJESCORRMET]=0.;
   nEvent.metPhi[PFMET]=pfMETvector.Phi();
   nEvent.metPhi[SUMET]=0.;
@@ -1597,7 +1544,7 @@ void JZBAnalysis::Analyze() {
 
   // remove the leptons from PFMET and tcMET blublu
   pfNoCutsJetVector = -pfMETvector - s1 - s2;
-  tcNoCutsJetVector = -tcMETvector - s1 - s2;
+  type1NoCutsJetVector = -type1METvector - s1 - s2;
 
   // #--- different versions of JZB
   nEvent.dphi_sumJetVSZ[CALOJZB]=caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
@@ -1615,9 +1562,9 @@ void JZBAnalysis::Analyze() {
   nEvent.jzb[PFRECOILJZB] = sumOfPFJets.Pt() - (s1+s2).Pt(); // to be used recoil met (recoilpt[0])
   nEvent.sumJetPt[PFRECOILJZB] = sumOfPFJets.Pt();
 
-  nEvent.dphi_sumJetVSZ[TCJZB] = tcNoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
-  nEvent.sumJetPt[TCJZB] = tcNoCutsJetVector.Pt(); 
-  nEvent.jzb[TCJZB] = tcNoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
+  nEvent.dphi_sumJetVSZ[TCJZB] = type1NoCutsJetVector.DeltaPhi(s1+s2); // tcJZB
+  nEvent.sumJetPt[TCJZB] = type1NoCutsJetVector.Pt(); 
+  nEvent.jzb[TCJZB] = type1NoCutsJetVector.Pt() - (s1+s2).Pt(); // to be used with tcMET
 
   // --- recoil met and pf recoil met
   nEvent.met[PFRECOILMET] = (sumOfPFJets + s1 + s2).Pt(); 
@@ -1699,8 +1646,8 @@ void JZBAnalysis::Analyze() {
   nEvent.dphiZs2 = (s1+s2).DeltaPhi(s2);
   nEvent.dphiMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(pfMETvector);
   nEvent.dphiMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(pfMETvector);
-  nEvent.dphitcMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(tcMETvector);
-  nEvent.dphitcMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(tcMETvector);
+  nEvent.dphitcMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(type1METvector);
+  nEvent.dphitcMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(type1METvector);
   nEvent.dphipfRecoilMet1 = sortedGoodLeptons[PosLepton1].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
   nEvent.dphipfRecoilMet2 = sortedGoodLeptons[PosLepton2].p.DeltaPhi(-sumOfPFJets - s1 - s2); // pf recoil met
     
@@ -1878,8 +1825,8 @@ const float JZBAnalysis::EffArea(float abseta) {
 }
 
 float JZBAnalysis::MuPFIso(int index){
-   double neutral = (fTR->MuPfIsoR04NeHad[index] + fTR->MuPfIsoR04Photon[index] - 0.5*fTR->MuPfIsoR04SumPUPt[index] );
-   float iso = ( fTR->MuPfIsoR04ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
+   double neutral = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] );
+   float iso = ( fTR->MuPfIsoR03ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
    return iso;
 }
 
