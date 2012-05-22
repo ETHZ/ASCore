@@ -302,10 +302,10 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuPt[index] < 5)          return false;
     if(fabs(fTR->MuEta[index]) > 2.4) return false;
 
-    if(fTR->MuNChi2[index] > 10)   return false;
-    if(fTR->MuNSiLayers[index] < 5) return false;
-    if(fTR->MuNPxHits[index] < 0)  return false;
-    if(fTR->MuNMuHits[index] < 1)  return false;
+    if(fTR->MuNChi2[index] > 10)    return false;
+    if(fTR->MuNSiLayers[index] < 6) return false;
+    if(fTR->MuNPxHits[index] < 1)   return false;
+    if(fTR->MuNMuHits[index] < 2)   return false;
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
     if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;
@@ -397,7 +397,11 @@ bool UserAnalysisBase::IsGoodElId_LooseWP(int index){
         if(fTR->ElHcalOverEcal             [index] > 0.10 ) return false;	
     }
 
-	if(fabs(1/fTR->ElCaloEnergy[index] - fTR->ElESuperClusterOverP[index]/fTR->ElCaloEnergy[index]) > 0.05 ) return false;
+    if(fabs(1/fTR->ElCaloEnergy[index] - fTR->ElESuperClusterOverP[index]/fTR->ElCaloEnergy[index]) > 0.05 ) return false;
+    
+    if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
+    if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
+
     // WP80 conv. rejection
     if(ElPassesConvRej(index) == false) return false;
     return true;
@@ -422,6 +426,9 @@ bool UserAnalysisBase::IsGoodElId_MediumWP(int index){
     // not applied     if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
     // not applied     return false;
     // not applied }
+
+    if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
+    if(fabs(fTR->ElDzPV[index]) > 0.10) return false;
 
     // WP80 conv. rejection
     if(ElPassesConvRej(index) == false) return false;
@@ -467,12 +474,14 @@ bool UserAnalysisBase::IsLooseEl(int index){
 
     // MARC: what is this? if(!fTR->ElEcalDriven[index]) return false;
 	
-    // Loose identification criteria: WP90
-    if(!IsGoodElId_LooseWP(index)) return false;
+    // Loose identification criteria: 
+    //   if(!IsGoodElId_LooseWP(index)) return false;
+    
+    // Requiring VETO WP: no further requirements need to be applied.
 
     // Loose isolation criteria
-    if( fabs(fTR->ElEta[index]) <= 1.479 && ElPFIso(index) > 1.0 ) return false;
-    if( fabs(fTR->ElEta[index]) >  1.479 && ElPFIso(index) > 0.6 ) return false;
+    if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
+    if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
 
     return true;
 }
