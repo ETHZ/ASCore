@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.23 $";
+string sjzbversion="$Revision: 1.70.2.24 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.23 2012/05/21 16:55:02 fronga Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.24 2012/05/22 10:07:45 buchmann Exp $
 */
 
 
@@ -695,6 +695,7 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("pfJetGoodNum",&nEvent.pfJetGoodNum,"pfJetGoodNum/I");
   myTree->Branch("pfJetGoodNumBtag",&nEvent.pfJetGoodNumBtag,"pfJetGoodNumBtag/I");
+  myTree->Branch("pfJetGoodNumIDBtag",&nEvent.pfJetGoodNumIDBtag,"pfJetGoodNumIDBtag/I");
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
   myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
   myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
@@ -1368,15 +1369,15 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
         nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-	nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
+	    nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+	    nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
         
         if(isJetID>0) {
-	  nEvent.pfJetGoodNumID++;
-	  if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumIDBtag++;
-	}
+	        nEvent.pfJetGoodNumID++;
+	        if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumIDBtag++;
+	    }
+	    if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumBtag++;
         nEvent.pfJetGoodNum++;
-	if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumBtag++;
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
