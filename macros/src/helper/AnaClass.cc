@@ -2797,3 +2797,28 @@ TString AnaClass::printRatio(const char* var, TH1D* h, double x1, double x2, dou
 	return result;
 }
 
+TH2D* AnaClass::mirrorHisto(TH2D * histo){ //small funtion that mirrors the upper left values of a symmetric TH2D onto the lower right.
+    TH2D* newHisto = (TH2D *)histo->Clone();
+    int nbins = histo->GetNbinsX();
+    for (int xbin=1; xbin<=nbins; xbin++){
+        for (int ybin=1; ybin<=nbins; ybin++){
+            if (ybin >= xbin) continue;
+            newHisto->SetBinContent(xbin, ybin, histo->GetBinContent(xbin, ybin) + histo->GetBinContent(ybin, xbin));
+            newHisto->SetBinContent(ybin, xbin, 0);
+        }
+    }
+    return newHisto;
+}
+
+void AnaClass::useNiceColorPalette( Int_t NCont ) {
+    const Int_t NRGBs = 5;
+    Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+    Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+    Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+}
+
+
+
