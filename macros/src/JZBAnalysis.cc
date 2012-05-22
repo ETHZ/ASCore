@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.24 $";
+string sjzbversion="$Revision: 1.70.2.25 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.24 2012/05/22 10:07:45 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.25 2012/05/22 13:14:17 buchmann Exp $
 */
 
 
@@ -391,6 +391,8 @@ void nanoEvent::reset()
 
   pfJetGoodNum=0;
   pfJetGoodNumID=0;
+  pfJetGoodNumBtag=0;
+  pfJetGoodNumIDBtag=0;
   pfJetGoodNump1sigma=0;
   pfJetGoodNumn1sigma=0;
   pfJetGoodNum40p1sigma=0;
