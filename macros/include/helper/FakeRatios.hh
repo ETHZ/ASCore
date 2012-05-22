@@ -8,6 +8,10 @@
 
 using namespace std;
 
+class TGraphAsymmErrors;
+class TH1D;
+
+
 class FakeRatios {
 	
 public:
@@ -17,6 +21,10 @@ public:
 	inline void setNToyMCs(int n){fNToyMCs = n;};
 	inline void setVerbose(int n){fVerbose = n;};
 	inline void setAddESyst(float e){fAddESyst = e;};
+	inline void setIsMC(bool b){fIsMC = b;};
+	inline void setNGen(long n){fNGen = n;};
+
+	enum gTLCat { TT, TL, LT, LL };
 
 	//_____________________________________________________________________________
 	// Input
@@ -128,14 +136,26 @@ public:
 
 	float getESystFromToys2(float, float, float, float, float, float, float, float, float, float, float, float, float(FakeRatios::*)(float, float, float, float, float, float, float, float));
 
+	// Event by event weights
+	float getWpp(gTLCat, float, float, float, float);
+	float getWpf(gTLCat, float, float, float, float);
+	float getWfp(gTLCat, float, float, float, float);
+	float getWff(gTLCat, float, float, float, float);
+
 	// Central place to fix how to handle statistical errors
 	float getEStat2(float);
+	TGraphAsymmErrors* getGraphPoissonErrors( TH1D* histo, float nSigma=1., const std::string& xErrType="0" );
 	inline float getEStat(float N){return sqrt(getEStat2(N));};
 
 private:
 	int fVerbose; // default 0
 	int fNToyMCs; // default 100
 	// Additional relative systematic error on predictions (added in quadrature), default 0.
+	
+	bool fIsMC; // default false
+	long fNGen; // number of generated events, only used if fIsMC is true
+	// Switches between different handlings of statistical errors
+	
 	float fAddESyst;
 
 	float fMMNtl[3]; // tt, tl, ll

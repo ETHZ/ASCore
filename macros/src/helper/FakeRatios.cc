@@ -13,10 +13,14 @@
 #include "helper/FakeRatios.hh"
 #include "TMath.h"
 #include "TRandom3.h"
+#include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
+#include "TH1D.h"
+#include "RooHistError.h"
 
 using namespace std;
 
-FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100), fAddESyst(0.0) {
+FakeRatios::FakeRatios() : fVerbose(0), fNToyMCs(100), fAddESyst(0.0), fIsMC(false), fNGen(0) {
 	// Initialize arrays to avoid segfaults
 	fMMNtl[0] = -1.; fMMNtl[1] = -1.; fMMNtl[2] = -1.; 
 	fEENtl[0] = -1.; fEENtl[1] = -1.; fEENtl[2] = -1.; 
@@ -659,8 +663,57 @@ float FakeRatios::getESystFromToys2(float Ntt, float Ntl, float Nlt, float Nll, 
 }
 
 //____________________________________________________________________________________
+// Event by event weights
+float FakeRatios::getWpp(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = p1*p2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(f1-1.)*(f2-1.);
+	if(cat == TL) return lambda*(f1-1.)* f2;
+	if(cat == LT) return lambda* f1*    (f2-1.);
+	if(cat == LL) return lambda* f1*     f2;
+	return 0.;
+}
+float FakeRatios::getWpf(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = p1*f2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(f1-1.)*(1.-p2);
+	if(cat == TL) return lambda*(1.-f1)*    p2;
+	if(cat == LT) return lambda* f1*    (1.-p2);
+	if(cat == LL) return lambda* f1*  (-1.)*p2;
+	return 0.;
+}
+float FakeRatios::getWfp(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = f1*p2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(1.-p1)*(f2-1.);
+	if(cat == TL) return lambda*(1.-p1)* f2;
+	if(cat == LT) return lambda*    p1 *(f2-1.)*(-1.);
+	if(cat == LL) return lambda*    p1 * f2    *(-1.);
+	return 0.;
+}
+float FakeRatios::getWff(gTLCat cat, float f1, float f2, float p1, float p2){
+	// float lambda = 1./((f1-p1)*(f2-p2));
+	float lambda = f1*f2/((f1-p1)*(f2-p2));
+	if(cat == TT) return lambda*(1.-p1)*(1.-p2);
+	if(cat == TL) return lambda*(1.-p1)*    p2 *(-1.);
+	if(cat == LT) return lambda*    p1 *(1.-p2)*(-1.);
+	if(cat == LL) return lambda*    p1 *    p2;
+	return 0.;
+}
+
+//____________________________________________________________________________________
 // This is the central place to fix how to calculate statistical errors
 float FakeRatios::getEStat2(float N){
+	if(fIsMC && fNGen > 0){
+		// If n passed of ngen generated, what is upper limit
+		// on number of events passing?
+		TEfficiency *eff = new TEfficiency();
+		float upper = eff->ClopperPearson(fNGen, N, 0.68, true);
+		float delta = upper - float(N)/float(fNGen);
+		delete eff;
+		return delta * float(fNGen);
+	}	
+	
 	if(N > 3.) return N;
 	// Get these limits from TMath::ChisquaredQuantile() according to formulas
 	// 32.51a and 32.51b in the PDG:
@@ -671,5 +724,41 @@ float FakeRatios::getEStat2(float N){
 	
 	// Always just return the upper one (will always be larger)
 	return ((up-N)*(up-N));
+}
+
+TGraphAsymmErrors* FakeRatios::getGraphPoissonErrors(TH1D* histo, float nSigma, const std::string& xErrType){
+	TGraphAsymmErrors* graph = new TGraphAsymmErrors(0);
+
+	for(unsigned iBin=1; iBin<(histo->GetXaxis()->GetNbins()+1); ++iBin){
+
+		int y; // these are data histograms, so y has to be integer
+		double x, xerr, yerrplus, yerrminus;
+
+		x = histo->GetBinCenter(iBin);
+		if( xErrType=="0" )
+			xerr = 0.;
+		else if( xErrType=="binWidth" )
+			xerr = histo->GetBinWidth(iBin)/2.;
+		else if( xErrType=="sqrt12" )
+			xerr = histo->GetBinWidth(iBin)/sqrt(12.);
+		else {
+			std::cout << "Unkown xErrType '" << xErrType << "'. Setting to bin width." << std::endl;
+			xerr = histo->GetBinWidth(iBin);
+		}
+		y = (int)histo->GetBinContent(iBin);
+
+		double ym, yp;
+		RooHistError::instance().getPoissonInterval(y,ym,yp,nSigma);
+
+		yerrplus = yp - y;
+		yerrminus = y - ym;
+
+		int thisPoint = graph->GetN();
+		graph->SetPoint( thisPoint, x, y );
+		graph->SetPointError( thisPoint, xerr, xerr, yerrminus, yerrplus );
+
+	}
+
+	return graph;
 }
 
