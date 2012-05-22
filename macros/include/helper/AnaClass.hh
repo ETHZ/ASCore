@@ -24,6 +24,7 @@
 #include "THStack.h"
 #include "TCanvas.h"
 #include "TTree.h"
+#include "TColor.h"
 #include "TCut.h"
 #include "TTreeFormula.h"
 #include "TStyle.h"
@@ -153,6 +154,8 @@ public:
 	virtual TString printTailFraction(const char* var, TH1D* h, double frac);
 	virtual TString printAverage(const char* var, TH1D* h);
 	virtual TString printRatio(const char* var, TH1D* h, double x1, double x2, double y1, double y2);
+	virtual TH2D* mirrorHisto(TH2D *);
+	virtual void useNiceColorPalette( Int_t NCont = 255);
 /*****************************************************************************
 ##################| Variables |###############################################
 *****************************************************************************/
