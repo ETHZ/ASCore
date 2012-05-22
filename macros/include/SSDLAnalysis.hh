@@ -128,8 +128,8 @@ private:
 
 	float fTpfMET;
 	float fTpfMETphi;
-	float fTpfMETT1;
-	float fTpfMETT1phi;
+	float fTpfMETType1;
+	float fTpfMETType1phi;
 	
 	// Muon properties
 	int   fTnqmus;
