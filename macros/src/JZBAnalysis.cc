@@ -1,6 +1,6 @@
 #include "helper/Utilities.hh"
 #include "JZBAnalysis.hh"
-#include "TF1.h"
+#include "TH1.h"
 #include <time.h>
 #include <TRandom.h>
 #include "TF1.h"
@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.22 $";
+string sjzbversion="$Revision: 1.70.2.23 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.22 2012/05/21 16:47:21 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.23 2012/05/21 16:55:02 fronga Exp $
 */
 
 
@@ -143,6 +143,10 @@ public:
   int pfJetGoodNumID;
   int pfJetGoodNump1sigma;
   int pfJetGoodNumn1sigma;
+  int pfJetGoodNum40p1sigma;
+  int pfJetGoodNum40n1sigma;
+  int pfJetGoodNum50p1sigma;
+  int pfJetGoodNum50n1sigma;
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
@@ -389,6 +393,10 @@ void nanoEvent::reset()
   pfJetGoodNumID=0;
   pfJetGoodNump1sigma=0;
   pfJetGoodNumn1sigma=0;
+  pfJetGoodNum40p1sigma=0;
+  pfJetGoodNum40n1sigma=0;
+  pfJetGoodNum50p1sigma=0;
+  pfJetGoodNum50n1sigma=0;
 
   pfJetGoodNumBtag=0;
   pfJetGoodNum40=0;
@@ -476,8 +484,8 @@ void nanoEvent::reset()
 
 
 TTree *myTree;
-TTree *FullTree;
 TTree *myInfo;
+TH1F *weight_histo;
 
 nanoEvent nEvent;
 
@@ -571,8 +579,7 @@ void JZBAnalysis::Begin(TFile *f){
   myInfo->Fill();
   myInfo->Write();
 
-  FullTree = new TTree("Allevents","Allevents");
-  FullTree->Branch("is_data",&nEvent.is_data,"is_data/O");
+  weight_histo = new TH1F("weight_histo","weight_histo",1,0,2);
   
   myTree = new TTree("events","events");
 
@@ -691,6 +698,10 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodNumID",&nEvent.pfJetGoodNumID,"pfJetGoodNumID/I");
   myTree->Branch("pfJetGoodNump1sigma",&nEvent.pfJetGoodNump1sigma,"pfJetGoodNump1sigma/I");
   myTree->Branch("pfJetGoodNumn1sigma",&nEvent.pfJetGoodNumn1sigma,"pfJetGoodNumn1sigma/I");
+  myTree->Branch("pfJetGoodNum40p1sigma",&nEvent.pfJetGoodNum40p1sigma,"pfJetGoodNum40p1sigma/I");
+  myTree->Branch("pfJetGoodNum40n1sigma",&nEvent.pfJetGoodNum40n1sigma,"pfJetGoodNum40n1sigma/I");
+  myTree->Branch("pfJetGoodNum50p1sigma",&nEvent.pfJetGoodNum50p1sigma,"pfJetGoodNum50p1sigma/I");
+  myTree->Branch("pfJetGoodNum50n1sigma",&nEvent.pfJetGoodNum50n1sigma,"pfJetGoodNum50n1sigma/I");
 
   myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
@@ -872,7 +883,6 @@ void JZBAnalysis::Analyze() {
   nEvent.runNum    = fTR->Run;
   nEvent.lumi      = fTR->LumiSection;
   nEvent.totEvents = fTR->GetEntries();
-  FullTree->Fill();
 
 
   if(fDataType_ == "mc") // only do this for MC; for data nEvent.reset() has already set both weights to 1 
@@ -900,6 +910,7 @@ void JZBAnalysis::Analyze() {
 	nEvent.weight     = GetPUWeight(fTR->PUnumInteractions);
 	nEvent.PUweight3D = GetPUWeight3D(fTR->PUOOTnumInteractionsEarly,fTR->PUnumInteractions,fTR->PUOOTnumInteractionsLate);
 	nEvent.weight3D   = nEvent.PUweight3D;
+	weight_histo->Fill(1,nEvent.PUweight3D);
       }
       
      // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
@@ -1369,6 +1380,10 @@ void JZBAnalysis::Analyze() {
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
       if ( jpt*(jesC-unc)/jesC>30 )  nEvent.pfJetGoodNumn1sigma++;
+      if ( jpt*(jesC+unc)/jesC>40 )  nEvent.pfJetGoodNum40p1sigma++;
+      if ( jpt*(jesC-unc)/jesC>40 )  nEvent.pfJetGoodNum40n1sigma++;
+      if ( jpt*(jesC+unc)/jesC>50 )  nEvent.pfJetGoodNum50p1sigma++;
+      if ( jpt*(jesC-unc)/jesC>50 )  nEvent.pfJetGoodNum50n1sigma++;
 
       if ( jpt>40. )  nEvent.pfJetGoodNum40++;
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
@@ -1557,7 +1572,7 @@ void JZBAnalysis::End(TFile *f){
   f->cd();	
 
   myTree->Write();
-  FullTree->Write();
+  weight_histo->Write();
 
   // Dump statistics
   if (1) { // Put that to 0 if you are annoyed
