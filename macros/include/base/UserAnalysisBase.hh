@@ -78,14 +78,19 @@ public:
     virtual bool IsTightMu(int);
     virtual bool IsLooseMu(int);
     virtual bool IsLooseNoTightMu(int);
+	virtual float MuPFIso(int);
+	virtual float MuRadIso(int);
 
     // Electron Selectors
     virtual bool IsGoodBasicEl(int);
-    virtual bool IsGoodElId_WP80(int);
-    virtual bool IsGoodElId_WP90(int);
-    virtual bool ElPassesWP80_ConvRej(int);
+    virtual bool IsGoodElId_MediumWP(int);
+    virtual bool IsGoodElId_LooseWP(int);
+    virtual bool ElPassesConvRej(int);
     virtual bool IsLooseEl(int);
     virtual float relElIso(int);
+    virtual float ElPFIso(int);
+    virtual float ElRadIso(int);
+	virtual float Aeff(float);
 
     // Photon Selectors
     virtual bool IsGoodBasicPho(int);
@@ -119,8 +124,9 @@ public:
 
     // Put all JES-related stuff between precompiler flags
     FactorizedJetCorrector *fJetCorrector;
-    JetCorrectionUncertainty *jecUnc;
+    JetCorrectionUncertainty *fJECUnc;
     virtual float GetJetPtNoResidual(int);
+	virtual float GetJECUncert(float pt, float eta);
 
 private:
 

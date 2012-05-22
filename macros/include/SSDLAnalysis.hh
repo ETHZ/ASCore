@@ -53,6 +53,9 @@ public:
 	bool IsTightMuon(int, int);
 	bool IsTightEle(int, int);
 	
+	int JetPartonMatch(int);
+	int GenJetMatch(int);
+	
 	double corrMuIso(int);
 	double corrElIso(int);
 	
@@ -64,6 +67,8 @@ public:
 	};
 
 private:
+	TH1F *fHEvCount;
+	
 	bool fDoFillEffTree;
 	
 	Monitor fCounter;
@@ -75,9 +80,12 @@ private:
 	
 	static TString gBaseDir;
 	
+	JetCorrectionUncertainty *fJetCorrUnc;
+	
 	TTree* fAnalysisTree;
 	TH2D* fMsugraCount;
 	TH2D* fProcessCount[10];
+	TH2D* fSMSCount;
 	
 	/////////////////////////////////////
 	// Tree branches
@@ -88,6 +96,8 @@ private:
 	float  fTm0;
 	float  fTm12;
 	int    fTprocess;
+	float  fTmGlu;
+	float  fTmLSP;
 
 	// PileUP info
 	float fTrho;
@@ -105,13 +115,21 @@ private:
 	float fTJetpt [fMaxNjets];
 	float fTJeteta[fMaxNjets];
 	float fTJetphi[fMaxNjets];
-	float fTJetbtag[fMaxNjets]; // tight WP: > 2.
+	float fTJetbtag1[fMaxNjets]; // CSV
+	float fTJetbtag2[fMaxNjets]; // JetProb
+	// MARC float fTJetbtag3[fMaxNjets]; // TCHP
+	// MARC float fTJetbtag4[fMaxNjets]; // TCHE
 	float fTJetArea[fMaxNjets];
+	float fTJetJECUncert[fMaxNjets];
+	int   fTJetPartonID[fMaxNjets];
+	float fTJetGenpt [fMaxNjets];
+	float fTJetGeneta[fMaxNjets];
+	float fTJetGenphi[fMaxNjets];
 
-	float fTtcMET;
-	float fTtcMETphi;
 	float fTpfMET;
 	float fTpfMETphi;
+	float fTpfMETT1;
+	float fTpfMETT1phi;
 	
 	// Muon properties
 	int   fTnqmus;
@@ -119,11 +137,14 @@ private:
 	float fTmupt          [fMaxNmus];
 	float fTmueta         [fMaxNmus];
 	float fTmuphi         [fMaxNmus];
-	float fTmuiso         [fMaxNmus];
+	float fTmupfiso       [fMaxNmus];
+	float fTmuradiso      [fMaxNmus];
 	int   fTmucharge      [fMaxNmus];
 	float fTmud0          [fMaxNmus];
 	float fTmudz          [fMaxNmus];
 	float fTmuptE         [fMaxNmus];
+	float fTmuEMVetoEt    [fMaxNmus];
+	float fTmuHadVetoEt   [fMaxNmus];
 	int   fTmuid          [fMaxNmus];
 	int   fTmumoid        [fMaxNmus];
 	int   fTmugmoid       [fMaxNmus];
@@ -144,7 +165,8 @@ private:
 	float fTElD0Err          [fMaxNeles];
 	float fTEldz             [fMaxNeles];
 	float fTElDzErr          [fMaxNeles];
-	float fTElRelIso         [fMaxNeles];
+	float fTElPFIso          [fMaxNeles];
+	float fTElRadIso         [fMaxNeles];
 	float fTElEcalRecHitSumEt[fMaxNeles];
 	float fTElHcalTowerSumEt [fMaxNeles];
 	float fTElTkSumPt        [fMaxNeles];
@@ -152,8 +174,11 @@ private:
 	float fTElDEta           [fMaxNeles];
 	float fTElSigmaIetaIeta  [fMaxNeles];
 	float fTElHoverE         [fMaxNeles];
-	int   fTElIsGoodElId_WP80[fMaxNeles];
-	int   fTElIsGoodElId_WP90[fMaxNeles];
+	float fTElEPthing        [fMaxNeles];
+	// MARC int   fTElIsGoodElId_WP80[fMaxNeles];
+	// MARC int   fTElIsGoodElId_WP90[fMaxNeles];
+	int   fTElIsGoodElId_LooseWP[fMaxNeles];
+	int   fTElIsGoodElId_MediumWP[fMaxNeles];
 	float fTElMT             [fMaxNeles];
 	int   fTElGenID          [fMaxNeles];
 	int   fTElGenMID         [fMaxNeles];

@@ -10,6 +10,8 @@
 #include <TTree.h>
 #include <TChain.h>
 
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+
 #include "SSDLAnalyzer.hh"
 
 using namespace std;
@@ -43,6 +45,7 @@ void usage( int status = 0 ) {
 
 //________________________________________________________________________________________
 int main(int argc, char* argv[]) {
+	AutoLibraryLoader::enable();
 // Default options
 	bool isList = false;
 	bool isdata = true;
@@ -86,21 +89,36 @@ int main(int argc, char* argv[]) {
 		usage(-1);
 	}
 
-	TChain *theChain = new TChain("analyze/Analysis");
-	for(int i = 0; i < argc; i++){
-		if( !isList ){
-			theChain->Add(argv[i]);
-			printf(" Adding file: %s\n",argv[i]);
-		} else {
-			TString rootFile;
-			ifstream is(argv[i]);
-			while(rootFile.ReadLine(is) && (!rootFile.IsNull())){
-				if(rootFile[0] == '#') continue;
-				theChain->Add(rootFile);
-				printf(" Adding file: %s\n", rootFile.Data());
+	// MARC TChain *theChain = new TChain("analyze/Analysis");
+	// MARC for(int i = 0; i < argc; i++){
+	// MARC 	if( !isList ){
+	// MARC 		theChain->Add(argv[i]);
+	// MARC 		printf(" Adding file: %s\n",argv[i]);
+	// MARC 	} else {
+	// MARC 		TString rootFile;
+	// MARC 		ifstream is(argv[i]);
+	// MARC 		while(rootFile.ReadLine(is) && (!rootFile.IsNull())){
+	// MARC 			if(rootFile[0] == '#') continue;
+	// MARC 			theChain->Add(rootFile);
+	// MARC 			printf(" Adding file: %s\n", rootFile.Data());
+	// MARC 		}
+	// MARC 	}
+	// MARC }
+	std::vector<std::string> fileList;
+		for(int i = 0; i < argc; i++){
+			if( !isList ){
+				fileList.push_back(argv[i]);
+				printf(" Adding file: %s\n",argv[i]);
+			} else {
+				TString rootFile;
+				ifstream is(argv[i]);
+				while(rootFile.ReadLine(is) && (!rootFile.IsNull())){
+					if(rootFile[0] == '#') continue;
+					fileList.push_back(rootFile.Data());
+					printf(" Adding file: %s\n", rootFile.Data());
+				}
 			}
 		}
-	}
 
 	cout << "--------------" << endl;
 	cout << "OutputFile is:    " << outputfile << endl;
@@ -108,12 +126,14 @@ int main(int argc, char* argv[]) {
 	cout << "JSON file is:     " << (jsonfile.length()>0?jsonfile:"empty") << endl;
 	cout << "PU distribution file of data is: " << datapufile << endl;
 	cout << "PU distribution file of MC is: " << mcpufile << endl;
-	cout << "Number of events: " << theChain->GetEntries() << endl;
+	cout << "Number of files: " << fileList.size() << endl;
+	// MARC cout << "Number of events: " << theChain->GetEntries() << endl;
 	if(pthatcut > -1.) cout << "Lower pthat cut: " << pthatcut << endl;
 	cout << "Running on " << (isdata?"data":"MC") << endl;
 	cout << "--------------" << endl;
 
-	SSDLAnalyzer *tA = new SSDLAnalyzer(theChain);
+	SSDLAnalyzer *tA = new SSDLAnalyzer(fileList);
+	// MARC SSDLAnalyzer *tA = new SSDLAnalyzer(theChain);
 	tA->SetOutputFile(outputfile);
 	//tA->SetPuFiles(datapufile, mcpufile);
 	tA->SetData(isdata);

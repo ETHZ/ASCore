@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov 15 17:07:04 2011 by ROOT version 5.27/06b
+// Mon May 21 14:13:11 2012 by ROOT version 5.32/00
 // from TTree Analysis/AnalysisTree
-// found on file: /scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root
+// found on file: output_0_0.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -11,6 +11,10 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+
+// Header file for the classes stored in the TTree if any.
+
+// Fixed size dimensions of array or collections stored in the TTree if any.
 
 class MetaTreeClassBase {
 public :
@@ -24,44 +28,26 @@ public :
    Float_t         m0;
    Float_t         m12;
    Int_t           process;
-   Int_t           HLT_MU8_JET40;
-   Int_t           HLT_MU8_JET40_PS;
-   Int_t           HLT_ELE8_JET40;
-   Int_t           HLT_ELE8_JET40_PS;
-   Int_t           HLT_DOUBLEMU7;
-   Int_t           HLT_DOUBLEMU7_PS;
-   Int_t           HLT_MU13_MU8;
-   Int_t           HLT_MU13_MU8_PS;
+   Float_t         mGlu;
+   Float_t         mLSP;
+   Int_t           HLT_MU8;
+   Int_t           HLT_MU8_PS;
+   Int_t           HLT_MU17;
+   Int_t           HLT_MU17_PS;
+   Int_t           HLT_ELE17;
+   Int_t           HLT_ELE17_PS;
+   Int_t           HLT_ELE8;
+   Int_t           HLT_ELE8_PS;
+   Int_t           HLT_ELE8_JET30;
+   Int_t           HLT_ELE8_JET30_PS;
    Int_t           HLT_MU17_MU8;
    Int_t           HLT_MU17_MU8_PS;
-   Int_t           HLT_ELE17_ELE8;
-   Int_t           HLT_ELE17_ELE8_PS;
    Int_t           HLT_ELE17_ELE8_TIGHT;
    Int_t           HLT_ELE17_ELE8_TIGHT_PS;
-   Int_t           HLT_MU17_ELE8;
-   Int_t           HLT_MU17_ELE8_PS;
-   Int_t           HLT_MU8_ELE17;
-   Int_t           HLT_MU8_ELE17_PS;
    Int_t           HLT_MU8_ELE17_TIGHT;
    Int_t           HLT_MU8_ELE17_TIGHT_PS;
    Int_t           HLT_MU17_ELE8_TIGHT;
    Int_t           HLT_MU17_ELE8_TIGHT_PS;
-   Int_t           HLT_DOUBLEELE8_HT160;
-   Int_t           HLT_DOUBLEELE8_HT160_PS;
-   Int_t           HLT_DOUBLEELE8_HT160_TIGHT;
-   Int_t           HLT_DOUBLEELE8_HT160_TIGHT_PS;
-   Int_t           HLT_DOUBLEMU3_HT160;
-   Int_t           HLT_DOUBLEMU3_HT160_PS;
-   Int_t           HLT_MU3_ELE8_HT160;
-   Int_t           HLT_MU3_ELE8_HT160_PS;
-   Int_t           HLT_MU3_ELE8_HT160_TIGHT;
-   Int_t           HLT_MU3_ELE8_HT160_TIGHT_PS;
-   Int_t           HLT_DOUBLEMU3_MASS4_HT150;
-   Int_t           HLT_DOUBLEMU3_MASS4_HT150_PS;
-   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;
-   Int_t           HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
-   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;
-   Int_t           HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;
    Float_t         Rho;
    Int_t           NVrtx;
    Float_t         PUWeight;
@@ -71,9 +57,12 @@ public :
    Float_t         MuEta[5];   //[NMus]
    Float_t         MuPhi[5];   //[NMus]
    Int_t           MuCharge[5];   //[NMus]
-   Float_t         MuIso[5];   //[NMus]
+   Float_t         MuPFIso[5];   //[NMus]
+   Float_t         MuRadIso[5];   //[NMus]
    Float_t         MuD0[5];   //[NMus]
    Float_t         MuDz[5];   //[NMus]
+   Float_t         MuEMVetoEt[5];   //[NMus]
+   Float_t         MuHadVetoEt[5];   //[NMus]
    Float_t         MuPtE[5];   //[NMus]
    Int_t           MuGenID[5];   //[NMus]
    Int_t           MuGenMID[5];   //[NMus]
@@ -93,7 +82,8 @@ public :
    Float_t         ElD0Err[5];   //[NEls]
    Float_t         ElDz[5];   //[NEls]
    Float_t         ElDzErr[5];   //[NEls]
-   Float_t         ElRelIso[5];   //[NEls]
+   Float_t         ElPFIso[5];   //[NEls]
+   Float_t         ElRadIso[5];   //[NEls]
    Float_t         ElEcalRecHitSumEt[5];   //[NEls]
    Float_t         ElHcalTowerSumEt[5];   //[NEls]
    Float_t         ElTkSumPt[5];   //[NEls]
@@ -101,8 +91,9 @@ public :
    Float_t         ElDEta[5];   //[NEls]
    Float_t         ElSigmaIetaIeta[5];   //[NEls]
    Float_t         ElHoverE[5];   //[NEls]
-   Int_t           ElIsGoodElId_WP80[5];   //[NEls]
-   Int_t           ElIsGoodElId_WP90[5];   //[NEls]
+   Float_t         ElEPthing[5];   //[NEls]
+   Int_t           ElIsGoodElId_LooseWP[5];   //[NEls]
+   Int_t           ElIsGoodElId_MediumWP[5];   //[NEls]
    Int_t           ElGenID[5];   //[NEls]
    Int_t           ElGenMID[5];   //[NEls]
    Int_t           ElGenGMID[5];   //[NEls]
@@ -110,16 +101,20 @@ public :
    Int_t           ElGenMType[5];   //[NEls]
    Int_t           ElGenGMType[5];   //[NEls]
    Float_t         ElMT[5];   //[NEls]
-   Float_t         tcMET;
-   Float_t         tcMETPhi;
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Int_t           NJets;
-   Float_t         JetPt[20];   //[NJets]
-   Float_t         JetEta[20];   //[NJets]
-   Float_t         JetPhi[20];   //[NJets]
-   Float_t         JetSSVHPBTag[20];   //[NJets]
-   Float_t         JetArea[20];   //[NJets]
+   Float_t         JetPt[40];   //[NJets]
+   Float_t         JetEta[40];   //[NJets]
+   Float_t         JetPhi[40];   //[NJets]
+   Float_t         JetCSVBTag[40];   //[NJets]
+   Float_t         JetProbBTag[40];   //[NJets]
+   Float_t         JetArea[40];   //[NJets]
+   Float_t         JetJECUncert[40];   //[NJets]
+   Int_t           JetPartonID[40];   //[NJets]
+   Float_t         JetGenPt[40];   //[NJets]
+   Float_t         JetGenEta[40];   //[NJets]
+   Float_t         JetGenPhi[40];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -128,44 +123,26 @@ public :
    TBranch        *b_m0;   //!
    TBranch        *b_m12;   //!
    TBranch        *b_process;   //!
-   TBranch        *b_HLT_MU8_JET40;   //!
-   TBranch        *b_HLT_MU8_JET40_PS;   //!
-   TBranch        *b_HLT_ELE8_JET40;   //!
-   TBranch        *b_HLT_ELE8_JET40_PS;   //!
-   TBranch        *b_HLT_DOUBLEMU7;   //!
-   TBranch        *b_HLT_DOUBLEMU7_PS;   //!
-   TBranch        *b_HLT_MU13_MU8;   //!
-   TBranch        *b_HLT_MU13_MU8_PS;   //!
+   TBranch        *b_mGlu;   //!
+   TBranch        *b_mLSP;   //!
+   TBranch        *b_HLT_MU8;   //!
+   TBranch        *b_HLT_MU8_PS;   //!
+   TBranch        *b_HLT_MU17;   //!
+   TBranch        *b_HLT_MU17_PS;   //!
+   TBranch        *b_HLT_ELE17;   //!
+   TBranch        *b_HLT_ELE17_PS;   //!
+   TBranch        *b_HLT_ELE8;   //!
+   TBranch        *b_HLT_ELE8_PS;   //!
+   TBranch        *b_HLT_ELE8_JET30;   //!
+   TBranch        *b_HLT_ELE8_JET30_PS;   //!
    TBranch        *b_HLT_MU17_MU8;   //!
    TBranch        *b_HLT_MU17_MU8_PS;   //!
-   TBranch        *b_HLT_ELE17_ELE8;   //!
-   TBranch        *b_HLT_ELE17_ELE8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8_TIGHT;   //!
    TBranch        *b_HLT_ELE17_ELE8_TIGHT_PS;   //!
-   TBranch        *b_HLT_MU17_ELE8;   //!
-   TBranch        *b_HLT_MU17_ELE8_PS;   //!
-   TBranch        *b_HLT_MU8_ELE17;   //!
-   TBranch        *b_HLT_MU8_ELE17_PS;   //!
    TBranch        *b_HLT_MU8_ELE17_TIGHT;   //!
    TBranch        *b_HLT_MU8_ELE17_TIGHT_PS;   //!
    TBranch        *b_HLT_MU17_ELE8_TIGHT;   //!
    TBranch        *b_HLT_MU17_ELE8_TIGHT_PS;   //!
-   TBranch        *b_HLT_DOUBLEELE8_HT160;   //!
-   TBranch        *b_HLT_DOUBLEELE8_HT160_PS;   //!
-   TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT;   //!
-   TBranch        *b_HLT_DOUBLEELE8_HT160_TIGHT_PS;   //!
-   TBranch        *b_HLT_DOUBLEMU3_HT160;   //!
-   TBranch        *b_HLT_DOUBLEMU3_HT160_PS;   //!
-   TBranch        *b_HLT_MU3_ELE8_HT160;   //!
-   TBranch        *b_HLT_MU3_ELE8_HT160_PS;   //!
-   TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT;   //!
-   TBranch        *b_HLT_MU3_ELE8_HT160_TIGHT_PS;   //!
-   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150;   //!
-   TBranch        *b_HLT_DOUBLEMU3_MASS4_HT150_PS;   //!
-   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
-   TBranch        *b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
-   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150;   //!
-   TBranch        *b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS;   //!
    TBranch        *b_Rho;   //!
    TBranch        *b_NVrtx;   //!
    TBranch        *b_PUWeight;   //!
@@ -175,9 +152,12 @@ public :
    TBranch        *b_MuEta;   //!
    TBranch        *b_MuPhi;   //!
    TBranch        *b_MuCharge;   //!
-   TBranch        *b_MuIso;   //!
+   TBranch        *b_MuPFIso;   //!
+   TBranch        *b_MuRadIso;   //!
    TBranch        *b_MuD0;   //!
    TBranch        *b_MuDz;   //!
+   TBranch        *b_MuEMVetoEt;   //!
+   TBranch        *b_MuHadVetoEt;   //!
    TBranch        *b_MuPtE;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenMID;   //!
@@ -197,7 +177,8 @@ public :
    TBranch        *b_ElD0Err;   //!
    TBranch        *b_ElDz;   //!
    TBranch        *b_ElDzErr;   //!
-   TBranch        *b_ElRelIso;   //!
+   TBranch        *b_ElPFIso;   //!
+   TBranch        *b_ElRadIso;   //!
    TBranch        *b_ElEcalRecHitSumEt;   //!
    TBranch        *b_ElHcalTowerSumEt;   //!
    TBranch        *b_ElTkSumPt;   //!
@@ -205,8 +186,9 @@ public :
    TBranch        *b_ElDEta;   //!
    TBranch        *b_ElSigmaIetaIeta;   //!
    TBranch        *b_ElHoverE;   //!
-   TBranch        *b_ElIsGoodElId_WP80;   //!
-   TBranch        *b_ElIsGoodElId_WP90;   //!
+   TBranch        *b_ElEPthing;   //!
+   TBranch        *b_ElIsGoodElId_LooseWP;   //!
+   TBranch        *b_ElIsGoodElId_MediumWP;   //!
    TBranch        *b_ElGenID;   //!
    TBranch        *b_ElGenMID;   //!
    TBranch        *b_ElGenGMID;   //!
@@ -214,16 +196,20 @@ public :
    TBranch        *b_ElGenMType;   //!
    TBranch        *b_ElGenGMType;   //!
    TBranch        *b_ElMT;   //!
-   TBranch        *b_tcMET;   //!
-   TBranch        *b_tcMETPhi;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_pfMETPhi;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
    TBranch        *b_JetPhi;   //!
-   TBranch        *b_JetSSVHPBTag;   //!
+   TBranch        *b_JetCSVBTag;   //!
+   TBranch        *b_JetProbBTag;   //!
    TBranch        *b_JetArea;   //!
+   TBranch        *b_JetJECUncert;   //!
+   TBranch        *b_JetPartonID;   //!
+   TBranch        *b_JetGenPt;   //!
+   TBranch        *b_JetGenEta;   //!
+   TBranch        *b_JetGenPhi;   //!
 
    MetaTreeClassBase(TTree *tree=0);
    virtual ~MetaTreeClassBase();
@@ -239,16 +225,16 @@ public :
 #endif
 
 #ifdef MetaTreeClassBase_cxx
-MetaTreeClassBase::MetaTreeClassBase(TTree *tree)
+MetaTreeClassBase::MetaTreeClassBase(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
-      if (!f) {
-         f = new TFile("/scratch/stiegerb/SSDLTrees/2011B/Nov15/MC/LM5_SUSY_sftsht_7TeV-pythia6.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("output_0_0.root");
+      if (!f || !f->IsOpen()) {
+         f = new TFile("output_0_0.root");
       }
-      tree = (TTree*)gDirectory->Get("Analysis");
+      f->GetObject("Analysis",tree);
 
    }
    Init(tree);
@@ -272,10 +258,8 @@ Long64_t MetaTreeClassBase::LoadTree(Long64_t entry)
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
-   if (!fChain->InheritsFrom(TChain::Class()))  return centry;
-   TChain *chain = (TChain*)fChain;
-   if (chain->GetTreeNumber() != fCurrent) {
-      fCurrent = chain->GetTreeNumber();
+   if (fChain->GetTreeNumber() != fCurrent) {
+      fCurrent = fChain->GetTreeNumber();
       Notify();
    }
    return centry;
@@ -300,55 +284,44 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("Run", &Run, &b_Run);
    fChain->SetBranchAddress("Event", &Event, &b_Event);
    fChain->SetBranchAddress("LumiSec", &LumiSec, &b_LumiSec);
-   fChain->SetBranchAddress("HLT_MU8_JET40", &HLT_MU8_JET40, &b_HLT_MU8_JET40);
-   fChain->SetBranchAddress("HLT_MU8_JET40_PS", &HLT_MU8_JET40_PS, &b_HLT_MU8_JET40_PS);
-   fChain->SetBranchAddress("HLT_ELE8_JET40", &HLT_ELE8_JET40, &b_HLT_ELE8_JET40);
-   fChain->SetBranchAddress("HLT_ELE8_JET40_PS", &HLT_ELE8_JET40_PS, &b_HLT_ELE8_JET40_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEMU7", &HLT_DOUBLEMU7, &b_HLT_DOUBLEMU7);
-   fChain->SetBranchAddress("HLT_DOUBLEMU7_PS", &HLT_DOUBLEMU7_PS, &b_HLT_DOUBLEMU7_PS);
-   fChain->SetBranchAddress("HLT_MU13_MU8", &HLT_MU13_MU8, &b_HLT_MU13_MU8);
-   fChain->SetBranchAddress("HLT_MU13_MU8_PS", &HLT_MU13_MU8_PS, &b_HLT_MU13_MU8_PS);
+   fChain->SetBranchAddress("m0", &m0, &b_m0);
+   fChain->SetBranchAddress("m12", &m12, &b_m12);
+   fChain->SetBranchAddress("process", &process, &b_process);
+   fChain->SetBranchAddress("mGlu", &mGlu, &b_mGlu);
+   fChain->SetBranchAddress("mLSP", &mLSP, &b_mLSP);
+   fChain->SetBranchAddress("HLT_MU8", &HLT_MU8, &b_HLT_MU8);
+   fChain->SetBranchAddress("HLT_MU8_PS", &HLT_MU8_PS, &b_HLT_MU8_PS);
+   fChain->SetBranchAddress("HLT_MU17", &HLT_MU17, &b_HLT_MU17);
+   fChain->SetBranchAddress("HLT_MU17_PS", &HLT_MU17_PS, &b_HLT_MU17_PS);
+   fChain->SetBranchAddress("HLT_ELE17", &HLT_ELE17, &b_HLT_ELE17);
+   fChain->SetBranchAddress("HLT_ELE17_PS", &HLT_ELE17_PS, &b_HLT_ELE17_PS);
+   fChain->SetBranchAddress("HLT_ELE8", &HLT_ELE8, &b_HLT_ELE8);
+   fChain->SetBranchAddress("HLT_ELE8_PS", &HLT_ELE8_PS, &b_HLT_ELE8_PS);
+   fChain->SetBranchAddress("HLT_ELE8_JET30", &HLT_ELE8_JET30, &b_HLT_ELE8_JET30);
+   fChain->SetBranchAddress("HLT_ELE8_JET30_PS", &HLT_ELE8_JET30_PS, &b_HLT_ELE8_JET30_PS);
    fChain->SetBranchAddress("HLT_MU17_MU8", &HLT_MU17_MU8, &b_HLT_MU17_MU8);
    fChain->SetBranchAddress("HLT_MU17_MU8_PS", &HLT_MU17_MU8_PS, &b_HLT_MU17_MU8_PS);
-   fChain->SetBranchAddress("HLT_ELE17_ELE8", &HLT_ELE17_ELE8, &b_HLT_ELE17_ELE8);
-   fChain->SetBranchAddress("HLT_ELE17_ELE8_PS", &HLT_ELE17_ELE8_PS, &b_HLT_ELE17_ELE8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT_PS", &HLT_ELE17_ELE8_TIGHT_PS, &b_HLT_ELE17_ELE8_TIGHT_PS);
-   fChain->SetBranchAddress("HLT_MU17_ELE8", &HLT_MU17_ELE8, &b_HLT_MU17_ELE8);
-   fChain->SetBranchAddress("HLT_MU17_ELE8_PS", &HLT_MU17_ELE8_PS, &b_HLT_MU17_ELE8_PS);
-   fChain->SetBranchAddress("HLT_MU8_ELE17", &HLT_MU8_ELE17, &b_HLT_MU8_ELE17);
-   fChain->SetBranchAddress("HLT_MU8_ELE17_PS", &HLT_MU8_ELE17_PS, &b_HLT_MU8_ELE17_PS);
    fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT", &HLT_MU8_ELE17_TIGHT, &b_HLT_MU8_ELE17_TIGHT);
    fChain->SetBranchAddress("HLT_MU8_ELE17_TIGHT_PS", &HLT_MU8_ELE17_TIGHT_PS, &b_HLT_MU8_ELE17_TIGHT_PS);
    fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT", &HLT_MU17_ELE8_TIGHT, &b_HLT_MU17_ELE8_TIGHT);
    fChain->SetBranchAddress("HLT_MU17_ELE8_TIGHT_PS", &HLT_MU17_ELE8_TIGHT_PS, &b_HLT_MU17_ELE8_TIGHT_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160", &HLT_DOUBLEELE8_HT160, &b_HLT_DOUBLEELE8_HT160);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_PS", &HLT_DOUBLEELE8_HT160_PS, &b_HLT_DOUBLEELE8_HT160_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT", &HLT_DOUBLEELE8_HT160_TIGHT, &b_HLT_DOUBLEELE8_HT160_TIGHT);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_HT160_TIGHT_PS", &HLT_DOUBLEELE8_HT160_TIGHT_PS, &b_HLT_DOUBLEELE8_HT160_TIGHT_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160", &HLT_DOUBLEMU3_HT160, &b_HLT_DOUBLEMU3_HT160);
-   fChain->SetBranchAddress("HLT_DOUBLEMU3_HT160_PS", &HLT_DOUBLEMU3_HT160_PS, &b_HLT_DOUBLEMU3_HT160_PS);
-   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160", &HLT_MU3_ELE8_HT160, &b_HLT_MU3_ELE8_HT160);
-   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_PS", &HLT_MU3_ELE8_HT160_PS, &b_HLT_MU3_ELE8_HT160_PS);
-   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT", &HLT_MU3_ELE8_HT160_TIGHT, &b_HLT_MU3_ELE8_HT160_TIGHT);
-   fChain->SetBranchAddress("HLT_MU3_ELE8_HT160_TIGHT_PS", &HLT_MU3_ELE8_HT160_TIGHT_PS, &b_HLT_MU3_ELE8_HT160_TIGHT_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150", &HLT_DOUBLEMU3_MASS4_HT150, &b_HLT_DOUBLEMU3_MASS4_HT150);
-   fChain->SetBranchAddress("HLT_DOUBLEMU3_MASS4_HT150_PS", &HLT_DOUBLEMU3_MASS4_HT150_PS, &b_HLT_DOUBLEMU3_MASS4_HT150_PS);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150);
-   fChain->SetBranchAddress("HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_DOUBLEELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
-   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150);
-   fChain->SetBranchAddress("HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS", &HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS, &b_HLT_MU5_ELE8_CALOIDT_TRKIDVL_MASS4_HT150_PS);
    fChain->SetBranchAddress("Rho", &Rho, &b_Rho);
    fChain->SetBranchAddress("NVrtx", &NVrtx, &b_NVrtx);
    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
    fChain->SetBranchAddress("NMus", &NMus, &b_NMus);
+   fChain->SetBranchAddress("IsSignalMuon", IsSignalMuon, &b_IsSignalMuon);
    fChain->SetBranchAddress("MuPt", MuPt, &b_MuPt);
    fChain->SetBranchAddress("MuEta", MuEta, &b_MuEta);
    fChain->SetBranchAddress("MuPhi", MuPhi, &b_MuPhi);
    fChain->SetBranchAddress("MuCharge", MuCharge, &b_MuCharge);
-   fChain->SetBranchAddress("MuIso", MuIso, &b_MuIso);
+   fChain->SetBranchAddress("MuPFIso", MuPFIso, &b_MuPFIso);
+   fChain->SetBranchAddress("MuRadIso", MuRadIso, &b_MuRadIso);
    fChain->SetBranchAddress("MuD0", MuD0, &b_MuD0);
    fChain->SetBranchAddress("MuDz", MuDz, &b_MuDz);
+   fChain->SetBranchAddress("MuEMVetoEt", MuEMVetoEt, &b_MuEMVetoEt);
+   fChain->SetBranchAddress("MuHadVetoEt", MuHadVetoEt, &b_MuHadVetoEt);
    fChain->SetBranchAddress("MuPtE", MuPtE, &b_MuPtE);
    fChain->SetBranchAddress("MuGenID", MuGenID, &b_MuGenID);
    fChain->SetBranchAddress("MuGenMID", MuGenMID, &b_MuGenMID);
@@ -358,6 +331,7 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("MuGenGMType", MuGenGMType, &b_MuGenGMType);
    fChain->SetBranchAddress("MuMT", MuMT, &b_MuMT);
    fChain->SetBranchAddress("NEls", &NEls, &b_NEls);
+   fChain->SetBranchAddress("IsSignalElectron", IsSignalElectron, &b_IsSignalElectron);
    fChain->SetBranchAddress("ElCharge", ElCharge, &b_ElCharge);
    fChain->SetBranchAddress("ElChIsCons", ElChIsCons, &b_ElChIsCons);
    fChain->SetBranchAddress("ElPt", ElPt, &b_ElPt);
@@ -367,7 +341,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElD0Err", ElD0Err, &b_ElD0Err);
    fChain->SetBranchAddress("ElDz", ElDz, &b_ElDz);
    fChain->SetBranchAddress("ElDzErr", ElDzErr, &b_ElDzErr);
-   fChain->SetBranchAddress("ElRelIso", ElRelIso, &b_ElRelIso);
+   fChain->SetBranchAddress("ElPFIso", ElPFIso, &b_ElPFIso);
+   fChain->SetBranchAddress("ElRadIso", ElRadIso, &b_ElRadIso);
    fChain->SetBranchAddress("ElEcalRecHitSumEt", ElEcalRecHitSumEt, &b_ElEcalRecHitSumEt);
    fChain->SetBranchAddress("ElHcalTowerSumEt", ElHcalTowerSumEt, &b_ElHcalTowerSumEt);
    fChain->SetBranchAddress("ElTkSumPt", ElTkSumPt, &b_ElTkSumPt);
@@ -375,8 +350,9 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElDEta", ElDEta, &b_ElDEta);
    fChain->SetBranchAddress("ElSigmaIetaIeta", ElSigmaIetaIeta, &b_ElSigmaIetaIeta);
    fChain->SetBranchAddress("ElHoverE", ElHoverE, &b_ElHoverE);
-   fChain->SetBranchAddress("ElIsGoodElId_WP80", ElIsGoodElId_WP80, &b_ElIsGoodElId_WP80);
-   fChain->SetBranchAddress("ElIsGoodElId_WP90", ElIsGoodElId_WP90, &b_ElIsGoodElId_WP90);
+   fChain->SetBranchAddress("ElEPthing", ElEPthing, &b_ElEPthing);
+   fChain->SetBranchAddress("ElIsGoodElId_LooseWP", ElIsGoodElId_LooseWP, &b_ElIsGoodElId_LooseWP);
+   fChain->SetBranchAddress("ElIsGoodElId_MediumWP", ElIsGoodElId_MediumWP, &b_ElIsGoodElId_MediumWP);
    fChain->SetBranchAddress("ElGenID", ElGenID, &b_ElGenID);
    fChain->SetBranchAddress("ElGenMID", ElGenMID, &b_ElGenMID);
    fChain->SetBranchAddress("ElGenGMID", ElGenGMID, &b_ElGenGMID);
@@ -384,16 +360,20 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElGenMType", ElGenMType, &b_ElGenMType);
    fChain->SetBranchAddress("ElGenGMType", ElGenGMType, &b_ElGenGMType);
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
-   fChain->SetBranchAddress("tcMET", &tcMET, &b_tcMET);
-   fChain->SetBranchAddress("tcMETPhi", &tcMETPhi, &b_tcMETPhi);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
    fChain->SetBranchAddress("JetPhi", JetPhi, &b_JetPhi);
-   fChain->SetBranchAddress("JetSSVHPBTag", JetSSVHPBTag, &b_JetSSVHPBTag);
+   fChain->SetBranchAddress("JetCSVBTag", JetCSVBTag, &b_JetCSVBTag);
+   fChain->SetBranchAddress("JetProbBTag", JetProbBTag, &b_JetProbBTag);
    fChain->SetBranchAddress("JetArea", JetArea, &b_JetArea);
+   fChain->SetBranchAddress("JetJECUncert", JetJECUncert, &b_JetJECUncert);
+   fChain->SetBranchAddress("JetPartonID", JetPartonID, &b_JetPartonID);
+   fChain->SetBranchAddress("JetGenPt", JetGenPt, &b_JetGenPt);
+   fChain->SetBranchAddress("JetGenEta", JetGenEta, &b_JetGenEta);
+   fChain->SetBranchAddress("JetGenPhi", JetGenPhi, &b_JetGenPhi);
    Notify();
 }
 

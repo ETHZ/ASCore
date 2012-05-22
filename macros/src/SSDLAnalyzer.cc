@@ -3,18 +3,23 @@
 
 using namespace std;
 
-SSDLAnalyzer::SSDLAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
+SSDLAnalyzer::SSDLAnalyzer(std::vector<std::string>& fileList) : TreeAnalyzerBase(fileList) {
 	fSSDLAnalysis = new SSDLAnalysis(fTR);
 	fDoFillEffTree = false;
 }
 
+// MARC SSDLAnalyzer::SSDLAnalyzer(TTree *tree) : TreeAnalyzerBase(tree) {
+// MARC 	fSSDLAnalysis = new SSDLAnalysis(fTR);
+// MARC 	fDoFillEffTree = false;
+// MARC }
+
 SSDLAnalyzer::~SSDLAnalyzer(){
 	delete fSSDLAnalysis;
-	if(!fTR->fChain) cout << "SSDLAnalyzer ==> No chain!" << endl;
+	// MARC if(!fTR->fChain) cout << "SSDLAnalyzer ==> No chain!" << endl;
 }
 
 // Method for looping over the tree
-void SSDLAnalyzer::Loop(Int_t prescale){
+void SSDLAnalyzer::Loop(){
 	Long64_t nentries = fTR->GetEntries();
 	cout << " total events in ntuples = " << nentries << endl;
 
@@ -23,35 +28,42 @@ void SSDLAnalyzer::Loop(Int_t prescale){
 		nentries = fMaxEvents;
 	}
 
-	if( prescale>1 ) cout << " processing only every " << prescale << " events" << endl;
+	// MARC if( prescale>1 ) cout << " processing only every " << prescale << " events" << endl;
+	// MARC for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
 
-	for( Long64_t jentry = 0; jentry < nentries; jentry++ ){
-		PrintProgress(jentry);
+    Long64_t jentry=0;
+	for ( fTR->ToBegin(); 
+			!(fTR->AtEnd()) && (jentry<fMaxEvents || fMaxEvents<0); 
+			++(*fTR) ) 
+		{
+			PrintProgress(jentry++);
 
-		// Prescale processing...
-		if ( prescale>1 && jentry%prescale ) continue;
+			// MARC PrintProgress(jentry);
+			// Prescale processing...
+			// MARC if ( prescale>1 && jentry%prescale ) continue;
 
-		fTR->GetEntry(jentry);
+			fTR->GetEntry(jentry);
 
-		// Upper Pt Hat cut
-		if( (fPtHatCut > -1.0) && (fTR->PtHat > fPtHatCut) ) continue;
+			// Upper Pt Hat cut
+			if( (fPtHatCut > -1.0) && (fTR->PtHat > fPtHatCut) ) continue;
 
-		// Run processing
-		if( fCurRun != fTR->Run ) { // new run
-			fCurRun = fTR->Run;
-			skipRun = false;
-			if ( CheckRun() == false ) skipRun = true;
-			else fSSDLAnalysis->BeginRun(fCurRun);
-		}
-		
-		// Check if new lumi is in JSON file
-		if( fCurLumi != fTR->LumiSection ) { // new lumisection
-			fCurLumi = fTR->LumiSection;
-			skipLumi = false;
-			if ( CheckRunLumi() == false ) skipLumi = true;
-		}
-		if(skipRun || skipLumi) continue;
-		fSSDLAnalysis->Analyze();
+			// Run processing
+			if( fCurRun != fTR->Run ) { // new run
+				fCurRun = fTR->Run;
+				skipRun = false;
+				// MARC if ( CheckRun() == false ) skipRun = true;
+				// MARC else fSSDLAnalysis->BeginRun(fCurRun);
+				fSSDLAnalysis->BeginRun(fCurRun);
+			}
+			
+			// MARC // Check if new lumi is in JSON file
+			// MARC if( fCurLumi != fTR->LumiSection ) { // new lumisection
+			// MARC 	fCurLumi = fTR->LumiSection;
+			// MARC 	skipLumi = false;
+			// MARC 	if ( CheckRunLumi() == false ) skipLumi = true;
+			// MARC }
+			if(skipRun || skipLumi) continue;
+			fSSDLAnalysis->Analyze();
 	}
 	cout << endl;
 }

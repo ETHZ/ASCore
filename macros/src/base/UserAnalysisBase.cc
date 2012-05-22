@@ -38,7 +38,7 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
     JetCorPar.push_back(*ResJetPar);
 
     fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-    jecUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
+    fJECUnc = new JetCorrectionUncertainty("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_Uncertainty.txt");
     delete L1JetPar;
     delete L2JetPar; 
     delete L3JetPar; 
@@ -51,7 +51,7 @@ UserAnalysisBase::~UserAnalysisBase(){
 //     if(fDoPileUpReweight3D) delete fPUWeight3D;
 
     delete fJetCorrector;
-    delete jecUnc;
+    delete fJECUnc;
 
 }
 
@@ -297,36 +297,47 @@ bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacu
 bool UserAnalysisBase::IsGoodBasicMu(int index){
     // Basic muon cleaning and ID
     if(fTR->MuIsGlobalMuon[index] == 0)  return false;
-    if(fTR->MuIsTrackerMuon[index] == 0) return false;
+    if(fTR->MuIsPFMuon[index] == 0) return false;
 
     if(fTR->MuPt[index] < 5)          return false;
     if(fabs(fTR->MuEta[index]) > 2.4) return false;
 
     if(fTR->MuNChi2[index] > 10)   return false;
-    if(fTR->MuNTkHits[index] < 11) return false;
+    if(fTR->MuNSiLayers[index] < 5) return false;
+    if(fTR->MuNPxHits[index] < 0)  return false;
     if(fTR->MuNMuHits[index] < 1)  return false;
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
-    if(fabs(fTR->MuDzPV[index]) > 1.00)    return false;
+    if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;
 
-    if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
-    if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
+    // in the dumper now if(fTR->MuIso03EMVetoEt[index] > 4.0)  return false;
+    // in the dumper now if(fTR->MuIso03HadVetoEt[index] > 6.0) return false;
 
-    if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
+    // if(fTR->MuPtE[index]/fTR->MuPt[index] > 0.1) return false;
 
-    if(fTR->MuRelIso03[index] > 1.0) return false;
+    if(MuPFIso(index) > 1.0) return false;
     return true;
+}
+
+float UserAnalysisBase::MuPFIso(int index){
+	double neutral = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] );
+	float iso = ( fTR->MuPfIsoR03ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
+	return iso;
+}
+
+float UserAnalysisBase::MuRadIso(int index){
+	return (fTR->MuPfIsoR03NeHad [index] + fTR->MuPfIsoR03Photon [index] + fTR->MuPfIsoR03SumPUPt[index]) / fTR->MuPt[index] ;
 }
 
 bool UserAnalysisBase::IsTightMu(int index){
     if(!IsGoodBasicMu(index)) return false;
-    if(fTR->MuRelIso03[index] > 0.15) return false;
+    if(MuPFIso(index) > 0.15) return false;
     return true;
 }
 
 bool UserAnalysisBase::IsLooseMu(int index){
     if(!IsGoodBasicMu(index)) return false;
-    if(fTR->MuRelIso03[index] > 1.0) return false;
+    if(MuPFIso(index) > 1.0) return false;
     return true;
 }
 
@@ -337,7 +348,7 @@ bool UserAnalysisBase::IsLooseNoTightMu(int index){
 
 // ELECTRONS
 bool UserAnalysisBase::IsGoodBasicEl(int index){
-    // Electrons with WP95 ID
+    // Electrons with Veto WP (corresponds to WP 95 from 2011)
     // if(fTR->ElIDsimpleWP95relIso[index] != 5 && fTR->ElIDsimpleWP95relIso[index] != 7) return false;		
     if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
         if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
@@ -355,62 +366,89 @@ bool UserAnalysisBase::IsGoodBasicEl(int index){
     // ECAL gap veto
     if ( fabs(fTR->ElSCEta[index]) > 1.4442 && fabs(fTR->ElSCEta[index]) < 1.566 )  return false;
 
-    if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
-    if(fabs(fTR->ElDzPV[index]) > 1.00) return false;
+    if(fabs(fTR->ElD0PV[index]) > 0.04) return false;
+    if(fabs(fTR->ElDzPV[index]) > 0.20) return false;
 
     return true;
 }
 
-bool UserAnalysisBase::ElPassesWP80_ConvRej(int index){
+bool UserAnalysisBase::ElPassesConvRej(int index){
     // if(fTR->ElNumberOfMissingInnerHits[index] > 0   ) return false;
     // if(fabs(fTR->ElConvPartnerTrkDist[index]) < 0.02 && fabs(fTR->ElConvPartnerTrkDCot[index]) < 0.02) return false;
-    if(fTR->ElIDsimpleWP80relIso[index] < 4) return false;
-    return true;
+    // if(fTR->ElIDsimpleWP80relIso[index] < 4) return false;
+    // return true;
+	if (fTR->ElNumberOfMissingInnerHits[index] > 0 ) return false;
+	if (!fTR->ElPassConversionVeto[index] ) return false;
+	return true;
 }
 
-bool UserAnalysisBase::IsGoodElId_WP90(int index){
+bool UserAnalysisBase::IsGoodElId_LooseWP(int index){
     // Electrons with WP90 ID and WP80 conv. rej.
     if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
         if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
-        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.80 ) return false;
+        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.15 ) return false;
         if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
         if(fTR->ElHcalOverEcal             [index] > 0.12 ) return false;	
     }
     if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
         if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
-        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.70 ) return false;
+        if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.10 ) return false;
         if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.009) return false;
-        // if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+        if(fTR->ElHcalOverEcal             [index] > 0.10 ) return false;	
     }
 
+	if(fabs(1/fTR->ElCaloEnergy[index] - fTR->ElESuperClusterOverP[index]/fTR->ElCaloEnergy[index]) > 0.05 ) return false;
     // WP80 conv. rejection
-    if(ElPassesWP80_ConvRej(index) == false) return false;
+    if(ElPassesConvRej(index) == false) return false;
     return true;
 }
 
-bool UserAnalysisBase::IsGoodElId_WP80(int index){
+bool UserAnalysisBase::IsGoodElId_MediumWP(int index){
     // Electrons with WP80 ID and conv. rej. cuts
     if( fabs(fTR->ElEta[index]) < 1.479 ){ // Barrel
         if(fTR->ElSigmaIetaIeta            [index] > 0.01 ) return false;
         if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.06 ) return false;
         if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.004) return false;
-        if(fTR->ElHcalOverEcal             [index] > 0.04 ) return false;	
+        if(fTR->ElHcalOverEcal             [index] > 0.10 ) return false;
     }
     if( fabs(fTR->ElEta[index]) > 1.479 ){ // Endcap
         if(fTR->ElSigmaIetaIeta            [index] > 0.03 ) return false;
         if(fabs(fTR->ElDeltaPhiSuperClusterAtVtx[index]) > 0.03 ) return false;
         if(fabs(fTR->ElDeltaEtaSuperClusterAtVtx[index]) > 0.007) return false;
-        // if(fTR->ElHcalOverEcal             [index] > 0.15 ) return false;	
+        if(fTR->ElHcalOverEcal             [index] > 0.075 ) return false;	
     }
-    if(fTR->ElPt[index] < 20.){
-        if(fTR->Elfbrem[index] > 0.15) return true;
-        if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
-        return false;
-    }
+    // not applied if(fTR->ElPt[index] < 20.){
+    // not applied     if(fTR->Elfbrem[index] > 0.15) return true;
+    // not applied     if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
+    // not applied     return false;
+    // not applied }
 
     // WP80 conv. rejection
-    if(ElPassesWP80_ConvRej(index) == false) return false;
+    if(ElPassesConvRej(index) == false) return false;
     return true;
+}
+
+float UserAnalysisBase::Aeff(float eta) {
+	float abseta = fabs(eta); // making sure we're looking at |eta|
+	if(abseta < 1.0)   return 0.10;
+	if(abseta < 1.479) return 0.12;
+	if(abseta < 2.0)   return 0.085;
+	if(abseta < 2.2)   return 0.11;
+	if(abseta < 2.3)   return 0.12;
+	if(abseta < 2.4)   return 0.12;
+	return 0.13;
+}
+
+float UserAnalysisBase::ElPFIso(int index){
+	double neutral = fTR->ElEventelPFIsoValueNeutral03PFIdStandard[index] + fTR->ElEventelPFIsoValueGamma03PFIdStandard[index];
+	double rhocorr = fTR->RhoForIso * Aeff(fTR->ElEta[index]);
+    double iso = ( fTR->ElEventelPFIsoValueCharged03PFIdStandard[index] + TMath::Max(0., neutral - rhocorr) )/ fTR->ElPt[index];
+    return iso;
+}
+
+float UserAnalysisBase::ElRadIso(int index){
+    double iso = ( fTR->ElelectronRadPFIsoChHad03[index] + fTR->ElelectronRadPFIsoNHad03[index] + fTR->ElelectronRadPFIsoPhoton03[index] ) / fTR->ElPt[index];
+    return iso;
 }
 
 float UserAnalysisBase::relElIso(int index){
@@ -427,14 +465,14 @@ bool UserAnalysisBase::IsLooseEl(int index){
     if(fTR->ElPt[index] < 10.)        return false;
     if(fabs(fTR->ElEta[index]) > 2.4) return false;
 
-    if(!fTR->ElEcalDriven[index]) return false;
+    // MARC: what is this? if(!fTR->ElEcalDriven[index]) return false;
 	
     // Loose identification criteria: WP90
-    if(!IsGoodElId_WP90(index)) return false;
+    if(!IsGoodElId_LooseWP(index)) return false;
 
     // Loose isolation criteria
-    if( fabs(fTR->ElEta[index]) <= 1.479 && relElIso(index) > 1.0 ) return false;
-    if( fabs(fTR->ElEta[index]) >  1.479 && relElIso(index) > 0.6 ) return false;
+    if( fabs(fTR->ElEta[index]) <= 1.479 && ElPFIso(index) > 1.0 ) return false;
+    if( fabs(fTR->ElEta[index]) >  1.479 && ElPFIso(index) > 0.6 ) return false;
 
     return true;
 }
@@ -870,6 +908,15 @@ float UserAnalysisBase::GetJetPtNoResidual(int jetindex){
 
     double l1l2l3scale = factors[2];
     return rawpt*l1l2l3scale;
+}
+float UserAnalysisBase::GetJECUncert(float pt, float eta){
+	if      (eta> 5.0) eta = 5.0;
+	else if (eta<-5.0) eta =-5.0;
+
+	fJECUnc->setJetPt(pt);   
+	fJECUnc->setJetEta(eta); 
+	float uncert= fJECUnc->getUncertainty(true);
+	return uncert;
 }
 
 // ///////////////////////////////////////////////////////////////

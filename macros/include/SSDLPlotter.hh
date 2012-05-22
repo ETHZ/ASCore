@@ -12,6 +12,73 @@
 #include "TLorentzVector.h"
 
 
+
+struct SSDLPrediction {
+
+	float bg;
+	float bg_err;
+
+	float bg_mm;
+	float bg_em;
+	float bg_ee;
+
+	float bg_mm_err;
+	float bg_em_err;
+	float bg_ee_err;
+
+	float s_ttw_mm;
+	float s_ttw_em;
+	float s_ttw_ee;
+
+	float s_ttz_mm;
+	float s_ttz_em;
+	float s_ttz_ee;
+
+	int ns_ttw_mm;
+	int ns_ttw_em;
+	int ns_ttw_ee;
+
+	int ns_ttz_mm;
+	int ns_ttz_em;
+	int ns_ttz_ee;
+
+	float s_mm;
+	float s_em;
+	float s_ee;
+
+	int obs_mm;
+	int obs_em;
+	int obs_ee;
+
+};
+
+struct TTWZPrediction {
+	int obs;
+	float ttwz;
+	float ttw;
+	float ttz;
+
+	float ttwz_mm;
+	float ttwz_ee;
+	float ttwz_em;
+
+	float fake;
+	float fake_err;
+	float cmid;
+	float cmid_err;
+	float wz;
+	float wz_mm;
+	float wz_ee;
+	float wz_em;
+	float wz_err;
+	float rare;
+	float rare_mm;
+	float rare_ee;
+	float rare_em;
+	float rare_err;
+};
+
+
 class SSDLPlotter : public SSDLDumper{
 
 public:
@@ -22,91 +89,110 @@ public:
 	static double gEChMisIDE;
 	static double gEChMisIDE_E;
 
+	static float gMMTrigScale;
+	static float gEMTrigScale;
+	static float gEETrigScale;
+
+	bool fDO_OPT;
+
 	SSDLPlotter();
 	SSDLPlotter(TString);
 	SSDLPlotter(TString, TString);
 	virtual ~SSDLPlotter();
 
 	virtual void init(TString filename = "samples.dat");
-	virtual void InitMC(TTree*); // remove a few branches
-	virtual void readSamples(const char* filename = "samples.dat");
 
 	virtual void doAnalysis();
 	virtual void sandBox();
-	virtual void load_kfacs(TFile *);
-	virtual void load_loxsecs(TFile *);
-	virtual void load_msugraInfo(const char * filestring);
+	virtual void msugraKfacs(TFile *);
+	virtual void msugraLOxsecs(TFile *);
+	virtual void msugraNLOxsecs(TFile *);
+	virtual void scanMSUGRA(const char * filestring);
+	virtual void scanSMS(const char * filestring, float minHT, float maxHT, float minMET, float maxMET, float pt1, float pt2);
+	virtual void plotWeightedHT();
 
 	//////////////////////////////
 	// Plots
-	void makeMuIsolationPlots();
-	void makeElIsolationPlots();
+	void makeMuIsolationPlots(bool = false);
+	void makeElIsolationPlots(bool = false);
 	void makeElIdPlots();
 	
-	void makeNT2KinPlots(gHiLoSwitch = HighPt);
+	void makeNT2KinPlots(bool=false);
 	void makeMETvsHTPlot(vector<int>, vector<int>, vector<int>, gHiLoSwitch = HighPt);
 	void makeMETvsHTPlotPRL();
+	void makeMETvsHTPlot0HT();
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
-	void makeFRvsPtPlotsForPAS(gChannel);
-	void makeFRvsEtaPlotsForPAS(gChannel);
 	void makeRatioPlots(gChannel);
+	void make2DRatioPlots(gChannel);
 	void makeNTightLoosePlots(gChannel);
+
+	void makeOriginPlots(gRegion);
 	
 	void makeIsoVsMETPlot(gSample);
 	void makePileUpPlots(bool write = true);
 	
 	void makePRLPlot1();
 	
-	void makeMCClosurePlots(vector<int>);
-	void makeDataClosurePlots();
 	void makeNT012Plots(vector<int>, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-	void makeIntPrediction(TString, gRegion, gHiLoSwitch = HighPt);
-	void makeDiffPrediction();
-	void makeIntMCClosure(TString, gHiLoSwitch = HighPt);	
+	// MARC void makeIntPrediction(TString, gRegion);
+	// MARC void makeTTWIntPredictions();
+	// MARC TTWZPrediction makeIntPredictionTTW(TString, gRegion);
+	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
+
+	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
+	// MARC void makeDiffPrediction();
+	// MARC void makeTTWDiffPredictions();
+	void makeDiffPredictionTTW(int);
+
+	// MARC void makeAllClosureTests();
+	// MARC void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
+
 	void makeTTbarClosure();
-	void makeRelIsoTTSigPlots();
+	// MARC void makeRelIsoTTSigPlots();
+	
+	void storeWeightedPred();
+	float getFRatio(gChannel, float, int = 0);        // diff in pt only
+	float getFRatio(gChannel, float, float, int = 0); // diff in pt/eta
+	float getPRatio(gChannel, float, int = 0);
 	
 	//////////////////////////////
 	// Fake ratios
-	// Produce from tree, with given selections:
-	void produceRatio(gChannel, int, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-	void produceRatio(gChannel, vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), TH2D*&, TH1D*&, TH1D*&, bool = false);
-
-	TH1D* fillMuRatioPt(int, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), bool = false);
-	TH1D* fillMuRatioPt(vector<int>, int, bool(SSDLPlotter::*)(), bool(SSDLPlotter::*)(int), const int, const double*, const int, const double*, bool = false);
-
 	// Calculate from pre stored numbers, with fixed selections:
-	void fillMuElRatios(vector<int>);
-
-	TH1D* fillMuRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillMuRatioPt(vector<int>, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(int, gFPSwitch, bool = false);
-	TH1D* fillElRatioPt(vector<int>, gFPSwitch, bool = false);
+	void fillRatios(vector<int>, vector<int>, int = 0);
+	TH1D* fillRatioPt(gChannel, int, gFPSwitch, bool = false);
+	TH1D* fillRatioPt(gChannel, vector<int>, gFPSwitch, bool = false);
+	TH2D* fillRatio(gChannel, int, gFPSwitch, bool = false);
+	TH2D* fillRatio(gChannel, vector<int>, gFPSwitch, bool = false);
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
-	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false, gHiLoSwitch = HighPt);
+	TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
+	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
+	
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
 	void ratioWithPoissErrors(float, float, float&, float&);
 	void ratioWithAsymmCPErrors(int, int, float&, float&, float&);
 
-	void storeNumbers(Sample*, gChannel, gRegion);
-	
 	void printYields(gChannel, float = -1.0);
 	void printYieldsShort(float = -1);
+	
+	void printAllYieldTables();
+	void printMCYieldTable(TString, gRegion = Baseline);
 
+	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
+	TGraph* getSigEventGraph(gChannel, float, float, float, float);
 
 	void fixPRatios();
 	
@@ -136,17 +222,14 @@ public:
 	void printOriginSummary(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
-	virtual void drawTopLine();
+	virtual void drawTopLine(float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawTopLineSim(float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	
-	const int     getNPtBins (gChannel);
-	const double *getPtBins  (gChannel);
-	const int     getNPt2Bins(gChannel);
-	const double *getPt2Bins (gChannel);
-	const int     getNEtaBins(gChannel);
-	const double *getEtaBins (gChannel);
-	
 	vector<int> fMCBG;    // SM background MC samples
+	vector<int> fMCBGNoQCDNoGJets;    // SM background MC samples without QCD or GJets
+	vector<int> fMCBGNoQCDNoGJetsSig;    // SM background MC samples without QCD or GJets, with signal
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
 	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
@@ -163,7 +246,26 @@ public:
 	
 	float fLumiNorm;      // Normalize everything to this luminosity
 	float fBinWidthScale; // Normalize bin contents to this width
-	inline int sampleType(TString);
+
+	TH1D *fH1D_MufRatio;
+	TH1D *fH1D_MupRatio;
+	TH1D *fH1D_ElfRatio;
+	TH1D *fH1D_ElpRatio;
+
+	TH1D *fH1D_MufRatio_MC;
+	TH1D *fH1D_MupRatio_MC;
+	TH1D *fH1D_ElfRatio_MC;
+	TH1D *fH1D_ElpRatio_MC;
+
+	TH2D *fH2D_MufRatio;
+	TH2D *fH2D_MupRatio;
+	TH2D *fH2D_ElfRatio;
+	TH2D *fH2D_ElpRatio;
+
+	TH2D *fH2D_MufRatio_MC;
+	TH2D *fH2D_MupRatio_MC;
+	TH2D *fH2D_ElfRatio_MC;
+	TH2D *fH2D_ElpRatio_MC;
 
 	private:
 	
