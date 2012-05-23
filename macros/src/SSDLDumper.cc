@@ -4131,7 +4131,7 @@ bool SSDLDumper::isLooseMuon(int muon){
 	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
 	
 	// require to pass tight ID:
-	//	if(MuPassesTightID[muon] != 1) return false;
+	if(MuPassesTightID[muon] != 1) return false;
 
 	// passes ISOLATION
 	if(MuPFIso[muon] > 1.00) return false;
