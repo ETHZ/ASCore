@@ -475,9 +475,9 @@ void SSDLAnalysis::FillAnalysisTree(){
 		TLorentzVector pel;
 		pel.SetXYZM(fTR->ElPx[elindex], fTR->ElPy[elindex], fTR->ElPz[elindex], 0.0005);
 		double ETlept = sqrt(pel.M2() + pel.Perp2());
-		double METpx  = fTR->PFMETpx;
-		double METpy  = fTR->PFMETpy;
-		fTElMT[ind]   = sqrt( 2*fTR->PFMET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
+		double METpx  = fTR->PFType1METpx;
+		double METpy  = fTR->PFType1METpy;
+		fTElMT[ind]   = sqrt( 2*fTR->PFType1MET*ETlept - pel.Px()*METpx - pel.Py()*METpy );
 
 		// Electron ID
 		fTElEcalRecHitSumEt[ind] = fTR->ElDR03EcalRecHitSumEt      [elindex];
