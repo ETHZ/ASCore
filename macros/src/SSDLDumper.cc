@@ -4285,6 +4285,8 @@ bool SSDLDumper::isLooseElectron(int ele){
 	if(ElEcalRecHitSumEt[ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElHcalTowerSumEt [ele]/ElPt[ele] > 0.2) return false; // CaloIsoVL
 	if(ElTkSumPt        [ele]/ElPt[ele] > 0.2) return false; // TrkIsoVL
+
+	if(ElIsGoodElId_LooseWP[ele] != 1) return false;
 	
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
