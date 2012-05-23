@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon May 21 14:13:11 2012 by ROOT version 5.32/00
+// Wed May 23 21:03:55 2012 by ROOT version 5.32/00
 // from TTree Analysis/AnalysisTree
-// found on file: output_0_0.root
+// found on file: output_19.root
 //////////////////////////////////////////////////////////
 
 #ifndef MetaTreeClassBase_h
@@ -40,6 +40,8 @@ public :
    Int_t           HLT_ELE8_PS;
    Int_t           HLT_ELE8_JET30;
    Int_t           HLT_ELE8_JET30_PS;
+   Int_t           HLT_ELE8_JET30_TIGHT;
+   Int_t           HLT_ELE8_JET30_TIGHT_PS;
    Int_t           HLT_MU17_MU8;
    Int_t           HLT_MU17_MU8_PS;
    Int_t           HLT_ELE17_ELE8_TIGHT;
@@ -52,72 +54,72 @@ public :
    Int_t           NVrtx;
    Float_t         PUWeight;
    Int_t           NMus;
-   Int_t           IsSignalMuon[5];   //[NMus]
-   Float_t         MuPt[5];   //[NMus]
-   Float_t         MuEta[5];   //[NMus]
-   Float_t         MuPhi[5];   //[NMus]
-   Int_t           MuCharge[5];   //[NMus]
-   Float_t         MuPFIso[5];   //[NMus]
-   Float_t         MuRadIso[5];   //[NMus]
-   Float_t         MuD0[5];   //[NMus]
-   Float_t         MuDz[5];   //[NMus]
-   Float_t         MuEMVetoEt[5];   //[NMus]
-   Float_t         MuHadVetoEt[5];   //[NMus]
-   Int_t           MuPassesTightID[5]; //[NMus]
-   Float_t         MuPtE[5];   //[NMus]
-   Int_t           MuGenID[5];   //[NMus]
-   Int_t           MuGenMID[5];   //[NMus]
-   Int_t           MuGenGMID[5];   //[NMus]
-   Int_t           MuGenType[5];   //[NMus]
-   Int_t           MuGenMType[5];   //[NMus]
-   Int_t           MuGenGMType[5];   //[NMus]
-   Float_t         MuMT[5];   //[NMus]
+   Int_t           IsSignalMuon[2];   //[NMus]
+   Float_t         MuPt[2];   //[NMus]
+   Float_t         MuEta[2];   //[NMus]
+   Float_t         MuPhi[2];   //[NMus]
+   Int_t           MuCharge[2];   //[NMus]
+   Float_t         MuPFIso[2];   //[NMus]
+   Float_t         MuRadIso[2];   //[NMus]
+   Float_t         MuD0[2];   //[NMus]
+   Float_t         MuDz[2];   //[NMus]
+   Float_t         MuEMVetoEt[2];   //[NMus]
+   Float_t         MuHadVetoEt[2];   //[NMus]
+   Int_t           MuPassesTightID[2];   //[NMus]
+   Float_t         MuPtE[2];   //[NMus]
+   Int_t           MuGenID[2];   //[NMus]
+   Int_t           MuGenMID[2];   //[NMus]
+   Int_t           MuGenGMID[2];   //[NMus]
+   Int_t           MuGenType[2];   //[NMus]
+   Int_t           MuGenMType[2];   //[NMus]
+   Int_t           MuGenGMType[2];   //[NMus]
+   Float_t         MuMT[2];   //[NMus]
    Int_t           NEls;
-   Int_t           IsSignalElectron[5];   //[NEls]
-   Int_t           ElCharge[5];   //[NEls]
-   Int_t           ElChIsCons[5];   //[NEls]
-   Float_t         ElPt[5];   //[NEls]
-   Float_t         ElEta[5];   //[NEls]
-   Float_t         ElPhi[5];   //[NEls]
-   Float_t         ElD0[5];   //[NEls]
-   Float_t         ElD0Err[5];   //[NEls]
-   Float_t         ElDz[5];   //[NEls]
-   Float_t         ElDzErr[5];   //[NEls]
-   Float_t         ElPFIso[5];   //[NEls]
-   Float_t         ElRadIso[5];   //[NEls]
-   Float_t         ElEcalRecHitSumEt[5];   //[NEls]
-   Float_t         ElHcalTowerSumEt[5];   //[NEls]
-   Float_t         ElTkSumPt[5];   //[NEls]
-   Float_t         ElDPhi[5];   //[NEls]
-   Float_t         ElDEta[5];   //[NEls]
-   Float_t         ElSigmaIetaIeta[5];   //[NEls]
-   Float_t         ElHoverE[5];   //[NEls]
-   Float_t         ElEPthing[5];   //[NEls]
-   Int_t           ElIsGoodElId_LooseWP[5];   //[NEls]
-   Int_t           ElIsGoodElId_MediumWP[5];   //[NEls]
-   Int_t           ElGenID[5];   //[NEls]
-   Int_t           ElGenMID[5];   //[NEls]
-   Int_t           ElGenGMID[5];   //[NEls]
-   Int_t           ElGenType[5];   //[NEls]
-   Int_t           ElGenMType[5];   //[NEls]
-   Int_t           ElGenGMType[5];   //[NEls]
-   Float_t         ElMT[5];   //[NEls]
+   Int_t           IsSignalElectron[3];   //[NEls]
+   Int_t           ElCharge[3];   //[NEls]
+   Int_t           ElChIsCons[3];   //[NEls]
+   Float_t         ElPt[3];   //[NEls]
+   Float_t         ElEta[3];   //[NEls]
+   Float_t         ElPhi[3];   //[NEls]
+   Float_t         ElD0[3];   //[NEls]
+   Float_t         ElD0Err[3];   //[NEls]
+   Float_t         ElDz[3];   //[NEls]
+   Float_t         ElDzErr[3];   //[NEls]
+   Float_t         ElPFIso[3];   //[NEls]
+   Float_t         ElRadIso[3];   //[NEls]
+   Float_t         ElEcalRecHitSumEt[3];   //[NEls]
+   Float_t         ElHcalTowerSumEt[3];   //[NEls]
+   Float_t         ElTkSumPt[3];   //[NEls]
+   Float_t         ElDPhi[3];   //[NEls]
+   Float_t         ElDEta[3];   //[NEls]
+   Float_t         ElSigmaIetaIeta[3];   //[NEls]
+   Float_t         ElHoverE[3];   //[NEls]
+   Float_t         ElEPthing[3];   //[NEls]
+   Int_t           ElIsGoodElId_LooseWP[3];   //[NEls]
+   Int_t           ElIsGoodElId_MediumWP[3];   //[NEls]
+   Int_t           ElGenID[3];   //[NEls]
+   Int_t           ElGenMID[3];   //[NEls]
+   Int_t           ElGenGMID[3];   //[NEls]
+   Int_t           ElGenType[3];   //[NEls]
+   Int_t           ElGenMType[3];   //[NEls]
+   Int_t           ElGenGMType[3];   //[NEls]
+   Float_t         ElMT[3];   //[NEls]
    Float_t         pfMET;
    Float_t         pfMETPhi;
    Float_t         pfMETType1;
    Float_t         pfMETType1Phi;
    Int_t           NJets;
-   Float_t         JetPt[40];   //[NJets]
-   Float_t         JetEta[40];   //[NJets]
-   Float_t         JetPhi[40];   //[NJets]
-   Float_t         JetCSVBTag[40];   //[NJets]
-   Float_t         JetProbBTag[40];   //[NJets]
-   Float_t         JetArea[40];   //[NJets]
-   Float_t         JetJECUncert[40];   //[NJets]
-   Int_t           JetPartonID[40];   //[NJets]
-   Float_t         JetGenPt[40];   //[NJets]
-   Float_t         JetGenEta[40];   //[NJets]
-   Float_t         JetGenPhi[40];   //[NJets]
+   Float_t         JetPt[12];   //[NJets]
+   Float_t         JetEta[12];   //[NJets]
+   Float_t         JetPhi[12];   //[NJets]
+   Float_t         JetCSVBTag[12];   //[NJets]
+   Float_t         JetProbBTag[12];   //[NJets]
+   Float_t         JetArea[12];   //[NJets]
+   Float_t         JetJECUncert[12];   //[NJets]
+   Int_t           JetPartonID[12];   //[NJets]
+   Float_t         JetGenPt[12];   //[NJets]
+   Float_t         JetGenEta[12];   //[NJets]
+   Float_t         JetGenPhi[12];   //[NJets]
 
    // List of branches
    TBranch        *b_Run;   //!
@@ -138,6 +140,8 @@ public :
    TBranch        *b_HLT_ELE8_PS;   //!
    TBranch        *b_HLT_ELE8_JET30;   //!
    TBranch        *b_HLT_ELE8_JET30_PS;   //!
+   TBranch        *b_HLT_ELE8_JET30_TIGHT;   //!
+   TBranch        *b_HLT_ELE8_JET30_TIGHT_PS;   //!
    TBranch        *b_HLT_MU17_MU8;   //!
    TBranch        *b_HLT_MU17_MU8_PS;   //!
    TBranch        *b_HLT_ELE17_ELE8_TIGHT;   //!
@@ -161,7 +165,7 @@ public :
    TBranch        *b_MuDz;   //!
    TBranch        *b_MuEMVetoEt;   //!
    TBranch        *b_MuHadVetoEt;   //!
-   TBranch        *b_MuPassesTightID; //!
+   TBranch        *b_MuPassesTightID;   //!
    TBranch        *b_MuPtE;   //!
    TBranch        *b_MuGenID;   //!
    TBranch        *b_MuGenMID;   //!
@@ -236,9 +240,9 @@ MetaTreeClassBase::MetaTreeClassBase(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("output_0_0.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("output_19.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("output_0_0.root");
+         f = new TFile("output_19.root");
       }
       f->GetObject("Analysis",tree);
 
@@ -305,6 +309,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_ELE8_PS", &HLT_ELE8_PS, &b_HLT_ELE8_PS);
    fChain->SetBranchAddress("HLT_ELE8_JET30", &HLT_ELE8_JET30, &b_HLT_ELE8_JET30);
    fChain->SetBranchAddress("HLT_ELE8_JET30_PS", &HLT_ELE8_JET30_PS, &b_HLT_ELE8_JET30_PS);
+   fChain->SetBranchAddress("HLT_ELE8_JET30_TIGHT", &HLT_ELE8_JET30_TIGHT, &b_HLT_ELE8_JET30_TIGHT);
+   fChain->SetBranchAddress("HLT_ELE8_JET30_TIGHT_PS", &HLT_ELE8_JET30_TIGHT_PS, &b_HLT_ELE8_JET30_TIGHT_PS);
    fChain->SetBranchAddress("HLT_MU17_MU8", &HLT_MU17_MU8, &b_HLT_MU17_MU8);
    fChain->SetBranchAddress("HLT_MU17_MU8_PS", &HLT_MU17_MU8_PS, &b_HLT_MU17_MU8_PS);
    fChain->SetBranchAddress("HLT_ELE17_ELE8_TIGHT", &HLT_ELE17_ELE8_TIGHT, &b_HLT_ELE17_ELE8_TIGHT);
