@@ -333,7 +333,7 @@ float UserAnalysisBase::MuPFIso(int index){
 }
 
 float UserAnalysisBase::MuRadIso(int index){
-	return (fTR->MuPfIsoR03NeHad [index] + fTR->MuPfIsoR03Photon [index] + fTR->MuPfIsoR03SumPUPt[index]) / fTR->MuPt[index] ;
+	return (fTR->MumuonRadPFIsoChHad03[index] + fTR->MumuonRadPFIsoNHad03[index] + fTR->MumuonRadPFIsoPhoton03[index]) / fTR->MuPt[index] ;
 }
 
 bool UserAnalysisBase::IsTightMu(int index){
