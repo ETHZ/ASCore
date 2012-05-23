@@ -38,6 +38,10 @@ Name	HLT_MU17_MU8
 Path	HLT_Mu17_Mu8_v16
 Path	HLT_Mu17_Mu8_v17
 
+Name	HLT_MU17_TKMU8
+Path	HLT_Mu17_Mu8_v9
+Path	HLT_Mu17_Mu8_v10
+
 PATHSET
 Name	HLT_ELE17_ELE8_TIGHT
 Path	HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v15
