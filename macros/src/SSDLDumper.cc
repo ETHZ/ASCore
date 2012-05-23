@@ -3091,12 +3091,12 @@ float SSDLDumper::getJetPt(int i){
 	return JetPt[i];
 }
 float SSDLDumper::getMET(){
-	return pfMET;
+	return pfMETType1;
 }
 float SSDLDumper::getMETPhi(){
 	// Return the METPhi, either the true one or the one corrected for applied
 	// JES/JER smearing/scaling
-	float phi = pfMETPhi;
+	float phi = pfMETType1Phi;
 	return phi;
 }
 int SSDLDumper::getNJets(){
