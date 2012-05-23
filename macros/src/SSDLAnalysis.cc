@@ -198,6 +198,7 @@ void SSDLAnalysis::BookTree(){
 	fAnalysisTree->Branch("MuDz"          ,&fTmudz,           "MuDz[NMus]/F");
 	fAnalysisTree->Branch("MuEMVetoEt"    ,&fTmuEMVetoEt,     "MuEMVetoEt[NMus]/F");
 	fAnalysisTree->Branch("MuHadVetoEt"   ,&fTmuHadVetoEt,    "MuHadVetoEt[NMus]/F");
+	fAnalysisTree->Branch("MuPassesTightID",&fTmuPassesTightID,    "MuPassesTightID[NMus]/I");
 	fAnalysisTree->Branch("MuPtE"         ,&fTmuptE,          "MuPtE[NMus]/F");
 	fAnalysisTree->Branch("MuGenID"       ,&fTmuid,           "MuGenID[NMus]/I");
 	fAnalysisTree->Branch("MuGenMID"      ,&fTmumoid,         "MuGenMID[NMus]/I");
@@ -399,6 +400,7 @@ void SSDLAnalysis::FillAnalysisTree(){
 		fTmuptE   [i] = fTR->MuPtE     [index];
 		fTmuEMVetoEt [i] = fTR->MuIso03EMVetoEt [index];
 		fTmuHadVetoEt[i] = fTR->MuIso03HadVetoEt[index];
+		fTmuPassesTightID[i] = IsGoodBasicMu(index);
 		
 		if(fIsData == false){ // mc truth information
 			fTmuid     [i] = fTR->MuGenID  [index];
@@ -583,6 +585,7 @@ void SSDLAnalysis::ResetTree(){
 		fTmuptE         [i] = -999.99;
 		fTmuEMVetoEt    [i] = -999.99;
 		fTmuHadVetoEt   [i] = -999.99;
+		fTmuPassesTightID[i] = -999.99;
 		fTmuid          [i] = -999;
 		fTmumoid        [i] = -999;
 		fTmugmoid       [i] = -999;

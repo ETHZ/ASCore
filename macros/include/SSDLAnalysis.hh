@@ -145,6 +145,7 @@ private:
 	float fTmuptE         [fMaxNmus];
 	float fTmuEMVetoEt    [fMaxNmus];
 	float fTmuHadVetoEt   [fMaxNmus];
+	int   fTmuPassesTightID[fMaxNmus];
 	int   fTmuid          [fMaxNmus];
 	int   fTmumoid        [fMaxNmus];
 	int   fTmugmoid       [fMaxNmus];
