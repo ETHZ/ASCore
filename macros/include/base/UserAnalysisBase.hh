@@ -74,6 +74,7 @@ public:
 //     virtual bool IsGoodPFJetTightPAT( int, double = 30., double = 2.5);
 
     // Muon Selectors
+    virtual bool IsMostBasicMu(int);
     virtual bool IsGoodBasicMu(int);
     virtual bool IsTightMu(int);
     virtual bool IsLooseMu(int);

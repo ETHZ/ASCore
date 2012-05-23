@@ -294,6 +294,13 @@ bool UserAnalysisBase::IsGoodPFJetTight(int index, double ptcut, double absetacu
 // }
 
 // MUONS
+bool UserAnalysisBase::IsMostBasicMu(int index){
+    // Most basic muons for Z-veto in 2012
+    if((fTR->MuIsGlobalMuon[index] == 0 && fTR->MuIsTrackerMuon[index] == 0 ))  return false;
+    if(fTR->MuIsPFMuon[index] == 0) return false;
+    return true;
+}
+
 bool UserAnalysisBase::IsGoodBasicMu(int index){
     // Basic muon cleaning and ID
     if(fTR->MuIsGlobalMuon[index] == 0)  return false;
@@ -474,9 +481,9 @@ bool UserAnalysisBase::IsLooseEl(int index){
 
     // MARC: what is this? if(!fTR->ElEcalDriven[index]) return false;
 	
-    // Loose identification criteria: 
-    //   if(!IsGoodElId_LooseWP(index)) return false;
-    
+    // Loose identification criteria: WP90
+    // if(!IsGoodElId_LooseWP(index)) return false;
+
     // Requiring VETO WP: no further requirements need to be applied.
 
     // Loose isolation criteria
