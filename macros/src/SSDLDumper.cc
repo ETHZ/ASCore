@@ -34,8 +34,8 @@
 #include <time.h> // access to date/time
 
 
-int gDEBUG_EVENTNUMBER_ = -1; //93995433;
-int gDEBUG_RUNNUMBER_ = -1; //191720;
+int gDEBUG_EVENTNUMBER_ = -1;  
+int gDEBUG_RUNNUMBER_ = -1;    
 
 using namespace std;
 
@@ -319,9 +319,35 @@ void SSDLDumper::loopEvents(Sample *S){
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
 		// if(jentry > 10000) break;
 		/////////////////////////////////////////////
-// 		if(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_) {
-// 		  fOUTSTREAM << "[DEBUG]: " << Run << ", " << Event << " --> " << Form ("NMu %1d NEl %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", NMus, NEls, getHT(), getNJets(), getNBTags()) << endl;
-// 		  fOUTSTREAM << "[DEBUG]: " << 
+		//	EE:     191720   98     93995433     2   0   172.534   34.461    N
+		//      EE:     193575   119    79605331     2   0   339.845   76.281    N
+		//	EE:     194076   665    653035050    3   1   182.267   72.469    N
+		//      MuMu:   191833   81     105354174    3   1   330.229   135.168   N
+		//      MuMu:   193541   433    275954331    2   0   328.698   22.611    N
+		//      EMu:    191062   541    557924239    2   1   146.861   5.132     N
+		//	EMu:    193575   475    365741102    3   1   219.300   56.996    N
+		//	EMu:    194050   607    577022380    2   0   115.695   109.439   N
+		//	EMu:    193998   85     51341300     3   0   263.314   123.356   N
+// 		bool printRun = false;
+// 		if(Event==93995433  && Run==191720) printRun = true;
+// 		if(Event==79605331  && Run==193575) printRun = true;
+// 		if(Event==653035050 && Run==194076) printRun = true;
+// 		if(Event==105354174 && Run==191833) printRun = true;
+// 		if(Event==275954331 && Run==193541) printRun = true;		
+// 		if(Event==557924239 && Run==191062) printRun = true;		
+// 		if(Event==365741102 && Run==193575) printRun = true;		
+// 		if(Event==577022380 && Run==194050) printRun = true;		
+// 		if(Event==51341300  && Run==193998) printRun = true;		
+// 		if (printRun){
+// 		  fOUTSTREAM << "[DEBUG]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l) %1d(%1d) NEl(#l) %1d(%1d) passZVeto(3rdLep) %1d(%1d) HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
+// 						     S->sname.Data(),
+// 						     Run, 
+// 						     Event, 
+// 						     NMus, hasLooseMuons(), 
+// 						     NEls, hasLooseElectrons(), 
+// 						     passesZVeto(), passes3rdLepVeto(),
+// 						     getHT(), getNJets(), getNBTags(),
+// 						     getMET()) << endl;
 // 		}
 		/////////////////////////////////////////////
 		// Event modifications
@@ -463,7 +489,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 				S->region[reg][HighPt].mm.nt20_pt ->Fill(MuPt [mu1], MuPt [mu2], gEventWeight);
 				S->region[reg][HighPt].mm.nt20_eta->Fill(fabs(MuEta[mu1]), fabs(MuEta[mu2]), gEventWeight);
 				if(S->datamc == 0 && reg == Baseline){
-					fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
+				  fOUTSTREAM << Form("%12s: MuMu - run %6.0d / ls %5.0d / ev %11.0d - HT(#J/#bJ) %6.2f(%1d/%1d) MET %6.2f MT2 %6.2f Pt1 %6.2f Pt2 %6.2f Charge %2d", S->sname.Data(), Run, LumiSec, Event, getHT(), getNJets(), getNBTags(), getMET(), getMT2(mu1,mu2,Muon), MuPt[mu1], MuPt[mu2], MuCharge[mu1]) << endl ;
 				}
 				if(S->datamc > 0 ){
 					S->region[reg][HighPt].mm.nt11_origin->Fill(muIndexToBin(mu1)-0.5, muIndexToBin(mu2)-0.5, gEventWeight);
@@ -4079,7 +4105,9 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 bool SSDLDumper::isGoodMuonForZVeto(int muon){
 	// Remove stupid PtE/Pt cut
 	if(muon >= NMus) return false; // Sanity check
-	if(MuPt[muon] < 5.) return false;
+	if(MuPt[muon] < 10.) return false;
+	
+	if (MuPFIso[muon] > 0.2) return false;
 	return true;
 }
 bool SSDLDumper::isGoodMuonFor3rdLepVeto(int muon){
@@ -4103,7 +4131,7 @@ bool SSDLDumper::isLooseMuon(int muon){
 	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
 	
 	// require to pass tight ID:
-	if(MuPassesTightID[muon] != 1) return false;
+	//	if(MuPassesTightID[muon] != 1) return false;
 
 	// passes ISOLATION
 	if(MuPFIso[muon] > 1.00) return false;
@@ -4185,6 +4213,9 @@ bool SSDLDumper::isGoodEleForZVeto(int ele){
 	// Don't care about charge consistency or trigger efficiency
 	if(ele >= NEls) return false; // Sanity check
 	if(ElPt[ele] < 10.) return false;
+
+	// Apply IsoCUT
+	if(ElPFIso[ele] > 0.2) return false;
 	return true;	
 }
 bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
