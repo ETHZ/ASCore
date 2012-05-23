@@ -34,9 +34,8 @@
 #include <time.h> // access to date/time
 
 
-int gDEBUG_EVENTNUMBER_ = -1;
-int gDEBUG_RUNNUMBER_ = -1;
-
+int gDEBUG_EVENTNUMBER_ = -1; //93995433;
+int gDEBUG_RUNNUMBER_ = -1; //191720;
 
 using namespace std;
 
@@ -320,7 +319,10 @@ void SSDLDumper::loopEvents(Sample *S){
 		// if(!(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_)) continue;
 		// if(jentry > 10000) break;
 		/////////////////////////////////////////////
-
+// 		if(Event==gDEBUG_EVENTNUMBER_ && Run==gDEBUG_RUNNUMBER_) {
+// 		  fOUTSTREAM << "[DEBUG]: " << Run << ", " << Event << " --> " << Form ("NMu %1d NEl %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", NMus, NEls, getHT(), getNJets(), getNBTags()) << endl;
+// 		  fOUTSTREAM << "[DEBUG]: " << 
+// 		}
 		/////////////////////////////////////////////
 		// Event modifications
 		scaleBTags(S, 0);
@@ -4099,7 +4101,11 @@ bool SSDLDumper::isLooseMuon(int muon){
 	if(MuEMVetoEt[muon]  > 4.0)      return false;
 	if(MuHadVetoEt[muon] > 6.0)      return false;
 	if(MuPtE[muon]/MuPt[muon] > 0.1) return false;
+	
+	// require to pass tight ID:
+	if(MuPassesTightID[muon] != 1) return false;
 
+	// passes ISOLATION
 	if(MuPFIso[muon] > 1.00) return false;
 	return true;
 }
@@ -4252,15 +4258,15 @@ bool SSDLDumper::isLooseElectron(int ele){
 	// Additional cuts for CaloIdVL and TrkIdVL:
 	if( fabs(ElEta[ele]) < 1.479 ){ // Barrel
 		if(ElHoverE[ele] > 0.10)         return false; // CaloIdT
-		if(ElSigmaIetaIeta[ele]  > 0.011) return false; // CaloIdT
+		if(ElSigmaIetaIeta[ele]  > 0.01) return false; // CaloIdT
 		if(fabs(ElDPhi    [ele]) > 0.15)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL // this is looser than WP90
+		if(fabs(ElDEta    [ele]) > 0.007)  return false; // TrkIdVL // this is looser than WP90
 	}
 	if( fabs(ElEta[ele]) >= 1.479 ){ // Endcap
 		if(ElHoverE[ele] > 0.075)        return false; // MARC CaloIdT, what about tight??
-		if(ElSigmaIetaIeta[ele]  > 0.031) return false; // CaloIdT
+		if(ElSigmaIetaIeta[ele]  > 0.03) return false; // CaloIdT
 		if(fabs(ElDPhi    [ele]) > 0.10)  return false; // TrkIdVL
-		if(fabs(ElDEta    [ele]) > 0.01)  return false; // TrkIdVL // this is looser than WP90
+		if(fabs(ElDEta    [ele]) > 0.009)  return false; // TrkIdVL // this is looser than WP90
 	}
 	return true;
 }
