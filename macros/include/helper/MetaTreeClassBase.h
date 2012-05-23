@@ -104,6 +104,8 @@ public :
    Float_t         ElMT[5];   //[NEls]
    Float_t         pfMET;
    Float_t         pfMETPhi;
+   Float_t         pfMETType1;
+   Float_t         pfMETType1Phi;
    Int_t           NJets;
    Float_t         JetPt[40];   //[NJets]
    Float_t         JetEta[40];   //[NJets]
@@ -200,6 +202,8 @@ public :
    TBranch        *b_ElMT;   //!
    TBranch        *b_pfMET;   //!
    TBranch        *b_pfMETPhi;   //!
+   TBranch        *b_pfMETType1;   //!
+   TBranch        *b_pfMETType1Phi;   //!
    TBranch        *b_NJets;   //!
    TBranch        *b_JetPt;   //!
    TBranch        *b_JetEta;   //!
@@ -365,6 +369,8 @@ void MetaTreeClassBase::Init(TTree *tree)
    fChain->SetBranchAddress("ElMT", ElMT, &b_ElMT);
    fChain->SetBranchAddress("pfMET", &pfMET, &b_pfMET);
    fChain->SetBranchAddress("pfMETPhi", &pfMETPhi, &b_pfMETPhi);
+   fChain->SetBranchAddress("pfMETType1", &pfMETType1, &b_pfMETType1);
+   fChain->SetBranchAddress("pfMETType1Phi", &pfMETType1Phi, &b_pfMETType1Phi);
    fChain->SetBranchAddress("NJets", &NJets, &b_NJets);
    fChain->SetBranchAddress("JetPt", JetPt, &b_JetPt);
    fChain->SetBranchAddress("JetEta", JetEta, &b_JetEta);
