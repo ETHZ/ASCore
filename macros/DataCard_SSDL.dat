@@ -6,15 +6,15 @@
 #    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
 ###################################################################################################################
 # Data
-#DoubleMu1	mdunser/SSDLTrees/2012/May20/V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD/			0	0
-#DoubleEle1	mdunser/SSDLTrees/2012/May20/V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD/		0	1
-#MuEG1		mdunser/SSDLTrees/2012/May20/V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD/		0	2
-DoubleMu2	mdunser/SSDLTrees/2012/May22/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
-DoubleEle2	mdunser/SSDLTrees/2012/May22/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
-MuEG2		mdunser/SSDLTrees/2012/May22/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/		0	2
+DoubleMu1	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD/			0	0
+DoubleEle1	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD/		0	1
+MuEG1		mdunser/SSDLTrees/2012/May24/V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD/		0	2
+DoubleMu2	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
+DoubleEle2	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
+MuEG2		mdunser/SSDLTrees/2012/May24/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/		0	2
 ####################################################################################################################
 # Top and EWK
-#TTJets		mdunser/SSDLTrees/2012/May21/V03-03-00_TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/				1	-1	225.197
+TTJets		mdunser/SSDLTrees/2012/May24/V03-03-00_TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/				1	-1	225.197
 #SingleT_t	stiegerb/SSDLTrees/2011B/Dec8/MC/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root		1	-1	92108.09	53
 #SingleTbar_t	stiegerb/SSDLTrees/2011B/Dec8/MC/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11.root		1	-1	85005.65	53
 #SingleT_tW	stiegerb/SSDLTrees/2011B/Dec8/MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11.root	1	-1	10348.03	55
@@ -22,7 +22,7 @@ MuEG2		mdunser/SSDLTrees/2012/May22/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/		
 #SingleT_s	stiegerb/SSDLTrees/2011B/Dec8/MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2.root		1	-1	79323.83	57
 #SingleTbar_s	stiegerb/SSDLTrees/2011B/Dec8/MC/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11.root		1	-1	95819.44	57
 #WJets		stiegerb/SSDLTrees/2011B/Dec8/MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2		1	-1	1809.89		61
-#DYJets		mdunser/SSDLTrees/2012/May21/V03-03-00_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v2/		1	-1	3503.71
+DYJets		mdunser/SSDLTrees/2012/May24/V03-03-00_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v2/		1	-1	3503.71
 #GJets40		stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root	1	-1	4.9556e+02	38
 #GJets100	stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root	1	-1	2.9470e+02	39
 #GJets200	stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4.root   	1	-1	1.1746e+04      40
