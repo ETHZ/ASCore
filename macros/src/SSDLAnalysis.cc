@@ -308,15 +308,18 @@ void SSDLAnalysis::FillAnalysisTree(){
 	fCounter.fill(fCutnames[2]);
 
 	// Do object selections
-	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsLooseMu);
+	vector<int> selectedMuInd  = MuonSelection(           &UserAnalysisBase::IsMostBasicMu);
+	vector<int> looseMuInd     = MuonSelection(           &UserAnalysisBase::IsLooseMu);
 	vector<int> selectedElInd  = ElectronSelection(       &UserAnalysisBase::IsLooseEl);
 	vector<int> selectedJetInd = PFJetSelection(15., 2.5, &UserAnalysisBase::IsGoodBasicPFJet);
 	fTnqmus  = std::min( (int)selectedMuInd .size(), fMaxNmus );
 	fTnqels  = std::min( (int)selectedElInd .size(), fMaxNeles);
 	fTnqjets = std::min( (int)selectedJetInd.size(), fMaxNjets);
+	int nLooseMus = std::min( (int)looseMuInd .size(), fMaxNmus );
 
 	// Require at least one loose lepton
-	if( (fTnqmus + fTnqels) < 1 ) return;
+	// if( (fTnqmus + fTnqels) < 1 ) return;
+	if( (nLooseMus + fTnqels) < 1 ) return;
 	fCounter.fill(fCutnames[3]);
 
 	// Event and run info
