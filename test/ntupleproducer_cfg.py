@@ -440,7 +440,7 @@ process.tauIsoDepositPFGammas = tauIsoDepositPFGammas.clone()
 process.patTaus = patTaus.clone()
 
 process.patTaus.tauIDSources = cms.PSet(
-    decayModeFinding = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
+    patTaus.tauIDSources,
     byVLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByVLooseChargedIsolation"),
     byLooseChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByLooseChargedIsolation"),
     byMediumChargedIsolation = cms.InputTag("hpsPFTauDiscriminationByMediumChargedIsolation"),
@@ -457,13 +457,11 @@ process.patTaus.tauIDSources = cms.PSet(
     byLooseCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr"),
     byMediumCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr"),
     byTightCombinedIsolationDBSumPtCorr = cms.InputTag("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr"),
-    againstElectronLoose = cms.InputTag("hpsPFTauDiscriminationByLooseElectronRejection"),
-    againstElectronMedium = cms.InputTag("hpsPFTauDiscriminationByMediumElectronRejection"),
-    againstElectronTight = cms.InputTag("hpsPFTauDiscriminationByTightElectronRejection"),
-    againstElectronMVA = cms.InputTag("hpsPFTauDiscriminationByMVAElectronRejection"),
-    againstMuonLoose = cms.InputTag("hpsPFTauDiscriminationByLooseMuonRejection"),
-    againstMuonMedium = cms.InputTag("hpsPFTauDiscriminationByMediumMuonRejection"),
-    againstMuonTight = cms.InputTag("hpsPFTauDiscriminationByTightMuonRejection")
+    #new 2012 ID's
+    byIsolationMVAraw  = cms.InputTag("hpsPFTauDiscriminationByIsolationMVAraw"),
+    byLooseIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByLooseIsolationMVA"),
+    byMediumIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationMVA"),
+    byTightIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByTightIsolationMVA"),
     )
 
 process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus)
@@ -500,6 +498,7 @@ process.p = cms.Path(
 	+ process.trackingFailureFilter
         + process.pfParticleSelectionSequence
  	+ process.eleIsoSequence
+        + process.PFTau
         + process.newTaus  
         + process.selectedNewTaus 
 #	+ process.jetIDFailure
