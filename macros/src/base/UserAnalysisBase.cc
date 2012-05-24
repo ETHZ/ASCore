@@ -327,9 +327,9 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
 }
 
 float UserAnalysisBase::MuPFIso(int index){
-	double neutral = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] );
-	float iso = ( fTR->MuPfIsoR03ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
-	return iso;
+  double neutral = (fTR->MuPfIsoR03NeHad[index] + fTR->MuPfIsoR03Photon[index] - 0.5*fTR->MuPfIsoR03SumPUPt[index] );
+  float iso = ( fTR->MuPfIsoR03ChHad[index] + TMath::Max(0., neutral) ) / fTR->MuPt[index];
+  return iso;
 }
 
 float UserAnalysisBase::MuRadIso(int index){
@@ -433,6 +433,7 @@ bool UserAnalysisBase::IsGoodElId_MediumWP(int index){
     // not applied     if(fabs(fTR->ElSCEta[index]) < 1.0 && fTR->ElESuperClusterOverP[index] > 0.95 ) return true;
     // not applied     return false;
     // not applied }
+    if(fabs(1/fTR->ElCaloEnergy[index] - fTR->ElESuperClusterOverP[index]/fTR->ElCaloEnergy[index]) > 0.05 ) return false;
 
     if(fabs(fTR->ElD0PV[index]) > 0.02) return false;
     if(fabs(fTR->ElDzPV[index]) > 0.10) return false;
