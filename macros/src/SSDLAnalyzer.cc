@@ -39,7 +39,7 @@ void SSDLAnalyzer::Loop(){
 			PrintProgress(jentry++);
 
 			// MARC PrintProgress(jentry);
-			// Prescale processing...
+			// MARC // Prescale processing...
 			// MARC if ( prescale>1 && jentry%prescale ) continue;
 
 			fTR->GetEntry(jentry);
@@ -51,17 +51,17 @@ void SSDLAnalyzer::Loop(){
 			if( fCurRun != fTR->Run ) { // new run
 				fCurRun = fTR->Run;
 				skipRun = false;
-				// MARC if ( CheckRun() == false ) skipRun = true;
-				// MARC else fSSDLAnalysis->BeginRun(fCurRun);
+				if ( CheckRun() == false ) skipRun = true;
+				else fSSDLAnalysis->BeginRun(fCurRun);
 				fSSDLAnalysis->BeginRun(fCurRun);
 			}
 			
-			// MARC // Check if new lumi is in JSON file
-			// MARC if( fCurLumi != fTR->LumiSection ) { // new lumisection
-			// MARC 	fCurLumi = fTR->LumiSection;
-			// MARC 	skipLumi = false;
-			// MARC 	if ( CheckRunLumi() == false ) skipLumi = true;
-			// MARC }
+			// Check if new lumi is in JSON file
+			if( fCurLumi != fTR->LumiSection ) { // new lumisection
+				fCurLumi = fTR->LumiSection;
+				skipLumi = false;
+				if ( CheckRunLumi() == false ) skipLumi = true;
+			}
 			if(skipRun || skipLumi) continue;
 			fSSDLAnalysis->Analyze();
 	}
