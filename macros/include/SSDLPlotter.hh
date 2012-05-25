@@ -58,13 +58,23 @@ struct TTWZPrediction {
 	float ttw;
 	float ttz;
 
+	float ttwz_mm;
+	float ttwz_ee;
+	float ttwz_em;
+
 	float fake;
 	float fake_err;
 	float cmid;
 	float cmid_err;
 	float wz;
+	float wz_mm;
+	float wz_ee;
+	float wz_em;
 	float wz_err;
 	float rare;
+	float rare_mm;
+	float rare_ee;
+	float rare_em;
 	float rare_err;
 };
 
@@ -114,6 +124,7 @@ public:
 	void makeMETvsHTPlotTau();
 	
 	void makeFRvsPtPlots(gChannel, gFPSwitch);
+	void makeFRvsNVPlots(gChannel, gFPSwitch);
 	void makeFRvsEtaPlots(gChannel);
 	void makeRatioPlots(gChannel);
 	void make2DRatioPlots(gChannel);
@@ -131,7 +142,10 @@ public:
 
 	void makeAllIntPredictions();
 	void makeIntPrediction(TString, gRegion);
+	void makeTTWIntPredictions();
 	TTWZPrediction makeIntPredictionTTW(TString, gRegion);
+	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);
+
 	SSDLPrediction makePredictionSignalEvents(float minHT, float maxHT, float minMET, float maxMET, int minNjets, int minNbjetsL, int minNbjetsM, float pT1=20., float pT2=10., bool ttw=false, int flag=0);
 	void makeDiffPrediction();
 	void makeTTWDiffPredictions();
@@ -159,6 +173,7 @@ public:
 
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
+	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
 	
@@ -166,6 +181,7 @@ public:
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
 	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);
+	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	TH1D* getFRatio(vector<int>, gChannel, int = 0, bool = false);
 
 	void ratioWithBinomErrors(float, float, float&, float&);
@@ -179,7 +195,7 @@ public:
 	void printMCYieldTable(TString, gRegion = Baseline);
 
 	TGraph* getSigEventGraph(gChannel, gRegion = Baseline);
-	TGraph* getSigEventGraph(gChannel, float, float, float, float);
+	TGraph* getSigEventGraph(gChannel, float, float, float, float, int=0);
 
 	void fixPRatios();
 	
@@ -210,6 +226,7 @@ public:
 	void printOriginSummary2L(vector<int>, int, gChannel, gRegion = Baseline, gHiLoSwitch = HighPt);
 	
 	virtual void drawTopLine(float = 0.60, float = 1.0, float = 0.13);
+	virtual void drawTopLineSim(float = 0.60, float = 1.0, float = 0.13);
 	virtual void drawRegionSel(gRegion);
 	virtual void drawDiffCuts(int);
 	

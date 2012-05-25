@@ -192,11 +192,18 @@ public:
 		TH2D *fnloose; 
 		TH2D *pntight; // pt vs eta
 		TH2D *pnloose;
+
+		TH1D *fntight_nv; // nvertices
+		TH1D *fnloose_nv;
+		TH1D *pntight_nv;
+		TH1D *pnloose_nv;
 		
 		TEfficiency *fratio_pt;
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
 		TEfficiency *pratio_eta;
+		TEfficiency *fratio_nv;
+		TEfficiency *pratio_nv;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -263,7 +270,7 @@ public:
 		TH1D *nloose[gNRatioVars];
 	};
 	
-	static const int gNKinVars = 12;
+	static const int gNKinVars = 13;
 	struct KinPlots{
 		static TString var_name[gNKinVars];
 		static TString axis_label[gNKinVars];
@@ -564,6 +571,8 @@ public:
 
 	// Event and Object selectors:
 	virtual void scaleBTags(Sample *S, int flag = 0);
+	virtual void saveBTags();
+	virtual void resetBTags();
 	virtual void smearJetPts(Sample *S, int flag = 0);
 	virtual void scaleLeptons(Sample *S, int flag = 0);
 	virtual void smearMET(Sample *S);
@@ -584,8 +593,8 @@ public:
 	virtual float getAwayJetPt(int, gChannel);
 	virtual float getMaxJPt();
 	
-	virtual int getNTightMuons();
-	virtual int getNTightElectrons();
+	virtual int getNTightMuons(float ptcut=0.);
+	virtual int getNTightElectrons(float ptcut=0.);
 	
 	virtual int isSSLLEvent(int&, int&);
 	virtual int isOSLLEvent(int&, int&);
@@ -766,6 +775,7 @@ public:
 	vector<float> fSigEv_HI_EM_HT;
 	vector<float> fSigEv_HI_EM_MET;
 	
+	vector<float> fSaved_Tags;
 	
 	TFile *fStorageFile;
 	TString fOutputFileName;
