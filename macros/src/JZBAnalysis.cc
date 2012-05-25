@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.27 $";
+string sjzbversion="$Revision: 1.70.2.28 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.27 2012/05/25 07:56:46 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.28 2012/05/25 09:09:34 buchmann Exp $
 */
 
 
@@ -1331,9 +1331,9 @@ void JZBAnalysis::Analyze() {
       counters[PJ].fill("... pt>20.");
 
       //Get Uncertainty
-      jecUnc->setJetEta(jeta);
-      jecUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
-      float unc = jecUnc->getUncertainty(true); 
+      fJECUnc->setJetEta(jeta);
+      fJECUnc->setJetPt(jpt); // here you must use the CORRECTED jet pt
+      float unc = fJECUnc->getUncertainty(true); 
       nEvent.pfJetPt[nEvent.pfJetNum]    = jpt;
       nEvent.pfJetEta[nEvent.pfJetNum]   = jeta;
       nEvent.pfJetPhi[nEvent.pfJetNum]   = jphi;
