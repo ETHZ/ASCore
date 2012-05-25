@@ -28,7 +28,7 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
     // Put all JES-related stuff between pre-compiler flags
     //----------- Correction Object ------------------------------
     vector<JetCorrectorParameters> JetCorPar;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2L3Residual.txt");
+    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_Uncertainty_AK5PF.txt");
     JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L3Absolute.txt");
     JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L2Relative.txt");
     JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/pnef/MT2Analysis/Code/JetEnergyCorrection/GR_R_42_V19_AK5PF/GR_R_42_V19_AK5PF_L1FastJet.txt");
