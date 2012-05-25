@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.29 $";
+string sjzbversion="$Revision: 1.70.2.30 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.29 2012/05/25 10:46:54 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.30 2012/05/25 14:04:15 buchmann Exp $
 */
 
 
@@ -150,6 +150,9 @@ public:
   float pfJetGoodPt[jMax];
   float pfJetGoodEta[jMax];
   float pfJetGoodPhi[jMax];
+  float pfJetGoodE[jMax];
+  float pfJetGoodMl[jMax];
+  float pfJetGoodPtl[jMax];
   bool  pfJetGoodID[jMax];
   float bTagProbCSVBP[jMax];
   float bTagProbCSVMVA[jMax];
@@ -159,6 +162,9 @@ public:
   float pfJetGoodPtBtag[jMax];
   float pfJetGoodEtaBtag[jMax];
   float pfJetGoodPhiBtag[jMax];
+  float pfJetGoodEBtag[jMax];
+  float pfJetGoodMlBtag[jMax];
+  float pfJetGoodPtlBtag[jMax];
   bool  pfJetGoodIDBtag[jMax];
 
   int pfJetGoodNum40;
@@ -380,10 +386,16 @@ void nanoEvent::reset()
     pfJetGoodPt[jCounter]=0;
     pfJetGoodEta[jCounter]=0;
     pfJetGoodPhi[jCounter]=0;
+    pfJetGoodE[jCounter]=0;
+    pfJetGoodMl[jCounter]=0;
+    pfJetGoodPtl[jCounter]=0;
     pfJetGoodID[jCounter]=0;
     pfJetGoodPtBtag[jCounter]=0;
     pfJetGoodEtaBtag[jCounter]=0;
     pfJetGoodPhiBtag[jCounter]=0;
+    pfJetGoodEBtag[jCounter]=0;
+    pfJetGoodMlBtag[jCounter]=0;
+    pfJetGoodPtlBtag[jCounter]=0;
     pfJetGoodIDBtag[jCounter]=0;
     bTagProbCSVBP[jCounter] = 0;
     bTagProbCSVMVA[jCounter] = 0;
@@ -710,11 +722,17 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/O");
+  myTree->Branch("pfJetGoodE", nEvent.pfJetGoodE,"pfJetGoodE[pfJetGoodNum]/O");
+  myTree->Branch("pfJetGoodMl", nEvent.pfJetGoodMl,"pfJetGoodMl[pfJetGoodNum]/O");
+  myTree->Branch("pfJetGoodPtl", nEvent.pfJetGoodPtl,"pfJetGoodPtl[pfJetGoodNum]/O");
 
   myTree->Branch("pfJetGoodPtBtag", nEvent.pfJetGoodPtBtag,"pfJetGoodPtBag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodEtaBtag",nEvent.pfJetGoodEtaBtag,"pfJetGoodEtaBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodPhiBtag",nEvent.pfJetGoodPhiBtag,"pfJetGoodPhiBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodIDBtag", nEvent.pfJetGoodIDBtag,"pfJetGoodID[pfJetGoodNumBtag]/O");
+  myTree->Branch("pfJetGoodEBtag", nEvent.pfJetGoodEBtag,"pfJetGoodEBtag[pfJetGoodNumBtag]/O");
+  myTree->Branch("pfJetGoodMlBtag", nEvent.pfJetGoodMlBtag,"pfJetGoodMlBtag[pfJetGoodNumBtag]/O");
+  myTree->Branch("pfJetGoodPtlBtag", nEvent.pfJetGoodPtlBtag,"pfJetGoodPtlBtag[pfJetGoodNumBtag]/O");
   myTree->Branch("bTagProbCSVBP", nEvent.bTagProbCSVBP,"bTagProbCSVBP[pfJetGoodNum]/F");
   myTree->Branch("bTagProbCSVMVA", nEvent.bTagProbCSVMVA,"bTagProbCSVMVA[pfJetGoodNum]/F");
 
@@ -1370,15 +1388,23 @@ void JZBAnalysis::Analyze() {
         nEvent.pfJetGoodPt[nEvent.pfJetGoodNum]  = jpt;
         nEvent.pfJetGoodEta[nEvent.pfJetGoodNum] = jeta;
         nEvent.pfJetGoodPhi[nEvent.pfJetGoodNum] = jphi;
+        nEvent.pfJetGoodE[nEvent.pfJetGoodNum] = jenergy;
         nEvent.pfJetGoodID[nEvent.pfJetGoodNum]  = isJetID;
-	    nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
-	    nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
+        nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexBPFJetTags[i];
+        nEvent.bTagProbCSVMVA[nEvent.pfJetGoodNum] = fTR->JnewPFCombinedSecondaryVertexMVABPFJetTags[i];
         
         if(isJetID>0) {
 	        nEvent.pfJetGoodNumID++;
 	        if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumIDBtag++;
-	    }
-	    if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) nEvent.pfJetGoodNumBtag++;
+	}
+	if(nEvent.bTagProbCSVBP[nEvent.pfJetGoodNum] > 0.679) { 
+	     nEvent.pfJetGoodPtBtag[nEvent.pfJetGoodNumBtag]  = jpt;
+             nEvent.pfJetGoodEtaBtag[nEvent.pfJetGoodNumBtag] = jeta;
+             nEvent.pfJetGoodPhiBtag[nEvent.pfJetGoodNumBtag] = jphi;
+             nEvent.pfJetGoodEBtag[nEvent.pfJetGoodNumBtag] = jenergy;
+             nEvent.pfJetGoodIDBtag[nEvent.pfJetGoodNumBtag]  = isJetID;
+	     nEvent.pfJetGoodNumBtag++;
+        }
         nEvent.pfJetGoodNum++;
       }
       if ( jpt*(jesC+unc)/jesC>30 )  nEvent.pfJetGoodNump1sigma++;
@@ -1393,6 +1419,21 @@ void JZBAnalysis::Analyze() {
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
     }
     
+    for(int jcounter = 0; jcounter < nEvent.pfJetGoodNum; ++jcounter) {
+    TLorentzVector j1(0,0,0,0);
+    j1.SetPtEtaPhiE(nEvent.pfJetGoodPt[jcounter], nEvent.pfJetGoodEta[jcounter], nEvent.pfJetGoodPhi[jcounter], nEvent.pfJetGoodE[jcounter]);
+    nEvent.pfJetGoodMl[jcounter] = (sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+j1).M();
+    nEvent.pfJetGoodPtl[jcounter] = (sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+j1).Pt();
+  }
+  for(int jcounter = 0; jcounter < nEvent.pfJetGoodNumBtag; ++jcounter) {
+    TLorentzVector j1(0,0,0,0);
+    j1.SetPtEtaPhiE(nEvent.pfJetGoodPtBtag[jcounter], nEvent.pfJetGoodEtaBtag[jcounter], nEvent.pfJetGoodPhiBtag[jcounter], nEvent.pfJetGoodEBtag[jcounter]);
+    nEvent.pfJetGoodMlBtag[jcounter] = (sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+j1).M();
+    nEvent.pfJetGoodPtlBtag[jcounter] = (sortedGoodLeptons[PosLepton1].p+sortedGoodLeptons[PosLepton2].p+j1).Pt();
+  }
+
+
+
   TLorentzVector s1 = sortedGoodLeptons[PosLepton1].p;
   TLorentzVector s2 = sortedGoodLeptons[PosLepton2].p;
 
