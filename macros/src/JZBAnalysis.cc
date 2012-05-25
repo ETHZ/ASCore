@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.26 $";
+string sjzbversion="$Revision: 1.70.2.27 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.26 2012/05/22 15:27:57 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.27 2012/05/25 07:56:46 buchmann Exp $
 */
 
 
@@ -1698,8 +1698,8 @@ float JZBAnalysis::ElPFIso(int index){
 
 const bool JZBAnalysis::IsCustomEl2012(const int index) {
   
-  if(!(fabs(fTR->ElEta[index]) < 2.4) ) return false;
-  counters[EL].fill(" ... |eta| < 2.4");
+  if(!(fabs(fTR->ElEta[index]) < 2.5) ) return false;
+  counters[EL].fill(" ... |eta| < 2.5");
 
   if(!(fabs(fTR->ElPt[index]) > 10.0 ) ) return false;
   counters[EL].fill(" ... pT > 10");
