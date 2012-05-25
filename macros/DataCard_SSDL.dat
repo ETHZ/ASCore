@@ -9,9 +9,9 @@
 DoubleMu1	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD/			0	0
 DoubleEle1	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD/		0	1
 MuEG1		mdunser/SSDLTrees/2012/May24/V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD/		0	2
-DoubleMu2	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
-DoubleEle2	mdunser/SSDLTrees/2012/May24/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
-MuEG2		mdunser/SSDLTrees/2012/May24/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/		0	2
+DoubleMu2	mdunser/SSDLTrees/2012/May25/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
+DoubleEle2	mdunser/SSDLTrees/2012/May25/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
+MuEG2		mdunser/SSDLTrees/2012/May25/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/		0	2
 ####################################################################################################################
 # Top and EWK
 TTJets		mdunser/SSDLTrees/2012/May24/V03-03-00_TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/				1	-1	225.197
