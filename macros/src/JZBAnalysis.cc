@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.25 $";
+string sjzbversion="$Revision: 1.70.2.26 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.25 2012/05/22 13:14:17 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.26 2012/05/22 15:27:57 buchmann Exp $
 */
 
 
@@ -1640,8 +1640,8 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
   double Iso = MuPFIso(index);
-  if ( !(Iso < 0.1) ) return false;
-  counters[MU].fill(" ... Iso < 0.1");
+  if ( !(Iso < 0.15) ) return false;
+  counters[MU].fill(" ... Iso < 0.15");
 
 
   return true;
