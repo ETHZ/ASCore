@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.28 $";
+string sjzbversion="$Revision: 1.70.2.29 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.28 2012/05/25 09:09:34 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.29 2012/05/25 10:46:54 pablom Exp $
 */
 
 
@@ -1634,7 +1634,7 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   if ( !(fabs(fTR->MuD0PV[index]) < 0.02) ) return false; //still open
   counters[MU].fill(" ... D0(pv) < 0.02");
   //HPA recommendation not POG
-  if ( !(fabs(fTR->MuDzPV[index]) < 0.1 ) ) return false; //still open
+  if ( !(fabs(fTR->MuDzPV[index]) < 0.2 ) ) return false; //still open
   counters[MU].fill(" ... DZ(pv) < 0.1");
 
 
@@ -1721,7 +1721,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
 
   if(!(abs(fTR->ElD0PV[index])<0.02)) return false;
   counters[EL].fill(" ... D0(PV)<0.02");
-  if(!(abs(fTR->ElDzPV[index])<0.1)) return false;
+  if(!(abs(fTR->ElDzPV[index])<0.2)) return false;
   counters[EL].fill(" ... DZ(PV)<0.1");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
