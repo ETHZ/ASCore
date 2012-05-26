@@ -3013,7 +3013,6 @@ bool SSDLDumper::singleElTrigger(){
 	if(fSample->datamc > 0) return true;
 	return ((HLT_ELE8_JET30 > 0) || HLT_ELE8_JET30_TIGHT ||
 		(HLT_ELE8 > 0) || (HLT_ELE17 > 0));
-	return 
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.

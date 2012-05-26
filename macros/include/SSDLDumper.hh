@@ -24,8 +24,8 @@ public:
 	static const int gNElFPtBins = 10;
 	static const int gNElPPtbins = 12;
 	static const int gNElEtabins = 5;
-	
-	static const int gNNVrtxBins = 9;
+        
+        static const int gNNVrtxBins = 10;
 
 	static double gNVrtxBins[gNNVrtxBins+1];
 
@@ -71,9 +71,9 @@ public:
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, //DoubleMu2, DoubleMu3, DoubleMu4, DoubleMu5,
-		DoubleEle1, //DoubleEle2, DoubleEle3, DoubleEle4, DoubleEle5,
-		MuEG1, //MuEG2, MuEG3, MuEG4, MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu2,// DoubleMu3, DoubleMu4, DoubleMu5,
+		DoubleEle1, DoubleEle2, //DoubleEle3, DoubleEle4, DoubleEle5,
+		MuEG1, MuEG2, //MuEG3, MuEG4, MuEG5,
 		TTJets, // TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		DYJets,
 		// GJets40, GJets100, GJets200,
@@ -94,19 +94,38 @@ public:
 		SigSup,
 		ZDecay
 	};
+// 	enum gRegion {
+// 		region_begin,
+// 		Baseline = region_begin, //HT0MET0
+// 		HT80MET30,
+// 		HT200MET30,
+// 		HT0MET120,
+// 		HT0MET200,
+// 		HT0MET1203V, // 3rd lep veto
+// 		HT0MET2003V, // 3rd lep veto
+// 		HT0MET120JV, // jet veto
+// 		HT0MET120JV3V, // jet veto + 3rd lep veto
+// 		TTbarWPresel, TTbarWSelIncl, TTbarWSel,
+// 		TTbarWSelJU, TTbarWSelJD, TTbarWSelJS, TTbarWSelBU, TTbarWSelBD, TTbarWSelLU, TTbarWSelLD,
+// 		gNREGIONS
+// 	};
 	enum gRegion {
 		region_begin,
-		Baseline = region_begin, //HT0MET0
+		Baseline = region_begin,
+		HT80MET0,
 		HT80MET30,
-		HT200MET30,
-		HT0MET120,
-		HT0MET200,
-		HT0MET1203V, // 3rd lep veto
-		HT0MET2003V, // 3rd lep veto
-		HT0MET120JV, // jet veto
-		HT0MET120JV3V, // jet veto + 3rd lep veto
-		TTbarWPresel, TTbarWSelIncl, TTbarWSel,
-		TTbarWSelJU, TTbarWSelJD, TTbarWSelJS, TTbarWSelBU, TTbarWSelBD, TTbarWSelLU, TTbarWSelLD,
+		HT80MET30b,
+		HT200MET50,
+		HT200MET50b,
+		HT200MET120,
+		HT200MET120b,
+		HT320MET50,
+		HT320MET50b,
+		HT320MET120,
+		HT320MET120b,
+		HT200MET503b,
+		HT320MET0,
+		HT320MET0b,
 		gNREGIONS
 	};
 	// enum gRegion {
