@@ -3621,21 +3621,21 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 //     }
 //   }
   
-  bool printRun = false;
-  if(Event==230464005 && Run==191226) printRun = true;
-  if(Event==128070684 && Run==191062) printRun = true;
-  if (printRun){
-    for (size_t i = 0; i < NMus; ++i)
-      fOUTSTREAM << "[SYNCH]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l/#t) %1d(%1d/%1d) NEl(#l/#t) %1d(%1d/%1d) passZVeto %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
-					 S->sname.Data(),
-					 Run, 
-					 Event, isSSLLEvent(ind1,ind2),
-					 NMus, hasLooseMuons(), getNTightMuons(),
-					 NEls, hasLooseElectrons(), getNTightElectrons(),
-					 passesZVeto(),
-					 getHT(), getNJets(), getNBTags(),
-					 getMET()) << endl;
- 		}
+//   bool printRun = false;
+//   if(Event==230464005 && Run==191226) printRun = true;
+//   if(Event==128070684 && Run==191062) printRun = true;
+//   if (printRun){
+//     for (size_t i = 0; i < NMus; ++i)
+//       fOUTSTREAM << "[SYNCH]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l/#t) %1d(%1d/%1d) NEl(#l/#t) %1d(%1d/%1d) passZVeto %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
+// 					 S->sname.Data(),
+// 					 Run, 
+// 					 Event, isSSLLEvent(ind1,ind2),
+// 					 NMus, hasLooseMuons(), getNTightMuons(),
+// 					 NEls, hasLooseElectrons(), getNTightElectrons(),
+// 					 passesZVeto(),
+// 					 getHT(), getNJets(), getNBTags(),
+// 					 getMET()) << endl;
+//  		}
 
   if(NMus > 1){
     for(size_t i = 0; i < NMus-1; ++i){
