@@ -3780,17 +3780,16 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	// eff_mc->Draw("P same");
 	//	h_ptratio_data->Draw("PE X0 same");
 	eff_data->Draw("P same");
-	// MARC eff_data->Draw("PZ 0 same");
 	leg->Draw();
-	// lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
+	//	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	lat->SetTextSize(0.04);
 	if(fp == SigSup) lat->DrawLatex(0.62,0.85, pfname + name);
 	if(fp == ZDecay) lat->DrawLatex(0.67,0.15, pfname + name);
 	double ymean(0.), yrms(0.);
-	//	getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
+	getWeightedYMeanRMS(h_ptratio_data, ymean, yrms);
 	drawTopLine();
 	lat->SetTextSize(0.03);
-	// lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	//	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 
 	TString fpname = "F";
 	if(fp == ZDecay) fpname = "P";
@@ -3912,7 +3911,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	double ymean(0.), yrms(0.);
 	getWeightedYMeanRMS(h_etaratio_data, ymean, yrms);
 	lat->SetTextSize(0.03);
-	// lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
+	//	lat->DrawLatex(0.25,0.92, Form("Mean ratio: %4.2f #pm %4.2f", ymean, yrms));
 	
 	// Util::PrintNoEPS( c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir, NULL);
 	Util::PrintPDF(   c_temp, "FRatio_" + name + "_Eta", fOutputDir + fOutputSubDir);
@@ -3953,7 +3952,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		h_ratio_mc  ->SetName(Form("FRatio_%s_mc",   FRatioPlots::var_name[i].Data()));
 
 		float max = 0.2;
-		if(i==8) max = 1.0;
+		//		if(i==8) max = 1.0;
 		if(chan==Elec) max = 0.5;
 		h_ratio_data->SetMaximum(max);
 		h_ratio_mc  ->SetMaximum(max);
@@ -3988,7 +3987,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 	
 		TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 		leg->AddEntry(h_ratio_data, "Data",         "p");
-		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
+		//		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
@@ -5234,7 +5233,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	///////////////////////////////////////////////////////////////////////////////////
 	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
 	OUT << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
-	OUT << setw(7)  << setprecision(3) << mufratio_data  << " +/- " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
+	OUT << "                 ||"<< setw(7)  << setprecision(3) << mufratio_data  << " +/- " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
 	OUT << setw(7)  << setprecision(3) << mupratio_data  << " +/- " << setw(7) << setprecision(3) << mupratio_data_e  << " ||";
 	OUT << setw(7)  << setprecision(3) << elfratio_data  << " +/- " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
 	OUT << setw(7)  << setprecision(3) << elpratio_data  << " +/- " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
@@ -5323,38 +5322,50 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	FR->setEENtl(nt2_ee, nt10_ee, nt0_ee);
  	FR->setEMNtl(nt2_em, nt10_em, nt01_em, nt0_em);
  
+//  	float nF_mm = npf_mm + nff_mm;
+//  	float nF_em = npf_em+nfp_em+nff_em;
+//  	float nF_ee = npf_ee+nff_ee;
+//  	float nSF   = npf_mm + npf_em + nfp_em + npf_ee;
+//  	float nDF   = nff_mm + nff_em + nff_ee;
+//  	float nF    = nF_mm + nF_em + nF_ee;
+	
+	npp_mm = FR->getMMNpp();   npf_mm = FR->getMMNpf();	nff_mm = FR->getMMNff();
+	npp_em = FR->getEMNpp();   npf_em = FR->getEMNpf();	nff_em = FR->getEMNff();
+	npp_ee = FR->getEENpp();   npf_ee = FR->getEENpf();	nff_ee = FR->getEENff();
+
  	float nF_mm = npf_mm + nff_mm;
  	float nF_em = npf_em+nfp_em+nff_em;
  	float nF_ee = npf_ee+nff_ee;
  	float nSF   = npf_mm + npf_em + nfp_em + npf_ee;
  	float nDF   = nff_mm + nff_em + nff_ee;
  	float nF    = nF_mm + nF_em + nF_ee;
- 
+
+	
  	OUT << "  Fake Predictions:" << endl;
  	OUT << "------------------------------------------------------------------------------------------" << endl;
  	OUT << "                 |          Mu/Mu        |         El/El         |          El/Mu        |" << endl;
  	OUT << "------------------------------------------------------------------------------------------" << endl;
- 	OUT << " Npp             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+ 	OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
  	npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
  	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
  	npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
- 	OUT << " Npf             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+ 	OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
  	npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
  	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
  	npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
- 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f Â± %5.1f Â± %5.1f |",
+ 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
  	nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
- 	OUT << " Nff             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+ 	OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
  	nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
  	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
  	nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
  	OUT << "------------------------------------------------------------------------------------------" << endl;
- 	OUT << " Total Fakes     |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+ 	OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
  	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
  	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
  	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
  	OUT << "------------------------------------------------------------------------------------------" << endl;
- 	OUT << " (Value Â± E_stat Â± E_syst) " << endl;
+ 	OUT << " (Value ± E_stat ± E_syst) " << endl;
  	OUT << "//////////////////////////////////////////////////////////////////////////////////////////" << endl;
  	OUT << endl;
  
@@ -5446,344 +5457,347 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << "----------------------------------------------------------------------------------------------" << endl;
  	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
  	OUT << "==============================================================================================" << endl;
- 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. fakes",
+ 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. fakes",
  	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
  	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em,
  	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee);
- 	OUT << Form("%16s ||                       || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. chmisid",
+ 	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. chmisid",
  	nt2_em_chmid, nt2_em_chmid_e1, nt2_em_chmid_e2, nt2_ee_chmid, nt2_ee_chmid_e1, nt2_ee_chmid_e2);
  
  	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
-// MARC 	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
-// MARC 
-// MARC 	vector<int> mcbkg;
-// MARC 	// MARC mcbkg.push_back(ZZ);
-// MARC 	// MARC mcbkg.push_back(GVJets);
-// MARC 	// MARC mcbkg.push_back(DPSWW);
-// MARC 	// MARC mcbkg.push_back(TTbarW);
-// MARC 	// MARC mcbkg.push_back(TTbarZ);
-// MARC 	// MARC mcbkg.push_back(TTbarG);
-// MARC 	// MARC mcbkg.push_back(WpWp);
-// MARC 	// MARC mcbkg.push_back(WmWm);
-// MARC 	// MARC mcbkg.push_back(WWZ);
-// MARC 	// MARC mcbkg.push_back(WZZ);
-// MARC 	// MARC mcbkg.push_back(WWG);
-// MARC 	// MARC mcbkg.push_back(WWW);
-// MARC 	// MARC mcbkg.push_back(ZZZ);
-// MARC 	for(size_t i = 0; i < mcbkg.size(); ++i){
-// MARC 		Sample *S = fSamples[mcbkg[i]];
-// MARC 		float scale = fLumiNorm/S->getLumi();
-// MARC 
-// MARC 		
-// MARC 		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-// MARC 
-// MARC 		nt2_rare_mc_mm += temp_nt2_mm;
-// MARC 		nt2_rare_mc_em += temp_nt2_em;
-// MARC 		nt2_rare_mc_ee += temp_nt2_ee;
-// MARC 
-// MARC 		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-// MARC 		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
-// MARC 		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
-// MARC 
-// MARC 		OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", S->sname.Data(),
-// MARC 		temp_nt2_mm, gMMTrigScale*S->numbers[reg][Muon].tt_avweight * scale*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
-// MARC 		temp_nt2_em, gEMTrigScale*S->numbers[reg][ElMu].tt_avweight * scale*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
-// MARC 		temp_nt2_ee, gEETrigScale*S->numbers[reg][Elec].tt_avweight * scale*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
-// MARC 	}
-// MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "Rare SM (Sum)",
-// MARC 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1), RareESyst*nt2_rare_mc_mm,
-// MARC 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
-// MARC 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
-// MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	
-// MARC 	///////////////////////////////////////////
-// MARC 	// WZ production
-// MARC 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-// MARC 	float wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 	float wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 	float wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-// MARC 
-// MARC 	float wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-// MARC 	float wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
-// MARC 	float wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
-// MARC 
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "WZ Prod.",
-// MARC 	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
-// MARC 	wz_nt2_em, sqrt(wz_nt2_em_e1),
-// MARC 	wz_nt2_ee, sqrt(wz_nt2_ee_e1));
-// MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	// Just add different errors in quadrature (they are independent)
-// MARC 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat()                                   + nt2_rare_mc_mm_e1 + wz_nt2_mm_e1;
-// MARC 	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + wz_nt2_em_e1;
-// MARC 	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_ee_e1;
-// MARC 	float mm_tot_sqerr2 = nF_mm*nF_mm*FakeESyst2                                   + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + WZESyst2*wz_nt2_mm*wz_nt2_mm;
-// MARC 	float em_tot_sqerr2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst2*wz_nt2_em*wz_nt2_em;
-// MARC 	float ee_tot_sqerr2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst2*wz_nt2_ee*wz_nt2_ee;
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "tot. backgr.",
-// MARC 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
-// MARC 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
-// MARC 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "",
-// MARC 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-// MARC 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
-// MARC 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
-// MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "tot. MC", nt2sum_mm, nt2sum_em, nt2sum_ee);
-// MARC 	OUT << "==============================================================================================" << endl;
-// MARC 	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
-// MARC 	OUT << "==============================================================================================" << endl;
-// MARC 	OUT << "        predicted: ";
-// MARC 	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_mm + wz_nt2_em + wz_nt2_ee;
-// MARC 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_ee_e1;
-// MARC 	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee)*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee);
-// MARC 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
-// MARC 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " Â± ";
-// MARC 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " Â± ";
-// MARC 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
-// MARC 	OUT << "      combined MC: ";
-// MARC 	OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
-// MARC 	OUT << "combined observed: ";
-// MARC 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
-// MARC 	OUT << "==============================================================================================" << endl;
-// MARC 	OUT.close();
-// MARC 		
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	//  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
-// MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-// MARC 	fOUTSTREAM3 << Form("DF:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
-// MARC 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
-// MARC 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
-// MARC 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
-// MARC 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
-// MARC 	fOUTSTREAM3 << Form("SF:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
-// MARC 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
-// MARC 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
-// MARC 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
-// MARC 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
-// MARC 	fOUTSTREAM3 << Form("CM:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f |   -         | %5.1fÂ±%5.1f )\n",
-// MARC 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
-// MARC 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
-// MARC 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-// MARC 	fOUTSTREAM3 << Form("MC:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
-// MARC 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
-// MARC 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
-// MARC 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
-// MARC 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
-// MARC 	fOUTSTREAM3 << Form("WZ:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
-// MARC 	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
-// MARC 	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
-// MARC 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
-// MARC 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
-// MARC 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em));
-// MARC 	fOUTSTREAM3 << Form("Tot: %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
-// MARC 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
-// MARC 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-// MARC 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-// MARC 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
-// MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-// MARC 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
-// MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-// MARC 	fOUTSTREAM3 << endl;
-// MARC 	
-// MARC 	
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	fOUTSTREAM << Region::sname[reg] << endl;
-// MARC 	fOUTSTREAM << Form("Double Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
-// MARC 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
-// MARC 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
-// MARC 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
-// MARC 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
-// MARC 	fOUTSTREAM << Form("Single Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
-// MARC 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
-// MARC 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
-// MARC 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
-// MARC 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
-// MARC 	fOUTSTREAM << Form("Charge MisID   &        -          & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
-// MARC 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
-// MARC 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
-// MARC 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-// MARC 	fOUTSTREAM << Form("Rare SM        & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
-// MARC 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
-// MARC 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
-// MARC 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
-// MARC 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
-// MARC 	fOUTSTREAM << Form("WZ Prod.       & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
-// MARC 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
-// MARC 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em),
-// MARC 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
-// MARC 	wz_nt2_ee + wz_nt2_mm + wz_nt2_em, sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)));
-// MARC 	fOUTSTREAM << Form("Total Bkg      & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
-// MARC 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
-// MARC 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
-// MARC 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
-// MARC 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-// MARC 	fOUTSTREAM << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
-// MARC 	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
-// MARC 	fOUTSTREAM << endl;
-// MARC 	
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
-// MARC 	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
-// MARC 	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 3, 0., 3.);
-// MARC 	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
-// MARC 	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted Rare SM", 3, 0., 3.);
-// MARC 	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted WZ", 3, 0., 3.);
-// MARC 	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
-// MARC 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
-// MARC 	
-// MARC 	h_obs->SetMarkerColor(kBlack);
-// MARC 	h_obs->SetMarkerStyle(20);
-// MARC 	h_obs->SetMarkerSize(2.5);
-// MARC 	h_obs->SetLineWidth(2);
-// MARC 	h_obs->SetLineColor(kBlack);
-// MARC 	h_obs->SetFillColor(kBlack);
-// MARC 	
-// MARC 	h_pred_sfake->SetLineWidth(1);
-// MARC 	h_pred_dfake->SetLineWidth(1);
-// MARC 	h_pred_chmid->SetLineWidth(1);
-// MARC 	h_pred_mc   ->SetLineWidth(1);
-// MARC 	h_pred_ttw  ->SetLineWidth(1);
-// MARC 	h_pred_sfake->SetLineColor(50);
-// MARC 	h_pred_sfake->SetFillColor(50);
-// MARC 	h_pred_dfake->SetLineColor(38);
-// MARC 	h_pred_dfake->SetFillColor(38);
-// MARC 	h_pred_chmid->SetLineColor(42);
-// MARC 	h_pred_chmid->SetFillColor(42);
-// MARC 	h_pred_mc   ->SetLineColor(31);
-// MARC 	h_pred_mc   ->SetFillColor(31);
-// MARC 	h_pred_ttw  ->SetLineColor(29);
-// MARC 	h_pred_ttw  ->SetFillColor(29);
-// MARC 
-// MARC 	h_pred_tot  ->SetLineWidth(1);
-// MARC 	// h_pred_tot  ->SetFillColor(kBlack);
-// MARC 	// h_pred_tot  ->SetFillStyle(3013);
-// MARC 	h_pred_tot  ->SetFillColor(12);
-// MARC 	h_pred_tot  ->SetFillStyle(3005);
-// MARC 	
-// MARC 	// Add numbers:
-// MARC 	h_obs->SetBinContent(1, nt2_ee);
-// MARC 	h_obs->SetBinContent(2, nt2_mm);
-// MARC 	h_obs->SetBinContent(3, nt2_em);
-// MARC 	//h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
-// MARC 	//h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
-// MARC 	//h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
-// MARC 
-// MARC 	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
-// MARC 	gr_obs->SetMarkerColor(kBlack);
-// MARC 	gr_obs->SetMarkerStyle(20);
-// MARC 	gr_obs->SetMarkerSize(2.5);
-// MARC 	gr_obs->SetLineWidth(2);
-// MARC 	gr_obs->SetLineColor(kBlack);
-// MARC 	gr_obs->SetFillColor(kBlack);
-// MARC 	
-// MARC 	h_pred_sfake->SetBinContent(1, npf_ee);
-// MARC 	h_pred_sfake->SetBinContent(2, npf_mm);
-// MARC 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
-// MARC 	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
-// MARC 	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
-// MARC 	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
-// MARC 	
-// MARC 	h_pred_dfake->SetBinContent(1, nff_ee);
-// MARC 	h_pred_dfake->SetBinContent(2, nff_mm);
-// MARC 	h_pred_dfake->SetBinContent(3, nff_em);
-// MARC 	
-// MARC 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
-// MARC 	h_pred_chmid->SetBinContent(2, 0.);
-// MARC 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
-// MARC 	
-// MARC 	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
-// MARC 	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
-// MARC 	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
-// MARC 	
-// MARC 	h_pred_ttw->SetBinContent(1, wz_nt2_ee);
-// MARC 	h_pred_ttw->SetBinContent(2, wz_nt2_mm);
-// MARC 	h_pred_ttw->SetBinContent(3, wz_nt2_em);
-// MARC 
-// MARC 	h_pred_tot->Add(h_pred_sfake);
-// MARC 	h_pred_tot->Add(h_pred_dfake);
-// MARC 	h_pred_tot->Add(h_pred_chmid);
-// MARC 	h_pred_tot->Add(h_pred_mc);
-// MARC 	h_pred_tot->Add(h_pred_ttw);
-// MARC 	h_pred_tot->SetBinError(1, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
-// MARC 	h_pred_tot->SetBinError(2, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2));
-// MARC 	h_pred_tot->SetBinError(3, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
-// MARC 	
-// MARC 	hs_pred->Add(h_pred_sfake);
-// MARC 	hs_pred->Add(h_pred_dfake);
-// MARC 	hs_pred->Add(h_pred_chmid);
-// MARC 	hs_pred->Add(h_pred_mc);
-// MARC 	hs_pred->Add(h_pred_ttw);
-// MARC 	
-// MARC 	// double max = h_obs->Integral();
-// MARC 	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
-// MARC 	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
-// MARC 	
-// MARC 	// if(reg == Baseline)    max = 125.;
-// MARC 	// if(reg == HT80MET120)  max = 15.;
-// MARC 	// if(reg == HT200MET120) max = 12.;
-// MARC 	// if(reg == HT450MET0)   max = 11.;
-// MARC 	// if(reg == HT450MET50)  max = 7.;
-// MARC 	// if(reg == HT450MET120) max = 3.;
-// MARC 	// if(reg == TTbarWSel3) max = 8.;
-// MARC 	// if(reg == TTbarWSel1) max = 12.;
-// MARC 	
-// MARC 	h_obs       ->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_dfake->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_chmid->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
-// MARC 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
-// MARC 	hs_pred     ->SetMaximum(max>1?max+1:1.);
-// MARC 	
-// MARC 	hs_pred->Draw("goff");
-// MARC 	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
-// MARC 	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
-// MARC 	hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
-// MARC 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
-// MARC 	hs_pred->GetXaxis()->SetLabelFont(42);
-// MARC 	hs_pred->GetXaxis()->SetLabelSize(0.1);
-// MARC 	
-// MARC 	TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
-// MARC 	leg->AddEntry(h_obs,        "Observed","p");
-// MARC 	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
-// MARC 	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
-// MARC 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
-// MARC 	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
-// MARC 	leg->AddEntry(h_pred_ttw,   "WZ Production","f");
-// MARC 	leg->AddEntry(h_pred_tot,   "Total Uncertainty","f");
-// MARC 	leg->SetFillStyle(0);
-// MARC 	leg->SetTextFont(42);
-// MARC 	// leg->SetTextSize(0.05);
-// MARC 	leg->SetBorderSize(0);
-// MARC 	
-// MARC 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
-// MARC 	c_temp->cd();
-// MARC 
-// MARC 	hs_pred->Draw("hist");
-// MARC 	h_pred_tot->DrawCopy("0 E2 same");
-// MARC 	gr_obs->Draw("P same");
-// MARC 	leg->Draw();
-// MARC 	
-// MARC 	drawRegionSel(reg);
-// MARC 	drawTopLine(0.66);
-// MARC 	
-// MARC 	gPad->RedrawAxis();
-// MARC 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
-// MARC 	delete c_temp;	
-// MARC 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_tot, hs_pred;
-// MARC 	delete gr_obs;
-// MARC 	delete FR;
+ 	float nt2_rare_mc_mm(0.),    nt2_rare_mc_em(0.),    nt2_rare_mc_ee(0.);
+ 	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
+ 
+ 	vector<int> mcbkg;
+// MARC 	mcbkg.push_back(ZZ);
+// MARC 	mcbkg.push_back(GVJets);
+// MARC 	mcbkg.push_back(DPSWW);
+// MARC 	mcbkg.push_back(TTbarW);
+// MARC 	mcbkg.push_back(TTbarZ);
+// MARC 	mcbkg.push_back(TTbarG);
+// MARC 	mcbkg.push_back(WpWp);
+// MARC 	mcbkg.push_back(WmWm);
+// MARC 	mcbkg.push_back(WWZ);
+// MARC 	mcbkg.push_back(WZZ);
+// MARC 	mcbkg.push_back(WWG);
+// MARC 	mcbkg.push_back(WWW);
+// MARC 	mcbkg.push_back(ZZZ);
+ 	for(size_t i = 0; i < mcbkg.size(); ++i){
+ 		Sample *S = fSamples[mcbkg[i]];
+ 		float scale = fLumiNorm/S->getLumi();
+  		
+ 		float temp_nt2_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+ 		float temp_nt2_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+ 		float temp_nt2_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+ 
+ 		nt2_rare_mc_mm += temp_nt2_mm;
+ 		nt2_rare_mc_em += temp_nt2_em;
+ 		nt2_rare_mc_ee += temp_nt2_ee;
+ 
+ 		nt2_rare_mc_mm_e1 += gMMTrigScale*gMMTrigScale*scale*scale*S->numbers[reg][Muon].tt_avweight*S->numbers[reg][Muon].tt_avweight * S->getError2(S->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+ 		nt2_rare_mc_em_e1 += gEMTrigScale*gEMTrigScale*scale*scale*S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
+ 		nt2_rare_mc_ee_e1 += gEETrigScale*gEETrigScale*scale*scale*S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
+ 
+ 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
+ 		temp_nt2_mm, gMMTrigScale*S->numbers[reg][Muon].tt_avweight * scale*S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
+ 		temp_nt2_em, gEMTrigScale*S->numbers[reg][ElMu].tt_avweight * scale*S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
+ 		temp_nt2_ee, gEETrigScale*S->numbers[reg][Elec].tt_avweight * scale*S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
+ 	}
+ 	OUT << "----------------------------------------------------------------------------------------------" << endl;
+ 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
+ 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1), RareESyst*nt2_rare_mc_mm,
+ 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
+ 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
+ 	OUT << "----------------------------------------------------------------------------------------------" << endl;
+ 	
+ 	///////////////////////////////////////////
+ 	// WZ production
+	float wzscale(0.);
+	float wz_nt2_mm(0.),wz_nt2_em(0.),wz_nt2_ee(0.);
+	float wz_nt2_mm_e1(0.),wz_nt2_em_e1(0.),wz_nt2_ee_e1(0.);
+	
+// MARC  	wzscale = fLumiNorm/fSamples[WZ]->getLumi();
+// MARC 	wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+// MARC 	wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+// MARC 	wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+ 
+// MARC 	wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+// MARC 	wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+// MARC 	wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+ 
+ 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
+ 	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
+ 	wz_nt2_em, sqrt(wz_nt2_em_e1),
+ 	wz_nt2_ee, sqrt(wz_nt2_ee_e1));
+ 	OUT << "----------------------------------------------------------------------------------------------" << endl;
+ 	// Just add different errors in quadrature (they are independent)
+ 	float mm_tot_sqerr1 = FR->getMMTotEStat()*FR->getMMTotEStat()                                   + nt2_rare_mc_mm_e1 + wz_nt2_mm_e1;
+ 	float em_tot_sqerr1 = FR->getEMTotEStat()*FR->getEMTotEStat() + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + wz_nt2_em_e1;
+ 	float ee_tot_sqerr1 = FR->getEETotEStat()*FR->getEETotEStat() + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_ee_e1;
+ 	float mm_tot_sqerr2 = nF_mm*nF_mm*FakeESyst2                                   + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + WZESyst2*wz_nt2_mm*wz_nt2_mm;
+ 	float em_tot_sqerr2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst2*wz_nt2_em*wz_nt2_em;
+ 	float ee_tot_sqerr2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst2*wz_nt2_ee*wz_nt2_ee;
+ 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "tot. backgr.",
+ 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
+ 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
+ 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
+ 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "",
+ 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+ 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+ 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
+ 	OUT << "----------------------------------------------------------------------------------------------" << endl;
+ 	OUT << Form("%16s || %5.2f                 || %5.2f                 || %5.2f                 ||\n", "tot. MC", nt2sum_mm, nt2sum_em, nt2sum_ee);
+ 	OUT << "==============================================================================================" << endl;
+ 	OUT << Form("%16s || %2.0f                    || %2.0f                    || %2.0f                    ||\n", "observed", nt2_mm, nt2_em, nt2_ee);
+ 	OUT << "==============================================================================================" << endl;
+ 	OUT << "        predicted: ";
+ 	float tot_pred        = nF + nt2_rare_mc_mm + nt2_em_chmid + nt2_rare_mc_em + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_mm + wz_nt2_em + wz_nt2_ee;
+ 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_ee_e1;
+ 	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee)*(wz_nt2_mm+wz_nt2_em+wz_nt2_ee);
+ 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
+ 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
+ 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
+ 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
+ 	OUT << "      combined MC: ";
+ 	OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
+ 	OUT << "combined observed: ";
+ 	OUT << setw(5) << left << Form("%2.0f", nt2_mm+nt2_em+nt2_ee ) << endl;
+ 	OUT << "==============================================================================================" << endl;
+ 	OUT.close();
+ 		
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	//  OUTPUT FOR ANALYSIS NOTE  /////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
+ 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
+ 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
+ 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
+ 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
+ 	fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
+ 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
+ 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
+ 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
+ 	fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
+ 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
+ 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
+ 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
+ 	fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
+ 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
+ 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
+ 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
+ 	fOUTSTREAM3 << Form("WZ:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
+ 	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
+ 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
+ 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
+ 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em));
+ 	fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
+ 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+ 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+ 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
+ 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
+ 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
+ 	fOUTSTREAM3 << endl;
+ 	
+ 	
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	//  OUTPUT FOR AN TABLE  //////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	fOUTSTREAM << Region::sname[reg] << endl;
+ 	fOUTSTREAM << Form("Double Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
+ 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
+ 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
+ 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
+ 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
+ 	fOUTSTREAM << Form("Single Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
+ 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
+ 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
+ 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
+ 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
+ 	fOUTSTREAM << Form("Charge MisID   &        -          & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
+ 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
+ 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
+ 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
+ 	fOUTSTREAM << Form("Rare SM        & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
+ 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
+ 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
+ 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
+ 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
+ 	fOUTSTREAM << Form("WZ Prod.       & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
+ 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
+ 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em),
+ 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
+ 	wz_nt2_ee + wz_nt2_mm + wz_nt2_em, sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)));
+ 	fOUTSTREAM << Form("Total Bkg      & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
+ 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+ 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+ 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+ 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+ 	fOUTSTREAM << Form("Observed       & %3.0f               & %3.0f               & %3.0f               & %3.0f               \\\\ \n",
+ 	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
+ 	fOUTSTREAM << endl;
+ 	
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	//  OUTPUT AS PLOT  ///////////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	TH1D    *h_obs        = new TH1D("h_observed",   "Observed number of events",  3, 0., 3.);
+ 	TH1D    *h_pred_sfake = new TH1D("h_pred_sfake", "Predicted single fakes", 3, 0., 3.);
+ 	TH1D    *h_pred_dfake = new TH1D("h_pred_dfake", "Predicted double fakes", 3, 0., 3.);
+ 	TH1D    *h_pred_chmid = new TH1D("h_pred_chmid", "Predicted charge mis id", 3, 0., 3.);
+ 	TH1D    *h_pred_mc    = new TH1D("h_pred_mc",    "Predicted Rare SM", 3, 0., 3.);
+ 	TH1D    *h_pred_ttw   = new TH1D("h_pred_ttw",   "Predicted WZ", 3, 0., 3.);
+ 	TH1D    *h_pred_tot   = new TH1D("h_pred_tot",   "Total Prediction", 3, 0., 3.);
+ 	THStack *hs_pred      = new THStack("hs_predicted", "Predicted number of events");
+ 	
+ 	h_obs->SetMarkerColor(kBlack);
+ 	h_obs->SetMarkerStyle(20);
+ 	h_obs->SetMarkerSize(2.5);
+ 	h_obs->SetLineWidth(2);
+ 	h_obs->SetLineColor(kBlack);
+ 	h_obs->SetFillColor(kBlack);
+ 	
+ 	h_pred_sfake->SetLineWidth(1);
+ 	h_pred_dfake->SetLineWidth(1);
+ 	h_pred_chmid->SetLineWidth(1);
+ 	h_pred_mc   ->SetLineWidth(1);
+ 	h_pred_ttw  ->SetLineWidth(1);
+ 	h_pred_sfake->SetLineColor(50);
+ 	h_pred_sfake->SetFillColor(50);
+ 	h_pred_dfake->SetLineColor(38);
+ 	h_pred_dfake->SetFillColor(38);
+ 	h_pred_chmid->SetLineColor(42);
+ 	h_pred_chmid->SetFillColor(42);
+ 	h_pred_mc   ->SetLineColor(31);
+ 	h_pred_mc   ->SetFillColor(31);
+ 	h_pred_ttw  ->SetLineColor(29);
+ 	h_pred_ttw  ->SetFillColor(29);
+ 
+ 	h_pred_tot  ->SetLineWidth(1);
+ 	// h_pred_tot  ->SetFillColor(kBlack);
+ 	// h_pred_tot  ->SetFillStyle(3013);
+ 	h_pred_tot  ->SetFillColor(12);
+ 	h_pred_tot  ->SetFillStyle(3005);
+ 	
+ 	// Add numbers:
+ 	h_obs->SetBinContent(1, nt2_ee);
+ 	h_obs->SetBinContent(2, nt2_mm);
+ 	h_obs->SetBinContent(3, nt2_em);
+ 	//h_obs->SetBinError(1, FR->getEStat(nt2_ee)); // FIXME
+ 	//h_obs->SetBinError(2, FR->getEStat(nt2_mm)); // FIXME
+ 	//h_obs->SetBinError(3, FR->getEStat(nt2_em)); // FIXME
+ 
+ 	TGraphAsymmErrors* gr_obs = FR->getGraphPoissonErrors( h_obs );
+ 	gr_obs->SetMarkerColor(kBlack);
+ 	gr_obs->SetMarkerStyle(20);
+ 	gr_obs->SetMarkerSize(2.5);
+ 	gr_obs->SetLineWidth(2);
+ 	gr_obs->SetLineColor(kBlack);
+ 	gr_obs->SetFillColor(kBlack);
+ 	
+ 	h_pred_sfake->SetBinContent(1, npf_ee);
+ 	h_pred_sfake->SetBinContent(2, npf_mm);
+ 	h_pred_sfake->SetBinContent(3, npf_em+nfp_em);
+ 	h_pred_sfake->GetXaxis()->SetBinLabel(1, "ee");
+ 	h_pred_sfake->GetXaxis()->SetBinLabel(2, "#mu#mu");
+ 	h_pred_sfake->GetXaxis()->SetBinLabel(3, "e#mu");
+ 	
+ 	h_pred_dfake->SetBinContent(1, nff_ee);
+ 	h_pred_dfake->SetBinContent(2, nff_mm);
+ 	h_pred_dfake->SetBinContent(3, nff_em);
+ 	
+ 	h_pred_chmid->SetBinContent(1, nt2_ee_chmid);
+ 	h_pred_chmid->SetBinContent(2, 0.);
+ 	h_pred_chmid->SetBinContent(3, nt2_em_chmid);
+ 	
+ 	h_pred_mc->SetBinContent(1, nt2_rare_mc_ee);
+ 	h_pred_mc->SetBinContent(2, nt2_rare_mc_mm);
+ 	h_pred_mc->SetBinContent(3, nt2_rare_mc_em);
+ 	
+ 	h_pred_ttw->SetBinContent(1, wz_nt2_ee);
+ 	h_pred_ttw->SetBinContent(2, wz_nt2_mm);
+ 	h_pred_ttw->SetBinContent(3, wz_nt2_em);
+ 
+ 	h_pred_tot->Add(h_pred_sfake);
+ 	h_pred_tot->Add(h_pred_dfake);
+ 	h_pred_tot->Add(h_pred_chmid);
+ 	h_pred_tot->Add(h_pred_mc);
+ 	h_pred_tot->Add(h_pred_ttw);
+ 	h_pred_tot->SetBinError(1, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
+ 	h_pred_tot->SetBinError(2, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2));
+ 	h_pred_tot->SetBinError(3, sqrt(em_tot_sqerr1 + em_tot_sqerr2));
+ 	
+ 	hs_pred->Add(h_pred_sfake);
+ 	hs_pred->Add(h_pred_dfake);
+ 	hs_pred->Add(h_pred_chmid);
+ 	hs_pred->Add(h_pred_mc);
+ 	hs_pred->Add(h_pred_ttw);
+ 	
+ 	// double max = h_obs->Integral();
+ 	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
+ 	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+ 	
+ 	// if(reg == Baseline)    max = 125.;
+ 	// if(reg == HT80MET120)  max = 15.;
+ 	// if(reg == HT200MET120) max = 12.;
+ 	// if(reg == HT450MET0)   max = 11.;
+ 	// if(reg == HT450MET50)  max = 7.;
+ 	// if(reg == HT450MET120) max = 3.;
+ 	// if(reg == TTbarWSel3) max = 8.;
+ 	// if(reg == TTbarWSel1) max = 12.;
+ 	
+ 	h_obs       ->SetMaximum(max>1?max+1:1.);
+ 	h_pred_sfake->SetMaximum(max>1?max+1:1.);
+ 	h_pred_dfake->SetMaximum(max>1?max+1:1.);
+ 	h_pred_chmid->SetMaximum(max>1?max+1:1.);
+ 	h_pred_mc   ->SetMaximum(max>1?max+1:1.);
+ 	h_pred_ttw  ->SetMaximum(max>1?max+1:1.);
+ 	h_pred_tot  ->SetMaximum(max>1?max+1:1.);
+ 	hs_pred     ->SetMaximum(max>1?max+1:1.);
+ 	
+ 	hs_pred->Draw("goff");
+ 	hs_pred->GetXaxis()->SetBinLabel(1, "ee");
+ 	hs_pred->GetXaxis()->SetBinLabel(2, "#mu#mu");
+ 	hs_pred->GetXaxis()->SetBinLabel(3, "e#mu");
+ 	hs_pred->GetXaxis()->SetLabelOffset(0.01);
+ 	hs_pred->GetXaxis()->SetLabelFont(42);
+ 	hs_pred->GetXaxis()->SetLabelSize(0.1);
+ 	
+ 	TLegend *leg = new TLegend(0.15,0.65,0.50,0.88);
+ 	leg->AddEntry(h_obs,        "Observed","p");
+ 	leg->AddEntry(h_pred_sfake, "Single Fakes","f");
+ 	leg->AddEntry(h_pred_dfake, "Double Fakes","f");
+ 	leg->AddEntry(h_pred_chmid, "Charge MisID","f");
+ 	leg->AddEntry(h_pred_mc,    "Irreducible (MC)","f");
+ 	leg->AddEntry(h_pred_ttw,   "WZ Production","f");
+ 	leg->AddEntry(h_pred_tot,   "Total Uncertainty","f");
+ 	leg->SetFillStyle(0);
+ 	leg->SetTextFont(42);
+ 	// leg->SetTextSize(0.05);
+ 	leg->SetBorderSize(0);
+ 	
+ 	TCanvas *c_temp = new TCanvas("C_ObsPred", "Observed vs Predicted", 0, 0, 600, 600);
+ 	c_temp->cd();
+ 
+ 	hs_pred->Draw("hist");
+ 	h_pred_tot->DrawCopy("0 E2 same");
+ 	gr_obs->Draw("P same");
+ 	leg->Draw();
+ 	
+ 	drawRegionSel(reg);
+ 	drawTopLine(0.66);
+ 	
+ 	gPad->RedrawAxis();
+ 	Util::PrintPDF(c_temp,   "ObsPred_" + Region::sname[reg], fOutputDir + fOutputSubDir);
+ 	delete c_temp;	
+ 	delete h_obs, h_pred_sfake, h_pred_dfake, h_pred_chmid, h_pred_mc, h_pred_ttw, h_pred_tot, hs_pred;
+ 	delete gr_obs;
+ 	delete FR;
 }
 // MARC TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 // MARC 	ofstream OUT(filename.Data(), ios::trunc);
@@ -5888,10 +5902,10 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	///////////////////////////////////////////////////////////////////////////////////
 // MARC 	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
 // MARC 	OUT << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
-// MARC 	OUT << setw(7)  << setprecision(3) << mufratio_data  << " +/- " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
-// MARC 	OUT << setw(7)  << setprecision(3) << mupratio_data  << " +/- " << setw(7) << setprecision(3) << mupratio_data_e  << " ||";
-// MARC 	OUT << setw(7)  << setprecision(3) << elfratio_data  << " +/- " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
-// MARC 	OUT << setw(7)  << setprecision(3) << elpratio_data  << " +/- " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
+// MARC 	OUT << setw(7)  << setprecision(3) << mufratio_data  << " ± " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
+// MARC 	OUT << setw(7)  << setprecision(3) << mupratio_data  << " ± " << setw(7) << setprecision(3) << mupratio_data_e  << " ||";
+// MARC 	OUT << setw(7)  << setprecision(3) << elfratio_data  << " ± " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
+// MARC 	OUT << setw(7)  << setprecision(3) << elpratio_data  << " ± " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
 // MARC 	OUT << endl;
 // MARC 	OUT << "---------------------------------------------------------------------------------------------------------" << endl << endl;
 // MARC 	OUT << "-------------------------------------------------------------------------------------------------------------" << endl;
@@ -5999,27 +6013,27 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	OUT << "------------------------------------------------------------------------------------------" << endl;
 // MARC 	OUT << "                 |          Mu/Mu        |         El/El         |          El/Mu        |" << endl;
 // MARC 	OUT << "------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << " Npp             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+// MARC 	OUT << " Npp             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 // MARC 	npp_mm, FR->getMMNppEStat(), FakeESyst*npp_mm,
 // MARC 	npp_ee, FR->getEENppEStat(), FakeESyst*npp_ee, 
 // MARC 	npp_em, FR->getEMNppEStat(), FakeESyst*npp_em) << endl;
-// MARC 	OUT << " Npf             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+// MARC 	OUT << " Npf             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 // MARC 	npf_mm, FR->getMMNpfEStat(), FakeESyst*npf_mm,
 // MARC 	npf_ee, FR->getEENpfEStat(), FakeESyst*npf_ee, 
 // MARC 	npf_em, FR->getEMNpfEStat(), FakeESyst*npf_em) << endl;
-// MARC 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f Â± %5.1f Â± %5.1f |",
+// MARC 	OUT << " Nfp             |" << Form("    -                  |    -                  | %5.1f ± %5.1f ± %5.1f |",
 // MARC 	nfp_em, FR->getEMNfpEStat(), FakeESyst*nfp_em) << endl;
-// MARC 	OUT << " Nff             |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+// MARC 	OUT << " Nff             |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 // MARC 	nff_mm, FR->getMMNffEStat(), FakeESyst*nff_mm,
 // MARC 	nff_ee, FR->getEENffEStat(), FakeESyst*nff_ee, 
 // MARC 	nff_em, FR->getEMNffEStat(), FakeESyst*nff_em) << endl;
 // MARC 	OUT << "------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << " Total Fakes     |" << Form(" %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f | %5.1f Â± %5.1f Â± %5.1f |",
+// MARC 	OUT << " Total Fakes     |" << Form(" %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f | %5.1f ± %5.1f ± %5.1f |",
 // MARC 	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
 // MARC 	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee, 
 // MARC 	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em) << endl;
 // MARC 	OUT << "------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << " (Value Â± E_stat Â± E_syst) " << endl;
+// MARC 	OUT << " (Value ± E_stat ± E_syst) " << endl;
 // MARC 	OUT << "//////////////////////////////////////////////////////////////////////////////////////////" << endl;
 // MARC 	OUT << endl;
 // MARC 
@@ -6051,8 +6065,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	OUT << "       E-ChMisID  ||       Barrel       |       Endcap      ||" << endl;
 // MARC 	OUT << "--------------------------------------------------------------" << endl;
 // MARC 	OUT << "                  ||";
-// MARC 	OUT << setw(7)  << setprecision(2) << fb  << " +/- " << setw(7) << setprecision(3) << fbE  << " |";
-// MARC 	OUT << setw(7)  << setprecision(2) << fe  << " +/- " << setw(7) << setprecision(3) << feE  << " ||";
+// MARC 	OUT << setw(7)  << setprecision(2) << fb  << " ± " << setw(7) << setprecision(3) << fbE  << " |";
+// MARC 	OUT << setw(7)  << setprecision(2) << fe  << " ± " << setw(7) << setprecision(3) << feE  << " ||";
 // MARC 	OUT << endl;
 // MARC 	OUT << "--------------------------------------------------------------" << endl << endl;
 // MARC 
@@ -6111,11 +6125,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 // MARC 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
 // MARC 	OUT << "==============================================================================================" << endl;
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. fakes",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. fakes",
 // MARC 	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
 // MARC 	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em,
 // MARC 	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee);
-// MARC 	OUT << Form("%16s ||                       || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. chmisid",
+// MARC 	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. chmisid",
 // MARC 	nt2_em_chmid, nt2_em_chmid_e1, nt2_em_chmid_e2, nt2_ee_chmid, nt2_ee_chmid_e1, nt2_ee_chmid_e2);
 // MARC 
 // MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
@@ -6151,13 +6165,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 		nt2_rare_mc_em_e1 += scale*scale * S->numbers[reg][ElMu].tt_avweight*S->numbers[reg][ElMu].tt_avweight * S->getError2(S->region[reg][HighPt].em.nt20_pt->GetEntries());
 // MARC 		nt2_rare_mc_ee_e1 += scale*scale * S->numbers[reg][Elec].tt_avweight*S->numbers[reg][Elec].tt_avweight * S->getError2(S->region[reg][HighPt].ee.nt20_pt->GetEntries());
 // MARC 
-// MARC 		OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", S->sname.Data(),
+// MARC 		OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", S->sname.Data(),
 // MARC 		temp_nt2_mm, scale*S->numbers[reg][Muon].tt_avweight * S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),
 // MARC 		temp_nt2_em, scale*S->numbers[reg][ElMu].tt_avweight * S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),
 // MARC 		temp_nt2_ee, scale*S->numbers[reg][Elec].tt_avweight * S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
 // MARC 	}
 // MARC 	OUT << "----------------------------------------------------------------------------------------------" << endl;
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "Rare SM (Sum)",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
 // MARC 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1), RareESyst*nt2_rare_mc_mm,
 // MARC 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1), RareESyst*nt2_rare_mc_em,
 // MARC 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1), RareESyst*nt2_rare_mc_ee);
@@ -6174,7 +6188,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	float wz_nt2_em_e1 = wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
 // MARC 	float wz_nt2_ee_e1 = wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 // MARC 
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "WZ Prod.",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
 // MARC 	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
 // MARC 	wz_nt2_em, sqrt(wz_nt2_em_e1),
 // MARC 	wz_nt2_ee, sqrt(wz_nt2_ee_e1));
@@ -6201,12 +6215,12 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	float ttz_nt2_em_e1 = ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight*fSamples[TTbarZ]->numbers[reg][ElMu].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
 // MARC 	float ttz_nt2_ee_e1 = ttzscale*ttzscale * fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight*fSamples[TTbarZ]->numbers[reg][Elec].tt_avweight * fSamples[TTbarZ]->getError2(fSamples[TTbarZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
 // MARC 
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "ttW Prod.",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttW Prod.",
 // MARC 	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1),
 // MARC 	ttw_nt2_em, sqrt(ttw_nt2_em_e1),
 // MARC 	ttw_nt2_ee, sqrt(ttw_nt2_ee_e1));
 // MARC 	
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "ttZ Prod.",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "ttZ Prod.",
 // MARC 	ttz_nt2_mm, sqrt(ttz_nt2_mm_e1),
 // MARC 	ttz_nt2_em, sqrt(ttz_nt2_em_e1),
 // MARC 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1));
@@ -6218,11 +6232,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	float mm_tot_sqerr2 = nF_mm*nF_mm*FakeESyst2                                   + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm + WZESyst2*wz_nt2_mm*wz_nt2_mm;
 // MARC 	float em_tot_sqerr2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst2*wz_nt2_em*wz_nt2_em;
 // MARC 	float ee_tot_sqerr2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst2*wz_nt2_ee*wz_nt2_ee;
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "tot. backgr.",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "tot. backgr.",
 // MARC 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1), sqrt(mm_tot_sqerr2),
 // MARC 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1), sqrt(em_tot_sqerr2),
 // MARC 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1), sqrt(ee_tot_sqerr2));
-// MARC 	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "",
+// MARC 	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "",
 // MARC 	nF_mm                + nt2_rare_mc_mm + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
 // MARC 	nF_em + nt2_em_chmid + nt2_rare_mc_em + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 // MARC 	nF_ee + nt2_ee_chmid + nt2_rare_mc_ee + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2));
@@ -6236,8 +6250,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	float comb_tot_sqerr1 = FR->getTotEStat()*FR->getTotEStat() + nt2_rare_mc_mm_e1 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_rare_mc_em_e1 + nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_rare_mc_ee_e1 + wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_ee_e1;
 // MARC 	float comb_tot_sqerr2 = nF*nF*FakeESyst2 + RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee); 
 // MARC 	// FIXME: Why take 50% on Rare yields on SUM and not on individual channels?
-// MARC 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " Â± ";
-// MARC 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " Â± ";
+// MARC 	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
+// MARC 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr1)) << " ± ";
 // MARC 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_sqerr2)) << endl;
 // MARC 	OUT << "      combined MC: ";
 // MARC 	OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
@@ -6251,32 +6265,32 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	///////////////////////////////////////////////////////////////////////////////////
 // MARC 	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
 // MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-// MARC 	fOUTSTREAM3 << Form("DF:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
 // MARC 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
 // MARC 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
 // MARC 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
-// MARC 	fOUTSTREAM3 << Form("SF:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
 // MARC 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
 // MARC 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
 // MARC 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
-// MARC 	fOUTSTREAM3 << Form("CM:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f |   -         | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
 // MARC 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
 // MARC 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
 // MARC 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-// MARC 	fOUTSTREAM3 << Form("MC:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
 // MARC 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
 // MARC 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
 // MARC 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
-// MARC 	fOUTSTREAM3 << Form("WZ:  %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("WZ:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
 // MARC 	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
 // MARC 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
 // MARC 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
 // MARC 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em));
-// MARC 	fOUTSTREAM3 << Form("Tot: %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
 // MARC 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
 // MARC 	nF_mm + nt2_rare_mc_mm               , sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
@@ -6284,13 +6298,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
 // MARC 	fOUTSTREAM3 << Form("Obs: %4.0f             ( %3.0f         | %3.0f         | %3.0f         )\n", nt2_mm+nt2_em+nt2_ee, nt2_ee, nt2_mm, nt2_em);
 // MARC 	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
-// MARC 	fOUTSTREAM3 << Form("ttW: %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("ttW: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	ttw_nt2_mm + ttw_nt2_em + ttw_nt2_ee,
 // MARC 	sqrt(ttw_nt2_mm_e1 + ttw_nt2_em_e1 + ttw_nt2_em_e1 + RareESyst2*(ttw_nt2_mm + ttw_nt2_em + ttw_nt2_ee)*(ttw_nt2_mm + ttw_nt2_em + ttw_nt2_ee)),
 // MARC 	ttw_nt2_ee, sqrt(ttw_nt2_ee_e1 + RareESyst2*ttw_nt2_ee*ttw_nt2_ee),
 // MARC 	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1 + RareESyst2*ttw_nt2_mm*ttw_nt2_mm),
 // MARC 	ttw_nt2_em, sqrt(ttw_nt2_em_e1 + RareESyst2*ttw_nt2_em*ttw_nt2_em));
-// MARC 	fOUTSTREAM3 << Form("ttZ: %6.1f Â± %6.1f  ( %5.1fÂ±%5.1f | %5.1fÂ±%5.1f | %5.1fÂ±%5.1f )\n",
+// MARC 	fOUTSTREAM3 << Form("ttZ: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
 // MARC 	ttz_nt2_mm + ttz_nt2_em + ttz_nt2_ee,
 // MARC 	sqrt(ttz_nt2_mm_e1 + ttz_nt2_em_e1 + ttz_nt2_em_e1 + RareESyst2*(ttz_nt2_mm + ttz_nt2_em + ttz_nt2_ee)*(ttz_nt2_mm + ttz_nt2_em + ttz_nt2_ee)),
 // MARC 	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1 + RareESyst2*ttz_nt2_ee*ttz_nt2_ee),
@@ -6797,10 +6811,10 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << "         RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
 	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(16) << "  data stat only ||";
-	OUT << setw(7)  << setprecision(3) << mufratio_data  << " +/- " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
-	OUT << setw(7)  << setprecision(3) << mupratio_data  << " +/- " << setw(7) << setprecision(3) << mupratio_data_e  << " ||";
-	OUT << setw(7)  << setprecision(3) << elfratio_data  << " +/- " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
-	OUT << setw(7)  << setprecision(3) << elpratio_data  << " +/- " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
+	OUT << setw(7)  << setprecision(3) << mufratio_data  << " ± " << setw(7) << setprecision(3) << mufratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(3) << mupratio_data  << " ± " << setw(7) << setprecision(3) << mupratio_data_e  << " ||";
+	OUT << setw(7)  << setprecision(3) << elfratio_data  << " ± " << setw(7) << setprecision(3) << elfratio_data_e  << " |";
+	OUT << setw(7)  << setprecision(3) << elpratio_data  << " ± " << setw(7) << setprecision(3) << elpratio_data_e  << " ||";
 	OUT << endl;
 	OUT << "---------------------------------------------------------------------------------------------------------" << endl;
 
@@ -6857,8 +6871,8 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << "       E-ChMisID  ||       Barrel       |       Endcap      ||" << endl;
 	OUT << "--------------------------------------------------------------" << endl;
 	OUT << "                  ||";
-	OUT << setw(7)  << setprecision(2) << fb  << " +/- " << setw(7) << setprecision(3) << fbE  << " |";
-	OUT << setw(7)  << setprecision(2) << fe  << " +/- " << setw(7) << setprecision(3) << feE  << " ||";
+	OUT << setw(7)  << setprecision(2) << fb  << " ± " << setw(7) << setprecision(3) << fbE  << " |";
+	OUT << setw(7)  << setprecision(2) << fe  << " ± " << setw(7) << setprecision(3) << feE  << " ||";
 	OUT << endl;
 	OUT << "--------------------------------------------------------------" << endl << endl;
 
@@ -6876,11 +6890,11 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	OUT << "       SUMMARY   ||         Mu/Mu         ||         E/Mu          ||          E/E          ||" << endl;
 	OUT << "==============================================================================================" << endl;
-	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. fakes",
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. fakes",
 	nF_mm, FR->getMMTotEStat(), FakeESyst*nF_mm,
 	nF_em, FR->getEMTotEStat(), FakeESyst*nF_em,
 	nF_ee, FR->getEETotEStat(), FakeESyst*nF_ee);
-	OUT << Form("%16s ||                       || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "pred. chmisid",
+	OUT << Form("%16s ||                       || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "pred. chmisid",
 	nt2_em_chmid, nt2_em_chmid_e1, nt2_em_chmid_e2, nt2_ee_chmid, nt2_ee_chmid_e1, nt2_ee_chmid_e2);
 
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
@@ -6950,7 +6964,7 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 		}
 
 
-		OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||", (it->first).c_str(), 
+		OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||", (it->first).c_str(), 
 		       MM_yiel, MM_stat, RareESyst*(MM_yiel),
 		       EM_yiel, EM_stat, RareESyst*(EM_yiel),
 		       EE_yiel, EE_stat, RareESyst*(EE_yiel)) << endl;
@@ -6961,14 +6975,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 	// RARE SM BACKGROUND  in case of ttw == true, without TTW
-	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "Rare SM (Sum)",
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "Rare SM (Sum)",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e2), RareESyst*nt2_rare_mc_mm,
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e2), RareESyst*nt2_rare_mc_em,
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e2), RareESyst*nt2_rare_mc_ee);
 	OUT << "----------------------------------------------------------------------------------------------" << endl;
 
 	// LINE FOR WZ BACKGROUND
-	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "WZ prod.",
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "WZ prod.",
 	nt2_wz_mc_mm, sqrt(nt2_wz_mc_mm_e2), WZESyst*nt2_wz_mc_mm,
 	nt2_wz_mc_em, sqrt(nt2_wz_mc_em_e2), WZESyst*nt2_wz_mc_em,
 	nt2_wz_mc_ee, sqrt(nt2_wz_mc_ee_e2), WZESyst*nt2_wz_mc_ee);
@@ -6989,11 +7003,11 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	//float em_tot_sqerr2 = nF_em*nF_em*FakeESyst2 + nt2_em_chmid_e2*nt2_em_chmid_e2 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em + WZESyst*nt2_wz_mc_em_e1*nt2_wz_mc_em_e1;
 	//float ee_tot_sqerr2 = nF_ee*nF_ee*FakeESyst2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee + WZESyst*nt2_wz_mc_ee_e1*nt2_wz_mc_ee_e1;
 
-	OUT << Form("%16s || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f || %5.2f Â± %5.2f Â± %5.2f ||\n", "tot. backgr.",
+	OUT << Form("%16s || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f || %5.2f ± %5.2f ± %5.2f ||\n", "tot. backgr.",
 	nF_mm + nt2_wz_mc_mm + nt2_rare_mc_mm,                sqrt(mm_tot_stat2), sqrt(mm_tot_syst2),
 	nF_em + nt2_wz_mc_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_stat2), sqrt(em_tot_syst2),
 	nF_ee + nt2_wz_mc_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_stat2), sqrt(ee_tot_syst2));
-	OUT << Form("%16s || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         || %5.2f Â± %5.2f         ||\n", "",
+	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "",
 	nF_mm + nt2_wz_mc_mm + nt2_rare_mc_mm,                sqrt(mm_tot_stat2 + mm_tot_syst2),
 	nF_em + nt2_wz_mc_em + nt2_em_chmid + nt2_rare_mc_em, sqrt(em_tot_stat2 + em_tot_syst2),
 	nF_ee + nt2_wz_mc_ee + nt2_ee_chmid + nt2_rare_mc_ee, sqrt(ee_tot_stat2 + ee_tot_syst2));
@@ -7025,14 +7039,14 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 	                        RareESyst2*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee)*(nt2_rare_mc_mm + nt2_rare_mc_em + nt2_rare_mc_ee) + 
 	                        WZESyst2  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee)  *(nt2_wz_mc_mm   + nt2_wz_mc_em   + nt2_wz_mc_ee) + 
 	                        nt2_em_chmid_e2*nt2_em_chmid_e2 + nt2_ee_chmid_e2*nt2_ee_chmid_e2;
-	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " Â± ";
-	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_stat2)) << " Â± ";
+	OUT << setw(5) << left << Form("%5.2f", tot_pred ) << " ± ";
+	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_stat2)) << " ± ";
 	OUT << setw(5) << Form("%5.2f", sqrt(comb_tot_syst2)) << endl;
 	// OUT << "      combined MC: ";
 	// OUT << setw(5) << left << Form("%5.2f", nt2sum_mm+nt2sum_em+nt2sum_ee ) << endl;
 	if (ttw) {
 		OUT << "ttW + ttZ signal : ";
-		OUT << setw(5) << left << Form("%5.2f", (nt2_sig_mc_mm + nt2_sig_mc_em + nt2_sig_mc_ee )) << " Â±";
+		OUT << setw(5) << left << Form("%5.2f", (nt2_sig_mc_mm + nt2_sig_mc_em + nt2_sig_mc_ee )) << " ±";
 		OUT << setw(5) << left << Form("%5.2f", sqrt(nt2_sig_mc_mm_e2 + nt2_sig_mc_em_e2 + nt2_sig_mc_ee_e2)) << endl;
 	}
 	OUT << "combined observed: ";
@@ -9554,10 +9568,10 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 // MARC 	// OUT << "         RATIOS  ||    Mu-fRatio     |    Mu-pRatio     ||    El-fRatio     |    El-pRatio     ||" << endl;
 // MARC 	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
 // MARC 	// OUT << setw(16) << "           MC    ||";
-// MARC 	// OUT << setw(7)  << setprecision(2) << mf << " Â± " << setw(7) << setprecision(2) << mf_e << " |";
-// MARC 	// OUT << setw(7)  << setprecision(2) << mp << " Â± " << setw(7) << setprecision(2) << mp_e << " ||";
-// MARC 	// OUT << setw(7)  << setprecision(2) << ef << " Â± " << setw(7) << setprecision(2) << ef_e << " |";
-// MARC 	// OUT << setw(7)  << setprecision(2) << ep << " Â± " << setw(7) << setprecision(2) << ep_e << " ||";
+// MARC 	// OUT << setw(7)  << setprecision(2) << mf << " ± " << setw(7) << setprecision(2) << mf_e << " |";
+// MARC 	// OUT << setw(7)  << setprecision(2) << mp << " ± " << setw(7) << setprecision(2) << mp_e << " ||";
+// MARC 	// OUT << setw(7)  << setprecision(2) << ef << " ± " << setw(7) << setprecision(2) << ef_e << " |";
+// MARC 	// OUT << setw(7)  << setprecision(2) << ep << " ± " << setw(7) << setprecision(2) << ep_e << " ||";
 // MARC 	// OUT << endl;
 // MARC 	// OUT << "-------------------------------------------------------------------------------------------------" << endl << endl;
 // MARC 
@@ -9866,12 +9880,12 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 // MARC 	// OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
 // MARC 	// for(size_t i = 0; i < nsamples; ++i){
 // MARC 	// 	OUT << setw(16) << left << names[i];
-// MARC 	// 	OUT << Form("  MM || %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) |                            |",
+// MARC 	// 	OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 // MARC 	// 	npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
 // MARC 	// 	OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
-// MARC 	// 	OUT << Form("  EM || %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) |",
+// MARC 	// 	OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
 // MARC 	// 	npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
-// MARC 	// 	OUT << Form("                  EE || %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) | %9.3f Â± %7.3f (stat) |                            |",
+// MARC 	// 	OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
 // MARC 	// 	npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
 // MARC 	// }
 // MARC 	// OUT << "===========================================================================================================================================" << endl;
@@ -9881,23 +9895,23 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 // MARC 	// OUT << "  PREDICTIONS (in tt window)" << endl;
 // MARC 	// OUT << "--------------------------------------------------------------" << endl;
 // MARC 	// OUT << " Mu/Mu Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " Â± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " Â± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " Â± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " Â± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
 // MARC 	// OUT << "--------------------------------------------------------------" << endl;
 // MARC 	// OUT << " E/Mu Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " Â± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " Â± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " Â± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " Â± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " Â± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
 // MARC 	// OUT << "--------------------------------------------------------------" << endl;
 // MARC 	// OUT << " E/E Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " Â± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " Â± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " Â± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " Â± " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
+// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ±   " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
 // MARC 	// OUT << "==========================================================================================================================" << endl;
 // MARC 	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
 // MARC 	
@@ -10103,10 +10117,10 @@ void SSDLPlotter::makeTTbarClosure(){
 	OUT << "     RATIOS  ||     Mu-fRatio      |     Mu-pRatio      ||     El-fRatio      |     El-pRatio      ||" << endl;
 	OUT << "-----------------------------------------------------------------------------------------------------" << endl;
 	OUT << setw(12) << "    allMC    ||";
-	OUT << setw(7)  << setprecision(2) << mufratio_allmc << " +/- " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
-	OUT << setw(7)  << setprecision(2) << mupratio_allmc << " +/- " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
-	OUT << setw(7)  << setprecision(2) << elfratio_allmc << " +/- " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
-	OUT << setw(7)  << setprecision(2) << elpratio_allmc << " +/- " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
+	OUT << setw(7)  << setprecision(2) << mufratio_allmc << " ± " << setw(7) << setprecision(2) << mufratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << mupratio_allmc << " ± " << setw(7) << setprecision(2) << mupratio_allmc_e << " ||";
+	OUT << setw(7)  << setprecision(2) << elfratio_allmc << " ± " << setw(7) << setprecision(2) << elfratio_allmc_e << " |";
+	OUT << setw(7)  << setprecision(2) << elpratio_allmc << " ± " << setw(7) << setprecision(2) << elpratio_allmc_e << " ||";
 	OUT << endl;
 	OUT << "-----------------------------------------------------------------------------------------------------" << endl << endl;
 	OUT << "---------------------------------------------------------------------------------------------------" << endl;
