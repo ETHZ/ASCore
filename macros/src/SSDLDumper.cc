@@ -344,27 +344,22 @@ void SSDLDumper::loopEvents(Sample *S){
 		//	EMu:    193575   475    365741102    3   1   219.300   56.996    N
 		//	EMu:    194050   607    577022380    2   0   115.695   109.439   N
 		//	EMu:    193998   85     51341300     3   0   263.314   123.356   N
-// 		bool printRun = false;
-// 		if(Event==93995433  && Run==191720) printRun = true;
-// 		if(Event==79605331  && Run==193575) printRun = true;
-// 		if(Event==653035050 && Run==194076) printRun = true;
-// 		if(Event==105354174 && Run==191833) printRun = true;
-// 		if(Event==275954331 && Run==193541) printRun = true;		
-// 		if(Event==557924239 && Run==191062) printRun = true;		
-// 		if(Event==365741102 && Run==193575) printRun = true;		
-// 		if(Event==577022380 && Run==194050) printRun = true;		
-// 		if(Event==51341300  && Run==193998) printRun = true;		
-// 		if (printRun){
-// 		  fOUTSTREAM << "[DEBUG]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l) %1d(%1d) NEl(#l) %1d(%1d) passZVeto(3rdLep) %1d(%1d) HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
-// 						     S->sname.Data(),
-// 						     Run, 
-// 						     Event, 
-// 						     NMus, hasLooseMuons(), 
-// 						     NEls, hasLooseElectrons(), 
-// 						     passesZVeto(), passes3rdLepVeto(),
-// 						     getHT(), getNJets(), getNBTags(),
-// 						     getMET()) << endl;
-// 		}
+ 		bool printRun = false;
+ 		if(Event==230464005 && Run==191226) printRun = true;
+ 		if(Event==128070684 && Run==191062) printRun = true;
+ 		if (printRun){
+		  int ind1(-1),ind2(-1);
+ 		  fOUTSTREAM << "[SYNCH]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> %1d, NMu(#l/#t) %1d(%1d/%1d) NEl(#l/#t) %1d(%1d/%1d) passZVeto %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
+ 						     S->sname.Data(),
+ 						     Run, 
+ 						     Event, isSSLLEvent(ind1,ind2),
+ 						     NMus, hasLooseMuons(), getNTightMuons(),
+ 						     NEls, hasLooseElectrons(), getNTightElectrons(),
+ 						     passesZVeto(),
+ 						     getHT(), getNJets(), getNBTags(),
+ 						     getMET()) << endl;
+ 		}
+		
 		/////////////////////////////////////////////
 		// Event modifications
 		scaleBTags(S, 0);
@@ -3009,14 +3004,14 @@ float SSDLDumper::singleMuPrescale(){
 	return 1;
 }
 bool SSDLDumper::singleElTrigger(){
-	// Pretend MC samples always fire trigger
+  // Pretend MC samples always fire trigger
 	if(fSample->datamc > 0) return true;
-	return ((HLT_ELE8_JET30 > 0) || HLT_ELE8_JET30_TIGHT ||
+	return ((HLT_ELE8_JET30 > 0) || (HLT_ELE8_JET30_TIGHT > 0) ||
 		(HLT_ELE8 > 0) || (HLT_ELE17 > 0));
 }
 float SSDLDumper::singleElPrescale(){
 	// Pretend MC samples have prescale 1.
-	if(fSample->datamc > 0) return 1.;
+  if(fSample->datamc > 0) return 1.;
 	// Get the prescale factor for whichever of these triggers fired
 	// Only correct if they are mutually exclusive!
 	if( HLT_ELE8_JET30_PS > 0 ) return HLT_ELE8_JET30_PS;
@@ -3596,66 +3591,85 @@ bool SSDLDumper::passesZVeto(bool(SSDLDumper::*muonSelector)(int), bool(SSDLDump
 // Checks if any combination of opposite sign, same flavor leptons (e or mu)
 // has invariant mass closer than dm to the Z mass, returns true if none found
 // Default for dm is 15 GeV
+
 // Check if a third lepton with OS, same flavour, is compatible with a Z candidate
 // with the hypothesis leptons
-  if (NMus > 1){
-    for (size_t i=0; i<NMus; ++i){
-      if (fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
-      if (fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
-      if ((*this.*muonSelector)(i)){
-	TLorentzVector pmu;
-	pmu.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
-	if (MuCharge[i] != fHypLepton1.charge && fabs((pmu+fHypLepton1.p).M() - gMZ) < dm) return false;
-	if (MuCharge[i] != fHypLepton2.charge && fabs((pmu+fHypLepton2.p).M() - gMZ) < dm) return false;
+//   if (NMus > 1){
+//     for (size_t i=0; i<NMus; ++i){
+//       if (fHypLepton1.type == 0 && fHypLepton1.index == i) continue;
+//       if (fHypLepton2.type == 0 && fHypLepton2.index == i) continue;
+//       if ((*this.*muonSelector)(i)){
+// 	TLorentzVector pmu;
+// 	pmu.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU); 
+// 	if (Run == 191248  && Event == 64376449 ) fOUTSTREAM << "[ZVeto] :" << (pmu+fHypLepton1.p).M() <<" , " << (pmu+fHypLepton2.p).M() << " OS?: "<< MuCharge[i]*fHypLepton1.charge <<endl;
+// 	if (Run == 190705  && Event == 496763485) fOUTSTREAM << "[ZVeto] :" << (pmu+fHypLepton1.p).M() <<" , " << (pmu+fHypLepton2.p).M() << " OS?: "<< MuCharge[i]*fHypLepton1.charge <<endl;
+// 	if (MuCharge[i] != fHypLepton1.charge && fabs((pmu+fHypLepton1.p).M() - gMZ) < dm) return false;
+// 	if (MuCharge[i] != fHypLepton2.charge && fabs((pmu+fHypLepton2.p).M() - gMZ) < dm) return false;
+//       }
+//     }
+//   }
+//   if (NEls > 1){
+//     for (size_t i=0; i<NEls; ++i){
+//       if (fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
+//       if (fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
+//       if ((*this.*eleSelector)(i)){
+// 	TLorentzVector pel;
+// 	pel.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+// 	if (ElCharge[i] != fHypLepton1.charge && fabs((pel+fHypLepton1.p).M() - gMZ) < dm) return false;
+// 	if (ElCharge[i] != fHypLepton2.charge && fabs((pel+fHypLepton2.p).M() - gMZ) < dm) return false;
+//       }
+//     }
+//   }
+  
+  bool printRun = false;
+  if(Event==230464005 && Run==191226) printRun = true;
+  if(Event==128070684 && Run==191062) printRun = true;
+  if (printRun){
+    for (size_t i = 0; i < NMus; ++i)
+      fOUTSTREAM << "[SYNCH]: " << Form ("%12s:  - run %6.0d / ev %11.0d ---> NMu(#l/#t) %1d(%1d/%1d) NEl(#l/#t) %1d(%1d/%1d) passZVeto %1d HT(#J,#b) %6.2f(%1d/%1d) MET %6.2f", 
+					 S->sname.Data(),
+					 Run, 
+					 Event, isSSLLEvent(ind1,ind2),
+					 NMus, hasLooseMuons(), getNTightMuons(),
+					 NEls, hasLooseElectrons(), getNTightElectrons(),
+					 passesZVeto(),
+					 getHT(), getNJets(), getNBTags(),
+					 getMET()) << endl;
+ 		}
+
+  if(NMus > 1){
+    for(size_t i = 0; i < NMus-1; ++i){
+      if((*this.*muonSelector)(i) == false) continue;
+      TLorentzVector pmu1, pmu2;
+      pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
+      
+      // Second muon
+      for(size_t j = i+1; j < NMus; ++j){ 
+	if((*this.*muonSelector)(j) == false) continue;
+	pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], gMMU);
+	if(MuCharge[i] == MuCharge[j]) continue;
+	if(fabs((pmu1+pmu2).M() - gMZ) < dm) return false;
       }
     }
   }
-  if (NEls > 1){
-    for (size_t i=0; i<NEls; ++i){
-      if (fHypLepton1.type == 1 && fHypLepton1.index == i) continue;
-      if (fHypLepton2.type == 1 && fHypLepton2.index == i) continue;
-      if ((*this.*eleSelector)(i)){
-	TLorentzVector pel;
-	pel.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-	if (ElCharge[i] != fHypLepton1.charge && fabs((pel+fHypLepton1.p).M() - gMZ) < dm) return false;
-	if (ElCharge[i] != fHypLepton2.charge && fabs((pel+fHypLepton2.p).M() - gMZ) < dm) return false;
+  
+  if(NEls > 1){
+    for(size_t i = 0; i < NEls-1; ++i){
+      if((*this.*eleSelector)(i)){
+	TLorentzVector pel1, pel2;
+	pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
+	
+	// Second electron
+	for(size_t j = i+1; j < NEls; ++j){
+	  if((*this.*eleSelector)(j) && (ElCharge[i] != ElCharge[j]) ){
+	    pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
+	    if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
+	  }
+	}
       }
-    }
+    }		
   }
-      // 	if(NMus > 1){
-// 		for(size_t i = 0; i < NMus-1; ++i){
-// 			if((*this.*muonSelector)(i)){
-// 				TLorentzVector pmu1, pmu2;
-// 				pmu1.SetPtEtaPhiM(MuPt[i], MuEta[i], MuPhi[i], gMMU);
-
-// 				// Second muon
-// 				for(size_t j = i+1; j < NMus; ++j){ 
-// 					if((*this.*muonSelector)(j) && (MuCharge[i] != MuCharge[j]) ){
-// 						pmu2.SetPtEtaPhiM(MuPt[j], MuEta[j], MuPhi[j], gMMU);
-// 						if(fabs((pmu1+pmu2).M() - gMZ) < dm) return false;
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	if(NEls > 1){
-// 		for(size_t i = 0; i < NEls-1; ++i){
-// 			if((*this.*eleSelector)(i)){
-// 				TLorentzVector pel1, pel2;
-// 				pel1.SetPtEtaPhiM(ElPt[i], ElEta[i], ElPhi[i], gMEL);
-
-// 				// Second electron
-// 				for(size_t j = i+1; j < NEls; ++j){
-// 					if((*this.*eleSelector)(j) && (ElCharge[i] != ElCharge[j]) ){
-// 						pel2.SetPtEtaPhiM(ElPt[j], ElEta[j], ElPhi[j], gMEL);
-// 						if(fabs((pel1+pel2).M() - gMZ) < dm) return false;
-// 					}
-// 				}
-// 			}
-// 		}		
-// 	}
-	return true;
+  return true;
 }
 bool SSDLDumper::passesZVeto(float dm){
 	if(!gApplyZVeto) return true;
@@ -4151,8 +4165,9 @@ bool SSDLDumper::isGoodMuon(int muon, float ptcut){
 bool SSDLDumper::isGoodMuonForZVeto(int muon){
 	// Remove stupid PtE/Pt cut
 	if(muon >= NMus) return false; // Sanity check
-	if(MuPt[muon] < 10.) return false;
 	
+	if(MuPt[muon] < 10.) return false;
+       	
 	if (MuPFIso[muon] > 0.2) return false;
 	return true;
 }
@@ -4428,7 +4443,7 @@ bool SSDLDumper::isGoodJet(int jet, float pt){
 	// Remove jets close to all tight leptons
 	for(size_t imu = 0; imu < NMus; ++imu){
 		if(!isTightMuon(imu)) continue;
-		if(!isGoodSecMuon(imu)) continue; // pt > 10
+		if(!isGoodSecMuon(imu)) continue; 
 		if(Util::GetDeltaR(MuEta[imu], JetEta[jet], MuPhi[imu], JetPhi[jet]) > minDR ) continue;
 		return false;
 	}
