@@ -130,13 +130,13 @@ void SSDLPlotter::init(TString filename){
 	TH1::AddDirectory(kFALSE);
 
 	fMCBG.push_back(TTJets);
-	// MARC fMCBG.push_back(TJets_t);
-	// MARC fMCBG.push_back(TbarJets_t);
-	// MARC fMCBG.push_back(TJets_tW);
-	// MARC fMCBG.push_back(TbarJets_tW);
-	// MARC fMCBG.push_back(TJets_s);
-	// MARC fMCBG.push_back(TbarJets_s);
-	// MARC fMCBG.push_back(WJets);
+	fMCBG.push_back(SingleT_t);
+	fMCBG.push_back(SingleTbar_t);
+	fMCBG.push_back(SingleT_tW);
+	fMCBG.push_back(SingleTbar_tW);
+	// MARC fMCBG.push_back(SingleT_s);
+	fMCBG.push_back(SingleTbar_s);
+	fMCBG.push_back(WJets);
 	fMCBG.push_back(DYJets);
 	// MARC fMCBG.push_back(GJets40);
 	// MARC fMCBG.push_back(GJets100);
@@ -146,8 +146,8 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(ZZ);
 	// MARC fMCBG.push_back(GVJets);
 	// MARC fMCBG.push_back(DPSWW);
-	// MARC fMCBG.push_back(TTbarW);
-	// MARC fMCBG.push_back(TTbarZ);
+	fMCBG.push_back(TTbarW);
+	fMCBG.push_back(TTbarZ);
 	// MARC fMCBG.push_back(TTbarG);
 	// MARC fMCBG.push_back(WpWp);
 	// MARC fMCBG.push_back(WmWm);
@@ -171,21 +171,21 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(QCD1800);
 
 	fMCBGNoQCDNoGJets.push_back(TTJets);
-	// MARC fMCBGNoQCDNoGJets.push_back(TJets_t);
-	// MARC fMCBGNoQCDNoGJets.push_back(TbarJets_t);
-	// MARC fMCBGNoQCDNoGJets.push_back(TJets_tW);
-	// MARC fMCBGNoQCDNoGJets.push_back(TbarJets_tW);
-	// MARC fMCBGNoQCDNoGJets.push_back(TJets_s);
-	// MARC fMCBGNoQCDNoGJets.push_back(TbarJets_s);
-	// MARC fMCBGNoQCDNoGJets.push_back(WJets);
+	fMCBGNoQCDNoGJets.push_back(SingleT_t);
+	fMCBGNoQCDNoGJets.push_back(SingleTbar_t);
+	fMCBGNoQCDNoGJets.push_back(SingleT_tW);
+	fMCBGNoQCDNoGJets.push_back(SingleTbar_tW);
+	// MARC fMCBGNoQCDNoGJets.push_back(SingleT_s);
+	fMCBGNoQCDNoGJets.push_back(SingleTbar_s);
+	fMCBGNoQCDNoGJets.push_back(WJets);
 	fMCBGNoQCDNoGJets.push_back(DYJets);
 	// MARC fMCBGNoQCDNoGJets.push_back(WW);
 	// MARC fMCBGNoQCDNoGJets.push_back(WZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(ZZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(GVJets);
 	// MARC fMCBGNoQCDNoGJets.push_back(DPSWW);
-	// MARC fMCBGNoQCDNoGJets.push_back(TTbarW);
-	// MARC fMCBGNoQCDNoGJets.push_back(TTbarZ);
+	fMCBGNoQCDNoGJets.push_back(TTbarW);
+	fMCBGNoQCDNoGJets.push_back(TTbarZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(TTbarG);
 	// MARC fMCBGNoQCDNoGJets.push_back(WpWp);
 	// MARC fMCBGNoQCDNoGJets.push_back(WmWm);
@@ -201,13 +201,13 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGNoQCDNoGJetsSig.push_back(LM6);
 
 	fMCBGMuEnr.push_back(TTJets);
-	// MARC fMCBGMuEnr.push_back(TJets_t);
-	// MARC fMCBGMuEnr.push_back(TbarJets_t);
-	// MARC fMCBGMuEnr.push_back(TJets_tW);
-	// MARC fMCBGMuEnr.push_back(TbarJets_tW);
-	// MARC fMCBGMuEnr.push_back(TJets_s);
-	// MARC fMCBGMuEnr.push_back(TbarJets_s);
-	// MARC fMCBGMuEnr.push_back(WJets);
+	fMCBGMuEnr.push_back(SingleT_t);
+	fMCBGMuEnr.push_back(SingleTbar_t);
+	fMCBGMuEnr.push_back(SingleT_tW);
+	fMCBGMuEnr.push_back(SingleTbar_tW);
+	// MARC fMCBGMuEnr.push_back(SingleT_s);
+	fMCBGMuEnr.push_back(SingleTbar_s);
+	fMCBGMuEnr.push_back(WJets);
 	fMCBGMuEnr.push_back(DYJets);
 	// MARC fMCBGMuEnr.push_back(GJets40);
 	// MARC fMCBGMuEnr.push_back(GJets100);
@@ -217,8 +217,8 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGMuEnr.push_back(ZZ);
 	// MARC fMCBGMuEnr.push_back(GVJets);
 	// MARC fMCBGMuEnr.push_back(DPSWW);
-	// MARC fMCBGMuEnr.push_back(TTbarW);
-	// MARC fMCBGMuEnr.push_back(TTbarZ);
+	fMCBGMuEnr.push_back(TTbarW);
+	fMCBGMuEnr.push_back(TTbarZ);
 	// MARC fMCBGMuEnr.push_back(TTbarG);
 	// MARC fMCBGMuEnr.push_back(WpWp);
 	// MARC fMCBGMuEnr.push_back(WmWm);
@@ -298,8 +298,8 @@ void SSDLPlotter::doAnalysis(){
 	
 	if(readHistos(fOutputFileName) != 0) return;
 	fillRatios(fMuData, fEGData, 0);
-	// MARC fillRatios(fMCBGMuEnr, fMCBG, 1);
-	// MARC storeWeightedPred();
+	fillRatios(fMCBGMuEnr, fMCBG, 1);
+	storeWeightedPred();
 
 	// makePileUpPlots(true); // loops on all data!
 	
@@ -3721,7 +3721,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
-	// MARC calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
+	calculateRatio(mcsamples,   chan, fp, h_dummy2, h_ptratio_mc,   h_dummy1);
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, fp, 0);
@@ -3776,7 +3776,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	if(fp == SigSup) leg = new TLegend(0.15,0.75,0.35,0.88);
 	if(fp == ZDecay) leg = new TLegend(0.15,0.15,0.35,0.28);
 	leg->AddEntry(h_ptratio_data, "Data",       "p");
-	// MARC leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
+	leg->AddEntry(h_ptratio_mc,   "Simulation", "p");
 	leg->SetTextSize(0.04);
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
@@ -3784,10 +3784,12 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 
 	TCanvas *c_temp = new TCanvas("C_PtRatioPlot", "fRatio vs Pt in Data vs MC", 0, 0, 800, 600);
 	c_temp->cd();
-	h_ptratio_mc->DrawCopy("axis");
-	// eff_mc->Draw("P same");
-	//	h_ptratio_data->Draw("PE X0 same");
-	eff_data->Draw("P same");
+	// MARC h_ptratio_mc->DrawCopy("axis");
+	h_ptratio_mc->DrawCopy("PE 0");
+	// MARC eff_mc->Draw("P same");
+	// MARC h_ptratio_data->Draw("PE X0 same");
+	eff_data->Draw("PZ 0 same");
+	// MARC eff_data->Draw("P same");
 	leg->Draw();
 	//	lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 	lat->SetTextSize(0.04);
@@ -3839,7 +3841,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	}
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
-	// MARC calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
+	calculateRatio(mcsamples,   chan, SigSup, h_dummy2, h_dummy1, h_etaratio_mc);
 
 	//////////////
 	TEfficiency *eff_data = getMergedEfficiency(datasamples, chan, SigSup, 1);
@@ -3890,7 +3892,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	
 	TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 	leg->AddEntry(h_etaratio_data, "Data",       "p");
-	// MARC leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
+	leg->AddEntry(h_etaratio_mc,   "Simulation", "p");
 	leg->SetFillStyle(0);
 	leg->SetTextFont(42);
 	leg->SetTextSize(0.04);
@@ -3909,9 +3911,10 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	//     lat.DrawLatex(0.23, 0.79, "#int L dt = XXX pb^{-1},   #sqrt{s} = 8 TeV");
 	//     lat.DrawLatex(0.83, 0.88, name);
 	
-	h_etaratio_mc->DrawCopy("axis");
-	eff_data->Draw("P same");
-	// MARC eff_data->Draw("PZ 0 same");
+	h_etaratio_mc->DrawCopy("PE X0");
+	// MARC h_etaratio_mc->DrawCopy("axis");
+	// MARC eff_data->Draw("P same");
+	eff_data->Draw("PZ 0 same");
 	leg->Draw();
 	drawTopLine();
 	lat->SetTextSize(0.04);
@@ -5483,8 +5486,8 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 // MARC 	mcbkg.push_back(ZZ);
 // MARC 	mcbkg.push_back(GVJets);
 // MARC 	mcbkg.push_back(DPSWW);
-// MARC 	mcbkg.push_back(TTbarW);
-// MARC 	mcbkg.push_back(TTbarZ);
+	mcbkg.push_back(TTbarW);
+	mcbkg.push_back(TTbarZ);
 // MARC 	mcbkg.push_back(TTbarG);
 // MARC 	mcbkg.push_back(WpWp);
 // MARC 	mcbkg.push_back(WmWm);

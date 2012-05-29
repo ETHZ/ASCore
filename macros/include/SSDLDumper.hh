@@ -74,11 +74,12 @@ public:
 		DoubleMu1 = sample_begin, DoubleMu2,// DoubleMu3, DoubleMu4, DoubleMu5,
 		DoubleEle1, DoubleEle2, //DoubleEle3, DoubleEle4, DoubleEle5,
 		MuEG1, MuEG2, //MuEG3, MuEG4, MuEG5,
-		TTJets, // TJets_t, TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
+		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
+		WJets,
 		DYJets,
 		// GJets40, GJets100, GJets200,
 		// GVJets, WW, WZ, ZZ, 
-		// TTbarW, TTbarZ, TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		TTbarW, TTbarZ, //TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		// QCDMuEnr10,
 		// QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
@@ -112,7 +113,9 @@ public:
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
+		HT0MET0,
 		HT80MET0,
+		HT80MET0b,
 		HT80MET30,
 		HT80MET30b,
 		HT200MET50,
@@ -128,6 +131,26 @@ public:
 		HT320MET0b,
 		gNREGIONS
 	};
+	//enum gRegion {
+	//	region_begin,
+	//	Baseline = region_begin,
+	//	HT80MET0,
+	//	HT80MET0b,
+	//	HT80MET30,
+	//	HT80MET30b,
+	//	HT200MET50,
+	//	HT200MET50b,
+	//	HT200MET120,
+	//	HT200MET120b,
+	//	HT320MET50,
+	//	HT320MET50b,
+	//	HT320MET120,
+	//	HT320MET120b,
+	//	HT200MET503b,
+	//	HT320MET0,
+	//	HT320MET0b,
+	//	gNREGIONS
+	//};
 	// enum gRegion {
 	// 	region_begin,
 	// 	Baseline = region_begin,
