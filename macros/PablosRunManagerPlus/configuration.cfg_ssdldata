@@ -1,12 +1,12 @@
 # Run 2012A
-/mdunser/DoubleMu/V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD/             '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
-/mdunser/DoubleElectron/V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD/ '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
-/mdunser/MuEG/V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD/                     '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/mdunser/DoubleMu/V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD/             '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/mdunser/DoubleElectron/V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD/ '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/mdunser/MuEG/V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD/                     '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
 
 # Run 2012B
-/fronga/DoubleMu/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/             '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
-/fronga/DoubleElectron/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/ '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
-/fronga/MuEG/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/                     '-v 1 -j /shome/mdunser/workspace/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/fronga/DoubleMu/V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD/             '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/fronga/DoubleElectron/V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD/ '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/fronga/MuEG/V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD/                     '-v 1 -j /shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
 
 # ## Latest runs
 # /susy/ntuples/data/V02-05-00b/DoubleElectron-Run2011B-PromptReco-v1-AOD/  '-v 1 -j /shome/stiegerb/NTP413/macros/Cert_160404-180252_7TeV_PromptReco_ReRecoAug5_ReRecoMay10_JSON.txt' -1 5
