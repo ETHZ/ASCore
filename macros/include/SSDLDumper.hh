@@ -9,6 +9,7 @@
 #include "helper/AnaClass.hh"
 #include "helper/Monitor.hh"
 #include "helper/BTagSFUtil/BTagSFUtil.h"
+#include "helper/GoodRunList.h"
 
 #include "TLorentzVector.h"
 
@@ -118,6 +119,7 @@ public:
 		HT80MET0b,
 		HT80MET30,
 		HT80MET30b,
+		HT80MET30bpp,
 		HT200MET50,
 		HT200MET50b,
 		HT200MET120,
@@ -289,6 +291,7 @@ public:
 		static int   minNbjmed [gNREGIONS];
 		static int   app3rdVet [gNREGIONS];
 		static int   vetoTTZSel[gNREGIONS];
+		static int   chargeVeto[gNREGIONS];
 		
 		Channel mm;
 		Channel em;
@@ -645,6 +648,7 @@ public:
 	virtual bool passesMETCut(float = -1., float = 7000.);
 	virtual bool passesZVeto(bool(SSDLDumper::*)(int), bool(SSDLDumper::*)(int), float = 15.); // cut with mZ +/- cut value and specified obj selectors
 	virtual bool passesZVeto(float = 15.); // cut with mZ +/- cut value
+        virtual bool passesChVeto(int = 1);
 	virtual bool passesMllEventVeto(float = 5.);
 	virtual bool passesMllEventVeto(int, int, int, float = 5.);
 	virtual bool passes3rdLepVeto();
@@ -728,7 +732,7 @@ public:
 	float fC_maxMt_Control;
 	int   fC_app3rdVet; // 3rd lepton veto
 	int   fC_vetoTTZSel; // ttZ veto
-	
+        int   fC_chargeVeto;
 	void resetHypLeptons();
 	void setHypLepton1(int, gChannel);
 	void setHypLepton2(int, gChannel);
@@ -814,6 +818,7 @@ public:
 	TRandom3 *fRand3;
 	
 	bool isTChiSlepSnu;
+        GoodRunList *runlist;  
 
 	private:
 	
