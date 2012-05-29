@@ -5340,9 +5340,9 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 //  	float nDF   = nff_mm + nff_em + nff_ee;
 //  	float nF    = nF_mm + nF_em + nF_ee;
 	
-	npp_mm = FR->getMMNpp();   npf_mm = FR->getMMNpf();	nff_mm = FR->getMMNff();
-	npp_em = FR->getEMNpp();   npf_em = FR->getEMNpf();	nff_em = FR->getEMNff();
-	npp_ee = FR->getEENpp();   npf_ee = FR->getEENpf();	nff_ee = FR->getEENff();
+// 	npp_mm = FR->getMMNpp();   npf_mm = FR->getMMNpf();	nff_mm = FR->getMMNff();
+// 	npp_em = FR->getEMNpp();   npf_em = FR->getEMNpf();	nff_em = FR->getEMNff();
+// 	npp_ee = FR->getEENpp();   npf_ee = FR->getEENpf();	nff_ee = FR->getEENff();
 
  	float nF_mm = npf_mm + nff_mm;
  	float nF_em = npf_em+nfp_em+nff_em;
