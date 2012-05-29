@@ -84,10 +84,17 @@ class SSDLPlotter : public SSDLDumper{
 public:
 	static TString gHiLoLabel[3];
 
-	static double gEChMisIDB;
-	static double gEChMisIDB_E;
+	static double gEChMisIDBB;
+	static double gEChMisIDBB_E;
+	static double gEChMisIDEE;
+	static double gEChMisIDEE_E;
+	static double gEChMisIDEB;
+	static double gEChMisIDEB_E;
+
 	static double gEChMisIDE;
 	static double gEChMisIDE_E;
+	static double gEChMisIDB;
+	static double gEChMisIDB_E;
 
 	static float gMMTrigScale;
 	static float gEMTrigScale;
@@ -140,7 +147,7 @@ public:
 	void makeNT012Plots(gChannel, vector<int>, bool(SSDLPlotter::*)(int&, int&), TString = "");
 
 	void makeAllIntPredictions();
-	// MARC void makeIntPrediction(TString, gRegion);
+        void makeIntPrediction(TString, gRegion);
 	// MARC void makeTTWIntPredictions();
 	// MARC TTWZPrediction makeIntPredictionTTW(TString, gRegion);
 	void makeSystPlot(TString outputname, TString label, TH1D *nom, TH1D *plus, TH1D *minus=NULL);

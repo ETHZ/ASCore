@@ -1,3 +1,4 @@
+
 /*****************************************************************************
 *   Collection of tools for producing plots for same-sign dilepton analysis  *
 *                                                                            *
@@ -45,11 +46,18 @@ static const double gStatBetaBeta  = 1.;
 
 TString SSDLPlotter::gHiLoLabel[3] = {"HighPt", "LowPt", "TauChan"};
 
-// Charge misid probability (from Hamed)
-double SSDLPlotter::gEChMisIDB   = 0.0002;
-double SSDLPlotter::gEChMisIDB_E = 0.0001;
-double SSDLPlotter::gEChMisIDE   = 0.0028;
-double SSDLPlotter::gEChMisIDE_E = 0.0004;
+// Charge misid probability (from NIK)
+double SSDLPlotter::gEChMisIDBB   = 0.00023;
+double SSDLPlotter::gEChMisIDBB_E = 0.00006;
+double SSDLPlotter::gEChMisIDEB   = 0.00093;
+double SSDLPlotter::gEChMisIDEB_E = 0.00016;
+double SSDLPlotter::gEChMisIDEE   = 0.00222;
+double SSDLPlotter::gEChMisIDEE_E = 0.00057;
+
+double SSDLPlotter::gEChMisIDB   = 0.;
+double SSDLPlotter::gEChMisIDB_E = 0.;
+double SSDLPlotter::gEChMisIDE   = 0.;
+double SSDLPlotter::gEChMisIDE_E = 0.;
 
 float SSDLPlotter::gMMTrigScale = 0.92;
 float SSDLPlotter::gEMTrigScale = 0.95;
@@ -302,9 +310,9 @@ void SSDLPlotter::doAnalysis(){
 	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	// makeNT2KinPlots(false);
-	// makeNT2KinPlots(true);
-	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	//	makeNT2KinPlots(false);
+	//	makeNT2KinPlots(true);
+	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
@@ -2542,39 +2550,39 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 			hvar_ttj [i]->SetFillColor(kAzure-5);
 			hvar_rare[i]->SetFillColor(kGreen+1);
 			// hvar_ttj [i]->SetFillColor(kAzure +1);
-			// hvar_rare[i]->SetFillColor(kViolet+5);
+			// hvar_rare[i]->SetFillColor(kViolet+ 5);
 
 
 			// Fill MC stacks
-			for(size_t j = 0; j < mcsamples.size();   ++j){
-				Sample *S = fSamples[mcsamples[j]];
-				TString s_name = S->sname;
-				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-				if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
-				if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
-				if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
-				if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
-				if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
-				if ( S->getType() == 4 &&
-				 (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
-			}
-			hvar_mc_s[i]->Add(hvar_ttj[i]);
-			hvar_mc_s[i]->Add(hvar_ewk[i]);
-			hvar_mc_s[i]->Add(hvar_rare[i]);
-			hvar_mc_s[i]->Add(hvar_db[i]);
-			hvar_mc_s[i]->Add(hvar_qcd[i]);
-			hvar_mc_s[i]->Draw("goff");
-			// hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
-			// if(intlabel) for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
-			// if(intlabel) for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
-			for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, "");
-			for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, "");
+// 			for(size_t j = 0; j < mcsamples.size();   ++j){
+// 				Sample *S = fSamples[mcsamples[j]];
+// 				TString s_name = S->sname;
+// 				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+// 				if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
+// 				if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
+// 				if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
+// 				if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
+// 				if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
+// 				if ( S->getType() == 4 &&
+// 				 (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
+// 			}
+// 			hvar_mc_s[i]->Add(hvar_ttj[i]);
+// 			hvar_mc_s[i]->Add(hvar_ewk[i]);
+// 			hvar_mc_s[i]->Add(hvar_rare[i]);
+// 			hvar_mc_s[i]->Add(hvar_db[i]);
+// 			hvar_mc_s[i]->Add(hvar_qcd[i]);
+// 			hvar_mc_s[i]->Draw("goff");
+// 			// hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
+// 			// if(intlabel) for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
+// 			// if(intlabel) for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
+ 			for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, "");
+// 			for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, "");
 
-			hvar_tot[i]->Add(hvar_qcd[i]);
-			hvar_tot[i]->Add(hvar_db[i]);
-			hvar_tot[i]->Add(hvar_ewk[i]);
-			hvar_tot[i]->Add(hvar_rare[i]);
-			hvar_tot[i]->Add(hvar_ttj[i]);
+// 			hvar_tot[i]->Add(hvar_qcd[i]);
+// 			hvar_tot[i]->Add(hvar_db[i]);
+// 			hvar_tot[i]->Add(hvar_ewk[i]);
+// 			hvar_tot[i]->Add(hvar_rare[i]);
+// 			hvar_tot[i]->Add(hvar_ttj[i]);
 
 			float binwidth = hvar_data[i]->GetBinWidth(1);
 			TString ytitle = Form("Events / %3.0f GeV", binwidth);
@@ -2718,7 +2726,7 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 }
 void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, vector<int> emsamples, gHiLoSwitch hilo){
 	if(readSigGraphs(fOutputFileName) != 0) return;
-	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/10 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
+	TString hiloname[2] = {"p_{T}(l_{1}/l_{2}) > 20/20 GeV", "p_{T}(#mu/e) > 5/10 GeV"};
 
 	fOutputSubDir = "KinematicPlots/HTvsMET/";
 	char cmd[100];
@@ -2789,18 +2797,18 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	TGraph *gmetvsht_da_em_ex2 = getSigEventGraph(ElMu, 0., 80., 30., 7000.);
 
 	gmetvsht_da_mm_ex1->SetMarkerColor(16);
-    gmetvsht_da_ee_ex1->SetMarkerColor(16);
-    gmetvsht_da_em_ex1->SetMarkerColor(16);
+	gmetvsht_da_ee_ex1->SetMarkerColor(16);
+	gmetvsht_da_em_ex1->SetMarkerColor(16);
 	gmetvsht_da_mm_ex1->SetMarkerSize(1.2);
-    gmetvsht_da_ee_ex1->SetMarkerSize(1.2);
-    gmetvsht_da_em_ex1->SetMarkerSize(1.2);
+	gmetvsht_da_ee_ex1->SetMarkerSize(1.2);
+	gmetvsht_da_em_ex1->SetMarkerSize(1.2);
 	gmetvsht_da_mm_ex2->SetMarkerColor(16);
-    gmetvsht_da_ee_ex2->SetMarkerColor(16);
-    gmetvsht_da_em_ex2->SetMarkerColor(16);
+	gmetvsht_da_ee_ex2->SetMarkerColor(16);
+	gmetvsht_da_em_ex2->SetMarkerColor(16);
 	gmetvsht_da_mm_ex2->SetMarkerSize(1.2);
-    gmetvsht_da_ee_ex2->SetMarkerSize(1.2);
-    gmetvsht_da_em_ex2->SetMarkerSize(1.2);
-
+	gmetvsht_da_ee_ex2->SetMarkerSize(1.2);
+	gmetvsht_da_em_ex2->SetMarkerSize(1.2);
+	
 	//////////////////////////////////////////////////////////
 	// Custom added for 0 < MET < 50:
 	TGraph *gmetvsht_da_mm_lowmet = getSigEventGraph(Muon, 450., 7000., 0., 50.);
@@ -2902,11 +2910,11 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	hmetvsht_da_mm->DrawCopy("axis");
 
 	gmetvsht_da_mm_ex1->Draw("P");
-    gmetvsht_da_ee_ex1->Draw("P");
-    gmetvsht_da_em_ex1->Draw("P");
-    gmetvsht_da_mm_ex2->Draw("P");
-    gmetvsht_da_ee_ex2->Draw("P");
-    gmetvsht_da_em_ex2->Draw("P");
+	gmetvsht_da_ee_ex1->Draw("P");
+	gmetvsht_da_em_ex1->Draw("P");
+	gmetvsht_da_mm_ex2->Draw("P");
+	gmetvsht_da_ee_ex2->Draw("P");
+	gmetvsht_da_em_ex2->Draw("P");
 	
 	lowhtbox ->Draw();
 	lowmetbox->Draw();
@@ -5277,35 +5285,35 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	nt2sum_ee ,	nt10sum_ee,	nt0sum_ee);
 	OUT << "\\hline" << endl;
 
-// MARC 	// Signal MC
-// MARC 	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
-// MARC 		Sample *S = fSamples[i];
-// MARC 		if(S->datamc != 2) continue;
-// MARC 		float scale = fLumiNorm / S->getLumi();
-// MARC 
-// MARC 		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
-// MARC 		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
-// MARC 		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
-// MARC 
-// MARC 		TString tempname = S->sname;
-// MARC 		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
-// MARC 		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
-// MARC 		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
-// MARC 		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
-// MARC 	}	
-// MARC 	OUT << "\\hline" << endl;
-// MARC 	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
-// MARC 	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
-// MARC 	OUT << "\\hline" << endl;	
-// MARC 	OUT << endl;
-// MARC 
+ 	// Signal MC
+//  	for(gSample i = sample_begin; i < gNSAMPLES; i=gSample(i+1)){
+//  		Sample *S = fSamples[i];
+//  		if(S->datamc != 2) continue;
+//  		float scale = fLumiNorm / S->getLumi();
+ 
+//  		float temp_nt2_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+//  		float temp_nt10_mm = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt10_pt->Integral(0, getNFPtBins(Muon)+1);
+//  		float temp_nt0_mm  = gMMTrigScale*scale*S->region[reg][HighPt].mm.nt01_pt->Integral(0, getNFPtBins(Muon)+1);
+//  		float temp_nt2_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+//  		float temp_nt10_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt10_pt->Integral(0, getNFPtBins(ElMu)+1);
+//  		float temp_nt01_em = gEMTrigScale*scale*S->region[reg][HighPt].em.nt01_pt->Integral(0, getNFPtBins(ElMu)+1);
+//  		float temp_nt0_em  = gEMTrigScale*scale*S->region[reg][HighPt].em.nt00_pt->Integral(0, getNFPtBins(ElMu)+1);
+//  		float temp_nt2_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+//  		float temp_nt10_ee = gEETrigScale*scale*S->region[reg][HighPt].ee.nt10_pt->Integral(0, getNFPtBins(Elec)+1);
+//  		float temp_nt0_ee  = gEETrigScale*scale*S->region[reg][HighPt].ee.nt01_pt->Integral(0, getNFPtBins(Elec)+1);
+ 
+//  		TString tempname = S->sname;
+//  		OUT << Form("%16s & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f & %6.2f \\\\\n", (tempname.ReplaceAll("_","\\_")).Data(),
+//  		temp_nt2_mm , temp_nt10_mm, temp_nt0_mm,
+//  		temp_nt2_em , temp_nt10_em, temp_nt01_em, temp_nt0_em,
+//  		temp_nt2_ee , temp_nt10_ee, temp_nt0_ee);
+//  	}	
+//  	OUT << "\\hline" << endl;
+ 	OUT << Form("%16s & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f & %6.0f \\\\\n", "Data",
+ 	nt2_mm, nt10_mm, nt0_mm, nt2_em, nt10_em, nt01_em, nt0_em, nt2_ee, nt10_ee, nt0_ee);
+ 	OUT << "\\hline" << endl;	
+ 	OUT << endl;
+
  	///////////////////////////////////////////////////////////////////////////////////
  	// PREDICTIONS ////////////////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
@@ -5376,29 +5384,32 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
  	
  	// Abbreviations
- 	float fb  = gEChMisIDB;
- 	float fbE = gEChMisIDB_E;
- 	float fe  = gEChMisIDE;
- 	float feE = gEChMisIDE_E;
+ 	float fbb  = gEChMisIDBB;
+ 	float fbbE = gEChMisIDBB_E;
+ 	float fee  = gEChMisIDEE;
+ 	float feeE = gEChMisIDEE_E;
+ 	float feb  = gEChMisIDEB;
+ 	float febE = gEChMisIDEB_E;
  
  	// Simple error propagation assuming error on number of events is sqrt(N)
- 	nt2_ee_chmid    = 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os;
- 	nt2_ee_chmid_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
- 	nt2_ee_chmid_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
- 
- 	nt2_em_chmid    = fb*nt2_em_BB_os + fe*nt2_em_EE_os;
- 	nt2_em_chmid_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
- 	nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+ 	nt2_ee_chmid    = fbb*nt2_ee_BB_os + fee*nt2_ee_EE_os + feb*nt2_ee_EB_os;
+ 	nt2_ee_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_ee_BB_os) + (fee*fee*FR->getEStat2(nt2_ee_EE_os)) + feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+	nt2_ee_chmid_e2 = sqrt( (nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + (febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+	
+        nt2_em_chmid    = 0.5*(fbb+feb)*nt2_em_BB_os + 0.5*(fee+feb)*nt2_em_EE_os;
+        nt2_em_chmid_e1 = sqrt( 0.5*(fbb+feb)*FR->getEStat2(nt2_em_BB_os) + 0.5*(fee+feb)*FR->getEStat2(nt2_em_EE_os) );
+        nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * 0.025*(fbbE*fbbE+febE*febE) + nt2_em_EE_os*nt2_em_EE_os * 0.025*(fbbE*fbbE+febE*febE) );
  
  	///////////////////////////////////////////////////////////////////////////////////
  	// PRINTOUT ///////////////////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
- 	OUT << "--------------------------------------------------------------" << endl;
- 	OUT << "       E-ChMisID  ||       Barrel       |       Endcap      ||" << endl;
- 	OUT << "--------------------------------------------------------------" << endl;
+ 	OUT << "---------------------------------------------------------------------------------" << endl;
+ 	OUT << "       E-ChMisID  ||   Barrel-Barrel   |  Barrel - EndCap  |       Endcap      ||" << endl;
+ 	OUT << "---------------------------------------------------------------------------------" << endl;
  	OUT << "                  ||";
- 	OUT << setw(7)  << setprecision(2) << fb  << " +/- " << setw(7) << setprecision(3) << fbE  << " |";
- 	OUT << setw(7)  << setprecision(2) << fe  << " +/- " << setw(7) << setprecision(3) << feE  << " ||";
+ 	OUT << setw(7)  << setprecision(2) << fbb  << " +/- " << setw(7) << setprecision(3) << fbbE  << " |";
+ 	OUT << setw(7)  << setprecision(2) << feb  << " +/- " << setw(7) << setprecision(3) << febE  << " |";
+ 	OUT << setw(7)  << setprecision(2) << fee  << " +/- " << setw(7) << setprecision(3) << feeE  << " ||";
  	OUT << endl;
  	OUT << "--------------------------------------------------------------" << endl << endl;
  
@@ -5446,11 +5457,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << endl;
  	OUT << "-----------------------------------------------------------------------" << endl;
  	OUT << setw(16) << "pred. SS contr."  << " || ";
- 	OUT << setw(7) << Form("%6.4f",   fb   * nt2_em_BB_os ) << " | ";
- 	OUT << setw(7) << Form("%6.4f",   fe   * nt2_em_EE_os ) << " || ";
- 	OUT << setw(7) << Form("%6.4f", 2*fb   * nt2_ee_BB_os ) << " | ";
- 	OUT << setw(7) << Form("%6.4f", (fb+fe)* nt2_ee_EB_os ) << " | ";
- 	OUT << setw(7) << Form("%6.4f", 2*fe   * nt2_ee_EE_os ) << " || ";
+ 	OUT << setw(7) << Form("%6.4f", 0.5*(feb+fbb) * nt2_em_BB_os ) << " | ";
+ 	OUT << setw(7) << Form("%6.4f", 0.5*(feb+fee) * nt2_em_EE_os ) << " || ";
+ 	OUT << setw(7) << Form("%6.4f",         fbb   * nt2_ee_BB_os ) << " | ";
+ 	OUT << setw(7) << Form("%6.4f",         feb   * nt2_ee_EB_os ) << " | ";
+ 	OUT << setw(7) << Form("%6.4f",         fee   * nt2_ee_EE_os ) << " || ";
  	OUT << endl;
  	OUT << "-----------------------------------------------------------------------" << endl << endl;
  	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
