@@ -16,16 +16,16 @@ using namespace std;
 #define Zmax 30
 
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
-enum JZBTYPE { jzbtype_min, CALOJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
+enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.30 $";
+string sjzbversion="$Revision: 1.70.2.31 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.30 2012/05/25 14:04:15 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.31 2012/05/25 14:41:05 pablom Exp $
 */
 
 
@@ -1248,7 +1248,7 @@ void JZBAnalysis::Analyze() {
 
     nEvent.eta1 = sortedGoodLeptons[PosLepton1].p.Eta();
     nEvent.pt1 = sortedGoodLeptons[PosLepton1].p.Pt();
-    nEvent.iso1 = sortedGoodLeptons[PosLepton1].iso;    
+    nEvent.iso1 = sortedGoodLeptons[PosLepton1].iso;
     nEvent.phi1 = sortedGoodLeptons[PosLepton1].p.Phi();
     nEvent.ch1 = sortedGoodLeptons[PosLepton1].charge;
     nEvent.id1 = sortedGoodLeptons[PosLepton1].type; //??????
@@ -1459,9 +1459,9 @@ void JZBAnalysis::Analyze() {
   type1NoCutsJetVector = -type1METvector - s1 - s2;
 
   // #--- different versions of JZB
-  nEvent.dphi_sumJetVSZ[CALOJZB]=0.; // kicked caloVector.DeltaPhi(s1+s2); // DPhi between Z and SumJpt
-  nEvent.sumJetPt[CALOJZB]=0.; // kicked caloVector.Pt();
-  nEvent.jzb[CALOJZB] = 0.; //kicked caloVector.Pt() - (s1+s2).Pt(); // calib issue of rawcalomet wrt lepton energy scale, under develop
+  nEvent.dphi_sumJetVSZ[TYPEONECORRPFMETJZB] = type1NoCutsJetVector.DeltaPhi(s1+s2);
+  nEvent.sumJetPt[TYPEONECORRPFMETJZB] = type1NoCutsJetVector.Pt();
+  nEvent.jzb[TYPEONECORRPFMETJZB] = type1NoCutsJetVector.Pt() - (s1+s2).Pt();
     
   nEvent.dphi_sumJetVSZ[PFJZB] = pfNoCutsJetVector.DeltaPhi(s1+s2); 
   nEvent.sumJetPt[PFJZB] = pfNoCutsJetVector.Pt(); 
