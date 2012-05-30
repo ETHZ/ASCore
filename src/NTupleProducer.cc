@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.146.2.24 2012/05/15 16:31:00 fronga Exp $
+// $Id: NTupleProducer.cc,v 1.146.2.26 2012/05/21 17:14:56 paktinat Exp $
 //
 //
 
@@ -1290,6 +1290,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTMuNGlHits->push_back( muon.globalTrack()->hitPattern().numberOfValidHits() );
       fTMuNMuHits->push_back( muon.outerTrack()->hitPattern().numberOfValidHits() );
       fTMuNMatches->push_back( muon.numberOfMatches() );
+      fTMuNMatchedStations->push_back( muon.numberOfMatchedStations() );
       fTMuNChambers->push_back( muon.numberOfChambers() );
     } else {
       fTMuPtE->push_back( 0.0 );
@@ -1299,6 +1300,7 @@ bool NTupleProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup){
       fTMuNGlHits->push_back( 0.0 );
       fTMuNMuHits->push_back( 0.0 );
       fTMuNMatches->push_back( 0.0 );
+      fTMuNMatchedStations->push_back( 0.0 );
       fTMuNChambers->push_back( 0.0 );
     }
 
@@ -3590,6 +3592,7 @@ void NTupleProducer::declareProducts(void) {
   produces<std::vector<float> >("MuInnerTkNChi2");
   produces<std::vector<int> >("MuNSiLayers");
   produces<std::vector<int> >("MuNMatches");
+  produces<std::vector<int> >("MuNMatchedStations");
   produces<std::vector<int> >("MuNChambers");
   produces<std::vector<float> >("MuCaloComp");
   produces<std::vector<float> >("MuSegmComp");
@@ -4240,6 +4243,7 @@ void NTupleProducer::resetProducts( void ) {
   fTMuInnerTkNChi2.reset(new std::vector<float> );
   fTMuNSiLayers.reset(new std::vector<int> );
   fTMuNMatches.reset(new std::vector<int> );
+  fTMuNMatchedStations.reset(new std::vector<int> );
   fTMuNChambers.reset(new std::vector<int> );
   fTMuCaloComp.reset(new std::vector<float> );
   fTMuSegmComp.reset(new std::vector<float> );
@@ -4953,6 +4957,7 @@ void NTupleProducer::putProducts( edm::Event& event ) {
   event.put(fTMuInnerTkNChi2, "MuInnerTkNChi2");
   event.put(fTMuNSiLayers, "MuNSiLayers");
   event.put(fTMuNMatches, "MuNMatches");
+  event.put(fTMuNMatchedStations, "MuNMatchedStations");
   event.put(fTMuNChambers, "MuNChambers");
   event.put(fTMuCaloComp, "MuCaloComp");
   event.put(fTMuSegmComp, "MuSegmComp");

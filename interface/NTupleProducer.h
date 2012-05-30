@@ -14,7 +14,7 @@
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.114.2.19 2012/05/15 16:30:59 fronga Exp $
+// $Id: NTupleProducer.h,v 1.114.2.21 2012/05/21 17:14:46 paktinat Exp $
 //
 //
 
@@ -587,6 +587,7 @@ private:
   std::auto_ptr<std::vector<float> >  fTMuInnerTkNChi2;
   std::auto_ptr<std::vector<int> >  fTMuNSiLayers;
   std::auto_ptr<std::vector<int> >  fTMuNMatches;
+  std::auto_ptr<std::vector<int> >  fTMuNMatchedStations;
   std::auto_ptr<std::vector<int> >  fTMuNChambers;
   std::auto_ptr<std::vector<float> >  fTMuCaloComp;
   std::auto_ptr<std::vector<float> >  fTMuSegmComp;
