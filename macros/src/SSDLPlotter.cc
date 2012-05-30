@@ -331,10 +331,10 @@ void SSDLPlotter::doAnalysis(){
 	
 	storeWeightedPred();
 	// makeAllClosureTests();
-	makeAllIntPredictions();
+	// makeAllIntPredictions();
 	// makeDiffPrediction();
 
-	// makeTTWIntPredictions();
+	makeTTWIntPredictions();
 	// makeTTWDiffPredictions();
 
 	// printAllYieldTables();
@@ -3954,8 +3954,8 @@ void SSDLPlotter::makeFRvsNVPlots(gChannel chan, gFPSwitch fp){
 
 	p_ratio->cd();
 	ratio_dtmc->GetYaxis()->SetNdivisions(505);
-	ratio_dtmc->SetMaximum(1.99);
-	ratio_dtmc->SetMinimum(0.0);
+	ratio_dtmc->SetMaximum(1.5);
+	ratio_dtmc->SetMinimum(0.8);
 	if(fp == ZDecay) ratio_dtmc->SetMaximum(1.1);
 	if(fp == ZDecay) ratio_dtmc->SetMinimum(0.9);
 	ratio_dtmc->DrawCopy("E2 ");
@@ -6557,47 +6557,64 @@ TTWZPrediction SSDLPlotter::makeIntPredictionTTW(TString filename, gRegion reg){
 	//  OUTPUT FOR AN TABLE  /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////
 	fOUTSTREAM << Region::sname[reg] << endl;
-	fOUTSTREAM << Form("Double Fakes   & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Double Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
 	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2),
 	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
 	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2));
-	fOUTSTREAM << Form("Single Fakes   & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Single Fakes   & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
 	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2),
 	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
 	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2));
-	fOUTSTREAM << Form("Charge MisID   & \\multicolumn{2}{c|}{-} & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Charge MisID   & - & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
 	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
 	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
-	fOUTSTREAM << Form("Rare SM        & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \n",
+	fOUTSTREAM << Form("Rare SM        & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \n",
 	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
 	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em),
 	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
 	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)));
-	fOUTSTREAM << Form("WZ Prod.       & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
+	fOUTSTREAM << Form("WZ             & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \\hline \n",
 	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
 	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em),
 	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
 	wz_nt2_ee + wz_nt2_mm + wz_nt2_em, sqrt(wz_nt2_mm_e1 + wz_nt2_ee_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)*(wz_nt2_ee + wz_nt2_mm + wz_nt2_em)));
-	fOUTSTREAM << Form("Total Bkg      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
+	fOUTSTREAM << Form("Total Bkg.      & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f & %5.1f $\\pm$ %5.1f \\\\ \\hline \n",
 	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
 	nF_em + nt2_rare_mc_em + nt2_em_chmid + wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
 	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
 	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
-	fOUTSTREAM << Form("\\bf{Observed}       & \\multicolumn{2}{c|}{\\bf{%3.0f}} & \\multicolumn{2}{c|}{\\bf{%3.0f}}  & \\multicolumn{2}{c|}{\\bf{%3.0f}}  & \\multicolumn{2}{c}{\\bf{%3.0f}}  \\\\ \n",
+	fOUTSTREAM << Form("\\bf{Observed}       & \\bf{%3.0f} & \\bf{%3.0f}  & \\bf{%3.0f}  & \\bf{%3.0f}  \\\\ \\hline \n",
 	nt2_mm, nt2_em, nt2_ee, nt2_mm+nt2_em+nt2_ee);
-	fOUTSTREAM << Form("ttW Prod.      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
-	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1 + RareESyst2*ttw_nt2_mm*ttw_nt2_mm),
-	ttw_nt2_em, sqrt(ttw_nt2_em_e1 + RareESyst2*ttw_nt2_em*ttw_nt2_em),
-	ttw_nt2_ee, sqrt(ttw_nt2_ee_e1 + RareESyst2*ttw_nt2_ee*ttw_nt2_ee),
-	ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em, sqrt(ttw_nt2_mm_e1 + ttw_nt2_ee_e1 + ttw_nt2_em_e1 + RareESyst2*(ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em)*(ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em)));
-	fOUTSTREAM << Form("ttZ Prod.      & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f & %5.1f &$\\pm$ %5.1f \\\\ \\hline \n",
-	ttz_nt2_mm, sqrt(ttz_nt2_mm_e1 + RareESyst2*ttz_nt2_mm*ttz_nt2_mm),
-	ttz_nt2_em, sqrt(ttz_nt2_em_e1 + RareESyst2*ttz_nt2_em*ttz_nt2_em),
-	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1 + RareESyst2*ttz_nt2_ee*ttz_nt2_ee),
-	ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em, sqrt(ttz_nt2_mm_e1 + ttz_nt2_ee_e1 + ttz_nt2_em_e1 + RareESyst2*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)));
+
+	fOUTSTREAM << Form("Obs. - Tot. Bkg.    & %5.1f$\\pm$ %5.1f & %5.1f$\\pm$ %5.1f  & %5.1f$\\pm$ %5.1f  & %5.1f$\\pm$ %5.1f  \\\\ \\hline \\hline\n",
+	nt2_mm - nF_mm - nt2_rare_mc_mm                - wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
+	nt2_em - nF_em - nt2_rare_mc_em - nt2_em_chmid - wz_nt2_em, sqrt(em_tot_sqerr1 + em_tot_sqerr2),
+	nt2_ee - nF_ee - nt2_rare_mc_ee - nt2_ee_chmid - wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
+	nt2_mm+nt2_em+nt2_ee - tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2));
+
+
+	float ttw_tot_err2 = ttw_nt2_mm_e1 + ttw_nt2_ee_e1 + ttw_nt2_em_e1;
+	float ttz_tot_err2 = ttz_nt2_mm_e1 + ttz_nt2_ee_e1 + ttz_nt2_em_e1;
+
+	fOUTSTREAM << Form("$t\\bar{t}+W/Z$ & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
+	ttw_nt2_mm + ttz_nt2_mm, sqrt(ttw_nt2_mm_e1 + ttz_nt2_mm_e1),
+	ttw_nt2_em + ttz_nt2_em, sqrt(ttw_nt2_em_e1 + ttz_nt2_em_e1),
+	ttw_nt2_ee + ttz_nt2_ee, sqrt(ttw_nt2_ee_e1 + ttz_nt2_ee_e1),
+	ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em + ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em,
+	sqrt(ttw_tot_err2 + ttz_tot_err2));
+	fOUTSTREAM << Form("$t\\bar{t}+W$    & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \\hline \n",
+	ttw_nt2_mm, sqrt(ttw_nt2_mm_e1),
+	ttw_nt2_em, sqrt(ttw_nt2_em_e1),
+	ttw_nt2_ee, sqrt(ttw_nt2_ee_e1),
+	ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em, sqrt(ttw_tot_err2)); // + RareESyst2*(ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em)*(ttw_nt2_ee + ttw_nt2_mm + ttw_nt2_em)));
+	fOUTSTREAM << Form("$t\\bar{t}+Z$    & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f & %5.2f $\\pm$ %5.2f \\\\ \n",
+	ttz_nt2_mm, sqrt(ttz_nt2_mm_e1),
+	ttz_nt2_em, sqrt(ttz_nt2_em_e1),
+	ttz_nt2_ee, sqrt(ttz_nt2_ee_e1),
+	ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em, sqrt(ttz_tot_err2)); // + RareESyst2*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)*(ttz_nt2_ee + ttz_nt2_mm + ttz_nt2_em)));
 	fOUTSTREAM << endl;
 	
 
