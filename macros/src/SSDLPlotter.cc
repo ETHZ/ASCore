@@ -2789,44 +2789,42 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	hmetvsht_da_em->SetXTitle(KinPlots::axis_label[0]);
 	hmetvsht_da_em->SetYTitle(KinPlots::axis_label[1]);
 
-	TGraph *gmetvsht_da_mm_ex1 = getSigEventGraph(Muon, 0., 450., 0., 30.);
-	TGraph *gmetvsht_da_ee_ex1 = getSigEventGraph(Elec, 0., 450., 0., 30.);
-	TGraph *gmetvsht_da_em_ex1 = getSigEventGraph(ElMu, 0., 450., 0., 30.);
-	TGraph *gmetvsht_da_mm_ex2 = getSigEventGraph(Muon, 0., 80., 30., 7000.);
-	TGraph *gmetvsht_da_ee_ex2 = getSigEventGraph(Elec, 0., 80., 30., 7000.);
-	TGraph *gmetvsht_da_em_ex2 = getSigEventGraph(ElMu, 0., 80., 30., 7000.);
+// 	TGraph *gmetvsht_da_mm_ex1 = getSigEventGraph(Muon, 0., 450., 0., 30.);
+// 	TGraph *gmetvsht_da_ee_ex1 = getSigEventGraph(Elec, 0., 450., 0., 30.);
+// 	TGraph *gmetvsht_da_em_ex1 = getSigEventGraph(ElMu, 0., 450., 0., 30.);
+	TGraph *gmetvsht_da_mm_ex2 = getSigEventGraph(Muon, 0., 80.,  0., 7000.);
+	TGraph *gmetvsht_da_ee_ex2 = getSigEventGraph(Elec, 0., 80.,  0., 7000.);
+	TGraph *gmetvsht_da_em_ex2 = getSigEventGraph(ElMu, 0., 80.,  0., 7000.);
 
-	gmetvsht_da_mm_ex1->SetMarkerColor(16);
-	gmetvsht_da_ee_ex1->SetMarkerColor(16);
-	gmetvsht_da_em_ex1->SetMarkerColor(16);
-	gmetvsht_da_mm_ex1->SetMarkerSize(1.2);
-	gmetvsht_da_ee_ex1->SetMarkerSize(1.2);
-	gmetvsht_da_em_ex1->SetMarkerSize(1.2);
+// 	gmetvsht_da_mm_ex1->SetMarkerColor(16);
+// 	gmetvsht_da_ee_ex1->SetMarkerColor(16);
+// 	gmetvsht_da_em_ex1->SetMarkerColor(16);
+// 	gmetvsht_da_mm_ex1->SetMarkerSize(1.5);
+// 	gmetvsht_da_ee_ex1->SetMarkerSize(1.5);
+// 	gmetvsht_da_em_ex1->SetMarkerSize(1.5);
 	gmetvsht_da_mm_ex2->SetMarkerColor(16);
 	gmetvsht_da_ee_ex2->SetMarkerColor(16);
 	gmetvsht_da_em_ex2->SetMarkerColor(16);
-	gmetvsht_da_mm_ex2->SetMarkerSize(1.2);
-	gmetvsht_da_ee_ex2->SetMarkerSize(1.2);
-	gmetvsht_da_em_ex2->SetMarkerSize(1.2);
+	gmetvsht_da_mm_ex2->SetMarkerSize(1.7);
+	gmetvsht_da_ee_ex2->SetMarkerSize(1.7);
+	gmetvsht_da_em_ex2->SetMarkerSize(1.7);
 	
 	//////////////////////////////////////////////////////////
 	// Custom added for 0 < MET < 50:
-	TGraph *gmetvsht_da_mm_lowmet = getSigEventGraph(Muon, 450., 7000., 0., 50.);
-	TGraph *gmetvsht_da_ee_lowmet = getSigEventGraph(Elec, 450., 7000., 0., 50.);
-	TGraph *gmetvsht_da_em_lowmet = getSigEventGraph(ElMu, 450., 7000., 0., 50.);
+// 	TGraph *gmetvsht_da_mm_lowmet = getSigEventGraph(Muon, 450., 7000., 0., 50.);
+// 	TGraph *gmetvsht_da_ee_lowmet = getSigEventGraph(Elec, 450., 7000., 0., 50.);
+// 	TGraph *gmetvsht_da_em_lowmet = getSigEventGraph(ElMu, 450., 7000., 0., 50.);
 
-	gmetvsht_da_mm_lowmet->SetMarkerColor(col_mm);
-	gmetvsht_da_mm_lowmet->SetMarkerStyle(8);
-	gmetvsht_da_mm_lowmet->SetMarkerSize(1.5);
-	gmetvsht_da_em_lowmet->SetMarkerColor(col_em);
-	gmetvsht_da_em_lowmet->SetMarkerStyle(23);
-	gmetvsht_da_em_lowmet->SetMarkerSize(1.5);
-	gmetvsht_da_ee_lowmet->SetMarkerColor(col_ee);
-	gmetvsht_da_ee_lowmet->SetMarkerStyle(21);
-	gmetvsht_da_ee_lowmet->SetMarkerSize(1.5);
+// 	gmetvsht_da_mm_lowmet->SetMarkerColor(col_mm);
+// 	gmetvsht_da_mm_lowmet->SetMarkerStyle(8);
+// 	gmetvsht_da_mm_lowmet->SetMarkerSize(1.5);
+// 	gmetvsht_da_em_lowmet->SetMarkerColor(col_em);
+// 	gmetvsht_da_em_lowmet->SetMarkerStyle(23);
+// 	gmetvsht_da_em_lowmet->SetMarkerSize(1.5);
+// 	gmetvsht_da_ee_lowmet->SetMarkerColor(col_ee);
+// 	gmetvsht_da_ee_lowmet->SetMarkerStyle(21);
+// 	gmetvsht_da_ee_lowmet->SetMarkerSize(1.5);
 	//////////////////////////////////////////////////////////
-
-
 
 	TLegend *leg = new TLegend(0.80,0.70,0.95,0.88);
 	leg->AddEntry(hmetvsht_da_mm, "#mu#mu","p");
@@ -2839,17 +2837,16 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 
 	// Special effects:
 	const float lowerht = hilo==HighPt? 80.:200.;
-	// const float lowerht = hilo==HighPt? 0.:200.;
 
 	TWbox *lowhtbox  = new TWbox(0., 0., lowerht, metmax, kBlack, 0, 0);
-	TWbox *lowmetbox = new TWbox(lowerht, 0., 450.,  30., kBlack, 0, 0);
+	TWbox *lowmetbox = new TWbox(lowerht, 0., htmax,  0., kBlack, 0, 0);
 	lowhtbox ->SetFillColor(12);
 	lowmetbox->SetFillColor(12);
 	lowhtbox ->SetFillStyle(3005);
 	lowmetbox->SetFillStyle(3005);
-	TLine *boxborder1 = new TLine(lowerht,30.,lowerht,metmax);
-	TLine *boxborder2 = new TLine(lowerht,30.,450.,30.);
-	TLine *boxborder3 = new TLine(450.,0.,450.,30.);
+	TLine *boxborder1 = new TLine(lowerht,0.,lowerht,metmax);
+	TLine *boxborder2 = new TLine(lowerht,0.,htmax,0.);
+	TLine *boxborder3 = new TLine(htmax, 0.,htmax,0.);
 	boxborder1->SetLineWidth(1);
 	boxborder2->SetLineWidth(1);
 	boxborder3->SetLineWidth(1);
@@ -2857,46 +2854,64 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	boxborder2->SetLineColor(14);
 	boxborder3->SetLineColor(14);
 
-	TLine *sig1x = new TLine(lowerht, 120., lowerht, metmax); // met 120 ht 80
-	TLine *sig1y = new TLine(lowerht, 120., htmax,   120.); 
-	TLine *sig2x = new TLine(200., 120., 200.,  metmax);      // met 120 ht 200
-	TLine *sig2y = new TLine(200., 120., htmax, 120.);
-	TLine *sig3x = new TLine(450.,  50., 450.,  metmax);      // met 50  ht 450
-	TLine *sig3y = new TLine(450.,  50., htmax,  50.);
-	TLine *sig4x = new TLine(450., 120., 450.,  metmax);      // met 120 ht 450
-	TLine *sig4y = new TLine(450., 120., htmax, 120.);
-	TLine *sig5x = new TLine(450.,   0., 450.,  metmax);      // met 0 ht 450
+	//HT80   MET0
+
+	//HT200  MET50 
+	//HT320  MET0
+	//HT200  MET50
+	//HT200  MET120
+	//HT320  MET50
+	//HT320  MET120
+
+	TLine *sig1x = new TLine(lowerht, 30., lowerht, metmax);   //HT80   MET30
+	TLine *sig1y = new TLine(lowerht, 30., htmax,   30.); 
+	TLine *sig2x = new TLine(200., 50., 200.,  metmax);       //HT200   MET50
+	TLine *sig2y = new TLine(200., 50., htmax, 50.);           
+	TLine *sig3x = new TLine(320.,  0., 320.,  metmax);      //HT320  MET0
+	TLine *sig4x = new TLine(200., 120., 200.,  metmax);     //HT200 MET120
+	TLine *sig4y = new TLine(200., 120., htmax, 120.);
+	TLine *sig5x = new TLine(320.,  50., 320.,  metmax);   //HT320 MET50
+	TLine *sig5y = new TLine(320., 50., htmax, 50.);
+	TLine *sig6x = new TLine(320.,  120., 320.,  metmax);   //HT320 MET120
+	TLine *sig6y = new TLine(320., 120., htmax, 120.);
 
 	sig1x->SetLineWidth(2);
 	sig1y->SetLineWidth(2);
 	sig2x->SetLineWidth(2);
 	sig2y->SetLineWidth(2);
 	sig3x->SetLineWidth(1);
-	sig3y->SetLineWidth(1);
 	sig4x->SetLineWidth(3);
 	sig4y->SetLineWidth(3);
-	sig5x->SetLineWidth(2);
+	sig5x->SetLineWidth(3);
+	sig5y->SetLineWidth(3);
+	sig6x->SetLineWidth(3);
+	sig6y->SetLineWidth(3);
 
 	sig1x->SetLineStyle(3);
 	sig1y->SetLineStyle(3);
 	sig2x->SetLineStyle(2);
 	sig2y->SetLineStyle(2);
 	sig3x->SetLineStyle(1);
-	sig3y->SetLineStyle(1);
 	// sig4x->SetLineStyle(1);
 	// sig4y->SetLineStyle(1);
 	sig5x->SetLineStyle(4);
+	sig5y->SetLineStyle(4);
+
+	sig6x->SetLineStyle(5);
+	sig6y->SetLineStyle(5);
+
 
 	// float legymax = hilo==HighPt?0.54:0.50;
 	// TLegend *regleg = new TLegend(0.70,0.37,0.88,0.54);
 	// TLegend *regleg = new TLegend(0.70,0.45,0.88,0.62);
 	// TLegend *regleg = new TLegend(0.70,0.29,0.88,0.46);
 	TLegend *regleg = new TLegend(0.70,0.27,0.88,0.47);
-	regleg->AddEntry(sig4x, "Search Region 1","l");
+	regleg->AddEntry(sig1x, "Search Region 1","l");
 	regleg->AddEntry(sig2x, "Search Region 2","l");
 	regleg->AddEntry(sig3x, "Search Region 3","l");
-	if(hilo != LowPt) regleg->AddEntry(sig1x, "Search Region 4","l");
+	regleg->AddEntry(sig4x, "Search Region 4","l");
 	regleg->AddEntry(sig5x, "Search Region 5","l");
+	regleg->AddEntry(sig6x, "Search Region 6","l");
 	regleg->SetFillStyle(0);
 	regleg->SetTextFont(42);
 	regleg->SetTextSize(0.03);
@@ -2909,13 +2924,7 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 
 	hmetvsht_da_mm->DrawCopy("axis");
 
-	gmetvsht_da_mm_ex1->Draw("P");
-	gmetvsht_da_ee_ex1->Draw("P");
-	gmetvsht_da_em_ex1->Draw("P");
-	gmetvsht_da_mm_ex2->Draw("P");
-	gmetvsht_da_ee_ex2->Draw("P");
-	gmetvsht_da_em_ex2->Draw("P");
-	
+
 	lowhtbox ->Draw();
 	lowmetbox->Draw();
 	boxborder1->Draw();
@@ -2927,19 +2936,26 @@ void SSDLPlotter::makeMETvsHTPlot(vector<int> mmsamples, vector<int> eesamples, 
 	sig2x->Draw();
 	sig2y->Draw();
 	sig3x->Draw();
-	sig3y->Draw();
 	sig4x->Draw();
 	sig4y->Draw();
 	sig5x->Draw();
+	sig5y->Draw();
+	sig6x->Draw();
+	sig6y->Draw();
 
 	// Graphs
 	gmetvsht_da_ee->Draw("P");
 	gmetvsht_da_em->Draw("P");
 	gmetvsht_da_mm->Draw("P");
 
-	gmetvsht_da_mm_lowmet->Draw("P");
-	gmetvsht_da_ee_lowmet->Draw("P");
-	gmetvsht_da_em_lowmet->Draw("P");
+	gmetvsht_da_mm_ex2->Draw("P");
+	gmetvsht_da_ee_ex2->Draw("P");
+	gmetvsht_da_em_ex2->Draw("P");
+	
+
+// 	gmetvsht_da_mm_lowmet->Draw("P");
+// 	gmetvsht_da_ee_lowmet->Draw("P");
+// 	gmetvsht_da_em_lowmet->Draw("P");
 
 	leg->Draw();
 	regleg->Draw();
@@ -4674,7 +4690,6 @@ void SSDLPlotter::calculateRatio(vector<int> samples, gChannel chan, gFPSwitch f
 		cout << "--------------------------------------------------------" << endl;
 	}
 }
-
 //____________________________________________________________________________
 TEfficiency *SSDLPlotter::getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta){
 	// Only call for data! For MC call the combination one
@@ -4785,6 +4800,46 @@ TH1D* SSDLPlotter::getFRatio(vector<int> samples, gChannel chan, int ratiovar, b
 
 	delete ntight, nloose;
 	return ratio;
+}
+//____________________________________________________________________________
+void SSDLPlotter::calculateChMisIdProb(vector<int>  samples, gChMisIdReg chmid_reg, float &chmid, float &chmide){
+  
+  float ospair(0.),   sspair(0.);
+  float ospair_e(0.), sspair_e(0.);
+  for (size_t i=0; i<samples.size(); ++i){
+    Sample *S = fSamples[samples[i]];
+
+    float scale = fLumiNorm/S->getLumi(); // Normalize all
+    if(S->datamc == 0) scale = 1;    
+
+    Channel *C = &S->region[Baseline][HighPt].ee;
+    TH2D *ospairstmp = C->ospairs;
+    TH2D *sspairstmp = C->sspairs;
+    
+    if (chmid_reg == BB){
+      ospair   += ospairstmp->GetBinContent(1,1) * scale;
+      sspair   += sspairstmp->GetBinContent(1,1) * scale;
+      ospair_e += ospairstmp->GetBinError(1,1)   * scale;
+      sspair_e += sspairstmp->GetBinError(1,1)   * scale;
+    }
+    if (chmid_reg == EB){
+      ospair   += (ospairstmp->GetBinContent(1,2) + ospairstmp->GetBinContent(1,1)) * scale;
+      sspair   += (sspairstmp->GetBinContent(1,2) + sspairstmp->GetBinContent(2,1)) * scale;
+      ospair_e += (ospairstmp->GetBinError(1,2)   + ospairstmp->GetBinError(2,1)  ) * scale;
+      sspair_e += (sspairstmp->GetBinError(1,2)   + sspairstmp->GetBinError(2,1)  ) * scale;     
+    }
+    if (chmid_reg == EE){
+      ospair   += ospairstmp->GetBinContent(2,2) * scale;
+      sspair   += sspairstmp->GetBinContent(2,2) * scale;
+      ospair_e += ospairstmp->GetBinError(2,2)   * scale;
+      sspair_e += sspairstmp->GetBinError(2,2)   * scale;
+    }
+  }
+  
+  chmid  = sspair / ospair;  
+  chmide = TMath::Sqrt(sspair_e*sspair_e + chmid*chmid*ospair_e*ospair_e) / ospair;
+  
+  return;
 }
 
 //____________________________________________________________________________
@@ -5387,14 +5442,20 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	float nt2_em_chmid(0.), nt2_em_chmid_e1(0.), nt2_em_chmid_e2(0.);
  	
  	// Abbreviations
- 	float fbb  = gEChMisIDBB;
- 	float fbbE = gEChMisIDBB_E;
- 	float fee  = gEChMisIDEE;
- 	float feeE = gEChMisIDEE_E;
- 	float feb  = gEChMisIDEB;
- 	float febE = gEChMisIDEB_E;
- 
- 	// Simple error propagation assuming error on number of events is sqrt(N)
+	float fbb(0.),fee(0.),feb(0.);
+	float fbbE(0.),feeE(0.),febE(0.);
+// 	float fbb  = gEChMisIDBB;
+//  	float fbbE = gEChMisIDBB_E;
+//  	float fee  = gEChMisIDEE;
+//  	float feeE = gEChMisIDEE_E;
+//  	float feb  = gEChMisIDEB;
+//  	float febE = gEChMisIDEB_E;
+	
+	calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+	calculateChMisIdProb(fEGData, EB, feb, febE);
+	calculateChMisIdProb(fEGData, EE, fee, feeE);
+
+  	// Simple error propagation assuming error on number of events is sqrt(N)
  	nt2_ee_chmid    = fbb*nt2_ee_BB_os + fee*nt2_ee_EE_os + feb*nt2_ee_EB_os;
  	nt2_ee_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_ee_BB_os) + (fee*fee*FR->getEStat2(nt2_ee_EE_os)) + feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
 	nt2_ee_chmid_e2 = sqrt( (nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + (febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
@@ -5406,13 +5467,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	///////////////////////////////////////////////////////////////////////////////////
  	// PRINTOUT ///////////////////////////////////////////////////////////////////////
  	///////////////////////////////////////////////////////////////////////////////////
- 	OUT << "---------------------------------------------------------------------------------" << endl;
- 	OUT << "       E-ChMisID  ||   Barrel-Barrel   |  Barrel - EndCap  |       Endcap      ||" << endl;
- 	OUT << "---------------------------------------------------------------------------------" << endl;
+ 	OUT << "-------------------------------------------------------------------------------------------" << endl;
+ 	OUT << "       E-ChMisID  ||     Barrel-Barrel    |    Barrel - EndCap   |    Endcap - EndCap    ||" << endl;
+ 	OUT << "-------------------------------------------------------------------------------------------" << endl;
  	OUT << "                  ||";
- 	OUT << setw(7)  << setprecision(2) << fbb  << " +/- " << setw(7) << setprecision(3) << fbbE  << " |";
- 	OUT << setw(7)  << setprecision(2) << feb  << " +/- " << setw(7) << setprecision(3) << febE  << " |";
- 	OUT << setw(7)  << setprecision(2) << fee  << " +/- " << setw(7) << setprecision(3) << feeE  << " ||";
+ 	OUT << setw(8) << setprecision(2) << fbb  << " +/- " << setw(8) << setprecision(2) << fbbE  << " |";
+ 	OUT << setw(8) << setprecision(2) << feb  << " +/- " << setw(8) << setprecision(2) << febE  << " |";
+ 	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << " ||";
  	OUT << endl;
  	OUT << "--------------------------------------------------------------" << endl << endl;
  
@@ -5753,9 +5814,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	hs_pred->Add(h_pred_ttw);
  	
  	// double max = h_obs->Integral();
- 	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
- 	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+//  	double max = std::max(h_pred_tot->GetBinContent(1), h_pred_tot->GetBinContent(2));
+//  	max = 1.7*std::max(max, h_pred_tot->GetBinContent(3));
+
+ 	double max = std::max(h_obs->GetBinContent(1), h_obs->GetBinContent(2));
+ 	max = 1.7*std::max(max, h_obs->GetBinContent(3));
  	
+	if (reg == HT80MET30bpp) max = 2.5; 
  	// if(reg == Baseline)    max = 125.;
  	// if(reg == HT80MET120)  max = 15.;
  	// if(reg == HT200MET120) max = 12.;
@@ -11552,16 +11617,15 @@ void SSDLPlotter::drawRegionSel(gRegion reg){
 	lat->SetNDC(kTRUE);
 	lat->SetTextColor(kBlack);
 	lat->SetTextSize(0.03);
-// 	if(reg == TTbarWSel){
-// 		lat->DrawLatex(0.55,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
-// 		lat->DrawLatex(0.55,0.80, Form("N_{bTags} (medium) #geq %1d",         Region::minNbjmed[reg]));
-// 		lat->DrawLatex(0.55,0.75, Form("p_{T}^{max} > %.0f GeV",              Region::minMu1pt[reg]));
-// 		lat->DrawLatex(0.55,0.70, Form("p_{T}^{min} > %.0f GeV",              Region::minMu2pt[reg]));
-// 	}
+	
+	lat->DrawLatex(0.52, 0.85, Form("H_{T} > %.0f GeV, N_{bTags}(med) #geq %1d",Region::minHT[reg], Region::minNbjmed[reg]));
+	lat->DrawLatex(0.52, 0.80, Form("E_{T}^{miss} > %.0f GeV",    Region::minMet[reg]));
+	if (reg == HT80MET30bpp) 
+	  lat->DrawLatex(0.52,0.75, Form("Only ++"));
 // 	if(reg == TTbarWPresel){
 // 		lat->DrawLatex(0.55,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d",        Region::minHT[reg], Region::minNjets[reg]));
 // 		lat->DrawLatex(0.55,0.80, Form("N_{bTags} (medium) #geq %1d",                Region::minNbjmed[reg]));
-// 		lat->DrawLatex(0.55,0.75, Form("p_{T}^{max} > %.0f, p_{T}^{min} > %.0f GeV", Region::minMu1pt[reg], Region::minMu2pt[reg]));
+
 // 	}
 	// else if(Region::maxHT[reg] < 19.)    lat->DrawLatex(0.55,0.85, "N_{Jets} = 0");
 	// else if(Region::minHT[reg] == 0.)    lat->DrawLatex(0.55,0.85, Form("H_{T} #geq %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
@@ -11569,7 +11633,7 @@ void SSDLPlotter::drawRegionSel(gRegion reg){
 	// // else                               lat->DrawLatex(0.55,0.85, Form("H_{T} > %.0f GeV, N_{Jets} #geq %1d", Region::minHT[reg], Region::minNjets[reg]));
 	// // if(     Region::minMet[reg] == 0.)   lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} #geq %.0f GeV", Region::minMet[reg]));
 	// // if(     Region::minMet[reg] == 0.);
-	// // else if(Region::minMet[reg] > 0. )   lat->DrawLatex(0.55,0.80, Form("E_{T}^{miss} > %.0f GeV",    Region::minMet[reg]));
+	// // else if(Region::minMet[reg] > 0. )   
 	// // if(     Region::minNbjets[reg] > 0 ) lat->DrawLatex(0.55,0.75, Form("N_{bTags} #geq %1d",         Region::minNbjets[reg]));
 	// if(     Region::minNbjmed[reg] > 0 ) lat->DrawLatex(0.55,0.80, Form("N_{bTags} (medium) #geq %1d",         Region::minNbjets[reg]));
 }

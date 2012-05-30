@@ -181,8 +181,10 @@ public:
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, TH2D*&, TH1D*&, TH1D*&, bool = false);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&);
 	void calculateRatio(vector<int>, gChannel, gFPSwitch, float&, float&, float&);
-	
-	TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
+        
+        void calculateChMisIdProb(vector<int>, gChMisIdReg, float&, float&);
+
+        TEfficiency *getMergedEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	TGraphAsymmErrors *getCombEfficiency(vector<int> samples, gChannel chan, gFPSwitch fp, int pteta=0);
 	
 	void getPassedTotal(vector<int>,  gChannel, gFPSwitch, TH2D*&, TH2D*&, bool = false);

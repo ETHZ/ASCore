@@ -25,7 +25,8 @@ public:
 	static const int gNElFPtBins = 10;
 	static const int gNElPPtbins = 12;
 	static const int gNElEtabins = 5;
-        
+        static const int gNElCMIdbins = 2;
+
         static const int gNNVrtxBins = 10;
 
 	static double gNVrtxBins[gNNVrtxBins+1];
@@ -37,6 +38,7 @@ public:
 	static double gElPPtbins[gNElPPtbins+1];
 	static double gElFPtBins[gNElFPtBins+1];
 	static double gElEtabins[gNElEtabins+1];
+        static double gElCMIdbins[gNElCMIdbins+1];
 
 	static const int gNDiffHTBins   = 6;
 	static const int gNDiffMETBins  = 6;
@@ -114,7 +116,6 @@ public:
 	enum gRegion {
 		region_begin,
 		Baseline = region_begin,
-		HT0MET0,
 		HT80MET0,
 		HT80MET0b,
 		HT80MET30,
@@ -183,6 +184,12 @@ public:
 		Elec,
 		gNCHANNELS
 	};
+        enum gChMisIdReg {
+	  chmisidreg_begin,
+	  BB = chmisidreg_begin,
+	  EB,
+	  EE
+	};
 	struct ValueAndError {
 		float val;
 		float err;
@@ -242,6 +249,10 @@ public:
 		TEfficiency *pratio_pt;
 		TEfficiency *fratio_eta;
 		TEfficiency *pratio_eta;
+	        
+         	// Charged miss-id calculation
+                TH2D *ospairs;
+                TH2D *sspairs;
 
 		// Gen matched yields: t = tight, p = prompt, etc.
 		TH2D *npp_pt; // overall pp/fp/.., binned in pt1 vs pt2
@@ -265,7 +276,7 @@ public:
 		TH1D *zt_origin;
 		TH1D *zl_origin;
 
-		// OS Yields
+	        // OS Yields
 		// Only filled for electrons
 		// For e/mu channel, use only BB and EE to count e's in barrel and endcaps
 		TH2D *nt20_OS_BB_pt; // binned in pt1 vs pt2
@@ -659,6 +670,7 @@ public:
 
 	virtual bool isSigSupElEvent();
 	virtual bool isZElElEvent(int&, int&);
+	virtual bool isZElElChMisIdEvent(int&, int&);
 
 	virtual bool isGenMatchedSUSYDiLepEvent();
 	virtual bool isGenMatchedSUSYDiLepEvent(int&, int&);
@@ -689,6 +701,7 @@ public:
 	virtual bool isGoodEleForZVeto(int);
 	virtual bool isGoodEleFor3rdLepVeto(int);
 	virtual bool isGoodEleForTTZ(int, float = 20.);
+	virtual bool isGoodEleForChMId(int, float = 20.);
 	virtual bool isLooseElectron(int);
 	virtual bool isTightElectron(int);
 	virtual bool isGoodPrimElectron(int, float = -1.);
@@ -749,7 +762,8 @@ public:
 	const double *getPPtBins  (gChannel);
 	const int     getNEtaBins(gChannel);
 	const double *getEtaBins (gChannel);
-	
+        const int     getNCMidbins() { return gNElCMIdbins; };
+        const double *getCMIdbins()  { return gElCMIdbins;  };
 	const double *getDiffPredBins(int);
 	
 	Monitor fCounters[gNSAMPLES][3];

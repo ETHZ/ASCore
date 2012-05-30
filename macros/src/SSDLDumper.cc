@@ -93,9 +93,10 @@ double SSDLDumper::gMuPPtbins[gNMuPPtbins+1] = {10., 15., 20., 25., 30., 35., 40
 double SSDLDumper::gMuEtabins[gNMuEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
 
 // Electron Binning //////////////////////////////////////////////////////////////
-double SSDLDumper::gElFPtBins[gNElFPtBins+1] = {10., 15., 20., 25., 30., 40., 50., 60., 70., 80., 100.}; // fake ratios
-double SSDLDumper::gElPPtbins[gNElPPtbins+1] = {10., 15., 20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
-double SSDLDumper::gElEtabins[gNElEtabins+1] = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
+double SSDLDumper::gElFPtBins[gNElFPtBins+1]   = {10., 15., 20., 25., 30., 40., 50., 60., 70., 80., 100.}; // fake ratios
+double SSDLDumper::gElPPtbins[gNElPPtbins+1]   = {10., 15., 20., 25., 30., 35., 40., 50., 60., 70., 80., 90., 100.}; // prompt ratios
+double SSDLDumper::gElEtabins[gNElEtabins+1]   = {0., 0.5, 1.0, 1.479, 2.0, 2.5};
+double SSDLDumper::gElCMIdbins[gNElCMIdbins+1] = {0., 1.479, 2.5};
 //////////////////////////////////////////////////////////////////////////////////
 
 // NVrtx Binning /////////////////////////////////////////////////////////////////
@@ -291,7 +292,6 @@ const double *SSDLDumper::getEtaBins (gChannel chan){
 	if(chan == Muon || chan == ElMu) return gMuEtabins;
 	if(chan == Elec)            return gElEtabins;
 }
-
 //____________________________________________________________________________
 void SSDLDumper::loop(){
 	for(size_t i = 0; i < fSamples.size(); ++i){
@@ -548,7 +548,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 			S->region[reg][HighPt].mm.pnloose->Fill(MuPt[mu2], fabs(MuEta[mu2]), gEventWeight);
 			if(S->datamc > 0) S->region[reg][HighPt].mm.zl_origin->Fill(muIndexToBin(mu2)-0.5, gEventWeight);
 		}
-	}				
+	}
 	resetHypLeptons();
 
 	// EE Channel
@@ -643,6 +643,15 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 			if(S->datamc > 0) S->region[reg][HighPt].ee.zl_origin->Fill(elIndexToBin(el2)-0.5, gEventWeight);
 		}
 	}
+	if (doubleElTrigger() && isZElElChMisIdEvent(el1, el2)){
+	  if ( ElCharge[el1] != ElCharge[el2]) {  //OS pair
+	    S->region[reg][HighPt].ee.ospairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+	  }
+	  if ( ElCharge[el1] == ElCharge[el2]) {  //SS pair
+	    S->region[reg][HighPt].ee.sspairs->Fill(fabs(ElEta[el1]), fabs(ElEta[el2]), gEventWeight);
+	  }
+	}
+	
 	resetHypLeptons();
 
 	// EMu Channel
@@ -2296,6 +2305,14 @@ void SSDLDumper::bookHistos(Sample *S){
 					labelOriginAxis(C->zl_origin->GetXaxis()  , c);
 				}
 			}
+			
+			// Charge Mis id
+			if (c == Elec){
+			        C->ospairs = new TH2D(rootname + "_ospairs", "ospairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); C->ospairs->Sumw2();
+			        C->sspairs = new TH2D(rootname + "_sspairs", "sspairs", getNCMidbins(), getCMIdbins(), getNCMidbins(), getCMIdbins()); C->sspairs->Sumw2();
+
+			}
+
 		}
 	}
 	// }
@@ -2396,11 +2413,11 @@ void SSDLDumper::deleteHistos(Sample *S){
 				delete C->nt2pp_cm_pt;
 			}
 
-				// OS Yields
+			// OS Yields
 			if(c == Elec){
 				delete C->nt20_OS_BB_pt;
 				delete C->nt20_OS_EE_pt;
-				delete C->nt20_OS_EB_pt;
+				delete C->nt20_OS_EB_pt;		  
 			}
 			if(c == ElMu){
 				delete C->nt20_OS_BB_pt;
@@ -2426,6 +2443,12 @@ void SSDLDumper::deleteHistos(Sample *S){
 					delete C->zl_origin;
 				}
 			}
+			//  Charge Miss-ID
+			if (c == Elec){
+			       delete C->ospairs;
+			       delete C->sspairs;
+			}
+			
 		}
 	}
 	// }
@@ -2577,6 +2600,10 @@ void SSDLDumper::writeHistos(Sample *S, TFile *pFile){
 					C->zt_origin  ->Write(C->zt_origin  ->GetName(), TObject::kWriteDelete);
 					C->zl_origin  ->Write(C->zl_origin  ->GetName(), TObject::kWriteDelete);						
 				}
+			}
+			if (ch == Elec){
+                          	C->ospairs->Write(C->ospairs->GetName(), TObject::kWriteDelete);
+                          	C->sspairs->Write(C->sspairs->GetName(), TObject::kWriteDelete);
 			}
 		}
 	}
@@ -2799,6 +2826,11 @@ int  SSDLDumper::readHistos(TString filename){
 							getObjectSafe(pFile, root + "_pTOrigin", C->zt_origin );
 							getObjectSafe(pFile, root + "_pLOrigin", C->zl_origin );
 						}
+					}
+					if (ch == Elec){
+					       getObjectSafe(pFile, root + "_ospairs", C->ospairs);
+					       getObjectSafe(pFile, root + "_sspairs", C->sspairs);
+
 					}
 				}
 				if(HighPt == HighPt){
@@ -3913,7 +3945,24 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	if(getNJets() < 2) return false;
 	return true;
 }
-
+bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
+  if (hasLooseElectrons(el1,el2) < 2) return false;
+  if (getMET() > 30.)             return false;
+  if (ElMT[0] > fC_maxMt_Control) return false;
+  if (!isGoodEleForChMId(el1,20)) return false;
+  if (!isGoodEleForChMId(el2,20)) return false;
+  
+  TLorentzVector p1, p2;
+  p1.SetPtEtaPhiM(ElPt[el1], ElEta[el1], ElPhi[el1], gMEL);
+  p2.SetPtEtaPhiM(ElPt[el2], ElEta[el2], ElPhi[el2], gMEL);
+  double m = (p1+p2).M();
+  if(fabs(gMZ - m) > 15.) return false;
+  
+  setHypLepton1(el1, Elec);
+  setHypLepton2(el2, Elec);
+  
+  return true;
+}
 //____________________________________________________________________________
 bool SSDLDumper::isGenMatchedSUSYDiLepEvent(){
 	int ind1(-1), ind2(-1);
@@ -4300,6 +4349,18 @@ bool SSDLDumper::isGoodEleFor3rdLepVeto(int ele){
 	
 	return true;	
 }
+bool SSDLDumper::isGoodEleForChMId(int ele, float ptcut){
+	// Don't care about charge consistency or trigger efficiency
+	if(ele >= NEls) return false; // Sanity check
+	if(ElPt[ele] < ptcut) return false;
+	
+	if (!isLooseElectron(ele)) return false;
+	float RelIso = (ElEcalRecHitSumEt[ele] + ElHcalTowerSumEt[ele] + ElTkSumPt[ele])/ElPt[ele];
+  
+	if (RelIso > 0.15) return false;
+	
+	return true;
+}
 bool SSDLDumper::isGoodEleForTTZ(int ele, float pt){
 	// Don't care about charge consistency or trigger efficiency
 	if(ele >= NEls) return false; // Sanity check
@@ -4383,7 +4444,6 @@ bool SSDLDumper::isGoodSecElectron(int ele, float ptcut){
 	if(ElPt[ele] < ptcut) return false;
 	return true;
 }
-
 //____________________________________________________________________________
 bool SSDLDumper::isFakeElectron(int ele){
 	if(isPromptElectron(ele)) return false;
