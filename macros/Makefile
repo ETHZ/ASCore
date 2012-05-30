@@ -47,18 +47,18 @@ all: RunUserAnalyzer RunJZBAnalyzer #RunQuickAnalyzer
 
 RunUserAnalyzer: src/exe/RunUserAnalyzer.C src/UserAnalyzer.cc src/UserAnalysis.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-	mv RunUserAnalyzer /scratch/$$USERNAME/RunUserAnalyzer 
-	mv /scratch/$$USERNAME/RunUserAnalyzer RunUserAnalyzer
+	mv RunUserAnalyzer /scratch/$$USER/RunUserAnalyzer 
+	mv /scratch/$$USER/RunUserAnalyzer RunUserAnalyzer
 
 RunJZBAnalyzer: src/exe/RunJZBAnalyzer.C src/JZBAnalyzer.cc src/JZBAnalysis.cc $(OBJS)
 	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-	mv RunJZBAnalyzer /scratch/$$USERNAME/RunJZBAnalyzer
-	mv /scratch/$$USERNAME/RunJZBAnalyzer RunJZBAnalyzer
+	mv RunJZBAnalyzer /scratch/$$USER/RunJZBAnalyzer
+	mv /scratch/$$USER/RunJZBAnalyzer RunJZBAnalyzer
 
 #RunQuickAnalyzer: src/exe/RunQuickAnalyzer.C src/QuickAnalyzer.cc src/QuickAnalysis.cc $(OBJS)
 #	$(CXX) $(CXXFLAGS) -ldl $(GLIBS) $(LDFLAGS) -o $@ $^
-#	mv RunQuickAnalyzer /scratch/$$USERNAME/RunQuickAnalyzer
-#	mv /scratch/$$USERNAME/RunQuickAnalyzer RunQuickAnalyzer
+#	mv RunQuickAnalyzer /scratch/$$USER/RunQuickAnalyzer
+#	mv /scratch/$$USER/RunQuickAnalyzer RunQuickAnalyzer
 
 clean:
 	find src -name '*.o' -exec $(RM) -v {} ';' 
