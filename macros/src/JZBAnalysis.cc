@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.32 $";
+string sjzbversion="$Revision: 1.70.2.33 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.32 2012/05/29 08:06:40 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.33 2012/05/30 08:58:36 pablom Exp $
 */
 
 
@@ -536,11 +536,9 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(muTriggerPaths,"HLT_Mu13_Mu8",10,11);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",2,4); // 2,3,4,6,7,10,11
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
-  addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,11);
-  addPath(muTriggerPaths,"HLT_Mu17_Mu8",12,16);
-  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",1, 15);  
-
-
+  addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,16);
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,10);
+  
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
   addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",1,9);
