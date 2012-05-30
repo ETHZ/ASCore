@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.33 $";
+string sjzbversion="$Revision: 1.70.2.34 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.33 2012/05/30 08:58:36 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.34 2012/05/30 09:03:23 fronga Exp $
 */
 
 
@@ -153,7 +153,7 @@ public:
   float pfJetGoodE[jMax];
   float pfJetGoodMl[jMax];
   float pfJetGoodPtl[jMax];
-  bool  pfJetGoodID[jMax];
+  float  pfJetGoodID[jMax];
   float bTagProbCSVBP[jMax];
   float bTagProbCSVMVA[jMax];
   
@@ -537,7 +537,7 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",2,4); // 2,3,4,6,7,10,11
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,16);
-  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,10);
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",8,15);
   
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
@@ -1324,7 +1324,7 @@ void JZBAnalysis::Analyze() {
       float jpz = fTR->JPz[i];
       float jenergy = fTR->JE[i];
       float jesC = fTR->JEcorr[i];
-      bool  isJetID = IsGoodBasicPFJet(i,false,3.0);
+      bool  isJetID = IsGoodBasicPFJet(i,0.0,3.0);
       
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
