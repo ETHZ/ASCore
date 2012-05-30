@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.31 $";
+string sjzbversion="$Revision: 1.70.2.32 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.31 2012/05/25 14:41:05 pablom Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.32 2012/05/29 08:06:40 buchmann Exp $
 */
 
 
@@ -538,7 +538,9 @@ JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",6,7);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",10,11);
   addPath(muTriggerPaths,"HLT_Mu17_Mu8",12,16);
-  
+  addPath(muTriggerPaths,"HLT_Mu17_TkMu8",1, 15);  
+
+
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",1,9);
   addPath(emTriggerPaths,"HLT_Mu17_Ele8_CaloIdL",12,13);
   addPath(emTriggerPaths,"HLT_Mu8_Ele17_CaloIdL",1,9);
@@ -721,18 +723,18 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetGoodPt", nEvent.pfJetGoodPt,"pfJetGoodPt[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodEta",nEvent.pfJetGoodEta,"pfJetGoodEta[pfJetGoodNum]/F");
   myTree->Branch("pfJetGoodPhi",nEvent.pfJetGoodPhi,"pfJetGoodPhi[pfJetGoodNum]/F");
-  myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/O");
-  myTree->Branch("pfJetGoodE", nEvent.pfJetGoodE,"pfJetGoodE[pfJetGoodNum]/O");
-  myTree->Branch("pfJetGoodMl", nEvent.pfJetGoodMl,"pfJetGoodMl[pfJetGoodNum]/O");
-  myTree->Branch("pfJetGoodPtl", nEvent.pfJetGoodPtl,"pfJetGoodPtl[pfJetGoodNum]/O");
+  myTree->Branch("pfJetGoodID", nEvent.pfJetGoodID,"pfJetGoodID[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodE", nEvent.pfJetGoodE,"pfJetGoodE[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodMl", nEvent.pfJetGoodMl,"pfJetGoodMl[pfJetGoodNum]/F");
+  myTree->Branch("pfJetGoodPtl", nEvent.pfJetGoodPtl,"pfJetGoodPtl[pfJetGoodNum]/F");
 
   myTree->Branch("pfJetGoodPtBtag", nEvent.pfJetGoodPtBtag,"pfJetGoodPtBag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodEtaBtag",nEvent.pfJetGoodEtaBtag,"pfJetGoodEtaBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodPhiBtag",nEvent.pfJetGoodPhiBtag,"pfJetGoodPhiBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("pfJetGoodIDBtag", nEvent.pfJetGoodIDBtag,"pfJetGoodID[pfJetGoodNumBtag]/O");
-  myTree->Branch("pfJetGoodEBtag", nEvent.pfJetGoodEBtag,"pfJetGoodEBtag[pfJetGoodNumBtag]/O");
-  myTree->Branch("pfJetGoodMlBtag", nEvent.pfJetGoodMlBtag,"pfJetGoodMlBtag[pfJetGoodNumBtag]/O");
-  myTree->Branch("pfJetGoodPtlBtag", nEvent.pfJetGoodPtlBtag,"pfJetGoodPtlBtag[pfJetGoodNumBtag]/O");
+  myTree->Branch("pfJetGoodEBtag", nEvent.pfJetGoodEBtag,"pfJetGoodEBtag[pfJetGoodNumBtag]/F");
+  myTree->Branch("pfJetGoodMlBtag", nEvent.pfJetGoodMlBtag,"pfJetGoodMlBtag[pfJetGoodNumBtag]/F");
+  myTree->Branch("pfJetGoodPtlBtag", nEvent.pfJetGoodPtlBtag,"pfJetGoodPtlBtag[pfJetGoodNumBtag]/F");
   myTree->Branch("bTagProbCSVBP", nEvent.bTagProbCSVBP,"bTagProbCSVBP[pfJetGoodNum]/F");
   myTree->Branch("bTagProbCSVMVA", nEvent.bTagProbCSVMVA,"bTagProbCSVMVA[pfJetGoodNum]/F");
 
