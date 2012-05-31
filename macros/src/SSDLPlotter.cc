@@ -142,7 +142,7 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(GJets100);
 	// MARC fMCBG.push_back(GJets200);
 	// MARC fMCBG.push_back(WW);
-	// MARC fMCBG.push_back(WZ);
+	fMCBG.push_back(WZ);
 	// MARC fMCBG.push_back(ZZ);
 	// MARC fMCBG.push_back(GVJets);
 	// MARC fMCBG.push_back(DPSWW);
@@ -213,7 +213,7 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGMuEnr.push_back(GJets100);
 	// MARC fMCBGMuEnr.push_back(GJets200);
 	// MARC fMCBGMuEnr.push_back(WW);
-	// MARC fMCBGMuEnr.push_back(WZ);
+	fMCBGMuEnr.push_back(WZ);
 	// MARC fMCBGMuEnr.push_back(ZZ);
 	// MARC fMCBGMuEnr.push_back(GVJets);
 	// MARC fMCBGMuEnr.push_back(DPSWW);
@@ -228,8 +228,9 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGMuEnr.push_back(WWW);
 	// MARC fMCBGMuEnr.push_back(ZZZ);
 	// MARC fMCBGMuEnr.push_back(QCDMuEnr10);
+	fMCBGMuEnr.push_back(QCDMuEnr15);
 
-	// MARC fMCBGMuEnrSig = fMCBGMuEnr;
+	fMCBGMuEnrSig = fMCBGMuEnr;
 	// MARC fMCBGMuEnrSig.push_back(LM6);
 
 	// MARC if(!gEWKino) fMCRareSM.push_back(WZ);
@@ -331,7 +332,7 @@ void SSDLPlotter::doAnalysis(){
  	makeFRvsEtaPlots(Muon);
  	makeFRvsEtaPlots(Elec);
 	
-	// makeAllClosureTests();
+	makeAllClosureTests();
 	makeAllIntPredictions();
 	// makeDiffPrediction();
 	// makeTTWDiffPredictions();
@@ -4014,7 +4015,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 	
 		TLegend *leg = new TLegend(0.15,0.75,0.35,0.88);
 		leg->AddEntry(h_ratio_data, "Data",         "p");
-		//		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
+		leg->AddEntry(h_ratio_mc,   "Simulation",   "p");
 		leg->SetFillStyle(0);
 		leg->SetTextFont(42);
 		leg->SetBorderSize(0);
@@ -4023,9 +4024,9 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 		c_temp->cd();
 
 		// gPad->SetLogy();
-		//	h_ratio_mc  ->DrawCopy("PE X0");
 		h_ratio_mc  ->DrawCopy("AXIS");
-		h_ratio_data->DrawCopy("PE same");
+		h_ratio_mc  ->DrawCopy("PE X0 SAME");
+		h_ratio_data->DrawCopy("PE SAME");
 		leg->Draw();
 		lat->DrawLatex(0.70,0.92, Form("L_{int.} = %2.1f fb^{-1}", fLumiNorm/1000.));
 		lat->DrawLatex(0.11,0.92, name);
@@ -5594,14 +5595,14 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	float wz_nt2_mm(0.),wz_nt2_em(0.),wz_nt2_ee(0.);
 	float wz_nt2_mm_e1(0.),wz_nt2_em_e1(0.),wz_nt2_ee_e1(0.);
 	
-// MARC  	wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-// MARC 	wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
-// MARC 	wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
-// MARC 	wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
+	wzscale = fLumiNorm/fSamples[WZ]->getLumi();
+	wz_nt2_mm = gMMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->Integral(0, getNFPtBins(Muon)+1);
+	wz_nt2_em = gEMTrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].em.nt20_pt->Integral(0, getNFPtBins(ElMu)+1);
+	wz_nt2_ee = gEETrigScale*wzscale*fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->Integral(0, getNFPtBins(Elec)+1);
  
-// MARC 	wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
-// MARC 	wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
-// MARC 	wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
+	wz_nt2_mm_e1 = gMMTrigScale*gMMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Muon].tt_avweight*fSamples[WZ]->numbers[reg][Muon].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()); // for stat error take actual entries, not pileup weighted integral...
+ 	wz_nt2_em_e1 = gEMTrigScale*gEMTrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][ElMu].tt_avweight*fSamples[WZ]->numbers[reg][ElMu].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries());
+ 	wz_nt2_ee_e1 = gEETrigScale*gEETrigScale*wzscale*wzscale * fSamples[WZ]->numbers[reg][Elec].tt_avweight*fSamples[WZ]->numbers[reg][Elec].tt_avweight * fSamples[WZ]->getError2(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries());
  
  	OUT << Form("%16s || %5.2f ± %5.2f         || %5.2f ± %5.2f         || %5.2f ± %5.2f         ||\n", "WZ Prod.",
  	wz_nt2_mm, sqrt(wz_nt2_mm_e1),
@@ -9289,717 +9290,717 @@ SSDLPrediction SSDLPlotter::makePredictionSignalEvents(float minHT, float maxHT,
 // MARC }
 
 //____________________________________________________________________________
-// MARC void SSDLPlotter::makeAllClosureTests(){
-// MARC 	TString outputdir = Util::MakeOutputDir(fOutputDir + "MCClosure");
-// MARC 	for(size_t i = 0; i < gNREGIONS; ++i){
-// MARC 		TString outputname = outputdir + "MCClosure_" + Region::sname[i] + ".txt";
-// MARC 		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, gRegion(i));
-// MARC 	}
-// MARC 	for(size_t i = 0; i < gNREGIONS; ++i){
-// MARC 		TString outputname = outputdir + "MCClosure_Sig_" + Region::sname[i] + ".txt";
-// MARC 		makeIntMCClosure(fMCBGNoQCDNoGJetsSig, outputname, gRegion(i));
-// MARC 	}
-// MARC 	fOutputSubDir = "";
-// MARC }
-// MARC void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegion reg){
-// MARC 	ofstream OUT(filename.Data(), ios::trunc);
-// MARC 	const int nsamples = samples.size();
-// MARC 
-// MARC 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-// MARC 	OUT << " Producing integrated predictions" << endl;
-// MARC 	OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
-// MARC 
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// RATIOS /////////////////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	float mf(0.), mf_e(0.), mp(0.), mp_e(0.), ef(0.), ef_e(0.), ep(0.), ep_e(0.);
-// MARC 
-// MARC 	calculateRatio(fMCBG, Muon, SigSup, mf, mf_e);
-// MARC 	calculateRatio(fMCBG, Muon, ZDecay, mp, mp_e);
-// MARC 	calculateRatio(fMCBG, Elec, SigSup, ef, ef_e);
-// MARC 	calculateRatio(fMCBG, Elec, ZDecay, ep, ep_e);
-// MARC 
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	vector<float> ntt_mm, ntl_mm, nll_mm;
-// MARC 	vector<float> ntt_ee, ntl_ee, nll_ee;
-// MARC 	vector<float> ntt_em, ntl_em, nlt_em, nll_em;
-// MARC 	
-// MARC 	vector<float> ntt_mm_e1, ntt_ee_e1, ntt_em_e1; // squared stat. errors
-// MARC 
-// MARC 	vector<float> npp_mm, npf_mm, nfp_mm, nff_mm;
-// MARC 	vector<float> npp_ee, npf_ee, nfp_ee, nff_ee;
-// MARC 	vector<float> npp_em, npf_em, nfp_em, nff_em;
-// MARC 
-// MARC 	vector<float> npp_tt_mm, npf_tt_mm, nfp_tt_mm, nff_tt_mm;
-// MARC 	vector<float> npp_tt_ee, npf_tt_ee, nfp_tt_ee, nff_tt_ee;
-// MARC 	vector<float> npp_tt_em, npf_tt_em, nfp_tt_em, nff_tt_em;
-// MARC 
-// MARC 	// OS yields
-// MARC 	vector<float> ntt_os_BB_ee, ntt_os_EE_ee, ntt_os_EB_ee;
-// MARC 	vector<float> ntt_os_BB_em, ntt_os_EE_em;
-// MARC 	// Squared stat. errors
-// MARC 	vector<float> ntt_os_BB_ee_e1, ntt_os_EE_ee_e1, ntt_os_EB_ee_e1, ntt_os_BB_em_e1, ntt_os_EE_em_e1;
-// MARC 
-// MARC 	// Charge misid
-// MARC 	vector<float> npp_tt_cm_ee, npp_cm_ee;
-// MARC 	vector<float> npp_tt_cm_em, npp_cm_em;
-// MARC 
-// MARC 	vector<float> scales;
-// MARC 	vector<TString> names;
-// MARC 	for(size_t i = 0; i < samples.size(); ++i){
-// MARC 		Sample *S = fSamples[samples[i]];
-// MARC 		float scale = fLumiNorm / S->getLumi();
-// MARC 		names.push_back(S->sname);
-// MARC 		scales.push_back(scale);
-// MARC 		ntt_mm.push_back(S->numbers[reg][Muon].nt2);
-// MARC 		ntl_mm.push_back(S->numbers[reg][Muon].nt10);
-// MARC 		nll_mm.push_back(S->numbers[reg][Muon].nt0);
-// MARC 
-// MARC 		ntt_em.push_back(S->numbers[reg][ElMu].nt2);
-// MARC 		ntl_em.push_back(S->numbers[reg][ElMu].nt10);
-// MARC 		nlt_em.push_back(S->numbers[reg][ElMu].nt01);
-// MARC 		nll_em.push_back(S->numbers[reg][ElMu].nt0);
-// MARC 
-// MARC 		ntt_ee.push_back(S->numbers[reg][Elec].nt2);
-// MARC 		ntl_ee.push_back(S->numbers[reg][Elec].nt10);
-// MARC 		nll_ee.push_back(S->numbers[reg][Elec].nt0);
-// MARC 
-// MARC 		ntt_mm_e1.push_back(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries())); // take unweighted entries
-// MARC 		ntt_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
-// MARC 		ntt_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()));
-// MARC 
-// MARC 		npp_mm.push_back(S->region[reg][HighPt].mm.npp_pt->GetEntries());
-// MARC 		npf_mm.push_back(S->region[reg][HighPt].mm.npf_pt->GetEntries());
-// MARC 		nfp_mm.push_back(S->region[reg][HighPt].mm.nfp_pt->GetEntries());
-// MARC 		nff_mm.push_back(S->region[reg][HighPt].mm.nff_pt->GetEntries());
-// MARC 
-// MARC 		npp_em.push_back(S->region[reg][HighPt].em.npp_pt->GetEntries());
-// MARC 		npf_em.push_back(S->region[reg][HighPt].em.npf_pt->GetEntries());
-// MARC 		nfp_em.push_back(S->region[reg][HighPt].em.nfp_pt->GetEntries());
-// MARC 		nff_em.push_back(S->region[reg][HighPt].em.nff_pt->GetEntries());
-// MARC 
-// MARC 		npp_ee.push_back(S->region[reg][HighPt].ee.npp_pt->GetEntries());
-// MARC 		npf_ee.push_back(S->region[reg][HighPt].ee.npf_pt->GetEntries());
-// MARC 		nfp_ee.push_back(S->region[reg][HighPt].ee.nfp_pt->GetEntries());
-// MARC 		nff_ee.push_back(S->region[reg][HighPt].ee.nff_pt->GetEntries());
-// MARC 
-// MARC 		npp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pp_pt->GetEntries());
-// MARC 		npf_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pf_pt->GetEntries());
-// MARC 		nfp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2fp_pt->GetEntries());
-// MARC 		nff_tt_mm.push_back(S->region[reg][HighPt].mm.nt2ff_pt->GetEntries());
-// MARC 
-// MARC 		npp_tt_em.push_back(S->region[reg][HighPt].em.nt2pp_pt->GetEntries());
-// MARC 		npf_tt_em.push_back(S->region[reg][HighPt].em.nt2pf_pt->GetEntries());
-// MARC 		nfp_tt_em.push_back(S->region[reg][HighPt].em.nt2fp_pt->GetEntries());
-// MARC 		nff_tt_em.push_back(S->region[reg][HighPt].em.nt2ff_pt->GetEntries());
-// MARC 
-// MARC 		npp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pp_pt->GetEntries());
-// MARC 		npf_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pf_pt->GetEntries());
-// MARC 		nfp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2fp_pt->GetEntries());
-// MARC 		nff_tt_ee.push_back(S->region[reg][HighPt].ee.nt2ff_pt->GetEntries());
-// MARC 		
-// MARC 		ntt_os_BB_em.push_back(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
-// MARC 		ntt_os_EE_em.push_back(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
-// MARC 		ntt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
-// MARC 		ntt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
-// MARC 		ntt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
-// MARC 		
-// MARC 		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()));
-// MARC 		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()));
-// MARC 		ntt_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()));
-// MARC 		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()));
-// MARC 		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()));
-// MARC 		
-// MARC 		npp_tt_cm_ee.push_back(scale*S->region[reg][HighPt].ee.nt2pp_cm_pt->GetEntries());
-// MARC 		npp_cm_ee   .push_back(scale*S->region[reg][HighPt].ee.npp_cm_pt->GetEntries());
-// MARC 		npp_tt_cm_em.push_back(scale*S->region[reg][HighPt].em.nt2pp_cm_pt->GetEntries());
-// MARC 		npp_cm_em   .push_back(scale*S->region[reg][HighPt].em.npp_cm_pt->GetEntries());
-// MARC 	}
-// MARC 
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	FakeRatios *FR = new FakeRatios();
-// MARC 	FR->setIsMC(true);
-// MARC 	FR->setNToyMCs(100);
-// MARC 	FR->setAddESyst(0.0);
-// MARC 
-// MARC 	FR->setMFRatio(mf, mf_e); // set error to pure statistical of ratio
-// MARC 	FR->setEFRatio(ef, ef_e);
-// MARC 	FR->setMPRatio(mp, mp_e);
-// MARC 	FR->setEPRatio(ep, ep_e);
-// MARC 	
-// MARC 	vector<float> npp_pred_mm,    npf_pred_mm,    nff_pred_mm;
-// MARC 	vector<float> npp_pred_mm_e1, npf_pred_mm_e1, nff_pred_mm_e1;
-// MARC 	vector<float> npp_pred_ee,    npf_pred_ee,    nff_pred_ee;
-// MARC 	vector<float> npp_pred_ee_e1, npf_pred_ee_e1, nff_pred_ee_e1;
-// MARC 	vector<float> npp_pred_em,    npf_pred_em,    nfp_pred_em,    nff_pred_em;
-// MARC 	vector<float> npp_pred_em_e1, npf_pred_em_e1, nfp_pred_em_e1, nff_pred_em_e1;
-// MARC 
-// MARC 	vector<float> nF_pred_mm_e1, nF_pred_em_e1, nF_pred_ee_e1; // combined stat errors on fakes
-// MARC 
-// MARC 	for(size_t i = 0; i < nsamples; ++i){
-// MARC 		FR->setMMNtl(ntt_mm[i], ntl_mm[i], nll_mm[i]);
-// MARC 		FR->setEENtl(ntt_ee[i], ntl_ee[i], nll_ee[i]);
-// MARC 		FR->setEMNtl(ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i]);
-// MARC 
-// MARC 		Sample *S = fSamples[samples[i]];
-// MARC 		FR->setNGen(S->ngen);
-// MARC 
-// MARC 		//// Differential Ratios
-// MARC 		npp_pred_mm.push_back(S->numbers[reg][Muon].npp);
-// MARC 		npf_pred_mm.push_back(S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp);
-// MARC 		nff_pred_mm.push_back(S->numbers[reg][Muon].nff);
-// MARC 		npp_pred_ee.push_back(S->numbers[reg][Elec].npp);
-// MARC 		npf_pred_ee.push_back(S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp);
-// MARC 		nff_pred_ee.push_back(S->numbers[reg][Elec].nff);
-// MARC 		npp_pred_em.push_back(S->numbers[reg][ElMu].npp);
-// MARC 		npf_pred_em.push_back(S->numbers[reg][ElMu].npf);
-// MARC 		nfp_pred_em.push_back(S->numbers[reg][ElMu].nfp);
-// MARC 		nff_pred_em.push_back(S->numbers[reg][ElMu].nff);
-// MARC 		
-// MARC 		npp_pred_mm_e1.push_back(FR->getMMNppEStat());
-// MARC 		npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
-// MARC 		nff_pred_mm_e1.push_back(FR->getMMNffEStat());
-// MARC 		nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
-// MARC 		
-// MARC 		npp_pred_ee_e1.push_back(FR->getEENppEStat());
-// MARC 		npf_pred_ee_e1.push_back(FR->getEENpfEStat());
-// MARC 		nff_pred_ee_e1.push_back(FR->getEENffEStat());
-// MARC 		nF_pred_ee_e1 .push_back(FR->getEETotEStat());
-// MARC 		
-// MARC 		npp_pred_em_e1.push_back(FR->getEMNppEStat());
-// MARC 		npf_pred_em_e1.push_back(FR->getEMNpfEStat());
-// MARC 		nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
-// MARC 		nff_pred_em_e1.push_back(FR->getEMNffEStat());
-// MARC 		nF_pred_em_e1 .push_back(FR->getEMTotEStat());
-// MARC 
-// MARC 		//// Flat Ratios
-// MARC 		// npp_pred_mm   .push_back(FR->getMMNpp());
-// MARC 		// npp_pred_mm_e1.push_back(FR->getMMNppEStat());
-// MARC 		// npf_pred_mm   .push_back(FR->getMMNpf());
-// MARC 		// npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
-// MARC 		// nff_pred_mm   .push_back(FR->getMMNff());
-// MARC 		// nff_pred_mm_e1.push_back(FR->getMMNffEStat());
-// MARC 		// nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
-// MARC 		// 
-// MARC 		// npp_pred_ee   .push_back(FR->getEENpp());
-// MARC 		// npp_pred_ee_e1.push_back(FR->getEENppEStat());
-// MARC 		// npf_pred_ee   .push_back(FR->getEENpf());
-// MARC 		// npf_pred_ee_e1.push_back(FR->getEENpfEStat());
-// MARC 		// nff_pred_ee   .push_back(FR->getEENff());
-// MARC 		// nff_pred_ee_e1.push_back(FR->getEENffEStat());
-// MARC 		// nF_pred_ee_e1 .push_back(FR->getEETotEStat());
-// MARC 		// 
-// MARC 		// npp_pred_em   .push_back(FR->getEMNpp());
-// MARC 		// npp_pred_em_e1.push_back(FR->getEMNppEStat());
-// MARC 		// npf_pred_em   .push_back(FR->getEMNpf());
-// MARC 		// npf_pred_em_e1.push_back(FR->getEMNpfEStat());
-// MARC 		// nfp_pred_em   .push_back(FR->getEMNfp());
-// MARC 		// nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
-// MARC 		// nff_pred_em   .push_back(FR->getEMNff());
-// MARC 		// nff_pred_em_e1.push_back(FR->getEMNffEStat());
-// MARC 		// nF_pred_em_e1 .push_back(FR->getEMTotEStat());
-// MARC 	}
-// MARC 	
-// MARC 	// Charge MisID Predictions
-// MARC 	// Abbreviations
-// MARC 	float fb  = gEChMisIDB;
-// MARC 	float fbE = gEChMisIDB_E;
-// MARC 	float fe  = gEChMisIDE;
-// MARC 	float feE = gEChMisIDE_E;
-// MARC 	
-// MARC 	vector<float> ntt_cm_ee, ntt_cm_em;
-// MARC 	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
-// MARC 	for(size_t i = 0; i < nsamples; ++i){
-// MARC 		Sample *S = fSamples[samples[i]];
-// MARC 		ntt_cm_ee.push_back(2*fb*ntt_os_BB_ee[i] + 2*fe*ntt_os_EE_ee[i] + (fb+fe)*ntt_os_EB_ee[i]);
-// MARC 		ntt_cm_ee_e1.push_back((4*fb*fb* S->getError(ntt_os_BB_ee[i])) + (4*fe*fe*S->getError(ntt_os_EE_ee[i])) + (fb+fe)*(fb+fe)*S->getError(ntt_os_EB_ee[i])
-// MARC 		    + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbE*fbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feE*feE) + (fbE*fbE+feE*feE)*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
-// MARC 
-// MARC 		ntt_cm_em.push_back(  fb*ntt_os_BB_em[i] +   fe*ntt_os_EE_em[i]);
-// MARC 		ntt_cm_em_e1.push_back(fb*fb*S->getError(ntt_os_BB_em[i]) + fe*fe*S->getError(ntt_os_EE_em[i]) 
-// MARC 		    + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbE*fbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feE*feE);
-// MARC 	}
-// MARC 
-// MARC 	// Sums
-// MARC 	float ntt_sum_mm(0.), ntl_sum_mm(0.), nll_sum_mm(0.);
-// MARC 	float ntt_sum_em(0.), ntl_sum_em(0.), nlt_sum_em(0.), nll_sum_em(0.);
-// MARC 	float ntt_sum_ee(0.), ntl_sum_ee(0.), nll_sum_ee(0.);
-// MARC 
-// MARC 	float ntt_sum_mm_e1(0.), ntt_sum_em_e1(0.), ntt_sum_ee_e1(0.);
-// MARC 
-// MARC 	float npp_sum_mm(0.), npf_sum_mm(0.), nff_sum_mm(0.);
-// MARC 	float npp_sum_em(0.), npf_sum_em(0.), nfp_sum_em(0.), nff_sum_em(0.);
-// MARC 	float npp_sum_ee(0.), npf_sum_ee(0.), nff_sum_ee(0.);
-// MARC 
-// MARC 	float npp_pred_sum_mm(0.), npf_pred_sum_mm(0.), nff_pred_sum_mm(0.);
-// MARC 	float npp_pred_sum_em(0.), npf_pred_sum_em(0.), nfp_pred_sum_em(0.), nff_pred_sum_em(0.);
-// MARC 	float npp_pred_sum_ee(0.), npf_pred_sum_ee(0.), nff_pred_sum_ee(0.);
-// MARC 
-// MARC 	float ntt_cm_sum_ee(0.), ntt_cm_sum_em(0.);
-// MARC 	float ntt_cm_sum_ee_e1(0.), ntt_cm_sum_em_e1(0.);
-// MARC 
-// MARC 	float npp_cm_sum_ee(0.),    npp_cm_sum_em(0.);
-// MARC 	float npp_tt_cm_sum_ee(0.), npp_tt_cm_sum_em(0.);
-// MARC 
-// MARC 	///////////////////////////////////////////
-// MARC 	// Rare SM
-// MARC 	float ntt_rare_mm(0.), ntt_rare_em(0.), ntt_rare_ee(0.);
-// MARC 	float ntt_rare_mm_e1(0.), ntt_rare_em_e1(0.), ntt_rare_ee_e1(0.); // squared stat errors
-// MARC 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
-// MARC 		Sample *S = fSamples[fMCRareSM[i]];
-// MARC 		float scale = fLumiNorm/S->getLumi();
-// MARC 		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
-// MARC 		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
-// MARC 		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
-// MARC 		ntt_rare_mm_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),2);
-// MARC 		ntt_rare_em_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
-// MARC 		ntt_rare_ee_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
-// MARC 	}
-// MARC 
-// MARC 	///////////////////////////////////////////
-// MARC 	// WZ production
-// MARC 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
-// MARC 	float ntt_wz_mm = wzscale*fSamples[WZ]->numbers[reg][Muon].nt2;
-// MARC 	float ntt_wz_em = wzscale*fSamples[WZ]->numbers[reg][ElMu].nt2;
-// MARC 	float ntt_wz_ee = wzscale*fSamples[WZ]->numbers[reg][Elec].nt2;
-// MARC 
-// MARC 	float ntt_wz_mm_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()),2); // for stat error take actual entries, not pileup weighted integral...
-// MARC 	float ntt_wz_em_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
-// MARC 	float ntt_wz_ee_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
-// MARC 
-// MARC 	// Squared errors
-// MARC 	float npp_pred_sum_mm_e1(0.), npf_pred_sum_mm_e1(0.), nff_pred_sum_mm_e1(0.);
-// MARC 	float npp_pred_sum_em_e1(0.), npf_pred_sum_em_e1(0.), nfp_pred_sum_em_e1(0.), nff_pred_sum_em_e1(0.);
-// MARC 	float npp_pred_sum_ee_e1(0.), npf_pred_sum_ee_e1(0.), nff_pred_sum_ee_e1(0.);
-// MARC 
-// MARC 	// Combined stat. errors
-// MARC 	float nF_pred_sum_mm_e1(0.), nF_pred_sum_em_e1(0.), nF_pred_sum_ee_e1(0.);
-// MARC 
-// MARC 	for(size_t i = 0; i < nsamples; ++i){
-// MARC 		ntt_sum_mm         += scales[i] * ntt_mm[i];
-// MARC 		ntl_sum_mm         += scales[i] * ntl_mm[i];
-// MARC 		nll_sum_mm         += scales[i] * nll_mm[i];
-// MARC 		npp_sum_mm         += scales[i] * npp_mm[i];
-// MARC 		npf_sum_mm         += scales[i] * (npf_mm[i]+nfp_mm[i]);
-// MARC 		nff_sum_mm         += scales[i] * nff_mm[i];
-// MARC 		npp_pred_sum_mm    += scales[i] * npp_pred_mm[i];
-// MARC 		npf_pred_sum_mm    += scales[i] * npf_pred_mm[i];
-// MARC 		nff_pred_sum_mm    += scales[i] * nff_pred_mm[i];
-// MARC 		npp_pred_sum_mm_e1 += scales[i]*scales[i] * npp_pred_mm_e1[i]*npp_pred_mm_e1[i];
-// MARC 		npf_pred_sum_mm_e1 += scales[i]*scales[i] * npf_pred_mm_e1[i]*npf_pred_mm_e1[i];
-// MARC 		nff_pred_sum_mm_e1 += scales[i]*scales[i] * nff_pred_mm_e1[i]*nff_pred_mm_e1[i];
-// MARC 		nF_pred_sum_mm_e1  += scales[i]*scales[i] * nF_pred_mm_e1[i]*nF_pred_mm_e1[i];
-// MARC 
-// MARC 		ntt_sum_ee         += scales[i] * ntt_ee[i];
-// MARC 		ntl_sum_ee         += scales[i] * ntl_ee[i];
-// MARC 		nll_sum_ee         += scales[i] * nll_ee[i];
-// MARC 		npp_sum_ee         += scales[i] * npp_ee[i];
-// MARC 		npf_sum_ee         += scales[i] * (npf_ee[i]+nfp_ee[i]);
-// MARC 		nff_sum_ee         += scales[i] * nff_ee[i];
-// MARC 		npp_pred_sum_ee    += scales[i] * npp_pred_ee[i];
-// MARC 		npf_pred_sum_ee    += scales[i] * npf_pred_ee[i];
-// MARC 		nff_pred_sum_ee    += scales[i] * nff_pred_ee[i];
-// MARC 		npp_pred_sum_ee_e1 += scales[i]*scales[i] * npp_pred_ee_e1[i]*npp_pred_ee_e1[i];
-// MARC 		npf_pred_sum_ee_e1 += scales[i]*scales[i] * npf_pred_ee_e1[i]*npf_pred_ee_e1[i];
-// MARC 		nff_pred_sum_ee_e1 += scales[i]*scales[i] * nff_pred_ee_e1[i]*nff_pred_ee_e1[i];
-// MARC 		nF_pred_sum_ee_e1  += scales[i]*scales[i] * nF_pred_ee_e1[i]*nF_pred_ee_e1[i];
-// MARC 
-// MARC 		ntt_sum_em         += scales[i] * ntt_em[i];
-// MARC 		ntl_sum_em         += scales[i] * ntl_em[i];
-// MARC 		nlt_sum_em         += scales[i] * nlt_em[i];
-// MARC 		nll_sum_em         += scales[i] * nll_em[i];
-// MARC 		npp_sum_em         += scales[i] * npp_em[i];
-// MARC 		npf_sum_em         += scales[i] * npf_em[i];
-// MARC 		nfp_sum_em         += scales[i] * nfp_em[i];
-// MARC 		nff_sum_em         += scales[i] * nff_em[i];
-// MARC 		npp_pred_sum_em    += scales[i] * npp_pred_em[i];
-// MARC 		npf_pred_sum_em    += scales[i] * npf_pred_em[i];
-// MARC 		nfp_pred_sum_em    += scales[i] * nfp_pred_em[i];
-// MARC 		nff_pred_sum_em    += scales[i] * nff_pred_em[i];
-// MARC 		npp_pred_sum_em_e1 += scales[i]*scales[i] * npp_pred_em_e1[i]*npp_pred_em_e1[i];
-// MARC 		npf_pred_sum_em_e1 += scales[i]*scales[i] * npf_pred_em_e1[i]*npf_pred_em_e1[i];
-// MARC 		nfp_pred_sum_em_e1 += scales[i]*scales[i] * nfp_pred_em_e1[i]*nfp_pred_em_e1[i];
-// MARC 		nff_pred_sum_em_e1 += scales[i]*scales[i] * nff_pred_em_e1[i]*nff_pred_em_e1[i];
-// MARC 		nF_pred_sum_em_e1  += scales[i]*scales[i] * nF_pred_em_e1[i]*nF_pred_em_e1[i];
-// MARC 		
-// MARC 		ntt_cm_sum_ee    += scales[i] * ntt_cm_ee[i];
-// MARC 		ntt_cm_sum_em    += scales[i] * ntt_cm_em[i];
-// MARC 
-// MARC 		ntt_cm_sum_ee_e1 += scales[i]*scales[i] * ntt_cm_ee_e1[i];
-// MARC 		ntt_cm_sum_em_e1 += scales[i]*scales[i] * ntt_cm_em_e1[i];
-// MARC 
-// MARC 		npp_cm_sum_ee    += scales[i] * npp_cm_ee[i];
-// MARC 		npp_cm_sum_em    += scales[i] * npp_cm_em[i];
-// MARC 		npp_tt_cm_sum_ee += scales[i] * npp_tt_cm_ee[i];
-// MARC 		npp_tt_cm_sum_em += scales[i] * npp_tt_cm_em[i];
-// MARC 		
-// MARC 		ntt_sum_mm_e1    += scales[i]*scales[i] * ntt_mm_e1[i];
-// MARC 		ntt_sum_em_e1    += scales[i]*scales[i] * ntt_em_e1[i];
-// MARC 		ntt_sum_ee_e1    += scales[i]*scales[i] * ntt_ee_e1[i];
-// MARC 	}
-// MARC 
-// MARC 
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
-// MARC 	///////////////////////////////////////////////////////////////////////////////////
-// MARC 	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << "         RATIOS  ||    Mu-fRatio     |    Mu-pRatio     ||    El-fRatio     |    El-pRatio     ||" << endl;
-// MARC 	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "           MC    ||";
-// MARC 	// OUT << setw(7)  << setprecision(2) << mf << " ± " << setw(7) << setprecision(2) << mf_e << " |";
-// MARC 	// OUT << setw(7)  << setprecision(2) << mp << " ± " << setw(7) << setprecision(2) << mp_e << " ||";
-// MARC 	// OUT << setw(7)  << setprecision(2) << ef << " ± " << setw(7) << setprecision(2) << ef_e << " |";
-// MARC 	// OUT << setw(7)  << setprecision(2) << ep << " ± " << setw(7) << setprecision(2) << ep_e << " ||";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "-------------------------------------------------------------------------------------------------" << endl << endl;
-// MARC 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-// MARC 	// OUT << "          YIELDS ||   Ntt   |   Ntl   |   Nll   ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << names[i] << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_mm[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nlt_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_em[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_ee[i]) << " || ";
-// MARC 	// 	OUT << endl;
-// MARC 	// }	
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Sum"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntl_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nll_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntl_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nlt_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nll_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntl_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << setw(16) << "Channels sum"  << " || ";
-// MARC 	// OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
-// MARC 	// ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-// MARC 	// OUT << "           TRUTH ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << names[i] << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_mm[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_em[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_ee[i]+nfp_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_ee[i]) << " || ";
-// MARC 	// 	OUT << endl;
-// MARC 	// }
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Sum"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nfp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << setw(16) << "Channels sum"  << " || ";
-// MARC 	// OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
-// MARC 	// npp_sum_mm+npf_sum_mm+nff_sum_mm, npp_sum_em+npf_sum_em+nfp_sum_em+nff_sum_em, npp_sum_ee+npf_sum_ee+nff_sum_ee) << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-// MARC 	// OUT << "     TRUTH IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << names[i] << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mp*mp*scales[i]*npp_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mp*mf*scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mf*mf*scales[i]*nff_mm[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mp*ep*scales[i]*npp_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mp*ef*scales[i]*npf_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
-// MARC 	// 	OUT << endl;
-// MARC 	// }
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Npf Sum"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-// MARC 	// OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << names[i] << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_mm[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_mm[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_pred_em[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_em[i]) << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_ee[i]) << " | ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_ee[i]) << " || ";
-// MARC 	// 	OUT << endl;
-// MARC 	// }
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Pred Sum"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 	// 
-// MARC 	// OUT << "=========================================================" << endl;
-// MARC 	// OUT << "                 ||       E/Mu      ||       E/E       ||" << endl;
-// MARC 	// OUT << "    CHARGE MISID ||  Pred  |  Truth ||  Pred  |  Truth ||" << endl;
-// MARC 	// OUT << "---------------------------------------------------------" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << names[i] << " || ";
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_em[i], scales[i]*npp_tt_cm_em[i]);
-// MARC 	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_ee[i], scales[i]*npp_tt_cm_ee[i]);
-// MARC 	// 	OUT << endl;
-// MARC 	// }	
-// MARC 	// OUT << "---------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Sum"  << " || ";
-// MARC 	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
-// MARC 	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_ee, npp_tt_cm_sum_ee) << endl;
-// MARC 	// OUT << "=========================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 
-// MARC 	OUT << "===================================================================================================" << endl;
-// MARC 	OUT << "                 ||       Mu/Mu       |       E/Mu        |        E/E        |        Sum        |" << endl;
-// MARC 	OUT << "---------------------------------------------------------------------------------------------------" << endl;
-// MARC 	float fakesum = npf_pred_sum_mm+npf_pred_sum_em+nfp_pred_sum_em+npf_pred_sum_ee+nff_pred_sum_mm+nff_pred_sum_em+nff_pred_sum_ee;
-// MARC 	float fakesum_e1 = nF_pred_sum_mm_e1+nF_pred_sum_em_e1+nF_pred_sum_ee_e1;
-// MARC 	OUT << Form(" Fakes           || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	npf_pred_sum_mm+nff_pred_sum_mm,                 sqrt(nF_pred_sum_mm_e1),
-// MARC 	npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em, sqrt(nF_pred_sum_em_e1),
-// MARC 	npf_pred_sum_ee+nff_pred_sum_ee,                 sqrt(nF_pred_sum_ee_e1),
-// MARC 	fakesum, sqrt(fakesum_e1)) << endl;
-// MARC 	OUT << Form(" Charge MisID    ||                   & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	ntt_cm_sum_em,               sqrt(ntt_cm_sum_em_e1),
-// MARC 	ntt_cm_sum_ee,               sqrt(ntt_cm_sum_ee_e1),
-// MARC 	ntt_cm_sum_ee+ntt_cm_sum_em, sqrt(ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)) << endl;
-// MARC 	OUT << Form(" Irreducible     || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	ntt_rare_mm,                         sqrt(ntt_rare_mm_e1),
-// MARC 	ntt_rare_em,                         sqrt(ntt_rare_em_e1),
-// MARC 	ntt_rare_ee,                         sqrt(ntt_rare_ee_e1),
-// MARC 	ntt_rare_mm+ntt_rare_em+ntt_rare_ee, sqrt(ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) << endl;
-// MARC 	OUT << Form(" WZ Production   || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	ntt_wz_mm,                     sqrt(ntt_wz_mm_e1),
-// MARC 	ntt_wz_em,                     sqrt(ntt_wz_em_e1),
-// MARC 	ntt_wz_ee,                     sqrt(ntt_wz_ee_e1),
-// MARC 	ntt_wz_mm+ntt_wz_em+ntt_wz_ee, sqrt(ntt_wz_mm_e1+ntt_wz_em_e1+ntt_wz_ee_e1)) << endl;
-// MARC 
-// MARC 	float tot_bg_mm = npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm + ntt_wz_mm;
-// MARC 	float tot_bg_em = npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em + ntt_wz_em;
-// MARC 	float tot_bg_ee = npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee + ntt_wz_ee;
-// MARC 	float tot_bg = tot_bg_mm + tot_bg_em + tot_bg_ee;
-// MARC 	float tot_bg_mm_e1 = nF_pred_sum_mm_e1                    + ntt_rare_mm_e1 + ntt_wz_mm_e1;
-// MARC 	float tot_bg_em_e1 = nF_pred_sum_em_e1 + ntt_cm_sum_em_e1 + ntt_rare_em_e1 + ntt_wz_em_e1;
-// MARC 	float tot_bg_ee_e1 = nF_pred_sum_ee_e1 + ntt_cm_sum_ee_e1 + ntt_rare_ee_e1 + ntt_wz_ee_e1;
-// MARC 	float tot_bg_e1    = tot_bg_mm_e1 + tot_bg_em_e1 + tot_bg_ee_e1;
-// MARC 	float ntt_sum    = ntt_sum_mm+ntt_sum_em+ntt_sum_ee;
-// MARC 	float ntt_sum_e1 = ntt_sum_mm_e1+ntt_sum_em_e1+ntt_sum_ee_e1;
-// MARC 	OUT << Form(" Total Pred.     || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	tot_bg_mm, sqrt(tot_bg_mm_e1),
-// MARC 	tot_bg_em, sqrt(tot_bg_em_e1),
-// MARC 	tot_bg_ee, sqrt(tot_bg_ee_e1),
-// MARC 	tot_bg,    sqrt(tot_bg_e1) ) << endl;
-// MARC 	OUT << Form(" Observed        || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	ntt_sum_mm, sqrt(ntt_sum_mm_e1),
-// MARC 	ntt_sum_em, sqrt(ntt_sum_em_e1),
-// MARC 	ntt_sum_ee, sqrt(ntt_sum_ee_e1),
-// MARC 	ntt_sum,    sqrt(ntt_sum_e1)) << endl;
-// MARC 	OUT << Form(" Pred./Obs.      || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	tot_bg_mm/ntt_sum_mm,
-// MARC 	sqrt(nF_pred_sum_mm_e1                  +  ntt_rare_mm_e1 * pow(((ntt_sum_mm-tot_bg_mm)/tot_bg_mm),2) + (tot_bg_mm_e1 - ntt_rare_mm_e1) * pow(tot_bg_mm/ntt_sum_mm,2)  )/ntt_sum_mm,
-// MARC 	tot_bg_em/ntt_sum_em,
-// MARC 	sqrt(nF_pred_sum_em_e1+ntt_cm_sum_em_e1 +  ntt_rare_em_e1 * pow(((ntt_sum_em-tot_bg_em)/tot_bg_em),2) + (tot_bg_em_e1 - ntt_rare_em_e1) * pow(tot_bg_em/ntt_sum_em,2)  )/ntt_sum_em,
-// MARC 	tot_bg_ee/ntt_sum_ee,
-// MARC 	sqrt(nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1 +  ntt_rare_ee_e1 * pow(((ntt_sum_ee-tot_bg_ee)/tot_bg_ee),2) + (tot_bg_ee_e1 - ntt_rare_ee_e1) * pow(tot_bg_ee/ntt_sum_ee,2)  )/ntt_sum_ee,
-// MARC 	tot_bg/ntt_sum,
-// MARC 	sqrt(fakesum_e1 + ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1 +  (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1) * pow(((ntt_sum-tot_bg)/tot_bg),2) + (tot_bg_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) * pow(tot_bg/ntt_sum,2)  )/ntt_sum
-// MARC 	) << endl;
-// MARC 
-// MARC 	OUT << Form(" Pred.-Obs./Pred || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
-// MARC 	(tot_bg_mm-ntt_sum_mm)/tot_bg_mm,
-// MARC 	sqrt(nF_pred_sum_mm_e1*pow(ntt_sum_mm/tot_bg_mm,2) + ntt_rare_mm_e1*(pow((ntt_sum_mm-tot_bg_mm)/tot_bg_mm,2)) + ntt_sum_mm_e1 - ntt_rare_mm_e1)/tot_bg_mm,
-// MARC 
-// MARC 	(tot_bg_em-ntt_sum_em)/tot_bg_em,
-// MARC 	sqrt((nF_pred_sum_em_e1+ntt_cm_sum_em_e1)*pow(ntt_sum_em/tot_bg_em,2) + ntt_rare_em_e1*(pow((ntt_sum_em-tot_bg_em)/tot_bg_em,2)) + ntt_sum_em_e1 - ntt_rare_em_e1)/tot_bg_em,
-// MARC 
-// MARC 	(tot_bg_ee-ntt_sum_ee)/tot_bg_ee,
-// MARC 	sqrt((nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1)*pow(ntt_sum_ee/tot_bg_ee,2) + ntt_rare_ee_e1*(pow((ntt_sum_ee-tot_bg_ee)/tot_bg_ee,2)) + ntt_sum_ee_e1 - ntt_rare_ee_e1)/tot_bg_ee,
-// MARC 
-// MARC 	(tot_bg-ntt_sum)/tot_bg,
-// MARC 	sqrt((fakesum_e1+ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)*pow(ntt_sum/tot_bg,2) + (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)*(pow((ntt_sum-tot_bg)/tot_bg,2)) + ntt_sum_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1))/tot_bg	
-// MARC 	) << endl;
-// MARC OUT << "===================================================================================================" << endl;
-// MARC 	OUT << endl;
-// MARC 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
-// MARC 	// OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Npf Truth"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "FR Prediction"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << setw(16) << "Pred. Fakes"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " |                   || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " |                             || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " |                   || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << setw(16) << "Pred. Ch-MID"  << " ||         |                   || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_cm_sum_em) << " |                             || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_cm_sum_ee) << " |                   || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << setw(16) << "Pred. Rare SM"  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_rare_mm) << " |                   || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_rare_em) << " |                             || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", ntt_rare_ee) << " |                   || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Total BG Pred."  << " || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", tot_bg_mm) << " | P/O  | P-O/P |    || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", tot_bg_em) << " | P/O  | P-O/P |              || ";
-// MARC 	// OUT << setw(7) << Form("%6.3f", tot_bg_ee) << " | P/O  | P-O/P |    || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
-// MARC 	// OUT << setw(16) << "Observed"  << " || ";
-// MARC 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_mm, tot_bg_mm/ntt_sum_mm, (tot_bg_mm-ntt_sum_mm)/tot_bg_mm) << "    || ";
-// MARC 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_em, tot_bg_em/ntt_sum_em, (tot_bg_em-ntt_sum_em)/tot_bg_em) << "              || ";
-// MARC 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_ee, tot_bg_ee/ntt_sum_ee, (tot_bg_ee-ntt_sum_ee)/tot_bg_ee) << "    || ";
-// MARC 	// OUT << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << Form("     Comb. Fakes || %6.3f |              ||",
-// MARC 	// npf_pred_sum_mm+nff_pred_sum_mm + 
-// MARC 	// npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em +
-// MARC 	// npf_pred_sum_ee+nff_pred_sum_ee) << endl;
-// MARC 	// OUT << Form("    Comb. Ch-MID || %6.3f |              ||", ntt_cm_sum_em+ntt_cm_sum_ee) << endl;
-// MARC 	// OUT << Form("   Comb. Rare SM || %6.3f |              ||", ntt_rare_mm+ntt_rare_em+ntt_rare_ee) << endl;
-// MARC 	// OUT << "---------------------------------------------" << endl;
-// MARC 	// OUT << Form("  Total BG Comb. || %6.3f | P/O  | P-O/P ||", tot_bg) << endl;
-// MARC 	// OUT << "---------------------------------------------" << endl;
-// MARC 	// OUT << Form("        Observed || %6.3f | %4.2f | %5.2f ||", ntt_sum, tot_bg/ntt_sum, (tot_bg-ntt_sum)/tot_bg) << endl;
-// MARC 	// OUT << "=============================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 
-// MARC 	// OUT << "===========================================================================================================================================" << endl;
-// MARC 	// OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
-// MARC 	// for(size_t i = 0; i < nsamples; ++i){
-// MARC 	// 	OUT << setw(16) << left << names[i];
-// MARC 	// 	OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
-// MARC 	// 	npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
-// MARC 	// 	OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
-// MARC 	// 	OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
-// MARC 	// 	npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
-// MARC 	// 	OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
-// MARC 	// 	npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
-// MARC 	// }
-// MARC 	// OUT << "===========================================================================================================================================" << endl;
-// MARC 	// OUT << endl;
-// MARC 	// 
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "  PREDICTIONS (in tt window)" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------" << endl;
-// MARC 	// OUT << " Mu/Mu Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------" << endl;
-// MARC 	// OUT << " E/Mu Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "--------------------------------------------------------------" << endl;
-// MARC 	// OUT << " E/E Channel:" << endl;
-// MARC 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ±   " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
-// MARC 	// OUT << "==========================================================================================================================" << endl;
-// MARC 	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
-// MARC 	
-// MARC 	OUT.close();
-// MARC 	delete FR;
-// MARC }
+ void SSDLPlotter::makeAllClosureTests(){
+ 	TString outputdir = Util::MakeOutputDir(fOutputDir + "MCClosure");
+ 	for(size_t i = 0; i < gNREGIONS; ++i){
+ 		TString outputname = outputdir + "MCClosure_" + Region::sname[i] + ".txt";
+ 		makeIntMCClosure(fMCBGNoQCDNoGJets, outputname, gRegion(i));
+ 	}
+ 	for(size_t i = 0; i < gNREGIONS; ++i){
+ 		TString outputname = outputdir + "MCClosure_Sig_" + Region::sname[i] + ".txt";
+ 		makeIntMCClosure(fMCBGNoQCDNoGJetsSig, outputname, gRegion(i));
+ 	}
+ 	fOutputSubDir = "";
+ }
+ void SSDLPlotter::makeIntMCClosure(vector<int> samples, TString filename, gRegion reg){
+ 	ofstream OUT(filename.Data(), ios::trunc);
+ 	const int nsamples = samples.size();
+ 
+ 	OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+ 	OUT << " Producing integrated predictions" << endl;
+ 	OUT << "  scaling MC to " << fLumiNorm << " /pb" << endl << endl;
+ 
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	// RATIOS /////////////////////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	float mf(0.), mf_e(0.), mp(0.), mp_e(0.), ef(0.), ef_e(0.), ep(0.), ep_e(0.);
+ 
+ 	calculateRatio(fMCBG, Muon, SigSup, mf, mf_e);
+ 	calculateRatio(fMCBG, Muon, ZDecay, mp, mp_e);
+ 	calculateRatio(fMCBG, Elec, SigSup, ef, ef_e);
+ 	calculateRatio(fMCBG, Elec, ZDecay, ep, ep_e);
+ 
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	// OBSERVATIONS ///////////////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	vector<float> ntt_mm, ntl_mm, nll_mm;
+ 	vector<float> ntt_ee, ntl_ee, nll_ee;
+ 	vector<float> ntt_em, ntl_em, nlt_em, nll_em;
+ 	
+ 	vector<float> ntt_mm_e1, ntt_ee_e1, ntt_em_e1; // squared stat. errors
+ 
+ 	vector<float> npp_mm, npf_mm, nfp_mm, nff_mm;
+ 	vector<float> npp_ee, npf_ee, nfp_ee, nff_ee;
+ 	vector<float> npp_em, npf_em, nfp_em, nff_em;
+ 
+ 	vector<float> npp_tt_mm, npf_tt_mm, nfp_tt_mm, nff_tt_mm;
+ 	vector<float> npp_tt_ee, npf_tt_ee, nfp_tt_ee, nff_tt_ee;
+ 	vector<float> npp_tt_em, npf_tt_em, nfp_tt_em, nff_tt_em;
+ 
+ 	// OS yields
+ 	vector<float> ntt_os_BB_ee, ntt_os_EE_ee, ntt_os_EB_ee;
+ 	vector<float> ntt_os_BB_em, ntt_os_EE_em;
+ 	// Squared stat. errors
+ 	vector<float> ntt_os_BB_ee_e1, ntt_os_EE_ee_e1, ntt_os_EB_ee_e1, ntt_os_BB_em_e1, ntt_os_EE_em_e1;
+ 
+ 	// Charge misid
+ 	vector<float> npp_tt_cm_ee, npp_cm_ee;
+ 	vector<float> npp_tt_cm_em, npp_cm_em;
+ 
+ 	vector<float> scales;
+ 	vector<TString> names;
+ 	for(size_t i = 0; i < samples.size(); ++i){
+ 		Sample *S = fSamples[samples[i]];
+ 		float scale = fLumiNorm / S->getLumi();
+ 		names.push_back(S->sname);
+ 		scales.push_back(scale);
+ 		ntt_mm.push_back(S->numbers[reg][Muon].nt2);
+ 		ntl_mm.push_back(S->numbers[reg][Muon].nt10);
+ 		nll_mm.push_back(S->numbers[reg][Muon].nt0);
+ 
+ 		ntt_em.push_back(S->numbers[reg][ElMu].nt2);
+ 		ntl_em.push_back(S->numbers[reg][ElMu].nt10);
+ 		nlt_em.push_back(S->numbers[reg][ElMu].nt01);
+ 		nll_em.push_back(S->numbers[reg][ElMu].nt0);
+ 
+ 		ntt_ee.push_back(S->numbers[reg][Elec].nt2);
+ 		ntl_ee.push_back(S->numbers[reg][Elec].nt10);
+ 		nll_ee.push_back(S->numbers[reg][Elec].nt0);
+ 
+ 		ntt_mm_e1.push_back(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries())); // take unweighted entries
+ 		ntt_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()));
+ 		ntt_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()));
+ 
+ 		npp_mm.push_back(S->region[reg][HighPt].mm.npp_pt->GetEntries());
+ 		npf_mm.push_back(S->region[reg][HighPt].mm.npf_pt->GetEntries());
+ 		nfp_mm.push_back(S->region[reg][HighPt].mm.nfp_pt->GetEntries());
+ 		nff_mm.push_back(S->region[reg][HighPt].mm.nff_pt->GetEntries());
+ 
+ 		npp_em.push_back(S->region[reg][HighPt].em.npp_pt->GetEntries());
+ 		npf_em.push_back(S->region[reg][HighPt].em.npf_pt->GetEntries());
+ 		nfp_em.push_back(S->region[reg][HighPt].em.nfp_pt->GetEntries());
+ 		nff_em.push_back(S->region[reg][HighPt].em.nff_pt->GetEntries());
+ 
+ 		npp_ee.push_back(S->region[reg][HighPt].ee.npp_pt->GetEntries());
+ 		npf_ee.push_back(S->region[reg][HighPt].ee.npf_pt->GetEntries());
+ 		nfp_ee.push_back(S->region[reg][HighPt].ee.nfp_pt->GetEntries());
+ 		nff_ee.push_back(S->region[reg][HighPt].ee.nff_pt->GetEntries());
+ 
+ 		npp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pp_pt->GetEntries());
+ 		npf_tt_mm.push_back(S->region[reg][HighPt].mm.nt2pf_pt->GetEntries());
+ 		nfp_tt_mm.push_back(S->region[reg][HighPt].mm.nt2fp_pt->GetEntries());
+ 		nff_tt_mm.push_back(S->region[reg][HighPt].mm.nt2ff_pt->GetEntries());
+ 
+ 		npp_tt_em.push_back(S->region[reg][HighPt].em.nt2pp_pt->GetEntries());
+ 		npf_tt_em.push_back(S->region[reg][HighPt].em.nt2pf_pt->GetEntries());
+ 		nfp_tt_em.push_back(S->region[reg][HighPt].em.nt2fp_pt->GetEntries());
+ 		nff_tt_em.push_back(S->region[reg][HighPt].em.nt2ff_pt->GetEntries());
+ 
+ 		npp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pp_pt->GetEntries());
+ 		npf_tt_ee.push_back(S->region[reg][HighPt].ee.nt2pf_pt->GetEntries());
+ 		nfp_tt_ee.push_back(S->region[reg][HighPt].ee.nt2fp_pt->GetEntries());
+ 		nff_tt_ee.push_back(S->region[reg][HighPt].ee.nt2ff_pt->GetEntries());
+ 		
+ 		ntt_os_BB_em.push_back(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()); // ele in barrel
+ 		ntt_os_EE_em.push_back(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()); // ele in endcal
+ 		ntt_os_BB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()); // both in barrel
+ 		ntt_os_EE_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()); // both in endcal
+ 		ntt_os_EB_ee.push_back(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()); // one barrel, one endcap
+ 		
+ 		ntt_os_BB_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_BB_pt->GetEntries()));
+ 		ntt_os_EE_em_e1.push_back(S->getError(S->region[reg][HighPt].em.nt20_OS_EE_pt->GetEntries()));
+ 		ntt_os_BB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_BB_pt->GetEntries()));
+ 		ntt_os_EE_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EE_pt->GetEntries()));
+ 		ntt_os_EB_ee_e1.push_back(S->getError(S->region[reg][HighPt].ee.nt20_OS_EB_pt->GetEntries()));
+ 		
+ 		npp_tt_cm_ee.push_back(scale*S->region[reg][HighPt].ee.nt2pp_cm_pt->GetEntries());
+ 		npp_cm_ee   .push_back(scale*S->region[reg][HighPt].ee.npp_cm_pt->GetEntries());
+ 		npp_tt_cm_em.push_back(scale*S->region[reg][HighPt].em.nt2pp_cm_pt->GetEntries());
+ 		npp_cm_em   .push_back(scale*S->region[reg][HighPt].em.npp_cm_pt->GetEntries());
+ 	}
+ 
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	// PREDICTIONS ////////////////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	FakeRatios *FR = new FakeRatios();
+ 	FR->setIsMC(true);
+ 	FR->setNToyMCs(100);
+ 	FR->setAddESyst(0.0);
+ 
+ 	FR->setMFRatio(mf, mf_e); // set error to pure statistical of ratio
+ 	FR->setEFRatio(ef, ef_e);
+ 	FR->setMPRatio(mp, mp_e);
+ 	FR->setEPRatio(ep, ep_e);
+ 	
+ 	vector<float> npp_pred_mm,    npf_pred_mm,    nff_pred_mm;
+ 	vector<float> npp_pred_mm_e1, npf_pred_mm_e1, nff_pred_mm_e1;
+ 	vector<float> npp_pred_ee,    npf_pred_ee,    nff_pred_ee;
+ 	vector<float> npp_pred_ee_e1, npf_pred_ee_e1, nff_pred_ee_e1;
+ 	vector<float> npp_pred_em,    npf_pred_em,    nfp_pred_em,    nff_pred_em;
+ 	vector<float> npp_pred_em_e1, npf_pred_em_e1, nfp_pred_em_e1, nff_pred_em_e1;
+ 
+ 	vector<float> nF_pred_mm_e1, nF_pred_em_e1, nF_pred_ee_e1; // combined stat errors on fakes
+ 
+ 	for(size_t i = 0; i < nsamples; ++i){
+ 		FR->setMMNtl(ntt_mm[i], ntl_mm[i], nll_mm[i]);
+ 		FR->setEENtl(ntt_ee[i], ntl_ee[i], nll_ee[i]);
+ 		FR->setEMNtl(ntt_em[i], ntl_em[i], nlt_em[i], nll_em[i]);
+ 
+ 		Sample *S = fSamples[samples[i]];
+ 		FR->setNGen(S->ngen);
+ 
+ 		//// Differential Ratios
+ 		npp_pred_mm.push_back(S->numbers[reg][Muon].npp);
+ 		npf_pred_mm.push_back(S->numbers[reg][Muon].npf + S->numbers[reg][Muon].nfp);
+ 		nff_pred_mm.push_back(S->numbers[reg][Muon].nff);
+ 		npp_pred_ee.push_back(S->numbers[reg][Elec].npp);
+ 		npf_pred_ee.push_back(S->numbers[reg][Elec].npf + S->numbers[reg][Elec].nfp);
+ 		nff_pred_ee.push_back(S->numbers[reg][Elec].nff);
+ 		npp_pred_em.push_back(S->numbers[reg][ElMu].npp);
+ 		npf_pred_em.push_back(S->numbers[reg][ElMu].npf);
+ 		nfp_pred_em.push_back(S->numbers[reg][ElMu].nfp);
+ 		nff_pred_em.push_back(S->numbers[reg][ElMu].nff);
+ 		
+ 		npp_pred_mm_e1.push_back(FR->getMMNppEStat());
+ 		npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
+ 		nff_pred_mm_e1.push_back(FR->getMMNffEStat());
+ 		nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
+ 		
+ 		npp_pred_ee_e1.push_back(FR->getEENppEStat());
+ 		npf_pred_ee_e1.push_back(FR->getEENpfEStat());
+ 		nff_pred_ee_e1.push_back(FR->getEENffEStat());
+ 		nF_pred_ee_e1 .push_back(FR->getEETotEStat());
+ 		
+ 		npp_pred_em_e1.push_back(FR->getEMNppEStat());
+ 		npf_pred_em_e1.push_back(FR->getEMNpfEStat());
+ 		nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
+ 		nff_pred_em_e1.push_back(FR->getEMNffEStat());
+ 		nF_pred_em_e1 .push_back(FR->getEMTotEStat());
+ 
+ 		//// Flat Ratios
+ 		// npp_pred_mm   .push_back(FR->getMMNpp());
+ 		// npp_pred_mm_e1.push_back(FR->getMMNppEStat());
+ 		// npf_pred_mm   .push_back(FR->getMMNpf());
+ 		// npf_pred_mm_e1.push_back(FR->getMMNpfEStat());
+ 		// nff_pred_mm   .push_back(FR->getMMNff());
+ 		// nff_pred_mm_e1.push_back(FR->getMMNffEStat());
+ 		// nF_pred_mm_e1 .push_back(FR->getMMTotEStat());
+ 		// 
+ 		// npp_pred_ee   .push_back(FR->getEENpp());
+ 		// npp_pred_ee_e1.push_back(FR->getEENppEStat());
+ 		// npf_pred_ee   .push_back(FR->getEENpf());
+ 		// npf_pred_ee_e1.push_back(FR->getEENpfEStat());
+ 		// nff_pred_ee   .push_back(FR->getEENff());
+ 		// nff_pred_ee_e1.push_back(FR->getEENffEStat());
+ 		// nF_pred_ee_e1 .push_back(FR->getEETotEStat());
+ 		// 
+ 		// npp_pred_em   .push_back(FR->getEMNpp());
+ 		// npp_pred_em_e1.push_back(FR->getEMNppEStat());
+ 		// npf_pred_em   .push_back(FR->getEMNpf());
+ 		// npf_pred_em_e1.push_back(FR->getEMNpfEStat());
+ 		// nfp_pred_em   .push_back(FR->getEMNfp());
+ 		// nfp_pred_em_e1.push_back(FR->getEMNfpEStat());
+ 		// nff_pred_em   .push_back(FR->getEMNff());
+ 		// nff_pred_em_e1.push_back(FR->getEMNffEStat());
+ 		// nF_pred_em_e1 .push_back(FR->getEMTotEStat());
+ 	}
+ 	
+ 	// Charge MisID Predictions
+ 	// Abbreviations
+ 	float fb  = gEChMisIDB;
+ 	float fbE = gEChMisIDB_E;
+ 	float fe  = gEChMisIDE;
+ 	float feE = gEChMisIDE_E;
+ 	
+ 	vector<float> ntt_cm_ee, ntt_cm_em;
+ 	vector<float> ntt_cm_ee_e1, ntt_cm_em_e1; // squared errors, includes stat errors on yields and errors on probabilities
+ 	for(size_t i = 0; i < nsamples; ++i){
+ 		Sample *S = fSamples[samples[i]];
+ 		ntt_cm_ee.push_back(2*fb*ntt_os_BB_ee[i] + 2*fe*ntt_os_EE_ee[i] + (fb+fe)*ntt_os_EB_ee[i]);
+ 		ntt_cm_ee_e1.push_back((4*fb*fb* S->getError(ntt_os_BB_ee[i])) + (4*fe*fe*S->getError(ntt_os_EE_ee[i])) + (fb+fe)*(fb+fe)*S->getError(ntt_os_EB_ee[i])
+ 		    + (4*ntt_os_BB_ee[i]*ntt_os_BB_ee[i]*fbE*fbE) + (4*ntt_os_EE_ee[i]*ntt_os_EE_ee[i]*feE*feE) + (fbE*fbE+feE*feE)*ntt_os_EB_ee[i]*ntt_os_EB_ee[i]);
+ 
+ 		ntt_cm_em.push_back(  fb*ntt_os_BB_em[i] +   fe*ntt_os_EE_em[i]);
+ 		ntt_cm_em_e1.push_back(fb*fb*S->getError(ntt_os_BB_em[i]) + fe*fe*S->getError(ntt_os_EE_em[i]) 
+ 		    + ntt_os_BB_em[i]*ntt_os_BB_em[i] * fbE*fbE + ntt_os_EE_em[i]*ntt_os_EE_em[i] * feE*feE);
+ 	}
+ 
+ 	// Sums
+ 	float ntt_sum_mm(0.), ntl_sum_mm(0.), nll_sum_mm(0.);
+ 	float ntt_sum_em(0.), ntl_sum_em(0.), nlt_sum_em(0.), nll_sum_em(0.);
+ 	float ntt_sum_ee(0.), ntl_sum_ee(0.), nll_sum_ee(0.);
+ 
+ 	float ntt_sum_mm_e1(0.), ntt_sum_em_e1(0.), ntt_sum_ee_e1(0.);
+ 
+ 	float npp_sum_mm(0.), npf_sum_mm(0.), nff_sum_mm(0.);
+ 	float npp_sum_em(0.), npf_sum_em(0.), nfp_sum_em(0.), nff_sum_em(0.);
+ 	float npp_sum_ee(0.), npf_sum_ee(0.), nff_sum_ee(0.);
+ 
+ 	float npp_pred_sum_mm(0.), npf_pred_sum_mm(0.), nff_pred_sum_mm(0.);
+ 	float npp_pred_sum_em(0.), npf_pred_sum_em(0.), nfp_pred_sum_em(0.), nff_pred_sum_em(0.);
+ 	float npp_pred_sum_ee(0.), npf_pred_sum_ee(0.), nff_pred_sum_ee(0.);
+ 
+ 	float ntt_cm_sum_ee(0.), ntt_cm_sum_em(0.);
+ 	float ntt_cm_sum_ee_e1(0.), ntt_cm_sum_em_e1(0.);
+ 
+ 	float npp_cm_sum_ee(0.),    npp_cm_sum_em(0.);
+ 	float npp_tt_cm_sum_ee(0.), npp_tt_cm_sum_em(0.);
+ 
+ 	///////////////////////////////////////////
+ 	// Rare SM
+ 	float ntt_rare_mm(0.), ntt_rare_em(0.), ntt_rare_ee(0.);
+ 	float ntt_rare_mm_e1(0.), ntt_rare_em_e1(0.), ntt_rare_ee_e1(0.); // squared stat errors
+ 	for(size_t i = 0; i < fMCRareSM.size(); ++i){
+ 		Sample *S = fSamples[fMCRareSM[i]];
+ 		float scale = fLumiNorm/S->getLumi();
+ 		ntt_rare_mm += scale*S->numbers[reg][Muon].nt2;
+ 		ntt_rare_em += scale*S->numbers[reg][ElMu].nt2;
+ 		ntt_rare_ee += scale*S->numbers[reg][Elec].nt2;
+ 		ntt_rare_mm_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].mm.nt20_pt->GetEntries()),2);
+ 		ntt_rare_em_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
+ 		ntt_rare_ee_e1 += scale*scale*pow(S->getError(S->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
+ 	}
+ 
+ 	///////////////////////////////////////////
+ 	// WZ production
+ 	float wzscale = fLumiNorm/fSamples[WZ]->getLumi();
+ 	float ntt_wz_mm = wzscale*fSamples[WZ]->numbers[reg][Muon].nt2;
+ 	float ntt_wz_em = wzscale*fSamples[WZ]->numbers[reg][ElMu].nt2;
+ 	float ntt_wz_ee = wzscale*fSamples[WZ]->numbers[reg][Elec].nt2;
+ 
+ 	float ntt_wz_mm_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].mm.nt20_pt->GetEntries()),2); // for stat error take actual entries, not pileup weighted integral...
+ 	float ntt_wz_em_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].em.nt20_pt->GetEntries()),2);
+ 	float ntt_wz_ee_e1 = wzscale*wzscale*pow(fSamples[WZ]->getError(fSamples[WZ]->region[reg][HighPt].ee.nt20_pt->GetEntries()),2);
+ 
+ 	// Squared errors
+ 	float npp_pred_sum_mm_e1(0.), npf_pred_sum_mm_e1(0.), nff_pred_sum_mm_e1(0.);
+ 	float npp_pred_sum_em_e1(0.), npf_pred_sum_em_e1(0.), nfp_pred_sum_em_e1(0.), nff_pred_sum_em_e1(0.);
+ 	float npp_pred_sum_ee_e1(0.), npf_pred_sum_ee_e1(0.), nff_pred_sum_ee_e1(0.);
+ 
+ 	// Combined stat. errors
+ 	float nF_pred_sum_mm_e1(0.), nF_pred_sum_em_e1(0.), nF_pred_sum_ee_e1(0.);
+ 
+ 	for(size_t i = 0; i < nsamples; ++i){
+ 		ntt_sum_mm         += scales[i] * ntt_mm[i];
+ 		ntl_sum_mm         += scales[i] * ntl_mm[i];
+ 		nll_sum_mm         += scales[i] * nll_mm[i];
+ 		npp_sum_mm         += scales[i] * npp_mm[i];
+ 		npf_sum_mm         += scales[i] * (npf_mm[i]+nfp_mm[i]);
+ 		nff_sum_mm         += scales[i] * nff_mm[i];
+ 		npp_pred_sum_mm    += scales[i] * npp_pred_mm[i];
+ 		npf_pred_sum_mm    += scales[i] * npf_pred_mm[i];
+ 		nff_pred_sum_mm    += scales[i] * nff_pred_mm[i];
+ 		npp_pred_sum_mm_e1 += scales[i]*scales[i] * npp_pred_mm_e1[i]*npp_pred_mm_e1[i];
+ 		npf_pred_sum_mm_e1 += scales[i]*scales[i] * npf_pred_mm_e1[i]*npf_pred_mm_e1[i];
+ 		nff_pred_sum_mm_e1 += scales[i]*scales[i] * nff_pred_mm_e1[i]*nff_pred_mm_e1[i];
+ 		nF_pred_sum_mm_e1  += scales[i]*scales[i] * nF_pred_mm_e1[i]*nF_pred_mm_e1[i];
+ 
+ 		ntt_sum_ee         += scales[i] * ntt_ee[i];
+ 		ntl_sum_ee         += scales[i] * ntl_ee[i];
+ 		nll_sum_ee         += scales[i] * nll_ee[i];
+ 		npp_sum_ee         += scales[i] * npp_ee[i];
+ 		npf_sum_ee         += scales[i] * (npf_ee[i]+nfp_ee[i]);
+ 		nff_sum_ee         += scales[i] * nff_ee[i];
+ 		npp_pred_sum_ee    += scales[i] * npp_pred_ee[i];
+ 		npf_pred_sum_ee    += scales[i] * npf_pred_ee[i];
+ 		nff_pred_sum_ee    += scales[i] * nff_pred_ee[i];
+ 		npp_pred_sum_ee_e1 += scales[i]*scales[i] * npp_pred_ee_e1[i]*npp_pred_ee_e1[i];
+ 		npf_pred_sum_ee_e1 += scales[i]*scales[i] * npf_pred_ee_e1[i]*npf_pred_ee_e1[i];
+ 		nff_pred_sum_ee_e1 += scales[i]*scales[i] * nff_pred_ee_e1[i]*nff_pred_ee_e1[i];
+ 		nF_pred_sum_ee_e1  += scales[i]*scales[i] * nF_pred_ee_e1[i]*nF_pred_ee_e1[i];
+ 
+ 		ntt_sum_em         += scales[i] * ntt_em[i];
+ 		ntl_sum_em         += scales[i] * ntl_em[i];
+ 		nlt_sum_em         += scales[i] * nlt_em[i];
+ 		nll_sum_em         += scales[i] * nll_em[i];
+ 		npp_sum_em         += scales[i] * npp_em[i];
+ 		npf_sum_em         += scales[i] * npf_em[i];
+ 		nfp_sum_em         += scales[i] * nfp_em[i];
+ 		nff_sum_em         += scales[i] * nff_em[i];
+ 		npp_pred_sum_em    += scales[i] * npp_pred_em[i];
+ 		npf_pred_sum_em    += scales[i] * npf_pred_em[i];
+ 		nfp_pred_sum_em    += scales[i] * nfp_pred_em[i];
+ 		nff_pred_sum_em    += scales[i] * nff_pred_em[i];
+ 		npp_pred_sum_em_e1 += scales[i]*scales[i] * npp_pred_em_e1[i]*npp_pred_em_e1[i];
+ 		npf_pred_sum_em_e1 += scales[i]*scales[i] * npf_pred_em_e1[i]*npf_pred_em_e1[i];
+ 		nfp_pred_sum_em_e1 += scales[i]*scales[i] * nfp_pred_em_e1[i]*nfp_pred_em_e1[i];
+ 		nff_pred_sum_em_e1 += scales[i]*scales[i] * nff_pred_em_e1[i]*nff_pred_em_e1[i];
+ 		nF_pred_sum_em_e1  += scales[i]*scales[i] * nF_pred_em_e1[i]*nF_pred_em_e1[i];
+ 		
+ 		ntt_cm_sum_ee    += scales[i] * ntt_cm_ee[i];
+ 		ntt_cm_sum_em    += scales[i] * ntt_cm_em[i];
+ 
+ 		ntt_cm_sum_ee_e1 += scales[i]*scales[i] * ntt_cm_ee_e1[i];
+ 		ntt_cm_sum_em_e1 += scales[i]*scales[i] * ntt_cm_em_e1[i];
+ 
+ 		npp_cm_sum_ee    += scales[i] * npp_cm_ee[i];
+ 		npp_cm_sum_em    += scales[i] * npp_cm_em[i];
+ 		npp_tt_cm_sum_ee += scales[i] * npp_tt_cm_ee[i];
+ 		npp_tt_cm_sum_em += scales[i] * npp_tt_cm_em[i];
+ 		
+ 		ntt_sum_mm_e1    += scales[i]*scales[i] * ntt_mm_e1[i];
+ 		ntt_sum_em_e1    += scales[i]*scales[i] * ntt_em_e1[i];
+ 		ntt_sum_ee_e1    += scales[i]*scales[i] * ntt_ee_e1[i];
+ 	}
+ 
+ 
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	// PRINTOUT ///////////////////////////////////////////////////////////////////////
+ 	///////////////////////////////////////////////////////////////////////////////////
+ 	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << "         RATIOS  ||    Mu-fRatio     |    Mu-pRatio     ||    El-fRatio     |    El-pRatio     ||" << endl;
+ 	// OUT << "-------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "           MC    ||";
+ 	// OUT << setw(7)  << setprecision(2) << mf << " ± " << setw(7) << setprecision(2) << mf_e << " |";
+ 	// OUT << setw(7)  << setprecision(2) << mp << " ± " << setw(7) << setprecision(2) << mp_e << " ||";
+ 	// OUT << setw(7)  << setprecision(2) << ef << " ± " << setw(7) << setprecision(2) << ef_e << " |";
+ 	// OUT << setw(7)  << setprecision(2) << ep << " ± " << setw(7) << setprecision(2) << ep_e << " ||";
+ 	// OUT << endl;
+ 	// OUT << "-------------------------------------------------------------------------------------------------" << endl << endl;
+ 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// OUT << "          YIELDS ||   Ntt   |   Ntl   |   Nll   ||   Ntt   |   Ntl   |   Nlt   |   Nll   ||   Ntt   |   Ntl   |   Nll   ||" << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << names[i] << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_mm[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nlt_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_em[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntt_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*ntl_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nll_ee[i]) << " || ";
+ 	// 	OUT << endl;
+ 	// }	
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Sum"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ntl_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nll_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ntl_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nlt_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nll_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ntl_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nll_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << setw(16) << "Channels sum"  << " || ";
+ 	// OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
+ 	// ntt_sum_mm+ntl_sum_mm+nll_sum_mm, ntt_sum_em+ntl_sum_em+nlt_sum_em+nll_sum_em, ntt_sum_ee+ntl_sum_ee+nll_sum_ee) << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << endl;
+ 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// OUT << "           TRUTH ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << names[i] << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_mm[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_em[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_ee[i]+nfp_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_ee[i]) << " || ";
+ 	// 	OUT << endl;
+ 	// }
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Sum"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nfp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << setw(16) << "Channels sum"  << " || ";
+ 	// OUT << Form("                     %6.3f ||                               %6.3f ||                      %6.3f || ",
+ 	// npp_sum_mm+npf_sum_mm+nff_sum_mm, npp_sum_em+npf_sum_em+nfp_sum_em+nff_sum_em, npp_sum_ee+npf_sum_ee+nff_sum_ee) << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << endl;
+ 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// OUT << "     TRUTH IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << names[i] << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mp*mp*scales[i]*npp_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mp*mf*scales[i]*(npf_mm[i]+nfp_mm[i])) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mf*mf*scales[i]*nff_mm[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mp*ep*scales[i]*npp_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mp*ef*scales[i]*npf_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mf*ep*scales[i]*nfp_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", mf*ef*scales[i]*nff_em[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", ep*ep*scales[i]*npp_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", ep*ef*scales[i]*(npf_ee[i]+nfp_ee[i])) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", ef*ef*scales[i]*nff_ee[i]) << " || ";
+ 	// 	OUT << endl;
+ 	// }
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Npf Sum"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << endl;
+ 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << names[i] << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_mm[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_mm[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nfp_pred_em[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_em[i]) << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npp_pred_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*npf_pred_ee[i]) << " | ";
+ 	// 	OUT << setw(7)  << Form("%6.3f", scales[i]*nff_pred_ee[i]) << " || ";
+ 	// 	OUT << endl;
+ 	// }
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Pred Sum"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << endl;
+ 	// 
+ 	// OUT << "=========================================================" << endl;
+ 	// OUT << "                 ||       E/Mu      ||       E/E       ||" << endl;
+ 	// OUT << "    CHARGE MISID ||  Pred  |  Truth ||  Pred  |  Truth ||" << endl;
+ 	// OUT << "---------------------------------------------------------" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << names[i] << " || ";
+ 	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_em[i], scales[i]*npp_tt_cm_em[i]);
+ 	// 	OUT << setw(7)  << Form("%6.3f | %6.3f || ", scales[i]*ntt_cm_ee[i], scales[i]*npp_tt_cm_ee[i]);
+ 	// 	OUT << endl;
+ 	// }	
+ 	// OUT << "---------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Sum"  << " || ";
+ 	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_em, npp_tt_cm_sum_em);
+ 	// OUT << setw(7)  << Form("%6.3f | %6.3f || ", ntt_cm_sum_ee, npp_tt_cm_sum_ee) << endl;
+ 	// OUT << "=========================================================" << endl;
+ 	// OUT << endl;
+ 
+ 	OUT << "===================================================================================================" << endl;
+ 	OUT << "                 ||       Mu/Mu       |       E/Mu        |        E/E        |        Sum        |" << endl;
+ 	OUT << "---------------------------------------------------------------------------------------------------" << endl;
+ 	float fakesum = npf_pred_sum_mm+npf_pred_sum_em+nfp_pred_sum_em+npf_pred_sum_ee+nff_pred_sum_mm+nff_pred_sum_em+nff_pred_sum_ee;
+ 	float fakesum_e1 = nF_pred_sum_mm_e1+nF_pred_sum_em_e1+nF_pred_sum_ee_e1;
+ 	OUT << Form(" Fakes           || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	npf_pred_sum_mm+nff_pred_sum_mm,                 sqrt(nF_pred_sum_mm_e1),
+ 	npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em, sqrt(nF_pred_sum_em_e1),
+ 	npf_pred_sum_ee+nff_pred_sum_ee,                 sqrt(nF_pred_sum_ee_e1),
+ 	fakesum, sqrt(fakesum_e1)) << endl;
+ 	OUT << Form(" Charge MisID    ||                   & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	ntt_cm_sum_em,               sqrt(ntt_cm_sum_em_e1),
+ 	ntt_cm_sum_ee,               sqrt(ntt_cm_sum_ee_e1),
+ 	ntt_cm_sum_ee+ntt_cm_sum_em, sqrt(ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)) << endl;
+ 	OUT << Form(" Irreducible     || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	ntt_rare_mm,                         sqrt(ntt_rare_mm_e1),
+ 	ntt_rare_em,                         sqrt(ntt_rare_em_e1),
+ 	ntt_rare_ee,                         sqrt(ntt_rare_ee_e1),
+ 	ntt_rare_mm+ntt_rare_em+ntt_rare_ee, sqrt(ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) << endl;
+ 	OUT << Form(" WZ Production   || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	ntt_wz_mm,                     sqrt(ntt_wz_mm_e1),
+ 	ntt_wz_em,                     sqrt(ntt_wz_em_e1),
+ 	ntt_wz_ee,                     sqrt(ntt_wz_ee_e1),
+ 	ntt_wz_mm+ntt_wz_em+ntt_wz_ee, sqrt(ntt_wz_mm_e1+ntt_wz_em_e1+ntt_wz_ee_e1)) << endl;
+ 
+ 	float tot_bg_mm = npf_pred_sum_mm                +nff_pred_sum_mm              +ntt_rare_mm + ntt_wz_mm;
+ 	float tot_bg_em = npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em+ntt_cm_sum_em+ntt_rare_em + ntt_wz_em;
+ 	float tot_bg_ee = npf_pred_sum_ee                +nff_pred_sum_ee+ntt_cm_sum_ee+ntt_rare_ee + ntt_wz_ee;
+ 	float tot_bg = tot_bg_mm + tot_bg_em + tot_bg_ee;
+ 	float tot_bg_mm_e1 = nF_pred_sum_mm_e1                    + ntt_rare_mm_e1 + ntt_wz_mm_e1;
+ 	float tot_bg_em_e1 = nF_pred_sum_em_e1 + ntt_cm_sum_em_e1 + ntt_rare_em_e1 + ntt_wz_em_e1;
+ 	float tot_bg_ee_e1 = nF_pred_sum_ee_e1 + ntt_cm_sum_ee_e1 + ntt_rare_ee_e1 + ntt_wz_ee_e1;
+ 	float tot_bg_e1    = tot_bg_mm_e1 + tot_bg_em_e1 + tot_bg_ee_e1;
+ 	float ntt_sum    = ntt_sum_mm+ntt_sum_em+ntt_sum_ee;
+ 	float ntt_sum_e1 = ntt_sum_mm_e1+ntt_sum_em_e1+ntt_sum_ee_e1;
+ 	OUT << Form(" Total Pred.     || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	tot_bg_mm, sqrt(tot_bg_mm_e1),
+ 	tot_bg_em, sqrt(tot_bg_em_e1),
+ 	tot_bg_ee, sqrt(tot_bg_ee_e1),
+ 	tot_bg,    sqrt(tot_bg_e1) ) << endl;
+ 	OUT << Form(" Observed        || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	ntt_sum_mm, sqrt(ntt_sum_mm_e1),
+ 	ntt_sum_em, sqrt(ntt_sum_em_e1),
+ 	ntt_sum_ee, sqrt(ntt_sum_ee_e1),
+ 	ntt_sum,    sqrt(ntt_sum_e1)) << endl;
+ 	OUT << Form(" Pred./Obs.      || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	tot_bg_mm/ntt_sum_mm,
+ 	sqrt(nF_pred_sum_mm_e1                  +  ntt_rare_mm_e1 * pow(((ntt_sum_mm-tot_bg_mm)/tot_bg_mm),2) + (tot_bg_mm_e1 - ntt_rare_mm_e1) * pow(tot_bg_mm/ntt_sum_mm,2)  )/ntt_sum_mm,
+ 	tot_bg_em/ntt_sum_em,
+ 	sqrt(nF_pred_sum_em_e1+ntt_cm_sum_em_e1 +  ntt_rare_em_e1 * pow(((ntt_sum_em-tot_bg_em)/tot_bg_em),2) + (tot_bg_em_e1 - ntt_rare_em_e1) * pow(tot_bg_em/ntt_sum_em,2)  )/ntt_sum_em,
+ 	tot_bg_ee/ntt_sum_ee,
+ 	sqrt(nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1 +  ntt_rare_ee_e1 * pow(((ntt_sum_ee-tot_bg_ee)/tot_bg_ee),2) + (tot_bg_ee_e1 - ntt_rare_ee_e1) * pow(tot_bg_ee/ntt_sum_ee,2)  )/ntt_sum_ee,
+ 	tot_bg/ntt_sum,
+ 	sqrt(fakesum_e1 + ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1 +  (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1) * pow(((ntt_sum-tot_bg)/tot_bg),2) + (tot_bg_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)) * pow(tot_bg/ntt_sum,2)  )/ntt_sum
+ 	) << endl;
+ 
+ 	OUT << Form(" Pred.-Obs./Pred || %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f & %7.2f\\pm%7.2f |",
+ 	(tot_bg_mm-ntt_sum_mm)/tot_bg_mm,
+ 	sqrt(nF_pred_sum_mm_e1*pow(ntt_sum_mm/tot_bg_mm,2) + ntt_rare_mm_e1*(pow((ntt_sum_mm-tot_bg_mm)/tot_bg_mm,2)) + ntt_sum_mm_e1 - ntt_rare_mm_e1)/tot_bg_mm,
+ 
+ 	(tot_bg_em-ntt_sum_em)/tot_bg_em,
+ 	sqrt((nF_pred_sum_em_e1+ntt_cm_sum_em_e1)*pow(ntt_sum_em/tot_bg_em,2) + ntt_rare_em_e1*(pow((ntt_sum_em-tot_bg_em)/tot_bg_em,2)) + ntt_sum_em_e1 - ntt_rare_em_e1)/tot_bg_em,
+ 
+ 	(tot_bg_ee-ntt_sum_ee)/tot_bg_ee,
+ 	sqrt((nF_pred_sum_ee_e1+ntt_cm_sum_ee_e1)*pow(ntt_sum_ee/tot_bg_ee,2) + ntt_rare_ee_e1*(pow((ntt_sum_ee-tot_bg_ee)/tot_bg_ee,2)) + ntt_sum_ee_e1 - ntt_rare_ee_e1)/tot_bg_ee,
+ 
+ 	(tot_bg-ntt_sum)/tot_bg,
+ 	sqrt((fakesum_e1+ntt_cm_sum_ee_e1+ntt_cm_sum_em_e1)*pow(ntt_sum/tot_bg,2) + (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1)*(pow((ntt_sum-tot_bg)/tot_bg,2)) + ntt_sum_e1 - (ntt_rare_mm_e1+ntt_rare_em_e1+ntt_rare_ee_e1))/tot_bg	
+ 	) << endl;
+	OUT << "===================================================================================================" << endl;
+ 	OUT << endl;
+ 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "                 ||            Mu/Mu            ||                   E/Mu                ||             E/E             ||" << endl;
+ 	// OUT << "     PRED. IN TT ||   Npp   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nfp   |   Nff   ||   Npp   |   Npf   |   Nff   ||" << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Npf Truth"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*mp*npp_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*mf*npf_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*mf*nff_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*ep*npp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mp*ef*npf_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*ep*nfp_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", mf*ef*nff_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ep*ep*npp_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ep*ef*npf_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", ef*ef*nff_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "FR Prediction"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_mm) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nfp_pred_sum_em) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_em) << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npp_pred_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee) << " | ";
+ 	// OUT << setw(7) << Form("%6.3f", nff_pred_sum_ee) << " || ";
+ 	// OUT << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << setw(16) << "Pred. Fakes"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " |                   || ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " |                             || ";
+ 	// OUT << setw(7) << Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " |                   || ";
+ 	// OUT << endl;
+ 	// OUT << setw(16) << "Pred. Ch-MID"  << " ||         |                   || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_cm_sum_em) << " |                             || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_cm_sum_ee) << " |                   || ";
+ 	// OUT << endl;
+ 	// OUT << setw(16) << "Pred. Rare SM"  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_rare_mm) << " |                   || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_rare_em) << " |                             || ";
+ 	// OUT << setw(7) << Form("%6.3f", ntt_rare_ee) << " |                   || ";
+ 	// OUT << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Total BG Pred."  << " || ";
+ 	// OUT << setw(7) << Form("%6.3f", tot_bg_mm) << " | P/O  | P-O/P |    || ";
+ 	// OUT << setw(7) << Form("%6.3f", tot_bg_em) << " | P/O  | P-O/P |              || ";
+ 	// OUT << setw(7) << Form("%6.3f", tot_bg_ee) << " | P/O  | P-O/P |    || ";
+ 	// OUT << endl;
+ 	// OUT << "--------------------------------------------------------------------------------------------------------------------------" << endl;
+ 	// OUT << setw(16) << "Observed"  << " || ";
+ 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_mm, tot_bg_mm/ntt_sum_mm, (tot_bg_mm-ntt_sum_mm)/tot_bg_mm) << "    || ";
+ 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_em, tot_bg_em/ntt_sum_em, (tot_bg_em-ntt_sum_em)/tot_bg_em) << "              || ";
+ 	// OUT << setw(7) << Form(" %6.3f | %4.2f | %5.2f |", ntt_sum_ee, tot_bg_ee/ntt_sum_ee, (tot_bg_ee-ntt_sum_ee)/tot_bg_ee) << "    || ";
+ 	// OUT << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << Form("     Comb. Fakes || %6.3f |              ||",
+ 	// npf_pred_sum_mm+nff_pred_sum_mm + 
+ 	// npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em +
+ 	// npf_pred_sum_ee+nff_pred_sum_ee) << endl;
+ 	// OUT << Form("    Comb. Ch-MID || %6.3f |              ||", ntt_cm_sum_em+ntt_cm_sum_ee) << endl;
+ 	// OUT << Form("   Comb. Rare SM || %6.3f |              ||", ntt_rare_mm+ntt_rare_em+ntt_rare_ee) << endl;
+ 	// OUT << "---------------------------------------------" << endl;
+ 	// OUT << Form("  Total BG Comb. || %6.3f | P/O  | P-O/P ||", tot_bg) << endl;
+ 	// OUT << "---------------------------------------------" << endl;
+ 	// OUT << Form("        Observed || %6.3f | %4.2f | %5.2f ||", ntt_sum, tot_bg/ntt_sum, (tot_bg-ntt_sum)/tot_bg) << endl;
+ 	// OUT << "=============================================" << endl;
+ 	// OUT << endl;
+ 
+ 	// OUT << "===========================================================================================================================================" << endl;
+ 	// OUT << "  All predictions (Npp / Npf / (Nfp) / Nff):                                                                                              |" << endl;
+ 	// for(size_t i = 0; i < nsamples; ++i){
+ 	// 	OUT << setw(16) << left << names[i];
+ 	// 	OUT << Form("  MM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
+ 	// 	npp_pred_mm[i], npp_pred_mm_e1[i], npf_pred_mm[i], npf_pred_mm_e1[i], nff_pred_mm[i], nff_pred_mm_e1[i]) << endl;
+ 	// 	OUT << " scale = " << setw(7) << setprecision(2) << scales[i];
+ 	// 	OUT << Form("  EM || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |",
+ 	// 	npp_pred_em[i], npp_pred_em_e1[i], npf_pred_em[i], npf_pred_em_e1[i], nfp_pred_em[i], nfp_pred_em_e1[i], nff_pred_mm[i], nff_pred_em_e1[i]) << endl;
+ 	// 	OUT << Form("                  EE || %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) | %9.3f ± %7.3f (stat) |                            |",
+ 	// 	npp_pred_ee[i], npp_pred_ee_e1[i], npf_pred_ee[i], npf_pred_ee_e1[i], nff_pred_ee[i], nff_pred_ee_e1[i]) << endl;
+ 	// }
+ 	// OUT << "===========================================================================================================================================" << endl;
+ 	// OUT << endl;
+ 	// 
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "  PREDICTIONS (in tt window)" << endl;
+ 	// OUT << "--------------------------------------------------------------" << endl;
+ 	// OUT << " Mu/Mu Channel:" << endl;
+ 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_mm_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_mm_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_mm_e1)) << " (stat)" << endl;
+ 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_mm+nff_pred_sum_mm) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_mm_e1)) << " (stat)" << endl;
+ 	// OUT << "--------------------------------------------------------------" << endl;
+ 	// OUT << " E/Mu Channel:" << endl;
+ 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_em_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_em) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_em_e1)) << " (stat)" << endl;
+ 	// OUT << "  Npf*pf:        " <<  Form("%6.3f", nfp_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nfp_pred_sum_em_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_em_e1)) << " (stat)" << endl;
+ 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_em+nfp_pred_sum_em+nff_pred_sum_em) << " ± " << Form("%6.3f", sqrt(nF_pred_sum_em_e1)) << " (stat)" << endl;
+ 	// OUT << "--------------------------------------------------------------" << endl;
+ 	// OUT << " E/E Channel:" << endl;
+ 	// OUT << "  Npp*pp:        " <<  Form("%6.3f", npp_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npp_pred_sum_ee_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nfp*fp:        " <<  Form("%6.3f", npf_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(npf_pred_sum_ee_e1)) << " (stat)" << endl;
+ 	// OUT << "  Nff*ff:        " <<  Form("%6.3f", nff_pred_sum_ee) << " ± " << Form("%6.3f", sqrt(nff_pred_sum_ee_e1)) << " (stat)" << endl;
+ 	// OUT << "  Total fakes:   " <<  Form("%6.3f", npf_pred_sum_ee+nff_pred_sum_ee) << " ±   " << Form("%6.3f", sqrt(nF_pred_sum_ee_e1)) << " (stat)" << endl;
+ 	// OUT << "==========================================================================================================================" << endl;
+ 	// OUT << "/////////////////////////////////////////////////////////////////////////////" << endl;
+ 	
+ 	OUT.close();
+ 	delete FR;
+ }
 void SSDLPlotter::makeTTbarClosure(){
 	TString filename = "TTbarClosure.txt";
 	ofstream OUT(fOutputDir + filename.Data(), ios::trunc);
@@ -10744,7 +10745,7 @@ void SSDLPlotter::printYieldsShort(float luminorm){
 	cout << setw(7) << nt00[Elec] << " || ";
 	cout << endl;
 	cout << "-------------------------------------------------------------------------------------------------------------------" << endl;
-
+	
 }
 void SSDLPlotter::printAllYieldTables(){
 	TString outputdir = Util::MakeOutputDir(fOutputDir + "YieldTables");

@@ -157,8 +157,8 @@ public:
 	// MARC void makeTTWDiffPredictions();
 	void makeDiffPredictionTTW(int);
 
-	// MARC void makeAllClosureTests();
-	// MARC void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
+        void makeAllClosureTests();
+	void makeIntMCClosure(vector<int>, TString, gRegion = Baseline);
 
 	void makeTTbarClosure();
 	// MARC void makeRelIsoTTSigPlots();
