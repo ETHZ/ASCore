@@ -3941,22 +3941,22 @@ bool SSDLDumper::isZElElEvent(int &el1, int &el2){
 	setHypLepton1(el1, Elec);
 	setHypLepton2(el2, Elec);
 
-	if(getMET() > 20.)    return false;
-	if(getNJets() < 2) return false;
+	if(getMET() > 20.)  return false;
+	if(getNJets() < 2)  return false;
 	return true;
 }
 bool SSDLDumper::isZElElChMisIdEvent(int &el1, int &el2){
   if (hasLooseElectrons(el1,el2) < 2) return false;
-  if (getMET() > 30.)             return false;
-  if (ElMT[0] > fC_maxMt_Control) return false;
-  if (!isGoodEleForChMId(el1,20)) return false;
-  if (!isGoodEleForChMId(el2,20)) return false;
+  if (!isTightElectron(el1))          return false;
+  if (!isTightElectron(el2))          return false;
+  if (getMET() > 30.)                 return false;
+  if (ElMT[0] > 25.)                  return false;
   
   TLorentzVector p1, p2;
   p1.SetPtEtaPhiM(ElPt[el1], ElEta[el1], ElPhi[el1], gMEL);
   p2.SetPtEtaPhiM(ElPt[el2], ElEta[el2], ElPhi[el2], gMEL);
   double m = (p1+p2).M();
-  if(fabs(gMZ - m) > 15.) return false;
+  if(fabs(gMZ - m) > 15.)             return false;
   
   setHypLepton1(el1, Elec);
   setHypLepton2(el2, Elec);

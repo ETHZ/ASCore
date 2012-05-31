@@ -4823,7 +4823,7 @@ void SSDLPlotter::calculateChMisIdProb(vector<int>  samples, gChMisIdReg chmid_r
       sspair_e += sspairstmp->GetBinError(1,1)   * scale;
     }
     if (chmid_reg == EB){
-      ospair   += (ospairstmp->GetBinContent(1,2) + ospairstmp->GetBinContent(1,1)) * scale;
+      ospair   += (ospairstmp->GetBinContent(1,2) + ospairstmp->GetBinContent(2,1)) * scale;
       sspair   += (sspairstmp->GetBinContent(1,2) + sspairstmp->GetBinContent(2,1)) * scale;
       ospair_e += (ospairstmp->GetBinError(1,2)   + ospairstmp->GetBinError(2,1)  ) * scale;
       sspair_e += (sspairstmp->GetBinError(1,2)   + sspairstmp->GetBinError(2,1)  ) * scale;     
@@ -4836,8 +4836,11 @@ void SSDLPlotter::calculateChMisIdProb(vector<int>  samples, gChMisIdReg chmid_r
     }
   }
   
-  chmid  = sspair / ospair;  
-  chmide = TMath::Sqrt(sspair_e*sspair_e + chmid*chmid*ospair_e*ospair_e) / ospair;
+  ratioWithBinomErrors(sspair, ospair, chmid, chmide);
+  
+  // Divide to get the per-electron probability...
+  chmid  = chmid  / 2.;
+  chmide = chmide / 2.;
   
   return;
 }
@@ -5456,13 +5459,13 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
 	calculateChMisIdProb(fEGData, EE, fee, feeE);
 
   	// Simple error propagation assuming error on number of events is sqrt(N)
- 	nt2_ee_chmid    = fbb*nt2_ee_BB_os + fee*nt2_ee_EE_os + feb*nt2_ee_EB_os;
- 	nt2_ee_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_ee_BB_os) + (fee*fee*FR->getEStat2(nt2_ee_EE_os)) + feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-	nt2_ee_chmid_e2 = sqrt( (nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + (febE*febE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+ 	nt2_ee_chmid    = 2*fbb*nt2_ee_BB_os                           + 2*fee*nt2_ee_EE_os                      + 2*feb*nt2_ee_EB_os;
+ 	nt2_ee_chmid_e1 = sqrt( 4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)  + 4*fee*fee*FR->getEStat2(nt2_ee_EE_os)   + 4*feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+	nt2_ee_chmid_e2 = sqrt( nt2_ee_BB_os*nt2_ee_BB_os*4*fbbE*fbbE  + 4*feeE*feeE*nt2_ee_EE_os*nt2_ee_EE_os   + 4*febE*febE*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
 	
-        nt2_em_chmid    = 0.5*(fbb+feb)*nt2_em_BB_os + 0.5*(fee+feb)*nt2_em_EE_os;
-        nt2_em_chmid_e1 = sqrt( 0.5*(fbb+feb)*FR->getEStat2(nt2_em_BB_os) + 0.5*(fee+feb)*FR->getEStat2(nt2_em_EE_os) );
-        nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * 0.025*(fbbE*fbbE+febE*febE) + nt2_em_EE_os*nt2_em_EE_os * 0.025*(fbbE*fbbE+febE*febE) );
+        nt2_em_chmid    = fbb*nt2_em_BB_os + fee*nt2_em_EE_os;
+        nt2_em_chmid_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+        nt2_em_chmid_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os*fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os*feeE*feeE );
  
  	///////////////////////////////////////////////////////////////////////////////////
  	// PRINTOUT ///////////////////////////////////////////////////////////////////////
@@ -5473,7 +5476,7 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << "                  ||";
  	OUT << setw(8) << setprecision(2) << fbb  << " +/- " << setw(8) << setprecision(2) << fbbE  << " |";
  	OUT << setw(8) << setprecision(2) << feb  << " +/- " << setw(8) << setprecision(2) << febE  << " |";
- 	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << " ||";
+ 	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << "  ||";
  	OUT << endl;
  	OUT << "--------------------------------------------------------------" << endl << endl;
  
