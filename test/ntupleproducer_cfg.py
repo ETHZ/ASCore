@@ -50,9 +50,12 @@ options.register ('perEvtMvaWeights',
                   "Input weights for vertexing perEvt MVA")
 # get and parse the command line arguments
 # set NTupleProducer defaults (override the output, files and maxEvents parameter)
-options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
-#options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
-options.maxEvents = -1# If it is different from -1, string "_numEventXX" will be added to the output file name 
+#options.files= 'file:////shome/mdunser/files/isoSynchFile_DoubleMu191700.root'
+options.files= 'file:////shome/mdunser/files/DoubleElectron_Run2012_synchFile.root'
+#options.files= 'file:////shome/mdunser/files/WJets8TeV.root'
+#options.files='file:////scratch/fronga/RelValTTbarLepton_EE4E6727-2C7A-E111-A4E8-002354EF3BCE.root'
+
+options.maxEvents = 100# If it is different from -1, string "_numEventXX" will be added to the output file name 
 # Now parse arguments from command line (might overwrite defaults)
 options.parseArguments()
 options.output='NTupleProducer_52X_'+options.runon+'.root'
@@ -438,6 +441,13 @@ process.tauIsoDepositPFChargedHadrons = tauIsoDepositPFChargedHadrons.clone()
 process.tauIsoDepositPFNeutralHadrons = tauIsoDepositPFNeutralHadrons.clone()
 process.tauIsoDepositPFGammas = tauIsoDepositPFGammas.clone()
 process.patTaus = patTaus.clone()
+### Remove MC matching
+process.patTaus.addGenJetMatch   = False
+process.patTaus.embedGenJetMatch = False
+process.patTaus.genJetMatch      = ''
+process.patTaus.genParticleMatch = ''
+process.patTaus.addGenMatch = False
+process.patTaus.embedGenMatch    = False
 
 process.patTaus.tauIDSources = cms.PSet(
     patTaus.tauIDSources,
@@ -463,9 +473,7 @@ process.patTaus.tauIDSources = cms.PSet(
     byMediumIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByMediumIsolationMVA"),
     byTightIsolationMVA  = cms.InputTag("hpsPFTauDiscriminationByTightIsolationMVA"),
     )
-
 process.newTaus = cms.Sequence(process.tauIsoDepositPFCandidates+process.tauIsoDepositPFChargedHadrons+process.tauIsoDepositPFNeutralHadrons+process.tauIsoDepositPFGammas+process.patTaus)
-
 #Only an obvious and loose selection
 process.selectedNewTaus = cms.EDFilter("PATTauSelector",
                                        src = cms.InputTag("patTaus"),
