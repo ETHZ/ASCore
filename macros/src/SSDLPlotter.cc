@@ -59,9 +59,9 @@ double SSDLPlotter::gEChMisIDB_E = 0.;
 double SSDLPlotter::gEChMisIDE   = 0.;
 double SSDLPlotter::gEChMisIDE_E = 0.;
 
-float SSDLPlotter::gMMTrigScale = 0.92;
-float SSDLPlotter::gEMTrigScale = 0.95;
-float SSDLPlotter::gEETrigScale = 1.00;
+float SSDLPlotter::gMMTrigScale = 0.798;
+float SSDLPlotter::gEMTrigScale = 0.888;
+float SSDLPlotter::gEETrigScale = 0.940;
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(){
