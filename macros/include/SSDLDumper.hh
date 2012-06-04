@@ -84,6 +84,7 @@ public:
 		WZ,
 		// GVJets, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, //TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		WZZ, WWG, ZZZ,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
 		EMEnr20, EMEnr30,
