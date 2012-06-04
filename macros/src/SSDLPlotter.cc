@@ -152,10 +152,12 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(WpWp);
 	// MARC fMCBG.push_back(WmWm);
 	// MARC fMCBG.push_back(WWZ);
-	// MARC fMCBG.push_back(WZZ);
-	// MARC fMCBG.push_back(WWG);
+	fMCBG.push_back(WZZ);
+	fMCBG.push_back(WWG);
 	// MARC fMCBG.push_back(WWW);
-	// MARC fMCBG.push_back(ZZZ);
+	fMCBG.push_back(ZZZ);
+	fMCBG.push_back(EMEnr20);
+	fMCBG.push_back(EMEnr30);
 	// MARC fMCBG.push_back(QCD15);
 	// MARC fMCBG.push_back(QCD30);
 	// MARC fMCBG.push_back(QCD50);
