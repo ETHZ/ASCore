@@ -81,10 +81,12 @@ public:
 		WJets,
 		DYJets,
 		// GJets40, GJets100, GJets200,
+		WZ,
 		// GVJets, WW, WZ, ZZ, 
 		TTbarW, TTbarZ, //TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
-		// QCDMuEnr10,
+		QCDMuEnr15,
+		EMEnr20, EMEnr30,
 		// QCD15, QCD30, QCD50, QCD80, QCD120, QCD170, QCD300, QCD470, QCD600, QCD800,
 		// QCD1000, QCD1400, QCD1800,
 		gNSAMPLES
