@@ -152,7 +152,7 @@ TString SSDLDumper::DiffPredYields::axis_label[SSDLDumper::gNDiffVars] = {"H_{T}
 
 //////////////////////////////////////////////////////////////////////////////////
 TString SSDLDumper::FRatioPlots::var_name[SSDLDumper::gNRatioVars] = {"NJets",  "HT", "MaxJPt", "NVertices", "ClosJetPt", "AwayJetPt", "NBJets", "MET",  "MT"};
-int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   20 ,      20 ,        10  ,        20  ,        20  ,       3 ,   10 ,   10 };
+int     SSDLDumper::FRatioPlots::nbins[SSDLDumper::gNRatioVars]    = {     7 ,   10 ,      10 ,        10  ,        10  ,        10  ,       3 ,   10 ,   10 };
 float   SSDLDumper::FRatioPlots::xmin[SSDLDumper::gNRatioVars]     = {     1.,   50.,      30.,         5. ,        30. ,        30. ,       0.,    0.,    0.};
 float   SSDLDumper::FRatioPlots::xmax[SSDLDumper::gNRatioVars]     = {     8.,  500.,     300.,        25. ,       150. ,       300. ,       3.,   50.,  100.};
 
@@ -211,7 +211,7 @@ void SSDLDumper::init(){
 	
 	setRegionCuts(); // no argument = reset to baseline
 	
-	fC_maxMet_Control = 20.;
+ 	fC_maxMet_Control = 20.;
 	fC_maxMt_Control  = 20.;
 
 	// Prevent root from adding histograms to current file
@@ -517,6 +517,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 		}
 		resetHypLeptons();
 	}
+
 	if(singleMuTrigger() && isSigSupMuEvent()){
 		if( isTightMuon(0) ){
 			S->region[reg][HighPt].mm.fntight->Fill(MuPt[0], fabs(MuEta[0]), gEventWeight);
@@ -550,6 +551,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 		}
 	}
 	resetHypLeptons();
+
 
 	// EE Channel
 	fCurrentChannel = Elec;
@@ -653,7 +655,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	}
 	
 	resetHypLeptons();
-
+	
 	// EMu Channel
 	fCurrentChannel = ElMu;
 	int mu(-1), el(-1);
@@ -1399,7 +1401,8 @@ void SSDLDumper::fillKinPlots(Sample *S){
 
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
-	setRegionCuts(Baseline);
+	//SANTI 	setRegionCuts(Baseline);
+	setRegionCuts(HT80MET0b);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MUMU CHANNEL:  //////////////////////////////////////////////////////////////////////////////////////
