@@ -241,6 +241,7 @@ public:
 	vector<int> fMCBGNoQCDNoGJetsSig;    // SM background MC samples without QCD or GJets, with signal
 	vector<int> fMCBGSig; // SM background + LM0 signal samples
 	vector<int> fMCBGMuEnr;    // SM background MC samples with Muon enriched QCD
+	vector<int> fMCBGEMEnr;    // SM background MC samples with Elec enriched QCD
 	vector<int> fMCBGMuEnrSig; // SM background + LM0 signal samples with Muon enriched QCD
 	vector<int> fMCRareSM; // Rare SM backgrounds
 	vector<int> fMuData;  // Muon data samples
