@@ -441,7 +441,10 @@ public:
 		int getType(){ // -1: undef, 0: data, 1: QCD, 2: top, 3: EWK, 4: Rare SM, 5: diboson
 			if(datamc == 0) return 0;
 			if( (sname.Contains("QCD")) ||
-			    (sname) == "MuEnr10" ) return 1;
+			    (sname) == "MuEnr15"    ||
+			    (sname) == "MuEnr10"    ||
+			    (sname) == "EMEnr20"    ||
+			    (sname) == "EMEnr30"    ) return 1;
 			if( (sname.Contains("SingleT")) ||
 			    (sname) == "TTJets" )  return 2;
 			if( (sname.Contains("DYJets")) ||

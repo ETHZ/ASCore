@@ -1437,14 +1437,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 
 	for(size_t i = 0; i < gNSels; ++i){
 		fOutputSubDir = "Isolation/Muons/";
-		hiso_data[i]->SetXTitle(convertVarName("MuIso[0]"));
+		hiso_data[i]->SetXTitle(convertVarName("MuPFIso[0]"));
 		hiso_data[i]->SetLineWidth(3);
 		hiso_data[i]->SetLineColor(kBlack);
 		hiso_data[i]->SetMarkerStyle(8);
 		hiso_data[i]->SetMarkerColor(kBlack);
 		hiso_data[i]->SetMarkerSize(1.2);
 		
-		hiso_ttbar[i]->SetXTitle(convertVarName("MuIso[0]"));
+		hiso_ttbar[i]->SetXTitle(convertVarName("MuPFIso[0]"));
 		hiso_ttbar[i]->SetLineWidth(3);
 		hiso_ttbar[i]->SetLineColor(kRed);
 		hiso_ttbar[i]->SetMarkerStyle(23);
@@ -1452,14 +1452,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_ttbar[i]->SetMarkerSize(1.3);
 		
 		for(int k = 0; k < gNMuFPtBins; ++k){
-			hiso_data_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+			hiso_data_pt[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			hiso_data_pt[i][k]->SetLineWidth(3);
 			hiso_data_pt[i][k]->SetLineColor(kBlack);
 			hiso_data_pt[i][k]->SetMarkerStyle(8);
 			hiso_data_pt[i][k]->SetMarkerColor(kBlack);
 			hiso_data_pt[i][k]->SetMarkerSize(1.2);
 
-			hiso_ttbar_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+			hiso_ttbar_pt[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			hiso_ttbar_pt[i][k]->SetLineWidth(3);
 			hiso_ttbar_pt[i][k]->SetLineColor(kRed);
 			hiso_ttbar_pt[i][k]->SetMarkerStyle(23);
@@ -1467,14 +1467,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_ttbar_pt[i][k]->SetMarkerSize(1.3);
 		}
 		for(int k = 0; k < gNNVrtxBins; ++k){
-			hiso_data_nv[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+			hiso_data_nv[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			hiso_data_nv[i][k]->SetLineWidth(3);
 			hiso_data_nv[i][k]->SetLineColor(kBlack);
 			hiso_data_nv[i][k]->SetMarkerStyle(8);
 			hiso_data_nv[i][k]->SetMarkerColor(kBlack);
 			hiso_data_nv[i][k]->SetMarkerSize(1.2);
 
-			hiso_ttbar_nv[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+			hiso_ttbar_nv[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			hiso_ttbar_nv[i][k]->SetLineWidth(3);
 			hiso_ttbar_nv[i][k]->SetLineColor(kRed);
 			hiso_ttbar_nv[i][k]->SetMarkerStyle(23);
@@ -1500,14 +1500,14 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		for(size_t j = 0; j < datasamples.size(); ++j){
 			Sample *S = fSamples[datasamples[j]];
 			hiso_data[i]->Add(S->isoplots[0].hiso[i]);
-			hiso_data[i]->SetXTitle(convertVarName("MuIso[0]"));
+			hiso_data[i]->SetXTitle(convertVarName("MuPFIso[0]"));
 			for(int k = 0; k < gNMuFPtBins; ++k){
 				hiso_data_pt[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
-				hiso_data_pt[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+				hiso_data_pt[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			}
 			for(int k = 0; k < gNNVrtxBins; ++k){
 				hiso_data_nv[i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
-				hiso_data_nv[i][k]->SetXTitle(convertVarName("MuIso[0]"));
+				hiso_data_nv[i][k]->SetXTitle(convertVarName("MuPFIso[0]"));
 			}
 		}
 
@@ -1576,7 +1576,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_mc_s[i]->Add(hiso_rare[i]);
 		hiso_mc_s[i]->Add(hiso_ttj[i]);
 		hiso_mc_s[i]->Draw("goff");
-		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 
 		for(int k = 0; k < gNMuFPtBins; ++k){
 			hiso_mc_pt_s[i][k]->Add(hiso_qcd_pt[i][k]);
@@ -1585,7 +1585,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_mc_pt_s[i][k]->Add(hiso_rare_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Add(hiso_ttj_pt[i][k]);
 			hiso_mc_pt_s[i][k]->Draw("goff");
-			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+			hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 		}
 
 		for(int k = 0; k < gNNVrtxBins; ++k){
@@ -1595,7 +1595,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 			hiso_mc_nv_s[i][k]->Add(hiso_rare_nv[i][k]);
 			hiso_mc_nv_s[i][k]->Add(hiso_ttj_nv[i][k]);
 			hiso_mc_nv_s[i][k]->Draw("goff");
-			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+			hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 		}
 		// Fill MC stacks
 		//for(size_t j = 0; j < mcsamples.size();   ++j){
@@ -1603,18 +1603,18 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		//	hiso_mc  [i]->Add(S->isoplots[0].hiso[i]);
 		//	hiso_mc_s[i]->Add(S->isoplots[0].hiso[i]);
 		//	hiso_mc_s[i]->Draw("goff");
-		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//	hiso_mc_s[i]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 		//	for(int k = 0; k < gNMuFPtBins; ++k){
 		//		hiso_mc_pt  [i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Add(S->isoplots[0].hiso_pt[i][k]);
 		//		hiso_mc_pt_s[i][k]->Draw("goff");
-		//		hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//		hiso_mc_pt_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 		//	}
 		//	for(int k = 0; k < gNNVrtxBins; ++k){
 		//		hiso_mc_nv  [i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
 		//		hiso_mc_nv_s[i][k]->Add(S->isoplots[0].hiso_nv[i][k]);
 		//		hiso_mc_nv_s[i][k]->Draw("goff");
-		//		hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuIso[0]"));
+		//		hiso_mc_nv_s[i][k]->GetXaxis()->SetTitle(convertVarName("MuPFIso[0]"));
 		//	}
 		//}
 
