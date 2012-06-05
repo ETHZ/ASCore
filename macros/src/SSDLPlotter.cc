@@ -1,4 +1,3 @@
-
 /*****************************************************************************
 *   Collection of tools for producing plots for same-sign dilepton analysis  *
 *                                                                            *
@@ -156,6 +155,10 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WWG);
 	// MARC fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
+// 	fMCBG.push_back(QCDMuEnr15);
+// 	fMCBG.push_back(EMEnr20);
+// 	fMCBG.push_back(EMEnr30);
+
 	// MARC fMCBG.push_back(QCD15);
 	// MARC fMCBG.push_back(QCD30);
 	// MARC fMCBG.push_back(QCD50);
@@ -259,6 +262,7 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGEMEnr.push_back(WWW);
 	// MARC fMCBGEMEnr.push_back(ZZZ);
 	// MARC fMCBGEMEnr.push_back(QCDEMEnr10);
+	//MARC	fMCBGMuEnr.push_back(QCDMuEnr15);
 	fMCBGEMEnr.push_back(EMEnr20);
 	fMCBGEMEnr.push_back(EMEnr30);
 
@@ -343,8 +347,8 @@ void SSDLPlotter::doAnalysis(){
 	makeMuIsolationPlots(false); // if true, loops on TTbar sample
 	makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	//	makeNT2KinPlots(false);
-	//	makeNT2KinPlots(true);
+	makeNT2KinPlots(false);
+	makeNT2KinPlots(true);
 	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
@@ -352,10 +356,10 @@ void SSDLPlotter::doAnalysis(){
 
 	makeRatioPlots(Muon);
 	makeRatioPlots(Elec);
-	// make2DRatioPlots(Muon);
-	// make2DRatioPlots(Elec);
-	// makeNTightLoosePlots(Muon);
-	// makeNTightLoosePlots(Elec);
+	make2DRatioPlots(Muon);
+	make2DRatioPlots(Elec);
+	makeNTightLoosePlots(Muon);
+	makeNTightLoosePlots(Elec);
 	
 	makeFRvsPtPlots(Muon, SigSup);
 	makeFRvsPtPlots(Elec, SigSup);
@@ -1625,7 +1629,7 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 		hiso_data[i]->SetMaximum(1.5*max);
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
-		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
+		int bin015 = hiso_data[i]->FindBin(0.1) - 1; // bins start at lower edge...
 		int bin1   = hiso_data[i]->FindBin(1.0)  - 1;
 		printf("bin 0: %3.0i bin015: %3.0i bin1: %3.0i \n", bin0, bin015, bin1);
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin1);
@@ -2154,7 +2158,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 		hiso_data[i]->SetMaximum(1.2*max);
 
 		int bin0   = hiso_data[i]->FindBin(0.0);
-		int bin015 = hiso_data[i]->FindBin(0.15) - 1; // bins start at lower edge...
+		int bin015 = hiso_data[i]->FindBin(0.09) - 1; // bins start at lower edge...
 		int bin06  = hiso_data[i]->FindBin(0.6)  - 1;
 		float ratio_data  = hiso_data[i] ->Integral(bin0, bin015) / hiso_data[i] ->Integral(bin0, bin06);
 		float ratio_mc    = hiso_mc[i]   ->Integral(bin0, bin015) / hiso_mc[i]   ->Integral(bin0, bin06);
@@ -2489,8 +2493,8 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 		fOutputSubDir = "KinematicPlots/" + selname[s];
 		if(loglin) fOutputSubDir += "/log/";
 		char cmd[100];
-	    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-	    system(cmd);
+		sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+		system(cmd);
 		
 		TH1D    *hvar_data[gNKinVars];
 
@@ -2502,7 +2506,6 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 		TH1D    *hvar_tot  [gNKinVars];
 
 		TH1D    *hvar_rat  [gNKinVars]; // ratio
-
 		THStack *hvar_mc_s[gNKinVars];
 
 		TLatex *lat = new TLatex();
@@ -2587,35 +2590,35 @@ void SSDLPlotter::makeNT2KinPlots(bool loglin){
 
 
 			// Fill MC stacks
-// 			for(size_t j = 0; j < mcsamples.size();   ++j){
-// 				Sample *S = fSamples[mcsamples[j]];
-// 				TString s_name = S->sname;
-// 				// sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
-// 				if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
-// 				if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
-// 				if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
-// 				if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
-// 				if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
-// 				if ( S->getType() == 4 &&
-// 				 (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
-// 			}
-// 			hvar_mc_s[i]->Add(hvar_ttj[i]);
-// 			hvar_mc_s[i]->Add(hvar_ewk[i]);
-// 			hvar_mc_s[i]->Add(hvar_rare[i]);
-// 			hvar_mc_s[i]->Add(hvar_db[i]);
-// 			hvar_mc_s[i]->Add(hvar_qcd[i]);
-// 			hvar_mc_s[i]->Draw("goff");
-// 			// hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
-// 			// if(intlabel) for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
-// 			// if(intlabel) for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
+			for(size_t j = 0; j < mcsamples.size();   ++j){
+			  Sample *S = fSamples[mcsamples[j]];
+			  TString s_name = S->sname;
+			  // sample type: QCD = 1 , Top = 2, EWK = 3 , Rare = 4 , DB = 5
+			  if ( S->getProc() == 11)                      hvar_qcd [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttZ
+			  if ( S->getProc() == 10)                      hvar_db  [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // ttW
+			  if ( S->getType() == 2 || S->getType() == 1 ) hvar_ttj [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // top + qcd
+			  if ( S->getType() == 3 )                      hvar_ewk [i]->Add( S->kinplots[s][HighPt].hvar[i] ); // single boson
+			  if ( S->getType() == 5)                       hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // di boson
+			  if ( S->getType() == 4 &&
+			       (S->getProc() != 10 || S->getProc() != 11) ) hvar_rare[i]->Add( S->kinplots[s][HighPt].hvar[i] ); // rare (no ttW/Z)
+ 			}
+ 			hvar_mc_s[i]->Add(hvar_ttj[i]);
+ 			hvar_mc_s[i]->Add(hvar_ewk[i]);
+ 			hvar_mc_s[i]->Add(hvar_rare[i]);
+ 			hvar_mc_s[i]->Add(hvar_db[i]);
+ 			hvar_mc_s[i]->Add(hvar_qcd[i]);
+ 			hvar_mc_s[i]->Draw("goff");
+			hvar_mc_s[i]->GetXaxis()->SetTitle(KinPlots::axis_label[i]);
+			//			if(intlabel) for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
+			//			if(intlabel) for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, Form("%d", j-1));
  			for(size_t j = 1; j <= hvar_data[i]->GetNbinsX(); ++j)            hvar_data[i]->GetXaxis()->SetBinLabel(j, "");
-// 			for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, "");
+ 			for(size_t j = 1; j <= hvar_mc_s[i]->GetXaxis()->GetNbins(); ++j) hvar_mc_s[i]->GetXaxis()->SetBinLabel(j, "");
 
-// 			hvar_tot[i]->Add(hvar_qcd[i]);
-// 			hvar_tot[i]->Add(hvar_db[i]);
-// 			hvar_tot[i]->Add(hvar_ewk[i]);
-// 			hvar_tot[i]->Add(hvar_rare[i]);
-// 			hvar_tot[i]->Add(hvar_ttj[i]);
+			hvar_tot[i]->Add(hvar_qcd[i]);
+			hvar_tot[i]->Add(hvar_db[i]);
+			hvar_tot[i]->Add(hvar_ewk[i]);
+			hvar_tot[i]->Add(hvar_rare[i]);
+			hvar_tot[i]->Add(hvar_ttj[i]);
 
 			float binwidth = hvar_data[i]->GetBinWidth(1);
 			TString ytitle = Form("Events / %3.0f GeV", binwidth);
@@ -3999,7 +4002,7 @@ void SSDLPlotter::makeRatioPlots(gChannel chan){
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		mcsamples   = fMCBG;
+		mcsamples   = fMCBGEMEnr;
 	}
 
 	// Customization
@@ -4088,8 +4091,8 @@ void SSDLPlotter::make2DRatioPlots(gChannel chan){
 
 	fOutputSubDir = "Ratios/";
 	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
+	sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	system(cmd);
 
 	histo->SetMinimum(0.0);
 	histo->SetMaximum(1.0);
@@ -4124,7 +4127,7 @@ void SSDLPlotter::makeNTightLoosePlots(gChannel chan){
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		mcsamples   = fMCBG;
+		mcsamples   = fMCBGEMEnr;
 	}
 
 	// Customization
