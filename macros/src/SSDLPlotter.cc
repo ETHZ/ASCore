@@ -156,8 +156,6 @@ void SSDLPlotter::init(TString filename){
 	fMCBG.push_back(WWG);
 	// MARC fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
-	fMCBG.push_back(EMEnr20);
-	fMCBG.push_back(EMEnr30);
 	// MARC fMCBG.push_back(QCD15);
 	// MARC fMCBG.push_back(QCD30);
 	// MARC fMCBG.push_back(QCD50);
@@ -231,6 +229,38 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGMuEnr.push_back(ZZZ);
 	// MARC fMCBGMuEnr.push_back(QCDMuEnr10);
 	fMCBGMuEnr.push_back(QCDMuEnr15);
+
+
+	fMCBGEMEnr.push_back(TTJets);
+	fMCBGEMEnr.push_back(SingleT_t);
+	fMCBGEMEnr.push_back(SingleTbar_t);
+	fMCBGEMEnr.push_back(SingleT_tW);
+	fMCBGEMEnr.push_back(SingleTbar_tW);
+	// MARC fMCBGEMEnr.push_back(SingleT_s);
+	fMCBGEMEnr.push_back(SingleTbar_s);
+	fMCBGEMEnr.push_back(WJets);
+	fMCBGEMEnr.push_back(DYJets);
+	// MARC fMCBGEMEnr.push_back(GJets40);
+	// MARC fMCBGEMEnr.push_back(GJets100);
+	// MARC fMCBGEMEnr.push_back(GJets200);
+	// MARC fMCBGEMEnr.push_back(WW);
+	fMCBGEMEnr.push_back(WZ);
+	// MARC fMCBGEMEnr.push_back(ZZ);
+	// MARC fMCBGEMEnr.push_back(GVJets);
+	// MARC fMCBGEMEnr.push_back(DPSWW);
+	fMCBGEMEnr.push_back(TTbarW);
+	fMCBGEMEnr.push_back(TTbarZ);
+	// MARC fMCBGEMEnr.push_back(TTbarG);
+	// MARC fMCBGEMEnr.push_back(WpWp);
+	// MARC fMCBGEMEnr.push_back(WmWm);
+	// MARC fMCBGEMEnr.push_back(WWZ);
+	// MARC fMCBGEMEnr.push_back(WZZ);
+	// MARC fMCBGEMEnr.push_back(WWG);
+	// MARC fMCBGEMEnr.push_back(WWW);
+	// MARC fMCBGEMEnr.push_back(ZZZ);
+	// MARC fMCBGEMEnr.push_back(QCDEMEnr10);
+	fMCBGEMEnr.push_back(EMEnr20);
+	fMCBGEMEnr.push_back(EMEnr30);
 
 	fMCBGMuEnrSig = fMCBGMuEnr;
 	// MARC fMCBGMuEnrSig.push_back(LM6);
@@ -310,8 +340,8 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(Baseline);
 	// printOrigins(Baseline);
 
-	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	// makeElIsolationPlots(false); // if true, loops on TTbar sample
+	makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
 	//	makeNT2KinPlots(false);
 	//	makeNT2KinPlots(true);
@@ -1729,8 +1759,8 @@ void SSDLPlotter::makeMuIsolationPlots(bool dottbar){
 }
 void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	char cmd[100];
-    sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
-    system(cmd);
+	sprintf(cmd,"mkdir -p %s%s", fOutputDir.Data(), fOutputSubDir.Data());
+	system(cmd);
 
 	TH1D    *hiso_data [gNSels];
 	TH1D    *hiso_mc   [gNSels];
@@ -1926,7 +1956,7 @@ void SSDLPlotter::makeElIsolationPlots(bool dottbar){
 	////////////////////////////////////////////////////
 
 	// Create plots
-	vector<int> mcsamples = fMCBG;
+	vector<int> mcsamples = fMCBGEMEnr;
 	vector<int> datasamples = fEGData;
 
 	for(size_t i = 0; i < gNSels; ++i){
@@ -3736,7 +3766,7 @@ void SSDLPlotter::makeFRvsPtPlots(gChannel chan, gFPSwitch fp){
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		mcsamples   = fMCBG;
+		mcsamples   = fMCBGEMEnr;
 	}
 
 	calculateRatio(datasamples, chan, fp, h_dummy2, h_ptratio_data, h_dummy1);
@@ -3856,7 +3886,7 @@ void SSDLPlotter::makeFRvsEtaPlots(gChannel chan){
 	}
 	if(chan == Elec){
 		datasamples = fEGData;
-		mcsamples   = fMCBG;
+		mcsamples   = fMCBGEMEnr;
 	}
 
 	calculateRatio(datasamples, chan, SigSup, h_dummy2, h_dummy1, h_etaratio_data);
