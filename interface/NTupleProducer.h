@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.130 2012/03/26 19:13:18 pandolf Exp $
+// $Id: NTupleProducer.h,v 1.131 2012/04/01 19:56:30 pandolf Exp $
 //
 //
 
@@ -22,6 +22,8 @@ Implementation:
 // system include files
 #include <vector>
 #include <string>
+
+#include <iostream>
 
 // ROOT includes
 #include "TH1.h"
@@ -141,6 +143,12 @@ private:
   std::string perEvtMvaWeights, perEvtMvaMethod;
   VertexAlgoParameters vtxAlgoParams;
   std::vector<std::string> rankVariables;
+
+  TMVA::Reader * perVtxReader;
+  TMVA::Reader * perEvtReader;
+  
+  HggVertexAnalyzer *vAna;
+  HggVertexFromConversions *vConv;
 
   PhotonInfo fillPhotonInfos(int p1, bool useAllConvs);
   std::vector<int> HggVertexSelection(HggVertexAnalyzer & vtxAna, HggVertexFromConversions & vtxAnaFromConv, 

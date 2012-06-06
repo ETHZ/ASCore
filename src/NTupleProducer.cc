@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.170 2012/03/27 10:31:50 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.171 2012/04/01 19:59:08 pandolf Exp $
 //
 //
 
@@ -288,6 +288,10 @@ NTupleProducer::NTupleProducer(const edm::ParameterSet& iConfig){
 			LumiWeights_      = edm::LumiReWeighting(fTPileUpHistoMC[0], fTPileUpHistoData[0], fTPileUpHistoMC[1], fTPileUpHistoData[1]);
 		}
 	}
+
+	vAna = new HggVertexAnalyzer(vtxAlgoParams);
+	vConv= new HggVertexFromConversions(vtxAlgoParams);
+	vAna->setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 
 }
 
@@ -2483,20 +2487,6 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 
 	 if (VTX_MVA_DEBUG)	  cout << "done convs" << endl;
 
-	 VertexAlgoParameters vtxAlgoParams;
-	 vector<string> rankVariables;
-	 HggVertexAnalyzer vAna(vtxAlgoParams,fTnvrtx); 
-	 HggVertexFromConversions vConv(vtxAlgoParams);
-	 
-	
-      
-
-	 //	 std::string perVtxMvaWeights, perVtxMvaMethod;
-	 
-	 //	 std::string perEvtMvaWeights, perEvtMvaMethod;
-	 TMVA::Reader * perVtxReader;	 
-	 TMVA::Reader * perEvtReader;
-	 vAna.setupWithDefaultOptions(perVtxMvaWeights, perEvtMvaWeights, rankVariables, perVtxReader, perVtxMvaMethod, perEvtReader, perEvtMvaMethod);
 	 std::vector<std::string> vtxVarNames;
 	 vtxVarNames.push_back("ptbal"), vtxVarNames.push_back("ptasym"), vtxVarNames.push_back("logsumpt2");
 
@@ -2561,32 +2551,32 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	     if (VTX_MVA_DEBUG)	     cout << "filled photon/tuplevertex info" << endl;
 	     if (VTX_MVA_DEBUG)	     cout << vinfo.nvtx() << " vertices" << endl;
 
-	     vAna.analyze(vinfo,pho1,pho2);
+	     vAna->analyze(vinfo,pho1,pho2);
 
 	     if (VTX_MVA_DEBUG)	     cout << "initialized vAna" << endl;
 
 	     // make sure that vertex analysis indexes are in synch 
-	     assert( int(id) == vAna.pairID(ipho1,ipho2) );
+	     assert( int(id) == vAna->pairID(ipho1,ipho2) );
 
 	     if (VTX_MVA_DEBUG)	     cout << "starting rankings" << endl;
 
 	     if (VTX_MVA_DEBUG)	     cout << "rankprod" << endl;
 	     /// rank product vertex selection. Including pre-selection based on conversions information.
-	     vtx_dipho_productrank.push_back(vAna.rankprod(rankVariables));
+	     vtx_dipho_productrank.push_back(vAna->rankprod(rankVariables));
 
 
 	     if (VTX_MVA_DEBUG)	     cout << "mva pasquale" << endl;
 	     /// MVA vertex selection
-	     vtx_dipho_mva.push_back(vAna.rank(*perVtxReader,perVtxMvaMethod));
+	     vtx_dipho_mva.push_back(vAna->rank(*perVtxReader,perVtxMvaMethod));
 
 
 	     // vertex probability through per-event MVA (not used so far)
-	     // float vtxEvtMva = vAna.perEventMva( *perEvtReader,  perEvtMvaMethod, vtx_dipho_mva->back() );
-	     // float vtxProb = vAna.vertexProbability( vtxEvtMva );
+	     // float vtxEvtMva = vAna->perEventMva( *perEvtReader,  perEvtMvaMethod, vtx_dipho_mva->back() );
+	     // float vtxProb = vAna->vertexProbability( vtxEvtMva );
 	     
 	     if (VTX_MVA_DEBUG)	     cout << "mva hgg globe" << endl;
 	     // Globe vertex selection with conversions
-	     vtx_dipho_h2gglobe.push_back(HggVertexSelection(vAna, vConv, pho1, pho2, vtxVarNames,false,0,""));
+	     vtx_dipho_h2gglobe.push_back(HggVertexSelection(*vAna, *vConv, pho1, pho2, vtxVarNames,false,0,""));
 
 
 	     if (VTX_MVA_DEBUG){
@@ -2608,9 +2598,6 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	 } // end else
 	
 
-	 if (VTX_MVA_DEBUG)	 cout << "deleting reader" << endl;
-	 delete perVtxReader;
-	 delete perEvtReader;
 
        } // end vertex selection for diphoton events
 
@@ -4697,6 +4684,7 @@ void NTupleProducer::resetTree(){
 	 gv_p3[i]=TVector3();
        }
        
+       vAna->clear();
 
 	resetFloat(fTSCraw,gMaxnSC);
 	resetFloat(fTSCpre,gMaxnSC);
