@@ -679,8 +679,8 @@ process.p = cms.Path(
 	+ (process.photonPartonMatch
 #	*process.printGenParticles*process.printPhotons*process.printPartons
 	)
-       #	+ process.HBHENoiseFilterResultProducerIso
-       #	+ process.HBHENoiseFilterResultProducerStd
+        + process.HBHENoiseFilterResultProducerIso
+       	+ process.HBHENoiseFilterResultProducerStd
 	+ process.ecalDeadCellTPfilter
 	+ process.recovRecHitFilter
 	+ process.kt6PFJets
