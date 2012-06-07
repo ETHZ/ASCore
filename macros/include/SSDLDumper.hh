@@ -81,8 +81,8 @@ public:
 		WJets,
 		DYJets,
 		// GJets40, GJets100, GJets200,
-		WZ,
-		// GVJets, WW, WZ, ZZ, 
+		WZ,ZZ, 
+		// GVJets, WW, WZ, 
 		TTbarW, TTbarZ, //TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		WZZ, WWG, ZZZ,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
@@ -492,7 +492,11 @@ public:
 			   sname == "ZZZ" ||                                     
 			   sname == "WWW" )                             return 14;
 			if(sname == "DPSWW")                            return 15;
-			if(sname.Contains("QCD") || sname == "MuEnr10") return 16;
+			if(sname.Contains("QCD") || 
+			   sname == "MuEnr10"    ||
+			   sname == "MuEnr15"    ||
+			   sname == "EMEnr20"    ||
+			   sname == "EMEnr30")                          return 16;
 			else {
 				cout << "SSDLDumper::Sample::getProc() ==> ERROR: "<< sname << " has no defined process!" << endl;
 				return -1;
