@@ -31,8 +31,8 @@ DYJets		mdunser/SSDLTrees/2012/May29b/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-t
 #WGstarMu	stiegerb/SSDLTrees/2011B/Dec8b/MC/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph.root						1	-1	6.2337e+04	41
 #WGstarTau	stiegerb/SSDLTrees/2011B/Dec8b/MC/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph.root						1	-1	1.6790e+05	41
 #WWTo2L2Nu	stiegerb/SSDLTrees/2011B/Dec8/MC/WWTo2L2NuMadgraph.root									1	-1	2.5754e+05	66
-WZTo3LNu	mdunser/SSDLTrees/2012/Jun7/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v2.root		1	-1	0.735
-ZZTo4L		mdunser/SSDLTrees/2012/Jun7/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v3.root									1	-1	0.093 
+WZTo3LNu	mdunser/SSDLTrees/2012/Jun7/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v2.root			1	-1	0.735
+ZZTo4L		mdunser/SSDLTrees/2012/Jun7/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v3.root		1	-1	0.093 
 ####################################################################################################################
 ## Rare SM
 TTbarW		mdunser/SSDLTrees/2012/May29b/TTW_Summer12_8TeV_FASTSIM/output_0.root			3	-1	0.232
