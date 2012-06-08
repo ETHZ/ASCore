@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131 2012/04/01 19:56:30 pandolf Exp $
+// $Id: NTupleProducer.h,v 1.131.2.1 2012/06/06 11:07:46 peruzzi Exp $
 //
 //
 
@@ -195,6 +195,9 @@ private:
 	static const int gMaxnEBhits  = 20;
         static const int gMaxngenvtx = 60;
         static const int nStoredGenParticles = 2000;
+
+  static const int gMax_vertexing_diphoton_pairs = 10;
+  static const int gMax_vertexing_vtxes = 5;
 
   static const unsigned int __TRK_AUX_ARRAYS_DIM__ = 2000;
   static const unsigned int __VTX_AUX_ARRAYS_DIM__ = 100;
@@ -889,6 +892,12 @@ float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
   float gv_sumPtLo[gMaxngenvtx];
   int gv_nTkHi[gMaxngenvtx];
   int gv_nTkLo[gMaxngenvtx];
+
+  Int_t f_diphotons_first[gMax_vertexing_diphoton_pairs];
+  Int_t f_diphotons_second[gMax_vertexing_diphoton_pairs];
+  Int_t f_vtx_dipho_h2gglobe[gMax_vertexing_diphoton_pairs][gMax_vertexing_vtxes];
+  Int_t f_vtx_dipho_mva[gMax_vertexing_diphoton_pairs][gMax_vertexing_vtxes];
+  Int_t f_vtx_dipho_productrank[gMax_vertexing_diphoton_pairs][gMax_vertexing_vtxes];
 
   // SC
   int fTnSC;

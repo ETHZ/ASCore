@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171 2012/04/01 19:59:08 pandolf Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.1 2012/06/06 11:07:46 peruzzi Exp $
 //
 //
 
@@ -2598,6 +2598,34 @@ if (VTX_MVA_DEBUG)	     	     	     std::cout << "tracks: " <<  temp.size() << s
 	 } // end else
 	
 
+         { // write output of vertexing
+
+           int i1;
+           int i2;
+
+           // [diphoton_pair][ranking_of_vertices]
+
+           i1=0; i2=0;
+           for (std::vector<int>::const_iterator it=diphotons_first.begin(); it!=diphotons_first.end(); it++) {f_diphotons_first[i1]=*it; i1++;}
+           for (std::vector<int>::const_iterator it=diphotons_second.begin(); it!=diphotons_second.end(); it++) {f_diphotons_second[i2]=*it; i2++;}
+
+           for (i1=0; i1<(int)vtx_dipho_h2gglobe.size(); i1++)
+             for (i2=0; i2<(int)vtx_dipho_h2gglobe.at(i1).size(); i2++)
+               f_vtx_dipho_h2gglobe[i1][i2]=vtx_dipho_h2gglobe.at(i1).at(i2);
+
+           for (i1=0; i1<(int)vtx_dipho_mva.size(); i1++)
+             for (i2=0; i2<(int)vtx_dipho_mva.at(i1).size(); i2++)
+               f_vtx_dipho_mva[i1][i2]=vtx_dipho_mva.at(i1).at(i2);
+
+           for (i1=0; i1<(int)vtx_dipho_productrank.size(); i1++)
+             for (i2=0; i2<(int)vtx_dipho_productrank.at(i1).size(); i2++)
+               f_vtx_dipho_productrank[i1][i2]=vtx_dipho_productrank.at(i1).at(i2);
+
+         }
+
+
+
+
 
        } // end vertex selection for diphoton events
 
@@ -3838,6 +3866,12 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_C
 // fEventTree->Branch("Gv_nTkHi",&gv_nTkHi,"Gv_nTkHi[Gvn]/I");
 // fEventTree->Branch("Gv_nTkLo",&gv_nTkLo,"Gv_nTkLo[Gvn]/I");
 
+ fEventTree->Branch("diphotons_first", &f_diphotons_first, Form("diphotons_first[%d]/I",gMax_vertexing_diphoton_pairs));
+ fEventTree->Branch("diphotons_second", &f_diphotons_second, Form("diphotons_second[%d]/I",gMax_vertexing_diphoton_pairs));
+
+ fEventTree->Branch("vtx_dipho_h2gglobe", &f_vtx_dipho_h2gglobe, Form("vtx_dipho_h2gglobe[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
+ fEventTree->Branch("vtx_dipho_mva", &f_vtx_dipho_mva, Form("vtx_dipho_mva[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
+ fEventTree->Branch("vtx_dipho_productrank", &f_vtx_dipho_productrank, Form("vtx_dipho_productrank[%d][%d]/I",gMax_vertexing_diphoton_pairs,gMax_vertexing_vtxes));
 
 	fEventTree->Branch("NSuperClusters",&fTnSC ,"NSuperClusters/I");
 	fEventTree->Branch("SCRaw",&fTSCraw ,"SCRaw[NSuperClusters]/F");
@@ -4624,6 +4658,17 @@ void NTupleProducer::resetTree(){
        resetFloat(gv_sumPtLo,gMaxngenvtx);
        resetInt(gv_nTkHi,gMaxngenvtx);
        resetInt(gv_nTkLo,gMaxngenvtx);
+
+       resetInt(f_diphotons_first,gMax_vertexing_diphoton_pairs);
+       resetInt(f_diphotons_second,gMax_vertexing_diphoton_pairs);
+
+       for (int i=0; i<gMax_vertexing_diphoton_pairs; i++) {
+	 for (int j=0; j<gMax_vertexing_vtxes; j++) {
+           f_vtx_dipho_h2gglobe[i][j]=-999;
+           f_vtx_dipho_mva[i][j]=-999;
+           f_vtx_dipho_productrank[i][j]=-999;
+         }
+       }
 
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
