@@ -28,17 +28,17 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
     // Put all JES-related stuff between pre-compiler flags
     //----------- Correction Object ------------------------------
     vector<JetCorrectorParameters> JetCorPar;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2L3Residual_AK5PF.txt");
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L3Absolute_AK5PF.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2Relative_AK5PF.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L1FastJet_AK5PF.txt");
+    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L2L3Residual_AK5PF.txt");
+    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L3Absolute_AK5PF.txt");
+    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L2Relative_AK5PF.txt");
+    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L1FastJet_AK5PF.txt");
     JetCorPar.push_back(*L1JetPar);
     JetCorPar.push_back(*L2JetPar);
     JetCorPar.push_back(*L3JetPar);
     JetCorPar.push_back(*ResJetPar);
 
     fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-    fJECUnc = new JetCorrectionUncertainty("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_Uncertainty_AK5PF.txt");
+    fJECUnc = new JetCorrectionUncertainty("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_Uncertainty_AK5PF.txt");
     delete L1JetPar;
     delete L2JetPar; 
     delete L3JetPar; 
