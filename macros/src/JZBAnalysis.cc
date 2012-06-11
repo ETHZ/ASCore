@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.34 $";
+string sjzbversion="$Revision: 1.70.2.36 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.34 2012/05/30 09:03:23 fronga Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.36 2012/06/11 07:36:37 buchmann Exp $
 */
 
 
@@ -43,6 +43,8 @@ public:
   float mll; // di-lepton system
   float pt;
   float phi;
+  float eta;
+  float E;
   bool is_data;
 
   float pt1; // leading leptons
@@ -135,6 +137,7 @@ public:
   float pfJetScale[jMax];
   float pfJetScaleUnc[jMax];
   float pfJetDphiMet[jMax];
+  float pfJetDphiZ[jMax];
   float pfHT;
   float pfGoodHT;
   float pfTightHT;
@@ -255,6 +258,11 @@ public:
   int LSP2Mo;
   float LSP1Mopt;
   float LSP2Mopt;
+  
+  //Z+b variables
+  float alpha;
+  float mpf;
+  bool pass_b_PU_rejection;
 
 };
 
@@ -265,6 +273,8 @@ void nanoEvent::reset()
   mll=0; // di-lepton system
   pt=0;
   phi=0;
+  eta=0;
+  E=0;
 
   is_data=false;
   NPdfs=0;
@@ -376,6 +386,7 @@ void nanoEvent::reset()
     pfJetScale[jCounter]=0;
     pfJetScaleUnc[jCounter]=0;
     pfJetDphiMet[jCounter]=0;
+    pfJetDphiZ[jCounter]=0;
   }
   pfJetNum=0;
   pfHT=0;
@@ -493,7 +504,11 @@ void nanoEvent::reset()
   LSP2Mo=0;
   LSP1Mopt=0;
   LSP2Mopt=0;
-
+  
+  //Z+b variables
+  alpha=0;
+  mpf=0;
+  pass_b_PU_rejection=false;
 }
 
 
@@ -601,6 +616,8 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("mll",&nEvent.mll,"mll/F");
   myTree->Branch("pt",&nEvent.pt,"pt/F");
   myTree->Branch("phi",&nEvent.phi,"phi/F");
+  myTree->Branch("eta",&nEvent.eta,"eta/F");
+  myTree->Branch("E",&nEvent.E,"E/F");
   myTree->Branch("pt1",&nEvent.pt1,"pt1/F");
   myTree->Branch("pt2",&nEvent.pt2,"pt2/F");
   myTree->Branch("iso1",&nEvent.iso1,"iso1/F");
@@ -703,6 +720,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfJetScale",nEvent.pfJetScale,"pfJetScale[pfJetNum]/F");
   myTree->Branch("pfJetScaleUnc",nEvent.pfJetScaleUnc,"pfJetScaleUnc[pfJetNum]/F");
   myTree->Branch("pfJetDphiMet",nEvent.pfJetDphiMet,"pfJetDphiMet[pfJetNum]/F");
+  myTree->Branch("pfJetDphiZ",nEvent.pfJetDphiZ,"pfJetDphiZ[pfJetNum]/F");
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
@@ -816,6 +834,11 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("realx",&nEvent.realx,"realx/F");
   myTree->Branch("imposedx",&nEvent.imposedx,"imposedx/F");
+  
+    //Z+b variables
+  myTree->Branch("alpha",&nEvent.alpha,"alpha/F");
+  myTree->Branch("mpf",&nEvent.mpf,"mpf/F");
+  myTree->Branch("pass_b_PU_rejection",&nEvent.pass_b_PU_rejection,"pass_b_PU_rejection/O");
 
   counters[EV].setName("Events");
   counters[TR].setName("Triggers");
@@ -1266,6 +1289,8 @@ void JZBAnalysis::Analyze() {
     
     nEvent.mll=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).M();
     nEvent.phi=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Phi();
+    nEvent.eta=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Eta();
+    nEvent.E=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).E();
     nEvent.pt=(sortedGoodLeptons[PosLepton2].p+sortedGoodLeptons[PosLepton1].p).Pt();
     nEvent.dphi=sortedGoodLeptons[PosLepton2].p.DeltaPhi(sortedGoodLeptons[PosLepton1].p);
     
@@ -1302,6 +1327,9 @@ void JZBAnalysis::Analyze() {
   TLorentzVector pfMETvector(pfMETpx,pfMETpy,0,0);
   TLorentzVector type1METvector(tcMETpx,tcMETpy,0,0);
   TLorentzVector sumOfPFJets(0,0,0,0);
+  TLorentzVector zVector;
+  zVector.SetPtEtaPhiE(nEvent.pt,nEvent.eta,nEvent.phi,nEvent.E);
+
   nEvent.pfJetNum=0;
   nEvent.pfJetGoodNum=0;
   nEvent.pfJetGoodNumBtag=0;
@@ -1359,6 +1387,7 @@ void JZBAnalysis::Analyze() {
       nEvent.pfJetScaleUnc[nEvent.pfJetNum] = unc;
       nEvent.pfJetID[nEvent.pfJetNum]    = isJetID;
       nEvent.pfJetDphiMet[nEvent.pfJetNum] = aJet.DeltaPhi(pfMETvector);
+      nEvent.pfJetDphiZ[nEvent.pfJetNum] = aJet.DeltaPhi(zVector);
       nEvent.pfJetNum = nEvent.pfJetNum +1;
       nEvent.pfHT    += jpt;
       
@@ -1418,6 +1447,14 @@ void JZBAnalysis::Analyze() {
       if ( jpt>50. )  nEvent.pfJetGoodNum50++;
       if ( jpt>60. )  nEvent.pfJetGoodNum60++;
     }
+    
+    if(nEvent.pfJetGoodNum>0) nEvent.alpha=nEvent.pfJetGoodPt[1]/nEvent.pt;
+    nEvent.mpf=1+(pfMETvector.Vect()*zVector.Vect())/(zVector.Vect()*zVector.Vect());
+    nEvent.pass_b_PU_rejection=true; // this needs to be fixed (i.e. the vertex loop below needs to be implemented)
+//    for(int ivtx=0;ivtx<fTR->NVrtx;ivtx++) {
+      //find vtx most compatible with our Z (not sure how, yet)
+      //for the given vertex store fTR->vrtxsumpt[ivtx], 
+//    }
     
     for(int jcounter = 0; jcounter < nEvent.pfJetGoodNum; ++jcounter) {
     TLorentzVector j1(0,0,0,0);
