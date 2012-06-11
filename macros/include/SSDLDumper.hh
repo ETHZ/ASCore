@@ -69,7 +69,11 @@ public:
 
 	float gHLTSF;
 	float gBtagSF;
+	float gBtagSF1;
+	float gBtagSF2;
 	float gEventWeight;
+	float gEventWeight1;
+	float gEventWeight2;
 
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
@@ -83,8 +87,9 @@ public:
 		// GJets40, GJets100, GJets200,
 		WZ,ZZ, 
 		// GVJets, WW, WZ, 
-		TTbarW, TTbarZ, //TTbarG, DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
-		WZZ, WWG, ZZZ,
+		TTbarW, TTbarZ, TTbarG, //DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
+		WZZ, WWG, ZZZ, WWW,
+		TTbarWW,
 		// LM0, LM1, LM2, LM3, LM4, LM5, LM6, LM7, LM8, LM9, LM11, LM12, LM13, 
 		QCDMuEnr15,
 		EMEnr20, EMEnr30,
@@ -636,6 +641,7 @@ public:
 	virtual int getNJets();
 	virtual int getNBTags();
 	virtual int getNBTagsMed();
+	virtual std::vector< int > getNBTagsMedIndices();
 	virtual float getHT();
 	virtual float getWeightedHT();
 	virtual float getMT2(int, int, gChannel);
@@ -799,7 +805,8 @@ public:
 	int         fSETree_SystFlag; // 0 nominal, 1 jets up, 2 jets dn, 3 jets smeared, 4 btag up, 5 btag dn, 6 lep up, 7 lep dn
 	float       fSETree_PUWeight;
 	float       fSETree_HLTSF;
-	float       fSETree_BtagSF;
+	float       fSETree_BtagSF1;
+	float       fSETree_BtagSF2;
 	float       fSETree_SLumi;
 	std::string fSETree_SName;
 	int         fSETree_SType; // DoubleMu(0), DoubleEle(1), MuEG(2), MC(10)

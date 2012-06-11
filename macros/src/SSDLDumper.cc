@@ -18,6 +18,8 @@
 #include "helper/FakeRatios.hh"
 #include "helper/Monitor.hh"
 
+#include "mcbtagSFuncert.h" // claudios btag scales
+
 #include "helper/BTagSFUtil/BTagSFUtil.h"
 
 #include "TLorentzVector.h"
@@ -343,7 +345,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		
 		/////////////////////////////////////////////
 		// Event modifications
-		scaleBTags(S, 0);
+		// MARC how come this function is called here..?? scaleBTags(S, 0);
 		/////////////////////////////////////////////
 		
 		fCounter[Muon].fill(fMMCutNames[0]);
@@ -360,7 +362,8 @@ void SSDLDumper::loopEvents(Sample *S){
 
 		// Compute event-by-event weights:
 		gHLTSF = 1.;
-		gBtagSF = 1.;
+		gBtagSF1 = 1.;
+		gBtagSF2 = 1.;
 
 		if( S->datamc!=0 ) {
 			int ind1(-1), ind2(-1);
@@ -371,8 +374,48 @@ void SSDLDumper::loopEvents(Sample *S){
 			fDoCounting = true;
 		}
 
-		gEventWeight = gHLTSF * gBtagSF;
-		if( S->datamc!=4 ) gEventWeight *= PUWeight; //no pu weight for mc with no pu
+		// marcs try on the b-tag scale factors:
+		if( S->datamc!=0 ) {
+			int ind1(-1), ind2(-1);
+			fDoCounting = false;
+			float myweight1(1.), myweight2(1.);
+			std::vector< int > btags = getNBTagsMedIndices();
+			int nbtags = btags.size();
+			if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
+				if (nbtags > 1) {
+					cout << "There are " << nbtags << " btags in this event!" << endl;
+					cout << "jet pt of 0th btagged-jet: " << getJetPt(btags[0]) << endl;
+					cout << "      index and tagger value: " << btags[0] << "  " << JetCSVBTag[btags[0]] << endl;
+					cout << "jet pt of 1th btagged-jet: " << getJetPt(btags[1]) << endl;
+					cout << "      index and tagger value: " << btags[1] << "  " << JetCSVBTag[btags[1]] << endl;
+					cout << endl;
+				}
+				if (nbtags == 2) {
+					myweight1 = btagEventWeight (2, getJetPt(btags[0]), getJetPt(btags[1]));
+				}
+				if (nbtags == 3) {
+					myweight1 = btagEventWeight (3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]));
+					myweight2 = btagEventWeight3(3, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]));
+				}
+				if (nbtags  > 3) {
+					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
+					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
+				}
+			}
+			//if (nbtags > 1) cout << "final btag weight for this event in case of 2 btags in region: " << myweight1 << endl;
+			//if (nbtags > 1) cout << "final btag weight for this event in case of 3 btags in region: " << myweight2 << endl;
+			gBtagSF1 = myweight1;
+			gBtagSF2 = myweight2;
+			fDoCounting = true;
+		}
+		
+
+		gEventWeight1 = gHLTSF * gBtagSF1;
+		gEventWeight2 = gHLTSF * gBtagSF2;
+		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
+			gEventWeight1 *= PUWeight;
+			gEventWeight2 *= PUWeight;
+		}
 
 
 		fillKinPlots(S);
@@ -389,7 +432,7 @@ void SSDLDumper::loopEvents(Sample *S){
 		// Systematic studies
 		if(!gDoSystStudies) continue;
 		fChain->GetEntry(jentry); // reset tree vars
-		scaleBTags(S, 0);
+		// scaleBTags(S, 0);
 
 // 		// Jet pts scaled down
 // 		smearJetPts(S, 1);
@@ -462,6 +505,8 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(reg);
+	if (fC_minNbjmed == 2) gEventWeight = gEventWeight1;
+	if (fC_minNbjmed == 3) gEventWeight = gEventWeight2;
 
 	///////////////////////////////////////////////////
 	// SS YIELDS
@@ -1170,7 +1215,8 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	fSETree_SystFlag = flag;
 	fSETree_PUWeight = PUWeight;
 	fSETree_HLTSF    = gHLTSF;
-	fSETree_BtagSF   = gBtagSF;
+	fSETree_BtagSF1   = gBtagSF1;
+	fSETree_BtagSF2   = gBtagSF2;
 	fSETree_SLumi    = S->getLumi();
 	fSETree_SName    = S->sname.Data();
 	fSETree_SType    = getSampleType(S);
@@ -1975,7 +2021,8 @@ void SSDLDumper::bookSigEvTree(){
 	fSigEv_Tree->Branch("PUWeight",    &fSETree_PUWeight, "PUWeight/F");
 	fSigEv_Tree->Branch("SystFlag",    &fSETree_SystFlag, "SystFlag/I");
 	fSigEv_Tree->Branch("HLTSF",       &fSETree_HLTSF   , "HLTSF/F");
-	fSigEv_Tree->Branch("BtagSF",      &fSETree_BtagSF  , "BtagSF/F");
+	fSigEv_Tree->Branch("BtagSF1",      &fSETree_BtagSF1  , "BtagSF1/F");
+	fSigEv_Tree->Branch("BtagSF2",      &fSETree_BtagSF2  , "BtagSF2/F");
 	fSigEv_Tree->Branch("SLumi",       &fSETree_SLumi   , "SLumi/F");
 	fSigEv_Tree->Branch("SName",       &fSETree_SName);
 	fSigEv_Tree->Branch("SType",       &fSETree_SType   , "SType/I");
@@ -2006,7 +2053,8 @@ void SSDLDumper::resetSigEventTree(){
 	fSETree_SystFlag = -1;
 	fSETree_PUWeight = -1.;
 	fSETree_HLTSF    = -1.;
-	fSETree_BtagSF   = -1.;
+	fSETree_BtagSF1   = -1.;
+	fSETree_BtagSF2   = -1.;
 	fSETree_SLumi    = -1.;
 	fSETree_SName    = "?";
 	fSETree_SType    = -1;
@@ -3141,6 +3189,15 @@ int SSDLDumper::getNBTagsMed(){
 	int ntags(0);
 	for(size_t i = 0; i < NJets; ++i) if(isGoodJet(i) && JetCSVBTag[i] > 0.679) ntags++;
 	return ntags;
+}
+std::vector< int > SSDLDumper::getNBTagsMedIndices(){
+	std::vector< int > tagIndices;
+	for(size_t i = 0; i < NJets; ++i) {
+		if(isGoodJet(i) && JetCSVBTag[i] > 0.679) {
+			tagIndices.push_back(i);
+		}
+	}
+	return tagIndices;
 }
 float SSDLDumper::getHT(){
 	float ht(0.);
