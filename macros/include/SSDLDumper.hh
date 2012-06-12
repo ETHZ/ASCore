@@ -72,21 +72,22 @@ public:
 	float gBtagSF1;
 	float gBtagSF2;
 	float gEventWeight;
+	float gEventWeight0;
 	float gEventWeight1;
 	float gEventWeight2;
 
 	// This enum has to correspond to the content of the samples.dat file
 	enum gSample {
 		sample_begin,
-		DoubleMu1 = sample_begin, DoubleMu2,// DoubleMu3, DoubleMu4, DoubleMu5,
-		DoubleEle1, DoubleEle2, //DoubleEle3, DoubleEle4, DoubleEle5,
-		MuEG1, MuEG2, //MuEG3, MuEG4, MuEG5,
+		DoubleMu1 = sample_begin, DoubleMu2, DoubleMu3, //DoubleMu4, DoubleMu5,
+		DoubleEle1, DoubleEle2, DoubleEle3, //DoubleEle4, DoubleEle5,
+		MuEG1, MuEG2, MuEG3, //MuEG4, MuEG5,
 		TTJets, SingleT_t, SingleTbar_t, SingleT_tW, SingleTbar_tW, SingleTbar_s, //TbarJets_t, TJets_tW, TbarJets_tW, TJets_s, TbarJets_s, WJets, 
 		WJets,
 		DYJets,
 		// GJets40, GJets100, GJets200,
 		WZ,ZZ, 
-		// GVJets, WW, WZ, 
+		// GVJets,
 		TTbarW, TTbarZ, TTbarG, //DPSWW, WWZ, WZZ, WWG, ZZZ, WWW, WpWp, WmWm,
 		WZZ, WWG, ZZZ, WWW,
 		TTbarWW,
@@ -735,6 +736,9 @@ public:
 
 	float getHLTSF_DoubleElectron( float pt, float eta, const std::string& runPeriod="" );
 	float getHLTSF_MuEG(           float pt, float eta, const std::string& runPeriod="" );
+	float diMuonHLTSF2012();
+	float muEleHLTSF2012();
+	float diEleHLTSF2012();
 
 	ValueAndError getMuMuHLTSF( float pt, float eta, const std::string& runPeriod );
 	ValueAndError getMuonRecoSF(              float pt, float eta );

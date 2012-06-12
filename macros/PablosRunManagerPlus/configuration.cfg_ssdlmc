@@ -1,70 +1,33 @@
-# # EWK/Top
-/fronga/TTJets_TuneZ2star_8TeV-madgraph-tauola/V03-03-00_TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/                       '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
-/fronga/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/V03-03-00_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v2/   '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root' -1 20
-# /susy/ntuples/mc/V02-04-01/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11_2/      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11/         '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11/      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11/  '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2/       '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11/      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/WZTo3LNuMadgraph/                                       '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/WWTo2L2NuMadgraph/                                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/ZZTo4LMadgraph/                                         '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4/    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/GVJets_7TeV-madgraph-Summer11-PU_S4/                    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WGstarToLNu2E_TuneZ2_7TeV-madgraph/                     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph/                    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph/                   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# 
-# 
-# # Rare SM
-# /susy/ntuples/mc/V02-05-01/DoublePartonWWFastSim/                                  '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WWZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WZZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WWPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv1/              '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/ZZZNoGstar_TuneZ2_7TeV-madgraph/                        '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/WWW_TuneZ2_7TeV-madgraph/                               '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/TTPhoton_TuneZ2_7TeV-madgraphCMSSW42xPUv3/              '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/TTW_TuneZ2_7TeV-madgraphCMSSW42xPUv2/                   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-05-01/TTZ_TuneZ2_7TeV-madgraphCMSSW42xPUv3/                   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root' -1 20
-# /susy/ntuples/mc/V02-04-03/WplusWplus/                                             '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root'  1 -1
-# /susy/ntuples/mc/V02-04-03/WminusWminus/                                           '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/RareSM_Sanjay-v1.root'  1 -1
-# 
-# # SUSY Signal
-# /susy/ntuples/mc/V02-01-01/LM0_SUSY_sftsht_7TeV-pythia6/                           '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM1_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM2_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM3_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM4_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM5_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM6_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM7_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM8_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM9_SUSY_sftsht_7TeV-pythia6/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM11_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM12_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-01-02_test/LM13_SUSY_sftsht_7TeV-pythia6/                     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# 
-# # QCD
-# /susy/ntuples/mc/V02-01-02/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6/          '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/LMX_Spring11-S1.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-15to30_TuneZ2_7TeV_pythia6_Summer11_PU_S4/       '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-30to50_TuneZ2_7TeV_pythia6_Summer11_PU_S4/       '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-50to80_TuneZ2_7TeV_pythia6_Summer11_PU_S4/       '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-80to120_TuneZ2_7TeV_pythia6_Summer11_PU_S4/      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-120to170_TuneZ2_7TeV_pythia6_Summer11_PU_S4/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-170to300_TuneZ2_7TeV_pythia6_Summer11_PU_S4/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-300to470_TuneZ2_7TeV_pythia6_Summer11_PU_S4/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-470to600_TuneZ2_7TeV_pythia6_Summer11_PU_S4/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-600to800_TuneZ2_7TeV_pythia6_Summer11_PU_S4/     '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-800to1000_TuneZ2_7TeV_pythia6_Summer11_PU_S4/    '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-1000to1400_TuneZ2_7TeV_pythia6_Summer11_PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-1400to1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4/   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-05-00/QCD_Pt-1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4/         '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-01-01/QCD_TuneD6T_HT-50To100_7TeV-madgraph/                   '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-01-01/QCD_TuneD6T_HT-100To250_7TeV-madgraph/                  '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-01-01/QCD_TuneD6T_HT-250To500_7TeV-madgraph/                  '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-01-01/QCD_TuneD6T_HT-500To1000_7TeV-madgraph/                 '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
-# /susy/ntuples/mc/V02-01-01/QCD_TuneD6T_HT-1000_7TeV-madgraph/                      '-s -v 1 -x /shome/stiegerb/Workspace/PileUpHistos/FullData_178078.root -y /shome/stiegerb/Workspace/PileUpHistos/TTJets_Summer11-S4.root' -1 20
+## QCD
+## /QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6/mdunser-V03-04-02_QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6-Summer12-PU_S7_START52_V9-v1-d79550d6f962eff2be63db84eb336be6/USER  '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+## /QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6/mdunser-V03-04-02_QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6-Summer12-PU_S7_START50_V15-v1-d79550d6f962eff2be63db84eb336be6/USER '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+ 
+## EWK/Top
+## /TTJets_TuneZ2star_8TeV-madgraph-tauola/fronga-V03-03-00_TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER                       '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+## /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/fronga-V03-03-00_DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v2-899320b8a525215e22070fd3afc8b610/USER   '-s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root' -1 20
+
+## WJets
+## /WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/fronga-V03-03-01_WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER            ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+
+## di-boson
+## /WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola/mdunser-V03-04-02_WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v2-d79550d6f962eff2be63db84eb336be6/USER            ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+## /ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola/mdunser-V03-04-02_ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v3-d79550d6f962eff2be63db84eb336be6/USER        ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+
+## single top
+## /Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/fronga-V03-03-01_Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER  ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 10
+## /Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/fronga-V03-03-01_Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER          ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+## /TBarToDilepton_tW-channel-DR_8TeV-powheg-tauola/fronga-V03-03-01_TBarToDilepton_tW-channel-DR_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER    ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 20
+## /T_t-channel_TuneZ2star_8TeV-powheg-tauola/fronga-V03-03-01_T_t-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER                ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+## /T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/fronga-V03-03-01_T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER        ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 10
+## /Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/fronga-V03-03-01_Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1-899320b8a525215e22070fd3afc8b610/USER          ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+
+
+## 2012 Rare (FASTSIM)
+/8TeV_TTWJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_TTWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER               ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_TTZJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_TTZJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER               ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_TTWWJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_TTWWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER             ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_ZZZNoGstarJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_ZZZNoGstarJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_WZZNoGstarJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_WZZNoGstarJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_WWWJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_WWWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER               ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_WWGJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_WWGJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER               ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5
+/8TeV_TTGJets_FastSim_525_Summer12-v3/mdunser-V03-04-01_8TeV_TTGJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3-30605ce380e2107dee3d0e5356baf29f/USER               ' -s -v 1 -x /shome/mdunser/puhistos/DataPUtrue.root -y /shome/mdunser/puhistos/MC2012PU.root'   -1 5

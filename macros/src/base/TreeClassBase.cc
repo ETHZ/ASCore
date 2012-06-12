@@ -941,6 +941,8 @@ const bool TreeClassBase::GetAllByLabel(void) {
     if ( hMuNGlHits.isValid() ) MuNGlHits = *hMuNGlHits;
     result &= event->getByLabel( tMuNMatches, hMuNMatches );
     if ( hMuNMatches.isValid() ) MuNMatches = *hMuNMatches;
+    result &= event->getByLabel( tMuNMatchedStations, hMuNMatchedStations );
+    if ( hMuNMatchedStations.isValid() ) MuNMatchedStations = *hMuNMatchedStations;
     result &= event->getByLabel( tMuNMuHits, hMuNMuHits );
     if ( hMuNMuHits.isValid() ) MuNMuHits = *hMuNMuHits;
     result &= event->getByLabel( tMuNPxHits, hMuNPxHits );
@@ -2016,6 +2018,7 @@ void TreeClassBase::Init(void)
     tMuNChi2                   = edm::InputTag("analyze","MuNChi2");
     tMuNGlHits                 = edm::InputTag("analyze","MuNGlHits");
     tMuNMatches                = edm::InputTag("analyze","MuNMatches");
+    tMuNMatchedStations        = edm::InputTag("analyze","MuNMatchedStations");
     tMuNMuHits                 = edm::InputTag("analyze","MuNMuHits");
     tMuNPxHits                 = edm::InputTag("analyze","MuNPxHits");
     tMuNSiLayers               = edm::InputTag("analyze","MuNSiLayers");

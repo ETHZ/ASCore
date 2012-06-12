@@ -143,20 +143,20 @@ def check_commands():
 			print '[status] `hadd\' exists...'
 			return True
 	else:
-		print '[status] `root\' and `hadd\' do not exist!'
-		print '[status] trying to obtain them...'
-		os.system('cd '+release_dir+' ; eval `scramv1 runtime -sh`')
-		os.system('eval `scramv1 runtime -sh`')
-		print '[status] checking again...'
-		if commands.getstatusoutput('which root')[0]==0:
-			print '[status] `root\' exists now...'
-			if not commands.getstatusoutput('which hadd')[0]:
-				print '[status] and so does `hadd\'...'
-		elif commands.getstatusoutput('which root')[0] == 256:
-				print '[ERROR] could not obtain `root\' and `hadd\''
-				print '[ERROR] you should have the output files in your output directory, you will have to merge them yourself.'
-				print '[status] cleaning up the mess...'
-				return False
+		#print '[status] `root\' and `hadd\' do not exist!'
+		#print '[status] trying to obtain them...'
+		#os.system('cd '+release_dir+' ; eval `scramv1 runtime -sh`')
+		#os.system('eval `scramv1 runtime -sh`')
+		#print '[status] checking again...'
+		#if commands.getstatusoutput('which root')[0]==0:
+		#	print '[status] `root\' exists now...'
+		#	if not commands.getstatusoutput('which hadd')[0]:
+		#		print '[status] and so does `hadd\'...'
+		#elif commands.getstatusoutput('which root')[0] == 256:
+		#		print '[ERROR] could not obtain `root\' and `hadd\''
+		#		print '[ERROR] you should have the output files in your output directory, you will have to merge them yourself.'
+		#		print '[status] cleaning up the mess...'
+		return False
 			
 def clean():
 	print '[status] cleaning up a bit...'
@@ -336,6 +336,12 @@ def main(args):
 	if len(args)==1:
 		print 'You must specify at least something... Let me help you:\n'
 		usage()
+		sys.exit()
+	if not check_commands():
+		print '[ERROR] you don\'t have \'root\' (and thus \'hadd\') available. This would only lead to trouble.'
+		print '        Obtain the commands first and then re-run the same command\n'
+		print '[tip]   You can get root e.g. by doing: \'source /swshare/ROOT/thisroot.sh\'\n'
+		print 'EXITING...'
 		sys.exit()
 	if ('-n' in args):
 		print 'Dry running only....'

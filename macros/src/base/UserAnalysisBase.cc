@@ -314,7 +314,10 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuNPxHits[index] < 1)   return false;
     // if(fTR->MuNMuHits [index] < 2)   return false;
     if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
-	if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
+	// if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
+	if(fTR->MuNMatchedStations.size() > 0) {
+		if(fTR->MuNMatchedStations[index] < 2)   return false; // muon.numberOfMatchedStations()
+	}
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
     if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;

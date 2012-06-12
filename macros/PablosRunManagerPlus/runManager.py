@@ -411,8 +411,8 @@ def check_directory(path,username) :
 			if(currentline.count(path) > 0) :
 				supposedtobejoined=True
 				listoffiles.append(currentline[currentline.find(path):])
-	if supposedtobejoined==True:
-		join_directory(path,listoffiles,username)
+	## MARC don't join on /scratch if supposedtobejoined==True:
+	## MARC don't join on /scratch 	join_directory(path,listoffiles,username)
 
 
 ##################################################################################

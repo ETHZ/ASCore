@@ -219,7 +219,7 @@ void SSDLDumper::init(){
 	// Prevent root from adding histograms to current file
 	TH1::AddDirectory(kFALSE);
 
-	runlist = new GoodRunList("/shome/mdunser/jsons/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt");
+	runlist = new GoodRunList("/shome/mdunser/jsons/Cert_190456-195396_8TeV_PromptReco_Collisions12_JSON_v2.txt");
 }
 
 void SSDLDumper::readDatacard(TString cardfile){
@@ -365,14 +365,14 @@ void SSDLDumper::loopEvents(Sample *S){
 		gBtagSF1 = 1.;
 		gBtagSF2 = 1.;
 
-		if( S->datamc!=0 ) {
-			int ind1(-1), ind2(-1);
-			fDoCounting = false;
-			if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = getMuMuHLTSF(           MuPt[ind1], MuEta[ind1], "Run2011").val * getMuMuHLTSF(MuPt[ind2], MuEta[ind2], "Run2011").val;
-			else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = getHLTSF_MuEG(          MuPt[ind1], MuEta[ind1], "") * getHLTSF_MuEG(          ElPt[ind2], ElEta[ind2], "");
-			else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = getHLTSF_DoubleElectron(ElPt[ind1], ElEta[ind1], "") * getHLTSF_DoubleElectron(ElPt[ind2], ElEta[ind2], "");
-			fDoCounting = true;
-		}
+		// MARC if( S->datamc!=0 ) {
+		// MARC 	int ind1(-1), ind2(-1);
+		// MARC 	fDoCounting = false;
+		// MARC 	if(isSSLLMuEvent(       ind1, ind2)) gHLTSF = diMuonHLTSF2012();
+		// MARC 	else if(isSSLLElMuEvent(ind1, ind2)) gHLTSF = muEleHLTSF2012();
+		// MARC 	else if(isSSLLElEvent(  ind1, ind2)) gHLTSF = diEleHLTSF2012();
+		// MARC 	fDoCounting = true;
+		// MARC }
 
 		// marcs try on the b-tag scale factors:
 		if( S->datamc!=0 ) {
@@ -382,7 +382,7 @@ void SSDLDumper::loopEvents(Sample *S){
 			std::vector< int > btags = getNBTagsMedIndices();
 			int nbtags = btags.size();
 			if(isSSLLMuEvent(ind1, ind2) || isSSLLElMuEvent(ind1, ind2) || isSSLLElEvent(ind1, ind2) ) {
-				if (nbtags > 1) {
+				if (fVerbose > 2 && nbtags > 1) {
 					cout << "There are " << nbtags << " btags in this event!" << endl;
 					cout << "jet pt of 0th btagged-jet: " << getJetPt(btags[0]) << endl;
 					cout << "      index and tagger value: " << btags[0] << "  " << JetCSVBTag[btags[0]] << endl;
@@ -401,20 +401,22 @@ void SSDLDumper::loopEvents(Sample *S){
 					myweight1 = btagEventWeight (4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
 					myweight2 = btagEventWeight3(4, getJetPt(btags[0]), getJetPt(btags[1]), getJetPt(btags[2]), getJetPt(btags[3]) );
 				}
+				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 2 btags in region: " << myweight1 << endl << endl;
+				if (fVerbose > 2 && nbtags > 1) cout << "final btag weight for this event in case of 3 btags in region: " << myweight2 << endl << endl;
 			}
-			//if (nbtags > 1) cout << "final btag weight for this event in case of 2 btags in region: " << myweight1 << endl;
-			//if (nbtags > 1) cout << "final btag weight for this event in case of 3 btags in region: " << myweight2 << endl;
 			gBtagSF1 = myweight1;
 			gBtagSF2 = myweight2;
 			fDoCounting = true;
 		}
 		
 
+		gEventWeight0 = gHLTSF * 1.;
 		gEventWeight1 = gHLTSF * gBtagSF1;
 		gEventWeight2 = gHLTSF * gBtagSF2;
 		if( S->datamc!=4 ) { 			//no pu weight for mc with no pu
-			gEventWeight1 *= PUWeight;
-			gEventWeight2 *= PUWeight;
+			gEventWeight0 *= 1.;//PUWeight; SPONSORED BY CLAUDIO et al
+			gEventWeight1 *= 1.;//PUWeight; SPONSORED BY CLAUDIO et al
+			gEventWeight2 *= 1.;//PUWeight; SPONSORED BY CLAUDIO et al
 		}
 
 
@@ -505,6 +507,7 @@ void SSDLDumper::fillYields(Sample *S, gRegion reg){
 	///////////////////////////////////////////////////
 	// Set custom event selections here:
 	setRegionCuts(reg);
+	if (fC_minNbjmed == 0) gEventWeight = gEventWeight0;
 	if (fC_minNbjmed == 2) gEventWeight = gEventWeight1;
 	if (fC_minNbjmed == 3) gEventWeight = gEventWeight2;
 
@@ -1213,7 +1216,7 @@ void SSDLDumper::fillSigEventTree(Sample *S, int flag=0){
 	fC_minEl1pt  = 10.;
 
 	fSETree_SystFlag = flag;
-	fSETree_PUWeight = PUWeight;
+	fSETree_PUWeight = 1.;//PUWeight; SPONSORED BY CLAUDIO et al
 	fSETree_HLTSF    = gHLTSF;
 	fSETree_BtagSF1   = gBtagSF1;
 	fSETree_BtagSF2   = gBtagSF2;
@@ -4587,6 +4590,15 @@ float SSDLDumper::getHLTSF_DoubleElectron( float pt, float eta, const std::strin
 }
 float SSDLDumper::getHLTSF_MuEG( float pt, float eta, const std::string& runPeriod ) {
 	return sqrt(0.95);
+}
+float SSDLDumper::diMuonHLTSF2012(){
+	return 0.882;
+}
+float SSDLDumper::muEleHLTSF2012(){
+	return 0.922;
+}
+float SSDLDumper::diEleHLTSF2012(){
+	return 0.949;
 }
 SSDLDumper::ValueAndError SSDLDumper::getMuMuHLTSF( float pt, float eta, const std::string& runPeriod ) {
 	// These numbers taken from AN2011-399-v4

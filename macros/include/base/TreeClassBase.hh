@@ -1370,6 +1370,9 @@ public:
     std::vector<int>                     MuNMatches;
     edm::Handle<std::vector<int> >      hMuNMatches;
     edm::InputTag                       tMuNMatches;
+    std::vector<int>                     MuNMatchedStations;
+    edm::Handle<std::vector<int> >      hMuNMatchedStations;
+    edm::InputTag                       tMuNMatchedStations;
     std::vector<int>                     MuNMuHits;
     edm::Handle<std::vector<int> >      hMuNMuHits;
     edm::InputTag                       tMuNMuHits;

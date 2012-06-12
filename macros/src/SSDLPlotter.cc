@@ -58,9 +58,9 @@ double SSDLPlotter::gEChMisIDB_E = 0.;
 double SSDLPlotter::gEChMisIDE   = 0.;
 double SSDLPlotter::gEChMisIDE_E = 0.;
 
-float SSDLPlotter::gMMTrigScale = 0.798;
-float SSDLPlotter::gEMTrigScale = 0.888;
-float SSDLPlotter::gEETrigScale = 0.940;
+float SSDLPlotter::gMMTrigScale = 0.882;
+float SSDLPlotter::gEMTrigScale = 0.922;
+float SSDLPlotter::gEETrigScale = 0.949;
 
 //____________________________________________________________________________
 SSDLPlotter::SSDLPlotter(){
@@ -109,7 +109,7 @@ void SSDLPlotter::init(TString filename){
 	
 	// Luminosity
 	// fLumiNorm = 4680.; // Full 2011B
-	fLumiNorm = 920.;     // JSON from May19 ---> 920 /pb
+	fLumiNorm = 2968.;     // this id for JSON of June 8th! JSON from May19 ---> 920 /pb
 
 	// Cuts:
 	fC_minMu1pt = 20.;
@@ -142,18 +142,18 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBG.push_back(GJets200);
 	// MARC fMCBG.push_back(WW);
 	fMCBG.push_back(WZ);
-	// MARC fMCBG.push_back(ZZ);
+	fMCBG.push_back(ZZ);
 	// MARC fMCBG.push_back(GVJets);
 	// MARC fMCBG.push_back(DPSWW);
 	fMCBG.push_back(TTbarW);
 	fMCBG.push_back(TTbarZ);
-	// MARC fMCBG.push_back(TTbarG);
+	fMCBG.push_back(TTbarG);
 	// MARC fMCBG.push_back(WpWp);
 	// MARC fMCBG.push_back(WmWm);
 	// MARC fMCBG.push_back(WWZ);
 	fMCBG.push_back(WZZ);
 	fMCBG.push_back(WWG);
-	// MARC fMCBG.push_back(WWW);
+	fMCBG.push_back(WWW);
 	fMCBG.push_back(ZZZ);
 // 	fMCBG.push_back(QCDMuEnr15);
 // 	fMCBG.push_back(EMEnr20);
@@ -183,20 +183,20 @@ void SSDLPlotter::init(TString filename){
 	fMCBGNoQCDNoGJets.push_back(WJets);
 	fMCBGNoQCDNoGJets.push_back(DYJets);
 	// MARC fMCBGNoQCDNoGJets.push_back(WW);
-	// MARC fMCBGNoQCDNoGJets.push_back(WZ);
-	// MARC fMCBGNoQCDNoGJets.push_back(ZZ);
+	fMCBGNoQCDNoGJets.push_back(WZ);
+	fMCBGNoQCDNoGJets.push_back(ZZ);
 	// MARC fMCBGNoQCDNoGJets.push_back(GVJets);
 	// MARC fMCBGNoQCDNoGJets.push_back(DPSWW);
 	fMCBGNoQCDNoGJets.push_back(TTbarW);
 	fMCBGNoQCDNoGJets.push_back(TTbarZ);
-	// MARC fMCBGNoQCDNoGJets.push_back(TTbarG);
+	fMCBGNoQCDNoGJets.push_back(TTbarG);
 	// MARC fMCBGNoQCDNoGJets.push_back(WpWp);
 	// MARC fMCBGNoQCDNoGJets.push_back(WmWm);
 	// MARC fMCBGNoQCDNoGJets.push_back(WWZ);
-	// MARC fMCBGNoQCDNoGJets.push_back(WZZ);
-	// MARC fMCBGNoQCDNoGJets.push_back(WWG);
-	// MARC fMCBGNoQCDNoGJets.push_back(WWW);
-	// MARC fMCBGNoQCDNoGJets.push_back(ZZZ);
+	fMCBGNoQCDNoGJets.push_back(WZZ);
+	fMCBGNoQCDNoGJets.push_back(WWG);
+	fMCBGNoQCDNoGJets.push_back(WWW);
+	fMCBGNoQCDNoGJets.push_back(ZZZ);
 
 	// MARC fMCBGSig = fMCBG;
 	// MARC fMCBGSig.push_back(LM6);
@@ -217,19 +217,19 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGMuEnr.push_back(GJets200);
 	// MARC fMCBGMuEnr.push_back(WW);
 	fMCBGMuEnr.push_back(WZ);
-	// MARC fMCBGMuEnr.push_back(ZZ);
+	fMCBGMuEnr.push_back(ZZ);
 	// MARC fMCBGMuEnr.push_back(GVJets);
 	// MARC fMCBGMuEnr.push_back(DPSWW);
 	fMCBGMuEnr.push_back(TTbarW);
 	fMCBGMuEnr.push_back(TTbarZ);
-	// MARC fMCBGMuEnr.push_back(TTbarG);
+	fMCBGMuEnr.push_back(TTbarG);
 	// MARC fMCBGMuEnr.push_back(WpWp);
 	// MARC fMCBGMuEnr.push_back(WmWm);
 	// MARC fMCBGMuEnr.push_back(WWZ);
-	// MARC fMCBGMuEnr.push_back(WZZ);
-	// MARC fMCBGMuEnr.push_back(WWG);
-	// MARC fMCBGMuEnr.push_back(WWW);
-	// MARC fMCBGMuEnr.push_back(ZZZ);
+	fMCBGMuEnr.push_back(WZZ);
+	fMCBGMuEnr.push_back(WWG);
+	fMCBGMuEnr.push_back(WWW);
+	fMCBGMuEnr.push_back(ZZZ);
 	// MARC fMCBGMuEnr.push_back(QCDMuEnr10);
 	fMCBGMuEnr.push_back(QCDMuEnr15);
 
@@ -248,19 +248,19 @@ void SSDLPlotter::init(TString filename){
 	// MARC fMCBGEMEnr.push_back(GJets200);
 	// MARC fMCBGEMEnr.push_back(WW);
 	fMCBGEMEnr.push_back(WZ);
-	// MARC fMCBGEMEnr.push_back(ZZ);
+	fMCBGEMEnr.push_back(ZZ);
 	// MARC fMCBGEMEnr.push_back(GVJets);
 	// MARC fMCBGEMEnr.push_back(DPSWW);
 	fMCBGEMEnr.push_back(TTbarW);
 	fMCBGEMEnr.push_back(TTbarZ);
-	// MARC fMCBGEMEnr.push_back(TTbarG);
+	fMCBGEMEnr.push_back(TTbarG);
 	// MARC fMCBGEMEnr.push_back(WpWp);
 	// MARC fMCBGEMEnr.push_back(WmWm);
 	// MARC fMCBGEMEnr.push_back(WWZ);
-	// MARC fMCBGEMEnr.push_back(WZZ);
-	// MARC fMCBGEMEnr.push_back(WWG);
-	// MARC fMCBGEMEnr.push_back(WWW);
-	// MARC fMCBGEMEnr.push_back(ZZZ);
+	fMCBGEMEnr.push_back(WZZ);
+	fMCBGEMEnr.push_back(WWG);
+	fMCBGEMEnr.push_back(WWW);
+	fMCBGEMEnr.push_back(ZZZ);
 	// MARC fMCBGEMEnr.push_back(QCDEMEnr10);
 	//MARC	fMCBGMuEnr.push_back(QCDMuEnr15);
 	fMCBGEMEnr.push_back(EMEnr20);
@@ -269,54 +269,54 @@ void SSDLPlotter::init(TString filename){
 	fMCBGMuEnrSig = fMCBGMuEnr;
 	// MARC fMCBGMuEnrSig.push_back(LM6);
 
-	// MARC if(!gEWKino) fMCRareSM.push_back(WZ);
-	// MARC fMCRareSM.push_back(ZZ);
+	if(!gEWKino) fMCRareSM.push_back(WZ);
+	fMCRareSM.push_back(ZZ);
 	// MARC fMCRareSM.push_back(GVJets);
 	// MARC fMCRareSM.push_back(DPSWW);
-	// MARC if(gEWKino)  fMCRareSM.push_back(TTbarW);
-	// MARC if(gEWKino)  fMCRareSM.push_back(TTbarZ);
+	if(gEWKino)  fMCRareSM.push_back(TTbarW);
+	if(gEWKino)  fMCRareSM.push_back(TTbarZ);
 	// MARC fMCRareSM.push_back(TTbarG);
 	// MARC fMCRareSM.push_back(WpWp);
 	// MARC fMCRareSM.push_back(WmWm);get
 	// MARC fMCRareSM.push_back(WWZ);
-	// MARC fMCRareSM.push_back(WZZ);
-	// MARC fMCRareSM.push_back(WWG);
-	// MARC fMCRareSM.push_back(WWW);
-	// MARC fMCRareSM.push_back(ZZZ);
+	fMCRareSM.push_back(WZZ);
+	fMCRareSM.push_back(WWG);
+	fMCRareSM.push_back(WWW);
+	fMCRareSM.push_back(ZZZ);
 
 	fMuData    .push_back(DoubleMu1);
 	fMuData    .push_back(DoubleMu2);
-	// fMuData    .push_back(DoubleMu3);
+	fMuData    .push_back(DoubleMu3);
 	// fMuData    .push_back(DoubleMu4);
 	// fMuData    .push_back(DoubleMu5);
 	// fMuHadData .push_back(MuHad1);
 	// fMuHadData .push_back(MuHad2);
 	fEGData    .push_back(DoubleEle1);
 	fEGData    .push_back(DoubleEle2);
-	// fEGData    .push_back(DoubleEle3);
+	fEGData    .push_back(DoubleEle3);
 	// fEGData    .push_back(DoubleEle4);
 	// fEGData    .push_back(DoubleEle5);
 	// fEleHadData.push_back(EleHad1);
 	// fEleHadData.push_back(EleHad2);
 	fMuEGData  .push_back(MuEG1);
 	fMuEGData  .push_back(MuEG2);
-	// fMuEGData  .push_back(MuEG3);
+	fMuEGData  .push_back(MuEG3);
 	// fMuEGData  .push_back(MuEG4);
 	// fMuEGData  .push_back(MuEG5);
 
 	fHighPtData.push_back(DoubleMu1);
 	fHighPtData.push_back(DoubleMu2);
-	// fHighPtData.push_back(DoubleMu3);
+	fHighPtData.push_back(DoubleMu3);
 	// fHighPtData.push_back(DoubleMu4);
 	// fHighPtData.push_back(DoubleMu5);
 	fHighPtData.push_back(DoubleEle1);
 	fHighPtData.push_back(DoubleEle2);
-	// fHighPtData.push_back(DoubleEle3);
+	fHighPtData.push_back(DoubleEle3);
 	// fHighPtData.push_back(DoubleEle4);
 	// fHighPtData.push_back(DoubleEle5);
 	fHighPtData.push_back(MuEG1);
 	fHighPtData.push_back(MuEG2);
-	// fHighPtData.push_back(MuEG3);
+	fHighPtData.push_back(MuEG3);
 	// fHighPtData.push_back(MuEG4);
 	// fHighPtData.push_back(MuEG5);
 
@@ -5583,19 +5583,19 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	float nt2_rare_mc_mm_e1(0.), nt2_rare_mc_em_e1(0.), nt2_rare_mc_ee_e1(0.);
  
  	vector<int> mcbkg;
-// MARC 	mcbkg.push_back(ZZ);
+	mcbkg.push_back(ZZ);
 // MARC 	mcbkg.push_back(GVJets);
 // MARC 	mcbkg.push_back(DPSWW);
 	mcbkg.push_back(TTbarW);
 	mcbkg.push_back(TTbarZ);
-// MARC 	mcbkg.push_back(TTbarG);
+	mcbkg.push_back(TTbarG);
 // MARC 	mcbkg.push_back(WpWp);
 // MARC 	mcbkg.push_back(WmWm);
 // MARC 	mcbkg.push_back(WWZ);
-// MARC 	mcbkg.push_back(WZZ);
-// MARC 	mcbkg.push_back(WWG);
-// MARC 	mcbkg.push_back(WWW);
-// MARC 	mcbkg.push_back(ZZZ);
+ 	mcbkg.push_back(WZZ);
+ 	mcbkg.push_back(WWG);
+ 	mcbkg.push_back(WWW);
+ 	mcbkg.push_back(ZZZ);
  	for(size_t i = 0; i < mcbkg.size(); ++i){
  		Sample *S = fSamples[mcbkg[i]];
  		float scale = fLumiNorm/S->getLumi();
