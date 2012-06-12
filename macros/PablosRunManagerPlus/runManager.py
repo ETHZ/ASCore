@@ -79,7 +79,7 @@ def checklist(joblist,currlist):
       jobfinished.append(int(i)) 
   for job in jobfinished:
     joblist.remove(int(job))
-  print "Jobs left:"+str(len(joblist))+" / "+str(totaljobnumber)
+  print "\033[0F\033[2K Jobs left:"+str(len(joblist))+" / "+str(totaljobnumber)
 
 #-------------------------------------------------------------#
 # getFiles method: Obtains a list with the name of the files  #
@@ -411,8 +411,8 @@ def check_directory(path,username) :
 			if(currentline.count(path) > 0) :
 				supposedtobejoined=True
 				listoffiles.append(currentline[currentline.find(path):])
-	## MARC don't join on /scratch if supposedtobejoined==True:
-	## MARC don't join on /scratch 	join_directory(path,listoffiles,username)
+	if supposedtobejoined==True:
+	 	join_directory(path,listoffiles,username)
 
 
 ##################################################################################
