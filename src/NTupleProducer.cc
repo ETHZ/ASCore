@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.cc,v 1.171.2.1 2012/06/06 11:07:46 peruzzi Exp $
+// $Id: NTupleProducer.cc,v 1.171.2.2 2012/06/08 15:07:54 peruzzi Exp $
 //
 //
 
@@ -1925,7 +1925,24 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	 const Photon* gamIter = &photon;
 	 
+	 //e/gammma agreed recommandation
 	 
+	 fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+	 fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] = 0;
+
+	 fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] = 0;
+	 fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] = 0;
+
+	 fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+	 fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] = 0;
+
+	 /*
 	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[phoqi] = 0;
 	 fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[phoqi] = 0;
 	 fT_pho_Cone04PhotonIso_dR8_dEta0_pt0[phoqi] = 0;
@@ -1980,10 +1997,15 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
      fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] = 0;
      fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] = 0;
      fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] = 0;
+	 */
+
 
 	 //Look for associated PF objects
 	 bool FoundPFPhoton=false;
 	 bool FoundPFElectron=false;
+
+	 fT_pho_isPFPhoton[phoqi] = 0;
+	 fT_pho_isPFElectron[phoqi] = 0;
 
 	 int iPFduplicata=-1;
 
@@ -1999,8 +2021,10 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	     }
 	   }
 	 }    
-
-	 if (iphot!=-1) FoundPFPhoton=true;
+	 if (iphot!=-1) {
+	   FoundPFPhoton=true;
+	   fT_pho_isPFPhoton[phoqi] = 1;
+	 }
 
 	 //Find PFElectron
 	 bool foundEgSC = false;
@@ -2026,10 +2050,12 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   }
      
 	 }
+	 if (iel!=-1) {
+	   FoundPFElectron=true;
+	   fT_pho_isPFElectron[phoqi] = 1;
+	 }
 
-
-	 if (iel!=-1) FoundPFElectron=true;
-   
+	 /*
 	 double photonPhi;
 	 double photonEta;
 	 double photonVz;
@@ -2094,69 +2120,73 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	   //photonVz = (*pfCandidates)[iel].vz();
 	   photonVz = gamIter->vz();
 	 }
-
-
-
+	
 	 if (FoundPFPhoton && FoundPFElectron){ //both => we have used PFPhoton
 
 	   fT_pho_isPFPhoton[phoqi] = 1;
 	   fT_pho_isPFElectron[phoqi] = 1;
 
 	 }
-
+	 */
  
+	 
 	 int pho_Cone06NbPfCand;
 	 int pho_Cone06PfCandType[500];
-	 int pho_Cone06PfCandOverlap[500];
-	 float pho_Cone06PfCandEta[500];
-	 float pho_Cone06PfCandPhi[500];
-	 float pho_Cone06PfCandDeltaR[500];
-	 float pho_Cone06PfCandDeltaEta[500];
-	 float pho_Cone06PfCandDeltaPhi[500];
 	 float pho_Cone06PfCandPt[500];
-	 float pho_Cone06PfCandDz[500]; 
+	 float pho_Cone06PfCandDz[500];
 	 int pho_Cone06PfCandIsFromPU[500]; 
 	 float pho_Cone06PfCandDxy[500];
 	 float pho_Cone06PfCandDeltaRrecomputed[500];
 	 float pho_Cone06PfCandDeltaEtarecomputed[500];
 	 float pho_Cone06PfCandDeltaPhirecomputed[500];
-	 float pho_Cone06PfCandPtrecomputed[500];
+	 
+	 //int pho_Cone06PfCandOverlap[500];
+	 //float pho_Cone06PfCandEta[500];
+	 //float pho_Cone06PfCandPhi[500];
+	 //float pho_Cone06PfCandDeltaR[500];
+	 //float pho_Cone06PfCandDeltaEta[500];
+	 //float pho_Cone06PfCandDeltaPhi[500];
+	 //float pho_Cone06PfCandPtrecomputed[500];
 
-   //Recompute pflow isolation keeping all the pfcandidates in a 0.6 cone
-     pho_Cone06NbPfCand = 0;
-     int ipf=0;
+	 //Recompute pflow isolation keeping all the pfcandidates in a 0.6 cone
+	 pho_Cone06NbPfCand = 0;
+	 int ipf=0;
 
-     //if (iphot!=-1){
+	 float photonEta = gamIter->superCluster()->eta();
+	 float photonPhi = gamIter->superCluster()->phi();
+	 float photonVz = gamIter->vz();
+
+	 //if (iphot!=-1){
     
-     double dR;
-     int type = -1;
+	 double dR;
+	 int type = -1;
 
-       for( int i=0; i<ncand; ++i ) {
+	 for( int i=0; i<ncand; ++i ) {
 
-	 if (FoundPFPhoton && i==iphot) continue;
-	 if (FoundPFElectron && i==iel) continue;
-
-	 dR = DeltaR(photonPhi, (*pfCandidates)[i].phi(), photonEta, (*pfCandidates)[i].eta());
-	 if (dR<0.6 && dR>1e-05){
+	   if (FoundPFPhoton && i==iphot) continue;
+	   if (FoundPFElectron && i==iel) continue;
+	   
+	   dR = DeltaR(photonPhi, (*pfCandidates)[i].phi(), photonEta, (*pfCandidates)[i].eta());
+	   //if (dR<0.6 && dR>1e-05){
 	   
 	   type = FindPFCandType((*pfCandidates)[i].pdgId());
 	   //cout << "type=" << type<<endl;
 	   
 	   if (type==0 || type==1 || type==2){
 	   
-	     if (dR<0.6){
+	     //if (dR<0.6){
 	       
 	       bool isOverlapping = false;
 	       //isOverlapping = CheckPhotonPFCandOverlap(gamIter->superCluster(), pfCandidates, i);
 	       
 	       pho_Cone06PfCandType[ipf] = type;
-	       pho_Cone06PfCandOverlap[ipf] = isOverlapping;
+	       //pho_Cone06PfCandOverlap[ipf] = isOverlapping;
 	       
-	       pho_Cone06PfCandEta[ipf] = (*pfCandidates)[i].eta();
-	       pho_Cone06PfCandPhi[ipf] = (*pfCandidates)[i].phi();
-	       pho_Cone06PfCandDeltaR[ipf] = DeltaR( photonPhi, (*pfCandidates)[i].phi(),photonEta,(*pfCandidates)[i].eta());
-	       pho_Cone06PfCandDeltaEta[ipf] = (*pfCandidates)[i].eta()-photonEta;
-	       pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
+	       //pho_Cone06PfCandEta[ipf] = (*pfCandidates)[i].eta();
+	       //pho_Cone06PfCandPhi[ipf] = (*pfCandidates)[i].phi();
+	       //pho_Cone06PfCandDeltaR[ipf] = DeltaR( photonPhi, (*pfCandidates)[i].phi(),photonEta,(*pfCandidates)[i].eta());
+	       //pho_Cone06PfCandDeltaEta[ipf] = (*pfCandidates)[i].eta()-photonEta;
+	       //pho_Cone06PfCandDeltaPhi[ipf] = DeltaPhi(photonPhi,(*pfCandidates)[i].phi());
 	       pho_Cone06PfCandPt[ipf] = (*pfCandidates)[i].pt();
 	       pho_Cone06PfCandDz[ipf] = fabs((*pfCandidates)[i].vz()-photonVz);
 	       pho_Cone06PfCandDxy[ipf] = ( -((*pfCandidates)[i].vx() - gamIter->vx())*(*pfCandidates)[i].py() + ((*pfCandidates)[i].vy() - gamIter->vy())*(*pfCandidates)[i].px()) / (*pfCandidates)[i].pt();
@@ -2173,7 +2203,7 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	       pho_Cone06PfCandDeltaRrecomputed[ipf] = DeltaR( vCand.Phi(), pvm.Phi(), vCand.Eta(), pvm.Eta());
 	       pho_Cone06PfCandDeltaEtarecomputed[ipf] = pvm.Eta() - vCand.Eta();
 	       pho_Cone06PfCandDeltaPhirecomputed[ipf] = DeltaPhi(vCand.Phi(),pvm.Phi());
-	       pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();	       
+	       //pho_Cone06PfCandPtrecomputed[ipf] = (*pfCandidates)[i].pt();
 
 
 	       pho_Cone06PfCandIsFromPU[ipf] = -1;
@@ -2187,117 +2217,60 @@ void NTupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		 }
 	       ipf++;
 	       
-	       if (dR<0.4 && isOverlapping==false) {
-		 FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pho_Cone06PfCandIsFromPU[ipf], pfCandidates, i, phoqi);
-		 		 { //		 FillPhotonIsoVariables_Frixione_Neutrals(type, ipf, phoqi);
+	       //if (dR<0.4 && isOverlapping==false) {
+	       //FillPhotonIsoVariables(photonEta, photonPhi, photonVz, type, pho_Cone06PfCandIsFromPU[ipf], pfCandidates, i, phoqi);
+	       //{ //		 FillPhotonIsoVariables_Frixione_Neutrals(type, ipf, phoqi);
 
 
-		   double pt = pho_Cone06PfCandPt[ipf];
-		   double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
-		   double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
-		   double dR = sqrt(dEta*dEta+dPhi*dPhi);
-  
-
-
-		   if (type==0){ //Neutral Hadron
-    
-		     if (dR<0.1) fT_pho_Cone01NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-		     if (dR<0.2) fT_pho_Cone02NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-		     if (dR<0.3) fT_pho_Cone03NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-		     if (dR<0.4) fT_pho_Cone04NeutralHadronIso_dR0_dEta0_pt0_mvVtx[phoqi] += pt;
-		   }
-
-		   if (type==2) { //Photon
-
-		     if ((dR>0.045 && gamIter->isEB() && pt>0.08)||(dR>0.07 && gamIter->isEE() && pt>0.1)){
-		       if (dR<0.1) fT_pho_Cone01PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
-		       if (dR<0.2) fT_pho_Cone02PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
-		       if (dR<0.3) fT_pho_Cone03PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;  
-		       if (dR<0.4) fT_pho_Cone04PhotonIso_dR045EB070EE_dEta015_pt08EB1EE_mvVtx[phoqi] += pt;
-		     }
-		   }
-		 }
-
-		 { // FillPhotonIsoVariables_Frixione_ChHad(type, pho_Cone06PfCandIsFromPU[ipf], ipf, phoqi);
-
-		   bool isPU=pho_Cone06PfCandIsFromPU[ipf];
-
-		   double pt = pho_Cone06PfCandPt[ipf];
-		   double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
-		   double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
-		   double dR = sqrt(dEta*dEta+dPhi*dPhi);
-		   double dz = pho_Cone06PfCandDz[ipf];
-		   double dxy = pho_Cone06PfCandDxy[ipf];
-  
-		   if (type==1){ //Charged Hadron
-    
-		     //no cut
-		     if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-		     if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-		     if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-		     if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz0[phoqi] += pt;
-
-		     if (dR>0.015){
-		       if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-		       if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-		       if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-		       if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[phoqi] += pt;
-		     }
-    
-		     //dz/dxy
-		     if (dz<1. && dxy<0.1){
-
-		       if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-		       if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-		       if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-		       if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-
-		       if (dR>0.015){
-			 if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-			 if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-			 if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-			 if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[phoqi] += pt;
-		       }
-
-		     }
-
-		     //pfNoPU
-		     if (isPU==false){
-
-		       if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-		       if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-		       if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-		       if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[phoqi] += pt;
-
-		       if (dR>0.015){
-			 if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-			 if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-			 if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-			 if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[phoqi] += pt;
-		       }
-		     }
-
-		   }
-
-
-		 }
-
-
-
-		
-
+	       double pt = pho_Cone06PfCandPt[ipf];
+	       double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
+	       double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
+	       double dR = sqrt(dEta*dEta+dPhi*dPhi);
+	       double dz = pho_Cone06PfCandDz[ipf];
+	       double dxy = pho_Cone06PfCandDxy[ipf];
+	       
+	       if (type==0){ //Neutral Hadron
+		 if (dR<0.1) fT_pho_Cone01NeutralHadronIso_mvVtx[phoqi] += pt;
+		 if (dR<0.2) fT_pho_Cone02NeutralHadronIso_mvVtx[phoqi] += pt;
+		 if (dR<0.3) fT_pho_Cone03NeutralHadronIso_mvVtx[phoqi] += pt;
+		 if (dR<0.4) fT_pho_Cone04NeutralHadronIso_mvVtx[phoqi] += pt;
 	       }
-	     }
-	   }
+	       if (type==2) { //Photon
+		 
+		 if ((fabs(dEta)>0.015 && gamIter->isEB())||(dR>0.07 && gamIter->isEE())){
+		   if (dR<0.1) fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
+		   if (dR<0.2) fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
+		   if (dR<0.3) fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;  
+		   if (dR<0.4) fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[phoqi] += pt;
+		 }
+	       }
 	   
+	       // FillPhotonIsoVariables_Frixione_ChHad(type, pho_Cone06PfCandIsFromPU[ipf], ipf, phoqi);
+
+	       //bool isPU=pho_Cone06PfCandIsFromPU[ipf];
+	       //double pt = pho_Cone06PfCandPt[ipf];
+	       //double dEta = pho_Cone06PfCandDeltaEtarecomputed[ipf];
+	       //double dPhi = pho_Cone06PfCandDeltaPhirecomputed[ipf];
+	       //double dR = sqrt(dEta*dEta+dPhi*dPhi);
+	       
+  
+	       if (type==1){ //Charged Hadron
+    
+		 //dz/dxy
+		 if (dz<0.2 && dxy<0.1 && dR>0.02){
+		   if (dR<0.1) fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		   if (dR<0.2) fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		   if (dR<0.3) fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		   if (dR<0.4) fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[phoqi] += pt;
+		 }
+		 
+	       }
+	       
+	       
+	   }
 	 }
-
-       }
-       pho_Cone06NbPfCand = ipf;
-
-
-
-
+	     
+	 pho_Cone06NbPfCand = ipf;
 
        }     // end PF stuff from Nicholas
 
@@ -3800,6 +3773,23 @@ void NTupleProducer::beginJob(){ //336 beginJob(const edm::EventSetup&)
        fEventTree->Branch("Pho_isPFElectron",&fT_pho_isPFElectron,"Pho_isPFElectron[NPhotons]/I");
        fEventTree->Branch("PhotSCindex",&fTPhotSCindex,"PhotSCindex[NPhotons]/I");
 
+
+       fEventTree->Branch("fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx",&fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx,"fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx/F");
+
+       fEventTree->Branch("fT_pho_Cone01NeutralHadronIso_mvVtx",&fT_pho_Cone01NeutralHadronIso_mvVtx,"fT_pho_Cone01NeutralHadronIso_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone02NeutralHadronIso_mvVtx",&fT_pho_Cone02NeutralHadronIso_mvVtx,"fT_pho_Cone02NeutralHadronIso_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone03NeutralHadronIso_mvVtx",&fT_pho_Cone03NeutralHadronIso_mvVtx,"fT_pho_Cone03NeutralHadronIso_mvVtx/F");
+       fEventTree->Branch("fT_pho_Cone04NeutralHadronIso_mvVtx",&fT_pho_Cone04NeutralHadronIso_mvVtx,"fT_pho_Cone04NeutralHadronIso_mvVtx/F");
+
+       fEventTree->Branch("fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01/F");
+       fEventTree->Branch("fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01/F");
+       fEventTree->Branch("fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01/F");
+       fEventTree->Branch("fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01",&fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01,"fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01/F");
+
+       /*
 fEventTree->Branch("Pho_Cone04PhotonIso_dR0_dEta0_pt0",&fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,"Pho_Cone04PhotonIso_dR0_dEta0_pt0[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04PhotonIso_dR0_dEta0_pt5",&fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,"Pho_Cone04PhotonIso_dR0_dEta0_pt5[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04PhotonIso_dR8_dEta0_pt0",&fT_pho_Cone04PhotonIso_dR8_dEta0_pt0,"Pho_Cone04PhotonIso_dR8_dEta0_pt0[NPhotons]/F");
@@ -3846,7 +3836,7 @@ fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU",&fT_pho_Con
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[NPhotons]/F");
 fEventTree->Branch("Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU",&fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,"Pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[NPhotons]/F");
-
+       */
 
  fEventTree->Branch("Pho_conv_validvtx",&pho_conv_validvtx,"Pho_conv_validvtx[NPhotons]/O");
  fEventTree->Branch("Pho_conv_ntracks",&pho_conv_ntracks,"Pho_conv_ntracks[NPhotons]/I");
@@ -4670,6 +4660,25 @@ void NTupleProducer::resetTree(){
          }
        }
 
+
+       resetFloat(fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx, gMaxnphos);
+       
+       resetFloat(fT_pho_Cone01NeutralHadronIso_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone02NeutralHadronIso_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone03NeutralHadronIso_mvVtx, gMaxnphos);
+       resetFloat(fT_pho_Cone04NeutralHadronIso_mvVtx, gMaxnphos);
+       
+       resetFloat(fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
+       resetFloat(fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
+       resetFloat(fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
+       resetFloat(fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01, gMaxnphos);
+
+       
+
+       /*
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt0,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR0_dEta0_pt5,gMaxnphos);
        resetFloat(fT_pho_Cone04PhotonIso_dR8_dEta0_pt0,gMaxnphos);
@@ -4716,6 +4725,7 @@ void NTupleProducer::resetTree(){
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0,gMaxnphos);
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01,gMaxnphos);
        resetFloat(fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU,gMaxnphos);
+       */
 
        for (int i=0; i<gMaxnphos; i++) {
 	 pho_conv_vtx[i]=TVector3();
@@ -5280,7 +5290,7 @@ double NTupleProducer::DeltaR(double phi1, double phi2, double eta1, double eta2
 
   return dR;
 }
-
+/*
 void NTupleProducer::FillPhotonIsoVariables(double photonEta, double photonPhi, double photonVz, int type, bool isPU, edm::Handle<reco::PFCandidateCollection>& pfCandidates, int ipf, int phoqi){
 
   double pt = (*pfCandidates)[ipf].pt();
@@ -5327,7 +5337,7 @@ void NTupleProducer::FillPhotonIsoVariables(double photonEta, double photonPhi, 
   
   return;
 }
-
+*/
 reco::VertexRef NTupleProducer::chargedHadronVertex( const edm::Handle<reco::VertexCollection>& vertices, const reco::PFCandidate& pfcand ) const {
 
   //PfPileUp candidates!

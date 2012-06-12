@@ -14,7 +14,7 @@ Implementation:
 //
 // Original Author:  Benjamin Stieger
 //         Created:  Wed Sep  2 16:43:05 CET 2009
-// $Id: NTupleProducer.h,v 1.131.2.1 2012/06/06 11:07:46 peruzzi Exp $
+// $Id: NTupleProducer.h,v 1.131.2.2 2012/06/08 15:07:54 peruzzi Exp $
 //
 //
 
@@ -820,6 +820,22 @@ private:
   int fT_pho_isPFElectron[gMaxnphos];
   int fTPhotSCindex[gMaxnphos];
 
+  float fT_pho_Cone01PhotonIso_dEta015EB_dR070EE_mvVtx[gMaxnphos];
+  float fT_pho_Cone02PhotonIso_dEta015EB_dR070EE_mvVtx[gMaxnphos];
+  float fT_pho_Cone03PhotonIso_dEta015EB_dR070EE_mvVtx[gMaxnphos];
+  float fT_pho_Cone04PhotonIso_dEta015EB_dR070EE_mvVtx[gMaxnphos];
+
+  float fT_pho_Cone01NeutralHadronIso_mvVtx[gMaxnphos];
+  float fT_pho_Cone02NeutralHadronIso_mvVtx[gMaxnphos];
+  float fT_pho_Cone03NeutralHadronIso_mvVtx[gMaxnphos];
+  float fT_pho_Cone04NeutralHadronIso_mvVtx[gMaxnphos];  
+
+  float fT_pho_Cone01ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];
+  float fT_pho_Cone02ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];
+  float fT_pho_Cone03ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];  
+  float fT_pho_Cone04ChargedHadronIso_dR02_dz02_dxy01[gMaxnphos];
+
+  /*
 float fT_pho_Cone04PhotonIso_dR0_dEta0_pt0[gMaxnphos];
 float fT_pho_Cone04PhotonIso_dR0_dEta0_pt5[gMaxnphos];
 float fT_pho_Cone04PhotonIso_dR8_dEta0_pt0[gMaxnphos];
@@ -866,7 +882,7 @@ float fT_pho_Cone04ChargedHadronIso_dR0_dEta0_pt0_PFnoPU[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz0[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_dz1_dxy01[gMaxnphos];
 float fT_pho_Cone04ChargedHadronIso_dR015_dEta0_pt0_PFnoPU[gMaxnphos];
-
+  */
 	TVector3 pho_conv_vtx[gMaxnphos];
 	TVector3 pho_conv_refitted_momentum[gMaxnphos];
 	TVector3 conv_vtx[gMaxnphos];
