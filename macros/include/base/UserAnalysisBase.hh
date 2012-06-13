@@ -22,7 +22,7 @@
 
 class UserAnalysisBase{
 public:
-    UserAnalysisBase(TreeReader *tr = 0);
+    UserAnalysisBase(TreeReader *tr = 0, bool isData=1);
     virtual ~UserAnalysisBase();
   
     virtual void Begin() {}

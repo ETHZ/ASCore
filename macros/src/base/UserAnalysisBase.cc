@@ -18,26 +18,28 @@
 
 using namespace std;
 
-UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
+UserAnalysisBase::UserAnalysisBase(TreeReader *tr, bool isData){
     fTR = tr;
     fTlat = new TLatex();
     fVerbose = 0;
     fDoPileUpReweight = false;
-
+    string JESPathPrefix="/shome/buchmann/material/JEStxtfiles/data/GR_R_52_V7C_";
+    if(!isData) JESPathPrefix="/shome/buchmann/material/JEStxtfiles/mc/START52_V9B_";
+    
     // Put all JES-related stuff between pre-compiler flags
     //----------- Correction Object ------------------------------
     vector<JetCorrectorParameters> JetCorPar;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2L3Residual_AK5PF.txt");
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L3Absolute_AK5PF.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2Relative_AK5PF.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L1FastJet_AK5PF.txt");
+    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters(JESPathPrefix+"L2L3Residual_AK5PF.txt");
+    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters(JESPathPrefix+"L3Absolute_AK5PF.txt");
+    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters(JESPathPrefix+"L2Relative_AK5PF.txt");
+    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters(JESPathPrefix+"L1FastJet_AK5PF.txt");
     JetCorPar.push_back(*L1JetPar);
     JetCorPar.push_back(*L2JetPar);
     JetCorPar.push_back(*L3JetPar);
-    JetCorPar.push_back(*ResJetPar);
+    if(isData) JetCorPar.push_back(*ResJetPar);
 
     fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-    fJECUnc = new JetCorrectionUncertainty("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_Uncertainty_AK5PF.txt");
+    fJECUnc = new JetCorrectionUncertainty(JESPathPrefix+"Uncertainty_AK5PF.txt");
     delete L1JetPar;
     delete L2JetPar; 
     delete L3JetPar; 
@@ -313,7 +315,10 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuNPxHits[index] < 1)   return false;
     // if(fTR->MuNMuHits [index] < 2)   return false;
     if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
-	if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
+	// if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
+	         if(fTR->MuNMatchedStations.size() > 0) { 	 
+	                 if(fTR->MuNMatchedStations[index] < 2)   return false; // muon.numberOfMatchedStations() 	 
+	         }
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
     if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;
