@@ -1,0 +1,12 @@
+#####
+# PromptReco: 2012B
+#####
+/DoubleElectron/fronga-V03-03-01_DoubleElectron-Run2012B-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER '-t el -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/DoubleMu/fronga-V03-03-01_DoubleMu-Run2012B-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER '-t mu -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/MuEG/fronga-V03-03-01_MuEG-Run2012B-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER  '-t em -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+#####
+# PromptReco: 2012A
+#####
+/DoubleElectron/mdunser-V03-03-01_DoubleElectron-Run2012A-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER '-t el -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/DoubleMu/mdunser-V03-03-01_DoubleMu-Run2012A-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER '-t mu -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1
+/MuEG/mdunser-V03-03-01_MuEG-Run2012A-PromptReco-v1-AOD-a2f0a0ba259be6c6f48f936772a5e77f/USER  '-t em -j /shome/fronga/code/CMSSW_5_2_5/src/DiLeptonAnalysis/NTupleProducer/macros/PablosRunManagerPlus/json/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt' 20 -1

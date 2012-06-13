@@ -1,0 +1,94 @@
+###################################################################################################################
+# Datacard for Same-sign dilepton analysis
+#   Format is: tag \t inputfile \t datamctype \t channel \t lumi[/pb] \t color
+#    - datamctype can be: 0(data), 1(sm mc), 2(sig mc), 3(rare sm mc), 4(rare sm mc w/ no PU)
+#    - lumi only used for MC weights, default is set to 1.0
+#    - channel can be:   -1(ignore), 0(mumu), 1(elel), 2(elmu) ... only used for data
+###################################################################################################################
+# Data
+DoubleMu1	mdunser/SSDLTrees/2012/Jun7/DoubleMu-Run2012A-PromptReco-v1-AOD.root			0	0
+DoubleMu2	mdunser/SSDLTrees/2012/Jun13/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
+DoubleMu3	mdunser/SSDLTrees/2012/Jun12/DoubleMu-Run2012B-PromptReco-v1-AOD-jun10ext.root	0	0
+DoubleEle1	mdunser/SSDLTrees/2012/Jun7/DoubleElectron-Run2012A-PromptReco-v1-AOD.root		0	1
+DoubleEle2	mdunser/SSDLTrees/2012/Jun13/DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
+DoubleEle3	mdunser/SSDLTrees/2012/Jun12/DoubleElectron-Run2012B-PromptReco-v1-AOD-jun10ext.root		0	1
+MuEG1		mdunser/SSDLTrees/2012/Jun7/MuEG-Run2012A-PromptReco-v1-AOD.root			0	2
+MuEG2		mdunser/SSDLTrees/2012/Jun13/MuEG-Run2012B-PromptReco-v1-AOD/			0	2
+MuEG3		mdunser/SSDLTrees/2012/Jun12/MuEG-Run2012B-PromptReco-v1-AOD-jun10ext.root			0	2
+####################################################################################################################
+# Top and EWK
+TTJets		mdunser/SSDLTrees/2012/May29b/TTJets_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v1/			1	-1	225.197
+SingleT_t	mdunser/SSDLTrees/2012/May29b/T_t-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1.root		1	-1	55.531
+SingleTbar_t	mdunser/SSDLTrees/2012/May29b/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1.root		1	-1	30.0042
+SingleT_tW	mdunser/SSDLTrees/2012/May29b/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1.root		1	-1	11.1773
+SingleTbar_tW	mdunser/SSDLTrees/2012/May29b/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1.root	1	-1	11.1773
+#SingleT_s	stiegerb/SSDLTrees/2011B/Dec8/MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11_2.root					1	-1	79323.83	57
+SingleTbar_s	mdunser/SSDLTrees/2012/May29b/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-Summer12-PU_S7_START52_V9-v1.root		1	-1	1.75776
+WJets		mdunser/SSDLTrees/2012/May29b/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v1/			1	-1	36257.2
+DYJets		mdunser/SSDLTrees/2012/May29b/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Summer12-PU_S7_START52_V9-v2/		1	-1	3503.71
+#GJets40	stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_40_HT_100_7TeV-madgraph-Summer11-PU_S4.root				1	-1	4.9556e+02	38
+#GJets100	stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_100_HT_200_7TeV-madgraph-Summer11-PU_S4.root				1	-1	2.9470e+02	39
+#GJets200	stiegerb/SSDLTrees/2011B/Dec8/MC/GJets_TuneZ2_200_HT_inf_7TeV-madgraph-Summer11-PU_S4.root  			 	1	-1	1.1746e+04      40
+#GVJets		stiegerb/SSDLTrees/2011B/Dec8/MC/GVJets_7TeV-madgraph-Summer11-PU_S4.root						1	-1	1.8854e+04	41
+#WGstarE	stiegerb/SSDLTrees/2011B/Dec8b/MC/WGstarToLNu2E_TuneZ2_7TeV-madgraph.root						1	-1	4.8121e+04	41
+#WGstarMu	stiegerb/SSDLTrees/2011B/Dec8b/MC/WGstarToLNu2Mu_TuneZ2_7TeV-madgraph.root						1	-1	6.2337e+04	41
+#WGstarTau	stiegerb/SSDLTrees/2011B/Dec8b/MC/WGstarToLNu2Tau_TuneZ2_7TeV-madgraph.root						1	-1	1.6790e+05	41
+#WWTo2L2Nu	stiegerb/SSDLTrees/2011B/Dec8/MC/WWTo2L2NuMadgraph.root									1	-1	2.5754e+05	66
+WZTo3LNu	mdunser/SSDLTrees/2012/Jun7/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v2.root			1	-1	0.735
+ZZTo4L		mdunser/SSDLTrees/2012/Jun7/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola-Summer12-PU_S7_START52_V9-v3.root		1	-1	0.093 
+####################################################################################################################
+## Rare SM
+TTbarW		mdunser/SSDLTrees/2012/Jun11//8TeV_TTWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root		3	-1	0.232
+TTbarZ		mdunser/SSDLTrees/2012/Jun11//8TeV_TTZJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root		3	-1	0.208
+TTbarG		mdunser/SSDLTrees/2012/Jun11//8TeV_TTGJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root		3	-1	2.166
+#DPSWW		stiegerb/SSDLTrees/2011B/Dec9/MC/DoublePartonWWFastSim.root				3	-1	1.059e+06	51
+#WWZ		stiegerb/SSDLTrees/2011B/Dec9/MC/WWZNoGstar_TuneZ2_7TeV-madgraph.root			3	-1	0.063
+WZZ			mdunser/SSDLTrees/2012/Jun3/8TeV_WZZNoGstarJets_FastSim_525_Summer12-v1-InTimePU_START52_V9-v1.root			3	-1	0.0192
+WWG			mdunser/SSDLTrees/2012/Jun11//8TeV_WWGJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root		3	-1	0.528	
+ZZZ			mdunser/SSDLTrees/2012/Jun11//8TeV_ZZZNoGstarJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root	3	-1	0.0192
+WWW			mdunser/SSDLTrees/2012/Jun11//8TeV_WWWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root		3	-1	0.08217
+TTbarWW		mdunser/SSDLTrees/2012/Jun11//8TeV_TTWWJets_FastSim_525_Summer12-v3-StoreResults-InTimePU_START52_V9-v3.root	3	-1	0.002
+####################################################################################################################
+## Rare SM with no pileup, correct all by 1/puweight = 1/0.2674456 = 3.739078
+#W+W+		stiegerb/SSDLTrees/2011B/Dec9/MC/WplusWplus.root					4	-1	8.106e+05	51
+#W-W-		stiegerb/SSDLTrees/2011B/Dec9/MC/WminusWminus.root					4	-1	3.126e+06	51
+#####################################################################################################################
+### SUSY Signal
+#LM0		stiegerb/SSDLTrees/2011B/Dec8/MC/LM0_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.978e+03	18
+#LM1		stiegerb/SSDLTrees/2011B/Dec8/MC/LM1_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.331e+04	18
+#LM2		stiegerb/SSDLTrees/2011B/Dec8/MC/LM2_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.574e+05	18
+#LM3		stiegerb/SSDLTrees/2011B/Dec8/MC/LM3_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.469e+04	18
+#LM4		stiegerb/SSDLTrees/2011B/Dec8/MC/LM4_SUSY_sftsht_7TeV-pythia6.root			2	-1	8.609e+04	18
+#LM5		stiegerb/SSDLTrees/2011B/Dec8/MC/LM5_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.534e+05	18
+#LM6		stiegerb/SSDLTrees/2011B/Dec8/MC/LM6_SUSY_sftsht_7TeV-pythia6.root			2	-1	5.452e+05	18
+#LM7		stiegerb/SSDLTrees/2011B/Dec8/MC/LM7_SUSY_sftsht_7TeV-pythia6.root			2	-1	4.000e+03	18
+#LM8		stiegerb/SSDLTrees/2011B/Dec8/MC/LM8_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.758e+05	18
+#LM9		stiegerb/SSDLTrees/2011B/Dec8/MC/LM9_SUSY_sftsht_7TeV-pythia6.root			2	-1	2.158e+04	18
+#LM11		stiegerb/SSDLTrees/2011B/Dec8/MC/LM11_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.967e+05	18
+#LM12		stiegerb/SSDLTrees/2011B/Dec8/MC/LM12_SUSY_sftsht_7TeV-pythia6.root			2	-1	3.779e+04	18
+#LM13		stiegerb/SSDLTrees/2011B/Dec8/MC/LM13_SUSY_sftsht_7TeV-pythia6.root			2	-1	1.768e+04	18
+####################################################################################################################
+## QCD
+MuEnr15		folguera/SSDLTrees/2012/May31/V03-03-01_QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6-Summer12-PU_S7_START52_V9-v1/		1	-1	3.64e+08*3.7e-04
+EMEnr20		mdunser/SSDLTrees/2012/Jun3/QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6-Summer12-PU_S7_START52_V9-v1.root	1	-1	2.886e+08*0.0101
+EMEnr30		mdunser/SSDLTrees/2012/Jun3/QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6-Summer12-PU_S7_START50_V15-v1.root	1	-1	7.433e+07*0.0621
+#MuEnr10	stiegerb/SSDLTrees/2011B/Dec8b/MC/QCD_Pt-20_MuEnrichedPt-10_TuneZ2_7TeV_pythia6							1	-1	2.2886e+01	94
+#QCD15		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-15to30_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	1.2913e-02	90
+#QCD30		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-30to50_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	1.2228e-01	91
+#QCD50		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-50to80_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	9.7783e-01	92
+#QCD80		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-80to120_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	8.4023e+00	93
+#QCD120		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-120to170_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	5.2763e+01	94
+#QCD170		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-170to300_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	2.4272e+02	95
+#QCD300		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-300to470_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	5.1804e+03	96
+#QCD470		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-470to600_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	4.9603e+04	97
+#QCD600		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-600to800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	2.7210e+05	98
+#QCD800		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-800to1000_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	2.1673e+06	99
+#QCD1000		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-1000to1400_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	6.2750e+06	100
+#QCD1400		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-1400to1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root	1	-1	1.9845e+08	46
+#QCD1800		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_Pt-1800_TuneZ2_7TeV_pythia6_Summer11_PU_S4.root		1	-1	8.1997e+08	50
+#QCDHT50		stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_TuneD6T_HT-50To100_7TeV-madgraph.root			1	-1	6.914e-03	91
+#QCDHT100	stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_TuneD6T_HT-100To250_7TeV-madgraph.root			1	-1	1.395		93
+#QCDHT250	stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_TuneD6T_HT-250To500_7TeV-madgraph.root			1	-1	2.729e+01	95
+#QCDHT500	stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_TuneD6T_HT-500To1000_7TeV-madgraph.root			1	-1	1.463e+03	97
+#QCDHT1000	stiegerb/SSDLTrees/2011B/Dec8/MC/QCD_TuneD6T_HT-1000_7TeV-madgraph.root				1	-1	2.016e+04	99
+####################################################################################################################
