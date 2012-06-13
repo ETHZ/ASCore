@@ -5684,32 +5684,32 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	///////////////////////////////////////////////////////////////////////////////////
  	fOUTSTREAM3 << "%% " + Region::sname[reg] << endl;
  	fOUTSTREAM3 << "-----------------------------------------------------------------" << endl;
- 	fOUTSTREAM3 << Form("DF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("DF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	nff_em + nff_mm + nff_ee, sqrt(FR->getTotDoubleEStat()*FR->getTotDoubleEStat() + nDF*nDF*FakeESyst2),
  	nff_ee, sqrt(FR->getEENffEStat()*FR->getEENffEStat()+nff_ee*nff_ee*FakeESyst2),
  	nff_mm, sqrt(FR->getMMNffEStat()*FR->getMMNffEStat()+nff_mm*nff_mm*FakeESyst2),
  	nff_em, sqrt(FR->getEMNffEStat()*FR->getEMNffEStat()+nff_em*nff_em*FakeESyst2));
- 	fOUTSTREAM3 << Form("SF:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("SF:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	npf_em + nfp_em + npf_mm + npf_ee, sqrt(FR->getTotSingleEStat()*FR->getTotSingleEStat() + nSF*nSF*FakeESyst2),
  	npf_ee,          sqrt(FR->getEENpfEStat()   *FR->getEENpfEStat()    +  npf_ee*npf_ee*FakeESyst2),
  	npf_mm,          sqrt(FR->getMMNpfEStat()   *FR->getMMNpfEStat()    +  npf_mm*npf_mm*FakeESyst2),
  	npf_em + nfp_em, sqrt(FR->getEMSingleEStat()*FR->getEMSingleEStat() + (npf_em+nfp_em)*(npf_em+nfp_em)*FakeESyst2));
- 	fOUTSTREAM3 << Form("CM:  %6.1f ± %6.1f  ( %5.1f±%5.1f |   -         | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("CM:  %6.2f ± %6.2f  ( %5.2f±%5.2f |   -         | %5.2f±%5.2f )\n",
  	nt2_ee_chmid + nt2_em_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2 + nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2),
  	nt2_ee_chmid, sqrt(nt2_ee_chmid_e1*nt2_ee_chmid_e1 + nt2_ee_chmid_e2*nt2_ee_chmid_e2),
  	nt2_em_chmid, sqrt(nt2_em_chmid_e1*nt2_em_chmid_e1 + nt2_em_chmid_e2*nt2_em_chmid_e2));
- 	fOUTSTREAM3 << Form("MC:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("MC:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em, sqrt(nt2_rare_mc_ee_e1 + nt2_rare_mc_mm_e1 + nt2_rare_mc_em_e1 + RareESyst2*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)*(nt2_rare_mc_ee + nt2_rare_mc_mm + nt2_rare_mc_em)),
  	nt2_rare_mc_ee, sqrt(nt2_rare_mc_ee_e1 + RareESyst2*nt2_rare_mc_ee*nt2_rare_mc_ee),
  	nt2_rare_mc_mm, sqrt(nt2_rare_mc_mm_e1 + RareESyst2*nt2_rare_mc_mm*nt2_rare_mc_mm),
  	nt2_rare_mc_em, sqrt(nt2_rare_mc_em_e1 + RareESyst2*nt2_rare_mc_em*nt2_rare_mc_em));
- 	fOUTSTREAM3 << Form("WZ:  %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("WZ:  %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	wz_nt2_mm + wz_nt2_em + wz_nt2_ee,
  	sqrt(wz_nt2_mm_e1 + wz_nt2_em_e1 + wz_nt2_em_e1 + WZESyst2*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)*(wz_nt2_mm + wz_nt2_em + wz_nt2_ee)),
  	wz_nt2_ee, sqrt(wz_nt2_ee_e1 + WZESyst2*wz_nt2_ee*wz_nt2_ee),
  	wz_nt2_mm, sqrt(wz_nt2_mm_e1 + WZESyst2*wz_nt2_mm*wz_nt2_mm),
  	wz_nt2_em, sqrt(wz_nt2_em_e1 + WZESyst2*wz_nt2_em*wz_nt2_em));
- 	fOUTSTREAM3 << Form("Tot: %6.1f ± %6.1f  ( %5.1f±%5.1f | %5.1f±%5.1f | %5.1f±%5.1f )\n",
+ 	fOUTSTREAM3 << Form("Tot: %6.2f ± %6.2f  ( %5.2f±%5.2f | %5.2f±%5.2f | %5.2f±%5.2f )\n",
  	tot_pred, sqrt(comb_tot_sqerr1 + comb_tot_sqerr2),
  	nF_ee + nt2_rare_mc_ee + nt2_ee_chmid + wz_nt2_ee, sqrt(ee_tot_sqerr1 + ee_tot_sqerr2),
  	nF_mm + nt2_rare_mc_mm                + wz_nt2_mm, sqrt(mm_tot_sqerr1 + mm_tot_sqerr2),
