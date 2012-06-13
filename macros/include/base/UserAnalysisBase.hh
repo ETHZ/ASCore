@@ -11,9 +11,7 @@
 
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
-//#include "helper/PUWeight.h"
-//#include "helper/Lumi3DReWeighting_standalone.hh"
-#include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h"
+#include "helper/LumiReweightingStandAlone.h"
 
 #include "TreeReader.hh"
 
