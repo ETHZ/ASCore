@@ -9,7 +9,7 @@ ROOTCFLAGS     = $(shell root-config --cflags)
 ROOTLIBS       = $(shell root-config --libs)
 ROOTGLIBS      = $(shell root-config --glibs)
 
-INCLUDES       = -I./include -I$(CMSSW_BASE)/src/ -I$(CMSSW_RELEASE_BASE)/src/ 
+INCLUDES       = -I./include -I$(CMSSW_RELEASE_BASE)/src/ 
 
 CXX            = g++
 CXXFLAGS       = -g -fPIC -fno-var-tracking -Wno-deprecated -D_GNU_SOURCE -O2 -std=c++0x $(INCLUDES) 
@@ -34,7 +34,7 @@ GLIBS         += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH) -L/swshare/cms/slc5_a
 
 
 SRCS           = src/base/TreeClassBase.cc src/base/TreeReader.cc src/base/TreeAnalyzerBase.cc src/base/UserAnalysisBase.cc \
-                 src/helper/PUWeight.C src/helper/Lumi3DReWeighting_standalone.cc\
+                 #src/helper/PUWeight.C src/helper/Lumi3DReWeighting_standalone.cc\
                  
 
 OBJS           = $(patsubst %.C,%.o,$(SRCS:.cc=.o))
@@ -1830,8 +1830,5 @@ src/base/UserAnalysisBase.o: /usr/include/_G_config.h /usr/include/wchar.h
 src/base/UserAnalysisBase.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 src/base/UserAnalysisBase.o: /usr/include/bits/stdio_lim.h
 src/base/UserAnalysisBase.o: /usr/include/bits/sys_errlist.h
-src/base/UserAnalysisBase.o: ./include/helper/PUWeight.h
-src/base/UserAnalysisBase.o: /swshare/cms/slc5_amd64_gcc462/cms/cmssw-patch/CMSSW_5_2_5_patch1/src/PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h
+src/base/UserAnalysisBase.o: ./include/helper/LumiReweightingStandAlone.h
 src/base/UserAnalysisBase.o: ./include/base/TreeReader.hh
-src/helper/PUWeight.o: ./include/helper/PUWeight.h
-src/helper/Lumi3DReWeighting_standalone.o: ./include/helper/Lumi3DReWeighting_standalone.hh
