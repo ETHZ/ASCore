@@ -61,8 +61,7 @@ void JZBAnalyzer::BeginJob(string fdata_PileUp, string fmc_PileUp){
   //	fJZBPFAnalysis->outputFileName_ = outputFileName_;
   if(whichanalysis!=2) fJZBAnalysis->SetVerbose(fVerbose);
 //  if(whichanalysis!=1) fJZBPFAnalysis->SetVerbose(fVerbose);
-  //if(whichanalysis!=2) fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
-  if(whichanalysis!=2) fJZBAnalysis->SetPileUp3DSrc(fdata_PileUp, fmc_PileUp);
+  if(whichanalysis!=2) fJZBAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
 //  if(whichanalysis!=1) fJZBPFAnalysis->SetPileUpSrc(fdata_PileUp, fmc_PileUp);
   if(whichanalysis!=2) fJZBAnalysis->Begin(fHistFile);
 //  if(whichanalysis!=1) fJZBPFAnalysis->Begin(fHistFile);

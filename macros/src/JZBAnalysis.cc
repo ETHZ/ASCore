@@ -18,14 +18,14 @@ using namespace std;
 enum METTYPE { mettype_min, RAW = mettype_min, DUM, TCMET, MUJESCORRMET, PFMET, SUMET, PFRECOILMET, RECOILMET, mettype_max };
 enum JZBTYPE { jzbtype_min, TYPEONECORRPFMETJZB = jzbtype_min, PFJZB, RECOILJZB, PFRECOILJZB, TCJZB, jzbtype_max };
 
-string sjzbversion="$Revision: 1.70.2.36 $";
+string sjzbversion="$Revision: 1.70.2.37 $";
 string sjzbinfo="";
 
 float firstLeptonPtCut  = 10.0;
 float secondLeptonPtCut = 10.0;
 
 /*
-$Id: JZBAnalysis.cc,v 1.70.2.36 2012/06/11 07:36:37 buchmann Exp $
+$Id: JZBAnalysis.cc,v 1.70.2.37 2012/06/11 09:21:32 buchmann Exp $
 */
 
 
@@ -72,6 +72,7 @@ public:
   float genMET;
   float genZPt;    // True Z Pt
   float genMll;
+  float genMllg;
   float genRecoil;
   float genJZB;
   int   genNjets;
@@ -138,6 +139,7 @@ public:
   float pfJetScaleUnc[jMax];
   float pfJetDphiMet[jMax];
   float pfJetDphiZ[jMax];
+  float CorrectionRatio[jMax];
   float pfHT;
   float pfGoodHT;
   float pfTightHT;
@@ -196,7 +198,6 @@ public:
   float sumJetPt[jzbtype_max];
 
   float weight;
-  float weight3D;
   float weightEffDown;
   float weightEffUp;
   float Efficiencyweightonly;
@@ -204,7 +205,6 @@ public:
   float pdfW[100];
   float pdfWsum;
   float PUweight;
-  float PUweight3D;
   bool passed_triggers;
   int trigger_bit;
   float mGlu;
@@ -306,6 +306,7 @@ void nanoEvent::reset()
   genMET=0;
   genZPt=0;
   genMll=0;
+  genMllg=0;
   genRecoil=0;
   genJZB = 0;
   genNjets = 0;
@@ -387,6 +388,7 @@ void nanoEvent::reset()
     pfJetScaleUnc[jCounter]=0;
     pfJetDphiMet[jCounter]=0;
     pfJetDphiZ[jCounter]=0;
+    CorrectionRatio[jMax]=0;
   }
   pfJetNum=0;
   pfHT=0;
@@ -444,9 +446,7 @@ void nanoEvent::reset()
   }
 
   weight = 1.0;
-  weight3D = 1.0;
   PUweight = 1.0;
-  PUweight3D = 1.0;
   Efficiencyweightonly = 1.0;
   weightEffDown = 1.0;
   weightEffUp = 1.0;
@@ -535,7 +535,7 @@ void JZBAnalysis::addPath(std::vector<std::string>& paths, std::string base,
 
 
 JZBAnalysis::JZBAnalysis(TreeReader *tr, std::string dataType, bool fullCleaning, bool isModelScan, bool makeSmall, bool doGenInfo) :
-  UserAnalysisBase(tr), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
+  UserAnalysisBase(tr,dataType!="mc"), fDataType_(dataType), fFullCleaning_(fullCleaning) , fisModelScan(isModelScan) , fmakeSmall(makeSmall), fdoGenInfo(doGenInfo) {
   // Define trigger paths to check
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL",1,8);
   addPath(elTriggerPaths,"HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL",1,5);
@@ -642,6 +642,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("genMET",&nEvent.genMET,"genMET/F");
   myTree->Branch("genZPt",&nEvent.genZPt,"genZPt/F");
   myTree->Branch("genMll",&nEvent.genMll,"genMll/F");
+  myTree->Branch("genMllg",&nEvent.genMllg,"genMllg/F");
   myTree->Branch("genRecoil",&nEvent.genRecoil,"genRecoil/F");
   myTree->Branch("genJZB",&nEvent.genJZB,"genJZB/F");
   myTree->Branch("genNjets",&nEvent.genNjets,"genNjets/I");
@@ -724,6 +725,7 @@ void JZBAnalysis::Begin(TFile *f){
   myTree->Branch("pfHT",&nEvent.pfHT,"pfHT/F");
   myTree->Branch("pfGoodHT",&nEvent.pfGoodHT,"pfGoodHT/F");
   myTree->Branch("pfTightHT",&nEvent.pfTightHT,"pfTightHT/F");
+  myTree->Branch("CorrectionRatio", nEvent.CorrectionRatio,"CorrectionRatio[pfJetNum]/F");
 
   myTree->Branch("pfJetGoodNum",&nEvent.pfJetGoodNum,"pfJetGoodNum/I");
   myTree->Branch("pfJetGoodNumBtag",&nEvent.pfJetGoodNumBtag,"pfJetGoodNumBtag/I");
@@ -765,8 +767,6 @@ void JZBAnalysis::Begin(TFile *f){
 
   myTree->Branch("weight", &nEvent.weight,"weight/F");
   myTree->Branch("PUweight",&nEvent.PUweight,"PUweight/F");
-  myTree->Branch("weight3D", &nEvent.weight3D,"weight3D/F");
-  myTree->Branch("PUweight3D",&nEvent.PUweight3D,"PUweight3D/F");
   myTree->Branch("Efficiencyweightonly",&nEvent.Efficiencyweightonly,"Efficiencyweightonly/F");
   myTree->Branch("weightEffDown",&nEvent.weightEffDown,"weightEffDown/F");
   myTree->Branch("weightEffUp",&nEvent.weightEffUp,"weightEffUp/F");
@@ -950,11 +950,9 @@ void JZBAnalysis::Analyze() {
 	nEvent.pdfWsum=fTR->pdfWsum; 
       } else {
 	//don't attempt to do PURW for model scans
-	nEvent.PUweight   = GetPUWeight(fTR->PUnumInteractions);
+	nEvent.PUweight   = GetPUWeight(fTR->PUnumTrueInteractions);
 	nEvent.weight     = GetPUWeight(fTR->PUnumInteractions);
-	nEvent.PUweight3D = GetPUWeight3D(fTR->PUOOTnumInteractionsEarly,fTR->PUnumInteractions,fTR->PUOOTnumInteractionsLate);
-	nEvent.weight3D   = nEvent.PUweight3D;
-	weight_histo->Fill(1,nEvent.PUweight3D);
+	weight_histo->Fill(1,nEvent.PUweight);
       }
       
      // the following part makes sense for all MC - not only for scans (though for scans imposedx/realx make more sense)
@@ -1242,7 +1240,6 @@ void JZBAnalysis::Analyze() {
         }
     }
 
-  
   // Sort the leptons by Pt and select the two opposite-signed ones with highest Pt
   vector<lepton> sortedGoodLeptons = sortLeptonsByPt(leptons);
 
@@ -1353,6 +1350,18 @@ void JZBAnalysis::Analyze() {
       float jenergy = fTR->JE[i];
       float jesC = fTR->JEcorr[i];
       bool  isJetID = IsGoodBasicPFJet(i,0.0,3.0);
+      
+      jpt=jpt/jesC;
+      jenergy=jenergy/jesC;
+      fJetCorrector->setJetEta(jeta);
+      fJetCorrector->setJetPt(jpt);
+      fJetCorrector->setJetA(fTR->JArea[i]);
+      fJetCorrector->setRho(fTR->Rho);
+      double correction = fJetCorrector->getCorrection();
+      jpt*=correction;
+      jenergy*=correction;
+      nEvent.CorrectionRatio[nEvent.pfJetNum]=correction/jesC;
+      jesC=correction;
       
       TLorentzVector aJet(jpx,jpy,jpz,jenergy);
       
@@ -1713,7 +1722,7 @@ const bool JZBAnalysis::IsCustomMu2012(const int index){
   counters[MU].fill(" ... D0(pv) < 0.02");
   //HPA recommendation not POG
   if ( !(fabs(fTR->MuDzPV[index]) < 0.2 ) ) return false; //still open
-  counters[MU].fill(" ... DZ(pv) < 0.1");
+  counters[MU].fill(" ... DZ(pv) < 0.2");
 
 
   // Flat isolation below 20 GeV (only for synch.: we cut at 20...)
@@ -1800,7 +1809,7 @@ const bool JZBAnalysis::IsCustomEl2012(const int index) {
   if(!(abs(fTR->ElD0PV[index])<0.02)) return false;
   counters[EL].fill(" ... D0(PV)<0.02");
   if(!(abs(fTR->ElDzPV[index])<0.2)) return false;
-  counters[EL].fill(" ... DZ(PV)<0.1");
+  counters[EL].fill(" ... DZ(PV)<0.2");
 
 //  if(!(fTR->ElPassConversionVeto[index])) return false;
   if(!(fTR->ElNumberOfMissingInnerHits[index]<=1)) return false;
@@ -1892,6 +1901,25 @@ void JZBAnalysis::GeneratorInfo(void) {
         //if ( fTR->GenLeptonMID[gIndex] ==23 ) gLeptons.push_back(tmpLepton); // WW study
       }         
   }
+  
+  vector<lepton> gPhotons;
+  for(int phoIndex=0;phoIndex<fTR->NGenPhotons;phoIndex++) {
+    if( fTR->GenPhotonPt[phoIndex]>minPt && 
+         fabs(fTR->GenPhotonEta[phoIndex])<maxEta) 
+    {
+        TLorentzVector tmpVector;
+        tmpVector.SetPtEtaPhiM(fTR->GenPhotonPt[phoIndex],fTR->GenPhotonEta[phoIndex], 
+                               fTR->GenPhotonPhi[phoIndex],0.);
+        lepton tmpLepton;
+        tmpLepton.p      = tmpVector;
+        tmpLepton.index  = phoIndex;
+        tmpLepton.genPt  = tmpVector.Pt();
+        gPhotons.push_back(tmpLepton); 
+    }
+  }
+  
+  vector<lepton> sortedGPhotons = sortLeptonsByPt(gPhotons);
+  
   // Gen leptons are not sorted by Pt...
   vector<lepton> sortedGLeptons = sortLeptonsByPt(gLeptons);
 
@@ -1937,12 +1965,16 @@ void JZBAnalysis::GeneratorInfo(void) {
       if(sortedGLeptons.size()>1)
         {
           TLorentzVector genZvector = sortedGLeptons[i1].p + sortedGLeptons[i2].p;
+	  TLorentzVector genZvectorPrime;
+	  if(sortedGPhotons.size()>0) genZvectorPrime = sortedGLeptons[i1].p + sortedGLeptons[i2].p + sortedGPhotons[0].p;
+	  else genZvectorPrime = sortedGLeptons[i1].p + sortedGLeptons[i2].p;
           nEvent.genRecoil  = (-GenMETvector - genZvector).Pt();
           nEvent.genPt2     = sortedGLeptons[i2].p.Pt();
           nEvent.genId2     = sortedGLeptons[i2].type;
           nEvent.genEta2    = sortedGLeptons[i2].p.Eta();
           nEvent.genZPt     = genZvector.Pt();
           nEvent.genMll     = genZvector.M();
+	  nEvent.genMllg    = genZvectorPrime.M();
           nEvent.genJZB     = nEvent.genRecoil - genZvector.Pt();
 	  nEvent.dphigenZgenMet = (sortedGLeptons[i1].p + sortedGLeptons[i2].p).DeltaPhi(GenMETvector);
         }
