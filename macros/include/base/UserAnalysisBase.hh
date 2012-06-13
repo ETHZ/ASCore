@@ -11,8 +11,10 @@
 
 #include "helper/pdgparticle.hh"
 #include "helper/Utilities.hh"
-#include "helper/PUWeight.h"
-#include "helper/Lumi3DReWeighting_standalone.hh"
+//#include "helper/PUWeight.h"
+//#include "helper/Lumi3DReWeighting_standalone.hh"
+#include "PhysicsTools/Utilities/interface/LumiReweightingStandAlone.h"
+
 #include "TreeReader.hh"
 
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
@@ -43,12 +45,7 @@ public:
 
     // PileUp reweighting;
     virtual void  SetPileUpSrc(string, string = "");
-    virtual void  SetPileUp3DSrc(string, string);
-
-    virtual float GetPUWeight(int);
-    virtual float GetPUWeight(int, int);
-    virtual float GetPUWeight3D( int , int , int );
-
+    virtual float GetPUWeight(float);
 
     TreeReader *fTR;
     TString fOutputDir;
@@ -147,11 +144,8 @@ private:
 //     std::vector<Cut> fEvtSelCuts;
 	
     // Pile UP reweighting
-    bool fDoPileUpReweight;
-    bool fDoPileUpReweight3D;
-
-    PUWeight  *fPUWeight;
-    Lumi3DReWeighting   *fPUWeight3D;
+  bool fDoPileUpReweight;
+  reweight::LumiReWeighting   *fPUWeight;
 
 
 };

@@ -23,22 +23,21 @@ UserAnalysisBase::UserAnalysisBase(TreeReader *tr){
     fTlat = new TLatex();
     fVerbose = 0;
     fDoPileUpReweight = false;
-    fDoPileUpReweight3D = false;
 
     // Put all JES-related stuff between pre-compiler flags
     //----------- Correction Object ------------------------------
     vector<JetCorrectorParameters> JetCorPar;
-    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L2L3Residual_AK5PF.txt");
-    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L3Absolute_AK5PF.txt");
-    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L2Relative_AK5PF.txt");
-    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_L1FastJet_AK5PF.txt");
+    JetCorrectorParameters *ResJetPar = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2L3Residual_AK5PF.txt");
+    JetCorrectorParameters *L3JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L3Absolute_AK5PF.txt");
+    JetCorrectorParameters *L2JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L2Relative_AK5PF.txt");
+    JetCorrectorParameters *L1JetPar  = new JetCorrectorParameters("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_L1FastJet_AK5PF.txt");
     JetCorPar.push_back(*L1JetPar);
     JetCorPar.push_back(*L2JetPar);
     JetCorPar.push_back(*L3JetPar);
     JetCorPar.push_back(*ResJetPar);
 
     fJetCorrector = new FactorizedJetCorrector(JetCorPar);
-    fJECUnc = new JetCorrectionUncertainty("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7C_Uncertainty_AK5PF.txt");
+    fJECUnc = new JetCorrectionUncertainty("/shome/buchmann/material/JEStxtfiles/GR_R_52_V7_Uncertainty_AK5PF.txt");
     delete L1JetPar;
     delete L2JetPar; 
     delete L3JetPar; 
@@ -314,10 +313,7 @@ bool UserAnalysisBase::IsGoodBasicMu(int index){
     if(fTR->MuNPxHits[index] < 1)   return false;
     // if(fTR->MuNMuHits [index] < 2)   return false;
     if(fTR->MuNGlHits [index] < 1)   return false; // muon.globalTrack()->hitPattern().numberOfValidHits() 
-	// if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
-	if(fTR->MuNMatchedStations.size() > 0) {
-		if(fTR->MuNMatchedStations[index] < 2)   return false; // muon.numberOfMatchedStations()
-	}
+	if(fTR->MuNMatches[index] < 2)   return false; // muon.numberOfMatches()
 
     if(fabs(fTR->MuD0PV[index]) > 0.02)    return false;
     if(fabs(fTR->MuDzPV[index]) > 0.10)    return false;
@@ -1263,42 +1259,17 @@ float UserAnalysisBase::GetJECUncert(float pt, float eta){
 // ---------------------------------------------
 // Pile Up Reweighting
 void UserAnalysisBase::SetPileUpSrc(string data_PileUp, string mc_PileUp){
-    if(data_PileUp.size() == 0 ) return;
+    if(data_PileUp.size() == 0 || mc_PileUp.size() == 0 ) return;
     if(fDoPileUpReweight  == 1 ) {cout << "ERROR in SetPileUpSrc: fPUWeight already initialized" << endl; return; }
-    if(mc_PileUp.size() ==0){
-        fPUWeight = new PUWeight(data_PileUp.c_str());
-    }else {
-        fPUWeight = new PUWeight(data_PileUp.c_str(), mc_PileUp.c_str());
-    } 
+    
+    fPUWeight = new reweight::LumiReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
     fDoPileUpReweight = true;
 }
 
-// // Pile Up Reweighting - 3D
-void UserAnalysisBase::SetPileUp3DSrc(string data_PileUp, string mc_PileUp){
-    if(data_PileUp.size() == 0 ) return;
-    if(fDoPileUpReweight3D == 1 ) {cout << "ERROR in SetPileUpSrc3D: fPUWeight already initialized" << endl; return; }
-    //if(mc_PileUp.size() ==0){
-    //	fPUWeight = new Lumi3DReWeighting(data_PileUp.c_str());
-    //}else {
-    fPUWeight3D = new Lumi3DReWeighting( mc_PileUp, data_PileUp,"pileup","pileup");
-    fPUWeight3D->weight3D_init(1);
-    //} 
-    fDoPileUpReweight3D = true;
-}
 
-float UserAnalysisBase::GetPUWeight(int nPUinteractions){
+//2012 PU reweighting: USE NUMBER OF TRUE INTERACTIONS!
+float UserAnalysisBase::GetPUWeight(float nPUTrueinteractions){
     if(! fDoPileUpReweight) return -999.99;
-    else return fPUWeight->GetWeight(nPUinteractions); 
-}
-
-float UserAnalysisBase::GetPUWeight(int nPUinteractions, int nPUinteractionsLate){
-    if(! fDoPileUpReweight) return -999.99;
-    else return fPUWeight->weightOOT(nPUinteractions, nPUinteractionsLate);
-}
-
-float UserAnalysisBase::GetPUWeight3D( int nPUinteractionsEarly, int nPUinteractions, int nPUinteractionsLate){
-    //  return -1;
-    if(! fDoPileUpReweight3D) return -999.99;
-    else return fPUWeight3D->weight3D(nPUinteractionsEarly ,nPUinteractions , nPUinteractionsLate);
+    else return fPUWeight->weight( nPUTrueinteractions); 
 }
 
