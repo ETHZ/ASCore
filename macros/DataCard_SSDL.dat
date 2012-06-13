@@ -7,13 +7,13 @@
 ###################################################################################################################
 # Data
 DoubleMu1	mdunser/SSDLTrees/2012/Jun7/DoubleMu-Run2012A-PromptReco-v1-AOD.root			0	0
-DoubleMu2	mdunser/SSDLTrees/2012/Jun7/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
+DoubleMu2	mdunser/SSDLTrees/2012/Jun13/DoubleMu-Run2012B-PromptReco-v1-AOD/			0	0
 DoubleMu3	mdunser/SSDLTrees/2012/Jun12/DoubleMu-Run2012B-PromptReco-v1-AOD-jun10ext.root	0	0
 DoubleEle1	mdunser/SSDLTrees/2012/Jun7/DoubleElectron-Run2012A-PromptReco-v1-AOD.root		0	1
-DoubleEle2	mdunser/SSDLTrees/2012/Jun7/DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
+DoubleEle2	mdunser/SSDLTrees/2012/Jun13/DoubleElectron-Run2012B-PromptReco-v1-AOD/		0	1
 DoubleEle3	mdunser/SSDLTrees/2012/Jun12/DoubleElectron-Run2012B-PromptReco-v1-AOD-jun10ext.root		0	1
 MuEG1		mdunser/SSDLTrees/2012/Jun7/MuEG-Run2012A-PromptReco-v1-AOD.root			0	2
-MuEG2		mdunser/SSDLTrees/2012/Jun7/MuEG-Run2012B-PromptReco-v1-AOD/			0	2
+MuEG2		mdunser/SSDLTrees/2012/Jun13/MuEG-Run2012B-PromptReco-v1-AOD/			0	2
 MuEG3		mdunser/SSDLTrees/2012/Jun12/MuEG-Run2012B-PromptReco-v1-AOD-jun10ext.root			0	2
 ####################################################################################################################
 # Top and EWK
