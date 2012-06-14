@@ -344,32 +344,32 @@ void SSDLPlotter::doAnalysis(){
 	// makeOriginPlots(Baseline);
 	// printOrigins(Baseline);
 
-	makeMuIsolationPlots(false); // if true, loops on TTbar sample
-	makeElIsolationPlots(false); // if true, loops on TTbar sample
+	// makeMuIsolationPlots(false); // if true, loops on TTbar sample
+	// makeElIsolationPlots(false); // if true, loops on TTbar sample
 	// makeElIdPlots();
-	makeNT2KinPlots(false);
-	makeNT2KinPlots(true);
-	makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
+	// makeNT2KinPlots(false);
+	// makeNT2KinPlots(true);
+	// makeMETvsHTPlot(fMuData, fEGData, fMuEGData, HighPt);
 	// makeMETvsHTPlotPRL();
 	// makeMETvsHTPlot0HT();
 	// makeMETvsHTPlotTau();
 
-	makeRatioPlots(Muon);
-	makeRatioPlots(Elec);
-	make2DRatioPlots(Muon);
-	make2DRatioPlots(Elec);
-	makeNTightLoosePlots(Muon);
-	makeNTightLoosePlots(Elec);
+	// makeRatioPlots(Muon);
+	// makeRatioPlots(Elec);
+	// make2DRatioPlots(Muon);
+	// make2DRatioPlots(Elec);
+	// makeNTightLoosePlots(Muon);
+	// makeNTightLoosePlots(Elec);
 	
-	makeFRvsPtPlots(Muon, SigSup);
-	makeFRvsPtPlots(Elec, SigSup);
-	makeFRvsPtPlots(Muon, ZDecay);
- 	makeFRvsPtPlots(Elec, ZDecay);
- 	makeFRvsEtaPlots(Muon);
- 	makeFRvsEtaPlots(Elec);
+	// makeFRvsPtPlots(Muon, SigSup);
+	// makeFRvsPtPlots(Elec, SigSup);
+	// makeFRvsPtPlots(Muon, ZDecay);
+ 	// makeFRvsPtPlots(Elec, ZDecay);
+ 	// makeFRvsEtaPlots(Muon);
+ 	// makeFRvsEtaPlots(Elec);
 	
-	makeAllClosureTests();
-	makeAllIntPredictions();
+	// makeAllClosureTests();
+	// makeAllIntPredictions();
         
 	makeDiffPrediction();
 	// makeTTWDiffPredictions();
@@ -7754,6 +7754,7 @@ void SSDLPlotter::makeDiffPrediction(){
 			delete FR;
 		}
 		
+		
 		nt11_sf->Add(nt11_mm_sf);
 		nt11_sf->Add(nt11_ee_sf);
 		nt11_sf->Add(nt11_em_sf);
@@ -7770,6 +7771,11 @@ void SSDLPlotter::makeDiffPrediction(){
 		totbg_em->Add(nt11_em_df);
 		totbg_ee->Add(nt11_ee_sf);
 		totbg_ee->Add(nt11_ee_df);
+		cout << "at variable: " << varname.Data() << endl;
+		cout << "BANG: integral of nt11_sf: " << nt11_sf->Integral() << endl;
+		cout << "BANG: integral of nt11_ee_sf: " << nt11_ee_sf->Integral() << endl;
+		cout << "BANG: integral of nt11_em_sf: " << nt11_em_sf->Integral() << endl;
+		cout << "BANG: integral of nt11_mm_sf: " << nt11_mm_sf->Integral() << endl;
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// E-CHARGE MISID /////////////////////////////////////////////////////////////////
@@ -10440,63 +10446,73 @@ void SSDLPlotter::storeWeightedPred(){
 		}
 
 		// Check pt cuts of TTbarWSel:
-// 		bool passespt = passesPtCuts(pT1, pT2, TTbarWSel, chan);
-		
-// 		if(HT        >  Region::minHT    [TTbarWPresel] &&
-// 		   HT        <  Region::maxHT    [TTbarWPresel] &&
-// 		   MET       >  Region::minMet   [TTbarWPresel] &&
-// 		   MET       <  Region::maxMet   [TTbarWPresel] &&
-// 		   nbjets    >= Region::minNbjets[TTbarWPresel] &&
-// 		   nbjetsmed >= Region::minNbjmed[TTbarWPresel] &&
-// 		   passespt)
-// 		  {
-// 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
-// 			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
-// 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
-// 			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);			
+ 		bool passespt = passesPtCuts(pT1, pT2, Baseline, chan);
+ 		// MARC bool passespt = passesPtCuts(pT1, pT2, TTbarWSel, chan);
+  	
+ 		if(HT        >  Region::minHT    [Baseline] &&
+ 		   HT        <  Region::maxHT    [Baseline] &&
+ 		   MET       >  Region::minMet   [Baseline] &&
+ 		   MET       <  Region::maxMet   [Baseline] &&
+ 		   nbjets    >= Region::minNbjets[Baseline] &&
+ 		   nbjetsmed >= Region::minNbjmed[Baseline] &&
+ 		   passespt)
+ 		  {
+ 		//MARC if(HT        >  Region::minHT    [TTbarWPresel] &&
+ 		//MARC    HT        <  Region::maxHT    [TTbarWPresel] &&
+ 		//MARC    MET       >  Region::minMet   [TTbarWPresel] &&
+ 		//MARC    MET       <  Region::maxMet   [TTbarWPresel] &&
+ 		//MARC    nbjets    >= Region::minNbjets[TTbarWPresel] &&
+ 		//MARC    nbjetsmed >= Region::minNbjmed[TTbarWPresel] &&
+ 		//MARC    passespt)
+ 		//MARC   {
+ 			fillWithoutOF(S->diffyields[chan].hnpp[2], njets+0.5, puweight * npp);
+ 			fillWithoutOF(S->diffyields[chan].hnpf[2], njets+0.5, puweight * npf);
+ 			fillWithoutOF(S->diffyields[chan].hnfp[2], njets+0.5, puweight * nfp);
+ 			fillWithoutOF(S->diffyields[chan].hnff[2], njets+0.5, puweight * nff);			
 
-// 			if(njets >= Region::minNjets [TTbarWPresel]){
-// 				fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[0], HT, puweight * nff);
+ 			if(njets >= Region::minNjets [Baseline]){
+ 			// MARC if(njets >= Region::minNjets [TTbarWPresel]){
+ 				fillWithoutOF(S->diffyields[chan].hnpp[0], HT, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[0], HT, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[0], HT, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[0], HT, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[1], MET, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[1], MET, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[1], MET, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[1], MET, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[1], MET, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[1], MET, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[1], MET, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[1], MET, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[3], MT2, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[3], MT2, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[3], MT2, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[3], MT2, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[3], MT2, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[3], MT2, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[3], MT2, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[3], MT2, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[4], pT1, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[4], pT1, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[4], pT1, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[4], pT1, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[4], pT1, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[4], pT1, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[4], pT1, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[4], pT1, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[5], pT2, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[5], pT2, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[5], pT2, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[5], pT2, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[5], pT2, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[5], pT2, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[5], pT2, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[5], pT2, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[6], nbjets+0.5, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[6], nbjets+0.5, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[6], nbjets+0.5, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[6], nbjets+0.5, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[6], nbjets+0.5, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[6], nbjets+0.5, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[8], nbjets+0.5, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[8], nbjets+0.5, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[8], nbjets+0.5, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[8], nbjets+0.5, puweight * nff);
+ 				fillWithoutOF(S->diffyields[chan].hnpp[8], nbjets+0.5, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[8], nbjets+0.5, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[8], nbjets+0.5, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[8], nbjets+0.5, puweight * nff);
 
-// 				fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed, puweight * npp);
-// 				fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed, puweight * npf);
-// 				fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed, puweight * nfp);
-// 				fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed, puweight * nff);
-// 			}
-// 		}
+ 				fillWithoutOF(S->diffyields[chan].hnpp[9], nbjetsmed, puweight * npp);
+ 				fillWithoutOF(S->diffyields[chan].hnpf[9], nbjetsmed, puweight * npf);
+ 				fillWithoutOF(S->diffyields[chan].hnfp[9], nbjetsmed, puweight * nfp);
+ 				fillWithoutOF(S->diffyields[chan].hnff[9], nbjetsmed, puweight * nff);
+ 			}
+ 		}
 
 		if( fDO_OPT && flav<3 && flag == 0){
 			float lumi_pb = 5000.;
