@@ -5517,10 +5517,11 @@ void SSDLPlotter::makeIntPrediction(TString filename, gRegion reg){
  	OUT << "-------------------------------------------------------------------------------------------" << endl;
  	OUT << "       E-ChMisID  ||     Barrel-Barrel    |    Barrel - EndCap   |    Endcap - EndCap    ||" << endl;
  	OUT << "-------------------------------------------------------------------------------------------" << endl;
- 	OUT << "                  ||";
+ 	OUT << "  Data            ||";
  	OUT << setw(8) << setprecision(2) << fbb  << " +/- " << setw(8) << setprecision(2) << fbbE  << " |";
  	OUT << setw(8) << setprecision(2) << feb  << " +/- " << setw(8) << setprecision(2) << febE  << " |";
- 	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << "  ||";
+ 	OUT << setw(8) << setprecision(2) << fee  << " +/- " << setw(8) << setprecision(2) << feeE  << "  ||" << endl;
+ 	OUT << "  MC              ||";
  	OUT << setw(8) << setprecision(2) << fbb_mc  << " +/- " << setw(8) << setprecision(2) << fbbE_mc  << " |";
  	OUT << setw(8) << setprecision(2) << feb_mc  << " +/- " << setw(8) << setprecision(2) << febE_mc  << " |";
  	OUT << setw(8) << setprecision(2) << fee_mc  << " +/- " << setw(8) << setprecision(2) << feeE_mc  << "  ||";
@@ -7779,10 +7780,12 @@ void SSDLPlotter::makeDiffPrediction(){
 		TH1D *nt11_em_cm = new TH1D(Form("NT11_EM_CM_%s", varname.Data()), varname, nbins, bins); nt11_em_cm->Sumw2();
 
 		// Abbreviations
-		float fb  = gEChMisIDB;
-		float fbE = gEChMisIDB_E;
-		float fe  = gEChMisIDE;
-		float feE = gEChMisIDE_E;
+		float fbb(0.),fee(0.),feb(0.);
+		float fbbE(0.),feeE(0.),febE(0.);
+		
+		calculateChMisIdProb(fEGData, BB, fbb, fbbE);
+		calculateChMisIdProb(fEGData, EB, feb, febE);
+		calculateChMisIdProb(fEGData, EE, fee, feeE);
 
 		for(size_t i = 0; i < nbins; ++i){
 			float nt2_ee_BB_os = nt2_os_ee_bb->GetBinContent(i+1);
@@ -7795,13 +7798,13 @@ void SSDLPlotter::makeDiffPrediction(){
 			FakeRatios *FR = new FakeRatios();
 
 			// Simple error propagation assuming error on number of events is FR->getEStat2()
-			nt11_ee_cm->SetBinContent(i+1, 2*fb*nt2_ee_BB_os + 2*fe*nt2_ee_EE_os + (fb+fe)*nt2_ee_EB_os);
-			float nt11_ee_cm_e1 = sqrt( (4*fb*fb*FR->getEStat2(nt2_ee_BB_os)) + (4*fe*fe*FR->getEStat2(nt2_ee_EE_os)) + (fb+fe)*(fb+fe)*FR->getEStat2(nt2_ee_EB_os) ); // stat only
-			float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbE*fbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feE*feE) + (fbE*fbE+feE*feE)*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
+			nt11_ee_cm->SetBinContent(i+1, 2*fbb*nt2_ee_BB_os + 2*fee*nt2_ee_EE_os + 2*feb*nt2_ee_EB_os);
+			float nt11_ee_cm_e1 = sqrt( (4*fbb*fbb*FR->getEStat2(nt2_ee_BB_os)) + (4*fee*fee*FR->getEStat2(nt2_ee_EE_os)) + 4*feb*feb*FR->getEStat2(nt2_ee_EB_os) ); // stat only
+			float nt11_ee_cm_e2 = sqrt( (4*nt2_ee_BB_os*nt2_ee_BB_os*fbbE*fbbE) + (4*nt2_ee_EE_os*nt2_ee_EE_os*feeE*feeE) + 4*febE*febE*nt2_ee_EB_os*nt2_ee_EB_os ); // syst only
 
-			nt11_em_cm->SetBinContent(i+i, fb*nt2_em_BB_os + fe*nt2_em_EE_os);
-			float nt11_em_cm_e1 = sqrt( fb*fb*FR->getEStat2(nt2_em_BB_os) + fe*fe*FR->getEStat2(nt2_em_EE_os) );
-			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbE*fbE + nt2_em_EE_os*nt2_em_EE_os * feE*feE );
+			nt11_em_cm->SetBinContent(i+i, fbb*nt2_em_BB_os + fee*nt2_em_EE_os);
+			float nt11_em_cm_e1 = sqrt( fbb*fbb*FR->getEStat2(nt2_em_BB_os) + fee*fee*FR->getEStat2(nt2_em_EE_os) );
+			float nt11_em_cm_e2 = sqrt( nt2_em_BB_os*nt2_em_BB_os * fbbE*fbbE + nt2_em_EE_os*nt2_em_EE_os * feeE*feeE );
 			
 			float esyst2_ee  = nt11_ee_cm_e2*nt11_ee_cm_e2;
 			float esyst2_em  = nt11_em_cm_e2*nt11_em_cm_e2;
@@ -8122,7 +8125,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_sig->DrawCopy("hist same");
 		leg->Draw();
 		lat->SetTextSize(0.04);
-		lat->DrawLatex(0.55,0.92, "#mu#mu/ee/e#mu");
+		lat->DrawLatex(0.45,0.92, "#mu#mu/ee/e#mu");
 		drawDiffCuts(j);
 		drawTopLine();
 		
@@ -8162,7 +8165,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_mm_sig->DrawCopy("hist same");
 		leg_mm->Draw();
 		lat->SetTextSize(0.04);
-		lat->DrawLatex(0.65,0.92, "#mu#mu");
+		lat->DrawLatex(0.45,0.92, "#mu#mu");
 		drawDiffCuts(j);
 		drawTopLine();
 		
@@ -8202,7 +8205,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_ee_sig->DrawCopy("hist same");
 		leg_ee->Draw();
 		lat->SetTextSize(0.04);
-		lat->DrawLatex(0.65,0.92, "ee");
+		lat->DrawLatex(0.45,0.92, "ee");
 		drawDiffCuts(j);
 		drawTopLine();
 		
@@ -8241,7 +8244,7 @@ void SSDLPlotter::makeDiffPrediction(){
 		// nt11_em_sig->DrawCopy("hist same");
 		leg_em->Draw();
 		lat->SetTextSize(0.04);
-		lat->DrawLatex(0.65,0.92, "e#mu");
+		lat->DrawLatex(0.45,0.92, "e#mu");
 		drawDiffCuts(j);
 		drawTopLine();
 		
